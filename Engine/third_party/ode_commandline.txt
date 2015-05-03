@@ -1,0 +1,3 @@
+ode:
+premake4 --os=windows --platform=x32 --with-demos --with-libccd --with-tests vs2008
+premake4 --os=windows --platform=x32 --with-demos --with-libccd --only-single --only-static --with-gimpact --with-tests vs2008

@@ -1,0 +1,865 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Include">
+      <UniqueIdentifier>{ae8e4201-3393-4d8f-a126-bd7381b154a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{cf8e4cfe-e041-4845-9c68-e3707f22c37e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{08f8d6c5-27fc-433a-a322-81e4f65781df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\Win32_D3D9">
+      <UniqueIdentifier>{d6c404df-6d3f-43b0-aeda-dccb32b73915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\CommInline">
+      <UniqueIdentifier>{b1950a05-a162-4811-902f-a6a31bbe087c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{1e01efe0-9aaa-4c6d-b848-a467ef1be1d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\3D">
+      <UniqueIdentifier>{d4983ee7-9aab-4bb8-b448-dca87211a452}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\Canvas">
+      <UniqueIdentifier>{08240552-3a43-47d2-8d40-9e16680074b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\Controls">
+      <UniqueIdentifier>{908a51e4-2cc3-498b-b253-178f4c9359de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\GDI">
+      <UniqueIdentifier>{f67fabf9-48b8-48df-9f22-fbf5a7501116}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\User">
+      <UniqueIdentifier>{25563ef9-0458-471b-b598-79821c2af203}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\Utility">
+      <UniqueIdentifier>{8802ff3d-45c4-45c0-856d-a6156b7cb17c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\GUnknown.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\guxtheme.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GVPhySimulator.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXApp.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXCanvas.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXCanvas3D.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXFont.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXGDI.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXGraphics.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXImage.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXImm.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXKernel.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXSprite.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GXUser.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\Marimo.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\MOAudio.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\MOBehavior.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\MOComponent.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\MOConsoleStaff.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\MOLogger.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DataInfrastructure.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DataPool.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DataPoolIterator.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\DataPoolVariable.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GCamera.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GFX.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GPrimitive.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GRegion.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GResource.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GShader.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GStateBlock.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GTexture.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Platform.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GStateBlock_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.h">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_XXX.h">
+      <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="res\resource.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvNode.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvScene.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvSceneMgr.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvSequence.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvSkeleton.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvSkinnedMesh.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\StdMtl.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\GrapVR.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvEnvironment.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvGeometry.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3D\gvMesh.h">
+      <Filter>Lib\3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GXEffectImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GXImageImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GXMaterialImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GXResourceMgr.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GXSpriteImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GFTFontImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GXCanvas3DImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Canvas\GXCanvasCoreImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUIList_Custom.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUIList_Simple.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUISlider.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUIStatic.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUIToolbar.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\PropertyList.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\PropertySheet.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\RichListAdapter.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUIButton.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUICtrlBase.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUIList.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GDI\RegionFunc.h">
+      <Filter>Lib\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GDI\GRegionImpl.h">
+      <Filter>Lib\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GDI\GXShaderMgr.h">
+      <Filter>Lib\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\DataPoolVariableVtbl.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\DesktopWindowsMgr.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\GrapX.Hxx">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\GrapXDef.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\gxAdvancedUI.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\gxusp10.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\gxWinDef.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\GXWindow.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\ResDataMgr.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\RichFXMgr.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\ScrollBar.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\UILayoutMgr.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\WindowsSurface.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\WineComm.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\Win32Emu\guxtheme\Button_ID_BP.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\Win32Emu\guxtheme\ScrollBar_ID_SBP.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\Win32Emu\GUXTheme.hxx">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\Win32Emu\GXCommCtrl.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\Win32Emu\OpenFileName.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\Win32Emu\_dpa.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\Win32Emu\_imagelist.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\WineCtrl\WineDragListDef.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\WineCtrl\WinePagerDef.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\WineCtrl\WineToolbarDef.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\WineCtrl\WineToolTipsDef.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\WineCtrl\WineTreeViewDef.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\DataPoolImpl.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\HLSL\FXCommRegister.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\Shader\AeroShader.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\Shader\BlurShader.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\Shader\SimpleShader.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\AeroCommon.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\ConsoleAssistant.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\LogMgr.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Utility\VertexDecl.h">
+      <Filter>Lib\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Console.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GrapX.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gxBaseTypes.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gxDevice.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gxError.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GXStation.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gxUtility.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Platform\GXApp.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\MOLauncher.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GStateBlock_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_XXX.cpp">
+      <Filter>Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvScene.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvSceneMgr.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvSequence.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvSkeleton.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvSkinnedMesh.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvEnvironment.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvGeometry.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvMesh.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3D\gvNode.cpp">
+      <Filter>Lib\3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXEffectImpl.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXImageImpl.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXMaterialImpl.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXResourceMgr.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXSpriteImpl.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXSpriteMan.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXWndCanvas.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GCamera.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GFTFontImpl.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\GXCanvas_Painting.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIList_Custom.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIList_Simple.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUISlider.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIStatic.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIToolbar.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\PropertyList.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\PropertySheet.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIButton.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUICtrlBase.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIEdit_WE1.3.30.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIList.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GDI\RegionFunc.cpp">
+      <Filter>Lib\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GDI\GRegionImpl.cpp">
+      <Filter>Lib\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GDI\GXShaderMgr.cpp">
+      <Filter>Lib\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DesktopWindowsMgr.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\GrapX.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\GrapXDef.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\gxAdvancedUI.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\gxWinConstant.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\GXWindow.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\ResDataMgr.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\RichFXMgr.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\ScrollBar.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\UILayoutMgr.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WindowsSurface.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\casemap.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\CommonDialogWndProc.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme\guxtheme_Button.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme\guxtheme_ScrollBar.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme\guxtheme_Window.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXCommCtrl.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\gxCreateDialog.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\gxDefWindowProc.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXGDI.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXImm.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXKernel.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Caret.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Class.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_ClipBoard.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_ExDC.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Menu.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Message.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Property.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_rect.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Region.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Scroll.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Timer.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Wnd.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\MessageBox.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\OpenFileName.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\_dpa.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\Win32Emu\_imagelist.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\header.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Button.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_combo.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_draglist.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Edit.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Edit_1.3.30.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Edit_1.5.30.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_header.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Listbox.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Listview.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Menu.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Menu_1.3.20.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_Static.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_toolbar.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_tooltips.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\WineCtrl\_treeview.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataInfrastructure.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataPool.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataPoolBuildTime.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataPoolCompiler.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataPoolImpl.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataPoolIterator.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataPoolVariable.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\MOKeyboardStaff.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\MOLogger.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\Shader\AeroShader.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\Shader\BlurShader.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\Shader\SimpleShader.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\ConsoleAssistant.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\GResourceImpl.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\LogMgr.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Utility\VertexDecl.cpp">
+      <Filter>Lib\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gxDevice.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GXStation.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gxUtility.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Console.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Platform\Readme.txt">
+      <Filter>Platform</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\D3D_ShaderImpl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\D3D_ShaderStubImpl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\GStateBlock.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\GXCanvasImpl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\GXCanvasImpl_DrawTexture.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\GXGraphicsImpl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\GXGraphicsImpl_ClassDecl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\GXGraphicsImpl_Inline.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\OGL_GraphicsImpl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\OGL_Primitive.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\OGL_StateBlock.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\OGL_TextureImpl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="..\..\Platform\CommonInline\X_ShaderImpl.inl">
+      <Filter>Platform\CommInline</Filter>
+    </None>
+    <None Include="res\obm_checkboxes.bmp">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\obm_dnarrow.bmp">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\obm_dnarrowi.bmp">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\obm_mnarrow.bmp">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\obm_uparrow.bmp">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\obm_uparrowi.bmp">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\idc_copy.cur">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\idc_divider.cur">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\idc_divideropen.cur">
+      <Filter>res</Filter>
+    </None>
+    <None Include="res\idi_dragarrow.ico">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\..\Canvas\GXCanvas_Text.inl">
+      <Filter>Lib\Canvas</Filter>
+    </None>
+    <None Include="..\..\Canvas\GXCanvas3DImpl.inl">
+      <Filter>Lib\Canvas</Filter>
+    </None>
+    <None Include="..\..\Canvas\GXCanvasCoreImpl.inl">
+      <Filter>Lib\Canvas</Filter>
+    </None>
+    <None Include="..\..\Canvas\GXCanvasImpl_ClassDecl.inl">
+      <Filter>Lib\Canvas</Filter>
+    </None>
+    <None Include="..\..\User\Win32Emu\GUXTheme.inl">
+      <Filter>Lib\User</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\GrapXUI.rc">
+      <Filter>res</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

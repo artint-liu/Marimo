@@ -1,0 +1,508 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>GrapX</ProjectName>
+    <ProjectGuid>{17EA3F13-8D94-4C8C-9B2F-3799E31A21A3}</ProjectGuid>
+    <RootNamespace>GrapXUI</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\..\bin\x86\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">x86\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\..\..\bin\x86\</OutDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\..\..\bin\x64\</OutDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\..\..\bin\x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</EmbedManifest>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>$(ProjectName)</TargetName>
+    <IntDir>x86\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>$(ProjectName)_x64d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName)_x64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;_ENABLE_WOGL;_ENABLE_GLES2;_ENABLE_DX11;________DEV_DISABLE_UI_CODE</PreprocessorDefinitions>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9d.lib;d3d9.lib;winmm.lib;clstd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <Profile>true</Profile>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x86;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x86;$(DXSDK_DIR)Lib\x86;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>_X86;_NDEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;_ENABLE_DX11;_ENABLE_GLES2;__DEV_DISABLE_UI_CODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9.lib;d3d9.lib;winmm.lib;clstd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x86;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x86;$(DXSDK_DIR)Lib\x86;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9d.lib;d3d9.lib;winmm.lib;clstd_x64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)Frame UI.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x64;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x64;$(DXSDK_DIR)lib/x64;$(VLDDIR)/lib/Win64</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_X64;_WIN64;NDEBUG;_WINDOWS;_NDEBUG;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9.lib;d3d9.lib;winmm.lib;clstd_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x64;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x64;$(DXSDK_DIR)lib/x64</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;msvcprt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\DataInfrastructure.h" />
+    <ClInclude Include="..\..\..\include\DataPool.h" />
+    <ClInclude Include="..\..\..\include\DataPoolIterator.h" />
+    <ClInclude Include="..\..\..\include\DataPoolVariable.h" />
+    <ClInclude Include="..\..\..\include\GCamera.h" />
+    <ClInclude Include="..\..\..\include\GFX.h" />
+    <ClInclude Include="..\..\..\include\GPrimitive.h" />
+    <ClInclude Include="..\..\..\include\GRegion.h" />
+    <ClInclude Include="..\..\..\include\GResource.h" />
+    <ClInclude Include="..\..\..\include\GShader.h" />
+    <ClInclude Include="..\..\..\include\GStateBlock.h" />
+    <ClInclude Include="..\..\..\include\GTexture.h" />
+    <ClInclude Include="..\..\..\include\GUnknown.h" />
+    <ClInclude Include="..\..\..\include\guxtheme.h" />
+    <ClInclude Include="..\..\..\include\GVPhySimulator.h" />
+    <ClInclude Include="..\..\..\include\GXApp.h" />
+    <ClInclude Include="..\..\..\include\GXCanvas.h" />
+    <ClInclude Include="..\..\..\include\GXCanvas3D.h" />
+    <ClInclude Include="..\..\..\include\GXFont.h" />
+    <ClInclude Include="..\..\..\include\GXGDI.h" />
+    <ClInclude Include="..\..\..\include\GXGraphics.h" />
+    <ClInclude Include="..\..\..\include\GXImage.h" />
+    <ClInclude Include="..\..\..\include\GXImm.h" />
+    <ClInclude Include="..\..\..\include\GXKernel.h" />
+    <ClInclude Include="..\..\..\include\GXSprite.h" />
+    <ClInclude Include="..\..\..\include\GXUser.h" />
+    <ClInclude Include="..\..\..\include\Marimo.h" />
+    <ClInclude Include="..\..\..\include\MOAudio.h" />
+    <ClInclude Include="..\..\..\include\MOBehavior.h" />
+    <ClInclude Include="..\..\..\include\MOComponent.h" />
+    <ClInclude Include="..\..\..\include\MOConsoleStaff.h" />
+    <ClInclude Include="..\..\..\include\MOLogger.h" />
+    <ClInclude Include="..\..\3D\GrapVR.h" />
+    <ClInclude Include="..\..\3D\gvEnvironment.h" />
+    <ClInclude Include="..\..\3D\gvGeometry.h" />
+    <ClInclude Include="..\..\3D\gvMesh.h" />
+    <ClInclude Include="..\..\3D\gvNode.h" />
+    <ClInclude Include="..\..\3D\gvScene.h" />
+    <ClInclude Include="..\..\3D\gvSceneMgr.h" />
+    <ClInclude Include="..\..\3D\gvSequence.h" />
+    <ClInclude Include="..\..\3D\gvSkeleton.h" />
+    <ClInclude Include="..\..\3D\gvSkinnedMesh.h" />
+    <ClInclude Include="..\..\3D\StdMtl.h" />
+    <ClInclude Include="..\..\Canvas\GFTFontImpl.h" />
+    <ClInclude Include="..\..\Canvas\GXCanvas3DImpl.h" />
+    <ClInclude Include="..\..\Canvas\GXCanvasCoreImpl.h" />
+    <ClInclude Include="..\..\Canvas\GXEffectImpl.h" />
+    <ClInclude Include="..\..\Canvas\GXImageImpl.h" />
+    <ClInclude Include="..\..\Canvas\GXMaterialImpl.h" />
+    <ClInclude Include="..\..\Canvas\GXResourceMgr.h" />
+    <ClInclude Include="..\..\Canvas\GXSpriteImpl.h" />
+    <ClInclude Include="..\..\Console.h" />
+    <ClInclude Include="..\..\Controls\GXUIButton.h" />
+    <ClInclude Include="..\..\Controls\GXUICtrlBase.h" />
+    <ClInclude Include="..\..\Controls\GXUIList.h" />
+    <ClInclude Include="..\..\Controls\GXUIList_Custom.h" />
+    <ClInclude Include="..\..\Controls\GXUIList_Simple.h" />
+    <ClInclude Include="..\..\Controls\GXUISlider.h" />
+    <ClInclude Include="..\..\Controls\GXUIStatic.h" />
+    <ClInclude Include="..\..\Controls\GXUIToolbar.h" />
+    <ClInclude Include="..\..\Controls\PropertyList.h" />
+    <ClInclude Include="..\..\Controls\PropertySheet.h" />
+    <ClInclude Include="..\..\Controls\RichListAdapter.h" />
+    <ClInclude Include="..\..\GDI\GRegionImpl.h" />
+    <ClInclude Include="..\..\GDI\GXShaderMgr.h" />
+    <ClInclude Include="..\..\GDI\RegionFunc.h" />
+    <ClInclude Include="..\..\GrapX.h" />
+    <ClInclude Include="..\..\gxBaseTypes.h" />
+    <ClInclude Include="..\..\gxDevice.h" />
+    <ClInclude Include="..\..\gxError.h" />
+    <ClInclude Include="..\..\GXStation.h" />
+    <ClInclude Include="..\..\gxUtility.h" />
+    <ClInclude Include="..\..\Platform\Platform.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GStateBlock_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.h" />
+    <ClInclude Include="..\..\Platform\Win32_XXX.h" />
+    <ClInclude Include="..\..\User\DataPoolImpl.h" />
+    <ClInclude Include="..\..\User\DataPoolVariableVtbl.h" />
+    <ClInclude Include="..\..\User\DesktopWindowsMgr.h" />
+    <ClInclude Include="..\..\User\GrapX.Hxx" />
+    <ClInclude Include="..\..\User\GrapXDef.h" />
+    <ClInclude Include="..\..\User\gxAdvancedUI.h" />
+    <ClInclude Include="..\..\User\gxusp10.h" />
+    <ClInclude Include="..\..\User\gxWinDef.h" />
+    <ClInclude Include="..\..\User\GXWindow.h" />
+    <ClInclude Include="..\..\User\ResDataMgr.h" />
+    <ClInclude Include="..\..\User\RichFXMgr.h" />
+    <ClInclude Include="..\..\User\ScrollBar.h" />
+    <ClInclude Include="..\..\User\UILayoutMgr.h" />
+    <ClInclude Include="..\..\User\Win32Emu\GUXTheme.hxx" />
+    <ClInclude Include="..\..\User\Win32Emu\guxtheme\Button_ID_BP.h" />
+    <ClInclude Include="..\..\User\Win32Emu\guxtheme\ScrollBar_ID_SBP.h" />
+    <ClInclude Include="..\..\User\Win32Emu\GXCommCtrl.h" />
+    <ClInclude Include="..\..\User\Win32Emu\OpenFileName.h" />
+    <ClInclude Include="..\..\User\Win32Emu\_dpa.h" />
+    <ClInclude Include="..\..\User\Win32Emu\_imagelist.h" />
+    <ClInclude Include="..\..\User\WindowsSurface.h" />
+    <ClInclude Include="..\..\User\WineComm.h" />
+    <ClInclude Include="..\..\User\WineCtrl\WineDragListDef.h" />
+    <ClInclude Include="..\..\User\WineCtrl\WinePagerDef.h" />
+    <ClInclude Include="..\..\User\WineCtrl\WineToolbarDef.h" />
+    <ClInclude Include="..\..\User\WineCtrl\WineToolTipsDef.h" />
+    <ClInclude Include="..\..\User\WineCtrl\WineTreeViewDef.h" />
+    <ClInclude Include="..\..\Utility\AeroCommon.h" />
+    <ClInclude Include="..\..\Utility\ConsoleAssistant.h" />
+    <ClInclude Include="..\..\Utility\HLSL\FXCommRegister.h" />
+    <ClInclude Include="..\..\Utility\LogMgr.h" />
+    <ClInclude Include="..\..\Utility\Shader\AeroShader.h" />
+    <ClInclude Include="..\..\Utility\Shader\BlurShader.h" />
+    <ClInclude Include="..\..\Utility\Shader\SimpleShader.h" />
+    <ClInclude Include="..\..\Utility\VertexDecl.h" />
+    <ClInclude Include="res\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\3D\gvEnvironment.cpp" />
+    <ClCompile Include="..\..\3D\gvGeometry.cpp" />
+    <ClCompile Include="..\..\3D\gvMesh.cpp" />
+    <ClCompile Include="..\..\3D\gvNode.cpp" />
+    <ClCompile Include="..\..\3D\gvScene.cpp" />
+    <ClCompile Include="..\..\3D\gvSceneMgr.cpp" />
+    <ClCompile Include="..\..\3D\gvSequence.cpp" />
+    <ClCompile Include="..\..\3D\gvSkeleton.cpp" />
+    <ClCompile Include="..\..\3D\gvSkinnedMesh.cpp" />
+    <ClCompile Include="..\..\Canvas\GCamera.cpp" />
+    <ClCompile Include="..\..\Canvas\GFTFontImpl.cpp" />
+    <ClCompile Include="..\..\Canvas\GXCanvas_Painting.cpp" />
+    <ClCompile Include="..\..\Canvas\GXEffectImpl.cpp" />
+    <ClCompile Include="..\..\Canvas\GXImageImpl.cpp" />
+    <ClCompile Include="..\..\Canvas\GXMaterialImpl.cpp" />
+    <ClCompile Include="..\..\Canvas\GXResourceMgr.cpp" />
+    <ClCompile Include="..\..\Canvas\GXSpriteImpl.cpp" />
+    <ClCompile Include="..\..\Canvas\GXSpriteMan.cpp" />
+    <ClCompile Include="..\..\Canvas\GXWndCanvas.cpp" />
+    <ClCompile Include="..\..\Console.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIButton.cpp" />
+    <ClCompile Include="..\..\Controls\GXUICtrlBase.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIEdit_WE1.3.30.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIList.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIList_Custom.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIList_Simple.cpp" />
+    <ClCompile Include="..\..\Controls\GXUISlider.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIStatic.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIToolbar.cpp" />
+    <ClCompile Include="..\..\Controls\PropertyList.cpp" />
+    <ClCompile Include="..\..\Controls\PropertySheet.cpp" />
+    <ClCompile Include="..\..\GDI\GRegionImpl.cpp" />
+    <ClCompile Include="..\..\GDI\GXShaderMgr.cpp" />
+    <ClCompile Include="..\..\GDI\RegionFunc.cpp" />
+    <ClCompile Include="..\..\gxDevice.cpp" />
+    <ClCompile Include="..\..\GXStation.cpp" />
+    <ClCompile Include="..\..\gxUtility.cpp" />
+    <ClCompile Include="..\..\Platform\GXApp.cpp" />
+    <ClCompile Include="..\..\Platform\MOLauncher.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GStateBlock_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_XXX.cpp" />
+    <ClCompile Include="..\..\User\DataInfrastructure.cpp" />
+    <ClCompile Include="..\..\User\DataPool.cpp" />
+    <ClCompile Include="..\..\User\DataPoolBuildTime.cpp" />
+    <ClCompile Include="..\..\User\DataPoolCompiler.cpp" />
+    <ClCompile Include="..\..\User\DataPoolImpl.cpp" />
+    <ClCompile Include="..\..\User\DataPoolIterator.cpp" />
+    <ClCompile Include="..\..\User\DataPoolVariable.cpp" />
+    <ClCompile Include="..\..\User\DesktopWindowsMgr.cpp" />
+    <ClCompile Include="..\..\User\GrapX.cpp" />
+    <ClCompile Include="..\..\User\GrapXDef.cpp" />
+    <ClCompile Include="..\..\User\gxAdvancedUI.cpp" />
+    <ClCompile Include="..\..\User\gxWinConstant.cpp" />
+    <ClCompile Include="..\..\User\GXWindow.cpp" />
+    <ClCompile Include="..\..\User\ResDataMgr.cpp" />
+    <ClCompile Include="..\..\User\RichFXMgr.cpp" />
+    <ClCompile Include="..\..\User\ScrollBar.cpp" />
+    <ClCompile Include="..\..\User\UILayoutMgr.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\casemap.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\CommonDialogWndProc.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme\guxtheme_Button.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme\guxtheme_ScrollBar.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\guxtheme\guxtheme_Window.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXCommCtrl.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\gxCreateDialog.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\gxDefWindowProc.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXGDI.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXImm.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXKernel.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Caret.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Class.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_ClipBoard.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_ExDC.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Menu.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Message.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Property.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_rect.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Region.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Scroll.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Timer.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\GXUser_Wnd.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\MessageBox.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\OpenFileName.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\_dpa.cpp" />
+    <ClCompile Include="..\..\User\Win32Emu\_imagelist.cpp" />
+    <ClCompile Include="..\..\User\WindowsSurface.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\header.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Button.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_combo.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_draglist.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Edit.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Edit_1.3.30.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Edit_1.5.30.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_header.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Listbox.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Listview.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Menu.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Menu_1.3.20.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_Static.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_toolbar.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_tooltips.cpp" />
+    <ClCompile Include="..\..\User\WineCtrl\_treeview.cpp" />
+    <ClCompile Include="..\..\Utility\ConsoleAssistant.cpp" />
+    <ClCompile Include="..\..\Utility\GResourceImpl.cpp" />
+    <ClCompile Include="..\..\Utility\LogMgr.cpp" />
+    <ClCompile Include="..\..\Utility\MOKeyboardStaff.cpp" />
+    <ClCompile Include="..\..\Utility\MOLogger.cpp" />
+    <ClCompile Include="..\..\Utility\Shader\AeroShader.cpp" />
+    <ClCompile Include="..\..\Utility\Shader\BlurShader.cpp" />
+    <ClCompile Include="..\..\Utility\Shader\SimpleShader.cpp" />
+    <ClCompile Include="..\..\Utility\VertexDecl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Canvas\GXCanvas3DImpl.inl" />
+    <None Include="..\..\Canvas\GXCanvasCoreImpl.inl" />
+    <None Include="..\..\Canvas\GXCanvasImpl_ClassDecl.inl" />
+    <None Include="..\..\Canvas\GXCanvas_Text.inl" />
+    <None Include="..\..\Platform\CommonInline\D3D_ShaderImpl.inl" />
+    <None Include="..\..\Platform\CommonInline\D3D_ShaderStubImpl.inl" />
+    <None Include="..\..\Platform\CommonInline\GStateBlock.inl" />
+    <None Include="..\..\Platform\CommonInline\GXCanvasImpl.inl" />
+    <None Include="..\..\Platform\CommonInline\GXCanvasImpl_DrawTexture.inl" />
+    <None Include="..\..\Platform\CommonInline\GXGraphicsImpl.inl" />
+    <None Include="..\..\Platform\CommonInline\GXGraphicsImpl_ClassDecl.inl" />
+    <None Include="..\..\Platform\CommonInline\GXGraphicsImpl_Inline.inl" />
+    <None Include="..\..\Platform\CommonInline\OGL_GraphicsImpl.inl" />
+    <None Include="..\..\Platform\CommonInline\OGL_Primitive.inl" />
+    <None Include="..\..\Platform\CommonInline\OGL_StateBlock.inl" />
+    <None Include="..\..\Platform\CommonInline\OGL_TextureImpl.inl" />
+    <None Include="..\..\Platform\CommonInline\X_ShaderImpl.inl" />
+    <None Include="..\..\Platform\Readme.txt" />
+    <None Include="..\..\User\Win32Emu\GUXTheme.inl" />
+    <None Include="res\idc_copy.cur" />
+    <None Include="res\idc_divider.cur" />
+    <None Include="res\idc_divideropen.cur" />
+    <None Include="res\idi_dragarrow.ico" />
+    <None Include="res\obm_checkboxes.bmp" />
+    <None Include="res\obm_dnarrow.bmp" />
+    <None Include="res\obm_dnarrowi.bmp" />
+    <None Include="res\obm_mnarrow.bmp" />
+    <None Include="res\obm_uparrow.bmp" />
+    <None Include="res\obm_uparrowi.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\GrapXUI.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

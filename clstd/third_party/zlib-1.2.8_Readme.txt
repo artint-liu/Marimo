@@ -1,0 +1,9 @@
+Windows
+1. 使用visual studio打开"contrib\vstudio"目录下对应版本的解决方案文件.
+2. 去掉zlibstat项目中的"ZLIB_WINAPI"预定义宏.这个会把函数以"__stdcall"方式定义,并使函数名支持重载而改变.
+3. 选择对应平台编译,或者使用"批生成...".
+
+* 项目自动执行"contrib\masmx86"下的"bld_ml32.bat",和"contrib\masmx64"下的"bld_ml64.bat"
+* 一般不编译安腾平台
+* 可以只编译zlibstat(静态库)和zlibvs(动态库)两个工程,其他工程在解决方案中卸载掉
+* debug版改名为"zlibstat_d.lib"

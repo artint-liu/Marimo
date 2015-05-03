@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="EditorUtility">
+      <UniqueIdentifier>{01911cce-069b-45cd-a78f-2c36b6dc50e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{8e955c07-1155-4b15-adeb-59f41e86c991}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third party">
+      <UniqueIdentifier>{6bd9395f-ebc4-492b-9a61-f11ea23c06ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PhysicalSimulator">
+      <UniqueIdentifier>{dad0a766-841e-46f9-93a5-6d9cb35e6029}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FBX Loader">
+      <UniqueIdentifier>{f28a4bf5-74da-4d47-96f8-c5e4866c9ae4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{2df282ab-5256-4f6d-961a-807bc7e8f11d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio">
+      <UniqueIdentifier>{2f48ecd6-129f-48e1-90bd-87b8779d332c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{dba11dd1-5442-4dfc-89cd-4915eb650bda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GFX">
+      <UniqueIdentifier>{03c0a788-5fae-4010-a662-6f175cf6b51f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Audio\Audio_OAL.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Audio\AudioBuffer_OAL.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Audio\AudioSource_OAL.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Audio\MOggVorbis.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Audio\aldlist.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\EditorUtility\RotationAxis.h">
+      <Filter>EditorUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\EditorUtility\ScalingAxis.h">
+      <Filter>EditorUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\EditorUtility\TransformAxis.h">
+      <Filter>EditorUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\EditorUtility\TranslationAxis.h">
+      <Filter>EditorUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\EditorUtility\Drag.h">
+      <Filter>EditorUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FBX\SceneCache.h">
+      <Filter>FBX Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FBX\SceneContext.h">
+      <Filter>FBX Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FBX\GetPosition.h">
+      <Filter>FBX Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GFX\GFXParticles.h">
+      <Filter>GFX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GFX\GFXPatch3D.h">
+      <Filter>GFX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PhySimulator\GVPhySimulator_Bullet.h">
+      <Filter>PhysicalSimulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Scene\SkyQuad.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Scene\BrunetonSkyQuad.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Scene\HeightfieldTerrain.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXDialog.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXDlgItemBase.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXEdit.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXFC.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXFCAgent.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXList.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXPropertySheet.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXStatic.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXToolbar.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXWndBase.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\MOPropertyList.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\UniversalDialog.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\WEEdit.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\WEListBox.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\WEListView.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\WEMenu.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\WEStatic.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\WETreeView.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\DlgConsole.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UI\GXButton.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GameEngine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Audio\Audio_OAL.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Audio\AudioBuffer_OAL.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Audio\AudioSource_OAL.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Audio\MOggVorbis.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Audio\aldlist.cpp">
+      <Filter>Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EditorUtility\ScalingAxis.cpp">
+      <Filter>EditorUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EditorUtility\TranslationAxis.cpp">
+      <Filter>EditorUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EditorUtility\Drag.cpp">
+      <Filter>EditorUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\EditorUtility\RotationAxis.cpp">
+      <Filter>EditorUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FBX\SceneContext.cpp">
+      <Filter>FBX Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FBX\GetPosition.cpp">
+      <Filter>FBX Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FBX\SceneCache.cpp">
+      <Filter>FBX Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GFX\GFXParticles.cpp">
+      <Filter>GFX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GFX\GFXPatch3D.cpp">
+      <Filter>GFX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GFX\GFX.cpp">
+      <Filter>GFX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\PhySimulator\GVPhySimulator_Bullet.cpp">
+      <Filter>PhysicalSimulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Scene\SkyQuad.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Scene\BrunetonSkyQuad.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Scene\HeightfieldTerrain.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXDlgItemBase.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXEdit.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXList.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXPropertySheet.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXStatic.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXToolbar.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXWndBase.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOPropertyList.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\UniversalDialog.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\WEEdit.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\WEListBox.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\WEListView.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\WEMenu.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\WEStatic.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\WETreeView.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\DlgConsole.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXButton.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\GXDialog.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GameEngine.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

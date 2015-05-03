@@ -1,0 +1,24 @@
+[Aero.fx]
+fxc /Od /Zi /Tfx_4_0 /Fo$(ProjectDir)../bin/Shader/$(InputName).fxo /nologo $(InputPath)
+fxc /Od /Zi /Tvs_3_0 /EAeroVS /Fo$(ProjectDir)../bin/Shader/$(InputName).vsu /nologo $(InputPath)
+fxc /Od /Zi /Tps_3_0 /EAeroPS /Fo$(ProjectDir)../bin/Shader/$(InputName).psu /nologo $(InputPath)
+
+[Simple.fx]
+fxc /Od /Zi /Tfx_2_0 /Fo$(ProjectDir)../bin/Shader/$(InputName).fxo /nologo $(InputPath)
+fxc /Od /Zi /Tvs_2_0 /ESimpleVS /Fo$(ProjectDir)../bin/Shader/$(InputName).vsu /nologo $(InputPath)
+fxc /Od /Zi /Tps_2_0 /ESimplePS /Fo$(ProjectDir)../bin/Shader/$(InputName).psu /nologo $(InputPath)
+
+[Simple2.fx]
+fxc /Od /Zi /Tfx_2_0 /Fo$(ProjectDir)../bin/Shader/$(InputName).fxo /nologo $(InputPath)
+fxc /Od /Zi /Tvs_2_0 /ESimple2VS /Fo$(ProjectDir)../bin/Shader/$(InputName).vsu /nologo $(InputPath)
+fxc /Od /Zi /Tps_2_0 /ESimple2PS /Fo$(ProjectDir)../bin/Shader/$(InputName).psu /nologo $(InputPath)
+
+[Simple_XYZ_COLOR.fx]
+fxc /Od /Zi /Tfx_2_0 /Fo$(ProjectDir)../bin/Shader/$(InputName).fxo /nologo $(InputPath)
+fxc /Od /Zi /Tvs_2_0 /ESimple_XYZ_COLOR_VS /Fo$(ProjectDir)../bin/Shader/$(InputName).vsu /nologo $(InputPath)
+fxc /Od /Zi /Tps_2_0 /ESimple_XYZ_COLOR_PS /Fo$(ProjectDir)../bin/Shader/$(InputName).psu /nologo $(InputPath)
+
+[Font.fx]
+fxc /Od /Zi /Tfx_2_0 /Fo$(ProjectDir)bin/Shader/$(InputName).fxo /nologo $(InputPath)
+fxc /Od /Zi /Tvs_2_0 /EFontVS /Fo$(ProjectDir)bin/Shader/$(InputName).vsu /nologo $(InputPath)
+fxc /Od /Zi /Tps_2_0 /EFontPS /Fo$(ProjectDir)bin/Shader/$(InputName).psu /nologo $(InputPath)

@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\3D\Camera.cpp" />
+    <ClCompile Include="..\..\3D\Geometry.cpp" />
+    <ClCompile Include="..\..\3D\GeoOp.cpp" />
+    <ClCompile Include="..\..\clAllocator.cpp" />
+    <ClCompile Include="..\..\clBuffer.CPP" />
+    <ClCompile Include="..\..\clColorSpace.cpp" />
+    <ClCompile Include="..\..\clCompress.cpp" />
+    <ClCompile Include="..\..\clCrypt.cpp" />
+    <ClCompile Include="..\..\clfifo.cpp" />
+    <ClCompile Include="..\..\clFile.CPP" />
+    <ClCompile Include="..\..\clImage.cpp" />
+    <ClCompile Include="..\..\clMatrix.cpp" />
+    <ClCompile Include="..\..\clMesh.cpp" />
+    <ClCompile Include="..\..\clPathFile.cpp" />
+    <ClCompile Include="..\..\clQuaternion.cpp" />
+    <ClCompile Include="..\..\clstd.CPP" />
+    <ClCompile Include="..\..\clString.cpp" />
+    <ClCompile Include="..\..\clTransform.cpp" />
+    <ClCompile Include="..\..\clTree.CPP" />
+    <ClCompile Include="..\..\clUtility.cpp" />
+    <ClCompile Include="..\..\Else\casemap.cpp" />
+    <ClCompile Include="..\..\Else\ecvt.cpp" />
+    <ClCompile Include="..\..\FloatX.cpp" />
+    <ClCompile Include="..\..\PrimeNum.cpp" />
+    <ClCompile Include="..\..\Smart\SmartRepository.cpp" />
+    <ClCompile Include="..\..\Smart\SmartProfile.cpp" />
+    <ClCompile Include="..\..\Smart\SmartStock.cpp" />
+    <ClCompile Include="..\..\Smart\smartstream.cpp" />
+    <ClCompile Include="..\..\Socket\clSocketClient.cpp" />
+    <ClCompile Include="..\..\Socket\clSocketServer.cpp" />
+    <ClCompile Include="..\..\third_party\crypt\crypt_arc4.cpp" />
+    <ClCompile Include="..\..\third_party\crypt\crypt_des.cpp" />
+    <ClCompile Include="..\..\third_party\crypt\crypt_lmhash.cpp" />
+    <ClCompile Include="..\..\third_party\crypt\crypt_md5.cpp" />
+    <ClCompile Include="..\..\third_party\crypt\crypt_sha.cpp" />
+    <ClCompile Include="..\..\thread\clLocker.cpp" />
+    <ClCompile Include="..\..\thread\clMessageThread.cpp" />
+    <ClCompile Include="..\..\Thread\clSignal.cpp" />
+    <ClCompile Include="..\..\thread\clThread.cpp" />
+    <ClCompile Include="..\..\Thread\clThreadQueue.cpp" />
+    <ClCompile Include="..\..\thread\clTracingLocker.cpp" />
+    <ClCompile Include="..\..\User32Ex.CPP" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\3D\Camera.h" />
+    <ClInclude Include="..\..\3D\cl3d.h" />
+    <ClInclude Include="..\..\3D\Geometry.h" />
+    <ClInclude Include="..\..\3D\GeoOp.h" />
+    <ClInclude Include="..\..\clAllocator.h" />
+    <ClInclude Include="..\..\clBuffer.H" />
+    <ClInclude Include="..\..\clColorSpace.h" />
+    <ClInclude Include="..\..\clCompress.h" />
+    <ClInclude Include="..\..\clCrypt.h" />
+    <ClInclude Include="..\..\clfifo.h" />
+    <ClInclude Include="..\..\clFile.H" />
+    <ClInclude Include="..\..\clImage.h" />
+    <ClInclude Include="..\..\clMathExpressionParser.h" />
+    <ClInclude Include="..\..\clMathVector.h" />
+    <ClInclude Include="..\..\clMatrix.h" />
+    <ClInclude Include="..\..\clmemory.h" />
+    <ClInclude Include="..\..\clMesh.h" />
+    <ClInclude Include="..\..\clPathFile.h" />
+    <ClInclude Include="..\..\clQuaternion.h" />
+    <ClInclude Include="..\..\clstd.h" />
+    <ClInclude Include="..\..\clString.H" />
+    <ClInclude Include="..\..\clStringSet.h" />
+    <ClInclude Include="..\..\clTextLines.h" />
+    <ClInclude Include="..\..\clTransform.h" />
+    <ClInclude Include="..\..\clTree.H" />
+    <ClInclude Include="..\..\cltypes.h" />
+    <ClInclude Include="..\..\clUtility.H" />
+    <ClInclude Include="..\..\floatx.h" />
+    <ClInclude Include="..\..\Smart\SmartRepository.h" />
+    <ClInclude Include="..\..\Smart\SmartProfile.h" />
+    <ClInclude Include="..\..\Smart\SmartStock.h" />
+    <ClInclude Include="..\..\Smart\smartstream.h" />
+    <ClInclude Include="..\..\Socket\clSocket.h" />
+    <ClInclude Include="..\..\Socket\clSocketClient.h" />
+    <ClInclude Include="..\..\Socket\clSocketServer.h" />
+    <ClInclude Include="..\..\thread\clLocker.h" />
+    <ClInclude Include="..\..\thread\clMessageThread.h" />
+    <ClInclude Include="..\..\Thread\clSignal.H" />
+    <ClInclude Include="..\..\thread\clThread.h" />
+    <ClInclude Include="..\..\Thread\clThreadQueue.h" />
+    <ClInclude Include="..\..\thread\clTracingLocker.h" />
+    <ClInclude Include="..\..\User32Ex.H" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\..\clstd_x64.asm">
+      <FileType>Document</FileType>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_WIN64;_X64</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_WIN64;_X64</PreprocessorDefinitions>
+      <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</GenerateDebugInformation>
+    </MASM>
+    <None Include="..\..\third_party\crypt\COPYRIGHT.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>clstd</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(ProjectDir)..\..\Bin\</OutDir>
+    <TargetName>$(ProjectName)_d</TargetName>
+    <IntDir>x86\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\..\Bin\</OutDir>
+    <TargetName>$(ProjectName)_x64d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(ProjectDir)..\..\Bin\</OutDir>
+    <IntDir>x86\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\..\Bin\</OutDir>
+    <TargetName>$(ProjectName)_x64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;_X86;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\pthread\lib\x86;$(ProjectDir)..\..\third_party\zlib\lib\x86;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pthreadVSE2.lib;zlibstat_d.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+    </Lib>
+    <ProjectReference />
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_X64;_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\pthread\lib\x64;$(ProjectDir)..\..\third_party\zlib\lib\x64;$(VLDDIR)\lib\Win64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pthreadVC2.lib;zlibstat_d.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+    </Lib>
+    <ProjectReference />
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_WINDOWS;_X86;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>zlibstat.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\pthread\lib;$(ProjectDir)..\..\third_party\zlib\lib\x86;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_X64;_WINDOWS;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>zlibstat.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\pthread\lib;$(ProjectDir)..\..\third_party\zlib\lib\x64;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+</Project>
