@@ -436,13 +436,13 @@ typename _SS_IMPL::iterator _SS_IMPL::begin()
   //return beginIt;
 }
 
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_WINDOWS)
 _SS_TEMPL 
 typename const _SS_IMPL::iterator& _SS_IMPL::end() const
 #elif defined(_IOS)
 _SS_TEMPL 
   typename _SS_IMPL::const_iterator& _SS_IMPL::end() const
-#endif // #if defined(_WIN32) || defined(_WINDOWS)
+#endif // #if defined(_WINDOWS)
 {
   return m_itEnd;
 }
@@ -629,12 +629,12 @@ typename _SS_IMPL::iterator  _SS_IMPL::iterator::operator+(const size_t n) const
   return it;
 }
 
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_WINDOWS)
 _SS_TEMPL
 typename const _SS_IMPL::iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
 #elif defined(_IOS)
 typename _SS_IMPL::const_iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
-#endif // #if defined(_WIN32) || defined(_WINDOWS)
+#endif // #if defined(_WINDOWS)
 {
   iterator it = itBegin;
   va_list arglist;

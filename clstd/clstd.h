@@ -14,16 +14,21 @@
 #elif defined(_ANDROID)
 #endif
 
+#if !defined(_X86) && !defined(_X64) && !defined(_ARM) && !defined(_ARM64)
+# define _X86
+#endif
+
+#if !defined(_WINDOWS) && !defined(_IOS) && !defined(_ANDROID)
+# define _WINDOWS
+#endif
+
 #if defined(_WINDOWS)
 # include <windows.h>
 
-# if !defined(_X86) && !defined(_X64)
-# define _X86
-# endif // #if !defined(_X86) && !defined(_X64)
 
-# if !defined(_WIN32) && !defined(_WIN64)
-# define _WIN32
-# endif // #if !defined(_X86) && !defined(_X64)
+//# if !defined(_WIN32) && !defined(_WIN64)
+//# define _WIN32
+//# endif // #if !defined(_X86) && !defined(_X64)
 
 #elif defined(_IOS)
 # include <assert.h>
@@ -151,7 +156,7 @@ extern "C" void _cl_NoOperation();
 #     define STATIC_ASSERT(x)    static_assert(x, #x);
 #     define V(x)              if(FAILED(x)) { _cl_Break(); }
 #     define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}
-#   endif // #   ifdef _WIN32
+#   endif // #ifdef _X86
 # elif defined(_IOS)
 void _cl_traceA(const char *fmt, ...);
 void _cl_traceW(const wchar_t *fmt, ...);
