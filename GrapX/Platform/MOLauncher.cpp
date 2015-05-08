@@ -2,7 +2,7 @@
 #include <windows.h>
 
 #include "GrapX.H"
-#include "Include/GXApp.H"
+#include "GXApp.H"
 #include "res/resource.h"
 
 #include <Smart/smartstream.h>

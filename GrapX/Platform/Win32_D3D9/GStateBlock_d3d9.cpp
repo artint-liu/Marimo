@@ -4,14 +4,14 @@
 #include <GrapX.H>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXGraphics.H"
-#include "Include/GStateBlock.H"
-#include "Include/GXKernel.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GStateBlock.H"
+#include "GrapX/GXKernel.H"
 
 // 平台相关
-#include "Platform/Platform.h"
+#include "GrapX/Platform.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 
@@ -21,7 +21,7 @@
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
 #include "Platform/Win32_D3D9/GStateBlock_d3d9.H"
 #include "User/GrapX.Hxx"
-#include "gxError.H"
+#include "GrapX/gxError.H"
 
 namespace D3D9
 {

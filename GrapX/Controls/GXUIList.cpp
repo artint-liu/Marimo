@@ -1,25 +1,24 @@
 #ifndef _DEV_DISABLE_UI_CODE
 #include "GrapX.H"
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXFont.H"
-#include "Include/GXSprite.H"
-#include "Include/GXGraphics.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
-#include "Include/DataInfrastructure.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXFont.H"
+#include "GrapX/GXSprite.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataInfrastructure.H"
 #include "Smart/smartstream.h"
 
-#include "Include/GXKernel.H"
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
 
 #include "GXUICtrlBase.h"
 #include "GXUIList.h"
 #include "GXUIList_Simple.h"
 #include "GXUIList_Custom.h"
-#include "Include/GXCanvas.H"
-#include "gxDevice.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/gxDevice.H"
 
 
 GXHWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, GXLPCWSTR lpDlgName, GXHWND hParent, GXDLGPROC lpDialogFunc, GXLPARAM lParam);

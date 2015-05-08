@@ -2,14 +2,13 @@
 // Default Rich list adapter
 //
 //#include "GrapX.H"
-//#include "Include/GUnknown.H"
-//#include "Include/GResource.H"
-//#include "Include/GXFont.H"
-//#include "Include/GXSprite.H"
-//#include "Include/GXGraphics.H"
-//#include "Include/DataPool.H"
-//#include "Include/DataPoolVariable.H"
-//#include "Include/DataInfrastructure.H"
+//#include "GrapX/GResource.H"
+//#include "GrapX/GXFont.H"
+//#include "GrapX/GXSprite.H"
+//#include "GrapX/GXGraphics.H"
+//#include "GrapX/DataPool.H"
+//#include "GrapX/DataPoolVariable.H"
+//#include "GrapX/DataInfrastructure.H"
 ////#include "Smart/smartstream.h"
 ////#include "Include/guxtheme.h"
 //

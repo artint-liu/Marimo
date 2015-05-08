@@ -3,15 +3,15 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
 
 // 私有头文件
-#include "Include/GXGDI.H"
-#include "Include/GXUser.H"
-#include "clstd/clPathFile.H"
-#include "gxError.H"
+#include "clPathFile.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/gxError.H"
 #if defined(_DEBUG) && (defined(_WIN32) || defined(_WIN64))
 #include <vld.h>
 #endif // #if defined(_DEBUG) && (defined(_WIN32) || defined(_WIN64))

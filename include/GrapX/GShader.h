@@ -17,6 +17,7 @@ class GXGraphics;
 class GTextureBase;
 class SmartProfileA;
 class clConstBuffer;
+class SmartRepository;
 struct MOSHADER_ELEMENT_SOURCE;
 struct MTLFILEPARAMDESC;
 struct STANDARDMTLUNIFORMTABLE;

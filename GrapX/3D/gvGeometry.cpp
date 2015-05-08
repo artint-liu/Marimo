@@ -3,25 +3,24 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GPrimitive.h>
-#include <Include/GXGraphics.H>
-#include <Include/GShader.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GPrimitive.h>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GShader.H>
 
 // 私有头文件
 //#include <clstd/clTree.H>
 //#include <clstd/Smart/smartstream.h>
-#include <Utility/VertexDecl.H>
+#include <GrapX/VertexDecl.H>
 #include "gxUtility.h"
 
-#include "gxError.H"
+#include "GrapX/gxError.H"
 
 //#include <3D/gvNode.h>
 //#include <3D/gvMesh.h>
 //#include <3D/gvGeometry.h>
 //#include <3D/gvScene.h>
-#include "3D/GrapVR.H"
+#include "GrapX/GrapVR.H"
 namespace PrimitiveIndicesUtility
 {
   template<typename _VIndexTy>

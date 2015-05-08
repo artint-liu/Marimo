@@ -1,0 +1,35 @@
+struct LAST_C        
+{                    
+  string name;       
+  int aDynD[];       
+  int aSttD[5];      
+  float4 aVertices[];
+  float3 aPos[3];    
+};                   
+
+struct MID_B         
+{                    
+  string nameB;      
+  string namesB[];   
+  LAST_C DynC[];     
+  LAST_C SttC[2];    
+};                   
+
+struct HEAD_A        
+{                    
+  string nameA;      
+  string namesA[];   
+  MID_B DynB[];      
+  MID_B SttB[3];     
+};                   
+
+string 	DlgText[];    
+int  	aStt[4];        
+int  	aDyn[];         
+LAST_C 	sTestC;       
+HEAD_A 	DynTestA[];   
+string 	strName;      
+int 	bResult;         
+HEAD_A 	SttTestA[4]; 
+
+#pragma import("Complex_data.txt")

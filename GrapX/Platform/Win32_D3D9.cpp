@@ -2,32 +2,34 @@
 
 // 全局头文件
 #include "GrapX.H"
+#include "GXApp.H"
 #include "User/GrapX.Hxx"
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXApp.H"
-#include "Include/MOLogger.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/MOLogger.H"
 
 // 平台相关
-#include "Platform/Platform.h"
+#include "GrapX/Platform.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 
 // 私有头文件
-#include <clstd/User32Ex.H>
+#include <User32Ex.H>
 #include "Console.h"
 //#ifdef _ENABLE_STMT
 //#include <clstdcode\stmt\stmt.h>
 //#else
 //#include <clMessageThread.h>
 //#endif // #ifdef _ENABLE_STMT
-#include <gxDevice.H>
+#include <GrapX/gxDevice.H>
 #include "Canvas/GXResourceMgr.h"
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
-#include "Include/GXUser.H"
+#include "GrapX/GXUser.H"
+#include "thread/clMessageThread.h"
+#include "User/gxMessage.hxx"
 
 #pragma comment(lib, "shell32.lib")
 //////////////////////////////////////////////////////////////////////////

@@ -3,15 +3,14 @@
 //#include <clstd/clTree.H>
 #include <smart/SmartRepository.h>
 
-#include "include/GUnknown.H"
-#include "include/GResource.H"
-#include "include/GShader.h"
-#include "include/GPrimitive.h"
-#include "include/GXGraphics.H"
-#include "Include/GXKernel.H"
-#include "gxerror.h"
+#include "GrapX/GResource.H"
+#include "GrapX/GShader.h"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXError.h"
 
-#include "GrapVR.H"
+#include "GrapX/GrapVR.H"
 
 #define ANIMTRACK_FRAMECOUNT     "AnimTrack@FrameCount"
 #define ANIMTRACK_FRAMERATE      "AnimTrack@FrameRate"

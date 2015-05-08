@@ -2,19 +2,20 @@
 #include <GrapX.H>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include "Include/GXKernel.H"
-#include "Include/GShader.H"
-#include "Include/GPrimitive.h"
-#include "Include/GXGraphics.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GShader.H"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GXGraphics.H"
 
 // 私有头文件
-#include <clstd/clTree.H>
-#include <clstd/clTransform.h>
-
-#include <3D/GVNode.h>
-#include <3D/gvScene.h>
+#include <clTree.H>
+#include <clTransform.h>
+#include <thread/clSignal.h>
+#include <thread/clMessageThread.h>
+#include <smart/SmartRepository.h>
+#include <GrapX/GVNode.h>
+#include <GrapX/gvScene.h>
 
 GVNode::GVNode(GVScene* pScene, GXDWORD dwClassCode)
   : m_ClsCode (dwClassCode)

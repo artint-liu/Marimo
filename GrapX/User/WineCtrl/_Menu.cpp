@@ -45,15 +45,15 @@
 #include <User/GrapX.Hxx>
 #include <GXStation.H>
 //#include <User/GXWindow.h>
-#include "Include/GXUser.H"
-#include "Include/GXKernel.h"
-#include "Include/GXGDI.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXGDI.H"
 
 #include <stdarg.h>
 #include <string.h>
 
-#include <User/WineComm.H>
-#include "gxError.H"
+#include <GrapX/WineComm.H>
+#include "GrapX/gxError.H"
 
 #if !defined(_WINE_MENU_1_3_20_)
 #define OEMRESOURCE

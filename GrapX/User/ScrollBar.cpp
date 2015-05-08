@@ -4,16 +4,16 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GXCanvas.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GXCanvas.H>
 
 // 平台相关
 // 私有头文件
 #include "ScrollBar.H"
 #include "Utility/AeroCommon.H"
-#include "Include/GXUser.H"
-#include "Include/guxtheme.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/guxtheme.h"
 
 extern GXHTHEME hTheme_ScrollBar;
 

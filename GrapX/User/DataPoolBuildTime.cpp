@@ -1,14 +1,9 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
-//#include "clstd/Smart/smartstream.h"
-//#include "clstd/clPathFile.h"
-#include "clstd/clStringSet.h"
-#include "Include/GUnknown.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
-//#include "Include/GXKernel.H"
-//#include "Include/GXUser.H"
-//#include "gxError.H"
+#include "clStringSet.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 
 #include "DataPoolVariableVtbl.h"
 using namespace clstd;

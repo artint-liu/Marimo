@@ -1,11 +1,10 @@
 #include "GrapX.H"
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GShader.H"
-#include "Include/GTexture.H"
-#include "Include/GXCanvas.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GShader.H"
+#include "GrapX/GTexture.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXKernel.H"
 #include "GXEffectImpl.h"
 
 DATALAYOUT g_CanvasCommon[] =

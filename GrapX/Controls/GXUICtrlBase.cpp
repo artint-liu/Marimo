@@ -8,20 +8,19 @@
 #include "User/GXWindow.h"
 #include "User/UILayoutMgr.h"
 
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXFont.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXUser.H"
-#include "Include/GXCanvas.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXFont.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 
 #include "GXUICtrlBase.h"
 #include "GXUIStatic.h"
 #include "GXUIButton.h"
 //#include "GXUISlider.h"
-#include "gxDevice.H"
+#include "GrapX/gxDevice.H"
 
 using namespace clstd;
 

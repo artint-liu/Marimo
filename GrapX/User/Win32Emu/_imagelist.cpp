@@ -40,9 +40,9 @@
 
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXImm.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 //#include <string.h>
@@ -69,7 +69,7 @@
 //WINE_DEFAULT_DEBUG_CHANNEL(imagelist);
 
 #include "GXCommCtrl.h"
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 #include "_imagelist.h"
 
 #pragma warning( disable : 4244 )  // _w64型数与普通类型的相互转换

@@ -33,16 +33,16 @@
  *    - LBS_NODATA
  */
 #include <GrapX.H>
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/gxKernel.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/gxKernel.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 //#include "windef.h"
 //#include "winbase.h"
 //#include "wingdi.h"
@@ -51,7 +51,7 @@
 //#include "user_private.h"
 //#include "controls.h"
 //#include "wine/debug.h"
-#include "gxError.H"
+#include "GrapX/gxError.H"
 //WINE_DEFAULT_DEBUG_CHANNEL(listbox);
 
 #pragma warning( disable : 4244 )  // _w64型数与普通类型的相互转换

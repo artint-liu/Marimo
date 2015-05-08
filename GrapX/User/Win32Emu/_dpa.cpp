@@ -48,16 +48,16 @@
 
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
-#include "Include/GXUser.H"
-#include "Include/GXKernel.H"
-#include "Include/GXGDI.H"
-#include "Include/GXImm.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXImm.h"
 #include "GXCommCtrl.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 #include <User/Win32Emu/_dpa.H>
 
 #ifdef TRACE

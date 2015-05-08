@@ -4,9 +4,9 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
 
 // 私有头文件
 #include <User/GXWindow.h>

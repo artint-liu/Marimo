@@ -4,22 +4,22 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXCanvas.H>
-#include <Include/GXImage.H>
-#include <Include/GXSprite.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXCanvas.H>
+#include <GrapX/GXImage.H>
+#include <GrapX/GXSprite.H>
 
 // 私有头文件
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
 #include <User/GXWindow.h>
 #include "Utility/AeroCommon.H"
 #include <User/WindowsSurface.h>
-#include "User/WineComm.H"
-#include "Include/guxtheme.h"
+#include "GrapX/WineComm.H"
+#include "GrapX/guxtheme.h"
 
 extern GXHFONT g_hSystemFont;
 //gxGetDCEx

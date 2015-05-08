@@ -13,44 +13,44 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GPrimitive.H"
-#include "Include/GStateBlock.H"
-#include "Include/GRegion.H"
-#include "Include/GTexture.H"
-#include "Include/GXCanvas.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXFont.H"
-#include "Include/GXImage.H"
-#include "Include/GShader.H"
-#include "Include/GXKernel.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GPrimitive.H"
+#include "GrapX/GStateBlock.H"
+#include "GrapX/GRegion.H"
+#include "GrapX/GTexture.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXFont.H"
+#include "GrapX/GXImage.H"
+#include "GrapX/GShader.H"
+#include "GrapX/GXKernel.H"
 
 // 平台相关
-#include "Platform/Platform.h"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
+#include "GrapX/Platform.h"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
 #include "Canvas/GXResourceMgr.h"
-#include "Include/GXCanvas3D.h"
+#include "GrapX/GXCanvas3D.h"
 #include "Canvas/GXEffectImpl.h"
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
 #include "Platform/Win32_D3D9/GTextureImpl_d3d9.H"
 #include "Platform/Win32_D3D9/GStateBlock_d3d9.H"
 
 // 私有头文件
-#include <clstd/clUtility.h>
-#include <Utility/VertexDecl.H>
+#include <clUtility.h>
+#include <GrapX/VertexDecl.H>
 #include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.H"
-#include "Include/GXUser.H"
+#include "GrapX/GXUser.H"
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
-#include <gxDevice.H>
+#include <GrapX/gxDevice.H>
 //#include <User/GXWindow.h>
 #include <Utility/hlsl/FXCommRegister.H>
-#include <Include/GCamera.h>
+#include <GrapX/GCamera.h>
 
 
 #define TRACE_BATCH

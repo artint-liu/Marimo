@@ -6,21 +6,20 @@
 #include <GrapX.H>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXImage.H"
-#include "Include/GXCanvas.H"
-#include "Include/GXSprite.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXImage.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/GXSprite.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXKernel.H"
 
 // 私有头文件
-#include <clstd/clPathFile.h>
-#include <clstd/clUtility.H>
-#include <clstd/clStringSet.H>
-#include <clstd/Smart/SmartStream.h>
-#include <clstd/Smart/SmartProfile.h>
-#include <clstd/Smart/SmartStock.h>
+#include <clPathFile.h>
+#include <clUtility.H>
+#include <clStringSet.H>
+#include <Smart/SmartStream.h>
+#include <Smart/SmartProfile.h>
+#include <Smart/SmartStock.h>
 #include <Canvas/GXSpriteImpl.H>
 
 //using namespace std;

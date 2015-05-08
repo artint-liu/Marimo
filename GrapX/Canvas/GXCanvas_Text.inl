@@ -3,7 +3,6 @@
 //#include <User/GrapX.Hxx>// 标准接口
 //
 //// 标准接口
-//#include <Include/GUnknown.H>
 //#include <Include/GResource.H>
 //#include <Include/GXCanvas.h>
 //#include <Include/GXFont.h>

@@ -2,7 +2,6 @@
 #include <GrapX.H>
 
 // 标准接口
-#include <Include/GUnknown.H>
 
 // 私有头文件
 

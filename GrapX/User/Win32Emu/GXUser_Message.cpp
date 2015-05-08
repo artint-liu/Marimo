@@ -4,20 +4,22 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXCanvas.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXCanvas.H>
 
 // 私有头文件
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
-#include "Include/GXUser.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.H"
 #include <User/GXWindow.h>
 #include <GrapX/gxDevice.H>
 
+#include "thread/clMessageThread.h"
+#include "User/gxMessage.hxx"
 
 
 GXBOOL IntMakeActionMessage(

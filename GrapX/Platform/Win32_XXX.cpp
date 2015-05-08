@@ -1,21 +1,24 @@
 // 全局头文件
 #include "GrapX.H"
+#include "GXApp.H"
 #include "User/GrapX.Hxx"
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GXApp.H"
-#include "Include/GXUser.H"
-#include "Include/GResource.H"
-#include "Include/GXGraphics.H"
-#include "Include/MOLogger.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/MOLogger.h"
 
 // 私有头文件
-#include <clstd/User32Ex.H>
+#include <User32Ex.H>
 //#include "Console.h"
-#include "gxDevice.H"
-#include "Platform.h"
+#include "GrapX/gxDevice.H"
+#include "GrapX/Platform.h"
 #include "Win32_XXX.h"
+
+#include "thread/clMessageThread.h"
+#include "User/gxMessage.hxx"
 
 using namespace clstd;
 void GXDestroyRootFrame();

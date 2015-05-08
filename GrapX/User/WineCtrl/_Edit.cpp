@@ -44,16 +44,16 @@
 */
 
 #include <GrapX.H>
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXKernel.H"
-#include "Include/GXImm.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 
 // #include "windef.h"
 // #include "winbase.h"

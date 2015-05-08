@@ -2,11 +2,11 @@
 #include <GrapX.H>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GShader.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GShader.H>
 
-#include "VertexDecl.H"
+#include "GrapX/VertexDecl.H"
 
 //D3DVERTEXELEMENT9 POS_TEXCOORD_COLOR_ELEMENT[] =
 //{

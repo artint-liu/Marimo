@@ -6,23 +6,22 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GPrimitive.H>
-#include <Include/GRegion.H>
-#include <Include/GTexture.H>
-#include <Include/GXCanvas.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXFont.H>
-#include <Include/GXImage.H>
-#include <Include/GShader.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GPrimitive.H>
+#include <GrapX/GRegion.H>
+#include <GrapX/GTexture.H>
+#include <GrapX/GXCanvas.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXFont.H>
+#include <GrapX/GXImage.H>
+#include <GrapX/GShader.H>
 
 // 平台相关
 #include "Canvas/GXResourceMgr.h"
-#include "Include/GXCanvas3D.h"
+#include "GrapX/GXCanvas3D.h"
 
 // 私有头文件
-#include "Include/GXUser.H"
+#include "GrapX/GXUser.H"
 #include "User/WindowsSurface.h"
 #include "User/DesktopWindowsMgr.h"
 #include "User/GXWindow.h"

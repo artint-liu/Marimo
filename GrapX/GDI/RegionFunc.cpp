@@ -2,10 +2,10 @@
 #include <GrapX.H>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
-#include "Include/GXUser.H"
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
+#include "GrapX/GXUser.H"
 
 // 私有头文件
 #include "RegionFunc.H"

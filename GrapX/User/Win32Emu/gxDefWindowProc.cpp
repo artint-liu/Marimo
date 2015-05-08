@@ -4,21 +4,21 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GTexture.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXCanvas.H>
-#include <Include/GXImage.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GTexture.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXCanvas.H>
+#include <GrapX/GXImage.H>
 
 // 私有头文件
-#include <clstd/clutility.h>
+#include <clutility.h>
 
 #include "User/WindowsSurface.h"
 #include <User/GXWindow.h>
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/gUxtheme.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/gUxtheme.h"
 #include <User/ScrollBar.H>
 #include <Utility/HLSL/FXCommRegister.H>
 

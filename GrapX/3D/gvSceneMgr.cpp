@@ -2,10 +2,9 @@
 #include <GrapX.H>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXKernel.H"
 
 // 私有头文件
 //#include <vector>
@@ -13,8 +12,8 @@
 
 //#include <3D/GVNode.h>
 //#include <3D/gvMesh.h>
-#include "3D/gvSceneMgr.h"
-#include "3D/GrapVR.H"
+#include "GrapX/gvSceneMgr.h"
+#include "GrapX/GrapVR.H"
 
 GVSceneMgr::GVSceneMgr(GXGraphics* pGraphics)
   : m_pGraphics(pGraphics)

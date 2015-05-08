@@ -54,7 +54,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 #include <User/gxusp10.h>
 
 #undef TRACE_

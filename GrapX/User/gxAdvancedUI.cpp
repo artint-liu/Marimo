@@ -4,10 +4,10 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXSprite.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXSprite.H>
 
 // 私有头文件
 #include <User/GXWindow.h>

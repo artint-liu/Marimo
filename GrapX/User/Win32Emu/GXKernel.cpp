@@ -1,11 +1,12 @@
 ﻿#include "GrapX.H"
 #include "User/GrapX.Hxx"
-#include "clstd/clPathFile.H"
-#include "Include/GXKernel.H"
-#include "Include/GXUser.H"  // TODO: 只是为了包含CP_ACP, 想办法去掉这个包含
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Platform/Platform.h"
+#include "clPathFile.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXUser.H"  // TODO: 只是为了包含CP_ACP, 想办法去掉这个包含
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/Platform.h"
+#include "thread/clThread.h"
 
 #include <time.h>
 

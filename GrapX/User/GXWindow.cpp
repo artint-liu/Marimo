@@ -4,18 +4,21 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXImage.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXImage.H>
 
 // 私有头文件
 #include <User/GXWindow.h>
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
+
+#include "thread/clMessageThread.h"
+#include "User/gxMessage.hxx"
 
 GXHICON GXDLLAPI GXCursorToIcon(GXHCURSOR hCursor);
 //GXHWND GXGetParentClip(HGXWND hWnd, GXBOOL bClient, GXLPRECT lprcOut);

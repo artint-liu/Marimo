@@ -1,11 +1,11 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
-#include "clstd/clStringSet.h"
-#include "Include/GUnknown.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolIterator.H"
-#include "Include/DataPoolVariable.H"
-#include "Include/GXKernel.H"
+#include "clStringSet.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolIterator.H"
+#include "GrapX/DataPoolVariable.H"
+#include "GrapX/GXKernel.H"
 
 #include "DataPoolVariableVtbl.h"
 using namespace clstd;

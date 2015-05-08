@@ -3,18 +3,17 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GRegion.H"
-#include "Include/GTexture.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXImage.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GRegion.H"
+#include "GrapX/GTexture.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXImage.H"
+#include "GrapX/GXKernel.H"
 
 // 平台相关
 // 私有头文件
 #include "GXImageImpl.H"
-#include "clstd/clUtility.H"
+#include "clUtility.H"
 
 GXImageImpl::GXImageImpl(GXGraphics* pGraphics)
 : GXImage    ()

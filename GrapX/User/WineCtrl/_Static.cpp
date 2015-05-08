@@ -47,11 +47,11 @@
 
 //#include "stdafx.h"
 #include <GrapX.H>
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXKernel.H"
 #include <stdarg.h>
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 
 #pragma warning( disable : 4244 )  // _w64型数与普通类型的相互转换
 #pragma warning( disable : 4018 )  // 无符号与有符号数比较

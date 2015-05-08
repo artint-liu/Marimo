@@ -4,21 +4,20 @@
 #include "User/GrapX.Hxx"
 //#include "User/GXWindow.h"
 
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXFont.H"
-#include "Include/GXSprite.H"
-#include "Include/GXGraphics.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXFont.H"
+#include "GrapX/GXSprite.H"
+#include "GrapX/GXGraphics.H"
 
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXCanvas.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 
 #include "GXUICtrlBase.h"
 #include "GXUISlider.h"
-#include "gxDevice.H"
+#include "GrapX/gxDevice.H"
 
 namespace GXUI
 {

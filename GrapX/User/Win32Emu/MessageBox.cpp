@@ -7,27 +7,19 @@
 #include <Smart/SmartProfile.h>
 
 // 平台相关
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
-#include "Include/DataInfrastructure.H"
-#include "clstd/clPathFile.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataInfrastructure.H"
+#include "clPathFile.H"
 
 // 私有头文件
-//#include "User/GXWindow.h"
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXKernel.H"
-//#include "Controls/GXUICtrlBase.h"
-//#include "Controls/GXUIStatic.h"
-//#include "Controls/GXUIButton.h"
-//#include "Controls/GXUIToolbar.h"
-//#include "Controls/GXUIList.h"
-//#include "Controls/GXUISlider.h"
-//#include "Controls/PropertySheet.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXKernel.H"
 #include "User/UILayoutMgr.h"
-#include "gxDevice.H"
+#include "GrapX/gxDevice.H"
 
 extern GXWNDCLASSEX WndClassEx_Menu;
 extern GXWNDCLASSEX WndClassEx_MyButton;

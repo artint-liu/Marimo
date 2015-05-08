@@ -30,40 +30,40 @@
 
 #include <GrapX.H>
 #include <GXApp.H>
-#include <GUnknown.H>
-#include <GResource.H>
-#include <GShader.H>
-#include <GPrimitive.H>
-#include <GTexture.H>
-#include <GRegion.H>
-#include <GXFont.H>
-#include <GXImage.H>
-#include <GXSprite.H>
-#include <GXCanvas.H>
-#include <GXCanvas3D.h>
-#include <GXGraphics.h>
-#include <GCamera.h>
-#include <GVPhySimulator.h>
-#include "MOLogger.h"
+//#include <GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GShader.H>
+#include <GrapX/GPrimitive.H>
+#include <GrapX/GTexture.H>
+#include <GrapX/GRegion.H>
+#include <GrapX/GXFont.H>
+#include <GrapX/GXImage.H>
+#include <GrapX/GXSprite.H>
+#include <GrapX/GXCanvas.H>
+#include <GrapX/GXCanvas3D.h>
+#include <GrapX/GXGraphics.h>
+#include <GrapX/GCamera.h>
+#include <GrapX/GVPhySimulator.h>
+#include "GrapX/MOLogger.h"
 
 #include <clTransform.h>
 
-#include <3D/StdMtl.h>
-#include <3D/GVNode.H>
-#include <3D/GVMesh.H>
-#include <3D/GVGeometry.H>
-#include <3D/gvSkinnedMesh.h>
-#include <3D/gvScene.h>
-#include <3D/gvSkeleton.h>
-#include <3D/gvSequence.h>
+#include <GrapX/StdMtl.h>
+#include <GrapX/GVNode.H>
+#include <GrapX/GVMesh.H>
+#include <GrapX/GVGeometry.H>
+#include <GrapX/gvSkinnedMesh.h>
+#include <GrapX/gvScene.h>
+#include <GrapX/gvSkeleton.h>
+#include <GrapX/gvSequence.h>
 
-#include <GXUser.H>
-#include <gxDevice.H>
-#include <gxKernel.H>
-#include <Platform/Platform.h>
-#include <DataPool.H>
-#include <DataPoolVariable.H>
-#include <DataInfrastructure.H>
+#include <GrapX/GXUser.H>
+#include <GrapX/gxDevice.H>
+#include <GrapX/gxKernel.H>
+#include <GrapX/Platform.h>
+#include <GrapX/DataPool.H>
+#include <GrapX/DataPoolVariable.H>
+#include <GrapX/DataInfrastructure.H>
 //#include "third_party\FBX SDK\2013.2\include\fbxsdk.h"
 
 
@@ -72,18 +72,18 @@
 // Game Engine Headers
 //
 
-#include <GameEngine/GameEngine.h>
-#include <GameEngine/EditorUtility/TransformAxis.h>
-#include <GameEngine/EditorUtility/ScalingAxis.h>
-#include <GameEngine/EditorUtility/RotationAxis.h>
-#include <GameEngine/EditorUtility/TranslationAxis.h>
-#include <GameEngine/EditorUtility/Drag.h>
+#include <Engine.h>
+#include <Engine/TransformAxis.h>
+#include <Engine/ScalingAxis.h>
+#include <Engine/RotationAxis.h>
+#include <Engine/TranslationAxis.h>
+#include <Engine/Drag.h>
 
-#include <GameEngine/UI/GXFC.H>
-#include <GameEngine/Scene/SkyQuad.h>
-#include <GameEngine/Scene/BrunetonSkyQuad.h>
-#include <GameEngine/VideoCapture.h>
-#include <MOAudio.h>
+#include <Engine/GXFC.H>
+#include <Engine/SkyQuad.h>
+#include <Engine/BrunetonSkyQuad.h>
+//#include <Engine/VideoCapture.h>
+#include <Engine/MOAudio.h>
 
 class CMOWnd;
 class CMODialog;

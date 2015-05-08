@@ -2,11 +2,10 @@
 #include <GrapX.H>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GCamera.H"
-#include "Include/GResource.H"
-#include "Include/GXCanvas.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GCamera.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/GXKernel.H"
 
 // 私有头文件
 //#include "GCamera.h"

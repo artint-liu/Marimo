@@ -11,14 +11,14 @@
 #include "clTree.H"
 #include "clTransform.h"
 
-#include "3D/StdMtl.h"
-#include "3D/gvNode.h"
-#include "3D/gvMesh.h"
-#include "3D/gvSkinnedMesh.h"
-#include "3D/gvGeometry.h"
-#include "3D/gvScene.h"
-#include "3D/gvSkeleton.h"
-#include "3D/gvSequence.h"
+#include "StdMtl.h"
+#include "gvNode.h"
+#include "gvMesh.h"
+#include "gvSkinnedMesh.h"
+#include "gvGeometry.h"
+#include "gvScene.h"
+#include "gvSkeleton.h"
+#include "gvSequence.h"
 
 
 //////////////////////////////////////////////////////////////////////////

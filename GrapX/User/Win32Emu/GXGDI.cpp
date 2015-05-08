@@ -4,18 +4,18 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXCanvas.H>
-#include <Include/GXImage.H>
-#include <Include/GXFont.H>
-#include <Include/GRegion.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXCanvas.H>
+#include <GrapX/GXImage.H>
+#include <GrapX/GXFont.H>
+#include <GrapX/GRegion.H>
 
 // 私有头文件
 #include <User/GXWindow.h>
-#include "Include/GXGDI.H"
-#include "Include/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXUser.H"
 
 
 

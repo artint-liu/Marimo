@@ -28,8 +28,6 @@ namespace clstd
 {
   namespace thread
   {
-    u32 GetCurrentId();
-
     class Context
     {
     private:

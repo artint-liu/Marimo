@@ -4,13 +4,13 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GXCanvas.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GXCanvas.H>
 
 // 私有头文件
 #include <User/GXWindow.h>
-#include "Include/GXUser.H"
+#include "GrapX/GXUser.H"
 
 extern GXLPSTATION g_pCurStation;
 extern "C"

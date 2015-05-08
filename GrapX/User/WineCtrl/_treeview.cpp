@@ -81,16 +81,16 @@
 #endif // TRACEW
 
 #include <GrapX.H>
-#include "Include/gUxtheme.h"
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXImm.h"
+#include "GrapX/gUxtheme.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 #include <User/Win32Emu/GXCommCtrl.H>
 #include <User/Win32Emu/_dpa.H>
 
@@ -236,7 +236,7 @@ static const GXWCHAR themeClass[] = { 'T','r','e','e','v','i','e','w',0 };
 
 typedef GXVOID (*TREEVIEW_ItemEnumFunc)(GXTREEVIEW_INFO *, GXTREEVIEW_ITEM *,GXLPVOID);
 
-static inline int lstrncmpiW(GXLPCWSTR s1, GXLPCWSTR s2, int n);
+//static inline int lstrncmpiW(GXLPCWSTR s1, GXLPCWSTR s2, int n);
 static GXVOID TREEVIEW_Invalidate(const GXTREEVIEW_INFO *, const GXTREEVIEW_ITEM *);
 
 static GXLRESULT TREEVIEW_DoSelectItem(GXTREEVIEW_INFO *, GXINT, GXHTREEITEM, GXINT);
@@ -5800,15 +5800,15 @@ TREEVIEW_Unregister()
   gxUnregisterClassW(WC_TREEVIEWW, NULL);
 }
 
-static inline int lstrncmpiW(GXLPCWSTR s1, GXLPCWSTR s2, int n)
-{
-  return GXSTRNCMPI(s1, s2, n);
-  //int res;
-
-  //n = min(min(n, GXSTRLEN(s1)), GXSTRLEN(s2));
-  //res = CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, s1, n, s2, n);
-  //return res ? res - sizeof(GXWCHAR) : res;
-}
+//static inline int lstrncmpiW(GXLPCWSTR s1, GXLPCWSTR s2, int n)
+//{
+//  return GXSTRNCMPI(s1, s2, n);
+//  //int res;
+//
+//  //n = min(min(n, GXSTRLEN(s1)), GXSTRLEN(s2));
+//  //res = CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, s1, n, s2, n);
+//  //return res ? res - sizeof(GXWCHAR) : res;
+//}
 
 /* Tree Verification ****************************************************/
 

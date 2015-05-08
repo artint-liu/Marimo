@@ -2,29 +2,28 @@
 #include <GrapX.H>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXGraphics.H"
-#include "Include/GShader.h"
-#include "Include/GXCanvas.H"
-#include "Include/GPrimitive.h"
-#include "Include/GTexture.H"
-#include "Include/GVPhySimulator.h"
-#include "Include/GCamera.h"
-#include "Include/GXKernel.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GShader.h"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GTexture.H"
+#include "GrapX/GVPhySimulator.h"
+#include "GrapX/GCamera.h"
+#include "GrapX/GXKernel.H"
 
 // 私有头文件
 #include "clTree.H"
 #include "clTransform.h"
 
-#include "Include/GXCanvas3D.h"
-#include "Utility/VertexDecl.H"
+#include "GrapX/GXCanvas3D.h"
+#include "GrapX/VertexDecl.H"
 
-#include <3D/gvNode.h>
-#include <3D/gvMesh.h>
-#include <3D/gvScene.h>
-#include <3D/gvSceneMgr.h>
-#include <3D/gvSequence.h>
+#include <GrapX/gvNode.h>
+#include <GrapX/gvMesh.h>
+#include <GrapX/gvScene.h>
+#include <GrapX/gvSceneMgr.h>
+#include <GrapX/gvSequence.h>
 #include "gxUtility.h"
 
 //#define DEFAULT_MTL_FILENAME "shaders\\Diffuse_shader.txt"

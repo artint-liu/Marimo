@@ -1,7 +1,7 @@
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
-#include "Include/GXUser.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.H"
 #include <User/ResDataMgr.H>
 
 GrapXResData* pWndPropertyMap;

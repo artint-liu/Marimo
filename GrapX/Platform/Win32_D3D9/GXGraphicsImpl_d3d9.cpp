@@ -10,24 +10,24 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GRegion.H"
-#include "Include/GPrimitive.h"
-#include "Include/GShader.H"
-#include "Include/GStateBlock.H"
-#include "Include/GTexture.H"
-#include "Include/GXGraphics.H"
-#include "Include/GXCanvas.H"
-#include "Include/GXImage.H"
-#include "Include/GXFont.H"
-#include "Include/GXCanvas3D.h"
-#include "Include/MOLogger.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GRegion.H"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GShader.H"
+#include "GrapX/GStateBlock.H"
+#include "GrapX/GTexture.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/GXImage.H"
+#include "GrapX/GXFont.H"
+#include "GrapX/GXCanvas3D.h"
+#include "GrapX/MOLogger.h"
 
 // 平台相关
-#include "Platform/Platform.h"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
+#include "GrapX/Platform.h"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GPrimitiveImpl_d3d9.h"
@@ -36,17 +36,17 @@
 #include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.H"
 
 // 私有头文件
-#include <clstd/clPathFile.H>
+#include <clPathFile.H>
 #include "Platform/Win32_D3D9/GStateBlock_d3d9.H"
-#include <Utility/VertexDecl.H>
+#include <GrapX/VertexDecl.H>
 #include "Canvas/GXResourceMgr.h"
 #include "Canvas/GXEffectImpl.h"
 //#include "Console.h"
 #include <Smart/SmartStream.h>
 #include <Smart/SmartProfile.h>
 
-#include "Include/GXKernel.H"
-#include "Include/GXUser.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXUser.H"
 #include <GDI/RegionFunc.H>
 #include <GDI/GRegionImpl.H>
 #include "Platform/Win32_D3D9/GTextureImpl_d3d9.H"
@@ -61,12 +61,12 @@
 #include <Canvas/GFTFontImpl.H>
 #include <GDI/GXShaderMgr.h>
 
-#include "gxError.H"
+#include "GrapX/gxError.H"
 
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
 // Canvas3D用的
-#include "Include/GCamera.h"
-#include "3D/GrapVR.H"  // Canvas3D 用的
+#include "GrapX/GCamera.h"
+#include "GrapX/GrapVR.H"  // Canvas3D 用的
 #include "Canvas/GXMaterialImpl.h"
 // </Canvas3D用的>
 

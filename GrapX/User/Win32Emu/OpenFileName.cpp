@@ -1,8 +1,7 @@
 #include <GrapX.H>
-#include "Include/GUnknown.H"
-#include "Include/MOLogger.h"
-//#include "Include/GXKernel.H"
-#include "Include/GXUser.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/MOLogger.h"
+#include "GrapX/GXUser.H"
 
 
 void GetPathFromItem(const GXHWND hTree, const GXHTREEITEM hItem, clStringW& strDir)

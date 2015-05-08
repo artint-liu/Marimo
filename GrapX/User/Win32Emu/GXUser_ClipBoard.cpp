@@ -1,10 +1,10 @@
 #ifndef _DEV_DISABLE_UI_CODE
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
-#include "Include/GXUser.H"
-#include "Include/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.H"
 #include "GXStation.H"
-#include "gxDevice.H"
+#include "GrapX/gxDevice.H"
 #include <User/GXWindow.h>
 
 GXHGLOBAL g_hClipboard = NULL;  // TODO: 改为线程独立的

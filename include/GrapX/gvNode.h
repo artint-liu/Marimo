@@ -6,6 +6,7 @@ class GPrimitive;
 class GVScene;
 class GXCanvas3D;
 class GXMaterialInst;
+class SmartRepository;
 struct GVSCENEUPDATE;
 //enum GXPRIMITIVETYPE;
 

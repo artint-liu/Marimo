@@ -1,7 +1,7 @@
 #include "GrapX.H"
-#include "Include/GUnknown.H"
-#include "Include/GXApp.H"
-#include "Platform/Platform.h"
+//#include "GrapX/GUnknown.H"
+#include "GXApp.H"
+#include "GrapX/Platform.h"
 #include "GrapX/gxDevice.H"
 
 class IGXPlatform_Win32OpenGL;

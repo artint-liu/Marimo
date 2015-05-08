@@ -1,7 +1,7 @@
 #ifndef _DEV_DISABLE_UI_CODE
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
-#include "Include/GXUser.H"
+#include "GrapX/GXUser.H"
 #include <GXStation.H>
 #include <User/GXWindow.h>
 #include "_dpa.H"

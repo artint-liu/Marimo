@@ -1,24 +1,24 @@
 // 全局头文件
 #include <GrapX.H>
+#include "GXApp.H"
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GTexture.H"
-#include "Include/GRegion.H"
-#include "Include/GXGraphics.H"
-#include "Include/GShader.H"
-#include "Include/GXFont.H"
-#include "Include/GXCanvas.H"
-#include "Include/GXUser.H"
-#include "Include/GXKernel.H"
-#include "Include/GXApp.H"
-#include "Platform/Platform.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GTexture.H"
+#include "GrapX/GRegion.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GShader.H"
+#include "GrapX/GXFont.H"
+#include "GrapX/GXCanvas.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/Platform.h"
 
 // 私有头文件
 #include <User/GXWindow.h>
-#include "Include/gUxtheme.h"
+#include "GrapX/gUxtheme.h"
 #include <User/Win32Emu/_dpa.H>
 #include <User/DesktopWindowsMgr.h>
 #include <Utility/LogMgr.H>
@@ -26,7 +26,7 @@
 #include <Utility/Shader/BlurShader.H>
 #include <Utility/Shader/SimpleShader.H>
 //#include <clMessageThread.h>
-#include "gxDevice.H"
+#include "GrapX/gxDevice.H"
 
 GXLPSTATION g_pCurStation;
 static GXINSTANCE* g_pInstDll;

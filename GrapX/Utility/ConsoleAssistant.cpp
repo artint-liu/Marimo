@@ -2,11 +2,11 @@
 #include "GrapX.H"
 #include "User/GrapX.Hxx"
 
-#include "Include/GUnknown.H"
-#include "Include/GXKernel.H"
-#include "Include/GXUser.H"
-#include "Include/MOLogger.h"
-#include "Include/MOConsoleStaff.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/MOLogger.h"
+#include "GrapX/MOConsoleStaff.h"
 
 #include "Utility/ConsoleAssistant.h"
 

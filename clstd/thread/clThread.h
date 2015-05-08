@@ -7,7 +7,10 @@
 
 namespace clstd
 {
-
+  namespace thread
+  {
+    u32 GetCurrentId();
+  } // namespace thread
 #ifdef _WIN32
   namespace _win32
   {

@@ -2,12 +2,11 @@
 #include <GrapX.H>
 #include "User/GrapX.Hxx"
 
-#include <clstd/clPathFile.H>
-#include <clstd/clString.H>
+#include <clPathFile.H>
+#include <clString.H>
 
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GXGraphics.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
 
 #include <GDI/GXShaderMgr.h>
 

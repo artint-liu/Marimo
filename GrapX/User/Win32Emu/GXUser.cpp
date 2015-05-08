@@ -3,19 +3,19 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
-#include <Include/GXGraphics.H>
-#include <Include/GXCanvas.H>
-#include <Include/GXSprite.H>
-#include <Include/GXFont.H>
-#include <Include/GXImage.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GXCanvas.H>
+#include <GrapX/GXSprite.H>
+#include <GrapX/GXFont.H>
+#include <GrapX/GXImage.H>
 
 // 私有头文件
-#include "Include/GXKernel.H"
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
 #include <User/GXWindow.h>
 #include "Utility/AeroCommon.H"
 #include "User/DesktopWindowsMgr.h"

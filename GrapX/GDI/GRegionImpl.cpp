@@ -2,14 +2,14 @@
 #include <GrapX.H>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GRegion.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GRegion.H>
 
 // 私有头文件
-#include <clstd/clUtility.H>
-#include "Include/GXUser.H"
-#include "Include/GXKernel.H"
+#include <clUtility.H>
+#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.H"
 
 #include "RegionFunc.H"
 #include "GRegionImpl.H"

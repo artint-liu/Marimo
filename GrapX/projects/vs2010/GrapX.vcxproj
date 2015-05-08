@@ -108,7 +108,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;_ENABLE_WOGL;_ENABLE_GLES2;_ENABLE_DX11;________DEV_DISABLE_UI_CODE</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -131,7 +131,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <Profile>true</Profile>
       <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x86;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x86;$(DXSDK_DIR)Lib\x86;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../third_party/FreeType/lib/x86;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x86;$(DXSDK_DIR)Lib\x86;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,7 +139,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -169,7 +169,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -199,7 +199,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)../../..;$(ProjectDir)../../../clstd;$(ProjectDir)../../../GrapX/;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;NDEBUG;_WINDOWS;_NDEBUG;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -223,49 +223,59 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\DataInfrastructure.h" />
-    <ClInclude Include="..\..\..\include\DataPool.h" />
-    <ClInclude Include="..\..\..\include\DataPoolIterator.h" />
-    <ClInclude Include="..\..\..\include\DataPoolVariable.h" />
-    <ClInclude Include="..\..\..\include\GCamera.h" />
-    <ClInclude Include="..\..\..\include\GFX.h" />
-    <ClInclude Include="..\..\..\include\GPrimitive.h" />
-    <ClInclude Include="..\..\..\include\GRegion.h" />
-    <ClInclude Include="..\..\..\include\GResource.h" />
-    <ClInclude Include="..\..\..\include\GShader.h" />
-    <ClInclude Include="..\..\..\include\GStateBlock.h" />
-    <ClInclude Include="..\..\..\include\GTexture.h" />
-    <ClInclude Include="..\..\..\include\GUnknown.h" />
-    <ClInclude Include="..\..\..\include\guxtheme.h" />
-    <ClInclude Include="..\..\..\include\GVPhySimulator.h" />
-    <ClInclude Include="..\..\..\include\GXApp.h" />
-    <ClInclude Include="..\..\..\include\GXCanvas.h" />
-    <ClInclude Include="..\..\..\include\GXCanvas3D.h" />
-    <ClInclude Include="..\..\..\include\GXFont.h" />
-    <ClInclude Include="..\..\..\include\GXGDI.h" />
-    <ClInclude Include="..\..\..\include\GXGraphics.h" />
-    <ClInclude Include="..\..\..\include\GXImage.h" />
-    <ClInclude Include="..\..\..\include\GXImm.h" />
-    <ClInclude Include="..\..\..\include\GXKernel.h" />
-    <ClInclude Include="..\..\..\include\GXSprite.h" />
-    <ClInclude Include="..\..\..\include\GXUser.h" />
+    <ClInclude Include="..\..\..\include\GrapX.h" />
+    <ClInclude Include="..\..\..\include\GrapX\DataInfrastructure.h" />
+    <ClInclude Include="..\..\..\include\GrapX\DataPool.h" />
+    <ClInclude Include="..\..\..\include\GrapX\DataPoolIterator.h" />
+    <ClInclude Include="..\..\..\include\GrapX\DataPoolVariable.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GBaseTypes.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GCamera.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GFX.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GPrimitive.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GrapVR.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GRegion.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GResource.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GShader.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GStateBlock.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GTexture.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GUnknown.h" />
+    <ClInclude Include="..\..\..\include\GrapX\guxtheme.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvGeometry.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvMesh.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvNode.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GVPhySimulator.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvScene.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvSceneMgr.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvSequence.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvSkeleton.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gvSkinnedMesh.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXCanvas.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXCanvas3D.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gxDevice.H" />
+    <ClInclude Include="..\..\..\include\GrapX\gxError.H" />
+    <ClInclude Include="..\..\..\include\GrapX\GXFont.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXGDI.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXGraphics.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXImage.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXImm.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXKernel.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXSprite.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GXUser.h" />
+    <ClInclude Include="..\..\..\include\GrapX\MOBehavior.h" />
+    <ClInclude Include="..\..\..\include\GrapX\MOComponent.h" />
+    <ClInclude Include="..\..\..\include\GrapX\MOConsoleStaff.h" />
+    <ClInclude Include="..\..\..\include\GrapX\MOLogger.h" />
+    <ClInclude Include="..\..\..\include\GrapX\Platform.h" />
+    <ClInclude Include="..\..\..\include\GrapX\StdMtl.h" />
+    <ClInclude Include="..\..\..\include\GrapX\VertexDecl.h" />
+    <ClInclude Include="..\..\..\include\GrapX\WineComm.h" />
+    <ClInclude Include="..\..\..\include\GrapX\WineDragListDef.h" />
+    <ClInclude Include="..\..\..\include\GrapX\WinePagerDef.h" />
+    <ClInclude Include="..\..\..\include\GrapX\WineToolbarDef.h" />
+    <ClInclude Include="..\..\..\include\GrapX\WineToolTipsDef.h" />
+    <ClInclude Include="..\..\..\include\GrapX\WineTreeViewDef.h" />
     <ClInclude Include="..\..\..\include\Marimo.h" />
-    <ClInclude Include="..\..\..\include\MOAudio.h" />
-    <ClInclude Include="..\..\..\include\MOBehavior.h" />
-    <ClInclude Include="..\..\..\include\MOComponent.h" />
-    <ClInclude Include="..\..\..\include\MOConsoleStaff.h" />
-    <ClInclude Include="..\..\..\include\MOLogger.h" />
-    <ClInclude Include="..\..\3D\GrapVR.h" />
     <ClInclude Include="..\..\3D\gvEnvironment.h" />
-    <ClInclude Include="..\..\3D\gvGeometry.h" />
-    <ClInclude Include="..\..\3D\gvMesh.h" />
-    <ClInclude Include="..\..\3D\gvNode.h" />
-    <ClInclude Include="..\..\3D\gvScene.h" />
-    <ClInclude Include="..\..\3D\gvSceneMgr.h" />
-    <ClInclude Include="..\..\3D\gvSequence.h" />
-    <ClInclude Include="..\..\3D\gvSkeleton.h" />
-    <ClInclude Include="..\..\3D\gvSkinnedMesh.h" />
-    <ClInclude Include="..\..\3D\StdMtl.h" />
     <ClInclude Include="..\..\Canvas\GFTFontImpl.h" />
     <ClInclude Include="..\..\Canvas\GXCanvas3DImpl.h" />
     <ClInclude Include="..\..\Canvas\GXCanvasCoreImpl.h" />
@@ -289,13 +299,8 @@
     <ClInclude Include="..\..\GDI\GRegionImpl.h" />
     <ClInclude Include="..\..\GDI\GXShaderMgr.h" />
     <ClInclude Include="..\..\GDI\RegionFunc.h" />
-    <ClInclude Include="..\..\GrapX.h" />
-    <ClInclude Include="..\..\gxBaseTypes.h" />
-    <ClInclude Include="..\..\gxDevice.h" />
-    <ClInclude Include="..\..\gxError.h" />
     <ClInclude Include="..\..\GXStation.h" />
     <ClInclude Include="..\..\gxUtility.h" />
-    <ClInclude Include="..\..\Platform\Platform.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D9.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.h" />
@@ -313,6 +318,7 @@
     <ClInclude Include="..\..\User\GrapX.Hxx" />
     <ClInclude Include="..\..\User\GrapXDef.h" />
     <ClInclude Include="..\..\User\gxAdvancedUI.h" />
+    <ClInclude Include="..\..\User\gxMessage.hxx" />
     <ClInclude Include="..\..\User\gxusp10.h" />
     <ClInclude Include="..\..\User\gxWinDef.h" />
     <ClInclude Include="..\..\User\GXWindow.h" />
@@ -328,12 +334,6 @@
     <ClInclude Include="..\..\User\Win32Emu\_dpa.h" />
     <ClInclude Include="..\..\User\Win32Emu\_imagelist.h" />
     <ClInclude Include="..\..\User\WindowsSurface.h" />
-    <ClInclude Include="..\..\User\WineComm.h" />
-    <ClInclude Include="..\..\User\WineCtrl\WineDragListDef.h" />
-    <ClInclude Include="..\..\User\WineCtrl\WinePagerDef.h" />
-    <ClInclude Include="..\..\User\WineCtrl\WineToolbarDef.h" />
-    <ClInclude Include="..\..\User\WineCtrl\WineToolTipsDef.h" />
-    <ClInclude Include="..\..\User\WineCtrl\WineTreeViewDef.h" />
     <ClInclude Include="..\..\Utility\AeroCommon.h" />
     <ClInclude Include="..\..\Utility\ConsoleAssistant.h" />
     <ClInclude Include="..\..\Utility\HLSL\FXCommRegister.h" />
@@ -341,7 +341,6 @@
     <ClInclude Include="..\..\Utility\Shader\AeroShader.h" />
     <ClInclude Include="..\..\Utility\Shader\BlurShader.h" />
     <ClInclude Include="..\..\Utility\Shader\SimpleShader.h" />
-    <ClInclude Include="..\..\Utility\VertexDecl.h" />
     <ClInclude Include="res\resource.h" />
   </ItemGroup>
   <ItemGroup>

@@ -6,16 +6,15 @@
 //#include <Smart/SmartProfile.h>
 
 // 平台相关
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
+#include "GrapX/GResource.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 //#include "Include/DataInfrastructure.H"
 //#include "clstd/clPathFile.H"
 
 // 私有头文件
 #include "User/GXWindow.h"
-#include "Include/GXUser.H"
+#include "GrapX/GXUser.H"
 //#include "Include/GXGDI.H"
 //#include "Include/GXKernel.H"
 //#include "Controls/GXUICtrlBase.h"

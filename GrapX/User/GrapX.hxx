@@ -322,23 +322,6 @@ struct MOUIMSG
   i32       yPos;
 };
 
-class GXUIMsgThread : public clstd::MsgThreadT<MOUIMSG>
-{
-  IGXPlatform*  m_pPlatform;
-  clstd::Signal m_SendingWaiter;
-  MOUIMSG*      m_pSendingMsg;
-  GXLRESULT*    m_pResult;
-public:
-  GXUIMsgThread(IGXPlatform* pPlatform)
-    : m_pPlatform(pPlatform)
-    , m_pSendingMsg(NULL)
-    , m_pResult(NULL)
-  {
-  }
-  GXLRESULT   SendRemoteMessage   (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
-  GXBOOL      CallSentMessageProc ();
-  virtual i32 Run                 ();
-};
 
 #define GXCARET_AVAILABLE     0x80000000L        // 可用标志
 #define GXCARET_VISIBLE       0x00000001L        // 是否被用户设置为显示

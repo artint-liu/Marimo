@@ -1,0 +1,17 @@
+DynTestA {
+  nameA="first";
+};
+
+DynTestA {
+  nameA="second";
+};
+
+DynTestA {
+  nameA="third";
+};
+
+aDyn = "1";
+aDyn = "2";
+aDyn = "56,57,58";
+aDyn = "3";
+aDyn = "4";

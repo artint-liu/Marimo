@@ -1,25 +1,25 @@
 // 全局头文件
 #include <GrapX.H>
+#include "thread/clMessageThread.h"
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GPrimitive.h"
-#include "Include/GXGraphics.H"
-#include "Include/GShader.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GShader.H"
 
 // 私有头文件
 #include "clTree.H"
 #include "clTransform.h"
-#include "gxError.H"
+#include "smart/SmartRepository.h"
 
-#include "3D/gvScene.h"
-#include "3D/gvNode.h"
-#include "3D/gvMesh.h"
-#include "3D/gvSkeleton.h"
-#include "3D/gvSkinnedMesh.h"
-#include "3D/gvScene.h"
+#include "GrapX/gvScene.h"
+#include "GrapX/gvNode.h"
+#include "GrapX/gvMesh.h"
+#include "GrapX/gvSkeleton.h"
+#include "GrapX/gvSkinnedMesh.h"
+#include "GrapX/gvScene.h"
 #include "gxUtility.h"
 
 // 文件储存用的Keys

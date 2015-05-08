@@ -24,14 +24,15 @@
 #include <clBuffer.H>
 #include <thread/clThread.H>
 #include <thread/clSignal.H>
-#include <thread/clMessageThread.h>
+//#include <thread/clMessageThread.h>
 #include <clutility.h>
 #include <clColorSpace.h>
-#include <smart/SmartRepository.h>
-#include <Socket/clSocket.h>
-#include <gxError.H>
+//#include <smart/SmartRepository.h>
+//#include <Socket/clSocket.h>
 
-#include "gxBaseTypes.H"
+#include "GrapX/GBaseTypes.H"
+#include <GrapX/GUnknown.h>
+#include <GrapX/gxError.H>
 
 #ifndef offsetof
 #define offsetof(s,m)     (size_t)&reinterpret_cast<const volatile char&>((((s *)0)->m))
@@ -5234,12 +5235,15 @@ extern "C"
 #define GXSSM_GETMODULEBYINDEX      (GXWM_USER + 27)  // ·µ»ØÖµ: Ë÷Òý
 
 
+#include <GrapX/GXKernel.h>
+#include <GrapX/GXUser.h>
+#include <GrapX/GXGDI.h>
 
-#include "User/WineCtrl/WineTreeViewDef.H"
-#include "User/WineCtrl/WineToolTipsDef.H"
-#include "User/WineCtrl/WineDragListDef.H"
-#include "User/WineCtrl/WinePagerDef.H"
-#include "User/WineCtrl/WineToolbarDef.H"
-#include "Utility/VertexDecl.H"
+#include "GrapX/WineTreeViewDef.H"
+#include "GrapX/WineToolTipsDef.H"
+#include "GrapX/WineDragListDef.H"
+#include "GrapX/WinePagerDef.H"
+#include "GrapX/WineToolbarDef.H"
+#include "GrapX/VertexDecl.H"
 
 #endif // _GRAPX_DEF_HEADER_

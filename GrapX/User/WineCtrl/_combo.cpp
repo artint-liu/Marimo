@@ -33,16 +33,16 @@
 */
 
 #include <GrapX.H>
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXImm.h"
-#include "Include/GXKernel.H"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXImm.h"
+#include "GrapX/GXKernel.H"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 
 #define OEMRESOURCE
 

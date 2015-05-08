@@ -5,17 +5,17 @@
 #include "User/GrapX.Hxx"
 
 // 标准接口
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GPrimitive.H"
-#include "Include/GXGraphics.H"
-#include "Include/GShader.H"
-#include "Include/GXKernel.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GPrimitive.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GShader.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 
 // 平台相关
-#include "Platform/Platform.h"
+#include "GrapX/Platform.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"

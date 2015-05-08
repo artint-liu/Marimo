@@ -4,16 +4,16 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <Include/GUnknown.H>
-#include <Include/GResource.H>
-#include <Include/GXGraphics.H>
-#include <Include/GRegion.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GRegion.H>
 
 // 私有头文件
-#include <clstd/clUtility.H>
+#include <clUtility.H>
 #include <User/GXWindow.h>
 #include <User/WindowsSurface.h>
-#include "Include/gxuser.h"
+#include "GrapX/gxuser.h"
 extern "C"
 {
   //gxGetScrollInfo

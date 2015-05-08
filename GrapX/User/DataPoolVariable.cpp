@@ -1,16 +1,12 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
-//#include "clstd/Smart/smartstream.h"
-#include "clstd/clStringSet.h"
-//#include "clstd/clUtility.H"
 
-#include "Include/GUnknown.H"
-#include "Include/DataPool.H"
-#include "Include/DataPoolVariable.H"
-#include "Include/DataPoolIterator.h"
-//#include "Include/GXKernel.H"
-//#include "Include/GXUser.H"
-//#include "gxError.H"
+#include "clStringSet.h"
+
+//#include "GrapX/GUnknown.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPoolIterator.h"
 
 #define Flag_ParseW             Flag_ParseT<clStringW>
 #define Flag_ParseA             Flag_ParseT<clStringA>

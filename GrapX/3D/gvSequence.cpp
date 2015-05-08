@@ -3,14 +3,13 @@
 #include "clTree.H"
 #include "clTransform.h"
 
-#include "Include/GUnknown.H"
-#include "Include/GResource.H"
-#include "Include/GPrimitive.h"
-#include "Include/GShader.H"
-#include "Include/GXKernel.H"
-#include "gxError.H"
-#include "gvNode.h"
-#include "GVSequence.h"
+#include "GrapX/GResource.H"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GShader.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/gxError.H"
+#include "GrapX/gvNode.h"
+#include "GrapX/GVSequence.h"
 
 //////////////////////////////////////////////////////////////////////////
 GVSequence::GVSequence()

@@ -44,16 +44,16 @@
 //WINE_DEFAULT_DEBUG_CHANNEL(commctrl);
 
 #include <GrapX.H>
-#include "Include/gUxtheme.h"
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXImm.h"
+#include "GrapX/gUxtheme.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 #include <User/Win32Emu/GXCommCtrl.H>
 #include "res/resource.h"
 

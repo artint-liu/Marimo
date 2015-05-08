@@ -1,9 +1,9 @@
 #include "GrapX.h"
 #include "User/GrapX.Hxx"
 
-#include "Include/GUnknown.H"
-#include "Include/GXKernel.H"
-#include "Include/MOLogger.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GXKernel.H"
+#include "GrapX/MOLogger.H"
 #include "clfifo.h"
 
 class FileLoggerImpl : public ILogger

@@ -209,17 +209,17 @@
 
 #include <GrapX.H>
 #include <User/GrapXDef.H>
-#include "Include/gUxtheme.h"
-#include "Include/GXUser.H"
-#include "Include/GXGDI.H"
-#include "Include/GXImm.h"
+#include "GrapX/gUxtheme.h"
+#include "GrapX/GXUser.H"
+#include "GrapX/GXGDI.H"
+#include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <User/WineComm.H>
+#include <GrapX/WineComm.H>
 #include <User/Win32Emu/GXCommCtrl.H>
 #include <User/Win32Emu/_dpa.H>
 
@@ -593,15 +593,15 @@ static inline int textcmpWT(GXLPCWSTR aw, GXLPCWSTR bt, GXBOOL isW)
   return 1;
 }
 
-static inline int lstrncmpiW(GXLPCWSTR s1, GXLPCWSTR s2, int n)
-{
-  //int res;
-
-  n = min(min(n, GXSTRLEN(s1)), GXSTRLEN(s2));
-  //res = CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, s1, n, s2, n);
-  //return res ? res - sizeof(GXWCHAR) : res;
-  return GXSTRNCMPI(s1, s2, n);
-}
+//static inline int lstrncmpiW(GXLPCWSTR s1, GXLPCWSTR s2, int n)
+//{
+//  //int res;
+//
+//  n = min(min(n, GXSTRLEN(s1)), GXSTRLEN(s2));
+//  //res = CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, s1, n, s2, n);
+//  //return res ? res - sizeof(GXWCHAR) : res;
+//  return GXSTRNCMPI(s1, s2, n);
+//}
 
 /******** Debugging functions *****************************************/
 

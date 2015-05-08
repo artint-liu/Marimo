@@ -37,107 +37,11 @@
     <Filter Include="Lib\Utility">
       <UniqueIdentifier>{8802ff3d-45c4-45c0-856d-a6156b7cb17c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\GrapX">
+      <UniqueIdentifier>{67dfe1a1-7ccf-4f68-b7fe-bc8f714b33b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\GUnknown.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\guxtheme.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GVPhySimulator.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXApp.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXCanvas.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXCanvas3D.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXFont.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXGDI.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXGraphics.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXImage.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXImm.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXKernel.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXSprite.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GXUser.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\Marimo.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\MOAudio.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\MOBehavior.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\MOComponent.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\MOConsoleStaff.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\MOLogger.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\DataInfrastructure.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\DataPool.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\DataPoolIterator.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\DataPoolVariable.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GCamera.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GFX.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GPrimitive.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GRegion.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GResource.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GShader.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GStateBlock.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GTexture.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Platform\Platform.h">
-      <Filter>Platform</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Platform\Win32_D3D9.h">
       <Filter>Platform</Filter>
     </ClInclude>
@@ -174,37 +78,7 @@
     <ClInclude Include="res\resource.h">
       <Filter>res</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\3D\gvNode.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\gvScene.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\gvSceneMgr.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\gvSequence.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\gvSkeleton.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\gvSkinnedMesh.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\StdMtl.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\GrapVR.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\3D\gvEnvironment.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\gvGeometry.h">
-      <Filter>Lib\3D</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3D\gvMesh.h">
       <Filter>Lib\3D</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Canvas\GXEffectImpl.h">
@@ -312,9 +186,6 @@
     <ClInclude Include="..\..\User\WindowsSurface.h">
       <Filter>Lib\User</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\User\WineComm.h">
-      <Filter>Lib\User</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\User\Win32Emu\guxtheme\Button_ID_BP.h">
       <Filter>Lib\User</Filter>
     </ClInclude>
@@ -334,21 +205,6 @@
       <Filter>Lib\User</Filter>
     </ClInclude>
     <ClInclude Include="..\..\User\Win32Emu\_imagelist.h">
-      <Filter>Lib\User</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\User\WineCtrl\WineDragListDef.h">
-      <Filter>Lib\User</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\User\WineCtrl\WinePagerDef.h">
-      <Filter>Lib\User</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\User\WineCtrl\WineToolbarDef.h">
-      <Filter>Lib\User</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\User\WineCtrl\WineToolTipsDef.h">
-      <Filter>Lib\User</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\User\WineCtrl\WineTreeViewDef.h">
       <Filter>Lib\User</Filter>
     </ClInclude>
     <ClInclude Include="..\..\User\DataPoolImpl.h">
@@ -375,22 +231,7 @@
     <ClInclude Include="..\..\Utility\LogMgr.h">
       <Filter>Lib\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Utility\VertexDecl.h">
-      <Filter>Lib\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Console.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\GrapX.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gxBaseTypes.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gxDevice.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gxError.h">
       <Filter>Lib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\GXStation.h">
@@ -398,6 +239,165 @@
     </ClInclude>
     <ClInclude Include="..\..\gxUtility.h">
       <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\Marimo.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GPrimitive.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GRegion.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GResource.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GShader.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GStateBlock.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GTexture.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GUnknown.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\guxtheme.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GVPhySimulator.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXCanvas.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXCanvas3D.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gxDevice.H">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gxError.H">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXFont.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXGDI.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXGraphics.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXImage.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXImm.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXKernel.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXSprite.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GXUser.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\MOBehavior.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\MOComponent.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\MOConsoleStaff.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\MOLogger.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\DataInfrastructure.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\DataPool.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\DataPoolIterator.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\DataPoolVariable.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GCamera.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GFX.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\WineDragListDef.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\WinePagerDef.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\WineToolbarDef.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\WineToolTipsDef.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\WineTreeViewDef.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\WineComm.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\VertexDecl.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GBaseTypes.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\gxMessage.hxx">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvSceneMgr.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvSequence.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvSkeleton.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvSkinnedMesh.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvGeometry.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvMesh.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvNode.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\gvScene.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GrapVR.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\StdMtl.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\Platform.h">
+      <Filter>Include\GrapX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
