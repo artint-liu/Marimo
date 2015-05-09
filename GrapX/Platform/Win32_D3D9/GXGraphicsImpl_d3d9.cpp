@@ -214,7 +214,7 @@ namespace D3D9
       }
     }
 
-    if(GXSUCCEEDED(CreateShaderFromFileA(&m_pSimpleShader, "Shader\\Simple.shader.txt")))
+    if(GXSUCCEEDED(CreateShaderFromFileA(&m_pSimpleShader, "shaders\\Simple.shader.txt")))
     {
       CreateEffect(&m_pSimpleEffect, m_pSimpleShader);
     }

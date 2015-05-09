@@ -487,6 +487,15 @@
     <None Include="..\..\Platform\CommonInline\X_ShaderImpl.inl" />
     <None Include="..\..\Platform\Readme.txt" />
     <None Include="..\..\User\Win32Emu\GUXTheme.inl" />
+    <None Include="..\..\Utility\HLSL\Aero.fx" />
+    <CustomBuild Include="..\..\Utility\HLSL\Simple.fx">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxc /Od /Zi /Tfx_2_0 /Fo$(ProjectDir)../../../bin/shaders/%(FileName).fxo /nologo %(FullPath)
+fxc /Od /Zi /Tvs_2_0 /ESimpleVS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).vsu /nologo %(FullPath)
+fxc /Od /Zi /Tps_2_0 /ESimplePS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).psu /nologo %(FullPath)
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
+    </CustomBuild>
     <None Include="res\idc_copy.cur" />
     <None Include="res\idc_divider.cur" />
     <None Include="res\idc_divideropen.cur" />

@@ -40,6 +40,9 @@
     <Filter Include="Include\GrapX">
       <UniqueIdentifier>{67dfe1a1-7ccf-4f68-b7fe-bc8f714b33b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lib\Utility\HLSL">
+      <UniqueIdentifier>{4bf2d8e8-fefd-4051-905a-cef8dcb1c73e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Platform\Win32_D3D9.h">
@@ -856,10 +859,18 @@
     <None Include="..\..\User\Win32Emu\GUXTheme.inl">
       <Filter>Lib\User</Filter>
     </None>
+    <None Include="..\..\Utility\HLSL\Aero.fx">
+      <Filter>Lib\Utility\HLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\GrapXUI.rc">
       <Filter>res</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\Utility\HLSL\Simple.fx">
+      <Filter>Lib\Utility\HLSL</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
