@@ -961,6 +961,18 @@ int _CLSTR_IMPL::CompareNoCase(const _TCh* pStr) const
 }
 
 _CLSTR_TEMPL
+  int _CLSTR_IMPL::Compare(const _TCh* pStr, size_t count) const
+{
+  return clstd::strncmpT(m_pBuf, pStr, count);
+}
+
+_CLSTR_TEMPL
+  int _CLSTR_IMPL::CompareNoCase(const _TCh* pStr, size_t count) const
+{
+  return clstd::strncmpiT(m_pBuf, pStr, count);
+}
+
+_CLSTR_TEMPL
 b32 _CLSTR_IMPL::BeginsWith(const _TCh c) const
 {
   return CLSTR_LENGTH(m_pBuf) > 1 && m_pBuf[0] == c;

@@ -258,6 +258,8 @@ public:
 
   int         Compare         (const _TCh* pStr) const;
   int         CompareNoCase   (const _TCh* pStr) const;
+  int         Compare         (const _TCh* pStr, size_t count) const;
+  int         CompareNoCase   (const _TCh* pStr, size_t count) const;
   b32         BeginsWith      (const _TCh c) const;
   b32         BeginsWith      (const _TCh* pStr) const;
   b32         BeginsWith      (const _XCh* pStr) const;

@@ -136,9 +136,23 @@ void _SS_IMPL::SetCharSemantic(const SemType* pCharSem, clsize uStart, clsize uE
 }
 
 _SS_TEMPL
-SemType _SS_IMPL::GetCharSemantic( TChar ch ) const
+typename _SS_IMPL::SemType _SS_IMPL::GetCharSemantic( TChar ch ) const
 {
+  if(ch >= c_nCharTabCount) {
+    return 0;
+  }
   return m_aCharSem[ch];
+}
+
+_SS_TEMPL
+typename _SS_IMPL::SemType _SS_IMPL::SetCharSemantic(TChar ch, SemType flagCharSem)
+{
+  if(ch >= c_nCharTabCount) {
+    return 0;
+  }
+  SemType ePrev = m_aCharSem[ch];
+  m_aCharSem[ch] = flagCharSem;
+  return ePrev;
 }
 
 _SS_TEMPL
@@ -426,7 +440,7 @@ _SS_TEMPL
 typename _SS_IMPL::iterator _SS_IMPL::begin()
 {
   iterator itBegin(this);
-  return next(itBegin); // 这里好像不对
+  return next(itBegin); // 这里这么写是为了保证begin也能触发特殊符号回调函数
 
   ////u32 uOldPointer = m_uPointer;
   //m_uPointer = 0;

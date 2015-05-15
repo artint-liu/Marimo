@@ -30,7 +30,6 @@
 //#define CU32  const u32
 //#define CU16  const u16
 #define CCH    const ch
-#define SemType  u32
 
 #pragma warning(disable: 4661)
 #ifdef _X64
@@ -81,6 +80,7 @@ public:
 
   typedef typename _TStr::LPCSTR T_LPCSTR;
   typedef typename _TStr::TChar  TChar;
+  typedef u32                    SemType;
 
   struct iterator
   {
@@ -148,6 +148,7 @@ public:
   void     GetCharSemantic   (SemType* pCharSem, clsize uStart, clsize uEnd) const;
   void     SetCharSemantic   (const SemType* pCharSem, clsize uStart, clsize uEnd);
   SemType  GetCharSemantic   (TChar ch) const;
+  SemType  SetCharSemantic   (TChar ch, SemType flagCharSem);
   b32      IsEndOfStream     () const;
   b32      IsHeadOfStream    () const;
   void     Reset             ();
