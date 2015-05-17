@@ -1,6 +1,7 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
 #include "clStringSet.h"
+#include "clPathFile.h"
 //#include "GrapX/GUnknown.H"
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolIterator.H"
@@ -1352,15 +1353,17 @@ namespace Marimo
   {
     clstd::File file;
     GXHRESULT hval = GX_FAIL;
-    if(file.OpenExistingW(szFilename))
+    clStringW strFilenameW = szFilename;
+    clpathfile::MakeFullPath(strFilenameW);
+    if(file.OpenExistingW(strFilenameW))
     {
       clBuffer* pBuffer;
       DefaultDataPoolInclude IncludeImpl;
       if(file.MapToBuffer(&pBuffer)) {
         // TODO: 这个从文件加载要检查BOM，并转换为Unicode格式
         clStringA strDefine;
-        clStringA strFilename = szFilename;
-        strDefine.Format("#FILE %s\n#LINE 1\n", (clStringA::LPCSTR)strFilename);
+        clStringA strFilenameA = strFilenameW;
+        strDefine.Format("#FILE %s\n#LINE 1\n", (clStringA::LPCSTR)strFilenameA);
         pBuffer->Insert(0, (GXLPCSTR)strDefine, strDefine.GetLength());
 
         hval = CompileFromMemory(ppDataPool, szName, pInclude ? pInclude : &IncludeImpl, (GXLPCSTR)pBuffer->GetPtr(), pBuffer->GetSize());

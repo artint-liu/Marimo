@@ -37,6 +37,11 @@ namespace clpathfile
   b32 LocalWorkingDirA(CLLPCSTR szDir);
   b32 LocalWorkingDirW(CLLPCWSTR szDir);
 
+  // 获得当前路径
+  // 返回值就是strDir，这么声明就是为了减少内存复制和便于使用
+  clStringA& GetCurrentDirectory(clStringA& strDir);
+  clStringW& GetCurrentDirectory(clStringW& strDir);
+
   inline i16 Slash()         // 路径分隔符
   {
     extern i16 s_PathSlash;
@@ -88,6 +93,14 @@ namespace clpathfile
   clsize CombineAbsPathT(_TString& strPath);
   clsize CombineAbsPathA(clStringA& strPath);
   clsize CombineAbsPathW(clStringW& strPath);
+
+  // 如果strPath是相对路径，则转换为基于当前路径的完整路径
+  // 返回0表示失败，strPath可能已经是完整路径
+  // 大于0表示成功，数值是转换后的字符串长度
+  template<typename _TString>
+  clsize MakeFullPath(_TString& strPath);
+  clsize MakeFullPathA(clStringA& strPath);
+  clsize MakeFullPathW(clStringW& strPath);
 
   template<typename _TString>
   _TString  CanonicalizeT  (const _TString& strPath);

@@ -342,6 +342,27 @@ namespace clpathfile
   }
 
   template<typename _TString>
+  clsize MakeFullPath(_TString& strPath)
+  {
+    if(IsRelativeT<typename _TString::TChar>(strPath)) {
+      _TString strCurrDir;
+      CombinePathT(strPath, clpathfile::GetCurrentDirectory(strCurrDir), strPath);
+      return strPath.GetLength();
+    }
+    return 0;
+  }
+
+  clsize MakeFullPathA(clStringA& strPath)
+  {
+    return MakeFullPath(strPath);
+  }
+
+  clsize MakeFullPathW(clStringW& strPath)
+  {
+    return MakeFullPath(strPath);
+  }
+
+  template<typename _TString>
   _TString CanonicalizeT(const _TString& strPath)
   {
     clsize nPos = 0;
@@ -574,6 +595,22 @@ namespace clpathfile
     }
     s_strRootDir = clpathfile::CanonicalizeT(strDir);
     return SetCurrentDirectory(strDir);
+  }
+
+  clStringA& GetCurrentDirectory(clStringA& strDir)
+  {
+    auto str = strDir.GetBuffer(MAX_PATH);
+    ::GetCurrentDirectoryA(MAX_PATH, str);
+    strDir.ReleaseBuffer();
+    return strDir;
+  }
+
+  clStringW& GetCurrentDirectory(clStringW& strDir)
+  {
+    auto str = strDir.GetBuffer(MAX_PATH);
+    ::GetCurrentDirectoryW(MAX_PATH, str);
+    strDir.ReleaseBuffer();
+    return strDir;
   }
 
 #else
