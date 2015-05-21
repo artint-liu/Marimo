@@ -565,7 +565,8 @@ namespace Marimo
     DataPool(GXLPCSTR szName);
     virtual ~DataPool();
     GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl);
-    GXBOOL  Clear             (GXLPVOID lpBuffer, LPCVD pVarDesc, int nCount);
+    GXBOOL  Cleanup           (GXLPVOID lpBuffer, LPCVD pVarDesc, int nVarDescCount);
+    GXBOOL  CleanupArray      (LPCVD pVarDesc, GXLPVOID lpFirstElement, int nElementCount);
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
     LPCVD   IntGetVariable    (LPCVD pVdd, GXLPCSTR szName);
     //GXBOOL  IntGetVariablePtr (GXLPCSTR szExpression, GXDWORD dwFlags, VARRETDESC* pDesc);

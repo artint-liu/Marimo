@@ -27,6 +27,7 @@
     <ClCompile Include="..\Demo_DataPool\TestBaseProperty.cpp" />
     <ClCompile Include="..\Demo_DataPool\TestCompileFromFile.cpp" />
     <ClCompile Include="..\Demo_DataPool\Demo_DataPool.cpp" />
+    <ClCompile Include="..\Demo_DataPool\TestComplexArray.cpp" />
     <ClCompile Include="..\Demo_DataPool\TestHugeArray.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

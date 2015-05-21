@@ -38,5 +38,8 @@
     <ClCompile Include="..\Demo_DataPool\Demo_DataPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Demo_DataPool\TestComplexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

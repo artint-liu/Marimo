@@ -27,7 +27,7 @@ using namespace clstd;
 // [C]12.描述结构是否也能添加定址，和数据放在一个内存块里
 // [C]13.遍历接口 iterator
 // [C]14.消除 struct A{ A a; } 这种自引用问题
-// 15.Remove需要增加一个接口可以删除若干成员，删除成员还有遍历，清理object，string和动态数组
+// [C]15.Remove需要增加一个接口可以删除若干成员，删除成员还有遍历，清理object，string和动态数组
 // 16.动态数组目前只增不减
 // 17.增加参考类型，相当于指针指向有效的变量
 // [C]18.save时的指针重定位，功能与load重定位合并，封装为标准函数
@@ -368,11 +368,76 @@ namespace Marimo
   }
 
 
-
-  GXBOOL DataPool::Clear(GXLPVOID lpBuffer, LPCVD pVarDesc, int nVarCount)
+  GXBOOL DataPool::CleanupArray(LPCVD pVarDesc, GXLPVOID lpFirstElement, int nElementCount)
   {
-    GXBYTE* pData = (GXBYTE*)lpBuffer;//m_pBuffer->GetPtr() + nBaseOffset;
-    for(int i = 0; i < nVarCount; i++)
+    switch(pVarDesc->GetTypeCategory())
+    {
+    case T_STRING:
+      {
+        clStringW* pString = reinterpret_cast<clStringW*>(lpFirstElement);
+
+        // 依次调用析构函数
+        for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
+        {
+          if(pString[nStringIndex]) {
+            pString[nStringIndex].~clStringX();
+#ifdef _DEBUG
+            m_nDbgNumOfString--;
+#endif // #ifdef _DEBUG
+          }
+        }
+      }
+      break;
+
+    case T_STRINGA:
+      {
+        clStringA* pString = reinterpret_cast<clStringA*>(lpFirstElement);
+
+        // 依次调用析构函数
+        for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
+        {
+          if(pString[nStringIndex]) {
+            pString[nStringIndex].~clStringX();
+#ifdef _DEBUG
+            m_nDbgNumOfString--;
+#endif // #ifdef _DEBUG
+          }
+        }
+      }
+      break;
+
+#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
+    case T_OBJECT:
+      {
+        GUnknown** pObjArray = reinterpret_cast<GUnknown**>(lpFirstElement);
+
+        // 依次调用析构函数
+        for(int i = 0; i < nElementCount; i++) {
+          SAFE_RELEASE(pObjArray[i]);
+        }
+      }
+      break;
+#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
+    case T_STRUCT:
+      {
+        for(int nStructIndex = 0; nStructIndex < nElementCount; nStructIndex++)
+        {
+          Cleanup(lpFirstElement, pVarDesc->MemberBeginPtr(), pVarDesc->MemberCount());
+          lpFirstElement = (GXLPBYTE)lpFirstElement + pVarDesc->TypeSize();
+        }
+        //if(bDynamicArray) {
+        //  SAFE_DELETE(*ppBuffer);
+        //}
+      }
+      break;
+    }
+    return TRUE;
+  }
+
+  GXBOOL DataPool::Cleanup(GXLPVOID lpBuffer, LPCVD pVarDesc, int nVarDescCount)
+  {
+    GXBYTE* pData = (GXBYTE*)lpBuffer;
+    for(int i = 0; i < nVarDescCount; i++)
     {
       const VARIABLE_DESC& VARDesc = pVarDesc[i];
       GXBOOL bDynamicArray = VARDesc.IsDynamicArray();
@@ -396,68 +461,7 @@ namespace Marimo
         nCount = VARDesc.nCount;
       }
 
-      switch(VARDesc.GetTypeCategory())
-      {
-      case T_STRING:
-        {
-          clStringW* pString = reinterpret_cast<clStringW*>(ptr);
-
-          // 依次调用析构函数
-          for(int nStringIndex = 0; nStringIndex < nCount; nStringIndex++)
-          {
-            if(pString[nStringIndex]) {
-              pString[nStringIndex].~clStringX();
-#ifdef _DEBUG
-              m_nDbgNumOfString--;
-#endif // #ifdef _DEBUG
-            }
-          }
-        }
-        break;
-
-      case T_STRINGA:
-        {
-          clStringA* pString = reinterpret_cast<clStringA*>(ptr);
-
-          // 依次调用析构函数
-          for(int nStringIndex = 0; nStringIndex < nCount; nStringIndex++)
-          {
-            if(pString[nStringIndex]) {
-              pString[nStringIndex].~clStringX();
-#ifdef _DEBUG
-              m_nDbgNumOfString--;
-#endif // #ifdef _DEBUG
-            }
-          }
-        }
-        break;
-
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
-      case T_OBJECT:
-        {
-          GUnknown** pObjArray = reinterpret_cast<GUnknown**>(ptr);
-
-          // 依次调用析构函数
-          for(int i = 0; i < nCount; i++) {
-            SAFE_RELEASE(pObjArray[i]);
-          }
-        }
-        break;
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
-      case T_STRUCT:
-        {
-          for(int nStructIndex = 0; nStructIndex < nCount; nStructIndex++)
-          {
-            Clear(ptr, VARDesc.MemberBeginPtr(),//&m_aMembers[VARDesc.MemberBegin()], 
-              VARDesc.MemberCount());
-            ptr = (GXLPBYTE)ptr + VARDesc.TypeSize();
-          }
-          //if(bDynamicArray) {
-          //  SAFE_DELETE(*ppBuffer);
-          //}
-        }
-        break;
-      }
+      CleanupArray(&VARDesc, ptr, nCount);
       
       if(bDynamicArray)
       {
@@ -694,7 +698,7 @@ namespace Marimo
     // 主要是清理动态数组，字符串，对象和结构体
     // 结构体会产生递归，遍历其下的数据类型
     if(m_nNumOfVar && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly)) {
-      Clear(m_VarBuffer.GetPtr(), m_aVariables, (int)m_nNumOfVar);
+      Cleanup(m_VarBuffer.GetPtr(), m_aVariables, (int)m_nNumOfVar);
       ASSERT(m_nDbgNumOfArray == 0);
       ASSERT(m_nDbgNumOfString == 0);
     }

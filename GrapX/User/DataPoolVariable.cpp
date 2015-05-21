@@ -40,9 +40,11 @@
 #define StringA_SetAsStringA    String_SetAsStringT<GXLPCSTR, clStringA>
 
 #ifdef ENABLE_DATAPOOL_WATCHER
-#define THIS_IMPULSE_DATA_CHANGE  pThis->Impulse(DATACT_Change)
+#define THIS_IMPULSE_DATA_CHANGE              pThis->Impulse(DATACT_Change)
+#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX)  pThis->Impulse(_DATA_ACT, _INDEX)
 #else
 #define THIS_IMPULSE_DATA_CHANGE
+#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX)
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
 using namespace clstd;
@@ -54,19 +56,18 @@ namespace Marimo
   // 类型重定义
   typedef DataPoolVariable                          Variable;
   typedef DataPoolVariableImpl                      VarImpl;
-  typedef const DataPool::VARIABLE_DESC DPVDD;
 
   // 函数声明
   Variable DynamicArray_NewBack(VarImpl* pThis, GXUINT nIncrease);
   Variable Struct_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName);
 
-  DataPoolVariable::DataPoolVariable( VTBL* vtbl, DPVDD* pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset )
+  DataPoolVariable::DataPoolVariable( VTBL* vtbl, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset )
     : m_vtbl(vtbl), m_pVdd(pVdd), m_pBuffer(pBufferBase), m_AbsOffset(nAbsOffset)
   {
     // 如果是object类型，这里可以不增加计数。原因见其它构造函数
   }
 
-  DataPoolVariable::DataPoolVariable( VTBL* vtbl, DataPool* pDataPool, DPVDD* pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset ) 
+  DataPoolVariable::DataPoolVariable( VTBL* vtbl, DataPool* pDataPool, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset ) 
     : m_vtbl(vtbl), m_pDataPool(pDataPool), m_pVdd(pVdd), m_pBuffer(pBufferBase), m_AbsOffset(nAbsOffset)
   {
     // 如果是object类型，这里可以不增加计数。原因见其它构造函数
@@ -98,9 +99,6 @@ namespace Marimo
   class DataPoolVariableImpl : public DataPoolVariable
   {
   public:
-    typedef const DataPool::VARIABLE_DESC DPVDD;
-
-  public:
     inline VTBL* InlGetVtbl() GXCONST
     {
       return m_vtbl;
@@ -111,7 +109,7 @@ namespace Marimo
       return m_pDataPool;
     }
 
-    inline DPVDD* InlGetVDD() GXCONST
+    inline LPCVD InlGetVDD() GXCONST
     {
       return m_pVdd;
     }
@@ -120,6 +118,10 @@ namespace Marimo
     //{
     //  return m_pDataPool->m_StringBase;
     //}
+    inline GXBOOL InlCleanupArray(LPCVD pVarDesc, GXLPVOID lpBuffer, int nCount)
+    {
+      return m_pDataPool->CleanupArray(pVarDesc, lpBuffer, nCount);
+    }
 
     inline clBufferBase* InlGetBufferObj() GXCONST
     {
@@ -785,7 +787,7 @@ namespace Marimo
 
   clStringA Primary_ToStringA(GXCONST VarImpl* pThis)
   {
-    DPVDD* pVDD = pThis->InlGetVDD();
+    DataPoolVariable::LPCVD pVDD = pThis->InlGetVDD();
     clStringA str = "(null)";
     if(pVDD != NULL)
     {
@@ -837,7 +839,7 @@ namespace Marimo
   template<typename _TChar>
   GXBOOL Primary_ParseT(VarImpl* pThis, const _TChar* szString, GXUINT length)
   {
-    DPVDD* pVDD = pThis->InlGetVDD();
+    DataPoolVariable::LPCVD pVDD = pThis->InlGetVDD();
     if(pVDD != NULL)
     {
       if(length == 0) {
@@ -1422,7 +1424,7 @@ namespace Marimo
 
   GXUINT DynamicArray_GetLength(GXCONST VarImpl* pThis)
   {
-    DPVDD* pVdd = pThis->InlGetVDD();
+    DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     //clBuffer* pElementBuffer = pVdd->CreateAsBuffer(pThis->InlGetBufferPtr(), 0);
     clBufferBase* pBuffer = pThis->InlGetBufferObj();
     return pBuffer == NULL ? 0 : ((GXUINT)pBuffer->GetSize() / pVdd->TypeSize());
@@ -1436,7 +1438,7 @@ namespace Marimo
       pThis->InlSetupUnary(nIndex - 1, &val);
     }
     else {
-      DPVDD* pVdd = pThis->InlGetVDD();
+      DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
       //ASSERT(pVdd->nOffset == pThis->InlGetOffset());
       ASSERT(pThis->GetOffset() == 0);
       DataPoolArray* pArrayBuffer = static_cast<DataPoolArray*>(pThis->InlGetBufferObj());//pThis->InlGetVDD()->CreateAsBuffer(pThis->InlGetBufferPtr(), 0);
@@ -1452,36 +1454,43 @@ namespace Marimo
 
   GXBOOL DynamicArray_Remove(VarImpl* pThis, GXUINT nIndex, GXUINT nCount)
   {
-    DPVDD* pVdd = pThis->InlGetVDD();
+    DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     const GXUINT nLength = pThis->GetLength();
 
-    if(nLength == 0 || nCount == 0 ||               // 删除本身长度就是0的数组
-      (nIndex != (GXUINT)-1 && nIndex >= nLength))  // 不合法的index
-    { 
+    if(
+      (nLength == 0) || 
+      ( (nIndex != (GXUINT)-1) && 
+        (nCount == 0 || nIndex >= nLength || nIndex + nCount > nLength)
+      )
+      )
+    {
       return FALSE;
     }
+    //else if((nIndex != (GXUINT)-1))
+    //if(nLength == 0 || nCount == 0 ||               // 删除本身长度就是0的数组
+    //  (nIndex != (GXUINT)-1 && nIndex >= nLength))  // 不合法的index
+    //{ 
+    //  return FALSE;
+    //}
 
-    ASSERT(nCount == 1); // 没实现大于1的情况，这里记一下
+    //ASSERT(nCount == 1); // 没实现大于1的情况，这里记一下
 
     DataPoolArray* pArrayBuffer = static_cast<DataPoolArray*>(pThis->InlGetBufferObj());
-    if(nIndex == (GXUINT)-1) {
-#ifdef ENABLE_DATAPOOL_WATCHER
-      pThis->Impulse(DATACT_Deleting, -1);
-      pArrayBuffer->Resize(0, FALSE);
-      pThis->Impulse(DATACT_Deleted, -1);
-#else
-      pArrayBuffer->Resize(0, FALSE);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-      return TRUE;
-    }
+    
+    THIS_IMPULSE_DATA(DATACT_Deleting, nIndex);
 
-#ifdef ENABLE_DATAPOOL_WATCHER
-    pThis->Impulse(DATACT_Deleting, nIndex);
-    pArrayBuffer->Replace(nIndex * pVdd->TypeSize(), pVdd->TypeSize(), NULL, 0);
-    pThis->Impulse(DATACT_Deleted, nIndex);
-#else
-    pArrayBuffer->Replace(nIndex * pVdd->TypeSize(), pVdd->TypeSize(), NULL, 0);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+    if(nIndex == (GXUINT)-1)     // 全部删除
+    {
+      pThis->InlCleanupArray(pVdd, pThis->GetPtr(), nLength);
+      pArrayBuffer->Resize(0, FALSE);
+    }
+    else    // 从指定位置删除
+    {
+      pThis->InlCleanupArray(pVdd, (GXLPBYTE)pThis->GetPtr() + pVdd->TypeSize() * nIndex, nCount);
+      pArrayBuffer->Replace(pVdd->TypeSize() * nIndex, pVdd->TypeSize() * nCount, NULL, 0);
+    }
+    
+    THIS_IMPULSE_DATA(DATACT_Deleted, nIndex);
     return TRUE;
   }
 

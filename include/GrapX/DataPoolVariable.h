@@ -10,9 +10,9 @@ namespace Marimo
   class GXDLL DataPoolVariable
   {
     //typedef const DataPool::VARIABLE_DESC   DPVD;
-    typedef const DataPool::VARIABLE_DESC*  LPCVD;
   public:
     struct VTBL;
+    typedef const DataPool::VARIABLE_DESC*    LPCVD;
     typedef DataPoolUtility::iterator         iterator;
     typedef DataPoolUtility::element_iterator element_iterator;
 
