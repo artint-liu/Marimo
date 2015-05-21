@@ -85,6 +85,7 @@ public:
   struct iterator
   {
   public:
+    const
     SmartStreamT*   pContainer;
     T_LPCSTR        marker;
     clsize          length;
@@ -94,9 +95,9 @@ public:
       , marker    (NULL)
       , length    (0){}
 
-    iterator(SmartStreamT*  _pContainer) 
+    iterator(const SmartStreamT*  _pContainer) 
       : pContainer(_pContainer)
-      , marker    (_pContainer->m_pStream)
+      , marker    (_pContainer->m_pBegin)
       , length    (0){}
     
     iterator(const iterator& it)
@@ -130,9 +131,8 @@ public:
 
 protected:
   static const u32     c_nCharTabCount = 128;
-  T_LPCSTR      m_pStream;
-  clsize        m_uCountOfChar;     // 字符数,不是字节数!
-  clsize        m_uPointer;         // 指针
+  T_LPCSTR      m_pBegin;
+  T_LPCSTR      m_pEnd;
   SemType       m_aCharSem[c_nCharTabCount];
   u32           m_dwFlags;
   iterator      m_itEnd;
@@ -141,38 +141,27 @@ protected:
   IteratorProc  m_pTriggerCallBack; // 带有触发标志的 Iterator 首字节
   u32_ptr       m_lParamTrigger;
 
-  clvector<clsize>    m_stackPointer;
 public:
-  SmartStreamT              (T_LPCSTR pStream = NULL, clsize uCountOfChar = NULL);
+  SmartStreamT               (T_LPCSTR pStream = NULL, clsize uCountOfChar = NULL);
   b32      Initialize        (T_LPCSTR pStream, clsize uCountOfChar);
   void     GetCharSemantic   (SemType* pCharSem, clsize uStart, clsize uEnd) const;
   void     SetCharSemantic   (const SemType* pCharSem, clsize uStart, clsize uEnd);
   SemType  GetCharSemantic   (TChar ch) const;
   SemType  SetCharSemantic   (TChar ch, SemType flagCharSem);
-  b32      IsEndOfStream     () const;
-  b32      IsHeadOfStream    () const;
-  void     Reset             ();
-  void     EndOfStream       ();
-  clsize   GetPointer        () const;
+  b32      IsEndOfStream     (T_LPCSTR pPointer) const;
+  b32      IsHeadOfStream    (T_LPCSTR pPointer) const;
   T_LPCSTR GetStreamPtr      () const;
   clsize   GetStreamCount    () const; // 返回的是TChar的类型长度，不是字节数
+  b32      Get               (T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) const;    // 取指针当前处的内容
+  u32      SetFlags          (u32 dwFlags);
+  u32      GetFlags          () const;
 
-  b32      ReadPrev          (T_LPCSTR* ppStream, clsize* pCount);
-  clsize   Read              (T_LPCSTR* ppStream, clsize* pCount);    // 读取一个内容, 然后把指针移动到下一个内容开始
-  b32      Get               (T_LPCSTR* ppStream, clsize* pCount);    // 取指针当前处的内容
-           
-  b32      PushPointer          ();
-  b32      PopPointer           (b32 bDiscard = FALSE);
-  b32      ClearPointerStack    ();
-           
-  u32      SetFlags             (u32 dwFlags);
-  u32      GetFlags             () const;
   IteratorProc SetIteratorCallBack(IteratorProc pNew, u32_ptr lParam);
   IteratorProc SetTriggerCallBack (IteratorProc pTrigger, u32_ptr lParam);
 
-  iterator&       next      (iterator& it);
-  iterator        nearest   (clsize nOffset); // 按照nOffset查找最近的iterator，iterator的偏移大于等于nOffset
-  iterator        begin     ();
+  iterator&       next      (iterator& it) const;
+  iterator        nearest   (clsize nOffset) const; // 按照nOffset查找最近的iterator，iterator的偏移大于等于nOffset
+  iterator        begin     () const;
   const_iterator& end       () const;
   const_iterator  find      (const iterator& itBegin, int nCount, ...) const; // 从 itBegin 开始查找, 如果找到参数列表的任意一个就马上返回
   b32             find_pair (const iterator& itCurrent, iterator& itOpen, iterator& itClose, T_LPCSTR chOpen, T_LPCSTR chClose) const;
@@ -180,11 +169,6 @@ public:
 
 typedef SmartStreamT<clStringA, SmartStream_TraitsA> SmartStreamA;
 typedef SmartStreamT<clStringW, SmartStream_TraitsW> SmartStreamW;
-//#ifdef _UNICODE
-//typedef SmartStreamW SmartStream;
-//#else
-//typedef SmartStreamA SmartStream;
-//#endif
 
 namespace SmartStreamUtility
 {

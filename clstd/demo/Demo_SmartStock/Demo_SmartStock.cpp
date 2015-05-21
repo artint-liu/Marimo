@@ -11,6 +11,8 @@
 #include <Smart\smartstream.h>
 #include <Smart\SmartStock.h>
 
+#pragma warning(disable : 4996)
+
 int GeneralRead()
 {
     //SmartStockA sp;

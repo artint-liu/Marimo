@@ -37,17 +37,30 @@ b32 SmartStream_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
 }
 
 
-#define CHAR_TYPE         ((TChar)m_pStream[m_uPointer] >= 0x80 ? M_LABEL : m_aCharSem[m_pStream[m_uPointer]])
-#define IS_GAP            (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_GAP) != 0)
-#define IS_ESCAPE         (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_ESCAPE) != 0)
-#define IS_LABEL          (m_pStream[m_uPointer] < 0 || (CHAR_TYPE & M_LABEL) != 0)
-#define IS_SYMBOL         (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_TYPE_MASK) == M_SYMBOL)
-#define IS_QUOT           (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_QUOT) != 0)
-#define QUOT_GROUP        (CHAR_TYPE & M_GROUP_MASK)
-#define IS_OPEN_BRAKERS   ((CHAR_TYPE & M_OPN_BRAKETS) != 0)
-#define IS_CLOSE_BRAKERS  ((CHAR_TYPE & M_CLS_BRAKETS) != 0)
-#define TRIM_HEAD_GAPS    while(IS_GAP && IsEndOfStream() == false){  m_uPointer++;  }
-#define TRIM_TAIL_GAPS    while(IS_GAP && IsHeadOfStream() == false){  m_uPointer--;  }
+//#define CHAR_TYPE         ((TChar)m_pStream[m_uPointer] >= 0x80 ? M_LABEL : m_aCharSem[m_pStream[m_uPointer]])
+//#define IS_GAP            (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_GAP) != 0)
+//#define IS_ESCAPE         (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_ESCAPE) != 0)
+//#define IS_LABEL          (m_pStream[m_uPointer] < 0 || (CHAR_TYPE & M_LABEL) != 0)
+//#define IS_SYMBOL         (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_TYPE_MASK) == M_SYMBOL)
+//#define IS_QUOT           (m_pStream[m_uPointer] >= 0 && (CHAR_TYPE & M_QUOT) != 0)
+//#define QUOT_GROUP        (CHAR_TYPE & M_GROUP_MASK)
+//#define IS_OPEN_BRAKERS   ((CHAR_TYPE & M_OPN_BRAKETS) != 0)
+//#define IS_CLOSE_BRAKERS  ((CHAR_TYPE & M_CLS_BRAKETS) != 0)
+//#define TRIM_HEAD_GAPS              while(IS_GAP && IsEndOfStream() == false){  m_uPointer++;  }
+//#define TRIM_TAIL_GAPS    while(IS_GAP && IsHeadOfStream() == false){  m_uPointer--;  }
+
+#define CHAR_TYPE(_POINTER)         ((TChar)(*_POINTER) >= 0x80 ? M_LABEL : m_aCharSem[*_POINTER])
+#define IS_GAP(_POINTER)            ((*_POINTER) >= 0 && (CHAR_TYPE(_POINTER) & M_GAP) != 0)
+#define IS_ESCAPE(_POINTER)         ((*_POINTER) >= 0 && (CHAR_TYPE(_POINTER) & M_ESCAPE) != 0)
+#define IS_LABEL(_POINTER)          ((*_POINTER) <  0 || (CHAR_TYPE(_POINTER) & M_LABEL) != 0)
+#define IS_SYMBOL(_POINTER)         ((*_POINTER) >= 0 && (CHAR_TYPE(_POINTER) & M_TYPE_MASK) == M_SYMBOL)
+#define IS_QUOT(_POINTER)           ((*_POINTER) >= 0 && (CHAR_TYPE(_POINTER) & M_QUOT) != 0)
+#define QUOT_GROUP(_POINTER)        ( CHAR_TYPE(_POINTER) & M_GROUP_MASK)
+#define IS_OPEN_BRAKERS(_POINTER)   ((CHAR_TYPE(_POINTER) & M_OPN_BRAKETS) != 0)
+#define IS_CLOSE_BRAKERS(_POINTER)  ((CHAR_TYPE(_POINTER) & M_CLS_BRAKETS) != 0)
+#define TRIM_HEAD_GAPS(_POINTER)    while(IS_GAP(_POINTER) && ( ! IsEndOfStream(_POINTER))){  _POINTER++;  }
+//#define TRIM_TAIL_GAPS    while(IS_GAP && IsHeadOfStream() == false){  m_uPointer--;  }
+
 
 #define SET_SYMBOL(ch)    m_aCharSem[(int)ch] = M_SYMBOL
 
@@ -55,9 +68,8 @@ b32 SmartStream_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
 #define _SS_IMPL SmartStreamT<_TStr, _Traits>
 
 _SS_TEMPL _SS_IMPL::SmartStreamT(T_LPCSTR pStream /* = NULL */, clsize uCountOfChar /* = NULL */)
-: m_pStream         (pStream)
-, m_uCountOfChar    (uCountOfChar)
-, m_uPointer        (0)
+: m_pBegin          (pStream)
+, m_pEnd            (pStream + uCountOfChar)
 , m_dwFlags         (NULL)
 , m_pCallBack       (NULL)
 , m_lParam          (NULL)
@@ -73,12 +85,15 @@ _SS_TEMPL _SS_IMPL::SmartStreamT(T_LPCSTR pStream /* = NULL */, clsize uCountOfC
   m_aCharSem[(int)'\r'] = M_GAP;
   m_aCharSem[(int)'\n'] = M_GAP;
 
-  for(i = (int)'0'; i <= (int)'9'; i++)
+  for(i = (int)'0'; i <= (int)'9'; i++) {
     m_aCharSem[i] = M_LABEL;
-  for(i = (int)'a'; i <= (int)'z'; i++)
+  }
+  for(i = (int)'a'; i <= (int)'z'; i++) {
     m_aCharSem[i] = M_LABEL;
-  for(i = (int)'A'; i <= (int)'Z'; i++)
+  }
+  for(i = (int)'A'; i <= (int)'Z'; i++) {
     m_aCharSem[i] = M_LABEL;
+  }
   m_aCharSem[(int)'_'] = M_LABEL;
 
   m_aCharSem[(int)'\''] = M_QUOT | 0x0000;
@@ -92,22 +107,19 @@ _SS_TEMPL _SS_IMPL::SmartStreamT(T_LPCSTR pStream /* = NULL */, clsize uCountOfC
   m_aCharSem[(int)']'] = M_CLS_BRAKETS | 0x1000;
   m_aCharSem[(int)'{'] = M_OPN_BRAKETS | 0x2000;
   m_aCharSem[(int)'}'] = M_CLS_BRAKETS | 0x2000;
-  if(m_pStream != NULL)
-    TRIM_HEAD_GAPS
+  //if(m_pStream != NULL)
+  //  TRIM_HEAD_GAPS
 }
 
 _SS_TEMPL
 b32 _SS_IMPL::Initialize(T_LPCSTR pStream, clsize uCountOfChar)
 {
-  m_pStream       = pStream;
-  m_uCountOfChar  = uCountOfChar;
-  m_uPointer      = 0;
+  m_pBegin = pStream;
+  m_pEnd   = pStream + uCountOfChar;
 
   m_itEnd.pContainer  = this;
   m_itEnd.marker      = &pStream[uCountOfChar];
   m_itEnd.length      = 0;
-  //m_itEnd.remain    = 0;
-  TRIM_HEAD_GAPS
   return TRUE;
 }
 
@@ -156,240 +168,97 @@ typename _SS_IMPL::SemType _SS_IMPL::SetCharSemantic(TChar ch, SemType flagCharS
 }
 
 _SS_TEMPL
-b32 _SS_IMPL::IsHeadOfStream() const
+b32 _SS_IMPL::IsHeadOfStream(T_LPCSTR pPointer) const
 {
-  return m_uPointer == 0;
+  return pPointer == m_pBegin;
 }
 
 _SS_TEMPL
-b32 _SS_IMPL::IsEndOfStream() const
+b32 _SS_IMPL::IsEndOfStream(T_LPCSTR pPointer) const
 {
-  return m_uPointer >= m_uCountOfChar;
-}
-
-_SS_TEMPL
-void _SS_IMPL::Reset()
-{
-  m_uPointer = 0;
-}
-
-_SS_TEMPL
-void _SS_IMPL::EndOfStream()
-{
-  m_uPointer = m_uCountOfChar - 1;
-}
-
-_SS_TEMPL
-clsize _SS_IMPL::GetPointer() const
-{
-  return m_uPointer;
+  return pPointer >= m_pEnd;
 }
 
 _SS_TEMPL
 typename _SS_IMPL::T_LPCSTR _SS_IMPL::GetStreamPtr() const
 {
-  return m_pStream;
+  return m_pBegin;
 }
 
 _SS_TEMPL
 clsize _SS_IMPL::GetStreamCount() const
 {
-  return m_uCountOfChar;
+  return m_pEnd - m_pBegin;
 }
-//u32 _SS_IMPL::SetPointer(u32 uPointer)
-//{
-//  u32 uOldPointer = m_uPointer;
-//  m_uPointer = uPointer;
-//  return uOldPointer;
-//}
 
 _SS_TEMPL
-b32 _SS_IMPL::Get(T_LPCSTR* ppStream, clsize* pCount)
+b32 _SS_IMPL::Get(T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) const
 {
-  if(IsEndOfStream() == TRUE)
+  if(pPointer < m_pBegin || IsEndOfStream(pPointer)) {
     return false;
-  if(ppStream != NULL)
-    *ppStream = &m_pStream[m_uPointer];
-  if(IS_OPEN_BRAKERS || IS_CLOSE_BRAKERS)
+  }
+
+  if(ppOutPointer != NULL) {
+    *ppOutPointer = pPointer;
+      //&m_pFirst[m_uPointer];
+  }
+
+  // 开括号闭括号的话，直接返回
+  if(IS_OPEN_BRAKERS(pPointer) || IS_CLOSE_BRAKERS(pPointer))
   {
-    if(pCount != NULL)
-      *pCount = 1;
+    if(pOutCount != NULL) {
+      *pOutCount = 1;
+    }
     return true;
   }
-  else if(IS_QUOT)
+  else if(IS_QUOT(pPointer))
   {
-    const u32 grp = QUOT_GROUP;
-    const clsize uBegin = m_uPointer;  // 不记录这个用指针相减也可以,但要除以CHAR的大小
-    m_uPointer++;
-    while (IsEndOfStream() == false)
+    const u32 grp = QUOT_GROUP(pPointer);
+    //const clsize uBegin = m_uPointer;  // 不记录这个用指针相减也可以,但要除以CHAR的大小
+    T_LPCSTR pInQuot = pPointer + 1;
+    //m_uPointer++;
+    while( ! IsEndOfStream(pInQuot))
     {
-      if(IS_ESCAPE)
+      if(IS_ESCAPE(pInQuot))
       {
-        m_uPointer += 2;
+        pInQuot += 2;
         continue;
       }
-      else if(IS_QUOT && QUOT_GROUP == grp)
+      else if(IS_QUOT(pInQuot) && QUOT_GROUP(pInQuot) == grp)
       {
-        if(pCount != NULL)
-          *pCount = (m_uPointer + 1) - uBegin;
-        m_uPointer = uBegin;  // 还原
+        if(pOutCount != NULL) {
+          *pOutCount = pInQuot + 1 - pPointer;
+            //(m_uPointer + 1) - uBegin;
+        }
+        //m_uPointer = uBegin;  // 还原
         return true;
       }
-      m_uPointer++;
+      //m_uPointer++;
+      pInQuot++;
     }
   }
-  else if(IS_LABEL || IS_SYMBOL)
+  else if(IS_LABEL(pPointer) || IS_SYMBOL(pPointer))
   {
-    const clsize uBegin = m_uPointer;
-    SemType t = (CHAR_TYPE & M_TYPE_MASK);
-    m_uPointer++;
-    if(t != M_SYMBOL || TEST_FLAG(m_dwFlags, F_SYMBOLBREAK) == FALSE)
+    //const clsize uBegin = m_uPointer;
+    T_LPCSTR pBegin = pPointer;
+    const SemType t = (CHAR_TYPE(pPointer) & M_TYPE_MASK);
+    pPointer++;
+    if(t != M_SYMBOL || TEST_FLAG_NOT(m_dwFlags, F_SYMBOLBREAK))
     {
-      while((CHAR_TYPE & M_TYPE_MASK) == t && IsEndOfStream() == false)
+      while((CHAR_TYPE(pPointer) & M_TYPE_MASK) == t && ( ! IsEndOfStream(pPointer)))
       {
-        m_uPointer++;
+        pPointer++;
       }
     }
-    if(pCount != NULL)
-      *pCount = m_uPointer - uBegin;
-    m_uPointer = uBegin;  // 还原指针
+    if(pOutCount != NULL) {
+      *pOutCount = pPointer - pBegin;
+    }
+    //m_uPointer = uBegin;  // 还原指针
     return true;
   }
   else
     ASSERT(0);
   return false;
-}
-
-//bool _SS_IMPL::GetPrevRef(T_LPCSTR pStream, u32* pCount)
-//{
-//
-//}
-//
-//bool _SS_IMPL::GetNextRef(T_LPCSTR pStream, u32* pCount)
-//{
-//  
-//}
-
-_SS_TEMPL
-b32 _SS_IMPL::ReadPrev(T_LPCSTR* ppStream, clsize* pCount)
-{
-  if(IsHeadOfStream())
-    return false;
-  
-  m_uPointer--;
-  
-  if(IsHeadOfStream())
-  {
-    TRIM_HEAD_GAPS;
-    if(pCount != NULL)
-      *pCount = 1;
-    if(ppStream != NULL)
-      *ppStream = &m_pStream[m_uPointer];
-    return false;
-  }
-
-  TRIM_TAIL_GAPS;
-  const clsize rbegin = m_uPointer;
-  //u32 prev = m_uPointer;;
-
-  if(IS_OPEN_BRAKERS || IS_CLOSE_BRAKERS)
-  {
-    if(pCount != NULL)
-      *pCount = 1;
-
-    goto TRUE_RET;
-  }
-  else if(IS_QUOT)
-  {
-    const u32 grp = QUOT_GROUP;
-    m_uPointer--;
-    while (IsHeadOfStream() == false)
-    {
-      if(IS_QUOT && QUOT_GROUP == grp)
-      {
-        if(m_uPointer > 0 && (m_aCharSem[m_pStream[m_uPointer - 1]] & M_ESCAPE) != 0)
-        {
-          m_uPointer -= 2;
-          continue;
-        }
-        break;
-      }
-      m_uPointer--;
-    }
-    if(pCount != NULL)
-      *pCount = rbegin - m_uPointer + 1;
-    goto TRUE_RET;
-  }
-  else if(IS_LABEL || IS_SYMBOL)
-  {
-    SemType t = (CHAR_TYPE & M_TYPE_MASK);
-    m_uPointer--;
-    if(t != M_SYMBOL || TEST_FLAG(m_dwFlags, F_SYMBOLBREAK) == FALSE)
-    {
-      while((CHAR_TYPE & M_TYPE_MASK) == t && IsHeadOfStream() == false)
-      {
-        m_uPointer--;
-      }
-    }
-    if(IsHeadOfStream() == false || (CHAR_TYPE & M_TYPE_MASK) != t)
-      m_uPointer++;
-    if(pCount != NULL)
-      *pCount = rbegin - (m_uPointer - 1);
-    goto TRUE_RET;
-  }
-  else
-    ASSERT(0);
-
-TRUE_RET:
-  if(ppStream != NULL)
-    *ppStream = &m_pStream[m_uPointer];
-  return true;
-}
-
-_SS_TEMPL
-clsize _SS_IMPL::Read(T_LPCSTR* ppStream, clsize* pCount)
-{
-  clsize        uCount;
-  const clsize  uOldPointer = m_uPointer;
-  if(Get(ppStream, &uCount) == false)
-    return -1;
-  m_uPointer += uCount;
-  if(pCount != NULL)
-    *pCount = uCount;
-  TRIM_HEAD_GAPS;
-  return uOldPointer;
-}
-
-_SS_TEMPL
-b32 _SS_IMPL::PushPointer()
-{
-  m_stackPointer.push_back(m_uPointer);
-  return true;
-}
-
-_SS_TEMPL
-b32 _SS_IMPL::PopPointer(b32 bDiscard)
-{
-  size_t size = m_stackPointer.size();
-  if(size == 0)
-  {
-#ifdef _DEBUG
-    ASSERT(0);
-#endif // _DEBUG
-    return false;
-  }
-  clvector<clsize>::iterator it = m_stackPointer.begin() + size - 1;
-  if(bDiscard == FALSE)
-    m_uPointer = *it;
-  m_stackPointer.erase(it);
-  return true;
-}
-
-_SS_TEMPL
-b32 _SS_IMPL::ClearPointerStack()
-{
-  m_stackPointer.clear();
-  return true;
 }
 
 _SS_TEMPL
@@ -427,27 +296,21 @@ u32 _SS_IMPL::GetFlags() const
 }
 
 _SS_TEMPL
-typename _SS_IMPL::iterator _SS_IMPL::nearest(clsize nOffset)
+typename _SS_IMPL::iterator _SS_IMPL::nearest(clsize nOffset) const
 {
   iterator it(this);
-  m_uPointer = nOffset;
-  TRIM_HEAD_GAPS;
-  Get(&it.marker, &it.length);
+  //m_uPointer = nOffset;
+  T_LPCSTR pPointer = m_pBegin + nOffset;
+  TRIM_HEAD_GAPS(pPointer);
+  Get(pPointer, &it.marker, &it.length);
   return it;
 }
 
 _SS_TEMPL
-typename _SS_IMPL::iterator _SS_IMPL::begin()
+typename _SS_IMPL::iterator _SS_IMPL::begin() const
 {
   iterator itBegin(this);
   return next(itBegin); // 这里这么写是为了保证begin也能触发特殊符号回调函数
-
-  ////u32 uOldPointer = m_uPointer;
-  //m_uPointer = 0;
-  //TRIM_HEAD_GAPS
-  //GetRef(&beginIt.marker, &beginIt.length);
-  ////m_uPointer = uOldPointer;
-  //return beginIt;
 }
 
 #if defined(_WINDOWS)
@@ -462,22 +325,23 @@ _SS_TEMPL
 }
 
 _SS_TEMPL 
-typename _SS_IMPL::iterator& _SS_IMPL::next(iterator& it)
+typename _SS_IMPL::iterator& _SS_IMPL::next(iterator& it) const
 {
-  m_uPointer = (u32)(it.marker - m_pStream) + it.length;
-  TRIM_HEAD_GAPS;
-  if(Get(&it.marker, &it.length) == false)
-  {
-    // 结尾
-    it.marker = &m_pStream[m_uCountOfChar];
-    it.length = 0;
-    //it.remain = 0;
+  //m_uPointer = (u32)(it.marker - m_pFirst) + it.length;
+  T_LPCSTR pPointer = it.marker + it.length;
+  TRIM_HEAD_GAPS(pPointer);
+  if( ! Get(pPointer, &it.marker, &it.length))
+  {    
+    it = end();
     return it;
   }
-  const clsize remain = m_uCountOfChar - m_uPointer;
+  
+  const clsize remain = m_pEnd - pPointer;
+  
   if(m_pCallBack != NULL) {
     m_pCallBack(it, remain, m_lParam);
   }
+
   if(m_pTriggerCallBack != NULL && TEST_FLAG(m_aCharSem[it.marker[0]], M_CALLBACK)) {
     m_pTriggerCallBack(it, remain, m_lParamTrigger);
   }
@@ -493,7 +357,7 @@ typename _SS_IMPL::iterator& _SS_IMPL::iterator::operator++()
 _SS_TEMPL
 clsize _SS_IMPL::iterator::offset() const
 {
-  return (u32)(marker - pContainer->m_pStream);
+  return (u32)(marker - pContainer->m_pBegin);
 }
 
 _SS_TEMPL

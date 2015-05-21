@@ -356,6 +356,7 @@ _SSP_TEMPL
   typename _SSP_IMPL::Section _SSP_IMPL::AddSection(Section sect)
 {
   ASSERT(sect->pStock != NULL);
+  ASSERT(sect->DbgCheck());
   Section sectNew = new SECTION_DESC;
   *sectNew = *sect;
   m_aHandles.push_back(sectNew);
