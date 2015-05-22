@@ -94,7 +94,7 @@ namespace Marimo
     DATACT_Deleted,   // 删除后的通知
   };
 
-#define ENABLE_OLD_DATA_ACTION
+//#define ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_OLD_DATA_ACTION
   struct KNOCKACTION
   {
@@ -549,10 +549,7 @@ namespace Marimo
       ImpulseProc pCallback;
       GXLPARAM    lParam;
 
-      bool operator<(const WATCH_FIXED& t) const
-      {
-        return pCallback < t.pCallback;
-      }
+      bool operator<(const WATCH_FIXED& t) const;
     };
     typedef clset<WATCH_FIXED>  WatchFixedList;
     typedef clhash_map<GXLPVOID, WatchFixedList> WatchFixedDict;
@@ -612,6 +609,8 @@ namespace Marimo
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
     //LPCENUMDESC   IntGetEnum          (GXUINT nPackIndex) const;  // m_aEnumPck中的索引
     LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
+    GXBOOL        IntWatch            (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+    GXBOOL        IntIgnore           (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
 
     GXSIZE_T      IntGetRTDescHeader    ();   // 获得运行时描述表大小
     GXSIZE_T      IntGetRTDescNames     ();   // 获得运行时描述表字符串表所占的大小
@@ -651,17 +650,30 @@ namespace Marimo
     virtual GXBOOL      IsKnocking          (const DataPoolVariable* pVar);
     virtual GXBOOL      SetAutoKnock        (GXBOOL bAutoKnock);
 
+#ifdef ENABLE_OLD_DATA_ACTION
     virtual GXHRESULT   CreateWatcher       (GXLPCSTR szClassName);
     virtual GXHRESULT   RemoveWatcherByName (GXLPCSTR szClassName);
     virtual GXHRESULT   AddWatcher          (DataPoolWatcher* pWatcher);
     virtual GXHRESULT   RemoveWatcher       (DataPoolWatcher* pWatcher);
     virtual GXHRESULT   RegisterIdentify    (GXLPCSTR szClassName, GXLPVOID pIdentify); // TODO: 名字起的不好
     virtual GXHRESULT   UnregisterIdentify  (GXLPCSTR szClassName, GXLPVOID pIdentify); // TODO: 名字起的不好
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
     virtual GXHRESULT   ImpluseByVariable   (DataAction eType, const DataPoolVariable& var, GXUINT nIndex, GXBOOL bForce = TRUE);
 
     virtual GXBOOL      Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam);
-    //virtual GXBOOL      Ignore              (GXLPCSTR szExpression);
+    virtual GXBOOL      Watch               (GXLPCSTR szExpression, DataPoolWatcher* pWatcher);
+    virtual GXBOOL      Watch               (GXLPCSTR szExpression, GXHWND hWnd);
+    virtual GXBOOL      Watch               (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+    virtual GXBOOL      Watch               (DataPoolVariable* pVar, DataPoolWatcher* pWatcher);
+    virtual GXBOOL      Watch               (DataPoolVariable* pVar, GXHWND hWnd);
+
+    virtual GXBOOL      Ignore              (GXLPCSTR szExpression, ImpulseProc pImpulseCallback);
+    virtual GXBOOL      Ignore              (GXLPCSTR szExpression, DataPoolWatcher* pWatcher);
+    virtual GXBOOL      Ignore              (GXLPCSTR szExpression, GXHWND hWnd);
+    virtual GXBOOL      Ignore              (DataPoolVariable* pVar, ImpulseProc pImpulseCallback);
+    virtual GXBOOL      Ignore              (DataPoolVariable* pVar, DataPoolWatcher* pWatcher);
+    virtual GXBOOL      Ignore              (DataPoolVariable* pVar, GXHWND hWnd);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
     iterator        begin       ();
@@ -733,6 +745,16 @@ namespace Marimo
   {
   };
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#else
+  class DataPoolWatcher : public GUnknown
+  {
+  public:
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXSTDINTERFACE(GXHRESULT AddRef   ());
+    GXSTDINTERFACE(GXHRESULT Release  ());
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXSTDINTERFACE(GXVOID OnImpulse   (LPCDATAIMPULSE pImpulse));
+  };
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   //

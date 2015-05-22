@@ -66,6 +66,17 @@ using namespace clstd;
 # define ASSERT_X64(x)
 #endif // #ifdef _X86
 
+//namespace std
+//{
+//  template<> struct less<Marimo::DataPool::WATCH_FIXED>
+//  {
+//    bool operator()(const Marimo::DataPool::WATCH_FIXED& a, const Marimo::DataPool::WATCH_FIXED& b) const
+//    {
+//      return _Str.GetHash(); 
+//    }
+//  };
+//}
+//
 namespace Marimo
 {
 //#ifdef _X86
@@ -724,6 +735,18 @@ namespace Marimo
     }
     m_aWatchers.clear();
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#else
+    for(WatchFixedDict::iterator it = m_FixedDict.begin(); it != m_FixedDict.end(); ++it)
+    {
+      for(WatchFixedList::iterator itList = it->second.begin(); itList != it->second.end(); ++itList)
+      {
+        if(itList->pCallback == 0) {
+          DataPoolWatcher* pWatcher = (DataPoolWatcher*)itList->lParam;
+          SAFE_RELEASE(pWatcher);
+        }
+      }
+    }
+    m_FixedDict.clear();
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
     //SAFE_DELETE(m_pBuffer);
   }
@@ -1134,7 +1157,6 @@ namespace Marimo
     //ka.Name      = var.GetName();
     //ka.Action    = eType;
     //ka.ptr       = var.GetPtr();
-
     auto it_result = m_FixedDict.find(var.GetPtr());
     if(it_result != m_FixedDict.end())
     {
@@ -1147,7 +1169,18 @@ namespace Marimo
       for(auto it = it_result->second.begin(); it != it_result->second.end(); ++it)
       {
         sImpulse.param = it->lParam;
-        it->pCallback(&sImpulse);
+        switch((GXINT_PTR)it->pCallback)
+        {
+        case 0:
+          ((DataPoolWatcher*)it->lParam)->OnImpulse(&sImpulse);
+          break;
+        case 1:
+          gxSendMessage((GXHWND)it->lParam, GXWM_IMPULSE, 0, (GXLPARAM)&sImpulse);
+          break;
+        default:
+          it->pCallback(&sImpulse);
+          break;
+        }
       }
     }
 
@@ -2460,27 +2493,117 @@ namespace Marimo
     }
   }
 
+  //bool operator<(const WATCH_FIXED& a, const WATCH_FIXED& b)
+  //{
+  //  return pCallback < t.pCallback;
+  //}
+
+
+  GXBOOL DataPool::IntWatch( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  {
+    GXBOOL bret = FALSE;
+    if(pVar->GetBuffer() == &m_VarBuffer) // 只有 fixed 变量才能被 watch
+    {
+      WatchFixedList sWatchList;
+      auto result = m_FixedDict.insert(clmake_pair(pVar->GetPtr(), sWatchList));
+      bret = TRUE;
+
+      WATCH_FIXED sWatch;
+      sWatch.pCallback = pImpulseCallback;
+      sWatch.lParam    = lParam;
+      result.first->second.insert(sWatch);
+    }
+    return bret;
+  }
+
+  GXBOOL DataPool::IntIgnore( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  {
+    CLBREAK;
+    return FALSE;
+  }
+
   GXBOOL DataPool::Watch( GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam )
   {
     DataPoolVariable var;
-    GXBOOL bret = FALSE;
-    if(QueryByExpression(szExpression, &var))
-    {
-      if(var.GetBuffer() == &m_VarBuffer) // 只有 fixed 变量才能被 watch
-      {
-        WatchFixedList sWatchList;
-        auto result = m_FixedDict.insert(clmake_pair(var.GetPtr(), sWatchList));
-        bret = result.second;
-        if(bret)
-        {
-          WATCH_FIXED sWatch;
-          sWatch.pCallback = pImpulseCallback;
-          sWatch.lParam    = lParam;
-          result.first->second.insert(sWatch);
-        }
-      }
+    if(QueryByExpression(szExpression, &var)) {
+      return IntWatch(&var, pImpulseCallback, lParam);
     }
-    return bret;
+    return FALSE;
+  }
+
+  GXBOOL DataPool::Watch( GXLPCSTR szExpression, DataPoolWatcher* pWatcher )
+  {
+    DataPoolVariable var;
+    if(QueryByExpression(szExpression, &var)) {
+      return IntWatch(&var, NULL, (GXLPARAM)pWatcher);
+    }
+    return FALSE;
+  }
+
+  GXBOOL DataPool::Watch( GXLPCSTR szExpression, GXHWND hWnd )
+  {
+    DataPoolVariable var;
+    if(QueryByExpression(szExpression, &var)) {
+      return IntWatch(&var, (ImpulseProc)1, (GXLPARAM)hWnd);
+    }
+    return FALSE;
+  }
+
+  GXBOOL DataPool::Watch( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  {
+    return IntWatch(pVar, pImpulseCallback, lParam);
+  }
+
+  GXBOOL DataPool::Watch( DataPoolVariable* pVar, DataPoolWatcher* pWatcher )
+  {
+    return IntWatch(pVar, NULL, (GXLPARAM)pWatcher);
+  }
+
+  GXBOOL DataPool::Watch( DataPoolVariable* pVar, GXHWND hWnd )
+  {
+    return IntWatch(pVar, (ImpulseProc)1, (GXLPARAM)hWnd);
+  }
+
+  GXBOOL DataPool::Ignore( GXLPCSTR szExpression, ImpulseProc pImpulseCallback )
+  {
+    DataPoolVariable var;
+    if(QueryByExpression(szExpression, &var)) {
+      return IntIgnore(&var, pImpulseCallback, NULL);
+    }
+    return FALSE;
+  }
+
+  GXBOOL DataPool::Ignore( GXLPCSTR szExpression, DataPoolWatcher* pWatcher )
+  {
+    DataPoolVariable var;
+    if(QueryByExpression(szExpression, &var)) {
+      return IntIgnore(&var, NULL, (GXLPARAM)pWatcher);
+    }
+    return FALSE;
+  }
+
+  GXBOOL DataPool::Ignore( GXLPCSTR szExpression, GXHWND hWnd )
+  {
+    DataPoolVariable var;
+    if(QueryByExpression(szExpression, &var)) {
+      return IntIgnore(&var, (ImpulseProc)1, (GXLPARAM)hWnd);
+    }
+    return FALSE;
+  }
+
+  GXBOOL DataPool::Ignore( DataPoolVariable* pVar, ImpulseProc pImpulseCallback )
+  {
+    return IntIgnore(pVar, pImpulseCallback, NULL);
+  }
+
+  GXBOOL DataPool::Ignore( DataPoolVariable* pVar, DataPoolWatcher* pWatcher )
+  {
+    return IntIgnore(pVar, NULL, (GXLPARAM)pWatcher);
+  }
+
+  GXBOOL DataPool::Ignore( DataPoolVariable* pVar, GXHWND hWnd )
+  {
+    return IntIgnore(pVar, (ImpulseProc)1, (GXLPARAM)hWnd);
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -2514,5 +2637,29 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
+
+
+  bool DataPool::WATCH_FIXED::operator<( const WATCH_FIXED& t ) const
+  {
+    // 这个写的好搓！
+    switch((GXINT_PTR)pCallback)
+    {
+    case 0: // DataPoolWatcher
+      switch((GXINT_PTR)t.pCallback)
+      {
+      case 0: return lParam < t.lParam;
+      default: return true;
+      }
+    case 1: // HWND
+      switch((GXINT_PTR)t.pCallback)
+      {
+      case 0: false;
+      case 1: return lParam < t.lParam;
+      default: return true;
+      }
+    // Callback
+    default: return pCallback < t.pCallback;
+    }
+  }
 
 } // namespace Marimo

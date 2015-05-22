@@ -211,18 +211,22 @@ namespace GXUI
 
   GXBOOL CtrlBase::SetDataVariable(GXHWND hWnd, MOVariable& var, MOVariable* pNewVar)
   {
+    CLBREAK;
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
     if(var.IsValid()) {
       var.GetPoolUnsafe()->UnregisterIdentify(STR_DATAPOOL_WATCHER_UI, hWnd);
     }
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
-
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
     if(pNewVar && pNewVar->IsValid())
     {
       var = *pNewVar;
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
       var.GetPoolUnsafe()->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, hWnd);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
       return TRUE;
     }
     var.Free();

@@ -37,9 +37,11 @@ namespace GXUI
 
   DefaultListDataAdapter::~DefaultListDataAdapter()
   {
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
     m_pDataPool->UnregisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
     SAFE_RELEASE(m_pDataPool);
   }
 
@@ -54,10 +56,12 @@ namespace GXUI
     m_strArrayName = "name";
     m_pDataPool->QueryByName(m_strArrayName, &m_DynArray);
 
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
     m_pDataPool->CreateWatcher(STR_DATAPOOL_WATCHER_UI);
     m_pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
     return TRUE;
   }
@@ -72,11 +76,12 @@ namespace GXUI
     m_DynArray = Var;
     Var.GetPool(&m_pDataPool);
 
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
     m_pDataPool->CreateWatcher(STR_DATAPOOL_WATCHER_UI);
     m_pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
-
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
     return TRUE;
   }
 

@@ -55,9 +55,35 @@ void GXCALLBACK sTestCImpulseProc(DATAPOOL_IMPULSE* pImpulse)
   TRACE("received impulse var:%s\n", pImpulse->sponsor->ToStringA());
 }
 
+class WatchTest : public DataPoolWatcher
+{
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+  GXHRESULT AddRef()
+  {
+    return ++m_nRefCount;
+  }
+
+  GXHRESULT Release()
+  {
+    if(--m_nRefCount == 0)
+    {
+      delete this;
+      return GX_OK;
+    }
+    return m_nRefCount;
+  }
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+  GXVOID OnImpulse(LPCDATAIMPULSE pImpulse)
+  {
+
+  }
+};
+
 void TestWatcher(DataPool* pDataPool)
 {
+  WatchTest* pTest = new WatchTest;
   pDataPool->Watch("sTestC.name", sTestCImpulseProc, NULL);
+  pDataPool->Watch("sTestC.name", pTest);
 
   MOVariable var;
   pDataPool->QueryByExpression("sTestC.name", &var);

@@ -38,7 +38,11 @@ namespace Scene
       clStringA GetClassName        ();
       GXHRESULT RegisterPrivate     (GXLPVOID pIndentify);
       GXHRESULT UnregisterPrivate   (GXLPVOID pIndentify);
+#ifdef ENABLE_OLD_DATA_ACTION
       GXHRESULT OnKnock             (Marimo::KNOCKACTION* pKnock);
+#else
+      GXVOID    OnImpulse           (Marimo::LPCDATAIMPULSE pImpulse);
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
     private:
       MODataPool* m_pDataPool;
@@ -90,7 +94,11 @@ namespace Scene
       clStringA GetClassName            ();
       GXHRESULT RegisterPrivate         (GXLPVOID pIndentify);
       GXHRESULT UnregisterPrivate       (GXLPVOID pIndentify);
+#ifdef ENABLE_OLD_DATA_ACTION
       GXHRESULT OnKnock                 (Marimo::KNOCKACTION* pKnock);
+#else
+      GXVOID    OnImpulse               (Marimo::LPCDATAIMPULSE pImpulse);
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
     private:
       MODataPool* m_pDataPool;
       //Scattering coefficients.

@@ -532,9 +532,12 @@ namespace GXUI
     MODataPool* pDataPool = NULL;
     if(GXSUCCEEDED(pAdapter->GetDataPool(&pDataPool)))
     {
+      CLBREAK;
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
       pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
       pDataPool->Release();
       pDataPool = NULL;
     }
