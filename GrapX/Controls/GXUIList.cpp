@@ -665,13 +665,14 @@ namespace GXUI
       }
       break;
 
-    case GXWM_KNOCK:
-      if(wParam == 0)
-      {
-        pThis->OnKnock((KNOCKACTION*)lParam);
-        return 0;
-      }
-      return -1;
+    case GXWM_IMPULSE:
+      //if(wParam == 0)
+      //{
+      //  pThis->OnKnock((KNOCKACTION*)lParam);
+      //  return 0;
+      //}
+      //return -1;
+      return 0;
 
     case GXWM_LBUTTONUP:
       {

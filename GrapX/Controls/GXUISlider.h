@@ -62,7 +62,8 @@ namespace GXUI
     virtual GXLRESULT           Measure         (GXRegn* pRegn);
     virtual GXLRESULT           Destroy         ();
     virtual GXLRESULT           SetVariable     (MOVariable* pVariable);
-    virtual GXHRESULT           OnKnock         (KNOCKACTION* pKnock);
+    //virtual GXHRESULT           OnKnock         (KNOCKACTION* pKnock);
+    virtual GXVOID              OnImpulse       (LPCDATAIMPULSE pImpulse);
     virtual GXBOOL              SolveDefinition (const GXDefinitionArrayW& aDefinitions);
 
     void                        IntCalcRects    (GXRECT* rcClient, GXDWORD dwStyle, GXOUT GXREGN* pRegns); // rect 数量应该与 HTS_COUNT 一致

@@ -82,11 +82,11 @@ void TestBaseProperty()
 
   static VARIABLE_DECLARATION g_StdMtl[] = 
   {
-    {"float",    "fFactor",           0,   },
-    {"float",    "aFactor",           0,   3},
-    {"float",    "aDynFactor",        0,  -7, &matIdentity},
+    {"float",     "fFactor",          0,   },
+    {"float",     "aFactor",          0,   3},
+    {"float",     "aDynFactor",       0,  -7, &matIdentity},
 
-    {"float4x4", "matViewProj",       0,   0, &matIdentity},
+    {"float4x4",  "matViewProj",      0,   0, &matIdentity},
     {"float4x4",  "testDynArray",     0,  -2, &matIdentity},
     {"float4x4",  "testArray",        0,  10, &matIdentity},
 
@@ -98,7 +98,7 @@ void TestBaseProperty()
     {"object",    "aObjects",         0,  7},
     {"object",    "aManyObjects",     0,  -12, &aManyObject},
 
-    {"vertex",   "VarMember",         0,      },
+    {"vertex",    "VarMember",        0,      },
 
     {NULL, NULL}
   };

@@ -64,7 +64,8 @@ namespace GXUI
     virtual GXLRESULT OnPaint             (GXWndCanvas& canvas);
     virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
     virtual int       OnSize              (int cx, int cy);
-    virtual GXHRESULT OnKnock             (KNOCKACTION* pAction);
+    //virtual GXHRESULT OnKnock             (KNOCKACTION* pAction);
+    virtual GXVOID    OnImpulse           (LPCDATAIMPULSE pImpulse);
     virtual GXBOOL    ReduceItemStat      (GXINT nCount);
     virtual void      DeleteItemStat      (GXINT nIndex);
     virtual GXBOOL    GetItemRect(int nItem, GXDWORD dwStyle, GXLPRECT lprc) const;

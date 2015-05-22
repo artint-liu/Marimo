@@ -3,7 +3,6 @@
 
 // 编译开关
 #define ENABLE_DATAPOOL_WATCHER     // DataPool 监视器
-#define ENABLE_DATAPOOL_OBJECT_TYPE // 内置支持GUnknown类型
 //#define DEBUG_DECL_NAME           // 使用字符串指针储存自定位副本，如果打开这个调试将不能保存和加载
 
 #ifdef ENABLE_DATAPOOL_WATCHER
@@ -52,9 +51,7 @@ namespace Marimo
     T_FLOAT,        // float 32
     T_STRING,
     T_STRINGA,      // ANSI string
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     T_OBJECT,       // GUnknown*
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     T_ENUM,         // 枚举
     T_FLAG,         // 标志型枚举
     T_STRUCT,
@@ -81,9 +78,7 @@ namespace Marimo
     TypeCategoryFlag_Float        = 1 << T_FLOAT,
     TypeCategoryFlag_String       = 1 << T_STRING,
     TypeCategoryFlag_StringA      = 1 << T_STRINGA,
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     TypeCategoryFlag_Object       = 1 << T_OBJECT,
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     TypeCategoryFlag_Enum         = 1 << T_ENUM,
     TypeCategoryFlag_Flag         = 1 << T_FLAG,
     TypeCategoryFlag_Struct       = 1 << T_STRUCT,
@@ -99,6 +94,8 @@ namespace Marimo
     DATACT_Deleted,   // 删除后的通知
   };
 
+#define ENABLE_OLD_DATA_ACTION
+#ifdef ENABLE_OLD_DATA_ACTION
   struct KNOCKACTION
   {
     const DataPoolVariable* pSponsor; // 发起者
@@ -108,6 +105,17 @@ namespace Marimo
     GXLPCVOID   ptr;
     GXINT       Index;  // 只有动态数组才有效
   };
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
+
+  struct DATAPOOL_IMPULSE
+  {
+    const DataPoolVariable* sponsor; // 发起者
+    DataAction reason;  // 数据改变类型
+    GXUINT     index;   // 如果是数组元素，标记开始索引
+    GXUINT     count;   // 如果是数组元素，标记元素数量
+    GXLPARAM   param;   // 用户参数
+  };
+  typedef const DATAPOOL_IMPULSE* LPCDATAIMPULSE;
 
   const GXDWORD VarDeclFlag_Const = 0x0001;
 
@@ -243,6 +251,9 @@ namespace Marimo
     typedef const TYPE_DESC*      LPCTD;
     typedef DataPoolUtility::iterator                 iterator;
     typedef DataPoolUtility::named_iterator           named_iterator;
+
+    typedef GXVOID (GXCALLBACK *ImpulseProc)(DATAPOOL_IMPULSE* pImpulse);
+
     //typedef DataPoolUtility::element_iterator         element_iterator;
     //typedef DataPoolUtility::element_reverse_iterator relement_iterator;
 
@@ -381,13 +392,11 @@ namespace Marimo
         return pBaseData + nOffset;
       }
 
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
       GUnknown** GetAsObject(GXBYTE* pBaseData) const
       {
         ASSERT(GetTypeCategory() == T_OBJECT); // object
         return (GUnknown**)(pBaseData + nOffset);
       }
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
 
       clStringW* GetAsStringW(GXBYTE* pBaseData) const
       {
@@ -490,18 +499,14 @@ namespace Marimo
     };
 #pragma pack(pop)
 
-    typedef i32                         Enum;     // 数据池所使用的枚举类型的C++表示
-    typedef u32                         Flag;     // 数据池所使用的标志类型的C++表示
-    typedef u32                     EnumFlag;     // 枚举和标志类型的统一表示
-    //typedef clmap<clStringA, TYPE_DESC> TypeDict;
-    //typedef clvector<TYPE_DESC>     TypeDescArray;
-    //typedef clvector<VARIABLE_DESC> VariableDescArray;
-    //typedef clvector<ENUM_DESC>     EnumDescArray;
-    //typedef const VARIABLE_DESC         LPCVD;  // 只用作参数和接口声明
+    typedef i32                 Enum;         // 数据池所使用的枚举类型的C++表示
+    typedef u32                 Flag;         // 数据池所使用的标志类型的C++表示
+    typedef u32                 EnumFlag;     // 枚举和标志类型的统一表示
     typedef clstd::FixedBuffer  clFixedBuffer;
     typedef clstd::RefBuffer    clRefBuffer;
     typedef DataPoolBuildTime   BUILDTIME;
     typedef GXUINT              SortedIndexType;
+
 #ifdef ENABLE_DATAPOOL_WATCHER
     typedef clvector<DataPoolWatcher*>  WatcherArray;
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
@@ -538,17 +543,26 @@ namespace Marimo
     WatcherArray        m_aWatchers;
     typedef clset<GXLPCVOID> KnockingSet;
     KnockingSet         m_setKnocking;    // 记录正在发送更改通知的Variable列表,防止多个相同指向的Variable反复递归.
+
+    struct WATCH_FIXED // 固定变量监视器
+    {
+      ImpulseProc pCallback;
+      GXLPARAM    lParam;
+
+      bool operator<(const WATCH_FIXED& t) const
+      {
+        return pCallback < t.pCallback;
+      }
+    };
+    typedef clset<WATCH_FIXED>  WatchFixedList;
+    typedef clhash_map<GXLPVOID, WatchFixedList> WatchFixedDict;
+
+    WatchFixedDict      m_FixedDict;
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
 
       GXDWORD           m_dwRuntimeFlags;
 
-//    GXDWORD             m_bFixedPool : 1;
-//    GXDWORD             m_bReadOnly  : 1;   
-//
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//    GXDWORD             m_bAutoKnock : 1;
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
     // COMMENT:
     // KnockingSet目前储存了Var指向变量的地址,静态变量不会有问题
@@ -569,8 +583,6 @@ namespace Marimo
     GXBOOL  CleanupArray      (LPCVD pVarDesc, GXLPVOID lpFirstElement, int nElementCount);
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
     LPCVD   IntGetVariable    (LPCVD pVdd, GXLPCSTR szName);
-    //GXBOOL  IntGetVariablePtr (GXLPCSTR szExpression, GXDWORD dwFlags, VARRETDESC* pDesc);
-    //GXBOOL  IntIsRawPool      () const;
 #ifdef ENABLE_DATAPOOL_WATCHER
     GXBOOL  IntIsKnocking     (const DataPoolVariable* pVar) const;
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
@@ -647,6 +659,9 @@ namespace Marimo
     virtual GXHRESULT   UnregisterIdentify  (GXLPCSTR szClassName, GXLPVOID pIdentify); // TODO: 名字起的不好
 
     virtual GXHRESULT   ImpluseByVariable   (DataAction eType, const DataPoolVariable& var, GXUINT nIndex, GXBOOL bForce = TRUE);
+
+    virtual GXBOOL      Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+    //virtual GXBOOL      Ignore              (GXLPCSTR szExpression);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
     iterator        begin       ();
@@ -680,6 +695,7 @@ namespace Marimo
     // 对于动态数组类型, 按照全局声明顺序分布,占用4字节,内容是(clBuffer*)的指针.
   };
 
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
   class DataPoolWatcher : public GUnknown
   {
@@ -717,6 +733,7 @@ namespace Marimo
   {
   };
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   //
   // DataPool 编译器使用的头文件打开方法

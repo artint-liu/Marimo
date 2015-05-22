@@ -493,14 +493,16 @@ namespace GXUI
     return GX_OK;
   }
 
-  GXHRESULT Slider::OnKnock(KNOCKACTION* pKnock)
+  //GXHRESULT Slider::OnKnock(KNOCKACTION* pKnock)
+  GXVOID Slider::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
+    CLBREAK;
     ASSERT(m_VarPos.IsValid());
-    if(pKnock->pSponsor != &m_VarPos && m_VarPos.GetName() == pKnock->Name)
+    //if(pImpulse->sponsor != &m_VarPos && m_VarPos.GetName() == pKnock->Name)
     {
 
     }
-    return 0;
+    //return 0;
   }
 
   void Slider::IntCalcRects(GXRECT* rcClient, GXDWORD dwStyle, GXREGN* pRegns)

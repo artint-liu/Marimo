@@ -108,9 +108,11 @@ namespace GXUI
         return pThis->SetVariable((MOVariable*)lParam);
       }
       else return -1;
-    case GXWM_KNOCK:
+
+    case GXWM_IMPULSE:
       {
-        pThis->OnKnock((KNOCKACTION*)lParam);
+        CLBREAK;
+        pThis->OnImpulse((LPCDATAIMPULSE)lParam);
       }
       break;
 
@@ -198,9 +200,10 @@ namespace GXUI
     return -1;
   }
 
-  GXHRESULT Static::OnKnock(KNOCKACTION* pKnock)
+  GXVOID Static::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
-    return 0;
+    CLBREAK;
+    //return 0;
   }
 
   //GXBOOL Static::SolveDefinition(const GXDefinitionArray& aDefinitions)
@@ -307,15 +310,17 @@ namespace GXUI
     return 0;
   }
 
-  GXHRESULT StaticLabel::OnKnock(KNOCKACTION* pKnock)
+  //GXHRESULT StaticLabel::OnKnock(KNOCKACTION* pKnock)
+  GXVOID StaticLabel::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
     ASSERT(m_VarText.IsValid());
-    if(pKnock->pSponsor != &m_VarText && m_VarText.GetName() == pKnock->Name)
+    CLBREAK;
+    //if(pImpulse->sponsor != &m_VarText && m_VarText.GetName() == pKnock->Name)
     {
       gxSetWindowTextW(m_hWnd, m_VarText.ToStringW());
       Invalidate(FALSE);
     }
-    return 0;
+    //return 0;
   }
 
   GXCOLORREF StaticLabel::SetColor(GXCOLORREF crText)

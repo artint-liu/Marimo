@@ -54,7 +54,7 @@ namespace GXUI
       wParam = (GXWPARAM)(pReflectKnock->pSender->GetWndOwner());
     }
 
-    gxSendMessage(m_hWndOwner, GXWM_KNOCK, wParam, (GXLPARAM)pReflectKnock);
+    gxSendMessage(m_hWndOwner, GXWM_IMPULSE, wParam, (GXLPARAM)pReflectKnock);
     return GX_OK;
   }
   //GXHRESULT DataContainer::Knock(GXHWND hSender) const

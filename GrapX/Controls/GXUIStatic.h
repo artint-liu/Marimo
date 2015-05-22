@@ -27,7 +27,8 @@ namespace GXUI
     virtual GXLRESULT           OnPaint     (GXWndCanvas& canvas) = NULL;
     virtual GXLRESULT           Destroy     ();
     virtual GXLRESULT           SetVariable (MOVariable* pVariable);
-    virtual GXHRESULT           OnKnock     (KNOCKACTION* pKnock);
+    virtual GXVOID              OnImpulse   (LPCDATAIMPULSE pImpulse);
+    //virtual GXHRESULT           OnKnock     (KNOCKACTION* pKnock);
     //virtual GXBOOL              SolveDefinition (const GXDefinitionArray& aDefinitions);
   public:
     Static(GXLPCWSTR szIdName, Type eType);
@@ -65,7 +66,8 @@ namespace GXUI
     virtual GXLRESULT   OnPaint         (GXWndCanvas& canvas);
     GXDWORD             GetDrawTextFlag ();
     virtual GXLRESULT   SetVariable     (MOVariable* pVariable);
-    virtual GXHRESULT   OnKnock         (KNOCKACTION* pKnock);
+    virtual GXVOID      OnImpulse       (LPCDATAIMPULSE pImpulse);
+    //virtual GXHRESULT   OnKnock         (KNOCKACTION* pKnock);
   public:
     StaticLabel(GXLPCWSTR szIdName);
   public:

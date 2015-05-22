@@ -215,66 +215,62 @@ typedef CLULONG           CLULONG_PTR;
 #endif
 
 #if defined(_WINDOWS) || defined(_WIN32)
-//#include <string>
-//#include <xstring>
-#include <vector>
-#include <hash_map>
-#include <hash_set>
-#include <map>
-#include <stack>
-#include <queue>
-#include <list>
-#include <set>
-//typedef std::string string;
-//typedef std::wstring wstring;
-#define clvector    std::vector
-#define clhash_map  stdext::hash_map
-#define clhash_set  stdext::hash_set
-#define clmap       std::map
-#define clstack     std::stack
-#define clset       std::set
-#define clqueue     std::queue
-#define cllist      std::list
-#define clist       std::list
-
+# include <vector>
+# include <hash_map>
+# include <hash_set>
+# include <map>
+# include <stack>
+# include <queue>
+# include <list>
+# include <set>
+# define clvector        std::vector
+# define clhash_map      stdext::hash_map
+# define clhash_set      stdext::hash_set
+# define clhash_multimap stdext::hash_multimap
+# define clmap           std::map
+# define clstack         std::stack
+# define clset           std::set
+# define clqueue         std::queue
+# define cllist          std::list
+# define clist           std::list
+# define clmake_pair     std::make_pair
 #elif _IOS
-#include <string>
-#include <vector>
-#include <hash_map.h>
-#include <hash_set.h>
-#include <map>
-#include <stack>
-#include <list>
-typedef std::string string;
-typedef std::basic_string<wch> wstring;
-#define clvector    std::vector
-#define clhash_map  hash_map
-#define clhash_set  hash_set
-#define clset       std::set
-#define clmap       std::map
-#define clstack     std::stack
-#define clqueue     std::queue
-#define cllist      std::list
-#define clist       std::list
+# include <vector>
+# include <hash_map.h>
+# include <hash_set.h>
+# include <map>
+# include <stack>
+# include <list>
+# define clmake_pair     std::make_pair
+# define clvector        std::vector
+# define clhash_map      hash_map
+# define clhash_set      hash_set
+# define clhash_multimap hash_multimap
+# define clset           std::set
+# define clmap           std::map
+# define clstack         std::stack
+# define clqueue         std::queue
+# define cllist          std::list
+# define clist           std::list
+# define clmake_pair     std::make_pair
 #else
-#include <string>
-#include <vector>
-#include <hash_map>
-#include <hash_set>
-#include <map>
-#include <stack>
-#include <list>
-typedef std::string string;
-typedef std::wstring wstring;
-#define clvector    std::vector
-#define clhash_map  std::hash_map
-#define clhash_set  std::hash_set
-#define clmap       std::map
-#define clset       std::set
-#define clstack     std::stack
-#define clqueue     std::queue
-#define cllist      std::list
-#define clist       std::list
+# include <vector>
+# include <hash_map>
+# include <hash_set>
+# include <map>
+# include <stack>
+# include <list>
+# define clvector        std::vector
+# define clhash_map      std::hash_map
+# define clhash_set      std::hash_set
+# define clhash_multimap std::hash_multimap
+# define clmap           std::map
+# define clset           std::set
+# define clstack         std::stack
+# define clqueue         std::queue
+# define cllist          std::list
+# define clist           std::list
+# define clmake_pair     std::make_pair
 #endif 
 
 #else

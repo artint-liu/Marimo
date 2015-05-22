@@ -245,9 +245,7 @@ namespace Marimo
     extern DataPoolVariable::VTBL* s_pPrimaryVtbl;
     extern DataPoolVariable::VTBL* s_pEnumVtbl;
     extern DataPoolVariable::VTBL* s_pFlagVtbl;
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     extern DataPoolVariable::VTBL* s_pObjectVtbl;
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     extern DataPoolVariable::VTBL* s_pStringVtbl;
     extern DataPoolVariable::VTBL* s_pStringAVtbl;
     extern DataPoolVariable::VTBL* s_pStructVtbl;
@@ -258,6 +256,7 @@ namespace Marimo
     extern DataPoolVariable::VTBL* s_pDynamicArrayVtbl;
   } // namespace Implement
 
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
   class DataPoolUIWatcher : public DataPoolWatcher
   {
@@ -318,12 +317,13 @@ namespace Marimo
     {
       for(WndHandleArray::iterator it = m_aHandles.begin();
         it != m_aHandles.end(); ++it) {
-          gxSendMessage(*it, GXWM_KNOCK, 0, (GXLPARAM)pKnock);
+          gxSendMessage(*it, GXWM_IMPULSE, 0, (GXLPARAM)pKnock);
       }
       return GX_OK;
     }
   }; // class DataPoolUIMonitor
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   GXBOOL DataPool::Initialize(LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl)
   {
@@ -406,7 +406,6 @@ namespace Marimo
       }
       break;
 
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     case T_OBJECT:
       {
         GUnknown** pObjArray = reinterpret_cast<GUnknown**>(lpFirstElement);
@@ -417,7 +416,7 @@ namespace Marimo
         }
       }
       break;
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
+
     case T_STRUCT:
       {
         for(int nStructIndex = 0; nStructIndex < nElementCount; nStructIndex++)
@@ -583,9 +582,7 @@ namespace Marimo
       case T_BYTE:
       case T_WORD:
       case T_DWORD:
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
       case T_OBJECT:
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
       case T_QWORD:
       case T_SBYTE:
       case T_SWORD:
@@ -718,6 +715,7 @@ namespace Marimo
     }
 #endif // #ifdef DATAPOOLCOMPILER_PROJECT
 
+#ifdef ENABLE_OLD_DATA_ACTION
 #ifdef ENABLE_DATAPOOL_WATCHER
     // 释放所有的监视器
     for(WatcherArray::iterator it = m_aWatchers.begin();
@@ -726,7 +724,7 @@ namespace Marimo
     }
     m_aWatchers.clear();
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
-
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
     //SAFE_DELETE(m_pBuffer);
   }
 
@@ -1013,6 +1011,7 @@ namespace Marimo
     return -1;
   }
 
+#ifdef ENABLE_OLD_DATA_ACTION
   int DataPool::FindWatcherByName(GXLPCSTR szClassName)
   {
     int nIndex = 0;
@@ -1113,7 +1112,8 @@ namespace Marimo
 
     return m_aWatchers[nIndex]->UnregisterPrivate(pIndentify);
   }
-    
+#endif // #ifdef ENABLE_OLD_DATA_ACTION
+
   GXHRESULT DataPool::ImpluseByVariable(DataAction eType, const DataPoolVariable& var, GXUINT nIndex, GXBOOL bForce)
   {
     if( ! var.IsValid() ||
@@ -1127,32 +1127,56 @@ namespace Marimo
       return GX_FAIL;
     }
 
-    KNOCKACTION ka;
-    //InlSetZeroT(ka);
-    ka.pSponsor  = &var;
-    ka.pDataPool = this;
-    ka.Name      = var.GetName();
-    ka.Action    = eType;
-    ka.ptr       = var.GetPtr();
+    //KNOCKACTION ka;
+    ////InlSetZeroT(ka);
+    //ka.pSponsor  = &var;
+    //ka.pDataPool = this;
+    //ka.Name      = var.GetName();
+    //ka.Action    = eType;
+    //ka.ptr       = var.GetPtr();
 
-    // FIXME: 随便写的，可能不对
-    if(TEST_FLAG_NOT(var.GetCaps(), DataPoolVariable::CAPS_FIXED)) {
-      //ka.Index = var.InlGetOffset() / var.InlGetVDD()->TypeSize();
-      ka.Index = nIndex;
-    }
-    else {
-      ka.Index = 0;
-    }
-
-    m_setKnocking.insert(var.GetPtr());
-    for(WatcherArray::iterator it = m_aWatchers.begin();
-      it != m_aWatchers.end(); ++it)
+    auto it_result = m_FixedDict.find(var.GetPtr());
+    if(it_result != m_FixedDict.end())
     {
-      (*it)->OnKnock(&ka);
+      DATAPOOL_IMPULSE sImpulse;
+      sImpulse.sponsor = &var;
+      sImpulse.reason = eType;
+      sImpulse.index = nIndex;
+      sImpulse.count = 1;
+      sImpulse.param = NULL;
+      for(auto it = it_result->second.begin(); it != it_result->second.end(); ++it)
+      {
+        sImpulse.param = it->lParam;
+        it->pCallback(&sImpulse);
+      }
     }
 
-    KnockingSet::iterator it = m_setKnocking.find(var.GetPtr());
-    m_setKnocking.erase(it);
+    //m_setKnocking
+    //m_setKnocking
+    //m_setKnocking
+    //m_setKnocking
+    //m_setKnocking
+    //m_setKnocking
+    //m_setKnocking
+
+    //// FIXME: 随便写的，可能不对
+    //if(TEST_FLAG_NOT(var.GetCaps(), DataPoolVariable::CAPS_FIXED)) {
+    //  //ka.Index = var.InlGetOffset() / var.InlGetVDD()->TypeSize();
+    //  ka.Index = nIndex;
+    //}
+    //else {
+    //  ka.Index = 0;
+    //}
+
+    //m_setKnocking.insert(var.GetPtr());
+    //for(WatcherArray::iterator it = m_aWatchers.begin();
+    //  it != m_aWatchers.end(); ++it)
+    //{
+    //  (*it)->OnKnock(&ka);
+    //}
+
+    //KnockingSet::iterator it = m_setKnocking.find(var.GetPtr());
+    //m_setKnocking.erase(it);
     //m_bAutoKnock = dwSaveAK;
     return GX_OK;
   }
@@ -1923,7 +1947,6 @@ namespace Marimo
         ASSERT_X86(var.GetSize() == 4);
         ++header.nNumOfStrings;
       }
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
       else if(it.pVarDesc->GetTypeCategory() == T_OBJECT)
       {
         ASSERT( ! bArray);
@@ -1931,7 +1954,6 @@ namespace Marimo
         nRelOffset += SIZEOF_PTR32;
         ASSERT_X86(var.GetSize() == 4);
       }
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
       else
       {
         ASSERT(var.IsValid());
@@ -2438,102 +2460,31 @@ namespace Marimo
     }
   }
 
-//  void DataPool::Generate( GXLPVOID lpBuffer, LPCVD pVarDesc, int nVarCount )
-//  {
-//    GXBYTE* pData = (GXBYTE*)lpBuffer;
-//
-//    for(int i = 0; i < nVarCount; i++)
-//    {
-//      const VARIABLE_DESC& VARDesc = pVarDesc[i];
-//      GXBOOL bDynamicArray = VARDesc.IsDynamicArray();
-//      DataPoolArray** ppBuffer = NULL;
-//
-//      GXLPVOID ptr;
-//      int nCount = 0;
-//
-//      if(bDynamicArray) // 动态字符串数组
-//      {
-//        ppBuffer = VARDesc.GetAsBufferPtr(pData);
-//        if(*ppBuffer == NULL) {
-//          continue;
-//        }
-//        ptr = (*ppBuffer)->GetPtr();
-//        nCount = (int)((*ppBuffer)->GetSize() / VARDesc.TypeSize());
-//      }
-//      else // 字符串数组
-//      {
-//        ptr = VARDesc.GetAsPtr(pData);
-//        nCount = VARDesc.nCount;
-//      }
-//
-//      switch(VARDesc.GetTypeCategory())
-//      {
-//      case T_STRING:
-//        {
-//          clStringW* pString = reinterpret_cast<clStringW*>(ptr);
-//
-//          // 依次调用析构函数
-//          for(int nStringIndex = 0; nStringIndex < nCount; nStringIndex++)
-//          {
-//            if(pString[nStringIndex]) {
-//              pString[nStringIndex].~clStringX();
-//#ifdef _DEBUG
-//              m_nDbgNumOfString--;
-//#endif // #ifdef _DEBUG
-//            }
-//          }
-//        }
-//        break;
-//#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
-//      case T_OBJECT:
-//        {
-//          GUnknown** pObjArray = reinterpret_cast<GUnknown**>(ptr);
-//
-//          // 依次调用析构函数
-//          for(int i = 0; i < nCount; i++) {
-//            SAFE_RELEASE(pObjArray[i]);
-//          }
-//        }
-//        break;
-//#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
-//      case T_STRUCT:
-//        {
-//          for(int nStructIndex = 0; nStructIndex < nCount; nStructIndex++)
-//          {
-//            Clear(ptr, &m_aMembers[VARDesc.MemberBegin()], 
-//              VARDesc.MemberCount());
-//            ptr = (GXLPBYTE)ptr + VARDesc.TypeSize();
-//          }
-//          //if(bDynamicArray) {
-//          //  SAFE_DELETE(*ppBuffer);
-//          //}
-//        }
-//        break;
-//      }
-//
-//      if(bDynamicArray)
-//      {
-//        // ppBuffer 可能在上面的判断中已经设置，如果没设置就是基础类型动态数组。
-//        ASSERT(ppBuffer == NULL || ppBuffer == VARDesc.GetAsBufferPtr(pData));
-//
-//        ppBuffer = VARDesc.GetAsBufferPtr(pData); // (clBuffer**)(pData + VARDesc.nOffset);
-//        if(*ppBuffer)
-//        {
-//          delete (*ppBuffer);
-//          *ppBuffer = NULL;
-//#ifdef _DEBUG
-//          m_nDbgNumOfArray--;
-//#endif // #ifdef _DEBUG
-//        }
-//      }
-//
-//    }
-//    return TRUE;
-//  }
+  GXBOOL DataPool::Watch( GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  {
+    DataPoolVariable var;
+    GXBOOL bret = FALSE;
+    if(QueryByExpression(szExpression, &var))
+    {
+      if(var.GetBuffer() == &m_VarBuffer) // 只有 fixed 变量才能被 watch
+      {
+        WatchFixedList sWatchList;
+        auto result = m_FixedDict.insert(clmake_pair(var.GetPtr(), sWatchList));
+        bret = result.second;
+        if(bret)
+        {
+          WATCH_FIXED sWatch;
+          sWatch.pCallback = pImpulseCallback;
+          sWatch.lParam    = lParam;
+          result.first->second.insert(sWatch);
+        }
+      }
+    }
+    return bret;
+  }
 
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
-
 
   DataPool::VARIABLE_DESC::VTBL* DataPool::VARIABLE_DESC::GetUnaryMethod() const
   {
@@ -2542,9 +2493,7 @@ namespace Marimo
     case T_STRING:  return (VTBL*)Implement::s_pStringVtbl;
     case T_STRINGA: return (VTBL*)Implement::s_pStringAVtbl;
     case T_STRUCT:  return (VTBL*)Implement::s_pStructVtbl;
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     case T_OBJECT:  return (VTBL*)Implement::s_pObjectVtbl;
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     case T_ENUM:    return (VTBL*)Implement::s_pEnumVtbl;
     case T_FLAG:    return (VTBL*)Implement::s_pFlagVtbl;
     default:        return (VTBL*)Implement::s_pPrimaryVtbl;

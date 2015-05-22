@@ -32,7 +32,7 @@ namespace clstd
     {
       const _TString sstr(str);
       STRINGSETDESC sDesc = {0, -1};
-      auto r = _TMap::insert(std::make_pair(sstr, sDesc));
+      auto r = _TMap::insert(clmake_pair(sstr, sDesc));
       //calcsize(sstr, r);
 
       if(r.second) { // 加入成功，计算使用空间

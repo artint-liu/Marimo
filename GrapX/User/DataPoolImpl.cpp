@@ -234,7 +234,7 @@ namespace Marimo
           VAR_COUNT vc;
           vc.var = var;
           vc.nCount = 0;
-          itVar = sVarDict.insert(std::make_pair(strVarName, vc)).first;
+          itVar = sVarDict.insert(clmake_pair(strVarName, vc)).first;
         }
 
         GXDWORD dwCaps = var.GetCaps();

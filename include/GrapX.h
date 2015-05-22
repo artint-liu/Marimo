@@ -3121,7 +3121,8 @@ enum GXWndMsg
   GXWM_WINDOWPOSCHANGED       = 0x0047,
   GXWM_NOTIFY                 = 0x004E,  // WM_NOTIFY
   GXWM_HELP                   = 0x0053,
-  GXWM_KNOCK                  = 0x0054,  // wParam -> 0: KnockName; 1: KnockVar; 2: KnockPtr, lParam: Name/VarPtr/Ptr
+  //GXWM_KNOCK                  = 0x0054,  // wParam -> 0: KnockName; 1: KnockVar; 2: KnockPtr, lParam: Name/VarPtr/Ptr
+  GXWM_IMPULSE                = 0x0054,
   GXWM_NOTIFYFORMAT           = 0x0055,
 
   GXWM_CONTEXTMENU            = 0x007B,

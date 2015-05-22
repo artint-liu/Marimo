@@ -50,6 +50,21 @@ void TestRemoveItem(DataPool* pDataPool)
   }
 }
 
+void GXCALLBACK sTestCImpulseProc(DATAPOOL_IMPULSE* pImpulse)
+{
+  TRACE("received impulse var:%s\n", pImpulse->sponsor->ToStringA());
+}
+
+void TestWatcher(DataPool* pDataPool)
+{
+  pDataPool->Watch("sTestC.name", sTestCImpulseProc, NULL);
+
+  MOVariable var;
+  pDataPool->QueryByExpression("sTestC.name", &var);
+  TRACE("before:%s\n", var.ToStringA());
+  var.Set("set new string.");
+}
+
 
 // 这个用来测试比较复杂的结构体+数组
 void TestComplexArray()
@@ -107,6 +122,7 @@ void TestComplexArray()
     var.Set(s_szExampleString[i]);
   }
 
+  TestWatcher(pDataPool);
   TestRemoveItem(pDataPool);
 
   //ENUM_DATAPOOL(pDataPool);

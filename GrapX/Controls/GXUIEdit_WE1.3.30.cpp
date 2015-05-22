@@ -270,8 +270,9 @@ struct EDITSTATE
   void      ML_InvalidateText(GXINT start, GXINT end);
   void      SL_InvalidateText(GXINT start, GXINT end);
 
-  GXLRESULT  SetVariable (MOVariable* pVariable);
-  GXHRESULT  OnKnock     (KNOCKACTION* pKnock);
+  GXLRESULT SetVariable (MOVariable* pVariable);
+  GXHRESULT OnKnock     (KNOCKACTION* pKnock);
+  GXVOID    OnImpulse   (LPCDATAIMPULSE pImpulse);
 
 };
 
@@ -4560,18 +4561,23 @@ GXLRESULT EDITSTATE::SetVariable(MOVariable* pVariable)
   return 0;
 }
 
-GXHRESULT EDITSTATE::OnKnock(KNOCKACTION* pKnock)
+//GXHRESULT EDITSTATE::OnKnock(KNOCKACTION* pKnock)
+//{
+//  ASSERT(m_VarText.IsValid());
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//  if(pKnock->pSponsor != &m_VarText && m_VarText.GetName() == pKnock->Name)// &&
+//    //! m_VarText.InlGetDataPool()->IsKnocking(&m_VarText))
+//  {
+//    WM_SetText(m_VarText.ToStringW(), TRUE);
+//    //gxInvalidateRect(hwndSelf, NULL, FALSE);
+//  }
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//  return 0;
+//}
+
+GXVOID EDITSTATE::OnImpulse(LPCDATAIMPULSE pImpulse)
 {
-  ASSERT(m_VarText.IsValid());
-#ifdef ENABLE_DATAPOOL_WATCHER
-  if(pKnock->pSponsor != &m_VarText && m_VarText.GetName() == pKnock->Name)// &&
-    //! m_VarText.InlGetDataPool()->IsKnocking(&m_VarText))
-  {
-    WM_SetText(m_VarText.ToStringW(), TRUE);
-    //gxInvalidateRect(hwndSelf, NULL, FALSE);
-  }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-  return 0;
+  CLBREAK;
 }
 
 GXBOOL EDITSTATE::SolveDefinition( const GXDefinitionArrayW& aDefinitions )
@@ -5144,9 +5150,11 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
       return pThis->SetVariable((MOVariable*)lParam);
     }
     else return -1;
-  case GXWM_KNOCK:
+
+  case GXWM_IMPULSE:
     {
-      pThis->OnKnock((KNOCKACTION*)lParam);
+      pThis->OnImpulse((LPCDATAIMPULSE)lParam);
+      //pThis->OnKnock((KNOCKACTION*)lParam);
     }
     break;
 

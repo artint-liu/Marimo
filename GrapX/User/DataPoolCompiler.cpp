@@ -490,7 +490,7 @@ namespace Marimo
       def.SourceFileId = m_ErrorMsg.GetCurrentFileId();
       def.SourceOffset = nSourceOffset;
       m_NameDict[szString] = def;
-      it = m_NameDict.insert(std::make_pair(szString, def)).first;
+      it = m_NameDict.insert(clmake_pair(szString, def)).first;
 
       if(eType == ST_VarName) {
         pVarNameSet->insert(szString);
@@ -717,11 +717,9 @@ namespace Marimo
       m_ErrorMsg.WriteErrorA(TRUE, it.marker, "错误的类型名(%s)", pVarDecl->Type);
       return FALSE;
     
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     case T_OBJECT:
       CLOG_ERROR("error: unsupport type.\n");
       return FALSE;
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
 
     case T_STRUCT:
     case T_STRUCTALWAYS:

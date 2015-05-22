@@ -1175,12 +1175,33 @@ int _tmain(int argc, _TCHAR* argv[])
   TestStringCutter();
 
   // Data pool test
-  TestHugeArray();
+  //TestHugeArray();
   TestComplexArray();
-  TestSelfContainStruct();
-  TestBaseProperty();
-  test();
-  TestDataPool_CompileFromCode();
+  //TestSelfContainStruct();
+  //TestBaseProperty();
+  //test();
+  //TestDataPool_CompileFromCode();
+
+  clhash_multimap<clStringA, int> dict;
+  //stdext::hash_map<clStringA, int> dict;
+  dict.insert(clmake_pair("a", 1));
+  dict.insert(clmake_pair("a", 2));
+  dict.insert(clmake_pair("b", 3));
+  dict.insert(clmake_pair("c", 4));
+  dict.insert(clmake_pair("a", 5));
+
+  for(auto it = dict.begin(); it != dict.end(); ++it)
+  {
+    TRACE("%s(%x)=%d\n", it->first, it->first.GetBuffer(), it->second);
+  }
+
+  auto itFind = dict.find("a");
+  TRACE("%s=%d\n", itFind->first, itFind->second);
+  //itFind = dict.
+  ++itFind;
+  TRACE("%s=%d\n", itFind->first, itFind->second);
+  ++itFind;
+  TRACE("%s=%d\n", itFind->first, itFind->second);
 
   // 下面这个抽取自真实游戏的样本数据，数据文本大约32MB，90万行数据
   // 由于版权问题无法提供样例文本

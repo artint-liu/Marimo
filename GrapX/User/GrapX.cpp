@@ -102,7 +102,7 @@ GXBOOL GXDLLAPI _gxDeleteObject(GXHGDIOBJ);
 GXVOID gxCOMCTL32_RefreshSysColors();
 
 static GXBitmapResMap  *s_pGXBitmapResMap;    // 用于储存 从应用程序内部读取的资源指针，避免多次创建对象
-static GXFontResMap    *s_pGXFontResMap;
+//static GXFontResMap    *s_pGXFontResMap;
 
 //GXFont*  g_pSystemFont = NULL;
 
@@ -267,7 +267,7 @@ GXBOOL GXWin32APIEmu::InitializeStatic()
   }
   gxCOMCTL32_RefreshSysColors();
   // 创建字体列表
-  s_pGXFontResMap = new GXFontResMap;
+  //s_pGXFontResMap = new GXFontResMap;
 
   // 创建系统默认字体
   GXLOGFONTW LogFont;
@@ -348,15 +348,15 @@ GXBOOL GXWin32APIEmu::ReleaseStatic()
     SAFE_DELETE(s_pGXBitmapResMap);
   }
 
-  if(s_pGXFontResMap != NULL)
-  {
-    for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
-      it != s_pGXFontResMap->end(); it++)
-    {
-      _gxDeleteObject((GXHGDIOBJ)*it);
-    }
-    SAFE_DELETE(s_pGXFontResMap);
-  }
+  //if(s_pGXFontResMap != NULL)
+  //{
+  //  for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
+  //    it != s_pGXFontResMap->end(); it++)
+  //  {
+  //    _gxDeleteObject((GXHGDIOBJ)*it);
+  //  }
+  //  SAFE_DELETE(s_pGXFontResMap);
+  //}
 
   return TRUE;
 }
@@ -373,18 +373,19 @@ GXVOID* GXWin32APIEmu::GetGXGdiObj(GXGDIOBJTYPE emObjType, GXVOID* uResCode)
       return NULL;
     return it->second;
   }
-  else if(emObjType == GXGDIOBJ_FONT)
-  {
-    // uResCode 是内存地址
-    for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
-      it != s_pGXFontResMap->end(); it++)
-    {
-      if(*it == uResCode)
-        // FIXME: 测试这个代码,编译有警告,返回局部地址
-        return (GXLPVOID)&it;
-    }
-    return NULL;
-  }
+  CLBREAK;
+  //else if(emObjType == GXGDIOBJ_FONT)
+  //{
+  //  // uResCode 是内存地址
+  //  for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
+  //    it != s_pGXFontResMap->end(); it++)
+  //  {
+  //    if(*it == uResCode)
+  //      // FIXME: 测试这个代码,编译有警告,返回局部地址
+  //      return (GXLPVOID)&it;
+  //  }
+  //  return NULL;
+  //}
   return NULL;
 }
 
@@ -394,27 +395,29 @@ GXVOID GXWin32APIEmu::MapGXGdiObj(GXGDIOBJTYPE emObjType, GXVOID* uResCode, GXLP
   {
     (*s_pGXBitmapResMap)[uResCode] = lpGdiObj;
   }
-  else if(emObjType == GXGDIOBJ_FONT)
-  {
-    (*s_pGXFontResMap).push_back(uResCode);
-  }
+  CLBREAK;
+  //else if(emObjType == GXGDIOBJ_FONT)
+  //{
+  //  (*s_pGXFontResMap).push_back(uResCode);
+  //}
 }
 
 GXBOOL GXWin32APIEmu::EraseGXGdiObj(GXGDIOBJTYPE emObjType, GXLPVOID uResCode)
 {
-  if(emObjType == GXGDIOBJ_FONT)
-  {
-    // uResCode 是内存地址
-    for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
-      it != s_pGXFontResMap->end(); it++)
-    {
-      if(*it == uResCode)
-      {
-        s_pGXFontResMap->erase(it);
-        return TRUE;
-      }
-    }
-  }
+  //if(emObjType == GXGDIOBJ_FONT)
+  //{
+  //  // uResCode 是内存地址
+  //  for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
+  //    it != s_pGXFontResMap->end(); it++)
+  //  {
+  //    if(*it == uResCode)
+  //    {
+  //      s_pGXFontResMap->erase(it);
+  //      return TRUE;
+  //    }
+  //  }
+  //}
+  CLBREAK;
   return FALSE;
 }
 #endif // _DEV_DISABLE_UI_CODE

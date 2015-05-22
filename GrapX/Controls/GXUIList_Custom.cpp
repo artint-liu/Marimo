@@ -571,20 +571,22 @@ namespace GXUI
     return 0;
   }
 
-  GXHRESULT CustomizeList::OnKnock(KNOCKACTION* pAction)
+  //GXHRESULT CustomizeList::OnKnock(KNOCKACTION* pAction)
+  GXVOID CustomizeList::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
-    GXHRESULT hval = ListTemplate<CUSTOMIZEITEMSTAT>::OnKnock(pAction);
-    if(hval == 0)
+    CLBREAK;
+    ListTemplate<CUSTOMIZEITEMSTAT>::OnImpulse(pImpulse);
+    //if(hval == 0)
     {
-      if(pAction->Action == Marimo::DATACT_Deleting)
+      if(pImpulse->reason == Marimo::DATACT_Deleting)
       {
         MOVariable varArray = m_pAdapter->GetVariable();
-        const int index = pAction->Index; //((GXINT_PTR)pAction->ptr - (GXINT_PTR)varArray.GetPtr()) / (varArray.GetSize()/varArray.GetLength());
+        const int index = pImpulse->index; //((GXINT_PTR)pAction->ptr - (GXINT_PTR)varArray.GetPtr()) / (varArray.GetSize()/varArray.GetLength());
         ASSERT(index >= -1);
         Recycle(clMax(index, 0), 1);
       }
     }
-    return hval;
+    //return hval;
   }
 
   GXBOOL CustomizeList::ReduceItemStat(GXINT nCount)

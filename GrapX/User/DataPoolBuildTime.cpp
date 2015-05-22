@@ -50,7 +50,7 @@ namespace Marimo
     // 这里要先在字典中加入这个类型，原因是：
     // 对于T_STRUCT类型，可能会在其中定义了自己类型的动态数组
     // 预先加入字典，在包含自身类型的递归中能找到类型定义，避免无限递归
-    BT_TYPE_DESC& t = (m_TypeDict.insert(std::make_pair(szTypeName, sDesc)).first)->second;
+    BT_TYPE_DESC& t = (m_TypeDict.insert(clmake_pair(szTypeName, sDesc)).first)->second;
 
     //VarDesc.Name = var.Name;
     switch(type.Cate)
@@ -73,12 +73,10 @@ namespace Marimo
       t.cbSize = sizeof(u64);
       break;
 
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     case T_OBJECT:
       t.cbSize = m_bPtr64 ? sizeof(u64) : sizeof(GUnknown*);
       m_bFixedPool = 0;
       break;
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
 
     case T_STRING:
     case T_STRINGA:

@@ -133,7 +133,8 @@ namespace GXUI
     virtual int       OnMouseWheel        (int fwKeys, int nDelta);
     virtual int       OnSize              (int cx, int cy) GXPURE;
     virtual int       OnTimer             (GXUINT nIDTimer);
-    virtual GXHRESULT OnKnock             (KNOCKACTION* pAction) GXPURE;
+    //virtual GXHRESULT OnKnock             (KNOCKACTION* pAction) GXPURE;
+    virtual GXVOID    OnImpulse           (LPCDATAIMPULSE pImpulse) GXPURE;
     virtual GXINT     GetCurSel           () GXPURE;
     virtual int       SetCurSel           (int nIndex) GXPURE;
     virtual GXBOOL    SetAdapter          (ListDataAdapter* pAdapter) GXPURE;
@@ -170,7 +171,8 @@ namespace GXUI
     virtual GXBOOL    EndScroll           ();
     virtual int       OnLButtonDown       (int fwKeys, int x, int y);
     virtual int       OnLButtonUp         (int fwKeys, int x, int y);
-    virtual GXHRESULT OnKnock             (KNOCKACTION* pAction);
+    //virtual GXHRESULT OnKnock             (KNOCKACTION* pAction);
+    virtual GXVOID    OnImpulse           (LPCDATAIMPULSE pImpulse);
     virtual int       SetCurSel           (int nIndex);
     virtual GXBOOL    SetAdapter          (ListDataAdapter* pAdapter);
     virtual GXBOOL    GetAdapter          (ListDataAdapter** ppAdapter);
@@ -430,33 +432,36 @@ namespace GXUI
   }
 
   _LISTT_TEMPL
-    GXHRESULT _LISTT_IMPL::OnKnock(Marimo::KNOCKACTION* pAction)
+    GXVOID _LISTT_IMPL::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
     MOVariable varArray = m_pAdapter->GetVariable();
-    ASSERT(varArray.IsSamePool(pAction->pDataPool));
+    //ASSERT(varArray.IsSamePool(pImpulse->pDataPool));
+    CLBREAK;
 
-    if(pAction->Action == Marimo::DATACT_Change)
+    if(pImpulse->reason == Marimo::DATACT_Change)
     {
-      const GXINT index = (GXINT)((GXINT_PTR)pAction->ptr - (GXINT_PTR)varArray.GetPtr()) / (varArray.GetSize()/varArray.GetLength());
+      CLBREAK;
+      const GXINT index = pImpulse->index;
+        //(GXINT)((GXINT_PTR)pImpulse->ptr - (GXINT_PTR)varArray.GetPtr()) / (varArray.GetSize()/varArray.GetLength());
       ASSERT(index >= 0);
       UpdateItemStat(index, index);
     }
-    else if(pAction->Action == Marimo::DATACT_Insert)
+    else if(pImpulse->reason == Marimo::DATACT_Insert)
     {
       //ASSERT(pAction->idx < m_pAdapter->GetItemCount());
       SyncItemStatCount();
 
       //CLBREAK; // 重新搞定!
       // 判断是否在中间插入
-      if(pAction->Index != m_pAdapter->GetItemCount() - 1)
+      if(pImpulse->index != m_pAdapter->GetItemCount() - 1)
       {
-        UpdateItemStat(pAction->Index, -1);
+        UpdateItemStat(pImpulse->index, -1);
       }
       //UpdateItemStat(0, -1);
     }
-    else if(pAction->Action == Marimo::DATACT_Deleting)
+    else if(pImpulse->reason == Marimo::DATACT_Deleting)
     {
-      auto index = pAction->Index;
+      auto index = pImpulse->index;
       ASSERT(index >= -1); // -1时删除所有Item
       ASSERT(m_pAdapter->GetItemCount() == m_aItemStat.size());
       if(index == -1) {
@@ -469,9 +474,9 @@ namespace GXUI
       }
       ASSERT(m_pAdapter->GetItemCount() > (GXINT)m_aItemStat.size());
     }
-    else if(pAction->Action == Marimo::DATACT_Deleted)
+    else if(pImpulse->reason == Marimo::DATACT_Deleted)
     {
-      auto index = pAction->Index;
+      auto index = pImpulse->index;
       ASSERT(m_pAdapter->GetItemCount() == m_aItemStat.size());
       ASSERT(index >= -1); // -1时删除所有Item
       if(index >= 0)
@@ -486,32 +491,7 @@ namespace GXUI
     }
 
     Invalidate(FALSE);
-
-    //if(pReflectKnock->eAction == DA_Change)
-    //{
-    //  ASSERT(pReflectKnock->nIndex >= 0);
-    //  UpdateItemStat(pReflectKnock->nIndex, pReflectKnock->nIndex);
-    //}
-    //else if(pReflectKnock->eAction == DA_Insert)
-    //{
-    //  ASSERT(pReflectKnock->nIndex < m_pAdapter->GetItemCount());
-    //  SyncItemStatCount();
-
-    //  // 判断是否在中间插入
-    //  if(pReflectKnock->nIndex != m_pAdapter->GetItemCount() - 1)
-    //  {
-    //    UpdateItemStat(pReflectKnock->nIndex, -1);
-    //  }
-    //}
-    //else if(pReflectKnock->eAction == DA_PotentialChange)
-    //{
-
-    //}
-    //else
-    //{
-    //  ASSERT(0);
-    //}
-    return 0;
+    //return 0;
   }
 
   _LISTT_TEMPL

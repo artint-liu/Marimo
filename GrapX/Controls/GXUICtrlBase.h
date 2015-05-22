@@ -24,7 +24,9 @@ namespace GXUI
   class CtrlBase
   {
   protected:
-    typedef Marimo::KNOCKACTION KNOCKACTION;
+    //typedef Marimo::KNOCKACTION KNOCKACTION;
+    //typedef Marimo::DATAPOOL_IMPULSE DATAPOOL_IMPULSE;
+    typedef Marimo::LPCDATAIMPULSE LPCDATAIMPULSE;
   protected:
     GXLONG    m_nLock;  // 引用锁， 用来防止在消息处理中用户销毁控件导致内存被释放而引发崩溃
     GXHWND    m_hWnd;   // Self
@@ -88,7 +90,8 @@ namespace GXUI
     virtual GXLRESULT           OnPaint         (GXWndCanvas& canvas) = NULL;
     virtual GXLRESULT           Destroy         ();
     virtual GXLRESULT           SetVariable     (MOVariable* pVariable) { return TRUE; };
-    virtual GXHRESULT           OnKnock         (KNOCKACTION* pKnock) { return 0; };
+    //virtual GXHRESULT           OnKnock         (KNOCKACTION* pKnock) { return 0; };
+    virtual GXVOID              OnImpulse       (LPCDATAIMPULSE pImpulse) {};
     virtual GXBOOL              SolveDefinition (const GXDefinitionArrayW& aDefinitions);
     //virtual GXLRESULT CtrlBase::Destroy()
     //{

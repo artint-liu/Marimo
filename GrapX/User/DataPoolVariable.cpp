@@ -358,9 +358,7 @@ namespace Marimo
     Variable::VTBL* s_pPrimaryVtbl      = &s_PrimaryVtbl;
     Variable::VTBL* s_pEnumVtbl         = &s_EnumVtbl;
     Variable::VTBL* s_pFlagVtbl         = &s_FlagVtbl;
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     Variable::VTBL* s_pObjectVtbl       = &s_ObjectVtbl;
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     Variable::VTBL* s_pStringVtbl       = &s_StringVtbl;
     Variable::VTBL* s_pStringAVtbl      = &s_StringAVtbl;
     Variable::VTBL* s_pStructVtbl       = &s_StructVtbl;
@@ -420,9 +418,7 @@ namespace Marimo
 
       {Marimo::T_STRING, "string"},
       {Marimo::T_STRINGA, "stringA"},
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
       {Marimo::T_OBJECT, "object"},
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
 
       {Marimo::T_STRUCT, "float2"  , c_float2},
       {Marimo::T_STRUCT, "float3"  , c_float3},
@@ -718,7 +714,6 @@ namespace Marimo
   }
 
   //////////////////////////////////////////////////////////////////////////
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
   GXBOOL Object_Retain(VarImpl* pThis, GUnknown* pUnknown)
   {
     // pUnknown 不能等于 m_pDataPool 否则永远也不会释放
@@ -742,7 +737,7 @@ namespace Marimo
     }
     return TRUE;
   }
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
+
   GXUINT Unary_GetSize(GXCONST VarImpl* pThis)
   {
     return pThis->InlGetVDD()->TypeSize();
@@ -1792,7 +1787,6 @@ namespace Marimo
       Exception_SetData       , // SetData
     }};
 
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     Variable::VTBL s_ObjectVtbl2[] = {{
       Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
@@ -1840,7 +1834,6 @@ namespace Marimo
       Primary_GetData         , // GetData
       Exception_SetData       , // SetData
     }};
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
 
     Variable::VTBL s_StaticArrayVtbl2[] = {{
       StaticArray_GetSize     , // GetSize     
@@ -2137,7 +2130,6 @@ namespace Marimo
     //  0                         , // GetData     
     //  0                         , // SetData     
     //};
-#ifdef ENABLE_DATAPOOL_OBJECT_TYPE
     Variable::VTBL s_ObjectVtbl = {
       Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
@@ -2162,7 +2154,6 @@ namespace Marimo
       Primary_GetData         , // GetData
       Primary_SetData         , // SetData
     };
-#endif // #ifdef ENABLE_DATAPOOL_OBJECT_TYPE
 
     //Variable::VTBL s_DynamicObjectVtbl = {
     //  Unary_GetSize       , // GetSize
