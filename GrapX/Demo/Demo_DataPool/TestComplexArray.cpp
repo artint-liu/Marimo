@@ -50,13 +50,17 @@ void TestRemoveItem(DataPool* pDataPool)
   }
 }
 
-void GXCALLBACK sTestCImpulseProc(DATAPOOL_IMPULSE* pImpulse)
+static GXBOOL s_bWatch = FALSE;
+
+void GXCALLBACK TestmpulseProc(DATAPOOL_IMPULSE* pImpulse)
 {
+  ASSERT(s_bWatch);
   TRACE("received impulse var:%s\n", pImpulse->sponsor->ToStringA());
 }
 
 class WatchTest : public DataPoolWatcher
 {
+public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   GXHRESULT AddRef()
   {
@@ -75,20 +79,50 @@ class WatchTest : public DataPoolWatcher
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   GXVOID OnImpulse(LPCDATAIMPULSE pImpulse)
   {
-
+    ASSERT(s_bWatch);
   }
 };
 
 void TestWatcher(DataPool* pDataPool)
 {
   WatchTest* pTest = new WatchTest;
-  pDataPool->Watch("sTestC.name", sTestCImpulseProc, NULL);
-  pDataPool->Watch("sTestC.name", pTest);
+  pTest->AddRef();
+
+  // 测试watch并改变变量
+  GXLPCSTR szWantToWatch = "sTestC.name";
+  s_bWatch = TRUE;
+  pDataPool->Watch(szWantToWatch, TestmpulseProc, NULL);
+  pDataPool->Watch(szWantToWatch, pTest);
 
   MOVariable var;
   pDataPool->QueryByExpression("sTestC.name", &var);
   TRACE("before:%s\n", var.ToStringA());
   var.Set("set new string.");
+
+  pDataPool->Ignore(szWantToWatch, TestmpulseProc);
+  pDataPool->Ignore(szWantToWatch, pTest);
+  s_bWatch = FALSE;
+  var.Set("set new string 2.");
+
+
+  // 测试结构，数组等对象watch
+  GXBOOL result;
+  result = pDataPool->Watch("DlgText", TestmpulseProc, NULL);
+  ASSERT( ! result); // 期望失败
+  
+  result = pDataPool->Watch("sTestC", TestmpulseProc, NULL);
+  ASSERT( ! result); // 期望失败
+
+  result = pDataPool->Watch("aStt", TestmpulseProc, NULL);
+  ASSERT( ! result); // 期望失败
+  
+  result = pDataPool->Watch("strName", TestmpulseProc, NULL);
+  ASSERT(result); // 期望成功
+
+  result = pDataPool->Watch("strName", pTest);
+  ASSERT(result); // 期望成功
+
+  SAFE_RELEASE(pTest);
 }
 
 

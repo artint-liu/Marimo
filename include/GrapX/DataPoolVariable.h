@@ -20,7 +20,8 @@ namespace Marimo
     {
       CAPS_FIXED    = 0x00000001, // 内存地址不变, 稳定变量的GetPtr()返回的地址是固定的，基于动态数组的变量可能随数据增加而改变
       CAPS_STRUCT   = 0x00000002, // 结构体
-      CAPS_DYNARRAY = 0x00000004, // 动态数组
+      CAPS_ARRAY    = 0x00000004, // 静态数组，也可以"GetLength() > 1"来判断
+      CAPS_DYNARRAY = 0x00000008, // 动态数组
     };
   protected:
     VTBL*         m_vtbl;

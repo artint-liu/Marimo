@@ -741,7 +741,7 @@ namespace Marimo
       for(WatchFixedList::iterator itList = it->second.begin(); itList != it->second.end(); ++itList)
       {
         if(itList->pCallback == 0) {
-          DataPoolWatcher* pWatcher = (DataPoolWatcher*)itList->lParam;
+          DataPoolWatcher*& pWatcher = *(DataPoolWatcher**)&itList->lParam;
           SAFE_RELEASE(pWatcher);
         }
       }
@@ -2502,7 +2502,14 @@ namespace Marimo
   GXBOOL DataPool::IntWatch( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
   {
     GXBOOL bret = FALSE;
-    if(pVar->GetBuffer() == &m_VarBuffer) // 只有 fixed 变量才能被 watch
+    const auto dwFlags = pVar->GetCaps();
+    const auto dwBan = DataPoolVariable::CAPS_STRUCT | DataPoolVariable::CAPS_ARRAY | DataPoolVariable::CAPS_DYNARRAY;
+
+    // 1.被 watch 必须是 fixed 变量
+    // 2.结构体，数组对象不能 wacth
+    // 3.Object对象也不能被 watch
+    if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_FIXED) &&
+      TEST_FLAG_NOT(dwFlags, dwBan) && pVar->GetTypeCategory() != T_OBJECT)
     {
       WatchFixedList sWatchList;
       auto result = m_FixedDict.insert(clmake_pair(pVar->GetPtr(), sWatchList));
@@ -2511,6 +2518,12 @@ namespace Marimo
       WATCH_FIXED sWatch;
       sWatch.pCallback = pImpulseCallback;
       sWatch.lParam    = lParam;
+
+      // DataPoolWatch 对象
+      if((GXINT_PTR)pImpulseCallback == 0) {
+        ((DataPoolWatcher*)lParam)->AddRef();
+      }
+
       result.first->second.insert(sWatch);
     }
     return bret;
@@ -2518,7 +2531,29 @@ namespace Marimo
 
   GXBOOL DataPool::IntIgnore( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
   {
-    CLBREAK;
+    auto itWatchSet = m_FixedDict.find(pVar->GetPtr());
+    if(itWatchSet != m_FixedDict.end())
+    {
+      WatchFixedList& sVarWatchSet = itWatchSet->second;
+      WATCH_FIXED sWatch;
+      sWatch.pCallback = pImpulseCallback;
+      sWatch.lParam    = lParam;
+
+      auto itWatch = sVarWatchSet.find(sWatch);
+      if(itWatch != sVarWatchSet.end())
+      {
+        // DataPoolWatch 对象
+        if((GXINT_PTR)itWatch->pCallback == 0) {
+          DataPoolWatcher*& pWatch = *(DataPoolWatcher**)&itWatch->lParam;
+          SAFE_RELEASE(pWatch);
+        }
+        sVarWatchSet.erase(itWatch);
+      }
+
+      if(sVarWatchSet.empty()) {
+        m_FixedDict.erase(itWatchSet);
+      }
+    }
     return FALSE;
   }
 

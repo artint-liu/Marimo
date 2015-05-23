@@ -60,6 +60,7 @@ namespace Marimo
   // 函数声明
   Variable DynamicArray_NewBack(VarImpl* pThis, GXUINT nIncrease);
   Variable Struct_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName);
+  Variable Array_GetIndex(GXCONST VarImpl* pThis, int nIndex);
 
   DataPoolVariable::DataPoolVariable( VTBL* vtbl, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset )
     : m_vtbl(vtbl), m_pVdd(pVdd), m_pBuffer(pBufferBase), m_AbsOffset(nAbsOffset)
@@ -521,6 +522,10 @@ namespace Marimo
     if(m_vtbl->NewBack == DynamicArray_NewBack) {
       SET_FLAG(r, CAPS_DYNARRAY);
       ASSERT(m_pVdd->IsDynamicArray());
+    }
+    else if(m_vtbl->GetIndex == Array_GetIndex) { // 动态数组和静态数组都具有 Array_GetIndex 方法
+      SET_FLAG(r, CAPS_ARRAY);
+      ASSERT(GetLength() > 1);
     }
 
     if(m_vtbl->GetMember == Struct_GetMember) {
