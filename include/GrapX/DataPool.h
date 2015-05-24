@@ -4,7 +4,6 @@
 // 编译开关
 #define ENABLE_DATAPOOL_WATCHER     // DataPool 监视器
 //#define DEBUG_DECL_NAME           // 使用字符串指针储存自定位副本，如果打开这个调试将不能保存和加载
-
 #ifdef ENABLE_DATAPOOL_WATCHER
 # define STR_DATAPOOL_WATCHER_UI       "DataPool/Watcher/UI"
 # define ON_KNOCKVAR(_KNOCKACT, _VAR)  (_KNOCKACT->pSponsor != &_VAR && _KNOCKACT->Name == _VAR.GetName())
@@ -311,18 +310,18 @@ namespace Marimo
         return (DataPoolArray**)(pBaseData + nOffset);
       }
 
-      DataPoolArray* CreateAsBuffer(DataPool* pDataPool, GXBYTE* pBaseData, int nInitCount) const
+      DataPoolArray* CreateAsBuffer(DataPool* pDataPool, clBufferBase* pParent, GXBYTE* pBaseData, int nInitCount) const
       {
         ASSERT(IsDynamicArray()); // 一定是动态数组
+        ASSERT(nInitCount >= 0);
 
         DataPoolArray** ppBuffer = GetAsBufferPtr(pBaseData);  // 动态数组
         if(*ppBuffer == NULL && TEST_FLAG_NOT(pDataPool->m_dwRuntimeFlags, RuntimeFlag_Readonly))
         {
-          //ASSERT(nInitCount >= 1);
           // 这里ArrayBuffer只能使用指针形式
           *ppBuffer = new DataPoolArray(TypeSize() * 10);  // 十倍类型大小
           (*ppBuffer)->Resize(nInitCount * TypeSize(), TRUE);
-          //TRACE("%%%s[%08x]\n", Name, *ppBuffer);
+
 #ifdef _DEBUG
           pDataPool->m_nDbgNumOfArray++;
 #endif // #ifdef _DEBUG
@@ -462,7 +461,8 @@ namespace Marimo
 
       GXBOOL IsValid()
       {
-        return vtbl && pBuffer&& pVdd;
+        // 只读模式下，未使用的动态数组pBuffer有可能是NULL, 所以这里不检查pBuffer
+        return vtbl && pVdd;
       }
     };
 
@@ -602,7 +602,7 @@ namespace Marimo
     void          CopyVariables       (VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const clstd::STRINGSETDESC* pTable, GXINT_PTR lpBase);
     GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, int nOffsetAdd, VARIABLE* pVar);
     GXBOOL        IntQuery            (clBufferBase* pBuffer, LPCVD pParentVdd, GXLPCSTR szVariable, int nOffsetAdd, VARIABLE* pVar);
-    GXBOOL        IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
+    GXINT         IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
 #ifdef ENABLE_DATAPOOL_WATCHER
     int           FindWatcher         (DataPoolWatcher* pWatcher);
     int           FindWatcherByName   (GXLPCSTR szClassName);

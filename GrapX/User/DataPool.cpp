@@ -605,7 +605,7 @@ namespace Marimo
           if(bDynamicArray)
           {
             ASSERT(varDecl.Count < 0);
-            clBuffer* pBuffer = VARDesc.CreateAsBuffer(this, pData, varDecl.Init == NULL ? 0 : -varDecl.Count);
+            clBuffer* pBuffer = VARDesc.CreateAsBuffer(this, &m_VarBuffer, pData, varDecl.Init == NULL ? 0 : -varDecl.Count);
             memcpy(pBuffer->GetPtr(), varDecl.Init, pBuffer->GetSize());
           }
           else
@@ -630,7 +630,7 @@ namespace Marimo
             ASSERT((varDecl.Init != NULL && nCount < 0) || 
               (varDecl.Init == NULL && nCount == 0));
 
-            pStrPool = (clStringW*)VARDesc.CreateAsBuffer(this, pData, -nCount)->GetPtr();
+            pStrPool = (clStringW*)VARDesc.CreateAsBuffer(this, &m_VarBuffer, pData, -nCount)->GetPtr();
             nCount = -nCount;
           }
           else
@@ -891,13 +891,17 @@ namespace Marimo
     return TRUE;
   }
 
-  GXBOOL DataPool::IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar)
+  // 返回值是变量储存的buffer层数，根变量是1
+  GXINT DataPool::IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar)
   {
     GXLPCSTR  szName;         // 用来查找的名字
     GXUINT    nIndex = (GXUINT)-1;
     clStringA str;
     clStringA strName; // 用来暂存带下标时的变量名
-    GXBOOL result = TRUE;
+    GXINT     result = 0;
+    GXBOOL    query_ret;
+
+    ASSERT( ! pVar->IsValid());
 
     // 分解表达式
     clstd::StringCutter<clStringA> sExpression(szExpression);
@@ -910,12 +914,12 @@ namespace Marimo
         size_t pos = str.Find('[', 0);
         if(pos == clStringA::npos) {
           CLBREAK;
-          result = FALSE;
+          result = 0;
           break;
         }
         clStringA strIndex = str.SubString(pos + 1, str.GetLength() - pos - 2);
         strName = str.Left(pos);
-        nIndex = GXATOI((GXLPCSTR)strIndex);
+        nIndex = strIndex.ToInteger();  // GXATOI((GXLPCSTR)strIndex);
         szName = strName;
       }
       else {
@@ -924,35 +928,34 @@ namespace Marimo
       }
 
       if( ! pVar->IsValid()) {
-        result = IntQuery(&m_VarBuffer, NULL, szName, 0, pVar);
+        query_ret = IntQuery(&m_VarBuffer, NULL, szName, 0, pVar);
       }
       else {
-        result = IntQuery(pVar->pBuffer, pVar->pVdd, szName, pVar->AbsOffset, pVar);
-        //stVariable = stVariable.MemberOf(szName);
+        query_ret = IntQuery(pVar->pBuffer, pVar->pVdd, szName, pVar->AbsOffset, pVar);
       }
 
-      // 这里没有检查stVariable有效性，要保证即使无效IndexOf()也不会崩溃
+      result = query_ret ? (result + 1) : 0;
+
+      // 处理索引
       if(result && nIndex != (GXUINT)-1) {
         // 这段就是实现了DataPoolVariable::GetLength()
         const GXBOOL bDynamic = pVar->pVdd->IsDynamicArray();
         if(( ! bDynamic && nIndex < pVar->pVdd->nCount) ||
           (bDynamic && nIndex < pVar->pBuffer->GetSize() / pVar->pVdd->TypeSize()))
         {
-          // pVar->nOffset 包含了 pVar->pVdd->nOffset
-          //IntCreateUnary(pVar->pBuffer, pVar->pVdd, 
-          //  pVar->nOffset - pVar->pVdd->nOffset + nIndex * pVar->pVdd->TypeSize(), pVar);
           IntCreateUnary(pVar->pBuffer, pVar->pVdd, nIndex * pVar->pVdd->TypeSize(), pVar);
         }
         else {
-          result = FALSE;
+          result = 0;
         }
       }
 
-      if(( ! result) || ( ! pVar->IsValid())) {
-        result = FALSE;
-        break;
-      }
-    } while( ! sExpression.IsEndOfString());
+      ASSERT(( ! result) || pVar->IsValid()); // result 和 pVar 一定同时有效或者无效
+      //if(( ! result) || ( ! pVar->IsValid())) {
+      //  result = 0;
+      //  break;
+      //}
+    } while(result && ( ! sExpression.IsEndOfString()));
 
     return result;
   }
@@ -1249,31 +1252,16 @@ namespace Marimo
     if(pVdd == NULL) {
       return FALSE;
     }
-    /*
+
     if(pVdd->IsDynamicArray()) {
-      clBuffer* pElementBuffer = pVdd->CreateAsBuffer((GXBYTE*)m_pBuffer->GetPtr() + nOffsetAdd, 0);
-      pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVdd, pElementBuffer, 0);
-      return GX_OK;
-    }
-    else if(pVdd->nCount > 1) {
-      if(bRootBuf) {
-        pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVdd, m_pBuffer, pVdd->nOffset + nOffsetAdd);
-        return GX_OK;
-      }
-      else {
-        CLBREAK;
-      }
-    }
-    /*/
-    if(pVdd->IsDynamicArray()) {
-      clBuffer* pElementBuffer = pVdd->CreateAsBuffer(this, (GXBYTE*)pBufferBase->GetPtr() + nOffsetAdd, 0);
+      clBuffer* pElementBuffer = pVdd->CreateAsBuffer(this, pBufferBase, (GXBYTE*)pBufferBase->GetPtr() + nOffsetAdd, 0);
       pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVdd, pElementBuffer, 0);
       return TRUE;
     }
     else if(pVdd->nCount > 1) {
       pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVdd, pBufferBase, pVdd->nOffset + nOffsetAdd);
       return TRUE;
-    }//*/
+    }
     else {
       ASSERT(pVdd->nCount == 1);
       pVar->AbsOffset = pVdd->nOffset;

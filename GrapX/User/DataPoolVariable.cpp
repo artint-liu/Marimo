@@ -1425,7 +1425,6 @@ namespace Marimo
   GXUINT DynamicArray_GetLength(GXCONST VarImpl* pThis)
   {
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
-    //clBuffer* pElementBuffer = pVdd->CreateAsBuffer(pThis->InlGetBufferPtr(), 0);
     clBufferBase* pBuffer = pThis->InlGetBufferObj();
     return pBuffer == NULL ? 0 : ((GXUINT)pBuffer->GetSize() / pVdd->TypeSize());
   }
@@ -1441,7 +1440,7 @@ namespace Marimo
       DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
       //ASSERT(pVdd->nOffset == pThis->InlGetOffset());
       ASSERT(pThis->GetOffset() == 0);
-      DataPoolArray* pArrayBuffer = static_cast<DataPoolArray*>(pThis->InlGetBufferObj());//pThis->InlGetVDD()->CreateAsBuffer(pThis->InlGetBufferPtr(), 0);
+      DataPoolArray* pArrayBuffer = static_cast<DataPoolArray*>(pThis->InlGetBufferObj());
       const GXUINT nPrevSize = (GXUINT)pArrayBuffer->GetSize();
       pArrayBuffer->Resize(nPrevSize + pVdd->TypeSize() * nIncrease, TRUE);
       pThis->InlSetupUnary(nIndex, &val);
