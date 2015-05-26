@@ -227,8 +227,10 @@ namespace Marimo
         if(index == -1)
         {
           if(pBuffer) {
+            //new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
+            //  child_buffer_unsafe(), nElementOffset);
             new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-              child_buffer_unsafe(), nElementOffset);
+              pBuffer, offset() + nElementOffset);
           }
         }
         else {

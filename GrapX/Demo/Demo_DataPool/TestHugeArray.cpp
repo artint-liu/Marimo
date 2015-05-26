@@ -75,7 +75,7 @@ void TestHugeArray()
   tt.End().Dump("查询aModules所用时间:");
   ASSERT(bval);
   //ASSERT( ! varModules.IsFixed());
-  ASSERT(TEST_FLAG_NOT(varModules.GetCaps(), MOVariable::CAPS_FIXED));
+  ASSERT(TEST_FLAG(varModules.GetCaps(), MOVariable::CAPS_FIXED));
   ASSERT(varModules.GetLength() == 0);
   ASSERT(varModules.GetSize() == 0);
 
@@ -129,7 +129,8 @@ void TestHugeArray()
   // 随机访问
   MOVariable var;
   strCheck.Format("%d+%d", 100, HUGE_NUMBER - 100);
-  pDataPool->QueryByExpression("aModules[100].name", &var);
+  bval = pDataPool->QueryByExpression("aModules[100].name", &var);
+  ASSERT(bval);
   ASSERT(var.ToStringA() == strCheck);
 
   // 测试object使用

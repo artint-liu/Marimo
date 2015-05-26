@@ -31,8 +31,12 @@ void TestCompileFromFile()
     ASSERT(bval);
 
     bval = pDataPool->QueryByExpression("equipment_essence_raw.equip_type", &varEquipType);
-    ASSERT(bval);
+    ASSERT( ! bval); // 尝试访问动态数组的成员变量
     
+
+    bval = pDataPool->QueryByExpression("equipment_essence_raw[0].equip_type", &varEquipType);
+    ASSERT(bval);
+
     // 测试枚举
     ASSERT(varEquipType.ToStringA() == "EQUIPTYPE_WEAPON");
     TRACE("equipment_essence_raw.equip_type = %s\n", varEquipType.ToStringA());
@@ -57,6 +61,9 @@ void TestCompileFromFile()
 
 
     bval = pDataPool->QueryByExpression("equipment_essence_raw.equip_mask", &varEquipMask);
+    ASSERT( ! bval); // 尝试访问动态数组的成员变量
+
+    bval = pDataPool->QueryByExpression("equipment_essence_raw[0].equip_mask", &varEquipMask);
     ASSERT(bval);
     varEquipMask.Set(0xf);
     TRACE("equipment_essence_raw.equip_mask = %s\n", varEquipMask.ToStringA());

@@ -876,8 +876,8 @@ namespace Marimo
   GXBOOL DataPool::QueryByName(GXLPCSTR szName, Variable* pVar)
   {
     VARIABLE var = {0};
-    // 这是什么鬼啊，当时为什么判断它有效？ if(pVar->IsValid() || ( ! IntQuery(&m_VarBuffer, NULL, szName, 0, &var))) {
-    if( ! IntQuery(&m_VarBuffer, NULL, szName, 0, &var)) {
+    var.pBuffer = &m_VarBuffer;
+    if( ! IntQuery(&var, szName, -1)) {
       pVar->Free();
       return FALSE;
     }
@@ -898,15 +898,26 @@ namespace Marimo
     GXUINT    nIndex = (GXUINT)-1;
     clStringA str;
     clStringA strName; // 用来暂存带下标时的变量名
-    GXINT     result = 0;
-    GXBOOL    query_ret;
+    GXINT     result = FALSE;
+    //clBufferBase* pArrayBuffer = NULL;
 
     ASSERT( ! pVar->IsValid());
+    pVar->pBuffer = &m_VarBuffer;
 
     // 分解表达式
     clstd::StringCutter<clStringA> sExpression(szExpression);
 
     do {
+
+      if(pVar->IsValid())
+      {
+        // 数组对象，没有取元素就试图访问成员变量，一定是不对的
+        // 进到这里一定是取过根变量之后的事情了
+        if((pVar->pVdd->IsDynamicArray() || pVar->pVdd->nCount > 1) && nIndex == (GXUINT)-1) {
+          return FALSE;
+        }
+      }
+
       sExpression.Cut(str, '.');
 
       if(str.EndsWith(']')) // 带下标的情况
@@ -914,7 +925,7 @@ namespace Marimo
         size_t pos = str.Find('[', 0);
         if(pos == clStringA::npos) {
           CLBREAK;
-          result = 0;
+          result = FALSE;
           break;
         }
         clStringA strIndex = str.SubString(pos + 1, str.GetLength() - pos - 2);
@@ -927,29 +938,37 @@ namespace Marimo
         szName = str;
       }
 
+      /*
       if( ! pVar->IsValid()) {
-        query_ret = IntQuery(&m_VarBuffer, NULL, szName, 0, pVar);
+        result = IntQuery(&m_VarBuffer, NULL, szName, 0, pVar, &pArrayBuffer);
       }
       else {
-        query_ret = IntQuery(pVar->pBuffer, pVar->pVdd, szName, pVar->AbsOffset, pVar);
+        result = IntQuery(pVar->pBuffer, pVar->pVdd, szName, pVar->AbsOffset, pVar, &pArrayBuffer);
       }
-
-      result = query_ret ? (result + 1) : 0;
 
       // 处理索引
       if(result && nIndex != (GXUINT)-1) {
         // 这段就是实现了DataPoolVariable::GetLength()
         const GXBOOL bDynamic = pVar->pVdd->IsDynamicArray();
-        if(( ! bDynamic && nIndex < pVar->pVdd->nCount) ||
-          (bDynamic && nIndex < pVar->pBuffer->GetSize() / pVar->pVdd->TypeSize()))
+        if( ! bDynamic && nIndex < pVar->pVdd->nCount)
         {
-          IntCreateUnary(pVar->pBuffer, pVar->pVdd, nIndex * pVar->pVdd->TypeSize(), pVar);
+          pVar->AbsOffset += nIndex * pVar->pVdd->TypeSize();
+          IntCreateUnary(pVar->pBuffer, pVar->pVdd, pVar);
+        }
+        else if(bDynamic && nIndex < (pArrayBuffer->GetSize() / pVar->pVdd->TypeSize()))
+        {
+          pVar->AbsOffset = nIndex * pVar->pVdd->TypeSize();
+          IntCreateUnary(pArrayBuffer, pVar->pVdd, pVar);
         }
         else {
-          result = 0;
+          result = FALSE;
         }
       }
+      /*/
 
+      result = IntQuery(pVar, szName, nIndex);
+
+      //*/
       ASSERT(( ! result) || pVar->IsValid()); // result 和 pVar 一定同时有效或者无效
       //if(( ! result) || ( ! pVar->IsValid())) {
       //  result = 0;
@@ -1218,57 +1237,93 @@ namespace Marimo
   }
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
-  GXBOOL DataPool::IntCreateUnary(clBufferBase* pBufferBase, LPCVD pThisVdd, int nOffsetAdd, VARIABLE* pVar)
+  GXBOOL DataPool::IntCreateUnary(clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar)
   {
-    using namespace Implement;
-    GXBYTE* pDataBuffer = (GXBYTE*)pBufferBase->GetPtr();
-    const GXBOOL bRootBuf = ((GXLPCVOID)pBufferBase == (GXLPCVOID)&m_VarBuffer);
-    ASSERT(nOffsetAdd >= 0 && pThisVdd->TypeSize() != 0);
-    //ASSERT(bRootBuf || (! bRootBuf && pThisVdd->IsDynamicArray()));
+    ASSERT(pThisVdd->TypeSize() != 0);
 
-    VARIABLE::VTBL* pVtbl = NULL;
-    if( ! pThisVdd->IsDynamicArray()) {
-      //nOffsetAdd += pThisVdd->nOffset;
-      nOffsetAdd += pVar->AbsOffset;
-    }
-
-    pVtbl = pThisVdd->GetUnaryMethod();
+    VARIABLE::VTBL* pVtbl = pThisVdd->GetUnaryMethod();
     ASSERT(pVtbl != NULL);
 
-    pVar->Set((VARIABLE::VTBL*)pVtbl, pThisVdd, pBufferBase, nOffsetAdd);
-    //new(pVar) DataPoolVariable(pVtbl, this, pThisVdd, pBufferBase, nOffsetAdd);
+    pVar->Set((VARIABLE::VTBL*)pVtbl, pThisVdd, pBuffer, pVar->AbsOffset);
     return TRUE;
   }
 
-  GXBOOL DataPool::IntQuery(clBufferBase* pBufferBase, DPVDD* pParentVdd, GXLPCSTR szVariable, int nOffsetAdd, VARIABLE* pVar)
+  GXBOOL DataPool::IntQuery(GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex)
   {
     // 内部函数中不改变pVar->m_pDataPool的引用计数
     using namespace Implement;
-    GXBYTE* pDataBuffer = (GXBYTE*)pBufferBase->GetPtr();
-    DPVDD* pVdd = IntGetVariable(pParentVdd, szVariable);
-    const GXBOOL bRootBuf = ((GXLPCVOID)pBufferBase == (GXLPCVOID)&m_VarBuffer);
-    ASSERT(bRootBuf || ( ! bRootBuf && pParentVdd != NULL));
-    //ASSERT( ! pVar->IsValid());
-    if(pVdd == NULL) {
+    LPCVD pVarDesc = IntGetVariable(pVar->pVdd, szVariableName);
+    const GXUINT nMemberOffset = pVar->AbsOffset + pVarDesc->nOffset; // 后面多出用到，这里算一下
+
+    if(pVarDesc == NULL) {
       return FALSE;
     }
 
-    if(pVdd->IsDynamicArray()) {
-      clBuffer* pElementBuffer = pVdd->CreateAsBuffer(this, pBufferBase, (GXBYTE*)pBufferBase->GetPtr() + nOffsetAdd, 0);
-      pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVdd, pElementBuffer, 0);
-      return TRUE;
+    if(pVarDesc->IsDynamicArray()) { // 动态数组
+      clBuffer* pArrayBuffer = pVarDesc->CreateAsBuffer(this, pVar->pBuffer, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
+      if(nIndex == (GXUINT)-1)
+      {
+        pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
+        return TRUE;
+      }
+      else if(nIndex < (pArrayBuffer->GetSize() / pVarDesc->TypeSize()))
+      {
+        pVar->AbsOffset = nIndex * pVarDesc->TypeSize();
+        return IntCreateUnary(pArrayBuffer, pVarDesc, pVar);
+      }
     }
-    else if(pVdd->nCount > 1) {
-      pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVdd, pBufferBase, pVdd->nOffset + nOffsetAdd);
-      return TRUE;
+    else if(pVarDesc->nCount > 1) { // 静态数组
+      if(nIndex == (GXUINT)-1)
+      {
+        pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
+        return TRUE;
+      }
+      else if(nIndex < pVarDesc->nCount)
+      {
+        pVar->AbsOffset += (pVarDesc->nOffset + nIndex * pVarDesc->TypeSize());
+        return IntCreateUnary(pVar->pBuffer, pVarDesc, pVar);
+      }
     }
     else {
-      ASSERT(pVdd->nCount == 1);
-      pVar->AbsOffset = pVdd->nOffset;
-      return IntCreateUnary(pBufferBase, pVdd, nOffsetAdd, pVar);
+      ASSERT(pVarDesc->nCount == 1);
+      pVar->AbsOffset = nMemberOffset;
+      return IntCreateUnary(pVar->pBuffer, pVarDesc, pVar);
     }
     return FALSE;
   }
+
+  //GXBOOL DataPool::IntQuery(clBufferBase* pBufferBase, DPVDD* pParentVdd, GXLPCSTR szVariable, int nOffsetAdd, VARIABLE* pVar, clBufferBase** ppArrayBuffer)
+  //{
+  //  // 内部函数中不改变pVar->m_pDataPool的引用计数
+  //  using namespace Implement;
+  //  GXBYTE* pDataBuffer = (GXBYTE*)pBufferBase->GetPtr();
+  //  DPVDD* pVdd = IntGetVariable(pParentVdd, szVariable);
+  //  const GXBOOL bRootBuf = ((GXLPCVOID)pBufferBase == (GXLPCVOID)&m_VarBuffer);
+  //  ASSERT(bRootBuf || ( ! bRootBuf && pParentVdd != NULL));
+  //  //ASSERT( ! pVar->IsValid());
+  //  if(pVdd == NULL) {
+  //    return FALSE;
+  //  }
+
+  //  if(pVdd->IsDynamicArray()) {
+  //    clBuffer* pElementBuffer = pVdd->CreateAsBuffer(this, pBufferBase, (GXBYTE*)pBufferBase->GetPtr() + nOffsetAdd, 0);
+  //    //pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVdd, pElementBuffer, 0);
+  //    pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVdd, pBufferBase, pVdd->nOffset + nOffsetAdd);
+  //    *ppArrayBuffer = pElementBuffer;
+  //    //return TRUE;
+  //  }
+  //  else if(pVdd->nCount > 1) {
+  //    pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVdd, pBufferBase, pVdd->nOffset + nOffsetAdd);
+  //    //return pBufferBase;
+  //  }
+  //  else {
+  //    ASSERT(pVdd->nCount == 1);
+  //    pVar->AbsOffset = pVdd->nOffset + nOffsetAdd;
+  //    return IntCreateUnary(pBufferBase, pVdd, pVar);
+  //    //return pBufferBase;
+  //  }
+  //  return TRUE;
+  //}
 
 #ifdef ENABLE_DATAPOOL_WATCHER
   GXBOOL DataPool::IntIsKnocking(const DataPoolVariable* pVar) const

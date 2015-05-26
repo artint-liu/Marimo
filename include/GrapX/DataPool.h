@@ -600,8 +600,9 @@ namespace Marimo
     const clBufferBase* IntGetEntryBuffer   () const; // 获得数据池最基础的buffer
     LPCTD         FindType            (GXLPCSTR szTypeName) const;
     void          CopyVariables       (VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const clstd::STRINGSETDESC* pTable, GXINT_PTR lpBase);
-    GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, int nOffsetAdd, VARIABLE* pVar);
-    GXBOOL        IntQuery            (clBufferBase* pBuffer, LPCVD pParentVdd, GXLPCSTR szVariable, int nOffsetAdd, VARIABLE* pVar);
+    GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar);
+    //GXBOOL        IntQuery            (clBufferBase* pBuffer, LPCVD pParentVdd, GXLPCSTR szVariable, int nOffsetAdd, VARIABLE* pVar, clBufferBase** ppArrayBuffer);
+    GXBOOL        IntQuery            (GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
     GXINT         IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
 #ifdef ENABLE_DATAPOOL_WATCHER
     int           FindWatcher         (DataPoolWatcher* pWatcher);

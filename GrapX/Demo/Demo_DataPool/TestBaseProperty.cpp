@@ -123,7 +123,7 @@ void TestBaseProperty()
 
   CheckUnary<float>(pDataPool, "fFactor", TRUE);
   CheckArray<float>(pDataPool, "aFactor", TRUE, 3);
-  CheckArray<float>(pDataPool, "aDynFactor", FALSE, 7);
+  CheckArray<float>(pDataPool, "aDynFactor", TRUE, 7);
 
   // 测试两种方式得到的数组元素为同一个
   CheckElement<float>(pDataPool, "aFactor", TRUE, 0);
@@ -131,7 +131,7 @@ void TestBaseProperty()
 
 
   CheckUnary<float4x4>(pDataPool, "matViewProj", TRUE);
-  CheckArray<float4x4>(pDataPool, "testDynArray", FALSE, 2);
+  CheckArray<float4x4>(pDataPool, "testDynArray", TRUE, 2);
 
   CheckElement<float4x4>(pDataPool, "testDynArray", FALSE, 0);
   CheckElement<float4x4>(pDataPool, "testDynArray", FALSE, 1);
@@ -145,20 +145,20 @@ void TestBaseProperty()
 
   CheckUnary<clStringW>(pDataPool, "strName", TRUE);
   CheckArray<clStringW>(pDataPool, "aNames", TRUE, 5);
-  CheckArray<clStringW>(pDataPool, "aManyNames", FALSE, 2);
+  CheckArray<clStringW>(pDataPool, "aManyNames", TRUE, 2);
   CheckElement<clStringW>(pDataPool, "aNames", TRUE, 1);
   CheckElement<clStringW>(pDataPool, "aManyNames", FALSE, 1);
   
   CheckUnary<GUnknown*>(pDataPool, "sObject", TRUE);
   CheckArray<GUnknown*>(pDataPool, "aObjects", TRUE, 7);
-  CheckArray<GUnknown*>(pDataPool, "aManyObjects", FALSE, 12);
+  CheckArray<GUnknown*>(pDataPool, "aManyObjects", TRUE, 12);
   CheckElement<GUnknown*>(pDataPool, "aObjects", TRUE, 1);
   CheckElement<GUnknown*>(pDataPool, "aObjects", TRUE, 3);
   CheckElement<GUnknown*>(pDataPool, "aManyObjects", FALSE, 1);
   CheckElement<GUnknown*>(pDataPool, "aManyObjects", FALSE, 5);
 
   CheckUnary<clStringW>(pDataPool, "VarMember.name", TRUE);
-  CheckArray<float3>(pDataPool, "VarMember.vertices", FALSE, 0);
+  CheckArray<float3>(pDataPool, "VarMember.vertices", TRUE, 0);
   CheckUnary<float>(pDataPool, "VarMember.pos.x", TRUE);
 
 

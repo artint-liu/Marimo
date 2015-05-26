@@ -40,6 +40,12 @@ void TestBaseProperty();
 void TestCompileFromFile();
 void TestComplexArray();
 
+GXUINT_PTR GetFirstElementPtr(const DataPoolVariable& var) // 获得数组对象第一个元素的指针地址
+{
+  ASSERT(TEST_FLAG(var.GetCaps(), DataPoolVariable::CAPS_DYNARRAY));
+  return (GXUINT_PTR)(*(clBufferBase**)var.GetPtr())->GetPtr();
+}
+
 void TestDynamicStringArray(DataPool* pDataPool)
 {
   GXBOOL bval;
@@ -137,7 +143,7 @@ void TestDynamicArrayTest(DataPool* pDataPool)
   bDynamic = IsDynamicArray(pDataPool, "g_matViewProj");
   ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "testDynArray");
-  ASSERT(   bDynamic);
+  ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "testArray");
   ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "g_matViewProjInv");
@@ -145,7 +151,7 @@ void TestDynamicArrayTest(DataPool* pDataPool)
   bDynamic = IsDynamicArray(pDataPool, "g_matView");
   ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "g_matViewInv");
-  ASSERT(   bDynamic);
+  ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "VarMember");
   ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "testStringList");
@@ -157,13 +163,13 @@ void TestDynamicArrayTest(DataPool* pDataPool)
   bDynamic = IsDynamicArray(pDataPool, "TestStringArray");
   ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "TestStringVarArray");
-  ASSERT(   bDynamic);
+  ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "g_vLightDiffuse");
   ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "g_vLightAmbient");
   ASSERT( ! bDynamic);
   bDynamic = IsDynamicArray(pDataPool, "testArray2");
-  ASSERT(   bDynamic);
+  ASSERT( ! bDynamic);
 }
 
 void TestDataPoolAgent(DataPool* pDataPool)
@@ -341,7 +347,7 @@ void TestDataPoolAgent_String_DynArray(DataPool* pDataPool)
   hval = pDataPool->QueryByName("TestStringVarArray", &Var);
   //clBuffer** lplpBuffer = (clBuffer**)Var.GetPtr();
   //GXUINT_PTR lpBasePtr = (GXUINT_PTR)(*lplpBuffer)->GetPtr();
-  GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
+  GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var); //GXUINT_PTR)(*(clBufferBase**)Var.GetPtr())->GetPtr();
 
   for(int i = 0; i < nArray; i++)
   {
@@ -381,9 +387,7 @@ void TestDataPoolAgent_String_DynArray_NewBack(DataPool* pDataPool)
   TRACE("=== "__FUNCTION__" ===\n");
 
   hval = pDataPool->QueryByName("TestStringVarArray", &Var);
-  //clBuffer** lplpBuffer = (clBuffer**)Var.GetPtr();
-  //GXUINT_PTR lpBasePtr = (GXUINT_PTR)(*lplpBuffer)->GetPtr();
-  GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
+  GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)(*(clBufferBase**)Var.GetPtr())->GetPtr();
 
   for(int i = 0; i < nArray; i++)
   {
@@ -493,9 +497,7 @@ void TestDataPoolAgent_Struct_DynArray_NewBack(DataPool* pDataPool)
   TRACE("=== "__FUNCTION__" ===\n");
 
   hval = pDataPool->QueryByName("testArray2", &Var);
-  GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
-  //clBuffer** lplpBuffer = (clBuffer**)Var.GetPtr();
-  //GXUINT_PTR lpBasePtr = (GXUINT_PTR)(*lplpBuffer)->GetPtr();
+  GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)(*(clBufferBase**)Var.GetPtr())->GetPtr();
 
   for(int i = 0; i < nArray; i++)
   {
@@ -521,7 +523,9 @@ void TestDataPoolAgent_Struct_DynArray_NewBack(DataPool* pDataPool)
     }
     else { 
       VarFloat3[i] = Var.NewBack();
-      lpBasePtr = (GXUINT_PTR)Var.GetPtr(); // NewBack 后地址会改变
+      //lpBasePtr = (GXUINT_PTR)Var.GetPtr(); 
+      lpBasePtr = GetFirstElementPtr(Var); // NewBack 后地址会改变
+      //(GXUINT_PTR)(*(clBufferBase**)Var.GetPtr())->GetPtr();
 
       ASSERT(VarFloat3[i].GetPtr() == (GXLPBYTE)lpBasePtr + sizeof(float3) * i);
       for(int n = 0; n < 3; n++)
@@ -568,7 +572,7 @@ void TestDataPoolAgent_Primary_DynArray(DataPool* pDataPool)
   TRACE("=== "__FUNCTION__" ===\n");
 
   hval = pDataPool->QueryByName("testDynArray", &Var);
-  GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
+  GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)Var.GetPtr();
 
   for(int i = 0; i < nArray; i++)
   {
@@ -608,7 +612,7 @@ void TestDataPoolAgent_Primary_DynArray_NewBack(DataPool* pDataPool)
 
   hval = pDataPool->QueryByName("testDynArray", &Var);
   //clBuffer** lplpBuffer = (clBuffer**)Var.GetPtr();
-  GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
+  GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)Var.GetPtr();
 
   for(int i = 0; i < nArray; i++)
   {
@@ -633,7 +637,7 @@ void TestDataPoolAgent_Primary_DynArray_NewBack(DataPool* pDataPool)
     }
     else {
       VarElement[i] = Var.NewBack();
-      lpBasePtr = (GXUINT_PTR)Var.GetPtr();
+      lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)Var.GetPtr();
       TRACE("%s %s\n", VarElement[i].GetTypeName(), VarElement[i].GetName());
       ASSERT(lpBasePtr + sizeof(float) * i == (GXUINT_PTR)VarElement[i].GetPtr());
 
@@ -1175,37 +1179,16 @@ int _tmain(int argc, _TCHAR* argv[])
   TestStringCutter();
 
   // Data pool test
-  //TestHugeArray();
+  TestHugeArray();
   TestComplexArray();
-  //TestSelfContainStruct();
-  //TestBaseProperty();
-  //test();
-  //TestDataPool_CompileFromCode();
-
-  clhash_multimap<clStringA, int> dict;
-  //stdext::hash_map<clStringA, int> dict;
-  dict.insert(clmake_pair("a", 1));
-  dict.insert(clmake_pair("a", 2));
-  dict.insert(clmake_pair("b", 3));
-  dict.insert(clmake_pair("c", 4));
-  dict.insert(clmake_pair("a", 5));
-
-  for(auto it = dict.begin(); it != dict.end(); ++it)
-  {
-    TRACE("%s(%x)=%d\n", it->first, it->first.GetBuffer(), it->second);
-  }
-
-  auto itFind = dict.find("a");
-  TRACE("%s=%d\n", itFind->first, itFind->second);
-  //itFind = dict.
-  ++itFind;
-  TRACE("%s=%d\n", itFind->first, itFind->second);
-  ++itFind;
-  TRACE("%s=%d\n", itFind->first, itFind->second);
+  TestSelfContainStruct();
+  TestBaseProperty();
+  test();
+  TestDataPool_CompileFromCode();
 
   // 下面这个抽取自真实游戏的样本数据，数据文本大约32MB，90万行数据
   // 由于版权问题无法提供样例文本
-  //TestCompileFromFile();
+  TestCompileFromFile();
   return 0;
 }
 
