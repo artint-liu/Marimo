@@ -69,9 +69,7 @@ namespace Marimo
     DataPoolVariable& operator=   (u64 val);
 
 
-#ifdef ENABLE_DATAPOOL_WATCHER
-    GXHRESULT         Impulse         (DataAction eAct, GXUINT nIndex = 0);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+    GXBOOL            Impulse         (DataAction reason, GXUINT index = 0, GXUINT count = 0); // index和count只有是数组时才有效
     GXHRESULT         GetPool         (DataPool** ppDataPool) GXCONST;
     DataPool*         GetPoolUnsafe   () GXCONST;
     GXBOOL            IsSamePool      (DataPool* pDataPool) GXCONST;

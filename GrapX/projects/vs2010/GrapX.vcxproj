@@ -230,7 +230,6 @@
     <ClInclude Include="..\..\..\include\GrapX\DataPoolVariable.h" />
     <ClInclude Include="..\..\..\include\GrapX\GBaseTypes.h" />
     <ClInclude Include="..\..\..\include\GrapX\GCamera.h" />
-    <ClInclude Include="..\..\..\include\GrapX\GFX.h" />
     <ClInclude Include="..\..\..\include\GrapX\GPrimitive.h" />
     <ClInclude Include="..\..\..\include\GrapX\GrapVR.h" />
     <ClInclude Include="..\..\..\include\GrapX\GRegion.h" />
@@ -243,7 +242,6 @@
     <ClInclude Include="..\..\..\include\GrapX\gvGeometry.h" />
     <ClInclude Include="..\..\..\include\GrapX\gvMesh.h" />
     <ClInclude Include="..\..\..\include\GrapX\gvNode.h" />
-    <ClInclude Include="..\..\..\include\GrapX\GVPhySimulator.h" />
     <ClInclude Include="..\..\..\include\GrapX\gvScene.h" />
     <ClInclude Include="..\..\..\include\GrapX\gvSceneMgr.h" />
     <ClInclude Include="..\..\..\include\GrapX\gvSequence.h" />
@@ -300,7 +298,6 @@
     <ClInclude Include="..\..\GDI\GXShaderMgr.h" />
     <ClInclude Include="..\..\GDI\RegionFunc.h" />
     <ClInclude Include="..\..\GXStation.h" />
-    <ClInclude Include="..\..\gxUtility.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D9.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.h" />

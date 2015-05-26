@@ -12,7 +12,7 @@
 //#include <clstd/clTree.H>
 //#include <clstd/Smart/smartstream.h>
 #include <GrapX/VertexDecl.H>
-#include "gxUtility.h"
+#include "GrapX/gxUtility.h"
 
 #include "GrapX/gxError.H"
 

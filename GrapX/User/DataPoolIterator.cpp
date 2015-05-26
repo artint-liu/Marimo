@@ -1,7 +1,6 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
 #include "clStringSet.h"
-//#include "GrapX/GUnknown.H"
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolIterator.H"
 #include "GrapX/DataPoolVariable.H"
@@ -152,29 +151,6 @@ namespace Marimo
       return iter;
     }
 
-
-    //clStringA iterator::FullNameA() const
-    //{
-    //  clStringA str;
-    //  return FullNameA(str);
-    //}
-
-    //clStringA& iterator::FullNameA(clStringA& str) const
-    //{
-    //  str = ParentName.IsEmpty()
-    //    ? pVarDesc->VariableName()
-    //    : ParentName + "." + pVarDesc->VariableName();
-
-    //  if(index != (GXUINT)-1) {
-    //    if(pVarDesc->nCount > 1 || pVarDesc->IsDynamicArray()) {
-    //      str.Append('[');
-    //      str.AppendInteger32(index);
-    //      str.Append(']');
-    //    }
-    //  }
-    //  return str;
-    //}
-
     DataPool::LPCSTR iterator::TypeName() const
     {
       return pVarDesc->TypeName();
@@ -252,14 +228,6 @@ namespace Marimo
       return pVarDesc->nOffset + nOffset;
     }
 
-    //GXUINT DataPoolIterator::AbsoluteOffset() const
-    //{
-    //  if(index == (GXUINT)-1) {
-    //    return offset();
-    //  }
-    //  return offset() + index * pVarDesc->TypeSize();
-    //}
-
     GXUINT iterator::array_length() const
     {
       if(pVarDesc->IsDynamicArray()) {
@@ -288,54 +256,11 @@ namespace Marimo
 
     //////////////////////////////////////////////////////////////////////////
 
-    //void named_iterator::first_child( named_iterator& it ) const
-    //{
-    //  it.pDataPool = pDataPool;
-
-    //  if(pVarDesc->GetTypeDesc()->Cate == T_STRUCT) {
-    //    it.pVarDesc = pVarDesc->MemberBeginPtr();
-    //    //&pDataPool->m_aMembers[pVarDesc->GetTypeDesc()->nMemberIndex];
-    //    it.nOffset  = offset();
-    //  }
-    //  else {
-    //    // 设为无效
-    //    it.pVarDesc = NULL;
-    //    it.nOffset  = 0;
-    //    it.pBuffer  = NULL;
-    //    return;
-    //  }
-
-    //  if(pVarDesc->IsDynamicArray()) // 动态数组
-    //  {
-    //    it.pBuffer = pBuffer; // child_buffer();
-    //    it.nOffset = 0;
-    //  }
-    //  else {
-    //    it.pBuffer = pBuffer;
-    //  }
-
-    //  // 数组元素
-    //  if(index != (GXUINT)-1) {
-    //    it.nOffset += index * pVarDesc->TypeSize();
-    //  }
-    //}
-
-    //clBufferBase* named_iterator::child_buffer() const
-    //{
-    //  ASSERT(pVarDesc->IsDynamicArray());
-    //  return pBuffer ? child_buffer_unsafe() : NULL;
-    //}
-
     void named_iterator::StepArrayMember(named_iterator& it)
     {
       iterator::StepArrayMember(it);
       FullNameA(it.ParentName);
     }
-
-    //clBufferBase* named_iterator::child_buffer_unsafe() const
-    //{
-    //  return pVarDesc->GetAsBuffer((GXBYTE*)pBuffer->GetPtr() + nOffset);
-    //}
 
     named_iterator named_iterator::begin() const
     {
@@ -361,23 +286,6 @@ namespace Marimo
       }
       return it;
     }
-
-    //void named_iterator::first_element(named_element_iterator& it) const
-    //{
-    //  it.pDataPool = pDataPool;
-    //  it.pVarDesc  = pVarDesc;
-    //  if(pVarDesc->IsDynamicArray()) {
-    //    it.pBuffer   = child_buffer();
-    //    it.nOffset   = 0;
-    //  }
-    //  else {
-    //    it.pBuffer   = pBuffer;
-    //    it.nOffset   = nOffset;
-    //  }
-
-    //  it.ParentName = ParentName;
-
-    //}
 
     named_element_iterator named_iterator::array_begin() const
     {
@@ -443,101 +351,6 @@ namespace Marimo
       }
       return str;
     }
-
-    //DataPool::LPCSTR named_iterator::TypeName() const
-    //{
-    //  return pVarDesc->TypeName();
-    //}
-
-    //GXBOOL named_iterator::IsArray() const
-    //{
-    //  return pVarDesc->IsDynamicArray() || pVarDesc->nCount > 1;
-    //}
-
-    //DataPool::LPCSTR named_iterator::VariableName() const
-    //{
-    //  return pVarDesc->VariableName();
-    //}
-
-    //DataPoolVariable named_iterator::ToVariable() const
-    //{
-    //  DataPoolVariable var;
-    //  return ToVariable(var);
-    //}
-
-    //DataPoolVariable& named_iterator::ToVariable(DataPoolVariable& var) const
-    //{
-    //  DataPoolVariable::VTBL* vtbl;
-    //  GXUINT nElementOffset = 0;
-
-    //  var.Free();
-
-    //  if(index == (GXUINT)-1) {
-    //    vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(pVarDesc->GetMethod());
-    //  }
-    //  else {
-    //    vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(pVarDesc->GetUnaryMethod());
-    //    nElementOffset = index * pVarDesc->TypeSize();
-    //  }
-
-    //  // 动态数组使用单独的buffer， 同时偏移也重新计算
-    //  //if(pVarDesc->IsDynamicArray()) {
-    //  //  if(pBuffer) {
-    //  //    new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-    //  //      child_buffer_unsafe(), nElementOffset);
-    //  //  }
-    //  //}
-    //  //else {
-    //  //  new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-    //  //    pBuffer, offset() + nElementOffset);
-    //  //}
-
-    //  if(pVarDesc->IsDynamicArray()) {
-    //    if(index == -1)
-    //    {
-    //      if(pBuffer) {
-    //        new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-    //          child_buffer_unsafe(), nElementOffset);
-    //      }
-    //    }
-    //    else {
-    //      ASSERT(nOffset == 0);
-    //      new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-    //        pBuffer, nElementOffset);
-    //    }
-    //  }
-    //  else {
-    //    new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-    //      pBuffer, offset() + nElementOffset);
-    //  }
-
-    //  return var;
-    //}
-
-    //GXUINT named_iterator::offset() const
-    //{
-    //  return pVarDesc->nOffset + nOffset;
-    //}
-
-    //GXUINT DataPoolIterator::AbsoluteOffset() const
-    //{
-    //  if(index == (GXUINT)-1) {
-    //    return offset();
-    //  }
-    //  return offset() + index * pVarDesc->TypeSize();
-    //}
-
-    //GXUINT named_iterator::array_length() const
-    //{
-    //  if(pVarDesc->IsDynamicArray()) {
-    //    clBufferBase* pChildBuffer = child_buffer();
-    //    return pChildBuffer == NULL ? NULL
-    //      : (GXUINT)pChildBuffer->GetSize() / pVarDesc->TypeSize();
-    //  }
-    //  else {
-    //    return pVarDesc->nCount;
-    //  }
-    //}
 
     //////////////////////////////////////////////////////////////////////////
 

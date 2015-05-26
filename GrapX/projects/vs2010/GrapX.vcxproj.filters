@@ -240,9 +240,6 @@
     <ClInclude Include="..\..\GXStation.h">
       <Filter>Lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gxUtility.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX.h">
       <Filter>Include</Filter>
     </ClInclude>
@@ -271,9 +268,6 @@
       <Filter>Include\GrapX</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX\guxtheme.h">
-      <Filter>Include\GrapX</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GrapX\GVPhySimulator.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX\GXCanvas.h">
@@ -337,9 +331,6 @@
       <Filter>Include\GrapX</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX\GCamera.h">
-      <Filter>Include\GrapX</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\GrapX\GFX.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX\WineDragListDef.h">

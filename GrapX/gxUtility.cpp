@@ -9,7 +9,7 @@
 #include "GrapX/GPrimitive.h"
 #include "GrapX/GXGraphics.H"
 #include "GrapX/GShader.H"
-#include "gxUtility.h"
+#include "GrapX/gxUtility.h"
 
 #include "GrapX/GrapVR.H"
 

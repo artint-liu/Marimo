@@ -24,7 +24,7 @@
 #include <GrapX/gvScene.h>
 #include <GrapX/gvSceneMgr.h>
 #include <GrapX/gvSequence.h>
-#include "gxUtility.h"
+#include "GrapX/gxUtility.h"
 
 //#define DEFAULT_MTL_FILENAME "shaders\\Diffuse_shader.txt"
 

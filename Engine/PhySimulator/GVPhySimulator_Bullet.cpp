@@ -14,7 +14,7 @@
 //#include <GXKernel.H>
 //#include <GXUser.H>
 #include "thread/clMessageThread.h"
-#include <Engine/GVPhySimulator.h>
+#include <GrapX/GVPhySimulator.h>
 #include <GrapX/gxError.h>
 #include "GrapX/GrapVR.H"
 

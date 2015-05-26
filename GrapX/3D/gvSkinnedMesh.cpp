@@ -20,7 +20,7 @@
 #include "GrapX/gvSkeleton.h"
 #include "GrapX/gvSkinnedMesh.h"
 #include "GrapX/gvScene.h"
-#include "gxUtility.h"
+#include "GrapX/gxUtility.h"
 
 // 文件储存用的Keys
 #define SKINNEDMESH_NAME          "SkMesh@Name"

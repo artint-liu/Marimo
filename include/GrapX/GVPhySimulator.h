@@ -1,5 +1,9 @@
 #ifndef _GRAPVR_PHYSICAL_SIMULATOR_INTERFACE_H_
 #define _GRAPVR_PHYSICAL_SIMULATOR_INTERFACE_H_
+//
+// 这个文件只在GrapX库中声明了物理引擎的接口，以便Scene使用
+// 实现方法则放在了Engine库中
+//
 
 class GVNode;
 

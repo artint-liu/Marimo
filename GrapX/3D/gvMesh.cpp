@@ -20,7 +20,7 @@
 #include <GrapX/gvMesh.h>
 #include <GrapX/gvScene.h>
 
-#include "gxUtility.h"
+#include "GrapX/gxUtility.h"
 
 // 文件储存用的Keys
 #define MESH_NAME         "Mesh@Name"

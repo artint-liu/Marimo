@@ -40,11 +40,11 @@
 #define StringA_SetAsStringA    String_SetAsStringT<GXLPCSTR, clStringA>
 
 #ifdef ENABLE_DATAPOOL_WATCHER
-#define THIS_IMPULSE_DATA_CHANGE              pThis->Impulse(DATACT_Change)
-#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX)  pThis->Impulse(_DATA_ACT, _INDEX)
+#define THIS_IMPULSE_DATA_CHANGE                      pThis->Impulse(DATACT_Change)
+#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)  pThis->Impulse(_DATA_ACT, _INDEX, _COUNT)
 #else
 #define THIS_IMPULSE_DATA_CHANGE
-#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX)
+#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
 using namespace clstd;
@@ -105,34 +105,15 @@ namespace Marimo
       return m_vtbl;
     }
 
-    inline DataPool* InlGetDataPool() GXCONST
-    {
-      return m_pDataPool;
-    }
-
     inline LPCVD InlGetVDD() GXCONST
     {
       return m_pVdd;
     }
 
-    //inline GXUINT_PTR InlStringBase() GXCONST
-    //{
-    //  return m_pDataPool->m_StringBase;
-    //}
     inline GXBOOL InlCleanupArray(LPCVD pVarDesc, GXLPVOID lpBuffer, int nCount)
     {
       return m_pDataPool->CleanupArray(pVarDesc, lpBuffer, nCount);
     }
-
-    inline clBufferBase* InlGetBufferObj() GXCONST
-    {
-      return m_pBuffer;
-    }
-
-    //inline GXLPBYTE InlGetBufferPtr() GXCONST
-    //{
-    //  return (GXLPBYTE)m_pBuffer->GetPtr();
-    //}
 
     inline GXBOOL IsReadOnly() GXCONST
     {
@@ -166,14 +147,6 @@ namespace Marimo
       }
       return TRUE;
     }
-
-//#ifdef _DEBUG
-//    inline void InlIncreateStringRefCount()
-//    {
-//      ASSERT( ! m_pDataPool->m_bReadOnly); // 只读模式下不会新建字符串
-//      m_pDataPool->m_nDbgNumOfString++;
-//    }
-//#endif // #ifdef _DEBUG
 
     inline DataPool::LPCED InlGetEnum(GXUINT nIndex) GXCONST
     {
@@ -233,7 +206,6 @@ namespace Marimo
       var.AbsOffset = m_AbsOffset;
       if(GXSUCCEEDED(m_pDataPool->IntQuery(&var, szName, -1)))
       {
-        //ASSERT(pArrayBuffer == NULL);
         new(pBase) DataPoolVariable((VTBL*)var.vtbl, m_pDataPool, var.pVdd, var.pBuffer, var.AbsOffset);
         return GX_OK;
       }
@@ -462,15 +434,13 @@ namespace Marimo
     return *this;
   }
 
-#ifdef ENABLE_DATAPOOL_WATCHER
-  GXHRESULT Variable::Impulse(DataAction eAct, GXUINT nIndex)
+  GXBOOL Variable::Impulse(DataAction reason, GXUINT index, GXUINT count)
   {
     if(m_pDataPool != NULL) {
-      return m_pDataPool->ImpluseByVariable(eAct, *this, nIndex, TRUE);
+      return m_pDataPool->Impluse(*this, reason, index, count);
     }
     return GX_OK;
   }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
   GXHRESULT Variable::GetPool(DataPool** ppDataPool) GXCONST
   {
@@ -520,12 +490,6 @@ namespace Marimo
     return (GXLPBYTE)m_pBuffer->GetPtr() + m_AbsOffset;
   }
 
-  //GXBOOL Variable::IsFixed() GXCONST
-  //{
-  //  // FIXME: 没有检查空值
-  //  return m_pDataPool->IntGetEntryBuffer() == m_pBuffer;
-  //}
-
   GXDWORD Variable::GetCaps() GXCONST
   {
     //m_pVdd->IsDynamicArray()
@@ -568,20 +532,17 @@ namespace Marimo
 
   GXUINT Variable::GetOffset() GXCONST
   {
-    //return m_vtbl->GetOffset   (this);
     return m_AbsOffset;
   }
   
   GXLPCSTR Variable::GetName() GXCONST
   {
     return m_pVdd->VariableName();
-    //return m_vtbl->GetName(this);
   }
   
   GXLPCSTR Variable::GetTypeName() GXCONST
   {
     return m_pVdd->TypeName();
-    //return m_vtbl->GetTypeName(this);
   }
 
   TypeCategory Variable::GetTypeCategory() GXCONST
@@ -630,24 +591,12 @@ namespace Marimo
     return FALSE;
   }
 
-  //GXBOOL Exception_SetAsStringA(VarImpl* pThis,GXLPCSTR szString)
-  //{
-  //  CLOG("DataPool: Can not set this variable as string.\n");
-  //  return FALSE;
-  //}
-
   template<typename _TChar>
   GXBOOL Exception_ParseT(VarImpl* pThis, const _TChar* szString, GXUINT length)
   {
     CLOG_ERROR("%s exception\n", __FUNCTION__);
     return FALSE;
   }
-
-  //GXBOOL Exception_ParseA(VarImpl* pThis,GXLPCSTR szString, GXUINT length)
-  //{
-  //  CLOG_ERROR("%s exception\n", __FUNCTION__);
-  //  return FALSE;
-  //}
 
   float Exception_ToFloat(GXCONST VarImpl* pThis )
   {
@@ -885,8 +834,6 @@ namespace Marimo
       case T_WORD:
       case T_DWORD:
         return pThis->Set((u32)clstd::xtou(szString, 10, length));
-        //return pThis->Set((u32)clstd::xtou(szString, 10, length));
-        //return pThis->Set((u32)clstd::xtou(szString, 10, length));
       case T_QWORD:
         return pThis->Set((u64)clstd::_xstrtou<u64>(szString, 10, length));
 
@@ -894,8 +841,6 @@ namespace Marimo
       case T_SWORD:
       case T_SDWORD:
         return pThis->Set((i32)clstd::xtoi(szString, 10, length));
-        //return pThis->Set((i32)clstd::xtoi(szString, 10, length));
-        //return pThis->Set((i32)clstd::xtoi(szString, 10, length));
       case T_SQWORD:
         return pThis->Set((i64)clstd::_xstrtoi<i64>(szString, 10, length));
       case T_FLOAT:
@@ -908,16 +853,6 @@ namespace Marimo
     return FALSE;
   }
 
-  //GXBOOL Primary_ParseW(VarImpl* pThis, GXLPCWSTR szString, GXUINT length)
-  //{
-  //  return Primary_ParseT(pThis, szString, length);
-  //}
-
-  //GXBOOL Primary_ParseA(VarImpl* pThis, GXLPCSTR szString, GXUINT length)
-  //{
-  //  return Primary_ParseT(pThis, szString, length);
-  //}
-
   float Primary_ToFloat(GXCONST VarImpl* pThis )
   {
     return (pThis->InlGetCategory() == T_FLOAT)
@@ -928,9 +863,7 @@ namespace Marimo
   {
     if(pThis->InlGetCategory() == T_FLOAT) {
       *(float*)pThis->GetPtr() = val;
-#ifdef ENABLE_DATAPOOL_WATCHER
-      pThis->InlGetDataPool()->ImpluseByVariable(DATACT_Change, *pThis, 0, FALSE);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+      THIS_IMPULSE_DATA_CHANGE;
       return TRUE;
     }
     return FALSE;
@@ -1020,9 +953,8 @@ namespace Marimo
       CLBREAK;
       return FALSE;
     }
-#ifdef ENABLE_DATAPOOL_WATCHER
-    pThis->InlGetDataPool()->ImpluseByVariable(DATACT_Change, *pThis, 0, FALSE);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+
+    THIS_IMPULSE_DATA_CHANGE;
     return TRUE;
   }
 
@@ -1068,17 +1000,6 @@ namespace Marimo
     }
   }
 
-  //GXBOOL Enum_ParseW(VarImpl* pThis, GXLPCWSTR szString, GXUINT length)
-  //{
-  //  return Enum_SetAsStringT(pThis, szString)
-  //}
-
-  //GXBOOL Enum_ParseA(VarImpl* pThis, GXLPCSTR szString, GXUINT length)
-  //{
-  //  CLBREAK; // TODO: 实现这个!
-  //  return FALSE;
-  //}
-
   template<class _TString>
   _TString Enum_ToStringT(GXCONST VarImpl* pThis)
   {
@@ -1096,26 +1017,6 @@ namespace Marimo
 
     return bval ? str : _TString(e);
   }
-
-  //clStringW Enum_ToStringW(GXCONST VarImpl* pThis)
-  //{
-  //  return Enum_ToStringT<clStringW>(pThis);
-  //}
-
-  //clStringA Enum_ToStringA(GXCONST VarImpl* pThis)
-  //{
-  //  return Enum_ToStringT<clStringA>(pThis);
-  //}
-
-  //GXBOOL Enum_SetAsStringW(VarImpl* pThis, GXLPCWSTR szString)
-  //{
-  //  return Enum_SetAsStringT(pThis, szString);
-  //}
-
-  //GXBOOL Enum_SetAsStringA(VarImpl* pThis, GXLPCSTR szString)
-  //{
-  //  return Enum_SetAsStringT(pThis, szString);
-  //}
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -1206,40 +1107,6 @@ namespace Marimo
     }
   }
 
-  //GXBOOL Flag_ParseW(VarImpl* pThis, GXLPCWSTR szString, GXUINT length)
-  //{
-  //  CLBREAK; // TODO: 实现这个!
-  //  return FALSE;
-  //}
-
-  //GXBOOL Flag_ParseA(VarImpl* pThis, GXLPCSTR szString, GXUINT length)
-  //{
-  //  CLBREAK; // TODO: 实现这个!
-  //  return FALSE;
-  //}
-
-  //clStringW Flag_ToStringW(GXCONST VarImpl* pThis)
-  //{
-  //  return Flag_ToStringT<clStringW>(pThis);
-  //}
-
-  //clStringA Flag_ToStringA(GXCONST VarImpl* pThis)
-  //{
-  //  return Flag_ToStringT<clStringA>(pThis);
-  //}
-
-  //GXBOOL Flag_SetAsStringW(VarImpl* pThis, GXLPCWSTR szString)
-  //{
-  //  CLBREAK; // TODO: 实现这个!
-  //  return FALSE;
-  //}
-
-  //GXBOOL Flag_SetAsStringA(VarImpl* pThis, GXLPCSTR szString)
-  //{
-  //  CLBREAK; // TODO: 实现这个!
-  //  return FALSE;
-  //}
-
   //////////////////////////////////////////////////////////////////////////
 
   template<class _TString>
@@ -1256,22 +1123,6 @@ namespace Marimo
     return TRUE;
   }
 
-  //GXBOOL String_ParseW(VarImpl* pThis, GXLPCWSTR szString, GXUINT length)
-  //{
-  //  ASSERT(length == 0); // 没实现非0长度的处理
-  //  if(length == 0 || szString[length] == 0) {
-  //    pThis->Set(szString);
-  //  }
-  //  return TRUE;
-  //}
-
-  //GXBOOL String_ParseA(VarImpl* pThis, GXLPCSTR szString, GXUINT length)
-  //{
-  //  ASSERT(length == 0); // 没实现非0长度的处理
-  //  pThis->Set(szString);
-  //  return TRUE;
-  //}
-
   template<class _TRetString, class _TStoString> // 返回字符串类型和自身储存的字符串类型
   _TRetString String_ToStringT(GXCONST VarImpl* pThis)
   {
@@ -1285,65 +1136,15 @@ namespace Marimo
     return _TRetString(*(_TStoString*)((GXBYTE*)pStringData));
   }
 
-  //clStringW String_ToStringW(GXCONST VarImpl* pThis)
-  //{
-  //  GXLPBYTE pStringData = ((GXBYTE*)pThis->InlGetBufferPtr() + pThis->GetOffset());
-  //  return *(void**)pStringData == NULL ? L"" : *(clStringW*)((GXBYTE*)pStringData);
-  //}
-
   template<typename T_LPCSTR, class _TStoString>
   GXBOOL String_SetAsStringT(VarImpl* pThis, T_LPCSTR szString)
   {
-//    GXLPBYTE pStringData = pThis->InlGetBufferPtr() + pThis->GetOffset();
-//    if(*(void**)(pStringData) == NULL) {
-//      new(pStringData) _TStoString(szString);
-//#ifdef _DEBUG
-//      pThis->InlIncreateStringRefCount();
-//#endif // #ifdef _DEBUG
-//    }
-//    else {
-//      *(_TStoString*)((GXBYTE*)pStringData) = szString;
-//    }
-    
     if(pThis->SetAsString<T_LPCSTR, _TStoString>(szString)) {
       THIS_IMPULSE_DATA_CHANGE;
       return TRUE;
     }
     return FALSE;
   }
-
-  //GXBOOL String_SetAsStringW(VarImpl* pThis, GXLPCWSTR szString)
-  //{
-  //  GXLPBYTE pStringData = pThis->InlGetBufferPtr() + pThis->GetOffset();
-  //  if(*(void**)(pStringData) == NULL) {
-  //    new(pStringData) clStringW(szString);
-  //    pThis->InlIncreateStringRefCount();
-  //  }
-  //  else {
-  //    *(clStringW*)((GXBYTE*)pStringData) = szString;
-  //  }
-
-  //  THIS_IMPULSE_DATA_CHANGE
-  //  return TRUE;
-  //}
-
-  //clStringA String_ToStringA(GXCONST VarImpl* pThis)
-  //{
-  //  return clStringA(*(clStringW*)((GXBYTE*)pThis->InlGetBufferPtr() + pThis->GetOffset()));
-  //}
-
-  //GXBOOL String_SetAsStringA(VarImpl* pThis, GXLPCSTR szString)
-  //{
-  //  GXLPBYTE pStringData = pThis->InlGetBufferPtr() + pThis->GetOffset();
-  //  if(*(void**)(pStringData) == NULL) {
-  //    new((GXBYTE*)pStringData) clStringW;
-  //    pThis->InlIncreateStringRefCount();
-  //  }
-
-  //  *(clStringW*)(pStringData) = szString;
-  //  THIS_IMPULSE_DATA_CHANGE
-  //  return TRUE;
-  //}
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -1356,20 +1157,6 @@ namespace Marimo
     return str;
   }
 
-  //clStringW Struct_ToStringW(GXCONST VarImpl* pThis)
-  //{
-  //  clStringW str = L"struct ";
-  //  str.Append(pThis->GetName());
-  //  return str;
-  //}
-
-  //clStringA Struct_ToStringA(GXCONST VarImpl* pThis)
-  //{
-  //  clStringA str = "struct ";
-  //  str.Append(pThis->GetName());
-  //  return str;
-  //}
-
   //////////////////////////////////////////////////////////////////////////
   template<class _TString>
   _TString Object_ToStringT(GXCONST VarImpl* pThis)
@@ -1380,20 +1167,6 @@ namespace Marimo
     str.Append(pThis->GetName());
     return str;
   }
-
-  //clStringW Object_ToStringW(GXCONST VarImpl* pThis)
-  //{
-  //  clStringW str = L"object ";
-  //  str.Append(pThis->GetName());
-  //  return str;
-  //}
-
-  //clStringA Object_ToStringA(GXCONST VarImpl* pThis)
-  //{
-  //  clStringA str = "object ";
-  //  str.Append(pThis->GetName());
-  //  return str;
-  //}
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -1425,20 +1198,6 @@ namespace Marimo
     return str;
   }
 
-  //clStringW StaticArray_ToStringW(GXCONST VarImpl* pThis)
-  //{
-  //  clStringW str = pThis->GetTypeName();
-  //  str.AppendFormat(L"[%d]", pThis->GetLength());
-  //  return str;
-  //}
-
-  //clStringA StaticArray_ToStringA(GXCONST VarImpl* pThis)
-  //{
-  //  clStringA str = pThis->GetTypeName();
-  //  str.AppendFormat("[%d]", pThis->GetLength());
-  //  return str;
-  //}
-
   GXBOOL StaticArray_ParseW(VarImpl* pThis, GXLPCWSTR szString, GXUINT length)
   {
     // TODO: 暂时不支持, 将来考虑支持"{键值1=数据1;键值2=数据2;...}..."这种类型的数据解析
@@ -1467,19 +1226,17 @@ namespace Marimo
     DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
     Variable val;
     if(nIncrease == 0) {
+      // 不新增元素，只返回最后一个对象
       pThis->InlDynSetupUnary(pArrayBuffer, nIndex - 1, &val);
     }
     else {
       DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
-      //ASSERT(pVdd->nOffset == pThis->InlGetOffset());
-      //ASSERT(pThis->GetOffset() == 0);
-      //DataPoolArray* pArrayBuffer = static_cast<DataPoolArray*>(pThis->InlGetBufferObj());
       const GXUINT nPrevSize = (GXUINT)pArrayBuffer->GetSize();
       pArrayBuffer->Resize(nPrevSize + pVdd->TypeSize() * nIncrease, TRUE);
       pThis->InlDynSetupUnary(pArrayBuffer, nIndex, &val);
-#ifdef ENABLE_DATAPOOL_WATCHER
-      pThis->InlGetDataPool()->ImpluseByVariable(DATACT_Insert, val, 0, FALSE);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+
+      ASSERT(nIndex == nPrevSize / pVdd->TypeSize());
+      THIS_IMPULSE_DATA(DATACT_Insert, nIndex, nIncrease);
     }
     return val;
   }
@@ -1498,19 +1255,10 @@ namespace Marimo
     {
       return FALSE;
     }
-    //else if((nIndex != (GXUINT)-1))
-    //if(nLength == 0 || nCount == 0 ||               // 删除本身长度就是0的数组
-    //  (nIndex != (GXUINT)-1 && nIndex >= nLength))  // 不合法的index
-    //{ 
-    //  return FALSE;
-    //}
 
-    //ASSERT(nCount == 1); // 没实现大于1的情况，这里记一下
-
-    //DataPoolArray* pArrayBuffer = static_cast<DataPoolArray*>(pThis->InlGetBufferObj());
     DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
     
-    THIS_IMPULSE_DATA(DATACT_Deleting, nIndex);
+    THIS_IMPULSE_DATA(DATACT_Deleting, nIndex, nCount);
 
     if(nIndex == (GXUINT)-1)     // 全部删除
     {
@@ -1523,7 +1271,7 @@ namespace Marimo
       pArrayBuffer->Replace(pVdd->TypeSize() * nIndex, pVdd->TypeSize() * nCount, NULL, 0);
     }
     
-    THIS_IMPULSE_DATA(DATACT_Deleted, nIndex);
+    THIS_IMPULSE_DATA(DATACT_Deleted, nIndex, nCount);
     return TRUE;
   }
 

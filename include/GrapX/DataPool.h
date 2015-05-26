@@ -540,9 +540,9 @@ namespace Marimo
 #endif // #ifdef _DEBUG
 
 #ifdef ENABLE_DATAPOOL_WATCHER
-    WatcherArray        m_aWatchers;
+    //WatcherArray        m_aWatchers;
     typedef clset<GXLPCVOID> KnockingSet;
-    KnockingSet         m_setKnocking;    // 记录正在发送更改通知的Variable列表,防止多个相同指向的Variable反复递归.
+    KnockingSet         m_ImpulsingSet;    // 记录正在发送更改通知的Variable列表,防止多个相同指向的Variable反复递归.
 
     struct WATCH_FIXED // 固定变量监视器
     {
@@ -581,7 +581,7 @@ namespace Marimo
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
     LPCVD   IntGetVariable    (LPCVD pVdd, GXLPCSTR szName);
 #ifdef ENABLE_DATAPOOL_WATCHER
-    GXBOOL  IntIsKnocking     (const DataPoolVariable* pVar) const;
+    GXBOOL  IntIsImpulsing    (const DataPoolVariable* pVar) const;
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
     void    LocalizeTables    (BUILDTIME& bt, GXSIZE_T cbVarSpace);
     clsize  LocalizePtr       ();
@@ -605,8 +605,8 @@ namespace Marimo
     GXBOOL        IntQuery            (GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
     GXINT         IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
 #ifdef ENABLE_DATAPOOL_WATCHER
-    int           FindWatcher         (DataPoolWatcher* pWatcher);
-    int           FindWatcherByName   (GXLPCSTR szClassName);
+    //int           FindWatcher         (DataPoolWatcher* pWatcher);
+    //int           FindWatcherByName   (GXLPCSTR szClassName);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
     //LPCENUMDESC   IntGetEnum          (GXUINT nPackIndex) const;  // m_aEnumPck中的索引
     LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
@@ -660,7 +660,8 @@ namespace Marimo
     virtual GXHRESULT   UnregisterIdentify  (GXLPCSTR szClassName, GXLPVOID pIdentify); // TODO: 名字起的不好
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
 
-    virtual GXHRESULT   ImpluseByVariable   (DataAction eType, const DataPoolVariable& var, GXUINT nIndex, GXBOOL bForce = TRUE);
+    //virtual GXHRESULT   ImpluseByVariable   (DataAction eType, const DataPoolVariable& var, GXUINT nIndex, GXBOOL bForce = TRUE);
+    virtual GXBOOL      Impluse             (const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count);
 
     virtual GXBOOL      Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam);
     virtual GXBOOL      Watch               (GXLPCSTR szExpression, DataPoolWatcher* pWatcher);
