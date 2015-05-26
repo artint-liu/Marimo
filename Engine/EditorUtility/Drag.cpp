@@ -1,18 +1,18 @@
 #include "GrapX.H"
 
-#include <GXUser.H>
+#include <GrapX/GXUser.H>
 
-#include "GUnknown.H"
-#include "GResource.H"
-#include "GShader.h"
-#include "GPrimitive.h"
-#include "GXGraphics.H"
-#include "GXCanvas.h"
-#include "GXCanvas3D.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GShader.h"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/GXCanvas3D.h"
 
-#include "3D/GrapVR.H"
-#include "../GameEngine.h"
-#include "Drag.h"
+#include "GrapX/GrapVR.H"
+#include "Engine.h"
+#include "Engine/Drag.h"
 
 namespace EditorUtility
 {

@@ -1,32 +1,32 @@
 // 全局头文件
 #include <GrapX.H>
-#include <User/GrapX.Hxx>
+#include <../GrapX/User/GrapX.Hxx>
 
 // 标准接口
-#include <GUnknown.H>
-#include <GResource.H>
-#include <GPrimitive.h>
-#include <GXGraphics.H>
-#include <GShader.H>
-#include <GXCanvas.H>
-#include <GXCanvas3D.h>
-#include <GCamera.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GPrimitive.h>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GShader.H>
+#include <GrapX/GXCanvas.H>
+#include <GrapX/GXCanvas3D.h>
+#include <GrapX/GCamera.H>
 
 // 私有头文件
 #include "clTree.H"
 #include "clTransform.H"
 #include <Smart/smartstream.h>
 #include "Smart/SmartProfile.h"
-#include <Utility/VertexDecl.H>
-#include "gxError.H"
+#include <GrapX/VertexDecl.H>
+#include "GrapX/gxError.H"
 
-#include <3D/gvNode.h>
-#include <3D/gvMesh.h>
-#include <3D/gvScene.h>
+#include <GrapX/gvNode.h>
+#include <GrapX/gvMesh.h>
+#include <GrapX/gvScene.h>
 
-#include "GameEngine.h"
-#include "gxUtility.h"
-#include "GFX.h"
+#include "Engine.h"
+//#include "gxUtility.h"
+#include "Engine/GFX.h"
 #include "GFXPatch3D.h"
 #include "GFXParticles.h"
 

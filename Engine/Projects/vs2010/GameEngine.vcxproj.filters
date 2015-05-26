@@ -57,21 +57,6 @@
     <ClInclude Include="..\..\Audio\aldlist.h">
       <Filter>Audio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\EditorUtility\RotationAxis.h">
-      <Filter>EditorUtility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\EditorUtility\ScalingAxis.h">
-      <Filter>EditorUtility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\EditorUtility\TransformAxis.h">
-      <Filter>EditorUtility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\EditorUtility\TranslationAxis.h">
-      <Filter>EditorUtility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\EditorUtility\Drag.h">
-      <Filter>EditorUtility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\FBX\SceneCache.h">
       <Filter>FBX Loader</Filter>
     </ClInclude>
@@ -90,77 +75,92 @@
     <ClInclude Include="..\..\PhySimulator\GVPhySimulator_Bullet.h">
       <Filter>PhysicalSimulator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Scene\SkyQuad.h">
-      <Filter>Scene</Filter>
+    <ClInclude Include="..\..\..\include\Engine\GXFCAgent.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Scene\BrunetonSkyQuad.h">
-      <Filter>Scene</Filter>
+    <ClInclude Include="..\..\..\include\Engine\HeightfieldTerrain.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Scene\HeightfieldTerrain.h">
-      <Filter>Scene</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOAudio.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXDialog.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOButton.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXDlgItemBase.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MODialog.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXEdit.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MODlgItemBase.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXFC.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOEdit.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXFCAgent.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOList.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXList.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOPropertyList.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXPropertySheet.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOPropertySheet.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXStatic.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOStatic.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXToolbar.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOToolbar.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXWndBase.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\MOWndBase.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\MOPropertyList.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\RotationAxis.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\UniversalDialog.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\ScalingAxis.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\WEEdit.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\SkyQuad.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\WEListBox.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\TransformAxis.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\WEListView.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\TranslationAxis.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\WEMenu.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\UniversalDialog.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\WEStatic.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\WEEdit.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\WETreeView.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\WEListBox.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\DlgConsole.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\WEListView.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UI\GXButton.h">
-      <Filter>UI</Filter>
+    <ClInclude Include="..\..\..\include\Engine\WEMenu.h">
+      <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\GameEngine.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\..\include\Engine\WEStatic.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\Engine\WETreeView.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\Engine\BrunetonSkyQuad.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\Engine\DlgConsole.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\Engine\Drag.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\Engine\GXFC.h">
+      <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

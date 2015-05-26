@@ -1,9 +1,10 @@
-#include "GameEngine.h"
-#include "GXFCAgent.H"
-#include "GXWndBase.H"
-#include "GXDialog.H"
-#include "GXDlgItemBase.H"
-#include "GXStatic.h"
+#include "GrapX.h"
+#include "Engine.h"
+#include "Engine/GXFCAgent.H"
+#include "Engine/MOWndBase.H"
+#include "Engine/MODialog.H"
+#include "Engine/MODlgItemBase.H"
+#include "Engine/MOStatic.h"
 
 CMOStatic::CMOStatic()
   : CMODlgItem(NULL)

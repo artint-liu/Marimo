@@ -2,18 +2,18 @@
 #include "clTree.H"
 #include "clTransform.h"
 #include "clImage.h"
-#include "GameEngine.h"
+#include "Engine.h"
 
-#include "GXUser.H"
+#include "GrapX/GXUser.H"
 
-#include "GUnknown.H"
-#include "GResource.H"
-#include "GPrimitive.h"
-#include "GTexture.H"
-#include "3D/gvNode.h"
-#include "3D/gvMesh.h"
-#include "HeightfieldTerrain.h"
-#include "gxUtility.h"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GTexture.H"
+#include "GrapX/gvNode.h"
+#include "GrapX/gvMesh.h"
+#include "Engine/HeightfieldTerrain.h"
+#include "GrapX/gxUtility.h"
 
 
 HeightfieldTerrainBlock::HeightfieldTerrainBlock( GXGraphics* pGraphics )

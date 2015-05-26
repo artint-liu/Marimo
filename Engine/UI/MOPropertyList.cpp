@@ -1,9 +1,10 @@
-#include "GameEngine.h"
-#include "GXFCAgent.H"
-#include "GXWndBase.H"
-#include "GXDialog.H"
-#include "GXDlgItemBase.H"
-#include "MOPropertyList.h"
+#include "GrapX.h"
+#include "Engine.h"
+#include "Engine/GXFCAgent.H"
+#include "Engine/MOWndBase.H"
+#include "Engine/MODialog.H"
+#include "Engine/MODlgItemBase.H"
+#include "Engine/MOPropertyList.h"
 
 CMOPropertyList::CMOPropertyList()
   : CMODlgItem(NULL)

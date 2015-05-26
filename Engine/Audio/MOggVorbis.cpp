@@ -3,9 +3,9 @@
 #endif // #if defined(_WIN32) || defined(_WINDOWS)
 
 #include <GrapX.H>
-#include "GUnknown.H"
-#include "GXKernel.H"
-#include "MOAudio.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GXKernel.H"
+#include "Engine/MOAudio.H"
 //#include <clstd.h>
 //#include <clString.H>
 //#include <clFile.H>

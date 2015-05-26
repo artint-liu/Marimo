@@ -1,12 +1,7 @@
-#include "GameEngine.h"
-//#include <PreDefine.H>
-#include "GXFCAgent.H"
-//#include <GrapX.H>
-//#include <gxWinDef.H>
-#include "GXFCAgent.H"
-//#include <GrapX.H>
-//#include <User\Win32Emu\GXUser.H>
-#include "GXWndBase.H"
+#include "GrapX.h"
+#include "Engine.h"
+#include "Engine/GXFCAgent.H"
+#include "Engine/MOWndBase.H"
 
 CMOWnd::CMOWnd() 
   : m_hWnd      (NULL)

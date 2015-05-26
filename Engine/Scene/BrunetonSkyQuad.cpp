@@ -1,21 +1,21 @@
 #include "GrapX.H"
 //#include "clTree.H"
-#include "GUnknown.H"
-#include "GResource.H"
-#include "GXGraphics.H"
-#include "GShader.H"
-#include "GXKernel.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GShader.H"
+#include "GrapX/GXKernel.H"
 
 //#include "3d/gvNode.h"
 //#include "3d/gvMesh.h"
 //#include "3d/gvGeometry.h"
-#include "3D/GrapVR.H"
-#include "GameEngine.h"
+#include "GrapX/GrapVR.H"
+#include "Engine.h"
 
-#include "DataPool.H"
-#include "DataPoolVariable.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 
-#include "BrunetonSkyQuad.h"
+#include "Engine/BrunetonSkyQuad.h"
 
 namespace Scene
 {

@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_X86;_DEBUG;_WIN32;_WINDOWS;_USRDLL;GAMEENGINE_EXPORTS;_GXUI;SQLITE_API=__declspec(dllexport);dSINGLE;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -108,7 +108,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_USRDLL;GAMEENGINE_EXPORTS;_GXUI;SQLITE_API=__declspec(dllexport);dSINGLE;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_X86;NDEBUG;_WINDOWS;_USRDLL;GAMEENGINE_EXPORTS;_GXUI;SQLITE_API=__declspec(dllexport);dSINGLE;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,7 +149,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_X64;NDEBUG;_WINDOWS;_USRDLL;GAMEENGINE_EXPORTS;_GXUI;SQLITE_API=__declspec(dllexport);dSINGLE;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,46 +162,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\Engine\BrunetonSkyQuad.h" />
+    <ClInclude Include="..\..\..\include\Engine\DlgConsole.h" />
+    <ClInclude Include="..\..\..\include\Engine\Drag.h" />
+    <ClInclude Include="..\..\..\include\Engine\GXFC.h" />
+    <ClInclude Include="..\..\..\include\Engine\GXFCAgent.h" />
+    <ClInclude Include="..\..\..\include\Engine\HeightfieldTerrain.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOAudio.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOButton.h" />
+    <ClInclude Include="..\..\..\include\Engine\MODialog.h" />
+    <ClInclude Include="..\..\..\include\Engine\MODlgItemBase.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOEdit.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOList.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOPropertyList.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOPropertySheet.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOStatic.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOToolbar.h" />
+    <ClInclude Include="..\..\..\include\Engine\MOWndBase.h" />
+    <ClInclude Include="..\..\..\include\Engine\RotationAxis.h" />
+    <ClInclude Include="..\..\..\include\Engine\ScalingAxis.h" />
+    <ClInclude Include="..\..\..\include\Engine\SkyQuad.h" />
+    <ClInclude Include="..\..\..\include\Engine\TransformAxis.h" />
+    <ClInclude Include="..\..\..\include\Engine\TranslationAxis.h" />
+    <ClInclude Include="..\..\..\include\Engine\UniversalDialog.h" />
+    <ClInclude Include="..\..\..\include\Engine\WEEdit.h" />
+    <ClInclude Include="..\..\..\include\Engine\WEListBox.h" />
+    <ClInclude Include="..\..\..\include\Engine\WEListView.h" />
+    <ClInclude Include="..\..\..\include\Engine\WEMenu.h" />
+    <ClInclude Include="..\..\..\include\Engine\WEStatic.h" />
+    <ClInclude Include="..\..\..\include\Engine\WETreeView.h" />
     <ClInclude Include="..\..\Audio\aldlist.h" />
     <ClInclude Include="..\..\Audio\AudioBuffer_OAL.h" />
     <ClInclude Include="..\..\Audio\AudioSource_OAL.h" />
     <ClInclude Include="..\..\Audio\Audio_OAL.h" />
     <ClInclude Include="..\..\Audio\MOggVorbis.h" />
-    <ClInclude Include="..\..\EditorUtility\Drag.h" />
-    <ClInclude Include="..\..\EditorUtility\RotationAxis.h" />
-    <ClInclude Include="..\..\EditorUtility\ScalingAxis.h" />
-    <ClInclude Include="..\..\EditorUtility\TransformAxis.h" />
-    <ClInclude Include="..\..\EditorUtility\TranslationAxis.h" />
     <ClInclude Include="..\..\FBX\GetPosition.h" />
     <ClInclude Include="..\..\FBX\SceneCache.h" />
     <ClInclude Include="..\..\FBX\SceneContext.h" />
-    <ClInclude Include="..\..\GameEngine.h" />
     <ClInclude Include="..\..\GFX\GFXParticles.h" />
     <ClInclude Include="..\..\GFX\GFXPatch3D.h" />
     <ClInclude Include="..\..\PhySimulator\GVPhySimulator_Bullet.h" />
-    <ClInclude Include="..\..\Scene\BrunetonSkyQuad.h" />
-    <ClInclude Include="..\..\Scene\HeightfieldTerrain.h" />
-    <ClInclude Include="..\..\Scene\SkyQuad.h" />
-    <ClInclude Include="..\..\UI\DlgConsole.h" />
-    <ClInclude Include="..\..\UI\GXButton.h" />
-    <ClInclude Include="..\..\UI\GXDialog.h" />
-    <ClInclude Include="..\..\UI\GXDlgItemBase.h" />
-    <ClInclude Include="..\..\UI\GXEdit.h" />
-    <ClInclude Include="..\..\UI\GXFC.h" />
-    <ClInclude Include="..\..\UI\GXFCAgent.h" />
-    <ClInclude Include="..\..\UI\GXList.h" />
-    <ClInclude Include="..\..\UI\GXPropertySheet.h" />
-    <ClInclude Include="..\..\UI\GXStatic.h" />
-    <ClInclude Include="..\..\UI\GXToolbar.h" />
-    <ClInclude Include="..\..\UI\GXWndBase.h" />
-    <ClInclude Include="..\..\UI\MOPropertyList.h" />
-    <ClInclude Include="..\..\UI\UniversalDialog.h" />
-    <ClInclude Include="..\..\UI\WEEdit.h" />
-    <ClInclude Include="..\..\UI\WEListBox.h" />
-    <ClInclude Include="..\..\UI\WEListView.h" />
-    <ClInclude Include="..\..\UI\WEMenu.h" />
-    <ClInclude Include="..\..\UI\WEStatic.h" />
-    <ClInclude Include="..\..\UI\WETreeView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Audio\aldlist.cpp" />

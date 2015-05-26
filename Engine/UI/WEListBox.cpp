@@ -1,13 +1,10 @@
-#include "GameEngine.h"
-#include "GXFCAgent.H"
-//#include <PreDefine.H>
-//#include <gxWinDef.H>
-//#include <GrapX.H>
-//#include <User\Win32Emu\GXUser.H>
-#include "GXWndBase.H"
-#include "GXDialog.H"
-#include "GXDlgItemBase.H"
-#include "WEListBox.H"
+#include "GrapX.h"
+#include "Engine.h"
+#include "Engine/GXFCAgent.H"
+#include "Engine/MOWndBase.H"
+#include "Engine/MODialog.H"
+#include "Engine/MODlgItemBase.H"
+#include "Engine/WEListBox.H"
 
 CWEListBox::CWEListBox() : CMODlgItem(NULL)
 {

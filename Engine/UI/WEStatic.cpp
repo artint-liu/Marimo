@@ -1,13 +1,14 @@
-#include "GameEngine.h"
-#include "GXFCAgent.H"
+#include "GrapX.h"
+#include "Engine.h"
+#include "Engine/GXFCAgent.H"
 //#include <PreDefine.H>
 //#include <gxWinDef.H>
 //#include <GrapX.H>
 //#include <User\Win32Emu\GXUser.H>
-#include "GXWndBase.H"
-#include "GXDialog.H"
-#include "GXDlgItemBase.H"
-#include "WEStatic.H"
+#include "Engine/MOWndBase.H"
+#include "Engine/MODialog.H"
+#include "Engine/MODlgItemBase.H"
+#include "Engine/WEStatic.H"
 
 CWEStatic::CWEStatic(GXHWND hWnd) : CMODlgItem(hWnd)
 {

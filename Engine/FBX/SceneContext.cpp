@@ -7,27 +7,25 @@ Use of this software is subject to the terms of the Autodesk license agreement
 provided at the time of installation or download, or which otherwise accompanies
 this software in either electronic or hard copy form.
 
+=========================================================================================
+
+这个文件来源信息参考上面的文本，这是Autodesk关于FBK SDK使用的示例代码，
+但是引擎中只是用了一小部分，而且这个文件只在windows下给编辑器使用，不能跨平台
+
 ****************************************************************************************/
 
-//#include <clstd.h>
-//#include <clBuffer.H>
+#include "GrapX.H"
+#include "GrapX/GrapVR.H"
+#include "clPathFile.H"
 
-#include <GrapX.H>
-#include <clString.H>
-#include <clPathFile.H>
-//#include <clTree.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GShader.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/gvNode.h>
+#include <GrapX/gvMesh.h>
+#include <GrapX/gvScene.h>
 
-#include <GUnknown.H>
-#include <GResource.H>
-#include <GShader.H>
-#include <GXGraphics.H>
-//#include <3D/gvNode.h>
-//#include <3D/gvMesh.h>
-//#include <3D/gvScene.h>
-//#include <3D/gvSkeleton.h>
-#include "3D/GrapVR.H"
-
-#include <GameEngine.h>
+#include "Engine.h"
 
 #include "third_party\FBX SDK\2013.2\include\fbxsdk.h"
 #include "SceneCache.h"

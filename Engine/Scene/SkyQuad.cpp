@@ -1,21 +1,21 @@
 #include "GrapX.H"
 //#include "clTree.H"
-#include "GUnknown.H"
-#include "GResource.H"
-#include "GXGraphics.H"
-#include "GShader.H"
-#include "GXKernel.H"
+//#include "GrapX/GUnknown.H"
+#include "GrapX/GResource.H"
+#include "GrapX/GXGraphics.H"
+#include "GrapX/GShader.H"
+#include "GrapX/GXKernel.H"
 
 //#include "3d/gvNode.h"
 //#include "3d/gvMesh.h"
 //#include "3d/gvGeometry.h"
-#include "3D/GrapVR.H"
-#include "GameEngine.h"
+#include "GrapX/GrapVR.H"
+#include "Engine.h"
 
-#include "DataPool.H"
-#include "DataPoolVariable.H"
+#include "GrapX/DataPool.H"
+#include "GrapX/DataPoolVariable.H"
 
-#include "SkyQuad.h"
+#include "Engine/SkyQuad.h"
 
 namespace Scene
 {
@@ -61,7 +61,8 @@ namespace Scene
     CSun::~CSun()
     {
 #ifdef ENABLE_DATAPOOL_WATCHER
-      m_pDataPool->RemoveWatcher(this);
+      CLBREAK;
+      //m_pDataPool->RemoveWatcher(this);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
       SAFE_RELEASE(m_pDataPool);
     }
@@ -267,7 +268,8 @@ namespace Scene
     {
       if(m_pDataPool) {
 #ifdef ENABLE_DATAPOOL_WATCHER
-        m_pDataPool->RemoveWatcher(this);
+        CLBREAK;
+        //m_pDataPool->RemoveWatcher(this);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
       }
       
@@ -275,7 +277,8 @@ namespace Scene
 
       if(m_pDataPool) {
 #ifdef ENABLE_DATAPOOL_WATCHER
-        m_pDataPool->AddWatcher(this);
+        CLBREAK;
+        //m_pDataPool->AddWatcher(this);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
       }
 
@@ -327,9 +330,10 @@ namespace Scene
       return GX_FAIL;
     }
 
-    GXHRESULT CSun::OnKnock(Marimo::KNOCKACTION* pKnock)
+    GXVOID CSun::OnImpulse(Marimo::LPCDATAIMPULSE pImpulse)
     {
-      if(pKnock->Name == "fSunTime")
+      CLBREAK;
+      if(GXSTRCMP(pImpulse->sponsor->GetName(), "fSunTime") == 0)
       {
         float fTime = m_fVarSunTime;
         float t = fTime + 0.170f * sinf( (4.0f * CL_PI * (JULIANDATE - 80.0f)) / 373.0f )
@@ -350,11 +354,11 @@ namespace Scene
 
         SetPosition( fTheta, fPhi );
       }
-      else if(pKnock->Name == "fTurbidity")
+      else if(GXSTRCMP(pImpulse->sponsor->GetName(), "fTurbidity") == 0)
       {
         ComputeAttenuation();
       }
-      return GX_OK;
+      //return GX_OK;
     }
 
 
@@ -381,7 +385,8 @@ namespace Scene
     CAtmosphere::~CAtmosphere()
     {
 #ifdef ENABLE_DATAPOOL_WATCHER
-      m_pDataPool->RemoveWatcher(this);
+      CLBREAK;
+      //m_pDataPool->RemoveWatcher(this);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
       SAFE_RELEASE(m_pDataPool);
     }
@@ -606,7 +611,8 @@ namespace Scene
     {
 #ifdef ENABLE_DATAPOOL_WATCHER
       if(m_pDataPool) {
-        m_pDataPool->RemoveWatcher(this);
+        CLBREAK;
+        //m_pDataPool->RemoveWatcher(this);
       }
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
@@ -614,7 +620,8 @@ namespace Scene
 
 #ifdef ENABLE_DATAPOOL_WATCHER
       if(m_pDataPool) {
-        m_pDataPool->AddWatcher(this);
+        CLBREAK;
+        //m_pDataPool->AddWatcher(this);
       }
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
@@ -668,23 +675,25 @@ namespace Scene
       return GX_FAIL;
     }
 
-    GXHRESULT CAtmosphere::OnKnock(Marimo::KNOCKACTION* pKnock)
+    //GXHRESULT CAtmosphere::OnKnock(Marimo::KNOCKACTION* pKnock)
+    GXVOID CAtmosphere::OnImpulse(Marimo::LPCDATAIMPULSE pImpulse)
     {
 #ifdef ENABLE_DATAPOOL_WATCHER
-      if(ON_KNOCKVAR(pKnock, m_fVarRayFactor))
-      {
-        CalculateRayleighCoeff();
-      }
-      else if(ON_KNOCKVAR(pKnock, m_fVarTurbidity))
-      {
-        CalculateMieCoeff();
-      }
-      else if(ON_KNOCKVAR(pKnock, m_fVarMieFactor))
-      {
-        CalculateMieCoeff();
-      }
+      CLBREAK;
+      //if(ON_KNOCKVAR(pKnock, m_fVarRayFactor))
+      //{
+      //  CalculateRayleighCoeff();
+      //}
+      //else if(ON_KNOCKVAR(pKnock, m_fVarTurbidity))
+      //{
+      //  CalculateMieCoeff();
+      //}
+      //else if(ON_KNOCKVAR(pKnock, m_fVarMieFactor))
+      //{
+      //  CalculateMieCoeff();
+      //}
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
-      return GX_OK;
+      //return GX_OK;
     }
 
   } // namespace Internal

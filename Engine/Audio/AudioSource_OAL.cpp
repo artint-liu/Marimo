@@ -1,7 +1,8 @@
 #include <GrapX.H>
-#include <GXKernel.H>
-#include <GUnknown.h>
-#include <MOAudio.H>
+#include "thread/clMessageThread.h"
+#include <GrapX/GXKernel.H>
+//#include <GrapX/GUnknown.h>
+#include <Engine/MOAudio.H>
 #include "Audio_OAL.h"
 #include "AudioSource_OAL.h"
 #include "AudioBuffer_OAL.h"

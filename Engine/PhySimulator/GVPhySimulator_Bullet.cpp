@@ -10,14 +10,15 @@
 
 
 #include <GrapX.H>
-#include <GUnknown.H>
-#include <GXKernel.H>
-#include <GXUser.H>
-#include <GVPhySimulator.h>
-#include <gxError.h>
-#include "3D/GrapVR.H"
+//#include <GUnknown.H>
+//#include <GXKernel.H>
+//#include <GXUser.H>
+#include "thread/clMessageThread.h"
+#include <Engine/GVPhySimulator.h>
+#include <GrapX/gxError.h>
+#include "GrapX/GrapVR.H"
 
-#include "GameEngine.h"
+#include "Engine.h"
 #include "GVPhySimulator_Bullet.h"
 
 #define MAX_LOADSTRING 100

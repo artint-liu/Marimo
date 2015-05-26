@@ -13,22 +13,22 @@
 //#include <clTree.H>
 #include <clPathFile.H>
 
-#include <GUnknown.H>
-#include <GResource.H>
-#include <GShader.H>
-#include <GXGraphics.H>
-#include <GTexture.H>
+//#include <GrapX/GUnknown.H>
+#include <GrapX/GResource.H>
+#include <GrapX/GShader.H>
+#include <GrapX/GXGraphics.H>
+#include <GrapX/GTexture.H>
 //#include <3D/gvNode.h>
 //#include <3D/gvMesh.h>
 //#include <3D/gvScene.h>
 //#include <3D/gvSkeleton.h>
 //#include <3D/gvSkinnedMesh.h>
-#include "3D/GrapVR.H"
+#include "GrapX/GrapVR.H"
 
-#include <GameEngine.h>
+#include <Engine.h>
 
 #include "third_party\FBX SDK\2013.2\include\fbxsdk.h"
-#include "gxError.H"
+#include "GrapX/gxError.H"
 #include "GetPosition.h"
 #include "SceneCache.h"
 #include "SceneContext.h"

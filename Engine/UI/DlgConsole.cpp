@@ -1,17 +1,17 @@
 //#include <Marimo.H>
 #include <GrapX.H>
-#include "GUnknown.H"
-#include "GameEngine.h"
-#include "GXFCAgent.H"
-#include "GXWndBase.H"
-#include "GXDialog.H"
-#include "GXDlgItemBase.H"
-#include "GXButton.h"
-#include "GXEdit.H"
-#include "MOLogger.h"
-#include "GXKernel.H"
+//#include "GrapX/GUnknown.H"
+#include "Engine.h"
+#include "Engine/GXFCAgent.H"
+#include "Engine/MOWndBase.H"
+#include "Engine/MODialog.H"
+#include "Engine/MODlgItemBase.H"
+#include "Engine/MOButton.h"
+#include "Engine/MOEdit.H"
+#include "GrapX/MOLogger.h"
+#include "GrapX/GXKernel.H"
 
-#include "DlgConsole.h"
+#include "Engine/DlgConsole.h"
 //#include "grapx/Console.h"
 
 LPCWSTR CDlgConsole::idTemplate = {L"@Resource\\console.dlg.txt"};
