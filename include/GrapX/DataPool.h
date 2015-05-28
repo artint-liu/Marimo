@@ -744,7 +744,7 @@ namespace Marimo
 //#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
     //virtual GXHRESULT   ImpluseByVariable   (DataAction eType, const DataPoolVariable& var, GXUINT nIndex, GXBOOL bForce = TRUE);
-    GXSTDINTERFACE(GXBOOL      Impluse             (const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count));
+    GXSTDINTERFACE(GXBOOL      Impulse             (const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count));
     GXSTDINTERFACE(GXBOOL      Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam));
     GXSTDINTERFACE(GXBOOL      Watch               (GXLPCSTR szExpression, DataPoolWatcher* pWatcher));
     GXSTDINTERFACE(GXBOOL      Watch               (GXLPCSTR szExpression, GXHWND hWnd));

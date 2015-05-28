@@ -922,7 +922,7 @@ namespace Marimo
   }
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
 
-  GXBOOL DataPoolImpl::Impluse(const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count)
+  GXBOOL DataPoolImpl::Impulse(const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count)
   {
     if( ! var.IsValid()) {
       return FALSE;
@@ -2299,6 +2299,7 @@ namespace Marimo
   bool DataPoolImpl::WATCH_FIXED::operator<( const WATCH_FIXED& t ) const
   {
     // 这个写的好搓！
+    TRACE("(%x,%x)(%x,%x)\n", pCallback, lParam, t.pCallback, t.lParam);
     switch((GXINT_PTR)pCallback)
     {
     case 0: // DataPoolWatcher
@@ -2310,7 +2311,7 @@ namespace Marimo
     case 1: // HWND
       switch((GXINT_PTR)t.pCallback)
       {
-      case 0: false;
+      case 0: return false;
       case 1: return lParam < t.lParam;
       default: return true;
       }

@@ -161,6 +161,9 @@ GXHRESULT GShaderImpl::LoadFromFile(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
 
     hr = LoadFromMemory(pVertexBuffer, pPixelBuffer);
   }
+  else {
+    hr = GX_FAIL;
+  }
 
 FUNC_RET:
   SAFE_DELETE(pInclude);

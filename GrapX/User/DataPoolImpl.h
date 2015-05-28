@@ -301,7 +301,7 @@ namespace Marimo
     virtual GXBOOL    IsKnocking          (const DataPoolVariable* pVar);
     virtual GXBOOL    SetAutoKnock        (GXBOOL bAutoKnock);
 
-    virtual GXBOOL    Impluse             (const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count);
+    virtual GXBOOL    Impulse             (const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count);
     virtual GXBOOL    Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam);
     virtual GXBOOL    Watch               (GXLPCSTR szExpression, DataPoolWatcher* pWatcher);
     virtual GXBOOL    Watch               (GXLPCSTR szExpression, GXHWND hWnd);

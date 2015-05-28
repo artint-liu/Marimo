@@ -438,7 +438,7 @@ namespace Marimo
   GXBOOL Variable::Impulse(DataAction reason, GXUINT index, GXUINT count)
   {
     if(m_pDataPool != NULL) {
-      return m_pDataPool->Impluse(*this, reason, index, count);
+      return m_pDataPool->Impulse(*this, reason, index, count);
     }
     return GX_OK;
   }

@@ -71,6 +71,11 @@ namespace D3D9
 
   GShaderImpl::~GShaderImpl()
   {
+    if( ! m_pVertexShader && ! m_pPixelShader && ! m_dwFlag) {
+      // 走到这里应该是创建失败了，都应该是空的
+      ASSERT( ! m_pvct && ! m_ppct);
+      return;
+    }
     m_pGraphicsImpl->UnregisterResource(this);
     CleanUp();
   }
@@ -614,7 +619,8 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
   clBuffer*& pPixelBuffer  = pSources->pPixelShader;
   clBuffer* pComponentBuf = NULL;
   clBuffer* pDeclCodesBuf = NULL;
-  GXHRESULT hr = GX_OK;
+  GXBOOL result = TRUE;
+  //GXHRESULT hr = GX_OK;
   //clvector<GXDefinition> aMacros; // 这个要放在这里, 避免在其他的作用域中析构
 
   clsize pos;
@@ -626,7 +632,7 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
 
   // TODO: 二进制数据和源码数据可能会有混合错误的问题...
   if( ! IntLoadShaderComponent(pSrcComponent->strVS, File, bCompiledVS, &pVertexBuffer, "Can't load VertexShader(%s).\n")) {
-    hr = GX_FAIL;
+    result = FALSE;
   }
 
   // 如果文件名一致则跳过磁盘IO直接复制一份
@@ -636,7 +642,7 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
     pPixelBuffer->Append(pVertexBuffer->GetPtr(), pVertexBuffer->GetSize());
   }
   else if( ! IntLoadShaderComponent(pSrcComponent->strPS, File, bCompiledPS, &pPixelBuffer, "Can't load PixelShader(%s).\n")) {
-    hr = GX_FAIL;
+    result = FALSE;
   }
   GXDEFINITION* pShaderMacro = NULL;
   int nCodeLenWithoutSwitcherMacro = 0; // pDeclCodesBuf 不带宏开关时的长度
@@ -661,7 +667,7 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
 
   // 编译的PS/VS只能在VertexShader和PixelShader里设定
   // 组件内的指定都认为是源代码, 并且只有在VertexShader和PixelShader为源代码时才加载.
-  if(hr == GX_OK)
+  if(result)
   {
     if( ! bCompiledVS)
     {
@@ -718,7 +724,7 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
   }
 
   SAFE_DELETE(pDeclCodesBuf);
-  return TRUE;
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////////

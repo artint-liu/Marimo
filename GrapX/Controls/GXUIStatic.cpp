@@ -109,12 +109,11 @@ namespace GXUI
       }
       else return -1;
 
-    case GXWM_IMPULSE:
-      {
-        CLBREAK;
-        pThis->OnImpulse((LPCDATAIMPULSE)lParam);
-      }
-      break;
+    //case GXWM_IMPULSE:
+    //  {
+    //    pThis->OnImpulse((LPCDATAIMPULSE)lParam);
+    //  }
+    //  break;
 
     case GXWM_NCCREATE:
       {
@@ -314,13 +313,10 @@ namespace GXUI
   GXVOID StaticLabel::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
     ASSERT(m_VarText.IsValid());
-    CLBREAK;
-    //if(pImpulse->sponsor != &m_VarText && m_VarText.GetName() == pKnock->Name)
-    {
-      gxSetWindowTextW(m_hWnd, m_VarText.ToStringW());
-      Invalidate(FALSE);
-    }
-    //return 0;
+    ASSERT(m_VarText.GetPtr() == pImpulse->sponsor->GetPtr());
+
+    gxSetWindowTextW(m_hWnd, m_VarText.ToStringW());
+    Invalidate(FALSE);
   }
 
   GXCOLORREF StaticLabel::SetColor(GXCOLORREF crText)

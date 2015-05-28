@@ -856,9 +856,6 @@
     <None Include="..\..\User\Win32Emu\GUXTheme.inl">
       <Filter>Lib\User</Filter>
     </None>
-    <None Include="..\..\Utility\HLSL\Aero.fx">
-      <Filter>Lib\Utility\HLSL</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\GrapXUI.rc">
@@ -867,6 +864,9 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\Utility\HLSL\Simple.fx">
+      <Filter>Lib\Utility\HLSL</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\Utility\HLSL\Aero.fx">
       <Filter>Lib\Utility\HLSL</Filter>
     </CustomBuild>
   </ItemGroup>

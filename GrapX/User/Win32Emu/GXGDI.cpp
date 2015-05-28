@@ -424,8 +424,9 @@ GXBOOL GXDLLAPI gxDeleteObject(
       return _gxDeleteObject(hObject);
     case GXGDIOBJ_FONT:
       // TODO: 会不会在 GXWin32APIEmu::ReleaseStatic() 时出错？
-      if(hObject == g_hSystemFont)
+      if(hObject == g_hSystemFont) {
         return TRUE;
+      }
       GXWin32APIEmu::EraseGXGdiObj(GXGDIOBJ_FONT, hObject);
       return _gxDeleteObject(hObject);
     }
@@ -804,7 +805,7 @@ GXHFONT GXDLLAPI gxCreateFontIndirectW(
 
   //GXCreateFreeTypeFontIndirectW((GXCONST LPLOGFONTW)lplf, &pFont->lpFont);
 
-  GXWin32APIEmu::MapGXGdiObj(GXGDIOBJ_FONT, pFont, NULL);
+  //GXWin32APIEmu::MapGXGdiObj(GXGDIOBJ_FONT, pFont, NULL);
 
   //if(FAILED(D3DXCreateFontIndirectW(g_pd3dDevice, &d3dfd, (LPD3DXFONT *)&pFont->lpD3DFont)))
   //{

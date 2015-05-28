@@ -168,6 +168,12 @@ namespace GXUI
         gxSetWindowLong(hWnd, 0, (GXLONG_PTR)0);
       }
       break;
+
+    case GXWM_IMPULSE:
+      {
+        pThis->OnImpulse((LPCDATAIMPULSE)lParam);
+      }
+      break;
     }
     return gxDefWindowProcW(hWnd, message, wParam, lParam);
   }
@@ -211,22 +217,13 @@ namespace GXUI
 
   GXBOOL CtrlBase::SetDataVariable(GXHWND hWnd, MOVariable& var, MOVariable* pNewVar)
   {
-    CLBREAK;
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
     if(var.IsValid()) {
-      var.GetPoolUnsafe()->UnregisterIdentify(STR_DATAPOOL_WATCHER_UI, hWnd);
+      var.GetPoolUnsafe()->Ignore(&var, hWnd);
     }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
     if(pNewVar && pNewVar->IsValid())
     {
       var = *pNewVar;
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-      var.GetPoolUnsafe()->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, hWnd);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
+      var.GetPoolUnsafe()->Watch(&var, hWnd);
       return TRUE;
     }
     var.Free();

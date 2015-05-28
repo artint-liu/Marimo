@@ -496,13 +496,28 @@ namespace GXUI
   //GXHRESULT Slider::OnKnock(KNOCKACTION* pKnock)
   GXVOID Slider::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
-    CLBREAK;
     ASSERT(m_VarPos.IsValid());
-    //if(pImpulse->sponsor != &m_VarPos && m_VarPos.GetName() == pKnock->Name)
+    auto eCate = m_VarPos.GetTypeCategory();
+    GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    switch(eCate)
     {
-
+    case Marimo::T_FLOAT:
+      SetPos(dwStyle, m_VarPos.ToFloat());
+      break;
+    case Marimo::T_BYTE:
+    case Marimo::T_WORD:
+    case Marimo::T_DWORD:
+    case Marimo::T_QWORD:
+    case Marimo::T_SBYTE:
+    case Marimo::T_SWORD:
+    case Marimo::T_SDWORD:
+    case Marimo::T_SQWORD:
+      SetPos(dwStyle, (GXINT)m_VarPos.ToInteger());
+      break;
+    default:
+      return;
     }
-    //return 0;
+    InvalidateRect(NULL, FALSE);
   }
 
   void Slider::IntCalcRects(GXRECT* rcClient, GXDWORD dwStyle, GXREGN* pRegns)

@@ -1,0 +1,122 @@
+smart{version = "0.0.1.0";}
+Sprite {
+	File = "Slider.png";
+	Module{
+		rect{
+			id = 100;
+			left = 3;
+			top = 2;
+			right = 48;
+			bottom = 47;
+			name = "SdSp_Handle";
+		};
+		rect{
+			id = 101;
+			left = 91;
+			top = 3;
+			right = 101;
+			bottom = 21;
+			name = "SdSp_FullBar";
+		};
+		rect{
+			id = 102;
+			left = 101;
+			top = 3;
+			right = 128;
+			bottom = 21;
+		};
+		rect{
+			id = 103;
+			left = 128;
+			top = 3;
+			right = 138;
+			bottom = 21;
+		};
+
+		rect{
+			id = 104;
+			left = 91;
+			top = 26;
+			right = 101;
+			bottom = 44;
+			name = "SdSp_EmptyBar";
+		};
+		rect{
+			id = 105;
+			left = 101;
+			top = 26;
+			right = 128;
+			bottom = 44;
+		};
+		rect{
+			id = 106;
+			left = 128;
+			top = 26;
+			right = 138;
+			bottom = 44;
+		};
+
+		rect{
+			id = 107;
+			left = 48;
+			top = 0;
+			right = 66;
+			bottom = 10;
+			name = "SdSp_FullBarV";
+		};
+		rect{
+			id = 108;
+			left = 48;
+			top = 10;
+			right = 66;
+			bottom = 38;
+		};
+		rect{
+			id = 109;
+			left = 48;
+			top = 38;
+			right = 66;
+			bottom = 48;
+		};
+
+		rect{
+			id = 110;
+			left = 71;
+			top = 0;
+			right = 89;
+			bottom = 10;
+			name = "SdSp_EmptyBarV";
+		};
+		rect{
+			id = 111;
+			left = 71;
+			top = 10;
+			right = 89;
+			bottom = 38;
+		};
+		rect{
+			id = 112;
+			left = 71;
+			top = 38;
+			right = 89;
+			bottom = 48;
+		};
+
+		rect{
+			id = 113;
+			left = 67;
+			top = 37;
+			right = 70;
+			bottom = 47;
+			name = "SdSp_Dial";
+		};
+		rect{
+			id = 114;
+			left = 128;
+			top = 22;
+			right = 139;
+			bottom = 25;
+			name = "SdSp_DialV";
+		};
+	};
+};

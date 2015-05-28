@@ -1,0 +1,10 @@
+shader {
+  d3d9 {
+    VertexShader="shaders\\AeroBlur.vsu";
+    PixelShader="shaders\\AeroBlur.psu";
+  };
+  gles2 {
+  };
+  wogl {
+  };
+};

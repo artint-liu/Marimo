@@ -273,36 +273,36 @@ GXBOOL GXWin32APIEmu::InitializeStatic()
   GXLOGFONTW LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTW));
   LogFont.lfHeight = 12;
-  GXSTRCPYN(LogFont.lfFaceName, L"Font\\msyh.ttf", GXLF_FACESIZE);
+  GXSTRCPYN(LogFont.lfFaceName, DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
   g_hSystemFont = gxCreateFontIndirectW(&LogFont);
 
   // 创建系统默认的 Brush 和 Pen
-  g_BlackBrush.emObjType  = GXGDIOBJ_BRUSH;
-  g_BlackBrush.pDC    = NULL;
+  g_BlackBrush.emObjType = GXGDIOBJ_BRUSH;
+  g_BlackBrush.pDC       = NULL;
   g_BlackBrush.uStyle    = GXBS_SOLID;
-  g_BlackBrush.crColor  = 0xFF000000;
+  g_BlackBrush.crColor   = 0xFF000000;
   g_BlackBrush.hHatch    = NULL;
 
-  g_DarkGrayBrush      = g_BlackBrush;
-  g_GrayBrush        = g_BlackBrush;
-  g_LightGrayBrush    = g_BlackBrush;
-  g_NullBrush        = g_BlackBrush;
+  g_DarkGrayBrush   = g_BlackBrush;
+  g_GrayBrush       = g_BlackBrush;
+  g_LightGrayBrush  = g_BlackBrush;
+  g_NullBrush       = g_BlackBrush;
   g_WhiteBrush      = g_BlackBrush;
-  g_Brush_00FFFFFF    = g_BlackBrush;
-  g_Brush_80FFFFFF    = g_BlackBrush;
+  g_Brush_00FFFFFF  = g_BlackBrush;
+  g_Brush_80FFFFFF  = g_BlackBrush;
 
-  g_DarkGrayBrush.crColor  = 0xFF404040;
-  g_GrayBrush.crColor    = 0xFF808080;
-  g_LightGrayBrush.crColor= 0xFFC0C0C0;
-  g_NullBrush.crColor    = 0x00000000;
-  g_WhiteBrush.crColor  = 0xFFFFFFFF;
-  g_Brush_00FFFFFF.crColor= 0x00FFFFFF;
-  g_Brush_80FFFFFF.crColor= 0x80FFFFFF;
+  g_DarkGrayBrush.crColor   = 0xFF404040;
+  g_GrayBrush.crColor       = 0xFF808080;
+  g_LightGrayBrush.crColor  = 0xFFC0C0C0;
+  g_NullBrush.crColor       = 0x00000000;
+  g_WhiteBrush.crColor      = 0xFFFFFFFF;
+  g_Brush_00FFFFFF.crColor  = 0x00FFFFFF;
+  g_Brush_80FFFFFF.crColor  = 0x80FFFFFF;
 
   g_BlackPen.emObjType  = GXGDIOBJ_PEN;
-  g_BlackPen.pDC      = NULL;
-  g_BlackPen.uStyle    = GXPS_SOLID;
-  g_BlackPen.uWidth    = 1;
+  g_BlackPen.pDC        = NULL;
+  g_BlackPen.uStyle     = GXPS_SOLID;
+  g_BlackPen.uWidth     = 1;
   g_BlackPen.crColor    = 0xFF000000;
 
   g_WhitePen = g_BlackPen;
@@ -348,6 +348,7 @@ GXBOOL GXWin32APIEmu::ReleaseStatic()
     SAFE_DELETE(s_pGXBitmapResMap);
   }
 
+  _gxDeleteObject(g_hSystemFont);
   //if(s_pGXFontResMap != NULL)
   //{
   //  for(GXFontResMap::iterator it = s_pGXFontResMap->begin();

@@ -658,7 +658,6 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
 
   // 创建 增加引用计数
   GShader* pShader = new GShaderImpl(this);
-  RegisterResource(pShader, &ResFeatDesc);
 
   // 初始化 验证
   GXHRESULT hval = pShader->LoadFromFile(pSdrElementSrc);
@@ -668,6 +667,8 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
     m_pLogger->OutputFormatW(L"...Failed.\n");
     return hval;
   }
+
+  RegisterResource(pShader, &ResFeatDesc);
 
   *ppShader = pShader;
   m_pLogger->OutputFormatA("...Succeeded.\n");

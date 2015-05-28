@@ -147,11 +147,10 @@ extern "C"
   //////////////////////////////////////////////////////////////////////////
   GXBOOL GXUXTHEME_Initialize(GXGraphics* pGraphics)
   {
-    GXCreateSpriteFromFileW(pGraphics, L"Window.GSprite", &s_pUxThemeSprite_Window);
-    //s_pUxThemeSprite_Window->SetSampStateRefPtr(g_UxThemeSampState_Window);
-    //s_pUxThemeSprite_Window->SetRenderStateRefPtr(s_OpaquePreBlend);
-    GXCreateSpriteFromFileW(pGraphics, L"ScrollBar.GSprite", &s_pUxThemeSprite_ScrollBar);
-    GXCreateSpriteFromFileW(pGraphics, L"Button.GSprite", &s_pUxThemeSprite_Button);
+    // TODO: ³éÈ¡×ÊÔ´
+    GXCreateSpriteFromFileW(pGraphics, L"UI/WindowFrame.GSprite",    &s_pUxThemeSprite_Window);
+    GXCreateSpriteFromFileW(pGraphics, L"UI/ScrollBar.GSprite", &s_pUxThemeSprite_ScrollBar);
+    GXCreateSpriteFromFileW(pGraphics, L"UI/Button.GSprite",    &s_pUxThemeSprite_Button);
     return TRUE;
   }
 

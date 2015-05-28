@@ -1086,7 +1086,7 @@ GXBOOL GXDLLAPI gxSystemParametersInfoW(
   {
     if( uiAction == SPI_GETICONTITLELOGFONT )
     {
-      GXSTRCPYN(((GXLOGFONTW*)pvParam)->lfFaceName, L"Font\\msyh.ttf", GXLF_FACESIZE);
+      GXSTRCPYN(((GXLOGFONTW*)pvParam)->lfFaceName, DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
     }
     else if( uiAction == SPI_GETNONCLIENTMETRICS )
     {
@@ -1094,11 +1094,11 @@ GXBOOL GXDLLAPI gxSystemParametersInfoW(
       const size_t sizeofNONCLIENTMETRICS = sizeof(GXNONCLIENTMETRICSW);
       ASSERT(sizeofNONCLIENTMETRICS == uiParam);
       GXNONCLIENTMETRICSW* pncm = (GXNONCLIENTMETRICSW*)pvParam;
-      GXSTRCPYN(pncm->lfCaptionFont.lfFaceName, L"Font\\msyh.ttf", GXLF_FACESIZE);
-      GXSTRCPYN(pncm->lfSmCaptionFont.lfFaceName, L"Font\\msyh.ttf", GXLF_FACESIZE);
-      GXSTRCPYN(pncm->lfMenuFont.lfFaceName, L"Font\\msyh.ttf", GXLF_FACESIZE);
-      GXSTRCPYN(pncm->lfStatusFont.lfFaceName, L"Font\\msyh.ttf", GXLF_FACESIZE);
-      GXSTRCPYN(pncm->lfMessageFont.lfFaceName, L"Font\\msyh.ttf", GXLF_FACESIZE);
+      GXSTRCPYN(pncm->lfCaptionFont.lfFaceName,   DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
+      GXSTRCPYN(pncm->lfSmCaptionFont.lfFaceName, DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
+      GXSTRCPYN(pncm->lfMenuFont.lfFaceName,      DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
+      GXSTRCPYN(pncm->lfStatusFont.lfFaceName,    DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
+      GXSTRCPYN(pncm->lfMessageFont.lfFaceName,   DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
     }
     else if( uiAction == SPI_GETWHEELSCROLLLINES ||
       uiAction == SPI_GETFLATMENU)

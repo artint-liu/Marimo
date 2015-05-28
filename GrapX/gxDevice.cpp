@@ -313,9 +313,10 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
   LPSTOCKOBJECT const lpStockObject = lpStation->m_pStockObject;
   GXGraphics* pGraphics = lpStation->pGraphics;
 
-  pGraphics->CreateShaderFromFileA(&lpStockObject->pAeroShader, "Shader/Aero.shader.txt");
-  pGraphics->CreateShaderFromFileA(&lpStockObject->pBlurShader, "Shader/Blur.shader.txt");
-  pGraphics->CreateShaderFromFileA(&lpStockObject->pSimpleShader, "Shader/Simple.shader.txt");
+  // TODO: ³éÈ¡×ÊÔ´
+  pGraphics->CreateShaderFromFileA(&lpStockObject->pAeroShader,   "shaders/Aero.shader.txt");
+  pGraphics->CreateShaderFromFileA(&lpStockObject->pBlurShader,   "shaders/Blur.shader.txt");
+  pGraphics->CreateShaderFromFileA(&lpStockObject->pSimpleShader, "shaders/Simple.shader.txt");
 
   lpStation->pGraphics->CreateEffect(&lpStockObject->pAeroEffect  , lpStockObject->pAeroShader);
   lpStation->pGraphics->CreateEffect(&lpStockObject->pBlurEffect  , lpStockObject->pBlurShader);
@@ -327,7 +328,7 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
     lpStockObject->pAeroEffect->SetTextureSlot("s_baseMap", 0);
     lpStockObject->pAeroEffect->SetTextureSlot("s_blurMap", 1);
   }
-  lpStockObject->pDefaultFont = lpStation->pGraphics->CreateFontW(0, 16, L"Font\\msyh.ttf");
+  lpStockObject->pDefaultFont = lpStation->pGraphics->CreateFontW(0, 16, DEFAULT_FONT_NAMEW);
 
   return TRUE;
 }

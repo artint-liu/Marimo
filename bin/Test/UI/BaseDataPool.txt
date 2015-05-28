@@ -1,0 +1,2 @@
+float fScale;
+float fScaleAddition;
