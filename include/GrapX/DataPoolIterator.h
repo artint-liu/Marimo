@@ -32,7 +32,7 @@ namespace Marimo
     // 如果想对数组中每个元素进行迭代，使用array_begin或者rarray_begin方法
     struct GXDLL iterator
     {
-      typedef const DataPool::VARIABLE_DESC*  LPCVD;
+      typedef const DATAPOOL_VARIABLE_DESC*  LPCVD;
       //typedef DataPoolUtility::element_iterator  element_iterator;
       typedef DataPoolUtility::element_reverse_iterator relement_iterator;
 
@@ -141,7 +141,7 @@ namespace Marimo
 
     struct GXDLL named_iterator : iterator
     {
-      typedef const DataPool::VARIABLE_DESC*  LPCVD;
+      typedef const DATAPOOL_VARIABLE_DESC*  LPCVD;
       //typedef DataPoolUtility::named_element_iterator  element_iterator;
       //typedef DataPoolUtility::named_element_reverse_iterator relement_iterator;
 

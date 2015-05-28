@@ -12,7 +12,7 @@ namespace Marimo
     //typedef const DataPool::VARIABLE_DESC   DPVD;
   public:
     struct VTBL;
-    typedef const DataPool::VARIABLE_DESC*    LPCVD;
+    typedef const DATAPOOL_VARIABLE_DESC*     LPCVD;
     typedef DataPoolUtility::iterator         iterator;
     typedef DataPoolUtility::element_iterator element_iterator;
 
@@ -78,8 +78,8 @@ namespace Marimo
     GXLPVOID          GetPtr          () GXCONST;  // 指针, 要注意动态数据指针会因为 NewBack 操作改变
     GXUINT            GetSize         () GXCONST;  // 字节大小, 数组是数组大小, 动态数据大小可变, 结构是结构体大小
     GXUINT            GetOffset       () GXCONST;  // 偏移,全局变量是全局偏移, 结构体变量是结构体内偏移
-    GXLPCSTR          GetName         () GXCONST;  // 获得定义名, 变量名, 数组变量名或者结构体变量名
-    GXLPCSTR          GetTypeName     () GXCONST;  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
+    DataPool::LPCSTR  GetName         () GXCONST;  // 获得定义名, 变量名, 数组变量名或者结构体变量名
+    DataPool::LPCSTR  GetTypeName     () GXCONST;  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
     TypeCategory      GetTypeCategory () GXCONST;  // 变量的分类
     GXDWORD           GetCaps         () GXCONST;  // 参考CAPS枚举
     clStringA         GetFullName     () GXCONST;  // （没实现）获得变量的全称,如果在结构体中，包括结构体名，如果在数组中会包含数组索引,如同DataPool::QueryByExpression()参数那样.

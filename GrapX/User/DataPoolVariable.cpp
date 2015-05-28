@@ -1,12 +1,10 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
 
-#include "clStringSet.h"
-
-//#include "GrapX/GUnknown.H"
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
 #include "GrapX/DataPoolIterator.h"
+#include "DataPoolImpl.h"
 
 #define Flag_ParseW             Flag_ParseT<clStringW>
 #define Flag_ParseA             Flag_ParseT<clStringA>
@@ -49,7 +47,6 @@
 
 using namespace clstd;
 
-#include "DataPoolVariableVtbl.h"
 
 namespace Marimo
 {
@@ -105,19 +102,20 @@ namespace Marimo
       return m_vtbl;
     }
 
-    inline LPCVD InlGetVDD() GXCONST
+    inline DataPoolImpl::LPCVD InlGetVDD() GXCONST
     {
-      return m_pVdd;
+      return reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd);
     }
 
     inline GXBOOL InlCleanupArray(LPCVD pVarDesc, GXLPVOID lpBuffer, int nCount)
     {
-      return m_pDataPool->CleanupArray(pVarDesc, lpBuffer, nCount);
+      DataPoolImpl* pDataPoolImpl = (DataPoolImpl*)m_pDataPool;
+      return pDataPoolImpl->CleanupArray(reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc), lpBuffer, nCount);
     }
 
     inline GXBOOL IsReadOnly() GXCONST
     {
-      return TEST_FLAG(m_pDataPool->m_dwRuntimeFlags, DataPool::RuntimeFlag_Readonly);
+      return TEST_FLAG(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly);
     }    
 
     template<typename T_LPCSTR, class _TStoString>
@@ -127,8 +125,10 @@ namespace Marimo
       ASSERT(m_pVdd->GetTypeCategory() == T_STRING || 
         m_pVdd->GetTypeCategory() == T_STRINGA);
 
+      auto pDataPoolImpl = reinterpret_cast<DataPoolImpl*>(m_pDataPool);
+
       // 只读模式跳过
-      if(TEST_FLAG(m_pDataPool->m_dwRuntimeFlags, DataPool::RuntimeFlag_Readonly)) {
+      if(TEST_FLAG(pDataPoolImpl->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly)) {
         return FALSE;
       }
 
@@ -137,9 +137,9 @@ namespace Marimo
         new(pStringData) _TStoString(szText);
 
         // 只读模式下不会新建字符串
-        ASSERT(TEST_FLAG_NOT(m_pDataPool->m_dwRuntimeFlags, DataPool::RuntimeFlag_Readonly));
+        ASSERT(TEST_FLAG_NOT(pDataPoolImpl->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly));
 #ifdef _DEBUG
-        m_pDataPool->m_nDbgNumOfString++;
+        pDataPoolImpl->m_nDbgNumOfString++;
 #endif // #ifdef _DEBUG
       }
       else {
@@ -148,20 +148,21 @@ namespace Marimo
       return TRUE;
     }
 
-    inline DataPool::LPCED InlGetEnum(GXUINT nIndex) GXCONST
+    inline DataPoolImpl::LPCED InlGetEnum(GXUINT nIndex) GXCONST
     {
-      return m_pVdd->GetTypeDesc()->GetEnumMembers() + nIndex;
+      return reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetTypeDesc()->GetEnumMembers()) + nIndex;
     }
 
     inline GXBOOL InlFindEnumFlagValue(DataPool::LPCSTR szName, DataPool::EnumFlag* pOutEnumFlag) GXCONST
     {
-      GXBOOL bval = m_pDataPool->IntFindEnumFlagValue(m_pVdd->GetTypeDesc(), szName, pOutEnumFlag);
+      GXBOOL bval = reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntFindEnumFlagValue(
+        reinterpret_cast<DataPoolImpl::LPCTD>(m_pVdd->GetTypeDesc()), szName, pOutEnumFlag);
 
 #ifdef _DEBUG
       // 使用传统函数验证二分法查找
       for(GXUINT i = 0; i < m_pVdd->GetTypeDesc()->nMemberCount; ++i)
       {
-        DataPool::LPCED pair = m_pVdd->GetTypeDesc()->GetEnumMembers() + i;
+        DataPoolImpl::LPCED pair = reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetTypeDesc()->GetEnumMembers()) + i;
           //m_pDataPool->IntGetEnum(m_pVdd->GetTypeDesc()->nMemberIndex + i);
         if(GXSTRCMP(szName, pair->GetName()) == 0)
         {
@@ -200,11 +201,11 @@ namespace Marimo
     inline GXHRESULT InlQuery(GXLPCSTR szName, DataPoolVariable* pBase) GXCONST
     {
       ASSERT(m_pBuffer != NULL);
-      DataPool::VARIABLE var = {0};
+      DataPoolImpl::VARIABLE var = {0};
       var.pBuffer   = m_pBuffer;
-      var.pVdd      = m_pVdd;
+      var.pVdd      = reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd);
       var.AbsOffset = m_AbsOffset;
-      if(GXSUCCEEDED(m_pDataPool->IntQuery(&var, szName, -1)))
+      if(GXSUCCEEDED(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntQuery(&var, szName, -1)))
       {
         new(pBase) DataPoolVariable((VTBL*)var.vtbl, m_pDataPool, var.pVdd, var.pBuffer, var.AbsOffset);
         return GX_OK;
@@ -215,10 +216,10 @@ namespace Marimo
     inline GXHRESULT InlSetupUnary(GXUINT nIndex, DataPoolVariable* pBase) GXCONST
     {
       ASSERT(m_pBuffer != NULL);
-      DataPool::VARIABLE var = {0};
+      DataPoolImpl::VARIABLE var = {0};
 
       var.AbsOffset = m_AbsOffset + nIndex * m_pVdd->TypeSize();
-      if(m_pDataPool->IntCreateUnary(m_pBuffer, m_pVdd, &var))
+      if(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntCreateUnary(m_pBuffer, reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd), &var))
       {
         new(pBase) DataPoolVariable((VTBL*)var.vtbl, m_pDataPool, var.pVdd, var.pBuffer, var.AbsOffset);
         return GX_OK;
@@ -229,10 +230,10 @@ namespace Marimo
     inline GXHRESULT InlDynSetupUnary(clBufferBase* pBuffer, GXUINT nIndex, DataPoolVariable* pBase) GXCONST
     {
       ASSERT(m_pBuffer != NULL);
-      DataPool::VARIABLE var = {0};
+      DataPoolImpl::VARIABLE var = {0};
 
       var.AbsOffset = nIndex * m_pVdd->TypeSize();
-      if(m_pDataPool->IntCreateUnary(pBuffer, m_pVdd, &var))
+      if(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntCreateUnary(pBuffer, reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd), &var))
       {
         new(pBase) DataPoolVariable((VTBL*)var.vtbl, m_pDataPool, var.pVdd, var.pBuffer, var.AbsOffset);
         return GX_OK;
@@ -248,7 +249,7 @@ namespace Marimo
       for (GXUINT i = 0; i < nCount; i++)
       {
         //auto sDesc = m_pDataPool->IntGetEnum(m_pVdd->GetTypeDesc()->nMemberIndex + i);
-        auto sDesc = m_pVdd->GetTypeDesc()->GetEnumMembers() + i;
+        auto sDesc = reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetTypeDesc()->GetEnumMembers()) + i;
         if( ! func(sDesc, eValue)) {
           return TRUE;
         }
@@ -495,7 +496,7 @@ namespace Marimo
     //m_pVdd->IsDynamicArray()
     GXDWORD r = 0;
 
-    if(m_pDataPool->IntGetEntryBuffer() == m_pBuffer) {
+    if(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntGetEntryBuffer() == m_pBuffer) {
       SET_FLAG(r, CAPS_FIXED);
     }
 
@@ -537,12 +538,12 @@ namespace Marimo
   
   GXLPCSTR Variable::GetName() GXCONST
   {
-    return m_pVdd->VariableName();
+    return reinterpret_cast<DataPool::LPCSTR>(m_pVdd->VariableName());
   }
   
   GXLPCSTR Variable::GetTypeName() GXCONST
   {
-    return m_pVdd->TypeName();
+    return reinterpret_cast<DataPool::LPCSTR>(m_pVdd->TypeName());
   }
 
   TypeCategory Variable::GetTypeCategory() GXCONST
@@ -1006,7 +1007,7 @@ namespace Marimo
     _TString str;
     DataPool::Enum e;
     //auto StringBase = pThis->InlStringBase();
-    GXBOOL bval = pThis->ForEachEnum(e, [&str](const DataPool::ENUM_DESC* pDesc, DataPool::Enum eValue) -> GXBOOL 
+    GXBOOL bval = pThis->ForEachEnum(e, [&str](const DataPoolImpl::ENUM_DESC* pDesc, DataPool::Enum eValue) -> GXBOOL 
     {
       if(pDesc->Value == eValue) {
         str = (pDesc->GetName());
@@ -1036,7 +1037,7 @@ namespace Marimo
     _TString str;
     for (GXUINT i = 0; i < nCount; i++)
     {
-      DataPool::LPCED pDesc = pThis->InlGetEnum(i);
+      DataPoolImpl::LPCED pDesc = pThis->InlGetEnum(i);
       if(TEST_FLAGS_ALL(dwFlags, pDesc->Value)) {
         str += pDesc->GetName();
         str += '|';

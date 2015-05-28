@@ -150,9 +150,6 @@
     <ClInclude Include="..\..\GDI\GXShaderMgr.h">
       <Filter>Lib\GDI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\User\DataPoolVariableVtbl.h">
-      <Filter>Lib\User</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\User\DesktopWindowsMgr.h">
       <Filter>Lib\User</Filter>
     </ClInclude>
@@ -392,6 +389,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX\Platform.h">
       <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\DataPoolErrorMsg.h">
+      <Filter>Lib\User</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\User\DataPoolBuildTime.h">
+      <Filter>Lib\User</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -760,6 +763,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Console.cpp">
       <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\User\DataPoolErrorMsg.cpp">
+      <Filter>Lib\User</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

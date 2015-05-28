@@ -1,19 +1,19 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
-#include "Smart/smartstream.h"
-#include "clStringSet.h"
+
 #include "clPathFile.h"
-#include "Smart/SmartStock.h"
+#include "clTextLines.h"
 #include "clMathExpressionParser.h"
-//#include "GrapX/GUnknown.H"
+#include "Smart/smartstream.h"
+
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
 #include "GrapX/GXKernel.H"
-#include "clTextLines.h"
 
-#include <exception>
+//#include <exception>
 
-#include "DataPoolVariableVtbl.h"
+//#include "DataPoolVariableVtbl.h"
+#include "DataPoolErrorMsg.h"
 #include "DataPoolImpl.h"
 using namespace clstd;
 
@@ -1242,5 +1242,8 @@ namespace Marimo
     *ppResolver = pResolver;
     return hval;
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
 
 } // namespace Marimo

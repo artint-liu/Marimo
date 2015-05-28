@@ -309,8 +309,9 @@
     <ClInclude Include="..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.h" />
     <ClInclude Include="..\..\Platform\Win32_XXX.h" />
+    <ClInclude Include="..\..\User\DataPoolBuildTime.h" />
+    <ClInclude Include="..\..\User\DataPoolErrorMsg.h" />
     <ClInclude Include="..\..\User\DataPoolImpl.h" />
-    <ClInclude Include="..\..\User\DataPoolVariableVtbl.h" />
     <ClInclude Include="..\..\User\DesktopWindowsMgr.h" />
     <ClInclude Include="..\..\User\GrapX.Hxx" />
     <ClInclude Include="..\..\User\GrapXDef.h" />
@@ -395,6 +396,7 @@
     <ClCompile Include="..\..\User\DataPool.cpp" />
     <ClCompile Include="..\..\User\DataPoolBuildTime.cpp" />
     <ClCompile Include="..\..\User\DataPoolCompiler.cpp" />
+    <ClCompile Include="..\..\User\DataPoolErrorMsg.cpp" />
     <ClCompile Include="..\..\User\DataPoolImpl.cpp" />
     <ClCompile Include="..\..\User\DataPoolIterator.cpp" />
     <ClCompile Include="..\..\User\DataPoolVariable.cpp" />

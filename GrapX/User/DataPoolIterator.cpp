@@ -1,12 +1,12 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
-#include "clStringSet.h"
+
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolIterator.H"
 #include "GrapX/DataPoolVariable.H"
 #include "GrapX/GXKernel.H"
 
-#include "DataPoolVariableVtbl.h"
+#include "DataPoolImpl.h"
 using namespace clstd;
 
 namespace Marimo
@@ -67,7 +67,7 @@ namespace Marimo
 
     clBufferBase* iterator::child_buffer_unsafe() const
     {
-      return pVarDesc->GetAsBuffer((GXBYTE*)pBuffer->GetPtr() + nOffset);
+      return reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc)->GetAsBuffer((GXBYTE*)pBuffer->GetPtr() + nOffset);
     }
 
     iterator iterator::begin() const
@@ -153,7 +153,7 @@ namespace Marimo
 
     DataPool::LPCSTR iterator::TypeName() const
     {
-      return pVarDesc->TypeName();
+      return (DataPool::LPCSTR)pVarDesc->TypeName();
     }
 
     GXBOOL iterator::IsArray() const
@@ -163,7 +163,7 @@ namespace Marimo
 
     DataPool::LPCSTR iterator::VariableName() const
     {
-      return pVarDesc->VariableName();
+      return (DataPool::LPCSTR)pVarDesc->VariableName();
     }
 
     DataPoolVariable iterator::ToVariable() const
@@ -180,10 +180,12 @@ namespace Marimo
       var.Free();
 
       if(index == (GXUINT)-1) {
-        vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(pVarDesc->GetMethod());
+        vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(
+          reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc)->GetMethod());
       }
       else {
-        vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(pVarDesc->GetUnaryMethod());
+        vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(
+          reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc)->GetUnaryMethod());
         nElementOffset = index * pVarDesc->TypeSize();
       }
 
@@ -339,8 +341,8 @@ namespace Marimo
     clStringA& named_iterator::FullNameA(clStringA& str) const
     {
       str = ParentName.IsEmpty()
-        ? clStringA(pVarDesc->VariableName())
-        : ParentName + "." + pVarDesc->VariableName();
+        ? clStringA((DataPool::LPCSTR)pVarDesc->VariableName())
+        : ParentName + "." + (DataPool::LPCSTR)pVarDesc->VariableName();
 
       if(index != (GXUINT)-1) {
         if(pVarDesc->nCount > 1 || pVarDesc->IsDynamicArray()) {

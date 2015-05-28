@@ -91,16 +91,25 @@ void TestWatcher(DataPool* pDataPool)
   // 测试watch并改变变量
   GXLPCSTR szWantToWatch = "sTestC.name";
   s_bWatch = TRUE;
+
+  // 关注变量
   pDataPool->Watch(szWantToWatch, TestmpulseProc, NULL);
   pDataPool->Watch(szWantToWatch, pTest);
+  
+  auto LambdaWatcher = pDataPool->WatchFor(szWantToWatch, [](LPCDATAIMPULSE pImpulse){
+    ASSERT(s_bWatch);
+    TRACE("received impulse var in lambda:%s\n", pImpulse->sponsor->ToStringA());
+  });
 
-  MOVariable var;
-  pDataPool->QueryByExpression("sTestC.name", &var);
+  // 修改Var数据
+  auto var = (*pDataPool)["sTestC.name"];
   TRACE("before:%s\n", var.ToStringA());
   var.Set("set new string.");
 
+  // 注销数据关注
   pDataPool->Ignore(szWantToWatch, TestmpulseProc);
   pDataPool->Ignore(szWantToWatch, pTest);
+  pDataPool->Ignore(szWantToWatch, LambdaWatcher);
   s_bWatch = FALSE;
   var.Set("set new string 2.");
 

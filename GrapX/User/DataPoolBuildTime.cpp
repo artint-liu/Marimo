@@ -1,17 +1,17 @@
 #include "GrapX.H"
 #include "GrapX.Hxx"
+
 #include "clStringSet.h"
-//#include "GrapX/GUnknown.H"
+
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
 
-#include "DataPoolVariableVtbl.h"
+#include "DataPoolImpl.h"
+#include "DataPoolBuildTime.h"
 using namespace clstd;
 
 namespace Marimo
 {
-
-
   GXBOOL DataPoolBuildTime::IntCheckTypeDecl(LPCTYPEDECL pTypeDecl, GXBOOL bCheck)
   {
     STATIC_ASSERT(sizeof(BUILDTIME_TYPE_DECLARATION) >= sizeof(TYPE_DECLARATION)); // 这个断言不能完全保证数据正确，但至少不会大出错
@@ -103,7 +103,7 @@ namespace Marimo
         t.cbSize = sizeof(DataPool::Enum);
         //t.nMemberIndex = m_aEnumPck.size();
         t.Member = (GXUINT)m_aEnumPck.size();
-        DataPool::ENUM_DESC sEnum;
+        DATAPOOL_ENUM_DESC sEnum;
         for(t.nMemberCount = 0; type.as.Enum[t.nMemberCount].Name != NULL; t.nMemberCount++)
         {
           sEnum.nName = (GXUINT)NameSet.index(type.as.Enum[t.nMemberCount].Name);
