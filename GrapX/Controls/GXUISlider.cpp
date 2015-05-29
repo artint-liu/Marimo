@@ -319,6 +319,7 @@ namespace GXUI
       else {
         m_nPos = pos->y - GetDialTop(regn);
       }
+      UpdateVarFromPos(dwStyle);
 
       if(TEST_FLAG(dwStyle, GXUISLDS_DISCRETE)) {
         AlignPos(dwStyle);

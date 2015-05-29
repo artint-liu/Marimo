@@ -951,7 +951,10 @@ namespace Marimo
       return FALSE;
     }
 
-    if(IntIsImpulsing(&var)) {
+    const auto dwCaps = var.GetCaps();
+    const auto dwExclude = DataPoolVariable::CAPS_ARRAY | DataPoolVariable::CAPS_STRUCT;
+
+    if(TEST_FLAG(dwCaps, dwExclude) || IntIsImpulsing(&var)) {
       return FALSE;
     }
 
@@ -962,13 +965,19 @@ namespace Marimo
     sImpulse.count   = count;
     sImpulse.param   = NULL;
 
-    IntImpulse(m_FixedDict, var.GetPtr(), &sImpulse);
-    for(WatchableArray::iterator it = m_WatchableArray.begin();
-      it != m_WatchableArray.end(); ++it)
-    {
-      IntImpulse(it->second, (GXLPVOID)var.GetOffset(), &sImpulse);
-    }
+    //TRACE("impulse\n");
 
+    WatchableArray::iterator itArray;
+
+    if(TEST_FLAG(dwCaps, DataPoolVariable::CAPS_FIXED)) {
+      IntImpulse(m_FixedDict, var.GetPtr(), &sImpulse);
+    }
+    else if( (itArray = m_WatchableArray.find((DataPoolArray*)var.GetBuffer()))
+      != m_WatchableArray.end() )
+    {
+      IntImpulse(itArray->second, (GXLPVOID)var.GetOffset(), &sImpulse);
+    }
+    else { return FALSE; }
     return TRUE;
   }
 
@@ -1434,8 +1443,13 @@ namespace Marimo
     // (1)元素不会增加或减少，不会因此产生监视事件
     // (2)元素的改变不会发生对象的监视事件
     // (3)无法通过地址来区分是数组对象还是数组第一个元素
+    // 2.结构体对象不能被watch
+    // (1)改变了结构体的成员函数，无法回溯到它的结构体再推送事件，或者说这样做不经济
+    // (2)无法通过地址来区别是结构体还是结构体第一个成员
 
-    // FIXME: 结构体目前无法通过GetPtr()来区分是结构体还是结构体第一个成员
+    if(pVar->GetTypeCategory() == T_STRUCT) {
+      return FALSE;
+    }
 
     if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_FIXED))
     {

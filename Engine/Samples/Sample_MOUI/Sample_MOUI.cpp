@@ -57,6 +57,7 @@ public:
       (*m_pBasicDataPool)["fScaling"] = 100.0f - fScaling;
     });
 
+    // 这里才设置了真正的按钮名字
     (*m_pBasicDataPool)["button[0]"] = "ButtonName";
 
     //

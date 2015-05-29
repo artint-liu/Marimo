@@ -263,6 +263,7 @@ namespace GXUI
     //  gxSetWindowTextW(m_hWnd, m_VarText.ToStringW());
     //}
     gxSetWindowTextW(m_hWnd, pVariable->ToStringW());
+    pVariable->GetPoolUnsafe()->Watch(pVariable, m_hWnd);
     return 0;
   }
 

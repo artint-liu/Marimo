@@ -2626,10 +2626,15 @@ void ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相
   }
   else if(*l9 == '.')
   {
-    l9[2] = '\0';
-    ASSERT(l9[-1] >= '0' && l9[-1] <= '8');
-    ASSERT(c >= &l9[2]);
-    l9[-1]++;
+    if(l9[-1] >= '0' && l9[-1] <= '8')
+    {
+      l9[2] = '\0';
+      ASSERT(c >= &l9[2]);
+      l9[-1]++;
+    }
+    else {
+      l9[nSignificance] = '\0';
+    }
   }
   else if(*l0 != '.' && l0[1] == '0' && l0 < l9)
   {
