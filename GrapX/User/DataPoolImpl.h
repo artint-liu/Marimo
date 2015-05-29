@@ -151,36 +151,36 @@ namespace Marimo
     {
       typedef GXLPCVOID    VTBL;
 
-      DataPoolArray** GetAsBufferPtr(GXBYTE* pBaseData) const
+      DataPoolArray** GetAsBufferObjPtr(GXBYTE* pBaseData) const
       {
         ASSERT(IsDynamicArray()); // 动态数组
         return (DataPoolArray**)(pBaseData + nOffset);
       }
 
-      DataPoolArray* CreateAsBuffer(DataPoolImpl* pDataPool, clBufferBase* pParent, GXBYTE* pBaseData, int nInitCount) const
-      {
-        ASSERT(IsDynamicArray()); // 一定是动态数组
-        ASSERT(nInitCount >= 0);
-
-        DataPoolArray** ppBuffer = GetAsBufferPtr(pBaseData);  // 动态数组
-        if(*ppBuffer == NULL && TEST_FLAG_NOT(pDataPool->m_dwRuntimeFlags, RuntimeFlag_Readonly))
-        {
-          // 这里ArrayBuffer只能使用指针形式
-          *ppBuffer = new DataPoolArray(TypeSize() * 10);  // 十倍类型大小
-          (*ppBuffer)->Resize(nInitCount * TypeSize(), TRUE);
-
-#ifdef _DEBUG
-          pDataPool->m_nDbgNumOfArray++;
-#endif // #ifdef _DEBUG
-        }
-        return *ppBuffer;
-      }
+//      DataPoolArray* CreateAsBuffer(DataPoolImpl* pDataPool, clBufferBase* pParent, GXBYTE* pBaseData, int nInitCount) const
+//      {
+//        ASSERT(IsDynamicArray()); // 一定是动态数组
+//        ASSERT(nInitCount >= 0);
+//
+//        DataPoolArray** ppBuffer = GetAsBufferObjPtr(pBaseData);  // 动态数组
+//        if(*ppBuffer == NULL && TEST_FLAG_NOT(pDataPool->m_dwRuntimeFlags, RuntimeFlag_Readonly))
+//        {
+//          // 这里ArrayBuffer只能使用指针形式
+//          *ppBuffer = new DataPoolArray(TypeSize() * 10);  // 十倍类型大小
+//          (*ppBuffer)->Resize(nInitCount * TypeSize(), TRUE);
+//
+////#ifdef _DEBUG
+////          pDataPool->m_nDbgNumOfArray++;
+////#endif // #ifdef _DEBUG
+//        }
+//        return *ppBuffer;
+//      }
 
 
 
       DataPoolArray* GetAsBuffer(GXBYTE* pBaseData) const
       {
-        return *GetAsBufferPtr(pBaseData);
+        return *GetAsBufferObjPtr(pBaseData);
       }
 
       GXLPVOID GetAsPtr(GXBYTE* pBaseData) const
@@ -292,13 +292,14 @@ namespace Marimo
     virtual GXHRESULT GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout);
 
     virtual GXBOOL    IsFixedPool         () const; // 池中不含有字符串和动态数组
+    virtual GXBOOL    IsAutoKnock         ();
+    virtual GXBOOL    IsKnocking          (const DataPoolVariable* pVar);
+
     virtual GXLPVOID  GetFixedDataPtr     (); // 必须是RawPool才返回指针
     virtual GXBOOL    QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar);
     virtual GXBOOL    QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar);
     virtual GXBOOL    FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset); // 查找变量全名
 
-    virtual GXBOOL    IsAutoKnock         ();
-    virtual GXBOOL    IsKnocking          (const DataPoolVariable* pVar);
     virtual GXBOOL    SetAutoKnock        (GXBOOL bAutoKnock);
 
     virtual GXBOOL    Impulse             (const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count);
@@ -357,7 +358,6 @@ namespace Marimo
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
     //LPCENUMDESC   IntGetEnum          (GXUINT nPackIndex) const;  // m_aEnumPck中的索引
     LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
-    GXBOOL        IntWatch            (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
     GXBOOL        IntIgnore           (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
 
     GXSIZE_T      IntGetRTDescHeader    ();   // 获得运行时描述表大小
@@ -366,9 +366,8 @@ namespace Marimo
     static void   IntClearChangePtrFlag (TYPE_DESC* pTypeDesc, GXUINT nCount);
     void          DbgIntDump            ();
 
-    //void          Generate              (GXLPVOID lpBuffer, LPCVD pVarDesc, int nVarCount);
-
-    GXBOOL IntFindEnumFlagValue(LPCTD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag) GXCONST;
+    GXBOOL          IntFindEnumFlagValue  (LPCTD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag) GXCONST;
+    DataPoolArray*  IntCreateArrayBuffer  (clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount);
 
     protected:
       clStringA           m_Name;             // 如果是具名对象的话，储存DataPool的名字
@@ -391,17 +390,23 @@ namespace Marimo
 
       clRefBuffer         m_VarBuffer;        // 变量空间开始地址, 这个指向了m_Buffer
 
-#ifdef _DEBUG
-      GXUINT              m_nDbgNumOfArray;   // 动态数组的缓冲区
-      GXUINT              m_nDbgNumOfString;  // 动态数组的缓冲区
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//      GXUINT              m_nDbgNumOfArray;   // 动态数组的缓冲区
+//      GXUINT              m_nDbgNumOfString;  // 动态数组的缓冲区
+//#endif // #ifdef _DEBUG
 
 #ifdef ENABLE_DATAPOOL_WATCHER
-      //WatcherArray        m_aWatchers;
-      typedef clset<GXLPCVOID> KnockingSet;
-      KnockingSet         m_ImpulsingSet;    // 记录正在发送更改通知的Variable列表,防止多个相同指向的Variable反复递归.
+      struct WATCH_FIXED;
+
+      typedef clset<GXLPCVOID>                      ImpulsingSet;
+      typedef clset<WATCH_FIXED>                    WatchFixedList;
+      typedef clmap<GXLPVOID, WatchFixedList>       WatchFixedDict;
+      typedef clmap<DataPoolArray*, WatchFixedDict> WatchableArray;
+
+
+      ImpulsingSet         m_ImpulsingSet;    // 记录正在发送更改通知的Variable列表,防止多个相同指向的Variable反复递归.
       // COMMENT:
-      // KnockingSet目前储存了Var指向变量的地址,静态变量不会有问题
+      // ImpulsingSet目前储存了Var指向变量的地址,静态变量不会有问题
       // 但是动态数组会有问题,在OnKnock时向动态数组增加元素可能
       // 会导致这个地址变化, 而最后在var->GetPtr无法找到并删除KnockingSet中的元素
 
@@ -410,13 +415,18 @@ namespace Marimo
       {
         ImpulseProc pCallback;
         GXLPARAM    lParam;
-
-        bool operator<(const WATCH_FIXED& t) const;
+        bool operator<(const WATCH_FIXED& t) const; // set "<" 方法
       };
-      typedef clset<WATCH_FIXED>  WatchFixedList;
-      typedef clhash_map<GXLPVOID, WatchFixedList> WatchFixedDict;
 
-      WatchFixedDict      m_FixedDict;
+
+      WatchFixedDict      m_FixedDict;      // 在根上的监视变量
+      WatchableArray      m_WatchableArray; // 可监视的数组,这个数组Buffer在根上的
+
+  static  GXBOOL  IntAddToWatchDict       (WatchFixedDict& sDict, GXLPVOID key, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+  static  GXBOOL  IntRemoveFromWatchDict  (WatchFixedDict& sDict, GXLPVOID key, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+          GXBOOL  IntWatch                (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+          void    IntImpulse              (WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse);
+          void    IntCleanupWatchObj      (WatchFixedDict& sWatchDict);
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
       GXDWORD           m_dwRuntimeFlags;
   }; // class DataPoolImpl

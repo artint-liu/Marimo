@@ -1,2 +1,6 @@
-float fScale;
-float fScaleAddition;
+float fScaling;
+float fHalfScaling;
+float fInvScaling;
+string button[];
+
+#pragma import("BaseDataPool.data.txt")

@@ -53,59 +53,6 @@ void trace(char* fmt, ...);
 
 namespace GXUIEXT
 {
-  // 可读化浮点字符串
-  // 调整格式化后的字符串修改为更容易阅读的数值
-  // 如“1.000000”改为“1.0”
-  static void ReadlizeFloatString(clStringW& str, int nSignificance = 5)
-  {
-    TRACEW(L"%s => ", str);
-    size_t p = str.Find('.');
-    if(p == clStringW::npos) {
-      return;
-    }
-    wch* c = str.GetBuffer() + p;
-    wch* l0 = c;
-    wch* l9 = c;
-    c++;
-
-    while(*c != '\0')
-    {
-      if(*c != '0' && c - l0 < nSignificance) {
-        l0 = c;
-      }
-      if(*c != '9' && c - l9 < nSignificance) {
-        l9 = c;
-      }
-      c++;
-    }
-
-    if(*l0 == '.')
-    {
-      l0[2] = '\0';
-      ASSERT(c >= &l0[2]);
-    }
-    else if(*l9 == '.')
-    {
-      l9[2] = '\0';
-      ASSERT(l9[-1] >= '0' && l9[-1] <= '8');
-      ASSERT(c >= &l9[2]);
-      l9[-1]++;
-    }
-    else if(*l0 != '.' && l0[1] == '0' && l0 < l9)
-    {
-      l0[1] = '\0';
-    }
-    else if(*l9 != '.' && l9[1] == '9' && l9 < l0)
-    {
-      l9[1] = '\0';
-      ASSERT(*l9 >= '0' && *l9 <= '8');
-      (*l9)++;
-    }
-
-    str.ReleaseBuffer();
-    TRACEW(L"%s\n", str);
-    CLNOP;
-  }
 
   namespace PropertyList
   {
@@ -1936,8 +1883,8 @@ DRAW_SCROLLBAR:
       }
       else 
       {
-        str.Format(_T("%f"), fVal);
-        ReadlizeFloatString(str);
+        str.AppendFloat(fVal, 'R');
+        //ReadlizeFloatString(str);
       }
 
       rect.right -= nHeight;
@@ -2160,8 +2107,8 @@ DRAW_SCROLLBAR:
 
       if(item.eType == PST_FLOAT)
       {
-        str.Format(L"%f", item.fVal);
-        ReadlizeFloatString(str);
+        str.AppendFloat(item.fVal, 'R');
+        //ReadlizeFloatString(str);
         lWndProc = (GXLONG)(GXLONG _w64)EditFloatWndProc;
       }
       else if(item.eType == PST_INTEGER)

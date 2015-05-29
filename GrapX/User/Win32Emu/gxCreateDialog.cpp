@@ -872,14 +872,15 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
 
-  file.GetBasicParam(hDlgItem, &dbpItem);
+  GXDefinitionArrayW aDefinitions;
+  file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
   clStringW strLayout = file.FindKeyAsString(hDlgItem, L"Layout", L"");
   if(strLayout.GetLength() > 0) {
     dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUIBS_", DlgXM::CMC_ButtonStyle);
   }
 
-  GXUI::Button* pButton = GXUI::Button::Create(hInstance, hDlgWnd, dbpItem.strCaption, dbpItem.dwStyle, dbpItem.strName, &dbpItem.regn);
+  GXUI::Button* pButton = GXUI::Button::Create(hInstance, hDlgWnd, dbpItem.strCaption, dbpItem.dwStyle, dbpItem.strName, &dbpItem.regn, &aDefinitions);
   hItemWnd = pButton->Get();
 
   // ‘ÿ»ÎSprite≈‰÷√

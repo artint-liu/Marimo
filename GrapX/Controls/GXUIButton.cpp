@@ -69,10 +69,14 @@ namespace GXUI
     return pButton;
   }
 
-  Button* Button::Create(GXHINSTANCE hInst, GXHWND hParent, GXLPCTSTR szText, GXDWORD dwStyle, GXLPCWSTR szIdName, const GXRegn* pRegn)
+  Button* Button::Create(GXHINSTANCE hInst, GXHWND hParent, GXLPCTSTR szText, GXDWORD dwStyle, GXLPCWSTR szIdName, const GXRegn* pRegn, const GXDefinitionArrayW* pDefinitions)
   {
     dwStyle |= GXWS_VISIBLE | GXWS_CHILD;
-    return Button::Create(NULL, szText, dwStyle, pRegn, hParent, NULL, hInst, szIdName, NULL);
+    Button* pButton = Button::Create(NULL, szText, dwStyle, pRegn, hParent, NULL, hInst, szIdName, NULL);
+    if(pButton && pDefinitions) {
+      pButton->SolveDefinition(*pDefinitions);
+    }
+    return pButton;
   }
 
   GXLRESULT Button::Destroy()
@@ -251,5 +255,25 @@ namespace GXUI
     }
     return dwDrawTexStyle;
   }
+
+  GXLRESULT Button::SetVariable( MOVariable* pVariable )
+  {
+    //if(SetDataVariable(m_hWnd, m_VarText, pVariable))
+    //{
+    //  gxSetWindowTextW(m_hWnd, m_VarText.ToStringW());
+    //}
+    gxSetWindowTextW(m_hWnd, pVariable->ToStringW());
+    return 0;
+  }
+
+  GXVOID Button::OnImpulse( LPCDATAIMPULSE pImpulse )
+  {
+    ASSERT(pImpulse->sponsor->IsValid());
+    //ASSERT(pImpulse->sponsor->GetPtr() == pImpulse->sponsor->GetPtr());
+
+    gxSetWindowTextW(m_hWnd, pImpulse->sponsor->ToStringW());
+    Invalidate(FALSE);
+  }
+
 } // namespace GXUI
 #endif // #ifndef _DEV_DISABLE_UI_CODE

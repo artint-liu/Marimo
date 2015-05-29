@@ -138,9 +138,9 @@ namespace Marimo
 
         // 只读模式下不会新建字符串
         ASSERT(TEST_FLAG_NOT(pDataPoolImpl->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly));
-#ifdef _DEBUG
-        pDataPoolImpl->m_nDbgNumOfString++;
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//        pDataPoolImpl->m_nDbgNumOfString++;
+//#endif // #ifdef _DEBUG
       }
       else {
         *(_TStoString*)((GXBYTE*)pStringData) = szText;
@@ -803,7 +803,7 @@ namespace Marimo
         break;
       case T_FLOAT:
         str.Clear();
-        str.AppendFloat(pThis->ToFloat());
+        str.AppendFloat(pThis->ToFloat(), 'R');
         break;
       default:
         CLBREAK;

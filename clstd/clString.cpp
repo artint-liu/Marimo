@@ -40,6 +40,8 @@ template<typename _TCh>
 _TCh* fcvt(double arg, int ndigits, int *decpt, int *sign);
 template<typename _TCh>
 _TCh* ecvt(double arg, int ndigits, int *decpt, int *sign);
+template <typename _TCh>
+void ReadlizeFloatString(_TCh* str, int nSignificance = 5); // nSignificance就是相当于一个容差
 
 
 namespace clstd
@@ -67,8 +69,8 @@ namespace clstd
   template i64    _xstrtoi<i64>(const wch* str, i32 radix, clsize len);
   template i64    _xstrtoi<i64>(const  ch* str, i32 radix, clsize len);
 
-  template int _ftoxstr(double value, wch* ascii, int width, int prec1, wch format);
-  template int _ftoxstr(double value,  ch* ascii, int width, int prec1,  ch format);
+  template int _ftoxstr(double value, wch* ascii, int width, int prec1, ch format);
+  template int _ftoxstr(double value,  ch* ascii, int width, int prec1, ch format);
 
   template wch*   strcpyT   (wch* pDest, const wch* pSrc);
   template  ch*   strcpyT   ( ch* pDest, const  ch* pSrc);
@@ -183,6 +185,7 @@ void clStringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength, u32 
     clstd::_ultoxg_t(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
+
 void clStringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
@@ -192,19 +195,23 @@ void clStringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, i32 i
     clstd::_ltoxg_t<wch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
+
 i32 clStringW_traits::StringToInteger32(wch* pString)
 {
   return clstd::_xstrtoi<i32>(pString);
 }
-void clStringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, float fNum)
+
+void clStringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, float fNum, char mode)
 {
-  if(fNum != fNum) {
-    clstd::strcpyn(pDestStr, L"<nan>", uMaxLength);
+  if(mode == 'F' || mode == 'E') {
+    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, mode);
   }
   else {
-    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, L'F');
+    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, 'F');
+    ReadlizeFloatString(pDestStr);
   }
 }
+
 void clStringW_traits::Unsigned64ToString(wch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
@@ -342,10 +349,15 @@ void clStringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i64 iN
   }
 }
 
-void clStringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, float fNum)
+void clStringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, float fNum, char mode)
 {
-  //_gcvt_s(pDestStr, uMaxLength, fNum, 5);
-  clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, 'F');
+  if(mode == 'F' || mode == 'E') {
+    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, mode);
+  }
+  else {
+    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, 'F');
+    ReadlizeFloatString(pDestStr);
+  }
 }
 
 void clStringA_traits::HexToLowerString(ch* pDestStr, size_t uMaxLength, u32 uValue)
@@ -475,12 +487,12 @@ _CLSTR_IMPL::clStringX(const int nInteger)
 
 
 _CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const float fFloat)
+_CLSTR_IMPL::clStringX(const float fFloat, char mode)
   : m_pBuf(NULL)
 {
   allocLength(&_Alloc, MAX_DIGITS);
   
-  _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat);
+  _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, mode);
   reduceLength(_Traits::StringLength(m_pBuf));
 }
 
@@ -590,7 +602,7 @@ _CLSTR_TEMPL
 _CLSTR_IMPL& _CLSTR_IMPL::operator=(const float fFloat)
 {
   resizeLengthNoCopy(MAX_DIGITS);
-  _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat);
+  _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, 'F');
   reduceLength(_Traits::StringLength(m_pBuf));
   return *this;
 }
@@ -783,11 +795,11 @@ _CLSTR_IMPL& _CLSTR_IMPL::operator+=(const clStringX& clStr)
 //  return *this;
 //}
 _CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::AppendFloat(float val)
+_CLSTR_IMPL& _CLSTR_IMPL::AppendFloat(float val, char mode)
 {
   const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
   resizeLength(uStrLength + MAX_DIGITS);
-  _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, val);
+  _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, val, mode);
   reduceLength(_Traits::StringLength(m_pBuf));
   return *this;
 }
@@ -1696,7 +1708,7 @@ SEQUENCE:
       case 'f':
         //_gcvt_s(buffer, 16, va_arg(arglist, double), 5);
         //swprintf_s(buffer, MAX_DIGITS, L"%f", va_arg(arglist, double));
-        _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double));
+        _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
         Append(buffer);
         break;
 
@@ -1754,7 +1766,7 @@ SEQUENCE:
             buffer[i] = '\0';
             nWidth = _Traits::StringToInteger32(buffer);
 
-            _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double));
+            _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
             const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
             if(pDot != NULL) {
               int nn = nWidth;
@@ -2231,16 +2243,17 @@ namespace clstd
     }
     return bNeg ? -a : a;
   }
+
   // ftoa 代码主要来自 2.11BSD
   template<typename _TCh>
-  int _ftoxstr(double value, _TCh* ascii, int width, int prec1, _TCh format)
+  int _ftoxstr(double value, _TCh* ascii, int width, int prec1, ch format)
   {
      int             expon;
      int             sign;
      register int    avail;
      register _TCh   *a;
      register _TCh   *p;
-     _TCh            mode;
+     ch              mode;
      int             lowercase;
      int             prec;
      //_TCh            *fcvt(), *ecvt();
@@ -2577,6 +2590,57 @@ extern "C" b32 strcmpnW(const wch* lpString1, const wch* lpString2, int nCount)
 {
   return clstd::strncmpT(lpString1, lpString2, nCount) == 0;
   //return (CompareStringW(LOCALE_USER_DEFAULT, NULL, lpString1, nCount, lpString2, -1) - 2) == 0;
+}
+
+// 可读化浮点字符串
+// 调整格式化后的字符串修改为更容易阅读的数值
+// 如"1.500000"改为"1.5", 或者"1.499999"改为"1.5"
+template <typename _TCh>
+void ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相当于一个容差
+{
+  //TRACEW(L"%s => ", str);
+  _TCh* c = clstd::strchrT(str, '.');
+  if(c == NULL) {
+    return;
+  }
+
+  _TCh* l0 = c;
+  _TCh* l9 = c;
+  c++;
+
+  while(*c != '\0')
+  {
+    if(*c != '0' && c - l0 < nSignificance) {
+      l0 = c;
+    }
+    if(*c != '9' && c - l9 < nSignificance) {
+      l9 = c;
+    }
+    c++;
+  }
+
+  if(*l0 == '.')
+  {
+    l0[2] = '\0';
+    ASSERT(c >= &l0[2]);
+  }
+  else if(*l9 == '.')
+  {
+    l9[2] = '\0';
+    ASSERT(l9[-1] >= '0' && l9[-1] <= '8');
+    ASSERT(c >= &l9[2]);
+    l9[-1]++;
+  }
+  else if(*l0 != '.' && l0[1] == '0' && l0 < l9)
+  {
+    l0[1] = '\0';
+  }
+  else if(*l9 != '.' && l9[1] == '9' && l9 < l0)
+  {
+    l9[1] = '\0';
+    ASSERT(*l9 >= '0' && *l9 <= '8');
+    (*l9)++;
+  }
 }
 
 int SimpleASCIItoUnicode(wch* pDestStr, int nCount, const ch* pSrcStr)

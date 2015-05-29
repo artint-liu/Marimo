@@ -43,15 +43,17 @@ namespace GXUI
   protected:
     static  GXLRESULT GXCALLBACK WndProc        (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
     //static  GXDWORD              RegisterClass  (GXHINSTANCE hInst);
-    virtual GXLRESULT            OnPaint        (GXWndCanvas& canvas);
-    virtual GXLRESULT            Destroy        ();
+    virtual GXLRESULT   OnPaint        (GXWndCanvas& canvas);
+    virtual GXLRESULT   Destroy        ();
+    virtual GXLRESULT   SetVariable    (MOVariable* pVariable);
+    virtual GXVOID      OnImpulse      (LPCDATAIMPULSE pImpulse);
 
     GXDWORD GetDrawTextFlag ();
     void    CommandNotify   ();
   public:
     Button(GXLPCWSTR szIdName);
     static Button* Create  (GXDWORD dwExStyle, GXLPCWSTR lpWindowName, GXDWORD dwStyle, const GXRegn* pRegn, GXHWND hWndParent, GXHMENU hMenu, GXHINSTANCE hInstance, GXLPCWSTR szIdName, GXLPVOID lpParam);
-    static Button* Create  (GXHINSTANCE hInst, GXHWND hParent, GXLPCTSTR szText, GXDWORD dwStyle, GXLPCWSTR szIdName, const GXRegn* pRegn);
+    static Button* Create  (GXHINSTANCE hInst, GXHWND hParent, GXLPCTSTR szText, GXDWORD dwStyle, GXLPCWSTR szIdName, const GXRegn* pRegn, const GXDefinitionArrayW* pDefinitions);
     virtual GXLRESULT Measure(GXRegn* pRegn);
   public:
     //GXHRESULT      SetFont (LPCWSTR szFontName, int nFontSize);

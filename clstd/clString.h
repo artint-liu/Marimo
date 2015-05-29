@@ -83,7 +83,7 @@ namespace clstd
 
   // double(float) to string
   template<typename _TCh>
-  int _ftoxstr(double value, _TCh* ascii, int width, int prec1, _TCh format);
+  int _ftoxstr(double value, _TCh* ascii, int width, int prec1, ch format);
 
   // string to integer
   i32 xtoi(CLCONST wch* str);
@@ -172,7 +172,7 @@ public:
   //clStringX(clStringX& clStr);
   clStringX(const clStringX& clStr);
   explicit clStringX(const int nInteger);
-  explicit clStringX(const float fFloat);
+  explicit clStringX(const float fFloat, char mode = 'F');
   explicit clStringX(const long lLong);
   explicit clStringX(const unsigned int uInteger);
   explicit clStringX(const unsigned long uLong);
@@ -246,7 +246,7 @@ public:
   clStringX&  Append          (_TCh cCh);
   clStringX&  Append          (_TCh cCh, size_t uCount);
   clStringX&  Append          (const clStringX& clStr);
-  clStringX&  AppendFloat     (float val);
+  clStringX&  AppendFloat     (float val, char mode = 'F'); // mode是转换模式，'F'标准浮点模式，'E'科学计数模式，'R'阅读增强模式
   clStringX&  AppendInteger32 (s32 val, int nNumGroup = 0);
   clStringX&  AppendUInt32    (u32 val, int nNumGroup = 0);
   clStringX&  AppendInteger64 (s64 val, int nNumGroup = 0);
@@ -314,7 +314,7 @@ struct clStringW_traits
   static i32        StringToInteger32   (wch* pString);
   static void       Unsigned64ToString  (wch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup);
   static void       Integer64ToString   (wch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup);
-  static void       FloatToString       (wch* pDestStr, size_t uMaxLength, float fNum);
+  static void       FloatToString       (wch* pDestStr, size_t uMaxLength, float fNum, char mode);
   static void       HexToLowerString    (wch* pDestStr, size_t uMaxLength, u32 uValue);
   static void       HexToUpperString    (wch* pDestStr, size_t uMaxLength, u32 uValue);
   static void       BinaryToString      (wch* pDestStr, size_t uMaxLength, u32 uValue);
@@ -337,7 +337,7 @@ struct clStringA_traits
   static i32        StringToInteger32   (ch* pString);
   static void       Unsigned64ToString  (ch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup);
   static void       Integer64ToString   (ch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup);
-  static void       FloatToString       (ch* pDestStr, size_t uMaxLength, float fNum);
+  static void       FloatToString       (ch* pDestStr, size_t uMaxLength, float fNum, char mode);
   static void       HexToLowerString    (ch* pDestStr, size_t uMaxLength, u32 uValue);
   static void       HexToUpperString    (ch* pDestStr, size_t uMaxLength, u32 uValue);
   static void       BinaryToString      (ch* pDestStr, size_t uMaxLength, u32 uValue);

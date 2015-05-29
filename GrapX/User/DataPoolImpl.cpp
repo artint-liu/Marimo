@@ -84,10 +84,10 @@ namespace Marimo
 #else
     , m_dwRuntimeFlags     (RuntimeFlag_AutoKnock | RuntimeFlag_Fixed)
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#ifdef _DEBUG
-    , m_nDbgNumOfArray (0)
-    , m_nDbgNumOfString(0)
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//    , m_nDbgNumOfArray (0)
+//    , m_nDbgNumOfString(0)
+//#endif // #ifdef _DEBUG
   {
   }
 
@@ -98,8 +98,8 @@ namespace Marimo
     // 结构体会产生递归，遍历其下的数据类型
     if(m_nNumOfVar && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly)) {
       Cleanup(m_VarBuffer.GetPtr(), m_aVariables, (int)m_nNumOfVar);
-      ASSERT(m_nDbgNumOfArray == 0);
-      ASSERT(m_nDbgNumOfString == 0);
+      //ASSERT(m_nDbgNumOfArray == 0);
+      //ASSERT(m_nDbgNumOfString == 0);
     }
 
 #ifdef DATAPOOLCOMPILER_PROJECT
@@ -127,17 +127,11 @@ namespace Marimo
     m_aWatchers.clear();
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 #else
-    for(WatchFixedDict::iterator it = m_FixedDict.begin(); it != m_FixedDict.end(); ++it)
+    IntCleanupWatchObj(m_FixedDict);
+    for(WatchableArray::iterator it = m_WatchableArray.begin(); it != m_WatchableArray.end(); ++it)
     {
-      for(WatchFixedList::iterator itList = it->second.begin(); itList != it->second.end(); ++itList)
-      {
-        if(itList->pCallback == 0) {
-          DataPoolWatcher*& pWatcher = *(DataPoolWatcher**)&itList->lParam;
-          SAFE_RELEASE(pWatcher);
-        }
-      }
+      IntCleanupWatchObj(it->second);
     }
-    m_FixedDict.clear();
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
     //SAFE_DELETE(m_pBuffer);
   }
@@ -198,9 +192,9 @@ namespace Marimo
         {
           if(pString[nStringIndex]) {
             pString[nStringIndex].~clStringX();
-#ifdef _DEBUG
-            m_nDbgNumOfString--;
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//            m_nDbgNumOfString--;
+//#endif // #ifdef _DEBUG
           }
         }
       }
@@ -215,9 +209,9 @@ namespace Marimo
         {
           if(pString[nStringIndex]) {
             pString[nStringIndex].~clStringX();
-#ifdef _DEBUG
-            m_nDbgNumOfString--;
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//            m_nDbgNumOfString--;
+//#endif // #ifdef _DEBUG
           }
         }
       }
@@ -264,7 +258,7 @@ namespace Marimo
 
       if(bDynamicArray) // 动态字符串数组
       {
-        ppBuffer = VARDesc.GetAsBufferPtr(pData);
+        ppBuffer = VARDesc.GetAsBufferObjPtr(pData);
         if(*ppBuffer == NULL) {
           continue;
         }
@@ -282,16 +276,16 @@ namespace Marimo
       if(bDynamicArray)
       {
         // ppBuffer 可能在上面的判断中已经设置，如果没设置就是基础类型动态数组。
-        ASSERT(ppBuffer == NULL || ppBuffer == VARDesc.GetAsBufferPtr(pData));
+        ASSERT(ppBuffer == NULL || ppBuffer == VARDesc.GetAsBufferObjPtr(pData));
 
-        ppBuffer = VARDesc.GetAsBufferPtr(pData); // (clBuffer**)(pData + VARDesc.nOffset);
+        ppBuffer = VARDesc.GetAsBufferObjPtr(pData); // (clBuffer**)(pData + VARDesc.nOffset);
         if(*ppBuffer)
         {
           delete (*ppBuffer);
           *ppBuffer = NULL;
-#ifdef _DEBUG
-          m_nDbgNumOfArray--;
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//          m_nDbgNumOfArray--;
+//#endif // #ifdef _DEBUG
         }
       }
 
@@ -453,7 +447,7 @@ namespace Marimo
           if(bDynamicArray)
           {
             ASSERT(varDecl.Count < 0);
-            clBuffer* pBuffer = VARDesc.CreateAsBuffer(this, &m_VarBuffer, pData, varDecl.Init == NULL ? 0 : -varDecl.Count);
+            clBuffer* pBuffer = IntCreateArrayBuffer(&m_VarBuffer, &VARDesc, pData, varDecl.Init == NULL ? 0 : -varDecl.Count);
             memcpy(pBuffer->GetPtr(), varDecl.Init, pBuffer->GetSize());
           }
           else
@@ -478,7 +472,8 @@ namespace Marimo
             ASSERT((varDecl.Init != NULL && nCount < 0) || 
               (varDecl.Init == NULL && nCount == 0));
 
-            pStrPool = (clStringW*)VARDesc.CreateAsBuffer(this, &m_VarBuffer, pData, -nCount)->GetPtr();
+            //pStrPool = (clStringW*)VARDesc.CreateAsBuffer(this, &m_VarBuffer, pData, -nCount)->GetPtr();
+            pStrPool = (clStringW*)IntCreateArrayBuffer(&m_VarBuffer, &VARDesc, pData, -nCount)->GetPtr();
             nCount = -nCount;
           }
           else
@@ -491,7 +486,7 @@ namespace Marimo
           {
             clStringW& str = pStrPool[i];
             new(&str) clStringW;
-            INC_DBGNUMOFSTRING;
+            //INC_DBGNUMOFSTRING;
             if(pStrInit != NULL)
             {
               str = pStrInit;
@@ -921,6 +916,34 @@ namespace Marimo
     return m_aWatchers[nIndex]->UnregisterPrivate(pIndentify);
   }
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
+  void DataPoolImpl::IntImpulse(WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse)
+  {
+    auto it_result = sDict.find(key);
+    if(it_result != sDict.end())
+    {
+
+      // 加入到推送集合里，放置自己被无限推送
+      ImpulsingSet::iterator itThisImpulse = m_ImpulsingSet.insert(key).first; // FIXME: 这个如果是动态数组的话，key是偏移，可能在多个动态数组中出现重合
+
+      for(auto it = it_result->second.begin(); it != it_result->second.end(); ++it)
+      {
+        pImpulse->param = it->lParam;
+        switch((GXINT_PTR)it->pCallback)
+        {
+        case 0: // DataPoolWatcher 对象
+          ((DataPoolWatcher*)it->lParam)->OnImpulse(pImpulse);
+          break;
+        case 1: // UI handle
+          gxSendMessage((GXHWND)it->lParam, GXWM_IMPULSE, 0, (GXLPARAM)pImpulse);
+          break;
+        default: // 回调函数
+          it->pCallback(pImpulse);
+          break;
+        }
+      }
+      m_ImpulsingSet.erase(itThisImpulse);
+    }
+  }
 
   GXBOOL DataPoolImpl::Impulse(const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count)
   {
@@ -932,40 +955,21 @@ namespace Marimo
       return FALSE;
     }
 
-    auto it_result = m_FixedDict.find(var.GetPtr());
-    if(it_result != m_FixedDict.end())
+    DATAPOOL_IMPULSE sImpulse;
+    sImpulse.sponsor = &var;
+    sImpulse.reason  = reason;
+    sImpulse.index   = index;
+    sImpulse.count   = count;
+    sImpulse.param   = NULL;
+
+    IntImpulse(m_FixedDict, var.GetPtr(), &sImpulse);
+    for(WatchableArray::iterator it = m_WatchableArray.begin();
+      it != m_WatchableArray.end(); ++it)
     {
-      DATAPOOL_IMPULSE sImpulse;
-      sImpulse.sponsor = &var;
-      sImpulse.reason  = reason;
-      sImpulse.index   = index;
-      sImpulse.count   = count;
-      sImpulse.param   = NULL;
-
-      // 加入到推送集合里，放置自己被无限推送
-      KnockingSet::iterator itThisImpulse = m_ImpulsingSet.insert(var.GetPtr()).first;
-
-      for(auto it = it_result->second.begin(); it != it_result->second.end(); ++it)
-      {
-        sImpulse.param = it->lParam;
-        switch((GXINT_PTR)it->pCallback)
-        {
-        case 0: // DataPoolWatcher 对象
-          ((DataPoolWatcher*)it->lParam)->OnImpulse(&sImpulse);
-          break;
-        case 1: // UI handle
-          gxSendMessage((GXHWND)it->lParam, GXWM_IMPULSE, 0, (GXLPARAM)&sImpulse);
-          break;
-        default: // 回调函数
-          it->pCallback(&sImpulse);
-          break;
-        }
-      }
-
-      m_ImpulsingSet.erase(itThisImpulse);
-      return TRUE;
+      IntImpulse(it->second, (GXLPVOID)var.GetOffset(), &sImpulse);
     }
-    return FALSE;
+
+    return TRUE;
   }
 
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
@@ -986,14 +990,15 @@ namespace Marimo
     // 内部函数中不改变pVar->m_pDataPool的引用计数
     using namespace Implement;
     LPCVD pVarDesc = IntGetVariable(pVar->pVdd, szVariableName);
-    const GXUINT nMemberOffset = pVar->AbsOffset + pVarDesc->nOffset; // 后面多出用到，这里算一下
 
     if(pVarDesc == NULL) {
       return FALSE;
     }
+    const GXUINT nMemberOffset = pVar->AbsOffset + pVarDesc->nOffset; // 后面多出用到，这里算一下
 
     if(pVarDesc->IsDynamicArray()) { // 动态数组
-      clBuffer* pArrayBuffer = pVarDesc->CreateAsBuffer(this, pVar->pBuffer, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
+      //clBuffer* pArrayBuffer = pVarDesc->CreateAsBuffer(this, pVar->pBuffer, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
+      clBuffer* pArrayBuffer = IntCreateArrayBuffer(pVar->pBuffer, pVarDesc, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
       if(nIndex == (GXUINT)-1)
       {
         pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
@@ -1028,7 +1033,7 @@ namespace Marimo
 #ifdef ENABLE_DATAPOOL_WATCHER
   GXBOOL DataPoolImpl::IntIsImpulsing(const DataPoolVariable* pVar) const
   {
-    KnockingSet::const_iterator it = m_ImpulsingSet.find(pVar->GetPtr());
+    ImpulsingSet::const_iterator it = m_ImpulsingSet.find(pVar->GetPtr());
     return it != m_ImpulsingSet.end();
   }
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
@@ -1373,41 +1378,28 @@ namespace Marimo
 
 
   //////////////////////////////////////////////////////////////////////////
-
-  GXBOOL DataPoolImpl::IntWatch( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  GXBOOL DataPoolImpl::IntAddToWatchDict(WatchFixedDict& sDict, GXLPVOID key, ImpulseProc pImpulseCallback, GXLPARAM lParam)
   {
-    GXBOOL bret = FALSE;
-    const auto dwFlags = pVar->GetCaps();
-    const auto dwBan = DataPoolVariable::CAPS_STRUCT | DataPoolVariable::CAPS_ARRAY | DataPoolVariable::CAPS_DYNARRAY;
+    WatchFixedList sWatchList;
+    auto result = sDict.insert(clmake_pair(key, sWatchList));
 
-    // 1.被 watch 必须是 fixed 变量
-    // 2.结构体，数组对象不能 wacth
-    // 3.Object对象也不能被 watch
-    if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_FIXED) &&
-      TEST_FLAG_NOT(dwFlags, dwBan) && pVar->GetTypeCategory() != T_OBJECT)
-    {
-      WatchFixedList sWatchList;
-      auto result = m_FixedDict.insert(clmake_pair(pVar->GetPtr(), sWatchList));
-      bret = TRUE;
+    WATCH_FIXED sWatch;
+    sWatch.pCallback = pImpulseCallback;
+    sWatch.lParam    = lParam;
 
-      WATCH_FIXED sWatch;
-      sWatch.pCallback = pImpulseCallback;
-      sWatch.lParam    = lParam;
-
-      // DataPoolWatch 对象
-      if((GXINT_PTR)pImpulseCallback == 0) {
-        ((DataPoolWatcher*)lParam)->AddRef();
-      }
-
-      result.first->second.insert(sWatch);
+    // DataPoolWatch 对象
+    if((GXINT_PTR)pImpulseCallback == 0) {
+      ((DataPoolWatcher*)lParam)->AddRef();
     }
-    return bret;
+
+    result.first->second.insert(sWatch);
+    return TRUE;
   }
 
-  GXBOOL DataPoolImpl::IntIgnore( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  GXBOOL DataPoolImpl::IntRemoveFromWatchDict(WatchFixedDict& sDict, GXLPVOID key, ImpulseProc pImpulseCallback, GXLPARAM lParam)
   {
-    auto itWatchSet = m_FixedDict.find(pVar->GetPtr());
-    if(itWatchSet != m_FixedDict.end())
+    auto itWatchSet = sDict.find(key);
+    if(itWatchSet != sDict.end())
     {
       WatchFixedList& sVarWatchSet = itWatchSet->second;
       WATCH_FIXED sWatch;
@@ -1423,10 +1415,54 @@ namespace Marimo
           SAFE_RELEASE(pWatch);
         }
         sVarWatchSet.erase(itWatch);
-      }
 
-      if(sVarWatchSet.empty()) {
-        m_FixedDict.erase(itWatchSet);
+        if(sVarWatchSet.empty()) {
+          sDict.erase(itWatchSet);
+        }
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  GXBOOL DataPoolImpl::IntWatch( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  {
+    const auto dwFlags = pVar->GetCaps();
+    const auto dwBan = DataPoolVariable::CAPS_ARRAY;
+
+    // 1.静态数组对象不能被watch
+    // (1)元素不会增加或减少，不会因此产生监视事件
+    // (2)元素的改变不会发生对象的监视事件
+    // (3)无法通过地址来区分是数组对象还是数组第一个元素
+
+    // FIXME: 结构体目前无法通过GetPtr()来区分是结构体还是结构体第一个成员
+
+    if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_FIXED))
+    {
+      if(TEST_FLAG_NOT(dwFlags, dwBan)) {
+        return IntAddToWatchDict(m_FixedDict, pVar->GetPtr(), pImpulseCallback, lParam);
+      }
+    }
+    else {
+      auto it = m_WatchableArray.find((DataPoolArray*)pVar->GetBuffer());
+      if(it != m_WatchableArray.end()) {
+        return IntAddToWatchDict(it->second, (GXLPVOID)pVar->GetOffset(), pImpulseCallback, lParam);
+      }
+    }
+    return FALSE;
+  }
+
+  GXBOOL DataPoolImpl::IntIgnore( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
+  {
+    // TODO: 这段代码和IntWatch相似，稳定后可以用模板合并
+    const auto dwFlags = pVar->GetCaps();
+    if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_FIXED)) {
+      return IntRemoveFromWatchDict(m_FixedDict, pVar->GetPtr(), pImpulseCallback, lParam);
+    }
+    else {
+      auto it = m_WatchableArray.find((DataPoolArray*)pVar->GetBuffer());
+      if(it != m_WatchableArray.end()) {
+        return IntRemoveFromWatchDict(it->second, (GXLPVOID)pVar->GetOffset(), pImpulseCallback, lParam);
       }
     }
     return FALSE;
@@ -2221,11 +2257,11 @@ namespace Marimo
             if(TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
             {
               *(GXLPCWSTR*)pDest = str;
-              INC_DBGNUMOFSTRING;
+              //INC_DBGNUMOFSTRING;
             }
             else if(str[0]) {
               new(pDest) clStringW(str);
-              INC_DBGNUMOFSTRING;
+              //INC_DBGNUMOFSTRING;
               //TRACEW(L"str:%s %s\n", str, *(clStringW*)pDest);
             }
             else {
@@ -2242,7 +2278,7 @@ namespace Marimo
               // 缓冲区肯定已经创建过了
               ASSERT(BufferTab[index].pBuffer != NULL);
               *(clBufferBase**)pDest = BufferTab[index].pBuffer;
-              INC_DBGNUMOFARRAY;
+              //INC_DBGNUMOFARRAY;
             }
             else {
               *(clBufferBase**)pDest = NULL;
@@ -2267,6 +2303,46 @@ namespace Marimo
     }
 #endif // #ifdef DEBUG_DECL_NAME
     return TRUE;
+  }
+
+  void DataPoolImpl::IntCleanupWatchObj(WatchFixedDict& sWatchDict)
+  {
+    for(WatchFixedDict::iterator it = sWatchDict.begin(); it != sWatchDict.end(); ++it)
+    {
+      for(WatchFixedList::iterator itList = it->second.begin(); itList != it->second.end(); ++itList)
+      {
+        if(itList->pCallback == 0) {
+          DataPoolWatcher*& pWatcher = *(DataPoolWatcher**)&itList->lParam;
+          SAFE_RELEASE(pWatcher);
+        }
+      }
+    }
+    sWatchDict.clear();
+  }
+
+  DataPoolArray* DataPoolImpl::IntCreateArrayBuffer( clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount )
+  {
+    ASSERT(pVarDesc->IsDynamicArray()); // 一定是动态数组
+    ASSERT(nInitCount >= 0);
+
+    DataPoolArray** ppBuffer = pVarDesc->GetAsBufferObjPtr(pBaseData);  // 动态数组
+    if(*ppBuffer == NULL && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly))
+    {
+      // 这里ArrayBuffer只能使用指针形式
+      *ppBuffer = new DataPoolArray(pVarDesc->TypeSize() * 10);  // 十倍类型大小
+      (*ppBuffer)->Resize(nInitCount * pVarDesc->TypeSize(), TRUE);
+
+      if(pParent == &m_VarBuffer) {
+        WatchFixedDict sDict;
+        auto insert_result = m_WatchableArray.insert(clmake_pair(*ppBuffer, sDict));
+        ASSERT(insert_result.second); // 添加的一定是全新的
+      }
+
+//#ifdef _DEBUG
+//      m_nDbgNumOfArray++;
+//#endif // #ifdef _DEBUG
+    }
+    return *ppBuffer;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -2299,7 +2375,7 @@ namespace Marimo
   bool DataPoolImpl::WATCH_FIXED::operator<( const WATCH_FIXED& t ) const
   {
     // 这个写的好搓！
-    TRACE("(%x,%x)(%x,%x)\n", pCallback, lParam, t.pCallback, t.lParam);
+    //TRACE("(%x,%x)(%x,%x)\n", pCallback, lParam, t.pCallback, t.lParam);
     switch((GXINT_PTR)pCallback)
     {
     case 0: // DataPoolWatcher
