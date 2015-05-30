@@ -857,9 +857,12 @@ GXBOOL GXDLLAPI gxIsWindowVisible(GXHWND hWnd)
 {
   //return hWnd == 0 ? FALSE : ((GXWND_PTR(hWnd)->m_uStyle & GXWS_VISIBLE) != 0);
   GXLPWND lpWnd = GXWND_PTR(hWnd);
-  CHECK_LPWND_VAILD(lpWnd);
-
-  return lpWnd->IsVisible();
+  if(lpWnd)
+  {
+    CHECK_LPWND_VAILD(lpWnd);
+    return lpWnd->IsVisible();
+  }
+  return FALSE;
 }
 //////////////////////////////////////////////////////////////////////////
 GXBOOL GXDLLAPI gxShowWindow(

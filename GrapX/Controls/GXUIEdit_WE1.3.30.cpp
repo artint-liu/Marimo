@@ -4531,6 +4531,12 @@ GXLRESULT EDITSTATE::WM_NCDestroy()
 {
   LINEDEF *pc, *pp;
   m_VarText.Free();
+
+  if(m_hFont) {
+    gxDeleteObject(m_hFont);
+    m_hFont = NULL;
+  }
+
   if (hloc32W) {
     gxLocalFree(hloc32W);
   }

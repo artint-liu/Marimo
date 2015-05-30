@@ -14,9 +14,15 @@
     <ClInclude Include="..\Sample_MOUI\Sample_MOUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sample_MOUI\MOUIStaff.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sample_MOUI\Sample_MOUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sample_MOUI\MOUIStaff.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

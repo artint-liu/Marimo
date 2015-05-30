@@ -11,9 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Sample_MOUI\MOUIStaff.h" />
     <ClInclude Include="..\Sample_MOUI\Sample_MOUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Sample_MOUI\MOUIStaff.cpp" />
     <ClCompile Include="..\Sample_MOUI\Sample_MOUI.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

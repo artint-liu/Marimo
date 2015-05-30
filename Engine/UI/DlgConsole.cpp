@@ -14,7 +14,7 @@
 #include "Engine/DlgConsole.h"
 //#include "grapx/Console.h"
 
-LPCWSTR CDlgConsole::idTemplate = {L"@Resource\\console.dlg.txt"};
+LPCWSTR CDlgConsole::idTemplate = {L"@UI/console.dlg.txt"};
 GXLONG_PTR CDlgConsole::s_OldWndProc;
 GXVOID CDlgConsole::OnInitDialog()
 {
@@ -146,9 +146,10 @@ extern "C"
   {
     CDlgConsole* pDlgConsole = NULL;
     pDlgConsole = new CDlgConsole();
-    pDlgConsole->CreateDlg();
-    pDlgConsole->AttachLogger(pLogger);
-    pDlgConsole->Show(FALSE);
+    if(pDlgConsole->CreateDlg()) {
+      pDlgConsole->AttachLogger(pLogger);
+      pDlgConsole->Show(FALSE);
+    }
 
     return pDlgConsole;
   }

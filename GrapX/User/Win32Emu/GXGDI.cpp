@@ -427,7 +427,7 @@ GXBOOL GXDLLAPI gxDeleteObject(
       if(hObject == g_hSystemFont) {
         return TRUE;
       }
-      GXWin32APIEmu::EraseGXGdiObj(GXGDIOBJ_FONT, hObject);
+      //GXWin32APIEmu::EraseGXGdiObj(GXGDIOBJ_FONT, hObject);
       return _gxDeleteObject(hObject);
     }
   }

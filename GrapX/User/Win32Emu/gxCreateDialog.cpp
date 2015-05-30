@@ -1085,7 +1085,9 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dlg
     LogFont.lfHeight = dfpItem.nFontSize;
     GXSTRCPYN<GXWCHAR>(LogFont.lfFaceName, dfpItem.strFontName, GXLF_FACESIZE);
     GXHFONT hFont = gxCreateFontIndirectW(&LogFont);
-    gxSendMessage(hItemWnd, GXWM_SETFONT, (GXWPARAM)hFont, 0);
+    if(hFont) {
+      gxSendMessage(hItemWnd, GXWM_SETFONT, (GXWPARAM)hFont, 0);
+    }
   }
   return hItemWnd;
 }
