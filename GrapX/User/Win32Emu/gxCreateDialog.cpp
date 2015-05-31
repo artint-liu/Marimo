@@ -852,16 +852,14 @@ GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   clStringW strSpriteInfo = file.FindKeyAsString(hDlgItem, L"Sprite", L"");
   if(strSpriteInfo.GetLength() > 0)
   {
-    size_t pos = strSpriteInfo.Find(L':');
-    if(pos != clStringW::npos)
+    clStringW strSpriteFile;
+    clStringW strSprite;
+
+    if(strSpriteInfo.DivideBy(L':', strSpriteFile, strSprite) != clStringW::npos &&
+      strSpriteFile.IsNotEmpty() && strSprite.IsNotEmpty())
     {
-      clStringW strSpriteFile = strSpriteInfo.SubString(0, pos);
-      clStringW strSprite = strSpriteInfo.SubString(pos + 1, strSpriteInfo.GetLength());
-      if(strSpriteFile.GetLength() > 0 && strSprite.GetLength() > 0)
-      {
-        pSprite->SetSpriteByFilenameW(strSpriteFile);
-        pSprite->SetByNameW(strSprite);
-      }
+      pSprite->SetSpriteByFilenameW(strSpriteFile);
+      pSprite->SetByNameW(strSprite);
     }
   }
   return hItemWnd;

@@ -1,0 +1,55 @@
+smart{version = "0.0.1.0";}
+Image
+{
+	File = "photo.jpg";
+	Module{
+		rect{
+			id=100;
+			left=0;
+			top=0;
+			right=408;
+			bottom=306;
+			name="first";
+		};
+		rect{
+			id=101;
+			left=408;
+			top=0;
+			right=816;
+			bottom=306;
+			name="second";
+		};
+		rect{
+			id=102;
+			left=0;
+			top=308;
+			right=408;
+			bottom=612;
+			name="third";
+		};
+		rect{
+			id=103;
+			left=408;
+			top=308;
+			right=816;
+			bottom=612;
+			name="fourth";
+		};
+		rect{
+			id=104;
+			left=0;
+			top=616;
+			right=408;
+			bottom=918;
+			name="fifth";
+		};
+		rect{
+			id=105;
+			left=408;
+			top=616;
+			right=816;
+			bottom=918;
+			name="sixth";
+		};
+	};
+};

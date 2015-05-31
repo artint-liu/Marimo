@@ -98,8 +98,10 @@ namespace GXUI
     GXSprite*   m_pSprite;
     int         m_nSpriteIdx;
   protected:
-    virtual GXLRESULT            OnPaint       (GXWndCanvas& canvas);
-    virtual GXLRESULT            Destroy        ();
+    virtual GXLRESULT   OnPaint       (GXWndCanvas& canvas);
+    virtual GXLRESULT   Destroy       ();
+    virtual GXLRESULT   SetVariable   (MOVariable* pVariable);
+    virtual GXVOID      OnImpulse     (LPCDATAIMPULSE pImpulse);
 
     void ClearSprite();
   public:

@@ -64,7 +64,7 @@ HRESULT SampleApp_MOUI::OnCreate()
   //
   // 必须先创建 DataPool，后来创建的UI才能找到它并绑定
   //
-  MODataPool::CompileFromFileW(&m_pBasicDataPool, "BasicPool", L"Test/UI/BaseDataPool.txt");
+  InitDataPool();
 
   //
   // 创建对话框
@@ -149,4 +149,21 @@ HRESULT SampleApp_MOUI::Render()
   }
 
   return GX_OK;
+}
+
+void SampleApp_MOUI::InitDataPool()
+{
+  MODataPool::CompileFromFileW(&m_pBasicDataPool, "BasicPool", L"Test/UI/BaseDataPool.txt");
+
+  GXSprite* pSprite = NULL;
+  GXCreateSpriteFromFileW(m_pGraphics, L"Test/sprites/photo.GSprite", &pSprite);
+
+  MOVariable varSpriteInfo;
+  if(m_pBasicDataPool->QueryByExpression("SpriteInfo", &varSpriteInfo))
+  {
+    varSpriteInfo["sprite"].Retain(pSprite);
+    varSpriteInfo["name"]   = "fourth";
+  }
+
+  SAFE_RELEASE(pSprite);
 }

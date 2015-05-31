@@ -13,6 +13,7 @@
 #include "GrapX/GXGDI.H"
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPoolIterator.H"
 #include "GXUICtrlBase.h"
 #include "GXUIStatic.h"
 #include "GrapX/GXCanvas.H"
@@ -505,6 +506,60 @@ namespace GXUI
   GXLRESULT StaticSprite::Measure(GXRegn* pRegn)
   {
     return -1;
+  }
+
+  GXLRESULT StaticSprite::SetVariable( MOVariable* pVariable )
+  {
+    auto eCate = pVariable->GetTypeCategory();
+    if(eCate == Marimo::T_STRING)
+    {
+      clStringW str = pVariable->ToStringW();
+      clStringW strFilename, strName;
+      str.DivideBy(L':', strFilename, strName);
+      SetSpriteByFilenameW(strFilename);
+      SetByNameW(strName);
+    }
+    else if(eCate == Marimo::T_STRUCT)
+    {
+      auto it = pVariable->begin();
+      auto itEnd = pVariable->end();
+      GXSprite* pSprite = NULL;
+      clStringW strName;
+
+      // 结构体对象
+      // 通过迭代器扫描到Object和String类型成员，作为SpriteObject和SpriteName
+      for(; it != itEnd; ++it)
+      {
+        auto eMemberCate = it.pVarDesc->GetTypeCategory();
+        if(eMemberCate == Marimo::T_OBJECT) {
+          GUnknown* pObject = NULL;
+          it.ToVariable().Query(&pObject);
+          pSprite = dynamic_cast<GXSprite*>(pObject);
+        }
+        else if(eMemberCate == Marimo::T_STRING) {
+          strName = it.ToVariable().ToStringW();
+        }
+
+        if(pSprite && strName.IsNotEmpty()) {
+          break;
+        }
+      }
+
+      
+      if(pSprite)
+      {
+        SetSprite(pSprite);
+        SetByNameW(strName);
+      }
+
+      SAFE_RELEASE(pSprite);
+    }
+    return 0;
+  }
+
+  GXVOID StaticSprite::OnImpulse( LPCDATAIMPULSE pImpulse )
+  {
+    CLNOP
   }
 
 } // namespace GXUI

@@ -19,5 +19,7 @@ public:
   virtual HRESULT OnDestroy();
   virtual HRESULT Render();
   virtual GXHRESULT KeyMessage(GXAPPKEYINFO* pKeyInfo);
+private:
+  void InitDataPool();
 };
 

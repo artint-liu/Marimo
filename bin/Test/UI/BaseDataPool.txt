@@ -1,6 +1,15 @@
+
+struct SPRITEINFO
+{
+  object sprite;
+  string name;
+};
+
 float fScaling;
 float fHalfScaling;
 float fInvScaling;
 string button[];
+string strSpriteFile;
+SPRITEINFO SpriteInfo;
 
 #pragma import("BaseDataPool.data.txt")
