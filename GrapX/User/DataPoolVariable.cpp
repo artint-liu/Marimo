@@ -645,12 +645,16 @@ namespace Marimo
   // 数组访问异常
   Variable Exception_GetIndex(GXCONST VarImpl* pThis, int nIndex)
   {
-    return Variable();
+    CLOG_ERROR("%s %s %s\n", __FUNCTION__, pThis->GetTypeName(), pThis->GetName());
+    throw("This variable does not support \"IndexOf()\" method.");
+    //return Variable();
   }
 
   Variable Exception_NewBack(VarImpl* pThis, GXUINT nIncrease)
   {
-    return Variable();
+    CLOG_ERROR("%s %s %s\n", __FUNCTION__, pThis->GetTypeName(), pThis->GetName());
+    throw("This variable does not support \"Newback()\" method.");
+    //return Variable();
   }
 
   GXBOOL Exception_Remove(VarImpl* pThis, GXUINT nIndex, GXUINT nCount)

@@ -39,6 +39,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 SampleApp_MOUI::SampleApp_MOUI() : m_pBasicDataPool(NULL)
   , m_pDlgConsole(NULL)
   , m_pDlgBasic(NULL)
+  , m_pDlgList(NULL)
   , m_pDlgUnitSelect(NULL)
   , m_pStreamLogger(NULL)
 {
@@ -73,6 +74,10 @@ HRESULT SampleApp_MOUI::OnCreate()
   m_pDlgBasic = new CUniversalDialog(L"Test/UI/DlgBasic.txt", NULL);
   m_pDlgBasic->CreateDlg();
   m_pDlgBasic->Show(TRUE);
+
+  m_pDlgList = new CUniversalDialog(L"Test/UI/DlgList.txt", NULL);
+  m_pDlgList->CreateDlg();
+  m_pDlgList->Show(TRUE);
 
   m_pDlgUnitSelect = new CUniversalDialog(L"Test/UI/DlgUnitSelect.txt", NULL);
   m_pDlgUnitSelect->CreateDlg();
@@ -109,6 +114,7 @@ HRESULT SampleApp_MOUI::OnCreate()
 
 HRESULT SampleApp_MOUI::OnDestroy()
 {
+  SAFE_DELETE(m_pDlgList);
   SAFE_DELETE(m_pDlgBasic);
   SAFE_DELETE(m_pDlgUnitSelect);
   SAFE_DELETE(m_pDlgConsole);

@@ -7,6 +7,7 @@ class SampleApp_MOUI : public GXApp
 protected:
   MODataPool*       m_pBasicDataPool;
   CUniversalDialog* m_pDlgBasic;
+  CUniversalDialog* m_pDlgList;
   CUniversalDialog* m_pDlgUnitSelect;
   CMODialog*        m_pDlgConsole;
 

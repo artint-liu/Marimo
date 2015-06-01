@@ -512,39 +512,54 @@ namespace GXUI
   _LISTT_TEMPL
     GXBOOL _LISTT_IMPL::SetAdapter(ListDataAdapter* pAdapter)
   {
+    MODataPool* pDataPool = NULL;
+
     if(m_pAdapter == pAdapter) {
       return FALSE;
     }
 
-    SAFE_RELEASE(m_pAdapter);
-    m_pAdapter = pAdapter;
-    m_pAdapter->AddRef();
-    SyncItemStatCount();
-
-    // 适配器改变通知
-    GXNMLISTADAPTER sCreateAdapter;
-    sCreateAdapter.hdr.hwndFrom = m_hWnd;
-    sCreateAdapter.hdr.idFrom   = 0;
-    sCreateAdapter.hdr.code     = GXLBN_ADAPTERCHANGED;
-    sCreateAdapter.hTemplateWnd = NULL;
-    sCreateAdapter.pAdapter     = pAdapter;
-
-    MODataPool* pDataPool = NULL;
-    if(GXSUCCEEDED(pAdapter->GetDataPool(&pDataPool)))
+    if(m_pAdapter)
     {
-      CLBREAK;
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-      pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
-      pDataPool->Release();
-      pDataPool = NULL;
+      if(GXSUCCEEDED(m_pAdapter->GetDataPool(&pDataPool)))
+      {
+        pDataPool->Ignore(&m_pAdapter->GetVariable(), m_hWnd);
+        pDataPool->Release();
+        pDataPool = NULL;
+      }
+
+      m_pAdapter->Release();
+      m_pAdapter = NULL;
     }
 
-    gxSendMessage(m_hWnd, GXWM_NOTIFY, sCreateAdapter.hdr.idFrom, (GXLPARAM)&sCreateAdapter);    
+    m_pAdapter = pAdapter;
 
-    InvalidateRect(NULL, FALSE);
+    if(m_pAdapter) {
+      m_pAdapter->AddRef();
+
+      SyncItemStatCount();
+
+      // 适配器改变通知
+      GXNMLISTADAPTER sCreateAdapter;
+      sCreateAdapter.hdr.hwndFrom = m_hWnd;
+      sCreateAdapter.hdr.idFrom   = 0;
+      sCreateAdapter.hdr.code     = GXLBN_ADAPTERCHANGED;
+      sCreateAdapter.hTemplateWnd = NULL;
+      sCreateAdapter.pAdapter     = pAdapter;
+
+      if(GXSUCCEEDED(pAdapter->GetDataPool(&pDataPool)))
+      {
+        pDataPool->Watch(&pAdapter->GetVariable(), m_hWnd);
+        pDataPool->Release();
+        pDataPool = NULL;
+      }
+
+      gxSendMessage(m_hWnd, GXWM_NOTIFY, sCreateAdapter.hdr.idFrom, (GXLPARAM)&sCreateAdapter);    
+
+      InvalidateRect(NULL, FALSE);
+    }
+    else {
+      SyncItemStatCount();
+    }
     return TRUE;
   }
 
@@ -575,7 +590,12 @@ namespace GXUI
     GXBOOL _LISTT_IMPL::SyncItemStatCount()
   {
     const GXUINT nItemCount = (GXUINT)m_aItemStat.size();
-    const GXUINT nAdapterCount = m_pAdapter->GetItemCount();
+    const GXUINT nAdapterCount = m_pAdapter ? m_pAdapter->GetItemCount() : 0;
+    if(nAdapterCount == 0) {
+      m_aItemStat.clear();
+      return TRUE;
+    }
+
     if(nItemCount < nAdapterCount)
     {
       _ITEMSTAT sis;

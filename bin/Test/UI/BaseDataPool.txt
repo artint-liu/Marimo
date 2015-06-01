@@ -9,6 +9,7 @@ float fScaling;
 float fHalfScaling;
 float fInvScaling;
 string button[];
+string List1[];
 string strSpriteFile;
 SPRITEINFO SpriteInfo;
 

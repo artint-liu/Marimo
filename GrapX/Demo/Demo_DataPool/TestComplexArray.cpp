@@ -2,6 +2,7 @@
 #include <GrapX.H>
 #include <GrapX/DataPool.h>
 #include <GrapX/DataPoolVariable.h>
+#include <exception>
 #include "TestObject.h"
 #include "TestDataPool.h"
 
@@ -83,6 +84,25 @@ public:
   }
 };
 
+void TestException(DataPool* pDataPool)
+{
+  MOVariable var;
+  MOVariable var2;
+  GXBOOL result = pDataPool->QueryByExpression("sTestC", &var); 
+  ASSERT(result) ; // 静态结构体这个一定存在
+  
+  GXUINT Length = 0;
+  try
+  {
+    var2 = var.IndexOf(1);
+  }
+  catch (GXLPCSTR str)
+  {
+    TRACE("访问结构体的\"数组元素\"会引发异常\n");
+    TRACE("Exception:%s\n", str);
+  }
+}
+
 void TestWatcher(DataPool* pDataPool)
 {
   WatchTest* pTest = new WatchTest;
@@ -117,7 +137,7 @@ void TestWatcher(DataPool* pDataPool)
   // 测试结构，数组等对象watch
   GXBOOL result;
   result = pDataPool->Watch("DlgText", TestmpulseProc, NULL);
-  ASSERT( ! result); // 动态数组-期望失败
+  ASSERT( result); // 动态数组-期望失败
   
   result = pDataPool->Watch("sTestC", TestmpulseProc, NULL);
   ASSERT( ! result); // 结构体-期望失败
@@ -132,7 +152,7 @@ void TestWatcher(DataPool* pDataPool)
   ASSERT(result); // 期望成功
 
   result = pDataPool->Watch("DlgText[0]", TestmpulseProc, NULL);
-  ASSERT( ! result); // 动态数组元素-期望失败
+  ASSERT(result); // 动态数组元素-期望失败
 
   result = pDataPool->Watch("aStt[0]", TestmpulseProc, NULL);
   ASSERT(result); // 静态数组-期望成功
@@ -197,6 +217,7 @@ void TestComplexArray()
     var.Set(s_szExampleString[i]);
   }
 
+  TestException(pDataPool);
   TestWatcher(pDataPool);
   TestRemoveItem(pDataPool);
 

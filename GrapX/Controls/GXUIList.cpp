@@ -117,7 +117,9 @@ namespace GXUI
 
   GXINT DefaultListDataAdapter::GetItemCount() const
   {
-    return m_DynArray.GetLength();
+    GXINT count = (GXINT)m_DynArray.GetLength();
+    TRACE(__FUNCTION__" %s[%d]\n", m_DynArray.GetName(), count);
+    return count;
   }
 
   GXBOOL DefaultListDataAdapter::IsFixedHeight() const
@@ -207,7 +209,8 @@ namespace GXUI
 
   GXLRESULT List::Destroy()
   {
-    SAFE_RELEASE(m_pAdapter);
+    SetAdapter(NULL);
+    //SAFE_RELEASE(m_pAdapter);
     return CtrlBase::Destroy();
   }
 
