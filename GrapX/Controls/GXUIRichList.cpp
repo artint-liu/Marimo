@@ -15,7 +15,7 @@
 #include "GrapX/GXGDI.H"
 #include "GXUICtrlBase.h"
 #include "GXUIList.h"
-#include "GXUIList_Custom.h"
+#include "GXUIRichList.h"
 #include "GrapX/GXCanvas.H"
 #include "GrapX/GXKernel.H"
 #include "GrapX/gxDevice.H"
@@ -145,13 +145,13 @@ namespace GXUI
 
   GXINT CustomizeList::GetItemHeight(GXINT nIdx) const
   {
-    const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
-    if(nItemHeight < 0) {
+    //const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
+    //if(nItemHeight < 0) {
       GXRECT rect;
       gxGetWindowRect(m_hPrototype, &rect);
       return rect.bottom - rect.top;
-    }
-    return nItemHeight;
+    //}
+    //return nItemHeight;
   }
 
   GXHWND CustomizeList::PlantCustItem(int nIndex, GXLPCRECT lprect)
@@ -226,17 +226,17 @@ namespace GXUI
     //clStringW strText;
     GXHWND hItem = m_aItemStat[nIndex].hItem;
     ASSERT(hItem != NULL);
-    ListDataAdapter::GETSTRW ItemStrDesc;
+    IListDataAdapter::GETSTRW ItemStrDesc;
     for(clStringArrayW::iterator it = m_aElementName.begin();
       it != m_aElementName.end(); ++it)
     {
       GXHWND hElement = GXGetDlgItemByName(hItem, *it);
       if(hElement != NULL) {
-        ItemStrDesc.nIdx     = nIndex;
-        ItemStrDesc.nElement = it - m_aElementName.begin();
+        ItemStrDesc.item     = nIndex;
+        ItemStrDesc.element  = it - m_aElementName.begin();
         ItemStrDesc.hItemWnd = hElement;
-        ItemStrDesc.szName   = *it;
-        ItemStrDesc.rect     = *rcItem;
+        ItemStrDesc.name     = *it;
+        //ItemStrDesc.rect     = *rcItem;
         if(m_pAdapter->GetStringW(&ItemStrDesc) && ( ! ItemStrDesc.VarString.IsValid() || 
           gxSendMessage(hElement, GXWM_DATAPOOLOPERATION, DPO_SETVARIABLE, (GXLPARAM)&ItemStrDesc.VarString) < 0))
         {
@@ -345,15 +345,15 @@ namespace GXUI
     GXRECT rcGap; // 左上的终止位置，右下的起始位置
     const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
 
-    GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
+    //GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
     GXRECT rcTemplProto;
 
     gxGetWindowRect(m_hPrototype, &rcTemplProto);
     const int TemplProtoWidth = rcTemplProto.right - rcTemplProto.left;
     const int TemplProtoHeight = rcTemplProto.bottom - rcTemplProto.top;
 
+    GXSIZE_T nCount = m_pAdapter->GetCount();
     GXINT nHeight = GetItemHeight(0);
-    GXINT nCount = m_pAdapter->GetItemCount();
     GXINT nPassPos = 0; // 用于DialogTemplate位置的累加计数
 
     ASSERT(m_nTopIndex >= 0 && m_nTopIndex < nCount);
@@ -387,14 +387,14 @@ namespace GXUI
         rcGap.bottom = nPassPos + TemplProtoHeight;  // 后面累加
       }
     }
-    else if(bFixedHeight) {
-      if(IS_LEFTTORIGHT(dwStyle)) {
-        nPassPos = m_nScrolled + m_nTopIndex * TemplProtoWidth;
-      }
-      else {
-        nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
-      }
-    }
+    //else if(bFixedHeight) {
+    //  if(IS_LEFTTORIGHT(dwStyle)) {
+    //    nPassPos = m_nScrolled + m_nTopIndex * TemplProtoWidth;
+    //  }
+    //  else {
+    //    nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
+    //  }
+    //}
     else {
       ASSERT(0); // FIXME: 起始(与 nHeight 相关)位置计算不对, 要修正
       nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
@@ -403,7 +403,7 @@ namespace GXUI
 
     clStringW strItem;
     GXRECT  rcItem = {0,0,0,0};
-    int i = m_nTopIndex;
+    GXSIZE_T i = m_nTopIndex;
     Recycle(i - 1, -1);
     for(; i < nCount; i++)
     {
@@ -458,9 +458,9 @@ namespace GXUI
         }
         else
         {
-          if( ! bFixedHeight) {
+          //if( ! bFixedHeight) {
             nHeight = GetItemHeight(i);
-          }
+          //}
           gxSetRect(&rcItem, 0, nPassPos, TemplProtoWidth, nPassPos + nHeight);
           nPassPos += nHeight;
           rcGap.bottom = nPassPos;
@@ -527,7 +527,7 @@ namespace GXUI
     }
     //////////////////////////////////////////////////////////////////////////
     if(m_bShowScrollBar) {
-      DrawScrollBar(&rect, dwStyle, canvas);
+      DrawScrollBar(canvas, &rect, m_aItemStat.back().nBottom, m_aItemStat.size(), dwStyle);
     }
     Recycle(i, 1);
     return 0;
@@ -676,7 +676,7 @@ namespace GXUI
           return -1;
         }
 
-        CDefCustListAdapter* pAdapter = new CDefCustListAdapter(m_hWnd);
+        CDefRichListAdapter* pAdapter = new CDefRichListAdapter(m_hWnd);
         if( ! InlCheckNewAndIncReference(pAdapter)) {
           return -1;
         }

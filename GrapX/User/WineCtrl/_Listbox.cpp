@@ -1484,38 +1484,38 @@ static GXLRESULT LISTBOX_SelectItemRange( GXLB_DESCR *descr, GXINT first,
 static GXLRESULT LISTBOX_SetSelection( GXLB_DESCR *descr, GXINT index,
                                      GXBOOL on, GXBOOL send_notify )
 {
-    LB_TRACE( "cur_sel=%d index=%d notify=%s\n",
-           descr->selected_item, index, send_notify ? "YES" : "NO" );
+  LB_TRACE( "cur_sel=%d index=%d notify=%s\n",
+    descr->selected_item, index, send_notify ? "YES" : "NO" );
 
-    if (descr->style & GXLBS_NOSEL)
-    {
-        descr->selected_item = index;
-        return GXLB_ERR;
-    }
-    if ((index < -1) || (index >= descr->nb_items)) return GXLB_ERR;
-    if (descr->style & GXLBS_MULTIPLESEL)
-    {
-        if (index == -1)  /* Select all items */
-            return LISTBOX_SelectItemRange( descr, 0, descr->nb_items, on );
-        else  /* Only one item */
-            return LISTBOX_SelectItemRange( descr, index, index, on );
-    }
-    else
-    {
-        GXINT oldsel = descr->selected_item;
-        if (index == oldsel) return GXLB_OKAY;
-        if (oldsel != -1) descr->items[oldsel].selected = FALSE;
-        if (index != -1) descr->items[index].selected = TRUE;
-        if (oldsel != -1) LISTBOX_RepaintItem( descr, oldsel, GXODA_SELECT );
-        descr->selected_item = index;
-        if (index != -1) LISTBOX_RepaintItem( descr, index, GXODA_SELECT );
-        if (send_notify && descr->nb_items) SEND_NOTIFICATION( descr,
-                               (index != -1) ? GXLBN_SELCHANGE : GXLBN_SELCANCEL );
+  if (descr->style & GXLBS_NOSEL)
+  {
+    descr->selected_item = index;
+    return GXLB_ERR;
+  }
+  if ((index < -1) || (index >= descr->nb_items)) return GXLB_ERR;
+  if (descr->style & GXLBS_MULTIPLESEL)
+  {
+    if (index == -1)  /* Select all items */
+      return LISTBOX_SelectItemRange( descr, 0, descr->nb_items, on );
+    else  /* Only one item */
+      return LISTBOX_SelectItemRange( descr, index, index, on );
+  }
   else
+  {
+    GXINT oldsel = descr->selected_item;
+    if (index == oldsel) return GXLB_OKAY;
+    if (oldsel != -1) descr->items[oldsel].selected = FALSE;
+    if (index != -1) descr->items[index].selected = TRUE;
+    if (oldsel != -1) LISTBOX_RepaintItem( descr, oldsel, GXODA_SELECT );
+    descr->selected_item = index;
+    if (index != -1) LISTBOX_RepaintItem( descr, index, GXODA_SELECT );
+    if (send_notify && descr->nb_items) SEND_NOTIFICATION( descr,
+      (index != -1) ? GXLBN_SELCHANGE : GXLBN_SELCANCEL );
+    else
       if( descr->lphc ) /* set selection change flag for parent combo */
-    descr->lphc->wState |= CBF_SELCHANGE;
-    }
-    return GXLB_OKAY;
+        descr->lphc->wState |= CBF_SELCHANGE;
+  }
+  return GXLB_OKAY;
 }
 
 

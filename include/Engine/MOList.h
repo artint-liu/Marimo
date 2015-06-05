@@ -15,7 +15,7 @@ namespace Marimo
 
 namespace GXUI
 {
-  class ListDataAdapter;
+  class IListDataAdapter;
   typedef Marimo::DataPoolVariable MOVariable;
   typedef Marimo::DataPool MODataPool;
 }
@@ -25,7 +25,7 @@ class GAMEENGINE_API CMOListBox : public CMODlgItem
 private:
   CMOListBoxReceiver*    m_pReceiver;
 public:
-  GXHRESULT   GetDataAdapter  (GXUI::ListDataAdapter** ppAdapter);
+  GXHRESULT   GetDataAdapter  (GXUI::IListDataAdapter** ppAdapter);
   GXHRESULT   GetDataPool     (GXUI::MODataPool** ppDataPool);
   GXHRESULT   GetArrayElement (GXUI::MOVariable* pVariable);
 
@@ -38,7 +38,7 @@ public:
   void        ResetContent    ();   // 清除所有项目
   GXINT       GetCount        ();
   GXINT       GetCurSel       ();
-  GXHRESULT   SetAdapter      (GXUI::ListDataAdapter* pAdapter);
+  GXHRESULT   SetAdapter      (GXUI::IListDataAdapter* pAdapter);
   GXCOLORREF  SetColor        (GXUINT nType, GXCOLORREF color);
   GXUINT      SetColumnsWidth (const GXUINT* pColumns, GXUINT nCount);
   GXUINT      GetColumnsWidth (GXUINT* pColumns, GXUINT nCount);
@@ -90,14 +90,14 @@ public:
   virtual GXLRESULT InvokeNotify   (GXNMHDR* pnmhdr);
 #endif // #ifdef REFACTOR_GXFC
 
-  virtual GXLRESULT OnListBoxClicked        (CMOListBox* pSender, GXLPCWSTR szBtnName) { return 0L; }
-  virtual GXLRESULT OnListBoxSelChange      (CMOListBox* pSender) { return 0L; }
-  virtual GXLRESULT OnListBoxSelCancel      (CMOListBox* pSender) { return 0L; }
-  virtual GXLRESULT OnListBoxErrorSpace     (CMOListBox* pSender) { return 0L; }
-  virtual GXLRESULT OnListBoxDoubleClicked  (CMOListBox* pSender) { return 0L; }
-  virtual GXLRESULT OnListBoxSetFocus       (CMOListBox* pSender) { return 0L; }
-  virtual GXLRESULT OnListBoxKillFocus      (CMOListBox* pSender) { return 0L; }
-  virtual GXLRESULT OnListBoxCtrlCommand    (CMOListBox* pSender, GXHWND hTmplItemWnd, GXINT nListItem, GXINT nCommand) { return 0L; }
+  //virtual GXLRESULT OnListBoxClicked        (CMOListBox* pSender, GXLPCWSTR szBtnName) { return 0L; }
+  virtual GXVOID OnListBoxSelChange      (CMOListBox* pSender) {}
+  virtual GXVOID OnListBoxSelCancel      (CMOListBox* pSender) {}
+  virtual GXVOID OnListBoxErrorSpace     (CMOListBox* pSender) {}
+  virtual GXVOID OnListBoxDoubleClicked  (CMOListBox* pSender) {}
+  virtual GXVOID OnListBoxSetFocus       (CMOListBox* pSender) {}
+  virtual GXVOID OnListBoxKillFocus      (CMOListBox* pSender) {}
+  virtual GXVOID OnListBoxCtrlCommand    (CMOListBox* pSender, GXHWND hTmplItemWnd, GXINT nListItem, GXINT nCommand) {}
 };
 
 //typedef CWEListBox *LPWELISTBOX, *PWELISTBOX;

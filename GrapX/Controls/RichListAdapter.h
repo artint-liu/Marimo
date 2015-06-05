@@ -1,26 +1,10 @@
 //
 // Default Rich list adapter
 //
-//#include "GrapX.H"
-//#include "GrapX/GResource.H"
-//#include "GrapX/GXFont.H"
-//#include "GrapX/GXSprite.H"
-//#include "GrapX/GXGraphics.H"
-//#include "GrapX/DataPool.H"
-//#include "GrapX/DataPoolVariable.H"
-//#include "GrapX/DataInfrastructure.H"
-////#include "Smart/smartstream.h"
-////#include "Include/guxtheme.h"
-//
-//#include "Include/GXUser.H"
-//#include "GXUICtrlBase.h"
-//#include "GXUIList.h"
-//#include "GXUIList_Custom.h"
-//#include "Include/GXKernel.H"
 
 namespace GXUI
 {
-  class CDefCustListAdapter : public GXUI::ListDataAdapter
+  class CDefRichListAdapter : public IListDataAdapter
   {
   private:
     enum CtrlClass
@@ -54,17 +38,20 @@ namespace GXUI
     clStringA     m_ArrayName;
     ElementArray  m_aElements;
     int           m_nDefault;   // LB_ADDSTRING 消息默认添加的字符串,m_aElements的索引
+    GXINT         m_nItemHeight;
 
   public:
-    CDefCustListAdapter(GXHWND hWnd)
-      : GXUI::ListDataAdapter(hWnd)
+    CDefRichListAdapter(GXHWND hWnd)
+      : GXUI::IListDataAdapter(hWnd)
       , m_pDataPool (NULL)
       , m_nDefault  (-1)
+      , m_nItemHeight(10)
     {
     }
 
-    ~CDefCustListAdapter()
+    ~CDefRichListAdapter()
     {
+      m_pDataPool->Ignore(&m_DynArray, m_hWnd);
       SAFE_RELEASE(m_pDataPool);
     }
 
@@ -331,13 +318,14 @@ namespace GXUI
       {
         m_ArrayName = "Array";
         m_pDataPool->QueryByName(m_ArrayName, &m_DynArray);
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-        m_pDataPool->CreateWatcher(STR_DATAPOOL_WATCHER_UI);
-        m_pDataPool->SetAutoKnock(TRUE);
-        m_pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
+        m_pDataPool->Watch(&m_DynArray, m_hWnd);
+//#ifdef ENABLE_OLD_DATA_ACTION
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//        m_pDataPool->CreateWatcher(STR_DATAPOOL_WATCHER_UI);
+//        m_pDataPool->SetAutoKnock(TRUE);
+//        m_pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_OLD_DATA_ACTION
       }
       return TRUE;
     }
@@ -349,23 +337,53 @@ namespace GXUI
     }
 #endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
-    virtual GXINT GetItemCount() const
+    virtual GXSIZE_T GetCount() const
     {
       if( ! m_DynArray.IsValid() || ! m_pDataPool) {
         return 0;
       }
-      return (GXINT)m_DynArray.GetLength();
+      return (GXSIZE_T)m_DynArray.GetLength();
     }
 
-    virtual GXINT GetItemHeight(GXINT nIdx) const
-    {
-      return -1;
-    }
+    //virtual GXINT GetItemHeight(GXINT nIdx) const
+    //{
+    //  return -1;
+    //}
 
-    virtual GXBOOL IsFixedHeight() const
-    {
-      return TRUE;
-    }
+    //virtual GXINT SetReferenceHeight(GXINT nItemHeight)
+    //{
+    //  GXINT nPrev = m_nItemHeight;
+    //  m_nItemHeight = nItemHeight;
+    //  return nPrev;
+    //}
+
+    //virtual GXINT GetItemBottoms(GXINT* bottoms, const GXINT* indices, int count) GXCONST
+    //{
+    //  // 参数合法性要有调用者保证,这里只是校验
+    //  ASSERT(count >= 1);
+    //  ASSERT(bottoms && indices);
+
+    //  int i = 0;
+    //  do {
+    //    bottoms[i] = m_nItemHeight + m_nItemHeight * indices[i];
+    //  } while (++i < count);
+    //  return i;
+    //}
+
+    //virtual GXDWORD GetStatus(GXINT item) GXCONST
+    //{
+    //  return 0;
+    //}
+
+    //virtual GXDWORD SetStatus(GXINT item, GXDWORD dwNewStatus)
+    //{
+    //  return 0;
+    //}
+
+    //virtual GXBOOL IsFixedHeight() const
+    //{
+    //  return TRUE;
+    //}
 
     virtual GXINT AddStringW(GXLPCWSTR szName, GXLPCWSTR lpString)
     {
@@ -411,11 +429,11 @@ namespace GXUI
 
     virtual GXBOOL GetStringW(GETSTRW* pItemStrDesc)
     {
-      MOVariable var = m_DynArray.IndexOf(pItemStrDesc->nIdx);
-      const ELEMENT& element = m_aElements[pItemStrDesc->nElement < 0
-        ? m_nDefault : pItemStrDesc->nElement];
+      MOVariable var = m_DynArray.IndexOf(pItemStrDesc->item);
+      const ELEMENT& element = m_aElements[pItemStrDesc->element < 0
+        ? m_nDefault : pItemStrDesc->element];
 
-      ASSERT(element.strName == pItemStrDesc->szName || pItemStrDesc->szName == NULL);
+      ASSERT(element.strName == pItemStrDesc->name || pItemStrDesc->name == NULL);
 
       switch(element.eClass)
       {

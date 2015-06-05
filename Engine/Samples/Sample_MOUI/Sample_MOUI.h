@@ -8,7 +8,9 @@ protected:
   MODataPool*       m_pBasicDataPool;
   CUniversalDialog* m_pDlgBasic;
   CUniversalDialog* m_pDlgList;
+  CUniversalDialog* m_pDlgRichList;
   CUniversalDialog* m_pDlgUnitSelect;
+  CUniversalDialog* m_pDlgPropertyList;
   CMODialog*        m_pDlgConsole;
 
 public:

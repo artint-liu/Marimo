@@ -47,7 +47,7 @@ public:
   virtual GXLRESULT InvokeCommand (GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);
   virtual GXLRESULT InvokeNotify  (GXNMHDR* pnmhdr);
 #endif // #ifdef REFACTOR_GXFC
-  virtual GXLRESULT OnBtnClicked  (CMOButton* pSender, GXLPCWSTR szBtnName);
+  virtual GXVOID    OnBtnClicked  (CMOButton* pSender);
 };
 //typedef CWEListBox *LPWELISTBOX, *PWELISTBOX;
 #endif // _GRAP_X_UI_TOOLBAR_H_

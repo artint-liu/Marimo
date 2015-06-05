@@ -233,19 +233,19 @@ namespace GXUI
 
   //};
   //////////////////////////////////////////////////////////////////////////
-  class GXDLL ListDataAdapter : public IDataAdapter
+  class GXDLL IListDataAdapter : public IDataAdapter
   {
   public:
     struct GETSTRW
     {
       // 参数值
-      GXINT     nIdx;       // list item 索引
-      GXINT     nElement;   // customize list有效，item 中控件的索引
-      GXHWND    hItemWnd;   // customize list有效，item 中控件句柄
-      GXLPCWSTR szName;     // customize list有效，item 中控件名
+      GXINT     item;       // list item 索引
+      GXINT     element;    // rich list有效，item 中控件的索引
+      GXLPCWSTR name;       // rich list有效，item 中控件名
+      GXHWND    hItemWnd;   // rich list有效，item 中控件句柄
       GXRECT    rect;       // item的大小，list box client空间的坐标
 
-      // customize list 控件中：
+      // rich list 控件中：
       // hItemWnd为NULL时表示需要获得默认字符串，一般出现在LB_GETTEXT消息中
 
       // 返回值
@@ -255,8 +255,8 @@ namespace GXUI
   protected:
     GXHWND  m_hWnd;
   public:
-    ListDataAdapter(GXHWND hWnd);
-    virtual ~ListDataAdapter();
+    IListDataAdapter(GXHWND hWnd);
+    virtual ~IListDataAdapter();
 
     //virtual GXHRESULT AddRef  ();
     //virtual GXHRESULT Release ();
@@ -264,12 +264,12 @@ namespace GXUI
     //virtual GXHRESULT Knock         (GXHWND hSender, GXLPVOID lpData) const;
 
     // 要支持szName == NULL
-#ifdef ENABLE_DATAPOOL_WATCHER
-    GXSTDINTERFACE(GXBOOL     IsAutoKnock       () GXCONST);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-    GXSTDINTERFACE(GXINT      GetItemCount      () GXCONST);
-    GXSTDINTERFACE(GXBOOL     IsFixedHeight     () GXCONST);  // MultiColumn 属性时这个无效,认为是统一高度
-    GXSTDINTERFACE(GXINT      GetItemHeight     (GXINT nIdx) GXCONST); 
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//    GXSTDINTERFACE(GXBOOL     IsAutoKnock       () GXCONST);
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+    GXSTDINTERFACE(GXSIZE_T   GetCount          () GXCONST);
+    //GXSTDINTERFACE(GXBOOL     IsFixedHeight     () GXCONST);  // MultiColumn 属性时这个无效,认为是统一高度
+    //GXSTDINTERFACE(GXINT      GetItemHeight     (GXINT nIdx) GXCONST); 
     //GXSTDINTERFACE(GXBOOL GetItemStatistics (GXINT nIdx, LISTBOXITEMSTAT* pStatictist) const);
     GXSTDINTERFACE(GXINT      AddStringW        (GXLPCWSTR szName, GXLPCWSTR lpString));
     GXSTDINTERFACE(GXBOOL     GetStringW        (GETSTRW* pItemStrDesc));   // 返回TRUE代表List将进行默认的显示操作，如ListSimple中绘制字符串，ListCustomize中SetWindowText，返回false表示GetStringW已经自己处理了显示方式。

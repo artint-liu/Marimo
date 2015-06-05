@@ -114,9 +114,8 @@ GXLRESULT CMOButton::Invoke(CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID
 }
 #endif // #ifdef REFACTOR_GXFC
 
-GXLRESULT CMOButtonReceiver::OnBtnClicked(CMOButton* pSender, GXLPCWSTR szBtnName)
+GXVOID CMOButtonReceiver::OnBtnClicked(CMOButton* pSender)
 {
-  return 0;
 }
 
 #ifdef REFACTOR_GXFC
@@ -125,7 +124,7 @@ GXLRESULT CMOButtonReceiver::InvokeCommand( GXINT nNotifyCode, GXINT wID, GXHWND
   if(nNotifyCode == GXBN_CLICKED)
   {
     CMOButton sButton(hwndCtrl);
-    return OnBtnClicked(&sButton, sButton.GetIdentifierName());
+    OnBtnClicked(&sButton);
   }
   return 0;
 }

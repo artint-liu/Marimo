@@ -25,7 +25,7 @@ namespace Marimo
 
     // 数组或动态数组专用 
     Variable  (*GetIndex    )(GXCONST VarImpl* pThis, int nIndex);         // 获得特定索引的变量
-    GXUINT    (*GetLength   )(GXCONST VarImpl* pThis);                     // 获得数组的成员个数, 注意与GetSize区别
+    GXSIZE_T  (*GetLength   )(GXCONST VarImpl* pThis);                     // 获得数组的成员个数, 注意与GetSize区别
     Variable  (*NewBack     )(        VarImpl* pThis, GXUINT nIncrease);   // 在动态数组上追加数据, 动态数组专用
     GXBOOL    (*Remove      )(        VarImpl* pThis, GXUINT nIndex, GXUINT nCount);      // 移出动态数组指定索引的数据, 动态数组专用
 

@@ -8,7 +8,6 @@
 #include "GrapX/DataPoolVariable.H"
 #include "GrapX/DataInfrastructure.H"
 #include "Smart/smartstream.h"
-//#include "Include/guxtheme.h"
 
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"
@@ -17,12 +16,8 @@
 #include "GXUIList_Simple.h"
 #include "GrapX/GXCanvas.H"
 #include "GrapX/gxDevice.H"
+#include "ListDataAdapter.h"
 
-
-//HGXWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, GXLPCWSTR lpDlgName, GXHWND hParent, GXDLGPROC lpDialogFunc, GXLPARAM lParam);
-//#ifdef _DEBUG
-//GXDWORD g_nDbg = 0;
-//#endif // _DEBUG
 namespace GXUI
 {
   //////////////////////////////////////////////////////////////////////////
@@ -48,11 +43,11 @@ namespace GXUI
   GXINT SimpleList::GetItemHeight(GXINT nIdx) const
   {
     //LISTBOXITEMSTAT sStat;
-    const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
-    if(nItemHeight < 0) {
+    //const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
+    //if(nItemHeight < 0) {
       return m_nItemHeight;
-    }
-    return nItemHeight;
+    //}
+    //return nItemHeight;
   }
 
   GXINT SimpleList::HitTest(int fwKeys, int x, int y) const
@@ -98,38 +93,42 @@ namespace GXUI
       return 0;
     }
 
-    const GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
-    GXINT nCount = m_pAdapter->GetItemCount();
-    GXINT nHeight = 0;
-    if(bFixedHeight) {
-      nHeight = GetItemHeight(0);
-    }
+    //const GXBOOL bFixedHeight = TRUE;//m_pAdapter->IsFixedHeight();
+    GXINT nCount = m_pAdapter->GetCount();
+    //GXINT nHeight = 0;
+    //if(bFixedHeight) {
+    //  nHeight = GetItemHeight(0);
+    //}
     if(nCount > (GXINT)m_aItemStat.size())
     {
       return 0;
     }
-    GXINT nAccHeight = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
+    //GXINT nItemTop = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom/* - nHeight*/;
+    GXINT nItemTop    = m_nScrolled + (m_nTopIndex == 0 ? 0 : m_aItemStat[m_nTopIndex - 1].nBottom);
+    GXINT nItemBottom;// = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom;
 
     //clStringW strItem;
     //GXRECT  rcItem;
 
-    ListDataAdapter::GETSTRW ItemStrDesc;
+    IListDataAdapter::GETSTRW ItemStrDesc;
     GXRECT& rcItem = ItemStrDesc.rect;
 
     for(int i = m_nTopIndex; i < nCount; i++)
     {
-      ItemStrDesc.nIdx = i;
-      ItemStrDesc.szName = NULL;
-      ItemStrDesc.nElement = 0;
+      ItemStrDesc.item = i;
+      ItemStrDesc.name = NULL;
+      ItemStrDesc.element = 0;
 
-      ITEMSTAT& ItemStat = m_aItemStat[i];
+      const ITEMSTAT& ItemStat = m_aItemStat[i];
       GXColor32 crText = m_crText;
 
-      if( ! bFixedHeight) {
-        nHeight = GetItemHeight(i);
-      }
+      nItemBottom = m_nScrolled + ItemStat.nBottom;
 
-      gxSetRect(&ItemStrDesc.rect, m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0, nAccHeight, rect.right, nAccHeight + nHeight);
+      //if( ! bFixedHeight) {
+      //  nHeight = GetItemHeight(i);
+      //}
+
+      gxSetRect(&ItemStrDesc.rect, m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0, nItemTop, rect.right, nItemBottom);
       if(m_pAdapter->GetStringW(&ItemStrDesc))
       {
         GXINT nStrLen = ItemStrDesc.sString.GetLength();
@@ -163,13 +162,17 @@ namespace GXUI
         }
       }
 
-      nAccHeight += nHeight;
-      if(nAccHeight >= rect.bottom)
+      //nItemTop += nHeight;
+      if(nItemTop >= rect.bottom) {
         break;
+      }
+
+      nItemTop    = nItemBottom;
+      //nItemBottom = m_nScrolled + ItemStat.nBottom;
     }
 
     if(m_bShowScrollBar) {
-      DrawScrollBar(&rect, dwStyle, canvas);
+      DrawScrollBar(canvas, &rect, m_aItemStat.back().nBottom, m_aItemStat.size(), dwStyle);
     }
 
     return 0;
@@ -355,18 +358,18 @@ LAST_STR:
       return result;
     }
     
-    DefaultListDataAdapter* pListAdapter = new DefaultListDataAdapter(m_hWnd);
-    if( ! InlCheckNewAndIncReference(pListAdapter)) {
-      return -1;
-    }
+    //DefaultListDataAdapter* pListAdapter = new DefaultListDataAdapter(m_hWnd);
+    //if( ! InlCheckNewAndIncReference(pListAdapter)) {
+    //  return -1;
+    //}
 
-    if( ! pListAdapter->Initialize()) {
-      CLBREAK;
-      SAFE_RELEASE(pListAdapter);
-      return -1;
-    }
-    SetAdapter(pListAdapter);
-    SAFE_RELEASE(pListAdapter);
+    //if( ! pListAdapter->Initialize()) {
+    //  CLBREAK;
+    //  SAFE_RELEASE(pListAdapter);
+    //  return -1;
+    //}
+    //SetAdapter(pListAdapter);
+    //SAFE_RELEASE(pListAdapter);
     return result;
   }
 

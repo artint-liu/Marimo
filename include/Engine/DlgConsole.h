@@ -42,7 +42,7 @@ public:
   //virtual GXLRESULT OnListBoxSelChange(CGXListBox* pSender);
   //virtual GXLRESULT OnListBoxSelCancel (CGXListBox* pSender);
   //virtual GXLRESULT OnBtnClicked(CMOButton* pSender, GXLPCWSTR szBtnName);
-  virtual GXLRESULT OnBtnClicked(CMOButton* pSender, GXLPCWSTR szBtnName);
+  virtual GXVOID OnBtnClicked(CMOButton* pSender);
 private:
   void ScrollToPreviousCommand();
   static GXLRESULT GXCALLBACK EditWndProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);

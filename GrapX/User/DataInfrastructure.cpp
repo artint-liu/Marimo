@@ -163,13 +163,13 @@ namespace GXUI
   //void pop_back(const _TCls& val);
   //_TCls& front() const;
   //_TCls& back() const;
-  ListDataAdapter::ListDataAdapter(GXHWND hWnd)
+  IListDataAdapter::IListDataAdapter(GXHWND hWnd)
     : m_hWnd(hWnd)
   {
     SetWndOwner(hWnd);
   }
 
-  ListDataAdapter::~ListDataAdapter()
+  IListDataAdapter::~IListDataAdapter()
   {
   }
 } // namespace GXUI

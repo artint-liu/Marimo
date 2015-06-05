@@ -22,43 +22,7 @@ namespace GXUI
   };
 
 
-  class DefaultListDataAdapter : public ListDataAdapter
-  {
-  public:
-    //typedef clvector<GXHWND>  WndHandleArray;
-  private:
-    //StringArrayDataPool* m_pDataPool;
-    MODataPool*   m_pDataPool;
-    MOVariable    m_DynArray;
-    //clStringA     m_strPoolName;
-    clStringA     m_strArrayName;
-
-  public:
-    DefaultListDataAdapter(GXHWND hWnd);
-    virtual ~DefaultListDataAdapter();
-
-    GXBOOL Initialize();
-    GXBOOL Initialize(MOVariable& Var);
-
-#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT   AddRef        ();
-    virtual GXHRESULT   Release       ();
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-
-    virtual GXBOOL      IsAutoKnock   () const;
-    virtual GXINT       GetItemCount  () const;
-    virtual GXINT       GetItemHeight (GXINT nIdx) const; 
-    //virtual GXBOOL      GetItemStatistics (GXINT nIdx, LISTBOXITEMSTAT* pStatictist) const;
-    virtual GXBOOL      IsFixedHeight () const;
-
-    virtual GXINT       AddStringW    (GXLPCWSTR szName, GXLPCWSTR lpString);
-    virtual GXBOOL      GetStringW    (GETSTRW* pItemStrDesc);
-    virtual MOVariable  GetVariable   ();
-    virtual GXHRESULT   GetDataPool   (MODataPool** ppDataPool);
-
-    //virtual GXHRESULT Knock         (GXHWND hSender, DataAction eAction, GXLPVOID lpData, GXINT nIndex) const;
-    //virtual GXHRESULT DispatchKnock (const DataOutlet* pSender) const;
-  };
+  
   //class StringArrayDataPool : public IArrayDataPool<clStringW>
   //{
   //public:
@@ -81,18 +45,14 @@ namespace GXUI
       LT_Custom,
     };
   protected:
-    ListDataAdapter*  m_pAdapter;
-    GXINT             m_nTopIndex;
+    IListDataAdapter* m_pAdapter;
+    GXSIZE_T          m_nTopIndex;
     GXINT             m_nColumnCount;
     GXINT             m_nColumnWidth;
-    GXINT             n_nLastSelected;
+    GXINT             m_nLastSelected;
     GXINT             m_nScrolled;      // Item 滚动过去的数量,稳定时<=0
     GXINT             m_nPrevScrolled;  // 拖动开始时的Scrolled
-    GXINT             m_nItemHeight;
-    //GXWORD            m_xHit;
-    //GXWORD            m_yHit;
-    //GXDWORD           m_bDrag : 1;
-    //GXDWORD           m_bLBtnDown : 1;
+    GXINT             m_nItemHeight;    // TODO: 这个看看是否能去掉
     GXCOLORREF        m_crBackground;
     GXCOLORREF        m_crText;
     GXCOLORREF        m_crHightlight;
@@ -109,8 +69,8 @@ namespace GXUI
     static List* CreateRich (GXHINSTANCE hInst, GXHWND hParent, const DlgXM::DLGBASICPARAMW* pDlgParam, const GXDefinitionArrayW* pDefinitions);
 
     GXINT   AddStringW          (GXLPCWSTR lpString);
-    GXINT   GetStringW          (GXINT nIndex, clStringW& str);
-    GXINT   DeleteString        (GXINT nIndex);
+    GXINT   GetStringW          (GXSIZE_T nIndex, clStringW& str);
+    GXINT   DeleteString        (GXSIZE_T nIndex);
     GXVOID  ResetContent        ();
     GXINT   GetCount            ();
     GXINT   SetItemHeight       (GXINT nNewHeight);
@@ -119,6 +79,7 @@ namespace GXUI
     //GXINT   GetStringLength     (GXINT nIndex);
     GXBOOL  CheckEndScrollAnim  (GXUINT nIDTimer, bool bForced);
     void    UpdateScrollBarRect (GXDWORD dwStyle, LPGXCRECT lprcClient = NULL);
+    GXBOOL  IsEmpty             () const;
 
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
     virtual GXLRESULT Destroy             ();
@@ -137,15 +98,19 @@ namespace GXUI
     virtual GXVOID    OnImpulse           (LPCDATAIMPULSE pImpulse) GXPURE;
     virtual GXINT     GetCurSel           () GXPURE;
     virtual int       SetCurSel           (int nIndex) GXPURE;
-    virtual GXBOOL    SetAdapter          (ListDataAdapter* pAdapter) GXPURE;
-    virtual GXBOOL    GetAdapter          (ListDataAdapter** ppAdapter) GXPURE;
+    virtual GXBOOL    SetAdapter          (IListDataAdapter* pAdapter) GXPURE;
+    virtual GXBOOL    GetAdapter          (IListDataAdapter** ppAdapter) GXPURE;
     virtual void      SetScrolledVal      (GXINT nScrolled) GXPURE;
     virtual GXINT     VirGetItemHeight    (GXINT nIdx) const GXPURE;
     virtual GXBOOL    EndScroll           () GXPURE;
     virtual GXBOOL    GetItemRect         (int nItem, GXDWORD dwStyle, GXLPRECT lprc) const GXPURE;
     virtual GXINT     HitTest             (int fwKeys, int x, int y) const GXPURE;
     virtual GXLRESULT SetItemTemplate     (GXLPCWSTR szTemplate) GXPURE;
+
+    void DrawScrollBar( GXWndCanvas& canvas, LPGXCRECT lprcClient, GXINT nLastBottom, GXSIZE_T count, GXDWORD dwStyle ) const;
   };
+
+  //////////////////////////////////////////////////////////////////////////
 
   template<typename _ITEMSTAT>
   class ListTemplate : public List
@@ -157,11 +122,11 @@ namespace GXUI
   public:
     ListTemplate(GXLPCWSTR szIdName) : List(szIdName) {}
   public:
-    void    DrawScrollBar       (LPGXCRECT lprcClient, GXDWORD dwStyle, GXWndCanvas& canvas);
     //GXINT   HitTest             (int fwKeys, int x, int y) const;
     GXBOOL  IsItemSelected      (GXINT nItem) const;
     GXINT   GetCurSel           ();
     GXBOOL  SelectItem          (GXINT nItem, GXBOOL bSelected, GXBOOL bNotify);
+    //GXINT   GetCurSel           ();
     void    SetScrolledVal      (GXINT nScrolled);
     GXBOOL  SyncItemStatCount   ();
     GXBOOL  UpdateTopIndex      ();
@@ -174,21 +139,21 @@ namespace GXUI
     //virtual GXHRESULT OnKnock             (KNOCKACTION* pAction);
     virtual GXVOID    OnImpulse           (LPCDATAIMPULSE pImpulse);
     virtual int       SetCurSel           (int nIndex);
-    virtual GXBOOL    SetAdapter          (ListDataAdapter* pAdapter);
-    virtual GXBOOL    GetAdapter          (ListDataAdapter** ppAdapter);
+    virtual GXBOOL    SetAdapter          (IListDataAdapter* pAdapter);
+    virtual GXBOOL    GetAdapter          (IListDataAdapter** ppAdapter);
     virtual GXBOOL    ReduceItemStat      (GXINT nCount);
     virtual void      DeleteItemStat      (GXINT nIndex);
   };
   
   struct ITEMSTAT
   {
-    //GXINT   nTop;
     GXINT   nBottom;
     GXDWORD bSelected : 1;
     GXDWORD bValidate : 1;  // Item的有效标志, 如果为0表示要重新从Adapter获取
     ITEMSTAT() : nBottom(-1), bSelected(0), bValidate(0){}
   };
  
+  //////////////////////////////////////////////////////////////////////////
 
   //class SimpleList : public ListTemplate<ITEMSTAT>
   //{
@@ -217,42 +182,11 @@ namespace GXUI
 #define _LISTT_TEMPL  template<typename _ITEMSTAT>
 #define _LISTT_IMPL   ListTemplate<_ITEMSTAT>
 
-  _LISTT_TEMPL
-    void _LISTT_IMPL::DrawScrollBar(LPGXCRECT lprcClient, GXDWORD dwStyle, GXWndCanvas& canvas)
-  {
-    if(IS_LEFTTORIGHT(dwStyle))
-    {
-      GXINT nTotalWidth = (m_aItemStat.size() + (m_nColumnCount - 1)) / m_nColumnCount * m_nColumnWidth;
-      ASSERT(nTotalWidth > 0);
-      canvas.FillRect(
-        (-m_nScrolled) * lprcClient->right / nTotalWidth,
-        lprcClient->bottom - SCROLLBAR_WIDTH, 
-        lprcClient->right * lprcClient->right / nTotalWidth,
-        SCROLLBAR_WIDTH, 0x80000000);
-    }
-    else
-    {
-      GXINT nTotalHeight = m_aItemStat.back().nBottom;
-      ASSERT(nTotalHeight > 0);
-      canvas.FillRect(
-        lprcClient->right - SCROLLBAR_WIDTH, 
-        (-m_nScrolled) * lprcClient->bottom / nTotalHeight,
-        SCROLLBAR_WIDTH,
-        lprcClient->bottom * lprcClient->bottom / nTotalHeight, 0x80000000);
-    }
-  }
+
 
   //_LISTT_TEMPL
-  //  GXINT _LISTT_IMPL::HitTest(int fwKeys, int x, int y) const
+  //  void _LISTT_IMPL::DrawScrollBar(LPGXCRECT lprcClient, GXDWORD dwStyle, GXWndCanvas& canvas)
   //{
-  //  if(m_aItemStat.empty()) {
-  //    return -1;
-  //  }
-  //  const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
-
-  //  ItemStatArray::const_iterator it = m_aItemStat.begin() + m_nTopIndex;
-
-  //  // FIXME: 没有处理MULTICOLUMN情况
   //  if(IS_LEFTTORIGHT(dwStyle))
   //  {
   //    CLBREAK; // 不知道这里该干什么
@@ -268,7 +202,6 @@ namespace GXUI
   //      }
   //    }
   //  }
-  //  return -1;
   //}
 
   _LISTT_TEMPL
@@ -401,12 +334,12 @@ namespace GXUI
     
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
       // 这个需要放在IsFixedHeight()前面, 因为此分支是 IsFixedHeight()==TRUE 的子集
-      const GXINT nModCount = m_pAdapter->GetItemCount() + (m_nColumnCount - 1);
+      const GXINT nModCount = m_pAdapter->GetCount() + (m_nColumnCount - 1);
       nMinScroll = nClientSize - (nModCount / m_nColumnCount * nItemSize);
     }
-    else if(m_pAdapter->IsFixedHeight()) {
-      nMinScroll = clMin(0, nClientSize - m_pAdapter->GetItemCount() * nItemSize);
-    }
+    //else if(m_pAdapter->IsFixedHeight()) {
+    //  nMinScroll = clMin(0, nClientSize - m_pAdapter->GetCount() * nItemSize);
+    //}
     else {
       nMinScroll = nClientSize - m_aItemStat.back().nBottom;
     }
@@ -448,12 +381,12 @@ namespace GXUI
     }
     else if(pImpulse->reason == Marimo::DATACT_Insert)
     {
-      //ASSERT(pAction->idx < m_pAdapter->GetItemCount());
+      //ASSERT(pAction->idx < m_pAdapter->GetCount());
       SyncItemStatCount();
 
       //CLBREAK; // 重新搞定!
       // 判断是否在中间插入
-      if(pImpulse->index != m_pAdapter->GetItemCount() - 1)
+      if(pImpulse->index != m_pAdapter->GetCount() - 1)
       {
         UpdateItemStat(pImpulse->index, -1);
       }
@@ -463,7 +396,7 @@ namespace GXUI
     {
       auto index = pImpulse->index;
       ASSERT(index >= -1); // -1时删除所有Item
-      ASSERT(m_pAdapter->GetItemCount() == m_aItemStat.size());
+      ASSERT(m_pAdapter->GetCount() == m_aItemStat.size());
       if(index == -1) {
         // 删除所有
         m_aItemStat.clear();
@@ -472,18 +405,18 @@ namespace GXUI
         ASSERT(index >= 0);
         DeleteItemStat(index);
       }
-      ASSERT(m_pAdapter->GetItemCount() > (GXINT)m_aItemStat.size());
+      ASSERT(m_pAdapter->GetCount() > (GXINT)m_aItemStat.size());
     }
     else if(pImpulse->reason == Marimo::DATACT_Deleted)
     {
       auto index = pImpulse->index;
-      ASSERT(m_pAdapter->GetItemCount() == m_aItemStat.size());
+      ASSERT(m_pAdapter->GetCount() == m_aItemStat.size());
       ASSERT(index >= -1); // -1时删除所有Item
       if(index >= 0)
       {
         UpdateItemStat(index, -1);
       }
-      ASSERT(m_pAdapter->GetItemCount() == m_aItemStat.size());
+      ASSERT(m_pAdapter->GetCount() == m_aItemStat.size());
     }
     else
     {
@@ -497,7 +430,7 @@ namespace GXUI
   _LISTT_TEMPL
   int _LISTT_IMPL::SetCurSel(int nIndex)
   {
-    const size_t nCount = m_pAdapter->GetItemCount();
+    const size_t nCount = m_pAdapter->GetCount();
     if(nIndex < 0 || nIndex >= (int)nCount) {
       return GXLB_ERR;
     }
@@ -510,26 +443,27 @@ namespace GXUI
   }
 
   _LISTT_TEMPL
-    GXBOOL _LISTT_IMPL::SetAdapter(ListDataAdapter* pAdapter)
+    GXBOOL _LISTT_IMPL::SetAdapter(IListDataAdapter* pAdapter)
   {
-    MODataPool* pDataPool = NULL;
+    //MODataPool* pDataPool = NULL;
 
     if(m_pAdapter == pAdapter) {
       return FALSE;
     }
 
-    if(m_pAdapter)
-    {
-      if(GXSUCCEEDED(m_pAdapter->GetDataPool(&pDataPool)))
-      {
-        pDataPool->Ignore(&m_pAdapter->GetVariable(), m_hWnd);
-        pDataPool->Release();
-        pDataPool = NULL;
-      }
+    //if(m_pAdapter)
+    //{
+    //  if(GXSUCCEEDED(m_pAdapter->GetDataPool(&pDataPool)))
+    //  {
+    //    pDataPool->Ignore(&m_pAdapter->GetVariable(), m_hWnd);
+    //    pDataPool->Release();
+    //    pDataPool = NULL;
+    //  }
 
-      m_pAdapter->Release();
-      m_pAdapter = NULL;
-    }
+    //  m_pAdapter->Release();
+    //  m_pAdapter = NULL;
+    //}
+    SAFE_DELETE(m_pAdapter);
 
     m_pAdapter = pAdapter;
 
@@ -546,12 +480,12 @@ namespace GXUI
       sCreateAdapter.hTemplateWnd = NULL;
       sCreateAdapter.pAdapter     = pAdapter;
 
-      if(GXSUCCEEDED(pAdapter->GetDataPool(&pDataPool)))
-      {
-        pDataPool->Watch(&pAdapter->GetVariable(), m_hWnd);
-        pDataPool->Release();
-        pDataPool = NULL;
-      }
+      //if(GXSUCCEEDED(pAdapter->GetDataPool(&pDataPool)))
+      //{
+      //  pDataPool->Watch(&pAdapter->GetVariable(), m_hWnd);
+      //  pDataPool->Release();
+      //  pDataPool = NULL;
+      //}
 
       gxSendMessage(m_hWnd, GXWM_NOTIFY, sCreateAdapter.hdr.idFrom, (GXLPARAM)&sCreateAdapter);    
 
@@ -564,7 +498,7 @@ namespace GXUI
   }
 
   _LISTT_TEMPL
-  GXBOOL _LISTT_IMPL::GetAdapter(ListDataAdapter** ppAdapter)
+  GXBOOL _LISTT_IMPL::GetAdapter(IListDataAdapter** ppAdapter)
   {
     *ppAdapter = m_pAdapter;
     if(m_pAdapter != NULL) {
@@ -590,7 +524,7 @@ namespace GXUI
     GXBOOL _LISTT_IMPL::SyncItemStatCount()
   {
     const GXUINT nItemCount = (GXUINT)m_aItemStat.size();
-    const GXUINT nAdapterCount = m_pAdapter ? m_pAdapter->GetItemCount() : 0;
+    const GXUINT nAdapterCount = m_pAdapter ? m_pAdapter->GetCount() : 0;
     if(nAdapterCount == 0) {
       m_aItemStat.clear();
       return TRUE;
@@ -616,19 +550,18 @@ namespace GXUI
   _LISTT_TEMPL
   GXINT _LISTT_IMPL::GetCurSel()
   {
-    if(n_nLastSelected >= 0 && n_nLastSelected < (int)m_aItemStat.size() && 
-      m_aItemStat[n_nLastSelected].bSelected)
+    if(m_nLastSelected >= 0 && m_nLastSelected < (int)m_aItemStat.size())
     {
-      return n_nLastSelected;
+      return m_nLastSelected;
     }
     return -1;
-    //return m_aItemStat[n_nLastSelected].bSelected ? n_nLastSelected : -1;
+    //return m_aItemStat[m_nLastSelected].bSelected ? m_nLastSelected : -1;
   }
 
   _LISTT_TEMPL
     GXBOOL _LISTT_IMPL::SelectItem(GXINT nItem, GXBOOL bSelected, GXBOOL bNotify)
   {
-    ASSERT(m_pAdapter->GetItemCount() == m_aItemStat.size());
+    ASSERT(m_pAdapter->GetCount() == m_aItemStat.size());
     GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     if(TEST_FLAG(dwStyle, GXLBS_NOSEL)) {
       return FALSE;
@@ -642,21 +575,16 @@ namespace GXUI
     m_aItemStat[nItem].bSelected = bSelected;
 
     // 单选时撤销上一次的选择
-    if(n_nLastSelected >= 0 && n_nLastSelected != nItem && 
+    if(m_nLastSelected >= 0 && m_nLastSelected != nItem && 
       TEST_FLAG(dwStyle, GXLBS_MULTIPLESEL) == 0)
     {
-      m_aItemStat[n_nLastSelected].bSelected = FALSE;
+      m_aItemStat[m_nLastSelected].bSelected = FALSE;
     }
 
-    n_nLastSelected = nItem;
+    m_nLastSelected = nItem;
 
     if(bNotify) {
-      if(bSelected) {
-        NotifyParent(GXLBN_SELCHANGE);
-      }
-      else {
-        NotifyParent(GXLBN_SELCANCEL);
-      }
+      NotifyParent((nItem == -1) ? GXLBN_SELCANCEL : GXLBN_SELCHANGE);
     }
 
     return TRUE;
@@ -675,10 +603,10 @@ namespace GXUI
     GXINT nScrolled = -m_nScrolled;
     GXINT nItem = 0;
 
-    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN) || m_pAdapter->IsFixedHeight())
+    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)/* || m_pAdapter->IsFixedHeight()*/)
     {
       m_nTopIndex = nScrolled / VirGetItemHeight(0) * m_nColumnCount;
-      clClamp(0, m_pAdapter->GetItemCount(), &m_nTopIndex);
+      clClamp((GXSIZE_T)0, m_pAdapter->GetCount(), &m_nTopIndex);
       return TRUE;
     }
     else {
@@ -707,8 +635,8 @@ namespace GXUI
   _LISTT_TEMPL
     GXBOOL _LISTT_IMPL::UpdateItemStat(GXINT nBegin, GXINT nEnd)
   {
-    ASSERT(m_pAdapter->GetItemCount() == m_aItemStat.size());
-    const GXINT nItemCount = m_pAdapter->GetItemCount();
+    ASSERT(m_pAdapter->GetCount() == m_aItemStat.size());
+    const GXINT nItemCount = m_pAdapter->GetCount();
 
     nBegin = clMax(nBegin, 0);
     ASSERT(nBegin < nItemCount);
@@ -720,8 +648,8 @@ namespace GXUI
 
     // 上一项的Bottom
     GXINT nPrevBottom = nBegin == 0 ? 0 : m_aItemStat[nBegin - 1].nBottom;
-    const GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
-    const GXINT nItemHeight = bFixedHeight ? VirGetItemHeight(0) : -1;
+    //const GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
+    //const GXINT nItemHeight = bFixedHeight ? VirGetItemHeight(0) : -1;
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
     {
@@ -731,14 +659,14 @@ namespace GXUI
         _ITEMSTAT& sis = m_aItemStat[i];
         const int nEndOfRow = (i + 1) % m_nColumnCount;
 
-        if(bFixedHeight) {
+        /*if(bFixedHeight) {
           sis.nBottom = nPrevBottom + nItemHeight;
 
           if(nEndOfRow == 0) {
             nPrevBottom = sis.nBottom;
           }
         }
-        else {
+        else */{
           const GXINT nVirHeight = VirGetItemHeight(i);
           sis.nBottom = nPrevBottom + nVirHeight;
           nVirHeightMax = clMax(nVirHeight, nVirHeightMax);
@@ -757,10 +685,10 @@ namespace GXUI
       for(GXINT i = nBegin; i <= nEnd; i++)
       {
         _ITEMSTAT& sis = m_aItemStat[i];
-        if(bFixedHeight) {
+        /*if(bFixedHeight) {
           sis.nBottom = nPrevBottom + nItemHeight;
         }
-        else {
+        else */{
           sis.nBottom = nPrevBottom + VirGetItemHeight(i);
         }
 
@@ -771,48 +699,6 @@ namespace GXUI
     return TRUE;
   }
 
-  //struct CUSTOMIZEITEMSTAT
-  //{
-  //  //GXINT   nTop;
-  //  GXINT   nBottom;
-  //  GXHWND  hItem;
-  //  GXDWORD bSelected : 1;
-  //  GXDWORD bValidate : 1;  // Item的有效标志, 如果为0表示要重新从Adapter获取
-  //  CUSTOMIZEITEMSTAT() : nBottom(-1), hItem(NULL), bSelected(0), bValidate(0){}
-  //};
-  //
-  //typedef clvector<CUSTOMIZEITEMSTAT>  CustItemStatArray;
-
-  //class CustomizeList : public ListTemplate<CUSTOMIZEITEMSTAT>
-  //{
-  //public:
-  //  typedef clvector<GXHWND>    GXHWndArray;
-  //private:
-  //  clStringW         m_strTemplate;
-  //  GXHWND            m_hPrototype;
-  //  //CustItemStatArray m_aCustItemStat;
-  //  clStringArray     m_aElementName;   // Item 中的控件名
-  //  GXHWndArray       m_aWndPool;
-  //private:
-  //  static GXLRESULT GXCALLBACK CustomWndProc  (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
-  //  static GXBOOL    GXCALLBACK EnumChildProc  (GXHWND hWnd, GXLPARAM lParam);
-
-  //public:
-  //  GXINT     GetItemHeight       (GXINT nIdx) const;
-  //  GXHWND    PlantCustItem       (int nIndex, GXLPCRECT lprect);
-  //  int       Recycle             (int nBegin, int nDir); // 包含 nBegin
-  //  GXBOOL    UpdateCustItemText  (int nIndex);
-
-  //  virtual ListType  GetListType         ();
-  //  virtual GXLRESULT Measure(GXRegn* pRegn);
-  //  virtual int       OnCreate            ();
-  //  virtual GXLRESULT OnPaint             (GXWndCanvas& canvas);
-  //  virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
-
-
-  //public:
-  //  CustomizeList(GXLPCWSTR szIdName, GXLPCWSTR szTemplate);
-  //};
 } // namespace GXUI
 #endif // _GXUI_LIST_H_
 #endif // #ifndef _DEV_DISABLE_UI_CODE

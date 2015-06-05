@@ -48,7 +48,7 @@
 
 namespace GXUI
 {
-  class ListDataAdapter;
+  class IListDataAdapter;
 } // namespace GXUI
 
 //////////////////////////////////////////////////////////////////////////
@@ -1191,7 +1191,7 @@ struct GXNMLISTADAPTER
 {
   GXNMHDR hdr;
   GXHWND  hTemplateWnd;
-  GXUI::ListDataAdapter* pAdapter;
+  GXUI::IListDataAdapter* pAdapter;
 };
 
 //////////////////////////////////////////////////////////////////////////

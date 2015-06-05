@@ -108,9 +108,6 @@
     <ClInclude Include="..\..\Canvas\GXCanvasCoreImpl.h">
       <Filter>Lib\Canvas</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Controls\GXUIList_Custom.h">
-      <Filter>Lib\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Controls\GXUIList_Simple.h">
       <Filter>Lib\Controls</Filter>
     </ClInclude>
@@ -396,6 +393,12 @@
     <ClInclude Include="..\..\User\DataPoolBuildTime.h">
       <Filter>Lib\User</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Controls\GXUIRichList.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Controls\ListDataAdapter.h">
+      <Filter>Lib\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Platform\GXApp.cpp">
@@ -493,9 +496,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Canvas\GXCanvas_Painting.cpp">
       <Filter>Lib\Canvas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Controls\GXUIList_Custom.cpp">
-      <Filter>Lib\Controls</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Controls\GXUIList_Simple.cpp">
       <Filter>Lib\Controls</Filter>
@@ -766,6 +766,12 @@
     </ClCompile>
     <ClCompile Include="..\..\User\DataPoolErrorMsg.cpp">
       <Filter>Lib\User</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIRichList.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Controls\ListDataAdapter.cpp">
+      <Filter>Lib\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

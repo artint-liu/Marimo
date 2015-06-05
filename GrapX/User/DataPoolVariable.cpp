@@ -555,7 +555,7 @@ namespace Marimo
   GXUINT    Variable::GetSize     () GXCONST                              { return m_vtbl->GetSize     (CAST2VARPTRC(this));                    }
   Variable  Variable::MemberOf    (GXLPCSTR szName) GXCONST               { return m_vtbl->GetMember   (CAST2VARPTRC(this), szName);            }
   Variable  Variable::IndexOf     (int nIndex) GXCONST                    { return m_vtbl->GetIndex    (CAST2VARPTRC(this), nIndex);            }
-  GXUINT    Variable::GetLength   () GXCONST                              { return m_vtbl->GetLength   (CAST2VARPTRC(this));                    }
+  GXSIZE_T  Variable::GetLength   () GXCONST                              { return m_vtbl->GetLength   (CAST2VARPTRC(this));                    }
   Variable  Variable::NewBack     (GXUINT nIncrease)                      { return m_vtbl->NewBack     (CAST2VARPTR (this), nIncrease);         }
   GXBOOL    Variable::Remove      (GXUINT nIndex, GXUINT nCount)          { return m_vtbl->Remove      (CAST2VARPTR (this), nIndex, nCount);    }
   clStringW Variable::ToStringW   () GXCONST                              { return m_vtbl->ToStringW   (CAST2VARPTRC(this));                    }
@@ -729,7 +729,7 @@ namespace Marimo
     return (GXUINT)pBuffer->GetSize();
   }
 
-  GXUINT Unary_GetLength(GXCONST VarImpl* pThis)
+  GXSIZE_T Unary_GetLength(GXCONST VarImpl* pThis)
   {
     return 1;
   }
@@ -1189,7 +1189,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXUINT StaticArray_GetLength(GXCONST VarImpl* pThis )
+  GXSIZE_T StaticArray_GetLength(GXCONST VarImpl* pThis )
   {
     return pThis->InlGetVDD()->nCount;
   }
@@ -1217,7 +1217,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXUINT DynamicArray_GetLength(GXCONST VarImpl* pThis)
+  GXSIZE_T DynamicArray_GetLength(GXCONST VarImpl* pThis)
   {
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     //clBufferBase* pBuffer = pThis->InlGetBufferObj();
@@ -1227,7 +1227,7 @@ namespace Marimo
 
   Variable DynamicArray_NewBack(VarImpl* pThis, GXUINT nIncrease)
   {
-    const GXUINT nIndex = pThis->GetLength();
+    const GXSIZE_T nIndex = pThis->GetLength();
     DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
     Variable val;
     if(nIncrease == 0) {
@@ -1249,7 +1249,7 @@ namespace Marimo
   GXBOOL DynamicArray_Remove(VarImpl* pThis, GXUINT nIndex, GXUINT nCount)
   {
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
-    const GXUINT nLength = pThis->GetLength();
+    const GXSIZE_T nLength = pThis->GetLength();
 
     if(
       (nLength == 0) || 

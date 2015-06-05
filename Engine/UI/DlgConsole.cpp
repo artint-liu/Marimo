@@ -71,7 +71,7 @@ GXINT GXCALLBACK CDlgConsole::LogStreamProc( GXLPVOID szText, GXBOOL bUnicode, G
   return 0;
 }
 
-GXLRESULT CDlgConsole::OnBtnClicked( CMOButton* pSender, GXLPCWSTR szBtnName )
+GXVOID CDlgConsole::OnBtnClicked(CMOButton* pSender)
 {
   clStringW str = m_Input.GetTextW();
   str.TrimLeft(' ');
@@ -79,7 +79,7 @@ GXLRESULT CDlgConsole::OnBtnClicked( CMOButton* pSender, GXLPCWSTR szBtnName )
   if(str.IsEmpty())
   {
     MOLogW(L"]\r\n");
-    return GX_OK;
+    return;
   }
 
   if(m_listCmd.empty() || str != m_listCmd.back())
@@ -94,7 +94,6 @@ GXLRESULT CDlgConsole::OnBtnClicked( CMOButton* pSender, GXLPCWSTR szBtnName )
   MOExecuteConsoleCmdW(str);
 
   m_Input.SetTextW(L"");
-  return GX_OK;
 }
 
 GXLRESULT GXCALLBACK CDlgConsole::EditWndProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
@@ -106,7 +105,7 @@ GXLRESULT GXCALLBACK CDlgConsole::EditWndProc(GXHWND hWnd, GXUINT message, GXWPA
       CDlgConsole* pDlg = (CDlgConsole*)gxGetWindowLong(hWnd, GXGWL_USERDATA);
       if(pDlg)
       {
-        pDlg->OnBtnClicked(NULL, NULL);
+        pDlg->OnBtnClicked(NULL);
       }
     }
     else if(wParam == '`') // TODO: 这里目前屏蔽输入控制台符号，以后应该在GXApp中增加一个接口用来处理未获得UI焦点时的键盘消息

@@ -16,190 +16,16 @@
 #include "GXUICtrlBase.h"
 #include "GXUIList.h"
 #include "GXUIList_Simple.h"
-#include "GXUIList_Custom.h"
+#include "GXUIRichList.h"
 #include "GrapX/GXCanvas.H"
 #include "GrapX/gxDevice.H"
-
+#include "ListDataAdapter.h"
 
 GXHWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, GXLPCWSTR lpDlgName, GXHWND hParent, GXDLGPROC lpDialogFunc, GXLPARAM lParam);
-//#ifdef _DEBUG
-//GXDWORD g_nDbg = 0;
-//#endif // _DEBUG
+
 namespace GXUI
 {
   //////////////////////////////////////////////////////////////////////////
-  DefaultListDataAdapter::DefaultListDataAdapter(GXHWND hWnd)
-    : ListDataAdapter (hWnd)
-    , m_pDataPool     (NULL)
-    , m_DynArray      ()
-  {
-  }
-
-  DefaultListDataAdapter::~DefaultListDataAdapter()
-  {
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-    m_pDataPool->UnregisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
-    SAFE_RELEASE(m_pDataPool);
-  }
-
-  GXBOOL DefaultListDataAdapter::Initialize()
-  {
-    static
-      Marimo::VARIABLE_DECLARATION s_DefaultListItem[] = {
-        {"string", "name", 0, -1, 0},
-        {NULL, NULL},
-    };
-    Marimo::DataPool::CreateDataPool(&m_pDataPool, NULL, NULL, s_DefaultListItem);
-    m_strArrayName = "name";
-    m_pDataPool->QueryByName(m_strArrayName, &m_DynArray);
-
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-    m_pDataPool->CreateWatcher(STR_DATAPOOL_WATCHER_UI);
-    m_pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
-
-    return TRUE;
-  }
-
-  GXBOOL DefaultListDataAdapter::Initialize(MOVariable& Var)
-  {
-    m_strArrayName = Var.GetName();
-    if(m_strArrayName.GetLength() == 0) {
-      CLBREAK;
-      return FALSE;
-    }
-    m_DynArray = Var;
-    Var.GetPool(&m_pDataPool);
-
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-    m_pDataPool->CreateWatcher(STR_DATAPOOL_WATCHER_UI);
-    m_pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
-    return TRUE;
-  }
-
-#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT DefaultListDataAdapter::AddRef()
-  {
-    const GXLONG nRef = gxInterlockedIncrement(&m_nRefCount);
-    return nRef;
-  }
-
-  GXHRESULT DefaultListDataAdapter::Release()
-  {
-    GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
-    if(nRefCount == 0)
-    {
-      //m_pDataPool->UnregisterOutlet(this);
-      delete this;
-      return GX_OK;
-    }
-    return nRefCount;
-  }
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-
-  GXBOOL DefaultListDataAdapter::IsAutoKnock() const
-  {
-#ifdef ENABLE_DATAPOOL_WATCHER
-    if(m_pDataPool) {
-      return m_pDataPool->IsAutoKnock();
-    }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-    return FALSE;
-  }
-
-  GXINT DefaultListDataAdapter::GetItemCount() const
-  {
-    GXINT count = (GXINT)m_DynArray.GetLength();
-    TRACE(__FUNCTION__" %s[%d]\n", m_DynArray.GetName(), count);
-    return count;
-  }
-
-  GXBOOL DefaultListDataAdapter::IsFixedHeight() const
-  {
-    return TRUE;
-  }
-
-  GXINT DefaultListDataAdapter::GetItemHeight(GXINT nIdx) const
-  {
-    return -1;
-  }
-
-  GXINT DefaultListDataAdapter::AddStringW(GXLPCWSTR szName, GXLPCWSTR lpString)
-  {
-    MOVariable newstr = m_DynArray.NewBack();
-    newstr.Set(lpString);
-#ifdef ENABLE_DATAPOOL_WATCHER
-    if( ! m_pDataPool->IsAutoKnock()) {
-      newstr.Impulse(Marimo::DATACT_Insert);
-    }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-    return m_DynArray.GetLength();
-  }
-
-  GXBOOL DefaultListDataAdapter::GetStringW(GETSTRW* pItemStrDesc)
-  {
-    pItemStrDesc->VarString = m_DynArray.IndexOf(pItemStrDesc->nIdx);
-    pItemStrDesc->sString   = pItemStrDesc->VarString.ToStringW();
-    return TRUE;
-  }
-
-  MOVariable DefaultListDataAdapter::GetVariable()
-  {
-    return m_DynArray;
-  }
-
-  GXHRESULT DefaultListDataAdapter::GetDataPool(MODataPool** ppDataPool)
-  {
-    *ppDataPool = m_pDataPool;
-    if(m_pDataPool != NULL)
-    {
-      return m_pDataPool->AddRef();
-    }
-    return GX_FAIL;
-  }
-
-  //GXHRESULT DefaultListDataAdapter::Knock(GXHWND hSender, DataAction eAction, GXLPVOID lpData, GXINT nIndex) const
-  //{
-  //  if(m_pDataPool != NULL)
-  //  {
-  //    if(m_pDataPool->IsMember(lpData))
-  //    {
-  //      return m_pDataPool->Knock(this, eAction, lpData, nIndex);
-  //    }
-  //    ASSERT(0);
-  //  }
-  //  return GX_FAIL;
-  //}
-
-
-  //////////////////////////////////////////////////////////////////////////
-  //StringArrayDataPool::StringArrayDataPool()
-  //  : IArrayDataPool(sizeof(this), 8, 8)
-  //{
-  //}
-
-  //GXHRESULT StringArrayDataPool::AddRef()
-  //{
-  //  return ++m_uRefCount;
-  //}
-
-  //GXHRESULT StringArrayDataPool::Release()
-  //{
-  //  if((--m_uRefCount) == 0)
-  //  {
-  //    delete this;
-  //    return GX_OK;
-  //  }
-  //  return m_uRefCount;
-  //}
   //////////////////////////////////////////////////////////////////////////
   int List::OnCreate(GXCREATESTRUCT* pCreateParam)
   {
@@ -210,7 +36,6 @@ namespace GXUI
   GXLRESULT List::Destroy()
   {
     SetAdapter(NULL);
-    //SAFE_RELEASE(m_pAdapter);
     return CtrlBase::Destroy();
   }
 
@@ -246,7 +71,7 @@ namespace GXUI
 
   GXLRESULT List::SetVariable(MOVariable* pVariable)
   {
-    DefaultListDataAdapter* pListAdapter = new DefaultListDataAdapter(m_hWnd);
+    CDefListDataAdapter* pListAdapter = new CDefListDataAdapter(m_hWnd);
 
     if( ! InlCheckNewAndIncReference(pListAdapter)) {
       return GX_FAIL;
@@ -295,36 +120,36 @@ namespace GXUI
     return nval;
   }
 
-  GXINT List::GetStringW(GXINT nIndex, clStringW& str)
+  GXINT List::GetStringW(GXSIZE_T nIndex, clStringW& str)
   {
-    if(nIndex < 0 || nIndex >= m_pAdapter->GetItemCount()) {
+    if(nIndex < 0 || nIndex >= m_pAdapter->GetCount()) {
       return -1;
     }
-    ListDataAdapter::GETSTRW gs;
-    gs.nIdx     = nIndex;
-    gs.nElement = -1;
+    IListDataAdapter::GETSTRW gs;
+    gs.item     = nIndex;
+    gs.element  = -1;
     gs.hItemWnd = NULL;
-    gs.szName   = NULL;
-    gxSetRectEmpty(&gs.rect);
+    gs.name     = NULL;
+    //gxSetRectEmpty(&gs.rect);
     m_pAdapter->GetStringW(&gs);
     str = gs.sString;
     return (GXINT)gs.sString.GetLength();
   }
 
-  GXINT List::DeleteString(GXINT nIndex)
+  GXINT List::DeleteString(GXSIZE_T nIndex)
   {
-    if(nIndex < 0 || nIndex >= m_pAdapter->GetItemCount()) {
+    if(nIndex < 0 || nIndex >= m_pAdapter->GetCount()) {
       return -1;
     }
     MOVariable VarArray = m_pAdapter->GetVariable();
     MOVariable VarElement = VarArray.IndexOf(nIndex);
 #ifdef ENABLE_DATAPOOL_WATCHER
-    if( ! m_pAdapter->IsAutoKnock()) {
+    /*if( ! m_pAdapter->IsAutoKnock()) {
       VarElement.Impulse(Marimo::DATACT_Deleting, nIndex);
       VarArray.Remove(nIndex);
       VarElement.Impulse(Marimo::DATACT_Deleted, nIndex);
     }
-    else {
+    else */{
       VarArray.Remove(nIndex);
     }
 #else
@@ -341,12 +166,12 @@ namespace GXUI
     MOVariable VarArray = m_pAdapter->GetVariable();
 
 #ifdef ENABLE_DATAPOOL_WATCHER
-    if( ! m_pAdapter->IsAutoKnock()) {
+    /*if( ! m_pAdapter->IsAutoKnock()) {
       VarArray.Impulse(Marimo::DATACT_Deleting, -1);
       VarArray.Remove(-1);
       VarArray.Impulse(Marimo::DATACT_Deleted, -1);
     }
-    else {
+    else */{
       VarArray.Remove(-1);
     }
 #else
@@ -357,7 +182,7 @@ namespace GXUI
 
   GXINT List::GetCount()
   {
-    return m_pAdapter->GetItemCount();
+    return m_pAdapter->GetCount();
   }
 
   GXINT List::SetItemHeight(GXINT nNewHeight)
@@ -521,7 +346,7 @@ namespace GXUI
 
     GXHWND hWnd = NULL;
     hWnd = gxCreateWindowEx(dwExStyle, GXUICLASSNAME_LIST, lpWindowName, dwStyle, 
-      pRegn->left, pRegn->top, pRegn->width, pRegn->height, hWndParent, NULL, hInstance, NULL);
+      pRegn->left, pRegn->top, pRegn->width, pRegn->height, hWndParent, (GXHMENU)szIdName, hInstance, NULL);
 
     // 检查控件创建结果
     List* pList = (List*)gxGetWindowLongPtrW(hWnd, 0);
@@ -560,7 +385,7 @@ namespace GXUI
     //ListCreationParam.szTemplate = szTemplate;
 
     hWnd = gxCreateWindowEx(dwExStyle, GXUICLASSNAME_RICHLIST, lpWindowName, dwStyle, 
-      pRegn->left, pRegn->top, pRegn->width, pRegn->height, hWndParent, NULL, hInstance, 
+      pRegn->left, pRegn->top, pRegn->width, pRegn->height, hWndParent, (GXHMENU)szIdName, hInstance, 
       NULL);
 
     // 检查控件创建结果
@@ -644,10 +469,10 @@ namespace GXUI
         switch((DataPoolOperation)wParam)
         {
         case DPO_SETADAPTER:
-          pThis->SetAdapter((ListDataAdapter*)lParam);
+          pThis->SetAdapter((IListDataAdapter*)lParam);
           break;
         case DPO_GETADAPTER:
-          pThis->GetAdapter((ListDataAdapter**)lParam);
+          pThis->GetAdapter((IListDataAdapter**)lParam);
           break;
         default:
           return -1;
@@ -763,7 +588,7 @@ namespace GXUI
     , m_nTopIndex     (0)
     , m_nColumnCount  (1)
     , m_nColumnWidth  (1)
-    , n_nLastSelected (-1)
+    , m_nLastSelected (-1)
     , m_nScrolled     (0)
     , m_nPrevScrolled (0)
     , m_nItemHeight   (-1)
@@ -806,6 +631,30 @@ namespace GXUI
   GXUINT List::GetColumnsWidth( GXUINT* pColumns, GXUINT nCount )
   {
     return 0;
+  }
+
+  void List::DrawScrollBar( GXWndCanvas& canvas, LPGXCRECT lprcClient, GXINT nLastBottom, GXSIZE_T count, GXDWORD dwStyle ) const
+  {
+    if(IS_LEFTTORIGHT(dwStyle))
+    {
+      GXINT nTotalWidth = (count + (m_nColumnCount - 1)) / m_nColumnCount * m_nColumnWidth;
+      ASSERT(nTotalWidth > 0);
+      canvas.FillRect(
+        (-m_nScrolled) * lprcClient->right / nTotalWidth,
+        lprcClient->bottom - SCROLLBAR_WIDTH, 
+        lprcClient->right * lprcClient->right / nTotalWidth,
+        SCROLLBAR_WIDTH, 0x80000000);
+    }
+    else
+    {
+      GXINT nTotalHeight = nLastBottom;
+      ASSERT(nTotalHeight > 0);
+      canvas.FillRect(
+        lprcClient->right - SCROLLBAR_WIDTH, 
+        (-m_nScrolled) * lprcClient->bottom / nTotalHeight,
+        SCROLLBAR_WIDTH,
+        lprcClient->bottom * lprcClient->bottom / nTotalHeight, 0x80000000);
+    }
   }
 
 } // namespace GXUI

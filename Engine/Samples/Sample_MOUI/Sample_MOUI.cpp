@@ -40,7 +40,9 @@ SampleApp_MOUI::SampleApp_MOUI() : m_pBasicDataPool(NULL)
   , m_pDlgConsole(NULL)
   , m_pDlgBasic(NULL)
   , m_pDlgList(NULL)
+  , m_pDlgRichList(NULL)
   , m_pDlgUnitSelect(NULL)
+  , m_pDlgPropertyList(NULL)
   , m_pStreamLogger(NULL)
 {
 }
@@ -79,9 +81,17 @@ HRESULT SampleApp_MOUI::OnCreate()
   m_pDlgList->CreateDlg();
   m_pDlgList->Show(TRUE);
 
+  m_pDlgRichList = new CUniversalDialog(L"Test/UI/DlgRichList.txt", NULL);
+  m_pDlgRichList->CreateDlg();
+  m_pDlgRichList->Show(TRUE);
+
   m_pDlgUnitSelect = new CUniversalDialog(L"Test/UI/DlgUnitSelect.txt", NULL);
   m_pDlgUnitSelect->CreateDlg();
   m_pDlgUnitSelect->Show(TRUE);
+
+  m_pDlgPropertyList = new CUniversalDialog(L"Test/UI/DlgPropertyList.txt", NULL); 
+  m_pDlgPropertyList->CreateDlg();
+  m_pDlgPropertyList->Show(FALSE);
 
   //
   // 下面两个 WatchFor 共同作用实现了 "fInvScaling <=> fScaling" 的双向修改
@@ -114,8 +124,10 @@ HRESULT SampleApp_MOUI::OnCreate()
 
 HRESULT SampleApp_MOUI::OnDestroy()
 {
+  SAFE_DELETE(m_pDlgRichList);
   SAFE_DELETE(m_pDlgList);
   SAFE_DELETE(m_pDlgBasic);
+  SAFE_DELETE(m_pDlgPropertyList);
   SAFE_DELETE(m_pDlgUnitSelect);
   SAFE_DELETE(m_pDlgConsole);
   SAFE_RELEASE(m_pBasicDataPool);
