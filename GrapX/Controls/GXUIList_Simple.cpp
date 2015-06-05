@@ -379,5 +379,24 @@ LAST_STR:
     return 0;
   }
 
+  GXLRESULT SimpleList::SetVariable( MOVariable* pVariable )
+  {
+    CDefListDataAdapter* pListAdapter = new CDefListDataAdapter(m_hWnd);
+
+    if( ! InlCheckNewAndIncReference(pListAdapter)) {
+      return GX_FAIL;
+    }
+
+    if( ! pListAdapter->Initialize(*pVariable)) {
+      SAFE_RELEASE(pListAdapter);
+      return GX_FAIL;
+    }
+
+    SetAdapter(pListAdapter);
+    SAFE_RELEASE(pListAdapter);
+    return GX_OK;
+
+  }
+
 } // namespace GXUI
 #endif // #ifndef _DEV_DISABLE_UI_CODE

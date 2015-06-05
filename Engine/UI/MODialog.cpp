@@ -484,7 +484,7 @@ CGXReceiver* CMODialog::TryCastReceiver( GXHWND hDlgItem )
   //else if(GXSTRCMPI(szClassName, GXWC_LISTVIEWW) == 0)
   //  CLBREAK // 没实现 return dynamic_cast<CWEListViewReceiver*>(this);
   //else 
-    if(GXSTRCMPI(szClassName, GXWC_TREEVIEWW) == 0)
+    if(GXSTRCMPI(szClassName, GXWE_TREEVIEWW) == 0)
     return dynamic_cast<CWETreeViewReceiver*>(this);
   //else if(GXSTRCMPI(szClassName, GXWC_STATICW) == 0)
   //  CLBREAK // 没实现 return dynamic_cast<CWEStaticReceiver*>(this);

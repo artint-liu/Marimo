@@ -71,56 +71,135 @@ namespace GXUI
       return nRefCount;
     }
 
-    GXBOOL Initialize(const ItemElementArray& aItemElements)
+    //GXBOOL Initialize(const ItemElementArray& aItemElements, MOVariable* pVariable)
+    //{
+    //  if( ! pVariable) {
+    //    return Initialize(aItemElements);
+    //  }
+    //  return FALSE;
+    //}
+
+    GXBOOL Initialize(const ItemElementArray& aItemElements, MOVariable* pVariable)
     {
       ELEMENT sElement;
       typedef clvector<Marimo::VARIABLE_DECLARATION> VarDeclArray;
 
       VarDeclArray                  aStructMember;
       Marimo::VARIABLE_DECLARATION  sVarDecl;
-      //typedef cllist<clStringA>     StringList;
-      //Marimo::VARIABLE_DECLARATION* pItemMember = new Marimo::VARIABLE_DECLARATION[aItemElements.size() + 1];
-      //memset(pItemMember, 0 ,sizeof(Marimo::VARIABLE_DECLARATION) * (aItemElements.size() + 1));
+
       static GXLPCSTR szStringTypeName  = "string";
       static GXLPCSTR szFloatTypeName   = "float";
       static GXLPCSTR szIntegerTypeName = "int";
       static GXLPCSTR szDWordTypeName   = "DWORD";
       static GXLPCSTR szObjectTypeName  = "object";
 
-      //StringList NameList;          // 用来储存GXUISS_TYPE_SPRITE下被拆分的字符串的
-      clstd::StringSetA VarNameSet; // 用来储存VARIABLE_DECLARATION中的字符串实体
+      clstd::StringSetA VarNameSet;   // 用来储存VARIABLE_DECLARATION中的字符串实体
 
       aStructMember.reserve(aItemElements.size());
 
-      for(ItemElementArray::const_iterator it = aItemElements.begin();
-        it != aItemElements.end(); ++it) {
+      for(ItemElementArray::const_iterator it = aItemElements.begin(); it != aItemElements.end(); ++it) 
+      {
+        if(it->strClass != GXUICLASSNAME_STATIC && ! Marimo::DataPool::IsIllegalName(sElement.strName)) {
+          continue;
+        }
 
-          if(it->strClass != GXUICLASSNAME_STATIC && ! Marimo::DataPool::IsIllegalName(sElement.strName)) {
-            continue;
+        sElement.strName   = it->strName;
+        sElement.eClass    = CC_None;
+        sElement.dwStyle   = it->dwStyle;
+        sElement.dwExStyle = it->dwExStyle;
+
+        sVarDecl.Count     = 1;
+        sVarDecl.Init      = NULL;
+
+        // Wine Button   => string
+        // Wine Edit     => string
+        // Wine ListBox  => 没实现
+        // Wine Scroll Bar => <None>
+        // GrapX Slider => float/int
+
+        if(it->strClass == GXWE_BUTTONW)
+        {
+          sElement.eClass    = CC_Button;
+          sVarDecl.Type      = szStringTypeName;
+          sVarDecl.Name      = VarNameSet.add(sElement.strName);
+          aStructMember.push_back(sVarDecl);
+        }
+        else if(it->strClass == GXWE_EDITW)
+        {
+          sElement.eClass    = CC_Edit;
+          sVarDecl.Type      = szStringTypeName;
+          sVarDecl.Name      = VarNameSet.add(sElement.strName);
+          aStructMember.push_back(sVarDecl);
+
+          //if(m_strDefault.IsEmpty()) {
+          //  m_strDefault = sVarDecl.Name;
+          //}
+          if(m_nDefault < 0) {
+            m_nDefault = m_aElements.size();
           }
+        }
+        else if(it->strClass == GXWE_EDITW_1_3_30)
+        {
+          sElement.eClass    = CC_Edit_1_3_30;
+          sVarDecl.Type      = szStringTypeName;
+          sVarDecl.Name      = VarNameSet.add(sElement.strName);
+          aStructMember.push_back(sVarDecl);
 
-          sElement.strName   = it->strName;
-          sElement.eClass    = CC_None;
-          sElement.dwStyle   = it->dwStyle;
-          sElement.dwExStyle = it->dwExStyle;
-
-          sVarDecl.Count     = 1;
-          sVarDecl.Init      = NULL;
-
-
-
-          if(it->strClass == GXWC_BUTTONW)
-          {
-            sElement.eClass    = CC_Button;
-            sVarDecl.Type      = szStringTypeName;
-            sVarDecl.Name      = VarNameSet.add(sElement.strName);
-            aStructMember.push_back(sVarDecl);
+          if(m_nDefault < 0) {
+            m_nDefault = m_aElements.size();
           }
-          else if(it->strClass == GXWC_EDITW)
+        }          
+        else if(it->strClass == GXWE_LISTBOXW)
+        {
+          CLBREAK; // 没实现!
+          //sElement.eClass    = CC_ListBox;
+          //sVarDecl.Type      = szStringTypeName;
+          //sVarDecl.Name      = sElement.strName;
+          //aStructMember.push_back(sVarDecl);
+        }
+        else if(it->strClass == GXWE_SCROLLBARW)
+        {
+          //sElement.eClass = CC_ScrollBar;
+          sElement.eClass = CC_None;
+        }
+        else if(it->strClass == GXWE_STATICW)
+        {
+          CLBREAK; // 没实现!
+          sElement.eClass = CC_Static;
+        }
+        else if(it->strClass == GXUICLASSNAME_EDIT)
+        {
+          sElement.eClass    = CC_UIEdit;
+          sVarDecl.Type      = szStringTypeName;
+          sVarDecl.Name      = VarNameSet.add(sElement.strName);
+          aStructMember.push_back(sVarDecl);
+
+          //if(m_strDefault.IsEmpty()) {
+          //  m_strDefault = sVarDecl.Name;
+          //}
+          if(m_nDefault < 0) {
+            m_nDefault = m_aElements.size();
+          }
+        }
+        else if(it->strClass == GXUICLASSNAME_STATIC)
+        {
+          sElement.eClass    = CC_UIStatic;
+          sVarDecl.Name      = VarNameSet.add(sElement.strName);
+
+          switch(it->dwStyle & GXUISS_TYPE_MASK)
           {
-            sElement.eClass    = CC_Edit;
-            sVarDecl.Type      = szStringTypeName;
-            sVarDecl.Name      = VarNameSet.add(sElement.strName);
+          case GXUISS_TYPE_LABEL:
+          case GXUISS_TYPE_RECT:
+            if( ! Marimo::DataPool::IsIllegalName(sElement.strName)) {
+              continue;
+            }
+
+            if((it->dwStyle & GXUISS_TYPE_MASK) == GXUISS_TYPE_LABEL) {
+              sVarDecl.Type = szStringTypeName;
+            }
+            else {
+              sVarDecl.Type = szDWordTypeName;
+            }
             aStructMember.push_back(sVarDecl);
 
             //if(m_strDefault.IsEmpty()) {
@@ -129,213 +208,134 @@ namespace GXUI
             if(m_nDefault < 0) {
               m_nDefault = m_aElements.size();
             }
-          }
-          else if(it->strClass == GXWC_EDITW_1_3_30)
-          {
-            sElement.eClass    = CC_Edit_1_3_30;
-            sVarDecl.Type      = szStringTypeName;
-            sVarDecl.Name      = VarNameSet.add(sElement.strName);
-            aStructMember.push_back(sVarDecl);
-
-            //if(m_strDefault.IsEmpty()) {
-            //  m_strDefault = sVarDecl.Name;
-            //}
-            if(m_nDefault < 0) {
-              m_nDefault = m_aElements.size();
-            }
-          }          
-          else if(it->strClass == GXWC_LISTBOXW)
-          {
-            CLBREAK; // 没实现!
-            //sElement.eClass    = CC_ListBox;
-            //sVarDecl.Type      = szStringTypeName;
-            //sVarDecl.Name      = sElement.strName;
-            //aStructMember.push_back(sVarDecl);
-          }
-          else if(it->strClass == GXWC_SCROLLBARW)
-          {
-            //sElement.eClass = CC_ScrollBar;
-            sElement.eClass = CC_None;
-          }
-          else if(it->strClass == GXWC_STATICW)
-          {
-            CLBREAK; // 没实现!
-            sElement.eClass = CC_Static;
-          }
-          else if(it->strClass == GXUICLASSNAME_EDIT)
-          {
-            sElement.eClass    = CC_UIEdit;
-            sVarDecl.Type      = szStringTypeName;
-            sVarDecl.Name      = VarNameSet.add(sElement.strName);
-            aStructMember.push_back(sVarDecl);
-
-            //if(m_strDefault.IsEmpty()) {
-            //  m_strDefault = sVarDecl.Name;
-            //}
-            if(m_nDefault < 0) {
-              m_nDefault = m_aElements.size();
-            }
-          }
-          else if(it->strClass == GXUICLASSNAME_STATIC)
-          {
-            sElement.eClass    = CC_UIStatic;
-            sVarDecl.Name      = VarNameSet.add(sElement.strName);
-
-            switch(it->dwStyle & GXUISS_TYPE_MASK)
+            break;
+          case GXUISS_TYPE_SPRITE:
             {
-            case GXUISS_TYPE_LABEL:
-            case GXUISS_TYPE_RECT:
-              if( ! Marimo::DataPool::IsIllegalName(sElement.strName)) {
-                continue;
-              }
+              clStringA strSprite;
+              clStringA strUniformIndex;
 
-              if((it->dwStyle & GXUISS_TYPE_MASK) == GXUISS_TYPE_LABEL) {
-                sVarDecl.Type = szStringTypeName;
-              }
-              else {
-                sVarDecl.Type = szDWordTypeName;
-              }
-              aStructMember.push_back(sVarDecl);
+              // Sprite 类型的static应该是“uniform_index@sprite_name”格式;
 
-              //if(m_strDefault.IsEmpty()) {
-              //  m_strDefault = sVarDecl.Name;
-              //}
-              if(m_nDefault < 0) {
-                m_nDefault = m_aElements.size();
-              }
-              break;
-            case GXUISS_TYPE_SPRITE:
+              sElement.strName.DivideBy('@', strUniformIndex, strSprite);
+
+              if(Marimo::DataPool::IsIllegalName(strSprite) && 
+                Marimo::DataPool::IsIllegalName(strUniformIndex))
               {
-                clStringA strSprite;
-                clStringA strUniformIndex;
+                //NameList.push_back(strSprite);
+                sVarDecl.Type = szObjectTypeName;
+                sVarDecl.Name = VarNameSet.add(strSprite);
+                aStructMember.push_back(sVarDecl);
 
-                // Sprite 类型的static应该是“uniform_index@sprite_name”格式;
-
-                sElement.strName.DivideBy('@', strUniformIndex, strSprite);
-
-                if(Marimo::DataPool::IsIllegalName(strSprite) && 
-                  Marimo::DataPool::IsIllegalName(strUniformIndex))
-                {
-                  //NameList.push_back(strSprite);
-                  sVarDecl.Type = szObjectTypeName;
-                  sVarDecl.Name = VarNameSet.add(strSprite);
-                  aStructMember.push_back(sVarDecl);
-
-                  //NameList.push_back(strUniformIndex);
-                  sVarDecl.Type = szIntegerTypeName;
-                  sVarDecl.Name = VarNameSet.add(strUniformIndex);
-                  aStructMember.push_back(sVarDecl);
-                }
+                //NameList.push_back(strUniformIndex);
+                sVarDecl.Type = szIntegerTypeName;
+                sVarDecl.Name = VarNameSet.add(strUniformIndex);
+                aStructMember.push_back(sVarDecl);
               }
-              break;
-            } // switch
-          }
-          else if(it->strClass == GXUICLASSNAME_SLIDER)
-          {
-            sElement.eClass = CC_UISlider;
-            if(TEST_FLAG(it->dwStyle, GXUISLDS_FLOAT))
-            {
-              sVarDecl.Type = szFloatTypeName;
             }
-            else
-            {
-              sVarDecl.Type = szIntegerTypeName;
-            }
-            sVarDecl.Name = VarNameSet.add(sElement.strName);
-            aStructMember.push_back(sVarDecl);
-          }
-          else if(it->strClass == GXUICLASSNAME_BUTTON)
+            break;
+          } // switch
+        }
+        else if(it->strClass == GXUICLASSNAME_SLIDER)
+        {
+          sElement.eClass = CC_UISlider;
+          if(TEST_FLAG(it->dwStyle, GXUISLDS_FLOAT))
           {
-            sElement.eClass    = CC_UIButton;
-            sVarDecl.Type      = szStringTypeName;
-            sVarDecl.Name      = VarNameSet.add(sElement.strName);
-            aStructMember.push_back(sVarDecl);
+            sVarDecl.Type = szFloatTypeName;
+          }
+          else
+          {
+            sVarDecl.Type = szIntegerTypeName;
+          }
+          sVarDecl.Name = VarNameSet.add(sElement.strName);
+          aStructMember.push_back(sVarDecl);
+        }
+        else if(it->strClass == GXUICLASSNAME_BUTTON)
+        {
+          sElement.eClass    = CC_UIButton;
+          sVarDecl.Type      = szStringTypeName;
+          sVarDecl.Name      = VarNameSet.add(sElement.strName);
+          aStructMember.push_back(sVarDecl);
 
-            //if(m_strDefault.IsEmpty()) {
-            //  m_strDefault = sVarDecl.Name;
-            //}
-            if(m_nDefault < 0) {
-              m_nDefault = m_aElements.size();
-            }
+          //if(m_strDefault.IsEmpty()) {
+          //  m_strDefault = sVarDecl.Name;
+          //}
+          if(m_nDefault < 0) {
+            m_nDefault = m_aElements.size();
           }
-          else if(it->strClass == GXUICLASSNAME_LIST)
-          {
-            CLBREAK; // 没实现!
-            sElement.eClass = CC_UIList;
-          }
-          else if(it->strClass == GXUICLASSNAME_TOOLBAR)
-          {
-            CLBREAK; // 没实现!
-            sElement.eClass = CC_UIToolbar;
-          }
+        }
+        else if(it->strClass == GXUICLASSNAME_LIST)
+        {
+          CLBREAK; // 没实现!
+          sElement.eClass = CC_UIList;
+        }
+        else if(it->strClass == GXUICLASSNAME_TOOLBAR)
+        {
+          CLBREAK; // 没实现!
+          sElement.eClass = CC_UIToolbar;
+        }
 
-          if(sElement.eClass != CC_None)
-          {
-            ASSERT(sElement.strName.IsNotEmpty());
-            m_aElements.push_back(sElement);
-          }
+        if(sElement.eClass != CC_None)
+        {
+          ASSERT(sElement.strName.IsNotEmpty());
+          m_aElements.push_back(sElement);
+        }
       } // for
 
-      // 结尾标志
-      sVarDecl.Type = NULL;
-      sVarDecl.Name = NULL;
-      sVarDecl.Count = 0;
-      sVarDecl.Init = NULL;
-      aStructMember.push_back(sVarDecl);
-
-      static GXLPCSTR szItemType = "ITEM";
-      Marimo::TYPE_DECLARATION sStructType[2];
-      Marimo::VARIABLE_DECLARATION aGlobalVar[2];
-
-      sStructType[0].Cate       = Marimo::T_STRUCT;
-      sStructType[0].Name       = szItemType;
-      sStructType[0].as.Struct  = &aStructMember.front();
-      sStructType[1].Cate       = Marimo::T_UNDEFINE;
-      sStructType[1].Name       = NULL;
-      sStructType[1].as.Struct  = NULL;
-
-
-      aGlobalVar[0].Type = szItemType;
-      aGlobalVar[0].Name = "Array";
-      aGlobalVar[0].Count = -1;
-      aGlobalVar[0].Init = NULL;
-      aGlobalVar[1].Type = NULL;
-      aGlobalVar[1].Name = NULL;
-      aGlobalVar[1].Count = 0;
-      aGlobalVar[1].Init = NULL;
-
-      //static GXLPCSTR s_szTwoLabelArray =
-      //  "struct ITEM {"
-      //  "string Desc;"
-      //  "int    nSpriteId;"
-      //  "};"
-      //  "ITEM Array[];";
-
-      //Marimo::DataPool::CreateFromCode(&m_pDataPool, NULL, s_szTwoLabelArray);
-      GXHRESULT result = Marimo::DataPool::CreateDataPool(&m_pDataPool, NULL, sStructType, aGlobalVar);
-
-      if(GXSUCCEEDED(result))
+      if( ! pVariable)
       {
-        m_ArrayName = "Array";
-        m_pDataPool->QueryByName(m_ArrayName, &m_DynArray);
+        // 结尾标志
+        sVarDecl.Type = NULL;
+        sVarDecl.Name = NULL;
+        sVarDecl.Count = 0;
+        sVarDecl.Init = NULL;
+        aStructMember.push_back(sVarDecl);
+
+        static GXLPCSTR szItemType = "ITEM";
+        Marimo::TYPE_DECLARATION sStructType[2];
+        Marimo::VARIABLE_DECLARATION aGlobalVar[2];
+
+        sStructType[0].Cate       = Marimo::T_STRUCT;
+        sStructType[0].Name       = szItemType;
+        sStructType[0].as.Struct  = &aStructMember.front();
+        sStructType[1].Cate       = Marimo::T_UNDEFINE;
+        sStructType[1].Name       = NULL;
+        sStructType[1].as.Struct  = NULL;
+
+
+        aGlobalVar[0].Type = szItemType;
+        aGlobalVar[0].Name = "Array";
+        aGlobalVar[0].Count = -1;
+        aGlobalVar[0].Init = NULL;
+        aGlobalVar[1].Type = NULL;
+        aGlobalVar[1].Name = NULL;
+        aGlobalVar[1].Count = 0;
+        aGlobalVar[1].Init = NULL;
+
+        GXHRESULT result = Marimo::DataPool::CreateDataPool(&m_pDataPool, NULL, sStructType, aGlobalVar);
+
+        if(GXSUCCEEDED(result))
+        {
+          m_ArrayName = "Array";
+          m_pDataPool->QueryByName(m_ArrayName, &m_DynArray);
+          m_pDataPool->Watch(&m_DynArray, m_hWnd);
+        }
+      }
+      else
+      {
+        pVariable->GetPool(&m_pDataPool);
+        m_ArrayName = pVariable->GetName();
+        m_DynArray = *pVariable;
         m_pDataPool->Watch(&m_DynArray, m_hWnd);
-//#ifdef ENABLE_OLD_DATA_ACTION
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//        m_pDataPool->CreateWatcher(STR_DATAPOOL_WATCHER_UI);
-//        m_pDataPool->SetAutoKnock(TRUE);
-//        m_pDataPool->RegisterIdentify(STR_DATAPOOL_WATCHER_UI, (GXLPVOID)m_hWnd);
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//#endif // #ifdef ENABLE_OLD_DATA_ACTION
       }
       return TRUE;
     }
 
-#ifdef ENABLE_DATAPOOL_WATCHER
-    virtual GXBOOL IsAutoKnock() const
-    {
-      return m_pDataPool->IsAutoKnock();
-    }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//    virtual GXBOOL IsAutoKnock() const
+//    {
+//      return m_pDataPool->IsAutoKnock();
+//    }
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
     virtual GXSIZE_T GetCount() const
     {
@@ -465,7 +465,9 @@ namespace GXUI
           case GXUISS_TYPE_LABEL:
             {
               MOVariable varString = var.MemberOf(element.strName);
-              pItemStrDesc->sString = varString.ToStringW();
+              if(varString.IsValid()) {
+                pItemStrDesc->sString = varString.ToStringW();
+              }
             }
             break;
           case GXUISS_TYPE_SPRITE:
@@ -479,17 +481,18 @@ namespace GXUI
                 MOVariable varSprite = var.MemberOf(strSprite);
                 MOVariable varIndex = var.MemberOf(strUniformIndex);
 
-                ASSERT(varSprite.IsValid() && varIndex.IsValid());
-
-                GXSprite* pSprite = NULL;
-                //varSprite.GetData(&pSprite, sizeof(pSprite)); // TODO: 专门实现"MOVariable object"对象,自动控制引用计数
-                varSprite.Query((GUnknown**)&pSprite);
-                if(pSprite)
+                if(varSprite.IsValid() && varIndex.IsValid())
                 {
-                  gxSendMessage(pItemStrDesc->hItemWnd, GXSSM_SETSPRITE, NULL, (GXLPARAM)pSprite);
-                  gxSendMessage(pItemStrDesc->hItemWnd, GXSSM_SETMODULEBYINDEX, varIndex.ToInteger(), NULL);
-                  pSprite->Release();
-                  pSprite = NULL;
+                  GXSprite* pSprite = NULL;
+                  //varSprite.GetData(&pSprite, sizeof(pSprite)); // TODO: 专门实现"MOVariable object"对象,自动控制引用计数
+                  varSprite.Query((GUnknown**)&pSprite);
+                  if(pSprite)
+                  {
+                    gxSendMessage(pItemStrDesc->hItemWnd, GXSSM_SETSPRITE, NULL, (GXLPARAM)pSprite);
+                    gxSendMessage(pItemStrDesc->hItemWnd, GXSSM_SETMODULEBYINDEX, varIndex.ToInteger(), NULL);
+                    pSprite->Release();
+                    pSprite = NULL;
+                  }
                 }
               }
             }

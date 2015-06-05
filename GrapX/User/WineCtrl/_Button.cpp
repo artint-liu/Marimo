@@ -184,7 +184,7 @@ static const GXWCHAR buttonW[] = {'B','u','t','t','o','n',0};
 
 GXWNDCLASSEX WndClassEx_MyButton = { sizeof(GXWNDCLASSEX), GXCS_DBLCLKS, ButtonWndProcW, 0L, NB_EXTRA_BYTES,
 (GXHINSTANCE)gxGetModuleHandle(NULL), NULL, gxLoadCursor(NULL, (GXLPCWSTR)GXIDC_ARROW), NULL, NULL,
-GXWC_BUTTONW, NULL };
+GXWE_BUTTONW, NULL };
 
 static inline GXLONG get_button_state( GXHWND hwnd )
 {

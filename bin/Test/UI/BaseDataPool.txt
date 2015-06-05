@@ -5,6 +5,13 @@ struct SPRITEINFO
   string name;
 };
 
+struct COMBO
+{
+  string Class;
+  string Name;
+  int Price;
+};
+
 float fScaling;
 float fHalfScaling;
 float fInvScaling;
@@ -12,5 +19,6 @@ string button[];
 string List1[];
 string strSpriteFile;
 SPRITEINFO SpriteInfo;
+COMBO combo[];
 
 #pragma import("BaseDataPool.data.txt")

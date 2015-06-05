@@ -147,7 +147,7 @@ static GXLRESULT LISTBOX_GetItemRect( const GXLB_DESCR *descr, GXINT index, GXRE
 
 GXWNDCLASSEX WndClassEx_MyListbox = { sizeof(GXWNDCLASSEX), GXCS_DBLCLKS, ListBoxWndProcW, 0L, sizeof(GXLB_DESCR *),
 (GXHINSTANCE)gxGetModuleHandle(NULL), NULL, gxLoadCursor(NULL, (GXLPWSTR)GXIDC_ARROW), NULL, NULL,
-GXWC_LISTBOXW, NULL };
+GXWE_LISTBOXW, NULL };
 
 
 /*********************************************************************

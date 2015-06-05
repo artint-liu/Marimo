@@ -25,7 +25,7 @@ GXSIZE_T CWEEdit::GetThisSizeOf() const
 
 clStringW CWEEdit::GetClassName() const
 {
-  clStringW ClsName(GXWC_EDITW);
+  clStringW ClsName(GXWE_EDITW);
   ClsName.MakeUpper();
   return ClsName;
 }

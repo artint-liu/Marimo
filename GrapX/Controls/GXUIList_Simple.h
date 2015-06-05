@@ -39,6 +39,7 @@ namespace GXUI
     virtual GXUINT    GetColumnsWidth     (GXUINT* pColumn, GXUINT nCount);
 
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
+    virtual GXLRESULT SetVariable         (MOVariable* pVariable);
     virtual ListType  GetListType         ();
     virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
     virtual int       OnSize              (int cx, int cy);

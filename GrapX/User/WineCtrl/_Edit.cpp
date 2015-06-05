@@ -317,7 +317,7 @@ GXLRESULT GXDLLAPI EditWndProcW(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPA
 
 GXWNDCLASSEX WndClassEx_MyEdit = { sizeof(GXWNDCLASSEX), GXCS_CLASSDC, EditWndProcW, 0L, sizeof(EDITSTATE *),
 (GXHINSTANCE)gxGetModuleHandle(NULL), NULL, gxLoadCursor(NULL, (GXLPCWSTR)GXIDC_IBEAM), NULL, NULL,
-GXWC_EDITW, NULL };
+GXWE_EDITW, NULL };
 
 /*********************************************************************
 *

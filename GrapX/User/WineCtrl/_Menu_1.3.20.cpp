@@ -254,7 +254,7 @@ static GXBOOL SetMenuItemInfo_common( MENUITEM *, const GXMENUITEMINFOW *, GXBOO
 
 GXWNDCLASSEX WndClassEx_Menu = { sizeof(GXWNDCLASSEX), GXCS_DROPSHADOW | GXCS_SAVEBITS | GXCS_DBLCLKS, PopupMenuWndProc, 0L, sizeof(GXHMENU),
   (GXHINSTANCE)gxGetModuleHandle(NULL), NULL, gxLoadCursor(NULL, (GXLPCWSTR)IDC_ARROW), NULL, NULL,
-  GXWC_MENUW, NULL };
+  GXWE_MENUW, NULL };
 
 #define GXPOPUPMENU_CLASS_ATOM  (WndClassEx_Menu.lpszClassName)
 

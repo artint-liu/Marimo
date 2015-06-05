@@ -81,10 +81,30 @@ namespace GXUI
     void    UpdateScrollBarRect (GXDWORD dwStyle, LPGXCRECT lprcClient = NULL);
     GXBOOL  IsEmpty             () const;
 
+    //template <class _TAdapter>
+    //GXLRESULT SetupAdapterByVariable      (MOVariable* pVar)
+    //{
+    //  _TAdapter* pListAdapter = new _TAdapter(m_hWnd);
+
+    //  if( ! InlCheckNewAndIncReference(pListAdapter)) {
+    //    return GX_FAIL;
+    //  }
+
+    //  if( ! pListAdapter->Initialize(*pVar)) {
+    //    SAFE_RELEASE(pListAdapter);
+    //    return GX_FAIL;
+    //  }
+
+    //  SetAdapter(pListAdapter);
+    //  SAFE_RELEASE(pListAdapter);
+    //  return GX_OK;
+
+    //}
+
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
     virtual GXLRESULT Destroy             ();
     virtual GXBOOL    SolveDefinition     (const GXDefinitionArrayW& aDefinitions);
-    virtual GXLRESULT SetVariable         (MOVariable* pVariable);
+    //virtual GXLRESULT SetVariable         (MOVariable* pVariable);
     virtual GXUINT    SetColumnsWidth     (GXLPCWSTR szString);
     virtual GXUINT    SetColumnsWidth     (const GXUINT* pColumns, GXUINT nCount);
     virtual GXUINT    GetColumnsWidth     (GXUINT* pColumns, GXUINT nCount);

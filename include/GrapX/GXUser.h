@@ -9,15 +9,15 @@
 #define WINSWITCH_CLASS_ATOM L"#32771"    // WinSwitch
 #define ICONTITLE_CLASS_ATOM L"#32772"    // IconTitle
 
-#define GXWC_MENUW              POPUPMENU_CLASS_ATOM
-#define GXWC_BUTTONW            _T("Button")
-#define GXWC_EDITW              _T("Edit")
-#define GXWC_EDITW_1_3_30       _T("Edit_1_3_30")
-#define GXWC_LISTBOXW           _T("ListBox")
-#define GXWC_SCROLLBARW         _T("ScrollBar")
-#define GXWC_STATICW            _T("Static")
-#define GXWC_LISTVIEWW          _T("SysListView32")
-#define GXWC_TREEVIEWW          _T("SysTreeView32")
+#define GXWE_MENUW              POPUPMENU_CLASS_ATOM
+#define GXWE_BUTTONW            _T("Button")
+#define GXWE_EDITW              _T("Edit")
+#define GXWE_EDITW_1_3_30       _T("Edit_1_3_30")
+#define GXWE_LISTBOXW           _T("ListBox")
+#define GXWE_SCROLLBARW         _T("ScrollBar")
+#define GXWE_STATICW            _T("Static")
+#define GXWE_LISTVIEWW          _T("SysListView32")
+#define GXWE_TREEVIEWW          _T("SysTreeView32")
 #define GXUICLASSNAME_EDIT      _T("GXUIEdit")       // 这个是从Wine的Edit控件修改来的
 #define GXUICLASSNAME_STATIC    _T("GXUIStatic")
 #define GXUICLASSNAME_SLIDER    _T("GXUISlider")

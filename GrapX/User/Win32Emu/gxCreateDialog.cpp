@@ -905,7 +905,7 @@ GXHWND CreateDialogItem_WETree( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
 
   file.GetBasicParam(hDlgItem, &dbpItem);
 
-  hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWC_TREEVIEWW, dbpItem.strCaption, 
+  hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWE_TREEVIEWW, dbpItem.strCaption, 
     dbpItem.dwStyle | GXWS_VISIBLE | GXWS_CHILD, 
     dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, hInstance, NULL);
   return hItemWnd;
@@ -917,7 +917,7 @@ GXHWND CreateDialogItem_WEListView( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgIte
   DlgXM::DLGFONTPARAMW  dfpItem;
   file.GetBasicParam(hDlgItem, &dbpItem);
 
-  hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWC_LISTVIEWW, dbpItem.strCaption, 
+  hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWE_LISTVIEWW, dbpItem.strCaption, 
     dbpItem.dwStyle | GXWS_VISIBLE | GXWS_CHILD, 
     dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, hInstance, NULL);
   return hItemWnd;
@@ -934,7 +934,7 @@ GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   //  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUIBS_", DlgXM::CMC_ButtonStyle);
   //}
 
-  hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWC_EDITW_1_3_30, dbpItem.strCaption, 
+  hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWE_EDITW_1_3_30, dbpItem.strCaption, 
     dbpItem.dwStyle | GXWS_VISIBLE | GXWS_CHILD, 
     dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, hInstance, NULL);
 

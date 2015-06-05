@@ -25,7 +25,7 @@ GXSIZE_T CWEListBox::GetThisSizeOf() const
 
 clStringW CWEListBox::GetClassName() const
 {
-  clStringW ClsName(GXWC_LISTBOXW);
+  clStringW ClsName(GXWE_LISTBOXW);
   ClsName.MakeUpper();
   return ClsName;
 }

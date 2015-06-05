@@ -126,7 +126,7 @@ static const GXWCHAR staticW[] = {'S','t','a','t','i','c',0};
 
 GXWNDCLASSEX WndClassEx_MyStatic = { sizeof(GXWNDCLASSEX), GXCS_DBLCLKS | GXCS_PARENTDC, StaticWndProcW, 0L, STATIC_EXTRA_BYTES,
 (GXHINSTANCE)gxGetModuleHandle(NULL), NULL, gxLoadCursor(NULL, (GXLPCWSTR)GXIDC_ARROW), NULL, NULL,
-GXWC_STATICW, NULL };
+GXWE_STATICW, NULL };
 
 static GXBOOL GetIconInfo2(GXHICON hIcon, CURSORICONINFO *lpIconInfo)
 {

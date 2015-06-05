@@ -43,10 +43,14 @@ namespace GXUI
     GXHWND            m_hPrototype;
     clStringArrayW    m_aElementName;   // Item 中的控件名
     GXHWndArray       m_aWndPool;
+    MOVariable        m_VarList;
   private:
     static GXLRESULT GXCALLBACK CustomWndProc         (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
     static GXBOOL    GXCALLBACK EnumChildProc         (GXHWND hWnd, GXLPARAM lParam);
     static GXBOOL    GXCALLBACK EnumAdapterChildProc  (GXHWND hWnd, GXLPARAM lParam);
+
+  private:
+    GXLRESULT SetupAdapter();
 
   public:
     GXINT     GetItemHeight       (GXINT nIdx) const;
@@ -59,6 +63,7 @@ namespace GXUI
     virtual ListType  GetListType         ();
     virtual GXLRESULT Measure             (GXRegn* pRegn);
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
+    virtual GXLRESULT SetVariable         (MOVariable* pVariable);
     virtual int       OnLButtonDown       (int fwKeys, int x, int y);
     virtual GXINT     HitTest             (int fwKeys, int x, int y) const;
     virtual GXLRESULT OnPaint             (GXWndCanvas& canvas);

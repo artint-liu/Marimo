@@ -221,27 +221,6 @@
     <ClCompile Include="..\..\Scene\HeightfieldTerrain.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\UI\GXDlgItemBase.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\UI\GXEdit.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\UI\GXList.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\UI\GXPropertySheet.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\UI\GXStatic.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\UI\GXToolbar.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\UI\GXWndBase.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\UI\MOPropertyList.cpp">
       <Filter>UI</Filter>
     </ClCompile>
@@ -269,14 +248,35 @@
     <ClCompile Include="..\..\UI\DlgConsole.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\UI\GXButton.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\UI\GXDialog.cpp">
-      <Filter>UI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\GameEngine.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MODlgItemBase.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOEdit.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOList.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOPropertySheet.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOStatic.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOToolbar.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOWndBase.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MOButton.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UI\MODialog.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -69,23 +69,15 @@ namespace GXUI
     return TRUE;
   }
 
-  GXLRESULT List::SetVariable(MOVariable* pVariable)
-  {
-    CDefListDataAdapter* pListAdapter = new CDefListDataAdapter(m_hWnd);
+  //template <class _TAdapter>
+  //GXLRESULT GXUI::List::SetupAdapterByVariable( MOVariable* pVar )
+  //{
+  //}
 
-    if( ! InlCheckNewAndIncReference(pListAdapter)) {
-      return GX_FAIL;
-    }
-
-    if( ! pListAdapter->Initialize(*pVariable)) {
-      SAFE_RELEASE(pListAdapter);
-      return GX_FAIL;
-    }
-
-    SetAdapter(pListAdapter);
-    SAFE_RELEASE(pListAdapter);
-    return GX_OK;
-  }
+  //GXLRESULT List::SetVariable(MOVariable* pVariable)
+  //{
+  //  return SetupAdapterByVariable<CDefListDataAdapter>(pVariable);
+  //}
 
   //int List::OnLButtonDown(int fwKeys, int x, int y)
   //{    

@@ -387,14 +387,14 @@ namespace GXUI
         rcGap.bottom = nPassPos + TemplProtoHeight;  // 后面累加
       }
     }
-    //else if(bFixedHeight) {
-    //  if(IS_LEFTTORIGHT(dwStyle)) {
-    //    nPassPos = m_nScrolled + m_nTopIndex * TemplProtoWidth;
-    //  }
-    //  else {
-    //    nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
-    //  }
-    //}
+    else if(TRUE/*bFixedHeight*/) {
+      if(IS_LEFTTORIGHT(dwStyle)) {
+        nPassPos = m_nScrolled + m_nTopIndex * TemplProtoWidth;
+      }
+      else {
+        nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
+      }
+    }
     else {
       ASSERT(0); // FIXME: 起始(与 nHeight 相关)位置计算不对, 要修正
       nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
@@ -670,38 +670,57 @@ namespace GXUI
       }
       else
       {
-        m_aElementName.clear();
-        ItemElementArray aItemElements;
-        if( ! gxEnumChildWindows(m_hPrototype, EnumAdapterChildProc, (GXLPARAM)&aItemElements)) {
-          return -1;
-        }
-
-        CDefRichListAdapter* pAdapter = new CDefRichListAdapter(m_hWnd);
-        if( ! InlCheckNewAndIncReference(pAdapter)) {
-          return -1;
-        }
-
-        if( ! pAdapter->Initialize(aItemElements)) {
-          SAFE_RELEASE(pAdapter);
-          return -1;
-        }
-
-        for(ItemElementArray::iterator it = aItemElements.begin();
-          it != aItemElements.end(); ++it) {
-            if(it->strName.IsNotEmpty()) {
-              m_aElementName.push_back(it->strName);
-            }
-        }
-
-        SetAdapter(pAdapter);
-        SAFE_RELEASE(pAdapter);
+        //SetVariable(NULL);
+        SetupAdapter();
       }
+
       // 更新每行/列中Item的数量
       GXRECT rcClient;
       gxGetClientRect(m_hWnd, &rcClient);
       OnSize(rcClient.right, rcClient.bottom);
     }
     return result;
+  }
+
+  GXLRESULT CustomizeList::SetupAdapter()
+  {
+    m_aElementName.clear();
+    ItemElementArray aItemElements;
+    if( ! gxEnumChildWindows(m_hPrototype, EnumAdapterChildProc, (GXLPARAM)&aItemElements)) {
+      return GX_FAIL;
+    }
+
+    CDefRichListAdapter* pAdapter = new CDefRichListAdapter(m_hWnd);
+    if( ! InlCheckNewAndIncReference(pAdapter)) {
+      return GX_FAIL;
+    }
+
+    if( ! pAdapter->Initialize(aItemElements, m_VarList.IsValid() ? &m_VarList : NULL)) {
+      SAFE_RELEASE(pAdapter);
+      return GX_FAIL;
+    }
+
+    for(ItemElementArray::iterator it = aItemElements.begin();
+      it != aItemElements.end(); ++it) {
+        if(it->strName.IsNotEmpty()) {
+          m_aElementName.push_back(it->strName);
+        }
+    }
+
+    SetAdapter(pAdapter);
+    SAFE_RELEASE(pAdapter);
+    return GX_OK;
+  }
+
+  GXLRESULT CustomizeList::SetVariable( MOVariable* pVariable )
+  {
+    if(pVariable && pVariable->IsValid()) {
+      m_VarList = *pVariable;
+      if(m_hPrototype) {
+        return SetupAdapter();
+      }
+    }
+    return GX_OK;
   }
 
 } // namespace GXUI
