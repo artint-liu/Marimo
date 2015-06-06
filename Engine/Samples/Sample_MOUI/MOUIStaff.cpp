@@ -63,15 +63,21 @@ GXHRESULT MOUIStaff::Execute(int nCmdIndex, const clStringW* argv, int argc)
   switch(nCmdIndex)
   {
   case CMD_console:
-    m_pMyApp->m_pDlgConsole->Show( ! m_pMyApp->m_pDlgConsole->IsVisible());
+    if(m_pMyApp->m_pDlgConsole) {
+      m_pMyApp->m_pDlgConsole->Show( ! m_pMyApp->m_pDlgConsole->IsVisible());
+    }
     break;
 
   case CMD_SlideAndLabel:
-    m_pMyApp->m_pDlgBasic->Show( ! m_pMyApp->m_pDlgBasic->IsVisible());
+    if(m_pMyApp->m_pDlgBasic) {
+      m_pMyApp->m_pDlgBasic->Show( ! m_pMyApp->m_pDlgBasic->IsVisible());
+    }
     break;
 
   case CMD_TestListBox:
-    m_pMyApp->m_pDlgList->Show( ! m_pMyApp->m_pDlgList->IsVisible());
+    if(m_pMyApp->m_pDlgList) {
+      m_pMyApp->m_pDlgList->Show( ! m_pMyApp->m_pDlgList->IsVisible());
+    }
     break;
 
   case CMD_DictList:

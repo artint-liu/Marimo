@@ -16,7 +16,7 @@ namespace GXUI
   
 
 
-  class SimpleList : public ListTemplate<ITEMSTAT>
+  class SimpleList : public List
   {
   public:
     //typedef clvector<ITEMSTAT>  ItemStatArray;
@@ -43,7 +43,7 @@ namespace GXUI
     virtual ListType  GetListType         ();
     virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
     virtual int       OnSize              (int cx, int cy);
-    virtual int       OnLButtonDown       (int fwKeys, int x, int y);
+    //virtual int       OnLButtonDown       (int fwKeys, int x, int y);
     virtual GXBOOL    GetItemRect         (int nItem, GXDWORD dwStyle, GXLPRECT lprc) const;
     virtual GXLRESULT SetItemTemplate     (GXLPCWSTR szTemplate);
 

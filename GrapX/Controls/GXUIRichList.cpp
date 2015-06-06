@@ -34,7 +34,7 @@ GXHWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, 
 namespace GXUI
 {
   //////////////////////////////////////////////////////////////////////////
-  GXLRESULT GXCALLBACK CustomizeList::CustomWndProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
+  GXLRESULT GXCALLBACK RichList::CustomWndProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
   {
     switch(message)
     {
@@ -43,7 +43,7 @@ namespace GXUI
         GXHWND hParent = gxGetParent(hWnd);
         GXRECT rect;
         GXBOOL bSelected = FALSE;
-        CustomizeList* pList = (CustomizeList*)gxGetWindowLong(hParent, 0);
+        RichList* pList = (RichList*)gxGetWindowLong(hParent, 0);
         const int nMyIndex = gxGetWindowLong(hWnd, GXGWL_USERDATA);
 
         gxGetClientRect(hWnd, &rect);
@@ -53,7 +53,7 @@ namespace GXUI
           //if(pList->m_bShowScrollBar && (((nMyIndex + 1) % pList->m_nColumnCount) == 0)) {
           //  rect.right -= SCROLLBAR_WIDTH;
           //}
-          bSelected = pList->m_aItemStat[nMyIndex].bSelected;
+          bSelected = pList->m_aItems[nMyIndex].bSelected;
         }
 
         GXHDC hdc = (GXHDC)wParam;
@@ -109,9 +109,9 @@ namespace GXUI
     return TRUE;
   }
 
-  GXBOOL GXCALLBACK CustomizeList::EnumChildProc(GXHWND hWnd, GXLPARAM lParam)
+  GXBOOL GXCALLBACK RichList::EnumChildProc(GXHWND hWnd, GXLPARAM lParam)
   {
-    CustomizeList* pThis = (CustomizeList*)lParam;
+    RichList* pThis = (RichList*)lParam;
     GXLPCWSTR szName = (GXLPCWSTR)gxSendMessage(hWnd, GXWM_GETIDNAMEW, 0, 0);
 
     if(szName != NULL && szName[0] != '\0') {
@@ -120,12 +120,12 @@ namespace GXUI
     return TRUE;
   }
 
-  GXBOOL GXCALLBACK CustomizeList::EnumAdapterChildProc(GXHWND hWnd, GXLPARAM lParam)
+  GXBOOL GXCALLBACK RichList::EnumAdapterChildProc(GXHWND hWnd, GXLPARAM lParam)
   {
     ItemElementArray* pItemElements = (ItemElementArray*)lParam;
     ITEMELEMENT sElement;
     GXWCHAR szClassName[128];
-    CustomizeList* pThis = (CustomizeList*)lParam;
+    RichList* pThis = (RichList*)lParam;
     gxGetClassName(hWnd, szClassName, sizeof(szClassName) / sizeof(szClassName[0]));
 
     GXLPCWSTR szCtrlName = (GXLPCWSTR)gxSendMessage(hWnd, GXWM_GETIDNAMEW, 0, 0);
@@ -143,7 +143,7 @@ namespace GXUI
     return TRUE;
   }
 
-  GXINT CustomizeList::GetItemHeight(GXINT nIdx) const
+  GXINT RichList::GetItemHeight(GXINT nIdx) const
   {
     //const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
     //if(nItemHeight < 0) {
@@ -154,62 +154,80 @@ namespace GXUI
     //return nItemHeight;
   }
 
-  GXHWND CustomizeList::PlantCustItem(int nIndex, GXLPCRECT lprect)
+  GXHWND RichList::GetItemWnd(int item)
   {
-    GXHWND hWnd = NULL;
-    if(m_aItemStat[nIndex].hItem == NULL)
+    //if(item < (int)m_FirstItem || item > (int)(m_FirstItem + m_ItemHandles.size())) {
+    //  return NULL;
+    //}
+    //return 
+    return m_aItems[item].hItem;
+  }
+
+  GXHWND RichList::CreateItemWnd(int item)
+  {
+    GXHWND hWnd;
+    if(m_HandlesPool.empty())
     {
-      if(m_aWndPool.size() == 0)
-      {
-        m_strTemplate.Find(L':');
-        clStringArrayW aString;
-        ResolveString(m_strTemplate, L':', aString);
-        if(aString.size() != 2) {
-          return NULL;
-        }
-        hWnd = gxIntCreateDialogFromFileW(NULL, aString[0], aString[1], m_hWnd, (GXDLGPROC)CustomWndProc, NULL);
-        gxShowWindow(hWnd, GXSW_SHOW);
+      m_strTemplate.Find(L':');
+      clStringArrayW aString;
+      ResolveString(m_strTemplate, L':', aString);
+      if(aString.size() != 2) {
+        return NULL;
       }
-      else {
-        hWnd = m_aWndPool.back();
-        m_aWndPool.pop_back();
-      }
-      m_aItemStat[nIndex].hItem = hWnd;
-      gxSetWindowPos(hWnd, NULL, lprect->left, lprect->top, lprect->right - lprect->left, lprect->bottom - lprect->top, GXSWP_NOSIZE|GXSWP_SHOWWINDOW|GXSWP_NOACTIVATE);
+      hWnd = gxIntCreateDialogFromFileW(NULL, aString[0], aString[1], m_hWnd, (GXDLGPROC)CustomWndProc, NULL);
+      gxShowWindow(hWnd, GXSW_SHOW);
+    }
+    else {
+      hWnd = m_HandlesPool.front();
+      m_HandlesPool.pop_front();
+    }
+    m_aItems[item].hItem = hWnd;
+    return hWnd;
+  }
+
+  GXHWND RichList::PlantCustItem(int nIndex, GXLPCRECT lprect)
+  {
+    GXHWND hWnd = GetItemWnd(nIndex);
+
+    if(hWnd == NULL) {
+      hWnd = CreateItemWnd(nIndex);
+
+      gxSetWindowPos(hWnd, NULL, lprect->left, lprect->top, 
+        lprect->right - lprect->left, lprect->bottom - lprect->top, 
+        GXSWP_NOSIZE | GXSWP_SHOWWINDOW | GXSWP_NOACTIVATE);
+
       gxSetWindowLong(hWnd, GXGWL_USERDATA, nIndex);
       UpdateCustItemText(nIndex, lprect);
     }
-    else {
-      hWnd = m_aItemStat[nIndex].hItem;
-    }
+
     ASSERT(gxIsWindow(hWnd));
     return hWnd;
   }
 
-  void CustomizeList::Recycle(int nIndex)
+  void RichList::Recycle(int nIndex)
   {
-    ASSERT(m_aItemStat[nIndex].hItem != NULL)
+    ASSERT(m_aItems[nIndex].hItem != NULL)
 
-      // 回收后需要隐藏,因为删除Item并且Items不足一页时会有多余ItemWnd
-    gxShowWindow(m_aItemStat[nIndex].hItem, GXSW_HIDE);
+    // 回收后需要隐藏,因为删除Item并且Items不足一页时会有多余ItemWnd
+    gxShowWindow(m_aItems[nIndex].hItem, GXSW_HIDE);
 
-    m_aWndPool.push_back(m_aItemStat[nIndex].hItem);
-    m_aItemStat[nIndex].hItem = NULL;
+    m_HandlesPool.push_back(m_aItems[nIndex].hItem);
+    m_aItems[nIndex].hItem = NULL;
   }
 
-  int CustomizeList::Recycle(int nBegin, int nDir)
+  int RichList::Recycle(int nBegin, int nDir)
   {
     ASSERT(nDir == -1 || nDir == 1);
     ASSERT(nBegin >= -1);
     int nEnd = -1;
     int nCount = 0;
     if(nDir == 1) {
-      nEnd = (int)m_aItemStat.size();
+      nEnd = (int)m_aItems.size();
     }
 
     while(nBegin != nEnd)
     {
-      if(m_aItemStat[nBegin].hItem != NULL) {
+      if(m_aItems[nBegin].hItem != NULL) {
         Recycle(nBegin);
         nCount++;
       }
@@ -221,10 +239,9 @@ namespace GXUI
     return nCount;
   }
 
-  GXBOOL CustomizeList::UpdateCustItemText(int nIndex, GXLPCRECT rcItem)
+  GXBOOL RichList::UpdateCustItemText(int nIndex, GXLPCRECT rcItem)
   {
-    //clStringW strText;
-    GXHWND hItem = m_aItemStat[nIndex].hItem;
+    GXHWND hItem = GetItemWnd(nIndex);
     ASSERT(hItem != NULL);
     IListDataAdapter::GETSTRW ItemStrDesc;
     for(clStringArrayW::iterator it = m_aElementName.begin();
@@ -249,12 +266,12 @@ namespace GXUI
     return TRUE;
   }
 
-  List::ListType CustomizeList::GetListType()
+  List::ListType RichList::GetListType()
   {
     return LT_Custom;
   }
 
-  GXLRESULT CustomizeList::Measure(GXRegn* pRegn)
+  GXLRESULT RichList::Measure(GXRegn* pRegn)
   {
     if(m_hPrototype == NULL)
     {
@@ -268,7 +285,7 @@ namespace GXUI
     return 0;
   }
 
-  int CustomizeList::OnCreate(GXCREATESTRUCT* pCreateParam)
+  int RichList::OnCreate(GXCREATESTRUCT* pCreateParam)
   {
     int result = List::OnCreate(pCreateParam);
     if(result < 0) {
@@ -277,22 +294,22 @@ namespace GXUI
     return 0;
   }
 
-  GXINT CustomizeList::HitTest(int fwKeys, int x, int y) const
+  GXINT RichList::HitTest(int fwKeys, int x, int y) const
   {
-    if(m_aItemStat.empty()) {
+    if(m_aItems.empty()) {
       return -1;
     }
 
     GXRECT rcItem;
     GXPOINT pt = {x, y};
     const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
-    ItemStatArray::const_iterator it = m_aItemStat.begin() + m_nTopIndex;
+    ItemStatusArray::const_iterator it = m_aItems.begin() + m_nTopIndex;
 
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
     {
-      for(; it < m_aItemStat.end(); ++it)
+      for(; it < m_aItems.end(); ++it)
       {
-        int nItem = it - m_aItemStat.begin();
+        int nItem = it - m_aItems.begin();
         GetItemRect(nItem, dwStyle, &rcItem);
         if(gxPtInRect(&rcItem, pt)) {
           return nItem;
@@ -311,9 +328,9 @@ namespace GXUI
 
       STATIC_ASSERT(sizeof(rcClient.bottom) == sizeof(GXLONG)); // 保证GXRECT与GXLONG类型长度一致
 
-      for(; it < m_aItemStat.end(); ++it)
+      for(; it < m_aItems.end(); ++it)
       {
-        int nItem = it - m_aItemStat.begin();
+        int nItem = it - m_aItems.begin();
         GetItemRect(nItem, dwStyle, &rcItem);
         ((GXLONG*)&rcItem)[nExtEdge] = ((GXLONG*)&rcClient)[nExtEdge];
         if(gxPtInRect(&rcItem, pt)) {
@@ -325,19 +342,13 @@ namespace GXUI
     return -1;
   }
 
-
-  int CustomizeList::OnLButtonDown(int fwKeys, int x, int y)
-  {
-    return ListTemplate<CUSTOMIZEITEMSTAT>::OnLButtonDown(fwKeys, x, y);
-  }
-
-  GXLRESULT CustomizeList::OnPaint(GXWndCanvas& canvas)
+  GXLRESULT RichList::OnPaint(GXWndCanvas& canvas)
   {
     GXRECT rect;
     gxGetClientRect(m_hWnd, &rect);
 
     // 如果没有条目, 填充背景区域
-    if(m_aItemStat.size() == 0) {
+    if(m_aItems.size() == 0) {
       canvas.FillRect(rect.left, rect.top, rect.right, rect.bottom, 0xffffffff);
       return 0;
     }
@@ -392,12 +403,12 @@ namespace GXUI
         nPassPos = m_nScrolled + m_nTopIndex * TemplProtoWidth;
       }
       else {
-        nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
+        nPassPos = m_nScrolled + m_aItems[m_nTopIndex].nBottom - nHeight;
       }
     }
     else {
       ASSERT(0); // FIXME: 起始(与 nHeight 相关)位置计算不对, 要修正
-      nPassPos = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom - nHeight;
+      nPassPos = m_nScrolled + m_aItems[m_nTopIndex].nBottom - nHeight;
     }
 
 
@@ -408,7 +419,7 @@ namespace GXUI
     for(; i < nCount; i++)
     {
       //GXINT nStrLen = m_pAdapter->GetStringW(i, NULL, strItem);
-      CUSTOMIZEITEMSTAT& ItemStat = m_aItemStat[i];
+      ITEMSTATUS& ItemStat = m_aItems[i];
       GXColor32 crText = 0xff000000;  // TODO: 用系统设置代替
       if(ItemStat.bSelected) {        // 绘制选择项目的底色
         crText = 0xffffffff;
@@ -527,13 +538,13 @@ namespace GXUI
     }
     //////////////////////////////////////////////////////////////////////////
     if(m_bShowScrollBar) {
-      DrawScrollBar(canvas, &rect, m_aItemStat.back().nBottom, m_aItemStat.size(), dwStyle);
+      DrawScrollBar(canvas, &rect, m_aItems.back().nBottom, m_aItems.size(), dwStyle);
     }
     Recycle(i, 1);
     return 0;
   }
 
-  int CustomizeList::OnSize(int cx, int cy)
+  int RichList::OnSize(int cx, int cy)
   {
     const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     GXINT nPrevColumn = m_nColumnCount;
@@ -572,10 +583,10 @@ namespace GXUI
   }
 
   //GXHRESULT CustomizeList::OnKnock(KNOCKACTION* pAction)
-  GXVOID CustomizeList::OnImpulse(LPCDATAIMPULSE pImpulse)
+  GXVOID RichList::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
     CLBREAK;
-    ListTemplate<CUSTOMIZEITEMSTAT>::OnImpulse(pImpulse);
+    List::OnImpulse(pImpulse);
     //if(hval == 0)
     {
       if(pImpulse->reason == Marimo::DATACT_Deleting)
@@ -589,19 +600,19 @@ namespace GXUI
     //return hval;
   }
 
-  GXBOOL CustomizeList::ReduceItemStat(GXINT nCount)
+  GXBOOL RichList::ReduceItemStat(GXINT nCount)
   {
     Recycle(nCount, 1);
-    m_aItemStat.erase(m_aItemStat.begin() + nCount, m_aItemStat.end());
+    m_aItems.erase(m_aItems.begin() + nCount, m_aItems.end());
     return TRUE;
   }
 
-  GXINT CustomizeList::VirGetItemHeight(GXINT nIdx) const
+  GXINT RichList::VirGetItemHeight(GXINT nIdx) const
   {
     return GetItemHeight(nIdx);
   }
 
-  GXBOOL CustomizeList::GetItemRect(int nItem, GXDWORD dwStyle, GXLPRECT lprc) const
+  GXBOOL RichList::GetItemRect(int nItem, GXDWORD dwStyle, GXLPRECT lprc) const
   {
     GXRECT rcItem;
     gxGetWindowRect(m_hPrototype, &rcItem);
@@ -621,21 +632,21 @@ namespace GXUI
     return TRUE;
   }
 
-  CustomizeList::CustomizeList(GXLPCWSTR szIdName)
-    : ListTemplate  (szIdName)
-    , m_hPrototype  (NULL)
+  RichList::RichList(GXLPCWSTR szIdName)
+    : List         (szIdName)
+    , m_hPrototype (NULL)
   {
   }
 
-  void CustomizeList::DeleteItemStat( GXINT nIndex )
+  void RichList::DeleteItemStat( GXINT nIndex )
   {
-    if(m_aItemStat[nIndex].hItem != NULL) {
+    if(GetItemWnd(nIndex) != NULL) {
       Recycle(nIndex);
     }
-    ListTemplate<CUSTOMIZEITEMSTAT>::DeleteItemStat(nIndex);
+    List::DeleteItemStat(nIndex);
   }
 
-  GXLRESULT CustomizeList::SetItemTemplate( GXLPCWSTR szTemplate )
+  GXLRESULT RichList::SetItemTemplate( GXLPCWSTR szTemplate )
   {
     GXLRESULT result = 0;
     m_strTemplate = szTemplate;
@@ -682,7 +693,7 @@ namespace GXUI
     return result;
   }
 
-  GXLRESULT CustomizeList::SetupAdapter()
+  GXLRESULT RichList::SetupAdapter()
   {
     m_aElementName.clear();
     ItemElementArray aItemElements;
@@ -712,7 +723,7 @@ namespace GXUI
     return GX_OK;
   }
 
-  GXLRESULT CustomizeList::SetVariable( MOVariable* pVariable )
+  GXLRESULT RichList::SetVariable( MOVariable* pVariable )
   {
     if(pVariable && pVariable->IsValid()) {
       m_VarList = *pVariable;

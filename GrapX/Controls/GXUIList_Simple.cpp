@@ -25,7 +25,7 @@ namespace GXUI
 
   //////////////////////////////////////////////////////////////////////////
   SimpleList::SimpleList(GXLPCWSTR szIdName)
-    : ListTemplate    (szIdName)
+    : List(szIdName)
   {
   }
 
@@ -52,15 +52,15 @@ namespace GXUI
 
   GXINT SimpleList::HitTest(int fwKeys, int x, int y) const
   {
-    if(m_aItemStat.empty()) {
+    if(m_aItems.empty()) {
       return -1;
     }
 
-    ItemStatArray::const_iterator it = m_aItemStat.begin() + m_nTopIndex;
+    ItemStatusArray::const_iterator it = m_aItems.begin() + m_nTopIndex;
     ASSERT(it->nBottom > -m_nScrolled);
     GXINT nItem = m_nTopIndex;
     y -= m_nScrolled;
-    for(; it != m_aItemStat.end(); ++it, ++nItem)
+    for(; it != m_aItems.end(); ++it, ++nItem)
     {
       if(y < it->nBottom) {
         return nItem;
@@ -89,7 +89,7 @@ namespace GXUI
     // 如果背景透明度小于0.5，则启用高对比方案
     GXBOOL bContrast = (m_crBackground >> 24) < 0x80;
 
-    if(m_aItemStat.size() == 0) {
+    if(m_aItems.empty()) {
       return 0;
     }
 
@@ -99,13 +99,13 @@ namespace GXUI
     //if(bFixedHeight) {
     //  nHeight = GetItemHeight(0);
     //}
-    if(nCount > (GXINT)m_aItemStat.size())
+    if(nCount > (GXINT)m_aItems.size())
     {
       return 0;
     }
-    //GXINT nItemTop = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom/* - nHeight*/;
-    GXINT nItemTop    = m_nScrolled + (m_nTopIndex == 0 ? 0 : m_aItemStat[m_nTopIndex - 1].nBottom);
-    GXINT nItemBottom;// = m_nScrolled + m_aItemStat[m_nTopIndex].nBottom;
+    //GXINT nItemTop = m_nScrolled + m_aItems[m_nTopIndex].nBottom/* - nHeight*/;
+    GXINT nItemTop    = m_nScrolled + (m_nTopIndex == 0 ? 0 : m_aItems[m_nTopIndex - 1].nBottom);
+    GXINT nItemBottom;// = m_nScrolled + m_aItems[m_nTopIndex].nBottom;
 
     //clStringW strItem;
     //GXRECT  rcItem;
@@ -119,10 +119,10 @@ namespace GXUI
       ItemStrDesc.name = NULL;
       ItemStrDesc.element = 0;
 
-      const ITEMSTAT& ItemStat = m_aItemStat[i];
+      const ITEMSTATUS& ItemStatus = m_aItems[i];
       GXColor32 crText = m_crText;
 
-      nItemBottom = m_nScrolled + ItemStat.nBottom;
+      nItemBottom = m_nScrolled + ItemStatus.nBottom;
 
       //if( ! bFixedHeight) {
       //  nHeight = GetItemHeight(i);
@@ -139,12 +139,12 @@ namespace GXUI
           if(gxGetWindowLong(m_hWnd, GXGWL_STYLE) & GXLBS_MULTIPLESEL) {
             dwState = GXDFCS_BUTTONCHECK;
           }
-          if(ItemStat.bSelected) {
+          if(ItemStatus.bSelected) {
             dwState |= GXDFCS_CHECKED;
           }
           canvas.DrawFrameControl(&rcBtnBox, GXDFC_BUTTON, dwState);
         }
-        else if(ItemStat.bSelected) {  // 绘制选择项目的底色
+        else if(ItemStatus.bSelected) {  // 绘制选择项目的底色
           crText = m_crHightlightText;
           canvas.FillRect(rcItem.left, rcItem.top, rcItem.right - rcItem.left, rcItem.bottom - rcItem.top, m_crHightlight);
         }
@@ -172,7 +172,7 @@ namespace GXUI
     }
 
     if(m_bShowScrollBar) {
-      DrawScrollBar(canvas, &rect, m_aItemStat.back().nBottom, m_aItemStat.size(), dwStyle);
+      DrawScrollBar(canvas, &rect, m_aItems.back().nBottom, m_aItems.size(), dwStyle);
     }
 
     return 0;
@@ -310,22 +310,17 @@ LAST_STR:
     return i;
   }
 
-  int SimpleList::OnLButtonDown( int fwKeys, int x, int y )
-  {
-    return ListTemplate<ITEMSTAT>::OnLButtonDown(fwKeys, x, y);
-  }
-
   GXBOOL SimpleList::GetItemRect( int nItem, GXDWORD dwStyle, GXLPRECT lprc ) const
   {
     CLBREAK; // 没测试过
     ASSERT(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)); // 暂不支持多列
     if(nItem > 0) {
-      lprc->top = m_aItemStat[nItem - 1].nBottom + m_nScrolled;
+      lprc->top = m_aItems[nItem - 1].nBottom + m_nScrolled;
     }
     else {
       lprc->top = m_nScrolled;
     }
-    lprc->bottom = m_aItemStat[nItem].nBottom + m_nScrolled;
+    lprc->bottom = m_aItems[nItem].nBottom + m_nScrolled;
     lprc->left= 0;
     lprc->right = m_nColumnWidth;
     return TRUE;

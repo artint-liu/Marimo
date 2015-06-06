@@ -33,16 +33,19 @@ namespace GXUI
   
   //typedef clvector<CUSTOMIZEITEMSTAT>  CustItemStatArray;
 
-  class CustomizeList : public ListTemplate<CUSTOMIZEITEMSTAT>
+  class RichList : public List
   {
   public:
     typedef clvector<GXHWND>        GXHWndArray;
+    typedef cllist<GXHWND>          WndHandleList;
     //typedef clvector<ITEMELEMENT>   ItemElementArray;
   private:
     clStringW         m_strTemplate;
     GXHWND            m_hPrototype;
     clStringArrayW    m_aElementName;   // Item 中的控件名
-    GXHWndArray       m_aWndPool;
+    WndHandleList     m_HandlesPool;    // Windows 句柄池
+    //GXSIZE_T          m_FirstItem;      // m_ItemHandles第一个对应的item索引
+    //WndHandleList     m_ItemHandles;
     MOVariable        m_VarList;
   private:
     static GXLRESULT GXCALLBACK CustomWndProc         (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
@@ -50,8 +53,9 @@ namespace GXUI
     static GXBOOL    GXCALLBACK EnumAdapterChildProc  (GXHWND hWnd, GXLPARAM lParam);
 
   private:
-    GXLRESULT SetupAdapter();
-
+    GXLRESULT SetupAdapter  ();
+    GXHWND    GetItemWnd    (int item);
+    GXHWND    CreateItemWnd (int item);
   public:
     GXINT     GetItemHeight       (GXINT nIdx) const;
     GXHWND    PlantCustItem       (int nIndex, GXLPCRECT lprect);
@@ -64,7 +68,6 @@ namespace GXUI
     virtual GXLRESULT Measure             (GXRegn* pRegn);
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
     virtual GXLRESULT SetVariable         (MOVariable* pVariable);
-    virtual int       OnLButtonDown       (int fwKeys, int x, int y);
     virtual GXINT     HitTest             (int fwKeys, int x, int y) const;
     virtual GXLRESULT OnPaint             (GXWndCanvas& canvas);
     virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
@@ -76,7 +79,7 @@ namespace GXUI
     virtual GXBOOL    GetItemRect(int nItem, GXDWORD dwStyle, GXLPRECT lprc) const;
 
   public:
-    CustomizeList(GXLPCWSTR szIdName);
+    RichList(GXLPCWSTR szIdName);
   };
 } // namespace GXUI
 #endif // _GXUI_LIST_CUSTOM_H_
