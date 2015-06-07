@@ -79,12 +79,13 @@ namespace GXUI
     virtual int       OnSize              (int cx, int cy) GXPURE;
     virtual int       OnTimer             (GXUINT nIDTimer);
     virtual GXVOID    OnImpulse           (LPCDATAIMPULSE pImpulse);
-    virtual GXINT     GetCurSel           ();
+    virtual GXINT     GetCurSel           () const;
     virtual int       SetCurSel           (int nIndex);
+    virtual GXBOOL    IsSelected          (GXSIZE_T index) const;
     virtual GXBOOL    SetAdapter          (IListDataAdapter* pAdapter);
     virtual GXBOOL    GetAdapter          (IListDataAdapter** ppAdapter);
     virtual void      SetScrolledVal      (GXINT nScrolled);
-    virtual GXINT     VirGetItemHeight    (GXINT nIdx) const GXPURE;
+    virtual GXINT     GetItemHeight       (GXINT nIdx) const;
     virtual GXBOOL    EndScroll           ();
     virtual GXBOOL    GetItemRect         (int nItem, GXDWORD dwStyle, GXLPRECT lprc) const GXPURE;
     virtual GXINT     HitTest             (int fwKeys, int x, int y) const GXPURE;
@@ -93,10 +94,12 @@ namespace GXUI
   protected:
     void        DrawScrollBar       (GXWndCanvas& canvas, LPGXCRECT lprcClient, GXINT nLastBottom, GXSIZE_T count, GXDWORD dwStyle ) const;
     GXBOOL      SelectItem          (GXINT nItem, GXBOOL bSelected, GXBOOL bNotify);
-    GXBOOL      UpdateItemStat      (GXINT nBegin, GXINT nEnd);
-    GXBOOL      SyncItemStatCount   ();
-    void        DeleteItemStat      (GXINT nIndex);
-    GXBOOL      ReduceItemStat      (GXINT nCount);
+    //GXBOOL      UpdateItemStatus    (GXSIZE_T nBegin, GXSIZE_T nEnd);
+    //GXBOOL      SyncItemStatCount   ();
+    GXBOOL      OnSyncInsert        (GXSIZE_T begin, GXSIZE_T count);
+    GXBOOL      OnSyncRemove        (GXSIZE_T begin, GXSIZE_T count);
+    //void        DeleteItemStat      (GXINT nIndex);
+    //GXBOOL      ReduceItemStat      (GXINT nCount);
     GXBOOL      UpdateTopIndex      (GXDWORD dwStyle);
     GXBOOL      UpdateTopIndex      ();
     GXINT       AddStringW          (GXLPCWSTR lpString);

@@ -82,10 +82,36 @@ GXHRESULT MOUIStaff::Execute(int nCmdIndex, const clStringW* argv, int argc)
 
   case CMD_DictList:
     if(argv[1] == "SelChange") {
-      TRACE("SelChange %d\n", argv[2].ToInteger());
+      int index = argv[2].ToInteger();
+      int selected = argv[3].ToInteger();
+      TRACE("SelChange %d %d\n", index, selected);
+
+      if(selected) {
+        m_WordSel.insert(index);
+      }
+      else {
+        m_WordSel.erase(index);
+      }
     }
     else if(argv[1] == "SelCancel") {
       TRACE("SelCancel %d\n", argv[2].ToInteger());
+    }
+    break;
+
+  case CMD_WordSelect:
+    {
+      MOVariable varList1;
+      MOVariable varList2;
+      m_pMyApp->m_pBasicDataPool->QueryByExpression("List1", &varList1);
+      m_pMyApp->m_pBasicDataPool->QueryByExpression("List2", &varList2);
+
+      // 这个要倒过来遍历，否则删除前面的后面会错位
+      for(auto it = m_WordSel.rbegin(); it != m_WordSel.rend(); ++it)
+      {
+        varList2.NewBack().Set(varList1[*it]);
+        varList1.Remove(*it);
+      }
+      m_WordSel.clear();
     }
     break;
   }

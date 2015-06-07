@@ -385,6 +385,9 @@ namespace GXUI
       }
       break;
 
+    case GXLB_GETSEL:
+      return (GXLRESULT)pThis->IsSelected((GXSIZE_T)wParam);
+
     case GXLB_GETCURSEL:
       return (GXLRESULT)pThis->GetCurSel();
 
@@ -714,7 +717,7 @@ namespace GXUI
     }
     else
     {
-      nItemSize = VirGetItemHeight(0);
+      nItemSize = GetItemHeight(0);
       nClientSize = rect.bottom;
     }
 
@@ -754,62 +757,66 @@ namespace GXUI
   {
     MOVariable varArray = m_pAdapter->GetVariable();
     //ASSERT(varArray.IsSamePool(pImpulse->pDataPool));
-    CLBREAK;
+    //CLBREAK;
 
     if(pImpulse->reason == Marimo::DATACT_Change)
     {
       CLBREAK;
-      const GXINT index = pImpulse->index;
+      ASSERT(m_pAdapter->GetCount() == m_aItems.size());
+      //const GXINT index = pImpulse->index;
       //(GXINT)((GXINT_PTR)pImpulse->ptr - (GXINT_PTR)varArray.GetPtr()) / (varArray.GetSize()/varArray.GetLength());
-      ASSERT(index >= 0);
-      UpdateItemStat(index, index);
+      //ASSERT(index >= 0);
+      //UpdateItemStatus(index, index);
     }
     else if(pImpulse->reason == Marimo::DATACT_Insert)
     {
+      OnSyncInsert(pImpulse->index, pImpulse->count);
+      ASSERT(m_pAdapter->GetCount() == m_aItems.size());
       //ASSERT(pAction->idx < m_pAdapter->GetCount());
-      SyncItemStatCount();
+      //SyncItemStatCount();
 
-      //CLBREAK; // 重新搞定!
-      // 判断是否在中间插入
-      if(pImpulse->index != m_pAdapter->GetCount() - 1)
-      {
-        UpdateItemStat(pImpulse->index, -1);
-      }
+      ////CLBREAK; // 重新搞定!
+      //// 判断是否在中间插入
+      //if(pImpulse->index != m_pAdapter->GetCount() - 1)
+      //{
+      //  UpdateItemStatus(pImpulse->index, -1);
+      //}
       //UpdateItemStat(0, -1);
     }
     else if(pImpulse->reason == Marimo::DATACT_Deleting)
     {
-      auto index = pImpulse->index;
-      ASSERT(index >= -1); // -1时删除所有Item
-      ASSERT(m_pAdapter->GetCount() == m_aItems.size());
-      if(index == -1) {
-        // 删除所有
-        m_aItems.clear();
-      }
-      else {
-        ASSERT(index >= 0);
-        DeleteItemStat(index);
-      }
-      ASSERT(m_pAdapter->GetCount() > (GXINT)m_aItems.size());
+      //auto index = pImpulse->index;
+      //ASSERT(index >= -1); // -1时删除所有Item
+      //ASSERT(m_pAdapter->GetCount() == m_aItems.size());
+      //if(index == -1) {
+      //  // 删除所有
+      //  m_aItems.clear();
+      //}
+      //else {
+      //  ASSERT(index >= 0);
+      //  DeleteItemStat(index);
+      //}
+      //ASSERT(m_pAdapter->GetCount() > (GXINT)m_aItems.size());
+      //OnSyncRemove(pImpulse->index, pImpulse->count);
     }
     else if(pImpulse->reason == Marimo::DATACT_Deleted)
     {
-      auto index = pImpulse->index;
-      ASSERT(m_pAdapter->GetCount() == m_aItems.size());
-      ASSERT(index >= -1); // -1时删除所有Item
-      if(index >= 0)
-      {
-        UpdateItemStat(index, -1);
-      }
+      //auto index = pImpulse->index;
+      //ASSERT(m_pAdapter->GetCount() == m_aItems.size());
+      //ASSERT(index >= -1); // -1时删除所有Item
+      //if(index >= 0)
+      //{
+      //  UpdateItemStatus(index, -1);
+      //}
+      OnSyncRemove(pImpulse->index, pImpulse->count);
       ASSERT(m_pAdapter->GetCount() == m_aItems.size());
     }
     else
     {
-      ASSERT(0);
+      CLBREAK;
     }
 
     Invalidate(FALSE);
-    //return 0;
   }
 
   int List::SetCurSel(int nIndex)
@@ -852,7 +859,11 @@ namespace GXUI
     if(m_pAdapter) {
       m_pAdapter->AddRef();
 
-      SyncItemStatCount();
+      //SyncItemStatCount();
+      m_aItems.clear();
+      if(m_pAdapter->GetCount()) {
+        OnSyncInsert(0, m_pAdapter->GetCount());
+      }
 
       // 适配器改变通知
       GXNMLISTADAPTER sCreateAdapter;
@@ -874,7 +885,7 @@ namespace GXUI
       InvalidateRect(NULL, FALSE);
     }
     else {
-      SyncItemStatCount();
+      m_aItems.clear();
     }
     return TRUE;
   }
@@ -888,44 +899,44 @@ namespace GXUI
     return TRUE;
   }
 
-  GXBOOL List::ReduceItemStat(GXINT nCount)
-  {
-    m_aItems.erase(m_aItems.begin() + nCount, m_aItems.end());
-    return TRUE;
-  }
+  //GXBOOL List::ReduceItemStat(GXINT nCount)
+  //{
+  //  m_aItems.erase(m_aItems.begin() + nCount, m_aItems.end());
+  //  return TRUE;
+  //}
 
-  void List::DeleteItemStat(GXINT nIndex)
-  {
-    m_aItems.erase(m_aItems.begin() + nIndex);
-  }
+  //void List::DeleteItemStat(GXINT nIndex)
+  //{
+  //  m_aItems.erase(m_aItems.begin() + nIndex);
+  //}
 
-  GXBOOL List::SyncItemStatCount()
-  {
-    const GXUINT nItemCount = (GXUINT)m_aItems.size();
-    const GXUINT nAdapterCount = m_pAdapter ? m_pAdapter->GetCount() : 0;
-    if(nAdapterCount == 0) {
-      m_aItems.clear();
-      return TRUE;
-    }
+  //GXBOOL List::SyncItemStatCount()
+  //{
+  //  const GXUINT nItemCount = (GXUINT)m_aItems.size();
+  //  const GXUINT nAdapterCount = m_pAdapter ? m_pAdapter->GetCount() : 0;
+  //  if(nAdapterCount == 0) {
+  //    m_aItems.clear();
+  //    return TRUE;
+  //  }
 
-    if(nItemCount < nAdapterCount)
-    {
-      ITEMSTATUS sis;
-      for(GXUINT i = nItemCount; i < nAdapterCount; i++) {
-        m_aItems.push_back(sis);
-      }
-      return UpdateItemStat(nItemCount, nAdapterCount - 1);
-    }
-    else if(nItemCount > nAdapterCount)
-    {
-      //m_aItems.erase(m_aItems.begin() + nAdapterCount, m_aItems.end());
-      //return TRUE;
-      return ReduceItemStat(nAdapterCount);
-    }
-    return TRUE;
-  }
+  //  if(nItemCount < nAdapterCount)
+  //  {
+  //    ITEMSTATUS sis;
+  //    for(GXUINT i = nItemCount; i < nAdapterCount; i++) {
+  //      m_aItems.push_back(sis);
+  //    }
+  //    return UpdateItemStatus(nItemCount, nAdapterCount - 1);
+  //  }
+  //  else if(nItemCount > nAdapterCount)
+  //  {
+  //    //m_aItems.erase(m_aItems.begin() + nAdapterCount, m_aItems.end());
+  //    //return TRUE;
+  //    return ReduceItemStat(nAdapterCount);
+  //  }
+  //  return TRUE;
+  //}
 
-  GXINT List::GetCurSel()
+  GXINT List::GetCurSel() const
   {
     if(m_nLastSelected >= 0 && m_nLastSelected < (int)m_aItems.size())
     {
@@ -979,7 +990,7 @@ namespace GXUI
 
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)/* || m_pAdapter->IsFixedHeight()*/)
     {
-      m_nTopIndex = nScrolled / VirGetItemHeight(0) * m_nColumnCount;
+      m_nTopIndex = nScrolled / GetItemHeight(0) * m_nColumnCount;
       clClamp((GXSIZE_T)0, m_pAdapter->GetCount(), &m_nTopIndex);
       return TRUE;
     }
@@ -1005,68 +1016,129 @@ namespace GXUI
     return UpdateTopIndex(dwStyle);
   }
 
-  GXBOOL List::UpdateItemStat(GXINT nBegin, GXINT nEnd)
+  //GXBOOL List::UpdateItemStatus(GXSIZE_T nBegin, GXSIZE_T nEnd)
+  //{
+  //  ASSERT(m_pAdapter->GetCount() == m_aItems.size());
+  //  const GXSIZE_T nItemCount = m_pAdapter->GetCount();
+
+  //  nBegin = clMax(nBegin, (GXSIZE_T)0);
+  //  ASSERT(nBegin < nItemCount);
+
+  //  if(nEnd < 0) {
+  //    nEnd = nItemCount - 1;
+  //  }
+  //  ASSERT(nEnd < nItemCount);
+
+  //  // 上一项的Bottom
+  //  GXINT nPrevBottom = nBegin == 0 ? 0 : m_aItems[nBegin - 1].nBottom;
+  //  //const GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
+  //  //const GXINT nItemHeight = bFixedHeight ? VirGetItemHeight(0) : -1;
+  //  const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+  //  if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
+  //  {
+  //    int nVirHeightMax = 0;
+  //    for(GXSIZE_T i = nBegin; i <= nEnd; i++)
+  //    {
+  //      ITEMSTATUS& sis = m_aItems[i];
+  //      const int nEndOfRow = (i + 1) % m_nColumnCount;
+
+  //      /*if(bFixedHeight) {
+  //      sis.nBottom = nPrevBottom + nItemHeight;
+
+  //      if(nEndOfRow == 0) {
+  //      nPrevBottom = sis.nBottom;
+  //      }
+  //      }
+  //      else */{
+  //        const GXINT nVirHeight = GetItemHeight(i);
+  //        sis.nBottom = nPrevBottom + nVirHeight;
+  //        nVirHeightMax = clMax(nVirHeight, nVirHeightMax);
+
+  //        if(nVirHeightMax == 0) {
+  //          nPrevBottom += nVirHeightMax;
+  //          nVirHeightMax = 0;
+  //        }
+  //      }
+
+  //      sis.bValidate = TRUE;
+  //    }
+  //  }
+  //  else
+  //  {
+  //    for(GXSIZE_T i = nBegin; i <= nEnd; i++)
+  //    {
+  //      ITEMSTATUS& sis = m_aItems[i];
+  //      /*if(bFixedHeight) {
+  //      sis.nBottom = nPrevBottom + nItemHeight;
+  //      }
+  //      else */{
+  //        sis.nBottom = nPrevBottom + GetItemHeight(i);
+  //      }
+
+  //      sis.bValidate = TRUE;
+  //      nPrevBottom = sis.nBottom;
+  //    }
+  //  }
+  //  return TRUE;
+  //}
+
+  GXBOOL List::IsSelected( GXSIZE_T index ) const
   {
-    ASSERT(m_pAdapter->GetCount() == m_aItems.size());
-    const GXINT nItemCount = m_pAdapter->GetCount();
-
-    nBegin = clMax(nBegin, 0);
-    ASSERT(nBegin < nItemCount);
-
-    if(nEnd < 0) {
-      nEnd = nItemCount - 1;
+    if(index >= m_aItems.size()) {
+      return FALSE;
     }
-    ASSERT(nEnd < nItemCount);
+    return m_aItems[index].bSelected;
+  }
 
-    // 上一项的Bottom
-    GXINT nPrevBottom = nBegin == 0 ? 0 : m_aItems[nBegin - 1].nBottom;
-    //const GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
-    //const GXINT nItemHeight = bFixedHeight ? VirGetItemHeight(0) : -1;
+  GXINT List::GetItemHeight( GXINT nIdx ) const
+  {
+    return m_nItemHeight;
+  }
+
+  GXBOOL List::OnSyncInsert( GXSIZE_T begin, GXSIZE_T count )
+  {
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
-    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
+    ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN));
+    ASSERT(m_pAdapter->GetCount() == m_aItems.size() + count);
+    ITEMSTATUS sItem;
+    auto n = begin == 0 ? 0 : m_aItems[begin - 1].nBottom;
+    
+    m_aItems.insert(m_aItems.begin() + begin, count, sItem);
+    auto it = m_aItems.begin() + begin;
+    //auto itEnd = (begin + count) == m_aItems.size() ? m_aItems.end() : (m_aItems.begin() + begin + count);
+    auto itEnd = (m_aItems.begin() + begin + count);
+
+    // 设置新增Item的bottom值
+    for(; it != itEnd; ++it)
     {
-      int nVirHeightMax = 0;
-      for(GXINT i = nBegin; i <= nEnd; i++)
-      {
-        ITEMSTATUS& sis = m_aItems[i];
-        const int nEndOfRow = (i + 1) % m_nColumnCount;
-
-        /*if(bFixedHeight) {
-        sis.nBottom = nPrevBottom + nItemHeight;
-
-        if(nEndOfRow == 0) {
-        nPrevBottom = sis.nBottom;
-        }
-        }
-        else */{
-          const GXINT nVirHeight = VirGetItemHeight(i);
-          sis.nBottom = nPrevBottom + nVirHeight;
-          nVirHeightMax = clMax(nVirHeight, nVirHeightMax);
-
-          if(nVirHeightMax == 0) {
-            nPrevBottom += nVirHeightMax;
-            nVirHeightMax = 0;
-          }
-        }
-
-        sis.bValidate = TRUE;
-      }
+      ASSERT(it->nBottom == -1);
+      it->nBottom = n + m_nItemHeight;
+      n = it->nBottom;
     }
-    else
-    {
-      for(GXINT i = nBegin; i <= nEnd; i++)
-      {
-        ITEMSTATUS& sis = m_aItems[i];
-        /*if(bFixedHeight) {
-        sis.nBottom = nPrevBottom + nItemHeight;
-        }
-        else */{
-          sis.nBottom = nPrevBottom + VirGetItemHeight(i);
-        }
 
-        sis.bValidate = TRUE;
-        nPrevBottom = sis.nBottom;
-      }
+    itEnd = m_aItems.end();
+    n = m_nItemHeight * count;
+
+    // 调整插入点之后的Item的bottom值
+    for(; it != itEnd; ++it) {
+      it->nBottom += n;
+    }
+    return TRUE;
+  }
+
+  GXBOOL List::OnSyncRemove( GXSIZE_T begin, GXSIZE_T count )
+  {
+    const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN));
+    ASSERT(m_pAdapter->GetCount() + count == m_aItems.size());
+    auto n = m_aItems[begin + count - 1].nBottom - (begin == 0 ? 0 : m_aItems[begin - 1].nBottom);
+
+    auto it = m_aItems.begin() + begin;
+    m_aItems.erase(it, it + count);
+
+    it = m_aItems.begin() + begin;
+    for(; it != m_aItems.end(); ++it) {
+      it->nBottom -= n;
     }
     return TRUE;
   }

@@ -77,9 +77,9 @@ HRESULT SampleApp_MOUI::OnCreate()
   m_pDlgBasic->CreateDlg();
   m_pDlgBasic->Show(TRUE);
 
-  //m_pDlgList = new CUniversalDialog(L"Test/UI/DlgList.txt", NULL);
-  //m_pDlgList->CreateDlg();
-  //m_pDlgList->Show(TRUE);
+  m_pDlgList = new CUniversalDialog(L"Test/UI/DlgList.txt", NULL);
+  m_pDlgList->CreateDlg();
+  m_pDlgList->Show(TRUE);
 
   m_pDlgRichList = new CUniversalDialog(L"Test/UI/DlgRichList.txt", NULL);
   m_pDlgRichList->CreateDlg();

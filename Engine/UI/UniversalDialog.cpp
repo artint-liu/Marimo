@@ -20,7 +20,8 @@ GXVOID CUniversalDialog::OnBtnClicked(CMOButton* pSender)
 
 GXVOID CUniversalDialog::OnListBoxSelChange( CMOListBox* pSender )
 {
-  IntExecuteVar(pSender, L"SelChange %d", pSender->GetCurSel());
+  auto index = pSender->GetCurSel();
+  IntExecuteVar(pSender, L"SelChange %d %d", index, pSender->IsSelected(index));
 }
 
 GXVOID CUniversalDialog::OnListBoxSelCancel( CMOListBox* pSender )

@@ -17,6 +17,7 @@ float fHalfScaling;
 float fInvScaling;
 string button[];
 string List1[];
+string List2[];
 string strSpriteFile;
 SPRITEINFO SpriteInfo;
 COMBO combo[];

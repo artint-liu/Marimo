@@ -117,12 +117,12 @@ void CMOListBox::ResetContent()
   gxSendMessage(m_hWnd, GXLB_RESETCONTENT, NULL, NULL);
 }
 
-GXINT CMOListBox::GetCount()
+GXINT CMOListBox::GetCount() const
 {
   return gxSendMessage(m_hWnd, GXLB_GETCOUNT, NULL, NULL);
 }
 
-GXINT CMOListBox::GetCurSel()
+GXINT CMOListBox::GetCurSel() const
 {
   return gxSendMessage(m_hWnd, GXLB_GETCURSEL, NULL, NULL);
 }
@@ -224,6 +224,12 @@ GXUINT CMOListBox::GetColumnsWidth( GXUINT* pColumns, GXUINT nCount )
 {
   return (GXUINT)gxSendMessage(m_hWnd, GXLB_GETCOLUMNSWIDTH, (GXWPARAM)nCount, (GXLPARAM)pColumns);
 }
+
+GXBOOL CMOListBox::IsSelected( GXSIZE_T index ) const
+{
+  return (GXBOOL)gxSendMessage(m_hWnd, GXLB_GETSEL, (GXWPARAM)index, 0);
+}
+
 #ifdef REFACTOR_GXFC
 //////////////////////////////////////////////////////////////////////////
 

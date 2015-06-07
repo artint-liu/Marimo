@@ -28,7 +28,7 @@ namespace GXUI
     GXINT     AddStringW          (GXLPCWSTR lpString);
     GXBOOL    CheckEndScrollAnim  (GXUINT nIDTimer, bool bForced);
     GXINT     HitTest             (int fwKeys, int x, int y) const;
-    GXINT     GetItemHeight       (GXINT nIdx) const;
+    //GXINT     GetItemHeight       (GXINT nIdx) const;
     GXBOOL    IsItemSelected      (GXINT nItem) const;
     GXBOOL    SelectItem          (GXINT nItem, GXBOOL bSelected);
     GXINT     DrawTextWithColumnsW(GXWndCanvas& canvas, GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,
@@ -41,7 +41,7 @@ namespace GXUI
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
     virtual GXLRESULT SetVariable         (MOVariable* pVariable);
     virtual ListType  GetListType         ();
-    virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
+    //virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
     virtual int       OnSize              (int cx, int cy);
     //virtual int       OnLButtonDown       (int fwKeys, int x, int y);
     virtual GXBOOL    GetItemRect         (int nItem, GXDWORD dwStyle, GXLPRECT lprc) const;

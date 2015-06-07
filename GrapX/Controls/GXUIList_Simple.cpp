@@ -35,20 +35,20 @@ namespace GXUI
     return 0;
   }
 
-  GXINT SimpleList::VirGetItemHeight(GXINT nIdx) const
-  {
-    return GetItemHeight(nIdx);
-  }
+  //GXINT SimpleList::VirGetItemHeight(GXINT nIdx) const
+  //{
+  //  return GetItemHeight(nIdx);
+  //}
 
-  GXINT SimpleList::GetItemHeight(GXINT nIdx) const
-  {
-    //LISTBOXITEMSTAT sStat;
-    //const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
-    //if(nItemHeight < 0) {
-      return m_nItemHeight;
-    //}
-    //return nItemHeight;
-  }
+  //GXINT SimpleList::GetItemHeight(GXINT nIdx) const
+  //{
+  //  //LISTBOXITEMSTAT sStat;
+  //  //const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
+  //  //if(nItemHeight < 0) {
+  //    return m_nItemHeight;
+  //  //}
+  //  //return nItemHeight;
+  //}
 
   GXINT SimpleList::HitTest(int fwKeys, int x, int y) const
   {

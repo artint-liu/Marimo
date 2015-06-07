@@ -476,6 +476,12 @@ namespace Marimo
   IMPLEMENT_EQUAL_OPERATOR_FUNC(u32, val);
   IMPLEMENT_EQUAL_OPERATOR_FUNC(u64, val);
 
+  GXBOOL Variable::Set(const DataPoolVariable& var)
+  {
+    // TODO: 这个是临时写法
+    return Set(var.ToStringW());
+  }
+
   GXVOID Variable::Free()
   {
     SAFE_RELEASE(m_pDataPool);

@@ -12,14 +12,14 @@ namespace GXUI
 {
   ////////////////////////////////////////////////////////////////////////////
 
-  struct CUSTOMIZEITEMSTAT
-  {
-    GXINT   nBottom;
-    GXHWND  hItem;
-    GXDWORD bSelected : 1;
-    GXDWORD bValidate : 1;  // Item的有效标志, 如果为0表示要重新从Adapter获取
-    CUSTOMIZEITEMSTAT() : nBottom(-1), hItem(NULL), bSelected(0), bValidate(0){}
-  };
+  //struct CUSTOMIZEITEMSTAT
+  //{
+  //  GXINT   nBottom;
+  //  GXHWND  hItem;
+  //  GXDWORD bSelected : 1;
+  //  GXDWORD bValidate : 1;  // Item的有效标志, 如果为0表示要重新从Adapter获取
+  //  CUSTOMIZEITEMSTAT() : nBottom(-1), hItem(NULL), bSelected(0), bValidate(0){}
+  //};
 
   struct ITEMELEMENT   // item中的子窗口信息
   {
@@ -57,7 +57,7 @@ namespace GXUI
     GXHWND    GetItemWnd    (int item);
     GXHWND    CreateItemWnd (int item);
   public:
-    GXINT     GetItemHeight       (GXINT nIdx) const;
+    //GXINT     GetItemHeight       (GXINT nIdx) const;
     GXHWND    PlantCustItem       (int nIndex, GXLPCRECT lprect);
     void      Recycle             (int nIndex);
     int       Recycle             (int nBegin, int nDir); // 包含 nBegin
@@ -70,12 +70,12 @@ namespace GXUI
     virtual GXLRESULT SetVariable         (MOVariable* pVariable);
     virtual GXINT     HitTest             (int fwKeys, int x, int y) const;
     virtual GXLRESULT OnPaint             (GXWndCanvas& canvas);
-    virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
+    //virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
     virtual int       OnSize              (int cx, int cy);
     //virtual GXHRESULT OnKnock             (KNOCKACTION* pAction);
     virtual GXVOID    OnImpulse           (LPCDATAIMPULSE pImpulse);
-    virtual GXBOOL    ReduceItemStat      (GXINT nCount);
-    virtual void      DeleteItemStat      (GXINT nIndex);
+    //virtual GXBOOL    ReduceItemStat      (GXINT nCount);
+    //virtual void      DeleteItemStat      (GXINT nIndex);
     virtual GXBOOL    GetItemRect(int nItem, GXDWORD dwStyle, GXLPRECT lprc) const;
 
   public:

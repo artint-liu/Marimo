@@ -36,8 +36,9 @@ public:
   GXLRESULT   GetStringA      (GXINT nIndex, clStringA& str);
   GXINT       DeleteString    (GXINT nIndex);
   void        ResetContent    ();   // 清除所有项目
-  GXINT       GetCount        ();
-  GXINT       GetCurSel       ();
+  GXINT       GetCount        () const;
+  GXINT       GetCurSel       () const;
+  GXBOOL      IsSelected      (GXSIZE_T index) const;
   GXHRESULT   SetAdapter      (GXUI::IListDataAdapter* pAdapter);
   GXCOLORREF  SetColor        (GXUINT nType, GXCOLORREF color);
   GXUINT      SetColumnsWidth (const GXUINT* pColumns, GXUINT nCount);

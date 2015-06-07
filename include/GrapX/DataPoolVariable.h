@@ -57,7 +57,7 @@ namespace Marimo
     }
 
   public:
-    DataPoolVariable& operator=   (const DataPoolVariable& val);
+    //DataPoolVariable& operator=   (const DataPoolVariable& val);
 
     // 分！别！重载不同类型，如果使用模板可能会接受其他不期望的类型
     DataPoolVariable& operator=   (GXLPCWSTR szString);
@@ -67,6 +67,9 @@ namespace Marimo
     DataPoolVariable& operator=   (i64 val);
     DataPoolVariable& operator=   (u32 val);            // 如果变量不足32位会被截断
     DataPoolVariable& operator=   (u64 val);
+    DataPoolVariable& operator=   (const DataPoolVariable& var);  // var 的描述信息复制给新的目标
+
+    //DataPoolVariable& operator*   (DataPoolVariable* pVar);       // var 的内容复制给新的目标
 
 
     GXBOOL            Impulse         (DataAction reason, GXUINT index = 0, GXUINT count = 0); // index和count只有是数组时才有效
@@ -101,6 +104,7 @@ namespace Marimo
     clStringW         ToStringW       () GXCONST;           // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
     clStringA         ToStringA       () GXCONST;
 
+    GXBOOL            Set             (const DataPoolVariable& var);  // 注意这个和“operator=”含义不同
     GXBOOL            Set             (GXLPCWSTR szString);
     GXBOOL            Set             (GXLPCSTR szString);
     GXBOOL            Set             (float val);

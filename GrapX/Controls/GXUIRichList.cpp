@@ -143,16 +143,16 @@ namespace GXUI
     return TRUE;
   }
 
-  GXINT RichList::GetItemHeight(GXINT nIdx) const
-  {
-    //const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
-    //if(nItemHeight < 0) {
-      GXRECT rect;
-      gxGetWindowRect(m_hPrototype, &rect);
-      return rect.bottom - rect.top;
-    //}
-    //return nItemHeight;
-  }
+  //GXINT RichList::GetItemHeight(GXINT nIdx) const
+  //{
+  //  //const GXINT nItemHeight = m_pAdapter->GetItemHeight(nIdx);
+  //  //if(nItemHeight < 0) {
+  //    GXRECT rect;
+  //    gxGetWindowRect(m_hPrototype, &rect);
+  //    return rect.bottom - rect.top;
+  //  //}
+  //  //return nItemHeight;
+  //}
 
   GXHWND RichList::GetItemWnd(int item)
   {
@@ -600,17 +600,17 @@ namespace GXUI
     //return hval;
   }
 
-  GXBOOL RichList::ReduceItemStat(GXINT nCount)
-  {
-    Recycle(nCount, 1);
-    m_aItems.erase(m_aItems.begin() + nCount, m_aItems.end());
-    return TRUE;
-  }
+  //GXBOOL RichList::ReduceItemStat(GXINT nCount)
+  //{
+  //  Recycle(nCount, 1);
+  //  m_aItems.erase(m_aItems.begin() + nCount, m_aItems.end());
+  //  return TRUE;
+  //}
 
-  GXINT RichList::VirGetItemHeight(GXINT nIdx) const
-  {
-    return GetItemHeight(nIdx);
-  }
+  //GXINT RichList::VirGetItemHeight(GXINT nIdx) const
+  //{
+  //  return GetItemHeight(nIdx);
+  //}
 
   GXBOOL RichList::GetItemRect(int nItem, GXDWORD dwStyle, GXLPRECT lprc) const
   {
@@ -638,13 +638,13 @@ namespace GXUI
   {
   }
 
-  void RichList::DeleteItemStat( GXINT nIndex )
-  {
-    if(GetItemWnd(nIndex) != NULL) {
-      Recycle(nIndex);
-    }
-    List::DeleteItemStat(nIndex);
-  }
+  //void RichList::DeleteItemStat( GXINT nIndex )
+  //{
+  //  if(GetItemWnd(nIndex) != NULL) {
+  //    Recycle(nIndex);
+  //  }
+  //  List::DeleteItemStat(nIndex);
+  //}
 
   GXLRESULT RichList::SetItemTemplate( GXLPCWSTR szTemplate )
   {
@@ -659,6 +659,7 @@ namespace GXUI
       m_hPrototype = gxIntCreateDialogFromFileW(NULL, aString[0], aString[1], m_hWnd, (GXDLGPROC)CustomWndProc, NULL);
       gxGetClientRect(m_hPrototype, &rect);
       m_nColumnWidth = rect.right - rect.left;
+      m_nItemHeight = rect.bottom - rect.top;
 
       GXNMLISTADAPTER sCreateAdapter;
       sCreateAdapter.hdr.hwndFrom = m_hWnd;
