@@ -116,7 +116,7 @@ namespace GXUI
     }
     MOVariable VarArray = m_pAdapter->GetVariable();
     MOVariable VarElement = VarArray.IndexOf(nIndex);
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
     /*if( ! m_pAdapter->IsAutoKnock()) {
     VarElement.Impulse(Marimo::DATACT_Deleting, nIndex);
     VarArray.Remove(nIndex);
@@ -125,9 +125,9 @@ namespace GXUI
     else */{
       VarArray.Remove(nIndex);
     }
-#else
-    VarArray.Remove(nIndex);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#else
+//    VarArray.Remove(nIndex);
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     return nIndex;
   }
 
@@ -138,7 +138,7 @@ namespace GXUI
     }
     MOVariable VarArray = m_pAdapter->GetVariable();
 
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
     /*if( ! m_pAdapter->IsAutoKnock()) {
     VarArray.Impulse(Marimo::DATACT_Deleting, -1);
     VarArray.Remove(-1);
@@ -147,9 +147,9 @@ namespace GXUI
     else */{
       VarArray.Remove(-1);
     }
-#else
-    VarArray.Remove(-1);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#else
+//    VarArray.Remove(-1);
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     Invalidate(FALSE);
   }
 

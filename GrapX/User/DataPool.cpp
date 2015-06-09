@@ -78,74 +78,74 @@ namespace Marimo
   
 
 
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-  class DataPoolUIWatcher : public DataPoolWatcher
-  {
-  private:
-    typedef clvector<GXHWND> WndHandleArray;
-    WndHandleArray m_aHandles;
-  public:
-    GXHRESULT AddRef()
-    {
-      return gxInterlockedIncrement(&m_nRefCount);
-    }
-
-    GXHRESULT Release()
-    {
-      GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
-      if(nRefCount == 0)
-      {
-        delete this;
-        return GX_OK;
-      }
-      return nRefCount;
-    }
-
-    clStringA DataPoolUIWatcher::GetClassName()
-    {
-      return STR_DATAPOOL_WATCHER_UI;
-    }
-
-    GXHRESULT DataPoolUIWatcher::RegisterPrivate(GXLPVOID pIndentify)
-    {
-      if( ! gxIsWindow((GXHWND)pIndentify)) {
-        return GX_FAIL;
-      }
-      WndHandleArray::iterator it = 
-        std::find(m_aHandles.begin(), m_aHandles.end(), pIndentify);
-
-      if(it == m_aHandles.end())
-      {
-        m_aHandles.push_back((GXHWND)pIndentify);
-      }
-      return GX_OK;
-    }
-
-    GXHRESULT DataPoolUIWatcher::UnregisterPrivate(GXLPVOID pIndentify)
-    {
-      WndHandleArray::iterator it = 
-        std::find(m_aHandles.begin(), m_aHandles.end(), pIndentify);
-
-      if(it != m_aHandles.end())
-      {
-        m_aHandles.erase(it);
-        return GX_OK;
-      }
-      return GX_FAIL;
-    }
-
-    GXHRESULT DataPoolUIWatcher::OnKnock(KNOCKACTION* pKnock)
-    {
-      for(WndHandleArray::iterator it = m_aHandles.begin();
-        it != m_aHandles.end(); ++it) {
-          gxSendMessage(*it, GXWM_IMPULSE, 0, (GXLPARAM)pKnock);
-      }
-      return GX_OK;
-    }
-  }; // class DataPoolUIMonitor
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
+//#ifdef ENABLE_OLD_DATA_ACTION
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//  class DataPoolUIWatcher : public DataPoolWatcher
+//  {
+//  private:
+//    typedef clvector<GXHWND> WndHandleArray;
+//    WndHandleArray m_aHandles;
+//  public:
+//    GXHRESULT AddRef()
+//    {
+//      return gxInterlockedIncrement(&m_nRefCount);
+//    }
+//
+//    GXHRESULT Release()
+//    {
+//      GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
+//      if(nRefCount == 0)
+//      {
+//        delete this;
+//        return GX_OK;
+//      }
+//      return nRefCount;
+//    }
+//
+//    clStringA DataPoolUIWatcher::GetClassName()
+//    {
+//      return STR_DATAPOOL_WATCHER_UI;
+//    }
+//
+//    GXHRESULT DataPoolUIWatcher::RegisterPrivate(GXLPVOID pIndentify)
+//    {
+//      if( ! gxIsWindow((GXHWND)pIndentify)) {
+//        return GX_FAIL;
+//      }
+//      WndHandleArray::iterator it = 
+//        std::find(m_aHandles.begin(), m_aHandles.end(), pIndentify);
+//
+//      if(it == m_aHandles.end())
+//      {
+//        m_aHandles.push_back((GXHWND)pIndentify);
+//      }
+//      return GX_OK;
+//    }
+//
+//    GXHRESULT DataPoolUIWatcher::UnregisterPrivate(GXLPVOID pIndentify)
+//    {
+//      WndHandleArray::iterator it = 
+//        std::find(m_aHandles.begin(), m_aHandles.end(), pIndentify);
+//
+//      if(it != m_aHandles.end())
+//      {
+//        m_aHandles.erase(it);
+//        return GX_OK;
+//      }
+//      return GX_FAIL;
+//    }
+//
+//    GXHRESULT DataPoolUIWatcher::OnKnock(KNOCKACTION* pKnock)
+//    {
+//      for(WndHandleArray::iterator it = m_aHandles.begin();
+//        it != m_aHandles.end(); ++it) {
+//          gxSendMessage(*it, GXWM_IMPULSE, 0, (GXLPARAM)pKnock);
+//      }
+//      return GX_OK;
+//    }
+//  }; // class DataPoolUIMonitor
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   //////////////////////////////////////////////////////////////////////////
 

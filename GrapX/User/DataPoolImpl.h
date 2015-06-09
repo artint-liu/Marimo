@@ -102,7 +102,8 @@ namespace Marimo
       GXUINT  nNumOfVar;        // 变量描述数量
       GXUINT  nNumOfMember;     // 成员变量描述数量
       GXUINT  nNumOfEnums;      // 枚举描述数量
-      GXUINT  cbDescTabNames;   // 所有描述表中名字(字符串)占用的总尺寸
+      GXUINT  nNumOfNames;      // 所有描述表中名字(字符串)数量
+      GXUINT  cbNames;          // 所有描述表中名字(字符串)占用的总尺寸
 
       GXUINT  cbVariableSpace;  // 全局变量占用的空间
       GXUINT  nNumOfPtrVars;    // 全局变量中包含的指针数，用来在不同平台下调整cbVariableSpace的尺寸
@@ -126,9 +127,9 @@ namespace Marimo
     {
       RuntimeFlag_Fixed     = 0x00000001,   // 只要出现动态数组，object或者string，就为false
       RuntimeFlag_Readonly  = 0x00000002,   // 只读模式，这个牛逼在于，所有一切都在一块内存上，不用析构了
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
       RuntimeFlag_AutoKnock = 0x00000004,
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     };
 
 
@@ -273,9 +274,9 @@ namespace Marimo
 
 
 
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
     typedef clvector<DataPoolWatcher*>  WatcherArray;
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
 
 
@@ -296,6 +297,7 @@ namespace Marimo
     virtual GXBOOL    IsKnocking          (const DataPoolVariable* pVar);
 
     virtual GXLPVOID  GetFixedDataPtr     (); // 必须是RawPool才返回指针
+    virtual GXUINT    GetNameId           (LPCSTR szName);
     virtual GXBOOL    QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar);
     virtual GXBOOL    QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar);
     virtual GXBOOL    FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset); // 查找变量全名
@@ -329,9 +331,9 @@ namespace Marimo
     GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, int nElementCount);
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
     LPCVD   IntGetVariable    (LPCVD pVdd, GXLPCSTR szName);
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
     GXBOOL  IntIsImpulsing    (const DataPoolVariable* pVar) const;
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     void    LocalizeTables    (BUILDTIME& bt, GXSIZE_T cbVarSpace);
     clsize  LocalizePtr       ();
     template<class DescT>
@@ -352,10 +354,10 @@ namespace Marimo
     GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar);
     GXBOOL        IntQuery            (GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
     GXINT         IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
     //int           FindWatcher         (DataPoolWatcher* pWatcher);
     //int           FindWatcherByName   (GXLPCSTR szClassName);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     //LPCENUMDESC   IntGetEnum          (GXUINT nPackIndex) const;  // m_aEnumPck中的索引
     LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
     GXBOOL        IntIgnore           (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
@@ -386,6 +388,8 @@ namespace Marimo
       VARIABLE_DESC*      m_aVariables;       // 所有变量描述表
       VARIABLE_DESC*      m_aMembers;         // 所有的结构体成员描述都存在这张表上
       ENUM_DESC*          m_aEnums;           // 所有枚举成员都在这个表上
+      GXUINT*             m_pNamesTabBegin;   // variable/type name table 的开始
+      GXUINT*             m_pNamesTabEnd;     // table 的结尾,也是Name ptr的开始
       // =====================
 
       clRefBuffer         m_VarBuffer;        // 变量空间开始地址, 这个指向了m_Buffer
@@ -395,7 +399,7 @@ namespace Marimo
 //      GXUINT              m_nDbgNumOfString;  // 动态数组的缓冲区
 //#endif // #ifdef _DEBUG
 
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
       struct WATCH_FIXED;
 
       typedef clset<GXLPCVOID>                      ImpulsingSet;
@@ -427,7 +431,7 @@ namespace Marimo
           GXBOOL  IntWatch                (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
           void    IntImpulse              (WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse);
           void    IntCleanupWatchObj      (WatchFixedDict& sWatchDict);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
       GXDWORD           m_dwRuntimeFlags;
   }; // class DataPoolImpl
 

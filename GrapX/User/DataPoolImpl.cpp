@@ -78,12 +78,14 @@ namespace Marimo
     , m_aGSIT       (NULL)
     //, m_bFixedPool  (1)
     //, m_bReadOnly   (0)
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
     //, m_bAutoKnock  (1)
     , m_dwRuntimeFlags     (RuntimeFlag_Fixed)
-#else
-    , m_dwRuntimeFlags     (RuntimeFlag_AutoKnock | RuntimeFlag_Fixed)
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+    , m_pNamesTabBegin (NULL)
+    , m_pNamesTabEnd   (NULL)
+//#else
+//    , m_dwRuntimeFlags     (RuntimeFlag_AutoKnock | RuntimeFlag_Fixed)
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 //#ifdef _DEBUG
 //    , m_nDbgNumOfArray (0)
 //    , m_nDbgNumOfString(0)
@@ -117,22 +119,22 @@ namespace Marimo
     }
 #endif // #ifdef DATAPOOLCOMPILER_PROJECT
 
-#ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-    // 释放所有的监视器
-    for(WatcherArray::iterator it = m_aWatchers.begin();
-      it != m_aWatchers.end(); ++it) {
-        SAFE_RELEASE(*it);
-    }
-    m_aWatchers.clear();
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#else
+//#ifdef ENABLE_OLD_DATA_ACTION
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//    // 释放所有的监视器
+//    for(WatcherArray::iterator it = m_aWatchers.begin();
+//      it != m_aWatchers.end(); ++it) {
+//        SAFE_RELEASE(*it);
+//    }
+//    m_aWatchers.clear();
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#else
     IntCleanupWatchObj(m_FixedDict);
     for(WatchableArray::iterator it = m_WatchableArray.begin(); it != m_WatchableArray.end(); ++it)
     {
       IntCleanupWatchObj(it->second);
     }
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
+//#endif // #ifdef ENABLE_OLD_DATA_ACTION
     //SAFE_DELETE(m_pBuffer);
   }
   //////////////////////////////////////////////////////////////////////////
@@ -571,7 +573,7 @@ namespace Marimo
 
 
 
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
   GXBOOL DataPoolImpl::IsAutoKnock()
   {
     return TEST_FLAG(m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_AutoKnock);
@@ -593,7 +595,7 @@ namespace Marimo
     }
     return bPrevFlag;
   }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
 
   GXINT DataPoolImpl::IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar)
@@ -729,7 +731,8 @@ namespace Marimo
     auto cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
     auto cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
     auto cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
-    return (cbTypes + cbGVSIT + cbVariables + cbMembers + cbEnums);
+    auto cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
+    return (cbTypes + cbGVSIT + cbVariables + cbMembers + cbEnums + cbNameTable);
   }
 
   GXSIZE_T DataPoolImpl::IntGetRTDescNames()
@@ -800,122 +803,122 @@ namespace Marimo
   }
 
 
-#ifdef ENABLE_DATAPOOL_WATCHER
-#ifdef ENABLE_OLD_DATA_ACTION
-  int DataPool::FindWatcher(DataPoolWatcher* pWatcher)
-  {
-    int nIndex = 0;
-    for(WatcherArray::iterator it = m_aWatchers.begin();
-      it != m_aWatchers.end(); ++it, ++nIndex)
-    {
-      if(*it == pWatcher) {
-        return nIndex;
-      }
-    }
-    return -1;
-  }
-
-  int DataPool::FindWatcherByName(GXLPCSTR szClassName)
-  {
-    int nIndex = 0;
-    for(WatcherArray::iterator it = m_aWatchers.begin();
-      it != m_aWatchers.end(); ++it, ++nIndex)
-    {
-      if((*it)->GetClassName() == szClassName) {
-        return nIndex;
-      }
-    }
-    return -1;
-  }
-
-  GXHRESULT DataPool::CreateWatcher(GXLPCSTR szClassName)
-  {
-    if(FindWatcherByName(szClassName) >= 0) {
-      // 重复创建
-      return GX_FAIL;
-    }
-    // TODO: ...
-
-    DataPoolWatcher* pWatcher = NULL;
-    if(clStringA(szClassName) == STR_DATAPOOL_WATCHER_UI)
-    {
-      pWatcher = new DataPoolUIWatcher;
-    }
-    if( ! InlCheckNewAndIncReference(pWatcher)) {
-      return GX_FAIL;
-    }
-    m_aWatchers.push_back(pWatcher);
-    return (GXHRESULT)(m_aWatchers.size() - 1);
-  }
-
-  GXHRESULT DataPool::RemoveWatcherByName(GXLPCSTR szClassName)
-  {
-    const int nIndex = FindWatcherByName(szClassName);
-    if(nIndex < 0) {
-      return GX_FAIL;
-    }
-    WatcherArray::iterator it = m_aWatchers.begin() + nIndex;
-    SAFE_RELEASE(*it);
-    m_aWatchers.erase(it);
-    return GX_OK;
-  }
-
-  GXHRESULT DataPool::AddWatcher(DataPoolWatcher* pWatcher)
-  {
-    if(FindWatcher(pWatcher) >= 0) {
-      return GX_FAIL;
-    }
-
-    GXHRESULT hval = pWatcher->AddRef();
-    if(GXSUCCEEDED(hval))
-    {
-      m_aWatchers.push_back(pWatcher);
-    }
-    return hval;
-  }
-
-  GXHRESULT DataPool::RemoveWatcher(DataPoolWatcher* pWatcher)
-  {
-    int nIndex = FindWatcher(pWatcher);
-    if(nIndex < 0 || nIndex >= (int)m_aWatchers.size()) {
-      return GX_FAIL;
-    }
-
-    m_aWatchers.erase(m_aWatchers.begin() + nIndex);
-    return pWatcher->Release();
-  }
-
-  GXHRESULT DataPool::RegisterIdentify(GXLPCSTR szClassName, GXLPVOID pIndentify)
-  {
-    if(szClassName == NULL) {
-      return GX_FAIL;
-    }
-
-    int nIndex = FindWatcherByName(szClassName);
-    if(nIndex < 0) {
-      nIndex = CreateWatcher(szClassName);
-      if(nIndex < 0) {
-        return GX_FAIL;
-      }
-    }
-
-    return m_aWatchers[nIndex]->RegisterPrivate(pIndentify);
-  }
-
-  GXHRESULT DataPool::UnregisterIdentify(GXLPCSTR szClassName, GXLPVOID pIndentify)
-  {
-    if(szClassName == NULL) {
-      return GX_FAIL;
-    }
-
-    const int nIndex = FindWatcherByName(szClassName);
-    if(nIndex < 0) {
-      return GX_FAIL;
-    }
-
-    return m_aWatchers[nIndex]->UnregisterPrivate(pIndentify);
-  }
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_OLD_DATA_ACTION
+//  int DataPool::FindWatcher(DataPoolWatcher* pWatcher)
+//  {
+//    int nIndex = 0;
+//    for(WatcherArray::iterator it = m_aWatchers.begin();
+//      it != m_aWatchers.end(); ++it, ++nIndex)
+//    {
+//      if(*it == pWatcher) {
+//        return nIndex;
+//      }
+//    }
+//    return -1;
+//  }
+//
+//  int DataPool::FindWatcherByName(GXLPCSTR szClassName)
+//  {
+//    int nIndex = 0;
+//    for(WatcherArray::iterator it = m_aWatchers.begin();
+//      it != m_aWatchers.end(); ++it, ++nIndex)
+//    {
+//      if((*it)->GetClassName() == szClassName) {
+//        return nIndex;
+//      }
+//    }
+//    return -1;
+//  }
+//
+//  GXHRESULT DataPool::CreateWatcher(GXLPCSTR szClassName)
+//  {
+//    if(FindWatcherByName(szClassName) >= 0) {
+//      // 重复创建
+//      return GX_FAIL;
+//    }
+//    // TODO: ...
+//
+//    DataPoolWatcher* pWatcher = NULL;
+//    if(clStringA(szClassName) == STR_DATAPOOL_WATCHER_UI)
+//    {
+//      pWatcher = new DataPoolUIWatcher;
+//    }
+//    if( ! InlCheckNewAndIncReference(pWatcher)) {
+//      return GX_FAIL;
+//    }
+//    m_aWatchers.push_back(pWatcher);
+//    return (GXHRESULT)(m_aWatchers.size() - 1);
+//  }
+//
+//  GXHRESULT DataPool::RemoveWatcherByName(GXLPCSTR szClassName)
+//  {
+//    const int nIndex = FindWatcherByName(szClassName);
+//    if(nIndex < 0) {
+//      return GX_FAIL;
+//    }
+//    WatcherArray::iterator it = m_aWatchers.begin() + nIndex;
+//    SAFE_RELEASE(*it);
+//    m_aWatchers.erase(it);
+//    return GX_OK;
+//  }
+//
+//  GXHRESULT DataPool::AddWatcher(DataPoolWatcher* pWatcher)
+//  {
+//    if(FindWatcher(pWatcher) >= 0) {
+//      return GX_FAIL;
+//    }
+//
+//    GXHRESULT hval = pWatcher->AddRef();
+//    if(GXSUCCEEDED(hval))
+//    {
+//      m_aWatchers.push_back(pWatcher);
+//    }
+//    return hval;
+//  }
+//
+//  GXHRESULT DataPool::RemoveWatcher(DataPoolWatcher* pWatcher)
+//  {
+//    int nIndex = FindWatcher(pWatcher);
+//    if(nIndex < 0 || nIndex >= (int)m_aWatchers.size()) {
+//      return GX_FAIL;
+//    }
+//
+//    m_aWatchers.erase(m_aWatchers.begin() + nIndex);
+//    return pWatcher->Release();
+//  }
+//
+//  GXHRESULT DataPool::RegisterIdentify(GXLPCSTR szClassName, GXLPVOID pIndentify)
+//  {
+//    if(szClassName == NULL) {
+//      return GX_FAIL;
+//    }
+//
+//    int nIndex = FindWatcherByName(szClassName);
+//    if(nIndex < 0) {
+//      nIndex = CreateWatcher(szClassName);
+//      if(nIndex < 0) {
+//        return GX_FAIL;
+//      }
+//    }
+//
+//    return m_aWatchers[nIndex]->RegisterPrivate(pIndentify);
+//  }
+//
+//  GXHRESULT DataPool::UnregisterIdentify(GXLPCSTR szClassName, GXLPVOID pIndentify)
+//  {
+//    if(szClassName == NULL) {
+//      return GX_FAIL;
+//    }
+//
+//    const int nIndex = FindWatcherByName(szClassName);
+//    if(nIndex < 0) {
+//      return GX_FAIL;
+//    }
+//
+//    return m_aWatchers[nIndex]->UnregisterPrivate(pIndentify);
+//  }
+//#endif // #ifdef ENABLE_OLD_DATA_ACTION
   void DataPoolImpl::IntImpulse(WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse)
   {
     auto it_result = sDict.find(key);
@@ -981,7 +984,7 @@ namespace Marimo
     return TRUE;
   }
 
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
   GXBOOL DataPoolImpl::IntCreateUnary(clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar)
   {
@@ -1039,13 +1042,13 @@ namespace Marimo
     return FALSE;
   }
 
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
   GXBOOL DataPoolImpl::IntIsImpulsing(const DataPoolVariable* pVar) const
   {
     ImpulsingSet::const_iterator it = m_ImpulsingSet.find(pVar->GetPtr());
     return it != m_ImpulsingSet.end();
   }
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
   const clBufferBase* DataPoolImpl::IntGetEntryBuffer() const
   {
@@ -1088,6 +1091,7 @@ namespace Marimo
     auto cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
     auto cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
     auto cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
+    auto cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
 
     m_aTypes      = (TYPE_DESC*)ptr;
     m_aGSIT       = (SortedIndexType*)(ptr + cbTypes);
@@ -1101,7 +1105,10 @@ namespace Marimo
       m_aEnums = (ENUM_DESC*)(ptr + cbTypes + cbGVSIT + cbVariables + cbMembers);
     }
 
-    return cbTypes + cbGVSIT + cbVariables + cbMembers + cbEnums;
+    m_pNamesTabBegin = (GXUINT*)(ptr + cbTypes + cbGVSIT + cbVariables + cbMembers + cbEnums);
+    m_pNamesTabEnd   = (GXUINT*)((GXUINT_PTR)m_pNamesTabBegin + cbNameTable);
+
+    return cbTypes + cbGVSIT + cbVariables + cbMembers + cbEnums + cbNameTable;
   }
 
   void DataPoolImpl::DbgIntDump()
@@ -1143,6 +1150,7 @@ namespace Marimo
     // #.Variable desc table        变量描述表
     // #.Struct members desc table  成员变量描述表
     // #.enum desc table            枚举描述表
+    // #.Strings Offset table       字符串偏移表, 这个后面一定要接上Strings,有特殊用法
     // #.Strings                    描述表中所有字符串的字符串表
     // #.Variable Data Space        变量空间
 
@@ -1156,7 +1164,8 @@ namespace Marimo
     auto cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
     auto cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
     auto cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
-    auto cbHeader    = cbTypes + cbGVSIT+ cbVariables + cbMembers + cbEnums;
+    auto cbNameTable = bt.NameSet.size() * sizeof(GXUINT);
+    auto cbHeader    = cbTypes + cbGVSIT+ cbVariables + cbMembers + cbEnums + cbNameTable;
     m_Buffer.Resize(cbHeader + bt.NameSet.buffer_size() + cbVarSpace, FALSE);
 
 #ifdef _DEBUG
@@ -1168,13 +1177,23 @@ namespace Marimo
 
     memset((GXLPBYTE)m_Buffer.GetPtr() + cbHeader, 0, bt.NameSet.buffer_size());
 
-    GXINT_PTR lpBase = (GXINT_PTR)bt.NameSet.GatherToBuffer(&m_Buffer, cbHeader);
+    auto result = bt.NameSet.gather_offset<GXUINT>((GXUINT*)
+      ((GXLPBYTE)m_Buffer.GetPtr() + cbHeader - cbNameTable), cbNameTable);
+    ASSERT(result);
+
+    GXINT_PTR lpBase = (GXINT_PTR)bt.NameSet.gather(&m_Buffer, cbHeader);
     //m_StringBase = lpBase;
 
     ASSERT(cbDbgSave == m_Buffer.GetSize()); // 确保GatherToBuffer不会改变Buffer的长度
 
+    m_pNamesTabBegin = (GXUINT*)0;
+    m_pNamesTabEnd   = (GXUINT*)cbNameTable;
     LocalizePtr();
     //ASSERT(m_StringBase == lpBase);
+    //for(auto p = m_pNamesTabBegin; p != m_pNamesTabEnd; ++p)
+    //{
+    //  TRACE("%d %s\n", *p, (LPCSTR)m_pNamesTabEnd + (*p));
+    //}
 
 
     // * 以下复制表的操作中均包含字符串重定位
@@ -1374,13 +1393,13 @@ namespace Marimo
       }
     }
 
-#if 0
-#ifdef ENABLE_DATAPOOL_WATCHER
-    for (GXUINT i = 0; i < pTypeDesc->nMemberCount; i++) {
-      TRACE("%*s %s\n", -50, aEnums[p[i]].GetName(), aEnums[p[i]].Name);
-    }
-#endif // ENABLE_DATAPOOL_WATCHER
-#endif // #ifdef _DEBUG
+//#if 0
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//    for (GXUINT i = 0; i < pTypeDesc->nMemberCount; i++) {
+//      TRACE("%*s %s\n", -50, aEnums[p[i]].GetName(), aEnums[p[i]].Name);
+//    }
+//#endif // ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef _DEBUG
 
     return FALSE;
   }
@@ -1772,11 +1791,12 @@ namespace Marimo
     header.nNumOfVar        = m_nNumOfVar;
     header.nNumOfMember     = m_nNumOfMember;
     header.nNumOfEnums      = m_nNumOfEnums;
-    header.cbDescTabNames   = (GXUINT)IntGetRTDescNames();
+    header.cbNames          = (GXUINT)IntGetRTDescNames();
     header.cbVariableSpace  = (GXUINT)m_VarBuffer.GetSize();
     header.nNumOfStrings    = 0;
     header.cbStringSpace    = 0;
     header.nNumOfArrayBufs  = 0;
+    header.nNumOfNames      = m_pNamesTabEnd - m_pNamesTabBegin;
     //header.cbArraySpace     = 0;
 
 
@@ -1970,7 +1990,7 @@ namespace Marimo
     clFixedBuffer StringVarBuf;
     ASSERT(file.GetPointer() == header.nStringVarOffset); // 当前指针与字符串变量表开始偏移一致
     StringVarBuf.Resize(sStringVar.buffer_size(), TRUE);
-    sStringVar.GatherToBuffer(&StringVarBuf, 0);
+    sStringVar.gather(&StringVarBuf, 0);
     V_WRITE(file.Write(StringVarBuf.GetPtr(), (GXUINT)StringVarBuf.GetSize()), "Failed to write variable string buffer.");
 
 
@@ -2067,6 +2087,8 @@ namespace Marimo
     m_nNumOfVar    = header.nNumOfVar;
     m_nNumOfMember = header.nNumOfMember;
     m_nNumOfEnums  = header.nNumOfEnums;
+    m_pNamesTabBegin = (GXUINT*)0;
+    m_pNamesTabEnd   = (GXUINT*)(header.nNumOfNames * sizeof(GXUINT));
 
 
 
@@ -2095,7 +2117,7 @@ namespace Marimo
 
 
     // 这个计算参考[MAIN BUFFER 结构表]
-    const GXSIZE_T nDescHeaderSize = IntGetRTDescHeader() + header.cbDescTabNames;
+    const GXSIZE_T nDescHeaderSize = IntGetRTDescHeader() + header.cbNames;
     const GXSIZE_T cbGlobalVariable = header.cbVariableSpace + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(header.nNumOfPtrVars);
     const GXSIZE_T nMainBufferSize_0 = nDescHeaderSize + cbGlobalVariable;
     GXSIZE_T nMainBufferSize = nMainBufferSize_0;
@@ -2134,8 +2156,13 @@ namespace Marimo
     V_READ(file.Read(m_Buffer.GetPtr(), (GXUINT)nDescHeaderSize), "Can not load desc header.");
 
     const clsize cbDesc = LocalizePtr();
-    new(&m_VarBuffer) clstd::RefBuffer((GXLPBYTE)m_Buffer.GetPtr() + cbDesc + header.cbDescTabNames, cbGlobalVariable);
+    new(&m_VarBuffer) clstd::RefBuffer((GXLPBYTE)m_Buffer.GetPtr() + cbDesc + header.cbNames, cbGlobalVariable);
 
+    //for(auto p = m_pNamesTabBegin; p != m_pNamesTabEnd; ++p)
+    //{
+    //  //TRACE("%d %s\n", *p, (LPCSTR)m_pNamesTabEnd + (*p));
+    //  TRACE("%s\n", (LPCSTR)m_pNamesTabEnd + (*p));
+    //}
 
     // 64位下扩展描述表中的指针
     if(SIZEOF_PTR > SIZEOF_PTR32)
@@ -2408,6 +2435,33 @@ namespace Marimo
       // Callback
     default: return pCallback < t.pCallback;
     }
+  }
+
+  GXUINT DataPoolImpl::GetNameId( LPCSTR szName )
+  {
+    DataPool::LPCSTR aNames = (DataPool::LPCSTR)m_pNamesTabEnd;
+    auto* begin = m_pNamesTabBegin;
+    auto* end = m_pNamesTabEnd;
+    while(begin != end)
+    {
+      auto* mid = begin + ((end - begin) >> 1); // 注意这是二分头尾两个指针
+      int r = GXSTRCMP(szName, aNames + (*mid));
+      if(r == 0) {
+        // 返回的是字符串在m_Buffer上的偏移
+        return *mid + (GXUINT)((GXUINT_PTR)aNames + (GXUINT_PTR)m_Buffer.GetPtr());
+      }
+      else if(r < 0) {
+        end = mid;
+      }
+      else {
+        ASSERT(r > 0);
+        if(mid == begin) {
+          return 0;
+        }
+        begin = mid;
+      }
+    }
+    return 0;
   }
 
 } // namespace Marimo

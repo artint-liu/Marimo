@@ -37,13 +37,13 @@
 #define StringA_SetAsStringW    String_SetAsStringT<GXLPCWSTR, clStringA>
 #define StringA_SetAsStringA    String_SetAsStringT<GXLPCSTR, clStringA>
 
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
 #define THIS_IMPULSE_DATA_CHANGE                      pThis->Impulse(DATACT_Change)
 #define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)  pThis->Impulse(_DATA_ACT, _INDEX, _COUNT)
-#else
-#define THIS_IMPULSE_DATA_CHANGE
-#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#else
+//#define THIS_IMPULSE_DATA_CHANGE
+//#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
 using namespace clstd;
 

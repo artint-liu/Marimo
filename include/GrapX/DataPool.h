@@ -4,10 +4,10 @@
 // 编译开关
 #define ENABLE_DATAPOOL_WATCHER     // DataPool 监视器
 //#define DEBUG_DECL_NAME           // 使用字符串指针储存自定位副本，如果打开这个调试将不能保存和加载
-#ifdef ENABLE_DATAPOOL_WATCHER
-# define STR_DATAPOOL_WATCHER_UI       "DataPool/Watcher/UI"
-# define ON_KNOCKVAR(_KNOCKACT, _VAR)  (_KNOCKACT->pSponsor != &_VAR && _KNOCKACT->Name == _VAR.GetName())
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//# define STR_DATAPOOL_WATCHER_UI       "DataPool/Watcher/UI"
+//# define ON_KNOCKVAR(_KNOCKACT, _VAR)  (_KNOCKACT->pSponsor != &_VAR && _KNOCKACT->Name == _VAR.GetName())
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
 namespace clstd
 {
@@ -94,17 +94,17 @@ namespace Marimo
   };
 
 //#define ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_OLD_DATA_ACTION
-  struct KNOCKACTION
-  {
-    const DataPoolVariable* pSponsor; // 发起者
-    DataPool*   pDataPool;
-    DataAction  Action;
-    clStringW   Name;
-    GXLPCVOID   ptr;
-    GXINT       Index;  // 只有动态数组才有效
-  };
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
+//#ifdef ENABLE_OLD_DATA_ACTION
+//  struct KNOCKACTION
+//  {
+//    const DataPoolVariable* pSponsor; // 发起者
+//    DataPool*   pDataPool;
+//    DataAction  Action;
+//    clStringW   Name;
+//    GXLPCVOID   ptr;
+//    GXINT       Index;  // 只有动态数组才有效
+//  };
+//#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   struct DATAPOOL_IMPULSE
   {
@@ -302,45 +302,45 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  #ifdef ENABLE_OLD_DATA_ACTION
-#ifdef ENABLE_DATAPOOL_WATCHER
-  class DataPoolWatcher : public GUnknown
-  {
-  public:
-#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    GXSTDINTERFACE(GXHRESULT AddRef   ());
-    GXSTDINTERFACE(GXHRESULT Release  ());
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    //************************************
-    // Method:    GetClassName
-    // FullName:  GetClassName
-    // Access:    public 
-    // Returns:   返回用于标识不同Watcher的字符串
-    // Qualifier:
-    // Parameter: clStringA GetClassName 
-    //************************************
-    GXSTDINTERFACE(clStringA GetClassName       ());
-
-    //************************************
-    // Method:    RegisterPrivate
-    // FullName:  RegisterPrivate
-    // Access:    public 
-    // Returns:   成功返回GX_OK,否则返回GX_FAIL
-    // Qualifier: 用来注册Watcher私有数据的接口, 比如UI Watcher会把HWND
-    //            注册在相同的Watcher内部,而不是为每个HWND产生一个Watcher,
-    //            如果是一个专用的Watcher也可以不去实现这个接口的功能.
-    // Parameter: GXLPVOID pIndentify
-    //************************************
-    GXSTDINTERFACE(GXHRESULT RegisterPrivate    (GXLPVOID pIndentify));
-    GXSTDINTERFACE(GXHRESULT UnregisterPrivate  (GXLPVOID pIndentify));
-    GXSTDINTERFACE(GXHRESULT OnKnock            (KNOCKACTION* pKnock));
-  };
-#else
-  class DataPoolWatcher : public GUnknown
-  {
-  };
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-#else
+//#ifdef ENABLE_OLD_DATA_ACTION
+//#ifdef ENABLE_DATAPOOL_WATCHER
+//  class DataPoolWatcher : public GUnknown
+//  {
+//  public:
+//#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+//    GXSTDINTERFACE(GXHRESULT AddRef   ());
+//    GXSTDINTERFACE(GXHRESULT Release  ());
+//#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+//    //************************************
+//    // Method:    GetClassName
+//    // FullName:  GetClassName
+//    // Access:    public 
+//    // Returns:   返回用于标识不同Watcher的字符串
+//    // Qualifier:
+//    // Parameter: clStringA GetClassName 
+//    //************************************
+//    GXSTDINTERFACE(clStringA GetClassName       ());
+//
+//    //************************************
+//    // Method:    RegisterPrivate
+//    // FullName:  RegisterPrivate
+//    // Access:    public 
+//    // Returns:   成功返回GX_OK,否则返回GX_FAIL
+//    // Qualifier: 用来注册Watcher私有数据的接口, 比如UI Watcher会把HWND
+//    //            注册在相同的Watcher内部,而不是为每个HWND产生一个Watcher,
+//    //            如果是一个专用的Watcher也可以不去实现这个接口的功能.
+//    // Parameter: GXLPVOID pIndentify
+//    //************************************
+//    GXSTDINTERFACE(GXHRESULT RegisterPrivate    (GXLPVOID pIndentify));
+//    GXSTDINTERFACE(GXHRESULT UnregisterPrivate  (GXLPVOID pIndentify));
+//    GXSTDINTERFACE(GXHRESULT OnKnock            (KNOCKACTION* pKnock));
+//  };
+//#else
+//  class DataPoolWatcher : public GUnknown
+//  {
+//  };
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#else
   class DataPoolWatcher : public GUnknown
   {
   public:
@@ -350,7 +350,7 @@ namespace Marimo
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXSTDINTERFACE(GXVOID OnImpulse   (LPCDATAIMPULSE pImpulse));
   };
-#endif // #ifdef ENABLE_OLD_DATA_ACTION
+//#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -723,13 +723,14 @@ namespace Marimo
     GXSTDINTERFACE(GXHRESULT   GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout));
     GXSTDINTERFACE(GXHRESULT   ImportDataFromFileW (GXLPCWSTR szFilename));
 
-    GXSTDINTERFACE(GXBOOL      IsFixedPool         () const); // 池中不含有字符串和动态数组
-    GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ()); // 必须是RawPool才返回指针
+    GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组
+    GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ());                 // 必须是RawPool才返回指针
+    GXSTDINTERFACE(GXUINT      GetNameId           (LPCSTR szName));  // 返回Type, Variable, Enum等内部稳定字符串的id
     GXSTDINTERFACE(GXBOOL      QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset)); // 查找变量全名
 
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
     GXSTDINTERFACE(GXBOOL      IsAutoKnock         ());
     GXSTDINTERFACE(GXBOOL      IsKnocking          (const DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      SetAutoKnock        (GXBOOL bAutoKnock));
@@ -757,7 +758,7 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL      Ignore              (DataPoolVariable* pVar, ImpulseProc pImpulseCallback));
     GXSTDINTERFACE(GXBOOL      Ignore              (DataPoolVariable* pVar, DataPoolWatcher* pWatcher));
     GXSTDINTERFACE(GXBOOL      Ignore              (DataPoolVariable* pVar, GXHWND hWnd));
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
     GXSTDINTERFACE(iterator        begin       ());
     GXSTDINTERFACE(iterator        end         ());

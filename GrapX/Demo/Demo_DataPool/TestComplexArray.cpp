@@ -160,6 +160,64 @@ void TestWatcher(DataPool* pDataPool)
   SAFE_RELEASE(pTest);
 }
 
+#define TEST_GETNAMEID(NAME, RESULT) id = pDataPool->GetNameId(NAME); ASSERT((id != 0) == RESULT);
+
+void TestGetNameId(DataPool* pDataPool)
+{
+  GXUINT id;
+  TEST_GETNAMEID("CET4_WORD",  TRUE);
+  TEST_GETNAMEID("DlgText",    TRUE);
+  TEST_GETNAMEID("DynB",       TRUE);
+  TEST_GETNAMEID("DynC",       TRUE);
+  TEST_GETNAMEID("DynTestA",   TRUE);
+  TEST_GETNAMEID("HEAD_A",     TRUE);
+  TEST_GETNAMEID("LAST_C",     TRUE);
+  TEST_GETNAMEID("MID_B",      TRUE);
+  TEST_GETNAMEID("SttB",       TRUE);
+  TEST_GETNAMEID("SttC",       TRUE);
+  TEST_GETNAMEID("SttTestA",   TRUE);
+  TEST_GETNAMEID("WORDCLASS",  TRUE);
+  TEST_GETNAMEID("a",          TRUE);
+  TEST_GETNAMEID("aDyn",       TRUE);
+  TEST_GETNAMEID("aDynD",      TRUE);
+  TEST_GETNAMEID("aPos",       TRUE);
+  TEST_GETNAMEID("aStt",       TRUE);
+  TEST_GETNAMEID("aSttD",      TRUE);
+  TEST_GETNAMEID("aVertices",  TRUE);
+  TEST_GETNAMEID("ad",         TRUE);
+  TEST_GETNAMEID("bResult",    TRUE);
+  TEST_GETNAMEID("chinese",    TRUE);
+  TEST_GETNAMEID("conj",       TRUE);
+  TEST_GETNAMEID("float",      TRUE);
+  TEST_GETNAMEID("float3",     TRUE);
+  TEST_GETNAMEID("float4",     TRUE);
+  TEST_GETNAMEID("int",        TRUE);
+  TEST_GETNAMEID("n",          TRUE);
+  TEST_GETNAMEID("name",       TRUE);
+  TEST_GETNAMEID("nameA",      TRUE);
+  TEST_GETNAMEID("nameB",      TRUE);
+  TEST_GETNAMEID("namesA",     TRUE);
+  TEST_GETNAMEID("namesB",     TRUE);
+  TEST_GETNAMEID("prep",       TRUE);
+  TEST_GETNAMEID("sTestC",     TRUE);
+  TEST_GETNAMEID("strName",    TRUE);
+  TEST_GETNAMEID("string",     TRUE);
+  TEST_GETNAMEID("vi",         TRUE);
+  TEST_GETNAMEID("vi_n",       TRUE);
+  TEST_GETNAMEID("vt",         TRUE);
+  TEST_GETNAMEID("vt_vi_n",    TRUE);
+  TEST_GETNAMEID("w",          TRUE);
+  TEST_GETNAMEID("word",       TRUE);
+  TEST_GETNAMEID("word_class", TRUE);
+  TEST_GETNAMEID("words",      TRUE);
+  TEST_GETNAMEID("x",          TRUE);
+  TEST_GETNAMEID("y",          TRUE);
+  TEST_GETNAMEID("z",          TRUE);
+
+  TEST_GETNAMEID("AAA",       FALSE);
+  TEST_GETNAMEID("sjd",       FALSE);
+  TEST_GETNAMEID("zzz",       FALSE);
+}
 
 // 这个用来测试比较复杂的结构体+数组
 void TestComplexArray()
@@ -232,6 +290,10 @@ void TestComplexArray()
 
   DataPool* pDataPoolFromFile = NULL;
   DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolLoad_ReadOnly);
+
+
+  TestGetNameId(pDataPoolFromFile);
+  TestGetNameId(pDataPool);
 
   ENUM_DATAPOOL(pDataPoolFromFile);
   SAFE_RELEASE(pDataPool);

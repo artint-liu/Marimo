@@ -79,17 +79,14 @@ namespace clstd
       return _TMap::end();
     }
 
-    //clsize size() const // 获得这个字符串集合所占用的空间, 注意这个与基类的size()重名
-    //{
-    //  ASSERT(ALIGN_4(m_nSpaceUsage) == m_nSpaceUsage); // 验证是四字节对齐的
-    //  return m_nSpaceUsage;
-    //}
-
     clsize size() const
     {
       return _TMap::size();
     }
 
+    // 输出的table是原来字符串插入顺序经过排序后的新顺序和偏移
+    // pTable[old_index].index  是排序后的顺序
+    // pTable[old_index].offset 是排序后的新偏移
     clsize sort(STRINGSETDESC* pTable) // 要保证 pTable 有足够的空间储存，空间从count()获得
     {
       if(pTable == NULL) {
@@ -115,6 +112,18 @@ namespace clstd
       return size();
     }
 
+    template<typename _Ty>
+    b32 gather_offset(_Ty* pDest, clsize cbSize) const // cbSize用来校验写入空间,如果不够返回false
+    {
+      if(cbSize < size() * sizeof(_Ty)) {
+        return FALSE;
+      }
+      for(auto it = _TMap::begin(); it != _TMap::end(); ++it) {
+        *pDest++ = it->second.offset;
+      }
+      return TRUE;
+    }
+
     void gather(typename _TString::LPCSTR pDest) const
     {
       for(auto it = _TMap::begin(); it != _TMap::end(); ++it) {
@@ -124,7 +133,7 @@ namespace clstd
     }
 
     template<class _TBuffer>
-    typename _TString::LPCSTR GatherToBuffer(_TBuffer* pBuffer, clsize nOffset) // nOffset==-1表示在末尾追加,追加时会按照四字节对齐
+    typename _TString::LPCSTR gather(_TBuffer* pBuffer, clsize nOffset) // nOffset==-1表示在末尾追加,追加时会按照四字节对齐
     {
       auto start = (nOffset == -1) ? ALIGN_4(pBuffer->GetSize()) : nOffset;
 

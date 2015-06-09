@@ -164,9 +164,9 @@ namespace Marimo
       const _Ty& operator=(const _Ty& val)
       {
         *(_Ty*)GetPtr() = val;
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
         Impulse(DATACT_Change);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
         return *(_Ty*)GetPtr();
       }
 
@@ -201,18 +201,18 @@ namespace Marimo
       _Ty& operator=(_Ty& val)
       {
         *(_Ty*)GetPtr() = val;
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
         Impulse(DATACT_Change);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
         return *(_Ty*)GetPtr();
       }
 
       const _Ty& operator=(const _Ty& val)
       {
         *(_Ty*)GetPtr() = val;
-#ifdef ENABLE_DATAPOOL_WATCHER
+//#ifdef ENABLE_DATAPOOL_WATCHER
         Impulse(DATACT_Change);
-#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
         return *(_Ty*)GetPtr();
       }
     };
