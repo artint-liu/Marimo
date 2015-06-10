@@ -5,7 +5,7 @@
 #define SCROLLBAR_WIDTH 10
 #define CHECKBOX_SIZE 10
 
-#define IS_LEFTTORIGHT(_STYLE)  TEST_FLAG(_STYLE, GXLBS_LTRSCROLLED)
+#define IS_LEFTTORIGHT(_STYLE)  ((m_bRichList && TEST_FLAG(_STYLE, GXLBS_LTRSCROLLED)) || ( ! m_bRichList && TEST_FLAG(_STYLE, GXLBS_MULTICOLUMN)))
 
 namespace DlgXM
 {
@@ -36,11 +36,11 @@ namespace GXUI
 
     typedef clvector<ITEMSTATUS>  ItemStatusArray;
 
-    enum ListType
-    {
-      LT_Simple,
-      LT_Custom,
-    };
+    //enum ListType
+    //{
+    //  LT_Simple,
+    //  LT_Custom,
+    //};
   protected:
     IListDataAdapter* m_pAdapter;
     GXSIZE_T          m_nTopIndex;
@@ -49,7 +49,7 @@ namespace GXUI
     GXINT             m_nLastSelected;
     GXINT             m_nScrolled;      // Item 滚动过去的数量,稳定时<=0
     GXINT             m_nPrevScrolled;  // 拖动开始时的Scrolled
-    GXINT             m_nItemHeight;    // TODO: 这个看看是否能去掉
+    GXINT             m_nItemHeight;
     GXCOLORREF        m_crBackground;
     GXCOLORREF        m_crText;
     GXCOLORREF        m_crHightlight;
@@ -57,9 +57,10 @@ namespace GXUI
     ItemStatusArray   m_aItems;
     GXDWORD           m_bShowScrollBar : 1;   // 这个滚动条只用于显示, 不响应操作
     GXDWORD           m_bShowButtonBox : 1;   // TODO: 以后改成List的Style
+    GXDWORD           m_bRichList      : 1;
 
   public:
-    List(GXLPCWSTR szIdName);
+    List(GXLPCWSTR szIdName, GXDWORD bRichList);
   public:
     static GXLRESULT GXCALLBACK WndProc        (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
     static List* Create     (GXHINSTANCE hInst, GXHWND hParent, const DlgXM::DLGBASICPARAMW* pDlgParam, const GXDefinitionArrayW* pDefinitions);
@@ -96,6 +97,9 @@ namespace GXUI
     GXBOOL      SelectItem          (GXINT nItem, GXBOOL bSelected, GXBOOL bNotify);
     //GXBOOL      UpdateItemStatus    (GXSIZE_T nBegin, GXSIZE_T nEnd);
     //GXBOOL      SyncItemStatCount   ();
+    void        BottomToHeight      (GXDWORD dwStyle, GXSIZE_T begin); // GXLBS_MULTICOLUMN
+    void        HeightToBottom      (GXDWORD dwStyle, const GXRECT& rcClient, GXSIZE_T begin); // GXLBS_MULTICOLUMN
+    GXINT       DbgCalcColumnCount  ();
     GXBOOL      OnSyncInsert        (GXSIZE_T begin, GXSIZE_T count);
     GXBOOL      OnSyncRemove        (GXSIZE_T begin, GXSIZE_T count);
     //void        DeleteItemStat      (GXINT nIndex);

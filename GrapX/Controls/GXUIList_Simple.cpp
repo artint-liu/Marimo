@@ -25,7 +25,7 @@ namespace GXUI
 
   //////////////////////////////////////////////////////////////////////////
   SimpleList::SimpleList(GXLPCWSTR szIdName)
-    : List(szIdName)
+    : List(szIdName, FALSE)
   {
   }
 
@@ -69,10 +69,10 @@ namespace GXUI
     return -1;
   }
 
-  List::ListType SimpleList::GetListType()
-  {
-    return LT_Simple;
-  }
+  //List::ListType SimpleList::GetListType()
+  //{
+  //  return LT_Simple;
+  //}
 
   GXLRESULT SimpleList::OnPaint(GXWndCanvas& canvas)
   {
@@ -104,14 +104,31 @@ namespace GXUI
       return 0;
     }
     //GXINT nItemTop = m_nScrolled + m_aItems[m_nTopIndex].nBottom/* - nHeight*/;
-    GXINT nItemTop    = m_nScrolled + (m_nTopIndex == 0 ? 0 : m_aItems[m_nTopIndex - 1].nBottom);
-    GXINT nItemBottom;// = m_nScrolled + m_aItems[m_nTopIndex].nBottom;
+    //GXINT nItemTop;//    = m_nScrolled + (m_nTopIndex == 0 ? 0 : m_aItems[m_nTopIndex - 1].nBottom);
+    //GXINT nItemBottom;// = m_nScrolled + m_aItems[m_nTopIndex].nBottom;
 
     //clStringW strItem;
     //GXRECT  rcItem;
 
     IListDataAdapter::GETSTRW ItemStrDesc;
     GXRECT& rcItem = ItemStrDesc.rect;
+    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
+
+      // m_nTopIndex 要指向某一列的第一行,但是这个断言在自定义列高度时不一定准确
+      ASSERT(m_nTopIndex == 0 || m_aItems[m_nTopIndex - 1].nBottom >= m_aItems[m_nTopIndex].nBottom);
+
+      //nItemTop      = 0;
+      rcItem.left   = (m_nScrolled % m_nColumnWidth) + (m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0);
+      rcItem.top    = 0;
+      rcItem.right  = rcItem.left + m_nColumnWidth;
+      rcItem.bottom = 0;
+    }
+    else {
+      rcItem.top    = m_nScrolled + (m_nTopIndex == 0 ? 0 : m_aItems[m_nTopIndex - 1].nBottom);
+      rcItem.left   = m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0;
+      rcItem.right  = rect.right;
+      //rcItem.bottom = m_nScrolled + m_aItems[m_nTopIndex].nBottom;
+    }
 
     for(int i = m_nTopIndex; i < nCount; i++)
     {
@@ -122,13 +139,20 @@ namespace GXUI
       const ITEMSTATUS& ItemStatus = m_aItems[i];
       GXColor32 crText = m_crText;
 
-      nItemBottom = m_nScrolled + ItemStatus.nBottom;
+      if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
+        if(rcItem.bottom >= ItemStatus.nBottom) {
+          rcItem.top = 0;
+          rcItem.left += m_nColumnWidth;
+          rcItem.right += m_nColumnWidth;
+        }
+        rcItem.bottom = ItemStatus.nBottom;
+      }
+      else {
+        rcItem.bottom = m_nScrolled + ItemStatus.nBottom;
+      }
 
-      //if( ! bFixedHeight) {
-      //  nHeight = GetItemHeight(i);
-      //}
+      //gxSetRect(&rcItem, , nItemTop, rect.right, nItemBottom);
 
-      gxSetRect(&ItemStrDesc.rect, m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0, nItemTop, rect.right, nItemBottom);
       if(m_pAdapter->GetStringW(&ItemStrDesc))
       {
         GXINT nStrLen = ItemStrDesc.sString.GetLength();
@@ -162,12 +186,22 @@ namespace GXUI
         }
       }
 
-      //nItemTop += nHeight;
-      if(nItemTop >= rect.bottom) {
-        break;
+      if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
+        rcItem.top = rcItem.bottom;
       }
+      else {
+        if(rcItem.top >= rect.bottom) {
+          break;
+        }
+        rcItem.top = rcItem.bottom;
+        //rcItem.bottom = m_nScrolled + ItemStatus.nBottom;
+      }
+      //nItemTop += nHeight;
+      //if(nItemTop >= rect.bottom) {
+      //  break;
+      //}
 
-      nItemTop    = nItemBottom;
+      //nItemTop    = nItemBottom;
       //nItemBottom = m_nScrolled + ItemStat.nBottom;
     }
 
@@ -259,7 +293,7 @@ LAST_STR:
 
   int SimpleList::OnSize(int cx, int cy)
   {
-    m_nColumnWidth = cx;
+    m_nColumnWidth = cx / 2;
     return 0;
   }
 

@@ -538,7 +538,7 @@ namespace GXUI
     return CtrlBase::DefWndProc(hWnd, message, wParam, lParam, pThis);
   }
 
-  List::List( GXLPCWSTR szIdName )
+  List::List( GXLPCWSTR szIdName, GXDWORD bRichList )
     : CtrlBase(szIdName)
     , m_pAdapter      (NULL)
     , m_nTopIndex     (0)
@@ -550,6 +550,7 @@ namespace GXUI
     , m_nItemHeight   (-1)
     , m_bShowScrollBar(0)
     , m_bShowButtonBox(0)
+    , m_bRichList     (bRichList)
     , m_crBackground  (gxGetSysColor(GXCOLOR_WINDOW))
     , m_crText        (gxGetSysColor(GXCOLOR_INFOTEXT))
     , m_crHightlight  (gxGetSysColor(GXCOLOR_HIGHLIGHT))
@@ -988,10 +989,21 @@ namespace GXUI
     GXINT nScrolled = -m_nScrolled;
     GXINT nItem = 0;
 
-    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)/* || m_pAdapter->IsFixedHeight()*/)
+    if( ! m_bRichList && TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
+    {
+      // 加上Item Height是一致的
+      GXRECT rect;
+      gxGetClientRect(m_hWnd, &rect);
+      int nColumn = (nScrolled / m_nColumnWidth);
+      m_nTopIndex = (nColumn == m_nColumnCount ? m_nColumnCount - 1 : nColumn) * (rect.bottom / m_nItemHeight);
+      TRACE("nColumn:%d\n", nColumn);
+      clClamp((GXSIZE_T)0, m_pAdapter->GetCount() - 1, &m_nTopIndex);
+      return TRUE;
+    }
+    else if(m_bRichList && TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)/* || m_pAdapter->IsFixedHeight()*/)
     {
       m_nTopIndex = nScrolled / GetItemHeight(0) * m_nColumnCount;
-      clClamp((GXSIZE_T)0, m_pAdapter->GetCount(), &m_nTopIndex);
+      clClamp((GXSIZE_T)0, m_pAdapter->GetCount() - 1, &m_nTopIndex);
       return TRUE;
     }
     else {
@@ -1098,30 +1110,48 @@ namespace GXUI
   GXBOOL List::OnSyncInsert( GXSIZE_T begin, GXSIZE_T count )
   {
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
-    ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN));
+    //ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN));
     ASSERT(m_pAdapter->GetCount() == m_aItems.size() + count);
     ITEMSTATUS sItem;
-    auto n = begin == 0 ? 0 : m_aItems[begin - 1].nBottom;
+    auto nPrevBottom = (begin == 0) ? 0 : m_aItems[begin - 1].nBottom;
     
-    m_aItems.insert(m_aItems.begin() + begin, count, sItem);
-    auto it = m_aItems.begin() + begin;
-    //auto itEnd = (begin + count) == m_aItems.size() ? m_aItems.end() : (m_aItems.begin() + begin + count);
-    auto itEnd = (m_aItems.begin() + begin + count);
+    //m_aItems.insert(m_aItems.begin() + begin, count, sItem);
+    //auto it = m_aItems.begin() + begin;
+    //auto itEnd = (m_aItems.begin() + begin + count);
 
-    // 设置新增Item的bottom值
-    for(; it != itEnd; ++it)
+    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
     {
-      ASSERT(it->nBottom == -1);
-      it->nBottom = n + m_nItemHeight;
-      n = it->nBottom;
+      GXRECT rect;
+      gxGetClientRect(m_hWnd, &rect);
+      BottomToHeight(dwStyle, begin);
+
+      sItem.nBottom = m_nItemHeight;
+      m_aItems.insert(m_aItems.begin() + begin, count, sItem);
+
+      HeightToBottom(dwStyle, rect, begin);
+      ASSERT(m_nColumnCount == DbgCalcColumnCount());
     }
+    else
+    {
+      m_aItems.insert(m_aItems.begin() + begin, count, sItem);
+      auto it = m_aItems.begin() + begin;
+      auto itEnd = (m_aItems.begin() + begin + count);
 
-    itEnd = m_aItems.end();
-    n = m_nItemHeight * count;
+      // 设置新增Item的bottom值
+      for(; it != itEnd; ++it)
+      {
+        ASSERT(it->nBottom == -1);
+        it->nBottom = nPrevBottom + m_nItemHeight;
+        nPrevBottom = it->nBottom;
+      }
 
-    // 调整插入点之后的Item的bottom值
-    for(; it != itEnd; ++it) {
-      it->nBottom += n;
+      itEnd = m_aItems.end();
+      nPrevBottom = m_nItemHeight * count; // 这里开始 nPrevBottom 另作它用
+
+      // 调整插入点之后的Item的bottom值
+      for(; it != itEnd; ++it) {
+        it->nBottom += nPrevBottom;
+      }
     }
     return TRUE;
   }
@@ -1129,18 +1159,84 @@ namespace GXUI
   GXBOOL List::OnSyncRemove( GXSIZE_T begin, GXSIZE_T count )
   {
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
-    ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN));
+    //ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN));
     ASSERT(m_pAdapter->GetCount() + count == m_aItems.size());
-    auto n = m_aItems[begin + count - 1].nBottom - (begin == 0 ? 0 : m_aItems[begin - 1].nBottom);
 
-    auto it = m_aItems.begin() + begin;
-    m_aItems.erase(it, it + count);
+    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
+    {
+      GXRECT rect;
+      gxGetClientRect(m_hWnd, &rect);
+      BottomToHeight(dwStyle, begin);
 
-    it = m_aItems.begin() + begin;
-    for(; it != m_aItems.end(); ++it) {
-      it->nBottom -= n;
+      auto it = m_aItems.begin() + begin;
+      m_aItems.erase(it, it + count);
+
+      HeightToBottom(dwStyle, rect, begin);
+      ASSERT(m_nColumnCount == DbgCalcColumnCount());
+    }
+    else
+    {
+      auto nReduceHeight = m_aItems[begin + count - 1].nBottom - (begin == 0 ? 0 : m_aItems[begin - 1].nBottom);
+      auto it = m_aItems.begin() + begin;
+      m_aItems.erase(it, it + count);
+
+      it = m_aItems.begin() + begin;
+      for(; it != m_aItems.end(); ++it) {
+        it->nBottom -= nReduceHeight;
+      }
     }
     return TRUE;
+  }
+
+  void List::BottomToHeight( GXDWORD dwStyle, GXSIZE_T begin )
+  {
+    ASSERT(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)); // 只在多列模式下使用
+    auto nPrevBottom = begin == 0 ? 0 : m_aItems[begin - 1].nBottom;
+    for(auto it = m_aItems.begin() + begin; it != m_aItems.end(); ++it)
+    {
+      if(nPrevBottom < it->nBottom) {
+        auto nBottom = it->nBottom;
+        it->nBottom -= nPrevBottom;
+        nPrevBottom = nBottom;
+      }
+      else {
+        // 此时 it->nBottom = it->nBottom; 这个就是高度
+        nPrevBottom = it->nBottom;
+        --m_nColumnCount;
+      }
+    }
+  }
+
+  void List::HeightToBottom( GXDWORD dwStyle, const GXRECT& rcClient, GXSIZE_T begin )
+  {
+    ASSERT(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)); // 只在多列模式下使用
+    auto nPrevBottom = begin == 0 ? 0 : m_aItems[begin - 1].nBottom;
+    for(auto it = m_aItems.begin() + begin; it != m_aItems.end(); ++it)
+    {
+      const auto nItemHeight = it->nBottom;
+      it->nBottom = nPrevBottom + it->nBottom;
+      if(it->nBottom > rcClient.bottom) {
+        it->nBottom = nItemHeight;
+        ++m_nColumnCount;
+      }
+      nPrevBottom = it->nBottom;
+    }    
+  }
+
+  GXINT List::DbgCalcColumnCount()
+  {
+    GXINT nColumnCount = 1;
+    if( ! m_aItems.empty()) {
+      auto nPrevBottom = m_aItems.front().nBottom;
+      for(auto it = m_aItems.begin() + 1; it != m_aItems.end(); ++it)
+      {
+        if(nPrevBottom >= it->nBottom) {
+          nColumnCount++;
+        }
+        nPrevBottom = it->nBottom;
+      }
+    }
+    return nColumnCount;
   }
 
 } // namespace GXUI

@@ -40,7 +40,7 @@ namespace GXUI
 
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
     virtual GXLRESULT SetVariable         (MOVariable* pVariable);
-    virtual ListType  GetListType         ();
+    //virtual ListType  GetListType         ();
     //virtual GXINT     VirGetItemHeight    (GXINT nIdx) const;
     virtual int       OnSize              (int cx, int cy);
     //virtual int       OnLButtonDown       (int fwKeys, int x, int y);

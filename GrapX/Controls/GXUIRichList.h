@@ -64,7 +64,7 @@ namespace GXUI
     GXBOOL    UpdateCustItemText  (int nIndex, GXLPCRECT rcItem);
     GXLRESULT SetItemTemplate     (GXLPCWSTR szTemplate);
 
-    virtual ListType  GetListType         ();
+    //virtual ListType  GetListType         ();
     virtual GXLRESULT Measure             (GXRegn* pRegn);
     virtual int       OnCreate            (GXCREATESTRUCT* pCreateParam);
     virtual GXLRESULT SetVariable         (MOVariable* pVariable);

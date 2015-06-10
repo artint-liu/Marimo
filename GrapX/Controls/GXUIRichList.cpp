@@ -266,10 +266,10 @@ namespace GXUI
     return TRUE;
   }
 
-  List::ListType RichList::GetListType()
-  {
-    return LT_Custom;
-  }
+  //List::ListType RichList::GetListType()
+  //{
+  //  return LT_Custom;
+  //}
 
   GXLRESULT RichList::Measure(GXRegn* pRegn)
   {
@@ -633,7 +633,7 @@ namespace GXUI
   }
 
   RichList::RichList(GXLPCWSTR szIdName)
-    : List         (szIdName)
+    : List         (szIdName, TRUE)
     , m_hPrototype (NULL)
   {
   }
