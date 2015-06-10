@@ -180,8 +180,21 @@ void SampleApp_MOUI::InitDataPool()
   if(m_pBasicDataPool->QueryByExpression("SpriteInfo", &varSpriteInfo))
   {
     varSpriteInfo["sprite"].Retain(pSprite);
-    varSpriteInfo["name"]   = "fourth";
+    varSpriteInfo["name"] = "fourth";
   }
+
+  MOVariable varRichList;
+  if(m_pBasicDataPool->QueryByExpression("combo", &varRichList))
+  {
+    MOVariable var;
+    for(auto it = varRichList.array_begin(); it != varRichList.array_end(); ++it)
+    {
+      it.ToVariable(var);
+      var["sprite"].Retain(pSprite);
+      var["index"] = 1;
+    }
+  }
+
 
   SAFE_RELEASE(pSprite);
 }

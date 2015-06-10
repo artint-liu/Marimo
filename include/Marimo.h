@@ -63,6 +63,7 @@
 #include <GrapX/Platform.h>
 #include <GrapX/DataPool.H>
 #include <GrapX/DataPoolVariable.H>
+#include <GrapX/DataPoolIterator.H>
 #include <GrapX/DataInfrastructure.H>
 //#include "third_party\FBX SDK\2013.2\include\fbxsdk.h"
 

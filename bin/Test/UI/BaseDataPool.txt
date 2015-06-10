@@ -7,6 +7,9 @@ struct SPRITEINFO
 
 struct COMBO
 {
+  object sprite;
+  int index;
+
   string Class;
   string Name;
   int Price;
