@@ -112,31 +112,46 @@ namespace GXUI
 
     IListDataAdapter::GETSTRW ItemStrDesc;
     GXRECT& rcItem = ItemStrDesc.rect;
+    ItemStrDesc.item = m_nTopIndex;
+
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
 
       // m_nTopIndex 要指向某一列的第一行,但是这个断言在自定义列高度时不一定准确
-      ASSERT(m_nTopIndex == 0 || m_aItems[m_nTopIndex - 1].nBottom >= m_aItems[m_nTopIndex].nBottom);
+      //ASSERT(m_nTopIndex == 0 || m_aItems[m_nTopIndex - 1].nBottom >= m_aItems[m_nTopIndex].nBottom);
 
       //nItemTop      = 0;
-      rcItem.left   = (m_nScrolled % m_nColumnWidth) + (m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0);
+      rcItem.left   = m_nScrolled >= 0 ? m_nScrolled : (m_nScrolled % m_nColumnWidth);
       rcItem.top    = 0;
       rcItem.right  = rcItem.left + m_nColumnWidth;
       rcItem.bottom = 0;
+
+      if(rcItem.left > rect.right) {
+        // 如果超出显示区域, 索引设为无效
+        ItemStrDesc.item = nCount;
+      }
+
+      rcItem.left += (m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0);
     }
     else {
       rcItem.top    = m_nScrolled + (m_nTopIndex == 0 ? 0 : m_aItems[m_nTopIndex - 1].nBottom);
       rcItem.left   = m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0;
       rcItem.right  = rect.right;
       //rcItem.bottom = m_nScrolled + m_aItems[m_nTopIndex].nBottom;
+
+      if(rcItem.top > rect.bottom) {
+        // 如果超出显示区域, 索引设为无效
+        ItemStrDesc.item = nCount;
+      }
     }
 
-    for(int i = m_nTopIndex; i < nCount; i++)
+    //TRACE("===================\n");
+
+    for(; ItemStrDesc.item < nCount; ++ItemStrDesc.item)
     {
-      ItemStrDesc.item = i;
-      ItemStrDesc.name = NULL;
+      ItemStrDesc.name    = NULL;
       ItemStrDesc.element = 0;
 
-      const ITEMSTATUS& ItemStatus = m_aItems[i];
+      const ITEMSTATUS& ItemStatus = m_aItems[ItemStrDesc.item];
       GXColor32 crText = m_crText;
 
       if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
@@ -156,6 +171,8 @@ namespace GXUI
       if(m_pAdapter->GetStringW(&ItemStrDesc))
       {
         GXINT nStrLen = ItemStrDesc.sString.GetLength();
+        //TRACEW(L"%s(%d,%d,%d,%d)\n", ItemStrDesc.sString,
+        //  rcItem.left, rcItem.top, rcItem.right, rcItem.bottom);
 
         if(m_bShowButtonBox) {
           GXRECT rcBtnBox  = {1, rcItem.top, CHECKBOX_SIZE + 2, rcItem.bottom};
@@ -187,22 +204,17 @@ namespace GXUI
       }
 
       if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
-        rcItem.top = rcItem.bottom;
+        if(rcItem.left > rect.right) {
+          break;
+        }
       }
       else {
         if(rcItem.top >= rect.bottom) {
           break;
         }
-        rcItem.top = rcItem.bottom;
-        //rcItem.bottom = m_nScrolled + ItemStatus.nBottom;
       }
-      //nItemTop += nHeight;
-      //if(nItemTop >= rect.bottom) {
-      //  break;
-      //}
 
-      //nItemTop    = nItemBottom;
-      //nItemBottom = m_nScrolled + ItemStat.nBottom;
+      rcItem.top = rcItem.bottom;
     }
 
     if(m_bShowScrollBar) {

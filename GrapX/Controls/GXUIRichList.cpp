@@ -25,6 +25,7 @@
 #define CHECKBOX_SIZE 10
 #define ITEM_LINE_POS(_ITEM, _SIZE)  (m_nScrolled + _ITEM / m_nColumnCount * _SIZE) // LEFTTORIGHT 时是Left位置，否则是Top位置
 #define ITEM_COLUMN_POS(_ITEM, _SIZE)  (_ITEM % m_nColumnCount * _SIZE)             // LEFTTORIGHT 时是Top位置，否则是Left位置
+#define IS_LTORRICHLIST(_STYLE)  TEST_FLAG(_STYLE, GXLBS_LTRSCROLLED)
 using namespace clstd;
 
 GXHWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, GXLPCWSTR lpDlgName, GXHWND hParent, GXDLGPROC lpDialogFunc, GXLPARAM lParam);
@@ -322,7 +323,7 @@ namespace GXUI
       gxGetClientRect(m_hWnd, &rcClient);
 
       // 扩展的边
-      const int nExtEdge = (IS_LEFTTORIGHT(dwStyle) 
+      const int nExtEdge = (IS_LTORRICHLIST(dwStyle) 
         ? offsetof(GXRECT, bottom)
         : offsetof(GXRECT, right)) / sizeof(GXLONG);
 
@@ -374,7 +375,7 @@ namespace GXUI
     //if(nRightCap < rect.right) {
     //  canvas.FillRect(nRightCap, rect.top, rect.right - nRightCap, rect.bottom, 0xffffffff);
     //}
-    if(IS_LEFTTORIGHT(dwStyle)) {
+    if(IS_LTORRICHLIST(dwStyle)) {
       rcGap.left = clMax(m_nScrolled, 0);
       rcGap.top = 0;      
       rcGap.bottom = m_nColumnCount * TemplProtoHeight/* - SCROLLBAR_WIDTH*/;
@@ -387,7 +388,7 @@ namespace GXUI
 
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) 
     {
-      if(IS_LEFTTORIGHT(dwStyle)) {
+      if(IS_LTORRICHLIST(dwStyle)) {
         //nPassPos = m_nScrolled + m_nTopIndex / m_nColumnCount * TemplProtoWidth;
         nPassPos = ITEM_LINE_POS(m_nTopIndex, TemplProtoWidth);
         rcGap.right = nPassPos + TemplProtoWidth;  // 后面累加
@@ -399,7 +400,7 @@ namespace GXUI
       }
     }
     else if(TRUE/*bFixedHeight*/) {
-      if(IS_LEFTTORIGHT(dwStyle)) {
+      if(IS_LTORRICHLIST(dwStyle)) {
         nPassPos = m_nScrolled + m_nTopIndex * TemplProtoWidth;
       }
       else {
@@ -427,7 +428,7 @@ namespace GXUI
       
       if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
       {
-        if(IS_LEFTTORIGHT(dwStyle))
+        if(IS_LTORRICHLIST(dwStyle))
         {
           const int yi = (i % m_nColumnCount);
           rcItem.left   = nPassPos;
@@ -442,7 +443,7 @@ namespace GXUI
             rcGap.right += TemplProtoWidth;
           }
         }
-        else
+        else // 多列,上下滚动
         {
           const int xi = (i % m_nColumnCount);
           rcItem.left   = xi * TemplProtoWidth;
@@ -450,18 +451,19 @@ namespace GXUI
           rcItem.right  = rcItem.left + TemplProtoWidth;
           rcItem.bottom = nPassPos + TemplProtoHeight;
 
+          rcGap.bottom = rcItem.bottom;
           PlantCustItem(i, &rcItem);
 
           if(xi + 1 == m_nColumnCount) {
             nPassPos = rcGap.bottom; 
-            rcGap.bottom += TemplProtoHeight;
+            //rcGap.bottom += TemplProtoHeight;
           }
         }
       }
-      else {
+      else { // 单列模式
         //CLBREAK; // 修改后目前这个不支持
 
-        if(IS_LEFTTORIGHT(dwStyle))
+        if(IS_LTORRICHLIST(dwStyle))
         {
           gxSetRect(&rcItem, nPassPos, 0, nPassPos + TemplProtoWidth, TemplProtoHeight);
           nPassPos += TemplProtoWidth;
@@ -486,8 +488,8 @@ namespace GXUI
       }
 
 
-      if((IS_LEFTTORIGHT(dwStyle) && nPassPos >= rect.right) ||
-        ( ! IS_LEFTTORIGHT(dwStyle) && nPassPos >= rect.bottom))
+      if((IS_LTORRICHLIST(dwStyle) && nPassPos >= rect.right) ||
+        ( ! IS_LTORRICHLIST(dwStyle) && nPassPos >= rect.bottom))
       {
         i++;  // 回收从这个开始
         break;
@@ -497,7 +499,7 @@ namespace GXUI
 
     // 填充最后一个Item之后一行的空白
     // 如果这个Item恰好在行尾，那么调整rcGap.bottom或rcGap.right
-    if(IS_LEFTTORIGHT(dwStyle)) {
+    if(IS_LTORRICHLIST(dwStyle)) {
       ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN) || nPassPos < rcGap.right);
       if(rcItem.bottom < rcGap.bottom) {        
         canvas.FillRect(nPassPos, rcItem.bottom, rcGap.right - nPassPos, rcGap.bottom - rcItem.bottom, 0xffffffff);
@@ -507,7 +509,7 @@ namespace GXUI
       }
     }
     else {
-      ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN) || nPassPos < rcGap.bottom);
+      ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN) || nPassPos <= rcGap.bottom);
       if(rcItem.right < rcGap.right) {
         canvas.FillRect(rcItem.right, nPassPos, rcGap.right - rcItem.right, rcGap.bottom - nPassPos, 0xffffffff);
       }
@@ -527,10 +529,12 @@ namespace GXUI
       canvas.FillRect(0, 0, rect.right, rcGap.top, 0xffffffff);
     }
 
-    // 如果宽度不足，会用上面逐条判断是否在选择高亮状态下的方法填充
-    //if(rcGap.right < rect.right) {
-    //  canvas.FillRect(rcGap.right, rcGap.top, rect.right - rcGap.right, rcGap.bottom - rcGap.top, 0xffffffff);
-    //}
+    if(rcGap.right < rect.right) {
+      if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN) || IS_LTORRICHLIST(dwStyle)) {
+        canvas.FillRect(rcGap.right, rcGap.top, rect.right - rcGap.right, rcGap.bottom - rcGap.top, 0xffffffff);
+      }
+      // 单列,上下滚动模式如果宽度不足，会用上面逐条判断是否在选择高亮状态下的方法填充
+    }
 
     // 底边空白填充
     if(rcGap.bottom < rect.bottom) {
@@ -555,7 +559,7 @@ namespace GXUI
       {
         gxGetWindowRect(m_hPrototype, &rcItemTemplate);
 
-        if(IS_LEFTTORIGHT(dwStyle)) {
+        if(IS_LTORRICHLIST(dwStyle)) {
           const int nItemSize = rcItemTemplate.bottom - rcItemTemplate.top;
           m_nColumnCount = nItemSize <= 0 ? 1 : cy / nItemSize;
         }
@@ -619,7 +623,7 @@ namespace GXUI
     rcItem.right -= rcItem.left;
     rcItem.bottom -= rcItem.top;
 
-    if(IS_LEFTTORIGHT(dwStyle)) {
+    if(IS_LTORRICHLIST(dwStyle)) {
       lprc->left = ITEM_LINE_POS(nItem, rcItem.right);
       lprc->top  = ITEM_COLUMN_POS(nItem, rcItem.bottom);
     }

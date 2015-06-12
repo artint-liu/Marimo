@@ -26,7 +26,7 @@ namespace GXUI
     virtual GXLRESULT            OnPaint        (GXWndCanvas& canvas);
 
     GXINT     AddStringW          (GXLPCWSTR lpString);
-    GXBOOL    CheckEndScrollAnim  (GXUINT nIDTimer, bool bForced);
+    //GXBOOL    CheckEndScrollAnim  (GXUINT nIDTimer, bool bForced);
     GXINT     HitTest             (int fwKeys, int x, int y) const;
     //GXINT     GetItemHeight       (GXINT nIdx) const;
     GXBOOL    IsItemSelected      (GXINT nItem) const;

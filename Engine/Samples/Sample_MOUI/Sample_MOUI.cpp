@@ -191,7 +191,7 @@ void SampleApp_MOUI::InitDataPool()
     {
       it.ToVariable(var);
       var["sprite"].Retain(pSprite);
-      var["index"] = 1;
+      var["index"] = (it - varRichList.array_begin()) % 5;
     }
   }
 

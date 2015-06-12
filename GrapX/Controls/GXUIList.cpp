@@ -23,6 +23,8 @@
 
 GXHWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, GXLPCWSTR lpDlgName, GXHWND hParent, GXDLGPROC lpDialogFunc, GXLPARAM lParam);
 
+#define IS_LEFTTORIGHT(_STYLE)  ((m_bRichList && TEST_FLAG(_STYLE, GXLBS_LTRSCROLLED)) || ( ! m_bRichList && TEST_FLAG(_STYLE, GXLBS_MULTICOLUMN)))
+
 namespace GXUI
 {
   //////////////////////////////////////////////////////////////////////////
@@ -175,17 +177,17 @@ namespace GXUI
   //  return gs.sString.GetLength();
   //}
 
-  GXBOOL List::CheckEndScrollAnim(GXUINT nIDTimer, bool bForced)
-  {
-    ASSERT(nIDTimer == IDT_SCROLLUP || nIDTimer == IDT_SCROLLDOWN);
-    if(bForced) 
-    {
-      m_bShowScrollBar = FALSE;
-      gxKillTimer(m_hWnd, nIDTimer);
-      return TRUE;
-    }
-    return FALSE;
-  }
+  //GXBOOL List::CheckEndScrollAnim(GXUINT nIDTimer, bool bForced)
+  //{
+  //  ASSERT(nIDTimer == IDT_SCROLLUP || nIDTimer == IDT_SCROLLDOWN);
+  //  if(bForced) 
+  //  {
+  //    m_bShowScrollBar = FALSE;
+  //    gxKillTimer(m_hWnd, nIDTimer);
+  //    return TRUE;
+  //  }
+  //  return FALSE;
+  //}
 
   void List::UpdateScrollBarRect(GXDWORD dwStyle, LPGXCRECT lprcClient)
   {
@@ -247,9 +249,18 @@ namespace GXUI
     case IDT_SCROLLUP:
     case IDT_SCROLLDOWN:
       {
-        const GXINT nNewScroll = (m_nPrevScrolled * 3 + m_nScrolled * 5) >> 3;
+        GXINT nNewScroll = (m_nPrevScrolled * 3 + m_nScrolled * 5) >> 3;
         const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
-        CheckEndScrollAnim(nIDTimer, nNewScroll == m_nScrolled);
+        
+        //if(abs(m_nPrevScrolled - nNewScroll) < 5)
+        if(nNewScroll == m_nScrolled)
+        {
+          ASSERT(nIDTimer == IDT_SCROLLUP || nIDTimer == IDT_SCROLLDOWN);
+          m_bShowScrollBar = FALSE;
+          gxKillTimer(m_hWnd, nIDTimer);
+          nNewScroll = m_nPrevScrolled;
+        }
+        //CheckEndScrollAnim(nIDTimer, abs(m_nPrevScrolled - nNewScroll) < 5);
 
         //gxScrollWindow(m_hWnd, 0, nNewScroll - m_nScrolled, NULL, NULL);
         if(IS_LEFTTORIGHT(dwStyle)) {
@@ -707,50 +718,59 @@ namespace GXUI
     GXRECT rect;
     gxGetClientRect(m_hWnd, &rect);
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
-    GXINT nMinScroll; // 就是最后一个项目完全显示之后Topmost的那个值
+    GXINT nMinScroll; // (pixel)就是最后一个项目完全显示之后Topmost的那个值
 
-    int nItemSize = 0;
-    int nClientSize = 0;
-    if(IS_LEFTTORIGHT(dwStyle))
+    if(m_bRichList)
     {
-      nItemSize = m_nColumnWidth;
-      nClientSize = rect.right;
+      if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) { // [复杂|多列]
+        if(TEST_FLAG(dwStyle, GXLBS_LTRSCROLLED))
+        {
+          const GXINT nModCount = m_pAdapter->GetCount() + (m_nColumnCount - 1);
+          nMinScroll = rect.right - (nModCount / m_nColumnCount * m_nColumnWidth);
+        }
+        else
+        {
+          const GXINT nModCount = m_pAdapter->GetCount() + (m_nColumnCount - 1);
+          nMinScroll = rect.bottom - (nModCount / m_nColumnCount * m_nItemHeight);
+        }
+      }
+      else { // [单列]
+        if(TEST_FLAG(dwStyle, GXLBS_LTRSCROLLED)) {
+          nMinScroll = rect.right - m_aItems.size() * m_nColumnWidth;
+        }
+        else { // [单列|竖直滚动]
+          nMinScroll = rect.bottom - m_aItems.back().nBottom;
+        }
+      }
     }
-    else
+    else // [简单List]
     {
-      nItemSize = GetItemHeight(0);
-      nClientSize = rect.bottom;
+      if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
+        // FIXME: 这个假定高度一致
+        nMinScroll = rect.right - m_nColumnCount * m_nColumnWidth;
+      }
+      else { // [简单|单列] [复杂|单列|竖直滚动]
+        nMinScroll = rect.bottom - m_aItems.back().nBottom;
+      }
     }
 
-    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
-      // 这个需要放在IsFixedHeight()前面, 因为此分支是 IsFixedHeight()==TRUE 的子集
-      const GXINT nModCount = m_pAdapter->GetCount() + (m_nColumnCount - 1);
-      nMinScroll = nClientSize - (nModCount / m_nColumnCount * nItemSize);
-    }
-    //else if(m_pAdapter->IsFixedHeight()) {
-    //  nMinScroll = clMin(0, nClientSize - m_pAdapter->GetCount() * nItemSize);
-    //}
-    else {
-      nMinScroll = nClientSize - m_aItems.back().nBottom;
-    }
+
 
     if(m_nScrolled > 0)
     {
       m_nPrevScrolled = 0;
       gxSetTimer(m_hWnd, IDT_SCROLLUP, 30, NULL);
-      m_bShowScrollBar = TRUE;
     }
     else if(m_nScrolled < nMinScroll)
     {
-      nMinScroll = clMin(nMinScroll, 0); // 所有的Item加起来仍小于List的Height，要按照顶部对齐
-
-      m_nPrevScrolled = nMinScroll;
+      m_nPrevScrolled = clMin(nMinScroll, 0); // 所有的Item加起来仍小于List的Height，要按照顶部对齐
       gxSetTimer(m_hWnd, IDT_SCROLLDOWN, 30, NULL);
-      m_bShowScrollBar = TRUE;
     }
     else {
       return FALSE;
     }
+
+    m_bShowScrollBar = TRUE;
     return TRUE;
   }
 
@@ -991,13 +1011,14 @@ namespace GXUI
 
     if( ! m_bRichList && TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
     {
-      // 加上Item Height是一致的
+      // FIXME: 这个假定高度一致
       GXRECT rect;
       gxGetClientRect(m_hWnd, &rect);
       int nColumn = (nScrolled / m_nColumnWidth);
-      m_nTopIndex = (nColumn == m_nColumnCount ? m_nColumnCount - 1 : nColumn) * (rect.bottom / m_nItemHeight);
-      TRACE("nColumn:%d\n", nColumn);
-      clClamp((GXSIZE_T)0, m_pAdapter->GetCount() - 1, &m_nTopIndex);
+      nItem = (nColumn == m_nColumnCount ? m_nColumnCount - 1 : nColumn) * (rect.bottom / m_nItemHeight);
+      //TRACE("nColumn:%d\n", nColumn);
+      m_nTopIndex = clClamp(0, (GXINT)m_pAdapter->GetCount() - 1, nItem);
+      TRACE("m_nTopIndex:%d\n", m_nTopIndex);
       return TRUE;
     }
     else if(m_bRichList && TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)/* || m_pAdapter->IsFixedHeight()*/)

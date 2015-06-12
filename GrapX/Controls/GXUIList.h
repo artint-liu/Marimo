@@ -5,8 +5,6 @@
 #define SCROLLBAR_WIDTH 10
 #define CHECKBOX_SIZE 10
 
-#define IS_LEFTTORIGHT(_STYLE)  ((m_bRichList && TEST_FLAG(_STYLE, GXLBS_LTRSCROLLED)) || ( ! m_bRichList && TEST_FLAG(_STYLE, GXLBS_MULTICOLUMN)))
-
 namespace DlgXM
 {
   struct DLGBASICPARAM;
@@ -114,7 +112,7 @@ namespace GXUI
     GXINT       SetItemHeight       (GXINT nNewHeight);
     GXBOOL      IsItemSelected      (GXINT nItem) const;
     GXCOLORREF  SetColor            (GXUINT nType, GXCOLORREF color);
-    GXBOOL      CheckEndScrollAnim  (GXUINT nIDTimer, bool bForced);
+    //GXBOOL      CheckEndScrollAnim  (GXUINT nIDTimer, bool bForced);
     void        UpdateScrollBarRect (GXDWORD dwStyle, LPGXCRECT lprcClient = NULL);
     GXBOOL      IsEmpty             () const;
   };
