@@ -282,23 +282,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  class DataPoolArray : public clBuffer
-  {
-  public:
-    DataPoolArray(u32 nPageSize)
-      : clBuffer(nPageSize)
-    {}
 
-    DataPoolArray(GXLPBYTE pPlacement, u32 nSize) // placement new 专用
-    {      
-      ASSERT((GXINT_PTR)this == (GXINT_PTR)pPlacement); // 纯验证用，没实际意义
-
-      m_lpBuffer  = (pPlacement + sizeof(DataPoolArray));
-      m_uSize     = nSize;
-      m_nCapacity = nSize;
-      m_nPageSize = 0;
-    }
-  };
 
   //////////////////////////////////////////////////////////////////////////
 

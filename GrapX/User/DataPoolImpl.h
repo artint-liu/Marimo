@@ -50,6 +50,37 @@ namespace Marimo
     GXBOOL    (*SetData     )(        VarImpl* pThis, GXLPCVOID lpData, GXUINT cbSize);
   };
 
+  class DataPoolArray : public clBuffer
+  {
+  protected:
+      clBufferBase* m_pParent;
+  public:
+      DataPoolArray(clBufferBase* pParent, u32 nPageSize)
+          : clBuffer(nPageSize)
+          , m_pParent(pParent)
+      {}
+
+      DataPoolArray(u32 nSize, GXLPBYTE pPlacement) // placement new 专用
+          : m_pParent((clBufferBase*)0x12345678)
+      {      
+          ASSERT((GXINT_PTR)this == (GXINT_PTR)pPlacement); // 纯验证用，没实际意义
+
+          m_lpBuffer  = (pPlacement + sizeof(DataPoolArray));
+          m_uSize     = nSize;
+          m_nCapacity = nSize;
+          m_nPageSize = 0;
+      }
+
+      void SetParent(clBufferBase* pParent) {
+          ASSERT(m_pParent == (clBufferBase*)0x12345678);
+          m_pParent = pParent;
+      }
+
+      clBufferBase* GetParent() const {
+          return m_pParent;
+      }
+  };
+
   class DataPoolImpl : public DataPool
   {
     friend class DataPool;

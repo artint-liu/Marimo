@@ -106,11 +106,11 @@ GXLRESULT DEFWNDPROC_GetText(GXHWND hWnd, GXLPWSTR pszName, int ccTextMax)
 
 #define FRAME_CAPTION_HEIGHT    g_SystemMetrics[GXSM_CYCAPTION]
 #define FRAME_SIZEBOX_LEFT      g_SystemMetrics[GXSM_CYFIXEDFRAME]  // TODO: 没测试
-#define FRAME_SIZEBOX_RIGHT      g_SystemMetrics[GXSM_CYFIXEDFRAME]  // TODO: 没测试
-#define FRAME_SIZEBOX_TOP      g_SystemMetrics[GXSM_CXFIXEDFRAME]  // TODO: 没测试
+#define FRAME_SIZEBOX_RIGHT     g_SystemMetrics[GXSM_CYFIXEDFRAME]  // TODO: 没测试
+#define FRAME_SIZEBOX_TOP       g_SystemMetrics[GXSM_CXFIXEDFRAME]  // TODO: 没测试
 #define FRAME_SIZEBOX_BOTTOM    g_SystemMetrics[GXSM_CXFIXEDFRAME]  // TODO: 没测试
 #define FRAME_CLOSEBTN_WIDTH    43
-#define FRAME_CLOSEBTN_HEIGHT    15  // 没用上
+#define FRAME_CLOSEBTN_HEIGHT   15  // 没用上
 #define FRAME_MAXBTN_WIDTH      26
 
 GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)

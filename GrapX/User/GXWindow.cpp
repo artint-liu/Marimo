@@ -925,8 +925,7 @@ GXINT GXWnd::Scroll(GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXREC
 
 GXBOOL GXWnd::SetPos(GXHWND hWndInsertAfter, int x, int y, int cx, int cy, GXUINT uFlags)
 {
-  ASSERT(hWndInsertAfter == NULL || 
-    hWndInsertAfter == GXHWND_TOPMOST);
+  ASSERT(hWndInsertAfter == NULL || hWndInsertAfter == GXHWND_TOPMOST);
 
   if(hWndInsertAfter == GXHWND_TOPMOST)
   {
@@ -1035,8 +1034,8 @@ GXBOOL GXWnd::Size(GXINT x, GXINT y, GXINT nWidth, GXINT nHeight)
   GRegion* pBeforeRegion = NULL;
   GRegion* pAfterRegion = NULL;
   const GXDWORD dwFlags = GSR_PARENTCLIP|GSR_CLIPSIBLINGS|GSR_WINDOW;
-  GXBOOL bSavePrevRgn = rectWindow.right - rectWindow.left > nWidth ||
-    rectWindow.bottom - rectWindow.top > nHeight;
+  GXBOOL bSavePrevRgn = (rectWindow.right - rectWindow.left) > nWidth ||
+    (rectWindow.bottom - rectWindow.top) > nHeight;
 
   const int dx = x - rectWindow.left;
   const int dy = y - rectWindow.top;
@@ -1044,8 +1043,9 @@ GXBOOL GXWnd::Size(GXINT x, GXINT y, GXINT nWidth, GXINT nHeight)
     IntMoveChild(dx, dy);
   }
 
-  if(bSavePrevRgn)
+  if(bSavePrevRgn) {
     GetSystemRegion(dwFlags, &pBeforeRegion);
+  }
 
   gxSetRect(&rectWindow, x, y, x + nWidth, y + nHeight);
 
@@ -1057,8 +1057,12 @@ GXBOOL GXWnd::Size(GXINT x, GXINT y, GXINT nWidth, GXINT nHeight)
   }
 
   GetSystemRegion(dwFlags, &pAfterRegion);
-  if(bSavePrevRgn)
+
+  if(bSavePrevRgn) {
+    // FIXME: 这里这么写会导致Window缩小时也重绘整个窗口
     pAfterRegion->Union(pBeforeRegion);
+  }
+
   pSurface->InvalidateRegion(pAfterRegion);
 
   SAFE_RELEASE(pBeforeRegion);

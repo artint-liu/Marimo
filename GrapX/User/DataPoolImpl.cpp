@@ -561,11 +561,44 @@ namespace Marimo
   {
     LPCVD pVar;
     if(pBuffer == &m_VarBuffer) {
-      pVar = IntFindVariable(m_aVariables, m_nNumOfVar, nOffset);
-      if(pVarDesc == pVar) {
-        *str = pVar->VariableName();
-        return TRUE;
+
+      LPCVD pVarDescTable = m_aVariables;
+      GXUINT count = m_nNumOfVar;
+
+      while(1)
+      {
+        pVar = IntFindVariable(pVarDescTable, count, nOffset);
+
+        if(str->IsNotEmpty()) {
+          str->Append('.');
+        }
+        str->Append((DataPool::LPCSTR)pVar->VariableName());
+
+        if(pVarDesc == pVar) {
+          TRACE("FindFullName:%s\n", *str);
+          return TRUE;
+        }
+        else {
+          TRACE("[%s]:[%s]\n", pVar->VariableName(), pVarDesc->VariableName());
+          ASSERT(pVar->GetTypeCategory() == T_STRUCT);
+          pVarDescTable = (LPCVD)pVar->MemberBeginPtr();
+          count = pVar->MemberCount();
+
+          if(nOffset < pVar->nOffset) { // 偏移异常,直接返回
+            return FALSE;
+          }
+
+          nOffset -= pVar->nOffset;
+
+          if(pVar->nCount > 1) {
+            GXUINT size = pVar->TypeSize();
+            GXUINT index = nOffset / size;
+            str->AppendFormat("[%d]", index);
+            nOffset -= index * size;
+          }
+        }
       }
+
       //CLNOP;
     }
     return FALSE;
@@ -674,10 +707,10 @@ namespace Marimo
       }
     }
 
-    if(pVarDesc[end].nOffset >= nOffset) {
+    if(pVarDesc[end].nOffset <= nOffset) {
       return pVarDesc + end;
     }
-    else if(pVarDesc[begin].nOffset >= nOffset) {
+    else if(pVarDesc[begin].nOffset <= nOffset) {
       return pVarDesc + begin;
     }
 
@@ -2210,7 +2243,7 @@ namespace Marimo
         bd.pTypeDesc = (TYPE_DESC*)((GXINT_PTR)m_aTypes + (fbh.nType - header.nDescOffset));
 
         const clsize nBufferSize = fbh.nBufferSize + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(fbh.nNumOfRel);
-        bd.pBuffer = new(lpBufferPtr) DataPoolArray(lpBufferPtr, nBufferSize);
+        bd.pBuffer = new(lpBufferPtr) DataPoolArray(nBufferSize, lpBufferPtr);
         //((DataPoolArray*)bd.pBuffer)->Resize(, FALSE);
 
         lpBufferPtr += (nBufferSize + sizeof(DataPoolArray));
@@ -2228,7 +2261,7 @@ namespace Marimo
         bd.pTypeDesc = (TYPE_DESC*)((GXINT_PTR)m_aTypes + (fbh.nType - header.nDescOffset));
 
         // 分配动态数组空间，增量是8倍类型大小
-        bd.pBuffer = new DataPoolArray(bd.pTypeDesc->cbSize * 8);
+        bd.pBuffer = new DataPoolArray(NULL, bd.pTypeDesc->cbSize * 8);
         ((DataPoolArray*)bd.pBuffer)->Resize(fbh.nBufferSize + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(fbh.nNumOfRel), FALSE);
       }
     }
@@ -2287,7 +2320,7 @@ namespace Marimo
 
       V_READ(file.Read(BufferForRead.GetPtr(), (GXUINT)BufferForRead.GetSize()), "Can not load buffer data.");
 
-      const auto nCheck = bd.RelocalizePtr(bd.pBuffer, &BufferForRead, [&pStringBegin, &BufferTab, &header, &dwFlag, this]
+      const auto nCheck = bd.RelocalizePtr(bd.pBuffer, &BufferForRead, [&pStringBegin, &BufferTab, &header, &dwFlag, &bd, this]
       (BUFFER_SAVELOAD_DESC::RelocalizeType type, GXUINT nOffset, GXLPBYTE& pDest, GXLPCBYTE& pSrc)
       {
         switch(type)
@@ -2319,6 +2352,7 @@ namespace Marimo
               // 缓冲区肯定已经创建过了
               ASSERT(BufferTab[index].pBuffer != NULL);
               *(clBufferBase**)pDest = BufferTab[index].pBuffer;
+              reinterpret_cast<DataPoolArray*>(BufferTab[index].pBuffer)->SetParent(bd.pBuffer);
               //INC_DBGNUMOFARRAY;
             }
             else {
@@ -2370,7 +2404,7 @@ namespace Marimo
     if(*ppBuffer == NULL && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly))
     {
       // 这里ArrayBuffer只能使用指针形式
-      *ppBuffer = new DataPoolArray(pVarDesc->TypeSize() * 10);  // 十倍类型大小
+      *ppBuffer = new DataPoolArray(pParent, pVarDesc->TypeSize() * 10);  // 十倍类型大小
       (*ppBuffer)->Resize(nInitCount * pVarDesc->TypeSize(), TRUE);
 
       if(pParent == &m_VarBuffer) {

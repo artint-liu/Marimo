@@ -94,14 +94,17 @@ GXBOOL DesktopWindowsMgr::InvalidateWndRegion(GXHWND hWnd, const GRegion* prgnUp
         rc = prgnWindow->Intersect(pWndUpdate);
         SAFE_RELEASE(pWndUpdate);
       }
-      else
+      else {
         rc = prgnWindow->Intersect(prgnUpdate);
+      }
     }
-    else
+    else {
       rc = prgnWindow->GetComplexity();
+    }
 
-    if(rc == RC_SIMPLE || rc == RC_COMPLEX)
+    if(rc == RC_SIMPLE || rc == RC_COMPLEX) {
       bRet = lpWnd->m_pWinsSurface->InvalidateRegion(prgnWindow);
+    }
     SAFE_RELEASE(prgnWindow);
   }
   return bRet;
