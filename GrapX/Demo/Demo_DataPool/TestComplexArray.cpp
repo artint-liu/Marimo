@@ -137,7 +137,7 @@ void TestWatcher(DataPool* pDataPool)
   // 测试结构，数组等对象watch
   GXBOOL result;
   result = pDataPool->Watch("DlgText", TestmpulseProc, NULL);
-  ASSERT( result); // 动态数组-期望失败
+  ASSERT( result); // 动态数组-期望成功
   
   result = pDataPool->Watch("sTestC", TestmpulseProc, NULL);
   ASSERT( ! result); // 结构体-期望失败
@@ -152,7 +152,7 @@ void TestWatcher(DataPool* pDataPool)
   ASSERT(result); // 期望成功
 
   result = pDataPool->Watch("DlgText[0]", TestmpulseProc, NULL);
-  ASSERT(result); // 动态数组元素-期望失败
+  ASSERT(result); // 动态数组元素-期望成功
 
   result = pDataPool->Watch("aStt[0]", TestmpulseProc, NULL);
   ASSERT(result); // 静态数组-期望成功

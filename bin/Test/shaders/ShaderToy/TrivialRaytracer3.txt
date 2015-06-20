@@ -1,0 +1,98 @@
+// https://www.shadertoy.com/view/4dj3Wc
+struct traceResult {
+	float d;
+	vec3 intersection;
+	vec3 normal;
+	vec3 color;
+};
+	
+traceResult trace( vec3 orig, vec3 delta ) {
+	vec3 spherea = vec3(-200, 10, 2000);
+	float spherea_r = 500.0;
+	vec3 sphereb = vec3(400, 250, 1500);
+	float sphereb_r = 300.0;
+	vec3 spherec = vec3(200, -300, 1400);
+	float spherec_r = 300.0;
+	
+	float plane_y = -300.0;
+	
+	float bar, foo, d=100000.0, d2;
+	vec3 intersection, norm, color;
+	
+	bar = dot(delta,orig-spherea);
+	foo = ( bar*bar - dot(orig-spherea,orig-spherea) + spherea_r*spherea_r );
+	d2 = - bar - sqrt(foo);
+	if( foo>0.0 && d2 > 0.01 && d2<d ) {
+		intersection = orig + delta*d2;
+		norm = normalize(spherea-intersection);
+		d=d2;
+		color=vec3(0.8,0.2,0.3);
+	}
+	
+	bar = dot(delta,orig-sphereb);
+	foo = ( bar*bar - dot(orig-sphereb,orig-sphereb) + sphereb_r*sphereb_r );
+	d2 = - bar - sqrt(foo);
+	if( foo>0.0 && d2 > 0.01 && d2<d ) {
+		intersection = orig + delta*d2;
+		norm = normalize(sphereb-intersection);
+		d=d2;
+		color=vec3(0.3,0.2,0.8);
+	}
+	
+	bar = dot(delta,orig-spherec);
+	foo = ( bar*bar - dot(orig-spherec,orig-spherec) + spherec_r*spherec_r );
+	d2 = - bar - sqrt(foo);
+	if( foo>0.0 && d2 > 0.01 && d2<d ) {
+		intersection = orig + delta*d2;
+		norm = normalize(spherec-intersection);
+		d=d2;
+		color=vec3(0.3,0.2,0.8);
+	}
+	
+	d2 = (plane_y-orig.y)/delta.y;
+	if( d2<d && d2 > 0.01) {
+		intersection = orig + delta*d2;
+		norm = vec3(0.0,-1.0,0.0);
+		d=d2;
+		color=vec3(0.1,0.3,0.2);
+	}
+	
+	return traceResult( d, intersection, norm, color );
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+	float st = sin(iGlobalTime);
+	float ct = cos(iGlobalTime);
+	vec3 delta = normalize( vec3(fragCoord.xy-0.5*iResolution.xy, iResolution.x*0.5) );
+	delta = vec3(delta.x*ct-delta.z*st,delta.y,delta.z*ct+delta.x*st);
+    vec3 orig = vec3( 1200.0*st, 0.0, 1600.0-1400.0*ct );
+	vec3 lighta = vec3(1000, 1000, 1000);
+	vec3 lightb = vec3(-1000, 2000, -1000);
+	
+	traceResult r = trace(orig, delta);
+	
+	vec3 delta2 = normalize(lighta-r.intersection);
+	vec3 orig2 = r.intersection + 0.1*delta2;
+	traceResult r2 = trace(orig2,delta2);
+	
+	vec3 delta3 = normalize(lightb-r.intersection);
+	vec3 orig3 = r.intersection + 0.1*delta3;
+	traceResult r3 = trace(orig3,delta3);
+	
+	if( ! (r.d > 0.001) ) {
+		fragColor = vec4(0,0,0,0);
+	}
+	else {
+		vec3 el = normalize(r.intersection-lighta);
+		float e = dot( r.normal, el );
+		float es = pow( dot( delta ,normalize(2.0*dot(el,r.normal)*r.normal-el) ), 100.0);
+		if(r2.d < distance(r2.intersection,lighta)-0.1 || e < 0.0){ e=0.0; es=0.0;} ;
+		
+		vec3 fl = normalize(r.intersection-lightb);
+		float f = dot( r.normal, normalize(r.intersection-lightb) );
+		float fs = pow( dot( delta ,normalize(2.0*dot(fl,r.normal)*r.normal-fl) ), 100.0);
+		if(r3.d < distance(r3.intersection,lightb)-0.1 || f < 0.0) {f=0.0; fs=0.0;};
+		fragColor = vec4( sqrt(e*e+f*f)*r.color + (es+fs)*vec3(1.0,1.0,1.0), 1.0 );
+	}
+}
