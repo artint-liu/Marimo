@@ -34,7 +34,7 @@
 #include <GrapX/GXFont.H>
 #include <GrapX/GXCanvas.H>
 #include <GrapX/gxDevice.H>
-#include "Demo_Graphics.h"
+#include "Sample_Graphics.h"
 #define MAX_LOADSTRING 100
 //#include "Resource.h"
 #include <clPathFile.H>

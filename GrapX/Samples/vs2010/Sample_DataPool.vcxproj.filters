@@ -15,30 +15,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Demo_DataPool\TestObject.h">
+    <ClInclude Include="..\Sample_DataPool\TestObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Demo_DataPool\TestDataPool.h">
+    <ClInclude Include="..\Sample_DataPool\TestDataPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Demo_DataPool\Enumerates.cpp">
+    <ClCompile Include="..\Sample_DataPool\Enumerates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Demo_DataPool\TestBaseProperty.cpp">
+    <ClCompile Include="..\Sample_DataPool\TestBaseProperty.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Demo_DataPool\TestCompileFromFile.cpp">
+    <ClCompile Include="..\Sample_DataPool\TestCompileFromFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Demo_DataPool\TestHugeArray.cpp">
+    <ClCompile Include="..\Sample_DataPool\TestHugeArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Demo_DataPool\Demo_DataPool.cpp">
+    <ClCompile Include="..\Sample_DataPool\Sample_DataPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Demo_DataPool\TestComplexArray.cpp">
+    <ClCompile Include="..\Sample_DataPool\TestComplexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

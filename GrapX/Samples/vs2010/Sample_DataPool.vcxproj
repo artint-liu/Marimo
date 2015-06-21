@@ -19,21 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Demo_DataPool\TestDataPool.h" />
-    <ClInclude Include="..\Demo_DataPool\TestObject.h" />
+    <ClInclude Include="..\Sample_DataPool\TestDataPool.h" />
+    <ClInclude Include="..\Sample_DataPool\TestObject.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Demo_DataPool\Enumerates.cpp" />
-    <ClCompile Include="..\Demo_DataPool\TestBaseProperty.cpp" />
-    <ClCompile Include="..\Demo_DataPool\TestCompileFromFile.cpp" />
-    <ClCompile Include="..\Demo_DataPool\Demo_DataPool.cpp" />
-    <ClCompile Include="..\Demo_DataPool\TestComplexArray.cpp" />
-    <ClCompile Include="..\Demo_DataPool\TestHugeArray.cpp" />
+    <ClCompile Include="..\Sample_DataPool\Enumerates.cpp" />
+    <ClCompile Include="..\Sample_DataPool\TestBaseProperty.cpp" />
+    <ClCompile Include="..\Sample_DataPool\TestCompileFromFile.cpp" />
+    <ClCompile Include="..\Sample_DataPool\Sample_DataPool.cpp" />
+    <ClCompile Include="..\Sample_DataPool\TestComplexArray.cpp" />
+    <ClCompile Include="..\Sample_DataPool\TestHugeArray.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{82CED33D-4874-4144-9089-9DEB40353D01}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Demo_DataPool</RootNamespace>
+    <RootNamespace>Sample_DataPool</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
