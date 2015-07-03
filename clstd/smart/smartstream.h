@@ -125,6 +125,27 @@ public:
     _TStr   ToString    () const;
     b32     BeginsWith  (T_LPCSTR str) const;
     b32     EndsWith    (T_LPCSTR str) const;
+
+    //
+    // 符合STL规范的接口
+    //
+    inline const TChar& front() const {
+      return marker[0];
+    }
+
+    inline const TChar& back() const {
+      return marker[length - 1];
+    }
+
+    inline T_LPCSTR begin() const {
+      return marker;
+    }
+
+    inline T_LPCSTR end() const {
+      return marker + length;
+    }
+
+
   };
   typedef u32 (CALLBACK *IteratorProc)(iterator& it, clsize nRemain, u32_ptr lParam); // nRemain 是it.marker[0]到文件结尾的(剩余)长度. 目前不关心返回值
   typedef const iterator const_iterator; 

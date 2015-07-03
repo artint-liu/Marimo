@@ -2,6 +2,8 @@
 #include <clString.h>
 #include <clUtility.h>
 #include <Smart/SmartStream.h>
+#include <clColorSpace.h>
+#include <GrapX/GBaseTypes.h>
 #include "ExpressionParser.h"
 
 //  Precedence  Operator          Description                                               Associativity 
@@ -99,12 +101,13 @@ ExpressionParser::ExpressionParser()
     s_nMultiByteOperatorLen = clMax(
       s_nMultiByteOperatorLen, s_MultiByteOperator[i].nLen);
   }
+  SetFlags(GetFlags() | F_SYMBOLBREAK);
   SetCharSemantic(aCharSem, 0, 128);
   SetIteratorCallBack(IteratorProc, 0);
   SetTriggerCallBack(MultiByteOperatorProc, 0);
 }
 
-b32 ExpressionParser::Attach( char* szExpression, clsize nSize )
+b32 ExpressionParser::Attach( const char* szExpression, clsize nSize )
 {
   return SmartStreamA::Initialize(szExpression, nSize);
 }
@@ -126,12 +129,31 @@ u32 CALLBACK ExpressionParser::MultiByteOperatorProc( iterator& it, u32 nRemain,
 
 u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 nRemain, u32_ptr lParam )
 {
-  if(IS_NUM(it.marker[it.length - 1]) && it.marker[it.length] == '.') {
+  GXBOOL bENotation = FALSE;
+
+  //
+  // 进入数字判断模式
+  //
+  if((it.front() == '.' && IS_NUM(it.marker[it.length])) ||             // 第一个是'.'
+    (IS_NUM(it.front()) && (it.back() == 'e' || it.back() == 'E')) ||   // 第一个是数字，最后以'e'结尾
+    (IS_NUM(it.back()) && it.marker[it.length] == '.'))                 // 最后是数字，下一个是'.'
+  {
     it.length++;
     while(--nRemain)
     {
       if(IS_NUM(it.marker[it.length])) {
         it.length++;
+      }
+      else if( ! bENotation && // 没有切换到科学计数法时遇到‘e’标记
+        (it.marker[it.length] == 'e' || it.marker[it.length] == 'E'))
+      {
+        bENotation = TRUE;
+        it.length++;
+
+        // 科学计数法，+/- 符号判断
+        if((--nRemain) != 0 && (*(it.end()) == '-' || *(it.end()) == '+')) {
+          it.length++;
+        }
       }
       else {
         break;
@@ -141,5 +163,6 @@ u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 nRemain, u32_ptr 
       it.length++;
     }
   }
+  ASSERT((int)nRemain >= 0);
   return 0;
 }
