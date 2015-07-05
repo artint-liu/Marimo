@@ -127,7 +127,7 @@ u32 CALLBACK ExpressionParser::MultiByteOperatorProc( iterator& it, u32 nRemain,
   return 0;
 }
 
-u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 nRemain, u32_ptr lParam )
+u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
 {
   GXBOOL bENotation = FALSE;
 
@@ -139,7 +139,7 @@ u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 nRemain, u32_ptr 
     (IS_NUM(it.back()) && it.marker[it.length] == '.'))                 // 最后是数字，下一个是'.'
   {
     it.length++;
-    while(--nRemain)
+    while(--remain)
     {
       if(IS_NUM(it.marker[it.length])) {
         it.length++;
@@ -151,7 +151,7 @@ u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 nRemain, u32_ptr 
         it.length++;
 
         // 科学计数法，+/- 符号判断
-        if((--nRemain) != 0 && (*(it.end()) == '-' || *(it.end()) == '+')) {
+        if((--remain) != 0 && (*(it.end()) == '-' || *(it.end()) == '+')) {
           it.length++;
         }
       }
@@ -163,6 +163,16 @@ u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 nRemain, u32_ptr 
       it.length++;
     }
   }
-  ASSERT((int)nRemain >= 0);
+  else if(it.marker[0] == '/' && (remain > 0 && it.marker[1] == '/')) // 处理单行注释“//...”
+  {
+    SmartStreamUtility::ExtendToNewLine(it, 2, remain);
+    ++it;
+  }
+  else if(it.marker[0] == '/' && (remain > 0 && it.marker[1] == '*')) // 处理块注释“/*...*/”
+  {
+    SmartStreamUtility::ExtendToCStyleBlockComment(it, 2, remain);
+    ++it;
+  }
+  ASSERT((int)remain >= 0);
   return 0;
 }

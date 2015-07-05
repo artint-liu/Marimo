@@ -3,8 +3,6 @@
 #include <Smart/SmartStream.h>
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 
-ExpressionParser expp;
-
 struct SAMPLE_EXPRESSION
 {
   const char* expression;
@@ -123,6 +121,7 @@ SAMPLE_EXPRESSION samples[] = {
 
 void TestExpressionParser()
 {
+  ExpressionParser expp;
   for(int i = 0; samples[i].expression != 0; i++)
   {
     expp.Attach(samples[i].expression, strlen(samples[i].expression));

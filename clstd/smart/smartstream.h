@@ -341,16 +341,34 @@ namespace SmartStreamUtility
   // uRemain 是 it.marker 到流结尾的剩余长度（字符数）
   // 返回true表示找到一个换行符号，false表示到了文件结尾，此时it被扩展到文件结尾
   template<class _Iter>
-  b32 ExtendToNewLine(_Iter &it, clsize nOffset, clsize uRemain) 
+  b32 ExtendToNewLine(_Iter &it, clsize nOffset, clsize remain) 
   {
-    while(nOffset < uRemain) {
+    while(nOffset < remain) {
       if(it.marker[nOffset] == '\n') {
         it.length = nOffset + 1;
         return TRUE;
       }
       ++nOffset;
     }
-    it.length = uRemain;
+    it.length = remain;
+    return FALSE;
+  }
+
+  template<class _Iter>
+  b32 ExtendToCStyleBlockComment(_Iter& it, clsize offset, clsize remain)
+  {
+    --remain;
+    auto c0 = it.marker[offset];
+    while(offset < remain)
+    {
+      auto c1 = it.marker[offset + 1];
+      if(c0 == '*' && c1 == '/') {
+        it.length = offset + 2;
+        return TRUE;
+      }
+      c0 = c1;
+      ++offset;
+    }
     return FALSE;
   }
 

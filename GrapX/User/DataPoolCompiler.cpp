@@ -231,19 +231,22 @@ namespace Marimo
     }
     else if(it.marker[0] == '/' && it.marker[1] == '*') // ´¦Àí¿é×¢ÊÍ¡°/*...*/¡±
     {
-      --uRemain;
-      auto c0 = it.marker[i];
-      while(i < uRemain)
-      {
-        auto c1 = it.marker[i + 1];
-        if(c0 == '*' && c1 == '/') {
-          it.length = i + 2;
-          ++it;
-          return 0;
-        }
-        c0 = c1;
-        ++i;
-      }
+      //--uRemain;
+      //auto c0 = it.marker[i];
+      //while(i < uRemain)
+      //{
+      //  auto c1 = it.marker[i + 1];
+      //  if(c0 == '*' && c1 == '/') {
+      //    it.length = i + 2;
+      //    ++it;
+      //    return 0;
+      //  }
+      //  c0 = c1;
+      //  ++i;
+      //}
+      SmartStreamUtility::ExtendToCStyleBlockComment(it, 2, uRemain);
+      ++it;
+      return 0;
     }
     else if(it.marker[0] == '#') {
       auto pThis = (DataPoolResolverImpl*)lParam;
