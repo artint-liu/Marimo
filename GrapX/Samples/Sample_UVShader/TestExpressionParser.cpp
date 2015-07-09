@@ -1,6 +1,6 @@
-#include <clstd.h>
-#include <clString.h>
+#include <GrapX.h>
 #include <Smart/SmartStream.h>
+#include <clStringSet.h>
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 
 struct SAMPLE_EXPRESSION
@@ -121,19 +121,22 @@ SAMPLE_EXPRESSION samples[] = {
 
 void TestExpressionParser()
 {
-  ExpressionParser expp;
+  UVShader::ExpressionParser expp;
   for(int i = 0; samples[i].expression != 0; i++)
   {
-    expp.Attach(samples[i].expression, strlen(samples[i].expression));
+    auto nSize = strlen(samples[i].expression);
+    expp.Attach(samples[i].expression, nSize);
+    expp.GenerateSymbols();
+    auto pSymbols = expp.GetSymbolsArray();
+
     int nCount = 0;
     TRACE("%3d# ", i);
-    for(SmartStreamA::iterator it = expp.begin();
-      it != expp.end(); ++it)
+    for(auto it = pSymbols->begin(); it != pSymbols->end(); ++it)
     {
-      TRACE("|%s|  ", it.ToString());
+      TRACE("|%s|  ", it->sym.ToString());
       nCount++;
     }
-    TRACE("(%d)\n", nCount);
+    TRACE("(%d:%f)\n", nCount, (float)nSize / nCount);
     ASSERT(samples[i].expectation == 0 || nCount == samples[i].expectation);
   }
 }
