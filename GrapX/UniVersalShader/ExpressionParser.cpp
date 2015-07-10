@@ -160,21 +160,28 @@ namespace UVShader
   };
 
   ExpressionParser::ExpressionParser()
+    : m_nMaxPrecedence(0)
+    , m_nDbgNumOfExpressionParse(0)
   {
     u32 aCharSem[128];
     GetCharSemantic(aCharSem, 0, 128);
 
     FOR_EACH_MBO(1, i) {
+      m_nMaxPrecedence = clMax(m_nMaxPrecedence, s_Operator1[i].precedence);
       aCharSem[s_Operator1[i].szOperator[0]] |= M_CALLBACK;
     }
 
     FOR_EACH_MBO(2, i) {
+      m_nMaxPrecedence = clMax(m_nMaxPrecedence, s_Operator2[i].precedence);
       aCharSem[s_Operator2[i].szOperator[0]] |= M_CALLBACK;
     }
 
     FOR_EACH_MBO(3, i) {
+      m_nMaxPrecedence = clMax(m_nMaxPrecedence, s_Operator3[i].precedence);
       aCharSem[s_Operator3[i].szOperator[0]] |= M_CALLBACK;
     }
+
+    ASSERT(m_nMaxPrecedence <= (1 << (SYMBOL::precedence_bits - 1))); // 检测位域表示范围没有超过优先级
 
     SetFlags(GetFlags() | F_SYMBOLBREAK);
     SetCharSemantic(aCharSem, 0, 128);
@@ -298,6 +305,11 @@ namespace UVShader
     PairStack stackSquareBrackets;  // 方括号
     PairStack stackBrace;           // 花括号
     SYMBOL sym;
+    
+    // 只是清理
+    m_CurSymInfo.sym.marker = NULL;
+    m_CurSymInfo.precedence = 0;
+
     for(auto it = begin(); it != stream_end; ++it)
     {
       sym.sym = it;
@@ -677,6 +689,111 @@ NOT_INC_P:
     
     // 对于内置类型，要解析出 Type[RxC] 这种格式
     return TRUE;
+  }
+
+  GXBOOL ExpressionParser::ParseStatementAs_Expression( RTSCOPE* pScope )
+  {
+    m_nDbgNumOfExpressionParse = 0;
+    GXBOOL bret = ParseExpression(pScope, 1);
+    TRACE("m_nDbgNumOfExpressionParse=%d\n", m_nDbgNumOfExpressionParse);
+    return bret;
+  }
+
+  GXBOOL ExpressionParser::ParseExpression( RTSCOPE* pScope, int nMinPrecedence )
+  {
+    if(m_aSymbols[pScope->begin].sym.ToString() == "(") {
+      CLNOP
+    }
+    if(pScope->begin >= pScope->end - 1) {
+      return TRUE;
+    }
+    else if(m_aSymbols[pScope->begin].pair == pScope->end - 1) { // 括号内表达式
+      // 括号肯定是匹配的
+      ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin);
+      RTSCOPE sBraketsScope = {pScope->begin + 1, pScope->end - 1};
+      return ParseExpression(&sBraketsScope, 1);
+    }
+    else if(m_aSymbols[pScope->begin + 1].pair == pScope->end - 1) { // 函数调用
+      // 括号肯定是匹配的
+      ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin + 1);
+      
+      // TODO: 检查m_aSymbols[pScope->begin]是函数名
+
+      RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
+      clStringA strArgs;
+      DbgDumpScope(strArgs, sArgumentScope);
+      TRACE("[<func call>] [%s] [%s]\n", m_aSymbols[pScope->begin].sym.ToString(), strArgs);
+      return ParseExpression(&sArgumentScope, 1);
+    }
+    
+    int nCandidate = m_nMaxPrecedence;
+    clsize nCandidatePos = pScope->begin;
+    clsize i = pScope->begin;
+
+    while(nMinPrecedence <= m_nMaxPrecedence)
+    {
+      for(; i != pScope->end; ++i)
+      {
+        m_nDbgNumOfExpressionParse++;
+
+        if(m_aSymbols[i].pair >= 0) {
+          ASSERT(m_aSymbols[i].pair < (int)pScope->end); // 闭括号肯定在表达式区间内
+          i = m_aSymbols[i].pair;
+          continue;
+        }
+        else if(m_aSymbols[i].precedence == 0) { // 跳过非运算符
+          continue;
+        }
+
+        //ASSERT(m_aSymbols[i].precedence == 0 || m_aSymbols[i].precedence >= nMinPrecedence);
+        if(m_aSymbols[i].precedence == nMinPrecedence) {
+          RTSCOPE scopeA = {pScope->begin, i};
+          RTSCOPE scopeB = {i + 1, pScope->end};
+
+          // <Trace>
+          clStringA strA, strB;
+          DbgDumpScope(strA, scopeA);
+          DbgDumpScope(strB, scopeB);
+          TRACE("[%s] [%s] [%s]\n", m_aSymbols[i].sym.ToString(), strA, strB);
+          // </Trace>
+
+          ParseExpression(&scopeA, nMinPrecedence);
+          ParseExpression(&scopeB, nMinPrecedence);
+          return TRUE;
+        }
+        else {
+          if(m_aSymbols[i].precedence < nCandidate)
+          {
+            nCandidate = m_aSymbols[i].precedence;
+            nCandidatePos = i;
+          }
+        }
+      }
+
+      if(nMinPrecedence == nCandidate) {
+        break;
+      }
+
+      nMinPrecedence = nCandidate;
+      i = nCandidatePos;
+    }
+    return TRUE;
+  }
+
+  void ExpressionParser::DbgDumpScope( clStringA& str, clsize begin, clsize end )
+  {
+    for(clsize i = begin; i < end; ++i)
+    {
+      //if(i != end) {
+      //  str.Append(' ');
+      //}
+      str.Append(m_aSymbols[i].sym.ToString());
+    }
+  }
+
+  void ExpressionParser::DbgDumpScope( clStringA& str, const RTSCOPE& scope )
+  {
+    DbgDumpScope(str, scope.begin, scope.end);
   }
 
 } // namespace UVShader

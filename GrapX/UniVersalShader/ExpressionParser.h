@@ -3,14 +3,33 @@
 
 namespace UVShader
 {
+  //struct GRAMMAR
+  //{
+  //  enum Modified
+  //  {
+  //    Modified_optional,
+  //    Modified_required,
+  //  };
+
+  //  Modified eModified;
+  //  GXLPCSTR szMarker;
+
+  //  GXLPVOID pDest;
+  //  GXSIZE_T offset;
+
+  //  GRAMMAR* pChild;
+  //};
+
   class ExpressionParser : public SmartStreamA
   {
   public:
     struct SYMBOL
     {
+      const static int pair_bits = 22;
+      const static int precedence_bits = 10;
       iterator  sym;
-      int       pair : 22;       // 括号匹配索引
-      int       precedence : 10; // 符号优先级
+      int       pair : pair_bits;             // 括号匹配索引
+      int       precedence : precedence_bits; // 符号优先级
     };
 
     typedef clvector<SYMBOL> SymbolArray;
@@ -110,6 +129,9 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
     GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
 
+    GXBOOL  ParseExpression(RTSCOPE* pScope, int nMinPrecedence);
+
+
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocalePointer();
     GXBOOL  IsIntrinsicType(GXLPCSTR szType);
@@ -124,7 +146,8 @@ namespace UVShader
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里
     SYMBOL              m_CurSymInfo;       // 遍历时符号的优先级信息
-
+    int                 m_nMaxPrecedence;   // 优先级最大值
+    int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     static INTRINSIC_TYPE s_aIntrinsicType[];
   public:
     ExpressionParser();
@@ -132,6 +155,11 @@ namespace UVShader
     clsize              GenerateSymbols         ();
     const SymbolArray*  GetSymbolsArray         () const;
     GXBOOL              Parse                   ();
+
+    void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
+    void DbgDumpScope(clStringA& str, clsize begin, clsize end);
+    /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(RTSCOPE* pScope); // (算数表)达式
+
   };
 
 } // namespace UVShader
