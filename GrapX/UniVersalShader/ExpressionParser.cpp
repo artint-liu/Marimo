@@ -694,6 +694,12 @@ NOT_INC_P:
   GXBOOL ExpressionParser::ParseStatementAs_Expression( RTSCOPE* pScope )
   {
     m_nDbgNumOfExpressionParse = 0;
+    m_aDbgExpressionOperStack.clear();
+
+    if(pScope->end > 0 && m_aSymbols[pScope->end - 1].sym == ";") {
+      --pScope->end;
+    }
+
     GXBOOL bret = ParseExpression(pScope, 1);
     TRACE("m_nDbgNumOfExpressionParse=%d\n", m_nDbgNumOfExpressionParse);
     return bret;
@@ -701,19 +707,23 @@ NOT_INC_P:
 
   GXBOOL ExpressionParser::ParseExpression( RTSCOPE* pScope, int nMinPrecedence )
   {
+    ASSERT(pScope->begin <= pScope->end);
     if(m_aSymbols[pScope->begin].sym.ToString() == "(") {
       CLNOP
     }
     if(pScope->begin >= pScope->end - 1) {
       return TRUE;
     }
-    else if(m_aSymbols[pScope->begin].pair == pScope->end - 1) { // 括号内表达式
+    else if(m_aSymbols[pScope->begin].pair == pScope->end - 1)  // 括号内表达式
+    {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin);
+
       RTSCOPE sBraketsScope = {pScope->begin + 1, pScope->end - 1};
       return ParseExpression(&sBraketsScope, 1);
     }
-    else if(m_aSymbols[pScope->begin + 1].pair == pScope->end - 1) { // 函数调用
+    else if(m_aSymbols[pScope->begin + 1].pair == pScope->end - 1)  // 函数调用
+    {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin + 1);
       
@@ -722,49 +732,67 @@ NOT_INC_P:
       RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
       clStringA strArgs;
       DbgDumpScope(strArgs, sArgumentScope);
-      TRACE("[<func call>] [%s] [%s]\n", m_aSymbols[pScope->begin].sym.ToString(), strArgs);
-      return ParseExpression(&sArgumentScope, 1);
+      GXBOOL bret = ParseExpression(&sArgumentScope, 1);
+
+      // <Make OperString>
+      clStringA strOper;
+      strOper.Format("[<func call>] [%s] [%s]", m_aSymbols[pScope->begin].sym.ToString(), strArgs);
+      TRACE("%s\n", strOper);
+      m_aDbgExpressionOperStack.push_back(strOper);
+      // </Make OperString>
+
+      return bret;
     }
     
     int nCandidate = m_nMaxPrecedence;
-    clsize nCandidatePos = pScope->begin;
-    clsize i = pScope->begin;
+    //clsize i = pScope->begin;
+    GXINT_PTR i = (GXINT_PTR)pScope->end - 1;
+    GXINT_PTR nCandidatePos = i;
 
     while(nMinPrecedence <= m_nMaxPrecedence)
     {
-      for(; i != pScope->end; ++i)
+      for(; i >= (GXINT_PTR)pScope->begin; --i)
       {
         m_nDbgNumOfExpressionParse++;
 
-        if(m_aSymbols[i].pair >= 0) {
-          ASSERT(m_aSymbols[i].pair < (int)pScope->end); // 闭括号肯定在表达式区间内
-          i = m_aSymbols[i].pair;
+        const SYMBOL& s = m_aSymbols[i];
+
+        if(s.pair >= 0) {
+          ASSERT(s.pair < (int)pScope->end); // 闭括号肯定在表达式区间内
+          i = s.pair;
           continue;
         }
-        else if(m_aSymbols[i].precedence == 0) { // 跳过非运算符
+        else if(s.precedence == 0) { // 跳过非运算符
           continue;
         }
 
-        //ASSERT(m_aSymbols[i].precedence == 0 || m_aSymbols[i].precedence >= nMinPrecedence);
-        if(m_aSymbols[i].precedence == nMinPrecedence) {
+        //ASSERT(s.precedence == 0 || s.precedence >= nMinPrecedence);
+        if(s.precedence == nMinPrecedence) {
           RTSCOPE scopeA = {pScope->begin, i};
           RTSCOPE scopeB = {i + 1, pScope->end};
+
+          ParseExpression(&scopeA, nMinPrecedence);
+          ParseExpression(&scopeB, nMinPrecedence);
 
           // <Trace>
           clStringA strA, strB;
           DbgDumpScope(strA, scopeA);
           DbgDumpScope(strB, scopeB);
-          TRACE("[%s] [%s] [%s]\n", m_aSymbols[i].sym.ToString(), strA, strB);
+
+          // <Make OperString>
+          clStringA strOper;
+          strOper.Format("[%s] [%s] [%s]", s.sym.ToString(), strA, strB);
+          TRACE("%s\n", strOper);
+          m_aDbgExpressionOperStack.push_back(strOper);
+          // </Make OperString>
           // </Trace>
 
-          ParseExpression(&scopeA, nMinPrecedence);
-          ParseExpression(&scopeB, nMinPrecedence);
           return TRUE;
         }
         else {
-          if(m_aSymbols[i].precedence < nCandidate)
+          if(s.precedence < nCandidate)
           {
-            nCandidate = m_aSymbols[i].precedence;
+            nCandidate = s.precedence;
             nCandidatePos = i;
           }
         }

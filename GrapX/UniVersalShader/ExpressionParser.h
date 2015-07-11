@@ -160,6 +160,7 @@ namespace UVShader
     void DbgDumpScope(clStringA& str, clsize begin, clsize end);
     /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(RTSCOPE* pScope); // (算数表)达式
 
+    clStringArrayA    m_aDbgExpressionOperStack;
   };
 
 } // namespace UVShader
