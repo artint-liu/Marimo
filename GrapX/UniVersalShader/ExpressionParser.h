@@ -130,6 +130,7 @@ namespace UVShader
     GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
 
     GXBOOL  ParseExpression(RTSCOPE* pScope, int nMinPrecedence);
+    GXBOOL  MakeInstruction(GXLPCSTR szOperator, int nMinPrecedence, RTSCOPE* pScope, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
@@ -157,7 +158,7 @@ namespace UVShader
     GXBOOL              Parse                   ();
 
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
-    void DbgDumpScope(clStringA& str, clsize begin, clsize end);
+    void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(RTSCOPE* pScope); // (算数表)达式
 
     clStringArrayA    m_aDbgExpressionOperStack;

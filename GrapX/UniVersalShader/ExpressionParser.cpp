@@ -101,6 +101,8 @@ static MBO s_Operator1[] = {
   {1, "^",  6},
   {1, "|",  5},
   {1, "=",  2},
+  {1, "?",  2}, // ?: 操作符
+  {1, ":",  2}, // ?: 操作符
   {1, ",",  1},
   {NULL,},
 };
@@ -301,14 +303,31 @@ namespace UVShader
 
     m_aSymbols.reserve(EstimateForSymbolsCount());
     typedef clstack<int> PairStack;
-    PairStack stackBrackets;        // 圆括号
-    PairStack stackSquareBrackets;  // 方括号
-    PairStack stackBrace;           // 花括号
+    //PairStack stackBrackets;        // 圆括号
+    //PairStack stackSquareBrackets;  // 方括号
+    //PairStack stackBrace;           // 花括号
     SYMBOL sym;
     
     // 只是清理
     m_CurSymInfo.sym.marker = NULL;
     m_CurSymInfo.precedence = 0;
+
+    struct PAIR_CONTEXT
+    {
+      GXLPCSTR szOpen;    // 开区间
+      GXLPCSTR szClosed;  // 闭区间
+      //PairStack* pStack;
+      PairStack sStack;
+    };
+
+    PAIR_CONTEXT pair_context[] = {
+      {"(", ")", },   // 圆括号
+      {"[", "]", },   // 方括号
+      {"{", "}", },   // 花括号
+      {"?", ":", },
+      {NULL, },
+    };
+
 
     for(auto it = begin(); it != stream_end; ++it)
     {
@@ -322,56 +341,79 @@ namespace UVShader
       m_CurSymInfo.sym.marker = NULL;
       m_CurSymInfo.precedence = 0;
 
-      if(it == "(") {
-        stackBrackets.push((int)m_aSymbols.size());
-      }
-      else if(it == "[") {
-        stackSquareBrackets.push((int)m_aSymbols.size());
-      }
-      else if(it == "{") {
-        stackBrace.push((int)m_aSymbols.size());
-      }
-      else if(it == ")") {
-        if(stackBrackets.empty()) {
-          // ERROR: ")"不匹配
+      // 符号配对处理
+      for(int i = 0; pair_context[i].szOpen != NULL; ++i)
+      {
+        PAIR_CONTEXT& c = pair_context[i];
+        if(it == c.szOpen) {
+          c.sStack.push((int)m_aSymbols.size());
         }
-        sym.pair = stackBrackets.top();
-        stackBrackets.pop();
-      }
-      else if(it == "]") {
-        if(stackSquareBrackets.empty()) {
-          // ERROR: "]"不匹配
+        else if(it == c.szClosed) {
+          if(c.sStack.empty()) {
+            // ERROR: 不匹配
+          }
+          sym.pair = c.sStack.top();
+          m_aSymbols[sym.pair].pair = (int)m_aSymbols.size();
+          c.sStack.pop();
         }
-        sym.pair = stackSquareBrackets.top();
-        stackSquareBrackets.pop();
-      }
-      else if(it == "}") {
-        if(stackBrace.empty()) {
-          // ERROR: "}"不匹配
-        }
-        sym.pair = stackBrace.top();
-        stackBrace.pop();
       }
 
-      if(sym.pair >= 0) {
-        m_aSymbols[sym.pair].pair = (int)m_aSymbols.size();
-      }
+      //if(it == "(") {
+      //  stackBrackets.push((int)m_aSymbols.size());
+      //}
+      //else if(it == "[") {
+      //  stackSquareBrackets.push((int)m_aSymbols.size());
+      //}
+      //else if(it == "{") {
+      //  stackBrace.push((int)m_aSymbols.size());
+      //}
+      //else if(it == ")") {
+      //  if(stackBrackets.empty()) {
+      //    // ERROR: ")"不匹配
+      //  }
+      //  sym.pair = stackBrackets.top();
+      //  stackBrackets.pop();
+      //}
+      //else if(it == "]") {
+      //  if(stackSquareBrackets.empty()) {
+      //    // ERROR: "]"不匹配
+      //  }
+      //  sym.pair = stackSquareBrackets.top();
+      //  stackSquareBrackets.pop();
+      //}
+      //else if(it == "}") {
+      //  if(stackBrace.empty()) {
+      //    // ERROR: "}"不匹配
+      //  }
+      //  sym.pair = stackBrace.top();
+      //  stackBrace.pop();
+      //}
+
+      //if(sym.pair >= 0) {
+      //  m_aSymbols[sym.pair].pair = (int)m_aSymbols.size();
+      //}
 
       m_aSymbols.push_back(sym);
     }
 
-
-    if( ! stackBrackets.empty()) {
-      // ERROR: "("不匹配
+    for(int i = 0; pair_context[i].szOpen != NULL; ++i)
+    {
+      PAIR_CONTEXT& c = pair_context[i];
+      if( ! c.sStack.empty()) {
+        // ERROR: 不匹配
+      }
     }
+    //if( ! stackBrackets.empty()) {
+    //  // ERROR: "("不匹配
+    //}
 
-    if( ! stackSquareBrackets.empty()) {
-      // ERROR: "["不匹配
-    }
+    //if( ! stackSquareBrackets.empty()) {
+    //  // ERROR: "["不匹配
+    //}
 
-    if( ! stackBrace.empty()) {
-      // ERROR: "{"不匹配
-    }
+    //if( ! stackBrace.empty()) {
+    //  // ERROR: "{"不匹配
+    //}
 
     return m_aSymbols.size();
   }
@@ -708,10 +750,11 @@ NOT_INC_P:
   GXBOOL ExpressionParser::ParseExpression( RTSCOPE* pScope, int nMinPrecedence )
   {
     ASSERT(pScope->begin <= pScope->end);
-    if(m_aSymbols[pScope->begin].sym.ToString() == "(") {
-      CLNOP
-    }
-    if(pScope->begin >= pScope->end - 1) {
+    //if(m_aSymbols[pScope->begin].sym.ToString() == "(") {
+    //  CLNOP
+    //}
+
+    if((GXINT_PTR)pScope->begin >= (GXINT_PTR)(pScope->end - 1)) {
       return TRUE;
     }
     else if(m_aSymbols[pScope->begin].pair == pScope->end - 1)  // 括号内表达式
@@ -735,10 +778,10 @@ NOT_INC_P:
       GXBOOL bret = ParseExpression(&sArgumentScope, 1);
 
       // <Make OperString>
-      clStringA strOper;
-      strOper.Format("[<func call>] [%s] [%s]", m_aSymbols[pScope->begin].sym.ToString(), strArgs);
-      TRACE("%s\n", strOper);
-      m_aDbgExpressionOperStack.push_back(strOper);
+      clStringA strIntruction;
+      strIntruction.Format("[F] [%s] [%s]", m_aSymbols[pScope->begin].sym.ToString(), strArgs);
+      TRACE("%s\n", strIntruction);
+      m_aDbgExpressionOperStack.push_back(strIntruction);
       // </Make OperString>
 
       return bret;
@@ -751,54 +794,88 @@ NOT_INC_P:
 
     while(nMinPrecedence <= m_nMaxPrecedence)
     {
-      for(; i >= (GXINT_PTR)pScope->begin; --i)
+      if(nMinPrecedence == 2)
       {
-        m_nDbgNumOfExpressionParse++;
+        for(i = (GXINT_PTR)pScope->begin; i < (GXINT_PTR)pScope->end; ++i)
+        {
+          m_nDbgNumOfExpressionParse++;
 
-        const SYMBOL& s = m_aSymbols[i];
+          const SYMBOL& s = m_aSymbols[i];
 
-        if(s.pair >= 0) {
-          ASSERT(s.pair < (int)pScope->end); // 闭括号肯定在表达式区间内
-          i = s.pair;
-          continue;
-        }
-        else if(s.precedence == 0) { // 跳过非运算符
-          continue;
-        }
+          if(s.precedence == 0) // 跳过非运算符, 也包括括号
+          {
+            if(s.pair >= 0) {
+              ASSERT(s.pair < (int)pScope->end); // 闭括号肯定在表达式区间内
+              i = s.pair;
+            }
+            continue;
+          }
+          else if(s.sym == ':') {
+            continue;
+          }
 
-        //ASSERT(s.precedence == 0 || s.precedence >= nMinPrecedence);
-        if(s.precedence == nMinPrecedence) {
-          RTSCOPE scopeA = {pScope->begin, i};
-          RTSCOPE scopeB = {i + 1, pScope->end};
+          // ?: 操作符标记：precedence 储存优先级，pair 储存?:的关系
 
-          ParseExpression(&scopeA, nMinPrecedence);
-          ParseExpression(&scopeB, nMinPrecedence);
+          if(s.precedence == nMinPrecedence)
+          {
+            if(s.sym == '?')
+            {
+              MakeInstruction(s.sym.ToString(), nMinPrecedence, pScope, i);
 
-          // <Trace>
-          clStringA strA, strB;
-          DbgDumpScope(strA, scopeA);
-          DbgDumpScope(strB, scopeB);
+              //RTSCOPE scope = {i + 1, pScope->end};
+              //if(s.pair >= (int)pScope->begin && s.pair < (int)pScope->end) {
+              //  MakeInstruction(":", nMinPrecedence, &scope, s.pair);
+              //}
+              //else {
+              //  // ERROR: ?:三元操作符不完整
+              //}
+            }
+            else { // 一元/二元 操作符或者三元操作符"?:"的":"部分
+              MakeInstruction(s.sym.ToString(), nMinPrecedence, pScope, i);
+            }
+            return TRUE;
+          }
+          else if(s.precedence < nCandidate)
+          {
+            nCandidate = s.precedence;
+          }
+        } // for
+        nCandidatePos = (GXINT_PTR)pScope->end - 1;
+      }
+      else
+      {
+        for(; i >= (GXINT_PTR)pScope->begin; --i)
+        {
+          m_nDbgNumOfExpressionParse++;
+          const SYMBOL& s = m_aSymbols[i];
 
-          // <Make OperString>
-          clStringA strOper;
-          strOper.Format("[%s] [%s] [%s]", s.sym.ToString(), strA, strB);
-          TRACE("%s\n", strOper);
-          m_aDbgExpressionOperStack.push_back(strOper);
-          // </Make OperString>
-          // </Trace>
+          //ASSERT(s.sym != '?' && s.sym != ':'); // 这个循环不能处理三元操作符
+          ASSERT(nMinPrecedence != 2);            // 优先级（2）是从右向左的，这个循环处理从左向右
 
-          return TRUE;
-        }
-        else {
-          if(s.precedence < nCandidate)
+          if(s.precedence == 0) // 跳过非运算符, 也包括括号
+          {
+            if(s.pair >= 0) {
+              ASSERT(s.pair < (int)pScope->end); // 闭括号肯定在表达式区间内
+              i = s.pair;
+            }
+            continue;
+          }
+
+          if(s.precedence == nMinPrecedence)
+          {
+            MakeInstruction(s.sym.ToString(), nMinPrecedence, pScope, i);
+            return TRUE;
+          }
+          else if(s.precedence < nCandidate)
           {
             nCandidate = s.precedence;
             nCandidatePos = i;
           }
-        }
+
+        } // for
       }
 
-      if(nMinPrecedence == nCandidate) {
+      if(nMinPrecedence >= nCandidate) {
         break;
       }
 
@@ -808,20 +885,71 @@ NOT_INC_P:
     return TRUE;
   }
 
-  void ExpressionParser::DbgDumpScope( clStringA& str, clsize begin, clsize end )
+  GXBOOL ExpressionParser::MakeInstruction( GXLPCSTR szOperator, int nMinPrecedence, RTSCOPE* pScope, int nMiddle )
   {
-    for(clsize i = begin; i < end; ++i)
+    RTSCOPE scopeA = {pScope->begin, nMiddle};
+    RTSCOPE scopeB = {nMiddle + 1, pScope->end};
+    GXBOOL bresult = TRUE;
+
+    if(szOperator[0] == '?') {
+      //RTSCOPE scope = {i + 1, pScope->end};
+      const SYMBOL& s = m_aSymbols[nMiddle];
+
+      bresult = ParseExpression(&scopeA, nMinPrecedence);
+
+      if(s.pair >= (int)pScope->begin && s.pair < (int)pScope->end) {
+        bresult = bresult && MakeInstruction(":", nMinPrecedence, &scopeB, s.pair);
+      }
+      else {
+        // ERROR: ?:三元操作符不完整
+      }
+    }
+    else {
+      bresult = 
+        ParseExpression(&scopeA, nMinPrecedence) &&
+        ParseExpression(&scopeB, nMinPrecedence) ;
+    }
+
+    // <Trace>
+    clStringA strA, strB;
+    DbgDumpScope(strA, scopeA);
+    DbgDumpScope(strB, scopeB);
+
+    // <Make OperString>
+    clStringA strIntruction;
+    strIntruction.Format("[%s] [%s] [%s]", szOperator, strA, strB);
+    TRACE("%s\n", strIntruction);
+    m_aDbgExpressionOperStack.push_back(strIntruction);
+    // </Make OperString>
+    // </Trace>
+
+    return bresult;
+  }
+
+  void ExpressionParser::DbgDumpScope( clStringA& str, clsize begin, clsize end, GXBOOL bRaw )
+  {
+    if(bRaw)
     {
-      //if(i != end) {
-      //  str.Append(' ');
-      //}
-      str.Append(m_aSymbols[i].sym.ToString());
+      if(begin < end) {
+        str.Append(m_aSymbols[begin].sym.marker,
+          (m_aSymbols[end - 1].sym.marker - m_aSymbols[begin].sym.marker) + m_aSymbols[end - 1].sym.length);
+      }
+      else {
+        str.Clear();
+      }
+    }
+    else
+    {
+      for (clsize i = begin; i < end; ++i)
+      {
+        str.Append(m_aSymbols[i].sym.ToString());
+      }
     }
   }
 
   void ExpressionParser::DbgDumpScope( clStringA& str, const RTSCOPE& scope )
   {
-    DbgDumpScope(str, scope.begin, scope.end);
+    DbgDumpScope(str, scope.begin, scope.end, FALSE);
   }
 
 } // namespace UVShader
