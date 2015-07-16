@@ -385,7 +385,6 @@ _TStr _SS_IMPL::iterator::ToString() const
 _SS_TEMPL
 b32 _SS_IMPL::iterator::BeginsWith(T_LPCSTR str) const
 {
-  //const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
   const size_t uCmpLength = clstd::strlenT(str);
   if(length < uCmpLength) {
     return FALSE;
@@ -404,6 +403,19 @@ b32 _SS_IMPL::iterator::EndsWith(T_LPCSTR str) const
   return clstd::strncmpT(marker + length - uCmpLength, str, uCmpLength) == 0;
 }
 
+_SS_TEMPL
+b32 _SS_IMPL::iterator::BeginsWith(T_LPCSTR str, clsize count) const
+{
+  return (length < count) ? FALSE
+    : (clstd::strncmpT(marker, str, count) == 0);
+}
+
+_SS_TEMPL
+b32 _SS_IMPL::iterator::EndsWith(T_LPCSTR str, clsize count) const
+{
+  return (length < count) ? FALSE 
+    : (clstd::strncmpT(marker + length - count, str, count) == 0);
+}
 
 _SS_TEMPL
 b32 _SS_IMPL::iterator::operator==(const _TStr& str) const

@@ -125,6 +125,8 @@ public:
     _TStr   ToString    () const;
     b32     BeginsWith  (T_LPCSTR str) const;
     b32     EndsWith    (T_LPCSTR str) const;
+    b32     BeginsWith  (T_LPCSTR str, clsize count) const;
+    b32     EndsWith    (T_LPCSTR str, clsize count) const;
 
     //
     // 符合STL规范的接口

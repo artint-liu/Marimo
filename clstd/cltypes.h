@@ -31,6 +31,7 @@ typedef signed char         b8;    // boolean
 typedef signed __int32      b32;   // boolean
 
 typedef size_t              clsize;
+typedef size_t              clsize_t;
 #else
 
 typedef signed char         s8, i8;
@@ -49,6 +50,7 @@ typedef s8                  b8;    // b32
 typedef s32                 b32;   // b32
 
 typedef size_t              clsize;
+typedef size_t              clsize_t;
 #endif
 
 #if defined(_X86)

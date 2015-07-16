@@ -4,7 +4,7 @@
 namespace Marimo
 {
   template<typename _TChar>
-  class DataPoolErrorMsg
+  class GXDLL DataPoolErrorMsg
   {
     struct FILE_SECTION
     {

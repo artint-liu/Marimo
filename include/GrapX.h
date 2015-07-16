@@ -3069,6 +3069,7 @@ typedef struct tagGXLVSETINFOTIP
 #endif
 
 #define GXSTRCMP          clstd::strcmpT
+#define GXSTRNCMP         clstd::strncmpT
 #define GXSTRLEN          (int)clstd::strlenT
 #define GXSTRCPY          clstd::strcpyT
 #define GXSTRCPYN         clstd::strcpyn

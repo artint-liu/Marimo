@@ -174,7 +174,7 @@ GXLPCSTR aOperStack_362[] = {
   "[=] [float3data] [viewdir.z>0.0?tex2D(glareSampler,float2(0.5,0.5)+viewdir.xy*4.0).rgb:float3(0.0,0.0,0.0)]",
   NULL, };
 
-SAMPLE_EXPRESSION samples[] = {
+SAMPLE_EXPRESSION samplesOpercode[] = {
   {0, "i=4, n=10",  7}, // 下面的例子就是这里的初始值
   {0, "n--i",       3},// err
   {0, "n---i",      4},// n=9, i=4, 结果6
@@ -182,7 +182,9 @@ SAMPLE_EXPRESSION samples[] = {
   {0, "n- --i",     4},// n=10, i=3, 结果7
   {0, "n--- --i",   5},// n=9, i=3, 结果7
   {0, "n--- - --i", 6},// n=9, i=3, 结果13
-  
+  {NULL},};
+
+SAMPLE_EXPRESSION samplesNumeric[] = {
   // 整数
   {0, "10",  1},
   {0, "2e3", 1},
@@ -233,12 +235,44 @@ SAMPLE_EXPRESSION samples[] = {
   {0, "-1.e-3f",       2},
   {0, "-.5e3f",        2},
   {0, "-.5e-3f",       2},
-  //{0, NULL, 0},
-  {0, "output.color", 3},
-  {0, "a+b*c", 5, aOperStack_008},
-  {0, "(a+b)*c", 7, aOperStack_009},
-  {0, "a+b+c+d*e/f", 11, aOperStack_010},
-  {0, "k*((a*b)+c+d*e)", 15},
+  {0, NULL, 0},};
+
+SAMPLE_EXPRESSION samplesSimpleExpression[] = {
+  //// 基本表达式
+  //{0, "output.color", 3},
+
+  //// 数学表达式
+  //{0, "a+b*c", 5, aOperStack_008},
+  //{0, "(a+b)*c", 7, aOperStack_009},
+  //{0, "a+b+c+d*e/f", 11, aOperStack_010},
+  //{0, "k*((a*b)+c+d*e)", 15},
+
+  //// 三元操作
+  //{0, "a?b:c", 5},
+  //{0, "a>b?b:c", 7},
+  //{0, "a?b:c?f:g", 9, aOperStack_348},
+  //{0, "a?b?d:e:c", 9, aOperStack_349},
+  //{0, "a?b?d:e:c?f:g", 13, aOperStack_350},
+
+  // 赋值
+  //{0, "a=b+c", 5},
+  //{0, "a=b=c=d", 7},
+  {0, "float a", 2},
+  {0, "float a=b+c", 6},
+  {0, "float a=b=c=d", 8},
+  {0, "float a,b,c,d,e", 10},
+  {0, "float a, b = c", 6},
+  {0, "if(a == b && c + d > e)", 12},
+  {0, "while(a - b * c)", 8},
+  {0, "switch(a - b * c)", 8},
+  {0, NULL,  0},
+  {0, "",    0},
+  {0, "",    0},
+  {0, "",    0},
+  {0, "",    0},
+};
+
+SAMPLE_EXPRESSION samplesExpression[] = {
   {0, "(Output.LdotN*shadowFactor)+Output.Ambient+Output.Specular*shadowFactor", 17},
   {0, "Input.Normal = (Input.Normal - 0.5) * 2.0", 13},
   {0, "Input.Position.xyz += SwingGrass(Input.Position.xyz, Input.Texcoord.y - 0.1875)", 22},
@@ -277,11 +311,6 @@ SAMPLE_EXPRESSION samples[] = {
   {0, "return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG*mieG) * pow(1.0 + (mieG*mieG) - 2.0*mieG*mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG*mieG)", 56},
   {0, "m_fHue = m_fSaturation = m_fValue = 0.0",    7},
 
-  {0, "a?b:c", 5},
-  {0, "a>b?b:c", 7},
-  {0, "a?b:c?f:g", 9, aOperStack_348},
-  {0, "a?b?d:e:c", 9, aOperStack_349},
-  {0, "a?b?d:e:c?f:g", 13, aOperStack_350},
   {0, "return sumWeight > 0.0 ? sumWeightedSlopes / sqrt(sumWeight) : texture2DGrad(river.wave.patternTex, p.xy / river.wave.length, gradx, grady).xy", 36, aOperStack_360},
   {0, "float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : float4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU))", 49, aOperStack_361},
   {0, "float3 data = viewdir.z > 0.0 ? tex2D(glareSampler, float2(0.5,0.5) + viewdir.xy * 4.0).rgb : float3(0.0,0.0,0.0)", 37, aOperStack_362},

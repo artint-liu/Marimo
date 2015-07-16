@@ -1,6 +1,12 @@
 #ifndef _EXPRESSION_PARSER_H_
 #define _EXPRESSION_PARSER_H_
 
+namespace Marimo
+{
+  template<typename _TChar>
+  class DataPoolErrorMsg;
+} // namespace Marimo
+
 namespace UVShader
 {
   //struct GRAMMAR
@@ -41,6 +47,7 @@ namespace UVShader
       StatementType_Function,       // 函数体
       StatementType_Struct,         // 结构体
       StatementType_Signatures,     // 用于shader输入输出标记的结构体
+      StatementType_Expression,     // 表达式
     };
 
     enum StorageClass // 函数修饰，可选
@@ -81,6 +88,59 @@ namespace UVShader
     };
     typedef clvector<STRUCT_MEMBER> MemberArray;
 
+    struct SYNTAXNODE
+    {
+      enum FLAGS
+      {
+        FLAG_OPERAND_SHIFT     = 8,
+        FLAG_OPERAND_TYPEMASK  = 0x00000003,
+        FLAG_OPERAND_IS_NODE   = 0x00000001,
+        FLAG_OPERAND_IS_SYMBOL = 0x00000002,
+      };
+
+      enum MODE
+      {
+        MODE_Normal,        // 操作符 + 操作数 模式
+        MODE_FunctionCall,  // 函数调用
+        MODE_Definition,    // 变量定义
+        MODE_Flow_If,
+        MODE_Flow_ElseIf,
+        MODE_Flow_While,
+        MODE_Flow_Switch,
+      };
+
+      const static int s_NumOfOperand = 2;
+
+      GXDWORD flags : 16;
+      MODE mode : 16;
+      const SYMBOL* pOpcode;
+
+      union UN {
+        SYNTAXNODE* pNode;
+        SYMBOL*     pSym;
+      };
+
+      UN Operand[s_NumOfOperand];
+
+      inline FLAGS GetOperandType(int index) const {
+        const int shift = FLAG_OPERAND_SHIFT * index;
+        return (FLAGS)((flags >> shift) & FLAG_OPERAND_TYPEMASK);
+      }
+
+      inline GXBOOL OperandA_IsNode() const {
+        const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK;
+        return (flags & dwTypeMask) == FLAG_OPERAND_IS_NODE;
+      }
+
+      inline GXBOOL OperandB_IsNode() const {
+        const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK << FLAG_OPERAND_SHIFT;
+        const GXDWORD dwNode = FLAG_OPERAND_IS_NODE << FLAG_OPERAND_SHIFT;
+        return (flags & dwTypeMask) == dwNode;
+      }
+    };
+    typedef clvector<SYNTAXNODE> SyntaxNodeArray;
+
+    //////////////////////////////////////////////////////////////////////////
 
     struct STATEMENT
     {
@@ -97,10 +157,14 @@ namespace UVShader
         }func;
 
         struct { // 结构体定义
-          GXLPCSTR szName;
+          GXLPCSTR        szName;
           STRUCT_MEMBER*  pMembers;
           clsize          nNumOfMembers;
         }stru;
+
+        struct { // 表达式定义
+          SYNTAXNODE::UN  sRoot;
+        }expr;
       };
     };
 
@@ -112,15 +176,22 @@ namespace UVShader
       clsize end;
     };
 
-    struct INTRINSIC_TYPE
+    struct INTRINSIC_TYPE // 内置类型
     {
       GXLPCSTR name;
+      clsize   name_len;
+      int      R;         // 最大允许值
+      int      C;         // 最大允许值
     };
+
+    //////////////////////////////////////////////////////////////////////////
 
   private:
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
 
+    void    InitPacks();
+    void    Cleanup();
     clsize  EstimateForSymbolsCount () const;  // 从Stream的字符数估计Symbol的数量
 
     GXBOOL  ParseStatementAs_Function(RTSCOPE* pScope);
@@ -129,29 +200,51 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
     GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
 
-    GXBOOL  ParseExpression(RTSCOPE* pScope, int nMinPrecedence);
-    GXBOOL  MakeInstruction(GXLPCSTR szOperator, int nMinPrecedence, RTSCOPE* pScope, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
+    GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
 
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocalePointer();
+    void    RelocaleSyntaxPtr(SYNTAXNODE* pNode);
     GXBOOL  IsIntrinsicType(GXLPCSTR szType);
 
     GXLPCSTR GetUniqueString(const SYMBOL* pSym);
-    GXBOOL   ParseType(GXOUT TYPE* pType);
+    GXBOOL   ParseType(const SYMBOL* pSym, GXOUT TYPE* pType);
+    GXBOOL   IsSymbol(const SYNTAXNODE::UN* pUnion) const;
+
+    template<class _Ty>
+    _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
+    {
+      return &array[(GXINT_PTR)ptr_index];
+    }
+
+    template<class _Ty>
+    void IndexToPtr(_Ty*& ptr_index, clvector<_Ty>& array)
+    {
+      ptr_index = IndexToPtr(array, ptr_index);
+    }
+
 
   protected:
+    typedef Marimo::DataPoolErrorMsg<ch> ErrorMessage;
+    ErrorMessage*           m_pMsg;
     SymbolArray         m_aSymbols;
     clstd::StringSetA   m_Strings;
     StatementArray      m_aStatements;
-    ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
+    
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里
+    ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
+    SyntaxNodeArray     m_aSyntaxNodePack;
+
     SYMBOL              m_CurSymInfo;       // 遍历时符号的优先级信息
     int                 m_nMaxPrecedence;   // 优先级最大值
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     static INTRINSIC_TYPE s_aIntrinsicType[];
   public:
     ExpressionParser();
+    virtual ~ExpressionParser();
     b32                 Attach                  (const char* szExpression, clsize nSize);
     clsize              GenerateSymbols         ();
     const SymbolArray*  GetSymbolsArray         () const;
@@ -159,7 +252,8 @@ namespace UVShader
 
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
-    /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(RTSCOPE* pScope); // (算数表)达式
+    void DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL);
+    /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
 
     clStringArrayA    m_aDbgExpressionOperStack;
   };

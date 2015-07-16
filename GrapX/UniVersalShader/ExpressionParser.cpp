@@ -4,6 +4,9 @@
 #include <clStringSet.h>
 #include "ExpressionParser.h"
 
+#include "clTextLines.h"
+#include "../User/DataPoolErrorMsg.h"
+
 //////////////////////////////////////////////////////////////////////////
 //
 // 运算符定义
@@ -150,21 +153,32 @@ inline b32 IS_NUM(char c)
 
 namespace UVShader
 {
-  ExpressionParser::INTRINSIC_TYPE s_aIntrinsicType[] = {
-    {"bool"},
-    {"int"},
-    {"uint"},
-    {"dword"},
-    {"half"},
-    {"float"},
-    {"double"},
+  ExpressionParser::INTRINSIC_TYPE ExpressionParser::s_aIntrinsicType[] = {
+    {"int",   3, 4, 4},
+    {"vec",   3, 4, 0},
+    {"bool",  4, 4, 0},
+    {"half",  4, 4, 4},
+    {"uint",  4, 4, 4},
+    {"dword", 5, 4, 4},
+    {"float", 5, 4, 4},
+    {"double",6, 4, 4},
     {NULL},
   };
 
   ExpressionParser::ExpressionParser()
     : m_nMaxPrecedence(0)
     , m_nDbgNumOfExpressionParse(0)
+    , m_pMsg(NULL)
   {
+#ifdef _DEBUG
+
+    // 检查名字与其设定长度是一致的
+    for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i) {
+      ASSERT(GXSTRLEN(s_aIntrinsicType[i].name) == s_aIntrinsicType[i].name_len);
+    }
+
+#endif // #ifdef _DEBUG
+
     u32 aCharSem[128];
     GetCharSemantic(aCharSem, 0, 128);
 
@@ -189,11 +203,49 @@ namespace UVShader
     SetCharSemantic(aCharSem, 0, 128);
     SetIteratorCallBack(IteratorProc, 0);
     SetTriggerCallBack(MultiByteOperatorProc, 0);
+
+    InitPacks();
+  }
+
+  ExpressionParser::~ExpressionParser()
+  {
+    SAFE_DELETE(m_pMsg);
+  }
+
+  void ExpressionParser::InitPacks()
+  {
+    //
+    // 所有pack类型，都存一个空值，避免记录0索引与NULL指针混淆的问题
+    //
+    SYNTAXNODE node = {NULL};
+    m_aSyntaxNodePack.clear();
+    m_aSyntaxNodePack.push_back(node);
+
+    STRUCT_MEMBER member = {NULL};
+    m_aMembersPack.clear();
+    m_aMembersPack.push_back(member);
+
+    FUNCTION_ARGUMENT argument = {InputModifier_in};
+    m_aArgumentsPack.clear();
+    m_aArgumentsPack.push_back(argument);
+  }
+
+  void ExpressionParser::Cleanup()
+  {
+    m_aSymbols.clear();
+    m_aStatements.clear();
+
+    InitPacks();
   }
 
   b32 ExpressionParser::Attach( const char* szExpression, clsize nSize )
   {
-    m_aSymbols.clear();
+    Cleanup();
+    if( ! m_pMsg) {
+      m_pMsg = new ErrorMessage();
+      m_pMsg->LoadErrorMessageW(L"uvsmsg.txt");
+      m_pMsg->WriteErrorW(FALSE, 0, 0);
+    }
     return SmartStreamA::Initialize(szExpression, nSize);
   }
 
@@ -350,7 +402,7 @@ namespace UVShader
         }
         else if(it == c.szClosed) {
           if(c.sStack.empty()) {
-            // ERROR: 不匹配
+            // ERROR: 不匹配            
           }
           sym.pair = c.sStack.top();
           m_aSymbols[sym.pair].pair = (int)m_aSymbols.size();
@@ -639,14 +691,31 @@ NOT_INC_P:
       {
       case StatementType_FunctionDecl:
       case StatementType_Function:
-        it->func.pArguments = &m_aArgumentsPack[(GXINT_PTR)it->func.pArguments];
+        //it->func.pArguments = &m_aArgumentsPack[(GXINT_PTR)it->func.pArguments];
+        IndexToPtr(it->func.pArguments, m_aArgumentsPack);
         break;
 
       case StatementType_Struct:
       case StatementType_Signatures:
-        it->stru.pMembers = &m_aMembersPack[(GXINT_PTR)it->stru.pMembers];
+        //it->stru.pMembers = &m_aMembersPack[(GXINT_PTR)it->stru.pMembers];
+        IndexToPtr(it->stru.pMembers, m_aMembersPack);
         break;
       }
+    }
+  }
+
+  void ExpressionParser::RelocaleSyntaxPtr(SYNTAXNODE* pNode)
+  {
+    if(pNode->OperandA_IsNode() && pNode->Operand[0].pNode) {
+      //pNode->Operand[0].pNode = &m_aSyntaxNodePack[(GXINT_PTR)pNode->Operand[0].pNode];
+      IndexToPtr(pNode->Operand[0].pNode, m_aSyntaxNodePack);
+      RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[0].pNode);
+    }
+
+    if(pNode->OperandB_IsNode() && pNode->Operand[1].pNode) {
+      //pNode->Operand[1].pNode = &m_aSyntaxNodePack[(GXINT_PTR)pNode->Operand[1].pNode];
+      IndexToPtr(pNode->Operand[1].pNode, m_aSyntaxNodePack);
+      RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[1].pNode);
     }
   }
 
@@ -720,20 +789,21 @@ NOT_INC_P:
     return m_Strings.add(pSym->sym.ToString());
   }
 
-  GXBOOL ExpressionParser::ParseType( GXOUT TYPE* pType )
+  GXBOOL ExpressionParser::ParseType( const SYMBOL* pSym, GXOUT TYPE* pType )
   {
-    static GXLPCSTR szBool   = "bool";
-    static GXLPCSTR szInt    = "int";
-    static GXLPCSTR szUint   = "uint";
-    static GXLPCSTR szHalf   = "half";
-    static GXLPCSTR szFloat  = "float";
-    static GXLPCSTR szDouble = "double";
+    for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i)
+    {
+      const INTRINSIC_TYPE& t = s_aIntrinsicType[i];
+      if(pSym->sym.BeginsWith(t.name, t.name_len)) {
+
+      }
+    }
     
     // 对于内置类型，要解析出 Type[RxC] 这种格式
     return TRUE;
   }
 
-  GXBOOL ExpressionParser::ParseStatementAs_Expression( RTSCOPE* pScope )
+  GXBOOL ExpressionParser::ParseStatementAs_Expression( RTSCOPE* pScope, GXBOOL bDbgRelocale )
   {
     m_nDbgNumOfExpressionParse = 0;
     m_aDbgExpressionOperStack.clear();
@@ -742,53 +812,151 @@ NOT_INC_P:
       --pScope->end;
     }
 
-    GXBOOL bret = ParseExpression(pScope, 1);
+    STATEMENT stat = {StatementType_Expression};
+    
+    GXBOOL bret = ParseExpression(pScope, &stat.expr.sRoot, 1);
     TRACE("m_nDbgNumOfExpressionParse=%d\n", m_nDbgNumOfExpressionParse);
+
+#ifdef _DEBUG
+    // 这个测试会重定位指针，所以仅作为一次性调用，之后m_aSyntaxNodePack不能再添加新的数据了
+    if(bDbgRelocale && ! IsSymbol(&stat.expr.sRoot)) {
+      IndexToPtr(stat.expr.sRoot.pNode, m_aSyntaxNodePack);
+      RelocaleSyntaxPtr(stat.expr.sRoot.pNode);
+      DbgDumpSyntaxTree(stat.expr.sRoot.pNode, 0);
+    }
+#endif // #ifdef _DEBUG
     return bret;
   }
 
-  GXBOOL ExpressionParser::ParseExpression( RTSCOPE* pScope, int nMinPrecedence )
+  void ExpressionParser::DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr)
+  {
+    clStringA str[2];
+    for(int i = 0; i < 2; i++)
+    {
+      if(pNode->Operand[i].pSym) {
+        if(IsSymbol(&pNode->Operand[i])) {
+          str[i] = pNode->Operand[i].pSym->sym.ToString();
+        }
+        else {
+          DbgDumpSyntaxTree(pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
+        }
+      }
+      else {
+        str[i].Clear();
+      }
+    }
+
+    TRACE("[%s] [%s] [%s]\n",
+      pNode->pOpcode ? pNode->pOpcode->sym.ToString() : "",
+      str[0], str[1]);
+
+    clStringA strOut;
+    if(pNode->mode == SYNTAXNODE::MODE_FunctionCall) // 函数调用
+    {
+      strOut.Format("%s(%s)", str[0], str[1]);
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Definition)
+    {
+      strOut.Format("%s %s", str[0], str[1]);
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_If || 
+      pNode->mode == SYNTAXNODE::MODE_Flow_While ||
+      pNode->mode == SYNTAXNODE::MODE_Flow_Switch)
+    {
+      strOut.Format("%s(%s)", str[0], str[1]);
+    }
+    else if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
+      strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+    }
+    else {
+      strOut.Format("%s%s%s", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+    }
+
+    if(pStr) {
+      *pStr = strOut;
+    }
+    else {
+      TRACE("%s\n", strOut);
+    }
+  }
+
+  GXBOOL ExpressionParser::ParseExpression( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence )
   {
     ASSERT(pScope->begin <= pScope->end);
-    //if(m_aSymbols[pScope->begin].sym.ToString() == "(") {
-    //  CLNOP
-    //}
 
-    if((GXINT_PTR)pScope->begin >= (GXINT_PTR)(pScope->end - 1)) {
+    const GXINT_PTR count = pScope->end - pScope->begin;
+    SYNTAXNODE::UN A, B;
+
+
+    if(count <= 1) {
+      if(count == 1) {
+        pUnion->pSym = &m_aSymbols[pScope->begin];
+      }
       return TRUE;
     }
+
+    else if(count == 2)
+    {
+      //ParseType()
+      A.pSym = &m_aSymbols[pScope->begin];
+      B.pSym = &m_aSymbols[pScope->begin + 1];      
+
+      MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Definition, NULL, &A, &B);
+    }
+
     else if(m_aSymbols[pScope->begin].pair == pScope->end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin);
 
       RTSCOPE sBraketsScope = {pScope->begin + 1, pScope->end - 1};
-      return ParseExpression(&sBraketsScope, 1);
+      return ParseExpression(&sBraketsScope, pUnion, 1);
     }
+
     else if(m_aSymbols[pScope->begin + 1].pair == pScope->end - 1)  // 函数调用
     {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin + 1);
+
+      A.pSym = &m_aSymbols[pScope->begin];
+      clStringA strFunction = A.pSym->sym.ToString();
       
       // TODO: 检查m_aSymbols[pScope->begin]是函数名
 
       RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
+      GXBOOL bret = ParseExpression(&sArgumentScope, &B, 1);
+
+      SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
+      if(strFunction == "if")
+      {
+        mode = SYNTAXNODE::MODE_Flow_If;
+      }
+      else if(strFunction == "while")
+      {
+        mode = SYNTAXNODE::MODE_Flow_While;
+      }
+      else if(strFunction == "switch")
+      {
+        mode = SYNTAXNODE::MODE_Flow_Switch;
+      }
+
+      MakeSyntaxNode(pUnion, mode, NULL, &A, &B);
+
+#ifdef _DEBUG
       clStringA strArgs;
       DbgDumpScope(strArgs, sArgumentScope);
-      GXBOOL bret = ParseExpression(&sArgumentScope, 1);
-
       // <Make OperString>
       clStringA strIntruction;
-      strIntruction.Format("[F] [%s] [%s]", m_aSymbols[pScope->begin].sym.ToString(), strArgs);
+      strIntruction.Format("[F] [%s] [%s]", strFunction, strArgs);
       TRACE("%s\n", strIntruction);
       m_aDbgExpressionOperStack.push_back(strIntruction);
       // </Make OperString>
+#endif // #ifdef _DEBUG
 
       return bret;
     }
     
     int nCandidate = m_nMaxPrecedence;
-    //clsize i = pScope->begin;
     GXINT_PTR i = (GXINT_PTR)pScope->end - 1;
     GXINT_PTR nCandidatePos = i;
 
@@ -816,30 +984,16 @@ NOT_INC_P:
 
           // ?: 操作符标记：precedence 储存优先级，pair 储存?:的关系
 
-          if(s.precedence == nMinPrecedence)
-          {
-            if(s.sym == '?')
-            {
-              MakeInstruction(s.sym.ToString(), nMinPrecedence, pScope, i);
-
-              //RTSCOPE scope = {i + 1, pScope->end};
-              //if(s.pair >= (int)pScope->begin && s.pair < (int)pScope->end) {
-              //  MakeInstruction(":", nMinPrecedence, &scope, s.pair);
-              //}
-              //else {
-              //  // ERROR: ?:三元操作符不完整
-              //}
-            }
-            else { // 一元/二元 操作符或者三元操作符"?:"的":"部分
-              MakeInstruction(s.sym.ToString(), nMinPrecedence, pScope, i);
-            }
+          if(s.precedence == nMinPrecedence) {
+            MakeInstruction(&s, nMinPrecedence, pScope, pUnion, i);
             return TRUE;
           }
-          else if(s.precedence < nCandidate)
-          {
+          else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
+            // 这里优先级因为从LTR切换到RTL，所以不记录 nCandidatePos
           }
         } // for
+
         nCandidatePos = (GXINT_PTR)pScope->end - 1;
       }
       else
@@ -849,8 +1003,8 @@ NOT_INC_P:
           m_nDbgNumOfExpressionParse++;
           const SYMBOL& s = m_aSymbols[i];
 
-          //ASSERT(s.sym != '?' && s.sym != ':'); // 这个循环不能处理三元操作符
-          ASSERT(nMinPrecedence != 2);            // 优先级（2）是从右向左的，这个循环处理从左向右
+          // 优先级（2）是从右向左的，这个循环处理从左向右
+          ASSERT(nMinPrecedence != 2);
 
           if(s.precedence == 0) // 跳过非运算符, 也包括括号
           {
@@ -861,17 +1015,14 @@ NOT_INC_P:
             continue;
           }
 
-          if(s.precedence == nMinPrecedence)
-          {
-            MakeInstruction(s.sym.ToString(), nMinPrecedence, pScope, i);
+          if(s.precedence == nMinPrecedence) {
+            MakeInstruction(&s, nMinPrecedence, pScope, pUnion, i);
             return TRUE;
           }
-          else if(s.precedence < nCandidate)
-          {
+          else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
             nCandidatePos = i;
           }
-
         } // for
       }
 
@@ -885,20 +1036,22 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXBOOL ExpressionParser::MakeInstruction( GXLPCSTR szOperator, int nMinPrecedence, RTSCOPE* pScope, int nMiddle )
+  GXBOOL ExpressionParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
   {
     RTSCOPE scopeA = {pScope->begin, nMiddle};
     RTSCOPE scopeB = {nMiddle + 1, pScope->end};
+    SYNTAXNODE::UN A = {0}, B = {0};
     GXBOOL bresult = TRUE;
 
-    if(szOperator[0] == '?') {
-      //RTSCOPE scope = {i + 1, pScope->end};
+    if(pOpcode->sym == '?') {
       const SYMBOL& s = m_aSymbols[nMiddle];
-
-      bresult = ParseExpression(&scopeA, nMinPrecedence);
+      //SYNTAXNODE sNodeB;
+      //B.pNode = &sNodeB;
+      bresult = ParseExpression(&scopeA, &A, nMinPrecedence);
 
       if(s.pair >= (int)pScope->begin && s.pair < (int)pScope->end) {
-        bresult = bresult && MakeInstruction(":", nMinPrecedence, &scopeB, s.pair);
+        ASSERT(m_aSymbols[s.pair].sym == ':');
+        bresult = bresult && MakeInstruction(&m_aSymbols[s.pair], nMinPrecedence, &scopeB, &B, s.pair);
       }
       else {
         // ERROR: ?:三元操作符不完整
@@ -906,10 +1059,13 @@ NOT_INC_P:
     }
     else {
       bresult = 
-        ParseExpression(&scopeA, nMinPrecedence) &&
-        ParseExpression(&scopeB, nMinPrecedence) ;
+        ParseExpression(&scopeA, &A, nMinPrecedence) &&
+        ParseExpression(&scopeB, &B, nMinPrecedence) ;
     }
 
+    MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Normal, pOpcode, &A, &B);
+
+#ifdef _DEBUG
     // <Trace>
     clStringA strA, strB;
     DbgDumpScope(strA, scopeA);
@@ -917,11 +1073,12 @@ NOT_INC_P:
 
     // <Make OperString>
     clStringA strIntruction;
-    strIntruction.Format("[%s] [%s] [%s]", szOperator, strA, strB);
+    strIntruction.Format("[%s] [%s] [%s]", pOpcode->sym.ToString(), strA, strB);
     TRACE("%s\n", strIntruction);
     m_aDbgExpressionOperStack.push_back(strIntruction);
     // </Make OperString>
     // </Trace>
+#endif // #ifdef _DEBUG
 
     return bresult;
   }
@@ -952,6 +1109,36 @@ NOT_INC_P:
     DbgDumpScope(str, scope.begin, scope.end, FALSE);
   }
 
+  GXBOOL ExpressionParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
+  {
+    const SYNTAXNODE::UN* pOperand[] = {pOperandA, pOperandB};
+    SYNTAXNODE sNode = {0, mode, pOpcode};
+
+    for(int i = 0; i < 2; ++i)
+    {
+      const int nFlagShift = SYNTAXNODE::FLAG_OPERAND_SHIFT * i;
+      if(IsSymbol(pOperand[i])) {
+        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_SYMBOL << nFlagShift);
+        sNode.Operand[i].pSym = pOperand[i]->pSym;
+      }
+      else {
+        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_NODE << nFlagShift);
+        sNode.Operand[i].pNode = pOperand[i]->pNode;
+      }
+    }
+
+    pDest->pNode = (SYNTAXNODE*)m_aSyntaxNodePack.size();
+    m_aSyntaxNodePack.push_back(sNode);
+
+    return TRUE;
+  }
+
+  GXBOOL ExpressionParser::IsSymbol(const SYNTAXNODE::UN* pUnion) const
+  {
+    const SYMBOL* pBegin = &m_aSymbols.front();
+    const SYMBOL* pBack   = &m_aSymbols.back();
+
+    return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
+  }
+
 } // namespace UVShader
-
-
