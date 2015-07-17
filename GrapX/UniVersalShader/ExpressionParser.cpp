@@ -789,18 +789,48 @@ NOT_INC_P:
     return m_Strings.add(pSym->sym.ToString());
   }
 
-  GXBOOL ExpressionParser::ParseType( const SYMBOL* pSym, GXOUT TYPE* pType )
+  const ExpressionParser::TYPE* ExpressionParser::ParseType(const SYMBOL* pSym)
   {
+    TYPE sType = {NULL, 1, 1};
+
+    // 对于内置类型，要解析出 Type[RxC] 这种格式
     for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i)
     {
       const INTRINSIC_TYPE& t = s_aIntrinsicType[i];
       if(pSym->sym.BeginsWith(t.name, t.name_len)) {
+        const auto* pElement = pSym->sym.marker + t.name_len;
+        const int   remain   = pSym->sym.length - (int)t.name_len;
+        sType.name = t.name;
 
+        // [(1..4)[x(1..4)]]
+        if(remain == 0) {
+          ;
+        }
+        else if(remain == 1 && *pElement >= '1' && *pElement <= '4') { // TypeR 格式
+          sType.R = *pElement - '0';
+          ASSERT(sType.R >= 1 && sType.R <= 4);
+        }
+        else if(remain == 3 && *pElement >= '1' && *pElement <= '4' && // TypeRxC 格式
+          pElement[1] == 'x' && pElement[2] >= '1' && pElement[2] <= '4')
+        {
+          sType.R = pElement[0] - '0';
+          sType.C = pElement[2] - '0';
+          ASSERT(sType.R >= 1 && sType.R <= 4);
+          ASSERT(sType.C >= 1 && sType.C <= 4);
+        }
+        else {
+          break;
+        }
+
+        return &(*m_TypeSet.insert(sType).first);
       }
     }
     
-    // 对于内置类型，要解析出 Type[RxC] 这种格式
-    return TRUE;
+    // TODO: 查找用户定义类型
+    // 1.typdef 定义
+    // 1.struct 定义
+
+    return NULL;
   }
 
   GXBOOL ExpressionParser::ParseStatementAs_Expression( RTSCOPE* pScope, GXBOOL bDbgRelocale )
@@ -865,6 +895,11 @@ NOT_INC_P:
     {
       strOut.Format("%s(%s)", str[0], str[1]);
     }
+    else if(pNode->mode == SYNTAXNODE::MODE_Return)
+    {
+      ASSERT(str[0] == "return");
+      strOut.Format("return %s", str[1]);
+    }
     else if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
       strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->sym.ToString(), str[1]);
     }
@@ -880,12 +915,19 @@ NOT_INC_P:
     }
   }
 
+  GXBOOL ExpressionParser::ParseExpression(SYNTAXNODE::UN* pUnion, int nMinPrecedence, clsize begin, clsize end)
+  {
+    RTSCOPE scope = {begin, end};
+    return ParseExpression(&scope, pUnion, nMinPrecedence);
+  }
+
   GXBOOL ExpressionParser::ParseExpression( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence )
   {
     ASSERT(pScope->begin <= pScope->end);
 
     const GXINT_PTR count = pScope->end - pScope->begin;
     SYNTAXNODE::UN A, B;
+    GXBOOL bret = TRUE;
 
 
     if(count <= 1) {
@@ -894,23 +936,43 @@ NOT_INC_P:
       }
       return TRUE;
     }
+    else if(m_aSymbols[pScope->begin].sym == "return")
+    {
+      A.pSym = &m_aSymbols[pScope->begin];
+      bret = ParseExpression(&B, 1, pScope->begin + 1, pScope->end);
+      MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Return, NULL, &A, &B);
+      return bret;
+    }
 
     else if(count == 2)
     {
-      //ParseType()
-      A.pSym = &m_aSymbols[pScope->begin];
-      B.pSym = &m_aSymbols[pScope->begin + 1];      
+      // 处理两种可能：(1)变量使用一元符号运算 (2)定义变量
 
-      MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Definition, NULL, &A, &B);
+      A.pSym = &m_aSymbols[pScope->begin];
+      B.pSym = &m_aSymbols[pScope->begin + 1];
+
+      if(A.pSym->precedence > 0)
+      {
+        // TODO: 检查支持左侧运算
+        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, A.pSym, NULL, &B);
+      }
+      else if(B.pSym->precedence > 0)
+      {
+        // TODO: 检查支持右侧运算
+        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, A.pSym, &B, NULL);
+      }
+      else {
+        // 变量声明
+        //const TYPE* pType = ParseType(A.pSym);
+        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Definition, NULL, &A, &B);
+      }
     }
 
     else if(m_aSymbols[pScope->begin].pair == pScope->end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin);
-
-      RTSCOPE sBraketsScope = {pScope->begin + 1, pScope->end - 1};
-      return ParseExpression(&sBraketsScope, pUnion, 1);
+      return ParseExpression(pUnion, 1, pScope->begin + 1, pScope->end - 1);
     }
 
     else if(m_aSymbols[pScope->begin + 1].pair == pScope->end - 1)  // 函数调用
@@ -924,7 +986,7 @@ NOT_INC_P:
       // TODO: 检查m_aSymbols[pScope->begin]是函数名
 
       RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
-      GXBOOL bret = ParseExpression(&sArgumentScope, &B, 1);
+      bret = ParseExpression(&sArgumentScope, &B, 1);
 
       SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
       if(strFunction == "if")
@@ -1139,6 +1201,19 @@ NOT_INC_P:
     const SYMBOL* pBack   = &m_aSymbols.back();
 
     return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
+  }
+
+
+  bool ExpressionParser::TYPE::operator<( const TYPE& t ) const
+  {
+    const int r = GXSTRCMP(name, t.name);
+    if(r < 0) {
+      return TRUE;
+    }
+    else if(r > 0) {
+      return FALSE;
+    }
+    return ((R << 3) | C) < ((t.R << 3) | t.C);
   }
 
 } // namespace UVShader

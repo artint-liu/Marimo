@@ -69,7 +69,10 @@ namespace UVShader
       GXLPCSTR  name;
       int       R;    // Row, 或者 array size
       int       C;    // Column
+
+      bool operator<(const TYPE& t) const;
     };
+    typedef clset<TYPE>   TypeSet;
 
     struct FUNCTION_ARGUMENT // 函数参数
     {
@@ -107,6 +110,7 @@ namespace UVShader
         MODE_Flow_ElseIf,
         MODE_Flow_While,
         MODE_Flow_Switch,
+        MODE_Return,
       };
 
       const static int s_NumOfOperand = 2;
@@ -117,7 +121,7 @@ namespace UVShader
 
       union UN {
         SYNTAXNODE* pNode;
-        SYMBOL*     pSym;
+        const SYMBOL* pSym;
       };
 
       UN Operand[s_NumOfOperand];
@@ -201,6 +205,7 @@ namespace UVShader
     GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
 
     GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
+    GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, int nMinPrecedence, clsize begin, clsize end);
     GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
 
@@ -211,7 +216,7 @@ namespace UVShader
     GXBOOL  IsIntrinsicType(GXLPCSTR szType);
 
     GXLPCSTR GetUniqueString(const SYMBOL* pSym);
-    GXBOOL   ParseType(const SYMBOL* pSym, GXOUT TYPE* pType);
+    const TYPE* ParseType(const SYMBOL* pSym);
     GXBOOL   IsSymbol(const SYNTAXNODE::UN* pUnion) const;
 
     template<class _Ty>
@@ -232,6 +237,7 @@ namespace UVShader
     ErrorMessage*           m_pMsg;
     SymbolArray         m_aSymbols;
     clstd::StringSetA   m_Strings;
+    TypeSet             m_TypeSet;
     StatementArray      m_aStatements;
     
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里

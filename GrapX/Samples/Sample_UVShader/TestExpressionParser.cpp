@@ -111,7 +111,7 @@ GXLPCSTR aOperStack_350[] = {
   NULL, };
 
 GXLPCSTR aOperStack_360[] = {
-  "[>] [returnsumWeight] [0.0]",
+  "[>] [sumWeight] [0.0]",
   "[F] [sqrt] [sumWeight]",
   "[/] [sumWeightedSlopes] [sqrt(sumWeight)]",
   "[.] [river] [wave]",
@@ -126,7 +126,7 @@ GXLPCSTR aOperStack_360[] = {
   "[F] [texture2DGrad] [river.wave.patternTex,p.xy/river.wave.length,gradx,grady]",
   "[.] [texture2DGrad(river.wave.patternTex,p.xy/river.wave.length,gradx,grady)] [xy]",
   "[:] [sumWeightedSlopes/sqrt(sumWeight)] [texture2DGrad(river.wave.patternTex,p.xy/river.wave.length,gradx,grady).xy]",
-  "[?] [returnsumWeight>0.0] [sumWeightedSlopes/sqrt(sumWeight):texture2DGrad(river.wave.patternTex,p.xy/river.wave.length,gradx,grady).xy]",
+  "[?] [sumWeight>0.0] [sumWeightedSlopes/sqrt(sumWeight):texture2DGrad(river.wave.patternTex,p.xy/river.wave.length,gradx,grady).xy]",
   NULL, };
 
 GXLPCSTR aOperStack_361[] = {
@@ -259,7 +259,7 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   //{0, "a=b=c=d", 7},
   {0, "float a", 2},
   {0, "float a=b+c", 6},
-  {0, "float a=b=c=d", 8},
+  {0, "float3 a=b=c=d", 8},
   {0, "float a,b,c,d,e", 10},
   {0, "float a, b = c", 6},
   {0, "if(a == b && c + d > e)", 12},
