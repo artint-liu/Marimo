@@ -86,63 +86,7 @@ struct MBO
   int precedence; // 优先级，越大越高
 };
 
-static MBO s_Operator1[] = {
-  {1, ".",  14},
-//{1, "+", 13}, // 正号
-//{1, "−", 13}, // 负号
-  {1, "!", 13},
-  {1, "~", 13},
-  {1, "&", 13},
-  {1, "*", 12},
-  {1, "/", 12},
-  {1, "%", 12},
-  {1, "+", 11}, // 加法
-  {1, "-", 11}, // 减法
-  {1, "<",  9},
-  {1, ">",  9},
-  {1, "&",  7},
-  {1, "^",  6},
-  {1, "|",  5},
-  {1, "=",  2},
-  {1, "?",  2}, // ?: 操作符
-  {1, ":",  2}, // ?: 操作符
-  {1, ",",  1},
-  {NULL,},
-};
 
-static MBO s_Operator2[] = {
-  {2, "--", 14},
-  {2, "++", 14},
-  {2, ">>", 10},
-  {2, "<<", 10},
-  {2, "<=", 9},
-  {2, ">=", 9},
-  {2, "==", 8},
-  {2, "!=", 8},
-  {2, "&&", 4},
-  {2, "||", 3},
-  {2, "+=", 2},
-  {2, "-=", 2},
-  {2, "*=", 2},
-  {2, "/=", 2},
-  {2, "%=", 2},
-  {2, "&=", 2},
-  {2, "^=", 2},
-  {2, "|=", 2},
-  {NULL,},
-
-  // 不会用到的符号
-  {2, "::",  0},
-  {2, "->",  0},
-  {2, ".*",  0},
-  {2, "->*", 0}, 
-};
-
-static MBO s_Operator3[] = {
-  {3, "<<=",2},
-  {3, ">>=",2},
-  {NULL,},
-};
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -153,6 +97,65 @@ inline b32 IS_NUM(char c)
 
 namespace UVShader
 {
+  static MBO s_Operator1[] = {
+    {1, ".", OPP(13)},
+    //{1, "+", OPP(12}}, // 正号
+    //{1, "−", OPP(12}}, // 负号
+    {1, "!", OPP(12)},
+    {1, "~", OPP(12)},
+    {1, "&", OPP(12)},
+    {1, "*", OPP(11)},
+    {1, "/", OPP(11)},
+    {1, "%", OPP(11)},
+    {1, "+", OPP(10)}, // 加法
+    {1, "-", OPP(10)}, // 减法
+    {1, "<", OPP( 8)},
+    {1, ">", OPP( 8)},
+    {1, "&", OPP( 6)},
+    {1, "^", OPP( 5)},
+    {1, "|", OPP( 4)},
+    {1, "=", OPP( 1)},
+    {1, "?", OPP( 1)}, // ?: 操作符
+    {1, ":", OPP( 1)}, // ?: 操作符
+    {1, ",", OPP( 0)},
+    {NULL,},
+  };
+
+  static MBO s_Operator2[] = {
+    {2, "--", OPP(13)},
+    {2, "++", OPP(13)},
+    {2, ">>", OPP( 9)},
+    {2, "<<", OPP( 9)},
+    {2, "<=", OPP( 8)},
+    {2, ">=", OPP( 8)},
+    {2, "==", OPP( 7)},
+    {2, "!=", OPP( 7)},
+    {2, "&&", OPP( 3)},
+    {2, "||", OPP( 2)},
+    {2, "+=", OPP( 1)},
+    {2, "-=", OPP( 1)},
+    {2, "*=", OPP( 1)},
+    {2, "/=", OPP( 1)},
+    {2, "%=", OPP( 1)},
+    {2, "&=", OPP( 1)},
+    {2, "^=", OPP( 1)},
+    {2, "|=", OPP( 1)},
+    {NULL,},
+
+    // 不会用到的符号
+    {2, "::",  OPP(-1)},
+    {2, "->",  OPP(-1)},
+    {2, ".*",  OPP(-1)},
+    {2, "->*", OPP(-1)}, 
+  };
+
+  static MBO s_Operator3[] = {
+    {3, "<<=", OPP(1)},
+    {3, ">>=", OPP(1)},
+    {NULL,},
+  };
+  //////////////////////////////////////////////////////////////////////////
+
   ExpressionParser::INTRINSIC_TYPE ExpressionParser::s_aIntrinsicType[] = {
     {"int",   3, 4, 4},
     {"vec",   3, 4, 0},
@@ -198,6 +201,7 @@ namespace UVShader
     }
 
     ASSERT(m_nMaxPrecedence <= (1 << (SYMBOL::precedence_bits - 1))); // 检测位域表示范围没有超过优先级
+    ASSERT(m_nMaxPrecedence != SYMBOL::ID_BRACE); // 保证优先级最大值与括号的ID不冲突
 
     SetFlags(GetFlags() | F_SYMBOLBREAK);
     SetCharSemantic(aCharSem, 0, 128);
@@ -285,7 +289,7 @@ namespace UVShader
     {
       pParser->m_CurSymInfo.precedence = precedence;
       pParser->m_CurSymInfo.sym = it;
-      pParser->m_CurSymInfo.pair = -1;
+      pParser->m_CurSymInfo.scope = -1;
       return 0;
     }
     return 0;
@@ -368,23 +372,25 @@ namespace UVShader
     {
       GXLPCSTR szOpen;    // 开区间
       GXLPCSTR szClosed;  // 闭区间
-      //PairStack* pStack;
+      GXBOOL   bNewEOE;   // 更新End Of Expression的位置
       PairStack sStack;
     };
 
     PAIR_CONTEXT pair_context[] = {
-      {"(", ")", },   // 圆括号
-      {"[", "]", },   // 方括号
-      {"{", "}", },   // 花括号
-      {"?", ":", },
+      {"(", ")", FALSE},   // 圆括号
+      {"[", "]", FALSE},   // 方括号
+      {"{", "}", TRUE },   // 花括号
+      {"?", ":", FALSE},
       {NULL, },
     };
 
+    int EOE = 0; // End Of Expression
 
     for(auto it = begin(); it != stream_end; ++it)
     {
+      const int c_size = (int)m_aSymbols.size();
       sym.sym = it;
-      sym.pair = -1;
+      sym.scope = -1;
 
       ASSERT(m_CurSymInfo.sym.marker == NULL || it.marker == m_CurSymInfo.sym.marker); // 遍历时一定这个要保持一致
       sym.precedence = m_CurSymInfo.precedence;
@@ -398,52 +404,37 @@ namespace UVShader
       {
         PAIR_CONTEXT& c = pair_context[i];
         if(it == c.szOpen) {
-          c.sStack.push((int)m_aSymbols.size());
+          c.sStack.push(c_size);
         }
         else if(it == c.szClosed) {
           if(c.sStack.empty()) {
             // ERROR: 不匹配            
           }
-          sym.pair = c.sStack.top();
-          m_aSymbols[sym.pair].pair = (int)m_aSymbols.size();
+          sym.scope = c.sStack.top();
+          m_aSymbols[sym.scope].scope = c_size;
           c.sStack.pop();
+        }
+        else {
+          continue;
+        }
+
+        // ?: 操作符会设置precedence的优先级，而我们只想设置括号的标记
+        if(sym.precedence == 0) {
+          sym.precedence = SYMBOL::ID_BRACE;
+        }
+
+        if(c.bNewEOE) {
+          EOE = c_size + 1;
         }
       }
 
-      //if(it == "(") {
-      //  stackBrackets.push((int)m_aSymbols.size());
-      //}
-      //else if(it == "[") {
-      //  stackSquareBrackets.push((int)m_aSymbols.size());
-      //}
-      //else if(it == "{") {
-      //  stackBrace.push((int)m_aSymbols.size());
-      //}
-      //else if(it == ")") {
-      //  if(stackBrackets.empty()) {
-      //    // ERROR: ")"不匹配
-      //  }
-      //  sym.pair = stackBrackets.top();
-      //  stackBrackets.pop();
-      //}
-      //else if(it == "]") {
-      //  if(stackSquareBrackets.empty()) {
-      //    // ERROR: "]"不匹配
-      //  }
-      //  sym.pair = stackSquareBrackets.top();
-      //  stackSquareBrackets.pop();
-      //}
-      //else if(it == "}") {
-      //  if(stackBrace.empty()) {
-      //    // ERROR: "}"不匹配
-      //  }
-      //  sym.pair = stackBrace.top();
-      //  stackBrace.pop();
-      //}
-
-      //if(sym.pair >= 0) {
-      //  m_aSymbols[sym.pair].pair = (int)m_aSymbols.size();
-      //}
+      if(it == ';' && EOE < c_size) {
+        m_aSymbols[EOE].scope = c_size;
+        EOE = c_size + 1;
+      }
+      else if(it == "for") { // for(;;) 这个形式有点特殊
+        EOE = c_size;
+      }
 
       m_aSymbols.push_back(sym);
     }
@@ -455,17 +446,6 @@ namespace UVShader
         // ERROR: 不匹配
       }
     }
-    //if( ! stackBrackets.empty()) {
-    //  // ERROR: "("不匹配
-    //}
-
-    //if( ! stackSquareBrackets.empty()) {
-    //  // ERROR: "["不匹配
-    //}
-
-    //if( ! stackBrace.empty()) {
-    //  // ERROR: "{"不匹配
-    //}
 
     return m_aSymbols.size();
   }
@@ -512,7 +492,7 @@ namespace UVShader
     }
 
     // 检测函数格式特征
-    if(p[2].sym != "(" || p[2].pair < 0) {
+    if(p[2].sym != "(" || p[2].scope < 0) {
       return FALSE;
     }
 
@@ -529,17 +509,17 @@ namespace UVShader
     INC_BUT_NOT_END(p, pEnd); // ERROR: 缺少“；”
 
     ASSERT(p->sym == "("); // 由前面的特征检查保证
-    ASSERT(p->pair >= 0);  // 由 GenerateSymbols 函数保证
+    ASSERT(p->scope >= 0);  // 由 GenerateSymbols 函数保证
 
     // #
     // # ( [ArgumentList] )
     // #
-    if(p[0].pair != p[1].pair + 1) // 有参数: 两个括号不相邻
+    if(p[0].scope != p[1].scope + 1) // 有参数: 两个括号不相邻
     {
-      RTSCOPE ArgScope = {m_aSymbols[p->pair].pair + 1, p->pair};
+      RTSCOPE ArgScope = {m_aSymbols[p->scope].scope + 1, p->scope};
       ParseFunctionArguments(&stat, &ArgScope);
     }
-    p = &m_aSymbols[p->pair];
+    p = &m_aSymbols[p->scope];
     ASSERT(p->sym == ")");
 
     ++p;
@@ -556,7 +536,7 @@ namespace UVShader
     }
     else if(p->sym == "{") { // 函数体
       stat.type = StatementType_Function;
-      p = &m_aSymbols[p->pair];
+      p = &m_aSymbols[p->scope];
       ++p;
     }
     else {
@@ -590,7 +570,7 @@ namespace UVShader
       return FALSE;
     }
 
-    RTSCOPE StruScope = {m_aSymbols[p->pair].pair + 1, p->pair};
+    RTSCOPE StruScope = {m_aSymbols[p->scope].scope + 1, p->scope};
     // 保证分析函数的域
     ASSERT(m_aSymbols[StruScope.begin - 1].sym == "{" && m_aSymbols[StruScope.end].sym == "}"); 
 
@@ -841,10 +821,14 @@ NOT_INC_P:
     if(pScope->end > 0 && m_aSymbols[pScope->end - 1].sym == ";") {
       --pScope->end;
     }
+    
+    if(pScope->begin == pScope->end) {
+      return TRUE;
+    }
 
     STATEMENT stat = {StatementType_Expression};
     
-    GXBOOL bret = ParseExpression(pScope, &stat.expr.sRoot, 1);
+    GXBOOL bret = ParseExpression(pScope, &stat.expr.sRoot, SYMBOL::FIRST_OPCODE_PRECEDENCE);
     TRACE("m_nDbgNumOfExpressionParse=%d\n", m_nDbgNumOfExpressionParse);
 
 #ifdef _DEBUG
@@ -939,7 +923,7 @@ NOT_INC_P:
     else if(m_aSymbols[pScope->begin].sym == "return")
     {
       A.pSym = &m_aSymbols[pScope->begin];
-      bret = ParseExpression(&B, 1, pScope->begin + 1, pScope->end);
+      bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 1, pScope->end);
       MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Return, NULL, &A, &B);
       return bret;
     }
@@ -968,25 +952,24 @@ NOT_INC_P:
       }
     }
 
-    else if(m_aSymbols[pScope->begin].pair == pScope->end - 1)  // 括号内表达式
+    else if(m_aSymbols[pScope->begin].scope == pScope->end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
-      ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin);
-      return ParseExpression(pUnion, 1, pScope->begin + 1, pScope->end - 1);
+      ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin);
+      return ParseExpression(pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 1, pScope->end - 1);
     }
 
-    else if(m_aSymbols[pScope->begin + 1].pair == pScope->end - 1)  // 函数调用
+    else if(m_aSymbols[pScope->begin + 1].scope == pScope->end - 1)  // 函数调用
     {
       // 括号肯定是匹配的
-      ASSERT(m_aSymbols[pScope->end - 1].pair == pScope->begin + 1);
+      ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin + 1);
 
       A.pSym = &m_aSymbols[pScope->begin];
       clStringA strFunction = A.pSym->sym.ToString();
       
       // TODO: 检查m_aSymbols[pScope->begin]是函数名
 
-      RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
-      bret = ParseExpression(&sArgumentScope, &B, 1);
+      bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 2, pScope->end - 1);
 
       SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
       if(strFunction == "if")
@@ -1006,6 +989,7 @@ NOT_INC_P:
 
 #ifdef _DEBUG
       clStringA strArgs;
+      RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
       DbgDumpScope(strArgs, sArgumentScope);
       // <Make OperString>
       clStringA strIntruction;
@@ -1024,7 +1008,7 @@ NOT_INC_P:
 
     while(nMinPrecedence <= m_nMaxPrecedence)
     {
-      if(nMinPrecedence == 2)
+      if(nMinPrecedence == OPP(1))
       {
         for(i = (GXINT_PTR)pScope->begin; i < (GXINT_PTR)pScope->end; ++i)
         {
@@ -1032,19 +1016,17 @@ NOT_INC_P:
 
           const SYMBOL& s = m_aSymbols[i];
 
-          if(s.precedence == 0) // 跳过非运算符, 也包括括号
+          if(s.precedence == SYMBOL::ID_BRACE) // 跳过非运算符, 也包括括号
           {
-            if(s.pair >= 0) {
-              ASSERT(s.pair < (int)pScope->end); // 闭括号肯定在表达式区间内
-              i = s.pair;
-            }
+            ASSERT(s.scope < (int)pScope->end); // 闭括号肯定在表达式区间内
+            i = s.scope;
             continue;
           }
-          else if(s.sym == ':') {
+          else if(s.precedence == 0 || s.sym == ':') {
             continue;
           }
 
-          // ?: 操作符标记：precedence 储存优先级，pair 储存?:的关系
+          // ?: 操作符标记：precedence 储存优先级，scope 储存?:的关系
 
           if(s.precedence == nMinPrecedence) {
             MakeInstruction(&s, nMinPrecedence, pScope, pUnion, i);
@@ -1068,12 +1050,14 @@ NOT_INC_P:
           // 优先级（2）是从右向左的，这个循环处理从左向右
           ASSERT(nMinPrecedence != 2);
 
-          if(s.precedence == 0) // 跳过非运算符, 也包括括号
+          // 跳过非运算符, 也包括括号
+          if(s.precedence == SYMBOL::ID_BRACE)
           {
-            if(s.pair >= 0) {
-              ASSERT(s.pair < (int)pScope->end); // 闭括号肯定在表达式区间内
-              i = s.pair;
-            }
+            ASSERT(s.scope < (int)pScope->end); // 闭括号肯定在表达式区间内
+            i = s.scope;
+            continue;
+          }
+          else if(s.precedence == 0) {
             continue;
           }
 
@@ -1111,9 +1095,9 @@ NOT_INC_P:
       //B.pNode = &sNodeB;
       bresult = ParseExpression(&scopeA, &A, nMinPrecedence);
 
-      if(s.pair >= (int)pScope->begin && s.pair < (int)pScope->end) {
-        ASSERT(m_aSymbols[s.pair].sym == ':');
-        bresult = bresult && MakeInstruction(&m_aSymbols[s.pair], nMinPrecedence, &scopeB, &B, s.pair);
+      if(s.scope >= (int)pScope->begin && s.scope < (int)pScope->end) {
+        ASSERT(m_aSymbols[s.scope].sym == ':');
+        bresult = bresult && MakeInstruction(&m_aSymbols[s.scope], nMinPrecedence, &scopeB, &B, s.scope);
       }
       else {
         // ERROR: ?:三元操作符不完整
@@ -1179,7 +1163,10 @@ NOT_INC_P:
     for(int i = 0; i < 2; ++i)
     {
       const int nFlagShift = SYNTAXNODE::FLAG_OPERAND_SHIFT * i;
-      if(IsSymbol(pOperand[i])) {
+      if(pOperand[i] == NULL) {
+        sNode.Operand[i].pSym = NULL;
+      }
+      else if(IsSymbol(pOperand[i])) {
         SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_SYMBOL << nFlagShift);
         sNode.Operand[i].pSym = pOperand[i]->pSym;
       }

@@ -28,8 +28,8 @@ void TestFromFile(GXLPCSTR szFilename)
       int nCount = 0;
       for(auto it = pSymbols->begin(); it != pSymbols->end(); ++it, ++nCount)
       {
-        if(it->pair >= 0) {
-          TRACE("<#%d:\"%s\"(%d)> ", nCount, it->sym.ToString(), it->pair);
+        if(it->scope >= 0) {
+          TRACE("<#%d:\"%s\"(%d)> ", nCount, it->sym.ToString(), it->scope);
         }
         else {
           TRACE("<#%d:\"%s\"> ", nCount, it->sym.ToString());

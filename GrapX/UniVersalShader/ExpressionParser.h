@@ -25,17 +25,24 @@ namespace UVShader
 
   //  GRAMMAR* pChild;
   //};
+#define OPP(_PRE) (ExpressionParser::SYMBOL::FIRST_OPCODE_PRECEDENCE + _PRE)
 
   class ExpressionParser : public SmartStreamA
   {
   public:
     struct SYMBOL
     {
-      const static int pair_bits = 22;
+      const static int scope_bits = 22;
       const static int precedence_bits = 10;
+      const static int FIRST_OPCODE_PRECEDENCE = 1;
+      const static int ID_BRACE = 15;
       iterator  sym;
-      int       pair : pair_bits;             // 括号匹配索引
+      int       scope : scope_bits;           // 括号匹配索引
       int       precedence : precedence_bits; // 符号优先级
+      // [precedence]
+      // 1~14 表示运算符的优先级
+      // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
+      // array[open].scope = closed && array[closed].scope = open
     };
 
     typedef clvector<SYMBOL> SymbolArray;

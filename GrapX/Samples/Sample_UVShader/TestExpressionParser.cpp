@@ -182,6 +182,8 @@ SAMPLE_EXPRESSION samplesOpercode[] = {
   {0, "n- --i",     4},// n=10, i=3, 结果7
   {0, "n--- --i",   5},// n=9, i=3, 结果7
   {0, "n--- - --i", 6},// n=9, i=3, 结果13
+  {0, ";", 1},
+  {0, ";;", 2},
   {NULL},};
 
 SAMPLE_EXPRESSION samplesNumeric[] = {
@@ -238,25 +240,25 @@ SAMPLE_EXPRESSION samplesNumeric[] = {
   {0, NULL, 0},};
 
 SAMPLE_EXPRESSION samplesSimpleExpression[] = {
-  //// 基本表达式
-  //{0, "output.color", 3},
+  // 基本表达式
+  {0, "output.color", 3},
 
-  //// 数学表达式
-  //{0, "a+b*c", 5, aOperStack_008},
-  //{0, "(a+b)*c", 7, aOperStack_009},
-  //{0, "a+b+c+d*e/f", 11, aOperStack_010},
-  //{0, "k*((a*b)+c+d*e)", 15},
+  // 数学表达式
+  {0, "a+b*c", 5, aOperStack_008},
+  {0, "(a+b)*c", 7, aOperStack_009},
+  {0, "a+b+c+d*e/f", 11, aOperStack_010},
+  {0, "k*((a*b)+c+d*e)", 15},
 
-  //// 三元操作
-  //{0, "a?b:c", 5},
-  //{0, "a>b?b:c", 7},
-  //{0, "a?b:c?f:g", 9, aOperStack_348},
-  //{0, "a?b?d:e:c", 9, aOperStack_349},
-  //{0, "a?b?d:e:c?f:g", 13, aOperStack_350},
+  // 三元操作
+  {0, "a?b:c", 5},
+  {0, "a>b?b:c", 7},
+  {0, "a?b:c?f:g", 9, aOperStack_348},
+  {0, "a?b?d:e:c", 9, aOperStack_349},
+  {0, "a?b?d:e:c?f:g", 13, aOperStack_350},
 
   // 赋值
-  //{0, "a=b+c", 5},
-  //{0, "a=b=c=d", 7},
+  {0, "a=b+c", 5},
+  {0, "a=b=c=d", 7},
   {0, "float a", 2},
   {0, "float a=b+c", 6},
   {0, "float3 a=b=c=d", 8},
@@ -265,6 +267,7 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, "if(a == b && c + d > e)", 12},
   {0, "while(a - b * c)", 8},
   {0, "switch(a - b * c)", 8},
+  {0, "a=a+b;b=c;c=a*d;", 16},
   {0, NULL,  0},
   {0, "",    0},
   {0, "",    0},
