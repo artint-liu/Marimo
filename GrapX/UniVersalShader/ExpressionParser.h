@@ -118,6 +118,7 @@ namespace UVShader
         MODE_Flow_While,
         MODE_Flow_Switch,
         MODE_Return,
+        MODE_Chain,         // 表达式链表,链表中的应该属于同一个作用域
       };
 
       const static int s_NumOfOperand = 2;
@@ -181,10 +182,24 @@ namespace UVShader
 
     typedef clvector<STATEMENT> StatementArray;
 
+    //////////////////////////////////////////////////////////////////////////
+
     struct RTSCOPE // 运行时的范围描述结构体
     {
       clsize begin;
       clsize end;
+    };
+
+    struct CONSTRUCT_RTSCOPE : public RTSCOPE
+    {
+      CONSTRUCT_RTSCOPE(clsize _begin, clsize _end) {
+        begin = _begin;
+        end = _end;
+      }
+      operator RTSCOPE*()
+      {
+        return this;
+      }
     };
 
     struct INTRINSIC_TYPE // 内置类型
@@ -213,6 +228,7 @@ namespace UVShader
 
     GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
     GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, int nMinPrecedence, clsize begin, clsize end);
+    GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
     GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
 
@@ -225,6 +241,7 @@ namespace UVShader
     GXLPCSTR GetUniqueString(const SYMBOL* pSym);
     const TYPE* ParseType(const SYMBOL* pSym);
     GXBOOL   IsSymbol(const SYNTAXNODE::UN* pUnion) const;
+    clsize   FindSemicolon(clsize begin, clsize end) const;
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
@@ -265,7 +282,9 @@ namespace UVShader
 
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
+    void DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB);
     void DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL);
+
     /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
 
     clStringArrayA    m_aDbgExpressionOperStack;

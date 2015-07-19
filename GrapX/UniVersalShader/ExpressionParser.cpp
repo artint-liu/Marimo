@@ -818,9 +818,9 @@ NOT_INC_P:
     m_nDbgNumOfExpressionParse = 0;
     m_aDbgExpressionOperStack.clear();
 
-    if(pScope->end > 0 && m_aSymbols[pScope->end - 1].sym == ";") {
-      --pScope->end;
-    }
+    //if(pScope->end > 0 && m_aSymbols[pScope->end - 1].sym == ";") {
+    //  --pScope->end;
+    //}
     
     if(pScope->begin == pScope->end) {
       return TRUE;
@@ -836,7 +836,11 @@ NOT_INC_P:
     if(bDbgRelocale && ! IsSymbol(&stat.expr.sRoot)) {
       IndexToPtr(stat.expr.sRoot.pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr(stat.expr.sRoot.pNode);
-      DbgDumpSyntaxTree(stat.expr.sRoot.pNode, 0);
+      if(stat.expr.sRoot.pNode->Operand[0].pSym != NULL &&
+        stat.expr.sRoot.pNode->Operand[1].pSym != NULL)
+      {
+        DbgDumpSyntaxTree(stat.expr.sRoot.pNode, 0);
+      }
     }
 #endif // #ifdef _DEBUG
     return bret;
@@ -873,8 +877,11 @@ NOT_INC_P:
     {
       strOut.Format("%s %s", str[0], str[1]);
     }
-    else if(pNode->mode == SYNTAXNODE::MODE_Flow_If || 
-      pNode->mode == SYNTAXNODE::MODE_Flow_While ||
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
+    {
+      strOut.Format("if(%s){%s}", str[0], str[1]);
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_While ||
       pNode->mode == SYNTAXNODE::MODE_Flow_Switch)
     {
       strOut.Format("%s(%s)", str[0], str[1]);
@@ -884,11 +891,22 @@ NOT_INC_P:
       ASSERT(str[0] == "return");
       strOut.Format("return %s", str[1]);
     }
-    else if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
-      strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+    else if(pNode->mode == SYNTAXNODE::MODE_Chain)
+    {
+      strOut.Format("%s;%s", str[0], str[1]);
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Normal)
+    {
+      if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
+        strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+      }
+      else {
+        strOut.Format("%s%s%s", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+      }
     }
     else {
-      strOut.Format("%s%s%s", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+      // 没处理的 pNode->mode 类型
+      CLBREAK;
     }
 
     if(pStr) {
@@ -910,7 +928,7 @@ NOT_INC_P:
     ASSERT(pScope->begin <= pScope->end);
 
     const GXINT_PTR count = pScope->end - pScope->begin;
-    SYNTAXNODE::UN A, B;
+    SYNTAXNODE::UN A = {0}, B = {0};
     GXBOOL bret = TRUE;
 
 
@@ -920,11 +938,71 @@ NOT_INC_P:
       }
       return TRUE;
     }
-    else if(m_aSymbols[pScope->begin].sym == "return")
+
+    const auto& first = m_aSymbols[pScope->begin];
+
+    if(first.sym == "return")
     {
-      A.pSym = &m_aSymbols[pScope->begin];
+      A.pSym = &first;
       bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 1, pScope->end);
       MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Return, NULL, &A, &B);
+      return bret;
+    }
+
+    else if(first.sym == "if")
+    {
+      RTSCOPE sConditional = {pScope->begin + 1, m_aSymbols[pScope->begin + 1].scope};
+      RTSCOPE sBlock;
+
+      if(sConditional.end >= 0 && sConditional.end < pScope->end) {
+        ++sConditional.begin;
+      }
+      else {
+        // ERROR: if 语法错误
+        return FALSE;
+      }
+
+      sBlock.begin = sConditional.end + 1;
+      if(sBlock.begin >= pScope->end) {
+        // ERROR: if 语法错误
+        return FALSE;
+      }
+
+      sBlock.end = m_aSymbols[sBlock.begin].scope;
+      if(sBlock.end == -1) {
+        sBlock.end = FindSemicolon(sBlock.begin, pScope->end);
+      }
+      else if(m_aSymbols[sBlock.begin].sym == '{') {
+        ++sBlock.begin;
+      }
+
+
+      if(sBlock.end >= 0 && sBlock.end < pScope->end) // 这么写是为了和sConditional检查流程看起来相似
+      {
+        ;
+      }
+      else {
+        // ERROR: if 语法错误
+        return FALSE;
+      }
+
+
+
+      bret =
+        ParseExpression(&sConditional, &A, SYMBOL::FIRST_OPCODE_PRECEDENCE) &&
+        ParseExpression(&sBlock, &B, SYMBOL::FIRST_OPCODE_PRECEDENCE) &&
+        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
+      return bret;
+    }
+
+    else if(first.scope >= 0 && (clsize)first.scope < pScope->end && first.precedence != SYMBOL::ID_BRACE)
+    {
+      ASSERT(m_aSymbols[first.scope].sym == ';'); // 目前进入这个循环的只可能是遇到分号
+      bret =
+        ParseExpression(&A, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin, first.scope) &&
+        ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, first.scope + 1, pScope->end) &&
+        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
+
       return bret;
     }
 
@@ -932,7 +1010,7 @@ NOT_INC_P:
     {
       // 处理两种可能：(1)变量使用一元符号运算 (2)定义变量
 
-      A.pSym = &m_aSymbols[pScope->begin];
+      A.pSym = &first;
       B.pSym = &m_aSymbols[pScope->begin + 1];
 
       if(A.pSym->precedence > 0)
@@ -952,7 +1030,7 @@ NOT_INC_P:
       }
     }
 
-    else if(m_aSymbols[pScope->begin].scope == pScope->end - 1)  // 括号内表达式
+    else if(first.scope == pScope->end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin);
@@ -961,45 +1039,49 @@ NOT_INC_P:
 
     else if(m_aSymbols[pScope->begin + 1].scope == pScope->end - 1)  // 函数调用
     {
-      // 括号肯定是匹配的
-      ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin + 1);
+      return ParseFunctionCall(pScope, pUnion, nMinPrecedence);
+      //// 括号肯定是匹配的
+      //ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin + 1);
 
-      A.pSym = &m_aSymbols[pScope->begin];
-      clStringA strFunction = A.pSym->sym.ToString();
-      
-      // TODO: 检查m_aSymbols[pScope->begin]是函数名
+      //A.pSym = &m_aSymbols[pScope->begin];
+      //clStringA strFunction = A.pSym->sym.ToString();
+      //
+      //// TODO: 检查m_aSymbols[pScope->begin]是函数名
 
-      bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 2, pScope->end - 1);
+      //bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 2, pScope->end - 1);
 
-      SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
-      if(strFunction == "if")
-      {
-        mode = SYNTAXNODE::MODE_Flow_If;
-      }
-      else if(strFunction == "while")
-      {
-        mode = SYNTAXNODE::MODE_Flow_While;
-      }
-      else if(strFunction == "switch")
-      {
-        mode = SYNTAXNODE::MODE_Flow_Switch;
-      }
+      //SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
+      //if(strFunction == "if")
+      //{
+      //  mode = SYNTAXNODE::MODE_Flow_If;
+      //}
+      //else if(strFunction == "while")
+      //{
+      //  mode = SYNTAXNODE::MODE_Flow_While;
+      //}
+      //else if(strFunction == "switch")
+      //{
+      //  mode = SYNTAXNODE::MODE_Flow_Switch;
+      //}
 
-      MakeSyntaxNode(pUnion, mode, NULL, &A, &B);
+      //MakeSyntaxNode(pUnion, mode, NULL, &A, &B);
+      //
+      //DbgDumpScope("F", CONSTRUCT_RTSCOPE(pScope->begin, pScope->begin + 1),
+      //  CONSTRUCT_RTSCOPE(pScope->begin + 2, pScope->end - 1));
 
-#ifdef _DEBUG
-      clStringA strArgs;
-      RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
-      DbgDumpScope(strArgs, sArgumentScope);
-      // <Make OperString>
-      clStringA strIntruction;
-      strIntruction.Format("[F] [%s] [%s]", strFunction, strArgs);
-      TRACE("%s\n", strIntruction);
-      m_aDbgExpressionOperStack.push_back(strIntruction);
-      // </Make OperString>
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//      clStringA strArgs;
+//      RTSCOPE sArgumentScope = {pScope->begin + 2, pScope->end - 1};
+//      DbgDumpScope(strArgs, sArgumentScope);
+//      // <Make OperString>
+//      clStringA strIntruction;
+//      strIntruction.Format("[F] [%s] [%s]", strFunction, strArgs);
+//      TRACE("%s\n", strIntruction);
+//      m_aDbgExpressionOperStack.push_back(strIntruction);
+//      // </Make OperString>
+//#endif // #ifdef _DEBUG
 
-      return bret;
+      //return bret;
     }
     
     int nCandidate = m_nMaxPrecedence;
@@ -1082,6 +1164,38 @@ NOT_INC_P:
     return TRUE;
   }
 
+  GXBOOL ExpressionParser::ParseFunctionCall( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence )
+  {
+    // 括号肯定是匹配的
+    ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin + 1);
+
+    SYNTAXNODE::UN A, B;
+
+    A.pSym = &m_aSymbols[pScope->begin];
+    clStringA strFunction = A.pSym->sym.ToString();
+
+    // TODO: 检查m_aSymbols[pScope->begin]是函数名
+
+    GXBOOL bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 2, pScope->end - 1);
+
+    SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
+    if(strFunction == "while")
+    {
+      mode = SYNTAXNODE::MODE_Flow_While;
+    }
+    else if(strFunction == "switch")
+    {
+      mode = SYNTAXNODE::MODE_Flow_Switch;
+    }
+
+    MakeSyntaxNode(pUnion, mode, NULL, &A, &B);
+
+    DbgDumpScope("F", CONSTRUCT_RTSCOPE(pScope->begin, pScope->begin + 1),
+      CONSTRUCT_RTSCOPE(pScope->begin + 2, pScope->end - 1));
+
+    return bret;
+  }
+
   GXBOOL ExpressionParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
   {
     RTSCOPE scopeA = {pScope->begin, nMiddle};
@@ -1111,20 +1225,22 @@ NOT_INC_P:
 
     MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Normal, pOpcode, &A, &B);
 
-#ifdef _DEBUG
-    // <Trace>
-    clStringA strA, strB;
-    DbgDumpScope(strA, scopeA);
-    DbgDumpScope(strB, scopeB);
+    DbgDumpScope(pOpcode->sym.ToString(), scopeA, scopeB);
 
-    // <Make OperString>
-    clStringA strIntruction;
-    strIntruction.Format("[%s] [%s] [%s]", pOpcode->sym.ToString(), strA, strB);
-    TRACE("%s\n", strIntruction);
-    m_aDbgExpressionOperStack.push_back(strIntruction);
-    // </Make OperString>
-    // </Trace>
-#endif // #ifdef _DEBUG
+//#ifdef _DEBUG
+//    // <Trace>
+//    clStringA strA, strB;
+//    DbgDumpScope(strA, scopeA);
+//    DbgDumpScope(strB, scopeB);
+//
+//    // <Make OperString>
+//    clStringA strIntruction;
+//    strIntruction.Format("[%s] [%s] [%s]", pOpcode->sym.ToString(), strA, strB);
+//    TRACE("%s\n", strIntruction);
+//    m_aDbgExpressionOperStack.push_back(strIntruction);
+//    // </Make OperString>
+//    // </Trace>
+//#endif // #ifdef _DEBUG
 
     return bresult;
   }
@@ -1153,6 +1269,20 @@ NOT_INC_P:
   void ExpressionParser::DbgDumpScope( clStringA& str, const RTSCOPE& scope )
   {
     DbgDumpScope(str, scope.begin, scope.end, FALSE);
+  }
+
+  void ExpressionParser::DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB )
+  {
+    clStringA strA, strB;
+    DbgDumpScope(strA, scopeA);
+    DbgDumpScope(strB, scopeB);
+
+    // <Make OperString>
+    clStringA strIntruction;
+    strIntruction.Format("[%s] [%s] [%s]", opcode, strA, strB);
+    TRACE("%s\n", strIntruction);
+    m_aDbgExpressionOperStack.push_back(strIntruction);
+    // </Make OperString>
   }
 
   GXBOOL ExpressionParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
@@ -1190,6 +1320,18 @@ NOT_INC_P:
     return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
   }
 
+  clsize ExpressionParser::FindSemicolon( clsize begin, clsize end ) const
+  {
+    for(; begin < end; ++begin)
+    {
+      if(m_aSymbols[begin].sym == ';') {
+        return begin;
+      }
+    }
+    return -1;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   bool ExpressionParser::TYPE::operator<( const TYPE& t ) const
   {
