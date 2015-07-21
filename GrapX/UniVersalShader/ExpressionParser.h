@@ -113,10 +113,18 @@ namespace UVShader
         MODE_Normal,        // 操作符 + 操作数 模式
         MODE_FunctionCall,  // 函数调用
         MODE_Definition,    // 变量定义
+        MODE_Flow_While,
         MODE_Flow_If,
         MODE_Flow_ElseIf,
-        MODE_Flow_While,
-        MODE_Flow_Switch,
+        MODE_Flow_Else,
+        MODE_Flow_For,            // [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]
+        MODE_Flow_ForInit,        // for 的初始化部分 [MODE_Flow_ForInit] [MODE_Flow_ForRunning]
+        MODE_Flow_ForRunning,     // for 的条件和步进部分
+        //MODE_Flow_Switch,
+        //MODE_Flow_Do,
+        //MODE_Flow_Break,
+        //MODE_Flow_Continue,
+        //MODE_Flow_Discard,
         MODE_Return,
         MODE_Chain,         // 表达式链表,链表中的应该属于同一个作用域
       };
@@ -188,19 +196,26 @@ namespace UVShader
     {
       clsize begin;
       clsize end;
+
+      RTSCOPE(){}
+      RTSCOPE(clsize _begin, clsize _end) : begin(_begin), end(_end) {}
+
+      inline GXBOOL IsValid() const {
+        return (begin != (clsize)-1) && begin < end;
+      }
     };
 
-    struct CONSTRUCT_RTSCOPE : public RTSCOPE
-    {
-      CONSTRUCT_RTSCOPE(clsize _begin, clsize _end) {
-        begin = _begin;
-        end = _end;
-      }
-      operator RTSCOPE*()
-      {
-        return this;
-      }
-    };
+    //struct CONSTRUCT_RTSCOPE : public RTSCOPE
+    //{
+    //  CONSTRUCT_RTSCOPE(clsize _begin, clsize _end) {
+    //    begin = _begin;
+    //    end = _end;
+    //  }
+    //  operator RTSCOPE*()
+    //  {
+    //    return this;
+    //  }
+    //};
 
     struct INTRINSIC_TYPE // 内置类型
     {
@@ -229,6 +244,9 @@ namespace UVShader
     GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
     GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, int nMinPrecedence, clsize begin, clsize end);
     GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
+    GXBOOL  ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseFlowWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
 

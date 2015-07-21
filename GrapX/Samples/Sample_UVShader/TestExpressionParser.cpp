@@ -4,6 +4,8 @@
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "TestExpressionParser.h"
 
+GXLPCSTR aOperStack_HasError[] = {NULL,};
+
 GXLPCSTR aOperStack_008[] = {
   "[*] [b] [c]",
   "[+] [a] [b*c]",
@@ -174,13 +176,105 @@ GXLPCSTR aOperStack_362[] = {
   "[=] [float3data] [viewdir.z>0.0?tex2D(glareSampler,float2(0.5,0.5)+viewdir.xy*4.0).rgb:float3(0.0,0.0,0.0)]",
   NULL, };
 
+GXLPCSTR aOperStack_if001[] = {
+  "[==] [a] [b]",
+  "[+] [c] [d]",
+  "[>] [c+d] [e]",
+  "[&&] [a==b] [c+d>e]",
+  "[=] [b] [c]",
+  "[if] [a==b&&c+d>e] [b=c]",
+  NULL, };
+
+GXLPCSTR aOperStack_if004[] = {
+  "[>] [a] [b]",
+  "[=] [c] [a]",
+  "[if] [a>b] [c=a]",
+  "[<] [a] [b]",
+  "[=] [c] [b]",
+  "[if] [a<b] [c=b]",
+  NULL, };
+
+GXLPCSTR aOperStack_if006[] = {
+  "[==] [a] [b]",
+  "[+] [c] [d]",
+  "[>] [c+d] [e]",
+  "[&&] [a==b] [c+d>e]",
+  "[=] [b] [c]",
+  "[=] [a] [b]",
+  "[else] [] [a=b]",
+  "[if] [a==b&&c+d>e] [b=c]",
+  NULL, };
+
+GXLPCSTR aOperStack_if007[] = {
+  "[==] [a] [b]",
+  "[<] [c] [d]",
+  "[&&] [a==b] [c<d]",
+  "[=] [b] [c]",
+  "[*] [4] [a]",
+  "[=] [a] [4*a]",
+  "[=] [a] [b]",
+  "[else] [] [a=b]",
+  "[if] [a==b&&c<d] [b=c;a=4*a]",
+  NULL, };
+
+GXLPCSTR aOperStack_if008[] = {
+  "[==] [a] [b]",
+  "[=] [r] [c]",
+  "[>] [a] [b]",
+  "[=] [r] [a]",
+  "[=] [r] [b]",
+  "[else] [] [r=b]",
+  "[elif] [a>b] [r=a]",
+  "[if] [a==b] [r=c]",
+  NULL, };
+
+GXLPCSTR aOperStack_if009[] = {
+  "[==] [a] [b]",
+  "[=] [b] [c]",
+  "[*] [4] [a]",
+  "[=] [a] [4*a]",
+  "[>] [a] [b]",
+  "[=] [a] [b]",
+  "[=] [a] [c]",
+  "[else] [] [a=c]",
+  "[elif] [a>b] [a=b]",
+  "[if] [a==b] [b=c;a=4*a]",
+  NULL, };
+
+//////////////////////////////////////////////////////////////////////////
+
+GXLPCSTR aOperStack_OC001[] = {
+  "[=] [i] [4]",
+  "[=] [n] [10]",
+  "[,] [i=4] [n=10]",
+  NULL, };
+
+GXLPCSTR aOperStack_OC003[] = {
+  "[--] [n] []",
+  "[-] [n--] [i]",
+  NULL, };
+
+GXLPCSTR aOperStack_OC004[] = {
+  "[--] [] [i]",
+  "[-] [n] [--i]",
+  NULL, };
+
+
+GXLPCSTR aOperStack_OC005[] = {
+  "[--] [n] []",
+  "[--] [] [i]",
+  "[-] [n--] [--i]",
+  NULL, };
+
+
 SAMPLE_EXPRESSION samplesOpercode[] = {
-  {0, "i=4, n=10",  7}, // 下面的例子就是这里的初始值
+  {0, "i=4, n=10",  7, aOperStack_OC001}, // 下面的例子就是这里的初始值
   {0, "n--i",       3},// err
-  {0, "n---i",      4},// n=9, i=4, 结果6
-  {0, "n-- -i",     4},// n=9, i=4, 结果6
-  {0, "n- --i",     4},// n=10, i=3, 结果7
-  {0, "n--- --i",   5},// n=9, i=3, 结果7
+  {0, "n- -i",      4},
+  {0, "n---i",      4, aOperStack_OC003},// n=9, i=4, 结果6
+  {0, "n-- -i",     4, aOperStack_OC003},// n=9, i=4, 结果6
+  {0, "n- --i",     4, aOperStack_OC004},// n=10, i=3, 结果7
+  {0, "n--- --i",   5, aOperStack_OC005},// n=9, i=3, 结果7
   {0, "n--- - --i", 6},// n=9, i=3, 结果13
   {0, ";", 1},
   {0, ";;", 2},
@@ -264,18 +358,43 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, "float3 a=b=c=d", 8},
   {0, "float a,b,c,d,e", 10},
   {0, "float a, b = c", 6},
-  {0, "if(a == b && c + d > e)", 12}, // error
-  {0, "if(a == b && c + d > e) b=c;", 16},
+  {0, "a=a+b;b=a-c*d;c=a*d;", 20},
+  {0, NULL,  0},};
+
+SAMPLE_EXPRESSION samplesIfExpression[] = {
+  {0, "if(a == b && c + d > e)", 12, aOperStack_HasError}, // error
+  {0, "if(a == b && c + d > e) b=c;", 16, aOperStack_if001},
   {0, "if(a == b && c + d > e) b=c; a=4*a;", 22},
   {0, "if(a == b && c + d > e) { b=c; a=4*a; }", 24},
-  {0, "while(a - b * c)", 8},
-  {0, "switch(a - b * c)", 8},
-  {0, "a=a+b;b=a-c*d;c=a*d;", 20},
+
+  {0, "if(a > b) c = a; if(a < b) c = b;", 20, aOperStack_if004},
+
+  {0, "if(a > b) else a = b;", 11, aOperStack_HasError}, // error
+  {0, "if(a == b && c + d > e) b=c; else a = b;", 21, aOperStack_if006},
+  {0, "if(a == b && c + d > e) b=c; a=4*a; else a = b;", 27, aOperStack_HasError}, // error
+  {0, "if(a == b && c < d) { b=c; a=4*a; } else a = b;", 27, aOperStack_if007},
+
+  {0, "if(a == b) else if(a > b) a = b;", 17, aOperStack_HasError}, // error
+  {0, "if(a == b) r=c; else if(a > b) r = a; else r = b;", 26, aOperStack_if008},
+  {0, "if(a == b) b=c; a=4*a; else if(a > b) a = b else a = b;", 31, aOperStack_HasError}, // error
+  {0, "if(a == b) { b=c; a=4*a; } else if(a > b) a = b; else a = c;", 34, aOperStack_if009},
+  {0, "while(a - b * c)", 8, aOperStack_HasError},
+  //{0, "switch(a - b * c)", 8},
   {0, NULL,  0},
   {0, "",    0},
   {0, "",    0},
   {0, "",    0},
   {0, "",    0},
+};
+
+SAMPLE_EXPRESSION samplesForExpression[] = {
+  //{0, ";;;;;",    0},
+  {0, "for(;;);",    0},
+  {0, "for(int i = 0; i < 10; i++) n = a+b*c;",    0},
+  {0, "for(i = 0; i < 10; i++) n = a+b*c;",    0},
+  {0, "for(int i = 0; i < 10; i++) {n = a+b*c;}",    0},
+  {0, "for(int i = 0, int n = 10; i < 10, n >= 0; i++, --n) {r = a+b*c + n; if(n < 5) { out(n);} }",    0},
+  {0, NULL,  0},
 };
 
 SAMPLE_EXPRESSION samplesExpression[] = {

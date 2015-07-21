@@ -49,6 +49,8 @@ void TestFromFile(GXLPCSTR szFilename)
 extern SAMPLE_EXPRESSION samplesNumeric[];
 extern SAMPLE_EXPRESSION samplesOpercode[];
 extern SAMPLE_EXPRESSION samplesExpression[];
+extern SAMPLE_EXPRESSION samplesIfExpression[];
+extern SAMPLE_EXPRESSION samplesForExpression[];
 extern SAMPLE_EXPRESSION samplesSimpleExpression[];
 
 void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
@@ -71,14 +73,14 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     TRACE("%3d# ", i);
     for(auto it = pSymbols->begin(); it != pSymbols->end(); ++it)
     {
-      TRACE("|%s|  ", it->sym.ToString());
+      TRACE("[%d]\"%s\"\t(p=%d,s=%d)\n", it - pSymbols->begin(), it->sym.ToString(), it->precedence, it->scope);
       nCount++;
     }
     TRACE("(%d:%f)\n", nCount, (float)nSize / nCount);
     TRACE("%3d# \"%s\"\n", i, pSamples[i].expression);
 
     // 表达式解析
-    UVShader::ExpressionParser::RTSCOPE scope = {0, pSymbols->size()};
+    UVShader::ExpressionParser::RTSCOPE scope(0, pSymbols->size());
     expp.ParseStatementAs_Expression(&scope, TRUE);
 
     // 检查操作堆栈
@@ -113,6 +115,8 @@ int _tmain(int argc, _TCHAR* argv[])
   TestExpressionParser(samplesOpercode);
   TestExpressionParser(samplesNumeric);
   TestExpressionParser(samplesSimpleExpression);
+  TestExpressionParser(samplesIfExpression);
+  TestExpressionParser(samplesForExpression);
   TestExpressionParser(samplesExpression);
 
   //TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt");
