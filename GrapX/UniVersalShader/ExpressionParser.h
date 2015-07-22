@@ -122,9 +122,9 @@ namespace UVShader
         MODE_Flow_ForRunning,     // for 的条件和步进部分
         //MODE_Flow_Switch,
         //MODE_Flow_Do,
-        //MODE_Flow_Break,
-        //MODE_Flow_Continue,
-        //MODE_Flow_Discard,
+        MODE_Flow_Break,
+        MODE_Flow_Continue,
+        MODE_Flow_Discard,
         MODE_Return,
         MODE_Chain,         // 表达式链表,链表中的应该属于同一个作用域
       };
@@ -194,8 +194,9 @@ namespace UVShader
 
     struct RTSCOPE // 运行时的范围描述结构体
     {
-      clsize begin;
-      clsize end;
+      typedef clsize TYPE;
+      TYPE begin;
+      TYPE end;
 
       RTSCOPE(){}
       RTSCOPE(clsize _begin, clsize _end) : begin(_begin), end(_end) {}
@@ -225,6 +226,20 @@ namespace UVShader
       int      C;         // 最大允许值
     };
 
+    struct MAKESCOPE
+    {
+      RTSCOPE*        pOut;     // 输出的scope，返回TRUE就一定有效
+      const RTSCOPE*  pScope;   // 限定区域
+      RTSCOPE::TYPE   begin;    // 开始
+      GXBOOL          bIndBegin;// begin 是否是m_aSymbols的索引
+      RTSCOPE::TYPE   end;
+      GXBOOL          bIndEnd;
+      GXWCHAR         chTermin; // 如果begin遇到这个终结符，返回一个begin==end的scope
+
+      MAKESCOPE(){}
+      MAKESCOPE(RTSCOPE*_pOut, const RTSCOPE*_pScope, RTSCOPE::TYPE _begin, GXBOOL _bIndBegin, RTSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
+        : pOut(_pOut), pScope(_pScope), begin(_begin), bIndBegin(_bIndBegin), end(_end), bIndEnd(_bIndEnd), chTermin(_chTermin) {}
+    };
     //////////////////////////////////////////////////////////////////////////
 
   private:
@@ -249,7 +264,7 @@ namespace UVShader
     GXBOOL  ParseFlowWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
-
+    GXBOOL  MakeScope(MAKESCOPE* pParam);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocalePointer();

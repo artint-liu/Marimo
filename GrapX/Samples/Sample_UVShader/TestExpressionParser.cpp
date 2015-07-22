@@ -387,13 +387,67 @@ SAMPLE_EXPRESSION samplesIfExpression[] = {
   {0, "",    0},
 };
 
+//////////////////////////////////////////////////////////////////////////
+
+
+GXLPCSTR aOperStack_FOR000[] = {
+  "[for_2] [] []",
+  "[for_1] [] []",
+  NULL};
+
+GXLPCSTR aOperStack_FOR001[] = {
+  "[=] [inti] [0]",
+  "[<] [i] [10]",
+  "[++] [i] []",
+  "[*] [b] [c]",
+  "[+] [a] [b*c]",
+  "[=] [n] [a+b*c]",
+  "[for_2] [i<10] [i++]",
+  "[for_1] [inti=0] [n=a+b*c]",
+  NULL};
+
+GXLPCSTR aOperStack_FOR002[] = {
+  "[=] [inti] [0]",
+  "[<] [i] [10]",
+  "[++] [i] []",
+  "[*] [b] [c]",
+  "[+] [a] [b*c]",
+  "[=] [n] [a+b*c]",
+  "[for_2] [i<10] [i++]",
+  "[for_1] [inti=0] [n=a+b*c]",
+  NULL};
+
+//GXLPCSTR* aOperStack_FOR003 = aOperStack_FOR002;
+
+GXLPCSTR aOperStack_FOR004[] = {
+  "[=] [inti] [0]",
+  "[=] [intn] [10]",
+  "[,] [inti=0] [intn=10]",
+  "[<] [i] [10]",
+  "[>=] [n] [0]",
+  "[,] [i<10] [n>=0]",
+  "[++] [i] []",
+  "[--] [] [n]",
+  "[,] [i++] [--n]",
+  "[*] [b] [c]",
+  "[+] [a] [b*c]",
+  "[+] [a+b*c] [n]",
+  "[=] [r] [a+b*c+n]",
+  "[<] [n] [5]",
+  "[F] [out] [n]",
+  "[if] [n<5] [out(n)]",
+  "[for_2] [i<10,n>=0] [i++,--n]",
+  "[for_1] [inti=0,intn=10] [r=a+b*c+n;if(n<5){out(n);}]",
+  NULL};
+
+
 SAMPLE_EXPRESSION samplesForExpression[] = {
   //{0, ";;;;;",    0},
-  {0, "for(;;);",    0},
-  {0, "for(int i = 0; i < 10; i++) n = a+b*c;",    0},
-  {0, "for(i = 0; i < 10; i++) n = a+b*c;",    0},
-  {0, "for(int i = 0; i < 10; i++) {n = a+b*c;}",    0},
-  {0, "for(int i = 0, int n = 10; i < 10, n >= 0; i++, --n) {r = a+b*c + n; if(n < 5) { out(n);} }",    0},
+  {0, "for(;;);", 0, aOperStack_FOR000},
+  {0, "for(int i = 0; i < 10; i++) n = a+b*c;", 0, aOperStack_FOR001},
+  {0, "for(int i = 0; i < 10; i++) n = a+b*c;", 0, aOperStack_FOR002},
+  {0, "for(int i = 0; i < 10; i++) {n = a+b*c;}", 0, aOperStack_FOR002},
+  {0, "for(int i = 0, int n = 10; i < 10, n >= 0; i++, --n) {r = a+b*c + n; if(n < 5) { out(n);} }", 0, aOperStack_FOR004},
   {0, NULL,  0},
 };
 

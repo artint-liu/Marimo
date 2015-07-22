@@ -1004,6 +1004,24 @@ NOT_INC_P:
       return ParseFlowWhile(pScope, pUnion);
     }
 
+    else if(first.sym == "break") {
+      A.pSym = &first;
+      bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_Break, NULL, &A, NULL);
+      ASSERT(count == 1); // 未处理后面的情况
+      return bret;
+    }
+    else if(first.sym == "continue") {
+      A.pSym = &first;
+      bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_Continue, NULL, &A, NULL);
+      ASSERT(count == 1); // 未处理后面的情况
+      return bret;
+    }
+    else if(first.sym == "discard") {
+      A.pSym = &first;
+      bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_Discard, NULL, &A, NULL);
+      ASSERT(count == 1); // 未处理后面的情况
+      return bret;
+    }
     else if(first.scope >= 0 && (clsize)first.scope < pScope->end && first.precedence != SYMBOL::ID_BRACE)
     {
       ASSERT(m_aSymbols[first.scope].sym == ';'); // 目前进入这个循环的只可能是遇到分号
@@ -1322,6 +1340,57 @@ NOT_INC_P:
     return bret;
   }
 
+  GXBOOL ExpressionParser::MakeScope(MAKESCOPE* pParam)
+  {
+    const MAKESCOPE& p = *pParam;
+    RTSCOPE::TYPE& begin = pParam->pOut->begin;
+    RTSCOPE::TYPE& end   = pParam->pOut->end;
+
+    ASSERT(p.pScope->begin < p.pScope->end);
+
+    if(p.begin >= p.pScope->end) {
+      // ERROR:
+      return FALSE;
+    }
+
+    if(p.bIndBegin) {
+      begin = m_aSymbols[p.begin].scope;
+
+      if(OUT_OF_SCOPE(begin) || begin >= p.pScope->end) {
+        // ERROR:
+        return FALSE;
+      }
+    }
+    else {
+      begin = p.begin;
+    }
+
+    if(p.chTermin != 0 && m_aSymbols[begin].sym == (TChar)p.chTermin) {
+      end = begin;
+      return TRUE;
+    }
+
+    if(p.end >= p.pScope->end) {
+      // ERROR:
+      return FALSE;
+    }
+
+    if(p.bIndEnd) {
+      end = m_aSymbols[p.end].scope;
+
+      if(OUT_OF_SCOPE(end) || end >= p.pScope->end) {
+        // ERROR:
+        return FALSE;
+      }
+    }
+    else {
+      end = p.end;
+    }
+
+    return TRUE;
+  }
+
+
   GXBOOL ExpressionParser::ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     RTSCOPE sInitializer, sConditional, sIterator, sBlock;
@@ -1329,69 +1398,104 @@ NOT_INC_P:
     //
     // 初始化部分
     //
-    if(pScope->begin + 2 < pScope->end) {
-      sInitializer = RTSCOPE(pScope->begin + 2, m_aSymbols[pScope->begin].scope);
-      if(OUT_OF_SCOPE(sInitializer.end)) {
-        // ERROR: 缺少";"
-        return FALSE;
-      }
+    MAKESCOPE ms;
+    ms.pOut       = &sInitializer;
+    ms.pScope     = pScope;
+    ms.begin      = pScope->begin + 2;
+    ms.bIndBegin  = FALSE;
+    ms.end        = pScope->begin;
+    ms.bIndEnd    = TRUE;
+    ms.chTermin   = ';';
 
-      ASSERT(m_aSymbols[sInitializer.end].sym == ';'); // 应该断在此处
-    }
-    else {
-      // ERROR: for 语法错误
-      CLBREAK;
+    if( ! MakeScope(&ms)) {
       return FALSE;
     }
+
+    //if(pScope->begin + 2 < pScope->end) {
+    //  sInitializer = RTSCOPE(pScope->begin + 2, m_aSymbols[pScope->begin].scope);
+    //  if(OUT_OF_SCOPE(sInitializer.end)) {
+    //    // ERROR: 缺少";"
+    //    return FALSE;
+    //  }
+
+    ASSERT(m_aSymbols[sInitializer.end].sym == ';'); // 应该断在此处
+    //}
+    //else {
+    //  // ERROR: for 语法错误
+    //  CLBREAK;
+    //  return FALSE;
+    //}
 
     //
     // 条件部分
     //
-    if(sInitializer.end + 1 < pScope->end)
-    {
-      const auto nCondScope = sInitializer.end + 1;
-      sConditional = RTSCOPE(nCondScope, m_aSymbols[nCondScope].sym == ';' 
-        ? nCondScope : m_aSymbols[nCondScope].scope);
+    ms.pOut       = &sConditional;
+    ms.pScope     = pScope;
+    ms.begin      = sInitializer.end + 1;
+    ms.bIndBegin  = FALSE;
+    ms.end        = sInitializer.end + 1;
+    ms.bIndEnd    = TRUE;
+    ms.chTermin   = ';';
 
-      if(OUT_OF_SCOPE(sConditional.end)) {
-        // ERROR: 缺少";"
-        return FALSE;
-      }
-      ASSERT(m_aSymbols[sConditional.end].sym == ';'); // 应该断在此处
+    if( ! MakeScope(&ms)) {
+      return TRUE;
     }
-    else {
-      // ERROR: for 语法错误
-      CLBREAK;
-      return FALSE;
-    }
+
+    //if(sInitializer.end + 1 < pScope->end)
+    //{
+    //  const auto nCondScope = sInitializer.end + 1;
+    //  sConditional = RTSCOPE(nCondScope, m_aSymbols[nCondScope].sym == ';' 
+    //    ? nCondScope : m_aSymbols[nCondScope].scope);
+
+    //  if(OUT_OF_SCOPE(sConditional.end)) {
+    //    // ERROR: 缺少";"
+    //    return FALSE;
+    //  }
+    //  ASSERT(m_aSymbols[sConditional.end].sym == ';'); // 应该断在此处
+    //}
+    //else {
+    //  // ERROR: for 语法错误
+    //  CLBREAK;
+    //  return FALSE;
+    //}
 
 
     //
     // 迭代部分
     //
-    const auto& sBeginOfFor = m_aSymbols[pScope->begin + 1];
+    ms = MAKESCOPE(&sIterator, pScope, sConditional.end + 1, FALSE, pScope->begin + 1, TRUE, ')');
+    if( ! MakeScope(&ms)) {
+      return FALSE;
+    }
 
-    if(sBeginOfFor.sym != '(') {
+    if(m_aSymbols[pScope->begin + 1].sym != '(') {
       // ERROR: for 语法错误
       CLBREAK;
       return FALSE;
     }
+    //const auto& sBeginOfFor = m_aSymbols[pScope->begin + 1];
 
-    if(sBeginOfFor.scope > (INT_PTR)pScope->end) {
-      // ERROR: 缺少";"
-      CLBREAK;
-      return FALSE;
-    }
+    //if(sBeginOfFor.sym != '(') {
+    //  // ERROR: for 语法错误
+    //  CLBREAK;
+    //  return FALSE;
+    //}
 
-    if(sConditional.end + 1 < pScope->end)
-    {
-      sIterator = RTSCOPE(sConditional.end + 1, sBeginOfFor.scope);
-    }
-    else {
-      // ERROR: for 语法错误
-      CLBREAK;
-      return FALSE;
-    }
+    //if(sBeginOfFor.scope > (INT_PTR)pScope->end) {
+    //  // ERROR: 缺少";"
+    //  CLBREAK;
+    //  return FALSE;
+    //}
+
+    //if(sConditional.end + 1 < pScope->end)
+    //{
+    //  sIterator = RTSCOPE(sConditional.end + 1, sBeginOfFor.scope);
+    //}
+    //else {
+    //  // ERROR: for 语法错误
+    //  CLBREAK;
+    //  return FALSE;
+    //}
 
 
     //
@@ -1440,6 +1544,9 @@ NOT_INC_P:
     ParseExpression(&sConditional, &uCond, SYMBOL::FIRST_OPCODE_PRECEDENCE);
     ParseExpression(&sIterator   , &uIter, SYMBOL::FIRST_OPCODE_PRECEDENCE);
     ParseExpression(&sBlock      , &uBlock, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+
+    DbgDumpScope("for_2", sConditional, sIterator);
+    DbgDumpScope("for_1", sInitializer, sBlock);
 
     GXBOOL bret = MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForRunning, NULL, &uCond, &uIter);
     bret = bret && MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForInit, NULL, &uInit, &D);
