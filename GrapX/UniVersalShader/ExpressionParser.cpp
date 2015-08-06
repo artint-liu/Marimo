@@ -103,6 +103,7 @@ inline b32 IS_NUM(char c)
 
 namespace UVShader
 {
+  static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
   static MBO s_Operator1[] = {
     {1, ".", OPP(13)},
     //{1, "+", OPP(12}}, // 正号
@@ -399,7 +400,19 @@ namespace UVShader
       sym.scope = -1;
 
       ASSERT(m_CurSymInfo.sym.marker == NULL || it.marker == m_CurSymInfo.sym.marker); // 遍历时一定这个要保持一致
+
       sym.precedence = m_CurSymInfo.precedence;
+
+      // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
+      if((it == '-' || it == '+') && ! m_aSymbols.empty())
+      {        
+        const auto& l_back = m_aSymbols.back();
+
+        // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
+        if(l_back.precedence != 0 && l_back.sym != ')' && l_back.sym != ']') {
+          sym.precedence = c_plus_minus_precedence;
+        }
+      }
 
       // 只是清理
       m_CurSymInfo.sym.marker = NULL;
