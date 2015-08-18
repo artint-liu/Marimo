@@ -506,7 +506,7 @@ _SSP_TEMPL
 }
 
 _SSP_TEMPL
-  _TStr _SSP_IMPL::SECTION_DESC::GetKeyAsString( T_LPCSTR szKey, _TStr strDefault ) const
+  _TStr _SSP_IMPL::SECTION_DESC::GetKeyAsString( T_LPCSTR szKey, const _TStr& strDefault ) const
 {
   PARAMETER p;
   if(GetKey(szKey, p)) {
@@ -561,18 +561,19 @@ _SSP_TEMPL
   }
   
   //ASSERT(DbgCheck());
+  _TStr strValue;
+  SmartStreamUtility::MakeQuotation(strValue, szValue);
 
   if(GetKey(szKey, param)) {
     return pStock->Replace(param.itValue.offset(), 
-      param.itValue.length, szValue, _Traits::_StrLen(szValue));
+      param.itValue.length, strValue, strValue.GetLength());
   }
   else {
     _TStr strBuffer;
-    _TStr strKey;
     strBuffer.Append(' ', nDepth);
     strBuffer.Append(szKey);
     strBuffer.Append('=');
-    strBuffer.Append(SmartStreamUtility::MakeQuotation(strKey, szValue));
+    strBuffer.Append(strValue);
     strBuffer.Append(';');
     strBuffer.Append('\r');
     strBuffer.Append('\n');

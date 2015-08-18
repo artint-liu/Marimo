@@ -107,7 +107,7 @@ public:
 
     b32     GetKey              (T_LPCSTR szKey, PARAMETER& param) const;
     int     GetKeyAsString      (T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount) const;
-    _TStr   GetKeyAsString      (T_LPCSTR szKey, _TStr strDefault) const;
+    _TStr   GetKeyAsString      (T_LPCSTR szKey, const _TStr& strDefault) const;
     int     GetKeyAsInteger     (T_LPCSTR szKey, int nDefault) const;
     float   GetKeyAsFloat       (T_LPCSTR szKey, float fDefault) const;
     b32     GetKeyAsBoolean     (T_LPCSTR szKey, b32 bDefault) const;
