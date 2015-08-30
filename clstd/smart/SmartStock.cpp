@@ -198,7 +198,12 @@ _SSP_TEMPL
   }
 
   if(file.MapToBuffer(&m_pBuffer) == FALSE) {
-    return FALSE;
+    // 如果Load一个空文件，则自己创建一个缓冲
+    ASSERT(m_pBuffer == NULL);
+    m_pBuffer = new clBuffer();
+    m_pBuffer->Resize(0, FALSE);
+    m_SmartStream.Initialize((_TCh*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(_TCh));
+    return TRUE;
   }
 
   u32 dwBOM = *(u32*)m_pBuffer->GetPtr();

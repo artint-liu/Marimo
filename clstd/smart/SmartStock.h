@@ -85,7 +85,7 @@ public:
 #ifdef _DEBUG
     b32 DbgCheck() const
     {
-      return ( ! IsValid() ) || ((itBegin.marker[0] == '{' || itBegin == itBegin.pContainer->begin()) &&
+      return ( ! IsValid() ) || nDepth == 0 || ((itBegin.marker[0] == '{' || itBegin == itBegin.pContainer->begin()) &&
         (itEnd.marker[0] == '}' || itEnd == itBegin.pContainer->end()));
     }
 #else
