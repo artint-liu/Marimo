@@ -56,6 +56,7 @@ namespace Marimo
     T_STRUCT,
     T_STRUCTALWAYS, // 即使定义后没有使用, 也会保留它的格式
     T_MAX,
+    T_CATE_MASK = 0x1f, // 64位调整指针时会标记 TYPE_CHANGED_FLAG，这里用安全掩码去除 TYPE_CHANGED_FLAG 标记
   };
 
   enum DataPoolLoad
@@ -244,7 +245,10 @@ namespace Marimo
     inline const DATAPOOL_VARIABLE_DESC* MemberBeginPtr() const
     {
       auto pTypeDesc = GetTypeDesc();
-      ASSERT(pTypeDesc->Cate == T_STRUCT || pTypeDesc->Cate == T_ENUM || pTypeDesc->Cate == T_FLAG);
+    
+      ASSERT((pTypeDesc->Cate & T_CATE_MASK) == T_STRUCT || 
+        (pTypeDesc->Cate & T_CATE_MASK) == T_ENUM || (pTypeDesc->Cate & T_CATE_MASK) == T_FLAG);
+
       return pTypeDesc->GetMembers();
     }
 

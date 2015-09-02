@@ -788,39 +788,38 @@ namespace Marimo
       const auto eCate = d.GetTypeCategory();
       d.nOffset = nNewOffset;
 
+      // 检查已经调整的标记
+      // 如果没有调整过，则重新计算这个类型的大小
+      // 否则步进这个类型的大小就可以
+      if(TEST_FLAG_NOT(eCate, TYPE_CHANGED_FLAG))
+      {
+        TYPE_DESC* pTypeDesc = (TYPE_DESC*)d.GetTypeDesc();
+        GXUINT& uCate = *(GXUINT*)&pTypeDesc->Cate;
+        SET_FLAG(uCate, TYPE_CHANGED_FLAG);
+        switch(eCate)
+        {
+        case T_STRUCT:
+          pTypeDesc->cbSize = IntChangePtrSize(nSizeofPtr, (VARIABLE_DESC*)d.MemberBeginPtr(), d.MemberCount());
+          break;
+
+        case T_STRING:
+        case T_STRINGA:
+        case T_OBJECT:
+          ASSERT((pTypeDesc->cbSize == 4 && nSizeofPtr == 8) ||
+            (pTypeDesc->cbSize == 8 && nSizeofPtr == 4));
+
+          pTypeDesc->cbSize = nSizeofPtr;
+          break;
+        }
+      }
+
       if(d.IsDynamicArray()) {
         // 动态数组就是一个指针
         nNewOffset += nSizeofPtr; // sizeof(DataPoolArray*)
       }
-      else
-      {
-        // 检查已经调整的标记
-        // 如果没有调整过，则重新计算这个类型的大小
-        // 否则步进这个类型的大小就可以
-        if(TEST_FLAG_NOT(eCate, TYPE_CHANGED_FLAG))
-        {
-          TYPE_DESC* pTypeDesc = (TYPE_DESC*)d.GetTypeDesc();
-          GXUINT& uCate = *(GXUINT*)&pTypeDesc->Cate;
-          SET_FLAG(uCate, TYPE_CHANGED_FLAG);
-          switch(eCate)
-          {
-          case T_STRUCT:
-            //pTypeDesc->cbSize = IntChangePtrSize(nSizeofPtr, pMembers, &pMembers[d.MemberBegin()], d.MemberCount());
-            pTypeDesc->cbSize = IntChangePtrSize(nSizeofPtr, (VARIABLE_DESC*)d.MemberBeginPtr(), d.MemberCount());
-            break;
-
-          case T_STRING:
-          case T_STRINGA:
-          case T_OBJECT:
-            ASSERT((pTypeDesc->cbSize == 4 && nSizeofPtr == 8) ||
-              (pTypeDesc->cbSize == 8 && nSizeofPtr == 4));
-
-            pTypeDesc->cbSize = nSizeofPtr;
-            break;
-          }
-        }
+      else {
         nNewOffset += d.GetSize();
-      } // if(d.IsDynamicArray())
+      }
     }
     return nNewOffset;
   }

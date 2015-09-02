@@ -5,6 +5,7 @@
 #include <exception>
 #include "TestObject.h"
 #include "TestDataPool.h"
+#include <Shlwapi.h>
 
 void TryGet(DataPool* pDataPool, GXLPCSTR szExpression)
 {
@@ -283,8 +284,10 @@ void TestComplexArray()
 
 #ifdef _X86
   GXLPCWSTR szFilename = L"Test\\TestComplexArray.DPL";
+  GXLPCWSTR szFilename2 = L"Test\\TestComplexArray_x64.DPL";  // 跨平台的文件名
 #else
   GXLPCWSTR szFilename = L"Test\\TestComplexArray_x64.DPL";
+  GXLPCWSTR szFilename2 = L"Test\\TestComplexArray.DPL";      // 跨平台的文件名
 #endif // #ifdef _X86
   pDataPool->SaveW(szFilename);
 
@@ -298,4 +301,14 @@ void TestComplexArray()
   ENUM_DATAPOOL(pDataPoolFromFile);
   SAFE_RELEASE(pDataPool);
   SAFE_RELEASE(pDataPoolFromFile);
+
+  // 异构架文件加载测试
+  if(PathFileExists(szFilename2))
+  {
+    DataPool* pAlternative = NULL;
+    DataPool::CreateFromFileW(&pAlternative, NULL, szFilename2, DataPoolLoad_ReadOnly);
+    TestGetNameId(pAlternative);
+    ENUM_DATAPOOL(pAlternative);
+    SAFE_RELEASE(pAlternative);
+  }
 }
