@@ -26,24 +26,39 @@ namespace UVShader
   //  GRAMMAR* pChild;
   //};
 #define OPP(_PRE) (ExpressionParser::SYMBOL::FIRST_OPCODE_PRECEDENCE + _PRE)
+#define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
+#define UNARY_RIGHT_OPERAND   1 // 01B
 
   class ExpressionParser : public SmartStreamA
   {
   public:
-    struct SYMBOL
+    struct SYMBOL // 运行时记录符号和操作符等属性
     {
       const static int scope_bits = 22;
-      const static int precedence_bits = 10;
+      const static int precedence_bits = 7;
       const static int FIRST_OPCODE_PRECEDENCE = 1;
       const static int ID_BRACE = 15;
       iterator  sym;
       int       scope : scope_bits;           // 括号匹配索引
       int       precedence : precedence_bits; // 符号优先级
+      u32       unary      : 1;               // 是否为一元操作符
+      u32       unary_mask : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
       // [precedence]
       // 1~14 表示运算符的优先级
       // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
       // array[open].scope = closed && array[closed].scope = open
     };
+        
+    struct MBO // 静态定义符号属性用的结构体
+    {
+      clsize nLen;
+      char* szOperator;
+      int precedence; // 优先级，越大越高
+
+      u32 unary      : 1; // 参考 SYMBOL 机构体说明
+      u32 unary_mask : 2;
+    };
+
 
     typedef clvector<SYMBOL> SymbolArray;
 
@@ -132,7 +147,7 @@ namespace UVShader
       const static int s_NumOfOperand = 2;
 
       GXDWORD flags : 16;
-      MODE mode : 16;
+      MODE    mode  : 16;
       const SYMBOL* pOpcode;
 
       union UN {

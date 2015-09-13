@@ -85,12 +85,6 @@
 #define OUT_OF_SCOPE(s) (s == (clsize)-1)
 
 static clsize s_nMultiByteOperatorLen = 0; // 最大长度
-struct MBO
-{
-  clsize nLen;
-  char* szOperator;
-  int precedence; // 优先级，越大越高
-};
 
 
 
@@ -103,14 +97,22 @@ inline b32 IS_NUM(char c)
 
 namespace UVShader
 {
-  static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
-  static MBO s_Operator1[] = {
-    {1, ".", OPP(13)},
-    //{1, "+", OPP(12}}, // 正号
-    //{1, "−", OPP(12}}, // 负号
-    {1, "!", OPP(12)},
-    {1, "~", OPP(12)},
-    {1, "&", OPP(12)},
+  //static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
+  
+  // 这个按照ASCII顺序分布, "+",",","-" 分别是43，44，45
+  static ExpressionParser::MBO s_plus_minus[] = {
+    {1, "+", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 正号
+    {},
+    {1, "-", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号
+  };
+
+  static ExpressionParser::MBO s_Operator1[] = {
+    {1, ".", OPP(13), FALSE},
+    //{1, "+", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 正号
+    //{1, "−", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号
+    {1, "!", OPP(12), TRUE, UNARY_RIGHT_OPERAND},
+    {1, "~", OPP(12), TRUE, UNARY_RIGHT_OPERAND},
+    //{1, "&", OPP(12), TRUE, UNARY_RIGHT_OPERAND},
     {1, "*", OPP(11)},
     {1, "/", OPP(11)},
     {1, "%", OPP(11)},
@@ -119,7 +121,7 @@ namespace UVShader
     {1, "<", OPP( 8)},
     {1, ">", OPP( 8)},
     {1, "&", OPP( 6)},
-    {1, "^", OPP( 5)},
+    {1, "^", OPP( 5), TRUE, UNARY_RIGHT_OPERAND},
     {1, "|", OPP( 4)},
     {1, "=", OPP( 1)},
     {1, "?", OPP( 1)}, // ?: 操作符
@@ -128,9 +130,9 @@ namespace UVShader
     {NULL,},
   };
 
-  static MBO s_Operator2[] = {
-    {2, "--", OPP(13)},
-    {2, "++", OPP(13)},
+  static ExpressionParser::MBO s_Operator2[] = {
+    {2, "--", OPP(13), TRUE, UNARY_RIGHT_OPERAND | UNARY_LEFT_OPERAND},
+    {2, "++", OPP(13), TRUE, UNARY_RIGHT_OPERAND | UNARY_LEFT_OPERAND},
     {2, ">>", OPP( 9)},
     {2, "<<", OPP( 9)},
     {2, "<=", OPP( 8)},
@@ -156,7 +158,7 @@ namespace UVShader
     {2, "->*", OPP(-1)}, 
   };
 
-  static MBO s_Operator3[] = {
+  static ExpressionParser::MBO s_Operator3[] = {
     {3, "<<=", OPP(1)},
     {3, ">>=", OPP(1)},
     {NULL,},
@@ -260,23 +262,24 @@ namespace UVShader
     return SmartStreamA::Initialize(szExpression, nSize);
   }
 
-  GXBOOL MatchOperator(const MBO* op, u32 op_len, ExpressionParser::iterator& it, u32 remain, int* precedence)
+  //////////////////////////////////////////////////////////////////////////
+  const ExpressionParser::MBO* MatchOperator(const ExpressionParser::MBO* op, u32 op_len, ExpressionParser::iterator& it, u32 remain)
   {
     if(remain <= op_len) {
-      return FALSE;
+      return NULL;
     }
 
     for(int i = 0; op[i].szOperator != NULL; ++i) {
       ASSERT(op_len == op[i].nLen);
       if(clstd::strncmpT(op[i].szOperator, it.marker, op[i].nLen) == 0)
       {
-        *precedence = op[i].precedence;
         it.length = op[i].nLen;
-        return TRUE;
+        return &op[i];
       }
     }
-    return FALSE;
+    return NULL;
   }
+  //////////////////////////////////////////////////////////////////////////
 
   u32 CALLBACK ExpressionParser::MultiByteOperatorProc( iterator& it, u32 nRemain, u32_ptr lParam )
   {
@@ -287,16 +290,19 @@ namespace UVShader
     ExpressionParser* pParser = (ExpressionParser*)it.pContainer;
     ASSERT(pParser->m_CurSymInfo.sym.marker == NULL); // 每次用完外面都要清理这个
 
-    int precedence = 0;
+    //int precedence = 0;
+    const MBO* pProp = NULL;
     // 从多字节到单字节符号匹配,其中有一个返回TRUE就不执行后面的匹配了
     if(
-      MatchOperator(s_Operator3, 3, it, nRemain, &precedence) ||
-      MatchOperator(s_Operator2, 2, it, nRemain, &precedence) ||
-      MatchOperator(s_Operator1, 1, it, nRemain, &precedence) )
+      (pProp = MatchOperator(s_Operator3, 3, it, nRemain)) ||
+      (pProp = MatchOperator(s_Operator2, 2, it, nRemain)) ||
+      (pProp = MatchOperator(s_Operator1, 1, it, nRemain)) )
     {
-      pParser->m_CurSymInfo.precedence = precedence;
+      pParser->m_CurSymInfo.precedence = pProp->precedence;
       pParser->m_CurSymInfo.sym = it;
       pParser->m_CurSymInfo.scope = -1;
+      pParser->m_CurSymInfo.unary = pProp->unary;
+      pParser->m_CurSymInfo.unary_mask = pProp->unary_mask;
       return 0;
     }
     return 0;
@@ -374,6 +380,7 @@ namespace UVShader
     // 只是清理
     m_CurSymInfo.sym.marker = NULL;
     m_CurSymInfo.precedence = 0;
+    m_CurSymInfo.unary      = 0;
 
     struct PAIR_CONTEXT
     {
@@ -402,21 +409,28 @@ namespace UVShader
       ASSERT(m_CurSymInfo.sym.marker == NULL || it.marker == m_CurSymInfo.sym.marker); // 遍历时一定这个要保持一致
 
       sym.precedence = m_CurSymInfo.precedence;
+      sym.unary      = m_CurSymInfo.unary;
+      sym.unary_mask = m_CurSymInfo.unary_mask;
 
       // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
       if((it == '-' || it == '+') && ! m_aSymbols.empty())
       {        
         const auto& l_back = m_aSymbols.back();
 
+        // 一元操作符，+/-就不转换为正负号
         // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
-        if(l_back.precedence != 0 && l_back.sym != ')' && l_back.sym != ']') {
-          sym.precedence = c_plus_minus_precedence;
+        if(l_back.precedence != 0 && l_back.sym != ')' && l_back.sym != ']' && ( ! l_back.unary)) {
+          const auto& p = s_plus_minus[(int)(it.marker[0] - '+')];
+          sym.precedence = p.precedence;
+          sym.unary      = p.unary;
+          sym.unary_mask = p.unary_mask;
         }
       }
 
       // 只是清理
       m_CurSymInfo.sym.marker = NULL;
       m_CurSymInfo.precedence = 0;
+      m_CurSymInfo.unary      = 0;
 
       // 符号配对处理
       for(int i = 0; pair_context[i].szOpen != NULL; ++i)
@@ -1602,6 +1616,27 @@ NOT_INC_P:
     MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Normal, pOpcode, &A, &B);
 
     DbgDumpScope(pOpcode->sym.ToString(), scopeA, scopeB);
+
+    if(pOpcode->unary) {
+      if(A.pNode != NULL && B.pNode != NULL)
+      {
+        // ERROR: 一元操作符不能同时带有左右操作数
+        return FALSE;
+      }
+
+      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_LEFT_OPERAND) && A.pNode != NULL)
+      {
+        // ERROR: 一元操作符不接受左值
+        return FALSE;
+      }
+
+      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_RIGHT_OPERAND) && B.pNode != NULL)
+      {
+        // ERROR: 一元操作符不接受右值
+        return FALSE;
+      }
+    }
+
     return bresult;
   }
 
