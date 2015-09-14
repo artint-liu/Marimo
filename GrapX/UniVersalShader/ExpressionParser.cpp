@@ -1730,6 +1730,11 @@ NOT_INC_P:
     return -1;
   }
 
+  const ExpressionParser::StatementArray& ExpressionParser::GetStatments() const
+  {
+    return m_aStatements;
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   bool ExpressionParser::TYPE::operator<( const TYPE& t ) const

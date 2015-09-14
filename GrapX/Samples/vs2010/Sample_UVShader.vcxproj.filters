@@ -16,6 +16,9 @@
     <ClCompile Include="..\..\UniVersalShader\ExpressionParser.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\Sample_UVShader\TestParseFromFile.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\UniVersalShader\ExpressionParser.h">

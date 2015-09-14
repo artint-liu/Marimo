@@ -98,18 +98,18 @@ namespace UVShader
 
     struct FUNCTION_ARGUMENT // 函数参数
     {
-      InputModifier eModifier;
-      GXLPCSTR      szType;
-      GXLPCSTR      szName;
-      GXLPCSTR      szSemantic;
+      InputModifier eModifier;  // [opt]
+      GXLPCSTR      szType;     // [req]
+      GXLPCSTR      szName;     // [req]
+      GXLPCSTR      szSemantic; // [opt]
     };
     typedef clvector<FUNCTION_ARGUMENT> ArgumentsArray;
     
     struct STRUCT_MEMBER // 结构体成员/Shader标记
     {
-      GXLPCSTR szType;
-      GXLPCSTR szName;
-      GXLPCSTR szSignature;  // 结构体成员没有这项
+      GXLPCSTR szType;       // [req]
+      GXLPCSTR szName;       // [req]
+      GXLPCSTR szSignature;  // [req], 结构体成员没有这项
     };
     typedef clvector<STRUCT_MEMBER> MemberArray;
 
@@ -183,10 +183,10 @@ namespace UVShader
       union
       {
         struct { // 函数体/函数声明
-          StorageClass eStorageClass;
-          GXLPCSTR     szReturnType;
-          GXLPCSTR     szName;
-          GXLPCSTR     szSemantic;
+          StorageClass eStorageClass; // [opt]
+          GXLPCSTR     szReturnType;  // [req]
+          GXLPCSTR     szName;        // [req]
+          GXLPCSTR     szSemantic;    // [opt]
           FUNCTION_ARGUMENT*  pArguments;
           clsize              nNumOfArguments;
         }func;
@@ -327,6 +327,8 @@ namespace UVShader
     clsize              GenerateSymbols         ();
     const SymbolArray*  GetSymbolsArray         () const;
     GXBOOL              Parse                   ();
+
+    const StatementArray& GetStatments          () const;
 
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
