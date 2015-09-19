@@ -38,6 +38,102 @@ GXLPCSTR Get(UVShader::ExpressionParser::StorageClass e)
 
 //////////////////////////////////////////////////////////////////////////
 
+void DbgDumpSyntaxTree(UVShader::ExpressionParser* pExpp, const UVShader::ExpressionParser::SYNTAXNODE* pNode, int precedence, clStringA* pStr)
+{
+  typedef UVShader::ExpressionParser::SYNTAXNODE SYNTAXNODE;
+
+  clStringA str[2];
+  for(int i = 0; i < 2; i++)
+  {
+    if(pNode->Operand[i].pSym) {
+      if(pExpp->IsSymbol(&pNode->Operand[i])) {
+        str[i] = pNode->Operand[i].pSym->sym.ToString();
+      }
+      else {
+        DbgDumpSyntaxTree(pExpp, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
+      }
+    }
+    else {
+      str[i].Clear();
+    }
+  }
+
+  TRACE("[%s] [%s] [%s]\n",
+    pNode->pOpcode ? pNode->pOpcode->sym.ToString() : "",
+    str[0], str[1]);
+
+  clStringA strOut;
+  switch(pNode->mode)
+  {
+  case SYNTAXNODE::MODE_FunctionCall: // 函数调用
+    strOut.Format("%s(%s)", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Definition:
+    strOut.Format("%s %s", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Flow_If:
+    strOut.Format("if(%s) {\n%s;\n}", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Flow_Else:
+    strOut.Format("%s else {\n%s;\n}", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Flow_ElseIf:
+    strOut.Format("%s else %s", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Flow_While:
+    strOut.Format("%s(%s)", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Flow_For:
+    strOut.Format("for(%s) {\n%s\n}", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Flow_ForInit:
+  case SYNTAXNODE::MODE_Flow_ForRunning:
+    strOut.Format("%s;%s", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Return:
+    ASSERT(str[0] == "return");
+    strOut.Format("return %s", str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_Chain:
+    if(str[1].IsEmpty()) {
+      strOut.Format("%s;\n", str[0]);
+    }
+    else {
+      strOut.Format("%s;\n%s", str[0], str[1]);
+    }
+    break;
+
+  case SYNTAXNODE::MODE_Normal:
+    if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
+      strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+    }
+    else {
+      strOut.Format("%s%s%s", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+    }
+    break;
+
+  default:
+    // 没处理的 pNode->mode 类型
+    CLBREAK;
+    break;
+  }
+
+  if(pStr) {
+    *pStr = strOut;
+  }
+  else {
+    TRACE("%s\n", strOut);
+  }
+}
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
 {
   clFile file;
@@ -107,6 +203,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
                 }
 
                 file.WritefA("{\n");
+                if(func.pExpression)
+                {
+                  clStringA str;
+                  DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, &str);
+                  file.WritefA("%s;\n", str);
+                }
                 file.WritefA("}\n");
               }
               break;
@@ -115,6 +217,11 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
             case UVShader::ExpressionParser::StatementType_Signatures:
               break;
             case UVShader::ExpressionParser::StatementType_Expression:
+              {
+                clStringA str;
+                DbgDumpSyntaxTree(&expp, s.expr.sRoot.pNode, 0, &str);
+                file.WritefA(str);
+              }
               break;
             }
           }

@@ -39,18 +39,19 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     auto pSymbols = expp.GetSymbolsArray();
 
     int nCount = 0;
-    TRACE("%3d# ", i);
+    //TRACE("%3d# ", i);
+    TRACE("%d# \"%s\"\n", i, pSamples[i].expression);
     for(auto it = pSymbols->begin(); it != pSymbols->end(); ++it)
     {
-      TRACE("[%d]\"%s\"\t(p=%d,s=%d)\n", it - pSymbols->begin(), it->sym.ToString(), it->precedence, it->scope);
+      TRACE("[%d]\"%s\"\t(p=%d,s=%d,s2=%d)\n", it - pSymbols->begin(), it->sym.ToString(), it->precedence, it->scope, it->semi_scope);
       nCount++;
     }
     TRACE("(%d:%f)\n", nCount, (float)nSize / nCount);
-    TRACE("%3d# \"%s\"\n", i, pSamples[i].expression);
 
     // 表达式解析
     UVShader::ExpressionParser::RTSCOPE scope(0, pSymbols->size());
-    expp.ParseStatementAs_Expression(&scope, TRUE);
+    UVShader::ExpressionParser::STATEMENT stat;
+    expp.ParseStatementAs_Expression(&stat, &scope, TRUE);
 
     // 检查操作堆栈
     if(pSamples[i].aOperStack)
@@ -79,6 +80,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+  int a = 1, b = 2, c = 3;
   clpathfile::LocalWorkingDirA("..");
 
   TestExpressionParser(samplesOpercode);

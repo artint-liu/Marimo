@@ -39,7 +39,8 @@ namespace UVShader
       const static int FIRST_OPCODE_PRECEDENCE = 1;
       const static int ID_BRACE = 15;
       iterator  sym;
-      int       scope : scope_bits;           // 括号匹配索引
+      int       scope;                        // 括号匹配索引
+      int       semi_scope : scope_bits;      // 分号作用域
       int       precedence : precedence_bits; // 符号优先级
       u32       unary      : 1;               // 是否为一元操作符
       u32       unary_mask : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
@@ -47,6 +48,11 @@ namespace UVShader
       // 1~14 表示运算符的优先级
       // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
       // array[open].scope = closed && array[closed].scope = open
+
+      int GetScope() const
+      {
+        return scope >= 0 ? scope : semi_scope;
+      }
     };
         
     struct MBO // 静态定义符号属性用的结构体
@@ -151,7 +157,7 @@ namespace UVShader
       const SYMBOL* pOpcode;
 
       union UN {
-        SYNTAXNODE* pNode;
+        SYNTAXNODE*   pNode;
         const SYMBOL* pSym;
       };
 
@@ -176,30 +182,40 @@ namespace UVShader
     typedef clvector<SYNTAXNODE> SyntaxNodeArray;
 
     //////////////////////////////////////////////////////////////////////////
+    struct STATEMENT;
+    struct STATEMENT_EXPR;
+
+    struct STATEMENT_FUNC // 函数体/函数声明
+    {
+      StorageClass eStorageClass; // [opt]
+      GXLPCSTR     szReturnType;  // [req]
+      GXLPCSTR     szName;        // [req]
+      GXLPCSTR     szSemantic;    // [opt]
+      FUNCTION_ARGUMENT*  pArguments;       // [opt]
+      clsize              nNumOfArguments;  // [opt]
+      STATEMENT* pExpression;
+    };
+
+    struct STATEMENT_STRU // 结构体定义
+    {
+      GXLPCSTR        szName;
+      STRUCT_MEMBER*  pMembers;
+      clsize          nNumOfMembers;
+    }stru;
+
+    struct STATEMENT_EXPR // 表达式定义
+    {
+      SYNTAXNODE::UN  sRoot;
+    }expr;
 
     struct STATEMENT
     {
       StatementType type;
       union
       {
-        struct { // 函数体/函数声明
-          StorageClass eStorageClass; // [opt]
-          GXLPCSTR     szReturnType;  // [req]
-          GXLPCSTR     szName;        // [req]
-          GXLPCSTR     szSemantic;    // [opt]
-          FUNCTION_ARGUMENT*  pArguments;
-          clsize              nNumOfArguments;
-        }func;
-
-        struct { // 结构体定义
-          GXLPCSTR        szName;
-          STRUCT_MEMBER*  pMembers;
-          clsize          nNumOfMembers;
-        }stru;
-
-        struct { // 表达式定义
-          SYNTAXNODE::UN  sRoot;
-        }expr;
+        STATEMENT_FUNC func;
+        STATEMENT_STRU stru;
+        STATEMENT_EXPR expr;
       };
     };
 
@@ -282,13 +298,13 @@ namespace UVShader
     GXBOOL  MakeScope(MAKESCOPE* pParam);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
+    void    RelocaleStatements(StatementArray& aStatements);
     void    RelocalePointer();
     void    RelocaleSyntaxPtr(SYNTAXNODE* pNode);
     GXBOOL  IsIntrinsicType(GXLPCSTR szType);
 
     GXLPCSTR GetUniqueString(const SYMBOL* pSym);
     const TYPE* ParseType(const SYMBOL* pSym);
-    GXBOOL   IsSymbol(const SYNTAXNODE::UN* pUnion) const;
     clsize   FindSemicolon(clsize begin, clsize end) const;
 
     template<class _Ty>
@@ -306,15 +322,16 @@ namespace UVShader
 
   protected:
     typedef Marimo::DataPoolErrorMsg<ch> ErrorMessage;
-    ErrorMessage*           m_pMsg;
+    ErrorMessage*       m_pMsg;
     SymbolArray         m_aSymbols;
     clstd::StringSetA   m_Strings;
     TypeSet             m_TypeSet;
     StatementArray      m_aStatements;
+    StatementArray      m_aSubStatements;   // m_aStatements的次级储存，没有顺序关系
     
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
-    SyntaxNodeArray     m_aSyntaxNodePack;
+    SyntaxNodeArray     m_aSyntaxNodePack;  // 表达式语法节点
 
     SYMBOL              m_CurSymInfo;       // 遍历时符号的优先级信息
     int                 m_nMaxPrecedence;   // 优先级最大值
@@ -330,12 +347,14 @@ namespace UVShader
 
     const StatementArray& GetStatments          () const;
 
+    GXBOOL   IsSymbol(const SYNTAXNODE::UN* pUnion) const;
+
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     void DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB);
     void DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL);
 
-    /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
+    /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
 
     clStringArrayA    m_aDbgExpressionOperStack;
   };

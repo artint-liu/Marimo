@@ -405,6 +405,7 @@ namespace UVShader
       const int c_size = (int)m_aSymbols.size();
       sym.sym = it;
       sym.scope = -1;
+      sym.semi_scope = -1;
 
       ASSERT(m_CurSymInfo.sym.marker == NULL || it.marker == m_CurSymInfo.sym.marker); // 遍历时一定这个要保持一致
 
@@ -462,12 +463,14 @@ namespace UVShader
       }
 
       if(it == ';') {
+        //if(EOE < c_size && m_aSymbols[EOE].scope == -1) // ";"的域不能覆盖其他的域记录
+        //{
+        //  m_aSymbols[EOE].scope = c_size;
+        //}
 
-        if(EOE < c_size && m_aSymbols[EOE].scope == -1) // ";"的域不能覆盖其他的域记录
-        {
-          m_aSymbols[EOE].scope = c_size;
+        if(EOE < c_size) {
+          m_aSymbols[EOE].semi_scope = c_size;
         }
-
         EOE = c_size + 1;
       }
       // 这个可能不需要，因为按照语法for应该是在";"分号或者"}"闭花括号后面
@@ -574,9 +577,21 @@ namespace UVShader
       stat.type = StatementType_FunctionDecl;
     }
     else if(p->sym == "{") { // 函数体
+      RTSCOPE func_statement_block(m_aSymbols[p->scope].scope + 1, p->scope);
+
       stat.type = StatementType_Function;
       p = &m_aSymbols[p->scope];
       ++p;
+
+      if(func_statement_block.IsValid())
+      {
+        STATEMENT sub_stat = {StatementType_Expression};
+        if(ParseStatementAs_Expression(&sub_stat, &func_statement_block, FALSE))
+        {
+          stat.func.pExpression = (STATEMENT*)m_aSubStatements.size();
+          m_aSubStatements.push_back(sub_stat);
+        }
+      }
     }
     else {
       // ERROR: 声明看起来是一个函数，但是既不是声明也不是实现。
@@ -704,23 +719,8 @@ NOT_INC_P:
 
   void ExpressionParser::RelocalePointer()
   {
-    for(auto it = m_aStatements.begin(); it != m_aStatements.end(); ++it)
-    {
-      switch(it->type)
-      {
-      case StatementType_FunctionDecl:
-      case StatementType_Function:
-        //it->func.pArguments = &m_aArgumentsPack[(GXINT_PTR)it->func.pArguments];
-        IndexToPtr(it->func.pArguments, m_aArgumentsPack);
-        break;
-
-      case StatementType_Struct:
-      case StatementType_Signatures:
-        //it->stru.pMembers = &m_aMembersPack[(GXINT_PTR)it->stru.pMembers];
-        IndexToPtr(it->stru.pMembers, m_aMembersPack);
-        break;
-      }
-    }
+    RelocaleStatements(m_aStatements);
+    RelocaleStatements(m_aSubStatements);
   }
 
   void ExpressionParser::RelocaleSyntaxPtr(SYNTAXNODE* pNode)
@@ -852,20 +852,16 @@ NOT_INC_P:
     return NULL;
   }
 
-  GXBOOL ExpressionParser::ParseStatementAs_Expression( RTSCOPE* pScope, GXBOOL bDbgRelocale )
+  GXBOOL ExpressionParser::ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale )
   {
     m_nDbgNumOfExpressionParse = 0;
     m_aDbgExpressionOperStack.clear();
 
-    //if(pScope->end > 0 && m_aSymbols[pScope->end - 1].sym == ";") {
-    //  --pScope->end;
-    //}
-    
     if(pScope->begin == pScope->end) {
       return TRUE;
     }
 
-    STATEMENT stat = {StatementType_Expression};
+    STATEMENT& stat = *pStat;
     
     GXBOOL bret = ParseExpression(pScope, &stat.expr.sRoot, SYMBOL::FIRST_OPCODE_PRECEDENCE);
     TRACE("m_nDbgNumOfExpressionParse=%d\n", m_nDbgNumOfExpressionParse);
@@ -880,13 +876,10 @@ NOT_INC_P:
     else if(bDbgRelocale && ! IsSymbol(&stat.expr.sRoot)) {
       IndexToPtr(stat.expr.sRoot.pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr(stat.expr.sRoot.pNode);
-      //if(stat.expr.sRoot.pNode->Operand[0].pSym != NULL &&
-      //  stat.expr.sRoot.pNode->Operand[1].pSym != NULL)
-      {
-        DbgDumpSyntaxTree(stat.expr.sRoot.pNode, 0);
-      }
+      DbgDumpSyntaxTree(stat.expr.sRoot.pNode, 0);
     }
 #endif // #ifdef _DEBUG
+    //m_aStatements.push_back(stat);
     return bret;
   }
 
@@ -1053,12 +1046,13 @@ NOT_INC_P:
       ASSERT(count == 1); // 未处理后面的情况
       return bret;
     }
-    else if(first.scope >= 0 && (clsize)first.scope < pScope->end && first.precedence != SYMBOL::ID_BRACE)
+    //else if(first.scope >= 0 && (clsize)first.scope < pScope->end && first.precedence != SYMBOL::ID_BRACE)
+    else if(first.semi_scope >= 0 && (clsize)first.semi_scope < pScope->end)
     {
-      ASSERT(m_aSymbols[first.scope].sym == ';'); // 目前进入这个循环的只可能是遇到分号
+      ASSERT(m_aSymbols[first.semi_scope].sym == ';'); // 目前进入这个循环的只可能是遇到分号
       bret =
-        ParseExpression(&A, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin, first.scope) &&
-        ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, first.scope + 1, pScope->end) &&
+        ParseExpression(&A, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin, first.semi_scope) &&
+        ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, first.semi_scope + 1, pScope->end) &&
         MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
 
       return bret;
@@ -1233,16 +1227,16 @@ NOT_INC_P:
       return FALSE;
     }
 
-    sBlock.end = m_aSymbols[sBlock.begin].scope;
+    sBlock.end = m_aSymbols[sBlock.begin].GetScope();
     if(sBlock.end == -1)
     {
       // 如果是"if(...) ...;"这种单语句形式，"if"位置的scope应该就是分号的位置
-      sBlock.end = m_aSymbols[pScope->begin].scope;
+      sBlock.end = m_aSymbols[pScope->begin].GetScope();
 
       // "else if(...) ...;" 这种单语句形式，"else"位置的记录了分号的位置
       if(sBlock.end == -1 && pScope->begin > 0) {
         bElseIf = TRUE;
-        sBlock.end = m_aSymbols[pScope->begin - 1].scope;
+        sBlock.end = m_aSymbols[pScope->begin - 1].GetScope();
       }
     }
     else if(m_aSymbols[sBlock.begin].sym == '{') {
@@ -1385,7 +1379,7 @@ NOT_INC_P:
     }
 
     if(p.bIndBegin) {
-      begin = m_aSymbols[p.begin].scope;
+      begin = m_aSymbols[p.begin].GetScope();
 
       if(OUT_OF_SCOPE(begin) || begin >= p.pScope->end) {
         // ERROR:
@@ -1407,7 +1401,7 @@ NOT_INC_P:
     }
 
     if(p.bIndEnd) {
-      end = m_aSymbols[p.end].scope;
+      end = m_aSymbols[p.end].GetScope();
 
       if(OUT_OF_SCOPE(end) || end >= p.pScope->end) {
         // ERROR:
@@ -1549,12 +1543,12 @@ NOT_INC_P:
         return FALSE;
       }
 
-      sBlock = RTSCOPE(sIterator.end + 2, sFirstBlock.scope);
+      sBlock = RTSCOPE(sIterator.end + 2, sFirstBlock.GetScope());
     }
     else {
       // 防止是for(...;...;)这种形式
       if(sIterator.IsValid() && m_aSymbols[sIterator.begin].sym != ')') {
-        sBlock = RTSCOPE(sIterator.end + 1, m_aSymbols[sIterator.begin].scope);
+        sBlock = RTSCOPE(sIterator.end + 1, m_aSymbols[sIterator.begin].GetScope());
       }
       else {
         sBlock = RTSCOPE(sIterator.end + 1, FindSemicolon(sIterator.end + 1, pScope->end));
@@ -1733,6 +1727,33 @@ NOT_INC_P:
   const ExpressionParser::StatementArray& ExpressionParser::GetStatments() const
   {
     return m_aStatements;
+  }
+
+  void ExpressionParser::RelocaleStatements( StatementArray& aStatements )
+  {
+    for(auto it = aStatements.begin(); it != aStatements.end(); ++it)
+    {
+      switch(it->type)
+      {
+      case StatementType_FunctionDecl:
+      case StatementType_Function:
+        //it->func.pArguments = &m_aArgumentsPack[(GXINT_PTR)it->func.pArguments];
+        IndexToPtr(it->func.pArguments, m_aArgumentsPack);
+        IndexToPtr(it->func.pExpression, m_aSubStatements);
+        break;
+
+      case StatementType_Struct:
+      case StatementType_Signatures:
+        //it->stru.pMembers = &m_aMembersPack[(GXINT_PTR)it->stru.pMembers];
+        IndexToPtr(it->stru.pMembers, m_aMembersPack);
+        break;
+
+      case StatementType_Expression:
+        IndexToPtr(it->expr.sRoot.pNode, m_aSyntaxNodePack);
+        RelocaleSyntaxPtr(it->expr.sRoot.pNode);
+        break;
+      }
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////

@@ -358,7 +358,10 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, "float3 a=b=c=d", 8},
   {0, "float a,b,c,d,e", 10},
   {0, "float a, b = c", 6},
+  {0, "(a)=a+b;", 0},
+  {0, "(a=a+b);", 0},
   {0, "a=a+b;b=a-c*d;c=a*d;", 20},
+  {0, "(a=a+b);(b=a-c*d);c=a*d;", 24},
   {0, NULL,  0},};
 
 SAMPLE_EXPRESSION samplesIfExpression[] = {
@@ -452,6 +455,7 @@ SAMPLE_EXPRESSION samplesForExpression[] = {
 };
 
 SAMPLE_EXPRESSION samplesExpression[] = {
+  {0, "return mix(a.x, a.y, f.z)", 0},
   {0, "(Output.LdotN*shadowFactor)+Output.Ambient+Output.Specular*shadowFactor", 17},
   {0, "Input.Normal = (Input.Normal - 0.5) * 2.0", 13},
   {0, "Input.Position.xyz += SwingGrass(Input.Position.xyz, Input.Texcoord.y - 0.1875)", 22},
