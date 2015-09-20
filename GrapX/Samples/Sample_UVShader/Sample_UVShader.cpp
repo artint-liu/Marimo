@@ -30,7 +30,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
   //int result = a?b:c?f:g;
   //int result = a>b?b:c;
 
-  UVShader::ExpressionParser expp;
+  UVShader::CodeParser expp;
   for(int i = 0; pSamples[i].expression != 0; i++)
   {
     auto nSize = strlen(pSamples[i].expression);
@@ -49,8 +49,8 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     TRACE("(%d:%f)\n", nCount, (float)nSize / nCount);
 
     // 表达式解析
-    UVShader::ExpressionParser::RTSCOPE scope(0, pSymbols->size());
-    UVShader::ExpressionParser::STATEMENT stat;
+    UVShader::CodeParser::RTSCOPE scope(0, pSymbols->size());
+    UVShader::CodeParser::STATEMENT stat;
     expp.ParseStatementAs_Expression(&stat, &scope, TRUE);
 
     // 检查操作堆栈
@@ -90,7 +90,7 @@ int _tmain(int argc, _TCHAR* argv[])
   TestExpressionParser(samplesForExpression);
   TestExpressionParser(samplesExpression);
 
-  TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame_output.txt");
+  //TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame_output.txt");
   //TestFromFile("Test\\shaders\\ShaderToy\\TrivialRaytracer3.txt");
 	return 0;
 }

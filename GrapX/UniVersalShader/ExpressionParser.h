@@ -25,11 +25,11 @@ namespace UVShader
 
   //  GRAMMAR* pChild;
   //};
-#define OPP(_PRE) (ExpressionParser::SYMBOL::FIRST_OPCODE_PRECEDENCE + _PRE)
+#define OPP(_PRE) (CodeParser::SYMBOL::FIRST_OPCODE_PRECEDENCE + _PRE)
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
 
-  class ExpressionParser : public SmartStreamA
+  class CodeParser : public SmartStreamA
   {
   public:
     struct SYMBOL // 运行时记录符号和操作符等属性
@@ -287,9 +287,10 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
     GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
 
-    GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
-    GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, int nMinPrecedence, clsize begin, clsize end);
-    GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
+    GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
+    GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
+    GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseFlowWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
@@ -338,8 +339,8 @@ namespace UVShader
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     static INTRINSIC_TYPE s_aIntrinsicType[];
   public:
-    ExpressionParser();
-    virtual ~ExpressionParser();
+    CodeParser();
+    virtual ~CodeParser();
     b32                 Attach                  (const char* szExpression, clsize nSize);
     clsize              GenerateSymbols         ();
     const SymbolArray*  GetSymbolsArray         () const;

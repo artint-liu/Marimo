@@ -6,30 +6,30 @@
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "TestExpressionParser.h"
 
-GXLPCSTR Get(UVShader::ExpressionParser::InputModifier e)
+GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
 {
   switch(e)
   {
-  case UVShader::ExpressionParser::InputModifier_in:
+  case UVShader::CodeParser::InputModifier_in:
     return "in ";
-  case UVShader::ExpressionParser::InputModifier_out:
+  case UVShader::CodeParser::InputModifier_out:
     return "out ";
-  case UVShader::ExpressionParser::InputModifier_inout:
+  case UVShader::CodeParser::InputModifier_inout:
     return "intout ";
-  case UVShader::ExpressionParser::InputModifier_uniform:
+  case UVShader::CodeParser::InputModifier_uniform:
     return "uniform ";
   default:
     CLBREAK;
   }
 }
 
-GXLPCSTR Get(UVShader::ExpressionParser::StorageClass e)
+GXLPCSTR Get(UVShader::CodeParser::StorageClass e)
 {
   switch(e)
   {
-  case UVShader::ExpressionParser::StorageClass_empty:
+  case UVShader::CodeParser::StorageClass_empty:
     return "";
-  case UVShader::ExpressionParser::StorageClass_inline:
+  case UVShader::CodeParser::StorageClass_inline:
     return "inline ";
   default:
     CLBREAK;
@@ -38,9 +38,9 @@ GXLPCSTR Get(UVShader::ExpressionParser::StorageClass e)
 
 //////////////////////////////////////////////////////////////////////////
 
-void DbgDumpSyntaxTree(UVShader::ExpressionParser* pExpp, const UVShader::ExpressionParser::SYNTAXNODE* pNode, int precedence, clStringA* pStr)
+void DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNODE* pNode, int precedence, clStringA* pStr)
 {
-  typedef UVShader::ExpressionParser::SYNTAXNODE SYNTAXNODE;
+  typedef UVShader::CodeParser::SYNTAXNODE SYNTAXNODE;
 
   clStringA str[2];
   for(int i = 0; i < 2; i++)
@@ -142,8 +142,8 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
     clBuffer* pBuffer = NULL;
     if(file.MapToBuffer(&pBuffer))
     {
-      UVShader::ExpressionParser expp;
-      const UVShader::ExpressionParser::SymbolArray* pSymbols;
+      UVShader::CodeParser expp;
+      const UVShader::CodeParser::SymbolArray* pSymbols;
       expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize());
 
       expp.GenerateSymbols();
@@ -173,9 +173,9 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
             const auto& s = *it;
             switch(s.type)
             {
-            case UVShader::ExpressionParser::StatementType_FunctionDecl:
+            case UVShader::CodeParser::StatementType_FunctionDecl:
               break;
-            case UVShader::ExpressionParser::StatementType_Function:
+            case UVShader::CodeParser::StatementType_Function:
               {
                 const auto& func = s.func;
 
@@ -212,11 +212,11 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
                 file.WritefA("}\n");
               }
               break;
-            case UVShader::ExpressionParser::StatementType_Struct:
+            case UVShader::CodeParser::StatementType_Struct:
               break;
-            case UVShader::ExpressionParser::StatementType_Signatures:
+            case UVShader::CodeParser::StatementType_Signatures:
               break;
-            case UVShader::ExpressionParser::StatementType_Expression:
+            case UVShader::CodeParser::StatementType_Expression:
               {
                 clStringA str;
                 DbgDumpSyntaxTree(&expp, s.expr.sRoot.pNode, 0, &str);

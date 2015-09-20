@@ -100,13 +100,13 @@ namespace UVShader
   //static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
   
   // 这个按照ASCII顺序分布, "+",",","-" 分别是43，44，45
-  static ExpressionParser::MBO s_plus_minus[] = {
+  static CodeParser::MBO s_plus_minus[] = {
     {1, "+", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 正号
     {},
     {1, "-", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号
   };
 
-  static ExpressionParser::MBO s_Operator1[] = {
+  static CodeParser::MBO s_Operator1[] = {
     {1, ".", OPP(13), FALSE},
     //{1, "+", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 正号
     //{1, "−", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号
@@ -130,7 +130,7 @@ namespace UVShader
     {NULL,},
   };
 
-  static ExpressionParser::MBO s_Operator2[] = {
+  static CodeParser::MBO s_Operator2[] = {
     {2, "--", OPP(13), TRUE, UNARY_RIGHT_OPERAND | UNARY_LEFT_OPERAND},
     {2, "++", OPP(13), TRUE, UNARY_RIGHT_OPERAND | UNARY_LEFT_OPERAND},
     {2, ">>", OPP( 9)},
@@ -158,14 +158,14 @@ namespace UVShader
     {2, "->*", OPP(-1)}, 
   };
 
-  static ExpressionParser::MBO s_Operator3[] = {
+  static CodeParser::MBO s_Operator3[] = {
     {3, "<<=", OPP(1)},
     {3, ">>=", OPP(1)},
     {NULL,},
   };
   //////////////////////////////////////////////////////////////////////////
 
-  ExpressionParser::INTRINSIC_TYPE ExpressionParser::s_aIntrinsicType[] = {
+  CodeParser::INTRINSIC_TYPE CodeParser::s_aIntrinsicType[] = {
     {"int",   3, 4, 4},
     {"vec",   3, 4, 0},
     {"bool",  4, 4, 0},
@@ -177,7 +177,7 @@ namespace UVShader
     {NULL},
   };
 
-  ExpressionParser::ExpressionParser()
+  CodeParser::CodeParser()
     : m_nMaxPrecedence(0)
     , m_nDbgNumOfExpressionParse(0)
     , m_pMsg(NULL)
@@ -220,12 +220,12 @@ namespace UVShader
     InitPacks();
   }
 
-  ExpressionParser::~ExpressionParser()
+  CodeParser::~CodeParser()
   {
     SAFE_DELETE(m_pMsg);
   }
 
-  void ExpressionParser::InitPacks()
+  void CodeParser::InitPacks()
   {
     //
     // 所有pack类型，都存一个空值，避免记录0索引与NULL指针混淆的问题
@@ -243,7 +243,7 @@ namespace UVShader
     m_aArgumentsPack.push_back(argument);
   }
 
-  void ExpressionParser::Cleanup()
+  void CodeParser::Cleanup()
   {
     m_aSymbols.clear();
     m_aStatements.clear();
@@ -251,7 +251,7 @@ namespace UVShader
     InitPacks();
   }
 
-  b32 ExpressionParser::Attach( const char* szExpression, clsize nSize )
+  b32 CodeParser::Attach( const char* szExpression, clsize nSize )
   {
     Cleanup();
     if( ! m_pMsg) {
@@ -263,7 +263,7 @@ namespace UVShader
   }
 
   //////////////////////////////////////////////////////////////////////////
-  const ExpressionParser::MBO* MatchOperator(const ExpressionParser::MBO* op, u32 op_len, ExpressionParser::iterator& it, u32 remain)
+  const CodeParser::MBO* MatchOperator(const CodeParser::MBO* op, u32 op_len, CodeParser::iterator& it, u32 remain)
   {
     if(remain <= op_len) {
       return NULL;
@@ -281,13 +281,13 @@ namespace UVShader
   }
   //////////////////////////////////////////////////////////////////////////
 
-  u32 CALLBACK ExpressionParser::MultiByteOperatorProc( iterator& it, u32 nRemain, u32_ptr lParam )
+  u32 CALLBACK CodeParser::MultiByteOperatorProc( iterator& it, u32 nRemain, u32_ptr lParam )
   {
     if(it.front() == '.' && it.length > 1) { // 跳过".5"这种格式的浮点数
       return 0;
     }
 
-    ExpressionParser* pParser = (ExpressionParser*)it.pContainer;
+    CodeParser* pParser = (CodeParser*)it.pContainer;
     ASSERT(pParser->m_CurSymInfo.sym.marker == NULL); // 每次用完外面都要清理这个
 
     //int precedence = 0;
@@ -308,7 +308,7 @@ namespace UVShader
     return 0;
   }
 
-  u32 CALLBACK ExpressionParser::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
+  u32 CALLBACK CodeParser::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
   {
     GXBOOL bENotation = FALSE;
 
@@ -359,13 +359,13 @@ namespace UVShader
     return 0;
   }
 
-  clsize ExpressionParser::EstimateForSymbolsCount() const
+  clsize CodeParser::EstimateForSymbolsCount() const
   {
     auto count = GetStreamCount();
     return (count << 1) + (count >> 1); // 按照 字节数：符号数=2.5：1来计算
   }
 
-  clsize ExpressionParser::GenerateSymbols()
+  clsize CodeParser::GenerateSymbols()
   {
     auto stream_end = end();
     ASSERT(m_aSymbols.empty()); // 调用者负责清空
@@ -492,12 +492,12 @@ namespace UVShader
     return m_aSymbols.size();
   }
 
-  const ExpressionParser::SymbolArray* ExpressionParser::GetSymbolsArray() const
+  const CodeParser::SymbolArray* CodeParser::GetSymbolsArray() const
   {
     return &m_aSymbols;
   }
 
-  GXBOOL ExpressionParser::Parse()
+  GXBOOL CodeParser::Parse()
   {
     RTSCOPE scope(0, m_aSymbols.size());
     while(ParseStatement(&scope));
@@ -505,13 +505,13 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ExpressionParser::ParseStatement(RTSCOPE* pScope)
+  GXBOOL CodeParser::ParseStatement(RTSCOPE* pScope)
   {    
     return (pScope->begin < pScope->end) && (
       ParseStatementAs_Function(pScope) || ParseStatementAs_Struct(pScope));
   }
 
-  GXBOOL ExpressionParser::ParseStatementAs_Function(RTSCOPE* pScope)
+  GXBOOL CodeParser::ParseStatementAs_Function(RTSCOPE* pScope)
   {
     // 函数语法
     //[StorageClass] Return_Value Name ( [ArgumentList] ) [: Semantic]
@@ -604,7 +604,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ExpressionParser::ParseStatementAs_Struct( RTSCOPE* pScope )
+  GXBOOL CodeParser::ParseStatementAs_Struct( RTSCOPE* pScope )
   {
     SYMBOL* p = &m_aSymbols[pScope->begin];
     const SYMBOL* pEnd = &m_aSymbols.front() + pScope->end;
@@ -644,7 +644,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ExpressionParser::ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope)
+  GXBOOL CodeParser::ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope)
   {
     // 函数参数格式
     // [InputModifier] Type Name [: Semantic]
@@ -717,13 +717,13 @@ NOT_INC_P:
     return TRUE;
   }
 
-  void ExpressionParser::RelocalePointer()
+  void CodeParser::RelocalePointer()
   {
     RelocaleStatements(m_aStatements);
     RelocaleStatements(m_aSubStatements);
   }
 
-  void ExpressionParser::RelocaleSyntaxPtr(SYNTAXNODE* pNode)
+  void CodeParser::RelocaleSyntaxPtr(SYNTAXNODE* pNode)
   {
     if(pNode->OperandA_IsNode() && pNode->Operand[0].pNode) {
       //pNode->Operand[0].pNode = &m_aSyntaxNodePack[(GXINT_PTR)pNode->Operand[0].pNode];
@@ -738,7 +738,7 @@ NOT_INC_P:
     }
   }
 
-  GXBOOL ExpressionParser::ParseStructMember( STATEMENT* pStat, RTSCOPE* pStruScope )
+  GXBOOL CodeParser::ParseStructMember( STATEMENT* pStat, RTSCOPE* pStruScope )
   {
     // 作为结构体成员
     // Type[RxC] MemberName; 
@@ -803,12 +803,12 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXLPCSTR ExpressionParser::GetUniqueString( const SYMBOL* pSym )
+  GXLPCSTR CodeParser::GetUniqueString( const SYMBOL* pSym )
   {
     return m_Strings.add(pSym->sym.ToString());
   }
 
-  const ExpressionParser::TYPE* ExpressionParser::ParseType(const SYMBOL* pSym)
+  const CodeParser::TYPE* CodeParser::ParseType(const SYMBOL* pSym)
   {
     TYPE sType = {NULL, 1, 1};
 
@@ -852,7 +852,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  GXBOOL ExpressionParser::ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale )
+  GXBOOL CodeParser::ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale )
   {
     m_nDbgNumOfExpressionParse = 0;
     m_aDbgExpressionOperStack.clear();
@@ -863,7 +863,7 @@ NOT_INC_P:
 
     STATEMENT& stat = *pStat;
     
-    GXBOOL bret = ParseExpression(pScope, &stat.expr.sRoot, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    GXBOOL bret = ParseExpression(pScope, &stat.expr.sRoot);
     TRACE("m_nDbgNumOfExpressionParse=%d\n", m_nDbgNumOfExpressionParse);
 
 #ifdef _DEBUG
@@ -883,7 +883,7 @@ NOT_INC_P:
     return bret;
   }
 
-  void ExpressionParser::DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr)
+  void CodeParser::DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr)
   {
     clStringA str[2];
     for(int i = 0; i < 2; i++)
@@ -978,13 +978,13 @@ NOT_INC_P:
     }
   }
 
-  GXBOOL ExpressionParser::ParseExpression(SYNTAXNODE::UN* pUnion, int nMinPrecedence, clsize begin, clsize end)
+  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end)
   {
     RTSCOPE scope(begin, end);
-    return ParseExpression(&scope, pUnion, nMinPrecedence);
+    return ParseExpression(&scope, pUnion);
   }
 
-  GXBOOL ExpressionParser::ParseExpression( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence )
+  GXBOOL CodeParser::ParseExpression( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     ASSERT(pScope->begin <= pScope->end);
 
@@ -1005,7 +1005,7 @@ NOT_INC_P:
     if(first.sym == "return")
     {
       A.pSym = &first;
-      bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 1, pScope->end);
+      bret = ParseExpression(&B, pScope->begin + 1, pScope->end);
       MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Return, NULL, &A, &B);
       return bret;
     }
@@ -1051,19 +1051,41 @@ NOT_INC_P:
     {
       ASSERT(m_aSymbols[first.semi_scope].sym == ';'); // 目前进入这个循环的只可能是遇到分号
       bret =
-        ParseExpression(&A, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin, first.semi_scope) &&
-        ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, first.semi_scope + 1, pScope->end) &&
+        ParseExpression(&A, pScope->begin, first.semi_scope) &&
+        ParseExpression(&B, first.semi_scope + 1, pScope->end) &&
         MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
 
       return bret;
     }
 
-    else if(count == 2)
+    ParseArithmeticExpression(pScope, pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    return TRUE;
+  }
+
+  GXBOOL CodeParser::ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence)
+  {
+    int nCandidate = m_nMaxPrecedence;
+    GXINT_PTR i = (GXINT_PTR)pScope->end - 1;
+    GXINT_PTR nCandidatePos = i;
+    const GXINT_PTR count = pScope->end - pScope->begin;
+
+    if(count <= 1) {
+      if(count == 1) {
+        pUnion->pSym = &m_aSymbols[pScope->begin];
+      }
+      return TRUE;
+    }
+
+    const auto& first = m_aSymbols[pScope->begin];
+
+    if(count == 2)
     {
       // 处理两种可能：(1)变量使用一元符号运算 (2)定义变量
+      SYNTAXNODE::UN A = {0}, B = {0};
 
       A.pSym = &first;
       B.pSym = &m_aSymbols[pScope->begin + 1];
+      GXBOOL bret = TRUE;
 
       if(B.pSym->sym == ';')
       {
@@ -1072,13 +1094,11 @@ NOT_INC_P:
       }
       else if(A.pSym->precedence > 0)
       {
-        // TODO: 检查支持左侧运算
         bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, A.pSym, NULL, &B);
         DbgDumpScope(A.pSym->sym.ToString(), RTSCOPE(0,0), RTSCOPE(pScope->begin + 1, pScope->end));
       }
       else if(B.pSym->precedence > 0)
       {
-        // TODO: 检查支持右侧运算
         bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, B.pSym, &A, NULL);
         DbgDumpScope(B.pSym->sym.ToString(), RTSCOPE(pScope->begin, pScope->begin + 1), RTSCOPE(0,0));
       }
@@ -1088,22 +1108,16 @@ NOT_INC_P:
       }
       return bret;
     }
-
     else if(first.scope == pScope->end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin);
-      return ParseExpression(pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 1, pScope->end - 1);
+      return ParseExpression(pUnion, pScope->begin + 1, pScope->end - 1);
     }
-
     else if(m_aSymbols[pScope->begin + 1].scope == pScope->end - 1)  // 函数调用
     {
-      return ParseFunctionCall(pScope, pUnion, nMinPrecedence);
+      return ParseFunctionCall(pScope, pUnion);
     }
-    
-    int nCandidate = m_nMaxPrecedence;
-    GXINT_PTR i = (GXINT_PTR)pScope->end - 1;
-    GXINT_PTR nCandidatePos = i;
 
     while(nMinPrecedence <= m_nMaxPrecedence)
     {
@@ -1181,7 +1195,8 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXBOOL ExpressionParser::ParseFunctionCall( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence )
+
+  GXBOOL CodeParser::ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     // 括号肯定是匹配的
     ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin + 1);
@@ -1193,7 +1208,7 @@ NOT_INC_P:
 
     // TODO: 检查m_aSymbols[pScope->begin]是函数名
 
-    GXBOOL bret = ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, pScope->begin + 2, pScope->end - 1);
+    GXBOOL bret = ParseExpression(&B, pScope->begin + 2, pScope->end - 1);
 
     SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
 
@@ -1204,7 +1219,7 @@ NOT_INC_P:
     return bret;
   }
 
-  GXBOOL ExpressionParser::ParseFlowIf( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseFlowIf( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     // 与 ParseFlowWhile 相似
     SYNTAXNODE::UN A, B;
@@ -1255,8 +1270,8 @@ NOT_INC_P:
 
 
     GXBOOL bret =
-      ParseExpression(&sConditional, &A, SYMBOL::FIRST_OPCODE_PRECEDENCE) &&
-      ParseExpression(&sBlock, &B, SYMBOL::FIRST_OPCODE_PRECEDENCE) &&
+      ParseExpression(&sConditional, &A) &&
+      ParseExpression(&sBlock, &B) &&
       MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
 
     SYNTAXNODE::MODE eNextMode = SYNTAXNODE::MODE_Chain;
@@ -1286,7 +1301,7 @@ NOT_INC_P:
       }
 
       bret =
-        ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, nNextBegin, pScope->end) &&
+        ParseExpression(&B, nNextBegin, pScope->end) &&
         MakeSyntaxNode(pUnion, eNextMode, NULL, &A, &B);
 
       if(eNextMode != SYNTAXNODE::MODE_Chain) {
@@ -1303,7 +1318,7 @@ NOT_INC_P:
     return bret;
   }
 
-  GXBOOL ExpressionParser::ParseFlowWhile( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseFlowWhile( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     // 与 ParseFlowIf 相似
     SYNTAXNODE::UN A, B;
@@ -1343,8 +1358,8 @@ NOT_INC_P:
     }
 
     GXBOOL bret =
-      ParseExpression(&sConditional, &A, SYMBOL::FIRST_OPCODE_PRECEDENCE) &&
-      ParseExpression(&sBlock, &B, SYMBOL::FIRST_OPCODE_PRECEDENCE) &&
+      ParseExpression(&sConditional, &A) &&
+      ParseExpression(&sBlock, &B) &&
       MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_While, NULL, &A, &B);
 
     DbgDumpScope("while", sConditional, sBlock);
@@ -1358,14 +1373,14 @@ NOT_INC_P:
       SYNTAXNODE::MODE eNextMode = SYNTAXNODE::MODE_Chain;
 
       bret =
-        ParseExpression(&B, SYMBOL::FIRST_OPCODE_PRECEDENCE, nNextBegin, pScope->end) &&
+        ParseExpression(&B, nNextBegin, pScope->end) &&
         MakeSyntaxNode(pUnion, eNextMode, NULL, &A, &B);
     }
 
     return bret;
   }
 
-  GXBOOL ExpressionParser::MakeScope(MAKESCOPE* pParam)
+  GXBOOL CodeParser::MakeScope(MAKESCOPE* pParam)
   {
     const MAKESCOPE& p = *pParam;
     RTSCOPE::TYPE& begin = pParam->pOut->begin;
@@ -1416,7 +1431,7 @@ NOT_INC_P:
   }
 
 
-  GXBOOL ExpressionParser::ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     RTSCOPE sInitializer, sConditional, sIterator, sBlock;
 
@@ -1436,20 +1451,7 @@ NOT_INC_P:
       return FALSE;
     }
 
-    //if(pScope->begin + 2 < pScope->end) {
-    //  sInitializer = RTSCOPE(pScope->begin + 2, m_aSymbols[pScope->begin].scope);
-    //  if(OUT_OF_SCOPE(sInitializer.end)) {
-    //    // ERROR: 缺少";"
-    //    return FALSE;
-    //  }
-
     ASSERT(m_aSymbols[sInitializer.end].sym == ';'); // 应该断在此处
-    //}
-    //else {
-    //  // ERROR: for 语法错误
-    //  CLBREAK;
-    //  return FALSE;
-    //}
 
     //
     // 条件部分
@@ -1466,24 +1468,6 @@ NOT_INC_P:
       return TRUE;
     }
 
-    //if(sInitializer.end + 1 < pScope->end)
-    //{
-    //  const auto nCondScope = sInitializer.end + 1;
-    //  sConditional = RTSCOPE(nCondScope, m_aSymbols[nCondScope].sym == ';' 
-    //    ? nCondScope : m_aSymbols[nCondScope].scope);
-
-    //  if(OUT_OF_SCOPE(sConditional.end)) {
-    //    // ERROR: 缺少";"
-    //    return FALSE;
-    //  }
-    //  ASSERT(m_aSymbols[sConditional.end].sym == ';'); // 应该断在此处
-    //}
-    //else {
-    //  // ERROR: for 语法错误
-    //  CLBREAK;
-    //  return FALSE;
-    //}
-
 
     //
     // 迭代部分
@@ -1498,29 +1482,6 @@ NOT_INC_P:
       CLBREAK;
       return FALSE;
     }
-    //const auto& sBeginOfFor = m_aSymbols[pScope->begin + 1];
-
-    //if(sBeginOfFor.sym != '(') {
-    //  // ERROR: for 语法错误
-    //  CLBREAK;
-    //  return FALSE;
-    //}
-
-    //if(sBeginOfFor.scope > (INT_PTR)pScope->end) {
-    //  // ERROR: 缺少";"
-    //  CLBREAK;
-    //  return FALSE;
-    //}
-
-    //if(sConditional.end + 1 < pScope->end)
-    //{
-    //  sIterator = RTSCOPE(sConditional.end + 1, sBeginOfFor.scope);
-    //}
-    //else {
-    //  // ERROR: for 语法错误
-    //  CLBREAK;
-    //  return FALSE;
-    //}
 
 
     //
@@ -1565,10 +1526,10 @@ NOT_INC_P:
     //SYNTAXNODE::UN A, B, C, D;
     SYNTAXNODE::UN uInit = {0}, uCond = {0}, uIter = {0}, uBlock = {0}, D;
 
-    ParseExpression(&sInitializer, &uInit, SYMBOL::FIRST_OPCODE_PRECEDENCE);
-    ParseExpression(&sConditional, &uCond, SYMBOL::FIRST_OPCODE_PRECEDENCE);
-    ParseExpression(&sIterator   , &uIter, SYMBOL::FIRST_OPCODE_PRECEDENCE);
-    ParseExpression(&sBlock      , &uBlock, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    ParseExpression(&sInitializer, &uInit);
+    ParseExpression(&sConditional, &uCond);
+    ParseExpression(&sIterator   , &uIter);
+    ParseExpression(&sBlock      , &uBlock);
 
     DbgDumpScope("for_2", sConditional, sIterator);
     DbgDumpScope("for_1", sInitializer, sBlock);
@@ -1580,7 +1541,7 @@ NOT_INC_P:
     return bret;
   }
 
-  GXBOOL ExpressionParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
+  GXBOOL CodeParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
   {
     RTSCOPE scopeA(pScope->begin, nMiddle);
     RTSCOPE scopeB(nMiddle + 1, pScope->end);
@@ -1591,7 +1552,7 @@ NOT_INC_P:
       const SYMBOL& s = m_aSymbols[nMiddle];
       //SYNTAXNODE sNodeB;
       //B.pNode = &sNodeB;
-      bresult = ParseExpression(&scopeA, &A, nMinPrecedence);
+      bresult = ParseArithmeticExpression(&scopeA, &A, nMinPrecedence);
 
       if(s.scope >= (int)pScope->begin && s.scope < (int)pScope->end) {
         ASSERT(m_aSymbols[s.scope].sym == ':');
@@ -1603,8 +1564,8 @@ NOT_INC_P:
     }
     else {
       bresult = 
-        ParseExpression(&scopeA, &A, nMinPrecedence) &&
-        ParseExpression(&scopeB, &B, nMinPrecedence) ;
+        ParseArithmeticExpression(&scopeA, &A, nMinPrecedence) &&
+        ParseArithmeticExpression(&scopeB, &B, nMinPrecedence) ;
     }
 
     MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Normal, pOpcode, &A, &B);
@@ -1634,7 +1595,7 @@ NOT_INC_P:
     return bresult;
   }
 
-  void ExpressionParser::DbgDumpScope( clStringA& str, clsize begin, clsize end, GXBOOL bRaw )
+  void CodeParser::DbgDumpScope( clStringA& str, clsize begin, clsize end, GXBOOL bRaw )
   {
     if(end - begin > 1 && m_aSymbols[end - 1].sym == ';') {
       --end;
@@ -1659,12 +1620,12 @@ NOT_INC_P:
     }
   }
 
-  void ExpressionParser::DbgDumpScope( clStringA& str, const RTSCOPE& scope )
+  void CodeParser::DbgDumpScope( clStringA& str, const RTSCOPE& scope )
   {
     DbgDumpScope(str, scope.begin, scope.end, FALSE);
   }
 
-  void ExpressionParser::DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB )
+  void CodeParser::DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB )
   {
     clStringA strA, strB;
     DbgDumpScope(strA, scopeA);
@@ -1678,7 +1639,7 @@ NOT_INC_P:
     // </Make OperString>
   }
 
-  GXBOOL ExpressionParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
+  GXBOOL CodeParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
   {
     const SYNTAXNODE::UN* pOperand[] = {pOperandA, pOperandB};
     SYNTAXNODE sNode = {0, mode, pOpcode};
@@ -1705,7 +1666,7 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXBOOL ExpressionParser::IsSymbol(const SYNTAXNODE::UN* pUnion) const
+  GXBOOL CodeParser::IsSymbol(const SYNTAXNODE::UN* pUnion) const
   {
     const SYMBOL* pBegin = &m_aSymbols.front();
     const SYMBOL* pBack   = &m_aSymbols.back();
@@ -1713,7 +1674,7 @@ NOT_INC_P:
     return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
   }
 
-  clsize ExpressionParser::FindSemicolon( clsize begin, clsize end ) const
+  clsize CodeParser::FindSemicolon( clsize begin, clsize end ) const
   {
     for(; begin < end; ++begin)
     {
@@ -1724,12 +1685,12 @@ NOT_INC_P:
     return -1;
   }
 
-  const ExpressionParser::StatementArray& ExpressionParser::GetStatments() const
+  const CodeParser::StatementArray& CodeParser::GetStatments() const
   {
     return m_aStatements;
   }
 
-  void ExpressionParser::RelocaleStatements( StatementArray& aStatements )
+  void CodeParser::RelocaleStatements( StatementArray& aStatements )
   {
     for(auto it = aStatements.begin(); it != aStatements.end(); ++it)
     {
@@ -1758,7 +1719,7 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  bool ExpressionParser::TYPE::operator<( const TYPE& t ) const
+  bool CodeParser::TYPE::operator<( const TYPE& t ) const
   {
     const int r = GXSTRCMP(name, t.name);
     if(r < 0) {
