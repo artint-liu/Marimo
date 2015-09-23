@@ -29,6 +29,7 @@ namespace UVShader
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
 
+#define ENABLE_STRINGED_SYMBOL
   class CodeParser : public SmartStreamA
   {
   public:
@@ -38,7 +39,10 @@ namespace UVShader
       const static int precedence_bits = 7;
       const static int FIRST_OPCODE_PRECEDENCE = 1;
       const static int ID_BRACE = 15;
-      iterator  sym;
+#ifdef ENABLE_STRINGED_SYMBOL
+      clStringA symbol;
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+      iterator  marker;
       int       scope;                        // 括号匹配索引
       int       semi_scope : scope_bits;      // 分号作用域
       int       precedence : precedence_bits; // 符号优先级
@@ -49,9 +53,50 @@ namespace UVShader
       // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
       // array[open].scope = closed && array[closed].scope = open
 
+      void ClearMarker()
+      {
+#ifdef ENABLE_STRINGED_SYMBOL
+        symbol.Clear();
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+        marker.marker = 0;
+      }
+
+      void Set(const iterator& _iter)
+      {
+#ifdef ENABLE_STRINGED_SYMBOL
+        symbol = _iter.ToString();
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+        marker = _iter;
+      }
+
+      clStringA ToString() const
+      {
+        return marker.ToString();
+      }
+
       int GetScope() const
       {
         return scope >= 0 ? scope : semi_scope;
+      }
+
+      GXBOOL operator==(SmartStreamA::T_LPCSTR str) const
+      {
+        return (marker == str);
+      }
+
+      GXBOOL operator==(SmartStreamA::TChar ch) const
+      {
+        return (marker == ch);
+      }
+
+      GXBOOL operator!=(SmartStreamA::T_LPCSTR str) const
+      {
+        return (marker != str);
+      }
+
+      GXBOOL operator!=(SmartStreamA::TChar ch) const
+      {
+        return (marker != ch);
       }
     };
         
@@ -287,7 +332,10 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
     GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
 
-    GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence);
+    GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
+
     GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
     GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
@@ -297,6 +345,7 @@ namespace UVShader
     GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
     GXBOOL  MakeScope(MAKESCOPE* pParam);
+    GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocaleStatements(StatementArray& aStatements);

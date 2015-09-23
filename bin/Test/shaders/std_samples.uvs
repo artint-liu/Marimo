@@ -1,0 +1,81 @@
+/*
+ *
+ *  1.UVS 测试用的样本代码，没有实际执行功能
+ *  2.只是为了测试解析器是否正常工作，这个代码里应该包含了大部分典型语法用法。
+ *  3.不要对已有代码做出修改，新的测试语法以独立的形式增加
+ *  4.每个测试部分需要有测试样本的功能的注释说明
+ *  5.语法必须保证正确，语法错误报告的测试在另外的样本中提供
+ *
+ */
+
+// 函数测试部分
+float func()
+{
+  return 1.0f;
+}
+
+float func2(float a)
+{
+  return a + 1.0f;
+}
+
+void func3(float a, float b)
+{
+  float c = a + b;
+}
+
+void flow_test()
+{
+  for(;;); // 无限空循环
+  for(int i = 0;;i++);
+  for(int i = 0;i<100;i++);
+
+  int k = 0;
+  for(;;k++);
+}
+
+void flow_test2()
+{
+  int count = 0;
+  
+  // 标准循环
+  for(int i = 0; i < 10; i++)
+    count += i;
+
+  for(int i = 0; i < 10; i++)
+  {
+    count += i;
+  }
+  count = 0;
+
+  for(int i = 0; i < 10; i++)
+  {
+    count += i;
+    count *= lerp(0, 1, i * 0.1f);
+  }
+  count = 0;
+  // 嵌套循环
+  for(int y = -10; y <= 10; y++)
+    for(int x = -10; x <= 10; x++)
+      count += y * 21 + x;
+
+  for(int y = -10; y <= 10; y++)
+    for(int x = -10; x <= 10; x++)
+    {
+      count += y * 23 + x;
+    }
+
+  for(int y = -10; y <= 10; y++)
+  {
+    for(int x = -10; x <= 10; x++)
+    {
+      count += y * 25 + x;
+    }
+  }
+  count = 0;
+  for(int z = -5; z <= 5; z++)
+    for(int y = -5; y <= 5; y++)
+      for(int x = -5; x <= 5; x++)
+        count += z + y + x;
+
+}

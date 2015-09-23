@@ -24,6 +24,15 @@ GXLPCSTR aOperStack_010[] = {
   "[+] [a+b+c] [d*e/f]",
   NULL, };
 
+GXLPCSTR aOperStack_Return0100[] = {
+  "[.] [a] [x]",
+  "[.] [a] [y]",
+  "[,] [a.x] [a.y]",
+  "[.] [f] [z]",
+  "[,] [a.x,a.y] [f.z]",
+  "[F] [mix] [a.x,a.y,f.z]",
+ NULL, };
+
 GXLPCSTR aOperStack_016[] = {
   "[,] [0] [Theta]",
   "[F] [max] [0,Theta]",
@@ -455,7 +464,7 @@ SAMPLE_EXPRESSION samplesForExpression[] = {
 };
 
 SAMPLE_EXPRESSION samplesExpression[] = {
-  {0, "return mix(a.x, a.y, f.z)", 0},
+  {0, "return mix(a.x, a.y, f.z);", 0, aOperStack_Return0100},
   {0, "(Output.LdotN*shadowFactor)+Output.Ambient+Output.Specular*shadowFactor", 17},
   {0, "Input.Normal = (Input.Normal - 0.5) * 2.0", 13},
   {0, "Input.Position.xyz += SwingGrass(Input.Position.xyz, Input.Texcoord.y - 0.1875)", 22},

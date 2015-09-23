@@ -7,6 +7,7 @@ struct SAMPLE_EXPRESSION
   const char* expression;
   int         expectation;
   GXLPCSTR*   aOperStack;
+  GXBOOL      bDbgBreak;    // µ÷ÊÔÖÐ¶Ï
 };
 
 #endif // _TEST_EXPRESSION_PARSER_H_

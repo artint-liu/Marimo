@@ -38,19 +38,33 @@ GXLPCSTR Get(UVShader::CodeParser::StorageClass e)
 
 //////////////////////////////////////////////////////////////////////////
 
-void DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNODE* pNode, int precedence, clStringA* pStr)
+int DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNODE* pNode, int precedence, int depth, clStringA* pStr)
 {
   typedef UVShader::CodeParser::SYNTAXNODE SYNTAXNODE;
 
   clStringA str[2];
+  //int chain = 0;
+
+  //int next_depth = depth;
+  int next_depth = (
+    (pNode->mode == SYNTAXNODE::MODE_Flow_For    ) ||
+    (pNode->mode == SYNTAXNODE::MODE_Flow_While  ) ||
+    (pNode->mode == SYNTAXNODE::MODE_Flow_If     ) ||
+    (pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf ) ||
+    (pNode->mode == SYNTAXNODE::MODE_Flow_Else   ) ||
+    (pNode->mode == SYNTAXNODE::MODE_Flow_For    ) ||
+    (pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning)
+    ) ? depth + 1 : depth;
+
   for(int i = 0; i < 2; i++)
   {
+
     if(pNode->Operand[i].pSym) {
       if(pExpp->IsSymbol(&pNode->Operand[i])) {
-        str[i] = pNode->Operand[i].pSym->sym.ToString();
+        str[i].Append(pNode->Operand[i].pSym->ToString());
       }
       else {
-        DbgDumpSyntaxTree(pExpp, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
+        DbgDumpSyntaxTree(pExpp, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, next_depth, &str[i]);
       }
     }
     else {
@@ -58,8 +72,13 @@ void DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::
     }
   }
 
+  //if(str[0] == "glowed=true" || str[1] == "glowed=true")
+  //{
+  //  CLNOP
+  //}
+
   TRACE("[%s] [%s] [%s]\n",
-    pNode->pOpcode ? pNode->pOpcode->sym.ToString() : "",
+    pNode->pOpcode ? pNode->pOpcode->ToString() : "",
     str[0], str[1]);
 
   clStringA strOut;
@@ -74,11 +93,17 @@ void DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::
     break;
 
   case SYNTAXNODE::MODE_Flow_If:
-    strOut.Format("if(%s) {\n%s;\n}", str[0], str[1]);
+    if( ! str[1].EndsWith('\n')) {
+      str[1].Append(";\n");
+    }
+    strOut.Format("if(%s) {\n%*s%s%*s}\n", str[0], (depth + 1) * 2, " ", str[1], depth * 2, " ");
     break;
 
   case SYNTAXNODE::MODE_Flow_Else:
-    strOut.Format("%s else {\n%s;\n}", str[0], str[1]);
+    if( ! str[1].EndsWith('\n')) {
+      str[1].Append(";\n");
+    }
+    strOut.Format("%s else {\n%*s%s%*s}\n", str[0], (depth + 1) * 2, " ", str[1], depth * 2, " ");
     break;
 
   case SYNTAXNODE::MODE_Flow_ElseIf:
@@ -90,7 +115,10 @@ void DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::
     break;
 
   case SYNTAXNODE::MODE_Flow_For:
-    strOut.Format("for(%s) {\n%s\n}", str[0], str[1]);
+    if( ! str[1].EndsWith('\n')) {
+      str[1].Append(";\n");
+    }
+    strOut.Format("for(%s) {\n%*s%s%*s}\n", str[0], (depth + 1) * 2, " ", str[1], depth * 2, " ");
     break;
 
   case SYNTAXNODE::MODE_Flow_ForInit:
@@ -100,24 +128,29 @@ void DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::
 
   case SYNTAXNODE::MODE_Return:
     ASSERT(str[0] == "return");
-    strOut.Format("return %s", str[1]);
+    strOut.Format("return %s;\n", str[1]);
     break;
 
   case SYNTAXNODE::MODE_Chain:
     if(str[1].IsEmpty()) {
       strOut.Format("%s;\n", str[0]);
     }
+    else if(str[0].EndsWith("}\n")) {
+      strOut.Format("%s%*s%s", str[0], depth * 2, " ", str[1]);
+    }
     else {
-      strOut.Format("%s;\n%s", str[0], str[1]);
+      strOut.Format("%s;\n%*s%s", str[0], depth * 2, " ", str[1]);
     }
     break;
 
   case SYNTAXNODE::MODE_Normal:
     if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
-      strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+      strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->ToString(), str[1]);
+      //chain = 1;
     }
     else {
-      strOut.Format("%s%s%s", str[0], pNode->pOpcode->sym.ToString(), str[1]);
+      strOut.Format("%s%s%s", str[0], pNode->pOpcode->ToString(), str[1]);
+      //chain++;
     }
     break;
 
@@ -133,6 +166,7 @@ void DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::
   else {
     TRACE("%s\n", strOut);
   }
+  return 0;
 }
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
 {
@@ -151,11 +185,20 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
       int nCount = 0;
       for(auto it = pSymbols->begin(); it != pSymbols->end(); ++it, ++nCount)
       {
-        if(it->scope >= 0) {
-          TRACE("<#%d:\"%s\"(%d)> ", nCount, it->sym.ToString(), it->scope);
+        if(it->scope >= 0 && it->semi_scope >= 0) {
+          TRACE("<#%d:\"%s\"(%d|%d)> ", nCount, it->ToString(), it->scope, it->semi_scope);
+        }
+        else if(it->scope >= 0) {
+          TRACE("<#%d:\"%s\"(%d|)> ", nCount, it->ToString(), it->scope);
+        }
+        else if(it->semi_scope >= 0) {
+          TRACE("<#%d:\"%s\"(|%d)> ", nCount, it->ToString(), it->semi_scope);
         }
         else {
-          TRACE("<#%d:\"%s\"> ", nCount, it->sym.ToString());
+          TRACE("<#%d:\"%s\"> ", nCount, it->ToString());
+        }
+        if(((nCount + 1) % 10) == 0 && nCount != 0) {
+          TRACE("\n");
         }
       }
 
@@ -206,10 +249,10 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
                 if(func.pExpression)
                 {
                   clStringA str;
-                  DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, &str);
-                  file.WritefA("%s;\n", str);
+                  DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, 1, &str);
+                  file.WritefA("  %s", str); // 缩进两个空格
                 }
-                file.WritefA("}\n");
+                file.WritefA("}\n\n");
               }
               break;
             case UVShader::CodeParser::StatementType_Struct:
@@ -219,7 +262,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
             case UVShader::CodeParser::StatementType_Expression:
               {
                 clStringA str;
-                DbgDumpSyntaxTree(&expp, s.expr.sRoot.pNode, 0, &str);
+                DbgDumpSyntaxTree(&expp, s.expr.sRoot.pNode, 0, 1, &str);
                 file.WritefA(str);
               }
               break;
