@@ -24,6 +24,8 @@ void func3(float a, float b)
   float c = a + b;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 void flow_test()
 {
   for(;;); // ÎÞÏÞ¿ÕÑ­»·
@@ -78,4 +80,62 @@ void flow_test2()
       for(int x = -5; x <= 5; x++)
         count += z + y + x;
 
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void test_flow_if()
+{
+  int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
+  if(a > b)
+    a = a;
+
+  if(a == b) {
+    a = a;
+  }
+
+  if(a > b) {
+    if(b < c) {
+      b = b;
+    }
+  }
+
+  if(a > b) {
+    b = b;
+  }
+  else {
+    a = a;
+  }
+
+  /*
+  if(a < b)
+    if(b > c)
+      if(c > d)
+        a = a;
+      else if(d < e)
+        b = b;
+      else
+        c = c;
+  /*
+  if(a < b) {
+    if(b > c) {
+      if(c > d) {
+        a = a;
+      }
+      else if(d < e) {
+        b = b;
+      }
+      else {
+        c = c;
+      }
+    }
+  }//*/
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void test_arithmetic_expression()
+{
+  int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
+  a=b+=(c++)-d+(--e/-f);
 }

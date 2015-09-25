@@ -1006,26 +1006,46 @@ NOT_INC_P:
 
   GXBOOL CodeParser::ParseExpression( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
-    ASSERT( pScope->end == m_aSymbols.size() || m_aSymbols[pScope->end] == ';' || 
+    ASSERT(pScope->end == m_aSymbols.size() || m_aSymbols[pScope->end] == ';' || 
       m_aSymbols[pScope->end] == '}');
 
-    ASSERT(pScope->begin <= pScope->end);
+    //ASSERT(pScope->begin <= pScope->end); // 这个不确定，因为
 
     const GXINT_PTR count = pScope->end - pScope->begin;
     SYNTAXNODE::UN A = {0}, B = {0};
     GXBOOL bret = TRUE;
 
-
     if(count <= 1) {
-      if(count == 1) {
+      if(count < 0) {
+        CLBREAK;
+        return FALSE;
+      }
+      else if(count == 1) {
         pUnion->pSym = &m_aSymbols[pScope->begin];
       }
-      return TRUE;
+      
+      return TRUE;  // count == 0 / count == 1
     }
 
     const auto& first = m_aSymbols[pScope->begin];
 
-    if(first == "return")
+    if(first == '{') // 代码块
+    {
+      if((clsize)first.scope > pScope->end) {
+        // ERROR: 没有正确的'}'来匹配
+      }
+
+      bret = ParseExpression(&A, pScope->begin + 1, first.scope);
+      if((clsize)first.scope + 1 >= pScope->end) {
+        *pUnion = A;
+      }
+      else {
+        bret = bret && ParseExpression(&B, first.scope + 1, pScope->end);
+        bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
+      }
+      return bret;
+    }
+    else if(first == "return")
     {
       A.pSym = &first;
       bret = ParseArithmeticExpression(pScope->begin + 1, pScope->end, &B);
@@ -1135,7 +1155,7 @@ NOT_INC_P:
       }
       return bret;
     }
-    else if(first.scope == pScope->end - 1)  // 括号内表达式
+    else if((first == '(' || first == '[') && first.scope == pScope->end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
       ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin);
@@ -1298,14 +1318,9 @@ NOT_INC_P:
 
 
 
-    //GXBOOL bret =
-    //  ParseExpression(&sConditional, &A) &&
-    //  ParseExpression(&sBlock, &B) &&
-    //  MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
-    GXBOOL bret =
-      ParseArithmeticExpression(&sConditional, &A, SYMBOL::FIRST_OPCODE_PRECEDENCE) &&
-      ParseExpression(&sBlock, &B) &&
-      MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
+    GXBOOL bret = ParseArithmeticExpression(&sConditional, &A, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    bret = bret && ParseExpression(&sBlock, &B);
+    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
 
     SYNTAXNODE::MODE eNextMode = SYNTAXNODE::MODE_Chain;
 
@@ -1319,14 +1334,13 @@ NOT_INC_P:
       if(m_aSymbols[nNextBegin] == "else") {
         ++nNextBegin;
 
-        if(nNextBegin < m_aSymbols.size() && m_aSymbols[nNextBegin] == "if")
-        {
+        if(nNextBegin < m_aSymbols.size() && m_aSymbols[nNextBegin] == "if") {
           eNextMode = SYNTAXNODE::MODE_Flow_ElseIf;
         }
-        else
-        {
+        else {
           eNextMode = SYNTAXNODE::MODE_Flow_Else;
         }
+
       }
 
       if(eNextMode == SYNTAXNODE::MODE_Chain) {

@@ -82,9 +82,24 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
 
 //////////////////////////////////////////////////////////////////////////
 
+void TestFlowIf()
+{
+  int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
+
+  if(a < b)
+    if(b < c)
+      if(c > d)
+        a = a;
+      else if(d < e)
+        b = b;
+      else
+        c = c;
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   int a = 1, b = 2, c = 3;
+  TestFlowIf();
   clpathfile::LocalWorkingDirA("..");
 
   TestExpressionParser(samplesOpercode);

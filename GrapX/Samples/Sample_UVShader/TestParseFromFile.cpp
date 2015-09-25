@@ -51,7 +51,7 @@ int DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::S
     (pNode->mode == SYNTAXNODE::MODE_Flow_While  ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_If     ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf ) ||
-    (pNode->mode == SYNTAXNODE::MODE_Flow_Else   ) ||
+    //(pNode->mode == SYNTAXNODE::MODE_Flow_Else   ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_For    ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning)
     ) ? depth + 1 : depth;
@@ -103,7 +103,7 @@ int DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::S
     if( ! str[1].EndsWith('\n')) {
       str[1].Append(";\n");
     }
-    strOut.Format("%s else {\n%*s%s%*s}\n", str[0], (depth + 1) * 2, " ", str[1], depth * 2, " ");
+    strOut.Format("%s%*selse {\n%*s%s%*s}\n", str[0], depth * 2, " ", (depth + 1) * 2, " ", str[1], depth * 2, " ");
     break;
 
   case SYNTAXNODE::MODE_Flow_ElseIf:

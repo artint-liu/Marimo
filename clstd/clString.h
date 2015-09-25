@@ -169,7 +169,6 @@ public:
   clStringX(const _XCh* pStrX);
   clStringX(const _XCh* pStrX, size_t uCount);
   clStringX(const _TCh cCh, size_t uCount);
-  //clStringX(clStringX& clStr);
   clStringX(const clStringX& clStr);
   explicit clStringX(const int nInteger);
   explicit clStringX(const float fFloat, char mode = 'F');

@@ -180,7 +180,7 @@ namespace UVShader
         MODE_FunctionCall,  // 函数调用
         MODE_Definition,    // 变量定义
         MODE_Flow_While,
-        MODE_Flow_If,
+        MODE_Flow_If,       // if(A) {B}
         MODE_Flow_ElseIf,
         MODE_Flow_Else,
         MODE_Flow_For,            // [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]
