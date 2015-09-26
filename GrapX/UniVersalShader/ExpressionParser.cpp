@@ -384,17 +384,17 @@ namespace UVShader
 
     struct PAIR_CONTEXT
     {
-      GXLPCSTR szOpen;    // 开区间
-      GXLPCSTR szClosed;  // 闭区间
-      GXBOOL   bNewEOE;   // 更新End Of Expression的位置
+      GXCHAR    chOpen;    // 开区间
+      GXCHAR    chClosed;  // 闭区间
+      GXBOOL    bNewEOE;   // 更新End Of Expression的位置
       PairStack sStack;
     };
 
-    PAIR_CONTEXT pair_context[] = {
-      {"(", ")", FALSE},   // 圆括号
-      {"[", "]", FALSE},   // 方括号
-      {"{", "}", TRUE },   // 花括号
-      {"?", ":", FALSE},
+    static PAIR_CONTEXT pair_context[] = {
+      {'(', ')', FALSE},   // 圆括号
+      {'[', ']', FALSE},   // 方括号
+      {'{', '}', TRUE },   // 花括号
+      {'?', ':', FALSE},
       {NULL, },
     };
 
@@ -434,13 +434,13 @@ namespace UVShader
       m_CurSymInfo.unary      = 0;
 
       // 符号配对处理
-      for(int i = 0; pair_context[i].szOpen != NULL; ++i)
+      for(int i = 0; pair_context[i].chOpen != NULL; ++i)
       {
         PAIR_CONTEXT& c = pair_context[i];
-        if(it == c.szOpen) {
+        if(it == c.chOpen) {
           c.sStack.push(c_size);
         }
-        else if(it == c.szClosed) {
+        else if(it == c.chClosed) {
           if(c.sStack.empty()) {
             // ERROR: 不匹配            
           }
@@ -461,17 +461,19 @@ namespace UVShader
           EOE = c_size + 1;
         }
       }
-
+      
+      /*
       if(it == ';') {
         if(EOE < c_size) {
           const auto& bracket_stack = pair_context[0].sStack;
 
           // 这个是要保证for中的分号定位在“for”上，而不是它前面的符号里
           if( ! bracket_stack.empty() && bracket_stack.top() > (EOE + 1) &&
-            m_aSymbols[bracket_stack.top() - 1] == "for" ) {
-              EOE = bracket_stack.top() - 1;
+          m_aSymbols[bracket_stack.top() - 1] == "for" ) {
+          EOE = bracket_stack.top() - 1;
           }
           m_aSymbols[EOE].semi_scope = c_size;
+
         }
         EOE = c_size + 1;
       }
@@ -481,9 +483,23 @@ namespace UVShader
       //}
 
       m_aSymbols.push_back(sym);
+
+      /*/
+      m_aSymbols.push_back(sym);
+
+      if(it == ';') {
+        ASSERT(EOE < (int)m_aSymbols.size());
+        for(auto it = m_aSymbols.begin() + EOE; it != m_aSymbols.end(); ++it)
+        {
+          it->semi_scope = c_size;
+        }
+        EOE = c_size + 1;
+      }
+
+      //*/
     }
 
-    for(int i = 0; pair_context[i].szOpen != NULL; ++i)
+    for(int i = 0; pair_context[i].chOpen != NULL; ++i)
     {
       PAIR_CONTEXT& c = pair_context[i];
       if( ! c.sStack.empty()) {
@@ -1055,7 +1071,7 @@ NOT_INC_P:
 
     else if(first == "if")
     {
-      return ParseFlowIf(pScope, pUnion);
+      return ParseFlowIf(pScope, pUnion, FALSE);
     }
     else if(first == "else")
     {
@@ -1064,7 +1080,18 @@ NOT_INC_P:
     }
     else if(first == "for")
     {
-      return ParseFlowFor(pScope, pUnion);
+      auto parse_end = ParseFlowFor(pScope, pUnion);
+
+      // 解析剩余部分
+      if(parse_end != RTSCOPE::npos && (pScope->end - parse_end) > 1)
+      {
+        SYNTAXNODE::UN A, B;
+        A = *pUnion;
+
+        bret = ParseExpression(&B, parse_end + 1, pScope->end) &&
+          MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
+      }
+      return parse_end != RTSCOPE::npos;
     }
     else if(first == "while")
     {
@@ -1268,11 +1295,11 @@ NOT_INC_P:
     return bret;
   }
 
-  GXBOOL CodeParser::ParseFlowIf( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf)
   {
     // 与 ParseFlowWhile 相似
     SYNTAXNODE::UN A, B;
-    GXBOOL bElseIf = FALSE; // 判断这个if是else if中的表达式
+    //GXBOOL bElseIf = FALSE; // 判断这个if是else if中的表达式
 
     RTSCOPE sConditional(pScope->begin + 1, m_aSymbols[pScope->begin + 1].scope);
     RTSCOPE sBlock;
@@ -1299,7 +1326,7 @@ NOT_INC_P:
 
       // "else if(...) ...;" 这种单语句形式，"else"位置的记录了分号的位置
       if(sBlock.end == -1 && pScope->begin > 0) {
-        bElseIf = TRUE;
+        //bElseIf = TRUE;
         sBlock.end = m_aSymbols[pScope->begin - 1].GetScope();
       }
     }
@@ -1347,9 +1374,16 @@ NOT_INC_P:
         DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
       }
 
-      bret =
-        ParseExpression(&B, nNextBegin, pScope->end) &&
-        MakeSyntaxNode(pUnion, eNextMode, NULL, &A, &B);
+
+      if(eNextMode == SYNTAXNODE::MODE_Flow_ElseIf) {
+        bret = ParseFlowIf(&RTSCOPE(nNextBegin, pScope->end), &B, TRUE);
+      }
+      else {
+        bret = ParseExpression(&B, nNextBegin, pScope->end);
+      }
+
+
+      bret = bret && MakeSyntaxNode(pUnion, eNextMode, NULL, &A, &B);
 
       if(eNextMode != SYNTAXNODE::MODE_Chain) {
         if(eNextMode == SYNTAXNODE::MODE_Flow_Else) {
@@ -1423,181 +1457,273 @@ NOT_INC_P:
     return bret;
   }
   
-  GXBOOL CodeParser::FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end)
+  //GXBOOL CodeParser::FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end)
+  //{
+  //  if(_begin >= _end) {
+  //    return FALSE;
+  //  }
+
+  //  GXBOOL bret = TRUE;
+  //  const auto& first = m_aSymbols[_begin];
+
+  //  // for 与 if/while 分离判断是因为：
+  //  // 1.for上面的semi_scope不是block的结尾，而是它初始化的结尾
+  //  // 2.检查semi_scope，比检查if/while字符串性能更好
+  //  // 3.基于以上两个原因，确定了"for"->semi_scope->"if/while"这样的依次检查顺序。
+  //  
+  //  if(first == "for")
+  //  {
+  //    if( ! (_begin + 1 < _end && (RTSCOPE::TYPE)m_aSymbols[_begin + 1].scope < _end)) {
+  //      // ERROR: for 语法错误
+  //    }
+  //    bret = FindScope(pOut, m_aSymbols[_begin + 1].scope + 1, _end);
+  //  }
+  //  else if(first.semi_scope != -1) {
+  //    pOut->end = first.semi_scope;
+  //  }
+  //  else if(first == '{')
+  //  {
+  //    pOut->end = first.scope;
+  //    bret = pOut->end <= _end;
+  //  }
+  //  else if(first == "if" || first == "while")
+  //  {
+  //    if( ! (_begin + 1 < _end && (RTSCOPE::TYPE)m_aSymbols[_begin + 1].scope < _end)) {
+  //      // ERROR: if/while 语法错误
+  //    }
+  //    bret = FindScope(pOut, m_aSymbols[_begin + 1].scope + 1, _end);
+  //  }
+  //  else {
+  //    // 万不得已的扫描
+  //    // TODO: 优化这里，尽量少调用
+  //    pOut->end = _end;
+  //    for(RTSCOPE::TYPE i = _begin; i < _end; i++) {
+  //      if(m_aSymbols[i] == ';') {
+  //        pOut->end = i;
+  //        break;
+  //      }
+  //    }
+  //  }
+
+  //  pOut->begin = _begin; // 这个一定要最后设置，保证递归中使用的是最初级的begin
+  //  return bret;
+  //}
+
+  //GXBOOL CodeParser::MakeScope(MAKESCOPE* pParam)
+  //{
+  //  const MAKESCOPE& p = *pParam;
+  //  RTSCOPE::TYPE& begin = pParam->pOut->begin;
+  //  RTSCOPE::TYPE& end   = pParam->pOut->end;
+
+  //  ASSERT(p.pScope->begin < p.pScope->end);
+
+  //  if(p.begin >= p.pScope->end) {
+  //    // ERROR:
+  //    return FALSE;
+  //  }
+
+  //  if(p.bIndBegin) {
+  //    begin = m_aSymbols[p.begin].GetScope();
+
+  //    if(OUT_OF_SCOPE(begin) || begin >= p.pScope->end) {
+  //      // ERROR:
+  //      return FALSE;
+  //    }
+  //  }
+  //  else {
+  //    begin = p.begin;
+  //  }
+
+  //  if(p.chTermin != 0 && m_aSymbols[begin] == (TChar)p.chTermin) {
+  //    end = begin;
+  //    return TRUE;
+  //  }
+
+  //  if(p.end >= p.pScope->end) {
+  //    // ERROR:
+  //    return FALSE;
+  //  }
+
+  //  if(p.bIndEnd) {
+  //    end = m_aSymbols[p.end].GetScope();
+
+  //    if(OUT_OF_SCOPE(end) || end >= p.pScope->end) {
+  //      // ERROR:
+  //      return FALSE;
+  //    }
+  //  }
+  //  else {
+  //    end = p.end;
+  //  }
+
+  //  return TRUE;
+  //}
+
+
+  CodeParser::RTSCOPE::TYPE CodeParser::MakeFlowForScope(const RTSCOPE* pScope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pUnion)
   {
-    if(_begin >= _end) {
-      return FALSE;
-    }
+    ASSERT(m_aSymbols[pScope->begin] == "for"); // 外部保证调用这个函数的正确性
 
-    GXBOOL bret = TRUE;
-    const auto& first = m_aSymbols[_begin];
-
-    // for 与 if/while 分离判断是因为：
-    // 1.for上面的semi_scope不是block的结尾，而是它初始化的结尾
-    // 2.检查semi_scope，比检查if/while字符串性能更好
-    // 3.基于以上两个原因，确定了"for"->semi_scope->"if/while"这样的依次检查顺序。
-    
-    if(first == "for")
+    auto open_bracket = pScope->begin + 1;
+    if(open_bracket >= pScope->end || m_aSymbols[open_bracket] != '(' || 
+      (pIter->end = m_aSymbols[open_bracket].scope) > pScope->end)
     {
-      if( ! (_begin + 1 < _end && (RTSCOPE::TYPE)m_aSymbols[_begin + 1].scope < _end)) {
-        // ERROR: for 语法错误
-      }
-      bret = FindScope(pOut, m_aSymbols[_begin + 1].scope + 1, _end);
+      // ERROR: for 格式错误
+      return RTSCOPE::npos;
     }
-    else if(first.semi_scope != -1) {
-      pOut->end = first.semi_scope;
-    }
-    else if(first == '{')
-    {
-      pOut->end = first.scope;
-      bret = pOut->end <= _end;
-    }
-    else if(first == "if" || first == "while")
-    {
-      if( ! (_begin + 1 < _end && (RTSCOPE::TYPE)m_aSymbols[_begin + 1].scope < _end)) {
-        // ERROR: if/while 语法错误
-      }
-      bret = FindScope(pOut, m_aSymbols[_begin + 1].scope + 1, _end);
-    }
-    else {
-      // 万不得已的扫描
-      // TODO: 优化这里，尽量少调用
-      pOut->end = _end;
-      for(RTSCOPE::TYPE i = _begin; i < _end; i++) {
-        if(m_aSymbols[i] == ';') {
-          pOut->end = i;
-          break;
-        }
-      }
-    }
-
-    pOut->begin = _begin; // 这个一定要最后设置，保证递归中使用的是最初级的begin
-    return bret;
-  }
-
-  GXBOOL CodeParser::MakeScope(MAKESCOPE* pParam)
-  {
-    const MAKESCOPE& p = *pParam;
-    RTSCOPE::TYPE& begin = pParam->pOut->begin;
-    RTSCOPE::TYPE& end   = pParam->pOut->end;
-
-    ASSERT(p.pScope->begin < p.pScope->end);
-
-    if(p.begin >= p.pScope->end) {
-      // ERROR:
-      return FALSE;
-    }
-
-    if(p.bIndBegin) {
-      begin = m_aSymbols[p.begin].GetScope();
-
-      if(OUT_OF_SCOPE(begin) || begin >= p.pScope->end) {
-        // ERROR:
-        return FALSE;
-      }
-    }
-    else {
-      begin = p.begin;
-    }
-
-    if(p.chTermin != 0 && m_aSymbols[begin] == (TChar)p.chTermin) {
-      end = begin;
-      return TRUE;
-    }
-
-    if(p.end >= p.pScope->end) {
-      // ERROR:
-      return FALSE;
-    }
-
-    if(p.bIndEnd) {
-      end = m_aSymbols[p.end].GetScope();
-
-      if(OUT_OF_SCOPE(end) || end >= p.pScope->end) {
-        // ERROR:
-        return FALSE;
-      }
-    }
-    else {
-      end = p.end;
-    }
-
-    return TRUE;
-  }
-
-
-  GXBOOL CodeParser::ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
-  {
-    RTSCOPE sInitializer, sConditional, sIterator, sBlock;
 
     //
+    // initializer
     // 初始化部分
     //
-    MAKESCOPE ms;
-    ms.pOut       = &sInitializer;
-    ms.pScope     = pScope;
-    ms.begin      = pScope->begin + 2;
-    ms.bIndBegin  = FALSE;
-    ms.end        = pScope->begin;
-    ms.bIndEnd    = TRUE;
-    ms.chTermin   = ';';
-
-    if( ! MakeScope(&ms)) {
-      return FALSE;
+    pInit->begin  = pScope->begin + 2;
+    pInit->end    = m_aSymbols[pScope->begin].semi_scope;
+    if(pInit->begin >= pScope->end || pInit->end == -1) {
+      // ERROR: for 格式错误
+      return RTSCOPE::npos;
     }
-
-    ASSERT(m_aSymbols[sInitializer.end] == ';'); // 应该断在此处
+    ASSERT(pInit->begin <= pInit->end);
 
     //
+    // conditional
     // 条件部分
     //
-    ms.pOut       = &sConditional;
-    ms.pScope     = pScope;
-    ms.begin      = sInitializer.end + 1;
-    ms.bIndBegin  = FALSE;
-    ms.end        = sInitializer.end + 1;
-    ms.bIndEnd    = TRUE;
-    ms.chTermin   = ';';
+    pCond->begin  = pInit->end + 1;
+    pCond->end    = m_aSymbols[pCond->begin].semi_scope;
 
-    if( ! MakeScope(&ms)) {
-      return TRUE;
+    if(pCond->begin >= pScope->end) {
+      // ERROR: for 格式错误
+      return RTSCOPE::npos;
     }
 
-
     //
+    // iterator
     // 迭代部分
     //
-    ms = MAKESCOPE(&sIterator, pScope, sConditional.end + 1, FALSE, pScope->begin + 1, TRUE, ')');
-    if( ! MakeScope(&ms)) {
-      return FALSE;
+    pIter->begin = pCond->end + 1;
+    // 上面设置过 pIter->end
+    if(pIter->begin >= pScope->end || pIter->begin > pIter->end) {
+      // ERROR: for 格式错误
+      return RTSCOPE::npos;
     }
-
-    if(m_aSymbols[pScope->begin + 1] != '(') {
-      // ERROR: for 语法错误
-      CLBREAK;
-      return FALSE;
-    }
-
 
     //
-    // 循环语句
+    // block
     //
-    // 1. for(;;) {...}
-    // 2. for(;;) ...;
-    // 3. for(;;) if/for/while{}
-
-    sBlock.begin = sIterator.end + 1;
-    sBlock.end = m_aSymbols[sIterator.begin].semi_scope;
-
-    if(sBlock.end == -1 && ! FindScope(&sBlock, sIterator.end + 1, pScope->end)) {
-      return FALSE;
+    //RTSCOPE sBlock;
+    pBlock->begin = pIter->end + 1;
+    if(pBlock->begin >= pScope->end) {
+      // ERROR: for 缺少执行
+      return RTSCOPE::npos;
     }
 
-    ASSERT(m_aSymbols[sBlock.end] == ';' || m_aSymbols[sBlock.end] == '}');
-
-    if(m_aSymbols[sBlock.begin] == '{') {
-      sBlock.begin++;
+    auto& block_begin = m_aSymbols[pBlock->begin];
+    if(block_begin == '{')
+    {
+      pBlock->end = block_begin.scope;
+      pBlock->begin++;
     }
+    else if(block_begin == "for")
+    {
+      pBlock->end = RTSCOPE::npos;
+      return pScope->end;  // 这个地方有特殊处理，特殊返回
+      //return ParseFlowFor(&RTSCOPE(pBlock->begin, pScope->end), pUnion);
+    }
+    else
+    {
+      pBlock->end = block_begin.semi_scope;
+    }
+
+    ASSERT(pBlock->end != -1);
+
+    if(pBlock->end > pScope->end) {
+      // ERROR: for 格式错误
+      return RTSCOPE::npos;
+    }
+
+    //ParseExpression(pBlock, pUnion);
+    return pBlock->end;
+  }
+
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  {
+    RTSCOPE sInitializer, sConditional, sIterator;
+    RTSCOPE sBlock;
+
+    ////
+    //// 初始化部分
+    ////
+    //MAKESCOPE ms;
+    //ms.pOut       = &sInitializer;
+    //ms.pScope     = pScope;
+    //ms.begin      = pScope->begin + 2;
+    //ms.bIndBegin  = FALSE;
+    //ms.end        = pScope->begin;
+    //ms.bIndEnd    = TRUE;
+    //ms.chTermin   = ';';
+
+    //if( ! MakeScope(&ms)) {
+    //  return FALSE;
+    //}
+
+    //ASSERT(m_aSymbols[sInitializer.end] == ';'); // 应该断在此处
+
+    ////
+    //// 条件部分
+    ////
+    //ms.pOut       = &sConditional;
+    //ms.pScope     = pScope;
+    //ms.begin      = sInitializer.end + 1;
+    //ms.bIndBegin  = FALSE;
+    //ms.end        = sInitializer.end + 1;
+    //ms.bIndEnd    = TRUE;
+    //ms.chTermin   = ';';
+
+    //if( ! MakeScope(&ms)) {
+    //  return TRUE;
+    //}
+
+
+    ////
+    //// 迭代部分
+    ////
+    //ms = MAKESCOPE(&sIterator, pScope, sConditional.end + 1, FALSE, pScope->begin + 1, TRUE, ')');
+    //if( ! MakeScope(&ms)) {
+    //  return FALSE;
+    //}
+
+    //if(m_aSymbols[pScope->begin + 1] != '(') {
+    //  // ERROR: for 语法错误
+    //  CLBREAK;
+    //  return FALSE;
+    //}
+
+
+    ////
+    //// 循环语句
+    ////
+    //// 1. for(;;) {...}
+    //// 2. for(;;) ...;
+    //// 3. for(;;) if/for/while{}
+
+    //sBlock.begin = sIterator.end + 1;
+    //sBlock.end = m_aSymbols[sIterator.begin].semi_scope;
+
+    //if(sBlock.end == -1 && ! FindScope(&sBlock, sIterator.end + 1, pScope->end)) {
+    //  return FALSE;
+    //}
+    SYNTAXNODE::UN uInit = {0}, uCond = {0}, uIter = {0}, uBlock = {0}, D;
+    
+    auto result = MakeFlowForScope(pScope, &sInitializer, &sConditional, &sIterator, &sBlock, &uBlock);
+    if(result == RTSCOPE::npos)
+    {
+      return result;
+    }
+
+    ASSERT(m_aSymbols[sBlock.begin] == "for" || m_aSymbols[sBlock.end] == ';' || m_aSymbols[sBlock.end] == '}');
+
+
+
     /*
     if(sIterator.end + 1 >= pScope->end) {
       // ERROR: for 缺少语句
@@ -1633,7 +1759,6 @@ NOT_INC_P:
     //*/
 
     //SYNTAXNODE::UN A, B, C, D;
-    SYNTAXNODE::UN uInit = {0}, uCond = {0}, uIter = {0}, uBlock = {0}, D;
 
     //ParseExpression(&sInitializer, &uInit);
     //ParseExpression(&sConditional, &uCond);
@@ -1642,7 +1767,15 @@ NOT_INC_P:
     ParseArithmeticExpression(&sInitializer, &uInit, SYMBOL::FIRST_OPCODE_PRECEDENCE);
     ParseArithmeticExpression(&sConditional, &uCond, SYMBOL::FIRST_OPCODE_PRECEDENCE);
     ParseArithmeticExpression(&sIterator   , &uIter, SYMBOL::FIRST_OPCODE_PRECEDENCE);
-    ParseExpression(&sBlock, &uBlock);
+    if(sBlock.end == RTSCOPE::npos)
+    {
+      ASSERT(m_aSymbols[sBlock.begin] == "for"); // MakeFlowForScope 函数保证
+      sBlock.end = ParseFlowFor(&RTSCOPE(sBlock.begin, pScope->end), &uBlock);
+    }
+    else
+    {
+      ParseExpression(&sBlock, &uBlock);
+    }
 
     DbgDumpScope("for_2", sConditional, sIterator);
     DbgDumpScope("for_1", sInitializer, sBlock);
@@ -1651,21 +1784,14 @@ NOT_INC_P:
     bret = bret && MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForInit, NULL, &uInit, &D);
     bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_For, NULL, &D, &uBlock);
     
-    // 解析剩余部分
-    if(bret && (pScope->end - sBlock.end) > 1)
-    {
-      SYNTAXNODE::UN A, B;
-      A = *pUnion;
-
-      bret = ParseExpression(&B, sBlock.end + 1, pScope->end) &&
-        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
-    }
-
-    return bret;
+    return bret ? sBlock.end : RTSCOPE::npos;
   }
 
   GXBOOL CodeParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
   {
+    ASSERT((int)pScope->begin <= nMiddle);
+    ASSERT(nMiddle <= (int)pScope->end);
+
     RTSCOPE scopeA(pScope->begin, nMiddle);
     RTSCOPE scopeB(nMiddle + 1, pScope->end);
     SYNTAXNODE::UN A = {0}, B = {0};
@@ -1797,16 +1923,16 @@ NOT_INC_P:
     return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
   }
 
-  clsize CodeParser::FindSemicolon( clsize begin, clsize end ) const
-  {
-    for(; begin < end; ++begin)
-    {
-      if(m_aSymbols[begin] == ';') {
-        return begin;
-      }
-    }
-    return -1;
-  }
+  //clsize CodeParser::FindSemicolon( clsize begin, clsize end ) const
+  //{
+  //  for(; begin < end; ++begin)
+  //  {
+  //    if(m_aSymbols[begin] == ';') {
+  //      return begin;
+  //    }
+  //  }
+  //  return -1;
+  //}
 
   const CodeParser::StatementArray& CodeParser::GetStatments() const
   {

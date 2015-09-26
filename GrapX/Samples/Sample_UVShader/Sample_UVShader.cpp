@@ -30,7 +30,17 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
   //int result = a?b:c?f:g;
   //int result = a>b?b:c;
 
-  UVShader::CodeParser expp;
+  // 使用继承类为了暴露ParseStatementAs_Expression接口进行测试
+  class TestExpression : public UVShader::CodeParser
+  {
+  public:
+    GXBOOL TestParseExpression(STATEMENT* pStat, RTSCOPE* pScope)
+    {
+      return ParseStatementAs_Expression(pStat, pScope, TRUE);
+    }
+  };
+
+  TestExpression expp;
   for(int i = 0; pSamples[i].expression != 0; i++)
   {
     auto nSize = strlen(pSamples[i].expression);
@@ -55,7 +65,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     // 表达式解析
     UVShader::CodeParser::RTSCOPE scope(0, pSymbols->size());
     UVShader::CodeParser::STATEMENT stat;
-    expp.ParseStatementAs_Expression(&stat, &scope, TRUE);
+    expp.TestParseExpression(&stat, &scope);
 
     // 检查操作堆栈
     if(pSamples[i].aOperStack)

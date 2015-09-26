@@ -271,6 +271,7 @@ namespace UVShader
     struct RTSCOPE // 运行时的范围描述结构体
     {
       typedef clsize TYPE;
+      const static TYPE npos = -1;
       TYPE begin;
       TYPE end;
 
@@ -318,7 +319,7 @@ namespace UVShader
     };
     //////////////////////////////////////////////////////////////////////////
 
-  private:
+  protected:
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
 
@@ -332,6 +333,8 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
     GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
 
+    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
+
     GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
@@ -339,13 +342,14 @@ namespace UVShader
     GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
     GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf);
+    RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE* pScope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pUnion);
+    RTSCOPE::TYPE  ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseFlowWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
-    GXBOOL  MakeScope(MAKESCOPE* pParam);
-    GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
+    //GXBOOL  MakeScope(MAKESCOPE* pParam);
+    //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocaleStatements(StatementArray& aStatements);
@@ -355,7 +359,7 @@ namespace UVShader
 
     GXLPCSTR GetUniqueString(const SYMBOL* pSym);
     const TYPE* ParseType(const SYMBOL* pSym);
-    clsize   FindSemicolon(clsize begin, clsize end) const;
+    //clsize   FindSemicolon(clsize begin, clsize end) const;
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
@@ -404,7 +408,6 @@ namespace UVShader
     void DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB);
     void DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL);
 
-    /*为了测试，临时改为公共函数*/GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
 
     clStringArrayA    m_aDbgExpressionOperStack;
   };
