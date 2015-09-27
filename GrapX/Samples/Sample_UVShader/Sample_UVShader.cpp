@@ -104,6 +104,20 @@ void TestFlowIf()
         b = b;
       else
         c = c;
+
+
+  switch(a)
+  {
+  case 0:
+  case 1:
+    if(b>c)
+    {
+  case 2:
+    break;
+    }
+  default:
+    break;
+  };
 }
 
 int _tmain(int argc, _TCHAR* argv[])

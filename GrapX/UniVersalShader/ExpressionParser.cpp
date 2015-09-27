@@ -1018,6 +1018,20 @@ NOT_INC_P:
     return ParseArithmeticExpression(pScope, pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE);
   }
 
+  GXBOOL CodeParser::ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  {
+    GXBOOL bret = TRUE;
+    if(parse_end != RTSCOPE::npos && (pScope->end - parse_end) > 1)
+    {
+      SYNTAXNODE::UN A, B;
+      A = *pUnion;
+
+      bret = ParseExpression(&B, parse_end + 1, pScope->end) &&
+        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
+    }
+    return bret ? parse_end != RTSCOPE::npos : FALSE;
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   GXBOOL CodeParser::ParseExpression( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
@@ -1071,7 +1085,8 @@ NOT_INC_P:
 
     else if(first == "if")
     {
-      return ParseFlowIf(pScope, pUnion, FALSE);
+      auto parse_end = ParseFlowIf(pScope, pUnion, FALSE);
+      return ParseRemainStatement(parse_end, pScope, pUnion);
     }
     else if(first == "else")
     {
@@ -1083,15 +1098,7 @@ NOT_INC_P:
       auto parse_end = ParseFlowFor(pScope, pUnion);
 
       // 解析剩余部分
-      if(parse_end != RTSCOPE::npos && (pScope->end - parse_end) > 1)
-      {
-        SYNTAXNODE::UN A, B;
-        A = *pUnion;
-
-        bret = ParseExpression(&B, parse_end + 1, pScope->end) &&
-          MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
-      }
-      return parse_end != RTSCOPE::npos;
+      return ParseRemainStatement(parse_end, pScope, pUnion);
     }
     else if(first == "while")
     {
@@ -1295,92 +1302,179 @@ NOT_INC_P:
     return bret;
   }
 
-  GXBOOL CodeParser::ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf)
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf)
   {
     // 与 ParseFlowWhile 相似
     SYNTAXNODE::UN A, B;
     //GXBOOL bElseIf = FALSE; // 判断这个if是else if中的表达式
+    ASSERT(m_aSymbols[pScope->begin] == "if");
 
-    RTSCOPE sConditional(pScope->begin + 1, m_aSymbols[pScope->begin + 1].scope);
+    RTSCOPE sConditional(pScope->begin + 2, m_aSymbols[pScope->begin + 1].scope);
     RTSCOPE sBlock;
 
-    if(sConditional.end >= 0 && sConditional.end < pScope->end) {
-      ++sConditional.begin;
-    }
-    else {
+    if(sConditional.begin >= pScope->end || sConditional.end == -1 || sConditional.end > pScope->end)
+    {
       // ERROR: if 语法错误
-      return FALSE;
+      return RTSCOPE::npos;
     }
 
     sBlock.begin = sConditional.end + 1;
     if(sBlock.begin >= pScope->end) {
       // ERROR: if 语法错误
-      return FALSE;
+      return RTSCOPE::npos;
     }
 
-    sBlock.end = m_aSymbols[sBlock.begin].GetScope();
-    if(sBlock.end == -1)
+    auto& block_begin = m_aSymbols[sBlock.begin];
+    SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
+
+    if(block_begin == '{')
     {
-      // 如果是"if(...) ...;"这种单语句形式，"if"位置的scope应该就是分号的位置
-      sBlock.end = m_aSymbols[pScope->begin].GetScope();
-
-      // "else if(...) ...;" 这种单语句形式，"else"位置的记录了分号的位置
-      if(sBlock.end == -1 && pScope->begin > 0) {
-        //bElseIf = TRUE;
-        sBlock.end = m_aSymbols[pScope->begin - 1].GetScope();
-      }
+      sBlock.end = block_begin.scope;
+      sBlock.begin++;
     }
-    else if(m_aSymbols[sBlock.begin] == '{') {
-      ++sBlock.begin;
+    else if(block_begin == "if")
+    {
+      sBlock.end = RTSCOPE::npos;
+      eMode = SYNTAXNODE::MODE_Flow_If;
+    }
+    // "for"
+    else {
+      sBlock.end = block_begin.semi_scope;
     }
 
-
-    // 这么写是为了和sConditional检查流程看起来相似
-    if( ! (sBlock.end >= 0 && sBlock.end < pScope->end))
+    if(eMode == SYNTAXNODE::MODE_Undefined && sBlock.end > pScope->end)
     {
       // ERROR: if 语法错误
-      return FALSE;
+      return RTSCOPE::npos;
     }
+
+    //sBlock.end = m_aSymbols[sBlock.begin].GetScope();
+    //if(sBlock.end == -1)
+    //{
+    //  // 如果是"if(...) ...;"这种单语句形式，"if"位置的scope应该就是分号的位置
+    //  sBlock.end = m_aSymbols[pScope->begin].GetScope();
+
+    //  // "else if(...) ...;" 这种单语句形式，"else"位置的记录了分号的位置
+    //  if(sBlock.end == -1 && pScope->begin > 0) {
+    //    //bElseIf = TRUE;
+    //    sBlock.end = m_aSymbols[pScope->begin - 1].GetScope();
+    //  }
+    //}
+    //else if(m_aSymbols[sBlock.begin] == '{') {
+    //  ++sBlock.begin;
+    //}
+
+
+    //// 这么写是为了和sConditional检查流程看起来相似
+    //if( ! (sBlock.end >= 0 && sBlock.end < pScope->end))
+    //{
+    //  // ERROR: if 语法错误
+    //  return FALSE;
+    //}
 
 
 
 
     GXBOOL bret = ParseArithmeticExpression(&sConditional, &A, SYMBOL::FIRST_OPCODE_PRECEDENCE);
-    bret = bret && ParseExpression(&sBlock, &B);
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
-
-    SYNTAXNODE::MODE eNextMode = SYNTAXNODE::MODE_Chain;
-
-
-    // 剩余标记当作与if同级的表达式链处理
-    if(bret && (pScope->end - sBlock.end) > 1)
+    if(eMode == SYNTAXNODE::MODE_Flow_If)
     {
-      A = *pUnion;
+      sBlock.end = ParseFlowIf(&RTSCOPE(sBlock.begin, pScope->end), &B, FALSE);
+      bret = sBlock.end != RTSCOPE::npos;
+    }
+    else
+    {
+      ASSERT(eMode == SYNTAXNODE::MODE_Undefined);
+      bret = bret && ParseExpression(&sBlock, &B);
+    }
+    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
+    //DbgDumpScope("if", sConditional, sBlock);
 
+
+    auto result = sBlock.end;
+    // 剩余标记当作与if同级的表达式链处理
+    //if(bret && (pScope->end - sBlock.end) > 1)
+    //{
+    //  A = *pUnion;
+
+    //  auto nNextBegin = sBlock.end + 1;
+    //  if(m_aSymbols[nNextBegin] == "else") {
+    //    ++nNextBegin;
+
+    //    if(nNextBegin < m_aSymbols.size() && m_aSymbols[nNextBegin] == "if") {
+    //      eNextMode = SYNTAXNODE::MODE_Flow_ElseIf;
+    //    }
+    //    else {
+    //      eNextMode = SYNTAXNODE::MODE_Flow_Else;
+    //    }
+
+    //  }
+
+    //  if(eNextMode == SYNTAXNODE::MODE_Chain) {
+    //    DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
+    //  }
+
+    //  if(eNextMode == SYNTAXNODE::MODE_Flow_ElseIf) {
+    //    result = ParseFlowIf(&RTSCOPE(nNextBegin, pScope->end), &B, TRUE);
+    //  }
+    //  else {
+    //    bret = ParseExpression(&B, nNextBegin, pScope->end);
+    //  }
+
+
+    //  bret = bret && MakeSyntaxNode(pUnion, eNextMode, NULL, &A, &B);
+
+    //  if(eNextMode != SYNTAXNODE::MODE_Chain) {
+    //    if(eNextMode == SYNTAXNODE::MODE_Flow_Else) {
+    //      DbgDumpScope("else", RTSCOPE(0,0), RTSCOPE(nNextBegin, pScope->end));
+    //    }
+    //    DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
+    //  }
+    //}
+    //else {
+    //  DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
+    //}
+
+    if(bret && (pScope->end - sBlock.end) > 1 && m_aSymbols[sBlock.end + 1] == "else")
+    {
       auto nNextBegin = sBlock.end + 1;
-      if(m_aSymbols[nNextBegin] == "else") {
-        ++nNextBegin;
 
-        if(nNextBegin < m_aSymbols.size() && m_aSymbols[nNextBegin] == "if") {
-          eNextMode = SYNTAXNODE::MODE_Flow_ElseIf;
+      // 只处理 else if/else 两种情况
+      A = *pUnion;
+      ++nNextBegin;
+      if(nNextBegin >= pScope->end) {
+        // ERROR: else 语法错误
+        return RTSCOPE::npos;
+      }
+
+      SYNTAXNODE::MODE eNextMode = SYNTAXNODE::MODE_Flow_Else;
+
+      if(m_aSymbols[nNextBegin] == "if")
+      {
+        eNextMode = SYNTAXNODE::MODE_Flow_ElseIf;
+        result = ParseFlowIf(&RTSCOPE(nNextBegin, pScope->end), &B, TRUE);
+      }
+      else
+      {
+        auto& else_begin = m_aSymbols[nNextBegin];
+        if(else_begin == '{')
+        {
+          result = else_begin.scope;
         }
         else {
-          eNextMode = SYNTAXNODE::MODE_Flow_Else;
+          result = else_begin.semi_scope;
         }
 
+        if(result == RTSCOPE::npos || result > pScope->end) {
+          // ERROR: else 语法错误
+          return RTSCOPE::npos;
+        }
+
+        bret = ParseExpression(&B, nNextBegin, result);
       }
 
-      if(eNextMode == SYNTAXNODE::MODE_Chain) {
-        DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
-      }
-
-
-      if(eNextMode == SYNTAXNODE::MODE_Flow_ElseIf) {
-        bret = ParseFlowIf(&RTSCOPE(nNextBegin, pScope->end), &B, TRUE);
-      }
-      else {
-        bret = ParseExpression(&B, nNextBegin, pScope->end);
-      }
+      //if(eNextMode == SYNTAXNODE::MODE_Chain) {
+      //  DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
+      //}
 
 
       bret = bret && MakeSyntaxNode(pUnion, eNextMode, NULL, &A, &B);
@@ -1393,10 +1487,10 @@ NOT_INC_P:
       }
     }
     else {
-      DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
+      DbgDumpScope("if", sConditional, sBlock);
     }
 
-    return bret;
+    return bret ? result : RTSCOPE::npos;
   }
 
   GXBOOL CodeParser::ParseFlowWhile( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
@@ -1629,6 +1723,7 @@ NOT_INC_P:
       return pScope->end;  // 这个地方有特殊处理，特殊返回
       //return ParseFlowFor(&RTSCOPE(pBlock->begin, pScope->end), pUnion);
     }
+    // "if"
     else
     {
       pBlock->end = block_begin.semi_scope;

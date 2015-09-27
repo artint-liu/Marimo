@@ -102,16 +102,6 @@ void test_flow_if()
     a = a;
   }
 
-  /*
-  if(a < b)
-    if(b > c)
-      if(c > d)
-        a = a;
-      else if(d < e)
-        b = b;
-      else
-        c = c;
-  /*
   if(a < b) {
     if(b > c) {
       if(c > d) {
@@ -124,7 +114,23 @@ void test_flow_if()
         c = c;
       }
     }
-  }//*/
+  }
+
+  if(a < b)
+    if(b > c)
+      if(c > d)
+        a = a;
+      else if(d < e)
+        b = b;
+ 
+  if(a < b)
+    if(b > c)
+      if(c > d)
+        a = a;
+      else if(d < e)
+        b = b;
+      else
+        c = c;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -133,4 +139,5 @@ void test_arithmetic_expression()
 {
   int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
   a=b+=(c++)-d+(--e/-f);
+  a=(b+c)*d+e+f;
 }

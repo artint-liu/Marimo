@@ -176,6 +176,7 @@ namespace UVShader
 
       enum MODE
       {
+        MODE_Undefined,
         MODE_Normal,        // 操作符 + 操作数 模式
         MODE_FunctionCall,  // 函数调用
         MODE_Definition,    // 变量定义
@@ -339,10 +340,11 @@ namespace UVShader
     GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
 
+    GXBOOL  ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
     GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf);
+    RTSCOPE::TYPE  ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf);
     RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE* pScope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pUnion);
     RTSCOPE::TYPE  ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseFlowWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
