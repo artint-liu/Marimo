@@ -11,7 +11,12 @@
 // º¯Êý²âÊÔ²¿·Ö
 float func()
 {
-  return 1.0f;
+  int a = 0;
+  int b = 1;
+  int c = 2;
+  c = c + a * b;
+  a = c * a + b / 2;
+  return a;
 }
 
 float func2(float a)
@@ -132,7 +137,65 @@ void test_flow_if()
       else
         c = c;
 }
+//////////////////////////////////////////////////////////////////////////
+void test_flow_while()
+{
+  int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
+  
+  while(a<10);  
+  
+  while(a<100)
+   a++;
+   
+  while(b<10)
+  {
+    b++;
+  }
+  
+  while(c < 20)
+  {
+    while(d < 30)
+	{
+	  d++;
+	}
+	c++;
+  }
+  
+  while(e<40)
+    while(f<50)
+	{
+	  e++;
+	  f++;
+	}
+  
+  while(a < 11)
+	while(b < 12)
+	  while(c < 13)
+	    while(d < 14) {
+		  a++;
+		  b++;
+		  c++;
+		  d++;
+		}
+}
+//////////////////////////////////////////////////////////////////////////
+void test_flow_dowhile()
+{
+  int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
+  do {
+  }while(a<b);
 
+  do {
+    a++;
+  }while(a<b);
+  
+  do {
+    do {
+	  a++;
+	  ++b;
+    }while(b<c);
+  }while(a<b);
+}
 //////////////////////////////////////////////////////////////////////////
 
 void test_arithmetic_expression()

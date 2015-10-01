@@ -50,7 +50,7 @@ int DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::S
     (pNode->mode == SYNTAXNODE::MODE_Flow_For    ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_While  ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_If     ) ||
-    //(pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf ) ||
+    (pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile) ||
     //(pNode->mode == SYNTAXNODE::MODE_Flow_Else   ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_For    ) ||
     (pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning)
@@ -82,6 +82,8 @@ int DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::S
     str[0], str[1]);
 
   clStringA strOut;
+  const int retraction = depth * 2;           // 缩进
+  const int next_retraction = (depth + 1) * 2;// 次级缩进
   switch(pNode->mode)
   {
   case SYNTAXNODE::MODE_FunctionCall: // 函数调用
@@ -96,32 +98,42 @@ int DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::S
     if( ! str[1].EndsWith('\n')) {
       str[1].Append(";\n");
     }
-    strOut.Format("if(%s) {\n%*s%s%*s}\n", str[0], (depth + 1) * 2, " ", str[1], depth * 2, " ");
+    strOut.Format("if(%s) {\n%*s%s%*s}\n", str[0], next_retraction, " ", str[1], retraction, " ");
     break;
 
   case SYNTAXNODE::MODE_Flow_Else:
     if( ! str[1].EndsWith('\n')) {
       str[1].Append(";\n");
     }
-    strOut.Format("%s%*selse {\n%*s%s%*s}\n", str[0], depth * 2, " ", (depth + 1) * 2, " ", str[1], depth * 2, " ");
+    strOut.Format("%s%*selse {\n%*s%s%*s}\n", str[0], retraction, " ", next_retraction, " ", str[1], retraction, " ");
     break;
 
   case SYNTAXNODE::MODE_Flow_ElseIf:
     if( ! str[1].EndsWith('\n')) {
       str[1].Append(";\n");
     }
-    strOut.Format("%s%*selse %s", str[0], depth * 2, " ", str[1]);
+    strOut.Format("%s%*selse %s", str[0], retraction, " ", str[1]);
     break;
 
   case SYNTAXNODE::MODE_Flow_While:
-    strOut.Format("%s(%s)", str[0], str[1]);
+    if( ! str[1].EndsWith('\n')) {
+      str[1].Append(";\n");
+    }
+    strOut.Format("while(%s) {\n%*s%s%*s}\n", str[0], next_retraction, " ", str[1], retraction, " ");
+    break;
+
+  case SYNTAXNODE::MODE_Flow_DoWhile:
+    if( ! str[1].EndsWith('\n')) {
+      str[1].Append(";\n");
+    }
+    strOut.Format("do {\n%*s%s%*s}while(%s);\n", next_retraction, " ", str[1], retraction, " ", str[0]);
     break;
 
   case SYNTAXNODE::MODE_Flow_For:
     if( ! str[1].EndsWith('\n')) {
       str[1].Append(";\n");
     }
-    strOut.Format("for(%s) {\n%*s%s%*s}\n", str[0], (depth + 1) * 2, " ", str[1], depth * 2, " ");
+    strOut.Format("for(%s) {\n%*s%s%*s}\n", str[0], next_retraction, " ", str[1], retraction, " ");
     break;
 
   case SYNTAXNODE::MODE_Flow_ForInit:
@@ -138,11 +150,11 @@ int DbgDumpSyntaxTree(UVShader::CodeParser* pExpp, const UVShader::CodeParser::S
     if(str[1].IsEmpty()) {
       strOut.Format("%s;\n", str[0]);
     }
-    else if(str[0].EndsWith("}\n")) {
-      strOut.Format("%s%*s%s", str[0], depth * 2, " ", str[1]);
+    else if(str[0].EndsWith("\n")) {
+      strOut.Format("%s%*s%s", str[0], retraction, " ", str[1]);
     }
     else {
-      strOut.Format("%s;\n%*s%s", str[0], depth * 2, " ", str[1]);
+      strOut.Format("%s;\n%*s%s", str[0], retraction, " ", str[1]);
     }
     break;
 
@@ -249,7 +261,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
                 }
 
                 file.WritefA("{\n");
-                if(func.pExpression)
+                if(func.pExpression && func.pExpression->expr.sRoot.pNode)
                 {
                   clStringA str;
                   DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, 1, &str);

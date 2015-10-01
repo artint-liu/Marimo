@@ -188,7 +188,7 @@ namespace UVShader
         MODE_Flow_ForInit,        // for 的初始化部分 [MODE_Flow_ForInit] [MODE_Flow_ForRunning]
         MODE_Flow_ForRunning,     // for 的条件和步进部分
         //MODE_Flow_Switch,
-        //MODE_Flow_Do,
+        MODE_Flow_DoWhile,
         MODE_Flow_Break,
         MODE_Flow_Continue,
         MODE_Flow_Discard,
@@ -306,17 +306,16 @@ namespace UVShader
 
     struct MAKESCOPE
     {
-      RTSCOPE*        pOut;     // 输出的scope，返回TRUE就一定有效
       const RTSCOPE*  pScope;   // 限定区域
       RTSCOPE::TYPE   begin;    // 开始
-      GXBOOL          bIndBegin;// begin 是否是m_aSymbols的索引
+      GXBOOL          bBeginMate;// scope begin 取自m_aSymbols[begin].scope
       RTSCOPE::TYPE   end;
-      GXBOOL          bIndEnd;
+      GXBOOL          bEndMate;
       GXWCHAR         chTermin; // 如果begin遇到这个终结符，返回一个begin==end的scope
 
       MAKESCOPE(){}
-      MAKESCOPE(RTSCOPE*_pOut, const RTSCOPE*_pScope, RTSCOPE::TYPE _begin, GXBOOL _bIndBegin, RTSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
-        : pOut(_pOut), pScope(_pScope), begin(_begin), bIndBegin(_bIndBegin), end(_end), bIndEnd(_bIndEnd), chTermin(_chTermin) {}
+      MAKESCOPE(const RTSCOPE*_pScope, RTSCOPE::TYPE _begin, GXBOOL _bIndBegin, RTSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
+        : pScope(_pScope), begin(_begin), bBeginMate(_bIndBegin), end(_end), bEndMate(_bIndEnd), chTermin(_chTermin) {}
     };
     //////////////////////////////////////////////////////////////////////////
 
@@ -347,10 +346,11 @@ namespace UVShader
     RTSCOPE::TYPE  ParseFlowIf(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf);
     RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE* pScope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pUnion);
     RTSCOPE::TYPE  ParseFlowFor(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseFlowWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    RTSCOPE::TYPE  ParseFlowWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    RTSCOPE::TYPE  ParseFlowDoWhile(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
-    //GXBOOL  MakeScope(MAKESCOPE* pParam);
+    GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
