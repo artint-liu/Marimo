@@ -1049,6 +1049,26 @@ size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh)
 }
 
 _CLSTR_TEMPL
+  size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh, size_t count)
+{
+  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+  resizeLength(uStrLength + count);
+  if(idx >= uStrLength)
+  {
+    m_pBuf[uStrLength] = cCh;
+  }
+  else
+  {
+    memcpy(m_pBuf + idx + count, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
+
+    for(size_t i = 0; i < count; i++) {
+      m_pBuf[i] = cCh;
+    }
+  }
+  return uStrLength + count;
+}
+
+_CLSTR_TEMPL
 size_t _CLSTR_IMPL::Insert(size_t idx, const _TCh* pStr)
 {
   const size_t uStrLength = CLSTR_LENGTH(m_pBuf);

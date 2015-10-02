@@ -29,6 +29,26 @@ void func3(float a, float b)
   float c = a + b;
 }
 
+void func4()
+{
+  int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
+  a = 3;
+  b = 4;
+  d = 4;
+  {
+    a = a + 1;
+	b *= 6;
+  }
+  {
+    c = 7;
+	f *= 1;
+	{
+	  d /= 2;
+	  e = 5;
+	}
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 void flow_test()
@@ -197,7 +217,38 @@ void test_flow_dowhile()
   }while(a<b);
 }
 //////////////////////////////////////////////////////////////////////////
+void test_flow_mix()
+{
+  int a=0,b=1,c=2,d=3,e=4,f=5;
+  for(int i = 0; i < 10; i++)
+  {
+    if(a > b) {
+      while(b < 10) {
+	    b++;
+	  }
+	}
+	else if(c < d){
+	  for(;;);
+	}
+	else {
+	  do {
+	    f++;
+	  }while(f < 20);
+	}
+  }
 
+  for(int i = 0; i < 10; i++)
+    if(a > b)
+      while(b < 10)
+	    b++;
+	else if(c < d)
+	  for(;;);
+	else
+	  do {
+	    f++;
+	  }while(f < 20);
+}
+//////////////////////////////////////////////////////////////////////////
 void test_arithmetic_expression()
 {
   int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;

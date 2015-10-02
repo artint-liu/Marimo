@@ -267,6 +267,7 @@ public:
   b32         EndsWith        (const _XCh* pStr) const;
 
   size_t      Insert          (size_t idx, _TCh cCh);
+  size_t      Insert          (size_t idx, _TCh cCh, size_t count);
   size_t      Insert          (size_t idx, const _TCh* pStr);
   size_t      Remove          (_TCh cCh);
   size_t      Remove          (size_t idx, size_t uCount);  // 返回值是剩余长度
