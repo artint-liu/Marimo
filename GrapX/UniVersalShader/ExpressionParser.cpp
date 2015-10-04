@@ -86,6 +86,7 @@
 
 static clsize s_nMultiByteOperatorLen = 0; // 最大长度
 
+#define ERROR_MSG__MISSING_SEMICOLON  CLBREAK
 
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
@@ -598,7 +599,7 @@ namespace UVShader
       stat.type = StatementType_FunctionDecl;
     }
     else if(*p == "{") { // 函数体
-      RTSCOPE func_statement_block(m_aSymbols[p->scope].scope + 1, p->scope);
+      RTSCOPE func_statement_block(m_aSymbols[p->scope].scope, p->scope);
 
       stat.type = StatementType_Function;
       p = &m_aSymbols[p->scope];
@@ -746,14 +747,12 @@ NOT_INC_P:
 
   void CodeParser::RelocaleSyntaxPtr(SYNTAXNODE* pNode)
   {
-    if(pNode->OperandA_IsNode() && pNode->Operand[0].pNode) {
-      //pNode->Operand[0].pNode = &m_aSyntaxNodePack[(GXINT_PTR)pNode->Operand[0].pNode];
+    if(pNode->OperandA_IsNodeIndex() && pNode->Operand[0].pNode) {
       IndexToPtr(pNode->Operand[0].pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[0].pNode);
     }
 
-    if(pNode->OperandB_IsNode() && pNode->Operand[1].pNode) {
-      //pNode->Operand[1].pNode = &m_aSyntaxNodePack[(GXINT_PTR)pNode->Operand[1].pNode];
+    if(pNode->OperandB_IsNodeIndex() && pNode->Operand[1].pNode) {
       IndexToPtr(pNode->Operand[1].pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[1].pNode);
     }
@@ -884,7 +883,7 @@ NOT_INC_P:
 
     STATEMENT& stat = *pStat;
     
-    GXBOOL bret = ParseExpression(pScope, &stat.expr.sRoot);
+    GXBOOL bret = ParseExpression(*pScope, &stat.expr.sRoot);
     TRACE("m_nDbgNumOfExpressionParse=%d\n", m_nDbgNumOfExpressionParse);
 
 #ifdef _DEBUG
@@ -967,6 +966,10 @@ NOT_INC_P:
       strOut.Format("return %s", str[1]);
       break;
 
+    case SYNTAXNODE::MODE_Block:
+      strOut.Format("{%s}", str[0]);
+      break;
+
     case SYNTAXNODE::MODE_Chain:
       if(str[1].IsEmpty()) {
         strOut.Format("%s", str[0]);
@@ -1001,35 +1004,40 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end)
-  {
-    RTSCOPE scope(begin, end);
-    return ParseExpression(&scope, pUnion);
-  }
-
+  //GXBOOL CodeParser::ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end)
+  //{
+  //  RTSCOPE scope(begin, end);
+  //  return ParseExpression(&scope, pUnion);
+  //}
+ 
   GXBOOL CodeParser::ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion)
   {
     RTSCOPE scope(begin, end);
     return ParseArithmeticExpression(&scope, pUnion);
   }
 
-  GXBOOL CodeParser::ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
-    if(pScope->end > pScope->begin && m_aSymbols[pScope->end - 1] == ';') {
-      pScope->end--;
+    RTSCOPE scope = *pScope;
+    if(scope.end > scope.begin && m_aSymbols[scope.end - 1] == ';') {
+      scope.end--;
     }
-    return ParseArithmeticExpression(pScope, pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    return ParseArithmeticExpression(&scope, pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE);
   }
 
   GXBOOL CodeParser::ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
   {
     GXBOOL bret = TRUE;
-    if(parse_end != RTSCOPE::npos && (scope.end - parse_end) > 1)
+    if(parse_end == RTSCOPE::npos) {
+      return FALSE;
+    }
+    ASSERT(parse_end <= scope.end);
+    if(parse_end < scope.end)
     {
-      SYNTAXNODE::UN A, B;
+      SYNTAXNODE::UN A, B = {0};
       A = *pUnion;
 
-      bret = ParseExpression(&B, parse_end + 1, scope.end) &&
+      bret = ParseExpression(RTSCOPE(parse_end + 1, scope.end), &B) &&
         MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
     }
     return bret ? parse_end != RTSCOPE::npos : FALSE;
@@ -1042,29 +1050,68 @@ NOT_INC_P:
     // 解析成功parse_end返回表达式最后一个token的索引，parse_end是这个关键字表达式之内的！
     // 解析失败parse_end返回RTSCOPE::npos
 
-    const auto& first = m_aSymbols[scope.begin];
+    const auto& front = m_aSymbols[scope.begin];
     auto& pend = *parse_end;
     GXBOOL bret = TRUE;
+    SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
 
     ASSERT(pend == RTSCOPE::npos); // 强调调用者要初始化这个变量
 
-    if(first == "else") {
+    if(front == "else") {
       // ERROR: "else" 不能独立使用
     }
-    else if(first == "for") {
+    else if(front == "for") {
       pend = ParseFlowFor(scope, pUnion);
     }
-    else if(first == "if") {
+    else if(front == "if") {
       pend = ParseFlowIf(scope, pUnion, FALSE);
     }
-    else if(first == "while") {
+    else if(front == "while") {
       pend = ParseFlowWhile(scope, pUnion);
     }
-    else if(first == "do") {
+    else if(front == "do") {
       pend = ParseFlowDoWhile(scope, pUnion);
+    }
+    else if(front == "break") {
+      eMode = SYNTAXNODE::MODE_Flow_Break;
+    }
+    else if(front == "continue") {
+      eMode = SYNTAXNODE::MODE_Flow_Continue;
+    }
+    else if(front == "discard") {
+      eMode = SYNTAXNODE::MODE_Flow_Discard;
+    }
+    else if(front == "return")
+    {
+      eMode = SYNTAXNODE::MODE_Return;
     }
     else {
       bret = FALSE;
+    }
+
+    while(eMode == SYNTAXNODE::MODE_Flow_Break || eMode == SYNTAXNODE::MODE_Flow_Continue ||
+      eMode == SYNTAXNODE::MODE_Flow_Discard || eMode == SYNTAXNODE::MODE_Return)
+    {
+      SYNTAXNODE::UN A = {0}, B = {0};
+
+      A.pSym = &front;
+      pend = scope.begin + 1;
+
+      if(front.semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)front.semi_scope > scope.end) {
+        // ERROR: 缺少;
+        ERROR_MSG__MISSING_SEMICOLON;
+        break;
+      }
+
+      if(eMode == SYNTAXNODE::MODE_Return) {
+        bret = ParseArithmeticExpression(scope.begin + 1, front.semi_scope, &B);
+        MakeSyntaxNode(pUnion, eMode, NULL, &A, &B);
+        pend = front.semi_scope;
+      }
+      else {
+        MakeSyntaxNode(pUnion, eMode, NULL, &A, NULL);
+      }
+      break;
     }
 
     ASSERT(( ! bret && pend == RTSCOPE::npos) || bret);
@@ -1072,13 +1119,37 @@ NOT_INC_P:
     return bret;
   }
 
-  GXBOOL CodeParser::ParseExpression( RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  //GXBOOL CodeParser::TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end)
+  //{
+  //  const auto& first = m_aSymbols[scope.begin];
+  //  auto& pend = *parse_end;
+  //  GXBOOL bret = TRUE;
+
+  //  ASSERT(pend == RTSCOPE::npos); // 强调调用者要初始化这个变量
+
+  //  if(first == '{')
+  //  {
+  //    if(first.scope > scope.end) {
+  //      // ERROR: 没有正确的'}'来匹配
+  //    }
+  //    else {
+  //      ParseExpression(pUnion, scope.begin + 1, first.scope);
+  //    }
+  //  }
+  //  else {
+  //    ASSERT(first.semi_scope < scope.end);
+  //  }
+
+  //  return bret;
+  //}
+
+  GXBOOL CodeParser::ParseExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
   {
-    ASSERT(pScope->end == m_aSymbols.size() || m_aSymbols[pScope->end] == ';' || 
-      m_aSymbols[pScope->end] == '}');
+    ASSERT(scope.end == m_aSymbols.size() || m_aSymbols[scope.end] == ';' || 
+      m_aSymbols[scope.end] == '}');
 
 
-    const GXINT_PTR count = pScope->end - pScope->begin;
+    const GXINT_PTR count = scope.end - scope.begin;
     SYNTAXNODE::UN A = {0}, B = {0};
     GXBOOL bret = TRUE;
     RTSCOPE::TYPE parse_end = RTSCOPE::npos;
@@ -1089,111 +1160,72 @@ NOT_INC_P:
         return FALSE;
       }
       else if(count == 1) {
-        pUnion->pSym = &m_aSymbols[pScope->begin];
+        pUnion->pSym = &m_aSymbols[scope.begin];
       }
       
       return TRUE;  // count == 0 / count == 1
     }
 
-    const auto& first = m_aSymbols[pScope->begin];
+    const auto& front = m_aSymbols[scope.begin];
 
-    if(first == '{') // 代码块
+    if(front == '{') // 代码块
     {
-      if((clsize)first.scope > pScope->end) {
+      if((clsize)front.scope > scope.end) {
         // ERROR: 没有正确的'}'来匹配
       }
 
-      bret = ParseExpression(&A, pScope->begin + 1, first.scope);
-      if((clsize)first.scope + 1 >= pScope->end) {
-        *pUnion = A;
-      }
-      else {
-        bret = bret && ParseExpression(&B, first.scope + 1, pScope->end);
-        bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
-      }
-      return bret;
-    }
+      ASSERT((RTSCOPE::TYPE)front.scope <= scope.end);  // scopeB.begin 最多仅仅比scope.end大1
 
-    else if(TryKeywords(*pScope, pUnion, &parse_end))
+      //////////////////////////////////////////////////////////////////////////
+      //
+      // ParseRemainStatement 在处理 statement block 剩余部分时有微妙的不同：
+      // parse_end 如果严格限定等于 scope.end，pUnion不做任何修改，这种用法通常在
+      // if/else if/else/for/while关键字的代码块解析中使用
+      //
+      // parse_end 如果小于 scope.end, pUnion会被修改为MODE_Chain，需要注意：
+      // * parse_end 如果仅仅比 scope.end 小 1，则意味着生成的MODE_Chain是chain的结尾。
+      // * 这种用法在 statement block 中用来标记chain的结尾
+      //
+      //////////////////////////////////////////////////////////////////////////
+      bret = ParseExpression(RTSCOPE(scope.begin + 1, front.scope), pUnion);
+      bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Block, pUnion, NULL);
+      return ParseRemainStatement(front.scope, scope, pUnion);
+    }
+    else if(TryKeywords(scope, pUnion, &parse_end))
     {
       if(parse_end == RTSCOPE::npos) {
         return FALSE; // 解析错误, 直接返回
       }
       // 解析剩余部分
-      return ParseRemainStatement(parse_end, *pScope, pUnion);
+      return ParseRemainStatement(parse_end, scope, pUnion);
     }
-
-
-    //else if(first == "else")
-    //{
-    //  // ERROR: "else" 不能独立使用
-    //  return FALSE;
-    //}
-    //else if(first == "for")
-    //{
-    //  auto parse_end = ParseFlowFor(pScope, pUnion);
-    //  return ParseRemainStatement(parse_end, pScope, pUnion);
-    //}
-    //else if(first == "if")
-    //{
-    //  auto parse_end = ParseFlowIf(pScope, pUnion, FALSE);
-    //  return ParseRemainStatement(parse_end, pScope, pUnion);
-    //}
-    //else if(first == "while")
-    //{
-    //  auto parse_end = ParseFlowWhile(pScope, pUnion);
-    //  return ParseRemainStatement(parse_end, pScope, pUnion);
-    //}
-    //else if(first == "do")
-    //{
-    //  auto parse_end = ParseFlowDoWhile(pScope, pUnion);
-    //  return ParseRemainStatement(parse_end, pScope, pUnion);
-    //}
-
-    else if(first == "return")
+    else if(front.semi_scope == RTSCOPE::npos) {
+      ERROR_MSG__MISSING_SEMICOLON;
+      return FALSE;
+    }
+    else if((clsize)front.semi_scope < scope.end)
     {
-      A.pSym = &first;
-      bret = ParseArithmeticExpression(pScope->begin + 1, pScope->end, &B);
-      MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Return, NULL, &A, &B);
-      return bret;
-    }
-    else if(first == "break") {
-      A.pSym = &first;
-      bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_Break, NULL, &A, NULL);
-      ASSERT(count == 1); // 未处理后面的情况
-      return bret;
-    }
-    else if(first == "continue") {
-      A.pSym = &first;
-      bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_Continue, NULL, &A, NULL);
-      ASSERT(count == 1); // 未处理后面的情况
-      return bret;
-    }
-    else if(first == "discard") {
-      A.pSym = &first;
-      bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_Discard, NULL, &A, NULL);
-      ASSERT(count == 1); // 未处理后面的情况
-      return bret;
-    }
-    //else if(first.scope >= 0 && (clsize)first.scope < pScope->end && first.precedence != SYMBOL::ID_BRACE)
-    else if(first.semi_scope >= 0 && (clsize)first.semi_scope < pScope->end)
-    {
-      ASSERT(m_aSymbols[first.semi_scope] == ';'); // 目前进入这个循环的只可能是遇到分号
-      bret =
-        ParseExpression(&A, pScope->begin, first.semi_scope) &&
-        ParseExpression(&B, first.semi_scope + 1, pScope->end) &&
-        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
+      ASSERT(m_aSymbols[front.semi_scope] == ';'); // 目前进入这个循环的只可能是遇到分号
+
+      RTSCOPE scopeA(scope.begin, front.semi_scope);
+      //RTSCOPE scopeB(front.semi_scope + 1, scope.end);
+      ASSERT((RTSCOPE::TYPE)front.semi_scope + 1 <= scope.end); // 感觉有可能begin>end，这里如果遇到就改成if(scopeB.begin >= scopeB.end)
+
+      bret = ParseExpression(scopeA, pUnion);
+      return ParseRemainStatement(front.semi_scope, scope, pUnion);
+      //bret = bret && ParseExpression(scopeB, &B);
+      //bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, &A, &B);
 
       return bret;
     }
 
-    ParseArithmeticExpression(pScope, pUnion);
+    ParseArithmeticExpression(&scope, pUnion);
     return TRUE;
   }
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence)
+  GXBOOL CodeParser::ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence)
   {
     int nCandidate = m_nMaxPrecedence;
     GXINT_PTR i = (GXINT_PTR)pScope->end - 1;
@@ -1220,12 +1252,7 @@ NOT_INC_P:
 
       ASSERT(*B.pSym != ';'); // 已经在外部避免了表达式内出现分号
 
-      /*if(B.pSym->sym == ';')
-      {
-        pUnion->pSym = A.pSym;
-        return TRUE;
-      }
-      else */if(A.pSym->precedence > 0)
+      if(A.pSym->precedence > 0)
       {
         bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, A.pSym, NULL, &B);
         DbgDumpScope(A.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(pScope->begin + 1, pScope->end));
@@ -1330,7 +1357,7 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseFunctionCall(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     // 括号肯定是匹配的
     ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin + 1);
@@ -1394,7 +1421,7 @@ NOT_INC_P:
       if(block_begin == '{')
       {
         sBlock.end = block_begin.scope;
-        sBlock.begin++;
+        //sBlock.begin ++;
       }
       else {
         sBlock.end = block_begin.semi_scope;
@@ -1405,44 +1432,18 @@ NOT_INC_P:
         // ERROR: if 语法错误
         return RTSCOPE::npos;
       }
-      bret = bret && ParseExpression(&sBlock, &B);
+      bret = bret && ParseExpression(sBlock, &B);
     }
 
-    //if(block_begin == '{')
-    //{
-    //  sBlock.end = block_begin.scope;
-    //  sBlock.begin++;
-    //}
-    //else if(TryKeywords(RTSCOPE(sBlock.begin, scope.end), &B, &sBlock.end))
-    //{
-    //  eMode = SYNTAXNODE::MODE_Flow_If;
-    //  bret = sBlock.end != RTSCOPE::npos;
-    //}
-    //else {
-    //  sBlock.end = block_begin.semi_scope;
-    //}
+    const SYNTAXNODE::MODE eMode = TryGetNode(&B);
+    if(eMode != SYNTAXNODE::MODE_Block) {
+      if(eMode != SYNTAXNODE::MODE_Chain) {
+        bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
+      }
+      bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
+    }
 
-    //if(eMode == SYNTAXNODE::MODE_Undefined && sBlock.end > scope.end)
-    //{
-    //  // ERROR: if 语法错误
-    //  return RTSCOPE::npos;
-    //}
-
-
-    //if(eMode == SYNTAXNODE::MODE_Flow_If)
-    //{
-    //  sBlock.end = ParseFlowIf(RTSCOPE(sBlock.begin, scope.end), &B, FALSE);
-    //  bret = sBlock.end != RTSCOPE::npos;
-    //}
-    //else
-    //if(eMode != SYNTAXNODE::MODE_Flow_If)
-    //{
-    //  ASSERT(eMode == SYNTAXNODE::MODE_Undefined);
-    //  bret = bret && ParseExpression(&sBlock, &B);
-    //}
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, NULL, &A, &B);
-    //DbgDumpScope("if", sConditional, sBlock);
-
+    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, &A, &B);
 
     auto result = sBlock.end;
 
@@ -1483,27 +1484,35 @@ NOT_INC_P:
             return RTSCOPE::npos;
           }
 
-          bret = ParseExpression(&B, nNextBegin, result);
+          bret = ParseExpression(RTSCOPE(nNextBegin, result), &B);
         }
       }
 
-      //if(eNextMode == SYNTAXNODE::MODE_Chain) {
-      //  DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
-      //}
-
-
-      bret = bret && MakeSyntaxNode(pUnion, eNextMode, NULL, &A, &B);
-
-      if(eNextMode != SYNTAXNODE::MODE_Chain) {
-        if(eNextMode == SYNTAXNODE::MODE_Flow_Else) {
-          DbgDumpScope("else", RTSCOPE(0,0), RTSCOPE(nNextBegin, scope.end));
+      // else if/else 处理
+      if(eNextMode == SYNTAXNODE::MODE_Flow_Else)
+      {
+        const SYNTAXNODE::MODE eMode = TryGetNode(&B);
+        if(eMode != SYNTAXNODE::MODE_Block) {
+          if(eMode != SYNTAXNODE::MODE_Chain) {
+            bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
+          }
+          bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
         }
-        DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
       }
+           
+
+      bret = bret && MakeSyntaxNode(pUnion, eNextMode, &A, &B);
+
+    //  if(eNextMode != SYNTAXNODE::MODE_Chain) {
+    //    if(eNextMode == SYNTAXNODE::MODE_Flow_Else) {
+    //      DbgDumpScope("else", RTSCOPE(0,0), RTSCOPE(nNextBegin, scope.end));
+    //    }
+    //    DbgDumpScope(bElseIf ? "elif" : "if", sConditional, sBlock);
+    //  }
     }
-    else {
-      DbgDumpScope("if", sConditional, sBlock);
-    }
+    //else {
+    //  DbgDumpScope("if", sConditional, sBlock);
+    //}
 
     return bret ? result : RTSCOPE::npos;
   }
@@ -1526,12 +1535,6 @@ NOT_INC_P:
     bret = bret && ParseArithmeticExpression(&sConditional, &A);
 
 
-    //if(sConditional.begin >= scope.end || sConditional.end == -1 || sConditional.end > scope.end)
-    //{
-    //  // ERROR: while 语法错误
-    //  return RTSCOPE::npos;
-    //}
-
     sBlock.begin = sConditional.end + 1;
     sBlock.end   = RTSCOPE::npos;
     if(sBlock.begin >= scope.end) {
@@ -1550,7 +1553,7 @@ NOT_INC_P:
       if(block_begin == '{')
       {
         sBlock.end = block_begin.scope;
-        sBlock.begin++;
+        //sBlock.begin++;
       }
       else {
         sBlock.end = block_begin.semi_scope;
@@ -1561,47 +1564,21 @@ NOT_INC_P:
         // ERROR: while 语法错误
         return RTSCOPE::npos;
       }
-      bret = bret && ParseExpression(&sBlock, &B);
+      bret = bret && ParseExpression(sBlock, &B);
     }
 
-    //if(block_begin == '{')
-    //{
-    //  sBlock.end = block_begin.scope;
-    //  sBlock.begin++;
-    //}
-    //else if(TryKeywords(RTSCOPE(sBlock.begin, scope.end), &B, &sBlock.end))
-    //{
-    //  eMode = SYNTAXNODE::MODE_Flow_While;
-    //  bret = sBlock.end != RTSCOPE::npos;
-    //}
-    ////else if(block_begin == "while")
-    ////{
-    ////  sBlock.end = RTSCOPE::npos;
-    ////  eMode = SYNTAXNODE::MODE_Flow_While;
-    ////}
-    //// "for"
-    //// "if"
-    //else {
-    //  sBlock.end = block_begin.semi_scope;
+    const SYNTAXNODE::MODE eMode = TryGetNode(&B);
+    if(eMode != SYNTAXNODE::MODE_Block) {
+      if(eMode != SYNTAXNODE::MODE_Chain) {
+        bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
+      }
+      bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
+    }
+
+    //if(TryGetNode(&B) != SYNTAXNODE::MODE_Block) {
+    //  bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
     //}
 
-    //if(eMode == SYNTAXNODE::MODE_Undefined && sBlock.end > scope.end)
-    //{
-    //  // ERROR: while 语法错误
-    //  return RTSCOPE::npos;
-    //}
-
-    //if(eMode == SYNTAXNODE::MODE_Flow_While)
-    //{
-    //  sBlock.end = ParseFlowWhile(RTSCOPE(sBlock.begin, scope.end), &B);
-    //  bret = sBlock.end != RTSCOPE::npos;
-    //}
-    //else
-    //if(eMode != SYNTAXNODE::MODE_Flow_While)
-    //{
-    //  ASSERT(eMode == SYNTAXNODE::MODE_Undefined);
-    //  bret = bret && ParseExpression(&sBlock, &B);
-    //}
     bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_While, NULL, &A, &B);
 
     DbgDumpScope("while", sConditional, sBlock);
@@ -1639,7 +1616,7 @@ NOT_INC_P:
 
     // TODO： 验证域的开始是括号和花括号
 
-    GXBOOL bret = ParseExpression(&sBlock, &B);
+    GXBOOL bret = ParseExpression(sBlock, &B);
     bret = bret && ParseArithmeticExpression(&sConditional, &A);
     bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
@@ -1767,7 +1744,7 @@ NOT_INC_P:
     if(block_begin == '{')
     {
       pBlock->end = block_begin.scope;
-      pBlock->begin++;
+      //pBlock->begin++;
     }
     else if(TryKeywords(RTSCOPE(pBlock->begin, scope.end), pBlockNode, &pBlock->end))
     {
@@ -1821,22 +1798,32 @@ NOT_INC_P:
     //}
     //else
 
-    if( ! uBlock.ptr)
-    {
-      ParseExpression(&sBlock, &uBlock);
+    if( ! uBlock.ptr) {
+      ParseExpression(sBlock, &uBlock);
+      //MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Chain, &uBlock, NULL);
     }
 
-    DbgDumpScope("for_2", sConditional, sIterator);
-    DbgDumpScope("for_1", sInitializer, sBlock);
+    GXBOOL bret = TRUE;
+    // 如果不是代码块，就转换为代码块
+    const SYNTAXNODE::MODE eMode = TryGetNode(&uBlock);
+    if(eMode != SYNTAXNODE::MODE_Block) {
+      if(eMode != SYNTAXNODE::MODE_Chain) {
+        bret = MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Chain, &uBlock, NULL);
+      }
+      bret = bret && MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Block, &uBlock, NULL);
+    }
 
-    GXBOOL bret = MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForRunning, NULL, &uCond, &uIter);
-    bret = bret && MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForInit, NULL, &uInit, &D);
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_For, NULL, &D, &uBlock);
+    //DbgDumpScope("for_2", sConditional, sIterator);
+    //DbgDumpScope("for_1", sInitializer, sBlock);
+
+    bret = bret && MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForRunning, &uCond, &uIter);
+    bret = bret && MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForInit, &uInit, &D);
+    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_For, &D, &uBlock);
     
     return bret ? sBlock.end : RTSCOPE::npos;
   }
 
-  GXBOOL CodeParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
+  GXBOOL CodeParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
   {
     ASSERT((int)pScope->begin <= nMiddle);
     ASSERT(nMiddle <= (int)pScope->end);
@@ -1937,6 +1924,11 @@ NOT_INC_P:
     // </Make OperString>
   }
 
+  GXBOOL CodeParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
+  {
+    return MakeSyntaxNode(pDest, mode, NULL, pOperandA, pOperandB);
+  }
+
   GXBOOL CodeParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
   {
     const SYNTAXNODE::UN* pOperand[] = {pOperandA, pOperandB};
@@ -1953,7 +1945,7 @@ NOT_INC_P:
         sNode.Operand[i].pSym = pOperand[i]->pSym;
       }
       else {
-        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_NODE << nFlagShift);
+        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX << nFlagShift);
         ASSERT((size_t)pOperand[i]->pNode < m_aSyntaxNodePack.size()); // 这时候还是索引，所以肯定小于序列的长度
         sNode.Operand[i].pNode = pOperand[i]->pNode;
       }

@@ -118,6 +118,11 @@ void TestFlowIf()
   default:
     break;
   };
+
+  do 
+  {
+    a++;
+  } while (a < b);
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -126,12 +131,12 @@ int _tmain(int argc, _TCHAR* argv[])
   TestFlowIf();
   clpathfile::LocalWorkingDirA("..");
 
-  TestExpressionParser(samplesOpercode);
-  TestExpressionParser(samplesNumeric);
-  TestExpressionParser(samplesSimpleExpression);
-  TestExpressionParser(samplesIfExpression);
-  TestExpressionParser(samplesForExpression);
-  TestExpressionParser(samplesExpression);
+  //TestExpressionParser(samplesOpercode);
+  //TestExpressionParser(samplesNumeric);
+  //TestExpressionParser(samplesSimpleExpression);
+  //TestExpressionParser(samplesIfExpression);
+  //TestExpressionParser(samplesForExpression);
+  //TestExpressionParser(samplesExpression);
 
   TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
   TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame_output.txt");

@@ -47,6 +47,10 @@ void func4()
 	  e = 5;
 	}
   }
+  {
+    a = 0;
+	b = 1;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -59,7 +63,7 @@ void flow_test()
 
   int k = 0;
   for(;;k++);
-}
+}//*/
 
 void flow_test2()
 {
@@ -109,9 +113,13 @@ void test_flow_if()
   int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
   if(a > b)
     a = a;
+  b = b;
+  c = c;
 
   if(a == b) {
     a = a;
+    b = b;
+    c = c;
   }
 
   if(a > b) {
@@ -122,6 +130,16 @@ void test_flow_if()
 
   if(a > b) {
     b = b;
+  }
+  else {
+    a = a;
+  }
+
+  if(a > b) {
+    b = b;
+  }
+  else if(b < c) {
+    c = c;
   }
   else {
     a = a;

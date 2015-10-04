@@ -168,10 +168,11 @@ namespace UVShader
     {
       enum FLAGS
       {
-        FLAG_OPERAND_SHIFT     = 8,
-        FLAG_OPERAND_TYPEMASK  = 0x00000003,
-        FLAG_OPERAND_IS_NODE   = 0x00000001,
-        FLAG_OPERAND_IS_SYMBOL = 0x00000002,
+        FLAG_OPERAND_SHIFT      = 8,
+        FLAG_OPERAND_TYPEMASK   = 0x0000000F,
+        FLAG_OPERAND_IS_NODEIDX = 0x00000001,
+        FLAG_OPERAND_IS_NODE    = 0x00000002,
+        FLAG_OPERAND_IS_SYMBOL  = 0x00000004,
       };
 
       enum MODE
@@ -193,7 +194,8 @@ namespace UVShader
         MODE_Flow_Continue,
         MODE_Flow_Discard,
         MODE_Return,
-        MODE_Chain,         // 表达式链表,链表中的应该属于同一个作用域
+        MODE_Block,
+        MODE_Chain,         // 表达式链表,链表中的应该属于同一个作用域, [A:statement][B:next chain]，在chain结尾应该是[A:statement][B:NULL]这样
       };
 
       const static int s_NumOfOperand = 2;
@@ -215,15 +217,29 @@ namespace UVShader
         return (FLAGS)((flags >> shift) & FLAG_OPERAND_TYPEMASK);
       }
 
-      inline GXBOOL OperandA_IsNode() const {
+      //inline GXBOOL OperandA_IsNode() const {
+      //  const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK;
+      //  return (flags & dwTypeMask) == FLAG_OPERAND_IS_NODE;
+      //}
+
+      inline GXBOOL OperandA_IsNodeIndex() const {
         const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK;
-        return (flags & dwTypeMask) == FLAG_OPERAND_IS_NODE;
+        return (flags & dwTypeMask) == FLAG_OPERAND_IS_NODEIDX;
       }
 
-      inline GXBOOL OperandB_IsNode() const {
+      inline GXBOOL OperandB_IsNodeIndex() const {
         const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK << FLAG_OPERAND_SHIFT;
-        const GXDWORD dwNode = FLAG_OPERAND_IS_NODE << FLAG_OPERAND_SHIFT;
+        const GXDWORD dwNode = FLAG_OPERAND_IS_NODEIDX << FLAG_OPERAND_SHIFT;
         return (flags & dwTypeMask) == dwNode;
+      }
+
+      inline void Clear()
+      {
+        flags  = 0;
+        mode   = MODE_Undefined;
+        pOpcode = NULL;
+        Operand[0].ptr = NULL;
+        Operand[1].ptr = NULL;
       }
     };
     typedef clvector<SYNTAXNODE> SyntaxNodeArray;
@@ -339,21 +355,23 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
 
     GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseArithmeticExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
+    GXBOOL  ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
 
     GXBOOL  ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseExpression(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
-    GXBOOL  ParseFunctionCall(RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
+    //GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
+    GXBOOL  ParseFunctionCall(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
     GXBOOL  TryKeywords(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end);
+    GXBOOL  TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end); // 解析一个代码块，用{}限定的一组或者仅有一句表达式的代码
     RTSCOPE::TYPE  ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf);
     RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pBlockNode);
     RTSCOPE::TYPE  ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     RTSCOPE::TYPE  ParseFlowWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     RTSCOPE::TYPE  ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
+    GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
     GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
 
@@ -366,6 +384,19 @@ namespace UVShader
     GXLPCSTR GetUniqueString(const SYMBOL* pSym);
     const TYPE* ParseType(const SYMBOL* pSym);
     //clsize   FindSemicolon(clsize begin, clsize end) const;
+
+    SYNTAXNODE::MODE TryGetNode(const SYNTAXNODE::UN* pUnion)
+    {
+      if(pUnion->ptr >= &m_aSymbols.begin() && pUnion->ptr < &m_aSymbols.end()) {
+        return SYNTAXNODE::MODE_Undefined;
+      }
+      else if(pUnion->ptr >= &m_aSyntaxNodePack.begin() && pUnion->ptr < &m_aSyntaxNodePack.end()) {
+        return pUnion->pNode->mode;
+      }
+      else {
+        return m_aSyntaxNodePack[(int)pUnion->pNode].mode;
+      }
+    }
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
