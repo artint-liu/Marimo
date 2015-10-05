@@ -1,0 +1,88 @@
+// https://www.shadertoy.com/view/lsS3zy
+float time;
+
+float de(vec3 p)
+{
+	float inner_sphere_scale = 0.7;
+	float s=4.0;
+	float t=fract(time/0.6);
+	float scale=pow(inner_sphere_scale, -t);
+	float d=1e4;
+	
+	for(int i = 0; i < 5; i += 1)
+	{
+		vec3 z=p/scale,az=abs(z),w=z;
+		
+		if(az.x>az.y && az.x>az.z)
+			w/=w.x*sign(w.x);
+		else if(az.y>az.x && az.y>az.z)
+			w/=w.y*sign(w.y);
+			else
+				w/=w.z*sign(w.z);
+			
+			w=normalize(floor(w*s+vec3(0.5)))*0.4;
+		
+		d=min(d,(distance(z,w) - 0.02*min(1.0, (float(i) + 1.0 - t) / 1.5))*scale);
+		scale*=inner_sphere_scale;
+	}
+	
+	return d;
+}
+
+mat3 rotateXMat(float a)
+{
+	return mat3(1.0, 0.0, 0.0, 0.0, cos(a), -sin(a), 0.0, sin(a), cos(a));
+}
+
+mat3 rotateYMat(float a)
+{
+	return mat3(cos(a), 0.0, -sin(a), 0.0, 1.0, 0.0, sin(a), 0.0, cos(a));
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+	time=iGlobalTime+10.63;
+	
+	mat3 m=rotateXMat(time*0.5)*rotateYMat(time*0.7);
+	
+	vec2 p=fragCoord.xy/iResolution.xy*2.0-vec2(1.0);
+	p.x*=iResolution.x/iResolution.y;
+	vec3 ro=m*vec3(0.0,0.0,0.4);
+	vec3 rd=m*normalize(vec3(p, -2.0));
+	
+	float t=0.0;
+	
+	for(int i=0;i<120;i+=1)
+	{
+		float d=de(ro+rd*t);
+		if(abs(d)<1e-4)
+			break;
+		t+=d;
+	}
+	
+	vec3 rp=ro+rd*t;
+	
+	vec3 col=mix(vec3(1.0,1.0,0.5),vec3(1.0,0.5,0.25)*0.1,pow(abs(rd.y),0.5));
+	
+	if(t<20.0)
+	{
+		float e=1e-3, c=de(rp);
+		vec3 n=normalize(vec3(de(rp+vec3(e,0.0,0.0))-c,de(rp+vec3(0.0,e,0.0))-c,de(rp+vec3(0.0,0.0,e))-c));
+		
+		col=mix(vec3(0.0),vec3(1.7,0.6,0.2)*5.0*mix(0.6,1.0,(0.5+0.5*cos(time*30.0))),
+				pow(0.5+0.5*cos(rp.x*50.0+sin(rp.y*10.0)*3.0+cos(rp.z*4.0)),3.0));
+		
+		col*=vec3(mix(0.3,2.0,0.5+0.5*dot(n,rd)));
+		
+		col+=vec3(pow(clamp(0.5+0.5*dot(n,rd),0.0,1.0),2.0))*0.6;
+		
+		vec3 l=normalize(vec3(1.0,1.0,-1.0)-rp);
+		vec3 h=normalize(normalize(l)+normalize(-rd));
+		
+		col+=vec3(pow(clamp(0.5+0.5*dot(h,n),0.0,1.0),80.0))*0.7;
+	}
+	
+	col+=(0.03+cos(time*7.0)*0.01)*mix(vec3(0.1,0.5,0.0)*0.3,vec3(1.2,0.7,0.1),0.5+0.5*cos(p.y*0.3+sin(p.x*0.1+time)*6.0)*sin(p.y));
+	
+	fragColor.rgb=sqrt(col);
+}
