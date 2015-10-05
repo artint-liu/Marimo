@@ -356,6 +356,29 @@ namespace SmartStreamUtility
     return FALSE;
   }
 
+  // 判断pChar所在位置是不是在一行的开头，以下情况返回TRUE
+  // 1.pChar之前的字符是'\n'
+  // 2.pChar在文档开头
+  // pChar之前的空白会被忽略，空白字符一般是0x20空格符号或者'\t'制表符号，
+  // 也可以用户自己标记空白字符
+  template<class SmartStreamT, typename _Ty>
+  b32 IsHeadOfLine(SmartStreamT* pStream, _Ty* pChar)
+  {
+    auto* ptr = pStream->GetStreamPtr();
+    auto* p = pChar - 1;
+    while(p >= ptr) {
+      if(*p == '\n') {
+        return TRUE;
+      }
+      else if(TEST_FLAG_NOT(pStream->GetCharSemantic(*p), SmartStreamT::M_GAP)) {
+        return FALSE;
+      }
+      --p;
+    }
+    return TRUE; // 到文档开头了
+  }
+
+
   template<class _Iter>
   b32 ExtendToCStyleBlockComment(_Iter& it, clsize offset, clsize remain)
   {

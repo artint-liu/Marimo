@@ -45,15 +45,15 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
   {
     auto nSize = strlen(pSamples[i].expression);
     expp.Attach(pSamples[i].expression, nSize);
-    expp.GenerateSymbols();
-    auto pSymbols = expp.GetSymbolsArray();
+    expp.GenerateTokens();
+    auto pTokens = expp.GetTokensArray();
 
     int nCount = 0;
     //TRACE("%3d# ", i);
     TRACE("%d# \"%s\"\n", i, pSamples[i].expression);
-    for(auto it = pSymbols->begin(); it != pSymbols->end(); ++it)
+    for(auto it = pTokens->begin(); it != pTokens->end(); ++it)
     {
-      TRACE("[%d]\"%s\"\t(p=%d,s=%d,s2=%d)\n", it - pSymbols->begin(), it->ToString(), it->precedence, it->scope, it->semi_scope);
+      TRACE("[%d]\"%s\"\t(p=%d,s=%d,s2=%d)\n", it - pTokens->begin(), it->ToString(), it->precedence, it->scope, it->semi_scope);
       nCount++;
     }
     TRACE("(%d:%f)\n", nCount, (float)nSize / nCount);
@@ -63,7 +63,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     }
 
     // 表达式解析
-    UVShader::CodeParser::RTSCOPE scope(0, pSymbols->size());
+    UVShader::CodeParser::RTSCOPE scope(0, pTokens->size());
     UVShader::CodeParser::STATEMENT stat;
     expp.TestParseExpression(&stat, &scope);
 
@@ -125,6 +125,30 @@ void TestFlowIf()
   } while (a < b);
 }
 
+void TestShaderToys()
+{
+  clstd::FindFile find("Test\\shaders\\ShaderToy\\*.txt");
+  clstd::FINDFILEDATAA find_data;
+  while(find.GetFileA(&find_data))
+  {
+    clStringA strInput;
+    clStringA strOutput = find_data.Filename;
+
+    if(strOutput.EndsWith("[output].txt")) {
+      continue;
+    }
+
+    clsize pos = clpathfile::FindExtensionA(strOutput);
+    if(pos != clStringA::npos)
+    {
+      strOutput.Insert(pos, "[output]");
+      clpathfile::CombinePathA(strInput, "Test\\shaders\\ShaderToy", find_data.Filename);
+      clpathfile::CombinePathA(strOutput, "Test\\shaders\\ShaderToy", strOutput);
+      TestFromFile(strInput, strOutput);
+    }
+  }
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   int a = 1, b = 2, c = 3;
@@ -139,7 +163,14 @@ int _tmain(int argc, _TCHAR* argv[])
   //TestExpressionParser(samplesExpression);
 
   TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
-  TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame_output.txt");
+
+  //TestShaderToys();
+
+  //TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame[output].txt");
+  //TestFromFile("Test\\shaders\\ShaderToy\\Anatomy of an explosion.txt", "Test\\shaders\\Anatomy of an explosion[output].txt");
+  //TestFromFile("Test\\shaders\\ShaderToy\\Warp speed.txt", "Test\\shaders\\Warp speed[output].txt");
+  //TestFromFile("Test\\shaders\\ShaderToy\\TrivialRaytracer3.txt", "Test\\shaders\\TrivialRaytracer3[output].txt");
+  
   //TestFromFile("Test\\shaders\\ShaderToy\\TrivialRaytracer3.txt");
 	return 0;
 }

@@ -177,22 +177,22 @@ namespace Marimo
     return GX_OK;
   }
 
-  template<class SmartStreamT, typename _Ty>
-  GXBOOL IsHeadOfLine(SmartStreamT* pStream, _Ty* pCurrent)
-  {
-    auto* ptr = pStream->GetStreamPtr();
-    auto* p = pCurrent - 1;
-    while(p >= ptr) {
-      if(*p == '\n') {
-        return TRUE;
-      }
-      else if(TEST_FLAG_NOT(pStream->GetCharSemantic(*p), SmartStreamT::M_GAP)) {
-        return FALSE;
-      }
-      --p;
-    }
-    return TRUE; // 到文档开头了
-  }
+  //template<class SmartStreamT, typename _Ty>
+  //GXBOOL IsHeadOfLine(SmartStreamT* pStream, _Ty* pCurrent)
+  //{
+  //  auto* ptr = pStream->GetStreamPtr();
+  //  auto* p = pCurrent - 1;
+  //  while(p >= ptr) {
+  //    if(*p == '\n') {
+  //      return TRUE;
+  //    }
+  //    else if(TEST_FLAG_NOT(pStream->GetCharSemantic(*p), SmartStreamT::M_GAP)) {
+  //      return FALSE;
+  //    }
+  //    --p;
+  //  }
+  //  return TRUE; // 到文档开头了
+  //}
 
   template<class _Iter>
   GXBOOL IsDifferentLines(const _Iter& first, const _Iter& second) {
@@ -255,7 +255,7 @@ namespace Marimo
       if(pThis->m_bParsingExpression) {
         return 0;
       }
-      if( ! IsHeadOfLine(it.pContainer, it.marker)) {
+      if( ! SmartStreamUtility::IsHeadOfLine(it.pContainer, it.marker)) {
         pThis->m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1900_SHARP_SIGN_MUST_BE_FIRST);
         SmartStreamUtility::ExtendToNewLine(it, 1, uRemain);
         ++it;

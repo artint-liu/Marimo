@@ -475,11 +475,13 @@ FALSE_RET:
   }
 
   FindFile::FindFile(CLLPCSTR szFilename)
+    : hFind(INVALID_HANDLE_VALUE)
   {
     NewFindA(szFilename);
   }
 
   FindFile::FindFile(CLLPCWSTR szFilename)
+    : hFind(INVALID_HANDLE_VALUE)
   {
     NewFindW(szFilename);
   }

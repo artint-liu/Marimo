@@ -210,8 +210,8 @@ namespace UVShader
       aCharSem[s_Operator3[i].szOperator[0]] |= M_CALLBACK;
     }
 
-    ASSERT(m_nMaxPrecedence <= (1 << (SYMBOL::precedence_bits - 1))); // 检测位域表示范围没有超过优先级
-    ASSERT(m_nMaxPrecedence != SYMBOL::ID_BRACE); // 保证优先级最大值与括号的ID不冲突
+    ASSERT(m_nMaxPrecedence <= (1 << (TOKEN::precedence_bits - 1))); // 检测位域表示范围没有超过优先级
+    ASSERT(m_nMaxPrecedence != TOKEN::ID_BRACE); // 保证优先级最大值与括号的ID不冲突
 
     SetFlags(GetFlags() | F_SYMBOLBREAK);
     SetCharSemantic(aCharSem, 0, 128);
@@ -249,7 +249,7 @@ namespace UVShader
 
   void CodeParser::Cleanup()
   {
-    m_aSymbols.clear();
+    m_aTokens.clear();
     m_aStatements.clear();
 
     InitPacks();
@@ -359,27 +359,32 @@ namespace UVShader
       SmartStreamUtility::ExtendToCStyleBlockComment(it, 2, remain);
       ++it;
     }
+    else if(it.marker[0] == '#' && SmartStreamUtility::IsHeadOfLine(it.pContainer, it.marker))
+    {
+      SmartStreamUtility::ExtendToNewLine(it, 1, remain);
+      ++it; // 暂时跳过
+    }
     ASSERT((int)remain >= 0);
     return 0;
   }
 
-  clsize CodeParser::EstimateForSymbolsCount() const
+  clsize CodeParser::EstimateForTokensCount() const
   {
     auto count = GetStreamCount();
     return (count << 1) + (count >> 1); // 按照 字节数：符号数=2.5：1来计算
   }
 
-  clsize CodeParser::GenerateSymbols()
+  clsize CodeParser::GenerateTokens()
   {
     auto stream_end = end();
-    ASSERT(m_aSymbols.empty()); // 调用者负责清空
+    ASSERT(m_aTokens.empty()); // 调用者负责清空
 
-    m_aSymbols.reserve(EstimateForSymbolsCount());
+    m_aTokens.reserve(EstimateForTokensCount());
     typedef clstack<int> PairStack;
     //PairStack stackBrackets;        // 圆括号
     //PairStack stackSquareBrackets;  // 方括号
     //PairStack stackBrace;           // 花括号
-    SYMBOL sym;
+    TOKEN sym;
     
     // 只是清理
     m_CurSymInfo.ClearMarker();
@@ -406,7 +411,7 @@ namespace UVShader
 
     for(auto it = begin(); it != stream_end; ++it)
     {
-      const int c_size = (int)m_aSymbols.size();
+      const int c_size = (int)m_aTokens.size();
       sym.Set(it);
       sym.scope = -1;
       sym.semi_scope = -1;
@@ -418,9 +423,9 @@ namespace UVShader
       sym.unary_mask = m_CurSymInfo.unary_mask;
 
       // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
-      if((it == '-' || it == '+') && ! m_aSymbols.empty())
+      if((it == '-' || it == '+') && ! m_aTokens.empty())
       {        
-        const auto& l_back = m_aSymbols.back();
+        const auto& l_back = m_aTokens.back();
 
         // 一元操作符，+/-就不转换为正负号
         // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
@@ -449,7 +454,7 @@ namespace UVShader
             // ERROR: 不匹配            
           }
           sym.scope = c.sStack.top();
-          m_aSymbols[sym.scope].scope = c_size;
+          m_aTokens[sym.scope].scope = c_size;
           c.sStack.pop();
         }
         else {
@@ -458,7 +463,7 @@ namespace UVShader
 
         // ?: 操作符会设置precedence的优先级，而我们只想设置括号的标记
         if(sym.precedence == 0) {
-          sym.precedence = SYMBOL::ID_BRACE;
+          sym.precedence = TOKEN::ID_BRACE;
         }
 
         if(c.bNewEOE) {
@@ -473,10 +478,10 @@ namespace UVShader
 
           // 这个是要保证for中的分号定位在“for”上，而不是它前面的符号里
           if( ! bracket_stack.empty() && bracket_stack.top() > (EOE + 1) &&
-          m_aSymbols[bracket_stack.top() - 1] == "for" ) {
+          m_aTokens[bracket_stack.top() - 1] == "for" ) {
           EOE = bracket_stack.top() - 1;
           }
-          m_aSymbols[EOE].semi_scope = c_size;
+          m_aTokens[EOE].semi_scope = c_size;
 
         }
         EOE = c_size + 1;
@@ -486,14 +491,14 @@ namespace UVShader
       //  EOE = c_size;
       //}
 
-      m_aSymbols.push_back(sym);
+      m_aTokens.push_back(sym);
 
       /*/
-      m_aSymbols.push_back(sym);
+      m_aTokens.push_back(sym);
 
       if(it == ';') {
-        ASSERT(EOE < (int)m_aSymbols.size());
-        for(auto it = m_aSymbols.begin() + EOE; it != m_aSymbols.end(); ++it)
+        ASSERT(EOE < (int)m_aTokens.size());
+        for(auto it = m_aTokens.begin() + EOE; it != m_aTokens.end(); ++it)
         {
           it->semi_scope = c_size;
         }
@@ -511,17 +516,17 @@ namespace UVShader
       }
     }
 
-    return m_aSymbols.size();
+    return m_aTokens.size();
   }
 
-  const CodeParser::SymbolArray* CodeParser::GetSymbolsArray() const
+  const CodeParser::TokenArray* CodeParser::GetTokensArray() const
   {
-    return &m_aSymbols;
+    return &m_aTokens;
   }
 
   GXBOOL CodeParser::Parse()
   {
-    RTSCOPE scope(0, m_aSymbols.size());
+    RTSCOPE scope(0, m_aTokens.size());
     while(ParseStatement(&scope));
     RelocalePointer();
     return TRUE;
@@ -530,7 +535,66 @@ namespace UVShader
   GXBOOL CodeParser::ParseStatement(RTSCOPE* pScope)
   {    
     return (pScope->begin < pScope->end) && (
+      ParseStatementAs_Definition(pScope) ||
       ParseStatementAs_Function(pScope) || ParseStatementAs_Struct(pScope));
+  }
+
+  GXBOOL CodeParser::ParseStatementAs_Definition(RTSCOPE* pScope)
+  {
+    TOKEN* p = &m_aTokens[pScope->begin];
+    const TOKEN* pEnd = &m_aTokens.front() + pScope->end;
+
+    if(p->semi_scope == RTSCOPE::npos) {
+      return FALSE;
+    }
+
+    STATEMENT stat = {StatementType_Definition};
+    RTSCOPE::TYPE definition_end = p->semi_scope;
+
+    // 修饰
+    if(*p == "const") {
+      stat.defn.modifier = UniformModifier_const;
+      INC_BUT_NOT_END(p, pEnd);
+    }
+    else {
+      stat.defn.modifier = UniformModifier_empty;
+    }
+    
+
+    // 类型
+    stat.defn.szType = GetUniqueString(p);
+    INC_BUT_NOT_END(p, pEnd);
+
+    // 名称
+    stat.defn.szName = GetUniqueString(p);
+    INC_BUT_NOT_END(p, pEnd);
+
+    // 数组定义----目前跳过了
+    while(*p == '[') {
+      if((RTSCOPE::TYPE)p->scope >= definition_end) {
+        ERROR_MSG__MISSING_SEMICOLON;
+      }
+      p = &m_aTokens[p->scope];
+      INC_BUT_NOT_END(p, pEnd);
+    }
+
+    if(*p == '=')
+    {
+      INC_BUT_NOT_END(p, pEnd);
+      ParseExpression(RTSCOPE(p - &m_aTokens.front(), definition_end), &stat.defn.sRoot);
+    }
+    else if(*p == ';') {
+      ;
+    }
+    else {
+      CLBREAK;
+      return FALSE;
+    }
+
+
+    m_aStatements.push_back(stat);
+    pScope->begin = definition_end + 1;
+    return FALSE;
   }
 
   GXBOOL CodeParser::ParseStatementAs_Function(RTSCOPE* pScope)
@@ -541,8 +605,8 @@ namespace UVShader
     //  [StatementBlock]
     //};
 
-    SYMBOL* p = &m_aSymbols[pScope->begin];
-    const SYMBOL* pEnd = &m_aSymbols.front() + pScope->end;
+    TOKEN* p = &m_aTokens[pScope->begin];
+    const TOKEN* pEnd = &m_aTokens.front() + pScope->end;
 
     STATEMENT stat = {StatementType_Empty};
 
@@ -573,17 +637,17 @@ namespace UVShader
     INC_BUT_NOT_END(p, pEnd); // ERROR: 缺少“；”
 
     ASSERT(*p == '('); // 由前面的特征检查保证
-    ASSERT(p->scope >= 0);  // 由 GenerateSymbols 函数保证
+    ASSERT(p->scope >= 0);  // 由 GenerateTokens 函数保证
 
     // #
     // # ( [ArgumentList] )
     // #
     if(p[0].scope != p[1].scope + 1) // 有参数: 两个括号不相邻
     {
-      RTSCOPE ArgScope(m_aSymbols[p->scope].scope + 1, p->scope);
+      RTSCOPE ArgScope(m_aTokens[p->scope].scope + 1, p->scope);
       ParseFunctionArguments(&stat, &ArgScope);
     }
-    p = &m_aSymbols[p->scope];
+    p = &m_aTokens[p->scope];
     ASSERT(*p == ')');
 
     ++p;
@@ -599,10 +663,10 @@ namespace UVShader
       stat.type = StatementType_FunctionDecl;
     }
     else if(*p == "{") { // 函数体
-      RTSCOPE func_statement_block(m_aSymbols[p->scope].scope, p->scope);
+      RTSCOPE func_statement_block(m_aTokens[p->scope].scope, p->scope);
 
       stat.type = StatementType_Function;
-      p = &m_aSymbols[p->scope];
+      p = &m_aTokens[p->scope];
       ++p;
 
       if(func_statement_block.IsValid())
@@ -622,14 +686,14 @@ namespace UVShader
 
 
     m_aStatements.push_back(stat);
-    pScope->begin = p - &m_aSymbols.front();
+    pScope->begin = p - &m_aTokens.front();
     return TRUE;
   }
 
   GXBOOL CodeParser::ParseStatementAs_Struct( RTSCOPE* pScope )
   {
-    SYMBOL* p = &m_aSymbols[pScope->begin];
-    const SYMBOL* pEnd = &m_aSymbols.front() + pScope->end;
+    TOKEN* p = &m_aTokens[pScope->begin];
+    const TOKEN* pEnd = &m_aTokens.front() + pScope->end;
 
     if(*p != "struct") {
       return FALSE;
@@ -646,12 +710,12 @@ namespace UVShader
       return FALSE;
     }
 
-    RTSCOPE StruScope(m_aSymbols[p->scope].scope + 1, p->scope);
+    RTSCOPE StruScope(m_aTokens[p->scope].scope + 1, p->scope);
     // 保证分析函数的域
-    ASSERT(m_aSymbols[StruScope.begin - 1] == "{" && m_aSymbols[StruScope.end] == "}"); 
+    ASSERT(m_aTokens[StruScope.begin - 1] == "{" && m_aTokens[StruScope.end] == "}"); 
 
     pScope->begin = StruScope.end + 1;
-    if(m_aSymbols[pScope->begin] != ";") {
+    if(m_aTokens[pScope->begin] != ";") {
       // ERROR: 缺少“；”
       return FALSE;
     }
@@ -660,7 +724,7 @@ namespace UVShader
     // #
     // # 解析成员变量
     // #
-    ParseStructMember(&stat, &StruScope);
+    ParseStructMembers(&stat, &StruScope);
 
     m_aStatements.push_back(stat);
     return TRUE;
@@ -672,8 +736,8 @@ namespace UVShader
     // [InputModifier] Type Name [: Semantic]
     // 函数可以包含多个参数，用逗号分隔
 
-    SYMBOL* p = &m_aSymbols[pArgScope->begin];
-    const SYMBOL* pEnd = &m_aSymbols.front() + pArgScope->end;
+    TOKEN* p = &m_aTokens[pArgScope->begin];
+    const TOKEN* pEnd = &m_aTokens.front() + pArgScope->end;
     ASSERT(*pEnd == ")"); // 函数参数列表的结尾必须是闭圆括号
 
     if(pArgScope->begin >= pArgScope->end) {
@@ -758,7 +822,12 @@ NOT_INC_P:
     }
   }
 
-  GXBOOL CodeParser::ParseStructMember( STATEMENT* pStat, RTSCOPE* pStruScope )
+  GXBOOL CodeParser::ParseStructMember(STRUCT_MEMBER* pMember, RTSCOPE* pStruScope)
+  {
+    return TRUE;
+  }
+
+  GXBOOL CodeParser::ParseStructMembers( STATEMENT* pStat, RTSCOPE* pStruScope )
   {
     // 作为结构体成员
     // Type[RxC] MemberName; 
@@ -766,8 +835,8 @@ NOT_INC_P:
     // Type[RxC] MemberName : ShaderFunction; 
     // 这个结构体成员必须一致，要么全是普通成员变量，要么全是Shader标记
 
-    SYMBOL* p = &m_aSymbols[pStruScope->begin];
-    const SYMBOL* pEnd = &m_aSymbols.front() + pStruScope->end;
+    TOKEN* p = &m_aTokens[pStruScope->begin];
+    const TOKEN* pEnd = &m_aTokens.front() + pStruScope->end;
     MemberArray aMembers;
 
     while(p < pEnd)
@@ -779,38 +848,38 @@ NOT_INC_P:
       member.szName = GetUniqueString(p);
       INC_BUT_NOT_END(p, pEnd); // ERROR: 结构体成员声明不正确
 
-      if(*p == ";") {
-        if(pStat->type == StatementType_Empty || pStat->type == StatementType_Struct) {
-          pStat->type = StatementType_Struct;
-          ++p;
-        }
-        else {
+      if(*p == ';') {
+        if(pStat->type != StatementType_Empty && pStat->type != StatementType_Struct) {
           // ERROR: 结构体成员作用不一致。纯结构体和Shader标记结构体混合定义
           return FALSE;
         }
+        pStat->type = StatementType_Struct;
+        ++p;
       }
-      else if(*p == ":") {
-        if(pStat->type == StatementType_Empty || pStat->type == StatementType_Signatures) {
-          pStat->type = StatementType_Signatures;
-          INC_BUT_NOT_END(p, pEnd);
-          member.szSignature = GetUniqueString(p);
-          
-          // TODO: 检查这个是Signature
-
-          INC_BUT_NOT_END(p, pEnd);
-          if(*p != ";") {
-            // ERROR: 缺少“；”
-            return FALSE;
-          }
-          ++p;
-        }
-        else {
+      else if(*p == ':') {
+        if(pStat->type != StatementType_Empty && pStat->type != StatementType_Struct) {
           // ERROR: 结构体成员作用不一致。纯结构体和Shader标记结构体混合定义
           return FALSE;
         }
+        pStat->type = StatementType_Signatures;
+        INC_BUT_NOT_END(p, pEnd);
+        member.szSignature = GetUniqueString(p);
+
+        // TODO: 检查这个是Signature
+
+        INC_BUT_NOT_END(p, pEnd);
+        if(*p != ";") {
+          // ERROR: 缺少“；”
+          return FALSE;
+        }
+        ++p;
+      }
+      else if(*p == ',') {
+        CLBREAK;
       }
       else {
         // ERROR: 缺少“；”
+        ERROR_MSG__MISSING_SEMICOLON;
         return FALSE;
       }
 
@@ -823,12 +892,12 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXLPCSTR CodeParser::GetUniqueString( const SYMBOL* pSym )
+  GXLPCSTR CodeParser::GetUniqueString( const TOKEN* pSym )
   {
     return m_Strings.add(pSym->ToString());
   }
 
-  const CodeParser::TYPE* CodeParser::ParseType(const SYMBOL* pSym)
+  const CodeParser::TYPE* CodeParser::ParseType(const TOKEN* pSym)
   {
     TYPE sType = {NULL, 1, 1};
 
@@ -893,7 +962,7 @@ NOT_INC_P:
       TRACE("编译错误\n");
       m_aDbgExpressionOperStack.clear();
     }
-    else if(bDbgRelocale && ! IsSymbol(&stat.expr.sRoot)) {
+    else if(bDbgRelocale && TryGetNodeType(&stat.expr.sRoot) == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
       IndexToPtr(stat.expr.sRoot.pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr(stat.expr.sRoot.pNode);
       DbgDumpSyntaxTree(stat.expr.sRoot.pNode, 0);
@@ -909,7 +978,7 @@ NOT_INC_P:
     for(int i = 0; i < 2; i++)
     {
       if(pNode->Operand[i].pSym) {
-        if(IsSymbol(&pNode->Operand[i])) {
+        if(TryGetNodeType(&pNode->Operand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
           str[i] = pNode->Operand[i].pSym->ToString();
         }
         else {
@@ -1019,10 +1088,10 @@ NOT_INC_P:
   GXBOOL CodeParser::ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     RTSCOPE scope = *pScope;
-    if(scope.end > scope.begin && m_aSymbols[scope.end - 1] == ';') {
+    if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
       scope.end--;
     }
-    return ParseArithmeticExpression(&scope, pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    return ParseArithmeticExpression(&scope, pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
 
   GXBOOL CodeParser::ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
@@ -1050,7 +1119,7 @@ NOT_INC_P:
     // 解析成功parse_end返回表达式最后一个token的索引，parse_end是这个关键字表达式之内的！
     // 解析失败parse_end返回RTSCOPE::npos
 
-    const auto& front = m_aSymbols[scope.begin];
+    const auto& front = m_aTokens[scope.begin];
     auto& pend = *parse_end;
     GXBOOL bret = TRUE;
     SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
@@ -1121,7 +1190,7 @@ NOT_INC_P:
 
   //GXBOOL CodeParser::TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end)
   //{
-  //  const auto& first = m_aSymbols[scope.begin];
+  //  const auto& first = m_aTokens[scope.begin];
   //  auto& pend = *parse_end;
   //  GXBOOL bret = TRUE;
 
@@ -1145,8 +1214,8 @@ NOT_INC_P:
 
   GXBOOL CodeParser::ParseExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
   {
-    ASSERT(scope.end == m_aSymbols.size() || m_aSymbols[scope.end] == ';' || 
-      m_aSymbols[scope.end] == '}');
+    ASSERT(scope.end == m_aTokens.size() || m_aTokens[scope.end] == ';' || 
+      m_aTokens[scope.end] == '}');
 
 
     const GXINT_PTR count = scope.end - scope.begin;
@@ -1160,13 +1229,13 @@ NOT_INC_P:
         return FALSE;
       }
       else if(count == 1) {
-        pUnion->pSym = &m_aSymbols[scope.begin];
+        pUnion->pSym = &m_aTokens[scope.begin];
       }
       
       return TRUE;  // count == 0 / count == 1
     }
 
-    const auto& front = m_aSymbols[scope.begin];
+    const auto& front = m_aTokens[scope.begin];
 
     if(front == '{') // 代码块
     {
@@ -1205,18 +1274,24 @@ NOT_INC_P:
     }
     else if((clsize)front.semi_scope < scope.end)
     {
-      ASSERT(m_aSymbols[front.semi_scope] == ';'); // 目前进入这个循环的只可能是遇到分号
+      ASSERT(m_aTokens[front.semi_scope] == ';'); // 目前进入这个循环的只可能是遇到分号
 
       RTSCOPE scopeA(scope.begin, front.semi_scope);
-      //RTSCOPE scopeB(front.semi_scope + 1, scope.end);
-      ASSERT((RTSCOPE::TYPE)front.semi_scope + 1 <= scope.end); // 感觉有可能begin>end，这里如果遇到就改成if(scopeB.begin >= scopeB.end)
 
-      bret = ParseExpression(scopeA, pUnion);
-      return ParseRemainStatement(front.semi_scope, scope, pUnion);
+      // 跳过只是一个分号的情况
+      if(scopeA.begin == scopeA.end) {
+        return ParseExpression(RTSCOPE(scopeA.end + 1, scope.end), pUnion);
+      }
+      else
+      {
+        //RTSCOPE scopeB(front.semi_scope + 1, scope.end);
+        ASSERT((RTSCOPE::TYPE)front.semi_scope + 1 <= scope.end); // 感觉有可能begin>end，这里如果遇到就改成if(scopeB.begin >= scopeB.end)
+
+        bret = ParseExpression(scopeA, pUnion);
+        return ParseRemainStatement(front.semi_scope, scope, pUnion);
+      }
       //bret = bret && ParseExpression(scopeB, &B);
       //bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, &A, &B);
-
-      return bret;
     }
 
     ParseArithmeticExpression(&scope, pUnion);
@@ -1234,20 +1309,20 @@ NOT_INC_P:
 
     if(count <= 1) {
       if(count == 1) {
-        pUnion->pSym = &m_aSymbols[pScope->begin];
+        pUnion->pSym = &m_aTokens[pScope->begin];
       }
       return TRUE;
     }
 
-    const auto& first = m_aSymbols[pScope->begin];
+    const auto& front = m_aTokens[pScope->begin];
 
     if(count == 2)
     {
       // 处理两种可能：(1)变量使用一元符号运算 (2)定义变量
       SYNTAXNODE::UN A = {0}, B = {0};
 
-      A.pSym = &first;
-      B.pSym = &m_aSymbols[pScope->begin + 1];
+      A.pSym = &front;
+      B.pSym = &m_aTokens[pScope->begin + 1];
       GXBOOL bret = TRUE;
 
       ASSERT(*B.pSym != ';'); // 已经在外部避免了表达式内出现分号
@@ -1268,13 +1343,13 @@ NOT_INC_P:
       }
       return bret;
     }
-    else if((first == '(' || first == '[') && first.scope == pScope->end - 1)  // 括号内表达式
+    else if((front == '(' || front == '[') && front.scope == pScope->end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
-      ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin);
-      return ParseArithmeticExpression(&RTSCOPE(pScope->begin + 1, pScope->end - 1), pUnion, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+      ASSERT(m_aTokens[pScope->end - 1].scope == pScope->begin);
+      return ParseArithmeticExpression(&RTSCOPE(pScope->begin + 1, pScope->end - 1), pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
     }
-    else if(m_aSymbols[pScope->begin + 1].scope == pScope->end - 1)  // 整个表达式是函数调用
+    else if(m_aTokens[pScope->begin + 1].scope == pScope->end - 1)  // 整个表达式是函数调用
     {
       return ParseFunctionCall(pScope, pUnion);
     }
@@ -1287,9 +1362,9 @@ NOT_INC_P:
         {
           m_nDbgNumOfExpressionParse++;
 
-          const SYMBOL& s = m_aSymbols[i];
+          const TOKEN& s = m_aTokens[i];
 
-          if(s.precedence == SYMBOL::ID_BRACE) // 跳过非运算符, 也包括括号
+          if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
           {
             ASSERT(s.scope < (int)pScope->end); // 闭括号肯定在表达式区间内
             i = s.scope;
@@ -1318,13 +1393,13 @@ NOT_INC_P:
         for(; i >= (GXINT_PTR)pScope->begin; --i)
         {
           m_nDbgNumOfExpressionParse++;
-          const SYMBOL& s = m_aSymbols[i];
+          const TOKEN& s = m_aTokens[i];
 
           // 优先级（2）是从右向左的，这个循环处理从左向右
           ASSERT(nMinPrecedence != 2);
 
           // 跳过非运算符, 也包括括号
-          if(s.precedence == SYMBOL::ID_BRACE)
+          if(s.precedence == TOKEN::ID_BRACE)
           {
             ASSERT(s.scope < (int)pScope->end); // 闭括号肯定在表达式区间内
             i = s.scope;
@@ -1360,17 +1435,17 @@ NOT_INC_P:
   GXBOOL CodeParser::ParseFunctionCall(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
   {
     // 括号肯定是匹配的
-    ASSERT(m_aSymbols[pScope->end - 1].scope == pScope->begin + 1);
+    ASSERT(m_aTokens[pScope->end - 1].scope == pScope->begin + 1);
 
     SYNTAXNODE::UN A, B;
 
-    A.pSym = &m_aSymbols[pScope->begin];
+    A.pSym = &m_aTokens[pScope->begin];
     clStringA strFunction = A.pSym->ToString();
 
-    // TODO: 检查m_aSymbols[pScope->begin]是函数名
+    // TODO: 检查m_aTokens[pScope->begin]是函数名
 
     //GXBOOL bret = ParseExpression(&B, pScope->begin + 2, pScope->end - 1);
-    GXBOOL bret = ParseArithmeticExpression(&RTSCOPE(pScope->begin + 2, pScope->end - 1), &B, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    GXBOOL bret = ParseArithmeticExpression(&RTSCOPE(pScope->begin + 2, pScope->end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
 
     SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_FunctionCall;
 
@@ -1386,9 +1461,9 @@ NOT_INC_P:
     // 与 ParseFlowWhile 相似
     SYNTAXNODE::UN A = {0}, B = {0};
     GXBOOL bret = TRUE;
-    ASSERT(m_aSymbols[scope.begin] == "if");
+    ASSERT(m_aTokens[scope.begin] == "if");
 
-    RTSCOPE sConditional(scope.begin + 2, m_aSymbols[scope.begin + 1].scope);
+    RTSCOPE sConditional(scope.begin + 2, m_aTokens[scope.begin + 1].scope);
     RTSCOPE sBlock;
 
     if(sConditional.begin >= scope.end || sConditional.end == -1 || sConditional.end > scope.end)
@@ -1408,7 +1483,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
 
-    auto& block_begin = m_aSymbols[sBlock.begin];
+    auto& block_begin = m_aTokens[sBlock.begin];
     //SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
 
     if(TryKeywords(RTSCOPE(sBlock.begin, scope.end), &B, &sBlock.end))
@@ -1448,7 +1523,7 @@ NOT_INC_P:
     auto result = sBlock.end;
 
 
-    if(bret && (scope.end - sBlock.end) > 1 && m_aSymbols[sBlock.end + 1] == "else")
+    if(bret && (scope.end - sBlock.end) > 1 && m_aTokens[sBlock.end + 1] == "else")
     {
       auto nNextBegin = sBlock.end + 1;
 
@@ -1462,14 +1537,14 @@ NOT_INC_P:
 
       SYNTAXNODE::MODE eNextMode = SYNTAXNODE::MODE_Flow_Else;
 
-      if(m_aSymbols[nNextBegin] == "if")
+      if(m_aTokens[nNextBegin] == "if")
       {
         eNextMode = SYNTAXNODE::MODE_Flow_ElseIf;
         result = ParseFlowIf(RTSCOPE(nNextBegin, scope.end), &B, TRUE);
       }
       else
       {
-        auto& else_begin = m_aSymbols[nNextBegin];
+        auto& else_begin = m_aTokens[nNextBegin];
         result = RTSCOPE::npos;
         if(TryKeywords(RTSCOPE(nNextBegin, scope.end), &B, &result))
         {
@@ -1522,10 +1597,10 @@ NOT_INC_P:
     // 与 ParseFlowIf 相似
     SYNTAXNODE::UN A = {0}, B = {0};
     GXBOOL bret = TRUE;
-    ASSERT(m_aSymbols[scope.begin] == "while");
+    ASSERT(m_aTokens[scope.begin] == "while");
 
 
-    RTSCOPE sConditional(scope.begin + 2, m_aSymbols[scope.begin + 1].scope);
+    RTSCOPE sConditional(scope.begin + 2, m_aTokens[scope.begin + 1].scope);
     RTSCOPE sBlock;
 
     if( ! MakeScope(&sConditional, &MAKESCOPE(scope, scope.begin + 2, FALSE, scope.begin + 1, TRUE, 0))) {
@@ -1542,7 +1617,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
 
-    auto& block_begin = m_aSymbols[sBlock.begin];
+    auto& block_begin = m_aTokens[sBlock.begin];
     //SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
     if(TryKeywords(RTSCOPE(sBlock.begin, scope.end), &B, &sBlock.end))
     {
@@ -1587,7 +1662,7 @@ NOT_INC_P:
   
   CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
   {
-    ASSERT(m_aSymbols[scope.begin] == "do");
+    ASSERT(m_aTokens[scope.begin] == "do");
 
     if(scope.begin + 1 >= scope.end) {
       // ERROR: do 语法错误
@@ -1605,7 +1680,7 @@ NOT_INC_P:
 
     RTSCOPE::TYPE while_token = sBlock.end + 1;
     
-    if(while_token >= scope.end && m_aSymbols[while_token] != "while") {
+    if(while_token >= scope.end && m_aTokens[while_token] != "while") {
       // ERROR: while 语法错误
       return RTSCOPE::npos;
     }
@@ -1621,7 +1696,7 @@ NOT_INC_P:
     bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
     RTSCOPE::TYPE while_end = sConditional.end + 1;
-    if(while_end >= scope.end || m_aSymbols[while_end] != ';') {
+    if(while_end >= scope.end || m_aTokens[while_end] != ';') {
       // ERROR: 缺少 ";"
       return while_end;
     }
@@ -1646,7 +1721,7 @@ NOT_INC_P:
     }
 
     if(p.bBeginMate) {
-      begin = m_aSymbols[p.begin].GetScope();
+      begin = m_aTokens[p.begin].GetScope();
 
       if(OUT_OF_SCOPE(begin) || begin >= p.pScope->end) {
         // ERROR:
@@ -1657,7 +1732,7 @@ NOT_INC_P:
       begin = p.begin;
     }
 
-    if(p.chTermin != 0 && m_aSymbols[begin] == (TChar)p.chTermin) {
+    if(p.chTermin != 0 && m_aTokens[begin] == (TChar)p.chTermin) {
       end = begin;
       return TRUE;
     }
@@ -1668,7 +1743,7 @@ NOT_INC_P:
     }
 
     if(p.bEndMate) {
-      end = m_aSymbols[p.end].GetScope();
+      end = m_aTokens[p.end].GetScope();
 
       if(OUT_OF_SCOPE(end) || end >= p.pScope->end) {
         // ERROR:
@@ -1684,11 +1759,11 @@ NOT_INC_P:
 
   CodeParser::RTSCOPE::TYPE CodeParser::MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pBlockNode)
   {
-    ASSERT(m_aSymbols[scope.begin] == "for"); // 外部保证调用这个函数的正确性
+    ASSERT(m_aTokens[scope.begin] == "for"); // 外部保证调用这个函数的正确性
 
     auto open_bracket = scope.begin + 1;
-    if(open_bracket >= scope.end || m_aSymbols[open_bracket] != '(' || 
-      (pIter->end = m_aSymbols[open_bracket].scope) > scope.end)
+    if(open_bracket >= scope.end || m_aTokens[open_bracket] != '(' || 
+      (pIter->end = m_aTokens[open_bracket].scope) > scope.end)
     {
       // ERROR: for 格式错误
       return RTSCOPE::npos;
@@ -1699,7 +1774,7 @@ NOT_INC_P:
     // 初始化部分
     //
     pInit->begin  = scope.begin + 2;
-    pInit->end    = m_aSymbols[scope.begin].semi_scope;
+    pInit->end    = m_aTokens[scope.begin].semi_scope;
     if(pInit->begin >= scope.end || pInit->end == -1) {
       // ERROR: for 格式错误
       return RTSCOPE::npos;
@@ -1711,7 +1786,7 @@ NOT_INC_P:
     // 条件部分
     //
     pCond->begin  = pInit->end + 1;
-    pCond->end    = m_aSymbols[pCond->begin].semi_scope;
+    pCond->end    = m_aTokens[pCond->begin].semi_scope;
 
     if(pCond->begin >= scope.end) {
       // ERROR: for 格式错误
@@ -1740,7 +1815,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
 
-    auto& block_begin = m_aSymbols[pBlock->begin];
+    auto& block_begin = m_aTokens[pBlock->begin];
     if(block_begin == '{')
     {
       pBlock->end = block_begin.scope;
@@ -1786,14 +1861,14 @@ NOT_INC_P:
       return result;
     }
 
-    ASSERT(m_aSymbols[sBlock.begin] == "for" || m_aSymbols[sBlock.end] == ';' || m_aSymbols[sBlock.end] == '}');
+    ASSERT(m_aTokens[sBlock.begin] == "for" || m_aTokens[sBlock.end] == ';' || m_aTokens[sBlock.end] == '}');
 
-    ParseArithmeticExpression(&sInitializer, &uInit, SYMBOL::FIRST_OPCODE_PRECEDENCE);
-    ParseArithmeticExpression(&sConditional, &uCond, SYMBOL::FIRST_OPCODE_PRECEDENCE);
-    ParseArithmeticExpression(&sIterator   , &uIter, SYMBOL::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(&sInitializer, &uInit, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(&sConditional, &uCond, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(&sIterator   , &uIter, TOKEN::FIRST_OPCODE_PRECEDENCE);
     //if(sBlock.end == RTSCOPE::npos)
     //{
-    //  ASSERT(m_aSymbols[sBlock.begin] == "for"); // MakeFlowForScope 函数保证
+    //  ASSERT(m_aTokens[sBlock.begin] == "for"); // MakeFlowForScope 函数保证
     //  sBlock.end = ParseFlowFor(RTSCOPE(sBlock.begin, scope.end), &uBlock);
     //}
     //else
@@ -1823,7 +1898,7 @@ NOT_INC_P:
     return bret ? sBlock.end : RTSCOPE::npos;
   }
 
-  GXBOOL CodeParser::MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
+  GXBOOL CodeParser::MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
   {
     ASSERT((int)pScope->begin <= nMiddle);
     ASSERT(nMiddle <= (int)pScope->end);
@@ -1834,14 +1909,14 @@ NOT_INC_P:
     GXBOOL bresult = TRUE;
 
     if(*pOpcode == '?') {
-      const SYMBOL& s = m_aSymbols[nMiddle];
+      const TOKEN& s = m_aTokens[nMiddle];
       //SYNTAXNODE sNodeB;
       //B.pNode = &sNodeB;
       bresult = ParseArithmeticExpression(&scopeA, &A, nMinPrecedence);
 
       if(s.scope >= (int)pScope->begin && s.scope < (int)pScope->end) {
-        ASSERT(m_aSymbols[s.scope] == ':');
-        bresult = bresult && MakeInstruction(&m_aSymbols[s.scope], nMinPrecedence, &scopeB, &B, s.scope);
+        ASSERT(m_aTokens[s.scope] == ':');
+        bresult = bresult && MakeInstruction(&m_aTokens[s.scope], nMinPrecedence, &scopeB, &B, s.scope);
       }
       else {
         // ERROR: ?:三元操作符不完整
@@ -1882,15 +1957,15 @@ NOT_INC_P:
 
   void CodeParser::DbgDumpScope( clStringA& str, clsize begin, clsize end, GXBOOL bRaw )
   {
-    if(end - begin > 1 && m_aSymbols[end - 1] == ';') {
+    if(end - begin > 1 && m_aTokens[end - 1] == ';') {
       --end;
     }
 
     if(bRaw)
     {
       if(begin < end) {
-        str.Append(m_aSymbols[begin].marker.marker,
-          (m_aSymbols[end - 1].marker.marker - m_aSymbols[begin].marker.marker) + m_aSymbols[end - 1].marker.length);
+        str.Append(m_aTokens[begin].marker.marker,
+          (m_aTokens[end - 1].marker.marker - m_aTokens[begin].marker.marker) + m_aTokens[end - 1].marker.length);
       }
       else {
         str.Clear();
@@ -1900,7 +1975,7 @@ NOT_INC_P:
     {
       for (clsize i = begin; i < end; ++i)
       {
-        str.Append(m_aSymbols[i].ToString());
+        str.Append(m_aTokens[i].ToString());
       }
     }
   }
@@ -1929,7 +2004,7 @@ NOT_INC_P:
     return MakeSyntaxNode(pDest, mode, NULL, pOperandA, pOperandB);
   }
 
-  GXBOOL CodeParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
+  GXBOOL CodeParser::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
   {
     const SYNTAXNODE::UN* pOperand[] = {pOperandA, pOperandB};
     SYNTAXNODE sNode = {0, mode, pOpcode};
@@ -1940,8 +2015,8 @@ NOT_INC_P:
       if(pOperand[i] == NULL) {
         sNode.Operand[i].pSym = NULL;
       }
-      else if(IsSymbol(pOperand[i])) {
-        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_SYMBOL << nFlagShift);
+      else if(TryGetNodeType(pOperand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN << nFlagShift);
         sNode.Operand[i].pSym = pOperand[i]->pSym;
       }
       else {
@@ -1957,19 +2032,19 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXBOOL CodeParser::IsSymbol(const SYNTAXNODE::UN* pUnion) const
-  {
-    const SYMBOL* pBegin = &m_aSymbols.front();
-    const SYMBOL* pBack   = &m_aSymbols.back();
+  //GXBOOL CodeParser::IsToken(const SYNTAXNODE::UN* pUnion) const
+  //{
+  //  const TOKEN* pBegin = &m_aTokens.front();
+  //  const TOKEN* pBack   = &m_aTokens.back();
 
-    return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
-  }
+  //  return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
+  //}
 
   //clsize CodeParser::FindSemicolon( clsize begin, clsize end ) const
   //{
   //  for(; begin < end; ++begin)
   //  {
-  //    if(m_aSymbols[begin] == ';') {
+  //    if(m_aTokens[begin] == ';') {
   //      return begin;
   //    }
   //  }
@@ -2004,7 +2079,41 @@ NOT_INC_P:
         IndexToPtr(it->expr.sRoot.pNode, m_aSyntaxNodePack);
         RelocaleSyntaxPtr(it->expr.sRoot.pNode);
         break;
+
+      case StatementType_Definition:
+        if(TryGetNodeType(&it->defn.sRoot) == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX)
+        {
+          IndexToPtr(it->defn.sRoot.pNode, m_aSyntaxNodePack);
+          RelocaleSyntaxPtr(it->defn.sRoot.pNode);
+        }
+        break;
       }
+    }
+  }
+
+  CodeParser::SYNTAXNODE::FLAGS CodeParser::TryGetNodeType( const SYNTAXNODE::UN* pUnion ) const
+  {
+    if(pUnion->ptr >= &m_aTokens.front() && pUnion->ptr <= &m_aTokens.back()) {
+      return SYNTAXNODE::FLAG_OPERAND_IS_TOKEN;
+    }
+    else if(pUnion->ptr >= &m_aSyntaxNodePack.front() && pUnion->ptr <= &m_aSyntaxNodePack.back()) {
+      return SYNTAXNODE::FLAG_OPERAND_IS_NODE;
+    }
+    else {
+      return SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX;
+    }
+  }
+
+  CodeParser::SYNTAXNODE::MODE CodeParser::TryGetNode( const SYNTAXNODE::UN* pUnion ) const
+  {
+    if(pUnion->ptr >= &m_aTokens.front() && pUnion->ptr <= &m_aTokens.back()) {
+      return SYNTAXNODE::MODE_Undefined;
+    }
+    else if(pUnion->ptr >= &m_aSyntaxNodePack.front() && pUnion->ptr <= &m_aSyntaxNodePack.back()) {
+      return pUnion->pNode->mode;
+    }
+    else {
+      return m_aSyntaxNodePack[(int)pUnion->pNode].mode;
     }
   }
 

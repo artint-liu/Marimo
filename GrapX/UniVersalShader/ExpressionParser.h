@@ -25,7 +25,7 @@ namespace UVShader
 
   //  GRAMMAR* pChild;
   //};
-#define OPP(_PRE) (CodeParser::SYMBOL::FIRST_OPCODE_PRECEDENCE + _PRE)
+#define OPP(_PRE) (CodeParser::TOKEN::FIRST_OPCODE_PRECEDENCE + _PRE)
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
 
@@ -33,7 +33,7 @@ namespace UVShader
   class CodeParser : public SmartStreamA
   {
   public:
-    struct SYMBOL // 运行时记录符号和操作符等属性
+    struct TOKEN // 运行时记录符号和操作符等属性
     {
       const static int scope_bits = 22;
       const static int precedence_bits = 7;
@@ -106,16 +106,17 @@ namespace UVShader
       char* szOperator;
       int precedence; // 优先级，越大越高
 
-      u32 unary      : 1; // 参考 SYMBOL 机构体说明
+      u32 unary      : 1; // 参考 TOKEN 机构体说明
       u32 unary_mask : 2;
     };
 
 
-    typedef clvector<SYMBOL> SymbolArray;
+    typedef clvector<TOKEN> TokenArray;
 
     enum StatementType
     {
       StatementType_Empty,
+      StatementType_Definition,     // 变量定义
       StatementType_FunctionDecl,   // 函数声明
       StatementType_Function,       // 函数体
       StatementType_Struct,         // 结构体
@@ -135,6 +136,12 @@ namespace UVShader
       InputModifier_out,
       InputModifier_inout,
       InputModifier_uniform,
+    };
+
+    enum UniformModifier
+    {
+      UniformModifier_empty,
+      UniformModifier_const,
     };
 
     struct TYPE
@@ -172,7 +179,7 @@ namespace UVShader
         FLAG_OPERAND_TYPEMASK   = 0x0000000F,
         FLAG_OPERAND_IS_NODEIDX = 0x00000001,
         FLAG_OPERAND_IS_NODE    = 0x00000002,
-        FLAG_OPERAND_IS_SYMBOL  = 0x00000004,
+        FLAG_OPERAND_IS_TOKEN   = 0x00000004,
       };
 
       enum MODE
@@ -202,12 +209,12 @@ namespace UVShader
 
       GXDWORD flags : 16;
       MODE    mode  : 16;
-      const SYMBOL* pOpcode;
+      const TOKEN* pOpcode;
 
       union UN {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
-        const SYMBOL* pSym;
+        const TOKEN* pSym;
       };
 
       UN Operand[s_NumOfOperand];
@@ -264,12 +271,21 @@ namespace UVShader
       GXLPCSTR        szName;
       STRUCT_MEMBER*  pMembers;
       clsize          nNumOfMembers;
-    }stru;
+    };
 
     struct STATEMENT_EXPR // 表达式定义
     {
       SYNTAXNODE::UN  sRoot;
-    }expr;
+    };
+    
+    struct STATEMENT_DEFN
+    {
+      UniformModifier modifier;
+      GXLPCSTR szType;
+      GXLPCSTR szName;
+      SYNTAXNODE::UN  sRoot;
+    };
+
 
     struct STATEMENT
     {
@@ -279,6 +295,7 @@ namespace UVShader
         STATEMENT_FUNC func;
         STATEMENT_STRU stru;
         STATEMENT_EXPR expr;
+        STATEMENT_DEFN defn; // 全局变量定义
       };
     };
 
@@ -325,7 +342,7 @@ namespace UVShader
     {
       const RTSCOPE*  pScope;   // 限定区域
       RTSCOPE::TYPE   begin;    // 开始
-      GXBOOL          bBeginMate;// scope begin 取自m_aSymbols[begin].scope
+      GXBOOL          bBeginMate;// scope begin 取自m_aTokens[begin].scope
       RTSCOPE::TYPE   end;
       GXBOOL          bEndMate;
       GXWCHAR         chTermin; // 如果begin遇到这个终结符，返回一个begin==end的scope
@@ -344,13 +361,15 @@ namespace UVShader
 
     void    InitPacks();
     void    Cleanup();
-    clsize  EstimateForSymbolsCount () const;  // 从Stream的字符数估计Symbol的数量
+    clsize  EstimateForTokensCount () const;  // 从Stream的字符数估计Token的数量
 
+    GXBOOL  ParseStatementAs_Definition(RTSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(RTSCOPE* pScope);
     GXBOOL  ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope);
 
     GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
-    GXBOOL  ParseStructMember(STATEMENT* pStat, RTSCOPE* pStruScope);
+    GXBOOL  ParseStructMember(STRUCT_MEMBER* pMember, RTSCOPE* pStruScope);
+    GXBOOL  ParseStructMembers(STATEMENT* pStat, RTSCOPE* pStruScope);
 
     GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
 
@@ -369,8 +388,8 @@ namespace UVShader
     RTSCOPE::TYPE  ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     RTSCOPE::TYPE  ParseFlowWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     RTSCOPE::TYPE  ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  MakeInstruction(const SYMBOL* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
-    GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const SYMBOL* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
+    GXBOOL  MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
     GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
@@ -381,22 +400,11 @@ namespace UVShader
     void    RelocaleSyntaxPtr(SYNTAXNODE* pNode);
     GXBOOL  IsIntrinsicType(GXLPCSTR szType);
 
-    GXLPCSTR GetUniqueString(const SYMBOL* pSym);
-    const TYPE* ParseType(const SYMBOL* pSym);
+    GXLPCSTR GetUniqueString(const TOKEN* pSym);
+    const TYPE* ParseType(const TOKEN* pSym);
     //clsize   FindSemicolon(clsize begin, clsize end) const;
 
-    SYNTAXNODE::MODE TryGetNode(const SYNTAXNODE::UN* pUnion)
-    {
-      if(pUnion->ptr >= &m_aSymbols.begin() && pUnion->ptr < &m_aSymbols.end()) {
-        return SYNTAXNODE::MODE_Undefined;
-      }
-      else if(pUnion->ptr >= &m_aSyntaxNodePack.begin() && pUnion->ptr < &m_aSyntaxNodePack.end()) {
-        return pUnion->pNode->mode;
-      }
-      else {
-        return m_aSyntaxNodePack[(int)pUnion->pNode].mode;
-      }
-    }
+    SYNTAXNODE::MODE TryGetNode(const SYNTAXNODE::UN* pUnion) const;
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
@@ -414,7 +422,7 @@ namespace UVShader
   protected:
     typedef Marimo::DataPoolErrorMsg<ch> ErrorMessage;
     ErrorMessage*       m_pMsg;
-    SymbolArray         m_aSymbols;
+    TokenArray          m_aTokens;
     clstd::StringSetA   m_Strings;
     TypeSet             m_TypeSet;
     StatementArray      m_aStatements;
@@ -424,7 +432,7 @@ namespace UVShader
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
     SyntaxNodeArray     m_aSyntaxNodePack;  // 表达式语法节点
 
-    SYMBOL              m_CurSymInfo;       // 遍历时符号的优先级信息
+    TOKEN              m_CurSymInfo;       // 遍历时符号的优先级信息
     int                 m_nMaxPrecedence;   // 优先级最大值
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     static INTRINSIC_TYPE s_aIntrinsicType[];
@@ -432,13 +440,14 @@ namespace UVShader
     CodeParser();
     virtual ~CodeParser();
     b32                 Attach                  (const char* szExpression, clsize nSize);
-    clsize              GenerateSymbols         ();
-    const SymbolArray*  GetSymbolsArray         () const;
+    clsize              GenerateTokens          ();
+    const TokenArray*   GetTokensArray          () const;
     GXBOOL              Parse                   ();
 
     const StatementArray& GetStatments          () const;
 
-    GXBOOL   IsSymbol(const SYNTAXNODE::UN* pUnion) const;
+//    GXBOOL   IsToken(const SYNTAXNODE::UN* pUnion) const;
+    SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const;
 
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
