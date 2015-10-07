@@ -56,8 +56,8 @@ namespace clpathfile
 
   template<typename _TString>
   b32 RenameExtensionT  (_TString& strPath, typename _TString::LPCSTR pszExt);
-  b32 RenameExtensionA  (clStringA& strPath, CLLPCSTR pszExt);
-  b32 RenameExtensionW  (clStringW& strPath, CLLPCWSTR pszExt);
+  b32 RenameExtensionA  (clStringA& strPath, clStringA::LPCSTR pszExt);
+  b32 RenameExtensionW  (clStringW& strPath, clStringW::LPCSTR  pszExt);
 
   //template<typename _TCh>
   //b32 RenameExtensionT  (_TCh* szPath, CLLPCTSTR pszExt);

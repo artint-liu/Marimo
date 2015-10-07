@@ -187,6 +187,7 @@ namespace UVShader
         MODE_Undefined,
         MODE_Normal,        // 操作符 + 操作数 模式
         MODE_FunctionCall,  // 函数调用
+        MODE_ArrayIndex,  // 函数调用
         MODE_Definition,    // 变量定义
         MODE_Flow_While,
         MODE_Flow_If,       // if(A) {B}
@@ -214,7 +215,7 @@ namespace UVShader
       union UN {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
-        const TOKEN* pSym;
+        const TOKEN*  pSym;
       };
 
       UN Operand[s_NumOfOperand];
@@ -368,10 +369,10 @@ namespace UVShader
     GXBOOL  ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope);
 
     GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
-    GXBOOL  ParseStructMember(STRUCT_MEMBER* pMember, RTSCOPE* pStruScope);
+    GXBOOL  ParseStructMember(STATEMENT* pStat, STRUCT_MEMBER& member, TOKEN**p, const TOKEN* pEnd);
     GXBOOL  ParseStructMembers(STATEMENT* pStat, RTSCOPE* pStruScope);
 
-    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope, GXBOOL bDbgRelocale); // (算数表)达式
+    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope/*, GXBOOL bDbgRelocale*/); // (算数表)达式
 
     GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);

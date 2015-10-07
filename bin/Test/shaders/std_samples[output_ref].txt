@@ -1,0 +1,268 @@
+float3 sun;
+float3 dir,diffuse;
+float4 colors[8];
+float func()
+{
+  int a=0;
+  int b=1;
+  int c=2;
+  c=c+a*b;
+  a=c*a+b/2;
+  return a;
+}
+
+float func2(in float a)
+{
+  return a+1.0f;
+}
+
+void func3(in float a,in float b)
+{
+  float c=a+b;
+}
+
+void func4()
+{
+  int a=0,b=1,c=2,d=3,e=4,f=5;
+  a=3;
+  b=4;
+  d=4;
+  {
+    a=a+1;
+    b*=6;
+  }
+  {
+    c=7;
+    f*=1;
+    {
+      d/=2;
+      e=5;
+    }
+  }
+  {
+    a=0;
+    b=1;
+  }
+}
+
+void flow_test()
+{
+  for(;;) {
+  }
+  for(int i=0;;i++) {
+  }
+  for(int i=0;i<100;i++) {
+  }
+  int k=0;
+  for(;;k++) {
+  }
+}
+
+void flow_test2()
+{
+  int count=0;
+  for(int i=0;i<10;i++) {
+    count+=i;
+  }
+  for(int i=0;i<10;i++) {
+    count+=i;
+  }
+  count=0;
+  for(int i=0;i<10;i++) {
+    count+=i;
+    count*=lerp(0,1,i*0.1f);
+  }
+  count=0;
+  for(int y=-10;y<=10;y++) {
+    for(int x=-10;x<=10;x++) {
+      count+=y*21+x;
+    }
+  }
+  for(int y=-10;y<=10;y++) {
+    for(int x=-10;x<=10;x++) {
+      count+=y*23+x;
+    }
+  }
+  for(int y=-10;y<=10;y++) {
+    for(int x=-10;x<=10;x++) {
+      count+=y*25+x;
+    }
+  }
+  count=0;
+  for(int z=-5;z<=5;z++) {
+    for(int y=-5;y<=5;y++) {
+      for(int x=-5;x<=5;x++) {
+        count+=z+y+x;
+      }
+    }
+  }
+}
+
+void test_flow_if()
+{
+  int a=0,b=1,c=2,d=3,e=4,f=5;
+  if(a>b) {
+    a=a;
+  }
+  b=b;
+  c=c;
+  if(a==b) {
+    a=a;
+    b=b;
+    c=c;
+  }
+  if(a>b) {
+    if(b<c) {
+      b=b;
+    }
+  }
+  if(a>b) {
+    b=b;
+  }
+  else {
+    a=a;
+  }
+  if(a>b) {
+    b=b;
+  }
+  else if(b<c) {
+    c=c;
+  }
+  else {
+    a=a;
+  }
+  if(a<b) {
+    if(b>c) {
+      if(c>d) {
+        a=a;
+      }
+      else if(d<e) {
+        b=b;
+      }
+      else {
+        c=c;
+      }
+    }
+  }
+  if(a<b) {
+    if(b>c) {
+      if(c>d) {
+        a=a;
+      }
+      else if(d<e) {
+        b=b;
+      }
+    }
+  }
+  if(a<b) {
+    if(b>c) {
+      if(c>d) {
+        a=a;
+      }
+      else if(d<e) {
+        b=b;
+      }
+      else {
+        c=c;
+      }
+    }
+  }
+}
+
+void test_flow_while()
+{
+  int a=0,b=1,c=2,d=3,e=4,f=5;
+  while(a<10) {
+  }
+  while(a<100) {
+    a++;
+  }
+  while(b<10) {
+    b++;
+  }
+  while(c<20) {
+    while(d<30) {
+      d++;
+    }
+    c++;
+  }
+  while(e<40) {
+    while(f<50) {
+      e++;
+      f++;
+    }
+  }
+  while(a<11) {
+    while(b<12) {
+      while(c<13) {
+        while(d<14) {
+          a++;
+          b++;
+          c++;
+          d++;
+        }
+      }
+    }
+  }
+}
+
+void test_flow_dowhile()
+{
+  int a=0,b=1,c=2,d=3,e=4,f=5;
+  do {
+  }while(a<b);
+  do {
+    a++;
+  }while(a<b);
+  do {
+    do {
+      a++;
+      ++b;
+    }while(b<c);
+  }while(a<b);
+}
+
+void test_flow_mix()
+{
+  int a=0,b=1,c=2,d=3,e=4,f=5;
+  for(int i=0;i<10;i++) {
+    if(a>b) {
+      while(b<10) {
+        b++;
+      }
+    }
+    else if(c<d) {
+      for(;;) {
+      }
+    }
+    else {
+      do {
+        f++;
+      }while(f<20);
+    }
+  }
+  for(int i=0;i<10;i++) {
+    if(a>b) {
+      while(b<10) {
+        b++;
+      }
+    }
+    else if(c<d) {
+      for(;;) {
+      }
+    }
+    else {
+      do {
+        f++;
+      }while(f<20);
+    }
+  }
+}
+
+void test_arithmetic_expression()
+{
+  int a=0,b=1,c=2,d=3,e=4,f=5;
+  a=b+=c++-d+--e/-f;
+  a=(b+c)*d+e+f;
+}
+

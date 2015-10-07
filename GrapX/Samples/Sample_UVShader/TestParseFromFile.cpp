@@ -95,6 +95,10 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
     strOut.Format("%s(%s)", str[0], str[1]);
     break;
 
+  case SYNTAXNODE::MODE_ArrayIndex:
+    strOut.Format("%s[%s]", str[0], str[1]);
+    break;
+
   case SYNTAXNODE::MODE_Definition:
     strOut.Format("%s %s", str[0], str[1]);
     break;
@@ -187,6 +191,14 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
     strOut = "break";
     break;
 
+  case SYNTAXNODE::MODE_Flow_Continue:
+    strOut = "continue";
+    break;
+
+  case SYNTAXNODE::MODE_Flow_Discard:
+    strOut = "discard";
+    break;
+
   default:
     // 没处理的 pNode->mode 类型
     CLBREAK;
@@ -263,6 +275,10 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
             case UVShader::CodeParser::StatementType_Definition:
               {
                 const auto& definition = s.defn;
+                clStringA str;
+                DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
+                file.WritefA("%s", str);
+                /*
                 file.WritefA("%s %s", definition.szType, definition.szName);
                 if(definition.sRoot.ptr) {
                   clStringA str;
@@ -280,7 +296,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
                   else {
                     CLBREAK;
                   }
-                }
+                }*/
                 file.WritefA(";\n");
               }
               break;

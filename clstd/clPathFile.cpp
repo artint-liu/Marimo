@@ -178,11 +178,11 @@ namespace clpathfile
     }
     return TRUE;
   }
-  b32 RenameExtensionA(clStringA& strPath, CLLPSTR pszExt)
+  b32 RenameExtensionA(clStringA& strPath, clStringA::LPCSTR  pszExt)
   {
     return RenameExtensionT(strPath, pszExt);
   }
-  b32 RenameExtensionW(clStringW& strPath, CLLPCWSTR pszExt)
+  b32 RenameExtensionW(clStringW& strPath, clStringW::LPCSTR  pszExt)
   {
     return RenameExtensionT(strPath, pszExt);
   }

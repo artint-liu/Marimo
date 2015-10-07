@@ -5,9 +5,17 @@
  *  3.不要对已有代码做出修改，新的测试语法以独立的形式增加
  *  4.每个测试部分需要有测试样本的功能的注释说明
  *  5.语法必须保证正确，语法错误报告的测试在另外的样本中提供
+ *  6.std_samples[output_ref].txt 是解析后再输出的参考文件
  *
  */
 
+// 全局变量
+float3 sun;
+float3 dir, diffuse;
+float4 colors[8];
+//float4 many[8][7];
+//float4 many3[8][7][16];
+ 
 // 函数测试部分
 float func()
 {

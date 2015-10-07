@@ -41,7 +41,7 @@ GXLPCSTR aOperStack_016[] = {
   "[,] [pow(max(0,Theta),10.0)] [SR]",
   "[,] [pow(max(0,Theta),10.0),SR] [SM]",
   "[F] [Lin] [pow(max(0,Theta),10.0),SR,SM]",
-  "[=] [float3L] [Lin(pow(max(0,Theta),10.0),SR,SM)]",
+  "[=] [L] [Lin(pow(max(0,Theta),10.0),SR,SM)]",
   NULL, };
 
 GXLPCSTR aOperStack_017[] = {
@@ -162,7 +162,7 @@ GXLPCSTR aOperStack_361[] = {
   "[F] [float4] [-1.0,H*H,H,0.5+0.5/float(RES_MU)]",
   "[:] [float4(1.0,0.0,0.0,0.5-0.5/float(RES_MU))] [float4(-1.0,H*H,H,0.5+0.5/float(RES_MU))]",
   "[?] [rmu<0.0&&delta>0.0] [float4(1.0,0.0,0.0,0.5-0.5/float(RES_MU)):float4(-1.0,H*H,H,0.5+0.5/float(RES_MU))]",
-  "[=] [float4cst] [rmu<0.0&&delta>0.0?float4(1.0,0.0,0.0,0.5-0.5/float(RES_MU)):float4(-1.0,H*H,H,0.5+0.5/float(RES_MU))]",
+  "[=] [cst] [rmu<0.0&&delta>0.0?float4(1.0,0.0,0.0,0.5-0.5/float(RES_MU)):float4(-1.0,H*H,H,0.5+0.5/float(RES_MU))]",
   NULL, };
 
 
@@ -182,7 +182,7 @@ GXLPCSTR aOperStack_362[] = {
   "[F] [float3] [0.0,0.0,0.0]",
   "[:] [tex2D(glareSampler,float2(0.5,0.5)+viewdir.xy*4.0).rgb] [float3(0.0,0.0,0.0)]",
   "[?] [viewdir.z>0.0] [tex2D(glareSampler,float2(0.5,0.5)+viewdir.xy*4.0).rgb:float3(0.0,0.0,0.0)]",
-  "[=] [float3data] [viewdir.z>0.0?tex2D(glareSampler,float2(0.5,0.5)+viewdir.xy*4.0).rgb:float3(0.0,0.0,0.0)]",
+  "[=] [data] [viewdir.z>0.0?tex2D(glareSampler,float2(0.5,0.5)+viewdir.xy*4.0).rgb:float3(0.0,0.0,0.0)]",
   NULL, };
 
 GXLPCSTR aOperStack_if001[] = {
@@ -360,6 +360,7 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, "a?b?d:e:c?f:g", 13, aOperStack_350},
 
   // ¸³Öµ
+  {0, "float freqs[16]", 5},
   {0, "a=b+c", 5},
   {0, "a=b=c=d", 7},
   {0, "float a", 2},
@@ -464,7 +465,6 @@ SAMPLE_EXPRESSION samplesForExpression[] = {
 };
 
 SAMPLE_EXPRESSION samplesExpression[] = {
-  {0, "return mix(a.x, a.y, f.z);", 0, aOperStack_Return0100},
   {0, "(Output.LdotN*shadowFactor)+Output.Ambient+Output.Specular*shadowFactor", 17},
   {0, "Input.Normal = (Input.Normal - 0.5) * 2.0", 13},
   {0, "Input.Position.xyz += SwingGrass(Input.Position.xyz, Input.Texcoord.y - 0.1875)", 22},
@@ -476,12 +476,6 @@ SAMPLE_EXPRESSION samplesExpression[] = {
   {0, "Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", 26, aOperStack_018},
   {0, "float4 c = Output.Diffuse * ((Output.LdotN * shadowFactor) + Output.Ambient + Output.Specular * shadowFactor)", 26},
   {0, "float4 c = Output.Diffuse * (Output.LdotN + Output.Ambient);", 17},
-  {0, "return float4(  c.xyz * Input.E.xyz  + Input.I.xyz, Output.Diffuse.w)", 25},
-  {0, "return (vBetaMieTheta * pow((1.0f - g), 2.0)) / (pow(abs(1 + g * g - 2 * g * Theta), 1.5))", 37},
-  {0, "return vBetaRayTheta * (2.0f + 0.5f * Theta * Theta)", 12},
-  {0, "return (BetaR(Theta) + BetaM(Theta)) / (vBetaRay + vBetaMie)", 18},
-  {0, "return exp( -(vBetaRay * SR + vBetaMie * SM))", 14},
-  {0, "return ((BetaR(Theta) + BetaM(Theta)) * (1.0f - exp(-(vBetaRay * SR + vBetaMie * SM)))) / (vBetaRay + vBetaMie)", 38},
   {0, "float4 Diffuse = tex2D(MainSampler, Input.TexUV) * Input.Color", 15},
   {0, "Output.uvSM.x = (Output.uvSM.x + Output.uvSM.w) * 0.5", 21},
   {0, "float blend = clamp((d - deformation.blending.x) / deformation.blending.y, 0.0, 1.0)", 25},
@@ -500,13 +494,20 @@ SAMPLE_EXPRESSION samplesExpression[] = {
   {0, "float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S))", 50},
   {0, "return tex3D(table, float3((uNu + uMuS      ) / float(RES_NU), uMu, uR)) * (1.0 - lerp) +  tex3D(table, float3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR)) * lerp", 56},
   {0, "float2 y = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * float2(1.0, exp(-d/H*(d/(2.0*r)+mu)))", 47},
-  {0, "return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG*mieG) * pow(1.0 + (mieG*mieG) - 2.0*mieG*mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG*mieG)", 56},
   {0, "m_fHue = m_fSaturation = m_fValue = 0.0",    7},
 
-  {0, "return sumWeight > 0.0 ? sumWeightedSlopes / sqrt(sumWeight) : texture2DGrad(river.wave.patternTex, p.xy / river.wave.length, gradx, grady).xy", 36, aOperStack_360},
   {0, "float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : float4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU))", 49, aOperStack_361},
   {0, "float3 data = viewdir.z > 0.0 ? tex2D(glareSampler, float2(0.5,0.5) + viewdir.xy * 4.0).rgb : float3(0.0,0.0,0.0)", 37, aOperStack_362},
   {0, NULL,  0},
+  {0, "return mix(a.x, a.y, f.z);", 0, aOperStack_Return0100},
+  {0, "return sumWeight > 0.0 ? sumWeightedSlopes / sqrt(sumWeight) : texture2DGrad(river.wave.patternTex, p.xy / river.wave.length, gradx, grady).xy", 36, aOperStack_360},
+  {0, "return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG*mieG) * pow(1.0 + (mieG*mieG) - 2.0*mieG*mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG*mieG)", 56},
+  {0, "return float4(  c.xyz * Input.E.xyz  + Input.I.xyz, Output.Diffuse.w)", 25},
+  {0, "return (vBetaMieTheta * pow((1.0f - g), 2.0)) / (pow(abs(1 + g * g - 2 * g * Theta), 1.5))", 37},
+  {0, "return vBetaRayTheta * (2.0f + 0.5f * Theta * Theta)", 12},
+  {0, "return (BetaR(Theta) + BetaM(Theta)) / (vBetaRay + vBetaMie)", 18},
+  {0, "return exp( -(vBetaRay * SR + vBetaMie * SM))", 14},
+  {0, "return ((BetaR(Theta) + BetaM(Theta)) * (1.0f - exp(-(vBetaRay * SR + vBetaMie * SM)))) / (vBetaRay + vBetaMie)", 38},
   {0, "",    0},
   {0, "",    0},
   {0, "",    0},
