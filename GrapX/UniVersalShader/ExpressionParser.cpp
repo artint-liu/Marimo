@@ -940,7 +940,7 @@ NOT_INC_P:
 
     pStat->stru.pMembers = (STRUCT_MEMBER*)m_aMembersPack.size();
     pStat->stru.nNumOfMembers = aMembers.size();
-    m_aMembersPack.insert(m_aMembersPack.begin(), aMembers.begin(), aMembers.end());
+    m_aMembersPack.insert(m_aMembersPack.end(), aMembers.begin(), aMembers.end());
     return TRUE;
   }
 
@@ -1024,7 +1024,7 @@ NOT_INC_P:
     return bret;
   }
 
-  void CodeParser::DbgDumpSyntaxTree(const SYNTAXNODE* pNode, int precedence, clStringA* pStr)
+  void CodeParser::DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr)
   {
     clStringA str[2];
     for(int i = 0; i < 2; i++)
@@ -1034,7 +1034,7 @@ NOT_INC_P:
           str[i] = pNode->Operand[i].pSym->ToString();
         }
         else {
-          DbgDumpSyntaxTree(pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
+          DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
         }
       }
       else {
@@ -1042,9 +1042,12 @@ NOT_INC_P:
       }
     }
 
-    TRACE("[%s] [%s] [%s]\n",
-      pNode->pOpcode ? pNode->pOpcode->ToString() : "",
-      str[0], str[1]);
+    clStringA strCommand;
+    strCommand.Format("[%s] [%s] [%s]", pNode->pOpcode ? pNode->pOpcode->ToString() : "", str[0], str[1]);
+    if(pArray) {
+      pArray->push_back(strCommand);
+    }
+    TRACE("%s\n", strCommand);
 
     clStringA strOut;
     switch(pNode->mode)

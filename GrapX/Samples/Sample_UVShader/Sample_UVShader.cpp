@@ -1,5 +1,6 @@
 // Sample_UVShader.cpp : 定义控制台应用程序的入口点。
 //
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <tchar.h>
 #include <conio.h>
@@ -268,7 +269,7 @@ void TestShaderToys(GXBOOL bShowList)
 }
 
 // 测试开关
-//#define TEST_ARITHMETIC_PARSING
+#define TEST_ARITHMETIC_PARSING
 #define TEST_ALL_SHADERTOYS
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -308,8 +309,8 @@ int _tmain(int argc, _TCHAR* argv[])
   TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
 
 #ifdef TEST_ALL_SHADERTOYS
-  //TestShaderToys(TRUE);
-  TestShaderToys(FALSE);
+  TestShaderToys(TRUE);
+  //TestShaderToys(FALSE);
 #endif // TEST_ALL_SHADERTOYS
 
   //TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame[output].txt");

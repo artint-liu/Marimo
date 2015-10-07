@@ -360,7 +360,6 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, "a?b?d:e:c?f:g", 13, aOperStack_350},
 
   // ∏≥÷µ
-  {0, "float freqs[16]", 5},
   {0, "a=b+c", 5},
   {0, "a=b=c=d", 7},
   {0, "float a", 2},
@@ -372,6 +371,12 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, "(a=a+b);", 0},
   {0, "a=a+b;b=a-c*d;c=a*d;", 20},
   {0, "(a=a+b);(b=a-c*d);c=a*d;", 24},
+
+  // ∂®“Â
+  {0, "float freqs, time", 4},
+  {0, "float freqs[8], time[4]", 10},
+  {0, "float freqs[16]", 5},
+  {0, "float freqs[16][8]", 8},
   {0, NULL,  0},};
 
 SAMPLE_EXPRESSION samplesIfExpression[] = {

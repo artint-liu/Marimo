@@ -7,9 +7,12 @@
 class TestExpression : public UVShader::CodeParser
 {
 public:
+  clStringArrayA m_aCommand;
+
   GXBOOL TestParseExpression(STATEMENT* pStat, RTSCOPE* pScope)
   {
     m_aDbgExpressionOperStack.clear();
+    m_aCommand.clear();
     STATEMENT stat = {StatementType_Expression};
     GXBOOL bret = ParseArithmeticExpression(pScope, &stat.expr.sRoot);
     if( ! bret)
@@ -20,7 +23,7 @@ public:
     else if(TryGetNodeType(&stat.expr.sRoot) == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX && stat.expr.sRoot.pNode) {
       IndexToPtr(stat.expr.sRoot.pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr(stat.expr.sRoot.pNode);
-      DbgDumpSyntaxTree(stat.expr.sRoot.pNode, 0);
+      DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.pNode, 0);
     }
     *pStat = stat;
     return bret;
@@ -52,6 +55,15 @@ int MeasureStringsWidth(GXLPCSTR* aStrings)
   int nWidth = 0;
   while(aStrings[i]) {
     nWidth = clMax(nWidth, GXSTRLEN(aStrings[i++]));
+  }
+  return nWidth;
+}
+
+int MeasureStringsWidth(const clStringArrayA& aStrings)
+{
+  int nWidth = 0;
+  for(auto it = aStrings.begin(); it != aStrings.end(); ++it) {
+    nWidth = clMax(nWidth, (int)it->GetLength());
   }
   return nWidth;
 }
@@ -98,12 +110,13 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     if(pSamples[i].aOperStack)
     {
 
-      int W = MeasureStringsWidth(pSamples[i].aOperStack);
+      int W0 = MeasureStringsWidth(pSamples[i].aOperStack);
+      int W1 = MeasureStringsWidth(dbg_stack);
 
       for(int n = 0; pSamples[i].aOperStack[n] != NULL; n++)
       {
         const GXBOOL bEuqal = dbg_stack[n] == pSamples[i].aOperStack[n];
-        TRACE("%*s %s %s\n", W, pSamples[i].aOperStack[n], bEuqal ? "==" : "!=", dbg_stack[n]);
+        TRACE("%*s %s %*s | %s\n", W0, pSamples[i].aOperStack[n], bEuqal ? "==" : "!=", -W1, dbg_stack[n], expp.m_aCommand[n]);
       }
 
       int n = 0;

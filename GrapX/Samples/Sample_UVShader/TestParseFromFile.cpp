@@ -36,6 +36,7 @@ GXLPCSTR Get(UVShader::CodeParser::StorageClass e)
   }
 }
 
+const int nTabSize = 2;
 //////////////////////////////////////////////////////////////////////////
 int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNODE* pNode, int precedence, int depth, clStringA* pStr)
 {
@@ -87,7 +88,7 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
   //  str[0], str[1]);
 
   clStringA strOut;
-  const int retraction = depth * 2;           // 缩进
+  const int retraction = depth * nTabSize;           // 缩进
   //const int next_retraction = (depth + 1) * 2;// 次级缩进
   switch(pNode->mode)
   {
@@ -218,6 +219,20 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
   return 0;
 }
 
+void DumpStructMembers(clStringA& str, int depth, UVShader::CodeParser::STRUCT_MEMBER* pMembers, clsize nNumOfMembers)
+{
+  for(clsize i = 0; i < nNumOfMembers; i++)
+  {
+    str.AppendFormat("%*s%s %s", depth * nTabSize, " ", pMembers[i].szType, pMembers[i].szName);
+    if(pMembers[i].szSignature) {
+      str.AppendFormat(" : %s;\n", pMembers[i].szSignature);
+    }
+    else {
+      str.Append(";\n");
+    }
+  }
+}
+
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
 {
   clFile file;
@@ -341,8 +356,15 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
               }
               break;
             case UVShader::CodeParser::StatementType_Struct:
-              break;
             case UVShader::CodeParser::StatementType_Signatures:
+              {
+                const auto& stru = s.stru;
+                clStringA str;
+                file.WritefA("struct %s {\n", stru.szName);
+                DumpStructMembers(str, 1, stru.pMembers, stru.nNumOfMembers);
+                file.WritefA(str);
+                file.WritefA("};\n");
+              }
               break;
             case UVShader::CodeParser::StatementType_Expression:
               {
