@@ -1,5 +1,10 @@
 float3 sun;
-float3 dir,diffuse;
+float3 dir;
+float3 diffuse;
+float aa=0;
+float bb=1+2;
+float cc=5+4*5;
+float dd=sin(3.14);
 float4 colors[8];
 float4 many[8][7];
 float4 many3[8][7][16];

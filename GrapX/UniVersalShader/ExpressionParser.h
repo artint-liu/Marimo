@@ -185,9 +185,9 @@ namespace UVShader
       enum MODE
       {
         MODE_Undefined,
-        MODE_Normal,        // 操作符 + 操作数 模式
+        MODE_Command,       // 操作符 + 操作数 模式
         MODE_FunctionCall,  // 函数调用
-        MODE_ArrayIndex,  // 函数调用
+        MODE_ArrayIndex,    // 函数调用
         MODE_Definition,    // 变量定义
         MODE_Flow_While,
         MODE_Flow_If,       // if(A) {B}
@@ -215,20 +215,21 @@ namespace UVShader
       union UN {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
+        size_t        nNodeIndex;
         const TOKEN*  pSym;
       };
 
       UN Operand[s_NumOfOperand];
 
-      inline FLAGS GetOperandType(int index) const {
+      inline FLAGS GetOperandType(const int index) const {
         const int shift = FLAG_OPERAND_SHIFT * index;
         return (FLAGS)((flags >> shift) & FLAG_OPERAND_TYPEMASK);
       }
 
-      //inline GXBOOL OperandA_IsNode() const {
-      //  const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK;
-      //  return (flags & dwTypeMask) == FLAG_OPERAND_IS_NODE;
-      //}
+      inline void SetOperandType(const int index, FLAGS flag) {
+        const int shift = FLAG_OPERAND_SHIFT * index;
+        flags = (flags & (~(FLAG_OPERAND_TYPEMASK << shift))) | (flag << shift);
+      }
 
       inline GXBOOL OperandA_IsNodeIndex() const {
         const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK;
@@ -251,16 +252,46 @@ namespace UVShader
       }
 
       template<class _Func>
-      static void RecursiveNode(SYNTAXNODE* pNode, _Func func)
+      static void RecursiveNode(CodeParser* pParser, SYNTAXNODE* pNode, _Func func) // 广度优先递归
       {
         if(func(pNode)) {
-          if(pNode->GetOperandType(0) == FLAG_OPERAND_IS_NODE) {
-            RecursiveNode(pNode->Operand[0].pNode, func);
-          }
-          if(pNode->GetOperandType(1) == FLAG_OPERAND_IS_NODE) {
-            RecursiveNode(pNode->Operand[1].pNode, func);
-          }
+          int i = 0;
+          do {
+            auto type = pNode->GetOperandType(i);
+            switch(type)
+            {
+            case FLAG_OPERAND_IS_NODE:
+              RecursiveNode(pParser, pNode->Operand[i].pNode, func);
+              break;
+            case FLAG_OPERAND_IS_NODEIDX:
+              RecursiveNode(pParser, &pParser->
+                m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], func);
+              break;
+            }
+            i++;
+          }while(i < 2);
         }
+      }
+
+      template<class _Func>
+      static void RecursiveNode2(CodeParser* pParser, SYNTAXNODE* pNode, _Func func) // 深度优先递归
+      {
+        int i = 0;
+        do {
+          auto type = pNode->GetOperandType(i);
+          switch(type)
+          {
+          case FLAG_OPERAND_IS_NODE:
+            RecursiveNode(pParser, pNode->Operand[i].pNode, func);
+            break;
+          case FLAG_OPERAND_IS_NODEIDX:
+            RecursiveNode(pParser, &pParser->
+              m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], func);
+            break;
+          }
+          i++;
+        }while(i < 2);
+        func(pNode);
       }
 
     };
@@ -296,8 +327,7 @@ namespace UVShader
     struct STATEMENT_DEFN
     {
       UniformModifier modifier;
-      GXLPCSTR szType;
-      GXLPCSTR szName;
+      GXLPCSTR        szType;
       SYNTAXNODE::UN  sRoot;
     };
 

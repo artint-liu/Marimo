@@ -561,9 +561,9 @@ namespace UVShader
     }
 
     stat.defn.szType = GetUniqueString(p);
-    if(p + 1 < pEnd) {
-      stat.defn.szName = GetUniqueString(p + 1);
-    }
+    //if(p + 1 < pEnd) {
+    //  stat.defn.szName = GetUniqueString(p + 1);
+    //}
 
     if( ! ParseExpression(RTSCOPE(pScope->begin, definition_end), &stat.defn.sRoot))
     {
@@ -571,49 +571,58 @@ namespace UVShader
       return FALSE;
     }
 
-    //// 类型
-    //stat.defn.szType = GetUniqueString(p);
-    //INC_BUT_NOT_END(p, pEnd);
+    //
+    // 将类型定义中的逗号表达式展开为独立的类型定义
+    // 如 float a, b, c; 改为
+    // float a; float b; float c;
+    //
+    SYNTAXNODE* pNode = &m_aSyntaxNodePack[stat.defn.sRoot.nNodeIndex];
+    cllist<SYNTAXNODE*> sDefinitionList;
+    SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList](SYNTAXNODE* pNode) -> GXBOOL {
+      if( ! (pNode->mode == CodeParser::SYNTAXNODE::MODE_Definition || (pNode->pOpcode && (*(pNode->pOpcode)) == ','))) {
+        return FALSE;
+      }
+      sDefinitionList.push_back(pNode);
+      return TRUE;
+    });
 
-    //while(1) {
-    //  // 名称
-    //  stat.defn.szName = GetUniqueString(p);
-    //  INC_BUT_NOT_END(p, pEnd);
+    if(sDefinitionList.size() == 1) {
+      m_aStatements.push_back(stat);
+    }
+    else {
+      ASSERT( ! sDefinitionList.empty());
+      // 这里list应该是如下形式
+      // (define) [type] [node1]
+      // (node1) [node2] [var define node N]
+      // (node2) [node3] [var define node (N-1)]
+      // ...
+      // (nodeN) [var define node 1] [var define node 2]
 
-    //  // 数组定义----目前跳过了
-    //  while(*p == '[') {
-    //    if((RTSCOPE::TYPE)p->scope >= definition_end) {
-    //      ERROR_MSG__MISSING_SEMICOLON;
-    //    }
-    //    p = &m_aTokens[p->scope];
-    //    INC_BUT_NOT_END(p, pEnd);
-    //  }
+      auto& front = sDefinitionList.front();
+      auto* pNodeFrontPtr = &m_aSyntaxNodePack.front();
 
-    //  if(*p == '=')
-    //  {
-    //    INC_BUT_NOT_END(p, pEnd);
-    //    ParseExpression(RTSCOPE(p - &m_aTokens.front(), definition_end), &stat.defn.sRoot);
-    //  }
-    //  else if(*p == ';') {
-    //    break;
-    //  }
-    //  else if(*p == ',') {
-    //    m_aStatements.push_back(stat);
-    //    INC_BUT_NOT_END(p, pEnd);
-    //  }
-    //  else {
-    //    ERROR_MSG__MISSING_SEMICOLON;
-    //    pScope->begin = definition_end + 1;
-    //    return FALSE;
-    //  }
-    //}
-    //SYNTAXNODE::RecursiveNode(stat.defn.sRoot.pNode, [](SYNTAXNODE* pNode) -> GXBOOL {
-    //  if(pNode->pOpcode && (*(pNode->pOpcode)) == ',') {
+      front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
+      front->SetOperandType(1, sDefinitionList.back()->GetOperandType(0));
+      stat.defn.sRoot.nNodeIndex = front - &m_aSyntaxNodePack.front();
+      m_aStatements.push_back(stat);
 
-    //  }
-    //});
+      auto it = sDefinitionList.end();
+      ASSERT(front->GetOperandType(0) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
+      for(--it; it != sDefinitionList.begin(); --it)
+      {
+        auto& SyntaxNode = **it;
 
-    m_aStatements.push_back(stat);
+        // 逗号并列式改为独立类型定义式
+        SyntaxNode.mode = SYNTAXNODE::MODE_Definition;
+        SyntaxNode.pOpcode = NULL;
+        SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type
+        SyntaxNode.SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN); // front->GetOperandType(0)
+
+        // 加入列表
+        stat.defn.sRoot.nNodeIndex = *it - pNodeFrontPtr;
+        m_aStatements.push_back(stat);
+      }
+    }
     ASSERT(pEnd->semi_scope == definition_end && *pEnd == ';');
     pScope->begin = definition_end + 1;
     return TRUE;
@@ -1111,7 +1120,7 @@ NOT_INC_P:
       }
       break;
 
-    case SYNTAXNODE::MODE_Normal:
+    case SYNTAXNODE::MODE_Command:
       if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
         strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->ToString(), str[1]);
       }
@@ -1392,12 +1401,12 @@ NOT_INC_P:
 
       if(A.pSym->precedence > 0)
       {
-        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, A.pSym, NULL, &B);
+        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Command, A.pSym, NULL, &B);
         DbgDumpScope(A.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
       }
       else if(B.pSym->precedence > 0)
       {
-        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, B.pSym, &A, NULL);
+        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Command, B.pSym, &A, NULL);
         DbgDumpScope(B.pSym->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
       }
       else {
@@ -2066,7 +2075,7 @@ NOT_INC_P:
         ParseArithmeticExpression(scopeB, &B, nMinPrecedence) ;
     }
 
-    MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Normal, pOpcode, &A, &B);
+    MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Command, pOpcode, &A, &B);
 
     DbgDumpScope(pOpcode->ToString(), scopeA, scopeB);
 
