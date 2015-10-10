@@ -13,8 +13,8 @@
 float3 sun;
 float3 dir, diffuse;
 float4 colors[8];
-//float4 many[8][7];
-//float4 many3[8][7][16];
+float4 many[8][7];
+float4 many3[8][7][16];
  
 // º¯Êý²âÊÔ²¿·Ö
 float func()
@@ -281,4 +281,32 @@ void test_arithmetic_expression()
   int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
   a=b+=(c++)-d+(--e/-f);
   a=(b+c)*d+e+f;
+}
+
+float CalcC_1(float t, float p, float q)
+{
+  return t<(1.0/4.0) ? (p+((q-p)*4.0*t))
+	: (t<0.5) ? q
+	: (t<3.0/4.0) ? p+((q-p)*8.0*(3.0/4.0-t))
+	: p;
+}
+
+float CalcC_2(float t, float p, float q)
+{
+  if(t<(1.0/4.0))
+  {
+    return p+((q-p)*4.0*t);
+  }
+  else if(t<0.5)
+  {
+    return q;
+  }
+  else if(t<3.0/4.0)
+  {
+    return p+((q-p)*4.0*(3.0/4.0-t));
+  }
+  else
+  {
+    return p;
+  }
 }

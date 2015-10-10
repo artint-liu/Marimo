@@ -4,7 +4,7 @@
 #include <clPathFile.h>
 #include <clStringSet.h>
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
-#include "TestExpressionParser.h"
+#include "ExpressionSample.h"
 
 GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
 {
@@ -52,10 +52,10 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
     (mode == SYNTAXNODE::MODE_Flow_ForRunning)
     ) ? depth + 1 : depth;
 
-  if(mode == SYNTAXNODE::MODE_Flow_For)
-  {
-    CLNOP
-  }
+  //if(mode == SYNTAXNODE::MODE_Flow_For)
+  //{
+  //  CLNOP
+  //}
   
   //auto flag0 = pNode->GetOperandType(0);
   //if(flag0 == SYNTAXNODE::FLAG_OPERAND_IS_NODE && pNode->Operand[0].pNode != NULL && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Chain)
@@ -202,7 +202,7 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
 
   default:
     // 没处理的 pNode->mode 类型
-    CLBREAK;
+    strOut = "[!ERROR!]";
     break;
   }
 
@@ -269,10 +269,10 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
 
       TRACE("\ncount:%d(%f)\n", pTokens->size(), (float)pBuffer->GetSize() / pTokens->size());
 
-      if(strcmpi(szFilename, "Test\\shaders\\ShaderToy\\GLSL smallpt.txt") == 0) 
-      {
-        CLNOP
-      }
+      //if(strcmpi(szFilename, "Test\\shaders\\ShaderToy\\GLSL smallpt.txt") == 0) 
+      //{
+      //  CLNOP
+      //}
       expp.Parse();
       if(szOutput != NULL)
       {

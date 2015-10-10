@@ -2,7 +2,7 @@
 #include <Smart/SmartStream.h>
 #include <clStringSet.h>
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
-#include "TestExpressionParser.h"
+#include "ExpressionSample.h"
 
 GXLPCSTR aOperStack_HasError[] = {NULL,};
 
@@ -370,10 +370,10 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, "(a)=a+b;", 0},
   {0, "(a=a+b);", 0},
   {0, "a=a+b;b=a-c*d;c=a*d;", 20},
-  {0, "(a=a+b);(b=a-c*d);c=a*d;", 24},
+  //{0, "(a=a+b);(b=a-c*d);c=a*d;", 24},
 
   // ∂®“Â
-  {0, "float freqs, time", 4},
+  {0, "float freqs, time, frame, fps", 8, NULL, TRUE},
   {0, "float freqs[8], time[4]", 10},
   {0, "float freqs[16]", 5},
   {0, "float freqs[16][8]", 8},

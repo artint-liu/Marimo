@@ -12,8 +12,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\UniVersalShader\ExpressionParser.cpp" />
+    <ClCompile Include="..\Sample_UVShader\ExpressionSample.cpp" />
     <ClCompile Include="..\Sample_UVShader\Sample_UVShader.cpp" />
-    <ClCompile Include="..\Sample_UVShader\TestExpressionParser.cpp" />
     <ClCompile Include="..\Sample_UVShader\TestParseArithmeticExpression.cpp" />
     <ClCompile Include="..\Sample_UVShader\TestParseFromFile.cpp" />
   </ItemGroup>

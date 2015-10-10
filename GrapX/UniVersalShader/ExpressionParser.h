@@ -249,6 +249,20 @@ namespace UVShader
         Operand[0].ptr = NULL;
         Operand[1].ptr = NULL;
       }
+
+      template<class _Func>
+      static void RecursiveNode(SYNTAXNODE* pNode, _Func func)
+      {
+        if(func(pNode)) {
+          if(pNode->GetOperandType(0) == FLAG_OPERAND_IS_NODE) {
+            RecursiveNode(pNode->Operand[0].pNode, func);
+          }
+          if(pNode->GetOperandType(1) == FLAG_OPERAND_IS_NODE) {
+            RecursiveNode(pNode->Operand[1].pNode, func);
+          }
+        }
+      }
+
     };
     typedef clvector<SYNTAXNODE> SyntaxNodeArray;
 
@@ -375,13 +389,14 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope/*, GXBOOL bDbgRelocale*/); // (算数表)达式
 
     GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
+    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
 
     GXBOOL  ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     //GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
-    GXBOOL  ParseFunctionCall(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     GXBOOL  TryKeywords(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end);
     GXBOOL  TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end); // 解析一个代码块，用{}限定的一组或者仅有一句表达式的代码
     RTSCOPE::TYPE  ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf);

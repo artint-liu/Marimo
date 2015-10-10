@@ -1,6 +1,8 @@
 float3 sun;
 float3 dir,diffuse;
 float4 colors[8];
+float4 many[8][7];
+float4 many3[8][7][16];
 float func()
 {
   int a=0;
@@ -266,3 +268,23 @@ void test_arithmetic_expression()
   a=(b+c)*d+e+f;
 }
 
+float CalcC_1(in float t, in float p, in float q)
+{
+  return t<1.0/4.0?p+(q-p)*4.0*t:t<0.5?q:t<3.0/4.0?p+(q-p)*8.0*(3.0/4.0-t):p;
+}
+
+float CalcC_2(in float t, in float p, in float q)
+{
+  if(t<1.0/4.0) {
+    return p+(q-p)*4.0*t;
+  }
+  else if(t<0.5) {
+    return q;
+  }
+  else if(t<3.0/4.0) {
+    return p+(q-p)*4.0*(3.0/4.0-t);
+  }
+  else {
+    return p;
+  }
+}

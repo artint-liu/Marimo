@@ -607,7 +607,11 @@ namespace UVShader
     //    return FALSE;
     //  }
     //}
+    //SYNTAXNODE::RecursiveNode(stat.defn.sRoot.pNode, [](SYNTAXNODE* pNode) -> GXBOOL {
+    //  if(pNode->pOpcode && (*(pNode->pOpcode)) == ',') {
 
+    //  }
+    //});
 
     m_aStatements.push_back(stat);
     ASSERT(pEnd->semi_scope == definition_end && *pEnd == ';');
@@ -1141,16 +1145,16 @@ NOT_INC_P:
   GXBOOL CodeParser::ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion)
   {
     RTSCOPE scope(begin, end);
-    return ParseArithmeticExpression(&scope, pUnion);
+    return ParseArithmeticExpression(scope, pUnion);
   }
 
-  GXBOOL CodeParser::ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseArithmeticExpression(const RTSCOPE& scope_in, SYNTAXNODE::UN* pUnion)
   {
-    RTSCOPE scope = *pScope;
+    RTSCOPE scope = scope_in;
     if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
       scope.end--;
     }
-    return ParseArithmeticExpression(&scope, pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    return ParseArithmeticExpression(scope, pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
 
   GXBOOL CodeParser::ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
@@ -1353,35 +1357,35 @@ NOT_INC_P:
       //bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, &A, &B);
     }
 
-    ParseArithmeticExpression(&scope, pUnion);
+    ParseArithmeticExpression(scope, pUnion);
     return TRUE;
   }
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseArithmeticExpression(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion, int nMinPrecedence)
+  GXBOOL CodeParser::ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, int nMinPrecedence)
   {
     int nCandidate = m_nMaxPrecedence;
-    GXINT_PTR i = (GXINT_PTR)pScope->end - 1;
+    GXINT_PTR i = (GXINT_PTR)scope.end - 1;
     GXINT_PTR nCandidatePos = i;
     SYNTAXNODE::UN A, B;
 
-    const GXINT_PTR count = pScope->end - pScope->begin;
+    const GXINT_PTR count = scope.end - scope.begin;
 
     if(count <= 1) {
       if(count == 1) {
-        pUnion->pSym = &m_aTokens[pScope->begin];
+        pUnion->pSym = &m_aTokens[scope.begin];
       }
       return TRUE;
     }
 
-    const auto& front = m_aTokens[pScope->begin];
+    const auto& front = m_aTokens[scope.begin];
 
     if(count == 2)
     {
       // 处理两种可能：(1)变量使用一元符号运算 (2)定义变量
       A.pSym = &front;
-      B.pSym = &m_aTokens[pScope->begin + 1];
+      B.pSym = &m_aTokens[scope.begin + 1];
       GXBOOL bret = TRUE;
 
       ASSERT(*B.pSym != ';'); // 已经在外部避免了表达式内出现分号
@@ -1389,12 +1393,12 @@ NOT_INC_P:
       if(A.pSym->precedence > 0)
       {
         bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, A.pSym, NULL, &B);
-        DbgDumpScope(A.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(pScope->begin + 1, pScope->end));
+        DbgDumpScope(A.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
       }
       else if(B.pSym->precedence > 0)
       {
         bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Normal, B.pSym, &A, NULL);
-        DbgDumpScope(B.pSym->ToString(), RTSCOPE(pScope->begin, pScope->begin + 1), RTSCOPE(0,0));
+        DbgDumpScope(B.pSym->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
       }
       else {
         // 变量声明
@@ -1402,31 +1406,31 @@ NOT_INC_P:
       }
       return bret;
     }
-    else if(front.precedence == 0 && m_aTokens[pScope->begin + 1].precedence == 0) // 变量声明
+    else if(front.precedence == 0 && m_aTokens[scope.begin + 1].precedence == 0) // 变量声明
     {
       ASSERT(count > 2);
       A.pSym = &front;
       B.ptr = NULL;
-      GXBOOL bret = ParseArithmeticExpression(&RTSCOPE(pScope->begin + 1, pScope->end), &B);
+      GXBOOL bret = ParseArithmeticExpression(RTSCOPE(scope.begin + 1, scope.end), &B);
       bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Definition, &A, &B);
       return bret;
     }
-    else if((front == '(' || front == '[') && front.scope == pScope->end - 1)  // 括号内表达式
+    else if((front == '(' || front == '[') && front.scope == scope.end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
-      ASSERT(m_aTokens[pScope->end - 1].scope == pScope->begin);
-      return ParseArithmeticExpression(&RTSCOPE(pScope->begin + 1, pScope->end - 1), pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
+      ASSERT(m_aTokens[scope.end - 1].scope == scope.begin);
+      return ParseArithmeticExpression(RTSCOPE(scope.begin + 1, scope.end - 1), pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
     }
-    else if(m_aTokens[pScope->begin + 1].scope == pScope->end - 1)  // 整个表达式是函数调用
+    else if(m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
     {
-      return ParseFunctionCall(pScope, pUnion);
+      return ParseFunctionCall(scope, pUnion);
     }
 
     while(nMinPrecedence <= m_nMaxPrecedence)
     {
       if(nMinPrecedence == OPP(1))
       {
-        for(i = (GXINT_PTR)pScope->begin; i < (GXINT_PTR)pScope->end; ++i)
+        for(i = (GXINT_PTR)scope.begin; i < (GXINT_PTR)scope.end; ++i)
         {
           m_nDbgNumOfExpressionParse++;
 
@@ -1434,19 +1438,18 @@ NOT_INC_P:
 
           if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
           {
-            ASSERT(s.scope < (int)pScope->end); // 闭括号肯定在表达式区间内
+            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
             i = s.scope;
             continue;
           }
-          else if(s.precedence == 0 || s == ':') {
+          else if(s.precedence == 0 || s == ':') { // 跳过非运算符, 这里包括三元运算符的次级运算符
             continue;
           }
 
           // ?: 操作符标记：precedence 储存优先级，scope 储存?:的关系
 
           if(s.precedence == nMinPrecedence) {
-            MakeInstruction(&s, nMinPrecedence, pScope, pUnion, i);
-            return TRUE;
+            return MakeInstruction(&s, nMinPrecedence, &scope, pUnion, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -1454,11 +1457,11 @@ NOT_INC_P:
           }
         } // for
 
-        nCandidatePos = (GXINT_PTR)pScope->end - 1;
+        nCandidatePos = (GXINT_PTR)scope.end - 1;
       }
       else
       {
-        for(; i >= (GXINT_PTR)pScope->begin; --i)
+        for(; i >= (GXINT_PTR)scope.begin; --i)
         {
           m_nDbgNumOfExpressionParse++;
           const TOKEN& s = m_aTokens[i];
@@ -1469,17 +1472,16 @@ NOT_INC_P:
           // 跳过非运算符, 也包括括号
           if(s.precedence == TOKEN::ID_BRACE)
           {
-            ASSERT(s.scope < (int)pScope->end); // 闭括号肯定在表达式区间内
+            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
             i = s.scope;
             continue;
           }
-          else if(s.precedence == 0) {
+          else if(s.precedence == 0) { // 跳过非运算符
             continue;
           }
 
           if(s.precedence == nMinPrecedence) {
-            MakeInstruction(&s, nMinPrecedence, pScope, pUnion, i);
-            return TRUE;
+            return MakeInstruction(&s, nMinPrecedence, &scope, pUnion, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -1495,35 +1497,101 @@ NOT_INC_P:
       nMinPrecedence = nCandidate;
       i = nCandidatePos;
     }
+
+    if( ! ParseFunctionIndexCall(scope, pUnion))
+    {
+      clStringA strMsg(m_aTokens[scope.begin].marker.marker, (m_aTokens[scope.end - 1].marker.marker - m_aTokens[scope.begin].marker.marker) + m_aTokens[scope.end - 1].marker.length);
+      TRACE("ERROR: 无法解析\"%s\"\n", strMsg);
+      return FALSE;
+    }
     return TRUE;
   }
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseFunctionCall(const RTSCOPE* pScope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
   {
     // 括号肯定是匹配的
-    ASSERT(m_aTokens[pScope->end - 1].scope == pScope->begin + 1);
+    ASSERT(m_aTokens[scope.end - 1].scope == scope.begin + 1);
 
     SYNTAXNODE::UN A, B = {0};
+    A.pSym = &m_aTokens[scope.begin];
 
-    A.pSym = &m_aTokens[pScope->begin];
-    //clStringA strFunction = A.pSym->ToString();
+    // TODO: 检查m_aTokens[scope.begin]是函数名
 
-    // TODO: 检查m_aTokens[pScope->begin]是函数名
-
-    //GXBOOL bret = ParseExpression(&B, pScope->begin + 2, pScope->end - 1);
-    auto& bracket = m_aTokens[pScope->begin + 1];
+    auto& bracket = m_aTokens[scope.begin + 1];
     ASSERT(bracket == '[' || bracket == '(');
-    GXBOOL bret = ParseArithmeticExpression(&RTSCOPE(pScope->begin + 2, pScope->end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    GXBOOL bret = ParseArithmeticExpression(RTSCOPE(scope.begin + 2, scope.end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
 
     SYNTAXNODE::MODE mode = bracket == '(' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
 
     MakeSyntaxNode(pUnion, mode, NULL, &A, &B);
-    DbgDumpScope(bracket == '(' ? "F" : "I", RTSCOPE(pScope->begin, pScope->begin + 1),
-      RTSCOPE(pScope->begin + 2, pScope->end - 1));
+    DbgDumpScope(bracket == '(' ? "F" : "I", RTSCOPE(scope.begin, scope.begin + 1),
+      RTSCOPE(scope.begin + 2, scope.end - 1));
 
     return bret;
+  }
+
+  GXBOOL CodeParser::ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  {
+    // 从右到左解析这两种形式:
+    // name(...)(...)(...)
+    // name[...][...][...]
+    // 括号域之间不能有其他符号, 括号域之内是数学表达式
+
+    struct CONTEXT
+    {
+      SYNTAXNODE::MODE mode;
+      SYNTAXNODE::UN   B;
+    };
+
+    typedef clstack<CONTEXT> SyntaxStack;
+    SyntaxStack node_stack;
+    SYNTAXNODE::UN A;
+    CONTEXT c;
+    TOKEN* pBack = &m_aTokens[scope.end - 1];
+    A.pSym = &m_aTokens[scope.begin];
+    ASSERT(A.pSym->precedence == 0); // 第一个必须不是运算符号
+
+
+    while(1) {
+      if(pBack->scope == RTSCOPE::npos) {
+        ERROR_MSG__MISSING_SEMICOLON;
+        return FALSE;
+      }
+      c.mode = *pBack == ')' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
+      c.B.ptr = NULL;
+
+      if( ! ParseArithmeticExpression(RTSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {
+        return FALSE;
+      }
+
+      if(scope.begin + 1 == pBack->scope) {
+        break;
+      }
+      else {
+        node_stack.push(c);
+        pBack = &m_aTokens[pBack->scope - 1];
+      }
+    }
+
+    while(1) {
+      if( ! MakeSyntaxNode(pUnion, c.mode, &A, &c.B)) {
+        CLBREAK;
+        return FALSE;
+      }
+
+      if( ! node_stack.empty()) {
+        c = node_stack.top();
+        node_stack.pop();
+        A = *pUnion;
+      }
+      else {
+        break;
+      }
+    }
+
+    return TRUE;
   }
 
   CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf)
@@ -1542,7 +1610,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
 
-    bret = bret && ParseArithmeticExpression(&sConditional, &A);
+    bret = bret && ParseArithmeticExpression(sConditional, &A);
 
 
 
@@ -1677,7 +1745,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
     
-    bret = bret && ParseArithmeticExpression(&sConditional, &A);
+    bret = bret && ParseArithmeticExpression(sConditional, &A);
 
 
     sBlock.begin = sConditional.end + 1;
@@ -1762,7 +1830,7 @@ NOT_INC_P:
     // TODO： 验证域的开始是括号和花括号
 
     GXBOOL bret = ParseExpression(sBlock, &B);
-    bret = bret && ParseArithmeticExpression(&sConditional, &A);
+    bret = bret && ParseArithmeticExpression(sConditional, &A);
     bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
     RTSCOPE::TYPE while_end = sConditional.end + 1;
@@ -1933,9 +2001,9 @@ NOT_INC_P:
 
     ASSERT(m_aTokens[sBlock.begin] == "for" || m_aTokens[sBlock.end] == ';' || m_aTokens[sBlock.end] == '}');
 
-    ParseArithmeticExpression(&sInitializer, &uInit, TOKEN::FIRST_OPCODE_PRECEDENCE);
-    ParseArithmeticExpression(&sConditional, &uCond, TOKEN::FIRST_OPCODE_PRECEDENCE);
-    ParseArithmeticExpression(&sIterator   , &uIter, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(sInitializer, &uInit, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(sConditional, &uCond, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(sIterator   , &uIter, TOKEN::FIRST_OPCODE_PRECEDENCE);
     //if(sBlock.end == RTSCOPE::npos)
     //{
     //  ASSERT(m_aTokens[sBlock.begin] == "for"); // MakeFlowForScope 函数保证
@@ -1982,7 +2050,7 @@ NOT_INC_P:
       const TOKEN& s = m_aTokens[nMiddle];
       //SYNTAXNODE sNodeB;
       //B.pNode = &sNodeB;
-      bresult = ParseArithmeticExpression(&scopeA, &A, nMinPrecedence);
+      bresult = ParseArithmeticExpression(scopeA, &A, nMinPrecedence);
 
       if(s.scope >= (int)pScope->begin && s.scope < (int)pScope->end) {
         ASSERT(m_aTokens[s.scope] == ':');
@@ -1994,8 +2062,8 @@ NOT_INC_P:
     }
     else {
       bresult = 
-        ParseArithmeticExpression(&scopeA, &A, nMinPrecedence) &&
-        ParseArithmeticExpression(&scopeB, &B, nMinPrecedence) ;
+        ParseArithmeticExpression(scopeA, &A, nMinPrecedence) &&
+        ParseArithmeticExpression(scopeB, &B, nMinPrecedence) ;
     }
 
     MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Normal, pOpcode, &A, &B);

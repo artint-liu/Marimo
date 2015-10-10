@@ -2,7 +2,7 @@
 #include <Smart/SmartStream.h>
 #include <clStringSet.h>
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
-#include "TestExpressionParser.h"
+#include "ExpressionSample.h"
 
 class TestExpression : public UVShader::CodeParser
 {
@@ -14,7 +14,7 @@ public:
     m_aDbgExpressionOperStack.clear();
     m_aCommand.clear();
     STATEMENT stat = {StatementType_Expression};
-    GXBOOL bret = ParseArithmeticExpression(pScope, &stat.expr.sRoot);
+    GXBOOL bret = ParseArithmeticExpression(*pScope, &stat.expr.sRoot);
     if( ! bret)
     {
       TRACE("±‡“Î¥ÌŒÛ\n");
@@ -132,6 +132,12 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
         ASSERT(a == b);
       }
       ASSERT( ! pSamples[i].aOperStack[n]);
+    }
+    else {
+      for(auto it = expp.m_aCommand.begin(); it != expp.m_aCommand.end(); ++it)
+      {
+        TRACE("%s\n", *it);
+      }
     }
 
     TRACE("\n\n");

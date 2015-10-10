@@ -9,7 +9,7 @@
 #include <clPathFile.h>
 #include <clStringSet.h>
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
-#include "TestExpressionParser.h"
+#include "ExpressionSample.h"
 #include "gdiplus.h"
 
 #pragma comment(lib, "gdiplus.lib")
@@ -274,13 +274,15 @@ void TestShaderToys(GXBOOL bShowList)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+#ifdef ENABLE_GRAPH
   using namespace Gdiplus;
   GdiplusStartupInput gdiplusStartupInput;
   ULONG_PTR gdiplusToken;
   GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+#endif // ENABLE_GRAPH
 
+  int a = 1, b = 2, c = 3, d = 4;
 
-  int a = 1, b = 2, c = 3;
   TestFlowIf();
   clpathfile::LocalWorkingDirA("..");
 
@@ -319,7 +321,9 @@ int _tmain(int argc, _TCHAR* argv[])
   //TestFromFile("Test\\shaders\\ShaderToy\\TrivialRaytracer3.txt", "Test\\shaders\\TrivialRaytracer3[output].txt");
   
   //TestFromFile("Test\\shaders\\ShaderToy\\TrivialRaytracer3.txt");
+#ifdef ENABLE_GRAPH
   GdiplusShutdown(gdiplusToken);
+#endif // ENABLE_GRAPH
 	return 0;
 }
 
