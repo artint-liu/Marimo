@@ -11,7 +11,7 @@
 
 // 全局变量
 float3 sun;
-float3 dir, diffuse;
+float3 dir : VIEWDIRECTION, diffuse : DIFFUSE;
 float aa = 0, bb = 1 + 2, cc = 5 + 4 * 5, dd = sin(3.14);
 float4 colors[8];
 float4 many[8][7];
@@ -61,6 +61,21 @@ void func4()
     a = 0;
 	b = 1;
   }
+}
+
+void func5()
+{
+  struct CONTEXT {
+    float3 pos;	
+	float3 dir;
+	;
+	float2 texcoord;
+  };
+  
+  CONTEXT c;
+  
+  c.pos = float3(0);
+  c.dir = float3(1.0);
 }
 
 //////////////////////////////////////////////////////////////////////////

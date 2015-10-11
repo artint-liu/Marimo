@@ -1,6 +1,6 @@
 float3 sun;
-float3 dir;
-float3 diffuse;
+float3 dir:VIEWDIRECTION;
+float3 diffuse:DIFFUSE;
 float aa=0;
 float bb=1+2;
 float cc=5+4*5;
@@ -50,6 +50,18 @@ void func4()
     a=0;
     b=1;
   }
+}
+
+void func5()
+{
+  struct CONTEXT {
+    float3 pos;
+    float3 dir;
+    float2 texcoord;
+  };
+  CONTEXT c;
+  c.pos=float3(0);
+  c.dir=float3(1.0);
 }
 
 void flow_test()
@@ -273,12 +285,12 @@ void test_arithmetic_expression()
   a=(b+c)*d+e+f;
 }
 
-float CalcC_1(in float t, in float p, in float q)
+float CalcC_1(in float t,in float p,in float q)
 {
   return t<1.0/4.0?p+(q-p)*4.0*t:t<0.5?q:t<3.0/4.0?p+(q-p)*8.0*(3.0/4.0-t):p;
 }
 
-float CalcC_2(in float t, in float p, in float q)
+float CalcC_2(in float t,in float p,in float q)
 {
   if(t<1.0/4.0) {
     return p+(q-p)*4.0*t;

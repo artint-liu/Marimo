@@ -1197,7 +1197,7 @@ NOT_INC_P:
       A = *pUnion;
 
       bret = ParseExpression(RTSCOPE(parse_end + 1, scope.end), &B) &&
-        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, NULL, &A, &B);
+        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, &A, &B);
     }
     return bret ? parse_end != RTSCOPE::npos : FALSE;
   }
@@ -1230,6 +1230,9 @@ NOT_INC_P:
     }
     else if(front == "do") {
       pend = ParseFlowDoWhile(scope, pUnion);
+    }
+    else if(front == "struct") {
+      pend = ParseStructDefine(scope, pUnion);
     }
     else if(front == "break") {
       eMode = SYNTAXNODE::MODE_Flow_Break;
@@ -1552,7 +1555,7 @@ NOT_INC_P:
 
     SYNTAXNODE::MODE mode = bracket == '(' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
 
-    MakeSyntaxNode(pUnion, mode, NULL, &A, &B);
+    MakeSyntaxNode(pUnion, mode, &A, &B);
     DbgDumpScope(bracket == '(' ? "F" : "I", RTSCOPE(scope.begin, scope.begin + 1),
       RTSCOPE(scope.begin + 2, scope.end - 1));
 
@@ -1819,7 +1822,7 @@ NOT_INC_P:
     //  bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
     //}
 
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_While, NULL, &A, &B);
+    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_While, &A, &B);
 
     DbgDumpScope("while", sConditional, sBlock);
     return bret ? sBlock.end : RTSCOPE::npos;
@@ -1867,6 +1870,71 @@ NOT_INC_P:
     }
 
     return bret ? while_end : RTSCOPE::npos;
+  }
+
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  {
+    SYNTAXNODE::UN T, B = {0};
+    GXBOOL bret = TRUE;
+    ASSERT(m_aTokens[scope.begin] == "struct");
+
+
+    //RTSCOPE sName(scope.begin + 2, m_aTokens[scope.begin + 1].scope);
+    RTSCOPE::TYPE index = scope.begin + 2;
+
+    if(index >= scope.end) {
+      // ERROR: struct 定义错误，缺少定义名
+      return RTSCOPE::npos;
+    }
+
+    // 确定定义块的范围
+    RTSCOPE sBlock(index, m_aTokens[index].scope);
+    if(sBlock.end == RTSCOPE::npos || sBlock.end >= scope.end) {
+      ERROR_MSG__MISSING_SEMICOLON;
+      return RTSCOPE::npos;
+    }
+
+    clstack<SYNTAXNODE::UN> NodeStack;
+
+    while(++index < sBlock.end && bret)
+    {
+      auto& decl = m_aTokens[index];
+      if(decl.semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)decl.semi_scope >= sBlock.end) {
+        ERROR_MSG_缺少分号;
+        break;
+      }
+      else if(index == decl.semi_scope) {
+        continue;
+      }
+
+      bret = bret && ParseArithmeticExpression(RTSCOPE(index, decl.semi_scope), &T);
+      NodeStack.push(T);
+      
+      index = decl.semi_scope;
+    }
+
+    while( ! NodeStack.empty())
+    {
+      MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &NodeStack.top(), &B);
+      NodeStack.pop();
+    }
+
+
+    index = sBlock.end + 1;
+    if(index >= scope.end || m_aTokens[index] != ';') {
+      ERROR_MSG_缺少分号;
+    }
+    else {
+      T.pSym = &m_aTokens[index];
+      ASSERT(*T.pSym == ';');
+      bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, &T);
+    }
+
+    T.pSym = &m_aTokens[scope.begin + 1];
+    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_StructDef, &T, &B);
+
+    //DbgDumpScope("while", sConditional, sBlock);
+    return bret ? sBlock.end + 1 : RTSCOPE::npos;
   }
 
   GXBOOL CodeParser::MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam)

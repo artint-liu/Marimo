@@ -52,10 +52,10 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
     (mode == SYNTAXNODE::MODE_Flow_ForRunning)
     ) ? depth + 1 : depth;
 
-  //if(mode == SYNTAXNODE::MODE_Flow_For)
-  //{
-  //  CLNOP
-  //}
+  if(mode == SYNTAXNODE::MODE_StructDef)
+  {
+    CLNOP
+  }
   
   //auto flag0 = pNode->GetOperandType(0);
   //if(flag0 == SYNTAXNODE::FLAG_OPERAND_IS_NODE && pNode->Operand[0].pNode != NULL && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Chain)
@@ -154,7 +154,13 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
     strOut.Append("{\n");
     strOut.Append(str[0]);
     strOut.Append(' ', retraction);
-    strOut.Append("}\n");
+    if(str[1].IsNotEmpty()) {
+      ASSERT(str[1] == ";"); // 目前只可能是分号
+      strOut.AppendFormat("}%s\n", str[1]);
+    }
+    else {
+      strOut.Append("}\n");
+    }
     break;
 
   case SYNTAXNODE::MODE_Chain:
@@ -177,6 +183,11 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
         strOut.AppendFormat("%s", str[1]);
       }
     }
+    break;
+
+  case SYNTAXNODE::MODE_StructDef:
+    strOut.Format("struct %s ", str[0]);
+    strOut.Append(str[1]);
     break;
 
   case SYNTAXNODE::MODE_Opcode:
