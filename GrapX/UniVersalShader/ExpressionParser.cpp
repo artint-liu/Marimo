@@ -86,7 +86,16 @@
 
 static clsize s_nMultiByteOperatorLen = 0; // 最大长度
 
-#define ERROR_MSG__MISSING_SEMICOLON  CLBREAK
+#define ERROR_MSG__MISSING_SEMICOLON      CLBREAK
+#define ERROR_MSG__MISSING_OPENBRACKET    CLBREAK
+#define ERROR_MSG__MISSING_CLOSEDBRACKET  CLBREAK
+
+//
+// 竟然可以使用中文 ಠ౪ಠ
+//
+#define ERROR_MSG_缺少分号    ERROR_MSG__MISSING_SEMICOLON    
+#define ERROR_MSG_缺少开括号  ERROR_MSG__MISSING_OPENBRACKET  
+#define ERROR_MSG_缺少闭括号  ERROR_MSG__MISSING_CLOSEDBRACKET
 
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
@@ -106,6 +115,9 @@ namespace UVShader
     {},
     {1, "-", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号
   };
+
+  static CodeParser::MBO s_semantic =  // ":" 作为语意的优先级
+    {1, ":", OPP(13) };
 
   static CodeParser::MBO s_Operator1[] = {
     {1, ".", OPP(13), FALSE},
@@ -384,7 +396,7 @@ namespace UVShader
     //PairStack stackBrackets;        // 圆括号
     //PairStack stackSquareBrackets;  // 方括号
     //PairStack stackBrace;           // 花括号
-    TOKEN sym;
+    TOKEN token;
     
     // 只是清理
     m_CurSymInfo.ClearMarker();
@@ -393,17 +405,18 @@ namespace UVShader
 
     struct PAIR_CONTEXT
     {
-      GXCHAR    chOpen;    // 开区间
-      GXCHAR    chClosed;  // 闭区间
-      GXBOOL    bNewEOE;   // 更新End Of Expression的位置
+      GXCHAR    chOpen;         // 开区间
+      GXCHAR    chClosed;       // 闭区间
+      GXUINT    bNewEOE   : 1;  // 更新End Of Expression的位置
+      GXUINT    bCloseAE  : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
       PairStack sStack;
     };
 
     static PAIR_CONTEXT pair_context[] = {
-      {'(', ')', FALSE},   // 圆括号
-      {'[', ']', FALSE},   // 方括号
-      {'{', '}', TRUE },   // 花括号
-      {'?', ':', FALSE},
+      {'(', ')', FALSE, FALSE},   // 圆括号
+      {'[', ']', FALSE, FALSE},   // 方括号
+      {'{', '}', TRUE , FALSE},   // 花括号
+      {'?', ':', FALSE, TRUE},    // 冒号不匹配会被解释为语意
       {NULL, },
     };
 
@@ -412,15 +425,13 @@ namespace UVShader
     for(auto it = begin(); it != stream_end; ++it)
     {
       const int c_size = (int)m_aTokens.size();
-      sym.Set(it);
-      sym.scope = -1;
-      sym.semi_scope = -1;
+      token.Set(it);
+      token.scope = -1;
+      token.semi_scope = -1;
 
       ASSERT(m_CurSymInfo.marker.marker == NULL || it.marker == m_CurSymInfo.marker.marker); // 遍历时一定这个要保持一致
 
-      sym.precedence = m_CurSymInfo.precedence;
-      sym.unary      = m_CurSymInfo.unary;
-      sym.unary_mask = m_CurSymInfo.unary_mask;
+      token.SetArithOperatorInfo(m_CurSymInfo);
 
       // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
       if((it == '-' || it == '+') && ! m_aTokens.empty())
@@ -431,16 +442,15 @@ namespace UVShader
         // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
         if(l_back.precedence != 0 && l_back != ')' && l_back != ']' && ( ! l_back.unary)) {
           const auto& p = s_plus_minus[(int)(it.marker[0] - '+')];
-          sym.precedence = p.precedence;
-          sym.unary      = p.unary;
-          sym.unary_mask = p.unary_mask;
+          token.SetArithOperatorInfo(p);
         }
       }
 
+      
       // 只是清理
       m_CurSymInfo.ClearMarker();
-      m_CurSymInfo.precedence = 0;
-      m_CurSymInfo.unary      = 0;
+      m_CurSymInfo.ClearArithOperatorInfo();
+
 
       // 符号配对处理
       for(int i = 0; pair_context[i].chOpen != NULL; ++i)
@@ -451,25 +461,34 @@ namespace UVShader
         }
         else if(it == c.chClosed) {
           if(c.sStack.empty()) {
-            // ERROR: 不匹配            
+            if(c.bCloseAE) {
+              ASSERT(token == ':'); // 目前只有这个
+              token.SetArithOperatorInfo(s_semantic);
+              break;
+            }
+            else {
+              // ERROR: 括号不匹配
+              ERROR_MSG__MISSING_OPENBRACKET;
+            }
           }
-          sym.scope = c.sStack.top();
-          m_aTokens[sym.scope].scope = c_size;
+          token.scope = c.sStack.top();
+          m_aTokens[token.scope].scope = c_size;
           c.sStack.pop();
         }
         else {
           continue;
         }
 
-        // ?: 操作符会设置precedence的优先级，而我们只想设置括号的标记
-        if(sym.precedence == 0) {
-          sym.precedence = TOKEN::ID_BRACE;
+        // ?: 操作符precedence不为0，拥有自己的优先级；其他括号我们标记为括号
+        if(token.precedence == 0) {
+          token.precedence = TOKEN::ID_BRACE;
         }
 
         if(c.bNewEOE) {
           EOE = c_size + 1;
         }
-      }
+        break;
+      } // for
       
       /*
       if(it == ';') {
@@ -494,7 +513,7 @@ namespace UVShader
       m_aTokens.push_back(sym);
 
       /*/
-      m_aTokens.push_back(sym);
+      m_aTokens.push_back(token);
 
       if(it == ';') {
         ASSERT(EOE < (int)m_aTokens.size());
@@ -504,8 +523,6 @@ namespace UVShader
         }
         EOE = c_size + 1;
       }
-
-      //*/
     }
 
     for(int i = 0; pair_context[i].chOpen != NULL; ++i)
@@ -513,6 +530,7 @@ namespace UVShader
       PAIR_CONTEXT& c = pair_context[i];
       if( ! c.sStack.empty()) {
         // ERROR: 不匹配
+        ERROR_MSG__MISSING_CLOSEDBRACKET;
       }
     }
 
@@ -1120,7 +1138,7 @@ NOT_INC_P:
       }
       break;
 
-    case SYNTAXNODE::MODE_Command:
+    case SYNTAXNODE::MODE_Opcode:
       if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
         strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->ToString(), str[1]);
       }
@@ -1401,12 +1419,12 @@ NOT_INC_P:
 
       if(A.pSym->precedence > 0)
       {
-        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Command, A.pSym, NULL, &B);
+        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Opcode, A.pSym, NULL, &B);
         DbgDumpScope(A.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
       }
       else if(B.pSym->precedence > 0)
       {
-        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Command, B.pSym, &A, NULL);
+        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Opcode, B.pSym, &A, NULL);
         DbgDumpScope(B.pSym->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
       }
       else {
@@ -2075,7 +2093,7 @@ NOT_INC_P:
         ParseArithmeticExpression(scopeB, &B, nMinPrecedence) ;
     }
 
-    MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Command, pOpcode, &A, &B);
+    MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Opcode, pOpcode, &A, &B);
 
     DbgDumpScope(pOpcode->ToString(), scopeA, scopeB);
 

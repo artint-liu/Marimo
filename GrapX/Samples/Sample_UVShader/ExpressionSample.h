@@ -4,6 +4,8 @@
 struct SAMPLE_EXPRESSION
 {
   int         id;
+  GXLPCSTR    szSourceFile;
+  GXINT       nLine;
   const char* expression;
   int         expectation;
   GXLPCSTR*   aOperStack;

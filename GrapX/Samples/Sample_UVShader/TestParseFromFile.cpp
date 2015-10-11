@@ -179,7 +179,7 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
     }
     break;
 
-  case SYNTAXNODE::MODE_Command:
+  case SYNTAXNODE::MODE_Opcode:
     if(precedence > pNode->pOpcode->precedence) { // 低优先级先运算
       strOut.Format("(%s%s%s)", str[0], pNode->pOpcode->ToString(), str[1]);
     }

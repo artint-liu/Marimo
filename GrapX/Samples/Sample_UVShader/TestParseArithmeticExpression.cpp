@@ -23,6 +23,7 @@ public:
     else if(TryGetNodeType(&stat.expr.sRoot) == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX && stat.expr.sRoot.pNode) {
       IndexToPtr(stat.expr.sRoot.pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr(stat.expr.sRoot.pNode);
+      TRACE("---\n");
       DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.pNode, 0);
     }
     *pStat = stat;
@@ -87,6 +88,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
 
     int nCount = 0;
     //TRACE("%3d# ", i);
+    TRACE("%s(%d)\n", pSamples[i].szSourceFile, pSamples[i].nLine);
     TRACE("%d# \"%s\"\n", i, pSamples[i].expression);
     for(auto it = pTokens->begin(); it != pTokens->end(); ++it)
     {

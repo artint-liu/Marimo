@@ -69,6 +69,21 @@ namespace UVShader
         marker = _iter;
       }
 
+      template<class _Ty>
+      void SetArithOperatorInfo(const _Ty& t) // 设置数学符号信息
+      {
+        unary      = t.unary;
+        unary_mask = t.unary_mask;
+        precedence = t.precedence;
+      }
+
+      void ClearArithOperatorInfo()
+      {
+        unary      = 0;
+        unary_mask = 0;
+        precedence = 0;
+      }
+
       clStringA ToString() const
       {
         return marker.ToString();
@@ -185,7 +200,7 @@ namespace UVShader
       enum MODE
       {
         MODE_Undefined,
-        MODE_Command,       // 操作符 + 操作数 模式
+        MODE_Opcode,        // 操作符 + 操作数 模式
         MODE_FunctionCall,  // 函数调用
         MODE_ArrayIndex,    // 函数调用
         MODE_Definition,    // 变量定义
