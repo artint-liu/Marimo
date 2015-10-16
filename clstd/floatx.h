@@ -20,6 +20,10 @@ namespace clstd
 
   struct _float2
   {
+    // [二维直角坐标系]
+    // 右手坐标系：x轴向右，y轴向上，常见于平面解析几何坐标系
+    // 左手坐标系：x轴向右，y轴向下，常见于屏幕坐标系
+
     union
     {
       struct{
@@ -39,8 +43,9 @@ namespace clstd
 
     _float2(){};
     _float2(const float v){x = y = v;};
-    _float2(const float x, const float y){this->x = x; this->y = y;};
+    _float2(float _x, float _y) : x(_x), y(_y) {}
     _float2(const _float2& v){x = v.x; y = v.y;};
+    explicit _float2(int _x, int _y) : x((float)_x), y((float)_y) {}
 
     friend _float2 operator + (const _float2& v, const float f){return _float2(v.x + f, v.y + f);};
     friend _float2 operator + (const _float2& v1, const _float2& v2){return _float2(v1.x + v2.x, v1.y + v2.y);};
@@ -86,6 +91,14 @@ namespace clstd
     bool operator == (const float f) const { return (x == f && y == f);}
     bool operator != (const float f) const { return (x != f || y != f);}
 
+    _float2& operator += (const float f){x += f; y += f; return *this;}
+    _float2& operator += (const _float2& v){x += v.x; y += v.y; return *this;}
+    _float2& operator -= (const float f){x -= f; y -= f; return *this;}
+    _float2& operator -= (const _float2& v){x -= v.x; y -= v.y; return *this;}
+    _float2& operator *= (const float f){x *= f; y *= f; return *this;}
+    _float2& operator *= (const _float2& v){x *= v.x; y *= v.y; return *this;}
+    _float2& operator /= (const float f){x /= f; y /= f; return *this;}
+    _float2& operator /= (const _float2& v){x /= v.x; y /= v.y; return *this;}
     _float2& operator = (const float v)  {x = y = v; return *this;}
     _float2& operator = (const _float2 v){x = v.x; y = v.y; return *this;}
 
@@ -134,7 +147,39 @@ namespace clstd
       }
       return l;
     }
+
+    // 设置为p0指向p1的向量的垂线
+    // 右手坐标系里法线在(p1-p0)的顺时针方向
+    _float2& perpendicular(const _float2& p0, const _float2& p1)
+    {
+      x = p1.y - p0.y;
+      y = p0.x - p1.x;
+      return *this;
+    }
+
+    // 设置为p0指向p1的向量的法线, 返回值是模
+    // 右手坐标系里法线在(p1-p0)的顺时针方向
+    float normal(const _float2& p0, const _float2& p1)
+    {
+      perpendicular(p0, p1);
+      return normalize();
+    }
+
+    // 求作为向量时，v是否在this的顺时针方向, 
+    // 右手坐标系，大于0是顺时针，等于0是重合，小于0是逆时针
+    float IsClockwise(const _float2& v) const
+    {
+      return y * v.x - x * v.y;
+    }
+
     _float2& set(float x, float y){this->x = x; this->y = y; return *this;}
+    _float2& set(int x, int y){this->x = (float)x; this->y = (float)y; return *this;}
+
+    b32 IsNearTo(const _float2& v, float epsilon) const
+    {
+      ASSERT(epsilon >= 0);
+      return fabs(x - v.x) < epsilon && fabs(y - v.y) < epsilon;
+    }
   };
   //////////////////////////////////////////////////////////////////////////
   struct _float3

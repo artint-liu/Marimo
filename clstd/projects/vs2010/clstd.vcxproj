@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\cltypes.h" />
     <ClInclude Include="..\..\clUtility.H" />
     <ClInclude Include="..\..\floatx.h" />
+    <ClInclude Include="..\..\clGeometry2D.h" />
     <ClInclude Include="..\..\Smart\SmartRepository.h" />
     <ClInclude Include="..\..\Smart\SmartProfile.h" />
     <ClInclude Include="..\..\Smart\SmartStock.h" />

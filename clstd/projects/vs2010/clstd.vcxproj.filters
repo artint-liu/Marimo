@@ -165,6 +165,7 @@
     <ClInclude Include="..\..\thread\clThread.h">
       <Filter>Thread</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\clGeometry2D.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

@@ -292,6 +292,7 @@ namespace clstd
 #include "clQuaternion.h"
 #include "3D/Geometry.h"
 #include "3D/GeoOp.h"
+#include "clGeometry2D.h"
 
 #else
 #pragma message(__FILE__": warning : Duplicate included this file.")

@@ -1457,9 +1457,18 @@ GXBOOL GXCanvasImpl::DrawUserPrimitive(GTexture*pTexture, GXLPVOID lpVertices, G
   GXUINT uBaseIndex = PrepareBatch(CF_Textured, uVertCount, uIdxCount, (GXLPARAM)pTexture);
   CHECK_LOCK;
 
-  memcpy(m_lpLockedVertex + m_uVertCount, lpVertices, uVertCount * sizeof(PRIMITIVE));
-  for(GXUINT i = 0; i < uIdxCount; i++)
+  //memcpy(m_lpLockedVertex + m_uVertCount, lpVertices, uVertCount * sizeof(PRIMITIVE));
+  PRIMITIVE* pVertex = m_lpLockedVertex + m_uVertCount;
+  for(GXUINT i = 0; i < uVertCount; i++, pVertex++)
+  {
+    *pVertex = *((PRIMITIVE*)lpVertices + i);
+    pVertex->x += (GXFLOAT)m_LastState.xOrigin;
+    pVertex->y += (GXFLOAT)m_LastState.yOrigin;
+  }
+
+  for(GXUINT i = 0; i < uIdxCount; i++) {
     m_lpLockedIndex[m_uIndexCount + i] = uBaseIndex + pIndices[i];
+  }
 
   m_uVertCount  += uVertCount;
   m_uIndexCount += uIdxCount;
