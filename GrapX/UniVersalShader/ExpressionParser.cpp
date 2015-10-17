@@ -588,7 +588,7 @@ namespace UVShader
       ERROR_MSG__MISSING_SEMICOLON;
       return FALSE;
     }
-
+    //*
     //
     // 将类型定义中的逗号表达式展开为独立的类型定义
     // 如 float a, b, c; 改为
@@ -597,7 +597,9 @@ namespace UVShader
     SYNTAXNODE* pNode = &m_aSyntaxNodePack[stat.defn.sRoot.nNodeIndex];
     cllist<SYNTAXNODE*> sDefinitionList;
     SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList](SYNTAXNODE* pNode) -> GXBOOL {
-      if( ! (pNode->mode == CodeParser::SYNTAXNODE::MODE_Definition || (pNode->pOpcode && (*(pNode->pOpcode)) == ','))) {
+      if( ! (pNode->mode == CodeParser::SYNTAXNODE::MODE_Definition || 
+        pNode->mode == CodeParser::SYNTAXNODE::MODE_DefinitionConst || (pNode->pOpcode && (*(pNode->pOpcode)) == ',')))
+      {
         return FALSE;
       }
       sDefinitionList.push_back(pNode);
@@ -619,6 +621,8 @@ namespace UVShader
       auto& front = sDefinitionList.front();
       auto* pNodeFrontPtr = &m_aSyntaxNodePack.front();
 
+      ASSERT(front->mode == SYNTAXNODE::MODE_Definition || front->mode == SYNTAXNODE::MODE_DefinitionConst);
+
       front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
       front->SetOperandType(1, sDefinitionList.back()->GetOperandType(0));
       stat.defn.sRoot.nNodeIndex = front - &m_aSyntaxNodePack.front();
@@ -631,7 +635,7 @@ namespace UVShader
         auto& SyntaxNode = **it;
 
         // 逗号并列式改为独立类型定义式
-        SyntaxNode.mode = SYNTAXNODE::MODE_Definition;
+        SyntaxNode.mode = front->mode;
         SyntaxNode.pOpcode = NULL;
         SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type
         SyntaxNode.SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN); // front->GetOperandType(0)
@@ -640,7 +644,7 @@ namespace UVShader
         stat.defn.sRoot.nNodeIndex = *it - pNodeFrontPtr;
         m_aStatements.push_back(stat);
       }
-    }
+    }//*/
     ASSERT(pEnd->semi_scope == definition_end && *pEnd == ';');
     pScope->begin = definition_end + 1;
     return TRUE;
@@ -863,11 +867,13 @@ NOT_INC_P:
     if(pNode->OperandA_IsNodeIndex() && pNode->Operand[0].pNode) {
       IndexToPtr(pNode->Operand[0].pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[0].pNode);
+      pNode->SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_NODE);
     }
 
     if(pNode->OperandB_IsNodeIndex() && pNode->Operand[1].pNode) {
       IndexToPtr(pNode->Operand[1].pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[1].pNode);
+      pNode->SetOperandType(1, SYNTAXNODE::FLAG_OPERAND_IS_NODE);
     }
   }
 
@@ -1061,11 +1067,18 @@ NOT_INC_P:
     for(int i = 0; i < 2; i++)
     {
       if(pNode->Operand[i].pSym) {
-        if(TryGetNodeType(&pNode->Operand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+        const auto flag = TryGetNodeType(&pNode->Operand[i]);
+        if(flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
           str[i] = pNode->Operand[i].pSym->ToString();
         }
-        else {
+        else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
           DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
+        }
+        else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
+          DbgDumpSyntaxTree(pArray, &m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
+        }
+        else {
+          CLBREAK;
         }
       }
       else {
@@ -1089,6 +1102,10 @@ NOT_INC_P:
 
     case SYNTAXNODE::MODE_ArrayIndex:
       strOut.Format("%s[%s]", str[0], str[1]);
+      break;
+
+    case SYNTAXNODE::MODE_DefinitionConst:
+      strOut.Format("const %s %s", str[0], str[1]);
       break;
 
     case SYNTAXNODE::MODE_Definition:
@@ -1439,10 +1456,30 @@ NOT_INC_P:
     else if(front.precedence == 0 && m_aTokens[scope.begin + 1].precedence == 0) // 变量声明
     {
       ASSERT(count > 2);
-      A.pSym = &front;
+      SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_Definition;
+      RTSCOPE scope_expr(scope.begin + 1, scope.end);
+      if(front == "const") {
+        if(count == 3) {
+          // ERROR: 缺少常量赋值
+          return FALSE;
+        }
+        else if(m_aTokens[scope.begin + 2].precedence != 0)
+        {
+          // m_aTokens[scope.begin + 1] 是类型 ERROR: 缺少适当的变量名
+          // m_aTokens[scope.begin + 1] 不是类型 ERROR: 缺少类型名
+          return FALSE;
+        }
+
+        mode = SYNTAXNODE::MODE_DefinitionConst;
+        A.pSym = &m_aTokens[scope.begin + 1];
+        scope_expr.begin++;
+      }
+      else {
+        A.pSym = &front;
+      }
       B.ptr = NULL;
-      GXBOOL bret = ParseArithmeticExpression(RTSCOPE(scope.begin + 1, scope.end), &B);
-      bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Definition, &A, &B);
+      GXBOOL bret = ParseArithmeticExpression(scope_expr, &B);
+      bret = bret && MakeSyntaxNode(pUnion, mode, &A, &B);
       return bret;
     }
     else if((front == '(' || front == '[') && front.scope == scope.end - 1)  // 括号内表达式

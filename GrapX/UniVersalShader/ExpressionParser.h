@@ -200,13 +200,14 @@ namespace UVShader
       enum MODE
       {
         MODE_Undefined,
-        MODE_Opcode,        // 操作符 + 操作数 模式
-        MODE_FunctionCall,  // 函数调用
-        MODE_ArrayIndex,    // 函数调用
-        MODE_Definition,    // 变量定义
-        MODE_StructDef,     // 结构定义
+        MODE_Opcode,          // 操作符 + 操作数 模式
+        MODE_FunctionCall,    // 函数调用
+        MODE_ArrayIndex,      // 函数调用
+        MODE_Definition,      // 变量定义
+        MODE_DefinitionConst, // 常量量定义
+        MODE_StructDef,       // 结构定义
         MODE_Flow_While,
-        MODE_Flow_If,       // if(A) {B}
+        MODE_Flow_If,         // if(A) {B}
         MODE_Flow_ElseIf,
         MODE_Flow_Else,
         MODE_Flow_For,            // [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]

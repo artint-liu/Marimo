@@ -257,19 +257,28 @@ void TestShaderToys(GXBOOL bShowList)
         printf("\n");
       }
     }
+    printf("type \"all\" for all.\n");
 
     char szBuffer[128];
     gets(szBuffer);
-    int nSelect = atoi(szBuffer);
-    if(nSelect >= 0 && nSelect < (int)toy_list.size()) {
-      auto& item = toy_list[nSelect];
-      TestFromFile(item.strInput, item.strOutput);
+    if(GXSTRCMPI(szBuffer, "all") == 0) {
+      for(auto it = toy_list.begin(); it != toy_list.end(); ++it) {
+        TestFromFile(it->strInput, it->strOutput);
+      }
+    }
+    else
+    {
+      int nSelect = atoi(szBuffer);
+      if(nSelect >= 0 && nSelect < (int)toy_list.size()) {
+        auto& item = toy_list[nSelect];
+        TestFromFile(item.strInput, item.strOutput);
+      }
     }
   }
 }
 
 // ²âÊÔ¿ª¹Ø
-#define TEST_ARITHMETIC_PARSING
+//#define TEST_ARITHMETIC_PARSING
 #define TEST_ALL_SHADERTOYS
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -308,11 +317,10 @@ int _tmain(int argc, _TCHAR* argv[])
   MakeGraphicalExpression("Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", "Test\\shaders\\output.png");
 #endif // #ifdef ENABLE_GRAPH
 
-  TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
+  //TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
 
 #ifdef TEST_ALL_SHADERTOYS
   TestShaderToys(TRUE);
-  //TestShaderToys(FALSE);
 #endif // TEST_ALL_SHADERTOYS
 
   //TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame[output].txt");
