@@ -96,6 +96,7 @@ static clsize s_nMultiByteOperatorLen = 0; // 最大长度
 #define ERROR_MSG_缺少分号    ERROR_MSG__MISSING_SEMICOLON    
 #define ERROR_MSG_缺少开括号  ERROR_MSG__MISSING_OPENBRACKET  
 #define ERROR_MSG_缺少闭括号  ERROR_MSG__MISSING_CLOSEDBRACKET
+#define ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动 CLBREAK
 
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
@@ -193,6 +194,7 @@ namespace UVShader
   CodeParser::CodeParser()
     : m_nMaxPrecedence(0)
     , m_nDbgNumOfExpressionParse(0)
+    , m_pSubParser(NULL)
     , m_pMsg(NULL)
   {
 #ifdef _DEBUG
@@ -235,6 +237,7 @@ namespace UVShader
 
   CodeParser::~CodeParser()
   {
+    SAFE_DELETE(m_pSubParser);
     SAFE_DELETE(m_pMsg);
   }
 
@@ -263,7 +266,8 @@ namespace UVShader
   {
     m_aTokens.clear();
     m_aStatements.clear();
-
+    m_Macros.clear();
+    SAFE_DELETE(m_pSubParser);
     InitPacks();
   }
 
@@ -371,10 +375,38 @@ namespace UVShader
       SmartStreamUtility::ExtendToCStyleBlockComment(it, 2, remain);
       ++it;
     }
-    else if(it.marker[0] == '#' && SmartStreamUtility::IsHeadOfLine(it.pContainer, it.marker))
+    else if(it.marker[0] == '#')
     {
-      SmartStreamUtility::ExtendToNewLine(it, 1, remain);
-      ++it; // 暂时跳过
+      if( ! SmartStreamUtility::IsHeadOfLine(it.pContainer, it.marker)) {
+        ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
+      }
+
+      auto iter_prend = it;
+      SmartStreamUtility::ExtendToNewLine(iter_prend, 1, remain, 0x0001);
+      
+      // szEnd 与 iter_prend.marker 之间可能存在空白，大量注释等信息，为了
+      // 减少预处理解析的工作量，这里预先存好 szEnd 再步进 iter_prend
+      CodeParser::T_LPCSTR szEnd = iter_prend.end();
+      ++iter_prend;
+
+      if(++it > iter_prend) { // 只有一个'#', 直接跳过
+        return 0 ;
+      }
+
+      CodeParser* pThis = (CodeParser*)it.pContainer;
+
+      
+      if(it == "endif" || it == "else")
+      {
+
+      }
+      else
+      {
+        pThis->ParseMacro(it.marker, szEnd);
+      }//*/
+
+
+      it = iter_prend; // 暂时跳过
     }
     ASSERT((int)remain >= 0);
     return 0;
@@ -412,7 +444,8 @@ namespace UVShader
       PairStack sStack;
     };
 
-    static PAIR_CONTEXT pair_context[] = {
+    // 这里面有 PairStack 对象，所以不能声明为静态的
+    PAIR_CONTEXT pair_context[] = {
       {'(', ')', FALSE, FALSE},   // 圆括号
       {'[', ']', FALSE, FALSE},   // 方括号
       {'{', '}', TRUE , FALSE},   // 花括号
@@ -490,29 +523,15 @@ namespace UVShader
         break;
       } // for
       
-      /*
-      if(it == ';') {
-        if(EOE < c_size) {
-          const auto& bracket_stack = pair_context[0].sStack;
-
-          // 这个是要保证for中的分号定位在“for”上，而不是它前面的符号里
-          if( ! bracket_stack.empty() && bracket_stack.top() > (EOE + 1) &&
-          m_aTokens[bracket_stack.top() - 1] == "for" ) {
-          EOE = bracket_stack.top() - 1;
-          }
-          m_aTokens[EOE].semi_scope = c_size;
-
+      if(token.precedence == 0)
+      {
+        auto iter_token = m_Macros.find(token.marker.ToString());
+        if(iter_token != m_Macros.end())
+        {
+          token.Set(iter_token->second.value.marker);
         }
-        EOE = c_size + 1;
       }
-      // 这个可能不需要，因为按照语法for应该是在";"分号或者"}"闭花括号后面
-      //else if(it == "for") { // for(;;) 这个形式有点特殊
-      //  EOE = c_size;
-      //}
 
-      m_aTokens.push_back(sym);
-
-      /*/
       m_aTokens.push_back(token);
 
       if(it == ';') {
@@ -2384,6 +2403,73 @@ NOT_INC_P:
     }
     else {
       return m_aSyntaxNodePack[(int)pUnion->pNode].mode;
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  CodeParser* CodeParser::GetSubParser()
+  {
+    if( ! m_pSubParser) {
+      m_pSubParser = new CodeParser;
+    }
+    return m_pSubParser;
+  }
+
+  void CodeParser::ParseMacro(T_LPCSTR begin, T_LPCSTR end)
+  {
+    CodeParser* pParse = GetSubParser();
+    pParse->Attach(begin, (clsize)end - (clsize)begin);
+    pParse->GenerateTokens();
+    const auto& tokens = *pParse->GetTokensArray();
+
+    if(tokens.front() == "define") {
+      Macro_Define(tokens);
+    }
+    else if(tokens.front() == "ifdef") {
+      Macro_IfDefine(tokens);
+    }
+  }
+
+  void CodeParser::Macro_Define(const TokenArray& tokens)
+  {
+    MACRO m;
+    //const auto& tokens = *m_pSubParser->GetTokensArray();
+    ASSERT( ! tokens.empty() && tokens.front() == "define");
+    
+    if(tokens.size() == 1) {
+      // ERROR: define 缺少定义
+    }
+    else if(tokens.size() == 2) {
+      m_Macros.insert(clmake_pair(tokens[1].ToString(), m));
+    }
+    else if(tokens.size() == 3) {
+      m.value = tokens[2];
+      m.value.marker.pContainer = NULL;
+      m_Macros.insert(clmake_pair(tokens[1].ToString(), m));
+    }
+  }
+
+  void CodeParser::Macro_IfDefine(const TokenArray& tokens)
+  {
+    //const auto& tokens = *m_pSubParser->GetTokensArray();
+    ASSERT( ! tokens.empty() && tokens.front() == "ifdef");
+
+    if(tokens.size() == 1) {
+      // ERROR: ifdef 缺少定义
+    }
+    else if(tokens.size() == 2) {
+      if(m_Macros.find(tokens[1].ToString()) != m_Macros.end()) // 没定义过
+      {
+
+      }
+      else // 
+      {
+
+      }
+    }
+    else {
+      CLBREAK; // 没完成
     }
   }
 

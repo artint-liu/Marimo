@@ -125,6 +125,11 @@ namespace UVShader
       u32 unary_mask : 2;
     };
 
+    struct MACRO
+    {
+      //clStringA value;
+      TOKEN value;
+    };
 
     typedef clvector<TOKEN> TokenArray;
 
@@ -458,6 +463,10 @@ namespace UVShader
     GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
 
+    void  ParseMacro(T_LPCSTR begin, T_LPCSTR end);
+    void  Macro_Define(const TokenArray& aTokens);
+    void  Macro_IfDefine(const TokenArray& aTokens);
+
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocaleStatements(StatementArray& aStatements);
     void    RelocalePointer();
@@ -481,10 +490,11 @@ namespace UVShader
     {
       ptr_index = IndexToPtr(array, ptr_index);
     }
-
+    CodeParser* GetSubParser();
 
   protected:
     typedef Marimo::DataPoolErrorMsg<ch> ErrorMessage;
+    typedef clhash_map<clStringA, MACRO> MacroDict; // TODO: key 改为 TOKEN
     ErrorMessage*       m_pMsg;
     TokenArray          m_aTokens;
     clstd::StringSetA   m_Strings;
@@ -496,10 +506,12 @@ namespace UVShader
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
     SyntaxNodeArray     m_aSyntaxNodePack;  // 表达式语法节点
 
-    TOKEN              m_CurSymInfo;       // 遍历时符号的优先级信息
+    TOKEN               m_CurSymInfo;       // 遍历时符号的优先级信息
     int                 m_nMaxPrecedence;   // 优先级最大值
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     static INTRINSIC_TYPE s_aIntrinsicType[];
+    MacroDict           m_Macros;
+    CodeParser*         m_pSubParser;
   public:
     CodeParser();
     virtual ~CodeParser();

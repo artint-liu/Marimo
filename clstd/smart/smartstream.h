@@ -339,18 +339,26 @@ namespace SmartStreamUtility
   }
 
   // 扩展it到换行标记，扩展后包含换行标记
-  // nOffset 是相对于 it.marker 的偏移
-  // uRemain 是 it.marker 到流结尾的剩余长度（字符数）
+  // offset 是相对于 it.marker 的偏移
+  // remain 是 it.marker 到流结尾的剩余长度（字符数）
+  // flags 是标志位，目前只有 0x0001 表示如果以"\"字符结尾并换行，则忽略此处的换行符继续扫描下一行
   // 返回true表示找到一个换行符号，false表示到了文件结尾，此时it被扩展到文件结尾
   template<class _Iter>
-  b32 ExtendToNewLine(_Iter &it, clsize nOffset, clsize remain) 
+  b32 ExtendToNewLine(_Iter &it, clsize offset, clsize remain, u32 flags = 0)
   {
-    while(nOffset < remain) {
-      if(it.marker[nOffset] == '\n') {
-        it.length = nOffset + 1;
+    while(offset < remain) {
+      if(it.marker[offset] == '\n') {
+        if(TEST_FLAG(flags, 0x0001) && (
+          (offset > 0 && it.marker[offset - 1] == '\\') ||
+          (offset > 1 && it.marker[offset - 1] == '\r' && it.marker[offset - 2] == '\\')))
+        {
+          ++offset;
+          continue;
+        }
+        it.length = offset + 1;
         return TRUE;
       }
-      ++nOffset;
+      ++offset;
     }
     it.length = remain;
     return FALSE;
