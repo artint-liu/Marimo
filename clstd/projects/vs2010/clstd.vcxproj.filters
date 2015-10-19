@@ -87,6 +87,7 @@
     <ClCompile Include="..\..\thread\clThread.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\clGeometry2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clBuffer.H" />

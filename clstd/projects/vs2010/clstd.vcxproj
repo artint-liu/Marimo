@@ -29,6 +29,7 @@
     <ClCompile Include="..\..\clCrypt.cpp" />
     <ClCompile Include="..\..\clfifo.cpp" />
     <ClCompile Include="..\..\clFile.CPP" />
+    <ClCompile Include="..\..\clGeometry2D.cpp" />
     <ClCompile Include="..\..\clImage.cpp" />
     <ClCompile Include="..\..\clMatrix.cpp" />
     <ClCompile Include="..\..\clMesh.cpp" />
