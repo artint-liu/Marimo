@@ -258,7 +258,9 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
     {
       UVShader::CodeParser expp;
       const UVShader::CodeParser::TokenArray* pTokens;
-      expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize());
+      clStringW strFullname = szFilename;
+      clpathfile::CombineAbsPathW(strFullname);
+      expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize(), 0, strFullname);
 
       expp.GenerateTokens();
       pTokens = expp.GetTokensArray();

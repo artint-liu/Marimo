@@ -82,7 +82,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
   for(int i = 0; pSamples[i].expression != 0; i++)
   {
     auto nSize = strlen(pSamples[i].expression);
-    expp.Attach(pSamples[i].expression, nSize);
+    expp.Attach(pSamples[i].expression, nSize, 0, NULL);
     expp.GenerateTokens();
     auto pTokens = expp.GetTokensArray();
 

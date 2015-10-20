@@ -364,6 +364,9 @@ _SS_TEMPL
 _TStr _SS_IMPL::iterator::ToString() const
 {
   _TStr strTemp;
+  if(length == 0) {
+    return strTemp;
+  }
   u32 i = (marker[0] != '\"' && marker[0] != '\'') ? 0 : 1;
   u32 n = 0;
   TChar* pTemp = strTemp.GetBuffer(length + 1);

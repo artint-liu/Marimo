@@ -10,6 +10,7 @@
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
+// 3.code block 表达式中如果中间语句缺少分号不报错
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -86,17 +87,19 @@
 
 static clsize s_nMultiByteOperatorLen = 0; // 最大长度
 
-#define ERROR_MSG__MISSING_SEMICOLON      CLBREAK
+#define IDX2ITER(_IDX)                           m_aTokens[_IDX]
+#define ERROR_MSG__MISSING_SEMICOLON(_token)      m_pMsg->WriteErrorW(TRUE, (_token).marker.offset(), 1000)
 #define ERROR_MSG__MISSING_OPENBRACKET    CLBREAK
 #define ERROR_MSG__MISSING_CLOSEDBRACKET  CLBREAK
 
 //
 // 竟然可以使用中文 ಠ౪ಠ
 //
-#define ERROR_MSG_缺少分号    ERROR_MSG__MISSING_SEMICOLON    
+#define ERROR_MSG_缺少分号(_token)    ERROR_MSG__MISSING_SEMICOLON(_token)
 #define ERROR_MSG_缺少开括号  ERROR_MSG__MISSING_OPENBRACKET  
 #define ERROR_MSG_缺少闭括号  ERROR_MSG__MISSING_CLOSEDBRACKET
 #define ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动 CLBREAK
+#define ERROR_MSG_C1021_无效的预处理器命令 CLBREAK
 
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
@@ -196,6 +199,7 @@ namespace UVShader
     , m_nDbgNumOfExpressionParse(0)
     , m_pSubParser(NULL)
     , m_pMsg(NULL)
+    , m_dwState(0)
   {
 #ifdef _DEBUG
 
@@ -271,13 +275,18 @@ namespace UVShader
     InitPacks();
   }
 
-  b32 CodeParser::Attach( const char* szExpression, clsize nSize )
+  b32 CodeParser::Attach(const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename)
   {
     Cleanup();
-    if( ! m_pMsg) {
-      m_pMsg = new ErrorMessage();
-      m_pMsg->LoadErrorMessageW(L"uvsmsg.txt");
-      m_pMsg->WriteErrorW(FALSE, 0, 0);
+    if(TEST_FLAG_NOT(dwFlags, AttachFlag_NotLoadMessage))
+    {
+      if( ! m_pMsg) {
+        m_pMsg = new ErrorMessage();
+        m_pMsg->SetCurrentFilenameW(szFilename);
+        m_pMsg->LoadErrorMessageW(L"uvsmsg.txt");
+        m_pMsg->SetMessageSign('C');
+      }
+      m_pMsg->GenerateCurLines(szExpression, nSize);
     }
     return SmartStreamA::Initialize(szExpression, nSize);
   }
@@ -377,36 +386,63 @@ namespace UVShader
     }
     else if(it.marker[0] == '#')
     {
+      CodeParser* pThis = (CodeParser*)it.pContainer;
+
+      // 测试是否已经在预处理中
+      if(TEST_FLAG(pThis->m_dwState, State_InPreprocess)) {
+        return 0;
+      }
+      SET_FLAG(pThis->m_dwState, State_InPreprocess);
+
       if( ! SmartStreamUtility::IsHeadOfLine(it.pContainer, it.marker)) {
         ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
       }
 
-      auto iter_prend = it;
-      SmartStreamUtility::ExtendToNewLine(iter_prend, 1, remain, 0x0001);
+      RTPPCONTEXT ctx;
+      ctx.iter_next = it;
+      SmartStreamUtility::ExtendToNewLine(ctx.iter_next, 1, remain, 0x0001);
       
-      // szEnd 与 iter_prend.marker 之间可能存在空白，大量注释等信息，为了
-      // 减少预处理解析的工作量，这里预先存好 szEnd 再步进 iter_prend
-      CodeParser::T_LPCSTR szEnd = iter_prend.end();
-      ++iter_prend;
+      // ppend 与 iter_next.marker 之间可能存在空白，大量注释等信息，为了
+      // 减少预处理解析的工作量，这里预先存好 ppend 再步进 iter_next
+      ctx.ppend = ctx.iter_next.end();
+      ctx.stream_end = pThis->GetStreamPtr() + pThis->GetStreamCount();
+      ++ctx.iter_next;
 
-      if(++it > iter_prend) { // 只有一个'#', 直接跳过
+      if(++it >= ctx.iter_next) { // 只有一个'#', 直接跳过
+        RESET_FLAG(pThis->m_dwState, State_InPreprocess);
         return 0 ;
       }
 
-      CodeParser* pThis = (CodeParser*)it.pContainer;
 
       
       if(it == "endif" || it == "else")
       {
-
+        it.marker = Macro_SkipConditionalBlock(ctx.iter_next.marker, ctx.stream_end);
+        it.length = 0;
+        //it = ctx.iter_next; // TODO: 稍后处理, 暂时跳过
       }
       else
       {
-        pThis->ParseMacro(it.marker, szEnd);
+        auto next_marker = pThis->ParseMacro(ctx, it.marker, ctx.ppend);
+        if(next_marker == ctx.iter_next.marker) {
+          it = ctx.iter_next;
+        }
+        else if(next_marker != ctx.stream_end)
+        {
+          it.marker = next_marker;
+          it.length = 0;
+        }
+        ASSERT(it.marker >= ctx.iter_next.marker);
       }//*/
 
 
-      it = iter_prend; // 暂时跳过
+      // 如果在预处理中步进iterator则会将#当作一般符号处理
+      // 这里判断如果下一个token仍然是#则置为0，这样会重新激活迭代器处理当前这个预处理
+      if(it == '#') {
+        it.length = 0;
+      }
+
+      RESET_FLAG(pThis->m_dwState, State_InPreprocess);
     }
     ASSERT((int)remain >= 0);
     return 0;
@@ -457,12 +493,20 @@ namespace UVShader
 
     for(auto it = begin(); it != stream_end; ++it)
     {
+      // 上一个预处理结束后，后面的语句长度设置为0可以回到主循环步进
+      // 这样做是为了避免如果下一条语句也是预处理指令，不会在处理回调中发生递归调用
+      if(it.length == 0) {
+        continue;
+      }
+
+
       const int c_size = (int)m_aTokens.size();
       token.Set(it);
       token.scope = -1;
       token.semi_scope = -1;
 
-      ASSERT(m_CurSymInfo.marker.marker == NULL || it.marker == m_CurSymInfo.marker.marker); // 遍历时一定这个要保持一致
+      ASSERT(m_CurSymInfo.marker.marker == NULL ||
+        m_CurSymInfo.marker.marker == it.marker); // 遍历时一定这个要保持一致
 
       token.SetArithOperatorInfo(m_CurSymInfo);
 
@@ -604,7 +648,7 @@ namespace UVShader
 
     if( ! ParseExpression(RTSCOPE(pScope->begin, definition_end), &stat.defn.sRoot))
     {
-      ERROR_MSG__MISSING_SEMICOLON;
+      ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(definition_end));
       return FALSE;
     }
     //*
@@ -953,7 +997,7 @@ NOT_INC_P:
       STRUCT_MEMBER member = {NULL};
 
       if((RTSCOPE::TYPE)p->semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)p->semi_scope >= pStruScope->end) {
-        ERROR_MSG__MISSING_SEMICOLON;
+        ERROR_MSG__MISSING_SEMICOLON(*p);
         return FALSE;
       }
 
@@ -1297,7 +1341,7 @@ NOT_INC_P:
 
       if(front.semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)front.semi_scope > scope.end) {
         // ERROR: 缺少;
-        ERROR_MSG__MISSING_SEMICOLON;
+        ERROR_MSG__MISSING_SEMICOLON(front);
         break;
       }
 
@@ -1398,7 +1442,7 @@ NOT_INC_P:
       return ParseRemainStatement(parse_end, scope, pUnion);
     }
     else if(front.semi_scope == RTSCOPE::npos) {
-      ERROR_MSG__MISSING_SEMICOLON;
+      ERROR_MSG__MISSING_SEMICOLON(front);
       return FALSE;
     }
     else if((clsize)front.semi_scope < scope.end)
@@ -1642,7 +1686,7 @@ NOT_INC_P:
 
     while(1) {
       if(pBack->scope == RTSCOPE::npos) {
-        ERROR_MSG__MISSING_SEMICOLON;
+        ERROR_MSG__MISSING_SEMICOLON(*A.pSym);
         return FALSE;
       }
       c.mode = *pBack == ')' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
@@ -1946,7 +1990,7 @@ NOT_INC_P:
     // 确定定义块的范围
     RTSCOPE sBlock(index, m_aTokens[index].scope);
     if(sBlock.end == RTSCOPE::npos || sBlock.end >= scope.end) {
-      ERROR_MSG__MISSING_SEMICOLON;
+      ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sBlock.begin));
       return RTSCOPE::npos;
     }
 
@@ -1956,7 +2000,7 @@ NOT_INC_P:
     {
       auto& decl = m_aTokens[index];
       if(decl.semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)decl.semi_scope >= sBlock.end) {
-        ERROR_MSG_缺少分号;
+        ERROR_MSG_缺少分号(decl);
         break;
       }
       else if(index == decl.semi_scope) {
@@ -1978,7 +2022,7 @@ NOT_INC_P:
 
     index = sBlock.end + 1;
     if(index >= scope.end || m_aTokens[index] != ';') {
-      ERROR_MSG_缺少分号;
+      ERROR_MSG_缺少分号(IDX2ITER(sBlock.end - 1));
     }
     else {
       T.pSym = &m_aTokens[index];
@@ -2416,10 +2460,10 @@ NOT_INC_P:
     return m_pSubParser;
   }
 
-  void CodeParser::ParseMacro(T_LPCSTR begin, T_LPCSTR end)
+  CodeParser::T_LPCSTR CodeParser::ParseMacro(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end)
   {
     CodeParser* pParse = GetSubParser();
-    pParse->Attach(begin, (clsize)end - (clsize)begin);
+    pParse->Attach(begin, (clsize)end - (clsize)begin, AttachFlag_NotLoadMessage, NULL);
     pParse->GenerateTokens();
     const auto& tokens = *pParse->GetTokensArray();
 
@@ -2427,8 +2471,13 @@ NOT_INC_P:
       Macro_Define(tokens);
     }
     else if(tokens.front() == "ifdef") {
-      Macro_IfDefine(tokens);
+      return Macro_IfDefine(ctx, tokens);
     }
+    else {
+      ERROR_MSG_C1021_无效的预处理器命令;
+      return end;
+    }
+    return ctx.iter_next.marker;
   }
 
   void CodeParser::Macro_Define(const TokenArray& tokens)
@@ -2450,27 +2499,118 @@ NOT_INC_P:
     }
   }
 
-  void CodeParser::Macro_IfDefine(const TokenArray& tokens)
+  CodeParser::T_LPCSTR CodeParser::Macro_IfDefine(const RTPPCONTEXT& ctx, const TokenArray& tokens)
   {
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && tokens.front() == "ifdef");
+    T_LPCSTR stream_end = GetStreamPtr() + GetStreamCount();
 
     if(tokens.size() == 1) {
       // ERROR: ifdef 缺少定义
     }
     else if(tokens.size() == 2) {
-      if(m_Macros.find(tokens[1].ToString()) != m_Macros.end()) // 没定义过
+      if(m_Macros.find(tokens[1].ToString()) == m_Macros.end()) // 没定义过
       {
-
+        const T_LPCSTR pBlockEnd = 
+          Macro_SkipConditionalBlock(ctx.ppend, stream_end);
+        ASSERT(pBlockEnd >= ctx.iter_next.marker);
+        return pBlockEnd;
       }
       else // 
       {
-
+        return ctx.iter_next.marker;
       }
     }
     else {
       CLBREAK; // 没完成
     }
+    return stream_end;
+  }
+
+  CodeParser::T_LPCSTR CodeParser::Macro_SkipConditionalBlock( T_LPCSTR begin, T_LPCSTR end )
+  {
+    typedef clstack<T_LPCSTR> PPNestStack;  // 预处理命令嵌套堆栈
+    PPNestStack pp_stack;
+
+    T_LPCSTR p = begin;
+    for(; p < end; ++p)
+    {
+      if(*p != '\n') {
+        continue;
+      }
+
+      if((p = Macro_SkipGaps(p, end)) >= end) {
+        return end;
+      }
+
+      if(*p != '#') {
+        continue;
+      }
+
+      if((p = Macro_SkipGaps(p, end)) >= end) {
+        return end;
+      }
+
+      // if 要放在两个 if* 后面
+      if(CompareString(p, "ifdef", 5) || CompareString(p, "ifndef", 6) || CompareString(p, "if", 2))
+      {
+        pp_stack.push(p);
+      }
+      else if(CompareString(p, "elif", 4))
+      {
+        // pp_stack 不空，说明在预处理域内，直接忽略
+        // pp_stack 为空，测试表达式(TODO)
+        if( ! pp_stack.empty()) {
+          continue;;
+        }
+      }
+      else if(CompareString(p, "else", 4))
+      {
+        // pp_stack 不空，说明在预处理域内，直接忽略
+        // pp_stack 为空，转到下行行首
+        if( ! pp_stack.empty()) {
+          continue;
+        }
+
+        p += 4; // "else" 长度
+        break;
+      }
+      else if(CompareString(p, "endif", 5))
+      {
+        // 测试了下，vs2010下 #endif 后面随便敲些什么都不会报错
+
+        if( ! pp_stack.empty()) {
+          pp_stack.pop();
+          continue;
+        }
+
+        p += 5; // "endif" 长度
+        break;
+      }
+      else {
+        // ERROR: 无效的预处理命令
+        ERROR_MSG_C1021_无效的预处理器命令;
+      }
+    }
+    
+    for(; *p != '\n' && p < end; p++);
+    return p != end ? ++p : end;
+  }
+
+  CodeParser::T_LPCSTR CodeParser::Macro_SkipGaps( T_LPCSTR p, T_LPCSTR end )
+  {
+    do {
+      p++;
+    } while ((*p == '\t' || *p == 0x20) && p < end);
+    return p;
+  }
+
+  GXBOOL CodeParser::CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count)
+  {
+    TChar c = str1[count];
+    ASSERT(c != '\0');
+    return GXSTRNCMP(str1, str2, count) == 0 && 
+      (c == '\t' || c == 0x20 || c == '\r' || c == '\n');
   }
 
   //////////////////////////////////////////////////////////////////////////

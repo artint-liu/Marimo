@@ -174,7 +174,7 @@ public:
   b32      IsEndOfStream     (T_LPCSTR pPointer) const;
   b32      IsHeadOfStream    (T_LPCSTR pPointer) const;
   T_LPCSTR GetStreamPtr      () const;
-  clsize   GetStreamCount    () const; // 返回的是TChar的类型长度，不是字节数
+  clsize   GetStreamCount    () const; // 返回的是TChar的类型长度，不是字节数 GetStreamEnd() - GetStreamPtr()
   b32      Get               (T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) const;    // 取指针当前处的内容
   u32      SetFlags          (u32 dwFlags);
   u32      GetFlags          () const;

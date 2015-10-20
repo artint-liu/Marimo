@@ -63,6 +63,7 @@ namespace UVShader
 
       void Set(const iterator& _iter)
       {
+        ASSERT(_iter.length != 0);
 #ifdef ENABLE_STRINGED_SYMBOL
         symbol = _iter.ToString();
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
@@ -132,6 +133,11 @@ namespace UVShader
     };
 
     typedef clvector<TOKEN> TokenArray;
+
+    enum AttachFlag
+    {
+      AttachFlag_NotLoadMessage = 0x00000001,
+    };
 
     enum StatementType
     {
@@ -385,6 +391,19 @@ namespace UVShader
       }
     };
 
+    struct RTPPCONTEXT // 运行时预处理解析上下文
+    {
+      T_LPCSTR ppend;       // 当前预处理的结尾
+      T_LPCSTR stream_end;  // 字符流的结尾，GetStreamPtr() + GetStreamCount()
+      iterator iter_next;   // #标志预处理结束，忽略注释后第一个token
+
+    };
+
+    enum RTState // 运行时状态
+    {
+      State_InPreprocess = 0x00000001, // 解析预处理
+    };
+
     //struct CONSTRUCT_RTSCOPE : public RTSCOPE
     //{
     //  CONSTRUCT_RTSCOPE(clsize _begin, clsize _end) {
@@ -463,9 +482,13 @@ namespace UVShader
     GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
 
-    void  ParseMacro(T_LPCSTR begin, T_LPCSTR end);
-    void  Macro_Define(const TokenArray& aTokens);
-    void  Macro_IfDefine(const TokenArray& aTokens);
+    T_LPCSTR ParseMacro(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
+    void     Macro_Define(const TokenArray& aTokens);
+    T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, const TokenArray& aTokens);
+    static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
+    static T_LPCSTR Macro_SkipConditionalBlock(T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
+
+    static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocaleStatements(StatementArray& aStatements);
@@ -495,6 +518,7 @@ namespace UVShader
   protected:
     typedef Marimo::DataPoolErrorMsg<ch> ErrorMessage;
     typedef clhash_map<clStringA, MACRO> MacroDict; // TODO: key 改为 TOKEN
+    GXDWORD             m_dwState;          // 内部状态, 参考RTState
     ErrorMessage*       m_pMsg;
     TokenArray          m_aTokens;
     clstd::StringSetA   m_Strings;
@@ -515,7 +539,7 @@ namespace UVShader
   public:
     CodeParser();
     virtual ~CodeParser();
-    b32                 Attach                  (const char* szExpression, clsize nSize);
+    b32                 Attach                  (const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename);
     clsize              GenerateTokens          ();
     const TokenArray*   GetTokensArray          () const;
     GXBOOL              Parse                   ();
