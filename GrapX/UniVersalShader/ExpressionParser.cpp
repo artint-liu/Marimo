@@ -99,7 +99,9 @@ static clsize s_nMultiByteOperatorLen = 0; // 最大长度
 #define ERROR_MSG_缺少开括号  ERROR_MSG__MISSING_OPENBRACKET  
 #define ERROR_MSG_缺少闭括号  ERROR_MSG__MISSING_CLOSEDBRACKET
 #define ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动 CLBREAK
-#define ERROR_MSG_C1021_无效的预处理器命令 CLBREAK
+//#define ERROR_MSG_C1021_无效的预处理器命令 
+
+#define E1021_无效的预处理器命令 1021
 
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
@@ -417,7 +419,7 @@ namespace UVShader
       
       if(it == "endif" || it == "else")
       {
-        it.marker = Macro_SkipConditionalBlock(ctx.iter_next.marker, ctx.stream_end);
+        it.marker = pThis->Macro_SkipConditionalBlock(ctx.iter_next.marker, ctx.stream_end);
         it.length = 0;
         //it = ctx.iter_next; // TODO: 稍后处理, 暂时跳过
       }
@@ -2471,10 +2473,13 @@ NOT_INC_P:
       Macro_Define(tokens);
     }
     else if(tokens.front() == "ifdef") {
-      return Macro_IfDefine(ctx, tokens);
+      return Macro_IfDefine(ctx, FALSE, tokens);
+    }
+    else if(tokens.front() == "ifndef") {
+      return Macro_IfDefine(ctx, TRUE, tokens);
     }
     else {
-      ERROR_MSG_C1021_无效的预处理器命令;
+      OutputErrorW(tokens.front(), E1021_无效的预处理器命令, clStringW(tokens.front().ToString()));
       return end;
     }
     return ctx.iter_next.marker;
@@ -2499,25 +2504,25 @@ NOT_INC_P:
     }
   }
 
-  CodeParser::T_LPCSTR CodeParser::Macro_IfDefine(const RTPPCONTEXT& ctx, const TokenArray& tokens)
+  CodeParser::T_LPCSTR CodeParser::Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TokenArray& tokens)
   {
     //const auto& tokens = *m_pSubParser->GetTokensArray();
-    ASSERT( ! tokens.empty() && tokens.front() == "ifdef");
+    ASSERT( ! tokens.empty() && (tokens.front() == "ifdef" || tokens.front() == "ifndef"));
     T_LPCSTR stream_end = GetStreamPtr() + GetStreamCount();
 
     if(tokens.size() == 1) {
       // ERROR: ifdef 缺少定义
     }
     else if(tokens.size() == 2) {
-      if(m_Macros.find(tokens[1].ToString()) == m_Macros.end()) // 没定义过
+      const GXBOOL bFind = (m_Macros.find(tokens[1].ToString()) == m_Macros.end());
+      if(( ! bNot && bFind) || (bNot && ! bFind))
       {
         const T_LPCSTR pBlockEnd = 
           Macro_SkipConditionalBlock(ctx.ppend, stream_end);
         ASSERT(pBlockEnd >= ctx.iter_next.marker);
         return pBlockEnd;
       }
-      else // 
-      {
+      else {
         return ctx.iter_next.marker;
       }
     }
@@ -2589,7 +2594,14 @@ NOT_INC_P:
       }
       else {
         // ERROR: 无效的预处理命令
-        ERROR_MSG_C1021_无效的预处理器命令;
+        T_LPCSTR pend = p;
+        for(; pend < end; pend++) {
+          if(*pend == 0x20 || *pend == '\t' || *pend == '\r' || *pend == '\n') {
+            break;
+          }
+        }
+        clStringW str(p, (size_t)pend - (size_t)p);
+        OutputErrorW(p, E1021_无效的预处理器命令, str);
       }
     }
     
@@ -2613,6 +2625,29 @@ NOT_INC_P:
       (c == '\t' || c == 0x20 || c == '\r' || c == '\n');
   }
 
+  //void CodeParser::OutputErrorW( GXSIZE_T offset, GXUINT code, ... )
+  //{
+  //  va_list  arglist;
+  //  va_start(arglist, code);
+  //  m_pMsg->VarWriteErrorW(TRUE, offset, code, arglist);
+  //  va_end(arglist);
+  //}
+
+  void CodeParser::OutputErrorW(const TOKEN& token, GXUINT code, ...)
+  {
+    va_list  arglist;
+    va_start(arglist, code);
+    m_pMsg->VarWriteErrorW(TRUE, token.marker.marker, code, arglist);
+    va_end(arglist);
+  }
+
+  void CodeParser::OutputErrorW(T_LPCSTR ptr, GXUINT code, ...)
+  {
+    va_list  arglist;
+    va_start(arglist, code);
+    m_pMsg->VarWriteErrorW(TRUE, ptr, code, arglist);
+    va_end(arglist);
+  }
   //////////////////////////////////////////////////////////////////////////
 
   bool CodeParser::TYPE::operator<( const TYPE& t ) const

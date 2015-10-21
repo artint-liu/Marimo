@@ -39,15 +39,19 @@ namespace Marimo
     GXLPCWSTR GetFilenameW        (GXUINT idFile = 0) const;
     GXUINT    GetCurrentFileId    () const;
     int       LineFromPtr         (T_LPCSTR ptr) const;
+    int       LineFromOffset      (GXSIZE_T nOffset, const FILE_SECTION* pfs) const;
     int       LineFromOffset      (GXSIZE_T nOffset, GXUINT idFile = 0) const;
     void      PushFile            (GXLPCWSTR szFilename, GXINT nTopLine = 0);
     void      PopFile             ();
     void      WriteErrorW         (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, ...);
-    //void      WriteErrorW         (GXBOOL bError, T_LPCSTR pSourcePtr, GXLPCWSTR message, ...);
+    void      VarWriteErrorW      (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, va_list arglist); // 从当前文件的偏移确定位置
+    void      VarWriteErrorW      (GXBOOL bError, T_LPCSTR ptr, GXUINT nCode, va_list arglist);     // 从指针确定源文件位置，这个支持多个源文件的行号查询
     void      WriteErrorA         (GXBOOL bError, T_LPCSTR pSourcePtr, GXLPCSTR message, ...);
-    int       GetErrorLevel       () const;
+    int       GetErrorLevel       () const;   // 参考 m_CompileCode
     GXBOOL    CheckIncludeLoop    (GXLPCWSTR szFilename) const;
     void      SetSilentMode       (GXBOOL bSilent);
+
+    const FILE_SECTION* SectionFromPtr(T_LPCSTR ptr) const; // 从指针找到来自哪一个文件
   };
 
 } // namespace Marimo

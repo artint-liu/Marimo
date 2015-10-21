@@ -99,6 +99,20 @@ namespace clstd
       return PosFromOffset(pText - m_pText, nLine, nRow);
     }
 
+    b32 IsPtrIn(const _TChar* ptr) const
+    {
+      return ptr >= m_pText && ptr < (m_pText + m_nLength);
+    }
+
+    const _TChar* GetPtr() const
+    {
+      return m_pText;
+    }
+
+    clsize GetLength() const
+    {
+      return m_nLength;
+    }
   };
 
   typedef TextLines<wch> TextLinesW;

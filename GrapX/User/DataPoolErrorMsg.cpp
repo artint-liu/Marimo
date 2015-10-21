@@ -80,40 +80,22 @@ namespace Marimo
     return FALSE;
   }
 
-  //_DPEM_TEMPL
-  //void _DPEM_CLS::WriteErrorW( GXBOOL bError, T_LPCSTR pSourcePtr, GXLPCWSTR message, ... )
-  //{
-  //  UpdateResult(bError);
-  //  clStringW str;
-  //  if(pSourcePtr) {
-  //    str.Format(bError ? STD_ERROR_HEADW : STD_WARNING_HEADW, m_Sources.back()->strFilename, LineFromPtr(pSourcePtr), m_cSign, 0);
-  //  }
-
-  //  va_list  arglist;
-  //  va_start(arglist, message);
-
-  //  str.VarFormat(message, arglist);
-  //  str.Append(L"\r\n");
-  //  if(bError) {
-  //    CLOG_ERRORW(str);
-  //  }
-  //  else {
-  //    CLOG_WARNINGW(str);
-  //  }
-  //}
-
   _DPEM_TEMPL
-    void _DPEM_CLS::WriteErrorW(GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, ...)
+  void _DPEM_CLS::VarWriteErrorW(GXBOOL bError, T_LPCSTR ptr, GXUINT nCode, va_list arglist)
   {
     UpdateResult(bError);
     clStringW str;
-    if(nOffset != (GXSIZE_T)-1) {
-      if(nOffset) {
-        str.Format(bError ? STD_ERROR_HEAD_EXTW : STD_WARNING_HEAD_EXTW, (GXLPCWSTR)m_Sources.back()->strFilename, LineFromOffset(nOffset), m_cSign, nCode);
+    while((GXSIZE_T)ptr != (GXSIZE_T)-1) {
+      if(ptr) {
+        const FILE_SECTION* pfs = SectionFromPtr(ptr);
+        if(pfs) {
+          str.Format(bError ? STD_ERROR_HEAD_EXTW : STD_WARNING_HEAD_EXTW, (GXLPCWSTR)pfs->strFilename, 
+            LineFromOffset((GXSIZE_T)ptr - (GXSIZE_T)pfs->tl.GetPtr(), pfs), m_cSign, nCode);
+          break;
+        }
       }
-      else {
-        str.Format(bError ? STD_ERROR_HEADW : STD_WARNING_HEADW, m_cSign, nCode);
-      }
+      str.Format(bError ? STD_ERROR_HEADW : STD_WARNING_HEADW, m_cSign, nCode);
+      break;
     }
 
     auto it = m_ErrorMsg.find(nCode);
@@ -121,12 +103,7 @@ namespace Marimo
       str.AppendFormat(L"Missing Compiler error message.\r\n");
     }
     else {
-
-      try
-      {
-        va_list  arglist;
-        va_start(arglist, nCode);
-
+      try {
         str.VarFormat(it->second, arglist);
         str.Append(L"\r\n");
       }
@@ -142,6 +119,21 @@ namespace Marimo
     else if( ! m_bSilent){
       CLOG_WARNINGW(str);
     }
+  }
+
+  _DPEM_TEMPL
+  void _DPEM_CLS::VarWriteErrorW(GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, va_list arglist)
+  {
+    VarWriteErrorW(bError, m_Sources.back()->tl.GetPtr() + nOffset, nCode, arglist);
+  }
+
+  _DPEM_TEMPL
+  void _DPEM_CLS::WriteErrorW(GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, ...)
+  {
+    va_list  arglist;
+    va_start(arglist, nCode);
+    VarWriteErrorW(bError, m_Sources.back()->tl.GetPtr() + nOffset, nCode, arglist);
+    va_end(arglist);
   }
 
   _DPEM_TEMPL
@@ -189,9 +181,19 @@ namespace Marimo
   }
 
   _DPEM_TEMPL
-    int _DPEM_CLS::LineFromOffset(GXSIZE_T nOffset, GXUINT idFile) const
+  int _DPEM_CLS::LineFromOffset(GXSIZE_T nOffset, const FILE_SECTION* pfs) const
   {
+    ASSERT(pfs); // 外部检查这个不为空
+
     int nLine, nRow;
+    pfs->tl.PosFromOffset(nOffset, &nLine, &nRow);
+    return pfs->nBaseLine + nLine;
+  }
+
+  _DPEM_TEMPL
+  int _DPEM_CLS::LineFromOffset(GXSIZE_T nOffset, GXUINT idFile) const
+  {
+    //int nLine, nRow;
     FILE_SECTION* pfs;
     if(idFile == 0) {
       pfs = m_Sources.back();
@@ -202,8 +204,9 @@ namespace Marimo
     else {
       return 0;
     }
-    pfs->tl.PosFromOffset(nOffset, &nLine, &nRow);
-    return pfs->nBaseLine + nLine;
+    return LineFromOffset(nOffset, pfs);
+    //pfs->tl.PosFromOffset(nOffset, &nLine, &nRow);
+    //return pfs->nBaseLine + nLine;
   }
 
   _DPEM_TEMPL
@@ -280,6 +283,19 @@ namespace Marimo
     void _DPEM_CLS::SetSilentMode( GXBOOL bSilent )
   {
     m_bSilent = bSilent;
+  }
+
+  _DPEM_TEMPL
+  const typename _DPEM_CLS::FILE_SECTION* _DPEM_CLS::SectionFromPtr(T_LPCSTR ptr) const
+  {
+    for(auto it = m_Sources.rbegin(); it != m_Sources.rend(); ++it)
+    {
+      const FILE_SECTION* pSect = *it;
+      if(pSect->tl.IsPtrIn(ptr)) {
+        return pSect;
+      }
+    }
+    return NULL;
   }
 
   template class DataPoolErrorMsg<GXWCHAR>;

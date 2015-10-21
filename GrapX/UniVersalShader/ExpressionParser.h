@@ -484,10 +484,10 @@ namespace UVShader
 
     T_LPCSTR ParseMacro(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
     void     Macro_Define(const TokenArray& aTokens);
-    T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, const TokenArray& aTokens);
-    static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
-    static T_LPCSTR Macro_SkipConditionalBlock(T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
+    T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TokenArray& aTokens); // bNot 表示 if not define
+    T_LPCSTR Macro_SkipConditionalBlock(T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
 
+    static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
     static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
@@ -499,6 +499,11 @@ namespace UVShader
     GXLPCSTR GetUniqueString(const TOKEN* pSym);
     const TYPE* ParseType(const TOKEN* pSym);
     //clsize   FindSemicolon(clsize begin, clsize end) const;
+
+    //void OutputErrorW(GXSIZE_T offset, GXUINT code, ...);
+    void OutputErrorW(const TOKEN& token, GXUINT code, ...);
+    void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
+    //void OutputErrorW(const TOKEN& token, GXUINT code, ...);
 
     SYNTAXNODE::MODE TryGetNode(const SYNTAXNODE::UN* pUnion) const;
 
