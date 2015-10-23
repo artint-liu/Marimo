@@ -8,6 +8,51 @@
  *  6.std_samples[output_ref].txt 是解析后再输出的参考文件
  *
  */
+ 
+ # define MACRO_TEST
+ # define MACRO_NEST
+ # define PI 3.1415926
+ # define PI2 PI * 2
+ 
+ # ifdef MACRO_TEST
+ float fUsingThisOne;	// 有效
+ # else
+ float fNeverForUsing;
+ # endif
+ 
+#ifdef MACRO_TEST
+float macro_test_1;		// 有效
+#	ifdef MACRO_NEST
+float macro_test_2;		// 有效
+#	else
+float macro_test_3;
+float macro_test_4;
+#	endif
+float macro_test_5;		// 有效
+#else
+float macro_test_6;
+#	ifdef MACRO_NEST
+float macro_test_7;
+#	else
+float macro_test_8;
+#	endif
+float macro_test_9;
+#endif
+
+// 测试ifndef
+#ifndef MACRO_TEST_NOTDEFINE
+float macro_test_notdefine1; // 有效
+#else
+float macro_test_notdefine2; // 无效
+#endif
+
+#ifdef MACRO_TEST
+float macro_test_10;
+#endif
+
+#ifndef MACRO_TEST
+float macro_test_11;
+#endif
 
 // 全局变量
 float3 sun;
@@ -31,7 +76,8 @@ float func()
 
 float func2(float a)
 {
-  return a + 1.0f;
+  float x = PI2;
+  return a + 1.0f * PI;
 }
 
 void func3(float a, float b)

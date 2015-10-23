@@ -8,6 +8,7 @@
 #include <Smart/SmartStream.h>
 #include <clPathFile.h>
 #include <clStringSet.h>
+#include "../../../GrapX/UniVersalShader/ArithmeticExpression.h"
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"
 #include "gdiplus.h"
@@ -279,7 +280,7 @@ void TestShaderToys(GXBOOL bShowList)
 
 // ²âÊÔ¿ª¹Ø
 //#define TEST_ARITHMETIC_PARSING
-#define TEST_ALL_SHADERTOYS
+//#define TEST_ALL_SHADERTOYS
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -317,7 +318,7 @@ int _tmain(int argc, _TCHAR* argv[])
   MakeGraphicalExpression("Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", "Test\\shaders\\output.png");
 #endif // #ifdef ENABLE_GRAPH
 
-  //TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
+  TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
 
 #ifdef TEST_ALL_SHADERTOYS
   TestShaderToys(TRUE);

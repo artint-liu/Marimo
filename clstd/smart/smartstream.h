@@ -364,6 +364,45 @@ namespace SmartStreamUtility
     return FALSE;
   }
 
+  template<class _Iter>
+  b32 ExtendToCStyleNumeric(_Iter &it, clsize remain)
+  {
+    b32 bENotation = FALSE;
+    if((it.front() == '.' && isdigit(it.marker[it.length])) ||             // 第一个是'.'
+      (isdigit(it.front()) && (it.back() == 'e' || it.back() == 'E')) ||   // 第一个是数字，最后以'e'结尾
+      (isdigit(it.back()) && it.marker[it.length] == '.'))                 // 最后是数字，下一个是'.'
+    {
+      it.length++;
+      while(--remain)
+      {
+        if(isdigit(it.marker[it.length])) {
+          it.length++;
+        }
+        else if( ! bENotation && // 没有切换到科学计数法时遇到‘e’标记
+          (it.marker[it.length] == 'e' || it.marker[it.length] == 'E'))
+        {
+          bENotation = TRUE;
+          it.length++;
+
+          // 科学计数法，+/- 符号判断
+          if((--remain) != 0 && (*(it.end()) == '-' || *(it.end()) == '+')) {
+            it.length++;
+          }
+        }
+        else {
+          break;
+        }
+      }
+
+      if(it.marker[it.length] == 'f' || it.marker[it.length] == 'F' ||
+        it.marker[it.length] == 'h' || it.marker[it.length] == 'H') {
+        it.length++;
+      }
+      return TRUE;
+    }
+    return FALSE;
+  }
+
   // 判断pChar所在位置是不是在一行的开头，以下情况返回TRUE
   // 1.pChar之前的字符是'\n'
   // 2.pChar在文档开头

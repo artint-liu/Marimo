@@ -1,6 +1,7 @@
 #include <Marimo.H>
 #include <Smart/SmartStream.h>
 #include <clStringSet.h>
+#include "../../../GrapX/UniVersalShader/ArithmeticExpression.h"
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"
 
@@ -106,7 +107,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     UVShader::CodeParser::STATEMENT stat;
     expp.TestParseExpression(&stat, &scope);
 
-    clStringArrayA dbg_stack = expp.m_aDbgExpressionOperStack;
+    const clStringArrayA& dbg_stack = expp.DbgGetExpressionStack();
 
     // ¼ì²é²Ù×÷¶ÑÕ»
     if(pSamples[i].aOperStack)

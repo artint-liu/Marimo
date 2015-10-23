@@ -1,3 +1,9 @@
+float fUsingThisOne;
+float macro_test_1;
+float macro_test_2;
+float macro_test_5;
+float macro_test_notdefine1;
+float macro_test_10;
 float3 sun;
 float3 dir:VIEWDIRECTION;
 float3 diffuse:DIFFUSE;
@@ -20,7 +26,8 @@ float func()
 
 float func2(in float a)
 {
-  return a+1.0f;
+  float x=3.1415926*2;
+  return a+1.0f*3.1415926;
 }
 
 void func3(in float a,in float b)

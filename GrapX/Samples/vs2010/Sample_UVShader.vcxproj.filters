@@ -22,6 +22,12 @@
     <ClCompile Include="..\Sample_UVShader\ExpressionSample.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\UniVersalShader\ArithmeticExpression.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\UniVersalShader\ArithmeticExpr_static.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\UniVersalShader\ExpressionParser.h">
@@ -30,5 +36,6 @@
     <ClInclude Include="..\Sample_UVShader\TestExpressionParser.h">
       <Filter>sources</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\UniVersalShader\ArithmeticExpression.h" />
   </ItemGroup>
 </Project>

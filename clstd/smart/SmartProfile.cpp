@@ -19,9 +19,9 @@ template class SmartProfileT<const wch, clStringW, SmartProfile_TraitsW>;
 #define _SSP_IMPL SmartProfileT<_CTCh, _TStr, _Traits>
 
 template clStringW FromProfileString (const clStringW&);
-template clStringA  FromProfileString (const clStringA&);
+template clStringA FromProfileString (const clStringA&);
 template clStringW ToProfileString   (const clStringW&);
-template clStringA  ToProfileString   (const clStringA&);
+template clStringA ToProfileString   (const clStringA&);
 
 #pragma warning(disable : 4267) // 类型转换警告，因为这个类不想维护了，所以暂时禁止
 

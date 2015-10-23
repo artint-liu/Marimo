@@ -2598,7 +2598,8 @@ namespace clstd
     }
     return TRUE;
   }
-}
+
+} // namespace clstd
 
 extern "C" b32 strcmpnA(const ch* lpString1, const ch* lpString2, int nCount)
 {
