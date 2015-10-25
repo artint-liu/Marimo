@@ -42,6 +42,8 @@ namespace UVShader
   public:
     struct TOKEN // 运行时记录符号和操作符等属性
     {
+      typedef cllist<TOKEN>   List;
+      typedef clvector<TOKEN> Array;
       const static int scope_bits = 22;
       const static int precedence_bits = 7;
       const static int FIRST_OPCODE_PRECEDENCE = 1;
@@ -102,6 +104,16 @@ namespace UVShader
         return scope >= 0 ? scope : semi_scope;
       }
 
+      GXBOOL operator==(const TOKEN& t) const
+      {
+        // 不可能出现指向同一地址却长度不同的情况
+        ASSERT((marker.marker == t.marker.marker && marker.length == t.marker.length) || 
+          (marker.marker != t.marker.marker));
+
+        return (marker.marker == t.marker.marker) || (marker.length == t.marker.length
+          && GXSTRNCMP(marker.marker, t.marker.marker, marker.length) == 0);
+      }
+
       GXBOOL operator==(SmartStreamA::T_LPCSTR str) const
       {
         return (marker == str);
@@ -121,6 +133,11 @@ namespace UVShader
       {
         return (marker != ch);
       }
+
+      b32 operator<(const TOKEN& _token) const
+      {
+        return (b32)(marker < _token.marker);
+      }
     };
     typedef clvector<TOKEN> TokenArray;
     typedef cllist<TOKEN> TokenList;
@@ -135,6 +152,15 @@ namespace UVShader
       u32 unary      : 1; // 参考 TOKEN 机构体说明
       u32 unary_mask : 2;
     };
+
+    struct PAIRMARK
+    {
+      GXCHAR    chOpen;         // 开区间
+      GXCHAR    chClosed;       // 闭区间
+      GXUINT    bNewEOE   : 1;  // 更新End Of Expression的位置
+      GXUINT    bCloseAE  : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
+    };
+
 
     struct SYNTAXNODE
     {
@@ -267,10 +293,13 @@ namespace UVShader
       }
 
     };
-    typedef clvector<SYNTAXNODE> SyntaxNodeArray;
+    typedef clvector<SYNTAXNODE>  SyntaxNodeArray;
+    typedef clstack<int>          PairStack;
+
 
     struct RTSCOPE // 运行时的范围描述结构体
     {
+      typedef cllist<RTSCOPE> List;
       typedef clsize TYPE;
       const static TYPE npos = -1;
       TYPE begin;
@@ -300,7 +329,10 @@ namespace UVShader
     static MBO s_Operator1[];
     static MBO s_Operator2[];
     static MBO s_Operator3[];
+    static PAIRMARK s_PairMark[4];
     static const int s_MaxPrecedence = 14;
+    static const int s_nPairMark = sizeof(s_PairMark) / sizeof(PAIRMARK);
+
 
 
     ErrorMessage*       m_pMsg;
@@ -315,6 +347,7 @@ namespace UVShader
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
 
+    void    MarryBracket(PairStack* sStack, TOKEN& token, int& EOE);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
     GXBOOL  MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
@@ -341,8 +374,34 @@ namespace UVShader
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     void DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB);
     const clStringArrayA& DbgGetExpressionStack() const;
+
   };
 
+
 } // namespace UVShader
+
+namespace stdext
+{
+  inline size_t hash_value(const UVShader::ArithmeticExpression::TOKEN& _token)
+  {
+    u32 _Val = 2166136261U;
+
+    auto* pBegin = _token.marker.marker;
+    auto* pEnd   = _token.marker.end();
+    while (pBegin != pEnd) {
+      _Val = 16777619U * _Val ^ (u32)*pBegin++;
+    }
+    return (_Val);
+  }
+}
+
+// gcc stlport
+namespace std
+{
+  template<> struct hash<UVShader::ArithmeticExpression::TOKEN>
+  {
+    size_t operator()(const UVShader::ArithmeticExpression::TOKEN& _token) const { return stdext::hash_value(_token); }
+  };
+}
 
 #endif // _ARITHMETIC_EXPRESSION_H_

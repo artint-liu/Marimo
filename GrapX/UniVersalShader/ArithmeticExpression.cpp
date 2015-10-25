@@ -715,6 +715,47 @@ namespace UVShader
     return bret;
   }
 
+  void ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token, int& EOE)
+  {
+    const int c_size = (int)m_aTokens.size();
+    for(int i = 0; i < s_nPairMark; ++i)
+    {
+      PAIRMARK& c = s_PairMark[i];
+      PairStack&    s = sStack[i];
+      if(token.marker == c.chOpen) {
+        s.push(c_size);
+      }
+      else if(token.marker == c.chClosed) {
+        if(s.empty()) {
+          if(c.bCloseAE) {
+            ASSERT(token == ':'); // 目前只有这个
+            token.SetArithOperatorInfo(s_semantic);
+            break;
+          }
+          else {
+            // ERROR: 括号不匹配
+            ERROR_MSG__MISSING_OPENBRACKET;
+          }
+        }
+        token.scope = s.top();
+        m_aTokens[token.scope].scope = c_size;
+        s.pop();
+      }
+      else {
+        continue;
+      }
+
+      // ?: 操作符precedence不为0，拥有自己的优先级；其他括号我们标记为括号
+      if(token.precedence == 0) {
+        token.precedence = TOKEN::ID_BRACE;
+      }
+
+      if(c.bNewEOE) {
+        EOE = c_size + 1;
+      }
+    } // for
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   void ArithmeticExpression::DbgDumpScope( clStringA& str, clsize begin, clsize end, GXBOOL bRaw )

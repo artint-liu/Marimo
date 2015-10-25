@@ -54,6 +54,9 @@ float macro_test_10;
 float macro_test_11;
 #endif
 
+#define ADD(a,b) a+b
+#define MUL(a,b) a*b
+
 // 全局变量
 float3 sun;
 float3 dir : VIEWDIRECTION, diffuse : DIFFUSE;
@@ -77,6 +80,8 @@ float func()
 float func2(float a)
 {
   float x = PI2;
+  float y = ADD(23,345) + MUL(23,65);
+  float z=ADD(MUL(4,0.1),MUL(7,0.9));
   return a + 1.0f * PI;
 }
 

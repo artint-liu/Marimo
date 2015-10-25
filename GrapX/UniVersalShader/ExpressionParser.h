@@ -27,13 +27,14 @@ namespace UVShader
 
     struct MACRO
     {
-      typedef clhash_map<clStringA, MACRO> Dict; // TODO: key 改为 TOKEN
+      typedef clmap<clStringA, MACRO> Dict; // macro 支持重载，所以 key 的名字用 clStringA 来储存, Dict 要求具有排序性
+      //typedef clhash_set<clStringA>   Set;
 
       TokenList aFormalParams;  // 形参
       TokenList aTokens;        // 替换内容
 
-      void set(const Dict& dict, const TokenArray& tokens, int begin_at);
-      void clear();
+      void set            (const Dict& dict, const TokenArray& tokens, int begin_at);
+      void clear          ();
 
       void ClearContainer (); // 这个用来清除iterator里的container，指向subparse容易出错
       int  ExpandMacro    (const Dict& dict); // 展开宏
@@ -204,6 +205,25 @@ namespace UVShader
     void    InitPacks();
     void    Cleanup();
 
+    template<class _Iter>
+    void    Append(const _Iter& begin, const _Iter& end)
+    {
+      auto addi = m_aTokens.size();
+      for(_Iter it = begin; it != end; ++it)
+      {
+        m_aTokens.push_back(*it);
+
+        auto& back = m_aTokens.back();
+        if(back.scope != -1) {
+          back.scope += addi;
+        }
+        if(back.semi_scope != -1) {
+          back.semi_scope += addi;
+        }
+        // TODO: 作为 +/- 符号 precedence 也可能会由于插入后上下文变化导致含义不同
+      }
+    }
+
     GXBOOL  ParseStatementAs_Definition(RTSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(RTSCOPE* pScope);
     GXBOOL  ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope);
@@ -233,12 +253,14 @@ namespace UVShader
     RTSCOPE::TYPE  ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
+    GXBOOL  OnToken(const TOKEN& token, clStringA& strMacro);
 
     T_LPCSTR ParseMacro(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
     void     Macro_Define(const TokenArray& aTokens);
     void     Macro_Undefine(const RTPPCONTEXT& ctx, const TokenArray& aTokens);
     T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TokenArray& aTokens); // bNot 表示 if not define
     T_LPCSTR Macro_SkipConditionalBlock(T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
+    GXBOOL   Macro_ExpandMacroInvoke(clStringA& strMacro, TOKEN& token);
 
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
     static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
@@ -283,7 +305,8 @@ namespace UVShader
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
 
-    MACRO::Dict         m_Macros;
+    //MACRO::Set          m_MacrosSet;        // 实名集合
+    MACRO::Dict         m_Macros;           // --------废----------化名表，没有参数的就是原名，含参数的会生成一个标记参数个数的化名
     CodeParser*         m_pSubParser;
 
   public:

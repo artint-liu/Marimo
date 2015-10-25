@@ -38,7 +38,7 @@
 
 #define OUT_OF_SCOPE(s) (s == (clsize)-1)
 
-static clsize s_nMultiByteOperatorLen = 0; // 最大长度
+//static clsize s_nMultiByteOperatorLen = 0; // 最大长度
 
 
 namespace UVShader
@@ -202,9 +202,9 @@ namespace UVShader
     ASSERT(m_aTokens.empty()); // 调用者负责清空
 
     m_aTokens.reserve(EstimateForTokensCount());
-    typedef clstack<int> PairStack;
     TOKEN token;
     TOKEN l_token; // 用来在迭代器中储存符号优先级的信息
+    clStringA strMacro;
     
     // 只是清理
     l_token.ClearMarker();
@@ -212,23 +212,8 @@ namespace UVShader
     l_token.unary      = 0;
     SetTriggerCallBack(MultiByteOperatorProc, (u32_ptr)&l_token);
 
-    struct PAIR_CONTEXT
-    {
-      GXCHAR    chOpen;         // 开区间
-      GXCHAR    chClosed;       // 闭区间
-      GXUINT    bNewEOE   : 1;  // 更新End Of Expression的位置
-      GXUINT    bCloseAE  : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
-      PairStack sStack;
-    };
 
-    // 这里面有 PairStack 对象，所以不能声明为静态的
-    PAIR_CONTEXT pair_context[] = {
-      {'(', ')', FALSE, FALSE},   // 圆括号
-      {'[', ']', FALSE, FALSE},   // 方括号
-      {'{', '}', TRUE , FALSE},   // 花括号
-      {'?', ':', FALSE, TRUE},    // 冒号不匹配会被解释为语意
-      {NULL, },
-    };
+    PairStack sStack[s_nPairMark];
 
     int EOE = 0; // End Of Expression
 
@@ -271,53 +256,17 @@ namespace UVShader
 
 
       // 符号配对处理
-      for(int i = 0; pair_context[i].chOpen != NULL; ++i)
-      {
-        PAIR_CONTEXT& c = pair_context[i];
-        if(it == c.chOpen) {
-          c.sStack.push(c_size);
-        }
-        else if(it == c.chClosed) {
-          if(c.sStack.empty()) {
-            if(c.bCloseAE) {
-              ASSERT(token == ':'); // 目前只有这个
-              token.SetArithOperatorInfo(s_semantic);
-              break;
-            }
-            else {
-              // ERROR: 括号不匹配
-              ERROR_MSG__MISSING_OPENBRACKET;
-            }
-          }
-          token.scope = c.sStack.top();
-          m_aTokens[token.scope].scope = c_size;
-          c.sStack.pop();
-        }
-        else {
-          continue;
-        }
-
-        // ?: 操作符precedence不为0，拥有自己的优先级；其他括号我们标记为括号
-        if(token.precedence == 0) {
-          token.precedence = TOKEN::ID_BRACE;
-        }
-
-        if(c.bNewEOE) {
-          EOE = c_size + 1;
-        }
-        break;
-      } // for
+      MarryBracket(sStack, token, EOE);
       
-      if(token.precedence == 0)
-      {
-        auto iter_token = m_Macros.find(token.marker.ToString());
-        if(iter_token != m_Macros.end())
-        {
-          m_aTokens.insert(m_aTokens.end(), iter_token->second.aTokens.begin(), iter_token->second.aTokens.end());
-          token.ClearMarker();
-        }
+      if(token.precedence == 0 && OnToken(token, strMacro)) {
+        token.ClearMarker();
       }
-      
+
+      // 带有参数的宏展开
+      if(token == ')' && strMacro.IsNotEmpty() && Macro_ExpandMacroInvoke(strMacro, token)) {
+        token.ClearMarker();
+      }
+
       // 可能被宏展开后清除
       if(token.marker.marker) {
         m_aTokens.push_back(token);
@@ -333,10 +282,10 @@ namespace UVShader
       }
     }
 
-    for(int i = 0; pair_context[i].chOpen != NULL; ++i)
+    for(int i = 0; i < s_nPairMark; ++i)
     {
-      PAIR_CONTEXT& c = pair_context[i];
-      if( ! c.sStack.empty()) {
+      PairStack& s = sStack[i];
+      if( ! s.empty()) {
         // ERROR: 不匹配
         ERROR_MSG__MISSING_CLOSEDBRACKET;
       }
@@ -345,6 +294,44 @@ namespace UVShader
     SetTriggerCallBack(MultiByteOperatorProc, NULL);
     return m_aTokens.size();
   }
+
+  GXBOOL CodeParser::OnToken(const TOKEN& token, clStringA& strMacro)
+  {
+    clStringA strTokenName = token.ToString();
+    //{
+    //  auto it = m_Macros.find(strTokenName);
+    //  if(it == m_MacrosSet.end()) {
+    //    return FALSE;
+    //  }
+    //}
+
+    //auto it = m_Macros.find(strTokenName);
+    //ASSERT(it != m_Macros.end());
+
+    //auto iter_next = it;
+    //++iter_next;
+    //strTokenName.Append("@A");
+
+    //if(iter_next == m_Macros.end() || ! iter_next->first.BeginsWith(strTokenName)) {
+    //  m_aTokens.insert(m_aTokens.end(), it->second.aTokens.begin(), it->second.aTokens.end());
+    //  return TRUE;
+    //}
+
+
+    auto it = m_Macros.find(strTokenName);
+    if(it == m_Macros.end()) {
+      return FALSE;
+    }
+
+    if(it->second.aFormalParams.empty()) {
+      m_aTokens.insert(m_aTokens.end(), it->second.aTokens.begin(), it->second.aTokens.end());
+      return TRUE;
+    }
+
+    strMacro = strTokenName;
+    return FALSE;
+  }
+
 
   GXBOOL CodeParser::Parse()
   {
@@ -1818,17 +1805,19 @@ NOT_INC_P:
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && tokens.front() == "define");
     const auto count = tokens.size();
-    
+    clStringA strMacroName(tokens[1].marker.marker, tokens[1].marker.length);
+    //m_MacrosSet.insert(strMacroName);
+
     if(count == 1) {
       OutputErrorW(tokens.front(), E2007_define缺少定义);
     }
     else if(count == 2) // "#define MACRO" 形
     {
-      m_Macros.insert(clmake_pair(tokens[1].ToString(), l_m));
+      m_Macros.insert(clmake_pair(strMacroName, l_m));
     }
     else if(count == 3) // "#define MACRO XXX" 形
     {
-      auto result = m_Macros.insert(clmake_pair(tokens[1].ToString(), l_m));
+      auto result = m_Macros.insert(clmake_pair(strMacroName, l_m));
 
       // 如果已经添加过，清除原有数据
       if( ! result.second) {
@@ -1839,12 +1828,6 @@ NOT_INC_P:
     }
     else
     {
-      auto result = m_Macros.insert(clmake_pair(tokens[1].ToString(), l_m));
-      if( ! result.second) {
-        result.first->second.clear();
-      }
-
-      MACRO& macro = result.first->second;
       int l_define = 2;
 
       // 宏定义名后不是开括号并且紧跟在宏定义名后则报错
@@ -1854,31 +1837,112 @@ NOT_INC_P:
           OutputErrorW(tokens[2], E2008_宏定义中的意外, clStringW(tokens[2].ToString()));
           return;
         }
-        
+
         const int scope_end = tokens[2].scope;
         if(scope_end > 3) // #define MACRO(...) ... 形解析
         {
           for(int i = 3; i < scope_end; i++)
           {
-            if(tokens[i] == ',') {
+            if((tokens[i] == ',' && (i & 1)) || (tokens[i] != ',' && (i & 1) == 0)) {
               OutputErrorW(tokens[i], E2010_宏形参表中的意外, clStringW(tokens[i].ToString()));
               return;
             }
-            macro.aFormalParams.push_back(tokens[i++]);
-            if(tokens[i] != ',') {
-              OutputErrorW(tokens[i], E2010_宏形参表中的意外, clStringW(tokens[i].ToString()));
-              return;
+            if(i & 1) {
+              l_m.aFormalParams.push_back(tokens[i++]);
             }
           }
+
+          //m_Macros.insert(clmake_pair(strMacroName, l_m)); // 添加原名
+          //strMacroName.AppendFormat("@A%d", l_m.aFormalParams.size());
         }
         l_define = scope_end + 1;
       }
+      else {} // #define MACRO ... 形解析
 
-      // #define MACRO() ... 形解析, 括号内没有内容
-      // #define MACRO ... 形解析
-      macro.set(m_Macros, tokens, l_define);
+      auto result = m_Macros.insert(clmake_pair(strMacroName, l_m));
+      if( ! result.second) {
+        result.first->second.clear();
+      }
+
+      result.first->second.set(m_Macros, tokens, l_define);
     }
-    // 
+  }
+
+  GXBOOL CodeParser::Macro_ExpandMacroInvoke(clStringA& strMacro, TOKEN& token)
+  {
+    ASSERT(token == ')' && token.scope != -1);
+    ASSERT(token.scope >= 1); // 不可能出现宏所用的括号在m_aTokens第一个位置的情况
+
+    RTSCOPE MacroArgsScope(token.scope + 1, m_aTokens.size());
+    if( ! MacroArgsScope.IsValid()) {
+      // ERROR: C4003: “ADD”宏的实参不足
+      return FALSE;
+    }
+
+    RTSCOPE::List arg_list;
+    RTSCOPE arg(MacroArgsScope.begin, MacroArgsScope.begin);
+
+    for(RTSCOPE::TYPE i = MacroArgsScope.begin; i < MacroArgsScope.end; i++)
+    {
+      if(m_aTokens[i] == ',') {
+        arg.end = i;
+        arg_list.push_back(arg);
+        arg.begin = i + 1;
+      }
+    }
+    arg.end = MacroArgsScope.end;
+    arg_list.push_back(arg);
+
+    auto iter_macro = m_Macros.find(strMacro);
+    ASSERT(iter_macro != m_Macros.end()); // 不应该出现记录了宏处理的名字却在宏字典里找不到的情况
+    strMacro.Clear();
+
+    const MACRO& macro = iter_macro->second;
+    if(macro.aFormalParams.size() != arg_list.size()) {
+      // ERROR: 宏参数不一致
+      return FALSE;
+    }
+
+    TOKEN::List token_list;
+    token_list.insert(token_list.begin(), macro.aTokens.begin(), macro.aTokens.end());
+
+    auto iter_arg = arg_list.begin();
+    for(auto iter_formalparam = macro.aFormalParams.begin(); 
+      iter_formalparam != macro.aFormalParams.end(); ++iter_formalparam, ++iter_arg)
+    {
+      for(auto it = token_list.begin(); it != token_list.end();)
+      {
+        if(*it == *iter_formalparam) {
+          *it = m_aTokens[iter_arg->begin];
+          ++it;
+          for(RTSCOPE::TYPE i = iter_arg->begin + 1; i < iter_arg->end; i++)
+          {
+            it = token_list.insert(it, m_aTokens[i]);
+            ++it;
+          }
+        }
+        else {
+          ++it;
+        }
+      }
+    }
+
+    m_aTokens.erase(m_aTokens.begin() + token.scope - 1, m_aTokens.end());
+    Append(token_list.begin(), token_list.end());
+    //// 宏定义参数中不应该出现分号，此时刚遇到')'，也还没有设置整个表达式的分号域
+    //if(m_aTokens[token.scope - 1].semi_scope == -1) {
+    //  
+    //}
+
+    //SYNTAXNODE::UN sUnion;
+    //CodeParser* pParser = GetSubParser();
+    //pParser->Cleanup();
+    //pParser->m_aTokens.insert(pParser->m_aTokens.begin(), m_aTokens.begin() + argscope.begin, m_aTokens.end()); // TODO: 增加一个专门的传递方法，调整scope标记
+    //if( ! pParser->ParseArithmeticExpression(0, pParser->m_aTokens.size(), &sUnion)) {
+    //  return;
+    //}
+
+    return TRUE;
   }
 
   void CodeParser::Macro_Undefine(const RTPPCONTEXT& ctx, const TokenArray& aTokens)
@@ -1893,8 +1957,16 @@ NOT_INC_P:
       return;
     }
 
-    clStringA str = aTokens[1].ToString();
-    m_Macros.erase(str);
+    //clStringA str = aTokens[1].ToString();
+    clStringA strMacroName = aTokens[1].ToString();
+    //m_MacrosSet.erase(strMacroName);
+    auto it = m_Macros.find(strMacroName);
+    ASSERT(it != m_Macros.end()); // 集合里有的话化名表里也应该有
+    
+    //strMacroName.Append("@A");
+    //do {
+    //  it = m_Macros.erase(it);
+    //} while (it->first.BeginsWith(strMacroName));
   }
 
   CodeParser::T_LPCSTR CodeParser::Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TokenArray& tokens)
@@ -2041,6 +2113,7 @@ NOT_INC_P:
     m_pMsg->VarWriteErrorW(TRUE, ptr, code, arglist);
     va_end(arglist);
   }
+
   //////////////////////////////////////////////////////////////////////////
 
   bool CodeParser::TYPE::operator<( const TYPE& t ) const

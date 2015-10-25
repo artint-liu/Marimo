@@ -27,6 +27,8 @@ float func()
 float func2(in float a)
 {
   float x=3.1415926*2;
+  float y=23+345+23*65;
+  float z=4*0.1+7*0.9;
   return a+1.0f*3.1415926;
 }
 
