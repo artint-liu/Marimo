@@ -21,11 +21,11 @@ public:
       TRACE("±‡“Î¥ÌŒÛ\n");
       m_aDbgExpressionOperStack.clear();
     }
-    else if(TryGetNodeType(&stat.expr.sRoot) == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX && stat.expr.sRoot.pNode) {
-      IndexToPtr(stat.expr.sRoot.pNode, m_aSyntaxNodePack);
-      RelocaleSyntaxPtr(stat.expr.sRoot.pNode);
+    else if(stat.expr.sRoot.flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX && stat.expr.sRoot.un.pNode) {
+      IndexToPtr(stat.expr.sRoot.un.pNode, m_aSyntaxNodePack);
+      RelocaleSyntaxPtr(stat.expr.sRoot.un.pNode);
       TRACE("---\n");
-      DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.pNode, 0);
+      DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.un.pNode, 0);
     }
     *pStat = stat;
     return bret;

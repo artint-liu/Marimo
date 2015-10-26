@@ -67,7 +67,8 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
   for(int i = 0; i < 2; i++)
   {
     if(pNode->Operand[i].ptr) {
-      if(pExpp->TryGetNodeType(&pNode->Operand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+      //if(pExpp->TryGetNodeType(&pNode->Operand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+      if(pNode->GetOperandType(i) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
         str[i].Append(pNode->Operand[i].pSym->ToString());
       }
       else {
@@ -258,7 +259,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
     if(file.MapToBuffer(&pBuffer))
     {
       UVShader::CodeParser expp;
-      const UVShader::CodeParser::TokenArray* pTokens;
+      const UVShader::CodeParser::TOKEN::Array* pTokens;
       clStringW strFullname = szFilename;
       clpathfile::CombineAbsPathW(strFullname);
       expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize(), 0, strFullname);
@@ -309,7 +310,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
               {
                 const auto& definition = s.defn;
                 clStringA str;
-                DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
+                DumpBlock(&expp, definition.sRoot.un.pNode, 0, 0, &str);
                 file.WritefA("%s", str);
                 /*
                 file.WritefA("%s %s", definition.szType, definition.szName);
@@ -361,12 +362,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
                 }
 
                 //file.WritefA("{\n");
-                if(func.pExpression && func.pExpression->expr.sRoot.pNode)
+                if(func.pExpression && func.pExpression->expr.sRoot.un.pNode)
                 {
                   clStringA str;
                   //str.Format("{\n");
                   //DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, 1, &str);
-                  DumpBlock(&expp, func.pExpression->expr.sRoot.pNode, 0, 0, &str);
+                  DumpBlock(&expp, func.pExpression->expr.sRoot.un.pNode, 0, 0, &str);
                   file.WritefA(str); // 缩进两个空格
                 }
                 file.WritefA("\n");
@@ -388,7 +389,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
               {
                 clStringA str;
                 CLBREAK;
-                DumpBlock(&expp, s.expr.sRoot.pNode, 0, 1, &str);
+                DumpBlock(&expp, s.expr.sRoot.un.pNode, 0, 1, &str);
                 file.WritefA(str);
               }
               break;

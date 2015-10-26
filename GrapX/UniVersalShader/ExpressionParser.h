@@ -23,6 +23,7 @@ namespace UVShader
   class CodeParser : public ArithmeticExpression
   {
   public:
+    typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
 
 
     struct MACRO
@@ -30,10 +31,10 @@ namespace UVShader
       typedef clmap<clStringA, MACRO> Dict; // macro 支持重载，所以 key 的名字用 clStringA 来储存, Dict 要求具有排序性
       //typedef clhash_set<clStringA>   Set;
 
-      TokenList aFormalParams;  // 形参
-      TokenList aTokens;        // 替换内容
+      TOKEN::List aFormalParams;  // 形参
+      TOKEN::List aTokens;        // 替换内容
 
-      void set            (const Dict& dict, const TokenArray& tokens, int begin_at);
+      void set            (const Dict& dict, const TOKEN::Array& tokens, int begin_at);
       void clear          ();
 
       void ClearContainer (); // 这个用来清除iterator里的container，指向subparse容易出错
@@ -129,14 +130,14 @@ namespace UVShader
 
     struct STATEMENT_EXPR // 表达式定义
     {
-      SYNTAXNODE::UN  sRoot;
+      SYNTAXNODE::DESC sRoot;
     };
     
     struct STATEMENT_DEFN
     {
       UniformModifier modifier;
       GXLPCSTR        szType;
-      SYNTAXNODE::UN  sRoot;
+      SYNTAXNODE::DESC  sRoot;
     };
 
 
@@ -238,29 +239,30 @@ namespace UVShader
     //GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     //GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
 
-    GXBOOL  ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
     //GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
     //GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  TryKeywords(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end);
+    GXBOOL  TryKeywords(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, RTSCOPE::TYPE* parse_end);
     GXBOOL  TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end); // 解析一个代码块，用{}限定的一组或者仅有一句表达式的代码
-    RTSCOPE::TYPE  ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf);
-    RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pBlockNode);
-    RTSCOPE::TYPE  ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    RTSCOPE::TYPE  ParseFlowWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    RTSCOPE::TYPE  ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    RTSCOPE::TYPE  ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
+    RTSCOPE::TYPE  ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, GXBOOL bElseIf);
+    RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::DESC* pBlockNode);
+    RTSCOPE::TYPE  ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    RTSCOPE::TYPE  ParseFlowWhile(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    RTSCOPE::TYPE  ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    RTSCOPE::TYPE  ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
     GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
-    GXBOOL  OnToken(const TOKEN& token, clStringA& strMacro);
+    GXBOOL  OnToken(const TOKEN& token, MacroStack& sStack);
 
-    T_LPCSTR ParseMacro(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
-    void     Macro_Define(const TokenArray& aTokens);
-    void     Macro_Undefine(const RTPPCONTEXT& ctx, const TokenArray& aTokens);
-    T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TokenArray& aTokens); // bNot 表示 if not define
+    T_LPCSTR DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
+    void     Macro_Define(const TOKEN::Array& aTokens);
+    void     Macro_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens);
+    T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
+    T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
     T_LPCSTR Macro_SkipConditionalBlock(T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
-    GXBOOL   Macro_ExpandMacroInvoke(clStringA& strMacro, TOKEN& token);
+    GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
 
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
     static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
@@ -295,7 +297,7 @@ namespace UVShader
     }
     CodeParser* GetSubParser();
 
-  protected:    
+  protected:
     GXDWORD             m_dwState;          // 内部状态, 参考RTState
     clstd::StringSetA   m_Strings;
     TypeSet             m_TypeSet;

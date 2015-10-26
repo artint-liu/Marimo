@@ -3,7 +3,7 @@
 #include <Smart/SmartStream.h>
 #include <clStringSet.h>
 #include "ArithmeticExpression.h"
-#include "ExpressionParser.h"
+//#include "ExpressionParser.h"
 
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
@@ -259,7 +259,7 @@ namespace UVShader
   }
   //*/
 
-  const ArithmeticExpression::TokenArray* ArithmeticExpression::GetTokensArray() const
+  const ArithmeticExpression::TOKEN::Array* ArithmeticExpression::GetTokensArray() const
   {
     return &m_aTokens;
   }
@@ -270,7 +270,7 @@ namespace UVShader
     return (count << 1) + (count >> 1); // 按照 字节数：符号数=2.5：1来计算
   }
 
-  const ArithmeticExpression::MBO* MatchOperator(const CodeParser::MBO* op, u32 op_len, CodeParser::iterator& it, u32 remain)
+  const ArithmeticExpression::MBO* MatchOperator(const ArithmeticExpression::MBO* op, u32 op_len, ArithmeticExpression::iterator& it, u32 remain)
   {
     if(remain <= op_len) {
       return NULL;
@@ -334,73 +334,95 @@ namespace UVShader
     return 0;
   }
 
-  ArithmeticExpression::SYNTAXNODE::FLAGS ArithmeticExpression::TryGetNodeType( const SYNTAXNODE::UN* pUnion ) const
-  {
-    if(pUnion->ptr >= &m_aTokens.front() && pUnion->ptr <= &m_aTokens.back()) {
-      return SYNTAXNODE::FLAG_OPERAND_IS_TOKEN;
-    }
-    else if(pUnion->ptr >= &m_aSyntaxNodePack.front() && pUnion->ptr <= &m_aSyntaxNodePack.back()) {
-      return SYNTAXNODE::FLAG_OPERAND_IS_NODE;
-    }
-    else {
-      return SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX;
-    }
-  }
+  //ArithmeticExpression::SYNTAXNODE::FLAGS ArithmeticExpression::TryGetNodeType( const SYNTAXNODE::DESC* pDesc ) const
+  //{
+  //  if(pDesc->un.ptr >= &m_aTokens.front() && pDesc->un.ptr <= &m_aTokens.back()) {
+  //    return SYNTAXNODE::FLAG_OPERAND_IS_TOKEN;
+  //  }
+  //  else if(pDesc->ptr >= &m_aSyntaxNodePack.front() && pDesc->ptr <= &m_aSyntaxNodePack.back()) {
+  //    return SYNTAXNODE::FLAG_OPERAND_IS_NODE;
+  //  }
+  //  else {
+  //    return SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX;
+  //  }
+  //}
 
-  ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNode( const SYNTAXNODE::UN* pUnion ) const
+  //ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNode( const SYNTAXNODE::DESC* pDesc ) const
+  //{
+  //  if(pDesc->ptr >= &m_aTokens.front() && pDesc->ptr <= &m_aTokens.back()) {
+  //    return SYNTAXNODE::MODE_Undefined;
+  //  }
+  //  else if(pDesc->ptr >= &m_aSyntaxNodePack.front() && pDesc->ptr <= &m_aSyntaxNodePack.back()) {
+  //    return pDesc->pNode->mode;
+  //  }
+  //  else {
+  //    return m_aSyntaxNodePack[pDesc->un.nNodeIndex].mode;
+  //  }
+  //}
+
+  ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNode(const SYNTAXNODE::DESC* pDesc) const
   {
-    if(pUnion->ptr >= &m_aTokens.front() && pUnion->ptr <= &m_aTokens.back()) {
+    switch(pDesc->flag)
+    {
+    case SYNTAXNODE::FLAG_OPERAND_IS_TOKEN:
       return SYNTAXNODE::MODE_Undefined;
-    }
-    else if(pUnion->ptr >= &m_aSyntaxNodePack.front() && pUnion->ptr <= &m_aSyntaxNodePack.back()) {
-      return pUnion->pNode->mode;
-    }
-    else {
-      return m_aSyntaxNodePack[(int)pUnion->pNode].mode;
+    case SYNTAXNODE::FLAG_OPERAND_IS_NODE:
+      return pDesc->un.pNode->mode;
+    case SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
+      return m_aSyntaxNodePack[pDesc->un.nNodeIndex].mode;
+    case SYNTAXNODE::FLAG_OPERAND_UNDEFINED:
+      return SYNTAXNODE::MODE_Undefined;
+    default:
+      CLBREAK;
     }
   }
 
-  GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
+  GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB)
   {
     return MakeSyntaxNode(pDest, mode, NULL, pOperandA, pOperandB);
   }
 
-  GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB)
+  GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB)
   {
-    const SYNTAXNODE::UN* pOperand[] = {pOperandA, pOperandB};
+    const SYNTAXNODE::DESC* pOperand[] = {pOperandA, pOperandB};
     SYNTAXNODE sNode = {0, mode, pOpcode};
 
     for(int i = 0; i < 2; ++i)
     {
       const int nFlagShift = SYNTAXNODE::FLAG_OPERAND_SHIFT * i;
-      if(pOperand[i] == NULL) {
-        sNode.Operand[i].pSym = NULL;
+      if(pOperand[i] == NULL || pOperand[i]->un.ptr == NULL) {
+        ASSERT(pOperand[i] == NULL || pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_UNDEFINED);
+        sNode.Operand[i].ptr = NULL;
       }
-      else if(TryGetNodeType(pOperand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN << nFlagShift);
-        sNode.Operand[i].pSym = pOperand[i]->pSym;
+      else if(pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN || pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
+        sNode.SetOperandType(i, pOperand[i]->flag);
+        sNode.Operand[i].ptr = pOperand[i]->un.ptr;
+      }
+      else if(pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
+        sNode.SetOperandType(i, SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX);
+        ASSERT(pOperand[i]->un.nNodeIndex < m_aSyntaxNodePack.size()); // 这时候还是索引，所以肯定小于序列的长度
+        sNode.Operand[i].nNodeIndex = pOperand[i]->un.nNodeIndex;
       }
       else {
-        SET_FLAG(sNode.flags, SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX << nFlagShift);
-        ASSERT((size_t)pOperand[i]->pNode < m_aSyntaxNodePack.size()); // 这时候还是索引，所以肯定小于序列的长度
-        sNode.Operand[i].pNode = pOperand[i]->pNode;
+        CLBREAK; // 空的或者不存在的 pOperand[i]->flag 类型        
       }
     }
 
-    pDest->pNode = (SYNTAXNODE*)m_aSyntaxNodePack.size();
+    pDest->flag = SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX;
+    pDest->un.nNodeIndex = m_aSyntaxNodePack.size();
     m_aSyntaxNodePack.push_back(sNode);
 
     return TRUE;
   }
 
-  GXBOOL ArithmeticExpression::MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle)
+  GXBOOL ArithmeticExpression::MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle)
   {
     ASSERT((int)pScope->begin <= nMiddle);
     ASSERT(nMiddle <= (int)pScope->end);
 
     RTSCOPE scopeA(pScope->begin, nMiddle);
     RTSCOPE scopeB(nMiddle + 1, pScope->end);
-    SYNTAXNODE::UN A = {0}, B = {0};
+    SYNTAXNODE::DESC A = {0}, B = {0};
     GXBOOL bresult = TRUE;
 
     if(*pOpcode == '?') {
@@ -428,19 +450,19 @@ namespace UVShader
     DbgDumpScope(pOpcode->ToString(), scopeA, scopeB);
 
     if(pOpcode->unary) {
-      if(A.pNode != NULL && B.pNode != NULL)
+      if(A.un.pNode != NULL && B.un.pNode != NULL)
       {
         // ERROR: 一元操作符不能同时带有左右操作数
         return FALSE;
       }
 
-      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_LEFT_OPERAND) && A.pNode != NULL)
+      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_LEFT_OPERAND) && A.un.pNode != NULL)
       {
         // ERROR: 一元操作符不接受左值
         return FALSE;
       }
 
-      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_RIGHT_OPERAND) && B.pNode != NULL)
+      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_RIGHT_OPERAND) && B.un.pNode != NULL)
       {
         // ERROR: 一元操作符不接受右值
         return FALSE;
@@ -451,33 +473,33 @@ namespace UVShader
   }
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::DESC* pDesc)
   {
     RTSCOPE scope(begin, end);
-    return ParseArithmeticExpression(scope, pUnion);
+    return ParseArithmeticExpression(scope, pDesc);
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(const RTSCOPE& scope_in, SYNTAXNODE::UN* pUnion)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(const RTSCOPE& scope_in, SYNTAXNODE::DESC* pDesc)
   {
     RTSCOPE scope = scope_in;
     if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
       scope.end--;
     }
-    return ParseArithmeticExpression(scope, pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    return ParseArithmeticExpression(scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, int nMinPrecedence)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence)
   {
     int nCandidate = s_MaxPrecedence;
     GXINT_PTR i = (GXINT_PTR)scope.end - 1;
     GXINT_PTR nCandidatePos = i;
-    SYNTAXNODE::UN A, B;
+    SYNTAXNODE::DESC A, B;
 
     const GXINT_PTR count = scope.end - scope.begin;
 
     if(count <= 1) {
       if(count == 1) {
-        pUnion->pSym = &m_aTokens[scope.begin];
+        *pDesc = m_aTokens[scope.begin];
       }
       return TRUE;
     }
@@ -487,25 +509,25 @@ namespace UVShader
     if(count == 2)
     {
       // 处理两种可能：(1)变量使用一元符号运算 (2)定义变量
-      A.pSym = &front;
-      B.pSym = &m_aTokens[scope.begin + 1];
+      A = front;
+      B = m_aTokens[scope.begin + 1];
       GXBOOL bret = TRUE;
 
-      ASSERT(*B.pSym != ';'); // 已经在外部避免了表达式内出现分号
+      ASSERT(*B.un.pSym != ';'); // 已经在外部避免了表达式内出现分号
 
-      if(A.pSym->precedence > 0)
+      if(A.un.pSym->precedence > 0)
       {
-        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Opcode, A.pSym, NULL, &B);
-        DbgDumpScope(A.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
+        bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, A.un.pSym, NULL, &B);
+        DbgDumpScope(A.un.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
       }
-      else if(B.pSym->precedence > 0)
+      else if(B.un.pSym->precedence > 0)
       {
-        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Opcode, B.pSym, &A, NULL);
-        DbgDumpScope(B.pSym->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
+        bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, B.un.pSym, &A, NULL);
+        DbgDumpScope(B.un.pSym->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
       }
       else {
         // 变量声明
-        bret = MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Definition, &A, &B);
+        bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Definition, &A, &B);
       }
       return bret;
     }
@@ -527,26 +549,26 @@ namespace UVShader
         }
 
         mode = SYNTAXNODE::MODE_DefinitionConst;
-        A.pSym = &m_aTokens[scope.begin + 1];
+        A = m_aTokens[scope.begin + 1];
         scope_expr.begin++;
       }
       else {
-        A.pSym = &front;
+        A = front;
       }
-      B.ptr = NULL;
+      B.un.ptr = NULL;
       GXBOOL bret = ParseArithmeticExpression(scope_expr, &B);
-      bret = bret && MakeSyntaxNode(pUnion, mode, &A, &B);
+      bret = bret && MakeSyntaxNode(pDesc, mode, &A, &B);
       return bret;
     }
     else if((front == '(' || front == '[') && front.scope == scope.end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
       ASSERT(m_aTokens[scope.end - 1].scope == scope.begin);
-      return ParseArithmeticExpression(RTSCOPE(scope.begin + 1, scope.end - 1), pUnion, TOKEN::FIRST_OPCODE_PRECEDENCE);
+      return ParseArithmeticExpression(RTSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
     }
     else if(m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
     {
-      return ParseFunctionCall(scope, pUnion);
+      return ParseFunctionCall(scope, pDesc);
     }
 
     while(nMinPrecedence <= s_MaxPrecedence)
@@ -572,7 +594,7 @@ namespace UVShader
           // ?: 操作符标记：precedence 储存优先级，scope 储存?:的关系
 
           if(s.precedence == nMinPrecedence) {
-            return MakeInstruction(&s, nMinPrecedence, &scope, pUnion, i);
+            return MakeInstruction(&s, nMinPrecedence, &scope, pDesc, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -604,7 +626,7 @@ namespace UVShader
           }
 
           if(s.precedence == nMinPrecedence) {
-            return MakeInstruction(&s, nMinPrecedence, &scope, pUnion, i);
+            return MakeInstruction(&s, nMinPrecedence, &scope, pDesc, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -621,7 +643,7 @@ namespace UVShader
       i = nCandidatePos;
     }
 
-    if( ! ParseFunctionIndexCall(scope, pUnion))
+    if( ! ParseFunctionIndexCall(scope, pDesc))
     {
       clStringA strMsg(m_aTokens[scope.begin].marker.marker, (m_aTokens[scope.end - 1].marker.marker - m_aTokens[scope.begin].marker.marker) + m_aTokens[scope.end - 1].marker.length);
       TRACE("ERROR: 无法解析\"%s\"\n", strMsg);
@@ -630,7 +652,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ArithmeticExpression::ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  GXBOOL ArithmeticExpression::ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 从右到左解析这两种形式:
     // name(...)(...)(...)
@@ -640,25 +662,25 @@ namespace UVShader
     struct CONTEXT
     {
       SYNTAXNODE::MODE mode;
-      SYNTAXNODE::UN   B;
+      SYNTAXNODE::DESC B;
     };
 
     typedef clstack<CONTEXT> SyntaxStack;
     SyntaxStack node_stack;
-    SYNTAXNODE::UN A;
+    SYNTAXNODE::DESC A;
     CONTEXT c;
     TOKEN* pBack = &m_aTokens[scope.end - 1];
-    A.pSym = &m_aTokens[scope.begin];
-    ASSERT(A.pSym->precedence == 0); // 第一个必须不是运算符号
+    A = m_aTokens[scope.begin];
+    ASSERT(A.un.pSym->precedence == 0); // 第一个必须不是运算符号
 
 
     while(1) {
       if(pBack->scope == RTSCOPE::npos) {
-        ERROR_MSG__MISSING_SEMICOLON(*A.pSym);
+        ERROR_MSG__MISSING_SEMICOLON(*A.un.pSym);
         return FALSE;
       }
       c.mode = *pBack == ')' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
-      c.B.ptr = NULL;
+      c.B.un.ptr = NULL;
 
       if( ! ParseArithmeticExpression(RTSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {
         return FALSE;
@@ -674,7 +696,7 @@ namespace UVShader
     }
 
     while(1) {
-      if( ! MakeSyntaxNode(pUnion, c.mode, &A, &c.B)) {
+      if( ! MakeSyntaxNode(pDesc, c.mode, &A, &c.B)) {
         CLBREAK;
         return FALSE;
       }
@@ -682,7 +704,7 @@ namespace UVShader
       if( ! node_stack.empty()) {
         c = node_stack.top();
         node_stack.pop();
-        A = *pUnion;
+        A = *pDesc;
       }
       else {
         break;
@@ -692,13 +714,13 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ArithmeticExpression::ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  GXBOOL ArithmeticExpression::ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 括号肯定是匹配的
     ASSERT(m_aTokens[scope.end - 1].scope == scope.begin + 1);
 
-    SYNTAXNODE::UN A, B = {0};
-    A.pSym = &m_aTokens[scope.begin];
+    SYNTAXNODE::DESC A, B = {0};
+    A = m_aTokens[scope.begin];
 
     // TODO: 检查m_aTokens[scope.begin]是函数名
 
@@ -708,7 +730,7 @@ namespace UVShader
 
     SYNTAXNODE::MODE mode = bracket == '(' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
 
-    MakeSyntaxNode(pUnion, mode, &A, &B);
+    MakeSyntaxNode(pDesc, mode, &A, &B);
     DbgDumpScope(bracket == '(' ? "F" : "I", RTSCOPE(scope.begin, scope.begin + 1),
       RTSCOPE(scope.begin + 2, scope.end - 1));
 

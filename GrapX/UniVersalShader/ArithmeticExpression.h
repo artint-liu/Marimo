@@ -26,7 +26,7 @@
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
 #define ENABLE_STRINGED_SYMBOL
-#define OPP(_PRE) (CodeParser::TOKEN::FIRST_OPCODE_PRECEDENCE + _PRE)
+#define OPP(_PRE) (ArithmeticExpression::TOKEN::FIRST_OPCODE_PRECEDENCE + _PRE)
 
 
 namespace Marimo
@@ -139,8 +139,8 @@ namespace UVShader
         return (b32)(marker < _token.marker);
       }
     };
-    typedef clvector<TOKEN> TokenArray;
-    typedef cllist<TOKEN> TokenList;
+    //typedef clvector<TOKEN> TokenArray;
+    //typedef cllist<TOKEN> TokenList;
 
 
     struct MBO // 静态定义符号属性用的结构体
@@ -167,6 +167,7 @@ namespace UVShader
       enum FLAGS
       {
         FLAG_OPERAND_SHIFT      = 8,
+        FLAG_OPERAND_UNDEFINED  = 0,
         FLAG_OPERAND_TYPEMASK   = 0x0000000F,
         FLAG_OPERAND_IS_NODEIDX = 0x00000001,
         FLAG_OPERAND_IS_NODE    = 0x00000002,
@@ -213,8 +214,13 @@ namespace UVShader
       };
 
       struct DESC {
-        FLAGS flag; // 标记un具体是哪一个类型
         UN    un;
+        FLAGS flag; // 标记un具体是哪一个类型
+        DESC& operator=(const TOKEN& token) {
+          flag = FLAG_OPERAND_IS_TOKEN;
+          un.pSym = &token;
+          return *this;
+        }
       };
 
       UN Operand[s_NumOfOperand];
@@ -280,10 +286,10 @@ namespace UVShader
           switch(type)
           {
           case FLAG_OPERAND_IS_NODE:
-            RecursiveNode(pParser, pNode->Operand[i].pNode, func);
+            RecursiveNode2(pParser, pNode->Operand[i].pNode, func);
             break;
           case FLAG_OPERAND_IS_NODEIDX:
-            RecursiveNode(pParser, &pParser->
+            RecursiveNode2(pParser, &pParser->
               m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], func);
             break;
           }
@@ -336,7 +342,7 @@ namespace UVShader
 
 
     ErrorMessage*       m_pMsg;
-    TokenArray          m_aTokens;
+    TOKEN::Array        m_aTokens;
     //int                 m_nMaxPrecedence;   // 优先级最大值
     SyntaxNodeArray     m_aSyntaxNodePack;  // 表达式语法节点
 
@@ -348,27 +354,28 @@ namespace UVShader
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
 
     void    MarryBracket(PairStack* sStack, TOKEN& token, int& EOE);
-    GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
-    GXBOOL  MakeSyntaxNode(SYNTAXNODE::UN* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::UN* pOperandA, SYNTAXNODE::UN* pOperandB);
-    GXBOOL  MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::UN* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
+    GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
+    GXBOOL  MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
-    GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
+    GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
     
   public:
     ArithmeticExpression();
     virtual ~ArithmeticExpression();
 
-    SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
-    SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
+    //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
+    //SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
+    SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::DESC* pDesc) const; // TODO: 修改所属类
 
     clsize              EstimateForTokensCount  () const;   // 从Stream的字符数估计Token的数量
     //clsize              GenerateTokens          ();
-    const TokenArray*   GetTokensArray          () const;
+    const TOKEN::Array* GetTokensArray          () const;
 
-    GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, int nMinPrecedence); // 递归函数
+    GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence); // 递归函数
 
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);

@@ -167,7 +167,7 @@ namespace UVShader
       }
       else
       {
-        auto next_marker = pThis->ParseMacro(ctx, it.marker, ctx.ppend);
+        auto next_marker = pThis->DoPreprocess(ctx, it.marker, ctx.ppend);
         if(next_marker == ctx.iter_next.marker) {
           it = ctx.iter_next;
         }
@@ -204,7 +204,8 @@ namespace UVShader
     m_aTokens.reserve(EstimateForTokensCount());
     TOKEN token;
     TOKEN l_token; // 用来在迭代器中储存符号优先级的信息
-    clStringA strMacro;
+    clstack<int> sMacroStack;
+    //clStringA strMacro;
     
     // 只是清理
     l_token.ClearMarker();
@@ -258,12 +259,15 @@ namespace UVShader
       // 符号配对处理
       MarryBracket(sStack, token, EOE);
       
-      if(token.precedence == 0 && OnToken(token, strMacro)) {
+      if(token.precedence == 0 && OnToken(token, sMacroStack)) {
         token.ClearMarker();
       }
 
       // 带有参数的宏展开
-      if(token == ')' && strMacro.IsNotEmpty() && Macro_ExpandMacroInvoke(strMacro, token)) {
+      else if(token == ')' && ! sMacroStack.empty() && token.scope == sMacroStack.top() + 1 &&
+        Macro_ExpandMacroInvoke(sMacroStack.top(), token))
+      {
+        sMacroStack.pop();
         token.ClearMarker();
       }
 
@@ -295,7 +299,7 @@ namespace UVShader
     return m_aTokens.size();
   }
 
-  GXBOOL CodeParser::OnToken(const TOKEN& token, clStringA& strMacro)
+  GXBOOL CodeParser::OnToken(const TOKEN& token, MacroStack& sStack)
   {
     clStringA strTokenName = token.ToString();
     //{
@@ -328,7 +332,8 @@ namespace UVShader
       return TRUE;
     }
 
-    strMacro = strTokenName;
+    sStack.push(m_aTokens.size());
+    //strMacro = strTokenName;
     return FALSE;
   }
 
@@ -385,7 +390,7 @@ namespace UVShader
     // 如 float a, b, c; 改为
     // float a; float b; float c;
     //
-    SYNTAXNODE* pNode = &m_aSyntaxNodePack[stat.defn.sRoot.nNodeIndex];
+    SYNTAXNODE* pNode = &m_aSyntaxNodePack[stat.defn.sRoot.un.nNodeIndex];
     cllist<SYNTAXNODE*> sDefinitionList;
     SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList](SYNTAXNODE* pNode) -> GXBOOL {
       if( ! (pNode->mode == CodeParser::SYNTAXNODE::MODE_Definition || 
@@ -416,7 +421,7 @@ namespace UVShader
 
       front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
       front->SetOperandType(1, sDefinitionList.back()->GetOperandType(0));
-      stat.defn.sRoot.nNodeIndex = front - &m_aSyntaxNodePack.front();
+      stat.defn.sRoot.un.nNodeIndex = front - &m_aSyntaxNodePack.front();
       m_aStatements.push_back(stat);
 
       auto it = sDefinitionList.end();
@@ -432,7 +437,7 @@ namespace UVShader
         SyntaxNode.SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN); // front->GetOperandType(0)
 
         // 加入列表
-        stat.defn.sRoot.nNodeIndex = *it - pNodeFrontPtr;
+        stat.defn.sRoot.un.nNodeIndex = *it - pNodeFrontPtr;
         m_aStatements.push_back(stat);
       }
     }//*/
@@ -858,7 +863,8 @@ NOT_INC_P:
     for(int i = 0; i < 2; i++)
     {
       if(pNode->Operand[i].pSym) {
-        const auto flag = TryGetNodeType(&pNode->Operand[i]);
+        //const auto flag = TryGetNodeType(&pNode->Operand[i]);
+        const auto flag = pNode->GetOperandType(i);
         if(flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
           str[i] = pNode->Operand[i].pSym->ToString();
         }
@@ -977,7 +983,7 @@ NOT_INC_P:
   //  return ParseExpression(&scope, pUnion);
   //}
  
-  GXBOOL CodeParser::ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     GXBOOL bret = TRUE;
     if(parse_end == RTSCOPE::npos) {
@@ -986,17 +992,17 @@ NOT_INC_P:
     ASSERT(parse_end <= scope.end);
     if(parse_end < scope.end)
     {
-      SYNTAXNODE::UN A, B = {0};
-      A = *pUnion;
+      SYNTAXNODE::DESC A, B = {0};
+      A = *pDesc;
 
       bret = ParseExpression(RTSCOPE(parse_end + 1, scope.end), &B) &&
-        MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, &A, &B);
+        MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, &A, &B);
     }
     return bret ? parse_end != RTSCOPE::npos : FALSE;
   }
 
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL CodeParser::TryKeywords(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end)
+  GXBOOL CodeParser::TryKeywords(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, RTSCOPE::TYPE* parse_end)
   {
     // 如果是关键字，返回true，否则返回false
     // 解析成功parse_end返回表达式最后一个token的索引，parse_end是这个关键字表达式之内的！
@@ -1013,19 +1019,19 @@ NOT_INC_P:
       // ERROR: "else" 不能独立使用
     }
     else if(front == "for") {
-      pend = ParseFlowFor(scope, pUnion);
+      pend = ParseFlowFor(scope, pDesc);
     }
     else if(front == "if") {
-      pend = ParseFlowIf(scope, pUnion, FALSE);
+      pend = ParseFlowIf(scope, pDesc, FALSE);
     }
     else if(front == "while") {
-      pend = ParseFlowWhile(scope, pUnion);
+      pend = ParseFlowWhile(scope, pDesc);
     }
     else if(front == "do") {
-      pend = ParseFlowDoWhile(scope, pUnion);
+      pend = ParseFlowDoWhile(scope, pDesc);
     }
     else if(front == "struct") {
-      pend = ParseStructDefine(scope, pUnion);
+      pend = ParseStructDefine(scope, pDesc);
     }
     else if(front == "break") {
       eMode = SYNTAXNODE::MODE_Flow_Break;
@@ -1047,9 +1053,9 @@ NOT_INC_P:
     while(eMode == SYNTAXNODE::MODE_Flow_Break || eMode == SYNTAXNODE::MODE_Flow_Continue ||
       eMode == SYNTAXNODE::MODE_Flow_Discard || eMode == SYNTAXNODE::MODE_Return)
     {
-      SYNTAXNODE::UN A = {0}, B = {0};
+      SYNTAXNODE::DESC A = {0}, B = {0};
 
-      A.pSym = &front;
+      A = front;
       pend = scope.begin + 1;
 
       if(front.semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)front.semi_scope > scope.end) {
@@ -1060,11 +1066,11 @@ NOT_INC_P:
 
       if(eMode == SYNTAXNODE::MODE_Return) {
         bret = ParseArithmeticExpression(scope.begin + 1, front.semi_scope, &B);
-        MakeSyntaxNode(pUnion, eMode, NULL, &A, &B);
+        MakeSyntaxNode(pDesc, eMode, NULL, &A, &B);
         pend = front.semi_scope;
       }
       else {
-        MakeSyntaxNode(pUnion, eMode, NULL, &A, NULL);
+        MakeSyntaxNode(pDesc, eMode, NULL, &A, NULL);
       }
       break;
     }
@@ -1098,7 +1104,7 @@ NOT_INC_P:
   //  return bret;
   //}
 
-  GXBOOL CodeParser::ParseExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  GXBOOL CodeParser::ParseExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     ASSERT(scope.end == m_aTokens.size() || m_aTokens[scope.end] == ';' || 
       m_aTokens[scope.end] == '}');
@@ -1115,7 +1121,7 @@ NOT_INC_P:
         return FALSE;
       }
       else if(count == 1) {
-        pUnion->pSym = &m_aTokens[scope.begin];
+        *pDesc = m_aTokens[scope.begin];
       }
       
       return TRUE;  // count == 0 / count == 1
@@ -1134,25 +1140,25 @@ NOT_INC_P:
       //////////////////////////////////////////////////////////////////////////
       //
       // ParseRemainStatement 在处理 statement block 剩余部分时有微妙的不同：
-      // parse_end 如果严格限定等于 scope.end，pUnion不做任何修改，这种用法通常在
+      // parse_end 如果严格限定等于 scope.end，pDesc不做任何修改，这种用法通常在
       // if/else if/else/for/while关键字的代码块解析中使用
       //
-      // parse_end 如果小于 scope.end, pUnion会被修改为MODE_Chain，需要注意：
+      // parse_end 如果小于 scope.end, pDesc会被修改为MODE_Chain，需要注意：
       // * parse_end 如果仅仅比 scope.end 小 1，则意味着生成的MODE_Chain是chain的结尾。
       // * 这种用法在 statement block 中用来标记chain的结尾
       //
       //////////////////////////////////////////////////////////////////////////
-      bret = ParseExpression(RTSCOPE(scope.begin + 1, front.scope), pUnion);
-      bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Block, pUnion, NULL);
-      return ParseRemainStatement(front.scope, scope, pUnion);
+      bret = ParseExpression(RTSCOPE(scope.begin + 1, front.scope), pDesc);
+      bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Block, pDesc, NULL);
+      return ParseRemainStatement(front.scope, scope, pDesc);
     }
-    else if(TryKeywords(scope, pUnion, &parse_end))
+    else if(TryKeywords(scope, pDesc, &parse_end))
     {
       if(parse_end == RTSCOPE::npos) {
         return FALSE; // 解析错误, 直接返回
       }
       // 解析剩余部分
-      return ParseRemainStatement(parse_end, scope, pUnion);
+      return ParseRemainStatement(parse_end, scope, pDesc);
     }
     else if(front.semi_scope == RTSCOPE::npos) {
       ERROR_MSG__MISSING_SEMICOLON(front);
@@ -1166,21 +1172,21 @@ NOT_INC_P:
 
       // 跳过只是一个分号的情况
       if(scopeA.begin == scopeA.end) {
-        return ParseExpression(RTSCOPE(scopeA.end + 1, scope.end), pUnion);
+        return ParseExpression(RTSCOPE(scopeA.end + 1, scope.end), pDesc);
       }
       else
       {
         //RTSCOPE scopeB(front.semi_scope + 1, scope.end);
         ASSERT((RTSCOPE::TYPE)front.semi_scope + 1 <= scope.end); // 感觉有可能begin>end，这里如果遇到就改成if(scopeB.begin >= scopeB.end)
 
-        bret = ParseExpression(scopeA, pUnion);
-        return ParseRemainStatement(front.semi_scope, scope, pUnion);
+        bret = ParseExpression(scopeA, pDesc);
+        return ParseRemainStatement(front.semi_scope, scope, pDesc);
       }
       //bret = bret && ParseExpression(scopeB, &B);
-      //bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Chain, &A, &B);
+      //bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, &A, &B);
     }
 
-    ParseArithmeticExpression(scope, pUnion);
+    ParseArithmeticExpression(scope, pDesc);
     return TRUE;
   }
 
@@ -1191,10 +1197,10 @@ NOT_INC_P:
   //////////////////////////////////////////////////////////////////////////
 
 
-  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, GXBOOL bElseIf)
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, GXBOOL bElseIf)
   {
     // 与 ParseFlowWhile 相似
-    SYNTAXNODE::UN A = {0}, B = {0};
+    SYNTAXNODE::DESC A = {0}, B = {0};
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "if");
 
@@ -1253,7 +1259,7 @@ NOT_INC_P:
       bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
     }
 
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_If, &A, &B);
+    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_If, &A, &B);
 
     auto result = sBlock.end;
 
@@ -1263,7 +1269,7 @@ NOT_INC_P:
       auto nNextBegin = sBlock.end + 1;
 
       // 只处理 else if/else 两种情况
-      A = *pUnion;
+      A = *pDesc;
       ++nNextBegin;
       if(nNextBegin >= scope.end) {
         // ERROR: else 语法错误
@@ -1311,7 +1317,7 @@ NOT_INC_P:
       }
            
 
-      bret = bret && MakeSyntaxNode(pUnion, eNextMode, &A, &B);
+      bret = bret && MakeSyntaxNode(pDesc, eNextMode, &A, &B);
 
     //  if(eNextMode != SYNTAXNODE::MODE_Chain) {
     //    if(eNextMode == SYNTAXNODE::MODE_Flow_Else) {
@@ -1327,10 +1333,10 @@ NOT_INC_P:
     return bret ? result : RTSCOPE::npos;
   }
 
-  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowWhile(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 与 ParseFlowIf 相似
-    SYNTAXNODE::UN A = {0}, B = {0};
+    SYNTAXNODE::DESC A = {0}, B = {0};
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "while");
 
@@ -1389,13 +1395,13 @@ NOT_INC_P:
     //  bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
     //}
 
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_While, &A, &B);
+    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_While, &A, &B);
 
     DbgDumpScope("while", sConditional, sBlock);
     return bret ? sBlock.end : RTSCOPE::npos;
   }
   
-  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     ASSERT(m_aTokens[scope.begin] == "do");
 
@@ -1406,7 +1412,7 @@ NOT_INC_P:
 
     RTSCOPE sConditional;
     RTSCOPE sBlock;
-    SYNTAXNODE::UN A = {0}, B = {0};
+    SYNTAXNODE::DESC A = {0}, B = {0};
 
 
     if( ! MakeScope(&sBlock, &MAKESCOPE(scope, scope.begin + 2, FALSE, scope.begin + 1, TRUE, 0))) {
@@ -1428,7 +1434,7 @@ NOT_INC_P:
 
     GXBOOL bret = ParseExpression(sBlock, &B);
     bret = bret && ParseArithmeticExpression(sConditional, &A);
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
+    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
     RTSCOPE::TYPE while_end = sConditional.end + 1;
     if(while_end >= scope.end || m_aTokens[while_end] != ';') {
@@ -1439,9 +1445,9 @@ NOT_INC_P:
     return bret ? while_end : RTSCOPE::npos;
   }
 
-  CodeParser::RTSCOPE::TYPE CodeParser::ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
-    SYNTAXNODE::UN T, B = {0};
+    SYNTAXNODE::DESC T, B = {0};
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "struct");
 
@@ -1461,7 +1467,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
 
-    clstack<SYNTAXNODE::UN> NodeStack;
+    clstack<SYNTAXNODE::DESC> NodeStack;
 
     while(++index < sBlock.end && bret)
     {
@@ -1492,13 +1498,13 @@ NOT_INC_P:
       ERROR_MSG_缺少分号(IDX2ITER(sBlock.end - 1));
     }
     else {
-      T.pSym = &m_aTokens[index];
-      ASSERT(*T.pSym == ';');
+      T = m_aTokens[index];
+      ASSERT(*T.un.pSym == ';');
       bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, &T);
     }
 
-    T.pSym = &m_aTokens[scope.begin + 1];
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_StructDef, &T, &B);
+    T = m_aTokens[scope.begin + 1];
+    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_StructDef, &T, &B);
 
     //DbgDumpScope("while", sConditional, sBlock);
     return bret ? sBlock.end + 1 : RTSCOPE::npos;
@@ -1557,7 +1563,7 @@ NOT_INC_P:
     return TRUE;
   }
 
-  CodeParser::RTSCOPE::TYPE CodeParser::MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::UN* pBlockNode)
+  CodeParser::RTSCOPE::TYPE CodeParser::MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::DESC* pBlockNode)
   {
     ASSERT(m_aTokens[scope.begin] == "for"); // 外部保证调用这个函数的正确性
 
@@ -1648,12 +1654,12 @@ NOT_INC_P:
     return pBlock->end;
   }
 
-  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion)
+  CodeParser::RTSCOPE::TYPE CodeParser::ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     RTSCOPE sInitializer, sConditional, sIterator;
     RTSCOPE sBlock;
 
-    SYNTAXNODE::UN uInit = {0}, uCond = {0}, uIter = {0}, uBlock = {0}, D;
+    SYNTAXNODE::DESC uInit = {0}, uCond = {0}, uIter = {0}, uBlock = {0}, D;
     
     auto result = MakeFlowForScope(scope, &sInitializer, &sConditional, &sIterator, &sBlock, &uBlock);
     if(result == RTSCOPE::npos)
@@ -1673,7 +1679,7 @@ NOT_INC_P:
     //}
     //else
 
-    if( ! uBlock.ptr) {
+    if( ! uBlock.un.ptr) {
       ParseExpression(sBlock, &uBlock);
       //MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Chain, &uBlock, NULL);
     }
@@ -1693,7 +1699,7 @@ NOT_INC_P:
 
     bret = bret && MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForRunning, &uCond, &uIter);
     bret = bret && MakeSyntaxNode(&D, SYNTAXNODE::MODE_Flow_ForInit, &uInit, &D);
-    bret = bret && MakeSyntaxNode(pUnion, SYNTAXNODE::MODE_Flow_For, &D, &uBlock);
+    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_For, &D, &uBlock);
     
     return bret ? sBlock.end : RTSCOPE::npos;
   }
@@ -1747,15 +1753,15 @@ NOT_INC_P:
         break;
 
       case StatementType_Expression:
-        IndexToPtr(it->expr.sRoot.pNode, m_aSyntaxNodePack);
-        RelocaleSyntaxPtr(it->expr.sRoot.pNode);
+        IndexToPtr(it->expr.sRoot.un.pNode, m_aSyntaxNodePack);
+        RelocaleSyntaxPtr(it->expr.sRoot.un.pNode);
         break;
 
       case StatementType_Definition:
-        if(TryGetNodeType(&it->defn.sRoot) == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX)
+        if(it->defn.sRoot.flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX)
         {
-          IndexToPtr(it->defn.sRoot.pNode, m_aSyntaxNodePack);
-          RelocaleSyntaxPtr(it->defn.sRoot.pNode);
+          IndexToPtr(it->defn.sRoot.un.pNode, m_aSyntaxNodePack);
+          RelocaleSyntaxPtr(it->defn.sRoot.un.pNode);
         }
         break;
       }
@@ -1773,7 +1779,7 @@ NOT_INC_P:
     return m_pSubParser;
   }
 
-  CodeParser::T_LPCSTR CodeParser::ParseMacro(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end)
+  CodeParser::T_LPCSTR CodeParser::DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end)
   {
     CodeParser* pParse = GetSubParser();
     pParse->Attach(begin, (clsize)end - (clsize)begin, AttachFlag_NotLoadMessage, NULL);
@@ -1792,6 +1798,9 @@ NOT_INC_P:
     else if(tokens.front() == "ifndef") {
       return Macro_IfDefine(ctx, TRUE, tokens);
     }
+    else if(tokens.front() == "if") {
+      return PP_If(ctx, pParse);
+    }
     else {
       OutputErrorW(tokens.front(), E1021_无效的预处理器命令, clStringW(tokens.front().ToString()));
       return end;
@@ -1799,7 +1808,7 @@ NOT_INC_P:
     return ctx.iter_next.marker;
   }
 
-  void CodeParser::Macro_Define(const TokenArray& tokens)
+  void CodeParser::Macro_Define(const TOKEN::Array& tokens)
   {
     MACRO l_m;
     //const auto& tokens = *m_pSubParser->GetTokensArray();
@@ -1868,8 +1877,9 @@ NOT_INC_P:
     }
   }
 
-  GXBOOL CodeParser::Macro_ExpandMacroInvoke(clStringA& strMacro, TOKEN& token)
+  GXBOOL CodeParser::Macro_ExpandMacroInvoke(int nMacro, TOKEN& token)
   {
+    clStringA strMacro = m_aTokens[nMacro].ToString();
     ASSERT(token == ')' && token.scope != -1);
     ASSERT(token.scope >= 1); // 不可能出现宏所用的括号在m_aTokens第一个位置的情况
 
@@ -1945,7 +1955,7 @@ NOT_INC_P:
     return TRUE;
   }
 
-  void CodeParser::Macro_Undefine(const RTPPCONTEXT& ctx, const TokenArray& aTokens)
+  void CodeParser::Macro_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens)
   {
     ASSERT(aTokens.front() == "undef");
     if(aTokens.size() == 1) {
@@ -1969,7 +1979,7 @@ NOT_INC_P:
     //} while (it->first.BeginsWith(strMacroName));
   }
 
-  CodeParser::T_LPCSTR CodeParser::Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TokenArray& tokens)
+  CodeParser::T_LPCSTR CodeParser::Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& tokens)
   {
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && (tokens.front() == "ifdef" || tokens.front() == "ifndef"));
@@ -1995,6 +2005,24 @@ NOT_INC_P:
       CLBREAK; // 没完成
     }
     return stream_end;
+  }
+
+  CodeParser::T_LPCSTR CodeParser::PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser)
+  {
+    SYNTAXNODE::DESC sDesc;
+    if( ! pParser->ParseArithmeticExpression(1, pParser->m_aTokens.size(), &sDesc)) {
+      // ERROR: 无法解析表达式
+      return ctx.iter_next.marker;
+    }
+
+    if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
+      pParser->IndexToPtr(sDesc.un.pNode, pParser->m_aSyntaxNodePack);
+      pParser->RelocaleSyntaxPtr(sDesc.un.pNode);
+    }
+    SYNTAXNODE::RecursiveNode2(pParser, sDesc.un.pNode, [](SYNTAXNODE* pNode){
+
+    });
+    return ctx.iter_next.marker; // FIXME: 临时返回
   }
 
   CodeParser::T_LPCSTR CodeParser::Macro_SkipConditionalBlock( T_LPCSTR begin, T_LPCSTR end )
@@ -2136,7 +2164,7 @@ NOT_INC_P:
     aFormalParams.clear();
   }
 
-  void CodeParser::MACRO::set(const Dict& dict, const TokenArray& tokens, int begin_at)
+  void CodeParser::MACRO::set(const Dict& dict, const TOKEN::Array& tokens, int begin_at)
   {
     ASSERT(tokens.front() == "define");
     aTokens.insert(aTokens.begin(), tokens.begin() + begin_at, tokens.end());
