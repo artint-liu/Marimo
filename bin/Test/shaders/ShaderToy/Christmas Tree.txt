@@ -1,0 +1,106 @@
+// https://www.shadertoy.com/view/4tSXRc
+float
+
+                                                        v(vec3 v,
+
+                                                     float y){return
+
+                                                   v.y+y;} float f(vec3
+
+                                                v,float y){return v.z+y;}
+
+                                              float n(vec3 v,float y){return
+
+                                         -v.z+y;} float s(vec3 v,float y){return
+
+                                    length(v)-y;} float f (in vec3 v,float y, float i)
+
+                                  {return max(abs(v.y)-i, length(v.xz))- y*clamp(i-abs(v
+
+                                .y),0.,i);} float i(vec3 v,vec2 y){vec2 i=abs(vec2(length
+
+                             (v.xz),v.y))-y;return min(max(i.x,i.y),0.)+length(max(i, 0.));}
+
+                         float m(vec3 v,vec2 y){vec2 i=vec2(length (v.xy)-y.x,v.z);return length
+
+                      (i)-y.y;}  float p(float v,float y) {return max(-y,v);} float e(float v,float
+
+                    y) {return min(y,v);} vec2 c(vec2 v,vec2 y){return v.x<y.x?v:y;} float r(float v,
+
+                 float y) {return max(y,v);} vec2 x(vec2 v,float y) { float i= cos(y),f = sin(y); return
+
+               vec2(v.x*i- v.y*f,v.x*f+v.y*i); } float h(float v,float y) { return mod(v,y)-y*.5; } vec3 t
+
+           (vec2 v,float y) { float i=6.28319/y; vec2 f=x(v,-i*.5); float z=floor(atan(f.x,f.y) /i);v=x(v,z*i);
+
+            return vec3(v.x,v.y,z);} float c(vec3 v) { return v.xy= t(v.xy,5.).xy, v.y=v.y-.3,v.xz=abs (v.xz),
+
+            dot(v,normalize(vec3 (2.,1,3.)))/3.;} float d(in vec3 v,float y) { float i=s(v,.5); if(y<= 0.) i+=
+
+          cos(atan(v.x,v.z)*30.)*.01*(.5-v.y) +sin(v.y*60.)*.01; else if(y<=1.) i=p(i,s(v+vec3 (0.,0.,-.9),.7));
+
+                                          else if(y<=2.) return i+=cos(v.y*28.)
+
+                               *.01; else if(y<=3.) i+=cos(atan(v.x,v.z)*20.)*.01*(.5-v.y);
+
+                            return i; } vec2 d(in vec3 v) { return v.y+=(sin(sin(v.z*.253)+v.x
+
+                          *.11)*.31+cos(v.z*.53+sin(v.x*.27))*.12)*1.2+.2,vec2(v.y,1.); } vec2 e
+
+                      (in vec3 y) { vec3 f=y; float z=abs(-floor(f.y/1.9)/4.+1.)*3.; vec3 n=t(f.xz,
+
+                  2.7*z); float x=z*113.+n.z*7.+55.; f.y+=mod(x,17.)*.03-.4;f.xz=n.xy; f.y=mod(f.y,1.9)
+
+               -.5; f+=vec3(0,0,-z); float l=mod(x,5.),s=d(f,l),a=i(f-vec3(0.,.5,0.),vec2(.08,.1)); a=e(a,m
+
+            (f-vec3(0.,.62,0.),vec2(.05,.015)));vec2 k=c(vec2(s,x),vec2(a,3.)); k.x=r(k.x,v(y,-8.)); return k;
+
+          } vec2 f(in vec3 v) { v.y-=8.3; v*=.5; float y=e(c(v),i(v-vec3(0.,-.2,0.),vec2 (.04,.1))); return vec2
+
+        (y,2.);} vec2 h (in vec3 v){vec3 y=vec3(v); float i=length(y.xy); y.xy=x(y.xy,-i*.5); y.z=h(y.z,.25);y.xy=
+
+    t(y.xy,17.).xy; y.yz=x(y.yz,(.15-i)*1.4+y.x);float z=f(y,.05,.5);z=r(z,f(v,0.)); float m=r(i-.02,f(v,.125));return
+
+ c(vec2(z,4.),vec2(m,5.));} vec2 i(vec3 v) { v.y+=.204; float y=floor(v.y/1.7),i=max(2.,9.-y*1.2);v.xz=t(v.xz,i).xy; v.z
+
+ -=3.81; v.yz=x(v.yz,.423); v.y=h(v.y,1.7); return h(v); } vec2 m(vec3 v) { vec2 y=i(v); v.xz=x(v.xz,.53); v.y-=.68; y=c(
+
+ y,i(v)); vec2 z=vec2(f(v.xyz,.02,8.),5.); y=c(y,z); y.x=r(y.x, s(v-vec3(0.,4.,0.),5.7)); return y; } vec2 n(in vec3 v) {
+
+vec2 y=d(v); y=c(y,f(v)); y=c(y,e(v)); y=c(y, m(v)); return y;} vec3 p(in vec3 v) { vec2 y=vec2(.001,0.); return normalize
+
+ (vec3(n(v+y.xyy).x-n(v-y.xyy).x, n(v+y.yxy).x -n(v-y.yxy).x,n(v+y.yyx).x -n(v-y.yyx).x));} vec2 l(in vec3 v,in vec3 y) {
+
+                                        float i=1.,f=-1.; for(int  z=0;z<256;z++)
+
+                                      { vec2 m=n(v+y*i); if(m.x<.001||i>100.) break;
+
+                                i+=m.x; f=m.y; } if(i>100.) f=-1.; return vec2(i,f);} vec3
+
+                       a(vec3 v,float y) { return mix(v,vec3(.3,.342,.5),1.-exp(-.001*y*y));} vec3
+
+                   a(float v) { vec3 y=vec3(.3,.342,.5); if(v<=1.) y=vec3 (3.3,3.3,4.5); else if(v<=2.)
+
+           y=vec3(1.6,1.,.6); else if(v<=3.) y=vec3(1.2,1.,.8); else if(v<=4.) y=vec3 (.152,.36,.18); else if(v
+
+         <=5.) y=vec3(.79,.51,.066); else y=.3+.7*sin(vec3(.7,.4,.41)*(v-6.)); return y;} float a(vec3 v,vec3 y,
+
+    float i,float z) { float f=1., r=i; for(int m=0;m<64;m++) { float x=n(v+ y*r).x; f=min(f,8.*x/r); r+=clamp(x,.02,
+
+      .2); if(x<.001||r>z) break; } return clamp(f,0.,1.);} vec3 g(vec3 v,in vec3 y) { vec3 i=vec3(0.); float f=1.;
+
+   for(float z=0.;z<3.;z++) { vec2 m=l(v,y); float x=m.x,s=m.y; vec3 c=v+x*y,r=p(c),n=reflect (y,r),e=a(s),d=normalize(
+
+vec3(-1.2,.3,-1.1)); float t=clamp(dot(r,d),0.,1.),k=pow(clamp(dot(n,d), 0.,1.),10.); e*=a(c,d,.01,1.); e*=t*(vec3(.8,1.,
+
+  .9)+1.2*k*vec3(.8,.9,.6)); e=a(e,x); i+=e*f; if(s<=6.) break; v=c+n*.001; f*=.5; y=n; } return vec3(clamp (i,0.,1.));}
+
+     void mainImage(out vec4 fragColor, in vec2 fragCoord) { vec2 y=gl_FragCoord.xy/iResolution.xy, v=-1.+2.*y; v.x*= iResolution.x/iResolution.y; float i=40.+
+
+  iGlobalTime,f=.1*i; vec3 z=vec3(13.*cos(f),4.,13.*sin(f)), x=normalize(vec3(0,3.8,0)-z), r=vec3(0.,1.,0.),s=normalize
+
+                                          (cross(x,r)),m=normalize(cross(s, x))
+
+                                          , d = normalize( v.x *s + v.y*m + 2.5
+
+                                         *x),a=g(z,d); fragColor=vec4(a,1.);}

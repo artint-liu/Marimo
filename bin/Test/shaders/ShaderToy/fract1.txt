@@ -1,0 +1,68 @@
+//https://www.shadertoy.com/view/4lBXzt
+#define pi 0.78539816339
+
+float distfunc (vec3 p)
+{
+    float r = length(p);
+    float df=1.;
+    float i3;
+    for (float i=1.; i<7.; i++)
+    {
+        i3=i*i*i;
+        df+=(1.+cos(pi*p.x*i3)*cos(pi*p.y*i3)*cos(pi*p.z*i3))/i3;
+    }
+    return (length(p-p/r*(df*1.8))-.2)/3.;
+}
+
+
+vec3 normal (vec3 pos, float rn)
+{
+    return vec3 ( distfunc (pos+vec3(rn,0,0))-distfunc (pos+vec3(-rn,0,0)),
+                  distfunc (pos+vec3(0,rn,0))-distfunc (pos+vec3(0,-rn,0)),
+                  distfunc (pos+vec3(0,0,rn))-distfunc (pos+vec3(0,0,-rn)) )/rn;                            		
+}
+
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+	vec2 uv = fragCoord.xy / iResolution.x;
+    float vr=0.05;
+    float cr=20.;
+    
+    vec3 camo = vec3(sin(iGlobalTime*vr)*cr,0.*sin(iGlobalTime*vr)*5.,cos(iGlobalTime*vr)*cr);
+    vec3 camd = vec3(0.,0.,0.);
+    vec3 up = vec3(0.,1.,0.);
+    
+    vec3 dir = normalize(camd-camo);
+    
+    dir = normalize(up*(uv.y-iResolution.y/iResolution.x/2.)+cross(dir,up)*(uv.x-0.5)+(dir));
+    
+    
+    vec3 pos = camo;
+    float dmas;
+    float dmar;
+    
+    for (int i=0; i<48; i++)
+    {
+        dmar = distfunc(pos);
+        pos += dir*dmar;
+    }
+ 
+    dir = normalize(normal(pos,0.001));
+    vec3 posr=pos+dir/10.;
+   
+    for (int i=0; i<7; i++)
+    {
+        dmas = distfunc(posr);
+        posr += dir*dmas;   
+    }
+    
+    float ao = (6.4-length(posr-pos));
+    ao=1.-ao/6.4;
+    
+
+    float lr = length(normal(pos,0.1));
+    float lv = length(normal(pos,0.01));
+    float lb = length(normal(pos,0.001));
+    fragColor = (normalize(vec4(lr*lb*lv,lv*lr,lb,1.)))*ao/(1.+dmar*400.)*4.0;
+}
