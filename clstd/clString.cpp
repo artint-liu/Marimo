@@ -1669,8 +1669,8 @@ size_t _CLSTR_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
     else
     {
       int nWidth = 0;
+      int nLong = 0;
       b32 bZeroPrefix = FALSE;
-
       Append(ptr, ptr2 - ptr);
       ptr = ptr2 + 1;
 SEQUENCE:
@@ -1681,48 +1681,36 @@ SEQUENCE:
       case '%':
         Append((_TCh)'%');
         break;
+      case 'l':
+        ptr++;
+        if(nLong < 2) {
+          nLong++;
+          goto SEQUENCE;
+        }
+        break;
       case 's':
         Append((_TCh*)va_arg(arglist, _TCh*), bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
-        //if(nWidth == 0) {
-        //  Append((_TCh*)va_arg(arglist, _TCh*));
-        //}
-        //else {
-        //  const _TCh* str = (_TCh*)va_arg(arglist, _TCh*);          
-        //  if(nWidth > 0) {
-        //    nWidth -= _Traits::StringLength(str);
-        //    if(nWidth > 0) {
-        //      Append(' ', nWidth);
-        //    }
-        //    Append(str);
-        //  }
-        //  else { // if(nWidth < 0)
-        //    ASSERT(nWidth < 0);
-        //    Append(str);
-        //    nWidth += _Traits::StringLength(str);
-        //    if(nWidth < 0) {
-        //      Append(' ', -nWidth);
-        //    }
-        //  }
-        //}
         break;
       case 'c':
         Append((_TCh)va_arg(arglist, int/*_TCh*/));
         break;
 
       case 'd':
-        _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int), 0);
+        if(nLong == 2) {
+          _Traits::Integer64ToString(buffer, MAX_DIGITS, va_arg(arglist, i64), 0);
+        }
+        else {
+          _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int), 0);
+        }
         Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
-        //if(nWidth > 0)
-        //{
-        //  nWidth -= (int)_Traits::StringLength(buffer);
-        //  if(nWidth > 0)
-        //    Append(' ', nWidth);
-        //}
-
-        //Append(buffer);
         break;
       case 'u':
-        _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
+        if(nLong == 2) {
+          _Traits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
+        }
+        else {
+          _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
+        }
         Append(buffer);
         break;
       case 'f':
