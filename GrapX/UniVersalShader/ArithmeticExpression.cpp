@@ -829,4 +829,244 @@ namespace UVShader
     return m_aDbgExpressionOperStack;
   }
 
+  //////////////////////////////////////////////////////////////////////////
+
+  void ArithmeticExpression::VALUE::clear()
+  {
+    uValue64 = 0;
+    type = Type_Undefined;
+  }
+
+  ArithmeticExpression::VALUE& ArithmeticExpression::VALUE::set(const VALUE& v)
+  {
+    *this = v;
+    return *this;
+  }
+
+  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::set( const TOKEN& token )
+  {
+    // 注意，有关上限的检查写的不严谨
+    // X是任意内容，D是指数字
+    // "-X" "+X" ".X" "Xf"
+    // "De-D" "DeD"
+    auto ptr     = token.marker.marker;
+    size_t count = token.marker.length;
+    GXDWORD dwFlags = 0;
+    GXQWORD digi[3] = {0}; // [0]是整数部分，[1]是小数部分, [2]是指数
+    size_t p = 0; // part
+    size_t i = 0;
+    GXBOOL bNegExp = FALSE;
+    ASSERT(count != 0); // 不可能为空
+
+    type = Type_BadValue;
+
+    //if(ptr[count - 1] == 'f' || ptr[count - 1] == 'F') {
+    //  SETBIT(dwFlags, Type_float);
+    //  count--;
+    //}
+    // 符号解析
+    if(ptr[i] == '-') {
+      SET_FLAG(dwFlags, Type_Signed);
+      i++;
+    }
+    else if(ptr[i] == '+') {
+      i++;
+    }
+    
+    while(ptr[i] == 0x20 || ptr[i] == '\t' || ptr[i] == '\r' || ptr[i] == '\n') { 
+      if(++i >= count) { // 只有一个+/-符号
+        return State_SyntaxError;
+      }
+    }
+
+    //if(i >= count) { // 只有一个+/-符号，这个怎么破？
+    //  return State_SyntaxError;
+    //}
+
+    for(; i < count; i++)
+    {
+      if(ptr[i] == '.')
+      {
+        SET_FLAG(dwFlags, Type_float);
+        p++;
+        if(p >= 2) { // 不会出现两个‘.’, 这个由TOKEN中的浮点数分析保证
+          return State_SyntaxError;
+        }
+      }
+      else if(ptr[i] == 'e' || ptr[i] == 'E')
+      {
+        p = 2;
+        i++;
+        SET_FLAG(dwFlags, Type_float);
+        if(i >= count) {
+          return State_SyntaxError;
+        }
+
+        auto c = ptr[i];
+        if(c == '-') {
+          bNegExp = TRUE;
+        }
+        else if(c != '+') {
+          i--;
+        }        
+      }
+      else if(ptr[i] >= '0' && ptr[i] <= '9') 
+      {
+        int n = ptr[i] - '0';
+        if(digi[p] >= (ULLONG_MAX - (ULLONG_MAX % 10)) ||
+          (digi[p] >= (ULLONG_MAX / 10) && n > (ULLONG_MAX % 10))) {
+            return State_Overflow;
+        }
+        digi[p] = digi[p] * 10 + n;
+      }
+      else {
+        return State_IllegalChar;
+      }
+    }
+
+    // 例子
+     //float x[] = {
+     //  9e9, 9.9e9, 9e9f, 9.9e9f,
+     //  9e-9, 9.9e-9, 9e-9f, 9.9e-9f };
+//#define R 18446744073709551616
+//#define R 1e3
+//#if R + R > 0
+//    int test = 0;
+//#endif
+
+    if(dwFlags == Type_float)
+    {
+      fValue64 = (double)digi[1];
+      while(fValue64 > 1.0) {
+        fValue64 *= 0.1;
+      }
+      fValue64 += digi[0];
+
+      if(digi[2]) {
+        if(bNegExp) {
+          for(size_t i = 0; i < digi[2]; i++) {
+            fValue64 *= 0.1;
+          }
+        }
+        else {
+          for(size_t i = 0; i < digi[2]; i++) {
+            fValue64 *= 10.0;
+          }
+        }
+      }
+
+      if(ptr[0] == '-') {
+        fValue64 = -fValue64;
+      }
+      SET_FLAG(dwFlags, Type_F_LongLong);
+    }
+    else
+    {
+      ASSERT(digi[1] == 0);
+      ASSERT(digi[2] == 0);
+      uValue64 = digi[0];
+
+      if(TEST_FLAG(dwFlags, Type_Signed)) {
+        if(nValue64 > 0x8000000000000000) {
+          return State_Overflow;
+        }
+        nValue64 = -nValue64;
+      }
+
+      SET_FLAG(dwFlags, Type_F_LongLong);
+
+      //if((TEST_FLAG(dwFlags, Type_Signed) && uValue64 > INT_MAX) ||
+      //  (TEST_FLAG_NOT(dwFlags, Type_Signed) && uValue64 > UINT_MAX)) {
+      //    SETBIT(dwFlags, Type_F_LongLong);
+      //}
+    }
+
+
+    type = (Type)dwFlags;
+    return State_OK;
+  }
+
+  template<typename _Ty>
+  typename _Ty ArithmeticExpression::VALUE::CalculateT(ArithmeticExpression::TChar opcode, _Ty& t1, _Ty& t2)
+  {
+    switch(opcode)
+    {
+    case '+': return t1 + t2;
+    case '-': return t1 - t2;
+    case '*': return t1 * t2;
+    case '/': return t1 / t2;
+    case '<': return _Ty(t1 < t2);
+    case '>': return _Ty(t1 > t2);
+    default:
+      TRACE("Unsupport opcode(%c).\n", opcode);
+      CLBREAK;
+    }
+    return (_Ty)0;
+  }
+
+  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1)
+  {
+    *this = param0;
+    VALUE second = param1;
+    Type type = clMax(this->type, second.type);
+    State state = SyncLevel(type);
+    state = (state == State_OK) ? second.SyncLevel(type) : state;
+    
+    if(state != State_OK) {
+      return state;
+    }
+
+    if(token.marker.length == 1)
+    {
+      if(type == Type_Signed64) {
+        nValue64 = CalculateT(token.marker.marker[0], nValue64, second.nValue64);
+      }
+      else if(type == Type_Unsigned64) {
+        uValue64 = CalculateT(token.marker.marker[0], uValue64, second.uValue64);
+      }
+      else if(type == Type_Double) {
+        fValue64 = CalculateT(token.marker.marker[0], fValue64, second.fValue64);
+      }
+      else {
+        return State_SyntaxError;
+      }
+    }
+    return State_OK;
+  }
+
+  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::SyncLevel(Type _type)
+  {
+    if(type == _type) {
+      return State_OK;
+    }
+    else if(type == Type_BadValue || type > _type) {
+      return State_SyntaxError;
+    }
+
+    if(_type == Type_Double) {
+      double d;
+      if(type == Type_Signed64) {
+        d = (double)nValue64;
+      }
+      else {
+        ASSERT(Type_Unsigned64);
+        d = (double)uValue64;
+      }
+    }
+    else {
+      ASSERT(_type == Type_Signed64 && type == Type_Unsigned64);
+      if(uValue64 & 0x8000000000000000) {
+        return State_Overflow;
+      }
+    }
+    type = _type;
+    return State_OK;
+  }
+
+  //ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::SyncLevel(VALUE& t1, VALUE& t2)
+  //{
+  //  Type type = clMax(t1.type, t2.type);
+  //  
+  //}
+
 } // namespace UVShader

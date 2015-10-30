@@ -64,6 +64,26 @@ float aa = 0, bb = 1 + 2, cc = 5 + 4 * 5, dd = sin(3.14);
 float4 colors[8];
 float4 many[8][7];
 float4 many3[8][7][16];
+
+#if 0
+string pp_test_0;
+#endif
+
+#if 1
+string pp_test_1;
+#endif
+
+#if 1 + 7 / 3 * 4 > 10
+string pp_test_2;
+#else
+string pp_test_3;
+#endif
+
+/*#if defined(MACRO_TEST) && ! defined(DISABLE_MACRO)
+string pp_test_4;
+#else
+string pp_test_5_;
+#endif*/
  
 // º¯Êý²âÊÔ²¿·Ö
 float func()

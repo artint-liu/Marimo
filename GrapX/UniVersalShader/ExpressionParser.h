@@ -181,7 +181,43 @@ namespace UVShader
     //    return this;
     //  }
     //};
+    struct OPERAND // TODO: 这个是临时结构体，以后放在源文件中，而不是头文件里
+    {
+      VALUE  v;
+      const TOKEN* pToken; // 如果VALUE解析了token, pToken应该为空
 
+      GXBOOL OnToken(const SYNTAXNODE* pNode, int i)
+      {
+        v.clear();
+        pToken = NULL;
+        VALUE::State s = VALUE::State_OK;
+
+        switch(pNode->mode)
+        {
+        case ArithmeticExpression::SYNTAXNODE::MODE_Opcode:
+          s = v.set(*pNode->Operand[i].pSym);
+
+        case ArithmeticExpression::SYNTAXNODE::MODE_FunctionCall:
+          if(i == 0) {
+            pToken = pNode->Operand[i].pSym;
+          }
+          else {
+            s = v.set(*pNode->Operand[i].pSym);
+          }
+          break;
+
+        default:
+          CLBREAK;
+          return FALSE;
+        }
+        return s == VALUE::State_OK;
+      }
+
+      VALUE::State Calculate(const TOKEN& token, const OPERAND* param)
+      {
+        return v.Calculate(token, param[0].v, param[1].v);
+      }
+    };
 
     struct MAKESCOPE
     {
@@ -234,6 +270,9 @@ namespace UVShader
     GXBOOL  ParseStructMembers(STATEMENT* pStat, RTSCOPE* pStruScope);
 
     GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope/*, GXBOOL bDbgRelocale*/); // (算数表)达式
+
+    GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::DESC* pDesc);
+
 
     //GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::UN* pUnion);
     //GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);

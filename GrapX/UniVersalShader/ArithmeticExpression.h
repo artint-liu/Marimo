@@ -22,10 +22,12 @@
 #define E2007_define缺少定义     2007
 #define E2008_宏定义中的意外     2008
 #define E2010_宏形参表中的意外   2010
+#define E2059_SyntaxError_v     2059
 
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
 #define ENABLE_STRINGED_SYMBOL
+#define ENABLE_VSYNTAX_FLAG       // syntax flag 可视化
 #define OPP(_PRE) (ArithmeticExpression::TOKEN::FIRST_OPCODE_PRECEDENCE + _PRE)
 
 
@@ -224,6 +226,9 @@ namespace UVShader
       };
 
       UN Operand[s_NumOfOperand];
+#ifdef ENABLE_VSYNTAX_FLAG
+      FLAGS visual_flag[2];
+#endif // ENABLE_VSYNTAX_FLAG
 
       inline FLAGS GetOperandType(const int index) const {
         const int shift = FLAG_OPERAND_SHIFT * index;
@@ -231,6 +236,9 @@ namespace UVShader
       }
 
       inline void SetOperandType(const int index, FLAGS flag) {
+#ifdef ENABLE_VSYNTAX_FLAG
+        visual_flag[index] = flag;
+#endif // ENABLE_VSYNTAX_FLAG
         const int shift = FLAG_OPERAND_SHIFT * index;
         flags = (flags & (~(FLAG_OPERAND_TYPEMASK << shift))) | (flag << shift);
       }
@@ -248,6 +256,11 @@ namespace UVShader
 
       inline void Clear()
       {
+#ifdef ENABLE_VSYNTAX_FLAG
+        visual_flag[0] = FLAG_OPERAND_UNDEFINED;
+        visual_flag[1] = FLAG_OPERAND_UNDEFINED;
+#endif // ENABLE_VSYNTAX_FLAG
+
         flags  = 0;
         mode   = MODE_Undefined;
         pOpcode = NULL;
@@ -277,31 +290,84 @@ namespace UVShader
         }
       }
 
-      template<class _Func>
-      static void RecursiveNode2(ArithmeticExpression* pParser, SYNTAXNODE* pNode, _Func func) // 深度优先递归
+      template<class _Func, class _Ty>
+      static GXBOOL RecursiveNode2(ArithmeticExpression* pParser, const SYNTAXNODE* pNode, _Ty& rOut, _Func func) // 深度优先递归
       {
-        int i = 0;
-        do {
-          auto type = pNode->GetOperandType(i);
-          switch(type)
-          {
-          case FLAG_OPERAND_IS_NODE:
-            RecursiveNode2(pParser, pNode->Operand[i].pNode, func);
-            break;
-          case FLAG_OPERAND_IS_NODEIDX:
-            RecursiveNode2(pParser, &pParser->
-              m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], func);
-            break;
+        _Ty param[2];
+        for(int i = 0; i < 2; i++)
+        {
+          const FLAGS f = pNode->GetOperandType(i);
+          GXBOOL bret = TRUE;
+          if(f == FLAG_OPERAND_IS_NODE) {
+            bret = RecursiveNode2(pParser, pNode->Operand[i].pNode, param[i], func);
           }
-          i++;
-        }while(i < 2);
-        func(pNode);
+          else if(f == FLAG_OPERAND_IS_NODEIDX) {
+            bret = RecursiveNode2(pParser, &pParser->m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], param[i], func);
+          }
+          else if(f == FLAG_OPERAND_IS_TOKEN){
+            bret = param[i].OnToken(pNode, i);
+          }
+
+          if( ! bret) {
+            return bret;
+          }
+        }
+
+        return func(rOut, pNode, param);
       }
 
     };
     typedef clvector<SYNTAXNODE>  SyntaxNodeArray;
     typedef clstack<int>          PairStack;
 
+
+    struct VALUE
+    {
+      enum State {
+        State_OK = 0,
+        State_SyntaxError = -1,
+        State_Overflow = -2,
+        State_IllegalChar = -3,
+      };
+      enum Type {
+        // 这些值由特殊用法不能轻易修改
+        Type_Unsigned   = 0, // 000B
+        Type_Signed     = 1, // 001B
+        Type_float      = 3, // 011B
+        Type_Unsigned64 = 4, // 100B
+        Type_Signed64   = 5, // 101B
+        Type_Double     = 7, // 111B
+
+        Type_F_LongLong = 4, // 100B 标记为64位类型
+        Type_Undefined   = -1, // 未定义
+        Type_BadValue   = -2, // 计算异常
+        Type_First = Type_Unsigned, // 第一个
+        Type_Last  = Type_Double,   // 最后一个
+      };
+      union {
+        GXUINT   uValue;
+        GXINT    nValue;
+        float    fValue;
+        GXUINT64 uValue64;
+        GXINT64  nValue64;
+        double   fValue64;
+      };
+      Type type;
+
+      VALUE(){}
+      VALUE(const TOKEN& token) { set(token); }
+
+      void clear();
+      State set(const TOKEN& token);
+      VALUE& set(const VALUE& v);
+      State SyncLevel(Type _type);  // 调整为到 type 指定的级别
+      State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
+
+      template<typename _Ty>
+      typename _Ty CalculateT(ArithmeticExpression::TChar opcode, _Ty& t1, _Ty& t2);
+
+      //static State SyncLevel(VALUE& t1, VALUE& t2);  // 两个值会被调整为同一个type
+    };
 
     struct RTSCOPE // 运行时的范围描述结构体
     {

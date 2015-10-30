@@ -14,6 +14,9 @@ float dd=sin(3.14);
 float4 colors[8];
 float4 many[8][7];
 float4 many3[8][7][16];
+string pp_test_1;
+string pp_test_3;
+string pp_test_4;
 float func()
 {
   int a=0;

@@ -52,6 +52,8 @@ typedef i8              GXINT8;
 typedef u8              GXUINT8;
 typedef i16             GXINT16;
 typedef u16             GXUINT16;
+typedef i64             GXINT64;
+typedef u64             GXUINT64;
 
 typedef CLBYTE          GXBYTE;
 typedef CLWORD          GXWORD;

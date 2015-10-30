@@ -19,6 +19,11 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput);
 void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples);
 //#define ENABLE_GRAPH // 毫无意义的开始了语法树转图形化的工作，有舍不得删代码，先注释掉
 
+namespace DigitalParsing
+{
+  void Test();
+} // namespace DigitalParsing
+
 //////////////////////////////////////////////////////////////////////////
 
 extern SAMPLE_EXPRESSION samplesNumeric[];
@@ -296,6 +301,8 @@ int _tmain(int argc, _TCHAR* argv[])
   TestFlowIf();
   clpathfile::LocalWorkingDirA("..");
 
+
+  DigitalParsing::Test();
 
   //
   // 数学表达式解析

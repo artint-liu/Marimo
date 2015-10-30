@@ -22,7 +22,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\UniVersalShader\ArithmeticExpression.h" />
     <ClInclude Include="..\..\UniVersalShader\ExpressionParser.h" />
-    <ClInclude Include="..\Sample_UVShader\TestExpressionParser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E155BF80-C981-4E82-BC2A-EB1AE7D088B6}</ProjectGuid>

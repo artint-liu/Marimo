@@ -147,3 +147,98 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     ASSERT(pSamples[i].expectation == 0 || nCount == pSamples[i].expectation);
   }
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+namespace DigitalParsing
+{
+  using namespace UVShader;
+  typedef ArithmeticExpression::VALUE VALUE;
+  typedef ArithmeticExpression::VALUE::State State;
+  typedef ArithmeticExpression::TOKEN TOKEN;
+  struct SAMPLE
+  {
+    GXLPCSTR  str;
+    State     state;
+  };
+
+  static SAMPLE aSampleDigitals[] = {
+    // 格式测试
+    {"- 666", ArithmeticExpression::VALUE::State_OK},
+    {"+\t666", ArithmeticExpression::VALUE::State_OK},
+    {"- \t\r666", ArithmeticExpression::VALUE::State_OK},
+    {"- \t\r6f66", ArithmeticExpression::VALUE::State_IllegalChar},
+    {"- \t\r", ArithmeticExpression::VALUE::State_SyntaxError},
+    {"- \t\r\\97", ArithmeticExpression::VALUE::State_IllegalChar},
+    // 整数类型
+    {"123456", ArithmeticExpression::VALUE::State_OK},
+    {"-123456", ArithmeticExpression::VALUE::State_OK},
+    {"123e4", ArithmeticExpression::VALUE::State_OK},
+    {"-123e4", ArithmeticExpression::VALUE::State_OK},
+    {"-9223372036854775808", ArithmeticExpression::VALUE::State_OK}, // 这个不要改, 基准参考, 64位有符号最小值
+    { "9223372036854775807", ArithmeticExpression::VALUE::State_OK},  // 这个不要改, 基准参考, 64位有符号最大值
+    {"18446744073709551615", ArithmeticExpression::VALUE::State_OK}, // 这个不要改, 基准参考, 64位无符号最大值
+    {"-9223372036854775809", ArithmeticExpression::VALUE::State_Overflow},
+    {"18446744073709551616", ArithmeticExpression::VALUE::State_Overflow},
+    {"184467440737095516140", ArithmeticExpression::VALUE::State_Overflow},
+    {"1e18", ArithmeticExpression::VALUE::State_OK},
+    {"1e19", ArithmeticExpression::VALUE::State_OK},
+    {"2e19", ArithmeticExpression::VALUE::State_Overflow},
+
+    // 浮点
+    {"123.456", ArithmeticExpression::VALUE::State_OK},
+    {"0.12345", ArithmeticExpression::VALUE::State_OK},
+    {".123456", ArithmeticExpression::VALUE::State_OK},
+    {"123456.", ArithmeticExpression::VALUE::State_OK},
+    {"-123.456", ArithmeticExpression::VALUE::State_OK},
+    {"-0.12345", ArithmeticExpression::VALUE::State_OK},
+    {"-.123456", ArithmeticExpression::VALUE::State_OK},
+    {"-123456.", ArithmeticExpression::VALUE::State_OK},
+    {"12.34.56", ArithmeticExpression::VALUE::State_SyntaxError},
+    {"-12.34.56", ArithmeticExpression::VALUE::State_SyntaxError},
+
+    {"123e3", ArithmeticExpression::VALUE::State_OK},
+    {"1.23e3", ArithmeticExpression::VALUE::State_OK},
+    {"123e-3", ArithmeticExpression::VALUE::State_OK},
+    {"1.23e-3", ArithmeticExpression::VALUE::State_OK},
+    {"-123e3", ArithmeticExpression::VALUE::State_OK},
+    {"-1.23e3", ArithmeticExpression::VALUE::State_OK},
+    {"-123e-3", ArithmeticExpression::VALUE::State_OK},
+    {"-1.23e-3", ArithmeticExpression::VALUE::State_OK},
+
+    {NULL, },
+  };
+
+  void Test()
+  {
+    for(int i = 0; aSampleDigitals[i].str != NULL; i++)
+    {
+      TOKEN token;
+      VALUE value;
+      token.marker.marker = aSampleDigitals[i].str;
+      token.marker.length = GXSTRLEN(aSampleDigitals[i].str);
+
+      VALUE v;
+      State state = v.set(token);
+      clStringA str;
+      if(v.type == VALUE::Type_Unsigned64)
+      {
+        str.Format("\"%s\" => %llu(Unsigned 64)\t\t%d|%d", aSampleDigitals[i].str, v.uValue64, aSampleDigitals[i].state, state);
+      }
+      else if(v.type == VALUE::Type_Signed64)
+      {
+        str.Format("\"%s\" => %lld(Signed 64)\t\t%d|%d", aSampleDigitals[i].str, v.nValue64, aSampleDigitals[i].state, state);
+      }
+      else if(v.type == VALUE::Type_Double)
+      {
+        str.Format("\"%s\" => %f(double)\t\t%d|%d", aSampleDigitals[i].str, v.fValue64, aSampleDigitals[i].state, state);
+      }
+      else if(state != VALUE::State_OK)
+      {
+        str.Format("\"%s\" => XXX(failed)\t\t%d|%d", aSampleDigitals[i].str, aSampleDigitals[i].state, state);
+      }
+
+      TRACE(str.AppendFormat("%s\n", aSampleDigitals[i].state == state ? "" : " (X)"));
+    }
+  }
+}

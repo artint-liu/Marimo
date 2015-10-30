@@ -1983,7 +1983,7 @@ NOT_INC_P:
   {
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && (tokens.front() == "ifdef" || tokens.front() == "ifndef"));
-    T_LPCSTR stream_end = GetStreamPtr() + GetStreamCount();
+    //T_LPCSTR stream_end = GetStreamPtr() + GetStreamCount();
 
     if(tokens.size() == 1) {
       // ERROR: ifdef 缺少定义
@@ -1993,7 +1993,7 @@ NOT_INC_P:
       if(( ! bNot && bFind) || (bNot && ! bFind))
       {
         const T_LPCSTR pBlockEnd = 
-          Macro_SkipConditionalBlock(ctx.ppend, stream_end);
+          Macro_SkipConditionalBlock(ctx.ppend, ctx.stream_end);
         ASSERT(pBlockEnd >= ctx.iter_next.marker);
         return pBlockEnd;
       }
@@ -2004,8 +2004,74 @@ NOT_INC_P:
     else {
       CLBREAK; // 没完成
     }
-    return stream_end;
+    return ctx.stream_end;
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
+
+
+  //////////////////////////////////////////////////////////////////////////
+
+  GXBOOL CodeParser::CalculateValue(OPERAND& sOut, const SYNTAXNODE::DESC* pDesc)
+  {
+    OPERAND param[2];
+    //SYNTAXNODE::DESC desc[2];
+    //desc[0].un = 
+    SYNTAXNODE* pNode = NULL;
+    switch(pDesc->flag)
+    {
+    case ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN:
+      sOut.v.set(*pDesc->un.pSym);
+      break;
+    case ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODE:
+      pNode = pDesc->un.pNode;
+      break;
+    case ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
+      pNode = &m_aSyntaxNodePack[pDesc->un.nNodeIndex];
+      break;
+    }
+
+    if(pNode) {
+      SYNTAXNODE::DESC l_desc;
+      for(int i = 0; i < 2; i++)
+      {
+        l_desc.flag = pNode->GetOperandType(i);
+        l_desc.un.ptr = pNode->Operand[i].ptr;
+        CalculateValue(param[i], &l_desc);
+      }
+    }
+    else {
+      return TRUE;
+    }
+
+    if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Opcode)
+    {
+      //CalculateValue(param[0], )
+      sOut.Calculate(*pNode->pOpcode, param);
+    }
+    //for(int i = 0; i < 2; i++)
+    //{
+    //  const auto f = pNode->GetOperandType(i);
+    //  GXBOOL bret = TRUE;
+    //  if(f == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
+    //    bret = CalculateValue(param[i], pNode->Operand[i].pNode);
+    //  }
+    //  else if(f == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
+    //    bret = CalculateValue(param[i], &m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex]);
+    //  }
+    //  else if(f == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN){
+    //    bret = param[i].OnToken(pNode, i);
+    //  }
+    //  else {
+    //    CLBREAK;
+    //  }
+    //}
+
+    return TRUE;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   CodeParser::T_LPCSTR CodeParser::PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser)
   {
@@ -2016,12 +2082,46 @@ NOT_INC_P:
     }
 
     if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
+
+      // TODO: 封装
       pParser->IndexToPtr(sDesc.un.pNode, pParser->m_aSyntaxNodePack);
       pParser->RelocaleSyntaxPtr(sDesc.un.pNode);
+      sDesc.flag = SYNTAXNODE::FLAG_OPERAND_IS_NODE;
+      // --封装
     }
-    SYNTAXNODE::RecursiveNode2(pParser, sDesc.un.pNode, [](SYNTAXNODE* pNode){
 
-    });
+    VALUE v;
+    if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+      v = *sDesc.un.pSym;
+    }
+    else
+    {      
+      OPERAND result;
+      CalculateValue(result, &sDesc);
+      //GXBOOL bret = SYNTAXNODE::RecursiveNode2(pParser, sDesc.un.pNode, result, []
+      //(OPERAND& sOut, const SYNTAXNODE* pNode, const OPERAND* param)->GXBOOL {
+      //  if( ! pNode->pOpcode) {
+      //    // ERROR
+      //    CLBREAK;
+      //  }
+
+      //  ArithmeticExpression::VALUE::State state = ArithmeticExpression::VALUE::State_OK;
+
+      //  if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Opcode)
+      //  {
+      //    state = sOut.Calculate(*pNode->pOpcode, param);
+      //  }
+      //  else {
+      //    CLBREAK;
+      //  }
+      //  return state == ArithmeticExpression::VALUE::State_OK;
+      //});
+      v = result.v;
+    }
+    
+    if(v.nValue64 == 0) {
+      return Macro_SkipConditionalBlock(ctx.ppend, ctx.stream_end);
+    }
     return ctx.iter_next.marker; // FIXME: 临时返回
   }
 
