@@ -188,8 +188,7 @@ namespace UVShader
 
       GXBOOL OnToken(const SYNTAXNODE* pNode, int i)
       {
-        v.clear();
-        pToken = NULL;
+        clear();
         VALUE::State s = VALUE::State_OK;
 
         switch(pNode->mode)
@@ -216,6 +215,12 @@ namespace UVShader
       VALUE::State Calculate(const TOKEN& token, const OPERAND* param)
       {
         return v.Calculate(token, param[0].v, param[1].v);
+      }
+
+      void clear()
+      {
+        v.clear();
+        pToken = NULL;
       }
     };
 

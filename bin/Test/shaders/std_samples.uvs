@@ -74,16 +74,16 @@ string pp_test_1;
 #endif
 
 #if 1 + 7 / 3 * 4 > 10
-string pp_test_2;
+string pp_test_2_;
 #else
 string pp_test_3;
 #endif
 
-/*#if defined(MACRO_TEST) && ! defined(DISABLE_MACRO)
+#if defined(MACRO_TEST) && ! defined(DISABLE_MACRO)
 string pp_test_4;
 #else
 string pp_test_5_;
-#endif*/
+#endif
  
 // º¯Êý²âÊÔ²¿·Ö
 float func()

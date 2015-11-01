@@ -19,6 +19,7 @@
 #define E1189_用户定义错误        1189
 #define E4006_undef应输入标识符   4006
 #define E4067_预处理器指令后有意外标记_应输入换行符 4067
+#define E2004_应输入_defined_id  2004
 #define E2007_define缺少定义     2007
 #define E2008_宏定义中的意外     2008
 #define E2010_宏形参表中的意外   2010
@@ -362,11 +363,10 @@ namespace UVShader
       VALUE& set(const VALUE& v);
       State SyncLevel(Type _type);  // 调整为到 type 指定的级别
       State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
+      clStringA ToString() const;
 
       template<typename _Ty>
-      typename _Ty CalculateT(ArithmeticExpression::TChar opcode, _Ty& t1, _Ty& t2);
-
-      //static State SyncLevel(VALUE& t1, VALUE& t2);  // 两个值会被调整为同一个type
+      typename _Ty CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2);
     };
 
     struct RTSCOPE // 运行时的范围描述结构体
@@ -433,7 +433,8 @@ namespace UVShader
 
     //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
     //SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
-    SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::DESC* pDesc) const; // TODO: 修改所属类
+    const SYNTAXNODE* TryGetNode        (const SYNTAXNODE::DESC* pDesc) const; // TODO: 修改所属类
+    SYNTAXNODE::MODE  TryGetNodeMode    (const SYNTAXNODE::DESC* pDesc) const; // TODO: 修改所属类
 
     clsize              EstimateForTokensCount  () const;   // 从Stream的字符数估计Token的数量
     //clsize              GenerateTokens          ();

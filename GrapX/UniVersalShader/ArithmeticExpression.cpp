@@ -360,7 +360,22 @@ namespace UVShader
   //  }
   //}
 
-  ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNode(const SYNTAXNODE::DESC* pDesc) const
+  const ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::TryGetNode(const SYNTAXNODE::DESC* pDesc) const
+  {
+    switch(pDesc->flag)
+    {
+    case SYNTAXNODE::FLAG_OPERAND_IS_TOKEN:
+      return NULL;
+    case SYNTAXNODE::FLAG_OPERAND_IS_NODE:
+      return pDesc->un.pNode;
+    case SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
+      return &m_aSyntaxNodePack[pDesc->un.nNodeIndex];
+    }
+    CLBREAK; // 不可能到这里
+    return NULL;
+  }
+
+  ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNodeMode(const SYNTAXNODE::DESC* pDesc) const
   {
     switch(pDesc->flag)
     {
@@ -987,19 +1002,33 @@ namespace UVShader
   }
 
   template<typename _Ty>
-  typename _Ty ArithmeticExpression::VALUE::CalculateT(ArithmeticExpression::TChar opcode, _Ty& t1, _Ty& t2)
+  typename _Ty ArithmeticExpression::VALUE::CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2)
   {
-    switch(opcode)
+    if(opcode.marker.length == 1)
     {
-    case '+': return t1 + t2;
-    case '-': return t1 - t2;
-    case '*': return t1 * t2;
-    case '/': return t1 / t2;
-    case '<': return _Ty(t1 < t2);
-    case '>': return _Ty(t1 > t2);
-    default:
-      TRACE("Unsupport opcode(%c).\n", opcode);
-      CLBREAK;
+      switch(opcode.marker.marker[0])
+      {
+      case '+': return t1 + t2;
+      case '-': return t1 - t2;
+      case '*': return t1 * t2;
+      case '/': return t1 / t2;
+      case '<': return _Ty(t1 < t2);
+      case '>': return _Ty(t1 > t2);
+      case '!': return _Ty( ! t2);
+      default:
+        TRACE("Unsupport opcode(%c).\n", opcode);
+        CLBREAK;
+      }
+    }
+    else
+    {
+      if(opcode == "&&") {
+        return t1 && t2;
+      }
+      else {
+        TRACE("Unsupport opcode(%c).\n", opcode);
+        CLBREAK;
+      }
     }
     return (_Ty)0;
   }
@@ -1016,27 +1045,45 @@ namespace UVShader
       return state;
     }
 
-    if(token.marker.length == 1)
-    {
-      if(type == Type_Signed64) {
-        nValue64 = CalculateT(token.marker.marker[0], nValue64, second.nValue64);
-      }
-      else if(type == Type_Unsigned64) {
-        uValue64 = CalculateT(token.marker.marker[0], uValue64, second.uValue64);
-      }
-      else if(type == Type_Double) {
-        fValue64 = CalculateT(token.marker.marker[0], fValue64, second.fValue64);
-      }
-      else {
-        return State_SyntaxError;
-      }
+    if(type == Type_Signed64) {
+      nValue64 = CalculateT(token, nValue64, second.nValue64);
+    }
+    else if(type == Type_Unsigned64) {
+      uValue64 = CalculateT(token, uValue64, second.uValue64);
+    }
+    else if(type == Type_Double) {
+      fValue64 = CalculateT(token, fValue64, second.fValue64);
+    }
+    else {
+      CLBREAK;
+      return State_SyntaxError;
     }
     return State_OK;
   }
 
+  clStringA ArithmeticExpression::VALUE::ToString() const
+  {
+    clStringA str;
+    switch(type)
+    {
+    case Type_Signed64:
+      str.AppendInteger64(nValue64);
+      break;
+    case Type_Unsigned64:
+      str.AppendUInt64(uValue64);
+      break;
+    case Type_Double:
+      str.AppendFloat((float)fValue64);
+      break;
+    default:
+      CLBREAK;
+    }
+    return str;
+  }
+
   ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::SyncLevel(Type _type)
   {
-    if(type == _type) {
+    if(type == _type || type == Type_Undefined) { // 同级或者未定义（一元操作情况）
       return State_OK;
     }
     else if(type == Type_BadValue || type > _type) {

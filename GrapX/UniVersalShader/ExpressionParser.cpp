@@ -1251,7 +1251,7 @@ NOT_INC_P:
       bret = bret && ParseExpression(sBlock, &B);
     }
 
-    const SYNTAXNODE::MODE eMode = TryGetNode(&B);
+    const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
     if(eMode != SYNTAXNODE::MODE_Block) {
       if(eMode != SYNTAXNODE::MODE_Chain) {
         bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
@@ -1307,7 +1307,7 @@ NOT_INC_P:
       // else if/else 处理
       if(eNextMode == SYNTAXNODE::MODE_Flow_Else)
       {
-        const SYNTAXNODE::MODE eMode = TryGetNode(&B);
+        const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
         if(eMode != SYNTAXNODE::MODE_Block) {
           if(eMode != SYNTAXNODE::MODE_Chain) {
             bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
@@ -1383,7 +1383,7 @@ NOT_INC_P:
       bret = bret && ParseExpression(sBlock, &B);
     }
 
-    const SYNTAXNODE::MODE eMode = TryGetNode(&B);
+    const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
     if(eMode != SYNTAXNODE::MODE_Block) {
       if(eMode != SYNTAXNODE::MODE_Chain) {
         bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
@@ -1686,7 +1686,7 @@ NOT_INC_P:
 
     GXBOOL bret = TRUE;
     // 如果不是代码块，就转换为代码块
-    const SYNTAXNODE::MODE eMode = TryGetNode(&uBlock);
+    const SYNTAXNODE::MODE eMode = TryGetNodeMode(&uBlock);
     if(eMode != SYNTAXNODE::MODE_Block) {
       if(eMode != SYNTAXNODE::MODE_Chain) {
         bret = MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Chain, &uBlock, NULL);
@@ -2010,7 +2010,6 @@ NOT_INC_P:
   //////////////////////////////////////////////////////////////////////////
 
 
-
   //////////////////////////////////////////////////////////////////////////
 
   GXBOOL CodeParser::CalculateValue(OPERAND& sOut, const SYNTAXNODE::DESC* pDesc)
@@ -2018,55 +2017,53 @@ NOT_INC_P:
     OPERAND param[2];
     //SYNTAXNODE::DESC desc[2];
     //desc[0].un = 
-    SYNTAXNODE* pNode = NULL;
-    switch(pDesc->flag)
-    {
-    case ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN:
-      sOut.v.set(*pDesc->un.pSym);
-      break;
-    case ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODE:
-      pNode = pDesc->un.pNode;
-      break;
-    case ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
-      pNode = &m_aSyntaxNodePack[pDesc->un.nNodeIndex];
-      break;
-    }
+    const SYNTAXNODE* pNode = TryGetNode(pDesc);
 
     if(pNode) {
+      param[0].clear();
+      param[1].clear();
       SYNTAXNODE::DESC l_desc;
       for(int i = 0; i < 2; i++)
       {
+        if( ! pNode->Operand[i].ptr) {
+          continue;
+        }
         l_desc.flag = pNode->GetOperandType(i);
         l_desc.un.ptr = pNode->Operand[i].ptr;
         CalculateValue(param[i], &l_desc);
       }
     }
     else {
+      sOut.pToken = pDesc->un.pSym;
       return TRUE;
     }
 
-    if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Opcode)
+    if(pNode->mode == SYNTAXNODE::MODE_Opcode)
     {
-      //CalculateValue(param[0], )
+      for(int i = 0; i < 2; i++) {
+        if(param[i].v.type == VALUE::Type_Undefined && param[i].pToken) {
+          param[i].v.set(*param[i].pToken);
+        }
+      }
       sOut.Calculate(*pNode->pOpcode, param);
     }
-    //for(int i = 0; i < 2; i++)
-    //{
-    //  const auto f = pNode->GetOperandType(i);
-    //  GXBOOL bret = TRUE;
-    //  if(f == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
-    //    bret = CalculateValue(param[i], pNode->Operand[i].pNode);
-    //  }
-    //  else if(f == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
-    //    bret = CalculateValue(param[i], &m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex]);
-    //  }
-    //  else if(f == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN){
-    //    bret = param[i].OnToken(pNode, i);
-    //  }
-    //  else {
-    //    CLBREAK;
-    //  }
-    //}
+    else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
+    {
+      if(*(pNode->Operand[0].pSym) == "defined")
+      {
+        ASSERT(pNode->GetOperandType(0) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
+
+        if(pNode->GetOperandType(1) != SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+          OutputErrorW(*pNode->Operand[0].pSym, E2004_应输入_defined_id);
+          return FALSE;
+        }
+
+        auto it = m_Macros.find(pNode->Operand[1].pSym->ToString());
+
+        sOut.v.type = ArithmeticExpression::VALUE::Type_Signed64;
+        sOut.v.nValue64 = (it != m_Macros.end());
+      }
+    }
 
     return TRUE;
   }
@@ -2098,24 +2095,8 @@ NOT_INC_P:
     {      
       OPERAND result;
       CalculateValue(result, &sDesc);
-      //GXBOOL bret = SYNTAXNODE::RecursiveNode2(pParser, sDesc.un.pNode, result, []
-      //(OPERAND& sOut, const SYNTAXNODE* pNode, const OPERAND* param)->GXBOOL {
-      //  if( ! pNode->pOpcode) {
-      //    // ERROR
-      //    CLBREAK;
-      //  }
+      TRACE("#if %s\n", result.v.ToString());
 
-      //  ArithmeticExpression::VALUE::State state = ArithmeticExpression::VALUE::State_OK;
-
-      //  if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Opcode)
-      //  {
-      //    state = sOut.Calculate(*pNode->pOpcode, param);
-      //  }
-      //  else {
-      //    CLBREAK;
-      //  }
-      //  return state == ArithmeticExpression::VALUE::State_OK;
-      //});
       v = result.v;
     }
     
