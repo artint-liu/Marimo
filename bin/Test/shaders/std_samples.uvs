@@ -8,7 +8,7 @@
  *  6.std_samples[output_ref].txt 是解析后再输出的参考文件
  *
  */
- 
+
  # define MACRO_TEST
  # define MACRO_NEST
  # define PI 3.1415926
@@ -84,6 +84,23 @@ string pp_test_4;
 #else
 string pp_test_5_;
 #endif
+
+
+#define PLATFORM_OPENGLES
+#define PLATFORM_DEFAULT
+
+#if defined(PLATFORM_DX9)
+string paltform_d3dx9;
+#elif defined(PLATFORM_OPENGL)
+string paltform_opengl;
+#elif defined(PLATFORM_OPENGLES)
+string paltform_opengles;
+#elif defined(PLATFORM_DEFAULT)
+string paltform_default; // 如果所有平台都没定义，则使用缺省
+#else
+string paltform_error; // 没定义平台也没缺省，就报错误
+#endif
+ 
  
 // 函数测试部分
 float func()

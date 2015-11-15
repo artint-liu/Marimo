@@ -17,6 +17,7 @@ float4 many3[8][7][16];
 string pp_test_1;
 string pp_test_3;
 string pp_test_4;
+string paltform_opengles;
 float func()
 {
   int a=0;

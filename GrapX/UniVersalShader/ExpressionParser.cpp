@@ -153,7 +153,12 @@ namespace UVShader
 
       if(it == "else")
       {
-        it.marker = pThis->Macro_SkipConditionalBlock(ctx.iter_next.marker, ctx.stream_end);
+        it.marker = pThis->PP_SkipConditionalBlock(PPCondRank_else, ctx.iter_next.marker, ctx.stream_end);
+        it.length = 0;
+      }
+      else if(it == "elif")
+      {
+        it.marker = pThis->PP_SkipConditionalBlock(PPCondRank_elif, ctx.iter_next.marker, ctx.stream_end);
         it.length = 0;
       }
       else if(it == "endif")
@@ -1993,7 +1998,7 @@ NOT_INC_P:
       if(( ! bNot && bFind) || (bNot && ! bFind))
       {
         const T_LPCSTR pBlockEnd = 
-          Macro_SkipConditionalBlock(ctx.ppend, ctx.stream_end);
+          PP_SkipConditionalBlock(PPCondRank_if, ctx.ppend, ctx.stream_end);
         ASSERT(pBlockEnd >= ctx.iter_next.marker);
         return pBlockEnd;
       }
@@ -2008,7 +2013,6 @@ NOT_INC_P:
   }
 
   //////////////////////////////////////////////////////////////////////////
-
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -2041,7 +2045,7 @@ NOT_INC_P:
     if(pNode->mode == SYNTAXNODE::MODE_Opcode)
     {
       for(int i = 0; i < 2; i++) {
-        if(param[i].v.type == VALUE::Type_Undefined && param[i].pToken) {
+        if(param[i].v.rank == VALUE::Rank_Undefined && param[i].pToken) {
           param[i].v.set(*param[i].pToken);
         }
       }
@@ -2060,8 +2064,11 @@ NOT_INC_P:
 
         auto it = m_Macros.find(pNode->Operand[1].pSym->ToString());
 
-        sOut.v.type = ArithmeticExpression::VALUE::Type_Signed64;
+        sOut.v.rank = ArithmeticExpression::VALUE::Rank_Signed64;
         sOut.v.nValue64 = (it != m_Macros.end());
+      }
+      else {
+        // ERROR: 类函数调用只能是defined
       }
     }
 
@@ -2079,7 +2086,6 @@ NOT_INC_P:
     }
 
     if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
-
       // TODO: 封装
       pParser->IndexToPtr(sDesc.un.pNode, pParser->m_aSyntaxNodePack);
       pParser->RelocaleSyntaxPtr(sDesc.un.pNode);
@@ -2089,6 +2095,7 @@ NOT_INC_P:
 
     VALUE v;
     if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+      // TODO: 测试 sDesc.un.pSym 能解析为一个数字，如果定义不为数字需要报错
       v = *sDesc.un.pSym;
     }
     else
@@ -2101,16 +2108,18 @@ NOT_INC_P:
     }
     
     if(v.nValue64 == 0) {
-      return Macro_SkipConditionalBlock(ctx.ppend, ctx.stream_end);
+      return PP_SkipConditionalBlock(PPCondRank_if, ctx.ppend, ctx.stream_end);
     }
-    return ctx.iter_next.marker; // FIXME: 临时返回
+    return ctx.iter_next.marker;
   }
 
-  CodeParser::T_LPCSTR CodeParser::Macro_SkipConditionalBlock( T_LPCSTR begin, T_LPCSTR end )
+  CodeParser::T_LPCSTR CodeParser::PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end)
   {
-    typedef clstack<T_LPCSTR> PPNestStack;  // 预处理命令嵌套堆栈
-    PPNestStack pp_stack;
-
+    // session 调用 Macro_SkipConditionalBlock 所处的状态，这个决定了跳过多少预处理指令
+    //typedef clstack<PPCondRank> RankStack;  // 预处理命令嵌套堆栈
+    //RankStack sRankStack;
+    UINT depth = 0;
+    //PPCondRank rank = PPCondRank_Empty;
     T_LPCSTR p = begin;
     for(; p < end; ++p)
     {
@@ -2130,26 +2139,70 @@ NOT_INC_P:
         return end;
       }
 
-      // if 要放在两个 if* 后面
+      size_t str_elif_len = 4;
+
+      // if 要放在 ifdef, ifndef 后面
       if(CompareString(p, "ifdef", 5) || CompareString(p, "ifndef", 6) || CompareString(p, "if", 2))
       {
-        pp_stack.push(p);
+        //pp_stack.push(p);
+        depth++;
+        //sRankStack.push(PPCondRank_if);
       }
-      else if(CompareString(p, "elif", 4))
+      else if(CompareString(p, "elif", str_elif_len))
       {
         // pp_stack 不空，说明在预处理域内，直接忽略
         // pp_stack 为空，测试表达式(TODO)
-        if( ! pp_stack.empty()) {
-          continue;;
+        //if( ! sRankStack.empty()) {
+        if(depth) {
+          continue;
         }
+
+        if(session > PPCondRank_elif) {
+          // ERROR: fatal error C1018: 意外的 #elif
+          CLBREAK;
+        }
+        session = PPCondRank_elif;
+
+        CodeParser* pParse = GetSubParser();
+        T_LPCSTR line_end = p;
+        for(; *line_end != '\n' && line_end < end; line_end++);
+
+        if(line_end == end) {
+          // ERROR: 意外的文件结尾
+          CLBREAK;
+        }
+
+        pParse->Attach(p, (clsize)line_end - (clsize)p, AttachFlag_NotLoadMessage, NULL);
+        pParse->GenerateTokens();
+        const auto& tokens = *pParse->GetTokensArray();
+        if(tokens.empty()) {
+          // ERROR: “elif” 后面需要表达式
+          CLBREAK;
+        }
+
+        RTPPCONTEXT ctx;
+        ctx.ppend = line_end + 1;
+        ctx.stream_end = end;
+        ctx.iter_next.pContainer = pParse;
+        ctx.iter_next.marker = ctx.ppend;
+        ctx.iter_next.length = 0;
+
+        return PP_If(ctx, pParse);
       }
       else if(CompareString(p, "else", 4))
       {
         // pp_stack 不空，说明在预处理域内，直接忽略
         // pp_stack 为空，转到下行行首
-        if( ! pp_stack.empty()) {
+        //if( ! pp_stack.empty()) {
+        if( depth || session == PPCondRank_elif) {
           continue;
         }
+
+        if(session >= PPCondRank_else) {
+          // ERROR: fatal error C1019: 意外的 #else
+          CLBREAK;
+        }
+        session = PPCondRank_else;
 
         p += 4; // "else" 长度
         break;
@@ -2157,9 +2210,10 @@ NOT_INC_P:
       else if(CompareString(p, "endif", 5))
       {
         // 测试了下，vs2010下 #endif 后面随便敲些什么都不会报错
-
-        if( ! pp_stack.empty()) {
-          pp_stack.pop();
+        //if( ! pp_stack.empty()) {
+        //  pp_stack.pop();
+        if(depth) {
+          depth--;
           continue;
         }
 

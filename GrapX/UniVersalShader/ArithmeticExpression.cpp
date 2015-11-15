@@ -849,7 +849,7 @@ namespace UVShader
   void ArithmeticExpression::VALUE::clear()
   {
     uValue64 = 0;
-    type = Type_Undefined;
+    rank = Rank_Undefined;
   }
 
   ArithmeticExpression::VALUE& ArithmeticExpression::VALUE::set(const VALUE& v)
@@ -873,15 +873,15 @@ namespace UVShader
     GXBOOL bNegExp = FALSE;
     ASSERT(count != 0); // 不可能为空
 
-    type = Type_BadValue;
+    rank = Rank_BadValue;
 
     //if(ptr[count - 1] == 'f' || ptr[count - 1] == 'F') {
-    //  SETBIT(dwFlags, Type_float);
+    //  SETBIT(dwFlags, Rank_float);
     //  count--;
     //}
     // 符号解析
     if(ptr[i] == '-') {
-      SET_FLAG(dwFlags, Type_Signed);
+      SET_FLAG(dwFlags, Rank_Signed);
       i++;
     }
     else if(ptr[i] == '+') {
@@ -902,7 +902,7 @@ namespace UVShader
     {
       if(ptr[i] == '.')
       {
-        SET_FLAG(dwFlags, Type_float);
+        SET_FLAG(dwFlags, Rank_float);
         p++;
         if(p >= 2) { // 不会出现两个‘.’, 这个由TOKEN中的浮点数分析保证
           return State_SyntaxError;
@@ -912,7 +912,7 @@ namespace UVShader
       {
         p = 2;
         i++;
-        SET_FLAG(dwFlags, Type_float);
+        SET_FLAG(dwFlags, Rank_float);
         if(i >= count) {
           return State_SyntaxError;
         }
@@ -949,7 +949,7 @@ namespace UVShader
 //    int test = 0;
 //#endif
 
-    if(dwFlags == Type_float)
+    if(dwFlags == Rank_float)
     {
       fValue64 = (double)digi[1];
       while(fValue64 > 1.0) {
@@ -973,7 +973,7 @@ namespace UVShader
       if(ptr[0] == '-') {
         fValue64 = -fValue64;
       }
-      SET_FLAG(dwFlags, Type_F_LongLong);
+      SET_FLAG(dwFlags, Rank_F_LongLong);
     }
     else
     {
@@ -981,23 +981,22 @@ namespace UVShader
       ASSERT(digi[2] == 0);
       uValue64 = digi[0];
 
-      if(TEST_FLAG(dwFlags, Type_Signed)) {
+      if(TEST_FLAG(dwFlags, Rank_Signed)) {
         if(nValue64 > 0x8000000000000000) {
           return State_Overflow;
         }
         nValue64 = -nValue64;
       }
 
-      SET_FLAG(dwFlags, Type_F_LongLong);
+      SET_FLAG(dwFlags, Rank_F_LongLong);
 
-      //if((TEST_FLAG(dwFlags, Type_Signed) && uValue64 > INT_MAX) ||
-      //  (TEST_FLAG_NOT(dwFlags, Type_Signed) && uValue64 > UINT_MAX)) {
-      //    SETBIT(dwFlags, Type_F_LongLong);
+      //if((TEST_FLAG(dwFlags, Rank_Signed) && uValue64 > INT_MAX) ||
+      //  (TEST_FLAG_NOT(dwFlags, Rank_Signed) && uValue64 > UINT_MAX)) {
+      //    SETBIT(dwFlags, Rank_F_LongLong);
       //}
     }
 
-
-    type = (Type)dwFlags;
+    rank = (Rank)dwFlags;
     return State_OK;
   }
 
@@ -1037,21 +1036,21 @@ namespace UVShader
   {
     *this = param0;
     VALUE second = param1;
-    Type type = clMax(this->type, second.type);
-    State state = SyncLevel(type);
-    state = (state == State_OK) ? second.SyncLevel(type) : state;
+    Rank type = clMax(this->rank, second.rank);
+    State state = SyncRank(type);
+    state = (state == State_OK) ? second.SyncRank(type) : state;
     
     if(state != State_OK) {
       return state;
     }
 
-    if(type == Type_Signed64) {
+    if(type == Rank_Signed64) {
       nValue64 = CalculateT(token, nValue64, second.nValue64);
     }
-    else if(type == Type_Unsigned64) {
+    else if(type == Rank_Unsigned64) {
       uValue64 = CalculateT(token, uValue64, second.uValue64);
     }
-    else if(type == Type_Double) {
+    else if(type == Rank_Double) {
       fValue64 = CalculateT(token, fValue64, second.fValue64);
     }
     else {
@@ -1064,15 +1063,15 @@ namespace UVShader
   clStringA ArithmeticExpression::VALUE::ToString() const
   {
     clStringA str;
-    switch(type)
+    switch(rank)
     {
-    case Type_Signed64:
+    case Rank_Signed64:
       str.AppendInteger64(nValue64);
       break;
-    case Type_Unsigned64:
+    case Rank_Unsigned64:
       str.AppendUInt64(uValue64);
       break;
-    case Type_Double:
+    case Rank_Double:
       str.AppendFloat((float)fValue64);
       break;
     default:
@@ -1081,32 +1080,32 @@ namespace UVShader
     return str;
   }
 
-  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::SyncLevel(Type _type)
+  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::SyncRank(Rank _type)
   {
-    if(type == _type || type == Type_Undefined) { // 同级或者未定义（一元操作情况）
+    if(rank == _type || rank == Rank_Undefined) { // 同级或者未定义（一元操作情况）
       return State_OK;
     }
-    else if(type == Type_BadValue || type > _type) {
+    else if(rank == Rank_BadValue || rank > _type) {
       return State_SyntaxError;
     }
 
-    if(_type == Type_Double) {
+    if(_type == Rank_Double) {
       double d;
-      if(type == Type_Signed64) {
+      if(rank == Rank_Signed64) {
         d = (double)nValue64;
       }
       else {
-        ASSERT(Type_Unsigned64);
+        ASSERT(Rank_Unsigned64);
         d = (double)uValue64;
       }
     }
     else {
-      ASSERT(_type == Type_Signed64 && type == Type_Unsigned64);
+      ASSERT(_type == Rank_Signed64 && rank == Rank_Unsigned64);
       if(uValue64 & 0x8000000000000000) {
         return State_Overflow;
       }
     }
-    type = _type;
+    rank = _type;
     return State_OK;
   }
 

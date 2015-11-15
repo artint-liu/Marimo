@@ -221,15 +221,15 @@ namespace DigitalParsing
       VALUE v;
       State state = v.set(token);
       clStringA str;
-      if(v.type == VALUE::Type_Unsigned64)
+      if(v.rank == VALUE::Rank_Unsigned64)
       {
         str.Format("\"%s\" => %llu(Unsigned 64)\t\t%d|%d", aSampleDigitals[i].str, v.uValue64, aSampleDigitals[i].state, state);
       }
-      else if(v.type == VALUE::Type_Signed64)
+      else if(v.rank == VALUE::Rank_Signed64)
       {
         str.Format("\"%s\" => %lld(Signed 64)\t\t%d|%d", aSampleDigitals[i].str, v.nValue64, aSampleDigitals[i].state, state);
       }
-      else if(v.type == VALUE::Type_Double)
+      else if(v.rank == VALUE::Rank_Double)
       {
         str.Format("\"%s\" => %f(double)\t\t%d|%d", aSampleDigitals[i].str, v.fValue64, aSampleDigitals[i].state, state);
       }

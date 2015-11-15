@@ -78,6 +78,15 @@ namespace UVShader
       UniformModifier_const,
     };
 
+    enum PPCondRank
+    {
+      PPCondRank_Empty = 0,
+      PPCondRank_if    = 1,
+      PPCondRank_elif  = 2,
+      PPCondRank_else  = 3,
+      PPCondRank_endif = 4,
+    };
+
     struct TYPE
     {
       GXLPCSTR  name;
@@ -305,7 +314,7 @@ namespace UVShader
     void     Macro_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens);
     T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
     T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
-    T_LPCSTR Macro_SkipConditionalBlock(T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
+    T_LPCSTR PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
     GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
 
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址

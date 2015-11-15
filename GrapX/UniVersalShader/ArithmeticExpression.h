@@ -330,20 +330,20 @@ namespace UVShader
         State_Overflow = -2,
         State_IllegalChar = -3,
       };
-      enum Type {
+      enum Rank {
         // 这些值由特殊用法不能轻易修改
-        Type_Unsigned   = 0, // 000B
-        Type_Signed     = 1, // 001B
-        Type_float      = 3, // 011B
-        Type_Unsigned64 = 4, // 100B
-        Type_Signed64   = 5, // 101B
-        Type_Double     = 7, // 111B
+        Rank_Unsigned   = 0, // 000B
+        Rank_Signed     = 1, // 001B
+        Rank_float      = 3, // 011B
+        Rank_Unsigned64 = 4, // 100B
+        Rank_Signed64   = 5, // 101B
+        Rank_Double     = 7, // 111B
 
-        Type_F_LongLong = 4, // 100B 标记为64位类型
-        Type_Undefined   = -1, // 未定义
-        Type_BadValue   = -2, // 计算异常
-        Type_First = Type_Unsigned, // 第一个
-        Type_Last  = Type_Double,   // 最后一个
+        Rank_F_LongLong = 4, // 100B 标记为64位类型
+        Rank_Undefined   = -1, // 未定义
+        Rank_BadValue   = -2, // 计算异常
+        Rank_First = Rank_Unsigned, // 第一个
+        Rank_Last  = Rank_Double,   // 最后一个
       };
       union {
         GXUINT   uValue;
@@ -353,7 +353,7 @@ namespace UVShader
         GXINT64  nValue64;
         double   fValue64;
       };
-      Type type;
+      Rank rank;
 
       VALUE(){}
       VALUE(const TOKEN& token) { set(token); }
@@ -361,7 +361,7 @@ namespace UVShader
       void clear();
       State set(const TOKEN& token);
       VALUE& set(const VALUE& v);
-      State SyncLevel(Type _type);  // 调整为到 type 指定的级别
+      State SyncRank(Rank _type);  // 调整为到 type 指定的级别
       State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
       clStringA ToString() const;
 
