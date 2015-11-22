@@ -9,16 +9,15 @@ namespace clstd
   class _AABBF
   {
   public:
-    union
-    {
-      struct{
-        float3 vMin;
-        float3 vMax;
-      };
-      struct {
-        float3 m[2];
-      };
-    };
+   // union
+   // {
+			//struct {
+			//	float3 vMin, vMax;
+			//};
+   //   float3 m[2];
+   // };
+	 	float3 vMin, vMax;
+
 
     _AABBF()
       : vMin(FLT_MAX)
@@ -75,9 +74,15 @@ namespace clstd
       return *this;
     }
 
+		operator float3*() const
+		{
+			return (float3*)this;
+		}
+
     float3 GetVertex(int nIndex) const
     {
       ASSERT(nIndex >= 0 && nIndex < 8);
+			float3* m = *this;
       return float3(m[nIndex & 1].x, m[(nIndex & 2) >> 1].y, m[(nIndex & 4) >> 2].z);
     }
 
@@ -164,6 +169,8 @@ namespace clstd
       return _AABBF(aabb.vMin * vScaling, aabb.vMax * vScaling);
     }  
   }; // class _AABBF
+
+	STATIC_ASSERT(sizeof(_AABBF) == sizeof(float3) * 2);
 
   template<typename _Ty>
   class _AABBI
@@ -365,14 +372,7 @@ namespace clstd
   struct _triangle
   {
     // 定点顺序是CCW
-    union {
-      struct {
-        _float3 A, B, C;
-      };
-      struct {
-        _float3 m[3];
-      };
-    };
+    _float3 A, B, C;
 
     _triangle();
     _triangle(const _float3* aVertices); // 至少需要3个
@@ -385,9 +385,13 @@ namespace clstd
     _triangle& flip(); // 翻转顶点顺序
     _float3 normal() const;   // 返回三角形的面法线
     _AABBF bounding() const;  // 返回三角形的AABB
+		operator _float3*() const;
 
     //int intersect(const _triangle& t);  // 判断与另一个三角形相交的情况,返回值是交点数[0, 3]
   };
+
+	STATIC_ASSERT(sizeof(_triangle) == sizeof(_float3) * 3);
+
 
   //////////////////////////////////////////////////////////////////////////
   struct _ray

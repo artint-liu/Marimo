@@ -23,7 +23,9 @@ template clStringA FromProfileString (const clStringA&);
 template clStringW ToProfileString   (const clStringW&);
 template clStringA ToProfileString   (const clStringA&);
 
+#ifdef _WINDOWS
 #pragma warning(disable : 4267) // 类型转换警告，因为这个类不想维护了，所以暂时禁止
+#endif // #ifdef _WINDOWS
 
 //////////////////////////////////////////////////////////////////////////
 b32 SmartProfile_TraitsW::_StrCmpN(const wch* pStr1, const wch* pStr2, int nCount)
@@ -242,8 +244,7 @@ b32 _SSP_IMPL::Close()
 {
   // 没有释放所有Handle
   ASSERT(m_aHandles.size() == 0);
-  for(HandleArray::iterator it = m_aHandles.begin();
-    it != m_aHandles.end(); ++it) {
+  for(auto it = m_aHandles.begin(); it != m_aHandles.end(); ++it) {
       SAFE_DELETE(*it);
   }
   m_aHandles.clear();
@@ -664,7 +665,7 @@ _SSP_TEMPL
   b32 _SSP_IMPL::DelHandle(HANDLE hHandle)
 {
   HandleArray& aHandles = m_aHandles;
-  for(HandleArray::iterator it = aHandles.begin();
+  for(auto it = aHandles.begin();
     it != aHandles.end(); ++it)
   {
     if(*it == hHandle)
@@ -1107,8 +1108,7 @@ _SSP_TEMPL
 _SSP_TEMPL
   b32 _SSP_IMPL::UpdateHandle(u32 uPos, _CTCh* lpOldPtr, u32 sizeOld, _CTCh* lpNewPtr, u32 sizeNew)
 {
-  for(HandleArray::iterator it = m_aHandles.begin();
-    it != m_aHandles.end(); ++it)
+  for(auto it = m_aHandles.begin(); it != m_aHandles.end(); ++it)
   {
     FINDSECT* pHandle = (FINDSECT*)*it;
     UpdateIterator(pHandle->itBegin,   uPos, lpOldPtr, sizeOld, lpNewPtr, sizeNew);

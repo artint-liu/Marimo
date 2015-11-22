@@ -59,7 +59,7 @@ static void arc4_init(arc4_info *a4i, const CLBYTE *key, unsigned int keyLen)
 
 static void arc4_ProcessString(arc4_info *a4i, CLBYTE *inoutString, unsigned int length)
 {
-    BYTE *const s=a4i->state;
+    CLBYTE *const s=a4i->state;
     unsigned int x = a4i->x;
     unsigned int y = a4i->y;
     unsigned int a, b;

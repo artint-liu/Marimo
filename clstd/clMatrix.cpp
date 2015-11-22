@@ -2,7 +2,7 @@
 #include "clString.H"
 #include "clUtility.H"
 
-#ifdef _X86
+#if defined(_WINDOWS) && defined(_X86)
 #define _X86_SSE_ENABLE
 #endif // #ifdef _X86
 
@@ -309,7 +309,7 @@ namespace clstd
   _float3x3& _float3x3::FromQuaternion( CLCONST _quaternion *pq )
   {
     float4x4 mat;
-    *MatrixRotationQuaternion(&mat, pq);
+    MatrixRotationQuaternion(&mat, pq);
     *this = mat;
     return *this;
   }

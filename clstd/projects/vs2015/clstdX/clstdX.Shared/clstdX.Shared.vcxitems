@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{78aa8294-ce44-4f27-81ab-22960bf56f39}</ItemsProjectGuid>
+    <ItemsProjectName>clstd.Shared</ItemsProjectName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Camera.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Geometry.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\GeoOp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clAllocator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clBuffer.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clColorSpace.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clCompress.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clCrypt.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clfifo.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clFile.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clGeometry2D.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clImage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\casemap.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\ecvt.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartStock.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketClient.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketServer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_arc4.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_des.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_lmhash.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_md5.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_sha.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clLocker.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clMessageThread.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clSignal.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clThread.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clThreadQueue.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clTracingLocker.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)clstdX.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Camera.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\cl3d.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Geometry.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\GeoOp.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clAllocator.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clBuffer.H" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clColorSpace.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clCompress.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clCrypt.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clfifo.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clFile.H" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clGeometry2D.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clImage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMathExpressionParser.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMathVector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clmemory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartStock.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocket.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketClient.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketServer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clLocker.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clMessageThread.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clSignal.H" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clThread.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clThreadQueue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clTracingLocker.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)clstdX.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\COPYRIGHT.txt" />
+  </ItemGroup>
+</Project>

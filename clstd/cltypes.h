@@ -53,6 +53,7 @@ typedef size_t              clsize;
 typedef size_t              clsize_t;
 #endif
 
+#if defined(_WINDOWS)
 #if defined(_X86)
 typedef _w64 i32            i32_ptr;
 typedef _w64 s32            s32_ptr;
@@ -61,10 +62,13 @@ typedef _w64 u32            u32_ptr;
 typedef i64                 i32_ptr;
 typedef s64                 s32_ptr;
 typedef u64                 u32_ptr;
-#elif defined(_ANDROID)
-typedef i32                 i32_ptr;
-typedef s32                 s32_ptr;
-typedef u32                 u32_ptr;
+#endif
+#elif defined(_ANDROID) || defined(_IOS)
+typedef intptr_t            i32_ptr;
+typedef intptr_t            s32_ptr;
+typedef uintptr_t           u32_ptr;
+#else
+#error 需要定义新平台
 #endif // #if defined(_X86)
 
 typedef char                ch;
@@ -126,22 +130,45 @@ typedef const ch*         CLLPCSTR;
 typedef wch               CLWCHAR;
 typedef wch*              CLLPWSTR;
 typedef const wch*        CLLPCWSTR;
-//typedef tch*              CLLPTSTR;
-//typedef const tch*        CLLPCTSTR;
 typedef int               CLINT;
 typedef long              CLLONG;
 typedef float             CLFLOAT;
 typedef void              CLVOID;
-
+typedef int64_t						CLLONGLONG;
 typedef u16               CLUSHORT;
 
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_WINDOWS)
 typedef _w64 CLDWORD      CLDWORD_PTR;
 typedef _w64 CLINT        CLINT_PTR;
 typedef _w64 CLLONG       CLLONG_PTR;
 typedef _w64 CLUINT       CLUINT_PTR;
 typedef _w64 CLULONG      CLULONG_PTR;
 #else
+typedef u8                BYTE;
+typedef u8*               LPBYTE;
+typedef unsigned short    WORD;
+typedef unsigned long     DWORD;
+typedef u32               UINT;
+typedef u32*              LPUINT;
+typedef u32               ULONG;
+typedef u32*              LPULONG;
+typedef u64               QWORD;
+typedef void*             LPVOID;
+typedef const void*       LPCVOID;
+typedef ch                CHAR;
+typedef unsigned char     UCHAR;
+typedef ch*               LPSTR;
+typedef const ch*         LPCSTR;
+typedef wch               WCHAR;
+typedef wch*              LPWSTR;
+typedef const wch*        LPCWSTR;
+typedef int               INT;
+typedef long              LONG;
+typedef float             FLOAT;
+typedef void              VOID;
+typedef int64_t           LONGLONG;
+typedef u16               USHORT;
+
 typedef CLDWORD           CLDWORD_PTR;
 typedef CLINT             CLINT_PTR;
 typedef CLLONG            CLLONG_PTR;
@@ -216,7 +243,7 @@ typedef CLULONG           CLULONG_PTR;
 #define FLT_MIN         1.175494351e-38F        /* min positive value */
 #endif
 
-#if defined(_WINDOWS) || defined(_WIN32)
+#if defined(_WINDOWS)
 # include <vector>
 # include <hash_map>
 # include <hash_set>
@@ -236,7 +263,7 @@ typedef CLULONG           CLULONG_PTR;
 # define cllist          std::list
 # define clist           std::list
 # define clmake_pair     std::make_pair
-#elif _IOS
+#elif defined(_IOS)
 # include <vector>
 # include <hash_map.h>
 # include <hash_set.h>
@@ -255,17 +282,17 @@ typedef CLULONG           CLULONG_PTR;
 # define cllist          std::list
 # define clist           std::list
 # define clmake_pair     std::make_pair
-#else
+#elif defined(_ANDROID)
 # include <vector>
-# include <hash_map>
-# include <hash_set>
+# include <unordered_map>
+# include <unordered_set>
 # include <map>
 # include <stack>
 # include <list>
 # define clvector        std::vector
-# define clhash_map      std::hash_map
-# define clhash_set      std::hash_set
-# define clhash_multimap std::hash_multimap
+# define clhash_map      hash_map
+# define clhash_set      std::unordered_set
+# define clhash_multimap hash_multimap
 # define clmap           std::map
 # define clset           std::set
 # define clstack         std::stack

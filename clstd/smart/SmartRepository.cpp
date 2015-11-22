@@ -123,11 +123,11 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
 {
   HEADER Header;
   if( ! file.Read(&Header, sizeof(HEADER))) {
-    CLOG_ERROR(__FUNCTION__": Can not read data header(%s).\n", szSmartNodeName);
+    CLOG_ERROR("%s: Can not read data header(%s).\n", __FUNCTION__, szSmartNodeName);
     return FALSE;
   }
   if(Header.dwMagic != SSDB_MAGIC && Header.dwMagic != SZDB_MAGIC) {
-    CLOG_ERROR(__FUNCTION__": Header sign does not match(%s).\n", szSmartNodeName);
+    CLOG_ERROR("%s: Header sign does not match(%s).\n", __FUNCTION__, szSmartNodeName);
     return FALSE;
   }
 
@@ -137,17 +137,17 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     KEYDESC KeyDesc;
     ch szNameBuf[256];
     if( ! file.Read(&KeyDesc, sizeof(KEYDESC))) {
-      CLOG_ERROR(__FUNCTION__": Can not read key-desc(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Can not read key-desc(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
 
     if(KeyDesc.nKeyLength == 0) {
-      CLOG_ERROR(__FUNCTION__": Bad key name length(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Bad key name length(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
 
     if( ! file.Read(szNameBuf, KeyDesc.nKeyLength)) {
-      CLOG_ERROR(__FUNCTION__": Can not read key name(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Can not read key name(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
 
@@ -156,7 +156,7 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     if(KeyDesc.eType == KT_Node) {
       KeyDesc.buf.pSmart = new SmartNode;
       if( ! LoadRecursive(KeyDesc.buf.pSmart, szNameBuf, file)) {
-        CLOG_ERROR(__FUNCTION__": Failed to load key-SmartNode[%s(%s)].\n", szSmartNodeName, szNameBuf);
+        CLOG_ERROR("%s: Failed to load key-SmartNode[%s(%s)].\n", __FUNCTION__, szSmartNodeName, szNameBuf);
         return FALSE;
       }
     }
@@ -178,18 +178,18 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
   {
     ZHEADER ZHeader;
     if( ! file.Read(&ZHeader, sizeof(ZHEADER))) {
-      CLOG_ERROR(__FUNCTION__": Can not read Z-Header data(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Can not read Z-Header data(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
 
     if(ZHeader.dwZCode != ZNODECC || ZHeader.nSize == 0) {
-      CLOG_ERROR(__FUNCTION__": Bad Z-Header data(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Bad Z-Header data(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
 
     clFixedBuffer* pZBuf = new clFixedBuffer(ZHeader.nSize);
     if( ! file.Read(pZBuf->GetPtr(), (u32)pZBuf->GetSize())) {
-      CLOG_ERROR(__FUNCTION__": Can not load compressed data(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Can not load compressed data(%s).\n", __FUNCTION__, szSmartNodeName);
       SAFE_DELETE(pZBuf);
       return FALSE;
     }
@@ -199,8 +199,8 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
 
     if(pDataBuf == NULL)
     {
-      CLOG_ERROR(__FUNCTION__": Failed to uncompressed data, "
-        "this may have wrong data-length or bad compressed data(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Failed to uncompressed data, "
+        "this may have wrong data-length or bad compressed data(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
     pSmart->m_bCompressed = TRUE;
@@ -214,7 +214,7 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     pSmart->pBuffer = new clBuffer;
     pSmart->pBuffer->Resize(nDataLength, FALSE);
     if( ! file.Read(pSmart->pBuffer->GetPtr(), (u32)pSmart->pBuffer->GetSize())) {
-      CLOG_ERROR(__FUNCTION__": Can not load buffer data(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Can not load buffer data(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
   }
@@ -227,7 +227,7 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
   Header.dwMagic   = m_bCompressed ? SZDB_MAGIC : SSDB_MAGIC;
   Header.dwNumKeys = (u32)pSmart->Keys.size();
   if( ! file.Write(&Header, sizeof(HEADER))) {
-    CLOG_ERROR(__FUNCTION__": Can not write data header(%s).\n", szSmartNodeName);
+    CLOG_ERROR("%s: Can not write data header(%s).\n", __FUNCTION__, szSmartNodeName);
     return FALSE;
   }
 
@@ -246,7 +246,7 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
         bval = bval && file.Write((it->first).GetBuffer(), (u32)(it->first).GetLength());
       }
       if( ! bval) {
-        CLOG_ERROR(__FUNCTION__": Can not write key-desc(%s).\n", szSmartNodeName);
+        CLOG_ERROR("%s: Can not write key-desc(%s).\n", __FUNCTION__, szSmartNodeName);
         return FALSE;
       }
       if(it->second.eType == KT_Varible) {
@@ -259,7 +259,7 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     (nDataLength != 0 && pSmart->pBuffer == NULL) || 
     (pSmart->pBuffer != NULL && nDataLength != pSmart->pBuffer->GetSize()))
   {
-    CLOG_ERROR(__FUNCTION__": Keys record length does not match the buffer size(%s).\n", szSmartNodeName);
+    CLOG_ERROR("%s: Keys record length does not match the buffer size(%s).\n", __FUNCTION__, szSmartNodeName);
     return FALSE;
   }
 
@@ -276,21 +276,21 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
       b32 bval = file.Write(&SmartNodeKey, sizeof(KEYDESC));
       bval = bval && file.Write((it->first).GetBuffer(), (u32)(it->first).GetLength());
       if( ! bval) {
-        CLOG_ERROR(__FUNCTION__": Can not write key-desc(%s).\n", szSmartNodeName);
+        CLOG_ERROR("%s: Can not write key-desc(%s).\n", __FUNCTION__, szSmartNodeName);
         return FALSE;
       }
 
       SmartNode* pChildSmartNode = it->second.buf.pSmart;
       if(pChildSmartNode->pBuffer != NULL && pChildSmartNode->pBuffer->GetSize() > 0) {
         if( ! SaveRecursive(pChildSmartNode, it->first, file)) {
-          CLOG_ERROR(__FUNCTION__": Failed to write SmartNode[%s(%s)].", 
-            szSmartNodeName, static_cast<clStringA>(it->first));
+          CLOG_ERROR("%s: Failed to write SmartNode[%s(%s)].", __FUNCTION__,
+            szSmartNodeName, (CLLPCSTR)static_cast<clStringA>(it->first));
           return FALSE;
         }
       }
       else {
-        CLOG_WARNING(__FUNCTION__": There is an empty SmartNode[%s(%s)].\n", 
-          szSmartNodeName, static_cast<clStringA>(it->first));
+        CLOG_WARNING("%s: There is an empty SmartNode[%s(%s)].\n", __FUNCTION__,
+          szSmartNodeName, (CLLPCSTR)(it->first));
       }
   }
 
@@ -305,7 +305,7 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     b32 bval = TRUE;
     clBuffer* pZBuf = clstd::CompressBuffer(pSmart->pBuffer);
     if(pZBuf == NULL || pZBuf->GetSize() == 0) {
-      CLOG_ERROR(__FUNCTION__": Failed to compress buffer(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Failed to compress buffer(%s).\n", __FUNCTION__, szSmartNodeName);
       bval = FALSE;
     }
     else
@@ -316,7 +316,7 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
 
       if( ! file.Write(&ZHeader, sizeof(ZHEADER)) ||
          ! file.Write(pZBuf->GetPtr(), (u32)pZBuf->GetSize())) {
-        CLOG_ERROR(__FUNCTION__": Can not write compressed buffer data(%s).\n", szSmartNodeName);
+        CLOG_ERROR("%s: Can not write compressed buffer data(%s).\n", __FUNCTION__, szSmartNodeName);
         bval = FALSE;
       }
     }
@@ -329,7 +329,7 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
   else
   {
     if( ! file.Write(pSmart->pBuffer->GetPtr(), (u32)pSmart->pBuffer->GetSize()) ) {
-      CLOG_ERROR(__FUNCTION__": Can not write buffer data(%s).\n", szSmartNodeName);
+      CLOG_ERROR("%s: Can not write buffer data(%s).\n", __FUNCTION__, szSmartNodeName);
       return FALSE;
     }
   }
@@ -345,7 +345,7 @@ SmartNode* SmartRepository::CreateNode(CLLPCSTR szKeys)
   for(clStringArrayA::iterator itKeyName = aPathKeys.begin();
     itKeyName != aPathKeys.end(); ++itKeyName) {
       if(itKeyName->GetLength() > 255 || itKeyName->IsEmpty()) {
-        CLOG_ERROR(__FUNCTION__": Key name(%s) is too long.\n", static_cast<clStringA>(*itKeyName));
+        CLOG_ERROR("%s: Key name(%s) is too long.\n", __FUNCTION__, (CLLPCSTR)(*itKeyName));
         return FALSE;
       }
   }
@@ -359,7 +359,7 @@ SmartNode* SmartRepository::CreateNode(CLLPCSTR szKeys)
       KEYDESC KeyDesc;
       KeyDesc.nKeyLength = itKeyName->GetLength();
       KeyDesc.eType  = KT_Node;
-      KeyDesc.Flags  = NULL;
+      KeyDesc.Flags  = 0;
       KeyDesc.buf.pSmart = new SmartNode;
       //KeyDesc.buf.pSmart->pBuffer = new clBuffer;
       pSmart->Keys[*itKeyName] = KeyDesc;
@@ -434,8 +434,8 @@ b32 SmartRepository::Write(SmartNode* pSmart, CLLPCSTR szKey, CLLPCVOID lpData, 
     return FALSE;
   }
   const clsize nKeyLength = clstd::strlenT(szKey);
-  if(nKeyLength < 0 || nKeyLength > 255) {
-    CLOG_ERROR(__FUNCTION__": Key name(%s) is too long.", szKey);
+  if(/*nKeyLength < 0 || */nKeyLength > 255) {
+    CLOG_ERROR("%s: Key name(%s) is too long.", __FUNCTION__, szKey);
   }
 
   if(pSmart->pBuffer == NULL) {
@@ -466,7 +466,7 @@ b32 SmartRepository::Write(SmartNode* pSmart, CLLPCSTR szKey, CLLPCVOID lpData, 
     KEYDESC Desc;
     Desc.nKeyLength = nKeyLength;
     Desc.eType      = KT_Varible;
-    Desc.Flags      = NULL;
+    Desc.Flags      = 0;
     Desc.v.cbSize   = cbSize;
     Desc.v.nOffset  = (u32)pSmart->pBuffer->GetSize();
 
@@ -505,8 +505,8 @@ b32 SmartRepository::Write64(SmartNode* pSmart, CLLPCSTR szKey, u32 dwLow, u32 d
 {
   pSmart = pSmart == NULL ? this : pSmart;
   const clsize nKeyLength = clstd::strlenT(szKey);
-  if(nKeyLength < 0 || nKeyLength > 255) {
-    CLOG_ERROR(__FUNCTION__": Key name(%s) is too long.", szKey);
+  if(/*nKeyLength < 0 || */nKeyLength > 255) {
+    CLOG_ERROR("%s: Key name(%s) is too long.", __FUNCTION__, szKey);
   }
 
   KeyDict::iterator itRep = pSmart->Keys.find(szKey);
@@ -519,7 +519,7 @@ b32 SmartRepository::Write64(SmartNode* pSmart, CLLPCSTR szKey, u32 dwLow, u32 d
       // 删除 pBuffer 已有的数据
       pSmart->pBuffer->Replace(Desc.v.nOffset, Desc.v.cbSize, NULL, 0);
       // 重定位表中其他键值的数据
-      const u32 cbDataSize = Desc.v.cbSize;
+      //const u32 cbDataSize = Desc.v.cbSize;
       for(KeyDict::iterator itLoop = pSmart->Keys.begin(); 
         itLoop != pSmart->Keys.end(); ++itLoop) {
           if(itLoop->second.eType == KT_Varible && itLoop->second.v.nOffset > Desc.v.nOffset) {
@@ -545,7 +545,7 @@ b32 SmartRepository::Write64(SmartNode* pSmart, CLLPCSTR szKey, u32 dwLow, u32 d
     KEYDESC Desc;
     Desc.nKeyLength = nKeyLength;
     Desc.eType      = KT_Octet;
-    Desc.Flags      = NULL;
+    Desc.Flags      = 0;
     Desc.o.dwLow    = dwLow;
     Desc.o.dwHigh   = dwHigh;
 

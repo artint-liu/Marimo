@@ -18,23 +18,24 @@
 # define _X86
 #endif
 
-#if !defined(_WINDOWS) && !defined(_IOS) && !defined(_ANDROID)
+#if ! defined(_WINDOWS) && ! defined(_IOS) && ! defined(_ANDROID)
 # define _WINDOWS
 #endif
 
 #if defined(_WINDOWS)
 # include <windows.h>
-
-
 //# if !defined(_WIN32) && !defined(_WIN64)
 //# define _WIN32
 //# endif // #if !defined(_X86) && !defined(_X64)
 
 #elif defined(_IOS)
 # include <assert.h>
-#else
+#elif defined(_ANDROID)
 # include <wchar.h>
+#else
+# error 未知平台或者新增加的平台
 #endif
+
 #include "cltypes.h"
 #include "thread/clLocker.h"
 #include <memory.h>
@@ -157,14 +158,15 @@ extern "C" void _cl_NoOperation();
 #     define V(x)              if(FAILED(x)) { _cl_Break(); }
 #     define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}
 #   endif // #ifdef _X86
-# elif defined(_IOS)
+# elif defined(_IOS) || defined(_ANDROID)
+#	include <assert.h>
 void _cl_traceA(const char *fmt, ...);
 void _cl_traceW(const wchar_t *fmt, ...);
 
 #   define TRACEW  _cl_traceW
 #   define TRACEA  _cl_traceA
-#   define TRACE  TRACEA
-#   define CLOG_WARNING
+#   define TRACE				 TRACEA
+#   define CLOG_WARNING	 TRACEA
 #   define CLOG_ERROR    TRACEA
 #   define CLOG          TRACEA
 #   define CLOG_WARNINGW TRACEW
@@ -177,6 +179,8 @@ void _cl_traceW(const wchar_t *fmt, ...);
 #   define STATIC_ASSERT(x)
 #   define V(x)      (x)
 #   define V_RETURN(x)  (x)
+# else
+#	error 新平台
 # endif // #if defined(_WINDOWS) || defined(_CONSOLE)
 #else  // _DEBUG
 #  if defined(_WINDOWS) || defined(_WIN32)
@@ -265,10 +269,10 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 #define BOM_UNICODE_BIGENDIAN   0xFFFE
 #define BOM_UTF8                0xBFBBEF
 
-extern "C" b32 strcmpnA(const ch* lpString1, const ch* lpString2, int nCount);
-extern "C" b32 strcmpnW(const wch* lpString1, const wch* lpString2, int nCount);
-extern "C" int cl_atoi(const char* szStr);
-extern "C" double cl_atof(const char* szStr);
+//extern "C" b32 strcmpnA(const ch* lpString1, const ch* lpString2, int nCount);
+//extern "C" b32 strcmpnW(const wch* lpString1, const wch* lpString2, int nCount);
+//extern "C" int cl_atoi(const char* szStr);
+//extern "C" double cl_atof(const char* szStr);
 
 namespace clstd
 {

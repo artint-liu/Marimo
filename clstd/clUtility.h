@@ -500,6 +500,16 @@ FINAL_RET:
     }
   };
 
+#if defined(_ANDROID) || defined(_IOS)
+	typedef union _LARGE_INTEGER {
+		struct {
+			CLDWORD LowPart;
+			CLLONG HighPart;
+		}u;
+		CLLONGLONG QuadPart;
+	} LARGE_INTEGER;
+#endif
+
   class TimeTrace
   {
     LARGE_INTEGER m_Frequency;

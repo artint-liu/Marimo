@@ -20,7 +20,7 @@ extern "C" void barrier(void);
 #define smp_mb()  barrier()
 #define smp_wmb() barrier()
 #endif // #ifdef _X86
-#elif defined(_IOS)
+#elif defined(_IOS) || defined(_ANDROID)
 static inline void barrier(void)
 {
   asm volatile("" : : : "memory");
@@ -34,9 +34,9 @@ namespace clstd
 
   fifo::fifo()
     : m_buffer  (NULL)
-    , m_size    (NULL)
-    , m_in      (NULL)
-    , m_out     (NULL)
+    , m_size    (0)
+    , m_in      (0)
+    , m_out     (0)
     , m_pLocker (NULL)
   {
   }

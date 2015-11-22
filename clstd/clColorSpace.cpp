@@ -5,6 +5,8 @@
 #include "clString.H"
 #include "clUtility.H"
 
+#include <stdlib.h>
+
 namespace clstd
 {
   STATIC_ASSERT(sizeof(COLOR_ARGB) == 4);
@@ -238,5 +240,246 @@ namespace clstd
   {
     return y;
   }
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL<_TDataDef>& _COLOR_RGBTEMPL<_TDataDef>::set(const Internal::COLOR_ARGB& argb)
+	{
+		Internal::_Assign(*this, argb);
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL<_TDataDef>& _COLOR_RGBTEMPL<_TDataDef>::set(u8 a, u8 r, u8 g, u8 b)
+	{
+		this->a = a;
+		this->r = r;
+		this->g = g;
+		this->b = b;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL<_TDataDef>& _COLOR_RGBTEMPL<_TDataDef>::set(u32 aarrggbb)
+	{
+		this->a = (aarrggbb >> 24) & 0xff;
+		this->r = (aarrggbb >> 16) & 0xff;
+		this->g = (aarrggbb >> 8) & 0xff;
+		this->b = aarrggbb & 0xff;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	u32 _COLOR_RGBTEMPL<_TDataDef>::RandomizeRGB() // 随机产生一个颜色
+	{
+		this->r = clrand() & 0xff;
+		this->g = clrand() & 0xff;
+		this->b = clrand() & 0xff;
+		return this->data;
+	}
+
+	template<class _TDataDef>
+	u32 _COLOR_RGBTEMPL<_TDataDef>::RandomizeAll() // 随机产生一个颜色和Alpha
+	{
+		RandomizeRGB();
+		this->a = clrand() & 0xff;
+		return this->data;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>::_COLOR_RGBTEMPL_F(const Internal::COLOR_ARGB& value)
+	{
+		Internal::_UnpackColorValue(*this, value);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>::_COLOR_RGBTEMPL_F(const Internal::COLOR_RGBA_F& value)
+	{
+		Internal::_Assign(*this, value);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>::_COLOR_RGBTEMPL_F(const Internal::COLOR_ABGR_F& value)
+	{
+		Internal::_Assign(*this, value);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>::_COLOR_RGBTEMPL_F(const COLOR_HSVA_F& hsv)
+	{
+		hsv2rgb(hsv.h, hsv.s, hsv.v, &this->r, &this->g, &this->b);
+		this->a = hsv.a;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>::_COLOR_RGBTEMPL_F(const COLOR_YUVA_F& yuv)
+	{
+		yuv2rgb(yuv.y, yuv.u, yuv.v, &this->r, &this->g, &this->b);
+		this->a = yuv.a;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>::_COLOR_RGBTEMPL_F(float r, float g, float b, float a)
+	{
+		this->r = r;
+		this->g = g;
+		this->b = b;
+		this->a = a;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef> _COLOR_RGBTEMPL_F<_TDataDef>::operator+(const _COLOR_RGBTEMPL_F& rgb) const
+	{
+		return _COLOR_RGBTEMPL_F(this->r + rgb.r, this->g + rgb.g, this->b + rgb.b, this->a + rgb.a);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef> _COLOR_RGBTEMPL_F<_TDataDef>::operator+(float v) const
+	{
+		return _COLOR_RGBTEMPL_F(this->r + v, this->g + v, this->b + v, this->a + v);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef> _COLOR_RGBTEMPL_F<_TDataDef>::operator-(const _COLOR_RGBTEMPL_F& rgb) const
+	{
+		return _COLOR_RGBTEMPL_F(this->r - rgb.r, this->g - rgb.g, this->b - rgb.b, this->a - rgb.a);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef> _COLOR_RGBTEMPL_F<_TDataDef>::operator-(float v) const
+	{
+		return _COLOR_RGBTEMPL_F(this->r - v, this->g - v, this->b - v, this->a - v);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef> _COLOR_RGBTEMPL_F<_TDataDef>::operator*(float v) const
+	{
+		return _COLOR_RGBTEMPL_F(this->r * v, this->g * v, this->b * v, this->a * v);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef> _COLOR_RGBTEMPL_F<_TDataDef>::operator/(float v) const
+	{
+		const float fInverseValue = 1.0f / v;
+		return _COLOR_RGBTEMPL_F(this->r * fInverseValue, this->g * fInverseValue, this->b * fInverseValue, this->a * fInverseValue);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator+=(const _COLOR_RGBTEMPL_F& rgb)
+	{
+		this->r += rgb.r;
+		this->g += rgb.g;
+		this->b += rgb.b;
+		this->a += rgb.a;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator+=(float v)
+	{
+		this->r += v;
+		this->g += v;
+		this->b += v;
+		this->a += v;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator-=(const _COLOR_RGBTEMPL_F& rgb)
+	{
+
+		this->r -= rgb.r;
+		this->g -= rgb.g;
+		this->b -= rgb.b;
+		this->a -= rgb.a;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator-=(float v)
+	{
+		this->r -= v;
+		this->g -= v;
+		this->b -= v;
+		this->a -= v;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator*=(float v)
+	{
+		this->r *= v;
+		this->g *= v;
+		this->b *= v;
+		this->a *= v;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator/=(float v)
+	{
+		const float fInverseValue = 1.0f / v;
+		this->r *= fInverseValue;
+		this->g *= fInverseValue;
+		this->b *= fInverseValue;
+		this->a *= fInverseValue;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	b32 _COLOR_RGBTEMPL_F<_TDataDef>::operator==(const _COLOR_RGBTEMPL_F& rgb) CLCONST
+	{
+		return (this->r == rgb.r && this->g == rgb.g && this->b == rgb.b && this->a == rgb.a);
+	}
+
+	template<class _TDataDef>
+	b32 _COLOR_RGBTEMPL_F<_TDataDef>::operator!=(const _COLOR_RGBTEMPL_F& rgb) CLCONST
+	{
+		return (this->r != rgb.r || this->g != rgb.g || this->b != rgb.b || this->a != rgb.a);
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::set(float r, float g, float b, float a)
+	{
+		this->r = r;
+		this->g = g;
+		this->b = b;
+		this->a = a;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	_COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::set(u32 aarrggbb)
+	{
+		const float fInverseFactor = 1.0f / 255.0f;
+		this->a = (float)((aarrggbb >> 24) & 0xff) * fInverseFactor;
+		this->r = (float)((aarrggbb >> 16) & 0xff) * fInverseFactor;
+		this->g = (float)((aarrggbb >>  8) & 0xff) * fInverseFactor;
+		this->b = (float)((aarrggbb      ) & 0xff) * fInverseFactor;
+		return *this;
+	}
+
+	template<class _TDataDef>
+	u32 _COLOR_RGBTEMPL_F<_TDataDef>::ARGB()
+	{
+		Internal::COLOR_ARGB ret;
+		Internal::_PackColorValue(ret, *this);
+		return ret.data;
+	}
+
+	template<class _TDataDef>
+	u32 _COLOR_RGBTEMPL_F<_TDataDef>::ABGR()
+	{
+		Internal::COLOR_ABGR ret;
+		Internal::_PackColorValue(ret, *this);
+		return ret.data;
+	}
+
+	template<class _TDataDef>
+	float _COLOR_RGBTEMPL_F<_TDataDef>::GetGray() const
+	{
+		return getgray(this->r, this->g, this->b);
+	}
 
 } // namespace clstd

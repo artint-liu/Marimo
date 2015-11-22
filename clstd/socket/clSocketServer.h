@@ -8,7 +8,7 @@
 namespace clstd
 {
   enum SocketEvent;
-
+#if defined(_WINDOWS)
   class TCPServer : public Thread
   {
   public:
@@ -85,7 +85,7 @@ namespace clstd
   public:
     virtual void OnEvent(SOCKET sock, SocketEvent eEvent) = 0;
   };
-
+#endif // #if defined(_WINDOWS)
 } // namespace clstd
 
 #endif // _SOCKET_SERVER_H_

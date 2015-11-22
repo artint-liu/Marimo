@@ -1,7 +1,9 @@
 #ifndef _CL_MEMORY_MANAGENT_
 #define _CL_MEMORY_MANAGENT_
 
+#ifdef _WINDOWS
 #pragma warning(disable : 4291)
+#endif // #ifdef _WINDOWS
 
 //void* operator new(unsigned int nSize, const char *file, int line);
 //void* operator new[](unsigned int nSize, const char *file, int line);

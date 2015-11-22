@@ -12,9 +12,9 @@ namespace clstd
     : m_ptr     (NULL)
     , m_width   (0)
     , m_height  (0)
-    , m_pitch   (0)
     , m_channel (0)
-    , m_depth   (0)
+		, m_pitch(0)
+		, m_depth(0)
   {
     m_format.code = 0;
   }
@@ -258,7 +258,7 @@ namespace clstd
 
     default:
       CLBREAK;
-      CLOG_ERROR(__FUNCTION__": Unsupported pixel size.\r\n");
+      CLOG_ERROR("%s: Unsupported pixel size.\r\n", __FUNCTION__);
       break;
     }
 

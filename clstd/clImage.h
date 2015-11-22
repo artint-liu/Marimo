@@ -37,7 +37,7 @@ namespace clstd
   {
     // 这里面包含了基本数据结构和方法，所有成员方法应当与数据类型无关
   protected:
-    void* m_ptr;      // 数据地址
+    CLLPBYTE m_ptr;   // 数据地址
     int m_width;      // 像素宽度
     int m_height;     // 像素高度
     int m_channel;    // 通道数, 1, 2, 3, 4

@@ -39,18 +39,9 @@ class SmartProfileT
 {
 public:
   typedef typename _Traits::_TCh _TCh;
-  typedef typename SmartProfileT<_CTCh, _TStr, typename _Traits::SmartStream_Traits> _SmartProfileT;
-  typedef typename SmartStreamT<_TStr, typename _Traits::SmartStream_Traits> _SmartStreamT;
+  typedef SmartProfileT<_CTCh, _TStr, typename _Traits::SmartStream_Traits> _SmartProfileT;
+  typedef SmartStreamT<_TStr, typename _Traits::SmartStream_Traits> _SmartStreamT;
   typedef typename _SmartStreamT::iterator _MyIterator;
-
-private:
-  typedef clvector<void*>  HandleArray;
-
-  _SmartStreamT m_SmartStream;
-  clBuffer*     m_pBuffer;
-  HandleArray   m_aHandles;
-
-  static void ReverseByteOrder16(u16* ptr, clsize nCount);
 
 public:
   //enum HandleType
@@ -74,7 +65,8 @@ public:
     _TStr          strFindName;
     _TStr          strPath;
   };
-  typedef FINDSECT*    HANDLE;
+  typedef FINDSECT*					HANDLE;
+	typedef clvector<HANDLE>  HandleArray;
 
   // TODO: 增加自动析构定义“AUTO_HANDLE”
   // !! 但是仔细考虑后发现自动指针有很多问题，比如当参数传递时，Handle复制了两份
@@ -115,6 +107,14 @@ public:
     float ToFloat     ();
     b32   ToBoolean   ();
   };
+
+private:
+	_SmartStreamT m_SmartStream;
+	clBuffer*     m_pBuffer;
+	HandleArray   m_aHandles;
+
+	static void ReverseByteOrder16(u16* ptr, clsize nCount);
+
 public:
   SmartProfileT();
   virtual ~SmartProfileT();

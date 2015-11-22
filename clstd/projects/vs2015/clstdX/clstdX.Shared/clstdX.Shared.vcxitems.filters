@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)clstdX.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Camera.cpp">
+      <Filter>3D</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Geometry.cpp">
+      <Filter>3D</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\GeoOp.cpp">
+      <Filter>3D</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_arc4.cpp">
+      <Filter>crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_des.cpp">
+      <Filter>crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_lmhash.cpp">
+      <Filter>crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_md5.cpp">
+      <Filter>crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_sha.cpp">
+      <Filter>crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\casemap.cpp">
+      <Filter>Else</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\ecvt.cpp">
+      <Filter>Else</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.cpp">
+      <Filter>Smart</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.cpp">
+      <Filter>Smart</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartStock.cpp">
+      <Filter>Smart</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.cpp">
+      <Filter>Smart</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketClient.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketServer.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clLocker.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clMessageThread.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clSignal.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clThread.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clThreadQueue.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clTracingLocker.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clAllocator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clBuffer.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clColorSpace.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clCompress.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clCrypt.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clfifo.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clFile.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clGeometry2D.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clImage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.CPP" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)clstdX.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Camera.h">
+      <Filter>3D</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\cl3d.h">
+      <Filter>3D</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\Geometry.h">
+      <Filter>3D</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3D\GeoOp.h">
+      <Filter>3D</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.h">
+      <Filter>Smart</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.h">
+      <Filter>Smart</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartStock.h">
+      <Filter>Smart</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.h">
+      <Filter>Smart</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocket.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketClient.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketServer.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clLocker.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clMessageThread.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clSignal.H">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clThread.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Thread\clThreadQueue.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\thread\clTracingLocker.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clAllocator.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clBuffer.H" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clColorSpace.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clCompress.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clCrypt.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clfifo.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clFile.H" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clGeometry2D.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clImage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMathExpressionParser.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMathVector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clmemory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="3D">
+      <UniqueIdentifier>{fd7af2dc-6207-42a0-acb9-890a1a60d606}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="crypt">
+      <UniqueIdentifier>{4b2864e9-2ca9-42fd-99d6-71a32a2722b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Else">
+      <UniqueIdentifier>{d5f7e894-81f9-4731-8f5e-94398cf2dd94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Smart">
+      <UniqueIdentifier>{3b6f64fc-231c-42c5-a779-2bee763f4e80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Socket">
+      <UniqueIdentifier>{9dfa59e7-13fc-4c98-b998-37c0186ff23b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thread">
+      <UniqueIdentifier>{d5e85b0e-619e-44c1-8945-599aa11b326b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\COPYRIGHT.txt">
+      <Filter>crypt</Filter>
+    </None>
+  </ItemGroup>
+</Project>

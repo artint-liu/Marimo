@@ -304,7 +304,7 @@ namespace clstd
 
   _quaternion* QuaternionLn(_quaternion *pout, CLCONST _quaternion *pq)
   {
-    FLOAT norm, normvec, theta;
+    float norm, normvec, theta;
 
     norm = QuaternionLengthSq(pq);
     if ( norm > 1.0001f )
@@ -344,7 +344,7 @@ namespace clstd
   _quaternion* QuaternionNormalize(_quaternion *pout, CLCONST _quaternion *pq)
   {
     _quaternion out;
-    FLOAT norm;
+    float norm;
 
     norm = QuaternionLength(pq);
 
@@ -426,7 +426,7 @@ namespace clstd
   //  return pout;
   //}
 
-  _quaternion* QuaternionSlerp(_quaternion *pout, CLCONST _quaternion *pq1, CLCONST _quaternion *pq2, FLOAT t)
+  _quaternion* QuaternionSlerp(_quaternion *pout, CLCONST _quaternion *pq1, CLCONST _quaternion *pq2, float t)
   {
     float dot, epsilon, temp, theta, u;
 

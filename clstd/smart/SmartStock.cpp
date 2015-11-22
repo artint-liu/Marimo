@@ -307,7 +307,7 @@ b32 _SSP_IMPL::Close()
 {
   // 没有释放所有Handle
   ASSERT(m_aHandles.size() == 0);
-  for(HandleArray::iterator it = m_aHandles.begin();
+  for(auto it = m_aHandles.begin();
     it != m_aHandles.end(); ++it) {
       SAFE_DELETE(*it);
   }
@@ -372,7 +372,7 @@ _SSP_TEMPL
   b32 _SSP_IMPL::DelSection(Section sect)
 {
   HandleArray& aHandles = m_aHandles;
-  for(HandleArray::iterator it = aHandles.begin();
+  for(auto it = aHandles.begin();
     it != aHandles.end(); ++it)
   {
     if(*it == sect)
@@ -583,7 +583,7 @@ _SSP_TEMPL
     strBuffer.Append('\r');
     strBuffer.Append('\n');
 
-    clsize nPos = pStock->InsertString(itEnd, strBuffer);
+    //clsize nPos = pStock->InsertString(itEnd, strBuffer);
     ASSERT(DbgCheck());
   }
   return TRUE;
@@ -633,7 +633,7 @@ typename _SSP_IMPL::Section _SSP_IMPL::CreateChild(Section sect, T_LPCSTR szPath
     m_pBuffer = new clBuffer();
 
     if(m_pBuffer == NULL) {
-      CLOG_ERROR(__FUNCTION__ ": Out of memory.\r\n");
+      CLOG_ERROR("%s: Out of memory.\r\n", __FUNCTION__);
       return NULL;
     }
     m_pBuffer->Reserve(1024);

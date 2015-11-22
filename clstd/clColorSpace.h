@@ -274,7 +274,7 @@ namespace clstd
     
     _COLOR_RGBTEMPL(const Internal::COLOR_ARGB& argb)
     {
-      Internal::_Assign(*this, argb)
+			Internal::_Assign(*this, argb);
     }
 
     _COLOR_RGBTEMPL(const Internal::COLOR_ABGR_F& clr)
@@ -287,48 +287,19 @@ namespace clstd
       Internal::_PackColorValue(*this, clr);
     }
 
-    _COLOR_RGBTEMPL& set(const Internal::COLOR_ARGB& argb)
-    {
-      Internal::_Assign(*this, argb);
-      return *this;
-    }
+    _COLOR_RGBTEMPL& set(const Internal::COLOR_ARGB& argb);
 
-    _COLOR_RGBTEMPL& set(u8 a, u8 r, u8 g, u8 b)
-    {
-      this->a = a;
-      this->r = r;
-      this->g = g;
-      this->b = b;
-      return *this;
-    }
+    _COLOR_RGBTEMPL& set(u8 a, u8 r, u8 g, u8 b);
 
-    _COLOR_RGBTEMPL& set(u32 aarrggbb)
-    {
-      a = (aarrggbb >> 24) & 0xff;
-      r = (aarrggbb >> 16) & 0xff;
-      g = (aarrggbb >> 8) & 0xff;
-      b = aarrggbb & 0xff;
-      return *this;
-    }
+    _COLOR_RGBTEMPL& set(u32 aarrggbb);
 
-    u32 RandomizeRGB()  // 随机产生一个颜色
-    {
-      r = clrand() & 0xff;
-      g = clrand() & 0xff;
-      b = clrand() & 0xff;
-      return data;
-    }
+    u32 RandomizeRGB();  // 随机产生一个颜色
 
-    u32 RandomizeAll()  // 随机产生一个颜色和Alpha
-    {
-      RandomizeRGB();
-      a = clrand() & 0xff;
-      return data;
-    }
+    u32 RandomizeAll();  // 随机产生一个颜色和Alpha
 
     operator u32()
     {
-      return data;
+      return this->data;
     }
   };
 
@@ -336,7 +307,7 @@ namespace clstd
   {
     _COLOR_RGBTEMPL_F()
     {
-      r = g = b = a = 1;
+      this->r = this->g = this->b = this->a = 1;
     }
     _COLOR_RGBTEMPL_F(u32 aarrggbb)
     {
@@ -344,138 +315,47 @@ namespace clstd
     }
 
     // 如果编译有歧义改为Set函数
-    _COLOR_RGBTEMPL_F(const Internal::COLOR_ARGB& value)
-    {
-      Internal::_UnpackColorValue(*this, value);
-    }
+    _COLOR_RGBTEMPL_F(const Internal::COLOR_ARGB& value);
 
-    _COLOR_RGBTEMPL_F(const Internal::COLOR_RGBA_F& value)
-    {
-      Internal::_Assign(*this, value);
-    }
+    _COLOR_RGBTEMPL_F(const Internal::COLOR_RGBA_F& value);
 
-    _COLOR_RGBTEMPL_F(const Internal::COLOR_ABGR_F& value)
-    {
-      Internal::_Assign(*this, value);
-    }
+    _COLOR_RGBTEMPL_F(const Internal::COLOR_ABGR_F& value);
 
-    _COLOR_RGBTEMPL_F(const COLOR_HSVA_F& hsv)
-    {
-      hsv2rgb(hsv.h, hsv.s, hsv.v, &r, &g, &b);
-      a = hsv.a;
-    }
+    _COLOR_RGBTEMPL_F(const COLOR_HSVA_F& hsv);
 
-    _COLOR_RGBTEMPL_F(const COLOR_YUVA_F& yuv)
-    {
-      yuv2rgb(yuv.y, yuv.u, yuv.v, &r, &g, &b);
-      a = yuv.a;
-    }
+    _COLOR_RGBTEMPL_F(const COLOR_YUVA_F& yuv);
 
-    _COLOR_RGBTEMPL_F(float r, float g, float b, float a)
-    {
-      this->r = r;
-      this->g = g;
-      this->b = b;
-      this->a = a;
-    }
+    _COLOR_RGBTEMPL_F(float r, float g, float b, float a);
 
-    _COLOR_RGBTEMPL_F operator+(const _COLOR_RGBTEMPL_F& rgb) const
-    {
-      return _COLOR_RGBTEMPL_F(r + rgb.r, g + rgb.g, b + rgb.b, a + rgb.a);
-    }
+    _COLOR_RGBTEMPL_F operator+(const _COLOR_RGBTEMPL_F& rgb) const;
 
-    _COLOR_RGBTEMPL_F operator+(float v) const
-    {
-      return _COLOR_RGBTEMPL_F(r + v, g + v, b + v, a + v);
-    }
+    _COLOR_RGBTEMPL_F operator+(float v) const;
 
-    _COLOR_RGBTEMPL_F operator-(const _COLOR_RGBTEMPL_F& rgb) const
-    {
-      return _COLOR_RGBTEMPL_F(r - rgb.r, g - rgb.g, b - rgb.b, a - rgb.a);
-    }
+    _COLOR_RGBTEMPL_F operator-(const _COLOR_RGBTEMPL_F& rgb) const;
 
-    _COLOR_RGBTEMPL_F operator-(float v) const
-    {
-      return _COLOR_RGBTEMPL_F(r - v, g - v, b - v, a - v);
-    }
+    _COLOR_RGBTEMPL_F operator-(float v) const;
 
-    _COLOR_RGBTEMPL_F operator*(float v) const
-    {
-      return _COLOR_RGBTEMPL_F(r * v, g * v, b * v, a * v);
-    }
+    _COLOR_RGBTEMPL_F operator*(float v) const;
 
-    _COLOR_RGBTEMPL_F operator/(float v) const
-    {
-      const float fInverseValue = 1.0f / v;
-      return _COLOR_RGBTEMPL_F(r * fInverseValue, g * fInverseValue, b * fInverseValue, a * fInverseValue);
-    }
+    _COLOR_RGBTEMPL_F operator/(float v) const;
     
     /////
 
-    _COLOR_RGBTEMPL_F& operator+=(const _COLOR_RGBTEMPL_F& rgb)
-    {
-      r += rgb.r;
-      g += rgb.g;
-      b += rgb.b;
-      a += rgb.a;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& operator+=(const _COLOR_RGBTEMPL_F& rgb);
 
-    _COLOR_RGBTEMPL_F& operator+=(float v)
-    {
-      r += v;
-      g += v;
-      b += v;
-      a += v;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& operator+=(float v);
 
-    _COLOR_RGBTEMPL_F& operator-=(const _COLOR_RGBTEMPL_F& rgb)
-    {      
-      r -= rgb.r;
-      g -= rgb.g;
-      b -= rgb.b;
-      a -= rgb.a;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& operator-=(const _COLOR_RGBTEMPL_F& rgb);
 
-    _COLOR_RGBTEMPL_F& operator-=(float v)
-    {
-      r -= v;
-      g -= v;
-      b -= v;
-      a -= v;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& operator-=(float v);
 
-    _COLOR_RGBTEMPL_F& operator*=(float v)
-    {
-      r *= v;
-      g *= v;
-      b *= v;
-      a *= v;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& operator*=(float v);
 
-    _COLOR_RGBTEMPL_F& operator/=(float v)
-    {
-      const float fInverseValue = 1.0f / v;
-      r *= fInverseValue;
-      g *= fInverseValue;
-      b *= fInverseValue;
-      a *= fInverseValue;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& operator/=(float v);
 
-    b32 operator==(const _COLOR_RGBTEMPL_F& rgb) CLCONST
-    {
-      return (r == rgb.r && g == rgb.g && b == rgb.b && a == rgb.a);
-    }
+    b32 operator==(const _COLOR_RGBTEMPL_F& rgb) CLCONST;
 
-    b32 operator!=(const _COLOR_RGBTEMPL_F& rgb) CLCONST
-    {
-      return (r != rgb.r || g != rgb.g || b != rgb.b || a != rgb.a);
-    }
+    b32 operator!=(const _COLOR_RGBTEMPL_F& rgb) CLCONST;
 
     //operator Internal::COLOR_ARGB () const
     //{
@@ -486,43 +366,15 @@ namespace clstd
     //  t.a = a < 0 ? 0 : (a > 1.0f ? 0xff : (u8)(a * 255.0f + 0.5f));
     //  return t;
     //}
-    _COLOR_RGBTEMPL_F& set(float r, float g, float b, float a)
-    {
-      this->r = r;
-      this->g = g;
-      this->b = b;
-      this->a = a;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& set(float r, float g, float b, float a);
 
-    _COLOR_RGBTEMPL_F& set(u32 aarrggbb)
-    {
-      const float fInverseFactor = 1.0f / 255.0f;
-      a = (float)((aarrggbb >> 24) & 0xff) * fInverseFactor;
-      r = (float)((aarrggbb >> 16) & 0xff) * fInverseFactor;
-      g = (float)((aarrggbb >> 8) & 0xff) * fInverseFactor;
-      b = (float)(aarrggbb & 0xff) * fInverseFactor;
-      return *this;
-    }
+    _COLOR_RGBTEMPL_F& set(u32 aarrggbb);
 
-    u32 ARGB()
-    {
-      Internal::COLOR_ARGB ret;
-      Internal::_PackColorValue(ret, *this);
-      return ret.data;
-    }
+    u32 ARGB();
 
-    u32 ABGR()
-    {
-      Internal::COLOR_ABGR ret;
-      Internal::_PackColorValue(ret, *this);
-      return ret.data;
-    }
+    u32 ABGR();
 
-    float GetGray() const
-    {
-      return getgray(r, g, b);
-    }
+    float GetGray() const;
   };
 
   typedef _COLOR_RGBTEMPL_F<Internal::COLOR_RGBA_F> COLOR_RGBA_F;

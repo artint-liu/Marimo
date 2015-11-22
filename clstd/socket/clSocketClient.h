@@ -8,7 +8,7 @@
 namespace clstd
 {
   enum SocketEvent;
-
+#if defined(_WINDOWS)
   class TCPClient : public Thread
   {
   protected:
@@ -31,6 +31,7 @@ namespace clstd
   public:
     virtual void OnEvent(/*SOCKET sock, */SocketEvent eEvent) = 0;
   };
+#endif // #if defined(_WINDOWS)
 } // namespace clstd
 
 #endif // _SOCKET_CLIENT_H_

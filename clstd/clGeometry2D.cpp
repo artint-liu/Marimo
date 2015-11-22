@@ -171,7 +171,7 @@ namespace clstd
       return TRUE;
     }
 
-#define SEG_TRACE
+#define SEG_TRACE(...)
     b32 Winding::CalcSubSegment( Segment& seg, LinesArray::iterator& line_iter, size_t myid )
     {
       b32 b[2] = {FALSE, FALSE};

@@ -36,19 +36,10 @@ class SmartStockT
 {
 public:
   typedef typename _Traits::_TCh _TCh;
-  typedef typename SmartStreamT<_TStr, typename _Traits::SmartStream_Traits> _SmartStreamT;
+  typedef SmartStreamT<_TStr, typename _Traits::SmartStream_Traits> _SmartStreamT;
   typedef typename _SmartStreamT::iterator _MyIterator;
   typedef typename _TStr::LPCSTR T_LPCSTR;
   typedef typename _TStr::TChar  TChar;
-
-protected:
-  typedef clvector<void*>  HandleArray;
-
-  _SmartStreamT m_SmartStream;
-  clBuffer*     m_pBuffer;
-  HandleArray   m_aHandles;
-
-  static void ReverseByteOrder16(u16* ptr, clsize nCount);
 
 public:
   struct SECTION_DESC;
@@ -94,10 +85,10 @@ public:
     SECTION_DESC(){}
     SECTION_DESC(SmartStockT* pCoStock)
       : pStock  (pCoStock)
-      , itBegin (pCoStock->m_SmartStream.begin())
-      , itEnd   (pCoStock->m_SmartStream.end())
       , nDepth  (0)
-    {}
+			, itBegin(pCoStock->m_SmartStream.begin())
+			, itEnd(pCoStock->m_SmartStream.end())
+		{}
 
     b32     IsValid             () const;
     _TStr   SectionName         () const;
@@ -117,6 +108,15 @@ public:
 
 
   typedef SECTION_DESC* Section;
+
+protected:
+	typedef clvector<Section>  HandleArray;
+
+	_SmartStreamT m_SmartStream;
+	clBuffer*     m_pBuffer;
+	HandleArray   m_aHandles;
+
+	static void ReverseByteOrder16(u16* ptr, clsize nCount);
 
 public:
   SmartStockT();

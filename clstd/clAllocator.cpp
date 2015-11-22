@@ -339,13 +339,13 @@ namespace clstd
 
   Allocator::Allocator(const ch* szName, const ALLOCPLOY* pAllocPloy)
     : m_szPoolName      (szName)
-    , m_nPloyCount      (0)
-    , m_aPloy           (pAllocPloy)
-    , m_nMemPoolSize    (0)
-    , m_pMemPoolObj     (NULL)
-    , m_nMaxPoolIndex   (0)
-    , m_nMaxUnit        (0)
-  {
+		, m_nMaxUnit(0)
+		, m_nMemPoolSize(0)
+		, m_pMemPoolObj(NULL)
+		, m_nMaxPoolIndex   (0)
+		, m_nPloyCount(0)
+		, m_aPloy(pAllocPloy)
+	{
     ASSERT(pAllocPloy != NULL);
     CalcMemPool();
   }

@@ -7,10 +7,13 @@
 #define SOCKET_ERROR_LOG(_STAT, _MSG) if (_STAT == SOCKET_ERROR) { CLOG_ERROR(_MSG); }
 #define MAX_RECV_BUF 4096
 
+#if defined(_WINDOWS)
 #pragma comment(lib, "Ws2_32.lib")
+#endif // #if defined(_WINDOWS)
 
 namespace clstd
 {
+#if defined(_WINDOWS)
   TCPServer::TCPServer()
     : m_ServerSocket (0)
   {
@@ -374,6 +377,6 @@ namespace clstd
     return result;
   }
 
-
+#endif // #if defined(_WINDOWS)
   //////////////////////////////////////////////////////////////////////////
 } // namespace clstd

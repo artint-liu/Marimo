@@ -246,7 +246,7 @@ static void sbox( unsigned char *dst, const unsigned char *src )
     }
 }
 
-static void xor( unsigned char *dst, const unsigned char *a, const unsigned char *b, const int count )
+static void _xor( unsigned char *dst, const unsigned char *a, const unsigned char *b, const int count )
 {
     int i;
 
@@ -276,11 +276,11 @@ unsigned char *CRYPT_DEShash( unsigned char *dst, const unsigned char *key, cons
         Permute( SubK, K, KeyCompression, 6 );
 
         Permute( Rexp, R, DataExpansion, 6 );
-        xor( Rexp, Rexp, SubK, 6 );
+        _xor( Rexp, Rexp, SubK, 6 );
 
         sbox( Rn, Rexp );
         Permute( Rexp, Rn, PBox, 4 );
-        xor( Rn, L, Rexp, 4 );
+        _xor( Rn, L, Rexp, 4 );
 
         for (j = 0; j < 4; j++)
         {
@@ -315,11 +315,11 @@ unsigned char *CRYPT_DESunhash( unsigned char *dst, const unsigned char *key, co
         Permute( SubK, K, KeyCompression, 6 );
 
         Permute( Rexp, R, DataExpansion, 6 );
-        xor( Rexp, Rexp, SubK, 6 );
+        _xor( Rexp, Rexp, SubK, 6 );
 
         sbox( Rn, Rexp );
         Permute( Rexp, Rn, PBox, 4 );
-        xor( Rn, L, Rexp, 4 );
+        _xor( Rn, L, Rexp, 4 );
 
         for (j = 0; j < 4; j++)
         {

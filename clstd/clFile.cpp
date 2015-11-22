@@ -7,7 +7,9 @@
 #include "clBuffer.H"
 #include "clUtility.H"
 
+#ifdef _WINDOWS
 #pragma warning(disable:4355)
+#endif // #ifdef _WINDOWS
 
 namespace clstd
 {
@@ -265,7 +267,8 @@ namespace clstd
       lpLastWriteTime->dwLowDateTime  = sLastWriteTime.dwLowDateTime;
     }
 #else
-#error not implement!
+		ASSERT(0);
+//#error not implement!
 #endif // #ifdef _WINDOWS
   }
 

@@ -225,15 +225,15 @@ extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile,int
 //#endif
 
 
-extern "C" int cl_atoi(const char* szStr)
-{
-  return atoi(szStr);
-}
-
-extern "C" double cl_atof(const char* szStr)
-{
-  return atof(szStr);
-}
+//extern "C" int cl_atoi(const char* szStr)
+//{
+//  return atoi(szStr);
+//}
+//
+//extern "C" double cl_atof(const char* szStr)
+//{
+//  return atof(szStr);
+//}
 
 namespace clstd
 {
@@ -265,27 +265,38 @@ namespace clstd
 #else
   CLLONG InterlockedIncrement(CLLONG volatile *Addend)
   {
-    return atomic_inc(Addend);
+		ASSERT(0);
+    //return atomic_inc(Addend);
+		return ++*Addend;
   }
 
   CLLONG InterlockedDecrement(CLLONG volatile *Addend)
   {
-    return atomic_dec(&Addend);
+		ASSERT(0);
+    //return atomic_dec(&Addend);
+		return --*Addend;
   }
 
   CLLONG InterlockedExchange(CLLONG volatile *Target, CLLONG Value)
   {
-    STATIC_ASSERT(0);
+		ASSERT(0);
+		//STATIC_ASSERT(0);
+		CLLONG v = *Target;
+		*Target = Value;
+		return v;
   }
 
   CLLONG InterlockedExchangeAdd(CLLONG volatile *Addend, CLLONG Value)
   {
-    STATIC_ASSERT(0);
+		ASSERT(0);
+    //STATIC_ASSERT(0);
+		return ((*Addend) += Value);
   }
 
-  CLLONG InterlockedCompareExchange (CLLONG volatile *Destination, CLLONG Exchange, CLLONG Comparand)
+  /*CLLONG InterlockedCompareExchange(CLLONG volatile *Destination, CLLONG Exchange, CLLONG Comparand)
   {
-    STATIC_ASSERT(0);
-  }
+		ASSERT(0);
+    //STATIC_ASSERT(0);
+  }*/
 #endif // #ifdef _WIN32
 } // namespace clstd

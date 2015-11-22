@@ -165,51 +165,63 @@ namespace clstd
 
   _triangle::_triangle( const _float3* aVertices )
   {
+		_float3* m = *this;
     m[0] = aVertices[0];
     m[1] = aVertices[1];
     m[2] = aVertices[2];
   }
 
-  _triangle::_triangle( const _float3& _A, const _float3& _B, const _float3& _C )
+  _triangle::_triangle( const _float3& _PA, const _float3& _PB, const _float3& _PC )
   {
-    m[0] = _A;
-    m[1] = _B;
-    m[2] = _C;
+		_float3* m = *this;
+		m[0] = _PA;
+    m[1] = _PB;
+    m[2] = _PC;
   }
 
-  _triangle::_triangle( const _float3* aVertices, int _A, int _B, int _C )
+  _triangle::_triangle( const _float3* aVertices, int _PA, int _PB, int _PC )
   {
-    m[0] = aVertices[_A];
-    m[1] = aVertices[_B];
-    m[2] = aVertices[_C];
+		_float3* m = *this;
+    m[0] = aVertices[_PA];
+    m[1] = aVertices[_PB];
+    m[2] = aVertices[_PC];
   }
+
+	_triangle::operator _float3*() const
+	{
+		return (_float3*)this;
+	}
 
   _triangle& _triangle::set( const _float3* aVertices )
   {
-    m[0] = aVertices[0];
+		_float3* m = *this;
+		m[0] = aVertices[0];
     m[1] = aVertices[1];
     m[2] = aVertices[2];
     return *this;
   }
 
-  _triangle& _triangle::set( const _float3& _A, const _float3& _B, const _float3& _C )
+  _triangle& _triangle::set(const _float3& _PA, const _float3& _PB, const _float3& _PC)
   {
-    m[0] = _A;
-    m[1] = _B;
-    m[2] = _C;
+		_float3* m = *this;
+		m[0] = _PA;
+    m[1] = _PB;
+    m[2] = _PC;
     return *this;
   }
 
-  _triangle& _triangle::set( const _float3* aVertices, int _A, int _B, int _C )
+  _triangle& _triangle::set( const _float3* aVertices, int _PA, int _PB, int _PC )
   {
-    m[0] = aVertices[_A];
-    m[1] = aVertices[_B];
-    m[2] = aVertices[_C];
+		_float3* m = *this;
+		m[0] = aVertices[_PA];
+    m[1] = aVertices[_PB];
+    m[2] = aVertices[_PC];
     return *this;
   }
 
   _triangle& _triangle::flip()
   {
+		_float3* m = *this;
     clSwap(m[0], m[2]);
     return *this;
   }

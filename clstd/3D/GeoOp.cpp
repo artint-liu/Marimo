@@ -94,7 +94,7 @@ namespace clstd
 
   int IntersectRayAABB(const Ray& ray, const AABB& aabb, float* fDist, float3* pNormal)
   {
-    const float fEpsilon = 1.0f;
+    //const float fEpsilon = 1.0f;
     float fLen;
     
     if(aabb.IsPointIn(ray.vOrigin)) {
@@ -483,7 +483,7 @@ namespace clstd
       return false;
 
     float3 aPoints[8];
-    DWORD dwPointMask = 0;
+    CLDWORD dwPointMask = 0;
     aPoints[0].set(aabb.vMin.x, aabb.vMin.y, aabb.vMin.z);
     aPoints[1].set(aabb.vMax.x, aabb.vMin.y, aabb.vMin.z);
     aPoints[2].set(aabb.vMax.x, aabb.vMin.y, aabb.vMax.z);

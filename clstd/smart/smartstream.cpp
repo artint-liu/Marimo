@@ -70,11 +70,11 @@ b32 SmartStream_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
 _SS_TEMPL _SS_IMPL::SmartStreamT(T_LPCSTR pStream /* = NULL */, clsize uCountOfChar /* = NULL */)
 : m_pBegin          (pStream)
 , m_pEnd            (pStream + uCountOfChar)
-, m_dwFlags         (NULL)
+, m_dwFlags         (0)
 , m_pCallBack       (NULL)
-, m_lParam          (NULL)
+, m_lParam          (0)
 , m_pTriggerCallBack(NULL)
-, m_lParamTrigger   (NULL)
+, m_lParamTrigger   (0)
 {
   int i;
   for(i = 0; i < 128; i++)
@@ -316,7 +316,7 @@ typename _SS_IMPL::iterator _SS_IMPL::begin() const
 #if defined(_WINDOWS)
 _SS_TEMPL 
 typename const _SS_IMPL::iterator& _SS_IMPL::end() const
-#elif defined(_IOS)
+#elif defined(_IOS) || defined(_ANDROID)
 _SS_TEMPL 
   typename _SS_IMPL::const_iterator& _SS_IMPL::end() const
 #endif // #if defined(_WINDOWS)
@@ -527,6 +527,11 @@ _SS_TEMPL
 typename const _SS_IMPL::iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
 #elif defined(_IOS)
 typename _SS_IMPL::const_iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
+#elif defined(_ANDROID)
+_SS_TEMPL
+typename _SS_IMPL::const_iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
+#else
+#error new platform
 #endif // #if defined(_WINDOWS)
 {
   iterator it = itBegin;

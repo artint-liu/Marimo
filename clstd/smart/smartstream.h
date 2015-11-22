@@ -31,7 +31,10 @@
 //#define CU16  const u16
 #define CCH    const ch
 
+#ifdef _WINDOWS
 #pragma warning(disable: 4661)
+#endif // #ifdef _WINDOWS
+
 #ifdef _X64
 #pragma pack(push)
 #pragma pack(8)
@@ -165,7 +168,7 @@ protected:
   u32_ptr       m_lParamTrigger;
 
 public:
-  SmartStreamT               (T_LPCSTR pStream = NULL, clsize uCountOfChar = NULL);
+  SmartStreamT               (T_LPCSTR pStream = NULL, clsize uCountOfChar = 0);
   b32      Initialize        (T_LPCSTR pStream, clsize uCountOfChar);
   void     GetCharSemantic   (SemType* pCharSem, clsize uStart, clsize uEnd) const;
   void     SetCharSemantic   (const SemType* pCharSem, clsize uStart, clsize uEnd);
@@ -496,7 +499,7 @@ namespace SmartStreamUtility
   template<class _Iter, class _TString>
   _TString& TranslateQuotation(const _Iter& it, _TString& str)
   {
-    _TString::TChar* pTemp = str.GetBuffer(it.length + 1);
+    typename _TString::TChar* pTemp = str.GetBuffer(it.length + 1);
     u32 i = 0, n = 0;
     if(it.marker[0] == '\"' || it.marker[0] == '\'')
     {
@@ -541,7 +544,7 @@ namespace SmartStreamUtility
   {
     // 极端情况下所有字符都变成"转义符+字符"形式，再加上首尾引号
     clsize length = clstd::strlenT<_TString::TChar>(szText);
-    _TString::TChar* pTemp = str.GetBuffer(length * 2 + 2 + 1);
+    typename _TString::TChar* pTemp = str.GetBuffer(length * 2 + 2 + 1);
     size_t n = 1;
     pTemp[0] = '\"';
 

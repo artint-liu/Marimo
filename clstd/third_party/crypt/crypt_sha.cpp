@@ -146,21 +146,21 @@ CLVOID A_SHAUpdate(PSHA_CTX Context, const unsigned char *Buffer, UINT BufferSiz
 
    if (BufferContentSize + BufferSize < 64)
    {
-      RtlCopyMemory(&Context->Buffer[BufferContentSize], Buffer,
+      memcpy(&Context->Buffer[BufferContentSize], Buffer,
                     BufferSize);
    }
    else
    {
       while (BufferContentSize + BufferSize >= 64)
       {
-         RtlCopyMemory(Context->Buffer + BufferContentSize, Buffer,
+        memcpy(Context->Buffer + BufferContentSize, Buffer,
                        64 - BufferContentSize);
          Buffer += 64 - BufferContentSize;
          BufferSize -= 64 - BufferContentSize;
          SHA1Transform(Context->State, Context->Buffer);
          BufferContentSize = 0;
       }
-      RtlCopyMemory(Context->Buffer + BufferContentSize, Buffer, BufferSize);
+      memcpy(Context->Buffer + BufferContentSize, Buffer, BufferSize);
    }
 }
 
@@ -176,7 +176,7 @@ CLVOID A_SHAUpdate(PSHA_CTX Context, const unsigned char *Buffer, UINT BufferSiz
  * RETURNS
  *  Nothing
  */
-CLVOID A_SHAFinal(PSHA_CTX Context, PULONG Result)
+CLVOID A_SHAFinal(PSHA_CTX Context, LPULONG Result)
 {
    INT Pad, Index;
    UCHAR Buffer[72];
@@ -192,7 +192,7 @@ CLVOID A_SHAFinal(PSHA_CTX Context, PULONG Result)
    LengthHi = (Context->Count[0] << 3) | (Context->Count[1] >> (32 - 3));
    LengthLo = (Context->Count[1] << 3);
 
-   RtlZeroMemory(Buffer + 1, Pad - 1);
+   memset(Buffer + 1, 0, Pad - 1);
    Buffer[0] = 0x80;
    Count = (ULONG*)(Buffer + Pad);
    Count[0] = DWORD2BE(LengthHi);
