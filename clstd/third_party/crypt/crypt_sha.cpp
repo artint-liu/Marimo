@@ -176,7 +176,7 @@ CLVOID A_SHAUpdate(PSHA_CTX Context, const unsigned char *Buffer, UINT BufferSiz
  * RETURNS
  *  Nothing
  */
-CLVOID A_SHAFinal(PSHA_CTX Context, LPULONG Result)
+CLVOID A_SHAFinal(PSHA_CTX Context, CLLPULONG Result)
 {
    INT Pad, Index;
    UCHAR Buffer[72];

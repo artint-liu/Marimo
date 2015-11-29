@@ -262,6 +262,9 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 #endif
 #endif
 
+#define clrand    rand
+#define clrand_s  rand_s
+
 //
 // Byte Order Mark
 //

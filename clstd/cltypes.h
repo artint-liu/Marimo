@@ -134,8 +134,13 @@ typedef int               CLINT;
 typedef long              CLLONG;
 typedef float             CLFLOAT;
 typedef void              CLVOID;
-typedef int64_t						CLLONGLONG;
 typedef u16               CLUSHORT;
+
+#if defined(_WINDOWS)
+typedef __int64           CLLONGLONG;
+#else
+typedef int64_t           CLLONGLONG;
+#endif
 
 #if defined(_WINDOWS)
 typedef _w64 CLDWORD      CLDWORD_PTR;

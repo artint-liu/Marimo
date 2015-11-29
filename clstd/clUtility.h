@@ -1,9 +1,6 @@
 #ifndef _CL_UTILITY_
 #define _CL_UTILITY_
 
-#define clrand    rand
-#define clrand_s  rand_s
-
 template<typename _T1, typename _T2>
 inline _T2 clClamp(CLCONST _T1 nMin, CLCONST _T1 nMax, _T2 *pValue)
 {
