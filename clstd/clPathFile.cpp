@@ -7,7 +7,7 @@
 #include "clPathFile.H"
 using namespace clstd;
 
-//template class clStringX<wch, g_Alloc_clStringW, clStringW_traits>;
+//template class clStringX<wch, g_Alloc_clStringW, clstd::StringW_traits>;
 //template class clStringX<ch, g_Alloc_clStringA, clStringA_traits>;
 
 //template b32 _GetFileExtensionT(const clStringA& strFile, clStringA* pstrFilename, clStringA* pstrExtension);
@@ -416,11 +416,11 @@ namespace clpathfile
   }
   b32 IsFileSpecA(const  ch* szPath)
   {
-    return IsFileSpecT<clStringA_traits, ch>(szPath);
+    return IsFileSpecT<clstd::StringA_traits, ch>(szPath);
   }
   b32 IsFileSpecW(const wch* szPath)
   {
-    return IsFileSpecT<clStringW_traits, wch>(szPath);
+    return IsFileSpecT<clstd::StringW_traits, wch>(szPath);
   }
   //////////////////////////////////////////////////////////////////////////
   template<typename _TString>

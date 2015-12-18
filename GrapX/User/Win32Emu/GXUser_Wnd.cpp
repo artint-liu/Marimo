@@ -568,7 +568,7 @@ int GXDLLAPI gxGetWindowTextA(
   }
   GXWCHAR* lpStringW = new GXWCHAR[nMaxCount];
   GXINT nLength = gxGetWindowTextW(hWnd, lpStringW, nMaxCount);
-  clStringA_traits::XStringToNative(lpString, nMaxCount, lpStringW, nMaxCount);
+  clstd::StringA_traits::XStringToNative(lpString, nMaxCount, lpStringW, nMaxCount);
   SAFE_DELETE_ARRAY(lpStringW);
   return nLength;
 }

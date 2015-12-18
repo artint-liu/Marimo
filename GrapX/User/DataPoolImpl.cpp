@@ -193,7 +193,7 @@ namespace Marimo
         for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
         {
           if(pString[nStringIndex]) {
-            pString[nStringIndex].~clStringX();
+            pString[nStringIndex].~StringX();
 //#ifdef _DEBUG
 //            m_nDbgNumOfString--;
 //#endif // #ifdef _DEBUG
@@ -210,7 +210,7 @@ namespace Marimo
         for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
         {
           if(pString[nStringIndex]) {
-            pString[nStringIndex].~clStringX();
+            pString[nStringIndex].~StringX();
 //#ifdef _DEBUG
 //            m_nDbgNumOfString--;
 //#endif // #ifdef _DEBUG

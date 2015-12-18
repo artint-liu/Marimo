@@ -29,11 +29,11 @@ const size_t  MAX_DIGITS = 80;
 #define IS_EMPTY_MODEL_STR          ((u32_ptr)m_pBuf == (u32_ptr)s_EmptyStr.buf || CLSTR_ALLOCATOR(m_pBuf) == NULL)
 
 #define _CLSTR_TEMPL template<typename _TCh, class _TAllocator, _TAllocator& _Alloc, class _Traits>
-#define _CLSTR_IMPL clStringX<_TCh, _TAllocator, _Alloc, _Traits>
+#define _CLSTR_IMPL StringX<_TCh, _TAllocator, _Alloc, _Traits>
 
 //#ifdef _IOS
 //clStringX<wch, g_Alloc_clStringW, clStringW_traits> g_clStringInstW;
-//clStringX<ch, g_Alloc_clStringA, clStringA_traits> g_clStringInstA;
+//clStringX<ch, g_Alloc_clStringA, clstd::StringA_traits> g_clStringInstA;
 //#endif // _IOS
 
 template<typename _TCh>
@@ -131,52 +131,33 @@ namespace clstd
 
 //////////////////////////////////////////////////////////////////////////
 
-clsize clStringW_traits::StringLength(const wch* pStr)
+clsize clstd::StringW_traits::StringLength(const wch* pStr)
 {
   return wcslen(pStr);
 }
-clsize clStringW_traits::XStringLength(const _XCh* pStrX)
+clsize clstd::StringW_traits::XStringLength(const _XCh* pStrX)
 {
   return strlen(pStrX);
 }
-wch* clStringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uLength)
+wch* clstd::StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uLength)
 {
   return clstd::strcpyn(pStrDest, pStrSrc, uLength);
 }
-i32 clStringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
+i32 clstd::StringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
 {
   return wcscmp(pStr1, pStr2);
 }
-i32 clStringW_traits::CompareStringNoCase(const wch* pStr1, const wch* pStr2)
+i32 clstd::StringW_traits::CompareStringNoCase(const wch* pStr1, const wch* pStr2)
 {
   //return _wcsicmp(pStr1, pStr2);
     return clstd::strcmpiT(pStr1, pStr2);
 }
-const wch* clStringW_traits::StringSearchChar(const wch* pStr, wch cCh)
+const wch* clstd::StringW_traits::StringSearchChar(const wch* pStr, wch cCh)
 {
   return wcschr(pStr, cCh);
 }
-//const wch* clStringW_traits::StringSearchString(const wch* pMainStr, const wch* pSubStr)
-//{
-//  int n;
-//  const wch* pStr = pMainStr;
-//  if (*pSubStr)
-//  {
-//    while (*pStr)
-//    {
-//      for (n=0; pStr[n] == pSubStr[n]; n++)
-//      {
-//        if (!*(pSubStr + n + 1))
-//          return pStr;
-//      }
-//      pStr++;
-//    }
-//    return NULL;
-//  }
-//  else
-//    return pStr;
-//}
-void clStringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
+
+void clstd::StringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::ultox(uNum, pDestStr, uMaxLength, 10);
@@ -186,7 +167,7 @@ void clStringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength, u32 
   }
 }
 
-void clStringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
+void clstd::StringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::ltox(iNum, pDestStr, uMaxLength, 10);
@@ -196,12 +177,12 @@ void clStringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, i32 i
   }
 }
 
-i32 clStringW_traits::StringToInteger32(wch* pString)
+i32 clstd::StringW_traits::StringToInteger32(wch* pString)
 {
   return clstd::_xstrtoi<i32>(pString);
 }
 
-void clStringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, float fNum, char mode)
+void clstd::StringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, float fNum, char mode)
 {
   if(mode == 'F' || mode == 'E') {
     clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, mode);
@@ -212,7 +193,7 @@ void clStringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, float fNu
   }
 }
 
-void clStringW_traits::Unsigned64ToString(wch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
+void clstd::StringW_traits::Unsigned64ToString(wch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::ul64tox(uNum, pDestStr, uMaxLength, 10);
@@ -221,7 +202,7 @@ void clStringW_traits::Unsigned64ToString(wch* pDestStr, size_t uMaxLength, u64 
     clstd::_ultoxg_t(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
-void clStringW_traits::Integer64ToString(wch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
+void clstd::StringW_traits::Integer64ToString(wch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::l64tox(iNum, pDestStr, uMaxLength, 10);
@@ -230,23 +211,23 @@ void clStringW_traits::Integer64ToString(wch* pDestStr, size_t uMaxLength, i64 i
     clstd::_ltoxg_t<wch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
-void clStringW_traits::HexToLowerString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringW_traits::HexToLowerString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 16);
 }
-void clStringW_traits::HexToUpperString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringW_traits::HexToUpperString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 16, 1);
 }
-void clStringW_traits::BinaryToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringW_traits::BinaryToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 2);
 }
-void clStringW_traits::OctalToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringW_traits::OctalToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 8);
 }
-size_t clStringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
+size_t clstd::StringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
 {
 #if defined(_WIN32) && !defined(_C_STANDARD)
    return (size_t)
@@ -258,53 +239,36 @@ size_t clStringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, const 
 #endif // _WINDOWS
 }
 //////////////////////////////////////////////////////////////////////////
-clsize clStringA_traits::StringLength(const ch* pStr)
+clsize clstd::StringA_traits::StringLength(const ch* pStr)
 {
   return strlen(pStr);
 }
-clsize clStringA_traits::XStringLength(const _XCh* pStrX)
+clsize clstd::StringA_traits::XStringLength(const _XCh* pStrX)
 {
   return wcslen(pStrX);
 }
-ch* clStringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uLength)
+ch* clstd::StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uLength)
 {
   return clstd::strcpyn(pStrDest, pStrSrc, uLength);
 }
-i32 clStringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
+
+i32 clstd::StringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
 {
   return strcmp(pStr1, pStr2);
 }
-i32 clStringA_traits::CompareStringNoCase(const ch* pStr1, const ch* pStr2)
+
+i32 clstd::StringA_traits::CompareStringNoCase(const ch* pStr1, const ch* pStr2)
 {
   //return _strcmpi(pStr1, pStr2);
     return clstd::strcmpiT(pStr1, pStr2);
 }
-const ch* clStringA_traits::StringSearchChar(const ch* pStr, ch cCh)
+
+const ch* clstd::StringA_traits::StringSearchChar(const ch* pStr, ch cCh)
 {
   return strchr(pStr, cCh);
 }
-//const ch* clStringA_traits::StringSearchString(const ch* pMainStr, const ch* pSubStr)
-//{
-//  int n;
-//  const ch* pStr = pMainStr;
-//  if (*pSubStr)
-//  {
-//    while (*pStr)
-//    {
-//      for (n=0; *(pStr + n) == *(pSubStr + n); n++)
-//      {
-//        if (!*(pSubStr + n + 1))
-//          return pStr;
-//      }
-//      pStr++;
-//    }
-//    return NULL;
-//  }
-//  else
-//    return pStr;
-//}
 
-void clStringA_traits::Unsigned32ToString(ch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
+void clstd::StringA_traits::Unsigned32ToString(ch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::ultox(uNum, pDestStr, uMaxLength, 10);
@@ -314,7 +278,7 @@ void clStringA_traits::Unsigned32ToString(ch* pDestStr, size_t uMaxLength, u32 u
   }
 }
 
-void clStringA_traits::Integer32ToString(ch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
+void clstd::StringA_traits::Integer32ToString(ch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::ltox(iNum, pDestStr, uMaxLength, 10);
@@ -324,12 +288,12 @@ void clStringA_traits::Integer32ToString(ch* pDestStr, size_t uMaxLength, i32 iN
   }
 }
 
-i32 clStringA_traits::StringToInteger32(ch* pString)
+i32 clstd::StringA_traits::StringToInteger32(ch* pString)
 {
   return atoi(pString);
 }
 
-void clStringA_traits::Unsigned64ToString(ch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
+void clstd::StringA_traits::Unsigned64ToString(ch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::ul64tox(uNum, pDestStr, uMaxLength, 10);
@@ -339,7 +303,7 @@ void clStringA_traits::Unsigned64ToString(ch* pDestStr, size_t uMaxLength, u64 u
   }
 }
 
-void clStringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
+void clstd::StringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::l64tox(iNum, pDestStr, uMaxLength, 10);
@@ -349,7 +313,7 @@ void clStringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i64 iN
   }
 }
 
-void clStringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, float fNum, char mode)
+void clstd::StringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, float fNum, char mode)
 {
   if(mode == 'F' || mode == 'E') {
     clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, mode);
@@ -360,24 +324,24 @@ void clStringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, float fNum
   }
 }
 
-void clStringA_traits::HexToLowerString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringA_traits::HexToLowerString(ch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 16);
 }
 
-void clStringA_traits::HexToUpperString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringA_traits::HexToUpperString(ch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 16, 1);
 }
-void clStringA_traits::BinaryToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringA_traits::BinaryToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 2);
 }
-void clStringA_traits::OctalToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+void clstd::StringA_traits::OctalToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 8);
 }
-size_t clStringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
+size_t clstd::StringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
 {
 #if defined(_WIN32) && !defined(_C_STANDARD)
   return (size_t)
@@ -392,1566 +356,1575 @@ size_t clStringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _
 }
 //////////////////////////////////////////////////////////////////////////
 
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX()
-  : m_pBuf  ((_TCh*)s_EmptyStr.buf)
+namespace clstd
 {
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const _TCh* pStr)
-  : m_pBuf(NULL)
-{
-  if(pStr == NULL) {
-    m_pBuf = (_TCh*)s_EmptyStr.buf;
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX()
+    : m_pBuf  ((_TCh*)s_EmptyStr.buf)
+  {
   }
-  else {
-    const clsize uStrLen = _Traits::StringLength(pStr);
-    allocLength(&_Alloc, uStrLen);
-    _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
-  }
-}
 
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const _TCh* pStr, size_t uCount)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, uCount);
-
-  _Traits::CopyStringN(m_pBuf, pStr, uCount);
-}
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const _XCh* pStrX)
-  : m_pBuf(NULL)
-{
-  if(pStrX == NULL) {
-    m_pBuf = (_TCh*)s_EmptyStr.buf;
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const _TCh* pStr)
+    : m_pBuf(NULL)
+  {
+    if(pStr == NULL) {
+      m_pBuf = (_TCh*)s_EmptyStr.buf;
+    }
+    else {
+      const clsize uStrLen = _Traits::StringLength(pStr);
+      allocLength(&_Alloc, uStrLen);
+      _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
+    }
   }
-  else {
-    const size_t uInputLength = _Traits::XStringLength(pStrX);
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const _TCh* pStr, size_t uCount)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, uCount);
+
+    _Traits::CopyStringN(m_pBuf, pStr, uCount);
+  }
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const _XCh* pStrX)
+    : m_pBuf(NULL)
+  {
+    if(pStrX == NULL) {
+      m_pBuf = (_TCh*)s_EmptyStr.buf;
+    }
+    else {
+      const size_t uInputLength = _Traits::XStringLength(pStrX);
+      size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
+      allocLength(&_Alloc, uLength);
+
+      _Traits::XStringToNative(m_pBuf, uLength, pStrX, uInputLength);
+    }
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const _XCh* pStrX, size_t uCount)
+  {
+    const size_t uInputLength = (uCount == (size_t)-1)
+      ? _Traits::XStringLength(pStrX) : uCount;
+
     size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
     allocLength(&_Alloc, uLength);
 
-    _Traits::XStringToNative(m_pBuf, uLength, pStrX, uInputLength);
-  }
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const _XCh* pStrX, size_t uCount)
-{
-  const size_t uInputLength = (uCount == (size_t)-1)
-    ? _Traits::XStringLength(pStrX) : uCount;
-
-  size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
-  allocLength(&_Alloc, uLength);
-
-  _Traits::XStringToNative(
-    m_pBuf, uLength, pStrX, uInputLength);
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const _TCh cCh, size_t uCount)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, uCount);
-  
-  for(size_t i = 0; i < uCount; i++)
-    m_pBuf[i] = cCh;
-}
-//_CLSTR_TEMPL
-//_CLSTR_IMPL::clStringX(clStringX& clStr)
-//{
-//  allocLength(clStr.GetLength());
-//  _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
-//}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const clStringX& clStr)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, clStr.GetLength());
-  
-  _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const int nInteger)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, MAX_DIGITS);
-  
-  _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, nInteger, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-}
-
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const float fFloat, char mode)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, MAX_DIGITS);
-  
-  _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, mode);
-  reduceLength(_Traits::StringLength(m_pBuf));
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const long lLong)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, MAX_DIGITS);
-  
-  _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, lLong, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const unsigned int uInteger)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, MAX_DIGITS);
-  
-  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::clStringX(const unsigned long uLong)
-  : m_pBuf(NULL)
-{
-  allocLength(&_Alloc, MAX_DIGITS);
-  
-  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL::~clStringX()
-{
-  _TAllocator* const pAlloc = CLSTR_ALLOCATOR(m_pBuf);
-  
-  // 如果容量是0,那么一定来自s_EmptyStr, 否则应该是正常的分配器
-  const size_t uCapacity = CLSTR_CAPACITY(m_pBuf);
-  ASSERT((uCapacity != 0 && ( ! IS_EMPTY_MODEL_STR)) ||
-    (uCapacity == 0 /*&& IS_EMPTY_MODEL_STR */) && pAlloc == NULL);
-  // 注释掉 "&& IS_EMPTY_MODEL_STR" 是因为不能以此判断, clstd多重连入时 s_EmptyStr 会有多个实例地址
-
-  if(uCapacity != 0)
-    pAlloc->Free(CLSTR_PTR(m_pBuf));
-}
-//_CLSTR_IMPL::clStringX(const _TCh* pFmt, ...)
-//{
-//}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const _TCh* pStr)
-{
-  if(pStr == NULL) {
-    Clear();
-  }
-  else {
-    const clsize uStrLen = _Traits::StringLength(pStr);
-    resizeLengthNoCopy(uStrLen);
-    _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
-  }
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const _XCh* pStrX)
-{
-  if(pStrX == NULL) {
-    Clear();
-  }
-  else {
-    const size_t uInputLength = _Traits::XStringLength(pStrX);
-    size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
-    resizeLengthNoCopy(uLength);
-    _Traits::XStringToNative(m_pBuf, uLength, pStrX, uInputLength);
-  }
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const _TCh ch)
-{
-  resizeLengthNoCopy(1);
-  *m_pBuf = ch;
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const clStringX& clStr)
-{
-  resizeLengthNoCopy(clStr.GetLength());
-  _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const int nInteger)
-{
-  resizeLengthNoCopy(MAX_DIGITS);
-  _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, nInteger, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const float fFloat)
-{
-  resizeLengthNoCopy(MAX_DIGITS);
-  _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, 'F');
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const long lLong)
-{
-  resizeLengthNoCopy(MAX_DIGITS);
-  _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, lLong, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const unsigned int uInteger)
-{
-  resizeLengthNoCopy(MAX_DIGITS);
-  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator=(const unsigned long uLong)
-{
-  resizeLengthNoCopy(MAX_DIGITS);
-  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-//_CLSTR_TEMPL
-//bool _CLSTR_IMPL::operator==(const _TCh* pStr) const
-//{
-//  return Compare(pStr) == 0;
-//}
-
-_CLSTR_TEMPL
-bool _CLSTR_IMPL::operator==(const _CLSTR_IMPL& clStr) const
-{
-  return (CLSTR_LENGTH(m_pBuf) == CLSTR_LENGTH(clStr.m_pBuf) &&
-    Compare(clStr.m_pBuf) == 0);
-}
-
-_CLSTR_TEMPL
-bool _CLSTR_IMPL::operator<(const clStringX& clStr2) const
-{
-  return (Compare(clStr2) < 0);
-}
-
-_CLSTR_TEMPL
-bool _CLSTR_IMPL::operator>(const clStringX& clStr2) const
-{
-  return (Compare(clStr2) > 0);
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL _CLSTR_IMPL::operator+(const _TCh* pStr) const
-{
-  _CLSTR_IMPL strTemp = *this;
-  strTemp.Append(pStr);
-  return strTemp;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL _CLSTR_IMPL::operator+(const _TCh ch) const
-{
-  _CLSTR_IMPL strTemp = *this;
-  strTemp.Append(ch);
-  return strTemp;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL _CLSTR_IMPL::operator+(const _XCh* pStrX) const
-{
-  _CLSTR_IMPL strTemp = *this;
-  strTemp.Append(pStrX);
-  return strTemp;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL _CLSTR_IMPL::operator+(const _CLSTR_IMPL& clStr2) const
-{
-  _CLSTR_IMPL strTemp = *this;
-  strTemp.Append(clStr2);
-  return strTemp;
-}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL _CLSTR_IMPL::operator+(int nInteger) const
-//{
-//  _CLSTR_IMPL strTemp = *this;
-//  strTemp+=nInteger;
-//  return strTemp;
-//}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL _CLSTR_IMPL::operator+(float fFloat) const
-//{
-//  _CLSTR_IMPL strTemp = *this;
-//  strTemp+=fFloat;
-//  return strTemp;
-//}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL _CLSTR_IMPL::operator+(long lLong) const
-//{
-//  _CLSTR_IMPL strTemp = *this;
-//  strTemp+=lLong;
-//  return strTemp;
-//}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL _CLSTR_IMPL::operator+(unsigned int uInteger) const
-//{
-//  _CLSTR_IMPL strTemp = *this;
-//  strTemp+=uInteger;
-//  return strTemp;
-//}
-//
-//_CLSTR_TEMPL
-//_CLSTR_IMPL _CLSTR_IMPL::operator+(unsigned long uLong) const
-//{
-//  _CLSTR_IMPL strTemp = *this;
-//  strTemp+=uLong;
-//  return strTemp;
-//}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const _TCh* pStr)
-{
-  const clsize uInputLen = _Traits::StringLength(pStr);
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLen + uInputLen);
-  _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uInputLen);
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const _XCh* pStrX)
-{
-  Append(pStrX);
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const _TCh cCh)
-{
-  resizeLength(CLSTR_LENGTH(m_pBuf) + 1);
-  m_pBuf[CLSTR_LENGTH(m_pBuf) - 1] = cCh;
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const clStringX& clStr)
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLen + clStr.GetLength());
-  _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, clStr.GetLength());
-  return *this;
-}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const int nInteger)
-//{
-//  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-//  resizeLength(uStrLength + MAX_DIGITS);
-//  _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, nInteger);
-//  reduceLength(_Traits::StringLength(m_pBuf));
-//  return *this;
-//}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const float fFloat)
-//{
-//  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-//  resizeLength(uStrLength + MAX_DIGITS);
-//  _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, fFloat);
-//  reduceLength(_Traits::StringLength(m_pBuf));
-//  return *this;
-//}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const long lLong)
-//{
-//  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-//  resizeLength(uStrLength + MAX_DIGITS);
-//  _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, lLong);
-//  reduceLength(_Traits::StringLength(m_pBuf));
-//  return *this;
-//}
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::AppendFloat(float val, char mode)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLength + MAX_DIGITS);
-  _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, val, mode);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::AppendInteger32(s32 val, int nNumGroup)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLength + MAX_DIGITS);
-  _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::AppendUInt32(u32 val, int nNumGroup)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLength + MAX_DIGITS);
-  _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-  _CLSTR_IMPL& _CLSTR_IMPL::AppendInteger64(s64 val, int nNumGroup)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLength + MAX_DIGITS);
-  _Traits::Integer64ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-_CLSTR_TEMPL
-  _CLSTR_IMPL& _CLSTR_IMPL::AppendUInt64(u64 val, int nNumGroup)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLength + MAX_DIGITS);
-  _Traits::Unsigned64ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-  reduceLength(_Traits::StringLength(m_pBuf));
-  return *this;
-}
-
-//_CLSTR_TEMPL
-//_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const unsigned int uInteger)
-//{
-//  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-//  resizeLength(uStrLength + MAX_DIGITS);
-//  _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, uInteger);
-//  reduceLength(_Traits::StringLength(m_pBuf));
-//  return *this;
-//}
-//
-//_CLSTR_TEMPL
-//_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const unsigned long uLong)
-//{
-//  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-//  resizeLength(uStrLength + MAX_DIGITS);
-//  _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, uLong);
-//  reduceLength(_Traits::StringLength(m_pBuf));
-//  return *this;
-//}
-
-_CLSTR_TEMPL
-_TCh& _CLSTR_IMPL::operator[](int nIdx)
-{
-  ASSERT(nIdx <= (int)CLSTR_LENGTH(m_pBuf));
-  return m_pBuf[nIdx];
-}
-
-//_CLSTR_TEMPL
-//  _TCh& _CLSTR_IMPL::operator[](clsize nIdx)
-//{
-//  ASSERT(nIdx <= (int)CLSTR_LENGTH(m_pBuf));
-//  return m_pBuf[nIdx];
-//}
-
-_CLSTR_TEMPL
-_TCh& _CLSTR_IMPL::Front() const
-{
-  return m_pBuf[0];
-}
-_CLSTR_TEMPL
-_TCh& _CLSTR_IMPL::Back() const
-{
-  return m_pBuf[CLSTR_LENGTH(m_pBuf) - 1];
-}
-_CLSTR_TEMPL
-_CLSTR_IMPL::operator const _TCh*() const
-{
-  return m_pBuf;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::GetLength() const
-{
-  ASSERT(CLSTR_LENGTH(m_pBuf) <= CLSTR_CAPACITY(m_pBuf));
-  return CLSTR_LENGTH(m_pBuf);
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::GetCapacity() const
-{
-  return CLSTR_CAPACITY(m_pBuf);
-}
-
-_CLSTR_TEMPL
-_TCh* _CLSTR_IMPL::GetBuffer() const
-{
-  return m_pBuf;
-}
-
-_CLSTR_TEMPL
-_TCh* _CLSTR_IMPL::GetBuffer(size_t nSize)
-{
-  if(nSize > 0) {
-    resizeLength(nSize);
-  }
-  return m_pBuf;
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::Reserve(size_t nSize)
-{
-  if(nSize > CLSTR_CAPACITY(m_pBuf)) {
-    const size_t length = CLSTR_LENGTH(m_pBuf);
-    inflateCapacity(nSize);
-    CLSTR_LENGTH(m_pBuf) = length;
-    if(length == 0) {
-      // 空字符串在扩容时没有复制操作，新空间可能没有正确的结尾
-      m_pBuf[length] = '\0';
-    }
-  }
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::ReleaseBuffer()
-{
-  const size_t nBufferLength = _Traits::StringLength(m_pBuf);
-  ASSERT(CLSTR_CAPACITY(m_pBuf) >= nBufferLength && // 不包含结尾'\0'
-    CLSTR_LENGTH(m_pBuf) >= nBufferLength);
-  CLSTR_LENGTH(m_pBuf) = nBufferLength;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Format(const _TCh *pFmt, ...)
-{
-  if( ! IS_EMPTY_MODEL_STR) {
-    CLSTR_LENGTH(m_pBuf) = 0;
+    _Traits::XStringToNative(
+      m_pBuf, uLength, pStrX, uInputLength);
   }
 
-  // 防止上面的条件判断失败，字符串长度又没有清零
-  ASSERT(CLSTR_LENGTH(m_pBuf) == 0);
-
-  va_list  arglist;
-  va_start(arglist, pFmt);
-  return VarFormat(pFmt, arglist);
-}
-
-_CLSTR_TEMPL
-int _CLSTR_IMPL::Compare(const _TCh* pStr) const
-{
-  return _Traits::CompareString(m_pBuf, pStr);
-}
-
-_CLSTR_TEMPL
-int _CLSTR_IMPL::CompareNoCase(const _TCh* pStr) const
-{
-  return _Traits::CompareStringNoCase(m_pBuf, pStr);
-}
-
-_CLSTR_TEMPL
-  int _CLSTR_IMPL::Compare(const _TCh* pStr, size_t count) const
-{
-  return clstd::strncmpT(m_pBuf, pStr, count);
-}
-
-_CLSTR_TEMPL
-  int _CLSTR_IMPL::CompareNoCase(const _TCh* pStr, size_t count) const
-{
-  return clstd::strncmpiT(m_pBuf, pStr, count);
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::BeginsWith(const _TCh c) const
-{
-  return CLSTR_LENGTH(m_pBuf) > 1 && m_pBuf[0] == c;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::BeginsWith(const _TCh* pStr) const
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  const size_t uCmpLength = clstd::strlenT(pStr);
-  if(uStrLength < uCmpLength) {
-    return FALSE;
-  }
-  return clstd::strncmpT(m_pBuf, pStr, uCmpLength) == 0;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::BeginsWith(const _XCh* pStr) const
-{
-  return EndsWith(clStringX(pStr));
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::EndsWith(const _TCh c) const
-{
-  return CLSTR_LENGTH(m_pBuf) > 1 && m_pBuf[CLSTR_LENGTH(m_pBuf) - 1] == c;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::EndsWith(const _TCh* pStr) const
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  const size_t uCmpLength = clstd::strlenT(pStr);
-  if(uStrLength < uCmpLength) {
-    return FALSE;
-  }
-  return clstd::strncmpT(m_pBuf + uStrLength - uCmpLength, pStr, uCmpLength) == 0;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::EndsWith(const _XCh* pStr) const
-{
-  return EndsWith(clStringX(pStr));
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLength + 1);
-  if(idx >= uStrLength)
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const _TCh cCh, size_t uCount)
+    : m_pBuf(NULL)
   {
-    m_pBuf[uStrLength] = cCh;
-  }
-  else
-  {
-    memcpy(m_pBuf + idx + 1, m_pBuf + idx, 
-      (uStrLength - idx + 1) * sizeof(_TCh));
-    m_pBuf[idx] = cCh;
-  }
-  return uStrLength + 1;
-}
+    allocLength(&_Alloc, uCount);
 
-_CLSTR_TEMPL
-  size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh, size_t count)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLength + count);
-  if(idx >= uStrLength)
-  {
-    m_pBuf[uStrLength] = cCh;
-  }
-  else
-  {
-    memcpy(m_pBuf + idx + count, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
-
-    for(size_t i = 0; i < count; i++) {
+    for(size_t i = 0; i < uCount; i++)
       m_pBuf[i] = cCh;
+  }
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL::StringX(StringX& clStr)
+  //{
+  //  allocLength(clStr.GetLength());
+  //  _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
+  //}
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const StringX& clStr)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, clStr.GetLength());
+
+    _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const int nInteger)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, MAX_DIGITS);
+
+    _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, nInteger, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+  }
+
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const float fFloat, char mode)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, MAX_DIGITS);
+
+    _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, mode);
+    reduceLength(_Traits::StringLength(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const long lLong)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, MAX_DIGITS);
+
+    _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, lLong, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const unsigned int uInteger)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, MAX_DIGITS);
+
+    _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const unsigned long uLong)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, MAX_DIGITS);
+
+    _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::~StringX()
+  {
+    _TAllocator* const pAlloc = CLSTR_ALLOCATOR(m_pBuf);
+
+    // 如果容量是0,那么一定来自s_EmptyStr, 否则应该是正常的分配器
+    const size_t uCapacity = CLSTR_CAPACITY(m_pBuf);
+    ASSERT((uCapacity != 0 && ( ! IS_EMPTY_MODEL_STR)) ||
+      (uCapacity == 0 /*&& IS_EMPTY_MODEL_STR */) && pAlloc == NULL);
+    // 注释掉 "&& IS_EMPTY_MODEL_STR" 是因为不能以此判断, clstd多重连入时 s_EmptyStr 会有多个实例地址
+
+    if(uCapacity != 0)
+      pAlloc->Free(CLSTR_PTR(m_pBuf));
+  }
+  //_CLSTR_IMPL::StringX(const _TCh* pFmt, ...)
+  //{
+  //}
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const _TCh* pStr)
+  {
+    if(pStr == NULL) {
+      Clear();
     }
-  }
-  return uStrLength + count;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Insert(size_t idx, const _TCh* pStr)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  const size_t uInputLength = _Traits::StringLength(pStr);
-  resizeLength(uStrLength + uInputLength);
-  if(idx >= uStrLength)
-  {
-    _Traits::CopyStringN(m_pBuf + uStrLength, pStr, uInputLength);
-  }
-  else
-  {
-    memcpy(m_pBuf + idx + uInputLength, m_pBuf + idx, 
-      (uStrLength - idx + 1) * sizeof(_TCh));
-    _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
-  }
-  return uStrLength + uInputLength;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Remove(_TCh cCh)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  size_t i = 0, d = 0;
-  for(; i < uStrLength; i++)
-  {
-    if(m_pBuf[i] != cCh)
-    {
-      m_pBuf[d] = m_pBuf[i];
-      d++;
+    else {
+      const clsize uStrLen = _Traits::StringLength(pStr);
+      resizeLengthNoCopy(uStrLen);
+      _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
     }
+    return *this;
   }
-  if(i != d)
-    reduceLength(d);
-  return d;
-}
 
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Remove(size_t idx, size_t uCount)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  if(uCount == (size_t)-1 || idx + uCount >= uStrLength)
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const _XCh* pStrX)
   {
-    reduceLength(idx);
-    return idx;
-  }
-  _Traits::CopyStringN(m_pBuf + idx, m_pBuf + idx + uCount, uStrLength - idx - uCount);
-  reduceLength(uStrLength - uCount);
-  return uStrLength - uCount;
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::TrimLeft(_TCh cTarget)
-{
-  size_t i = 0;
-  const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
-  for(;i < uStrLen; i++)
-    if(m_pBuf[i] != cTarget)
-      break;
-  if(i != 0)
-  {
-    _Traits::CopyStringN(m_pBuf, m_pBuf + i, uStrLen - i);
-    reduceLength(uStrLen - i);
-  }
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::TrimLeft(const _TCh* pTarget)
-{
-  size_t i = 0;
-  size_t n;
-  const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
-  for(;i < uStrLen; i++)
-  {
-    for(n = 0;pTarget[n] != 0; n++)
-      if(m_pBuf[i] == pTarget[n])
-        break;
-    if(m_pBuf[i] != pTarget[n])
-      break;
-  }
-  if(i != 0)
-  {
-    _Traits::CopyStringN(m_pBuf, m_pBuf + i, uStrLen - i);
-    reduceLength(uStrLen - i);
-  }
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::TrimRight(_TCh cTarget)
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  clsize i = uStrLen - 1;
-  for(;i != (clsize)-1; i--)
-    if(m_pBuf[i] != cTarget)
-      break;
-  if(++i != uStrLen)
-    reduceLength(i);
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::TrimRight(const _TCh* pTarget)
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  clsize i = uStrLen - 1;
-  clsize n;
-  for(;i != (clsize)-1; i--)
-  {
-    for(n = 0; pTarget[n] != 0; n++)
-      if(m_pBuf[i] == pTarget[n])
-        break;
-    if(m_pBuf[i] != pTarget[n])
-      break;
-  }
-  if(++i != uStrLen)
-    reduceLength(i);
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::IsEmpty() const
-{
-  return this == 0 || CLSTR_LENGTH(m_pBuf) == 0;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::IsNotEmpty() const
-{
-  return this && CLSTR_LENGTH(m_pBuf) > 0;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::IsFloat() const // [NOT BEEN TESTED]
-{
-  // 目前不支持1e2f这种科学计数形式
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  if(uStrLen == 0) { // null string
-    return FALSE;
-  }
-
-  // bNumeric 用来防止".f"被认为是合法的
-  b32 bNumeric = (*m_pBuf >= '0' && *m_pBuf <= '9');
-  b32 bHasDot = FALSE;
-
-  if(uStrLen == 1) {
-    return bNumeric;
-  }
-  else if(( ! bNumeric) && 
-    *m_pBuf != '+' && *m_pBuf != '-' && *m_pBuf != '.') {
-    return FALSE;
-  }
-
-  for(clsize i = 1; i < uStrLen; i++)
-  {
-    const _TCh c = m_pBuf[i];
-    if(c >= '0' && c <= '9') {
-      bNumeric = TRUE;
-      continue;
+    if(pStrX == NULL) {
+      Clear();
     }
-    else if(c == '.' && ! bHasDot) {
-      bHasDot = TRUE;
-      continue;
+    else {
+      const size_t uInputLength = _Traits::XStringLength(pStrX);
+      size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
+      resizeLengthNoCopy(uLength);
+      _Traits::XStringToNative(m_pBuf, uLength, pStrX, uInputLength);
     }
-    else if((c == 'f' || c == 'F') && i == uStrLen - 1) {
-      return bNumeric;
-    }
-    return FALSE;
-  }
-  return bNumeric;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::IsInteger() const // [NOT BEEN TESTED]
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-
-  if(uStrLen == 0) { // null string
-    return FALSE;
-  }
-  else if(uStrLen == 1) {
-    return (*m_pBuf >= '0' && *m_pBuf <= '9');
-  }
-  else if((*m_pBuf < '0' || *m_pBuf > '9') && *m_pBuf != '+' && *m_pBuf != '-') {
-     return FALSE;
+    return *this;
   }
 
-  for(clsize i = 1; i < uStrLen; i++)
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const _TCh ch)
   {
-    const _TCh c = m_pBuf[i];
-    if(c < '0' || c > '9') {
-        return FALSE;
-    }
-  }
-  return TRUE;
-}
-
-_CLSTR_TEMPL
-b32 _CLSTR_IMPL::IsAlphanumeric() const // [NOT BEEN TESTED]
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  if(uStrLen == 0) { // null string
-    return FALSE;
+    resizeLengthNoCopy(1);
+    *m_pBuf = ch;
+    return *this;
   }
 
-  for(clsize i = 0; i < uStrLen; i++)
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const StringX& clStr)
   {
-    const _TCh c = m_pBuf[i];
-    if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-      (c >= '0' && c <= '9') || c == '_') {
-        continue;
-    }
-    return FALSE;
-  }
-  return TRUE;
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::Clear()
-{
-  reduceLength(0);
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Find(_TCh cFind, size_t uStart /* = 0 */) const
-{
-  const _TCh* pFind = _Traits::StringSearchChar(m_pBuf + uStart, cFind);
-  return pFind == NULL ? npos : pFind - m_pBuf;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Find(const _TCh* pFind, size_t uStart /* = 0 */) const
-{
-  const _TCh* pFindResult = clstd::strstrT<_TCh>(m_pBuf + uStart, pFind);
-  return pFindResult == NULL ? npos : pFindResult - m_pBuf;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::FindAny(const _TCh* pCharList, size_t uStart) const
-{
-  if(pCharList == NULL) {
-    return npos;
+    resizeLengthNoCopy(clStr.GetLength());
+    _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
+    return *this;
   }
 
-  size_t nLength = CLSTR_LENGTH(m_pBuf);
-  const _TCh* pList = pCharList;
-
-  for(size_t i = 0; i < nLength; i++)
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const int nInteger)
   {
-    while(*pList) {
-      if(m_pBuf[i] == *pList) {
-        return i;
+    resizeLengthNoCopy(MAX_DIGITS);
+    _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, nInteger, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const float fFloat)
+  {
+    resizeLengthNoCopy(MAX_DIGITS);
+    _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, 'F');
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const long lLong)
+  {
+    resizeLengthNoCopy(MAX_DIGITS);
+    _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, lLong, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const unsigned int uInteger)
+  {
+    resizeLengthNoCopy(MAX_DIGITS);
+    _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator=(const unsigned long uLong)
+  {
+    resizeLengthNoCopy(MAX_DIGITS);
+    _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  //_CLSTR_TEMPL
+  //bool _CLSTR_IMPL::operator==(const _TCh* pStr) const
+  //{
+  //  return Compare(pStr) == 0;
+  //}
+
+  _CLSTR_TEMPL
+    bool _CLSTR_IMPL::operator==(const _CLSTR_IMPL& clStr) const
+  {
+    return (CLSTR_LENGTH(m_pBuf) == CLSTR_LENGTH(clStr.m_pBuf) &&
+      Compare(clStr.m_pBuf) == 0);
+  }
+
+  _CLSTR_TEMPL
+    bool _CLSTR_IMPL::operator<(const StringX& clStr2) const
+  {
+    return (Compare(clStr2) < 0);
+  }
+
+  _CLSTR_TEMPL
+    bool _CLSTR_IMPL::operator>(const StringX& clStr2) const
+  {
+    return (Compare(clStr2) > 0);
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL _CLSTR_IMPL::operator+(const _TCh* pStr) const
+  {
+    _CLSTR_IMPL strTemp = *this;
+    strTemp.Append(pStr);
+    return strTemp;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL _CLSTR_IMPL::operator+(const _TCh ch) const
+  {
+    _CLSTR_IMPL strTemp = *this;
+    strTemp.Append(ch);
+    return strTemp;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL _CLSTR_IMPL::operator+(const _XCh* pStrX) const
+  {
+    _CLSTR_IMPL strTemp = *this;
+    strTemp.Append(pStrX);
+    return strTemp;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL _CLSTR_IMPL::operator+(const _CLSTR_IMPL& clStr2) const
+  {
+    _CLSTR_IMPL strTemp = *this;
+    strTemp.Append(clStr2);
+    return strTemp;
+  }
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL _CLSTR_IMPL::operator+(int nInteger) const
+  //{
+  //  _CLSTR_IMPL strTemp = *this;
+  //  strTemp+=nInteger;
+  //  return strTemp;
+  //}
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL _CLSTR_IMPL::operator+(float fFloat) const
+  //{
+  //  _CLSTR_IMPL strTemp = *this;
+  //  strTemp+=fFloat;
+  //  return strTemp;
+  //}
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL _CLSTR_IMPL::operator+(long lLong) const
+  //{
+  //  _CLSTR_IMPL strTemp = *this;
+  //  strTemp+=lLong;
+  //  return strTemp;
+  //}
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL _CLSTR_IMPL::operator+(unsigned int uInteger) const
+  //{
+  //  _CLSTR_IMPL strTemp = *this;
+  //  strTemp+=uInteger;
+  //  return strTemp;
+  //}
+  //
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL _CLSTR_IMPL::operator+(unsigned long uLong) const
+  //{
+  //  _CLSTR_IMPL strTemp = *this;
+  //  strTemp+=uLong;
+  //  return strTemp;
+  //}
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator+=(const _TCh* pStr)
+  {
+    const clsize uInputLen = _Traits::StringLength(pStr);
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLen + uInputLen);
+    _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uInputLen);
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator+=(const _XCh* pStrX)
+  {
+    Append(pStrX);
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator+=(const _TCh cCh)
+  {
+    resizeLength(CLSTR_LENGTH(m_pBuf) + 1);
+    m_pBuf[CLSTR_LENGTH(m_pBuf) - 1] = cCh;
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::operator+=(const StringX& clStr)
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLen + clStr.GetLength());
+    _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, clStr.GetLength());
+    return *this;
+  }
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const int nInteger)
+  //{
+  //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, nInteger);
+  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  return *this;
+  //}
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const float fFloat)
+  //{
+  //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, fFloat);
+  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  return *this;
+  //}
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const long lLong)
+  //{
+  //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, lLong);
+  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  return *this;
+  //}
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::AppendFloat(float val, char mode)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLength + MAX_DIGITS);
+    _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, val, mode);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::AppendInteger32(s32 val, int nNumGroup)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLength + MAX_DIGITS);
+    _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::AppendUInt32(u32 val, int nNumGroup)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLength + MAX_DIGITS);
+    _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::AppendInteger64(s64 val, int nNumGroup)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLength + MAX_DIGITS);
+    _Traits::Integer64ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::AppendUInt64(u64 val, int nNumGroup)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLength + MAX_DIGITS);
+    _Traits::Unsigned64ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
+    reduceLength(_Traits::StringLength(m_pBuf));
+    return *this;
+  }
+
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const unsigned int uInteger)
+  //{
+  //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, uInteger);
+  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  return *this;
+  //}
+  //
+  //_CLSTR_TEMPL
+  //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const unsigned long uLong)
+  //{
+  //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, uLong);
+  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  return *this;
+  //}
+
+  _CLSTR_TEMPL
+    _TCh& _CLSTR_IMPL::operator[](int nIdx)
+  {
+    ASSERT(nIdx <= (int)CLSTR_LENGTH(m_pBuf));
+    return m_pBuf[nIdx];
+  }
+
+  _CLSTR_TEMPL
+    _TCh& _CLSTR_IMPL::operator[](clsize nIdx)
+  {
+    ASSERT(nIdx <= CLSTR_LENGTH(m_pBuf));
+    return m_pBuf[nIdx];
+  }
+
+  //_CLSTR_TEMPL
+  //  _TCh& _CLSTR_IMPL::operator[](clsize nIdx)
+  //{
+  //  ASSERT(nIdx <= (int)CLSTR_LENGTH(m_pBuf));
+  //  return m_pBuf[nIdx];
+  //}
+
+  _CLSTR_TEMPL
+    _TCh& _CLSTR_IMPL::Front() const
+  {
+    return m_pBuf[0];
+  }
+  _CLSTR_TEMPL
+    _TCh& _CLSTR_IMPL::Back() const
+  {
+    return m_pBuf[CLSTR_LENGTH(m_pBuf) - 1];
+  }
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::operator const _TCh*() const
+  {
+    return m_pBuf;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::GetLength() const
+  {
+    ASSERT(CLSTR_LENGTH(m_pBuf) <= CLSTR_CAPACITY(m_pBuf));
+    return CLSTR_LENGTH(m_pBuf);
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::GetCapacity() const
+  {
+    return CLSTR_CAPACITY(m_pBuf);
+  }
+
+  _CLSTR_TEMPL
+    _TCh* _CLSTR_IMPL::GetBuffer() const
+  {
+    return m_pBuf;
+  }
+
+  _CLSTR_TEMPL
+    _TCh* _CLSTR_IMPL::GetBuffer(size_t nSize)
+  {
+    if(nSize > 0) {
+      resizeLength(nSize);
+    }
+    return m_pBuf;
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::Reserve(size_t nSize)
+  {
+    if(nSize > CLSTR_CAPACITY(m_pBuf)) {
+      const size_t length = CLSTR_LENGTH(m_pBuf);
+      inflateCapacity(nSize);
+      CLSTR_LENGTH(m_pBuf) = length;
+      if(length == 0) {
+        // 空字符串在扩容时没有复制操作，新空间可能没有正确的结尾
+        m_pBuf[length] = '\0';
       }
-      pList++;
     }
-
-    pList = pCharList;
   }
-  return npos;
-}
 
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::FindAnyFromList(const _TCh* pCharList, size_t uStart /* = 0 */) const
-{
-  if(pCharList == NULL) {
-    return npos;
-  }
-  while(*pCharList) {
-    size_t pos = Find(*pCharList, uStart);
-
-    if(pos != npos) {
-      return pos;
-    }
-
-    pCharList++;
-  }
-  return npos;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::ReverseFind(_TCh cFind) const
-{
-  size_t uIdx = CLSTR_LENGTH(m_pBuf);
-  while((int)--uIdx >= 0)
-    if(m_pBuf[uIdx] == cFind)
-      return uIdx;
-  return (size_t)-1;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::ReverseFind(_TCh cFind, int nStart, int nEnd) const
-{
-  size_t uIdx = CLSTR_LENGTH(m_pBuf);
-
-  if(nEnd > 0)
-    uIdx = (size_t)nEnd;
-
-  while((int)--uIdx >= nStart)
-    if(m_pBuf[uIdx] == cFind)
-      return uIdx;
-  return (size_t)-1;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL _CLSTR_IMPL::Left(size_t uCount) const
-{
-  if(uCount > CLSTR_LENGTH(m_pBuf))
-    uCount = CLSTR_LENGTH(m_pBuf);
-  return _CLSTR_IMPL(m_pBuf, uCount);
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL _CLSTR_IMPL::Right(size_t uCount) const
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  if(uCount > uStrLength)
-    uCount = uStrLength;
-  return _CLSTR_IMPL(m_pBuf + uStrLength - uCount, uCount);
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL _CLSTR_IMPL::SubString(size_t uStart, size_t uCount) const
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  if(uStart + uCount > uStrLength || ((i32)uCount) < 0)
-    uCount = uStrLength - uStart;
-  if((i32)uCount < 0)
-    return _CLSTR_IMPL();
-  return _CLSTR_IMPL(m_pBuf + uStart, uCount);
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::DivideBy(_TCh cCh, clStringX& strFront, clStringX& strBack) const
-{
-  size_t pos = Find(cCh);
-  if(pos != npos) {
-    strFront = SubString(0, pos);
-    strBack  = &m_pBuf[pos + 1];
-  }
-  else {
-    strFront = *this;
-    strBack.Clear();
-  }
-  return pos;
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::ReverseDivideBy(_TCh cCh, clStringX& strFront, clStringX& strBack) const
-{
-  size_t pos = ReverseFind(cCh);
-  if(pos != npos) {
-    strFront = SubString(0, pos);
-    strBack  = &m_pBuf[pos + 1];
-  }
-  else {
-    strFront = *this;
-    strBack.Clear();
-  }
-  return pos;
-}
-
-_CLSTR_TEMPL
-i32 _CLSTR_IMPL::ToInteger(int nRadix) const
-{
-  return clstd::xtou(m_pBuf, nRadix);
-}
-
-_CLSTR_TEMPL
-double _CLSTR_IMPL::ToFloat() const
-{
-  return clstd::_xstrtof(m_pBuf);
-}
-
-_CLSTR_TEMPL
-u32 _CLSTR_IMPL::GetHash() const
-{
-  u32 _Val = 2166136261U;
-
-  _TCh* pBegin = &m_pBuf[0];
-  _TCh* pEnd = &m_pBuf[CLSTR_LENGTH(m_pBuf)];
-  while (pBegin != pEnd)
-      _Val = 16777619U * _Val ^ (u32)*pBegin++;
-    return (_Val);
-}
-
-_CLSTR_TEMPL
-u32 _CLSTR_IMPL::GetCRC32() const
-{
-  extern u32 chksum_crc32 (unsigned char *block, unsigned int length);
-  return chksum_crc32((u8*)&m_pBuf[0], (unsigned int)CLSTR_LENGTH(m_pBuf));
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::Replace(size_t idx, size_t uCount, const _TCh* pStr)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  const size_t uInputLength = pStr == NULL ? 0 : _Traits::StringLength(pStr);
-  if(idx > uStrLength)
-    idx = uStrLength;
-
-  if(idx + uCount > uStrLength || ((i32)uCount) < 0)
-    uCount = uStrLength - idx;
-  
-  if(uCount < uInputLength)
-    resizeLength(uStrLength - uCount + uInputLength);
-
-  if(uStrLength - idx - uCount != 0 && uInputLength != uCount)
-    memcpy(m_pBuf + idx + uInputLength, 
-      m_pBuf + idx + uCount, (uStrLength - idx - uCount) * sizeof(_TCh));
-
-  if(uCount > uInputLength)
-    reduceLength(uStrLength - uCount + uInputLength);
-  if(pStr != NULL)
-    _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
-}
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::Replace(_TCh cFind, _TCh cReplaceWith, size_t uStart/* = 0*/)
-{
-  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  if(uStart >= uStrLength)
-    return 0;
-  size_t nCount = 0;
-  for(size_t i = uStart; i < uStrLength; i++)
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::ReleaseBuffer()
   {
-    if(m_pBuf[i] == cFind)
+    const size_t nBufferLength = _Traits::StringLength(m_pBuf);
+    ASSERT(CLSTR_CAPACITY(m_pBuf) >= nBufferLength && // 不包含结尾'\0'
+      CLSTR_LENGTH(m_pBuf) >= nBufferLength);
+    CLSTR_LENGTH(m_pBuf) = nBufferLength;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Format(const _TCh *pFmt, ...)
+  {
+    if( ! IS_EMPTY_MODEL_STR) {
+      CLSTR_LENGTH(m_pBuf) = 0;
+    }
+
+    // 防止上面的条件判断失败，字符串长度又没有清零
+    ASSERT(CLSTR_LENGTH(m_pBuf) == 0);
+
+    va_list  arglist;
+    va_start(arglist, pFmt);
+    return VarFormat(pFmt, arglist);
+  }
+
+  _CLSTR_TEMPL
+    int _CLSTR_IMPL::Compare(const _TCh* pStr) const
+  {
+    return _Traits::CompareString(m_pBuf, pStr);
+  }
+
+  _CLSTR_TEMPL
+    int _CLSTR_IMPL::CompareNoCase(const _TCh* pStr) const
+  {
+    return _Traits::CompareStringNoCase(m_pBuf, pStr);
+  }
+
+  _CLSTR_TEMPL
+    int _CLSTR_IMPL::Compare(const _TCh* pStr, size_t count) const
+  {
+    return clstd::strncmpT(m_pBuf, pStr, count);
+  }
+
+  _CLSTR_TEMPL
+    int _CLSTR_IMPL::CompareNoCase(const _TCh* pStr, size_t count) const
+  {
+    return clstd::strncmpiT(m_pBuf, pStr, count);
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::BeginsWith(const _TCh c) const
+  {
+    return CLSTR_LENGTH(m_pBuf) > 1 && m_pBuf[0] == c;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::BeginsWith(const _TCh* pStr) const
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    const size_t uCmpLength = clstd::strlenT(pStr);
+    if(uStrLength < uCmpLength) {
+      return FALSE;
+    }
+    return clstd::strncmpT(m_pBuf, pStr, uCmpLength) == 0;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::BeginsWith(const _XCh* pStr) const
+  {
+    return EndsWith(StringX(pStr));
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::EndsWith(const _TCh c) const
+  {
+    return CLSTR_LENGTH(m_pBuf) > 1 && m_pBuf[CLSTR_LENGTH(m_pBuf) - 1] == c;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::EndsWith(const _TCh* pStr) const
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    const size_t uCmpLength = clstd::strlenT(pStr);
+    if(uStrLength < uCmpLength) {
+      return FALSE;
+    }
+    return clstd::strncmpT(m_pBuf + uStrLength - uCmpLength, pStr, uCmpLength) == 0;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::EndsWith(const _XCh* pStr) const
+  {
+    return EndsWith(StringX(pStr));
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLength + 1);
+    if(idx >= uStrLength)
     {
-      m_pBuf[i] = cReplaceWith;
-      nCount++;
-    }
-  }
-  return nCount;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr)
-{
-  const clsize uInputLen = _Traits::StringLength(pStr);
-  return Append(pStr, uInputLen);
-}
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(const _XCh *pStrX)
-{
-  const size_t uInputLength = _Traits::XStringLength(pStrX);
-  const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
-
-  size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
-
-  resizeLength(uLength + uStrLen);
-  _Traits::XStringToNative(
-    m_pBuf + uStrLen, uLength, pStrX, uInputLength);
-
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(const _XCh* pStrX, size_t uCount)
-{
-  const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
-
-  size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uCount);
-
-  resizeLength(uLength + uStrLen);
-  _Traits::XStringToNative(
-    m_pBuf + uStrLen, uLength, pStrX, uCount);
-
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr, size_t uCount)
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLen + uCount);
-  _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uCount);
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr, _TCh c, long nWidth)
-{
-  const clsize uInputLen = _Traits::StringLength(pStr);
-  
-  if(nWidth == 0) {
-    return Append(pStr, uInputLen);
-  }
-  else if(nWidth > 0) {
-    nWidth -= (long)uInputLen;
-    if(nWidth > 0) {
-      Append(c, nWidth);
-    }
-    Append(pStr);
-  }
-  else { // if(nWidth < 0)
-    ASSERT(nWidth < 0);
-    Append(pStr);
-    nWidth += (long)uInputLen;
-    if(nWidth < 0) {
-      Append(c, -nWidth);
-    }
-  }
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(_TCh cCh)
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLen + 1);
-  m_pBuf[uStrLen] = cCh;
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(_TCh cCh, size_t uCount)
-{
-  const size_t uPrevLength = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uPrevLength + uCount);
-  for(size_t i = 0; i < uCount; i++) {
-    m_pBuf[uPrevLength + i] = cCh;
-  }
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::Append(const clStringX& clStr)
-{
-  const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-  resizeLength(uStrLen + clStr.GetLength());
-  _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, clStr.GetLength());
-  return *this;
-}
-
-_CLSTR_TEMPL
-_CLSTR_IMPL& _CLSTR_IMPL::AppendFormat(const _TCh *pFmt, ...)
-{
-  va_list  arglist;
-  va_start(arglist, pFmt);
-  VarFormat(pFmt, arglist);
-  return *this;
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::MakeReverser()
-{
-  size_t uLength = CLSTR_LENGTH(m_pBuf);
-  
-  if(uLength == 0)
-    return;
-
-  const size_t uLoop = uLength >> 1;
-  uLength--;
-
-  for(size_t i = 0; i < uLoop; i++)
-  {
-    m_pBuf[i]           = m_pBuf[i] ^ m_pBuf[uLength - i];
-    m_pBuf[uLength - i] = m_pBuf[i] ^ m_pBuf[uLength - i];
-    m_pBuf[i]           = m_pBuf[i] ^ m_pBuf[uLength - i];
-  }
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::MakeUpper()
-{
-  const size_t uLength = CLSTR_LENGTH(m_pBuf);
-  for(size_t i = 0; i < uLength; i++)
-  {
-    _TCh& c = m_pBuf[i];
-    if(c >= 'a' && c <= 'z')
-      c = c - 'a' + 'A';
-  }
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::MakeLower()
-{
-  const size_t uLength = CLSTR_LENGTH(m_pBuf);
-  for(size_t i = 0; i < uLength; i++)
-  {
-    _TCh& c = m_pBuf[i];
-    if(c >= 'A' && c <= 'Z')
-      c = c - 'A' + 'a';
-  }
-}
-
-
-_CLSTR_TEMPL
-size_t _CLSTR_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
-{
-  const _TCh* ptr = pFmt;
-  _TCh        buffer[MAX_DIGITS];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于16
-  int         i;
-
-  while (*ptr != '\0')
-  {
-    const _TCh* ptr2 = _Traits::StringSearchChar(ptr, '%');
-    if(ptr2 == NULL)
-    {
-      Append(ptr);
-      break;
+      m_pBuf[uStrLength] = cCh;
     }
     else
     {
-      int nWidth = 0;
-      int nLong = 0;
-      b32 bZeroPrefix = FALSE;
-      Append(ptr, ptr2 - ptr);
-      ptr = ptr2 + 1;
-SEQUENCE:
-      switch(*ptr)
+      memcpy(m_pBuf + idx + 1, m_pBuf + idx, 
+        (uStrLength - idx + 1) * sizeof(_TCh));
+      m_pBuf[idx] = cCh;
+    }
+    return uStrLength + 1;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh, size_t count)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLength + count);
+    if(idx >= uStrLength)
+    {
+      m_pBuf[uStrLength] = cCh;
+    }
+    else
+    {
+      memcpy(m_pBuf + idx + count, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
+
+      for(size_t i = 0; i < count; i++) {
+        m_pBuf[i] = cCh;
+      }
+    }
+    return uStrLength + count;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Insert(size_t idx, const _TCh* pStr)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    const size_t uInputLength = _Traits::StringLength(pStr);
+    resizeLength(uStrLength + uInputLength);
+    if(idx >= uStrLength)
+    {
+      _Traits::CopyStringN(m_pBuf + uStrLength, pStr, uInputLength);
+    }
+    else
+    {
+      memcpy(m_pBuf + idx + uInputLength, m_pBuf + idx, 
+        (uStrLength - idx + 1) * sizeof(_TCh));
+      _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
+    }
+    return uStrLength + uInputLength;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Remove(_TCh cCh)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    size_t i = 0, d = 0;
+    for(; i < uStrLength; i++)
+    {
+      if(m_pBuf[i] != cCh)
       {
-      case '\0':
-        goto FUNC_RET;
-      case '%':
-        Append((_TCh)'%');
+        m_pBuf[d] = m_pBuf[i];
+        d++;
+      }
+    }
+    if(i != d)
+      reduceLength(d);
+    return d;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Remove(size_t idx, size_t uCount)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    if(uCount == (size_t)-1 || idx + uCount >= uStrLength)
+    {
+      reduceLength(idx);
+      return idx;
+    }
+    _Traits::CopyStringN(m_pBuf + idx, m_pBuf + idx + uCount, uStrLength - idx - uCount);
+    reduceLength(uStrLength - uCount);
+    return uStrLength - uCount;
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::TrimLeft(_TCh cTarget)
+  {
+    size_t i = 0;
+    const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
+    for(;i < uStrLen; i++)
+      if(m_pBuf[i] != cTarget)
         break;
-      case 'l':
-        ptr++;
-        if(nLong < 2) {
-          nLong++;
-          goto SEQUENCE;
+    if(i != 0)
+    {
+      _Traits::CopyStringN(m_pBuf, m_pBuf + i, uStrLen - i);
+      reduceLength(uStrLen - i);
+    }
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::TrimLeft(const _TCh* pTarget)
+  {
+    size_t i = 0;
+    size_t n;
+    const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
+    for(;i < uStrLen; i++)
+    {
+      for(n = 0;pTarget[n] != 0; n++)
+        if(m_pBuf[i] == pTarget[n])
+          break;
+      if(m_pBuf[i] != pTarget[n])
+        break;
+    }
+    if(i != 0)
+    {
+      _Traits::CopyStringN(m_pBuf, m_pBuf + i, uStrLen - i);
+      reduceLength(uStrLen - i);
+    }
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::TrimRight(_TCh cTarget)
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    clsize i = uStrLen - 1;
+    for(;i != (clsize)-1; i--)
+      if(m_pBuf[i] != cTarget)
+        break;
+    if(++i != uStrLen)
+      reduceLength(i);
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::TrimRight(const _TCh* pTarget)
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    clsize i = uStrLen - 1;
+    clsize n;
+    for(;i != (clsize)-1; i--)
+    {
+      for(n = 0; pTarget[n] != 0; n++)
+        if(m_pBuf[i] == pTarget[n])
+          break;
+      if(m_pBuf[i] != pTarget[n])
+        break;
+    }
+    if(++i != uStrLen)
+      reduceLength(i);
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::IsEmpty() const
+  {
+    return this == 0 || CLSTR_LENGTH(m_pBuf) == 0;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::IsNotEmpty() const
+  {
+    return this && CLSTR_LENGTH(m_pBuf) > 0;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::IsFloat() const // [NOT BEEN TESTED]
+  {
+    // 目前不支持1e2f这种科学计数形式
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    if(uStrLen == 0) { // null string
+      return FALSE;
+    }
+
+    // bNumeric 用来防止".f"被认为是合法的
+    b32 bNumeric = (*m_pBuf >= '0' && *m_pBuf <= '9');
+    b32 bHasDot = FALSE;
+
+    if(uStrLen == 1) {
+      return bNumeric;
+    }
+    else if(( ! bNumeric) && 
+      *m_pBuf != '+' && *m_pBuf != '-' && *m_pBuf != '.') {
+        return FALSE;
+    }
+
+    for(clsize i = 1; i < uStrLen; i++)
+    {
+      const _TCh c = m_pBuf[i];
+      if(c >= '0' && c <= '9') {
+        bNumeric = TRUE;
+        continue;
+      }
+      else if(c == '.' && ! bHasDot) {
+        bHasDot = TRUE;
+        continue;
+      }
+      else if((c == 'f' || c == 'F') && i == uStrLen - 1) {
+        return bNumeric;
+      }
+      return FALSE;
+    }
+    return bNumeric;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::IsInteger() const // [NOT BEEN TESTED]
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+
+    if(uStrLen == 0) { // null string
+      return FALSE;
+    }
+    else if(uStrLen == 1) {
+      return (*m_pBuf >= '0' && *m_pBuf <= '9');
+    }
+    else if((*m_pBuf < '0' || *m_pBuf > '9') && *m_pBuf != '+' && *m_pBuf != '-') {
+      return FALSE;
+    }
+
+    for(clsize i = 1; i < uStrLen; i++)
+    {
+      const _TCh c = m_pBuf[i];
+      if(c < '0' || c > '9') {
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+
+  _CLSTR_TEMPL
+    b32 _CLSTR_IMPL::IsAlphanumeric() const // [NOT BEEN TESTED]
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    if(uStrLen == 0) { // null string
+      return FALSE;
+    }
+
+    for(clsize i = 0; i < uStrLen; i++)
+    {
+      const _TCh c = m_pBuf[i];
+      if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+        (c >= '0' && c <= '9') || c == '_') {
+          continue;
+      }
+      return FALSE;
+    }
+    return TRUE;
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::Clear()
+  {
+    reduceLength(0);
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Find(_TCh cFind, size_t uStart /* = 0 */) const
+  {
+    const _TCh* pFind = _Traits::StringSearchChar(m_pBuf + uStart, cFind);
+    return pFind == NULL ? npos : pFind - m_pBuf;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Find(const _TCh* pFind, size_t uStart /* = 0 */) const
+  {
+    const _TCh* pFindResult = clstd::strstrT<_TCh>(m_pBuf + uStart, pFind);
+    return pFindResult == NULL ? npos : pFindResult - m_pBuf;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::FindAny(const _TCh* pCharList, size_t uStart) const
+  {
+    if(pCharList == NULL) {
+      return npos;
+    }
+
+    size_t nLength = CLSTR_LENGTH(m_pBuf);
+    const _TCh* pList = pCharList;
+
+    for(size_t i = 0; i < nLength; i++)
+    {
+      while(*pList) {
+        if(m_pBuf[i] == *pList) {
+          return i;
         }
+        pList++;
+      }
+
+      pList = pCharList;
+    }
+    return npos;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::FindAnyFromList(const _TCh* pCharList, size_t uStart /* = 0 */) const
+  {
+    if(pCharList == NULL) {
+      return npos;
+    }
+    while(*pCharList) {
+      size_t pos = Find(*pCharList, uStart);
+
+      if(pos != npos) {
+        return pos;
+      }
+
+      pCharList++;
+    }
+    return npos;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::ReverseFind(_TCh cFind) const
+  {
+    size_t uIdx = CLSTR_LENGTH(m_pBuf);
+    while((int)--uIdx >= 0)
+      if(m_pBuf[uIdx] == cFind)
+        return uIdx;
+    return (size_t)-1;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::ReverseFind(_TCh cFind, int nStart, int nEnd) const
+  {
+    size_t uIdx = CLSTR_LENGTH(m_pBuf);
+
+    if(nEnd > 0)
+      uIdx = (size_t)nEnd;
+
+    while((int)--uIdx >= nStart)
+      if(m_pBuf[uIdx] == cFind)
+        return uIdx;
+    return (size_t)-1;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL _CLSTR_IMPL::Left(size_t uCount) const
+  {
+    if(uCount > CLSTR_LENGTH(m_pBuf))
+      uCount = CLSTR_LENGTH(m_pBuf);
+    return _CLSTR_IMPL(m_pBuf, uCount);
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL _CLSTR_IMPL::Right(size_t uCount) const
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    if(uCount > uStrLength)
+      uCount = uStrLength;
+    return _CLSTR_IMPL(m_pBuf + uStrLength - uCount, uCount);
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL _CLSTR_IMPL::SubString(size_t uStart, size_t uCount) const
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    if(uStart + uCount > uStrLength || ((i32)uCount) < 0)
+      uCount = uStrLength - uStart;
+    if((i32)uCount < 0)
+      return _CLSTR_IMPL();
+    return _CLSTR_IMPL(m_pBuf + uStart, uCount);
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::DivideBy(_TCh cCh, StringX& strFront, StringX& strBack) const
+  {
+    size_t pos = Find(cCh);
+    if(pos != npos) {
+      strFront = SubString(0, pos);
+      strBack  = &m_pBuf[pos + 1];
+    }
+    else {
+      strFront = *this;
+      strBack.Clear();
+    }
+    return pos;
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::ReverseDivideBy(_TCh cCh, StringX& strFront, StringX& strBack) const
+  {
+    size_t pos = ReverseFind(cCh);
+    if(pos != npos) {
+      strFront = SubString(0, pos);
+      strBack  = &m_pBuf[pos + 1];
+    }
+    else {
+      strFront = *this;
+      strBack.Clear();
+    }
+    return pos;
+  }
+
+  _CLSTR_TEMPL
+    i32 _CLSTR_IMPL::ToInteger(int nRadix) const
+  {
+    return clstd::xtou(m_pBuf, nRadix);
+  }
+
+  _CLSTR_TEMPL
+    double _CLSTR_IMPL::ToFloat() const
+  {
+    return clstd::_xstrtof(m_pBuf);
+  }
+
+  _CLSTR_TEMPL
+    u32 _CLSTR_IMPL::GetHash() const
+  {
+    u32 _Val = 2166136261U;
+
+    _TCh* pBegin = &m_pBuf[0];
+    _TCh* pEnd = &m_pBuf[CLSTR_LENGTH(m_pBuf)];
+    while (pBegin != pEnd)
+      _Val = 16777619U * _Val ^ (u32)*pBegin++;
+    return (_Val);
+  }
+
+  _CLSTR_TEMPL
+    u32 _CLSTR_IMPL::GetCRC32() const
+  {
+    extern u32 chksum_crc32 (unsigned char *block, unsigned int length);
+    return chksum_crc32((u8*)&m_pBuf[0], (unsigned int)CLSTR_LENGTH(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::Replace(size_t idx, size_t uCount, const _TCh* pStr)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    const size_t uInputLength = pStr == NULL ? 0 : _Traits::StringLength(pStr);
+    if(idx > uStrLength)
+      idx = uStrLength;
+
+    if(idx + uCount > uStrLength || ((i32)uCount) < 0)
+      uCount = uStrLength - idx;
+
+    if(uCount < uInputLength)
+      resizeLength(uStrLength - uCount + uInputLength);
+
+    if(uStrLength - idx - uCount != 0 && uInputLength != uCount)
+      memcpy(m_pBuf + idx + uInputLength, 
+      m_pBuf + idx + uCount, (uStrLength - idx - uCount) * sizeof(_TCh));
+
+    if(uCount > uInputLength)
+      reduceLength(uStrLength - uCount + uInputLength);
+    if(pStr != NULL)
+      _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Replace(_TCh cFind, _TCh cReplaceWith, size_t uStart/* = 0*/)
+  {
+    const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
+    if(uStart >= uStrLength)
+      return 0;
+    size_t nCount = 0;
+    for(size_t i = uStart; i < uStrLength; i++)
+    {
+      if(m_pBuf[i] == cFind)
+      {
+        m_pBuf[i] = cReplaceWith;
+        nCount++;
+      }
+    }
+    return nCount;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr)
+  {
+    const clsize uInputLen = _Traits::StringLength(pStr);
+    return Append(pStr, uInputLen);
+  }
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(const _XCh *pStrX)
+  {
+    const size_t uInputLength = _Traits::XStringLength(pStrX);
+    const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
+
+    size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
+
+    resizeLength(uLength + uStrLen);
+    _Traits::XStringToNative(
+      m_pBuf + uStrLen, uLength, pStrX, uInputLength);
+
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(const _XCh* pStrX, size_t uCount)
+  {
+    const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
+
+    size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uCount);
+
+    resizeLength(uLength + uStrLen);
+    _Traits::XStringToNative(
+      m_pBuf + uStrLen, uLength, pStrX, uCount);
+
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr, size_t uCount)
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLen + uCount);
+    _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uCount);
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr, _TCh c, long nWidth)
+  {
+    const clsize uInputLen = _Traits::StringLength(pStr);
+
+    if(nWidth == 0) {
+      return Append(pStr, uInputLen);
+    }
+    else if(nWidth > 0) {
+      nWidth -= (long)uInputLen;
+      if(nWidth > 0) {
+        Append(c, nWidth);
+      }
+      Append(pStr);
+    }
+    else { // if(nWidth < 0)
+      ASSERT(nWidth < 0);
+      Append(pStr);
+      nWidth += (long)uInputLen;
+      if(nWidth < 0) {
+        Append(c, -nWidth);
+      }
+    }
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(_TCh cCh)
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLen + 1);
+    m_pBuf[uStrLen] = cCh;
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(_TCh cCh, size_t uCount)
+  {
+    const size_t uPrevLength = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uPrevLength + uCount);
+    for(size_t i = 0; i < uCount; i++) {
+      m_pBuf[uPrevLength + i] = cCh;
+    }
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Append(const StringX& clStr)
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    resizeLength(uStrLen + clStr.GetLength());
+    _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, clStr.GetLength());
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::AppendFormat(const _TCh *pFmt, ...)
+  {
+    va_list  arglist;
+    va_start(arglist, pFmt);
+    VarFormat(pFmt, arglist);
+    return *this;
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::MakeReverser()
+  {
+    size_t uLength = CLSTR_LENGTH(m_pBuf);
+
+    if(uLength == 0)
+      return;
+
+    const size_t uLoop = uLength >> 1;
+    uLength--;
+
+    for(size_t i = 0; i < uLoop; i++)
+    {
+      m_pBuf[i]           = m_pBuf[i] ^ m_pBuf[uLength - i];
+      m_pBuf[uLength - i] = m_pBuf[i] ^ m_pBuf[uLength - i];
+      m_pBuf[i]           = m_pBuf[i] ^ m_pBuf[uLength - i];
+    }
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::MakeUpper()
+  {
+    const size_t uLength = CLSTR_LENGTH(m_pBuf);
+    for(size_t i = 0; i < uLength; i++)
+    {
+      _TCh& c = m_pBuf[i];
+      if(c >= 'a' && c <= 'z')
+        c = c - 'a' + 'A';
+    }
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::MakeLower()
+  {
+    const size_t uLength = CLSTR_LENGTH(m_pBuf);
+    for(size_t i = 0; i < uLength; i++)
+    {
+      _TCh& c = m_pBuf[i];
+      if(c >= 'A' && c <= 'Z')
+        c = c - 'A' + 'a';
+    }
+  }
+
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
+  {
+    const _TCh* ptr = pFmt;
+    _TCh        buffer[MAX_DIGITS];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于16
+    int         i;
+
+    while (*ptr != '\0')
+    {
+      const _TCh* ptr2 = _Traits::StringSearchChar(ptr, '%');
+      if(ptr2 == NULL)
+      {
+        Append(ptr);
         break;
-      case 's':
-        Append((_TCh*)va_arg(arglist, _TCh*), bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
-        break;
-      case 'c':
-        Append((_TCh)va_arg(arglist, int/*_TCh*/));
-        break;
-
-      case 'd':
-        if(nLong == 2) {
-          _Traits::Integer64ToString(buffer, MAX_DIGITS, va_arg(arglist, i64), 0);
-        }
-        else {
-          _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int), 0);
-        }
-        Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
-        break;
-      case 'u':
-        if(nLong == 2) {
-          _Traits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
-        }
-        else {
-          _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
-        }
-        Append(buffer);
-        break;
-      case 'f':
-        //_gcvt_s(buffer, 16, va_arg(arglist, double), 5);
-        //swprintf_s(buffer, MAX_DIGITS, L"%f", va_arg(arglist, double));
-        _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
-        Append(buffer);
-        break;
-
-      case 'o':
-        _Traits::OctalToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
-        Append(buffer);
-        break;
-
-      case 'b':
-        _Traits::BinaryToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
-        Append(buffer);
-        break;
-
-      case 'X':
-        _Traits::HexToUpperString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
-
-        nWidth -= (int)_Traits::StringLength(buffer);
-        if(nWidth > 0)
-          Append('0', nWidth);
-
-        Append(buffer);
-        break;
-
-      case 'x':
-        _Traits::HexToLowerString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
-
-        nWidth -= (int)_Traits::StringLength(buffer);
-        if(nWidth > 0)
-          Append('0', nWidth);
-
-        Append(buffer);
-        break;
-
-      case '*':
-        nWidth = (int)va_arg(arglist, int);
-        ptr++;
-        goto SEQUENCE;
-
-      case '0':
-        bZeroPrefix = TRUE;
-        ptr++;
-        goto SEQUENCE;
-
-      case '.':  // "%.3f"
-        i = 0;
-        while(1)
+      }
+      else
+      {
+        int nWidth = 0;
+        int nLong = 0;
+        b32 bZeroPrefix = FALSE;
+        Append(ptr, ptr2 - ptr);
+        ptr = ptr2 + 1;
+SEQUENCE:
+        switch(*ptr)
         {
+        case '\0':
+          goto FUNC_RET;
+        case '%':
+          Append((_TCh)'%');
+          break;
+        case 'l':
           ptr++;
-          if(*ptr >= '0' && *ptr <= '9')
-            buffer[i++] = *ptr;
-          else if(*ptr == '\0')
-            goto FUNC_RET;
-          else if(*ptr == 'f' || i >= sizeof(buffer))
-          {
-            buffer[i] = '\0';
-            nWidth = _Traits::StringToInteger32(buffer);
-
-            _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
-            const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
-            if(pDot != NULL) {
-              int nn = nWidth;
-              while(*++pDot != '\0' && nn--)        ; // 没错，就是分号！
-              *(_TCh*)pDot = '\0';
-            }            
-            Append(buffer);
-
-            //size_t nPos = ReverseFind('.');
-            //if(nPos != npos)
-            //{
-            //  nPos = GetLength() - nPos - 1;
-            //  if(nPos < sizeof(buffer))
-            //  {
-            //    nLen -= (int)nPos;
-            //    if(nLen > 0)
-            //      Append('\0', nLen);
-            //  }
-            //}
-            break;
+          if(nLong < 2) {
+            nLong++;
+            goto SEQUENCE;
           }
-          else
-            break;
-        }
-        break;
-      default:
-        if(*ptr >= '0' && *ptr <= '9')  // "%8d"
-        {
+          break;
+        case 's':
+          Append((_TCh*)va_arg(arglist, _TCh*), bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+          break;
+        case 'c':
+          Append((_TCh)va_arg(arglist, int/*_TCh*/));
+          break;
+
+        case 'd':
+          if(nLong == 2) {
+            _Traits::Integer64ToString(buffer, MAX_DIGITS, va_arg(arglist, i64), 0);
+          }
+          else {
+            _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int), 0);
+          }
+          Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+          break;
+        case 'u':
+          if(nLong == 2) {
+            _Traits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
+          }
+          else {
+            _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
+          }
+          Append(buffer);
+          break;
+        case 'f':
+          //_gcvt_s(buffer, 16, va_arg(arglist, double), 5);
+          //swprintf_s(buffer, MAX_DIGITS, L"%f", va_arg(arglist, double));
+          _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
+          Append(buffer);
+          break;
+
+        case 'o':
+          _Traits::OctalToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
+          Append(buffer);
+          break;
+
+        case 'b':
+          _Traits::BinaryToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
+          Append(buffer);
+          break;
+
+        case 'X':
+          _Traits::HexToUpperString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
+
+          nWidth -= (int)_Traits::StringLength(buffer);
+          if(nWidth > 0)
+            Append('0', nWidth);
+
+          Append(buffer);
+          break;
+
+        case 'x':
+          _Traits::HexToLowerString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
+
+          nWidth -= (int)_Traits::StringLength(buffer);
+          if(nWidth > 0)
+            Append('0', nWidth);
+
+          Append(buffer);
+          break;
+
+        case '*':
+          nWidth = (int)va_arg(arglist, int);
+          ptr++;
+          goto SEQUENCE;
+
+        case '0':
+          bZeroPrefix = TRUE;
+          ptr++;
+          goto SEQUENCE;
+
+        case '.':  // "%.3f"
           i = 0;
           while(1)
           {
+            ptr++;
             if(*ptr >= '0' && *ptr <= '9')
               buffer[i++] = *ptr;
             else if(*ptr == '\0')
               goto FUNC_RET;
-            else if(i >= sizeof(buffer))
-              break;
-            else if(*ptr == 'd' || *ptr == 'X' || *ptr == 'x')
+            else if(*ptr == 'f' || i >= sizeof(buffer))
             {
               buffer[i] = '\0';
               nWidth = _Traits::StringToInteger32(buffer);
-              goto SEQUENCE;
+
+              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
+              const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
+              if(pDot != NULL) {
+                int nn = nWidth;
+                while(*++pDot != '\0' && nn--)        ; // 没错，就是分号！
+                *(_TCh*)pDot = '\0';
+              }            
+              Append(buffer);
+
+              //size_t nPos = ReverseFind('.');
+              //if(nPos != npos)
+              //{
+              //  nPos = GetLength() - nPos - 1;
+              //  if(nPos < sizeof(buffer))
+              //  {
+              //    nLen -= (int)nPos;
+              //    if(nLen > 0)
+              //      Append('\0', nLen);
+              //  }
+              //}
+              break;
             }
-            //else if(*ptr == 'd' || i >= sizeof(buffer))
-            //{
-            //  buffer[i] = '\0';
-            //  int nLen = _Traits::StringToInteger32(buffer);
-
-            //  //_itow_s(va_arg(arglist, int), buffer, MAX_DIGITS, 10);
-            //  _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int));
-
-            //  nLen -= (int)_Traits::StringLength(buffer);
-            //  if(nLen > 0)
-            //    Append('0', nLen);
-
-            //  operator+=(buffer);
-            //  break;
-            //}
             else
               break;
-            ptr++;
+          }
+          break;
+        default:
+          if(*ptr >= '0' && *ptr <= '9')  // "%8d"
+          {
+            i = 0;
+            while(1)
+            {
+              if(*ptr >= '0' && *ptr <= '9')
+                buffer[i++] = *ptr;
+              else if(*ptr == '\0')
+                goto FUNC_RET;
+              else if(i >= sizeof(buffer))
+                break;
+              else if(*ptr == 'd' || *ptr == 'X' || *ptr == 'x')
+              {
+                buffer[i] = '\0';
+                nWidth = _Traits::StringToInteger32(buffer);
+                goto SEQUENCE;
+              }
+              //else if(*ptr == 'd' || i >= sizeof(buffer))
+              //{
+              //  buffer[i] = '\0';
+              //  int nLen = _Traits::StringToInteger32(buffer);
+
+              //  //_itow_s(va_arg(arglist, int), buffer, MAX_DIGITS, 10);
+              //  _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int));
+
+              //  nLen -= (int)_Traits::StringLength(buffer);
+              //  if(nLen > 0)
+              //    Append('0', nLen);
+
+              //  operator+=(buffer);
+              //  break;
+              //}
+              else
+                break;
+              ptr++;
+            }
           }
         }
       }
+      ptr++;
     }
-    ptr++;
-  }
 
 FUNC_RET:
-  va_end(arglist);
-  return CLSTR_LENGTH(m_pBuf);
-}
-//////////////////////////////////////////////////////////////////////////
-_CLSTR_TEMPL
-void _CLSTR_IMPL::resizeLength(size_t uLength)
-{
-  if(uLength > CLSTR_CAPACITY(m_pBuf))
+    va_end(arglist);
+    return CLSTR_LENGTH(m_pBuf);
+  }
+  //////////////////////////////////////////////////////////////////////////
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::resizeLength(size_t uLength)
   {
-    inflateCapacity(uLength);
-  }
-  else if(CLSTR_LENGTH(m_pBuf) == uLength) {
-    return;
+    if(uLength > CLSTR_CAPACITY(m_pBuf))
+    {
+      inflateCapacity(uLength);
+    }
+    else if(CLSTR_LENGTH(m_pBuf) == uLength) {
+      return;
+    }
+
+    CLSTR_LENGTH(m_pBuf) = uLength;
+    m_pBuf[uLength] = '\0';
   }
 
-  CLSTR_LENGTH(m_pBuf) = uLength;
-  m_pBuf[uLength] = '\0';
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::resizeLengthNoCopy(size_t uLength)
-{
-  _TAllocator* pAlloc = CLSTR_ALLOCATOR(m_pBuf);
-  if(pAlloc == NULL) {
-    pAlloc = &_Alloc;
-  }
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::resizeLengthNoCopy(size_t uLength)
+  {
+    _TAllocator* pAlloc = CLSTR_ALLOCATOR(m_pBuf);
+    if(pAlloc == NULL) {
+      pAlloc = &_Alloc;
+    }
 #ifdef _X86
-  ASSERT((int)pAlloc >= 0);
+    ASSERT((int)pAlloc >= 0);
 #endif // #ifdef _X86
 
-  if(uLength > CLSTR_CAPACITY(m_pBuf))
+    if(uLength > CLSTR_CAPACITY(m_pBuf))
+    {
+      if(CLSTR_CAPACITY(m_pBuf) != 0)
+        pAlloc->Free(CLSTR_PTR(m_pBuf));
+
+      allocLength(pAlloc, uLength);
+    }
+    else if(uLength == 0) {
+      if(CLSTR_CAPACITY(m_pBuf) != 0)
+        pAlloc->Free(CLSTR_PTR(m_pBuf));
+
+      m_pBuf = (_TCh*)&s_EmptyStr.buf;
+    }
+    else
+    {
+      CLSTR_LENGTH(m_pBuf) = uLength;
+      m_pBuf[uLength] = 0;
+    }
+  }
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::reduceLength(size_t uLength)
   {
-    if(CLSTR_CAPACITY(m_pBuf) != 0)
-      pAlloc->Free(CLSTR_PTR(m_pBuf));
-    
-    allocLength(pAlloc, uLength);
+    ASSERT(uLength <= CLSTR_LENGTH(m_pBuf));
+    if(CLSTR_LENGTH(m_pBuf) != uLength) {
+      CLSTR_LENGTH(m_pBuf) = uLength;
+      m_pBuf[uLength] = 0;
+    }
   }
-  else if(uLength == 0) {
-    if(CLSTR_CAPACITY(m_pBuf) != 0)
-      pAlloc->Free(CLSTR_PTR(m_pBuf));
 
-    m_pBuf = (_TCh*)&s_EmptyStr.buf;
-  }
-  else
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::inflateCapacity(size_t uLength)
   {
-    CLSTR_LENGTH(m_pBuf) = uLength;
-    m_pBuf[uLength] = 0;
-  }
-}
+    // 注意：这里重新分配缓冲后没有设置 CLSTR_LENGTH(m_pBuf) 这个要在外面设置
+    ASSERT(uLength > CLSTR_CAPACITY(m_pBuf));
 
-_CLSTR_TEMPL
-void _CLSTR_IMPL::reduceLength(size_t uLength)
-{
-  ASSERT(uLength <= CLSTR_LENGTH(m_pBuf));
-  if(CLSTR_LENGTH(m_pBuf) != uLength) {
-    CLSTR_LENGTH(m_pBuf) = uLength;
-    m_pBuf[uLength] = 0;
-  }
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::inflateCapacity(size_t uLength)
-{
-  // 注意：这里重新分配缓冲后没有设置 CLSTR_LENGTH(m_pBuf) 这个要在外面设置
-  ASSERT(uLength > CLSTR_CAPACITY(m_pBuf));
-
-  _TAllocator* pAlloc = CLSTR_ALLOCATOR(m_pBuf);
-  if(pAlloc == NULL) {
-    pAlloc = &_Alloc;
-  }
+    _TAllocator* pAlloc = CLSTR_ALLOCATOR(m_pBuf);
+    if(pAlloc == NULL) {
+      pAlloc = &_Alloc;
+    }
 
 #ifdef _X86
-  ASSERT((int)pAlloc >= 0);
+    ASSERT((int)pAlloc >= 0);
 #endif // #ifdef _X86
 
-  clsize uCapacity;
-  // 最后加上 CLSTD_HEADER_SIZE, 得到 string buffer 的实际地址
-  void* ptrNew = (u8*)pAlloc->Alloc(uLength * sizeof(_TCh) + CLSTR_EXTRA, &uCapacity) + CLSTD_HEADER_SIZE;
+    clsize uCapacity;
+    // 最后加上 CLSTD_HEADER_SIZE, 得到 string buffer 的实际地址
+    void* ptrNew = (u8*)pAlloc->Alloc(uLength * sizeof(_TCh) + CLSTR_EXTRA, &uCapacity) + CLSTD_HEADER_SIZE;
 
-  const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
-  if(uStrLen > 0) {
-    _Traits::CopyStringN((_TCh*)ptrNew, m_pBuf, uStrLen + 1);
-  }
+    const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
+    if(uStrLen > 0) {
+      _Traits::CopyStringN((_TCh*)ptrNew, m_pBuf, uStrLen + 1);
+    }
 
-  CLSTR_CAPACITY(ptrNew) = (uCapacity - CLSTR_EXTRA) / sizeof(_TCh);
-  if(CLSTR_CAPACITY(m_pBuf) != 0) {
-    pAlloc->Free(CLSTR_PTR(m_pBuf));
-  }
-  m_pBuf = (_TCh*)ptrNew;
-  CLSTR_ALLOCATOR(m_pBuf) = pAlloc;
-}
-
-_CLSTR_TEMPL
-void _CLSTR_IMPL::allocLength(_TAllocator* pAlloc, size_t uLength)
-{
-  clsize uCapacity;
-  if(uLength == 0) {
-    m_pBuf = (_TCh*)s_EmptyStr.buf;
-  }
-  else {
-    m_pBuf = (_TCh*)((u8*)pAlloc->Alloc(uLength * sizeof(_TCh) + CLSTR_EXTRA, &uCapacity) + CLSTD_HEADER_SIZE);
-
-    CLSTR_LENGTH(m_pBuf)    = uLength;
-    CLSTR_CAPACITY(m_pBuf)  = (uCapacity - CLSTR_EXTRA) / sizeof(_TCh);
+    CLSTR_CAPACITY(ptrNew) = (uCapacity - CLSTR_EXTRA) / sizeof(_TCh);
+    if(CLSTR_CAPACITY(m_pBuf) != 0) {
+      pAlloc->Free(CLSTR_PTR(m_pBuf));
+    }
+    m_pBuf = (_TCh*)ptrNew;
     CLSTR_ALLOCATOR(m_pBuf) = pAlloc;
-    m_pBuf[uLength] = 0;
   }
-}
+
+  _CLSTR_TEMPL
+    void _CLSTR_IMPL::allocLength(_TAllocator* pAlloc, size_t uLength)
+  {
+    clsize uCapacity;
+    if(uLength == 0) {
+      m_pBuf = (_TCh*)s_EmptyStr.buf;
+    }
+    else {
+      m_pBuf = (_TCh*)((u8*)pAlloc->Alloc(uLength * sizeof(_TCh) + CLSTR_EXTRA, &uCapacity) + CLSTD_HEADER_SIZE);
+
+      CLSTR_LENGTH(m_pBuf)    = uLength;
+      CLSTR_CAPACITY(m_pBuf)  = (uCapacity - CLSTR_EXTRA) / sizeof(_TCh);
+      CLSTR_ALLOCATOR(m_pBuf) = pAlloc;
+      m_pBuf[uLength] = 0;
+    }
+  }
+} // namespace clstd
 
 extern wch wine_casemap_lower[];
 
@@ -2696,10 +2669,10 @@ int SimpleUnicodeToASCII(ch* pDestStr, int nCount, const wch* pSrcStr)
   return n;
 }
 
-template class clStringX<wch, clstd::Allocator, g_Alloc_clStringW, clStringW_traits>;
-template class clStringX<ch, clstd::Allocator, g_Alloc_clStringA, clStringA_traits>;
-template class clStringX<wch, clstd::StdAllocator, g_StdAlloc, clStringW_traits>;
-template class clStringX<ch, clstd::StdAllocator, g_StdAlloc, clStringA_traits>;
+template class clstd::StringX<wch, clstd::Allocator, g_Alloc_clStringW, clstd::StringW_traits>;
+template class clstd::StringX<ch, clstd::Allocator, g_Alloc_clStringA, clstd::StringA_traits>;
+template class clstd::StringX<wch, clstd::StdAllocator, g_StdAlloc, clstd::StringW_traits>;
+template class clstd::StringX<ch, clstd::StdAllocator, g_StdAlloc, clstd::StringA_traits>;
 
 //////////////////////////////////////////////////////////////////////////
 clStringW AnsiStringToUnicodeString(const clStringA& str)

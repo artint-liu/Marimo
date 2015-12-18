@@ -1173,7 +1173,11 @@ int VBOMesh::AddUndeformerBone(FbxNode* pNode)
   bone.fmAbs = *(FbxAMatrix*)&GlbTransform;
 #endif // #ifdef FBX_SDK
 
-  GenerateAnimData(bone, BoneInfo, NULL, pNode, 0, 0, 1);
+  FbxTime StartTime = m_pSceneCtx->GetStartTime();
+  FbxTime StopTime = m_pSceneCtx->GetStopTime();
+  FbxLongLong nFrameCount = StopTime.GetFrameCount();
+  FbxTime FrameFreqTime = (StopTime - StartTime) / nFrameCount;
+  GenerateAnimData(bone, BoneInfo, NULL, pNode, StartTime, FrameFreqTime, nFrameCount);
 
   int nIndex = m_pSkeleton->AddBone(bone);
   m_aBoneInfo.push_back(BoneInfo);

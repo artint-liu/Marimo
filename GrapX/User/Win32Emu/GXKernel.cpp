@@ -50,7 +50,7 @@ int GXDLLAPI gxMultiByteToWideChar(
   if(CodePage != GXCP_ACP || dwFlags != NULL)
     return 0;
   
-  return (int)clStringW_traits::XStringToNative(lpWideCharStr, cchWideChar, lpMultiByteStr, cchMultiByte);
+  return (int)clstd::StringW_traits::XStringToNative(lpWideCharStr, cchWideChar, lpMultiByteStr, cchMultiByte);
 }
 
 int GXDLLAPI gxWideCharToMultiByte(
@@ -69,7 +69,7 @@ int GXDLLAPI gxWideCharToMultiByte(
   if(lpDefaultChar != NULL || lpUsedDefaultChar != NULL)
     return 0;
 
-  return (int)clStringA_traits::XStringToNative(lpMultiByteStr, cchMultiByte, lpWideCharStr, cchWideChar);
+  return (int)clstd::StringA_traits::XStringToNative(lpMultiByteStr, cchMultiByte, lpWideCharStr, cchWideChar);
 }
 
 GXDWORD GXDLLAPI gxGetTickCount()

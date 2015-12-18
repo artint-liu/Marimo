@@ -24,6 +24,7 @@ namespace clstd
     // 右手坐标系：x轴向右，y轴向上，常见于平面解析几何坐标系
     // 左手坐标系：x轴向右，y轴向下，常见于屏幕坐标系
 
+    typedef float Type;
     union
     {
       struct{
@@ -179,6 +180,16 @@ namespace clstd
     {
       ASSERT(epsilon >= 0);
       return fabs(x - v.x) < epsilon && fabs(y - v.y) < epsilon;
+    }
+
+    Type GetMinScalar() const // 获得分量中最小的标量
+    {
+      return x < y ? x : y;
+    }
+
+    Type GetMaxScalar() const // 获得分量中最大的标量
+    {
+      return x > y ? x : y;
     }
   };
   //////////////////////////////////////////////////////////////////////////
@@ -442,10 +453,21 @@ namespace clstd
     }
     void Min(const _float3& v);
     void Max(const _float3& v);
+
+    Type GetMinScalar() const // 获得分量中最小的标量
+    {
+      return x < y ? (x < z ? x : z) : (y < z ? y : z);
+    }
+
+    Type GetMaxScalar() const // 获得分量中最大的标量
+    {
+      return x > y ? (x > z ? x : z) : (y > z ? y : z);
+    }
   };
   //////////////////////////////////////////////////////////////////////////
   struct _float4
   {
+    typedef float Type;
     union
     {
       struct{
@@ -604,6 +626,22 @@ namespace clstd
         x = y = z = w = 0;
       }
       return l;
+    }
+
+    Type GetMinScalar() const // 获得分量中最小的标量
+    {
+      Type t = x < y ? x : y;
+      t = t < z ? t : z;
+      t = t < w ? t : w;
+      return t;
+    }
+
+    Type GetMaxScalar() const // 获得分量中最大的标量
+    {
+      Type t = x > y ? x : y;
+      t = t > z ? t : z;
+      t = t > w ? t : w;
+      return t;
     }
   };
 } // namespace clstd
