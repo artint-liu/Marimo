@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clString.H"
 #if defined(_WINDOWS) || defined(_WIN32)
 #include <Windows.h>
@@ -35,7 +35,7 @@ const static clstd::ALLOCPLOY aclAllocPloyA[] =
   {0,0},
 };
 
-// s_strRootDir ÒªÔÚ alloc Ö®Ç°Îö¹¹
+// s_strRootDir è¦åœ¨ alloc ä¹‹å‰ææ„
 clstd::Allocator g_Alloc_clStringW("StringPoolW", aclAllocPloyW);
 clstd::Allocator g_Alloc_clStringA("StringPoolA", aclAllocPloyA);
 clstd::StdAllocator g_StdAlloc;
@@ -58,11 +58,11 @@ void _cl_vtraceT(const _TCh *fmt, va_list val)
   int nWriteToBuf;
   _TCh buffer[MAX_TRACE_BUFFER];
 
-  // Á÷³ÌÃèÊö:
-  // * ÓÃÔ­Ê¼»º³å³¢ÊÔÉú³ÉTraceĞÅÏ¢
-  // * Èç¹ûÊ§°Ü³¢ÊÔ·ÖÅäÊ¹ÓÃÁ½±¶´óĞ¡µÄ»º³åÉú³É
-  // * Èç¹ûÔÙÊ§°Ü³¢ÊÔ·ÖÅäÊ¹ÓÃÈı±¶´óĞ¡µÄ»º³åÉú³É
-  // ! ×ÛÉÏ,³¬´ó×Ö·û´®»á±È½ÏÂı
+  // æµç¨‹æè¿°:
+  // * ç”¨åŸå§‹ç¼“å†²å°è¯•ç”ŸæˆTraceä¿¡æ¯
+  // * å¦‚æœå¤±è´¥å°è¯•åˆ†é…ä½¿ç”¨ä¸¤å€å¤§å°çš„ç¼“å†²ç”Ÿæˆ
+  // * å¦‚æœå†å¤±è´¥å°è¯•åˆ†é…ä½¿ç”¨ä¸‰å€å¤§å°çš„ç¼“å†²ç”Ÿæˆ
+  // ! ç»¼ä¸Š,è¶…å¤§å­—ç¬¦ä¸²ä¼šæ¯”è¾ƒæ…¢
   do {
     const int nBufferSize = MAX_TRACE_BUFFER * nTimes;
     _TCh* pBuffer = nTimes == 1 ? buffer : new _TCh[nBufferSize];
@@ -87,7 +87,7 @@ void _cl_vtraceT(const _TCh *fmt, va_list val)
   ASSERT(nWriteToBuf < MAX_TRACE_BUFFER * nTimes - 1 && nWriteToBuf >= 0);
 }
 
-// ²»ÄÜÓÃclString,ÒòÎªclStringÊ¹ÓÃµÄ·ÖÅä³Ø»áµ÷ÓÃTRACE
+// ä¸èƒ½ç”¨clString,å› ä¸ºclStringä½¿ç”¨çš„åˆ†é…æ± ä¼šè°ƒç”¨TRACE
 extern "C" void _cl_traceA(const char *fmt, ...)
 {
   //if(IsDebuggerPresent() == FALSE)
@@ -98,11 +98,11 @@ extern "C" void _cl_traceA(const char *fmt, ...)
   //int nWriteToBuf;
   //char buffer[MAX_TRACE_BUFFER];
 
-  //// Á÷³ÌÃèÊö:
-  //// * ÓÃÔ­Ê¼»º³å³¢ÊÔÉú³ÉTraceĞÅÏ¢
-  //// * Èç¹ûÊ§°Ü³¢ÊÔ·ÖÅäÊ¹ÓÃÁ½±¶´óĞ¡µÄ»º³åÉú³É
-  //// * Èç¹ûÔÙÊ§°Ü³¢ÊÔ·ÖÅäÊ¹ÓÃÈı±¶´óĞ¡µÄ»º³åÉú³É
-  //// ! ËùÒÔÔ½´óÔ½Âı
+  //// æµç¨‹æè¿°:
+  //// * ç”¨åŸå§‹ç¼“å†²å°è¯•ç”ŸæˆTraceä¿¡æ¯
+  //// * å¦‚æœå¤±è´¥å°è¯•åˆ†é…ä½¿ç”¨ä¸¤å€å¤§å°çš„ç¼“å†²ç”Ÿæˆ
+  //// * å¦‚æœå†å¤±è´¥å°è¯•åˆ†é…ä½¿ç”¨ä¸‰å€å¤§å°çš„ç¼“å†²ç”Ÿæˆ
+  //// ! æ‰€ä»¥è¶Šå¤§è¶Šæ…¢
   //do {
   //  const int nBufferSize = MAX_TRACE_BUFFER * nTimes;
   //  char* pBuffer = nTimes == 1 ? buffer : new char[nBufferSize];
@@ -183,7 +183,7 @@ extern "C" void _cl_traceW(wchar_t *fmt, ...)
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum)
 {
 #ifdef _WIN32
-  PCHAR  pszCaption = "ÏµÍ³APIµ÷ÓÃ´íÎó";
+  PCHAR  pszCaption = "ç³»ç»ŸAPIè°ƒç”¨é”™è¯¯";
   LPSTR  lpBuffer;
   FormatMessageA(
     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -198,7 +198,7 @@ extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile,
   CHAR  buffer[1024];
   wsprintfA(
     buffer,
-    ">%s(%d)\n%sÊ§°Ü:\n×îºóµÄ´íÎó´íÎó´úÂëÊÇ:%d - %s",
+    ">%s(%d)\n%så¤±è´¥:\næœ€åçš„é”™è¯¯é”™è¯¯ä»£ç æ˜¯:%d - %s",
     pszSrcFile,
     nLine,
     pszSrc,

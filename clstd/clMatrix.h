@@ -1,4 +1,4 @@
-#ifndef _CLSTD_MATRIX_H_
+ï»¿#ifndef _CLSTD_MATRIX_H_
 #define _CLSTD_MATRIX_H_
 
 #ifndef _CL_STD_CODE_
@@ -47,7 +47,7 @@ namespace clstd
     _float3x3& RotationZ(const float fAngle); // radian
 
 
-    // Å·À­½Ç×ª»»²¿·ÖËã·¨À´×Ô Euler angle convertion algorithm is from Ogre
+    // æ¬§æ‹‰è§’è½¬æ¢éƒ¨åˆ†ç®—æ³•æ¥è‡ª Euler angle convertion algorithm is from Ogre
     // The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
     // where yaw is rotation about the Up vector, pitch is rotation about the
     // Right axis, and roll is rotation about the Direction axis.
@@ -169,7 +169,7 @@ namespace clstd
 
     _float4x4& transpose();
 
-    float inverse();  // ·µ»ØÖµÊÇDeterminant
+    float inverse();  // è¿”å›žå€¼æ˜¯Determinant
     static _float4x4 inverse(const _float4x4& m, float* fDeterminant = NULL);
 
     friend _float4x4 operator*(const _float4x4& m1, const _float4x4& m2);
@@ -200,12 +200,12 @@ namespace clstd
     const _float4& GetRow(const int r) const;
 
     _float4x4& LookAtLH(CLCONST _float3& vEye, CLCONST _float3& vLookAt, CLCONST _float3& vUp);
-    _float4x4& FromDirection(CLCONST _float3& vDir, CLCONST _float3& vUp);  // vDir ºÍ vUp ¶¼ÊÇÒÑ¾­¹éÒ»»¯µÄ
+    _float4x4& FromDirection(CLCONST _float3& vDir, CLCONST _float3& vUp);  // vDir å’Œ vUp éƒ½æ˜¯å·²ç»å½’ä¸€åŒ–çš„
     _float4x4& PerspectiveFovLH(float fovy, float fAspect, float fNear, float fFar);
     _float4x4& OrthoLH(float w, float h, float fNear, float fFar);
     _float4x4& RotationQuaternion(CLCONST _quaternion *pq);
-    _float4x4& RotationYawPitchRollA(float yaw, float pitch, float roll); // »ùÓÚ½Ç¶È
-    _float4x4& RotationYawPitchRollR(float yaw, float pitch, float roll); // »ùÓÚ»¡¶È y(yaw)->x(pitch)->z(roll)
+    _float4x4& RotationYawPitchRollA(float yaw, float pitch, float roll); // åŸºäºŽè§’åº¦
+    _float4x4& RotationYawPitchRollR(float yaw, float pitch, float roll); // åŸºäºŽå¼§åº¦ y(yaw)->x(pitch)->z(roll)
 
     _float4x4& AffineTransformation (CLCONST _float3* scaling, CLCONST _float3* rotationcenter, CLCONST _quaternion* rotation, CLCONST _float3* translation);
     void       DecomposeScaling     (_float3* pOutScale) CLCONST;

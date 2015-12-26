@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clImage.h"
 const int delta = 'a' - 'A';
 
@@ -137,7 +137,7 @@ namespace clstd
       channel++;
     }
 
-    // ÕâÑùĞ´Èç¹û·µ»Øfalse£¬Ôò²»»áĞŞ¸ÄfmtcodeºÍchannelµÄÈÎºÎÄÚÈİ
+    // è¿™æ ·å†™å¦‚æœè¿”å›falseï¼Œåˆ™ä¸ä¼šä¿®æ”¹fmtcodeå’Œchannelçš„ä»»ä½•å†…å®¹
     *pChannel = channel;
     *pFmtCode = format.code;
     return TRUE;
@@ -155,7 +155,7 @@ namespace clstd
 
   int Image::Inflate( int left, int top, int right, int bottom )
   {
-    // Ã»ÊµÏÖ
+    // æ²¡å®ç°
     CLBREAK;
     return 0;
   }

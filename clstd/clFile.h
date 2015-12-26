@@ -1,4 +1,4 @@
-#ifndef _CL_FILE_H_
+ï»¿#ifndef _CL_FILE_H_
 #define _CL_FILE_H_
 
 #define FILEATTRIBUTE_READONLY   0x00000001
@@ -54,7 +54,7 @@ namespace clstd
       u32 dwHighDateTime; 
     };
 
-    // TODO: ÒÔºó¸ÄÎª FileTextStream ...
+    // TODO: ä»¥åæ”¹ä¸º FileTextStream ...
     //template<class _TString>
     //class TextStreamT
     //{
@@ -114,7 +114,7 @@ namespace clstd
     int  WritefW      (const wch* format, ...);
 
     b32  ReadToBuffer (clBuffer* pBuffer, int nFileOffset = 0, int cbSize = 0);
-    b32  MapToBuffer  (CLBYTE** pBuffer, int nFileOffset, int cbSize, u32* pcbSize); // ´ÓnFileOffsetÆ«ÒÆ¿ªÊ¼¶ÁcbSize£¨0±íÊ¾¶Áµ½ÎÄ¼şÄ©Î²£©×Ö½Úµ½pBuffer»º³åÖĞ£¬Êµ¼Ê¶ÁÈë´óĞ¡ÊÇpcbSize
+    b32  MapToBuffer  (CLBYTE** pBuffer, int nFileOffset, int cbSize, u32* pcbSize); // ä»nFileOffsetåç§»å¼€å§‹è¯»cbSizeï¼ˆ0è¡¨ç¤ºè¯»åˆ°æ–‡ä»¶æœ«å°¾ï¼‰å­—èŠ‚åˆ°pBufferç¼“å†²ä¸­ï¼Œå®é™…è¯»å…¥å¤§å°æ˜¯pcbSize
     b32  MapToBuffer  (clBuffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
     //TextStream& 
     //    GetTextStream ();  

@@ -1,4 +1,4 @@
-#ifndef _CLSTD_TRACING_LOCKER_H_
+ï»¿#ifndef _CLSTD_TRACING_LOCKER_H_
 #define _CLSTD_TRACING_LOCKER_H_
 
 namespace clstd
@@ -52,7 +52,7 @@ namespace clstd
     ~ScopedSafeTracingLocker() { if(m_locker) { m_locker->Unlock(m_rCriticalTime); }}
   };
 
-  // TODO: Ó¦¸ÃÔö¼ÓÒ»¸ö¶Ô¼ÓËø½âËø½øÐÐÊ±¼ä¸ú×ÙµÄLocker»òÕß²ÎÊý
+  // TODO: åº”è¯¥å¢žåŠ ä¸€ä¸ªå¯¹åŠ é”è§£é”è¿›è¡Œæ—¶é—´è·Ÿè¸ªçš„Lockeræˆ–è€…å‚æ•°
 
 } // namespace clstd
 

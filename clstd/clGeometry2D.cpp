@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clGeometry2D.h"
 
 namespace clstd
@@ -49,19 +49,19 @@ namespace clstd
       return TRUE;
     }
 
-    float Line::IsPointIn( const float2& p ) const /* µãÊÇ ñÔÚÖ±Ï??ÖµÄ¶?Ö¿Õ¼äÄ? Ğ¡ÓÚ0ÔÚ¿Õ¼äÄÚ£¬µÈÓÚ0ÔÚÖ±ÏßÉÏ£¬´óÓÚ0ÔÚ¿Õ¼äÍâ */
+    float Line::IsPointIn( const float2& p ) const /* ç‚¹æ˜¯ è£¨è°¥æ¯•??å€¼äº©?æŒšå æ· ? å°äº0åœ¨ç©ºé—´å†…ï¼Œç­‰äº0åœ¨ç›´çº¿ä¸Šï¼Œå¤§äº0åœ¨ç©ºé—´å¤– */
     {
       return float2::dot(direction, p) - distance;
     }
 
-    Line& Line::midnormal( const float2& p0, const float2& p1 ) /* ÉèÖÃÎª´Óp0Ö¸Ïòp1µÄ´¹Ö±Æ½ ÖÏ?*/
+    Line& Line::midnormal( const float2& p0, const float2& p1 ) /* è®¾ç½®ä¸ºä»p0æŒ‡å‘p1çš„å‚ç›´å¹³ çª’?*/
     {
       float2 dir = p1 - p0;
       dir.normalize();
       return SetFromDirectionPoint(dir, (p0 + p1) * 0.5f);
     }
 
-    Line& Line::SetFromDirectionPoint( const float2& dir, const float2& p ) /* ´ÓÏòÁ¿+¾­¹ıÖ±ÏßµÄµãÀ´ÉèÖÃÖ±Ïß */
+    Line& Line::SetFromDirectionPoint( const float2& dir, const float2& p ) /* ä»å‘é‡+ç»è¿‡ç›´çº¿çš„ç‚¹æ¥è®¾ç½®ç›´çº¿ */
     {
       direction = dir;
       distance = float2::dot(dir, p);
@@ -100,7 +100,7 @@ namespace clstd
     }
 
     //////////////////////////////////////////////////////////////////////////
-    b32 Winding::calculate() /* ¼ÆËãÍ¹°ü¶¥µã, ´¿±©Á¦¼ÆËã */
+    b32 Winding::calculate() /* è®¡ç®—å‡¸åŒ…é¡¶ç‚¹, çº¯æš´åŠ›è®¡ç®— */
     {
       vertices.clear();
       if(lines.size() < 3) {
@@ -222,7 +222,7 @@ namespace clstd
           SEG_TRACE("\n");
         }
         else {
-          CLBREAK; // Æ½ĞĞ£¬Ïà½»²âÊÔÊ±Ó¦¸ÃÒÑ¾­ÌŞ³ı
+          CLBREAK; // å¹³è¡Œï¼Œç›¸äº¤æµ‹è¯•æ—¶åº”è¯¥å·²ç»å‰”é™¤
         }
       }
 
@@ -236,7 +236,7 @@ namespace clstd
       return b[0] && b[1] && t > 0;
     }
 
-    void Winding::AddLines( const Line& line ) /* Ìí¼ÓÖ±Ïß */
+    void Winding::AddLines( const Line& line ) /* æ·»åŠ ç›´çº¿ */
     {
       lines.push_back(line);
     }

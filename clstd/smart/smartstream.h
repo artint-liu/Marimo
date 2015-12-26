@@ -1,22 +1,22 @@
-#ifndef _SMARTSTREAM_2_H_
+ï»¿#ifndef _SMARTSTREAM_2_H_
 #define _SMARTSTREAM_2_H_
 
-// »®·Ö¹æÔò:
-// 1.<ÒıºÅ>Ö®ÄÚµÄ×Ö·û¶¼Ëã×÷ÕûÌå, Óöµ½<×ªÒå·û>Ê±¸ù¾İºóĞø×Ö·ûÄÚÈİ×ªÒå.
-// 2.<¿Õ¸ñ>ÓÃÀ´¶Ï¿ª<·ûºÅ>ºÍ<±êÇ©>,²»°üÀ¨(1)
+// åˆ’åˆ†è§„åˆ™:
+// 1.<å¼•å·>ä¹‹å†…çš„å­—ç¬¦éƒ½ç®—ä½œæ•´ä½“, é‡åˆ°<è½¬ä¹‰ç¬¦>æ—¶æ ¹æ®åç»­å­—ç¬¦å†…å®¹è½¬ä¹‰.
+// 2.<ç©ºæ ¼>ç”¨æ¥æ–­å¼€<ç¬¦å·>å’Œ<æ ‡ç­¾>,ä¸åŒ…æ‹¬(1)
 
-// {¡¡open brace, open curly¡¡×ó»¨À¨ºÅ
-// }¡¡close brace, close curly¡¡ÓÒ»¨À¨ºÅ
-// (¡¡open parenthesis, open paren¡¡×óÔ²À¨ºÅ
-// )¡¡close parenthesis, close paren¡¡ÓÒÔ²À¨ºÅ
-// () brakets/ parentheses¡¡À¨ºÅ
-// [¡¡open bracket ×ó·½À¨ºÅ
-// ]¡¡close bracket ÓÒ·½À¨ºÅ
-// [] square brackets¡¡·½À¨ºÅ
-// \¡¡backslash, sometimes escape¡¡·´Ğ±Ïß×ªÒå·û£¬ÓĞÊ±±íÊ¾×ªÒå·û»òĞøĞĞ·û
-// "¡¡single quotation marks µ¥ÒıºÅ
-// ""¡¡double quotation marks Ë«ÒıºÅ
-// , Comma ¶ººÅ
+// {ã€€open brace, open curlyã€€å·¦èŠ±æ‹¬å·
+// }ã€€close brace, close curlyã€€å³èŠ±æ‹¬å·
+// (ã€€open parenthesis, open parenã€€å·¦åœ†æ‹¬å·
+// )ã€€close parenthesis, close parenã€€å³åœ†æ‹¬å·
+// () brakets/ parenthesesã€€æ‹¬å·
+// [ã€€open bracket å·¦æ–¹æ‹¬å·
+// ]ã€€close bracket å³æ–¹æ‹¬å·
+// [] square bracketsã€€æ–¹æ‹¬å·
+// \ã€€backslash, sometimes escapeã€€åæ–œçº¿è½¬ä¹‰ç¬¦ï¼Œæœ‰æ—¶è¡¨ç¤ºè½¬ä¹‰ç¬¦æˆ–ç»­è¡Œç¬¦
+// "ã€€single quotation marks å•å¼•å·
+// ""ã€€double quotation marks åŒå¼•å·
+// , Comma é€—å·
 
 //typedef unsigned __int32 u32;
 //typedef char CH;
@@ -64,21 +64,21 @@ class SmartStreamT
 public:
   enum MARK
   {
-    M_ESCAPE      = 0x0800,  // ×ªÒå·û
-    M_SYMBOL      = 0x0000,  // ·ûºÅ
-    M_GAP         = 0x0001,  // ¿Õ°×
-    M_QUOT        = 0x0002,  // ÒıºÅ
-    M_OPN_BRAKETS = 0x0004,  // ¿ªÀ¨ºÅ
-    M_CLS_BRAKETS = 0x0008,  // ±ÕÀ¨ºÅ
-    M_LABEL       = 0x0010,  // ±êÇ©
-    M_TYPE_MASK   = 0x001F,  // ÀàĞÍÑÚÂë
-    M_CALLBACK    = 0x0020,  // ´¥·¢»Øµ÷, ±ØĞëÊÇ iterator µÄÊ××Ö½Ú
-    M_GROUP_MASK  = 0xF000,  // ×éÑÚÂë, Ö»ÊÊÓÃÓÚÒıºÅÀ¨ºÅ
+    M_ESCAPE      = 0x0800,  // è½¬ä¹‰ç¬¦
+    M_SYMBOL      = 0x0000,  // ç¬¦å·
+    M_GAP         = 0x0001,  // ç©ºç™½
+    M_QUOT        = 0x0002,  // å¼•å·
+    M_OPN_BRAKETS = 0x0004,  // å¼€æ‹¬å·
+    M_CLS_BRAKETS = 0x0008,  // é—­æ‹¬å·
+    M_LABEL       = 0x0010,  // æ ‡ç­¾
+    M_TYPE_MASK   = 0x001F,  // ç±»å‹æ©ç 
+    M_CALLBACK    = 0x0020,  // è§¦å‘å›è°ƒ, å¿…é¡»æ˜¯ iterator çš„é¦–å­—èŠ‚
+    M_GROUP_MASK  = 0xF000,  // ç»„æ©ç , åªé€‚ç”¨äºå¼•å·æ‹¬å·
   };
 
   enum FLAGS
   {
-    F_SYMBOLBREAK = 0x0001,    // ÇĞ¿ª Symbol, ¶ÔÓÚÁ¬ĞøµÄ Symbol ½«·Ö³É¶ÀÁ¢µÄ×Ö·û·Ö±ğ·µ»Ø.
+    F_SYMBOLBREAK = 0x0001,    // åˆ‡å¼€ Symbol, å¯¹äºè¿ç»­çš„ Symbol å°†åˆ†æˆç‹¬ç«‹çš„å­—ç¬¦åˆ†åˆ«è¿”å›.
   };
 
   typedef typename _TStr::LPCSTR T_LPCSTR;
@@ -111,7 +111,7 @@ public:
     iterator&  operator++();
     b32  operator==(const _TStr& str) const;
     b32  operator==(T_LPCSTR pStr) const;
-    b32  operator==(TChar ch) const;            // Èç¹ûiteratorÊÇ¶à×Ö½Ú½«·µ»ØFALSE
+    b32  operator==(TChar ch) const;            // å¦‚æœiteratoræ˜¯å¤šå­—èŠ‚å°†è¿”å›FALSE
     b32  operator!=(const _TStr& str) const;
     b32  operator!=(T_LPCSTR pStr) const;
     b32  operator!=(TChar ch) const;
@@ -122,9 +122,9 @@ public:
     b32  operator>(const iterator& it) const;
     b32  operator<(const iterator& it) const;
     iterator&  operator=(const iterator& it);
-    iterator  operator+(const size_t n) const;  // Ö»ÄÜÊ¹ÓÃÔöÁ¿
+    iterator  operator+(const size_t n) const;  // åªèƒ½ä½¿ç”¨å¢é‡
 
-    clsize  offset      () const;   // ·µ»ØÖµ TChar µÄÀàĞÍÆ«ÒÆ£¬ ²»ÊÇ×Ö½ÚÆ«ÒÆ
+    clsize  offset      () const;   // è¿”å›å€¼ TChar çš„ç±»å‹åç§»ï¼Œ ä¸æ˜¯å­—èŠ‚åç§»
     _TStr   ToString    () const;
     b32     BeginsWith  (T_LPCSTR str) const;
     b32     EndsWith    (T_LPCSTR str) const;
@@ -132,7 +132,7 @@ public:
     b32     EndsWith    (T_LPCSTR str, clsize count) const;
 
     //
-    // ·ûºÏSTL¹æ·¶µÄ½Ó¿Ú
+    // ç¬¦åˆSTLè§„èŒƒçš„æ¥å£
     //
     inline const TChar& front() const {
       return marker[0];
@@ -152,7 +152,7 @@ public:
 
 
   };
-  typedef u32 (CALLBACK *IteratorProc)(iterator& it, clsize nRemain, u32_ptr lParam); // nRemain ÊÇit.marker[0]µ½ÎÄ¼ş½áÎ²µÄ(Ê£Óà)³¤¶È. Ä¿Ç°²»¹ØĞÄ·µ»ØÖµ
+  typedef u32 (CALLBACK *IteratorProc)(iterator& it, clsize nRemain, u32_ptr lParam); // nRemain æ˜¯it.marker[0]åˆ°æ–‡ä»¶ç»“å°¾çš„(å‰©ä½™)é•¿åº¦. ç›®å‰ä¸å…³å¿ƒè¿”å›å€¼
   typedef const iterator const_iterator; 
 
 protected:
@@ -162,9 +162,9 @@ protected:
   SemType       m_aCharSem[c_nCharTabCount];
   u32           m_dwFlags;
   iterator      m_itEnd;
-  IteratorProc  m_pCallBack;        // Õë¶ÔÃ¿Ò»¸ö Iterator
+  IteratorProc  m_pCallBack;        // é’ˆå¯¹æ¯ä¸€ä¸ª Iterator
   u32_ptr       m_lParam;
-  IteratorProc  m_pTriggerCallBack; // ´øÓĞ´¥·¢±êÖ¾µÄ Iterator Ê××Ö½Ú
+  IteratorProc  m_pTriggerCallBack; // å¸¦æœ‰è§¦å‘æ ‡å¿—çš„ Iterator é¦–å­—èŠ‚
   u32_ptr       m_lParamTrigger;
 
 public:
@@ -177,8 +177,8 @@ public:
   b32      IsEndOfStream     (T_LPCSTR pPointer) const;
   b32      IsHeadOfStream    (T_LPCSTR pPointer) const;
   T_LPCSTR GetStreamPtr      () const;
-  clsize   GetStreamCount    () const; // ·µ»ØµÄÊÇTCharµÄÀàĞÍ³¤¶È£¬²»ÊÇ×Ö½ÚÊı GetStreamEnd() - GetStreamPtr()
-  b32      Get               (T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) const;    // È¡Ö¸Õëµ±Ç°´¦µÄÄÚÈİ
+  clsize   GetStreamCount    () const; // è¿”å›çš„æ˜¯TCharçš„ç±»å‹é•¿åº¦ï¼Œä¸æ˜¯å­—èŠ‚æ•° GetStreamEnd() - GetStreamPtr()
+  b32      Get               (T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) const;    // å–æŒ‡é’ˆå½“å‰å¤„çš„å†…å®¹
   u32      SetFlags          (u32 dwFlags);
   u32      GetFlags          () const;
 
@@ -186,10 +186,10 @@ public:
   IteratorProc SetTriggerCallBack (IteratorProc pTrigger, u32_ptr lParam);
 
   iterator&       next      (iterator& it) const;
-  iterator        nearest   (clsize nOffset) const; // °´ÕÕnOffset²éÕÒ×î½üµÄiterator£¬iteratorµÄÆ«ÒÆ´óÓÚµÈÓÚnOffset
+  iterator        nearest   (clsize nOffset) const; // æŒ‰ç…§nOffsetæŸ¥æ‰¾æœ€è¿‘çš„iteratorï¼Œiteratorçš„åç§»å¤§äºç­‰äºnOffset
   iterator        begin     () const;
   const_iterator& end       () const;
-  const_iterator  find      (const iterator& itBegin, int nCount, ...) const; // ´Ó itBegin ¿ªÊ¼²éÕÒ, Èç¹ûÕÒµ½²ÎÊıÁĞ±íµÄÈÎÒâÒ»¸ö¾ÍÂíÉÏ·µ»Ø
+  const_iterator  find      (const iterator& itBegin, int nCount, ...) const; // ä» itBegin å¼€å§‹æŸ¥æ‰¾, å¦‚æœæ‰¾åˆ°å‚æ•°åˆ—è¡¨çš„ä»»æ„ä¸€ä¸ªå°±é©¬ä¸Šè¿”å›
   b32             find_pair (const iterator& itCurrent, iterator& itOpen, iterator& itClose, T_LPCSTR chOpen, T_LPCSTR chClose) const;
 };
 
@@ -201,7 +201,7 @@ namespace SmartStreamUtility
   //template<class _SSIt> //SmartStreamT::iterator
   //int ParseArray(_SSIt itBegin, _SSIt itEnd, CLLPCSTR Separators, CLLPCSTR Pairs, clStringArrayA& aStrings);
 
-  // ²éÕÒÅä¶Ô±ê¼Ç¿ªÊ¼ºÍ½áÊøÎ»ÖÃ£¬Í¬Ê±»á×Ô¶¯´¦ÀíÇ¶Ì×µÄÅä¶Ô±ê¼Ç¡£
+  // æŸ¥æ‰¾é…å¯¹æ ‡è®°å¼€å§‹å’Œç»“æŸä½ç½®ï¼ŒåŒæ—¶ä¼šè‡ªåŠ¨å¤„ç†åµŒå¥—çš„é…å¯¹æ ‡è®°ã€‚
   template<typename TChar, class _Iter>
   b32 FindPair(const _Iter& itCurrent, _Iter& itOpen, _Iter& itClose, const TChar* chOpen, const TChar* chClose)
   {
@@ -230,7 +230,7 @@ namespace SmartStreamUtility
     return false;
   }
 
-  // FindPair ÖØÔØ£¬Ö§³Ö×Ö·û·½Ê½±íÊ¾
+  // FindPair é‡è½½ï¼Œæ”¯æŒå­—ç¬¦æ–¹å¼è¡¨ç¤º
   template<class _Iter>
   b32 FindPair(const _Iter& itCurrent, _Iter& itOpen, _Iter& itClose, ch chOpen, ch chClose)
   {
@@ -262,15 +262,15 @@ namespace SmartStreamUtility
     return false;
   }
 
-  // °ÑÒ»¶Î±ê¼ÇÁ÷°´ÕÕÖ¸¶¨µÄ·Ö¸ô·ûÇĞ·Ö²¢·Åµ½×Ö·û´®Êı×éÖĞ
-  // ·Ö¸ô·ûÁĞ±íÊÇÒÔµ¥×Ö½Ú±íÊ¾Æäº¬Òå, Ã»ÓĞÇ°ºó×Ö·ûÉÏÏÂÎÄºÍË³ĞòµÄ¹ØÁª, ·Ö¸ô·ûÁĞ±íÖÁÉÙÒªÖ¸¶¨Ò»¸ö·Ö¸ô·û
-  // Åä¶Ô·ûºÅ±í¿ÉÒÔÎªNULL, Èç¹û²»Îª¿Õ±ØĞëº¬ÓĞÅ¼Êı¸ö×Ö·û, Ã¿¸öÁ½¸ö×Ö·û»¥ÏàÎªÒ»¶Ô.
-  // bTight ±íÊ¾Åä¶Ô·ûºÅÖĞµÄÄÚÈİÊÇ·ñÒÔ½ô´Õ·½Ê½±£´æ£¬ ½ô´Õ·½Ê½È¥µôÁË¿Õ°×·ûºÅ,Èç¹ûÃ»ÓĞÕıÈ·µÄ·Ö¸ô·û¿ÉÄÜ»áÔì³É´íÎóµÄºÏ²¢¡£
-  // bTight == FALSE Ê±Åä¶Ô·ûºÅÖĞµÄÄÚÈİ½«±£³Ö×Ö·û´®µÄÔ­Ê¼ÄÚÈİ
+  // æŠŠä¸€æ®µæ ‡è®°æµæŒ‰ç…§æŒ‡å®šçš„åˆ†éš”ç¬¦åˆ‡åˆ†å¹¶æ”¾åˆ°å­—ç¬¦ä¸²æ•°ç»„ä¸­
+  // åˆ†éš”ç¬¦åˆ—è¡¨æ˜¯ä»¥å•å­—èŠ‚è¡¨ç¤ºå…¶å«ä¹‰, æ²¡æœ‰å‰åå­—ç¬¦ä¸Šä¸‹æ–‡å’Œé¡ºåºçš„å…³è”, åˆ†éš”ç¬¦åˆ—è¡¨è‡³å°‘è¦æŒ‡å®šä¸€ä¸ªåˆ†éš”ç¬¦
+  // é…å¯¹ç¬¦å·è¡¨å¯ä»¥ä¸ºNULL, å¦‚æœä¸ä¸ºç©ºå¿…é¡»å«æœ‰å¶æ•°ä¸ªå­—ç¬¦, æ¯ä¸ªä¸¤ä¸ªå­—ç¬¦äº’ç›¸ä¸ºä¸€å¯¹.
+  // bTight è¡¨ç¤ºé…å¯¹ç¬¦å·ä¸­çš„å†…å®¹æ˜¯å¦ä»¥ç´§å‡‘æ–¹å¼ä¿å­˜ï¼Œ ç´§å‡‘æ–¹å¼å»æ‰äº†ç©ºç™½ç¬¦å·,å¦‚æœæ²¡æœ‰æ­£ç¡®çš„åˆ†éš”ç¬¦å¯èƒ½ä¼šé€ æˆé”™è¯¯çš„åˆå¹¶ã€‚
+  // bTight == FALSE æ—¶é…å¯¹ç¬¦å·ä¸­çš„å†…å®¹å°†ä¿æŒå­—ç¬¦ä¸²çš„åŸå§‹å†…å®¹
   template<class _Iter>
   int ParseArray(_Iter itBegin, _Iter itEnd, CLLPCSTR Separators, CLLPCSTR Pairs, b32 bTight, clStringArrayA& aStrings)
   {
-    //ASSERT(bTight = TRUE);  // ÔİÊ±²»Ö§³ÖÆäËû
+    //ASSERT(bTight = TRUE);  // æš‚æ—¶ä¸æ”¯æŒå…¶ä»–
 
     //i32 nPairsLen = 0;
     if(Separators == NULL) {
@@ -300,7 +300,7 @@ namespace SmartStreamUtility
           }
         } // for
 
-        // ÕÒµ½ÁË·Ö¸î·ûºÅ
+        // æ‰¾åˆ°äº†åˆ†å‰²ç¬¦å·
         if(Separators[i] != '\0') { continue; }
 
         if(Pairs != NULL)
@@ -320,7 +320,7 @@ namespace SmartStreamUtility
               }
               else
               {
-                // ÔİÊ±²»Ö§³Ö±£ÁôÔ­Ê¼ÄÚÈİµÄ·½Ê½
+                // æš‚æ—¶ä¸æ”¯æŒä¿ç•™åŸå§‹å†…å®¹çš„æ–¹å¼
                 CLBREAK;
               }
               ASSERT(str.IsNotEmpty());
@@ -329,7 +329,7 @@ namespace SmartStreamUtility
               break;
             }
           }
-          // ÕÒµ½ÁËÅä¶Ô·ûºÅ
+          // æ‰¾åˆ°äº†é…å¯¹ç¬¦å·
           if(Pairs[i] != '\0') { continue; }
         } // if(Pairs != NULL)
       } // for
@@ -341,11 +341,11 @@ namespace SmartStreamUtility
     return (int)aStrings.size();
   }
 
-  // À©Õ¹itµ½»»ĞĞ±ê¼Ç£¬À©Õ¹ºó°üº¬»»ĞĞ±ê¼Ç
-  // offset ÊÇÏà¶ÔÓÚ it.marker µÄÆ«ÒÆ
-  // remain ÊÇ it.marker µ½Á÷½áÎ²µÄÊ£Óà³¤¶È£¨×Ö·ûÊı£©
-  // flags ÊÇ±êÖ¾Î»£¬Ä¿Ç°Ö»ÓĞ 0x0001 ±íÊ¾Èç¹ûÒÔ"\"×Ö·û½áÎ²²¢»»ĞĞ£¬ÔòºöÂÔ´Ë´¦µÄ»»ĞĞ·û¼ÌĞøÉ¨ÃèÏÂÒ»ĞĞ
-  // ·µ»Øtrue±íÊ¾ÕÒµ½Ò»¸ö»»ĞĞ·ûºÅ£¬false±íÊ¾µ½ÁËÎÄ¼ş½áÎ²£¬´ËÊ±it±»À©Õ¹µ½ÎÄ¼ş½áÎ²
+  // æ‰©å±•itåˆ°æ¢è¡Œæ ‡è®°ï¼Œæ‰©å±•ååŒ…å«æ¢è¡Œæ ‡è®°
+  // offset æ˜¯ç›¸å¯¹äº it.marker çš„åç§»
+  // remain æ˜¯ it.marker åˆ°æµç»“å°¾çš„å‰©ä½™é•¿åº¦ï¼ˆå­—ç¬¦æ•°ï¼‰
+  // flags æ˜¯æ ‡å¿—ä½ï¼Œç›®å‰åªæœ‰ 0x0001 è¡¨ç¤ºå¦‚æœä»¥"\"å­—ç¬¦ç»“å°¾å¹¶æ¢è¡Œï¼Œåˆ™å¿½ç•¥æ­¤å¤„çš„æ¢è¡Œç¬¦ç»§ç»­æ‰«æä¸‹ä¸€è¡Œ
+  // è¿”å›trueè¡¨ç¤ºæ‰¾åˆ°ä¸€ä¸ªæ¢è¡Œç¬¦å·ï¼Œfalseè¡¨ç¤ºåˆ°äº†æ–‡ä»¶ç»“å°¾ï¼Œæ­¤æ—¶itè¢«æ‰©å±•åˆ°æ–‡ä»¶ç»“å°¾
   template<class _Iter>
   b32 ExtendToNewLine(_Iter &it, clsize offset, clsize remain, u32 flags = 0)
   {
@@ -371,9 +371,9 @@ namespace SmartStreamUtility
   b32 ExtendToCStyleNumeric(_Iter &it, clsize remain)
   {
     b32 bENotation = FALSE;
-    if((it.front() == '.' && isdigit(it.marker[it.length])) ||             // µÚÒ»¸öÊÇ'.'
-      (isdigit(it.front()) && (it.back() == 'e' || it.back() == 'E')) ||   // µÚÒ»¸öÊÇÊı×Ö£¬×îºóÒÔ'e'½áÎ²
-      (isdigit(it.back()) && it.marker[it.length] == '.'))                 // ×îºóÊÇÊı×Ö£¬ÏÂÒ»¸öÊÇ'.'
+    if((it.front() == '.' && isdigit(it.marker[it.length])) ||             // ç¬¬ä¸€ä¸ªæ˜¯'.'
+      (isdigit(it.front()) && (it.back() == 'e' || it.back() == 'E')) ||   // ç¬¬ä¸€ä¸ªæ˜¯æ•°å­—ï¼Œæœ€åä»¥'e'ç»“å°¾
+      (isdigit(it.back()) && it.marker[it.length] == '.'))                 // æœ€åæ˜¯æ•°å­—ï¼Œä¸‹ä¸€ä¸ªæ˜¯'.'
     {
       it.length++;
       while(--remain)
@@ -381,13 +381,13 @@ namespace SmartStreamUtility
         if(isdigit(it.marker[it.length])) {
           it.length++;
         }
-        else if( ! bENotation && // Ã»ÓĞÇĞ»»µ½¿ÆÑ§¼ÆÊı·¨Ê±Óöµ½¡®e¡¯±ê¼Ç
+        else if( ! bENotation && // æ²¡æœ‰åˆ‡æ¢åˆ°ç§‘å­¦è®¡æ•°æ³•æ—¶é‡åˆ°â€˜eâ€™æ ‡è®°
           (it.marker[it.length] == 'e' || it.marker[it.length] == 'E'))
         {
           bENotation = TRUE;
           it.length++;
 
-          // ¿ÆÑ§¼ÆÊı·¨£¬+/- ·ûºÅÅĞ¶Ï
+          // ç§‘å­¦è®¡æ•°æ³•ï¼Œ+/- ç¬¦å·åˆ¤æ–­
           if((--remain) != 0 && (*(it.end()) == '-' || *(it.end()) == '+')) {
             it.length++;
           }
@@ -406,11 +406,11 @@ namespace SmartStreamUtility
     return FALSE;
   }
 
-  // ÅĞ¶ÏpCharËùÔÚÎ»ÖÃÊÇ²»ÊÇÔÚÒ»ĞĞµÄ¿ªÍ·£¬ÒÔÏÂÇé¿ö·µ»ØTRUE
-  // 1.pCharÖ®Ç°µÄ×Ö·ûÊÇ'\n'
-  // 2.pCharÔÚÎÄµµ¿ªÍ·
-  // pCharÖ®Ç°µÄ¿Õ°×»á±»ºöÂÔ£¬¿Õ°××Ö·ûÒ»°ãÊÇ0x20¿Õ¸ñ·ûºÅ»òÕß'\t'ÖÆ±í·ûºÅ£¬
-  // Ò²¿ÉÒÔÓÃ»§×Ô¼º±ê¼Ç¿Õ°××Ö·û
+  // åˆ¤æ–­pCharæ‰€åœ¨ä½ç½®æ˜¯ä¸æ˜¯åœ¨ä¸€è¡Œçš„å¼€å¤´ï¼Œä»¥ä¸‹æƒ…å†µè¿”å›TRUE
+  // 1.pCharä¹‹å‰çš„å­—ç¬¦æ˜¯'\n'
+  // 2.pCharåœ¨æ–‡æ¡£å¼€å¤´
+  // pCharä¹‹å‰çš„ç©ºç™½ä¼šè¢«å¿½ç•¥ï¼Œç©ºç™½å­—ç¬¦ä¸€èˆ¬æ˜¯0x20ç©ºæ ¼ç¬¦å·æˆ–è€…'\t'åˆ¶è¡¨ç¬¦å·ï¼Œ
+  // ä¹Ÿå¯ä»¥ç”¨æˆ·è‡ªå·±æ ‡è®°ç©ºç™½å­—ç¬¦
   template<class SmartStreamT, typename _Ty>
   b32 IsHeadOfLine(SmartStreamT* pStream, _Ty* pChar)
   {
@@ -425,7 +425,7 @@ namespace SmartStreamUtility
       }
       --p;
     }
-    return TRUE; // µ½ÎÄµµ¿ªÍ·ÁË
+    return TRUE; // åˆ°æ–‡æ¡£å¼€å¤´äº†
   }
 
 
@@ -447,14 +447,14 @@ namespace SmartStreamUtility
     return FALSE;
   }
 
-  // [È¡³öÒ»Ğ©iterator·Åµ½listÖĞ]
-  // ·µ»ØÖµ£ºÈç¹ûÕÒµ½szEnd»òÕßµ½´ïnCountÊıÁ¿£¬·µ»Øtrue
-  //        Èç¹ûµ½½áÎ²µÄ»°·µ»Øfalse
-  //        Èç¹ûÑ­»·½áÊøµÄÓÅÏÈ¼¶ÊÇszEnd>itEnd>nCount
-  // ²ÎÊı£ºnCountÈç¹ûÎª0Ôò±íÊ¾ºöÂÔÕâ¸ö²ÎÊı
-  // ×¢Òâ£ºit»á±»¸Ä±ä£¡
+  // [å–å‡ºä¸€äº›iteratoræ”¾åˆ°listä¸­]
+  // è¿”å›å€¼ï¼šå¦‚æœæ‰¾åˆ°szEndæˆ–è€…åˆ°è¾¾nCountæ•°é‡ï¼Œè¿”å›true
+  //        å¦‚æœåˆ°ç»“å°¾çš„è¯è¿”å›false
+  //        å¦‚æœå¾ªç¯ç»“æŸçš„ä¼˜å…ˆçº§æ˜¯szEnd>itEnd>nCount
+  // å‚æ•°ï¼šnCountå¦‚æœä¸º0åˆ™è¡¨ç¤ºå¿½ç•¥è¿™ä¸ªå‚æ•°
+  // æ³¨æ„ï¼šitä¼šè¢«æ”¹å˜ï¼
   template<typename _TCh, class _Iter, class _ListT>
-  b32 Get(_Iter& it, const _Iter& itEnd, const _TCh* szEnd, clsize nCount, _ListT& list) // [Ã»²âÊÔ¹ı]
+  b32 Get(_Iter& it, const _Iter& itEnd, const _TCh* szEnd, clsize nCount, _ListT& list) // [æ²¡æµ‹è¯•è¿‡]
   { 
     do {
       if(it == szEnd) {
@@ -470,12 +470,12 @@ namespace SmartStreamUtility
     return TRUE;
   }
 
-  // [È¡³öÒ»Ğ©iterator·Åµ½listÖĞ]
-  // ·µ»ØÖµ£º1.Èç¹ûÕÒµ½szEnd»òÕßµ½´ïnCountÊıÁ¿£¬·µ»Øtrue
-  //        2.Èç¹ûµ½½áÎ²µÄ»°·µ»Øfalse£¬´ËÊ±Êı×éÖĞ²»º¬itEnd
-  //        3.Èç¹ûÓÃ»§µÄlambda±í´ïÊ½ÖĞ·µ»Øfalse£¬ÔòÖÕÖ¹Ñ­»·²¢·µ»Øtrue£¬Êı×éÖĞ²»°üº¬Õâ¸öiterator
-  // ²ÎÊı£ºnCountÈç¹ûÎª0Ôò±íÊ¾ºöÂÔÕâ¸ö²ÎÊı
-  // ×¢Òâ£ºit»á±»¸Ä±ä£¡
+  // [å–å‡ºä¸€äº›iteratoræ”¾åˆ°listä¸­]
+  // è¿”å›å€¼ï¼š1.å¦‚æœæ‰¾åˆ°szEndæˆ–è€…åˆ°è¾¾nCountæ•°é‡ï¼Œè¿”å›true
+  //        2.å¦‚æœåˆ°ç»“å°¾çš„è¯è¿”å›falseï¼Œæ­¤æ—¶æ•°ç»„ä¸­ä¸å«itEnd
+  //        3.å¦‚æœç”¨æˆ·çš„lambdaè¡¨è¾¾å¼ä¸­è¿”å›falseï¼Œåˆ™ç»ˆæ­¢å¾ªç¯å¹¶è¿”å›trueï¼Œæ•°ç»„ä¸­ä¸åŒ…å«è¿™ä¸ªiterator
+  // å‚æ•°ï¼šnCountå¦‚æœä¸º0åˆ™è¡¨ç¤ºå¿½ç•¥è¿™ä¸ªå‚æ•°
+  // æ³¨æ„ï¼šitä¼šè¢«æ”¹å˜ï¼
   template<class _Iter, class _ListT, class _Fn>
   b32 Get(_Iter& it, const _Iter& itEnd, clsize nCount, _ListT& list, _Fn fn)
   { 
@@ -492,10 +492,10 @@ namespace SmartStreamUtility
     return TRUE;
   }
 
-  // ·­ÒëÒıÓï
-  // Èç¹ûiteratorÃ»ÓĞ±»ÒıºÅÒıÓÃ£¬ÔòÖ±½Ó×ª»»Îª×Ö·û´®·µ»Ø
-  // ·ñÔò»á½«ÒıºÅÈ¥µô£¬²¢½«ÒıºÅÄÚµÄÄÚ×ªÒå·û·­Òë³ÉÆäËü×Ö·û
-  // ×¢Òâ£ºiterator±ØĞëÊÇÍ·Î²Ê¹ÓÃÒıºÅµÄ²ÅÄÜ±»·­Òë
+  // ç¿»è¯‘å¼•è¯­
+  // å¦‚æœiteratoræ²¡æœ‰è¢«å¼•å·å¼•ç”¨ï¼Œåˆ™ç›´æ¥è½¬æ¢ä¸ºå­—ç¬¦ä¸²è¿”å›
+  // å¦åˆ™ä¼šå°†å¼•å·å»æ‰ï¼Œå¹¶å°†å¼•å·å†…çš„å†…è½¬ä¹‰ç¬¦ç¿»è¯‘æˆå…¶å®ƒå­—ç¬¦
+  // æ³¨æ„ï¼šiteratorå¿…é¡»æ˜¯å¤´å°¾ä½¿ç”¨å¼•å·çš„æ‰èƒ½è¢«ç¿»è¯‘
   template<class _Iter, class _TString>
   _TString& TranslateQuotation(const _Iter& it, _TString& str)
   {
@@ -521,7 +521,7 @@ namespace SmartStreamUtility
         pTemp[n++] = c;
       }
 
-      // ÓÃÀ´´¦ÀíÓĞ¿ÉÄÜÊÇ²»ÕıÈ·µÄ½áÎ²
+      // ç”¨æ¥å¤„ç†æœ‰å¯èƒ½æ˜¯ä¸æ­£ç¡®çš„ç»“å°¾
       if(it.marker[it.length - 1] != '\"' && it.marker[it.length - 1] != '\'') {
         pTemp[n++] = it.marker[i];
       }
@@ -542,7 +542,7 @@ namespace SmartStreamUtility
   template<class _TString>
   _TString& MakeQuotation(_TString& str, typename _TString::LPCSTR szText)
   {
-    // ¼«¶ËÇé¿öÏÂËùÓĞ×Ö·û¶¼±ä³É"×ªÒå·û+×Ö·û"ĞÎÊ½£¬ÔÙ¼ÓÉÏÊ×Î²ÒıºÅ
+    // æç«¯æƒ…å†µä¸‹æ‰€æœ‰å­—ç¬¦éƒ½å˜æˆ"è½¬ä¹‰ç¬¦+å­—ç¬¦"å½¢å¼ï¼Œå†åŠ ä¸Šé¦–å°¾å¼•å·
     clsize length = clstd::strlenT<_TString::TChar>(szText);
     typename _TString::TChar* pTemp = str.GetBuffer(length * 2 + 2 + 1);
     size_t n = 1;

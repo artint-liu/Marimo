@@ -1,11 +1,11 @@
-#ifndef _CL_STRING_H_
+ï»¿#ifndef _CL_STRING_H_
 #define _CL_STRING_H_
 
 #ifndef _CL_ALLOCATOR_H_
 #error Must be include "clAllocator.h" first.
 #endif // _CL_ALLOCATOR_H_
 
-// autoexp.dat ½âÎöÎÄ¼ş
+// autoexp.dat è§£ææ–‡ä»¶
 //clstd::StringX<wchar_t,*>|clstd::StringX<unsigned short,*>{
 //  preview  (  #("L", [$e.m_pBuf,su]))
 //
@@ -46,21 +46,21 @@ namespace clstd
   template<typename _TCh>
   _TCh* strstrT(_TCh* pStr, const _TCh* pSubStr);
 
-  // ÓĞ·ûºÅÊı×Ö => ×Ö·û´®
+  // æœ‰ç¬¦å·æ•°å­— => å­—ç¬¦ä¸²
   template<typename _TCh, typename _TNum, typename _TUNum>
   void _ltox_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper);
 
-  // ÎŞ·ûºÅÊı×Ö => ×Ö·û´®
+  // æ— ç¬¦å·æ•°å­— => å­—ç¬¦ä¸²
   template<typename _TCh, typename _TNum>
   void _ultox_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper);
 
-  // ÊıÑ§·Ö×é£º12345678 => 12,345,678
+  // æ•°å­¦åˆ†ç»„ï¼š12345678 => 12,345,678
 
-  // ÓĞ·ûºÅÊı×Ö => ×Ö·û´®(´øÊıÑ§·Ö×é)
+  // æœ‰ç¬¦å·æ•°å­— => å­—ç¬¦ä¸²(å¸¦æ•°å­¦åˆ†ç»„)
   template<typename _TCh, typename _TNum, typename _TUNum>
   void _ltoxg_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper);
 
-  // ÎŞ·ûºÅÊı×Ö => ×Ö·û´®(´øÊıÑ§·Ö×é)
+  // æ— ç¬¦å·æ•°å­— => å­—ç¬¦ä¸²(å¸¦æ•°å­¦åˆ†ç»„)
   template<typename _TCh, typename _TNum>
   void _ultoxg_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper);
 
@@ -69,13 +69,13 @@ namespace clstd
   _TInt _xstrtoi(const _TCh *String);
 
   template<typename _TInt, typename _TCh>
-  _TInt _xstrtoi(const _TCh *str, i32 radix, clsize len = -1);  // (2-36½øÖÆ)×Ö·û´®×ª´ø·ûºÅÕûÊı
+  _TInt _xstrtoi(const _TCh *str, i32 radix, clsize len = -1);  // (2-36è¿›åˆ¶)å­—ç¬¦ä¸²è½¬å¸¦ç¬¦å·æ•´æ•°
 
   template<typename _TUInt, typename _TCh>
   _TUInt _xstrtou(const _TCh *str);
 
   template<typename _TUInt, typename _TCh>
-  _TUInt _xstrtou(const _TCh *str, i32 radix, clsize len = -1);  // (2-36½øÖÆ)×Ö·û´®×ªÎŞ·ûºÅÕûÊı
+  _TUInt _xstrtou(const _TCh *str, i32 radix, clsize len = -1);  // (2-36è¿›åˆ¶)å­—ç¬¦ä¸²è½¬æ— ç¬¦å·æ•´æ•°
 
 
   template<typename _TCh>
@@ -112,13 +112,13 @@ namespace clstd
   template<typename _TCh>
   _TCh tolowerT(_TCh ch);
 
-  template<typename _TCh>  // ±È½Ïstr1µÄÇ°n¸ö×Ö·û,Èç¹ûÓöµ½'\0'ÔòÌáÇ°½áÊø
+  template<typename _TCh>  // æ¯”è¾ƒstr1çš„å‰nä¸ªå­—ç¬¦,å¦‚æœé‡åˆ°'\0'åˆ™æå‰ç»“æŸ
   int strncmpiT( const _TCh *str1, const _TCh *str2, clsize n );
 
   template<typename _TCh>
   int strcmpiT( const _TCh *str1, const _TCh *str2);
 
-  template<typename _TCh> // ±È½Ïstr1µÄÇ°n¸ö×Ö·û,Èç¹ûÓöµ½'\0'ÔòÌáÇ°½áÊø
+  template<typename _TCh> // æ¯”è¾ƒstr1çš„å‰nä¸ªå­—ç¬¦,å¦‚æœé‡åˆ°'\0'åˆ™æå‰ç»“æŸ
   int strncmpT( const _TCh *str1, const _TCh *str2, clsize n );
 
   template<typename _TCh>
@@ -131,7 +131,7 @@ namespace clstd
   clsize strlenT(const _TCh* str);
 
   template<typename _TCh>
-  b32 IsNumericT(const _TCh* str, i32 radix = 10, clsize len = -1);  // Óöµ½\0»òÕß´ïµ½lenÊ±ÍË³ö
+  b32 IsNumericT(const _TCh* str, i32 radix = 10, clsize len = -1);  // é‡åˆ°\0æˆ–è€…è¾¾åˆ°lenæ—¶é€€å‡º
 }
 
 
@@ -157,7 +157,7 @@ namespace clstd
     typedef _XCh        XChar;
     typedef const _TCh* LPCSTR;
   private:
-    _TCh*        m_pBuf;  // Ö»ÄÜÓĞÒ»¸ö±äÁ¿, ·ñÔò×÷ÎªFormat²ÎÊıÊ±»á°Ñ¶àÓàµÄ³ÉÔ±±äÁ¿Ò²Ñ¹Èë¶ÑÕ», ³öÏÖÎÊÌâ.
+    _TCh*        m_pBuf;  // åªèƒ½æœ‰ä¸€ä¸ªå˜é‡, å¦åˆ™ä½œä¸ºFormatå‚æ•°æ—¶ä¼šæŠŠå¤šä½™çš„æˆå‘˜å˜é‡ä¹Ÿå‹å…¥å †æ ˆ, å‡ºç°é—®é¢˜.
     //clAllocator* m_pAlloc;
     void  resizeLength        (size_t uLength);
     void  resizeLengthNoCopy  (size_t uLength);
@@ -218,8 +218,8 @@ namespace clstd
     StringX& operator+=(const _TCh cCh);
     StringX& operator+=(const StringX& clStr);
     //StringX& operator+=(const float fFloat);
-    //StringX& operator+=(const int nInteger);  // ²ÎÊıÈİÒ×»ìÏı_TCh,³öÏÖBug
-    //StringX& operator+=(const long lLong);  // ²ÎÊıÈİÒ×»ìÏıÎª_TCh,³öÏÖBug
+    //StringX& operator+=(const int nInteger);  // å‚æ•°å®¹æ˜“æ··æ·†_TCh,å‡ºç°Bug
+    //StringX& operator+=(const long lLong);  // å‚æ•°å®¹æ˜“æ··æ·†ä¸º_TCh,å‡ºç°Bug
     //StringX& operator+=(const unsigned int uInteger);
     //StringX& operator+=(const unsigned long uLong);
 
@@ -243,12 +243,12 @@ namespace clstd
     StringX&    Append          (const _XCh* pStrX);
     StringX&    Append          (const _XCh* pStrX, size_t uCount);
     StringX&    Append          (const _TCh* pStr);
-    StringX&    Append          (const _TCh* pStr, size_t uCount);       // ×·¼Ó×Ö·û´®£¬Èç¹û³¤¶È´óÓÚcount»á±»½Ø¶Ï
-    StringX&    Append          (const _TCh* pStr, _TCh c, long nWidth);  // ×·¼Ó×Ö·û´®£¬Èç¹û³¤¶ÈĞ¡ÓÚwidth»áÒÔÖ¸¶¨×Ö·ûÌî³ä, width > 0 Ìî³äµ½Í·²¿£¬width < 0 Ìî³äÎ²²¿£¬width == 0°´Êµ¼Ê´óĞ¡Ìî³ä
+    StringX&    Append          (const _TCh* pStr, size_t uCount);       // è¿½åŠ å­—ç¬¦ä¸²ï¼Œå¦‚æœé•¿åº¦å¤§äºcountä¼šè¢«æˆªæ–­
+    StringX&    Append          (const _TCh* pStr, _TCh c, long nWidth);  // è¿½åŠ å­—ç¬¦ä¸²ï¼Œå¦‚æœé•¿åº¦å°äºwidthä¼šä»¥æŒ‡å®šå­—ç¬¦å¡«å……, width > 0 å¡«å……åˆ°å¤´éƒ¨ï¼Œwidth < 0 å¡«å……å°¾éƒ¨ï¼Œwidth == 0æŒ‰å®é™…å¤§å°å¡«å……
     StringX&    Append          (_TCh cCh);
     StringX&    Append          (_TCh cCh, size_t uCount);
     StringX&    Append          (const StringX& clStr);
-    StringX&    AppendFloat     (float val, char mode = 'F'); // modeÊÇ×ª»»Ä£Ê½£¬'F'±ê×¼¸¡µãÄ£Ê½£¬'E'¿ÆÑ§¼ÆÊıÄ£Ê½£¬'R'ÔÄ¶ÁÔöÇ¿Ä£Ê½
+    StringX&    AppendFloat     (float val, char mode = 'F'); // modeæ˜¯è½¬æ¢æ¨¡å¼ï¼Œ'F'æ ‡å‡†æµ®ç‚¹æ¨¡å¼ï¼Œ'E'ç§‘å­¦è®¡æ•°æ¨¡å¼ï¼Œ'R'é˜…è¯»å¢å¼ºæ¨¡å¼
     StringX&    AppendInteger32 (s32 val, int nNumGroup = 0);
     StringX&    AppendUInt32    (u32 val, int nNumGroup = 0);
     StringX&    AppendInteger64 (s64 val, int nNumGroup = 0);
@@ -273,21 +273,21 @@ namespace clstd
     size_t      Insert          (size_t idx, _TCh cCh, size_t count);
     size_t      Insert          (size_t idx, const _TCh* pStr);
     size_t      Remove          (_TCh cCh);
-    size_t      Remove          (size_t idx, size_t uCount);  // ·µ»ØÖµÊÇÊ£Óà³¤¶È
+    size_t      Remove          (size_t idx, size_t uCount);  // è¿”å›å€¼æ˜¯å‰©ä½™é•¿åº¦
     void        TrimLeft        (_TCh cTarget);
     void        TrimLeft        (const _TCh* pTarget);
     void        TrimRight       (_TCh cTarget);
     void        TrimRight       (const _TCh* pTarget);
     b32         IsEmpty         () const;
     b32         IsNotEmpty      () const;
-    b32         IsFloat         () const; // ÒÔ'+'or'-'¿ªÍ·£¬'0'-'9',Ö»³öÏÖÒ»´ÎµÄ'.'£¬'F'»ò'f'½áÎ²µÄĞÎÊ½£¬ÔİÊ±²»Ö§³Ö"1e2"ÕâÖÖ¿ÆÑ§¼ÆÊıĞÎÊ½
-    b32         IsInteger       () const; // ÅĞ¶ÏÊÇ·ñÊÇÕûÊıĞÎÊ½µÄ×Ö·û´®£¬ÒÔ'+'or'-'¿ªÍ·£¬ºóÃæÈ«ÊÇÊı×Ö
-    b32         IsAlphanumeric  () const; // ÅĞ¶Ï×Ö·û´®ÊÇ·ñÖ»°üº¬['a'-'z', 'A'-'Z', '0'-'9', '_']ÕâĞ©×Ö·û
+    b32         IsFloat         () const; // ä»¥'+'or'-'å¼€å¤´ï¼Œ'0'-'9',åªå‡ºç°ä¸€æ¬¡çš„'.'ï¼Œ'F'æˆ–'f'ç»“å°¾çš„å½¢å¼ï¼Œæš‚æ—¶ä¸æ”¯æŒ"1e2"è¿™ç§ç§‘å­¦è®¡æ•°å½¢å¼
+    b32         IsInteger       () const; // åˆ¤æ–­æ˜¯å¦æ˜¯æ•´æ•°å½¢å¼çš„å­—ç¬¦ä¸²ï¼Œä»¥'+'or'-'å¼€å¤´ï¼Œåé¢å…¨æ˜¯æ•°å­—
+    b32         IsAlphanumeric  () const; // åˆ¤æ–­å­—ç¬¦ä¸²æ˜¯å¦åªåŒ…å«['a'-'z', 'A'-'Z', '0'-'9', '_']è¿™äº›å­—ç¬¦
     void        Clear           ();
     size_t      Find            (_TCh cFind, size_t uStart = 0) const;
     size_t      Find            (const _TCh* pFind, size_t uStart = 0) const;
-    size_t      FindAny         (const _TCh* pCharList, size_t uStart = 0) const; // ×Ö·û´®×ÖÄ¸Ë³ĞòÓÅÏÈ²éÕÒ
-    size_t      FindAnyFromList (const _TCh* pCharList, size_t uStart = 0) const; // ÁĞ±í×ÖÄ¸Ë³ĞòÓÅÏÈ²éÕÒ
+    size_t      FindAny         (const _TCh* pCharList, size_t uStart = 0) const; // å­—ç¬¦ä¸²å­—æ¯é¡ºåºä¼˜å…ˆæŸ¥æ‰¾
+    size_t      FindAnyFromList (const _TCh* pCharList, size_t uStart = 0) const; // åˆ—è¡¨å­—æ¯é¡ºåºä¼˜å…ˆæŸ¥æ‰¾
     size_t      ReverseFind     (_TCh cFind) const;
     size_t      ReverseFind     (_TCh cFind, int nStart, int nEnd) const;
     StringX     Left            (size_t uCount) const;

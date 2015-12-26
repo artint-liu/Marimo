@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clString.H"
 #include "clUtility.H"
 
@@ -94,7 +94,6 @@ namespace clstd
     return chksum_crc32(pData, nLength);
   }
 
-
   TimeTrace::TimeTrace()
   {
     QueryPerformanceFrequency(&m_Frequency);
@@ -127,7 +126,7 @@ namespace clstd
 
   //ScopeTimeTrace::ScopeTimeTrace(CLLPCSTR szName)
   //{
-  //  // ÕâÃ´Ğ´ÊÇÎªÁË·ÀÖ¹Í·ÎÄ¼ş°üº¬ clStringA µÄ¶¨Òå
+  //  // è¿™ä¹ˆå†™æ˜¯ä¸ºäº†é˜²æ­¢å¤´æ–‡ä»¶åŒ…å« clStringA çš„å®šä¹‰
   //  clStringA& strName = *(clStringA*)&name;
   //  new(&strName) clStringA;
   //  strName = szName;
@@ -137,7 +136,7 @@ namespace clstd
   ScopeTimeTrace::ScopeTimeTrace(CLLPCSTR szName, double* rTotalTime)
     : prTotalTime(rTotalTime)
   {
-    // ÕâÃ´Ğ´ÊÇÎªÁË·ÀÖ¹Í·ÎÄ¼ş°üº¬ clStringA µÄ¶¨Òå
+    // è¿™ä¹ˆå†™æ˜¯ä¸ºäº†é˜²æ­¢å¤´æ–‡ä»¶åŒ…å« clStringA çš„å®šä¹‰
     clStringA& strName = *(clStringA*)&name;
     new(&strName) clStringA;
     strName = szName;
@@ -228,7 +227,7 @@ namespace clstd
     return str;
   }
 
-  // Gaussian ¼ÆËã²¿·Ö£¬Ö»ÊÇÏÈ°Ñ´úÂë·ÅÕâÀï£¬»¹Ã»ÓÃÉÏ£¬Ò²Ã»ÕûÀí
+  // Gaussian è®¡ç®—éƒ¨åˆ†ï¼Œåªæ˜¯å…ˆæŠŠä»£ç æ”¾è¿™é‡Œï¼Œè¿˜æ²¡ç”¨ä¸Šï¼Œä¹Ÿæ²¡æ•´ç†
   const float g_sigma = 0.84089642f;
   void Gaussian2D(float sigma)
   {
@@ -243,7 +242,7 @@ namespace clstd
       }
       printf("\n");
     }
-    // Gaussian2D[7][7] sigma=0.84089642f Ó¦¸ÃÊÇÈçÏÂÖµ£º
+    // Gaussian2D[7][7] sigma=0.84089642f åº”è¯¥æ˜¯å¦‚ä¸‹å€¼ï¼š
     //0.00000067	0.00002292	0.00019117	0.00038771	0.00019117	0.00002292	0.00000067
     //0.00002292	0.00078633	0.00655965	0.01330373	0.00655965	0.00078633	0.00002292
     //0.00019117	0.00655965	0.05472157	0.11098164	0.05472157	0.00655965	0.00019117

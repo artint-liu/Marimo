@@ -1,4 +1,4 @@
-#ifndef _CLSTD_QUATERNION_H_
+ï»¿#ifndef _CLSTD_QUATERNION_H_
 #define _CLSTD_QUATERNION_H_
 
 #ifndef _CL_STD_CODE_
@@ -113,8 +113,8 @@ namespace clstd
       return _float3(x, y, z);
     }
 
-    _euler& positivity(); // ÕıÊı»¯£¬ËùÓĞ·ÖÁ¿×ªÎªÕıÊı
-    _euler& negativity(); // ¸ºÊı»¯£¬ËùÓĞ·ÖÁ¿×ªÎª¸ºÊı
+    _euler& positivity(); // æ­£æ•°åŒ–ï¼Œæ‰€æœ‰åˆ†é‡è½¬ä¸ºæ­£æ•°
+    _euler& negativity(); // è´Ÿæ•°åŒ–ï¼Œæ‰€æœ‰åˆ†é‡è½¬ä¸ºè´Ÿæ•°
   };
 
 

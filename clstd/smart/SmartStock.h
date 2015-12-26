@@ -1,10 +1,10 @@
-#ifndef _CLSTD_SMART_STOCK_H_
+ï»¿#ifndef _CLSTD_SMART_STOCK_H_
 #define _CLSTD_SMART_STOCK_H_
 
-// ÖØÐÂÉè¼ÆµÄÐÂ½Ó¿Ú SmartStock£¨Ãô½ÝÍÐÅÌ£©£¬ÓÃÀ´´¢´æÓÃ»§Êý¾ÝÎÄ¼þºÍÊý¾Ý¸ñÊ½
-// Éè¼ÆÄ¿µÄÊÇÎªÁËÌæ»»¾ÉµÄSmartProfileÀà
-// ·ÏÆúSmartProfileÖ÷ÒªÔ­ÒòÊÇ£¬ SmartProfileÖÐºÜ¶à½Ó¿Ú¶¨Òå²»ÇåÎú£¬ÓÐµã»ìÂÒ
-// ½á¹¹½âÎöÈÔÈ»²ÉÓÃÖð²½½âÎö·½Ê½£¬ÓÃµ½µÄ²Å½âÎö
+// é‡æ–°è®¾è®¡çš„æ–°æŽ¥å£ SmartStockï¼ˆæ•æ·æ‰˜ç›˜ï¼‰ï¼Œç”¨æ¥å‚¨å­˜ç”¨æˆ·æ•°æ®æ–‡ä»¶å’Œæ•°æ®æ ¼å¼
+// è®¾è®¡ç›®çš„æ˜¯ä¸ºäº†æ›¿æ¢æ—§çš„SmartProfileç±»
+// åºŸå¼ƒSmartProfileä¸»è¦åŽŸå› æ˜¯ï¼Œ SmartProfileä¸­å¾ˆå¤šæŽ¥å£å®šä¹‰ä¸æ¸…æ™°ï¼Œæœ‰ç‚¹æ··ä¹±
+// ç»“æž„è§£æžä»ç„¶é‡‡ç”¨é€æ­¥è§£æžæ–¹å¼ï¼Œç”¨åˆ°çš„æ‰è§£æž
 
 #ifndef _SMARTSTREAM_2_H_
 #error Must be include "smartstream.h" first.
@@ -46,8 +46,8 @@ public:
   struct PARAMETER
   {
     const SECTION_DESC* pSection;
-    _MyIterator   itKey;   // ¼ü
-    _MyIterator   itValue; // Öµ
+    _MyIterator   itKey;   // é”®
+    _MyIterator   itValue; // å€¼
 
     PARAMETER(){}
     PARAMETER(SECTION_DESC* pCoSection) : pSection(pCoSection){}
@@ -68,10 +68,10 @@ public:
   struct SECTION_DESC
   {
     SmartStockT*  pStock;
-    int           nDepth;   // ËùÔÚÉî¶È£¬ÓÃÓÚÎÄ±¾¶ÔÆë. ¸ùÊÇ0, Èç¹ûÊÇ<0£¬ËµÃ÷Õâ¸öSectionÒÑ¾­Ê§Ð§
+    int           nDepth;   // æ‰€åœ¨æ·±åº¦ï¼Œç”¨äºŽæ–‡æœ¬å¯¹é½. æ ¹æ˜¯0, å¦‚æžœæ˜¯<0ï¼Œè¯´æ˜Žè¿™ä¸ªSectionå·²ç»å¤±æ•ˆ
     _MyIterator   itSectionName;
-    _MyIterator   itBegin;  // Section¿ªÊ¼µÄ'{'Î»ÖÃ
-    _MyIterator   itEnd;    // Section½áÊøµÄ'}'Î»ÖÃ
+    _MyIterator   itBegin;  // Sectionå¼€å§‹çš„'{'ä½ç½®
+    _MyIterator   itEnd;    // Sectionç»“æŸçš„'}'ä½ç½®
 
 #ifdef _DEBUG
     b32 DbgCheck() const
@@ -143,35 +143,35 @@ public:
   b32 CloseSection(Section sect);
   
   //************************************
-  // Method:    Create ´´½¨section
+  // Method:    Create åˆ›å»ºsection
   // Qualifier:
   // Parameter: _TCh * szPath
-  // szPathÖ§³Ö"sect3/sect2/sect1/sect0"ºÍ"sect"Á½ÖÖ¸ñÊ½
-  // Èç¹û´øÓÐÂ·¾¶£¬sect3£¬sect2ºÍsect1Â·¾¶ÏÈÖ´ÐÐ²éÕÒ¹¦ÄÜ£¬Èç¹ûÕÒ²»µ½Ôò»á´´½¨
-  // ×îºóµÄsect0»áÖ±½Ó´´½¨
-  // Èç¹û²»´øÂ·¾¶£¬ÔòÖ±½ÓÔÚ¸ùÉÏ´´½¨sect
-  // ×¢Òâ£º²»ÔÙÊ¹ÓÃÊ±ÐèÒªÓÃCloseSection¹Ø±Õ
+  // szPathæ”¯æŒ"sect3/sect2/sect1/sect0"å’Œ"sect"ä¸¤ç§æ ¼å¼
+  // å¦‚æžœå¸¦æœ‰è·¯å¾„ï¼Œsect3ï¼Œsect2å’Œsect1è·¯å¾„å…ˆæ‰§è¡ŒæŸ¥æ‰¾åŠŸèƒ½ï¼Œå¦‚æžœæ‰¾ä¸åˆ°åˆ™ä¼šåˆ›å»º
+  // æœ€åŽçš„sect0ä¼šç›´æŽ¥åˆ›å»º
+  // å¦‚æžœä¸å¸¦è·¯å¾„ï¼Œåˆ™ç›´æŽ¥åœ¨æ ¹ä¸Šåˆ›å»ºsect
+  // æ³¨æ„ï¼šä¸å†ä½¿ç”¨æ—¶éœ€è¦ç”¨CloseSectionå…³é—­
   //************************************
   Section Create(T_LPCSTR szPath);
   Section CreateChild(Section sect, T_LPCSTR szPath);
 
   //************************************
-  // Method:    Open ´ò¿ªÖ¸¶¨µÄSection
+  // Method:    Open æ‰“å¼€æŒ‡å®šçš„Section
   // Qualifier:
   // Parameter: _TCh * szPath
-  // ´ò¿ªSectionµÄÂ·¾¶Ãû£¬Èç"sect1/sect0"»òÕß"sect"
-  // ×¢Òâ£º²»ÔÙÊ¹ÓÃÊ±ÐèÒªÓÃCloseSection¹Ø±Õ
+  // æ‰“å¼€Sectionçš„è·¯å¾„åï¼Œå¦‚"sect1/sect0"æˆ–è€…"sect"
+  // æ³¨æ„ï¼šä¸å†ä½¿ç”¨æ—¶éœ€è¦ç”¨CloseSectionå…³é—­
   //************************************
   Section Open(T_LPCSTR szPath);
   Section OpenChild(Section sect, T_LPCSTR szPath);
 
   //************************************
-  // Method:    DeleteSection É¾³ýÖ¸¶¨µÄSection
-  // Returns:   b32 É¾³ý³É¹¦·µ»Øtrue£¬Èç¹ûÖ¸¶¨µÄSection²»´æÔÚÔò·µ»Øfalse
+  // Method:    DeleteSection åˆ é™¤æŒ‡å®šçš„Section
+  // Returns:   b32 åˆ é™¤æˆåŠŸè¿”å›žtrueï¼Œå¦‚æžœæŒ‡å®šçš„Sectionä¸å­˜åœ¨åˆ™è¿”å›žfalse
   // Qualifier:
   // Parameter: _TCh * szPath
-  // SectionµÄÂ·¾¶Ãû£¬Èç¹ûÊÇ"sect"ÕâÖÖÐÎÊ½£¬ÔòÖ±½ÓÉ¾³ýËü¼°Ëù°üº¬µÄ×ÓSection
-  // Èç¹ûÊÇ"sect3/sect2/sect1/sect0"£¬ÔòÉ¾³ýµÄÊÇ"sect3/sect2/sect1"Â·¾¶ÏÂµÄ"sect0"
+  // Sectionçš„è·¯å¾„åï¼Œå¦‚æžœæ˜¯"sect"è¿™ç§å½¢å¼ï¼Œåˆ™ç›´æŽ¥åˆ é™¤å®ƒåŠæ‰€åŒ…å«çš„å­Section
+  // å¦‚æžœæ˜¯"sect3/sect2/sect1/sect0"ï¼Œåˆ™åˆ é™¤çš„æ˜¯"sect3/sect2/sect1"è·¯å¾„ä¸‹çš„"sect0"
   //************************************
   b32 DeleteSection(T_LPCSTR szPath);
 
@@ -187,7 +187,7 @@ protected:
   b32     Append            (T_LPCSTR szText, clsize nCount);
   b32     Insert            (clsize nPos, T_LPCSTR szText, clsize nCount);
   b32     Replace           (clsize nPos, clsize nReplaced, T_LPCSTR szText, clsize nCount);
-  b32     FindSigleSection  (const SECTION_DESC* pFindSect, T_LPCSTR szName, SECTION_DESC* pOutSect); // szNameÎªNULL±íÊ¾²éÕÒÈÎºÎSection;
+  b32     FindSigleSection  (const SECTION_DESC* pFindSect, T_LPCSTR szName, SECTION_DESC* pOutSect); // szNameä¸ºNULLè¡¨ç¤ºæŸ¥æ‰¾ä»»ä½•Section;
   b32     NewSection        (const SECTION_DESC* pSection, T_LPCSTR szName, SECTION_DESC* pNewSect);
   clsize  InsertString      (const _MyIterator& it, const _TStr& str);
 

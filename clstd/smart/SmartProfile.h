@@ -1,4 +1,4 @@
-#ifndef _SMART_PROFILE_H_
+ï»¿#ifndef _SMART_PROFILE_H_
 #define _SMART_PROFILE_H_
 
 #ifndef _SMARTSTREAM_2_H_
@@ -57,7 +57,7 @@ public:
     _MyIterator    itBegin;
     _MyIterator    itEnd;
     _MyIterator    itCur;
-    _MyIterator    itSection;  // Sect µÄÃû×Ö
+    _MyIterator    itSection;  // Sect çš„åå­—
 
     u32            bSection : 1;
     u32            bWrite   : 1;
@@ -68,9 +68,9 @@ public:
   typedef FINDSECT*					HANDLE;
 	typedef clvector<HANDLE>  HandleArray;
 
-  // TODO: Ôö¼Ó×Ô¶¯Îö¹¹¶¨Òå¡°AUTO_HANDLE¡±
-  // !! µ«ÊÇ×ĞÏ¸¿¼ÂÇºó·¢ÏÖ×Ô¶¯Ö¸ÕëÓĞºÜ¶àÎÊÌâ£¬±ÈÈçµ±²ÎÊı´«µİÊ±£¬Handle¸´ÖÆÁËÁ½·İ
-  // !! Èç¹ûÆäÖĞÒ»¸öÎö¹¹£¬ÁíÍâÒ»¸ö´¢´æµÄhandleÆäÊµÒÑ¾­Ê§Ğ§ÁË¡£²»ÖªµÀ¸ÄÔõÃ´½â¾ö¡£
+  // TODO: å¢åŠ è‡ªåŠ¨ææ„å®šä¹‰â€œAUTO_HANDLEâ€
+  // !! ä½†æ˜¯ä»”ç»†è€ƒè™‘åå‘ç°è‡ªåŠ¨æŒ‡é’ˆæœ‰å¾ˆå¤šé—®é¢˜ï¼Œæ¯”å¦‚å½“å‚æ•°ä¼ é€’æ—¶ï¼ŒHandleå¤åˆ¶äº†ä¸¤ä»½
+  // !! å¦‚æœå…¶ä¸­ä¸€ä¸ªææ„ï¼Œå¦å¤–ä¸€ä¸ªå‚¨å­˜çš„handleå…¶å®å·²ç»å¤±æ•ˆäº†ã€‚ä¸çŸ¥é“æ”¹æ€ä¹ˆè§£å†³ã€‚
   //struct AUTOHANDLE
   //{
   //  HANDLE          handle;
@@ -96,9 +96,9 @@ public:
   class VALUE
   {
     friend class SmartProfileT;
-    _MyIterator  itSection;    // Sect µÄÃû×Ö
-    _MyIterator  itKeyName;    // Key µÄÃû×Ö
-    _MyIterator  itValue;      // Öµ
+    _MyIterator  itSection;    // Sect çš„åå­—
+    _MyIterator  itKeyName;    // Key çš„åå­—
+    _MyIterator  itValue;      // å€¼
   public:
     _TStr SectionName ();
     _TStr KeyName     ();
@@ -126,15 +126,15 @@ public:
   b32 SaveW(const wch* lpProfile);
   b32 Close();
 
-  // ÔÚ hParentSession ÏÂµÄ szOffset Æ«ÒÆÏÂ²éÕÒSession
-  // szSect == NULL Ôò²éÕÒÄ¿±êSectionÏÂµÄËùÓĞSection
+  // åœ¨ hParentSession ä¸‹çš„ szOffset åç§»ä¸‹æŸ¥æ‰¾Session
+  // szSect == NULL åˆ™æŸ¥æ‰¾ç›®æ ‡Sectionä¸‹çš„æ‰€æœ‰Section
   HANDLE  FindFirstSection  (HANDLE hSect, b32 bSiblingSect, _CTCh* szOffset, _CTCh* szSect);
   b32     FindNextSection   (HANDLE hFind);
   _TStr   GetSectionName    (HANDLE hSect);
   _TStr   GetPathName       (HANDLE hSect);
-  HANDLE  OpenSection       (_CTCh* szDir);    // "a\b\c\d" Ê½µÄÃû×Ö
+  HANDLE  OpenSection       (_CTCh* szDir);    // "a\b\c\d" å¼çš„åå­—
 
-  // Ã¶¾ÙÓÃ, Key ²»Ö§³ÖÖØÃûÊ¹ÓÃ, ËùÒÔÃ»ÓĞ²éÕÒ¶à¸öKey¹¦ÄÜ
+  // æšä¸¾ç”¨, Key ä¸æ”¯æŒé‡åä½¿ç”¨, æ‰€ä»¥æ²¡æœ‰æŸ¥æ‰¾å¤šä¸ªKeyåŠŸèƒ½
   HANDLE  FindFirstKey    (HANDLE hSection, VALUE& value);
   b32     FindNextKey     (HANDLE hKey, VALUE& value);
 
@@ -149,7 +149,7 @@ public:
   b32     FindClose      (HANDLE hFind);
   b32     CloseHandle    (HANDLE hHandle);
 
-  HANDLE  CreateSection   (_CTCh* szPath, _CTCh* szSect);  // ÆäÊµĞÂ½¨µÄÂ·¾¶ÊÇ szPath\szSect
+  HANDLE  CreateSection   (_CTCh* szPath, _CTCh* szSect);  // å…¶å®æ–°å»ºçš„è·¯å¾„æ˜¯ szPath\szSect
   b32     DeleteSection   (_CTCh* szPath, _CTCh* szSect);
   b32     SetKey          (HANDLE hSect, _CTCh* szKeyName, _CTCh* szValue, b32 bReplace = TRUE);
   b32     DeleteKey       (HANDLE hSect, _CTCh* szKeyName);

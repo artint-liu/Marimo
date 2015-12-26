@@ -1,4 +1,4 @@
-#include <string>
+ï»¿#include <string>
 
 #include "clStd.H"
 #include "clString.H"
@@ -122,7 +122,7 @@ namespace clstd
       eCreationDistribution, eFlagAttr, NULL);
     return (m_hFile != INVALID_HANDLE_VALUE);
 #else
-    // TODO: Õâ¸öÃ»²âÊÔ¹ı
+    // TODO: è¿™ä¸ªæ²¡æµ‹è¯•è¿‡
     ch szOpenMode[8];
     CreateFileCreationDistributionToStdOpenCode(
       eCreationDistribution, eDesiredAccess, szOpenMode, sizeof(szOpenMode));
@@ -165,7 +165,7 @@ namespace clstd
       eCreationDistribution, eFlagAttr, NULL);
     return (m_hFile != INVALID_HANDLE_VALUE);
 #else
-    // TODO: Õâ¸öÃ»²âÊÔ¹ı
+    // TODO: è¿™ä¸ªæ²¡æµ‹è¯•è¿‡
     ch szOpenMode[8];
     CreateFileCreationDistributionToStdOpenCode(
       eCreationDistribution, eDesiredAccess, szOpenMode, sizeof(szOpenMode));
@@ -279,7 +279,7 @@ namespace clstd
     const b32 bRet = ::ReadFile(m_hFile, lpBuffer, nNumOfBytesToRead, (LPDWORD)&dwNumRead, NULL);
 #else
     dwNumRead = fread(lpBuffer, nNumOfBytesToRead, 1, m_hFile);
-    ASSERT(dwNumRead == 1); // Èç¹û³öÏÖ¶ÏÑÔÔòËµÃ÷·¢Éú´íÎó
+    ASSERT(dwNumRead == 1); // å¦‚æœå‡ºç°æ–­è¨€åˆ™è¯´æ˜å‘ç”Ÿé”™è¯¯
     dwNumRead = nNumOfBytesToRead;
     const b32 bRet = (dwNumRead != 0);
 #endif // _WINDOWS
@@ -357,13 +357,13 @@ namespace clstd
     if(m_hFile == NULL || ppBuffer == NULL || pcbSize == NULL)
       goto FALSE_RET;
 
-    if(cbSize < 0) {  // Èç¹ûÎª¸º, ÔòËµÃ÷(u32)cbSize > 2GB
+    if(cbSize < 0) {  // å¦‚æœä¸ºè´Ÿ, åˆ™è¯´æ˜(u32)cbSize > 2GB
       goto FALSE_RET;
     }
 
     dwSizeLow = GetSize(&dwSizeHigh);
 
-    // Èç¹ûÓ³ÉäÈ«²¿ÎÄ¼şÇÒÎÄ¼ş´óÓÚ 2GB,Ôò·µ»Ø FALSE
+    // å¦‚æœæ˜ å°„å…¨éƒ¨æ–‡ä»¶ä¸”æ–‡ä»¶å¤§äº 2GB,åˆ™è¿”å› FALSE
     if(cbSize == 0 && (dwSizeHigh != 0 && dwSizeLow > 0x80000000))
       goto FALSE_RET;
 

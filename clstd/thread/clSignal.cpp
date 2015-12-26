@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "Thread/clSignal.H"
 
 namespace clstd
@@ -44,7 +44,7 @@ namespace clstd
   namespace _posix
   {
     //
-    // Ã»²âÊÔ¹ı!!
+    // æ²¡æµ‹è¯•è¿‡!!
     //
     Signal::Signal()
       : m_cond(NULL)
@@ -74,8 +74,8 @@ namespace clstd
     {
       timespec timeout;
 
-      // Õâ¸öËã·¨²»¾«È·!
-      // TODO: windows°æÏÂÕâ¸ötv_nsecÊ±¼äÃ²ËÆÊÇÎŞĞ§µÄ, ËùÒÔÓÃÁË½üËÆÖµÀ´´úÌæ, ×¢ÒâÒªÊµÏÖÆäËûÆ½Ì¨µÄ°æ±¾
+      // è¿™ä¸ªç®—æ³•ä¸ç²¾ç¡®!
+      // TODO: windowsç‰ˆä¸‹è¿™ä¸ªtv_nsecæ—¶é—´è²Œä¼¼æ˜¯æ— æ•ˆçš„, æ‰€ä»¥ç”¨äº†è¿‘ä¼¼å€¼æ¥ä»£æ›¿, æ³¨æ„è¦å®ç°å…¶ä»–å¹³å°çš„ç‰ˆæœ¬
       timeout.tv_sec = time(0) + (dwMilliSec + 999) / 1000;
       timeout.tv_nsec = 0;
 

@@ -1,4 +1,4 @@
-#ifndef _CL_MEMORY_MANAGENT_
+﻿#ifndef _CL_MEMORY_MANAGENT_
 #define _CL_MEMORY_MANAGENT_
 
 #ifdef _WINDOWS

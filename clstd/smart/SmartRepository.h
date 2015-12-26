@@ -1,5 +1,5 @@
-// ÁéÇÉ/Ãô½İµÄ"ÄÚ´æ-ÎÄ¼ş"Êı¾İ¿â
-// ÊÊÓÃÓÚĞ¡¹æÄ£µÄÊı¾İ´¢´æºÍ²éÑ¯
+ï»¿// çµå·§/æ•æ·çš„"å†…å­˜-æ–‡ä»¶"æ•°æ®åº“
+// é€‚ç”¨äºå°è§„æ¨¡çš„æ•°æ®å‚¨å­˜å’ŒæŸ¥è¯¢
 #ifndef _CLSTD_SMART_REPOSITORY_H_
 #define _CLSTD_SMART_REPOSITORY_H_
 
@@ -25,9 +25,9 @@ class SmartRepository
 public:
   enum KeyType
   {
-    KT_Node,    // ½Úµã
-    KT_Varible, // ±ä³¤Êı¾İ
-    KT_Octet,   // 8×Ö½ÚÊı¾İ
+    KT_Node,    // èŠ‚ç‚¹
+    KT_Varible, // å˜é•¿æ•°æ®
+    KT_Octet,   // 8å­—èŠ‚æ•°æ®
   };
 
   struct HEADER
@@ -42,8 +42,8 @@ public:
 #ifdef ENABLE_HASH_NAME
     typedef clhash_map<clStringA, struct KEYDESC> KeyDict;
 #else
-    // ½ñºó¿¼ÂÇ¿ÉÄÜ²»ÔÙÖ§³Öhash_mapµÄ¼üÖµ¼ÇÂ¼
-    // Ê¹ÓÃmapµÄºìºÚÊ÷£¬¼üÖµ×Ö·û´®ÊÇÓĞĞòµÄ£¬Î´À´ÔÚÖ»¶ÁÄ£Ê½ÖĞ¿ÉÒÔÓÃ¶ş·Ö·¨²éÕÒ
+    // ä»Šåè€ƒè™‘å¯èƒ½ä¸å†æ”¯æŒhash_mapçš„é”®å€¼è®°å½•
+    // ä½¿ç”¨mapçš„çº¢é»‘æ ‘ï¼Œé”®å€¼å­—ç¬¦ä¸²æ˜¯æœ‰åºçš„ï¼Œæœªæ¥åœ¨åªè¯»æ¨¡å¼ä¸­å¯ä»¥ç”¨äºŒåˆ†æ³•æŸ¥æ‰¾
     typedef clmap<clStringA, struct KEYDESC> KeyDict;
 #endif // #ifdef ENABLE_HASH_NAME
 
@@ -61,9 +61,9 @@ public:
         u32 dwHigh;
       }o; // octet
       struct {
-        // 64Î»ÏÂ´æÃ»ÓĞ8×Ö½Ú¶ÔÆë£¬¿ÉÄÜĞÔÄÜ»áÓĞÎÊÌâ
-        // ÒòÎªÕâ¸öÖ»ÊÇÔËĞĞÊ±Êı¾İ£¬¿¼ÂÇ°ÑËü·ÖÀë³öÀ´
-        // Ôö¼ÓÒ»¸öKEYDESC_RTÀ´Çø±ğ´ÓÎÄ¼ş¶Á/Ğ´µÄKEYDESCÊı¾İ
+        // 64ä½ä¸‹å­˜æ²¡æœ‰8å­—èŠ‚å¯¹é½ï¼Œå¯èƒ½æ€§èƒ½ä¼šæœ‰é—®é¢˜
+        // å› ä¸ºè¿™ä¸ªåªæ˜¯è¿è¡Œæ—¶æ•°æ®ï¼Œè€ƒè™‘æŠŠå®ƒåˆ†ç¦»å‡ºæ¥
+        // å¢åŠ ä¸€ä¸ªKEYDESC_RTæ¥åŒºåˆ«ä»æ–‡ä»¶è¯»/å†™çš„KEYDESCæ•°æ®
         SmartRepository* pSmart;
       }buf;
     };
@@ -92,16 +92,16 @@ public:
 
   SmartNode*  CreateNode      (CLLPCSTR szKeys);
   SmartNode*  GetNode         (CLLPCSTR szKeys) CLCONST;
-  u32         SetFlags        (u32 dwFlags);  // ²é¿´ SRF_ ±êÖ¾
+  u32         SetFlags        (u32 dwFlags);  // æŸ¥çœ‹ SRF_ æ ‡å¿—
 
   b32     Write       (SmartNode* pSmart, CLLPCSTR szKey, CLLPCVOID lpData, u32 cbSize);
   b32     Write64     (SmartNode* pSmart, CLLPCSTR szKey, u32 dwLow, u32 dwHigh);
   s32     GetLength   (CLCONST SmartNode* pSmart, CLLPCSTR szKey) CLCONST;
-  s32     Read        (CLCONST SmartNode* pSmart, CLLPCSTR szKey, CLLPVOID lpData, u32 cbSize) CLCONST; // Èç¹û´«ÈëµÄcbSize¹ı´ó»á±»½Ø¶Ï
+  s32     Read        (CLCONST SmartNode* pSmart, CLLPCSTR szKey, CLLPVOID lpData, u32 cbSize) CLCONST; // å¦‚æœä¼ å…¥çš„cbSizeè¿‡å¤§ä¼šè¢«æˆªæ–­
   b32     Read64      (CLCONST SmartNode* pSmart, CLLPCSTR szKey, u32* dwLow, u32* dwHigh) CLCONST;
   s32     ReadToBuffer(CLCONST SmartNode* pSmart, CLLPCSTR szKey, clBuffer* pBuffer) CLCONST;
 
-  // ×Ö·û´®´æÈ¡º¯Êı²»¼ì²éKeyµÄÊôĞÔ, Èç¹ûÓÃ´íÁËÔò¿ÉÄÜ³ö´í
+  // å­—ç¬¦ä¸²å­˜å–å‡½æ•°ä¸æ£€æŸ¥Keyçš„å±æ€§, å¦‚æœç”¨é”™äº†åˆ™å¯èƒ½å‡ºé”™
   b32     WriteStringW(SmartNode* pSmart, CLLPCSTR szKey, CLLPCWSTR szString);
   b32     WriteStringA(SmartNode* pSmart, CLLPCSTR szKey, CLLPCSTR  szString);
   b32     WriteStringW(SmartNode* pSmart, CLLPCSTR szKey, const clStringW& strString);
@@ -125,13 +125,13 @@ public:
   }
 
   template<typename _T>
-  b32 WriteStructArrayT(SmartNode* pSmart, CLLPCSTR szKey, const _T& stru, u32 nCount)  // Count ÊÇÊı×éÔªËØ¸öÊı, ²»ÊÇ×Ö½ÚÊı
+  b32 WriteStructArrayT(SmartNode* pSmart, CLLPCSTR szKey, const _T& stru, u32 nCount)  // Count æ˜¯æ•°ç»„å…ƒç´ ä¸ªæ•°, ä¸æ˜¯å­—èŠ‚æ•°
   {
     return Write(pSmart, szKey, &stru, sizeof(_T) * nCount);
   }
 
   template<typename _T>
-  s32 ReadStructArrayT(SmartNode* pSmart, CLLPCSTR szKey, _T& stru, u32 nCount)  // Count ÊÇÊı×éÔªËØ¸öÊı, ²»ÊÇ×Ö½ÚÊı
+  s32 ReadStructArrayT(SmartNode* pSmart, CLLPCSTR szKey, _T& stru, u32 nCount)  // Count æ˜¯æ•°ç»„å…ƒç´ ä¸ªæ•°, ä¸æ˜¯å­—èŠ‚æ•°
   {
     return Read(pSmart, szKey, &stru, sizeof(_T) * nCount);
   }

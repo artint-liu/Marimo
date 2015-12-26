@@ -1,4 +1,4 @@
-#ifndef _CLSTD_COMPRESS_H_
+ï»¿#ifndef _CLSTD_COMPRESS_H_
 #define _CLSTD_COMPRESS_H_
 
 namespace clstd
@@ -14,7 +14,7 @@ namespace clstd
   clBuffer*     CompressBuffer   (CLLPCVOID ptr, clsize nSize);
   clBuffer*     CompressBuffer   (clBufferBase* pSourceBuffer);
 
-  FixedBuffer*  UncompressBuffer (clBufferBase* pSourceBuffer, clsize nDestSize);  // nDestSize ½âÑ¹ºóµÄ³¤¶È, Èç¹ûÓëÊı¾İÊµ¼Ê³¤¶È²»·û, »áÊ§°Ü.
+  FixedBuffer*  UncompressBuffer (clBufferBase* pSourceBuffer, clsize nDestSize);  // nDestSize è§£å‹åçš„é•¿åº¦, å¦‚æœä¸æ•°æ®å®é™…é•¿åº¦ä¸ç¬¦, ä¼šå¤±è´¥.
 } // namespace clstd
 
 

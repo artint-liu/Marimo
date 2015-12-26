@@ -1,14 +1,14 @@
-#ifndef _CL_STD_CODE_
+ï»¿#ifndef _CL_STD_CODE_
 #define _CL_STD_CODE_
 
-// ´¦ÀíÆ÷Æ½Ì¨
+// å¤„ç†å™¨å¹³å°
 #ifdef _X86
 #elif defined(_X64)
 #elif defined(_ARM)
 #elif defined(_ARM64)
 #endif
 
-// ²Ù×÷ÏµÍ³Æ½Ì¨
+// æ“ä½œç³»ç»Ÿå¹³å°
 #ifdef _WINDOWS
 #elif defined(_IOS)
 #elif defined(_ANDROID)
@@ -33,7 +33,7 @@
 #elif defined(_ANDROID)
 # include <wchar.h>
 #else
-# error Î´ÖªÆ½Ì¨»òÕßĞÂÔö¼ÓµÄÆ½Ì¨
+# error æœªçŸ¥å¹³å°æˆ–è€…æ–°å¢åŠ çš„å¹³å°
 #endif
 
 #include "cltypes.h"
@@ -123,13 +123,13 @@ extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, in
 #     define CLOGW         TRACEW
 #     define CLBREAK       {__asm int 3}
 
-// TODO:ÉÔºóÊµÏÖCLUNIQUEBREAK
-//  1.Ïß³Ì×Ô¼º³ÖÓĞ
-//  2.µÚÒ»´ÎÖĞ¶Ï£¬ÒÔºóÌø¹ı²¢Êä³ölog
-#     define CLUNIQUEBREAK {__asm int 3}      // Ö»ÖĞ¶ÏÒ»´ÎµÄ¶Ïµã
+// TODO:ç¨åå®ç°CLUNIQUEBREAK
+//  1.çº¿ç¨‹è‡ªå·±æŒæœ‰
+//  2.ç¬¬ä¸€æ¬¡ä¸­æ–­ï¼Œä»¥åè·³è¿‡å¹¶è¾“å‡ºlog
+#     define CLUNIQUEBREAK {__asm int 3}      // åªä¸­æ–­ä¸€æ¬¡çš„æ–­ç‚¹
 #     define CLNOP         {__asm nop}
 #     define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
-#     define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); CLBREAK; } // TODO: ²»ÒªÔÚÕâÀïÃæ¼ÓÈë³ÌĞò¹¦ÄÜÂß¼­´úÂë£¬Release°æÏÂ»á±»ºöÂÔ
+#     define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); CLBREAK; } // TODO: ä¸è¦åœ¨è¿™é‡Œé¢åŠ å…¥ç¨‹åºåŠŸèƒ½é€»è¾‘ä»£ç ï¼ŒReleaseç‰ˆä¸‹ä¼šè¢«å¿½ç•¥
 #     define STATIC_ASSERT(x)    static_assert(x, #x);
 #     define V(x)              if(FAILED(x)) { CLBREAK; }
 #     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
@@ -153,7 +153,7 @@ extern "C" void _cl_NoOperation();
 #     define CLUNIQUEBREAK CLBREAK
 #     define CLNOP         { _cl_NoOperation(); }
 #     define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
-#     define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); _cl_Break();} // TODO: ²»ÒªÔÚÕâÀïÃæ¼ÓÈë³ÌĞò¹¦ÄÜÂß¼­´úÂë£¬Release°æÏÂ»á±»ºöÂÔ
+#     define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); _cl_Break();} // TODO: ä¸è¦åœ¨è¿™é‡Œé¢åŠ å…¥ç¨‹åºåŠŸèƒ½é€»è¾‘ä»£ç ï¼ŒReleaseç‰ˆä¸‹ä¼šè¢«å¿½ç•¥
 #     define STATIC_ASSERT(x)    static_assert(x, #x);
 #     define V(x)              if(FAILED(x)) { _cl_Break(); }
 #     define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}
@@ -180,7 +180,7 @@ void _cl_traceW(const wchar_t *fmt, ...);
 #   define V(x)      (x)
 #   define V_RETURN(x)  (x)
 # else
-#	error ĞÂÆ½Ì¨
+#	error æ–°å¹³å°
 # endif // #if defined(_WINDOWS) || defined(_CONSOLE)
 #else  // _DEBUG
 #  if defined(_WINDOWS) || defined(_WIN32)
@@ -281,9 +281,9 @@ namespace clstd
 {
   struct CLSTDOBJCTSTAT     // clstd object statistics
   {
-    CLLONG nNumLockers;     // ËøµÄÊıÁ¿
-    CLLONG nNumAllocators;  // ·ÖÅäÆ÷µÄÊıÁ¿
-    CLLONG nNumThreads;     // Ïß³ÌÊıÁ¿, Õâ¸öÊÇ»ùÓÚclstd·½·¨´´½¨µÄÏß³Ì
+    CLLONG nNumLockers;     // é”çš„æ•°é‡
+    CLLONG nNumAllocators;  // åˆ†é…å™¨çš„æ•°é‡
+    CLLONG nNumThreads;     // çº¿ç¨‹æ•°é‡, è¿™ä¸ªæ˜¯åŸºäºclstdæ–¹æ³•åˆ›å»ºçš„çº¿ç¨‹
   };
 
   CLLONG InterlockedIncrement       (CLLONG volatile *Addend);

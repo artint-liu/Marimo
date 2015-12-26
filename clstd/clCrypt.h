@@ -1,4 +1,4 @@
-#ifndef _CL_CRYPT_H_
+﻿#ifndef _CL_CRYPT_H_
 #define _CL_CRYPT_H_
 
 //struct MD5_CTX;

@@ -1,17 +1,17 @@
-#ifndef _FILEPATH_H_
+ï»¿#ifndef _FILEPATH_H_
 #define _FILEPATH_H_
 
-// ÎÄ¼şÃû²»ÄÜ°üº¬µÄ×Ö·û£º\ / * ? " : < > |
+// æ–‡ä»¶åä¸èƒ½åŒ…å«çš„å­—ç¬¦ï¼š\ / * ? " : < > |
 
-// ·ÖÀëÂ·¾¶ÎªÄ¿Â¼ºÍÎÄ¼şÃû
-// ·µ»ØÖµ,Èç¹ûÊäÈëµÄÂ·¾¶ÃûÎª´¿Ä¿Â¼»òÎÄ¼şÃû,·µ»ØFALSE,·ñÔò·µ»ØTRUE
+// åˆ†ç¦»è·¯å¾„ä¸ºç›®å½•å’Œæ–‡ä»¶å
+// è¿”å›å€¼,å¦‚æœè¾“å…¥çš„è·¯å¾„åä¸ºçº¯ç›®å½•æˆ–æ–‡ä»¶å,è¿”å›FALSE,å¦åˆ™è¿”å›TRUE
 template<typename _TString>
 b32 _SplitPathT(const _TString& strPath, _TString* pstrDir, _TString* pstrFile);
 
 b32 SplitPathA(const clStringA& strPath, clStringA* pstrDir, clStringA* pstrFile);
 b32 SplitPathW(const clStringW& strPath, clStringW* pstrDir, clStringW* pstrFile);
 
-// ÖØÖÃµ±Ç°¹¤×÷Ä¿Â¼, Õâ¸öÄ¿Â¼ÊÇ»ùÓÚÓ¦ÓÃ³ÌĞòÄ¿Â¼µÄ
+// é‡ç½®å½“å‰å·¥ä½œç›®å½•, è¿™ä¸ªç›®å½•æ˜¯åŸºäºåº”ç”¨ç¨‹åºç›®å½•çš„
 void ResetWorkingDir();
 
 //template<typename _TString>
@@ -20,7 +20,7 @@ void ResetWorkingDir();
 //b32 GetFileExtensionA(const clStringA& strFile, clStringA* pstrFilename, clStringA* pstrExtension);
 //b32 GetFileExtensionW(const clStringW& strFile, clStringW* pstrFilename, clStringW* pstrExtension);
 
-// TODO: Õâ¸ö½«À´·ÏÆú
+// TODO: è¿™ä¸ªå°†æ¥åºŸå¼ƒ
 template<typename _TString>
 b32 IsFullPath(const _TString& strFilename);
 
@@ -29,26 +29,26 @@ b32 IsFullPathW(const clStringW& strFilename);
 
 namespace clpathfile
 {
-  // ¶¨Î»¹¤×÷Ä¿Â¼
-  // Èç¹ûszDirÎªNULL£¬Ôò¹¤×÷Â·¾¶ÉèÖÃÎªµ±Ç°Ó¦ÓÃ³ÌĞòËùÔÚÄ¿Â¼
-  // Èç¹ûszDirÊÇÒ»¸öÏà¶ÔÂ·¾¶£¬ÄÇÃ´¹¤×÷Â·¾¶ÊÇÏà¶ÔÓÚÓ¦ÓÃ³ÌĞòËùÔÚÄ¿Â¼µÄÂ·¾¶
-  // Èç¹ûszDirÊÇÒ»¸ö¾ø¶ÔÂ·¾¶£¬Ôò°´ÕÕ´Ë¾ø¶ÔÂ·¾¶ÉèÖÃµ±Ç°Â·¾¶
-  // Õâ¸öº¯ÊıÄ¿Ç°Ö»ÔÚWindowsÏµÍ³ÏÂÓĞĞ§
+  // å®šä½å·¥ä½œç›®å½•
+  // å¦‚æœszDirä¸ºNULLï¼Œåˆ™å·¥ä½œè·¯å¾„è®¾ç½®ä¸ºå½“å‰åº”ç”¨ç¨‹åºæ‰€åœ¨ç›®å½•
+  // å¦‚æœszDiræ˜¯ä¸€ä¸ªç›¸å¯¹è·¯å¾„ï¼Œé‚£ä¹ˆå·¥ä½œè·¯å¾„æ˜¯ç›¸å¯¹äºåº”ç”¨ç¨‹åºæ‰€åœ¨ç›®å½•çš„è·¯å¾„
+  // å¦‚æœszDiræ˜¯ä¸€ä¸ªç»å¯¹è·¯å¾„ï¼Œåˆ™æŒ‰ç…§æ­¤ç»å¯¹è·¯å¾„è®¾ç½®å½“å‰è·¯å¾„
+  // è¿™ä¸ªå‡½æ•°ç›®å‰åªåœ¨Windowsç³»ç»Ÿä¸‹æœ‰æ•ˆ
   b32 LocalWorkingDirA(CLLPCSTR szDir);
   b32 LocalWorkingDirW(CLLPCWSTR szDir);
 
-  // »ñµÃµ±Ç°Â·¾¶
-  // ·µ»ØÖµ¾ÍÊÇstrDir£¬ÕâÃ´ÉùÃ÷¾ÍÊÇÎªÁË¼õÉÙÄÚ´æ¸´ÖÆºÍ±ãÓÚÊ¹ÓÃ
+  // è·å¾—å½“å‰è·¯å¾„
+  // è¿”å›å€¼å°±æ˜¯strDirï¼Œè¿™ä¹ˆå£°æ˜å°±æ˜¯ä¸ºäº†å‡å°‘å†…å­˜å¤åˆ¶å’Œä¾¿äºä½¿ç”¨
   clStringA& GetCurrentDirectory(clStringA& strDir);
   clStringW& GetCurrentDirectory(clStringW& strDir);
 
-  inline i16 Slash()         // Â·¾¶·Ö¸ô·û
+  inline i16 Slash()         // è·¯å¾„åˆ†éš”ç¬¦
   {
     extern i16 s_PathSlash;
     return s_PathSlash;
   }
 
-  inline i16 ViceSlash()    // ´Î¼¶Â·¾¶·Ö¸ô·û, ÓĞĞ©ÏµÍ³ÏÂÕâ¸ö¿ÉÄÜÎŞĞ§
+  inline i16 ViceSlash()    // æ¬¡çº§è·¯å¾„åˆ†éš”ç¬¦, æœ‰äº›ç³»ç»Ÿä¸‹è¿™ä¸ªå¯èƒ½æ— æ•ˆ
   {
     extern i16 s_VicePathSlash;
     return s_VicePathSlash;
@@ -94,9 +94,9 @@ namespace clpathfile
   clsize CombineAbsPathA(clStringA& strPath);
   clsize CombineAbsPathW(clStringW& strPath);
 
-  // Èç¹ûstrPathÊÇÏà¶ÔÂ·¾¶£¬Ôò×ª»»Îª»ùÓÚµ±Ç°Â·¾¶µÄÍêÕûÂ·¾¶
-  // ·µ»Ø0±íÊ¾Ê§°Ü£¬strPath¿ÉÄÜÒÑ¾­ÊÇÍêÕûÂ·¾¶
-  // ´óÓÚ0±íÊ¾³É¹¦£¬ÊıÖµÊÇ×ª»»ºóµÄ×Ö·û´®³¤¶È
+  // å¦‚æœstrPathæ˜¯ç›¸å¯¹è·¯å¾„ï¼Œåˆ™è½¬æ¢ä¸ºåŸºäºå½“å‰è·¯å¾„çš„å®Œæ•´è·¯å¾„
+  // è¿”å›0è¡¨ç¤ºå¤±è´¥ï¼ŒstrPathå¯èƒ½å·²ç»æ˜¯å®Œæ•´è·¯å¾„
+  // å¤§äº0è¡¨ç¤ºæˆåŠŸï¼Œæ•°å€¼æ˜¯è½¬æ¢åçš„å­—ç¬¦ä¸²é•¿åº¦
   template<typename _TString>
   clsize MakeFullPath(_TString& strPath);
   clsize MakeFullPathA(clStringA& strPath);
@@ -112,7 +112,7 @@ namespace clpathfile
   b32 IsFileSpecA (const  ch* szPath);
   b32 IsFileSpecW (const wch* szPath);
 
-  // ÒÆ³ıÂ·¾¶ÖĞµÄÎÄ¼şÃûºÍ×îºóÒ»¸öÂ·¾¶·ûºÅ
+  // ç§»é™¤è·¯å¾„ä¸­çš„æ–‡ä»¶åå’Œæœ€åä¸€ä¸ªè·¯å¾„ç¬¦å·
   template<typename _TString>
   b32 RemoveFileSpecT (_TString&   strPath);
   b32 RemoveFileSpecA (clStringA& strPath);

@@ -1,4 +1,4 @@
-#include "clstd.h"
+﻿#include "clstd.h"
 #include "clBuffer.H"
 #include "clmemory.h"
 #include "clString.H"

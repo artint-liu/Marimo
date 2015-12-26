@@ -1,20 +1,20 @@
-#ifndef _CL_BUFFER_H_
+ï»¿#ifndef _CL_BUFFER_H_
 #define _CL_BUFFER_H_
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Buffer »ùÀà
+// Buffer åŸºç±»
 //
 class clBufferBase
 {
 protected:
-  CLBYTE*  m_lpBuffer;  // Êı¾İÖ¸ÕëµØÖ·
-  clsize   m_uSize;     // ÒÑ¾­Ê¹ÓÃµÄ´óĞ¡
+  CLBYTE*  m_lpBuffer;  // æ•°æ®æŒ‡é’ˆåœ°å€
+  clsize   m_uSize;     // å·²ç»ä½¿ç”¨çš„å¤§å°
 protected:
   clBufferBase(const CLLPVOID pData, clsize uLength)
     : m_lpBuffer((CLBYTE*)pData), m_uSize(uLength){}
 
-  virtual ~clBufferBase(){} // Îö¹¹ÊÇË½ÓĞµÄ, ·ÀÖ¹ÓÃ»§ delete clBufferBase
+  virtual ~clBufferBase(){} // ææ„æ˜¯ç§æœ‰çš„, é˜²æ­¢ç”¨æˆ· delete clBufferBase
 public:
   inline CLLPVOID   GetPtr    () const;
   inline clsize     GetSize   () const;
@@ -38,9 +38,9 @@ CLBYTE* clBufferBase::Set(int val)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÒıÓÃ Buffer , ÔÚÎö¹¹Ê±²»»áÊÍ·ÅÖ¸Õë.
-// ÓÃÓÚ°ÑÊı¾İ·â×°ÎªBuffer´«µİ
-// clBufferBase Óë´ËÀàËÆ, µ«ÊÇËüµÄÎö¹¹º¯Êı²»ÊÇ¹²ÓĞµÄ, ËùÒÔ²»ÄÜÖ±½ÓÊ¹ÓÃ
+// å¼•ç”¨ Buffer , åœ¨ææ„æ—¶ä¸ä¼šé‡Šæ”¾æŒ‡é’ˆ.
+// ç”¨äºæŠŠæ•°æ®å°è£…ä¸ºBufferä¼ é€’
+// clBufferBase ä¸æ­¤ç±»ä¼¼, ä½†æ˜¯å®ƒçš„ææ„å‡½æ•°ä¸æ˜¯å…±æœ‰çš„, æ‰€ä»¥ä¸èƒ½ç›´æ¥ä½¿ç”¨
 //
 namespace clstd
 {
@@ -54,7 +54,7 @@ namespace clstd
 
   //////////////////////////////////////////////////////////////////////////
   //
-  // ³ß´ç¹Ì¶¨µÄ Buffer
+  // å°ºå¯¸å›ºå®šçš„ Buffer
   //
   class FixedBuffer : public clBufferBase
   {
@@ -63,9 +63,9 @@ namespace clstd
     FixedBuffer(clsize nSize);
     virtual ~FixedBuffer();
 
-    // Èç¹ûĞÂ¾ÉSize²»ÏàµÈ, ¾Í»á·ÖÅäÒ»¸öĞÂµÄ»º³åÇø
-    // ĞÂµÄ»º³åÇø´óĞ¡ÓëÊäÈë²ÎÊıÑÏ¸ñÏàµÈ, ²»»áÔ¤Áô¶àÓà×·¼ÓÊı¾İµÄ¿Õ¼ä
-    // Resize ³ß´ç±ÈÔ­À´Êı¾İÇøĞ¡, »á½Ø¶ÏÊı¾İ, ±ÈÔ­À´Êı¾İÇø´ó, ²»»áÆÆ»µÊı¾İ, ¸ù¾İ²ÎÊı¾ö¶¨ÊÇ·ñÌî0
+    // å¦‚æœæ–°æ—§Sizeä¸ç›¸ç­‰, å°±ä¼šåˆ†é…ä¸€ä¸ªæ–°çš„ç¼“å†²åŒº
+    // æ–°çš„ç¼“å†²åŒºå¤§å°ä¸è¾“å…¥å‚æ•°ä¸¥æ ¼ç›¸ç­‰, ä¸ä¼šé¢„ç•™å¤šä½™è¿½åŠ æ•°æ®çš„ç©ºé—´
+    // Resize å°ºå¯¸æ¯”åŸæ¥æ•°æ®åŒºå°, ä¼šæˆªæ–­æ•°æ®, æ¯”åŸæ¥æ•°æ®åŒºå¤§, ä¸ä¼šç ´åæ•°æ®, æ ¹æ®å‚æ•°å†³å®šæ˜¯å¦å¡«0
     b32 Resize(clsize dwSize, b32 bZeroInit);
     void Set(CLLPVOID lpData, clsize cbSize);
     void Set(const clBufferBase* pBuffer);
@@ -75,13 +75,13 @@ namespace clstd
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Í¨ÓÃ Buffer
+// é€šç”¨ Buffer
 //
 class clBuffer : public clBufferBase
 {
 protected:
-  clsize m_nCapacity;  // ÈİÁ¿´óĞ¡
-  clsize m_nPageSize;  // Ò³´óĞ¡, ´óĞ¡²»¹»½«°´ÕÕÕâ¸ö³¤¶ÈÔö¼Ó
+  clsize m_nCapacity;  // å®¹é‡å¤§å°
+  clsize m_nPageSize;  // é¡µå¤§å°, å¤§å°ä¸å¤Ÿå°†æŒ‰ç…§è¿™ä¸ªé•¿åº¦å¢åŠ 
 public:
   clBuffer(u32 nPageSize = 512);
   virtual ~clBuffer();
@@ -90,7 +90,7 @@ public:
   b32       Resize    (clsize dwSize, b32 bZeroInit);
   CLLPVOID  GetPtr    () const;
   clsize    GetSize   () const;
-  //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // ÕâÊÇÊ²Ã´¹í°¡£¡£¡£¡
+  //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // è¿™æ˜¯ä»€ä¹ˆé¬¼å•Šï¼ï¼ï¼
   b32       Append    (CLLPCVOID lpData, clsize dwSize);
   b32       Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
   b32       Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
@@ -98,22 +98,22 @@ public:
 
 namespace clstd
 {
-  // ¿í×Ö·ûbuffer
-  // TODO: Õâ¸ö´ÓclStringW¼Ì³Ğ°É£¬ÖØĞÂÊµÏÖAllocator
+  // å®½å­—ç¬¦buffer
+  // TODO: è¿™ä¸ªä»clStringWç»§æ‰¿å§ï¼Œé‡æ–°å®ç°Allocator
   //class WideTextBuffer : public clBuffer
   //{
   //public:
   //  WideTextBuffer(clBufferBase* pRawBuffer);
   //  WideTextBuffer(clBufferBase* pRawBuffer, CLDWORD dwBOM);
-  //  clsize GetLength(); // ·µ»Ø×Ö·ûÊı£¬GetSize()·µ»ØµÄ»¹ÊÇ×Ö½ÚÊı
+  //  clsize GetLength(); // è¿”å›å­—ç¬¦æ•°ï¼ŒGetSize()è¿”å›çš„è¿˜æ˜¯å­—èŠ‚æ•°
   //};
 } // namespace clstd
 //////////////////////////////////////////////////////////////////////////
 //
-// Ğ´ÍêÖ®ºóÃ»ÓÃ¹ıÍüÁË²»ÖªµÀ¸ÉÉ¶µÄÁË
+// å†™å®Œä¹‹åæ²¡ç”¨è¿‡å¿˜äº†ä¸çŸ¥é“å¹²å•¥çš„äº†
 //
 class clQueueBuffer
-{ // Ã»²âÊÔ¹ı
+{ // æ²¡æµ‹è¯•è¿‡
   struct HEADER
   {
     HEADER* pNext;
@@ -136,14 +136,14 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Buffer ´¦Àí½á¹¹
+// Buffer å¤„ç†ç»“æ„
 //
 namespace clstd
 {
   struct PROCESSBUFFER
   {
-    clBuffer*     pDestBuf; // Èç¹ûÎª NULL, ´¦Àíº¯Êı»á×Ô¼º´´½¨. ²»ÔÙÊ¹ÓÃÊ±ÓÉÓÃ»§ÊÍ·Å
-    clBufferBase* pSrcBuf;  // ÊäÈëµÄ Buffer
+    clBuffer*     pDestBuf; // å¦‚æœä¸º NULL, å¤„ç†å‡½æ•°ä¼šè‡ªå·±åˆ›å»º. ä¸å†ä½¿ç”¨æ—¶ç”±ç”¨æˆ·é‡Šæ”¾
+    clBufferBase* pSrcBuf;  // è¾“å…¥çš„ Buffer
   };
 } // namespace clstd
 

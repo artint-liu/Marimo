@@ -1,4 +1,4 @@
-//#include <d3dx9.h>
+﻿//#include <d3dx9.h>
 #include "../clstd.h"
 #include "cl3d.h"
 //#include "../floatx.h"

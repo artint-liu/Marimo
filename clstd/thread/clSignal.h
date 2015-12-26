@@ -1,4 +1,4 @@
-#ifndef _CLSTD_SIGNAL_H_
+ï»¿#ifndef _CLSTD_SIGNAL_H_
 #define _CLSTD_SIGNAL_H_
 
 namespace clstd
@@ -10,13 +10,13 @@ namespace clstd
     class Signal
     {
     private:
-      HANDLE m_hEvent; // Ä¬ÈÏ³õÊ¼»¯Îª×èÈû×´Ì¬£¬×Ô¶¯ÖØÖÃ
+      HANDLE m_hEvent; // é»˜è®¤åˆå§‹åŒ–ä¸ºé˜»å¡çŠ¶æ€ï¼Œè‡ªåŠ¨é‡ç½®
 
     public:
       Signal();
       virtual ~Signal();
 
-      //i32 Reset       (); // linuxÏÂÃ»ÕÒµ½ÀàËÆÊµÏÖ
+      //i32 Reset       (); // linuxä¸‹æ²¡æ‰¾åˆ°ç±»ä¼¼å®ç°
       i32 Set         ();
       i32 Wait        ();
       i32 WaitTimeOut (u32 dwMilliSec);

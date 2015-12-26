@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clBuffer.H"
 #include "clCompress.h"
 
@@ -6,7 +6,7 @@
 
 namespace clstd
 {
-  // compress ºÍ uncompress ²ÎÊýÊ¹ÓÃuLongf, Òª±£Ö¤ºÍ°ü×°²ÎÊýÖÐclsize³¤¶ÈÏàÍ¬»ò¸ü´ó
+  // compress å’Œ uncompress å‚æ•°ä½¿ç”¨uLongf, è¦ä¿è¯å’ŒåŒ…è£…å‚æ•°ä¸­clsizeé•¿åº¦ç›¸åŒæˆ–æ›´å¤§
   STATIC_ASSERT(sizeof(clsize) == sizeof(uLongf) || 
     sizeof(clsize) == sizeof(uLongf) * 2);
 
@@ -28,7 +28,7 @@ namespace clstd
 
   int CompressBuffer(clBuffer* pBuffer, CLLPCVOID ptr, clsize nSize)
   {
-    //µÃµ½Òª±£´æÑ¹Ëõ½á¹ûµÄ×îÐ¡buffer´óÐ¡
+    //å¾—åˆ°è¦ä¿å­˜åŽ‹ç¼©ç»“æžœçš„æœ€å°bufferå¤§å°
     clsize nMinLength = compressBound((uLong)nSize);
     pBuffer->Resize(nMinLength, FALSE);
     int result = compress((Bytef*)pBuffer->GetPtr(),

@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clThread.h"
 namespace clstd
 {
@@ -31,8 +31,8 @@ namespace clstd
     b32 Thread::Start()
     {
       if(m_handle == NULL) {
-        // ²»·Åµ½¹¹Ôìº¯ÊıÖĞÆô¶¯ÊÇÒòÎªÄ³Ğ©Çé¿öÏÂ¿ÉÄÜĞèÒªÓÃ»§Ñ¡ÔñÊÇ·ñÁí¿ªÏß³Ì
-        // ±ÈÈçUDPÍ¨Ñ¶,Èç¹ûÃ»ÓĞ½ÓÊÜÄ£Ê½Ôò²»¿ªÆô¶îÍâÏß³Ì.
+        // ä¸æ”¾åˆ°æ„é€ å‡½æ•°ä¸­å¯åŠ¨æ˜¯å› ä¸ºæŸäº›æƒ…å†µä¸‹å¯èƒ½éœ€è¦ç”¨æˆ·é€‰æ‹©æ˜¯å¦å¦å¼€çº¿ç¨‹
+        // æ¯”å¦‚UDPé€šè®¯,å¦‚æœæ²¡æœ‰æ¥å—æ¨¡å¼åˆ™ä¸å¼€å¯é¢å¤–çº¿ç¨‹.
         m_handle = CreateThread(NULL, NULL, ThreadStartRoutine, this, CREATE_SUSPENDED, &m_ThreadId);
       }
       else if(m_handle == INVALID_HANDLE_VALUE) {
@@ -66,7 +66,7 @@ namespace clstd
   namespace _posix
   {
     //
-    // Ã»²âÊÔ¹ı!!!
+    // æ²¡æµ‹è¯•è¿‡!!!
     //
 
     void* ThreadStart(void* pParam)
@@ -115,7 +115,7 @@ namespace clstd
         return pthread_cond_signal(&m_cond) == 0;
       }
       else {
-        // m_cond Óë m_tidp.p Ó¦¸ÃÍ¬Ê±²úÉúºÍÊÍ·Å, ²»Ó¦¸Ã³öÏÖÕâÖÖ×´Ì¬
+        // m_cond ä¸ m_tidp.p åº”è¯¥åŒæ—¶äº§ç”Ÿå’Œé‡Šæ”¾, ä¸åº”è¯¥å‡ºç°è¿™ç§çŠ¶æ€
         CLBREAK;
       }
       return FALSE;

@@ -1,4 +1,4 @@
-//#include "stdafx.h"
+ï»¿//#include "stdafx.h"
 //#include <clTypes.H>
 #include "clMemory.h"
 #include "clStd.H"
@@ -89,7 +89,7 @@ namespace clstd
     return pNewParent;
   }
 
-  // É¾³ı½Úµã
+  // åˆ é™¤èŠ‚ç‚¹
   bool Tree::DestroyNode()
   {
     while(m_pFirstChild != NULL)
@@ -103,10 +103,10 @@ namespace clstd
   }
 
   // bool Tree::InsertAfter(Tree *pAfter, bool bForward);
-  // µ÷Õû½ÚµãË³Ğò
-  // ²ÎÊı:  pAfter    ²åÈëµÄ²Î¿¼½Úµã
-  //      bForward  ·½Ïò£¬Èç¹ûbForwardÎªfalse£¬Ôòµ±Ç°½Úµã²åÈëµ½Ä¿±ê½ÚµãµÄºóÃæ£¬·ñÔò²åÈëµ½µ±Ç°½ÚµãµÄÇ°Ãæ
-  // ±¸×¢: ¸ù¾İÁ´µÄË³Ğò£¬ÏòNext·½ÏòÎªºóÃæ£¬·´Ö®ÏòÇ°
+  // è°ƒæ•´èŠ‚ç‚¹é¡ºåº
+  // å‚æ•°:  pAfter    æ’å…¥çš„å‚è€ƒèŠ‚ç‚¹
+  //      bForward  æ–¹å‘ï¼Œå¦‚æœbForwardä¸ºfalseï¼Œåˆ™å½“å‰èŠ‚ç‚¹æ’å…¥åˆ°ç›®æ ‡èŠ‚ç‚¹çš„åé¢ï¼Œå¦åˆ™æ’å…¥åˆ°å½“å‰èŠ‚ç‚¹çš„å‰é¢
+  // å¤‡æ³¨: æ ¹æ®é“¾çš„é¡ºåºï¼Œå‘Nextæ–¹å‘ä¸ºåé¢ï¼Œåä¹‹å‘å‰
   bool Tree::InsertAfter(Tree *pAfter, bool bForward)
   {
     if(pAfter == NULL)

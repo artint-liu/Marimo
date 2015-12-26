@@ -1,4 +1,4 @@
-#ifndef _CLSTD_GEOMERTY_2D_H_
+ï»¿#ifndef _CLSTD_GEOMERTY_2D_H_
 #define _CLSTD_GEOMERTY_2D_H_
 
 namespace clstd
@@ -17,13 +17,13 @@ namespace clstd
       Line(const float2& dir, float d);
       Line(const float2& p0, const float2& p1);
 
-      Line& set(const float2& dir, float d); // ´ÓÏòÁ¿ºÍ¾àÀë´´½¨Ö±Ïß
-      Line& set(const float2& p0, const float2& p1); // ´Ó¾­¹ıÖ±ÏßµÄÁ½¸öµã´´½¨Ö±Ïß
-      Line& midnormal(const float2& p0, const float2& p1); // ÉèÖÃÎª´Óp0Ö¸Ïòp1µÄ´¹Ö±Æ½·ÖÏß
+      Line& set(const float2& dir, float d); // ä»å‘é‡å’Œè·ç¦»åˆ›å»ºç›´çº¿
+      Line& set(const float2& p0, const float2& p1); // ä»ç»è¿‡ç›´çº¿çš„ä¸¤ä¸ªç‚¹åˆ›å»ºç›´çº¿
+      Line& midnormal(const float2& p0, const float2& p1); // è®¾ç½®ä¸ºä»p0æŒ‡å‘p1çš„å‚ç›´å¹³åˆ†çº¿
       b32 intersect(const Line& line, float2* p) const;
 
-      Line& SetFromDirectionPoint(const float2& dir, const float2& p); // ´ÓÏòÁ¿+¾­¹ıÖ±ÏßµÄµãÀ´ÉèÖÃÖ±Ïß
-      float IsPointIn(const float2& p) const; // µãÊÇ·ñÔÚÖ±Ïß»®·ÖµÄ¶ş·Ö¿Õ¼äÄÚ, Ğ¡ÓÚ0ÔÚ¿Õ¼äÄÚ£¬µÈÓÚ0ÔÚÖ±ÏßÉÏ£¬´óÓÚ0ÔÚ¿Õ¼äÍâ
+      Line& SetFromDirectionPoint(const float2& dir, const float2& p); // ä»å‘é‡+ç»è¿‡ç›´çº¿çš„ç‚¹æ¥è®¾ç½®ç›´çº¿
+      float IsPointIn(const float2& p) const; // ç‚¹æ˜¯å¦åœ¨ç›´çº¿åˆ’åˆ†çš„äºŒåˆ†ç©ºé—´å†…, å°äº0åœ¨ç©ºé—´å†…ï¼Œç­‰äº0åœ¨ç›´çº¿ä¸Šï¼Œå¤§äº0åœ¨ç©ºé—´å¤–
     };
 
     class Segment
@@ -51,9 +51,9 @@ namespace clstd
       LinesArray    lines;
       VerticesArray vertices;
 
-      void AddLines(const Line& line); // Ìí¼ÓÖ±Ïß
+      void AddLines(const Line& line); // æ·»åŠ ç›´çº¿
       void clear();
-      b32 calculate(); // ¼ÆËãÍ¹°ü¶¥µã, ´¿±©Á¦¼ÆËã
+      b32 calculate(); // è®¡ç®—å‡¸åŒ…é¡¶ç‚¹, çº¯æš´åŠ›è®¡ç®—
 
     private:
       b32 CalcSubSegment(Segment& seg, LinesArray::iterator& line_iter, size_t myid);

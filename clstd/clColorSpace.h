@@ -1,4 +1,4 @@
-#ifndef _CLSTD_COLOR_SPACE_H_
+ï»¿#ifndef _CLSTD_COLOR_SPACE_H_
 #define _CLSTD_COLOR_SPACE_H_
 
 #ifndef _CL_STD_CODE_
@@ -12,152 +12,152 @@ namespace clstd
   namespace Color
   {
     enum {
-      AliceBlue             = 0xF0F8FF, // °¬ÀûË¹À¼
-      AntiqueWhite          = 0xFAEBD7, // ¹Å¶­°×
-      Aqua                  = 0x00FFFF, // Ç³ÂÌÉ«
-      Aquamarine            = 0x7FFFD4, // ±ÌÂÌÉ«
-      Azure                 = 0xF0FFFF, // ÌìÀ¶É«
-      Beige                 = 0xF5F5DC, // Ã×É«
-      Bisque                = 0xFFE4C4, // ½Û»ÆÉ«
-      Black                 = 0x000000, // ºÚÉ«
-      Blanchedalmond        = 0xFFEBCD, // °×ĞÓÉ«
-      Blue                  = 0x0000FF, // À¶É«
-      BlueViolet            = 0x8A2BE2, // ×ÏÂŞÀ¼É«
-      Brown                 = 0xA52A2A, // ºÖÉ«
-      BurlyWood             = 0xDEB887, // ÊµÄ¾É«
-      CadetBlue             = 0x5F9EA0, // ¾üÀ¼É«
-      Chartreuse            = 0x7FFF00, // »ÆÂÌÉ«
-      Chocolate             = 0xD2691E, // ÇÉ¿ÉÁ¦É«
-      Coral                 = 0xFF7F50, // Éºº÷É«
-      CornflowerBlue        = 0x6495ED, // ¾ÕÀ¼É«
-      Cornsilk              = 0xFFF8DC, // Ã×³ñÉ«
-      Crimson               = 0xDC143C, // °µÉîºìÉ«
-      Cyan                  = 0x00FFFF, // ÇàÉ«
-      DarkBlue              = 0x00008B, // °µÀ¶É«
-      DarkCyan              = 0x008B8B, // °µÇàÉ«
-      DarkGoldenrod         = 0xB8860B, // °µ½ğ»ÆÉ«
-      DarkGray              = 0xA9A9A9, // °µ»ÒÉ«
-      DarkGreen             = 0x006400, // °µÂÌÉ«
-      DarkGrey              = 0xA9A9A9, // °µ»ÒÉ«
-      DarkKhaki             = 0xBDB76B, // °µ»ÆºÖÉ«
-      DarkMagenta           = 0x8B008B, // °µÑóºì
-      DarkOliveGreen        = 0x556B2F, // °µéÏé­ÂÌ
-      DarkOrange            = 0xFF8C00, // °µ½Û»ÆÉ«
-      DarkOrchid            = 0x9932CC, // °µ×ÏÉ«
-      DarkRed               = 0x8B0000, // °µºìÉ«
-      DarkSalmon            = 0xE9967A, // °µÈâÉ«
-      DarkSeaGreen          = 0x8FBC8F, // °µº£À¼É«
-      DarkSlateBlue         = 0x483D8B, // °µ»ÒÀ¶É«
-      DarkSlateGray         = 0x2F4F4F, // °µÍß»ÒÉ«
-      DarkSlateGrey         = 0x2F4F4F, // °µÍß»ÒÉ«
-      DarkTurquoise         = 0x00CED1, // °µ±¦Ê¯ÂÌ
-      DarkViolet            = 0x9400D3, // °µ×ÏÂŞÀ¼É«
-      DeepPink              = 0xFF1493, // Éî·ÛºìÉ«
-      DeepSkyBlue           = 0x00BFFF, // ÉîÌìÀ¶É«
-      DimGray               = 0x696969, // °µ»ÒÉ«
-      DimGrey               = 0x696969, // °µ»ÒÉ«
-      DodgerBlue            = 0x1E90FF, // ÉÁÀ¼É«
-      FireBrick             = 0xB22222, // »ğ×©É«
-      FloralWhite           = 0xFFFAF0, // »¨°×É«
-      ForestGreen           = 0x228B22, // É­ÁÖÂÌ
-      Fuchsia               = 0xFF00FF, // ×ÏºìÉ«
-      Gainsboro             = 0xDCDCDC, // µ­»ÒÉ«
-      GhostWhite            = 0xF8F8FF, // ÓÄÁé°×
-      Gold                  = 0xFFD700, // ½ğÉ«
-      Goldenrod             = 0xDAA520, // ½ğ÷è÷ëÉ«
-      Gray                  = 0x808080, // »ÒÉ«
-      Green                 = 0x008000, // ÂÌÉ«
-      GreenYellow           = 0xADFF2F, // »ÆÂÌÉ«
-      Grey                  = 0x808080, // »ÒÉ«
-      Honeydew              = 0xF0FFF0, // ÃÛÉ«
-      HotPink               = 0xFF69B4, // ÈÈ·ÛºìÉ«
-      IndianRed             = 0xCD5C5C, // Ó¡µÚ°²ºì
-      Indigo                = 0x4B0082, // µåÇàÉ«
-      Ivory                 = 0xFFFFF0, // ÏóÑÀÉ«
-      Khaki                 = 0xF0E68C, // »ÆºÖÉ«
-      Lavender              = 0xE6E6FA, // µ­×ÏÉ«
-      LavenderBlush         = 0xFFF0F5, // µ­×Ïºì
-      LawnGreen             = 0x7CFC00, // ²İÂÌÉ«
-      LemonChiffon          = 0xFFFACD, // ÄûÃÊ³ñÉ«  
-      LightBlue             = 0xADD8E6, // ÁÁÀ¶É«    
-      LightCoral            = 0xF08080, // ÁÁÉºº÷É«  
-      LightCyan             = 0xE0FFFF, // ÁÁÇàÉ«    
-      LightGoldenrodYellow  = 0xFAFAD2, // ÁÁ½ğ»ÆÉ«  
-      LightGray             = 0xD3D3D3, // ÁÁ»ÒÉ«    
-      LightGreen            = 0x90EE90, // ÁÁÂÌÉ«    
-      LightGrey             = 0xD3D3D3, // ÁÁ»ÒÉ«    
-      LightPink             = 0xFFB6C1, // ÁÁ·ÛºìÉ«  
-      LightSalmon           = 0xFFA07A, // ÁÁÈâÉ«    
-      LightSeaGreen         = 0x20B2AA, // ÁÁº£À¶É«  
-      LightSkyBlue          = 0x87CEFA, // ÁÁÌìÀ¶É«  
-      LightSlateGray        = 0x778899, // ÁÁÀ¶»Ò    
-      LightSlateGrey        = 0x778899, // ÁÁÀ¶»Ò    
-      LightSteelBlue        = 0xB0C4DE, // ÁÁ¸ÖÀ¼É«  
-      LightYellow           = 0xFFFFE0, // ÁÁ»ÆÉ«      
-      Lime                  = 0x00FF00, // Ëá³ÈÉ«      
-      LimeGreen             = 0x32CD32, // ³ÈÂÌÉ«      
-      Linen                 = 0xFAF0E6, // ÑÇÂéÉ«      
-      Magenta               = 0xFF00FF, // ºì×ÏÉ«      
-      Maroon                = 0x800000, // ËÚÉ«        
-      MediumAquamarine      = 0x66CDAA, // ÖĞÂÌÉ«      
-      MediumBlue            = 0x0000CD, // ÖĞÀ¼É«      
-      MediumOrchid          = 0xBA55D3, // ÖĞ·Û×ÏÉ«    
-      MediumPurple          = 0x9370DB, // ÖĞ×ÏÉ«      
-      MediumSeaGreen        = 0x3CB371, // ÖĞº£À¶      
-      MediumSlateBlue       = 0x7B68EE, // ÖĞ°µÀ¶É«    
-      MediumSpringGreen     = 0x00FA9A, // ÖĞ´ºÂÌÉ«    
-      MediumTurquoise       = 0x48D1CC, // ÖĞÂÌ±¦Ê¯    
-      MediumVioletRed       = 0xC71585, // ÖĞ×ÏÂŞÀ¼É«   
-      MidnightBlue          = 0x191970, // ÖĞ»ÒÀ¼É«    
-      Mintcream             = 0xF5FFFA, // ±¡ºÉÉ«      
-      Mistyrose             = 0xFFE4E1, // Ç³Ãµ¹åÉ«    
-      Moccasin              = 0xFFE4B5, // Â¹Æ¤É«      
-      NavajoWhite           = 0xFFDEAD, // ÄÉÍß°×      
-      Navy                  = 0x000080, // º£¾üÉ«    
-      Oldlace               = 0xFDF5E6, // ÀÏ»¨É«    
-      Olive                 = 0x808000, // éÏé­É«    
-      Olivedrab             = 0x6B8E23, // ÉîÂÌºÖÉ«  
-      Orange                = 0xFFA500, // ³ÈÉ«      
-      OrangeRed             = 0xFF4500, // ºì³ÈÉ«    
-      Orchid                = 0xDA70D6, // µ­×ÏÉ«    
-      PaleGoldenrod         = 0xEEE8AA, // ²Ô÷è÷ëÉ«  
-      PaleGreen             = 0x98FB98, // ²ÔÂÌÉ«    
-      PaleTurquoise         = 0xAFEEEE, // ²Ô±¦Ê¯ÂÌ  
-      PaleVioletRed         = 0xDB7093, // ²Ô×ÏÂŞÀ¼É« 
-      Papayawhip            = 0xFFEFD5, // ·¬Ä¾É«    
-      PeachPuff             = 0xFFDAB9, // ÌÒÉ«      
-      Peru                  = 0xCD853F, // ÃØÂ³É«    
-      Pink                  = 0xFFC0CB, // ·ÛºìÉ«    
-      Plum                  = 0xDDA0DD, // ÑóÀîÉ«    
-      PowderBlue            = 0xB0E0E6, // ·ÛÀ¶É«    
-      Purple                = 0x800080, // ×ÏÉ«      
-      Red                   = 0xFF0000, // ºìÉ«      
-      RosyBrown             = 0xBC8F8F, // ºÖÃµ¹åºì   
-      RoyalBlue             = 0x4169E1, // »Ê¼ÒÀ¶     
-      SaddleBrown           = 0x8B4513, // ÖØºÖÉ«     
-      Salmon                = 0xFA8072, // ÏÊÈâÉ«     
-      SandyBrown            = 0xF4A460, // É³ºÖÉ«     
-      SeaGreen              = 0x2E8B57, // º£ÂÌÉ«     
-      SeaShell              = 0xFFF5EE, // º£±´É«     
-      Sienna                = 0xA0522D, // ô÷É«      
-      Silver                = 0xC0C0C0, // ÒøÉ«      
-      SkyBlue               = 0x87CEEB, // ÌìÀ¶É«
-      SlateBlue             = 0x6A5ACD, // Ê¯À¶É«
-      SlateGray             = 0x708090, // »ÒÊ¯É«
-      SlateGrey             = 0x708090, // »ÒÊ¯É«
-      Snow                  = 0xFFFAFA, // Ñ©°×É«
-      SpringGreen           = 0x00FF7F, // ´ºÂÌÉ«
-      SteelBlue             = 0x4682B4, // ¸ÖÀ¼É«
-      Tan                   = 0xD2B48C, // ²èÉ«      
-      Teal                  = 0x008080, // Ë®Ñ¼É«     
-      Thistle               = 0xD8BFD8, // ¼»É«      
-      Tomato                = 0xFF6347, // Î÷ºìÊÁÉ«   
-      Turquoise             = 0x40E0D0, // ÇàÂÌÉ«     
-      Violet                = 0xEE82EE, // ×ÏÂŞÀ¼É«   
-      Wheat                 = 0xF5DEB3, // Ç³»ÆÉ«     
-      White                 = 0xFFFFFF, // °×É«      
-      WhiteSmoke            = 0xF5F5F5, // ÑÌ°×É«     
-      Yellow                = 0xFFFF00, // »ÆÉ«      
+      AliceBlue             = 0xF0F8FF, // è‰¾åˆ©æ–¯å…°
+      AntiqueWhite          = 0xFAEBD7, // å¤è‘£ç™½
+      Aqua                  = 0x00FFFF, // æµ…ç»¿è‰²
+      Aquamarine            = 0x7FFFD4, // ç¢§ç»¿è‰²
+      Azure                 = 0xF0FFFF, // å¤©è“è‰²
+      Beige                 = 0xF5F5DC, // ç±³è‰²
+      Bisque                = 0xFFE4C4, // æ¡”é»„è‰²
+      Black                 = 0x000000, // é»‘è‰²
+      Blanchedalmond        = 0xFFEBCD, // ç™½æè‰²
+      Blue                  = 0x0000FF, // è“è‰²
+      BlueViolet            = 0x8A2BE2, // ç´«ç½—å…°è‰²
+      Brown                 = 0xA52A2A, // è¤è‰²
+      BurlyWood             = 0xDEB887, // å®æœ¨è‰²
+      CadetBlue             = 0x5F9EA0, // å†›å…°è‰²
+      Chartreuse            = 0x7FFF00, // é»„ç»¿è‰²
+      Chocolate             = 0xD2691E, // å·§å¯åŠ›è‰²
+      Coral                 = 0xFF7F50, // çŠç‘šè‰²
+      CornflowerBlue        = 0x6495ED, // èŠå…°è‰²
+      Cornsilk              = 0xFFF8DC, // ç±³ç»¸è‰²
+      Crimson               = 0xDC143C, // æš—æ·±çº¢è‰²
+      Cyan                  = 0x00FFFF, // é’è‰²
+      DarkBlue              = 0x00008B, // æš—è“è‰²
+      DarkCyan              = 0x008B8B, // æš—é’è‰²
+      DarkGoldenrod         = 0xB8860B, // æš—é‡‘é»„è‰²
+      DarkGray              = 0xA9A9A9, // æš—ç°è‰²
+      DarkGreen             = 0x006400, // æš—ç»¿è‰²
+      DarkGrey              = 0xA9A9A9, // æš—ç°è‰²
+      DarkKhaki             = 0xBDB76B, // æš—é»„è¤è‰²
+      DarkMagenta           = 0x8B008B, // æš—æ´‹çº¢
+      DarkOliveGreen        = 0x556B2F, // æš—æ©„æ¦„ç»¿
+      DarkOrange            = 0xFF8C00, // æš—æ¡”é»„è‰²
+      DarkOrchid            = 0x9932CC, // æš—ç´«è‰²
+      DarkRed               = 0x8B0000, // æš—çº¢è‰²
+      DarkSalmon            = 0xE9967A, // æš—è‚‰è‰²
+      DarkSeaGreen          = 0x8FBC8F, // æš—æµ·å…°è‰²
+      DarkSlateBlue         = 0x483D8B, // æš—ç°è“è‰²
+      DarkSlateGray         = 0x2F4F4F, // æš—ç“¦ç°è‰²
+      DarkSlateGrey         = 0x2F4F4F, // æš—ç“¦ç°è‰²
+      DarkTurquoise         = 0x00CED1, // æš—å®çŸ³ç»¿
+      DarkViolet            = 0x9400D3, // æš—ç´«ç½—å…°è‰²
+      DeepPink              = 0xFF1493, // æ·±ç²‰çº¢è‰²
+      DeepSkyBlue           = 0x00BFFF, // æ·±å¤©è“è‰²
+      DimGray               = 0x696969, // æš—ç°è‰²
+      DimGrey               = 0x696969, // æš—ç°è‰²
+      DodgerBlue            = 0x1E90FF, // é—ªå…°è‰²
+      FireBrick             = 0xB22222, // ç«ç –è‰²
+      FloralWhite           = 0xFFFAF0, // èŠ±ç™½è‰²
+      ForestGreen           = 0x228B22, // æ£®æ—ç»¿
+      Fuchsia               = 0xFF00FF, // ç´«çº¢è‰²
+      Gainsboro             = 0xDCDCDC, // æ·¡ç°è‰²
+      GhostWhite            = 0xF8F8FF, // å¹½çµç™½
+      Gold                  = 0xFFD700, // é‡‘è‰²
+      Goldenrod             = 0xDAA520, // é‡‘éº’éºŸè‰²
+      Gray                  = 0x808080, // ç°è‰²
+      Green                 = 0x008000, // ç»¿è‰²
+      GreenYellow           = 0xADFF2F, // é»„ç»¿è‰²
+      Grey                  = 0x808080, // ç°è‰²
+      Honeydew              = 0xF0FFF0, // èœœè‰²
+      HotPink               = 0xFF69B4, // çƒ­ç²‰çº¢è‰²
+      IndianRed             = 0xCD5C5C, // å°ç¬¬å®‰çº¢
+      Indigo                = 0x4B0082, // é›é’è‰²
+      Ivory                 = 0xFFFFF0, // è±¡ç‰™è‰²
+      Khaki                 = 0xF0E68C, // é»„è¤è‰²
+      Lavender              = 0xE6E6FA, // æ·¡ç´«è‰²
+      LavenderBlush         = 0xFFF0F5, // æ·¡ç´«çº¢
+      LawnGreen             = 0x7CFC00, // è‰ç»¿è‰²
+      LemonChiffon          = 0xFFFACD, // æŸ æª¬ç»¸è‰²  
+      LightBlue             = 0xADD8E6, // äº®è“è‰²    
+      LightCoral            = 0xF08080, // äº®çŠç‘šè‰²  
+      LightCyan             = 0xE0FFFF, // äº®é’è‰²    
+      LightGoldenrodYellow  = 0xFAFAD2, // äº®é‡‘é»„è‰²  
+      LightGray             = 0xD3D3D3, // äº®ç°è‰²    
+      LightGreen            = 0x90EE90, // äº®ç»¿è‰²    
+      LightGrey             = 0xD3D3D3, // äº®ç°è‰²    
+      LightPink             = 0xFFB6C1, // äº®ç²‰çº¢è‰²  
+      LightSalmon           = 0xFFA07A, // äº®è‚‰è‰²    
+      LightSeaGreen         = 0x20B2AA, // äº®æµ·è“è‰²  
+      LightSkyBlue          = 0x87CEFA, // äº®å¤©è“è‰²  
+      LightSlateGray        = 0x778899, // äº®è“ç°    
+      LightSlateGrey        = 0x778899, // äº®è“ç°    
+      LightSteelBlue        = 0xB0C4DE, // äº®é’¢å…°è‰²  
+      LightYellow           = 0xFFFFE0, // äº®é»„è‰²      
+      Lime                  = 0x00FF00, // é…¸æ©™è‰²      
+      LimeGreen             = 0x32CD32, // æ©™ç»¿è‰²      
+      Linen                 = 0xFAF0E6, // äºšéº»è‰²      
+      Magenta               = 0xFF00FF, // çº¢ç´«è‰²      
+      Maroon                = 0x800000, // ç²Ÿè‰²        
+      MediumAquamarine      = 0x66CDAA, // ä¸­ç»¿è‰²      
+      MediumBlue            = 0x0000CD, // ä¸­å…°è‰²      
+      MediumOrchid          = 0xBA55D3, // ä¸­ç²‰ç´«è‰²    
+      MediumPurple          = 0x9370DB, // ä¸­ç´«è‰²      
+      MediumSeaGreen        = 0x3CB371, // ä¸­æµ·è“      
+      MediumSlateBlue       = 0x7B68EE, // ä¸­æš—è“è‰²    
+      MediumSpringGreen     = 0x00FA9A, // ä¸­æ˜¥ç»¿è‰²    
+      MediumTurquoise       = 0x48D1CC, // ä¸­ç»¿å®çŸ³    
+      MediumVioletRed       = 0xC71585, // ä¸­ç´«ç½—å…°è‰²   
+      MidnightBlue          = 0x191970, // ä¸­ç°å…°è‰²    
+      Mintcream             = 0xF5FFFA, // è–„è·è‰²      
+      Mistyrose             = 0xFFE4E1, // æµ…ç«ç‘°è‰²    
+      Moccasin              = 0xFFE4B5, // é¹¿çš®è‰²      
+      NavajoWhite           = 0xFFDEAD, // çº³ç“¦ç™½      
+      Navy                  = 0x000080, // æµ·å†›è‰²    
+      Oldlace               = 0xFDF5E6, // è€èŠ±è‰²    
+      Olive                 = 0x808000, // æ©„æ¦„è‰²    
+      Olivedrab             = 0x6B8E23, // æ·±ç»¿è¤è‰²  
+      Orange                = 0xFFA500, // æ©™è‰²      
+      OrangeRed             = 0xFF4500, // çº¢æ©™è‰²    
+      Orchid                = 0xDA70D6, // æ·¡ç´«è‰²    
+      PaleGoldenrod         = 0xEEE8AA, // è‹éº’éºŸè‰²  
+      PaleGreen             = 0x98FB98, // è‹ç»¿è‰²    
+      PaleTurquoise         = 0xAFEEEE, // è‹å®çŸ³ç»¿  
+      PaleVioletRed         = 0xDB7093, // è‹ç´«ç½—å…°è‰² 
+      Papayawhip            = 0xFFEFD5, // ç•ªæœ¨è‰²    
+      PeachPuff             = 0xFFDAB9, // æ¡ƒè‰²      
+      Peru                  = 0xCD853F, // ç§˜é²è‰²    
+      Pink                  = 0xFFC0CB, // ç²‰çº¢è‰²    
+      Plum                  = 0xDDA0DD, // æ´‹æè‰²    
+      PowderBlue            = 0xB0E0E6, // ç²‰è“è‰²    
+      Purple                = 0x800080, // ç´«è‰²      
+      Red                   = 0xFF0000, // çº¢è‰²      
+      RosyBrown             = 0xBC8F8F, // è¤ç«ç‘°çº¢   
+      RoyalBlue             = 0x4169E1, // çš‡å®¶è“     
+      SaddleBrown           = 0x8B4513, // é‡è¤è‰²     
+      Salmon                = 0xFA8072, // é²œè‚‰è‰²     
+      SandyBrown            = 0xF4A460, // æ²™è¤è‰²     
+      SeaGreen              = 0x2E8B57, // æµ·ç»¿è‰²     
+      SeaShell              = 0xFFF5EE, // æµ·è´è‰²     
+      Sienna                = 0xA0522D, // èµ­è‰²      
+      Silver                = 0xC0C0C0, // é“¶è‰²      
+      SkyBlue               = 0x87CEEB, // å¤©è“è‰²
+      SlateBlue             = 0x6A5ACD, // çŸ³è“è‰²
+      SlateGray             = 0x708090, // ç°çŸ³è‰²
+      SlateGrey             = 0x708090, // ç°çŸ³è‰²
+      Snow                  = 0xFFFAFA, // é›ªç™½è‰²
+      SpringGreen           = 0x00FF7F, // æ˜¥ç»¿è‰²
+      SteelBlue             = 0x4682B4, // é’¢å…°è‰²
+      Tan                   = 0xD2B48C, // èŒ¶è‰²      
+      Teal                  = 0x008080, // æ°´é¸­è‰²     
+      Thistle               = 0xD8BFD8, // è“Ÿè‰²      
+      Tomato                = 0xFF6347, // è¥¿çº¢æŸ¿è‰²   
+      Turquoise             = 0x40E0D0, // é’ç»¿è‰²     
+      Violet                = 0xEE82EE, // ç´«ç½—å…°è‰²   
+      Wheat                 = 0xF5DEB3, // æµ…é»„è‰²     
+      White                 = 0xFFFFFF, // ç™½è‰²      
+      WhiteSmoke            = 0xF5F5F5, // çƒŸç™½è‰²     
+      Yellow                = 0xFFFF00, // é»„è‰²      
     };
   } // namespace color
 
@@ -293,9 +293,9 @@ namespace clstd
 
     _COLOR_RGBTEMPL& set(u32 aarrggbb);
 
-    u32 RandomizeRGB();  // Ëæ»ú²úÉúÒ»¸öÑÕÉ«
+    u32 RandomizeRGB();  // éšæœºäº§ç”Ÿä¸€ä¸ªé¢œè‰²
 
-    u32 RandomizeAll();  // Ëæ»ú²úÉúÒ»¸öÑÕÉ«ºÍAlpha
+    u32 RandomizeAll();  // éšæœºäº§ç”Ÿä¸€ä¸ªé¢œè‰²å’ŒAlpha
 
     operator u32()
     {
@@ -314,7 +314,7 @@ namespace clstd
       set(aarrggbb);
     }
 
-    // Èç¹û±àÒëÓĞÆçÒå¸ÄÎªSetº¯Êı
+    // å¦‚æœç¼–è¯‘æœ‰æ­§ä¹‰æ”¹ä¸ºSetå‡½æ•°
     _COLOR_RGBTEMPL_F(const Internal::COLOR_ARGB& value);
 
     _COLOR_RGBTEMPL_F(const Internal::COLOR_RGBA_F& value);
@@ -383,7 +383,7 @@ namespace clstd
   typedef _COLOR_RGBTEMPL<Internal::COLOR_ARGB> COLOR_ARGB;
   typedef _COLOR_RGBTEMPL<Internal::COLOR_ABGR> COLOR_ABGR;
 
-  // ²»ÄÜÓÃÏÂÃæµÄ¼¯³É·½·¨, ÕâÑù»¹ÒªÖØĞÂÉùÃ÷ºÍÊµÏÖ¹¹Ôìº¯Êı
+  // ä¸èƒ½ç”¨ä¸‹é¢çš„é›†æˆæ–¹æ³•, è¿™æ ·è¿˜è¦é‡æ–°å£°æ˜å’Œå®ç°æ„é€ å‡½æ•°
   //class COLOR_RGBA_F : public _COLOR_RGBTEMPL_F<Internal::COLOR_RGBA_F>
   //{
   //};

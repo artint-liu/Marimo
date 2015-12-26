@@ -1,4 +1,4 @@
-#include "../clstd.h"
+﻿#include "../clstd.h"
 #include "clString.H"
 #include "clUtility.H"
 namespace clstd

@@ -1,29 +1,29 @@
-#ifndef _CLSTD_IMAGE_H_
+ï»¿#ifndef _CLSTD_IMAGE_H_
 #define _CLSTD_IMAGE_H_
 
-// Õâ¸öÊÇclstdÏÂµÄÉè±¸ÎŞ¹ØImage´¦ÀíÀà
-// ImageÊı¾İÍêÈ«ÔÚÄÚ´æÖĞ£¬²»ÓëÏÔ¿¨µÈÓ²¼şÉè±¸¹ØÁª£¬´¦Àí²Ù×÷Ò²ÒÀÀµÓÚcpu½øĞĞ
+// è¿™ä¸ªæ˜¯clstdä¸‹çš„è®¾å¤‡æ— å…³Imageå¤„ç†ç±»
+// Imageæ•°æ®å®Œå…¨åœ¨å†…å­˜ä¸­ï¼Œä¸ä¸æ˜¾å¡ç­‰ç¡¬ä»¶è®¾å¤‡å…³è”ï¼Œå¤„ç†æ“ä½œä¹Ÿä¾èµ–äºcpuè¿›è¡Œ
 
 namespace clstd
 {
-  // Í¨µÀº¬Òå£º
-  // R = ºìÉ«
-  // G = ÂÌÉ«
-  // B = À¶É«
+  // é€šé“å«ä¹‰ï¼š
+  // R = çº¢è‰²
+  // G = ç»¿è‰²
+  // B = è“è‰²
   // A = Alpha
-  // X = Õ¼Î»
-  // Î´À´¿¼ÂÇÖ§³Ö'Y','U','V'Í¨µÀ
+  // X = å ä½
+  // æœªæ¥è€ƒè™‘æ”¯æŒ'Y','U','V'é€šé“
 
   struct IMAGEDESC
   {
-    void* ptr;        // Êı¾İµØÖ·
-    int   width;      // ÏñËØ¿í¶È
-    int   height;     // ÏñËØ¸ß¶È
-    int   channel;    // Í¨µÀÊı, 1, 2, 3, 4
-    int   pitch;      // Ò»ĞĞÏñËØÕ¼µÄ×Ö½Ú³¤¶È
-    int   depth;      // Í¨µÀÎ»Êı£¬8bit/16bit/32bits/64bits
+    void* ptr;        // æ•°æ®åœ°å€
+    int   width;      // åƒç´ å®½åº¦
+    int   height;     // åƒç´ é«˜åº¦
+    int   channel;    // é€šé“æ•°, 1, 2, 3, 4
+    int   pitch;      // ä¸€è¡Œåƒç´ å çš„å­—èŠ‚é•¿åº¦
+    int   depth;      // é€šé“ä½æ•°ï¼Œ8bit/16bit/32bits/64bits
     union {
-      u8  name[4];    // Í¨µÀ¸ñÊ½ 'R','G','B','A','X'
+      u8  name[4];    // é€šé“æ ¼å¼ 'R','G','B','A','X'
       u32 code;
     }format;
   };
@@ -35,17 +35,17 @@ namespace clstd
 
   class Image
   {
-    // ÕâÀïÃæ°üº¬ÁË»ù±¾Êı¾İ½á¹¹ºÍ·½·¨£¬ËùÓĞ³ÉÔ±·½·¨Ó¦µ±ÓëÊı¾İÀàĞÍÎŞ¹Ø
+    // è¿™é‡Œé¢åŒ…å«äº†åŸºæœ¬æ•°æ®ç»“æ„å’Œæ–¹æ³•ï¼Œæ‰€æœ‰æˆå‘˜æ–¹æ³•åº”å½“ä¸æ•°æ®ç±»å‹æ— å…³
   protected:
-    CLLPBYTE m_ptr;   // Êı¾İµØÖ·
-    int m_width;      // ÏñËØ¿í¶È
-    int m_height;     // ÏñËØ¸ß¶È
-    int m_channel;    // Í¨µÀÊı, 1, 2, 3, 4
-    int m_pitch;      // Ò»ĞĞÏñËØÕ¼µÄ×Ö½Ú³¤¶È
-    int m_depth;      // Í¨µÀÎ»Êı£¬8bit/16bit/32bits
+    CLLPBYTE m_ptr;   // æ•°æ®åœ°å€
+    int m_width;      // åƒç´ å®½åº¦
+    int m_height;     // åƒç´ é«˜åº¦
+    int m_channel;    // é€šé“æ•°, 1, 2, 3, 4
+    int m_pitch;      // ä¸€è¡Œåƒç´ å çš„å­—èŠ‚é•¿åº¦
+    int m_depth;      // é€šé“ä½æ•°ï¼Œ8bit/16bit/32bits
     union
     {
-      u8  name[4];    // Í¨µÀ¸ñÊ½ 'R','G','B','A','X'
+      u8  name[4];    // é€šé“æ ¼å¼ 'R','G','B','A','X'
       u32 code;
     }m_format;
 
@@ -63,14 +63,14 @@ namespace clstd
     b32       Set           (int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData);
     int       GetWidth      () const;
     int       GetHeight     () const;
-/*Ã»ÊµÏÖ*/int       Inflate       (int left, int top, int right, int bottom); // µ÷ÕûImage³ß´ç£¬²ÎÊıÊÇËÄ¸ö±ßÔµÀ©Õ¹µÄÏñËØÊı£¬¿ÉÒÔÊÇ¸ºÊı
+/*æ²¡å®ç°*/int       Inflate       (int left, int top, int right, int bottom); // è°ƒæ•´Imageå°ºå¯¸ï¼Œå‚æ•°æ˜¯å››ä¸ªè¾¹ç¼˜æ‰©å±•çš„åƒç´ æ•°ï¼Œå¯ä»¥æ˜¯è´Ÿæ•°
     const void* GetPixelPtr   (int x, int y) const;
     void*       GetPixelPtr   (int x, int y);
     const void* GetLine       (int y) const;
     void*       GetLine       (int y);
-    int       GetChannelOffset(char chChannel);   // Í¨µÀÔÚÏñËØÖĞµÄÆ«ÒÆÁ¿
-    b32       GetChannelPlane (Image* pDestImage, char chChannel); // »ñµÃÍ¨µÀÆ½Ãæ£¬pDest½«±»Çå¿Õ
-    b32       ScaleNearest    (Image* pDestImage, int nWidth, int nHeight); // µã²ÉÑùËõ·Å£¬Õâ¸ö²»ĞèÒª¼ÆËãÏñËØ
+    int       GetChannelOffset(char chChannel);   // é€šé“åœ¨åƒç´ ä¸­çš„åç§»é‡
+    b32       GetChannelPlane (Image* pDestImage, char chChannel); // è·å¾—é€šé“å¹³é¢ï¼ŒpDestå°†è¢«æ¸…ç©º
+    b32       ScaleNearest    (Image* pDestImage, int nWidth, int nHeight); // ç‚¹é‡‡æ ·ç¼©æ”¾ï¼Œè¿™ä¸ªä¸éœ€è¦è®¡ç®—åƒç´ 
     const char* GetFormat     () const;
   private:
     template<typename _Ty>
@@ -90,12 +90,12 @@ namespace clstd
   };
 
   //
-  // Filter »¹ÊÇ Sampler
+  // Filter è¿˜æ˜¯ Sampler
   //
   class ImageFilterI8 : public Image
   {
   public:
-    b32 SetAsInteger(Image* pSrcImage); // °´ÕÕÕûÊıÏñËØÉèÖÃ
+    b32 SetAsInteger(Image* pSrcImage); // æŒ‰ç…§æ•´æ•°åƒç´ è®¾ç½®
   protected:
   private:
   };
@@ -126,7 +126,7 @@ namespace clstd
     b32 Clear(float value, char chChannel);
   };
 
-  // ImageFilterXXXÖ»ÊÇImageµÄ·½·¨À©Õ¹£¬²»×öÊı¾İ¼ÇÂ¼
+  // ImageFilterXXXåªæ˜¯Imageçš„æ–¹æ³•æ‰©å±•ï¼Œä¸åšæ•°æ®è®°å½•
   STATIC_ASSERT(sizeof(Image) == sizeof(ImageFilterF));
   STATIC_ASSERT(sizeof(Image) == sizeof(ImageFilterI8));
   STATIC_ASSERT(sizeof(Image) == sizeof(ImageFilterI16));

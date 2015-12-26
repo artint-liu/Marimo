@@ -1,4 +1,4 @@
-#ifndef _CL_UTILITY_
+ï»¿#ifndef _CL_UTILITY_
 #define _CL_UTILITY_
 
 template<typename _T1, typename _T2>
@@ -83,13 +83,13 @@ namespace clstd
   }
 
   template<typename _Ty>
-  inline b32 approximate(_Ty a, _Ty b, _Ty epsilon)
+  inline b32 approximate(_Ty a, _Ty b, _Ty epsilon) // çº¦ç­‰äº
   {
     return (fabs(a - b) < epsilon);
   }
 
   template<typename _Ty, typename _TCh>
-  _vector2<_Ty> strtovec2i(const _TCh* str)
+  _vector2<_Ty> strtovec2i(const _TCh* str) // "a,b"å­—ç¬¦ä¸²è§£æä¸ºå‘é‡
   {
     _vector2<_Ty> v2(0);
     v2.x = (_Ty)_xstrtoi<i32>(str);
@@ -104,7 +104,7 @@ namespace clstd
   }
 
   template<typename _Ty, typename _TCh>
-  _vector3<_Ty> strtovec3i(const _TCh* str)
+  _vector3<_Ty> strtovec3i(const _TCh* str) // "a,b,c"å­—ç¬¦ä¸²è§£æä¸ºå‘é‡
   {
     _vector3<_Ty> v3(0);
     v3.x = (_Ty)_xstrtoi<i32>(str);
@@ -124,7 +124,7 @@ namespace clstd
   }
 
   template<typename _TCh>
-  float2 strtovec2f(const _TCh* str)
+  float2 strtovec2f(const _TCh* str) // "a,b"å­—ç¬¦ä¸²è§£æä¸ºå‘é‡
   {
     float2 v2(0.0f);
     v2.x = (float)_xstrtof(str);
@@ -139,7 +139,7 @@ namespace clstd
   }
 
   template<typename _TCh>
-  float3 strtovec3f(const _TCh* str)
+  float3 strtovec3f(const _TCh* str) // "a,b,c"å­—ç¬¦ä¸²è§£æä¸ºå‘é‡
   {
     float3 v3(0.0f);
     v3.x = (float)_xstrtof(str);
@@ -158,7 +158,7 @@ namespace clstd
     return v3;
   }
 
-  inline CLDWORD MakeFourCC(CLBYTE ch0, CLBYTE ch1, CLBYTE ch2, CLBYTE ch3)
+  inline CLDWORD MakeFourCC(CLBYTE ch0, CLBYTE ch1, CLBYTE ch2, CLBYTE ch3) // character code
   {
     return CLMAKEFOURCC(ch0, ch1, ch2, ch3);
   }
@@ -180,7 +180,7 @@ namespace clstd
   }
 
   template <class _TElement>
-  void QuickSortClassic(_TElement* array, int start, int end)  // Ñ­»·²»°üº¬end
+  void QuickSortClassic(_TElement* array, int start, int end)  // å¾ªç¯ä¸åŒ…å«end
   {
     if(start >= end)
       return;
@@ -246,10 +246,10 @@ namespace clstd
   }
   //////////////////////////////////////////////////////////////////////////
   //************************************
-  // Method:    ResolveString ·Ö½â×Ö·û´®µ½Ò»¸öÊı×éÖĞ
-  // Parameter: const _String& str Òª·Ö½âµÄ×Ö·û´®
-  // Parameter: _TCh ch Ê¹ÓÃµÄ·Ö¸ô·û
-  // Parameter: _StringArray& aStr Êı×é¶ÔÏó£¬¿ÉÒÔÊÇvector£¬listµÈ
+  // Method:    ResolveString åˆ†è§£å­—ç¬¦ä¸²åˆ°ä¸€ä¸ªæ•°ç»„ä¸­
+  // Parameter: const _String& str è¦åˆ†è§£çš„å­—ç¬¦ä¸²
+  // Parameter: _TCh ch ä½¿ç”¨çš„åˆ†éš”ç¬¦
+  // Parameter: _StringArray& aStr æ•°ç»„å¯¹è±¡ï¼Œå¯ä»¥æ˜¯vectorï¼Œlistç­‰
   //************************************
   template <class _String, typename _TCh, class _StringArray>
   void ResolveString(const _String& str, _TCh ch, _StringArray& aStr)
@@ -270,8 +270,8 @@ namespace clstd
 
   //////////////////////////////////////////////////////////////////////////
   //
-  // ¸ßĞ§°´ÕÕÌØ¶¨·ûºÅ·Ö½â×Ö·û´®µÄÀà
-  // ³ıÁËĞŞ¸ÄÄ¿±ê×Ö·û´®Íâ²»»á²úÉú¶àÓàµÄ¶ÔÏó/ÄÚ´æ·ÖÅä
+  // é«˜æ•ˆæŒ‰ç…§ç‰¹å®šç¬¦å·åˆ†è§£å­—ç¬¦ä¸²çš„ç±»
+  // é™¤äº†ä¿®æ”¹ç›®æ ‡å­—ç¬¦ä¸²å¤–ä¸ä¼šäº§ç”Ÿå¤šä½™çš„å¯¹è±¡/å†…å­˜åˆ†é…
   //
   template <class _TString>
   class StringCutter
@@ -287,7 +287,7 @@ namespace clstd
     StringCutter() : m_pos(0), m_str(""), m_length(0) {}
     StringCutter(T_LPCSTR str, size_t len = 0) : m_pos(0), m_str(str), m_length(len) {}
 
-    // TODO: Ôö¼ÓÒ»¸ö·µ»Ø×Ö·û´®µØÖ·ºÍ³¤¶È£¬±ÜÃâ¹¹ÔìstringµÄ·½·¨
+    // TODO: å¢åŠ ä¸€ä¸ªè¿”å›å­—ç¬¦ä¸²åœ°å€å’Œé•¿åº¦ï¼Œé¿å…æ„é€ stringçš„æ–¹æ³•
 
     _TString& Cut(_TString& strOut, T_CHAR ch)
     {
@@ -325,14 +325,18 @@ namespace clstd
   };  
 
   //////////////////////////////////////////////////////////////////////////
-
-  template <class _String, class _TCh>
-  void AssembleString(_String& str, _TCh ch, const clvector<_String>& aStr)
+  // ç»„è£…å­—ç¬¦ä¸²åºåˆ—
+  // ch=','
+  // "a","b","c","d" ç»„è£…ä¸º
+  // "a,b,c,d"
+  template <class _String, class _TCh, class _TStringList>
+  void AssembleString(_String& str, _TCh ch, const _TStringList& aStr)
   {
     str.Empty();
 
-    typename clvector<_String>::const_iterator it = aStr.begin();
-    for(;it != aStr.end(); ++it) {
+    auto it = aStr.begin();
+    auto itEnd = aStr.end();
+    for(;it != itEnd; ++it) {
         str += (*it);
         str.Append(ch);
     }
@@ -382,7 +386,7 @@ FINAL_RET:
   }
 
   template <class _String>
-  void TranslateEscapeCharacter(_String& str) // ÊäÈë/Êä³ö
+  void TranslateEscapeCharacter(_String& str) // è¾“å…¥/è¾“å‡º
   {
     int i = 0;
     int d = 0;
@@ -432,7 +436,7 @@ FINAL_RET:
     return clstd::GenerateCRC32((CLBYTE*)&v4, sizeof(_vector4<_Ty>));
   }
 
-
+  // æŠŠnumå‘ä¸Šå¯¹é½åˆ°2çš„å¹‚
   template<typename _Ty>
   _Ty RoundupPowOfTwo(_Ty num)
   {
@@ -507,6 +511,7 @@ FINAL_RET:
 	} LARGE_INTEGER;
 #endif
 
+  // æ‰‹åŠ¨æ§åˆ¶çš„æ—¶é—´å·®è®¡ç®—
   class TimeTrace
   {
     LARGE_INTEGER m_Frequency;
@@ -521,9 +526,10 @@ FINAL_RET:
     double              Dump(CLLPCSTR szName) CLCONST;
   };
 
+  // åŸºäºä½œç”¨åŸŸçš„æ—¶é—´å·®è®¡ç®— 
   class ScopeTimeTrace
   {
-    CLLPCSTR name;  // Õâ¸öÆäÊµÊÇclStringA
+    CLLPCSTR name;  // è¿™ä¸ªå…¶å®æ˜¯clStringA
     TimeTrace tt;
     double* prTotalTime;
   public:
@@ -533,7 +539,7 @@ FINAL_RET:
   };
 
   u64 GetTime64(); // Milli Seconds
-  u32 GetNumberOfProcessors();  // »ñµÃ´¦ÀíÆ÷ÊıÁ¿
+  u32 GetNumberOfProcessors();  // è·å¾—å¤„ç†å™¨æ•°é‡
 
   clStringA ToStringA(const float4x4& m);
   clStringA ToStringA(const float3x3& m);

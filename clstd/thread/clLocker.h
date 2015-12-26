@@ -1,4 +1,4 @@
-#ifndef _CLSTD_LOCKER_H_
+ï»¿#ifndef _CLSTD_LOCKER_H_
 #define _CLSTD_LOCKER_H_
 
 #if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
@@ -51,7 +51,7 @@ namespace clstd
     ~ScopedSafeLocker() { if(m_locker) { m_locker->Unlock(); }}
   };
 
-  // TODO: Ó¦¸ÃÔö¼ÓÒ»¸ö¶Ô¼ÓËø½âËø½øÐÐÊ±¼ä¸ú×ÙµÄLocker»òÕß²ÎÊý
+  // TODO: åº”è¯¥å¢žåŠ ä¸€ä¸ªå¯¹åŠ é”è§£é”è¿›è¡Œæ—¶é—´è·Ÿè¸ªçš„Lockeræˆ–è€…å‚æ•°
 
 } // namespace clstd
 

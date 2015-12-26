@@ -1,4 +1,4 @@
-#ifndef _TREE_H_
+ï»¿#ifndef _TREE_H_
 #define _TREE_H_
 
 namespace clstd
@@ -11,7 +11,7 @@ namespace clstd
     Tree  *  m_pPrev;
     Tree  *  m_pNext;
 
-    bool  PickNode      ();  // ´ÓTreeÖĞÕª³ı½Úµã
+    bool  PickNode      ();  // ä»Treeä¸­æ‘˜é™¤èŠ‚ç‚¹
   public:
     Tree* GetParent     () const;
     Tree* GetFirstChild () const;
@@ -34,7 +34,7 @@ namespace clstd
     _T*  m_pPrev;
     _T*  m_pNext;
 
-    bool PickNode()  // ´ÓTreeÖĞÕª³ı½Úµã
+    bool PickNode()  // ä»Treeä¸­æ‘˜é™¤èŠ‚ç‚¹
     {
       if(m_pPrev == NULL)
       {
@@ -107,7 +107,7 @@ namespace clstd
       return pNewParent;
     }
 
-    bool IsAncestorOf(const _T* pChild) const // Èç¹û²ÎÊıÊÇ×Ô¼º·µ»Ø false
+    bool IsAncestorOf(const _T* pChild) const // å¦‚æœå‚æ•°æ˜¯è‡ªå·±è¿”å› false
     {
       const _T* pNode = pChild->m_pParent;
 

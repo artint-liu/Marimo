@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clTransform.h"
 #ifdef _DEBUG
 #include "clString.H"
@@ -78,7 +78,7 @@ namespace clstd
     GlobalMatrix = mat;
     b32 bret = mat.Decompose(&scaling, &rotation, &translation);
     if(bret) {
-      //GlobalScaling = scaling; // ÎªÊ²Ã´ÓĞÕâ¸ö£¿
+      //GlobalScaling = scaling; // ä¸ºä»€ä¹ˆæœ‰è¿™ä¸ªï¼Ÿ
     }
     return bret;
   }   
@@ -86,35 +86,35 @@ namespace clstd
   void TRANSFORM::SetPosition(CFloat3& vPos)
   {
     translation = vPos;
-    //GlobalScaling = scaling;  // ÎªÊ²Ã´ÓĞÕâ¸ö£¿
+    //GlobalScaling = scaling;  // ä¸ºä»€ä¹ˆæœ‰è¿™ä¸ªï¼Ÿ
     CalcAbsoluteMatrix(this);
   }
 
   void TRANSFORM::SetScaling(CFloat3& vScaling)
   {
     scaling = vScaling;
-    //GlobalScaling = vScaling; // ÎªÊ²Ã´ÓĞÕâ¸ö£¿
+    //GlobalScaling = vScaling; // ä¸ºä»€ä¹ˆæœ‰è¿™ä¸ªï¼Ÿ
     CalcAbsoluteMatrix(this);
   }
 
   void TRANSFORM::SetRotationA(CFloat3& vEuler)
   {
     rotation.YawPitchRollA(vEuler);
-    //GlobalScaling = scaling; // ÎªÊ²Ã´ÓĞÕâ¸ö£¿
+    //GlobalScaling = scaling; // ä¸ºä»€ä¹ˆæœ‰è¿™ä¸ªï¼Ÿ
     CalcAbsoluteMatrix(this);
   }
 
   void TRANSFORM::SetRotationR(CFloat3& vEuler)
   {
     rotation.YawPitchRollR(vEuler);
-    //GlobalScaling = scaling; // ÎªÊ²Ã´ÓĞÕâ¸ö£¿
+    //GlobalScaling = scaling; // ä¸ºä»€ä¹ˆæœ‰è¿™ä¸ªï¼Ÿ
     CalcAbsoluteMatrix(this);
   }
 
   void TRANSFORM::SetRotation(CQuaternion& quater)
   {
     rotation = quater;
-    //GlobalScaling = scaling; // ÎªÊ²Ã´ÓĞÕâ¸ö£¿
+    //GlobalScaling = scaling; // ä¸ºä»€ä¹ˆæœ‰è¿™ä¸ªï¼Ÿ
     CalcAbsoluteMatrix(this);
   }
 
@@ -122,7 +122,7 @@ namespace clstd
   {
     quaternion r;
     r.YawPitchRollA(vEuler);
-    rotation = r * rotation;  // ÔÚ×ÔÉíµÄĞı×ª×ø±êÖ®ÉÏ×öĞı×ª
+    rotation = r * rotation;  // åœ¨è‡ªèº«çš„æ—‹è½¬åæ ‡ä¹‹ä¸Šåšæ—‹è½¬
     CalcAbsoluteMatrix(this);
   }
 
@@ -130,7 +130,7 @@ namespace clstd
   {
     quaternion r;
     r.YawPitchRollA(vEuler);
-    rotation = r * rotation;  // ÔÚ×ÔÉíµÄĞı×ª×ø±êÖ®ÉÏ×öĞı×ª
+    rotation = r * rotation;  // åœ¨è‡ªèº«çš„æ—‹è½¬åæ ‡ä¹‹ä¸Šåšæ—‹è½¬
     CalcAbsoluteMatrix(this, Coordinate);
   }
 
@@ -138,7 +138,7 @@ namespace clstd
   {
     quaternion r;
     r.YawPitchRollR(vEuler);
-    rotation = r * rotation;  // ÔÚ×ÔÉíµÄĞı×ª×ø±êÖ®ÉÏ×öĞı×ª
+    rotation = r * rotation;  // åœ¨è‡ªèº«çš„æ—‹è½¬åæ ‡ä¹‹ä¸Šåšæ—‹è½¬
     CalcAbsoluteMatrix(this);
   }
 
@@ -146,7 +146,7 @@ namespace clstd
   {
     quaternion r;
     r.YawPitchRollR(vEuler);
-    rotation = r * rotation;  // ÔÚ×ÔÉíµÄĞı×ª×ø±êÖ®ÉÏ×öĞı×ª
+    rotation = r * rotation;  // åœ¨è‡ªèº«çš„æ—‹è½¬åæ ‡ä¹‹ä¸Šåšæ—‹è½¬
     CalcAbsoluteMatrix(this, Coordinate);
   }
 

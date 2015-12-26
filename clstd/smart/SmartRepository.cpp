@@ -1,4 +1,4 @@
-#include "../clstd.h"
+ï»¿#include "../clstd.h"
 #include "../clString.H"
 #include "../clFile.H"
 #include "SmartRepository.h"
@@ -9,17 +9,17 @@
 // SSDB = Simple Storage DataBase
 // SZDB = Smart Zlib-compressed DataBase
 #define ROOT_NAME "<Root>"
-#define SSDB_MAGIC CLMAKEFOURCC('S','S','D','B')  // ÆÕÍ¨ÎÄ¼şÍ·
-#define SZDB_MAGIC CLMAKEFOURCC('S','Z','D','B')  // ´øÓĞzlibÑ¹ËõµÄÍ·
-#define ZNODECC    CLMAKEFOURCC('Z','L','I','B')  // ½Úµã - Ê¹ÓÃµÄÑ¹ËõËã·¨±ê¼Ç
+#define SSDB_MAGIC CLMAKEFOURCC('S','S','D','B')  // æ™®é€šæ–‡ä»¶å¤´
+#define SZDB_MAGIC CLMAKEFOURCC('S','Z','D','B')  // å¸¦æœ‰zlibå‹ç¼©çš„å¤´
+#define ZNODECC    CLMAKEFOURCC('Z','L','I','B')  // èŠ‚ç‚¹ - ä½¿ç”¨çš„å‹ç¼©ç®—æ³•æ ‡è®°
 using namespace clstd;
 
-typedef SmartRepository::SmartNode SmartNode;     // Ö»ÔÚÔ´ÎÄ¼şÖĞÓĞĞ§,ÎªÁË·½±ãĞ´´úÂë
+typedef SmartRepository::SmartNode SmartNode;     // åªåœ¨æºæ–‡ä»¶ä¸­æœ‰æ•ˆ,ä¸ºäº†æ–¹ä¾¿å†™ä»£ç 
 
 struct ZHEADER
 {
-  u32 dwZCode;  // Ñ¹ËõËã·¨±êÖ¾
-  u32 nSize;    // Ñ¹ËõÇ°Êı¾İµÄ³¤¶È
+  u32 dwZCode;  // å‹ç¼©ç®—æ³•æ ‡å¿—
+  u32 nSize;    // å‹ç¼©å‰æ•°æ®çš„é•¿åº¦
 };
 
 #ifdef ENABLE_HASH_NAME
@@ -29,22 +29,22 @@ STATIC_ASSERT(sizeof(SmartRepository::KEYDESC) == sizeof(u32) * 3);
 #endif // #ifdef ENABLE_HASH_NAME
 
 //////////////////////////////////////////////////////////////////////////
-//[NodeÊı¾İ½á¹¹]:
-//  [HEADER]              ¼ÇÂ¼±êÖ¾Í·ºÍÓĞ¶àÉÙÊı¾İ¼ü
-//  [KEYDESC + KeyName]   ·ÇNodeÀàĞÍµÄ¼ü1
-//  [KEYDESC + KeyName]   ·ÇNodeÀàĞÍµÄ¼ü2
+//[Nodeæ•°æ®ç»“æ„]:
+//  [HEADER]              è®°å½•æ ‡å¿—å¤´å’Œæœ‰å¤šå°‘æ•°æ®é”®
+//  [KEYDESC + KeyName]   éNodeç±»å‹çš„é”®1
+//  [KEYDESC + KeyName]   éNodeç±»å‹çš„é”®2
 //  ...
-//  [KEYDESC + KeyName]   ·ÇNodeÀàĞÍµÄ¼ün
+//  [KEYDESC + KeyName]   éNodeç±»å‹çš„é”®n
 //
-//  [KEYDESC + KeyName]   NodeÀàĞÍµÄ¼ü1
-//    [NodeÊı¾İ½á¹¹]
-//  [KEYDESC + KeyName]   NodeÀàĞÍµÄ¼ü2
-//    [NodeÊı¾İ½á¹¹]
+//  [KEYDESC + KeyName]   Nodeç±»å‹çš„é”®1
+//    [Nodeæ•°æ®ç»“æ„]
+//  [KEYDESC + KeyName]   Nodeç±»å‹çš„é”®2
+//    [Nodeæ•°æ®ç»“æ„]
 //  ...
-//  [KEYDESC + KeyName]   NodeÀàĞÍµÄ¼ün
-//    [NodeÊı¾İ½á¹¹]
+//  [KEYDESC + KeyName]   Nodeç±»å‹çš„é”®n
+//    [Nodeæ•°æ®ç»“æ„]
 //
-//  [Buffer]              VariableÀàĞÍµÄÊı¾İ³Ø
+//  [Buffer]              Variableç±»å‹çš„æ•°æ®æ± 
 //////////////////////////////////////////////////////////////////////////
 
 SmartRepository::SmartRepository()
@@ -54,7 +54,7 @@ SmartRepository::SmartRepository()
 
 SmartRepository::~SmartRepository()
 {
-  // Îö¹¹²»×ö±£´æ¶¯×÷, ÒòÎªÎÄ¼ş¿ÉÄÜÊÇ¶ÁÈ¡
+  // ææ„ä¸åšä¿å­˜åŠ¨ä½œ, å› ä¸ºæ–‡ä»¶å¯èƒ½æ˜¯è¯»å–
   ClearRecursive(this);
 }
 
@@ -92,7 +92,7 @@ b32 SmartRepository::LoadW(CLLPCWSTR szFile)
   ClearRecursive(this);
   clFile file;
   if( ! file.OpenExistingW(szFile)) {
-    // ÎÄ¼ş´ò¿ªÊ§°ÜÍ¨¹ı·µ»ØÖµÌåÏÖ,·µ»ØÖµÒÑ¾­×ã¹»ÌåÏÖ´íÎóĞÅÏ¢,ÕâÀï²»Êä³öLOG.
+    // æ–‡ä»¶æ‰“å¼€å¤±è´¥é€šè¿‡è¿”å›å€¼ä½“ç°,è¿”å›å€¼å·²ç»è¶³å¤Ÿä½“ç°é”™è¯¯ä¿¡æ¯,è¿™é‡Œä¸è¾“å‡ºLOG.
     return FALSE;
   }
   return LoadRecursive(this, ROOT_NAME, file);
@@ -102,7 +102,7 @@ b32 SmartRepository::SaveW(CLLPCWSTR szFile)
 {
   clFile file;
   if( ! file.CreateAlwaysW(szFile)) {
-    return FALSE; // ·µ»ØÖµÒÑ¾­×ã¹»ÌåÏÖ´íÎóĞÅÏ¢,ÕâÀï²»Êä³öLOG.
+    return FALSE; // è¿”å›å€¼å·²ç»è¶³å¤Ÿä½“ç°é”™è¯¯ä¿¡æ¯,è¿™é‡Œä¸è¾“å‡ºLOG.
   }
   return SaveRecursive(this, ROOT_NAME, file);
 }
@@ -115,7 +115,7 @@ b32 SmartRepository::LoadSubNodeA(CLLPCSTR szFile, CLLPCSTR szKeys)
 
 b32 SmartRepository::LoadSubNodeW(CLLPCWSTR szFile, CLLPCSTR szKeys)
 {
-  CLBREAK; // Ã»ÊµÏÖÄØ!
+  CLBREAK; // æ²¡å®ç°å‘¢!
   return FALSE;
 }
 
@@ -151,7 +151,7 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
       return FALSE;
     }
 
-    szNameBuf[KeyDesc.nKeyLength] = '\0'; // °²È«½áÎ²
+    szNameBuf[KeyDesc.nKeyLength] = '\0'; // å®‰å…¨ç»“å°¾
 
     if(KeyDesc.eType == KT_Node) {
       KeyDesc.buf.pSmart = new SmartNode;
@@ -173,7 +173,7 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     return TRUE;
   }
 
-  // ×îºó×îºó,¶Á³öVariableÓÃµÄBuffer
+  // æœ€åæœ€å,è¯»å‡ºVariableç”¨çš„Buffer
   if(Header.dwMagic == SZDB_MAGIC)
   {
     ZHEADER ZHeader;
@@ -195,7 +195,7 @@ b32 SmartRepository::LoadRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     }
 
     clFixedBuffer* pDataBuf = clstd::UncompressBuffer(pZBuf, nDataLength);
-    SAFE_DELETE(pZBuf); // ²»ÔÙÓÃÁË, Ö±½ÓÊÍ·Å
+    SAFE_DELETE(pZBuf); // ä¸å†ç”¨äº†, ç›´æ¥é‡Šæ”¾
 
     if(pDataBuf == NULL)
     {
@@ -231,16 +231,16 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     return FALSE;
   }
 
-  // µÚÒ»´ÎĞ´ÈëËùÓĞ·ÇSmartNodeÊı¾İ
+  // ç¬¬ä¸€æ¬¡å†™å…¥æ‰€æœ‰éSmartNodeæ•°æ®
   u32 nDataLength = 0;
   for(KeyDict::iterator it = pSmart->Keys.begin();
     it != pSmart->Keys.end(); ++it) {
-      // ÏÈÌø¹ıSmartNodeÀàĞÍµÄÊı¾İ
+      // å…ˆè·³è¿‡SmartNodeç±»å‹çš„æ•°æ®
       if(it->second.eType == KT_Node) {
         continue;
       }
 
-      // Ğ´ÈëKey
+      // å†™å…¥Key
       b32 bval = file.Write(&(it->second), sizeof(KEYDESC));
       if(it->first.IsNotEmpty()) {
         bval = bval && file.Write((it->first).GetBuffer(), (u32)(it->first).GetLength());
@@ -250,11 +250,11 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
         return FALSE;
       }
       if(it->second.eType == KT_Varible) {
-        nDataLength += it->second.v.cbSize; // Ö»ÓĞVariable²ÅĞèÒª¼ÇÂ¼³¤¶È,Õâ¸öÒªºÍBufferµÄ¼ÇÂ¼Ïà·û!
+        nDataLength += it->second.v.cbSize; // åªæœ‰Variableæ‰éœ€è¦è®°å½•é•¿åº¦,è¿™ä¸ªè¦å’ŒBufferçš„è®°å½•ç›¸ç¬¦!
       }
   }
 
-  // ¼ì²é±ä³¤Êı¾İµÄ¼ÇÂ¼³¤¶ÈºÍBufferµÄ³¤¶È
+  // æ£€æŸ¥å˜é•¿æ•°æ®çš„è®°å½•é•¿åº¦å’ŒBufferçš„é•¿åº¦
   if((nDataLength == 0 && pSmart->pBuffer != NULL) || 
     (nDataLength != 0 && pSmart->pBuffer == NULL) || 
     (pSmart->pBuffer != NULL && nDataLength != pSmart->pBuffer->GetSize()))
@@ -263,16 +263,16 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
     return FALSE;
   }
 
-  // µÚ¶ş½×¶ÎĞ´ÈëSmartNodeÊı¾İ
+  // ç¬¬äºŒé˜¶æ®µå†™å…¥SmartNodeæ•°æ®
   for(KeyDict::iterator it = pSmart->Keys.begin();
     it != pSmart->Keys.end(); ++it) {
       if(it->second.eType != KT_Node) {
         continue;
       }
       KEYDESC SmartNodeKey = it->second;
-      SmartNodeKey.v.nOffset = CLMAKEFOURCC('G','R','U','P'); // ÕâÁ½¸öÔİÊ±Ã»ÓÃÉÏ
+      SmartNodeKey.v.nOffset = CLMAKEFOURCC('G','R','U','P'); // è¿™ä¸¤ä¸ªæš‚æ—¶æ²¡ç”¨ä¸Š
       SmartNodeKey.v.cbSize  = CLMAKEFOURCC('E','M','P','Y');
-      // Ğ´ÈëKey
+      // å†™å…¥Key
       b32 bval = file.Write(&SmartNodeKey, sizeof(KEYDESC));
       bval = bval && file.Write((it->first).GetBuffer(), (u32)(it->first).GetLength());
       if( ! bval) {
@@ -294,12 +294,12 @@ b32 SmartRepository::SaveRecursive(SmartNode* pSmart, CLLPCSTR szSmartNodeName, 
       }
   }
 
-  // È«ÊÇ KT_Octet ÀàĞÍ¼üÖµ¿ÉÄÜ»áÃ»ÓĞ Buffer Êı¾İ.
+  // å…¨æ˜¯ KT_Octet ç±»å‹é”®å€¼å¯èƒ½ä¼šæ²¡æœ‰ Buffer æ•°æ®.
   if(pSmart->pBuffer == NULL || pSmart->pBuffer->GetSize() == 0) {
     return TRUE;
   }
 
-  // Êı¾İbuffer·ÅÔÚ×îºóÃæ
+  // æ•°æ®bufferæ”¾åœ¨æœ€åé¢
   if(m_bCompressed)
   {
     b32 bval = TRUE;
@@ -341,7 +341,7 @@ SmartNode* SmartRepository::CreateNode(CLLPCSTR szKeys)
   clStringArrayA aPathKeys;
   ResolveString<clStringA>(szKeys, '\\', aPathKeys);
 
-  // ¼ì²é¼üÖµ²»ÄÜ´óÓÚ255×Ö½Ú
+  // æ£€æŸ¥é”®å€¼ä¸èƒ½å¤§äº255å­—èŠ‚
   for(clStringArrayA::iterator itKeyName = aPathKeys.begin();
     itKeyName != aPathKeys.end(); ++itKeyName) {
       if(itKeyName->GetLength() > 255 || itKeyName->IsEmpty()) {
@@ -444,7 +444,7 @@ b32 SmartRepository::Write(SmartNode* pSmart, CLLPCSTR szKey, CLLPCVOID lpData, 
 
   KeyDict::iterator it = pSmart->Keys.find(szKey);
   if(it != pSmart->Keys.end()) {
-    // º¬ÓĞ¸Ã¼üÖµÔòĞŞ¸Ä
+    // å«æœ‰è¯¥é”®å€¼åˆ™ä¿®æ”¹
     KEYDESC& Desc = it->second;
     if(Desc.eType == KT_Varible)
     {
@@ -452,7 +452,7 @@ b32 SmartRepository::Write(SmartNode* pSmart, CLLPCSTR szKey, CLLPCVOID lpData, 
     }
     else if(Desc.eType == KT_Octet)
     {
-      ASSERT(0); // FIXME: ÑéÖ¤ºóÈ¥µô
+      ASSERT(0); // FIXME: éªŒè¯åå»æ‰
       Desc.eType     = KT_Octet;
       Desc.v.cbSize  = cbSize;
       Desc.v.nOffset = (u32)pSmart->pBuffer->GetSize();
@@ -511,14 +511,14 @@ b32 SmartRepository::Write64(SmartNode* pSmart, CLLPCSTR szKey, u32 dwLow, u32 d
 
   KeyDict::iterator itRep = pSmart->Keys.find(szKey);
   if(itRep != pSmart->Keys.end()) {
-    // º¬ÓĞ¸Ã¼üÖµÔòĞŞ¸Ä
+    // å«æœ‰è¯¥é”®å€¼åˆ™ä¿®æ”¹
     KEYDESC& Desc = itRep->second;
     if(Desc.eType == KT_Varible)
     {
-      ASSERT(0); // FIXME: ÑéÖ¤ºóÈ¥µô
-      // É¾³ı pBuffer ÒÑÓĞµÄÊı¾İ
+      ASSERT(0); // FIXME: éªŒè¯åå»æ‰
+      // åˆ é™¤ pBuffer å·²æœ‰çš„æ•°æ®
       pSmart->pBuffer->Replace(Desc.v.nOffset, Desc.v.cbSize, NULL, 0);
-      // ÖØ¶¨Î»±íÖĞÆäËû¼üÖµµÄÊı¾İ
+      // é‡å®šä½è¡¨ä¸­å…¶ä»–é”®å€¼çš„æ•°æ®
       //const u32 cbDataSize = Desc.v.cbSize;
       for(KeyDict::iterator itLoop = pSmart->Keys.begin(); 
         itLoop != pSmart->Keys.end(); ++itLoop) {
@@ -526,7 +526,7 @@ b32 SmartRepository::Write64(SmartNode* pSmart, CLLPCSTR szKey, u32 dwLow, u32 d
             itLoop->second.v.nOffset -= Desc.v.cbSize;
           }
       }
-      // ÉèÖÃÎª Octet Êı¾İ
+      // è®¾ç½®ä¸º Octet æ•°æ®
       Desc.eType    = KT_Octet;
       Desc.o.dwHigh = dwHigh;
       Desc.o.dwLow  = dwLow;

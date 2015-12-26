@@ -1,4 +1,4 @@
-#include "../clstd.H"
+ï»¿#include "../clstd.H"
 //#include "../FloatX.h"
 //#include "Geometry.h"
 //#include "GeoOp.H"
@@ -694,12 +694,12 @@ RET_HIT_CONTENT:
   {
     float3 vMin = Max(aabbFirst.vMin, aabbSecond.vMin);
     float3 vMax = Min(aabbFirst.vMax, aabbSecond.vMax);
-    return vMin <= vMax;  // Õâ¸ö"="ÒÔºóÐÞ¸ÄÒªÐ¡ÐÄ, ×¢ÒâAABBÊÇ¸ö±¡Æ¬(vMin.x==vMax.x || vMin.y==vMax.y || vMin.z==vMax.z)µÄÇé¿ö
+    return vMin <= vMax;  // è¿™ä¸ª"="ä»¥åŽä¿®æ”¹è¦å°å¿ƒ, æ³¨æ„AABBæ˜¯ä¸ªè–„ç‰‡(vMin.x==vMax.x || vMin.y==vMax.y || vMin.z==vMax.z)çš„æƒ…å†µ
   }
 
   /*void ComputeFrustumFromProjection( Frustum* pOut, float4x4* pProjection )
   {
-    // TODO: Ã»²âÊÔ
+    // TODO: æ²¡æµ‹è¯•
     ASSERT( pOut );
     ASSERT( pProjection );
 

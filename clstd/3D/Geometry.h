@@ -1,4 +1,4 @@
-#ifndef _GEOMETRY_IMPL_H_
+ï»¿#ifndef _GEOMETRY_IMPL_H_
 #define _GEOMETRY_IMPL_H_
 namespace clstd
 {
@@ -86,7 +86,7 @@ namespace clstd
       return float3(m[nIndex & 1].x, m[(nIndex & 2) >> 1].y, m[(nIndex & 4) >> 2].z);
     }
 
-    _AABBF& GetSubAsOctree(int nIndex, _AABBF* pSubAABB) const // °´ÕÕx,y,zÖáË³ĞòÇĞ¸îAABB
+    _AABBF& GetSubAsOctree(int nIndex, _AABBF* pSubAABB) const // æŒ‰ç…§x,y,zè½´é¡ºåºåˆ‡å‰²AABB
     {
       float3 vCenter = (vMin + vMax) * 0.5f;
       if(nIndex & 1)
@@ -277,9 +277,9 @@ namespace clstd
       return v3(m[nIndex & 1].x, m[(nIndex & 2) >> 1].y, m[(nIndex & 4) >> 2].z);
     }
 
-    _AABBI& GetSubAsOctree(int nIndex, _AABBI* pSubAABB) const // °´ÕÕx,y,zÖáË³ĞòÇĞ¸îAABB
+    _AABBI& GetSubAsOctree(int nIndex, _AABBI* pSubAABB) const // æŒ‰ç…§x,y,zè½´é¡ºåºåˆ‡å‰²AABB
     {
-      // ±ÜÃâÕûÊıÎó²îÒıÆğµÄÎÊÌâ
+      // é¿å…æ•´æ•°è¯¯å·®å¼•èµ·çš„é—®é¢˜
       ASSERT(vMin.x + 1 < vMax.x && vMin.y + 1 < vMax.y && vMin.z + 1 < vMax.z);
       v3 vCenter = (vMin + vMax) / 2;
 
@@ -326,7 +326,7 @@ namespace clstd
     {
       v3 vMinRes = v3::Max(vMin, aabb.vMin);
       v3 vMaxRes = v3::Min(vMax, aabb.vMax);
-      return vMinRes <= vMaxRes;  // Õâ¸ö"="ÒÔºóĞŞ¸ÄÒªĞ¡ĞÄ, ×¢ÒâAABBÊÇ¸ö±¡Æ¬(vMin.x==vMax.x || vMin.y==vMax.y || vMin.z==vMax.z)µÄÇé¿ö
+      return vMinRes <= vMaxRes;  // è¿™ä¸ª"="ä»¥åä¿®æ”¹è¦å°å¿ƒ, æ³¨æ„AABBæ˜¯ä¸ªè–„ç‰‡(vMin.x==vMax.x || vMin.y==vMax.y || vMin.z==vMax.z)çš„æƒ…å†µ
     }
   };
 
@@ -371,23 +371,23 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
   struct _triangle
   {
-    // ¶¨µãË³ĞòÊÇCCW
+    // å®šç‚¹é¡ºåºæ˜¯CCW
     _float3 A, B, C;
 
     _triangle();
-    _triangle(const _float3* aVertices); // ÖÁÉÙĞèÒª3¸ö
-    _triangle(const _float3* aVertices, int A, int B, int C); // ¸ù¾İË÷Òı´Ó¶¥µãÁĞ±íÖĞ³õÊ¼»¯Èı½ÇĞÎ
+    _triangle(const _float3* aVertices); // è‡³å°‘éœ€è¦3ä¸ª
+    _triangle(const _float3* aVertices, int A, int B, int C); // æ ¹æ®ç´¢å¼•ä»é¡¶ç‚¹åˆ—è¡¨ä¸­åˆå§‹åŒ–ä¸‰è§’å½¢
     _triangle(const _float3& A, const _float3& B, const _float3& C);
 
-    _triangle& set(const _float3* aVertices); // ÖÁÉÙĞèÒª3¸ö
+    _triangle& set(const _float3* aVertices); // è‡³å°‘éœ€è¦3ä¸ª
     _triangle& set(const _float3* aVertices, int A, int B, int C);
     _triangle& set(const _float3& A, const _float3& B, const _float3& C);
-    _triangle& flip(); // ·­×ª¶¥µãË³Ğò
-    _float3 normal() const;   // ·µ»ØÈı½ÇĞÎµÄÃæ·¨Ïß
-    _AABBF bounding() const;  // ·µ»ØÈı½ÇĞÎµÄAABB
+    _triangle& flip(); // ç¿»è½¬é¡¶ç‚¹é¡ºåº
+    _float3 normal() const;   // è¿”å›ä¸‰è§’å½¢çš„é¢æ³•çº¿
+    _AABBF bounding() const;  // è¿”å›ä¸‰è§’å½¢çš„AABB
 		operator _float3*() const;
 
-    //int intersect(const _triangle& t);  // ÅĞ¶ÏÓëÁíÒ»¸öÈı½ÇĞÎÏà½»µÄÇé¿ö,·µ»ØÖµÊÇ½»µãÊı[0, 3]
+    //int intersect(const _triangle& t);  // åˆ¤æ–­ä¸å¦ä¸€ä¸ªä¸‰è§’å½¢ç›¸äº¤çš„æƒ…å†µ,è¿”å›å€¼æ˜¯äº¤ç‚¹æ•°[0, 3]
   };
 
 	STATIC_ASSERT(sizeof(_triangle) == sizeof(_float3) * 3);

@@ -1,8 +1,8 @@
-#ifndef _CLSTD_TEXT_LINES_H_
+ï»¿#ifndef _CLSTD_TEXT_LINES_H_
 #define _CLSTD_TEXT_LINES_H_
 
-// ÎÄ±¾ĞĞºÅ¼ÆËã¹¤¾ß
-// Ö÷ÒªÓÃÓÚ·ÖÎöÎÄ±¾»»ĞĞÊı¾İ£¬Ìá¹©ĞĞ£¬ÁĞ×ª»»µ½Æ«ÒÆÁ¿ºÍ´ÓÆ«ÒÆÁ¿×ª»»ÎªĞĞÁĞ
+// æ–‡æœ¬è¡Œå·è®¡ç®—å·¥å…·
+// ä¸»è¦ç”¨äºåˆ†ææ–‡æœ¬æ¢è¡Œæ•°æ®ï¼Œæä¾›è¡Œï¼Œåˆ—è½¬æ¢åˆ°åç§»é‡å’Œä»åç§»é‡è½¬æ¢ä¸ºè¡Œåˆ—
 
 namespace clstd
 {
@@ -14,8 +14,8 @@ namespace clstd
     clsize        m_nLength;
     LinesArray    m_aLines;
     
-    // ¼ÇÂ¼ÉÏÒ»´ÎoffsetËùÔÚĞĞ£¬ÒòÎª¼Ù¶¨PosFromOffsetºÜ¸ß¸ÅÂÊÊÇÒÔµİÔöoffsetµÄ·½Ê½µ÷ÓÃµÄ
-    // Êµ¼Ê²âÊÔ90ÍòĞĞÎÄ±¾14Íò´Î²éÕÒÊ¹ÓÃµİÔö¶ş·Ö·¨ºÍÆÕÍ¨¶ş·Ö·¨Ëù»¨Ê±¼äµÄ²î±ğÎ¢ºõÆäÎ¢
+    // è®°å½•ä¸Šä¸€æ¬¡offsetæ‰€åœ¨è¡Œï¼Œå› ä¸ºå‡å®šPosFromOffsetå¾ˆé«˜æ¦‚ç‡æ˜¯ä»¥é€’å¢offsetçš„æ–¹å¼è°ƒç”¨çš„
+    // å®é™…æµ‹è¯•90ä¸‡è¡Œæ–‡æœ¬14ä¸‡æ¬¡æŸ¥æ‰¾ä½¿ç”¨é€’å¢äºŒåˆ†æ³•å’Œæ™®é€šäºŒåˆ†æ³•æ‰€èŠ±æ—¶é—´çš„å·®åˆ«å¾®ä¹å…¶å¾®
     //clsize        m_nPrevLine;
 
   protected:
@@ -46,7 +46,7 @@ namespace clstd
           start = mid;
         }
         else if(nOffset >= m_nLength) {
-          // Èç¹û³¬¹ıÎÄ±¾³¤¶È£¬ĞĞºÅÉèÎª×îºóÒ»ĞĞ
+          // å¦‚æœè¶…è¿‡æ–‡æœ¬é•¿åº¦ï¼Œè¡Œå·è®¾ä¸ºæœ€åä¸€è¡Œ
           *nLine = (int)m_aLines.size() - 1;
           *nRow = 0;
           return FALSE;
@@ -78,7 +78,7 @@ namespace clstd
       return IntGenerate(pText, length);
     }
 
-    clsize OffsetFromPos(int nLine, int nRow) // nLine ºÍ nRow ¶¼ÊÇ´Ó1¿ªÊ¼µÄ£¬Èç¹û»ñµÃµÄÆ«ÒÆ²»´æÔÚ·µ»Ø(clsize)-1
+    clsize OffsetFromPos(int nLine, int nRow) // nLine å’Œ nRow éƒ½æ˜¯ä»1å¼€å§‹çš„ï¼Œå¦‚æœè·å¾—çš„åç§»ä¸å­˜åœ¨è¿”å›(clsize)-1
     {
       clsize nBase = nLine < 1 ? 0 : m_aLines[nLine - 1];
       

@@ -1,4 +1,4 @@
-#if defined(_WINDOWS) || defined(_WIN32)
+ï»¿#if defined(_WINDOWS) || defined(_WIN32)
 #include <Windows.h>
 #endif // defined(_WINDOWS) || defined(_WIN32)
 
@@ -32,7 +32,7 @@ b32 _SplitPathT(const _TString& strPath, _TString* pstrDir, _TString* pstrFile)
   }
   else if(nPos == strPath.GetLength() - 1)
   {
-    ASSERT(0); // ÑéÖ¤ºóÈ¥µô
+    ASSERT(0); // éªŒè¯åå»æ‰
     if(pstrDir != NULL)
       (*pstrDir) = strPath;
     if(pstrFile != NULL)
@@ -123,7 +123,7 @@ void ResetWorkingDir()
 //  }
 //  else if(nPos == strFile.GetLength() - 1)
 //  {
-//    ASSERT(0); // ÑéÖ¤ºóÈ¥µô
+//    ASSERT(0); // éªŒè¯åå»æ‰
 //    if(pstrFilename != NULL)
 //      (*pstrFilename) = strFile;
 //    if(pstrExtension != NULL)
@@ -476,7 +476,7 @@ namespace clpathfile
   template<typename _TString, typename _TCh>
   int CommonPrefixT(_TString& strCommDir, const _TCh* szPath1, const _TCh* szPath2)
   {
-    // Ã»²âÊÔ¹ı
+    // æ²¡æµ‹è¯•è¿‡
     clsize nLen1 = clstd::strlenT(szPath1);
     clsize nLen2 = clstd::strlenT(szPath2);
     if(nLen1 == 0 || nLen2 == 0)
@@ -486,7 +486,7 @@ namespace clpathfile
     }
 
     _TCh* pBuffer = strCommDir.GetBuffer((int)(nLen1 > nLen2 ? nLen1 : nLen2) + 1);
-    int nSlash = -1; // ¼ÇÂ¼Â·¾¶·Ö¸î·ûµÄÎ»ÖÃ
+    int nSlash = -1; // è®°å½•è·¯å¾„åˆ†å‰²ç¬¦çš„ä½ç½®
     for(int i = 0;; i++)
     {
       if(IS_ANY_SLASH(szPath1[i]) && IS_ANY_SLASH(szPath2[i])) {
@@ -534,7 +534,7 @@ namespace clpathfile
     //  RemoveFileSpecA(strToPath);
     //}
 
-    // FIXME: Èç¹ûstrFromPathºÍstrToPathÖ»°üº¬Ò»¸öÅÌ·û£¬ÁíÒ»¸öÒÔ¡°\¡±¿ªÍ·£¬ÔòÈ¥µôÅÌ·û
+    // FIXME: å¦‚æœstrFromPathå’ŒstrToPathåªåŒ…å«ä¸€ä¸ªç›˜ç¬¦ï¼Œå¦ä¸€ä¸ªä»¥â€œ\â€å¼€å¤´ï¼Œåˆ™å»æ‰ç›˜ç¬¦
 
     if( ! CommonPrefixT(strCommon, szFromPath, szToPath)) {
       if(IsRelativeT(szToPath)) {

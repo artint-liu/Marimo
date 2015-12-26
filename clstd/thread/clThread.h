@@ -1,4 +1,4 @@
-#ifndef _CLSTD_THREAD_H_
+﻿#ifndef _CLSTD_THREAD_H_
 #define _CLSTD_THREAD_H_
 
 #ifdef POSIX_THREAD

@@ -1,4 +1,4 @@
-#ifndef _CLSTD_TRANSFORM_H_
+ï»¿#ifndef _CLSTD_TRANSFORM_H_
 #define _CLSTD_TRANSFORM_H_
 
 namespace clstd
@@ -27,14 +27,14 @@ namespace clstd
     float3      scaling;
     quaternion  rotation;
     float3      translation;
-    //float3      rotationEuler;     // ½Ç¶ÈÖµ
+    //float3      rotationEuler;     // è§’åº¦å€¼
     //quaternion  rotationQuaternion;
     float4x4    GlobalMatrix; // Global = Coordinate * Local
     //float3      GlobalScaling;
     
     TRANSFORM();
 
-    // ÏÂÃæÕâĞ©½Ó¿ÚÉèÖÃ·ÖÁ¿ºó»á¶ªÊ§Ô­ÓĞTRANSFORMËùÔÚ¿Õ¼ä£¬ÖØĞÂ½¨Á¢ÔÚµÑ¿¨¶û×ø±ê¿Õ¼äÖĞ
+    // ä¸‹é¢è¿™äº›æ¥å£è®¾ç½®åˆ†é‡åä¼šä¸¢å¤±åŸæœ‰TRANSFORMæ‰€åœ¨ç©ºé—´ï¼Œé‡æ–°å»ºç«‹åœ¨ç¬›å¡å°”åæ ‡ç©ºé—´ä¸­
     CFloat4x4&  Set                 (CFloat3& vScaling, CQuaternion& quater, CFloat3& vTranslation);
     CFloat4x4&  Set                 (CFloat3& vScaling, CFloat3& vEuler, CFloat3& vTranslation);
     b32         SetTransform        (CFloat4x4& mat);
@@ -62,7 +62,7 @@ namespace clstd
     void        Rotate              (CFloat4x4& Coordinate, CQuaternion& quater);
     b32         SetDirection        (CFloat4x4& Coordinate, CFloat3& vDir, CFloat3& vUp);
     // void   Forward                   (float fDistance);
-    // void   Translate                 (CFloat3& translation, Space relativeTo = Space.Self);  // Ïà¶ÔÒÆ¶¯
+    // void   Translate                 (CFloat3& translation, Space relativeTo = Space.Self);  // ç›¸å¯¹ç§»åŠ¨
     // void   RotateAround              (CFloat3& point, CFloat3& axis, float angle);
     // void   LookAt                    (CFloat3& worldPosition, CFloat3& worldUp);
     // float3 TransformDirection        (CFloat3& direction); // Transforms direction from local space to world space.

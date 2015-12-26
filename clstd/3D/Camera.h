@@ -1,4 +1,4 @@
-#ifndef _CAMERA_H_
+ï»¿#ifndef _CAMERA_H_
 #define _CAMERA_H_
 
 namespace clstd
@@ -18,11 +18,11 @@ namespace clstd
     float3    m_vEyePt;
     float3    m_vLookatPt;
 
-    float3    m_vUpVec;   // Õâ¸öÏòÁ¿ÓÃÓÚÖ¸Ê¾ÉãÏñ»ú·½Ïò,Ö»ÊÇ²Î¿¼·½Ïò
-    float3    m_vLeft;    // ÉãÏñ»ú¿Õ¼äÏò×óÏòÁ¿
-    float3    m_vRight;   // ÉãÏñ»ú¿Õ¼äÏòÓÒÏòÁ¿
-    float3    m_vTop;     // ÉãÏñ»ú¿Õ¼äÏòÉÏµÄÏòÁ¿, Õâ¸öÏòÁ¿Óë×óÇ°ÏòÁ¿¹¹³ÉÖ±½Ç×ø±êÏµ
-    float3    m_vFront;   // ÉãÏñ»ú¿Õ¼äÏòÇ°µÄÏòÁ¿
+    float3    m_vUpVec;   // è¿™ä¸ªå‘é‡ç”¨äºæŒ‡ç¤ºæ‘„åƒæœºæ–¹å‘,åªæ˜¯å‚è€ƒæ–¹å‘
+    float3    m_vLeft;    // æ‘„åƒæœºç©ºé—´å‘å·¦å‘é‡
+    float3    m_vRight;   // æ‘„åƒæœºç©ºé—´å‘å³å‘é‡
+    float3    m_vTop;     // æ‘„åƒæœºç©ºé—´å‘ä¸Šçš„å‘é‡, è¿™ä¸ªå‘é‡ä¸å·¦å‰å‘é‡æ„æˆç›´è§’åæ ‡ç³»
+    float3    m_vFront;   // æ‘„åƒæœºç©ºé—´å‘å‰çš„å‘é‡
 
     float4x4  m_matView;
     float4x4  m_matProj;
@@ -49,16 +49,16 @@ namespace clstd
     bool InitializePerspectiveLH  (const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar, float fovy, float fAspect);
     bool InitializeOrthoLH        (const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar, float w, float h);
 
-    void RotateEye  (float fHAngle, float fVAngle);   // Ğı×ª¹Û²ìÎ»ÖÃ
+    void RotateEye  (float fHAngle, float fVAngle);   // æ—‹è½¬è§‚å¯Ÿä½ç½®
     void Forward    (float fSize, bool bSetLookat);
     void Translation(float xOffset, float yOffset);
 
-    void DeltaPitch (float fDelta);   // ÆÁÄ»xÖá
-    void DeltaYaw   (float fDelta);   // ÆÁÄ»yÖá
-    void DeltaRoll  (float fDelta);   // ÆÁÄ»zÖá
+    void DeltaPitch (float fDelta);   // å±å¹•xè½´
+    void DeltaYaw   (float fDelta);   // å±å¹•yè½´
+    void DeltaRoll  (float fDelta);   // å±å¹•zè½´
 
     void DeltaYawPitchRoll(const float Yaw, const float Pitch, const float Roll);
-    b32  IsSimilarUpDir(CFloat3& vDir, float fEpsilon);  // ¼ì²éFrontÓëUp·½Ïò, Èç¹û½üËÆÔò·µ»Øtrue
+    b32  IsSimilarUpDir(CFloat3& vDir, float fEpsilon);  // æ£€æŸ¥Frontä¸Upæ–¹å‘, å¦‚æœè¿‘ä¼¼åˆ™è¿”å›true
 
     void UpdateMat();
 

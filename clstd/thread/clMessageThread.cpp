@@ -1,4 +1,4 @@
-#include "clstd.h"
+﻿#include "clstd.h"
 #include "clLocker.h"
 #undef ETIMEDOUT
 #include "Thread/clSignal.H"

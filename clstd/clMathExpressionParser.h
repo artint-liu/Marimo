@@ -1,4 +1,4 @@
-#ifndef _CLSTD_MATH_EXPRESSION_PARSER_H_
+ï»¿#ifndef _CLSTD_MATH_EXPRESSION_PARSER_H_
 #define _CLSTD_MATH_EXPRESSION_PARSER_H_
 
 namespace clstd
@@ -16,7 +16,7 @@ namespace clstd
 
     i32 OperatorPrecedence(const _TString& str)
     {
-      // [ 0] ´ú±í²Ù×÷Êı
+      // [ 0] ä»£è¡¨æ“ä½œæ•°
       // [ 1] '(' ')'
       // [ 4] (*) (/)
       // [ 5] (+) (-)
@@ -47,7 +47,7 @@ namespace clstd
         return TRUE;
       }
 
-      // ºó×º±í´ïÊ½×ª»»
+      // åç¼€è¡¨è¾¾å¼è½¬æ¢
       clstack<_TString> stackOp;
       for(auto it = expression.begin(); it != expression.end(); ++it)
       {
@@ -74,7 +74,7 @@ namespace clstd
           }
           else {
             GXINT oTop = OperatorPrecedence(stackOp.top());
-            if(o >= oTop) // µ±Ç°²Ù×÷·ûĞ¡ÓÚµÈÓÚÕ»¶¥²Ù×÷·û
+            if(o >= oTop) // å½“å‰æ“ä½œç¬¦å°äºç­‰äºæ ˆé¡¶æ“ä½œç¬¦
             {
               m_PostfixExpression.push_back(stackOp.top());
               stackOp.pop();
@@ -96,7 +96,7 @@ namespace clstd
     {
       struct ELEMENT
       {
-        // ´æ´¢Ê±¶şÑ¡Ò»
+        // å­˜å‚¨æ—¶äºŒé€‰ä¸€
         _TString* pstr;
         _TNumeric value;
       };

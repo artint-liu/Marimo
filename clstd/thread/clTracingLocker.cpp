@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clLocker.h"
 #include "clString.H"
 #include "clUtility.H"
@@ -22,7 +22,7 @@ namespace clstd
     m_szFile = NULL;
     m_nLine  = 0;
     Locker::Lock();
-    // ³É¹¦Ëø¶¨ºó²Å¼ÆÊ±, ²»¼ÆËãËø¶¨µÈ´ýµÄÊ±¼ä
+    // æˆåŠŸé”å®šåŽæ‰è®¡æ—¶, ä¸è®¡ç®—é”å®šç­‰å¾…çš„æ—¶é—´
     m_Trace.Begin();
   }
 
@@ -31,7 +31,7 @@ namespace clstd
     m_szFile = szFile;
     m_nLine  = nLine;
     Locker::Lock();
-    // ³É¹¦Ëø¶¨ºó²Å¼ÆÊ±, ²»¼ÆËãËø¶¨µÈ´ýµÄÊ±¼ä
+    // æˆåŠŸé”å®šåŽæ‰è®¡æ—¶, ä¸è®¡ç®—é”å®šç­‰å¾…çš„æ—¶é—´
     m_Trace.Begin();
   }
 
@@ -43,7 +43,7 @@ namespace clstd
   b32 TracingLocker::Unlock(double rCriticalTime)
   {
     m_Trace.End();
-    double dwDeltaTime = m_Trace.GetDeltaTime(); // ÔÚunlockÖ®ÍâÈ¡DeltaTime¿ÉÄÜµÃ²»µ½ÕýÈ·½á¹û
+    double dwDeltaTime = m_Trace.GetDeltaTime(); // åœ¨unlockä¹‹å¤–å–DeltaTimeå¯èƒ½å¾—ä¸åˆ°æ­£ç¡®ç»“æžœ
     Locker::Unlock();
     if(dwDeltaTime > rCriticalTime)
     {

@@ -1,4 +1,4 @@
-#ifndef _CLSTD_FIFO_H_
+﻿#ifndef _CLSTD_FIFO_H_
 #define _CLSTD_FIFO_H_
 
 // First input first out buffer

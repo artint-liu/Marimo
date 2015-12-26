@@ -1,4 +1,4 @@
-#ifndef _CLTYPES_H_
+ï»¿#ifndef _CLTYPES_H_
 
 #ifndef _CL_STD_CODE_
 #error Must be include "clstd.h" first.
@@ -68,7 +68,7 @@ typedef intptr_t            i32_ptr;
 typedef intptr_t            s32_ptr;
 typedef uintptr_t           u32_ptr;
 #else
-#error ĞèÒª¶¨ÒåĞÂÆ½Ì¨
+#error éœ€è¦å®šä¹‰æ–°å¹³å°
 #endif // #if defined(_X86)
 
 typedef char                ch;

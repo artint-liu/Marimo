@@ -1,8 +1,8 @@
-#ifndef _CLSTD_MESH_H_
+ï»¿#ifndef _CLSTD_MESH_H_
 #define _CLSTD_MESH_H_
 
-// Õâ¸öÊÇclstdÏÂµÄÉè±¸ÎÞ¹ØMesh´¦ÀíÀà
-// MeshÊý¾ÝÍêÈ«ÔÚÄÚ´æÖÐ£¬²»ÓëÏÔ¿¨µÈÓ²¼þÉè±¸¹ØÁª£¬´¦Àí²Ù×÷Ò²ÒÀÀµÓÚcpu½øÐÐ
+// è¿™ä¸ªæ˜¯clstdä¸‹çš„è®¾å¤‡æ— å…³Meshå¤„ç†ç±»
+// Meshæ•°æ®å®Œå…¨åœ¨å†…å­˜ä¸­ï¼Œä¸ä¸Žæ˜¾å¡ç­‰ç¡¬ä»¶è®¾å¤‡å…³è”ï¼Œå¤„ç†æ“ä½œä¹Ÿä¾èµ–äºŽcpuè¿›è¡Œ
 
 namespace clstd
 {

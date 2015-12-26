@@ -1,4 +1,4 @@
-#include <stdarg.h>
+ï»¿#include <stdarg.h>
 #include "../clstd.h"
 #include "../clString.H"
 #include "SmartStream.H"
@@ -22,7 +22,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÏÔÊ½ÉùÃ÷Ä£°åÀà
+// æ˜¾å¼å£°æ˜æ¨¡æ¿ç±»
 //
 template class SmartStreamT<clStringA, SmartStream_TraitsA>;
 template class SmartStreamT<clStringW, SmartStream_TraitsW>;
@@ -203,7 +203,7 @@ b32 _SS_IMPL::Get(T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) 
       //&m_pFirst[m_uPointer];
   }
 
-  // ¿ªÀ¨ºÅ±ÕÀ¨ºÅµÄ»°£¬Ö±½Ó·µ»Ø
+  // å¼€æ‹¬å·é—­æ‹¬å·çš„è¯ï¼Œç›´æ¥è¿”å›
   if(IS_OPEN_BRAKERS(pPointer) || IS_CLOSE_BRAKERS(pPointer))
   {
     if(pOutCount != NULL) {
@@ -214,7 +214,7 @@ b32 _SS_IMPL::Get(T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) 
   else if(IS_QUOT(pPointer))
   {
     const u32 grp = QUOT_GROUP(pPointer);
-    //const clsize uBegin = m_uPointer;  // ²»¼ÇÂ¼Õâ¸öÓÃÖ¸ÕëÏà¼õÒ²¿ÉÒÔ,µ«Òª³ıÒÔCHARµÄ´óĞ¡
+    //const clsize uBegin = m_uPointer;  // ä¸è®°å½•è¿™ä¸ªç”¨æŒ‡é’ˆç›¸å‡ä¹Ÿå¯ä»¥,ä½†è¦é™¤ä»¥CHARçš„å¤§å°
     T_LPCSTR pInQuot = pPointer + 1;
     //m_uPointer++;
     while( ! IsEndOfStream(pInQuot))
@@ -230,7 +230,7 @@ b32 _SS_IMPL::Get(T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) 
           *pOutCount = pInQuot + 1 - pPointer;
             //(m_uPointer + 1) - uBegin;
         }
-        //m_uPointer = uBegin;  // »¹Ô­
+        //m_uPointer = uBegin;  // è¿˜åŸ
         return true;
       }
       //m_uPointer++;
@@ -253,7 +253,7 @@ b32 _SS_IMPL::Get(T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) 
     if(pOutCount != NULL) {
       *pOutCount = pPointer - pBegin;
     }
-    //m_uPointer = uBegin;  // »¹Ô­Ö¸Õë
+    //m_uPointer = uBegin;  // è¿˜åŸæŒ‡é’ˆ
     return true;
   }
   else
@@ -310,7 +310,7 @@ _SS_TEMPL
 typename _SS_IMPL::iterator _SS_IMPL::begin() const
 {
   iterator itBegin(this);
-  return next(itBegin); // ÕâÀïÕâÃ´Ğ´ÊÇÎªÁË±£Ö¤beginÒ²ÄÜ´¥·¢ÌØÊâ·ûºÅ»Øµ÷º¯Êı
+  return next(itBegin); // è¿™é‡Œè¿™ä¹ˆå†™æ˜¯ä¸ºäº†ä¿è¯beginä¹Ÿèƒ½è§¦å‘ç‰¹æ®Šç¬¦å·å›è°ƒå‡½æ•°
 }
 
 #if defined(_WINDOWS)

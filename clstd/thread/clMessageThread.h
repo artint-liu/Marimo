@@ -1,4 +1,4 @@
-#ifndef _CLSTD_THREAD_MESSAGE_H_
+ï»¿#ifndef _CLSTD_THREAD_MESSAGE_H_
 #define _CLSTD_THREAD_MESSAGE_H_
 
 #ifndef _CLSTD_SIGNAL_H_
@@ -82,18 +82,18 @@ namespace clstd
     //static MsgThreadT*  CreateThread  (CLTHREADCALLBACK pCallBack, void* pParam);
     //static void         DestroyThread (MsgThreadT* pCLThread);
 
-    // GetMessage Óë GetMessageTimeOut Óöµ½ -1 (Quit)ÏûÏ¢ºó»á×è¶ÏÔÚÕâÀï, ²»»á½«´ËÏûÏ¢´Ó¶ÓÁĞÒÆ³ı.
-    // Èç¹ûÏ£ÍûÇ¿ÖÆÒÆ³ıQuitÏûÏ¢,Ó¦Ê¹ÓÃ PeekMessage À´½øĞĞ´¦Àí
+    // GetMessage ä¸ GetMessageTimeOut é‡åˆ° -1 (Quit)æ¶ˆæ¯åä¼šé˜»æ–­åœ¨è¿™é‡Œ, ä¸ä¼šå°†æ­¤æ¶ˆæ¯ä»é˜Ÿåˆ—ç§»é™¤.
+    // å¦‚æœå¸Œæœ›å¼ºåˆ¶ç§»é™¤Quitæ¶ˆæ¯,åº”ä½¿ç”¨ PeekMessage æ¥è¿›è¡Œå¤„ç†
     b32       GetMessage        (_TMsg* pMsg);
     i32       GetMessageTimeOut (_TMsg* pMsg, u32 dwMSec); // -1: time out; 0: quit message, 1:normal message
     b32       WaitMessage       ();
 
-    // ¼ì²éÏûÏ¢¶ÓÁĞÊÇ·ñÓĞÏûÏ¢, QuitÏûÏ¢»áµ±×÷ÆÕÍ¨ÏûÏ¢´¦Àí, ¸ù¾İuRemoveMsg±êÖ¾ÓÉÓÃ»§À´¾ö¶¨ÊÇ·ñÒÆ³ı.
+    // æ£€æŸ¥æ¶ˆæ¯é˜Ÿåˆ—æ˜¯å¦æœ‰æ¶ˆæ¯, Quitæ¶ˆæ¯ä¼šå½“ä½œæ™®é€šæ¶ˆæ¯å¤„ç†, æ ¹æ®uRemoveMsgæ ‡å¿—ç”±ç”¨æˆ·æ¥å†³å®šæ˜¯å¦ç§»é™¤.
     b32       PeekMessage       (_TMsg* pMsg, void* handle, u32 dwMsgFilterMin, u32 dwMsgFilterMax, u32 uRemoveMsg);
 
     b32       PostMessage       (const _TMsg* pMsg);
     void      PostQuitMessage   (u32_ptr nExitCode);
-    u32       WaitThreadQuit    (u32 nMilliSec);               // ÖÁÉÙÖ®Ç°µ÷ÓÃÁË PostQuitMessage, Õâ¸öÄÚ²¿»áµ÷ÓÃDestroyThread
+    u32       WaitThreadQuit    (u32 nMilliSec);               // è‡³å°‘ä¹‹å‰è°ƒç”¨äº† PostQuitMessage, è¿™ä¸ªå†…éƒ¨ä¼šè°ƒç”¨DestroyThread
 
     clLocker* GetLocker         ();
 
@@ -161,7 +161,7 @@ namespace clstd
     void _CLMSGTRD_IMPL::PostQuitMessage(u32_ptr nExitCode)
   {
     _TMsg msg;
-    // memset Çå¿Õ²Ù×÷¿ÉÄÜ»áÆÆ»µÆä³ÉÔ±µÄ¹¹ÔìÊı¾İ
+    // memset æ¸…ç©ºæ“ä½œå¯èƒ½ä¼šç ´åå…¶æˆå‘˜çš„æ„é€ æ•°æ®
     // memset(&msg, 0, sizeof(msg));
     msg.message = (u32)-1;
     msg.handle  = (void*)nExitCode;
@@ -256,7 +256,7 @@ namespace clstd
 //  void _CLMSGTRD_IMPL::PostQuitMessage(u32_ptr nExitCode)
 //  {
 //    _TMsg msg;
-//    // memset Çå¿Õ²Ù×÷¿ÉÄÜ»áÆÆ»µÆä³ÉÔ±µÄ¹¹ÔìÊı¾İ
+//    // memset æ¸…ç©ºæ“ä½œå¯èƒ½ä¼šç ´åå…¶æˆå‘˜çš„æ„é€ æ•°æ®
 //    // memset(&msg, 0, sizeof(msg));
 //    msg.message = (u32)-1;
 //    msg.handle  = (void*)nExitCode;
@@ -292,7 +292,7 @@ namespace clstd
 //#else
 //
 //  //
-//  // Ã»²âÊÔ¹ı!!!
+//  // æ²¡æµ‹è¯•è¿‡!!!
 //  //
 //
 //  _CLMSGTRD_TEMPL
@@ -347,8 +347,8 @@ namespace clstd
 //      else {
 //        timespec timeout;
 //
-//        // Õâ¸öËã·¨²»¾«È·!
-//        // TODO: windows°æÏÂÕâ¸ötv_nsecÊ±¼äÃ²ËÆÊÇÎŞĞ§µÄ, ËùÒÔÓÃÁË½üËÆÖµÀ´´úÌæ, ×¢ÒâÒªÊµÏÖÆäËûÆ½Ì¨µÄ°æ±¾
+//        // è¿™ä¸ªç®—æ³•ä¸ç²¾ç¡®!
+//        // TODO: windowsç‰ˆä¸‹è¿™ä¸ªtv_nsecæ—¶é—´è²Œä¼¼æ˜¯æ— æ•ˆçš„, æ‰€ä»¥ç”¨äº†è¿‘ä¼¼å€¼æ¥ä»£æ›¿, æ³¨æ„è¦å®ç°å…¶ä»–å¹³å°çš„ç‰ˆæœ¬
 //        timeout.tv_sec = time(0) + (nMSec + 999) / 1000;
 //        timeout.tv_nsec = 0;
 //
@@ -372,7 +372,7 @@ namespace clstd
 //  void _CLMSGTRD_IMPL::PostQuitMessage(u32_ptr nExitCode)
 //  {
 //    _TMsg msg;
-//    // memset Çå¿Õ²Ù×÷¿ÉÄÜ»áÆÆ»µÆä³ÉÔ±µÄ¹¹ÔìÊı¾İ
+//    // memset æ¸…ç©ºæ“ä½œå¯èƒ½ä¼šç ´åå…¶æˆå‘˜çš„æ„é€ æ•°æ®
 //    // memset(&msg, 0, sizeof(msg));
 //    msg.message = (u32)-1;
 //    msg.wParam = nExitCode;
@@ -501,10 +501,10 @@ namespace clstd
 //  b32     WaitMessage       ();
 //  b32     PeekMessage       (_TMsg* pMsg, void* handle, u32 dwMsgFilterMin, u32 dwMsgFilterMax, u32 uRemoveMsg);
 //
-//  //b32     PostMessage       (void* handle, u32 message, u32_ptr wParam, u32_ptr lParam); // timeºÍposĞÅÏ¢¶¼»á±»Ğ´³É0
+//  //b32     PostMessage       (void* handle, u32 message, u32_ptr wParam, u32_ptr lParam); // timeå’Œposä¿¡æ¯éƒ½ä¼šè¢«å†™æˆ0
 //  b32     PostMessage       (const _TMsg* pMsg);
 //  void    PostQuitMessage   (u32_ptr nExitCode);
-//  u32     WaitThreadQuit    ();                   // ÖÁÉÙÖ®Ç°µ÷ÓÃÁË PostQuitMessage, Õâ¸öÄÚ²¿»áµ÷ÓÃDestroyThread
+//  u32     WaitThreadQuit    ();                   // è‡³å°‘ä¹‹å‰è°ƒç”¨äº† PostQuitMessage, è¿™ä¸ªå†…éƒ¨ä¼šè°ƒç”¨DestroyThread
 //
 //  clLocker* GetLocker       ();
 //

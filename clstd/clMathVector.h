@@ -1,4 +1,4 @@
-#ifndef _CLSTD_MATH_VECTOR_IMPL_H_
+ï»¿#ifndef _CLSTD_MATH_VECTOR_IMPL_H_
 #define _CLSTD_MATH_VECTOR_IMPL_H_
 
 namespace clstd
@@ -386,7 +386,7 @@ namespace clstd
 #ifdef _DEBUG
     bool operator>= (const _vector2_key& v2k) const
     {
-      // Õâ¸öÒªÓë operator< Ëã·¨Ò»ÖÂ
+      // è¿™ä¸ªè¦ä¸ operator< ç®—æ³•ä¸€è‡´
       return compare(v2k) >= 0;
     }
 #endif // #ifdef _DEBUG
@@ -396,7 +396,7 @@ namespace clstd
       const bool bval = compare(v2k) < 0;
 
       ASSERT((bval && (v2k >= *this)) || 
-        ( ! bval && ! (v2k >= *this)) || compare(v2k) == 0); // Ê¹ÓÃ½»»»·¨ÔòÑéÖ¤Ëã·¨
+        ( ! bval && ! (v2k >= *this)) || compare(v2k) == 0); // ä½¿ç”¨äº¤æ¢æ³•åˆ™éªŒè¯ç®—æ³•
       return bval;
     }
   };
@@ -422,7 +422,7 @@ namespace clstd
 #ifdef _DEBUG
     bool operator>= (const _vector3_key& v3k) const
     {
-      // Õâ¸öÒªÓë operator< Ëã·¨Ò»ÖÂ
+      // è¿™ä¸ªè¦ä¸ operator< ç®—æ³•ä¸€è‡´
       return compare(v3k) >= 0;
     }
 #endif // #ifdef _DEBUG
@@ -432,7 +432,7 @@ namespace clstd
       const bool bval = compare(v3k) < 0;
 
       ASSERT((bval && (v3k >= *this)) || 
-        ( ! bval && ! (v3k >= *this)) || compare(v3k) == 0); // Ê¹ÓÃ½»»»·¨ÔòÑéÖ¤Ëã·¨
+        ( ! bval && ! (v3k >= *this)) || compare(v3k) == 0); // ä½¿ç”¨äº¤æ¢æ³•åˆ™éªŒè¯ç®—æ³•
       return bval;
     }
   };
@@ -459,7 +459,7 @@ namespace clstd
 #ifdef _DEBUG
     bool operator>= (const _vector4_key& v4k) const
     {
-      // Õâ¸öÒªÓë operator< Ëã·¨Ò»ÖÂ
+      // è¿™ä¸ªè¦ä¸ operator< ç®—æ³•ä¸€è‡´
       return compare(v4k) >= 0;
     }
 #endif // #ifdef _DEBUG
@@ -469,7 +469,7 @@ namespace clstd
       const bool bval = compare(v4k) < 0;
 
       ASSERT((bval && (v4k >= *this)) || 
-        ( ! bval && ! (v4k >= *this)) || compare(v4k) == 0); // Ê¹ÓÃ½»»»·¨ÔòÑéÖ¤Ëã·¨
+        ( ! bval && ! (v4k >= *this)) || compare(v4k) == 0); // ä½¿ç”¨äº¤æ¢æ³•åˆ™éªŒè¯ç®—æ³•
       return bval;
     }
   };

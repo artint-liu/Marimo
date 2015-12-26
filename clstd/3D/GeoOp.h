@@ -1,4 +1,4 @@
-#ifndef _GEOMETRY_OPERATION_H_
+ï»¿#ifndef _GEOMETRY_OPERATION_H_
 #define _GEOMETRY_OPERATION_H_
 
 namespace clstd
@@ -15,14 +15,14 @@ namespace clstd
 
   struct SPLITTRIBYPLANE
   {
-    const Plane*  /*IN*/ pPlane;      // ÇĞ·ÖÆ½Ãæ
-    const float3  /*IN*/ vTri[3];     // Ô´Èı½ÇĞÎµÄ¶¥µã
-    float         /*IN*/ fEpsilon;    // Èİ²î
+    const Plane*  /*IN*/ pPlane;      // åˆ‡åˆ†å¹³é¢
+    const float3  /*IN*/ vTri[3];     // æºä¸‰è§’å½¢çš„é¡¶ç‚¹
+    float         /*IN*/ fEpsilon;    // å®¹å·®
     struct SPLITEDTRI
     {
-      float3    vTri[6];      // Ã¿·İ×î¶àÁ½¸öÈı½ÇĞÎ
+      float3    vTri[6];      // æ¯ä»½æœ€å¤šä¸¤ä¸ªä¸‰è§’å½¢
       int       nTri;
-    }/*OUT*/ SplitTri[2];     // ·Ö¸î³ÉÁ½·İ
+    }/*OUT*/ SplitTri[2];     // åˆ†å‰²æˆä¸¤ä»½
   };
   struct MOVINGCONTENT
   {
@@ -85,14 +85,14 @@ namespace clstd
   bool IsPointInWinding(const float3* vPos, const float3* vWinding, int nNumOfPoints);
   bool SplitTriByPlane(SPLITTRIBYPLANE* pSplitTriByPlane);
 
-  // ÉäÏßÓëÃæÇó½», ·´ÕıÁ½Ãæ
+  // å°„çº¿ä¸é¢æ±‚äº¤, åæ­£ä¸¤é¢
   bool RayIntersectPlane2S(const Ray& ray, const Plane& plane, float* fDist);
   bool RayIntersectPlane2S(const Ray& ray, const Plane& plane, float3* vHit);
 
-  // ÉäÏßÓëAABBÇó½»
+  // å°„çº¿ä¸AABBæ±‚äº¤
   int IntersectRayAABB(const Ray& ray, const AABB& aabb, float* fDist, float3* pNormal);  // 0: no intersect -1: inside, 1: Intersect
 
-  // ÉäÏßÓëAABBÇó½», ·µ»ØÉä³öÃæ
+  // å°„çº¿ä¸AABBæ±‚äº¤, è¿”å›å°„å‡ºé¢
   bool RayIntersectAABB_Out(const Ray& ray, const AABB& aabb, float* fDist, float3* pBackNormal);
 
 

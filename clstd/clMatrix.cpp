@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clString.H"
 #include "clUtility.H"
 
@@ -36,7 +36,7 @@ namespace clstd
 
   b32 _float3x3::ToEulerAnglesXYZ(_euler& eur) CLCONST
   {
-    // Õâ¸öº¯ÊıÀ´×ÔOrge£¬¼ÆËã¹«Ê½ĞèÒª×ªÖÃ²ÅÄÜ¶ÔÓ¦float3x3µÄ·ÖÁ¿
+    // è¿™ä¸ªå‡½æ•°æ¥è‡ªOrgeï¼Œè®¡ç®—å…¬å¼éœ€è¦è½¬ç½®æ‰èƒ½å¯¹åº”float3x3çš„åˆ†é‡
     // rot =  cy*cz          -cy*sz           sy
     //        cz*sx*sy+cx*sz  cx*cz-sx*sy*sz -cy*sx
     //       -cx*cz*sy+sx*sz  cz*sx+cx*sy*sz  cx*cy
@@ -71,7 +71,7 @@ namespace clstd
 
   b32 _float3x3::ToEulerAnglesXZY(_euler& eur) CLCONST
   {
-    // Õâ¸öº¯ÊıÀ´×ÔOrge£¬¼ÆËã¹«Ê½ĞèÒª×ªÖÃ²ÅÄÜ¶ÔÓ¦float3x3µÄ·ÖÁ¿
+    // è¿™ä¸ªå‡½æ•°æ¥è‡ªOrgeï¼Œè®¡ç®—å…¬å¼éœ€è¦è½¬ç½®æ‰èƒ½å¯¹åº”float3x3çš„åˆ†é‡
     // rot =  cy*cz          -sz              cz*sy
     //        sx*sy+cx*cy*sz  cx*cz          -cy*sx+cx*sy*sz
     //       -cx*sy+cy*sx*sz  cz*sx           cx*cy+sx*sy*sz
@@ -106,7 +106,7 @@ namespace clstd
 
   b32 _float3x3::ToEulerAnglesYXZ(_euler& eur) CLCONST
   {
-    // Õâ¸öº¯ÊıÀ´×ÔOrge£¬¼ÆËã¹«Ê½ĞèÒª×ªÖÃ²ÅÄÜ¶ÔÓ¦float3x3µÄ·ÖÁ¿
+    // è¿™ä¸ªå‡½æ•°æ¥è‡ªOrgeï¼Œè®¡ç®—å…¬å¼éœ€è¦è½¬ç½®æ‰èƒ½å¯¹åº”float3x3çš„åˆ†é‡
     // rot =  cy*cz+sx*sy*sz  cz*sx*sy-cy*sz  cx*sy
     //        cx*sz           cx*cz          -sx
     //       -cz*sy+cy*sx*sz  cy*cz*sx+sy*sz  cx*cy
@@ -141,7 +141,7 @@ namespace clstd
 
   b32 _float3x3::ToEulerAnglesYZX(_euler& eur) CLCONST
   {
-    // Õâ¸öº¯ÊıÀ´×ÔOrge£¬¼ÆËã¹«Ê½ĞèÒª×ªÖÃ²ÅÄÜ¶ÔÓ¦float3x3µÄ·ÖÁ¿
+    // è¿™ä¸ªå‡½æ•°æ¥è‡ªOrgeï¼Œè®¡ç®—å…¬å¼éœ€è¦è½¬ç½®æ‰èƒ½å¯¹åº”float3x3çš„åˆ†é‡
     // rot =  cy*cz           sx*sy-cx*cy*sz  cx*sy+cy*sx*sz
     //        sz              cx*cz          -cz*sx
     //       -cz*sy           cy*sx+cx*sy*sz  cx*cy-sx*sy*sz
@@ -176,7 +176,7 @@ namespace clstd
 
   b32 _float3x3::ToEulerAnglesZXY(_euler& eur) CLCONST // debug:transpose
   {
-    // Õâ¸öº¯ÊıÀ´×ÔOrge£¬¼ÆËã¹«Ê½ĞèÒª×ªÖÃ²ÅÄÜ¶ÔÓ¦float3x3µÄ·ÖÁ¿
+    // è¿™ä¸ªå‡½æ•°æ¥è‡ªOrgeï¼Œè®¡ç®—å…¬å¼éœ€è¦è½¬ç½®æ‰èƒ½å¯¹åº”float3x3çš„åˆ†é‡
     // rot =  cy*cz-sx*sy*sz -cx*sz           cz*sy+cy*sx*sz
     //        cz*sx*sy+cy*sz  cx*cz          -cy*cz*sx+sy*sz
     //       -cx*sy           sx              cx*cy
@@ -211,7 +211,7 @@ namespace clstd
 
   b32 _float3x3::ToEulerAnglesZYX(_euler& eur) CLCONST
   {
-    // Õâ¸öº¯ÊıÀ´×ÔOrge£¬¼ÆËã¹«Ê½ĞèÒª×ªÖÃ²ÅÄÜ¶ÔÓ¦float3x3µÄ·ÖÁ¿
+    // è¿™ä¸ªå‡½æ•°æ¥è‡ªOrgeï¼Œè®¡ç®—å…¬å¼éœ€è¦è½¬ç½®æ‰èƒ½å¯¹åº”float3x3çš„åˆ†é‡
     // rot =  cy*cz           cz*sx*sy-cx*sz  cx*cz*sy+sx*sz
     //        cy*sz           cx*cz+sx*sy*sz -cz*sx+cx*sy*sz
     //       -sy              cy*sx           cx*cy
@@ -425,7 +425,7 @@ namespace clstd
       MULPS    XMM3, XMM7
 
       ADDPS    XMM0, XMM1
-      ADDPS    XMM2, XMM3 // TODO: »¹ÄÜÏû³ıÀàËÆµÄÊı¾İÏà¹Ø
+      ADDPS    XMM2, XMM3 // TODO: è¿˜èƒ½æ¶ˆé™¤ç±»ä¼¼çš„æ•°æ®ç›¸å…³
       ADDPS    XMM0, XMM2
       movaps   [edx], XMM0
 
@@ -627,7 +627,7 @@ namespace clstd
 
   _float4x4& _float4x4::RotationYawPitchRollA(float yaw, float pitch, float roll)
   {
-    // TODO: »»ÓÃMatrixRotationYawPitchRoll
+    // TODO: æ¢ç”¨MatrixRotationYawPitchRoll
     quaternion q;
     q.YawPitchRollA(yaw, pitch, roll);
     return *MatrixRotationQuaternion(this, &q);
@@ -635,7 +635,7 @@ namespace clstd
 
   _float4x4& _float4x4::RotationYawPitchRollR(float yaw, float pitch, float roll)
   {
-    // TODO: »»ÓÃMatrixRotationYawPitchRoll
+    // TODO: æ¢ç”¨MatrixRotationYawPitchRoll
     quaternion q;
     q.YawPitchRollR(yaw, pitch, roll);
     return *MatrixRotationQuaternion(this, &q);
@@ -701,7 +701,7 @@ namespace clstd
       movups [eax + 48], xmm5
     }
 #else
-    // TODO: Ê¹ÓÃ¸ü¸ßĞ§ÂÊµÄ½»»»·½·¨
+    // TODO: ä½¿ç”¨æ›´é«˜æ•ˆç‡çš„äº¤æ¢æ–¹æ³•
     _float4x4 t = *this;
     for(int i = 0; i < 4; i++)
       for(int j = 0; j < 4; j++)
@@ -818,7 +818,7 @@ namespace clstd
 #define MUL3(a, b, c) (m[a] * m[b] * m[c])
 #define MUL2(a, b) (m[a] * m[b])
 
-    // ÇóÄæµÄ¼ò»¯°æ£¬Ö±½ÓÇó²»»á°¡
+    // æ±‚é€†çš„ç®€åŒ–ç‰ˆï¼Œç›´æ¥æ±‚ä¸ä¼šå•Š
     float inv[16];
     inv[ 0] =  MUL2(5, 10) - MUL2(9, 6);
     inv[ 4] = -MUL2(4, 10) + MUL2(8, 6);
@@ -957,7 +957,7 @@ namespace clstd
 
   _float4x4* MatrixRotationYawPitchRoll(_float4x4 *pout, float yaw, float pitch, float roll)
   {
-    // TODO: Ìá¸ßĞ§ÂÊ
+    // TODO: æé«˜æ•ˆç‡
     _float4x4 m;
 
     MatrixIdentity(pout);
@@ -1112,7 +1112,7 @@ namespace clstd
     return pout;
   }
 
-  _float4x4* MatrixInverseGaussJordan(_float4x4* pout, float* pDeterminant, const _float4x4* pin) // ¸ßË¹-Ô¼µ©·¨£¨È«Ñ¡Ö÷Ôª£©ÇóÄæ
+  _float4x4* MatrixInverseGaussJordan(_float4x4* pout, float* pDeterminant, const _float4x4* pin) // é«˜æ–¯-çº¦æ—¦æ³•ï¼ˆå…¨é€‰ä¸»å…ƒï¼‰æ±‚é€†
   {
     _float4x4 m(*pin);
     u32 is[4];
@@ -1122,7 +1122,7 @@ namespace clstd
 
     for (int k = 0; k < 4; k ++)
     {
-      // µÚÒ»²½£¬È«Ñ¡Ö÷Ôª
+      // ç¬¬ä¸€æ­¥ï¼Œå…¨é€‰ä¸»å…ƒ
       float fMax = 0.0f;
       for (u32 i = k; i < 4; i ++)
       {
@@ -1160,20 +1160,20 @@ namespace clstd
         clSwap32(m.dm[3][k], m.dm[3][js[k]]);
       }
 
-      // ¼ÆËãĞĞÁĞÖµ
+      // è®¡ç®—è¡Œåˆ—å€¼
       fDet *= m.dm[k][k];
 
-      // ¼ÆËãÄæ¾ØÕó
+      // è®¡ç®—é€†çŸ©é˜µ
 
-      // µÚ¶ş²½
+      // ç¬¬äºŒæ­¥
       m.dm[k][k] = 1.0f / m.dm[k][k];  
-      // µÚÈı²½
+      // ç¬¬ä¸‰æ­¥
       for (u32 j = 0; j < 4; j ++)
       {
         if (j != k)
           m.dm[k][j] *= m.dm[k][k];
       }
-      // µÚËÄ²½
+      // ç¬¬å››æ­¥
       for (u32 i = 0; i < 4; i ++)
       {
         if (i != k)
@@ -1185,7 +1185,7 @@ namespace clstd
           }
         }
       }
-      // µÚÎå²½
+      // ç¬¬äº”æ­¥
       for (u32 i = 0; i < 4; i ++)
       {
         if (i != k)

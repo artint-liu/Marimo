@@ -1,10 +1,10 @@
-#ifndef _CLSTD_STRING_SET_H_
+ï»¿#ifndef _CLSTD_STRING_SET_H_
 #define _CLSTD_STRING_SET_H_
 
-// Õâ¸öÀàÖ÷ÒªÊÇÓÃÀ´
-// 1.´¢´æÒ»¸ö×Ö·û´®¼¯ºÏ
-// 2.Ïû³ıÖØ¸´ÄÚÈİµÄ×Ö·û´®
-// 3.²úÉúÒ»¿é×Ö·û´®¼¯ºÏÄÚ´æ£¬²¢ÖØ¶¨Î»Ô­ÓĞÖ¸Õë
+// è¿™ä¸ªç±»ä¸»è¦æ˜¯ç”¨æ¥
+// 1.å‚¨å­˜ä¸€ä¸ªå­—ç¬¦ä¸²é›†åˆ
+// 2.æ¶ˆé™¤é‡å¤å†…å®¹çš„å­—ç¬¦ä¸²
+// 3.äº§ç”Ÿä¸€å—å­—ç¬¦ä¸²é›†åˆå†…å­˜ï¼Œå¹¶é‡å®šä½åŸæœ‰æŒ‡é’ˆ
 
 namespace clstd
 {
@@ -14,11 +14,11 @@ namespace clstd
     clsize index;
   };
 
-  // Èç¹û×Ô¼ºÊµÏÖ _TMap ĞèÒª±£Ö¤´Óµü´úÆ÷È¡³öµÄ×Ö·û´®ÊÇ¾­¹ıÅÅĞòµÄ
+  // å¦‚æœè‡ªå·±å®ç° _TMap éœ€è¦ä¿è¯ä»è¿­ä»£å™¨å–å‡ºçš„å­—ç¬¦ä¸²æ˜¯ç»è¿‡æ’åºçš„
   template<class _TString, class _TMap = clmap<_TString, STRINGSETDESC> >
-  class StringSetT : _TMap // ²»ÓÃpublic¼Ì³Ğ
+  class StringSetT : _TMap // ä¸ç”¨publicç»§æ‰¿
   {
-    clsize m_nSpaceUsage; // Õ¼ÓÃ¿Õ¼ä
+    clsize m_nSpaceUsage; // å ç”¨ç©ºé—´
   
     //template<class _Pair>
     //void calcsize(const _TString& sstr, _Pair& r)
@@ -35,32 +35,32 @@ namespace clstd
       auto r = _TMap::insert(clmake_pair(sstr, sDesc));
       //calcsize(sstr, r);
 
-      if(r.second) { // ¼ÓÈë³É¹¦£¬¼ÆËãÊ¹ÓÃ¿Õ¼ä
+      if(r.second) { // åŠ å…¥æˆåŠŸï¼Œè®¡ç®—ä½¿ç”¨ç©ºé—´
         r.first->second.offset = m_nSpaceUsage;
         r.first->second.index  = _TMap::size() - 1;
-        m_nSpaceUsage += ALIGN_4((sstr.GetLength() * sizeof(typename _TString::TChar)) + 1); // 4×Ö½Ú¶ÔÆë
+        m_nSpaceUsage += ALIGN_4((sstr.GetLength() * sizeof(typename _TString::TChar)) + 1); // 4å­—èŠ‚å¯¹é½
       }
       return r.first;
     }
 
-    typename _TString::LPCSTR add(typename _TString::LPCSTR str)  // Ìí¼Ó×Ö·û´®²¢·µ»ØÓĞĞ§µØÖ·
+    typename _TString::LPCSTR add(typename _TString::LPCSTR str)  // æ·»åŠ å­—ç¬¦ä¸²å¹¶è¿”å›æœ‰æ•ˆåœ°å€
     {
       return insert(str)->first;
     }
 
-    clsize offset(typename _TString::LPCSTR str) // Ìí¼Ó×Ö·û´®²¢·µ»Ø½«À´ÔÚ»º´æÖĞµÄ×Ö½ÚÆ«ÒÆ
+    clsize offset(typename _TString::LPCSTR str) // æ·»åŠ å­—ç¬¦ä¸²å¹¶è¿”å›å°†æ¥åœ¨ç¼“å­˜ä¸­çš„å­—èŠ‚åç§»
     {
       return insert(str)->second.offset;
     }
 
-    clsize index(typename _TString::LPCSTR str) // Ìí¼Ó×Ö·û´®²¢·µ»ØË÷ÒıÖµ£¬sortºó¿ÉÒÔÔÚTableÖĞ¶¨Î»ĞÂµÄË÷ÒıºÍÆ«ÒÆ
+    clsize index(typename _TString::LPCSTR str) // æ·»åŠ å­—ç¬¦ä¸²å¹¶è¿”å›ç´¢å¼•å€¼ï¼Œsortåå¯ä»¥åœ¨Tableä¸­å®šä½æ–°çš„ç´¢å¼•å’Œåç§»
     {
       return insert(str)->second.index;
     }
 
-    clsize buffer_size() const // »ñµÃÕâ¸ö×Ö·û´®¼¯ºÏËùÕ¼ÓÃµÄ¿Õ¼ä, ×Ö½ÚÊı
+    clsize buffer_size() const // è·å¾—è¿™ä¸ªå­—ç¬¦ä¸²é›†åˆæ‰€å ç”¨çš„ç©ºé—´, å­—èŠ‚æ•°
     {
-      ASSERT(ALIGN_4(m_nSpaceUsage) == m_nSpaceUsage); // ÑéÖ¤ÊÇËÄ×Ö½Ú¶ÔÆëµÄ
+      ASSERT(ALIGN_4(m_nSpaceUsage) == m_nSpaceUsage); // éªŒè¯æ˜¯å››å­—èŠ‚å¯¹é½çš„
       return m_nSpaceUsage;
     }
 
@@ -84,10 +84,10 @@ namespace clstd
       return _TMap::size();
     }
 
-    // Êä³öµÄtableÊÇÔ­À´×Ö·û´®²åÈëË³Ğò¾­¹ıÅÅĞòºóµÄĞÂË³ĞòºÍÆ«ÒÆ
-    // pTable[old_index].index  ÊÇÅÅĞòºóµÄË³Ğò
-    // pTable[old_index].offset ÊÇÅÅĞòºóµÄĞÂÆ«ÒÆ
-    clsize sort(STRINGSETDESC* pTable) // Òª±£Ö¤ pTable ÓĞ×ã¹»µÄ¿Õ¼ä´¢´æ£¬¿Õ¼ä´Ócount()»ñµÃ
+    // è¾“å‡ºçš„tableæ˜¯åŸæ¥å­—ç¬¦ä¸²æ’å…¥é¡ºåºç»è¿‡æ’åºåçš„æ–°é¡ºåºå’Œåç§»
+    // pTable[old_index].index  æ˜¯æ’åºåçš„é¡ºåº
+    // pTable[old_index].offset æ˜¯æ’åºåçš„æ–°åç§»
+    clsize sort(STRINGSETDESC* pTable) // è¦ä¿è¯ pTable æœ‰è¶³å¤Ÿçš„ç©ºé—´å‚¨å­˜ï¼Œç©ºé—´ä»count()è·å¾—
     {
       if(pTable == NULL) {
         return size();
@@ -99,11 +99,11 @@ namespace clstd
       {
         STRINGSETDESC& sDesc = it->second;
 
-        // ÅÅĞò±í - ÅÅĞòÇ°µÄË÷ÒıÎ»ÖÃ·ÅÖÃÅÅĞòºóµÄÎ»ÖÃºÍÆ«ÒÆ
+        // æ’åºè¡¨ - æ’åºå‰çš„ç´¢å¼•ä½ç½®æ”¾ç½®æ’åºåçš„ä½ç½®å’Œåç§»
         pTable[sDesc.index].index = nIndex;
         pTable[sDesc.index].offset = nSpaceUsage;
 
-        // Ó³ÉäÊı¾İ - °´ÕÕµü´úÆ÷µÄË³ĞòÉèÖÃÎ»ÖÃºÍÆ«ÒÆ
+        // æ˜ å°„æ•°æ® - æŒ‰ç…§è¿­ä»£å™¨çš„é¡ºåºè®¾ç½®ä½ç½®å’Œåç§»
         sDesc.index = nIndex;
         sDesc.offset = nSpaceUsage;
         nSpaceUsage += ALIGN_4(it->first.GetLength() + 1);
@@ -113,7 +113,7 @@ namespace clstd
     }
 
     template<typename _Ty>
-    b32 gather_offset(_Ty* pDest, clsize cbSize) const // cbSizeÓÃÀ´Ğ£ÑéĞ´Èë¿Õ¼ä,Èç¹û²»¹»·µ»Øfalse
+    b32 gather_offset(_Ty* pDest, clsize cbSize) const // cbSizeç”¨æ¥æ ¡éªŒå†™å…¥ç©ºé—´,å¦‚æœä¸å¤Ÿè¿”å›false
     {
       if(cbSize < size() * sizeof(_Ty)) {
         return FALSE;
@@ -133,11 +133,11 @@ namespace clstd
     }
 
     template<class _TBuffer>
-    typename _TString::LPCSTR gather(_TBuffer* pBuffer, clsize nOffset) // nOffset==-1±íÊ¾ÔÚÄ©Î²×·¼Ó,×·¼ÓÊ±»á°´ÕÕËÄ×Ö½Ú¶ÔÆë
+    typename _TString::LPCSTR gather(_TBuffer* pBuffer, clsize nOffset) // nOffset==-1è¡¨ç¤ºåœ¨æœ«å°¾è¿½åŠ ,è¿½åŠ æ—¶ä¼šæŒ‰ç…§å››å­—èŠ‚å¯¹é½
     {
       auto start = (nOffset == -1) ? ALIGN_4(pBuffer->GetSize()) : nOffset;
 
-      // ËùĞè¿Õ¼ä´óÓÚBuffer³ß´ç²ÅÖ´ĞĞResize²Ù×÷
+      // æ‰€éœ€ç©ºé—´å¤§äºBufferå°ºå¯¸æ‰æ‰§è¡ŒResizeæ“ä½œ
       if(start + m_nSpaceUsage > pBuffer->GetSize()) {
         pBuffer->Resize(start + m_nSpaceUsage, FALSE);
       }
