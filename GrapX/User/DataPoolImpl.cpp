@@ -181,7 +181,7 @@ namespace Marimo
   }
 
 
-  GXBOOL DataPoolImpl::CleanupArray(const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, int nElementCount)
+  GXBOOL DataPoolImpl::CleanupArray(const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXSIZE_T nElementCount)
   {
     switch(pVarDesc->GetTypeCategory())
     {
@@ -980,7 +980,7 @@ namespace Marimo
     }
   }
 
-  GXBOOL DataPoolImpl::Impulse(const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count)
+  GXBOOL DataPoolImpl::Impulse(const DataPoolVariable& var, DataAction reason, GXSIZE_T index, GXSIZE_T count)
   {
     if( ! var.IsValid()) {
       return FALSE;
@@ -996,8 +996,8 @@ namespace Marimo
     DATAPOOL_IMPULSE sImpulse;
     sImpulse.sponsor = &var;
     sImpulse.reason  = reason;
-    sImpulse.index   = index;
-    sImpulse.count   = count;
+    sImpulse.index   = (GXUINT)index;
+    sImpulse.count   = (GXUINT)count;
     sImpulse.param   = NULL;
 
     //TRACE("impulse\n");
@@ -1713,7 +1713,7 @@ namespace Marimo
       // 使用这个缓冲上的动态数组必须匹配, 大小也肯定是类型长度的整数倍, 空的话表示这个是全局变量
       ASSERT((pBuffer->GetSize() % pTypeDesc->cbSize) == 0);
 
-      const GXUINT nCount = pBuffer->GetSize() / pTypeDesc->cbSize;
+      const GXSIZE_T nCount = pBuffer->GetSize() / pTypeDesc->cbSize;
 
       GXUINT nBase = 0; // 基础偏移
       switch(pTypeDesc->Cate)
@@ -1729,7 +1729,7 @@ namespace Marimo
       }
     }
 
-    GXUINT GenerateRelocalizeTable(GXUINT nBase, RelocalizeType eRelType, GXUINT nCount)
+    GXUINT GenerateRelocalizeTable(GXUINT nBase, RelocalizeType eRelType, GXSIZE_T nCount)
     {
       for(GXUINT n = 0; n < nCount; ++n) {
         RelTable.push_back(nBase | eRelType);
@@ -1739,7 +1739,7 @@ namespace Marimo
     }
 
     // 迭代收集重定位表,平台无关，指针按照4字节计算
-    GXUINT GenerateRelocalizeTable(GXUINT nBase, const DATAPOOL_VARIABLE_DESC* pVarDesc, GXUINT nCount)
+    GXUINT GenerateRelocalizeTable(GXUINT nBase, const DATAPOOL_VARIABLE_DESC* pVarDesc, GXSIZE_T nCount)
     {
       for(GXUINT i = 0; i < nCount; ++i)
       {
@@ -1828,7 +1828,7 @@ namespace Marimo
     header.nNumOfStrings    = 0;
     header.cbStringSpace    = 0;
     header.nNumOfArrayBufs  = 0;
-    header.nNumOfNames      = m_pNamesTabEnd - m_pNamesTabBegin;
+    header.nNumOfNames      = (GXUINT)(m_pNamesTabEnd - m_pNamesTabBegin);
     //header.cbArraySpace     = 0;
 
 
@@ -1964,7 +1964,7 @@ namespace Marimo
     header.nBufHeaderOffset   = (GXUINT)(sizeof(FILE_HEADER));
     header.nDescOffset        = (GXUINT)(sizeof(FILE_HEADER) + sizeof(FILE_BUFFERHEADER) * (header.nNumOfArrayBufs + 1));
     header.nStringVarOffset   = (GXUINT)(header.nDescOffset + (m_Buffer.GetSize() - m_VarBuffer.GetSize()));
-    header.nBuffersOffset     = (GXUINT)header.nStringVarOffset + sStringVar.buffer_size();
+    header.nBuffersOffset     = (GXUINT)(header.nStringVarOffset + sStringVar.buffer_size());
 
     header.nNumOfPtrVars      = (GXUINT)BufferTab.front().RelTable.size();
     header.cbStringSpace      = (GXUINT)sStringVar.buffer_size();
@@ -2242,7 +2242,7 @@ namespace Marimo
         bd.pTypeDesc = (TYPE_DESC*)((GXINT_PTR)m_aTypes + (fbh.nType - header.nDescOffset));
 
         const clsize nBufferSize = fbh.nBufferSize + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(fbh.nNumOfRel);
-        bd.pBuffer = new(lpBufferPtr) DataPoolArray(nBufferSize, lpBufferPtr);
+        bd.pBuffer = new(lpBufferPtr) DataPoolArray((u32)nBufferSize, lpBufferPtr);
         //((DataPoolArray*)bd.pBuffer)->Resize(, FALSE);
 
         lpBufferPtr += (nBufferSize + sizeof(DataPoolArray));

@@ -243,7 +243,7 @@ GXLRESULT IMOPlatform_Win32Base::AppHandle(GXUINT message, GXWPARAM wParam, GXLP
   case GXWM_MOUSEMOVE:
     {
       GXAPPACTIONINFO Info;
-      DWORD dwKeys = wParam;  // 要保证 STATIC_ASSERT(MK_XXX == GXMK_XXX)
+      DWORD dwKeys = (DWORD)wParam;  // 要保证 STATIC_ASSERT(MK_XXX == GXMK_XXX)
 
       InlPrepareActionInfo(Info, wParam, lParam, dwKeys);
       m_pApp->ActionMove(&Info);
@@ -271,7 +271,7 @@ GXLRESULT IMOPlatform_Win32Base::AppHandle(GXUINT message, GXWPARAM wParam, GXLP
       GXAPPKEYINFO KeyInfo;
       KeyInfo.hUIFocusWnd = NULL;
       KeyInfo.dwAction    = message;
-      KeyInfo.dwKey       = wParam;
+      KeyInfo.dwKey       = (DWORD)wParam;
       m_pApp->KeyMessage(&KeyInfo);
     }
     break;
@@ -453,7 +453,7 @@ void ResolverMacroStringToD3DMacro(GXLPCSTR szMacros, GXDefinitionArray& aMacros
   ResolveString<clStringA, ch, clStringArrayA>(szMacros, ';', aMacroStrings);
   for(clStringArrayA::iterator it = aMacroStrings.begin();
     it != aMacroStrings.end(); ++it) {
-      int nPos = it->Find('=');
+      int nPos = (int)it->Find('=');
       if(nPos < 0) {
         m.Name = *it;
         m.Value.Clear();

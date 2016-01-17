@@ -24,10 +24,10 @@ namespace Marimo
     Variable  (*GetMember   )(GXCONST VarImpl* pThis, GXLPCSTR szName);    // 获得成员
 
     // 数组或动态数组专用 
-    Variable  (*GetIndex    )(GXCONST VarImpl* pThis, int nIndex);         // 获得特定索引的变量
+    Variable  (*GetIndex    )(GXCONST VarImpl* pThis, GXSIZE_T nIndex);    // 获得特定索引的变量
     GXSIZE_T  (*GetLength   )(GXCONST VarImpl* pThis);                     // 获得数组的成员个数, 注意与GetSize区别
     Variable  (*NewBack     )(        VarImpl* pThis, GXUINT nIncrease);   // 在动态数组上追加数据, 动态数组专用
-    GXBOOL    (*Remove      )(        VarImpl* pThis, GXUINT nIndex, GXUINT nCount);      // 移出动态数组指定索引的数据, 动态数组专用
+    GXBOOL    (*Remove      )(        VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount);      // 移出动态数组指定索引的数据, 动态数组专用
 
     // 变量专用
     //clStringW (*ToStringW   )(GXCONST VarImpl* pThis);                   // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
@@ -335,7 +335,7 @@ namespace Marimo
 
     virtual GXBOOL    SetAutoKnock        (GXBOOL bAutoKnock);
 
-    virtual GXBOOL    Impulse             (const DataPoolVariable& var, DataAction reason, GXUINT index, GXUINT count);
+    virtual GXBOOL    Impulse             (const DataPoolVariable& var, DataAction reason, GXSIZE_T index, GXSIZE_T count) override;
     virtual GXBOOL    Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam);
     virtual GXBOOL    Watch               (GXLPCSTR szExpression, DataPoolWatcher* pWatcher);
     virtual GXBOOL    Watch               (GXLPCSTR szExpression, GXHWND hWnd);
@@ -359,7 +359,7 @@ namespace Marimo
     //void    IntImportKeys     (IMPORT& import, Section sect, MOVariable* var);
     GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl);
     GXBOOL  Cleanup           (GXLPVOID lpBuffer, const DATAPOOL_VARIABLE_DESC* pVarDesc, int nVarDescCount);
-    GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, int nElementCount);
+    GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXSIZE_T nElementCount);
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
     LPCVD   IntGetVariable    (LPCVD pVdd, GXLPCSTR szName);
 //#ifdef ENABLE_DATAPOOL_WATCHER

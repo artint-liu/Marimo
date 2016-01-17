@@ -45,7 +45,7 @@ namespace GXUI
         GXRECT rect;
         GXBOOL bSelected = FALSE;
         RichList* pList = (RichList*)gxGetWindowLong(hParent, 0);
-        const int nMyIndex = gxGetWindowLong(hWnd, GXGWL_USERDATA);
+        const int nMyIndex = (int)gxGetWindowLong(hWnd, GXGWL_USERDATA);
 
         gxGetClientRect(hWnd, &rect);
         if(pList != NULL)
@@ -86,7 +86,7 @@ namespace GXUI
           UIList.hdr.idFrom   = GXLOWORD(wParam);
           UIList.hdr.code     = GXLBN_CUSTCTRLCMD;
           UIList.nCommand     = GXHIWORD(wParam);
-          UIList.nListItem    = gxGetWindowLong(hWnd, GXGWL_USERDATA);
+          UIList.nListItem    = (int)gxGetWindowLong(hWnd, GXGWL_USERDATA);
           UIList.hTmplItemWnd = (GXHWND)lParam;
 
           gxSendMessage(hParent, GXWM_NOTIFY, UIList.hdr.idFrom, (GXLPARAM)&UIList);
@@ -135,8 +135,8 @@ namespace GXUI
     }
 
     sElement.strName   = szCtrlName;
-    sElement.dwStyle   = gxGetWindowLong(hWnd, GXGWL_STYLE);
-    sElement.dwExStyle = gxGetWindowLong(hWnd, GXGWL_EXSTYLE);
+    sElement.dwStyle   = (GXDWORD)gxGetWindowLong(hWnd, GXGWL_STYLE);
+    sElement.dwExStyle = (GXDWORD)gxGetWindowLong(hWnd, GXGWL_EXSTYLE);
     sElement.strClass  = szClassName;
     pItemElements->push_back(sElement);
 
@@ -155,7 +155,7 @@ namespace GXUI
   //  //return nItemHeight;
   //}
 
-  GXHWND RichList::GetItemWnd(int item)
+  GXHWND RichList::GetItemWnd(GXSIZE_T item)
   {
     //if(item < (int)m_FirstItem || item > (int)(m_FirstItem + m_ItemHandles.size())) {
     //  return NULL;
@@ -164,7 +164,7 @@ namespace GXUI
     return m_aItems[item].hItem;
   }
 
-  GXHWND RichList::CreateItemWnd(int item)
+  GXHWND RichList::CreateItemWnd(GXSIZE_T item)
   {
     GXHWND hWnd;
     if(m_HandlesPool.empty())
@@ -186,7 +186,7 @@ namespace GXUI
     return hWnd;
   }
 
-  GXHWND RichList::PlantCustItem(int nIndex, GXLPCRECT lprect)
+  GXHWND RichList::PlantCustItem(GXSIZE_T nIndex, GXLPCRECT lprect)
   {
     GXHWND hWnd = GetItemWnd(nIndex);
 
@@ -205,7 +205,7 @@ namespace GXUI
     return hWnd;
   }
 
-  void RichList::Recycle(int nIndex)
+  void RichList::Recycle(GXSIZE_T nIndex)
   {
     ASSERT(m_aItems[nIndex].hItem != NULL)
 
@@ -216,7 +216,7 @@ namespace GXUI
     m_aItems[nIndex].hItem = NULL;
   }
 
-  int RichList::Recycle(int nBegin, int nDir)
+  int RichList::Recycle(GXSIZE_T nBegin, GXSIZE_T nDir)
   {
     ASSERT(nDir == -1 || nDir == 1);
     ASSERT(nBegin >= -1);
@@ -240,7 +240,7 @@ namespace GXUI
     return nCount;
   }
 
-  GXBOOL RichList::UpdateCustItemText(int nIndex, GXLPCRECT rcItem)
+  GXBOOL RichList::UpdateCustItemText(GXSIZE_T nIndex, GXLPCRECT rcItem)
   {
     GXHWND hItem = GetItemWnd(nIndex);
     ASSERT(hItem != NULL);
@@ -250,8 +250,8 @@ namespace GXUI
     {
       GXHWND hElement = GXGetDlgItemByName(hItem, *it);
       if(hElement != NULL) {
-        ItemStrDesc.item     = nIndex;
-        ItemStrDesc.element  = it - m_aElementName.begin();
+        ItemStrDesc.item     = (GXINT)nIndex;
+        ItemStrDesc.element  = (int)(it - m_aElementName.begin());
         ItemStrDesc.hItemWnd = hElement;
         ItemStrDesc.name     = *it;
         //ItemStrDesc.rect     = *rcItem;
@@ -303,14 +303,14 @@ namespace GXUI
 
     GXRECT rcItem;
     GXPOINT pt = {x, y};
-    const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     ItemStatusArray::const_iterator it = m_aItems.begin() + m_nTopIndex;
 
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
     {
       for(; it < m_aItems.end(); ++it)
       {
-        int nItem = it - m_aItems.begin();
+        int nItem = (int)(it - m_aItems.begin());
         GetItemRect(nItem, dwStyle, &rcItem);
         if(gxPtInRect(&rcItem, pt)) {
           return nItem;
@@ -331,7 +331,7 @@ namespace GXUI
 
       for(; it < m_aItems.end(); ++it)
       {
-        int nItem = it - m_aItems.begin();
+        int nItem = (int)(it - m_aItems.begin());
         GetItemRect(nItem, dwStyle, &rcItem);
         ((GXLONG*)&rcItem)[nExtEdge] = ((GXLONG*)&rcClient)[nExtEdge];
         if(gxPtInRect(&rcItem, pt)) {
@@ -355,7 +355,7 @@ namespace GXUI
     }
 
     GXRECT rcGap; // 左上的终止位置，右下的起始位置
-    const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
 
     //GXBOOL bFixedHeight = m_pAdapter->IsFixedHeight();
     GXRECT rcTemplProto;
@@ -390,21 +390,21 @@ namespace GXUI
     {
       if(IS_LTORRICHLIST(dwStyle)) {
         //nPassPos = m_nScrolled + m_nTopIndex / m_nColumnCount * TemplProtoWidth;
-        nPassPos = ITEM_LINE_POS(m_nTopIndex, TemplProtoWidth);
+        nPassPos = (int)ITEM_LINE_POS(m_nTopIndex, TemplProtoWidth);
         rcGap.right = nPassPos + TemplProtoWidth;  // 后面累加
       }
       else {
         //nPassPos = m_nScrolled + m_nTopIndex / m_nColumnCount * nHeight;
-        nPassPos = ITEM_LINE_POS(m_nTopIndex, nHeight);
+        nPassPos = (int)ITEM_LINE_POS(m_nTopIndex, nHeight);
         rcGap.bottom = nPassPos + TemplProtoHeight;  // 后面累加
       }
     }
     else if(TRUE/*bFixedHeight*/) {
       if(IS_LTORRICHLIST(dwStyle)) {
-        nPassPos = m_nScrolled + m_nTopIndex * TemplProtoWidth;
+        nPassPos = (int)(m_nScrolled + m_nTopIndex * TemplProtoWidth);
       }
       else {
-        nPassPos = m_nScrolled + m_aItems[m_nTopIndex].nBottom - nHeight;
+        nPassPos = (int)(m_nScrolled + m_aItems[m_nTopIndex].nBottom - nHeight);
       }
     }
     else {
@@ -472,7 +472,7 @@ namespace GXUI
         else
         {
           //if( ! bFixedHeight) {
-            nHeight = GetItemHeight(i);
+          nHeight = GetItemHeight(i);
           //}
           gxSetRect(&rcItem, 0, nPassPos, TemplProtoWidth, nPassPos + nHeight);
           nPassPos += nHeight;
@@ -550,7 +550,7 @@ namespace GXUI
 
   int RichList::OnSize(int cx, int cy)
   {
-    const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     GXINT nPrevColumn = m_nColumnCount;
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
     {

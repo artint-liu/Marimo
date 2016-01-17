@@ -239,7 +239,7 @@ namespace D3D9
   }
 
 #ifdef REFACTOR_SHADER
-  GXBOOL GShaderStubImpl::UpdateCanvasUniform(GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize)
+  GXBOOL GShaderStubImpl::UpdateCanvasUniform(GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize)
   {
     // Canvas-uniform 提交
     GShaderImpl::ConstDescArray& aConstDesc = m_pShaderImpl->m_aConstDesc;
@@ -258,7 +258,7 @@ namespace D3D9
     return TRUE;
   }
 
-  GXBOOL GShaderStubImpl::UpdateUniform(int nDefIdx, GXLPCBYTE lpCanvasUniform/*, const float4* pSharedTable*/, GXLPVOID lpUniform, GXUINT cbSize)
+  GXBOOL GShaderStubImpl::UpdateUniform(int nDefIdx, GXLPCBYTE lpCanvasUniform/*, const float4* pSharedTable*/, GXLPVOID lpUniform, GXSIZE_T cbSize)
   {
     if(nDefIdx == -2) // 绑定的Uniform
     {

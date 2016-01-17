@@ -34,9 +34,9 @@ public:
   static GXVOID InitializeMtlStateDict();
   static GXVOID FinalizeMtlStateDict  ();
 protected:
-  int       SetSampler      (GXDEFINITION* pParameters, int nCount);
-  GXHRESULT SetUniforms     (GXDEFINITION* pParameters, int nCount);
-  GXHRESULT SetRenderStates (GXDEFINITION* pParameters, int nCount);
+  int       SetSampler      (GXDEFINITION* pParameters, GXSIZE_T nCount);
+  GXHRESULT SetUniforms     (GXDEFINITION* pParameters, GXSIZE_T nCount);
+  GXHRESULT SetRenderStates (GXDEFINITION* pParameters, GXSIZE_T nCount);
   virtual ~GXMaterialInstImpl();
 public:
   GXMaterialInstImpl(GXGraphics* pGraphics);

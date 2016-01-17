@@ -602,7 +602,7 @@ namespace GXUI
     {
       if((IS_PTR(idCommand) && IS_PTR(it->idCommand) && *(clStringW*)&it->idCommand == (GXLPCWSTR)idCommand) ||
         (it->idCommand == (GXLPCWSTR)idCommand)) {
-        return it - m_aButtons.begin();
+        return (int)(it - m_aButtons.begin());
       }
     }
     return -1;
@@ -734,7 +734,7 @@ namespace GXUI
 
   GXBOOL Toolbar::SolveDefinition( const GXDefinitionArrayW& aDefinitions )
   {
-    const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);    
+    const GXDWORD dwStyle = (DWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);    
 
     for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
       it != aDefinitions.end(); ++it)
@@ -757,7 +757,7 @@ namespace GXUI
     //////////}
 
     const int nIndex = TEST_FLAG(pInfo->dwMask, GXTBIF_BYINDEX) 
-      ? idCommand : GetButtonIndex(idCommand);
+      ? (int)idCommand : GetButtonIndex(idCommand);
 
     const TOOLBARBUTTON& sButton = m_aButtons[nIndex];
     if(pInfo->cbSize == sizeof(GXTBBUTTONINFOW))
@@ -801,7 +801,7 @@ namespace GXUI
     //////////}
 
     const int nIndex = TEST_FLAG(pInfo->dwMask, GXTBIF_BYINDEX) 
-      ? idCommand : GetButtonIndex(idCommand);
+      ? (int)idCommand : GetButtonIndex(idCommand);
     TOOLBARBUTTON& sButton = m_aButtons[nIndex];
     GXBOOL bRedraw = FALSE;
 

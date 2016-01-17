@@ -525,7 +525,7 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
     sFrame = pDesc->aFrames[i];
     if(sFrame.name) {
       sFrame.name = m_NameSet.add(sFrame.name);
-      m_SpriteDict[sFrame.name] = m_aModules.size() + i;
+      m_SpriteDict[sFrame.name] = (int)(m_aModules.size() + i);
     }
     m_aFrames.push_back(sFrame);
   }
@@ -544,7 +544,7 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
     sAnimation = pDesc->aAnimations[i];
     if(sAnimation.name) {
       sAnimation.name = m_NameSet.add(sAnimation.name);
-      m_SpriteDict[sAnimation.name] = m_aModules.size() + m_aFrames.size() + i;
+      m_SpriteDict[sAnimation.name] = (int)(m_aModules.size() + m_aFrames.size() + i);
     }
     m_aAnimations.push_back(sAnimation);
   }

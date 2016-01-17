@@ -292,7 +292,7 @@ GXLRESULT GXConsole::WriteW(GXLPCWSTR szFormat, ...)
   va_list    arglist;
   va_start(arglist, szFormat);
   size_t length = str.VarFormat(szFormat, arglist);
-  m_pBuffer->WriteW(str, str.GetLength());
+  m_pBuffer->WriteW(str, (u32)str.GetLength());
   return length;
 }
 
@@ -305,6 +305,6 @@ GXLRESULT GXConsole::WriteA(GXLPCSTR szFormat, ...)
   size_t length = TextA.VarFormat(szFormat, arglist);
 
   TextW = TextA;
-  m_pBuffer->WriteW(TextW, TextW.GetLength());
+  m_pBuffer->WriteW(TextW, (u32)TextW.GetLength());
   return length;
 }

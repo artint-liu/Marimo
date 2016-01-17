@@ -414,7 +414,7 @@ namespace D3D9
     return Desc.RegisterIndex;
   }
 #ifdef REFACTOR_SHADER
-  GXBOOL GShaderImpl::CommitToDevice(GXLPVOID lpUniform, GXUINT cbSize)
+  GXBOOL GShaderImpl::CommitToDevice(GXLPVOID lpUniform, GXSIZE_T cbSize)
   {
     if(cbSize != m_cbCacheSize) {
       return FALSE;

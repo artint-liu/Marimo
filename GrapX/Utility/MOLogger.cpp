@@ -51,7 +51,7 @@ public:
   }
 
   template<typename _Ty>
-  inline u32 OutputT(const _Ty* szText, u32 length, const _Ty* szEnd = NULL, u32 endLen = 0)
+  inline size_t OutputT(const _Ty* szText, size_t length, const _Ty* szEnd = NULL, size_t endLen = 0)
   {
     if(length == 0) {
       return 0;
@@ -63,16 +63,16 @@ public:
       length = GXSTRLEN(szText);
     }
 
-    m_file.Write(szText, length * sizeof(_Ty));
+    m_file.Write(szText, (u32)(length * sizeof(_Ty)));
 
     if(endLen && szText[length - 1] != (_Ty)'\n') {
-      m_file.Write(szEnd, endLen * sizeof(_Ty));
+      m_file.Write(szEnd, (u32)(endLen * sizeof(_Ty)));
     }
 
     return length;
   }
 
-  virtual u32 OutputW(GXLPCWSTR szString)
+  virtual size_t OutputW(GXLPCWSTR szString)
   {
     if(m_bUnicode) {
       return OutputT(szString, GXSTRLEN(szString)/*, L"\r\n", 2*/);
@@ -83,7 +83,7 @@ public:
     }
   }
 
-  virtual u32 OutputA(GXLPCSTR szString)
+  virtual size_t OutputA(GXLPCSTR szString)
   {
     if(m_bUnicode)
     {
@@ -95,7 +95,7 @@ public:
     }
   }
 
-  virtual u32 OutputFormatA(GXLPCSTR szFormat, ...)
+  virtual size_t OutputFormatA(GXLPCSTR szFormat, ...)
   {
     va_list  arglist;
     va_start(arglist, szFormat);
@@ -112,7 +112,7 @@ public:
     }
   }
 
-  virtual u32 OutputFormatW(GXLPCWSTR szFormat, ...)
+  virtual size_t OutputFormatW(GXLPCWSTR szFormat, ...)
   {
     va_list  arglist;
     va_start(arglist, szFormat);
@@ -177,9 +177,9 @@ public:
     return nRefCount;
   }
 
-  virtual u32 OutputW(GXLPCWSTR szString)
+  virtual size_t OutputW(GXLPCWSTR szString) override
   {
-    u32 nRet = 0;
+    size_t nRet = 0;
     if(m_bUnicode) {
       nRet = m_fifo.put((const u8*)szString, GXSTRLEN(szString) * sizeof(wch));
     }
@@ -191,9 +191,9 @@ public:
     return nRet;
   }
 
-  virtual u32 OutputA(GXLPCSTR szString)
+  virtual size_t OutputA(GXLPCSTR szString)
   {
-    u32 nRet = 0;
+    size_t nRet = 0;
     if(m_bUnicode) {
       clStringW str(szString);
       nRet = m_fifo.put((const u8*)(const wch*)str, str.GetLength() * sizeof(wch));
@@ -205,12 +205,12 @@ public:
     return nRet;
   }
 
-  virtual u32 OutputFormatA(GXLPCSTR szFormat, ...)
+  virtual size_t OutputFormatA(GXLPCSTR szFormat, ...)
   {
     va_list  arglist;
     va_start(arglist, szFormat);
 
-    u32 nRet = 0;
+    size_t nRet = 0;
     clStringA str;
     str.VarFormat(szFormat, arglist);
 
@@ -225,12 +225,12 @@ public:
     return nRet;
   }
 
-  virtual u32 OutputFormatW (GXLPCWSTR szFormat, ...)
+  virtual size_t OutputFormatW (GXLPCWSTR szFormat, ...)
   {
     va_list  arglist;
     va_start(arglist, szFormat);
 
-    u32 nRet = 0;
+    size_t nRet = 0;
     clStringW str;
     str.VarFormat(szFormat, arglist);
     if(m_bUnicode) {
@@ -266,7 +266,7 @@ public:
 
       while (true)
       {
-        const u32 len = m_fifo.get(buffer, sizeof(buffer) - 4); // gcc 下 wchar_t 有可能是4字节
+        const size_t len = m_fifo.get(buffer, sizeof(buffer) - 4); // gcc 下 wchar_t 有可能是4字节
         if(len == 0) {
           break;
         }

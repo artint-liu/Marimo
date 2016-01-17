@@ -48,7 +48,7 @@ namespace clstd
   }
 
 
-  b32 fifo::Initialize(u32 size, b32 bLock)
+  b32 fifo::Initialize(size_t size, b32 bLock)
   {
     if (size & (size - 1)) {   
       if(size > 0x80000000) {
@@ -69,9 +69,9 @@ namespace clstd
     return TRUE;
   }
 
-  u32 fifo::put(const u8* data, u32 len)
+  size_t fifo::put(const u8* data, size_t len)
   {
-    unsigned int l;   
+    size_t l;   
 
     len = clMin(len, m_size - m_in + m_out);
 
@@ -96,9 +96,9 @@ namespace clstd
     return len;   
   }
 
-  u32 fifo::get(u8* data, u32 len)
+  size_t fifo::get(u8* data, size_t len)
   {
-    unsigned int l;   
+    size_t l;   
     len = clMin(len, m_in - m_out);
 
     smp_mb();
@@ -122,7 +122,7 @@ namespace clstd
     return len;   
   }
 
-  u32 fifo::size()
+  size_t fifo::size()
   {
     return m_in - m_out;
   }

@@ -54,14 +54,14 @@ namespace GXUI
 
   private:
     GXLRESULT SetupAdapter  ();
-    GXHWND    GetItemWnd    (int item);
-    GXHWND    CreateItemWnd (int item);
+    GXHWND    GetItemWnd    (GXSIZE_T item);
+    GXHWND    CreateItemWnd (GXSIZE_T item);
   public:
     //GXINT     GetItemHeight       (GXINT nIdx) const;
-    GXHWND    PlantCustItem       (int nIndex, GXLPCRECT lprect);
-    void      Recycle             (int nIndex);
-    int       Recycle             (int nBegin, int nDir); // °üº¬ nBegin
-    GXBOOL    UpdateCustItemText  (int nIndex, GXLPCRECT rcItem);
+    GXHWND    PlantCustItem       (GXSIZE_T nIndex, GXLPCRECT lprect);
+    void      Recycle             (GXSIZE_T nIndex);
+    int       Recycle             (GXSIZE_T nBegin, GXSIZE_T nDir); // °üº¬ nBegin
+    GXBOOL    UpdateCustItemText  (GXSIZE_T nIndex, GXLPCRECT rcItem);
     GXLRESULT SetItemTemplate     (GXLPCWSTR szTemplate);
 
     //virtual ListType  GetListType         ();

@@ -339,7 +339,7 @@ public:
       it != m_KeyDict.end(); ++it) {
         if(GetBindCommandLine(strCommandLine, it))
         {
-          file.Write((GXLPCWSTR)strCommandLine, strCommandLine.GetLength() * sizeof(GXWCHAR));
+          file.Write((GXLPCWSTR)strCommandLine, (u32)(strCommandLine.GetLength() * sizeof(GXWCHAR)));
         }
     }
     return TRUE;

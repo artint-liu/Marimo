@@ -57,7 +57,7 @@ namespace Marimo
   // 函数声明
   Variable DynamicArray_NewBack(VarImpl* pThis, GXUINT nIncrease);
   Variable Struct_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName);
-  Variable Array_GetIndex(GXCONST VarImpl* pThis, int nIndex);
+  Variable Array_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex);
 
   DataPoolVariable::DataPoolVariable( VTBL* vtbl, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset )
     : m_vtbl(vtbl), m_pVdd(pVdd), m_pBuffer(pBufferBase), m_AbsOffset(nAbsOffset)
@@ -107,7 +107,7 @@ namespace Marimo
       return reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd);
     }
 
-    inline GXBOOL InlCleanupArray(LPCVD pVarDesc, GXLPVOID lpBuffer, int nCount)
+    inline GXBOOL InlCleanupArray(LPCVD pVarDesc, GXLPVOID lpBuffer, GXSIZE_T nCount)
     {
       DataPoolImpl* pDataPoolImpl = (DataPoolImpl*)m_pDataPool;
       return pDataPoolImpl->CleanupArray(reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc), lpBuffer, nCount);
@@ -213,12 +213,12 @@ namespace Marimo
       return GX_FAIL;
     }
 
-    inline GXHRESULT InlSetupUnary(GXUINT nIndex, DataPoolVariable* pBase) GXCONST
+    inline GXHRESULT InlSetupUnary(GXSIZE_T nIndex, DataPoolVariable* pBase) GXCONST
     {
       ASSERT(m_pBuffer != NULL);
       DataPoolImpl::VARIABLE var = {0};
 
-      var.AbsOffset = m_AbsOffset + nIndex * m_pVdd->TypeSize();
+      var.AbsOffset = (GXUINT)(m_AbsOffset + nIndex * m_pVdd->TypeSize());
       if(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntCreateUnary(m_pBuffer, reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd), &var))
       {
         new(pBase) DataPoolVariable((VTBL*)var.vtbl, m_pDataPool, var.pVdd, var.pBuffer, var.AbsOffset);
@@ -227,12 +227,12 @@ namespace Marimo
       return GX_FAIL;
     }
 
-    inline GXHRESULT InlDynSetupUnary(clBufferBase* pBuffer, GXUINT nIndex, DataPoolVariable* pBase) GXCONST
+    inline GXHRESULT InlDynSetupUnary(clBufferBase* pBuffer, GXSIZE_T nIndex, DataPoolVariable* pBase) GXCONST
     {
       ASSERT(m_pBuffer != NULL);
       DataPoolImpl::VARIABLE var = {0};
 
-      var.AbsOffset = nIndex * m_pVdd->TypeSize();
+      var.AbsOffset = (GXUINT)(nIndex * m_pVdd->TypeSize());
       if(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntCreateUnary(pBuffer, reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd), &var))
       {
         new(pBase) DataPoolVariable((VTBL*)var.vtbl, m_pDataPool, var.pVdd, var.pBuffer, var.AbsOffset);
@@ -326,7 +326,7 @@ namespace Marimo
   {
     element_iterator iter;
     reinterpret_cast<DataPoolVariableImpl*>(this)->first_element(iter);
-    iter.index = GetLength();
+    iter.index = (GXUINT)GetLength();
     return iter;
   }
 
@@ -435,7 +435,7 @@ namespace Marimo
     return *this;
   }
 
-  GXBOOL Variable::Impulse(DataAction reason, GXUINT index, GXUINT count)
+  GXBOOL Variable::Impulse(DataAction reason, GXSIZE_T index, GXSIZE_T count)
   {
     if(m_pDataPool != NULL) {
       return m_pDataPool->Impulse(*this, reason, index, count);
@@ -560,10 +560,10 @@ namespace Marimo
 
   GXUINT    Variable::GetSize     () GXCONST                              { return m_vtbl->GetSize     (CAST2VARPTRC(this));                    }
   Variable  Variable::MemberOf    (GXLPCSTR szName) GXCONST               { return m_vtbl->GetMember   (CAST2VARPTRC(this), szName);            }
-  Variable  Variable::IndexOf     (int nIndex) GXCONST                    { return m_vtbl->GetIndex    (CAST2VARPTRC(this), nIndex);            }
+  Variable  Variable::IndexOf     (GXSIZE_T nIndex) GXCONST               { return m_vtbl->GetIndex    (CAST2VARPTRC(this), nIndex);            }
   GXSIZE_T  Variable::GetLength   () GXCONST                              { return m_vtbl->GetLength   (CAST2VARPTRC(this));                    }
   Variable  Variable::NewBack     (GXUINT nIncrease)                      { return m_vtbl->NewBack     (CAST2VARPTR (this), nIncrease);         }
-  GXBOOL    Variable::Remove      (GXUINT nIndex, GXUINT nCount)          { return m_vtbl->Remove      (CAST2VARPTR (this), nIndex, nCount);    }
+  GXBOOL    Variable::Remove      (GXSIZE_T nIndex, GXSIZE_T nCount)      { return m_vtbl->Remove      (CAST2VARPTR (this), nIndex, nCount);    }
   clStringW Variable::ToStringW   () GXCONST                              { return m_vtbl->ToStringW   (CAST2VARPTRC(this));                    }
   clStringA Variable::ToStringA   () GXCONST                              { return m_vtbl->ToStringA   (CAST2VARPTRC(this));                    }
   GXBOOL    Variable::ParseW      (GXLPCWSTR szString, GXUINT length)     { return m_vtbl->ParseW      (CAST2VARPTR (this), szString, length);  }
@@ -649,7 +649,7 @@ namespace Marimo
   }
 
   // 数组访问异常
-  Variable Exception_GetIndex(GXCONST VarImpl* pThis, int nIndex)
+  Variable Exception_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex)
   {
     CLOG_ERROR("%s %s %s\n", __FUNCTION__, pThis->GetTypeName(), pThis->GetName());
     throw("This variable does not support \"IndexOf()\" method.");
@@ -663,7 +663,7 @@ namespace Marimo
     //return Variable();
   }
 
-  GXBOOL Exception_Remove(VarImpl* pThis, GXUINT nIndex, GXUINT nCount)
+  GXBOOL Exception_Remove(VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount)
   {
     return FALSE;
   }
@@ -740,7 +740,7 @@ namespace Marimo
     return 1;
   }
 
-  Variable Array_GetIndex(GXCONST VarImpl* pThis, int nIndex)
+  Variable Array_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex)
   {
     ASSERT(( ! pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
     Variable val;
@@ -751,7 +751,7 @@ namespace Marimo
     return val;
   }
 
-  Variable DynArray_GetIndex(GXCONST VarImpl* pThis, int nIndex)
+  Variable DynArray_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex)
   {
     ASSERT(pThis->InlGetVDD()->IsDynamicArray());
     //ASSERT(( ! pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
@@ -1238,21 +1238,21 @@ namespace Marimo
     Variable val;
     if(nIncrease == 0) {
       // 不新增元素，只返回最后一个对象
-      pThis->InlDynSetupUnary(pArrayBuffer, nIndex - 1, &val);
+      pThis->InlDynSetupUnary(pArrayBuffer, (GXUINT)(nIndex - 1), &val);
     }
     else {
       DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
       const GXUINT nPrevSize = (GXUINT)pArrayBuffer->GetSize();
       pArrayBuffer->Resize(nPrevSize + pVdd->TypeSize() * nIncrease, TRUE);
-      pThis->InlDynSetupUnary(pArrayBuffer, nIndex, &val);
+      pThis->InlDynSetupUnary(pArrayBuffer, (GXUINT)nIndex, &val);
 
       ASSERT(nIndex == nPrevSize / pVdd->TypeSize());
-      THIS_IMPULSE_DATA(DATACT_Insert, nIndex, nIncrease);
+      THIS_IMPULSE_DATA(DATACT_Insert, (GXUINT)nIndex, nIncrease);
     }
     return val;
   }
 
-  GXBOOL DynamicArray_Remove(VarImpl* pThis, GXUINT nIndex, GXUINT nCount)
+  GXBOOL DynamicArray_Remove(VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount)
   {
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     const GXSIZE_T nLength = pThis->GetLength();

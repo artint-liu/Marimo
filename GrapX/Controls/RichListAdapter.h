@@ -135,7 +135,7 @@ namespace GXUI
           //  m_strDefault = sVarDecl.Name;
           //}
           if(m_nDefault < 0) {
-            m_nDefault = m_aElements.size();
+            m_nDefault = (int)m_aElements.size();
           }
         }
         else if(it->strClass == GXWE_EDITW_1_3_30)
@@ -146,7 +146,7 @@ namespace GXUI
           aStructMember.push_back(sVarDecl);
 
           if(m_nDefault < 0) {
-            m_nDefault = m_aElements.size();
+            m_nDefault = (int)m_aElements.size();
           }
         }          
         else if(it->strClass == GXWE_LISTBOXW)
@@ -178,7 +178,7 @@ namespace GXUI
           //  m_strDefault = sVarDecl.Name;
           //}
           if(m_nDefault < 0) {
-            m_nDefault = m_aElements.size();
+            m_nDefault = (int)m_aElements.size();
           }
         }
         else if(it->strClass == GXUICLASSNAME_STATIC)
@@ -206,7 +206,7 @@ namespace GXUI
             //  m_strDefault = sVarDecl.Name;
             //}
             if(m_nDefault < 0) {
-              m_nDefault = m_aElements.size();
+              m_nDefault = (int)m_aElements.size();
             }
             break;
           case GXUISS_TYPE_SPRITE:
@@ -260,7 +260,7 @@ namespace GXUI
           //  m_strDefault = sVarDecl.Name;
           //}
           if(m_nDefault < 0) {
-            m_nDefault = m_aElements.size();
+            m_nDefault = (int)m_aElements.size();
           }
         }
         else if(it->strClass == GXUICLASSNAME_LIST)
@@ -385,7 +385,7 @@ namespace GXUI
     //  return TRUE;
     //}
 
-    virtual GXINT AddStringW(GXLPCWSTR szName, GXLPCWSTR lpString)
+    virtual GXSIZE_T AddStringW(GXLPCWSTR szName, GXLPCWSTR lpString)
     {
       // FIXME: szName 没起作用
       // 如果没有默认控件显示LB_ADDSTRING所添加的内容，返回错误

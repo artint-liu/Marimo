@@ -95,7 +95,7 @@ namespace GXUI
     {
     case GXWM_LBUTTONDOWN:
       {
-        GXDWORD dwStyle = gxGetWindowLong(hWnd, GXGWL_STYLE);
+        GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(hWnd, GXGWL_STYLE);
 
         if( ! pThis->ShouldNotifyParent())
           break;
@@ -243,7 +243,7 @@ namespace GXUI
     GXRECT rect;
     gxGetClientRect(m_hWnd, &rect);
 
-    GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GWL_STYLE);
+    GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GWL_STYLE);
     if(TEST_FLAG(dwStyle, GXUISS_SIMPLE))
     {
       canvas.TextOutW(m_pFont, rect.left, rect.top, lpText, nLen, m_crText);
@@ -265,7 +265,7 @@ namespace GXUI
 
   GXDWORD StaticLabel::GetDrawTextFlag()
   {
-    GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GWL_STYLE);
+    GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GWL_STYLE);
 
     GXDWORD dwDrawTexStyle = NULL;
     if(TEST_FLAG(dwStyle, GXUISS_LEFT)) {

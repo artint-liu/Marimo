@@ -276,8 +276,8 @@ GXBOOL GVGeometry::InitializeAsQuadPlane(GXGraphics* pGraphics, const float3& vP
   }
 
   m_eType = GXPT_TRIANGLELIST;
-  m_nPrimiCount = aIndices.size() / 3;
-  m_nVertCount = aVertices.size();
+  m_nPrimiCount = (GXUINT)(aIndices.size() / 3);
+  m_nVertCount = (GXUINT)aVertices.size();
 
   return IntCreateMesh(pGraphics, &MeshData);
 
@@ -1046,13 +1046,14 @@ void GenerateTorusSides(
     }
   }
 
-  const int nTotalVertCount = aVertices.size();
+  const GXSIZE_T nTotalVertCount = aVertices.size();
+  ASSERT(nTotalVertCount < 0xffff);
   const int nLastLine = (nSides - 1) * nSegment * 6;
   PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(nSides, nSegment, nBaseIdx, aIndices);
   for(IndicesArray::iterator it = aIndices.begin() + nLastLine;
     it != aIndices.end(); ++it) {
     if(*it >= nTotalVertCount) {
-      *it -= nTotalVertCount;
+      *it -= (VIndex)nTotalVertCount;
     }
   }
 }

@@ -119,7 +119,7 @@ namespace clstd
         return FALSE;
       }
       for(auto it = _TMap::begin(); it != _TMap::end(); ++it) {
-        *pDest++ = it->second.offset;
+        *pDest++ = (_Ty)it->second.offset;
       }
       return TRUE;
     }

@@ -41,7 +41,7 @@ GXBOOL GShaderStubImpl::SetUniformByHandle(clBufferBase* pUnusualUnifom, GXUINT 
 }
 
 #ifdef REFACTOR_SHADER
-GXBOOL GShaderStubImpl::CommitToDevice(GXLPVOID lpUniform, GXUINT cbSize)
+GXBOOL GShaderStubImpl::CommitToDevice(GXLPVOID lpUniform, GXSIZE_T cbSize)
 {
   return m_pShaderImpl->CommitToDevice(lpUniform, cbSize);
 }

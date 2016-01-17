@@ -90,7 +90,7 @@ namespace GXUI
     return count;
   }
 
-  GXINT CDefListDataAdapter::AddStringW(GXLPCWSTR szName, GXLPCWSTR lpString)
+  GXSIZE_T CDefListDataAdapter::AddStringW(GXLPCWSTR szName, GXLPCWSTR lpString)
   {
     MOVariable newstr = m_DynArray.NewBack();
     newstr.Set(lpString);

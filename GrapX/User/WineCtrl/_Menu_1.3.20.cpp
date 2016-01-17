@@ -2498,7 +2498,7 @@ static GXHMENU MENU_PtMenu( GXHMENU hMenu, GXPOINT pt )
 
   if (!ret)  /* check the current window (avoiding WM_HITTEST) */
   {
-    GXINT ht = NC_HandleNCHitTest( menu->hWnd, pt );
+    GXINT ht = (GXINT)NC_HandleNCHitTest( menu->hWnd, pt );
     if( menu->wFlags & MF_POPUP )
     {
       if (ht != HTNOWHERE && ht != HTERROR) ret = hMenu;
@@ -2558,7 +2558,7 @@ static GXINT MENU_ExecFocusedItem( MTRACKER* pmt, GXHMENU hMenu, GXUINT wFlags )
             gxPostMessageW( pmt->hOwnerWnd, WM_COMMAND, item->wID, 0 );
         }
       }
-      return item->wID;
+      return (GXINT)item->wID;
     }
   }
   else
@@ -2770,7 +2770,7 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, GXUINT vk, GXUINT wFlags )
 
     if (!next_menu.hmenuNext || !next_menu.hwndNext)
     {
-      GXDWORD style = gxGetWindowLongW( pmt->hOwnerWnd, GWL_STYLE );
+      GXDWORD style = (GXDWORD)gxGetWindowLongW( pmt->hOwnerWnd, GWL_STYLE );
       hNewWnd = pmt->hOwnerWnd;
       if( IS_SYSTEM_MENU(menu) )
       {
@@ -2804,7 +2804,7 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, GXUINT vk, GXUINT wFlags )
 
       if( gxIsMenu(hNewMenu) && gxIsWindow(hNewWnd) )
       {
-        GXDWORD style = gxGetWindowLongW( hNewWnd, GWL_STYLE );
+        GXDWORD style = (GXDWORD)gxGetWindowLongW( hNewWnd, GWL_STYLE );
 
         if (style & WS_SYSMENU &&
           gxGetSubMenu(get_win_sys_menu(hNewWnd), 0) == hNewMenu )
@@ -3246,7 +3246,7 @@ static GXBOOL MENU_TrackMenu( GXHMENU hmenu, GXUINT wFlags, GXINT x, GXINT y,
             if (menu->FocusedItem == NO_SELECTED_ITEM)
               hi.iCtrlId = 0;
             else
-              hi.iCtrlId = menu->items[menu->FocusedItem].wID;
+              hi.iCtrlId = (int)menu->items[menu->FocusedItem].wID;
             hi.hItemHandle = hmenu;
             hi.dwContextId = menu->dwContextHelpID;
             hi.MousePos = msg.pt;
@@ -3751,7 +3751,7 @@ GXINT GXDLLAPI GetMenuStringA(
     if (!WideCharToMultiByte( CP_ACP, 0, item->text, -1, str, nMaxSiz, NULL, NULL ))
       str[nMaxSiz-1] = 0;
     TRACE("returning %s\n", debugstr_a(str));
-    return strlen(str);
+    return (GXINT)strlen(str);
 }
 
 
@@ -3843,7 +3843,7 @@ GXUINT GXDLLAPI GetMenuItemID( GXHMENU hMenu, GXINT nPos )
 
   if (!(lpmi = MENU_FindItem(&hMenu,(GXUINT*)&nPos,MF_BYPOSITION))) return -1;
   if (lpmi->fType & MF_POPUP) return -1;
-  return lpmi->wID;
+  return (GXUINT)lpmi->wID;
 
 }
 
@@ -3878,7 +3878,7 @@ static void MENU_mnu2mnuii( GXUINT flags, GXUINT_PTR id, GXLPCWSTR str,
   }
   if( flags & MF_OWNERDRAW){
     pmii->fMask |= MIIM_DATA;
-    pmii->dwItemData = (ULONG_PTR) str;
+    pmii->dwItemData = (GXULONG) str;
   }
   if( flags & MF_POPUP) {
     pmii->fMask |= MIIM_SUBMENU;
@@ -4587,7 +4587,7 @@ static GXBOOL GetMenuItemInfo_common ( GXHMENU hmenu, GXUINT item, GXBOOL bypos,
     lpmii->fState = menu->fState & MENUITEMINFO_STATE_MASK;
 
   if (lpmii->fMask & MIIM_ID)
-    lpmii->wID = menu->wID;
+    lpmii->wID = (GXUINT)menu->wID;
 
   if (lpmii->fMask & MIIM_SUBMENU)
     lpmii->hSubMenu = menu->hSubMenu;
@@ -4602,7 +4602,7 @@ static GXBOOL GetMenuItemInfo_common ( GXHMENU hmenu, GXUINT item, GXBOOL bypos,
     lpmii->hbmpUnchecked = menu->hUnCheckBit;
   }
   if (lpmii->fMask & MIIM_DATA)
-    lpmii->dwItemData = menu->dwItemData;
+    lpmii->dwItemData = (GXULONG)menu->dwItemData;
 
   return TRUE;
 }
@@ -4932,7 +4932,7 @@ GXUINT GXDLLAPI GetMenuDefaultItem(GXHMENU hmenu, GXUINT bypos, GXUINT flags)
 
     /* when item not found in submenu, return the popup item */
   }
-  return ( bypos ) ? i : item->wID;
+  return ( bypos ) ? i : (GXUINT)item->wID;
 
 }
 
@@ -5087,7 +5087,7 @@ static GXBOOL menu_SetMenuInfo( GXHMENU hMenu, GXLPCMENUINFO lpmi)
     menu->cyMax = lpmi->cyMax;
 
   if (lpmi->fMask & MIM_MENUDATA)
-    menu->dwMenuData = lpmi->dwMenuData;
+    menu->dwMenuData = (GXDWORD)lpmi->dwMenuData;
 
   if (lpmi->fMask & MIM_STYLE)
     menu->dwStyle = lpmi->dwStyle;

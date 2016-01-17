@@ -69,7 +69,7 @@ namespace Marimo
   class DataPoolResolverImpl : public DataPoolCompiler
   {
     friend class DataPoolCompiler;
-    friend u32 CALLBACK TriggerProc(StreamIter& it, clsize uRemain, u32_ptr lParam);
+    friend size_t CALLBACK TriggerProc(StreamIter& it, clsize uRemain, u32_ptr lParam);
 
     enum StringType
     {
@@ -215,7 +215,7 @@ namespace Marimo
     return IsNumericT(it.marker, it.length, pInteger);
   }
 
-  u32 CALLBACK TriggerProc(StreamIter& it, clsize uRemain, u32_ptr lParam)
+  size_t CALLBACK TriggerProc(StreamIter& it, clsize uRemain, u32_ptr lParam)
   {
     u32 i = 2; // "//" 和 "/*"开始都是两个字节
 

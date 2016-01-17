@@ -730,15 +730,15 @@ static void CBPaintText(
   /* follow Windows combobox that sends a bunch of text
   * inquiries to its listbox while processing WM_PAINT. */
 
-  if( (id = gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0) ) != LB_ERR )
+  if( (id = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0) ) != LB_ERR )
   {
-    size = gxSendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, id, 0);
+    size = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, id, 0);
     if (size == LB_ERR)
       FIXME("LB_ERR probably not handled yet\n");
     if( (pText = (GXLPWSTR)gxHeapAlloc( gxGetProcessHeap(), 0, (size + 1) * sizeof(GXWCHAR))) )
     {
       /* size from LB_GETTEXTLEN may be too large, from LB_GETTEXT is accurate */
-      size=gxSendMessageW(lphc->hWndLBox, LB_GETTEXT, id, (LPARAM)pText);
+      size = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETTEXT, id, (LPARAM)pText);
       pText[size] = '\0';	/* just in case */
     } else return;
   }
@@ -784,7 +784,7 @@ static void CBPaintText(
       dis.itemState	  = itemState;
       dis.hDC		      = hdc;
       dis.rcItem	    = rectEdit;
-      dis.itemData    = gxSendMessageW(lphc->hWndLBox, LB_GETITEMDATA, id, 0);
+      dis.itemData    = (GXULONG)gxSendMessageW(lphc->hWndLBox, LB_GETITEMDATA, id, 0);
 
       /*
       * Clip the DC and have the parent draw the item.
@@ -968,7 +968,7 @@ static GXINT CBUpdateLBox( GXLPHEADCOMBO lphc, GXBOOL bSelect )
   GXLPWSTR pText = NULL;
 
   idx = LB_ERR;
-  length = gxSendMessageW( lphc->hWndEdit, WM_GETTEXTLENGTH, 0, 0 );
+  length = (GXINT)gxSendMessageW( lphc->hWndEdit, WM_GETTEXTLENGTH, 0, 0 );
 
   if( length > 0 )
     pText = (GXLPWSTR)gxHeapAlloc( gxGetProcessHeap(), 0, (length + 1) * sizeof(GXWCHAR));
@@ -978,7 +978,7 @@ static GXINT CBUpdateLBox( GXLPHEADCOMBO lphc, GXBOOL bSelect )
   if( pText )
   {
     gxGetWindowTextW( lphc->hWndEdit, pText, length + 1);
-    idx = gxSendMessageW(lphc->hWndLBox, LB_FINDSTRING, -1, (LPARAM)pText);
+    idx = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_FINDSTRING, -1, (LPARAM)pText);
     gxHeapFree( gxGetProcessHeap(), 0, pText );
   }
 
@@ -1006,7 +1006,7 @@ static void CBUpdateEdit( GXLPHEADCOMBO lphc , GXINT index )
 
   if( index >= 0 ) /* got an entry */
   {
-    length = gxSendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, index, 0);
+    length = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, index, 0);
     if( length != LB_ERR)
     {
       if( (pText = (GXLPWSTR)gxHeapAlloc( gxGetProcessHeap(), 0, (length + 1) * sizeof(GXWCHAR))) )
@@ -1059,7 +1059,7 @@ static void CBDropDown( GXLPHEADCOMBO lphc )
   }
   else
   {
-    lphc->droppedIndex = gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
+    lphc->droppedIndex = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
 
     gxSendMessageW(lphc->hWndLBox, LB_SETTOPINDEX,
       lphc->droppedIndex == LB_ERR ? 0 : lphc->droppedIndex, 0);
@@ -1359,7 +1359,7 @@ static LRESULT COMBO_Command( GXLPHEADCOMBO lphc, WPARAM wParam, GXHWND hWnd )
       {
         if( lphc->wState & CBF_EDIT )
         {
-          GXINT index = gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
+          GXINT index = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
           lphc->wState |= CBF_NOLBSELECT;
           CBUpdateEdit( lphc, index );
           /* select text in edit, as Windows does */
@@ -1448,9 +1448,9 @@ static LRESULT COMBO_GetTextW( GXLPHEADCOMBO lphc, GXINT count, GXLPWSTR buf )
   if (!count || !buf) return 0;
   if( lphc->hWndLBox )
   {
-    GXINT idx = gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
+    GXINT idx = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
     if (idx == LB_ERR) goto error;
-    length = gxSendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, idx, 0 );
+    length = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, idx, 0 );
     if (length == LB_ERR) goto error;
 
     /* 'length' is without the terminating character */
@@ -1458,7 +1458,7 @@ static LRESULT COMBO_GetTextW( GXLPHEADCOMBO lphc, GXINT count, GXLPWSTR buf )
     {
       GXLPWSTR lpBuffer = (GXLPWSTR)gxHeapAlloc(gxGetProcessHeap(), 0, (length + 1) * sizeof(GXWCHAR));
       if (!lpBuffer) goto error;
-      length = gxSendMessageW(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)lpBuffer);
+      length = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)lpBuffer);
 
       /* truncate if buffer is too short */
       if (length != LB_ERR)
@@ -1468,7 +1468,7 @@ static LRESULT COMBO_GetTextW( GXLPHEADCOMBO lphc, GXINT count, GXLPWSTR buf )
       }
       gxHeapFree( gxGetProcessHeap(), 0, lpBuffer );
     }
-    else length = gxSendMessageW(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)buf);
+    else length = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)buf);
 
     if (length == LB_ERR) return 0;
     return length;
@@ -1498,9 +1498,9 @@ static LRESULT COMBO_GetTextA( GXLPHEADCOMBO lphc, GXINT count, GXLPSTR buf )
   if (!count || !buf) return 0;
   if( lphc->hWndLBox )
   {
-    GXINT idx = gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
+    GXINT idx = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
     if (idx == LB_ERR) goto error;
-    length = gxSendMessageA(lphc->hWndLBox, LB_GETTEXTLEN, idx, 0 );
+    length = (GXINT)gxSendMessageA(lphc->hWndLBox, LB_GETTEXTLEN, idx, 0 );
     if (length == LB_ERR) goto error;
 
     /* 'length' is without the terminating character */
@@ -1508,7 +1508,7 @@ static LRESULT COMBO_GetTextA( GXLPHEADCOMBO lphc, GXINT count, GXLPSTR buf )
     {
       GXLPSTR lpBuffer = (GXLPSTR)gxHeapAlloc(gxGetProcessHeap(), 0, (length + 1) );
       if (!lpBuffer) goto error;
-      length = gxSendMessageA(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)lpBuffer);
+      length = (GXINT)gxSendMessageA(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)lpBuffer);
 
       /* truncate if buffer is too short */
       if (length != LB_ERR)
@@ -1518,7 +1518,7 @@ static LRESULT COMBO_GetTextA( GXLPHEADCOMBO lphc, GXINT count, GXLPSTR buf )
       }
       gxHeapFree( gxGetProcessHeap(), 0, lpBuffer );
     }
-    else length = gxSendMessageA(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)buf);
+    else length = (GXINT)gxSendMessageA(lphc->hWndLBox, LB_GETTEXT, idx, (LPARAM)buf);
 
     if (length == LB_ERR) return 0;
     return length;
@@ -1708,8 +1708,8 @@ static LRESULT COMBO_SetItemHeight( GXLPHEADCOMBO lphc, GXINT index, GXINT heigh
 */
 static LRESULT COMBO_SelectString( GXLPHEADCOMBO lphc, GXINT start, LPARAM pText, GXBOOL unicode )
 {
-  GXINT index = unicode ? gxSendMessageW(lphc->hWndLBox, LB_SELECTSTRING, start, pText) :
-    gxSendMessageA(lphc->hWndLBox, LB_SELECTSTRING, start, pText);
+  GXINT index = unicode ? (GXINT)gxSendMessageW(lphc->hWndLBox, LB_SELECTSTRING, start, pText) :
+    (GXINT)gxSendMessageA(lphc->hWndLBox, LB_SELECTSTRING, start, pText);
 if( index >= 0 )
 {
   if( lphc->wState & CBF_EDIT )
@@ -1858,7 +1858,7 @@ static LRESULT COMBO_GetComboBoxInfo(const GXHEADCOMBO *lphc, GXCOMBOBOXINFO *pc
 static char *strdupA(LPCSTR str)
 {
   char *ret;
-  DWORD len;
+  size_t len;
 
   if(!str) return NULL;
 
@@ -1967,14 +1967,14 @@ LRESULT ComboWndProc_common( GXHWND hwnd, GXUINT message, WPARAM wParam, LPARAM 
     case WM_COMMAND:
       return  COMBO_Command( lphc, wParam, WIN_GetFullHandle( (GXHWND)lParam ) );
     case WM_GETTEXT:
-      return unicode ? COMBO_GetTextW( lphc, wParam, (GXLPWSTR)lParam )
-        : COMBO_GetTextA( lphc, wParam, (GXLPSTR)lParam );
+      return unicode ? COMBO_GetTextW( lphc, (GXINT)wParam, (GXLPWSTR)lParam )
+        : COMBO_GetTextA( lphc, (GXINT)wParam, (GXLPSTR)lParam );
     case WM_SETTEXT:
     case WM_GETTEXTLENGTH:
     case WM_CLEAR:
       if ((message == WM_GETTEXTLENGTH) && !ISWIN31 && !(lphc->wState & CBF_EDIT))
       {
-        int j = gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
+        int j = (GXINT)gxSendMessageW(lphc->hWndLBox, LB_GETCURSEL, 0, 0);
         if (j == -1) return 0;
         return unicode ? gxSendMessageW(lphc->hWndLBox, LB_GETTEXTLEN, j, 0) :
           gxSendMessageA(lphc->hWndLBox, LB_GETTEXTLEN, j, 0);
@@ -2170,7 +2170,7 @@ LRESULT ComboWndProc_common( GXHWND hwnd, GXUINT message, WPARAM wParam, LPARAM 
         return CB_ERR;
       /* new value must be higher than combobox width */
       if((GXINT)wParam >= lphc->droppedRect.right - lphc->droppedRect.left)
-        lphc->droppedWidth = wParam;
+        lphc->droppedWidth = (GXINT)wParam;
       else if(wParam)
         lphc->droppedWidth = 0;
 
@@ -2272,5 +2272,5 @@ GXBOOL WINAPI GetComboBoxInfo(GXHWND hwndCombo,      /* [in] handle to combo box
   PCOMBOBOXINFO pcbi   /* [in/out] combo box information */)
 {
   TRACE("(%p, %p)\n", hwndCombo, pcbi);
-  return gxSendMessageW(hwndCombo, CB_GETCOMBOBOXINFO, 0, (LPARAM)pcbi);
+  return gxSendMessageW(hwndCombo, CB_GETCOMBOBOXINFO, 0, (LPARAM)pcbi) != 0;
 }

@@ -897,14 +897,14 @@ GXBOOL GRegionImpl::_Impl_Intersect(GRegionImpl* pDestRegion, const GRegionImpl*
   GXUINT nBegin, nEnd;
   while(1)
   {
-    nBegin = pDestRegion->m_aData.size();
+    nBegin = (GXUINT)pDestRegion->m_aData.size();
     REGIONLINEHEAD* const prlhDest = 
       BeginLine(pDestRegion->m_aData, prlhSrc1->nCounts + prlhSrc2->nCounts + 2);
 
     if(prlhSrc1->nCounts != 0 && prlhSrc2->nCounts != 0)
     {
       Line_And(pDestRegion->m_aData, prlhSrc1->DataPtr(), prlhSrc2->DataPtr(), (size_t)prlhSrc1->nCounts, (size_t)prlhSrc2->nCounts);
-      nEnd = pDestRegion->m_aData.size();
+      nEnd = (GXUINT)pDestRegion->m_aData.size();
       prlhDest->nCounts = (nEnd - nBegin - 2);
     }
     else
@@ -1008,7 +1008,7 @@ SAME_LINE:
 
   while(1)
   {
-    nBegin = pDestRegion->m_aData.size();
+    nBegin = (GXUINT)pDestRegion->m_aData.size();
     REGIONLINEHEAD* const prlhDest = BeginLine(pDestRegion->m_aData, prlhSrc1->nCounts + prlhSrc2->nCounts + 2);
     //CheckCapacity(pDestRegion->m_aData, prlhSrc1->nCounts + prlhSrc2->nCounts);
     //prlhDest = (REGIONLINEHEAD*)&pDestRegion->m_aData[nBegin];
@@ -1016,7 +1016,7 @@ SAME_LINE:
     //pDestRegion->m_aData.push_back(0);
     //pDestRegion->m_aData.push_back(0);
     Line_Xor(pDestRegion->m_aData, prlhSrc1->DataPtr(), prlhSrc2->DataPtr(), (size_t)prlhSrc1->nCounts, (size_t)prlhSrc2->nCounts);
-    nEnd = pDestRegion->m_aData.size();
+    nEnd = (GXUINT)pDestRegion->m_aData.size();
     prlhDest->nCounts = (nEnd - nBegin - 2);
 
     pDestRegion->m_nLine++;
@@ -1142,7 +1142,7 @@ GXBOOL GRegionImpl::_Impl_Subtract(GRegionImpl* pDestRegion, const GRegionImpl* 
   }
   while(1)
   {
-    nBegin = pDestRegion->m_aData.size();
+    nBegin = (GXUINT)pDestRegion->m_aData.size();
     //CheckCapacity(pDestRegion->m_aData, prlhSrc1->nCounts + prlhSrc2->nCounts);
     //prlhDest = (REGIONLINEHEAD*)&pDestRegion->m_aData[nBegin];
     //pDestRegion->m_aData.push_back(0);
@@ -1157,7 +1157,7 @@ GXBOOL GRegionImpl::_Impl_Subtract(GRegionImpl* pDestRegion, const GRegionImpl* 
         Line_Subtract(pDestRegion->m_aData, prlhSrc1->DataPtr(), prlhSrc2->DataPtr(), 
         (size_t)prlhSrc1->nCounts, (size_t)prlhSrc2->nCounts);
 
-      nEnd = pDestRegion->m_aData.size();
+      nEnd = (GXUINT)pDestRegion->m_aData.size();
       prlhDest->nCounts = (nEnd - nBegin - 2);
     }
     else
@@ -1270,7 +1270,7 @@ SAME_LINE:
     if(prlhSrc1->nCounts != 0 && prlhSrc2->nCounts != 0)
     {
 
-      prlhDest->nCounts = Line_Or(pDestRegion->m_aData, 
+      prlhDest->nCounts = (GXUINT)Line_Or(pDestRegion->m_aData, 
         (REGIONLINE*)prlhSrc1->DataPtr(), (REGIONLINE*)prlhSrc2->DataPtr(), 
         (REGIONLINE*)prlhSrc1->DataPtr() + (prlhSrc1->nCounts >> 1), 
         (REGIONLINE*)prlhSrc2->DataPtr() + (prlhSrc2->nCounts >> 1));

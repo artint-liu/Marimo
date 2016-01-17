@@ -56,7 +56,7 @@ namespace RepoUtility
     return GX_OK;
   }
 
-  GXHRESULT LoadPrimitive(SmartRepository* pStorage, GXLPCSTR szDomain, GXVERTEXELEMENT* pVertElement, clBuffer* pVertices, clBuffer* pIndices, int& nStartIndex, int& nNumPrimi)
+  GXHRESULT LoadPrimitive(SmartRepository* pStorage, GXLPCSTR szDomain, GXVERTEXELEMENT* pVertElement, clBuffer* pVertices, clBuffer* pIndices, size_t& nStartIndex, size_t& nNumPrimi)
   {
     clStringA strMeshVertexDecl;
     clStringA strMeshAsmVertices;
@@ -117,7 +117,7 @@ namespace RepoUtility
 
 namespace ObjMeshUtility
 {
-  u32 CALLBACK ObjSymbolProc(SmartStreamA::iterator& it, clsize uRemain, u32_ptr lParam)
+  size_t CALLBACK ObjSymbolProc(SmartStreamA::iterator& it, clsize uRemain, u32_ptr lParam)
   {
     if(it.marker[0] == '#') {
       u32 i = 0;

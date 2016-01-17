@@ -554,7 +554,7 @@ GXHRESULT GXMaterialInstImpl::LoadRepository(GXGraphics* pGraphics, SmartReposit
   return GX_FAIL;
 }
 
-int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, int nCount)
+int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, GXSIZE_T nCount)
 {
   GXHRESULT hval = GX_FAIL;
   GXUINT    handle = NULL;
@@ -657,7 +657,7 @@ int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, int nCount)
   return i;
 }
 
-GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, int nCount)
+GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, GXSIZE_T nCount)
 {
   float4x4 mat;
   clStringArrayA aStrings;
@@ -753,7 +753,7 @@ GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, int nCount)
   return GX_OK;
 }
 
-GXHRESULT GXMaterialInstImpl::SetRenderStates(GXDEFINITION* pParameters, int nCount)
+GXHRESULT GXMaterialInstImpl::SetRenderStates(GXDEFINITION* pParameters, GXSIZE_T nCount)
 {
   RENDERSTATE RenderState;
   GXBOOL bRasterizer = FALSE;

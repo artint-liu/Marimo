@@ -152,23 +152,23 @@ GXBOOL GVMesh::InitializeAsObjFromMemory(GXGraphics* pGraphics, clBufferBase* pB
   return bval;
 }
 
-GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, VIndex* pIndices, int nIdxCount)
+GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount)
 {
   GXBOOL bval = FALSE;
   //m_eType       = eType;
-  m_nPrimiCount = nPrimCount;
-  m_nVertCount  = nVertCount;
+  m_nPrimiCount = (GXUINT)nPrimCount;
+  m_nVertCount  = (GXUINT)nVertCount;
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
   if(GXSUCCEEDED(pGraphics->CreatePrimitiveVI(&m_pPrimitive, NULL,
-    lpVertDecl, GXRU_DEFAULT, nIdxCount, nVertCount, nStride, pIndices, lpVertics)))
+    lpVertDecl, GXRU_DEFAULT, (GXUINT)nIdxCount, (GXUINT)nVertCount, (GXUINT)nStride, pIndices, lpVertics)))
   {
     GXVERTEXELEMENT Desc;
     int nOffset = MOGetDeclOffset(lpVertDecl, GXDECLUSAGE_POSITION, 0, &Desc);
     if(Desc.Type == GXDECLTYPE_FLOAT3)
     {
       AABB aabbPrim;
-      mesh::CalculateAABB(aabbPrim, (float3*)((GXLPBYTE)lpVertics + nOffset), nVertCount, nStride);
+      mesh::CalculateAABB(aabbPrim, (float3*)((GXLPBYTE)lpVertics + nOffset), (GXUINT)nVertCount, (GXUINT)nStride);
       m_aabbLocal.Merge(aabbPrim);
     }
     //m_aabbLocal.UpdateCenterExtent();
@@ -177,7 +177,7 @@ GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, int nPrimCount, GXLPCVE
   return bval;
 }
 
-GXBOOL GVMesh::IntSetPrimitive(int nPrimCount, int nStartIndex, GPrimitiveVI* pPrimitive)
+GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive)
 {
   m_pPrimitive = pPrimitive;
   if(m_pPrimitive) {
@@ -185,8 +185,8 @@ GXBOOL GVMesh::IntSetPrimitive(int nPrimCount, int nStartIndex, GPrimitiveVI* pP
   }
   else return FALSE;
   //m_eType = eType;
-  m_nPrimiCount = nPrimCount;
-  m_nStartIndex = nStartIndex;
+  m_nPrimiCount = (GXUINT)nPrimCount;
+  m_nStartIndex = (GXUINT)nStartIndex;
   m_nVertCount = m_pPrimitive->GetVerticesCount();
 
   //GVertexDeclaration* pDeclaration = NULL;
@@ -316,7 +316,7 @@ GXHRESULT GVMesh::GetMaterialInstFilenameW(clStringW* pstrFilename)
 
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, VIndex* pIndices, int nIdxCount, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if(pMesh == NULL) {
@@ -333,7 +333,7 @@ GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, int nPrimCount, GXL
   return GX_FAIL;
 }
 
-GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, int nPrimCount, int nStartIndex, GPrimitiveVI* pPrimitive, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
@@ -625,8 +625,8 @@ GXHRESULT GVMesh::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
   clBuffer Indices;
   try
   {
-    int nPrimiCount;
-    int nStartIndex;
+    GXSIZE_T nPrimiCount;
+    GXSIZE_T nStartIndex;
   //  pStorage->Read64(NULL, MESH_PRIMCOUNT, (u32*)&nPrimiCount, 0);
   //  pStorage->Read64(NULL, MESH_STARTINDEX, (u32*)&nStartIndex, 0);
     RepoUtility::LoadPrimitive(pStorage, "Mesh", VertexElement, &Vertices, &Indices, nStartIndex, nPrimiCount);
@@ -734,7 +734,7 @@ namespace mesh
   }
 
   template<typename _Ty>
-  inline void _SetVertexElementT(GXLPVOID lpFirstElement, GXUINT nStride, const _Ty& Value, GXUINT nVertCount)
+  inline void _SetVertexElementT(GXLPVOID lpFirstElement, GXUINT nStride, const _Ty& Value, GXSIZE_T nVertCount)
   {
     for(GXUINT nVertIndex = 0; nVertIndex < nVertCount; nVertIndex++) {
       *(_Ty*)lpFirstElement = Value;
@@ -742,7 +742,7 @@ namespace mesh
     }
   }
 
-  GXBOOL ClearVertexElement(GXLPVOID lpFirstElement, GXUINT cbElement, GXUINT nStride, GXUINT nVertCount)
+  GXBOOL ClearVertexElement(GXLPVOID lpFirstElement, GXSIZE_T cbElement, GXUINT nStride, GXSIZE_T nVertCount)
   {
     if(cbElement == 4) {
       _SetVertexElementT<GXDWORD>(lpFirstElement, nStride, 0, nVertCount);
@@ -766,7 +766,7 @@ namespace mesh
     return TRUE;
   }
 
-  GXBOOL SetVertexElement(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID pValue, GXUINT nVertCount)
+  GXBOOL SetVertexElement(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID pValue, GXSIZE_T nVertCount)
   {
     if(cbElementStride == 4) {
       _SetVertexElementT<GXDWORD>(lpFirstElement, nStride, *(GXDWORD*)pValue, nVertCount);
@@ -785,7 +785,7 @@ namespace mesh
   }
 
   template<typename _Ty>
-  inline void _CopyVertexElementT(GXLPVOID lpFirstElement, GXUINT nStride, _Ty* lpSource, GXUINT nVertCount)
+  inline void _CopyVertexElementT(GXLPVOID lpFirstElement, GXUINT nStride, _Ty* lpSource, GXSIZE_T nVertCount)
   {
     for(GXUINT nVertIndex = 0; nVertIndex < nVertCount; nVertIndex++) {
       *(_Ty*)lpFirstElement = *lpSource++;
@@ -793,7 +793,7 @@ namespace mesh
     }
   }
 
-  GXBOOL CopyVertexElementFromStream(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID lpSourceStream, GXUINT nVertCount)
+  GXBOOL CopyVertexElementFromStream(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID lpSourceStream, GXSIZE_T nVertCount)
   {
     if(cbElementStride == 4) {
       _CopyVertexElementT<GXDWORD>(lpFirstElement, nStride, (GXDWORD*)lpSourceStream, nVertCount);
@@ -822,9 +822,9 @@ namespace mesh
   GXBOOL CalculateNormalsT(
     float3*         pNormals, 
     const float3*   pVertices, 
-    int             nVertCount, 
+    GXSIZE_T        nVertCount, 
     const _VIndexT* pIndices, 
-    int             nFaceCount, 
+    GXSIZE_T        nFaceCount, 
     GXUINT          nNormalStride = NULL, 
     GXUINT          nVertexStride = NULL)
   {
@@ -872,11 +872,10 @@ namespace mesh
   }
 
   // 16-bits indices
-  GXBOOL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const VIndex* pIndices, int nFaceCount)
+  GXBOOL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const VIndex* pIndices, GXSIZE_T nFaceCount)
   {
     ASSERT(aNormals.size() == aVertices.size());
-    return mesh::CalculateNormalsT<VIndex>(&aNormals.front(), &aVertices.front(), 
-      aVertices.size(), pIndices, nFaceCount);
+    return mesh::CalculateNormalsT<VIndex>(&aNormals.front(), &aVertices.front(), aVertices.size(), pIndices, nFaceCount);
   }
 
   GXBOOL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const clvector<VIndex>& aIndices)
@@ -1059,7 +1058,7 @@ namespace mesh
     //aabb.UpdateCenterExtent();
   }
 
-  GXVOID CalculateAABBFromIndices(AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, int nIndexCount, GXUINT nVertexStride)
+  GXVOID CalculateAABBFromIndices(AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, GXSIZE_T nIndexCount, GXUINT nVertexStride)
   {
     if(nVertexStride == 0) {
       nVertexStride = sizeof(float3);
@@ -1073,19 +1072,19 @@ namespace mesh
   }
 
   template<typename _VIndexT>
-  GXBOOL ReverseVerticesArrayT( float3* pVertices, GXUINT nBegin, GXUINT nCount, _VIndexT* pIndices, GXUINT nFaceCount )
+  GXBOOL ReverseVerticesArrayT( float3* pVertices, GXSIZE_T nBegin, GXSIZE_T nCount, _VIndexT* pIndices, GXSIZE_T nFaceCount )
   {
-    const GXUINT nCountV = nCount >> 1;
-    const GXUINT nEnd = nBegin + nCount; // ²»º¬
+    const GXSIZE_T nCountV = nCount >> 1;
+    const GXSIZE_T nEnd = nBegin + nCount; // ²»º¬
     float3* pVerticesBack = pVertices + nEnd - 1;
     pVertices += nBegin;
-    for(GXUINT i = 0; i < nCountV; i++)
+    for(GXSIZE_T i = 0; i < nCountV; i++)
     {
       clSwap(*pVertices, *pVerticesBack);
       pVertices++;
       pVerticesBack--;
     }
-#define REVERSE_INDEX(_I)      if(_I >= nBegin && _I < nEnd) { _I = (nEnd - 1) - (_I - nBegin); }
+#define REVERSE_INDEX(_I)      if(_I >= nBegin && _I < nEnd) { _I = (_VIndexT)((nEnd - 1) - (_I - nBegin)); }
 
     if(pIndices && nFaceCount > 0)
     {
@@ -1101,12 +1100,12 @@ namespace mesh
     return TRUE;
   }
 
-  GXBOOL GXDLL ReverseVerticesArray( float3* pVertices, GXUINT nBegin, GXUINT nCount, VIndex* pIndices, GXUINT nFaceCount )
+  GXBOOL GXDLL ReverseVerticesArray( float3* pVertices, GXSIZE_T nBegin, GXSIZE_T nCount, VIndex* pIndices, GXSIZE_T nFaceCount )
   {
     return ReverseVerticesArrayT<VIndex>(pVertices, nBegin, nCount, pIndices, nFaceCount);
   }
 
-  GXBOOL GXDLL ReverseVerticesArray( float3* pVertices, GXUINT nBegin, GXUINT nCount, VIndex32* pIndices, GXUINT nFaceCount )
+  GXBOOL GXDLL ReverseVerticesArray( float3* pVertices, GXSIZE_T nBegin, GXSIZE_T nCount, VIndex32* pIndices, GXSIZE_T nFaceCount )
   {
     return ReverseVerticesArrayT<VIndex32>(pVertices, nBegin, nCount, pIndices, nFaceCount);
   }
@@ -1166,7 +1165,7 @@ GXBOOL GVMESHDATA::Check(const GVMESHDATA* pMesh)
   return TRUE;
 }
 
-GXUINT GVMESHDATA::Build(const GVMESHDATA* pMeshComponent, GXLPVERTEXELEMENT lpVertDelement)
+GXSIZE_T GVMESHDATA::Build(const GVMESHDATA* pMeshComponent, GXLPVERTEXELEMENT lpVertDelement)
 {
   typedef clvector<GXVERTEXELEMENT> VertElementArray;
   VertElementArray aVertDecl;

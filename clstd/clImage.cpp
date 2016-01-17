@@ -321,7 +321,7 @@ namespace clstd
   {
     int* aLine = new int[nWidth];
     const float fStrideH = (float)m_width / (float)nWidth;
-    const float fStrideV = (float)m_height / (float)nHeight;
+    //const float fStrideV = (float)m_height / (float)nHeight;
     float fx = 0;
     float fy = 0;
 

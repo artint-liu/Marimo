@@ -7,10 +7,10 @@ class ILogger : public GUnknown
 public:
   GXSTDINTERFACE(GXHRESULT  AddRef        ());
   GXSTDINTERFACE(GXHRESULT  Release       ());
-  GXSTDINTERFACE(u32        OutputW       (GXLPCWSTR szString));
-  GXSTDINTERFACE(u32        OutputA       (GXLPCSTR szString));
-  GXSTDINTERFACE(u32        OutputFormatA (GXLPCSTR szFormat, ...));
-  GXSTDINTERFACE(u32        OutputFormatW (GXLPCWSTR szFormat, ...));
+  GXSTDINTERFACE(size_t     OutputW       (GXLPCWSTR szString));
+  GXSTDINTERFACE(size_t     OutputA       (GXLPCSTR szString));
+  GXSTDINTERFACE(size_t     OutputFormatA (GXLPCSTR szFormat, ...));
+  GXSTDINTERFACE(size_t     OutputFormatW (GXLPCWSTR szFormat, ...));
 };
 
 
@@ -21,10 +21,10 @@ public:
 public:
   GXSTDINTERFACE(GXHRESULT  AddRef        ());
   GXSTDINTERFACE(GXHRESULT  Release       ());
-  GXSTDINTERFACE(u32        OutputW       (GXLPCWSTR szString));
-  GXSTDINTERFACE(u32        OutputA       (GXLPCSTR szString));
-  GXSTDINTERFACE(u32        OutputFormatA (GXLPCSTR szFormat, ...));
-  GXSTDINTERFACE(u32        OutputFormatW (GXLPCWSTR szFormat, ...));
+  GXSTDINTERFACE(size_t     OutputW       (GXLPCWSTR szString));
+  GXSTDINTERFACE(size_t     OutputA       (GXLPCSTR szString));
+  GXSTDINTERFACE(size_t     OutputFormatA (GXLPCSTR szFormat, ...));
+  GXSTDINTERFACE(size_t     OutputFormatW (GXLPCWSTR szFormat, ...));
   GXSTDINTERFACE(GXLPVOID   SetStreamProc (GXDWORD idThread, LogStreamProc pNewProc, GXLPARAM lParam));
 };
 

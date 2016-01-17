@@ -45,6 +45,7 @@ namespace clstd
       virtual i32 Run();
 
       b32 Start();
+      u32 Wait(u32 nMilliSec);
     };
   } // namespace _posix
 #endif // #ifdef POSIX_THREAD

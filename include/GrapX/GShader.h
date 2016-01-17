@@ -102,9 +102,9 @@ public:
   GXSTDINTERFACE(GXBOOL         SetTextureByHandle      (GTextureBase** pTextureArray, GXUINT uHandle, GTextureBase* pTexture));
   GXSTDINTERFACE(GXBOOL         SetTextureByIndex       (GTextureBase** pTextureArray, GXUINT nIndex, GTextureBase* pTexture));
 #ifdef REFACTOR_SHADER
-  GXSTDINTERFACE(GXBOOL         CommitToDevice          (GXLPVOID lpUniform, GXUINT cbSize));
-  GXSTDINTERFACE(GXBOOL         UpdateCanvasUniform     (GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize));
-  GXSTDINTERFACE(GXBOOL         UpdateUniform           (int nDefIdx, GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize));
+  GXSTDINTERFACE(GXBOOL         CommitToDevice          (GXLPVOID lpUniform, GXSIZE_T cbSize));
+  GXSTDINTERFACE(GXBOOL         UpdateCanvasUniform     (GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize));
+  GXSTDINTERFACE(GXBOOL         UpdateUniform           (int nDefIdx, GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize));
 #endif // #ifdef REFACTOR_SHADER
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE

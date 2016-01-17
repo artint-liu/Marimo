@@ -66,9 +66,9 @@ namespace D3D9
     virtual GXBOOL        SetTextureByHandle      (GTextureBase** pTextureArray, GXUINT uHandle, GTextureBase* pTexture);
     virtual GXBOOL        SetTextureByIndex       (GTextureBase** pTextureArray, GXUINT uIndex, GTextureBase* pTexture);
 #ifdef REFACTOR_SHADER
-    virtual GXBOOL        CommitToDevice          (GXLPVOID lpUniform, GXUINT cbSize);
-    virtual GXBOOL        UpdateCanvasUniform     (GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize);
-    virtual GXBOOL        UpdateUniform           (int nDefIdx, GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize);
+    virtual GXBOOL        CommitToDevice          (GXLPVOID lpUniform, GXSIZE_T cbSize) override;
+    virtual GXBOOL        UpdateCanvasUniform     (GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize) override;
+    virtual GXBOOL        UpdateUniform           (int nDefIdx, GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize) override;
 #endif // #ifdef REFACTOR_SHADER
 
     // 接口实现

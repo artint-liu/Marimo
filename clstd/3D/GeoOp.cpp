@@ -848,7 +848,7 @@ RET_HIT_CONTENT:
     quaternion BoxOrientation = pVolumeA->Orientation;
 
     //XMASSERT( XMQuaternionIsUnit( BoxOrientation ) );
-    /*
+    
     // Transform the oriented box into the space of the frustum in order to 
     // minimize the number of transforms we have to do.
     Center = XMVector3InverseRotate( Center - Origin, FrustumOrientation );

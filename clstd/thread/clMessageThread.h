@@ -421,7 +421,7 @@ namespace clstd
     size_t uMsgCount = m_aMessage.size();
     if(uMsgCount > 0)
     {
-      for(_TList::iterator it = m_aMessage.begin();
+      for(typename _TList::iterator it = m_aMessage.begin();
         it != m_aMessage.end(); ++it)
       {
         if((handle == NULL || handle == it->handle) &&

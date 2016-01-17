@@ -117,7 +117,7 @@ namespace GXUI
   {
     GXHWND hParent = gxGetWindow(m_hWnd, GXGW_PARENT);
     if(hParent) {
-      GXDWORD wId = gxGetWindowLong(m_hWnd, GXGWL_ID);
+      GXDWORD wId = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_ID);
       gxSendMessage(hParent, GXWM_COMMAND, GXMAKEWPARAM(wId, wNotiMsg), (GXLPARAM)m_hWnd);
     }
     return FALSE;

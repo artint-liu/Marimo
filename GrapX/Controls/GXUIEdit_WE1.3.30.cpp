@@ -102,10 +102,10 @@ typedef enum
 
 typedef struct tagLINEDEF {
   GXINT     length;       // bruto length of a line in bytes
-  GXINT     net_length;   // netto length of a line in visible characters
+  size_t    net_length;   // netto length of a line in visible characters
   LINE_END  ending;
   GXINT     width;        // width of the line in pixels
-  GXINT     index;        // line index into the buffer
+  size_t    index;        // line index into the buffer
   struct tagLINEDEF *next;
 } LINEDEF;
 
@@ -502,9 +502,9 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
   LINEDEF *current_line;
   LINEDEF *previous_line;
   LINEDEF *start_line;
-  GXINT line_index = 0, nstart_line = 0, nstart_index = 0;
+  size_t line_index = 0, nstart_line = 0, nstart_index = 0;
   GXINT l_line_count = line_count;
-  GXINT orig_net_length;
+  size_t orig_net_length;
   GXRECT rc;
 
   if (istart == iend && delta == 0)
@@ -554,7 +554,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
   do {
     if (current_line != start_line)
     {
-      if (!current_line || current_line->index + delta > current_position - m_pText)
+      if ( ! current_line || (current_line->index + (size_t)delta) > (size_t)(current_position - m_pText))
       {
         /* The buffer has been expanded, create a new line and
         insert it into the link list */
@@ -564,7 +564,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
         current_line = new_line;
         line_count++;
       }
-      else if (current_line->index + delta < current_position - m_pText)
+      else if (current_line->index + (size_t)delta < (size_t)(current_position - m_pText))
       {
         /* The previous line merged with this line so we delete this extra entry */
         previous_line->next = current_line->next;
@@ -610,7 +610,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
 
     /* Calculate line width */
     current_line->width = (GXINT)GXLOWORD(gxGetTabbedTextExtentW(dc,
-      current_position, current_line->net_length,
+      current_position, (GXINT)current_line->net_length,
       tabs_count, tabs));
 
     /* FIXME: check here for lines that are too wide even in AUTOHSCROLL (> 32767 ???) */
@@ -620,8 +620,8 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
         GXINT prev;
         do {
           prev = next;
-          next = CallWordBreakProc(current_position - m_pText,
-            prev + 1, current_line->net_length, GXWB_RIGHT);
+          next = CallWordBreakProc((GXINT)(current_position - m_pText),
+            prev + 1, (GXINT)current_line->net_length, GXWB_RIGHT);
           current_line->width = (GXINT)GXLOWORD(gxGetTabbedTextExtentW(dc,
             current_position, next, tabs_count, tabs));
         } while (current_line->width <= fw);
@@ -639,8 +639,8 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
 
         /* If the first line we are calculating, wrapped before istart, we must
         * adjust istart in order for this to be reflected in the update region. */
-        if (current_line->index == nstart_index && istart > current_line->index + prev)
-          istart = current_line->index + prev;
+        if (current_line->index == nstart_index && (size_t)istart > current_line->index + (size_t)prev)
+          istart = (GXINT)(current_line->index + prev);
         /* else if we are updating the previous line before the first line we
         * are re-calculating and it expanded */
         else if (current_line == start_line &&
@@ -650,13 +650,13 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
           * previous line in update region */
           nstart_line = line_index;
           nstart_index = current_line->index;
-          istart = current_line->index + orig_net_length;
+          istart = (GXINT)(current_line->index + orig_net_length);
         }
 
         current_line->net_length = prev;
         current_line->ending = END_WRAP;
         current_line->width = (GXINT)GXLOWORD(gxGetTabbedTextExtentW(dc, current_position,
-          current_line->net_length, tabs_count, tabs));
+          (GXINT)current_line->net_length, tabs_count, tabs));
       }
       else if (current_line == start_line &&
         current_line->index != nstart_index &&
@@ -666,7 +666,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
           it in the update region */
           nstart_line = line_index;
           nstart_index = current_line->index;
-          istart = current_line->index + orig_net_length;
+          istart = (GXINT)(current_line->index + orig_net_length);
       }
     }
 
@@ -674,17 +674,17 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
     /* Adjust length to include line termination */
     switch (current_line->ending) {
     case END_SOFT:
-      current_line->length = current_line->net_length + 3;
+      current_line->length = (GXINT)(current_line->net_length + 3);
       break;
     case END_RICH:
-      current_line->length = current_line->net_length + 1;
+      current_line->length = (GXINT)(current_line->net_length + 1);
       break;
     case END_HARD:
-      current_line->length = current_line->net_length + 2;
+      current_line->length = (GXINT)(current_line->net_length + 2);
       break;
     case END_WRAP:
     case END_0:
-      current_line->length = current_line->net_length;
+      current_line->length = (GXINT)current_line->net_length;
       break;
     }
     text_width = max(text_width, current_line->width);
@@ -726,14 +726,14 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
     * an indent with respect to the format rect. The other is a format-width
     * rectangle that spans the rest of the lines that changed or moved.
     */
-    rc.top = format_rect.top + nstart_line * line_height -
-      (y_offset * line_height); /* Adjust for vertical scrollbar */
+    rc.top = (GXLONG)(format_rect.top + nstart_line * line_height -
+      (y_offset * line_height)); /* Adjust for vertical scrollbar */
     rc.bottom = rc.top + line_height;
     if ((m_dwStyle & ES_CENTER) || (m_dwStyle & ES_RIGHT))
       rc.left = format_rect.left;
     else
       rc.left = format_rect.left + (GXINT)GXLOWORD(gxGetTabbedTextExtentW(dc,
-      m_pText + nstart_index, istart - nstart_index,
+      m_pText + nstart_index, (GXINT)(istart - nstart_index),
       tabs_count, tabs)) - x_offset; /* Adjust for horz scroll */
     rc.right = format_rect.right;
     gxSetRectRgn(hrgn, rc.left, rc.top, rc.right, rc.bottom);
@@ -750,7 +750,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
     else if (l_line_count > line_count) /* We removed lines */
       rc.bottom = l_line_count * line_height;
     else
-      rc.bottom = line_index * line_height;
+      rc.bottom = (GXLONG)(line_index * line_height);
     rc.bottom += format_rect.top;
     rc.bottom -= (y_offset * line_height); /* Adjust for vertical scrollbar */
     tmphrgn = gxCreateRectRgn(rc.left, rc.top, rc.right, rc.bottom);
@@ -857,7 +857,7 @@ GXINT EDITSTATE::CharFromPos(GXINT x, GXINT y, GXLPBOOL after_wrap)
     if (x >= line_def->width) {
       if (after_wrap)
         *after_wrap = (line_def->ending == END_WRAP);
-      return line_index + line_def->net_length;
+      return (GXINT)(line_index + line_def->net_length);
     }
     if (x <= 0) {
       if (after_wrap)
@@ -868,7 +868,7 @@ GXINT EDITSTATE::CharFromPos(GXINT x, GXINT y, GXLPBOOL after_wrap)
     if (m_hFont)
       old_font = (GXHFONT)gxSelectObject(dc, m_hFont);
     low = line_index;
-    high = line_index + line_def->net_length + 1;
+    high = (GXINT)(line_index + line_def->net_length + 1);
     while (low < high - 1)
     {
       GXINT mid = (low + high) / 2;
@@ -1076,7 +1076,7 @@ GXINT EDITSTATE::EM_LineLength(GXINT index)
     line_def = line_def->next;
     index -= line_def->length;
   }
-  return line_def->net_length;
+  return (GXINT)line_def->net_length;
 }
 
 
@@ -1126,7 +1126,7 @@ GXLRESULT EDITSTATE::EM_PosFromChar(GXINT index, GXBOOL after_wrap)
     while (line_def->index != li)
       line_def = line_def->next;
 
-    ll = line_def->net_length;
+    ll = (GXINT)line_def->net_length;
     lw = line_def->width;
 
     w = format_rect.right - format_rect.left;
@@ -1233,7 +1233,7 @@ void EDITSTATE::LockBuffer()
         if(hloc32W_new)
         {
           hloc32W = hloc32W_new;
-          buffer_size = gxLocalSize(hloc32W_new)/sizeof(GXWCHAR) - 1;
+          buffer_size = (GXUINT)gxLocalSize(hloc32W_new)/sizeof(GXWCHAR) - 1;
           TRACE("Real new size %d+1 WCHARs\n", buffer_size);
         }
         else
@@ -1283,7 +1283,7 @@ void EDITSTATE::UnlockBuffer(GXBOOL force)
         GXUINT countA_new = gxWideCharToMultiByte(CP_ACP, 0, m_pText, countW, NULL, 0, NULL, NULL);
         TRACE("Synchronizing with 32-bit ANSI buffer\n");
         TRACE("%d WCHARs translated to %d bytes\n", countW, countA_new);
-        countA = LocalSize(hloc32A);
+        countA = (GXUINT)LocalSize(hloc32A);
         if(countA_new > countA)
         {
           GXHLOCAL hloc32A_new;
@@ -1293,7 +1293,7 @@ void EDITSTATE::UnlockBuffer(GXBOOL force)
           if(hloc32A_new)
           {
             hloc32A = hloc32A_new;
-            countA = LocalSize(hloc32A_new);
+            countA = (GXUINT)LocalSize(hloc32A_new);
             TRACE("Real new size %d bytes\n", countA);
           }
           else
@@ -1339,7 +1339,7 @@ GXBOOL EDITSTATE::MakeFit(GXUINT size)
     if ((hNew32W = gxLocalReAlloc(hloc32W, alloc_size, LMEM_MOVEABLE | LMEM_ZEROINIT))) {
       TRACE("Old 32 bit handle %p, new handle %p\n", hloc32W, hNew32W);
       hloc32W = hNew32W;
-      buffer_size = gxLocalSize(hNew32W)/sizeof(GXWCHAR) - 1;
+      buffer_size = (GXUINT)gxLocalSize(hNew32W)/sizeof(GXWCHAR) - 1;
     }
   }
 
@@ -2726,7 +2726,7 @@ void EDITSTATE::EM_SetHandle(GXHLOCAL hloc)
     GXWCHAR *textW;
     GXCHAR *textA;
 
-    countA = gxLocalSize(hloc);
+    countA = (GXINT)gxLocalSize(hloc);
     textA = (GXCHAR*)gxLocalLock(hloc);
     countW = gxMultiByteToWideChar(CP_ACP, 0, textA, countA, NULL, 0);
     if(!(hloc32W_new = gxLocalAlloc(LMEM_MOVEABLE | LMEM_ZEROINIT, countW * sizeof(GXWCHAR))))
@@ -2746,7 +2746,7 @@ void EDITSTATE::EM_SetHandle(GXHLOCAL hloc)
     hloc32A = hloc;
   }
 
-  buffer_size = gxLocalSize(hloc32W)/sizeof(GXWCHAR) - 1;
+  buffer_size = (GXUINT)gxLocalSize(hloc32W)/sizeof(GXWCHAR) - 1;
 
   flags |= EF_APP_HAS_HANDLE;
   LockBuffer();
@@ -2878,7 +2878,7 @@ void EDITSTATE::EM_SetPasswordChar(GXWCHAR c)
   if (password_char == c)
     return;
 
-  dwStyle = gxGetWindowLongW( hwndSelf, GWL_STYLE );
+  dwStyle = (GXLONG)gxGetWindowLongW( hwndSelf, GWL_STYLE );
   password_char = c;
   if (c) {
     gxSetWindowLongW( hwndSelf, GWL_STYLE, dwStyle | ES_PASSWORD );
@@ -3266,7 +3266,7 @@ GXINT EDITSTATE::WM_GetText(GXINT count, GXLPWSTR dst, GXBOOL unicode) const
     GXLPSTR textA = (GXLPSTR)dst;
     if (!gxWideCharToMultiByte(CP_ACP, 0, m_pText, -1, textA, count, NULL, NULL))
       textA[count - 1] = 0; /* ensure 0 termination */
-    return strlen(textA);
+    return (GXINT)strlen(textA);
   }
 }
 
@@ -3442,7 +3442,7 @@ GXLRESULT EDITSTATE::WM_KeyDown(GXINT key)
         break;
       }
 
-      dw = gxSendMessageW(hwndParent, DM_GETDEFID, 0, 0);
+      dw = (GXDWORD)gxSendMessageW(hwndParent, DM_GETDEFID, 0, 0);
       if (GXHIWORD(dw) == DC_HASDEFID)
       {
         GXHWND hwDefCtrl = gxGetDlgItem(hwndParent, GXLOWORD(dw));
@@ -4433,7 +4433,7 @@ GXLRESULT EDITSTATE::WM_NCCreate(GXHWND hwnd, GXLPCREATESTRUCTW lpcs, GXBOOL uni
   alloc_size = ROUND_TO_GROW((es->buffer_size + 1) * sizeof(GXWCHAR));
   if(!(es->hloc32W = gxLocalAlloc(LMEM_MOVEABLE | LMEM_ZEROINIT, alloc_size)))
     goto cleanup;
-  es->buffer_size = gxLocalSize(es->hloc32W)/sizeof(GXWCHAR) - 1;
+  es->buffer_size = (GXUINT)gxLocalSize(es->hloc32W)/sizeof(GXWCHAR) - 1;
 
   if (!(es->undo_text = (GXLPWSTR)gxHeapAlloc(gxGetProcessHeap(), GXHEAP_ZERO_MEMORY, (es->buffer_size + 1) * sizeof(GXWCHAR))))
     goto cleanup;
@@ -4636,7 +4636,7 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
     break;
 
   case GXEM_SETSEL:
-    es->EM_SetSel(wParam, lParam, FALSE);
+    es->EM_SetSel((GXUINT)wParam, (GXUINT)lParam, FALSE);
     es->EM_ScrollCaret();
     result = 1;
     break;
@@ -4746,7 +4746,7 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
     break;
 
   case GXEM_SETLIMITTEXT:
-    es->EM_SetLimitText(wParam);
+    es->EM_SetLimitText((GXUINT)wParam);
     break;
 
   case GXEM_CANUNDO:
@@ -4778,7 +4778,7 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
         charW = (GXWCHAR)wParam;
       else
       {
-        GXCHAR charA = wParam;
+        GXCHAR charA = (GXCHAR)wParam;
         gxMultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
       }
 
@@ -4902,8 +4902,8 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
       GXWCHAR charW;
       GXCHAR  strng[2];
 
-      strng[0] = wParam >> 8;
-      strng[1] = wParam & 0xff;
+      strng[0] = (GXCHAR)(wParam >> 8);
+      strng[1] = (GXCHAR)(wParam & 0xff);
       if (strng[0]) gxMultiByteToWideChar(CP_ACP, 0, strng, 2, &charW, 1);
       else gxMultiByteToWideChar(CP_ACP, 0, &strng[1], 1, &charW, 1);
       result = es->WM_Char(charW);
@@ -4915,10 +4915,10 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
       GXWCHAR charW;
 
       if(unicode)
-        charW = wParam;
+        charW = (GXWCHAR)wParam;
       else
       {
-        GXCHAR charA = wParam;
+        GXCHAR charA = (GXCHAR)wParam;
         gxMultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
       }
 
@@ -4944,11 +4944,11 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
         if(wParam > 0xffff) /* convert to surrogates */
         {
           wParam -= 0x10000;
-          es->WM_Char((wParam >> 10) + 0xd800);
+          es->WM_Char((GXWCHAR)(wParam >> 10) + 0xd800);
           es->WM_Char((wParam & 0x03ff) + 0xdc00);
         }
         else {
-          es->WM_Char(wParam);
+          es->WM_Char((GXWCHAR)wParam);
         }
       }
       return 0;
@@ -5034,7 +5034,7 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
     break;
 
   case GXWM_LBUTTONDOWN:
-    result = es->WM_LButtonDown(wParam, (short)GXLOWORD(lParam), (short)GXHIWORD(lParam));
+    result = es->WM_LButtonDown((GXDWORD)wParam, (short)GXLOWORD(lParam), (short)GXHIWORD(lParam));
     break;
 
   case GXWM_LBUTTONUP:

@@ -84,7 +84,7 @@ namespace GXUI
     virtual GXBOOL    SetAdapter          (IListDataAdapter* pAdapter);
     virtual GXBOOL    GetAdapter          (IListDataAdapter** ppAdapter);
     virtual void      SetScrolledVal      (GXINT nScrolled);
-    virtual GXINT     GetItemHeight       (GXINT nIdx) const;
+    virtual GXINT     GetItemHeight       (GXSIZE_T nIdx) const;
     virtual GXBOOL    EndScroll           ();
     virtual GXBOOL    GetItemRect         (int nItem, GXDWORD dwStyle, GXLPRECT lprc) const GXPURE;
     virtual GXINT     HitTest             (int fwKeys, int x, int y) const GXPURE;
@@ -104,11 +104,11 @@ namespace GXUI
     //GXBOOL      ReduceItemStat      (GXINT nCount);
     GXBOOL      UpdateTopIndex      (GXDWORD dwStyle);
     GXBOOL      UpdateTopIndex      ();
-    GXINT       AddStringW          (GXLPCWSTR lpString);
-    GXINT       GetStringW          (GXSIZE_T nIndex, clStringW& str);
-    GXINT       DeleteString        (GXSIZE_T nIndex);
+    GXSIZE_T    AddStringW          (GXLPCWSTR lpString);
+    GXSIZE_T    GetStringW          (GXSIZE_T nIndex, clStringW& str);
+    GXSIZE_T    DeleteString        (GXSIZE_T nIndex);
     GXVOID      ResetContent        ();
-    GXINT       GetCount            () const;
+    GXSIZE_T    GetCount            () const;
     GXINT       SetItemHeight       (GXINT nNewHeight);
     GXBOOL      IsItemSelected      (GXINT nItem) const;
     GXCOLORREF  SetColor            (GXUINT nType, GXCOLORREF color);

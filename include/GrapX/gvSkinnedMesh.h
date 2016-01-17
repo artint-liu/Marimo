@@ -13,14 +13,14 @@ private:
   GXUINT      m_nVertStride;
   GXUINT      m_nPosOffset;
   GXUINT      m_nNormalOffset;
-  int         m_nClusterCount;
+  GXSIZE_T    m_nClusterCount;
 
 protected:
   GVSkinnedMeshSoft(GXGraphics* pGraphics);
   virtual ~GVSkinnedMeshSoft();
 
-  GXBOOL Initialize(GXGraphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount);
-  GXBOOL Initialize(GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount);
+  GXBOOL Initialize(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, GXWORD* pIndices, GXSIZE_T nIdxCount, GVSkeleton* pSkeleton, float* pWeight, GXSIZE_T nClusterCount);
+  GXBOOL Initialize(GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, GXSIZE_T nClusterCount);
   GXBOOL CheckSkeleton(GVSkeleton* pSkeleton);
 
 public:

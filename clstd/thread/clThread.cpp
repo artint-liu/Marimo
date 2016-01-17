@@ -125,6 +125,12 @@ namespace clstd
     {
       return 0;
     }
+
+    u32 Thread::Wait(u32 nMilliSec)
+    {
+      return 0;
+    }
+
   } // namespace _posix
 #endif // #ifdef POSIX_THREAD
 

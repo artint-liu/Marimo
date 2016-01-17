@@ -61,7 +61,7 @@ int GXDLLAPI gxGetObject(
   default:
     return 0;
   }
-  return nNumCopy;
+  return (int)nNumCopy;
 }
 
 

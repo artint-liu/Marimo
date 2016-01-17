@@ -37,15 +37,15 @@
 
 GXBOOL GVSkinnedMeshSoft::Initialize(
   GXGraphics*         pGraphics,
-  int                 nPrimCount, 
+  GXSIZE_T            nPrimCount, 
   GXLPCVERTEXELEMENT  lpVertDecl, 
   GXLPVOID            lpVertics, 
-  int                 nVertCount, 
+  GXSIZE_T            nVertCount, 
   GXWORD*             pIndices, 
-  int                 nIdxCount, 
+  GXSIZE_T            nIdxCount, 
   GVSkeleton*         pSkeleton, 
   float*              pWeight, 
-  int                 nClusterCount)
+  GXSIZE_T            nClusterCount)
 {
   if(IntCreatePrimitive(pGraphics, nPrimCount, lpVertDecl, lpVertics, nVertCount, pIndices, nIdxCount))
   {
@@ -70,11 +70,11 @@ GXBOOL GVSkinnedMeshSoft::Initialize(
   return FALSE;
 }
 
-GXBOOL GVSkinnedMeshSoft::Initialize(GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount)
+GXBOOL GVSkinnedMeshSoft::Initialize(GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, clsize nClusterCount)
 {
   if(GVMesh::IntCreateMesh(pGraphics, pMeshData))
   {
-    const int nVertCount = pMeshData->nVertexCount;
+    const GXSIZE_T nVertCount = pMeshData->nVertexCount;
     m_pWeight = new float[nClusterCount * nVertCount];
     memcpy(m_pWeight, pWeight, nClusterCount * nVertCount * sizeof(float));
 
@@ -201,7 +201,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
     pSrcNormal = (float3*)((GXBYTE*)m_pVertices + m_nNormalOffset);
     pDestNormal = (float3*)((GXBYTE*)pNewVertices + m_nNormalOffset);
 
-    for(int nVertIndex = 0; nVertIndex < m_nVertCount; nVertIndex++)
+    for(GXSIZE_T nVertIndex = 0; nVertIndex < m_nVertCount; nVertIndex++)
     {
       float3 vPos(0.0f);
       float3 vNormal(0.0f);
@@ -272,8 +272,8 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(SmartRepository* pStorage)
     //pStorage->Write64(NULL, SKINNEDMESH_STARTINDEX, m_nStartIndex, 0);
     RepoUtility::SavePrimitive(pStorage, "SkMesh", m_pPrimitive, m_nStartIndex, m_nPrimiCount);
     
-    pStorage->Write(NULL, SKINNEDMESH_WEIGHT, m_pWeight, m_nVertCount * m_nClusterCount * sizeof(float));
-    pStorage->Write64(NULL, SKINNEDMESH_CLUSTERCOUNT, m_nClusterCount, 0);
+    pStorage->Write(NULL, SKINNEDMESH_WEIGHT, m_pWeight, (u32)(m_nVertCount * m_nClusterCount * sizeof(float)));
+    pStorage->Write64(NULL, SKINNEDMESH_CLUSTERCOUNT, (u32)m_nClusterCount, 0);
   }
 
   ASSERT(GetFirstChild() == NULL);
@@ -327,20 +327,20 @@ GXHRESULT GVSkinnedMeshSoft::LoadFile(GXGraphics* pGraphics, SmartRepository* pS
     //  ASSERT(0);
     //}
 
-    int nPrimiCount;
-    int nStartIndex;
-    int nClusterCount;
+    clsize nPrimiCount;
+    clsize nStartIndex;
+    clsize nClusterCount;
 
     RepoUtility::LoadPrimitive(pStorage, "SkMesh", VertexElement, &Vertices, &Indices, nStartIndex, nPrimiCount);
 
     s32 nStride = MOGetDeclVertexSize(VertexElement);
-    s32 nVertCount = Vertices.GetSize() / nStride;
+    size_t nVertCount = Vertices.GetSize() / nStride;
 
     //pStorage->Read64(NULL, SKINNEDMESH_PRIMCOUNT, (u32*)&nPrimiCount, 0);
     //pStorage->Read64(NULL, SKINNEDMESH_STARTINDEX, (u32*)&nStartIndex, 0);
     pStorage->Read64(NULL, SKINNEDMESH_CLUSTERCOUNT, (u32*)&nClusterCount, 0);
 
-    nReadSize = pStorage->Read(NULL, SKINNEDMESH_WEIGHT, pWeight, nVertCount * nClusterCount * sizeof(float));
+    nReadSize = pStorage->Read(NULL, SKINNEDMESH_WEIGHT, pWeight, (u32)(nVertCount * nClusterCount * sizeof(float)));
 
 
     GXBOOL bval = Initialize(pGraphics, nPrimiCount, VertexElement, Vertices.GetPtr(), nVertCount, (VIndex*)Indices.GetPtr(), 

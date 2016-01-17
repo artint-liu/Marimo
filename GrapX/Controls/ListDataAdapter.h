@@ -28,7 +28,7 @@ namespace GXUI
     virtual GXSIZE_T    GetCount        () const;
     //virtual GXINT       GetItemBottoms      (GXINT* bottoms, const GXINT* indices, int count) GXCONST;
 
-    virtual GXINT       AddStringW          (GXLPCWSTR szName, GXLPCWSTR lpString);
+    virtual GXSIZE_T    AddStringW          (GXLPCWSTR szName, GXLPCWSTR lpString);
     virtual GXBOOL      GetStringW          (GETSTRW* pItemStrDesc);
     //virtual GXDWORD     GetStatus           (GXINT item) GXCONST;
     //virtual GXDWORD     SetStatus           (GXINT item, GXDWORD dwNewStatus);

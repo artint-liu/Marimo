@@ -80,7 +80,7 @@ namespace D3D9
     GXUniformType   GetHandleType       (GXUINT handle) GXCONST;
     GXUINT          GetStageByHandle    (GXUINT handle) GXCONST;
 #ifdef REFACTOR_SHADER
-    GXBOOL          CommitToDevice      (GXLPVOID lpUniform, GXUINT cbSize);
+    GXBOOL          CommitToDevice      (GXLPVOID lpUniform, GXSIZE_T cbSize);
 #endif // #ifdef REFACTOR_SHADER
   };
   //////////////////////////////////////////////////////////////////////////

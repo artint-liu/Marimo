@@ -443,9 +443,9 @@ FINAL_RET:
     if(num == 0) {
       return 0;
     }
-    int i = 1;
+    _Ty i = 1;
     while((_Ty)(1 << i) < num) i++;
-    return (1 << i);
+    return ((_Ty)1 << i);
   }
 
   class Rand

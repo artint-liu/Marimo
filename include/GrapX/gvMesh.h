@@ -7,8 +7,8 @@ class GPrimitiveVI;
 
 struct GVMESHDATA
 {
-  int         nVertexCount;     // 顶点数量, 除索引列表外, 下面的元素必须都与这个数量一致
-  int         nIndexCount;      // 索引数量
+  GXSIZE_T   nVertexCount;     // 顶点数量, 除索引列表外, 下面的元素必须都与这个数量一致
+  GXSIZE_T   nIndexCount;      // 索引数量
   float3*     pVertices;        // 顶点, 这个必须有
   float3*     pNormals;         // 法线, 可选
   float3*     pTangents;        // 切线, 可选
@@ -25,7 +25,7 @@ struct GVMESHDATA
 
   static void   Destroy   (GVMESHDATA* pMeshData);
   static GXBOOL Check     (const GVMESHDATA* pMeshData);
-  static GXUINT Build     (const GVMESHDATA* pMeshData, GXLPVERTEXELEMENT lpVertDelement); // 要给一个足够大的数组,建议64个
+  static GXSIZE_T Build     (const GVMESHDATA* pMeshData, GXLPVERTEXELEMENT lpVertDelement); // 要给一个足够大的数组,建议64个
 };
 
 class GXDLL GVMesh : public GVNode
@@ -33,15 +33,15 @@ class GXDLL GVMesh : public GVNode
 protected:
   GXMaterialInst*   m_pMtlInst;
   GPrimitiveVI*     m_pPrimitive;
-  int               m_nPrimiCount;
-  int               m_nVertCount;
-  int               m_nStartIndex;
+  GXUINT            m_nPrimiCount;
+  GXUINT            m_nVertCount;
+  GXUINT            m_nStartIndex;
 protected:
   void   Clear();
   GXBOOL InitializeAsObjFromFile(GXGraphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform);
   GXBOOL InitializeAsObjFromMemory(GXGraphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform);
-  GXBOOL IntCreatePrimitive(GXGraphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, VIndex* pIndices, int nIdxCount);
-  GXBOOL IntSetPrimitive(int nPrimCount, int nStartIndex, GPrimitiveVI* pPrimitive);
+  GXBOOL IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount);
+  GXBOOL IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive);
   GXBOOL IntCreateMesh(GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent);
   GXBOOL IntInitializeAsContainer(GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount);
   //GXBOOL CloneMesh(GVMesh* pSource);
@@ -77,8 +77,8 @@ public:
 
   void ApplyTransform(); // 将变换应用到顶点
 
-  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, VIndex* pIndices, int nIdxCount, GVMesh** ppMesh);
-  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, int nPrimCount, int nStartIndex, GPrimitiveVI* pPrimitive, GVMesh** ppMesh);
+  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh);
+  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive, GVMesh** ppMesh);
   static GXHRESULT CreateMesh             (GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh);
   static GXHRESULT CreateContainer        (GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh); // 不增加pNodesArray中Node的引用计数
   //static GXHRESULT Clone                  (GVMesh** pNewMesh, GVMesh* pSourceMesh);
@@ -104,15 +104,15 @@ namespace mesh
   }
 
   GXBOOL GXDLL ValidateIndex(VIndex* pIndices, int nIndexCount, int nVertexCount);
-  GXBOOL GXDLL ClearVertexElement(GXLPVOID lpFirstElement, GXUINT cbElement, GXUINT nStride, GXUINT nVertCount);
-  GXBOOL GXDLL CopyVertexElementFromStream(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID lpSourceStream, GXUINT nVertCount); // lpSourceStream 的大小是 cbElementStride
-  GXBOOL GXDLL SetVertexElement(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID pValue, GXUINT nVertCount);
+  GXBOOL GXDLL ClearVertexElement(GXLPVOID lpFirstElement, GXSIZE_T cbElement, GXUINT nStride, GXSIZE_T nVertCount);
+  GXBOOL GXDLL CopyVertexElementFromStream(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID lpSourceStream, GXSIZE_T nVertCount); // lpSourceStream 的大小是 cbElementStride
+  GXBOOL GXDLL SetVertexElement(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID pValue, GXSIZE_T nVertCount);
   GXBOOL GXDLL TransformPosition(const float4x4& mat, float3* pVertices, GXUINT nCount, GXUINT nStride = 0);
   GXBOOL GXDLL TransformVectors(const float4x4& mat, float3* pVertors, GXUINT nCount, GXUINT nStride = 0);
 
   // 翻转pVertices中的顶点顺序，如果pIndices不为NULL也会调整索引
-  GXBOOL GXDLL ReverseVerticesArray(float3* pVertices, GXUINT nBegin, GXUINT nCount, VIndex* pIndices, GXUINT nFaceCount);
-  GXBOOL GXDLL ReverseVerticesArray(float3* pVertices, GXUINT nBegin, GXUINT nCount, VIndex32* pIndices, GXUINT nFaceCount);
+  GXBOOL GXDLL ReverseVerticesArray(float3* pVertices, GXSIZE_T nBegin, GXSIZE_T nCount, VIndex* pIndices, GXSIZE_T nFaceCount);
+  GXBOOL GXDLL ReverseVerticesArray(float3* pVertices, GXSIZE_T nBegin, GXSIZE_T nCount, VIndex32* pIndices, GXSIZE_T nFaceCount);
 
   GXBOOL GXDLL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const VIndex* pIndices, int nFaceCount);
   GXBOOL GXDLL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const clvector<VIndex>& aIndices);
@@ -122,7 +122,7 @@ namespace mesh
   GXBOOL GXDLL CalculateNormals(float3* pNormals, const float3* pVertices, int nVertCount, const VIndex32* pIndices, int nFaceCount, GXUINT nNormalStride = NULL, GXUINT nVertexStride = NULL);
 
   GXVOID GXDLL CalculateAABB(AABB& aabb, const float3* pVertices, int nVertCount, GXUINT nVertexStride = NULL);
-  GXVOID GXDLL CalculateAABBFromIndices(AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, int nIndexCount, GXUINT nVertexStride = NULL);
+  GXVOID GXDLL CalculateAABBFromIndices(AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, GXSIZE_T nIndexCount, GXUINT nVertexStride = NULL);
 
   GXBOOL CalculateTBs(
     float4*       pTangents, 

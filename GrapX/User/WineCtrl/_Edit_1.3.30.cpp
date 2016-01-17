@@ -497,10 +497,10 @@ static void EDIT_BuildLineDefs_ML(EDITSTATE *es, GXINT istart, GXINT iend, GXINT
       current_line->net_length = (GXINT)(cp - current_position - 1);
     } else if (*cp == '\n') {
       current_line->ending = END_RICH;
-      current_line->net_length = cp - current_position;
+      current_line->net_length = (GXINT)(cp - current_position);
     } else {
       current_line->ending = END_HARD;
-      current_line->net_length = cp - current_position;
+      current_line->net_length = (GXINT)(cp - current_position);
     }
 
     /* Calculate line width */
@@ -515,8 +515,8 @@ static void EDIT_BuildLineDefs_ML(EDITSTATE *es, GXINT istart, GXINT iend, GXINT
         GXINT prev;
         do {
           prev = next;
-          next = EDIT_CallWordBreakProc(es, current_position - es->text,
-            prev + 1, current_line->net_length, GXWB_RIGHT);
+          next = EDIT_CallWordBreakProc(es, (GXINT)(current_position - es->text),
+            (GXINT)(prev + 1), (GXINT)current_line->net_length, GXWB_RIGHT);
           current_line->width = (GXINT)GXLOWORD(gxGetTabbedTextExtentW(dc,
             current_position, next, es->tabs_count, es->tabs));
         } while (current_line->width <= fw);
@@ -1128,7 +1128,7 @@ static void EDIT_LockBuffer(EDITSTATE *es)
         if(hloc32W_new)
         {
           es->hloc32W = hloc32W_new;
-          es->buffer_size = gxLocalSize(hloc32W_new)/sizeof(GXWCHAR) - 1;
+          es->buffer_size = (GXINT)gxLocalSize(hloc32W_new)/sizeof(GXWCHAR) - 1;
           TRACE("Real new size %d+1 WCHARs\n", es->buffer_size);
         }
         else
@@ -1179,7 +1179,7 @@ static void EDIT_UnlockBuffer(EDITSTATE *es, GXBOOL force)
         GXUINT countA_new = gxWideCharToMultiByte(CP_ACP, 0, es->text, countW, NULL, 0, NULL, NULL);
         TRACE("Synchronizing with 32-bit ANSI buffer\n");
         TRACE("%d WCHARs translated to %d bytes\n", countW, countA_new);
-        countA = LocalSize(es->hloc32A);
+        countA = (GXINT)LocalSize(es->hloc32A);
         if(countA_new > countA)
         {
           GXHLOCAL hloc32A_new;
@@ -1189,7 +1189,7 @@ static void EDIT_UnlockBuffer(EDITSTATE *es, GXBOOL force)
           if(hloc32A_new)
           {
             es->hloc32A = hloc32A_new;
-            countA = LocalSize(hloc32A_new);
+            countA = (GXINT)LocalSize(hloc32A_new);
             TRACE("Real new size %d bytes\n", countA);
           }
           else
@@ -1235,7 +1235,7 @@ static GXBOOL EDIT_MakeFit(EDITSTATE *es, GXUINT size)
       if ((hNew32W = gxLocalReAlloc(es->hloc32W, alloc_size, LMEM_MOVEABLE | LMEM_ZEROINIT))) {
     TRACE("Old 32 bit handle %p, new handle %p\n", es->hloc32W, hNew32W);
     es->hloc32W = hNew32W;
-    es->buffer_size = gxLocalSize(hNew32W)/sizeof(GXWCHAR) - 1;
+    es->buffer_size = (GXINT)gxLocalSize(hNew32W)/sizeof(GXWCHAR) - 1;
       }
   }
 
@@ -2619,7 +2619,7 @@ static void EDIT_EM_SetHandle(EDITSTATE *es, GXHLOCAL hloc)
     GXWCHAR *textW;
     GXCHAR *textA;
 
-    countA = gxLocalSize(hloc);
+    countA = (GXINT)gxLocalSize(hloc);
     textA = (GXCHAR*)gxLocalLock(hloc);
     countW = gxMultiByteToWideChar(CP_ACP, 0, textA, countA, NULL, 0);
     if(!(hloc32W_new = gxLocalAlloc(LMEM_MOVEABLE | LMEM_ZEROINIT, countW * sizeof(GXWCHAR))))
@@ -2639,7 +2639,7 @@ static void EDIT_EM_SetHandle(EDITSTATE *es, GXHLOCAL hloc)
     es->hloc32A = hloc;
   }
 
-  es->buffer_size = gxLocalSize(es->hloc32W)/sizeof(GXWCHAR) - 1;
+  es->buffer_size = (GXUINT)gxLocalSize(es->hloc32W)/sizeof(GXWCHAR) - 1;
 
   es->flags |= EF_APP_HAS_HANDLE;
   EDIT_LockBuffer(es);
@@ -2772,7 +2772,7 @@ static void EDIT_EM_SetPasswordChar(EDITSTATE *es, GXWCHAR c)
   if (es->password_char == c)
     return;
 
-  style = gxGetWindowLongW( es->hwndSelf, GWL_STYLE );
+  style = (GXLONG)gxGetWindowLongW( es->hwndSelf, GWL_STYLE );
   es->password_char = c;
   if (c) {
     gxSetWindowLongW( es->hwndSelf, GWL_STYLE, style | ES_PASSWORD );
@@ -3147,20 +3147,20 @@ static void EDIT_WM_ContextMenu(EDITSTATE *es, GXINT x, GXINT y)
  */
 static GXINT EDIT_WM_GetText(const EDITSTATE *es, GXINT count, GXLPWSTR dst, GXBOOL unicode)
 {
-    if(!count) return 0;
+  if(!count) return 0;
 
-    if(unicode)
-    {
-  lstrcpynW(dst, es->text, count);
-  return GXSTRLEN(dst);
-    }
-    else
-    {
-  GXLPSTR textA = (GXLPSTR)dst;
-  if (!gxWideCharToMultiByte(CP_ACP, 0, es->text, -1, textA, count, NULL, NULL))
-            textA[count - 1] = 0; /* ensure 0 termination */
-  return strlen(textA);
-    }
+  if(unicode)
+  {
+    lstrcpynW(dst, es->text, count);
+    return GXSTRLEN(dst);
+  }
+  else
+  {
+    GXLPSTR textA = (GXLPSTR)dst;
+    if (!gxWideCharToMultiByte(CP_ACP, 0, es->text, -1, textA, count, NULL, NULL))
+      textA[count - 1] = 0; /* ensure 0 termination */
+    return (GXINT)strlen(textA);
+  }
 }
 
 /*********************************************************************
@@ -3329,7 +3329,7 @@ static GXLRESULT EDIT_WM_KeyDown(EDITSTATE *es, GXINT key)
 
                 if (!EDIT_IsInsideDialog(es)) break;
                 if (control) break;
-                dw = gxSendMessageW(es->hwndParent, DM_GETDEFID, 0, 0);
+                dw = (GXDWORD)gxSendMessageW(es->hwndParent, DM_GETDEFID, 0, 0);
                 if (GXHIWORD(dw) == DC_HASDEFID)
                 {
                     GXHWND hwDefCtrl = gxGetDlgItem(es->hwndParent, GXLOWORD(dw));
@@ -4302,7 +4302,7 @@ static GXLRESULT EDIT_WM_NCCreate(GXHWND hwnd, GXLPCREATESTRUCTW lpcs, GXBOOL un
   alloc_size = ROUND_TO_GROW((es->buffer_size + 1) * sizeof(GXWCHAR));
   if(!(es->hloc32W = gxLocalAlloc(LMEM_MOVEABLE | LMEM_ZEROINIT, alloc_size)))
       goto cleanup;
-  es->buffer_size = gxLocalSize(es->hloc32W)/sizeof(GXWCHAR) - 1;
+  es->buffer_size = (GXUINT)gxLocalSize(es->hloc32W)/sizeof(GXWCHAR) - 1;
 
   if (!(es->undo_text = (GXLPWSTR)gxHeapAlloc(gxGetProcessHeap(), GXHEAP_ZERO_MEMORY, (es->buffer_size + 1) * sizeof(GXWCHAR))))
     goto cleanup;
@@ -4455,7 +4455,7 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
     break;
 
   case GXEM_SETSEL:
-    EDIT_EM_SetSel(es, wParam, lParam, FALSE);
+    EDIT_EM_SetSel(es, (GXUINT)wParam, (GXUINT)lParam, FALSE);
     EDIT_EM_ScrollCaret(es);
     result = 1;
     break;
@@ -4561,7 +4561,7 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
     break;
 
   case GXEM_SETLIMITTEXT:
-    EDIT_EM_SetLimitText(es, wParam);
+    EDIT_EM_SetLimitText(es, (GXUINT)wParam);
     break;
 
   case GXEM_CANUNDO:
@@ -4593,7 +4593,7 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
         charW = (GXWCHAR)wParam;
       else
       {
-        GXCHAR charA = wParam;
+        GXCHAR charA = (GXCHAR)wParam;
         gxMultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
       }
 
@@ -4716,8 +4716,8 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
       GXWCHAR charW;
       GXCHAR  strng[2];
 
-      strng[0] = wParam >> 8;
-      strng[1] = wParam & 0xff;
+      strng[0] = (GXCHAR)(wParam >> 8);
+      strng[1] = (GXCHAR)(wParam & 0xff);
       if (strng[0]) gxMultiByteToWideChar(CP_ACP, 0, strng, 2, &charW, 1);
       else gxMultiByteToWideChar(CP_ACP, 0, &strng[1], 1, &charW, 1);
       result = EDIT_WM_Char(es, charW);
@@ -4729,10 +4729,10 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
       GXWCHAR charW;
 
       if(unicode)
-        charW = wParam;
+        charW = (GXWCHAR)wParam;
       else
       {
-        GXCHAR charA = wParam;
+        GXCHAR charA = (GXCHAR)wParam;
         gxMultiByteToWideChar(CP_ACP, 0, &charA, 1, &charW, 1);
       }
 
@@ -4758,10 +4758,10 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
         if(wParam > 0xffff) /* convert to surrogates */
         {
           wParam -= 0x10000;
-          EDIT_WM_Char(es, (wParam >> 10) + 0xd800);
-          EDIT_WM_Char(es, (wParam & 0x03ff) + 0xdc00);
+          EDIT_WM_Char(es, (GXWCHAR)(wParam >> 10) + 0xd800);
+          EDIT_WM_Char(es, (GXWCHAR)(wParam & 0x03ff) + 0xdc00);
         }
-        else EDIT_WM_Char(es, wParam);
+        else EDIT_WM_Char(es, (GXWCHAR)wParam);
       }
       return 0;
     }
@@ -4846,7 +4846,7 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
     break;
 
   case GXWM_LBUTTONDOWN:
-    result = EDIT_WM_LButtonDown(es, wParam, (short)GXLOWORD(lParam), (short)GXHIWORD(lParam));
+    result = EDIT_WM_LButtonDown(es, (GXWORD)wParam, (short)GXLOWORD(lParam), (short)GXHIWORD(lParam));
     break;
 
   case GXWM_LBUTTONUP:

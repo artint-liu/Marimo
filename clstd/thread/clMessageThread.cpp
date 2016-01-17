@@ -2,6 +2,7 @@
 #include "clLocker.h"
 #undef ETIMEDOUT
 #include "Thread/clSignal.H"
+#include "clThread.h"
 #include "clMessageThread.h"
 #include "clString.H"
 #include "clUtility.H"

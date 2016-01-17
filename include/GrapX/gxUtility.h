@@ -10,7 +10,7 @@ namespace clstd
 namespace RepoUtility
 {
   GXHRESULT GXDLL SavePrimitive(SmartRepository* pStorage, GXLPCSTR szDomain, GPrimitiveVI* pPrimitive, int nStartIndex, int nNumPrimi);
-  GXHRESULT GXDLL LoadPrimitive(SmartRepository* pStorage, GXLPCSTR szDomain, GXVERTEXELEMENT* pVertElement, clBuffer* pVertices, clBuffer* pIndices, int& nStartIndex, int& nNumPrimi);
+  GXHRESULT GXDLL LoadPrimitive(SmartRepository* pStorage, GXLPCSTR szDomain, GXVERTEXELEMENT* pVertElement, clBuffer* pVertices, clBuffer* pIndices, size_t& nStartIndex, size_t& nNumPrimi);
 }; // namespace RepoUtility
 
 namespace ObjMeshUtility

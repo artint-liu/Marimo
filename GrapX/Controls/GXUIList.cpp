@@ -71,7 +71,7 @@ namespace GXUI
     return TRUE;
   }
 
-  GXINT List::AddStringW(GXLPCWSTR lpString)
+  GXSIZE_T List::AddStringW(GXLPCWSTR lpString)
   {
     ASSERT(m_pAdapter != NULL);
     /*if(m_pAdapter == NULL)
@@ -90,18 +90,18 @@ namespace GXUI
     SAFE_RELEASE(pListAdapter);
     }*/
 
-    const GXINT nval = m_pAdapter->AddStringW(NULL, lpString);
+    const GXSIZE_T nval = m_pAdapter->AddStringW(NULL, lpString);
     Invalidate(FALSE);
     return nval;
   }
 
-  GXINT List::GetStringW(GXSIZE_T nIndex, clStringW& str)
+  GXSIZE_T List::GetStringW(GXSIZE_T nIndex, clStringW& str)
   {
     if(nIndex < 0 || nIndex >= m_pAdapter->GetCount()) {
       return -1;
     }
     IListDataAdapter::GETSTRW gs;
-    gs.item     = nIndex;
+    gs.item     = (GXINT)nIndex;
     gs.element  = -1;
     gs.hItemWnd = NULL;
     gs.name     = NULL;
@@ -111,7 +111,7 @@ namespace GXUI
     return (GXINT)gs.sString.GetLength();
   }
 
-  GXINT List::DeleteString(GXSIZE_T nIndex)
+  GXSIZE_T List::DeleteString(GXSIZE_T nIndex)
   {
     if(nIndex < 0 || nIndex >= m_pAdapter->GetCount()) {
       return -1;
@@ -155,7 +155,7 @@ namespace GXUI
     Invalidate(FALSE);
   }
 
-  GXINT List::GetCount() const
+  GXSIZE_T List::GetCount() const
   {
     return m_pAdapter->GetCount();
   }
@@ -217,7 +217,7 @@ namespace GXUI
   {
     //const GXINT nScrolled = m_nPrevScrolled + nDelta / 2;
     const GXINT nScrolled = m_nScrolled + nDelta / 5;
-    const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
 
     if(IS_LEFTTORIGHT(dwStyle)) {
       gxScrollWindow(m_hWnd, nScrolled - m_nScrolled, 0, NULL, NULL);
@@ -250,7 +250,7 @@ namespace GXUI
     case IDT_SCROLLDOWN:
       {
         GXINT nNewScroll = (m_nPrevScrolled * 3 + m_nScrolled * 5) >> 3;
-        const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+        const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
         
         //if(abs(m_nPrevScrolled - nNewScroll) < 5)
         if(nNewScroll == m_nScrolled)
@@ -427,7 +427,7 @@ namespace GXUI
       break;
 
     case GXLB_ITEMFROMPOINT:
-      return pThis->HitTest(wParam, GXGET_X_LPARAM(lParam), GXGET_Y_LPARAM(lParam));
+      return (GXWPARAM)pThis->HitTest((int)wParam, GXGET_X_LPARAM(lParam), GXGET_Y_LPARAM(lParam));
 
     case GXLB_SETITEMTEMPLATE:
       return pThis->SetItemTemplate((GXLPCWSTR)lParam);
@@ -605,7 +605,7 @@ namespace GXUI
   {
     if(IS_LEFTTORIGHT(dwStyle))
     {
-      GXINT nTotalWidth = (count + (m_nColumnCount - 1)) / m_nColumnCount * m_nColumnWidth;
+      GXINT nTotalWidth = (GXINT)((count + (m_nColumnCount - 1)) / m_nColumnCount * m_nColumnWidth);
       ASSERT(nTotalWidth > 0);
       canvas.FillRect(
         (-m_nScrolled) * lprcClient->right / nTotalWidth,
@@ -639,7 +639,7 @@ namespace GXUI
     if(gxDragDetect(m_hWnd, &pt))
     {
       GXMSG msg;
-      const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+      const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
       gxSetCapture(m_hWnd);
 
       m_bShowScrollBar = TRUE;
@@ -725,21 +725,21 @@ namespace GXUI
       if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) { // [复杂|多列]
         if(TEST_FLAG(dwStyle, GXLBS_LTRSCROLLED))
         {
-          const GXINT nModCount = m_pAdapter->GetCount() + (m_nColumnCount - 1);
+          const GXINT nModCount = (GXINT)m_pAdapter->GetCount() + (m_nColumnCount - 1);
           nMinScroll = rect.right - (nModCount / m_nColumnCount * m_nColumnWidth);
         }
         else
         {
-          const GXINT nModCount = m_pAdapter->GetCount() + (m_nColumnCount - 1);
+          const GXINT nModCount = (GXINT)m_pAdapter->GetCount() + (m_nColumnCount - 1);
           nMinScroll = rect.bottom - (nModCount / m_nColumnCount * m_nItemHeight);
         }
       }
       else { // [单列]
         if(TEST_FLAG(dwStyle, GXLBS_LTRSCROLLED)) {
-          nMinScroll = rect.right - m_aItems.size() * m_nColumnWidth;
+          nMinScroll = (GXINT)(rect.right - m_aItems.size() * m_nColumnWidth);
         }
         else { // [单列|竖直滚动]
-          nMinScroll = rect.bottom - m_aItems.back().nBottom;
+          nMinScroll = (GXINT)(rect.bottom - m_aItems.back().nBottom);
         }
       }
     }
@@ -1123,7 +1123,7 @@ namespace GXUI
     return m_aItems[index].bSelected;
   }
 
-  GXINT List::GetItemHeight( GXINT nIdx ) const
+  GXINT List::GetItemHeight(GXSIZE_T nIdx) const
   {
     return m_nItemHeight;
   }
@@ -1167,7 +1167,7 @@ namespace GXUI
       }
 
       itEnd = m_aItems.end();
-      nPrevBottom = m_nItemHeight * count; // 这里开始 nPrevBottom 另作它用
+      nPrevBottom = (GXINT)(m_nItemHeight * count); // 这里开始 nPrevBottom 另作它用
 
       // 调整插入点之后的Item的bottom值
       for(; it != itEnd; ++it) {

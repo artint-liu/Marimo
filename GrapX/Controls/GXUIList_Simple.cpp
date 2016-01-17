@@ -58,12 +58,12 @@ namespace GXUI
 
     ItemStatusArray::const_iterator it = m_aItems.begin() + m_nTopIndex;
     ASSERT(it->nBottom > -m_nScrolled);
-    GXINT nItem = m_nTopIndex;
+    auto nItem = m_nTopIndex;
     y -= m_nScrolled;
     for(; it != m_aItems.end(); ++it, ++nItem)
     {
       if(y < it->nBottom) {
-        return nItem;
+        return (GXINT)nItem;
       }
     }
     return -1;
@@ -79,7 +79,7 @@ namespace GXUI
     GXRECT rect;
     gxGetClientRect(m_hWnd, &rect);
 
-    const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
 
 
     if(m_crBackground & 0xff000000) {
@@ -94,7 +94,7 @@ namespace GXUI
     }
 
     //const GXBOOL bFixedHeight = TRUE;//m_pAdapter->IsFixedHeight();
-    GXINT nCount = m_pAdapter->GetCount();
+    auto nCount = m_pAdapter->GetCount();
     //GXINT nHeight = 0;
     //if(bFixedHeight) {
     //  nHeight = GetItemHeight(0);
@@ -112,7 +112,7 @@ namespace GXUI
 
     IListDataAdapter::GETSTRW ItemStrDesc;
     GXRECT& rcItem = ItemStrDesc.rect;
-    ItemStrDesc.item = m_nTopIndex;
+    ItemStrDesc.item = (GXINT)m_nTopIndex;
 
     if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) {
 
@@ -127,7 +127,7 @@ namespace GXUI
 
       if(rcItem.left > rect.right) {
         // 如果超出显示区域, 索引设为无效
-        ItemStrDesc.item = nCount;
+        ItemStrDesc.item = (GXINT)nCount;
       }
 
       rcItem.left += (m_bShowButtonBox ? CHECKBOX_SIZE + 2 : 0);
@@ -140,7 +140,7 @@ namespace GXUI
 
       if(rcItem.top > rect.bottom) {
         // 如果超出显示区域, 索引设为无效
-        ItemStrDesc.item = nCount;
+        ItemStrDesc.item = (GXINT)nCount;
       }
     }
 
@@ -170,7 +170,7 @@ namespace GXUI
 
       if(m_pAdapter->GetStringW(&ItemStrDesc))
       {
-        GXINT nStrLen = ItemStrDesc.sString.GetLength();
+        auto nStrLen = ItemStrDesc.sString.GetLength();
         //TRACEW(L"%s(%d,%d,%d,%d)\n", ItemStrDesc.sString,
         //  rcItem.left, rcItem.top, rcItem.right, rcItem.bottom);
 
@@ -193,12 +193,12 @@ namespace GXUI
         if(m_aColumns.empty()) {
           if(bContrast) {
             GXRECT rcContrast = {rcItem.left + 1, rcItem.top + 1, rcItem.right + 1, rcItem.bottom + 1};
-            canvas.DrawTextW(m_pFont, ItemStrDesc.sString, nStrLen, &rcContrast, DT_SINGLELINE|DT_VCENTER, crText.color ^ 0xFFFFFF);
+            canvas.DrawTextW(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcContrast, DT_SINGLELINE|DT_VCENTER, crText.color ^ 0xFFFFFF);
           }
-          canvas.DrawTextW(m_pFont, ItemStrDesc.sString, nStrLen, &rcItem, DT_SINGLELINE|DT_VCENTER, crText.color);
+          canvas.DrawTextW(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcItem, DT_SINGLELINE|DT_VCENTER, crText.color);
         }
         else {
-          DrawTextWithColumnsW(canvas, m_pFont, ItemStrDesc.sString, nStrLen, &rcItem, 
+          DrawTextWithColumnsW(canvas, m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcItem, 
             DT_SINGLELINE|DT_VCENTER, crText.color, bContrast ? crText.color ^ 0xFFFFFF : 0);
         }
       }
@@ -323,7 +323,7 @@ LAST_STR:
       GXUINT nWidth = clstd::xtou(*it, 10);
       aWidth.push_back(nWidth);
     }
-    return SetColumnsWidth(&aWidth.front(), aWidth.size());
+    return SetColumnsWidth(&aWidth.front(), (GXUINT)aWidth.size());
   }
 
   GXUINT SimpleList::SetColumnsWidth( const GXUINT* pColumns, GXUINT nCount )
@@ -339,13 +339,13 @@ LAST_STR:
       m_aColumns.push_back(pColumns[i]);
     }
 
-    return m_aColumns.size();
+    return (GXUINT)m_aColumns.size();
   }
 
   GXUINT SimpleList::GetColumnsWidth( GXUINT* pColumns, GXUINT nCount )
   {
     if( ! pColumns || ! nCount) {
-      return m_aColumns.size();
+      return (GXUINT)m_aColumns.size();
     }
 
     GXUINT i = 0;
@@ -387,7 +387,7 @@ LAST_STR:
     sCreateAdapter.hTemplateWnd = NULL;
     sCreateAdapter.pAdapter     = NULL;
 
-    result = gxSendMessage(m_hWnd, GXWM_NOTIFY, sCreateAdapter.hdr.idFrom, (GXLPARAM)&sCreateAdapter);
+    result = (int)gxSendMessage(m_hWnd, GXWM_NOTIFY, sCreateAdapter.hdr.idFrom, (GXLPARAM)&sCreateAdapter);
     if(result < 0) {
       return result;
     }

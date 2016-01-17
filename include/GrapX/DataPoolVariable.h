@@ -42,7 +42,7 @@ namespace Marimo
   public:
     inline DataPoolVariable operator[](int nIndex)
     {
-      return IndexOf(nIndex);
+      return IndexOf((GXSIZE_T)nIndex);
     }
 
     inline DataPoolVariable operator[](GXLPCSTR szMemberName)
@@ -72,7 +72,7 @@ namespace Marimo
     //DataPoolVariable& operator*   (DataPoolVariable* pVar);       // var 的内容复制给新的目标
 
 
-    GXBOOL            Impulse         (DataAction reason, GXUINT index = 0, GXUINT count = 0); // index和count只有是数组时才有效
+    GXBOOL            Impulse         (DataAction reason, GXSIZE_T index = 0, GXSIZE_T count = 0); // index和count只有是数组时才有效
     GXHRESULT         GetPool         (DataPool** ppDataPool) GXCONST;
     DataPool*         GetPoolUnsafe   () GXCONST;
     GXBOOL            IsSamePool      (DataPool* pDataPool) GXCONST;
@@ -92,10 +92,10 @@ namespace Marimo
     DataPoolVariable  MemberOf        (GXLPCSTR szName) GXCONST;     // 获得成员
 
     // 数组或动态数组专用 
-    DataPoolVariable  IndexOf         (int nIndex) GXCONST;         // 获得特定索引的变量
+    DataPoolVariable  IndexOf         (GXSIZE_T nIndex) GXCONST;     // 获得特定索引的变量
     GXSIZE_T          GetLength       () GXCONST;                   // 获得数组的成员个数, 注意与GetSize区别
     DataPoolVariable  NewBack         (GXUINT nIncrease = 1);       // 在动态数组上追加数据, 动态数组专用, 如果inc大于1，返回第一个新增变量，如果inc为0，不会新增变量，返回最后一个数据
-    GXBOOL            Remove          (GXUINT nIndex, GXUINT nCount = 1);        // 移出动态数组指定索引的数据, 动态数组专用
+    GXBOOL            Remove          (GXSIZE_T nIndex, GXSIZE_T nCount = 1);        // 移出动态数组指定索引的数据, 动态数组专用
 
     // 变量专用
     GXBOOL            ParseW          (GXLPCWSTR szString, GXUINT length); // 按照变量类型转值, length=0表示按照'\0'结尾

@@ -98,7 +98,7 @@ namespace GXUI
 
   GXBOOL Slider::SolveDefinition(const GXDefinitionArrayW& aDefinitions)
   {
-    const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);    
+    const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);    
 
     for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
       it != aDefinitions.end(); ++it)
@@ -174,7 +174,7 @@ namespace GXUI
 
     case GXSBM_SETPOS:
       {
-        GXDWORD dwStyle = gxGetWindowLong(hWnd, GXGWL_STYLE);
+        GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(hWnd, GXGWL_STYLE);
         return pThis->SetPos(dwStyle, (GXINT)wParam);
       }
 
@@ -249,7 +249,7 @@ namespace GXUI
         GXREGN regn[HTS_COUNT];
 
         gxGetClientRect(m_hWnd, &rect);
-        GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+        GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
 
         UPDATE_MINOR_PERCENT;
         IntCalcRects(&rect, dwStyle, regn);
@@ -267,7 +267,7 @@ namespace GXUI
 
     gxGetClientRect(m_hWnd, &rect);
     HTSlider eTest = IntHitTest(&rect, pos, regn);
-    GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     
     if(eTest == HTS_HANDLE)
     {
@@ -433,7 +433,7 @@ namespace GXUI
 
   Slider::HTSlider Slider::IntHitTest(GXRECT* rcClient, GXPOINT* pos, GXREGN* pRegns)
   {
-    GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     IntCalcRects(rcClient, dwStyle, pRegns);
     if(gxPtInRegn(&pRegns[HTS_HANDLE], *pos))
     {
@@ -488,7 +488,7 @@ namespace GXUI
     if(SetDataVariable(m_hWnd, m_VarPos, pVariable))
     {
       // TODO: ≈–∂œfloat/int¿‡–Õ
-      const GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+      const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
       UpdatePosFromVar(dwStyle);
     }
     return GX_OK;
@@ -499,7 +499,7 @@ namespace GXUI
   {
     ASSERT(m_VarPos.IsValid());
     auto eCate = m_VarPos.GetTypeCategory();
-    GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     switch(eCate)
     {
     case Marimo::T_FLOAT:
@@ -626,7 +626,7 @@ namespace GXUI
 
     gxGetClientRect(m_hWnd, &rect);
 
-    GXDWORD dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+    GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
 
     UPDATE_MINOR_PERCENT;
     IntCalcRects(&rect, dwStyle, regn);
