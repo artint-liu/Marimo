@@ -106,14 +106,10 @@ inline void InlSetZeroT(_Ty& t) {
 
 #ifdef _DEBUG
 # if defined(_WINDOWS) || defined(_CONSOLE)
-#   ifdef _X86
-extern "C" void _cl_traceA(const char *fmt, ...);
-extern "C" void _cl_traceW(const wchar_t *fmt, ...);
-extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
-extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
-
-#     define TRACEW        _cl_traceW
-#     define TRACEA        _cl_traceA
+#   ifdef __clang__
+#     include <assert.h>
+#     define TRACEW        wprintf
+#     define TRACEA        printf
 #     define TRACE         TRACEA
 #     define CLOG_WARNING  TRACEA
 #     define CLOG_ERROR    TRACEA
@@ -121,43 +117,69 @@ extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, in
 #     define CLOG_WARNINGW TRACEW
 #     define CLOG_ERRORW   TRACEW
 #     define CLOGW         TRACEW
-#     define CLBREAK       {__asm int 3}
+#     define CLBREAK       abort()
+#     define CLUNIQUEBREAK abort()      // 只中断一次的断点
+#     define CLNOP         ;
+#     define VERIFY(v)     (v)
+#     define ASSERT(x)     assert(x)
+#     define STATIC_ASSERT(x)    static_assert(x, #x);
+#     define V(x)              if(FAILED(x)) { CLBREAK; }
+#     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
+#   elif defined(_MSC_VER)
+#     ifdef _X86
+extern "C" void _cl_traceA(const char *fmt, ...);
+extern "C" void _cl_traceW(const wchar_t *fmt, ...);
+extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
+extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
+
+#       define TRACEW        _cl_traceW
+#       define TRACEA        _cl_traceA
+#       define TRACE         TRACEA
+#       define CLOG_WARNING  TRACEA
+#       define CLOG_ERROR    TRACEA
+#       define CLOG          TRACEA
+#       define CLOG_WARNINGW TRACEW
+#       define CLOG_ERRORW   TRACEW
+#       define CLOGW         TRACEW
+#       define CLBREAK       {__asm int 3}
 
 // TODO:稍后实现CLUNIQUEBREAK
 //  1.线程自己持有
 //  2.第一次中断，以后跳过并输出log
-#     define CLUNIQUEBREAK {__asm int 3}      // 只中断一次的断点
-#     define CLNOP         {__asm nop}
-#     define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
-#     define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); CLBREAK; } // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
-#     define STATIC_ASSERT(x)    static_assert(x, #x);
-#     define V(x)              if(FAILED(x)) { CLBREAK; }
-#     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
-#   elif defined(_X64)
+#       define CLUNIQUEBREAK {__asm int 3}      // 只中断一次的断点
+#       define CLNOP         {__asm nop}
+#       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
+#       define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); CLBREAK; } // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
+#       define STATIC_ASSERT(x)    static_assert(x, #x);
+#       define V(x)              if(FAILED(x)) { CLBREAK; }
+#       define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
+#     elif defined(_X64)
 extern "C" void _cl_traceA(const char *fmt, ...);
 extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
 extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
 extern "C" void _cl_Break();
 extern "C" void _cl_NoOperation();
-#     define TRACEW        _cl_traceW
-#     define TRACEA        _cl_traceA
-#     define TRACE         TRACEA
-#     define CLOG_WARNING  TRACEA
-#     define CLOG_ERROR    TRACEA
-#     define CLOG          TRACEA
-#     define CLOG_WARNINGW TRACEW
-#     define CLOG_ERRORW   TRACEW
-#     define CLOGW         TRACEW
-#     define CLBREAK       { _cl_Break(); }
-#     define CLUNIQUEBREAK CLBREAK
-#     define CLNOP         { _cl_NoOperation(); }
-#     define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
-#     define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); _cl_Break();} // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
-#     define STATIC_ASSERT(x)    static_assert(x, #x);
-#     define V(x)              if(FAILED(x)) { _cl_Break(); }
-#     define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}
-#   endif // #ifdef _X86
+#       define TRACEW        _cl_traceW
+#       define TRACEA        _cl_traceA
+#       define TRACE         TRACEA
+#       define CLOG_WARNING  TRACEA
+#       define CLOG_ERROR    TRACEA
+#       define CLOG          TRACEA
+#       define CLOG_WARNINGW TRACEW
+#       define CLOG_ERRORW   TRACEW
+#       define CLOGW         TRACEW
+#       define CLBREAK       { _cl_Break(); }
+#       define CLUNIQUEBREAK CLBREAK
+#       define CLNOP         { _cl_NoOperation(); }
+#       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
+#       define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); _cl_Break();} // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
+#       define STATIC_ASSERT(x)    static_assert(x, #x);
+#       define V(x)              if(FAILED(x)) { _cl_Break(); }
+#       define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}
+#     endif // #ifdef _X86
+#   endif  // #   ifdef __clang__
+
 # elif defined(_IOS) || defined(_ANDROID)
 #	include <assert.h>
 void _cl_traceA(const char *fmt, ...);

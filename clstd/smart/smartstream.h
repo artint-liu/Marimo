@@ -149,8 +149,6 @@ public:
     inline T_LPCSTR end() const {
       return marker + length;
     }
-
-
   };
   typedef size_t (CALLBACK *IteratorProc)(iterator& it, clsize nRemain, u32_ptr lParam); // nRemain 是it.marker[0]到文件结尾的(剩余)长度. 目前不关心返回值
   typedef const iterator const_iterator; 

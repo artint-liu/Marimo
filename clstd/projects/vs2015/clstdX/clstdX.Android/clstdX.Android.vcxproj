@@ -73,7 +73,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>-D PLATFORM=0 -D _ANDROID -D _DEBUG %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>_DEBUG;_ANDROID</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_ANDROID;_CPLUSPLUS_11_THREAD</PreprocessorDefinitions>
       <CLanguageStandard>gnu11</CLanguageStandard>
       <CppLanguageStandard>gnu++11</CppLanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -87,6 +87,7 @@
       <CLanguageStandard>gnu11</CLanguageStandard>
       <CppLanguageStandard>gnu++11</CppLanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ANDROID;NDEBUG;%(PreprocessorDefinitions);_CPLUSPLUS_11_THREAD</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -98,6 +99,7 @@
       <CppLanguageStandard>gnu++11</CppLanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel />
+      <PreprocessorDefinitions>_DEBUG;_ANDROID;_CPLUSPLUS_11_THREAD</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -108,6 +110,7 @@
       <CLanguageStandard>gnu11</CLanguageStandard>
       <CppLanguageStandard>gnu++11</CppLanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ANDROID;NDEBUG;%(PreprocessorDefinitions);_CPLUSPLUS_11_THREAD</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

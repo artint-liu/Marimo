@@ -1,5 +1,6 @@
 ﻿#include "clstd.h"
 #include "clThread.h"
+
 namespace clstd
 {
 #ifdef _WIN32

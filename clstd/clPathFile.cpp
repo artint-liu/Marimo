@@ -101,10 +101,10 @@ void ResetWorkingDir()
   wch szModulePath[MAX_PATH];
   clStringW strDir;
   clStringW strFile;
-  GetModuleFileName(NULL, szModulePath, MAX_PATH);
+  GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
   SplitPathW(clStringW(szModulePath), &strDir, &strFile);
   s_strRootDir = clpathfile::CanonicalizeT(strDir);
-  SetCurrentDirectory(strDir);
+  SetCurrentDirectoryW(strDir);
 #endif // _WINDOWS
 }
 
@@ -594,7 +594,7 @@ namespace clpathfile
       CombinePathW(strDir, strDir, szDir);
     }
     s_strRootDir = clpathfile::CanonicalizeT(strDir);
-    return SetCurrentDirectory(strDir);
+    return SetCurrentDirectoryW(strDir);
   }
 
   clStringA& GetCurrentDirectory(clStringA& strDir)

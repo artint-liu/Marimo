@@ -513,7 +513,7 @@ FALSE_RET:
     FindFileData->dwAttributes  = wfd.dwFileAttributes;
     FindFileData->nFileSizeHigh = wfd.nFileSizeHigh;
     FindFileData->nFileSizeLow  = wfd.nFileSizeLow;
-    if( ! FindNextFile(hFind, &wfd))
+    if( ! FindNextFileW(hFind, &wfd))
     {
       FindClose(hFind);
       hFind = INVALID_HANDLE_VALUE;

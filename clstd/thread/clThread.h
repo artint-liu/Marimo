@@ -5,11 +5,18 @@
 #include <pthread.h>
 #endif // #ifdef POSIX_THREAD
 
+#ifdef _CPLUSPLUS_11_THREAD
+# if __cplusplus < 201103L
+#   error 低版本C++编译器没有将thread纳入标准库
+# endif // # if __cplusplus >= 201103L
+#endif // #ifdef _CPP11_THREAD
+
+
 namespace clstd
 {
   namespace thread
   {
-    u32 GetCurrentId();
+    size_t GetCurrentId();
   } // namespace thread
 #ifdef _WIN32
   namespace _win32

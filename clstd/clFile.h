@@ -12,12 +12,20 @@ namespace clstd
   class File
   {
   public:
+#ifdef __clang__
+    typedef u32 DesiredAccess;
+    const static DesiredAccess DA_Query = 0;
+    const static DesiredAccess DA_Write = 0x40000000L;
+    const static DesiredAccess DA_Read  = 0x80000000L;
+#else
     enum DesiredAccess
     {
-      DA_Query  = 0,          // Specifies device query access to the object. An application can query device attributes without accessing the device.
-      DA_Read   = (0x80000000L),    // Specifies read access to the object. Data can be read from the file and the file pointer can be moved. Combine with GENERIC_WRITE for read-write access. 
+      DA_Query  = 0,                // Specifies device query access to the object. An application can query device attributes without accessing the device.
       DA_Write  = (0x40000000L),    // Specifies write access to the object. Data can be written to the file and the file pointer can be moved. Combine with GENERIC_READ for read-write access. 
+      DA_Read   = (0x80000000L),    // Specifies read access to the object. Data can be read from the file and the file pointer can be moved. Combine with GENERIC_WRITE for read-write access. 
     };
+#endif // #ifdef __clang__
+
     enum ShareMode
     {
       SM_Delete = (0x00000004),      // Windows NT only: Subsequent open operations on the object will succeed only if delete access is requested. 
@@ -140,8 +148,8 @@ namespace clstd
   class FindFile
   {
 #if defined(_WINDOWS) || defined(_WIN32)
-    HANDLE          hFind;
-    WIN32_FIND_DATA wfd;
+    HANDLE           hFind;
+    WIN32_FIND_DATAW wfd;
 #else
 #endif // #if defined(_WINDOWS) || defined(_WIN32)
   public:

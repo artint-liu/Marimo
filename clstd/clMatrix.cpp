@@ -2,7 +2,7 @@
 #include "clString.H"
 #include "clUtility.H"
 
-#if defined(_WINDOWS) && defined(_X86)
+#if defined(_WINDOWS) && defined(_X86) && ! defined(__clang__)
 #define _X86_SSE_ENABLE
 #endif // #ifdef _X86
 

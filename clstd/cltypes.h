@@ -14,6 +14,7 @@
 # endif
 #endif // NULL
 
+
 #if defined(_WINDOWS) || defined(_WIN32)
 typedef __int8              s8, i8;
 typedef __int16             s16, i16;
@@ -54,15 +55,18 @@ typedef size_t              clsize_t;
 #endif
 
 #if defined(_WINDOWS)
-#if defined(_X86)
+# ifdef __clang__
+#   define _w64
+# endif // #if __clang__
+# if defined(_X86)
 typedef _w64 i32            i32_ptr;
 typedef _w64 s32            s32_ptr;
 typedef _w64 u32            u32_ptr;
-#elif defined(_X64)
+# elif defined(_X64)
 typedef i64                 i32_ptr;
 typedef s64                 s32_ptr;
 typedef u64                 u32_ptr;
-#endif
+# endif
 #elif defined(_ANDROID) || defined(_IOS)
 typedef intptr_t            i32_ptr;
 typedef intptr_t            s32_ptr;
@@ -250,17 +254,28 @@ typedef CLULONG           CLULONG_PTR;
 
 #if defined(_WINDOWS)
 # include <vector>
+#if __cplusplus >= 199711L
+# include <unordered_map>
+# include <unordered_set>
+#else
 # include <hash_map>
 # include <hash_set>
+#endif // #if __cplusplus >= 199711L
 # include <map>
 # include <stack>
 # include <queue>
 # include <list>
 # include <set>
 # define clvector        std::vector
+#if __cplusplus >= 199711L
+# define clhash_map      std::unordered_map
+# define clhash_set      std::unordered_set
+# define clhash_multimap std::unordered_multimap
+#else
 # define clhash_map      stdext::hash_map
 # define clhash_set      stdext::hash_set
 # define clhash_multimap stdext::hash_multimap
+#endif // #if __cplusplus >= 199711L
 # define clmap           std::map
 # define clstack         std::stack
 # define clset           std::set

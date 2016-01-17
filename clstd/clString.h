@@ -150,7 +150,11 @@ namespace clstd
   public:
     enum 
     {
+#ifdef __clang__
+      npos = -1,
+#else
       npos = (size_t)-1,
+#endif // #ifdef __clang__
     };
     typedef typename _Traits::_XCh _XCh;
     typedef _TCh        TChar;

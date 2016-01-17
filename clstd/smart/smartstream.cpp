@@ -313,13 +313,13 @@ typename _SS_IMPL::iterator _SS_IMPL::begin() const
   return next(itBegin); // 这里这么写是为了保证begin也能触发特殊符号回调函数
 }
 
-#if defined(_WINDOWS)
-_SS_TEMPL 
-typename const _SS_IMPL::iterator& _SS_IMPL::end() const
-#elif defined(_IOS) || defined(_ANDROID)
+#if defined(__clang__)
 _SS_TEMPL 
   typename _SS_IMPL::const_iterator& _SS_IMPL::end() const
-#endif // #if defined(_WINDOWS)
+#else
+_SS_TEMPL 
+  typename const _SS_IMPL::iterator& _SS_IMPL::end() const
+#endif
 {
   return m_itEnd;
 }
@@ -522,17 +522,14 @@ typename _SS_IMPL::iterator  _SS_IMPL::iterator::operator+(const size_t n) const
   return it;
 }
 
-#if defined(_WINDOWS)
+
+#if defined(__clang__)
 _SS_TEMPL
-typename const _SS_IMPL::iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
-#elif defined(_IOS)
-typename _SS_IMPL::const_iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
-#elif defined(_ANDROID)
-_SS_TEMPL
-typename _SS_IMPL::const_iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
+  typename _SS_IMPL::const_iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
 #else
-#error new platform
-#endif // #if defined(_WINDOWS)
+_SS_TEMPL
+  typename const _SS_IMPL::iterator _SS_IMPL::find(const iterator& itBegin, int nCount, ...) const
+#endif
 {
   iterator it = itBegin;
   va_list arglist;

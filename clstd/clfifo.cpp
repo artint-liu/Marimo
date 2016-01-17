@@ -3,7 +3,7 @@
 #include "clUtility.H"
 #include "clfifo.h"
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS) && ! defined(__clang__)
 #ifdef _X86
 static inline void barrier(void)
 {
@@ -20,7 +20,7 @@ extern "C" void barrier(void);
 #define smp_mb()  barrier()
 #define smp_wmb() barrier()
 #endif // #ifdef _X86
-#elif defined(_IOS) || defined(_ANDROID)
+#elif defined(_IOS) || defined(_ANDROID) || defined(__clang__)
 static inline void barrier(void)
 {
   asm volatile("" : : : "memory");
