@@ -26,7 +26,7 @@ namespace clstd
     return uncompress((Bytef*)pDest, (uLongf*)destLen, (const Bytef*)pSource, (uLong)sourceLen);
   }
 
-  int CompressBuffer(clBuffer* pBuffer, CLLPCVOID ptr, clsize nSize)
+  int CompressBuffer(Buffer* pBuffer, CLLPCVOID ptr, clsize nSize)
   {
     //得到要保存压缩结果的最小buffer大小
     clsize nMinLength = compressBound((uLong)nSize);
@@ -40,9 +40,9 @@ namespace clstd
     return result;
   }
 
-  clBuffer* CompressBuffer(CLLPCVOID ptr, clsize nSize)
+  Buffer* CompressBuffer(CLLPCVOID ptr, clsize nSize)
   {
-    clBuffer* pBuffer = new clBuffer(16);
+    Buffer* pBuffer = new Buffer(16);
     int result = CompressBuffer(pBuffer, ptr, nSize);
     if(result != Z_OK) {
       delete pBuffer;
@@ -51,12 +51,12 @@ namespace clstd
     return pBuffer;
   }
 
-  clBuffer* CompressBuffer(clBufferBase* pSourceBuffer)
+  Buffer* CompressBuffer(BufferBase* pSourceBuffer)
   {
     return CompressBuffer(pSourceBuffer->GetPtr(), pSourceBuffer->GetSize());
   }
 
-  FixedBuffer* UncompressBuffer(clBufferBase* pSourceBuffer, clsize nDestSize)
+  FixedBuffer* UncompressBuffer(BufferBase* pSourceBuffer, clsize nDestSize)
   {
     int err = Z_OK;
     FixedBuffer* pBuffer = new FixedBuffer(nDestSize);

@@ -34,14 +34,14 @@ public:
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXBOOL      Update    (const GVSCENEUPDATE& sContext);
 
-  virtual GXHRESULT   SaveFile  (SmartRepository* pStorage);
-  virtual GXHRESULT   LoadFile  (GXGraphics* pGraphics, SmartRepository* pStorage);
+  virtual GXHRESULT   SaveFile  (clSmartRepository* pStorage);
+  virtual GXHRESULT   LoadFile  (GXGraphics* pGraphics, clSmartRepository* pStorage);
 
   static  GXHRESULT   CreateMesh            (GXGraphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh);
   static  GXHRESULT   CreateFromMeshData    (GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh);
   static  GXHRESULT   CreateFromFileA       (GXGraphics* pGraphics, GXLPCSTR szFilename, GVSkinnedMeshSoft** ppMesh);
   static  GXHRESULT   CreateFromFileW       (GXGraphics* pGraphics, GXLPCWSTR szFilename, GVSkinnedMeshSoft** ppMesh);
-  static  GXHRESULT   CreateFromRepository  (GXGraphics* pGraphics, SmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh);
+  static  GXHRESULT   CreateFromRepository  (GXGraphics* pGraphics, clSmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh);
 };
 
 

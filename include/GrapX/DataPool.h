@@ -2,7 +2,7 @@
 #define _MARIMO_DATA_POOL_H_
 
 // 编译开关
-#define ENABLE_DATAPOOL_WATCHER     // DataPool 监视器
+//#define ENABLE_DATAPOOL_WATCHER     // DataPool 监视器
 //#define DEBUG_DECL_NAME           // 使用字符串指针储存自定位副本，如果打开这个调试将不能保存和加载
 //#ifdef ENABLE_DATAPOOL_WATCHER
 //# define STR_DATAPOOL_WATCHER_UI       "DataPool/Watcher/UI"
@@ -718,21 +718,11 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL      QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset)); // 查找变量全名
 
-//#ifdef ENABLE_DATAPOOL_WATCHER
+#ifndef DISABLE_DATAPOOL_WATCHER
     GXSTDINTERFACE(GXBOOL      IsAutoKnock         ());
     GXSTDINTERFACE(GXBOOL      IsKnocking          (const DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      SetAutoKnock        (GXBOOL bAutoKnock));
 
-//#ifdef ENABLE_OLD_DATA_ACTION
-//    virtual GXHRESULT   CreateWatcher       (GXLPCSTR szClassName);
-//    virtual GXHRESULT   RemoveWatcherByName (GXLPCSTR szClassName);
-//    virtual GXHRESULT   AddWatcher          (DataPoolWatcher* pWatcher);
-//    virtual GXHRESULT   RemoveWatcher       (DataPoolWatcher* pWatcher);
-//    virtual GXHRESULT   RegisterIdentify    (GXLPCSTR szClassName, GXLPVOID pIdentify); // TODO: 名字起的不好
-//    virtual GXHRESULT   UnregisterIdentify  (GXLPCSTR szClassName, GXLPVOID pIdentify); // TODO: 名字起的不好
-//#endif // #ifdef ENABLE_OLD_DATA_ACTION
-
-    //virtual GXHRESULT   ImpluseByVariable   (DataAction eType, const DataPoolVariable& var, GXUINT nIndex, GXBOOL bForce = TRUE);
     GXSTDINTERFACE(GXBOOL      Impulse             (const DataPoolVariable& var, DataAction reason, GXSIZE_T index, GXSIZE_T count));
     GXSTDINTERFACE(GXBOOL      Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam));
     GXSTDINTERFACE(GXBOOL      Watch               (GXLPCSTR szExpression, DataPoolWatcher* pWatcher));
@@ -746,7 +736,7 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL      Ignore              (DataPoolVariable* pVar, ImpulseProc pImpulseCallback));
     GXSTDINTERFACE(GXBOOL      Ignore              (DataPoolVariable* pVar, DataPoolWatcher* pWatcher));
     GXSTDINTERFACE(GXBOOL      Ignore              (DataPoolVariable* pVar, GXHWND hWnd));
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
     GXSTDINTERFACE(iterator        begin       ());
     GXSTDINTERFACE(iterator        end         ());

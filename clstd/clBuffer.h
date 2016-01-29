@@ -1,62 +1,62 @@
 ﻿#ifndef _CL_BUFFER_H_
 #define _CL_BUFFER_H_
 
-//////////////////////////////////////////////////////////////////////////
-//
-// Buffer 基类
-//
-class clBufferBase
-{
-protected:
-  CLBYTE*  m_lpBuffer;  // 数据指针地址
-  clsize   m_uSize;     // 已经使用的大小
-protected:
-  clBufferBase(const CLLPVOID pData, clsize uLength)
-    : m_lpBuffer((CLBYTE*)pData), m_uSize(uLength){}
-
-  virtual ~clBufferBase(){} // 析构是私有的, 防止用户 delete clBufferBase
-public:
-  inline CLLPVOID   GetPtr    () const;
-  inline clsize     GetSize   () const;
-  inline CLBYTE*    Set       (int val);
-};
-
-CLLPVOID clBufferBase::GetPtr() const
-{
-  return m_lpBuffer;
-}
-
-clsize clBufferBase::GetSize() const
-{
-  return m_uSize;
-}
-
-CLBYTE* clBufferBase::Set(int val)
-{
-  return (CLBYTE*)memset(m_lpBuffer, val, m_uSize);
-}
-
-//////////////////////////////////////////////////////////////////////////
-//
-// 引用 Buffer , 在析构时不会释放指针.
-// 用于把数据封装为Buffer传递
-// clBufferBase 与此类似, 但是它的析构函数不是共有的, 所以不能直接使用
-//
 namespace clstd
 {
-  class RefBuffer : public clBufferBase
+  //////////////////////////////////////////////////////////////////////////
+  //
+  // Buffer 基类
+  //
+  class BufferBase
+  {
+  protected:
+    CLBYTE*  m_lpBuffer;  // 数据指针地址
+    clsize   m_uSize;     // 已经使用的大小
+  protected:
+    BufferBase(const CLLPVOID pData, clsize uLength)
+      : m_lpBuffer((CLBYTE*)pData), m_uSize(uLength){}
+
+    virtual ~BufferBase(){} // 析构是私有的, 防止用户 delete clBufferBase
+  public:
+    inline CLLPVOID   GetPtr    () const;
+    inline clsize     GetSize   () const;
+    inline CLBYTE*    Set       (int val);
+  };
+
+  CLLPVOID BufferBase::GetPtr() const
+  {
+    return m_lpBuffer;
+  }
+
+  clsize BufferBase::GetSize() const
+  {
+    return m_uSize;
+  }
+
+  CLBYTE* BufferBase::Set(int val)
+  {
+    return (CLBYTE*)memset(m_lpBuffer, val, m_uSize);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  //
+  // 引用 Buffer , 在析构时不会释放指针.
+  // 用于把数据封装为Buffer传递
+  // clBufferBase 与此类似, 但是它的析构函数不是共有的, 所以不能直接使用
+  //
+  class RefBuffer : public BufferBase
   {
   public:
-    RefBuffer() : clBufferBase(NULL, 0){}
+    RefBuffer() : BufferBase(NULL, 0){}
     RefBuffer(const CLLPVOID pData, clsize uLength)
-      : clBufferBase(pData, uLength){}
+      : BufferBase(pData, uLength){}
   };
 
   //////////////////////////////////////////////////////////////////////////
   //
   // 尺寸固定的 Buffer
   //
-  class FixedBuffer : public clBufferBase
+  class FixedBuffer : public BufferBase
   {
   public:
     FixedBuffer();
@@ -68,36 +68,32 @@ namespace clstd
     // Resize 尺寸比原来数据区小, 会截断数据, 比原来数据区大, 不会破坏数据, 根据参数决定是否填0
     b32 Resize(clsize dwSize, b32 bZeroInit);
     void Set(CLLPVOID lpData, clsize cbSize);
-    void Set(const clBufferBase* pBuffer);
+    void Set(const BufferBase* pBuffer);
   };
-}
 
+  //////////////////////////////////////////////////////////////////////////
+  //
+  // 通用 Buffer
+  //
+  class Buffer : public BufferBase
+  {
+  protected:
+    clsize m_nCapacity;  // 容量大小
+    clsize m_nPageSize;  // 页大小, 大小不够将按照这个长度增加
+  public:
+    Buffer(u32 nPageSize = 512);
+    virtual ~Buffer();
 
-//////////////////////////////////////////////////////////////////////////
-//
-// 通用 Buffer
-//
-class clBuffer : public clBufferBase
-{
-protected:
-  clsize m_nCapacity;  // 容量大小
-  clsize m_nPageSize;  // 页大小, 大小不够将按照这个长度增加
-public:
-  clBuffer(u32 nPageSize = 512);
-  virtual ~clBuffer();
+    b32       Reserve   (clsize dwSize);
+    b32       Resize    (clsize dwSize, b32 bZeroInit);
+    CLLPVOID  GetPtr    () const;
+    clsize    GetSize   () const;
+    //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
+    b32       Append    (CLLPCVOID lpData, clsize dwSize);
+    b32       Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
+    b32       Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
+  };
 
-  b32       Reserve   (clsize dwSize);
-  b32       Resize    (clsize dwSize, b32 bZeroInit);
-  CLLPVOID  GetPtr    () const;
-  clsize    GetSize   () const;
-  //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
-  b32       Append    (CLLPCVOID lpData, clsize dwSize);
-  b32       Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
-  b32       Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
-};
-
-namespace clstd
-{
   // 宽字符buffer
   // TODO: 这个从clStringW继承吧，重新实现Allocator
   //class WideTextBuffer : public clBuffer
@@ -107,6 +103,7 @@ namespace clstd
   //  WideTextBuffer(clBufferBase* pRawBuffer, CLDWORD dwBOM);
   //  clsize GetLength(); // 返回字符数，GetSize()返回的还是字节数
   //};
+
 } // namespace clstd
 //////////////////////////////////////////////////////////////////////////
 //
@@ -142,8 +139,8 @@ namespace clstd
 {
   struct PROCESSBUFFER
   {
-    clBuffer*     pDestBuf; // 如果为 NULL, 处理函数会自己创建. 不再使用时由用户释放
-    clBufferBase* pSrcBuf;  // 输入的 Buffer
+    Buffer*     pDestBuf; // 如果为 NULL, 处理函数会自己创建. 不再使用时由用户释放
+    BufferBase* pSrcBuf;  // 输入的 Buffer
   };
 } // namespace clstd
 

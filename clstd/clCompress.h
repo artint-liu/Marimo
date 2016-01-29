@@ -10,11 +10,11 @@ namespace clstd
   int           CompressBuffer   (CLLPVOID pDest, clsize* destLen, CLLPCVOID pSource, clsize sourceLen);
   int           UncompressBuffer (CLLPVOID pDest, clsize* destLen, CLLPCVOID pSource, clsize sourceLen);
 
-  int           CompressBuffer   (clBuffer* pBuffer, CLLPCVOID ptr, clsize nSize);
-  clBuffer*     CompressBuffer   (CLLPCVOID ptr, clsize nSize);
-  clBuffer*     CompressBuffer   (clBufferBase* pSourceBuffer);
+  int           CompressBuffer   (Buffer* pBuffer, CLLPCVOID ptr, clsize nSize);
+  Buffer*     CompressBuffer   (CLLPCVOID ptr, clsize nSize);
+  Buffer*     CompressBuffer   (BufferBase* pSourceBuffer);
 
-  FixedBuffer*  UncompressBuffer (clBufferBase* pSourceBuffer, clsize nDestSize);  // nDestSize 解压后的长度, 如果与数据实际长度不符, 会失败.
+  FixedBuffer*  UncompressBuffer (BufferBase* pSourceBuffer, clsize nDestSize);  // nDestSize 解压后的长度, 如果与数据实际长度不符, 会失败.
 } // namespace clstd
 
 

@@ -5,7 +5,7 @@
 //class FbxAMatrix;
 #endif // #ifdef FBX_SDK
 
-class SmartRepository;
+//class SmartRepository;
 
 struct Bone
 {  
@@ -115,8 +115,8 @@ public:
 
   GXLPCSTR  GetName             ();
   void      UpdateBoneLocalMarix(Bone& bone, int nBoneIndex, int nFrame, float fResidue);
-  GXHRESULT SaveFile            (SmartRepository* pStorage);
-  GXHRESULT LoadFile            (SmartRepository* pStorage);
+  GXHRESULT SaveFile            (clSmartRepository* pStorage);
+  GXHRESULT LoadFile            (clSmartRepository* pStorage);
   GXHRESULT SaveFileW           (GXLPCWSTR szFilename);
 
   inline int    GetFrameCount   () const;
@@ -135,7 +135,7 @@ public:
     BONEINFO*           pBoneInfo,
     int                 nBoneCount);
   static GXHRESULT CreateFromFileW      (GVAnimationTrack** ppTrack, GXLPCWSTR szFilename);
-  static GXHRESULT CreateFromRepository (GVAnimationTrack** ppTrack, SmartRepository* pStorage);
+  static GXHRESULT CreateFromRepository (GVAnimationTrack** ppTrack, clSmartRepository* pStorage);
 };
 
 inline int GVAnimationTrack::GetFrameCount() const
@@ -204,12 +204,12 @@ public:
   GXBOOL      PlayById              (int nId);  // 用这个接口设置动作名将会为空
 
 
-  virtual GXHRESULT SaveFile(SmartRepository* pStorage);
-  virtual GXHRESULT LoadFile(SmartRepository* pStorage);
+  virtual GXHRESULT SaveFile(clSmartRepository* pStorage);
+  virtual GXHRESULT LoadFile(clSmartRepository* pStorage);
 
   virtual GXBOOL    Update                (const GVSCENEUPDATE& sContext);
   static  GXHRESULT CreateFromFileW       (GVSkeleton** ppSkeleton, GVScene* pScene, GXLPCWSTR szFilename);
-  static  GXHRESULT CreateFromRepository  (GVSkeleton** ppSkeleton, GVScene* pScene, SmartRepository* pStorage);
+  static  GXHRESULT CreateFromRepository  (GVSkeleton** ppSkeleton, GVScene* pScene, clSmartRepository* pStorage);
 
   //template<class _Vec, class _VecArray>
   //inline int CalcComponent(_Vec& vDst, const _VecArray& aVec, const _Vec& vDefault, int nRefIdx)

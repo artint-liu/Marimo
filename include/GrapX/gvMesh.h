@@ -48,7 +48,7 @@ protected:
 
   //static GXHRESULT SavePrimitive(SmartRepository* pStorage, GPrimitiveVI* pPrimitive, int nStartIndex, int nNumPrimi);
 
-  virtual GXHRESULT LoadFile (GXGraphics* pGraphics, SmartRepository* pStorage);
+  virtual GXHRESULT LoadFile (GXGraphics* pGraphics, clSmartRepository* pStorage);
 public:
   GVMesh(GXGraphics* pGraphics);
   GVMesh(GXGraphics* pGraphics, GXDWORD dwClassCode);
@@ -67,7 +67,7 @@ public:
   virtual GXHRESULT Clone( GVNode** ppClonedNode/*, GXBOOL bRecursive*/ );
 
   // 文件存取相关的
-  virtual GXHRESULT SaveFile (SmartRepository* pStorage);
+  virtual GXHRESULT SaveFile (clSmartRepository* pStorage);
   virtual GXHRESULT SetMaterialInstDirect     (GXMaterialInst* pMtlInst);
 
   virtual GXHRESULT GetMaterialInst         (GXMaterialInst** ppMtlInst);
@@ -86,7 +86,7 @@ public:
   static GXHRESULT LoadObjFromFileW       (GXGraphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
   static GXHRESULT LoadMeshFromFileA      (GXGraphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh);
   static GXHRESULT LoadMeshFromFileW      (GXGraphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh);
-  static GXHRESULT LoadMeshFromRepository (GXGraphics* pGraphics, SmartRepository* pStorage, GVMesh** ppMesh);
+  static GXHRESULT LoadMeshFromRepository (GXGraphics* pGraphics, clSmartRepository* pStorage, GVMesh** ppMesh);
 };
 
 namespace mesh

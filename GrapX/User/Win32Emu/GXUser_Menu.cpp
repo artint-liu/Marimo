@@ -38,13 +38,13 @@ struct GXMENUEX_TEMPLATE_ITEM {
 STATIC_ASSERT(sizeof(GXMENUEX_TEMPLATE_ITEM) == 3 * sizeof(GXDWORD) + sizeof(GXWORD) + 1024 * sizeof(GXWCHAR));
 
 GXBOOL IntEnumMenuKeys(
-  SmartProfileW* pSmart, 
-  SmartProfileW::HANDLE hPopup, 
+  clSmartProfileW* pSmart, 
+  clSmartProfileW::HANDLE hPopup, 
   const TIdentifyDefination& DefTable,
   GXMENUEX_TEMPLATE_ITEM& MenuItem)
 {
-  SmartProfileW::HANDLE hKeys;
-  SmartProfileW::VALUE val;  
+  clSmartProfileW::HANDLE hKeys;
+  clSmartProfileW::VALUE val;  
 
   int nTextLength = 0;
   //InlSetZeroT(MenuItem);
@@ -79,8 +79,8 @@ GXBOOL IntEnumMenuKeys(
 }
 
 GXBOOL LoadMenuTemplateFromSmartProfileSectionW(
-  SmartProfileW* pSmart, 
-  SmartProfileW::HANDLE hPopup, 
+  clSmartProfileW* pSmart, 
+  clSmartProfileW::HANDLE hPopup, 
   clBuffer* pBuffer, 
   const TIdentifyDefination& DefTable)
 {
@@ -88,7 +88,7 @@ GXBOOL LoadMenuTemplateFromSmartProfileSectionW(
   GXBOOL bValidPopup;
   GXSIZE_T nLastOffset = 0;
 
-  SmartProfileW::HANDLE hItems = pSmart->FindFirstSection(hPopup, FALSE, NULL, NULL);
+  clSmartProfileW::HANDLE hItems = pSmart->FindFirstSection(hPopup, FALSE, NULL, NULL);
   while(hItems != NULL)
   {
     clStringW strSectName = hItems->itSection.ToString();
@@ -132,16 +132,16 @@ GXBOOL LoadMenuTemplateFromSmartProfileSectionW(
 
 GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIdentifyDefination& DefTable)
 {
-  SmartProfileW sp;
+  clSmartProfileW sp;
   if(sp.LoadW(szFilename))
   {
-    SmartProfileW::HANDLE hDef = sp.OpenSection(szSmartPath);
+    clSmartProfileW::HANDLE hDef = sp.OpenSection(szSmartPath);
     if(hDef == NULL) {
       return FALSE;
     }
 
-    SmartProfileW::VALUE val;
-    SmartProfileW::HANDLE hEnumKey = sp.FindFirstKey(hDef, val);
+    clSmartProfileW::VALUE val;
+    clSmartProfileW::HANDLE hEnumKey = sp.FindFirstKey(hDef, val);
     while(hEnumKey != NULL)
     {
       DefTable[clStringA(val.KeyName())] = val.ToInt();
@@ -157,13 +157,13 @@ GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIde
   return FALSE;
 }
 
-GXBOOL LoadMenuTemplateFromSmartProfileW(SmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer)
+GXBOOL LoadMenuTemplateFromSmartProfileW(clSmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer)
 {
-  SmartProfileW::HANDLE hSect = NULL;
+  clSmartProfileW::HANDLE hSect = NULL;
   hSect = pSmart->OpenSection(szName);
   if(hSect != NULL)
   {
-    SmartProfileW::VALUE val;
+    clSmartProfileW::VALUE val;
     TIdentifyDefination DefTable;
     GXBOOL bval = TRUE;
     if(pSmart->FindKey(hSect, L"Defination", val))

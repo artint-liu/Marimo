@@ -28,7 +28,7 @@ extern GXWNDCLASSEX WndClassEx_MyEdit_1_3_30;
 extern GXWNDCLASSEX WndClassEx_MyListbox;
 extern GXWNDCLASSEX WndClassEx_MyStatic;
 extern GXWNDCLASSEX WndClassEx_GXUIEdit_1_3_30;
-extern GXBOOL LoadMenuTemplateFromSmartProfileW(SmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
+extern GXBOOL LoadMenuTemplateFromSmartProfileW(clSmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
 //struct DLGLOG
 //{
 //  typedef clmap<clStringW, GXHWND>  NameToWndDict;

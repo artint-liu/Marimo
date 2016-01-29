@@ -35,7 +35,7 @@ namespace clstd
     MD5Update(&ctx, pBuffer, (unsigned long)cbSize);
   }
 
-  void MD5Calculater::Update(const clBufferBase* pBuffer)
+  void MD5Calculater::Update(const BufferBase* pBuffer)
   {
     Update((u8*)pBuffer->GetPtr(), pBuffer->GetSize());
   }

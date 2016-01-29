@@ -6,7 +6,7 @@ class GPrimitive;
 class GVScene;
 class GXCanvas3D;
 class GXMaterialInst;
-class SmartRepository;
+//class SmartRepository;
 struct GVSCENEUPDATE;
 //enum GXPRIMITIVETYPE;
 
@@ -147,7 +147,7 @@ private:
 protected:
   virtual GXHRESULT LoadFileA(GXGraphics* pGraphics, GXLPCSTR szFilename);
   virtual GXHRESULT LoadFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename);
-  virtual GXHRESULT LoadFile (GXGraphics* pGraphics, SmartRepository* pStorage);
+  virtual GXHRESULT LoadFile (GXGraphics* pGraphics, clSmartRepository* pStorage);
 public:
   //GVModel   (GVModelClass eClass);
   GVNode   (GVScene* pScene, GXDWORD dwClassCode);
@@ -200,7 +200,7 @@ public:
 
   virtual GXHRESULT SaveFileA(GXLPCSTR szFilename);
   virtual GXHRESULT SaveFileW(GXLPCWSTR szFilename);
-  virtual GXHRESULT SaveFile (SmartRepository* pStorage);
+  virtual GXHRESULT SaveFile (clSmartRepository* pStorage);
 
   //virtual void GetGeoDesc();
   inline void             SetName           (GXLPCSTR szName);

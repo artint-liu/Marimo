@@ -461,7 +461,7 @@ GXVOID GShader::ResolveProfileDescW(GXLPCWSTR szProfileDesc, clStringW* pstrFile
 
 GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam)
 {
-  SmartProfileA sp;
+  clSmartProfileA sp;
   clStringA strSect = clStringA("shader\\") + szPlatformSect;
   clStringW strFilename;
   clStringA strMacros;
@@ -519,10 +519,10 @@ GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCST
   return GX_OK;
 }
 
-GXBOOL GShader::LoadElementSource(SmartProfileA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool)
+GXBOOL GShader::LoadElementSource(clSmartProfileA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool)
 {
-  typedef SmartProfileA::HANDLE sHANDLE;
-  typedef SmartProfileA::VALUE sVALUE;
+  typedef clSmartProfileA::HANDLE sHANDLE;
+  typedef clSmartProfileA::VALUE sVALUE;
 
   //clStringA strSect = clStringA("shader\\") + szPlatformSect;
   //clStringA strComponentSect = clStringA(szSection) + "\\PixelComponent";
@@ -729,10 +729,10 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
 
 //////////////////////////////////////////////////////////////////////////
 
-GXBOOL GShader::LoadUniformSet(SmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms)
+GXBOOL GShader::LoadUniformSet(clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms)
 {
-  typedef SmartProfileA::HANDLE sHANDLE;
-  typedef SmartProfileA::VALUE sVALUE;
+  typedef clSmartProfileA::HANDLE sHANDLE;
+  typedef clSmartProfileA::VALUE sVALUE;
 
   clStringA strSection = clStringA(szSection) + "\\parameter";
 
@@ -785,10 +785,10 @@ GXBOOL GShader::LoadUniformSet(SmartProfileA* pSmart, GXLPCSTR szSection, ParamA
   return TRUE;
 }
 
-GXBOOL GShader::LoadStateSet(SmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aStates)
+GXBOOL GShader::LoadStateSet(clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aStates)
 {
-  typedef SmartProfileA::HANDLE sHANDLE;
-  typedef SmartProfileA::VALUE sVALUE;
+  typedef clSmartProfileA::HANDLE sHANDLE;
+  typedef clSmartProfileA::VALUE sVALUE;
 
   for(int i = 0; i < 2; i++)
   {

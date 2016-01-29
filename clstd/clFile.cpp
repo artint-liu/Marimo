@@ -395,16 +395,16 @@ FALSE_RET:
     return FALSE;
   }
 
-  b32 File::MapToBuffer(clBuffer** ppBuffer, int nFileOffset, int cbSize)
+  b32 File::MapToBuffer(Buffer** ppBuffer, int nFileOffset, int cbSize)
   {
     CLBYTE*   pBuffer    = NULL;
     u32       dwSize     = 0;
-    clBuffer* pBufferObj = NULL;
+    Buffer* pBufferObj = NULL;
 
     if(MapToBuffer(&pBuffer, nFileOffset, cbSize, &dwSize) == FALSE || ppBuffer == NULL)
       return FALSE;
 
-    pBufferObj = new clBuffer;
+    pBufferObj = new Buffer;
     pBufferObj->Append(pBuffer, dwSize);
 
     *ppBuffer = pBufferObj;
@@ -413,7 +413,7 @@ FALSE_RET:
     return TRUE;
   }
 
-  b32 File::ReadToBuffer(clBuffer* pBuffer, int nFileOffset, int cbSize)
+  b32 File::ReadToBuffer(Buffer* pBuffer, int nFileOffset, int cbSize)
   {
     u32 dwSizeHigh;
     const i32 nReadSize = cbSize == 0 ? GetSize(&dwSizeHigh) 

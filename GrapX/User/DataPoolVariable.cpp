@@ -37,9 +37,13 @@
 #define StringA_SetAsStringW    String_SetAsStringT<GXLPCWSTR, clStringA>
 #define StringA_SetAsStringA    String_SetAsStringT<GXLPCSTR, clStringA>
 
-//#ifdef ENABLE_DATAPOOL_WATCHER
+#ifndef DISABLE_DATAPOOL_WATCHER
 #define THIS_IMPULSE_DATA_CHANGE                      pThis->Impulse(DATACT_Change)
 #define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)  pThis->Impulse(_DATA_ACT, _INDEX, _COUNT)
+#else
+#define THIS_IMPULSE_DATA_CHANGE
+#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 //#else
 //#define THIS_IMPULSE_DATA_CHANGE
 //#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)
@@ -435,6 +439,7 @@ namespace Marimo
     return *this;
   }
 
+#ifndef DISABLE_DATAPOOL_WATCHER
   GXBOOL Variable::Impulse(DataAction reason, GXSIZE_T index, GXSIZE_T count)
   {
     if(m_pDataPool != NULL) {
@@ -442,6 +447,7 @@ namespace Marimo
     }
     return GX_OK;
   }
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
   GXHRESULT Variable::GetPool(DataPool** ppDataPool) GXCONST
   {
@@ -886,11 +892,13 @@ namespace Marimo
     switch(pThis->InlGetCategory())
     {
     case T_BYTE:
-    case T_SBYTE:
       return (u32)*(u8*)pData;
+    case T_SBYTE:
+      return (s32)*(s8*)pData;
     case T_WORD:
-    case T_SWORD:
       return (u32)*(u16*)pData;
+    case T_SWORD:
+      return (s32)*(s16*)pData;
     case T_DWORD:
     case T_SDWORD:
       return *(u32*)pData;

@@ -375,23 +375,6 @@ namespace Marimo
   }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-#ifdef DATAPOOLCOMPILER_PROJECT
-  GXHRESULT DataPoolResolverImpl::AddRef()
-  {
-    return ++m_nRefCount;
-  }
-
-  GXHRESULT DataPoolResolverImpl::Release()
-  {
-    const GXLONG nRefCount = --m_nRefCount;
-    if(nRefCount == 0)
-    {
-      delete this;
-      return GX_OK;
-    }
-    return nRefCount;
-  }
-#else
   GXHRESULT DataPoolResolverImpl::AddRef()
   {
     return gxInterlockedIncrement(&m_nRefCount);
@@ -407,7 +390,6 @@ namespace Marimo
     }
     return nRefCount;
   }
-#endif // #ifdef DATAPOOLCOMPILER_PROJECT
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   DataPoolResolverImpl::~DataPoolResolverImpl()

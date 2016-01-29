@@ -37,7 +37,7 @@ extern GXWNDCLASSEX WndClassEx_MyEdit_1_3_30;
 extern GXWNDCLASSEX WndClassEx_MyListbox;
 extern GXWNDCLASSEX WndClassEx_MyStatic;
 extern GXWNDCLASSEX WndClassEx_GXUIEdit_1_3_30;
-extern GXBOOL LoadMenuTemplateFromSmartProfileW(SmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
+extern GXBOOL LoadMenuTemplateFromSmartProfileW(clSmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
 extern GXLRESULT GXCALLBACK CommDialogWndProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
 extern GXLRESULT GXCALLBACK CommDialogWndProcEx(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
 
@@ -127,11 +127,11 @@ GXBOOL GetVariableData(GXLPBYTE lpBytes, GXLPINT pRetLen)
 
 namespace DlgXM
 {
-  class DlgSmartFile : public SmartProfileW
+  class DlgSmartFile : public clSmartProfileW
   {
   public:
-    typedef SmartProfileW::HANDLE HANDLE;
-    typedef SmartProfileW::VALUE VALUE;
+    typedef clSmartProfileW::HANDLE HANDLE;
+    typedef clSmartProfileW::VALUE VALUE;
     typedef clvector<GXTBBUTTON> TBButtonArray;
   private:
     //GXHRESULT LoadLayoutBinaryItem(HANDLE hHandle, GXUI::DlgLayout::BINARYITEM* pBinaryItemDesc);

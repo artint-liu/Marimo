@@ -837,7 +837,7 @@ namespace mesh
 
     ClearVertexElement(pNormals, sizeof(float3), nNormalStride, nVertCount);
 
-    for(int nFaceIndex = 0; nFaceIndex < nFaceCount; nFaceIndex++)
+    for(GXSIZE_T nFaceIndex = 0; nFaceIndex < nFaceCount; nFaceIndex++)
     {
       const _VIndexT ia = *pIndices++;
       const _VIndexT ib = *pIndices++;
@@ -860,7 +860,7 @@ namespace mesh
     }
 
     float3* pNormalPtr = pNormals;
-    for(int nVertIndex = 0; nVertIndex < nVertCount; nVertIndex++)
+    for(GXSIZE_T nVertIndex = 0; nVertIndex < nVertCount; nVertIndex++)
     {
       const float fLenSqu = pNormalPtr->lengthsquare();
       if(fLenSqu != 0 && fLenSqu != 1.0f) {
@@ -1064,7 +1064,7 @@ namespace mesh
       nVertexStride = sizeof(float3);
     }
     aabb.Clear();
-    for(int i = 0; i < nIndexCount; i++)
+    for(GXSIZE_T i = 0; i < nIndexCount; i++)
     {
       float3* v = (float3*)((GXBYTE*)pVertices + nVertexStride * pIndex[i]);
       aabb.AppendVertex(*v);

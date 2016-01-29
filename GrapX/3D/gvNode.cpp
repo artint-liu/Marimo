@@ -376,7 +376,7 @@ GXHRESULT GVNode::SaveFileA(GXLPCSTR szFilename)
 
 GXHRESULT GVNode::SaveFileW(GXLPCWSTR szFilename)
 {
-  SmartRepository Storage;
+  clSmartRepository Storage;
   GXHRESULT hval = SaveFile(&Storage);
   if(GXSUCCEEDED(hval)) {
     hval = Storage.SaveW(szFilename) ? GX_OK : GX_FAIL;
@@ -384,7 +384,7 @@ GXHRESULT GVNode::SaveFileW(GXLPCWSTR szFilename)
   return hval;
 }
 
-GXHRESULT GVNode::SaveFile (SmartRepository* pStorage)
+GXHRESULT GVNode::SaveFile(clSmartRepository* pStorage)
 {
   return GX_FAIL;
 }
@@ -396,7 +396,7 @@ GXHRESULT GVNode::LoadFileA(GXGraphics* pGraphics, GXLPCSTR szFilename)
 
 GXHRESULT GVNode::LoadFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename)
 {
-  SmartRepository Storage;
+  clSmartRepository Storage;
   GXBOOL bval = Storage.LoadW(szFilename);
   if(bval) {
     return LoadFile(pGraphics, &Storage);
@@ -404,7 +404,7 @@ GXHRESULT GVNode::LoadFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename)
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
+GXHRESULT GVNode::LoadFile(GXGraphics* pGraphics, clSmartRepository* pStorage)
 {
   return GX_FAIL;
 }

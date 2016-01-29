@@ -471,7 +471,7 @@ GXHRESULT GVGeometry::CreateBox(GXGraphics* pGraphics, CFloat3& vCenter, CFloat3
     if(TEST_FLAG(dwVertexFlags, GXVF_COLOR))
     {
       MeshComp.pColors32 = new GXColor32[MeshComp.nVertexCount];
-      for(int i = 0; i < MeshComp.nVertexCount; i++)
+      for(GXSIZE_T i = 0; i < MeshComp.nVertexCount; i++)
       {
         MeshComp.pColors32[i] = clr;
       }

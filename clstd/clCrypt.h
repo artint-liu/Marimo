@@ -2,7 +2,6 @@
 #define _CL_CRYPT_H_
 
 //struct MD5_CTX;
-class clBufferBase;
 struct MD5_CTX
 {
   unsigned int i[2];
@@ -25,6 +24,7 @@ CLVOID A_SHAFinal   (SHA_CTX* Context, CLLPULONG Result);
 
 namespace clstd
 {
+  class BufferBase;
   class MD5Calculater
   {
     MD5_CTX ctx;
@@ -34,7 +34,7 @@ namespace clstd
     void Clear();
     //void End();
     void Update(const u8* pBuffer, clsize cbSize);
-    void Update(const clBufferBase* pBuffer);
+    void Update(const BufferBase* pBuffer);
 
     b32       operator=(CLCONST MD5Calculater& md5) CLCONST;
     int       Compare(CLCONST MD5Calculater& md5) CLCONST;  // return 0 if equal

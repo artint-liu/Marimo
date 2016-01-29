@@ -206,7 +206,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
       float3 vPos(0.0f);
       float3 vNormal(0.0f);
       float3 vNormalStore;
-      for(int nClusterIndex = 0; nClusterIndex < m_nClusterCount; nClusterIndex++)
+      for(GXSIZE_T nClusterIndex = 0; nClusterIndex < m_nClusterCount; nClusterIndex++)
       {
         const float fWeight = m_pWeight[nVertIndex * m_nClusterCount + nClusterIndex];
         if(fWeight > 0) {
@@ -233,7 +233,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
   return TRUE;
 }
 
-GXHRESULT GVSkinnedMeshSoft::SaveFile(SmartRepository* pStorage)
+GXHRESULT GVSkinnedMeshSoft::SaveFile(clSmartRepository* pStorage)
 {
   pStorage->WriteStringA(NULL, SKINNEDMESH_NAME, GetName());
 
@@ -280,7 +280,7 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(SmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVSkinnedMeshSoft::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
+GXHRESULT GVSkinnedMeshSoft::LoadFile(GXGraphics* pGraphics, clSmartRepository* pStorage)
 {
   Clear();
   clStringA strName;
@@ -391,7 +391,7 @@ GXHRESULT GVSkinnedMeshSoft::CreateFromFileW(GXGraphics* pGraphics, GXLPCWSTR sz
   return hval;
 }
 
-GXHRESULT GVSkinnedMeshSoft::CreateFromRepository(GXGraphics* pGraphics, SmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh)
+GXHRESULT GVSkinnedMeshSoft::CreateFromRepository(GXGraphics* pGraphics, clSmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh)
 {
   GVSkinnedMeshSoft* pMesh = new GVSkinnedMeshSoft(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {

@@ -65,10 +65,10 @@ public:
   virtual GXHRESULT   Clone             (GXMaterialInst** ppCuplicateMtlInst);
 
   virtual GXHRESULT   SaveFileW         (GXLPCWSTR szFilename);
-  virtual GXHRESULT   SaveRepository    (SmartRepository* pStorage);
+  virtual GXHRESULT   SaveRepository    (clSmartRepository* pStorage);
 
   virtual GXHRESULT   LoadFileW         (GXGraphics* pGraphics, GXLPCWSTR szFilename);
-  virtual GXHRESULT   LoadRepository    (GXGraphics* pGraphics, SmartRepository* pStorage);
+  virtual GXHRESULT   LoadRepository    (GXGraphics* pGraphics, clSmartRepository* pStorage);
 
   virtual GXHRESULT GetUniformList    (UniformArray* pUniforms);
   virtual GXHRESULT BindData          (MODataPool* pDataPool, GXLPCSTR szStruct);

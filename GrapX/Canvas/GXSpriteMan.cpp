@@ -25,7 +25,7 @@
 //using namespace std;
 //////////////////////////////////////////////////////////////////////////
 extern "C" GXBOOL GXDLLAPI gxSetRegn(GXLPREGN lprg, GXINT xLeft, GXINT yTop, GXINT xWidth, GXINT yHeight);
-GXHRESULT IntLoadSpriteDesc(SmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
+GXHRESULT IntLoadSpriteDesc(clSmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
 //////////////////////////////////////////////////////////////////////////
 
 GXHRESULT GXDLLAPI GXCreateSprite(GXGraphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount, GXSprite** ppSprite)
@@ -89,7 +89,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteArray(GXGraphics* pGraphics, GXLPCWSTR szTextur
 
 GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSpriteFile, GXSprite** ppSprite)
 {
-  SmartProfileA ss;
+  clSmartProfileA ss;
   GXHRESULT hval = GX_FAIL;
 
   if( ! ss.LoadW(szSpriteFile)) {
@@ -102,7 +102,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
   // 未来不排除增加同时读取两种格式并合并为同一个Sprite对象的可能
   //
 
-  SmartProfileA::HANDLE hSpriteArray = ss.FindFirstSection(NULL, NULL, NULL, "SpriteArray");
+  clSmartProfileA::HANDLE hSpriteArray = ss.FindFirstSection(NULL, NULL, NULL, "SpriteArray");
   if(hSpriteArray)
   {
     clStringW strImageFile;
@@ -142,7 +142,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
 //  friend GXHRESULT IntLoadAnimations( SmartProfileA &ss, GXSpriteDescObjImpl* pDescObj ) ;
 //};
 
-GXHRESULT IntLoadModules( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
+GXHRESULT IntLoadModules( clSmartProfileA& ss, GXSpriteDescImpl* pDescObj )
 {
   GXHRESULT hval = GX_OK;
   // 创建对象
@@ -165,7 +165,7 @@ GXHRESULT IntLoadModules( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
   //}
 
   //clvector<REGN> aRegns;
-  SmartProfileA::HANDLE hModule = ss.FindFirstSection(NULL, FALSE, "Sprite\\Module", "rect");
+  clSmartProfileA::HANDLE hModule = ss.FindFirstSection(NULL, FALSE, "Sprite\\Module", "rect");
 
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
@@ -179,10 +179,10 @@ GXHRESULT IntLoadModules( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
 
     GXSprite::MODULE sModule;
     clStringA strModuleName;
-    SmartProfileA::VALUE valueLeft;
-    SmartProfileA::VALUE valueTop;
-    SmartProfileA::VALUE valueRight;
-    SmartProfileA::VALUE valueBottom;
+    clSmartProfileA::VALUE valueLeft;
+    clSmartProfileA::VALUE valueTop;
+    clSmartProfileA::VALUE valueRight;
+    clSmartProfileA::VALUE valueBottom;
 
     do 
     {
@@ -218,10 +218,10 @@ GXHRESULT IntLoadModules( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
   return hval;
 }
 
-GXHRESULT IntLoadFrames( SmartProfileA &ss, GXSpriteDescImpl* pDescObj ) 
+GXHRESULT IntLoadFrames(clSmartProfileA& ss, GXSpriteDescImpl* pDescObj ) 
 {
   GXHRESULT hval = GX_OK;
-  SmartProfileA::HANDLE hFrame = ss.FindFirstSection(NULL, FALSE, "Sprite", "Frame");
+  clSmartProfileA::HANDLE hFrame = ss.FindFirstSection(NULL, FALSE, "Sprite", "Frame");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
   if(hFrame == NULL) {
@@ -230,7 +230,7 @@ GXHRESULT IntLoadFrames( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
 
   if(hFrame != NULL)
   {
-    SmartProfileA::VALUE valueName;
+    clSmartProfileA::VALUE valueName;
     //SmartProfileA::VALUE valueId;
 
     //typedef clvector<GXSPRITEFRAME> FrameArray;
@@ -250,7 +250,7 @@ GXHRESULT IntLoadFrames( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
 
       sFrame.id = ss.FindKeyAsInteger(hFrame, "id", 0);
 
-      SmartProfileA::HANDLE hFrameModule = ss.FindFirstSection(hFrame, FALSE, NULL, "module");
+      clSmartProfileA::HANDLE hFrameModule = ss.FindFirstSection(hFrame, FALSE, NULL, "module");
       if(hFrameModule)
       {
         GXSprite::FRAME_MODULE sFrameModule = {0};
@@ -285,10 +285,10 @@ GXHRESULT IntLoadFrames( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
   return hval;
 }
 
-GXHRESULT IntLoadAnimations( SmartProfileA &ss, GXSpriteDescImpl* pDescObj ) 
+GXHRESULT IntLoadAnimations(clSmartProfileA &ss, GXSpriteDescImpl* pDescObj ) 
 {
   GXHRESULT hval = GX_OK;
-  SmartProfileA::HANDLE hAnim = ss.FindFirstSection(NULL, FALSE, "Sprite", "Animation");
+  clSmartProfileA::HANDLE hAnim = ss.FindFirstSection(NULL, FALSE, "Sprite", "Animation");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
   if(hAnim == NULL) {
@@ -297,7 +297,7 @@ GXHRESULT IntLoadAnimations( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
 
   if(hAnim != NULL)
   {
-    SmartProfileA::VALUE valueName;
+    clSmartProfileA::VALUE valueName;
     GXSprite::ANIMATION sAnimation = {0};
 
     auto& aAnimations = pDescObj->m_aAnimations;
@@ -350,7 +350,7 @@ GXHRESULT IntLoadAnimations( SmartProfileA &ss, GXSpriteDescImpl* pDescObj )
   return hval;
 }
 
-GXHRESULT IntLoadSpriteDesc(SmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc)
+GXHRESULT IntLoadSpriteDesc(clSmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc)
 {
   GXSpriteDescImpl* pDescObj = NULL;
   GXHRESULT hval = GX_OK;
@@ -362,7 +362,7 @@ GXHRESULT IntLoadSpriteDesc(SmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteD
   }
 
 
-  SmartProfileA::HANDLE hSprite = ss.FindFirstSection(NULL, NULL, NULL, "Sprite");
+  clSmartProfileA::HANDLE hSprite = ss.FindFirstSection(NULL, NULL, NULL, "Sprite");
 
   // TODO: 之前Sprite描述定义在Image段, 后来改为Sprite
   // 这里用了兼容写法，如果Sprite段不存在则尝试读取就的Image段定义
@@ -378,13 +378,13 @@ GXHRESULT IntLoadSpriteDesc(SmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteD
     //
     // 读取纹理文件名
     //
-    SmartProfileA::VALUE valueFile;
+    clSmartProfileA::VALUE valueFile;
     if(hSprite != NULL)
     {
       if(ss.FindKey(hSprite, "File", valueFile) == TRUE) {
         clStringW strSpriteDir = szSpriteFile;
         clpathfile::RemoveFileSpecW(strSpriteDir);
-        pDescObj->m_strImageFile = AS2WS(FromProfileString<clStringA>(valueFile.ToString()));
+        pDescObj->m_strImageFile = AS2WS(clstd::FromProfileString<clStringA>(valueFile.ToString()));
         clpathfile::CombinePathW(pDescObj->m_strImageFile, strSpriteDir, pDescObj->m_strImageFile);
       }
     }
@@ -410,7 +410,7 @@ GXHRESULT IntLoadSpriteDesc(SmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteD
 
 GXHRESULT GXDLLAPI GXLoadSpriteDescW(GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc)
 {
-  SmartProfileA ss;
+  clSmartProfileA ss;
 
   if( ! ss.LoadW(szSpriteFile)) {
     return GX_E_OPEN_FAILED;
@@ -628,7 +628,7 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
 GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* pDesc)
 {
   //clFile file;
-  SmartStockA stock;
+  clSmartStockA stock;
 
   if(pDesc->szImageFile == NULL || GXSTRLEN(pDesc->szImageFile) == 0) {
     CLOG_ERROR(__FUNCTION__": Texture filename is empty.\r\n");

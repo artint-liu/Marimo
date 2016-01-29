@@ -82,8 +82,8 @@ INT_PTR CALLBACK PlatformSelDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* pDesc)
 {
-  typedef SmartProfileA::HANDLE sHANDLE;
-  SmartProfileA sp;
+  typedef clstd::SmartProfileA::HANDLE sHANDLE;
+  clstd::SmartProfileA sp;
   GXWCHAR buffer[MAX_PATH];
   clStringW strProfile;
   GetModuleFileNameW(hInstance, buffer, MAX_PATH);

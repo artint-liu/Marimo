@@ -21,7 +21,7 @@
 
 namespace RepoUtility
 {
-  GXHRESULT SavePrimitive(SmartRepository* pStorage, GXLPCSTR szDomain, GPrimitiveVI* pPrimitive, int nStartIndex, int nNumPrimi)
+  GXHRESULT SavePrimitive(clSmartRepository* pStorage, GXLPCSTR szDomain, GPrimitiveVI* pPrimitive, int nStartIndex, int nNumPrimi)
   {
     clStringA strMeshVertexDecl;
     clStringA strMeshAsmVertices;
@@ -56,7 +56,7 @@ namespace RepoUtility
     return GX_OK;
   }
 
-  GXHRESULT LoadPrimitive(SmartRepository* pStorage, GXLPCSTR szDomain, GXVERTEXELEMENT* pVertElement, clBuffer* pVertices, clBuffer* pIndices, size_t& nStartIndex, size_t& nNumPrimi)
+  GXHRESULT LoadPrimitive(clSmartRepository* pStorage, GXLPCSTR szDomain, GXVERTEXELEMENT* pVertElement, clBuffer* pVertices, clBuffer* pIndices, GXSIZE_T& nStartIndex, GXSIZE_T& nNumPrimi)
   {
     clStringA strMeshVertexDecl;
     clStringA strMeshAsmVertices;

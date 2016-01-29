@@ -6,9 +6,10 @@
 #define FILEATTRIBUTE_SYSTEM     0x00000004
 #define FILEATTRIBUTE_DIRECTORY  0x00000010
 
-class clBuffer;
 namespace clstd
 {
+  class Buffer;
+
   class File
   {
   public:
@@ -121,9 +122,9 @@ namespace clstd
     int  WritefA      (const ch* format, ...);
     int  WritefW      (const wch* format, ...);
 
-    b32  ReadToBuffer (clBuffer* pBuffer, int nFileOffset = 0, int cbSize = 0);
+    b32  ReadToBuffer (Buffer* pBuffer, int nFileOffset = 0, int cbSize = 0);
     b32  MapToBuffer  (CLBYTE** pBuffer, int nFileOffset, int cbSize, u32* pcbSize); // 从nFileOffset偏移开始读cbSize（0表示读到文件末尾）字节到pBuffer缓冲中，实际读入大小是pcbSize
-    b32  MapToBuffer  (clBuffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
+    b32  MapToBuffer  (Buffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
     //TextStream& 
     //    GetTextStream ();  
   };

@@ -104,8 +104,6 @@ namespace Marimo
       //ASSERT(m_nDbgNumOfString == 0);
     }
 
-#ifdef DATAPOOLCOMPILER_PROJECT
-#else
     if(m_Name.IsNotEmpty())
     {
       GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
@@ -117,7 +115,6 @@ namespace Marimo
         CLBREAK; // 不应该啊, 肿么找不到了呢?
       }
     }
-#endif // #ifdef DATAPOOLCOMPILER_PROJECT
 
 //#ifdef ENABLE_OLD_DATA_ACTION
 //#ifdef ENABLE_DATAPOOL_WATCHER
@@ -129,11 +126,15 @@ namespace Marimo
 //    m_aWatchers.clear();
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 //#else
+
+#ifndef DISABLE_DATAPOOL_WATCHER
     IntCleanupWatchObj(m_FixedDict);
     for(WatchableArray::iterator it = m_WatchableArray.begin(); it != m_WatchableArray.end(); ++it)
     {
       IntCleanupWatchObj(it->second);
     }
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
+
 //#endif // #ifdef ENABLE_OLD_DATA_ACTION
     //SAFE_DELETE(m_pBuffer);
   }
@@ -606,7 +607,7 @@ namespace Marimo
 
 
 
-//#ifdef ENABLE_DATAPOOL_WATCHER
+#ifndef DISABLE_DATAPOOL_WATCHER
   GXBOOL DataPoolImpl::IsAutoKnock()
   {
     return TEST_FLAG(m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_AutoKnock);
@@ -628,7 +629,7 @@ namespace Marimo
     }
     return bPrevFlag;
   }
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
 
   GXINT DataPoolImpl::IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar)
@@ -951,6 +952,8 @@ namespace Marimo
 //    return m_aWatchers[nIndex]->UnregisterPrivate(pIndentify);
 //  }
 //#endif // #ifdef ENABLE_OLD_DATA_ACTION
+
+#ifndef DISABLE_DATAPOOL_WATCHER
   void DataPoolImpl::IntImpulse(WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse)
   {
     auto it_result = sDict.find(key);
@@ -1016,7 +1019,7 @@ namespace Marimo
     return TRUE;
   }
 
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
   GXBOOL DataPoolImpl::IntCreateUnary(clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar)
   {
@@ -1074,13 +1077,13 @@ namespace Marimo
     return FALSE;
   }
 
-//#ifdef ENABLE_DATAPOOL_WATCHER
+#ifndef DISABLE_DATAPOOL_WATCHER
   GXBOOL DataPoolImpl::IntIsImpulsing(const DataPoolVariable* pVar) const
   {
     ImpulsingSet::const_iterator it = m_ImpulsingSet.find(pVar->GetPtr());
     return it != m_ImpulsingSet.end();
   }
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
   const clBufferBase* DataPoolImpl::IntGetEntryBuffer() const
   {
@@ -1438,6 +1441,7 @@ namespace Marimo
 
 
   //////////////////////////////////////////////////////////////////////////
+#ifndef DISABLE_DATAPOOL_WATCHER
   GXBOOL DataPoolImpl::IntAddToWatchDict(WatchFixedDict& sDict, GXLPVOID key, ImpulseProc pImpulseCallback, GXLPARAM lParam)
   {
     WatchFixedList sWatchList;
@@ -1617,7 +1621,7 @@ namespace Marimo
     return IntIgnore(pVar, (ImpulseProc)1, (GXLPARAM)hWnd);
   }
 
-
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -1859,11 +1863,7 @@ namespace Marimo
     DataPoolUtility::EnumerateVariables2
       <DataPoolUtility::iterator, DataPoolUtility::element_iterator, DataPoolUtility::element_reverse_iterator>
       (_itBegin, _itEnd, 
-#ifdef _DEBUG
-      [&sStringVar, &sStringVarA, &header, &nRelOffset, &BufferTab, &pCurrBufDesc, &sDbgBufSet, &bd]
-#else
-      [&sStringVar, &sStringVarA, &header, &nRelOffset, &BufferTab, &pCurrBufDesc, &bd]
-#endif // #ifdef _DEBUG
+      [&]
     (int bArray, DataPool::iterator& it, int nDepth) 
     {
       MOVariable var = it.ToVariable();
@@ -1964,10 +1964,10 @@ namespace Marimo
     header.nBufHeaderOffset   = (GXUINT)(sizeof(FILE_HEADER));
     header.nDescOffset        = (GXUINT)(sizeof(FILE_HEADER) + sizeof(FILE_BUFFERHEADER) * (header.nNumOfArrayBufs + 1));
     header.nStringVarOffset   = (GXUINT)(header.nDescOffset + (m_Buffer.GetSize() - m_VarBuffer.GetSize()));
-    header.nBuffersOffset     = (GXUINT)(header.nStringVarOffset + sStringVar.buffer_size());
+    header.cbStringSpace      = (GXUINT)(sStringVar.buffer_size() + sStringVarA.buffer_size());
+    header.nBuffersOffset     = (GXUINT)(header.nStringVarOffset + header.cbStringSpace);
 
     header.nNumOfPtrVars      = (GXUINT)BufferTab.front().RelTable.size();
-    header.cbStringSpace      = (GXUINT)sStringVar.buffer_size();
 
 
     clBuffer BufferToWrite; // 临时使用的缓冲区
@@ -2021,8 +2021,9 @@ namespace Marimo
     // 字符串变量的字符串列表
     clFixedBuffer StringVarBuf;
     ASSERT(file.GetPointer() == header.nStringVarOffset); // 当前指针与字符串变量表开始偏移一致
-    StringVarBuf.Resize(sStringVar.buffer_size(), TRUE);
+    StringVarBuf.Resize(header.cbStringSpace, TRUE);
     sStringVar.gather(&StringVarBuf, 0);
+    sStringVarA.gather(&StringVarBuf, sStringVar.buffer_size());
     V_WRITE(file.Write(StringVarBuf.GetPtr(), (GXUINT)StringVarBuf.GetSize()), "Failed to write variable string buffer.");
 
 
@@ -2034,7 +2035,7 @@ namespace Marimo
 
       BufferToWrite.Resize(it->GetDiskBufferSize(), FALSE);
 
-      const auto nCheck = it->RelocalizePtr(&BufferToWrite, it->pBuffer, [this, &sStringVar, header, &BufferTab, &nBufferIndex]
+      const auto nCheck = it->RelocalizePtr(&BufferToWrite, it->pBuffer, [&, this]
       (BUFFER_SAVELOAD_DESC::RelocalizeType type, GXUINT nOffset, GXLPBYTE& pDest, GXLPCBYTE& pSrc)
       {
         //SAVE_TRACE("rel offset:%d\n", (GXINT_PTR)pSrc - (GXINT_PTR)it->pBuffer->GetPtr());
@@ -2043,15 +2044,23 @@ namespace Marimo
         case BUFFER_SAVELOAD_DESC::RelocalizeType_String:
           {
             clStringW* pStr = (clStringW*)pSrc;
-            //SAVE_TRACE("str:%s\n", *pStr);
-            if(pStr)
-            {
+            if(pStr) {
               auto itSetSet = sStringVar.find(*pStr);
               ASSERT(itSetSet != sStringVar.end());
               *(GXUINT*)pDest = (GXUINT)(itSetSet->second.offset + header.nStringVarOffset);
             }
           }
           break;
+        case BUFFER_SAVELOAD_DESC::RelocalizeType_StringA:
+        {
+          clStringA* pStr = (clStringA*)pSrc;
+          if (pStr) {
+            auto itSetSet = sStringVarA.find(*pStr);
+            ASSERT(itSetSet != sStringVarA.end());
+            *(GXUINT*)pDest = (GXUINT)(itSetSet->second.offset + header.nStringVarOffset + sStringVar.buffer_size());
+          }
+        }
+        break;
         case BUFFER_SAVELOAD_DESC::RelocalizeType_Array:
           {
             clBufferBase** ppBuf = (clBufferBase**)pSrc;
@@ -2319,53 +2328,68 @@ namespace Marimo
 
       V_READ(file.Read(BufferForRead.GetPtr(), (GXUINT)BufferForRead.GetSize()), "Can not load buffer data.");
 
-      const auto nCheck = bd.RelocalizePtr(bd.pBuffer, &BufferForRead, [&pStringBegin, &BufferTab, &header, &dwFlag, &bd, this]
+      const auto nCheck = bd.RelocalizePtr(bd.pBuffer, &BufferForRead, [&, this]
       (BUFFER_SAVELOAD_DESC::RelocalizeType type, GXUINT nOffset, GXLPBYTE& pDest, GXLPCBYTE& pSrc)
       {
-        switch(type)
+        switch (type)
         {
         case BUFFER_SAVELOAD_DESC::RelocalizeType_String:
+        {
+          GXLPCWSTR str = (GXLPCWSTR)((GXINT_PTR)pStringBegin + *(GXUINT*)pSrc - header.nStringVarOffset);
+          if (TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
           {
-            GXLPCWSTR str = (GXLPCWSTR)((GXINT_PTR)pStringBegin + *(GXUINT*)pSrc - header.nStringVarOffset);
-            if(TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
-            {
-              *(GXLPCWSTR*)pDest = str;
-              //INC_DBGNUMOFSTRING;
-            }
-            else if(str[0]) {
-              new(pDest) clStringW(str);
-              //INC_DBGNUMOFSTRING;
-              //TRACEW(L"str:%s %s\n", str, *(clStringW*)pDest);
-            }
-            else {
-              *(GXLPCWSTR*)pDest = NULL;
-            }
+            *(GXLPCWSTR*)pDest = str;
+            //INC_DBGNUMOFSTRING;
           }
-          break;
+          else if (str[0]) {
+            new(pDest) clStringW(str);
+            //INC_DBGNUMOFSTRING;
+            //TRACEW(L"str:%s %s\n", str, *(clStringW*)pDest);
+          }
+          else {
+            *(GXLPCWSTR*)pDest = NULL;
+          }
+        }
+        break;
+        case BUFFER_SAVELOAD_DESC::RelocalizeType_StringA:
+        {
+          GXLPCSTR str = (GXLPCSTR)((GXINT_PTR)pStringBegin + *(GXUINT*)pSrc - header.nStringVarOffset);
+          if (TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
+          {
+            *(GXLPCSTR*)pDest = str;
+          }
+          else if (str[0]) {
+            new(pDest) clStringA(str);
+          }
+          else {
+            *(GXLPCSTR*)pDest = NULL;
+          }
+        }
+        break;
         case BUFFER_SAVELOAD_DESC::RelocalizeType_Array:
+        {
+          GXUINT index = *(GXUINT*)pSrc;
+          ASSERT(index < BufferTab.size());
+          if (index)
           {
-            GXUINT index = *(GXUINT*)pSrc;
-            ASSERT(index < BufferTab.size());
-            if(index)
-            {
-              // 缓冲区肯定已经创建过了
-              ASSERT(BufferTab[index].pBuffer != NULL);
-              *(clBufferBase**)pDest = BufferTab[index].pBuffer;
-              reinterpret_cast<DataPoolArray*>(BufferTab[index].pBuffer)->SetParent(bd.pBuffer);
-              //INC_DBGNUMOFARRAY;
-            }
-            else {
-              *(clBufferBase**)pDest = NULL;
-            }
+            // 缓冲区肯定已经创建过了
+            ASSERT(BufferTab[index].pBuffer != NULL);
+            *(clBufferBase**)pDest = BufferTab[index].pBuffer;
+            reinterpret_cast<DataPoolArray*>(BufferTab[index].pBuffer)->SetParent(bd.pBuffer);
+            //INC_DBGNUMOFARRAY;
           }
-          break;
+          else {
+            *(clBufferBase**)pDest = NULL;
+          }
+        }
+        break;
 
         case BUFFER_SAVELOAD_DESC::RelocalizeType_Object:
-          {
-            ASSERT(*(GXUINT*)pSrc == 0);
-            *(GUnknown**)pDest = NULL;
-          }
-          break;
+        {
+          ASSERT(*(GXUINT*)pSrc == 0);
+          *(GUnknown**)pDest = NULL;
+        }
+        break;
         default:
           CLBREAK;
           break;
@@ -2378,6 +2402,8 @@ namespace Marimo
 #endif // #ifdef DEBUG_DECL_NAME
     return TRUE;
   }
+
+#ifndef DISABLE_DATAPOOL_WATCHER
 
   void DataPoolImpl::IntCleanupWatchObj(WatchFixedDict& sWatchDict)
   {
@@ -2393,6 +2419,7 @@ namespace Marimo
     }
     sWatchDict.clear();
   }
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
   DataPoolArray* DataPoolImpl::IntCreateArrayBuffer( clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount )
   {
@@ -2406,12 +2433,13 @@ namespace Marimo
       *ppBuffer = new DataPoolArray(pParent, pVarDesc->TypeSize() * 10);  // 十倍类型大小
       (*ppBuffer)->Resize(nInitCount * pVarDesc->TypeSize(), TRUE);
 
+#ifndef DISABLE_DATAPOOL_WATCHER
       if(pParent == &m_VarBuffer) {
         WatchFixedDict sDict;
         auto insert_result = m_WatchableArray.insert(clmake_pair(*ppBuffer, sDict));
         ASSERT(insert_result.second); // 添加的一定是全新的
       }
-
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 //#ifdef _DEBUG
 //      m_nDbgNumOfArray++;
 //#endif // #ifdef _DEBUG
@@ -2446,6 +2474,8 @@ namespace Marimo
   }
   //////////////////////////////////////////////////////////////////////////
 
+#ifndef DISABLE_DATAPOOL_WATCHER
+
   bool DataPoolImpl::WATCH_FIXED::operator<( const WATCH_FIXED& t ) const
   {
     // 这个写的好搓！
@@ -2469,6 +2499,8 @@ namespace Marimo
     default: return pCallback < t.pCallback;
     }
   }
+
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
   GXUINT DataPoolImpl::GetNameId( LPCSTR szName )
   {

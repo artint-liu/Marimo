@@ -61,13 +61,13 @@ namespace Marimo
   _DPEM_TEMPL
     GXBOOL _DPEM_CLS::LoadErrorMessageW(GXLPCWSTR szErrorFile)
   {
-    SmartStockW ss;
+    clstd::SmartStockW ss;
     if(ss.LoadW(szErrorFile))
     {
-      SmartStockW::Section sectRoot = ss.Open(NULL);
+      clstd::SmartStockW::Section sectRoot = ss.Open(NULL);
       if(sectRoot)
       {
-        SmartStockW::PARAMETER param;
+        clstd::SmartStockW::PARAMETER param;
         if(sectRoot->FirstKey(param))
         {
           do {

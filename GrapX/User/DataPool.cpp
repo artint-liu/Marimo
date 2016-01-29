@@ -179,7 +179,7 @@ namespace Marimo
   class DataPoolObject : public _TDataPoolImpl
   {
   protected:
-    typedef SmartStockW::Section Section;
+    typedef clstd::SmartStockW::Section Section;
     typedef clstd::TextLinesW clTextLinesW;
 
     enum ErrorCode
@@ -198,8 +198,8 @@ namespace Marimo
     struct IMPORT
     {
       typedef DataPoolErrorMsg<GXWCHAR> DataPoolErrorMsgW;
-      SmartStockW       ss;
-      DataPoolErrorMsgW ErrorMsg;
+      clstd::SmartStockW ss;
+      DataPoolErrorMsgW  ErrorMsg;
     };
 
   public:
@@ -344,7 +344,7 @@ namespace Marimo
 
     void IntImportKeys(IMPORT& import, Section sect, MOVariable* var)
     {
-      SmartStockW::PARAMETER param;
+      clstd::SmartStockW::PARAMETER param;
       clStringW strValue;
       clStringW strKey;
       if(sect->FirstKey(param))
@@ -441,8 +441,6 @@ namespace Marimo
 
   GXHRESULT DataPool::FindDataPool(DataPool** ppDataPool, GXLPCSTR szName)
   {
-#ifdef DATAPOOLCOMPILER_PROJECT
-#else
     if(IS_VALID_NAME(szName))
     {
       GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
@@ -454,7 +452,6 @@ namespace Marimo
         return it->second->AddRef();
       }
     }
-#endif // #ifdef DATAPOOLCOMPILER_PROJECT
     return GX_FAIL;
   }
 
@@ -586,34 +583,6 @@ namespace Marimo
 
   GXHRESULT DataPool::CreateDataPool(DataPool** ppDataPool, GXLPCSTR szName, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl)
   {
-#ifdef DATAPOOLCOMPILER_PROJECT
-    GXHRESULT hval = GX_OK;
-
-    // 查找同名的 DataPool
-
-    hval = FindDataPool(ppDataPool, szName);
-    if(GXSUCCEEDED(hval)) {
-      return hval;
-    }
-
-    DataPoolObject* pDataPoolObj = new DataPoolObject(szName);
-    if( ! InlCheckNewAndIncReference(pDataPoolObj)) {
-      return GX_FAIL;
-    }
-
-    // 初始化
-    if( ! pDataPoolObj->Initialize(pTypeDecl, pVarDecl)) {
-      pDataPoolObj->Release();
-      pDataPoolObj = NULL;
-      hval = GX_FAIL;
-    }
-    else {
-      hval = GX_OK;
-    }
-
-    *ppDataPool = pDataPoolObj;
-    return hval;
-#else
     GXLPSTATION lpStation = NULL;
     GXHRESULT hval = GX_OK;
 
@@ -651,7 +620,6 @@ namespace Marimo
 
     *ppDataPool = pDataPoolObj;
     return hval;
-#endif // #ifdef DATAPOOLCOMPILER_PROJECT
   }
 
   //DataPool::LPCENUMDESC DataPool::IntGetEnum( GXUINT nPackIndex ) const

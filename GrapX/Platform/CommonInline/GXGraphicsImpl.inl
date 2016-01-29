@@ -447,7 +447,7 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFileW(GXMaterialInst** ppMtlInst, GX
     return hval;
   }
   else {
-    ASSERT(0);
+    //ASSERT(0);
   }
   return hval;
 }

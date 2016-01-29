@@ -17,7 +17,7 @@ class GXGraphics;
 class GTextureBase;
 class SmartProfileA;
 class clConstBuffer;
-class SmartRepository;
+//class SmartRepository;
 struct MOSHADER_ELEMENT_SOURCE;
 struct MTLFILEPARAMDESC;
 struct STANDARDMTLUNIFORMTABLE;
@@ -65,10 +65,10 @@ public:
 public:
   static GXDLL GXVOID     ResolveProfileDescW (GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros);
   static GXDLL GXHRESULT  Load                (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam);
-  static GXDLL GXBOOL     LoadElementSource   (SmartProfileA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool);
+  static GXDLL GXBOOL     LoadElementSource   (clSmartProfileA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool);
   static GXDLL GXBOOL     ComposeSource       (MOSHADER_ELEMENT_SOURCE* pElement, GXDWORD dwPlatfomCode, GXOUT MOSHADERBUFFERS* pSources, GXOUT GXDefinitionArray* aMacros);
-  static GXDLL GXBOOL     LoadUniformSet      (SmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms);
-  static GXDLL GXBOOL     LoadStateSet        (SmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aStates);
+  static GXDLL GXBOOL     LoadUniformSet      (clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms);
+  static GXDLL GXBOOL     LoadStateSet        (clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aStates);
 };
 
 class GShaderStub : public GResource
@@ -155,10 +155,10 @@ public:
   GXSTDINTERFACE(GXHRESULT  Clone                       (GXMaterialInst** ppCuplicateMtlInst));
 
   GXSTDINTERFACE(GXHRESULT  SaveFileW                   (GXLPCWSTR szFilename));
-  GXSTDINTERFACE(GXHRESULT  SaveRepository              (SmartRepository* pStorage));
+  GXSTDINTERFACE(GXHRESULT  SaveRepository              (clSmartRepository* pStorage));
 
   GXSTDINTERFACE(GXHRESULT  LoadFileW                   (GXGraphics* pGraphics, GXLPCWSTR szFilename));
-  GXSTDINTERFACE(GXHRESULT  LoadRepository              (GXGraphics* pGraphics, SmartRepository* pStorage));
+  GXSTDINTERFACE(GXHRESULT  LoadRepository              (GXGraphics* pGraphics, clSmartRepository* pStorage));
 
   // 初始化接口
   // 这些函数建议都不要频繁调用, 可能会严重影响性能.
