@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
 #ifndef _FRAME_UI_BASIC_
 #define _FRAME_UI_BASIC_
 
@@ -26,20 +26,20 @@ GXHRESULT _gxInitializeCommonSprite(GXGraphics* pGraphics);
 GXHRESULT _gxReleaseCommonSprite();
 
 
-//´°¿ÚÖ®ÍâÍâ·¢¹âµÄ¾àÀë
+//çª—å£ä¹‹å¤–å¤–å‘å…‰çš„è·ç¦»
 //#define FRAME_NC_GLOW_LEFT    0
 //#define FRAME_NC_GLOW_TOP    0
 //#define FRAME_NC_GLOW_RIGHT    0
 //#define FRAME_NC_GLOW_BOTTOM  0
 
-// ´°¿ÚÖ®Íâ±ßÔµ£¨²»°üÀ¨ÒõÓ°£©µÄ¾àÀë
+// çª—å£ä¹‹å¤–è¾¹ç¼˜ï¼ˆä¸åŒ…æ‹¬é˜´å½±ï¼‰çš„è·ç¦»
 #define FRAME_NC_EDGE_CAPTION g_SystemMetrics[GXSM_CYCAPTION]
 #define FRAME_NC_EDGE_LEFT    g_SystemMetrics[GXSM_CYFIXEDFRAME]
 #define FRAME_NC_EDGE_TOP     g_SystemMetrics[GXSM_CXFIXEDFRAME]
 #define FRAME_NC_EDGE_RIGHT   g_SystemMetrics[GXSM_CYFIXEDFRAME]
 #define FRAME_NC_EDGE_BOTTOM  g_SystemMetrics[GXSM_CXFIXEDFRAME]
 
-// ¾àÀëºÍ
+// è·ç¦»å’Œ
 //#define FRAME_NC_LEFT      (FRAME_NC_GLOW_LEFT    + FRAME_NC_EDGE_LEFT  )
 //#define FRAME_NC_TOP      (FRAME_NC_GLOW_TOP    + FRAME_NC_EDGE_TOP    )
 //#define FRAME_NC_RIGHT      (FRAME_NC_GLOW_RIGHT  + FRAME_NC_EDGE_RIGHT  )
@@ -58,13 +58,13 @@ GXHRESULT _gxReleaseCommonSprite();
 //#define WIS_RESTOREBUTTON   0x00000010L
 //#define WIS_MASK            0x0000001FL
 
-#define WIS_VISIBLE         0x00000010L   // WS_VISIBLE »áÓ°Ïì×Ó´°¿ÚÊÇ·ñ¿É¼û£¬WIS_VISIBLE±ê¼Çµ±Ç°´°¿ÚµÄÊµ¼Ê×´Ì¬
+#define WIS_VISIBLE         0x00000010L   // WS_VISIBLE ä¼šå½±å“å­çª—å£æ˜¯å¦å¯è§ï¼ŒWIS_VISIBLEæ ‡è®°å½“å‰çª—å£çš„å®é™…çŠ¶æ€
 
 #define WIS_HASDESTROYWND   0x00000100L
 #define WIS_DESTROYTHISWND  0x00000200L
 
 #if 0
-#define WIS_HASBEENDEL      0x00000400L // (Debug Ä£Ê½) ÒÑ¾­±»É¾³ıÁË
+#define WIS_HASBEENDEL      0x00000400L // (Debug æ¨¡å¼) å·²ç»è¢«åˆ é™¤äº†
 #endif
 
 #if defined(_DEBUG) && defined(WIS_HASBEENDEL)
@@ -83,11 +83,11 @@ class GXSprite;
 class GXWnd
 {
 public:
-  // TODO: ¹¤×÷Õ¾Î¨Ò»
+  // TODO: å·¥ä½œç«™å”¯ä¸€
   //static GXDWORD      s_emCursorResult;
   static GXSprite    *  s_pCommonSpr;
 
-  // È«¾ÖÎ¨Ò»
+  // å…¨å±€å”¯ä¸€
   static GXHICON      s_hCursorArrow;
 
 #ifdef ENABLE_DYNMAIC_EFFECT
@@ -99,35 +99,35 @@ public:
   GXLPWND           m_pParent;
   GXLPWND           m_pFirstChild;
   GXLPWND           m_pPrevWnd;
-  GXLPWND           m_pNextWnd;       // NextÏÔÊ¾ÔÚthisÇ°Ãæ
+  GXLPWND           m_pNextWnd;       // Nextæ˜¾ç¤ºåœ¨thiså‰é¢
 
   GXULONG           m_uStyle;
   GXULONG           m_uExStyle;
-  GXULONG           m_uState;           // ÄÚ²¿Ê¹ÓÃµÄ×´Ì¬
-  GXWCHAR*          m_pText;            // Frame µÄÎÄ±¾ĞÅÏ¢
+  GXULONG           m_uState;           // å†…éƒ¨ä½¿ç”¨çš„çŠ¶æ€
+  GXWCHAR*          m_pText;            // Frame çš„æ–‡æœ¬ä¿¡æ¯
   GXHINSTANCE       m_hInstance;
   GXLPWNDCLSATOM    m_lpClsAtom;
 
   GXWNDPROC         m_lpWndProc;
   GXHMENU           m_pMenu;
-  LPGXSCROLLBAR     m_lpVScrollBar;     // Èç¹ûÔÊĞí£¬Õâ¸ö¼ÇÂ¼´¹Ö±¹ö¶¯ÌõµÄ½á¹¹
-  LPGXSCROLLBAR     m_lpHScrollBar;     // Ë®Æ½¹ö¶¯ÌõµÄ½á¹¹Ìå
+  LPGXSCROLLBAR     m_lpVScrollBar;     // å¦‚æœå…è®¸ï¼Œè¿™ä¸ªè®°å½•å‚ç›´æ»šåŠ¨æ¡çš„ç»“æ„
+  LPGXSCROLLBAR     m_lpHScrollBar;     // æ°´å¹³æ»šåŠ¨æ¡çš„ç»“æ„ä½“
 
-  GXHMENU           hSysMenu;           // ÏµÍ³²Ëµ¥
+  GXHMENU           hSysMenu;           // ç³»ç»Ÿèœå•
   GXLPVOID          m_dwUserData;
   GXHTHEME          m_hTheme;
-  GXDWORD_PTR       m_CObj;             // C++ ¶ÔÏó
-  GXLPVOID          m_pResponder;       // C++ ÏìÓ¦Æ÷
+  GXDWORD_PTR       m_CObj;             // C++ å¯¹è±¡
+  GXLPVOID          m_pResponder;       // C++ å“åº”å™¨
   //////////////////////////////////////////////////////////////////////////
   //
-  // Ö»ÓĞTopLevelµÄWnd²Å¾ßÓĞÏÂÃæµÄÊı¾İ½á¹¹
-  // ÆäËû×Ó´°¿Ú¶¼ÊÇNULL£¬»ò¸ù¾İĞèÒª´´½¨£¬
-  // Õâ¸öÀàÓÃÓÚ D3Device µÄäÖÈ¾Ä¿±ê
+  // åªæœ‰TopLevelçš„Wndæ‰å…·æœ‰ä¸‹é¢çš„æ•°æ®ç»“æ„
+  // å…¶ä»–å­çª—å£éƒ½æ˜¯NULLï¼Œæˆ–æ ¹æ®éœ€è¦åˆ›å»ºï¼Œ
+  // è¿™ä¸ªç±»ç”¨äº D3Device çš„æ¸²æŸ“ç›®æ ‡
   //
   GXWindowsSurface* m_pWinsSurface;
   //////////////////////////////////////////////////////////////////////////
 
-  GRegion*          m_prgnUpdate;       // ×ÔÉíµÄ¿Í»§ÇøµÄUpdateÇøÓò,Ã»¾­¹ıÆäËû´°¿Ú²Ã¼ô; [ÆÁÄ»×ø±êÏµ]
+  GRegion*          m_prgnUpdate;       // è‡ªèº«çš„å®¢æˆ·åŒºçš„UpdateåŒºåŸŸ,æ²¡ç»è¿‡å…¶ä»–çª—å£è£å‰ª; [å±å¹•åæ ‡ç³»]
 //#ifdef _ENABLE_STMT
 //  static GXUINT  s_idxMsgStackTop;
 //  static GXUINT  s_idxMsgStackBottom;
@@ -142,7 +142,7 @@ public:
   static  GXVOID    OutDebugMsg           ();
 
           GXHWND    SetParent             (GXHWND hParent);
-  static  void      GetNonclientThickness (GXRECT* lpThickness, GXDWORD dwStyle, GXBOOL bMenu); // lpThickness ²»ÊÇÇøÓò£¬¶øÊÇÉÏÏÂ×óÓÒNonclient±ßÔµºñ¶È
+  static  void      GetNonclientThickness (GXRECT* lpThickness, GXDWORD dwStyle, GXBOOL bMenu); // lpThickness ä¸æ˜¯åŒºåŸŸï¼Œè€Œæ˜¯ä¸Šä¸‹å·¦å³Nonclientè¾¹ç¼˜åšåº¦
   static  GXBOOL    AnalyzeMouseMoveMsg   (GXINOUT GXMSG* msg, GXLPPOINT pptMSWinClient);
           GXINT     gxGetWindowText       (GXLPWCHAR pwszString, GXINT nMaxCount);
 
@@ -152,7 +152,7 @@ public:
           GXINT     MapWindowPoints       (GXLPWND lpWndFrom, GXLPPOINT lpPoints, GXUINT cPoints) const;
 
 
-          // <ÕâĞ©ÊÇÖØ¹¹ºó±È½Ï¹æ·¶µÄ½Ó¿Ú>
+          // <è¿™äº›æ˜¯é‡æ„åæ¯”è¾ƒè§„èŒƒçš„æ¥å£>
           GXLPWND   SetActive             ();
           //GXLPWND   GetActive             ();
 
@@ -167,8 +167,8 @@ public:
           //GXVOID    MoveWindow            (GXINT x, GXINT y, GXINT nWidth, GXINT nHeight, GXBOOL bRepaint);
 
           int       GetWindowRegion       (GRegion** ppRegion);
-          int       GetSystemRegion       (GXDWORD dwFlags, GRegion** ppRegion);  // ppRegion ¿ÉÒÔÊÇÒ»¸öÏÖ³ÉµÄGRegion, ÕâÑù½«ÖØĞÂÖ¸¶¨, Ò²¿ÉÒÔÊÇÒ»¸öNULL, ÕâÑù½«»á´´½¨Ò»¸öGRegion
-          GXBOOL    GetBoundingRect       (GXBOOL bWindow, GXRECT* lprcOut);  // ·µ»ØµÄlprcOutÊÇÆÁÄ»¿Õ¼äµÄ ²»ÂÛ bWindow ÊÇ·ñÎª FALSE, Èç¹û lprcOut ºÍ´°¿ÚÇøÓòÒ»ÖÂ¾Í·µ»Ø TRUE
+          int       GetSystemRegion       (GXDWORD dwFlags, GRegion** ppRegion);  // ppRegion å¯ä»¥æ˜¯ä¸€ä¸ªç°æˆçš„GRegion, è¿™æ ·å°†é‡æ–°æŒ‡å®š, ä¹Ÿå¯ä»¥æ˜¯ä¸€ä¸ªNULL, è¿™æ ·å°†ä¼šåˆ›å»ºä¸€ä¸ªGRegion
+          GXBOOL    GetBoundingRect       (GXBOOL bWindow, GXRECT* lprcOut);  // è¿”å›çš„lprcOutæ˜¯å±å¹•ç©ºé—´çš„ ä¸è®º bWindow æ˜¯å¦ä¸º FALSE, å¦‚æœ lprcOut å’Œçª—å£åŒºåŸŸä¸€è‡´å°±è¿”å› TRUE
           LPGXWND   ChildWindowFromPoint  (LPGXPOINT lpPoint, GXLRESULT* lpHitTest, GXBOOL* bEnabled);
           void      SysUpdateWindow       (GRegion* prgnUpdate);
           void      UpdateWholeWindow     (GXWindowsSurface* pWinsSurface, GRegion* prgnPainted = NULL);
@@ -178,7 +178,7 @@ public:
           GXBOOL    IsEnabled             () const;
           GXBOOL    IsVisible             () const;
           GXBOOL    ShowWindow            (int nCmdShow);
-      // </ÕâĞ©ÊÇÖØ¹¹ºó±È½Ï¹æ·¶µÄ½Ó¿Ú>
+      // </è¿™äº›æ˜¯é‡æ„åæ¯”è¾ƒè§„èŒƒçš„æ¥å£>
 
   static  GXBOOL    gxGetCursorPos        (GXLPPOINT pt);
 
@@ -186,7 +186,7 @@ public:
           GXBOOL    InvalidateRgn         (GRegion* pRegion, GXBOOL bErase);
           GXHWND    GXGetTopLevel         ();
 
-          GXBOOL    IsAncestorVisible     () const; // ¼ì²é×æÏÈºÍ×Ô¼ºµÄ WS_VISIBLE ÊôĞÔ
+          GXBOOL    IsAncestorVisible     () const; // æ£€æŸ¥ç¥–å…ˆå’Œè‡ªå·±çš„ WS_VISIBLE å±æ€§
 
   inline  LPGXWND   GetDesktop            () const;
 
@@ -196,8 +196,8 @@ public:
   GXWnd();
   ~GXWnd();
 private:
-  void       SetClientUpdateRegion    (GRegion* prgnUpdate);  // ÉèÖÃ¿Í»§Çø¸üĞÂ,Èç¹ûÔ­À´´æÔÚÔòºÏ²¢
-  GXLPWND    GetActiveOrder           (const GXWINDOWPOS* pWndPos) const;  // ¸ù¾İ´°¿Ú±êÖ¾(WS_EX_TOPMOST)µÃµ½¼¤»îÊ±²åÈëµÄÎ»ÖÃ
+  void       SetClientUpdateRegion    (GRegion* prgnUpdate);  // è®¾ç½®å®¢æˆ·åŒºæ›´æ–°,å¦‚æœåŸæ¥å­˜åœ¨åˆ™åˆå¹¶
+  GXLPWND    GetActiveOrder           (const GXWINDOWPOS* pWndPos) const;  // æ ¹æ®çª—å£æ ‡å¿—(WS_EX_TOPMOST)å¾—åˆ°æ¿€æ´»æ—¶æ’å…¥çš„ä½ç½®
   GXLPWND    GetLastSiblingNoTopMost  ();
   GXLPWND    GetLastSibling           ();
   void       SetVisibleStateRecursive (GXBOOL bVisible);
@@ -215,8 +215,8 @@ inline LPGXWND GXWnd::GetDesktop() const
 
 //////////////////////////////////////////////////////////////////////////
 // int  GXWnd::GetWindowRegion(GRegion** ppRegion);
-// ²ÎÊı: ppRegion    ·µ»Ø´°¿ÚµÄÇøÓò, Õâ¸öÇøÓòÊÇ´°¿ÚÔÚÆÁÄ»×ø±êÏµµÄÍêÕûÇøÓò, Ëæ´°¿ÚÎ»ÖÃ±ä»¯¶øÆ«ÒÆ, ²»»á±»ÆÁÄ»ÇøÓò»òÆäËûÈÎºÎÇøÓò²Ã¼ô
-// ·µ»Ø: ÇøÓòµÄ¸´ÔÓ¶È, ²Î¿¼ RGNCOMPLEX µÄ¶¨Òå
+// å‚æ•°: ppRegion    è¿”å›çª—å£çš„åŒºåŸŸ, è¿™ä¸ªåŒºåŸŸæ˜¯çª—å£åœ¨å±å¹•åæ ‡ç³»çš„å®Œæ•´åŒºåŸŸ, éšçª—å£ä½ç½®å˜åŒ–è€Œåç§», ä¸ä¼šè¢«å±å¹•åŒºåŸŸæˆ–å…¶ä»–ä»»ä½•åŒºåŸŸè£å‰ª
+// è¿”å›: åŒºåŸŸçš„å¤æ‚åº¦, å‚è€ƒ RGNCOMPLEX çš„å®šä¹‰
 
 #endif // end of _FRAME_UI_BASIC_
 #endif // _DEV_DISABLE_UI_CODE

@@ -1,4 +1,4 @@
-#include "GrapX.H"
+ï»¿#include "GrapX.H"
 #include "GrapX.Hxx"
 
 #include "GrapX/DataPool.H"
@@ -24,14 +24,14 @@ namespace Marimo
         it.nOffset  = offset();
       }
       else {
-        // ÉèÎªÎŞĞ§
+        // è®¾ä¸ºæ— æ•ˆ
         it.pVarDesc = NULL;
         it.nOffset  = 0;
         it.pBuffer  = NULL;
         return;
       }
 
-      if(pVarDesc->IsDynamicArray()) // ¶¯Ì¬Êı×é
+      if(pVarDesc->IsDynamicArray()) // åŠ¨æ€æ•°ç»„
       {
         it.pBuffer = pBuffer; // child_buffer();
         it.nOffset = 0;
@@ -40,7 +40,7 @@ namespace Marimo
         it.pBuffer = pBuffer;
       }
 
-      // Êı×éÔªËØ
+      // æ•°ç»„å…ƒç´ 
       if(index != (GXUINT)-1) {
         it.nOffset += index * pVarDesc->TypeSize();
       }
@@ -54,12 +54,12 @@ namespace Marimo
 
     void iterator::StepArrayMember(iterator& it)
     {
-      // ÅĞ¶ÏÊÇthisÓëitÊÇ¸¸×Ó¹ØÏµ
+      // åˆ¤æ–­æ˜¯thisä¸itæ˜¯çˆ¶å­å…³ç³»
       //ASSERT((GXINT_PTR)it.pVarDesc >= (GXINT_PTR)&pDataPool->m_aMembers[pVarDesc->GetTypeDesc()->nMemberIndex] &&
       //  (GXINT_PTR)it.pVarDesc < (GXINT_PTR)&pDataPool->m_aMembers[pVarDesc->GetTypeDesc()->nMemberIndex + pVarDesc->GetTypeDesc()->nMemberCount]);
       ASSERT((GXUINT_PTR)it.pVarDesc >= (GXUINT_PTR)pVarDesc->MemberBeginPtr() &&
         (GXUINT_PTR)it.pVarDesc < (GXUINT_PTR)pVarDesc->MemberBeginPtr() + pVarDesc->MemberCount());
-      ASSERT(IsArray() && index != (GXUINT)-1); // ±ØĞëÊÇÊı×é
+      ASSERT(IsArray() && index != (GXUINT)-1); // å¿…é¡»æ˜¯æ•°ç»„
       index++;
       //FullNameA(it.ParentName);
       it.nOffset += pVarDesc->TypeSize();
@@ -86,11 +86,11 @@ namespace Marimo
       first_child(it);
       it.index = -1;
 
-      ASSERT(it.pVarDesc != NULL); // ÏÂÃæµÄÅĞ¶ÏºÃÏñ²»×¼È·£¬ÕâÀï¶ÏÑÔÒ»ÏÂÑéÖ¤
+      ASSERT(it.pVarDesc != NULL); // ä¸‹é¢çš„åˆ¤æ–­å¥½åƒä¸å‡†ç¡®ï¼Œè¿™é‡Œæ–­è¨€ä¸€ä¸‹éªŒè¯
 
       if(it.pVarDesc != NULL) {
-        // Èç¹ûÊÇ½á¹¹Ìå£¬°ÑpVarDescµ÷Õûµ½½á¹¹ÌåÄ©Î²
-        it.pVarDesc += pVarDesc->MemberCount(); // ×¢Òâ£º¿ÉÄÜÊÇÎŞĞ§µØÖ·
+        // å¦‚æœæ˜¯ç»“æ„ä½“ï¼ŒæŠŠpVarDescè°ƒæ•´åˆ°ç»“æ„ä½“æœ«å°¾
+        it.pVarDesc += pVarDesc->MemberCount(); // æ³¨æ„ï¼šå¯èƒ½æ˜¯æ— æ•ˆåœ°å€
       }
       return it;
     }
@@ -189,7 +189,7 @@ namespace Marimo
         nElementOffset = index * pVarDesc->TypeSize();
       }
 
-      // ¶¯Ì¬Êı×éÊ¹ÓÃµ¥¶ÀµÄbuffer£¬ Í¬Ê±Æ«ÒÆÒ²ÖØĞÂ¼ÆËã
+      // åŠ¨æ€æ•°ç»„ä½¿ç”¨å•ç‹¬çš„bufferï¼Œ åŒæ—¶åç§»ä¹Ÿé‡æ–°è®¡ç®—
       //if(pVarDesc->IsDynamicArray()) {
       //  if(pBuffer) {
       //    new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
@@ -280,11 +280,11 @@ namespace Marimo
       iterator::first_child((iterator&)it);
       it.index = -1;
 
-      //ASSERT(it.pVarDesc != NULL); // ÏÂÃæµÄÅĞ¶ÏºÃÏñ²»×¼È·£¬ÕâÀï¶ÏÑÔÒ»ÏÂÑéÖ¤
+      //ASSERT(it.pVarDesc != NULL); // ä¸‹é¢çš„åˆ¤æ–­å¥½åƒä¸å‡†ç¡®ï¼Œè¿™é‡Œæ–­è¨€ä¸€ä¸‹éªŒè¯
 
       if(it.pVarDesc != NULL) {
-        // Èç¹ûÊÇ½á¹¹Ìå£¬°ÑpVarDescµ÷Õûµ½½á¹¹ÌåÄ©Î²
-        it.pVarDesc += pVarDesc->MemberCount(); // ×¢Òâ£º¿ÉÄÜÊÇÎŞĞ§µØÖ·
+        // å¦‚æœæ˜¯ç»“æ„ä½“ï¼ŒæŠŠpVarDescè°ƒæ•´åˆ°ç»“æ„ä½“æœ«å°¾
+        it.pVarDesc += pVarDesc->MemberCount(); // æ³¨æ„ï¼šå¯èƒ½æ˜¯æ— æ•ˆåœ°å€
       }
       return it;
     }

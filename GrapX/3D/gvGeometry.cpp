@@ -677,8 +677,8 @@ void GenerateTaperSides(
 
   const GXWORD nBaseIdx = (GXWORD)aVertices.size();
   const GXUINT nStart = 2 * nSides + nBaseIdx;
-  GXVERTEX_P3T2N3F_C1D VertCenter;
-  GXVERTEX_P3T2N3F_C1D Vert;
+  //GXVERTEX_P3T2N3F_C1D VertCenter;
+  //GXVERTEX_P3T2N3F_C1D Vert;
   const float fHeightBegin = bDir ? fHeight : -fHeight;
   float3 VertCenter_pos(0, fHeightBegin + fOffset , 0);
   float3 VertCenter_normal(0, 0, 0);
@@ -773,7 +773,7 @@ void GenerateSphereSides(
     aVertices.size() == aTexcoord.size());
 
   const GXWORD nBaseIdx = (GXWORD)aVertices.size();
-  const GXUINT nStart = nSides + nBaseIdx;
+  //const GXUINT nStart = nSides + nBaseIdx;
 
   float fHeightBegin = fRadius + fOffset;
   float fHeightEnd = -fRadius + fOffset;

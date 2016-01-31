@@ -16,6 +16,7 @@ EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{78aa8294-ce44-4f27-81ab-22960bf56f39}*SharedItemsImports = 9
+		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{3e11e44f-6b62-4ca1-aa6f-e6aa9e920f7a}*SharedItemsImports = 4
 		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{4ef5a126-bc56-4a82-ae23-2dea7399621e}*SharedItemsImports = 4
 		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{4cf346c6-c312-4bc0-a7f6-ce944a4f73f4}*SharedItemsImports = 4
 	EndGlobalSection

@@ -116,8 +116,10 @@ namespace clstd
           auto Operand1 = stackCalc.top();
           stackCalc.pop();
 
-          if(Operand1.pstr && ( ! fn(*Operand1.pstr, &Operand1.value)) ||
-            Operand2.pstr && ( ! fn(*Operand2.pstr, &Operand2.value)) ) {
+          if(
+            (Operand1.pstr && ( ! fn(*Operand1.pstr, &Operand1.value)))
+            ||
+            (Operand2.pstr && ( ! fn(*Operand2.pstr, &Operand2.value))) ) {
               return FALSE;
           }
 

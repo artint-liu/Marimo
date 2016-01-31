@@ -1,15 +1,15 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GXCanvas.H>
 
-// Æ½Ì¨Ïà¹Ø
-// Ë½ÓĞÍ·ÎÄ¼ş
+// å¹³å°ç›¸å…³
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "ScrollBar.H"
 #include "Utility/AeroCommon.H"
 #include "GrapX/GXUser.H"

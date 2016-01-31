@@ -1,31 +1,31 @@
-#if 0
+ï»¿#if 0
 //////////////////////////////////////////////////////////////////////////
 //
-// ÌØÐ§¹ÜÀíÆ÷
-// Á¥ÊôÓÚ GXStation, Ö÷ÒªÓÃÓÚ Windows µÄ¸÷ÖÖÌØÐ§ÊµÏÖ, Ò²¿ÉÓÃ»Øµ÷º¯Êý±àÐ´²»»ùÓÚ 
-// Window µÄÌØÐ§, ËùÒÔÒÔ"rich"ÃüÃû.
+// ç‰¹æ•ˆç®¡ç†å™¨
+// éš¶å±žäºŽ GXStation, ä¸»è¦ç”¨äºŽ Windows çš„å„ç§ç‰¹æ•ˆå®žçŽ°, ä¹Ÿå¯ç”¨å›žè°ƒå‡½æ•°ç¼–å†™ä¸åŸºäºŽ 
+// Window çš„ç‰¹æ•ˆ, æ‰€ä»¥ä»¥"rich"å‘½å.
 //
 #ifndef _RICH_FX_MANAGER_H_
 #define _RICH_FX_MANAGER_H_
 
 //#include <vector>
 
-// RichFX »Øµ÷Ê±µÄ²ÎÊý
+// RichFX å›žè°ƒæ—¶çš„å‚æ•°
 struct RFXPROCPARAM
 {
   GXDWORD  dwId;
-  GXDWORD  dwTime;    // ´Ó×¢²á¿ªÊ¼µ½ÏÖÔÚµÄÊ±¼ä,´Ó0¿ªÊ¼, Èç¹ûÎª0xffffffff, 
-            // ÔòËµÃ÷ËüÒÑ¾­´ïµ½ÁËÉúÃüÖÜÆÚµÄ×îºó, ¼´½«±»Ïú»Ù
-  GXDWORD  dwElapse;  // ×¢²áÊ±ÉùÃ÷µÄ³ÖÐøÊ±¼ä
-  GXDWORD  dwFlags;  // ×¢²áÊ±ÓÃµÄ±êÖ¾
-  GXLPARAM  lParam;    // ÓÃ»§²ÎÊý
+  GXDWORD  dwTime;    // ä»Žæ³¨å†Œå¼€å§‹åˆ°çŽ°åœ¨çš„æ—¶é—´,ä»Ž0å¼€å§‹, å¦‚æžœä¸º0xffffffff, 
+            // åˆ™è¯´æ˜Žå®ƒå·²ç»è¾¾åˆ°äº†ç”Ÿå‘½å‘¨æœŸçš„æœ€åŽ, å³å°†è¢«é”€æ¯
+  GXDWORD  dwElapse;  // æ³¨å†Œæ—¶å£°æ˜Žçš„æŒç»­æ—¶é—´
+  GXDWORD  dwFlags;  // æ³¨å†Œæ—¶ç”¨çš„æ ‡å¿—
+  GXLPARAM  lParam;    // ç”¨æˆ·å‚æ•°
 };
 
-// RichFX µÄ»Øµ÷º¯Êý
-// RichFXµÄÉúÃüÖÜÆÚÊÇ×¢²áÊ±ÉùÃ÷µÄdwElapse, µ«ÊÇÈç¹û»Øµ÷º¯Êý·µ»ØfalseÔò»áÁ¢¼´Ïú»ÙÕâ¸öÌØÐ§
+// RichFX çš„å›žè°ƒå‡½æ•°
+// RichFXçš„ç”Ÿå‘½å‘¨æœŸæ˜¯æ³¨å†Œæ—¶å£°æ˜Žçš„dwElapse, ä½†æ˜¯å¦‚æžœå›žè°ƒå‡½æ•°è¿”å›žfalseåˆ™ä¼šç«‹å³é”€æ¯è¿™ä¸ªç‰¹æ•ˆ
 typedef GXBOOL (GXCALLBACK* RichFXProc)(const RFXPROCPARAM* pParam);
 
-// ×¢²áÓÃµÄRichFXÃèÊö
+// æ³¨å†Œç”¨çš„RichFXæè¿°
 struct RICHFX
 {
   GXDWORD      dwElapse;

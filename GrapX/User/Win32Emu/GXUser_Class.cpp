@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+Ôªø#ifndef _DEV_DISABLE_UI_CODE
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 #include "GrapX/GXUser.H"
@@ -120,7 +120,7 @@ GXBOOL GXDLLAPI gxUnregisterClassW(
     return TRUE;
   }
 
-  CLBREAK;  // ≤ªƒ‹…æ≥˝ªπ‘⁄ π”√µƒ¿‡
+  CLBREAK;  // ‰∏çËÉΩÂà†Èô§ËøòÂú®‰ΩøÁî®ÁöÑÁ±ª
   return FALSE;
 }
 
@@ -167,7 +167,7 @@ GXDWORD GXDLLAPI gxGetClassInfoExW(
 //    ASSERT(lpWndClsAtom->cbClsExtra >= nIndex + sizeof(GXDWORD));
 //    return ((GXDWORD*)(((GXBYTE*)lpWndClsAtom) + sizeof(GXWNDCLSATOM)))[nIndex];
 //  }
-//  // TODO: Œ¥÷ß≥÷
+//  // TODO: Êú™ÊîØÊåÅ
 //  ASSERT(FALSE);
 //}
 //GXDWORD GXDLLAPI gxSetClassLong(

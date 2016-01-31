@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2005 Steven Edwards
  * Copyright (C) 2005 Vijay Kiran Kamuju
  *

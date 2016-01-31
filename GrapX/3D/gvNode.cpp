@@ -1,14 +1,14 @@
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 #include "GrapX/GResource.H"
 #include "GrapX/GXKernel.H"
 #include "GrapX/GShader.H"
 #include "GrapX/GPrimitive.h"
 #include "GrapX/GXGraphics.H"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <clTree.H>
 #include <clTransform.h>
 #include <thread/clSignal.h>
@@ -79,7 +79,7 @@ void GVNode::UpdateChildPos()
     //pNode->m_matAbsolute = m_matAbsolute * pNode->GetRelativeMatrix();
     pNode->m_Transformation.UpdateAbsoluteMatrix(m_Transformation.GlobalMatrix);
 
-    // TODO: Õâ¸öÒªÖØĞÂÉè¼Æ
+    // TODO: è¿™ä¸ªè¦é‡æ–°è®¾è®¡
     if(pNode->m_Transformation.GlobalMatrix != float4x4::Identity) {
       SET_FLAG(pNode->m_dwFlags, GVNF_UPDATEWORLDMAT);
     }
@@ -132,13 +132,13 @@ void GVNode::SetTransform(const float4x4& matTransform, ESpace eTransform/* = S_
   else if(eTransform == S_PHYSICALBODY && TEST_FLAG(m_dwFlags, GVNF_PHYSICALBODY))
   {
     m_Transformation.SetTransform(matTransform);
-    // TODO: ·Ö½âLocal transform
+    // TODO: åˆ†è§£Local transform
     return;
   }
   else return;
   UpdateChildPos();
 
-  // TODO: Õâ¸öÒªÖØĞÂÉè¼Æ
+  // TODO: è¿™ä¸ªè¦é‡æ–°è®¾è®¡
   if(m_Transformation.GlobalMatrix != float4x4::Identity) {
     SET_FLAG(m_dwFlags, GVNF_UPDATEWORLDMAT);
   }
@@ -205,7 +205,7 @@ GVNode* GVNode::FindChild(GVNode* pStart, GXLPCSTR szName)
     pChild = pStart;
   }
   else {
-    CLOG_ERROR(__FUNCTION__": ²»ÊÇ×Ó¶ÔÏó.\n");
+    CLOG_ERROR("%s : ä¸æ˜¯å­å¯¹è±¡.\n", __FUNCTION__);
     ASSERT(0);
     return pChild;
   }
@@ -288,7 +288,7 @@ GXHRESULT GVNode::GetMaterialInstFilenameW(clStringW* pstrFilename)
 
 GXHRESULT GVNode::SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags)
 {
-  // Èç¹ûÒª¸ù¾İ¶¥µãÊôĞÔ¼ÓÔØÎÆÀíµÄ»°, ¾ÍÊ¹ÓÃÎÄ¼şÃû·½Ê½¼ÓÔØ
+  // å¦‚æœè¦æ ¹æ®é¡¶ç‚¹å±æ€§åŠ è½½çº¹ç†çš„è¯, å°±ä½¿ç”¨æ–‡ä»¶åæ–¹å¼åŠ è½½
   if(TEST_FLAG_NOT(dwFlags, NODEMTL_IGNOREVERT))
   {
     clStringW strFilename;
@@ -296,7 +296,7 @@ GXHRESULT GVNode::SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags)
     return SetMaterialInstFromFileW(pMtlInst->GetGraphicsUnsafe(), strFilename, dwFlags);
   }
 
-  // ÉèÖÃ×Ó½Úµã
+  // è®¾ç½®å­èŠ‚ç‚¹
   if(TEST_FLAG(dwFlags, NODEMTL_SETCHILDREN|NODEMTL_SETSONONLY)) {
     const GXDWORD dwChildFlags = TEST_FLAG(dwFlags, NODEMTL_SETSONONLY)
       ? dwFlags & (~(NODEMTL_SETCHILDREN|NODEMTL_SETSONONLY)) : dwFlags;
@@ -314,7 +314,7 @@ GXHRESULT GVNode::SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags)
 
 GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags)
 {
-  // ÉèÖÃ×Ó½Úµã
+  // è®¾ç½®å­èŠ‚ç‚¹
   if(TEST_FLAG(dwFlags, NODEMTL_SETCHILDREN|NODEMTL_SETSONONLY)) {
     const GXDWORD dwChildFlags = TEST_FLAG(dwFlags, NODEMTL_SETSONONLY)
       ? dwFlags & (~(NODEMTL_SETCHILDREN|NODEMTL_SETSONONLY)) : dwFlags;
@@ -332,13 +332,13 @@ GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFi
     ? MLT_CLONE : MLT_REFERENCE;
 
 
-  // Ã»ÉèÖÃºöÂÔ¶¥µã¸ñÊ½
+  // æ²¡è®¾ç½®å¿½ç•¥é¡¶ç‚¹æ ¼å¼
   if(TEST_FLAG_NOT(dwFlags, NODEMTL_IGNOREVERT))
   {
     GVRENDERDESC renderdesc;
     GetRenderDesc(GVRT_Normal, &renderdesc);
     if(renderdesc.pPrimitive == NULL) {
-      CLOG_WARNING(__FUNCTION__": Primitive is null.\r\n");
+      CLOG_WARNING("%s : Primitive is null.\r\n", __FUNCTION__);
       return GX_OK;
     }
 
@@ -353,8 +353,8 @@ GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFi
 
       if(strMacros.IsNotEmpty())
       {
-        // Èç¹ûÓÃ»§ÒÑ¾­Ö¸¶¨ÁËºê¿ª¹Ø, ÔòÓÃ';'×·¼Ó
-        // TODO: Ôö¼Ó"!MACRO_SWITCHER"·½Ê½À´Ç¿ÖÆÈ¥µôÄ³¸öºêµÄ¹¦ÄÜ
+        // å¦‚æœç”¨æˆ·å·²ç»æŒ‡å®šäº†å®å¼€å…³, åˆ™ç”¨';'è¿½åŠ 
+        // TODO: å¢åŠ "!MACRO_SWITCHER"æ–¹å¼æ¥å¼ºåˆ¶å»æ‰æŸä¸ªå®çš„åŠŸèƒ½
         strFilename.Append(strFilename.Find('|') != clStringW::npos ? ';' : '|');
         strFilename.Append(strMacros);
       }
@@ -429,7 +429,7 @@ GXBOOL GVNode::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace)
   return FALSE;
 }
 
-void GVNode::SetScaling(const float3& vScaling/*, ESpace eTransform/* = S_RELATIVE*/)
+void GVNode::SetScaling(const float3& vScaling/*, ESpace eTransform = S_RELATIVE*/)
 {
   if(TEST_FLAG(m_dwFlags, GVNF_STATIC)) {
     return;
@@ -597,7 +597,7 @@ void GVNode::SetPosition(const float3& vPos, ESpace eSpace/* = S_RELATIVVE*/)
 
 GXVOID GVNode::GetAbsoluteAABB( AABB& aabb ) const
 {
-  // Õâ¸ö¼ÆËã³öµÄAABBÔÚÓĞĞı×ªµÄÇé¿öÏÂÊÇ²»Ì«×¼È·µÄ
+  // è¿™ä¸ªè®¡ç®—å‡ºçš„AABBåœ¨æœ‰æ—‹è½¬çš„æƒ…å†µä¸‹æ˜¯ä¸å¤ªå‡†ç¡®çš„
   float3 vTranslation;
   float3 vScaling;
   m_Transformation.GlobalMatrix.DecomposeTranslation(&vTranslation);

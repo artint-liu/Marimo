@@ -1,12 +1,12 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
 #include <Smart/smartstream.h>
 #include <Smart/SmartProfile.h>
 
-// Æ½Ì¨Ïà¹Ø
+// å¹³å°ç›¸å…³
 //#include "GrapX/GUnknown.H"
 #include "GrapX/GResource.H"
 #include "GrapX/DataPool.H"
@@ -14,7 +14,7 @@
 #include "GrapX/DataInfrastructure.H"
 #include "clPathFile.H"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "User/GXWindow.h"
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"
@@ -101,7 +101,7 @@ typedef struct __tagGXDLGITEMTEMPLATEEX{
 
 GXHWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, GXLPCWSTR lpDlgName, GXHWND hParent, GXDLGPROC lpDialogFunc, GXLPARAM lParam);
 
-// Èç¹ûÊÇ×Ö·û´®Ôò·µ»Ø TRUE
+// å¦‚æœæ˜¯å­—ç¬¦ä¸²åˆ™è¿”å› TRUE
 GXBOOL GetVariableData(GXLPBYTE lpBytes, GXLPINT pRetLen)
 {
   GXLPSHORT  pwData = (GXLPSHORT)lpBytes;
@@ -141,8 +141,8 @@ namespace DlgXM
   public:
     GXHRESULT GetBasicParam       (SmartProfileW::HANDLE hHandle, DLGBASICPARAMW* pwbp, GXDefinitionArrayW* pDefinitions = NULL);
     GXHRESULT GetFontParam        (SmartProfileW::HANDLE hHandle, DLGFONTPARAMW* pwfp);
-    GXHRESULT LoadBtnSpriteCfg    (SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite);  // hHandle ÊÇ¸¸¾ä±ú
-    GXHRESULT LoadSliderSpriteCfg (SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pSliderSprite);  // hHandle ÊÇ¸¸¾ä±ú
+    GXHRESULT LoadBtnSpriteCfg    (SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite);  // hHandle æ˜¯çˆ¶å¥æŸ„
+    GXHRESULT LoadSliderSpriteCfg (SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pSliderSprite);  // hHandle æ˜¯çˆ¶å¥æŸ„
     GXHRESULT LoadLayout          (SmartProfileW::HANDLE hHandle, GXUI::DLGPANEL* pPanel);
     GXHRESULT LoadTBButton        (SmartProfileW::HANDLE hHandle, TBButtonArray& aTBButton);
   };
@@ -232,7 +232,7 @@ namespace DlgXM
     return 0;
   }
 
-  GXHRESULT DlgSmartFile::LoadBtnSpriteCfg(SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite)  // hHandle ÊÇ¸¸¾ä±ú
+  GXHRESULT DlgSmartFile::LoadBtnSpriteCfg(SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite)  // hHandle æ˜¯çˆ¶å¥æŸ„
   {
     SmartProfileW::HANDLE hSprite = FindFirstSection(hHandle, FALSE, NULL, szSect);
     if(hSprite != NULL)
@@ -250,7 +250,7 @@ namespace DlgXM
     return -1;
   }
 
-  GXHRESULT DlgSmartFile::LoadSliderSpriteCfg(SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pBtnSprite)  // hHandle ÊÇ¸¸¾ä±ú
+  GXHRESULT DlgSmartFile::LoadSliderSpriteCfg(SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pBtnSprite)  // hHandle æ˜¯çˆ¶å¥æŸ„
   {
     SmartProfileW::HANDLE hSprite = FindFirstSection(hHandle, FALSE, NULL, szSect);
     if(hSprite != NULL)
@@ -543,7 +543,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
   ptBaseUnit.y = GXHIWORD(lRet);
 
 
-  // ¼ÆËãÏñËØ³ß´ç
+  // è®¡ç®—åƒç´ å°ºå¯¸
   ptPos.x    = (ptBaseUnit.x * lpDlgTemplate->x) / 4;
   ptPos.y    = (ptBaseUnit.y * lpDlgTemplate->y) / 8;
   ptSize.cx  = (GXLONG)(ptBaseUnit.x * lpDlgTemplate->cx) / 4;
@@ -572,8 +572,8 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
   lpBytes += nVariableLen * sizeof(GXSHORT);
 
   GXLPARAM aParam[2] = {
-    lParam,            // ÓÃ»§²ÎÊı
-    (GXLPARAM)lpDialogFunc    // ¶Ô»°¿ò´¦Àíº¯Êı
+    lParam,            // ç”¨æˆ·å‚æ•°
+    (GXLPARAM)lpDialogFunc    // å¯¹è¯æ¡†å¤„ç†å‡½æ•°
   };
   hDialogFrame = gxCreateWindowExW( lpDlgTemplate->exStyle, WndClassEx_Dialog.lpszClassName,
     (GXLPCWSTR)L"", lpDlgTemplate->style, 
@@ -593,7 +593,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
   GetVariableData(lpBytes, &nVariableLen);
   TRACE("class name length:%d\n",nVariableLen);
 
-  // µÃµ½´°¿Ú±êÌâ
+  // å¾—åˆ°çª—å£æ ‡é¢˜
   lpBytes += nVariableLen * sizeof(GXSHORT);
   if(GetVariableData(lpBytes, &nVariableLen) != FALSE)
   {
@@ -612,7 +612,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
     TRACEW(L"font face name:%s, length: %d\n", (GXLPWCHAR)lpBytes,nVariableLen);
   }
 
-  lpBytes = (GXLPBYTE)BYTE_ALIGN_4((GXLONG_PTR)lpBytes + nVariableLen * sizeof(GXSHORT));    // ¿ÉÄÜ»áÓĞBug,ÒòÎªLockµÄÄÚ´æÓĞ¿ÉÄÜ²»ÊÇ4×Ö½Ú¶ÔÆë
+  lpBytes = (GXLPBYTE)BYTE_ALIGN_4((GXLONG_PTR)lpBytes + nVariableLen * sizeof(GXSHORT));    // å¯èƒ½ä¼šæœ‰Bug,å› ä¸ºLockçš„å†…å­˜æœ‰å¯èƒ½ä¸æ˜¯4å­—èŠ‚å¯¹é½
   //////////////////////////////////////////////////////////////////////////
   for(GXINT i = 0; i < lpDlgTemplate->cDlgItems; i++)
   {
@@ -638,7 +638,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
       GXLPSHORT pTitle;
       GXBOOL bId = FALSE;
 
-      // ¶¨Î»µ½¿Ø¼ş±êÌâ
+      // å®šä½åˆ°æ§ä»¶æ ‡é¢˜
       pTitle = (GXLPSHORT)BYTE_ALIGN_4((GXLONG_PTR)pShort+2);
       if(*pTitle == (GXSHORT)0xffff)
       {
@@ -710,7 +710,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
       hControl = gxCreateWindowExW(NULL, (GXLPCWSTR)lpBytes, (GXLPCWSTR)L"", lpDlgItem->style, ptPos.x, ptPos.y, ptSize.cx, ptSize.cy, hDialogFrame, (GXHMENU)lpDlgItem->id, NULL, 0);
       //ASSERT(FALSE);
     }
-    // ¶¨Î»µ½¿Ø¼ş±êÌâ
+    // å®šä½åˆ°æ§ä»¶æ ‡é¢˜
     pShort = (GXLPSHORT)BYTE_ALIGN_4((GXLONG_PTR)pShort);
     if(*pShort == (GXSHORT)0xffff)
     {
@@ -729,13 +729,13 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
       pShort += (GXSTRLEN((GXLPCWSTR)pShort) + 1);
     }
 
-    // ¶¨Î»µ½¿Ø¼ş¸½¼Ó×Ö½Ú
+    // å®šä½åˆ°æ§ä»¶é™„åŠ å­—èŠ‚
     pShort = (GXLPSHORT)BYTE_ALIGN_4((GXLONG_PTR)(pShort + (*pShort + 1)));
     lpBytes = (GXLPBYTE)pShort;
 
   }
 
-  //gxSetWindowLongW(hDialogFrame, GXGWL_WNDPROC, (GXLONG_PTR)lpDialogFunc);  // ÎªÉ¶ÒªÍêÈ«Ìæ»»ÄØ?
+  //gxSetWindowLongW(hDialogFrame, GXGWL_WNDPROC, (GXLONG_PTR)lpDialogFunc);  // ä¸ºå•¥è¦å®Œå…¨æ›¿æ¢å‘¢?
   gxSendMessageW(hDialogFrame, GXWM_INITDIALOG, NULL, lParam);
   return hDialogFrame;
 }
@@ -789,7 +789,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dl
   hItemWnd = pLabel->Get();
   //gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
-  // ÉèÖÃÑÕÉ«
+  // è®¾ç½®é¢œè‰²
   clStringW strColor = file.FindKeyAsString(hDlgItem, L"Color", L"");
   if(strColor.GetLength() > 0)
   {
@@ -818,7 +818,7 @@ GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem
   hItemWnd = pRectangle->Get();
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
-  // ÉèÖÃÑÕÉ«
+  // è®¾ç½®é¢œè‰²
   clStringW strColor = file.FindKeyAsString(hDlgItem, L"Color", L"");
   if(strColor.GetLength() > 0)
   {
@@ -881,7 +881,7 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   GXUI::Button* pButton = GXUI::Button::Create(hInstance, hDlgWnd, dbpItem.strCaption, dbpItem.dwStyle, dbpItem.strName, &dbpItem.regn, &aDefinitions);
   hItemWnd = pButton->Get();
 
-  // ÔØÈëSpriteÅäÖÃ
+  // è½½å…¥Spriteé…ç½®
   DlgXM::DLGBTNSPRITE sDlgBtnSprite = sDlgTemplateBtnSprite;
 
   file.LoadBtnSpriteCfg(hDlgItem, L"Sprite", &sDlgBtnSprite);
@@ -891,7 +891,7 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   file.GetFontParam(hDlgItem, &dfpItem);
   dfpItem.Inherit(&dfp);
 
-  // ÉèÖÃ×ÖÌå
+  // è®¾ç½®å­—ä½“
   if(dfpItem.IsAvailable()) {
     pButton->SetFont(dfpItem.strFontName, dfpItem.nFontSize);
   }
@@ -945,7 +945,7 @@ GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   //GXUI::Button* pButton = GXUI::Button::Create(hInstance, hDlgWnd, dbpItem.strCaption, dbpItem.dwStyle, dbpItem.strName, &dbpItem.regn);
   //hItemWnd = pButton->Get();
 
-  //// ÔØÈëSpriteÅäÖÃ
+  //// è½½å…¥Spriteé…ç½®
   //DlgXM::DLGBTNSPRITE sDlgBtnSprite = sDlgTemplateBtnSprite;
 
   //file.LoadBtnSpriteCfg(hDlgItem, L"Sprite", &sDlgBtnSprite);
@@ -953,7 +953,7 @@ GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   //  sDlgBtnSprite.strHover, sDlgBtnSprite.strPressed, 
   //  sDlgBtnSprite.strDisable, sDlgBtnSprite.strDefault);
 
-  // ÉèÖÃ×ÖÌå
+  // è®¾ç½®å­—ä½“
   //if(dfp.IsAvailable()) {
   //  pEdit->SetFont(dfp.strFontName, dfp.nFontSize);
   //}
@@ -1004,7 +1004,7 @@ GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, 
     {
       pToolbar->AddButton(&*itTBBtn);
 
-      // ÊÍ·ÅÄÚ²¿µÄ clStringW
+      // é‡Šæ”¾å†…éƒ¨çš„ clStringW
       if(itTBBtn->idCommand) {
         clStringW& str = *(clStringW*)&itTBBtn->idCommand;
         str.~clStringW();
@@ -1018,7 +1018,7 @@ GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, 
   }
   hItemWnd = pToolbar->Get();
 
-  // ÉèÖÃ×ÖÌå
+  // è®¾ç½®å­—ä½“
   if(dfp.IsAvailable()) {
     pToolbar->SetFont(dfp.strFontName, dfp.nFontSize);
   }
@@ -1036,7 +1036,7 @@ GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dl
   GXUI::Slider* pSlider = GXUI::Slider::Create(hInstance, hDlgWnd, &dbpItem, &aDefinitions);
   hItemWnd = pSlider->Get();
 
-  // ÔØÈëSpriteÅäÖÃ
+  // è½½å…¥Spriteé…ç½®
   DlgXM::DLGSLIDERSPRITE sDlgSldSprite = sDlgTemplateSldSprite;
 
   file.LoadSliderSpriteCfg(hDlgItem, L"Sprite", &sDlgSldSprite);
@@ -1066,7 +1066,7 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dlg
   {
     if(it->Name == L"DataPool") {
       MOVariable Var;
-      clStringA strExpression = it->Value;
+      clStringA strExpression = (GXLPCWSTR)it->Value;
       MODataPool::FindVariable(NULL, &Var, strExpression);
       gxSendMessage(hItemWnd, GXWM_DATAPOOLOPERATION, DPO_SETVARIABLE, (GXLPARAM)&Var);
     }
@@ -1105,7 +1105,7 @@ GXHWND CreateDialogItem_List( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dlg
 
   hItemWnd = pList->Get();
 
-  // ÉèÖÃ×ÖÌå
+  // è®¾ç½®å­—ä½“
   if(dfp.IsAvailable()) {
     pList->SetFont(dfp.strFontName, dfp.nFontSize);
   }
@@ -1144,20 +1144,20 @@ GXHWND gxIntCreateDialogFromFileW(
   clStringW strDialogSection = clStringW(L"Dialogs\\") + lpDlgName;
   clStringW strDialogFile = lpStation->ConvertAbsPathW(szDlgFilename);
 
-  //RichListParams sRichListParams; // ²ÎÊı¶ÓÁĞ£¬ÓÃÀ´ÔÚInitDialogÏûÏ¢Ö®ºó³õÊ¼»¯Rich List Box¿Ø¼ş
+  //RichListParams sRichListParams; // å‚æ•°é˜Ÿåˆ—ï¼Œç”¨æ¥åœ¨InitDialogæ¶ˆæ¯ä¹‹ååˆå§‹åŒ–Rich List Boxæ§ä»¶
 
   if( ! file.LoadW(strDialogFile))
   {
-    TRACEW(L"Error gxIntCreateDialogFromFileW, ÎŞ·¨¼ÓÔØÎÄ¼ş(%s).\n", lpFilename);
+    TRACEW(L"Error gxIntCreateDialogFromFileW, æ— æ³•åŠ è½½æ–‡ä»¶(%s).\n", lpFilename);
     return NULL;
   }
 
-  // ×¢²á¶Ô»°¿ò×ÊÔ´
+  // æ³¨å†Œå¯¹è¯æ¡†èµ„æº
   gxRegisterClassExW(&WndClassEx_DialogEx);
 
   hDlgSect = file.OpenSection(strDialogSection);
   if(hDlgSect == NULL)  {
-    TRACE("Error gxIntCreateDialogFromFileW, Ö¸¶¨µÄ¶Î²»´æÔÚ.\n");
+    TRACE("Error gxIntCreateDialogFromFileW, æŒ‡å®šçš„æ®µä¸å­˜åœ¨.\n");
     return NULL;
   }
   GXUI::DLGPANEL          DlgPanel;
@@ -1169,15 +1169,15 @@ GXHWND gxIntCreateDialogFromFileW(
   file.GetFontParam(hDlgSect, &dfp);
   
   //GXLPARAM aParam[2] = {
-  //  lParam,                  // ÓÃ»§²ÎÊı
-  //  (GXLPARAM)lpDialogFunc  // ¶Ô»°¿ò´¦Àíº¯Êı
+  //  lParam,                  // ç”¨æˆ·å‚æ•°
+  //  (GXLPARAM)lpDialogFunc  // å¯¹è¯æ¡†å¤„ç†å‡½æ•°
   //};
 
   GXHWND hDlgWnd = NULL;
   GXHMENU hMenu = NULL;
   SP_HANDLE hTemplate = NULL;
 
-  // ´´½¨¶Ô»°¿ò´¢´æ½á¹¹
+  // åˆ›å»ºå¯¹è¯æ¡†å‚¨å­˜ç»“æ„
   DLGLOG* pDlgLog = new DLGLOG;
   if(pDlgLog == NULL) {
     goto FUNC_RET;
@@ -1186,15 +1186,17 @@ GXHWND gxIntCreateDialogFromFileW(
   pDlgLog->strName = wbp.strName;
   pDlgLog->lParam = lParam;
 
-  // »ñµÃ¶Ô»°¿òÀ©Õ¹ÑùÊ½
-  GXDWORD dwDlgStyle = DlgXM::ParseCombinedFlags(wbp.strStyle, L"GXDS_", DlgXM::CMC_DlgStyle);
-
-  // ´¦Àí"¾ÓÖĞ"ÑùÊ½, ´ËÊ±ºöÂÔÔ­À´²ÎÊıÖĞµÄ left ºÍ top ²ÎÊı
-  if(TEST_FLAG(dwDlgStyle, GXDS_CENTER))
   {
-    //GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
-    wbp.regn.left = (lpStation->nWidth  - wbp.regn.width) / 2;
-    wbp.regn.top  = (lpStation->nHeight - wbp.regn.height) / 2;
+    // è·å¾—å¯¹è¯æ¡†æ‰©å±•æ ·å¼
+    GXDWORD dwDlgStyle = DlgXM::ParseCombinedFlags(wbp.strStyle, L"GXDS_", DlgXM::CMC_DlgStyle);
+
+    // å¤„ç†"å±…ä¸­"æ ·å¼, æ­¤æ—¶å¿½ç•¥åŸæ¥å‚æ•°ä¸­çš„ left å’Œ top å‚æ•°
+    if (TEST_FLAG(dwDlgStyle, GXDS_CENTER))
+    {
+      //GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
+      wbp.regn.left = (lpStation->nWidth - wbp.regn.width) / 2;
+      wbp.regn.top = (lpStation->nHeight - wbp.regn.height) / 2;
+    }
   }
 
   if(wbp.strMenu.IsNotEmpty())
@@ -1207,7 +1209,7 @@ GXHWND gxIntCreateDialogFromFileW(
     }
   }
 
-  // ´´½¨ Dialog ´°¿Ú
+  // åˆ›å»º Dialog çª—å£
   hDlgWnd = gxCreateWindowExW( wbp.dwExStyle, WndClassEx_DialogEx.lpszClassName,
     wbp.strCaption, wbp.dwStyle, 
     wbp.regn.left, wbp.regn.top, wbp.regn.width, wbp.regn.height, 
@@ -1218,7 +1220,7 @@ GXHWND gxIntCreateDialogFromFileW(
     goto FUNC_RET;
   }
 
-  // ¼ÓÔØ¶Ô»°¿òÄ£°å×ÊÔ´
+  // åŠ è½½å¯¹è¯æ¡†æ¨¡æ¿èµ„æº
   hTemplate = file.OpenSection(L"Template");
   if(hTemplate != NULL)
   {
@@ -1345,7 +1347,7 @@ GXHWND gxIntCreateDialogFromFileW(
           DlgPanel.fScale[i] = 0.5f;
         }
         file.LoadLayout(hDlgItem, &DlgPanel);
-        continue; // Ìø¹ı AddItem Óï¾ä
+        continue; // è·³è¿‡ AddItem è¯­å¥
       }
 
       pDlgLog->AddItem(dbpItem.strName, hItemWnd);
@@ -1367,8 +1369,8 @@ GXHWND gxIntCreateDialogFromFileW(
   //  gxSendMessageW(it->hWnd, GXLB_SETITEMTEMPLATE, NULL, (GXLPARAM)(GXLPCWSTR)it->strItemTemplate);
   //}
 
-  // #.¶ÔÓÚ¸´ÔÓ¿Ø¼ş£¬Ä³Ğ©¿Ø¼şÏûÏ¢¿ÉÄÜÏÈÓÚGXWM_INITDIALOG·¢Éú
-  // #.ÔÚGXWM_INITDIALOGÏûÏ¢·¢ËÍÇ°£¬Dialog×ÊÔ´ÖĞµÄ¿Ø¼şÓ¦¸Ã¶¼ÒÑ¾­×¼±¸ºÃÁË
+  // #.å¯¹äºå¤æ‚æ§ä»¶ï¼ŒæŸäº›æ§ä»¶æ¶ˆæ¯å¯èƒ½å…ˆäºGXWM_INITDIALOGå‘ç”Ÿ
+  // #.åœ¨GXWM_INITDIALOGæ¶ˆæ¯å‘é€å‰ï¼ŒDialogèµ„æºä¸­çš„æ§ä»¶åº”è¯¥éƒ½å·²ç»å‡†å¤‡å¥½äº†
   gxSendMessageW(hDlgWnd, GXWM_INITDIALOG, NULL, lParam);
 
 

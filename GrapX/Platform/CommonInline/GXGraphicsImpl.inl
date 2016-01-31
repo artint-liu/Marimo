@@ -25,7 +25,7 @@ GXBOOL GXGraphicsImpl::InitCommon()
   // Rasterizer State
   GXRASTERIZERDESC RasterizerDesc;
   if(GXFAILED(CreateRasterizerState((GRasterizerState**)&m_pDefaultRasterizerState, &RasterizerDesc))) {
-    CLOG_ERROR(__FUNCTION__": Create rasterizer state error.\n");
+    CLOG_ERROR("%s : Create rasterizer state error.\n", __FUNCTION__);
   }
   m_pCurRasterizerState = m_pDefaultRasterizerState;
   m_pCurRasterizerState->AddRef();
@@ -34,7 +34,7 @@ GXBOOL GXGraphicsImpl::InitCommon()
   // Blend State
   GXBLENDDESC BlendDesc;  // 自动构造默认参数
   if(GXFAILED(CreateBlendState((GBlendState**)&m_pDefaultBlendState, &BlendDesc, 1))) {
-    CLOG_ERROR(__FUNCTION__": Create default blend state error.\n");
+    CLOG_ERROR("%s : Create default blend state error.\n", __FUNCTION__);
   }
   m_pCurBlendState = m_pDefaultBlendState;
   m_pCurBlendState->AddRef();
@@ -42,7 +42,7 @@ GXBOOL GXGraphicsImpl::InitCommon()
 
   GXDEPTHSTENCILDESC DepthStencilDesc(TRUE, FALSE);
   if(GXFAILED(CreateDepthStencilState((GDepthStencilState**)&m_pDefaultDepthStencilState, &DepthStencilDesc))) {
-    CLOG_ERROR(__FUNCTION__": Create depth stencil state error.\n");
+    CLOG_ERROR("%s : Create depth stencil state error.\n", __FUNCTION__);
   }
   m_pCurDepthStencilState = m_pDefaultDepthStencilState;
   m_pCurDepthStencilState->AddRef();

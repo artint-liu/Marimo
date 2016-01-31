@@ -163,7 +163,7 @@ GXBOOL GXDLLAPI gxIsValidLocale(
 //#endif // (defined(_WIN32) || defined(_WINDOWS)) && (_WIN32_WINNT >= 0x0600)
 //}
 //#if defined(_WIN32) || defined(_WINDOWS)
-#ifndef _DEV_DISABLE_UI_CODE
+#if ! defined(_DEV_DISABLE_UI_CODE ) && ! defined(__clang__)
 clStringA GXDLLAPI Win32ResourceTypeToStringA(GXLPCSTR szType)
 {
   switch((GXDWORD)szType)
@@ -270,8 +270,8 @@ GXHRSRC GXDLLAPI gxFindResourceW(
   }
 
   return gxFindResourceA(hModule,
-    IS_IDENTIFY(lpName) ? (GXLPCSTR)lpName : clStringA(lpName), 
-    IS_IDENTIFY(lpType) ? (GXLPCSTR)lpType : clStringA(lpType));
+    IS_IDENTIFY(lpName) ? (GXLPCSTR)lpName : (GXLPCSTR)clStringA(lpName), 
+    IS_IDENTIFY(lpType) ? (GXLPCSTR)lpType : (GXLPCSTR)clStringA(lpType));
 
   //GXINSTANCE* lpModule = GXHINSTANCE_PTR(hModule);
   //clString strT = Win32ResourceTypeNameToString(lpType, lpName);
@@ -408,7 +408,7 @@ GXHLOCAL GXDLLAPI gxLocalFree(GXIN GXHLOCAL hMem)
   return NULL;
 }
 
-#if defined(_WIN32) && defined(_X86)
+#if defined(_WIN32) && defined(_X86) && ! defined(__clang__)
 __declspec(naked) GXDWORD GXDLLAPI gxGetCurrentThreadId()
 {
   __asm mov eax, FS:[0x18]    // TEB
@@ -418,7 +418,7 @@ __declspec(naked) GXDWORD GXDLLAPI gxGetCurrentThreadId()
 #else
 GXDWORD GXDLLAPI gxGetCurrentThreadId()
 {
-  return clstd::thread::GetCurrentId();
+  return (GXDWORD)clstd::thread::GetCurrentId();
 }
 #endif // #if defined(_WIN32) && defined(_X86)
 
@@ -526,7 +526,7 @@ GXHANDLE GXDLLAPI gxGetModuleHandle(
   GXLPCWSTR lpModuleName   // address of module name to return handle for  
   )
 {
-  return (GXHANDLE)GetModuleHandle(lpModuleName);
+  return (GXHANDLE)GetModuleHandleW(lpModuleName);
 }
 
 GXLONG GXDLLAPI gxInterlockedIncrement(GXLONG volatile *Addend)
@@ -553,8 +553,8 @@ GXHANDLE GXDLLAPI gxFindFirstFileW(
   GXLPWIN32_FIND_DATAW lpFindFileData   // pointer to returned information 
   )
 {
-  ASSERT(sizeof(WIN32_FIND_DATA) == sizeof(GXWIN32_FIND_DATAW));
-  return (GXHANDLE)FindFirstFileW(lpFileName, (WIN32_FIND_DATA*)lpFindFileData);
+  ASSERT(sizeof(WIN32_FIND_DATAW) == sizeof(GXWIN32_FIND_DATAW));
+  return (GXHANDLE)FindFirstFileW(lpFileName, (WIN32_FIND_DATAW*)lpFindFileData);
 }
 GXBOOL GXDLLAPI gxFindNextFileW(
   GXHANDLE hFindFile,  // handle to search  
@@ -562,7 +562,7 @@ GXBOOL GXDLLAPI gxFindNextFileW(
   )
 {
   ASSERT(sizeof(WIN32_FIND_DATA) == sizeof(GXWIN32_FIND_DATAW));
-  return FindNextFileW(hFindFile, (WIN32_FIND_DATA*)lpFindFileData);
+  return FindNextFileW(hFindFile, (WIN32_FIND_DATAW*)lpFindFileData);
 }
 GXBOOL GXDLLAPI gxFindClose(
   GXHANDLE hFindFile   // file search handle 

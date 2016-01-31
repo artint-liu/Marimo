@@ -253,7 +253,7 @@ GXLONG* __cpp_Line_Copy(LongFixedArray& aDest, const GXLONG* aSrc1, const size_t
   return NULL;
 }
 
-#if defined(_WIN32) && defined(_X86)
+#if defined(_WIN32) && defined(_X86) && ! defined(__clang__)
 __declspec( naked ) GXLONG* __asm_Line_Copy(LongFixedArray& aDest, const GXLONG* aSrc1, const size_t aSrc1_size)
 {
   __asm {

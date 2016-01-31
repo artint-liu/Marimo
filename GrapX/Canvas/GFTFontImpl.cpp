@@ -174,12 +174,12 @@ GXBOOL _GFTFont::GetDescA(GXLPLOGFONTA lpLogFont) const
 _GFTFont::_GFTFont(GXGraphics* pGraphics, GXCONST GXLPLOGFONTA lpLogFont)
   : GXFont        ()
   //, m_pFaceName   (NULL)
-  , m_pmapCode2FMatrix(NULL)
   , m_pGraphics   (pGraphics)
   , m_Library     (NULL)
   , m_Face        (NULL)
   , m_nWidth      (0)
   , m_nHeight     (0)
+  , m_pmapCode2FMatrix(NULL)
 {
   m_LogFont = *lpLogFont;
   m_ptPen.x = 0;

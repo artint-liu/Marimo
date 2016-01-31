@@ -14,7 +14,11 @@
 #ifdef _WIN32
 #define _GXW64                 __w64
 #define GXCALLBACK             __stdcall
-#define GXAPI                  __stdcall
+# ifdef __clang__
+#   define GXAPI
+# else
+#   define GXAPI                  __stdcall
+# endif
 #elif defined(_IOS)
 #define _GXW64
 #define GXCALLBACK
@@ -144,9 +148,9 @@ public:
       GXBYTE a;
     };
   };
-  GXColor32(){}
-  GXColor32(int _r, int _g, int _b) : r(_r), g(_g), b(_b), a(255) {}
-  GXColor32(int _a, int _r, int _g, int _b) : r(_r), g(_g), b(_b), a(_a) {}
+  GXColor32() TRIVIAL_DEFAULT;
+  GXColor32(int _r, int _g, int _b) : b(_b), g(_g), r(_r), a(255) {}
+  GXColor32(int _a, int _r, int _g, int _b) : b(_b), g(_g), r(_r), a(_a) {}
   GXColor32(const GXColor32& clr) : color(clr.color){}
   GXColor32(GXDWORD clr) : color(clr){}
 

@@ -346,7 +346,7 @@ GXHRESULT IMOPlatform_Win32Base::QueryFeature(GXDWORD dwFeatureCode, GXVOID** pp
 
 GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndProc, GXAPP_DESC* pDesc, GXApp* pApp)
 {
-  WNDCLASSEX wcex;
+  WNDCLASSEXW wcex;
 
   m_hInstance        = GetModuleHandle(NULL);
   wcex.cbSize        = sizeof(WNDCLASSEX);
@@ -362,7 +362,7 @@ GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndPro
   wcex.lpszClassName = lpClassName;
   wcex.hIconSm       = NULL;
 
-  if(RegisterClassEx(&wcex) == 0)
+  if(RegisterClassExW(&wcex) == 0)
   {
     return GX_FAIL;
   }
@@ -383,14 +383,14 @@ GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndPro
     //    rcWorkArea.left + (rcWorkArea.right - rcWorkArea.left - pDesc->nWidth) / 2, 
     //    rcWorkArea.top + (rcWorkArea.bottom - rcWorkArea.top - pDesc->nHeight) / 2, pDesc->nWidth, pDesc->nHeight);
     //}
-    m_hWnd = CreateWindowEx(
+    m_hWnd = CreateWindowExW(
       NULL, lpClassName, pDesc->lpName, WS_OVERLAPPEDWINDOW,
       regnNewWin.left, regnNewWin.top, regnNewWin.width, regnNewWin.height, NULL, NULL, 
       m_hInstance, NULL);
   }
   else
   {
-    m_hWnd = CreateWindowEx(
+    m_hWnd = CreateWindowExW(
       NULL, lpClassName, pDesc->lpName, bSizeable ? WS_OVERLAPPEDWINDOW : (WS_CAPTION | WS_SYSMENU),
       0, 0, 100, 100, NULL, NULL, m_hInstance, NULL);
     RECT rectWorkarea;

@@ -1,4 +1,4 @@
-#ifndef _GRAPX_INTERNAL_MESSAGE_H_
+﻿#ifndef _GRAPX_INTERNAL_MESSAGE_H_
 #define _GRAPX_INTERNAL_MESSAGE_H_
 
 class GXUIMsgThread : public clstd::MsgThreadT<MOUIMSG>

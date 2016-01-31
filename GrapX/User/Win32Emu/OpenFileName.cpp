@@ -1,4 +1,4 @@
-#include <GrapX.H>
+ï»¿#include <GrapX.H>
 //#include "GrapX/GUnknown.H"
 #include "GrapX/MOLogger.h"
 #include "GrapX/GXUser.H"
@@ -42,7 +42,7 @@ void GetPathFromItem(const GXHWND hTree, const GXHTREEITEM hItem, clStringW& str
 
 void PreFillItem(GXHWND hTree, GXHTREEITEM hParent)
 {
-  WIN32_FIND_DATA ffd;
+  WIN32_FIND_DATAW ffd;
   clStringW strPath;
   GXTVINSERTSTRUCT tis;
   memset(&tis, 0, sizeof(tis));
@@ -50,7 +50,7 @@ void PreFillItem(GXHWND hTree, GXHTREEITEM hParent)
   GetPathFromItem(hTree, hParent, strPath);
   strPath += _T("\\*.*");
 
-  HANDLE hFind = FindFirstFile(strPath, &ffd);
+  HANDLE hFind = FindFirstFileW(strPath, &ffd);
   if(hFind == INVALID_HANDLE_VALUE) {
     return;
   }
@@ -69,11 +69,11 @@ void PreFillItem(GXHWND hTree, GXHTREEITEM hParent)
         gxSendMessage(hTree, GXTVM_INSERTITEM, 0, (LPARAM)&tis);
       }
     }
-  } while (FindNextFile(hFind, &ffd));
+  } while (FindNextFileW(hFind, &ffd));
   FindClose(hFind);
 }
 
-//TODO: Èç¹û×ÓÏîÄ¿Õ¹¿ª,ÔòÒ²Ìî³äËüµÄ×ÓÏîÄ¿
+//TODO: å¦‚æœå­é¡¹ç›®å±•å¼€,åˆ™ä¹Ÿå¡«å……å®ƒçš„å­é¡¹ç›®
 void FillItem(GXHWND hTree, GXHTREEITEM hParent)
 {
   GXHTREEITEM hItem = (GXHTREEITEM)gxSendMessage(hTree, GXTVM_GETNEXTITEM, GXTVGN_CHILD, (LPARAM)hParent);
@@ -127,25 +127,25 @@ void InitTree(GXHWND hWnd)
     if(((1 << i) & dwDriverMask) != 0)
     {
       szPathName[0] = i + _T('A');
-      UINT nType = GetDriveType(szPathName);
+      UINT nType = GetDriveTypeW(szPathName);
 
       szVolume[0] = _T('\0');
       DWORD dwFileSystemFlag;
       GXWCHAR szFilesystem[32];
       szFilesystem[0] = '\0';
-      GetVolumeInformation(szPathName, szVolume, 64, NULL, NULL, &dwFileSystemFlag, szFilesystem, sizeof(szFilesystem) / sizeof(szFilesystem[0]));
+      GetVolumeInformationW(szPathName, szVolume, 64, NULL, NULL, &dwFileSystemFlag, szFilesystem, sizeof(szFilesystem) / sizeof(szFilesystem[0]));
 
       static GXWCHAR *aType[] = {
         _T("Unknown"), _T("NoRootDir"), _T("Removable"), _T("Fixed"), _T("Remote"), _T("CD-ROM"), _T("RamDisk")};
 
         if(szVolume[0] != _T('\0'))
         {
-          wsprintf(szBuffer, _T("%s(%c:)"), szVolume, _T('A') + i);
+          wsprintfW(szBuffer, _T("%s(%c:)"), szVolume, _T('A') + i);
         }
         else
         {
           //FILE_NAMED_STREAMS
-          wsprintf(szBuffer, _T("%s(%c:)"), aType[nType], _T('A') + i);
+          wsprintfW(szBuffer, _T("%s(%c:)"), aType[nType], _T('A') + i);
         }
 
         tis.hParent       = NULL;
@@ -167,7 +167,7 @@ void InitListView(GXHWND hWnd)
   memset(&lvc, 0, sizeof(lvc));
   lvc.mask = LVCF_TEXT;
   lvc.fmt = LVCFMT_LEFT;
-  lvc.pszText = _T("ÎÄ¼şÃû");
+  lvc.pszText = _T("æ–‡ä»¶å");
 
   gxSendMessage(hListView, GXLVM_INSERTCOLUMN, 0, (GXLPARAM)&lvc);
 }
@@ -182,8 +182,8 @@ void FillFile(GXHWND hWnd, GXHTREEITEM hTreeItem)
 
   gxSendMessage(hListView, GXLVM_DELETEALLITEMS, 0, 0);
 
-  WIN32_FIND_DATA ffd;
-  HANDLE hFind = FindFirstFile(strPath, &ffd);
+  WIN32_FIND_DATAW ffd;
+  HANDLE hFind = FindFirstFileW(strPath, &ffd);
   if(hFind != INVALID_HANDLE_VALUE)
   {
     do{
@@ -195,7 +195,7 @@ void FillFile(GXHWND hWnd, GXHTREEITEM hTreeItem)
         lvi.pszText = ffd.cFileName;
         gxSendMessage(hListView, GXLVM_INSERTITEM, 0, (LPARAM)&lvi);
       }
-    }while(FindNextFile(hFind, &ffd));
+    }while(FindNextFileW(hFind, &ffd));
     FindClose(hFind);
   }
 }
@@ -208,14 +208,14 @@ GXINT_PTR GXCALLBACK IntBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM wParam,
   case WM_INITDIALOG:
     //SendDlgItemMessage(hDlg, IDC_COMBOBOXEX1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
     //SendDlgItemMessage(hDlg, IDC_COMBO1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
-    SetErrorMode(SEM_FAILCRITICALERRORS); // FindFirstFile ·ÃÎÊÎŞ´ÅÅÌµÄ¶Á¿¨Æ÷Ê±»áµ¯³öMessageBox£¬ Õâ¸öÓÃÀ´ĞŞ¸Ä´íÎóÄ£Ê½ÆÁ±Îµô
+    SetErrorMode(SEM_FAILCRITICALERRORS); // FindFirstFile è®¿é—®æ— ç£ç›˜çš„è¯»å¡å™¨æ—¶ä¼šå¼¹å‡ºMessageBoxï¼Œ è¿™ä¸ªç”¨æ¥ä¿®æ”¹é”™è¯¯æ¨¡å¼å±è”½æ‰
     InitTree(hDlg);
     InitListView(hDlg);
     return (INT_PTR)TRUE;
 
   case WM_NOTIFY:
-    //CLBREAK; // ²âÊÔÏÂÃæµÄwParamÖµ
-    //if(wParam == IDT_DIR) // FIXME: ĞŞ¸´Õâ¸öÅĞ¶Ï
+    //CLBREAK; // æµ‹è¯•ä¸‹é¢çš„wParamå€¼
+    //if(wParam == IDT_DIR) // FIXME: ä¿®å¤è¿™ä¸ªåˆ¤æ–­
     {
       NMHDR* pnmh = (NMHDR*)lParam;
       if(pnmh->code == GXTVN_ITEMEXPANDING)

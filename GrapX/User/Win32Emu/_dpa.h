@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_DYNAMIC_POINTER_ARRAY_H_
+﻿#ifndef _GRAP_X_DYNAMIC_POINTER_ARRAY_H_
 #define _GRAP_X_DYNAMIC_POINTER_ARRAY_H_
 
 typedef int    (GXCALLBACK *GXPFNDPAENUMCALLBACK)(void *p, void *pData);

@@ -1,11 +1,11 @@
-#ifndef _DATAPOOL_BUILD_TIME_H_
+ï»¿#ifndef _DATAPOOL_BUILD_TIME_H_
 #define _DATAPOOL_BUILD_TIME_H_
 
 namespace Marimo
 {
   class DataPoolVariableImpl;
 
-  struct DataPoolBuildTime // Build time ËõĞ´£¬ÓÃÓÚ¹¹½¨Ê±´¢´æÁÙÊ±¶ÔÏó
+  struct DataPoolBuildTime // Build time ç¼©å†™ï¼Œç”¨äºæ„å»ºæ—¶å‚¨å­˜ä¸´æ—¶å¯¹è±¡
   {
     friend class DataPoolImpl;
     //typedef clmap<clStringA, TYPE_DESC> TypeDict;
@@ -22,7 +22,7 @@ namespace Marimo
 
     struct BT_VARIABLE_DESC : public DATAPOOL_VARIABLE_DESC
     {
-      // »ùÀàÖĞTypeDesc³ÉÔ±²»Æğ×÷ÓÃ!
+      // åŸºç±»ä¸­TypeDescæˆå‘˜ä¸èµ·ä½œç”¨!
       DataPoolImpl::TYPE_DESC* pTypeDesc;
 
       inline const DataPoolImpl::TYPE_DESC* GetTypeDesc() const
@@ -44,7 +44,7 @@ namespace Marimo
 
       GXUINT GetSize() const
       {
-        ASSERT( ! IsDynamicArray()); // ²»Ó¦¸ÃÊÇ¶¯Ì¬Êı×é
+        ASSERT( ! IsDynamicArray()); // ä¸åº”è¯¥æ˜¯åŠ¨æ€æ•°ç»„
         return nCount * TypeSize();
       }
     };
@@ -54,10 +54,10 @@ namespace Marimo
     typedef clvector<BT_VARIABLE_DESC>        BTVarDescArray;
     typedef clvector<DATAPOOL_ENUM_DESC>      EnumDescArray;
 
-    // ¹¹½¨Ê±¼ì²éÓÃµÄÀàĞÍÉùÃ÷½á¹¹
+    // æ„å»ºæ—¶æ£€æŸ¥ç”¨çš„ç±»å‹å£°æ˜ç»“æ„
     enum BuildtimeTypeDeclarationFlags{
-      BuildtimeTypeDeclaration_Used    = 0x0001,  // Ê¹ÓÃ¹ı
-      BuildtimeTypeDeclaration_Checked = 0x0002,  // ¼ì²é¹ı
+      BuildtimeTypeDeclaration_Used    = 0x0001,  // ä½¿ç”¨è¿‡
+      BuildtimeTypeDeclaration_Checked = 0x0002,  // æ£€æŸ¥è¿‡
     };
 
 
@@ -70,12 +70,12 @@ namespace Marimo
 
   protected:
     BuildTimeTypeDeclarationDict sBuildTimeTypeDeclDict;
-    BTTypeDict          m_TypeDict;         // ÀàĞÍ
-    BTVarDescArray      m_aVar;             // È«¾Ö±äÁ¿
-    BTVarDescArray      m_aStructMember;    // ËùÓĞµÄ½á¹¹Ìå³ÉÔ±ÃèÊö¶¼´æÔÚÕâÕÅ±íÉÏ
-    EnumDescArray       m_aEnumPck;         // ËùÓĞÃ¶¾Ù³ÉÔ±¶¼ÔÚÕâ¸ö±íÉÏ
+    BTTypeDict          m_TypeDict;         // ç±»å‹
+    BTVarDescArray      m_aVar;             // å…¨å±€å˜é‡
+    BTVarDescArray      m_aStructMember;    // æ‰€æœ‰çš„ç»“æ„ä½“æˆå‘˜æè¿°éƒ½å­˜åœ¨è¿™å¼ è¡¨ä¸Š
+    EnumDescArray       m_aEnumPck;         // æ‰€æœ‰æšä¸¾æˆå‘˜éƒ½åœ¨è¿™ä¸ªè¡¨ä¸Š
     clstd::StringSetA   NameSet;
-    GXUINT              m_bPtr64 : 1;       // 64Î»Ö¸Õë¼æÈİÄ£Ê½
+    GXUINT              m_bPtr64 : 1;       // 64ä½æŒ‡é’ˆå…¼å®¹æ¨¡å¼
     GXUINT              m_bFixedPool : 1;
 
     DataPoolBuildTime() : m_bPtr64(0), m_bFixedPool(1) {}

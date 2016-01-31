@@ -1,9 +1,9 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GRegion.H>
@@ -12,7 +12,7 @@
 #include <GrapX/GXCanvas.H>
 #include <GrapX/GXImage.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <User/GXWindow.h>
 #include "GrapX/GXUser.H"
 #include <User/WindowsSurface.h>
@@ -121,7 +121,7 @@ GXHRESULT DesktopWindowsMgr::ManageWindowSurface(GXHWND hWnd, GXUINT message)
     GXGraphics*  pGraphics = lpStation->pGraphics;
 
     ASSERT(lpStation->m_pDesktopWindowsMgr == this);
-    // TopLevel ´°¿Ú
+    // TopLevel çª—å£
     if(gxIsTopLevelWindow(hWnd) == FALSE)
       return FALSE;
 
@@ -145,7 +145,7 @@ GXHRESULT DesktopWindowsMgr::ManageWindowSurface(GXHWND hWnd, GXUINT message)
       pWnd->m_pWinsSurface->SetExclusiveWnd(NULL, SEW_DONOTBLT);
       if(lpStation->m_pDesktopWindowsMgr->FreeSurface(pWnd->m_pWinsSurface) < 0)
       {
-        // Ã»ÓĞÊÍ·Å³É¹¦ËµÃ÷ÊÇDesktop Surface
+        // æ²¡æœ‰é‡Šæ”¾æˆåŠŸè¯´æ˜æ˜¯Desktop Surface
         GRegion* prgnWnd;
         pWnd->GetWindowRegion(&prgnWnd);
         pWnd->m_pWinsSurface->InvalidateRegion(prgnWnd);
@@ -168,14 +168,14 @@ GXHRESULT DesktopWindowsMgr::AllocSurface(GXHWND hWnd)
   {
     GXWindowsSurface* pExclusiveSur = new GXWindowsSurface(m_lpStation, hWnd);
     
-    // Îª¼ÓÈëÁĞ±íÔö¼ÓÒıÓÃ¼ÆÊı
+    // ä¸ºåŠ å…¥åˆ—è¡¨å¢åŠ å¼•ç”¨è®¡æ•°
     if(IS_TOPMOST(pExclusiveSur))
     {
       m_aExclusiveSurface.push_back(pExclusiveSur);
     }
     else
     {
-      // ½«·Ç TopMost Surface ²åÈëµ½×îºóÒ»¸ö TopMost Ö®Ç°
+      // å°†é TopMost Surface æ’å…¥åˆ°æœ€åä¸€ä¸ª TopMost ä¹‹å‰
       for(WinsSurface_Iterator it = m_aExclusiveSurface.end() - 1;
         it != m_aExclusiveSurface.begin(); --it)
       {
@@ -186,7 +186,7 @@ GXHRESULT DesktopWindowsMgr::AllocSurface(GXHWND hWnd)
     }
     pExclusiveSur->AddRef();
 
-    // Îª·µ»ØÖµÔö¼ÓÒıÓÃ¼ÆÊı
+    // ä¸ºè¿”å›å€¼å¢åŠ å¼•ç”¨è®¡æ•°
     lpWnd->m_pWinsSurface = pExclusiveSur;
     return pExclusiveSur->AddRef();
   }
@@ -214,7 +214,7 @@ GXHRESULT DesktopWindowsMgr::FreeSurface(GXWindowsSurface* pWinsSurface)
     m_aExclusiveSurface.erase(it);
   }
   else {
-    pSurface->AddRef();  // ÎªÁË Release() ·µ»ØÒıÓÃ¼ÆÊı
+    pSurface->AddRef();  // ä¸ºäº† Release() è¿”å›å¼•ç”¨è®¡æ•°
   }
   return pSurface->Release();
   /*/
@@ -226,7 +226,7 @@ GXHRESULT DesktopWindowsMgr::FreeSurface(GXWindowsSurface* pWinsSurface)
   if(pSurface != m_pActiveWndSur)
     m_aExclusiveSurface.erase(m_aExclusiveSurface.begin() + nIndex);
   else
-    pSurface->AddRef();  // ÎªÁË Release() ·µ»ØÒıÓÃ¼ÆÊı
+    pSurface->AddRef();  // ä¸ºäº† Release() è¿”å›å¼•ç”¨è®¡æ•°
   return pSurface->Release();
   //*/
 }
@@ -273,7 +273,7 @@ GXBOOL DesktopWindowsMgr::SendPaintMessage()
   static int g_nDbgCount = 0;
 #endif // #ifdef TRACE_SURACE_PAINTING
 
-  // ×ÀÃæÍ¨ÓÃ±íÃæµÄ¸üĞÂ¼ì²é
+  // æ¡Œé¢é€šç”¨è¡¨é¢çš„æ›´æ–°æ£€æŸ¥
   if(m_pDesktopWindows->m_prgnUpdate->GetComplexity() != RC_NULL &&
     m_pDesktopWindows->ValidateBlank() != RC_NULL)
   {
@@ -298,7 +298,7 @@ GXBOOL DesktopWindowsMgr::SendPaintMessage()
     }
   }
 
-  // Ë½ÓĞµÄ¶ÀÕ¼±íÃæ
+  // ç§æœ‰çš„ç‹¬å è¡¨é¢
   for(WinsSurface_Iterator it = m_aExclusiveSurface.begin(); 
     it != m_aExclusiveSurface.end(); ++it)
   {
@@ -332,7 +332,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
 {
   GXCARET*      lpCaret        = &m_lpStation->SysCaret;
   LPGXWND        lpCaretTopWnd = NULL;
-  GXWindowsSurface*  pCaretSurface = NULL;    // ¹â±êËùÔÚµÄSurface
+  GXWindowsSurface*  pCaretSurface = NULL;    // å…‰æ ‡æ‰€åœ¨çš„Surface
   if(lpCaret->Tick() == TRUE)
   {
     lpCaretTopWnd = GXWND_PTR(lpCaret->hTopLevel);
@@ -341,13 +341,13 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
     else
       ASSERT(0);
   }
-  // TODO: ¸ù¾İ´°¿ÚÇøÓò»æÖÆÎÆÀí
+  // TODO: æ ¹æ®çª—å£åŒºåŸŸç»˜åˆ¶çº¹ç†
   GXREGN regn = {0, 0};
   m_pDesktopWindows->m_pRenderTar->GetTextureUnsafe()->GetDimension((GXUINT*)&regn.width, (GXUINT*)&regn.height);
 
   if(TEST_FLAG(m_dwFlags, GXDWM_AERO))
   {
-    // AERO Ğ§¹û»æÖÆ´°¿Ú²ã
+    // AERO æ•ˆæœç»˜åˆ¶çª—å£å±‚
     m_lpStation->pBackDownSampTexA->StretchRect(
       m_lpStation->pGraphics->GetDeviceOriginTex(), NULL, NULL, GXTEXFILTER_LINEAR);
 
@@ -427,7 +427,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
         if(TEST_FLAG(m_dwFlags, GXDWM_AERO))
           pCanvas->SetEffect(m_lpStation->m_pStockObject->pSimpleEffect);
         lpCaret->PaintCaret(pCanvas);
-        // ²»»Ö¸´EffectÊÇÒòÎª´øÓĞCaretµÄ´°¿ÚÖ»ÄÜÊÇTop´°¿Ú,Ò²¾ÍÊÇ×îºóÒ»¸ö»­³öÀ´µÄ´°¿Ú
+        // ä¸æ¢å¤Effectæ˜¯å› ä¸ºå¸¦æœ‰Caretçš„çª—å£åªèƒ½æ˜¯Topçª—å£,ä¹Ÿå°±æ˜¯æœ€åä¸€ä¸ªç”»å‡ºæ¥çš„çª—å£
       }
     }
   }
@@ -461,7 +461,7 @@ void DesktopWindowsMgr::ActiveWindows(GXINT uActiveState, DWM_ACTIVEWINDOWS* p)
   else if(uActiveState == GXWA_ACTIVE)
   {
     GXBOOL bNeedSubtract = FALSE;
-    // ½«¼¤»îµÄ´°¿Ú·ÅÈëActive²ã
+    // å°†æ¿€æ´»çš„çª—å£æ”¾å…¥Activeå±‚
     if(m_pActiveWndSur != NULL)
     {
       GXBOOL bActiveLayered = (p->lpActiveWnd->m_uExStyle & GXWS_EX_LAYERED) != 0;
@@ -473,18 +473,18 @@ void DesktopWindowsMgr::ActiveWindows(GXINT uActiveState, DWM_ACTIVEWINDOWS* p)
         m_pActiveWndSur->SetExclusiveWnd(GXWND_HANDLE(p->lpActiveWnd), NULL);
         bNeedSubtract = TRUE;
       }
-      else if(bInactiveLayered == FALSE)  // Ò»¶¨ÊÇ: bActiveLayered == TRUE
+      else if(bInactiveLayered == FALSE)  // ä¸€å®šæ˜¯: bActiveLayered == TRUE
         m_pActiveWndSur->SetExclusiveWnd(NULL, NULL);
-      else if(bActiveLayered == FALSE)  // Ò»¶¨ÊÇ: bInactiveLayered == TRUE
+      else if(bActiveLayered == FALSE)  // ä¸€å®šæ˜¯: bInactiveLayered == TRUE
       {
         m_pActiveWndSur->SetExclusiveWnd(GXWND_HANDLE(p->lpActiveWnd), NULL);
         m_pDesktopWindows->GenerateWindowsRgn(TRUE);
         m_pDesktopWindows->InvalidateRegion(p->prgnBefore);
         bNeedSubtract = TRUE;
       }
-      else // Ò»¶¨ÊÇ: bActiveLayered == TRUE && bInactiveLayered == TRUE
+      else // ä¸€å®šæ˜¯: bActiveLayered == TRUE && bInactiveLayered == TRUE
       {
-        // µ÷ÕûË³Ğò¾ÍĞĞ, É¶Ò²²»×öÁË...
+        // è°ƒæ•´é¡ºåºå°±è¡Œ, å•¥ä¹Ÿä¸åšäº†...
       }
 
     }
@@ -498,7 +498,7 @@ void DesktopWindowsMgr::ActiveWindows(GXINT uActiveState, DWM_ACTIVEWINDOWS* p)
       bNeedSubtract = TRUE;
     }
     
-    // ¼ÆËã¼¤»î´°¿ÚµÄÎŞĞ§ÇøÓò, ±ä»¯ºó¼õ±ä»¯Ç°
+    // è®¡ç®—æ¿€æ´»çª—å£çš„æ— æ•ˆåŒºåŸŸ, å˜åŒ–åå‡å˜åŒ–å‰
     if(bNeedSubtract == TRUE)
     {
       p->lpActiveWnd->GetSystemRegion(dwFlags, &p->prgnAfter);
@@ -509,7 +509,7 @@ void DesktopWindowsMgr::ActiveWindows(GXINT uActiveState, DWM_ACTIVEWINDOWS* p)
     SAFE_RELEASE(p->prgnBefore);
     SAFE_RELEASE(p->prgnAfter);
 
-    // µ÷Õû¶ÀÕ¼SurfaceµÄË³Ğò
+    // è°ƒæ•´ç‹¬å Surfaceçš„é¡ºåº
     ActiveSurface(p->lpActiveWnd->m_pWinsSurface);
   }
   else
@@ -526,7 +526,7 @@ GXBOOL DesktopWindowsMgr::ActiveSurface(GXWindowsSurface* pWndSurface)
     ASSERT(it != m_aExclusiveSurface.end());
     WinsSurface_Iterator itNext = it + 1;
     
-    // TopMost ´°¿ÚÖ±½Ó¼Óµ½¶ÓÁĞÎ²²¿
+    // TopMost çª—å£ç›´æ¥åŠ åˆ°é˜Ÿåˆ—å°¾éƒ¨
     if(IS_TOPMOST(pWndSurface))
     {
       //GXWindowsSurface* pTopSurface = *it;//m_aExclusiveSurface[nIndex];
@@ -536,7 +536,7 @@ GXBOOL DesktopWindowsMgr::ActiveSurface(GXWindowsSurface* pWndSurface)
     }
     else
     {
-      // ·Ç TopMost ´°¿ÚÖğ½¥ÒÆ¶¯µ½ TopMost Ö®Ç°
+      // é TopMost çª—å£é€æ¸ç§»åŠ¨åˆ° TopMost ä¹‹å‰
       while(itNext != m_aExclusiveSurface.end())
       {
         if(IS_TOPMOST(*itNext)) {

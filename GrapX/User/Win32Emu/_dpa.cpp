@@ -1,4 +1,4 @@
-#ifndef _DPA_
+ï»¿#ifndef _DPA_
 /*
 * Dynamic pointer array (GXDPA) implementation
 *
@@ -602,7 +602,7 @@ GXINT GXDLLAPI gxDPA_InsertPtr (const GXHDPA hdpa, GXINT i, GXLPVOID p)
 */
 GXBOOL GXDLLAPI gxDPA_SetPtr (const GXHDPA hdpa, GXINT i, GXLPVOID p)
 {
-  GXLPVOID *lpTemp;  // TODO:ÎªÊ²Ã´Õâ¸öµØ·½ÒªÓÃË«ÖØÖ¸ÕëÄØ£¿
+  GXLPVOID *lpTemp;  // TODO:ä¸ºä»€ä¹ˆè¿™ä¸ªåœ°æ–¹è¦ç”¨åŒé‡æŒ‡é’ˆå‘¢ï¼Ÿ
 
   TRACE("(%p %d %p)\n", hdpa, i, p);
 

@@ -55,7 +55,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WIN32;_DEBUG;_WINDOWS;_USRDLL;GrapX_Clang_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WIN32;_DEBUG;_WINDOWS;_USRDLL;GXDLL_API_EXPORTS;_UNICODE;FT_CONFIG_OPTION_NO_ASSEMBLER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WIN32;NDEBUG;_WINDOWS;_USRDLL;GrapX_Clang_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_WINDOWS;_USRDLL;GrapX_Clang_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NDEBUG;_WINDOWS;_USRDLL;GrapX_Clang_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -63,6 +63,8 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

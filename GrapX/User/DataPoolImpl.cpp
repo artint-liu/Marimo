@@ -1,4 +1,4 @@
-#include "GrapX.H"
+ï»¿#include "GrapX.H"
 #include "GrapX.Hxx"
 
 #include "clStringSet.h"
@@ -22,7 +22,7 @@ using namespace clstd;
 #define SIZEOF_PTR          sizeof(void*)
 #define SIZEOF_PTR32        sizeof(GXDWORD)
 #define SIZEOF_PTR64        sizeof(GXQWORD)
-#define TYPE_CHANGED_FLAG   0x80000000  // ÀàĞÍÀ©Õ¹»òÕßËõ¼õÊ±µÄ±ê¼Ç£¬¼ÇÔÚTYPE_DESC::CateÉÏ£¬ÓÃºóÒªÇå³ı!
+#define TYPE_CHANGED_FLAG   0x80000000  // ç±»å‹æ‰©å±•æˆ–è€…ç¼©å‡æ—¶çš„æ ‡è®°ï¼Œè®°åœ¨TYPE_DESC::Cateä¸Šï¼Œç”¨åè¦æ¸…é™¤!
 
 #ifdef _DEBUG
 # define INC_DBGNUMOFSTRING ++m_nDbgNumOfString
@@ -95,9 +95,9 @@ namespace Marimo
 
   DataPoolImpl::~DataPoolImpl()
   {
-    // ÇåÀí³ØÖĞµÄÊı¾İ
-    // Ö÷ÒªÊÇÇåÀí¶¯Ì¬Êı×é£¬×Ö·û´®£¬¶ÔÏóºÍ½á¹¹Ìå
-    // ½á¹¹Ìå»á²úÉúµİ¹é£¬±éÀúÆäÏÂµÄÊı¾İÀàĞÍ
+    // æ¸…ç†æ± ä¸­çš„æ•°æ®
+    // ä¸»è¦æ˜¯æ¸…ç†åŠ¨æ€æ•°ç»„ï¼Œå­—ç¬¦ä¸²ï¼Œå¯¹è±¡å’Œç»“æ„ä½“
+    // ç»“æ„ä½“ä¼šäº§ç”Ÿé€’å½’ï¼Œéå†å…¶ä¸‹çš„æ•°æ®ç±»å‹
     if(m_nNumOfVar && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly)) {
       Cleanup(m_VarBuffer.GetPtr(), m_aVariables, (int)m_nNumOfVar);
       //ASSERT(m_nDbgNumOfArray == 0);
@@ -112,13 +112,13 @@ namespace Marimo
         lpStation->m_NamedPool.erase(it);
       }
       else {
-        CLBREAK; // ²»Ó¦¸Ã°¡, Ö×Ã´ÕÒ²»µ½ÁËÄØ?
+        CLBREAK; // ä¸åº”è¯¥å•Š, è‚¿ä¹ˆæ‰¾ä¸åˆ°äº†å‘¢?
       }
     }
 
 //#ifdef ENABLE_OLD_DATA_ACTION
 //#ifdef ENABLE_DATAPOOL_WATCHER
-//    // ÊÍ·ÅËùÓĞµÄ¼àÊÓÆ÷
+//    // é‡Šæ”¾æ‰€æœ‰çš„ç›‘è§†å™¨
 //    for(WatcherArray::iterator it = m_aWatchers.begin();
 //      it != m_aWatchers.end(); ++it) {
 //        SAFE_RELEASE(*it);
@@ -144,11 +144,11 @@ namespace Marimo
     if(pVarDecl == NULL) {
       return FALSE;
     }
-    //FloatVarTypeDict FloatDict; // ºÜ¶àÊÂÇé»¹Ã»ÓĞÈ·¶¨ÏÂÀ´µÄÀàĞÍ±í, ¸¡¶¯µÄ
-    DataPoolBuildTime sBuildTime;   // ¹¹½¨Ê±Ê¹ÓÃµÄ½á¹¹
+    //FloatVarTypeDict FloatDict; // å¾ˆå¤šäº‹æƒ…è¿˜æ²¡æœ‰ç¡®å®šä¸‹æ¥çš„ç±»å‹è¡¨, æµ®åŠ¨çš„
+    DataPoolBuildTime sBuildTime;   // æ„å»ºæ—¶ä½¿ç”¨çš„ç»“æ„
 
-    // ´´½¨¸¡¶¯ÀàĞÍ±í
-    // -- ÄÚÖÃÀàĞÍ±íÊ¾ÊÇ±»ĞÅÈÎµÄ,²»½øĞĞºÏ·¨ĞÔ¼ì²é,Debug°æ»¹ÊÇÒªÉÔÎ¢¼ì²éÏÂµÄ
+    // åˆ›å»ºæµ®åŠ¨ç±»å‹è¡¨
+    // -- å†…ç½®ç±»å‹è¡¨ç¤ºæ˜¯è¢«ä¿¡ä»»çš„,ä¸è¿›è¡Œåˆæ³•æ€§æ£€æŸ¥,Debugç‰ˆè¿˜æ˜¯è¦ç¨å¾®æ£€æŸ¥ä¸‹çš„
 #ifdef _DEBUG
     if( ! sBuildTime.IntCheckTypeDecl(Implement::c_InternalTypeDefine, TRUE))
       return FALSE;
@@ -161,7 +161,7 @@ namespace Marimo
         return FALSE;
     }
 
-    // ¼ì²é±äÁ¿ÀàĞÍ
+    // æ£€æŸ¥å˜é‡ç±»å‹
     if( ! sBuildTime.CheckVarList(pVarDecl)) {
       return FALSE;
     }
@@ -172,7 +172,7 @@ namespace Marimo
       return FALSE;
     }
 
-    // ¶¨Î»¸÷ÖÖÃèÊö±í
+    // å®šä½å„ç§æè¿°è¡¨
     LocalizeTables(sBuildTime, nBufferSize);
     
     InitializeValue(0, pVarDecl);
@@ -190,7 +190,7 @@ namespace Marimo
       {
         clStringW* pString = reinterpret_cast<clStringW*>(lpFirstElement);
 
-        // ÒÀ´Îµ÷ÓÃÎö¹¹º¯Êı
+        // ä¾æ¬¡è°ƒç”¨ææ„å‡½æ•°
         for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
         {
           if(pString[nStringIndex]) {
@@ -207,7 +207,7 @@ namespace Marimo
       {
         clStringA* pString = reinterpret_cast<clStringA*>(lpFirstElement);
 
-        // ÒÀ´Îµ÷ÓÃÎö¹¹º¯Êı
+        // ä¾æ¬¡è°ƒç”¨ææ„å‡½æ•°
         for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
         {
           if(pString[nStringIndex]) {
@@ -224,7 +224,7 @@ namespace Marimo
       {
         GUnknown** pObjArray = reinterpret_cast<GUnknown**>(lpFirstElement);
 
-        // ÒÀ´Îµ÷ÓÃÎö¹¹º¯Êı
+        // ä¾æ¬¡è°ƒç”¨ææ„å‡½æ•°
         for(int i = 0; i < nElementCount; i++) {
           SAFE_RELEASE(pObjArray[i]);
         }
@@ -259,7 +259,7 @@ namespace Marimo
       GXLPVOID ptr;
       int nCount = 0;
 
-      if(bDynamicArray) // ¶¯Ì¬×Ö·û´®Êı×é
+      if(bDynamicArray) // åŠ¨æ€å­—ç¬¦ä¸²æ•°ç»„
       {
         ppBuffer = VARDesc.GetAsBufferObjPtr(pData);
         if(*ppBuffer == NULL) {
@@ -268,7 +268,7 @@ namespace Marimo
         ptr = (*ppBuffer)->GetPtr();
         nCount = (int)((*ppBuffer)->GetSize() / VARDesc.TypeSize());
       }
-      else // ×Ö·û´®Êı×é
+      else // å­—ç¬¦ä¸²æ•°ç»„
       {
         ptr = VARDesc.GetAsPtr(pData);
         nCount = VARDesc.nCount;
@@ -278,7 +278,7 @@ namespace Marimo
       
       if(bDynamicArray)
       {
-        // ppBuffer ¿ÉÄÜÔÚÉÏÃæµÄÅĞ¶ÏÖĞÒÑ¾­ÉèÖÃ£¬Èç¹ûÃ»ÉèÖÃ¾ÍÊÇ»ù´¡ÀàĞÍ¶¯Ì¬Êı×é¡£
+        // ppBuffer å¯èƒ½åœ¨ä¸Šé¢çš„åˆ¤æ–­ä¸­å·²ç»è®¾ç½®ï¼Œå¦‚æœæ²¡è®¾ç½®å°±æ˜¯åŸºç¡€ç±»å‹åŠ¨æ€æ•°ç»„ã€‚
         ASSERT(ppBuffer == NULL || ppBuffer == VARDesc.GetAsBufferObjPtr(pData));
 
         ppBuffer = VARDesc.GetAsBufferObjPtr(pData); // (clBuffer**)(pData + VARDesc.nOffset);
@@ -309,12 +309,12 @@ namespace Marimo
 
   DataPoolImpl::LPCVD DataPoolImpl::IntGetVariable(LPCVD pVdd, GXLPCSTR szName/*, int nIndex*/)
   {
-    // TODO: ÕâÀï¿ÉÒÔ¸ÄÎª±È½ÏName IdµÄ·½Ê½£¬Name Id¿ÉÒÔ¾ÍÊÇm_BufferÖĞµÄÆ«ÒÆ
+    // TODO: è¿™é‡Œå¯ä»¥æ”¹ä¸ºæ¯”è¾ƒName Idçš„æ–¹å¼ï¼ŒName Idå¯ä»¥å°±æ˜¯m_Bufferä¸­çš„åç§»
     LPCVD pDesc = NULL;
     int begin = 0, end;
     if(pVdd != NULL) {
 
-      // Ö»ÓĞ½á¹¹Ìå²ÅÓĞ³ÉÔ±, ÆäËûÇé¿öÖ±½Ó·µ»Ø
+      // åªæœ‰ç»“æ„ä½“æ‰æœ‰æˆå‘˜, å…¶ä»–æƒ…å†µç›´æ¥è¿”å›
       if(pVdd->GetTypeCategory() != T_STRUCT) {
         return NULL;
       }
@@ -340,7 +340,7 @@ namespace Marimo
     while(begin <= end - 1)
     {
       int mid = (begin + end) >> 1;
-      ASSERT(p[mid] < count); // Ë÷Òı¿Ï¶¨µÍÓÚ×Ü´óĞ¡
+      ASSERT(p[mid] < count); // ç´¢å¼•è‚¯å®šä½äºæ€»å¤§å°
       LPCVD pCurDesc = pDesc + p[mid];
       //TRACE("%s\n", pCurDesc->VariableName());
       int result = GXSTRCMP(szName, (DataPool::LPCSTR)pCurDesc->VariableName());
@@ -406,7 +406,7 @@ namespace Marimo
     GXBYTE* pData = (GXBYTE*)m_VarBuffer.GetPtr();
     for(;; nVarIndex++)
     {
-      // ÏÂÃæÁ½¸ö¿ªÍ·¹ÊÒâĞ´³É²»Ò»ÑùµÄ, ·ñÔò²»Ì«ÈİÒ×Çø·Ö, Ì«ÏñÁË!
+      // ä¸‹é¢ä¸¤ä¸ªå¼€å¤´æ•…æ„å†™æˆä¸ä¸€æ ·çš„, å¦åˆ™ä¸å¤ªå®¹æ˜“åŒºåˆ†, å¤ªåƒäº†!
       const VARIABLE_DECLARATION& varDecl = pVarDecl[nVarIndex];
       if(varDecl.Type == NULL || varDecl.Name == NULL) {
         break;
@@ -424,7 +424,7 @@ namespace Marimo
           int nEnd = VARDesc.MemberCount();
           auto pMembers = VARDesc.MemberBeginPtr();
 
-          // ¶ÔÓÚº¬ÓĞ¶¯Ì¬Êı×éºÍ×Ö·û´®µÄ½á¹¹ÌåÊÇ²»ÄÜÖ±½Ó¸³ÖµµÄ
+          // å¯¹äºå«æœ‰åŠ¨æ€æ•°ç»„å’Œå­—ç¬¦ä¸²çš„ç»“æ„ä½“æ˜¯ä¸èƒ½ç›´æ¥èµ‹å€¼çš„
           for(nMemberIndex = 0; nMemberIndex < nEnd; nMemberIndex++)
           {
             if(pMembers[nMemberIndex].GetTypeCategory() == T_STRING || 
@@ -434,7 +434,7 @@ namespace Marimo
           }
           if(nMemberIndex != nEnd)
             break;
-        } // ÕâÀïÃ»ÓĞ break, Èç¹û Struct ÖĞÃ»ÓĞ¶¯Ì¬Êı×éºÍ×Ö·û´®ÉùÃ÷, Ö§³Ö³õÊ¼Êı¾İ.
+        } // è¿™é‡Œæ²¡æœ‰ break, å¦‚æœ Struct ä¸­æ²¡æœ‰åŠ¨æ€æ•°ç»„å’Œå­—ç¬¦ä¸²å£°æ˜, æ”¯æŒåˆå§‹æ•°æ®.
       case T_BYTE:
       case T_WORD:
       case T_DWORD:
@@ -471,7 +471,7 @@ namespace Marimo
           {
             ASSERT(VARDesc.TypeSize() == sizeof(clStringW));
 
-            // Èç¹ûÃ»ÓĞ³õÊ¼»¯Êı¾İ, Ôò³õÊ¼Î¬¶ÈÉèÖÃÎª0
+            // å¦‚æœæ²¡æœ‰åˆå§‹åŒ–æ•°æ®, åˆ™åˆå§‹ç»´åº¦è®¾ç½®ä¸º0
             ASSERT((varDecl.Init != NULL && nCount < 0) || 
               (varDecl.Init == NULL && nCount == 0));
 
@@ -484,7 +484,7 @@ namespace Marimo
             pStrPool = VARDesc.GetAsStringW(pData);
           }
 
-          // Õâ¸öĞ´µÄÌ«±äÌ¬ÁË!!
+          // è¿™ä¸ªå†™çš„å¤ªå˜æ€äº†!!
           for(int i = 0; i < nCount; i++)
           {
             clStringW& str = pStrPool[i];
@@ -576,16 +576,16 @@ namespace Marimo
         str->Append((DataPool::LPCSTR)pVar->VariableName());
 
         if(pVarDesc == pVar) {
-          TRACE("FindFullName:%s\n", *str);
+          TRACE("FindFullName:%s\n", (DataPool::LPCSTR)*str);
           return TRUE;
         }
         else {
-          TRACE("[%s]:[%s]\n", pVar->VariableName(), pVarDesc->VariableName());
+          TRACE("[%s]:[%s]\n", (DataPool::LPCSTR)pVar->VariableName(), (DataPool::LPCSTR)pVarDesc->VariableName());
           ASSERT(pVar->GetTypeCategory() == T_STRUCT);
           pVarDescTable = (LPCVD)pVar->MemberBeginPtr();
           count = pVar->MemberCount();
 
-          if(nOffset < pVar->nOffset) { // Æ«ÒÆÒì³£,Ö±½Ó·µ»Ø
+          if(nOffset < pVar->nOffset) { // åç§»å¼‚å¸¸,ç›´æ¥è¿”å›
             return FALSE;
           }
 
@@ -634,25 +634,25 @@ namespace Marimo
 
   GXINT DataPoolImpl::IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar)
   {
-    GXLPCSTR  szName;         // ÓÃÀ´²éÕÒµÄÃû×Ö
+    GXLPCSTR  szName;         // ç”¨æ¥æŸ¥æ‰¾çš„åå­—
     GXUINT    nIndex = (GXUINT)-1;
     clStringA str;
-    clStringA strName; // ÓÃÀ´Ôİ´æ´øÏÂ±êÊ±µÄ±äÁ¿Ãû
+    clStringA strName; // ç”¨æ¥æš‚å­˜å¸¦ä¸‹æ ‡æ—¶çš„å˜é‡å
     GXINT     result = FALSE;
     //clBufferBase* pArrayBuffer = NULL;
 
     ASSERT( ! pVar->IsValid());
     pVar->pBuffer = &m_VarBuffer;
 
-    // ·Ö½â±í´ïÊ½
+    // åˆ†è§£è¡¨è¾¾å¼
     clstd::StringCutter<clStringA> sExpression(szExpression);
 
     do {
 
       if(pVar->IsValid())
       {
-        // Êı×é¶ÔÏó£¬Ã»ÓĞÈ¡ÔªËØ¾ÍÊÔÍ¼·ÃÎÊ³ÉÔ±±äÁ¿£¬Ò»¶¨ÊÇ²»¶ÔµÄ
-        // ½øµ½ÕâÀïÒ»¶¨ÊÇÈ¡¹ı¸ù±äÁ¿Ö®ºóµÄÊÂÇéÁË
+        // æ•°ç»„å¯¹è±¡ï¼Œæ²¡æœ‰å–å…ƒç´ å°±è¯•å›¾è®¿é—®æˆå‘˜å˜é‡ï¼Œä¸€å®šæ˜¯ä¸å¯¹çš„
+        // è¿›åˆ°è¿™é‡Œä¸€å®šæ˜¯å–è¿‡æ ¹å˜é‡ä¹‹åçš„äº‹æƒ…äº†
         if((pVar->pVdd->IsDynamicArray() || pVar->pVdd->nCount > 1) && nIndex == (GXUINT)-1) {
           return FALSE;
         }
@@ -660,7 +660,7 @@ namespace Marimo
 
       sExpression.Cut(str, '.');
 
-      if(str.EndsWith(']')) // ´øÏÂ±êµÄÇé¿ö
+      if(str.EndsWith(']')) // å¸¦ä¸‹æ ‡çš„æƒ…å†µ
       {
         size_t pos = str.Find('[', 0);
         if(pos == clStringA::npos) {
@@ -680,7 +680,7 @@ namespace Marimo
 
       result = IntQuery(pVar, szName, nIndex);
 
-      ASSERT(( ! result) || pVar->IsValid()); // result ºÍ pVar Ò»¶¨Í¬Ê±ÓĞĞ§»òÕßÎŞĞ§
+      ASSERT(( ! result) || pVar->IsValid()); // result å’Œ pVar ä¸€å®šåŒæ—¶æœ‰æ•ˆæˆ–è€…æ— æ•ˆ
     } while(result && ( ! sExpression.IsEndOfString()));
 
     return result;
@@ -721,7 +721,7 @@ namespace Marimo
   template<class _TIter>
   _TIter& DataPoolImpl::first_iterator(_TIter& it)
   {
-    it.pDataPool = this; // Õâ¸öµ¼ÖÂ½á¹¹²»ÄÜĞŞÊÎÎªconst
+    it.pDataPool = this; // è¿™ä¸ªå¯¼è‡´ç»“æ„ä¸èƒ½ä¿®é¥°ä¸ºconst
     it.pVarDesc  = m_aVariables;
     it.pBuffer   = &m_VarBuffer;
     it.nOffset   = 0;
@@ -776,10 +776,10 @@ namespace Marimo
 
   GXUINT DataPoolImpl::IntChangePtrSize(GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount)
   {
-    // ÑéÖ¤ÊÇÈ«¾Ö±äÁ¿¿ªÊ¼£¬»òÕßÊÇ³ÉÔ±±äÁ¿¿ªÊ¼
+    // éªŒè¯æ˜¯å…¨å±€å˜é‡å¼€å§‹ï¼Œæˆ–è€…æ˜¯æˆå‘˜å˜é‡å¼€å§‹
     ASSERT(pVarDesc->nOffset == 0);
 
-    // Ö»ÓÃÓÚ32Î»Ö¸Õëµ½64Î»Ö¸Õë»òÕß64Î»Ö¸Õëµ½32Î»Ö¸Õë×ª»»
+    // åªç”¨äº32ä½æŒ‡é’ˆåˆ°64ä½æŒ‡é’ˆæˆ–è€…64ä½æŒ‡é’ˆåˆ°32ä½æŒ‡é’ˆè½¬æ¢
     ASSERT(nSizeofPtr == 4 || nSizeofPtr == 8);
 
     GXUINT nNewOffset = 0;
@@ -789,9 +789,9 @@ namespace Marimo
       const auto eCate = d.GetTypeCategory();
       d.nOffset = nNewOffset;
 
-      // ¼ì²éÒÑ¾­µ÷ÕûµÄ±ê¼Ç
-      // Èç¹ûÃ»ÓĞµ÷Õû¹ı£¬ÔòÖØĞÂ¼ÆËãÕâ¸öÀàĞÍµÄ´óĞ¡
-      // ·ñÔò²½½øÕâ¸öÀàĞÍµÄ´óĞ¡¾Í¿ÉÒÔ
+      // æ£€æŸ¥å·²ç»è°ƒæ•´çš„æ ‡è®°
+      // å¦‚æœæ²¡æœ‰è°ƒæ•´è¿‡ï¼Œåˆ™é‡æ–°è®¡ç®—è¿™ä¸ªç±»å‹çš„å¤§å°
+      // å¦åˆ™æ­¥è¿›è¿™ä¸ªç±»å‹çš„å¤§å°å°±å¯ä»¥
       if(TEST_FLAG_NOT(eCate, TYPE_CHANGED_FLAG))
       {
         TYPE_DESC* pTypeDesc = (TYPE_DESC*)d.GetTypeDesc();
@@ -815,7 +815,7 @@ namespace Marimo
       }
 
       if(d.IsDynamicArray()) {
-        // ¶¯Ì¬Êı×é¾ÍÊÇÒ»¸öÖ¸Õë
+        // åŠ¨æ€æ•°ç»„å°±æ˜¯ä¸€ä¸ªæŒ‡é’ˆ
         nNewOffset += nSizeofPtr; // sizeof(DataPoolArray*)
       }
       else {
@@ -827,7 +827,7 @@ namespace Marimo
 
   void DataPoolImpl::IntClearChangePtrFlag( TYPE_DESC* pTypeDesc, GXUINT nCount )
   {
-    // Èç¹û±äÁ¿Ã»ÓĞÉèÖÃĞŞ¸Ä±êÖ¾£¬±íÊ¾Õâ¸öº¯ÊıÖ®Ç°µÄµ÷ÓÃÓĞÎó
+    // å¦‚æœå˜é‡æ²¡æœ‰è®¾ç½®ä¿®æ”¹æ ‡å¿—ï¼Œè¡¨ç¤ºè¿™ä¸ªå‡½æ•°ä¹‹å‰çš„è°ƒç”¨æœ‰è¯¯
     //ASSERT(TEST_FLAG(pTypeDesc[i].Cate, TYPE_CHANGED_FLAG));
     for(GXUINT i = 0; i < nCount; ++i)
     {
@@ -867,7 +867,7 @@ namespace Marimo
 //  GXHRESULT DataPool::CreateWatcher(GXLPCSTR szClassName)
 //  {
 //    if(FindWatcherByName(szClassName) >= 0) {
-//      // ÖØ¸´´´½¨
+//      // é‡å¤åˆ›å»º
 //      return GX_FAIL;
 //    }
 //    // TODO: ...
@@ -960,21 +960,21 @@ namespace Marimo
     if(it_result != sDict.end())
     {
 
-      // ¼ÓÈëµ½ÍÆËÍ¼¯ºÏÀï£¬·ÅÖÃ×Ô¼º±»ÎŞÏŞÍÆËÍ
-      ImpulsingSet::iterator itThisImpulse = m_ImpulsingSet.insert(key).first; // FIXME: Õâ¸öÈç¹ûÊÇ¶¯Ì¬Êı×éµÄ»°£¬keyÊÇÆ«ÒÆ£¬¿ÉÄÜÔÚ¶à¸ö¶¯Ì¬Êı×éÖĞ³öÏÖÖØºÏ
+      // åŠ å…¥åˆ°æ¨é€é›†åˆé‡Œï¼Œæ”¾ç½®è‡ªå·±è¢«æ— é™æ¨é€
+      ImpulsingSet::iterator itThisImpulse = m_ImpulsingSet.insert(key).first; // FIXME: è¿™ä¸ªå¦‚æœæ˜¯åŠ¨æ€æ•°ç»„çš„è¯ï¼Œkeyæ˜¯åç§»ï¼Œå¯èƒ½åœ¨å¤šä¸ªåŠ¨æ€æ•°ç»„ä¸­å‡ºç°é‡åˆ
 
       for(auto it = it_result->second.begin(); it != it_result->second.end(); ++it)
       {
         pImpulse->param = it->lParam;
         switch((GXINT_PTR)it->pCallback)
         {
-        case 0: // DataPoolWatcher ¶ÔÏó
+        case 0: // DataPoolWatcher å¯¹è±¡
           ((DataPoolWatcher*)it->lParam)->OnImpulse(pImpulse);
           break;
         case 1: // UI handle
           gxSendMessage((GXHWND)it->lParam, GXWM_IMPULSE, 0, (GXLPARAM)pImpulse);
           break;
-        default: // »Øµ÷º¯Êı
+        default: // å›è°ƒå‡½æ•°
           it->pCallback(pImpulse);
           break;
         }
@@ -1034,16 +1034,16 @@ namespace Marimo
 
   GXBOOL DataPoolImpl::IntQuery(GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex)
   {
-    // ÄÚ²¿º¯ÊıÖĞ²»¸Ä±äpVar->m_pDataPoolµÄÒıÓÃ¼ÆÊı
+    // å†…éƒ¨å‡½æ•°ä¸­ä¸æ”¹å˜pVar->m_pDataPoolçš„å¼•ç”¨è®¡æ•°
     using namespace Implement;
     LPCVD pVarDesc = IntGetVariable(pVar->pVdd, szVariableName);
 
     if(pVarDesc == NULL) {
       return FALSE;
     }
-    const GXUINT nMemberOffset = pVar->AbsOffset + pVarDesc->nOffset; // ºóÃæ¶à³öÓÃµ½£¬ÕâÀïËãÒ»ÏÂ
+    const GXUINT nMemberOffset = pVar->AbsOffset + pVarDesc->nOffset; // åé¢å¤šå‡ºç”¨åˆ°ï¼Œè¿™é‡Œç®—ä¸€ä¸‹
 
-    if(pVarDesc->IsDynamicArray()) { // ¶¯Ì¬Êı×é
+    if(pVarDesc->IsDynamicArray()) { // åŠ¨æ€æ•°ç»„
       //clBuffer* pArrayBuffer = pVarDesc->CreateAsBuffer(this, pVar->pBuffer, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
       clBuffer* pArrayBuffer = IntCreateArrayBuffer(pVar->pBuffer, pVarDesc, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
       if(nIndex == (GXUINT)-1)
@@ -1057,7 +1057,7 @@ namespace Marimo
         return IntCreateUnary(pArrayBuffer, pVarDesc, pVar);
       }
     }
-    else if(pVarDesc->nCount > 1) { // ¾²Ì¬Êı×é
+    else if(pVarDesc->nCount > 1) { // é™æ€æ•°ç»„
       if(nIndex == (GXUINT)-1)
       {
         pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
@@ -1150,7 +1150,7 @@ namespace Marimo
   {
     TRACE("========= Types =========\n");
     for(GXUINT i = 0; i < m_nNumOfTypes; ++i) {
-      TRACE("%16s %8d\n", m_aTypes[i].GetName(), m_aTypes[i].cbSize);
+      TRACE("%16s %8d\n", (DataPool::LPCSTR)m_aTypes[i].GetName(), m_aTypes[i].cbSize);
     }
 
     TRACE("========= Variables =========\n");
@@ -1158,10 +1158,10 @@ namespace Marimo
     {
       const auto& v = m_aVariables[i];
       if(v.nCount > 1) {
-        TRACE("%16s %12s[%4d] %8d[%d]\n", v.TypeName(), v.VariableName(), v.nCount, v.nOffset, v.GetUsageSize());
+        TRACE("%16s %12s[%4d] %8d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nCount, v.nOffset, v.GetUsageSize());
       }
       else {
-        TRACE("%16s %16s %10d[%d]\n", v.TypeName(), v.VariableName(), v.nOffset, v.GetUsageSize());
+        TRACE("%16s %16s %10d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nOffset, v.GetUsageSize());
       }
     }
 
@@ -1169,25 +1169,25 @@ namespace Marimo
     for(GXUINT i = 0; i < m_nNumOfMember; ++i){
       const auto& v = m_aMembers[i];
       if(v.nCount > 1) {
-        TRACE("%16s %12s[%4d] %8d[%d]\n", v.TypeName(), v.VariableName(), v.nCount, v.nOffset, v.GetUsageSize());
+        TRACE("%16s %12s[%4d] %8d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nCount, v.nOffset, v.GetUsageSize());
       }
       else {
-        TRACE("%16s %16s %10d[%d]\n", v.TypeName(), v.VariableName(), v.nOffset, v.GetUsageSize());
+        TRACE("%16s %16s %10d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nOffset, v.GetUsageSize());
       }
     }
   }
 
   void DataPoolImpl::LocalizeTables(BUILDTIME& bt, GXSIZE_T cbVarSpace)
   {
-    // [MAIN BUFFER ½á¹¹±í]:
-    // #.Type desc table            ÀàĞÍÃèÊö±í
+    // [MAIN BUFFER ç»“æ„è¡¨]:
+    // #.Type desc table            ç±»å‹æè¿°è¡¨
     // #.GVSIT
-    // #.Variable desc table        ±äÁ¿ÃèÊö±í
-    // #.Struct members desc table  ³ÉÔ±±äÁ¿ÃèÊö±í
-    // #.enum desc table            Ã¶¾ÙÃèÊö±í
-    // #.Strings Offset table       ×Ö·û´®Æ«ÒÆ±í, Õâ¸öºóÃæÒ»¶¨Òª½ÓÉÏStrings,ÓĞÌØÊâÓÃ·¨
-    // #.Strings                    ÃèÊö±íÖĞËùÓĞ×Ö·û´®µÄ×Ö·û´®±í
-    // #.Variable Data Space        ±äÁ¿¿Õ¼ä
+    // #.Variable desc table        å˜é‡æè¿°è¡¨
+    // #.Struct members desc table  æˆå‘˜å˜é‡æè¿°è¡¨
+    // #.enum desc table            æšä¸¾æè¿°è¡¨
+    // #.Strings Offset table       å­—ç¬¦ä¸²åç§»è¡¨, è¿™ä¸ªåé¢ä¸€å®šè¦æ¥ä¸ŠStrings,æœ‰ç‰¹æ®Šç”¨æ³•
+    // #.Strings                    æè¿°è¡¨ä¸­æ‰€æœ‰å­—ç¬¦ä¸²çš„å­—ç¬¦ä¸²è¡¨
+    // #.Variable Data Space        å˜é‡ç©ºé—´
 
     m_nNumOfTypes  = (GXUINT)bt.m_TypeDict.size();
     m_nNumOfVar    = (GXUINT)bt.m_aVar.size();
@@ -1219,7 +1219,7 @@ namespace Marimo
     GXINT_PTR lpBase = (GXINT_PTR)bt.NameSet.gather(&m_Buffer, cbHeader);
     //m_StringBase = lpBase;
 
-    ASSERT(cbDbgSave == m_Buffer.GetSize()); // È·±£GatherToBuffer²»»á¸Ä±äBufferµÄ³¤¶È
+    ASSERT(cbDbgSave == m_Buffer.GetSize()); // ç¡®ä¿GatherToBufferä¸ä¼šæ”¹å˜Bufferçš„é•¿åº¦
 
     m_pNamesTabBegin = (GXUINT*)0;
     m_pNamesTabEnd   = (GXUINT*)cbNameTable;
@@ -1231,9 +1231,9 @@ namespace Marimo
     //}
 
 
-    // * ÒÔÏÂ¸´ÖÆ±íµÄ²Ù×÷ÖĞ¾ù°üº¬×Ö·û´®ÖØ¶¨Î»
+    // * ä»¥ä¸‹å¤åˆ¶è¡¨çš„æ“ä½œä¸­å‡åŒ…å«å­—ç¬¦ä¸²é‡å®šä½
 
-    // ¸´ÖÆÀàĞÍÃèÊö±í
+    // å¤åˆ¶ç±»å‹æè¿°è¡¨
     GXUINT nIndex = 0;
     for(auto it = bt.m_TypeDict.begin(); it != bt.m_TypeDict.end(); ++it, ++nIndex) {
       BUILDTIME::BT_TYPE_DESC& sBtType = it->second;
@@ -1259,11 +1259,11 @@ namespace Marimo
       sBtType.nIndex = nIndex;
     }
 
-    // ¸´ÖÆ±äÁ¿ºÍ³ÉÔ±±äÁ¿ÃèÊö±í
+    // å¤åˆ¶å˜é‡å’Œæˆå‘˜å˜é‡æè¿°è¡¨
     CopyVariables(m_aVariables, &bt.m_aVar, pTable, lpBase);
     CopyVariables(m_aMembers, &bt.m_aStructMember, pTable, lpBase);
 
-    // ¸´ÖÆÃ¶¾ÙÃèÊö±í
+    // å¤åˆ¶æšä¸¾æè¿°è¡¨
     nIndex = 0;
     for(auto it = bt.m_aEnumPck.begin(); it != bt.m_aEnumPck.end(); ++it, ++nIndex) {
       const ENUM_DESC& sBtDesc = reinterpret_cast<ENUM_DESC&>(*it);
@@ -1277,22 +1277,22 @@ namespace Marimo
 #endif // DEBUG_DECL_NAME
     }
 
-    // #.Õâ¸öÒÀÀµÓÚÓĞĞ§µÄ m_aVariables£¬ m_aMembers ºÍ m_aEnums
-    // #.ÅÅĞòÒÀÀµÓÚÃèÊöÖĞµÄ nName ³ÉÔ±£¬Ëü»á°´µİÔöÅÅĞò
-    // #.ÅÅĞò²»¸Ä±äm_aVariables£¬ m_aMembers ºÍ m_aEnumsÉÏµÄË³Ğò£¬
-    //   ¶øÊÇÉú³ÉÓĞĞòµÄ»ùÓÚÕâĞ©Êı×éµÄË÷Òı£¬·Åµ½GSITÉÏ
-    // #.nName ÔÚÔËĞĞÊ±Ê¹ÓÃÁË×Ô¶¨Î»·½·¨£¬×Ô¶¨Î»»¯ºóËüµÄÖµ²»ÄÜ±£Ö¤ÔÚ
-    //   GSITÉÏÊÇµİÔöµÄ£¬ËùÒÔ×Ô¶¨Î»»¯·ÅÔÚºóÃæ½øĞĞ
+    // #.è¿™ä¸ªä¾èµ–äºæœ‰æ•ˆçš„ m_aVariablesï¼Œ m_aMembers å’Œ m_aEnums
+    // #.æ’åºä¾èµ–äºæè¿°ä¸­çš„ nName æˆå‘˜ï¼Œå®ƒä¼šæŒ‰é€’å¢æ’åº
+    // #.æ’åºä¸æ”¹å˜m_aVariablesï¼Œ m_aMembers å’Œ m_aEnumsä¸Šçš„é¡ºåºï¼Œ
+    //   è€Œæ˜¯ç”Ÿæˆæœ‰åºçš„åŸºäºè¿™äº›æ•°ç»„çš„ç´¢å¼•ï¼Œæ”¾åˆ°GSITä¸Š
+    // #.nName åœ¨è¿è¡Œæ—¶ä½¿ç”¨äº†è‡ªå®šä½æ–¹æ³•ï¼Œè‡ªå®šä½åŒ–åå®ƒçš„å€¼ä¸èƒ½ä¿è¯åœ¨
+    //   GSITä¸Šæ˜¯é€’å¢çš„ï¼Œæ‰€ä»¥è‡ªå®šä½åŒ–æ”¾åœ¨åé¢è¿›è¡Œ
     GenGSIT();
 
-    // ×Ô¶¨Î»»¯×ª»»
+    // è‡ªå®šä½åŒ–è½¬æ¢
     SelfLocalizable(m_aTypes,     m_nNumOfTypes,  lpBase);
     SelfLocalizable(m_aVariables, m_nNumOfVar,    lpBase);
     SelfLocalizable(m_aMembers,   m_nNumOfMember, lpBase);
     SelfLocalizable(m_aEnums,     m_nNumOfEnums,  lpBase);
 
     new(&m_VarBuffer) clstd::RefBuffer((GXLPBYTE)lpBase + bt.NameSet.buffer_size(), cbVarSpace);
-    memset(m_VarBuffer.GetPtr(), 0, m_VarBuffer.GetSize());   // Ö»Çå³ı±äÁ¿¶ÎµÄÄÚ´æ
+    memset(m_VarBuffer.GetPtr(), 0, m_VarBuffer.GetSize());   // åªæ¸…é™¤å˜é‡æ®µçš„å†…å­˜
 
     SAFE_DELETE_ARRAY(pTable);
   }
@@ -1330,7 +1330,7 @@ namespace Marimo
     for(int i = 0; i < nCount; ++i)
     {
       GXUINT* pName = &pDescs[i].nName;
-      ASSERT(lpBase - (GXINT_PTR)pName > 0); // ±£Ö¤ lpBase ÔÚ &nName µÄºóÃæ³öÏÖ
+      ASSERT(lpBase - (GXINT_PTR)pName > 0); // ä¿è¯ lpBase åœ¨ &nName çš„åé¢å‡ºç°
 
       *pName = (GXUINT)(lpBase - (GXINT_PTR)pName + *pName);
 
@@ -1367,9 +1367,9 @@ namespace Marimo
     GXUINT mask = 0;
     for(int i = 0; i < nCount; ++i)
     {
-      //pContext[i].index = nBegin + i; // GVSITµÄË÷ÒıÒÑ¾­¼ÓÁËGroupµÄÆ«ÒÆ
+      //pContext[i].index = nBegin + i; // GVSITçš„ç´¢å¼•å·²ç»åŠ äº†Groupçš„åç§»
       //pContext[i].name = pDescs[i + nBegin].nName;
-      pContext[i].index = i; // GVSITµÄË÷ÒıÒÑ¾­¼ÓÁËGroupµÄÆ«ÒÆ
+      pContext[i].index = i; // GVSITçš„ç´¢å¼•å·²ç»åŠ äº†Groupçš„åç§»
       pContext[i].name = pDescs[i].nName;
       //m_aGVSIT[nTargetTopIndex + i] = pContext[i].index;
       pDest[i] = pContext[i].index;
@@ -1380,7 +1380,7 @@ namespace Marimo
       prev = pContext[i].name;
     }
 
-    if(mask >> 31) // ¼ì²éÃû×ÖÊÇ²»ÊÇÒÑ¾­°´ÕÕ´Ó´óµ½Ğ£µÄË³ĞòÅÅĞòÁË
+    if(mask >> 31) // æ£€æŸ¥åå­—æ˜¯ä¸æ˜¯å·²ç»æŒ‰ç…§ä»å¤§åˆ°æ ¡çš„é¡ºåºæ’åºäº†
     {
       clstd::QuickSort(pContext, 0, nCount);
 #ifdef _DEBUG
@@ -1410,7 +1410,7 @@ namespace Marimo
     while(begin <= end - 1)
     {
       int mid = (begin + end) >> 1;
-      ASSERT(p[mid] < m_nNumOfEnums); // Ë÷Òı¿Ï¶¨µÍÓÚ×Ü´óĞ¡
+      ASSERT(p[mid] < m_nNumOfEnums); // ç´¢å¼•è‚¯å®šä½äºæ€»å¤§å°
       auto& pair = aEnums[p[mid]];
       auto result = GXSTRCMP(szName, pair.GetName());
       if(result < 0) {
@@ -1451,7 +1451,7 @@ namespace Marimo
     sWatch.pCallback = pImpulseCallback;
     sWatch.lParam    = lParam;
 
-    // DataPoolWatch ¶ÔÏó
+    // DataPoolWatch å¯¹è±¡
     if((GXINT_PTR)pImpulseCallback == 0) {
       ((DataPoolWatcher*)lParam)->AddRef();
     }
@@ -1473,7 +1473,7 @@ namespace Marimo
       auto itWatch = sVarWatchSet.find(sWatch);
       if(itWatch != sVarWatchSet.end())
       {
-        // DataPoolWatch ¶ÔÏó
+        // DataPoolWatch å¯¹è±¡
         if((GXINT_PTR)itWatch->pCallback == 0) {
           DataPoolWatcher*& pWatch = *(DataPoolWatcher**)&itWatch->lParam;
           SAFE_RELEASE(pWatch);
@@ -1494,13 +1494,13 @@ namespace Marimo
     const auto dwFlags = pVar->GetCaps();
     const auto dwBan = DataPoolVariable::CAPS_ARRAY;
 
-    // 1.¾²Ì¬Êı×é¶ÔÏó²»ÄÜ±»watch
-    // (1)ÔªËØ²»»áÔö¼Ó»ò¼õÉÙ£¬²»»áÒò´Ë²úÉú¼àÊÓÊÂ¼ş
-    // (2)ÔªËØµÄ¸Ä±ä²»»á·¢Éú¶ÔÏóµÄ¼àÊÓÊÂ¼ş
-    // (3)ÎŞ·¨Í¨¹ıµØÖ·À´Çø·ÖÊÇÊı×é¶ÔÏó»¹ÊÇÊı×éµÚÒ»¸öÔªËØ
-    // 2.½á¹¹Ìå¶ÔÏó²»ÄÜ±»watch
-    // (1)¸Ä±äÁË½á¹¹ÌåµÄ³ÉÔ±º¯Êı£¬ÎŞ·¨»ØËİµ½ËüµÄ½á¹¹ÌåÔÙÍÆËÍÊÂ¼ş£¬»òÕßËµÕâÑù×ö²»¾­¼Ã
-    // (2)ÎŞ·¨Í¨¹ıµØÖ·À´Çø±ğÊÇ½á¹¹Ìå»¹ÊÇ½á¹¹ÌåµÚÒ»¸ö³ÉÔ±
+    // 1.é™æ€æ•°ç»„å¯¹è±¡ä¸èƒ½è¢«watch
+    // (1)å…ƒç´ ä¸ä¼šå¢åŠ æˆ–å‡å°‘ï¼Œä¸ä¼šå› æ­¤äº§ç”Ÿç›‘è§†äº‹ä»¶
+    // (2)å…ƒç´ çš„æ”¹å˜ä¸ä¼šå‘ç”Ÿå¯¹è±¡çš„ç›‘è§†äº‹ä»¶
+    // (3)æ— æ³•é€šè¿‡åœ°å€æ¥åŒºåˆ†æ˜¯æ•°ç»„å¯¹è±¡è¿˜æ˜¯æ•°ç»„ç¬¬ä¸€ä¸ªå…ƒç´ 
+    // 2.ç»“æ„ä½“å¯¹è±¡ä¸èƒ½è¢«watch
+    // (1)æ”¹å˜äº†ç»“æ„ä½“çš„æˆå‘˜å‡½æ•°ï¼Œæ— æ³•å›æº¯åˆ°å®ƒçš„ç»“æ„ä½“å†æ¨é€äº‹ä»¶ï¼Œæˆ–è€…è¯´è¿™æ ·åšä¸ç»æµ
+    // (2)æ— æ³•é€šè¿‡åœ°å€æ¥åŒºåˆ«æ˜¯ç»“æ„ä½“è¿˜æ˜¯ç»“æ„ä½“ç¬¬ä¸€ä¸ªæˆå‘˜
 
     if(pVar->GetTypeCategory() == T_STRUCT) {
       return FALSE;
@@ -1523,7 +1523,7 @@ namespace Marimo
 
   GXBOOL DataPoolImpl::IntIgnore( DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam )
   {
-    // TODO: Õâ¶Î´úÂëºÍIntWatchÏàËÆ£¬ÎÈ¶¨ºó¿ÉÒÔÓÃÄ£°åºÏ²¢
+    // TODO: è¿™æ®µä»£ç å’ŒIntWatchç›¸ä¼¼ï¼Œç¨³å®šåå¯ä»¥ç”¨æ¨¡æ¿åˆå¹¶
     const auto dwFlags = pVar->GetCaps();
     if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_FIXED)) {
       return IntRemoveFromWatchDict(m_FixedDict, pVar->GetPtr(), pImpulseCallback, lParam);
@@ -1626,12 +1626,12 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
   //
-  // ±£´æÓÃµÄÄÚ²¿½á¹¹Ìå
+  // ä¿å­˜ç”¨çš„å†…éƒ¨ç»“æ„ä½“
   //
   typedef clvector<GXUINT>      UIntArray;
-  struct BUFFER_SAVELOAD_DESC // ÓÃÓÚ¶ÁĞ´Ê±ÁÙÊ±´¢´æµÄbufferÃèÊö
+  struct BUFFER_SAVELOAD_DESC // ç”¨äºè¯»å†™æ—¶ä¸´æ—¶å‚¨å­˜çš„bufferæè¿°
   {
-    enum RelocalizeType // ÖØ¶¨Î»±í¸½¼ÓÃèÊö£¨32Î»£©
+    enum RelocalizeType : GXDWORD// é‡å®šä½è¡¨é™„åŠ æè¿°ï¼ˆ32ä½ï¼‰
     {
       RelocalizeType_Array   = (0 << 28),
       RelocalizeType_String  = (1 << 28),
@@ -1642,20 +1642,20 @@ namespace Marimo
     };
 
     clBufferBase* pBuffer;
-    //UIntArray     RelTable;   // ÖØ¶¨Î»±í, ²Î¿¼RelocalizeType
-    // 2ºÅÖØ¶¨Î»±í£¬ÓÃÀ´¿ª·¢´Óº¯ÊıÊÕ¼¯µÄ·½·¨£¬Õâ¸ö³ÉÊìºóÈ¥µô1ºÅ±í£¬È¥µôÎÄ¼ş¼ÇÂ¼
-    UIntArray     RelTable;  // ÖØ¶¨Î»±í, ²Î¿¼RelocalizeType, Õâ¸öÊÇÆ½Ì¨ÎŞ¹ØµÄ£¬Ö¸Õë°´ÕÕ32Î»¼ÆËã
+    //UIntArray     RelTable;   // é‡å®šä½è¡¨, å‚è€ƒRelocalizeType
+    // 2å·é‡å®šä½è¡¨ï¼Œç”¨æ¥å¼€å‘ä»å‡½æ•°æ”¶é›†çš„æ–¹æ³•ï¼Œè¿™ä¸ªæˆç†Ÿåå»æ‰1å·è¡¨ï¼Œå»æ‰æ–‡ä»¶è®°å½•
+    UIntArray     RelTable;  // é‡å®šä½è¡¨, å‚è€ƒRelocalizeType, è¿™ä¸ªæ˜¯å¹³å°æ— å…³çš„ï¼ŒæŒ‡é’ˆæŒ‰ç…§32ä½è®¡ç®—
     //DataPoolImpl::LPCTD    pTypeDesc;
     const DATAPOOL_TYPE_DESC* pTypeDesc;
 
-    // Ä£°åº¯ÊıÔ­ĞÍ£º fn(RelocalizeType type, GXUINT nOffset, GXLPBYTE& pDest, GXLPCBYTE& pSrc); ×¢Òâ×îºóÁ½¸öÒªÊÇÒıÓÃ
+    // æ¨¡æ¿å‡½æ•°åŸå‹ï¼š fn(RelocalizeType type, GXUINT nOffset, GXLPBYTE& pDest, GXLPCBYTE& pSrc); æ³¨æ„æœ€åä¸¤ä¸ªè¦æ˜¯å¼•ç”¨
     template<class _Fn>
     GXUINT_PTR RelocalizePtr(clBufferBase* pDestBuffer, const clBufferBase* pSourceBuffer, _Fn fn)
     {
       clsize nCopy;
 
       if(RelTable.empty()) {
-        // ²»º¬Ö¸ÕëµÄbuffer´óĞ¡Ò»¶¨ÏàµÈ
+        // ä¸å«æŒ‡é’ˆçš„bufferå¤§å°ä¸€å®šç›¸ç­‰
         ASSERT(pDestBuffer->GetSize() == pSourceBuffer->GetSize());
 
         nCopy = pSourceBuffer->GetSize();
@@ -1664,7 +1664,7 @@ namespace Marimo
       }
       GXLPBYTE pDest = (GXLPBYTE)pDestBuffer->GetPtr();
       GXLPCBYTE pSrc = (GXLPCBYTE)pSourceBuffer->GetPtr();
-      GXSIZE_T nRelOffset = 0; // Õâ¸öÊÇÆ½Ì¨Ïà¹ØµÄ£¬Òª×¢Òâ64bitsÏÂµÄĞŞ¸Ä
+      GXSIZE_T nRelOffset = 0; // è¿™ä¸ªæ˜¯å¹³å°ç›¸å…³çš„ï¼Œè¦æ³¨æ„64bitsä¸‹çš„ä¿®æ”¹
 
       for(auto itRel = RelTable.begin(); itRel != RelTable.end(); ++itRel)
       {
@@ -1692,34 +1692,34 @@ namespace Marimo
       return ((GXUINT_PTR)pDest - (GXUINT_PTR)pDestBuffer->GetPtr() + nCopy);
     }
 
-    static clsize GetPtrAdjustSize(clsize nCountOfRelTab) // Ö¸ÕëĞŞÕı³ß´ç
+    static clsize GetPtrAdjustSize(clsize nCountOfRelTab) // æŒ‡é’ˆä¿®æ­£å°ºå¯¸
     {
-      // ´ÅÅÌÉÏÖ¸Õë¶¼±»×ª»»Îª32Î»ÎŞ·ûºÅÕûÊı
+      // ç£ç›˜ä¸ŠæŒ‡é’ˆéƒ½è¢«è½¬æ¢ä¸º32ä½æ— ç¬¦å·æ•´æ•°
       return (SIZEOF_PTR - sizeof(GXUINT)) * nCountOfRelTab;
     }
 
-    clsize GetPtrAdjustSize() const // Ö¸ÕëĞŞÕı³ß´ç
+    clsize GetPtrAdjustSize() const // æŒ‡é’ˆä¿®æ­£å°ºå¯¸
     {
       return GetPtrAdjustSize(RelTable.size());
     }
 
     clsize GetDiskBufferSize() const
     {
-      // ×îÖÕ³ß´çÓ¦¸Ã¿¼ÂÇ¼õÈ¥°ÑËùÓĞÖ¸Õë×ª»»Îª4×Ö½ÚÕûÊıµÄ²îÖµ
+      // æœ€ç»ˆå°ºå¯¸åº”è¯¥è€ƒè™‘å‡å»æŠŠæ‰€æœ‰æŒ‡é’ˆè½¬æ¢ä¸º4å­—èŠ‚æ•´æ•°çš„å·®å€¼
       return pBuffer->GetSize() - GetPtrAdjustSize();
     }
 
     void GenerateRelocalizeTable(const DATAPOOL_TYPE_DESC* pTypeDesc)
     {
-      // Íâ²¿±£Ö¤Õâ¸ö, È«¾Ö±äÁ¿Ê¹ÓÃÁíÒ»¸öÖØÔØ·½·¨
+      // å¤–éƒ¨ä¿è¯è¿™ä¸ª, å…¨å±€å˜é‡ä½¿ç”¨å¦ä¸€ä¸ªé‡è½½æ–¹æ³•
       ASSERT(pTypeDesc != NULL);
 
-      // Ê¹ÓÃÕâ¸ö»º³åÉÏµÄ¶¯Ì¬Êı×é±ØĞëÆ¥Åä, ´óĞ¡Ò²¿Ï¶¨ÊÇÀàĞÍ³¤¶ÈµÄÕûÊı±¶, ¿ÕµÄ»°±íÊ¾Õâ¸öÊÇÈ«¾Ö±äÁ¿
+      // ä½¿ç”¨è¿™ä¸ªç¼“å†²ä¸Šçš„åŠ¨æ€æ•°ç»„å¿…é¡»åŒ¹é…, å¤§å°ä¹Ÿè‚¯å®šæ˜¯ç±»å‹é•¿åº¦çš„æ•´æ•°å€, ç©ºçš„è¯è¡¨ç¤ºè¿™ä¸ªæ˜¯å…¨å±€å˜é‡
       ASSERT((pBuffer->GetSize() % pTypeDesc->cbSize) == 0);
 
       const GXSIZE_T nCount = pBuffer->GetSize() / pTypeDesc->cbSize;
 
-      GXUINT nBase = 0; // »ù´¡Æ«ÒÆ
+      GXUINT nBase = 0; // åŸºç¡€åç§»
       switch(pTypeDesc->Cate)
       {
       case T_STRUCT:
@@ -1742,7 +1742,7 @@ namespace Marimo
       return nBase;
     }
 
-    // µü´úÊÕ¼¯ÖØ¶¨Î»±í,Æ½Ì¨ÎŞ¹Ø£¬Ö¸Õë°´ÕÕ4×Ö½Ú¼ÆËã
+    // è¿­ä»£æ”¶é›†é‡å®šä½è¡¨,å¹³å°æ— å…³ï¼ŒæŒ‡é’ˆæŒ‰ç…§4å­—èŠ‚è®¡ç®—
     GXUINT GenerateRelocalizeTable(GXUINT nBase, const DATAPOOL_VARIABLE_DESC* pVarDesc, GXSIZE_T nCount)
     {
       for(GXUINT i = 0; i < nCount; ++i)
@@ -1776,7 +1776,7 @@ namespace Marimo
       return nBase;
     }
 
-    //void DbgCheck() // ÑéÖ¤ÎÄ¼ş¼ÇÂ¼ºÍ×Ô¼ºÊÕ¼¯µÄÖØ¶¨Î»±íÒ»ÖÂĞÔ£¬ÊÕ¼¯Ëã·¨ÎÈ¶¨ºóÈ¥µô±í1
+    //void DbgCheck() // éªŒè¯æ–‡ä»¶è®°å½•å’Œè‡ªå·±æ”¶é›†çš„é‡å®šä½è¡¨ä¸€è‡´æ€§ï¼Œæ”¶é›†ç®—æ³•ç¨³å®šåå»æ‰è¡¨1
     //{
     //  ASSERT(RelTable.size() == RelTable2.size());
 
@@ -1804,10 +1804,10 @@ namespace Marimo
   GXBOOL DataPoolImpl::Save( clFile& file )
   {
     //
-    // TODO: ¸ÄÎªSmartRepository´¢´æ
+    // TODO: æ”¹ä¸ºSmartRepositoryå‚¨å­˜
     //
 #ifdef DEBUG_DECL_NAME
-    TRACE("´ò¿ªÃû×Öµ÷ÊÔÄ£Ê½,ÎÄ¼ş½á¹¹ÌåÖĞº¬ÓĞÖ¸Õë£¬Òª¹Ø±ÕÕâ¸öºê²ÅÄÜ±£´æ");
+    TRACE("æ‰“å¼€åå­—è°ƒè¯•æ¨¡å¼,æ–‡ä»¶ç»“æ„ä½“ä¸­å«æœ‰æŒ‡é’ˆï¼Œè¦å…³é—­è¿™ä¸ªå®æ‰èƒ½ä¿å­˜");
     CLBREAK;
 #else
     // #.[FILE_HEADER]
@@ -1816,10 +1816,10 @@ namespace Marimo
     // #.Array buffer header[1]
     // ...
     // #.DataPool::m_Buffer - Variable space
-    // #.×Ö·û´®±äÁ¿£¬×Ö·û´®ÁĞ±í
-    // #.Variable space µÄÖØ¶¨Î»±í + Variable data
-    // #.Array Buffer[0] µÄÖØ¶¨Î»±í + data
-    // #.Array Buffer[1] µÄÖØ¶¨Î»±í + data
+    // #.å­—ç¬¦ä¸²å˜é‡ï¼Œå­—ç¬¦ä¸²åˆ—è¡¨
+    // #.Variable space çš„é‡å®šä½è¡¨ + Variable data
+    // #.Array Buffer[0] çš„é‡å®šä½è¡¨ + data
+    // #.Array Buffer[1] çš„é‡å®šä½è¡¨ + data
     // ...
     FILE_HEADER header;
     header.dwFlags          = 0;
@@ -1837,9 +1837,9 @@ namespace Marimo
 
 
 
-    StringSetW sStringVar; // ×Ö·û´®±äÁ¿¼¯ºÏ
-    StringSetA sStringVarA; // ×Ö·û´®±äÁ¿¼¯ºÏ
-    GXUINT nRelOffset = 0;  // ÖØ¶¨Î»±íµÄ¿ªÊ¼Æ«ÒÆ
+    StringSetW sStringVar; // å­—ç¬¦ä¸²å˜é‡é›†åˆ
+    StringSetA sStringVarA; // å­—ç¬¦ä¸²å˜é‡é›†åˆ
+    GXUINT nRelOffset = 0;  // é‡å®šä½è¡¨çš„å¼€å§‹åç§»
     //UIntArray     RelocalizeTab;  
     BufDescArray  BufferTab;
     BUFFER_SAVELOAD_DESC bd;
@@ -1855,9 +1855,9 @@ namespace Marimo
     BufSet        sDbgBufSet;
 #endif // #ifdef _DEBUG
 
-    // ±äÁ¿Ô¤´¦Àí£º
-    // 1.ÊÕ¼¯×Ö·û´®±äÁ¿¼¯ºÏ
-    // 2.ÊÕ¼¯ÖØ¶¨Î»±í
+    // å˜é‡é¢„å¤„ç†ï¼š
+    // 1.æ”¶é›†å­—ç¬¦ä¸²å˜é‡é›†åˆ
+    // 2.æ”¶é›†é‡å®šä½è¡¨
     auto _itBegin = begin();
     auto _itEnd = end();
     DataPoolUtility::EnumerateVariables2
@@ -1868,22 +1868,22 @@ namespace Marimo
     {
       MOVariable var = it.ToVariable();
       const auto pCheckBuffer = it.pBuffer;
-      if(pCheckBuffer != pCurrBufDesc->pBuffer) // ÇĞ»»ÁËBuffer
+      if(pCheckBuffer != pCurrBufDesc->pBuffer) // åˆ‡æ¢äº†Buffer
       {
         //TRACE("%08x:%08x\n", pCheckBuffer, pCurrBufDesc->pBuffer);
 
 #ifdef _DEBUG
-        // sDbgBufSet´æÁËÖ®Ç°µÄbuffer£¬ĞÂµÄbufferÒ»¶¨²»ÔÚÕâ¸ö¼¯ºÏÀï
+        // sDbgBufSetå­˜äº†ä¹‹å‰çš„bufferï¼Œæ–°çš„bufferä¸€å®šä¸åœ¨è¿™ä¸ªé›†åˆé‡Œ
         ASSERT(sDbgBufSet.find(pCheckBuffer) == sDbgBufSet.end());
         sDbgBufSet.insert(pCheckBuffer);
 #endif // #ifdef _DEBUG
 
-        // Õâ¸öbuffer½áÊøÊ±£¬ÀÛ¼ÆÆ«ÒÆÒ»¶¨µÈÓÚbuffer´óĞ¡
+        // è¿™ä¸ªbufferç»“æŸæ—¶ï¼Œç´¯è®¡åç§»ä¸€å®šç­‰äºbufferå¤§å°
         ASSERT_X86(nRelOffset == pCurrBufDesc->pBuffer->GetSize());
 
         ++pCurrBufDesc;
 
-        // Ò»¶¨ÔÚÏÂÃæ¡°if(bArray)¡±Àï×¢²á¹ı£¬²¢ÇÒÒ²ÊÇ°´ÕÕË³Ğò³öÏÖµÄ
+        // ä¸€å®šåœ¨ä¸‹é¢â€œif(bArray)â€é‡Œæ³¨å†Œè¿‡ï¼Œå¹¶ä¸”ä¹Ÿæ˜¯æŒ‰ç…§é¡ºåºå‡ºç°çš„
         ASSERT(pCurrBufDesc->pBuffer == pCheckBuffer);
         nRelOffset = 0;
       }
@@ -1906,7 +1906,7 @@ namespace Marimo
             bd.pTypeDesc = it.pVarDesc->GetTypeDesc();
             const GXINT_PTR nCurOffset = (GXINT_PTR)pCurrBufDesc - (GXINT_PTR)&BufferTab.front();
             BufferTab.push_back(bd);
-            pCurrBufDesc = (BUFFER_SAVELOAD_DESC*)((GXINT_PTR)&BufferTab.front() + nCurOffset); // vectorÖ¸Õë¸Ä±ä£¬ÕâÀï¸üĞÂÒ»ÏÂÖ¸Õë
+            pCurrBufDesc = (BUFFER_SAVELOAD_DESC*)((GXINT_PTR)&BufferTab.front() + nCurOffset); // vectoræŒ‡é’ˆæ”¹å˜ï¼Œè¿™é‡Œæ›´æ–°ä¸€ä¸‹æŒ‡é’ˆ
           }
         }
         pCurrBufDesc->RelTable.push_back(nRelOffset | BUFFER_SAVELOAD_DESC::RelocalizeType_Array);
@@ -1950,14 +1950,14 @@ namespace Marimo
         nRelOffset += var.GetSize();
       }
 
-      // ÀÛ¼ÆÆ«ÒÆÑéÖ¤
+      // ç´¯è®¡åç§»éªŒè¯
       ASSERT(nRelOffset <= it.pBuffer->GetSize());
     });
 
 
-    if(SIZEOF_PTR > SIZEOF_PTR32) // ÔËĞĞÊ±64Î»Æ½Ì¨Ö¸Õëµ½´ÅÅÌÎÄ¼ş32Î»ÎŞ·ûºÅÕûÊı
+    if(SIZEOF_PTR > SIZEOF_PTR32) // è¿è¡Œæ—¶64ä½å¹³å°æŒ‡é’ˆåˆ°ç£ç›˜æ–‡ä»¶32ä½æ— ç¬¦å·æ•´æ•°
     {      
-      ASSERT( ! BufferTab.empty()) // ÖÁÉÙÓĞm_VarBuffer
+      ASSERT(!BufferTab.empty()); // è‡³å°‘æœ‰m_VarBuffer
       header.cbVariableSpace = (GXUINT)BufferTab.front().GetDiskBufferSize();
     }
 
@@ -1970,14 +1970,14 @@ namespace Marimo
     header.nNumOfPtrVars      = (GXUINT)BufferTab.front().RelTable.size();
 
 
-    clBuffer BufferToWrite; // ÁÙÊ±Ê¹ÓÃµÄ»º³åÇø
+    clBuffer BufferToWrite; // ä¸´æ—¶ä½¿ç”¨çš„ç¼“å†²åŒº
 
-    // ÎÄ¼şÍ·
+    // æ–‡ä»¶å¤´
     V_WRITE(file.Write(&header, sizeof(FILE_HEADER)), "Failed to write file header.");
 
 
-    // Êı¾İ»º³åĞÅÏ¢Í·
-    ASSERT(file.GetPointer() == header.nBufHeaderOffset); // µ±Ç°Ö¸ÕëÓëbufferÃèÊö±í¿ªÊ¼Æ«ÒÆÒ»ÖÂ
+    // æ•°æ®ç¼“å†²ä¿¡æ¯å¤´
+    ASSERT(file.GetPointer() == header.nBufHeaderOffset); // å½“å‰æŒ‡é’ˆä¸bufferæè¿°è¡¨å¼€å§‹åç§»ä¸€è‡´
     FILE_BUFFERHEADER fbh;
     for(auto it = BufferTab.begin(); it != BufferTab.end(); ++it)
     {
@@ -1996,7 +1996,7 @@ namespace Marimo
 
 
 
-    // È¥µô±äÁ¿¿Õ¼äµÄ DataPool::m_Buffer
+    // å»æ‰å˜é‡ç©ºé—´çš„ DataPool::m_Buffer
     //DbgIntDump();
     ASSERT(file.GetPointer() == header.nDescOffset);
     if(SIZEOF_PTR > SIZEOF_PTR32)
@@ -2004,7 +2004,7 @@ namespace Marimo
       BufferToWrite.Resize((GXUINT)m_Buffer.GetSize() - m_VarBuffer.GetSize(), FALSE);
       memcpy(BufferToWrite.GetPtr(), m_Buffer.GetPtr(), BufferToWrite.GetSize());
 
-      // Õâ¶Î¶ùµØÖ·¼ÆËã²Î¿¼[MAIN BUFFER ½á¹¹±í]
+      // è¿™æ®µå„¿åœ°å€è®¡ç®—å‚è€ƒ[MAIN BUFFER ç»“æ„è¡¨]
       const GXUINT_PTR nDeltaVarToType = (GXUINT_PTR)m_aVariables - (GXUINT_PTR)m_aTypes;
       const GXUINT_PTR nDeltaMemberToType = (GXUINT_PTR)m_aMembers - (GXUINT_PTR)m_aTypes;
       IntChangePtrSize(4, (VARIABLE_DESC*)((GXUINT_PTR)BufferToWrite.GetPtr() + nDeltaVarToType), m_nNumOfVar);
@@ -2018,20 +2018,20 @@ namespace Marimo
 
 
     
-    // ×Ö·û´®±äÁ¿µÄ×Ö·û´®ÁĞ±í
+    // å­—ç¬¦ä¸²å˜é‡çš„å­—ç¬¦ä¸²åˆ—è¡¨
     clFixedBuffer StringVarBuf;
-    ASSERT(file.GetPointer() == header.nStringVarOffset); // µ±Ç°Ö¸ÕëÓë×Ö·û´®±äÁ¿±í¿ªÊ¼Æ«ÒÆÒ»ÖÂ
+    ASSERT(file.GetPointer() == header.nStringVarOffset); // å½“å‰æŒ‡é’ˆä¸å­—ç¬¦ä¸²å˜é‡è¡¨å¼€å§‹åç§»ä¸€è‡´
     StringVarBuf.Resize(header.cbStringSpace, TRUE);
     sStringVar.gather(&StringVarBuf, 0);
     sStringVarA.gather(&StringVarBuf, sStringVar.buffer_size());
     V_WRITE(file.Write(StringVarBuf.GetPtr(), (GXUINT)StringVarBuf.GetSize()), "Failed to write variable string buffer.");
 
 
-    // Êı¾İ»º³åµÄÊı¾İ
+    // æ•°æ®ç¼“å†²çš„æ•°æ®
     GXUINT nBufferIndex = 1;
     for(auto it = BufferTab.begin(); it != BufferTab.end(); ++it)
     {
-      SAVE_TRACE("2.Buffer Ptr:%08x %d\n", it->pBuffer, it->pBuffer->GetSize());
+      SAVE_TRACE("2.Buffer Ptr:%08x %zu\n", (clsize)it->pBuffer, it->pBuffer->GetSize());
 
       BufferToWrite.Resize(it->GetDiskBufferSize(), FALSE);
 
@@ -2071,7 +2071,7 @@ namespace Marimo
               ++nBufferIndex;
             }
             else {
-              *(GXUINT*)pDest = 0; // ³¤¶ÈÎª0µÄbuffer´¦ÀíÎª¿Õ
+              *(GXUINT*)pDest = 0; // é•¿åº¦ä¸º0çš„bufferå¤„ç†ä¸ºç©º
             }
           }
           break;
@@ -2092,7 +2092,7 @@ namespace Marimo
       ASSERT(nCheck == BufferToWrite.GetSize());
 
       //TRACE("file ptr:%d\n", file.GetPointer());
-      // ÖØ¶¨Î»±í
+      // é‡å®šä½è¡¨
       //if( ! it->RelTable.empty())
       //{
       //  V_WRITE(file.Write(&it->RelTable.front(), (GXUINT)it->RelTable.size() * sizeof(GXUINT)), "Failed to write relocalize table.");
@@ -2112,12 +2112,12 @@ namespace Marimo
   GXBOOL DataPoolImpl::Load( clFile& file, GXDWORD dwFlag )
   {
     //
-    // TODO: ¸ÄÎªSmartRepository¼ÓÔØ
+    // TODO: æ”¹ä¸ºSmartRepositoryåŠ è½½
     //
-    ASSERT(m_Buffer.GetSize() == 0); // ÓĞĞ§µÄDataPool¶ÔÏó²»ÄÜÖ´ĞĞLoad·½·¨
+    ASSERT(m_Buffer.GetSize() == 0); // æœ‰æ•ˆçš„DataPoolå¯¹è±¡ä¸èƒ½æ‰§è¡ŒLoadæ–¹æ³•
 
 #ifdef DEBUG_DECL_NAME
-    TRACE("´ò¿ªÃû×Öµ÷ÊÔÄ£Ê½,ÎÄ¼ş½á¹¹ÌåÖĞº¬ÓĞÖ¸Õë£¬Òª¹Ø±ÕÕâ¸öºê²ÅÄÜ¼ÓÔØ");
+    TRACE("æ‰“å¼€åå­—è°ƒè¯•æ¨¡å¼,æ–‡ä»¶ç»“æ„ä½“ä¸­å«æœ‰æŒ‡é’ˆï¼Œè¦å…³é—­è¿™ä¸ªå®æ‰èƒ½åŠ è½½");
     CLBREAK;
 #else
 
@@ -2137,8 +2137,8 @@ namespace Marimo
     // Buffer header
     //
     typedef clvector<FILE_BUFFERHEADER> FileBufArray;
-    FileBufArray BufHeaders;  // ÎÄ¼ş¼ÇÂ¼
-    BufDescArray BufferTab;   // ÔËĞĞÊ±¼ÇÂ¼
+    FileBufArray BufHeaders;  // æ–‡ä»¶è®°å½•
+    BufDescArray BufferTab;   // è¿è¡Œæ—¶è®°å½•
     BUFFER_SAVELOAD_DESC bd = {0};
     FILE_BUFFERHEADER BufHeader = {0};
 
@@ -2149,7 +2149,7 @@ namespace Marimo
     BufferTab.insert(BufferTab.begin(), nNumOfBuffers, bd);
     BufferTab.front().pBuffer = &m_VarBuffer;
 
-    // ¶ÁÈëÎÄ¼ş¼ÇÂ¼µÄËùÓĞBufferHeaderÊı¾İ
+    // è¯»å…¥æ–‡ä»¶è®°å½•çš„æ‰€æœ‰BufferHeaderæ•°æ®
     BufHeaders.insert(BufHeaders.begin(), nNumOfBuffers, BufHeader);
     V_READ(file.Read(&BufHeaders.front(), sizeof(FILE_BUFFERHEADER) * nNumOfBuffers), "Can not load buffer header.");
 
@@ -2157,7 +2157,7 @@ namespace Marimo
 
 
 
-    // Õâ¸ö¼ÆËã²Î¿¼[MAIN BUFFER ½á¹¹±í]
+    // è¿™ä¸ªè®¡ç®—å‚è€ƒ[MAIN BUFFER ç»“æ„è¡¨]
     const GXSIZE_T nDescHeaderSize = IntGetRTDescHeader() + header.cbNames;
     const GXSIZE_T cbGlobalVariable = header.cbVariableSpace + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(header.nNumOfPtrVars);
     const GXSIZE_T nMainBufferSize_0 = nDescHeaderSize + cbGlobalVariable;
@@ -2166,7 +2166,7 @@ namespace Marimo
 
 
 
-    //dwFlag = 0; // Ç¿Á¦µ÷ÊÔÆÁ±Î£¡£¡£¡
+    //dwFlag = 0; // å¼ºåŠ›è°ƒè¯•å±è”½ï¼ï¼ï¼
 
 
 
@@ -2179,7 +2179,7 @@ namespace Marimo
       nMainBufferSize += header.cbStringSpace;
       nMainBufferSize += sizeof(DataPoolArray) * header.nNumOfArrayBufs;
 
-      // Ë÷Òı´Ó1¿ªÊ¼£¬[0]ÊÇÈ«¾Ö±äÁ¿¿Õ¼ä£¬ÒÑ¾­¼ÆËãÁË
+      // ç´¢å¼•ä»1å¼€å§‹ï¼Œ[0]æ˜¯å…¨å±€å˜é‡ç©ºé—´ï¼Œå·²ç»è®¡ç®—äº†
       for(int i = 1; i < nNumOfBuffers; ++i)
       {
         const FILE_BUFFERHEADER& fbh = BufHeaders[i];
@@ -2193,7 +2193,7 @@ namespace Marimo
       file.SetPointer(header.nDescOffset, 0);
     }
 
-    // Ò»´Î¶ÁÈë³ıÁËÈ«¾Ö±äÁ¿ÒÔÍâµÄÊı¾İ£¬°üÀ¨¸÷ÖÖÃèÊö±í£¬Ãû×Ö×Ö·û´®ÁĞ±íµÈ
+    // ä¸€æ¬¡è¯»å…¥é™¤äº†å…¨å±€å˜é‡ä»¥å¤–çš„æ•°æ®ï¼ŒåŒ…æ‹¬å„ç§æè¿°è¡¨ï¼Œåå­—å­—ç¬¦ä¸²åˆ—è¡¨ç­‰
     V_READ(file.Read(m_Buffer.GetPtr(), (GXUINT)nDescHeaderSize), "Can not load desc header.");
 
     const clsize cbDesc = LocalizePtr();
@@ -2205,7 +2205,7 @@ namespace Marimo
     //  TRACE("%s\n", (LPCSTR)m_pNamesTabEnd + (*p));
     //}
 
-    // 64Î»ÏÂÀ©Õ¹ÃèÊö±íÖĞµÄÖ¸Õë
+    // 64ä½ä¸‹æ‰©å±•æè¿°è¡¨ä¸­çš„æŒ‡é’ˆ
     if(SIZEOF_PTR > SIZEOF_PTR32)
     {
       IntChangePtrSize(8, m_aVariables, m_nNumOfVar);
@@ -2215,7 +2215,7 @@ namespace Marimo
 
 
 
-    // ×Ö·û´®±äÁ¿µÄ×Ö·û´®ÁĞ±í
+    // å­—ç¬¦ä¸²å˜é‡çš„å­—ç¬¦ä¸²åˆ—è¡¨
     clFixedBuffer StringVarBuf;
     GXLPBYTE pStringBegin;
     if(header.cbStringSpace)
@@ -2236,7 +2236,7 @@ namespace Marimo
     }
     
 
-    // ·ÇÖ»¶ÁÄ£Ê½ÏÂ£¬ÔÚÕâÀï³õÊ¼»¯»º³åÇø
+    // éåªè¯»æ¨¡å¼ä¸‹ï¼Œåœ¨è¿™é‡Œåˆå§‹åŒ–ç¼“å†²åŒº
     ASSERT(m_aTypes != NULL);
     if(TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
     {
@@ -2247,7 +2247,7 @@ namespace Marimo
         const FILE_BUFFERHEADER& fbh = BufHeaders[i];
         BUFFER_SAVELOAD_DESC& bd = BufferTab[i];
 
-        // ¶¨Î»¶¯Ì¬Êı×éÀàĞÍ
+        // å®šä½åŠ¨æ€æ•°ç»„ç±»å‹
         bd.pTypeDesc = (TYPE_DESC*)((GXINT_PTR)m_aTypes + (fbh.nType - header.nDescOffset));
 
         const clsize nBufferSize = fbh.nBufferSize + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(fbh.nNumOfRel);
@@ -2265,22 +2265,22 @@ namespace Marimo
         const FILE_BUFFERHEADER& fbh = BufHeaders[i];
         BUFFER_SAVELOAD_DESC& bd = BufferTab[i];
 
-        // ¶¨Î»¶¯Ì¬Êı×éÀàĞÍ
+        // å®šä½åŠ¨æ€æ•°ç»„ç±»å‹
         bd.pTypeDesc = (TYPE_DESC*)((GXINT_PTR)m_aTypes + (fbh.nType - header.nDescOffset));
 
-        // ·ÖÅä¶¯Ì¬Êı×é¿Õ¼ä£¬ÔöÁ¿ÊÇ8±¶ÀàĞÍ´óĞ¡
+        // åˆ†é…åŠ¨æ€æ•°ç»„ç©ºé—´ï¼Œå¢é‡æ˜¯8å€ç±»å‹å¤§å°
         bd.pBuffer = new DataPoolArray(NULL, bd.pTypeDesc->cbSize * 8);
         ((DataPoolArray*)bd.pBuffer)->Resize(fbh.nBufferSize + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(fbh.nNumOfRel), FALSE);
       }
     }
 
 
-    // ¿ªÊ¼¶ÁÈ¡È«¾Ö±äÁ¿ºÍ¶¯Ì¬Êı×éÊı¾İ
+    // å¼€å§‹è¯»å–å…¨å±€å˜é‡å’ŒåŠ¨æ€æ•°ç»„æ•°æ®
     if(file.GetPointer() != header.nBuffersOffset) {
       file.SetPointer(header.nBuffersOffset, 0);
     }
 
-    // buffer ±íÖĞµÚÒ»¸ö¾ÍÊÇÈ«¾Ö±äÁ¿µÄ³ß´ç£¬¿Ï¶¨ÊÇÏàµÈµÄ
+    // buffer è¡¨ä¸­ç¬¬ä¸€ä¸ªå°±æ˜¯å…¨å±€å˜é‡çš„å°ºå¯¸ï¼Œè‚¯å®šæ˜¯ç›¸ç­‰çš„
     ASSERT(BufferTab.front().pBuffer->GetSize() == cbGlobalVariable);
 
     clBuffer BufferForRead;
@@ -2289,7 +2289,7 @@ namespace Marimo
       const FILE_BUFFERHEADER& fbh = BufHeaders[i];
       BUFFER_SAVELOAD_DESC& bd = BufferTab[i];
 
-      // ÎªÖØ¶¨Î»±íÔ¤Áô¿Õ¼ä
+      // ä¸ºé‡å®šä½è¡¨é¢„ç•™ç©ºé—´
       if(fbh.nNumOfRel) {
         //BufferTab[i].RelTable.insert(BufferTab[i].RelTable.begin(), fbh.nNumOfRel, 0);
         bd.RelTable.reserve(fbh.nNumOfRel);
@@ -2297,17 +2297,17 @@ namespace Marimo
 
 
       //
-      // PS£ºÖØ¶¨Î»±í¼ÈÈ»ÄÜÊÕ¼¯³öÀ´£¬ÎªÊ²Ã´Ã«»¹Òªµİ¹éÏÈÊÕ¼¯£¬ÁíÒ»¸öÑ­»·¶¨Î»£¿Õâ¸ö¿ÉÒÔÒ»´Î¸ã¶¨£¡
+      // PSï¼šé‡å®šä½è¡¨æ—¢ç„¶èƒ½æ”¶é›†å‡ºæ¥ï¼Œä¸ºä»€ä¹ˆæ¯›è¿˜è¦é€’å½’å…ˆæ”¶é›†ï¼Œå¦ä¸€ä¸ªå¾ªç¯å®šä½ï¼Ÿè¿™ä¸ªå¯ä»¥ä¸€æ¬¡æå®šï¼
       //
 
 
-      // ¼ÆËãbufferµÄÀàĞÍËµÃ÷,ÊÕ¼¯ÖØ¶¨Î»±í
+      // è®¡ç®—bufferçš„ç±»å‹è¯´æ˜,æ”¶é›†é‡å®šä½è¡¨
       if(fbh.nType) {
         ASSERT(bd.pBuffer != NULL);
         bd.GenerateRelocalizeTable(bd.pTypeDesc);
       }
       else {
-        // È«¾Ö±äÁ¿
+        // å…¨å±€å˜é‡
         bd.GenerateRelocalizeTable(0, m_aVariables, m_nNumOfVar);
       }
 
@@ -2317,11 +2317,11 @@ namespace Marimo
       TRACE("load buffer type:%s\n", bd.pTypeDesc ? (DataPool::LPCSTR)bd.pTypeDesc->GetName() : "<global>");
 
 
-      // ¶ÁÈ¡ÖØ¶¨Î»±í
+      // è¯»å–é‡å®šä½è¡¨
       //if( ! rbd.RelTable.empty()) {
       //  file.Read(&rbd.RelTable.front(), (GXUINT)rbd.RelTable.size() * sizeof(GXUINT));
       //  //rbd.DbgCheck();
-      //  // ÖØ¶¨Î»±íÆ«ÒÆ¿Ï¶¨¶¼Ğ¡ÓÚ»º³åÇø
+      //  // é‡å®šä½è¡¨åç§»è‚¯å®šéƒ½å°äºç¼“å†²åŒº
       //  ASSERT(rbd.pBuffer->GetSize() >= (rbd.RelTable.front() & BUFFER_SAVELOAD_DESC::RelocalizeOffsetMask));
       //  ASSERT(rbd.pBuffer->GetSize() >= (rbd.RelTable.back() & BUFFER_SAVELOAD_DESC::RelocalizeOffsetMask))
       //}
@@ -2372,7 +2372,7 @@ namespace Marimo
           ASSERT(index < BufferTab.size());
           if (index)
           {
-            // »º³åÇø¿Ï¶¨ÒÑ¾­´´½¨¹ıÁË
+            // ç¼“å†²åŒºè‚¯å®šå·²ç»åˆ›å»ºè¿‡äº†
             ASSERT(BufferTab[index].pBuffer != NULL);
             *(clBufferBase**)pDest = BufferTab[index].pBuffer;
             reinterpret_cast<DataPoolArray*>(BufferTab[index].pBuffer)->SetParent(bd.pBuffer);
@@ -2423,21 +2423,21 @@ namespace Marimo
 
   DataPoolArray* DataPoolImpl::IntCreateArrayBuffer( clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount )
   {
-    ASSERT(pVarDesc->IsDynamicArray()); // Ò»¶¨ÊÇ¶¯Ì¬Êı×é
+    ASSERT(pVarDesc->IsDynamicArray()); // ä¸€å®šæ˜¯åŠ¨æ€æ•°ç»„
     ASSERT(nInitCount >= 0);
 
-    DataPoolArray** ppBuffer = pVarDesc->GetAsBufferObjPtr(pBaseData);  // ¶¯Ì¬Êı×é
+    DataPoolArray** ppBuffer = pVarDesc->GetAsBufferObjPtr(pBaseData);  // åŠ¨æ€æ•°ç»„
     if(*ppBuffer == NULL && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly))
     {
-      // ÕâÀïArrayBufferÖ»ÄÜÊ¹ÓÃÖ¸ÕëĞÎÊ½
-      *ppBuffer = new DataPoolArray(pParent, pVarDesc->TypeSize() * 10);  // Ê®±¶ÀàĞÍ´óĞ¡
+      // è¿™é‡ŒArrayBufferåªèƒ½ä½¿ç”¨æŒ‡é’ˆå½¢å¼
+      *ppBuffer = new DataPoolArray(pParent, pVarDesc->TypeSize() * 10);  // åå€ç±»å‹å¤§å°
       (*ppBuffer)->Resize(nInitCount * pVarDesc->TypeSize(), TRUE);
 
 #ifndef DISABLE_DATAPOOL_WATCHER
       if(pParent == &m_VarBuffer) {
         WatchFixedDict sDict;
         auto insert_result = m_WatchableArray.insert(clmake_pair(*ppBuffer, sDict));
-        ASSERT(insert_result.second); // Ìí¼ÓµÄÒ»¶¨ÊÇÈ«ĞÂµÄ
+        ASSERT(insert_result.second); // æ·»åŠ çš„ä¸€å®šæ˜¯å…¨æ–°çš„
       }
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 //#ifdef _DEBUG
@@ -2478,7 +2478,7 @@ namespace Marimo
 
   bool DataPoolImpl::WATCH_FIXED::operator<( const WATCH_FIXED& t ) const
   {
-    // Õâ¸öĞ´µÄºÃ´ê£¡
+    // è¿™ä¸ªå†™çš„å¥½æ“ï¼
     //TRACE("(%x,%x)(%x,%x)\n", pCallback, lParam, t.pCallback, t.lParam);
     switch((GXINT_PTR)pCallback)
     {
@@ -2509,10 +2509,10 @@ namespace Marimo
     auto* end = m_pNamesTabEnd;
     while(begin != end)
     {
-      auto* mid = begin + ((end - begin) >> 1); // ×¢ÒâÕâÊÇ¶ş·ÖÍ·Î²Á½¸öÖ¸Õë
+      auto* mid = begin + ((end - begin) >> 1); // æ³¨æ„è¿™æ˜¯äºŒåˆ†å¤´å°¾ä¸¤ä¸ªæŒ‡é’ˆ
       int r = GXSTRCMP(szName, aNames + (*mid));
       if(r == 0) {
-        // ·µ»ØµÄÊÇ×Ö·û´®ÔÚm_BufferÉÏµÄÆ«ÒÆ
+        // è¿”å›çš„æ˜¯å­—ç¬¦ä¸²åœ¨m_Bufferä¸Šçš„åç§»
         return *mid + (GXUINT)((GXUINT_PTR)aNames + (GXUINT_PTR)m_Buffer.GetPtr());
       }
       else if(r < 0) {

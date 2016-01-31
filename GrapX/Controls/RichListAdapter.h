@@ -503,6 +503,7 @@ namespace GXUI
           case CC_Static:
           case CC_UIList:
           case CC_UIToolbar:
+          case CC_None:
           default:
             CLBREAK; // √ª µœ÷
             break;

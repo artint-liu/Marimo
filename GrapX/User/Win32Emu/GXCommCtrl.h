@@ -1,4 +1,4 @@
-#ifndef _GX_COMMON_CONTROL_H_
+﻿#ifndef _GX_COMMON_CONTROL_H_
 #define _GX_COMMON_CONTROL_H_
 
 extern GXCOMCTL32_SysColor  comctl32_color;

@@ -36,21 +36,21 @@ using namespace clstd;
 
 GVMesh::GVMesh(GXGraphics* pGraphics)
   : GVNode       (NULL, GXMAKEFOURCC('M','E','S','H'))
+  , m_pMtlInst    (NULL)
+  , m_pPrimitive  (NULL)
   , m_nPrimiCount (0)
   , m_nVertCount  (0)
   , m_nStartIndex (0)
-  , m_pMtlInst    (NULL)
-  , m_pPrimitive  (NULL)
 {
 }
 
 GVMesh::GVMesh(GXGraphics* pGraphics, GXDWORD dwClassCode)
   : GVNode       (NULL, dwClassCode)
+  , m_pMtlInst(NULL)
+  , m_pPrimitive(NULL)
   , m_nPrimiCount (0)
   , m_nVertCount  (0)
   , m_nStartIndex (0)
-  , m_pMtlInst    (NULL)
-  , m_pPrimitive  (NULL)
 {
 }
 
@@ -120,7 +120,7 @@ GXBOOL GVMesh::InitializeAsObjFromMemory(GXGraphics* pGraphics, clBufferBase* pB
           pSubMesh->SetName(me.Name);
         }
         pSubMesh->SetParent(this);
-        CLOG("Add Obj mesh:\"%s\"\n", pSubMesh->m_strName);
+        CLOG("Add Obj mesh:\"%s\"\n", (const char*)pSubMesh->m_strName);
 
         // 更新父对象的AABB
         GVMesh* pChild = (GVMesh*)m_pFirstChild;
@@ -604,7 +604,7 @@ GXHRESULT GVMesh::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
   float4x4 matLocal = m_Transformation.ToRelativeMatrix();
   GXVERTEXELEMENT VertexElement[64];
   if( ! pStorage->ReadStringA(NULL, MESH_NAME, strName)) {
-    CLOG_ERROR(__FUNCTION__": Can not find mesh name.\n");
+    CLOG_ERROR("%s : Can not find mesh name.\n", __FUNCTION__);
     //return FALSE;
   }
   pStorage->ReadStringW(NULL, MESH_MTLINST, strMtlName);    
@@ -700,7 +700,9 @@ void GVMesh::ApplyTransform()
   m_pPrimitive->UpdateResouce(GPrimitive::ResourceVertices);
 
   // 重置变换矩阵为单位阵
-  SetTransform(&float3(1.0f), &quaternion(0,0,0,1), &float3(0.0f));
+  float3 vScale(1.0f);
+  quaternion sRotation(0, 0, 0, 1);
+  SetTransform(&vScale, &sRotation, &float3::Origin);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -983,7 +985,7 @@ namespace mesh
         continue;
 
       float3 T = (p1 * t2.y - p2 * t1.y) / fValue0;
-      float3 B = (p2 * t1.x - p1 * t2.x) / fValue1;
+      //float3 B = (p2 * t1.x - p1 * t2.x) / fValue1;
 
       if(pTangents != NULL)
       {
@@ -1143,24 +1145,24 @@ namespace mesh
 GXBOOL GVMESHDATA::Check(const GVMESHDATA* pMesh)
 {
   if(pMesh->nVertexCount <= 0 || pMesh->nIndexCount <= 0 || pMesh->nIndexCount % 3 != 0) {
-    CLOG_ERROR(__FUNCTION__": Invalid vertex or index count.\n");
+    CLOG_ERROR("%s : Invalid vertex or index count.\n", __FUNCTION__);
     return FALSE;
   }
   if(pMesh->pVertices == NULL) {
-    CLOG_ERROR(__FUNCTION__": vertex can not be empty.\n");
+    CLOG_ERROR("%s : vertex can not be empty.\n", __FUNCTION__);
     return FALSE;
   }
   if(pMesh->pIndices == NULL) {
-    CLOG_ERROR(__FUNCTION__": index can not be empty.\n");
+    CLOG_ERROR("%s : index can not be empty.\n", __FUNCTION__);
     return FALSE;
   }
 
   if(pMesh->pBoneWeights != NULL && pMesh->pBoneWeights32 != NULL) {
-    CLOG_WARNING(__FUNCTION__": Both pBoneWeights and pBoneWeights32 are not empty.\n");
+    CLOG_WARNING("%s : Both pBoneWeights and pBoneWeights32 are not empty.\n", __FUNCTION__);
   }
 
   if(pMesh->pColors != NULL && pMesh->pColors32 != NULL) {
-    CLOG_WARNING(__FUNCTION__": Both pColors and pColors32 are not empty.\n");
+    CLOG_WARNING("%s : Both pColors and pColors32 are not empty.\n", __FUNCTION__);
   }
   return TRUE;
 }

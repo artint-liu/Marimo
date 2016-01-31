@@ -733,7 +733,7 @@ namespace D3D9
   GXHRESULT GSamplerStateImpl::SetState(GXUINT nSamplerSlot, GXSAMPLERDESC* pSamplerDesc)
   {
     if(nSamplerSlot >= SAMPLERCOUNT) {
-      CLOG_ERROR(__FUNCTION__": Bad sampler index.\n");
+      CLOG_ERROR("%s : Bad sampler index.\n", __FUNCTION__);
       return GX_ERROR_OUTOFRANGE;
     }
     GXSAMPLERDESC DefaultDesc;
@@ -751,12 +751,12 @@ namespace D3D9
   GXHRESULT GSamplerStateImpl::SetStateArray(GXUINT nStartSlot, GXSAMPLERDESC* pSamplerDesc, int nCount)
   {
     if(nStartSlot >= SAMPLERCOUNT) {
-      CLOG_ERROR(__FUNCTION__": Bad sampler index.\n");
+      CLOG_ERROR("%s : Bad sampler index.\n", __FUNCTION__);
       return GX_ERROR_OUTOFRANGE;
     }
     if(nStartSlot + nCount > SAMPLERCOUNT)
     {
-      CLOG_WARNING(__FUNCTION__": Out of slot range.\n");
+      CLOG_WARNING("%s : Out of slot range.\n", __FUNCTION__);
       nCount = SAMPLERCOUNT - nStartSlot;
     }
 

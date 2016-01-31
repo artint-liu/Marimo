@@ -126,7 +126,8 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
     GXSpriteDesc* pSpriteDesc = NULL;
     hval = IntLoadSpriteDesc(ss, szSpriteFile, &pSpriteDesc);
     if(GXSUCCEEDED(hval)) {
-      hval = GXCreateSpriteEx(pGraphics, &pSpriteDesc->ToDesc(), ppSprite);
+      GXSPRITE_DESCW sDesc = pSpriteDesc->ToDesc();
+      hval = GXCreateSpriteEx(pGraphics, &sDesc, ppSprite);
     }
     SAFE_DELETE(pSpriteDesc);
   }
@@ -265,7 +266,7 @@ GXHRESULT IntLoadFrames(clSmartProfileA& ss, GXSpriteDescImpl* pDescObj )
           sFrameModule.offset.x   = ss.FindKeyAsInteger(hFrameModule, "x", 0);
           sFrameModule.offset.y   = ss.FindKeyAsInteger(hFrameModule, "y", 0);
 
-          TRACE("index:%d flags:%d x:%d y:%d\n", sFrameModule.nModuleIdx, sFrameModule.rotate, sFrameModule.offset.x, sFrameModule.offset.y);
+          TRACE("index:%u flags:%lu x:%ld y:%ld\n", sFrameModule.nModuleIdx, sFrameModule.rotate, sFrameModule.offset.x, sFrameModule.offset.y);
           // push back
           aFrameModulesArray.push_back(sFrameModule);
 
@@ -329,7 +330,7 @@ GXHRESULT IntLoadAnimations(clSmartProfileA &ss, GXSpriteDescImpl* pDescObj )
 
       // 检查文件记录与实际读入的数量是否相符
       if(aFrameList.size() != sAnimation.count) {
-        CLOG_WARNING(__FUNCTION__": Number of animation frames is not match the record.(%s,%d)\r\n", 
+        CLOG_WARNING("%s : Number of animation frames is not match the record.(%s,%d)\r\n", __FUNCTION__,
           sAnimation.name != NULL ? sAnimation.name : "", sAnimation.id);
       }
 
@@ -357,7 +358,7 @@ GXHRESULT IntLoadSpriteDesc(clSmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSprit
 
   pDescObj = new GXSpriteDescImpl;
   if(pDescObj == NULL) {
-    CLOG_ERROR(__FUNCTION__": Out of memory!\r\n");
+    CLOG_ERROR("%s : Out of memory!\r\n", __FUNCTION__);
     return GX_ERROR_OUROFMEMORY;
   }
 
@@ -533,16 +534,16 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
   clFile file;
 
   if(pDesc->szImageFile == NULL || GXSTRLEN(pDesc->szImageFile) == 0) {
-    CLOG_ERROR(__FUNCTION__": Texture filename is empty.\r\n");
+    CLOG_ERROR("%s : Texture filename is empty.\r\n", __FUNCTION__);
     return FALSE;
   }
 
   if( ! IntCheckSpriteDesc(pDesc)) {
-    CLOG_ERROR(__FUNCTION__": Bad input argument.\r\n");
+    CLOG_ERROR("%s : Bad input argument.\r\n", __FUNCTION__);
   }
 
   if( ! file.CreateAlwaysW(szFilename)) {
-    CLOG_ERROR(__FUNCTION__": Can't create file.\r\n");
+    CLOG_ERROR("%s : Can't create file.\r\n", __FUNCTION__);
     return FALSE;
   }
 
@@ -552,7 +553,7 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
   clStringW strRelativePath;
   clpathfile::RelativePathToW(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
   clStringA strFilenameA(strRelativePath);
-  file.WritefA("  File=\"%s\";\r\n", strFilenameA);
+  file.WritefA("  File=\"%s\";\r\n", (const char*)strFilenameA);
   file.WritefA("  Module {\r\n"); // <Module>
 
   //
@@ -615,7 +616,7 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
         strFrameList.AppendFormat("%d,", pDesc->aAnimFrames[n + a.start]);
       }
       strFrameList.TrimRight(',');
-      file.WritefA("      frames=\"%s\"\r\n", strFrameList);
+      file.WritefA("      frames=\"%s\"\r\n", (const char*)strFrameList);
       file.WritefA("    };\r\n"); // </animation>
     }
   }
@@ -631,12 +632,12 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
   clSmartStockA stock;
 
   if(pDesc->szImageFile == NULL || GXSTRLEN(pDesc->szImageFile) == 0) {
-    CLOG_ERROR(__FUNCTION__": Texture filename is empty.\r\n");
+    CLOG_ERROR("%s : Texture filename is empty.\r\n", __FUNCTION__);
     return FALSE;
   }
 
   if( ! IntCheckSpriteDesc(pDesc)) {
-    CLOG_ERROR(__FUNCTION__": Bad input argument.\r\n");
+    CLOG_ERROR("%s : Bad input argument.\r\n", __FUNCTION__);
   }
 
   auto pSmartSection = stock.Create("smart");
@@ -728,7 +729,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
 
   if( ! stock.SaveW(szFilename))
   {
-    CLOG_ERROR(__FUNCTION__": Can not save file(%s).\r\n", szFilename);
+    CLOG_ERROR("%s : Can not save file(%s).\r\n", __FUNCTION__, (const char*)szFilename);
     return FALSE;
   }
 

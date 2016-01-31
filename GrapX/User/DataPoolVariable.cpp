@@ -1,4 +1,4 @@
-#include "GrapX.H"
+ï»¿#include "GrapX.H"
 #include "GrapX.Hxx"
 
 #include "GrapX/DataPool.H"
@@ -54,11 +54,11 @@ using namespace clstd;
 
 namespace Marimo
 {
-  // ÀàĞÍÖØ¶¨Òå
+  // ç±»å‹é‡å®šä¹‰
   typedef DataPoolVariable                          Variable;
   typedef DataPoolVariableImpl                      VarImpl;
 
-  // º¯ÊıÉùÃ÷
+  // å‡½æ•°å£°æ˜
   Variable DynamicArray_NewBack(VarImpl* pThis, GXUINT nIncrease);
   Variable Struct_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName);
   Variable Array_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex);
@@ -66,24 +66,24 @@ namespace Marimo
   DataPoolVariable::DataPoolVariable( VTBL* vtbl, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset )
     : m_vtbl(vtbl), m_pVdd(pVdd), m_pBuffer(pBufferBase), m_AbsOffset(nAbsOffset)
   {
-    // Èç¹ûÊÇobjectÀàĞÍ£¬ÕâÀï¿ÉÒÔ²»Ôö¼Ó¼ÆÊı¡£Ô­Òò¼ûÆäËü¹¹Ôìº¯Êı
+    // å¦‚æœæ˜¯objectç±»å‹ï¼Œè¿™é‡Œå¯ä»¥ä¸å¢åŠ è®¡æ•°ã€‚åŸå› è§å…¶å®ƒæ„é€ å‡½æ•°
   }
 
   DataPoolVariable::DataPoolVariable( VTBL* vtbl, DataPool* pDataPool, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset ) 
     : m_vtbl(vtbl), m_pDataPool(pDataPool), m_pVdd(pVdd), m_pBuffer(pBufferBase), m_AbsOffset(nAbsOffset)
   {
-    // Èç¹ûÊÇobjectÀàĞÍ£¬ÕâÀï¿ÉÒÔ²»Ôö¼Ó¼ÆÊı¡£Ô­Òò¼ûÆäËü¹¹Ôìº¯Êı
+    // å¦‚æœæ˜¯objectç±»å‹ï¼Œè¿™é‡Œå¯ä»¥ä¸å¢åŠ è®¡æ•°ã€‚åŸå› è§å…¶å®ƒæ„é€ å‡½æ•°
     if(m_pDataPool) {m_pDataPool->AddRef();}
   }
 
   DataPoolVariable::DataPoolVariable( const DataPoolVariable& val ) : m_vtbl(NULL), m_pDataPool(NULL), m_pVdd(NULL), m_pBuffer(NULL), m_AbsOffset(0)
   {
-    *this = val; // µÈºÅÖØÔØ£¬ÄÚ²¿Ôö¼ÓÁËDataPoolÒıÓÃ¼ÆÊı
+    *this = val; // ç­‰å·é‡è½½ï¼Œå†…éƒ¨å¢åŠ äº†DataPoolå¼•ç”¨è®¡æ•°
 
-    // Èç¹ûÊÇobjectÀàĞÍ£¬ÕâÀï¿ÉÒÔ²»Ôö¼Ó¼ÆÊı¡£
-    // DataPool ÖĞÎ¬»¤ÁË object ¶ÔÏóÒıÓÃ¼ÆÊı
-    // ¶ø DataPoolVariable ÔÚÉúÃüÖÜÆÚÄÚÎ¬»¤ÁË DataPool µÄÒıÓÃ¼ÆÊı
-    // ËùÒÔÕâÀï¾Í²»±ØÎ¬»¤ object µÄÒıÓÃ¼ÆÊıÁË
+    // å¦‚æœæ˜¯objectç±»å‹ï¼Œè¿™é‡Œå¯ä»¥ä¸å¢åŠ è®¡æ•°ã€‚
+    // DataPool ä¸­ç»´æŠ¤äº† object å¯¹è±¡å¼•ç”¨è®¡æ•°
+    // è€Œ DataPoolVariable åœ¨ç”Ÿå‘½å‘¨æœŸå†…ç»´æŠ¤äº† DataPool çš„å¼•ç”¨è®¡æ•°
+    // æ‰€ä»¥è¿™é‡Œå°±ä¸å¿…ç»´æŠ¤ object çš„å¼•ç”¨è®¡æ•°äº†
   }
 
   DataPoolVariable::DataPoolVariable() : m_vtbl(NULL), m_pDataPool(NULL), m_pVdd(NULL), m_pBuffer(NULL), m_AbsOffset(0)
@@ -96,8 +96,8 @@ namespace Marimo
   }
 
   //////////////////////////////////////////////////////////////////////////
-  // Õâ¸öÀàÀïÃæ²»´¢´æ³ÉÔ±±äÁ¿£¬Ö»ÊÇÓÃÀ´À©Õ¹·ÃÎÊDataPoolVariable
-  // ³ÉÔ±±äÁ¿µÄ·½·¨£¬ÕâÑùÊ¹ÓÃ»§Ê¹ÓÃµÄÍ·ÎÄ¼ş¿´ÆğÀ´¸ü¼ò½à
+  // è¿™ä¸ªç±»é‡Œé¢ä¸å‚¨å­˜æˆå‘˜å˜é‡ï¼Œåªæ˜¯ç”¨æ¥æ‰©å±•è®¿é—®DataPoolVariable
+  // æˆå‘˜å˜é‡çš„æ–¹æ³•ï¼Œè¿™æ ·ä½¿ç”¨æˆ·ä½¿ç”¨çš„å¤´æ–‡ä»¶çœ‹èµ·æ¥æ›´ç®€æ´
   class DataPoolVariableImpl : public DataPoolVariable
   {
   public:
@@ -125,13 +125,13 @@ namespace Marimo
     template<typename T_LPCSTR, class _TStoString>
     inline GXBOOL SetAsString(T_LPCSTR szText)
     {
-      // Õâ¸öº¯ÊıÊÇStringÀàĞÍ×¨ÓÃµÄ
+      // è¿™ä¸ªå‡½æ•°æ˜¯Stringç±»å‹ä¸“ç”¨çš„
       ASSERT(m_pVdd->GetTypeCategory() == T_STRING || 
         m_pVdd->GetTypeCategory() == T_STRINGA);
 
       auto pDataPoolImpl = reinterpret_cast<DataPoolImpl*>(m_pDataPool);
 
-      // Ö»¶ÁÄ£Ê½Ìø¹ı
+      // åªè¯»æ¨¡å¼è·³è¿‡
       if(TEST_FLAG(pDataPoolImpl->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly)) {
         return FALSE;
       }
@@ -140,7 +140,7 @@ namespace Marimo
       if(*(void**)(pStringData) == NULL) {
         new(pStringData) _TStoString(szText);
 
-        // Ö»¶ÁÄ£Ê½ÏÂ²»»áĞÂ½¨×Ö·û´®
+        // åªè¯»æ¨¡å¼ä¸‹ä¸ä¼šæ–°å»ºå­—ç¬¦ä¸²
         ASSERT(TEST_FLAG_NOT(pDataPoolImpl->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly));
 //#ifdef _DEBUG
 //        pDataPoolImpl->m_nDbgNumOfString++;
@@ -163,7 +163,7 @@ namespace Marimo
         reinterpret_cast<DataPoolImpl::LPCTD>(m_pVdd->GetTypeDesc()), szName, pOutEnumFlag);
 
 #ifdef _DEBUG
-      // Ê¹ÓÃ´«Í³º¯ÊıÑéÖ¤¶ş·Ö·¨²éÕÒ
+      // ä½¿ç”¨ä¼ ç»Ÿå‡½æ•°éªŒè¯äºŒåˆ†æ³•æŸ¥æ‰¾
       for(GXUINT i = 0; i < m_pVdd->GetTypeDesc()->nMemberCount; ++i)
       {
         DataPoolImpl::LPCED pair = reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetTypeDesc()->GetEnumMembers()) + i;
@@ -191,7 +191,7 @@ namespace Marimo
 
     inline GXBOOL InlIsPrimaryType() GXCONST
     {
-      // ÅĞ¶ÏÊÇ·ñÎª»ù´¡ÀàĞÍ£¬structºÍobject²»ÈÏÎªÊÇ»ù´¡ÀàĞÍ
+      // åˆ¤æ–­æ˜¯å¦ä¸ºåŸºç¡€ç±»å‹ï¼Œstructå’Œobjectä¸è®¤ä¸ºæ˜¯åŸºç¡€ç±»å‹
       const TypeCategory cate = InlGetCategory();
       return (cate == T_BYTE || cate == T_WORD || 
         cate == T_DWORD || cate == T_QWORD ||
@@ -299,7 +299,7 @@ namespace Marimo
     }
   }; // class DataPoolVariableImpl : public DataPoolVariable
 
-  STATIC_ASSERT(sizeof(DataPoolVariableImpl) == sizeof(DataPoolVariable)); // È·±£DataPoolVariableImpl²»»áÔö¼ÓĞÂµÄ³ÉÔ±±äÁ¿
+  STATIC_ASSERT(sizeof(DataPoolVariableImpl) == sizeof(DataPoolVariable)); // ç¡®ä¿DataPoolVariableImplä¸ä¼šå¢åŠ æ–°çš„æˆå‘˜å˜é‡
 
   //////////////////////////////////////////////////////////////////////////
   Marimo::DataPoolUtility::iterator DataPoolVariable::begin()
@@ -360,7 +360,7 @@ namespace Marimo
     Variable::VTBL* s_pDynamicArrayVtbl = &s_DynamicArrayVtbl;
   } // namespace Implement
 
-  // Ô¤ÖÃÀàĞÍ
+  // é¢„ç½®ç±»å‹
   VARIABLE_DECLARATION c_float2[] = {
     {"float", "x"},
     {"float", "y"},
@@ -484,7 +484,7 @@ namespace Marimo
 
   GXBOOL Variable::Set(const DataPoolVariable& var)
   {
-    // TODO: Õâ¸öÊÇÁÙÊ±Ğ´·¨
+    // TODO: è¿™ä¸ªæ˜¯ä¸´æ—¶å†™æ³•
     return Set(var.ToStringW());
   }
 
@@ -516,7 +516,7 @@ namespace Marimo
       SET_FLAG(r, CAPS_DYNARRAY);
       ASSERT(m_pVdd->IsDynamicArray());
     }
-    else if(m_vtbl->GetIndex == Array_GetIndex) { // ¾²Ì¬Êı×é¶¼¾ßÓĞ Array_GetIndex ·½·¨
+    else if(m_vtbl->GetIndex == Array_GetIndex) { // é™æ€æ•°ç»„éƒ½å…·æœ‰ Array_GetIndex æ–¹æ³•
       SET_FLAG(r, CAPS_ARRAY);
       ASSERT(GetLength() > 1);
     }
@@ -596,7 +596,7 @@ namespace Marimo
   //////////////////////////////////////////////////////////////////////////
   //Exception_...
 
-  // »ù±¾ÀàĞÍ·ÃÎÊÒì³£
+  // åŸºæœ¬ç±»å‹è®¿é—®å¼‚å¸¸
   template<typename _TChar>
   GXBOOL Exception_SetAsStringT(VarImpl* pThis, const _TChar* szString)
   {
@@ -647,14 +647,14 @@ namespace Marimo
     return FALSE;
   }
 
-  // ½á¹¹Ìå·ÃÎÊÒì³£
+  // ç»“æ„ä½“è®¿é—®å¼‚å¸¸
   Variable Exception_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName)
   {
     CLOG_ERROR("DataPool exception: Can not get member (\"%s\") from a unary type(\"%s\").\r\n", szName, pThis->GetName());
     return Variable();
   }
 
-  // Êı×é·ÃÎÊÒì³£
+  // æ•°ç»„è®¿é—®å¼‚å¸¸
   Variable Exception_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex)
   {
     CLOG_ERROR("%s %s %s\n", __FUNCTION__, pThis->GetTypeName(), pThis->GetName());
@@ -675,7 +675,7 @@ namespace Marimo
   }
 
 
-  // ¶ÔÏó·ÃÎÊÒì³£
+  // å¯¹è±¡è®¿é—®å¼‚å¸¸
   GXBOOL Exception_Retain(VarImpl* pThis, GUnknown* pUnknown)
   {
     CLOG_ERROR("DataPool exception: Can not retain \"%s\" as \"object\" type.\r\n", pThis->GetTypeName());
@@ -703,7 +703,7 @@ namespace Marimo
   //////////////////////////////////////////////////////////////////////////
   GXBOOL Object_Retain(VarImpl* pThis, GUnknown* pUnknown)
   {
-    // pUnknown ²»ÄÜµÈÓÚ m_pDataPool ·ñÔòÓÀÔ¶Ò²²»»áÊÍ·Å
+    // pUnknown ä¸èƒ½ç­‰äº m_pDataPool å¦åˆ™æ°¸è¿œä¹Ÿä¸ä¼šé‡Šæ”¾
     ASSERT(pThis->InlGetVDD()->GetTypeCategory() == T_OBJECT);
     if( ! pThis->IsSamePool((DataPool*)pUnknown))
     {
@@ -840,7 +840,7 @@ namespace Marimo
     if(pVDD != NULL)
     {
       if(length == 0) {
-        // clstd::xtou ºÍ clstd::xtoi ÊäÈë-1×÷Îª³¤¶È²ÅÊÇ±íÊ¾×Ö·û´®¡®\0¡¯½áÎ²
+        // clstd::xtou å’Œ clstd::xtoi è¾“å…¥-1ä½œä¸ºé•¿åº¦æ‰æ˜¯è¡¨ç¤ºå­—ç¬¦ä¸²â€˜\0â€™ç»“å°¾
         length = -1;
       }
 
@@ -1001,7 +1001,7 @@ namespace Marimo
     }
     else {
       clStringA str(szText);
-      STATIC_ASSERT(sizeof(clStringA::TChar) == sizeof(((DataPool::LPCSTR)0)[0]));  // ·ÀÖ¹strÓësDesc.NameÀàĞÍ²»Ò»ÖÂ¶øÔì³É±àÂë·´¸´×ª»»µ¼ÖÂµÄĞÔÄÜÎÊÌâ
+      STATIC_ASSERT(sizeof(clStringA::TChar) == sizeof(((DataPool::LPCSTR)0)[0]));  // é˜²æ­¢strä¸sDesc.Nameç±»å‹ä¸ä¸€è‡´è€Œé€ æˆç¼–ç åå¤è½¬æ¢å¯¼è‡´çš„æ€§èƒ½é—®é¢˜
       return pThis->InlFindEnumFlagValue(str, reinterpret_cast<DataPool::EnumFlag*>(pEnum));
     }
   }
@@ -1047,7 +1047,7 @@ namespace Marimo
     DataPool::Flag dwFlags = *(DataPool::Flag*)pThis->GetPtr();
     DataPool::Flag dwOriFlags = dwFlags;
 
-    // Èç¹û¿ÕÖµÖ±½Ó·µ»Ø
+    // å¦‚æœç©ºå€¼ç›´æ¥è¿”å›
     if(dwFlags == 0) {
       return _TString(dwFlags);
     }
@@ -1066,7 +1066,7 @@ namespace Marimo
       }
     }
 
-    // Èç¹ûÑÚÂëÃ»ÓĞÏû³ıËùÓĞÎ»£¬Ôò·µ»ØÊıÖµ
+    // å¦‚æœæ©ç æ²¡æœ‰æ¶ˆé™¤æ‰€æœ‰ä½ï¼Œåˆ™è¿”å›æ•°å€¼
     if(dwFlags) {
       return _TString(dwOriFlags);
     }
@@ -1108,7 +1108,7 @@ namespace Marimo
       return TRUE;
     }
     else {
-      STATIC_ASSERT(sizeof(clStringA::TChar) == sizeof(((DataPool::LPCSTR)0)[0]));  // ·ÀÖ¹strÓësDesc.NameÀàĞÍ²»Ò»ÖÂ¶øÔì³É±àÂë·´¸´×ª»»µ¼ÖÂµÄĞÔÄÜÎÊÌâ
+      STATIC_ASSERT(sizeof(clStringA::TChar) == sizeof(((DataPool::LPCSTR)0)[0]));  // é˜²æ­¢strä¸sDesc.Nameç±»å‹ä¸ä¸€è‡´è€Œé€ æˆç¼–ç åå¤è½¬æ¢å¯¼è‡´çš„æ€§èƒ½é—®é¢˜
       return Flag_ParseString(pThis, clStringA(szText), pFlag);
     }
   }
@@ -1131,7 +1131,7 @@ namespace Marimo
   template<class _TString>
   GXBOOL String_ParseT(VarImpl* pThis, typename _TString::LPCSTR szText, GXUINT length)
   {
-    //ASSERT(length == 0); // Ã»ÊµÏÖ·Ç0³¤¶ÈµÄ´¦Àí
+    //ASSERT(length == 0); // æ²¡å®ç°é0é•¿åº¦çš„å¤„ç†
     if(length == 0 || szText[length] == '\0') {
       pThis->Set(szText);
     }
@@ -1142,7 +1142,7 @@ namespace Marimo
     return TRUE;
   }
 
-  template<class _TRetString, class _TStoString> // ·µ»Ø×Ö·û´®ÀàĞÍºÍ×ÔÉí´¢´æµÄ×Ö·û´®ÀàĞÍ
+  template<class _TRetString, class _TStoString> // è¿”å›å­—ç¬¦ä¸²ç±»å‹å’Œè‡ªèº«å‚¨å­˜çš„å­—ç¬¦ä¸²ç±»å‹
   _TRetString String_ToStringT(GXCONST VarImpl* pThis)
   {
     GXLPBYTE pStringData = (GXBYTE*)pThis->GetPtr();// InlGetBufferPtr() + pThis->GetOffset());
@@ -1150,7 +1150,7 @@ namespace Marimo
       return "";
     }
     else if(pThis->IsReadOnly()) {
-      return _TRetString(*(_TStoString::LPCSTR*)((GXBYTE*)pStringData));
+      return _TRetString(*(typename _TStoString::LPCSTR*)((GXBYTE*)pStringData));
     }
     return _TRetString(*(_TStoString*)((GXBYTE*)pStringData));
   }
@@ -1191,13 +1191,13 @@ namespace Marimo
 
   GXBOOL Struct_ParseW(VarImpl* pThis, GXLPCWSTR szString, GXUINT length)
   {
-    // TODO: ÔİÊ±²»Ö§³Ö, ½«À´¿¼ÂÇÖ§³Ö"¼üÖµ1=Êı¾İ1;¼üÖµ2=Êı¾İ2;..."ÕâÖÖÀàĞÍµÄÊı¾İ½âÎö
+    // TODO: æš‚æ—¶ä¸æ”¯æŒ, å°†æ¥è€ƒè™‘æ”¯æŒ"é”®å€¼1=æ•°æ®1;é”®å€¼2=æ•°æ®2;..."è¿™ç§ç±»å‹çš„æ•°æ®è§£æ
     return FALSE;
   }
 
   GXBOOL Struct_ParseA(VarImpl* pThis, GXLPCSTR szString, GXUINT length)
   {
-    // TODO: ÔİÊ±²»Ö§³Ö, ½«À´¿¼ÂÇÖ§³Ö"¼üÖµ1=Êı¾İ1;¼üÖµ2=Êı¾İ2;..."ÕâÖÖÀàĞÍµÄÊı¾İ½âÎö
+    // TODO: æš‚æ—¶ä¸æ”¯æŒ, å°†æ¥è€ƒè™‘æ”¯æŒ"é”®å€¼1=æ•°æ®1;é”®å€¼2=æ•°æ®2;..."è¿™ç§ç±»å‹çš„æ•°æ®è§£æ
     return FALSE;
   }
 
@@ -1219,13 +1219,13 @@ namespace Marimo
 
   GXBOOL StaticArray_ParseW(VarImpl* pThis, GXLPCWSTR szString, GXUINT length)
   {
-    // TODO: ÔİÊ±²»Ö§³Ö, ½«À´¿¼ÂÇÖ§³Ö"{¼üÖµ1=Êı¾İ1;¼üÖµ2=Êı¾İ2;...}..."ÕâÖÖÀàĞÍµÄÊı¾İ½âÎö
+    // TODO: æš‚æ—¶ä¸æ”¯æŒ, å°†æ¥è€ƒè™‘æ”¯æŒ"{é”®å€¼1=æ•°æ®1;é”®å€¼2=æ•°æ®2;...}..."è¿™ç§ç±»å‹çš„æ•°æ®è§£æ
     return FALSE;
   }
 
   GXBOOL StaticArray_ParseA(VarImpl* pThis, GXLPCSTR szString, GXUINT length)
   {
-    // TODO: ÔİÊ±²»Ö§³Ö, ½«À´¿¼ÂÇÖ§³Ö"{¼üÖµ1=Êı¾İ1;¼üÖµ2=Êı¾İ2;...}..."ÕâÖÖÀàĞÍµÄÊı¾İ½âÎö
+    // TODO: æš‚æ—¶ä¸æ”¯æŒ, å°†æ¥è€ƒè™‘æ”¯æŒ"{é”®å€¼1=æ•°æ®1;é”®å€¼2=æ•°æ®2;...}..."è¿™ç§ç±»å‹çš„æ•°æ®è§£æ
     return FALSE;
   }
 
@@ -1245,7 +1245,7 @@ namespace Marimo
     DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
     Variable val;
     if(nIncrease == 0) {
-      // ²»ĞÂÔöÔªËØ£¬Ö»·µ»Ø×îºóÒ»¸ö¶ÔÏó
+      // ä¸æ–°å¢å…ƒç´ ï¼Œåªè¿”å›æœ€åä¸€ä¸ªå¯¹è±¡
       pThis->InlDynSetupUnary(pArrayBuffer, (GXUINT)(nIndex - 1), &val);
     }
     else {
@@ -1279,12 +1279,12 @@ namespace Marimo
     
     THIS_IMPULSE_DATA(DATACT_Deleting, nIndex, nCount);
 
-    if(nIndex == (GXUINT)-1)     // È«²¿É¾³ı
+    if(nIndex == (GXUINT)-1)     // å…¨éƒ¨åˆ é™¤
     {
       pThis->InlCleanupArray(pVdd, pThis->GetPtr(), nLength);
       pArrayBuffer->Resize(0, FALSE);
     }
-    else    // ´ÓÖ¸¶¨Î»ÖÃÉ¾³ı
+    else    // ä»æŒ‡å®šä½ç½®åˆ é™¤
     {
       pThis->InlCleanupArray(pVdd, (GXLPBYTE)pArrayBuffer->GetPtr() + pVdd->TypeSize() * nIndex, nCount);
       pArrayBuffer->Replace(pVdd->TypeSize() * nIndex, pVdd->TypeSize() * nCount, NULL, 0);
@@ -1307,7 +1307,7 @@ namespace Marimo
   template<class _TString, class _Fn>
   GXBOOL DynamicArray_ParseT(VarImpl* pThis, typename _TString::LPCSTR szText, GXUINT length, _Fn fn)
   {
-    // ²Î¿¼ StaticArray_Parse
+    // å‚è€ƒ StaticArray_Parse
     if(pThis->InlIsPrimaryType())
     {
       clstd::StringCutter<_TString> sc(szText, length);
@@ -1325,8 +1325,8 @@ namespace Marimo
       return TRUE;
     }
     else {
-      // object ²»Ö§³Ö½âÎö
-      // struct Ã»ÊµÏÖ½âÎö
+      // object ä¸æ”¯æŒè§£æ
+      // struct æ²¡å®ç°è§£æ
       CLBREAK;
     }
     return FALSE;
@@ -1811,7 +1811,7 @@ namespace Marimo
       Primary_SetData         , // SetData     
     };
 
-    // Õâ¸öÓë s_PrimaryVtbl ÍêÈ«Ò»ÖÂ£¬ËùÒÔºÏ²¢ÁË
+    // è¿™ä¸ªä¸ s_PrimaryVtbl å®Œå…¨ä¸€è‡´ï¼Œæ‰€ä»¥åˆå¹¶äº†
     //Variable::VTBL s_DynamicPrimaryVtbl = {
     //  Unary_GetSize           , // GetSize      
     //  Exception_GetMember     , // GetMember    

@@ -126,7 +126,7 @@ namespace GXUI
     ItemElementArray* pItemElements = (ItemElementArray*)lParam;
     ITEMELEMENT sElement;
     GXWCHAR szClassName[128];
-    RichList* pThis = (RichList*)lParam;
+    //RichList* pThis = (RichList*)lParam;
     gxGetClassName(hWnd, szClassName, sizeof(szClassName) / sizeof(szClassName[0]));
 
     GXLPCWSTR szCtrlName = (GXLPCWSTR)gxSendMessage(hWnd, GXWM_GETIDNAMEW, 0, 0);
@@ -207,7 +207,7 @@ namespace GXUI
 
   void RichList::Recycle(GXSIZE_T nIndex)
   {
-    ASSERT(m_aItems[nIndex].hItem != NULL)
+    ASSERT(m_aItems[nIndex].hItem != NULL);
 
     // 回收后需要隐藏,因为删除Item并且Items不足一页时会有多余ItemWnd
     gxShowWindow(m_aItems[nIndex].hItem, GXSW_HIDE);

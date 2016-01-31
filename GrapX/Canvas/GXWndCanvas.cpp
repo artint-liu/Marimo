@@ -68,37 +68,40 @@ GXLRESULT GXWndCanvas::Initialize(GXHWND hWnd, GRegion* pRegion, GXDWORD dwFlags
   m_pNative->SetRegion(m_pEffectiveRegion, TRUE);
   return 0;
 }
+
 GXWndCanvas::GXWndCanvas(GXHWND hWnd)
-  : m_hWnd            (hWnd)
-  , m_pNative          (NULL)
+  : m_pNative          (NULL)
+  , m_hWnd             (hWnd)
+  , m_lpStation        (NULL)
   , m_pSystemRegion    (NULL)
   , m_pUpdateRegion    (NULL)
   , m_pClipRegion      (NULL)
-  , m_pEffectiveRegion(NULL)
-  , m_lpStation        (NULL)
+  , m_pEffectiveRegion (NULL)
 {
   GXLPWND lpWnd = GXWND_PTR(hWnd);
   Initialize(hWnd, lpWnd == NULL ? NULL : lpWnd->m_prgnUpdate, GXDCX_PARENTCLIP | GXDCX_CLIPSIBLINGS);
 }
+
 GXWndCanvas::GXWndCanvas(GXHWND hWnd, GRegion* pRegion)
-  : m_hWnd            (hWnd)
-  , m_pNative          (NULL)
-  , m_pSystemRegion    (NULL)
-  , m_pUpdateRegion    (NULL)
-  , m_pClipRegion      (NULL)
+  : m_pNative(NULL)
+  , m_hWnd(hWnd)
+  , m_lpStation(NULL)
+  , m_pSystemRegion(NULL)
+  , m_pUpdateRegion(NULL)
+  , m_pClipRegion(NULL)
   , m_pEffectiveRegion(NULL)
-  , m_lpStation        (NULL)
 {
   Initialize(hWnd, pRegion, GXDCX_PARENTCLIP | GXDCX_CLIPSIBLINGS);
 }
+
 GXWndCanvas::GXWndCanvas(GXHWND hWnd, GRegion* pRegion, GXDWORD dwFlags)
-  : m_hWnd            (hWnd)
-  , m_pNative          (NULL)
-  , m_pSystemRegion    (NULL)
-  , m_pUpdateRegion    (NULL)
-  , m_pClipRegion      (NULL)
+  : m_pNative(NULL)
+  , m_hWnd(hWnd)
+  , m_lpStation(NULL)
+  , m_pSystemRegion(NULL)
+  , m_pUpdateRegion(NULL)
+  , m_pClipRegion(NULL)
   , m_pEffectiveRegion(NULL)
-  , m_lpStation        (NULL)
 {
   Initialize(hWnd, pRegion, dwFlags);
 }
@@ -132,12 +135,12 @@ GXHRESULT GXWndCanvas::DrawImage(GXImage*pImage, GXINT xPos, GXINT yPos, const G
   return m_pNative->DrawImage(pImage, xPos, yPos, rcSrc);
 }
 
-GXINT GXWndCanvas::DrawText(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
+GXINT GXWndCanvas::DrawTextW(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
 {
   return m_pNative->DrawTextW(pFTFont, lpString, nCount, lpRect, uFormat, crText);
 }
 
-GXINT GXWndCanvas::DrawGlowText(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius)
+GXINT GXWndCanvas::DrawGlowTextW(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius)
 {
   return m_pNative->DrawTextW(pFTFont, lpString, nCount, lpRect, uFormat, Color);
 }

@@ -1,14 +1,14 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// ȫ��ͷ�ļ�
+﻿#ifndef _DEV_DISABLE_UI_CODE
+// 全局头文件
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ��׼�ӿ�
+// 标准接口
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GXCanvas.H>
 
-// ˽��ͷ�ļ�
+// 私有头文件
 #include <User/GXWindow.h>
 #include "GrapX/GXUser.H"
 
@@ -165,13 +165,13 @@ extern "C"
   //}
   GXBOOL GXCARET::IsVisible()
   {
-    // TODO: �Ժ��Ƿ��ܰѹ����˸���뵽RichFX����?
+    // TODO: 以后是否能把光标闪烁加入到RichFX中呢?
     return (flag & GXCARET_SHOWING) == GXCARET_SHOWING;
   }
 
   GXBOOL GXCARET::Tick()
   {
-    // TODO: �Ժ��Ƿ��ܰѹ����˸���뵽RichFX����?
+    // TODO: 以后是否能把光标闪烁加入到RichFX中呢?
     const GXDWORD dwUpdateFlag = (GXCARET_AVAILABLE | GXCARET_VISIBLE);
     if(
       (flag & dwUpdateFlag) == dwUpdateFlag &&
@@ -188,7 +188,7 @@ extern "C"
 
   GXHRESULT GXCARET::PaintCaret(GXCanvas* pCanvas)
   {
-    // TODO: �Ժ��Ƿ��ܰѹ����˸���뵽RichFX����?
+    // TODO: 以后是否能把光标闪烁加入到RichFX中呢?
     if(flag & GXCARET_BLINK)
     {
       LPGXWND lpWnd = GXWND_PTR(hWnd);

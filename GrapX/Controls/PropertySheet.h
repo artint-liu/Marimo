@@ -38,7 +38,7 @@ namespace GXUIEXT
         HT_SPINDOWN,
         HT_SPINTRACK,
       };
-      enum FLAGS
+      enum FLAGS : GXDWORD
       {
         F_DISABLE = 0x00008000,
         F_VISIBLE = 0x80000000,

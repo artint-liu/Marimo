@@ -182,7 +182,7 @@ static const GXWCHAR buttonW[] = {'B','u','t','t','o','n',0};
 //    0                    /* brush */
 //};
 
-GXWNDCLASSEX WndClassEx_MyButton = { sizeof(GXWNDCLASSEX), GXCS_DBLCLKS, ButtonWndProcW, 0L, NB_EXTRA_BYTES,
+GXWNDCLASSEX WndClassEx_MyButton = { sizeof(GXWNDCLASSEX), GXCS_DBLCLKS, (GXWNDPROC)ButtonWndProcW, 0L, NB_EXTRA_BYTES,
 (GXHINSTANCE)gxGetModuleHandle(NULL), NULL, gxLoadCursor(NULL, (GXLPCWSTR)GXIDC_ARROW), NULL, NULL,
 GXWE_BUTTONW, NULL };
 

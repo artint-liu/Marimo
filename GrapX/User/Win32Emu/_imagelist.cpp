@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
 #ifndef IMAGELIST
 /*
 *  ImageList implementation
@@ -72,8 +72,8 @@
 #include <GrapX/WineComm.H>
 #include "_imagelist.h"
 
-#pragma warning( disable : 4244 )  // _w64ĞÍÊıÓëÆÕÍ¨ÀàĞÍµÄÏà»¥×ª»»
-#pragma warning( disable : 4018 )  // ÎŞ·ûºÅÓëÓĞ·ûºÅÊı±È½Ï
+#pragma warning( disable : 4244 )  // _w64å‹æ•°ä¸æ™®é€šç±»å‹çš„ç›¸äº’è½¬æ¢
+#pragma warning( disable : 4018 )  // æ— ç¬¦å·ä¸æœ‰ç¬¦å·æ•°æ¯”è¾ƒ
 
 #define MAX_OVERLAYIMAGE 15
 

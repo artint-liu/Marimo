@@ -1,9 +1,9 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include "GrapX/GUnknown.H"
 #include "GrapX/GResource.H"
 #include "GrapX/GRegion.H"
@@ -12,7 +12,7 @@
 #include "GrapX/GXImage.H"
 #include "GrapX/GXKernel.H"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "GrapX/GXUser.H"
 #include <User/GXWindow.h>
 #include <User/DesktopWindowsMgr.h>
@@ -54,7 +54,7 @@ GXWindowsSurface::GXWindowsSurface(GXLPSTATION lpStation, GXHWND hWnd)
   //pGraphics->CreateTexture(&m_pDepthStencil, TEXSIZE_SAME, TEXSIZE_SAME, 1, NULL, GXFMT_D24S8, GXPOOL_DEFAULT);
   m_pRenderTar = pGraphics->CreateImage(TEXSIZE_SAME, TEXSIZE_SAME, GXFMT_A8R8G8B8, TRUE, NULL);
 
-  // ¸´Î»Éè±¸ºóÕû¸öÒ³ÃæÒªÖØ»æ£¬ÕâÀïÒªÉèÖÃ·¶Î§
+  // å¤ä½è®¾å¤‡åæ•´ä¸ªé¡µé¢è¦é‡ç»˜ï¼Œè¿™é‡Œè¦è®¾ç½®èŒƒå›´
   m_pRenderTar->GetTextureUnsafe()->GetDimension(&nWidth, &nHeight);
   gxSetRect(&rcScrUpdate, 0, 0, nWidth, nHeight);
 
@@ -79,7 +79,7 @@ GXWindowsSurface::~GXWindowsSurface()
 
 RGNCOMPLEX GXWindowsSurface::InvalidateRegion(const GRegion* pRegion)
 {
-  // TODO: Ó¦¸Ã¼ì²é´«ÈëµÄÇøÓòÊÇ·ñ³¬³öÁË¿ÉÒÔ»æÍ¼µÄÃæ»ı
+  // TODO: åº”è¯¥æ£€æŸ¥ä¼ å…¥çš„åŒºåŸŸæ˜¯å¦è¶…å‡ºäº†å¯ä»¥ç»˜å›¾çš„é¢ç§¯
   return m_prgnUpdate->Union(pRegion);
 }
 
@@ -111,7 +111,7 @@ GXBOOL GXWindowsSurface::Scroll(int dx, int dy, LPGXCRECT lprcScroll, GRegion* l
   GRegion* prgnUpdate = NULL;
   m_pRenderTar->Scroll(dx, dy, lprcScroll, lprgnClip, &prgnUpdate);
 
-  // ½«¸üĞÂÇøÌí¼Óµ½SurfaceÖĞ
+  // å°†æ›´æ–°åŒºæ·»åŠ åˆ°Surfaceä¸­
   if(prgnUpdate != NULL)
     m_prgnUpdate->Union(prgnUpdate);
 
@@ -231,7 +231,7 @@ GXHWND GXWindowsSurface::SetExclusiveWnd(GXHWND hWnd, GXDWORD dwFlags)
     {
       pOldWndOldSur = lpOldWnd->m_pWinsSurface;
 
-      // °Ñ×ÀÃæSurface·ÖÅä¸øÕâ¸ö´°¿Ú
+      // æŠŠæ¡Œé¢Surfaceåˆ†é…ç»™è¿™ä¸ªçª—å£
       lpOldWnd->m_pWinsSurface = pDesktopSurface;
       pDesktopSurface->AddRef();
 
@@ -261,13 +261,13 @@ GXHWND GXWindowsSurface::SetExclusiveWnd(GXHWND hWnd, GXDWORD dwFlags)
   {
     if(prgnOldWnd != NULL)
     {
-      // ²âÊÔÊÇ·ñÏà½»,²»Ïà½»ÔòÊ¡µôÒ»´Î¸´ÖÆ
+      // æµ‹è¯•æ˜¯å¦ç›¸äº¤,ä¸ç›¸äº¤åˆ™çœæ‰ä¸€æ¬¡å¤åˆ¶
 
       GXRECT rcNew, rcOld, rcResult;
       prgnNewWnd->GetBounding(&rcNew);
       prgnOldWnd->GetBounding(&rcOld);
 
-      // ¼ÆËãĞèÒª¸´ÖÆµÄÎŞĞ§ÇøÓò
+      // è®¡ç®—éœ€è¦å¤åˆ¶çš„æ— æ•ˆåŒºåŸŸ
       if(pOldWndOldSur->m_prgnUpdate->GetComplexity() > RC_NULL && prgnOldWnd->GetComplexity() > RC_NULL) {
         prgnOldWndOldSurInvld = pOldWndOldSur->m_prgnUpdate->CreateIntersect(prgnOldWnd);
       }
@@ -290,7 +290,7 @@ GXHWND GXWindowsSurface::SetExclusiveWnd(GXHWND hWnd, GXDWORD dwFlags)
         m_pRenderTar->BitBltRegion(pBackBufferImage, 0, 0, prgnNewWnd);
       }
 
-      // ÒÆ¶¯
+      // ç§»åŠ¨
       if(prgnOldWndOldSurInvld != NULL)
       {
         ASSERT(pDesktopSurface == pNewWndOldSur);
@@ -304,12 +304,12 @@ GXHWND GXWindowsSurface::SetExclusiveWnd(GXHWND hWnd, GXDWORD dwFlags)
         //pNewWndOldSur->m_prgnUpdate->Subtract(prgnNewWndOldSurInvld);
       }
 
-      // pNewWndOldSurÒªÉèÖÃNewWndµÄÎŞĞ§Çø£¬²¢ÅÅ³ıOldWndµÄÓĞĞ§Çø
+      // pNewWndOldSurè¦è®¾ç½®NewWndçš„æ— æ•ˆåŒºï¼Œå¹¶æ’é™¤OldWndçš„æœ‰æ•ˆåŒº
       GRegion* prgnDesktopSurUpdate = prgnNewWnd->CreateSubtract(prgnOldWnd);
       pDesktopSurface->InvalidateRegion(prgnDesktopSurUpdate);
       SAFE_RELEASE(prgnDesktopSurUpdate);
     }
-    else // Õâ¸ö±íÃæÃ»ÓĞ¾ÉµÄ¶ÀÕ¼´°¿Ú (prgnOldWnd == NULL)
+    else // è¿™ä¸ªè¡¨é¢æ²¡æœ‰æ—§çš„ç‹¬å çª—å£ (prgnOldWnd == NULL)
     {
       if(pNewWndOldSur->m_prgnUpdate->GetComplexity() > RC_NULL && 
         prgnNewWnd->GetComplexity() > RC_NULL)
@@ -323,7 +323,7 @@ GXHWND GXWindowsSurface::SetExclusiveWnd(GXHWND hWnd, GXDWORD dwFlags)
         //pNewWndOldSur->m_prgnUpdate->Subtract(prgnNewWndOldSurInvld);
       }
 
-      // pNewWndOldSurÒªÉèÖÃNewWndµÄÎŞĞ§Çø
+      // pNewWndOldSurè¦è®¾ç½®NewWndçš„æ— æ•ˆåŒº
       pNewWndOldSur->InvalidateRegion(prgnNewWnd);
     }
   }
@@ -359,10 +359,10 @@ GXHWND GXWindowsSurface::SetExclusiveWnd(GXHWND hWnd, GXDWORD dwFlags)
   return hOldWnd;
 }
 
-// ·µ»ØÖµÊÇ m_pUpdate µÄ×´Ì¬
+// è¿”å›å€¼æ˜¯ m_pUpdate çš„çŠ¶æ€
 RGNCOMPLEX GXWindowsSurface::ValidateBlank()
 {
-  // Çó³öWindowsÖ®ÍâµÄ¸üĞÂÇø, ÕâĞ©ÇøÓòÒòÎªÃ»ÓĞ´°¿Ú, ¿ÉÒÔÖ±½Ó¼ôµô
+  // æ±‚å‡ºWindowsä¹‹å¤–çš„æ›´æ–°åŒº, è¿™äº›åŒºåŸŸå› ä¸ºæ²¡æœ‰çª—å£, å¯ä»¥ç›´æ¥å‰ªæ‰
   RGNCOMPLEX rc = RC_ERROR;
   if(m_hExclusiveWnd != NULL)
   {
@@ -371,7 +371,7 @@ RGNCOMPLEX GXWindowsSurface::ValidateBlank()
     m_prgnUpdate->GetBounding(&rcUpdate);
     gxGetWindowRect(m_hExclusiveWnd, &rcWindow);
 
-    // Èç¹û¸üĞÂ¾ØĞÎÔÚ´°¿Ú¾ØĞÎÖ®ÄÚ
+    // å¦‚æœæ›´æ–°çŸ©å½¢åœ¨çª—å£çŸ©å½¢ä¹‹å†…
     if(rcUpdate.left >= rcWindow.left && rcUpdate.top >= rcWindow.top &&
       rcUpdate.right <= rcWindow.right && rcUpdate.bottom >= rcWindow.bottom)
     {

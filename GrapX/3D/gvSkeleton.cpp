@@ -286,10 +286,10 @@ GXHRESULT GVAnimationTrack::CreateFromRepository(GVAnimationTrack** ppTrack, Sma
 //////////////////////////////////////////////////////////////////////////
 GVSkeleton::GVSkeleton( GVScene* pScene ) : GVMesh(pScene->GetGraphicsUnsafe(), GXMAKEFOURCC('S','K','T','N'))
   , m_pScene      (pScene)
-  , m_nRefFrame   (0)
-  , m_fResidue    (0)
   , m_pCurrTrack  (NULL)
   , m_idCurTrack  (0)
+  , m_nRefFrame   (0)
+  , m_fResidue    (0)
 {
   SetName("skeleton");
   RESET_FLAG(m_dwFlags, GVNF_VISIBLE);
@@ -383,7 +383,7 @@ GXBOOL GVSkeleton::BuildRenderData(GXGraphics* pGraphics)
   }
   else if(m_BoneDict.size() == 0)
   {
-    CLOG_ERROR(__FUNCTION__": Must call BuildDict() first!\n");
+    CLOG_ERROR("%s : Must call BuildDict() first!\n", __FUNCTION__);
     return FALSE;
   }
 
@@ -493,7 +493,7 @@ GXHRESULT GVSkeleton::CreateFromRepository(GVSkeleton** ppSkeleton, GVScene* pSc
     return GX_FAIL;
   }
 
-  if(GXFAILED(pSkeleton->LoadFile(pStorage)))
+  if(GXFAILED(pSkeleton->LoadFile(pScene->GetGraphicsUnsafe(), pStorage)))
   {
     pSkeleton->Release();
     pSkeleton = NULL;
@@ -674,7 +674,7 @@ GXHRESULT GVSkeleton::SaveFile(SmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVSkeleton::LoadFile(SmartRepository* pStorage)
+GXHRESULT GVSkeleton::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
 {
   Clear();
   int nBoneCount;
@@ -707,7 +707,7 @@ void GVSkeleton::DbgDump()
     it != m_aBones.end(); ++it, ++i)
   {
     const float4& vPos = it->matAbs.GetRow(3);
-    TRACE("\n\n%d:%s %d (%f,%f,%f)\n", i, it->Name, it->nParent, vPos.x, vPos.y, vPos.z);
+    TRACE("\n\n%d:%s %d (%f,%f,%f)\n", i, (const char*)it->Name, it->nParent, vPos.x, vPos.y, vPos.z);
     //TRACE("%s\n", it->Name);
 #ifdef FBX_SDK
     Dump(it->fmAbs);

@@ -330,7 +330,7 @@ public:
   {
     clstd::File file;
     if( ! file.CreateAlwaysW(szFilename)) {
-      CLOG_ERROR(__FUNCTION__": Can not create file(%s).\n", clStringA(szFilename));
+      CLOG_ERROR("%s : Can not create file(%s).\n", __FUNCTION__, clStringA(szFilename));
       return FALSE;
     }
 

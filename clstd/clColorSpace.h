@@ -265,7 +265,7 @@ namespace clstd
 
   template<class _TDataDef> struct _COLOR_RGBTEMPL : public _TDataDef
   {
-    _COLOR_RGBTEMPL(){}
+    _COLOR_RGBTEMPL() TRIVIAL_DEFAULT;
 
     _COLOR_RGBTEMPL(const Internal::COLOR_ABGR& abgr)
     {
@@ -305,10 +305,10 @@ namespace clstd
 
   template<class _TDataDef> struct _COLOR_RGBTEMPL_F : public _TDataDef
   {
-    _COLOR_RGBTEMPL_F()
-    {
-      this->r = this->g = this->b = this->a = 1;
-    }
+    _COLOR_RGBTEMPL_F() TRIVIAL_DEFAULT;
+    //{
+    //  this->r = this->g = this->b = this->a = 1;
+    //}
     _COLOR_RGBTEMPL_F(u32 aarrggbb)
     {
       set(aarrggbb);

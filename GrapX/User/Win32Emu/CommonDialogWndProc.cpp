@@ -1,18 +1,18 @@
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
 //#include <Smart/smartstream.h>
 //#include <Smart/SmartProfile.h>
 
-// Æ½Ì¨Ïà¹Ø
+// å¹³å°ç›¸å…³
 #include "GrapX/GResource.H"
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
 //#include "Include/DataInfrastructure.H"
 //#include "clstd/clPathFile.H"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "User/GXWindow.h"
 #include "GrapX/GXUser.H"
 //#include "Include/GXGDI.H"
@@ -65,7 +65,7 @@ GXLRESULT GXCALLBACK CommDialogWndProcEx(GXHWND hWnd, GXUINT message, GXWPARAM w
       return pDlgLog ? (GXLRESULT)(GXLPCWSTR)pDlgLog->strName : NULL;
     }
 
-    // ºöÂÔGXDWL_MSGRESULT, Ö±½Ó°ÑDlg´¦Àíº¯ÊıµÄ·µ»ØÖµµ±×÷WndµÄ·µ»ØÖµ
+    // å¿½ç•¥GXDWL_MSGRESULT, ç›´æ¥æŠŠDlgå¤„ç†å‡½æ•°çš„è¿”å›å€¼å½“ä½œWndçš„è¿”å›å€¼
   case GXWM_ERASEBKGND:
     if(lpDlgProc != NULL) {
       return lpDlgProc(hWnd, message, wParam, lParam);
@@ -113,7 +113,7 @@ GXLRESULT GXCALLBACK CommDialogWndProcEx(GXHWND hWnd, GXUINT message, GXWPARAM w
       LPDLGLOG pDlgLog = (DLGLOG*)gxGetWindowLong(hWnd, GXDWL_DLGLOG);
       if(pDlgLog->pLayout != NULL) {
         GXPOINT pt = {GXGET_X_LPARAM(lParam), GXGET_Y_LPARAM(lParam)};
-        pDlgLog->pLayout->OnHitTest(&pt);// TODO: Õâ¸öÈç¹ûÊÇfalseÒ²µÄµ÷ÓÃpDlgLog->pDlgProc,ÉÔºó¸ÄÒ»ÏÂ,ËùÓĞpDlgLog->pLayout¶¼ÓĞÎÊÌâ
+        pDlgLog->pLayout->OnHitTest(&pt);// TODO: è¿™ä¸ªå¦‚æœæ˜¯falseä¹Ÿçš„è°ƒç”¨pDlgLog->pDlgProc,ç¨åæ”¹ä¸€ä¸‹,æ‰€æœ‰pDlgLog->pLayoutéƒ½æœ‰é—®é¢˜
       }
 
       //if( ! pDlgLog->pDlgProc(hWnd, message, wParam, lParam)) {
@@ -143,7 +143,7 @@ RET_FROM_MSGRESULT:
     if(lval != 0) {
       return gxSetWindowLongW(hWnd, GXDWL_MSGRESULT, 0);
     }
-    //return lval; // ²»ÄÜµ¥´¿Ìø¹ı
+    //return lval; // ä¸èƒ½å•çº¯è·³è¿‡
   }
   return gxDefWindowProc(hWnd, message, wParam, lParam);
 }
@@ -172,12 +172,12 @@ GXLRESULT GXCALLBACK CommDialogWndProc(GXHWND hWnd, GXUINT message, GXWPARAM wPa
   }
   return CommDialogWndProcEx(hWnd, message, wParam, lParam);
 
-  //ASSERT(0); // TODO: ĞŞ¸ÄÁË¶Ô»°¿òÊı¾İ´¢´æ, Õâ¸öÃ»ÓĞ¸ú×ÅĞŞ¸Ä, ĞŞ¸ÄÍêÈ¥µô!
+  //ASSERT(0); // TODO: ä¿®æ”¹äº†å¯¹è¯æ¡†æ•°æ®å‚¨å­˜, è¿™ä¸ªæ²¡æœ‰è·Ÿç€ä¿®æ”¹, ä¿®æ”¹å®Œå»æ‰!
   //if(message == GXWM_NCCREATE)
   //{
   //  GXCREATESTRUCTW cs = *(LPGXCREATESTRUCTW)lParam;
   //  GXLPARAM *aParam = (GXLPARAM*)cs.lpCreateParams;
-  //  cs.lpCreateParams = (GXLPVOID)aParam[0];  // [ÓÃ»§²ÎÊı][¶Ô»°¿ò´¦Àíº¯Êı]
+  //  cs.lpCreateParams = (GXLPVOID)aParam[0];  // [ç”¨æˆ·å‚æ•°][å¯¹è¯æ¡†å¤„ç†å‡½æ•°]
   //  gxSetWindowLongW(hWnd, GXDWL_DLGPROC, aParam[1]);
 
   //  return TRUE;

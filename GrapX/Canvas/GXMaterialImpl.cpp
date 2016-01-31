@@ -563,7 +563,7 @@ int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, GXSIZE_T nCount)
   ASSERT(clstd::strcmpT(pParameters[0].szName, "SAMPLER") == 0);
   handle = GetHandle(pParameters[0].szValue);
 
-  int i = 1;
+  GXSIZE_T i = 1;
   for(; i < nCount; i++)
   {
     if(clstd::strcmpT(pParameters[i].szName, "SAMPLER") == 0) {
@@ -662,7 +662,7 @@ GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, GXSIZE_T nC
   float4x4 mat;
   clStringArrayA aStrings;
   GXUINT handle = 0;
-  for(int i = 0; i < nCount; i++)
+  for(GXSIZE_T i = 0; i < nCount; i++)
   {
     if(pParameters[i].szName == NULL ||
       pParameters[i].szValue == NULL ||
@@ -748,6 +748,11 @@ GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, GXSIZE_T nC
     //    SAFE_RELEASE(pTexture);
     //  }
     //  break;
+    case GXUB_SAMPLER2D:
+    case GXUB_UNDEFINED:
+    case GXUB_SAMPLER3D:
+      CLBREAK;
+      break;
     }
   }
   return GX_OK;
@@ -760,7 +765,7 @@ GXHRESULT GXMaterialInstImpl::SetRenderStates(GXDEFINITION* pParameters, GXSIZE_
   GXBOOL bBlend = FALSE;
   GXBOOL bDepthStencil = FALSE;
 
-  for(int i = 0; i < nCount; i++)
+  for(GXSIZE_T i = 0; i < nCount; i++)
   {
     if(pParameters[i].szName == NULL ||
       pParameters[i].szValue == NULL ||

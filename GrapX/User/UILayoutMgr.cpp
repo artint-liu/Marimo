@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
 #include "GrapX.H"
 #include "User/UILayoutMgr.h"
 #include "GrapX/GXUser.H"
@@ -68,7 +68,7 @@ namespace GXUI
       const DLGPANEL& ChildPanel = pPanel->aPanels[i];
       const GXDWORD dwChildType = ChildPanel.dwStyle & LPS_TYPEMASK;
 
-      // ¼ÆËã·Ö¸îÇøÓò
+      // è®¡ç®—åˆ†å‰²åŒºåŸŸ
       GXRECT rcPart;
       CalcPanelFactor(lpRect, pPanel->fScale);
       CalcRect(lpRect, i, &rcPart);
@@ -133,12 +133,12 @@ namespace GXUI
     if(GetPanelType() == LPS_HBINARYPANEL)
     {
       nPos = ptMouse->y;
-      idLoadCursor = IDC_SIZENS;
+      idLoadCursor = (GXLPCWSTR)IDC_SIZENS;
     }
     else if(GetPanelType() == LPS_VBINARYPANEL)
     {
       nPos = ptMouse->x;
-      idLoadCursor = IDC_SIZEWE;
+      idLoadCursor = (GXLPCWSTR)IDC_SIZEWE;
     }
     else
       return FALSE;
@@ -166,7 +166,7 @@ namespace GXUI
 
   GXLRESULT BinaryPanel::OnSize(GXRECT* rect)
   {
-    // ÏòºóÒ»¸ö¶ÔÏó¶ÔÆë
+    // å‘åä¸€ä¸ªå¯¹è±¡å¯¹é½
     if(GetKeepIndex() == LPS_KEEPSECOND)
     {
       if(GetPanelType() == LPS_VBINARYPANEL) {
@@ -191,7 +191,7 @@ namespace GXUI
       GXRECT rcPart;
       CalcRect(rect, i, &rcPart);
 
-      // ¼ÇÂ¼ºóÓëÏŞÖÆÇøÓòÇó½», ÕâÑùÈç¹ûÓĞÇøÓò±»"¼·"Ã»ÁË»¹ÄÜ»Ö¸´
+      // è®°å½•åä¸é™åˆ¶åŒºåŸŸæ±‚äº¤, è¿™æ ·å¦‚æœæœ‰åŒºåŸŸè¢«"æŒ¤"æ²¡äº†è¿˜èƒ½æ¢å¤
       m_rect = *rect;
       gxIntersectRect(&rcPart, &rcPart, rect);
 
@@ -296,7 +296,7 @@ namespace GXUI
       const DLGPANEL& ChildPanel = pPanel->aPanels[i];
       const GXDWORD dwChildType = ChildPanel.dwStyle & LPS_TYPEMASK;
 
-      // ¼ÆËã·Ö¸îÇøÓò
+      // è®¡ç®—åˆ†å‰²åŒºåŸŸ
       GXRECT rcPart;
       CalcPanelFactor(lpRect, pPanel->fScale);
       CalcRect(lpRect, i, &rcPart);
@@ -372,19 +372,19 @@ namespace GXUI
       pResult->hCursor = NULL;
       if(gxPtInRect(&rcCross, *ptMouse))
       {
-        pResult->hCursor = gxLoadCursor(NULL, IDC_SIZEALL);
+        pResult->hCursor = gxLoadCursor(NULL, (GXLPCWSTR)IDC_SIZEALL);
         pResult->ptParam.x = ptMouse->x - m_uPanel[0];
         pResult->ptParam.y = ptMouse->y - m_uPanel[1];
       }
       else if(ptMouse->x >= rcCross.left && ptMouse->x <= rcCross.right)
       {
-        pResult->hCursor = gxLoadCursor(NULL, IDC_SIZEWE);
+        pResult->hCursor = gxLoadCursor(NULL, (GXLPCWSTR)IDC_SIZEWE);
         pResult->ptParam.x = ptMouse->x - m_uPanel[0];
         pResult->ptParam.y = INT_MAX;
       }
       else if(ptMouse->y >= rcCross.top && ptMouse->y <= rcCross.bottom)
       {
-        pResult->hCursor = gxLoadCursor(NULL, IDC_SIZENS);
+        pResult->hCursor = gxLoadCursor(NULL, (GXLPCWSTR)IDC_SIZENS);
         pResult->ptParam.x = INT_MAX;
         pResult->ptParam.y = ptMouse->y - m_uPanel[1];
       }
@@ -440,7 +440,7 @@ namespace GXUI
 
   GXLRESULT CrossPanel::OnSize(GXRECT* rect)
   {
-    // ÏòºóÒ»¸ö¶ÔÏó¶ÔÆë
+    // å‘åä¸€ä¸ªå¯¹è±¡å¯¹é½
     if(GetKeepIndex() == LPS_KEEPSECOND)
     {
       m_uPanel[0] = m_uPanel[0] + rect->right - m_rect.right;
@@ -537,7 +537,7 @@ namespace GXUI
         cur.x += (nWidth + c_nGap);
         nMaxHeight = clMax(nMaxHeight, rcWnd.bottom - rcWnd.top);
         if(TEST_FLAG(it->dwStyle, LPS_INT_RETURN)) {
-          cur.x = rect->right; // Õ¼Âú¿í¶È, Ê¹Ç¿ÖÆ»»ĞĞ
+          cur.x = rect->right; // å æ»¡å®½åº¦, ä½¿å¼ºåˆ¶æ¢è¡Œ
         }
 
         //aRects.push_back(rcWnd);

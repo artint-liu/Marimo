@@ -1,11 +1,11 @@
-//#include "stdafx.h"
+ï»¿//#include "stdafx.h"
 //#include <tchar.h>
 //#include <windows.h>
 //#include <commdlg.h>
 //#include <uxtheme.h>
 //#include <vsstyle.h>
 
-// È«¾ÖÍ·ÎÄ¼ş
+// å…¨å±€å¤´æ–‡ä»¶
 #include "GrapX.H"
 #include "GrapX/GResource.H"
 #include "GrapX/GXGraphics.H"
@@ -51,10 +51,10 @@ void trace(char* fmt, ...);
 
 namespace GXUIEXT
 {
-  // ¿É¶Á»¯¸¡µã×Ö·û´®
+  // å¯è¯»åŒ–æµ®ç‚¹å­—ç¬¦ä¸²
   static void ReadlizeFloatString(clStringW& str, int nSignificance = 5)
   {
-    TRACEW(L"%s => ", str);
+    TRACEW(L"%s => ", (GXLPCWSTR)str);
     size_t p = str.Find('.');
     if(p == clStringW::npos) {
       return;
@@ -99,7 +99,7 @@ namespace GXUIEXT
     }
 
     str.ReleaseBuffer();
-    TRACEW(L"%s\n", str);
+    TRACEW(L"%s\n", (GXLPCWSTR)str);
     CLNOP;
   }
 
@@ -375,7 +375,7 @@ PROCESS_IT:
         if(m_hEdit != NULL)
         {
           INT nLen = gxGetWindowTextLengthA(m_hEdit) + 1;
-          CHAR* pbuf = new CHAR[nLen];
+          GXCHAR* pbuf = new GXCHAR[nLen];
           gxGetWindowTextA(m_hEdit, pbuf, nLen);
           if(item.eType == PST_STRING) {
             item.strVal = pbuf;
@@ -388,9 +388,9 @@ PROCESS_IT:
           }
           else if(item.eType == PST_FLOAT) {
             item.fVal = (float)clstd::_xstrtof(pbuf);
-            //sscanf(pbuf, "%f", &item.fVal);  // TODO: »»³ÉclStringÖ§³ÖµÄ
+            //sscanf(pbuf, "%f", &item.fVal);  // TODO: æ¢æˆclStringæ”¯æŒçš„
           }
-          SAFE_DELETE(pbuf);
+          SAFE_DELETE_ARRAY(pbuf);
           NotifyParent(GXNM_RETURN, item);
         }
       }
@@ -520,7 +520,7 @@ PROCESS_IT:
           DrawUpDownControl(hdc, &rect, nBtnState);
           gxSetTimer(m_hWnd, idTimer, 100, NULL);
           m_bChangedNumber = FALSE;
-          SubmitString(FALSE); // »áÇå³ı m_nEditing
+          SubmitString(FALSE); // ä¼šæ¸…é™¤ m_nEditing
           m_SpinBtnDown.nVal = item.nVal;
           m_nEditing = nItem;
         }
@@ -641,7 +641,7 @@ PROCESS_IT:
           }
           if(m_hListBox)
           {
-            GXBOOL bRet = (m_nEditing == nItem);  // Á½´ÎÑ¡ÔñÁËÍ¬Ò»¸öÏîÄ¿Ôò¹Ø±ÕListBox
+            GXBOOL bRet = (m_nEditing == nItem);  // ä¸¤æ¬¡é€‰æ‹©äº†åŒä¸€ä¸ªé¡¹ç›®åˆ™å…³é—­ListBox
             SubmitList(FALSE);
             if(bRet)
               goto RESET_PARAM;
@@ -757,7 +757,7 @@ PROCESS_IT:
             break;
           case PST_COLOR:
             {
-              // ²»Ö§³ÖÑÕÉ«Ñ¡Ôñ
+              // ä¸æ”¯æŒé¢œè‰²é€‰æ‹©
               //CHOOSECOLOR sChooseColor;
               //memset(&sChooseColor, 0, sizeof(sChooseColor));
               //sChooseColor.lStructSize  = sizeof(sChooseColor);
@@ -786,14 +786,14 @@ PROCESS_IT:
             {
               GXBOOL bChangeTex = FALSE;
 #ifdef _WINDOWS
-              OPENFILENAME ofn;
+              OPENFILENAMEW ofn;
               GXWCHAR szFilename[MAX_PATH];
               InlSetZeroT(ofn);
               InlSetZeroT(szFilename);
 
               ofn.lStructSize = sizeof(ofn);
               ofn.hInstance = GetModuleHandle(NULL);
-              ofn.lpstrFilter = L"ËùÓĞÖ§³ÖµÄÍ¼Ïñ¸ñÊ½\0*.jpg;*.png;*.dds;*.tga;*.bmp;*.tif\0all files(*.*)\0*.*\0";
+              ofn.lpstrFilter = L"æ‰€æœ‰æ”¯æŒçš„å›¾åƒæ ¼å¼\0*.jpg;*.png;*.dds;*.tga;*.bmp;*.tif\0all files(*.*)\0*.*\0";
               ofn.lpstrFile = szFilename;
               ofn.nMaxFile = MAX_PATH;
               ofn.lpstrTitle = L"Open Image File";
@@ -802,7 +802,7 @@ PROCESS_IT:
               {
                 if(item.strVal != szFilename)
                 {
-                  item.strVal = szFilename; // FIXME: ×ª»»ÎªÏà¶ÔÂ·¾¶?
+                  item.strVal = szFilename; // FIXME: è½¬æ¢ä¸ºç›¸å¯¹è·¯å¾„?
                   bChangeTex = TRUE;
                 }
 
@@ -1036,7 +1036,7 @@ RESET_PARAM:
           ITEM& item = m_pCurPage->GetList()[m_nEditing];
           m_pCurPage->GetItemRect(m_nEditing, &rcItem);
           INT nOffset = ((rcItem.top + rcItem.bottom) >> 1) - ptPos.y + 1;
-          union  // ±£´æµ±Ç°ÏÔÊ¾µÄÖµ
+          union  // ä¿å­˜å½“å‰æ˜¾ç¤ºçš„å€¼
           {
             INT    nVal;
             float  fVal;
@@ -1103,11 +1103,11 @@ RESET_PARAM:
 
         m_bShowScorollBar = TRUE;
 
-        // ¹ö¶¯´°¿ÚÄÚÈİ
-        // ²»ÄÜÊ¹ÓÃ ScrollWindowEx ´øCHILDµÄ·½Ê½,ÕâÖĞ·½Ê½Ö»ÄÜ¹ö¶¯×Ó´°¿Ú,¶ø²»Ó°Ïì×Ó´°¿ÚµÄ×Ó´°¿Ú
+        // æ»šåŠ¨çª—å£å†…å®¹
+        // ä¸èƒ½ä½¿ç”¨ ScrollWindowEx å¸¦CHILDçš„æ–¹å¼,è¿™ä¸­æ–¹å¼åªèƒ½æ»šåŠ¨å­çª—å£,è€Œä¸å½±å“å­çª—å£çš„å­çª—å£
         gxScrollWindow(m_hWnd, 0, -nTopIndex, &rcClient, NULL);
 
-        // ÏÂÃæµÄ´úÂëÈ«¶¼ÊÇÎªÁË½â¾ö¹ö¶¯ÌõÉÁË¸µÄÎÊÌâ,¿¿ÁËµÄ!
+        // ä¸‹é¢çš„ä»£ç å…¨éƒ½æ˜¯ä¸ºäº†è§£å†³æ»šåŠ¨æ¡é—ªçƒçš„é—®é¢˜,é äº†çš„!
         rcClient.left = rcClient.right - 10;
         gxInvalidateRect(m_hWnd, &rcClient, TRUE);
         GXHDC hdc = gxGetDC(m_hWnd);
@@ -1142,7 +1142,7 @@ RESET_PARAM:
       {
         ITEM& item = *it;
 
-        // ²âÊÔ×Ö·û´®¸ß¶È
+        // æµ‹è¯•å­—ç¬¦ä¸²é«˜åº¦
         rect.left  = 0;
         rect.top = 0;
         if(item.dwStyle & ITEM::F_VISIBLE)
@@ -1161,7 +1161,7 @@ RESET_PARAM:
             gxSetRect(&rect, 0, 0, rcClient.right, (rcClient.right >> 2) * 3);
           }
 #ifdef _DEBUG
-          // ÕâÃ´Ğ´ÊÇÎªÁË¼ì²éĞÂÔöÀàĞÍµÄ
+          // è¿™ä¹ˆå†™æ˜¯ä¸ºäº†æ£€æŸ¥æ–°å¢ç±»å‹çš„
           else if(item.eType == PST_UNKNOWN ||
             item.eType == PST_BOOLEAN       ||
             item.eType == PST_INTEGER       ||
@@ -1179,7 +1179,7 @@ RESET_PARAM:
               gxDrawTextW(hdc, item.strName, (int)item.strName.GetLength(), &rect, DT_SINGLELINE | DT_CALCRECT);
           }
           else {
-            CLBREAK; // ĞÂÔöÀàĞÍÈç¹ûÃ»ÓĞ´¦Àí»áÔÚ´Ë³öÏÖ
+            CLBREAK; // æ–°å¢ç±»å‹å¦‚æœæ²¡æœ‰å¤„ç†ä¼šåœ¨æ­¤å‡ºç°
           }
 
 #else
@@ -1245,7 +1245,7 @@ SUM_HEIGHT:
           gxSetBkColor(hdc, COLOR_B_DARK);
         }
 
-        // ²âÊÔ×Ö·û´®¸ß¶È
+        // æµ‹è¯•å­—ç¬¦ä¸²é«˜åº¦
         rect.left   = m_pPropSheet->m_xLeft;
         rect.top    = yTop;
         rect.right  = rcClient.right + xLeft;
@@ -1278,11 +1278,11 @@ SUM_HEIGHT:
         }
         else if(item.eType == PST_DIALOG)
         {
-          ;  // É¶Ò²²»×ö
+          ;  // å•¥ä¹Ÿä¸åš
         }
         else
         {
-          // Ìî³ä±³¾°ÑÕÉ«
+          // å¡«å……èƒŒæ™¯é¢œè‰²
           rcItem.right  = nSplit + xLeft;
           gxFillRect(hdc, &rcItem, hBrushD);
 
@@ -1291,7 +1291,7 @@ SUM_HEIGHT:
           gxFillRect(hdc, &rcItem, hBrushL);
         }
 
-        // »æÖÆ±êÌâ
+        // ç»˜åˆ¶æ ‡é¢˜
         if(item.eType != PST_BUTTON)
         {
           rect.right  = nSplit + xLeft;
@@ -1342,7 +1342,7 @@ SUM_HEIGHT:
           gxSetBkColor(hdc, COLOR_B_LIGHT);
         }
 
-        // »æÖÆItemµÄÖµ
+        // ç»˜åˆ¶Itemçš„å€¼
         rect.left  = nSplit + xLeft;
         rect.right  = rcClient.right + xLeft;
         if(item.eType == PST_STRING)
@@ -1549,7 +1549,7 @@ DRAW_SCROLLBAR:
       ITEM item;
       if(m_pParent != NULL)
       {
-        item.strName = "<<·µ»Ø";
+        item.strName = "<<è¿”å›";
         item.dwId   = IDCLOSE;
         item.eType   = PST_BUTTON;
         m_aItemList.push_back(item);
@@ -1880,7 +1880,7 @@ DRAW_SCROLLBAR:
 
     GXBOOL Form::UpdateData(const PROPSHEET_DATALINK* pDataLink)
     {
-      CLBREAK; // Ã»ÊµÏÖ
+      CLBREAK; // æ²¡å®ç°
       return TRUE;
     }
 

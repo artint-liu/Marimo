@@ -1,13 +1,13 @@
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GRegion.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "clPathFile.H"
 #include "GrapX/GXGDI.H"
 #include "GrapX/GXUser.H"
@@ -92,7 +92,7 @@ GXLPWSTR strcpyW(GXLPWSTR lpString1,GXLPCWSTR lpString2)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Win32 GDI Emulator Object ¹ÜÀíÏà¹Øº¯Êı
+// Win32 GDI Emulator Object ç®¡ç†ç›¸å…³å‡½æ•°
 //
 //#include <map>
 //#include <vector>
@@ -101,12 +101,12 @@ typedef clvector<void*>    GXFontResMap;
 GXBOOL GXDLLAPI _gxDeleteObject(GXHGDIOBJ);
 GXVOID gxCOMCTL32_RefreshSysColors();
 
-static GXBitmapResMap  *s_pGXBitmapResMap;    // ÓÃÓÚ´¢´æ ´ÓÓ¦ÓÃ³ÌĞòÄÚ²¿¶ÁÈ¡µÄ×ÊÔ´Ö¸Õë£¬±ÜÃâ¶à´Î´´½¨¶ÔÏó
+static GXBitmapResMap  *s_pGXBitmapResMap;    // ç”¨äºå‚¨å­˜ ä»åº”ç”¨ç¨‹åºå†…éƒ¨è¯»å–çš„èµ„æºæŒ‡é’ˆï¼Œé¿å…å¤šæ¬¡åˆ›å»ºå¯¹è±¡
 //static GXFontResMap    *s_pGXFontResMap;
 
 //GXFont*  g_pSystemFont = NULL;
 
-// GetStockObject Ê¹ÓÃµÄ³£Á¿
+// GetStockObject ä½¿ç”¨çš„å¸¸é‡
 GXHFONT g_hSystemFont = NULL;  // SYSTEM_FONT
 
 GXGDIBRUSH g_BlackBrush;    // BLACK_BRUSH
@@ -158,15 +158,15 @@ GXCOLORREF crSysColor[31] = {
 GXGDIBRUSH stSysColorBrush[32];
 
 long g_SystemMetrics[] = {
-  -1/*1920*/,    //( 0) SM_CXSCREEN  ÆÁÄ»¿í¶È
-  -1/*1200*/,    //( 1) SM_CYSCREEN  ÆÁÄ»¸ß¶È
+  -1/*1920*/,    //( 0) SM_CXSCREEN  å±å¹•å®½åº¦
+  -1/*1200*/,    //( 1) SM_CYSCREEN  å±å¹•é«˜åº¦
   17,      //( 2) SM_CXVSCROLL
   17,      //( 3) SM_CYHSCROLL
-  30,      //( 4) SM_CYCAPTION  ±êÌâÇø
+  30,      //( 4) SM_CYCAPTION  æ ‡é¢˜åŒº
   1,      //( 5) SM_CXBORDER
   1,      //( 6) SM_CYBORDER
-  6,      //( 7) SM_CXDLGFRAME or SM_CXFIXEDFRAME  Ë®Æ½±ß¿òµÄ¸ß¶È
-  6,      //( 8) SM_CYDLGFRAME or SM_CYFIXEDFRAME ÊúÖ±±ß¿òµÄ¿í¶È
+  6,      //( 7) SM_CXDLGFRAME or SM_CXFIXEDFRAME  æ°´å¹³è¾¹æ¡†çš„é«˜åº¦
+  6,      //( 8) SM_CYDLGFRAME or SM_CYFIXEDFRAME ç«–ç›´è¾¹æ¡†çš„å®½åº¦
   17,      //( 9) SM_CYVTHUMB
   17,      //(10) SM_CXHTHUMB
   32,      //(11) SM_CXICON
@@ -190,8 +190,8 @@ long g_SystemMetrics[] = {
   30,      //(29) SM_CYMIN
   21,      //(30) SM_CXSIZE
   21,      //(31) SM_CYSIZE
-  6,      //(32) SM_CXFRAME or SM_CXSIZEFRAME Ë®Æ½±ß¿òµÄ¸ß¶È
-  6,      //(33) SM_CYFRAME or SM_CYSIZEFRAME ÊúÖ±±ß¿òµÄ¿í¶È
+  6,      //(32) SM_CXFRAME or SM_CXSIZEFRAME æ°´å¹³è¾¹æ¡†çš„é«˜åº¦
+  6,      //(33) SM_CYFRAME or SM_CYSIZEFRAME ç«–ç›´è¾¹æ¡†çš„å®½åº¦
   119,    //(34) SM_CXMINTRACK
   30,      //(35) SM_CYMINTRACK
   4,      //(36) SM_CXDOUBLECLK
@@ -254,10 +254,10 @@ GXBOOL GXWin32APIEmu::InitializeStatic()
 {
   int i;
 
-  // ´´½¨Î»Í¼´¢´æÁĞ±í
+  // åˆ›å»ºä½å›¾å‚¨å­˜åˆ—è¡¨
   s_pGXBitmapResMap = new GXBitmapResMap;
 
-  // ´´½¨»­Ë¢³£Á¿
+  // åˆ›å»ºç”»åˆ·å¸¸é‡
   for(i = 0; i < 31; i++)
   {
     stSysColorBrush[i].emObjType = GXGDIOBJ_BRUSH;
@@ -266,17 +266,17 @@ GXBOOL GXWin32APIEmu::InitializeStatic()
     stSysColorBrush[i].hHatch   = NULL;
   }
   gxCOMCTL32_RefreshSysColors();
-  // ´´½¨×ÖÌåÁĞ±í
+  // åˆ›å»ºå­—ä½“åˆ—è¡¨
   //s_pGXFontResMap = new GXFontResMap;
 
-  // ´´½¨ÏµÍ³Ä¬ÈÏ×ÖÌå
+  // åˆ›å»ºç³»ç»Ÿé»˜è®¤å­—ä½“
   GXLOGFONTW LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTW));
   LogFont.lfHeight = 12;
   GXSTRCPYN(LogFont.lfFaceName, DEFAULT_FONT_NAMEW, GXLF_FACESIZE);
   g_hSystemFont = gxCreateFontIndirectW(&LogFont);
 
-  // ´´½¨ÏµÍ³Ä¬ÈÏµÄ Brush ºÍ Pen
+  // åˆ›å»ºç³»ç»Ÿé»˜è®¤çš„ Brush å’Œ Pen
   g_BlackBrush.emObjType = GXGDIOBJ_BRUSH;
   g_BlackBrush.pDC       = NULL;
   g_BlackBrush.uStyle    = GXBS_SOLID;
@@ -366,9 +366,9 @@ GXVOID* GXWin32APIEmu::GetGXGdiObj(GXGDIOBJTYPE emObjType, GXVOID* uResCode)
 {
   if(emObjType == GXGDIOBJ_BITMAP)
   {
-    // uResCode ÊÇ×ÊÔ´Ãû
-    // TODO: uResCode¿ÉÄÜÊÇid»ò×Ö·û´®£¬×Ö·û´®¿ÉÄÜÊÇ¾²Ì¬µØÖ·»ò¶¯Ì¬µØÖ·
-    // ¶¯Ì¬µØÖ·Ê±»á³öÏÖ¶à¸öÊµÀı
+    // uResCode æ˜¯èµ„æºå
+    // TODO: uResCodeå¯èƒ½æ˜¯idæˆ–å­—ç¬¦ä¸²ï¼Œå­—ç¬¦ä¸²å¯èƒ½æ˜¯é™æ€åœ°å€æˆ–åŠ¨æ€åœ°å€
+    // åŠ¨æ€åœ°å€æ—¶ä¼šå‡ºç°å¤šä¸ªå®ä¾‹
     GXBitmapResMap::iterator it = s_pGXBitmapResMap->find(uResCode);
     if(it == s_pGXBitmapResMap->end())
       return NULL;
@@ -377,12 +377,12 @@ GXVOID* GXWin32APIEmu::GetGXGdiObj(GXGDIOBJTYPE emObjType, GXVOID* uResCode)
   CLBREAK;
   //else if(emObjType == GXGDIOBJ_FONT)
   //{
-  //  // uResCode ÊÇÄÚ´æµØÖ·
+  //  // uResCode æ˜¯å†…å­˜åœ°å€
   //  for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
   //    it != s_pGXFontResMap->end(); it++)
   //  {
   //    if(*it == uResCode)
-  //      // FIXME: ²âÊÔÕâ¸ö´úÂë,±àÒëÓĞ¾¯¸æ,·µ»Ø¾Ö²¿µØÖ·
+  //      // FIXME: æµ‹è¯•è¿™ä¸ªä»£ç ,ç¼–è¯‘æœ‰è­¦å‘Š,è¿”å›å±€éƒ¨åœ°å€
   //      return (GXLPVOID)&it;
   //  }
   //  return NULL;
@@ -407,7 +407,7 @@ GXBOOL GXWin32APIEmu::EraseGXGdiObj(GXGDIOBJTYPE emObjType, GXLPVOID uResCode)
 {
   //if(emObjType == GXGDIOBJ_FONT)
   //{
-  //  // uResCode ÊÇÄÚ´æµØÖ·
+  //  // uResCode æ˜¯å†…å­˜åœ°å€
   //  for(GXFontResMap::iterator it = s_pGXFontResMap->begin();
   //    it != s_pGXFontResMap->end(); it++)
   //  {
@@ -531,7 +531,7 @@ GXVOID GXDLLAPI MOCanonicalizeVertexDecl(LPGXVERTEXELEMENT pNewVertDecl, LPCGXVE
 
   QuickSort<SORT_CONTEXT, GXUINT>((SORT_CONTEXT*)pNewVertDecl, 0, nCount);
   if(bRelocalOffset) {
-    // ÖØĞÂ¼ÆËãOffset
+    // é‡æ–°è®¡ç®—Offset
     MORelocateVertexDecl(pNewVertDecl);
   }
 }
@@ -579,7 +579,7 @@ GXUINT GXDLLAPI MOGetDeclTypeSize(GXDeclType eType)
   case GXDECLTYPE_FLOAT16_4: // Four 16-bit floating point values
   case GXDECLTYPE_UNUSED:
   default:
-    ASSERT(0);  // ²»Ö§³Ö
+    ASSERT(0);  // ä¸æ”¯æŒ
   }
   return 0;
 }
@@ -616,7 +616,7 @@ GXUINT GXDLLAPI MOGetDeclTypeDimension(GXDeclType eType)
   case GXDECLTYPE_FLOAT16_4: // Four 16-bit floating point values
   case GXDECLTYPE_UNUSED:
   default:
-    ASSERT(0);  // ²»Ö§³Ö
+    ASSERT(0);  // ä¸æ”¯æŒ
   }
   return 0;
 }
@@ -724,7 +724,7 @@ GXINT GetAdaptedSize(GXINT nSize)
   return RoundupPowOfTwo<GXINT>(nSize);
 }
 
-// ´ÓÉùÃ÷ÖĞ»ñµÃĞèÒªµÄ³¤¶È
+// ä»å£°æ˜ä¸­è·å¾—éœ€è¦çš„é•¿åº¦
 GXUINT GXDLLAPI MOGetDeclVertexSize(LPCGXVERTEXELEMENT pVertDecl)
 {
   GXUINT nOffset = 0;
@@ -779,7 +779,7 @@ void GXDLLAPI MOTestShaderCapsString(LPCGXVERTEXELEMENT pVertDecl, clStringA& st
 
 void GXDLLAPI MOMakeShaderCapsString(GXDWORD dwCapsFlags, clStringA& strMacro)
 {
-  static GXLPSTR aMacro[] = {
+  static GXLPCSTR aMacro[] = {
     "_INPUT_NORMAL_ELEMENT",
     "_INPUT_VCOLOR_ELEMENT",
     "_INPUT_TEXCOORD0_ELEMENT",
@@ -788,7 +788,7 @@ void GXDLLAPI MOMakeShaderCapsString(GXDWORD dwCapsFlags, clStringA& strMacro)
     "_INPUT_TEXCOORD3_ELEMENT",
   };
 
-  // Òª°´Ë³ĞòÀ´
+  // è¦æŒ‰é¡ºåºæ¥
   STATIC_ASSERT(GXSHADERCAP_NORMAL    == 0x0004);
   STATIC_ASSERT(GXSHADERCAP_VCOLOR    == 0x0008);
   STATIC_ASSERT(GXSHADERCAP_TEXCOORD0 == 0x0010);
@@ -806,7 +806,7 @@ void GXDLLAPI MOMakeShaderCapsString(GXDWORD dwCapsFlags, clStringA& strMacro)
   }
 }
 
-// »ñµÃÖ¸¶¨µÄÆ«ÒÆ
+// è·å¾—æŒ‡å®šçš„åç§»
 GXINT GXDLLAPI MOGetDeclOffset(
   GXIN LPCGXVERTEXELEMENT pVertDecl, 
   GXIN GXDeclUsage Usage, 
@@ -846,7 +846,7 @@ GXBOOL GXDLLAPI MOConvertVertexFormat(
   GXUINT              nCount, 
   GXDWORD             dwFlags)
 {
-  // FIXME: Ã»ÍêÈ«ÊµÏÖ!
+  // FIXME: æ²¡å®Œå…¨å®ç°!
   GXUINT nDestStride = MOGetDeclVertexSize(lpDestDecl);
   GXUINT nSrcStride  = MOGetDeclVertexSize(lpSrcDecl);
 
@@ -904,7 +904,7 @@ GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpCommUniformDef, GXDWORD dwPlatfo
     return FALSE;
   }
 
-  // ÓÃÓÚÅÅĞòµÄ½á¹¹Ìå,²»ÄÜÓĞ³ÉÔ±
+  // ç”¨äºæ’åºçš„ç»“æ„ä½“,ä¸èƒ½æœ‰æˆå‘˜
   struct CONTEXT : public DATALAYOUT
   {
     GXBOOL SortCompare(CONTEXT& Stru) const {
@@ -922,14 +922,14 @@ GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpCommUniformDef, GXDWORD dwPlatfo
   typedef clvector<CONTEXT> ContextArray;
   ContextArray aContext;
   
-  // ¸´ÖÆºÍ¼ì²é×Ö½Ú¶ÔÆë
+  // å¤åˆ¶å’Œæ£€æŸ¥å­—èŠ‚å¯¹é½
   for(int i = 0;; i++)
   {
     if(lpCommUniformDef[i].pName == NULL) {
       break;
     }
 
-    // ËÄ×Ö½Ú¶ÔÆë¼ì²é
+    // å››å­—èŠ‚å¯¹é½æ£€æŸ¥
     if(lpCommUniformDef[i].uOffset & 3) {
       CLOG_ERROR("%s Error: Must be aligned for 4 bytes.\n", __FUNCTION__);
       return FALSE;
@@ -937,7 +937,7 @@ GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpCommUniformDef, GXDWORD dwPlatfo
     aContext.push_back(*(CONTEXT*)&lpCommUniformDef[i]);
   }
 
-  // °´ÕÕÆ«ÒÆÅÅĞò
+  // æŒ‰ç…§åç§»æ’åº
   QuickSort(&aContext.front(), 0, (int)aContext.size());
 
   GXUINT uOffset = 0;
@@ -946,7 +946,7 @@ GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpCommUniformDef, GXDWORD dwPlatfo
 
   if(dwPlatfomCode == GXPLATFORM_X_OPENGLES2 ||
     dwPlatfomCode == GXPLATFORM_WIN32_OPENGL) {
-      ASSERT(0); // Ã»ÊµÏÖ
+      ASSERT(0); // æ²¡å®ç°
   }
 
   for(ContextArray::iterator it = aContext.begin();
@@ -982,7 +982,7 @@ GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpCommUniformDef, GXDWORD dwPlatfo
       ASSERT(c.uSize == sizeof(float4x4));
       break;
     default:
-      ASSERT(0); // ²»Ö§³ÖµÄÀàĞÍ
+      ASSERT(0); // ä¸æ”¯æŒçš„ç±»å‹
       break;
     }
     uOffset += c.uSize;
@@ -1152,7 +1152,7 @@ STATIC_ASSERT(sizeof(GXHICON) == sizeof(GXLPVOID));
 
 
 //////////////////////////////////////////////////////////////////////////
-// È«¾ÖÍ·ÎÄ¼ş
-// ±ê×¼½Ó¿Ú
-// Æ½Ì¨Ïà¹Ø
-// Ë½ÓĞÍ·ÎÄ¼ş
+// å…¨å±€å¤´æ–‡ä»¶
+// æ ‡å‡†æ¥å£
+// å¹³å°ç›¸å…³
+// ç§æœ‰å¤´æ–‡ä»¶

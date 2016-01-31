@@ -1,4 +1,4 @@
-#ifndef _SCROLLBAR_
+ï»¿#ifndef _SCROLLBAR_
 #define _SCROLLBAR_
 
 #define GX_SCROLLBAR_BUTTON_WIDTH    g_SystemMetrics[GXSM_CXVSCROLL]
@@ -21,8 +21,8 @@
 
 typedef struct __tagGXSCROLLBARDRWAINGINFO
 {
-  GXINT nPageSize;      // »¬¿éµÄÏñËØ³ß´ç
-  GXINT nTotalPage;      // Õû¸ö¿Õ°×ÇøÓòµÄÏñËØ³ß´ç
+  GXINT nPageSize;      // æ»‘å—çš„åƒç´ å°ºå¯¸
+  GXINT nTotalPage;      // æ•´ä¸ªç©ºç™½åŒºåŸŸçš„åƒç´ å°ºå¯¸
   GXINT nTrackPos;
 }GXSCROLLBARDRAWINGINFO, *LPGXSCROLLBARDRAWINGINFO;
 

@@ -42,7 +42,7 @@ namespace clstd
     static _float2 AxisY;
     static _float2 Origin;
 
-    _float2(){};
+    _float2() TRIVIAL_DEFAULT;
     _float2(const float v){x = y = v;};
     _float2(float _x, float _y) : x(_x), y(_y) {}
     _float2(const _float2& v){x = v.x; y = v.y;};
@@ -217,7 +217,7 @@ namespace clstd
     static _float3 AxisZ;
     static _float3 Origin;
 
-    _float3(){};
+    _float3() TRIVIAL_DEFAULT;
     _float3(const float v){x = y = z = v;}
     _float3(const float x, const float y, const float z) {this->x = x; this->y = y; this->z = z;}
     _float3(const _float3& v){x = v.x; y = v.y; z = v.z;}
@@ -489,7 +489,7 @@ namespace clstd
     static _float4 AxisZ;
     static _float4 Origin;
 
-    _float4(){};
+    _float4() TRIVIAL_DEFAULT;
     _float4(const float v){x = y = z = w = v;}
     _float4(const float x, const float y, const float z, const float w){this->x = x; this->y = y; this->z = z; this->w = w;}
     _float4(const _float3& v){x = v.x; y = v.y; z = v.z; w = 1.0f;}

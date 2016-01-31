@@ -1,7 +1,7 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 //
-// GRAPX �ڲ��ṹ�����ļ�
-// ������GX������ʹ�õ��ڲ����ݽṹ����
+// GRAPX 内部结构定义文件
+// 包含了GX不对外使用的内部数据结构定义
 // Liu.Chenglong
 
 #ifndef _GRAPHICS_X_USER_INTERFACE_GLOBAL_DEFINE_
@@ -11,7 +11,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ������
+// 类声明
 //
 class GXWnd;
 class GXImage;
@@ -39,7 +39,7 @@ namespace GXUI
 struct STOCKOBJECT;
 
 #define GXSTATION_MAGIC      ((GXDWORD)0x54535847)  // "GXST"
-#define TRACE_UNACHIEVE      //TRACE    // ����δʵ�ֵĺ���
+#define TRACE_UNACHIEVE(...)      //TRACE    // 跟踪未实现的函数
 #define ENABLE_AERO
 
 typedef struct __tagGXHOTKEY
@@ -68,7 +68,7 @@ struct CONSOLECMD
 #define GET_LAST_WINDOW(_LPWND)   while((_LPWND)->m_pNextWnd != NULL) { (_LPWND) = (_LPWND)->m_pNextWnd; }
 
 //
-// GRESCRIPTDESC ʹ�õ��ڲ�����
+// GRESCRIPTDESC 使用的内部命令
 //
 enum ResCmd
 {
@@ -79,9 +79,9 @@ enum ResCmd
   RC_MarkCanvsUniform   = GXMAKEFOURCC('M','C','V','U'),  // Mark canvas uniform
 };
 
-// TODO: ���Ӻ꿪�أ�����ʹ�������İ汾
-// TODO: ȥ�����ö�٣�ͳһʹ��"RESTYPE_*"����
-enum RESOURCE_CATEGORY_CODE // TODO: ���Ҫ��Ϊ�ⲿ����
+// TODO: 增加宏开关，可以使用索引的版本
+// TODO: 去掉这个枚举，统一使用"RESTYPE_*"定义
+enum RESOURCE_CATEGORY_CODE // TODO: 这个要改为外部声明
 {
   RCC_FontA             = GXMAKEFOURCC('F','T','I','A'),
   RCC_Texture           = GXMAKEFOURCC('T','X','F','W'),
@@ -103,7 +103,7 @@ enum RESOURCE_CATEGORY_CODE // TODO: ���Ҫ��Ϊ�ⲿ����
 //
 // GX Object
 //
-// GXDC Object ö��
+// GXDC Object 枚举
 enum GXGDIOBJTYPE
 {
   GXGDIOBJ_NULL   = 0,
@@ -190,10 +190,10 @@ typedef struct __tagGXGDIDC : GXGDIOBJ
 {
   GXWndCanvas*    pWndCanvas;    // 
   GXCanvas*       pCanvas;    
-  LPGXGDIBITMAP   lpBitmap;      // �����MemDC���Ų�Ϊ0
-  GXHWND          hBindWnd;      // �����DC�󶨵Ĵ���
+  LPGXGDIBITMAP   lpBitmap;      // 如果是MemDC，才不为0
+  GXHWND          hBindWnd;      // 与这个DC绑定的窗口
   //GXUINT        uRefCount;
-  //GXINT         wndOrgX;       // ���ڵ�ԭ��,��ͼ����ָ����(0,0)��������(wndOrgX,wndOrgY)��
+  //GXINT         wndOrgX;       // 窗口的原点,绘图函数指定的(0,0)将出现在(wndOrgX,wndOrgY)点
   //GXINT         wndOrgY;
   GXCOLORREF      crTextBack;
   GXCOLORREF      crText;
@@ -250,28 +250,28 @@ namespace GXWin32APIEmu
 //////////////////////////////////////////////////////////////////////////
 struct GXCARET
 {
-  // TODO: �Ժ��Ƿ��ܰѹ����˸���뵽RichFX����?
+  // TODO: 以后是否能把光标闪烁加入到RichFX中呢?
   GXHWND        hWnd;
   GXHWND        hTopLevel;
   GXHBITMAP      hBitmap;
-  GXREGN        regnCaret;    // �������Ⱦ�����λ��, ���� hWnd ��λ�ü���õ�
-  GXREGN        regnPrevShowing;// ��һ����ʾ��λ�ã����SetCaretPos����ʱû����ʾ��Ϊ��
+  GXREGN        regnCaret;    // 相对于渲染区域的位置, 经由 hWnd 的位置计算得到
+  GXREGN        regnPrevShowing;// 上一次显示的位置，如果SetCaretPos设置时没有显示则为空
   GXUINT        nBlinkTime;
-  GXUINT        nBaseTime;    // ���ֵ������֤һ��ϸ�����⣬����걻�ƶ�/��ʾʱ��������ʾ
+  GXUINT        nBaseTime;    // 这个值用来保证一个细节问题，即光标被移动/显示时会立即显示
   GXDWORD        flag;
   GXBOOL  IsVisible  ();
-  GXBOOL  Tick    ();        // ֻ�ڿ��ò�����ʾʱ���¾Ϳ�����
+  GXBOOL  Tick    ();        // 只在可用并且显示时更新就可以了
   GXHRESULT PaintCaret  (GXCanvas* pCanvas);
 };
 
-struct INTMEASURESTRING // �ڲ��ַ��������ṹ
+struct INTMEASURESTRING // 内部字符串测量结构
 {
   GXFont*   pFont;
   GXLPCWSTR lpString;
   GXINT     cString;
-  GXUINT    uFormat; // "GXDT_"��־
+  GXUINT    uFormat; // "GXDT_"标志
 
-  // ����GXDT_EXPANDTABSʱ����Ч
+  // 设置GXDT_EXPANDTABS时才有效
   GXINT     nTabPositions;
   GXINT*    lpnTabStopPositions;
 };
@@ -295,10 +295,10 @@ struct GXLOCALMEM_STRUCT
 #define GXLOCALMEM_HANDLE(LMEMPTR)  ((GXHLOCAL)LMEMPTR)
 #define GXLOCALMEM_PTR(LMEMHANDLE)  ((GXLOCALMEM_STRUCT*)LMEMHANDLE)
 
-// ��ע��󴢴��õ����ݽṹ
+// 类注册后储存用的数据结构
 typedef struct __tagGXWNDCLSATOM
 {
-  GXINT       nRefCount;  // �ж��ٴ��������������
+  GXINT       nRefCount;  // 有多少窗口引用了这个类
   GXWNDPROC   lpfnWndProc; 
   GXINT       cbClsExtra; 
   GXINT       cbWndExtra; 
@@ -323,12 +323,12 @@ struct MOUIMSG
 };
 
 
-#define GXCARET_AVAILABLE     0x80000000L        // ���ñ�־
-#define GXCARET_VISIBLE       0x00000001L        // �Ƿ��û�����Ϊ��ʾ
-#define GXCARET_BLINK         0x00000002L        // ��˸��ʾʱ����ɼ��������ô˱�־
-#define GXCARET_SHOWING       (GXCARET_AVAILABLE | GXCARET_VISIBLE | GXCARET_VISIBLE)    // �ܱ���Ⱦ���������м���־
+#define GXCARET_AVAILABLE     0x80000000L        // 可用标志
+#define GXCARET_VISIBLE       0x00000001L        // 是否被用户设置为显示
+#define GXCARET_BLINK         0x00000002L        // 闪烁显示时如果可见，则设置此标志
+#define GXCARET_SHOWING       (GXCARET_AVAILABLE | GXCARET_VISIBLE | GXCARET_VISIBLE)    // 能被渲染出来的所有检测标志
                 
-#if defined(_WIN32) && defined(_X86)
+#if defined(_WIN32) && defined(_X86) && ! defined(__clang__)
 #define ENABLE_ASSEMBLE
 #endif // _WIN32
 
@@ -353,7 +353,7 @@ typedef cllist<GXLPWND>    GXLPWND_LIST;
 #define GXHRSRC_PTR(_HRSRC)           ((LPGXRSRC)_HRSRC)
 #define GXRSRC_HANDLE(RSRC_PTR)       ((GXHRSRC)RSRC_PTR)
 
-// GXSTATION �ı�־
+// GXSTATION 的标志
 #define  GXST_DRAWDEBUGMSG      0x00000001
 struct GXINSTANCE;
 struct GXSTATION
@@ -363,10 +363,10 @@ struct GXSTATION
   GXDWORD             dwMagic;
   GXDWORD             m_dwFlags;
   IGXPlatform*        lpPlatform;
-  GXDWORD             dwUIThreadId;     // GXUI��֧�ֶ��߳�Wnd, �����¼��UI�߳�ID, ����У��
+  GXDWORD             dwUIThreadId;     // GXUI不支持多线程Wnd, 这里记录了UI线程ID, 用于校验
   GXMONITORINFO       MonitorInfo;
 #ifdef _WIN32
-  HWND                hBindWin32Wnd;    // gx ������ϵͳ����
+  HWND                hBindWin32Wnd;    // gx 所属的系统窗口
   HCURSOR             hCursor;
 #endif // _WIN32
   GXINSTANCE*         pInstDll;
@@ -374,19 +374,19 @@ struct GXSTATION
   GXGraphics*         pGraphics;
   GXLPWND             lpDesktopWnd;
   //D3DPRESENT_PARAMETERS  d3dpp;
-  GXUINT              nWidth;   // TODO: ��MonitorInfo�ظ�
+  GXUINT              nWidth;   // TODO: 和MonitorInfo重复
   GXUINT              nHeight;  // TODO: 
-  GXCARET             SysCaret;      // ϵͳʹ�õĹ��
+  GXCARET             SysCaret;      // 系统使用的光标
   GXHDPA              hClassDPA;
 
-  GXLPWND             m_pMouseFocus;    // ֻ����TopLevel Frame
+  GXLPWND             m_pMouseFocus;    // 只限于TopLevel Frame
   GXLPWND             m_pKeyboardFocus;
   GXLPWND             m_pCapture;
   STOCKOBJECT*        m_pStockObject;
 
-  GXPOINT             m_ptCursor;      // ��������λ��
+  GXPOINT             m_ptCursor;      // 储存的鼠标位置
   GXVOID*             m_HotKeyChain;
-  GXULONG             m_uFrameCount;    // UI��֡������
+  GXULONG             m_uFrameCount;    // UI的帧计数器
   DesktopWindowsMgr*  m_pDesktopWindowsMgr;
   GXLPWND_LIST        m_aActiveWnds;
   RichFXMgr*          m_pRichFXMgr;
@@ -399,8 +399,8 @@ struct GXSTATION
   GXUIMsgThread*      m_pMsgThread;
 
 #ifdef ENABLE_AERO
-  GTexture*        pBackDownSampTexA;    // ����Ч���Ļ������� - A
-  GTexture*        pBackDownSampTexB;    // ����Ч���Ļ������� - B
+  GTexture*        pBackDownSampTexA;    // 玻璃效果的缓冲纹理 - A
+  GTexture*        pBackDownSampTexB;    // 玻璃效果的缓冲纹理 - B
 #endif // ENABLE_AERO
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
   GXSTATION(HWND hWnd, IGXPlatform* lpPlatform);
@@ -415,7 +415,7 @@ struct GXSTATION
   GXINT        Leave          ();
 
   GXBOOL      SetCursorPos    (GXLPPOINT lpCursor);
-  GXLRESULT   SetCursor       (GXWPARAM wParam, GXLPARAM lParam); // Win32 ���ڴ����������
+  GXLRESULT   SetCursor       (GXWPARAM wParam, GXLPARAM lParam); // Win32 窗口处理程序调用
   clStringW   ConvertAbsPathW (GXLPCWSTR szPath);
 
   //GXBOOL      RegisterNamedPool(GXLPCSTR szName, GXUI::Layout);
@@ -454,7 +454,7 @@ struct GXINSTANCE
   HINSTANCE    hInstance;
 #endif // defined(_WIN32) || defined(_WINDOWS)
   clStringA    strRootDir;
-  clStringA    strModuleName;  // ͬʱҲ��Ϊ·��
+  clStringA    strModuleName;  // 同时也作为路径
   typedef clhash_map<GXDWORD, GXRSRC*> ResCodeDict;
   ResCodeDict    sResCodeDict;
 #if defined(_WIN32) || defined(_WINDOWS)
@@ -470,11 +470,11 @@ struct DLGLOG
   typedef clmap<clStringW, GXHWND>  NameToWndDict;
 
   GXUINT        cbSize;
-  GXDLGPROC     pDlgProc; // ��DWL_PROC�����ظ�?
+  GXDLGPROC     pDlgProc; // 与DWL_PROC储存重复?
   clStringW     strName;
   NameToWndDict CtrlItemDict;
   GXUI::Layout* pLayout;
-  GXLPARAM      lParam;   // CreateDialog()��lParam����
+  GXLPARAM      lParam;   // CreateDialog()的lParam参数
  
   DLGLOG();
   virtual ~DLGLOG();
@@ -515,7 +515,7 @@ typedef GXDEFERWNDPOS*    GXLPDEFERWNDPOS;
 #define GXDWP_PTR(_HANDLE)    ((GXLPDEFERWNDPOS)_HANDLE)
 #define GXDWP_HANDLE(_PTR)    ((GXHDWP)_PTR)
 
-// ���õ�ȫ�ֱ���
+// 引用的全局变量
 extern long g_SystemMetrics[];
 
 extern GXGDIBRUSH g_BlackBrush;
@@ -545,12 +545,12 @@ struct GXMENUEX_TEMPLATE_HEADER{
 
 #pragma pack(push, 2)
 struct GXMENUEX_TEMPLATE_ITEM_HEADER{
-  //GXDWORD dwHelpId;   // Popup ��������
+  //GXDWORD dwHelpId;   // Popup 才有这项
   GXDWORD dwType;
   GXDWORD dwState;
   GXDWORD menuId;
   GXWORD  bResInfo;
-  // ����� GXWCHAR[] ����
+  // 后面接 GXWCHAR[] 数据
 };
 #pragma pack(pop)
 
@@ -568,9 +568,9 @@ inline _Ty GetVertexDeclLength(LPCGXVERTEXELEMENT lpVerticesDecl)
   return nCount;
 }
 
-// ������ڲ��Ա�־ʱʹ��,�������ڲ���־, ��������������ʱ�ı�־
-#define GXRU_TEST_READ  (GXRU_MIGHTBEREAD | GXRU_FREQUENTLYREAD)    // �������Զ��ı�־
-#define GXRU_TEST_WRITE (GXRU_MIGHTBEWRITE | GXRU_FREQUENTLYWRITE)  // ��������д�ı�־
+// 这个是在测试标志时使用,所以是内部标志, 不能用来做创建时的标志
+#define GXRU_TEST_READ  (GXRU_MIGHTBEREAD | GXRU_FREQUENTLYREAD)    // 用来测试读的标志
+#define GXRU_TEST_WRITE (GXRU_MIGHTBEWRITE | GXRU_FREQUENTLYWRITE)  // 用来测试写的标志
 #define GXRU_TEST_FREQUENTLY (GXRU_FREQUENTLYREAD | GXRU_FREQUENTLYWRITE)
 #define GXRU_TEST_MIGHTBE    (GXRU_MIGHTBEREAD | GXRU_MIGHTBEWRITE)
 

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * ImageList definitions
  *
  * Copyright 1998 Eric Kohl

@@ -1,9 +1,9 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GXGraphics.H>
@@ -12,7 +12,7 @@
 #include <GrapX/GXFont.H>
 #include <GrapX/GRegion.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <User/GXWindow.h>
 #include "GrapX/GXGDI.H"
 #include "GrapX/GXUser.H"
@@ -77,7 +77,7 @@ GXDWORD GXDLLAPI gxGetObjectType(
 }
 
 
-// ³õÊ¼»¯Ä¬ÈÏµÄ GXDC ½á¹¹
+// åˆå§‹åŒ–é»˜è®¤çš„ GXDC ç»“æ„
 GXVOID _gxInitDefGXDC(GXHDC hDC)
 {
 }
@@ -97,7 +97,7 @@ GXHDC GXDLLAPI gxBeginPaint(
 
   GRegion* prgnUpdate = lpWnd->m_prgnUpdate;
 
-  // ÖØ¸´µ÷ÓÃ gxBeginPaint ¾Í·µ»Ø
+  // é‡å¤è°ƒç”¨ gxBeginPaint å°±è¿”å›
   if(prgnUpdate == NULL) {
     memset(lpPaint, 0, sizeof(GXPAINTSTRUCT));
     return NULL;
@@ -148,7 +148,7 @@ GXHGDIOBJ GXDLLAPI gxSelectObject(
   //ASSERT(FALSE);
   GXHGDIOBJ  hPrevObj = NULL;
   //GXGDIECT *pObjType = (GXGDIECT*)hgdiobj;
-  if(hgdiobj == NULL || hgdiobj == (GXHGDIOBJ)-1)  // TODO: SelectObject ÉÏ´Î·µ»Ø¿ÕÖµ£¬Ôì³ÉÎŞ·¨»¹Ô­Ô­À´ObjectµÄÎÊÌâ
+  if(hgdiobj == NULL || hgdiobj == (GXHGDIOBJ)-1)  // TODO: SelectObject ä¸Šæ¬¡è¿”å›ç©ºå€¼ï¼Œé€ æˆæ— æ³•è¿˜åŸåŸæ¥Objectçš„é—®é¢˜
     return NULL;
   switch(GXGDIOBJ_TYPE(hgdiobj))
   {
@@ -248,14 +248,14 @@ GXCOLORREF GXDLLAPI gxSetBkColor(
   if(pDC == NULL) {
     return NULL;
   }
-  GXCOLORREF crPrevious = pDC->crTextBack;  // ±£´æ¾ÉµÄÑÕÉ«Öµ
+  GXCOLORREF crPrevious = pDC->crTextBack;  // ä¿å­˜æ—§çš„é¢œè‰²å€¼
 
-  if((crColor & 0xff000000) == 0) {   // Èç¹û Alpha ÖµÎª0
-    crColor |= 0xff000000;            // ÔòÇ¿ÖÆÎª255£¬²»Í¸Ã÷Ä£Ê½
+  if((crColor & 0xff000000) == 0) {   // å¦‚æœ Alpha å€¼ä¸º0
+    crColor |= 0xff000000;            // åˆ™å¼ºåˆ¶ä¸º255ï¼Œä¸é€æ˜æ¨¡å¼
   }
 
   pDC->crTextBack = crColor;
-  return crPrevious;                  // ¸ù¾İWin32APIÎÄµµ·µ»ØÇ°Ò»¸öÑÕÉ«ÉèÖÃ
+  return crPrevious;                  // æ ¹æ®Win32APIæ–‡æ¡£è¿”å›å‰ä¸€ä¸ªé¢œè‰²è®¾ç½®
 }
 
 GXCOLORREF GXDLLAPI GXSetBkColor(GXHDC hdc, GXCOLORREF crColor)
@@ -265,9 +265,9 @@ GXCOLORREF GXDLLAPI GXSetBkColor(GXHDC hdc, GXCOLORREF crColor)
     return NULL;
   }
 
-  GXCOLORREF crPrevious = pDC->crTextBack;  // ±£´æ¾ÉµÄÑÕÉ«Öµ
+  GXCOLORREF crPrevious = pDC->crTextBack;  // ä¿å­˜æ—§çš„é¢œè‰²å€¼
   pDC->crTextBack = crColor;
-  return crPrevious;                  // ¸ù¾İWin32APIÎÄµµ·µ»ØÇ°Ò»¸öÑÕÉ«ÉèÖÃ
+  return crPrevious;                  // æ ¹æ®Win32APIæ–‡æ¡£è¿”å›å‰ä¸€ä¸ªé¢œè‰²è®¾ç½®
 }
 //////////////////////////////////////////////////////////////////////////
 //gxGetBkColor
@@ -379,7 +379,7 @@ GXBOOL GXDLLAPI _gxDeleteObject(
       SAFE_DELETE(hObject);
       return TRUE;
     case GXGDIOBJ_FONT:
-      // TODO: »á²»»áÔÚ GXWin32APIEmu::ReleaseStatic() Ê±³ö´í£¿
+      // TODO: ä¼šä¸ä¼šåœ¨ GXWin32APIEmu::ReleaseStatic() æ—¶å‡ºé”™ï¼Ÿ
       //GXWin32APIEmu::EraseGXGdiObj(GXGDIOBJ_FONT, hObject);
       SAFE_RELEASE(GXGDI_FONT_PTR(hObject)->lpFont);
       SAFE_DELETE(hObject);
@@ -423,7 +423,7 @@ GXBOOL GXDLLAPI gxDeleteObject(
       //  return TRUE;
       return _gxDeleteObject(hObject);
     case GXGDIOBJ_FONT:
-      // TODO: »á²»»áÔÚ GXWin32APIEmu::ReleaseStatic() Ê±³ö´í£¿
+      // TODO: ä¼šä¸ä¼šåœ¨ GXWin32APIEmu::ReleaseStatic() æ—¶å‡ºé”™ï¼Ÿ
       if(hObject == g_hSystemFont) {
         return TRUE;
       }
@@ -490,14 +490,14 @@ GXCOLORREF GXDLLAPI gxSetTextColor(
             GXCOLORREF crColor   // text color 
             )
 {
-  GXCOLORREF crPrevious = ((LPGXGDIDC)hdc)->crText;        // ±£´æÇ°Ò»¸öÑÕÉ«
-  if((crColor & 0xff000000) == 0)            // Win32APIµÄ¼æÈİÄ£Ê½
-    crColor |= 0xff000000;              // Èç¹ûAlphaÎª0ÔòÈÏÎªÊ¹ÓÃÁË
-                            // Win32APIµÄÑÕÉ«ÉèÖÃ£¬½«´Ë
-                            // Ä¬ÈÏ×ª»»Îª²»Í¸Ã÷£¨255£©
-  ((LPGXGDIDC)hdc)->crText = crColor;          // ÉèÖÃhdc
-  //hdc->pGraphics->SetFontColor(crColor | 0xff000000);  // Í¬Ê±ÉèÖÃGraphics
-  return crPrevious;                  // °´ÕÕÎÄµµ·µ»ØÇ°´ÎÑÕÉ«
+  GXCOLORREF crPrevious = ((LPGXGDIDC)hdc)->crText;        // ä¿å­˜å‰ä¸€ä¸ªé¢œè‰²
+  if((crColor & 0xff000000) == 0)            // Win32APIçš„å…¼å®¹æ¨¡å¼
+    crColor |= 0xff000000;              // å¦‚æœAlphaä¸º0åˆ™è®¤ä¸ºä½¿ç”¨äº†
+                            // Win32APIçš„é¢œè‰²è®¾ç½®ï¼Œå°†æ­¤
+                            // é»˜è®¤è½¬æ¢ä¸ºä¸é€æ˜ï¼ˆ255ï¼‰
+  ((LPGXGDIDC)hdc)->crText = crColor;          // è®¾ç½®hdc
+  //hdc->pGraphics->SetFontColor(crColor | 0xff000000);  // åŒæ—¶è®¾ç½®Graphics
+  return crPrevious;                  // æŒ‰ç…§æ–‡æ¡£è¿”å›å‰æ¬¡é¢œè‰²
 }
 //////////////////////////////////////////////////////////////////////////
 //gxGetTextColor
@@ -862,7 +862,7 @@ int GXDLLAPI gxCombineRgn(
         break;
 
       case RGN_DIFF:
-        CLBREAK; // Ã´ÊµÏÖ£¡
+        CLBREAK; // ä¹ˆå®ç°ï¼
         break;
 
       case RGN_OR:
@@ -898,7 +898,7 @@ int GXDLLAPI gxCombineRgn(
 
       case RGN_DIFF:
         SAFE_RELEASE(lpDest);
-        CLBREAK; // Ã´ÊµÏÖ£¡
+        CLBREAK; // ä¹ˆå®ç°ï¼
         break;
 
       case RGN_OR:

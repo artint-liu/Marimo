@@ -9,7 +9,7 @@ class GXDLL GVSkinnedMeshSoft : public GVMesh
 private:
   float*      m_pWeight;
   GVSkeleton* m_pSkeleton;
-  GXLPVOID    m_pVertices;
+  GXLPBYTE    m_pVertices;
   GXUINT      m_nVertStride;
   GXUINT      m_nPosOffset;
   GXUINT      m_nNormalOffset;

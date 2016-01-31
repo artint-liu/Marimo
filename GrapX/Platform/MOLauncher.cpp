@@ -1,4 +1,4 @@
-#if defined(_WINDOWS)
+#if defined(_WINDOWS) && ! defined(__clang__)
 #include <windows.h>
 
 #include "GrapX.H"

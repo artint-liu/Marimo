@@ -182,7 +182,7 @@ GXHRESULT GVScene::Add(GVNode* pNode, GVNode* pParent)
     }
     else
     {
-      CLOG_ERROR(__FUNCTION__": Node has been added another scene.!\n");
+      CLOG_ERROR("%s : Node has been added another scene.!\n", __FUNCTION__);
       return GX_FAIL;
     }    
   }
@@ -562,7 +562,7 @@ void GVScene::Update(GXCanvas3D* pCanvas, GXDWORD dwDeltaTime)
   if( ! m_CmdBuffer.empty()) {
     IntExecuteCommand();
   }
-  END_SCOPED_LOCKER(m_Locker);
+  END_SCOPED_LOCKER;
 
   m_dwDeltaTime = dwDeltaTime;
   m_dwAbsTime += dwDeltaTime;

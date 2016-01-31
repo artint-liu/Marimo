@@ -329,7 +329,7 @@ namespace ObjMeshUtility
       }
       else {
         //ASSERT(0);
-        CLOG_WARNING("%s: Unsupport cmd label(\"%s\").\n", __FUNCTION__, it.ToString());
+        CLOG_WARNING("%s: Unsupport cmd label(\"%s\").\n", __FUNCTION__, (GXLPCSTR)it.ToString());
       }
     }
 
@@ -468,7 +468,7 @@ GXBOOL GXDLL PrimitiveUtility::SetUnifiedDiffuse( GPrimitive* pPrimitive, GXColo
   GXVERTEXELEMENT element;
   GXINT nOffset = pPrimitive->GetElementOffset(GXDECLUSAGE_COLOR, 0, &element);
   if(nOffset < 0) {
-    CLOG_ERROR(__FUNCTION__": Primitive doesn't has diffuse element.\r\n");
+    CLOG_ERROR("%s : Primitive doesn't has diffuse element.\r\n", __FUNCTION__);
     return FALSE;
   }
 
@@ -480,13 +480,13 @@ GXBOOL GXDLL PrimitiveUtility::SetUnifiedDiffuse( GPrimitive* pPrimitive, GXColo
 
   if(lpColors == NULL || nNumVertices == 0 || nStride <= 0) {
     if(lpColors == NULL) {
-      CLOG_ERROR(__FUNCTION__": Can't get vertices buffer.\r\n");
+      CLOG_ERROR("%s : Can't get vertices buffer.\r\n", __FUNCTION__);
     }
     if(nNumVertices == 0) {
-      CLOG_ERROR(__FUNCTION__": Number of vertices is empty.\r\n");
+      CLOG_ERROR("%s : Number of vertices is empty.\r\n", __FUNCTION__);
     }
     if(nStride <= 0) {
-      CLOG_ERROR(__FUNCTION__": Bad stride number.\r\n");
+      CLOG_ERROR("%s : Bad stride number.\r\n", __FUNCTION__);
     }
     return FALSE;
   }
@@ -511,13 +511,13 @@ GXDLL clstd::Image* TextureUtility::CreateImage( GTexture* pTexture )
 {
   GTexture::LOCKEDRECT lr;
   if( ! pTexture->LockRect(&lr, NULL, 0)) {
-    CLOG_ERROR(__FUNCTION__": Can't lock texture.\r\n");
+    CLOG_ERROR("%s : Can't lock texture.\r\n", __FUNCTION__);
     return NULL;
   }
   char fmt[8];
   int nDepth;
   if( ! TextureFormatToClstdImageFormat(fmt, &nDepth, pTexture->GetFormat())) {
-    CLOG_ERROR(__FUNCTION__": Unsupport texture format.\r\n");
+    CLOG_ERROR("%s : Unsupport texture format.\r\n", __FUNCTION__);
     return NULL;
   }
 
@@ -525,7 +525,7 @@ GXDLL clstd::Image* TextureUtility::CreateImage( GTexture* pTexture )
 
   if( ! pImage->Set(pTexture->GetWidth(), pTexture->GetHeight(), fmt, lr.Pitch, nDepth, lr.pBits))
   {
-    CLOG_ERROR(__FUNCTION__": Failed to set image.\r\n");
+    CLOG_ERROR("%s : Failed to set image.\r\n", __FUNCTION__);
     SAFE_DELETE(pImage);
   }
 

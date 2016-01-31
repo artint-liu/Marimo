@@ -71,18 +71,18 @@ protected:
   float           m_fTimeLength; // (float)m_nFrameCount / m_nFrameRate * 1000; ms
 private:
   GVAnimationTrack()
-    : m_nFrameCount (1)
-    , m_nFrameRate  (1)
-    , m_pTS         (NULL)
+    : m_pTS         (NULL)
     , m_nTSCount    (0)
     , m_pQuaternions(NULL)
     , m_nQuaterCount(0)
     , m_pBoneInfo   (NULL)
     , m_nBoneCount  (0)
+    , m_nFrameCount (1)
+    , m_nFrameRate  (1)
     , m_fTimeLength (0.0f)
   {
   }
-  ~GVAnimationTrack();
+  virtual ~GVAnimationTrack();
 
   GXBOOL InitializeTrack(
     GXLPCSTR            szName,
@@ -205,7 +205,7 @@ public:
 
 
   virtual GXHRESULT SaveFile(clSmartRepository* pStorage);
-  virtual GXHRESULT LoadFile(clSmartRepository* pStorage);
+  virtual GXHRESULT LoadFile(GXGraphics* pGraphics, clSmartRepository* pStorage);
 
   virtual GXBOOL    Update                (const GVSCENEUPDATE& sContext);
   static  GXHRESULT CreateFromFileW       (GVSkeleton** ppSkeleton, GVScene* pScene, GXLPCWSTR szFilename);

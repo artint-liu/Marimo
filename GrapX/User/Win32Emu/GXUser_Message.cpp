@@ -1,16 +1,16 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GRegion.H>
 #include <GrapX/GXGraphics.H>
 #include <GrapX/GXCanvas.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
 #include "GrapX/GXUser.H"
@@ -27,10 +27,10 @@ GXBOOL IntMakeActionMessage(
   GXLPWND   lpWnd,
   GXINOUT GXMSG* msg, 
   GXWndMsg  message,
-  GXWndMsg  msgNClient,      // ·Ç¿Í»§ÇøµÄÏûÏ¢
+  GXWndMsg  msgNClient,      // éå®¢æˆ·åŒºçš„æ¶ˆæ¯
   GXWPARAM  wParam, 
   GXLPARAM  lParam, 
-  GXBOOL    bActiveWnd) // ÒÔºóĞèÒª±êÖ¾À©Õ¹,¿ÉÒÔ¿¼ÂÇ¹²ÓÃ"SWP_*"»ò"SW_*" ±êÖ¾
+  GXBOOL    bActiveWnd) // ä»¥åéœ€è¦æ ‡å¿—æ‰©å±•,å¯ä»¥è€ƒè™‘å…±ç”¨"SWP_*"æˆ–"SW_*" æ ‡å¿—
 {
   ASSERT(hWnd != NULL);
   ASSERT(hWnd == GXWND_HANDLE(lpWnd));
@@ -82,8 +82,8 @@ GXBOOL IntMakeActionMessage(
 }
 
 //////////////////////////////////////////////////////////////////////////
-// ·µ»ØÖµ:  TRUE ºóĞø´°¿Ú´¦Àíº¯Êı¿ÉÒÔ¼ÌĞø´¦Àí¸ÃÏûÏ¢
-//      FALSE ºóĞø´°¿Ú´¦Àíº¯ÊıĞèÒª¿¼ÂÇµ½ÊÇ·ñ»á¸Ä±ä¸Ãº¯ÊıµÄ´¦Àí½á¹û
+// è¿”å›å€¼:  TRUE åç»­çª—å£å¤„ç†å‡½æ•°å¯ä»¥ç»§ç»­å¤„ç†è¯¥æ¶ˆæ¯
+//      FALSE åç»­çª—å£å¤„ç†å‡½æ•°éœ€è¦è€ƒè™‘åˆ°æ˜¯å¦ä¼šæ”¹å˜è¯¥å‡½æ•°çš„å¤„ç†ç»“æœ
 GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
 {
   GXPOINT      pt;
@@ -106,7 +106,7 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
   //    return FALSE;
   //}
   GXDWORD ht = HTERROR;
-  GXBOOL  bRet = TRUE; // Õâ¸ö³õÊ¼Öµ¹ØÏµµ½ºóÃæµÄÏûÏ¢´¦ÀíÂß¼­
+  GXBOOL  bRet = TRUE; // è¿™ä¸ªåˆå§‹å€¼å…³ç³»åˆ°åé¢çš„æ¶ˆæ¯å¤„ç†é€»è¾‘
 
   switch(message)
   {  
@@ -130,7 +130,7 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
       ht = (GXDWORD)gxSendMessageW(hMouseFocus, GXWM_NCHITTEST, wParam, GXMAKELPARAM(pt.x, pt.y));
       gxSendMessageW(hMouseFocus, GXWM_SETCURSOR,(GXWPARAM)hMouseFocus, GXMAKELPARAM(ht, message));
 
-      // Capture Ê±²»·¢ËÍ GXWM_SETCURSOR ÏûÏ¢£¡
+      // Capture æ—¶ä¸å‘é€ GXWM_SETCURSOR æ¶ˆæ¯ï¼
       pMouseFocus->ScreenToClient(&ptClient, 1);
 
       msg->hwnd = hMouseFocus;
@@ -210,7 +210,7 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
         lpHotKey = lpHotKey->lpNext;
       }
     }
-    // Ã»ÓĞ break !!!
+    // æ²¡æœ‰ break !!!
   case GXWM_KEYUP:
   case GXWM_CHAR:
     {
@@ -251,7 +251,7 @@ inline void InlSetUIMSG(MOUIMSG& Msg, GXHWND hWnd, GXUINT message, GXWPARAM wPar
 
 GXLRESULT GXUIMsgThread::SendRemoteMessage( GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam )
 {
-  // TODO: Õâ¸öÃ»ÓĞ½øĞĞ¹ı¶àÏß³ÌÍ¬Ê±ÏòUIÏß³ÌSendMessageµÄ²âÊÔ
+  // TODO: è¿™ä¸ªæ²¡æœ‰è¿›è¡Œè¿‡å¤šçº¿ç¨‹åŒæ—¶å‘UIçº¿ç¨‹SendMessageçš„æµ‹è¯•
   MOUIMSG Msg;
   GXLRESULT result;
   InlSetUIMSG(Msg, hWnd, message, wParam, lParam);
@@ -332,7 +332,7 @@ EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH){
     return IntBroadcastToplevelWindowsMessage(Msg, wParam, lParam);
   }
 
-  const GXLPWND lpWnd = GXWND_PTR(hWnd);  // FIXME: ÆäËûÏß³Ì·ÃÎÊÕâ¸öWndµÄÍ¬Ê±Èç¹ûWnd±»ÊÍ·ÅÓĞ¿ÉÄÜ»á³ö´í
+  const GXLPWND lpWnd = GXWND_PTR(hWnd);  // FIXME: å…¶ä»–çº¿ç¨‹è®¿é—®è¿™ä¸ªWndçš„åŒæ—¶å¦‚æœWndè¢«é‡Šæ”¾æœ‰å¯èƒ½ä¼šå‡ºé”™
   if(lpWnd != NULL)
   {
 
@@ -346,7 +346,7 @@ EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH){
 # endif // WIS_HASBEENDEL
 #endif // _DEBUG
 
-    // TODO: Desktop Ôö¼Ó ClassAtom ºóÊ¹ÓÃ GXLPWND_STATION_PTR(lpWnd);
+    // TODO: Desktop å¢åŠ  ClassAtom åä½¿ç”¨ GXLPWND_STATION_PTR(lpWnd);
     GXLPSTATION lpStation = GXLPWND_STATION_PTR(lpWnd); // GXSTATION_PTR(GXUIGetStation()); 
     if(lpStation->dwUIThreadId == gxGetCurrentThreadId()) {
       return lpWnd->m_lpWndProc(hWnd, Msg, wParam, lParam);
@@ -383,9 +383,9 @@ GXLRESULT GXDLLAPI gxSendDlgItemMessageW(
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ·ÖÅÉÏûÏ¢
-// ÔÚÏûÏ¢¶ÓÁĞÖĞÈ¡³öÒ»ÌõÏûÏ¢£¬Èç¹ûÊÇÏûÏ¢GrapXËùÔÚµÄWin32´°¿ÚÏûÏ¢£¬Ôòµ÷ÓÃ½âÎö
-// º¯Êı½øĞĞÏûÏ¢·ÖÅÉ£¬Èç¹ûÊÇGrapXµÄ´°¿ÚÏûÏ¢£¬ÔòÖ±½Ó·¢ËÍµ½ÏàÓ¦´°¿Ú
+// åˆ†æ´¾æ¶ˆæ¯
+// åœ¨æ¶ˆæ¯é˜Ÿåˆ—ä¸­å–å‡ºä¸€æ¡æ¶ˆæ¯ï¼Œå¦‚æœæ˜¯æ¶ˆæ¯GrapXæ‰€åœ¨çš„Win32çª—å£æ¶ˆæ¯ï¼Œåˆ™è°ƒç”¨è§£æ
+// å‡½æ•°è¿›è¡Œæ¶ˆæ¯åˆ†æ´¾ï¼Œå¦‚æœæ˜¯GrapXçš„çª—å£æ¶ˆæ¯ï¼Œåˆ™ç›´æ¥å‘é€åˆ°ç›¸åº”çª—å£
 //
 GXLRESULT GXDLLAPI gxDispatchMessageW( const GXMSG *lpmsg )
 {
@@ -463,7 +463,7 @@ GXBOOL GXDLLAPI gxPostMessageW(
   //ThreadMsg.yPos = ptCursor.y;
   InlSetUIMSG(ThreadMsg, hWnd, Msg, wParam, lParam);
 
-  GXBOOL bval = pStation->m_pMsgThread->PostMessage(&ThreadMsg); // FIXME: ÍË³öÊ±pStation->m_pMsgThread¿ÉÄÜ»áÎªNULL
+  GXBOOL bval = pStation->m_pMsgThread->PostMessage(&ThreadMsg); // FIXME: é€€å‡ºæ—¶pStation->m_pMsgThreadå¯èƒ½ä¼šä¸ºNULL
   return bval;
 }
 
@@ -485,7 +485,7 @@ GXBOOL GXDLLAPI gxPeekMessageW(
   GXUINT wRemoveMsg     // removal flags
   )
 {
-  // FIXME: PeekMessage Ò²ÄÜ´Ó¶ÓÁĞÖĞÈ¡³ö hWnd ×Ó´°¿ÚµÄÏûÏ¢
+  // FIXME: PeekMessage ä¹Ÿèƒ½ä»é˜Ÿåˆ—ä¸­å–å‡º hWnd å­çª—å£çš„æ¶ˆæ¯
   MOUIMSG ThreadMsg;
   GXMSG msg;
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
@@ -562,7 +562,7 @@ GXBOOL GXDLLAPI gxGetMessage(
 
       GXUINT uOriginMessage = lpMsg->message;
       if(IntAnalyzeMessage(lpMsg)) {
-        // AppÏûÏ¢ÏÈÓÚUIÏûÏ¢´¦Àí, ±£Ö¤µÃµ½ÕıÈ·µÄhUIHoverWndĞÅÏ¢
+        // Appæ¶ˆæ¯å…ˆäºUIæ¶ˆæ¯å¤„ç†, ä¿è¯å¾—åˆ°æ­£ç¡®çš„hUIHoverWndä¿¡æ¯
         lpStation->AppHandle(uOriginMessage, lpMsg->wParam, lpMsg->lParam);
         break;
       }
@@ -587,7 +587,7 @@ GXBOOL GXDLLAPI gxWaitMessage()
   while(1)
   {
     GXBOOL bval = lpStation->m_pMsgThread->PeekMessage(NULL, NULL, NULL, NULL, GXPM_NOREMOVE);
-    if(bval != 0)  // Êµ¼ÊÉÏÊÇÏûÏ¢¶ÓÁĞÀïÏûÏ¢µÄÊıÁ¿
+    if(bval != 0)  // å®é™…ä¸Šæ˜¯æ¶ˆæ¯é˜Ÿåˆ—é‡Œæ¶ˆæ¯çš„æ•°é‡
       return bval;
     lpStation->AppRender();
   }

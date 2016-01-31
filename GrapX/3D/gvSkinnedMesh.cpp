@@ -14,8 +14,8 @@
 #include "clTransform.h"
 #include "smart/SmartRepository.h"
 
-#include "GrapX/gvScene.h"
 #include "GrapX/gvNode.h"
+#include "GrapX/gvScene.h"
 #include "GrapX/gvMesh.h"
 #include "GrapX/gvSkeleton.h"
 #include "GrapX/gvSkinnedMesh.h"
@@ -206,6 +206,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
       float3 vPos(0.0f);
       float3 vNormal(0.0f);
       float3 vNormalStore;
+      float4x4 mat;
       for(GXSIZE_T nClusterIndex = 0; nClusterIndex < m_nClusterCount; nClusterIndex++)
       {
         const float fWeight = m_pWeight[nVertIndex * m_nClusterCount + nClusterIndex];
@@ -213,7 +214,8 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
           const Bone& bone = m_pSkeleton->GetBones()[nClusterIndex];
           vPos += ((*pSrcPos) * (bone.BindPose * bone.matAbs)) * fWeight;
 
-          clstd::Vec3TransformNormal(&vNormalStore, pSrcNormal, &(bone.BindPose * bone.matAbs));
+          mat = bone.BindPose * bone.matAbs;
+          clstd::Vec3TransformNormal(&vNormalStore, pSrcNormal, &mat);
           vNormal += vNormalStore * fWeight;
         }
       }
@@ -289,7 +291,7 @@ GXHRESULT GVSkinnedMeshSoft::LoadFile(GXGraphics* pGraphics, clSmartRepository* 
   float4x4 matLocal = m_Transformation.ToRelativeMatrix();
   GXVERTEXELEMENT VertexElement[64];
   if( ! pStorage->ReadStringA(NULL, SKINNEDMESH_NAME, strName)) {
-    CLOG_ERROR(__FUNCTION__": Can not find mesh name.\n");
+    CLOG_ERROR("%s : Can not find mesh name.\n", __FUNCTION__);
   }
   InlSetZeroT(VertexElement);
   pStorage->ReadStringW(NULL, SKINNEDMESH_MTLINST, strMtlName);    

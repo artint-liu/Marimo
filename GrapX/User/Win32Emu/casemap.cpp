@@ -1,7 +1,7 @@
-//
-// �����ļ�����������Wine
-// ���˰�����ͷ�ļ���û���޸��κ����ݣ������ļ��е���ʾ
-// ��Щ���������ɵģ����Բ�Ҫ�ı����е��κ����ݣ���
+﻿//
+// 以下文件的数据来自Wine
+// 除了包含的头文件外没有修改任何数据，按照文件中的提示
+// 这些数据是生成的，所以不要改变其中的任何数据！！
 // 
 /* Unicode case mappings */
 /* Automatically generated; DO NOT EDIT!! */

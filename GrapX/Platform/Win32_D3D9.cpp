@@ -1,4 +1,4 @@
-#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#if (defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)) && ! defined(__clang__)
 
 // 全局头文件
 #include "GrapX.H"

@@ -1,12 +1,12 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// ȫ��ͷ�ļ�
+﻿#ifndef _DEV_DISABLE_UI_CODE
+// 全局头文件
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
 #include <Smart/smartstream.h>
 #include <Smart/SmartProfile.h>
 
-// ƽ̨���
+// 平台相关
 //#include "GrapX/GUnknown.H"
 #include "GrapX/GResource.H"
 #include "GrapX/DataPool.H"
@@ -14,7 +14,7 @@
 #include "GrapX/DataInfrastructure.H"
 #include "clPathFile.H"
 
-// ˽��ͷ�ļ�
+// 私有头文件
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"
 #include "GrapX/GXKernel.H"

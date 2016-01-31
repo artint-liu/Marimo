@@ -1,4 +1,4 @@
-#ifndef _UI_DLG_LAYOUT_H_
+ï»¿#ifndef _UI_DLG_LAYOUT_H_
 #define _UI_DLG_LAYOUT_H_
 
 class CMOWnd;
@@ -23,21 +23,21 @@ namespace GXUI
 
 // Layout Panel Style
 #define LPS_WNDITEM       0x00000000  // Default
-#define LPS_HBINARYPANEL  0x00000001  // Ë®Æ½·Ö¸îÌõµÄ°æÊ½, ÇĞ·ÖÎªÉÏÏÂÁ½²¿·Ö
-#define LPS_VBINARYPANEL  0x00000002  // ÊúÖ±·Ö¸îÌõµÄ°æÊ½, ÇĞ·ÖÎª×óÓÒÁ½²¿·Ö
-#define LPS_CROSSPANEL    0x00000003  // Ê®×Ö·Ö¸î
-#define LPS_FREEPANEL     0x00000004  // ÔİÊ±²»Ö§³Ö
-#define LPS_TYPESETPANEL  0x00000005  // ÔİÊ±²»Ö§³Ö
-#define LPS_LINEWRAP      0x00000006  // ÅÅ°æ»»ĞĞÄ£Ê½,´ËÄ£Ê½ÏÂÓëÉÏÃæµÄ±êÖ¾²»ÄÜÍ¬Ê±Ê¹ÓÃÇÒÓÅÏÈ¼¶¸ü¸ß
-#define LPS_TYPEMASK      0x0000000f  // ÑÚÂë
-#define LPS_FIXED         0x00000100  // ÓÃ»§²»ÄÜµ÷Õû
-#define LPS_KEEPFIRST     0x00000000  // ±£³ÖµÚÒ»¸öµÄ³ß´ç[Default]
-#define LPS_KEEPSECOND    0x00001000  // ±£³ÖµÚ¶ş¸ö³ß´ç
+#define LPS_HBINARYPANEL  0x00000001  // æ°´å¹³åˆ†å‰²æ¡çš„ç‰ˆå¼, åˆ‡åˆ†ä¸ºä¸Šä¸‹ä¸¤éƒ¨åˆ†
+#define LPS_VBINARYPANEL  0x00000002  // ç«–ç›´åˆ†å‰²æ¡çš„ç‰ˆå¼, åˆ‡åˆ†ä¸ºå·¦å³ä¸¤éƒ¨åˆ†
+#define LPS_CROSSPANEL    0x00000003  // åå­—åˆ†å‰²
+#define LPS_FREEPANEL     0x00000004  // æš‚æ—¶ä¸æ”¯æŒ
+#define LPS_TYPESETPANEL  0x00000005  // æš‚æ—¶ä¸æ”¯æŒ
+#define LPS_LINEWRAP      0x00000006  // æ’ç‰ˆæ¢è¡Œæ¨¡å¼,æ­¤æ¨¡å¼ä¸‹ä¸ä¸Šé¢çš„æ ‡å¿—ä¸èƒ½åŒæ—¶ä½¿ç”¨ä¸”ä¼˜å…ˆçº§æ›´é«˜
+#define LPS_TYPEMASK      0x0000000f  // æ©ç 
+#define LPS_FIXED         0x00000100  // ç”¨æˆ·ä¸èƒ½è°ƒæ•´
+#define LPS_KEEPFIRST     0x00000000  // ä¿æŒç¬¬ä¸€ä¸ªçš„å°ºå¯¸[Default]
+#define LPS_KEEPSECOND    0x00001000  // ä¿æŒç¬¬äºŒä¸ªå°ºå¯¸
 #define LPS_KEEPTHIRD     0x00002000
 #define LPS_KEEPFOURTH    0x00003000
-#define LPS_KEEPWEIGHT    0x00004000  // ±£³ÖÈ¨ÖØµÄ³ß´çµ÷Õû, Ê®×ÖPanelµÄË®Æ½ºÍÊúÖ±·½Ïò¶¼±£³ÖÔ­À´µÄÈ¨ÖØµ÷Õû
-#define LPS_KEEPMASK      0x0000f000  // ÑÚÂë
-#define LPS_INT_RETURN    0x01000000  // ÄÚ²¿±êÖ¾, LPS_LINEWRAP²¼¾ÖÏÂÄ³¸öWndÖ®ºóĞèÒª»»ĞĞµÄ±êÖ¾.
+#define LPS_KEEPWEIGHT    0x00004000  // ä¿æŒæƒé‡çš„å°ºå¯¸è°ƒæ•´, åå­—Panelçš„æ°´å¹³å’Œç«–ç›´æ–¹å‘éƒ½ä¿æŒåŸæ¥çš„æƒé‡è°ƒæ•´
+#define LPS_KEEPMASK      0x0000f000  // æ©ç 
+#define LPS_INT_RETURN    0x01000000  // å†…éƒ¨æ ‡å¿—, LPS_LINEWRAPå¸ƒå±€ä¸‹æŸä¸ªWndä¹‹åéœ€è¦æ¢è¡Œçš„æ ‡å¿—.
   //enum PanelType
   //{
   //  PT_Unknown,
@@ -48,9 +48,9 @@ namespace GXUI
   //
   //enum PanelAlignType
   //{
-  //  PAT_FixedFirst,   // ÓÃ»§²»ÄÜ¸Ä±ä´óĞ¡, Size´°¿ÚÊ±±£³ÖÇ°Ãæ¿Ø¼şµÄ´óĞ¡
+  //  PAT_FixedFirst,   // ç”¨æˆ·ä¸èƒ½æ”¹å˜å¤§å°, Sizeçª—å£æ—¶ä¿æŒå‰é¢æ§ä»¶çš„å¤§å°
   //  PAT_FixedSecond,
-  //  PAT_AlignFirst,   // Size´°¿ÚÊ±±£³ÖÇ°Ãæ¿Ø¼şµÄ´óĞ¡
+  //  PAT_AlignFirst,   // Sizeçª—å£æ—¶ä¿æŒå‰é¢æ§ä»¶çš„å¤§å°
   //  PAT_AlignSecond,
   //};
 
@@ -59,7 +59,7 @@ namespace GXUI
     clStringW           strName;
     clvector<DLGPANEL>  aPanels;
     GXDWORD             dwStyle;
-    float               fScale[2];  // ·Ö¸îÖµ,ÓÃÓÚ2´ÎºÍÊ®×Ö·Ö¸î
+    float               fScale[2];  // åˆ†å‰²å€¼,ç”¨äº2æ¬¡å’Œåå­—åˆ†å‰²
   };
   typedef clvector<DLGPANEL> DlgPanelArray;
 
@@ -82,7 +82,7 @@ namespace GXUI
     {
       GXHCURSOR   hCursor;
       PanelBase*  pPanel;
-      GXPOINT     ptParam;  // ²»Í¬µÄPanelº¬Òå²»Í¬µÄ²ÎÊı,Ö÷ÒªÊÇÊó±êÎ»ÖÃÏà¹ØµÄ²ÎÊı
+      GXPOINT     ptParam;  // ä¸åŒçš„Panelå«ä¹‰ä¸åŒçš„å‚æ•°,ä¸»è¦æ˜¯é¼ æ ‡ä½ç½®ç›¸å…³çš„å‚æ•°
     };
     //enum PanelMode
     //{
@@ -144,8 +144,8 @@ namespace GXUI
     GXDWORD m_dwItemPanel1 : 8;
     //GXDWORD m_dwPanelType  : 8;
     //GXDWORD m_dwAlignType  : 8;
-    const static int c_nRange = 3; // ¿í¶È
-    //GXINT m_nPartOffset;  // Êó±ê°´ÏÂÊ±Óë·Ö¸îÏßµÄÆ«ÒÆ
+    const static int c_nRange = 3; // å®½åº¦
+    //GXINT m_nPartOffset;  // é¼ æ ‡æŒ‰ä¸‹æ—¶ä¸åˆ†å‰²çº¿çš„åç§»
   protected:
     inline GXDWORD GetPanelType() const
     {
@@ -218,7 +218,7 @@ namespace GXUI
         }
         //ASSERT(rcPart->top <= rcPart->bottom);
       }
-      //m_rect = *rcParent; // TODO: calcÊ±²»Ó¦¸ÃĞŞ¸ÄÄÚ²¿³ÉÔ±µÄÖµ
+      //m_rect = *rcParent; // TODO: calcæ—¶ä¸åº”è¯¥ä¿®æ”¹å†…éƒ¨æˆå‘˜çš„å€¼
     }
   public:
     BinaryPanel();
@@ -264,7 +264,7 @@ namespace GXUI
     GXDWORD m_dwItemPanel1 : 4;
     GXDWORD m_dwItemPanel2 : 4;
     GXDWORD m_dwItemPanel3 : 4;
-    const static int c_nRange = 3; // ¿í¶È
+    const static int c_nRange = 3; // å®½åº¦
   private:
     inline GXDWORD GetPanelType()
     {
@@ -382,7 +382,7 @@ namespace GXUI
     };
     typedef clvector<WNDITEM> WndItemArray;
     WndItemArray m_aItems;
-    const static int c_nGap = 3; // ¼ä¾à
+    const static int c_nGap = 3; // é—´è·
   public:
     LineWrapPanel();
     virtual ~LineWrapPanel();
@@ -420,7 +420,7 @@ namespace GXUI
     virtual GXLRESULT OnLButtonUp(GXWPARAM fwKeys, GXPOINT* ptMouse);
     //virtual GXBOOL    OnSetCursor(GXHWND hWnd, int nHittest, GXWORD wMouseMsg);
     virtual GXVOID    OnMouseMove(GXWPARAM fwKeys, GXPOINT* ptMouse);
-    virtual GXBOOL    OnHitTest(const GXPOINT* ptCursor);   // ËæºóÒªµ÷ÓÃ gxDefWindowProc
+    virtual GXBOOL    OnHitTest(const GXPOINT* ptCursor);   // éšåè¦è°ƒç”¨ gxDefWindowProc
     static PanelBase* CreatePanel(GXHWND hWnd, GXLPCRECT lpRect, const DLGPANEL* pPanel);
   };
 } // namespace GXUI

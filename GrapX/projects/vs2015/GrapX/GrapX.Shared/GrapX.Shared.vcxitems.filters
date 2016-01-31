@@ -34,9 +34,6 @@
     <Filter Include="Platform">
       <UniqueIdentifier>{201f61c9-6e9f-4fd3-a2cb-7f3cf6dabcc5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Platform\Win32_D3D9">
-      <UniqueIdentifier>{e0ac01f6-015a-42e7-b8c2-1e3990bac574}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Platform\CommInline">
       <UniqueIdentifier>{025101f3-1483-4aba-82ed-a07732202db2}</UniqueIdentifier>
     </Filter>
@@ -365,33 +362,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_XXX.h">
       <Filter>Platform</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GStateBlock_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.h">
-      <Filter>Platform\Win32_D3D9</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -739,33 +709,6 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_XXX.cpp">
       <Filter>Platform</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GStateBlock_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.cpp">
-      <Filter>Platform\Win32_D3D9</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

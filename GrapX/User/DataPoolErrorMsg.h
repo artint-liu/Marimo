@@ -1,4 +1,4 @@
-#ifndef _MARIMO_DATAPOOL_ERROR_MESSAGE_H_
+ï»¿#ifndef _MARIMO_DATAPOOL_ERROR_MESSAGE_H_
 #define _MARIMO_DATAPOOL_ERROR_MESSAGE_H_
 
 namespace Marimo
@@ -10,8 +10,8 @@ namespace Marimo
     {
       typedef clstd::TextLines<_TChar>          TextLines;
       TextLines tl;
-      clStringW strFilename;  // ÓÃÓÚ±¨´íÊ±ÌáÊ¾µÄÎÄ¼şÃû
-      GXINT     nBaseLine;    // ±¨´íÊ±ÌáÊ¾µÄÆğÊ¼ĞĞºÅ
+      clStringW strFilename;  // ç”¨äºæŠ¥é”™æ—¶æç¤ºçš„æ–‡ä»¶å
+      GXINT     nBaseLine;    // æŠ¥é”™æ—¶æç¤ºçš„èµ·å§‹è¡Œå·
     };
 
     typedef clvector<FILE_SECTION*>           FileSectionTable;
@@ -19,12 +19,12 @@ namespace Marimo
     typedef clmap<GXUINT, clStringW>          ErrorMsgDict;
     typedef const _TChar*                     T_LPCSTR;
 
-    GXWCHAR               m_cSign;        // ´íÎóºÅÂëÇ°ÃæµÄÇ©Ãû£¬Èç"error(C1200)"»òÕß"error(I1200)"
+    GXWCHAR               m_cSign;        // é”™è¯¯å·ç å‰é¢çš„ç­¾åï¼Œå¦‚"error(C1200)"æˆ–è€…"error(I1200)"
     FileSectionTable      m_SourcesTable;
-    FileSectionList       m_Sources;      // ±àÒëµÄÎÄ¼şÃûĞÅÏ¢
+    FileSectionList       m_Sources;      // ç¼–è¯‘çš„æ–‡ä»¶åä¿¡æ¯
     ErrorMsgDict          m_ErrorMsg;
-    GXBOOL                m_bSilent;      // ¾²Ä¬Ä£Ê½, ²»ÌáÊ¾ÈÎºÎ¾¯¸æ
-    int                   m_CompileCode;  // 0:Ê§°Ü; 1:³É¹¦µ«ÊÇº¬ÓĞ¾¯¸æ; 2:³É¹¦ÎŞÈÎºÎĞÅÏ¢
+    GXBOOL                m_bSilent;      // é™é»˜æ¨¡å¼, ä¸æç¤ºä»»ä½•è­¦å‘Š
+    int                   m_CompileCode;  // 0:å¤±è´¥; 1:æˆåŠŸä½†æ˜¯å«æœ‰è­¦å‘Š; 2:æˆåŠŸæ— ä»»ä½•ä¿¡æ¯
 
   protected:
     GXHRESULT UpdateResult  (GXBOOL bError);
@@ -44,14 +44,14 @@ namespace Marimo
     void      PushFile            (GXLPCWSTR szFilename, GXINT nTopLine = 0);
     void      PopFile             ();
     void      WriteErrorW         (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, ...);
-    void      VarWriteErrorW      (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, va_list arglist); // ´Óµ±Ç°ÎÄ¼şµÄÆ«ÒÆÈ·¶¨Î»ÖÃ
-    void      VarWriteErrorW      (GXBOOL bError, T_LPCSTR ptr, GXUINT nCode, va_list arglist);     // ´ÓÖ¸ÕëÈ·¶¨Ô´ÎÄ¼şÎ»ÖÃ£¬Õâ¸öÖ§³Ö¶à¸öÔ´ÎÄ¼şµÄĞĞºÅ²éÑ¯
+    void      VarWriteErrorW      (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, va_list arglist); // ä»å½“å‰æ–‡ä»¶çš„åç§»ç¡®å®šä½ç½®
+    void      VarWriteErrorW      (GXBOOL bError, T_LPCSTR ptr, GXUINT nCode, va_list arglist);     // ä»æŒ‡é’ˆç¡®å®šæºæ–‡ä»¶ä½ç½®ï¼Œè¿™ä¸ªæ”¯æŒå¤šä¸ªæºæ–‡ä»¶çš„è¡Œå·æŸ¥è¯¢
     void      WriteErrorA         (GXBOOL bError, T_LPCSTR pSourcePtr, GXLPCSTR message, ...);
-    int       GetErrorLevel       () const;   // ²Î¿¼ m_CompileCode
+    int       GetErrorLevel       () const;   // å‚è€ƒ m_CompileCode
     GXBOOL    CheckIncludeLoop    (GXLPCWSTR szFilename) const;
     void      SetSilentMode       (GXBOOL bSilent);
 
-    const FILE_SECTION* SectionFromPtr(T_LPCSTR ptr) const; // ´ÓÖ¸ÕëÕÒµ½À´×ÔÄÄÒ»¸öÎÄ¼ş
+    const FILE_SECTION* SectionFromPtr(T_LPCSTR ptr) const; // ä»æŒ‡é’ˆæ‰¾åˆ°æ¥è‡ªå“ªä¸€ä¸ªæ–‡ä»¶
   };
 
 } // namespace Marimo

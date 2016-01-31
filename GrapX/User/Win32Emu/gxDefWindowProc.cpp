@@ -1,9 +1,9 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GTexture.H>
@@ -11,7 +11,7 @@
 #include <GrapX/GXCanvas.H>
 #include <GrapX/GXImage.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <clutility.h>
 
 #include "User/WindowsSurface.h"
@@ -36,7 +36,7 @@ void MENU_TrackMouseMenuBar( GXHWND hWnd, GXINT ht, GXPOINT pt );
 const GXFLOAT  c_flScaleWidth  = 2.0f;
 const GXFLOAT  c_flScaleHeight  = 2.0f;
 
-// ÓÃÓÚÍÏ¶¯´°¿ÚÊ±ÊÖ¸ĞµÄ¸ÄÉÆ
+// ç”¨äºæ‹–åŠ¨çª—å£æ—¶æ‰‹æ„Ÿçš„æ”¹å–„
 GXHWND  g_hSensorWnd;
 GXPOINT g_ptSensorCursor;
 GXPOINT g_ptSensorWnd;
@@ -105,12 +105,12 @@ GXLRESULT DEFWNDPROC_GetText(GXHWND hWnd, GXLPWSTR pszName, int ccTextMax)
 }
 
 #define FRAME_CAPTION_HEIGHT    g_SystemMetrics[GXSM_CYCAPTION]
-#define FRAME_SIZEBOX_LEFT      g_SystemMetrics[GXSM_CYFIXEDFRAME]  // TODO: Ã»²âÊÔ
-#define FRAME_SIZEBOX_RIGHT     g_SystemMetrics[GXSM_CYFIXEDFRAME]  // TODO: Ã»²âÊÔ
-#define FRAME_SIZEBOX_TOP       g_SystemMetrics[GXSM_CXFIXEDFRAME]  // TODO: Ã»²âÊÔ
-#define FRAME_SIZEBOX_BOTTOM    g_SystemMetrics[GXSM_CXFIXEDFRAME]  // TODO: Ã»²âÊÔ
+#define FRAME_SIZEBOX_LEFT      g_SystemMetrics[GXSM_CYFIXEDFRAME]  // TODO: æ²¡æµ‹è¯•
+#define FRAME_SIZEBOX_RIGHT     g_SystemMetrics[GXSM_CYFIXEDFRAME]  // TODO: æ²¡æµ‹è¯•
+#define FRAME_SIZEBOX_TOP       g_SystemMetrics[GXSM_CXFIXEDFRAME]  // TODO: æ²¡æµ‹è¯•
+#define FRAME_SIZEBOX_BOTTOM    g_SystemMetrics[GXSM_CXFIXEDFRAME]  // TODO: æ²¡æµ‹è¯•
 #define FRAME_CLOSEBTN_WIDTH    43
-#define FRAME_CLOSEBTN_HEIGHT   15  // Ã»ÓÃÉÏ
+#define FRAME_CLOSEBTN_HEIGHT   15  // æ²¡ç”¨ä¸Š
 #define FRAME_MAXBTN_WIDTH      26
 
 GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)
@@ -119,7 +119,7 @@ GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)
   //  return HTCAPTION;
   GXLRESULT ret = GXHTCLIENT;
   LPGXWND lpWnd = GXWND_PTR(hWnd);
-  GXPOINT ptCursor = {xPos, yPos};    // TODO: ÓÅ»¯µô
+  GXPOINT ptCursor = {xPos, yPos};    // TODO: ä¼˜åŒ–æ‰
   GXLPWND lpDesktop = GXLPWND_STATION_PTR(lpWnd)->lpDesktopWnd;
   //GXULONG uPrevState = m_uState & FIS_MASK;
   ////if((GetKeyState(GXVK_LCONTROL) & 0xffff0000) != 0)
@@ -134,7 +134,7 @@ GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)
     return GXHTNOWHERE;
   if(WINSTYLE_HASCAPTION(lpWnd->m_uStyle))
   {
-    // ±êÌâÇø
+    // æ ‡é¢˜åŒº
     if(xPos > rect.left && xPos < rect.right && yPos > rect.top && yPos <= rect.top + FRAME_CAPTION_HEIGHT)
     {
       if(xPos < rect.left + FRAME_SIZEBOX_LEFT)
@@ -142,13 +142,13 @@ GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)
       else if(xPos > rect.right - FRAME_SIZEBOX_RIGHT)
         ret = GXHTTOPRIGHT;
       else if(FALSE && (lpWnd->m_uStyle & GXWS_SYSMENU) && xPos > rect.right - (FRAME_SIZEBOX_RIGHT + FRAME_CLOSEBTN_WIDTH))
-        ret = GXHTCLOSE;    // ÔİÊ±²»Ö§³Ö
+        ret = GXHTCLOSE;    // æš‚æ—¶ä¸æ”¯æŒ
       else if(FALSE && (lpWnd->m_uStyle & GXWS_SYSMENU) && (lpWnd->m_uStyle & GXWS_MAXIMIZEBOX) &&
         (xPos > rect.right - (FRAME_SIZEBOX_RIGHT + FRAME_CLOSEBTN_WIDTH + FRAME_MAXBTN_WIDTH)))
-        ret = GXHTMAXBUTTON;  // ÔİÊ±²»Ö§³Ö
+        ret = GXHTMAXBUTTON;  // æš‚æ—¶ä¸æ”¯æŒ
       else if(FALSE && (lpWnd->m_uStyle & GXWS_SYSMENU) && (lpWnd->m_uStyle & GXWS_MINIMIZEBOX) &&
         (xPos > rect.right - (FRAME_SIZEBOX_RIGHT + FRAME_CLOSEBTN_WIDTH + FRAME_MAXBTN_WIDTH * 2)))
-        ret = GXHTMINBUTTON;  // ÔİÊ±²»Ö§³Ö
+        ret = GXHTMINBUTTON;  // æš‚æ—¶ä¸æ”¯æŒ
       else if(yPos < rect.top + FRAME_SIZEBOX_TOP)
         ret = GXHTTOP;
       else
@@ -173,7 +173,7 @@ GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)
     else
       ret = GXHTNOWHERE;
 
-    // Ã»ÓĞResizingÊôĞÔ
+    // æ²¡æœ‰Resizingå±æ€§
     if((lpWnd->m_uStyle & GXWS_THICKFRAME) == 0 && ret >= GXHTLEFT && ret <= GXHTBOTTOMRIGHT)
     {
       if(ret >= GXHTTOP && ret <= GXHTTOPRIGHT)
@@ -188,7 +188,7 @@ GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)
     rect.bottom += FRAME_SIZEBOX_BOTTOM;
   }
 
-  // ¼ì²â¾ØĞÎÊó±êÔÚ¹ö¶¯ÌõÇøÓò
+  // æ£€æµ‹çŸ©å½¢é¼ æ ‡åœ¨æ»šåŠ¨æ¡åŒºåŸŸ
   if(lpWnd->m_uStyle & GXWS_VSCROLL && lpWnd->m_uStyle & GXWS_HSCROLL)
   {
     if(xPos > rect.right - g_SystemMetrics[GXSM_CXVSCROLL] && 
@@ -214,7 +214,7 @@ GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos)
       ret = GXHTHSCROLL;
   }
   if(WINSTYLE_HASMENU(lpWnd, lpDesktop) && ret == GXHTCLIENT && yPos < rect.top + FRAME_CAPTION_HEIGHT * 2)
-  {//TODO: Õâ¸öÊÇÁÙÊ±´úÂë
+  {//TODO: è¿™ä¸ªæ˜¯ä¸´æ—¶ä»£ç 
     return GXHTMENU;
   }
   return ret;
@@ -233,12 +233,12 @@ GXLRESULT DEFWNDPROC_NcLButtonDown(GXHWND hWnd, GXUINT nHittest, GXINT xScrPos, 
 {
   LPGXWND lpWnd = GXWND_PTR(hWnd);
   //TRACE("DEFWNDPROC_NcLButtonDown\n");
-  // SC_SIZE ÒÆ¶¯Ê±µÍ4Î»µÄÎ»ÖÃÂë
+  // SC_SIZE ç§»åŠ¨æ—¶ä½4ä½çš„ä½ç½®ç 
   // 4 3 5
   // 1   2
   // 7 6 8
-  // Êó±êÍÏ¶¯´°¿ÚÒÆ¶¯Ê±ÊÇ2
-  // ÓÃ¼üÅÌ¿ØÖÆ´°¿ÚÒÆ¶¯Ê±ÊÇ0
+  // é¼ æ ‡æ‹–åŠ¨çª—å£ç§»åŠ¨æ—¶æ˜¯2
+  // ç”¨é”®ç›˜æ§åˆ¶çª—å£ç§»åŠ¨æ—¶æ˜¯0
   GXDWORD uCmdType = GXSC_DEFAULT;
   if(nHittest == GXHTVSCROLL)
   {
@@ -258,10 +258,10 @@ GXLRESULT DEFWNDPROC_NcLButtonDown(GXHWND hWnd, GXUINT nHittest, GXINT xScrPos, 
     //GXRECT rcWin;
     //GXRECT rcWinUV;
     //GXSIZE sizeTex;
-    //gxGetWindowRect(&rcWin);        // »ñµÃWinµÄ³ß´ç
-    //gxGetRenderingRect(this, NULL, NULL, &rcWinUV);  // ×ª»»ÎªäÖÈ¾ÎÆÀíµÄ×ø±ê
-    //gxGetOverlappedRect(&rcWin,&rcWin);    // ×ª»»Îª´°¿Ú¸²¸ÇµÄÇøÓò
-    //gxGetOverlappedRect(&rcWinUV,&rcWinUV);  // ×ª»»ÎªäÖÈ¾ÎÆÀí¸²¸ÇµÄÇøÓò
+    //gxGetWindowRect(&rcWin);        // è·å¾—Winçš„å°ºå¯¸
+    //gxGetRenderingRect(this, NULL, NULL, &rcWinUV);  // è½¬æ¢ä¸ºæ¸²æŸ“çº¹ç†çš„åæ ‡
+    //gxGetOverlappedRect(&rcWin,&rcWin);    // è½¬æ¢ä¸ºçª—å£è¦†ç›–çš„åŒºåŸŸ
+    //gxGetOverlappedRect(&rcWinUV,&rcWinUV);  // è½¬æ¢ä¸ºæ¸²æŸ“çº¹ç†è¦†ç›–çš„åŒºåŸŸ
     //sizeTex.cx = CGraphics::s_d3dpp.BackBufferWidth;
     //sizeTex.cy = CGraphics::s_d3dpp.BackBufferHeight;
     //m_pKGrid->BuildGrid(&rcWin, &rcWinUV, &sizeTex);
@@ -390,17 +390,17 @@ GXLRESULT DEFWNDPROC_SysCommand_SizeMove(GXHWND hWnd, GXUINT uCmdType, GXINT xSc
     }
     else if(emCmdType == GXSC_SIZE)
     {
-      // ´«ËÍÏµÍ³³ß´çµ½ÓÃ»§ÉèÖÃ
+      // ä¼ é€ç³»ç»Ÿå°ºå¯¸åˆ°ç”¨æˆ·è®¾ç½®
       gxSendMessageW(hWnd, GXWM_GETMINMAXINFO, NULL, (GXLPARAM)&mmi);
       //WinMsg_GetMinMaxInfo(&mmi);
-      // Ã»ÓĞ¶ÔÓÃ»§·µ»ØÖµ½øĞĞºÏ·¨ĞÔ¼ì²é
+      // æ²¡æœ‰å¯¹ç”¨æˆ·è¿”å›å€¼è¿›è¡Œåˆæ³•æ€§æ£€æŸ¥
 
-      // ¶ÔÓÚ³ß´ç²»ÄÜÔÚ´¦ÀíÖ®Ç°ÅĞ¶Ï£¬ ÒòÎªÊó±êÒÆ¶¯Á¿¿ÉÄÜºÜ´ó¡£
-      // ¿ÉÄÜÖ®Ç°µÄ³ß´çÔ¶Ğ¡ÓÚÏŞÖÆÖµ£¬¼ÓÉÏÆ«ÒÆÖ®ºóµÄÖµÓÖ»á´óÓÚÏŞÖÆÖµ¡£
-      // Ó¦¸ÃÔÚ¼ÓÉÏÆ«ÒÆÖ®ºóµ÷Õûµ½ÏŞÖÆ·¶Î§Ö®ÄÚ
-      GXLONG  *  pxSize, *  pySize;        // Ö¸Ïòµ÷Õû³ß´çµÄ±äÁ¿
-      GXLONG  *  pxBase, *  pyBase;        // Ö¸Ïò»ù×¼³ß´çµÄÖ¸Õë
-      GXLONG    xMinTrackInc,  yMinTrackInc,  // ËÄ¸öÏŞ¶¨Öµ
+      // å¯¹äºå°ºå¯¸ä¸èƒ½åœ¨å¤„ç†ä¹‹å‰åˆ¤æ–­ï¼Œ å› ä¸ºé¼ æ ‡ç§»åŠ¨é‡å¯èƒ½å¾ˆå¤§ã€‚
+      // å¯èƒ½ä¹‹å‰çš„å°ºå¯¸è¿œå°äºé™åˆ¶å€¼ï¼ŒåŠ ä¸Šåç§»ä¹‹åçš„å€¼åˆä¼šå¤§äºé™åˆ¶å€¼ã€‚
+      // åº”è¯¥åœ¨åŠ ä¸Šåç§»ä¹‹åè°ƒæ•´åˆ°é™åˆ¶èŒƒå›´ä¹‹å†…
+      GXLONG  *  pxSize, *  pySize;        // æŒ‡å‘è°ƒæ•´å°ºå¯¸çš„å˜é‡
+      GXLONG  *  pxBase, *  pyBase;        // æŒ‡å‘åŸºå‡†å°ºå¯¸çš„æŒ‡é’ˆ
+      GXLONG    xMinTrackInc,  yMinTrackInc,  // å››ä¸ªé™å®šå€¼
         xMaxTrackInc,  yMaxTrackInc;
       if(emOpType == GXSC_OPERATION_LEFT)
       {
@@ -540,7 +540,7 @@ GXLRESULT DEFWNDPROC_SysCommand_Scroll(GXHWND hWnd, GXUINT uCmdType, GXINT xScrP
     LPGXSCROLLBAR pTrackScroll = NULL;
     GXPOINT ptHit = {0,0};
     GXINT  nPos;
-    GXINT  nRevise = 0;// Èç¹û¹ı VScroll ºÍ HScroll Í¬Ê±´æÔÚ£¬ÓÃÀ´Ğ£ÕıÁíÍâÒ»ÕßµÄ¸ß¶È£¨¿í¶È£©
+    GXINT  nRevise = 0;// å¦‚æœè¿‡ VScroll å’Œ HScroll åŒæ—¶å­˜åœ¨ï¼Œç”¨æ¥æ ¡æ­£å¦å¤–ä¸€è€…çš„é«˜åº¦ï¼ˆå®½åº¦ï¼‰
     if(uCmdType == GXSC_VSCROLL)
     {
       g_MsgForScrollMsg = GXWM_VSCROLL;
@@ -651,7 +651,7 @@ GXLRESULT DEFWNDPROC_SysCommand(GXHWND hWnd, GXUINT uCmdType, GXINT xScrPos, GXI
     MENU_TrackMouseMenuBar(hWnd, GXHTMENU, ptPos);
     return 0L;
   }
-  TRACE("²»Ì«Ö§³ÖµÄ SysCommand ÏûÏ¢ %d\n", emCmdType);
+  TRACE("ä¸å¤ªæ”¯æŒçš„ SysCommand æ¶ˆæ¯ %d\n", emCmdType);
   return 0L;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -679,16 +679,16 @@ GXLRESULT DEFWNDPROC_NcPaint(LPGXWND lpWnd, GXHRGN hRgn)
 
     if(WINSTYLE_HASCAPTION(lpWnd->m_uStyle))
     {
-      // »æÖÆ Frame Ç°¹Ø±Õ Alpha ºÏ³É
-      // Ê¹±³¾°É«¾ÍÊÇ Frame Í¼Æ¬µÄÑÕÉ«£¬ 
-      // ²¢±£Áô Frame ÖĞµÄ Alpha Í¨µÀ
+      // ç»˜åˆ¶ Frame å‰å…³é—­ Alpha åˆæˆ
+      // ä½¿èƒŒæ™¯è‰²å°±æ˜¯ Frame å›¾ç‰‡çš„é¢œè‰²ï¼Œ 
+      // å¹¶ä¿ç•™ Frame ä¸­çš„ Alpha é€šé“
       //if(s_pMouseFocusFrame != this)
       //  m_uState &= (~(FIS_MAXBUTTON | FIS_MINBUTTON | FIS_CLOSE));
       DEFWNDPROC_NcPaint_HasCaption(lpWnd, hRgn);
       //_GXDrawFrameEdge(&Canvas, &rcWindow, lpWnd->m_uStyle, lpWnd->m_uExStyle, lpWnd->m_uState);
 
-      // Èç¹û´°¿Ú¾ßÓĞ WS_THICKFRAME | WS_BORDER | WS_CAPTION µÈÊôĞÔ
-      // Ôò½«±ßÔµËõ¼õ£¬±ãÓÚ»æÖÆ¹ö¶¯Ìõ
+      // å¦‚æœçª—å£å…·æœ‰ WS_THICKFRAME | WS_BORDER | WS_CAPTION ç­‰å±æ€§
+      // åˆ™å°†è¾¹ç¼˜ç¼©å‡ï¼Œä¾¿äºç»˜åˆ¶æ»šåŠ¨æ¡
       rcWindow.left  += FRAME_NC_EDGE_LEFT;
       rcWindow.top  += FRAME_NC_EDGE_CAPTION;
       rcWindow.right  -= FRAME_NC_EDGE_RIGHT;
@@ -756,13 +756,13 @@ GXLRESULT DEFWNDPROC_NcPaint_HasCaption(LPGXWND lpWnd, GXHRGN hRgn)
     return GX_FAIL;
 
   const GXDWORD dwDCXFlags = GXDCX_CACHE|GXDCX_WINDOW|GXDCX_PARENTCLIP|GXDCX_CLIPSIBLINGS;
-  GXRECT rect;  // ¾ØĞÎÇøÓòÊÇ×ø±êÇø
+  GXRECT rect;  // çŸ©å½¢åŒºåŸŸæ˜¯åæ ‡åŒº
   GXHDC hdc = gxGetDCEx(hWnd, hRgn, dwDCXFlags);
   GXREGN rgWin;
   GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(CM_SourceCopy);
   gxRectToRegn(&rgWin, &lpWnd->rectWindow);
 
-  // ±êÌâÀ¸
+  // æ ‡é¢˜æ 
   gxSetRect(&rect, 0, 0, rgWin.width, g_SystemMetrics[GXSM_CYCAPTION]);
   gxDrawThemeBackground(hTheme, hdc, GXWP_CAPTION, GXCS_ACTIVE, &rect, NULL);
 
@@ -776,7 +776,7 @@ GXLRESULT DEFWNDPROC_NcPaint_HasCaption(LPGXWND lpWnd, GXHRGN hRgn)
   }
 #endif
 
-  // ×óÓÒ±ß½ç
+  // å·¦å³è¾¹ç•Œ
   gxSetRect(&rect, 0, g_SystemMetrics[GXSM_CYCAPTION], g_SystemMetrics[GXSM_CYFIXEDFRAME], rgWin.height - g_SystemMetrics[GXSM_CXFIXEDFRAME]);
   gxDrawThemeBackground(hTheme, hdc, GXWP_FRAMELEFT, GXFS_ACTIVE, &rect, NULL);
 
@@ -784,7 +784,7 @@ GXLRESULT DEFWNDPROC_NcPaint_HasCaption(LPGXWND lpWnd, GXHRGN hRgn)
   rect.right = rgWin.width;
   gxDrawThemeBackground(hTheme, hdc, GXWP_FRAMERIGHT, GXFS_ACTIVE, &rect, NULL);
 
-  // ÏÂ±ß½ç
+  // ä¸‹è¾¹ç•Œ
   gxSetRect(&rect, 0, rgWin.height - g_SystemMetrics[GXSM_CXFIXEDFRAME], rgWin.width, rgWin.height);
   gxDrawThemeBackground(hTheme, hdc, GXWP_FRAMEBOTTOM, GXFS_ACTIVE, &rect, NULL);
 
@@ -802,7 +802,7 @@ GXLRESULT DEFWNDPROC_EraseBkGnd(GXHWND hWnd, GXHDC hdc)
   GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(CM_SourceCopy);
   gxDrawThemeBackground(hTheme, hdc, GXWP_DIALOG, 0, &rcClient, NULL);
   GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(CM_SourceOver);
-  return -1;  // ·µ»Ø·Ç0±íÊ¾ÒÑ¾­´¦Àí
+  return -1;  // è¿”å›é0è¡¨ç¤ºå·²ç»å¤„ç†
 }
 GXLRESULT DEFWNDPROC_SetCursor(GXHWND hWnd, GXHWND hCursorWnd, GXLPARAM lParam)
 {
@@ -819,8 +819,8 @@ GXLRESULT DEFWNDPROC_SetCursor(GXHWND hWnd, GXHWND hCursorWnd, GXLPARAM lParam)
 //GXLRESULT DEFWNDPROC_DisplayChange(LPGXWND lpWnd, GXINT nColorDepth, GXLPARAM dwScreenSize)
 //{
 //  //ASSERT(0);
-//  // TODO: ±¾À´Ğ´µÄÖØĞÂÊµÏÖ,µ«ÊÇÎÒÍüÁËÎªÉ¶ÒªÖØĞÂÊµÏÖÁËÄØ....
-//  // TODO: ÖØĞÂÊµÏÖ
+//  // TODO: æœ¬æ¥å†™çš„é‡æ–°å®ç°,ä½†æ˜¯æˆ‘å¿˜äº†ä¸ºå•¥è¦é‡æ–°å®ç°äº†å‘¢....
+//  // TODO: é‡æ–°å®ç°
 //
 //  if(lpWnd->m_pFirstChild != NULL)
 //    gxSendMessageW(GXWND_HANDLE(lpWnd->m_pFirstChild), GXWM_DISPLAYCHANGE, nColorDepth, dwScreenSize);

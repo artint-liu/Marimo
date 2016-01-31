@@ -26,7 +26,7 @@ namespace clstd
       }; // means dual dimension
       float m[9];
     };
-    _float3x3(){}
+    _float3x3() TRIVIAL_DEFAULT;
     _float3x3(const _float4x4& m4x4);
     _float3x3(
       float m11, float m12, float m13,
@@ -86,7 +86,7 @@ namespace clstd
       }; // means dual dimension
       float m[16];
     };
-    _float4x4(){};
+    _float4x4() TRIVIAL_DEFAULT;
     _float4x4(float* a)
     {
       m[ 0] = a[ 0];  m[ 1] = a[ 1];  m[ 2] = a[ 2];  m[ 3] = a[ 3];

@@ -476,7 +476,7 @@ GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCST
   }
 
   if( ! sp.LoadW(strFilename)) {
-    CLOG_WARNING(__FUNCTION__": Can not open file(%s).\n", clStringA(strFilename));
+    CLOG_WARNING(__FUNCTION__": Can not open file(%s).\n", __FUNCTION__, clStringA(strFilename));
     return GX_E_OPEN_FAILED;
   }
 

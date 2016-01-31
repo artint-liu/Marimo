@@ -656,7 +656,7 @@ namespace D3D9
 #ifdef _DEBUG
     if(GXFAILED(hval))
     {
-      TRACE(__FUNCTION__" failed:%d", hval);
+      TRACE("%s : failed : %d", __FUNCTION__, hval);
     }
 #endif // _DEBUG
     return GXSUCCEEDED(hval);
@@ -687,7 +687,7 @@ namespace D3D9
 #ifdef _DEBUG
     if(GXFAILED(hval))
     {
-      TRACE(__FUNCTION__" failed:%d", hval);
+      TRACE("%s : failed : %d", __FUNCTION__, hval);
     }
 #endif // _DEBUG
     return GXSUCCEEDED(hval);

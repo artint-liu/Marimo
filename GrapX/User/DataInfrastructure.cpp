@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+﻿#ifndef _DEV_DISABLE_UI_CODE
 #include "GrapX.H"
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"

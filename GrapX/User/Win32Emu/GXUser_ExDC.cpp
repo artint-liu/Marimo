@@ -1,9 +1,9 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GRegion.H>
@@ -12,7 +12,7 @@
 #include <GrapX/GXImage.H>
 #include <GrapX/GXSprite.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"
 #include <User/GXWindow.h>
@@ -138,7 +138,7 @@ GXLONG GXDLLAPI gxTabbedTextOutW(
 {
 #ifdef _DEBUG
   if(nTabOrigin != 0) {
-    TRACE("ÔİÊ±²»Ö§³Ö nTabOrigin != 0\n");
+    TRACE("æš‚æ—¶ä¸æ”¯æŒ nTabOrigin != 0\n");
   }
 #endif // #ifdef _DEBUG
   GXLONG ret = gxGetTabbedTextExtentW(hDC, lpString, nCount, nTabPositions, lpnTabStopPositions);
@@ -412,7 +412,7 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
         break;
       }
 
-      // [»ñµÃ³É¾Í] µÚÒ»´ÎÊµ¼ÊÊ¹ÓÃ clString Å¶!!
+      // [è·å¾—æˆå°±] ç¬¬ä¸€æ¬¡å®é™…ä½¿ç”¨ clString å“¦!!
       if(szOBMFile != NULL)
         strFilename = clStringW(szBaseDir) + szOBMFile;
     }

@@ -222,8 +222,8 @@ public:
   GXHRESULT DrawImage       (GXImage*pImage, const GXREGN *rcDest, const GXREGN *rcSrc);
   GXHRESULT DrawImage       (GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rcSrc);
 
-  GXINT     DrawText        (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText);
-  GXINT     DrawGlowText    (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius);
+  GXINT     DrawTextW       (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText);
+  GXINT     DrawGlowTextW   (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius);
   GXBOOL    TextOutW        (GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText);
 
   GXVOID    DrawRect        (GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight, GXCOLORREF Color);

@@ -15,7 +15,7 @@ Invoke(&Desc);}
 
 #define INVOKE_DESC_CHECK(pDesc)\
 if(pDesc->szCmdString != NULL && pDesc->dwCmdCode != NULL)\
-{ CLOG_ERROR(__FUNCTION__": Bad script desc param.\n"); return GX_FAIL; }
+{ CLOG_ERROR("%s : Bad script desc param.\n", __FUNCTION__); return GX_FAIL; }
 
 enum {
   RESTYPE_UNKNOWN,            // [”≈œ»º∂]

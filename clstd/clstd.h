@@ -75,6 +75,12 @@ inline void InlSetZeroT(_Ty& t) {
 #define SAFE_RELEASE(pobj)    if((pobj) != NULL)  {(pobj)->Release(); (pobj) = NULL; }
 #endif // SAFE_RELEASE
 
+#if __cplusplus < 201103L
+# define TRIVIAL_DEFAULT {}
+#else
+# define TRIVIAL_DEFAULT = default
+#endif
+
 #define SETBIT(_DW, _IDX)       ((_DW) |= (1 << (_IDX)))
 #define RESETBIT(_DW, _IDX)     ((_DW) &= (~(1 << (_IDX))))
 #define TESTBIT(_DW, _IDX)      ((_DW) & (1 << (_IDX)))
@@ -142,6 +148,7 @@ extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, in
 #       define CLOG_ERRORW   TRACEW
 #       define CLOGW         TRACEW
 #       define CLBREAK       {__asm int 3}
+#       define CLABORT       {__asm int 3}
 
 // TODO:稍后实现CLUNIQUEBREAK
 //  1.线程自己持有
@@ -170,6 +177,7 @@ extern "C" void _cl_NoOperation();
 #       define CLOG_ERRORW   TRACEW
 #       define CLOGW         TRACEW
 #       define CLBREAK       { _cl_Break(); }
+#       define CLABORT       { _cl_Break(); }
 #       define CLUNIQUEBREAK CLBREAK
 #       define CLNOP         { _cl_NoOperation(); }
 #       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
@@ -194,7 +202,8 @@ void _cl_traceW(const wchar_t *fmt, ...);
 #   define CLOG_WARNINGW TRACEW
 #   define CLOG_ERRORW   TRACEW
 #   define CLOGW         TRACEA
-#   define CLBREAK       {;}
+#   define CLBREAK       ASSERT(0)
+#   define CLABORT       abort()
 #   define CLNOP
 #   define VERIFY(v)  (v)
 #   define ASSERT(x)  assert(x)
@@ -237,7 +246,7 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 #  define V_RETURN(x)  (x)
 #endif  // _DEBUG
 
-#define NOT_IMPLEMENT_FUNC_MAKER  TRACE("%s(%d): Not implement:"__FUNCTION__"()\n", __FILE__, __LINE__)
+#define NOT_IMPLEMENT_FUNC_MAKER  TRACE("%s(%d): Not implement:%s()\n", __FILE__, __LINE__, __FUNCTION__)
 
 #include "clAllocator.h"
 

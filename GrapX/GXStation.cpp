@@ -448,7 +448,7 @@ GXBOOL GXDLLAPI MOExecuteConsoleCmdW(GXLPCWSTR szCommand)
     return TRUE;
   }
   else {
-    MOLogW(L"\"%s\" is not a command.\r\n", aArgs[0]);
+    MOLogW(L"\"%s\" is not a command.\r\n", (GXLPCWSTR)aArgs[0]);
     return FALSE;
   }
 }

@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+﻿#ifndef _DEV_DISABLE_UI_CODE
 #ifndef _GX_THEME_INTERNAL_H_
 #define _GX_THEME_INTERNAL_H_
 

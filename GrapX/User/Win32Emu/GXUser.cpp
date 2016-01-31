@@ -1,8 +1,8 @@
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GRegion.H>
@@ -12,7 +12,7 @@
 #include <GrapX/GXFont.H>
 #include <GrapX/GXImage.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "GrapX/GXKernel.H"
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"
@@ -25,18 +25,18 @@
 #ifndef _DEV_DISABLE_UI_CODE
 //////////////////////////////////////////////////////////////////////////
 //
-// ÄÚ²¿ÀàĞÍ¶¨Òå
+// å†…éƒ¨ç±»å‹å®šä¹‰
 //
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÄÚ²¿±äÁ¿¶¨Òå
+// å†…éƒ¨å˜é‡å®šä¹‰
 //
 //GXHRESDATA hControlRegMap;
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÄÚ²¿º¯Êı¶¨Òå
+// å†…éƒ¨å‡½æ•°å®šä¹‰
 //
 GXBOOL GXUSER_InitializeCtrlRegMap();
 GXVOID GXUSER_ReleaseCtrlRegMap();
@@ -60,7 +60,7 @@ extern GXWNDCLASSEX WndClassEx_MyStatic;
 extern GXWNDCLASSEX WndClassEx_GXUIEdit_1_3_30;
 //////////////////////////////////////////////////////////////////////////
 //
-// Íâ²¿ÒıÓÃº¯Êı
+// å¤–éƒ¨å¼•ç”¨å‡½æ•°
 // 
 GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos);
 
@@ -111,11 +111,11 @@ GXVOID GXUSER_ReleaseCtrlRegMap()
 //    lpWnd = pParent;
 //    pParent = lpWnd->m_pParent;
 //  }
-//  // ´°¿Ú²»ÔÚ×î´ó»¯Ê±
+//  // çª—å£ä¸åœ¨æœ€å¤§åŒ–æ—¶
 //  lpPoint->x -= (lpWnd->rectWindow.left/* - FRAME_NC_GLOW_LEFT*/);
 //  lpPoint->y -= (lpWnd->rectWindow.top/*  - FRAME_NC_GLOW_TOP */);
 //
-//  // ´°¿Ú×î´ó»¯Ê±£ºÃ»ÓĞÒõÓ°
+//  // çª—å£æœ€å¤§åŒ–æ—¶ï¼šæ²¡æœ‰é˜´å½±
 //  // TODO:
 //  //lpPoint->x -= pFrame->rectWindow.left;
 //  //lpPoint->y -= pFrame->rectWindow.top;
@@ -172,7 +172,7 @@ int GXDLLAPI gxDrawTextW(
   //if(uFormat & GDT_GLOW)
   //{
   //  lpDC->pCanvas->DrawGlowText(
-  //    pFont->lpFont, lpString, nCount, lpRect, uFmt & (~GXDT_TABSTOP), /*((LPGXGDIDC)hDC)->crText*/0xffffffff, 7);// TODO: ÁÙÊ±Ğ´³É°×É«
+  //    pFont->lpFont, lpString, nCount, lpRect, uFmt & (~GXDT_TABSTOP), /*((LPGXGDIDC)hDC)->crText*/0xffffffff, 7);// TODO: ä¸´æ—¶å†™æˆç™½è‰²
   //}
   GXCanvas* pCanvas = lpDC->pCanvas;
   //if(lpDC->flag & GXDCFLAG_OPAQUEBKMODE)
@@ -258,14 +258,14 @@ GXBOOL GXDLLAPI gxScreenToClient(
 //
 //gxDragDetect
 // GXBOOL gxDragDetect(GXHWND hwnd, GXLPPOINT pt);
-// hwnd ĞèÒª¼à¿ØµÄ´°¿Ú¾ä±ú
-// pt   Êó±ê³õÊ¼Î»ÖÃ, ×ø±ê¿Õ¼äÊÇ¿Í»§Çø.
-// ·µ»ØÖµ:
-//    ÔÚ°´×¡Êó±ê×ó¼ü²¢ÇÒÒÆ³ö²Î¿¼ÇøÓòÊ±,·µ»Ø·Ç0
-//    ÔÚËÉ¿ª×ó¼üÊ±Èç¹ûÃ»ÓĞÒÆ³öÇøÓò,·µ»Ø0
-// ËµÃ÷:  
-//    Õâ¸öº¯ÊıÊ×ÏÈ¸ù¾İ²ÎÊı¼ÆËã³öÒ»¸ö¾ØĞÎ²Î¿¼ÇøÓò,¾ØĞÎ´óĞ¡È¡×Ô gxGetSystemMetrics(GXSM_CXDRAG)ºÍ
-//    gxGetSystemMetrics(GXSM_CYDRAG) Á½¸öº¯Êı.
+// hwnd éœ€è¦ç›‘æ§çš„çª—å£å¥æŸ„
+// pt   é¼ æ ‡åˆå§‹ä½ç½®, åæ ‡ç©ºé—´æ˜¯å®¢æˆ·åŒº.
+// è¿”å›å€¼:
+//    åœ¨æŒ‰ä½é¼ æ ‡å·¦é”®å¹¶ä¸”ç§»å‡ºå‚è€ƒåŒºåŸŸæ—¶,è¿”å›é0
+//    åœ¨æ¾å¼€å·¦é”®æ—¶å¦‚æœæ²¡æœ‰ç§»å‡ºåŒºåŸŸ,è¿”å›0
+// è¯´æ˜:  
+//    è¿™ä¸ªå‡½æ•°é¦–å…ˆæ ¹æ®å‚æ•°è®¡ç®—å‡ºä¸€ä¸ªçŸ©å½¢å‚è€ƒåŒºåŸŸ,çŸ©å½¢å¤§å°å–è‡ª gxGetSystemMetrics(GXSM_CXDRAG)å’Œ
+//    gxGetSystemMetrics(GXSM_CYDRAG) ä¸¤ä¸ªå‡½æ•°.
 
 GXBOOL GXDLLAPI gxDragDetect(
         GXHWND hwnd,   
@@ -281,7 +281,7 @@ GXBOOL GXDLLAPI gxDragDetect(
     pt->x - cxDrag, pt->y - cyDrag, 
     pt->x + cxDrag, pt->y + cyDrag);
 
-  // µäĞÍÒÆ¶¯´¦Àí
+  // å…¸å‹ç§»åŠ¨å¤„ç†
   GXMSG msg;
   while(gxGetMessage(&msg, NULL))
   {
@@ -351,14 +351,16 @@ GXBOOL GXDLLAPI GXInvalidateWindowRgn(GXHWND hWnd, GRegion* pRegion, GXBOOL bEra
 
   lpWnd->GetSystemRegion(GSR_WINDOW|GSR_CLIPSIBLINGS|GSR_PARENTCLIP, &pUpdateRegion);
 
-  if(pWndRegion && pUpdateRegion->Intersect(pWndRegion) == RC_NULL) {
+  do {
+    if (pWndRegion && pUpdateRegion->Intersect(pWndRegion) == RC_NULL) {
       bval = FALSE;
-      goto FUNC_RET;
-  }
+      break;
+    }
 
-  // ÓëÒÑÓĞµÄÇøÓòÇó²¢¼¯
-  GXWindowsSurface* pWinsSur = lpWnd->GetTopSurface();
-  pWinsSur->InvalidateRegion(pUpdateRegion);
+    // ä¸å·²æœ‰çš„åŒºåŸŸæ±‚å¹¶é›†
+    GXWindowsSurface* pWinsSur = lpWnd->GetTopSurface();
+    pWinsSur->InvalidateRegion(pUpdateRegion);
+  } while (0);
 
 FUNC_RET:
   SAFE_RELEASE(pUpdateRegion);
@@ -367,12 +369,12 @@ FUNC_RET:
 }
 
 //////////////////////////////////////////////////////////////////////////
-// ÆäÊµ GXInvalidateWindowRect ¿ÉÒÔÊ¹ÓÃ GXInvalidateWindowRgn ÊµÏÖ
-// µ«ÊÇµ¥¶ÀÊµÏÖĞÔÄÜ¸üºÃĞ©
+// å…¶å® GXInvalidateWindowRect å¯ä»¥ä½¿ç”¨ GXInvalidateWindowRgn å®ç°
+// ä½†æ˜¯å•ç‹¬å®ç°æ€§èƒ½æ›´å¥½äº›
 //
 GXBOOL GXDLLAPI GXInvalidateWindowRect(
       GXHWND    hWnd,
-      GXLPCRECT lpRect,   // Window¿Õ¼äµÄ
+      GXLPCRECT lpRect,   // Windowç©ºé—´çš„
       GXBOOL    bErase)
 {
   GXLPWND lpWnd         = GXWND_PTR(hWnd);
@@ -384,12 +386,12 @@ GXBOOL GXDLLAPI GXInvalidateWindowRect(
 
   if(lpRect != NULL)
   {
-    // Ğ£Ñé´«ÈëµÄ×ø±êÊÇ·ñ¿ÉÄÜÊÇÆÁÄ»¿Õ¼äµÄ
+    // æ ¡éªŒä¼ å…¥çš„åæ ‡æ˜¯å¦å¯èƒ½æ˜¯å±å¹•ç©ºé—´çš„
     ASSERT(lpRect->right <= lpWnd->rectWindow.right - lpWnd->rectWindow.left &&
       lpRect->bottom <= lpWnd->rectWindow.bottom - lpWnd->rectWindow.top);
 
-    // Èç¹ûÓÃ»§¶¨ÒåµÄ¸üĞÂÇøÓò
-    // ÄÇÃ´½«ÇøÓòÓ°Éäµ½ÆÁÄ»×ø±ê£¬È»ºóÓë´°¿Ú×ø±êÇó½»
+    // å¦‚æœç”¨æˆ·å®šä¹‰çš„æ›´æ–°åŒºåŸŸ
+    // é‚£ä¹ˆå°†åŒºåŸŸå½±å°„åˆ°å±å¹•åæ ‡ï¼Œç„¶åä¸çª—å£åæ ‡æ±‚äº¤
     rcUpdate = *lpRect;
     gxOffsetRect(&rcUpdate, lpWnd->rectWindow.left, lpWnd->rectWindow.top);
     gxIntersectRect(&rcUpdate, &rcUpdate, &lpWnd->rectWindow);
@@ -402,18 +404,20 @@ GXBOOL GXDLLAPI GXInvalidateWindowRect(
     goto FUNC_RET;
   }
 
-  // ´´½¨¸üĞÂÇøÓò
+  // åˆ›å»ºæ›´æ–°åŒºåŸŸ
   lpStation->pGraphics->CreateRectRgn(&pRegion, rcUpdate.left, rcUpdate.top, rcUpdate.right, rcUpdate.bottom);
   lpWnd->GetSystemRegion(GSR_WINDOW|GSR_CLIPSIBLINGS|GSR_PARENTCLIP, &prgnWindow);
   
-  if(pRegion->Intersect(prgnWindow) == RC_NULL) {
-    bval = FALSE;
-    goto FUNC_RET;
-  }
+  do {
+    if (pRegion->Intersect(prgnWindow) == RC_NULL) {
+      bval = FALSE;
+      break;
+    }
 
-  // ÓëÒÑÓĞµÄÇøÓòÇó²¢¼¯
-  GXWindowsSurface* pWinsSur = lpWnd->GetTopSurface();
-  pWinsSur->InvalidateRegion(pRegion);
+    // ä¸å·²æœ‰çš„åŒºåŸŸæ±‚å¹¶é›†
+    GXWindowsSurface* pWinsSur = lpWnd->GetTopSurface();
+    pWinsSur->InvalidateRegion(pRegion);
+  } while (0);
 
 FUNC_RET:
   SAFE_RELEASE(prgnWindow);
@@ -461,7 +465,7 @@ GXBOOL GXDLLAPI gxValidateRect(
     return FALSE;
   }
 
-  // »ñµÃ¾ßÓĞ Surface µÄ Window
+  // è·å¾—å…·æœ‰ Surface çš„ Window
   GXWindowsSurface* pSurface = lpWnd->GetTopSurface();
   //while( lpCanvasWnd->m_pWinsSurface == NULL && gxIsTopLevelWindow(GXWND_HANDLE(lpCanvasWnd)) == FALSE)
   //{
@@ -483,7 +487,7 @@ GXBOOL GXDLLAPI gxValidateRect(
     GXRECT rect = *lpRect;
     GXRECT rcScreen;
 
-    // ¿Í»§ÇøÔÚÆÁÄ»¿Õ¼äµÄÇøÓò
+    // å®¢æˆ·åŒºåœ¨å±å¹•ç©ºé—´çš„åŒºåŸŸ
     lpWnd->GetBoundingRect(FALSE, &rcScreen);
     gxOffsetRect(&rect, rcScreen.left, rcScreen.top);
 
@@ -497,7 +501,7 @@ GXBOOL GXDLLAPI gxValidateRect(
 
   //if(lpWnd->m_pWinsSurface != NULL)
   //  gxSetRect(&lpWnd->m_pWinsSurface->rcScrUpdate, 0, 0, 0, 0);
-  //// TODO: ÊÇ·ñÒªÃ¶¾ÙÉÏÃæµÄ¸¸¶ÔÏó£¬Èç¹û¸üĞÂÇøºÍÕâ¸ö´°¿ÚÏàµÈÔòÈ¥µô£¿
+  //// TODO: æ˜¯å¦è¦æšä¸¾ä¸Šé¢çš„çˆ¶å¯¹è±¡ï¼Œå¦‚æœæ›´æ–°åŒºå’Œè¿™ä¸ªçª—å£ç›¸ç­‰åˆ™å»æ‰ï¼Ÿ
   return TRUE;
 }
 
@@ -516,7 +520,7 @@ GXBOOL GXDLLAPI gxGetUpdateRect(
   }
 
   if(bErase) {
-    ASSERT(0);  // FIXME: ÔİÊ±²»Ö§³Ö!
+    ASSERT(0);  // FIXME: æš‚æ—¶ä¸æ”¯æŒ!
   }
 
   if(lpRect != NULL) {
@@ -572,7 +576,7 @@ GXBOOL GXDLLAPI gxIsChild(
 //gxReleaseCapture
 GXBOOL GXDLLAPI gxReleaseCapture()
 {
-  // TODO: ·¢ËÍÊ§È¥´°¿Ú²¶»ñĞÅÏ¢
+  // TODO: å‘é€å¤±å»çª—å£æ•è·ä¿¡æ¯
   GXLPSTATION pStation = IntGetStationPtr();
   if(pStation->m_pCapture == NULL)
   {
@@ -598,7 +602,7 @@ GXHWND GXDLLAPI gxSetCapture(
         GXHWND hWnd   // handle of window to receive mouse capture
         )
 {
-  // TODO: ¼ì²âDisabled
+  // TODO: æ£€æµ‹Disabled
   GXLPWND lpWnd = GXWND_PTR(hWnd);
   GXCLPSTATION pStation = GXLPWND_STATION_PTR(lpWnd);
 
@@ -619,7 +623,7 @@ GXHWND GXDLLAPI gxSetFocus(
         GXHWND hWnd     // handle of window to receive focus
         )
 {
-  // Win32²âÊÔ£º SetFocus ¿ÉÒÔÉèÖÃÒş²Ø´°¿Ú
+  // Win32æµ‹è¯•ï¼š SetFocus å¯ä»¥è®¾ç½®éšè—çª—å£
   GXLPSTATION pStation = NULL;
   LPGXWND lpWnd = GXWND_PTR(hWnd);
 
@@ -640,7 +644,7 @@ GXHWND GXDLLAPI gxSetFocus(
 
   pStation->m_pKeyboardFocus = GXWND_PTR(hWnd);
 
-  // ²»ÅĞ¶Ï lpWnd->IsVisible() !
+  // ä¸åˆ¤æ–­ lpWnd->IsVisible() !
   if(hWnd != NULL) {
     gxSendMessage(hWnd, GXWM_SETFOCUS, (GXWPARAM)hPrevWnd, NULL);
   }
@@ -674,29 +678,29 @@ GXHWND GXDLLAPI gxGetDlgItem(
 }
 //////////////////////////////////////////////////////////////////////////
 //
-//±à¼­´ÊÌõGetNextDlgGroupltem
-//º¯Êı¹¦ÄÜ£º¸Ãº¯Êı¼ìË÷¿Ø¼ş×éµÄµÚÒ»¸ö¿Ø¼şµÄ¾ä±ú£¬¸Ã¿Ø¼ş×é¸úËæ¶Ô»°¿òÖĞÖ¸¶¨µÄ¿Ø¼ş¡£
-//º¯ÊıÔ­ĞÍ£ºHWND GetNextDlgGroupltem(HWND hDlg£¬HWND hctl£¬GXBOOL bPrevious);
-//²ÎÊı£º
-//hDlg£º±êÊ¶ÕıÔÚ±»ËÑÑ°µÄ¶Ô»°¿ò¡£
-//hCtl£ºÖ¸¶¨ÓÃÀ´×÷ÎªËÑÑ°¿ªÊ¼µãµÄ¿Ø¼ş¡£Èç¹û´Ë²ÎÊıÎª¿Õ£¬º¯Êı½«ÒÔ(»òÕß×îÇ°Ò»¸ö)×îºóÒ»¸öµãÎªËÑÑ°¿ªÊ¼µã¡£
-//BPrevious£ºÖ¸¶¨²ÎÊıÈçºÎËÑÑ°£¬Èç¹û´Ë²ÎÊıÎªTRUE£¬Ôòº¯ÊıÑ°ÕÒÒÔÇ°µÄ¿Ø¼ş×éÖĞµÄ¿Ø¼ş¡£
-//  Èç¹ûÎªFALSE£¬Ôòº¯ÊıÑ°ÕÒ¿Ø¼ş×éÖĞµÄÏÂÒ»¸ö¿Ø¼ş¡£
+//ç¼–è¾‘è¯æ¡GetNextDlgGroupltem
+//å‡½æ•°åŠŸèƒ½ï¼šè¯¥å‡½æ•°æ£€ç´¢æ§ä»¶ç»„çš„ç¬¬ä¸€ä¸ªæ§ä»¶çš„å¥æŸ„ï¼Œè¯¥æ§ä»¶ç»„è·Ÿéšå¯¹è¯æ¡†ä¸­æŒ‡å®šçš„æ§ä»¶ã€‚
+//å‡½æ•°åŸå‹ï¼šHWND GetNextDlgGroupltem(HWND hDlgï¼ŒHWND hctlï¼ŒGXBOOL bPrevious);
+//å‚æ•°ï¼š
+//hDlgï¼šæ ‡è¯†æ­£åœ¨è¢«æœå¯»çš„å¯¹è¯æ¡†ã€‚
+//hCtlï¼šæŒ‡å®šç”¨æ¥ä½œä¸ºæœå¯»å¼€å§‹ç‚¹çš„æ§ä»¶ã€‚å¦‚æœæ­¤å‚æ•°ä¸ºç©ºï¼Œå‡½æ•°å°†ä»¥(æˆ–è€…æœ€å‰ä¸€ä¸ª)æœ€åä¸€ä¸ªç‚¹ä¸ºæœå¯»å¼€å§‹ç‚¹ã€‚
+//BPreviousï¼šæŒ‡å®šå‚æ•°å¦‚ä½•æœå¯»ï¼Œå¦‚æœæ­¤å‚æ•°ä¸ºTRUEï¼Œåˆ™å‡½æ•°å¯»æ‰¾ä»¥å‰çš„æ§ä»¶ç»„ä¸­çš„æ§ä»¶ã€‚
+//  å¦‚æœä¸ºFALSEï¼Œåˆ™å‡½æ•°å¯»æ‰¾æ§ä»¶ç»„ä¸­çš„ä¸‹ä¸€ä¸ªæ§ä»¶ã€‚
 //
-//·µ»ØÖµ£ºÈç¹ûGetNextDlgGroupltemº¯Êıµ÷ÓÃ³É¹¦£¬Ôò·µ»ØÖµÎª¿Ø¼ş×éÖĞÒÔÇ°µÄ£¨»òÏÂÒ»¸ö£©¿Ø¼ş¡£
-//  Èç¹ûº¯Êıµ÷ÓÃÊ§°Ü£¬Ôò·µ»ØÖµÎªÁã¡£ÈôÏë»ñµÃ¸ü¶àµÄ´íÎóĞÅÏ¢£¬Çëµ÷ÓÃGetLastErrorº¯Êı¡£
-//±¸Íù£ºGetNextDlgGroupltemº¯Êı°´ÕÕ¶Ô»°¿òÄ£°åÖĞ±»´´½¨µÄË³Ğò£¨»òÏà·´µÄË³Ğò£©Ñ°ÕÒ¿Ø¼ş¡£
-//  ¿Ø¼ş×éµÄµÚÒ»¸ö¿Ø¼şÒ»¶¨ÓĞWS_GROUPÀàĞÍ£»ËùÓĞÆäËûµÄ¿Ø¼ş×éµÄ¿Ø¼şÒ»¶¨±»Ë³Ğò´´½¨ÇÒÒ»¶¨Ã»ÓĞWS_GROUPÀàĞÍ¡£
-//  µ±Ñ°ÕÒÒÔÇ°µÄ¿Ø¼şÊ±£¬º¯Êı·µ»ØµÚÒ»¸öÎ»ÖÃÉÏ¿ÉÊÓµÄ¡¢ÇÒ²»Ê§Ğ§µÄ¿Ø¼ş¡£Èç¹ûÓÉhCtl¸ø¶¨µÄ¿Ø¼şÓĞWS_GROUP
-//  ÀàĞÍ£¬Ôòº¯ÊıÔİÊ±·´ÏòÑ°ÕÒ¾ßÓĞWS_GROUPÀàĞÍµÄµÚÒ»¸ö¿Ø¼ş£¬È»ºóÖØĞÂ»Øµ½Ô­À´µÄ·½Ïò½øĞĞÑ°ÕÒ£¬·µ»Ø¿ÉÊÓµÄ¡¢
-//  ÇÒ²»Ê§Ğ§µÄµÚÒ»¸ö¿Ø¼ş£¬Èç¹ûÃ»ÓĞ·¢ÏÖ¿Ø¼ş£¬Ôò·µ»ØhCtl¡£
-//  µ±Ñ°ÕÒÏÂÒ»¸ö¿Ø¼şÊ±£¬º¯Êı·µ»ØµÚÒ»¸öÎ»ÖÃÉÏµÄ¿ÉÊÓ¿Ø¼ş£¬ÇÒÃ»ÓĞWS_GROUPÀàĞÍ¡£Èç¹ûÓöµ½Ò»¸öÓĞWS_GROUP
-//  ÀàĞÍµÄ¿Ø¼ş£¬Ôòº¯Êı·´ÏòÑ°ÕÒ¾ßÓĞWS_GROUPÀàĞÍµÄµÚÒ»¸ö¿Ø¼ş£¬ÇÒÈç¹û´Ë¿Ø¼şÎª¿ÉÊÓµÄ¡¢ÇÒÃ»ÓĞÊ§Ğ§£¬Ôò·µ»Ø
-//  ´Ë¿Ø¼ş¡£·ñÔò£¬º¯ÊıÖØĞÂ»Øµ½Ô­À´·½ÏòµÄÑ°ÕÒ£¬·µ»Ø¿ÉÊÓµÄ¡¢ÇÒ²»Ê§Ğ§µÄµÚÒ»¸ö¿Ø¼ş¡£Èç¹ûÃ»ÓĞ·¢ÏÖ¿Ø¼ş¡£
-//  Ôò·µ»ØhCtl¡£
-//ËÙ²é£ºWindows NT£º3.1¼°ÒÔÉÏ°æ±¾£»Windows£º95¼°ÒÔÉÏ°æ±¾£»Windows CE£º1.0¼°ÒÔÉÏ°æ±¾£»Í·ÎÄ¼ş£ºwinuser.h£»¿âÎÄ¼ş£ºuser32.lib¡£
-//Òı×Ô£ºArtintËÑË÷ÓÚ°Ù¶È°Ù¿Æ£¬¶ÔÓÚÔ­ÎÄÓĞ¸Ä¶¯¡£
-//±¸×¢£ºÔ­ÎÄÒëµÄÕæËûÂèµÄÔÎ
+//è¿”å›å€¼ï¼šå¦‚æœGetNextDlgGroupltemå‡½æ•°è°ƒç”¨æˆåŠŸï¼Œåˆ™è¿”å›å€¼ä¸ºæ§ä»¶ç»„ä¸­ä»¥å‰çš„ï¼ˆæˆ–ä¸‹ä¸€ä¸ªï¼‰æ§ä»¶ã€‚
+//  å¦‚æœå‡½æ•°è°ƒç”¨å¤±è´¥ï¼Œåˆ™è¿”å›å€¼ä¸ºé›¶ã€‚è‹¥æƒ³è·å¾—æ›´å¤šçš„é”™è¯¯ä¿¡æ¯ï¼Œè¯·è°ƒç”¨GetLastErrorå‡½æ•°ã€‚
+//å¤‡å¾€ï¼šGetNextDlgGroupltemå‡½æ•°æŒ‰ç…§å¯¹è¯æ¡†æ¨¡æ¿ä¸­è¢«åˆ›å»ºçš„é¡ºåºï¼ˆæˆ–ç›¸åçš„é¡ºåºï¼‰å¯»æ‰¾æ§ä»¶ã€‚
+//  æ§ä»¶ç»„çš„ç¬¬ä¸€ä¸ªæ§ä»¶ä¸€å®šæœ‰WS_GROUPç±»å‹ï¼›æ‰€æœ‰å…¶ä»–çš„æ§ä»¶ç»„çš„æ§ä»¶ä¸€å®šè¢«é¡ºåºåˆ›å»ºä¸”ä¸€å®šæ²¡æœ‰WS_GROUPç±»å‹ã€‚
+//  å½“å¯»æ‰¾ä»¥å‰çš„æ§ä»¶æ—¶ï¼Œå‡½æ•°è¿”å›ç¬¬ä¸€ä¸ªä½ç½®ä¸Šå¯è§†çš„ã€ä¸”ä¸å¤±æ•ˆçš„æ§ä»¶ã€‚å¦‚æœç”±hCtlç»™å®šçš„æ§ä»¶æœ‰WS_GROUP
+//  ç±»å‹ï¼Œåˆ™å‡½æ•°æš‚æ—¶åå‘å¯»æ‰¾å…·æœ‰WS_GROUPç±»å‹çš„ç¬¬ä¸€ä¸ªæ§ä»¶ï¼Œç„¶åé‡æ–°å›åˆ°åŸæ¥çš„æ–¹å‘è¿›è¡Œå¯»æ‰¾ï¼Œè¿”å›å¯è§†çš„ã€
+//  ä¸”ä¸å¤±æ•ˆçš„ç¬¬ä¸€ä¸ªæ§ä»¶ï¼Œå¦‚æœæ²¡æœ‰å‘ç°æ§ä»¶ï¼Œåˆ™è¿”å›hCtlã€‚
+//  å½“å¯»æ‰¾ä¸‹ä¸€ä¸ªæ§ä»¶æ—¶ï¼Œå‡½æ•°è¿”å›ç¬¬ä¸€ä¸ªä½ç½®ä¸Šçš„å¯è§†æ§ä»¶ï¼Œä¸”æ²¡æœ‰WS_GROUPç±»å‹ã€‚å¦‚æœé‡åˆ°ä¸€ä¸ªæœ‰WS_GROUP
+//  ç±»å‹çš„æ§ä»¶ï¼Œåˆ™å‡½æ•°åå‘å¯»æ‰¾å…·æœ‰WS_GROUPç±»å‹çš„ç¬¬ä¸€ä¸ªæ§ä»¶ï¼Œä¸”å¦‚æœæ­¤æ§ä»¶ä¸ºå¯è§†çš„ã€ä¸”æ²¡æœ‰å¤±æ•ˆï¼Œåˆ™è¿”å›
+//  æ­¤æ§ä»¶ã€‚å¦åˆ™ï¼Œå‡½æ•°é‡æ–°å›åˆ°åŸæ¥æ–¹å‘çš„å¯»æ‰¾ï¼Œè¿”å›å¯è§†çš„ã€ä¸”ä¸å¤±æ•ˆçš„ç¬¬ä¸€ä¸ªæ§ä»¶ã€‚å¦‚æœæ²¡æœ‰å‘ç°æ§ä»¶ã€‚
+//  åˆ™è¿”å›hCtlã€‚
+//é€ŸæŸ¥ï¼šWindows NTï¼š3.1åŠä»¥ä¸Šç‰ˆæœ¬ï¼›Windowsï¼š95åŠä»¥ä¸Šç‰ˆæœ¬ï¼›Windows CEï¼š1.0åŠä»¥ä¸Šç‰ˆæœ¬ï¼›å¤´æ–‡ä»¶ï¼šwinuser.hï¼›åº“æ–‡ä»¶ï¼šuser32.libã€‚
+//å¼•è‡ªï¼šArtintæœç´¢äºç™¾åº¦ç™¾ç§‘ï¼Œå¯¹äºåŸæ–‡æœ‰æ”¹åŠ¨ã€‚
+//å¤‡æ³¨ï¼šåŸæ–‡è¯‘çš„çœŸä»–å¦ˆçš„æ™•
 GXHWND GXDLLAPI gxGetNextDlgGroupItem(
                GXHWND hDlg,  // handle of dialog box
                GXHWND hCtl,  // handle of control
@@ -939,7 +943,7 @@ GXBOOL GXDLLAPI gxUpdateWindow(
   GXLPSTATION lpStation = GXLPWND_STATION_PTR(lpWnd);
   lpStation->Enter();
   if((lpWnd->m_uStyle & GXWS_VISIBLE) &&
-    lpWnd->m_prgnUpdate != NULL &&  // ´´½¨´°¿Úºó½«²úÉúÕâ¸öÇøÓò,µ«ÊÇÓĞ¿ÉÄÜ±»StationÏß³Ìµ÷ÓÃWM_PAINT¶øÇåµôÕâ¸öÇøÓò
+    lpWnd->m_prgnUpdate != NULL &&  // åˆ›å»ºçª—å£åå°†äº§ç”Ÿè¿™ä¸ªåŒºåŸŸ,ä½†æ˜¯æœ‰å¯èƒ½è¢«Stationçº¿ç¨‹è°ƒç”¨WM_PAINTè€Œæ¸…æ‰è¿™ä¸ªåŒºåŸŸ
     gxIsRectEmpty(&lpWnd->rectWindow) == FALSE)
   {
     GXWindowsSurface* pSurface = lpWnd->GetTopSurface();
@@ -1266,9 +1270,9 @@ LPGXWND GXWnd::ChildWindowFromPoint(LPGXPOINT lpPoint, GXLRESULT* lpHitTest, GXB
   GXLRESULT htParent = GXHTNOWHERE;
   *lpHitTest = GXHTERROR;
   //GXBOOL& enabled = *bEnabled;
-  *bEnabled = IsEnabled(); // °üº¬ÁË¶Ô¸¸¼¶µÄ¼ì²é
+  *bEnabled = IsEnabled(); // åŒ…å«äº†å¯¹çˆ¶çº§çš„æ£€æŸ¥
 
-  // ÔÚ´°¿ÚÖ®Íâ
+  // åœ¨çª—å£ä¹‹å¤–
   if( ! gxPtInRect(&rectWindow, *lpPoint)) {
     return NULL;
   }
@@ -1277,13 +1281,13 @@ LPGXWND GXWnd::ChildWindowFromPoint(LPGXPOINT lpPoint, GXLRESULT* lpHitTest, GXB
     return this;
   }
 
-  // Ã»ÓĞ×Ó¶ÔÏó
+  // æ²¡æœ‰å­å¯¹è±¡
   if(pWnd == NULL) {
     *lpHitTest = m_lpWndProc(GXWND_HANDLE(this), GXWM_NCHITTEST, NULL, GXMAKELONG(lpPoint->x, lpPoint->y));
     return this;
   }
 
-  // Ñ­»·µ½×îºóÒ»¸ö´°¿Ú, ÒòÎª×îºóÒ»¸ö´°¿ÚÊÇ×îÇ°ÏÔÊ¾µÄ
+  // å¾ªç¯åˆ°æœ€åä¸€ä¸ªçª—å£, å› ä¸ºæœ€åä¸€ä¸ªçª—å£æ˜¯æœ€å‰æ˜¾ç¤ºçš„
   GET_LAST_WINDOW(pWnd);
   //while(pWnd->m_pNextFrame != NULL) {
   //  pWnd = pWnd->m_pNextFrame;
@@ -1298,7 +1302,7 @@ LPGXWND GXWnd::ChildWindowFromPoint(LPGXPOINT lpPoint, GXLRESULT* lpHitTest, GXB
     {
       GXLRESULT ht = GXHTERROR;
 
-      // Èç¹û±»½ûÖ¹, ÔòÖ±½Ó·µ»Ø
+      // å¦‚æœè¢«ç¦æ­¢, åˆ™ç›´æ¥è¿”å›
       if(TEST_FLAG(pWnd->m_uStyle, GXWS_DISABLED)) {
         *lpHitTest = ht;
         *bEnabled  = FALSE;
@@ -1307,7 +1311,7 @@ LPGXWND GXWnd::ChildWindowFromPoint(LPGXPOINT lpPoint, GXLRESULT* lpHitTest, GXB
       
       ht = pWnd->m_lpWndProc(GXWND_HANDLE(pWnd), GXWM_NCHITTEST, NULL, GXMAKELONG(lpPoint->x, lpPoint->y));
 
-      if(ht == GXHTCLIENT) // ÔÚ¿Í»§Çø, ¼ì²â×Ó¶ÔÏó
+      if(ht == GXHTCLIENT) // åœ¨å®¢æˆ·åŒº, æ£€æµ‹å­å¯¹è±¡
       {
         pParent  = pWnd;
         htParent = ht;
@@ -1323,12 +1327,12 @@ LPGXWND GXWnd::ChildWindowFromPoint(LPGXPOINT lpPoint, GXLRESULT* lpHitTest, GXB
         //}
         continue;
       }
-      else if(ht > GXHTCLIENT)  // ²»ÔÚ¿Í»§Çø
+      else if(ht > GXHTCLIENT)  // ä¸åœ¨å®¢æˆ·åŒº
       {
         *lpHitTest = ht;
         return pWnd;
       }
-      // ÆäËûÇé¿ö,±ÈÈç·µ»Ø GXHTTRANSPARENT Ôò¼ÌĞø
+      // å…¶ä»–æƒ…å†µ,æ¯”å¦‚è¿”å› GXHTTRANSPARENT åˆ™ç»§ç»­
     }
     pWnd = pWnd->m_pPrevWnd;
   }while(pWnd != NULL);
@@ -1393,7 +1397,7 @@ GXBOOL GXDLLAPI gxEnableWindow(
           GXBOOL bEnable   // flag for enabling or disabling input
           )
 {
-  // TODO: Èç¹û disable window ÔòÈ¥µô Capture ÊôĞÔ
+  // TODO: å¦‚æœ disable window åˆ™å»æ‰ Capture å±æ€§
   //return GXWND_PTR(hWnd)->gxEnableWindow(bEnable);
   GXLPWND lpWnd = GXWND_PTR(hWnd);
   CHECK_LPWND_VAILD(lpWnd);
@@ -1421,7 +1425,7 @@ GXBOOL GXDLLAPI gxEndDialog(
 
 GXUINT GXDLLAPI gxGetDoubleClickTime()
 {
-  return 500; // TODO: ·Åµ½ÏµÍ³ÅäÖÃÀïÃæ
+  return 500; // TODO: æ”¾åˆ°ç³»ç»Ÿé…ç½®é‡Œé¢
 }
 
 GXSHORT GXDLLAPI gxGetAsyncKeyState(
@@ -1439,7 +1443,7 @@ GXSHORT GXDLLAPI gxGetKeyState(
   int nVirtKey   // virtual-key code
   )
 {
-  // ¿´ÏÂÎÄµµ£¬Õâ¸öËÆºõÊÇºÍÏûÏ¢¶ÓÁĞÏà¹ØµÄ
+  // çœ‹ä¸‹æ–‡æ¡£ï¼Œè¿™ä¸ªä¼¼ä¹æ˜¯å’Œæ¶ˆæ¯é˜Ÿåˆ—ç›¸å…³çš„
 #if defined(_WIN32) || defined(_WINDOWS)
   return GetKeyState(nVirtKey);
 #else
@@ -1491,7 +1495,7 @@ GXDWORD GXDLLAPI gxCharUpperBuffW(
   GXDWORD cchLength   // number of characters to process  
   )
 {
-  // TODO: ÒªÖ§³ÖËùÓĞÀ­¶¡ÎÄ×Ö
+  // TODO: è¦æ”¯æŒæ‰€æœ‰æ‹‰ä¸æ–‡å­—
   GXDWORD i;
   for(i = 0; i < cchLength; i++)
   {
@@ -1511,7 +1515,7 @@ GXDWORD GXDLLAPI gxCharLowerBuffW(
   GXDWORD cchLength   // number of bytes or characters to process  
   )
 {
-  // TODO: ÒªÖ§³ÖËùÓĞÀ­¶¡ÎÄ×Ö
+  // TODO: è¦æ”¯æŒæ‰€æœ‰æ‹‰ä¸æ–‡å­—
   GXDWORD i;
   for(i = 0; i < cchLength; i++)
   {

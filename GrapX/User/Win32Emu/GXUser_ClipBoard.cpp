@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 #include "GrapX/GXUser.H"
@@ -7,7 +7,7 @@
 #include "GrapX/gxDevice.H"
 #include <User/GXWindow.h>
 
-GXHGLOBAL g_hClipboard = NULL;  // TODO: ¸ÄÎªÏß³Ì¶ÀÁ¢µÄ
+GXHGLOBAL g_hClipboard = NULL;  // TODO: æ”¹ä¸ºçº¿ç¨‹ç‹¬ç«‹çš„
 
 //////////////////////////////////////////////////////////////////////////
 GXBOOL GXDLLAPI gxEmptyClipboard()

@@ -534,12 +534,12 @@ namespace GXUI
       clr = m_crChecked;
     }
 
-    if(clr != 0) {
+    if(clr != (GXDWORD)0) {
       GXRECT rect;
       GetItemRect(nItem, &rect);
 
       canvas.FillRect(x, y, rect.right - x, m_ButtonSize.cy, clr.color);
-      canvas.DrawRect(x, y, rect.right - x, m_ButtonSize.cy, clr | 0xff000000);
+      canvas.DrawRect(x, y, rect.right - x, m_ButtonSize.cy, clr.color | 0xff000000);
     }
 
     int nBtnSize = ox;
@@ -588,7 +588,7 @@ namespace GXUI
     if(TEST_FLAG(pTBBtn->fsStyle, BTNS_SHOWTEXT)) {
       ASSERT(pCanvas != NULL);
       GXRECT rect = {0,0,0,0};
-      pCanvas->DrawText(m_pFont, pTBBtn->strText, -1, &rect, 
+      pCanvas->DrawTextW(m_pFont, pTBBtn->strText, -1, &rect, 
         GXDT_SINGLELINE | GXDT_CALCRECT, 0);
       return clMin(m_nMaxBtnWidth, nBtnSize + rect.right + (m_ButtonSize.cx - m_BitmapSize.cx) / 2);
     }

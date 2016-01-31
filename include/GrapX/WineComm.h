@@ -16,9 +16,9 @@ typedef GXINT16   (CALLBACK *EDITWORDBREAKPROC16)(GXLPSTR,GXINT16,GXINT16,GXINT1
 //#define FIXME  TRACE
 //#define ERR    TRACE
 //#define WARN  TRACE
-#define FIXME
-#define ERR
-#define WARN
+#define FIXME(...)
+#define ERR(...)
+#define WARN(...)
 #define LB_TRACE
 #define ED_TRACE
 #define ST_TRACE
@@ -272,7 +272,7 @@ typedef struct tagCURSORICONINFO
 //#define wine_dbg_sprintf /*sprintf_s*/
 
 #if defined(_WIN32) || defined(_WINDOWS) 
-#define assert ASSERT
+#define WEAssert ASSERT
 #endif // defined(_WIN32) || defined(_WINDOWS) 
 
 #define SYSCOLOR_GetPen(x)  (GXHGDIOBJ)gxGetSysColorBrush(x)

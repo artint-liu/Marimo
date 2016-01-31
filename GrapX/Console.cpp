@@ -200,7 +200,7 @@ u32 TextRoundBuffer::GetLines(u32 uLineCount, LineOffset eOffset, LINEDESC* pLin
     for(u32 i = 0; i < uLineCount; i++)
     {
       pLineDesc->aPos.push_back(uStart);
-      if(uStart = FindNewLine(uStart) == m_uEnd) {
+      if((uStart = FindNewLine(uStart)) == m_uEnd) {
         break;
       }
       pLineDesc->nNumLines++;

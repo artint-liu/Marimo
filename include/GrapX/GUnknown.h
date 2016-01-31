@@ -27,6 +27,8 @@ protected:
 #endif // #ifdef _X86
   }
 
+  virtual ~GUnknown() {}
+
   union
   {
     GXULONG m_uRefCount;

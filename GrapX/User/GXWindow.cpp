@@ -1,16 +1,16 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GRegion.H>
 #include <GrapX/GXGraphics.H>
 #include <GrapX/GXImage.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <User/GXWindow.h>
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"
@@ -106,20 +106,20 @@ GXHWND GXWnd::SetParent(GXHWND hParent)
   if(pParent == NULL)
     pParent = pDesktop;
 
-  // Èç¹û½á¹¹ÄÚ m_pParent Îª¿Õ, ÔòÊÇ´¦ÓÚ CreateWindow µÄ¹ı³ÌÖĞ
-  // ·ñÔòÆäËûÇé¿ö m_pParent ¶¼²»Ó¦¸ÃÎª¿Õ
+  // å¦‚æœç»“æ„å†… m_pParent ä¸ºç©º, åˆ™æ˜¯å¤„äº CreateWindow çš„è¿‡ç¨‹ä¸­
+  // å¦åˆ™å…¶ä»–æƒ…å†µ m_pParent éƒ½ä¸åº”è¯¥ä¸ºç©º
   if(pParent == m_pParent) {
     return NULL;
   }
 
-  //if(m_pParent != NULL) // CreateWindow µ÷ÓÃÖĞ²»Ö´ĞĞÕâ¸ö
+  //if(m_pParent != NULL) // CreateWindow è°ƒç”¨ä¸­ä¸æ‰§è¡Œè¿™ä¸ª
   //{
   //  pParent->MapWindowPoints(m_pParent, (GXLPPOINT)&rectWindow, 2);
   //}
 
   GXUINT message = GXWM_NULL;
 
-  // ¶Ï¿ªÔ­ÓĞµÄ¸¸¶ÔÏó
+  // æ–­å¼€åŸæœ‰çš„çˆ¶å¯¹è±¡
   if(m_pParent != NULL)
   {
     if(m_pParent == pDesktop)
@@ -146,13 +146,13 @@ GXHWND GXWnd::SetParent(GXHWND hParent)
     m_pParent = NULL;
   }
 
-  // ÉèÖÃ½á¹¹ÖĞµÄ¸¸¶ÔÏó
+  // è®¾ç½®ç»“æ„ä¸­çš„çˆ¶å¯¹è±¡
   m_pParent = pParent;
 
-  // µÃµ½¸¸¶ÔÏóµÄµÚÒ»¸ö×Ó¶ÔÏó
+  // å¾—åˆ°çˆ¶å¯¹è±¡çš„ç¬¬ä¸€ä¸ªå­å¯¹è±¡
   GXWnd *pChild = pParent->m_pFirstChild;
 
-  // ¶Ô¸¸¶ÔÏóÃ»ÓĞ×Ó¶ÔÏóµÄ´¦Àí
+  // å¯¹çˆ¶å¯¹è±¡æ²¡æœ‰å­å¯¹è±¡çš„å¤„ç†
   if(pChild == NULL)
   {
     pParent->m_pFirstChild = this;
@@ -170,8 +170,8 @@ GXHWND GXWnd::SetParent(GXHWND hParent)
     goto MANAGE_SURFACE;
   }
   {
-  // ¸¸¶ÔÏóÈç¹ûÓĞ×Ó¶ÔÏó, Ôò²åÈëµ½Á´µÄ×îºó, 
-  // Èç¹û TopLevel ´°¿Ú²»¾ßÓĞ TopMost ÊôĞÔ, Ôò²åµ½ÒÑÓĞµÄ TopMost ´°¿ÚÖ®Ç°
+  // çˆ¶å¯¹è±¡å¦‚æœæœ‰å­å¯¹è±¡, åˆ™æ’å…¥åˆ°é“¾çš„æœ€å, 
+  // å¦‚æœ TopLevel çª—å£ä¸å…·æœ‰ TopMost å±æ€§, åˆ™æ’åˆ°å·²æœ‰çš„ TopMost çª—å£ä¹‹å‰
   GXLPWND pInsert = NULL;
   if(pParent == pDesktop)
   {
@@ -199,9 +199,9 @@ GXHWND GXWnd::SetParent(GXHWND hParent)
   pInsert->m_pNextWnd = this;
   m_pPrevWnd = pInsert;
 }
-  //if(GetTopSurface() != NULL) // CreateWindow Ê±ÎŞ·¨µÃµ½ÓĞĞ§µÄ Surface
+  //if(GetTopSurface() != NULL) // CreateWindow æ—¶æ— æ³•å¾—åˆ°æœ‰æ•ˆçš„ Surface
   //{
-    //GXInvalidateWindow(m_hSelf, NULL, FALSE);  // ²âÊÔ
+    //GXInvalidateWindow(m_hSelf, NULL, FALSE);  // æµ‹è¯•
   //}
 MANAGE_SURFACE:
   pDWM->ManageWindowSurface(m_hSelf, message);
@@ -229,7 +229,7 @@ GXHRESULT GXWnd::CreateDesktop(GXLPSTATION lpStation)
   lpWnd->rectWindow.bottom = g_SystemMetrics[GXSM_CYSCREEN];
   ASSERT(lpWnd->rectWindow.right  == lpStation->nWidth);
   ASSERT(lpWnd->rectWindow.bottom == lpStation->nHeight);
-  lpWnd->m_lpWndProc = gxDefWindowProcW;
+  lpWnd->m_lpWndProc = (GXWNDPROC)gxDefWindowProcW;
 
   InitializeSysCursor();
   return _gxInitializeCommonSprite(lpStation->pGraphics);
@@ -245,7 +245,7 @@ GXHRESULT GXWnd::InitializeSysCursor()
 #if defined(_WIN32) || defined(_WINDOWS)
   //ICONINFO IconInfo;
   //GetIconInfo((HICON)IDC_ARROW, &IconInfo);
-  s_hCursorArrow  = GXCursorToIcon(gxLoadCursorW(NULL, IDC_ARROW));
+  s_hCursorArrow  = GXCursorToIcon(gxLoadCursorW(NULL, (GXLPCWSTR)IDC_ARROW));
   //s_hCursorNESW  = GXCursorToIcon(LoadCursorW(NULL, IDC_SIZENESW));
   //s_hCursorNS    = GXCursorToIcon(LoadCursorW(NULL, IDC_SIZENS));
   //s_hCursorNWSE  = GXCursorToIcon(LoadCursorW(NULL, IDC_SIZENWSE));
@@ -291,8 +291,8 @@ GXBOOL GXWnd::AnalyzeMouseMoveMsg(GXINOUT GXMSG* msg, GXLPPOINT pptMSWinClient)
     IntSetCursor(NULL, GXMAKELPARAM(GXHTNOWHERE, NULL));
   }
 
-  // Èç¹ûÊó±êËùÔÚµÄ½¹µã´°¿Ú¸Ä±äÁË
-  // Disabled ´°¿ÚÄÜ¹»Õı³£½ÓÊÕÅÌĞıºÍÀë¿ªÏûÏ¢
+  // å¦‚æœé¼ æ ‡æ‰€åœ¨çš„ç„¦ç‚¹çª—å£æ”¹å˜äº†
+  // Disabled çª—å£èƒ½å¤Ÿæ­£å¸¸æ¥æ”¶ç›˜æ—‹å’Œç¦»å¼€æ¶ˆæ¯
   if(pNowFocus != lpStation->m_pMouseFocus)
   {
     GXHWND hNowFocus = GXWND_HANDLE(pNowFocus);
@@ -310,8 +310,8 @@ GXBOOL GXWnd::AnalyzeMouseMoveMsg(GXINOUT GXMSG* msg, GXLPPOINT pptMSWinClient)
     }
     else
     {
-      // Èç¹û hMouseFocus == NULL
-      // ÔÚÕâ¸öÌõ¼şÏÂ pNowFocus Ò»¶¨²»Îª NULL ËùÒÔ²»ÓÃÅĞ¶Ï¡£
+      // å¦‚æœ hMouseFocus == NULL
+      // åœ¨è¿™ä¸ªæ¡ä»¶ä¸‹ pNowFocus ä¸€å®šä¸ä¸º NULL æ‰€ä»¥ä¸ç”¨åˆ¤æ–­ã€‚
       //lpStation->m_pMouseFocus = pNowFocus;
       gxSendMessageW(hNowFocus, GXWM_NCMOUSEHOVER, fwKeys, GXMAKELPARAM(ptClient.x, ptClient.y));
       gxSendMessageW(hNowFocus, GXWM_MOUSEHOVER, fwKeys, GXMAKELPARAM(ptClient.x, ptClient.y));
@@ -325,7 +325,7 @@ GXBOOL GXWnd::AnalyzeMouseMoveMsg(GXINOUT GXMSG* msg, GXLPPOINT pptMSWinClient)
 
   if(hMouseFocus != NULL)
   {
-    // TODO: ÏÖÔÚ·Ç¿Í»§ÇøÒ²»áÊÜµ½MouseMoveÏûÏ¢,Òª¸Ä³ÉNCMouseMove
+    // TODO: ç°åœ¨éå®¢æˆ·åŒºä¹Ÿä¼šå—åˆ°MouseMoveæ¶ˆæ¯,è¦æ”¹æˆNCMouseMove
     gxSendMessageW(hMouseFocus, GXWM_SETCURSOR, (GXWPARAM)hMouseFocus, GXMAKELPARAM(ht, GXWM_MOUSEMOVE));
 
     if( ! bEnabled) {
@@ -416,7 +416,7 @@ extern "C" GXBOOL GXDLLAPI GXUIPostRootMessage(GXHWND hWnd, GXUINT message, GXWP
 //    it != lpStation->m_aActiveWnds.rend(); ++it)
 //  {
 //    const GXULONG uStyle = (*it)->m_uStyle;
-//    // TODO: ²»¿É¼ûµÄ´°¿Ú»òÕß±»½ûÓÃµÄ´°¿Ú»¹»áÔÚ¶ÓÁĞÎ²¶ËÂğ? Ó¦¸ÃÏòºó·ÅÁË°É?
+//    // TODO: ä¸å¯è§çš„çª—å£æˆ–è€…è¢«ç¦ç”¨çš„çª—å£è¿˜ä¼šåœ¨é˜Ÿåˆ—å°¾ç«¯å—? åº”è¯¥å‘åæ”¾äº†å§?
 //    if((uStyle & (GXWS_VISIBLE | GXWS_DISABLED)) == GXWS_VISIBLE)
 //      return *it;
 //  }
@@ -453,14 +453,14 @@ GXLPWND GXWnd::GetActiveOrder(const GXWINDOWPOS* pWndPos) const
   else if(pWndPos->hwndInsertAfter == GXHWND_TOP ||
     pWndPos->hwndInsertAfter == GXHWND_TOPMOST)
   {
-    // Ôİ²»Ö§³Ö
+    // æš‚ä¸æ”¯æŒ
     return NULL;
   }
   else if(CHECK_HWND_VAILD(pWndPos->hwndInsertAfter))
   {
     GXLPWND lpInsertAfter = GXWND_PTR(pWndPos->hwndInsertAfter);
     
-    // ³öÏÖÕâ¸ö¶ÏÑÔµÄÎÊÌâÊÇµ÷ÓÃÕßÃ»ÓĞ´¦ÀíÕâ¸öÇé¿ö.¶¥²ã´°¿Ú²åÈëµ½·Ç¶¥²ãÖ®ºó½«Ê§È¥¶¥²ãÊôĞÔ
+    // å‡ºç°è¿™ä¸ªæ–­è¨€çš„é—®é¢˜æ˜¯è°ƒç”¨è€…æ²¡æœ‰å¤„ç†è¿™ä¸ªæƒ…å†µ.é¡¶å±‚çª—å£æ’å…¥åˆ°éé¡¶å±‚ä¹‹åå°†å¤±å»é¡¶å±‚å±æ€§
     ASSERT(TEST_FLAG(m_uExStyle, GXWS_EX_TOPMOST) &&
       TEST_FLAG(lpInsertAfter->m_uExStyle, GXWS_EX_TOPMOST) == FALSE);
 
@@ -470,7 +470,7 @@ GXLPWND GXWnd::GetActiveOrder(const GXWINDOWPOS* pWndPos) const
       {
         return lpInsertAfter->m_pPrevWnd;
       }
-      else  // ·Ç¶¥²ãWnd²åÈëµ½¶¥²ãWndºó
+      else  // éé¡¶å±‚Wndæ’å…¥åˆ°é¡¶å±‚Wndå
       {
         return lpWnd->GetLastSiblingNoTopMost();
       }
@@ -489,7 +489,7 @@ GXLPWND GXWnd::GetLastSiblingNoTopMost()
   while(1)
   {
     if(lpWnd->m_pNextWnd == NULL || 
-      (lpWnd->m_pNextWnd->m_uExStyle & GXWS_EX_TOPMOST))  // ½ØÖÁµ½¶¥²ã´°¿Ú
+      (lpWnd->m_pNextWnd->m_uExStyle & GXWS_EX_TOPMOST))  // æˆªè‡³åˆ°é¡¶å±‚çª—å£
     {
       return lpWnd;
     }
@@ -534,22 +534,22 @@ GXLPWND GXWnd::SetActive()
   WndPos.flags = NULL;
   gxSendMessage(WndPos.hwnd, GXWM_WINDOWPOSCHANGING, NULL, (GXLPARAM)&WndPos);
 
-  // ²»ÄÜ·ÅÔÚ×Ô¼ºÖ®ºó
+  // ä¸èƒ½æ”¾åœ¨è‡ªå·±ä¹‹å
   if(WndPos.hwndInsertAfter == WndPos.hwnd) {
     WndPos.hwndInsertAfter = NULL;
   }
 
-  GXWnd* pInsert = GetActiveOrder(&WndPos);   // this ·ÅÔÚ´°¿ÚÁ´ pInsert µÄºóÃæ
-  GXWnd* pActive = lpStation->GetActiveWnd(); // ¾ÉµÄ¼¤»î´°¿Ú
+  GXWnd* pInsert = GetActiveOrder(&WndPos);   // this æ”¾åœ¨çª—å£é“¾ pInsert çš„åé¢
+  GXWnd* pActive = lpStation->GetActiveWnd(); // æ—§çš„æ¿€æ´»çª—å£
 
-  //// Èç¹ûÒÑ¾­ÊÇ¶¥²ã´°¿Ú£¬Ôò·µ»Ø
+  //// å¦‚æœå·²ç»æ˜¯é¡¶å±‚çª—å£ï¼Œåˆ™è¿”å›
   //if(pInsert == this)
   //{
-  //  // TODO: ·¢ËÍ¼¤»î/·Ç¼¤»îÏûÏ¢
+  //  // TODO: å‘é€æ¿€æ´»/éæ¿€æ´»æ¶ˆæ¯
   //  goto UPDATE_ORDER;
   //}
 
-  // Èç¹ûÊÇ¼¤»î´°¿Ú,Ôò·µ»Ø
+  // å¦‚æœæ˜¯æ¿€æ´»çª—å£,åˆ™è¿”å›
   if(pActive == this)
   {
     lpStation->Leave();
@@ -635,8 +635,8 @@ GXBOOL GXWnd::GetBoundingRect(GXBOOL bWindow, GXRECT* lprcOut)
   GXLPSTATION lpStation = GXLPWND_STATION_PTR(this);
   *lprcOut = rectWindow;
   GXBOOL bval = TRUE;
-  // TODO: ÓÃGetNonclientThicknessÌæ´ú
-  // Çó¿Í»§ÇøµÄ²Ã¼ô
+  // TODO: ç”¨GetNonclientThicknessæ›¿ä»£
+  // æ±‚å®¢æˆ·åŒºçš„è£å‰ª
   if(bWindow == FALSE)
   {
     if(WINSTYLE_HASCAPTION(m_uStyle))
@@ -702,8 +702,8 @@ GXVOID GXWnd::GetWindowRect(GXRECT *lpRect) const
 
 GXVOID GXWnd::ClientToScreen(GXLPPOINT lpPoints, GXUINT cPoints)
 {
-  // Ä¿Ç°½«Õû¸ö´°¿Ú(gxWin)µ±×÷¿Í»§Çø
-  // ËûµÄ±êÌâÀ¸ºÍ±ß¿ò¶¼ÔÚ¿Í»§Çø×ø±êÄÚ
+  // ç›®å‰å°†æ•´ä¸ªçª—å£(gxWin)å½“ä½œå®¢æˆ·åŒº
+  // ä»–çš„æ ‡é¢˜æ å’Œè¾¹æ¡†éƒ½åœ¨å®¢æˆ·åŒºåæ ‡å†…
   //GXWnd *pParent = m_pParent;
   //while(pParent != NULL)
   //{
@@ -729,9 +729,9 @@ GXVOID GXWnd::ClientToScreen(GXLPPOINT lpPoints, GXUINT cPoints)
 
 GXVOID GXWnd::ScreenToClient(GXLPPOINT lpPoints, GXUINT cPoints)
 {
-  // Ä¿Ç°½«Õû¸ö´°¿Úµ±×÷¿Í»§Çø
-  // Ä¿Ç°½«Õû¸ö´°¿Ú(gxWin)µ±×÷¿Í»§Çø
-  // ËûµÄ±êÌâÀ¸ºÍ±ß¿ò¶¼ÔÚ¿Í»§Çø×ø±êÄÚ
+  // ç›®å‰å°†æ•´ä¸ªçª—å£å½“ä½œå®¢æˆ·åŒº
+  // ç›®å‰å°†æ•´ä¸ªçª—å£(gxWin)å½“ä½œå®¢æˆ·åŒº
+  // ä»–çš„æ ‡é¢˜æ å’Œè¾¹æ¡†éƒ½åœ¨å®¢æˆ·åŒºåæ ‡å†…
 
   CHECK_LPWND_VAILD(this);
   for(GXUINT i = 0; i < cPoints; i++)
@@ -815,7 +815,7 @@ GXINT GXWnd::Scroll(GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXREC
   GetSystemRegion(GSR_PARENTCLIP|GSR_CLIPSIBLINGS, &prgnClip);
   //rcClipClient = rcClient;
 
-  // ÓÃ»§ÓĞÖ¸¶¨²Ã¼ôÇø
+  // ç”¨æˆ·æœ‰æŒ‡å®šè£å‰ªåŒº
   if(prcClip != NULL)
   {
     GXRECT rcUserClip = *prcClip;
@@ -842,14 +842,14 @@ GXINT GXWnd::Scroll(GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXREC
     gxIntersectRect(&rcScrollClient, &rcScrollClient, &rcClient);
   }
 
-  // TODO: ½«À´¸ÄÓÃDefWindowPos
-  // ¹ö¶¯×Ó´°Ìå
+  // TODO: å°†æ¥æ”¹ç”¨DefWindowPos
+  // æ»šåŠ¨å­çª—ä½“
   if(TEST_FLAG(flags, GXSW_SCROLLCHILDREN))
   {
     GXLPWND lpChildWnd = m_pFirstChild;
     GXRECT rcResult;
 
-    // ¹ö¶¯×Ó´°Ìå, ¸ù¾İ prcScroll
+    // æ»šåŠ¨å­çª—ä½“, æ ¹æ® prcScroll
     if(prcScroll != NULL)
     {
       while(lpChildWnd != NULL)
@@ -864,7 +864,7 @@ GXINT GXWnd::Scroll(GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXREC
         lpChildWnd = lpChildWnd->m_pNextWnd;
       }
     }
-    else  // Ã»Ö¸¶¨ScrollÇøÓò, ¹ö¶¯ËùÓĞ×Ó´°Ìå
+    else  // æ²¡æŒ‡å®šScrollåŒºåŸŸ, æ»šåŠ¨æ‰€æœ‰å­çª—ä½“
     {
       while(lpChildWnd != NULL)
       {
@@ -879,14 +879,14 @@ GXINT GXWnd::Scroll(GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXREC
 
   GXWindowsSurface* pSurface = GetTopSurface();
 
-  // Èç¹û¹ö¶¯ÇøÄÚº¬ÓĞÔàÇøÓò,Ôò¼õµôËü
+  // å¦‚æœæ»šåŠ¨åŒºå†…å«æœ‰è„åŒºåŸŸ,åˆ™å‡æ‰å®ƒ
   if(m_prgnUpdate != NULL) {
     prgnClip->Subtract(m_prgnUpdate);
   }
   if(pSurface->m_prgnUpdate != NULL) {
     prgnClip->Subtract(pSurface->m_prgnUpdate);
   }
-  // </¼õµôÔàÇøÓò>
+  // </å‡æ‰è„åŒºåŸŸ>
 
   stdesc.pOperationTex = pSurface->m_pRenderTar->GetTextureUnsafe();
   stdesc.pTempTex      = NULL;
@@ -935,7 +935,7 @@ GXBOOL GXWnd::SetPos(GXHWND hWndInsertAfter, int x, int y, int cx, int cy, GXUIN
   //LPGXWND lpDesktop = GXLPWND_STATION_PTR(lpWnd)->lpRootFrame;
   CHECK_LPWND_VAILD(lpWnd);
 
-  // Ö§³ÖÁĞ±í
+  // æ”¯æŒåˆ—è¡¨
   ASSERT((uFlags & (~(
     GXSWP_NOMOVE|
     GXSWP_NOSIZE|
@@ -943,14 +943,14 @@ GXBOOL GXWnd::SetPos(GXHWND hWndInsertAfter, int x, int y, int cx, int cy, GXUIN
     GXSWP_HIDEWINDOW|
     GXSWP_SHOWWINDOW|
     GXSWP_NOZORDER|
-    GXSWP_DRAWFRAME|  // Ã»ÊµÏÖ
+    GXSWP_DRAWFRAME|  // æ²¡å®ç°
     GXSWP_NOACTIVATE))) == 0);
 
   GXREGN rgWindow;
   GXBOOL bNeedMoveSize = FALSE;
   gxRectToRegn(&rgWindow, &rectWindow);
 
-  // ÒÆ¶¯´°¿Ú
+  // ç§»åŠ¨çª—å£
   if( ! TEST_FLAG(uFlags, GXSWP_NOMOVE))
   {
     rgWindow.left = x;
@@ -958,7 +958,7 @@ GXBOOL GXWnd::SetPos(GXHWND hWndInsertAfter, int x, int y, int cx, int cy, GXUIN
     bNeedMoveSize = TRUE;
   }
 
-  // ¸Ä±ä³ß´ç
+  // æ”¹å˜å°ºå¯¸
   if( ! TEST_FLAG(uFlags, GXSWP_NOSIZE))
   {
     rgWindow.width  = cx;
@@ -988,7 +988,7 @@ GXBOOL GXWnd::SetPos(GXHWND hWndInsertAfter, int x, int y, int cx, int cy, GXUIN
 
 GXBOOL GXWnd::Move(int x, int y, int cx, int cy, GXBOOL bRepaint)
 {
-  // ×ø±ê×ª»»
+  // åæ ‡è½¬æ¢
   GXPOINT ptOrg = {x, y};
   m_pParent->ClientToScreen(&ptOrg, 1);
   x = ptOrg.x;
@@ -1059,7 +1059,7 @@ GXBOOL GXWnd::Size(GXINT x, GXINT y, GXINT nWidth, GXINT nHeight)
   GetSystemRegion(dwFlags, &pAfterRegion);
 
   if(bSavePrevRgn) {
-    // FIXME: ÕâÀïÕâÃ´Ğ´»áµ¼ÖÂWindowËõĞ¡Ê±Ò²ÖØ»æÕû¸ö´°¿Ú
+    // FIXME: è¿™é‡Œè¿™ä¹ˆå†™ä¼šå¯¼è‡´Windowç¼©å°æ—¶ä¹Ÿé‡ç»˜æ•´ä¸ªçª—å£
     pAfterRegion->Union(pBeforeRegion);
   }
 
@@ -1082,21 +1082,21 @@ GXBOOL GXWnd::MoveOnly(GXINT x, GXINT y)
 
   IntMoveChild(dx, dy);
 
-  // TODO: ¶ÀÕ¼Ä£Ê½ÏÂ²»ĞèÒª¼ÆËã²Ã¼ôÇøÓò
+  // TODO: ç‹¬å æ¨¡å¼ä¸‹ä¸éœ€è¦è®¡ç®—è£å‰ªåŒºåŸŸ
   GXLPSTATION lpStation = GXLPWND_STATION_PTR(this);
-  GRegion* prgnOldUpdate = NULL;    // Ã»ÓĞ¼°Ê±¸üĞÂµÄÇøÓò
+  GRegion* prgnOldUpdate = NULL;    // æ²¡æœ‰åŠæ—¶æ›´æ–°çš„åŒºåŸŸ
   GRegion* prgnClip = NULL;
   GRegion* prgnBefore = NULL;
   GRegion* prgnAfter = NULL;
 
-  // ¼ÆËãÃ»ÓĞ¼°Ê±¸üĞÂµÄÇøÓò
+  // è®¡ç®—æ²¡æœ‰åŠæ—¶æ›´æ–°çš„åŒºåŸŸ
   GetSystemRegion(GSR_PARENTCLIP|GSR_CLIPSIBLINGS|GSR_WINDOW, &prgnOldUpdate);
   RGNCOMPLEX rgncpxOld = prgnOldUpdate->Intersect(pSurface->m_prgnUpdate);
 
-  // µÃµ½´°¿ÚµÄËùÓĞ¿ÉÓÃÇøÓò
+  // å¾—åˆ°çª—å£çš„æ‰€æœ‰å¯ç”¨åŒºåŸŸ
   GetSystemRegion(GSR_PARENTCLIP|GSR_CLIPSIBLINGS|GSR_AVAILABLE, &prgnClip);
 
-  // µÃµ½ÒÆ¶¯Ç°ºóµÄÇøÓò
+  // å¾—åˆ°ç§»åŠ¨å‰åçš„åŒºåŸŸ
   GetWindowRegion(&prgnBefore);
   gxOffsetRect(&rectWindow, dx, dy);
   GetWindowRegion(&prgnAfter);
@@ -1134,36 +1134,36 @@ GXBOOL GXWnd::MoveOnly(GXINT x, GXINT y)
 //
 //  GetWindowRegion(&prgnWindow);
 //
-//  // prgnClip Ó¦¸Ã°üÀ¨ÁË¸¸´°¿ÚµÄ²Ã¼ô
+//  // prgnClip åº”è¯¥åŒ…æ‹¬äº†çˆ¶çª—å£çš„è£å‰ª
 //  RGNCOMPLEX cpx = prgnWindow->Intersect(prgnUpdate);
 //  if(cpx == RC_NULL) {
 //    return;
 //  }
 //
 //  if(GetBoundingRect(FALSE, &rcClient)) {
-//    // ¿Í»§ÇøÕ¼ÂúÕû¸ö´°¿Ú
+//    // å®¢æˆ·åŒºå æ»¡æ•´ä¸ªçª—å£
 //    prgnClient = prgnWindow;
 //    prgnClient->AddRef();
 //  }
 //  else {
-//    // ´æÔÚ·Ç¿Í»§Çø
+//    // å­˜åœ¨éå®¢æˆ·åŒº
 //    GXLPSTATION lpStation = GXLPWND_STATION_PTR(this);
 //    lpStation->pGraphics->CreateRectRgn(&prgnClient, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
 //    prgnNClient = prgnWindow->CreateSubtract(prgnClient);
-//    prgnClient->Intersect(prgnWindow);// ÆäÊµSubtractÒ²¿ÉÒÔ
+//    prgnClient->Intersect(prgnWindow);// å…¶å®Subtractä¹Ÿå¯ä»¥
 //  }
 //
 //  GXLPWND lpChildWnd = m_pFirstChild;
 //
 //  if(lpChildWnd == NULL)
 //  {
-//    // ¸üĞÂ·Ç¿Í»§Çø
+//    // æ›´æ–°éå®¢æˆ·åŒº
 //    if(prgnNClient != NULL && ( ! prgnNClient->IsEmpty())) {
 //      GXGDIREGION gdiRegion(prgnNClient);
 //      gxSendMessageW(m_hSelf, GXWM_NCPAINT, (GXWPARAM)GXGDI_RGN_HANDLE(&gdiRegion), NULL);
 //    }
 //
-//    // ¸üĞÂ¿Í»§Çø
+//    // æ›´æ–°å®¢æˆ·åŒº
 //    if( ! prgnClient->IsEmpty()) {
 //      if(m_prgnUpdate == NULL)
 //      {
@@ -1178,7 +1178,7 @@ GXBOOL GXWnd::MoveOnly(GXINT x, GXINT y)
 //      gxSendMessageW(m_hSelf, GXWM_PAINT, 0, 0);
 //    }
 //
-//    // ¼õµô
+//    // å‡æ‰
 //    prgnUpdate->Subtract(prgnWindow);
 //
 //    SAFE_RELEASE(prgnClient);
@@ -1213,7 +1213,7 @@ void GXWnd::SetClientUpdateRegion(GRegion* prgnUpdate)
 
 void GXWnd::UpdateWholeWindow(GXWindowsSurface* pWinsSurface, GRegion* prgnPainted)
 {
-  // TODO: ÒªºÃºÃ¿¼ÂÇÏÂ ²»Ó¦¸ÃÊÇÓÃGetSystemRegionÕâ¸öÍ¨ÓÃº¯Êı,Ó¦¸ÃÊ¹ÓÃÒ»¸öÉî¶ÈÓÅ»¯µÄ¸ßĞ§¼ÆËã·½·¨
+  // TODO: è¦å¥½å¥½è€ƒè™‘ä¸‹ ä¸åº”è¯¥æ˜¯ç”¨GetSystemRegionè¿™ä¸ªé€šç”¨å‡½æ•°,åº”è¯¥ä½¿ç”¨ä¸€ä¸ªæ·±åº¦ä¼˜åŒ–çš„é«˜æ•ˆè®¡ç®—æ–¹æ³•
   CHECK_LPWND_VAILD(this);
   GXLPSTATION lpStation = GXLPWND_STATION_PTR(this);
   GRegion* prgnCurPainted = NULL;
@@ -1226,13 +1226,13 @@ void GXWnd::UpdateWholeWindow(GXWindowsSurface* pWinsSurface, GRegion* prgnPaint
   }
 
   GRegion* prgnWindow;
-  // ´°¿ÚÈ«²¿ÇøÓò
+  // çª—å£å…¨éƒ¨åŒºåŸŸ
   RGNCOMPLEX r = (RGNCOMPLEX)GetSystemRegion(GSR_PARENTCLIP|GSR_CLIPSIBLINGS|GSR_WINDOW, &prgnWindow);
 
   if(r != RC_NULL)
   {
     GRegion* pClientRgn = NULL;
-    // ĞèÒª¸üĞÂÇøÓò
+    // éœ€è¦æ›´æ–°åŒºåŸŸ
     //if(TEST_FLAG_NOT(m_uExStyle, GXWS_EX_TRANSPARENT))
     r = prgnWindow->Intersect(pWinsSurface->m_prgnUpdate);
     if(r != RC_NULL)
@@ -1242,31 +1242,31 @@ void GXWnd::UpdateWholeWindow(GXWindowsSurface* pWinsSurface, GRegion* prgnPaint
 
       GRegion* pNClientRgn = NULL;
 
-      // ·Ö¿ª¼ÆËã¿Í»§ÇøºÍ·Ç¿Í»§Çø
-      if(GetBoundingRect(FALSE, &rcClient)) { // ¿Í»§ÇøÕ¼ÂúÕû¸ö´°¿Ú
+      // åˆ†å¼€è®¡ç®—å®¢æˆ·åŒºå’Œéå®¢æˆ·åŒº
+      if(GetBoundingRect(FALSE, &rcClient)) { // å®¢æˆ·åŒºå æ»¡æ•´ä¸ªçª—å£
         pClientRgn = prgnWindow;
         pClientRgn->AddRef();
       }
-      else { // ÓĞ·Ç¿Í»§Çø
+      else { // æœ‰éå®¢æˆ·åŒº
         lpStation->pGraphics->CreateRectRgn(&pClientRgn, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom);
         r = pClientRgn->Intersect(prgnWindow);
         pNClientRgn = prgnWindow->CreateSubtract(pClientRgn);
       }
 
-      // ¿Í»§Çø - ±ê×¼
+      // å®¢æˆ·åŒº - æ ‡å‡†
       if(r != RC_NULL) {
         SetClientUpdateRegion(pClientRgn);
         gxSendMessageW(hPaintWnd, GXWM_PAINT, 0, 0);
       }
       
-      // ·Ç¿Í»§Çø
+      // éå®¢æˆ·åŒº
       if(pNClientRgn != NULL && ( ! pNClientRgn->IsEmpty())) {
         GXGDIREGION gdiRegion(pNClientRgn);
         gxSendMessageW(hPaintWnd, GXWM_NCPAINT, (GXWPARAM)GXGDI_RGN_HANDLE(&gdiRegion), NULL);
         //pWinsSurface->m_prgnUpdate->Subtract(pNClientRgn);
       }
 
-      // ×Ó´°¿Ú
+      // å­çª—å£
       if(m_pFirstChild != NULL) {
         GXLPWND lpChild = m_pFirstChild;
         do 
@@ -1282,8 +1282,8 @@ void GXWnd::UpdateWholeWindow(GXWindowsSurface* pWinsSurface, GRegion* prgnPaint
 
       SAFE_RELEASE(pNClientRgn);
 
-      // Íâ²¿º¯ÊıÊÇ·ñÏë»ñµÃÒÑ¸üĞÂÇøÓò
-      // Èç¹û²»Ïë¾ÍÖ±½ÓÔÚUpdateÀï¼õµô,·ñÔòÏÈ´æÆğÀ´
+      // å¤–éƒ¨å‡½æ•°æ˜¯å¦æƒ³è·å¾—å·²æ›´æ–°åŒºåŸŸ
+      // å¦‚æœä¸æƒ³å°±ç›´æ¥åœ¨Updateé‡Œå‡æ‰,å¦åˆ™å…ˆå­˜èµ·æ¥
       if(prgnPainted == NULL) {
         pWinsSurface->m_prgnUpdate->Subtract(prgnWindow);
       }
@@ -1291,7 +1291,7 @@ void GXWnd::UpdateWholeWindow(GXWindowsSurface* pWinsSurface, GRegion* prgnPaint
         prgnCurPainted->Union(prgnWindow);
       }
     }
-    ASSERT(m_prgnUpdate == NULL); // ¾­¹ıWM_PAINT,Õâ¸öÓ¦¸Ã±»Çå¿ÕÁË, Èç¹û²»Îª¿Õ,²éÕÒÔ­Òò,»òÕßÔÚpWinsSurface->m_prgnUpdate¼Ó»ØÈ¥?
+    ASSERT(m_prgnUpdate == NULL); // ç»è¿‡WM_PAINT,è¿™ä¸ªåº”è¯¥è¢«æ¸…ç©ºäº†, å¦‚æœä¸ä¸ºç©º,æŸ¥æ‰¾åŸå› ,æˆ–è€…åœ¨pWinsSurface->m_prgnUpdateåŠ å›å»?
     //if(m_prgnUpdate == NULL && pClientRgn != NULL)
     //  pWinsSurface->m_prgnUpdate->Subtract(pClientRgn);
     SAFE_RELEASE(pClientRgn);
@@ -1313,7 +1313,7 @@ GXBOOL GXWnd::InvalidateRect(GXCONST GXRECT* lpRect, GXBOOL bErase)
       return FALSE;
   }
 
-  // FIXME: rcUpdateÊÇclinet spaceµÄ£¬µ«ÊÇGXInvalidateWindowRect²ÎÊıÓ¦¸ÃÊÇwindow spaceµÄ
+  // FIXME: rcUpdateæ˜¯clinet spaceçš„ï¼Œä½†æ˜¯GXInvalidateWindowRectå‚æ•°åº”è¯¥æ˜¯window spaceçš„
   return GXInvalidateWindowRect(m_hSelf, &rcUpdate, bErase);
 }
 
@@ -1336,7 +1336,7 @@ GXBOOL GXWnd::InvalidateRgn(GRegion* pRegion, GXBOOL bErase)
   }
 
   //NOT_IMPLEMENT_FUNC_MAKER;
-  //InvalidateRect(NULL, bErase); // ÕâÊÇÌæ´úº¯Êı
+  //InvalidateRect(NULL, bErase); // è¿™æ˜¯æ›¿ä»£å‡½æ•°
   return FALSE;
 }
 
@@ -1366,7 +1366,7 @@ int GXWnd::GetWindowRegion(GRegion** ppRegion)
 {
   if(FALSE && gxIsTopLevelWindow(m_hSelf) && (m_uStyle & GXWS_CAPTION))
   {
-    // ÁÁµã!
+    // äº®ç‚¹!
     GXLPWND_STATION_PTR(this)->pGraphics->CreateRoundRectRgn(ppRegion, 
       rectWindow, 4, 4);
     return GXCOMPLEXREGION;
@@ -1381,14 +1381,14 @@ int GXWnd::GetWindowRegion(GRegion** ppRegion)
 
 int GXWnd::GetSystemRegion(GXDWORD dwFlags, GRegion** ppRegion)
 {
-  // TODO: Èç¹ûÊÇTopLevel ´°¿Ú,»á²Ã¼ôÁ½±ßĞÖµÜ´°¿Ú
+  // TODO: å¦‚æœæ˜¯TopLevel çª—å£,ä¼šè£å‰ªä¸¤è¾¹å…„å¼Ÿçª—å£
   GXLPSTATION pStation  = GXLPWND_STATION_PTR(this);
   LPGXWND lpDesktop    = pStation->lpDesktopWnd;
   GRegion* pRegion    = *ppRegion;
   GRegion* pClipRegion  = NULL;
   LPGXWND lpSiblings    = m_pNextWnd;
 
-  // »ñµÃ´°¿Ú×Ô¼ºµÄ²Ã¼ôÇø
+  // è·å¾—çª—å£è‡ªå·±çš„è£å‰ªåŒº
   GXRECT rcClip;
   if(dwFlags & GSR_AVAILABLE)
   {
@@ -1413,8 +1413,8 @@ int GXWnd::GetSystemRegion(GXDWORD dwFlags, GRegion** ppRegion)
       GRegion* prgnStation = NULL;
       GetWindowRegion(&pRegion);
 
-      // Èç¹û´°¿ÚÇøÓò³¬¹ıÆÁÄ», Ôò½øĞĞ²Ã¼ô
-      // rcClipÇøÓòÓ¦¸ÃÓëpRegion°üÎ§ºĞÏàµÈ!!!
+      // å¦‚æœçª—å£åŒºåŸŸè¶…è¿‡å±å¹•, åˆ™è¿›è¡Œè£å‰ª
+      // rcClipåŒºåŸŸåº”è¯¥ä¸pRegionåŒ…å›´ç›’ç›¸ç­‰!!!
       if(rcClip.left < 0 || rcClip.top < 0 ||
         rcClip.right > rcStation.right || rcClip.bottom > rcStation.bottom)
       {
@@ -1433,11 +1433,11 @@ int GXWnd::GetSystemRegion(GXDWORD dwFlags, GRegion** ppRegion)
 
   RGNCOMPLEX rc = RC_SIMPLE;
 
-  // ÒÑ¾­ÊÇ¿ÕµÄÁË,·µ»Ø
+  // å·²ç»æ˜¯ç©ºçš„äº†,è¿”å›
   if(gxIsRectEmpty(&rcClip))
     return NULLREGION;
 
-  // ²Ã¼ôËùÓĞ¸¸´°¿Ú
+  // è£å‰ªæ‰€æœ‰çˆ¶çª—å£
   if(dwFlags & GSR_PARENTCLIP)
   {
     LPGXWND pCanvasWnd = this;
@@ -1457,11 +1457,11 @@ int GXWnd::GetSystemRegion(GXDWORD dwFlags, GRegion** ppRegion)
         return NULLREGION;
     }
 
-    // ²Ã¼ô¸¸´°¿ÚµÄĞÖµÜ´°¿Ú
+    // è£å‰ªçˆ¶çª—å£çš„å…„å¼Ÿçª—å£
     GXWindowsSurface* pWinsSurface = pCanvasWnd->m_pWinsSurface;
     pCanvasWnd = pCanvasWnd->m_pNextWnd;
 
-    // Èç¹ûTopLevel´°¿ÚµÄĞÖµÜ´°¿ÚºÍ×Ô¼ºµÄĞÖµÜ´°¿ÚÒ»ÖÂ,ÔòËµÃ÷×Ô¼ºÊÇTopLevel,Ìø¹ıÕâ¸ö
+    // å¦‚æœTopLevelçª—å£çš„å…„å¼Ÿçª—å£å’Œè‡ªå·±çš„å…„å¼Ÿçª—å£ä¸€è‡´,åˆ™è¯´æ˜è‡ªå·±æ˜¯TopLevel,è·³è¿‡è¿™ä¸ª
     if(lpSiblings != pCanvasWnd)
     {
       while(pCanvasWnd != NULL)
@@ -1485,7 +1485,7 @@ int GXWnd::GetSystemRegion(GXDWORD dwFlags, GRegion** ppRegion)
   if(dwFlags & GSR_CLIPSIBLINGS)
   {
     LPGXWND lpWnd = m_pNextWnd;
-    GXRECT rcTest;  // ÓÃÀ´±£´æ²âÊÔÁ½¸ö´°¿ÚÊÇ·ñÏà½»µÄ½á¹û, ºóÃæÓ¦¸Ã²»»áÔÙÓÃµ½Õâ¸ö¶«¶«
+    GXRECT rcTest;  // ç”¨æ¥ä¿å­˜æµ‹è¯•ä¸¤ä¸ªçª—å£æ˜¯å¦ç›¸äº¤çš„ç»“æœ, åé¢åº”è¯¥ä¸ä¼šå†ç”¨åˆ°è¿™ä¸ªä¸œä¸œ
 
     if(TEST_FLAG_NOT(dwFlags, GSR_ALLLAYERS) &&
       gxIsTopLevelWindow(m_hSelf))
@@ -1551,7 +1551,7 @@ int GXWnd::GetSystemRegion(GXDWORD dwFlags, GRegion** ppRegion)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// È¡µ±Ç°FrameËùÊ¹ÓÃµÄäÖÈ¾Ä¿±ê
+// å–å½“å‰Frameæ‰€ä½¿ç”¨çš„æ¸²æŸ“ç›®æ ‡
 GXWindowsSurface* GXWnd::GetTopSurface()
 {
   GXWnd* lpWnd = this;
@@ -1606,7 +1606,7 @@ GXBOOL GXWnd::IsEnabled() const
 GXBOOL GXWnd::IsVisible() const
 {
   //
-  // Èç¹û m_uStyle Ã»ÓĞ WS_VISIBLE Ôò m_uState Ò»¶¨Ã»ÓĞ WIS_VISIBLE ÊôĞÔ
+  // å¦‚æœ m_uStyle æ²¡æœ‰ WS_VISIBLE åˆ™ m_uState ä¸€å®šæ²¡æœ‰ WIS_VISIBLE å±æ€§
   //
   ASSERT((TEST_FLAG_NOT(m_uStyle, GXWS_VISIBLE) && TEST_FLAG_NOT(m_uState, WIS_VISIBLE)) ||
     TEST_FLAG(m_uStyle, GXWS_VISIBLE));
@@ -1616,12 +1616,12 @@ GXBOOL GXWnd::IsVisible() const
 
 GXBOOL GXWnd::IsAncestorVisible() const
 {
-  if((m_uStyle & GXWS_VISIBLE) == 0 ||    // Òş²Ø´°¿Ú
-    (m_uState & WIS_DESTROYTHISWND) != 0 ) {  // ×¼±¸Ïú»ÙµÄ´°¿Ú
+  if((m_uStyle & GXWS_VISIBLE) == 0 ||    // éšè—çª—å£
+    (m_uState & WIS_DESTROYTHISWND) != 0 ) {  // å‡†å¤‡é”€æ¯çš„çª—å£
     return FALSE;
   }
 
-  // ÅĞ¶Ï¸¸´°¿Ú¿É¼ûĞÔ
+  // åˆ¤æ–­çˆ¶çª—å£å¯è§æ€§
   GXLPWND lpPWnd = m_pParent;
   LPGXWND lpDesktop = IntGetStationPtr()->lpDesktopWnd;
 
@@ -1673,7 +1673,7 @@ GXBOOL GXWnd::ShowWindow( int nCmdShow )
   {
   case GXSW_HIDE:        //Hides the window and activates another window.
 
-    // Èç¹ûÔ­À´¾ÍÊÇÒş²Ø×´Ì¬£¬ Ö±½Ó·µ»Ø
+    // å¦‚æœåŸæ¥å°±æ˜¯éšè—çŠ¶æ€ï¼Œ ç›´æ¥è¿”å›
     if(TEST_FLAG_NOT(m_uStyle, GXWS_VISIBLE)) {
       ASSERT(TEST_FLAG_NOT(m_uState, WIS_VISIBLE));
       return TRUE;
@@ -1688,7 +1688,7 @@ GXBOOL GXWnd::ShowWindow( int nCmdShow )
     {
       if(pWndLost == this)
       {
-        // ·¢ËÍÊ§È¥Êó±ê½¹µãĞÅÏ¢
+        // å‘é€å¤±å»é¼ æ ‡ç„¦ç‚¹ä¿¡æ¯
         gxSendMessageW(GXWND_HANDLE(lpStation->m_pMouseFocus), GXWM_NCMOUSELEAVE, NULL, NULL);
         gxSendMessageW(GXWND_HANDLE(lpStation->m_pMouseFocus), GXWM_MOUSELEAVE, NULL, NULL);
         lpStation->m_pMouseFocus = NULL;
@@ -1700,7 +1700,7 @@ GXBOOL GXWnd::ShowWindow( int nCmdShow )
     {
       if(pWndLost == this)
       {
-        // ·¢ËÍÊ§È¥¼üÅÌ½¹µãĞÅÏ¢
+        // å‘é€å¤±å»é”®ç›˜ç„¦ç‚¹ä¿¡æ¯
         gxSetFocus(NULL);
       }
       pWndLost = pWndLost->m_pParent;
@@ -1710,7 +1710,7 @@ GXBOOL GXWnd::ShowWindow( int nCmdShow )
     {
       if(pWndLost == this)
       {
-        // ·¢ËÍÊ§È¥´°¿Ú²¶»ñĞÅÏ¢
+        // å‘é€å¤±å»çª—å£æ•è·ä¿¡æ¯
         gxReleaseCapture();
       }
       pWndLost = pWndLost->m_pParent;
@@ -1737,7 +1737,7 @@ GXBOOL GXWnd::ShowWindow( int nCmdShow )
   case GXSW_SHOWMINIMIZED:    //Activates the window and displays it as a minimized window.
   case GXSW_RESTORE:          //Activates and displays the window. If the window is minimized or maximized, Windows restores it to its original size and position. An application should specify this flag when restoring a minimized window.
   case GXSW_MINIMIZE:         //Minimizes the specified window and activates the next top-level window in the Z order.
-    // ²»Ö§³ÖÕâĞ©
+    // ä¸æ”¯æŒè¿™äº›
     ASSERT(FALSE);
     return FALSE;
   }
@@ -1747,12 +1747,12 @@ GXBOOL GXWnd::ShowWindow( int nCmdShow )
 
   if(bShow == TRUE)
   {
-    // ´ËÊ± m_uStyle ¿ÉÄÜÓĞ GXWS_VISIBLE ±êÖ¾
+    // æ­¤æ—¶ m_uStyle å¯èƒ½æœ‰ GXWS_VISIBLE æ ‡å¿—
     if(TEST_FLAG_NOT(m_uStyle, GXWS_VISIBLE) || TEST_FLAG_NOT(m_uState, WIS_VISIBLE)) {
       //ASSERT(TEST_FLAG_NOT(m_uState, WIS_VISIBLE));
       SET_FLAG(m_uStyle, GXWS_VISIBLE);
       
-      // ×æÏÈÊÇÏÔÊ¾×´Ì¬£¬¸üĞÂ WIS_VISIBLE     
+      // ç¥–å…ˆæ˜¯æ˜¾ç¤ºçŠ¶æ€ï¼Œæ›´æ–° WIS_VISIBLE     
       const GXBOOL bAncestorVisible = IsAncestorVisible();
       if(bAncestorVisible) {
         SetVisibleStateRecursive(TRUE);

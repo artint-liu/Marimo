@@ -1,4 +1,4 @@
-#include "GrapX.H"
+ï»¿#include "GrapX.H"
 #include "GrapX.Hxx"
 
 #include "clTextLines.h"
@@ -35,7 +35,7 @@ namespace Marimo
     FILE_SECTION* fs = new FILE_SECTION;
     fs->nBaseLine = 0;
     m_Sources.push_back(fs);
-    m_SourcesTable.push_back(NULL); // ±ÜÃâÊ¹ÓÃ0Õâ¸öId
+    m_SourcesTable.push_back(NULL); // é¿å…ä½¿ç”¨0è¿™ä¸ªId
     m_SourcesTable.push_back(fs);
   }
 
@@ -161,10 +161,10 @@ namespace Marimo
   _DPEM_TEMPL
     GXHRESULT _DPEM_CLS::UpdateResult( GXBOOL bError )
   {
-    // ¸üÐÂ×´Ì¬
-    // Èç¹ûÒÑ¾­ÔÚ³ö´í×´Ì¬£¬²»¸üÐÂ
-    // ¾¯¸æ×´Ì¬£¬»á½µ¼¶µ½´íÎó×´Ì¬
-    // Õý³£×´Ì¬£¬»á½µ¼¶µ½¾¯¸æ»òÕß´íÎó×´Ì¬
+    // æ›´æ–°çŠ¶æ€
+    // å¦‚æžœå·²ç»åœ¨å‡ºé”™çŠ¶æ€ï¼Œä¸æ›´æ–°
+    // è­¦å‘ŠçŠ¶æ€ï¼Œä¼šé™çº§åˆ°é”™è¯¯çŠ¶æ€
+    // æ­£å¸¸çŠ¶æ€ï¼Œä¼šé™çº§åˆ°è­¦å‘Šæˆ–è€…é”™è¯¯çŠ¶æ€
     int nNewCode = bError ? 0 : 1;
     m_CompileCode = clMin(nNewCode, m_CompileCode);
     return m_CompileCode;
@@ -183,7 +183,7 @@ namespace Marimo
   _DPEM_TEMPL
   int _DPEM_CLS::LineFromOffset(GXSIZE_T nOffset, const FILE_SECTION* pfs) const
   {
-    ASSERT(pfs); // Íâ²¿¼ì²éÕâ¸ö²»Îª¿Õ
+    ASSERT(pfs); // å¤–éƒ¨æ£€æŸ¥è¿™ä¸ªä¸ä¸ºç©º
 
     int nLine, nRow;
     pfs->tl.PosFromOffset(nOffset, &nLine, &nRow);

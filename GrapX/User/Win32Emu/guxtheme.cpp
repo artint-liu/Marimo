@@ -1,16 +1,16 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GXGraphics.H>
 #include <GrapX/GXSprite.H>
 #include "GrapX/GXCanvas.H"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <User/GXWindow.h>
 #include <User/Win32Emu/guxTheme.hxx>
 
@@ -95,7 +95,7 @@ extern "C"
     GXCanvas* canvas,
     int iPartId,
     int iStateId,
-    const GXRECT *pRect,  // Á½¸ö¶ËµãµÄ×ø±ê
+    const GXRECT *pRect,  // ä¸¤ä¸ªç«¯ç‚¹çš„åæ ‡
     const GXRECT *pClipRect
     )
   {
@@ -147,7 +147,7 @@ extern "C"
   //////////////////////////////////////////////////////////////////////////
   GXBOOL GXUXTHEME_Initialize(GXGraphics* pGraphics)
   {
-    // TODO: ³éÈ¡×ÊÔ´
+    // TODO: æŠ½å–èµ„æº
     GXCreateSpriteFromFileW(pGraphics, L"UI/WindowFrame.GSprite",    &s_pUxThemeSprite_Window);
     GXCreateSpriteFromFileW(pGraphics, L"UI/ScrollBar.GSprite", &s_pUxThemeSprite_ScrollBar);
     GXCreateSpriteFromFileW(pGraphics, L"UI/Button.GSprite",    &s_pUxThemeSprite_Button);
@@ -167,7 +167,7 @@ GXHRESULT GXDLLAPI GXDrawThemeBackground(
   GXWndCanvas& canvas,
   int iPartId,
   int iStateId,
-  const GXRECT *pRect,  // Á½¸ö¶ËµãµÄ×ø±ê
+  const GXRECT *pRect,  // ä¸¤ä¸ªç«¯ç‚¹çš„åæ ‡
   const GXRECT *pClipRect
   )
 {

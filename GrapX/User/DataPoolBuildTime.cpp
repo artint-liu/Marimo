@@ -1,4 +1,4 @@
-#include "GrapX.H"
+ï»¿#include "GrapX.H"
 #include "GrapX.Hxx"
 
 #include "clStringSet.h"
@@ -14,7 +14,7 @@ namespace Marimo
 {
   GXBOOL DataPoolBuildTime::IntCheckTypeDecl(LPCTYPEDECL pTypeDecl, GXBOOL bCheck)
   {
-    STATIC_ASSERT(sizeof(BUILDTIME_TYPE_DECLARATION) >= sizeof(TYPE_DECLARATION)); // Õâ¸ö¶ÏÑÔ²»ÄÜÍêÈ«±£Ö¤Êı¾İÕıÈ·£¬µ«ÖÁÉÙ²»»á´ó³ö´í
+    STATIC_ASSERT(sizeof(BUILDTIME_TYPE_DECLARATION) >= sizeof(TYPE_DECLARATION)); // è¿™ä¸ªæ–­è¨€ä¸èƒ½å®Œå…¨ä¿è¯æ•°æ®æ­£ç¡®ï¼Œä½†è‡³å°‘ä¸ä¼šå¤§å‡ºé”™
 
     for(int i = 0;; i++) {
       BUILDTIME_TYPE_DECLARATION type;
@@ -47,9 +47,9 @@ namespace Marimo
     sDesc.nMemberCount = 0;
     sDesc.nIndex       = -1;
 
-    // ÕâÀïÒªÏÈÔÚ×ÖµäÖĞ¼ÓÈëÕâ¸öÀàĞÍ£¬Ô­ÒòÊÇ£º
-    // ¶ÔÓÚT_STRUCTÀàĞÍ£¬¿ÉÄÜ»áÔÚÆäÖĞ¶¨ÒåÁË×Ô¼ºÀàĞÍµÄ¶¯Ì¬Êı×é
-    // Ô¤ÏÈ¼ÓÈë×Öµä£¬ÔÚ°üº¬×ÔÉíÀàĞÍµÄµİ¹éÖĞÄÜÕÒµ½ÀàĞÍ¶¨Òå£¬±ÜÃâÎŞÏŞµİ¹é
+    // è¿™é‡Œè¦å…ˆåœ¨å­—å…¸ä¸­åŠ å…¥è¿™ä¸ªç±»å‹ï¼ŒåŸå› æ˜¯ï¼š
+    // å¯¹äºT_STRUCTç±»å‹ï¼Œå¯èƒ½ä¼šåœ¨å…¶ä¸­å®šä¹‰äº†è‡ªå·±ç±»å‹çš„åŠ¨æ€æ•°ç»„
+    // é¢„å…ˆåŠ å…¥å­—å…¸ï¼Œåœ¨åŒ…å«è‡ªèº«ç±»å‹çš„é€’å½’ä¸­èƒ½æ‰¾åˆ°ç±»å‹å®šä¹‰ï¼Œé¿å…æ— é™é€’å½’
     BT_TYPE_DESC& t = (m_TypeDict.insert(clmake_pair(szTypeName, sDesc)).first)->second;
 
     //VarDesc.Name = var.Name;
@@ -80,7 +80,7 @@ namespace Marimo
 
     case T_STRING:
     case T_STRINGA:
-      // ×Ö·û´®ÀàÏàµ±ÓÚÖ¸Õë£¬ËùÒÔprintf formatÏµ²ÅÄÜÊ¹ÓÃ
+      // å­—ç¬¦ä¸²ç±»ç›¸å½“äºæŒ‡é’ˆï¼Œæ‰€ä»¥printf formatç³»æ‰èƒ½ä½¿ç”¨
       STATIC_ASSERT(sizeof(clStringW) == sizeof(void*) && sizeof(clStringA) == sizeof(void*));
       t.cbSize = m_bPtr64 ? sizeof(u64) : sizeof(void*);
       m_bFixedPool = 0;
@@ -113,7 +113,7 @@ namespace Marimo
       }
       break;
     default:
-      ASSERT(0); // Ôö¼ÓÁËĞÂÀàĞÍ»òÕßÀàĞÍÒì³£
+      ASSERT(0); // å¢åŠ äº†æ–°ç±»å‹æˆ–è€…ç±»å‹å¼‚å¸¸
       break;
     }
     
@@ -136,7 +136,7 @@ namespace Marimo
         (var.Count <= 1 ? 1 : var.Count);
 
       clStringA strTypeName = var.Type;
-      //if(var.Count < 0) {  // ±ä³¤Êı×é
+      //if(var.Count < 0) {  // å˜é•¿æ•°ç»„
       //  strTypeName.Insert(0, '#');
       //}
       auto itType = m_TypeDict.find(strTypeName);
@@ -151,7 +151,7 @@ namespace Marimo
       VarDesc.nName = (GXUINT)NameSet.index(var.Name);
       VarDesc.pTypeDesc = &itType->second;
       VarDesc.TypeDesc  = 0;
-      ASSERT(((GXLONG_PTR)VarDesc.pTypeDesc & 3) == 0); // Ò»¶¨ÊÇ4×Ö½Ú¶ÔÆëµÄ
+      ASSERT(((GXLONG_PTR)VarDesc.pTypeDesc & 3) == 0); // ä¸€å®šæ˜¯4å­—èŠ‚å¯¹é½çš„
 
       //VarDesc.bDynamic = var.Count < 0 ? 1 : 0;
       VarDesc.bConst = 0;
@@ -159,7 +159,7 @@ namespace Marimo
       VarDesc.nCount  = nDim;
       VarDesc.nOffset = cbSize;
 
-      // ¶¯Ì¬Êı×éÉùÃ÷ÎªclBuffer*
+      // åŠ¨æ€æ•°ç»„å£°æ˜ä¸ºclBuffer*
       if(var.Count < 0) {
         ASSERT(VarDesc.nCount == 0);
         VarDesc.bDynamic = 1;
@@ -195,7 +195,7 @@ namespace Marimo
 
       if(TEST_FLAG(it->second.dwFlags, BuildtimeTypeDeclaration_Used | BuildtimeTypeDeclaration_Checked)) {
 
-        // Èç¹û²»ÊÇ¶¯Ì¬Êı×é£¬Ôò¼ì²éÕâ¸ö±äÁ¿ÊÇ²»ÊÇÔÚ¼ì²éÖĞ
+        // å¦‚æœä¸æ˜¯åŠ¨æ€æ•°ç»„ï¼Œåˆ™æ£€æŸ¥è¿™ä¸ªå˜é‡æ˜¯ä¸æ˜¯åœ¨æ£€æŸ¥ä¸­
         if(pVarDecl[i].Count >= 0 && ((it->second.dwFlags & (BuildtimeTypeDeclaration_Used | 
           BuildtimeTypeDeclaration_Checked)) == BuildtimeTypeDeclaration_Used)) {
             CLOG_ERROR("%s:  Can not use type(%s) when it is defining.\n", __FUNCTION__, it->second.Name);
@@ -208,7 +208,7 @@ namespace Marimo
       {
         SET_FLAG(it->second.dwFlags, BuildtimeTypeDeclaration_Used);
 
-        // ½á¹¹ÀàĞÍ µİ¹é¼ì²é
+        // ç»“æ„ç±»å‹ é€’å½’æ£€æŸ¥
         if(it->second.Cate == T_STRUCT) {
           if( ! CheckVarList(it->second.as.Struct)) {
             result = FALSE;
@@ -221,7 +221,7 @@ namespace Marimo
         result = FALSE;
       }
 
-      // ÖØÃû¼ì²é
+      // é‡åæ£€æŸ¥
       TVariableSet::iterator itVarSet = VariableSet.find(pVarDecl[i].Name);
       if(itVarSet == VariableSet.end()) {
         VariableSet.insert(pVarDecl[i].Name);
@@ -234,7 +234,7 @@ namespace Marimo
       SET_FLAG(it->second.dwFlags, BuildtimeTypeDeclaration_Checked);
       i++;
     }
-    return i > 0 && result; // ²»ÄÜÎª¿Õ
+    return i > 0 && result; // ä¸èƒ½ä¸ºç©º
   }
 
   //////////////////////////////////////////////////////////////////////////

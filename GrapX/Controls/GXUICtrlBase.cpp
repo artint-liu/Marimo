@@ -51,7 +51,7 @@ namespace GXUI
     wcex.cbWndExtra     = sizeof(CtrlBase*);
     wcex.hInstance      = hInst;
     wcex.hIcon          = NULL;
-    wcex.hCursor        = gxLoadCursor(NULL, IDC_ARROW);
+    wcex.hCursor        = gxLoadCursor(NULL, (GXLPCWSTR)IDC_ARROW);
     wcex.hbrBackground  = (GXHBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = NULL;
     wcex.lpszClassName  = szClassName;
@@ -136,7 +136,7 @@ namespace GXUI
 
   GXBOOL CtrlBase::SetDataPoolVariableW(const clStringW& strExpression)
   {
-    clStringA strExpressionA = strExpression;
+    clStringA strExpressionA = (GXLPCWSTR)strExpression;
     return SetDataPoolVariableA(strExpressionA);
   }
 
@@ -200,8 +200,9 @@ namespace GXUI
 
   GXLRESULT CtrlBase::OnNCCreate(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
   {
-    if(this == NULL) {
-      CLOG_ERROR(__FUNCTION__": Can't create Toolbar object.\r\n");
+    const CtrlBase* pThis = this; // 不这么写clang下会报警告
+    if(pThis == NULL) {
+      CLOG_ERROR("%s : Can't create Toolbar object.\r\n", __FUNCTION__);
       return FALSE;
     }
 

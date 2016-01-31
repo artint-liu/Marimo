@@ -1,4 +1,4 @@
-#include <GrapX.H>
+ï»¿#include <GrapX.H>
 #include <User/GrapX.Hxx>
 //////////////////////////////////////////////////////////////////////////
 extern "C"
@@ -243,7 +243,7 @@ false_ret:
     __asm add eax, ecx
     __asm add eax, edx
 
-    // ÏÂÃæÈıĞĞ´ÓVC±àÒë½á¹ûÉÏ³­µÄ£¬±È½ÏĞşÃî
+    // ä¸‹é¢ä¸‰è¡Œä»VCç¼–è¯‘ç»“æœä¸ŠæŠ„çš„ï¼Œæ¯”è¾ƒç„å¦™
                       // eax = 0  | eax != 0
     __asm neg eax     // CF = 0   | CF = 1
     __asm sbb eax,eax // eax = 0  | eax = 0xffffffff

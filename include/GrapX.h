@@ -1,21 +1,21 @@
-//////////////////////////////////////////////////////////////////////////
+ï»¿//////////////////////////////////////////////////////////////////////////
 // GrapX.H
 
 //////////////////////////////////////////////////////////////////////////
 // 
-// _GRAPX_DEF_HEADER_ ¶¨ÒåÍ·ÎÄ¼ş
-// °üº¬ÁË¹«¹²½è¿ÚËùÓÃµÄ³£Á¿¡¢½á¹¹¡¢Êı¾İÀàĞÍºÍºêµÄĞÅÏ¢
+// _GRAPX_DEF_HEADER_ å®šä¹‰å¤´æ–‡ä»¶
+// åŒ…å«äº†å…¬å…±å€Ÿå£æ‰€ç”¨çš„å¸¸é‡ã€ç»“æ„ã€æ•°æ®ç±»å‹å’Œå®çš„ä¿¡æ¯
 // Liu.Chenglong
 //
 
 #ifndef _GRAPX_DEF_HEADER_
 #define _GRAPX_DEF_HEADER_
 
-#define REFACTOR_SHADER   // shader ÖØ¹¹ºê
+#define REFACTOR_SHADER   // shader é‡æ„å®
 
 //////////////////////////////////////////////////////////////////////////
 //
-// »ù´¡ÀàĞÍÉùÃ÷
+// åŸºç¡€ç±»å‹å£°æ˜
 //
 
 #include <clstd.h>
@@ -74,7 +74,7 @@ typedef clstd::SmartRepository  clSmartRepository;
 
 //////////////////////////////////////////////////////////////////////////
 //
-// »ù´¡Êı¾İ½á¹¹
+// åŸºç¡€æ•°æ®ç»“æ„
 //
 typedef struct __tagGXPOINT
 {
@@ -145,8 +145,8 @@ public:
 
 typedef clvector<GXDefinition> GXDefinitionArray;
 
-// ÓÉÓÚ clString µÄÌØÊâĞÔ GXDEFINITION_S ¿ÉÒÔÖ±½ÓÇ¿ÖÆÀàĞÍ×ª»»Îª GXDEFINITION, µ«ÊÇ·´Ö®²»¿ÉÒÔ!
-struct GXDEFINITION // ¸ÄÃû GXPARAMETER ?
+// ç”±äº clString çš„ç‰¹æ®Šæ€§ GXDEFINITION_S å¯ä»¥ç›´æ¥å¼ºåˆ¶ç±»å‹è½¬æ¢ä¸º GXDEFINITION, ä½†æ˜¯åä¹‹ä¸å¯ä»¥!
+struct GXDEFINITION // æ”¹å GXPARAMETER ?
 {
   GXLPCSTR szName;
   GXLPCSTR szValue;
@@ -190,7 +190,7 @@ STATIC_ASSERT(sizeof(GXGUID) == 16);
 
 //////////////////////////////////////////////////////////////////////////
 
-class GXWnd;  // TODO: ·Åµ½ÄÚ²¿ÎÄ¼şÖĞ?
+class GXWnd;  // TODO: æ”¾åˆ°å†…éƒ¨æ–‡ä»¶ä¸­?
 class GXGraphics;
 class GShader;
 class GXEffect;
@@ -204,7 +204,7 @@ class GXFont;
 //class CGraphics;
 
 
-// ³£Á¿
+// å¸¸é‡
 #define GX_OK                 (0L)
 #define GX_FAIL               (0x80004005L)
 #define GX_ERROR_HANDLE       (0x80000006L)
@@ -477,7 +477,7 @@ typedef GXBOOL        (GXCALLBACK* GXDRAWSTATEPROC) (GXHDC hdc, GXLPARAM lData, 
 
 
 // Ctl brush index
-// ÓÃÓÚWM_CTLCOLOR_XXXX ÏûÏ¢·µ»Ø Brush µÄË÷Òı
+// ç”¨äºWM_CTLCOLOR_XXXX æ¶ˆæ¯è¿”å› Brush çš„ç´¢å¼•
 #define CTLBRUSH_MSGBOX         0
 #define CTLBRUSH_EDIT           1
 #define CTLBRUSH_LISTBOX        2
@@ -488,7 +488,7 @@ typedef GXBOOL        (GXCALLBACK* GXDRAWSTATEPROC) (GXHDC hdc, GXLPARAM lData, 
 #define CTLBRUSH_MAX            7
 
 //
-// gxGetWindow ²ÎÊı
+// gxGetWindow å‚æ•°
 //
 #define GXGW_FIRSTCHILD   (256 + 0)
 #define GXGW_PREVIOUS     (256 + 1)
@@ -496,14 +496,14 @@ typedef GXBOOL        (GXCALLBACK* GXDRAWSTATEPROC) (GXHDC hdc, GXLPARAM lData, 
 #define GXGW_PARENT       (256 + 3)
 
 //
-// GXGetSystemRegion ²ÎÊı
+// GXGetSystemRegion å‚æ•°
 //
-#define GSR_WINDOW        (GXDCX_WINDOW)        // ¼ÆËãÕû¸ö´°¿Ú
-#define GSR_CLIPSIBLINGS  (GXDCX_CLIPSIBLINGS)  // ¿¼ÂÇ¶ÔĞÖµÜ´°¿ÚµÄ²Ã¼ô
-#define GSR_CLIPCHILDREN  (GXDCX_CLIPCHILDREN)  // ¿¼ÂÇ×Ó´°¿ÚµÄ²Ã¼ô
-#define GSR_PARENTCLIP    (GXDCX_PARENTCLIP)    // ²Ã¼ô¸¸´°¿Ú
-#define GSR_ALLLAYERS     0x01000000            // ¿¼ÂÇËùÓĞµÄ²ã
-#define GSR_AVAILABLE     0x02000000            // ËùÓĞ¿ÉÓÃµÄÇøÓò, ¼´°´´°¿ÚÔÚÈ«ÆÁ´óĞ¡ÏÂµÄ²Ã¼ô, Õâ¸ö»áÎŞÊÓGSR_WINDOW
+#define GSR_WINDOW        (GXDCX_WINDOW)        // è®¡ç®—æ•´ä¸ªçª—å£
+#define GSR_CLIPSIBLINGS  (GXDCX_CLIPSIBLINGS)  // è€ƒè™‘å¯¹å…„å¼Ÿçª—å£çš„è£å‰ª
+#define GSR_CLIPCHILDREN  (GXDCX_CLIPCHILDREN)  // è€ƒè™‘å­çª—å£çš„è£å‰ª
+#define GSR_PARENTCLIP    (GXDCX_PARENTCLIP)    // è£å‰ªçˆ¶çª—å£
+#define GSR_ALLLAYERS     0x01000000            // è€ƒè™‘æ‰€æœ‰çš„å±‚
+#define GSR_AVAILABLE     0x02000000            // æ‰€æœ‰å¯ç”¨çš„åŒºåŸŸ, å³æŒ‰çª—å£åœ¨å…¨å±å¤§å°ä¸‹çš„è£å‰ª, è¿™ä¸ªä¼šæ— è§†GSR_WINDOW
 
 //
 // Owner Draw Itesm
@@ -614,13 +614,13 @@ typedef struct __tagGXBITMAP {  // bm
 
 
 //////////////////////////////////////////////////////////////////////////
-// ³£Á¿µÄ¶¨Òå
+// å¸¸é‡çš„å®šä¹‰
 //extern GXINT c_nGXVScrollBarWidth;
 //extern GXINT c_nGXHScrollBarHeight;
 
 //////////////////////////////////////////////////////////////////////////
-// gxGetRenderingRect ²ÎÊıÓÃµÄ±êÖ¾
-//#define GRR_CLIENT    0x00000001L    // ĞèÒªµÄÊÇClientµÄäÖÈ¾ÇøÓò
+// gxGetRenderingRect å‚æ•°ç”¨çš„æ ‡å¿—
+//#define GRR_CLIENT    0x00000001L    // éœ€è¦çš„æ˜¯Clientçš„æ¸²æŸ“åŒºåŸŸ
 #define GRR_GETRECT           0L
 #define GRR_CLIENT            1L
 #define GRR_CONVERTRENDERORG  0x100L
@@ -809,7 +809,7 @@ typedef struct _GXOUTLINETEXTMETRICW {
 } GXOUTLINETEXTMETRICW, *GXLPOUTLINETEXTMETRICW;
 
 //
-// WM_GETMINMAXINFO ÏûÏ¢ lParam Ö¸ÏòµÄÊı¾İ½á¹¹
+// WM_GETMINMAXINFO æ¶ˆæ¯ lParam æŒ‡å‘çš„æ•°æ®ç»“æ„
 //
 typedef struct __tagGXMINMAXINFO {
   GXPOINT    ptReserved;
@@ -820,7 +820,7 @@ typedef struct __tagGXMINMAXINFO {
 } GXMINMAXINFO, *GXLPMINMAXINFO, *LPGXMINMAXINFO;
 
 //
-// WM_NOTIFY ÏûÏ¢ lParam Ö¸ÏòµÄÊı¾İ½á¹¹
+// WM_NOTIFY æ¶ˆæ¯ lParam æŒ‡å‘çš„æ•°æ®ç»“æ„
 typedef struct __tagGXNMHDR
 {
   GXHWND    hwndFrom;
@@ -830,7 +830,7 @@ typedef struct __tagGXNMHDR
 typedef GXNMHDR *GXLPNMHDR, *LPGXNMHDR;
 
 //
-// WM_STYLECHANGED, GXWM_STYLECHANGING ÏûÏ¢ lParam Ö¸ÏòµÄÊı¾İ½á¹¹
+// WM_STYLECHANGED, GXWM_STYLECHANGING æ¶ˆæ¯ lParam æŒ‡å‘çš„æ•°æ®ç»“æ„
 //
 typedef struct __tagGXSTYLESTRUCT
 {
@@ -839,7 +839,7 @@ typedef struct __tagGXSTYLESTRUCT
 } GXSTYLESTRUCT, *GXLPSTYLESTRUCT, *LPGXSTYLESTRUCT;
 
 //
-// gxCreateWindowEx º¯ÊıÊ¹ÓÃµÄÊı¾İ½á¹¹
+// gxCreateWindowEx å‡½æ•°ä½¿ç”¨çš„æ•°æ®ç»“æ„
 //
 typedef struct __tagGXWNDCLASSEX {
   GXUINT        cbSize;
@@ -869,9 +869,9 @@ typedef struct GXWINDOWPOS {
 //typedef struct __tagGXDC
 //{
 //  //CGraphics  *    pGraphics;
-//  GXHWND        hBindWnd;      // ÓëÕâ¸öDC°ó¶¨µÄ´°¿Ú
+//  GXHWND        hBindWnd;      // ä¸è¿™ä¸ªDCç»‘å®šçš„çª—å£
 //  GXUINT        uRefCount;
-//  GXINT        wndOrgX;      // ´°¿ÚµÄÔ­µã,»æÍ¼º¯ÊıÖ¸¶¨µÄ(0,0)½«³öÏÖÔÚ(wndOrgX,wndOrgY)µã
+//  GXINT        wndOrgX;      // çª—å£çš„åŸç‚¹,ç»˜å›¾å‡½æ•°æŒ‡å®šçš„(0,0)å°†å‡ºç°åœ¨(wndOrgX,wndOrgY)ç‚¹
 //  GXINT        wndOrgY;
 //  GXCOLORREF      crTextBack;
 //  GXCOLORREF      crText;
@@ -889,7 +889,7 @@ typedef GXLOGBRUSH *GXLPLOGBRUSH;
 
 
 //
-// WM_NCCREATE£¬ WM_CREATE ÏûÏ¢ lParam Ö¸ÏòµÄÊı¾İ½á¹¹
+// WM_NCCREATEï¼Œ WM_CREATE æ¶ˆæ¯ lParam æŒ‡å‘çš„æ•°æ®ç»“æ„
 typedef struct __tagCREATESTRUCTA {
   GXLPVOID      lpCreateParams;
   GXHINSTANCE   hInstance;
@@ -930,7 +930,7 @@ typedef struct __tagGXCREATESTRUCTW{
 #endif // _UNICODE
 
 //
-// ¹ö¶¯ÌõÊ¹ÓÃµÄÏà¹Ø½á¹¹
+// æ»šåŠ¨æ¡ä½¿ç”¨çš„ç›¸å…³ç»“æ„
 // 
 typedef struct __tagGXSCROLLINFO
 {
@@ -1203,9 +1203,9 @@ typedef struct __tagGXNMLVCUSTOMDRAW
 struct GXNMCUSTLISTCTRLCMD
 {
   GXNMHDR hdr;
-  GXHWND  hTmplItemWnd; // ×Ô¶¨ÒåÁĞ±íÏîÄ¿µÄ´°¿Ú¾ä±ú
-  GXINT   nListItem;    // ÏîÄ¿ÔÚÁĞ±íÖĞµÄË÷Òı£¬¿ªÊ¼»ùÓÚ0
-  GXINT   nCommand;     // WM_COMMANDµÄGXHIWORD(wParam);
+  GXHWND  hTmplItemWnd; // è‡ªå®šä¹‰åˆ—è¡¨é¡¹ç›®çš„çª—å£å¥æŸ„
+  GXINT   nListItem;    // é¡¹ç›®åœ¨åˆ—è¡¨ä¸­çš„ç´¢å¼•ï¼Œå¼€å§‹åŸºäº0
+  GXINT   nCommand;     // WM_COMMANDçš„GXHIWORD(wParam);
 };
 
 struct GXNMLISTADAPTER
@@ -3071,7 +3071,7 @@ typedef struct tagGXLVSETINFOTIP
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÒıÓÃµÄ±ê×¼º¯Êı
+// å¼•ç”¨çš„æ ‡å‡†å‡½æ•°
 //
 #ifdef _WIN32
 //#define GXSTRLEN           lstrlenW
@@ -3100,7 +3100,7 @@ typedef struct tagGXLVSETINFOTIP
 
 
 //
-// ÏûÏ¢¶¨Òå
+// æ¶ˆæ¯å®šä¹‰
 //
 enum GXWndMsg
 {
@@ -3348,8 +3348,8 @@ enum GXWndMsg
   GXLB_SETITEMHEIGHT          = 0x01A0,
   GXLB_GETITEMHEIGHT          = 0x01A1,
   GXLB_FINDSTRINGEXACT        = 0x01A2,
-  GXLB_CARETON                = 0x01a3,  // Õâ¸öÔÚWindowsÍ·ÎÄ¼şÖĞÃ»¶¨Òå
-  GXLB_CARETOFF               = 0x01a4,  // Õâ¸öÔÚWindowsÍ·ÎÄ¼şÖĞÃ»¶¨Òå
+  GXLB_CARETON                = 0x01a3,  // è¿™ä¸ªåœ¨Windowså¤´æ–‡ä»¶ä¸­æ²¡å®šä¹‰
+  GXLB_CARETOFF               = 0x01a4,  // è¿™ä¸ªåœ¨Windowså¤´æ–‡ä»¶ä¸­æ²¡å®šä¹‰
   GXLB_SETLOCALE              = 0x01A5,
   GXLB_GETLOCALE              = 0x01A6,
   GXLB_SETCOUNT               = 0x01A7,
@@ -3357,7 +3357,7 @@ enum GXWndMsg
   GXLB_ITEMFROMPOINT          = 0x01A9,
   GXLB_MULTIPLEADDSTRING      = 0x01B1,
   GXLB_GETLISTBOXINFO         = 0x01B2,
-  GXLB_SETITEMTEMPLATE        = 0x01B3,  // GXUIÀ©Õ¹£¬ÉèÖÃRichListÏîÄ¿Ä£°åÃû
+  GXLB_SETITEMTEMPLATE        = 0x01B3,  // GXUIæ‰©å±•ï¼Œè®¾ç½®RichListé¡¹ç›®æ¨¡æ¿å
   GXLB_SETCOLOR               = 0x01C0,
   GXLB_SETCOLUMNSWIDTH        = 0x01C1,
   GXLB_GETCOLUMNSWIDTH        = 0x01C2,
@@ -3405,27 +3405,27 @@ enum GXWndMsg
   GXWM_PRINTCLIENT            = 0x0318,
   GXWM_THEMECHANGED           = 0x031A,
 
-//GXWM_SETOPACITY             = 0x0300,  // GXUI²»Í¸Ã÷ĞÔ
-//GXWM_GETCLSID               = 0x0301,  // GXUIµÃµ½ÀàÊ¶±ğ´úÂë
-  GXWM_GXPRIVATEBEGIN         = 0x03AF,  // GXUI Ë½ÓĞÏûÏ¢¿ªÊ¼
-  GXWM_DATAPOOLOPERATION      = 0x03B0,  // wParam = (DataPoolOperation), ¸ù¾İDataPoolOperation ½âÊÍ lParam º¬Òå
+//GXWM_SETOPACITY             = 0x0300,  // GXUIä¸é€æ˜æ€§
+//GXWM_GETCLSID               = 0x0301,  // GXUIå¾—åˆ°ç±»è¯†åˆ«ä»£ç 
+  GXWM_GXPRIVATEBEGIN         = 0x03AF,  // GXUI ç§æœ‰æ¶ˆæ¯å¼€å§‹
+  GXWM_DATAPOOLOPERATION      = 0x03B0,  // wParam = (DataPoolOperation), æ ¹æ®DataPoolOperation è§£é‡Š lParam å«ä¹‰
   GXWM_SOLVEDEFINITION        = 0x03B1,
-  GXWM_SETCOBJECT             = 0x03B0,  // ÔÚÕâ¸öÏûÏ¢ÀïÉèÖÃ GXGWL_COBJECT ¶ÔÏóÊôĞÔ
+  GXWM_SETCOBJECT             = 0x03B0,  // åœ¨è¿™ä¸ªæ¶ˆæ¯é‡Œè®¾ç½® GXGWL_COBJECT å¯¹è±¡å±æ€§
 //GXWM_GETADAPTER             = 0x02B1,  // lParam = (DataAdapter**) and add reference count, you must call Release() when you no longer needed.
 //GXWM_SETDATAPOOL            = 0x02B2,  // lParam = pDataPoolObj
-//GXWM_FLUSHCANVAS            GXWM_GXPRIVATEBEGIN      // ½«´°¿Ú»º´æÍ¼ÏñË¢ĞÂµ½ÆÁÄ»£¬Õâ¸öÏûÏ¢½«·¢ËÍGXWM_CALCCANVASSIZE£¬GXWM_SETRENDERCANVASSTATE£¬GXWM_RENDERCANVAS
-//GXWM_CALCCANVASSIZE         (GXWM_GXPRIVATEBEGIN + 1)  // ¼ÆËã´°¿ÚË¢ĞÂµ½ÆÁÄ»µÄ³ß´ç£¬GXLPARAMÖ¸ÏòÁËÒ»¸ö³ß´çĞÅÏ¢
-//GXWM_SETRENDERCANVASSTATE   (GXWM_GXPRIVATEBEGIN + 2)  // ÉèÖÃäÖÈ¾µÄ×´Ì¬£¬ GXWPARAMÎª0Ê±ÊÇ¿ªÊ¼äÖÈ¾µÄ×´Ì¬£¬·Ç0Îª½áÊøäÖÈ¾×´Ì¬£¬GXLPARAMÖ¸ÏòÁËÒ»¸ö³ß´çĞÅÏ¢
-//GXWM_RENDERCANVAS           (GXWM_GXPRIVATEBEGIN + 3)  // Ë¢ĞÂÆÁÄ»µÄ²Ù×÷ÏûÏ¢
-//GXWM_LOSTD3DDEVICE          (GXWM_GXPRIVATEBEGIN + 4)  // D3D Éè±¸¶ªÊ§
-//GXWM_RESETD3DDEVICE         (GXWM_GXPRIVATEBEGIN + 5)  // D3D ¸´Î»
-  GXWM_GXPRIVATEEND           = 0x03FF,  // GXUI Ë½ÓĞÏûÏ¢½áÊø
+//GXWM_FLUSHCANVAS            GXWM_GXPRIVATEBEGIN      // å°†çª—å£ç¼“å­˜å›¾åƒåˆ·æ–°åˆ°å±å¹•ï¼Œè¿™ä¸ªæ¶ˆæ¯å°†å‘é€GXWM_CALCCANVASSIZEï¼ŒGXWM_SETRENDERCANVASSTATEï¼ŒGXWM_RENDERCANVAS
+//GXWM_CALCCANVASSIZE         (GXWM_GXPRIVATEBEGIN + 1)  // è®¡ç®—çª—å£åˆ·æ–°åˆ°å±å¹•çš„å°ºå¯¸ï¼ŒGXLPARAMæŒ‡å‘äº†ä¸€ä¸ªå°ºå¯¸ä¿¡æ¯
+//GXWM_SETRENDERCANVASSTATE   (GXWM_GXPRIVATEBEGIN + 2)  // è®¾ç½®æ¸²æŸ“çš„çŠ¶æ€ï¼Œ GXWPARAMä¸º0æ—¶æ˜¯å¼€å§‹æ¸²æŸ“çš„çŠ¶æ€ï¼Œé0ä¸ºç»“æŸæ¸²æŸ“çŠ¶æ€ï¼ŒGXLPARAMæŒ‡å‘äº†ä¸€ä¸ªå°ºå¯¸ä¿¡æ¯
+//GXWM_RENDERCANVAS           (GXWM_GXPRIVATEBEGIN + 3)  // åˆ·æ–°å±å¹•çš„æ“ä½œæ¶ˆæ¯
+//GXWM_LOSTD3DDEVICE          (GXWM_GXPRIVATEBEGIN + 4)  // D3D è®¾å¤‡ä¸¢å¤±
+//GXWM_RESETD3DDEVICE         (GXWM_GXPRIVATEBEGIN + 5)  // D3D å¤ä½
+  GXWM_GXPRIVATEEND           = 0x03FF,  // GXUI ç§æœ‰æ¶ˆæ¯ç»“æŸ
   GXWM_USER                   = 0x0400,  // WM_USER
   GXWM_APP                    = 0x8000,  // WM_APP
   GXWM_STRING                 = 0xC000,  // 0xC000 through 0xFFFF String messages for use by applications.
 }; // enum GXWndMsg
 
-// GXWM_DATAPOOLOPERATION wParam ²ÎÊı
+// GXWM_DATAPOOLOPERATION wParam å‚æ•°
 enum DataPoolOperation
 {
   DPO_SETDATAPOOL = 1,  // lParam = (DataAdapter*)
@@ -3531,7 +3531,7 @@ enum DataPoolOperation
  * Extended Window Styles
  */
 #define GXWS_EX_DLGMODALFRAME     0x00000001L
-#define GXWS_EX_IMPALPABLE        0x00000002L   // GrapX ×¨ÓĞ, ¿´µÃ¼ûÃş²»×ÅµÄ
+#define GXWS_EX_IMPALPABLE        0x00000002L   // GrapX ä¸“æœ‰, çœ‹å¾—è§æ‘¸ä¸ç€çš„
 #define GXWS_EX_NOPARENTNOTIFY    0x00000004L
 #define GXWS_EX_TOPMOST           0x00000008L
 #define GXWS_EX_ACCEPTFILES       0x00000010L
@@ -3618,8 +3618,8 @@ enum DataPoolOperation
 #define GXGWL_ID                 (-12)  // GWL_ID
 #define GXGWL_HINSTANCE          (-6)
 #define GXGWL_WNDPROC            (-4)  // GWL_WNDPROC
-#define GXGWL_COBJECT            (-1)  // TODO: ×¼±¸È¥µôÕâ¸ö
-#define GXGWL_RESPONDER          (-2)  // C++ ÓÃµÄÏìÓ¦Æ÷
+#define GXGWL_COBJECT            (-1)  // TODO: å‡†å¤‡å»æ‰è¿™ä¸ª
+#define GXGWL_RESPONDER          (-2)  // C++ ç”¨çš„å“åº”å™¨
 
 #define GXGWLP_WNDPROC        (-4)
 #define GXGWLP_HINSTANCE      (-6)
@@ -3974,7 +3974,7 @@ typedef struct tagGXNMCHAR {
   GXDWORD   dwItemNext;     // Item to be selected
 } GXNMCHAR, *GXLPNMCHAR;
 
-// GXWM_CALCCANVASSIZE ½á¹¹
+// GXWM_CALCCANVASSIZE ç»“æ„
 typedef struct __tagCANVASSIZEINFO{
   GXSIZE    sizeRenderingSur;//GXINT nWidth, nHeight;
   GXREGN    rgDest;
@@ -3988,7 +3988,7 @@ typedef struct __tagCANVASSIZEINFO{
 //
 struct GXCANVASCOMMCONST
 {
-  float4x4  matWVProj; // TODO: ¼Æ»®¸ÄÃûÎªTransform
+  float4x4  matWVProj; // TODO: è®¡åˆ’æ”¹åä¸ºTransform
   float4    colorMul;
   float4    colorAdd;
 };
@@ -4112,7 +4112,7 @@ enum GXRenderStateType {
   GXRS_FORCE_DWORD               = 0x7fffffff, /* force 32-bit size enum */
 };
 
-// ÒÑ¾­²»ÔÙÊ¹ÓÃÕâ¸ö, ²Î¿¼ GXSAMPLERDESC
+// å·²ç»ä¸å†ä½¿ç”¨è¿™ä¸ª, å‚è€ƒ GXSAMPLERDESC
 //enum GXSamplerStateType
 //{
 //    GXSAMP_ADDRESSU       = 1,  /* D3DTEXTUREADDRESS for U coordinate */
@@ -4248,7 +4248,7 @@ typedef GXIMAGEINFOX *LPGXIMAGEINFOX;
 typedef GXIMAGEINFOX *GXLPIMAGEINFOX;
 
 //
-// ¸ñÊ½Àà±ğ
+// æ ¼å¼ç±»åˆ«
 //
 enum GXFormatCategory
 {
@@ -4416,20 +4416,22 @@ enum GXTextureFilterType
 
 #define GX_MAX_TEXTURE_STAGE    8
 
-// ÎÆÀí³ß´ç±ÈÂÊ,ÓëÆÁÄ»Ïà±È
+// çº¹ç†å°ºå¯¸æ¯”ç‡,ä¸å±å¹•ç›¸æ¯”
 enum GXTextureRatio
 {
   TEXSIZE_FIXEDPOINT  = 2048,
-  TEXSIZE_OKTA        = (GXUINT)-(TEXSIZE_FIXEDPOINT >> 3),    // 1/8 ÆÁÄ», ³¤(¿í)
-  TEXSIZE_QUARTER     = (GXUINT)-(TEXSIZE_FIXEDPOINT >> 2),    // 1/4 ÆÁÄ», ³¤(¿í)
-  TEXSIZE_HALF        = (GXUINT)-(TEXSIZE_FIXEDPOINT >> 1),    // 1/2 ÆÁÄ», ³¤(¿í)
-  TEXSIZE_SAME        = (GXUINT)-TEXSIZE_FIXEDPOINT,        // Ò»±¶ ÆÁÄ», ³¤(¿í)
-  TEXSIZE_DOUBLE      = (GXUINT)-(TEXSIZE_FIXEDPOINT << 1),    // Á½ ÆÁÄ», ³¤(¿í)
-  TEXSIZE_QUAD        = (GXUINT)-(TEXSIZE_FIXEDPOINT << 2),    // ËÄ±¶ ÆÁÄ», ³¤(¿í)
-  TEXSIZE_OCTUPLE     = (GXUINT)-(TEXSIZE_FIXEDPOINT << 3),    // °Ë±¶ ÆÁÄ», ³¤(¿í)
+  TEXSIZE_OKTA        = -(TEXSIZE_FIXEDPOINT >> 3),    // 1/8 å±å¹•, é•¿(å®½)
+  TEXSIZE_QUARTER     = -(TEXSIZE_FIXEDPOINT >> 2),    // 1/4 å±å¹•, é•¿(å®½)
+  TEXSIZE_HALF        = -(TEXSIZE_FIXEDPOINT >> 1),    // 1/2 å±å¹•, é•¿(å®½)
+  TEXSIZE_SAME        = -TEXSIZE_FIXEDPOINT,        // ä¸€å€ å±å¹•, é•¿(å®½)
+  TEXSIZE_DOUBLE      = -(TEXSIZE_FIXEDPOINT << 1),    // ä¸¤ å±å¹•, é•¿(å®½)
+  TEXSIZE_QUAD        = -(TEXSIZE_FIXEDPOINT << 2),    // å››å€ å±å¹•, é•¿(å®½)
+  TEXSIZE_OCTUPLE     = -(TEXSIZE_FIXEDPOINT << 3),    // å…«å€ å±å¹•, é•¿(å®½)
+
+  FORCE_DWORD = 0x7fffffff,
 };
 
-// TextureRatioToDimension() ²ÎÊı
+// TextureRatioToDimension() å‚æ•°
 #define TEXTURERATIO_POW2 0x00000001
 
 
@@ -4445,13 +4447,13 @@ enum GXTextureRatio
 //
 struct SCROLLTEXTUREDESC
 {
-  GTexture* pOperationTex;  // ĞèÒª¹ö¶¯µÄÎÆÀí
-  GTexture* pTempTex;       // ÁÙÊ±ÎÆÀí
-  int       dx, dy;         // Æ«ÒÆÁ¿
-  LPGXCRECT lprcScroll;     // ¹ö¶¯ÇøÓò
-  GRegion*  lprgnClip;      // ²Ã¼ôÇø
-  GRegion** lpprgnUpdate;   // [Êä³ö]¸üĞÂµÄÇøÓò
-  LPGXRECT  lprcUpdate;     // [Êä³ö]¸üĞÂµÄÇøÓò
+  GTexture* pOperationTex;  // éœ€è¦æ»šåŠ¨çš„çº¹ç†
+  GTexture* pTempTex;       // ä¸´æ—¶çº¹ç†
+  int       dx, dy;         // åç§»é‡
+  LPGXCRECT lprcScroll;     // æ»šåŠ¨åŒºåŸŸ
+  GRegion*  lprgnClip;      // è£å‰ªåŒº
+  GRegion** lpprgnUpdate;   // [è¾“å‡º]æ›´æ–°çš„åŒºåŸŸ
+  LPGXRECT  lprcUpdate;     // [è¾“å‡º]æ›´æ–°çš„åŒºåŸŸ
 };
 
 //
@@ -4514,19 +4516,19 @@ typedef GXCONST GXRENDERSTATE* GXLPCRENDERSTATE;
 
 //
 // GXResUsage flags
-// ×ÊÔ´·ÃÎÊÏŞ¶¨
+// èµ„æºè®¿é—®é™å®š
 //
-#define GXRU_DEFAULT            0x0000   // ÆÕÍ¨·½Ê½, Ö»ÔÚ´´½¨Ê±Ğ´Èë
-#define GXRU_MIGHTBEREAD        0x0001   // Å¼¶û»á¶Á, µÍĞÔÄÜ, µÍÄÚ´æÕ¼ÓÃ, Ö»¹ØĞÄÄÜ¹»È¡µÃ½á¹û
-#define GXRU_MIGHTBEWRITE       0x0002   // Å¼¶û»áĞ´, ĞÔÄÜÄÚ´æÍ¬ÉÏ
-#define GXRU_FREQUENTLYREAD     0x0004   // Æµ·±¶Á, ¸ßĞÔÄÜ, ¸ßÄÚ´æÕ¼ÓÃ
-#define GXRU_FREQUENTLYWRITE    0x0008   // Æµ·±Ğ´, ĞÔÄÜÄÚ´æÍ¬ÉÏ
-#define GXRU_SYSTEMMEM          0x0010   // ´´½¨ÔÚÏµÍ³ÄÚ´æÖĞ,²»ÄÜÓÃÓÚäÖÈ¾
+#define GXRU_DEFAULT            0x0000   // æ™®é€šæ–¹å¼, åªåœ¨åˆ›å»ºæ—¶å†™å…¥
+#define GXRU_MIGHTBEREAD        0x0001   // å¶å°”ä¼šè¯», ä½æ€§èƒ½, ä½å†…å­˜å ç”¨, åªå…³å¿ƒèƒ½å¤Ÿå–å¾—ç»“æœ
+#define GXRU_MIGHTBEWRITE       0x0002   // å¶å°”ä¼šå†™, æ€§èƒ½å†…å­˜åŒä¸Š
+#define GXRU_FREQUENTLYREAD     0x0004   // é¢‘ç¹è¯», é«˜æ€§èƒ½, é«˜å†…å­˜å ç”¨
+#define GXRU_FREQUENTLYWRITE    0x0008   // é¢‘ç¹å†™, æ€§èƒ½å†…å­˜åŒä¸Š
+#define GXRU_SYSTEMMEM          0x0010   // åˆ›å»ºåœ¨ç³»ç»Ÿå†…å­˜ä¸­,ä¸èƒ½ç”¨äºæ¸²æŸ“
 
-// Õâ¼¸¸ö²»ÄÜÍ¬Ê±ÓÃ
+// è¿™å‡ ä¸ªä¸èƒ½åŒæ—¶ç”¨
 #define GXRU_TEX_MASK           0x0f00
-#define GXRU_TEX_RENDERTARGET   0x0100   // äÖÈ¾ÎÆÀí, Õâ¸ö±êÖ¾Ö»ÔÚ´´½¨ÎÆÀíÊ±ÓĞĞ§
-#define GXRU_TEX_DEPTHSTENCIL   0x0200   // äÖÈ¾ÓÃµÄÉî¶È+Ä£°åÎÆÀí, Õâ¸ö±êÖ¾Ö»ÔÚ´´½¨ÎÆÀíÊ±ÓĞĞ§
+#define GXRU_TEX_RENDERTARGET   0x0100   // æ¸²æŸ“çº¹ç†, è¿™ä¸ªæ ‡å¿—åªåœ¨åˆ›å»ºçº¹ç†æ—¶æœ‰æ•ˆ
+#define GXRU_TEX_DEPTHSTENCIL   0x0200   // æ¸²æŸ“ç”¨çš„æ·±åº¦+æ¨¡æ¿çº¹ç†, è¿™ä¸ªæ ‡å¿—åªåœ¨åˆ›å»ºçº¹ç†æ—¶æœ‰æ•ˆ
 
 enum MtlLoadType
 {
@@ -4534,28 +4536,28 @@ enum MtlLoadType
   MLT_CLONE = 1,
 };
 //
-// GShader ÓµÓĞµÄÊôĞÔÅäÖÃ flags
+// GShader æ‹¥æœ‰çš„å±æ€§é…ç½® flags
 //
-// TODO[9]: ÊµÏÖ
+// TODO[9]: å®ç°
 // TODO[9]: _DECL_NORMAL
 // TODO[9]: _DECL_VERTEXCOLOR
 // TODO[9]: _DECL_TEXCOORD
-// shader´´½¨Ê±»áÒıÓÃÒ»¸ö¶¥µãÉùÃ÷µÄ²Î¿¼,ÓÃÀ´È·¶¨¶¥µãÉùÃ÷ÖĞÊÇ·ñÊ¹ÓÃÁË
-// ·¨Ïß,¶¥µãÑÕÉ«ºÍÎÆÀí²ÉÑùÕâĞ©Ó°Ïì×îÖÕÑÕÉ«µÄ¶¥µãÔªËØ,×îÖÕÉú³ÉÒ»¸ö¶ÔÓ¦µÄºê
-// ÓÃÀ´ÔÚShaderÖĞÊ¶±ğ.ÕâÑù¾Í±ÜÃâÁËShaderÊ¹ÓÃÁË¿ÕµÄ¶¥µãÔªËØ¶øÊ¹×îÖÕÑÕÉ«¼ÆËã²»ÕıÈ·µÄÎÊÌâ
-enum GXShaderCapability // TODO: ¸ÄÃûÎª trait
+// shaderåˆ›å»ºæ—¶ä¼šå¼•ç”¨ä¸€ä¸ªé¡¶ç‚¹å£°æ˜çš„å‚è€ƒ,ç”¨æ¥ç¡®å®šé¡¶ç‚¹å£°æ˜ä¸­æ˜¯å¦ä½¿ç”¨äº†
+// æ³•çº¿,é¡¶ç‚¹é¢œè‰²å’Œçº¹ç†é‡‡æ ·è¿™äº›å½±å“æœ€ç»ˆé¢œè‰²çš„é¡¶ç‚¹å…ƒç´ ,æœ€ç»ˆç”Ÿæˆä¸€ä¸ªå¯¹åº”çš„å®
+// ç”¨æ¥åœ¨Shaderä¸­è¯†åˆ«.è¿™æ ·å°±é¿å…äº†Shaderä½¿ç”¨äº†ç©ºçš„é¡¶ç‚¹å…ƒç´ è€Œä½¿æœ€ç»ˆé¢œè‰²è®¡ç®—ä¸æ­£ç¡®çš„é—®é¢˜
+enum GXShaderCapability // TODO: æ”¹åä¸º trait
 {
   GXSHADERCAP_VERTEX    = 0x0001,
   GXSHADERCAP_PIXEL     = 0x0002,
-  GXSHADERCAP_NORMAL    = 0x0004,   // shader Ö§³Ö·¨ÏßÏà¹ØµÄ¼ÆËã
-  GXSHADERCAP_VCOLOR    = 0x0008,   // shader Ö§³Ö¶¥µãÉ«Ïà¹ØµÄ¼ÆËã
-  GXSHADERCAP_TEXCOORD0 = 0x0010,   // shader Ö§³ÖµÚ0²ãÎÆÀí×ø±êÏà¹ØµÄ¼ÆËã, Ö÷ÒªÊÇ²ÉÑù
-  GXSHADERCAP_TEXCOORD1 = 0x0020,   // shader Ö§³ÖµÚ1²ãÎÆÀí
-  GXSHADERCAP_TEXCOORD2 = 0x0040,   // shader Ö§³ÖµÚ2²ãÎÆÀí
-  GXSHADERCAP_TEXCOORD3 = 0x0080,   // shader Ö§³ÖµÚ3²ãÎÆÀí
+  GXSHADERCAP_NORMAL    = 0x0004,   // shader æ”¯æŒæ³•çº¿ç›¸å…³çš„è®¡ç®—
+  GXSHADERCAP_VCOLOR    = 0x0008,   // shader æ”¯æŒé¡¶ç‚¹è‰²ç›¸å…³çš„è®¡ç®—
+  GXSHADERCAP_TEXCOORD0 = 0x0010,   // shader æ”¯æŒç¬¬0å±‚çº¹ç†åæ ‡ç›¸å…³çš„è®¡ç®—, ä¸»è¦æ˜¯é‡‡æ ·
+  GXSHADERCAP_TEXCOORD1 = 0x0020,   // shader æ”¯æŒç¬¬1å±‚çº¹ç†
+  GXSHADERCAP_TEXCOORD2 = 0x0040,   // shader æ”¯æŒç¬¬2å±‚çº¹ç†
+  GXSHADERCAP_TEXCOORD3 = 0x0080,   // shader æ”¯æŒç¬¬3å±‚çº¹ç†
 
-  // ÔİÊ±²»ÏëÖ§³ÖÕâÁ½¸ö,»áÔö¼Ó±àÒë¸´ÔÓ¶È,Èç¹ûÒªÊµÏÖµ¥¶À·Öshader
-  // ¶øÇÒÎÒÒ²²»ÈÏÎªÕâÁ½¸öÊÇÓïÒåµÄ»ù±¾ÀàĞÍ
+  // æš‚æ—¶ä¸æƒ³æ”¯æŒè¿™ä¸¤ä¸ª,ä¼šå¢åŠ ç¼–è¯‘å¤æ‚åº¦,å¦‚æœè¦å®ç°å•ç‹¬åˆ†shader
+  // è€Œä¸”æˆ‘ä¹Ÿä¸è®¤ä¸ºè¿™ä¸¤ä¸ªæ˜¯è¯­ä¹‰çš„åŸºæœ¬ç±»å‹
   //GXSHADERCAP_TANGENT   = 0x0100,   // 
   //GXSHADERCAP_BINORMAL  = 0x0200,   // 
 };
@@ -4578,7 +4580,7 @@ enum GXDeclUsage
   //GXDECLUSAGE_SAMPLE       = 13,
 };
 
-// Vertex Format µÄÑÚÂë
+// Vertex Format çš„æ©ç 
 #define GXVF_POSITION     (1 << GXDECLUSAGE_POSITION)
 #define GXVF_BLENDWEIGHT  (1 << GXDECLUSAGE_BLENDWEIGHT)
 #define GXVF_BLENDINDICES (1 << GXDECLUSAGE_BLENDINDICES)
@@ -4646,7 +4648,7 @@ struct GXVERTEXELEMENT
   GXUINT        UsageIndex; // Semantic index
 };
 
-// TODO: ¸÷ÖÖtypeÓ¦¸ÃÄÜºÏ²¢³ÉÍ³Ò»µÄ¶¨Òå
+// TODO: å„ç§typeåº”è¯¥èƒ½åˆå¹¶æˆç»Ÿä¸€çš„å®šä¹‰
 enum GXUniformType{
   GXUB_UNDEFINED,
   GXUB_FLOAT,
@@ -4658,7 +4660,7 @@ enum GXUniformType{
   GXUB_SAMPLER3D,
 };
 
-// TODO: ÒÔºóÕâ¸ö½á¹¹²»Ö±½ÓÓÃ×ö°ó¶¨, ÒªÓÃËü´´½¨Ò»¸ö¶ÔÏóÔÙ°ó¶¨
+// TODO: ä»¥åè¿™ä¸ªç»“æ„ä¸ç›´æ¥ç”¨åšç»‘å®š, è¦ç”¨å®ƒåˆ›å»ºä¸€ä¸ªå¯¹è±¡å†ç»‘å®š
 struct DATALAYOUT
 {
   GXLPCSTR      pName;
@@ -4668,23 +4670,23 @@ struct DATALAYOUT
 };
 typedef clvector<DATALAYOUT> DataLayoutArray;
 
-struct MOSHADER_ELEMENT_SOURCE // ¸ÄÃûÎª MOSHADERCOMPONENTFILE / MOSHADERSOURCECOMPONENT
+struct MOSHADER_ELEMENT_SOURCE // æ”¹åä¸º MOSHADERCOMPONENTFILE / MOSHADERSOURCECOMPONENT
 {
-  GXBOOL          bExtComposer;       // External Íâ²¿ÒıÓÃµÄºÏ³ÉÆ÷, Èç¹û×Ô¼º´øÓĞºÏ³ÉÆ÷ÔòÓÅÏÈÊ¹ÓÃ
-  clStringA       strPreVS;           // VertexÔ¤ÏÈ´¦Àí
-  clStringA       strVS;              // Vertex´¦Àí
-  //clStringA       strVSExtra;       // Vertex¸½¼Ó´¦Àí
-  clStringA       strPS;              // Pixel´¦Àí
-  clStringA       strVSComposer;      // VertexºÏ³ÉÆ÷
-  clStringA       strPSComposer;      // PixelºÏ³ÉÆ÷
-  //clStringArrayA  aPSComponent;     // Pixel·ÖÁ¿
+  GXBOOL          bExtComposer;       // External å¤–éƒ¨å¼•ç”¨çš„åˆæˆå™¨, å¦‚æœè‡ªå·±å¸¦æœ‰åˆæˆå™¨åˆ™ä¼˜å…ˆä½¿ç”¨
+  clStringA       strPreVS;           // Vertexé¢„å…ˆå¤„ç†
+  clStringA       strVS;              // Vertexå¤„ç†
+  //clStringA       strVSExtra;       // Vertexé™„åŠ å¤„ç†
+  clStringA       strPS;              // Pixelå¤„ç†
+  clStringA       strVSComposer;      // Vertexåˆæˆå™¨
+  clStringA       strPSComposer;      // Pixelåˆæˆå™¨
+  //clStringArrayA  aPSComponent;     // Pixelåˆ†é‡
   clStringA       strMacros;
 };
 
 struct MOSHADERBUFFERS
 {
-  // ÓÃ»§²»ĞèÒª¹ØĞÄÕâÀïÃæÊÇÊ²Ã´,¿ÉÄÜÊÇÔ´´úÂë,Ò²¿ÉÄÜÊÇ±àÒëºóÊı¾İ
-  // Òª×¢Òâ clBuffer µÄÄÚ´æ»ØÊÕ.
+  // ç”¨æˆ·ä¸éœ€è¦å…³å¿ƒè¿™é‡Œé¢æ˜¯ä»€ä¹ˆ,å¯èƒ½æ˜¯æºä»£ç ,ä¹Ÿå¯èƒ½æ˜¯ç¼–è¯‘åæ•°æ®
+  // è¦æ³¨æ„ clBuffer çš„å†…å­˜å›æ”¶.
   GXUINT cbSize;
   clBuffer* pVertexShader;
   clBuffer* pPixelShader;
@@ -4751,7 +4753,7 @@ struct GXBLENDDESC
   GXBlendOp BlendOpAlpha;
   GXUINT8   WriteMask;
 
-  GXBLENDDESC()  // Ä¬ÈÏ²ÎÊı
+  GXBLENDDESC()  // é»˜è®¤å‚æ•°
     : BlendEnable   (FALSE)
     , SrcBlend      (GXBLEND_ONE)
     , DestBlend     (GXBLEND_ZERO)
@@ -4964,23 +4966,23 @@ struct PROPSHEET_LISTBOX
 
 struct PROPSHEET_DATALINK
 {
-  GXLPCSTR   lpName;      // ±êÇ©Ãû
+  GXLPCSTR   lpName;      // æ ‡ç­¾å
   GXDWORD    dwId;
-  GXDWORD    eType;       // ÀàĞÍ
+  GXDWORD    eType;       // ç±»å‹
   union{
     struct
     {
-      GXINT      nBasePtrIdx;     // »ùÖµµÄË÷ÒıÖµ
-      size_t     pDestOffsetPtr;  // Æ«ÒÆÁ¿
-      void*      pValue;          // Öµ, LIST×÷ÎªÁĞ±íµØÖ·, PropSheetPage×÷ÎªÏÂÒ»¸öPageµÄµØÖ·
-      float      fIncrease;       // ×÷ÎªFLOATÊ±,µ¥»÷ÉÏÏÂ°´Å¥µÄÔöÁ¿
+      GXINT      nBasePtrIdx;     // åŸºå€¼çš„ç´¢å¼•å€¼
+      size_t     pDestOffsetPtr;  // åç§»é‡
+      void*      pValue;          // å€¼, LISTä½œä¸ºåˆ—è¡¨åœ°å€, PropSheetPageä½œä¸ºä¸‹ä¸€ä¸ªPageçš„åœ°å€
+      float      fIncrease;       // ä½œä¸ºFLOATæ—¶,å•å‡»ä¸Šä¸‹æŒ‰é’®çš„å¢é‡
     };
     struct
     {
       GXLPCWSTR  lpTemplate;
       GXDLGPROC  lpDlgProc;
       GXLPARAM   dwInitParam;
-      GXDWORD    dwReserved;      // ±£Áô
+      GXDWORD    dwReserved;      // ä¿ç•™
     };
   };
 };
@@ -5014,23 +5016,23 @@ struct PROPLIST_LISTBOX
 
 struct PROPLIST_DATALINK
 {
-  GXLPCSTR   lpName;      // ±êÇ©Ãû
+  GXLPCSTR   lpName;      // æ ‡ç­¾å
   GXDWORD    dwId;
-  GXDWORD    eType;       // ÀàĞÍ
+  GXDWORD    eType;       // ç±»å‹
   union{
     struct
     {
-      GXINT      nBasePtrIdx;     // »ùÖµµÄË÷ÒıÖµ
-      size_t     pDestOffsetPtr;  // Æ«ÒÆÁ¿
-      void*      pValue;          // Öµ, LIST×÷ÎªÁĞ±íµØÖ·, PropSheetPage×÷ÎªÏÂÒ»¸öPageµÄµØÖ·
-      float      fIncrease;       // ×÷ÎªFLOATÊ±,µ¥»÷ÉÏÏÂ°´Å¥µÄÔöÁ¿
+      GXINT      nBasePtrIdx;     // åŸºå€¼çš„ç´¢å¼•å€¼
+      size_t     pDestOffsetPtr;  // åç§»é‡
+      void*      pValue;          // å€¼, LISTä½œä¸ºåˆ—è¡¨åœ°å€, PropSheetPageä½œä¸ºä¸‹ä¸€ä¸ªPageçš„åœ°å€
+      float      fIncrease;       // ä½œä¸ºFLOATæ—¶,å•å‡»ä¸Šä¸‹æŒ‰é’®çš„å¢é‡
     };
     struct
     {
       GXLPCWSTR  lpTemplate;
       GXDLGPROC  lpDlgProc;
       GXLPARAM   dwInitParam;
-      GXDWORD    dwReserved;      // ±£Áô
+      GXDWORD    dwReserved;      // ä¿ç•™
     };
   };
 };
@@ -5040,12 +5042,12 @@ struct PROPLIST_DATALAYOUT
   const GXLPVOID* pBasePtrList;
   const PROPLIST_DATALINK* pDataDesc;
 
-  // ¸üĞÂÊı¾İÊ±²ÅÄÜÓÃµ½
+  // æ›´æ–°æ•°æ®æ—¶æ‰èƒ½ç”¨åˆ°
   GXINT nIDFirst;
   GXINT nIDLast;
 };
 
-// PropertySheet WM_NOTIFY ÏûÏ¢½á¹¹
+// PropertySheet WM_NOTIFY æ¶ˆæ¯ç»“æ„
 struct NM_PROPLISTW
 {
   GXNMHDR       nmhdr;
@@ -5069,8 +5071,8 @@ struct NM_PROPLISTW
   //{
   //  Page*         pChildPage;
   //  LBItemList*   pListBoxItem;
-  //  GXLPVOID      pGeneral;    // Í¨ÓÃµÄ,Ö»ÓÃÓÚÖ¸ÕëÅĞ¶Ï
-  float         fIncrease;  // Èç¹ûÊÇ¸¡µãÊıµÄ»°
+  //  GXLPVOID      pGeneral;    // é€šç”¨çš„,åªç”¨äºæŒ‡é’ˆåˆ¤æ–­
+  float         fIncrease;  // å¦‚æœæ˜¯æµ®ç‚¹æ•°çš„è¯
   //};
 };
 
@@ -5083,12 +5085,12 @@ struct PROPSHEET_DATALAYOUT
   const GXLPVOID* pBasePtrList;
   const PROPSHEET_DATALINK* pDataDesc;
 
-  // ¸üĞÂÊı¾İÊ±²ÅÄÜÓÃµ½
+  // æ›´æ–°æ•°æ®æ—¶æ‰èƒ½ç”¨åˆ°
   GXINT nIDFirst;
   GXINT nIDLast;
 };
 
-// PropertySheet WM_NOTIFY ÏûÏ¢½á¹¹
+// PropertySheet WM_NOTIFY æ¶ˆæ¯ç»“æ„
 struct NM_PROPSHEETW
 {
   GXNMHDR       nmhdr;
@@ -5112,8 +5114,8 @@ struct NM_PROPSHEETW
   //{
   //  Page*         pChildPage;
   //  LBItemList*   pListBoxItem;
-  //  GXLPVOID      pGeneral;    // Í¨ÓÃµÄ,Ö»ÓÃÓÚÖ¸ÕëÅĞ¶Ï
-  float         fIncrease;  // Èç¹ûÊÇ¸¡µãÊıµÄ»°
+  //  GXLPVOID      pGeneral;    // é€šç”¨çš„,åªç”¨äºæŒ‡é’ˆåˆ¤æ–­
+  float         fIncrease;  // å¦‚æœæ˜¯æµ®ç‚¹æ•°çš„è¯
   //};
 };
 
@@ -5143,7 +5145,7 @@ inline GXBOOL InlCheckNewAndIncReference(_TIUnknown* pIUnknown)
 }
 
 template<class _TObj>
-inline GXHRESULT InlSetNewObjectT(_TObj*& pObj, _TObj* pNew) // pNew ¿ÉÒÔÎª¿Õ
+inline GXHRESULT InlSetNewObjectT(_TObj*& pObj, _TObj* pNew) // pNew å¯ä»¥ä¸ºç©º
 {
   SAFE_RELEASE(pObj);
   pObj = pNew;
@@ -5154,7 +5156,7 @@ inline GXHRESULT InlSetNewObjectT(_TObj*& pObj, _TObj* pNew) // pNew ¿ÉÒÔÎª¿Õ
 }
 
 template<class _TObj>
-inline GXHRESULT InlSetNewObjectAlwaysT(_TObj*& pObj, _TObj* pNew) // ÓÃ»§±£Ö¤ pNew ÊÇ²»Îª¿ÕµÄ
+inline GXHRESULT InlSetNewObjectAlwaysT(_TObj*& pObj, _TObj* pNew) // ç”¨æˆ·ä¿è¯ pNew æ˜¯ä¸ä¸ºç©ºçš„
 {
   SAFE_RELEASE(pObj);
   pObj = pNew;
@@ -5171,14 +5173,14 @@ inline GXHRESULT InlGetSafeObjectT(_TInterface** ppInterface, _TInterface* pHold
 }
 
 
-// TODO: ÊÇ²»ÊÇÒÔºóÒª¼ÓÉÏ"Gph"Ç°×ºÄØ?
+// TODO: æ˜¯ä¸æ˜¯ä»¥åè¦åŠ ä¸Š"Gph"å‰ç¼€å‘¢?
 GXDLL GXINT         GetAdaptedSize        (GXINT nSize);
 GXDLL GXUINT        GetBytesOfGraphicsFormat  (GXFormat eFmt);
 GXDLL GXFormatCategory  GetGraphicsFormatCategory  (GXFormat eFmt);
 GXDLL GXBOOL        IsPow2            (GXINT nNum);
 GXDLL GXUINT        TextureRatioToDimension    (GXINT nTexRatio, GXUINT nModel, GXDWORD dwFlags);
 
-// ÄÚÖÃµÄ¶¥µã¸ñÊ½¶¨Òå
+// å†…ç½®çš„é¡¶ç‚¹æ ¼å¼å®šä¹‰
 enum GXSysVertexDecl
 {
   GXVD_P3F_C1D,
@@ -5192,43 +5194,43 @@ enum GXSysVertexDecl
 
 GXLPCVERTEXELEMENT GXDLLAPI MOGetSysVertexDecl     (GXSysVertexDecl eDecl);
 GXDWORD GXDLLAPI MOGenerateVertexDeclCode (LPCGXVERTEXELEMENT pVertDecl);
-GXVOID  GXDLLAPI MOCanonicalizeVertexDecl (LPGXVERTEXELEMENT pNewVertDecl, LPCGXVERTEXELEMENT pSrcVertDecl, GXBOOL bRelocalOffset);  // ĞÂµÄ Offset »á¸Ä±ä
+GXVOID  GXDLLAPI MOCanonicalizeVertexDecl (LPGXVERTEXELEMENT pNewVertDecl, LPCGXVERTEXELEMENT pSrcVertDecl, GXBOOL bRelocalOffset);  // æ–°çš„ Offset ä¼šæ”¹å˜
 GXVOID  GXDLLAPI MORelocateVertexDecl     (LPGXVERTEXELEMENT pVertDecl);
-GXUINT  GXDLLAPI MOGetDeclTypeSize        (GXDeclType eType); // »ñµÃDeclType±í´ïµÄ×Ö½ÚÊı
-GXUINT  GXDLLAPI MOGetDeclTypeDimension   (GXDeclType eType); // »ñµÃÎ¬¶ÈÊı, float4¾ÍÊÇ4
-GXUINT  GXDLLAPI MOGetDeclVertexSize      (LPCGXVERTEXELEMENT pVertDecl); // ´ÓÉùÃ÷ÖĞ»ñµÃ¶¥µãµÄ³¤¶È
+GXUINT  GXDLLAPI MOGetDeclTypeSize        (GXDeclType eType); // è·å¾—DeclTypeè¡¨è¾¾çš„å­—èŠ‚æ•°
+GXUINT  GXDLLAPI MOGetDeclTypeDimension   (GXDeclType eType); // è·å¾—ç»´åº¦æ•°, float4å°±æ˜¯4
+GXUINT  GXDLLAPI MOGetDeclVertexSize      (LPCGXVERTEXELEMENT pVertDecl); // ä»å£°æ˜ä¸­è·å¾—é¡¶ç‚¹çš„é•¿åº¦
 GXUINT  GXDLLAPI MOGetDeclCount           (LPCGXVERTEXELEMENT pVertDecl);
-GXDWORD GXDLLAPI MOTestDeclElementFlags   (LPCGXVERTEXELEMENT pVertDecl); // ¸ù¾İ¶¥µãÉùÃ÷²âÊÔShaderÊäÈëÔªËØ
-void    GXDLLAPI MOTestShaderCapsString   (LPCGXVERTEXELEMENT pVertDecl, clStringA& strMacro);  // ¸ù¾İ¶¥µãÉùÃ÷²âÊÔShaderÊäÈëÔªËØ,²¢Éú³ÉShader±àÒëºê
-void    GXDLLAPI MOMakeShaderCapsString   (GXDWORD dwCapsFlags, clStringA& strMacro);  // ¸ù¾İ±êÖ¾Éú³ÉShader±àÒëºê
-GXINT   GXDLLAPI MOGetDeclOffset          (GXIN LPCGXVERTEXELEMENT pVertDecl, GXIN GXDeclUsage Usage, GXIN GXUINT UsageIndex, GXOUT LPGXVERTEXELEMENT lpDesc = NULL); // »ñµÃÖ¸¶¨µÄÆ«ÒÆ
+GXDWORD GXDLLAPI MOTestDeclElementFlags   (LPCGXVERTEXELEMENT pVertDecl); // æ ¹æ®é¡¶ç‚¹å£°æ˜æµ‹è¯•Shaderè¾“å…¥å…ƒç´ 
+void    GXDLLAPI MOTestShaderCapsString   (LPCGXVERTEXELEMENT pVertDecl, clStringA& strMacro);  // æ ¹æ®é¡¶ç‚¹å£°æ˜æµ‹è¯•Shaderè¾“å…¥å…ƒç´ ,å¹¶ç”ŸæˆShaderç¼–è¯‘å®
+void    GXDLLAPI MOMakeShaderCapsString   (GXDWORD dwCapsFlags, clStringA& strMacro);  // æ ¹æ®æ ‡å¿—ç”ŸæˆShaderç¼–è¯‘å®
+GXINT   GXDLLAPI MOGetDeclOffset          (GXIN LPCGXVERTEXELEMENT pVertDecl, GXIN GXDeclUsage Usage, GXIN GXUINT UsageIndex, GXOUT LPGXVERTEXELEMENT lpDesc = NULL); // è·å¾—æŒ‡å®šçš„åç§»
 int     GXDLLAPI MOParseRenderQueue       (GXLPCSTR szName);
 
 GXHRESULT GXDLLAPI MOCompileHLSL          (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADERBUFFERS* pBuffers);
 #define MOGetDeclVertexStride MOGetDeclVertexSize
 
-// TODO: Ôö¼ÓÒ»¸öÖ±½Ó´ÓPrimitive×ª»»µÄ½Ó¿Ú
-GXBOOL GXDLLAPI MOConvertVertexFormat   (GXLPVOID lpDestVert, GXLPCVERTEXELEMENT lpDestDecl, GXLPVOID lpSrcVert, GXLPCVERTEXELEMENT lpSrcDecl, GXUINT nCount, GXDWORD dwFlags); // dwFlags »¹Ã»ÓÃÉÏ
+// TODO: å¢åŠ ä¸€ä¸ªç›´æ¥ä»Primitiveè½¬æ¢çš„æ¥å£
+GXBOOL GXDLLAPI MOConvertVertexFormat   (GXLPVOID lpDestVert, GXLPCVERTEXELEMENT lpDestDecl, GXLPVOID lpSrcVert, GXLPCVERTEXELEMENT lpSrcDecl, GXUINT nCount, GXDWORD dwFlags); // dwFlags è¿˜æ²¡ç”¨ä¸Š
 
-GXLPCRENDERSTATE    GXDLLAPI MOGetDefaultRenderState(); // »ùÓÚD3D9µÄ¶¨Òå
+GXLPCRENDERSTATE    GXDLLAPI MOGetDefaultRenderState(); // åŸºäºD3D9çš„å®šä¹‰
 
 // GetAdaptedSize
-// »ñµÃÊÊÅä³ß´ç, ÕÒµ½Ò»¸ö´óÓÚÊäÈëÊıÖµµÄ2µÄÃİµÄÖµ
+// è·å¾—é€‚é…å°ºå¯¸, æ‰¾åˆ°ä¸€ä¸ªå¤§äºè¾“å…¥æ•°å€¼çš„2çš„å¹‚çš„å€¼
 
 // GetBytesOfGraphicsFormat
-// »ñµÃÏñËØ¸ñÊ½ËùÕ¼µÄ×Ö½ÚÊı
+// è·å¾—åƒç´ æ ¼å¼æ‰€å çš„å­—èŠ‚æ•°
 
 // GetGraphicsFormatCategory
-// »ñµÃÏñËØ¸ñÊ½µÄ·ÖÀà
+// è·å¾—åƒç´ æ ¼å¼çš„åˆ†ç±»
 
 // IsPow2
-// ÅĞ¶ÏÊäÈëÊıÖµÊÇ·ñÊÇ2µÄÃİÊı
+// åˆ¤æ–­è¾“å…¥æ•°å€¼æ˜¯å¦æ˜¯2çš„å¹‚æ•°
 
 // TextureRatioToDimension
-// ÎÆÀí±ÈÀı×ª»»ÎªÊµ¼Ê³ß´ç
+// çº¹ç†æ¯”ä¾‹è½¬æ¢ä¸ºå®é™…å°ºå¯¸
 
 //////////////////////////////////////////////////////////////////////////
-enum GXPlaformIdentity // TODO: ÒÔºóÈ¥µôÕâ¸ö, Ê¹ÓÃFOURCCÀ´±íÊ¾
+enum GXPlaformIdentity // TODO: ä»¥åå»æ‰è¿™ä¸ª, ä½¿ç”¨FOURCCæ¥è¡¨ç¤º
 {
   GXPLATFORM_UNKNOWN          = 0,
   GXPLATFORM_WIN32_DIRECT3D9  = GXMAKEFOURCC('D','3','D','9'),
@@ -5239,7 +5241,7 @@ enum GXPlaformIdentity // TODO: ÒÔºóÈ¥µôÕâ¸ö, Ê¹ÓÃFOURCCÀ´±íÊ¾
 };
 
 
-// Platform id Óë×Ö·û´®»¥Ïà×ª»»µÄº¯Êı
+// Platform id ä¸å­—ç¬¦ä¸²äº’ç›¸è½¬æ¢çš„å‡½æ•°
 extern "C"
 {
   GXBOOL            GXDLLAPI MOPlatformEnumToStringW (GXPlaformIdentity ePlatform, GXLPWSTR szName, int nSize);
@@ -5247,15 +5249,15 @@ extern "C"
 };
 
 // Static Sprite Message
-#define GXSSM_SETSPRITEBYFILENAMEW  (GXWM_USER + 20)  // lParam: ÎÄ¼şÃû
-#define GXSSM_SETSPRITE             (GXWM_USER + 21)  // lParam: Sprite¶ÔÏó
-#define GXSSM_SETMODULEBYNAMEW      (GXWM_USER + 22)  // lParam: ModuleÃû×Ö
-#define GXSSM_SETMODULEBYINDEX      (GXWM_USER + 23)  // wParam: Ë÷Òı
+#define GXSSM_SETSPRITEBYFILENAMEW  (GXWM_USER + 20)  // lParam: æ–‡ä»¶å
+#define GXSSM_SETSPRITE             (GXWM_USER + 21)  // lParam: Spriteå¯¹è±¡
+#define GXSSM_SETMODULEBYNAMEW      (GXWM_USER + 22)  // lParam: Moduleåå­—
+#define GXSSM_SETMODULEBYINDEX      (GXWM_USER + 23)  // wParam: ç´¢å¼•
 
-#define GXSSM_GETSPRITEBYFILENAMEW  (GXWM_USER + 24)  // lParam: ÎÄ¼şÃû, wParam »º³å´óĞ¡
-#define GXSSM_GETSPRITE             (GXWM_USER + 25)  // lParam: Sprite**¶ÔÏó, ÓÃÍêÒªÊÍ·ÅÒıÓÃ
-#define GXSSM_GETMODULEBYNAMEW      (GXWM_USER + 26)  // lParam: ModuleÃû×Ö, wParam »º³å´óĞ¡
-#define GXSSM_GETMODULEBYINDEX      (GXWM_USER + 27)  // ·µ»ØÖµ: Ë÷Òı
+#define GXSSM_GETSPRITEBYFILENAMEW  (GXWM_USER + 24)  // lParam: æ–‡ä»¶å, wParam ç¼“å†²å¤§å°
+#define GXSSM_GETSPRITE             (GXWM_USER + 25)  // lParam: Sprite**å¯¹è±¡, ç”¨å®Œè¦é‡Šæ”¾å¼•ç”¨
+#define GXSSM_GETMODULEBYNAMEW      (GXWM_USER + 26)  // lParam: Moduleåå­—, wParam ç¼“å†²å¤§å°
+#define GXSSM_GETMODULEBYINDEX      (GXWM_USER + 27)  // è¿”å›å€¼: ç´¢å¼•
 
 
 #include <GrapX/GXKernel.h>

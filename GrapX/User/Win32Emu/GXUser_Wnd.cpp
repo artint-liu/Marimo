@@ -1,16 +1,16 @@
-#ifndef _DEV_DISABLE_UI_CODE
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include <GrapX/GUnknown.H>
 #include <GrapX/GResource.H>
 #include <GrapX/GRegion.H>
 #include <GrapX/GXGraphics.H>
 #include <GrapX/GXCanvas.H>
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
 #include "GrapX/GXUser.H"
@@ -53,7 +53,7 @@ GXBOOL IntSendCreateMessage(GXHWND hWnd, GXHWND hParent, GXLPCWSTR szClassName, 
   return TRUE;
 }
 //////////////////////////////////////////////////////////////////////////
-// Ã»ÓĞ²âÊÔÔËĞĞÖĞ¶¯Ì¬´´½¨ºÍÏú»Ù´°¿Ú
+// æ²¡æœ‰æµ‹è¯•è¿è¡Œä¸­åŠ¨æ€åˆ›å»ºå’Œé”€æ¯çª—å£
 GXBOOL GXDLLAPI gxDestroyWindow(
                GXHWND hWnd   // handle to window to destroy  
              )
@@ -69,8 +69,8 @@ GXBOOL GXDLLAPI gxDestroyWindow(
 
   GXLPSTATION lpStation = GXLPWND_STATION_PTR(lpWnd);
 
-  // TODO: Active ´°¿ÚÏú»ÙÊ± WndsSurface µÄ´¦Àí, ÒªÖØĞÂÉèÖÃActive´°¿Ú
-  // TODO: ·Ç Active ´°¿ÚÏú»ÙÊ± WndsSurface µÄ´¦Àí, ¸üĞÂDWM ĞÎ×´
+  // TODO: Active çª—å£é”€æ¯æ—¶ WndsSurface çš„å¤„ç†, è¦é‡æ–°è®¾ç½®Activeçª—å£
+  // TODO: é Active çª—å£é”€æ¯æ—¶ WndsSurface çš„å¤„ç†, æ›´æ–°DWM å½¢çŠ¶
 
   gxIntDestroyChildWnd(lpWnd);
 
@@ -81,7 +81,7 @@ GXBOOL GXDLLAPI gxDestroyWindow(
     lpParent = lpParent->m_pParent;
   }
 
-  // ¼ÆËãÖØ»æÇøÓò
+  // è®¡ç®—é‡ç»˜åŒºåŸŸ
   GXWindowsSurface* pSurface = lpWnd->GetTopSurface();
   if(pSurface != NULL)
   {
@@ -107,8 +107,8 @@ GXINT gxIntDestroyChildWnd(GXLPWND lpWnd)
     gxDispatchMessageW(&msg);
   }
 
-  // ÕâÀïÍüÁËÈç¹û²»ĞŞ¸ÄÏú»Ù±êÖ¾»á³öÉ¶ÎÊÌâÁË£¡
-  //// ÒªÊ×ÏÈÉèÖÃÏú»Ù±êÖ¾
+  // è¿™é‡Œå¿˜äº†å¦‚æœä¸ä¿®æ”¹é”€æ¯æ ‡å¿—ä¼šå‡ºå•¥é—®é¢˜äº†ï¼
+  //// è¦é¦–å…ˆè®¾ç½®é”€æ¯æ ‡å¿—
   //SET_FLAG(lpWnd->m_uState, WIS_DESTROYTHISWND | WIS_HASDESTROYWND);
 
   lpStation->CleanupRecord(hWnd);
@@ -126,8 +126,8 @@ GXINT gxIntDestroyChildWnd(GXLPWND lpWnd)
 
   gxSendMessage(hWnd, GXWM_NCDESTROY, 0, 0);
 
-  // IsWindow ÖĞ»á¼ì²é WIS_DESTROYTHISWND Õâ¸ö±êÖ¾
-  // ÔÚÊÕµ½ GXWM_DESTROY ºÍ GXWM_NCDESTROY Ê± IsWindow ÈÔÈ»ÊÇ TRUE
+  // IsWindow ä¸­ä¼šæ£€æŸ¥ WIS_DESTROYTHISWND è¿™ä¸ªæ ‡å¿—
+  // åœ¨æ”¶åˆ° GXWM_DESTROY å’Œ GXWM_NCDESTROY æ—¶ IsWindow ä»ç„¶æ˜¯ TRUE
   SET_FLAG(lpWnd->m_uState, WIS_DESTROYTHISWND | WIS_HASDESTROYWND);
   return 1;
 }
@@ -169,31 +169,31 @@ GXVOID _gxDestroyWindow(GXHWND hWnd)
 
   ////////////////////////////////////////////////////////////////////////////
   ////
-  //// ÇåÀí Station µÄ¼ÇÂ¼
+  //// æ¸…ç† Station çš„è®°å½•
   ////
 
-  //// Èç¹ûÉæ¼°µ½½¹µã»òÕß²¶»ñ´°¿ÚÔòÇå³ı
+  //// å¦‚æœæ¶‰åŠåˆ°ç„¦ç‚¹æˆ–è€…æ•è·çª—å£åˆ™æ¸…é™¤
   //if(lpStation->m_pMouseFocus == lpWnd)  {
-  //  // ·¢ËÍÊ§È¥Êó±ê½¹µãĞÅÏ¢
+  //  // å‘é€å¤±å»é¼ æ ‡ç„¦ç‚¹ä¿¡æ¯
   //  gxSendMessageW(lpStation->m_pMouseFocus, GXWM_NCMOUSELEAVE, NULL, NULL);
   //  gxSendMessageW(lpStation->m_pMouseFocus, GXWM_MOUSELEAVE, NULL, NULL);
   //  lpStation->m_pMouseFocus = NULL;
   //}
   //if(lpStation->m_pKeyboardFocus == lpWnd)  {
-  //  // ·¢ËÍÊ§È¥¼üÅÌ½¹µãĞÅÏ¢
+  //  // å‘é€å¤±å»é”®ç›˜ç„¦ç‚¹ä¿¡æ¯
   //  gxSetFocus(NULL);
   //}
   //if(lpStation->m_pCapture == lpWnd)  {
-  //  // ·¢ËÍÊ§È¥´°¿Ú²¶»ñĞÅÏ¢
+  //  // å‘é€å¤±å»çª—å£æ•è·ä¿¡æ¯
   //  gxReleaseCapture();
   //}
 
-  //// Èç¹ûÊÇ¶¥²ã´°¿Ú, ÔòÒªÇå³ı¼¤»îÁĞ±íÀïµÄ¼ÇÂ¼
+  //// å¦‚æœæ˜¯é¡¶å±‚çª—å£, åˆ™è¦æ¸…é™¤æ¿€æ´»åˆ—è¡¨é‡Œçš„è®°å½•
   //if(gxIsTopLevelWindow(hWnd) == TRUE)
   //{
   //  GXLPWND_ARRAY& aWnds = lpStation->m_aActiveWnds;
 
-  //  // Èç¹ûÊÇ¼¤»î´°¿Ú,ÔòÏÈ¸ü»»µôËü,Ê¹Æä·Ç¼¤»î
+  //  // å¦‚æœæ˜¯æ¿€æ´»çª—å£,åˆ™å…ˆæ›´æ¢æ‰å®ƒ,ä½¿å…¶éæ¿€æ´»
   //  if(lpWnd->GetActive() == lpWnd)
   //  {
   //    for(GXLPWND_ARRAY::reverse_iterator it = aWnds.rbegin();
@@ -278,7 +278,7 @@ GXVOID GXDestroyRootFrame()
 
   LPGXWND lpWnd = lpDesktop->m_pFirstChild;
 
-  // ±ê¼Ç´°¿ÚÏú»Ù±êÖ¾,È»ºóÔÙÏú»Ù,ÕâÊÇÎªÁËÈÃ´°¿ÚÕıÈ·ÊÕµ½¸÷ÖÖ´¦ÀíÏûÏ¢
+  // æ ‡è®°çª—å£é”€æ¯æ ‡å¿—,ç„¶åå†é”€æ¯,è¿™æ˜¯ä¸ºäº†è®©çª—å£æ­£ç¡®æ”¶åˆ°å„ç§å¤„ç†æ¶ˆæ¯
   while(lpWnd != NULL)
   {
     gxDestroyWindow(GXWND_HANDLE(lpWnd));
@@ -286,7 +286,7 @@ GXVOID GXDestroyRootFrame()
   }
   _gxDestroyMarkedWindow(GXWND_HANDLE(lpDesktop));
 
-  // TODO: ×¢ÏúµôËùÓĞÈÈ¼ü(UngisterHotKey)
+  // TODO: æ³¨é”€æ‰æ‰€æœ‰çƒ­é”®(UngisterHotKey)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -326,7 +326,7 @@ GXHWND GXDLLAPI gxCreateWindowExW(GXDWORD dwExStyle,GXLPCWSTR lpClassName,GXLPCW
   GXWNDCLASSEX WndClassEx;
 
   if(TEST_FLAG(dwStyle, GXWS_CHILD) && hWndParent == NULL) {
-    // Õâ¸öÅĞ¶ÏÊÇ¸Õ¼ÓµÄ£¬·ÀÖ¹Ö®Ç°Ğ´µÄÓĞÎÊÌâÕâÀï¼Ó¸öÖĞ¶ÏÓÃÀ´¶ÔÒÔÇ°µÄ´íÎóĞ´·¨½øĞĞÅÅ²é
+    // è¿™ä¸ªåˆ¤æ–­æ˜¯åˆšåŠ çš„ï¼Œé˜²æ­¢ä¹‹å‰å†™çš„æœ‰é—®é¢˜è¿™é‡ŒåŠ ä¸ªä¸­æ–­ç”¨æ¥å¯¹ä»¥å‰çš„é”™è¯¯å†™æ³•è¿›è¡Œæ’æŸ¥
     CLBREAK;
     return NULL;
   }
@@ -339,14 +339,14 @@ GXHWND GXDLLAPI gxCreateWindowExW(GXDWORD dwExStyle,GXLPCWSTR lpClassName,GXLPCW
   }
 
 
-  // ¶ÔÓÚ32Î»ÏµÍ³, ¶îÍâµÄ´¢´æ¿Õ¼äµÈÓÚcbWndExtra
-  // ¶ÔÓÚ64Î»ÏµÍ³¶îÍâµÄ´¢´æ¿Õ¼äÊÇcbWndExtraµÄ2±¶, ÕâÑù±£Ö¤´¢´æ¿Õ¼äÀï¿ÉÒÔ±£´æ8×Ö½ÚµÄÖ¸Õë
+  // å¯¹äº32ä½ç³»ç»Ÿ, é¢å¤–çš„å‚¨å­˜ç©ºé—´ç­‰äºcbWndExtra
+  // å¯¹äº64ä½ç³»ç»Ÿé¢å¤–çš„å‚¨å­˜ç©ºé—´æ˜¯cbWndExtraçš„2å€, è¿™æ ·ä¿è¯å‚¨å­˜ç©ºé—´é‡Œå¯ä»¥ä¿å­˜8å­—èŠ‚çš„æŒ‡é’ˆ
   const GXSIZE_T cbWndClassSize = sizeof(GXWnd) + WndClassEx.cbWndExtra * (sizeof(void*) / sizeof(GXDWORD));
 
-  // ´´½¨´°¿ÚÀàºÍ¶îÍâµÄÊı¾İ´¢´æ¿Õ¼ä
+  // åˆ›å»ºçª—å£ç±»å’Œé¢å¤–çš„æ•°æ®å‚¨å­˜ç©ºé—´
   pNewWnd = new(new GXBYTE[cbWndClassSize]) GXWnd;
   if( ! pNewWnd) {
-    CLOG_ERROR(__FUNCTION__": Out of memory.\n");
+    CLOG_ERROR("%s : Out of memory.\n", __FUNCTION__);
     return NULL;
   }
 
@@ -364,20 +364,20 @@ GXHWND GXDLLAPI gxCreateWindowExW(GXDWORD dwExStyle,GXLPCWSTR lpClassName,GXLPCW
   GXLPSTATION lpStation = GXLPWND_STATION_PTR(pNewWnd);
   GXDWORD dwThreadId = gxGetCurrentThreadId();
   if(lpStation->dwUIThreadId == NULL) {
-    CLOG_WARNING(__FUNCTION__": User doesn't set UI thread Id, set to default.\n"
-      "Call GXUIMakeCurrent() first in UI message processing thread.\n");
+    CLOG_WARNING("%s : User doesn't set UI thread Id, set to default.\n"
+      "Call GXUIMakeCurrent() first in UI message processing thread.\n", __FUNCTION__);
     lpStation->dwUIThreadId = dwThreadId;
   }
   else if(lpStation->dwUIThreadId != dwThreadId)
   {
-    CLOG_ERROR(__FUNCTION__": GXUI can not create window out of UI thread.\n");
+    CLOG_ERROR("%s : GXUI can not create window out of UI thread.\n", __FUNCTION__);
     CLBREAK;
     delete pNewWnd;
     return NULL;
   }
   lpStation->Enter();
 
-  // ÉèÖÃ¸¸´°Ìå
+  // è®¾ç½®çˆ¶çª—ä½“
   ptTopLeft.x = x;
   ptTopLeft.y = y;
   pNewWnd->SetParent(hWndParent);
@@ -386,14 +386,14 @@ GXHWND GXDLLAPI gxCreateWindowExW(GXDWORD dwExStyle,GXLPCWSTR lpClassName,GXLPCW
     GXWND_PTR(hWndParent)->ClientToScreen(&ptTopLeft, 1);
   }
 
-  // ÉèÖÃ Wnd ³ß´ç
+  // è®¾ç½® Wnd å°ºå¯¸
   pNewWnd->rectWindow.left    = ptTopLeft.x;
   pNewWnd->rectWindow.top     = ptTopLeft.y;
   pNewWnd->rectWindow.right   = ptTopLeft.x + nWidth;
   pNewWnd->rectWindow.bottom  = ptTopLeft.y + nHeight;
 
   if(lpWindowName != NULL) {
-    // Win32 ÔÚ´°¿Ú´´½¨Ê±ÊÇ²»·¢ËÍWM_SETTEXTÏûÏ¢µÄ, ÕâÀïÖ±½ÓÉèÖÃ
+    // Win32 åœ¨çª—å£åˆ›å»ºæ—¶æ˜¯ä¸å‘é€WM_SETTEXTæ¶ˆæ¯çš„, è¿™é‡Œç›´æ¥è®¾ç½®
     DEFWNDPROC_SetText(hNewWnd, lpWindowName);
     //gxSendMessage(hNewWnd, GXWM_SETTEXT, NULL, (GXLPARAM)lpWindowName);
   }
@@ -401,7 +401,7 @@ GXHWND GXDLLAPI gxCreateWindowExW(GXDWORD dwExStyle,GXLPCWSTR lpClassName,GXLPCW
   if(hWndParent == NULL)
   {
     //ASSERT(IS_IDENTIFY(hMenu));
-    //TODO: ÕâÀïÓĞÄÚ´æĞ¹Â¶£¬µ«ÊÇÓÉÓÚWineMenu²ÉÓÃÁËgxHeapAlloc·ÖÅäÄÚ´æ£¬Òò´ËÎŞ·¨¼ì²â
+    //TODO: è¿™é‡Œæœ‰å†…å­˜æ³„éœ²ï¼Œä½†æ˜¯ç”±äºWineMenué‡‡ç”¨äº†gxHeapAllocåˆ†é…å†…å­˜ï¼Œå› æ­¤æ— æ³•æ£€æµ‹
     //pNewWnd->m_pMenu = gxLoadMenuW(hInstance, (GXLPCWSTR)hMenu);
     pNewWnd->m_pMenu = hMenu;
   }
@@ -410,11 +410,11 @@ GXHWND GXDLLAPI gxCreateWindowExW(GXDWORD dwExStyle,GXLPCWSTR lpClassName,GXLPCW
     //ASSERT(hMenu != NULL && dwStyle & WS_CHILD);
     pNewWnd->m_pMenu = hMenu;
   }
-  // FIXME: WS_CHILDÄ£Ê½ÏÂ, ×Ö·û´®ĞÎÊ½µÄControl IdÓ¦¸Ãµ¥¶À·ÖÅäÄÚ´æ±£´æ, ²»Ó¦¸ÃÖ±½ÓÒıÓÃÖ¸Õë.
+  // FIXME: WS_CHILDæ¨¡å¼ä¸‹, å­—ç¬¦ä¸²å½¢å¼çš„Control Idåº”è¯¥å•ç‹¬åˆ†é…å†…å­˜ä¿å­˜, ä¸åº”è¯¥ç›´æ¥å¼•ç”¨æŒ‡é’ˆ.
 
   if(IntSendCreateMessage(hNewWnd, hWndParent, lpClassName, dwExStyle, dwStyle, x, y, nWidth, nHeight, hMenu, lpParam) == FALSE)
   {
-    ASSERT(0);  // ´´½¨¿Ø¼ş³õÊ¼»¯Ê§°Ü
+    ASSERT(0);  // åˆ›å»ºæ§ä»¶åˆå§‹åŒ–å¤±è´¥
     gxDestroyWindow(hNewWnd);
     lpStation->Leave();
     return NULL;
@@ -719,7 +719,7 @@ GXLONG_PTR GXDLLAPI gxGetWindowLongW(GXHWND hWnd, GXINT nIndex)
   if(gxIsWindow(hWnd) == FALSE) {
     return 0;
   }
-  //TODO: ÒªÖØ¹¹£¡
+  //TODO: è¦é‡æ„ï¼
   LPGXWND lpWnd = GXWND_PTR(hWnd);
   CHECK_LPWND_VAILD(lpWnd);
 
@@ -761,7 +761,7 @@ GXLONG_PTR GXDLLAPI gxGetWindowLongW(GXHWND hWnd, GXINT nIndex)
 
 GXLONG_PTR GXDLLAPI gxSetWindowLongW(GXHWND hWnd,GXINT nIndex, GXLONG_PTR dwNewLong)
 {
-  //TODO: ÒªÖØ¹¹£¡¾Í²»ÓÃÕâÃ´¶àĞĞÁË
+  //TODO: è¦é‡æ„ï¼å°±ä¸ç”¨è¿™ä¹ˆå¤šè¡Œäº†
   GXLPWND lpWnd = GXWND_PTR(hWnd);
   CHECK_LPWND_VAILD(lpWnd);
   if( ! lpWnd) {
@@ -805,7 +805,7 @@ GXLONG_PTR GXDLLAPI gxSetWindowLongW(GXHWND hWnd,GXINT nIndex, GXLONG_PTR dwNewL
     if(((dwPrevPtr ^ dwNewLong) & GXWS_EX_LAYERED) != 0)
       lpWnd->SetLayeredWindowStyle((dwNewLong & GXWS_EX_LAYERED) != 0);
 
-    // Õâ¸ö²»ÄÜ·ÅÔÚ SetLayeredWindowStyle Ç°Ãæ, ËüÅĞ¶ÏÈç¹ûÒÑ¾­ÉèÖÃLayeredÔòÖ±½Ó·µ»Ø
+    // è¿™ä¸ªä¸èƒ½æ”¾åœ¨ SetLayeredWindowStyle å‰é¢, å®ƒåˆ¤æ–­å¦‚æœå·²ç»è®¾ç½®Layeredåˆ™ç›´æ¥è¿”å›
     lpWnd->m_uExStyle = (GXULONG)dwNewLong;
     break;
 
@@ -882,7 +882,7 @@ GXBOOL GXDLLAPI gxShowWindow(
 //////////////////////////////////////////////////////////////////////////
 GXBOOL gxRegisterHotKey(GXHWND hWnd, GXINT id, GXUINT fsModifiers, GXUINT vk)
 {
-  // ¿ÉÄÜÓĞBug
+  // å¯èƒ½æœ‰Bug
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
   LPGXHOTKEY lpHotKey = (LPGXHOTKEY)&lpStation->m_HotKeyChain;
   while(lpHotKey != NULL && lpHotKey->hWnd != NULL)
@@ -904,7 +904,7 @@ GXBOOL gxRegisterHotKey(GXHWND hWnd, GXINT id, GXUINT fsModifiers, GXUINT vk)
 
 GXBOOL gxUnregisterHotKey(GXHWND hWnd, GXINT id)
 {
-  // ¿ÉÄÜÓĞBug
+  // å¯èƒ½æœ‰Bug
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
   LPGXHOTKEY lpHotKey = (LPGXHOTKEY)&lpStation->m_HotKeyChain;
   LPGXHOTKEY lpPrevHotKey = NULL;
@@ -938,10 +938,10 @@ GXBOOL gxUnregisterHotKey(GXHWND hWnd, GXINT id)
 }
 //////////////////////////////////////////////////////////////////////////
 // 
-// Ã¶¾ÙÒ»¸ö´°¿ÚµÄËùÓĞ×Ó´°¿Ú
-// Èç¹ûÕâ¸ö´°¿ÚµÄ×Ó´°¿Ú´´½¨×Ô¼ºµÄ×Ó´°¿Ú£¬Í¬Ñù»á±»Ã¶¾Ù
-// Èç¹ûÔÚÃ¶¾Ù¹ı³ÌÖĞ£¬´¦Àíº¯Êı·µ»ØFALSE£¬ÔòÖĞ¶ÏÃ¶¾Ù£¬
-// gxEnumChildWindows º¯Êı·µ»ØFALSE£¬·ñÔò»áÃ¶¾ÙÈ«²¿×Ó´°¿Ú²¢·µ»ØTRUE
+// æšä¸¾ä¸€ä¸ªçª—å£çš„æ‰€æœ‰å­çª—å£
+// å¦‚æœè¿™ä¸ªçª—å£çš„å­çª—å£åˆ›å»ºè‡ªå·±çš„å­çª—å£ï¼ŒåŒæ ·ä¼šè¢«æšä¸¾
+// å¦‚æœåœ¨æšä¸¾è¿‡ç¨‹ä¸­ï¼Œå¤„ç†å‡½æ•°è¿”å›FALSEï¼Œåˆ™ä¸­æ–­æšä¸¾ï¼Œ
+// gxEnumChildWindows å‡½æ•°è¿”å›FALSEï¼Œå¦åˆ™ä¼šæšä¸¾å…¨éƒ¨å­çª—å£å¹¶è¿”å›TRUE
 // 
 GXBOOL GXDLLAPI gxEnumChildWindows(
             GXHWND hWndParent,    // handle to parent window
@@ -970,17 +970,17 @@ GXHWND GXDLLAPI gxFindWindowEx(
   )
 {
   GXLPWND lpParentWnd = GXWND_PTR(hwndParent);
-  GXLPWND lpChildAfter = GXWND_PTR(hwndChildAfter); // ËÑË÷(¹ı³Ì)²»°üÀ¨Õâ¸ö´°¿Ú
+  GXLPWND lpChildAfter = GXWND_PTR(hwndChildAfter); // æœç´¢(è¿‡ç¨‹)ä¸åŒ…æ‹¬è¿™ä¸ªçª—å£
   GXLPWND lpWnd = NULL;
 
-  // ¶¨Î»¸¸´°¿Ú
+  // å®šä½çˆ¶çª—å£
   if(lpParentWnd == NULL)
   {
     GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
     lpParentWnd = lpStation->lpDesktopWnd;
   }
 
-  // ¶¨Î»×Ó´°¿Ú,ÒÔ¼°¿ªÊ¼Ñ­»·µÄ´°¿Ú
+  // å®šä½å­çª—å£,ä»¥åŠå¼€å§‹å¾ªç¯çš„çª—å£
   if(lpChildAfter != NULL)
   {
     if(lpChildAfter->m_pParent != lpParentWnd) {

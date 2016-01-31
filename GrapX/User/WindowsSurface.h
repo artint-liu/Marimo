@@ -1,28 +1,28 @@
-#ifndef _GRAP_X_WINDOWS_SURFACE_H_
+ï»¿#ifndef _GRAP_X_WINDOWS_SURFACE_H_
 #define _GRAP_X_WINDOWS_SURFACE_H_
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÒıÓÃµÄ×îµ×²ãÍ·ÎÄ¼ş
+// å¼•ç”¨çš„æœ€åº•å±‚å¤´æ–‡ä»¶
 //
 ////#include <Include/GUnknown.H>
 //#include <vector>
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÀàÉùÃ÷
+// ç±»å£°æ˜
 //
 class GXImage;
 class GTexture;
 class GRegion;
 enum RGNCOMPLEX;
 
-// GXWindowsSurface::SetExclusiveWnd ±êÖ¾
+// GXWindowsSurface::SetExclusiveWnd æ ‡å¿—
 #define SEW_DONOTBLT    0x00000001
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÀàÊµÏÖ
+// ç±»å®ç°
 //
 class GXWindowsSurface : public GUnknown
 {
@@ -43,19 +43,19 @@ public:
   GXBOOL          Scroll              (int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate);
   GXBOOL          BitBltRect          (GXWindowsSurface* pSrcSurface, int xDest, int yDest, LPGXCRECT lprcSource);
   GXBOOL          BitBltRegion        (GXWindowsSurface* pSrcSurface, int xDest, int yDest, GRegion* lprgnSource);
-  int             GenerateWindowsRgn  (GXBOOL bDelay); // ÊÕ¼¯Õâ¸öSurfaceÉÏËùÓĞ´°¿ÚµÄ²¢¼¯
+  int             GenerateWindowsRgn  (GXBOOL bDelay); // æ”¶é›†è¿™ä¸ªSurfaceä¸Šæ‰€æœ‰çª—å£çš„å¹¶é›†
   GXHWND          GetExclusiveWnd     ();
   GXHWND          SetExclusiveWnd     (GXHWND hWnd, GXDWORD dwFlags);
 
   GXBOOL          SaveToFileW         (GXLPCWSTR lpFilename, GXLPCSTR lpFormat);
 
   GXLPSTATION     m_lpStation;
-  GXImage*        m_pRenderTar;       // Ô­µã¶ÔÓ¦ Windows µÄÔ­µã
+  GXImage*        m_pRenderTar;       // åŸç‚¹å¯¹åº” Windows çš„åŸç‚¹
   GTexture*       m_pDepthStencil;    // D3DFMT_D24S8
-  GXRECT          rcScrUpdate;        // GXÆÁÄ»¿Õ¼äµÄ×ø±ê£¬Ô­µã¶ÔÓ¦ Station ÆÁÄ»Ô­µã
+  GXRECT          rcScrUpdate;        // GXå±å¹•ç©ºé—´çš„åæ ‡ï¼ŒåŸç‚¹å¯¹åº” Station å±å¹•åŸç‚¹
 
-  GXHWND          m_hExclusiveWnd;    // Ö»ÓĞ¶ÀÕ¼SurfaceµÄ´°¿Ú²ÅÓĞÕâ¸öÖµ
-  GRegion*        m_prgnWindows;      // TODO: ÒÔºó´°¿ÚÇøÓò´¢´æÔÚÕâ¸öÀïÃæ, ²»ÔÙ°ÑÕûÕÅm_pRenderTar»­³öÀ´ÁË
+  GXHWND          m_hExclusiveWnd;    // åªæœ‰ç‹¬å Surfaceçš„çª—å£æ‰æœ‰è¿™ä¸ªå€¼
+  GRegion*        m_prgnWindows;      // TODO: ä»¥åçª—å£åŒºåŸŸå‚¨å­˜åœ¨è¿™ä¸ªé‡Œé¢, ä¸å†æŠŠæ•´å¼ m_pRenderTarç”»å‡ºæ¥äº†
   GRegion*        m_prgnUpdate;
 private:
   GXDWORD         m_bGenerateWindowsRgn : 1;

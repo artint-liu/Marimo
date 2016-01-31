@@ -1,4 +1,4 @@
-#include "GrapX.H"
+ï»¿#include "GrapX.H"
 #include "GrapX.Hxx"
 
 #include "clPathFile.h"
@@ -109,13 +109,13 @@ namespace Marimo
     TypeDeclArray         m_aTypes;
     MembersArray          m_aStructMember;
     EnumDeclArray         m_aEnums;
-    VarDeclArray          m_aVariables;         // ²»ÔÚ½á¹¹ÖĞµÄ±äÁ¿    
+    VarDeclArray          m_aVariables;         // ä¸åœ¨ç»“æ„ä¸­çš„å˜é‡    
     DataPoolInclude*      m_pInclude;
     clStringListW         m_ImportFiles;
-    GXBOOL                m_bParsingExpression; // TriggerProc²¿·Ö¹¦ÄÜÔÚ±í´ïÊ½½âÎöÊ±ÒªÌø¹ı
-    clStringHashSetA      m_VarNameSet;         // È«¾Ö±äÁ¿¼¯ºÏ£¬ÓÃÀ´¼ì²éÖØÃû
+    GXBOOL                m_bParsingExpression; // TriggerProcéƒ¨åˆ†åŠŸèƒ½åœ¨è¡¨è¾¾å¼è§£ææ—¶è¦è·³è¿‡
+    clStringHashSetA      m_VarNameSet;         // å…¨å±€å˜é‡é›†åˆï¼Œç”¨æ¥æ£€æŸ¥é‡å
     DataPoolErrorMsgA     m_ErrorMsg;
-    // ×Ô¶¯ÉèÖÃ±í´ïÊ½½âÎö×´Ì¬µÄÀà
+    // è‡ªåŠ¨è®¾ç½®è¡¨è¾¾å¼è§£æçŠ¶æ€çš„ç±»
     class EPSection
     {
       DataPoolResolverImpl* m_pCompiler;
@@ -191,7 +191,7 @@ namespace Marimo
   //    }
   //    --p;
   //  }
-  //  return TRUE; // µ½ÎÄµµ¿ªÍ·ÁË
+  //  return TRUE; // åˆ°æ–‡æ¡£å¼€å¤´äº†
   //}
 
   template<class _Iter>
@@ -217,19 +217,19 @@ namespace Marimo
 
   size_t CALLBACK TriggerProc(StreamIter& it, clsize uRemain, u32_ptr lParam)
   {
-    u32 i = 2; // "//" ºÍ "/*"¿ªÊ¼¶¼ÊÇÁ½¸ö×Ö½Ú
+    u32 i = 2; // "//" å’Œ "/*"å¼€å§‹éƒ½æ˜¯ä¸¤ä¸ªå­—èŠ‚
 
     if(it.marker[0] == '\n') {
       ++it;
       return 0 ;
     }
-    else if(it.marker[0] == '/' && it.marker[1] == '/') // ´¦Àíµ¥ĞĞ×¢ÊÍ¡°//...¡±
+    else if(it.marker[0] == '/' && it.marker[1] == '/') // å¤„ç†å•è¡Œæ³¨é‡Šâ€œ//...â€
     {
       SmartStreamUtility::ExtendToNewLine(it, 2, uRemain);
       ++it;
       return 0;
     }
-    else if(it.marker[0] == '/' && it.marker[1] == '*') // ´¦Àí¿é×¢ÊÍ¡°/*...*/¡±
+    else if(it.marker[0] == '/' && it.marker[1] == '*') // å¤„ç†å—æ³¨é‡Šâ€œ/*...*/â€
     {
       //--uRemain;
       //auto c0 = it.marker[i];
@@ -251,7 +251,7 @@ namespace Marimo
     else if(it.marker[0] == '#') {
       auto pThis = (DataPoolResolverImpl*)lParam;
 
-      // ±í´ïÊ½½âÎöÊ±²»»á´¦Àí'#'£¬Ê¹´íÎóĞÅÏ¢¸ü×¼È·
+      // è¡¨è¾¾å¼è§£ææ—¶ä¸ä¼šå¤„ç†'#'ï¼Œä½¿é”™è¯¯ä¿¡æ¯æ›´å‡†ç¡®
       if(pThis->m_bParsingExpression) {
         return 0;
       }
@@ -270,14 +270,14 @@ namespace Marimo
       static const GXCHAR szPragma[] = "pragma";
       static const GXCHAR szPragma_import[] = "import";
 
-      // ´¦ÀíÎÄ¼şÃûÉè¶¨±êÖ¾
+      // å¤„ç†æ–‡ä»¶åè®¾å®šæ ‡å¿—
       if(it.BeginsWith(szFileDefine)) { // # FILE
         it.length = GXSTRLEN(szFileDefine);
         ++it;
         SmartStreamUtility::ExtendToNewLine(it, 0, uRemain);
         clStringW str = (GXLPCSTR)it.ToString();
 
-        // È¥µôÉè¶¨±ê¼Ç£¬»»ĞĞ£¬¿Õ¸ñ
+        // å»æ‰è®¾å®šæ ‡è®°ï¼Œæ¢è¡Œï¼Œç©ºæ ¼
         str.TrimLeft(0x20);
         str.TrimRight(L" \n");
         pThis->m_ErrorMsg.SetCurrentFilenameW(str);
@@ -300,7 +300,7 @@ namespace Marimo
         GXLPCVOID pData = NULL;
         GXUINT nBytes = 0;
 
-        // ¸ù¾İµ±Ç°ÎÄ¼şÂ·¾¶¼ÆËãincludeÎÄ¼şÂ·¾¶
+        // æ ¹æ®å½“å‰æ–‡ä»¶è·¯å¾„è®¡ç®—includeæ–‡ä»¶è·¯å¾„
         clStringW str = pThis->m_ErrorMsg.GetFilenameW();
         clpathfile::RemoveFileSpecW(str);
         clpathfile::CombinePathW(str, str, clStringW(it.ToString()));
@@ -331,11 +331,11 @@ namespace Marimo
           argv.reserve(3);
           SmartStreamUtility::Get(it, it.pContainer->end(), ")", 3, argv);
 
-          if(argv.size() == 3 && argv[0] != "(" || argv[2] != ")") {
+          if(argv.size() == 3 && (argv[0] != "(" || argv[2] != ")")) {
             pThis->m_ErrorMsg.WriteErrorW(FALSE, it.offset(), E_1901_BAD_SHARP_PRAGMA_FMT);
           }
           else {
-            // µ¼ÈëÊı¾İÎÄ¼ş
+            // å¯¼å…¥æ•°æ®æ–‡ä»¶
             
             clStringW str = pThis->m_ErrorMsg.GetFilenameW();
             clpathfile::RemoveFileSpecW(str);
@@ -345,7 +345,7 @@ namespace Marimo
             //TRACEW(L"Import file: %s\n", pThis->m_ImportFiles.back());
           }
 
-          it = itImport; // »¹Ô­itÓÃÀ´ÖØ¶¨Î»ĞĞÎ²
+          it = itImport; // è¿˜åŸitç”¨æ¥é‡å®šä½è¡Œå°¾
         }
         else
         {
@@ -364,12 +364,12 @@ namespace Marimo
       ++it;
 
       if( ! IsDifferentLines(itPrev, it)) {
-        //CLOG_ERROR("Ô¤´¦ÀíÃüÁîºóÓ¦Ö±½Ó´øÓĞ»»ĞĞ±ê¼Ç.\n");
+        //CLOG_ERROR("é¢„å¤„ç†å‘½ä»¤ååº”ç›´æ¥å¸¦æœ‰æ¢è¡Œæ ‡è®°.\n");
         pThis->m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1904_PROCESS_NEED_NEWLINE_AT_END);
       }
     }
     else {
-      CLBREAK; // Ö»´¦Àí ¡°//¡± ºÍ ¡°/*...*/¡± Á½ÖÖ×¢ÊÍ
+      CLBREAK; // åªå¤„ç† â€œ//â€ å’Œ â€œ/*...*/â€ ä¸¤ç§æ³¨é‡Š
     }
     return 0;
   }
@@ -439,7 +439,7 @@ namespace Marimo
       DEFINE& d = it->second;
       GXUINT nErrorCode = 0;
       if(d.type != eType) {
-        // ±»¶¨ÒåÎª²»Í¬µÄÀàĞÍ
+        // è¢«å®šä¹‰ä¸ºä¸åŒçš„ç±»å‹
         nErrorCode = E_1010__DEFINE_DIFFERENT_TYPE;
       }
       else if(eType == ST_StructType) {
@@ -447,9 +447,9 @@ namespace Marimo
       }
       else if(eType == ST_VarName)
       {
-        ASSERT(pVarNameSet != NULL); // Õâ¸öÒ»¶¨Òª´«Èë±äÁ¿¼¯ºÏ
+        ASSERT(pVarNameSet != NULL); // è¿™ä¸ªä¸€å®šè¦ä¼ å…¥å˜é‡é›†åˆ
 
-        // È«¾Ö±äÁ¿/³ÉÔ±±äÁ¿ÖØÃû¼ì²é
+        // å…¨å±€å˜é‡/æˆå‘˜å˜é‡é‡åæ£€æŸ¥
         if(pVarNameSet->find(szString) != pVarNameSet->end()) {
           nErrorCode = E_1202_ALREADY_DEFINED;
         }
@@ -495,7 +495,7 @@ namespace Marimo
       return NULL;
     }
     else if( ! (it->second.type & ST_AnyType)) {
-      // "%s" ²»ÊÇÓĞĞ§µÄ±äÁ¿ÀàĞÍ.
+      // "%s" ä¸æ˜¯æœ‰æ•ˆçš„å˜é‡ç±»å‹.
       clStringW strTypename = szTypeName;
       m_ErrorMsg.WriteErrorW(TRUE, nSourceOffset, E_1201_INVALID_TYPE, (GXLPCWSTR)strTypename);
       *result = FALSE;
@@ -506,9 +506,9 @@ namespace Marimo
 
   u64 DataPoolResolverImpl::ParseInitValue(const clStringA& strValue) const
   {
-    // TODO: ¼ì²é×Ö·û´®×÷ÎªÊı×ÖµÄºÏ·¨ĞÔ
-    // TODO: ±í´ïÊ½½âÎö?
-    // FIXME: 64/32Î»,ÓĞ·ûºÅ/ÎŞ·ûºÅ»ìÂÒ
+    // TODO: æ£€æŸ¥å­—ç¬¦ä¸²ä½œä¸ºæ•°å­—çš„åˆæ³•æ€§
+    // TODO: è¡¨è¾¾å¼è§£æ?
+    // FIXME: 64/32ä½,æœ‰ç¬¦å·/æ— ç¬¦å·æ··ä¹±
 
     if(strValue.BeginsWith("0x") || strValue.BeginsWith("0X")) {
       clStringA str = strValue.Right(strValue.GetLength() - 2);      
@@ -522,7 +522,7 @@ namespace Marimo
 
   GXBOOL DataPoolResolverImpl::MainCompile(DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength)
   {
-    // Ìî³äÄÚÖÃÊı¾İÀàĞÍ
+    // å¡«å……å†…ç½®æ•°æ®ç±»å‹
     DEFINE def;
     def.SourceFileId = 0;
     def.SourceOffset = 0;
@@ -532,7 +532,7 @@ namespace Marimo
       m_NameDict[Implement::c_InternalTypeDefine[i].Name] = def;
     }
 
-    // ¼ÓÔØ±àÒëĞÅÏ¢×ÊÔ´
+    // åŠ è½½ç¼–è¯‘ä¿¡æ¯èµ„æº
     m_ErrorMsg.LoadErrorMessageW(L"dpcmsg.txt");
     m_ErrorMsg.SetMessageSign('C');
 
@@ -585,7 +585,7 @@ namespace Marimo
         if(it != "struct")
         {
           result = FALSE;
-          // "\"always\" ¹Ø¼ü×ÖÖ»ÄÜÓÃÀ´ĞŞÊÎ½á¹¹ÌåÉùÃ÷"
+          // "\"always\" å…³é”®å­—åªèƒ½ç”¨æ¥ä¿®é¥°ç»“æ„ä½“å£°æ˜"
           m_ErrorMsg.WriteErrorW(TRUE, nPrevOffset, E_1100_ALWAYS_MODIFIES_STRUCT_ONLY);
         }
         if( ! ParseStruct(ss, it, TRUE)) {
@@ -661,7 +661,7 @@ namespace Marimo
       StreamIter itEnd;
 
       if( ! SmartStreamUtility::FindPair(it, itBegin, itEnd, '{', '}')) {
-        // "È±ÉÙ \'}\'."
+        // "ç¼ºå°‘ \'}\'."
         m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1021_NEED_END_OF_BRACE);
         return FALSE;
       }
@@ -674,7 +674,7 @@ namespace Marimo
         }
         if(it != ',') {
           //CLOG_ERROR("error: missing expected \',\' in array.\n");
-          m_ErrorMsg.WriteErrorA(TRUE, it.marker, "Êı×éÖĞÈ±ÉÙ \',\' ·Ö¸î.");
+          m_ErrorMsg.WriteErrorA(TRUE, it.marker, "æ•°ç»„ä¸­ç¼ºå°‘ \',\' åˆ†å‰².");
           return FALSE;
         }
       }
@@ -687,7 +687,7 @@ namespace Marimo
 
     if(pVarDecl->Count > 0) {
       if(aInit.size() > (GXUINT)pVarDecl->Count) {
-        m_ErrorMsg.WriteErrorA(TRUE, NULL, "¸³ÖµÏîÌ«¶àÁË");
+        m_ErrorMsg.WriteErrorA(TRUE, NULL, "èµ‹å€¼é¡¹å¤ªå¤šäº†");
         return FALSE;
       }
     }
@@ -699,7 +699,7 @@ namespace Marimo
     switch(eCate)
     {
     case T_UNDEFINE:
-      m_ErrorMsg.WriteErrorA(TRUE, it.marker, "´íÎóµÄÀàĞÍÃû(%s)", pVarDecl->Type);
+      m_ErrorMsg.WriteErrorA(TRUE, it.marker, "é”™è¯¯çš„ç±»å‹å(%s)", pVarDecl->Type);
       return FALSE;
     
     case T_OBJECT:
@@ -708,7 +708,7 @@ namespace Marimo
 
     case T_STRUCT:
     case T_STRUCTALWAYS:
-      m_ErrorMsg.WriteErrorA(TRUE, it.marker, "\"object\"ÀàĞÍ(%s)²»Ö§³Ö¸³Öµ", pVarDecl->Name);
+      m_ErrorMsg.WriteErrorA(TRUE, it.marker, "\"object\"ç±»å‹(%s)ä¸æ”¯æŒèµ‹å€¼", pVarDecl->Name);
       return FALSE;
 
     case T_BYTE:
@@ -750,7 +750,7 @@ namespace Marimo
 
     case T_STRING:
       {
-        // ×Ö·û´®ÁĞ±í¸ñÊ½:"str1\0str2\0str3" Î¬¶ÈÓÉpVarDecl->CountÖ¸¶¨
+        // å­—ç¬¦ä¸²åˆ—è¡¨æ ¼å¼:"str1\0str2\0str3" ç»´åº¦ç”±pVarDecl->CountæŒ‡å®š
         GXSIZE_T nSize = 0; // WCHAR
         for(clStringArrayA::iterator it = aInit.begin();
           it != aInit.end(); ++it) {
@@ -777,7 +777,7 @@ namespace Marimo
   {
     GXBOOL bSigned = TRUE;
     GXBOOL result = TRUE;
-    auto nPrevOffset = it.offset(); // ÓÃÀ´¼Ç×¡³ö´íÇ°µÄÖ¸ÕëÎ»ÖÃ
+    auto nPrevOffset = it.offset(); // ç”¨æ¥è®°ä½å‡ºé”™å‰çš„æŒ‡é’ˆä½ç½®
     GXBOOL bTmplArray = FALSE;
     EPSection eps(this);
 
@@ -799,7 +799,7 @@ namespace Marimo
     }Step = STEP_Sign;
 
 
-    if(it == "array") // ¡°array<Type>¡± Ä£°åÉùÃ÷
+    if(it == "array") // â€œarray<Type>â€ æ¨¡æ¿å£°æ˜
     {
       ++it;
       Step = STEP_TmplBegin;
@@ -830,7 +830,7 @@ namespace Marimo
           continue;
         }
         CLBREAK;
-        break; // ²»Ó¦¸Ã×ßµ½ÕâÀï
+        break; // ä¸åº”è¯¥èµ°åˆ°è¿™é‡Œ
 
       case STEP_Type:
         if(bSigned) {
@@ -879,7 +879,7 @@ namespace Marimo
 
           if(pVarDecl->Count <= 0) {
             //CLOG_ERROR(STD_ERROR_HEAD"can not use negative or zero count.\n", m_strFilename, LineFromPtr(pPrevPtr));
-            // Êı×é²»ÄÜÖ¸¶¨Ğ¡ÓÚµÈÓÚ0µÄ³¤¶È
+            // æ•°ç»„ä¸èƒ½æŒ‡å®šå°äºç­‰äº0çš„é•¿åº¦
             m_ErrorMsg.WriteErrorW(TRUE, nPrevOffset, E_1016_ILLEGAL_NUM_OF_ARRAY);
             result = FALSE;
           }
@@ -890,7 +890,7 @@ namespace Marimo
           if(it != "]") {
             //CLOG_ERROR(STD_ERROR_HEAD"missing expected \']\'.\n", m_strFilename, LineFromPtr(pPrevPtr));
             //CLBREAK;
-            // "È±ÉÙ\']\'·ûºÅ"
+            // "ç¼ºå°‘\']\'ç¬¦å·"
             m_ErrorMsg.WriteErrorW(TRUE, nPrevOffset, E_1017_NEED_END_OF_SQUARE_BRACKETS);
             result = FALSE;
           }
@@ -937,18 +937,18 @@ namespace Marimo
       STEP_End,
     }Step = STEP_Name;
 
-    auto nPrevOffset = it.offset(); // ÓÃÀ´¼Ç×¡³ö´íÇ°µÄÆ«ÒÆ
+    auto nPrevOffset = it.offset(); // ç”¨æ¥è®°ä½å‡ºé”™å‰çš„åç§»
     GXBOOL result = TRUE;
 
     while(it != ss.end())
     {
       switch(Step)
       {
-      case STEP_Name: // Ã¶¾ÙÖµ
+      case STEP_Name: // æšä¸¾å€¼
         sEnum.Name = AddString(ST_EnumName, NULL, it.ToString(), it.offset(), &result);
 
         if( ! DataPool::IsIllegalName(sEnum.Name)) {
-          // \"%s\" ²»ÄÜ×÷ÎªÃ¶¾ÙÃû×ÖÊ¹ÓÃ
+          // \"%s\" ä¸èƒ½ä½œä¸ºæšä¸¾åå­—ä½¿ç”¨
           m_ErrorMsg.WriteErrorW(TRUE, nPrevOffset, E_1401_CANT_USE_AS_ENUM_NAME, sEnum.Name);
           result = FALSE;
         }
@@ -956,7 +956,7 @@ namespace Marimo
         Step = STEP_EqualOperator;
         break;
 
-      case STEP_EqualOperator: // µÈºÅ
+      case STEP_EqualOperator: // ç­‰å·
         if(it == itEnd || it == ",") {
           return result;
         }
@@ -970,7 +970,7 @@ namespace Marimo
         }
         break;
 
-      case STEP_Value: // ½âÎöÖµ
+      case STEP_Value: // è§£æå€¼
         {
           Step = STEP_End;
           GXBOOL bPositive = TRUE;
@@ -981,7 +981,7 @@ namespace Marimo
 
           if(IsNumeric(it, &sEnum.Value))
           {
-            // ¸ù¾İÖ®Ç°µÄ·ûºÅ×ª»»Îª¸ºÖµ
+            // æ ¹æ®ä¹‹å‰çš„ç¬¦å·è½¬æ¢ä¸ºè´Ÿå€¼
             sEnum.Value = bPositive ? sEnum.Value : -sEnum.Value;
           }
           else{
@@ -995,7 +995,7 @@ namespace Marimo
             });
 
             if(listIters.empty()) {
-              // ÎŞ·¨½âÎö±í´ïÊ½
+              // æ— æ³•è§£æè¡¨è¾¾å¼
               m_ErrorMsg.WriteErrorW(TRUE, nPrevOffset, E_1403_CANT_PARSE_EXPRESSION);
               result = FALSE;
             }
@@ -1037,21 +1037,21 @@ namespace Marimo
     TypeDecl.Name = AddString(ST_StructType, NULL, it.ToString(), it.offset(), &result);
     
     if( ! DataPool::IsIllegalName(TypeDecl.Name)) {
-      m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1101_CANT_USE_AS_STRUCT_NAME, TypeDecl.Name);      // "%s" ²»ÄÜ×÷Îª½á¹¹ÌåÃûÊ¹ÓÃ
+      m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1101_CANT_USE_AS_STRUCT_NAME, TypeDecl.Name);      // "%s" ä¸èƒ½ä½œä¸ºç»“æ„ä½“åä½¿ç”¨
       result = FALSE;
     }
 
     ++it;
     if(it != "{") {
-      // struct ¶¨Òå´íÎó
-      //CLOG_ERROR(STD_ERROR_HEAD"È±ÉÙÆÚÍûµÄ\'{\'·ûºÅ¡£\n", m_strFilename, LineFromPtr(it.marker));
+      // struct å®šä¹‰é”™è¯¯
+      //CLOG_ERROR(STD_ERROR_HEAD"ç¼ºå°‘æœŸæœ›çš„\'{\'ç¬¦å·ã€‚\n", m_strFilename, LineFromPtr(it.marker));
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1020_NEED_BEGIN_OF_BRACE);
       return FALSE;
     }
     
     if( ! SmartStreamUtility::FindPair(it, itBegin, itEnd, "{", "}")) {
-      // »¨À¨ºÅ²»Æ¥Åä
-      //CLOG_ERROR(STD_ERROR_HEAD"ÕÒ²»µ½¶ÔÓ¦µÄ\'}\'¡£\n", m_strFilename, LineFromPtr(it.marker));
+      // èŠ±æ‹¬å·ä¸åŒ¹é…
+      //CLOG_ERROR(STD_ERROR_HEAD"æ‰¾ä¸åˆ°å¯¹åº”çš„\'}\'ã€‚\n", m_strFilename, LineFromPtr(it.marker));
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1021_NEED_END_OF_BRACE);
       return FALSE;
     }
@@ -1064,7 +1064,7 @@ namespace Marimo
         pStruct->push_back(VarMember);
       }
       else {
-        result = FALSE; // ´íÎó²»·µ»Ø£¬¼ÌĞø±¨ÆäËû´íÎó
+        result = FALSE; // é”™è¯¯ä¸è¿”å›ï¼Œç»§ç»­æŠ¥å…¶ä»–é”™è¯¯
       }
     }
     ++it;
@@ -1073,13 +1073,13 @@ namespace Marimo
       result = FALSE;
     }
 
-    // Ôö¼Ó½áÎ²
+    // å¢åŠ ç»“å°¾
     VARIABLE_DECLARATION VarDeclEnd;
     InlSetZeroT(VarDeclEnd);
     pStruct->push_back(VarDeclEnd);
 
-    // ½áÎ² it Ó¦¸ÃÎª ";"
-    TypeDecl.as.Struct = &(pStruct->front()); // Õâ¸öÌîÈëºó TypeStorage.aVariable ¾Í²»ÄÜÔÙ×·¼ÓÊı¾İÁË
+    // ç»“å°¾ it åº”è¯¥ä¸º ";"
+    TypeDecl.as.Struct = &(pStruct->front()); // è¿™ä¸ªå¡«å…¥å TypeStorage.aVariable å°±ä¸èƒ½å†è¿½åŠ æ•°æ®äº†
     m_aStructMember.push_back(pStruct);
     m_aTypes.push_back(TypeDecl);
     return result;
@@ -1094,7 +1094,7 @@ namespace Marimo
     GXBOOL result = TRUE;
     ASSERT(it == "enum" || it == "flag");
 
-    // Ô¤ÏÈ¼ÓÈëÁĞ±í£¬±ÜÃâ°´ÕÕÖµ²éÕÒÊ±ÕÒ²»µ½
+    // é¢„å…ˆåŠ å…¥åˆ—è¡¨ï¼Œé¿å…æŒ‰ç…§å€¼æŸ¥æ‰¾æ—¶æ‰¾ä¸åˆ°
     m_aEnums.push_back(pEnum);
 
     ++it;
@@ -1108,18 +1108,18 @@ namespace Marimo
 
     ++it;
     if(it != "{") {
-      // enum ¶¨Òå´íÎó
+      // enum å®šä¹‰é”™è¯¯
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1020_NEED_BEGIN_OF_BRACE);
       return FALSE;
     }
 
     if( ! SmartStreamUtility::FindPair(it, itBegin, itEnd, "{", "}")) {
-      // »¨À¨ºÅ²»Æ¥Åä
+      // èŠ±æ‹¬å·ä¸åŒ¹é…
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1021_NEED_END_OF_BRACE);
       return FALSE;
     }
 
-    ENUM_DECLARATION sEnum = {0}; // Èç¹ûÃ»ÓĞÉèÖÃ³õÊ¼Öµ£¬Ã¶¾Ù´Ó0¿ªÊ¼
+    ENUM_DECLARATION sEnum = {0}; // å¦‚æœæ²¡æœ‰è®¾ç½®åˆå§‹å€¼ï¼Œæšä¸¾ä»0å¼€å§‹
 
     while(++it != itEnd && it != ss.end())
     {
@@ -1131,7 +1131,7 @@ namespace Marimo
         pEnum->push_back(sEnum);
       }
       else {
-        result = FALSE; // ´íÎó²»·µ»Ø£¬¼ÌĞø±¨ÆäËû´íÎó
+        result = FALSE; // é”™è¯¯ä¸è¿”å›ï¼Œç»§ç»­æŠ¥å…¶ä»–é”™è¯¯
       }
 
       if(it == itEnd) {
@@ -1143,19 +1143,19 @@ namespace Marimo
 
     ++it;
     if(it != ";") {
-      // È±ÉÙ";"
+      // ç¼ºå°‘";"
       LOG_NOT_FOUND_SEMICOLON(it.offset());
       CLBREAK;
       result = FALSE;
     }
 
-    // Ôö¼Ó½áÎ²
+    // å¢åŠ ç»“å°¾
     ENUM_DECLARATION sEnumEnd;
     InlSetZeroT(sEnumEnd);
     pEnum->push_back(sEnumEnd);
 
-    // ½áÎ² it Ó¦¸ÃÎª ";"
-    TypeDecl.as.Enum = &(pEnum->front()); // Õâ¸öÌîÈëºó TypeStorage.aVariable ¾Í²»ÄÜÔÙ×·¼ÓÊı¾İÁË    
+    // ç»“å°¾ it åº”è¯¥ä¸º ";"
+    TypeDecl.as.Enum = &(pEnum->front()); // è¿™ä¸ªå¡«å…¥å TypeStorage.aVariable å°±ä¸èƒ½å†è¿½åŠ æ•°æ®äº†    
     m_aTypes.push_back(TypeDecl);
     return result;
   }
@@ -1183,12 +1183,12 @@ namespace Marimo
 
   GXBOOL DataPoolResolverImpl::MathExpressionParser( const cllist<StreamIter>& expression, GXINT* nValue )
   {
-    ASSERT( ! expression.empty()); // ÍâÃæ±£Ö¤Õâ¸ö
+    ASSERT( ! expression.empty()); // å¤–é¢ä¿è¯è¿™ä¸ª
 
     clstd::MathExpressionParser<StreamIter> m;
 
     if( ! m.ParseExpression(expression)) {
-      // ÎŞ·¨½âÎö±í´ïÊ½
+      // æ— æ³•è§£æè¡¨è¾¾å¼
       m_ErrorMsg.WriteErrorW(TRUE, expression.front().offset(), E_1403_CANT_PARSE_EXPRESSION);
     }
 

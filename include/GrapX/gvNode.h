@@ -44,7 +44,7 @@ enum GVNodeFlags
   GVNF_USER_4         = 0x10000000,
   GVNF_USER_5         = 0x20000000,
   GVNF_USER_6         = 0x40000000,
-  GVNF_USER_7         = 0x80000000,
+  GVNF_USER_7         = (int)0x80000000,
 
   GVNF_DEFAULT        = GVNF_VISIBLE|GVNF_CASTSHADOW,
 };

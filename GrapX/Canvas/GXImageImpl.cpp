@@ -187,7 +187,7 @@ GXHRESULT GXImageImpl::Invoke(GRESCRIPTDESC* pDesc)
 //////////////////////////////////////////////////////////////////////////
 GXImage* GXImageImpl::Clone() const
 {
-  GXImage* pImage = NULL;
+  //GXImage* pImage = NULL;
   ASSERT(0);
   return NULL;
 }

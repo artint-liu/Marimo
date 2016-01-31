@@ -64,7 +64,7 @@
 #undef TRACE
 #undef TRACE_
 
-#define TRACE
+#define TRACE(...)
 #define TRACE_(_TYPE)  TRACE
 #define SPY_GetMsgName(_X, _Y)  ""
 
@@ -3808,10 +3808,11 @@ void EDITSTATE::WM_SetText(GXLPCWSTR text, GXBOOL unicode)
     text = textW;
   }
 
-  if (flags & EF_UPDATE)
+  if (flags & EF_UPDATE) {
     /* fixed this bug once; complain if we see it about to happen again. */
     ERR("SetSel may generate UPDATE message whose handler may reset "
     "selection.\n");
+  }
 
   EM_SetSel(0, (GXUINT)-1, FALSE);
   if (text) 

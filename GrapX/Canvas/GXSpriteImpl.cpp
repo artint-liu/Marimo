@@ -131,7 +131,7 @@ GXLONG GXSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, 
     //REGN rgTip1 = m_pRect[nStartIdx + 2];
     float fScale0 = (float)nHeight / (float)m_aModules[nStartIdx    ].regn.height;
     float fScale1 = (float)nHeight / (float)m_aModules[nStartIdx + 1].regn.height;
-    float fScale2 = (float)nHeight / (float)m_aModules[nStartIdx + 2].regn.height;
+    //float fScale2 = (float)nHeight / (float)m_aModules[nStartIdx + 2].regn.height;
 
     rgTip0.width  = (GXLONG)(rgTip0.width  * fScale0 + 0.5f);
     rgTip0.height = nHeight;
@@ -194,7 +194,7 @@ GXLONG GXSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, 
     //REGN rgTip1 = m_pRect[nStartIdx + 2];
     float fScale0 = (float)nWidth / (float)m_aModules[nStartIdx    ].regn.width;
     float fScale1 = (float)nWidth / (float)m_aModules[nStartIdx + 1].regn.width;
-    float fScale2 = (float)nWidth / (float)m_aModules[nStartIdx + 2].regn.width;
+    //float fScale2 = (float)nWidth / (float)m_aModules[nStartIdx + 2].regn.width;
 
     rgTip0.height  = (GXLONG)(rgTip0.height  * fScale0 + 0.5f);
     rgTip0.width = nWidth;
@@ -249,7 +249,7 @@ GXVOID GXSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL b
   const GXINT width = rect->right - rect->left;
   const GXINT height = rect->bottom - rect->top;
   const GXINT top = rect->top;
-  const GXINT bottom = rect->bottom;
+  //const GXINT bottom = rect->bottom;
 
   /*×óÉÏ½Ç*/pCanvas->DrawImage(m_pImage, rect->left, rect->top, &m_aModules[nStartIdx].regn);
   /*ÓÒÉÏ½Ç*/pCanvas->DrawImage(m_pImage, rect->right - m_aModules[nStartIdx + 2].regn.width, rect->top, &m_aModules[nStartIdx + 2].regn);
@@ -492,12 +492,12 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   m_pImage = pGraphics->CreateImageFromFile(m_strImageFile);
 
   if( ! m_pImage) {
-    CLOG_ERROR(__FUNCTION__": Can not create sprite image.\r\n");
+    CLOG_ERROR("%s : Can not create sprite image.\r\n", __FUNCTION__);
     return FALSE;
   }
 
   if(pDesc->nNumOfModules == 0 || pDesc->aModules == NULL) {
-    CLOG_ERROR(__FUNCTION__": Sprite module is empty.\r\n");
+    CLOG_ERROR("%s : Sprite module is empty.\r\n", __FUNCTION__);
     return FALSE;
   }
 

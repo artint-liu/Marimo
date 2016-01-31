@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+﻿#ifndef _DEV_DISABLE_UI_CODE
 #include <GrapX.H>
 #include "GXCommCtrl.H"
 #include "GrapX/GXUser.H"
@@ -23,7 +23,7 @@ GXLPVOID GXDLLAPI Alloc(GXUINT nBytes)
 
 GXLPVOID GXDLLAPI ReAlloc(GXLPVOID lpPointer, GXUINT nBytes)
 {
-  GXLPVOID lpNewPoint = new GXCHAR[nBytes];
+  GXCHAR* lpNewPoint = new GXCHAR[nBytes];
   //TRACE("ReAlloc:%p\n", lpNewPoint);
   if(lpPointer != NULL)
   {
