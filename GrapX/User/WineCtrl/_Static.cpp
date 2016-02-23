@@ -73,8 +73,8 @@ static void STATIC_PaintIconfn( GXHWND hwnd, GXHDC hdc, GXDWORD style );
 static void STATIC_PaintBitmapfn( GXHWND hwnd, GXHDC hdc, GXDWORD style );
 static void STATIC_PaintEnhMetafn( GXHWND hwnd, GXHDC hdc, GXDWORD style );
 static void STATIC_PaintEtchedfn( GXHWND hwnd, GXHDC hdc, GXDWORD style );
-GXLRESULT GXDLLAPI StaticWndProcA( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam );
-GXLRESULT GXDLLAPI StaticWndProcW( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam );
+GXLRESULT GXCALLBACK StaticWndProcA( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam );
+GXLRESULT GXCALLBACK StaticWndProcW( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam );
 
 static GXCOLORREF color_3dshadow, color_3ddkshadow, color_3dhighlight;
 
@@ -669,7 +669,7 @@ GXLRESULT GXDLLAPI StaticWndProcA( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GX
 /***********************************************************************
 *           StaticWndProcW
 */
-GXLRESULT GXDLLAPI StaticWndProcW( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam )
+GXLRESULT GXCALLBACK StaticWndProcW( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam )
 {
   //if (!gxIsWindow( hWnd )) return 0;
   return StaticWndProc_common(hWnd, uMsg, wParam, lParam, TRUE);

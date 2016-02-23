@@ -298,8 +298,8 @@ static void  EDIT_UpdateText(EDITSTATE *es, const GXRECT* rc, GXBOOL bErase);
 static void  EDIT_UpdateTextRegion(EDITSTATE *es, GXHRGN hrgn, GXBOOL bErase);
 static void EDIT_ImeComposition(GXHWND hwnd, GXLPARAM CompFlag, EDITSTATE *es);
 
-GXLRESULT GXDLLAPI EditWndProcA(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam);
-GXLRESULT GXDLLAPI EditWndProcW(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam);
+GXLRESULT GXCALLBACK EditWndProcA(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam);
+GXLRESULT GXCALLBACK EditWndProcW(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam);
 
 /*********************************************************************
 * edit class descriptor
@@ -398,7 +398,7 @@ static GXDWORD get_app_version()
     GXDWORD dwProcVersion = GetProcessVersion(0);
 
     info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
-    GetVersionExW( &info );
+    GetVersionExW(&info);
     dwEmulatedVersion = GXMAKELONG( info.dwMinorVersion, info.dwMajorVersion );
     /* FIXME: this may not be 100% correct; see discussion on the
     * wine developer list in Nov 1999 */
@@ -1093,7 +1093,7 @@ static GXLRESULT GXAPI EditWndProc_common( GXHWND hwnd, GXUINT msg,
 *
 *  EditWndProcW   (USER32.@)
 */
-GXLRESULT GXDLLAPI EditWndProcW(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam)
+GXLRESULT GXCALLBACK EditWndProcW(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam)
 {
   return EditWndProc_common(hWnd, (GXUINT)uMsg, wParam, lParam, TRUE);
 }
@@ -1102,7 +1102,7 @@ GXLRESULT GXDLLAPI EditWndProcW(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPA
 *
 *  EditWndProc   (USER32.@)
 */
-GXLRESULT GXDLLAPI EditWndProcA(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam)
+GXLRESULT GXCALLBACK EditWndProcA(GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam)
 {
   return EditWndProc_common(hWnd, (GXUINT)uMsg, wParam, lParam, FALSE);
 }

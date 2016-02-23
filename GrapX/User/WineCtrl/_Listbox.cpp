@@ -139,8 +139,8 @@ typedef enum
 
 static TIMER_DIRECTION LISTBOX_Timer = LB_TIMER_NONE;
 
-GXLRESULT GXDLLAPI ListBoxWndProcA( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam );
-GXLRESULT GXDLLAPI ListBoxWndProcW( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam );
+GXLRESULT GXCALLBACK ListBoxWndProcA( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam );
+GXLRESULT GXCALLBACK ListBoxWndProcW( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam );
 
 static GXLRESULT LISTBOX_GetItemRect( const GXLB_DESCR *descr, GXINT index, GXRECT *rect );
 
@@ -3299,7 +3299,7 @@ static GXLRESULT GXAPI ListBoxWndProc_common( GXHWND hwnd, GXUINT msg,
 /***********************************************************************
  *           ListBoxWndProcA
  */
-GXLRESULT GXDLLAPI ListBoxWndProcA( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam )
+GXLRESULT GXCALLBACK ListBoxWndProcA( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam )
 {
     return ListBoxWndProc_common( hwnd, msg, wParam, lParam, FALSE );
 }
@@ -3307,7 +3307,7 @@ GXLRESULT GXDLLAPI ListBoxWndProcA( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GX
 /***********************************************************************
  *           ListBoxWndProcW
  */
-GXLRESULT GXDLLAPI ListBoxWndProcW( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam )
+GXLRESULT GXCALLBACK ListBoxWndProcW( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam )
 {
     return ListBoxWndProc_common( hwnd, msg, wParam, lParam, TRUE );
 }

@@ -2009,10 +2009,9 @@ static GXLRESULT HEADER_ThemeChanged(GXHWND hwnd)
 }
 
 
-static GXLRESULT GXAPI
-HEADER_WindowProc (GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam)
+static GXLRESULT GXCALLBACK HEADER_WindowProc (GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam)
 {
-  TRACE("hwnd=%p msg=%x wparam=%lx lParam=%lx\n", hwnd, msg, wParam, lParam);
+  TRACEW(L"hwnd=%p msg=%x wparam=%lx lParam=%lx\n", hwnd, msg, wParam, lParam);
   if (!HEADER_GetInfoPtr (hwnd) && (msg != GXWM_CREATE))
     return gxDefWindowProcW (hwnd, msg, wParam, lParam);
   switch (msg) {

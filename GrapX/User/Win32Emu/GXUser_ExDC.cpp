@@ -330,8 +330,8 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
 
     if(IS_IDENTIFY(lpBitmapName))
     {
-      GXWCHAR* szBaseDir = L"Resource\\OBM\\";
-      GXWCHAR* szOBMFile = NULL;
+      GXLPCWSTR szBaseDir = L"Resource\\OBM\\";
+      GXLPCWSTR szOBMFile = NULL;
       switch((GXDWORD)lpBitmapName)
       {
       case GXOBM_CLOSE:

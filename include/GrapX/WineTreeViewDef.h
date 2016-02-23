@@ -1,5 +1,5 @@
-#define GXTVN_FIRST               (0U-400U)       // treeview
-#define GXTVN_LAST                (0U-499U)
+#define GXTVN_FIRST               ((GXINT)0U-(GXINT)400U)       // treeview
+#define GXTVN_LAST                ((GXINT)0U-(GXINT)499U)
 #define GXTV_FIRST                0x1100      // TreeView messages
 
 enum 

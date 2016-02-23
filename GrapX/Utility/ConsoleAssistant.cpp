@@ -72,7 +72,7 @@ GXHRESULT ConsoleAssistant::Execute(int nCmdIndex, const clStringW* argv, int ar
       for(CmdDict::iterator it = lpStation->m_CommandDict.begin();
         it != lpStation->m_CommandDict.end(); ++it) {
           LPCSTAFFCAPSDESC pCapsDesc = it->second.pStaff->GetCapacity();
-          lpStation->m_pLogger->OutputFormatW(L"%*s %s\r\n", -nWidth, clStringW(it->first), pCapsDesc[it->second.nIndex].szDesc);
+          lpStation->m_pLogger->OutputFormatW(L"%*s %s\r\n", -nWidth, (GXLPCWSTR)clStringW(it->first), pCapsDesc[it->second.nIndex].szDesc);
       }
     }
     break;

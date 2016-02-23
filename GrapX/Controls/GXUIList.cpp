@@ -97,7 +97,7 @@ namespace GXUI
 
   GXSIZE_T List::GetStringW(GXSIZE_T nIndex, clStringW& str)
   {
-    if(nIndex < 0 || nIndex >= m_pAdapter->GetCount()) {
+    if(/*nIndex < 0 || */nIndex >= m_pAdapter->GetCount()) {
       return -1;
     }
     IListDataAdapter::GETSTRW gs;
@@ -113,7 +113,7 @@ namespace GXUI
 
   GXSIZE_T List::DeleteString(GXSIZE_T nIndex)
   {
-    if(nIndex < 0 || nIndex >= m_pAdapter->GetCount()) {
+    if(/*nIndex < 0 || */nIndex >= m_pAdapter->GetCount()) {
       return -1;
     }
     MOVariable VarArray = m_pAdapter->GetVariable();

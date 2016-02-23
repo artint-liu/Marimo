@@ -28,7 +28,7 @@ GXLPVOID GXDLLAPI ReAlloc(GXLPVOID lpPointer, GXUINT nBytes)
   if(lpPointer != NULL)
   {
     memcpy(lpNewPoint, lpPointer, nBytes);
-    delete[] lpPointer;
+    delete[] (GXCHAR*)lpPointer;
   }
   return lpNewPoint;
 }
@@ -37,7 +37,7 @@ GXLPVOID GXDLLAPI ReAlloc(GXLPVOID lpPointer, GXUINT nBytes)
 GXVOID GXDLLAPI Free(GXLPVOID lpPointer)
 {
   if(lpPointer != NULL)
-    delete[] lpPointer;
+    delete[](GXCHAR*)lpPointer;
 }
 
 

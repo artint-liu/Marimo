@@ -153,13 +153,13 @@ public:
 
         KeyResponseDict::iterator it = m_KeyDict.find(nVirKey);
         if(it == m_KeyDict.end()) {
-          MOLogW(L"\"%s\" doesn't bind anything.\n", argv[1]);
+          MOLogW(L"\"%s\" doesn't bind anything.\n", (GXLPCWSTR)argv[1]);
           break;
         }
 
         SAFE_RELEASE(it->second.pStaff);
         m_KeyDict.erase(it);
-        MOLogW(L"Unbind \"%s\".\n", argv[1]);
+        MOLogW(L"Unbind \"%s\".\n", (GXLPCWSTR)argv[1]);
       }
     }
     return GX_OK;
@@ -256,7 +256,7 @@ public:
         MOLogW(L"\"%c\" doesn't bind anything.\r\n", nVirKey);
       }
       else {
-        MOLogW(L"\"%c\" bind with \"%s\"\r\n", nVirKey, it->second.strCmdLine);
+        MOLogW(L"\"%c\" bind with \"%s\"\r\n", nVirKey, (GXLPCWSTR)it->second.strCmdLine);
       }
     }
     else
@@ -278,7 +278,7 @@ public:
         krUp.strCmdLine = strCmdLine;
         krUp.strCmdLine[0] = '-';
 
-        clStringA strNegArg0 = aArgs[0];
+        clStringA strNegArg0 = (GXLPCWSTR)aArgs[0];
         strNegArg0[0] = '-';
 
         if(MOGetConsoleCmdInfoA(clStringA(aArgs[0]), &kr.nCmdIndex, &kr.pStaff) &&
@@ -318,10 +318,10 @@ public:
     }
 
     if(sKey.bParams) {
-      strCommandLine.Format(L"bind %s \"%s\"\r\n", strKey, it->second.strCmdLine);
+      strCommandLine.Format(L"bind %s \"%s\"\r\n", (GXLPCWSTR)strKey, (GXLPCWSTR)it->second.strCmdLine);
     }
     else {
-      strCommandLine.Format(L"bind %s %s\r\n", strKey, it->second.strCmdLine);
+      strCommandLine.Format(L"bind %s %s\r\n", (GXLPCWSTR)strKey, (GXLPCWSTR)it->second.strCmdLine);
     }
     return TRUE;
   }
@@ -330,7 +330,7 @@ public:
   {
     clstd::File file;
     if( ! file.CreateAlwaysW(szFilename)) {
-      CLOG_ERROR("%s : Can not create file(%s).\n", __FUNCTION__, clStringA(szFilename));
+      CLOG_ERROR("%s : Can not create file(%s).\n", __FUNCTION__, (GXLPCSTR)clStringA(szFilename));
       return FALSE;
     }
 

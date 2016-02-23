@@ -310,8 +310,7 @@ GXINT GXDLLAPI gxLBItemFromPt (GXHWND hwndLB, GXPOINT pt, GXBOOL bAutoScroll)
   GXINT nIndex;
   GXDWORD dwScrollTime;
 
-  TRACE("(%p %d x %d %s)\n",
-    hwndLB, pt.x, pt.y, bAutoScroll ? "TRUE" : "FALSE");
+  TRACE("(%p %ld x %ld %s)\n", hwndLB, pt.x, pt.y, bAutoScroll ? "TRUE" : "FALSE");
 
   gxScreenToClient (hwndLB, &pt);
   gxGetClientRect (hwndLB, &rcClient);

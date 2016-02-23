@@ -10268,8 +10268,7 @@ static GXLRESULT EditLblWndProcT(GXHWND hwnd, GXUINT uMsg, GXWPARAM wParam, GXLP
   //Artint
   ASSERT(isW == TRUE);
 
-  TRACE("(hwnd=%p, uMsg=%x, wParam=%lx, lParam=%lx, isW=%d)\n",
-    hwnd, uMsg, wParam, lParam, isW);
+  TRACE("(hwnd=%p, uMsg=%x, wParam=%lx, lParam=%lx, isW=%d)\n", hwnd, uMsg, wParam, lParam, isW);
 
   switch (uMsg)
   {

@@ -20,7 +20,7 @@ typedef GXINT16   (CALLBACK *EDITWORDBREAKPROC16)(GXLPSTR,GXINT16,GXINT16,GXINT1
 #define ERR(...)
 #define WARN(...)
 #define LB_TRACE
-#define ED_TRACE
+#define ED_TRACE(...)
 #define ST_TRACE
 #define LocalFree16 gxLocalFree
 #define LocalInit16 
@@ -297,9 +297,9 @@ __inline void *gxULongToHandle(
 #define USER_HEAP_FREE(p) (delete[] p)  //HeapFree(gxGetProcessHeap(),0,p)
 #define USER_HEAP_LIN_ADDR(x) x
 
-#define ERR_accel
-#define WARN_accel
-#define TRACE_accel
+#define ERR_accel(...)
+#define WARN_accel(...)
+#define TRACE_accel(...)
 
 #define ERR_(x)   ERR_##x
 #define WARN_(x)  WARN_##x

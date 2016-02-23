@@ -862,46 +862,55 @@ static void MENU_GetBitmapItemSize( MENUITEM *lpitem, GXSIZE *size,
   size->cx = size->cy = 0;
 
   /* check if there is a magic menu item associated with this item */
-  switch( (GXINT_PTR) bmp )
+  //switch((GXINT_PTR)bmp)
+  //{
+  if ((GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_CALLBACK)
   {
-  case (GXINT_PTR)HBMMENU_CALLBACK:
-    {
-      GXMEASUREITEMSTRUCT measItem;
-      measItem.CtlType = ODT_MENU;
-      measItem.CtlID = 0;
-      measItem.itemID = (GXUINT)lpitem->wID;
-      measItem.itemWidth = lpitem->rect.right - lpitem->rect.left;
-      measItem.itemHeight = lpitem->rect.bottom - lpitem->rect.top;
-      measItem.itemData = lpitem->dwItemData;
-      gxSendMessageW( hwndOwner, WM_MEASUREITEM, lpitem->wID, (LPARAM)&measItem);
-      size->cx = measItem.itemWidth;
-      size->cy = measItem.itemHeight;
-      return;
-    }
-    break;
-  case (GXINT_PTR)HBMMENU_SYSTEM:
+    GXMEASUREITEMSTRUCT measItem;
+    measItem.CtlType = ODT_MENU;
+    measItem.CtlID = 0;
+    measItem.itemID = (GXUINT)lpitem->wID;
+    measItem.itemWidth = lpitem->rect.right - lpitem->rect.left;
+    measItem.itemHeight = lpitem->rect.bottom - lpitem->rect.top;
+    measItem.itemData = lpitem->dwItemData;
+    gxSendMessageW(hwndOwner, WM_MEASUREITEM, lpitem->wID, (LPARAM)&measItem);
+    size->cx = measItem.itemWidth;
+    size->cy = measItem.itemHeight;
+    return;
+  }
+  //break;
+  else if ((GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_SYSTEM)
+  {
     if (lpitem->dwItemData)
     {
       bmp = (GXHBITMAP)lpitem->dwItemData;
-      break;
+      //break;
     }
-    /* fall through */
-  case (GXINT_PTR)HBMMENU_MBAR_RESTORE:
-  case (GXINT_PTR)HBMMENU_MBAR_MINIMIZE:
-  case (GXINT_PTR)HBMMENU_MBAR_MINIMIZE_D:
-  case (GXINT_PTR)HBMMENU_MBAR_CLOSE:
-  case (GXINT_PTR)HBMMENU_MBAR_CLOSE_D:
-    size->cx = gxGetSystemMetrics( SM_CYMENU ) - 4;
+  }
+  /* fall through */
+  else if (
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_MBAR_RESTORE ||
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_MBAR_MINIMIZE ||
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_MBAR_MINIMIZE_D ||
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_MBAR_CLOSE ||
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_MBAR_CLOSE_D)
+  {
+    size->cx = gxGetSystemMetrics(SM_CYMENU) - 4;
     size->cy = size->cx;
     return;
-  case (GXINT_PTR)HBMMENU_POPUP_CLOSE:
-  case (GXINT_PTR)HBMMENU_POPUP_RESTORE:
-  case (GXINT_PTR)HBMMENU_POPUP_MAXIMIZE:
-  case (GXINT_PTR)HBMMENU_POPUP_MINIMIZE:
-    size->cx = gxGetSystemMetrics( SM_CXMENUSIZE);
-    size->cy = gxGetSystemMetrics( SM_CYMENUSIZE);
+  }
+  else if (
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_POPUP_CLOSE ||
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_POPUP_RESTORE ||
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_POPUP_MAXIMIZE ||
+    (GXINT_PTR)bmp == (GXINT_PTR)HBMMENU_POPUP_MINIMIZE)
+  {
+    size->cx = gxGetSystemMetrics(SM_CXMENUSIZE);
+    size->cy = gxGetSystemMetrics(SM_CYMENUSIZE);
     return;
   }
+
+  //}
   if (gxGetObjectW(bmp, sizeof(bm), &bm ))
   {
     size->cx = bm.bmWidth;
@@ -935,13 +944,14 @@ static void MENU_DrawBitmapItem( GXHDC hdc, MENUITEM *lpitem, const GXRECT *rect
     GXWCHAR bmchr = 0;
     GXRECT r;
 
-    switch((GXINT_PTR)hbmToDraw)
+    //switch((GXINT_PTR)hbmToDraw)
+    //{
+    if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_SYSTEM)
     {
-    case (GXINT_PTR)HBMMENU_SYSTEM:
       if (lpitem->dwItemData)
       {
         bmp = (GXHBITMAP)lpitem->dwItemData;
-        if (!gxGetObjectW( bmp, sizeof(bm), &bm )) return;
+        if (!gxGetObjectW(bmp, sizeof(bm), &bm)) return;
       }
       else
       {
@@ -949,63 +959,84 @@ static void MENU_DrawBitmapItem( GXHDC hdc, MENUITEM *lpitem, const GXRECT *rect
 
         if (!hBmpSysMenu) hBmpSysMenu = gxLoadBitmapW(0, GXMAKEINTRESOURCEW(GXOBM_CLOSE));
         bmp = hBmpSysMenu;
-        if (!gxGetObjectW( bmp, sizeof(bm), &bm )) return;
+        if (!gxGetObjectW(bmp, sizeof(bm), &bm)) return;
         /* only use right half of the bitmap */
         bmp_xoffset = bm.bmWidth / 2;
         bm.bmWidth -= bmp_xoffset;
       }
       goto got_bitmap;
-    case (GXINT_PTR)HBMMENU_MBAR_RESTORE:
+    }
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_MBAR_RESTORE)
+    {
       flags = DFCS_CAPTIONRESTORE;
-      break;
-    case (GXINT_PTR)HBMMENU_MBAR_MINIMIZE:
+    }
+    //break;
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_MBAR_MINIMIZE)
+    {
       flags = DFCS_CAPTIONMIN;
-      break;
-    case (GXINT_PTR)HBMMENU_MBAR_MINIMIZE_D:
+    }
+    //break;
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_MBAR_MINIMIZE_D)
+    {
       flags = DFCS_CAPTIONMIN | DFCS_INACTIVE;
-      break;
-    case (GXINT_PTR)HBMMENU_MBAR_CLOSE:
+    }
+    //break;
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_MBAR_CLOSE)
+    {
       flags = DFCS_CAPTIONCLOSE;
-      break;
-    case (GXINT_PTR)HBMMENU_MBAR_CLOSE_D:
+    }
+    //break;
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_MBAR_CLOSE_D)
+    {
       flags = DFCS_CAPTIONCLOSE | DFCS_INACTIVE;
-      break;
-    case (GXINT_PTR)HBMMENU_CALLBACK:
-      {
-        GXDRAWITEMSTRUCT drawItem;
-        drawItem.CtlType = ODT_MENU;
-        drawItem.CtlID = 0;
-        drawItem.itemID = (GXUINT)lpitem->wID;
-        drawItem.itemAction = odaction;
-        drawItem.itemState = (lpitem->fState & MF_CHECKED)?ODS_CHECKED:0;
-        drawItem.itemState |= (lpitem->fState & MF_DEFAULT)?ODS_DEFAULT:0;
-        drawItem.itemState |= (lpitem->fState & MF_DISABLED)?ODS_DISABLED:0;
-        drawItem.itemState |= (lpitem->fState & MF_GRAYED)?ODS_GRAYED|ODS_DISABLED:0;
-        drawItem.itemState |= (lpitem->fState & MF_HILITE)?ODS_SELECTED:0;
-        drawItem.hwndItem = (GXHWND)hmenu;
-        drawItem.hDC = hdc;
-        drawItem.itemData = (GXULONG)lpitem->dwItemData;
-        drawItem.rcItem = *rect;
-        gxSendMessageW( hwndOwner, WM_DRAWITEM, 0, (GXLPARAM)&drawItem);
-        return;
-      }
-      break;
-    case (GXINT_PTR)HBMMENU_POPUP_CLOSE:
+    }
+    //break;
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_CALLBACK)
+    {
+      GXDRAWITEMSTRUCT drawItem;
+      drawItem.CtlType = ODT_MENU;
+      drawItem.CtlID = 0;
+      drawItem.itemID = (GXUINT)lpitem->wID;
+      drawItem.itemAction = odaction;
+      drawItem.itemState = (lpitem->fState & MF_CHECKED) ? ODS_CHECKED : 0;
+      drawItem.itemState |= (lpitem->fState & MF_DEFAULT) ? ODS_DEFAULT : 0;
+      drawItem.itemState |= (lpitem->fState & MF_DISABLED) ? ODS_DISABLED : 0;
+      drawItem.itemState |= (lpitem->fState & MF_GRAYED) ? ODS_GRAYED | ODS_DISABLED : 0;
+      drawItem.itemState |= (lpitem->fState & MF_HILITE) ? ODS_SELECTED : 0;
+      drawItem.hwndItem = (GXHWND)hmenu;
+      drawItem.hDC = hdc;
+      drawItem.itemData = (GXULONG)lpitem->dwItemData;
+      drawItem.rcItem = *rect;
+      gxSendMessageW(hwndOwner, WM_DRAWITEM, 0, (GXLPARAM)&drawItem);
+      return;
+    }
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_POPUP_CLOSE)
+    {
       bmchr = 0x72;
-      break;
-    case (GXINT_PTR)HBMMENU_POPUP_RESTORE:
+      //break;
+    }
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_POPUP_RESTORE)
+    {
       bmchr = 0x32;
-      break;
-    case (GXINT_PTR)HBMMENU_POPUP_MAXIMIZE:
+      //break;
+    }
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_POPUP_MAXIMIZE)
+    {
       bmchr = 0x31;
-      break;
-    case (GXINT_PTR)HBMMENU_POPUP_MINIMIZE:
+      //break;
+    }
+    else if ((GXINT_PTR)hbmToDraw == (GXINT_PTR)HBMMENU_POPUP_MINIMIZE)
+    {
       bmchr = 0x30;
-      break;
-    default:
+      //break;
+    }
+    //default:
+    else {
       FIXME("Magic %p not implemented\n", hbmToDraw);
       return;
     }
+
+    //}
     if (bmchr)
     {
       /* draw the magic bitmaps using marlett font characters */
