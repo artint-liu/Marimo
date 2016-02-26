@@ -367,6 +367,7 @@
     <ClCompile Include="..\..\Controls\GXUIButton.cpp" />
     <ClCompile Include="..\..\Controls\GXUICtrlBase.cpp" />
     <ClCompile Include="..\..\Controls\GXUIEdit_WE1.3.30.cpp" />
+    <ClCompile Include="..\..\Controls\GXUIEdit_WE1.9.4.cpp" />
     <ClCompile Include="..\..\Controls\GXUIList.cpp" />
     <ClCompile Include="..\..\Controls\GXUIList_Simple.cpp" />
     <ClCompile Include="..\..\Controls\GXUIRichList.cpp" />

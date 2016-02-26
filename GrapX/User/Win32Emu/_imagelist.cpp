@@ -207,8 +207,9 @@ IMAGELIST_InternalExpandBitmaps (GXHIMAGELIST himl, GXINT nImageCount, GXINT cx,
 
   hbmNewBitmap = gxImageList_CreateImage(hdcBitmap, himl, nNewCount, cx);
 
-  if (hbmNewBitmap == 0)
+  if (hbmNewBitmap == 0) {
     ERR("creating new image bitmap (x=%d y=%d)!\n", sz.cx, cy);
+  }
 
   if (himl->cCurImage)
   {
@@ -225,8 +226,9 @@ IMAGELIST_InternalExpandBitmaps (GXHIMAGELIST himl, GXINT nImageCount, GXINT cx,
   {
     hbmNewBitmap = gxCreateBitmap (sz.cx, sz.cy, 1, 1, NULL);
 
-    if (hbmNewBitmap == 0)
+    if (hbmNewBitmap == 0) {
       ERR("creating new mask bitmap!\n");
+    }
 
     if(himl->cCurImage)
     {
@@ -818,8 +820,9 @@ gxImageList_DragLeave (GXHWND hwndLock)
   InternalDrag.hwnd = GetDesktopWindow (); */
   if(!hwndLock)
     hwndLock = gxGetDesktopWindow();
-  if(InternalDrag.hwnd != hwndLock)
+  if(InternalDrag.hwnd != hwndLock) {
     FIXME("DragLeave hWnd != DragEnter hWnd\n");
+  }
 
   gxImageList_DragShowNolock (FALSE);
 
@@ -1278,14 +1281,14 @@ gxImageList_DrawIndirect (GXIMAGELISTDRAWPARAMS *pimldp)
     }
   }
 
-  if (fState & GXILS_SATURATE) FIXME("ILS_SATURATE: unimplemented!\n");
-  if (fState & GXILS_GLOW) FIXME("ILS_GLOW: unimplemented!\n");
-  if (fState & GXILS_SHADOW) FIXME("ILS_SHADOW: unimplemented!\n");
-  if (fState & GXILS_ALPHA) FIXME("ILS_ALPHA: unimplemented!\n");
+  if (fState & GXILS_SATURATE) { FIXME("ILS_SATURATE: unimplemented!\n"); }
+  if (fState & GXILS_GLOW) { FIXME("ILS_GLOW: unimplemented!\n"); }
+  if (fState & GXILS_SHADOW) { FIXME("ILS_SHADOW: unimplemented!\n"); }
+  if (fState & GXILS_ALPHA) { FIXME("ILS_ALPHA: unimplemented!\n"); }
 
-  if (fStyle & GXILD_PRESERVEALPHA) FIXME("GXILD_PRESERVEALPHA: unimplemented!\n");
-  if (fStyle & GXILD_SCALE) FIXME("GXILD_SCALE: unimplemented!\n");
-  if (fStyle & GXILD_DPISCALE) FIXME("GXILD_DPISCALE: unimplemented!\n");
+  if (fStyle & GXILD_PRESERVEALPHA) { FIXME("GXILD_PRESERVEALPHA: unimplemented!\n"); }
+  if (fStyle & GXILD_SCALE) { FIXME("GXILD_SCALE: unimplemented!\n"); }
+  if (fStyle & GXILD_DPISCALE) { FIXME("GXILD_DPISCALE: unimplemented!\n"); }
 
   /* now copy the image to the screen */
   dwRop = GXSRCCOPY;
@@ -2345,8 +2348,9 @@ gxImageList_ReplaceIcon (GXHIMAGELIST himl, GXINT nIndex, GXHICON hIcon)
 
   hdcImage = gxCreateCompatibleDC (0);
   TRACE("hdcImage=%p\n", hdcImage);
-  if (hdcImage == 0)
+  if (hdcImage == 0) {
     ERR("invalid hdcImage!\n");
+  }
 
   imagelist_point_from_index(himl, nIndex, &pt);
 

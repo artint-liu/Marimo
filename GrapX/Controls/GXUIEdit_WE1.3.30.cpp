@@ -42,7 +42,7 @@
 // *
 // *
 
-// Artint: 这个修改自1.3.30版Wine项目的Edit空间代码
+// Artint: 这个修改自1.3.30版Wine项目的Edit控件代码
 
 #include <GrapX.H>
 #include "GrapX/GXUser.H"
@@ -520,7 +520,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
   /* Find starting line. istart must lie inside an existing line or
   * at the end of buffer */
   do {
-    if (istart < current_line->index + current_line->length ||
+    if ((size_t)istart < current_line->index + current_line->length ||
       current_line->ending == END_0)
       break;
 
@@ -643,8 +643,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
           istart = (GXINT)(current_line->index + prev);
         /* else if we are updating the previous line before the first line we
         * are re-calculating and it expanded */
-        else if (current_line == start_line &&
-          current_line->index != nstart_index && orig_net_length < prev)
+        else if (current_line == start_line && current_line->index != nstart_index && orig_net_length < (size_t)prev)
         {
           /* Line expanded due to an upwards line wrap so we must partially include
           * previous line in update region */

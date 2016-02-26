@@ -205,6 +205,10 @@
 #define TRACEW
 #endif // TRACEW
 
+#ifndef assert
+#define assert ASSERT
+#endif // #ifndef assert
+
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <GrapX.H>

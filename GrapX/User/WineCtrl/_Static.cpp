@@ -660,7 +660,7 @@ static GXLRESULT StaticWndProc_common( GXHWND hwnd, GXUINT uMsg, GXWPARAM wParam
 /***********************************************************************
 *           StaticWndProcA
 */
-GXLRESULT GXDLLAPI StaticWndProcA( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam )
+GXLRESULT GXCALLBACK StaticWndProcA( GXHWND hWnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam )
 {
   //if (!gxIsWindow( hWnd )) return 0;
   return StaticWndProc_common(hWnd, uMsg, wParam, lParam, FALSE);

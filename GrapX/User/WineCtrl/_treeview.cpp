@@ -80,6 +80,10 @@
 #define TRACEW
 #endif // TRACEW
 
+#ifndef assert
+#define assert ASSERT
+#endif // #ifndef assert
+
 #include <GrapX.H>
 #include "GrapX/gUxtheme.h"
 #include "GrapX/GXUser.H"

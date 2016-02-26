@@ -773,6 +773,9 @@
     <ClCompile Include="..\..\Controls\ListDataAdapter.cpp">
       <Filter>Lib\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Controls\GXUIEdit_WE1.9.4.cpp">
+      <Filter>Lib\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Platform\Readme.txt">

@@ -40,6 +40,23 @@
 
 //static clsize s_nMultiByteOperatorLen = 0; // 最大长度
 
+#define PREPROCESS_define   "define"
+#define PREPROCESS_defined  "defined"
+#define PREPROCESS_if       "if"
+#define PREPROCESS_ifndef   "ifndef"
+#define PREPROCESS_ifdef    "ifdef"
+#define PREPROCESS_elif     "elif"
+#define PREPROCESS_else     "else"
+#define PREPROCESS_endif    "endif"
+#define PREPROCESS_undef    "undef"
+#define PREPROCESS_include  "include"
+#define PREPROCESS_line     "line"
+#define PREPROCESS_file     "file"
+#define PREPROCESS_pragma   "pragma"
+#define PREPROCESS_message  "message"
+#define PREPROCESS_error    "error"
+
+#pragma message("hello world")
 
 namespace UVShader
 {
@@ -148,30 +165,31 @@ namespace UVShader
       // if, ifndef, ifdef, elif, else, endif, undef
       // include
       // line, file
-      // program
+      // pragma
       // error
 
-      if(it == "else")
+      if(it == PREPROCESS_else)
       {
         it.marker = pThis->PP_SkipConditionalBlock(PPCondRank_else, ctx.iter_next.marker, ctx.stream_end);
         it.length = 0;
       }
-      else if(it == "elif")
+      else if(it == PREPROCESS_elif)
       {
         it.marker = pThis->PP_SkipConditionalBlock(PPCondRank_elif, ctx.iter_next.marker, ctx.stream_end);
         it.length = 0;
       }
-      else if(it == "endif")
+      else if(it == PREPROCESS_endif)
       {
         it = ctx.iter_next;
       }
-      else if(it == "error")
+      else if(it == PREPROCESS_error)
       {
         clStringW str(it.marker + it.length, ctx.ppend - (it.marker + it.length));
         pThis->OutputErrorW(it.marker, E1189_用户定义错误, str);
       }
       else
       {
+        // DoPreprocess 处理中，先将命令分解到子tokens集合，再进行解析
         auto next_marker = pThis->DoPreprocess(ctx, it.marker, ctx.ppend);
         if(next_marker == ctx.iter_next.marker) {
           it = ctx.iter_next;
@@ -1791,20 +1809,23 @@ NOT_INC_P:
     pParse->GenerateTokens();
     const auto& tokens = *pParse->GetTokensArray();
 
-    if(tokens.front() == "define") {
+    if(tokens.front() == PREPROCESS_define) {
       Macro_Define(tokens);
     }
-    else if(tokens.front() == "undef") {
+    else if(tokens.front() == PREPROCESS_undef) {
       Macro_Undefine(ctx, tokens);
     }
-    else if(tokens.front() == "ifdef") {
+    else if(tokens.front() == PREPROCESS_ifdef) {
       return Macro_IfDefine(ctx, FALSE, tokens);
     }
-    else if(tokens.front() == "ifndef") {
+    else if(tokens.front() == PREPROCESS_ifndef) {
       return Macro_IfDefine(ctx, TRUE, tokens);
     }
-    else if(tokens.front() == "if") {
+    else if(tokens.front() == PREPROCESS_if) {
       return PP_If(ctx, pParse);
+    }
+    else if(tokens.front() == PREPROCESS_pragma) {
+
     }
     else {
       OutputErrorW(tokens.front(), E1021_无效的预处理器命令, clStringW(tokens.front().ToString()));
@@ -1817,7 +1838,7 @@ NOT_INC_P:
   {
     MACRO l_m;
     //const auto& tokens = *m_pSubParser->GetTokensArray();
-    ASSERT( ! tokens.empty() && tokens.front() == "define");
+    ASSERT( ! tokens.empty() && tokens.front() == PREPROCESS_define);
     const auto count = tokens.size();
     clStringA strMacroName(tokens[1].marker.marker, tokens[1].marker.length);
     //m_MacrosSet.insert(strMacroName);
@@ -2053,7 +2074,7 @@ NOT_INC_P:
     }
     else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
-      if(*(pNode->Operand[0].pSym) == "defined")
+      if(*(pNode->Operand[0].pSym) == PREPROCESS_defined)
       {
         ASSERT(pNode->GetOperandType(0) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
 
@@ -2142,13 +2163,13 @@ NOT_INC_P:
       size_t str_elif_len = 4;
 
       // if 要放在 ifdef, ifndef 后面
-      if(CompareString(p, "ifdef", 5) || CompareString(p, "ifndef", 6) || CompareString(p, "if", 2))
+      if(CompareString(p, PREPROCESS_ifdef, 5) || CompareString(p, PREPROCESS_ifndef, 6) || CompareString(p, PREPROCESS_if, 2))
       {
         //pp_stack.push(p);
         depth++;
         //sRankStack.push(PPCondRank_if);
       }
-      else if(CompareString(p, "elif", str_elif_len))
+      else if(CompareString(p, PREPROCESS_elif, str_elif_len))
       {
         // pp_stack 不空，说明在预处理域内，直接忽略
         // pp_stack 为空，测试表达式(TODO)
@@ -2189,7 +2210,7 @@ NOT_INC_P:
 
         return PP_If(ctx, pParse);
       }
-      else if(CompareString(p, "else", 4))
+      else if(CompareString(p, PREPROCESS_else, 4))
       {
         // pp_stack 不空，说明在预处理域内，直接忽略
         // pp_stack 为空，转到下行行首
@@ -2207,7 +2228,7 @@ NOT_INC_P:
         p += 4; // "else" 长度
         break;
       }
-      else if(CompareString(p, "endif", 5))
+      else if(CompareString(p, PREPROCESS_endif, 5))
       {
         // 测试了下，vs2010下 #endif 后面随便敲些什么都不会报错
         //if( ! pp_stack.empty()) {
@@ -2301,7 +2322,7 @@ NOT_INC_P:
 
   void CodeParser::MACRO::set(const Dict& dict, const TOKEN::Array& tokens, int begin_at)
   {
-    ASSERT(tokens.front() == "define");
+    ASSERT(tokens.front() == PREPROCESS_define);
     aTokens.insert(aTokens.begin(), tokens.begin() + begin_at, tokens.end());
     ClearContainer();
     while(ExpandMacro(dict) > 0); // 反复调用直到返回0 
