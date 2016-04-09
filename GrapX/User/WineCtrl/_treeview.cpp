@@ -278,7 +278,7 @@ TREEVIEW_GetInfoPtr(GXHWND hwnd)
 static inline int
 TREEVIEW_GetItemIndex(const GXTREEVIEW_INFO *infoPtr, GXHTREEITEM handle)
 {
-  assert(infoPtr != NULL);
+  WEAssert(infoPtr != NULL);
 
   return gxDPA_GetPtrIndex(infoPtr->items, handle);
 }
@@ -444,7 +444,7 @@ TREEVIEW_GetPrevListItem(const GXTREEVIEW_INFO *infoPtr, const GXTREEVIEW_ITEM *
 static GXTREEVIEW_ITEM *
 TREEVIEW_GetNextListItem(const GXTREEVIEW_INFO *infoPtr, const GXTREEVIEW_ITEM *tvItem)
 {
-  assert(tvItem != NULL);
+  WEAssert(tvItem != NULL);
 
   /*
   * If this item has children and is expanded, return the first child
@@ -489,7 +489,7 @@ TREEVIEW_GetListItem(const GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *wineItem,
   GXTREEVIEW_ITEM *(*next_item)(const GXTREEVIEW_INFO *, const GXTREEVIEW_ITEM *);
   GXTREEVIEW_ITEM *previousItem;
 
-  assert(wineItem != NULL);
+  WEAssert(wineItem != NULL);
 
   if (count > 0)
   {
@@ -1095,12 +1095,12 @@ static void
 TREEVIEW_InsertBefore(GXTREEVIEW_ITEM *newItem, GXTREEVIEW_ITEM *sibling,
             GXTREEVIEW_ITEM *parent)
 {
-  assert(newItem != NULL);
-  assert(parent != NULL);
+  WEAssert(newItem != NULL);
+  WEAssert(parent != NULL);
 
   if (sibling != NULL)
   {
-    assert(sibling->parent == parent);
+    WEAssert(sibling->parent == parent);
 
     if (sibling->prevSibling != NULL)
       sibling->prevSibling->nextSibling = newItem;
@@ -1128,12 +1128,12 @@ static void
 TREEVIEW_InsertAfter(GXTREEVIEW_ITEM *newItem, GXTREEVIEW_ITEM *sibling,
            GXTREEVIEW_ITEM *parent)
 {
-  assert(newItem != NULL);
-  assert(parent != NULL);
+  WEAssert(newItem != NULL);
+  WEAssert(parent != NULL);
 
   if (sibling != NULL)
   {
-    assert(sibling->parent == parent);
+    WEAssert(sibling->parent == parent);
 
     if (sibling->nextSibling != NULL)
       sibling->nextSibling->prevSibling = newItem;
@@ -1476,9 +1476,9 @@ TREEVIEW_RemoveAllChildren(GXTREEVIEW_INFO *infoPtr, const GXTREEVIEW_ITEM *pare
     kill = next;
   }
 
-  assert(parentItem->cChildren <= 0); /* I_CHILDRENCALLBACK or 0 */
-  assert(parentItem->firstChild == NULL);
-  assert(parentItem->lastChild == NULL);
+  WEAssert(parentItem->cChildren <= 0); /* I_CHILDRENCALLBACK or 0 */
+  WEAssert(parentItem->firstChild == NULL);
+  WEAssert(parentItem->lastChild == NULL);
 }
 
 static void
@@ -1486,8 +1486,8 @@ TREEVIEW_UnlinkItem(const GXTREEVIEW_ITEM *item)
 {
   GXTREEVIEW_ITEM *parentItem = item->parent;
 
-  assert(item != NULL);
-  assert(item->parent != NULL); /* i.e. it must not be the root */
+  WEAssert(item != NULL);
+  WEAssert(item->parent != NULL); /* i.e. it must not be the root */
 
   if (parentItem->firstChild == item)
     parentItem->firstChild = item->nextSibling;
@@ -1534,7 +1534,7 @@ TREEVIEW_RemoveTree(GXTREEVIEW_INFO *infoPtr)
 {
   TREEVIEW_RemoveAllChildren(infoPtr, infoPtr->root);
 
-  assert(infoPtr->uNumItems == 0);  /* root isn't counted in uNumItems */
+  WEAssert(infoPtr->uNumItems == 0);  /* root isn't counted in uNumItems */
 }
 
 static GXLRESULT
@@ -4287,7 +4287,7 @@ TREEVIEW_DoSelectItem(GXTREEVIEW_INFO *infoPtr, GXINT action, GXHTREEITEM newSel
   GXTREEVIEW_ITEM *prevSelect;
   GXRECT rcFocused;
 
-  assert(newSelect == NULL || TREEVIEW_ValidItem(infoPtr, newSelect));
+  WEAssert(newSelect == NULL || TREEVIEW_ValidItem(infoPtr, newSelect));
 
   TRACE("Entering item %p (%s), flag %x, cause %x, state %d\n",
     newSelect, TREEVIEW_ItemName(newSelect), action, cause,
@@ -4721,7 +4721,7 @@ TREEVIEW_VScroll(GXTREEVIEW_INFO *infoPtr, GXWPARAM wParam)
 
   if (!oldFirstVisible)
   {
-    assert(infoPtr->root->firstChild == NULL);
+    WEAssert(infoPtr->root->firstChild == NULL);
     return 0;
   }
 
@@ -5817,52 +5817,52 @@ TREEVIEW_VerifyChildren(GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *item);
 static inline void TREEVIEW_VerifyItemCommon(GXTREEVIEW_INFO *infoPtr,
                        GXTREEVIEW_ITEM *item)
 {
-  assert(infoPtr != NULL);
-  assert(item != NULL);
+  WEAssert(infoPtr != NULL);
+  WEAssert(item != NULL);
 
   /* both NULL, or both non-null */
-  assert((item->firstChild == NULL) == (item->lastChild == NULL));
+  WEAssert((item->firstChild == NULL) == (item->lastChild == NULL));
 
-  assert(item->firstChild != item);
-  assert(item->lastChild != item);
+  WEAssert(item->firstChild != item);
+  WEAssert(item->lastChild != item);
 
   if (item->firstChild)
   {
-    assert(item->firstChild->parent == item);
-    assert(item->firstChild->prevSibling == NULL);
+    WEAssert(item->firstChild->parent == item);
+    WEAssert(item->firstChild->prevSibling == NULL);
   }
 
   if (item->lastChild)
   {
-    assert(item->lastChild->parent == item);
-    assert(item->lastChild->nextSibling == NULL);
+    WEAssert(item->lastChild->parent == item);
+    WEAssert(item->lastChild->nextSibling == NULL);
   }
 
-  assert(item->nextSibling != item);
+  WEAssert(item->nextSibling != item);
   if (item->nextSibling)
   {
-    assert(item->nextSibling->parent == item->parent);
-    assert(item->nextSibling->prevSibling == item);
+    WEAssert(item->nextSibling->parent == item->parent);
+    WEAssert(item->nextSibling->prevSibling == item);
   }
 
-  assert(item->prevSibling != item);
+  WEAssert(item->prevSibling != item);
   if (item->prevSibling)
   {
-    assert(item->prevSibling->parent == item->parent);
-    assert(item->prevSibling->nextSibling == item);
+    WEAssert(item->prevSibling->parent == item->parent);
+    WEAssert(item->prevSibling->nextSibling == item);
   }
 }
 
 static inline void
 TREEVIEW_VerifyItem(GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *item)
 {
-  assert(item != NULL);
+  WEAssert(item != NULL);
 
-  assert(item->parent != NULL);
-  assert(item->parent != item);
-  assert(item->iLevel == item->parent->iLevel + 1);
+  WEAssert(item->parent != NULL);
+  WEAssert(item->parent != item);
+  WEAssert(item->iLevel == item->parent->iLevel + 1);
 
-  assert(gxDPA_GetPtrIndex(infoPtr->items, item) != -1);
+  WEAssert(gxDPA_GetPtrIndex(infoPtr->items, item) != -1);
 
   TREEVIEW_VerifyItemCommon(infoPtr, item);
 
@@ -5873,7 +5873,7 @@ static inline void
 TREEVIEW_VerifyChildren(GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *item)
 {
   GXTREEVIEW_ITEM *child;
-  assert(item != NULL);
+  WEAssert(item != NULL);
 
   for (child = item->firstChild; child != NULL; child = child->nextSibling)
     TREEVIEW_VerifyItem(infoPtr, child);
@@ -5884,10 +5884,10 @@ TREEVIEW_VerifyRoot(GXTREEVIEW_INFO *infoPtr)
 {
   GXTREEVIEW_ITEM *root = infoPtr->root;
 
-  assert(root != NULL);
-  assert(root->iLevel == -1);
-  assert(root->parent == NULL);
-  assert(root->prevSibling == NULL);
+  WEAssert(root != NULL);
+  WEAssert(root->iLevel == -1);
+  WEAssert(root->parent == NULL);
+  WEAssert(root->prevSibling == NULL);
 
   TREEVIEW_VerifyItemCommon(infoPtr, root);
 
@@ -5897,7 +5897,7 @@ TREEVIEW_VerifyRoot(GXTREEVIEW_INFO *infoPtr)
 static void
 TREEVIEW_VerifyTree(GXTREEVIEW_INFO *infoPtr)
 {
-  assert(infoPtr != NULL);
+  WEAssert(infoPtr != NULL);
 
   TREEVIEW_VerifyRoot(infoPtr);
 }

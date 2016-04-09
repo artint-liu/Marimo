@@ -3679,10 +3679,11 @@ static void EDIT_WM_SetText(EDITSTATE *es, GXLPCWSTR text, GXBOOL unicode)
   text = textW;
     }
 
-    if (es->flags & EF_UPDATE)
-  /* fixed this bug once; complain if we see it about to happen again. */
-  ERR("SetSel may generate UPDATE message whose handler may reset "
-      "selection.\n");
+    if (es->flags & EF_UPDATE) {
+      /* fixed this bug once; complain if we see it about to happen again. */
+      ERR("SetSel may generate UPDATE message whose handler may reset "
+        "selection.\n");
+    }
 
     EDIT_EM_SetSel(es, 0, (GXUINT)-1, FALSE);
     if (text) 

@@ -895,7 +895,7 @@ static int get_ansi_notification(GXUINT unicodeNotificationCode)
   case LVN_GETINFOTIPW: return LVN_GETINFOTIPA;
   }
   ERR("unknown notification %x\n", unicodeNotificationCode);
-  assert(FALSE);
+  WEAssert(FALSE);
   return 0;
 }
 
@@ -1434,7 +1434,7 @@ static inline COLUMN_INFO * LISTVIEW_GetColumnInfo(const LISTVIEW_INFO *infoPtr,
   static COLUMN_INFO mainItem;
 
   if (nSubItem == 0 && gxDPA_GetPtrCount(infoPtr->hdpaColumns) == 0) return &mainItem;
-  assert (nSubItem >= 0 && nSubItem < gxDPA_GetPtrCount(infoPtr->hdpaColumns));
+  WEAssert (nSubItem >= 0 && nSubItem < gxDPA_GetPtrCount(infoPtr->hdpaColumns));
   return (COLUMN_INFO *)gxDPA_GetPtr(infoPtr->hdpaColumns, nSubItem);
 }
 
@@ -1477,7 +1477,7 @@ static inline void LISTVIEW_InvalidateSubItem(const LISTVIEW_INFO *infoPtr, GXIN
   GXRECT rcBox;
 
   if(!is_redrawing(infoPtr)) return; 
-  assert ((infoPtr->dwStyle & LVS_TYPEMASK) == LVS_REPORT);
+  WEAssert ((infoPtr->dwStyle & LVS_TYPEMASK) == LVS_REPORT);
   LISTVIEW_GetOrigin(infoPtr, &Origin);
   LISTVIEW_GetItemOrigin(infoPtr, nItem, &Position);
   LISTVIEW_GetHeaderRect(infoPtr, nSubItem, &rcBox);
@@ -1917,7 +1917,7 @@ static void LISTVIEW_GetItemOrigin(const LISTVIEW_INFO *infoPtr, GXINT nItem, LP
 {
   GXUINT uView = infoPtr->dwStyle & LVS_TYPEMASK;
 
-  assert(nItem >= 0 && nItem < infoPtr->nItemCount);
+  WEAssert(nItem >= 0 && nItem < infoPtr->nItemCount);
 
   if ((uView == LVS_SMALLICON) || (uView == LVS_ICON))
   {
@@ -1993,11 +1993,11 @@ static void LISTVIEW_GetItemMetrics(const LISTVIEW_INFO *infoPtr, const GXLVITEM
 
   /* Be smart and try to figure out the minimum we have to do */
   if (lpLVItem->iSubItem) {
-    assert(uView == LVS_REPORT);
+    WEAssert(uView == LVS_REPORT);
   }
   if (uView == LVS_ICON && (lprcBox || lprcLabel))
   {
-    assert((lpLVItem->mask & GXLVIF_STATE) && (lpLVItem->stateMask & LVIS_FOCUSED));
+    WEAssert((lpLVItem->mask & GXLVIF_STATE) && (lpLVItem->stateMask & LVIS_FOCUSED));
     if (lpLVItem->state & LVIS_FOCUSED) oversizedBox = doLabel = TRUE;
   }
   if (lprcSelectBox) doSelectBox = TRUE;
@@ -2101,7 +2101,7 @@ static void LISTVIEW_GetItemMetrics(const LISTVIEW_INFO *infoPtr, const GXLVITEM
     }
 
     /* we need the text in non owner draw mode */
-    assert(lpLVItem->mask & GXLVIF_TEXT);
+    WEAssert(lpLVItem->mask & GXLVIF_TEXT);
     if (is_textT(lpLVItem->pszText, TRUE))
     {
       GXHFONT hFont = infoPtr->hFont ? infoPtr->hFont : infoPtr->hDefaultFont;
@@ -2181,7 +2181,7 @@ calc_label:
       if (lpLVItem->iSubItem == 0)
       {
         /* we need the indent in report mode */
-        assert(lpLVItem->mask & GXLVIF_INDENT);
+        WEAssert(lpLVItem->mask & GXLVIF_INDENT);
         SelectBox.left += infoPtr->iconSize.cx * lpLVItem->iIndent;
       }
       SelectBox.right = min(SelectBox.left + labelSize.cx, Label.right);
@@ -2665,18 +2665,18 @@ static void ranges_assert(RANGES ranges, GXLPCSTR desc, const char *func, int li
   RANGE *prev, *curr;
 
   TRACE("*** Checking %s:%d:%s ***\n", func, line, desc);
-  assert (ranges);
-  assert (gxDPA_GetPtrCount(ranges->hdpa) >= 0);
+  WEAssert (ranges);
+  WEAssert (gxDPA_GetPtrCount(ranges->hdpa) >= 0);
   ranges_dump(ranges);
   prev = (RANGE *)gxDPA_GetPtr(ranges->hdpa, 0);
   if (gxDPA_GetPtrCount(ranges->hdpa) > 0) {
-    assert (prev->lower >= 0 && prev->lower < prev->upper);
+    WEAssert (prev->lower >= 0 && prev->lower < prev->upper);
   }
   for (i = 1; i < gxDPA_GetPtrCount(ranges->hdpa); i++)
   {
     curr = (RANGE *)gxDPA_GetPtr(ranges->hdpa, i);
-    assert (prev->upper <= curr->lower);
-    assert (curr->lower < curr->upper);
+    WEAssert (prev->upper <= curr->lower);
+    WEAssert (curr->lower < curr->upper);
     prev = curr;
   }
   TRACE("--- Done checking---\n");
@@ -3091,7 +3091,7 @@ static void LISTVIEW_ShiftIndices(LISTVIEW_INFO *infoPtr, GXINT nItem, GXINT dir
 
   ranges_shift(infoPtr->selectionRanges, nItem, direction, infoPtr->nItemCount);
 
-  assert(abs(direction) == 1);
+  WEAssert(abs(direction) == 1);
 
   infoPtr->nSelectionMark = shift_item(infoPtr, infoPtr->nSelectionMark, nItem, direction);
 
@@ -3484,7 +3484,7 @@ static GXBOOL set_main_item(LISTVIEW_INFO *infoPtr, const GXLVITEMW *lpLVItem, G
 
   TRACE("()\n");
 
-  assert(lpLVItem->iItem >= 0 && lpLVItem->iItem < infoPtr->nItemCount);
+  WEAssert(lpLVItem->iItem >= 0 && lpLVItem->iItem < infoPtr->nItemCount);
 
   if (lpLVItem->mask == 0) return TRUE;   
 
@@ -3499,7 +3499,7 @@ static GXBOOL set_main_item(LISTVIEW_INFO *infoPtr, const GXLVITEMW *lpLVItem, G
   {
     GXHDPA hdpaSubItems = (GXHDPA)gxDPA_GetPtr(infoPtr->hdpaItems, lpLVItem->iItem);
     lpItem = (ITEM_INFO *)gxDPA_GetPtr(hdpaSubItems, 0);
-    assert (lpItem);
+    WEAssert (lpItem);
   }
 
   /* we need to get the lParam and state of the item */
@@ -3639,7 +3639,7 @@ static GXBOOL set_sub_item(const LISTVIEW_INFO *infoPtr, const GXLVITEMW *lpLVIt
 
   /* get the subitem structure, and create it if not there */
   hdpaSubItems = (GXHDPA)gxDPA_GetPtr(infoPtr->hdpaItems, lpLVItem->iItem);
-  assert (hdpaSubItems);
+  WEAssert (hdpaSubItems);
 
   lpSubItem = LISTVIEW_GetSubItemPtr(hdpaSubItems, lpLVItem->iSubItem);
   if (!lpSubItem)
@@ -4456,10 +4456,12 @@ static GXDWORD LISTVIEW_ApproximateViewRect(const LISTVIEW_INFO *infoPtr, GXINT 
 
     dwViewRect = GXMAKELONG(wWidth, wHeight);
   }
-  else if (uView == LVS_SMALLICON)
+  else if (uView == LVS_SMALLICON) {
     FIXME("uView == LVS_SMALLICON: not implemented\n");
-  else if (uView == LVS_ICON)
+  }
+  else if (uView == LVS_ICON) {
     FIXME("uView == LVS_ICON: not implemented\n");
+  }
 
   return dwViewRect;
 }
@@ -4756,7 +4758,7 @@ static void LISTVIEW_ScrollOnInsert(LISTVIEW_INFO *infoPtr, GXINT nItem, GXINT d
   /* if we don't refresh, what's the point of scrolling? */
   if (!is_redrawing(infoPtr)) return;
 
-  assert (abs(dir) == 1);
+  WEAssert (abs(dir) == 1);
 
   /* arrange icons if autoarrange is on */
   if (is_autoarrange(infoPtr))
@@ -5415,7 +5417,7 @@ static GXINT LISTVIEW_GetCountPerPage(const LISTVIEW_INFO *infoPtr)
   case LVS_LIST:
     return LISTVIEW_GetCountPerRow(infoPtr) * LISTVIEW_GetCountPerColumn(infoPtr);
   }
-  assert(FALSE);
+  WEAssert(FALSE);
   return 0;
 }
 
@@ -5572,7 +5574,7 @@ static GXBOOL LISTVIEW_GetItemT(const LISTVIEW_INFO *infoPtr, GXLPLVITEMW lpLVIt
   /* find the item and subitem structures before we proceed */
   hdpaSubItems = (GXHDPA)gxDPA_GetPtr(infoPtr->hdpaItems, lpLVItem->iItem);
   lpItem = (ITEM_INFO *)gxDPA_GetPtr(hdpaSubItems, 0);
-  assert (lpItem);
+  WEAssert (lpItem);
 
   if (isubitem)
   {
@@ -6559,7 +6561,7 @@ static GXINT LISTVIEW_InsertItemT(LISTVIEW_INFO *infoPtr, const GXLVITEMW *lpLVI
   /* insert item in listview control data structure */
   if ( !(hdpaSubItems = gxDPA_Create(8)) ) goto fail;
   if ( !gxDPA_SetPtr(hdpaSubItems, 0, lpItem) ){
-    assert (FALSE);
+    WEAssert (FALSE);
   }
 
   is_sorted = (infoPtr->dwStyle & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) &&
@@ -6607,7 +6609,7 @@ static GXINT LISTVIEW_InsertItemT(LISTVIEW_INFO *infoPtr, const GXLVITEMW *lpLVI
   {
     gxDPA_Sort( infoPtr->hdpaItems, LISTVIEW_InsertCompare, (GXLPARAM)infoPtr );
     nItem = gxDPA_GetPtrIndex( infoPtr->hdpaItems, hdpaSubItems );
-    assert(nItem != -1);
+    WEAssert(nItem != -1);
   }
 
   /* make room for the position, if we are in the right mode */
@@ -6897,11 +6899,18 @@ static GXINT LISTVIEW_InsertColumnT(LISTVIEW_INFO *infoPtr, GXINT nColumn,
     isW ? GXHDM_INSERTITEMW : GXHDM_INSERTITEMA,
     (GXWPARAM)nColumn, (GXLPARAM)&hdi);
   if (nNewColumn == -1) return -1;
-  if (nNewColumn != nColumn) ERR("nColumn=%d, nNewColumn=%d\n", nColumn, nNewColumn);
+  if (nNewColumn != nColumn) {
+    ERR("nColumn=%d, nNewColumn=%d\n", nColumn, nNewColumn);
+  }
 
   /* create our own column info */ 
-  if (!(lpColumnInfo = (COLUMN_INFO*)Alloc(sizeof(COLUMN_INFO)))) goto fail;
-  if (gxDPA_InsertPtr(infoPtr->hdpaColumns, nNewColumn, lpColumnInfo) == -1) goto fail;
+  if (!(lpColumnInfo = (COLUMN_INFO*)Alloc(sizeof(COLUMN_INFO)))) {
+    goto fail;
+  }
+
+  if (gxDPA_InsertPtr(infoPtr->hdpaColumns, nNewColumn, lpColumnInfo) == -1) {
+    goto fail;
+  }
 
   if (lpColumn->mask & LVCF_FMT) lpColumnInfo->fmt = lpColumn->fmt;
   if (!gxHeader_GetItemRect(infoPtr->hwndHeader, nNewColumn, &lpColumnInfo->rcHeader)) goto fail;
@@ -10128,8 +10137,9 @@ LISTVIEW_WindowProc(GXHWND hwnd, GXUINT uMsg, GXWPARAM wParam, GXLPARAM lParam)
     /*  case GXWM_WININICHANGE: */
 
   default:
-    if ((uMsg >= GXWM_USER) && (uMsg < GXWM_APP) && !gxCOMCTL32_IsReflectedMessage(uMsg))
+    if ((uMsg >= GXWM_USER) && (uMsg < GXWM_APP) && !gxCOMCTL32_IsReflectedMessage(uMsg)) {
       ERR("unknown msg %04x wp=%08lx lp=%08lx\n", uMsg, wParam, lParam);
+    }
 
 fwd_msg:
     /* call default window procedure */
