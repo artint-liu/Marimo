@@ -101,6 +101,7 @@ string paltform_default; // 如果所有平台都没定义，则使用缺省
 string paltform_error; // 没定义平台也没缺省，就报错误
 #endif
  
+#pragma message("hello world")
  
 // 函数测试部分
 float func()

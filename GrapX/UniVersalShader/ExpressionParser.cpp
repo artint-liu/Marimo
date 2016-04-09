@@ -1825,11 +1825,10 @@ NOT_INC_P:
       return PP_If(ctx, pParse);
     }
     else if(tokens.front() == PREPROCESS_pragma) {
-
+      CLBREAK;
     }
     else {
       OutputErrorW(tokens.front(), E1021_无效的预处理器命令, clStringW(tokens.front().ToString()));
-      return end;
     }
     return ctx.iter_next.marker;
   }
@@ -1899,6 +1898,7 @@ NOT_INC_P:
         result.first->second.clear();
       }
 
+      // 设置宏代替的表达式，如果表达式中含有宏也会展开
       result.first->second.set(m_Macros, tokens, l_define);
     }
   }
