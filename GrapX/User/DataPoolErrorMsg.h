@@ -43,6 +43,8 @@ namespace Marimo
     int       LineFromOffset      (GXSIZE_T nOffset, GXUINT idFile = 0) const;
     void      PushFile            (GXLPCWSTR szFilename, GXINT nTopLine = 0);
     void      PopFile             ();
+
+    void      WriteMessageW       (GXBOOL bError, GXLPCWSTR szMessage);
     void      WriteErrorW         (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, ...);
     void      VarWriteErrorW      (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, va_list arglist); // 从当前文件的偏移确定位置
     void      VarWriteErrorW      (GXBOOL bError, T_LPCSTR ptr, GXUINT nCode, va_list arglist);     // 从指针确定源文件位置，这个支持多个源文件的行号查询

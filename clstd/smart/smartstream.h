@@ -126,6 +126,8 @@ public:
 
     clsize  offset      () const;   // 返回值 TChar 的类型偏移， 不是字节偏移
     _TStr   ToString    () const;
+    b32     BeginsWith  (TChar ch) const;
+    b32     EndsWith    (TChar ch) const;
     b32     BeginsWith  (T_LPCSTR str) const;
     b32     EndsWith    (T_LPCSTR str) const;
     b32     BeginsWith  (T_LPCSTR str, clsize count) const;

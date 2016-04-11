@@ -386,6 +386,18 @@ _TStr _SS_IMPL::iterator::ToString() const
 }
 
 _SS_TEMPL
+b32 _SS_IMPL::iterator::BeginsWith(TChar ch) const
+{
+  return (length > 1) && (marker[0] == ch);
+}
+
+_SS_TEMPL
+b32 _SS_IMPL::iterator::EndsWith(TChar ch) const
+{
+  return (length > 1) && (marker[length - 1] == ch);
+}
+
+_SS_TEMPL
 b32 _SS_IMPL::iterator::BeginsWith(T_LPCSTR str) const
 {
   const size_t uCmpLength = clstd::strlenT(str);

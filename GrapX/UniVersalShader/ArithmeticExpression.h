@@ -47,6 +47,17 @@ namespace UVShader
     {
       typedef cllist<TOKEN>   List;
       typedef clvector<TOKEN> Array;
+      enum Type
+      {
+        TokenType_Undefine      = 0,
+        TokenType_String        = 1,
+        TokenType_FirstNumeric  = 5,
+        TokenType_Numeric       = TokenType_FirstNumeric,
+        TokenType_LastNumeric,
+        TokenType_Name          = 20,
+        TokenType_Operator      = 30,
+      };
+
       const static int scope_bits = 22;
       const static int precedence_bits = 7;
       const static int FIRST_OPCODE_PRECEDENCE = 1;
@@ -54,6 +65,7 @@ namespace UVShader
 #ifdef ENABLE_STRINGED_SYMBOL
       clStringA symbol;
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
+      Type      type;                         // 类型
       iterator  marker;
       int       scope;                        // 括号匹配索引
       int       semi_scope : scope_bits;      // 分号作用域
@@ -65,22 +77,8 @@ namespace UVShader
       // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
       // array[open].scope = closed && array[closed].scope = open
 
-      void ClearMarker()
-      {
-#ifdef ENABLE_STRINGED_SYMBOL
-        symbol.Clear();
-#endif // #ifdef ENABLE_STRINGED_SYMBOL
-        marker.marker = 0;
-      }
-
-      void Set(const iterator& _iter)
-      {
-        ASSERT(_iter.length != 0);
-#ifdef ENABLE_STRINGED_SYMBOL
-        symbol = _iter.ToString();
-#endif // #ifdef ENABLE_STRINGED_SYMBOL
-        marker = _iter;
-      }
+      void ClearMarker();
+      void Set(const iterator& _iter);
 
       template<class _Ty>
       void SetArithOperatorInfo(const _Ty& t) // 设置数学符号信息
@@ -90,57 +88,16 @@ namespace UVShader
         precedence = t.precedence;
       }
 
-      void ClearArithOperatorInfo()
-      {
-        unary      = 0;
-        unary_mask = 0;
-        precedence = 0;
-      }
+      void ClearArithOperatorInfo();
+      clStringA ToString() const;
+      int GetScope() const;
 
-      clStringA ToString() const
-      {
-        return marker.ToString();
-      }
-
-      int GetScope() const
-      {
-        return scope >= 0 ? scope : semi_scope;
-      }
-
-      GXBOOL operator==(const TOKEN& t) const
-      {
-        // 不可能出现指向同一地址却长度不同的情况
-        ASSERT((marker.marker == t.marker.marker && marker.length == t.marker.length) || 
-          (marker.marker != t.marker.marker));
-
-        return (marker.marker == t.marker.marker) || (marker.length == t.marker.length
-          && GXSTRNCMP(marker.marker, t.marker.marker, marker.length) == 0);
-      }
-
-      GXBOOL operator==(SmartStreamA::T_LPCSTR str) const
-      {
-        return (marker == str);
-      }
-
-      GXBOOL operator==(SmartStreamA::TChar ch) const
-      {
-        return (marker == ch);
-      }
-
-      GXBOOL operator!=(SmartStreamA::T_LPCSTR str) const
-      {
-        return (marker != str);
-      }
-
-      GXBOOL operator!=(SmartStreamA::TChar ch) const
-      {
-        return (marker != ch);
-      }
-
-      b32 operator<(const TOKEN& _token) const
-      {
-        return (b32)(marker < _token.marker);
-      }
+      GXBOOL operator==(const TOKEN& t) const;
+      GXBOOL operator==(SmartStreamA::T_LPCSTR str) const;
+      GXBOOL operator==(SmartStreamA::TChar ch) const;
+      GXBOOL operator!=(SmartStreamA::T_LPCSTR str) const;
+      GXBOOL operator!=(SmartStreamA::TChar ch) const;
+      b32    operator<(const TOKEN& _token) const;
     };
     //typedef clvector<TOKEN> TokenArray;
     //typedef cllist<TOKEN> TokenList;

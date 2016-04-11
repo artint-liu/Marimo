@@ -310,13 +310,15 @@ namespace UVShader
     GXBOOL  OnToken(const TOKEN& token, MacroStack& sStack);
 
     T_LPCSTR DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
-    void     Macro_Define(const TOKEN::Array& aTokens);
-    void     Macro_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens);
-    T_LPCSTR Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
+    void     PP_Pragma(const TOKEN::Array& aTokens);
+    void     PP_Define(const TOKEN::Array& aTokens);
+    void     PP_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens);
+    T_LPCSTR PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
     T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
     T_LPCSTR PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
     GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
 
+    static void StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin);
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
     static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 

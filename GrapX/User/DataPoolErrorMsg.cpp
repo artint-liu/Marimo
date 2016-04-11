@@ -81,6 +81,17 @@ namespace Marimo
   }
 
   _DPEM_TEMPL
+  void _DPEM_CLS::WriteMessageW(GXBOOL bError, GXLPCWSTR szMessage)
+  {
+    if(bError) {
+      CLOG_ERRORW(szMessage);
+    }
+    else if( ! m_bSilent){
+      CLOG_WARNINGW(szMessage);
+    }
+  }
+
+  _DPEM_TEMPL
   void _DPEM_CLS::VarWriteErrorW(GXBOOL bError, T_LPCSTR ptr, GXUINT nCode, va_list arglist)
   {
     UpdateResult(bError);
@@ -113,12 +124,7 @@ namespace Marimo
       }
     }
 
-    if(bError) {
-      CLOG_ERRORW(str);
-    }
-    else if( ! m_bSilent){
-      CLOG_WARNINGW(str);
-    }
+    WriteMessageW(bError, str);
   }
 
   _DPEM_TEMPL

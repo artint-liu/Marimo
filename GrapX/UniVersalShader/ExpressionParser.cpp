@@ -235,7 +235,7 @@ namespace UVShader
     l_token.precedence = 0;
     l_token.unary      = 0;
     SetTriggerCallBack(MultiByteOperatorProc, (u32_ptr)&l_token);
-
+    SetIteratorCallBack(IteratorProc, (u32_ptr)&l_token);
 
     PairStack sStack[s_nPairMark];
 
@@ -254,6 +254,7 @@ namespace UVShader
       token.Set(it);
       token.scope = -1;
       token.semi_scope = -1;
+      token.type = l_token.type;
 
       ASSERT(l_token.marker.marker == NULL ||
         l_token.marker.marker == it.marker); // 遍历时一定这个要保持一致
@@ -282,11 +283,11 @@ namespace UVShader
       // 符号配对处理
       MarryBracket(sStack, token, EOE);
       
+      // 1.宏展开
       if(token.precedence == 0 && OnToken(token, sMacroStack)) {
         token.ClearMarker();
       }
-
-      // 带有参数的宏展开
+      // 2.带有参数的宏展开
       else if(token == ')' && ! sMacroStack.empty() && token.scope == sMacroStack.top() + 1 &&
         Macro_ExpandMacroInvoke(sMacroStack.top(), token))
       {
@@ -319,6 +320,7 @@ namespace UVShader
     }
 
     SetTriggerCallBack(MultiByteOperatorProc, NULL);
+    SetIteratorCallBack(IteratorProc, NULL);
     return m_aTokens.size();
   }
 
@@ -1810,22 +1812,22 @@ NOT_INC_P:
     const auto& tokens = *pParse->GetTokensArray();
 
     if(tokens.front() == PREPROCESS_define) {
-      Macro_Define(tokens);
+      PP_Define(tokens);
     }
     else if(tokens.front() == PREPROCESS_undef) {
-      Macro_Undefine(ctx, tokens);
+      PP_Undefine(ctx, tokens);
     }
     else if(tokens.front() == PREPROCESS_ifdef) {
-      return Macro_IfDefine(ctx, FALSE, tokens);
+      return PP_IfDefine(ctx, FALSE, tokens);
     }
     else if(tokens.front() == PREPROCESS_ifndef) {
-      return Macro_IfDefine(ctx, TRUE, tokens);
+      return PP_IfDefine(ctx, TRUE, tokens);
     }
     else if(tokens.front() == PREPROCESS_if) {
       return PP_If(ctx, pParse);
     }
     else if(tokens.front() == PREPROCESS_pragma) {
-      CLBREAK;
+      PP_Pragma(tokens);
     }
     else {
       OutputErrorW(tokens.front(), E1021_无效的预处理器命令, clStringW(tokens.front().ToString()));
@@ -1833,7 +1835,7 @@ NOT_INC_P:
     return ctx.iter_next.marker;
   }
 
-  void CodeParser::Macro_Define(const TOKEN::Array& tokens)
+  void CodeParser::PP_Define(const TOKEN::Array& tokens)
   {
     MACRO l_m;
     //const auto& tokens = *m_pSubParser->GetTokensArray();
@@ -1981,7 +1983,7 @@ NOT_INC_P:
     return TRUE;
   }
 
-  void CodeParser::Macro_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens)
+  void CodeParser::PP_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens)
   {
     ASSERT(aTokens.front() == "undef");
     if(aTokens.size() == 1) {
@@ -2005,7 +2007,7 @@ NOT_INC_P:
     //} while (it->first.BeginsWith(strMacroName));
   }
 
-  CodeParser::T_LPCSTR CodeParser::Macro_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& tokens)
+  CodeParser::T_LPCSTR CodeParser::PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& tokens)
   {
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && (tokens.front() == "ifdef" || tokens.front() == "ifndef"));
@@ -2033,6 +2035,31 @@ NOT_INC_P:
     return ctx.stream_end;
   }
 
+  void CodeParser::PP_Pragma(const TOKEN::Array& aTokens)
+  {
+    ASSERT(aTokens.front() == "pragma");
+    if(aTokens[1] == "message")
+    {
+      if(aTokens[2] != '(') {
+        OutputErrorW(aTokens[2], E2059_SyntaxError_v, clStringW(aTokens[2].ToString()));
+        return;
+      }
+
+      if(aTokens[3].type != TOKEN::TokenType_String) {
+        OutputErrorW(aTokens[2], E2059_SyntaxError_v, clStringW(aTokens[2].ToString()));
+        return;
+      }
+
+      ASSERT(aTokens[2].GetScope() != -1); // 如果能走到这里括号一定是配对的
+      clStringW str;
+      StringTokenToString(str, aTokens, 3);
+      m_pMsg->WriteMessageW(FALSE, str);
+    }
+    else {
+      // 不能识别的pragma子指令
+      OutputErrorW(aTokens[1], E1021_无效的预处理器命令, clStringW(aTokens[1].ToString()));
+    }
+  }
   //////////////////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////////////////
@@ -2256,6 +2283,18 @@ NOT_INC_P:
     
     for(; *p != '\n' && p < end; p++);
     return p != end ? ++p : end;
+  }
+
+  // 用来组装字符串："aaa" "bbb" => "aaabbb"
+  void CodeParser::StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin)
+  {
+    int i = nBegin;
+    ASSERT(aTokens[i].type == TOKEN::TokenType_String);
+    strOut.Clear();
+    do {
+      strOut.Append(aTokens[i].ToString());
+      i++;
+    } while(aTokens[i].type == TOKEN::TokenType_String);
   }
 
   CodeParser::T_LPCSTR CodeParser::Macro_SkipGaps( T_LPCSTR p, T_LPCSTR end )

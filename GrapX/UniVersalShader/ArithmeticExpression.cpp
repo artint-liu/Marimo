@@ -99,7 +99,7 @@ namespace UVShader
 
     SetFlags(GetFlags() | F_SYMBOLBREAK);
     SetCharSemantic(aCharSem, 0, 128);
-    SetIteratorCallBack(IteratorProc, 0);
+    //SetIteratorCallBack(IteratorProc, 0);
     //SetTriggerCallBack(MultiByteOperatorProc, 0);
   }
 
@@ -289,7 +289,17 @@ namespace UVShader
 
   u32 CALLBACK ArithmeticExpression::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
   {
+    if(it.BeginsWith('\"') && it.EndsWith('\"')) {
+      TOKEN& l_token = *(TOKEN*)lParam;
+      l_token.type = TOKEN::TokenType_String;
+      return 0;
+    }
+
     GXBOOL bIsNumeric = SmartStreamUtility::ExtendToCStyleNumeric(it, remain);
+    if(bIsNumeric) {
+      TOKEN& l_token = *(TOKEN*)lParam;
+      l_token.type = TOKEN::TokenType_Numeric;
+    }
     ASSERT((int)remain >= 0);
     return 0;
   }
@@ -329,6 +339,7 @@ namespace UVShader
         l_token.scope = -1;
         l_token.unary = pProp->unary;
         l_token.unary_mask = pProp->unary_mask;
+        l_token.type = TOKEN::TokenType_Operator;
       }
     }
     return 0;
@@ -1114,5 +1125,76 @@ namespace UVShader
   //  Type type = clMax(t1.type, t2.type);
   //  
   //}
+  
+  //////////////////////////////////////////////////////////////////////////
+  void ArithmeticExpression::TOKEN::ClearMarker()
+  {
+#ifdef ENABLE_STRINGED_SYMBOL
+    symbol.Clear();
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+    marker.marker = 0;
+    type = TokenType_Undefine;
+  }
+
+  void ArithmeticExpression::TOKEN::Set(const iterator& _iter)
+  {
+    ASSERT(_iter.length != 0);
+#ifdef ENABLE_STRINGED_SYMBOL
+    symbol = _iter.ToString();
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+    marker = _iter;
+  }
+
+  void ArithmeticExpression::TOKEN::ClearArithOperatorInfo()
+  {
+    unary      = 0;
+    unary_mask = 0;
+    precedence = 0;
+  }
+
+  clStringA ArithmeticExpression::TOKEN::ToString() const
+  {
+    return marker.ToString();
+  }
+
+  int ArithmeticExpression::TOKEN::GetScope() const
+  {
+    return scope >= 0 ? scope : semi_scope;
+  }
+
+  GXBOOL ArithmeticExpression::TOKEN::operator==(const TOKEN& t) const
+  {
+    // 不可能出现指向同一地址却长度不同的情况
+    ASSERT((marker.marker == t.marker.marker && marker.length == t.marker.length) || 
+      (marker.marker != t.marker.marker));
+
+    return (marker.marker == t.marker.marker) || (marker.length == t.marker.length
+      && GXSTRNCMP(marker.marker, t.marker.marker, marker.length) == 0);
+  }
+
+  GXBOOL ArithmeticExpression::TOKEN::operator==(SmartStreamA::T_LPCSTR str) const
+  {
+    return (marker == str);
+  }
+
+  GXBOOL ArithmeticExpression::TOKEN::operator==(SmartStreamA::TChar ch) const
+  {
+    return (marker == ch);
+  }
+
+  GXBOOL ArithmeticExpression::TOKEN::operator!=(SmartStreamA::T_LPCSTR str) const
+  {
+    return (marker != str);
+  }
+
+  GXBOOL ArithmeticExpression::TOKEN::operator!=(SmartStreamA::TChar ch) const
+  {
+    return (marker != ch);
+  }
+
+  b32 ArithmeticExpression::TOKEN::operator<(const TOKEN& _token) const
+  {
+    return (b32)(marker < _token.marker);
+  }
 
 } // namespace UVShader
