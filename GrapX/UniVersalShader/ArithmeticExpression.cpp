@@ -1145,6 +1145,17 @@ namespace UVShader
     marker = _iter;
   }
 
+  void ArithmeticExpression::TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)
+  {
+    ASSERT(str.IsNotEmpty());
+#ifdef ENABLE_STRINGED_SYMBOL
+    symbol = str;
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+    marker.pContainer = NULL;
+    marker.marker     = sStrSet.add(str);
+    marker.length     = str.GetLength();
+  }
+
   void ArithmeticExpression::TOKEN::ClearArithOperatorInfo()
   {
     unary      = 0;

@@ -102,6 +102,8 @@ string paltform_error; // 没定义平台也没缺省，就报错误
 #endif
  
 #pragma message("hello world" "!")
+#pragma message("File name is " __FILE__)
+
  
 // 函数测试部分
 float func()

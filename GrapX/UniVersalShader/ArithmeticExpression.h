@@ -15,15 +15,16 @@
 #define ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动 CLBREAK
 //#define ERROR_MSG_C1021_无效的预处理器命令 
 
-#define E1021_无效的预处理器命令  1021
-#define E1189_用户定义错误        1189
-#define E4006_undef应输入标识符   4006
+#define E1021_无效的预处理器命令_vs     1021
+#define E1189_用户定义错误_vs           1189
+#define E4006_undef应输入标识符         4006
 #define E4067_预处理器指令后有意外标记_应输入换行符 4067
-#define E2004_应输入_defined_id  2004
-#define E2007_define缺少定义     2007
-#define E2008_宏定义中的意外     2008
-#define E2010_宏形参表中的意外   2010
-#define E2059_SyntaxError_v     2059
+#define E2004_应输入_defined_id        2004
+#define E2007_define缺少定义_vs         2007
+#define E2008_宏定义中的意外_vs         2008
+#define E2010_宏形参表中的意外          2010
+#define E2059_SyntaxError_vs           2059
+#define E9999_未定义错误_vsd            9999
 
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
@@ -79,6 +80,7 @@ namespace UVShader
 
       void ClearMarker();
       void Set(const iterator& _iter);
+      void Set(clstd::StringSetA& sStrSet, const clStringA& str); // 设置外来字符串
 
       template<class _Ty>
       void SetArithOperatorInfo(const _Ty& t) // 设置数学符号信息
@@ -98,6 +100,53 @@ namespace UVShader
       GXBOOL operator!=(SmartStreamA::T_LPCSTR str) const;
       GXBOOL operator!=(SmartStreamA::TChar ch) const;
       b32    operator<(const TOKEN& _token) const;
+
+    public:
+
+      // offset是指begin在序列中的索引, 用来修正括号匹配. 这么写的原因是_Iter类型有可能不支持“+”操作
+      template<class _List, class _Iter>
+      static void Append(_List& tokens, int offset, const _Iter& begin, const _Iter& end)
+      {
+        int addi = (int)tokens.size() - offset;
+        for(_Iter it = begin; it != end; ++it)
+        {
+          tokens.push_back(*it);
+          
+          auto& back = tokens.back();
+
+          if(back.scope != -1) {
+            back.scope += addi;
+            ASSERT(back.scope < (int)tokens.size());
+          }
+
+          if(back.semi_scope != -1) {
+            back.semi_scope += addi;
+            ASSERT(back.semi_scope < (int)tokens.size());
+          }
+          // TODO: 作为 +/- 符号 precedence 也可能会由于插入后上下文变化导致含义不同
+        }
+      }
+
+      // 调试模式检查tokens序列合法性, 主要是检查scope是否匹配
+      static GXBOOL DbgCheck(const Array& tokens, Array::const_iterator& begin)
+      {
+        int i = 0;
+        for(auto it = begin; it != tokens.end(); ++it, ++i)
+        {
+          // 检查括号是否匹配
+          if(it->scope != -1 && tokens[it->scope].scope != i) {
+            return FALSE;
+          }
+
+          // 检查分号是否标记正确
+          if(it->semi_scope != -1 && tokens[it->semi_scope] != ";") {
+            return FALSE;
+          }
+        }
+
+        return TRUE;
+      }
+
     };
     //typedef clvector<TOKEN> TokenArray;
     //typedef cllist<TOKEN> TokenList;

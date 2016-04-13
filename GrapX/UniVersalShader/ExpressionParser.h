@@ -30,9 +30,11 @@ namespace UVShader
     {
       typedef clmap<clStringA, MACRO> Dict; // macro 支持重载，所以 key 的名字用 clStringA 来储存, Dict 要求具有排序性
       //typedef clhash_set<clStringA>   Set;
-
       TOKEN::List aFormalParams;  // 形参
       TOKEN::List aTokens;        // 替换内容
+      GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
+
+      MACRO();
 
       void set            (const Dict& dict, const TOKEN::Array& tokens, int begin_at);
       void clear          ();
@@ -256,25 +258,6 @@ namespace UVShader
     void    InitPacks();
     void    Cleanup();
 
-    template<class _Iter>
-    void    Append(const _Iter& begin, const _Iter& end)
-    {
-      auto addi = m_aTokens.size();
-      for(_Iter it = begin; it != end; ++it)
-      {
-        m_aTokens.push_back(*it);
-
-        auto& back = m_aTokens.back();
-        if(back.scope != -1) {
-          back.scope += addi;
-        }
-        if(back.semi_scope != -1) {
-          back.semi_scope += addi;
-        }
-        // TODO: 作为 +/- 符号 precedence 也可能会由于插入后上下文变化导致含义不同
-      }
-    }
-
     GXBOOL  ParseStatementAs_Definition(RTSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(RTSCOPE* pScope);
     GXBOOL  ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope);
@@ -370,7 +353,7 @@ namespace UVShader
     CodeParser();
     virtual ~CodeParser();
     b32                 Attach                  (const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename);
-    clsize              GenerateTokens          ();
+    clsize              GenerateTokens          (CodeParser* pParent = NULL);
     GXBOOL              Parse                   ();
 
     const StatementArray& GetStatments          () const;

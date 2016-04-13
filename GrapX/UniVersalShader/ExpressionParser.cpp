@@ -55,6 +55,8 @@
 #define PREPROCESS_pragma   "pragma"
 #define PREPROCESS_message  "message"
 #define PREPROCESS_error    "error"
+#define MACRO_FILE          "__FILE__"
+#define MACRO_LINE          "__LINE__"
 
 #pragma message("hello world")
 
@@ -185,7 +187,7 @@ namespace UVShader
       else if(it == PREPROCESS_error)
       {
         clStringW str(it.marker + it.length, ctx.ppend - (it.marker + it.length));
-        pThis->OutputErrorW(it.marker, E1189_用户定义错误, str);
+        pThis->OutputErrorW(it.marker, E1189_用户定义错误_vs, str);
       }
       else
       {
@@ -219,7 +221,7 @@ namespace UVShader
     return 0;
   }
 
-  clsize CodeParser::GenerateTokens()
+  clsize CodeParser::GenerateTokens(CodeParser* pParent)
   {
     auto stream_end = end();
     ASSERT(m_aTokens.empty()); // 调用者负责清空
@@ -283,11 +285,29 @@ namespace UVShader
       // 符号配对处理
       MarryBracket(sStack, token, EOE);
       
-      // 1.宏展开
-      if(token.precedence == 0 && OnToken(token, sMacroStack)) {
+      // 1.__FILE__ 展开
+      if(token == MACRO_FILE)
+      {
+        clStringA strFilenameA  = m_pMsg ? m_pMsg->GetFilenameW() : pParent->m_pMsg->GetFilenameW();
+        token.type = ArithmeticExpression::TOKEN::TokenType_String;
+        token.Set(m_Strings, strFilenameA);
+      }
+      // 2.__LINE__ 展开
+      else if(token == MACRO_LINE)
+      {
+        clStringA strFilenameA;
+        strFilenameA.AppendInteger32(m_pMsg 
+          ? m_pMsg->LineFromPtr(token.marker.marker)
+          : pParent->m_pMsg->LineFromPtr(token.marker.marker));
+
+        token.type = ArithmeticExpression::TOKEN::TokenType_Numeric;
+        token.Set(m_Strings, strFilenameA);
+      }
+      // 3.宏展开
+      else if(token.precedence == 0 && OnToken(token, sMacroStack)) {
         token.ClearMarker();
       }
-      // 2.带有参数的宏展开
+      // 4.带有参数的宏展开
       else if(token == ')' && ! sMacroStack.empty() && token.scope == sMacroStack.top() + 1 &&
         Macro_ExpandMacroInvoke(sMacroStack.top(), token))
       {
@@ -327,25 +347,6 @@ namespace UVShader
   GXBOOL CodeParser::OnToken(const TOKEN& token, MacroStack& sStack)
   {
     clStringA strTokenName = token.ToString();
-    //{
-    //  auto it = m_Macros.find(strTokenName);
-    //  if(it == m_MacrosSet.end()) {
-    //    return FALSE;
-    //  }
-    //}
-
-    //auto it = m_Macros.find(strTokenName);
-    //ASSERT(it != m_Macros.end());
-
-    //auto iter_next = it;
-    //++iter_next;
-    //strTokenName.Append("@A");
-
-    //if(iter_next == m_Macros.end() || ! iter_next->first.BeginsWith(strTokenName)) {
-    //  m_aTokens.insert(m_aTokens.end(), it->second.aTokens.begin(), it->second.aTokens.end());
-    //  return TRUE;
-    //}
-
 
     auto it = m_Macros.find(strTokenName);
     if(it == m_Macros.end()) {
@@ -353,7 +354,12 @@ namespace UVShader
     }
 
     if(it->second.aFormalParams.empty()) {
-      m_aTokens.insert(m_aTokens.end(), it->second.aTokens.begin(), it->second.aTokens.end());
+      TOKEN::Append(m_aTokens, 0, it->second.aTokens.begin(), it->second.aTokens.end());
+      ASSERT(TOKEN::DbgCheck(m_aTokens, m_aTokens.end() - it->second.aTokens.size()));
+
+      if(it->second.bHasLINE) {
+        CLBREAK; // 解析__LINE__宏
+      }
       return TRUE;
     }
 
@@ -1808,10 +1814,13 @@ NOT_INC_P:
   {
     CodeParser* pParse = GetSubParser();
     pParse->Attach(begin, (clsize)end - (clsize)begin, AttachFlag_NotLoadMessage, NULL);
-    pParse->GenerateTokens();
+    pParse->GenerateTokens(this);
     const auto& tokens = *pParse->GetTokensArray();
 
-    if(tokens.front() == PREPROCESS_define) {
+    if(tokens.front() == PREPROCESS_include) {
+
+    }
+    else if(tokens.front() == PREPROCESS_define) {
       PP_Define(tokens);
     }
     else if(tokens.front() == PREPROCESS_undef) {
@@ -1829,8 +1838,14 @@ NOT_INC_P:
     else if(tokens.front() == PREPROCESS_pragma) {
       PP_Pragma(tokens);
     }
+    else if(tokens.front() == PREPROCESS_file) {
+      CLBREAK;
+    }
+    else if(tokens.front() == PREPROCESS_line) {
+      CLBREAK;
+    }
     else {
-      OutputErrorW(tokens.front(), E1021_无效的预处理器命令, clStringW(tokens.front().ToString()));
+      OutputErrorW(tokens.front(), E1021_无效的预处理器命令_vs, clStringW(tokens.front().ToString()));
     }
     return ctx.iter_next.marker;
   }
@@ -1845,7 +1860,7 @@ NOT_INC_P:
     //m_MacrosSet.insert(strMacroName);
 
     if(count == 1) {
-      OutputErrorW(tokens.front(), E2007_define缺少定义);
+      OutputErrorW(tokens.front(), E2007_define缺少定义_vs);
     }
     else if(count == 2) // "#define MACRO" 形
     {
@@ -1859,8 +1874,9 @@ NOT_INC_P:
       if( ! result.second) {
         result.first->second.clear();
       }
-      result.first->second.aTokens.push_back(tokens[2]);
-      result.first->second.ClearContainer();      
+      //result.first->second.aTokens.push_back(tokens[2]);
+      result.first->second.set(m_Macros, tokens, 2);
+      //result.first->second.ClearContainer();      
     }
     else
     {
@@ -1870,7 +1886,7 @@ NOT_INC_P:
       if(tokens[1].marker.end() == tokens[2].marker.marker)
       {
         if(tokens[2] != '(') {
-          OutputErrorW(tokens[2], E2008_宏定义中的意外, clStringW(tokens[2].ToString()));
+          OutputErrorW(tokens[2], E2008_宏定义中的意外_vs, clStringW(tokens[2].ToString()));
           return;
         }
 
@@ -1887,9 +1903,6 @@ NOT_INC_P:
               l_m.aFormalParams.push_back(tokens[i++]);
             }
           }
-
-          //m_Macros.insert(clmake_pair(strMacroName, l_m)); // 添加原名
-          //strMacroName.AppendFormat("@A%d", l_m.aFormalParams.size());
         }
         l_define = scope_end + 1;
       }
@@ -1902,6 +1915,7 @@ NOT_INC_P:
 
       // 设置宏代替的表达式，如果表达式中含有宏也会展开
       result.first->second.set(m_Macros, tokens, l_define);
+      //result.first->second.ClearContainer();      
     }
   }
 
@@ -1955,7 +1969,7 @@ NOT_INC_P:
           ++it;
           for(RTSCOPE::TYPE i = iter_arg->begin + 1; i < iter_arg->end; i++)
           {
-            it = token_list.insert(it, m_aTokens[i]);
+            it = token_list.insert(it, m_aTokens[i]); // FIXME: 修正scope括号匹配问题
             ++it;
           }
         }
@@ -1966,7 +1980,10 @@ NOT_INC_P:
     }
 
     m_aTokens.erase(m_aTokens.begin() + token.scope - 1, m_aTokens.end());
-    Append(token_list.begin(), token_list.end());
+
+    m_aTokens.reserve(m_aTokens.size() + token_list.size());
+    TOKEN::Append(m_aTokens, 0, token_list.begin(), token_list.end());
+    ASSERT(TOKEN::DbgCheck(m_aTokens, m_aTokens.end() - token_list.size()));
     //// 宏定义参数中不应该出现分号，此时刚遇到')'，也还没有设置整个表达式的分号域
     //if(m_aTokens[token.scope - 1].semi_scope == -1) {
     //  
@@ -2037,27 +2054,28 @@ NOT_INC_P:
 
   void CodeParser::PP_Pragma(const TOKEN::Array& aTokens)
   {
-    ASSERT(aTokens.front() == "pragma");
-    if(aTokens[1] == "message")
+    ASSERT(aTokens.front() == PREPROCESS_pragma);
+    if(aTokens[1] == PREPROCESS_message)
     {
       if(aTokens[2] != '(') {
-        OutputErrorW(aTokens[2], E2059_SyntaxError_v, clStringW(aTokens[2].ToString()));
+        OutputErrorW(aTokens[2], E2059_SyntaxError_vs, clStringW(aTokens[2].ToString()));
         return;
       }
 
       if(aTokens[3].type != TOKEN::TokenType_String) {
-        OutputErrorW(aTokens[2], E2059_SyntaxError_v, clStringW(aTokens[2].ToString()));
+        OutputErrorW(aTokens[2], E2059_SyntaxError_vs, clStringW(aTokens[2].ToString()));
         return;
       }
 
       ASSERT(aTokens[2].GetScope() != -1); // 如果能走到这里括号一定是配对的
       clStringW str;
       StringTokenToString(str, aTokens, 3);
+      str.Append("\r\n");
       m_pMsg->WriteMessageW(FALSE, str);
     }
     else {
       // 不能识别的pragma子指令
-      OutputErrorW(aTokens[1], E1021_无效的预处理器命令, clStringW(aTokens[1].ToString()));
+      OutputErrorW(aTokens[1], E1021_无效的预处理器命令_vs, clStringW(aTokens[1].ToString()));
     }
   }
   //////////////////////////////////////////////////////////////////////////
@@ -2221,7 +2239,7 @@ NOT_INC_P:
         }
 
         pParse->Attach(p, (clsize)line_end - (clsize)p, AttachFlag_NotLoadMessage, NULL);
-        pParse->GenerateTokens();
+        pParse->GenerateTokens(this);
         const auto& tokens = *pParse->GetTokensArray();
         if(tokens.empty()) {
           // ERROR: “elif” 后面需要表达式
@@ -2277,7 +2295,7 @@ NOT_INC_P:
           }
         }
         clStringW str(p, (size_t)pend - (size_t)p);
-        OutputErrorW(p, E1021_无效的预处理器命令, str);
+        OutputErrorW(p, E1021_无效的预处理器命令_vs, str);
       }
     }
     
@@ -2359,10 +2377,15 @@ NOT_INC_P:
     aFormalParams.clear();
   }
 
+  CodeParser::MACRO::MACRO() : bHasLINE(0)
+  {}
+
   void CodeParser::MACRO::set(const Dict& dict, const TOKEN::Array& tokens, int begin_at)
   {
     ASSERT(tokens.front() == PREPROCESS_define);
-    aTokens.insert(aTokens.begin(), tokens.begin() + begin_at, tokens.end());
+    aTokens.clear();
+    ASSERT(TOKEN::DbgCheck(tokens, tokens.begin()));
+    TOKEN::Append(aTokens, begin_at, tokens.begin() + begin_at, tokens.end());
     ClearContainer();
     while(ExpandMacro(dict) > 0); // 反复调用直到返回0 
   }
@@ -2381,7 +2404,13 @@ NOT_INC_P:
   {
     int result = 0;
     for(auto it = aTokens.begin(); it != aTokens.end();) {
-      if(it->precedence == 0 && it->scope == -1) {
+      if(it->precedence == 0 && it->scope == -1)
+      {        
+        if(*it == MACRO_LINE) {
+          bHasLINE = 1;
+          continue;
+        }
+
         auto iter_dict = dict.find(it->ToString());
         if(iter_dict != dict.end() && &iter_dict->second != this)
         {

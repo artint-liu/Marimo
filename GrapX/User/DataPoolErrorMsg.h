@@ -33,16 +33,18 @@ namespace Marimo
     virtual ~DataPoolErrorMsg();
     GXBOOL    LoadErrorMessageW   (GXLPCWSTR szErrorFile);
     void      SetMessageSign      (GXWCHAR cSign);
+
+    void      PushFile            (GXLPCWSTR szFilename, GXINT nTopLine = 0);
+    void      PopFile             ();
+    GXSIZE_T  GenerateCurLines    (T_LPCSTR pText, clsize length);
+
     void      SetCurrentFilenameW (GXLPCWSTR szFilename);
     void      SetCurrentTopLine   (GXINT nTopLine);
-    GXSIZE_T  GenerateCurLines    (T_LPCSTR pText, clsize length);
     GXLPCWSTR GetFilenameW        (GXUINT idFile = 0) const;
     GXUINT    GetCurrentFileId    () const;
     int       LineFromPtr         (T_LPCSTR ptr) const;
     int       LineFromOffset      (GXSIZE_T nOffset, const FILE_SECTION* pfs) const;
     int       LineFromOffset      (GXSIZE_T nOffset, GXUINT idFile = 0) const;
-    void      PushFile            (GXLPCWSTR szFilename, GXINT nTopLine = 0);
-    void      PopFile             ();
 
     void      WriteMessageW       (GXBOOL bError, GXLPCWSTR szMessage);
     void      WriteErrorW         (GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, ...);
