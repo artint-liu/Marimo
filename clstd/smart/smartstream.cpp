@@ -361,6 +361,17 @@ clsize _SS_IMPL::iterator::offset() const
 }
 
 _SS_TEMPL
+_TStr _SS_IMPL::iterator::ToRawString() const
+{
+  _TStr strTemp;
+  if(length == 0) {
+    return strTemp;
+  }
+
+  return strTemp.Append(marker, length);
+}
+
+_SS_TEMPL
 _TStr _SS_IMPL::iterator::ToString() const
 {
   _TStr strTemp;

@@ -33,6 +33,7 @@ namespace UVShader
       TOKEN::List aFormalParams;  // 形参
       TOKEN::List aTokens;        // 替换内容
       GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
+      GXDWORD bPoundSign     : 1; // #解析
 
       MACRO();
 
@@ -301,6 +302,9 @@ namespace UVShader
     T_LPCSTR PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
     GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
 
+    template<class _List, class _Iter>
+    void     AppendWithExpandProprocess(_List& tokens, int offset, int nSrcLine, const _Iter& begin, const _Iter& end);
+
     static void StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin);
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
     static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
@@ -337,6 +341,7 @@ namespace UVShader
 
   protected:
     GXDWORD             m_dwState;          // 内部状态, 参考RTState
+    CodeParser*         m_pParent;
     clstd::StringSetA   m_Strings;
     TypeSet             m_TypeSet;
     StatementArray      m_aStatements;
@@ -365,6 +370,8 @@ namespace UVShader
 
 
   };
+
+  //////////////////////////////////////////////////////////////////////////
 
 } // namespace UVShader
 

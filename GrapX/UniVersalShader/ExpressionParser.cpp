@@ -55,6 +55,7 @@
 #define PREPROCESS_pragma   "pragma"
 #define PREPROCESS_message  "message"
 #define PREPROCESS_error    "error"
+#define PREPROCESS_pound    '#'
 #define MACRO_FILE          "__FILE__"
 #define MACRO_LINE          "__LINE__"
 
@@ -69,6 +70,7 @@ namespace UVShader
   CodeParser::CodeParser()
     : m_pSubParser(NULL)
     , m_dwState(0)
+    , m_pParent(NULL)
   {
     SetIteratorCallBack(CodeParser::IteratorProc, 0);
     InitPacks();
@@ -223,6 +225,8 @@ namespace UVShader
 
   clsize CodeParser::GenerateTokens(CodeParser* pParent)
   {
+    CodeParser* pPrevParent = m_pParent;
+    m_pParent = pParent;
     auto stream_end = end();
     ASSERT(m_aTokens.empty()); // 调用者负责清空
 
@@ -286,19 +290,17 @@ namespace UVShader
       MarryBracket(sStack, token, EOE);
       
       // 1.__FILE__ 展开
-      if(token == MACRO_FILE)
+      if(m_pMsg && token == MACRO_FILE) // m_pMsg 不为空表示一级解析，不是在预处理解析
       {
-        clStringA strFilenameA  = m_pMsg ? m_pMsg->GetFilenameW() : pParent->m_pMsg->GetFilenameW();
+        clStringA strFilenameA  = m_pMsg->GetFilenameW();
         token.type = ArithmeticExpression::TOKEN::TokenType_String;
         token.Set(m_Strings, strFilenameA);
       }
       // 2.__LINE__ 展开
-      else if(token == MACRO_LINE)
+      else if(m_pMsg && token == MACRO_LINE)
       {
         clStringA strFilenameA;
-        strFilenameA.AppendInteger32(m_pMsg 
-          ? m_pMsg->LineFromPtr(token.marker.marker)
-          : pParent->m_pMsg->LineFromPtr(token.marker.marker));
+        strFilenameA.AppendInteger32(m_pMsg->LineFromPtr(token.marker.marker));
 
         token.type = ArithmeticExpression::TOKEN::TokenType_Numeric;
         token.Set(m_Strings, strFilenameA);
@@ -341,6 +343,8 @@ namespace UVShader
 
     SetTriggerCallBack(MultiByteOperatorProc, NULL);
     SetIteratorCallBack(IteratorProc, NULL);
+
+    m_pParent = pPrevParent;
     return m_aTokens.size();
   }
 
@@ -354,12 +358,16 @@ namespace UVShader
     }
 
     if(it->second.aFormalParams.empty()) {
-      TOKEN::Append(m_aTokens, 0, it->second.aTokens.begin(), it->second.aTokens.end());
-      ASSERT(TOKEN::DbgCheck(m_aTokens, m_aTokens.end() - it->second.aTokens.size()));
 
-      if(it->second.bHasLINE) {
-        CLBREAK; // 解析__LINE__宏
+      if(it->second.bHasLINE || it->second.bPoundSign) {
+        AppendWithExpandProprocess(m_aTokens, 0, m_pMsg->LineFromPtr(token.marker.marker),
+          it->second.aTokens.begin(), it->second.aTokens.end());
       }
+      else {
+        TOKEN::Append(m_aTokens, 0, it->second.aTokens.begin(), it->second.aTokens.end());
+      }
+
+      ASSERT(TOKEN::DbgCheck(m_aTokens, m_aTokens.end() - it->second.aTokens.size()));
       return TRUE;
     }
 
@@ -1962,6 +1970,7 @@ NOT_INC_P:
     for(auto iter_formalparam = macro.aFormalParams.begin(); 
       iter_formalparam != macro.aFormalParams.end(); ++iter_formalparam, ++iter_arg)
     {
+      // 改为 std::find()
       for(auto it = token_list.begin(); it != token_list.end();)
       {
         if(*it == *iter_formalparam) {
@@ -1980,9 +1989,9 @@ NOT_INC_P:
     }
 
     m_aTokens.erase(m_aTokens.begin() + token.scope - 1, m_aTokens.end());
-
     m_aTokens.reserve(m_aTokens.size() + token_list.size());
-    TOKEN::Append(m_aTokens, 0, token_list.begin(), token_list.end());
+    AppendWithExpandProprocess(m_aTokens, 0, m_pMsg->LineFromPtr(token.marker.marker),
+      token_list.begin(), token_list.end());
     ASSERT(TOKEN::DbgCheck(m_aTokens, m_aTokens.end() - token_list.size()));
     //// 宏定义参数中不应该出现分号，此时刚遇到')'，也还没有设置整个表达式的分号域
     //if(m_aTokens[token.scope - 1].semi_scope == -1) {
@@ -2078,6 +2087,23 @@ NOT_INC_P:
       OutputErrorW(aTokens[1], E1021_无效的预处理器命令_vs, clStringW(aTokens[1].ToString()));
     }
   }
+
+  template<class _List, class _Iter>
+  void UVShader::CodeParser::AppendWithExpandProprocess(_List& tokens, int offset, int nSrcLine, const _Iter& begin, const _Iter& end)
+  {
+    TOKEN::Append(tokens, offset, begin, end, [=](int a, TOKEN& t)
+    {
+      if(t == MACRO_LINE)
+      {
+        clStringA strSourceLine;
+        strSourceLine.AppendInteger32(nSrcLine);
+
+        t.type = ArithmeticExpression::TOKEN::TokenType_Numeric;
+        t.Set(m_Strings, strSourceLine);
+      }
+    });
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////////////////
@@ -2377,7 +2403,7 @@ NOT_INC_P:
     aFormalParams.clear();
   }
 
-  CodeParser::MACRO::MACRO() : bHasLINE(0)
+  CodeParser::MACRO::MACRO() : bHasLINE(0), bPoundSign(0)
   {}
 
   void CodeParser::MACRO::set(const Dict& dict, const TOKEN::Array& tokens, int begin_at)
@@ -2405,21 +2431,25 @@ NOT_INC_P:
     int result = 0;
     for(auto it = aTokens.begin(); it != aTokens.end();) {
       if(it->precedence == 0 && it->scope == -1)
-      {        
+      {
         if(*it == MACRO_LINE) {
           bHasLINE = 1;
-          continue;
         }
+        else if(*it == PREPROCESS_pound) {
+          bPoundSign = 1;
+        }
+        else {
+          auto iter_dict = dict.find(it->ToString());
+          if(iter_dict != dict.end() && &iter_dict->second != this)
+          {
+            it = aTokens.erase(it);
+            aTokens.insert(it, iter_dict->second.aTokens.begin(), iter_dict->second.aTokens.end());
+            result++;
+            continue;
+          }
+        } // else
+      } // if
 
-        auto iter_dict = dict.find(it->ToString());
-        if(iter_dict != dict.end() && &iter_dict->second != this)
-        {
-          it = aTokens.erase(it);
-          aTokens.insert(it, iter_dict->second.aTokens.begin(), iter_dict->second.aTokens.end());
-          result++;
-          continue;
-        }
-      }
       ++it;
     }
     return result;

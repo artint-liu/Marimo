@@ -104,8 +104,8 @@ namespace UVShader
     public:
 
       // offset是指begin在序列中的索引, 用来修正括号匹配. 这么写的原因是_Iter类型有可能不支持“+”操作
-      template<class _List, class _Iter>
-      static void Append(_List& tokens, int offset, const _Iter& begin, const _Iter& end)
+      template<class _List, class _Iter, class _Fn>
+      static void Append(_List& tokens, int offset, const _Iter& begin, const _Iter& end, _Fn fn)
       {
         int addi = (int)tokens.size() - offset;
         for(_Iter it = begin; it != end; ++it)
@@ -113,6 +113,8 @@ namespace UVShader
           tokens.push_back(*it);
           
           auto& back = tokens.back();
+
+          fn(addi, back); // 这个可能会改变addi，所以必须在这里做
 
           if(back.scope != -1) {
             back.scope += addi;
@@ -125,6 +127,12 @@ namespace UVShader
           }
           // TODO: 作为 +/- 符号 precedence 也可能会由于插入后上下文变化导致含义不同
         }
+      }
+
+      template<class _List, class _Iter>
+      static void Append(_List& tokens, int offset, const _Iter& begin, const _Iter& end)
+      {
+        Append(tokens, offset, begin, end, [](int, const TOKEN&){});
       }
 
       // 调试模式检查tokens序列合法性, 主要是检查scope是否匹配

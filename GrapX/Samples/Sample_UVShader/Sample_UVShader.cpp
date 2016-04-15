@@ -209,49 +209,85 @@ void TestFlowIf()
   } while (a < b);
 }
 
-void TestShaderToys(GXBOOL bShowList)
-{
-  clstd::FindFile find("Test\\shaders\\ShaderToy\\*.txt");
-  clstd::FINDFILEDATAA find_data;
+namespace Test{
   struct ITEM
   {
     clStringA strName;
     clStringA strInput;
     clStringA strOutput;
   };
-
   typedef clvector<ITEM> ItemList;
 
-  ItemList toy_list;
-
-  while(find.GetFileA(&find_data))
+  void Generate(ItemList& toy_list, GXLPCSTR szDir)
   {
-    ITEM item;
-    item.strName = find_data.Filename;
-    item.strOutput = find_data.Filename;
+    clStringA strFindTarget;
+    strFindTarget.Format("%s\\*.txt", szDir);
+    clstd::FindFile find(strFindTarget);
+    clstd::FINDFILEDATAA find_data;
 
-    clpathfile::RenameExtensionA(item.strName, "");
-
-    if(item.strOutput.EndsWith("[output].txt")) {
-      continue;
-    }
-
-    clsize pos = clpathfile::FindExtensionA(item.strOutput);
-    if(pos != clStringA::npos)
+    while(find.GetFileA(&find_data))
     {
-      item.strOutput.Insert(pos, "[output]");
-      clpathfile::CombinePathA(item.strInput, "Test\\shaders\\ShaderToy", find_data.Filename);
-      clpathfile::CombinePathA(item.strOutput, "Test\\shaders\\ShaderToy", item.strOutput);
-      if(bShowList)
-      {
-        toy_list.push_back(item);
+      ITEM item;
+      item.strName = find_data.Filename;
+      item.strOutput = find_data.Filename;
+
+      clpathfile::RenameExtensionA(item.strName, "");
+
+      if(item.strOutput.EndsWith("[output].txt")) {
+        continue;
       }
-      else
+
+      clsize pos = clpathfile::FindExtensionA(item.strOutput);
+      if(pos != clStringA::npos)
       {
-        TestFromFile(item.strInput, item.strOutput);
+        item.strOutput.Insert(pos, "[output]");
+        clpathfile::CombinePathA(item.strInput, szDir, find_data.Filename);
+        clpathfile::CombinePathA(item.strOutput, szDir, item.strOutput);
+        toy_list.push_back(item);
       }
     }
   }
+}
+
+void TestShaderToys(GXBOOL bShowList)
+{
+  Test::ItemList toy_list;
+  Test::Generate(toy_list, "Test\\shaders\\ShaderToy");
+
+  //clstd::FindFile find("Test\\shaders\\ShaderToy\\*.txt");
+  //clstd::FINDFILEDATAA find_data;
+
+
+  //ItemList toy_list;
+
+  //while(find.GetFileA(&find_data))
+  //{
+  //  ITEM item;
+  //  item.strName = find_data.Filename;
+  //  item.strOutput = find_data.Filename;
+
+  //  clpathfile::RenameExtensionA(item.strName, "");
+
+  //  if(item.strOutput.EndsWith("[output].txt")) {
+  //    continue;
+  //  }
+
+  //  clsize pos = clpathfile::FindExtensionA(item.strOutput);
+  //  if(pos != clStringA::npos)
+  //  {
+  //    item.strOutput.Insert(pos, "[output]");
+  //    clpathfile::CombinePathA(item.strInput, "Test\\shaders\\ShaderToy", find_data.Filename);
+  //    clpathfile::CombinePathA(item.strOutput, "Test\\shaders\\ShaderToy", item.strOutput);
+  //    if(bShowList)
+  //    {
+  //      toy_list.push_back(item);
+  //    }
+  //    else
+  //    {
+  //      TestFromFile(item.strInput, item.strOutput);
+  //    }
+  //  }
+  //}
 
   if(bShowList)
   {
@@ -330,6 +366,14 @@ int _tmain(int argc, _TCHAR* argv[])
 #ifdef TEST_ALL_SHADERTOYS
   TestShaderToys(TRUE);
 #endif // TEST_ALL_SHADERTOYS
+
+  {
+    Test::ItemList toys_list;
+    Test::Generate(toys_list, "Test\\shaders\\debris");
+    std::for_each(toys_list.begin(), toys_list.end(), [](Test::ITEM& item){
+      TestFromFile(item.strInput, item.strOutput);
+    });
+  }
 
   //TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame[output].txt");
   //TestFromFile("Test\\shaders\\ShaderToy\\Anatomy of an explosion.txt", "Test\\shaders\\Anatomy of an explosion[output].txt");

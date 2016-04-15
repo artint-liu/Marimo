@@ -1165,7 +1165,7 @@ namespace UVShader
 
   clStringA ArithmeticExpression::TOKEN::ToString() const
   {
-    return marker.ToString();
+    return marker.ToRawString();
   }
 
   int ArithmeticExpression::TOKEN::GetScope() const
