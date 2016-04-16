@@ -118,12 +118,10 @@ namespace UVShader
 
           if(back.scope != -1) {
             back.scope += addi;
-            ASSERT(back.scope < (int)tokens.size());
           }
 
           if(back.semi_scope != -1) {
             back.semi_scope += addi;
-            ASSERT(back.semi_scope < (int)tokens.size());
           }
           // TODO: 作为 +/- 符号 precedence 也可能会由于插入后上下文变化导致含义不同
         }
@@ -136,10 +134,10 @@ namespace UVShader
       }
 
       // 调试模式检查tokens序列合法性, 主要是检查scope是否匹配
-      static GXBOOL DbgCheck(const Array& tokens, Array::const_iterator& begin)
+      static GXBOOL DbgCheck(const Array& tokens, int begin)
       {
-        int i = 0;
-        for(auto it = begin; it != tokens.end(); ++it, ++i)
+        int i = begin;
+        for(auto it = tokens.begin() + begin; it != tokens.end(); ++it, ++i)
         {
           // 检查括号是否匹配
           if(it->scope != -1 && tokens[it->scope].scope != i) {

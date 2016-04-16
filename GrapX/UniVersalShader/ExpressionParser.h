@@ -32,7 +32,9 @@ namespace UVShader
       //typedef clhash_set<clStringA>   Set;
       TOKEN::List aFormalParams;  // 形参
       TOKEN::List aTokens;        // 替换内容
+      GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
       GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
+      GXDWORD bHasFILE       : 1; // 有__FILE__宏
       GXDWORD bPoundSign     : 1; // #解析
 
       MACRO();
