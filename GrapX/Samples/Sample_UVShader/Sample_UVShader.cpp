@@ -15,9 +15,9 @@
 
 #pragma comment(lib, "gdiplus.lib")
 void TestExpressionParser();
-void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput);
+void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference);
 void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples);
-//#define ENABLE_GRAPH // 毫无意义的开始了语法树转图形化的工作，有舍不得删代码，先注释掉
+//#define ENABLE_GRAPH // 毫无意义的开始了语法树转图形化的工作，又舍不得删代码，先注释掉
 
 namespace DigitalParsing
 {
@@ -35,8 +35,7 @@ extern SAMPLE_EXPRESSION samplesSimpleExpression[];
 
 // 使用继承类为了暴露ParseStatementAs_Expression接口进行测试
 
-
-//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 #ifdef ENABLE_GRAPH
 int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 {
@@ -215,6 +214,7 @@ namespace Test{
     clStringA strName;
     clStringA strInput;
     clStringA strOutput;
+    clStringA strReference;
   };
   typedef clvector<ITEM> ItemList;
 
@@ -228,12 +228,15 @@ namespace Test{
     while(find.GetFileA(&find_data))
     {
       ITEM item;
-      item.strName = find_data.Filename;
-      item.strOutput = find_data.Filename;
+      item.strName      = find_data.Filename;
+      item.strOutput    = find_data.Filename;
+      item.strReference = find_data.Filename;
 
       clpathfile::RenameExtensionA(item.strName, "");
 
-      if(item.strOutput.EndsWith("[output].txt")) {
+      // 跳过输出文件和屏蔽文件
+      if(item.strOutput.EndsWith("[output].txt") || item.strOutput.EndsWith("[reference].txt") ||
+        item.strOutput.BeginsWith('_')) {
         continue;
       }
 
@@ -241,8 +244,10 @@ namespace Test{
       if(pos != clStringA::npos)
       {
         item.strOutput.Insert(pos, "[output]");
+        item.strReference.Insert(pos, "[reference]");
         clpathfile::CombinePathA(item.strInput, szDir, find_data.Filename);
         clpathfile::CombinePathA(item.strOutput, szDir, item.strOutput);
+        clpathfile::CombinePathA(item.strReference, szDir, item.strReference);
         toy_list.push_back(item);
       }
     }
@@ -305,7 +310,7 @@ void TestShaderToys(GXBOOL bShowList)
     gets(szBuffer);
     if(GXSTRCMPI(szBuffer, "all") == 0) {
       for(auto it = toy_list.begin(); it != toy_list.end(); ++it) {
-        TestFromFile(it->strInput, it->strOutput);
+        TestFromFile(it->strInput, it->strOutput, it->strReference);
       }
     }
     else
@@ -313,7 +318,7 @@ void TestShaderToys(GXBOOL bShowList)
       int nSelect = atoi(szBuffer);
       if(nSelect >= 0 && nSelect < (int)toy_list.size()) {
         auto& item = toy_list[nSelect];
-        TestFromFile(item.strInput, item.strOutput);
+        TestFromFile(item.strInput, item.strOutput, item.strReference);
       }
     }
   }
@@ -361,7 +366,10 @@ int _tmain(int argc, _TCHAR* argv[])
   MakeGraphicalExpression("Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", "Test\\shaders\\output.png");
 #endif // #ifdef ENABLE_GRAPH
 
-  TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt");
+//#define TEST_STD_SAMPLE
+#ifdef TEST_STD_SAMPLE
+  TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt", "Test\\shaders\\std_samples[reference].txt");
+#endif // #ifdef TEST_STD_SAMPLE
 
 #ifdef TEST_ALL_SHADERTOYS
   TestShaderToys(TRUE);
@@ -371,7 +379,7 @@ int _tmain(int argc, _TCHAR* argv[])
     Test::ItemList toys_list;
     Test::Generate(toys_list, "Test\\shaders\\debris");
     std::for_each(toys_list.begin(), toys_list.end(), [](Test::ITEM& item){
-      TestFromFile(item.strInput, item.strOutput);
+      TestFromFile(item.strInput, item.strOutput, item.strReference);
     });
   }
 

@@ -250,7 +250,74 @@ void DumpStructMembers(clStringA& str, int depth, UVShader::CodeParser::STRUCT_M
   }
 }
 
-void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
+void DumpMemory(const void* ptr, size_t count)
+{
+  // "0123456789ABCDEF 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00 ...............\r\n"
+  char buffer[sizeof(void*) + 80];
+  CLUINT_PTR nDisplay = ((CLUINT_PTR)ptr) & (~0xf);
+  const char HexTab[] = "0123456789ABCDEF";
+  const int offset = 49; // 16进制区与字符区的偏移
+  size_t n = 0;
+
+  while(n < count) {
+    size_t i = 0;
+    size_t i2 = 0;
+
+    for(; i < (sizeof(void*) * 2); i++)
+    {
+      CLUINT_PTR mask = nDisplay >> ((sizeof(void*) * 8) - (i * 4) - 4);
+      buffer[i] = HexTab[mask & 0xf];
+    }
+
+    buffer[i++] = 0x20;
+    buffer[i++] = 0x20;
+    i2 = i + offset;
+
+    for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
+    {
+      buffer[i2++] = 0x20;
+      buffer[i++] = 0x20;
+      buffer[i++] = 0x20;
+      buffer[i++] = 0x20;
+    }
+
+    ptr = (void*)(((CLUINT_PTR)ptr & (~0xf)) + 16);
+    for(; n < count && nDisplay < (CLUINT_PTR)ptr; n++, nDisplay++)
+    {
+      u8 c = *(u8*)nDisplay;
+      if(c < 0x20) {
+        buffer[i2++] = '.';
+      }
+      else if(c < 128) {
+        buffer[i2++] = c;
+      }
+      else {
+        buffer[i2++] = '?';
+      }
+
+      buffer[i++] = HexTab[(c >> 4) & 0xf];
+      buffer[i++] = HexTab[c & 0xf];
+      buffer[i++] = 0x20;
+    }
+
+    for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
+    {
+      buffer[i2++] = 0x20;
+      buffer[i++] = 0x20;
+      buffer[i++] = 0x20;
+      buffer[i++] = 0x20;
+    }
+
+    buffer[i++] = 0x20;
+    buffer[i2++] = '\r';
+    buffer[i2++] = '\n';
+    buffer[i2++] = '\0';
+
+    TRACE(buffer);
+  }
+}
+
+void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 {
   clFile file;
   if(file.OpenExistingA(szFilename))
@@ -403,4 +470,63 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput)
     }
     SAFE_DELETE(pBuffer);
   }
+
+  // TODO: 对比输出文件与参考文件
+  do {
+    if(file.OpenExistingA(szReference)) {
+      clBuffer* pRefBuffer = NULL;
+      clBuffer* pOutBuffer = NULL;
+      clFile sOutFile;
+
+      if( ! sOutFile.OpenExistingA(szOutput)) {
+        break;
+      }
+
+      file.MapToBuffer(&pRefBuffer);
+      sOutFile.MapToBuffer(&pOutBuffer);
+      clStringA strRef((GXLPCSTR)pRefBuffer->GetPtr(), pRefBuffer->GetSize());
+      clStringA strOut((GXLPCSTR)pOutBuffer->GetPtr(), pOutBuffer->GetSize());
+
+      // FIXME: 这里不对 清除空格会导致语法变化
+      strRef.Remove(' ');
+      strRef.Remove('\t');
+      strRef.Remove('\n');
+      strRef.Remove('\a');
+
+      strOut.Remove(' ');
+      strOut.Remove('\t');
+      strOut.Remove('\n');
+      strOut.Remove('\a');
+
+      auto outLen = strOut.GetLength();
+      auto refLen = strRef.GetLength();
+      auto len = clMin(outLen, refLen);
+
+      if(outLen != refLen)
+      {
+        printf("%s not equals %s\n", szOutput, szReference);
+      }
+
+      for(size_t i = 0; i < len; i++)
+      {
+        ch& c1 = strOut[i];
+        ch& c2 = strRef[i];
+
+        if(c1 != c2) {
+          TRACE("\n");
+          DumpMemory(&c1, 48);
+          TRACE("--------------------------------------------------------\n");
+          DumpMemory(&c2, 48);
+          TRACE("\n");
+          CLBREAK;
+          break;
+        }
+      }
+
+
+      SAFE_DELETE(pRefBuffer);
+      SAFE_DELETE(pOutBuffer);
+    }
+  } while(0);
+
 }

@@ -783,6 +783,7 @@ namespace UVShader
           else {
             // ERROR: 括号不匹配
             ERROR_MSG__MISSING_OPENBRACKET;
+            break;
           }
         }
         token.scope = s.top();
@@ -1134,15 +1135,21 @@ namespace UVShader
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
     marker.marker = 0;
     type = TokenType_Undefine;
+    bInStringSet = 0;
   }
 
   void ArithmeticExpression::TOKEN::Set(const iterator& _iter)
   {
-    ASSERT(_iter.length != 0);
+    if(_iter.length != 0)
+    {
 #ifdef ENABLE_STRINGED_SYMBOL
-    symbol = _iter.ToString();
+      symbol = _iter.ToString();
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
-    marker = _iter;
+      scope = -1;
+      semi_scope = -1;
+      marker = _iter;
+      bInStringSet = 0;
+    }
   }
 
   void ArithmeticExpression::TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)
@@ -1154,6 +1161,7 @@ namespace UVShader
     marker.pContainer = NULL;
     marker.marker     = sStrSet.add(str);
     marker.length     = str.GetLength();
+    bInStringSet      = 1;
   }
 
   void ArithmeticExpression::TOKEN::ClearArithOperatorInfo()
@@ -1165,6 +1173,9 @@ namespace UVShader
 
   clStringA ArithmeticExpression::TOKEN::ToString() const
   {
+    if(type == TokenType_String && ! marker.BeginsWith('\"')) {
+      return clStringA("\"") + marker.ToRawString() + '\"';
+    }
     return marker.ToRawString();
   }
 

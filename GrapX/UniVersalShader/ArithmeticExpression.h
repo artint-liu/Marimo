@@ -24,6 +24,7 @@
 #define E2008_宏定义中的意外_vs         2008
 #define E2010_宏形参表中的意外          2010
 #define E2059_SyntaxError_vs           2059
+#define E2121_无效的井号_可能是宏扩展    2121
 #define E9999_未定义错误_vsd            9999
 
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
@@ -44,6 +45,8 @@ namespace UVShader
   class ArithmeticExpression : public SmartStreamA
   {
   public:
+    typedef cllist<iterator> IterList;
+
     struct TOKEN // 运行时记录符号和操作符等属性
     {
       typedef cllist<TOKEN>   List;
@@ -52,6 +55,7 @@ namespace UVShader
       {
         TokenType_Undefine      = 0,
         TokenType_String        = 1,
+        TokenType_FormalParams  = 2,  // 宏的形参
         TokenType_FirstNumeric  = 5,
         TokenType_Numeric       = TokenType_FirstNumeric,
         TokenType_LastNumeric,
@@ -66,13 +70,15 @@ namespace UVShader
 #ifdef ENABLE_STRINGED_SYMBOL
       clStringA symbol;
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
-      Type      type;                         // 类型
       iterator  marker;
-      int       scope;                        // 括号匹配索引
-      int       semi_scope : scope_bits;      // 分号作用域
-      int       precedence : precedence_bits; // 符号优先级
-      u32       unary      : 1;               // 是否为一元操作符
-      u32       unary_mask : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
+      int       scope;                          // 括号匹配索引
+      int       semi_scope   : scope_bits;      // 分号作用域
+      int       precedence   : precedence_bits; // 符号优先级
+      u32       unary        : 1;               // 是否为一元操作符
+      u32       unary_mask   : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
+
+      Type      type         : 8;               // 类型
+      u32       bInStringSet : 1;               // 在String字典而不再流中
       // [precedence]
       // 1~14 表示运算符的优先级
       // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
@@ -127,11 +133,11 @@ namespace UVShader
         }
       }
 
-      template<class _List, class _Iter>
-      static void Append(_List& tokens, int offset, const _Iter& begin, const _Iter& end)
-      {
-        Append(tokens, offset, begin, end, [](int, const TOKEN&){});
-      }
+      //template<class _List, class _Iter>
+      //static void Append(_List& tokens, int offset, const _Iter& begin, const _Iter& end)
+      //{
+      //  Append(tokens, offset, begin, end, [](int, const TOKEN&){});
+      //}
 
       // 调试模式检查tokens序列合法性, 主要是检查scope是否匹配
       static GXBOOL DbgCheck(const Array& tokens, int begin)
@@ -384,6 +390,7 @@ namespace UVShader
     struct RTSCOPE // 运行时的范围描述结构体
     {
       typedef cllist<RTSCOPE> List;
+      typedef clvector<RTSCOPE> Array;
       typedef clsize TYPE;
       const static TYPE npos = -1;
       TYPE begin;

@@ -25,13 +25,27 @@ namespace UVShader
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
 
+    struct MACRO_TOKEN : public TOKEN
+    {
+      typedef cllist<MACRO_TOKEN> List;
+      typedef clvector<MACRO_TOKEN> Array;
+
+      MACRO_TOKEN(const TOKEN& t)
+        : TOKEN(t)
+        , formal_index(-1)
+      {
+      }
+
+      int formal_index; // 对应的形参索引
+    };
 
     struct MACRO
     {
       typedef clmap<clStringA, MACRO> Dict; // macro 支持重载，所以 key 的名字用 clStringA 来储存, Dict 要求具有排序性
+      typedef clvector<int>           IntArray;
       //typedef clhash_set<clStringA>   Set;
-      TOKEN::List aFormalParams;  // 形参
-      TOKEN::List aTokens;        // 替换内容
+      MACRO_TOKEN::Array aFormalParams;  // 形参
+      MACRO_TOKEN::List aTokens;        // 替换内容
       GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
       GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
       GXDWORD bHasFILE       : 1; // 有__FILE__宏
@@ -43,9 +57,37 @@ namespace UVShader
       void clear          ();
 
       void ClearContainer (); // 这个用来清除iterator里的container，指向subparse容易出错
-      int  ExpandMacro    (const Dict& dict); // 展开宏
+      //int  ExpandMacro    (const Dict& dict); // 展开宏
     };
 
+    //struct MACRO_EXPAND_CONTEXT
+    //{
+    //  typedef clstack<MACRO_EXPAND_CONTEXT> Stack;
+    //  typedef cllist<MACRO_EXPAND_CONTEXT>  List;
+    //  CodeParser* pParser;
+    //  MACRO*      pMacro;
+    //  TOKEN::List current;
+
+    //  //// ActualParam 实参
+    //  //TOKEN::Array aTokens; // 实参列表
+    //  //RTSCOPE::Array aArgs; // 实参
+
+    //  ArithmeticExpression::iterator itSave;
+
+    //  template<class _TIter>
+    //  void Append(const _TIter& _begin, const _TIter& _end);
+    //};
+    //
+
+    struct MACRO_EXPAND_CONTEXT
+    {
+      TOKEN::List stream;
+      MACRO*      pMacro;
+
+      clvector<TOKEN::List> ActualParam;
+    };
+
+    //////////////////////////////////////////////////////////////////////////
 
     enum AttachFlag
     {
@@ -293,7 +335,11 @@ namespace UVShader
     RTSCOPE::TYPE  ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
     GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
     //GXBOOL  FindScope(RTSCOPE* pOut, RTSCOPE::TYPE _begin, RTSCOPE::TYPE _end);
-    GXBOOL  OnToken(const TOKEN& token, MacroStack& sStack);
+    //void    OnNextToken(iterator& it, TOKEN& token, GXBOOL bReplace = TRUE);
+    GXBOOL  OnToken(TOKEN& token);
+    void    GetNext(iterator& it, TOKEN& token);
+    void    ExpandMacro(MACRO_EXPAND_CONTEXT& c);
+    GXBOOL  TryMatchMacro(const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end, MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out);
 
     T_LPCSTR DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
     void     PP_Pragma(const TOKEN::Array& aTokens);
@@ -302,7 +348,9 @@ namespace UVShader
     T_LPCSTR PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
     T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
     T_LPCSTR PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
-    GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
+    GXBOOL   ReplaceInnerMacro(TOKEN& token); // 主要是替换__FILE__ __LINE__
+
+    //GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
 
     template<class _List, class _Iter>
     void     AppendWithExpandProprocess(_List& tokens, int offset, int nSrcLine, const _Iter& begin, const _Iter& end);
@@ -352,10 +400,11 @@ namespace UVShader
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
 
-    //MACRO::Set          m_MacrosSet;        // 实名集合
+  //MACRO::Set          m_MacrosSet;        // 实名集合
     MACRO::Dict         m_Macros;           // --------废----------化名表，没有参数的就是原名，含参数的会生成一个标记参数个数的化名
     CodeParser*         m_pSubParser;
-
+    //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
+    TOKEN::List         m_ExpandedStream;   // 宏展开流
   public:
     CodeParser();
     virtual ~CodeParser();
