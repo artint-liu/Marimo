@@ -765,6 +765,10 @@ namespace UVShader
 
   void ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token, int& EOE)
   {
+    //if(token.type == TOKEN::TokenType_String) {
+    //  return;
+    //}
+
     const int c_size = (int)m_aTokens.size();
     for(int i = 0; i < s_nPairMark; ++i)
     {

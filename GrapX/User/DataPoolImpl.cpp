@@ -208,7 +208,7 @@ namespace Marimo
         clStringA* pString = reinterpret_cast<clStringA*>(lpFirstElement);
 
         // 依次调用析构函数
-        for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
+        for(GXSIZE_T nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
         {
           if(pString[nStringIndex]) {
             pString[nStringIndex].~StringX();

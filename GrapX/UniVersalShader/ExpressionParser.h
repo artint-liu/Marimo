@@ -81,6 +81,7 @@ namespace UVShader
 
     struct MACRO_EXPAND_CONTEXT
     {
+      const TOKEN* pLineNumRef;
       TOKEN::List stream;
       MACRO*      pMacro;
 
@@ -339,7 +340,8 @@ namespace UVShader
     GXBOOL  OnToken(TOKEN& token);
     void    GetNext(iterator& it, TOKEN& token);
     void    ExpandMacro(MACRO_EXPAND_CONTEXT& c);
-    GXBOOL  TryMatchMacro(const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end, MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out);
+    void    ExpandMacroStream(TOKEN::List& sTokenList, const TOKEN& line_num);
+    GXBOOL  TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
 
     T_LPCSTR DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
     void     PP_Pragma(const TOKEN::Array& aTokens);
@@ -348,7 +350,7 @@ namespace UVShader
     T_LPCSTR PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
     T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
     T_LPCSTR PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
-    GXBOOL   ReplaceInnerMacro(TOKEN& token); // 主要是替换__FILE__ __LINE__
+    GXBOOL   ExpandInnerMacro(TOKEN& token, const TOKEN& line_num); // 主要是替换__FILE__ __LINE__
 
     //GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
 
@@ -370,6 +372,7 @@ namespace UVShader
     //clsize   FindSemicolon(clsize begin, clsize end) const;
 
     //void OutputErrorW(GXSIZE_T offset, GXUINT code, ...);
+    void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
     void OutputErrorW(const TOKEN& token, GXUINT code, ...);
     void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
     //void OutputErrorW(const TOKEN& token, GXUINT code, ...);
