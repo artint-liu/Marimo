@@ -290,6 +290,7 @@ namespace Marimo
         //auto* pThis = ((DataPoolResolverImpl*)lParam);
         //str.Remove(0, (sizeof(szFileDefine) / sizeof(szFileDefine[0]) - 1));
         str.TrimLeft(0x20);
+        pThis->m_ErrorMsg.SetCurrentTopLine(0);
         int nCurLine = pThis->m_ErrorMsg.LineFromPtr(it.marker);
         pThis->m_ErrorMsg.SetCurrentTopLine(str.ToInteger() - nCurLine - 1);
       }

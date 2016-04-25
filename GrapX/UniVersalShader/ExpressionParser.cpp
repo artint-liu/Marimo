@@ -2137,10 +2137,29 @@ NOT_INC_P:
       PP_Pragma(tokens);
     }
     else if(tokens.front() == PREPROCESS_file) {
-      CLBREAK;
+      if(tokens.size() != 2) {
+        // ERROR: #file 格式不正确
+      }
+
+      clStringW strW = tokens[1].ToString();
+      strW.TrimBoth('\"');
+      m_pMsg->SetCurrentFilenameW(strW);
     }
     else if(tokens.front() == PREPROCESS_line) {
-      CLBREAK;
+      if(tokens.size() != 2) {
+        // ERROR: #line 格式不正确
+      }
+
+      GXINT nLine = tokens[1].ToString().ToInteger();
+      if(nLine > 0)
+      {
+        m_pMsg->SetCurrentTopLine(0);
+        GXINT nCurLine = m_pMsg->LineFromPtr(tokens[1].marker.marker);
+        m_pMsg->SetCurrentTopLine(nLine - nCurLine - 1);
+      }
+      else {
+        // ERROR: 行号不正确
+      }
     }
     else {
       OutputErrorW(tokens.front(), E1021_无效的预处理器命令_vs, clStringW(tokens.front().ToString()));
@@ -2387,16 +2406,8 @@ NOT_INC_P:
       }
 
       ASSERT(aTokens[2].GetScope() != -1); // 如果能走到这里括号一定是配对的
-      clStringW str;
-      //StringTokenToString(str, aTokens, 3);
-      str.Append(aTokens[3].ToString());
-      // TODO: 优化处理分号
-      if(str.BeginsWith('\"')) {
-        str.Remove(0, 1);
-      }
-      if(str.EndsWith('\"')) {
-        str.Remove(str.GetLength() - 1, 1);
-      }
+      clStringW str = aTokens[3].ToString();
+      str.TrimBoth('\"');
       str.Append("\r\n");
       m_pMsg->WriteMessageW(FALSE, str);
     }

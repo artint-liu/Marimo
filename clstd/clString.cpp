@@ -1096,9 +1096,12 @@ namespace clstd
   {
     size_t i = 0;
     const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
-    for(;i < uStrLen; i++)
-      if(m_pBuf[i] != cTarget)
+    for(;i < uStrLen; i++) {
+      if(m_pBuf[i] != cTarget) {
         break;
+      }
+    }
+
     if(i != 0)
     {
       _Traits::CopyStringN(m_pBuf, m_pBuf + i, uStrLen - i);
@@ -1156,6 +1159,56 @@ namespace clstd
     if(++i != uStrLen)
       reduceLength(i);
   }
+
+  _CLSTR_TEMPL
+  void _CLSTR_IMPL::TrimBoth(_TCh cTarget)
+  {
+    const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
+    size_t i0 = 0, i1 = uStrLen - 1;
+    for(; i0 < uStrLen; i0++) {
+      if(m_pBuf[i0] != cTarget) {
+        break;
+      }
+    }
+
+    for(; i1 > i0; i1--)
+    {
+      if(m_pBuf[i1] != cTarget) {
+        break;
+      }
+    }
+
+    if(i0 >= i1) {
+      Clear();
+      return;
+    }
+
+    if(i0 != 0 || i1 != uStrLen - 1)
+    {
+      i1 = i1 - i0 + 1; // 这里转换为长度
+      _Traits::CopyStringN(m_pBuf, m_pBuf + i0, i1);
+      reduceLength(i1);
+    }
+  }
+
+  _CLSTR_TEMPL
+  void _CLSTR_IMPL::Augment(const _TCh* szLeft, const _TCh* szRight)
+  {
+    const clsize left  = szLeft ? _Traits::StringLength(szLeft) : 0;
+    const clsize right = szRight ?  _Traits::StringLength(szRight) : 0;
+    const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
+    resizeLength(left + uStrLen + right);
+
+    if(szLeft) {
+      _Traits::CopyStringN(m_pBuf + left, m_pBuf, uStrLen);
+      _Traits::CopyStringN(m_pBuf, szLeft, left);
+    }
+
+    if(szRight) {
+      _Traits::CopyStringN(m_pBuf + left + uStrLen, szRight, right);
+    }
+  }
+
 
   _CLSTR_TEMPL
     b32 _CLSTR_IMPL::IsEmpty() const

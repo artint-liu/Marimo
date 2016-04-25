@@ -282,6 +282,8 @@ namespace clstd
     void        TrimLeft        (const _TCh* pTarget);
     void        TrimRight       (_TCh cTarget);
     void        TrimRight       (const _TCh* pTarget);
+    void        TrimBoth        (_TCh cTarget);   // 修剪两端的字符, 如果两端存在连续的cTarget将都会被修剪掉
+    void        Augment         (const _TCh* szLeft, const _TCh* szRight);   // 扩充两端
     b32         IsEmpty         () const;
     b32         IsNotEmpty      () const;
     b32         IsFloat         () const; // 以'+'or'-'开头，'0'-'9',只出现一次的'.'，'F'或'f'结尾的形式，暂时不支持"1e2"这种科学计数形式
