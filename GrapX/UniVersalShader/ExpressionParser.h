@@ -83,16 +83,17 @@ namespace UVShader
     {
       const TOKEN* pLineNumRef;
       TOKEN::List stream;
-      MACRO*      pMacro;
+      const MACRO* pMacro;
 
       clvector<TOKEN::List> ActualParam;
     };
 
     //////////////////////////////////////////////////////////////////////////
 
-    enum AttachFlag
+    enum AttachFlag // 注意: 与RTState公用标记位
     {
-      AttachFlag_NotLoadMessage = 0x00000001,
+      AttachFlag_NotLoadMessage = 0x00010000,
+      AttachFlag_NotExpandMacro = 0x00020000,
     };
 
     enum StatementType
@@ -222,7 +223,7 @@ namespace UVShader
 
     };
 
-    enum RTState // 运行时状态
+    enum RTState // 运行时状态, 与AttachFlag公用标记位
     {
       State_InPreprocess = 0x00000001, // 解析预处理
     };
@@ -342,6 +343,8 @@ namespace UVShader
     void    ExpandMacro(MACRO_EXPAND_CONTEXT& c);
     void    ExpandMacroStream(TOKEN::List& sTokenList, const TOKEN& line_num);
     GXBOOL  TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
+    GXBOOL  MergeStringToken(const TOKEN& token);
+    const MACRO* FindMacro(const TOKEN& token);
 
     T_LPCSTR DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
     void     PP_Pragma(const TOKEN::Array& aTokens);
@@ -357,7 +360,7 @@ namespace UVShader
     template<class _List, class _Iter>
     void     AppendWithExpandProprocess(_List& tokens, int offset, int nSrcLine, const _Iter& begin, const _Iter& end);
 
-    static void StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin);
+    //static void StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin);
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
     static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 

@@ -671,7 +671,9 @@ namespace UVShader
 
     if( ! ParseFunctionIndexCall(scope, pDesc))
     {
-      clStringA strMsg(m_aTokens[scope.begin].marker.marker, (m_aTokens[scope.end - 1].marker.marker - m_aTokens[scope.begin].marker.marker) + m_aTokens[scope.end - 1].marker.length);
+      GXINT_PTR len = (m_aTokens[scope.end - 1].marker.marker - m_aTokens[scope.begin].marker.marker) + m_aTokens[scope.end - 1].marker.length;
+      ASSERT(len >= 0);
+      clStringA strMsg(m_aTokens[scope.begin].marker.marker, len);
       TRACE("ERROR: 无法解析\"%s\"\n", strMsg);
       return FALSE;
     }
@@ -765,9 +767,9 @@ namespace UVShader
 
   void ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token, int& EOE)
   {
-    //if(token.type == TOKEN::TokenType_String) {
-    //  return;
-    //}
+    if(token.type == TOKEN::TokenType_String) {
+      return;
+    }
 
     const int c_size = (int)m_aTokens.size();
     for(int i = 0; i < s_nPairMark; ++i)
