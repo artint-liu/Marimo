@@ -32,11 +32,11 @@ namespace Marimo
     , m_CompileCode(2)
     , m_bSilent(FALSE)
   {
-    FILE_SECTION* fs = new FILE_SECTION;
-    fs->nBaseLine = 0;
-    m_Sources.push_back(fs);
+    //FILE_SECTION* fs = new FILE_SECTION;
+    //fs->nBaseLine = 0;
+    //m_Sources.push_back(fs);
     m_SourcesTable.push_back(NULL); // 避免使用0这个Id
-    m_SourcesTable.push_back(fs);
+    //m_SourcesTable.push_back(fs);
   }
 
   _DPEM_TEMPL
@@ -240,6 +240,18 @@ namespace Marimo
   }
 
   _DPEM_TEMPL
+  GXLPCWSTR _DPEM_CLS::GetFilePathW(GXUINT idFile) const
+  {
+    if(idFile == 0) {
+      return m_Sources.back()->strPath;
+    }
+    else if(idFile < m_SourcesTable.size()) {
+      return m_SourcesTable[idFile]->strPath;
+    }
+    return L"";
+  }
+
+  _DPEM_TEMPL
     GXUINT _DPEM_CLS::GetCurrentFileId() const
   {
     return (GXUINT)m_SourcesTable.size() - 1;
@@ -249,6 +261,7 @@ namespace Marimo
     void _DPEM_CLS::PushFile( GXLPCWSTR szFilename, GXINT nTopLine /*= 0*/ )
   {
     FILE_SECTION* fs = new FILE_SECTION;
+    fs->strPath = szFilename;
     fs->strFilename = szFilename;
     fs->nBaseLine = nTopLine;
     m_Sources.push_back(fs);

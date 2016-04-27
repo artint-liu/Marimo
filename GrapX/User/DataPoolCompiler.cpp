@@ -302,7 +302,7 @@ namespace Marimo
         GXUINT nBytes = 0;
 
         // 根据当前文件路径计算include文件路径
-        clStringW str = pThis->m_ErrorMsg.GetFilenameW();
+        clStringW str = pThis->m_ErrorMsg.GetFilePathW();
         clpathfile::RemoveFileSpecW(str);
         clpathfile::CombinePathW(str, str, clStringW(it.ToString()));
 

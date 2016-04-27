@@ -5,6 +5,7 @@
 #include "ArithmeticExpression.h"
 #include "ExpressionParser.h"
 
+#include "clPathFile.h"
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
@@ -72,20 +73,39 @@ namespace UVShader
 
   //////////////////////////////////////////////////////////////////////////
 
+  DefaultInclude s_DefaultInclude;
 
-  CodeParser::CodeParser()
-    : m_pSubParser(NULL)
+  CodeParser::CodeParser(PARSER_CONTEXT* pContext, Include* pInclude)
+    : m_pContext(pContext)
+    , m_pSubParser(NULL)
     , m_dwState(0)
     , m_pParent(NULL)
+    , m_pInclude(pInclude ? pInclude : &s_DefaultInclude)
   {
+    if(pContext) {
+      pContext->nRefCount++;
+    }
+
     SetIteratorCallBack(CodeParser::IteratorProc, 0);
     InitPacks();
   }
 
   CodeParser::~CodeParser()
   {
+    if( ! (--m_pContext->nRefCount)) {
+      delete m_pContext;
+    }
+    m_pContext = NULL;
+
     SAFE_DELETE(m_pSubParser);
     SAFE_DELETE(m_pMsg);
+
+    // 释放包含文件缓存
+    ASSERT( ! m_pParent || (m_pParent && m_sIncludeFiles.empty())); // 只有 root parser 才有包含文件的缓存
+    for(auto it = m_sIncludeFiles.begin();
+      it != m_sIncludeFiles.end(); ++it) {
+      m_pInclude->Close(it->second);
+    }
   }
 
   void CodeParser::InitPacks()
@@ -113,7 +133,7 @@ namespace UVShader
   {
     m_aTokens.clear();
     m_aStatements.clear();
-    m_Macros.clear();
+    //m_Macros.clear();
     SAFE_DELETE(m_pSubParser);
     InitPacks();
   }
@@ -121,14 +141,19 @@ namespace UVShader
   b32 CodeParser::Attach(const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename)
   {
     Cleanup();
+    if( ! m_pContext) {
+      m_pContext = new PARSER_CONTEXT;
+      m_pContext->nRefCount = 1;
+    }
+
     m_dwState = dwFlags;
     if(TEST_FLAG_NOT(dwFlags, AttachFlag_NotLoadMessage))
     {
       if( ! m_pMsg) {
         m_pMsg = new ErrorMessage();
-        m_pMsg->SetCurrentFilenameW(szFilename);
         m_pMsg->LoadErrorMessageW(L"uvsmsg.txt");
         m_pMsg->SetMessageSign('C');
+        m_pMsg->PushFile(szFilename);
       }
       m_pMsg->GenerateCurLines(szExpression, nSize);
     }
@@ -143,7 +168,7 @@ namespace UVShader
   {
     GXBOOL bENotation = FALSE;
 
-    if(it.marker[0] == '#' && ( ! ((CodeParser*)it.pContainer)->m_pParent))
+    if(it.marker[0] == '#' && TEST_FLAG_NOT(((CodeParser*)it.pContainer)->m_dwState, AttachFlag_Preprocess))
     {
       CodeParser* pThis = (CodeParser*)it.pContainer;
 
@@ -257,14 +282,16 @@ namespace UVShader
 
     PairStack sStack[s_nPairMark];
 
-    int EOE = 0; // End Of Expression
 
-    token.Set(begin());
+    auto it = begin();
+    token.Set(it);
+
+    int EOE = m_aTokens.size(); // End Of Expression
 
     //m_Macros[MACRO_FILE]
     //m_Macros[MACRO_LINE]
 
-    for(auto it = begin(); it.pContainer == NULL || it != stream_end; GetNext(it, token))
+    for(; it.pContainer == NULL || it != stream_end; GetNext(it, token))
     {
       // 上一个预处理结束后，后面的语句长度设置为0可以回到主循环步进
       // 这样做是为了避免如果下一条语句也是预处理指令，不会在处理回调中发生递归调用
@@ -315,6 +342,7 @@ namespace UVShader
         ASSERT(EOE < (int)m_aTokens.size());
         for(auto it = m_aTokens.begin() + EOE; it != m_aTokens.end(); ++it)
         {
+          ASSERT(it->semi_scope == -1); // 如果非-1，则说明被覆盖
           it->semi_scope = c_size;
         }
         EOE = c_size + 1;
@@ -378,7 +406,7 @@ namespace UVShader
         }
         //str.Append(last_one.marker.marker, last_one.marker.length);
         //str.Append(token.marker.marker, token.marker.length);
-        last_one.Set(m_Strings, str);
+        last_one.Set(m_pContext->Strings, str);
       }
 #ifdef ENABLE_STRINGED_SYMBOL
       last_one.symbol = last_one.ToString();
@@ -388,23 +416,19 @@ namespace UVShader
     return FALSE;
   }
 
-  const CodeParser::MACRO* CodeParser::FindMacro(const TOKEN& token)
+  const CodeParser::MACRO* CodeParser::FindMacro(const TOKEN& token) // TODO: 正常的查找都要换做这个
   {
     clStringA strTokenName = token.ToString();
 
-    if(strTokenName == "__LOC__") {
-      CLNOP;
-    }
-
-    auto& it_macro = m_Macros.find(strTokenName);
-    if(it_macro != m_Macros.end()) {
+    auto& it_macro = m_pContext->Macros.find(strTokenName);
+    if(it_macro != m_pContext->Macros.end()) {
       return &it_macro->second;
     }
 
-    if(m_pParent) {
-      it_macro = m_pParent->m_Macros.find(strTokenName);
-      return it_macro == m_pParent->m_Macros.end() ? NULL : &it_macro->second;
-    }
+    //if(m_pParent) {
+    //  it_macro = m_pParent->m_Macros.find(strTokenName);
+    //  return it_macro == m_pParent->m_Macros.end() ? NULL : &it_macro->second;
+    //}
 
     return NULL;
   }
@@ -818,7 +842,7 @@ namespace UVShader
     // # [: Semantic]
     // #
     if(*p == ":") {
-      stat.func.szSemantic = m_Strings.add((p++)->ToString());
+      stat.func.szSemantic = m_pContext->Strings.add((p++)->ToString());
     }
 
     if(*p == ";") { // 函数声明
@@ -1092,7 +1116,7 @@ NOT_INC_P:
 
   GXLPCSTR CodeParser::GetUniqueString( const TOKEN* pSym )
   {
-    return m_Strings.add(pSym->ToString());
+    return m_pContext->Strings.add(pSym->ToString());
   }
 
   const CodeParser::TYPE* CodeParser::ParseType(const TOKEN* pSym)
@@ -2017,30 +2041,6 @@ NOT_INC_P:
     return bret ? sBlock.end : RTSCOPE::npos;
   }
 
-
-
-
-
-
-  //GXBOOL CodeParser::IsToken(const SYNTAXNODE::UN* pUnion) const
-  //{
-  //  const TOKEN* pBegin = &m_aTokens.front();
-  //  const TOKEN* pBack   = &m_aTokens.back();
-
-  //  return pUnion->pSym >= pBegin && pUnion->pSym <= pBack;
-  //}
-
-  //clsize CodeParser::FindSemicolon( clsize begin, clsize end ) const
-  //{
-  //  for(; begin < end; ++begin)
-  //  {
-  //    if(m_aTokens[begin] == ';') {
-  //      return begin;
-  //    }
-  //  }
-  //  return -1;
-  //}
-
   const CodeParser::StatementArray& CodeParser::GetStatments() const
   {
     return m_aStatements;
@@ -2087,7 +2087,7 @@ NOT_INC_P:
   CodeParser* CodeParser::GetSubParser()
   {
     if( ! m_pSubParser) {
-      m_pSubParser = new CodeParser;
+      m_pSubParser = new CodeParser(m_pContext, m_pInclude);
     }
     return m_pSubParser;
   }
@@ -2095,7 +2095,7 @@ NOT_INC_P:
   CodeParser::T_LPCSTR CodeParser::DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end)
   {
     CodeParser* pParse = GetSubParser();
-    GXDWORD dwFlags = AttachFlag_NotLoadMessage;
+    GXDWORD dwFlags = AttachFlag_NotLoadMessage | AttachFlag_Preprocess;
 
     ASSERT(sizeof(PREPROCESS_define) - 1 == 6);
     if(clstd::strncmpT(begin, PREPROCESS_define, sizeof(PREPROCESS_define) - 1) == 0) {
@@ -2116,7 +2116,7 @@ NOT_INC_P:
 #endif // #ifdef _DEBUG
 
     if(tokens.front() == PREPROCESS_include) {
-
+      PP_Include(tokens);
     }
     else if(tokens.front() == PREPROCESS_define) {
       PP_Define(tokens);
@@ -2182,17 +2182,17 @@ NOT_INC_P:
     }
     else if(count == 2) // "#define MACRO" 形
     {
-      m_Macros.insert(clmake_pair(strMacroName, l_m));
+      m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
     }
     else if(count == 3) // "#define MACRO XXX" 形
     {
-      auto result = m_Macros.insert(clmake_pair(strMacroName, l_m));
+      auto result = m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
 
       // 如果已经添加过，清除原有数据
       if( ! result.second) {
         result.first->second.clear();
       }
-      result.first->second.set(m_Macros, tokens, 2);
+      result.first->second.set(m_pContext->Macros, tokens, 2);
     }
     else
     {
@@ -2226,7 +2226,7 @@ NOT_INC_P:
       }
       else {} // #define MACRO ... 形解析
 
-      auto result = m_Macros.insert(clmake_pair(strMacroName, l_m));
+      auto result = m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
       if( ! result.second) {
         result.first->second.clear();
       }
@@ -2236,107 +2236,50 @@ NOT_INC_P:
         result.first->second.aFormalParams.begin(),
         sFormalList.begin(), sFormalList.end());
 
-      result.first->second.set(m_Macros, tokens, l_define);
+      result.first->second.set(m_pContext->Macros, tokens, l_define);
     }
   }
 
-  //GXBOOL CodeParser::Macro_ExpandMacroInvoke(int nMacro, TOKEN& token)
-  //{
-  //  clStringA strMacro = m_aTokens[nMacro].ToString();
-  //  ASSERT(token == ')' && token.scope != -1);
-  //  ASSERT(token.scope >= 1); // 不可能出现宏所用的括号在m_aTokens第一个位置的情况
+  void CodeParser::PP_Include(const TOKEN::Array& aTokens)
+  {
+    clStringW strPath = m_pMsg->GetFilePathW();
+    clpathfile::RemoveFileSpecW(strPath);
+    clStringW strHeader = aTokens[1].ToString();
+    strHeader.TrimBoth('\"');
 
-  //  RTSCOPE MacroArgsScope(token.scope + 1, m_aTokens.size());
-  //  if( ! MacroArgsScope.IsValid()) {
-  //    // ERROR: C4003: “strMacro”宏的实参不足
-  //    return FALSE;
-  //  }
+    clpathfile::CombinePathW(strPath, strPath, strHeader);
 
-  //  RTSCOPE::Array arg_list;
-  //  RTSCOPE arg(MacroArgsScope.begin, MacroArgsScope.begin);
+    CodeParser* pRoot = GetRootParser();
 
-  //  for(RTSCOPE::TYPE i = MacroArgsScope.begin; i < MacroArgsScope.end; i++)
-  //  {
-  //    if(m_aTokens[i].scope != -1) {
-  //      i = m_aTokens[i].scope;
-  //    }
-  //    else if(m_aTokens[i] == ',') {
-  //      arg.end = i;
-  //      arg_list.push_back(arg);
-  //      arg.begin = i + 1;
-  //    }
-  //  }
-  //  arg.end = MacroArgsScope.end;
-  //  arg_list.push_back(arg);
+    clBuffer* pBuffer = OpenIncludeFile(strPath);
+    //GXHRESULT hr = m_pInclude->Open(Include::IncludeType_Local, strPath, &pBuffer);
+    //if(GXFAILED(hr)) {
+    //  return;
+    //}
 
-  //  auto iter_macro = m_Macros.find(strMacro);
-  //  ASSERT(iter_macro != m_Macros.end()); // 不应该出现记录了宏处理的名字却在宏字典里找不到的情况
-  //  strMacro.Clear();
+    ASSERT(m_pMsg); // 应该从m_pParent设置过临时的m_pMsg
+    CodeParser parser(m_pContext, m_pInclude);
 
-  //  const MACRO& macro = iter_macro->second;
-  //  if(macro.aFormalParams.size() != arg_list.size()) {
-  //    // ERROR: 宏参数不一致
-  //    return FALSE;
-  //  }
+    m_pMsg->PushFile(strPath);
+    m_pMsg->GenerateCurLines((GXLPCSTR)pBuffer->GetPtr(), pBuffer->GetSize());
 
-  //  MACRO_TOKEN::List token_list;
+    parser.Attach((GXLPCSTR)pBuffer->GetPtr(), pBuffer->GetSize(), AttachFlag_NotLoadMessage, strPath);
+    parser.GenerateTokens(this);
 
-  //  for(auto it = macro.aTokens.begin(); it != macro.aTokens.end(); ++it)
-  //  {
-  //    if(it->type == TOKEN::TokenType_FormalParams) {
-  //      ASSERT(it->formal_index >= 0);
-  //      auto& a = arg_list[it->formal_index];
-  //      token_list.insert(token_list.end(), m_aTokens.begin() + a.begin, m_aTokens.begin() + a.end);
-  //    }
-  //    else {
-  //      token_list.push_back(*it);
-  //    }
-  //  }
+    //if( ! m_pMsg->GetErrorLevel()) // 有错误
 
-  //  /*
-  //  auto iter_arg = arg_list.begin();
-  //  for(auto iter_formalparam = macro.aFormalParams.begin(); 
-  //    iter_formalparam != macro.aFormalParams.end(); ++iter_formalparam, ++iter_arg)
-  //  {
-  //    auto it = token_list.begin();
-  //    while(1)
-  //    {
-  //      it = std::find(it, token_list.end(), *iter_formalparam);
-  //      if(it != token_list.end())
-  //      {
-  //        *it = m_aTokens[iter_arg->begin];
-  //        ++it;
-  //        for(RTSCOPE::TYPE i = iter_arg->begin + 1; i < iter_arg->end; i++, ++it)
-  //        {
-  //          it = token_list.insert(it, m_aTokens[i]); // FIXME: 修正scope括号匹配问题
-  //        }
-  //      }
-  //      else {
-  //        break;
-  //      }
-  //    } // while(1)
-  //  }//*/
+    m_aTokens.reserve(m_aTokens.capacity() + parser.m_aTokens.size());
+    clsize offset = m_aTokens.size();
+    for(auto it = parser.m_aTokens.begin(); it != parser.m_aTokens.end(); ++it)
+    {
+      m_aTokens.push_back(*it);
+      auto& last_one = m_aTokens.back();
+      last_one.scope += offset;
+      last_one.semi_scope += offset;
+    }
 
-  //  m_aTokens.erase(m_aTokens.begin() + token.scope - 1, m_aTokens.end());
-  //  m_aTokens.reserve(m_aTokens.size() + token_list.size());
-  //  AppendWithExpandProprocess(m_aTokens, 0, m_pMsg->LineFromPtr(token.marker.marker),
-  //    token_list.begin(), token_list.end());
-  //  ASSERT(TOKEN::DbgCheck(m_aTokens, m_aTokens.size() - token_list.size()));
-  //  //// 宏定义参数中不应该出现分号，此时刚遇到')'，也还没有设置整个表达式的分号域
-  //  //if(m_aTokens[token.scope - 1].semi_scope == -1) {
-  //  //  
-  //  //}
-
-  //  //SYNTAXNODE::UN sUnion;
-  //  //CodeParser* pParser = GetSubParser();
-  //  //pParser->Cleanup();
-  //  //pParser->m_aTokens.insert(pParser->m_aTokens.begin(), m_aTokens.begin() + argscope.begin, m_aTokens.end()); // TODO: 增加一个专门的传递方法，调整scope标记
-  //  //if( ! pParser->ParseArithmeticExpression(0, pParser->m_aTokens.size(), &sUnion)) {
-  //  //  return;
-  //  //}
-
-  //  return TRUE;
-  //}
+    m_pMsg->PopFile();
+  }
 
   void CodeParser::PP_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens)
   {
@@ -2353,8 +2296,8 @@ NOT_INC_P:
     //clStringA str = aTokens[1].ToString();
     clStringA strMacroName = aTokens[1].ToString();
     //m_MacrosSet.erase(strMacroName);
-    auto it = m_Macros.find(strMacroName);
-    ASSERT(it != m_Macros.end()); // 集合里有的话化名表里也应该有
+    auto it = m_pContext->Macros.find(strMacroName);
+    ASSERT(it != m_pContext->Macros.end()); // 集合里有的话化名表里也应该有
     
     //strMacroName.Append("@A");
     //do {
@@ -2372,7 +2315,7 @@ NOT_INC_P:
       // ERROR: ifdef 缺少定义
     }
     else if(tokens.size() == 2) {
-      const GXBOOL bFind = (m_Macros.find(tokens[1].ToString()) == m_Macros.end());
+      const GXBOOL bFind = (m_pContext->Macros.find(tokens[1].ToString()) == m_pContext->Macros.end());
       if(( ! bNot && bFind) || (bNot && ! bFind))
       {
         const T_LPCSTR pBlockEnd = 
@@ -2416,43 +2359,6 @@ NOT_INC_P:
       OutputErrorW(aTokens[1], E1021_无效的预处理器命令_vs, clStringW(aTokens[1].ToString()));
     }
   }
-
-  //template<class _List, class _Iter>
-  //void UVShader::CodeParser::AppendWithExpandProprocess(_List& tokens, int offset, int nSrcLine, const _Iter& begin, const _Iter& end)
-  //{
-  //  GXBOOL bPound = FALSE;
-  //  TOKEN::Append(tokens, offset, begin, end, [=, &tokens, &bPound](int a, TOKEN& t)
-  //  {
-  //    if(t == MACRO_LINE)
-  //    {
-  //      clStringA strSourceLine;
-  //      strSourceLine.AppendInteger32(nSrcLine);
-
-  //      t.type = ArithmeticExpression::TOKEN::TokenType_Numeric;
-  //      t.Set(m_Strings, strSourceLine);
-  //    }
-  //    else if(t == MACRO_FILE)
-  //    {
-  //      clStringA strFilename = m_pMsg->GetFilenameW();
-  //      t.type = ArithmeticExpression::TOKEN::TokenType_String;
-  //      t.Set(m_Strings, strFilename);
-  //    }
-  //    else if(t == PREPROCESS_pound)
-  //    {
-  //      bPound = TRUE;
-  //    }
-  //    
-
-  //    if(bPound)
-  //    {
-  //      t.type = ArithmeticExpression::TOKEN::TokenType_String;
-  //      ASSERT(tokens.back() == PREPROCESS_pound);
-  //      tokens.pop_back();
-  //      a--;
-  //      bPound = FALSE;
-  //    }
-  //  });
-  //}
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -2504,10 +2410,10 @@ NOT_INC_P:
           return FALSE;
         }
 
-        auto it = m_Macros.find(pNode->Operand[1].pSym->ToString());
+        auto it = m_pContext->Macros.find(pNode->Operand[1].pSym->ToString());
 
         sOut.v.rank = ArithmeticExpression::VALUE::Rank_Signed64;
-        sOut.v.nValue64 = (it != m_Macros.end());
+        sOut.v.nValue64 = (it != m_pContext->Macros.end());
       }
       else {
         // ERROR: 类函数调用只能是defined
@@ -2694,30 +2600,18 @@ NOT_INC_P:
       str.Append("\"");
 
       token.type = ArithmeticExpression::TOKEN::TokenType_String;
-      token.Set(m_Strings, str);
+      token.Set(m_pContext->Strings, str);
       return TRUE;
     }
     else if(token == MACRO_LINE)
     {
       str.AppendInteger32(m_pMsg->LineFromPtr(line_num.marker.marker));
       token.type = ArithmeticExpression::TOKEN::TokenType_Numeric;
-      token.Set(m_Strings, str);
+      token.Set(m_pContext->Strings, str);
       return TRUE;
     }
     return FALSE;
   }
-
-  // 用来组装字符串："aaa" "bbb" => "aaabbb"
-  //void CodeParser::StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin)
-  //{
-  //  int i = nBegin;
-  //  ASSERT(aTokens[i].type == TOKEN::TokenType_String);
-  //  strOut.Clear();
-  //  do {
-  //    strOut.Append(aTokens[i].ToString());
-  //    i++;
-  //  } while(aTokens[i].type == TOKEN::TokenType_String);
-  //}
 
   CodeParser::T_LPCSTR CodeParser::Macro_SkipGaps( T_LPCSTR p, T_LPCSTR end )
   {
@@ -2770,6 +2664,32 @@ NOT_INC_P:
     va_start(arglist, code);
     m_pMsg->VarWriteErrorW(TRUE, ptr, code, arglist);
     va_end(arglist);
+  }
+
+  CodeParser* CodeParser::GetRootParser()
+  {
+    CodeParser* pRoot = this;
+    while(pRoot->m_pParent) {
+      pRoot = pRoot->m_pParent;
+    }
+    return pRoot;
+  }
+
+  clBuffer* CodeParser::OpenIncludeFile(const clStringW& strFilename)
+  {
+    auto it = m_sIncludeFiles.find(strFilename);
+    if(it != m_sIncludeFiles.end()) {
+      return it->second;
+    }
+
+    clBuffer* pBuffer = NULL;
+    GXHRESULT hr = m_pInclude->Open(Include::IncludeType_Local, strFilename, &pBuffer);
+    if(GXSUCCEEDED(hr)) {
+      m_sIncludeFiles[strFilename] = pBuffer;
+      return pBuffer;
+    }
+
+    return NULL;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -2831,18 +2751,24 @@ NOT_INC_P:
     }
   }
 
-  //template<class _TIter>
-  //bool IsAllInStream(const _TIter& _begin, const _TIter& _end)
-  //{
-  //  for(auto it = _begin; it != _end; ++it)
-  //  {
-  //    if(it->bInStringSet) {
-  //      return FALSE;
-  //    }
-  //  }
-  //  return TRUE;
-  //}
+  GXHRESULT DefaultInclude::Open(IncludeType eIncludeType, GXLPCWSTR szFileName, clBuffer** ppBuffer)
+  {
+    clFile file;
+    if( ! file.OpenExistingW(szFileName)) {
+      return GX_FAIL;
+    }
 
+    if(file.MapToBuffer(ppBuffer)) {
+      return GX_OK; // 文件为空当作成功处理
+    }
 
+    return GX_FAIL;
+  }
+
+  GXHRESULT DefaultInclude::Close(clBuffer* pBuffer)
+  {
+    delete pBuffer;
+    return GX_OK;
+  }
 
 } // namespace UVShader

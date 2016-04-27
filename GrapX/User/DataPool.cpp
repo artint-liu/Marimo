@@ -216,9 +216,10 @@ namespace Marimo
         const GXWCHAR* pText = import.ss.GetText(&length);
         //clstd::TextLinesW tl(pText, length);
         auto sectRoot = import.ss.Open(NULL);
-        import.ErrorMsg.SetCurrentFilenameW(szFilename);
+        //import.ErrorMsg.SetCurrentFilenameW(szFilename);
         import.ErrorMsg.GenerateCurLines(pText, length);
         import.ErrorMsg.SetMessageSign('I');
+        import.ErrorMsg.PushFile(szFilename);
         //import.ErrorMsg.SetSilentMode(TRUE);  // Debug!!
         //import.szFilename = szFilename;
         //import.tl = &tl;

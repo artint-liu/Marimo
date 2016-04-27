@@ -325,7 +325,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
     clBuffer* pBuffer = NULL;
     if(file.MapToBuffer(&pBuffer))
     {
-      UVShader::CodeParser expp;
+      UVShader::CodeParser expp(NULL, NULL);
       const UVShader::CodeParser::TOKEN::Array* pTokens;
       clStringW strFullname = szFilename;
       clpathfile::CombineAbsPathW(strFullname);

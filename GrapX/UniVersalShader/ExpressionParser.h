@@ -19,6 +19,26 @@ namespace UVShader
 
   //  GRAMMAR* pChild;
   //};
+  class Include
+  {
+  public:
+    enum IncludeType {
+      IncludeType_System,
+      IncludeType_Local,
+    };
+
+    GXSTDINTERFACE(GXHRESULT Open(IncludeType eIncludeType, GXLPCWSTR szFileName, clBuffer** ppBuffer));
+    GXSTDINTERFACE(GXHRESULT Close(clBuffer* pBuffer));
+  };
+
+
+  class DefaultInclude : public Include
+  {
+  public:
+    GXHRESULT Open(IncludeType eIncludeType, GXLPCWSTR szFileName, clBuffer** ppBuffer) override;
+    GXHRESULT Close(clBuffer* pBuffer) override;
+  };
+
 
   class CodeParser : public ArithmeticExpression
   {
@@ -79,6 +99,13 @@ namespace UVShader
     //};
     //
 
+    struct PARSER_CONTEXT
+    {
+      GXUINT            nRefCount;
+      clstd::StringSetA Strings;
+      MACRO::Dict       Macros;
+    };
+
     struct MACRO_EXPAND_CONTEXT
     {
       const TOKEN* pLineNumRef;
@@ -92,6 +119,7 @@ namespace UVShader
 
     enum AttachFlag // 注意: 与RTState公用标记位
     {
+      AttachFlag_Preprocess     = 0x00000001,
       AttachFlag_NotLoadMessage = 0x00010000,
       AttachFlag_NotExpandMacro = 0x00020000,
     };
@@ -349,6 +377,7 @@ namespace UVShader
     T_LPCSTR DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
     void     PP_Pragma(const TOKEN::Array& aTokens);
     void     PP_Define(const TOKEN::Array& aTokens);
+    void     PP_Include(const TOKEN::Array& aTokens);
     void     PP_Undefine(const RTPPCONTEXT& ctx, const TOKEN::Array& aTokens);
     T_LPCSTR PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
     T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
@@ -378,6 +407,9 @@ namespace UVShader
     void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
     void OutputErrorW(const TOKEN& token, GXUINT code, ...);
     void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
+
+    CodeParser* GetRootParser();
+    clBuffer* OpenIncludeFile(const clStringW& strFilename);
     //void OutputErrorW(const TOKEN& token, GXUINT code, ...);
 
     //SYNTAXNODE::MODE TryGetNode(const SYNTAXNODE::UN* pUnion) const;
@@ -396,23 +428,26 @@ namespace UVShader
     CodeParser* GetSubParser();
 
   protected:
+    typedef clmap<clStringW, clBuffer*> FileDict;
     GXDWORD             m_dwState;          // 内部状态, 参考RTState
     CodeParser*         m_pParent;
-    clstd::StringSetA   m_Strings;
     TypeSet             m_TypeSet;
     StatementArray      m_aStatements;
     StatementArray      m_aSubStatements;   // m_aStatements的次级储存，没有顺序关系
     
+    PARSER_CONTEXT*     m_pContext;
+
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
 
+    FileDict            m_sIncludeFiles;    // 包含文件集合, 仅限于Root parser
+    Include*            m_pInclude;
   //MACRO::Set          m_MacrosSet;        // 实名集合
-    MACRO::Dict         m_Macros;           // --------废----------化名表，没有参数的就是原名，含参数的会生成一个标记参数个数的化名
     CodeParser*         m_pSubParser;
     //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // 宏展开流
   public:
-    CodeParser();
+    CodeParser(PARSER_CONTEXT* pContext, Include* pInclude);
     virtual ~CodeParser();
     b32                 Attach                  (const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename);
     clsize              GenerateTokens          (CodeParser* pParent = NULL);

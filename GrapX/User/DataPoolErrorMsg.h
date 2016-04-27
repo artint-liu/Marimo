@@ -10,6 +10,7 @@ namespace Marimo
     {
       typedef clstd::TextLines<_TChar>          TextLines;
       TextLines tl;
+      clStringW strPath;      // 原始文件路径, 这个是不会改变的
       clStringW strFilename;  // 用于报错时提示的文件名
       GXINT     nBaseLine;    // 报错时提示的起始行号
     };
@@ -37,10 +38,11 @@ namespace Marimo
     void      PushFile            (GXLPCWSTR szFilename, GXINT nTopLine = 0);
     void      PopFile             ();
     GXSIZE_T  GenerateCurLines    (T_LPCSTR pText, clsize length);
+    GXLPCWSTR GetFilePathW        (GXUINT idFile = 0) const;  // 获得文件路径，这个是PushFile初始设置的文件路径，应该对应一个有效的物理路径
 
     void      SetCurrentFilenameW (GXLPCWSTR szFilename);
     void      SetCurrentTopLine   (GXINT nTopLine);
-    GXLPCWSTR GetFilenameW        (GXUINT idFile = 0) const;
+    GXLPCWSTR GetFilenameW        (GXUINT idFile = 0) const; // 获得文件名，这个可以被SetCurrentFilenameW重新设置
     GXUINT    GetCurrentFileId    () const;
     int       LineFromPtr         (T_LPCSTR ptr) const;
     int       LineFromOffset      (GXSIZE_T nOffset, const FILE_SECTION* pfs) const;

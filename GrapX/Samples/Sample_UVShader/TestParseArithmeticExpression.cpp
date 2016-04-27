@@ -10,6 +10,10 @@ class TestExpression : public UVShader::CodeParser
 public:
   clStringArrayA m_aCommand;
 
+  TestExpression() : UVShader::CodeParser(NULL, NULL)
+  {
+  }
+
   GXBOOL TestParseExpression(STATEMENT* pStat, RTSCOPE* pScope)
   {
     m_aDbgExpressionOperStack.clear();
