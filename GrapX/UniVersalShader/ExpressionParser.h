@@ -66,12 +66,12 @@ namespace UVShader
       //typedef clhash_set<clStringA>   Set;
       MACRO_TOKEN::Array aFormalParams;  // 形参
       MACRO_TOKEN::List aTokens;        // 替换内容
-      GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
-      GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
-      GXDWORD bHasFILE       : 1; // 有__FILE__宏
-      GXDWORD bPoundSign     : 1; // #解析
+      //GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
+      //GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
+      //GXDWORD bHasFILE       : 1; // 有__FILE__宏
+      //GXDWORD bPoundSign     : 1; // #解析
 
-      MACRO();
+      //MACRO();
 
       void set            (const Dict& dict, const TOKEN::Array& tokens, int begin_at);
       void clear          ();
@@ -391,7 +391,7 @@ namespace UVShader
 
     //static void StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin);
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
-    static GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
+    GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 
     GXBOOL  ParseStatement(RTSCOPE* pScope);
     void    RelocaleStatements(StatementArray& aStatements);

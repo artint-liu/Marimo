@@ -230,7 +230,7 @@ namespace UVShader
         if(next_marker == ctx.iter_next.marker) {
           it = ctx.iter_next;
         }
-        else if(next_marker != ctx.stream_end)
+        else //if(next_marker != ctx.stream_end)
         {
           it.marker = next_marker;
           it.length = 0;
@@ -464,7 +464,7 @@ namespace UVShader
     //clStringA strTokenName = token.ToString();
     const MACRO* pMacro = FindMacro(token);
 
-    if( ! pMacro) {
+    if( ! pMacro || (pMacro->aFormalParams.empty() && pMacro->aTokens.empty())) {
       return FALSE;
     }
 
@@ -2623,10 +2623,10 @@ NOT_INC_P:
 
   GXBOOL CodeParser::CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count)
   {
-    TChar c = str1[count];
+    GXBOOL bSame = GXSTRNCMP(str1, str2, count) == 0;
+    const TChar& c = str1[count];
     ASSERT(c != '\0');
-    return GXSTRNCMP(str1, str2, count) == 0 && 
-      (c == '\t' || c == 0x20 || c == '\r' || c == '\n');
+    return bSame && (&c == m_pEnd || c == '\t' || c == 0x20 || c == '\r' || c == '\n');
   }
 
   //void CodeParser::OutputErrorW( GXSIZE_T offset, GXUINT code, ... )
@@ -2714,8 +2714,8 @@ NOT_INC_P:
     aFormalParams.clear();
   }
 
-  CodeParser::MACRO::MACRO() : bTranslate(0), bHasLINE(0), bHasFILE(0), bPoundSign(0)
-  {}
+  //CodeParser::MACRO::MACRO() : bTranslate(0), bHasLINE(0), bHasFILE(0), bPoundSign(0)
+  //{}
 
   void CodeParser::MACRO::set(const Dict& dict, const TOKEN::Array& tokens, int begin_at)
   {
