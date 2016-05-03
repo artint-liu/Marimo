@@ -1075,6 +1075,7 @@ namespace UVShader
       CLBREAK;
       return State_SyntaxError;
     }
+    rank = type;
     return State_OK;
   }
 

@@ -119,9 +119,10 @@ namespace UVShader
 
     enum AttachFlag // 注意: 与RTState公用标记位
     {
-      AttachFlag_Preprocess     = 0x00000001,
-      AttachFlag_NotLoadMessage = 0x00010000,
-      AttachFlag_NotExpandMacro = 0x00020000,
+      AttachFlag_Preprocess     = 0x00000001, // 在预处理中，这个状态不再认为#为预处理开始标记
+      AttachFlag_NotLoadMessage = 0x00010000, // TODO: 这个干掉？！
+      AttachFlag_NotExpandMacro = 0x00020000, // 不展开宏
+      AttachFlag_NotExpandCond  = 0x00040000, // 不展开defined()里面的宏
     };
 
     enum StatementType

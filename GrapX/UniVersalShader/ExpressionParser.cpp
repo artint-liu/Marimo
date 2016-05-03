@@ -464,6 +464,7 @@ namespace UVShader
     //clStringA strTokenName = token.ToString();
     const MACRO* pMacro = FindMacro(token);
 
+    // 如果没有定义宏的形参和代换，则不处理这个宏
     if( ! pMacro || (pMacro->aFormalParams.empty() && pMacro->aTokens.empty())) {
       return FALSE;
     }
@@ -488,6 +489,7 @@ namespace UVShader
     {
       int depth = 0;
       iterator it_end = end();
+      TOKEN save_token = token;
 
       for(; it != it_end; ++it)
       {
@@ -501,13 +503,27 @@ namespace UVShader
         }
         else if(it == ')') {
           depth--;
-          if( ! depth) {
+          if(depth <= 0) {
             break;
           }
         }
       }
 
       ASSERT(it == it_end || it == ')');
+
+      if(depth < 0)
+      {
+        if(TEST_FLAG(m_dwState, AttachFlag_NotExpandCond)) {
+          // FIXME: 这里没有处理 #if defined(ADD(1,2)) 这种符合ADD(a,b)形参的形式, 可能会导致后面表达式计算出错！
+          token = save_token;
+          return FALSE;
+        }
+        else {
+          // ERROR: 宏看起来有形参，但实际使用时缺少形参
+          CLBREAK;
+        }
+      }
+
       if(it == ')') {
         ++it;
       }
@@ -2098,8 +2114,15 @@ NOT_INC_P:
     GXDWORD dwFlags = AttachFlag_NotLoadMessage | AttachFlag_Preprocess;
 
     ASSERT(sizeof(PREPROCESS_define) - 1 == 6);
-    if(clstd::strncmpT(begin, PREPROCESS_define, sizeof(PREPROCESS_define) - 1) == 0) {
+
+    if(CompareString(begin, PREPROCESS_define, sizeof(PREPROCESS_define) - 1) ||
+      CompareString(begin, PREPROCESS_ifdef, sizeof(PREPROCESS_ifdef) - 1) ||
+      CompareString(begin, PREPROCESS_ifndef, sizeof(PREPROCESS_ifndef) - 1)) {
       dwFlags |= AttachFlag_NotExpandMacro;
+    }
+    else if(CompareString(begin, PREPROCESS_if, sizeof(PREPROCESS_if) - 1) ||
+      CompareString(begin, PREPROCESS_elif, sizeof(PREPROCESS_elif) - 1)) {
+      dwFlags |= AttachFlag_NotExpandCond;
     }
 
     pParse->Attach(begin, (clsize)end - (clsize)begin, dwFlags, NULL);
@@ -2107,7 +2130,7 @@ NOT_INC_P:
     const auto& tokens = *pParse->GetTokensArray();
 
 #ifdef _DEBUG
-    if(tokens.front() == PREPROCESS_define) {
+    if(tokens.front() == PREPROCESS_define || tokens.front() == PREPROCESS_ifdef || tokens.front() == PREPROCESS_ifndef) {
       ASSERT(TEST_FLAG(dwFlags, AttachFlag_NotExpandMacro));
     }
     else {
@@ -2308,7 +2331,7 @@ NOT_INC_P:
   CodeParser::T_LPCSTR CodeParser::PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& tokens)
   {
     //const auto& tokens = *m_pSubParser->GetTokensArray();
-    ASSERT( ! tokens.empty() && (tokens.front() == "ifdef" || tokens.front() == "ifndef"));
+    ASSERT( ! tokens.empty() && (tokens.front() == PREPROCESS_ifdef || tokens.front() == PREPROCESS_ifndef));
     //T_LPCSTR stream_end = GetStreamPtr() + GetStreamCount();
 
     if(tokens.size() == 1) {
