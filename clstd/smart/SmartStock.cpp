@@ -15,11 +15,11 @@ namespace clstd
   //
   // 显式声明模板类
   //
-  template class SmartStockT<clStringA, SmartStock_TraitsA>;
-  template class SmartStockT<clStringW, SmartStock_TraitsW>;
+  template class SmartStockT<clStringA>;
+  template class SmartStockT<clStringW>;
 
-#define _SSP_TEMPL template<class _TStr, class _Traits>
-#define _SSP_IMPL SmartStockT<_TStr, _Traits>
+#define _SSP_TEMPL template<class _TStr>
+#define _SSP_IMPL SmartStockT<_TStr>
 
   //template clStringW FromProfileString (const clStringW&);
   //template clStringA  FromProfileString (const clStringA&);
@@ -31,10 +31,10 @@ namespace clstd
   //{
   //  return wcsncmp(pStr1, pStr2, nCount) == 0;
   //}
-  clsize SmartStock_TraitsW::_StrLen(const wch* pStr)
-  {
-    return wcslen(pStr);
-  }
+  //clsize SmartStock_TraitsW::_StrLen(const wch* pStr)
+  //{
+  //  return wcslen(pStr);
+  //}
   //clsize SmartStock_TraitsW::_TToI(const wch* pStr)
   //{
   //  return clstd::_xstrtoi(pStr);
@@ -43,22 +43,22 @@ namespace clstd
   //{
   //  return clstd::_xstrtof(pStr);
   //}
-  b32 SmartStock_TraitsW::_CheckBoolean(const wch* pStr)
-  {
-    return clstd::strcmpiT(pStr, L"ok") == 0 ||
-      clstd::strcmpiT(pStr, L"true") == 0 ||
-      clstd::strcmpiT(pStr, L"yes") == 0 ||
-      clstd::strcmpiT(pStr, L"1") == 0;
-  }
+  //b32 SmartStock_TraitsW::_CheckBoolean(const wch* pStr)
+  //{
+  //  return clstd::strcmpiT(pStr, L"ok") == 0 ||
+  //    clstd::strcmpiT(pStr, L"true") == 0 ||
+  //    clstd::strcmpiT(pStr, L"yes") == 0 ||
+  //    clstd::strcmpiT(pStr, L"1") == 0;
+  //}
 
   //b32 SmartStock_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
   //{
   //  return strncmp(pStr1, pStr2, nCount) == 0;
   //}
-  clsize SmartStock_TraitsA::_StrLen(const ch* pStr)
-  {
-    return strlen(pStr);
-  }
+  //clsize SmartStock_TraitsA::_StrLen(const ch* pStr)
+  //{
+  //  return strlen(pStr);
+  //}
   //clsize SmartStock_TraitsA::_TToI(const ch* pStr)
   //{
   //  return atoi(pStr);
@@ -67,19 +67,33 @@ namespace clstd
   //{
   //  return atof(pStr);
   //}
-  b32 SmartStock_TraitsA::_CheckBoolean(const ch* pStr)
-  {
-    return clstd::strcmpiT(pStr, "ok") == 0 ||
-      clstd::strcmpiT(pStr, "true") == 0 ||
-      clstd::strcmpiT(pStr, "yes") == 0 ||
-      clstd::strcmpiT(pStr, "1") == 0;
-  }
+  //b32 SmartStock_TraitsA::_CheckBoolean(const ch* pStr)
+  //{
+  //  return clstd::strcmpiT(pStr, "ok") == 0 ||
+  //    clstd::strcmpiT(pStr, "true") == 0 ||
+  //    clstd::strcmpiT(pStr, "yes") == 0 ||
+  //    clstd::strcmpiT(pStr, "1") == 0;
+  //}
 
+  template <typename _TCh>
+  b32 _CheckBoolean(const _TCh* pStr)
+  {
+    static const _TCh sz_1[]    = {'1','\0'};
+    static const _TCh sz_ok[]   = {'o','k','\0'};
+    static const _TCh sz_yes[]  = {'y','e','s','\0'};
+    static const _TCh sz_true[] = {'t','r','u','e','\0'};
+
+    return
+      clstd::strcmpiT(pStr, sz_1) == 0 ||
+      clstd::strcmpiT(pStr, sz_ok) == 0 ||
+      clstd::strcmpiT(pStr, sz_yes) == 0 ||
+      clstd::strcmpiT(pStr, sz_true) == 0 ;
+  }
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::PARAMETER::NextKey()
+    b32 _SSP_IMPL::ATTRIBUTE::NextKey()
   {
     if(pSection == NULL) {
       return FALSE;
@@ -98,7 +112,7 @@ namespace clstd
       }
       else if(itNext.marker[0] == '{') {
         _MyIterator itBegin;
-        if( ! SmartStreamUtility::FindPair(itNext, itBegin, it, (_TCh*)L"{", (_TCh*)L"}")) {
+        if( ! SmartStreamUtility::FindPair(itNext, itBegin, it, (TChar*)L"{", (TChar*)L"}")) {
           return FALSE;
         }
         itNext = it;
@@ -110,57 +124,81 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    _TStr _SSP_IMPL::PARAMETER::SectionName() const
+    _TStr _SSP_IMPL::ATTRIBUTE::SectionName() const
   {
     _TStr str;
     return SmartStreamUtility::TranslateQuotation(pSection->itSectionName, str);
   }
 
   _SSP_TEMPL
-    _TStr _SSP_IMPL::PARAMETER::KeyName() const
+    _TStr _SSP_IMPL::ATTRIBUTE::KeyName() const
   {
     _TStr str;
     return SmartStreamUtility::TranslateQuotation(itKey, str);
   }
 
   _SSP_TEMPL
-    _TStr& _SSP_IMPL::PARAMETER::KeyName(_TStr& str) const
+    _TStr& _SSP_IMPL::ATTRIBUTE::KeyName(_TStr& str) const
   {
     return SmartStreamUtility::TranslateQuotation(itKey, str);
   }
 
   _SSP_TEMPL
-    int _SSP_IMPL::PARAMETER::ToInt() const
+    int _SSP_IMPL::ATTRIBUTE::ToInt() const
   {
     return ToString().ToInteger();
   }
 
   _SSP_TEMPL
-    _TStr _SSP_IMPL::PARAMETER::ToString() const
+    _TStr _SSP_IMPL::ATTRIBUTE::ToString() const
   {
     _TStr str;
     return SmartStreamUtility::TranslateQuotation(itValue, str);
   }
 
   _SSP_TEMPL
-    _TStr& _SSP_IMPL::PARAMETER::ToString(_TStr& str) const
+    _TStr& _SSP_IMPL::ATTRIBUTE::ToString(_TStr& str) const
   {
     return SmartStreamUtility::TranslateQuotation(itValue, str);
   }
 
   _SSP_TEMPL
-    float _SSP_IMPL::PARAMETER::ToFloat() const
+    float _SSP_IMPL::ATTRIBUTE::ToFloat() const
   {
     return (float)ToString().ToFloat();
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::PARAMETER::ToBoolean() const
+    b32 _SSP_IMPL::ATTRIBUTE::ToBoolean() const
   {
     _TStr str;
     SmartStreamUtility::TranslateQuotation(itValue, str);
-    return _Traits::_CheckBoolean(str);
+    return _CheckBoolean((T_LPCSTR)str);
   }
+
+  _SSP_TEMPL
+  b32 _SSP_IMPL::ATTRIBUTE::operator==(const ATTRIBUTE& attr) const
+  {
+    ASSERT(pSection == attr.pSection);
+    return ! operator!=(attr);
+  }
+
+  _SSP_TEMPL
+  b32 _SSP_IMPL::ATTRIBUTE::operator!=(const ATTRIBUTE& attr) const
+  {
+    ASSERT(pSection == attr.pSection);
+    return itKey != attr.itKey || itValue != attr.itValue;
+  }
+
+  _SSP_TEMPL
+  typename _SSP_IMPL::ATTRIBUTE& _SSP_IMPL::ATTRIBUTE::operator++()
+  {
+    if( ! NextKey()) {
+      itKey = itValue = pSection->itEnd;
+    }
+    return *this;
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
 
@@ -205,12 +243,12 @@ namespace clstd
       ASSERT(m_pBuffer == NULL);
       m_pBuffer = new Buffer();
       m_pBuffer->Resize(0, FALSE);
-      m_SmartStream.Initialize((_TCh*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(_TCh));
+      m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(TChar));
       return TRUE;
     }
 
     u32 dwBOM = *(u32*)m_pBuffer->GetPtr();
-    if(sizeof(_TCh) == 1)
+    if(sizeof(TChar) == 1)
     {
       b32 bUnicode = FALSE;
       if((dwBOM & 0xFFFF) == BOM_UNICODE)   {  // UNICODE 格式头
@@ -249,7 +287,7 @@ namespace clstd
         m_pBuffer = pNewBuffer;
       }
     }
-    else if(sizeof(_TCh) == 2)  // UNICODE
+    else if(sizeof(TChar) == 2)  // UNICODE
     {
       if((dwBOM & 0xFFFF) == BOM_UNICODE)   {  // UNICODE 格式头
         m_pBuffer->Replace(0, 2, NULL, 0);
@@ -276,12 +314,12 @@ namespace clstd
 
         clsize size = mbstowcs((wchar_t*)pNewBuffer->GetPtr(), (const char*)m_pBuffer->GetPtr(), m_pBuffer->GetSize());
 
-        pNewBuffer->Resize(size * sizeof(_TCh), FALSE);
+        pNewBuffer->Resize(size * sizeof(TChar), FALSE);
         delete m_pBuffer;
         m_pBuffer = pNewBuffer;
       }
     }
-    m_SmartStream.Initialize((_TCh*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(_TCh));
+    m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(TChar));
     return TRUE;
   }
 
@@ -293,7 +331,7 @@ namespace clstd
       return FALSE;
     }
 
-    if(sizeof(_TCh) == 2)
+    if(sizeof(TChar) == 2)
     {
       const u16 wFlag = 0xfeff;
       file.Write(&wFlag, 2);
@@ -305,14 +343,14 @@ namespace clstd
 
     return true;
   }
+
   _SSP_TEMPL 
     b32 _SSP_IMPL::Close()
   {
     // 没有释放所有Handle
     ASSERT(m_aHandles.size() == 0);
-    for(auto it = m_aHandles.begin();
-      it != m_aHandles.end(); ++it) {
-        SAFE_DELETE(*it);
+    for(auto it = m_aHandles.begin(); it != m_aHandles.end(); ++it) {
+      SAFE_DELETE(*it);
     }
     m_aHandles.clear();
     SAFE_DELETE(m_pBuffer);
@@ -352,35 +390,33 @@ namespace clstd
   }
 
   _SSP_TEMPL 
-    b32 _SSP_IMPL::CloseSection(Section sect)
+    b32 _SSP_IMPL::CloseSection(SECTION* desc)
   {
-    if(DelSection(sect)) {
-      SAFE_DELETE(sect);
+    if(RemoveSection(desc)) {
+      delete desc;
     }
     return true;
   }
 
   _SSP_TEMPL 
-    typename _SSP_IMPL::Section _SSP_IMPL::AddSection(Section sect)
+    typename _SSP_IMPL::SECTION* _SSP_IMPL::AddSection(SECTION* desc)
   {
-    ASSERT(sect->pStock != NULL);
-    ASSERT(sect->DbgCheck());
-    Section sectNew = new SECTION_DESC;
-    *sectNew = *sect;
+    ASSERT(desc->pStock != NULL);
+    ASSERT(desc->DbgCheck());
+    SECTION* sectNew = new SECTION;
+    *sectNew = *desc;
     m_aHandles.push_back(sectNew);
     return sectNew;
   }
 
   _SSP_TEMPL 
-    b32 _SSP_IMPL::DelSection(Section sect)
+    b32 _SSP_IMPL::RemoveSection(SECTION* desc)
   {
-    HandleArray& aHandles = m_aHandles;
-    for(auto it = aHandles.begin();
-      it != aHandles.end(); ++it)
+    for(auto it = m_aHandles.begin(); it != m_aHandles.end(); ++it)
     {
-      if(*it == sect)
+      if(*it == desc)
       {
-        aHandles.erase(it);
+        m_aHandles.erase(it);
         return true;
       }
     }
@@ -392,24 +428,30 @@ namespace clstd
   _SSP_TEMPL 
     void _SSP_IMPL::TrimFrontTab(clsize& uOffset)
   {
-    while(uOffset > 0 && (((_TCh*)m_pBuffer->GetPtr())[uOffset - 1]) == (_TCh)L'\t') uOffset--;
+    while(uOffset > 0 && (((TChar*)m_pBuffer->GetPtr())[uOffset - 1]) == (TChar)L'\t') uOffset--;
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SECTION_DESC::IsValid() const
+    b32 _SSP_IMPL::SECTION::IsValid() const
   {
     return nDepth >= 0;
   }
 
   _SSP_TEMPL
-    _TStr _SSP_IMPL::SECTION_DESC::SectionName() const
+    _TStr _SSP_IMPL::SECTION::SectionName() const
   {
     _TStr str;
     return itSectionName.pContainer == NULL ? "" : SmartStreamUtility::TranslateQuotation(itSectionName, str);
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SECTION_DESC::NextSection(T_LPCSTR szName)
+  typename _SSP_IMPL::SECTION* _SSP_IMPL::SECTION::Open(T_LPCSTR szSubPath)
+  {
+    return pStock->Open(this, szSubPath);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::SECTION::NextSection(T_LPCSTR szName)
   {
     if( ! IsValid()) {
       return FALSE;
@@ -432,7 +474,7 @@ namespace clstd
 
         // itNext应该与输出的ItBegin是同一个值
         return SmartStreamUtility::FindPair(itNext,
-          itBegin, itEnd, (_TCh*)L"{", (_TCh*)L"}");
+          itBegin, itEnd, (TChar*)L"{", (TChar*)L"}");
       }
       else if(it.marker[0] == '}') {
         break;
@@ -443,17 +485,17 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SECTION_DESC::Rename( T_LPCSTR szNewName )
+    b32 _SSP_IMPL::SECTION::Rename( T_LPCSTR szNewName )
   {
     if( ! IsValid() || itSectionName.marker == NULL || itSectionName.length == 0) {
       return FALSE;
     }
 
-    return pStock->Replace(itSectionName.offset(), itSectionName.length, szNewName, _Traits::_StrLen(szNewName));
+    return pStock->Replace(itSectionName.offset(), itSectionName.length, szNewName, clstd::strlenT(szNewName));
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SECTION_DESC::FirstKey( PARAMETER& param ) const
+    b32 _SSP_IMPL::SECTION::FirstKey( ATTRIBUTE& param ) const
   {
     if( ! IsValid()) {
       return FALSE;
@@ -471,7 +513,7 @@ namespace clstd
 
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SECTION_DESC::GetKey( T_LPCSTR szKey, PARAMETER& param ) const
+    b32 _SSP_IMPL::SECTION::GetKey( T_LPCSTR szKey, ATTRIBUTE& param ) const
   {
     if( ! FirstKey(param)) {
       return FALSE;
@@ -486,10 +528,10 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    int _SSP_IMPL::SECTION_DESC::GetKeyAsString( T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount ) const
+    int _SSP_IMPL::SECTION::GetKeyAsString( T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount ) const
   {
     T_LPCSTR pSource = NULL;
-    PARAMETER p;
+    ATTRIBUTE p;
     if(GetKey(szKey, p)) {
       pSource = p.itValue.marker;
       nCount = clMin(nCount, (int)p.itValue.length);
@@ -497,7 +539,7 @@ namespace clstd
     else {
       pSource = szDefault;
       if(szDefault != NULL)
-        nCount = clMin(nCount, (int)_Traits::_StrLen(szDefault));
+        nCount = clMin(nCount, (int)clstd::strlenT(szDefault));
     }
 
     int n = 0;
@@ -514,9 +556,9 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    _TStr _SSP_IMPL::SECTION_DESC::GetKeyAsString( T_LPCSTR szKey, const _TStr& strDefault ) const
+    _TStr _SSP_IMPL::SECTION::GetKeyAsString( T_LPCSTR szKey, const _TStr& strDefault ) const
   {
-    PARAMETER p;
+    ATTRIBUTE p;
     if(GetKey(szKey, p)) {
       return p.ToString();
     }
@@ -524,9 +566,9 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    int _SSP_IMPL::SECTION_DESC::GetKeyAsInteger( T_LPCSTR szKey, int nDefault ) const
+    int _SSP_IMPL::SECTION::GetKeyAsInteger( T_LPCSTR szKey, int nDefault ) const
   {
-    PARAMETER p;
+    ATTRIBUTE p;
     if(GetKey(szKey, p)) {
       return p.ToInt();
     }
@@ -534,9 +576,9 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    float _SSP_IMPL::SECTION_DESC::GetKeyAsFloat( T_LPCSTR szKey, float fDefault ) const
+    float _SSP_IMPL::SECTION::GetKeyAsFloat( T_LPCSTR szKey, float fDefault ) const
   {
-    PARAMETER p;
+    ATTRIBUTE p;
     if(GetKey(szKey, p)) {
       return p.ToFloat();
     }
@@ -544,9 +586,9 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SECTION_DESC::GetKeyAsBoolean( T_LPCSTR szKey, b32 bDefault ) const
+    b32 _SSP_IMPL::SECTION::GetKeyAsBoolean( T_LPCSTR szKey, b32 bDefault ) const
   {
-    PARAMETER p;
+    ATTRIBUTE p;
     if(GetKey(szKey, p)) {
       return p.ToBoolean();
     }
@@ -554,15 +596,15 @@ namespace clstd
   }
 
   //_SSP_TEMPL
-  //  int _SSP_IMPL::SECTION_DESC::GetKeyAsIntegerArray( T_LPCSTR szKey, clBuffer** ppBuffer ) const
+  //  int _SSP_IMPL::SECTION::GetKeyAsIntegerArray( T_LPCSTR szKey, clBuffer** ppBuffer ) const
   //{
   //
   //}
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SECTION_DESC::SetKey( T_LPCSTR szKey, T_LPCSTR szValue )
+    b32 _SSP_IMPL::SECTION::SetKey( T_LPCSTR szKey, T_LPCSTR szValue )
   {
-    PARAMETER param;
+    ATTRIBUTE param;
 
     if(szValue == NULL || szValue[0] == L'\0') {
       return FALSE;
@@ -586,16 +628,16 @@ namespace clstd
       strBuffer.Append('\r');
       strBuffer.Append('\n');
 
-      //clsize nPos = pStock->InsertString(itEnd, strBuffer);
+      clsize nPos = pStock->InsertString(itEnd, strBuffer);
       ASSERT(DbgCheck());
     }
     return TRUE;
   }
 
   _SSP_TEMPL 
-    b32 _SSP_IMPL::SECTION_DESC::DeleteKey( T_LPCSTR szKey )
+    b32 _SSP_IMPL::SECTION::DeleteKey( T_LPCSTR szKey )
   {
-    PARAMETER param;
+    ATTRIBUTE param;
     if(GetKey(szKey, param))
     {
       auto it = pStock->m_SmartStream.find(param.itValue, 1, L";");
@@ -619,13 +661,35 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::Create( T_LPCSTR szPath )
+    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::SECTION::begin()
   {
-    return CreateChild(NULL, szPath);
+    ATTRIBUTE attr;
+    if(FirstKey(attr)) {
+      return attr;
+    }
+    return end();
   }
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::CreateChild(Section sect, T_LPCSTR szPath)
+    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::SECTION::end()
+  {
+    ATTRIBUTE attr;
+    attr.pSection = this;
+    attr.itKey    = itEnd;
+    attr.itValue  = itEnd;
+    return attr;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  _SSP_TEMPL
+    typename _SSP_IMPL::SECTION* _SSP_IMPL::Create( T_LPCSTR szPath )
+  {
+    return Create(NULL, szPath);
+  }
+
+  _SSP_TEMPL
+    typename _SSP_IMPL::SECTION* _SSP_IMPL::Create(SECTION* desc, T_LPCSTR szPath)
   {
     if(szPath == NULL) {
       return NULL;
@@ -640,18 +704,18 @@ namespace clstd
         return NULL;
       }
       m_pBuffer->Reserve(1024);
-      m_SmartStream.Initialize((_TCh*)m_pBuffer->GetPtr(), m_pBuffer->GetSize() / sizeof(_TCh));
+      m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), m_pBuffer->GetSize() / sizeof(TChar));
     }
 
     clstd::StringCutter<_TStr> rsc(szPath);
-    SECTION_DESC sDesc;
-    SECTION_DESC sResult;
+    SECTION sDesc;
+    SECTION sResult;
 
-    if(sect) {
-      sDesc = *sect;
+    if(desc) {
+      sDesc = *desc;
     }
     else {
-      new(&sDesc) SECTION_DESC(this);
+      new(&sDesc) SECTION(this);
     }
 
     _TStr strSectName;
@@ -670,13 +734,13 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::Open( T_LPCSTR szPath )
+    typename _SSP_IMPL::SECTION* _SSP_IMPL::Open( T_LPCSTR szPath )
   {
-    return OpenChild(NULL, szPath);
+    return Open(NULL, szPath);
   }
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::OpenChild(Section sect, T_LPCSTR szPath)
+    typename _SSP_IMPL::SECTION* _SSP_IMPL::Open(SECTION* desc, T_LPCSTR szPath)
   {
     // sect != NULL
     // OpenChild(NULL, NULL); 返回根Section
@@ -684,19 +748,19 @@ namespace clstd
     // OpenChild(NULL, "sect1/sect0"); 返回根下的"sect1/sect0"
 
     if((szPath != NULL && szPath[0] == L'\0') || m_pBuffer == NULL || 
-      (sect != NULL && sect->pStock != this))
+      (desc != NULL && desc->pStock != this))
     {
       return NULL;
     }
 
     // FIXME: 目前重名Section包含不同子Section，查找只会匹配第一个找到的Section
 
-    SECTION_DESC sDesc;
-    SECTION_DESC sResult;
+    SECTION sDesc;
+    SECTION sResult;
 
-    if(sect)
+    if(desc)
     {
-      sDesc = *sect;
+      sDesc = *desc;
       if(szPath == NULL)
       {
         if( ! FindSigleSection(&sDesc, NULL, &sResult)) { // sect下的第一个Section
@@ -706,7 +770,7 @@ namespace clstd
       }
     }
     else {
-      new(&sDesc) SECTION_DESC(this);
+      new(&sDesc) SECTION(this);
       if(szPath == NULL) {
         return AddSection(&sDesc); // 根Section
       }
@@ -734,8 +798,8 @@ namespace clstd
     // 2. 如果在Section列表查找到了删除的Section，调整
 
     clstd::StringCutter<_TStr> rsc(szPath);
-    SECTION_DESC sDesc(this);
-    SECTION_DESC sResult;
+    SECTION sDesc(this);
+    SECTION sResult;
 
     _TStr strSectName;
 
@@ -785,7 +849,7 @@ namespace clstd
   {
     for(auto it = m_aHandles.begin(); it != m_aHandles.end(); ++it)
     {
-      SECTION_DESC* pSection = (SECTION_DESC*)*it;
+      SECTION* pSection = (SECTION*)*it;
       if(( ! RelocateIterator(pSection->itBegin,        lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) ||
         ( ! RelocateIterator(pSection->itEnd,          lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) ||
         ( ! RelocateIterator(pSection->itSectionName,  lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) )
@@ -868,7 +932,7 @@ namespace clstd
   //}
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::NewSection( const SECTION_DESC* pSection, T_LPCSTR szName, SECTION_DESC* pNewSect )
+    b32 _SSP_IMPL::NewSection( const SECTION* pSection, T_LPCSTR szName, SECTION* pNewSect )
   {
     ASSERT(pSection != NULL && pSection->DbgCheck());
     _TStr strBuffer;
@@ -889,12 +953,12 @@ namespace clstd
     pNewSect->itSectionName = m_SmartStream.nearest(nPos);
     pNewSect->nDepth        = pSection->nDepth + 1;
     SmartStreamUtility::FindPair(pNewSect->itSectionName,
-      pNewSect->itBegin, pNewSect->itEnd, (_TCh*)L"{", (_TCh*)L"}");
+      pNewSect->itBegin, pNewSect->itEnd, (TChar*)L"{", (TChar*)L"}");
     return TRUE;
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::FindSigleSection( const SECTION_DESC* pFindSect, T_LPCSTR szName, SECTION_DESC* pOutSect ) /* szName为NULL表示查找任何Section */
+    b32 _SSP_IMPL::FindSigleSection( const SECTION* pFindSect, T_LPCSTR szName, SECTION* pOutSect ) /* szName为NULL表示查找任何Section */
   {
     ASSERT(pFindSect != NULL);
 
@@ -917,7 +981,7 @@ namespace clstd
 
         // itNext应该与输出的ItBegin是同一个值
         return SmartStreamUtility::FindPair(itNext,
-          pOutSect->itBegin, pOutSect->itEnd, (_TCh*)L"{", (_TCh*)L"}");
+          pOutSect->itBegin, pOutSect->itEnd, (TChar*)L"{", (TChar*)L"}");
       }
       it = itNext;
     }
@@ -952,18 +1016,18 @@ namespace clstd
       nPos = m_SmartStream.GetStreamCount();
     }
 
-    _TCh* pOldPtr = (_TCh*)m_pBuffer->GetPtr();
-    const clsize cbSize = nCount * sizeof(_TCh);
-    const clsize cbReplaced = nReplaced * sizeof(_TCh);
-    const clsize cbPos = nPos * sizeof(_TCh);
+    TChar* pOldPtr = (TChar*)m_pBuffer->GetPtr();
+    const clsize cbSize = nCount * sizeof(TChar);
+    const clsize cbReplaced = nReplaced * sizeof(TChar);
+    const clsize cbPos = nPos * sizeof(TChar);
 
     m_pBuffer->Replace(cbPos, cbReplaced, (CLLPCVOID)szText, cbSize);
 
     // 重新设置SmartStream：指针变化，大小变化都要重新初始化
-    m_SmartStream.Initialize((_TCh*)m_pBuffer->GetPtr(), m_pBuffer->GetSize() / sizeof(_TCh));
+    m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), m_pBuffer->GetSize() / sizeof(TChar));
 
     // m_SmartStream.Initialize()之后会修正end()，RelocateSection内部断言检查需要准确的end()
-    RelocateSection(pOldPtr, (_TCh*)m_pBuffer->GetPtr(), nPos, nReplaced, nCount);
+    RelocateSection(pOldPtr, (TChar*)m_pBuffer->GetPtr(), nPos, nReplaced, nCount);
     return true;
   }
 
@@ -978,4 +1042,77 @@ namespace clstd
   {
     return Replace(-1, 0, szText, nCount);
   }
+
+  _SSP_TEMPL
+  typename _SSP_IMPL::T_LPCSTR _SSP_IMPL::GetText(clsize* length) const
+  {
+    if(length) {
+      *length = m_pBuffer->GetSize() / sizeof(TChar);
+    }
+    return (T_LPCSTR)m_pBuffer->GetPtr();
+  }
+
+
+  //////////////////////////////////////////////////////////////////////////
+  _SSP_TEMPL
+  _SSP_IMPL::Section::Section(SECTION* desc)
+    : m_desc(desc)
+  {      
+  }
+
+  _SSP_TEMPL
+  _SSP_IMPL::Section::~Section()
+  {
+    Close();
+  }
+
+  _SSP_TEMPL
+  b32 _SSP_IMPL::Section::IsValid() const
+  {
+    return m_desc != NULL && m_desc->IsValid();
+  }
+
+  _SSP_TEMPL
+    void _SSP_IMPL::Section::Close()
+  {
+    if(m_desc) {
+      m_desc->pStock->CloseSection(m_desc);
+      m_desc = NULL;
+    }
+  }
+
+  _SSP_TEMPL
+  typename _SSP_IMPL::SECTION* _SSP_IMPL::Section::operator=(SECTION* desc)
+  {
+    Close();
+    m_desc = desc;
+    return m_desc;
+  }
+
+  _SSP_TEMPL
+  typename _SSP_IMPL::SECTION* _SSP_IMPL::Section::operator->() const
+  {
+    return m_desc;
+  }
+
+  _SSP_TEMPL
+    typename _SSP_IMPL::SECTION* _SSP_IMPL::Section::operator&() const
+  {
+    return m_desc;
+  }
+
+  _SSP_TEMPL
+  typename _SSP_IMPL::SECTION& _SSP_IMPL::Section::operator*() const
+  {
+    return *m_desc;
+  }
+
+  _SSP_TEMPL
+  typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::operator[](T_LPCSTR name) const
+  {
+    ATTRIBUTE attr;
+    m_desc->GetKey(name, attr);
+    return attr;
+  }
+
 } // namespace clstd

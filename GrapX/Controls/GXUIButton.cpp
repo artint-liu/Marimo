@@ -133,7 +133,9 @@ namespace GXUI
         bval = FALSE;
         m_nDefault = 0;
       }
-
+    }
+    else {
+      CLOG_ERRORW(L"Can not load sprite(%s).\r\n", szSpriteFile);
     }
     return TRUE;
   }

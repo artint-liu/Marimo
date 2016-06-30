@@ -15,7 +15,10 @@ typedef Marimo::DataPool MODataPool;
 
 class GXGraphics;
 class GTextureBase;
-class SmartProfileA;
+namespace clstd
+{
+  class SmartProfileA;
+} // namespace clstd
 class clConstBuffer;
 //class SmartRepository;
 struct MOSHADER_ELEMENT_SOURCE;

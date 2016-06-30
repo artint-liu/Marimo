@@ -12,7 +12,7 @@
 #include <Smart\SmartStock.h>
 
 #pragma warning(disable : 4996)
-
+using namespace clstd;
 int GeneralRead()
 {
     //SmartStockA sp;
@@ -84,17 +84,17 @@ int CreateSectAndSave()
     //s.CloseHandle(hNew);
 
     // 创建Section
-    auto hRoot = s.Create("root");
-    s.CloseSection(hRoot);
+    SmartStockA::Section hRoot = s.Create("root");
+    //s.CloseSection(hRoot);
 
     auto hWillBeDelete = s.Create("WillBeDelete");
 
     hRoot = s.Create("AfterWillBeDelete");
-    s.CloseSection(hRoot);
+    //s.CloseSection(hRoot);
 
     // 创建重名Section
     hRoot = s.Create("root");
-    s.CloseSection(hRoot);
+    //s.CloseSection(hRoot);
 
     // 创建子Section
     auto hSub = s.Create("root/sub2/sub1/sub0");
@@ -124,12 +124,12 @@ int CreateSectAndSave()
 
     // 测试遍历Section
     hRoot = s.Open("root");
-    if(hRoot)
+    if(hRoot.IsValid())
     {
         hRoot->SetKey("TestKey1", "abc");
         hRoot->NextSection("root");
         hRoot->SetKey("TestKey2", "abcd");
-        s.CloseSection(hRoot);
+        //s.CloseSection(hRoot);
     }
     else {
         CLBREAK;
@@ -153,29 +153,78 @@ int CreateSectAndSave()
 
 void TestRoot()
 {
-    SmartStockA s;
-    s.LoadW(L"TestSave.txt");
-    auto pSect = s.Open(NULL);
-    ASSERT(pSect);
-    SmartStockA::PARAMETER p;
-    if(pSect->FirstKey(p))
-    {
-        do 
-        {
-            printf("key:%s=%s\n", p.KeyName(), p.ToString());
-        } while (p.NextKey());
-    }
-
-    printf("\n");
-
-    auto pSectChild = s.OpenChild(pSect, NULL);
-    ASSERT(pSectChild);
+  SmartStockA s;
+  s.LoadW(L"TestSave.txt");
+  auto pSect = s.Open(NULL);
+  ASSERT(pSect);
+  SmartStockA::ATTRIBUTE p;
+  if(pSect->FirstKey(p))
+  {
     do {
-        printf("pSectChild:%s\n", pSectChild->SectionName());
-    }while(pSectChild->NextSection(NULL));
+      printf("key:%s=%s\n", p.KeyName(), p.ToString());
+    } while (p.NextKey());
+  }
 
-    s.CloseSection(pSectChild);
-    s.CloseSection(pSect);
+  printf("\n");
+
+  auto pSectChild = s.Open(pSect, NULL);
+  ASSERT(pSectChild);
+  do {
+    printf("pSectChild:%s\n", pSectChild->SectionName());
+  }while(pSectChild->NextSection(NULL));
+
+  s.CloseSection(pSectChild);
+  s.CloseSection(pSect);
+}
+
+void test2_write()
+{
+  SmartStockA ss;
+  SmartStockA::Section frames_sect = ss.Create("frames");
+  clstd::Rand r;
+  for(int i = 0; i < 10; i++)
+  {
+    SmartStockA::Section rect_sect = ss.Create(&frames_sect, "rect");
+    rect_sect->SetKey("x", clStringA(r.rand() % 640));
+    rect_sect->SetKey("y", clStringA(r.rand() % 480));
+    rect_sect->SetKey("w", clStringA(r.rand() % 640));
+    rect_sect->SetKey("h", clStringA(r.rand() % 480));
+  }
+  ss.SaveA("framelist.txt");
+}
+
+void test2_read()
+{
+  SmartStockA ss;
+  if( ! ss.LoadA("framelist.txt")) {
+    return;
+  }
+
+  SmartStockA::Section root_sect = ss.Open(NULL);
+  if( ! root_sect->IsValid()) {
+    return;
+  }
+
+  root_sect = root_sect->Open(NULL);
+  if(root_sect->IsValid()) {
+    SmartStockA::Section child_sect = root_sect->Open(NULL);
+    while(child_sect->IsValid())
+    {
+      SmartStockA::ATTRIBUTE attr = child_sect->begin();
+      SmartStockA::ATTRIBUTE end_attr = child_sect->end();
+
+      printf("%s\n", child_sect->SectionName());
+      for(; attr != end_attr; ++attr)
+      {
+        printf("%s=%s\n", attr.KeyName(), attr.ToString());
+      }
+
+      if( ! child_sect->NextSection(NULL)) {
+        break;
+      }
+    }
+  }
+
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -185,8 +234,9 @@ int _tmain(int argc, _TCHAR* argv[])
     // 这两种忽略写入，但是Stock文件中如果有“key=;”这种模式还应该能正常读取
 
     CreateSectAndSave();
-    TestRoot();
-
+    //TestRoot();
+    test2_write();
+    test2_read();
     printf("Press any key to continue...\n");
     getch();
     //return GeneralRead();

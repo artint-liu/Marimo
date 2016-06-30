@@ -484,4 +484,5 @@ namespace clstd
 
   template struct _COLOR_RGBTEMPL_F<Internal::COLOR_RGBA_F>;
   template struct _COLOR_RGBTEMPL_F<Internal::COLOR_ABGR_F>;
+  template struct _COLOR_RGBTEMPL<Internal::COLOR_ARGB>;
 } // namespace clstd

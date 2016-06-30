@@ -15,46 +15,46 @@ namespace clstd
 {
   class Buffer;
 
-  struct SmartStock_TraitsW
-  {
-    static clsize _StrLen(const wch*);
-    static b32    _CheckBoolean(const wch*);
-    typedef wch _TCh;
-    typedef SmartStream_TraitsW SmartStream_Traits;
-  };
+  //struct SmartStock_TraitsW
+  //{
+  //  //static clsize _StrLen(const wch*);
+  //  static b32    _CheckBoolean(const wch*);
+  //  typedef wch _TCh;
+  //  typedef SmartStream_TraitsW SmartStream_Traits;
+  //};
 
-  struct SmartStock_TraitsA
-  {
-    static clsize _StrLen(const ch*);
-    static b32    _CheckBoolean(const ch*);
-    typedef ch _TCh;
-    typedef SmartStream_TraitsA SmartStream_Traits;
-  };
+  //struct SmartStock_TraitsA
+  //{
+  //  //static clsize _StrLen(const ch*);
+  //  static b32    _CheckBoolean(const ch*);
+  //  typedef ch _TCh;
+  //  typedef SmartStream_TraitsA SmartStream_Traits;
+  //};
+
+  //template <typename _TCh> b32 _CheckBoolean(const _TCh*);
 
   //////////////////////////////////////////////////////////////////////////
 
-  template<
-    class    _TStr, 
-    class    _Traits>
+  template<class _TStr>
   class SmartStockT
   {
   public:
-    typedef typename _Traits::_TCh _TCh;
-    typedef SmartStreamT<_TStr, typename _Traits::SmartStream_Traits> _SmartStreamT;
+    //typedef typename _Traits::_TCh _TCh;
+    typedef SmartStreamT<_TStr> _SmartStreamT;
     typedef typename _SmartStreamT::iterator _MyIterator;
     typedef typename _TStr::LPCSTR T_LPCSTR;
     typedef typename _TStr::TChar  TChar;
 
   public:
-    struct SECTION_DESC;
-    struct PARAMETER
+    struct SECTION;
+    struct ATTRIBUTE
     {
-      const SECTION_DESC* pSection;
+      const SECTION* pSection;
       _MyIterator   itKey;   // 键
       _MyIterator   itValue; // 值
 
-      PARAMETER(){}
-      PARAMETER(SECTION_DESC* pCoSection) : pSection(pCoSection){}
+      ATTRIBUTE(){}
+      ATTRIBUTE(SECTION* pCoSection) : pSection(pCoSection){}
 
       b32     NextKey     ();
       _TStr   SectionName () const;
@@ -65,11 +65,15 @@ namespace clstd
       b32     ToBoolean   () const;
       _TStr&  KeyName     (_TStr& str) const;
       _TStr&  ToString    (_TStr& str) const;
+
+      b32         operator==(const ATTRIBUTE& attr) const;
+      b32         operator!=(const ATTRIBUTE& attr) const;
+      ATTRIBUTE&  operator++();
     };
 
     //////////////////////////////////////////////////////////////////////////
 
-    struct SECTION_DESC
+    struct SECTION
     {
       SmartStockT*  pStock;
       int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
@@ -86,39 +90,62 @@ namespace clstd
 #else
       b32 DbgCheck() const { return TRUE; }
 #endif
-      SECTION_DESC(){}
-      SECTION_DESC(SmartStockT* pCoStock)
+      SECTION(){}
+      SECTION(SmartStockT* pCoStock)
         : pStock  (pCoStock)
         , nDepth  (0)
         , itBegin(pCoStock->m_SmartStream.begin())
         , itEnd(pCoStock->m_SmartStream.end())
       {}
 
-      b32     IsValid             () const;
-      _TStr   SectionName         () const;
-      b32     NextSection         (T_LPCSTR szName);
-      b32     Rename              (T_LPCSTR szNewName);
-      b32     FirstKey            (PARAMETER& param) const;
+      b32       IsValid             () const;
+      _TStr     SectionName         () const;
+      SECTION*  Open                (T_LPCSTR szSubPath); // 等价于SmartStockT::Open()
+      b32       NextSection         (T_LPCSTR szName);
+      b32       Rename              (T_LPCSTR szNewName);
+      b32       FirstKey            (ATTRIBUTE& param) const;
 
-      b32     GetKey              (T_LPCSTR szKey, PARAMETER& param) const;
-      int     GetKeyAsString      (T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount) const;
-      _TStr   GetKeyAsString      (T_LPCSTR szKey, const _TStr& strDefault) const;
-      int     GetKeyAsInteger     (T_LPCSTR szKey, int nDefault) const;
-      float   GetKeyAsFloat       (T_LPCSTR szKey, float fDefault) const;
-      b32     GetKeyAsBoolean     (T_LPCSTR szKey, b32 bDefault) const;
-      b32     SetKey              (T_LPCSTR szKey, T_LPCSTR szValue);
-      b32     DeleteKey           (T_LPCSTR szKey);
+      b32       GetKey              (T_LPCSTR szKey, ATTRIBUTE& param) const;
+      int       GetKeyAsString      (T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount) const;
+      _TStr     GetKeyAsString      (T_LPCSTR szKey, const _TStr& strDefault) const;
+      int       GetKeyAsInteger     (T_LPCSTR szKey, int nDefault) const;
+      float     GetKeyAsFloat       (T_LPCSTR szKey, float fDefault) const;
+      b32       GetKeyAsBoolean     (T_LPCSTR szKey, b32 bDefault) const;
+      b32       SetKey              (T_LPCSTR szKey, T_LPCSTR szValue);
+      b32       DeleteKey           (T_LPCSTR szKey);
+
+      // std 适应接口
+      ATTRIBUTE begin ();
+      ATTRIBUTE end   ();
     };
 
 
-    typedef SECTION_DESC* Section;
+    //
+    // 用于自动处理SECTION_DESC*的类
+    //
+    class Section
+    {
+    protected:
+      SECTION* m_desc;
+
+    public:
+      Section(SECTION* desc);
+      ~Section();
+      b32 IsValid() const;
+      void Close();
+      SECTION* operator=(SECTION* desc);
+      SECTION* operator->() const;
+      SECTION* operator&() const;
+      SECTION& operator*() const;
+      ATTRIBUTE operator[](T_LPCSTR name) const;
+    };
 
   protected:
-    typedef clvector<Section>  HandleArray;
+    typedef clvector<SECTION*>  SectionArray;
 
     _SmartStreamT m_SmartStream;
-    Buffer*     m_pBuffer;
-    HandleArray   m_aHandles;
+    Buffer*       m_pBuffer;
+    SectionArray  m_aHandles;
 
     static void ReverseByteOrder16(u16* ptr, clsize nCount);
 
@@ -126,25 +153,16 @@ namespace clstd
     SmartStockT();
     virtual ~SmartStockT();
 
-    b32 Close();
-
     b32 LoadA(const ch* lpProfile);
     b32 SaveA(const ch* lpProfile) const;
     b32 LoadW(const wch* lpProfile);
     b32 SaveW(const wch* lpProfile) const;
 
-    //#ifdef _UNICODE
-    //  b32 Load(const wch* lpProfile) { return LoadW(lpProfile); }
-    //  b32 Save(const wch* lpProfile) const { return SaveW(lpProfile); }
-    //#else
-    //  b32 Load(const ch* lpProfile) { return LoadA(lpProfile); }
-    //  b32 Save(const ch* lpProfile) const { return SaveA(lpProfile); }
-    //#endif // #ifdef _UNICODE
+    b32 Close();
 
     //////////////////////////////////////////////////////////////////////////
-    // new
 
-    b32 CloseSection(Section sect);
+    b32 CloseSection(SECTION* desc);
 
     //************************************
     // Method:    Create 创建section
@@ -156,8 +174,8 @@ namespace clstd
     // 如果不带路径，则直接在根上创建sect
     // 注意：不再使用时需要用CloseSection关闭
     //************************************
-    Section Create(T_LPCSTR szPath);
-    Section CreateChild(Section sect, T_LPCSTR szPath);
+    SECTION* Create(T_LPCSTR szPath);
+    SECTION* Create(SECTION* desc, T_LPCSTR szSubPath);
 
     //************************************
     // Method:    Open 打开指定的Section
@@ -166,8 +184,8 @@ namespace clstd
     // 打开Section的路径名，如"sect1/sect0"或者"sect"
     // 注意：不再使用时需要用CloseSection关闭
     //************************************
-    Section Open(T_LPCSTR szPath);
-    Section OpenChild(Section sect, T_LPCSTR szPath);
+    SECTION* Open(T_LPCSTR szPath);
+    SECTION* Open(SECTION* desc, T_LPCSTR szSubPath); // 等价于SECTION::Open
 
     //************************************
     // Method:    DeleteSection 删除指定的Section
@@ -179,28 +197,26 @@ namespace clstd
     //************************************
     b32 DeleteSection(T_LPCSTR szPath);
 
-    inline T_LPCSTR GetText(clsize* length)
-    {
-      if(length) {
-        *length = m_pBuffer->GetSize() / sizeof(_TCh);
-      }
-      return (T_LPCSTR)m_pBuffer->GetPtr();
-    }
+    T_LPCSTR GetText(clsize* length) const;
+
+    // std
+    //begin();
+    //end();
 
   protected:
-    b32     Append            (T_LPCSTR szText, clsize nCount);
-    b32     Insert            (clsize nPos, T_LPCSTR szText, clsize nCount);
-    b32     Replace           (clsize nPos, clsize nReplaced, T_LPCSTR szText, clsize nCount);
-    b32     FindSigleSection  (const SECTION_DESC* pFindSect, T_LPCSTR szName, SECTION_DESC* pOutSect); // szName为NULL表示查找任何Section;
-    b32     NewSection        (const SECTION_DESC* pSection, T_LPCSTR szName, SECTION_DESC* pNewSect);
-    clsize  InsertString      (const _MyIterator& it, const _TStr& str);
+    b32      Append            (T_LPCSTR szText, clsize nCount);
+    b32      Insert            (clsize nPos, T_LPCSTR szText, clsize nCount);
+    b32      Replace           (clsize nPos, clsize nReplaced, T_LPCSTR szText, clsize nCount);
+    b32      FindSigleSection  (const SECTION* pFindSect, T_LPCSTR szName, SECTION* pOutSect); // szName为NULL表示查找任何Section;
+    b32      NewSection        (const SECTION* pSection, T_LPCSTR szName, SECTION* pNewSect);
+    clsize   InsertString      (const _MyIterator& it, const _TStr& str);
 
-    b32     Remove            (const _MyIterator& itBegin, const _MyIterator& itEnd);
-    Section AddSection        (Section sect);
-    b32     DelSection        (Section sect);
-    b32     RelocateIterator  (_MyIterator& it, T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
-    b32     RelocateSection   (T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
-    void    TrimFrontTab      (clsize& uOffset);
+    b32      Remove            (const _MyIterator& itBegin, const _MyIterator& itEnd);
+    SECTION* AddSection        (SECTION* desc);
+    b32      RemoveSection     (SECTION* desc);
+    b32      RelocateIterator  (_MyIterator& it, T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
+    b32      RelocateSection   (T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
+    void     TrimFrontTab      (clsize& uOffset);
   };
 
   //template<class _STR>
@@ -209,8 +225,8 @@ namespace clstd
   //template<class _STR>
   //_STR ToProfileString(const _STR& str);
 
-  class SmartStockA : public SmartStockT<clStringA, SmartStock_TraitsA> {};
-  class SmartStockW : public SmartStockT<clStringW, SmartStock_TraitsW> {};
+  class SmartStockA : public SmartStockT<clStringA> {};
+  class SmartStockW : public SmartStockT<clStringW> {};
 } // namespace clstd
 
 

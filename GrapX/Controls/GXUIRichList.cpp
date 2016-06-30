@@ -216,10 +216,10 @@ namespace GXUI
     m_aItems[nIndex].hItem = NULL;
   }
 
-  int RichList::Recycle(GXSIZE_T nBegin, GXSIZE_T nDir)
+  int RichList::Recycle(GXSIZE_T nBegin, int nDir)
   {
     ASSERT(nDir == -1 || nDir == 1);
-    ASSERT(nBegin >= -1);
+    ASSERT(nBegin != (GXSIZE_T)-1);
     int nEnd = -1;
     int nCount = 0;
     if(nDir == 1) {

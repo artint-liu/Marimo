@@ -46,19 +46,17 @@
 extern "C" b32 strcmpnA(const ch* lpString1, const ch* lpString2, int nCount);
 extern "C" b32 strcmpnW(const wch* lpString1, const wch* lpString2, int nCount);
 
-struct SmartStream_TraitsW
-{
-  static b32  _StrCmpN(const wch*, const wch*, int);
-};
+//struct SmartStream_TraitsW
+//{
+//  static b32  _StrCmpN(const wch*, const wch*, int);
+//};
+//
+//struct SmartStream_TraitsA
+//{
+//  static b32  _StrCmpN(const ch*, const ch*, int);
+//};
 
-struct SmartStream_TraitsA
-{
-  static b32  _StrCmpN(const ch*, const ch*, int);
-};
-
-template<
-  class    _TStr, 
-  class    _Traits>
+template<class _TStr>
 class SmartStreamT
 {
 public:
@@ -194,8 +192,8 @@ public:
   b32             find_pair (const iterator& itCurrent, iterator& itOpen, iterator& itClose, T_LPCSTR chOpen, T_LPCSTR chClose) const;
 };
 
-typedef SmartStreamT<clStringA, SmartStream_TraitsA> SmartStreamA;
-typedef SmartStreamT<clStringW, SmartStream_TraitsW> SmartStreamW;
+typedef SmartStreamT<clStringA> SmartStreamA;
+typedef SmartStreamT<clStringW> SmartStreamW;
 
 namespace SmartStreamUtility
 {

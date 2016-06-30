@@ -14,7 +14,7 @@
 // clstd Headers
 //
 #include <cltree.h>
-
+#include "socket/clSocket.h"
 //#include "3D/GrapVR.H"
 
 // fbx 文件解析库, 来自 Autodesk

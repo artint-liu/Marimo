@@ -24,17 +24,17 @@
 //
 // 显式声明模板类
 //
-template class SmartStreamT<clStringA, SmartStream_TraitsA>;
-template class SmartStreamT<clStringW, SmartStream_TraitsW>;
+template class SmartStreamT<clStringA>;
+template class SmartStreamT<clStringW>;
 
-b32 SmartStream_TraitsW::_StrCmpN(const wch* pStr1, const wch* pStr2, int nCount)
-{
-  return wcsncmp(pStr1, pStr2, nCount) == 0;
-}
-b32 SmartStream_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
-{
-  return strncmp(pStr1, pStr2, nCount) == 0;
-}
+//b32 SmartStream_TraitsW::_StrCmpN(const wch* pStr1, const wch* pStr2, int nCount)
+//{
+//  return wcsncmp(pStr1, pStr2, nCount) == 0;
+//}
+//b32 SmartStream_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
+//{
+//  return strncmp(pStr1, pStr2, nCount) == 0;
+//}
 
 
 //#define CHAR_TYPE         ((TChar)m_pStream[m_uPointer] >= 0x80 ? M_LABEL : m_aCharSem[m_pStream[m_uPointer]])
@@ -64,8 +64,8 @@ b32 SmartStream_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
 
 #define SET_SYMBOL(ch)    m_aCharSem[(int)ch] = M_SYMBOL
 
-#define _SS_TEMPL template<class _TStr, class _Traits>
-#define _SS_IMPL SmartStreamT<_TStr, _Traits>
+#define _SS_TEMPL template<class _TStr>
+#define _SS_IMPL SmartStreamT<_TStr>
 
 _SS_TEMPL _SS_IMPL::SmartStreamT(T_LPCSTR pStream /* = NULL */, clsize uCountOfChar /* = NULL */)
 : m_pBegin          (pStream)
@@ -446,15 +446,15 @@ b32 _SS_IMPL::iterator::EndsWith(T_LPCSTR str, clsize count) const
 _SS_TEMPL
 b32 _SS_IMPL::iterator::operator==(const _TStr& str) const
 {
-  return (str.GetLength() == length && 
-    _Traits::_StrCmpN(marker, str, (int)length));
+  return (str.GetLength() == length && ! clstd::strncmpT(marker, (T_LPCSTR)str, (int)length));
+    //_Traits::_StrCmpN(marker, str, (int)length));
 }
 
 _SS_TEMPL
 b32 _SS_IMPL::iterator::operator==(T_LPCSTR pStr) const
 {
-  return (_TStr(pStr).GetLength() == length &&
-    _Traits::_StrCmpN(marker, pStr, (int)length));
+  return (_TStr(pStr).GetLength() == length && ! clstd::strncmpT(marker, pStr, (int)length));
+    //_Traits::_StrCmpN(marker, pStr, (int)length));
 }
 
 _SS_TEMPL
@@ -466,15 +466,13 @@ b32 _SS_IMPL::iterator::operator==(TChar ch) const
 _SS_TEMPL
 b32 _SS_IMPL::iterator::operator!=(const _TStr& str) const
 {
-  return (str.GetLength() != length ||
-    ! _Traits::_StrCmpN(marker, str, (int)length));
+  return (str.GetLength() != length || clstd::strncmpT(marker, (T_LPCSTR)str, (int)length));
 }
 
 _SS_TEMPL
 b32 _SS_IMPL::iterator::operator!=(T_LPCSTR pStr) const
 {
-  return (_TStr(pStr).GetLength() != length ||
-    ! _Traits::_StrCmpN(marker, pStr, (int)length));
+  return (_TStr(pStr).GetLength() != length || clstd::strncmpT(marker, pStr, (int)length));
 }
 
 _SS_TEMPL

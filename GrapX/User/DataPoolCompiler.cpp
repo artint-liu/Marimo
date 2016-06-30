@@ -536,6 +536,7 @@ namespace Marimo
     // 加载编译信息资源
     m_ErrorMsg.LoadErrorMessageW(L"dpcmsg.txt");
     m_ErrorMsg.SetMessageSign('C');
+    m_ErrorMsg.PushFile(L"<null>");
 
     GXBOOL bval = IntCompile(pInclude, szDefinitionCodes, nCodeLength);
     if(bval)

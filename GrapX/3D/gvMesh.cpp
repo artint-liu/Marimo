@@ -894,7 +894,7 @@ namespace mesh
   }
 
   // 32-bits indices
-  GXBOOL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const VIndex32* pIndices, int nFaceCount)
+  GXBOOL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const VIndex32* pIndices, GXSIZE_T nFaceCount)
   {
     ASSERT(aNormals.size() == aVertices.size());
     return mesh::CalculateNormalsT<VIndex32>(&aNormals.front(), &aVertices.front(), 

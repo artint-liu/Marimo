@@ -31,7 +31,7 @@
 #include "GFXParticles.h"
 
 #define CMP_PARAM(_STR) GXSTRCMP(aDefines[i].szName, _STR) == 0
-
+using namespace clstd;
 namespace GFX
 {
   //////////////////////////////////////////////////////////////////////////
