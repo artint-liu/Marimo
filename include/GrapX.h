@@ -57,19 +57,15 @@ namespace clstd
   class Buffer;
   class BufferBase;
   class SmartRepository;
-  class SmartProfileA;
-  class SmartProfileW;
-  class SmartStockA;
-  class SmartStockW;
+  class StockA;
+  class StockW;
 
 } // namespace clstd
 
 typedef clstd::Buffer           clBuffer;
 typedef clstd::BufferBase       clBufferBase;
-typedef clstd::SmartStockA      clSmartStockA;
-typedef clstd::SmartStockW      clSmartStockW;
-typedef clstd::SmartProfileA    clSmartProfileA;
-typedef clstd::SmartProfileW    clSmartProfileW;
+typedef clstd::StockA           clStockA;
+typedef clstd::StockW           clStockW;
 typedef clstd::SmartRepository  clSmartRepository;
 
 //////////////////////////////////////////////////////////////////////////

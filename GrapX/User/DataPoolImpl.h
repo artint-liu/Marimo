@@ -1,7 +1,7 @@
 ﻿#ifndef _MARIMO_DATAPOOL_IMPLEMENT_H_
 #define _MARIMO_DATAPOOL_IMPLEMENT_H_
 
-class SmartStockW;
+//class StockW;
 
 namespace Marimo
 {

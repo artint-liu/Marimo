@@ -9,9 +9,6 @@
     <ClCompile Include="..\..\Smart\smartstream.cpp">
       <Filter>Smart</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Smart\SmartProfile.cpp">
-      <Filter>Smart</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\clTree.CPP" />
     <ClCompile Include="..\..\3D\Camera.cpp">
       <Filter>3D</Filter>
@@ -71,9 +68,6 @@
     <ClCompile Include="..\..\PrimeNum.cpp" />
     <ClCompile Include="..\..\clImage.cpp" />
     <ClCompile Include="..\..\clMesh.cpp" />
-    <ClCompile Include="..\..\Smart\SmartStock.cpp">
-      <Filter>Smart</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\thread\clMessageThread.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
@@ -88,6 +82,9 @@
       <Filter>Thread</Filter>
     </ClCompile>
     <ClCompile Include="..\..\clGeometry2D.cpp" />
+    <ClCompile Include="..\..\smart\Stock.cpp">
+      <Filter>Smart</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clBuffer.H" />
@@ -99,9 +96,6 @@
       <Filter>Smart</Filter>
     </ClInclude>
     <ClInclude Include="..\..\clmemory.h" />
-    <ClInclude Include="..\..\Smart\SmartProfile.h">
-      <Filter>Smart</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\clString.H" />
     <ClInclude Include="..\..\clTree.H" />
     <ClInclude Include="..\..\3D\Camera.h">
@@ -147,9 +141,6 @@
     <ClInclude Include="..\..\clPathFile.h" />
     <ClInclude Include="..\..\clImage.h" />
     <ClInclude Include="..\..\clMesh.h" />
-    <ClInclude Include="..\..\Smart\SmartStock.h">
-      <Filter>Smart</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\clTextLines.h" />
     <ClInclude Include="..\..\clStringSet.h" />
     <ClInclude Include="..\..\clMathExpressionParser.h" />
@@ -167,6 +158,9 @@
       <Filter>Thread</Filter>
     </ClInclude>
     <ClInclude Include="..\..\clGeometry2D.h" />
+    <ClInclude Include="..\..\smart\Stock.h">
+      <Filter>Smart</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

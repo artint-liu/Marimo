@@ -45,9 +45,8 @@
     <ClCompile Include="..\..\FloatX.cpp" />
     <ClCompile Include="..\..\PrimeNum.cpp" />
     <ClCompile Include="..\..\Smart\SmartRepository.cpp" />
-    <ClCompile Include="..\..\Smart\SmartProfile.cpp" />
-    <ClCompile Include="..\..\Smart\SmartStock.cpp" />
     <ClCompile Include="..\..\Smart\smartstream.cpp" />
+    <ClCompile Include="..\..\smart\Stock.cpp" />
     <ClCompile Include="..\..\Socket\clSocketClient.cpp" />
     <ClCompile Include="..\..\Socket\clSocketServer.cpp" />
     <ClCompile Include="..\..\third_party\crypt\crypt_arc4.cpp" />
@@ -94,9 +93,8 @@
     <ClInclude Include="..\..\floatx.h" />
     <ClInclude Include="..\..\clGeometry2D.h" />
     <ClInclude Include="..\..\Smart\SmartRepository.h" />
-    <ClInclude Include="..\..\Smart\SmartProfile.h" />
-    <ClInclude Include="..\..\Smart\SmartStock.h" />
     <ClInclude Include="..\..\Smart\smartstream.h" />
+    <ClInclude Include="..\..\smart\Stock.h" />
     <ClInclude Include="..\..\Socket\clSocket.h" />
     <ClInclude Include="..\..\Socket\clSocketClient.h" />
     <ClInclude Include="..\..\Socket\clSocketServer.h" />

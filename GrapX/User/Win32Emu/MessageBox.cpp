@@ -4,7 +4,7 @@
 #include <User/GrapX.Hxx>
 
 #include <Smart/smartstream.h>
-#include <Smart/SmartProfile.h>
+#include <Smart/Stock.h>
 
 // 平台相关
 //#include "GrapX/GUnknown.H"
@@ -28,7 +28,7 @@ extern GXWNDCLASSEX WndClassEx_MyEdit_1_3_30;
 extern GXWNDCLASSEX WndClassEx_MyListbox;
 extern GXWNDCLASSEX WndClassEx_MyStatic;
 extern GXWNDCLASSEX WndClassEx_GXUIEdit_1_3_30;
-extern GXBOOL LoadMenuTemplateFromSmartProfileW(clSmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
+extern GXBOOL LoadMenuTemplateFromStockW(clStockW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
 //struct DLGLOG
 //{
 //  typedef clmap<clStringW, GXHWND>  NameToWndDict;

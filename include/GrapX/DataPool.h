@@ -14,7 +14,6 @@ namespace clstd
   struct STRINGSETDESC;
 } // namespace clstd
 
-//class SmartStockW;
 
 namespace Marimo
 {
@@ -840,7 +839,7 @@ namespace Marimo
     GXSTDINTERFACE(GXHRESULT GetManifest(MANIFEST* pManifest) const);
 
   public:
-    static GXHRESULT CreateFromMemory(DataPoolCompiler** ppResolver, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength);
+    static GXHRESULT CreateFromMemory(DataPoolCompiler** ppResolver, GXLPCWSTR szSourceFilePath, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength);
   };
 
   //////////////////////////////////////////////////////////////////////////

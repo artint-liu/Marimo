@@ -16,12 +16,12 @@ typedef GXINT16   (CALLBACK *EDITWORDBREAKPROC16)(GXLPSTR,GXINT16,GXINT16,GXINT1
 //#define FIXME  TRACE
 //#define ERR    TRACE
 //#define WARN  TRACE
-#define FIXME(...)
-#define ERR(...)
-#define WARN(...)
-#define LB_TRACE
-#define ED_TRACE(...)
-#define ST_TRACE
+#define FIXME(...)      {}
+#define ERR(...)        {}
+#define WARN(...)       {}
+#define LB_TRACE        {}
+#define ED_TRACE(...)   {}
+#define ST_TRACE        {}
 #define LocalFree16 gxLocalFree
 #define LocalInit16 
 #define LocalAlloc16 gxLocalAlloc

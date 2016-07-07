@@ -29,10 +29,10 @@ public:
   GXSPRITE_DESCW ToDesc();
 
 public:
-  friend GXHRESULT IntLoadSpriteDesc(clSmartProfileA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
-  friend GXHRESULT IntLoadModules   (clSmartProfileA& ss, GXSpriteDescImpl* pDescObj);
-  friend GXHRESULT IntLoadFrames    (clSmartProfileA& ss, GXSpriteDescImpl* pDescObj);
-  friend GXHRESULT IntLoadAnimations(clSmartProfileA& ss, GXSpriteDescImpl* pDescObj) ;
+  friend GXHRESULT IntLoadSpriteDesc(clstd::StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
+  friend GXHRESULT IntLoadModules   (clstd::StockA& ss, GXSpriteDescImpl* pDescObj);
+  friend GXHRESULT IntLoadFrames    (clstd::StockA& ss, GXSpriteDescImpl* pDescObj);
+  friend GXHRESULT IntLoadAnimations(clstd::StockA& ss, GXSpriteDescImpl* pDescObj) ;
 };
 
 class GXSpriteImpl : public GXSprite

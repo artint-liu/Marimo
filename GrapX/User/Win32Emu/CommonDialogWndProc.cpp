@@ -2,8 +2,6 @@
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
 
-//#include <Smart/smartstream.h>
-//#include <Smart/SmartProfile.h>
 
 // 平台相关
 #include "GrapX/GResource.H"

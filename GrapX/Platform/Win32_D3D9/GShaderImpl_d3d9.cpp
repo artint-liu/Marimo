@@ -429,7 +429,7 @@ namespace D3D9
 } // namespace D3D9
 
 #include <Smart/smartstream.h>
-#include <Smart/SmartProfile.h>
+#include <Smart/Stock.h>
 
 GXVOID GShader::ResolveProfileDescW(GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros)
 {
@@ -461,7 +461,7 @@ GXVOID GShader::ResolveProfileDescW(GXLPCWSTR szProfileDesc, clStringW* pstrFile
 
 GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam)
 {
-  clSmartProfileA sp;
+  clStockA sp;
   clStringA strSect = clStringA("shader\\") + szPlatformSect;
   clStringW strFilename;
   clStringA strMacros;
@@ -519,34 +519,34 @@ GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCST
   return GX_OK;
 }
 
-GXBOOL GShader::LoadElementSource(clSmartProfileA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool)
+GXBOOL GShader::LoadElementSource(clStockA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool)
 {
-  typedef clSmartProfileA::HANDLE sHANDLE;
-  typedef clSmartProfileA::VALUE sVALUE;
+  typedef clStockA::Section Section;
+  typedef clStockA::ATTRIBUTE ATTRIBUTE;
 
   //clStringA strSect = clStringA("shader\\") + szPlatformSect;
   //clStringA strComponentSect = clStringA(szSection) + "\\PixelComponent";
 
 
-  sHANDLE handle = pSmart->OpenSection(szSection);
+  Section handle = pSmart->Open(szSection);
   //sHANDLE hPixelCpn = pSmart->OpenSection(strComponentSect);
 
-  if(handle == NULL) {
+  if( ! handle->IsValid()) {
     return GX_ERROR_HANDLE;
   }
   //MOSHADER_ELEMENT_SOURCE ses;
   //clStringArrayA aPixelComponentKeys;
-  pElement->bExtComposer  = pSmart->FindKeyAsBoolean(handle, "ExternalComposer", FALSE);
-  pElement->strPreVS      = pSmart->FindKeyAsString(handle, "PreVertexShader", "");
-  pElement->strVS         = pSmart->FindKeyAsString(handle, "VertexShader", "");
+  pElement->bExtComposer  = handle->GetKeyAsBoolean("ExternalComposer", FALSE);
+  pElement->strPreVS      = handle->GetKeyAsString("PreVertexShader", "");
+  pElement->strVS         = handle->GetKeyAsString("VertexShader", "");
 
-  pElement->strPS         = pSmart->FindKeyAsString(handle, "PixelShader", "");
-  pElement->strVSComposer = pSmart->FindKeyAsString(handle, "VertexShaderComposer", "");
-  pElement->strPSComposer = pSmart->FindKeyAsString(handle, "PixelShaderComposer", "");
+  pElement->strPS         = handle->GetKeyAsString("PixelShader", "");
+  pElement->strVSComposer = handle->GetKeyAsString("VertexShaderComposer", "");
+  pElement->strPSComposer = handle->GetKeyAsString("PixelShaderComposer", "");
 
   if(aDataPool != NULL)
   {
-    clStringA strDataPool = pSmart->FindKeyAsString(handle, "DataPool", "");
+    clStringA strDataPool = handle->GetKeyAsString("DataPool", "");
     if(strDataPool.IsNotEmpty())
     {
       if(strDataPool.Find(';', 0)) {
@@ -582,7 +582,7 @@ GXBOOL GShader::LoadElementSource(clSmartProfileA* pSmart, GXLPCSTR szSection, M
   //  }
   //}
   //pSmart->CloseHandle(hPixelCpn);
-  pSmart->FindClose(handle);
+  //pSmart->FindClose(handle);
   return TRUE;
 }
 
@@ -729,85 +729,83 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
 
 //////////////////////////////////////////////////////////////////////////
 
-GXBOOL GShader::LoadUniformSet(clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms)
+GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms)
 {
-  typedef clSmartProfileA::HANDLE sHANDLE;
-  typedef clSmartProfileA::VALUE sVALUE;
+  typedef clStockA::Section Section;
+  typedef clStockA::ATTRIBUTE ATTRIBUTE;
 
   clStringA strSection = clStringA(szSection) + "\\parameter";
 
   //for(int i = 0; i < 2; i++)
   {
-    sHANDLE hParam = pSmart->OpenSection(strSection);
-    if(hParam != NULL)
+    Section hParam = pSmart->Open(strSection);
+    if(hParam->IsValid())
     {
-      sVALUE val;
-      sHANDLE hKey = pSmart->FindFirstKey(hParam, val);
-      if(hKey != NULL) {
+      ATTRIBUTE val;
+      if(hParam->FirstKey(val)) {
         do {
           GXDefinition Def;
           Def.Name = val.KeyName();
           Def.Value = val.ToString();
           aUniforms->push_back(Def);
-        } while (pSmart->FindNextKey(hKey, val));
+        } while (val.NextKey());
       }
 
       //sHANDLE hSect = pSmart->FindFirstSection(hParam, FALSE, NULL, NULL);
-      sHANDLE hSect = pSmart->FindFirstSection(NULL, FALSE, strSection, NULL);
+      Section hSect = pSmart->Open(strSection);
       GXDefinition Def;
 
-      if(hSect != NULL)
+      if(hSect->IsValid())
       {
         do {
-          sHANDLE hKeySampler = pSmart->FindFirstKey(hSect, val);
-          if(hKeySampler != NULL)
+          if(hSect->FirstKey(val))
           {
             Def.Name = "SAMPLER";
-            Def.Value = pSmart->GetSectionName(hSect);
+            Def.Value = hSect->SectionName();
             aUniforms->push_back(Def);
             do {
               Def.Name = val.KeyName();
               Def.Value = val.ToString();
               aUniforms->push_back(Def);
-            } while(pSmart->FindNextKey(hKeySampler, val));
+            } while(val.NextKey());
           }
           Def.Name = "SAMPLER";
           Def.Value = "";
           aUniforms->push_back(Def);
-          pSmart->CloseHandle(hKeySampler);
-        } while (pSmart->FindNextSection(hSect));
-        pSmart->CloseHandle(hSect);
+          //pSmart->CloseHandle(hKeySampler);
+        } while (hSect->NextSection());
+        //pSmart->CloseHandle(hSect);
       }
-      pSmart->CloseHandle(hKey);
-      pSmart->CloseHandle(hParam);
+      //pSmart->CloseHandle(hKey);
+      //pSmart->CloseHandle(hParam);
     }
   }
   return TRUE;
 }
 
-GXBOOL GShader::LoadStateSet(clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aStates)
+GXBOOL GShader::LoadStateSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray* aStates)
 {
-  typedef clSmartProfileA::HANDLE sHANDLE;
-  typedef clSmartProfileA::VALUE sVALUE;
+  typedef clStockA::Section Section;
+  typedef clStockA::ATTRIBUTE ATTRIBUTE;
 
   for(int i = 0; i < 2; i++)
   {
-    sHANDLE hParam = pSmart->OpenSection(clStringA(szSection) + "\\state");
-    if(hParam != NULL)
+    Section hParam = pSmart->Open(clStringA(szSection) + "/state");
+    if(hParam->IsValid())
     {
-      sVALUE val;
-      sHANDLE hKey = pSmart->FindFirstKey(hParam, val);
-      if(hKey != NULL) {
+      ATTRIBUTE val;
+      //Section hKey = pSmart->FindFirstKey(hParam, val);
+      if(hParam->FirstKey(val)) {
         do {
           GXDefinition Def;
           Def.Name = val.KeyName();
           Def.Value = val.ToString();
           aStates->push_back(Def);
-        } while (pSmart->FindNextKey(hKey, val));
+        } while (val.NextKey());
       }
 
-      pSmart->CloseHandle(hKey);
-      pSmart->CloseHandle(hParam);
+      //pSmart->CloseHandle(hKey);
+      //pSmart->CloseHandle(hParam);
     }
   }
   return TRUE;

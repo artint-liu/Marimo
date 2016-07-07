@@ -6,7 +6,7 @@
 #include "res/resource.h"
 
 #include <Smart/smartstream.h>
-#include <Smart/SmartProfile.h>
+#include <Smart/Stock.h>
 #include <clPathFile.H>
 
 //#pragma comment(lib, "user32.lib")
@@ -82,8 +82,9 @@ INT_PTR CALLBACK PlatformSelDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* pDesc)
 {
-  typedef clstd::SmartProfileA::HANDLE sHANDLE;
-  clstd::SmartProfileA sp;
+  //typedef clstd::SmartProfileA::HANDLE sHANDLE;
+  typedef clstd::StockA::Section Section;
+  clstd::StockA sp;
   GXWCHAR buffer[MAX_PATH];
   clStringW strProfile;
   GetModuleFileNameW(hInstance, buffer, MAX_PATH);
@@ -91,15 +92,16 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
   clpathfile::RenameExtensionW(strProfile, L".smartfile");
   pDesc->idPlatform = GXPLATFORM_WIN32_DIRECT3D9;
   if(sp.LoadW(strProfile)) {
-    sHANDLE handle = sp.OpenSection("Startup\\Info");
-    if(handle)
+    Section handle = sp.Open("Startup/Info");
+    if(handle->IsValid())
     {
-      clStringW strPlatform = sp.FindKeyAsString(handle, "Platform", "");
+      clStringW strPlatform = handle->GetKeyAsString("Platform", "");
       if( ! strPlatform.IsEmpty()) {
         pDesc->idPlatform = MOPlatformStringToEnumW(strPlatform);
       }
     }
-    sp.FindClose(handle);
+    //sp.FindClose(handle);
+    handle.Close();
     sp.Close();
   }
 
@@ -108,13 +110,14 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
     g_hDLLModule, MAKEINTRESOURCE(IDD_PLATFORM), 
     NULL, PlatformSelDlgProc, (LPARAM)pDesc);
 
-  if(val == 0 && sp.Create("Startup"))
+  if(val == 0)
   {
-    sHANDLE handle = sp.CreateSection("Startup", "Info");
+    Section handle = sp.Create("Startup/Info");
     MOPlatformEnumToStringW(pDesc->idPlatform, buffer, MAX_PATH);
     clStringA strPlatform = buffer;
-    sp.SetKey(handle, "Platform", strPlatform);
-    sp.CloseHandle(handle);
+    handle->SetKey("Platform", strPlatform);
+    //sp.Close(handle);
+    handle.Close();
     sp.SaveW(strProfile);
   }
 

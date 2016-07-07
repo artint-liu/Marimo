@@ -6,7 +6,7 @@
 #include "../clFile.H"
 #include "../clBuffer.H"
 #include "smartstream.h"
-#include "SmartStock.h"
+#include "Stock.h"
 #include "../clUtility.H"
 
 namespace clstd
@@ -15,11 +15,11 @@ namespace clstd
   //
   // 显式声明模板类
   //
-  template class SmartStockT<clStringA>;
-  template class SmartStockT<clStringW>;
+  template class StockT<clStringA>;
+  template class StockT<clStringW>;
 
 #define _SSP_TEMPL template<class _TStr>
-#define _SSP_IMPL SmartStockT<_TStr>
+#define _SSP_IMPL StockT<_TStr>
 
   //template clStringW FromProfileString (const clStringW&);
   //template clStringA  FromProfileString (const clStringA&);
@@ -203,13 +203,13 @@ namespace clstd
 
 
   _SSP_TEMPL 
-    _SSP_IMPL::SmartStockT()
+    _SSP_IMPL::StockT()
     : m_pBuffer(NULL)
   {
   }
 
   _SSP_TEMPL 
-    _SSP_IMPL::~SmartStockT()
+    _SSP_IMPL::~StockT()
   {
     Close();
   }
@@ -434,7 +434,7 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::SECTION::IsValid() const
   {
-    return nDepth >= 0;
+    return this && nDepth >= 0;
   }
 
   _SSP_TEMPL
@@ -448,6 +448,12 @@ namespace clstd
   typename _SSP_IMPL::SECTION* _SSP_IMPL::SECTION::Open(T_LPCSTR szSubPath)
   {
     return pStock->Open(this, szSubPath);
+  }
+
+  _SSP_TEMPL
+    typename _SSP_IMPL::SECTION* _SSP_IMPL::SECTION::Create(T_LPCSTR szSubPath)
+  {
+    return pStock->Create(this, szSubPath);
   }
 
   _SSP_TEMPL
@@ -658,26 +664,6 @@ namespace clstd
       //return TRUE;
     }
     return FALSE;
-  }
-
-  _SSP_TEMPL
-    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::SECTION::begin()
-  {
-    ATTRIBUTE attr;
-    if(FirstKey(attr)) {
-      return attr;
-    }
-    return end();
-  }
-
-  _SSP_TEMPL
-    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::SECTION::end()
-  {
-    ATTRIBUTE attr;
-    attr.pSection = this;
-    attr.itKey    = itEnd;
-    attr.itValue  = itEnd;
-    return attr;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -1055,9 +1041,15 @@ namespace clstd
 
   //////////////////////////////////////////////////////////////////////////
   _SSP_TEMPL
+    _SSP_IMPL::Section::Section()
+    : m_desc(NULL)
+  {
+  }
+
+  _SSP_TEMPL
   _SSP_IMPL::Section::Section(SECTION* desc)
     : m_desc(desc)
-  {      
+  {
   }
 
   _SSP_TEMPL
@@ -1112,6 +1104,34 @@ namespace clstd
   {
     ATTRIBUTE attr;
     m_desc->GetKey(name, attr);
+    return attr;
+  }
+
+  _SSP_TEMPL
+    void _SSP_IMPL::Section::operator++()
+  {
+    if( ! m_desc->NextSection(NULL)) {
+      Close();
+    }
+  }
+
+  _SSP_TEMPL
+    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::begin()
+  {
+    ATTRIBUTE attr;
+    if(m_desc && m_desc->FirstKey(attr)) {
+      return attr;
+    }
+    return end();
+  }
+
+  _SSP_TEMPL
+    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::end()
+  {
+    ATTRIBUTE attr;
+    attr.pSection = m_desc;
+    attr.itKey    = m_desc->itEnd;
+    attr.itValue  = m_desc->itEnd;
     return attr;
   }
 

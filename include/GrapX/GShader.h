@@ -17,7 +17,7 @@ class GXGraphics;
 class GTextureBase;
 namespace clstd
 {
-  class SmartProfileA;
+  class SmartStockA;
 } // namespace clstd
 class clConstBuffer;
 //class SmartRepository;
@@ -68,10 +68,10 @@ public:
 public:
   static GXDLL GXVOID     ResolveProfileDescW (GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros);
   static GXDLL GXHRESULT  Load                (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam);
-  static GXDLL GXBOOL     LoadElementSource   (clSmartProfileA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool);
+  static GXDLL GXBOOL     LoadElementSource   (clStockA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool);
   static GXDLL GXBOOL     ComposeSource       (MOSHADER_ELEMENT_SOURCE* pElement, GXDWORD dwPlatfomCode, GXOUT MOSHADERBUFFERS* pSources, GXOUT GXDefinitionArray* aMacros);
-  static GXDLL GXBOOL     LoadUniformSet      (clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms);
-  static GXDLL GXBOOL     LoadStateSet        (clSmartProfileA* pSmart, GXLPCSTR szSection, ParamArray* aStates);
+  static GXDLL GXBOOL     LoadUniformSet      (clStockA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms);
+  static GXDLL GXBOOL     LoadStateSet        (clStockA* pSmart, GXLPCSTR szSection, ParamArray* aStates);
 };
 
 class GShaderStub : public GResource

@@ -4,7 +4,7 @@
 #include "clPathFile.h"
 #include "clTextLines.h"
 #include "Smart/smartstream.h"
-#include "Smart/SmartStock.h"
+#include "Smart/Stock.h"
 
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolIterator.H"
@@ -179,7 +179,7 @@ namespace Marimo
   class DataPoolObject : public _TDataPoolImpl
   {
   protected:
-    typedef clstd::SmartStockW::Section Section;
+    typedef clstd::StockW::Section Section;
     typedef clstd::TextLinesW clTextLinesW;
 
     enum ErrorCode
@@ -198,7 +198,7 @@ namespace Marimo
     struct IMPORT
     {
       typedef DataPoolErrorMsg<GXWCHAR> DataPoolErrorMsgW;
-      clstd::SmartStockW ss;
+      clstd::StockW ss;
       DataPoolErrorMsgW  ErrorMsg;
     };
 
@@ -217,9 +217,9 @@ namespace Marimo
         //clstd::TextLinesW tl(pText, length);
         auto sectRoot = import.ss.Open(NULL);
         //import.ErrorMsg.SetCurrentFilenameW(szFilename);
+        import.ErrorMsg.PushFile(szFilename);
         import.ErrorMsg.GenerateCurLines(pText, length);
         import.ErrorMsg.SetMessageSign('I');
-        import.ErrorMsg.PushFile(szFilename);
         //import.ErrorMsg.SetSilentMode(TRUE);  // Debug!!
         //import.szFilename = szFilename;
         //import.tl = &tl;
@@ -236,15 +236,15 @@ namespace Marimo
     }
 
   protected:
-    void IntImportSections(IMPORT& import, Section sectParent, MOVariable* varParent)
+    void IntImportSections(IMPORT& import, const Section& sectParent, MOVariable* varParent)
     {
       typedef clhash_map<clStringA, DataPoolImpl::VAR_COUNT> VarDict;
       GXBOOL bval = TRUE;
-      auto sect = import.ss.OpenChild(sectParent, NULL);
+      Section sect = sectParent->Open(NULL);
       MOVariable var;
       VarDict sVarDict;
 
-      if(sect)
+      if(sect->IsValid())
       {
         do {
           clStringA strVarName = (GXLPCWSTR)sect->SectionName();
@@ -335,7 +335,7 @@ namespace Marimo
       IntImportKeys(import, sectParent, varParent);
       //}
 
-      import.ss.CloseSection(sect);
+      //import.ss.CloseSection(sect);
 
       //for(auto it = sVarDict.begin(); it != sVarDict.end(); ++it)
       //{
@@ -343,9 +343,9 @@ namespace Marimo
       //}
     }
 
-    void IntImportKeys(IMPORT& import, Section sect, MOVariable* var)
+    void IntImportKeys(IMPORT& import, const Section& sect, MOVariable* var)
     {
-      clstd::SmartStockW::PARAMETER param;
+      clstd::StockW::ATTRIBUTE param;
       clStringW strValue;
       clStringW strKey;
       if(sect->FirstKey(param))
@@ -518,12 +518,12 @@ namespace Marimo
   {
     DataPoolCompiler* pResolver = NULL;
     GXHRESULT hval = szDefinitionCodes == NULL ? GX_OK :
-      DataPoolCompiler::CreateFromMemory(&pResolver, pInclude, szDefinitionCodes, nCodeLength);
+      DataPoolCompiler::CreateFromMemory(&pResolver, NULL, pInclude, szDefinitionCodes, nCodeLength);
     if(GXSUCCEEDED(hval))
     {
       hval = CreateFromResolver(ppDataPool, szName, pResolver);
-      SAFE_RELEASE(pResolver);
     }
+    SAFE_RELEASE(pResolver);
     return hval;
   }
 
@@ -539,12 +539,26 @@ namespace Marimo
       DefaultDataPoolInclude IncludeImpl;
       if(file.MapToBuffer(&pBuffer)) {
         // TODO: 这个从文件加载要检查BOM，并转换为Unicode格式
-        clStringA strDefine;
-        clStringA strFilenameA = (GXLPCWSTR)strFilenameW;
-        strDefine.Format("#FILE %s\n#LINE 1\n", (clStringA::LPCSTR)strFilenameA);
-        pBuffer->Insert(0, (GXLPCSTR)strDefine, strDefine.GetLength());
+        //clStringA strDefine;
+        //clStringA strFilenameA = (GXLPCWSTR)strFilenameW;
+        //strDefine.Format("#FILE %s\n#LINE 1\n", (clStringA::LPCSTR)strFilenameA);
+        //pBuffer->Insert(0, (GXLPCSTR)strDefine, strDefine.GetLength());
 
-        hval = CompileFromMemory(ppDataPool, szName, pInclude ? pInclude : &IncludeImpl, (GXLPCSTR)pBuffer->GetPtr(), pBuffer->GetSize());
+        //hval = CompileFromMemory(ppDataPool, szName, , , );
+
+        GXLPCSTR szDefinitionCodes = (GXLPCSTR)pBuffer->GetPtr();
+        DataPoolCompiler* pResolver = NULL;
+        if(szDefinitionCodes == NULL || pBuffer->GetSize() == 0) {
+          hval = GX_OK;
+        }
+        else {
+          hval = DataPoolCompiler::CreateFromMemory(&pResolver, strFilenameW, pInclude ? pInclude : &IncludeImpl, szDefinitionCodes, pBuffer->GetSize());
+          if(GXSUCCEEDED(hval)) {
+            hval = CreateFromResolver(ppDataPool, szName, pResolver);
+          }
+          SAFE_RELEASE(pResolver);
+        }
+
         delete pBuffer;
         pBuffer = NULL;
       }

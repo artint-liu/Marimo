@@ -9,7 +9,7 @@
 #include <clString.H>
 #include <clUtility.H>
 #include <Smart\smartstream.h>
-#include <Smart\SmartStock.h>
+#include <Smart\Stock.h>
 
 #pragma warning(disable : 4996)
 using namespace clstd;
@@ -63,7 +63,7 @@ int EnumAllSectKey()
 
 int CreateSectAndSave()
 {
-    SmartStockA s;
+    StockA s;
 
     //SmartStockA::HANDLE hNew = s.CreateSection("123", "456");
     //s.Load(_T("Window.GSprite"));
@@ -84,7 +84,7 @@ int CreateSectAndSave()
     //s.CloseHandle(hNew);
 
     // ´´½¨Section
-    SmartStockA::Section hRoot = s.Create("root");
+    StockA::Section hRoot = s.Create("root");
     //s.CloseSection(hRoot);
 
     auto hWillBeDelete = s.Create("WillBeDelete");
@@ -153,11 +153,11 @@ int CreateSectAndSave()
 
 void TestRoot()
 {
-  SmartStockA s;
+  StockA s;
   s.LoadW(L"TestSave.txt");
   auto pSect = s.Open(NULL);
   ASSERT(pSect);
-  SmartStockA::ATTRIBUTE p;
+  StockA::ATTRIBUTE p;
   if(pSect->FirstKey(p))
   {
     do {
@@ -179,50 +179,61 @@ void TestRoot()
 
 void test2_write()
 {
-  SmartStockA ss;
-  SmartStockA::Section frames_sect = ss.Create("frames");
+  StockA ss;
+  StockA::Section frames_sect = ss.Create("frames");
   clstd::Rand r;
   for(int i = 0; i < 10; i++)
   {
-    SmartStockA::Section rect_sect = ss.Create(&frames_sect, "rect");
+    StockA::Section rect_sect = frames_sect->Create("rect");
     rect_sect->SetKey("x", clStringA(r.rand() % 640));
     rect_sect->SetKey("y", clStringA(r.rand() % 480));
     rect_sect->SetKey("w", clStringA(r.rand() % 640));
     rect_sect->SetKey("h", clStringA(r.rand() % 480));
   }
+
+  StockA::Section anim_sect = ss.Create("anim");
+  for(int i = 0; i < 10; i++)
+  {
+    StockA::Section point_sect = anim_sect->Create("point");
+    point_sect->SetKey("x", clStringA(r.rand() % 512));
+    point_sect->SetKey("y", clStringA(r.rand() % 512));
+  }
+
   ss.SaveA("framelist.txt");
 }
 
 void test2_read()
 {
-  SmartStockA ss;
+  StockA ss;
   if( ! ss.LoadA("framelist.txt")) {
     return;
   }
 
-  SmartStockA::Section root_sect = ss.Open(NULL);
+  StockA::Section root_sect = ss.Open(NULL);
   if( ! root_sect->IsValid()) {
     return;
   }
 
   root_sect = root_sect->Open(NULL);
-  if(root_sect->IsValid()) {
-    SmartStockA::Section child_sect = root_sect->Open(NULL);
+  while(root_sect->IsValid()) {
+    StockA::Section child_sect = root_sect->Open(NULL);
     while(child_sect->IsValid())
     {
-      SmartStockA::ATTRIBUTE attr = child_sect->begin();
-      SmartStockA::ATTRIBUTE end_attr = child_sect->end();
+      StockA::ATTRIBUTE attr     = child_sect.begin();
+      StockA::ATTRIBUTE end_attr = child_sect.end();
 
       printf("%s\n", child_sect->SectionName());
       for(; attr != end_attr; ++attr)
       {
-        printf("%s=%s\n", attr.KeyName(), attr.ToString());
+        printf(" %s=%s\n", attr.KeyName(), attr.ToString());
       }
 
       if( ! child_sect->NextSection(NULL)) {
         break;
       }
     }
+
+    ++root_sect;
   }
 
 }

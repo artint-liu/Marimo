@@ -3,7 +3,7 @@
 
 #include "clTextLines.h"
 #include "Smart/smartstream.h"
-#include "Smart/SmartStock.h"
+#include "Smart/Stock.h"
 
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
@@ -61,20 +61,20 @@ namespace Marimo
   _DPEM_TEMPL
     GXBOOL _DPEM_CLS::LoadErrorMessageW(GXLPCWSTR szErrorFile)
   {
-    clstd::SmartStockW ss;
+    clstd::StockW ss;
     if(ss.LoadW(szErrorFile))
     {
-      clstd::SmartStockW::Section sectRoot = ss.Open(NULL);
-      if(sectRoot)
+      clstd::StockW::Section sectRoot = ss.Open(NULL);
+      if(sectRoot->IsValid())
       {
-        clstd::SmartStockW::PARAMETER param;
+        clstd::StockW::ATTRIBUTE param;
         if(sectRoot->FirstKey(param))
         {
           do {
             m_ErrorMsg[clstd::xtou(param.KeyName())] = param.ToString();
           } while (param.NextKey());
         }
-        ss.CloseSection(sectRoot);
+        //ss.CloseSection(sectRoot);
       }
     }
     return FALSE;

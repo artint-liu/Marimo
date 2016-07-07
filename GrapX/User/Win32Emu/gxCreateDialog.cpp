@@ -4,7 +4,7 @@
 #include <User/GrapX.Hxx>
 
 #include <Smart/smartstream.h>
-#include <Smart/SmartProfile.h>
+#include <Smart/Stock.h>
 
 // 平台相关
 //#include "GrapX/GUnknown.H"
@@ -37,7 +37,7 @@ extern GXWNDCLASSEX WndClassEx_MyEdit_1_3_30;
 extern GXWNDCLASSEX WndClassEx_MyListbox;
 extern GXWNDCLASSEX WndClassEx_MyStatic;
 extern GXWNDCLASSEX WndClassEx_GXUIEdit_1_3_30;
-extern GXBOOL LoadMenuTemplateFromSmartProfileW(clSmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
+extern GXBOOL LoadMenuTemplateFromStockW(clStockW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer);
 extern GXLRESULT GXCALLBACK CommDialogWndProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
 extern GXLRESULT GXCALLBACK CommDialogWndProcEx(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
 
@@ -127,38 +127,37 @@ GXBOOL GetVariableData(GXLPBYTE lpBytes, GXLPINT pRetLen)
 
 namespace DlgXM
 {
-  class DlgSmartFile : public clSmartProfileW
+  class DlgSmartFile : public clStockW
   {
   public:
-    typedef clSmartProfileW::HANDLE HANDLE;
-    typedef clSmartProfileW::VALUE VALUE;
+    typedef clStockW::Section Section;
+    typedef clStockW::ATTRIBUTE ATTRIBUTE;
     typedef clvector<GXTBBUTTON> TBButtonArray;
   private:
     //GXHRESULT LoadLayoutBinaryItem(HANDLE hHandle, GXUI::DlgLayout::BINARYITEM* pBinaryItemDesc);
     //GXHRESULT LoadLayoutBinary(HANDLE hHandle, GXUI::DlgLayout::BINARY* pBinaryDesc);
-    GXHRESULT LoadLayoutPanel     (SmartProfileW::HANDLE hHandle, GXUI::DLGPANEL* pPanel);
-    GXHRESULT LoadTBButtonItem    (SmartProfileW::HANDLE hHandle, GXTBBUTTON& sTBButton);
+    GXHRESULT LoadLayoutPanel     (clStockW::Section hHandle, GXUI::DLGPANEL* pPanel);
+    GXHRESULT LoadTBButtonItem    (clStockW::Section hHandle, GXTBBUTTON& sTBButton);
   public:
-    GXHRESULT GetBasicParam       (SmartProfileW::HANDLE hHandle, DLGBASICPARAMW* pwbp, GXDefinitionArrayW* pDefinitions = NULL);
-    GXHRESULT GetFontParam        (SmartProfileW::HANDLE hHandle, DLGFONTPARAMW* pwfp);
-    GXHRESULT LoadBtnSpriteCfg    (SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite);  // hHandle 是父句柄
-    GXHRESULT LoadSliderSpriteCfg (SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pSliderSprite);  // hHandle 是父句柄
-    GXHRESULT LoadLayout          (SmartProfileW::HANDLE hHandle, GXUI::DLGPANEL* pPanel);
-    GXHRESULT LoadTBButton        (SmartProfileW::HANDLE hHandle, TBButtonArray& aTBButton);
+    GXHRESULT GetBasicParam       (clStockW::Section hHandle, DLGBASICPARAMW* pwbp, GXDefinitionArrayW* pDefinitions = NULL);
+    GXHRESULT GetFontParam        (clStockW::Section hHandle, DLGFONTPARAMW* pwfp);
+    GXHRESULT LoadBtnSpriteCfg    (clStockW::Section hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite);  // hHandle 是父句柄
+    GXHRESULT LoadSliderSpriteCfg (clStockW::Section hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pSliderSprite);  // hHandle 是父句柄
+    GXHRESULT LoadLayout          (clStockW::Section hHandle, GXUI::DLGPANEL* pPanel);
+    GXHRESULT LoadTBButton        (clStockW::Section hHandle, TBButtonArray& aTBButton);
   };
 
-  GXHRESULT DlgSmartFile::GetBasicParam(SmartProfileW::HANDLE hHandle, DLGBASICPARAMW* pwbp, GXDefinitionArrayW* pDefinitions)
+  GXHRESULT DlgSmartFile::GetBasicParam(StockW::Section hHandle, DLGBASICPARAMW* pwbp, GXDefinitionArrayW* pDefinitions)
   {
     clStringW strStyle;
     clStringW strExStyle;
-    VALUE val;
+    ATTRIBUTE val;
 
     if(pDefinitions &&  ! pDefinitions->empty()) {
       pDefinitions->clear();
     }
 
-    HANDLE hKey = FindFirstKey(hHandle, val);
-    if(hKey != NULL)
+    if(hHandle->FirstKey(val))
     {
       do 
       {
@@ -197,10 +196,10 @@ namespace DlgXM
           def.Value = val.ToString();
           pDefinitions->push_back(def);
         }
-      } while (FindNextKey(hKey, val));
+      } while (val.NextKey());
     }
 
-    FindClose(hKey);
+    //FindClose(hKey);
     pwbp->strStyle = strStyle;
     pwbp->strExStyle = strExStyle;
 
@@ -224,105 +223,58 @@ namespace DlgXM
     return 0;
   }
 
-  GXHRESULT DlgSmartFile::GetFontParam(SmartProfileW::HANDLE hHandle, DLGFONTPARAMW* pwfp)
+  GXHRESULT DlgSmartFile::GetFontParam(StockW::Section hHandle, DLGFONTPARAMW* pwfp)
   {
-    pwfp->strFontName = FindKeyAsString(hHandle, L"FontName", L"");
-    pwfp->nFontSize = FindKeyAsInteger(hHandle, L"FontSize", 0);
+    pwfp->strFontName = hHandle->GetKeyAsString(L"FontName", L"");
+    pwfp->nFontSize = hHandle->GetKeyAsInteger(L"FontSize", 0);
 
     return 0;
   }
 
-  GXHRESULT DlgSmartFile::LoadBtnSpriteCfg(SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite)  // hHandle 是父句柄
+  GXHRESULT DlgSmartFile::LoadBtnSpriteCfg(StockW::Section hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite)  // hHandle 是父句柄
   {
-    SmartProfileW::HANDLE hSprite = FindFirstSection(hHandle, FALSE, NULL, szSect);
-    if(hSprite != NULL)
+    StockW::Section hSprite = hHandle->Open(szSect);
+    if(hSprite->IsValid())
     {
-      pBtnSprite->strResource = FindKeyAsString(hSprite, L"Resource", L"");
-      pBtnSprite->strNormal   = FindKeyAsString(hSprite, L"Normal", L"");
-      pBtnSprite->strHover    = FindKeyAsString(hSprite, L"Hover", L"");
-      pBtnSprite->strPressed  = FindKeyAsString(hSprite, L"Pressed", L"");
-      pBtnSprite->strDisable  = FindKeyAsString(hSprite, L"Disable", L"");
-      pBtnSprite->strDefault  = FindKeyAsString(hSprite, L"Default", L"");
+      pBtnSprite->strResource = hSprite->GetKeyAsString(L"Resource", L"");
+      pBtnSprite->strNormal   = hSprite->GetKeyAsString(L"Normal", L"");
+      pBtnSprite->strHover    = hSprite->GetKeyAsString(L"Hover", L"");
+      pBtnSprite->strPressed  = hSprite->GetKeyAsString(L"Pressed", L"");
+      pBtnSprite->strDisable  = hSprite->GetKeyAsString(L"Disable", L"");
+      pBtnSprite->strDefault  = hSprite->GetKeyAsString(L"Default", L"");
 
-      FindClose(hSprite);
+      //FindClose(hSprite);
       return GX_OK;
     }
     return -1;
   }
 
-  GXHRESULT DlgSmartFile::LoadSliderSpriteCfg(SmartProfileW::HANDLE hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pBtnSprite)  // hHandle 是父句柄
+  GXHRESULT DlgSmartFile::LoadSliderSpriteCfg(StockW::Section hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pBtnSprite)  // hHandle 是父句柄
   {
-    SmartProfileW::HANDLE hSprite = FindFirstSection(hHandle, FALSE, NULL, szSect);
-    if(hSprite != NULL)
+    StockW::Section hSprite = hHandle->Open(szSect);
+    if(hSprite->IsValid())
     {
-      pBtnSprite->strResource   = FindKeyAsString(hSprite, L"Resource", L"");
-      pBtnSprite->strHandle     = FindKeyAsString(hSprite, L"Handle", L"");
-      pBtnSprite->strEmpty      = FindKeyAsString(hSprite, L"EmptyBar", L"");
-      pBtnSprite->strFull       = FindKeyAsString(hSprite, L"FullBar", L"");
-      pBtnSprite->strDial       = FindKeyAsString(hSprite, L"Dial", L"");
-      pBtnSprite->strVertEmpty  = FindKeyAsString(hSprite, L"VertEmptyBar", L"");
-      pBtnSprite->strVertFull   = FindKeyAsString(hSprite, L"VertFullBar", L"");
-      pBtnSprite->strVertDial   = FindKeyAsString(hSprite, L"VertDial", L"");
+      pBtnSprite->strResource   = hSprite->GetKeyAsString(L"Resource", L"");
+      pBtnSprite->strHandle     = hSprite->GetKeyAsString(L"Handle", L"");
+      pBtnSprite->strEmpty      = hSprite->GetKeyAsString(L"EmptyBar", L"");
+      pBtnSprite->strFull       = hSprite->GetKeyAsString(L"FullBar", L"");
+      pBtnSprite->strDial       = hSprite->GetKeyAsString(L"Dial", L"");
+      pBtnSprite->strVertEmpty  = hSprite->GetKeyAsString(L"VertEmptyBar", L"");
+      pBtnSprite->strVertFull   = hSprite->GetKeyAsString(L"VertFullBar", L"");
+      pBtnSprite->strVertDial   = hSprite->GetKeyAsString(L"VertDial", L"");
 
-      FindClose(hSprite);
+      //FindClose(hSprite);
       return GX_OK;
     }
     return -1;
   }
 
-  //GXHRESULT DlgSmartFile::LoadLayoutBinaryItem(SmartProfileW::HANDLE hHandle, GXUI::DlgLayout::BINARYITEM* pBinaryItemDesc)
-  //{
-  //  VALUE Value;
-  //  HANDLE hKey = FindFirstKey(hHandle, Value);
-  //  if(hKey != NULL) {
-  //    do 
-  //    {
-  //      if(Value.KeyName() == L"Name") {
-  //        pBinaryItemDesc->strName = Value.ToString();
-  //      }
-  //    } while(FindNextKey(hKey, Value));
-  //  }
-  //  FindClose(hKey);
-  //  return GX_OK;
-  //}
-
-  //GXHRESULT DlgSmartFile::LoadLayoutBinary(SmartProfileW::HANDLE hHandle, GXUI::DlgLayout::BINARY* pBinaryDesc)
-  //{
-  //  VALUE Value;
-  //  HANDLE hKey = FindFirstKey(hHandle, Value);
-  //  if(hKey != NULL) {
-  //    do 
-  //    {
-  //      if(Value.KeyName() == L"Name") {
-  //        pBinaryDesc->strName = Value.ToString();
-  //      }
-  //    } while(FindNextKey(hKey, Value));
-  //  }
-
-  //  HANDLE hItemSect = FindFirstSection(hHandle, FALSE, NULL, NULL);
-  //  if(hItemSect != NULL)
-  //  {
-  //    do 
-  //    {
-  //      wstring strName = GetSectionName(hItemSect);
-  //      if(strName == L"Item")
-  //      {
-  //        GXUI::DlgLayout::BINARYITEM BinaryItem;
-  //        LoadLayoutBinaryItem(hItemSect, &BinaryItem);
-  //        pBinaryDesc->aItems.push_back(BinaryItem);
-  //      }
-  //    } while(FindNextSection(hItemSect));
-  //  }
-  //  FindClose(hItemSect);
-  //  FindClose(hKey);
-  //  return GX_OK;
-  //}
-  GXHRESULT DlgSmartFile::LoadLayoutPanel(SmartProfileW::HANDLE hHandle, GXUI::DLGPANEL* pPanel)
+  GXHRESULT DlgSmartFile::LoadLayoutPanel(StockW::Section hHandle, GXUI::DLGPANEL* pPanel)
   {
-    VALUE Value;
-    HANDLE hKey = FindFirstKey(hHandle, Value);
+    ATTRIBUTE Value;
+    //HANDLE hKey = FindFirstKey(hHandle, Value);
     const int nScaleMaxIdx = sizeof(pPanel->fScale) / sizeof(float);
-    if(hKey != NULL) {
+    if(hHandle->FirstKey(Value)) {
       int nScaleIdx = 0;
       STATIC_ASSERT(nScaleMaxIdx == 2);
       do 
@@ -386,17 +338,17 @@ namespace DlgXM
         //    pPanel->eAlignType = GXUI::PAT_AlignSecond;
         //  }
         //}
-      } while(FindNextKey(hKey, Value));
+      } while(Value.NextKey());
     }
     const GXDWORD dwType = pPanel->dwStyle & LPS_TYPEMASK;
     if(dwType != LPS_WNDITEM)
     {
-      HANDLE hItemSect = FindFirstSection(hHandle, FALSE, NULL, NULL);
-      if(hItemSect != NULL)
+      Section hItemSect = hHandle->Open(NULL);
+      if(hItemSect->IsValid())
       {
         do 
         {
-          clStringW strName = GetSectionName(hItemSect);
+          clStringW strName = hItemSect->SectionName();
           GXUI::DLGPANEL Panel;
           //Panel.eType      = GXUI::PT_Unknown;
           //Panel.eAlignType = GXUI::PAT_AlignFirst;
@@ -416,23 +368,23 @@ namespace DlgXM
               break;
           }
 
-        } while(FindNextSection(hItemSect));
+        } while(hItemSect->NextSection());
       }
-      FindClose(hItemSect);
+      //FindClose(hItemSect);
     }
-    FindClose(hKey);
+    //FindClose(hKey);
     return GX_OK;
   }
 
-  GXHRESULT DlgSmartFile::LoadLayout(SmartProfileW::HANDLE hHandle, GXUI::DLGPANEL* pPanel)
+  GXHRESULT DlgSmartFile::LoadLayout(StockW::Section hHandle, GXUI::DLGPANEL* pPanel)
   {
-    HANDLE hSect = FindFirstSection(hHandle, FALSE, NULL, NULL);
+    Section hSect = hHandle->Open(NULL);
     GXHRESULT hval = GX_FAIL;
-    if(hSect != NULL)
+    if(hSect->IsValid())
     {
       do 
       {
-        clStringW strName = GetSectionName(hSect);
+        clStringW strName = hSect->SectionName();
         if(strName == L"Panel")
         {
           if(GXSUCCEEDED(LoadLayoutPanel(hSect, pPanel))) {
@@ -440,17 +392,16 @@ namespace DlgXM
           }
           break;
         }
-      } while(FindNextSection(hSect));
-      FindClose(hSect);
+      } while(hSect->NextSection());
+      //FindClose(hSect);
     }
     return GX_OK;
   }
 
-  GXHRESULT DlgSmartFile::LoadTBButtonItem(SmartProfileW::HANDLE hHandle, GXTBBUTTON& sTBButton)
+  GXHRESULT DlgSmartFile::LoadTBButtonItem(StockW::Section hHandle, GXTBBUTTON& sTBButton)
   {
-    VALUE Value;
-    HANDLE hKey = FindFirstKey(hHandle, Value);
-    if(hKey != NULL) {
+    ATTRIBUTE Value;
+    if(hHandle->FirstKey(Value)) {
       do 
       {
         const clStringW& strKey = Value.KeyName();
@@ -477,23 +428,23 @@ namespace DlgXM
           clStringW strState = Value.ToString();
           sTBButton.fsState = (GXBYTE)DlgXM::ParseCombinedFlags(strState, L"TBSTATE_", DlgXM::CMC_ToolbarState);
         }
-      } while(FindNextKey(hKey, Value));
-      FindClose(hKey);
+      } while(Value.NextKey());
+      //FindClose(hKey);
     }
     return GX_OK;
   }
 
-  GXHRESULT DlgSmartFile::LoadTBButton(SmartProfileW::HANDLE hHandle, TBButtonArray& aTBButton)
+  GXHRESULT DlgSmartFile::LoadTBButton(StockW::Section hHandle, TBButtonArray& aTBButton)
   {
-    SmartProfileW::HANDLE hButtons = FindFirstSection(hHandle, FALSE, NULL, L"Button");
-    if(hButtons)
+    StockW::Section hButtons = hHandle->Open(L"Button");
+    if(hButtons->IsValid())
     {
       do {
         GXTBBUTTON btn = {-1};
         LoadTBButtonItem(hButtons, btn);
         aTBButton.push_back(btn);        
-      }while(FindNextSection(hButtons));
-      FindClose(hButtons);
+      }while(hButtons->NextSection());
+      //FindClose(hButtons);
     }
     return GX_OK;
   }
@@ -767,9 +718,9 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
 
 
 
-typedef DlgXM::DlgSmartFile::HANDLE SP_HANDLE;
+typedef DlgXM::DlgSmartFile::Section Section;
 
-GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
 {
   GXHWND hItemWnd = NULL;
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -777,7 +728,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dl
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  clStringW strLayout = file.FindKeyAsString(hDlgItem, L"Layout", L"");
+  clStringW strLayout = hDlgItem->GetKeyAsString(L"Layout", L"");
   if(strLayout.GetLength() > 0)
   {
     dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUISS_", DlgXM::CMC_StaticLabel);
@@ -790,7 +741,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dl
   //gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
   // 设置颜色
-  clStringW strColor = file.FindKeyAsString(hDlgItem, L"Color", L"");
+  clStringW strColor = hDlgItem->GetKeyAsString(L"Color", L"");
   if(strColor.GetLength() > 0)
   {
     pLabel->SetColor(DlgXM::GetColorFromMarkW(strColor));
@@ -806,7 +757,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dl
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -819,7 +770,7 @@ GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
   // 设置颜色
-  clStringW strColor = file.FindKeyAsString(hDlgItem, L"Color", L"");
+  clStringW strColor = hDlgItem->GetKeyAsString(L"Color", L"");
   if(strColor.GetLength() > 0)
   {
     pRectangle->SetColor(DlgXM::GetColorFromMarkW(strColor));
@@ -834,7 +785,7 @@ GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
+GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -849,7 +800,7 @@ GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   hItemWnd = pSprite->Get();
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
-  clStringW strSpriteInfo = file.FindKeyAsString(hDlgItem, L"Sprite", L"");
+  clStringW strSpriteInfo = hDlgItem->GetKeyAsString(L"Sprite", L"");
   if(strSpriteInfo.GetLength() > 0)
   {
     clStringW strSpriteFile;
@@ -865,7 +816,7 @@ GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGBTNSPRITE sDlgTemplateBtnSprite, DlgXM::DLGFONTPARAMW dfp ) 
+GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGBTNSPRITE sDlgTemplateBtnSprite, DlgXM::DLGFONTPARAMW dfp ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -873,7 +824,7 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  clStringW strLayout = file.FindKeyAsString(hDlgItem, L"Layout", L"");
+  clStringW strLayout = hDlgItem->GetKeyAsString(L"Layout", L"");
   if(strLayout.GetLength() > 0) {
     dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUIBS_", DlgXM::CMC_ButtonStyle);
   }
@@ -898,7 +849,7 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_WETree( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
+GXHWND CreateDialogItem_WETree( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -911,7 +862,7 @@ GXHWND CreateDialogItem_WETree( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_WEListView( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
+GXHWND CreateDialogItem_WEListView( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -923,7 +874,7 @@ GXHWND CreateDialogItem_WEListView( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgIte
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
+GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -960,7 +911,7 @@ GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, D
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_PropSheet( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
+GXHWND CreateDialogItem_PropSheet( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -972,7 +923,7 @@ GXHWND CreateDialogItem_PropSheet( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_PropList( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
+GXHWND CreateDialogItem_PropList( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -984,7 +935,7 @@ GXHWND CreateDialogItem_PropList( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem,
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -1025,7 +976,7 @@ GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, 
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGSLIDERSPRITE sDlgTemplateSldSprite ) 
+GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGSLIDERSPRITE sDlgTemplateSldSprite ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -1044,7 +995,7 @@ GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dl
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance, DlgXM::DLGFONTPARAMW dfp ) 
+GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance, DlgXM::DLGFONTPARAMW dfp ) 
 {
   GXHWND hItemWnd;
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -1052,7 +1003,7 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dlg
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
   //file.GetBasicParam(hDlgItem, &dbpItem);
 
-  clStringW strEditStyle = file.FindKeyAsString(hDlgItem, L"EditStyle", L"");
+  clStringW strEditStyle = hDlgItem->GetKeyAsString(L"EditStyle", L"");
   if(strEditStyle.IsNotEmpty()) {
     dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strEditStyle, L"GXES_", DlgXM::CMC_EditStyle);
   }
@@ -1090,7 +1041,7 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, Dlg
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_List( DlgXM::DlgSmartFile &file, SP_HANDLE hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, const clStringW& strItemTemplate, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_List( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, const clStringW& strItemTemplate, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -1139,8 +1090,8 @@ GXHWND gxIntCreateDialogFromFileW(
   GXLPCWSTR szDlgFilename = lpFilename[0] == '@' ? &lpFilename[1] : lpFilename;
 
   DlgXM::DlgSmartFile file;
-  SP_HANDLE hDlgSect = NULL;
-  SP_HANDLE hDlgItem = NULL;
+  Section hDlgSect = NULL;
+  Section hDlgItem = NULL;
   clStringW strDialogSection = clStringW(L"Dialogs\\") + lpDlgName;
   clStringW strDialogFile = lpStation->ConvertAbsPathW(szDlgFilename);
 
@@ -1155,8 +1106,8 @@ GXHWND gxIntCreateDialogFromFileW(
   // 注册对话框资源
   gxRegisterClassExW(&WndClassEx_DialogEx);
 
-  hDlgSect = file.OpenSection(strDialogSection);
-  if(hDlgSect == NULL)  {
+  hDlgSect = file.Open(strDialogSection);
+  if( ! hDlgSect->IsValid())  {
     TRACE("Error gxIntCreateDialogFromFileW, 指定的段不存在.\n");
     return NULL;
   }
@@ -1175,12 +1126,12 @@ GXHWND gxIntCreateDialogFromFileW(
 
   GXHWND hDlgWnd = NULL;
   GXHMENU hMenu = NULL;
-  SP_HANDLE hTemplate = NULL;
+  Section hTemplate = NULL;
 
   // 创建对话框储存结构
   DLGLOG* pDlgLog = new DLGLOG;
   if(pDlgLog == NULL) {
-    goto FUNC_RET;
+    return hDlgWnd;
   }
   pDlgLog->pDlgProc = lpDialogFunc;
   pDlgLog->strName = wbp.strName;
@@ -1202,7 +1153,7 @@ GXHWND gxIntCreateDialogFromFileW(
   if(wbp.strMenu.IsNotEmpty())
   {
     clBuffer bufMenu;
-    if(LoadMenuTemplateFromSmartProfileW(&file, clStringW("Menus\\") + wbp.strMenu, &bufMenu))
+    if(LoadMenuTemplateFromStockW(&file, clStringW("Menus\\") + wbp.strMenu, &bufMenu))
     {
       hMenu = gxLoadMenuIndirectW(bufMenu.GetPtr());
       ASSERT(hMenu != NULL);
@@ -1217,43 +1168,44 @@ GXHWND gxIntCreateDialogFromFileW(
   GXWND_PTR(hDlgWnd)->m_uState |= WIS_ISDIALOGEX;
 
   if(hDlgWnd == NULL) {
-    goto FUNC_RET;
+    //goto FUNC_RET;
+    return hDlgWnd;
   }
 
   // 加载对话框模板资源
-  hTemplate = file.OpenSection(L"Template");
-  if(hTemplate != NULL)
+  hTemplate = file.Open(L"Template");
+  if(hTemplate->IsValid())
   {
-    SP_HANDLE hButton = file.FindFirstSection(hTemplate, FALSE, NULL, L"Button");
-    if(hButton != NULL)
+    Section hButton = hTemplate->Open(L"Button");
+    if(hButton->IsValid())
     {
       file.LoadBtnSpriteCfg(hButton, L"Sprite", &sDlgTemplateBtnSprite);
       sDlgTemplateBtnSprite.strResource = lpStation->ConvertAbsPathW(sDlgTemplateBtnSprite.strResource);
-      file.FindClose(hButton);
+      //file.FindClose(hButton);
     }
 
-    SP_HANDLE hSlider = file.FindFirstSection(hTemplate, FALSE, NULL, L"Slide");
-    if(hSlider != NULL)
+    Section hSlider = hTemplate->Open(L"Slide");
+    if(hSlider->IsValid())
     {
       file.LoadSliderSpriteCfg(hSlider, L"Sprite", &sDlgTemplateSldSprite);
       sDlgTemplateSldSprite.strResource = lpStation->ConvertAbsPathW(sDlgTemplateSldSprite.strResource);
-      file.FindClose(hSlider);
+      //file.FindClose(hSlider);
     }
 
-    file.FindClose(hTemplate);
+    //file.FindClose(hTemplate);
   }
 
-  hDlgItem = file.FindFirstSection(NULL, NULL, strDialogSection, NULL);
+  hDlgItem = file.Open(strDialogSection);
   //SP_HANDLE hDlgItem = file.FindFirstSection(hDlgSect, NULL, NULL);
 
-  if(hDlgItem != NULL)
+  if(hDlgItem->IsValid())
   {
     do 
     {
       DlgXM::DLGBASICPARAMW dbpItem;
       GXHWND hItemWnd = NULL;
 
-      clStringW strItemName = file.GetSectionName(hDlgItem);
+      clStringW strItemName = hDlgItem->SectionName();
 
       //////////////////////////////////////////////////////////////////////////
       if(strItemName == L"Label") // GXUI Label
@@ -1316,7 +1268,7 @@ GXHWND gxIntCreateDialogFromFileW(
       else if(strItemName == L"List") // GXUI List Box
       {
         RICHLIST_PARAM sParam;
-        sParam.strItemTemplate = file.FindKeyAsString(hDlgItem, L"ItemTemplate", L"");
+        sParam.strItemTemplate = hDlgItem->GetKeyAsString(L"ItemTemplate", L"");
         if(sParam.strItemTemplate.IsNotEmpty() && clpathfile::IsFileSpecW(sParam.strItemTemplate)) {
           sParam.strItemTemplate = clStringW(lpFilename) + L":" + sParam.strItemTemplate;
         }
@@ -1351,7 +1303,7 @@ GXHWND gxIntCreateDialogFromFileW(
       }
 
       pDlgLog->AddItem(dbpItem.strName, hItemWnd);
-    } while(file.FindNextSection(hDlgItem));
+    } while(hDlgItem->NextSection());
 
     if(DlgPanel.aPanels.size() != 0)
     {
@@ -1378,13 +1330,13 @@ GXHWND gxIntCreateDialogFromFileW(
   //  gxSendMessageW(it->hWnd, GXLB_SETITEMTEMPLATE, NULL, (GXLPARAM)(GXLPCWSTR)it->strItemTemplate);
   //}
 
-FUNC_RET:
-  if(hDlgItem != NULL) {
-    file.FindClose(hDlgItem);
-  }
-  if(hDlgSect != NULL) {
-    file.FindClose(hDlgSect);
-  }
+//FUNC_RET:
+  //if(hDlgItem != NULL) {
+  //  file.FindClose(hDlgItem);
+  //}
+  //if(hDlgSect != NULL) {
+  //  file.FindClose(hDlgSect);
+  //}
   return hDlgWnd;
 }
 

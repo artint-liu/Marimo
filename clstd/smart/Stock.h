@@ -1,5 +1,5 @@
-﻿#ifndef _CLSTD_SMART_STOCK_H_
-#define _CLSTD_SMART_STOCK_H_
+﻿#ifndef _CLSTD_STOCK_H_
+#define _CLSTD_STOCK_H_
 
 // 重新设计的新接口 SmartStock（敏捷托盘），用来储存用户数据文件和数据格式
 // 设计目的是为了替换旧的SmartProfile类
@@ -36,7 +36,7 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
 
   template<class _TStr>
-  class SmartStockT
+  class StockT
   {
   public:
     //typedef typename _Traits::_TCh _TCh;
@@ -75,7 +75,7 @@ namespace clstd
 
     struct SECTION
     {
-      SmartStockT*  pStock;
+      StockT*       pStock;
       int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
       _MyIterator   itSectionName;
       _MyIterator   itBegin;  // Section开始的'{'位置
@@ -91,7 +91,7 @@ namespace clstd
       b32 DbgCheck() const { return TRUE; }
 #endif
       SECTION(){}
-      SECTION(SmartStockT* pCoStock)
+      SECTION(StockT* pCoStock)
         : pStock  (pCoStock)
         , nDepth  (0)
         , itBegin(pCoStock->m_SmartStream.begin())
@@ -100,8 +100,9 @@ namespace clstd
 
       b32       IsValid             () const;
       _TStr     SectionName         () const;
-      SECTION*  Open                (T_LPCSTR szSubPath); // 等价于SmartStockT::Open()
-      b32       NextSection         (T_LPCSTR szName);
+      SECTION*  Open                (T_LPCSTR szSubPath); // 等价于StockT::Open()
+      SECTION*  Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
+      b32       NextSection         (T_LPCSTR szName = NULL);
       b32       Rename              (T_LPCSTR szNewName);
       b32       FirstKey            (ATTRIBUTE& param) const;
 
@@ -114,9 +115,6 @@ namespace clstd
       b32       SetKey              (T_LPCSTR szKey, T_LPCSTR szValue);
       b32       DeleteKey           (T_LPCSTR szKey);
 
-      // std 适应接口
-      ATTRIBUTE begin ();
-      ATTRIBUTE end   ();
     };
 
 
@@ -129,15 +127,20 @@ namespace clstd
       SECTION* m_desc;
 
     public:
+      Section();
       Section(SECTION* desc);
       ~Section();
       b32 IsValid() const;
       void Close();
-      SECTION* operator=(SECTION* desc);
-      SECTION* operator->() const;
-      SECTION* operator&() const;
-      SECTION& operator*() const;
+      SECTION*  operator=(SECTION* desc);
+      SECTION*  operator->() const;
+      SECTION*  operator&() const;
+      SECTION&  operator*() const;
+      void      operator++();
       ATTRIBUTE operator[](T_LPCSTR name) const;
+
+      ATTRIBUTE begin ();
+      ATTRIBUTE end   ();
     };
 
   protected:
@@ -150,8 +153,8 @@ namespace clstd
     static void ReverseByteOrder16(u16* ptr, clsize nCount);
 
   public:
-    SmartStockT();
-    virtual ~SmartStockT();
+    StockT();
+    virtual ~StockT();
 
     b32 LoadA(const ch* lpProfile);
     b32 SaveA(const ch* lpProfile) const;
@@ -175,7 +178,7 @@ namespace clstd
     // 注意：不再使用时需要用CloseSection关闭
     //************************************
     SECTION* Create(T_LPCSTR szPath);
-    SECTION* Create(SECTION* desc, T_LPCSTR szSubPath);
+    SECTION* Create(SECTION* desc, T_LPCSTR szSubPath); // 等价于SECTION::Create
 
     //************************************
     // Method:    Open 打开指定的Section
@@ -225,10 +228,10 @@ namespace clstd
   //template<class _STR>
   //_STR ToProfileString(const _STR& str);
 
-  class SmartStockA : public SmartStockT<clStringA> {};
-  class SmartStockW : public SmartStockT<clStringW> {};
+  class StockA : public StockT<clStringA> {};
+  class StockW : public StockT<clStringW> {};
 } // namespace clstd
 
 
 
-#endif // _CLSTD_SMART_STOCK_H_
+#endif // _CLSTD_STOCK_H_

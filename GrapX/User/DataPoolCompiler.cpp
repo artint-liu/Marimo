@@ -135,7 +135,7 @@ namespace Marimo
     GXBOOL        ParseAssignment   (SmartStreamA& ss, StreamIter& it, VARIABLE_DECLARATION* pVarDecl);
     u64           ParseInitValue    (const clStringA& strValue) const;
     GXBOOL        FindValueFromEnum (const StreamIter& it, GXINT* nValue);
-    GXBOOL        MainCompile       (DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength);
+    GXBOOL        MainCompile       (DataPoolInclude* pInclude, GXLPCWSTR szSourceFilePath, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength);
     GXBOOL        IntCompile        (DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength);
     GXHRESULT     GetCompileResult  ();
     GXBOOL        CheckIncludeLoop  (GXLPCWSTR szFilename, GXSIZE_T nSourceOffset);
@@ -521,7 +521,7 @@ namespace Marimo
     return strValue.ToInteger();
   }
 
-  GXBOOL DataPoolResolverImpl::MainCompile(DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength)
+  GXBOOL DataPoolResolverImpl::MainCompile(DataPoolInclude* pInclude, GXLPCWSTR szSourceFilePath, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength)
   {
     // 填充内置数据类型
     DEFINE def;
@@ -536,7 +536,8 @@ namespace Marimo
     // 加载编译信息资源
     m_ErrorMsg.LoadErrorMessageW(L"dpcmsg.txt");
     m_ErrorMsg.SetMessageSign('C');
-    m_ErrorMsg.PushFile(L"<null>");
+    //clStringA strSourceFilePath = ;
+    m_ErrorMsg.PushFile(szSourceFilePath ? szSourceFilePath : L"");
 
     GXBOOL bval = IntCompile(pInclude, szDefinitionCodes, nCodeLength);
     if(bval)
@@ -1212,7 +1213,7 @@ namespace Marimo
     return bval;
   }
 
-  GXHRESULT DataPoolCompiler::CreateFromMemory(DataPoolCompiler** ppResolver, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength)
+  GXHRESULT DataPoolCompiler::CreateFromMemory(DataPoolCompiler** ppResolver, GXLPCWSTR szSourceFilePath, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength)
   {
     DataPoolResolverImpl* pResolver = new DataPoolResolverImpl;
     if( ! InlCheckNewAndIncReference(pResolver)) {
@@ -1220,7 +1221,7 @@ namespace Marimo
     }
 
     GXHRESULT hval = GX_OK;
-    if( ! pResolver->MainCompile(pInclude, szDefinitionCodes, nCodeLength)) {
+    if( ! pResolver->MainCompile(pInclude, szSourceFilePath, szDefinitionCodes, nCodeLength)) {
       pResolver->Release();
       pResolver = NULL;
       hval = GX_FAIL;

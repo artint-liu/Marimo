@@ -1,7 +1,7 @@
 ﻿#include "GrapX.H"
 #include "User/GrapX.Hxx"
 #include "Smart/smartstream.h"
-#include "Smart/SmartProfile.h"
+#include "Smart/Stock.h"
 
 //#include "GrapX/GUnknown.H"
 #include "GrapX/GResource.H"
@@ -38,49 +38,47 @@ struct GXMENUEX_TEMPLATE_ITEM {
 STATIC_ASSERT(sizeof(GXMENUEX_TEMPLATE_ITEM) == 3 * sizeof(GXDWORD) + sizeof(GXWORD) + 1024 * sizeof(GXWCHAR));
 
 GXBOOL IntEnumMenuKeys(
-  clSmartProfileW* pSmart, 
-  clSmartProfileW::HANDLE hPopup, 
+  clStockW* pSmart, 
+  clStockW::Section hPopup, 
   const TIdentifyDefination& DefTable,
   GXMENUEX_TEMPLATE_ITEM& MenuItem)
 {
-  clSmartProfileW::HANDLE hKeys;
-  clSmartProfileW::VALUE val;  
+  //clStockW::Section hKeys;
+  clStockW::ATTRIBUTE val;  
 
   int nTextLength = 0;
   //InlSetZeroT(MenuItem);
   MenuItem.Clear();
 
-  hKeys = pSmart->FindFirstKey(hPopup, val);
-  while(hKeys != NULL) {
-    clStringW strKeyName = val.KeyName();
-    if(strKeyName == L"Text")
-    {
-      //TRACEW(L"%s\n", val.ToString());
-      GXSTRCPYN<wch>(MenuItem.szText, val.ToString(), 1024);
-      nTextLength = GXSTRLEN(MenuItem.szText);
-    }
-    else if(strKeyName == L"Name")
-    {
-      //TRACEW(L"%s\n", val.ToString());
-      TIdentifyDefination::const_iterator it = DefTable.find(clStringA(val.ToString()));
-      MenuItem.head.menuId = it != DefTable.end() ? it->second : 0;
-    }
-    else if(strKeyName == L"State")
-    {
-      //TRACEW(L"%s\n", val.ToString());
-      MenuItem.head.dwState = DlgXM::ParseCombinedFlags(val.ToString(), L"GXMFS_", DlgXM::CMC_MenuState);
-    }
-    if( ! pSmart->FindNextKey(hKeys, val)) {
-      pSmart->CloseHandle(hKeys);
-      break;
-    }
+  if(hPopup->FirstKey(val))
+  {
+    do {
+      clStringW strKeyName = val.KeyName();
+      if(strKeyName == L"Text")
+      {
+        //TRACEW(L"%s\n", val.ToString());
+        GXSTRCPYN<wch>(MenuItem.szText, val.ToString(), 1024);
+        nTextLength = GXSTRLEN(MenuItem.szText);
+      }
+      else if(strKeyName == L"Name")
+      {
+        //TRACEW(L"%s\n", val.ToString());
+        TIdentifyDefination::const_iterator it = DefTable.find(clStringA(val.ToString()));
+        MenuItem.head.menuId = it != DefTable.end() ? it->second : 0;
+      }
+      else if(strKeyName == L"State")
+      {
+        //TRACEW(L"%s\n", val.ToString());
+        MenuItem.head.dwState = DlgXM::ParseCombinedFlags(val.ToString(), L"GXMFS_", DlgXM::CMC_MenuState);
+      }
+    } while(val.NextKey());
   }
   return TRUE;
 }
 
-GXBOOL LoadMenuTemplateFromSmartProfileSectionW(
-  clSmartProfileW* pSmart, 
-  clSmartProfileW::HANDLE hPopup, 
+GXBOOL LoadMenuTemplateFromStockSectionW(
+  clStockW* pSmart, 
+  clStockW::Section hPopup, 
   clBuffer* pBuffer, 
   const TIdentifyDefination& DefTable)
 {
@@ -88,10 +86,10 @@ GXBOOL LoadMenuTemplateFromSmartProfileSectionW(
   GXBOOL bValidPopup;
   GXSIZE_T nLastOffset = 0;
 
-  clSmartProfileW::HANDLE hItems = pSmart->FindFirstSection(hPopup, FALSE, NULL, NULL);
-  while(hItems != NULL)
+  clStockW::Section hItems = hPopup->Open(NULL);
+  while(hItems->IsValid())
   {
-    clStringW strSectName = hItems->itSection.ToString();
+    clStringW strSectName = hItems->SectionName();
     
     if(strSectName == L"MenuItem")
     {
@@ -115,15 +113,15 @@ GXBOOL LoadMenuTemplateFromSmartProfileSectionW(
         pBuffer->Append(&dwHelpId, sizeof(dwHelpId));
       }
 
-      LoadMenuTemplateFromSmartProfileSectionW(pSmart, hItems, pBuffer, DefTable);
+      LoadMenuTemplateFromStockSectionW(pSmart, hItems, pBuffer, DefTable);
       MenuItem.Clear();
     }
 
-    if( ! pSmart->FindNextSection(hItems)) {
+    if( ! hItems->NextSection()) {
       GXMENUEX_TEMPLATE_ITEM* pLastItem = (GXMENUEX_TEMPLATE_ITEM*)((GXLPBYTE)pBuffer->GetPtr() + nLastOffset);
       ASSERT(pLastItem->head.bResInfo == 0x01 || pLastItem->head.bResInfo == 0x00);
       pLastItem->head.bResInfo |= 0x80;
-      pSmart->CloseHandle(hItems);
+      //pSmart->CloseHandle(hItems);
       break;
     }
   }
@@ -132,41 +130,43 @@ GXBOOL LoadMenuTemplateFromSmartProfileSectionW(
 
 GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIdentifyDefination& DefTable)
 {
-  clSmartProfileW sp;
+  clStockW sp;
   if(sp.LoadW(szFilename))
   {
-    clSmartProfileW::HANDLE hDef = sp.OpenSection(szSmartPath);
-    if(hDef == NULL) {
+    clStockW::Section hDef = sp.Open(szSmartPath);
+    if(hDef->IsValid()) {
       return FALSE;
     }
 
-    clSmartProfileW::VALUE val;
-    clSmartProfileW::HANDLE hEnumKey = sp.FindFirstKey(hDef, val);
-    while(hEnumKey != NULL)
+    clStockW::ATTRIBUTE val;
+    //clStockW::Section hEnumKey = sp.FindFirstKey(hDef, val);
+    if(hDef->FirstKey(val))
     {
-      DefTable[clStringA(val.KeyName())] = val.ToInt();
+      do {
+        DefTable[clStringA(val.KeyName())] = val.ToInt();
 
-      if( ! sp.FindNextKey(hEnumKey, val)) {
-        sp.CloseHandle(hEnumKey);
-        break;
-      }
+        //if( ! sp.FindNextKey(hEnumKey, val)) {
+        //  //sp.CloseHandle(hEnumKey);
+        //  break;
+        //}
+      } while(val.NextKey());
     }
-    sp.CloseHandle(hDef);
+    //sp.CloseHandle(hDef);
     return TRUE;
   }
   return FALSE;
 }
 
-GXBOOL LoadMenuTemplateFromSmartProfileW(clSmartProfileW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer)
+GXBOOL LoadMenuTemplateFromStockW(clStockW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer)
 {
-  clSmartProfileW::HANDLE hSect = NULL;
-  hSect = pSmart->OpenSection(szName);
-  if(hSect != NULL)
+  clStockW::Section hSect = NULL;
+  hSect = pSmart->Open(szName);
+  if(hSect->IsValid())
   {
-    clSmartProfileW::VALUE val;
+    clStockW::ATTRIBUTE val;
     TIdentifyDefination DefTable;
     GXBOOL bval = TRUE;
-    if(pSmart->FindKey(hSect, L"Defination", val))
+    if(hSect->GetKey(L"Defination", val))
     {
       clStringW strDesc = val.ToString();
       clStringW strFilename;
@@ -182,10 +182,10 @@ GXBOOL LoadMenuTemplateFromSmartProfileW(clSmartProfileW* pSmart, GXLPCWSTR szNa
       header.wOffset = 4; // MSDN: If the first item definition immediately follows the dwHelpId member, this member should be 4.
       header.dwHelpId = 0;
       pBuffer->Append(&header, sizeof(header));
-      bval = LoadMenuTemplateFromSmartProfileSectionW(pSmart, hSect, pBuffer, DefTable);
+      bval = LoadMenuTemplateFromStockSectionW(pSmart, hSect, pBuffer, DefTable);
     }
 
-    pSmart->CloseHandle(hSect);
+    //pSmart->CloseHandle(hSect);
     return bval;
   }
   return FALSE;

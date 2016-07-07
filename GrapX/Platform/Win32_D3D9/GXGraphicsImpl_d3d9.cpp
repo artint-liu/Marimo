@@ -43,7 +43,7 @@
 #include "Canvas/GXEffectImpl.h"
 //#include "Console.h"
 #include <Smart/SmartStream.h>
-#include <Smart/SmartProfile.h>
+#include <Smart/Stock.h>
 
 #include "GrapX/GXKernel.H"
 #include "GrapX/GXUser.H"
