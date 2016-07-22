@@ -102,16 +102,16 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
   //
 
   clstd::StockA::Section hSpriteArray = ss.Open("SpriteArray");
-  if(hSpriteArray->IsValid())
+  if(hSpriteArray.IsValid())
   {
     clStringW strImageFile;
-    strImageFile    = hSpriteArray->GetKeyAsString("File", "");
-    int xStart      = hSpriteArray->GetKeyAsInteger("Left", 0);
-    int yStart      = hSpriteArray->GetKeyAsInteger("Top", 0);
-    int nTileWidth  = hSpriteArray->GetKeyAsInteger("TileWidth", 0);
-    int nTileHeight = hSpriteArray->GetKeyAsInteger("TileHeight", 0);
-    int nGapWidth   = hSpriteArray->GetKeyAsInteger("GapWidth", 0);
-    int nGapHeight  = hSpriteArray->GetKeyAsInteger("GapHeight", 0);
+    strImageFile    = hSpriteArray.GetKeyAsString("File", "");
+    int xStart      = hSpriteArray.GetKeyAsInteger("Left", 0);
+    int yStart      = hSpriteArray.GetKeyAsInteger("Top", 0);
+    int nTileWidth  = hSpriteArray.GetKeyAsInteger("TileWidth", 0);
+    int nTileHeight = hSpriteArray.GetKeyAsInteger("TileHeight", 0);
+    int nGapWidth   = hSpriteArray.GetKeyAsInteger("GapWidth", 0);
+    int nGapHeight  = hSpriteArray.GetKeyAsInteger("GapHeight", 0);
 
     clStringW strImageFileW = szSpriteFile;//;
     strImageFileW.Replace(clpathfile::ViceSlash(), clpathfile::Slash());
@@ -161,12 +161,12 @@ GXHRESULT IntLoadModules(StockA& ss, GXSpriteDescImpl* pDescObj )
 
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hModule->IsValid()) {
+  if( ! hModule.IsValid()) {
     hModule = ss.Open("Image/Module/rect");
   }
 
 
-  if(hModule->IsValid())
+  if(hModule.IsValid())
   {
     GXSprite::MODULE sModule;
     clStringA strModuleName;
@@ -182,17 +182,17 @@ GXHRESULT IntLoadModules(StockA& ss, GXSpriteDescImpl* pDescObj )
       sModule.name = NULL;
       sModule.id   = 0;
 
-      if( hModule->GetKey("left", valueLeft) == TRUE &&
-        hModule->GetKey("top", valueTop) == TRUE &&
-        hModule->GetKey("right", valueRight) == TRUE &&
-        hModule->GetKey("bottom", valueBottom) == TRUE)
+      if( hModule.GetKey("left", valueLeft) == TRUE &&
+        hModule.GetKey("top", valueTop) == TRUE &&
+        hModule.GetKey("right", valueRight) == TRUE &&
+        hModule.GetKey("bottom", valueBottom) == TRUE)
       {
         sModule.regn.left   = valueLeft.ToInt();
         sModule.regn.top    = valueTop.ToInt();
         sModule.regn.width  = valueRight.ToInt() - sModule.regn.left;
         sModule.regn.height = valueBottom.ToInt() - sModule.regn.top;
 
-        strModuleName = hModule->GetKeyAsString("name", "");
+        strModuleName = hModule.GetKeyAsString("name", "");
 
         // 如果名字不为空则加入到集合中并赋给结构体
         if(strModuleName.IsNotEmpty()) {
@@ -201,7 +201,7 @@ GXHRESULT IntLoadModules(StockA& ss, GXSpriteDescImpl* pDescObj )
 
         pDescObj->m_aModules.push_back(sModule);
       }
-    } while(hModule->NextSection());
+    } while(hModule.NextSection());
     //*ppSprite = pSprite;
     hval = GX_OK;
   }
@@ -215,11 +215,11 @@ GXHRESULT IntLoadFrames(StockA& ss, GXSpriteDescImpl* pDescObj )
   StockA::Section hFrame = ss.Open("Sprite/Frame");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hFrame->IsValid()) {
+  if( ! hFrame.IsValid()) {
     hFrame = ss.Open("Image/Frame");
   }
 
-  if(hFrame->IsValid())
+  if(hFrame.IsValid())
   {
     StockA::ATTRIBUTE valueName;
 
@@ -231,28 +231,28 @@ GXHRESULT IntLoadFrames(StockA& ss, GXSpriteDescImpl* pDescObj )
       sFrame.name = NULL;
       sFrame.start = (GXINT)aFrameModulesArray.size();
 
-      if(hFrame->GetKey("name", valueName)) {
+      if(hFrame.GetKey("name", valueName)) {
         sFrame.name = pDescObj->m_NameSet.add(valueName.ToString());
       }
 
-      sFrame.id = hFrame->GetKeyAsInteger("id", 0);
+      sFrame.id = hFrame.GetKeyAsInteger("id", 0);
 
-      StockA::Section hFrameModule = hFrame->Open("module");
-      if(hFrameModule->IsValid())
+      StockA::Section hFrameModule = hFrame.Open("module");
+      if(hFrameModule.IsValid())
       {
         GXSprite::FRAME_MODULE sFrameModule = {0};
         do {
 
-          sFrameModule.nModuleIdx = hFrameModule->GetKeyAsInteger("index", -1);
-          sFrameModule.rotate     = hFrameModule->GetKeyAsInteger("flags", -1);
-          sFrameModule.offset.x   = hFrameModule->GetKeyAsInteger("x", 0);
-          sFrameModule.offset.y   = hFrameModule->GetKeyAsInteger("y", 0);
+          sFrameModule.nModuleIdx = hFrameModule.GetKeyAsInteger("index", -1);
+          sFrameModule.rotate     = hFrameModule.GetKeyAsInteger("flags", -1);
+          sFrameModule.offset.x   = hFrameModule.GetKeyAsInteger("x", 0);
+          sFrameModule.offset.y   = hFrameModule.GetKeyAsInteger("y", 0);
 
           TRACE("index:%u flags:%lu x:%ld y:%ld\n", sFrameModule.nModuleIdx, sFrameModule.rotate, sFrameModule.offset.x, sFrameModule.offset.y);
           // push back
           aFrameModulesArray.push_back(sFrameModule);
 
-        } while(hFrameModule->NextSection());
+        } while(hFrameModule.NextSection());
         //ss.FindClose(hFrameModule);
       }
 
@@ -261,7 +261,7 @@ GXHRESULT IntLoadFrames(StockA& ss, GXSpriteDescImpl* pDescObj )
       aFrames.push_back(sFrame);
       sFrame.start = (GXINT)aFrameModulesArray.size();
 
-    }while(hFrame->NextSection());
+    }while(hFrame.NextSection());
 
     //ss.FindClose(hFrame);
   }
@@ -274,11 +274,11 @@ GXHRESULT IntLoadAnimations(StockA &ss, GXSpriteDescImpl* pDescObj )
   StockA::Section hAnim = ss.Open("Sprite/Animation");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hAnim->IsValid()) {
+  if( ! hAnim.IsValid()) {
     hAnim = ss.Open("Image/Animation");
   }
 
-  if(hAnim->IsValid())
+  if(hAnim.IsValid())
   {
     StockA::ATTRIBUTE valueName;
     GXSprite::ANIMATION sAnimation = {0};
@@ -288,17 +288,17 @@ GXHRESULT IntLoadAnimations(StockA &ss, GXSpriteDescImpl* pDescObj )
 
     do {
       sAnimation.name = NULL;
-      if(hAnim->GetKey("name", valueName)) {
+      if(hAnim.GetKey("name", valueName)) {
         sAnimation.name = pDescObj->m_NameSet.add(valueName.ToString());
       }
 
-      sAnimation.rate  = hAnim->GetKeyAsInteger("rate", 0);
-      sAnimation.id    = hAnim->GetKeyAsInteger("id", 0);
+      sAnimation.rate  = hAnim.GetKeyAsInteger("rate", 0);
+      sAnimation.id    = hAnim.GetKeyAsInteger("id", 0);
       sAnimation.start = (GXINT)aAnimFrames.size();
-      sAnimation.count = hAnim->GetKeyAsInteger("count", 0);
+      sAnimation.count = hAnim.GetKeyAsInteger("count", 0);
       aAnimFrames.reserve(aAnimFrames.size() + sAnimation.count);
 
-      clStringA strFrames = hAnim->GetKeyAsString("frames", "");
+      clStringA strFrames = hAnim.GetKeyAsString("frames", "");
       clStringArrayA aFrameList;
       if(strFrames.IsNotEmpty())
       {
@@ -326,7 +326,7 @@ GXHRESULT IntLoadAnimations(StockA &ss, GXSpriteDescImpl* pDescObj )
       aAnimations.push_back(sAnimation);
       sAnimation.start = (GXINT)aAnimFrames.size();
 
-    }while(hAnim->NextSection());
+    }while(hAnim.NextSection());
 
     //ss.FindClose(hAnim);
   }
@@ -351,20 +351,20 @@ GXHRESULT IntLoadSpriteDesc(StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** p
   // 这里用了兼容写法，如果Sprite段不存在则尝试读取就的Image段定义
   // 以后去掉
   // TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hSprite->IsValid()) {
+  if( ! hSprite.IsValid()) {
     hSprite = ss.Open("Image");
   }
 
 
-  if(hSprite->IsValid())
+  if(hSprite.IsValid())
   {
     //
     // 读取纹理文件名
     //
     StockA::ATTRIBUTE valueFile;
-    if(hSprite->IsValid())
+    if(hSprite.IsValid())
     {
-      if(hSprite->GetKey("File", valueFile) == TRUE) {
+      if(hSprite.GetKey("File", valueFile) == TRUE) {
         clStringW strSpriteDir = szSpriteFile;
         clpathfile::RemoveFileSpecW(strSpriteDir);
         pDescObj->m_strImageFile = AS2WS(valueFile.ToString());
@@ -623,7 +623,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
   }
 
   clStockA::Section pSmartSection = stock.Create("smart");
-  pSmartSection->SetKey("version", "0.0.1.0");
+  pSmartSection.SetKey("version", "0.0.1.0");
   //stock.CloseSection(pSmartSection);
 
   auto pSpriteSection = stock.Create("Sprite");
@@ -632,8 +632,8 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
   clpathfile::RelativePathToW(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
   clStringA strFilenameA(strRelativePath);
 
-  pSpriteSection->SetKey("File", strFilenameA);
-  stock.CloseSection(pSpriteSection);
+  pSpriteSection.SetKey("File", strFilenameA);
+  //stock.CloseSection(pSpriteSection);
 
   //
   // Module
@@ -644,13 +644,13 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     {
       GXSprite::MODULE& m = pDesc->aModules[i];
       auto pRectSection = stock.Create("Sprite/Module/rect");
-      pRectSection->SetKey("name",    m.name);
-      pRectSection->SetKey("id",      clStringA(m.id));
-      pRectSection->SetKey("left",    clStringA(m.regn.left));
-      pRectSection->SetKey("top",     clStringA(m.regn.top));
-      pRectSection->SetKey("right",   clStringA(m.regn.left + m.regn.width));
-      pRectSection->SetKey("bottom",  clStringA(m.regn.top + m.regn.height));
-      stock.CloseSection(pRectSection);
+      pRectSection.SetKey("name",    m.name);
+      pRectSection.SetKey("id",      clStringA(m.id));
+      pRectSection.SetKey("left",    clStringA(m.regn.left));
+      pRectSection.SetKey("top",     clStringA(m.regn.top));
+      pRectSection.SetKey("right",   clStringA(m.regn.left + m.regn.width));
+      pRectSection.SetKey("bottom",  clStringA(m.regn.top + m.regn.height));
+      //stock.CloseSection(pRectSection);
     }
   }
 
@@ -663,23 +663,23 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     {
       GXSprite::FRAME& f = pDesc->aFrames[i];
       auto pFrameSection = stock.Create("Sprite/Frame");
-      pFrameSection->SetKey("name",   f.name);
-      pFrameSection->SetKey("id",     clStringA(f.id));
-      pFrameSection->SetKey("start",  clStringA(f.start));
-      pFrameSection->SetKey("count",  clStringA(f.count));
+      pFrameSection.SetKey("name",   f.name);
+      pFrameSection.SetKey("id",     clStringA(f.id));
+      pFrameSection.SetKey("start",  clStringA(f.start));
+      pFrameSection.SetKey("count",  clStringA(f.count));
 
       // Frame描述信息
       for(GXINT n = 0; n < f.count; n++)
       {
         GXSprite::FRAME_MODULE& fd = pDesc->aFrameModules[n + f.start];
-        clStockA::Section pFrameModuleSection = stock.Create(pFrameSection, "module");
-        pFrameModuleSection->SetKey("index",  clStringA(fd.nModuleIdx));
-        pFrameModuleSection->SetKey("flags",  clStringA(fd.rotate));
-        pFrameModuleSection->SetKey("x",      clStringA(fd.offset.x));
-        pFrameModuleSection->SetKey("y",      clStringA(fd.offset.y));
+        clStockA::Section pFrameModuleSection = stock.Create(&pFrameSection, "module");
+        pFrameModuleSection.SetKey("index",  clStringA(fd.nModuleIdx));
+        pFrameModuleSection.SetKey("flags",  clStringA(fd.rotate));
+        pFrameModuleSection.SetKey("x",      clStringA(fd.offset.x));
+        pFrameModuleSection.SetKey("y",      clStringA(fd.offset.y));
         //stock.CloseSection(pFrameModuleSection);
       }
-      stock.CloseSection(pFrameSection);
+      //stock.CloseSection(pFrameSection);
       //file.WritefA("  };\r\n"); // </frame>
     }
   }
@@ -694,18 +694,18 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     {
       GXSprite::ANIMATION& a = pDesc->aAnimations[i];
       auto pAnimSection = stock.Create("Sprite/Animation");
-      pAnimSection->SetKey("name",   a.name);
-      pAnimSection->SetKey("id",     clStringA(a.id));
-      pAnimSection->SetKey("rate",   clStringA(a.rate));
-      pAnimSection->SetKey("start",  clStringA(a.start));
-      pAnimSection->SetKey("count",  clStringA(a.count));
+      pAnimSection.SetKey("name",   a.name);
+      pAnimSection.SetKey("id",     clStringA(a.id));
+      pAnimSection.SetKey("rate",   clStringA(a.rate));
+      pAnimSection.SetKey("start",  clStringA(a.start));
+      pAnimSection.SetKey("count",  clStringA(a.count));
 
       strFrameList.Clear();
       for(GXINT n = 0; n < a.count; n++) {
         strFrameList.AppendFormat("%d,", pDesc->aAnimFrames[n + a.start]);
       }
-      pAnimSection->SetKey("frames", strFrameList);
-      stock.CloseSection(pAnimSection);
+      pAnimSection.SetKey("frames", strFrameList);
+      //stock.CloseSection(pAnimSection);
     }
   }
 

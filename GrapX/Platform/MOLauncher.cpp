@@ -93,9 +93,9 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
   pDesc->idPlatform = GXPLATFORM_WIN32_DIRECT3D9;
   if(sp.LoadW(strProfile)) {
     Section handle = sp.Open("Startup/Info");
-    if(handle->IsValid())
+    if(handle.IsValid())
     {
-      clStringW strPlatform = handle->GetKeyAsString("Platform", "");
+      clStringW strPlatform = handle.GetKeyAsString("Platform", "");
       if( ! strPlatform.IsEmpty()) {
         pDesc->idPlatform = MOPlatformStringToEnumW(strPlatform);
       }
@@ -115,7 +115,7 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
     Section handle = sp.Create("Startup/Info");
     MOPlatformEnumToStringW(pDesc->idPlatform, buffer, MAX_PATH);
     clStringA strPlatform = buffer;
-    handle->SetKey("Platform", strPlatform);
+    handle.SetKey("Platform", strPlatform);
     //sp.Close(handle);
     handle.Close();
     sp.SaveW(strProfile);

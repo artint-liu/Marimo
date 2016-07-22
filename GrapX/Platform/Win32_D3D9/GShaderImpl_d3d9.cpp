@@ -531,22 +531,22 @@ GXBOOL GShader::LoadElementSource(clStockA* pSmart, GXLPCSTR szSection, MOSHADER
   Section handle = pSmart->Open(szSection);
   //sHANDLE hPixelCpn = pSmart->OpenSection(strComponentSect);
 
-  if( ! handle->IsValid()) {
+  if( ! handle.IsValid()) {
     return GX_ERROR_HANDLE;
   }
   //MOSHADER_ELEMENT_SOURCE ses;
   //clStringArrayA aPixelComponentKeys;
-  pElement->bExtComposer  = handle->GetKeyAsBoolean("ExternalComposer", FALSE);
-  pElement->strPreVS      = handle->GetKeyAsString("PreVertexShader", "");
-  pElement->strVS         = handle->GetKeyAsString("VertexShader", "");
+  pElement->bExtComposer  = handle.GetKeyAsBoolean("ExternalComposer", FALSE);
+  pElement->strPreVS      = handle.GetKeyAsString("PreVertexShader", "");
+  pElement->strVS         = handle.GetKeyAsString("VertexShader", "");
 
-  pElement->strPS         = handle->GetKeyAsString("PixelShader", "");
-  pElement->strVSComposer = handle->GetKeyAsString("VertexShaderComposer", "");
-  pElement->strPSComposer = handle->GetKeyAsString("PixelShaderComposer", "");
+  pElement->strPS         = handle.GetKeyAsString("PixelShader", "");
+  pElement->strVSComposer = handle.GetKeyAsString("VertexShaderComposer", "");
+  pElement->strPSComposer = handle.GetKeyAsString("PixelShaderComposer", "");
 
   if(aDataPool != NULL)
   {
-    clStringA strDataPool = handle->GetKeyAsString("DataPool", "");
+    clStringA strDataPool = handle.GetKeyAsString("DataPool", "");
     if(strDataPool.IsNotEmpty())
     {
       if(strDataPool.Find(';', 0)) {
@@ -739,10 +739,10 @@ GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray*
   //for(int i = 0; i < 2; i++)
   {
     Section hParam = pSmart->Open(strSection);
-    if(hParam->IsValid())
+    if(hParam.IsValid())
     {
       ATTRIBUTE val;
-      if(hParam->FirstKey(val)) {
+      if(hParam.FirstKey(val)) {
         do {
           GXDefinition Def;
           Def.Name = val.KeyName();
@@ -755,13 +755,13 @@ GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray*
       Section hSect = pSmart->Open(strSection);
       GXDefinition Def;
 
-      if(hSect->IsValid())
+      if(hSect.IsValid())
       {
         do {
-          if(hSect->FirstKey(val))
+          if(hSect.FirstKey(val))
           {
             Def.Name = "SAMPLER";
-            Def.Value = hSect->SectionName();
+            Def.Value = hSect.SectionName();
             aUniforms->push_back(Def);
             do {
               Def.Name = val.KeyName();
@@ -773,7 +773,7 @@ GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray*
           Def.Value = "";
           aUniforms->push_back(Def);
           //pSmart->CloseHandle(hKeySampler);
-        } while (hSect->NextSection());
+        } while (hSect.NextSection());
         //pSmart->CloseHandle(hSect);
       }
       //pSmart->CloseHandle(hKey);
@@ -791,11 +791,11 @@ GXBOOL GShader::LoadStateSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray* a
   for(int i = 0; i < 2; i++)
   {
     Section hParam = pSmart->Open(clStringA(szSection) + "/state");
-    if(hParam->IsValid())
+    if(hParam.IsValid())
     {
       ATTRIBUTE val;
       //Section hKey = pSmart->FindFirstKey(hParam, val);
-      if(hParam->FirstKey(val)) {
+      if(hParam.FirstKey(val)) {
         do {
           GXDefinition Def;
           Def.Name = val.KeyName();

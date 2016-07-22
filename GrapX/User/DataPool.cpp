@@ -226,7 +226,7 @@ namespace Marimo
 
         IntImportSections(import, sectRoot, NULL);
 
-        import.ss.CloseSection(sectRoot);
+        //import.ss.CloseSection(sectRoot);
         return GX_OK;
       }
       else {
@@ -240,14 +240,14 @@ namespace Marimo
     {
       typedef clhash_map<clStringA, DataPoolImpl::VAR_COUNT> VarDict;
       GXBOOL bval = TRUE;
-      Section sect = sectParent->Open(NULL);
+      Section sect = sectParent.Open(NULL);
       MOVariable var;
       VarDict sVarDict;
 
-      if(sect->IsValid())
+      if(sect.IsValid())
       {
         do {
-          clStringA strVarName = (GXLPCWSTR)sect->SectionName();
+          clStringA strVarName = (GXLPCWSTR)sect.SectionName();
           //TRACE("sect name(%d):%s\n", nDbg++, strVarName);
 
           auto itVar = sVarDict.find(strVarName);
@@ -263,7 +263,7 @@ namespace Marimo
                 //CLOG_WARNINGW(L"%s(%d): %s下面不存在名为\"%s\"的结构体\n", import.ErrorMsg.GetCurrentFilenameW(), nLine, clStringW(varParent->GetName()), clStringW(strVarName));
                 clStringW strParent = varParent->GetName();
                 clStringW strVarNameW = (GXLPCSTR)strVarName;
-                import.ErrorMsg.WriteErrorW(FALSE, sect->itSectionName.offset(), ERROR_CODE_STRUCT_NOT_EXIST_IN_STRUCT, (GXLPCWSTR)strParent, (GXLPCWSTR)strVarNameW);
+                import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_STRUCT_NOT_EXIST_IN_STRUCT, (GXLPCWSTR)strParent, (GXLPCWSTR)strVarNameW);
                 continue;
               }
             }
@@ -273,7 +273,7 @@ namespace Marimo
                 //nLine = import.ErrorMsg.LineFromPtr(sect->itSectionName.marker);
                 //CLOG_WARNINGW(L"%s(%d): 不存在名为\"%s\"的结构体\n", import.ErrorMsg.GetCurrentFilenameW(), nLine, clStringW(strVarName));
                 clStringW strVarNameW = (GXLPCSTR)strVarName;
-                import.ErrorMsg.WriteErrorW(FALSE, sect->itSectionName.offset(), ERROR_CODE_STRUCT_NOT_EXIST, (GXLPCWSTR)strVarNameW);
+                import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_STRUCT_NOT_EXIST, (GXLPCWSTR)strVarNameW);
                 continue;
               }
             }
@@ -300,7 +300,7 @@ namespace Marimo
               //import.tl->PosFromPtr(sect->itSectionName.marker, &nLine, &nRow);
               //CLOG_WARNINGW(L"%s(%d): 静态数组\"%s\"导入数据已经超过了它的最大容量(%d).\n", import.szFilename, nLine, clStringW(strVarName), var.GetLength());
               clStringW strVarNameW = (GXLPCSTR)strVarName;
-              import.ErrorMsg.WriteErrorW(FALSE, sect->itSectionName.offset(), ERROR_CODE_OUTOF_STATIC_ARRAY, (GXLPCWSTR)strVarNameW, var.GetLength());
+              import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_OUTOF_STATIC_ARRAY, (GXLPCWSTR)strVarNameW, var.GetLength());
               continue;
             }
 
@@ -312,7 +312,7 @@ namespace Marimo
               //import.tl->PosFromPtr(sect->itSectionName.marker, &nLine, &nRow);
               //CLOG_WARNINGW(L"%s(%d): \"%s\"变量声明为数组才可以重复导入数据.\n", import.szFilename, nLine, clStringW(strVarName));
               clStringW strVarNameW = (GXLPCSTR)strVarName;
-              import.ErrorMsg.WriteErrorW(FALSE, sect->itSectionName.offset(), ERROR_CODE_NOT_ARRAY, (GXLPCWSTR)strVarNameW);
+              import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_NOT_ARRAY, (GXLPCWSTR)strVarNameW);
               continue;
             }
             varNew = var;
@@ -321,14 +321,14 @@ namespace Marimo
           // 结构体属性检查
           if(TEST_FLAG_NOT(varNew.GetCaps(), MOVariable::CAPS_STRUCT)) {
             clStringW strVarNameW = (GXLPCSTR)strVarName;
-            import.ErrorMsg.WriteErrorW(FALSE, sect->itSectionName.offset(), ERROR_CODE_NOT_STRUCT, (GXLPCWSTR)strVarNameW);
+            import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_NOT_STRUCT, (GXLPCWSTR)strVarNameW);
             continue;
           }
 
           IntImportSections(import, sect, &varNew);
           itVar->second.nCount++;
 
-        } while(sect->NextSection(NULL));
+        } while(sect.NextSection(NULL));
       }
 
       //if(varParent) {
@@ -348,7 +348,7 @@ namespace Marimo
       clstd::StockW::ATTRIBUTE param;
       clStringW strValue;
       clStringW strKey;
-      if(sect->FirstKey(param))
+      if(sect.FirstKey(param))
       {
         do {
           param.KeyName(strKey);

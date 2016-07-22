@@ -1,10 +1,15 @@
 ﻿#ifndef _CLSTD_STOCK_H_
 #define _CLSTD_STOCK_H_
 
-// 重新设计的新接口 SmartStock（敏捷托盘），用来储存用户数据文件和数据格式
+// 重新设计的新接口 Stock（敏捷托盘），用来储存用户数据文件和数据格式
 // 设计目的是为了替换旧的SmartProfile类
 // 废弃SmartProfile主要原因是， SmartProfile中很多接口定义不清晰，有点混乱
 // 结构解析仍然采用逐步解析方式，用到的才解析
+
+// 这个接口的特点：
+// 1.解析速度快，渐进式解析。
+// 2.结构简单，使用方便。
+// 3.访问内容时不需要分配额外内存，不调用new操作。
 
 #ifndef _SMARTSTREAM_2_H_
 #error Must be include "smartstream.h" first.
@@ -46,16 +51,18 @@ namespace clstd
     typedef typename _TStr::TChar  TChar;
 
   public:
-    struct SECTION;
+    //struct SECTION;
+    class Section;
     struct ATTRIBUTE
     {
-      const SECTION* pSection;
+      const Section* pSection;
       _MyIterator   itKey;   // 键
       _MyIterator   itValue; // 值
 
       ATTRIBUTE(){}
-      ATTRIBUTE(SECTION* pCoSection) : pSection(pCoSection){}
+      ATTRIBUTE(Section* pCoSection) : pSection(pCoSection){}
 
+      b32     IsValid     () const;
       b32     NextKey     ();
       _TStr   SectionName () const;
       _TStr   KeyName     () const;
@@ -73,14 +80,70 @@ namespace clstd
 
     //////////////////////////////////////////////////////////////////////////
 
-    struct SECTION
+//    struct SECTION
+//    {
+//      StockT*       pStock;
+//      int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
+//      _MyIterator   itSectionName;
+//      _MyIterator   itBegin;  // Section开始的'{'位置
+//      _MyIterator   itEnd;    // Section结束的'}'位置
+//
+//#ifdef _DEBUG
+//      b32 DbgCheck() const
+//      {
+//        return ( ! IsValid() ) || nDepth == 0 || ((itBegin.marker[0] == '{' || itBegin == itBegin.pContainer->begin()) &&
+//          (itEnd.marker[0] == '}' || itEnd == itBegin.pContainer->end()));
+//      }
+//#else
+//      b32 DbgCheck() const { return TRUE; }
+//#endif
+//      SECTION(){}
+//      SECTION(StockT* pCoStock)
+//        : pStock  (pCoStock)
+//        , nDepth  (0)
+//        , itBegin(pCoStock->m_SmartStream.begin())
+//        , itEnd(pCoStock->m_SmartStream.end())
+//      {}
+//
+//      b32       IsValid             () const;
+//      _TStr     SectionName         () const;
+//      SECTION*  Open                (T_LPCSTR szSubPath); // 等价于StockT::Open()
+//      SECTION*  Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
+//      b32       NextSection         (T_LPCSTR szName = NULL);
+//      b32       Rename              (T_LPCSTR szNewName);
+//      b32       FirstKey            (ATTRIBUTE& param) const;
+//
+//      b32       GetKey              (T_LPCSTR szKey, ATTRIBUTE& param) const;
+//      int       GetKeyAsString      (T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount) const;
+//      _TStr     GetKeyAsString      (T_LPCSTR szKey, const _TStr& strDefault) const;
+//      int       GetKeyAsInteger     (T_LPCSTR szKey, int nDefault) const;
+//      float     GetKeyAsFloat       (T_LPCSTR szKey, float fDefault) const;
+//      b32       GetKeyAsBoolean     (T_LPCSTR szKey, b32 bDefault) const;
+//      b32       SetKey              (T_LPCSTR szKey, T_LPCSTR szValue);
+//      b32       DeleteKey           (T_LPCSTR szKey);
+//
+//    };
+//
+
+    //
+    // 用于自动处理SECTION_DESC*的类
+    //
+    class Section
     {
+      friend class StockT;
+    protected:
       StockT*       pStock;
+      Section*      pParent;  // 父section
+      int           nModify;  // 修改次数，如果与Stock不一致，则说明这个section已经过期，不再可用
       int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
+
+    public:
       _MyIterator   itSectionName;
       _MyIterator   itBegin;  // Section开始的'{'位置
       _MyIterator   itEnd;    // Section结束的'}'位置
 
+      //SECTION* m_desc;
+    protected:
 #ifdef _DEBUG
       b32 DbgCheck() const
       {
@@ -90,18 +153,22 @@ namespace clstd
 #else
       b32 DbgCheck() const { return TRUE; }
 #endif
-      SECTION(){}
-      SECTION(StockT* pCoStock)
-        : pStock  (pCoStock)
-        , nDepth  (0)
-        , itBegin(pCoStock->m_SmartStream.begin())
-        , itEnd(pCoStock->m_SmartStream.end())
-      {}
 
+
+    public:
+      Section();
+      //Section(SECTION* desc);
+      Section(StockT* pCoStock);
+      ~Section();
+
+      //StockT*   GetStock            () const
+      //{
+      //  return pStock;
+      //}
       b32       IsValid             () const;
       _TStr     SectionName         () const;
-      SECTION*  Open                (T_LPCSTR szSubPath); // 等价于StockT::Open()
-      SECTION*  Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
+      Section   Open                (T_LPCSTR szSubPath) const; // 等价于StockT::Open()
+      Section   Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
       b32       NextSection         (T_LPCSTR szName = NULL);
       b32       Rename              (T_LPCSTR szNewName);
       b32       FirstKey            (ATTRIBUTE& param) const;
@@ -115,27 +182,12 @@ namespace clstd
       b32       SetKey              (T_LPCSTR szKey, T_LPCSTR szValue);
       b32       DeleteKey           (T_LPCSTR szKey);
 
-    };
-
-
-    //
-    // 用于自动处理SECTION_DESC*的类
-    //
-    class Section
-    {
-    protected:
-      SECTION* m_desc;
-
-    public:
-      Section();
-      Section(SECTION* desc);
-      ~Section();
-      b32 IsValid() const;
+      //b32 IsValid() const;
       void Close();
-      SECTION*  operator=(SECTION* desc);
-      SECTION*  operator->() const;
-      SECTION*  operator&() const;
-      SECTION&  operator*() const;
+      //Section   operator=(const Section& desc);
+      //Section   operator->() const;
+      //Section   operator&() const;
+      //SECTION&  operator*() const;
       void      operator++();
       ATTRIBUTE operator[](T_LPCSTR name) const;
 
@@ -144,11 +196,12 @@ namespace clstd
     };
 
   protected:
-    typedef clvector<SECTION*>  SectionArray;
+    //typedef clvector<SECTION*>  SectionArray;
 
     _SmartStreamT m_SmartStream;
     Buffer*       m_pBuffer;
-    SectionArray  m_aHandles;
+    int           m_nModify;
+    //SectionArray  m_aHandles;
 
     static void ReverseByteOrder16(u16* ptr, clsize nCount);
 
@@ -165,7 +218,7 @@ namespace clstd
 
     //////////////////////////////////////////////////////////////////////////
 
-    b32 CloseSection(SECTION* desc);
+    //b32 CloseSection(Section& desc);
 
     //************************************
     // Method:    Create 创建section
@@ -177,8 +230,8 @@ namespace clstd
     // 如果不带路径，则直接在根上创建sect
     // 注意：不再使用时需要用CloseSection关闭
     //************************************
-    SECTION* Create(T_LPCSTR szPath);
-    SECTION* Create(SECTION* desc, T_LPCSTR szSubPath); // 等价于SECTION::Create
+    Section Create(T_LPCSTR szPath);
+    Section Create(Section* desc, T_LPCSTR szSubPath); // 等价于SECTION::Create
 
     //************************************
     // Method:    Open 打开指定的Section
@@ -187,8 +240,8 @@ namespace clstd
     // 打开Section的路径名，如"sect1/sect0"或者"sect"
     // 注意：不再使用时需要用CloseSection关闭
     //************************************
-    SECTION* Open(T_LPCSTR szPath);
-    SECTION* Open(SECTION* desc, T_LPCSTR szSubPath); // 等价于SECTION::Open
+    Section Open(T_LPCSTR szPath) const;
+    Section Open(Section* desc, T_LPCSTR szSubPath) const; // 等价于SECTION::Open
 
     //************************************
     // Method:    DeleteSection 删除指定的Section
@@ -199,6 +252,7 @@ namespace clstd
     // 如果是"sect3/sect2/sect1/sect0"，则删除的是"sect3/sect2/sect1"路径下的"sect0"
     //************************************
     b32 DeleteSection(T_LPCSTR szPath);
+    // b32 DeleteSection(Section* desc); // TODO: 没实现
 
     T_LPCSTR GetText(clsize* length) const;
 
@@ -207,18 +261,18 @@ namespace clstd
     //end();
 
   protected:
-    b32      Append            (T_LPCSTR szText, clsize nCount);
-    b32      Insert            (clsize nPos, T_LPCSTR szText, clsize nCount);
-    b32      Replace           (clsize nPos, clsize nReplaced, T_LPCSTR szText, clsize nCount);
-    b32      FindSigleSection  (const SECTION* pFindSect, T_LPCSTR szName, SECTION* pOutSect); // szName为NULL表示查找任何Section;
-    b32      NewSection        (const SECTION* pSection, T_LPCSTR szName, SECTION* pNewSect);
-    clsize   InsertString      (const _MyIterator& it, const _TStr& str);
+    //b32      Append            (Section* pSect, T_LPCSTR szText, clsize nCount);
+    //b32      Insert            (Section* pSect, clsize nPos, T_LPCSTR szText, clsize nCount);
+    b32      Replace           (Section* pSect, clsize nPos, clsize nReplaced, T_LPCSTR szText, clsize nCount);
+    b32      FindSingleSection (Section* pFindSect, T_LPCSTR szName, Section& pOutSect) const; // szName为NULL表示查找任何Section;
+    b32      NewSection        (Section* pSection, T_LPCSTR szName, Section& pNewSect);
+    clsize   InsertString      (Section* pSect, const _MyIterator& it, const _TStr& str);
 
-    b32      Remove            (const _MyIterator& itBegin, const _MyIterator& itEnd);
-    SECTION* AddSection        (SECTION* desc);
-    b32      RemoveSection     (SECTION* desc);
+    b32      Remove            (Section* pSect, const _MyIterator& itBegin, const _MyIterator& itEnd);
+    //SECTION* AddSection        (SECTION* desc);
+    //b32      RemoveSection     (SECTION* desc);
     b32      RelocateIterator  (_MyIterator& it, T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
-    b32      RelocateSection   (T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
+    b32      RelocateSection   (Section* pSection, T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
     void     TrimFrontTab      (clsize& uOffset);
   };
 

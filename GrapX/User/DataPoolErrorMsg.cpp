@@ -65,10 +65,10 @@ namespace Marimo
     if(ss.LoadW(szErrorFile))
     {
       clstd::StockW::Section sectRoot = ss.Open(NULL);
-      if(sectRoot->IsValid())
+      if(sectRoot.IsValid())
       {
         clstd::StockW::ATTRIBUTE param;
-        if(sectRoot->FirstKey(param))
+        if(sectRoot.FirstKey(param))
         {
           do {
             m_ErrorMsg[clstd::xtou(param.KeyName())] = param.ToString();

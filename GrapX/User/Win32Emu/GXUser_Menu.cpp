@@ -50,7 +50,7 @@ GXBOOL IntEnumMenuKeys(
   //InlSetZeroT(MenuItem);
   MenuItem.Clear();
 
-  if(hPopup->FirstKey(val))
+  if(hPopup.FirstKey(val))
   {
     do {
       clStringW strKeyName = val.KeyName();
@@ -86,10 +86,10 @@ GXBOOL LoadMenuTemplateFromStockSectionW(
   GXBOOL bValidPopup;
   GXSIZE_T nLastOffset = 0;
 
-  clStockW::Section hItems = hPopup->Open(NULL);
-  while(hItems->IsValid())
+  clStockW::Section hItems = hPopup.Open(NULL);
+  while(hItems.IsValid())
   {
-    clStringW strSectName = hItems->SectionName();
+    clStringW strSectName = hItems.SectionName();
     
     if(strSectName == L"MenuItem")
     {
@@ -117,7 +117,7 @@ GXBOOL LoadMenuTemplateFromStockSectionW(
       MenuItem.Clear();
     }
 
-    if( ! hItems->NextSection()) {
+    if( ! hItems.NextSection()) {
       GXMENUEX_TEMPLATE_ITEM* pLastItem = (GXMENUEX_TEMPLATE_ITEM*)((GXLPBYTE)pBuffer->GetPtr() + nLastOffset);
       ASSERT(pLastItem->head.bResInfo == 0x01 || pLastItem->head.bResInfo == 0x00);
       pLastItem->head.bResInfo |= 0x80;
@@ -134,13 +134,13 @@ GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIde
   if(sp.LoadW(szFilename))
   {
     clStockW::Section hDef = sp.Open(szSmartPath);
-    if(hDef->IsValid()) {
+    if(hDef.IsValid()) {
       return FALSE;
     }
 
     clStockW::ATTRIBUTE val;
     //clStockW::Section hEnumKey = sp.FindFirstKey(hDef, val);
-    if(hDef->FirstKey(val))
+    if(hDef.FirstKey(val))
     {
       do {
         DefTable[clStringA(val.KeyName())] = val.ToInt();
@@ -161,12 +161,12 @@ GXBOOL LoadMenuTemplateFromStockW(clStockW* pSmart, GXLPCWSTR szName, clBuffer* 
 {
   clStockW::Section hSect = NULL;
   hSect = pSmart->Open(szName);
-  if(hSect->IsValid())
+  if(hSect.IsValid())
   {
     clStockW::ATTRIBUTE val;
     TIdentifyDefination DefTable;
     GXBOOL bval = TRUE;
-    if(hSect->GetKey(L"Defination", val))
+    if(hSect.GetKey(L"Defination", val))
     {
       clStringW strDesc = val.ToString();
       clStringW strFilename;
