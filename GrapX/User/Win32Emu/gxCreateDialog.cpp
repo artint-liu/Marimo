@@ -1090,9 +1090,9 @@ GXHWND gxIntCreateDialogFromFileW(
   GXLPCWSTR szDlgFilename = lpFilename[0] == '@' ? &lpFilename[1] : lpFilename;
 
   DlgXM::DlgSmartFile file;
-  Section hDlgSect = NULL;
-  Section hDlgItem = NULL;
-  clStringW strDialogSection = clStringW(L"Dialogs\\") + lpDlgName;
+  Section hDlgSect;
+  Section hDlgItem;
+  clStringW strDialogSection = clStringW(L"Dialogs/") + lpDlgName;
   clStringW strDialogFile = lpStation->ConvertAbsPathW(szDlgFilename);
 
   //RichListParams sRichListParams; // 参数队列，用来在InitDialog消息之后初始化Rich List Box控件
@@ -1126,7 +1126,7 @@ GXHWND gxIntCreateDialogFromFileW(
 
   GXHWND hDlgWnd = NULL;
   GXHMENU hMenu = NULL;
-  Section hTemplate = NULL;
+  Section hTemplate;
 
   // 创建对话框储存结构
   DLGLOG* pDlgLog = new DLGLOG;
@@ -1153,7 +1153,7 @@ GXHWND gxIntCreateDialogFromFileW(
   if(wbp.strMenu.IsNotEmpty())
   {
     clBuffer bufMenu;
-    if(LoadMenuTemplateFromStockW(&file, clStringW("Menus\\") + wbp.strMenu, &bufMenu))
+    if(LoadMenuTemplateFromStockW(&file, clStringW("Menus/") + wbp.strMenu, &bufMenu))
     {
       hMenu = gxLoadMenuIndirectW(bufMenu.GetPtr());
       ASSERT(hMenu != NULL);
@@ -1195,7 +1195,7 @@ GXHWND gxIntCreateDialogFromFileW(
     //file.FindClose(hTemplate);
   }
 
-  hDlgItem = file.Open(strDialogSection);
+  hDlgItem = file.Open(strDialogSection).Open(NULL);
   //SP_HANDLE hDlgItem = file.FindFirstSection(hDlgSect, NULL, NULL);
 
   if(hDlgItem.IsValid())

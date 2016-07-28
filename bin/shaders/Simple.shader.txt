@@ -1,11 +1,11 @@
 shader {
   d3d9 {
-    VertexShader="shaders\Simple.vsu";
-    PixelShader="shaders\Simple.psu";
+    VertexShader="shaders\\Simple.vsu";
+    PixelShader="shaders\\Simple.psu";
   };
   d3d11 {
-    VertexShader="shaders\d3d11\Simple.hlsl";
-    PixelShader="shaders\d3d11\Simple.hlsl";
+    VertexShader="shaders\\d3d11\\Simple.hlsl";
+    PixelShader="shaders\\d3d11\\Simple.hlsl";
   }
   gles2 {
     VertexShader="shaders/gles2/Simple.vs";

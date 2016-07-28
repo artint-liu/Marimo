@@ -16,7 +16,7 @@
 #include "clTree.H"
 #include "clTransform.H"
 #include <Smart/smartstream.h>
-#include "Smart/SmartProfile.h"
+#include "Smart/Stock.h"
 #include <GrapX/VertexDecl.H>
 #include "GrapX/gxError.H"
 
@@ -70,7 +70,7 @@ namespace GFX
   
   GXHRESULT GAMEENGINE_API CreateFromFileW( Element** ppElement, GXGraphics* pGraphics, GXLPCWSTR szFilename )
   {
-    SmartProfileW sp;
+    clStockW sp;
     if( ! sp.LoadW(szFilename)) {
       return GX_E_OPEN_FAILED;
     }
@@ -78,10 +78,11 @@ namespace GFX
     ElementList listElement;
 
     GXHRESULT hval = GX_OK;
-    SmartProfileW::HANDLE handle = sp.FindFirstSection(NULL, FALSE, NULL, NULL);
-    if(handle) {
+    //clStockW::Section handle = sp.FindFirstSection(NULL, FALSE, NULL, NULL);
+    clStockW::Section handle = sp.Open(NULL);
+    if(handle.IsValid()) {
       do {
-        clStringW strSect = sp.GetSectionName(handle);
+        clStringW strSect = handle.SectionName(); // sp.GetSectionName(handle);
         TypeId eTypeId = Empty;
         if(strSect == L"particles")
         {
@@ -94,21 +95,22 @@ namespace GFX
         
         if(eTypeId != Empty)
         {
-          SmartProfileW::VALUE val;
-          SmartProfileW::HANDLE hParam = sp.FindFirstKey(handle, val);
+          clStockW::ATTRIBUTE val;
+          handle.FirstKey(val);
+
           GXDefinitionArray aParams;
           aParams.reserve(30);
 
-          if(hParam)
+          if(val.IsValid())
           {
             do {
               GXDefinition def;
               def.Name = val.KeyName();
               def.Value = val.ToString();
               aParams.push_back(def);
-            }while(sp.FindNextKey(hParam, val));
+            }while(val.NextKey());
 
-            sp.FindClose(hParam);
+            //sp.FindClose(hParam);
             Element* pSubElement = NULL;
             if(GXSUCCEEDED(Create(&pSubElement, pGraphics, eTypeId, 
               aParams.front(), aParams.size()))) {
@@ -119,8 +121,8 @@ namespace GFX
             }
           }
         }
-      }while(sp.FindNextSection(handle));
-      sp.FindClose(handle);
+      }while(handle.NextSection());
+      //sp.FindClose(handle);
     }
 
     if(listElement.empty()) { // 空的Element或者全部创建失败

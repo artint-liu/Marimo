@@ -462,7 +462,7 @@ GXVOID GShader::ResolveProfileDescW(GXLPCWSTR szProfileDesc, clStringW* pstrFile
 GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam)
 {
   clStockA sp;
-  clStringA strSect = clStringA("shader\\") + szPlatformSect;
+  clStringA strSect = clStringA("shader/") + szPlatformSect;
   clStringW strFilename;
   clStringA strMacros;
 
