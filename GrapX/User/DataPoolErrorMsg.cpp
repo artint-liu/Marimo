@@ -65,7 +65,7 @@ namespace Marimo
     if(ss.LoadW(szErrorFile))
     {
       clstd::StockW::Section sectRoot = ss.Open(NULL);
-      if(sectRoot.IsValid())
+      if(sectRoot)
       {
         clstd::StockW::ATTRIBUTE param;
         if(sectRoot.FirstKey(param))

@@ -322,6 +322,12 @@ namespace clstd
   CLLONG InterlockedExchange        (CLLONG volatile *Target, CLLONG Value);
   CLLONG InterlockedExchangeAdd     (CLLONG volatile *Addend, CLLONG Value);
   CLLONG InterlockedCompareExchange (CLLONG volatile *Destination, CLLONG Exchange, CLLONG Comperand);
+
+  template<class _Ty>
+  static void __unspecified_bool_type(_Ty***)
+  {
+  }
+
 } // namespace clstd
 
 #include "clMathVector.h"

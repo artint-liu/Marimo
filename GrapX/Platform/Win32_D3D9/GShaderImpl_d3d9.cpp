@@ -531,7 +531,7 @@ GXBOOL GShader::LoadElementSource(clStockA* pSmart, GXLPCSTR szSection, MOSHADER
   Section handle = pSmart->Open(szSection);
   //sHANDLE hPixelCpn = pSmart->OpenSection(strComponentSect);
 
-  if( ! handle.IsValid()) {
+  if( ! handle) {
     return GX_ERROR_HANDLE;
   }
   //MOSHADER_ELEMENT_SOURCE ses;
@@ -739,7 +739,7 @@ GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray*
   //for(int i = 0; i < 2; i++)
   {
     Section hParam = pSmart->Open(strSection);
-    if(hParam.IsValid())
+    if(hParam)
     {
       ATTRIBUTE val;
       if(hParam.FirstKey(val)) {
@@ -755,7 +755,7 @@ GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray*
       Section hSect = pSmart->Open(strSection);
       GXDefinition Def;
 
-      if(hSect.IsValid())
+      if(hSect)
       {
         do {
           if(hSect.FirstKey(val))
@@ -791,7 +791,7 @@ GXBOOL GShader::LoadStateSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray* a
   for(int i = 0; i < 2; i++)
   {
     Section hParam = pSmart->Open(clStringA(szSection) + "/state");
-    if(hParam.IsValid())
+    if(hParam)
     {
       ATTRIBUTE val;
       //Section hKey = pSmart->FindFirstKey(hParam, val);

@@ -20,24 +20,6 @@ namespace clstd
 {
   class Buffer;
 
-  //struct SmartStock_TraitsW
-  //{
-  //  //static clsize _StrLen(const wch*);
-  //  static b32    _CheckBoolean(const wch*);
-  //  typedef wch _TCh;
-  //  typedef SmartStream_TraitsW SmartStream_Traits;
-  //};
-
-  //struct SmartStock_TraitsA
-  //{
-  //  //static clsize _StrLen(const ch*);
-  //  static b32    _CheckBoolean(const ch*);
-  //  typedef ch _TCh;
-  //  typedef SmartStream_TraitsA SmartStream_Traits;
-  //};
-
-  //template <typename _TCh> b32 _CheckBoolean(const _TCh*);
-
   //////////////////////////////////////////////////////////////////////////
 
   template<class _TStr>
@@ -55,6 +37,7 @@ namespace clstd
     class Section;
     struct ATTRIBUTE
     {
+      typedef void (*unspecified_bool_type)(ATTRIBUTE***);
       const Section* pSection;
       _MyIterator   itKey;   // 键
       _MyIterator   itValue; // 值
@@ -62,7 +45,8 @@ namespace clstd
       ATTRIBUTE(){}
       ATTRIBUTE(Section* pCoSection) : pSection(pCoSection){}
 
-      b32     IsValid     () const;
+      b32     empty       () const;
+
       b32     NextKey     ();
       _TStr   SectionName () const;
       _TStr   KeyName     () const;
@@ -72,65 +56,25 @@ namespace clstd
       b32     ToBoolean   () const;
       _TStr&  KeyName     (_TStr& str) const;
       _TStr&  ToString    (_TStr& str) const;
+      //void    SetValue    (T_LPCSTR str);
 
+                  operator unspecified_bool_type() const;
       b32         operator==(const ATTRIBUTE& attr) const;
       b32         operator!=(const ATTRIBUTE& attr) const;
       ATTRIBUTE&  operator++();
+
+      //T_LPCSTR      operator=(T_LPCSTR str);
+      //int           operator=(int val);
+      //float         operator=(float val);
+      //unsigned int  operator=(unsigned int val);
     };
 
     //////////////////////////////////////////////////////////////////////////
 
-//    struct SECTION
-//    {
-//      StockT*       pStock;
-//      int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
-//      _MyIterator   itSectionName;
-//      _MyIterator   itBegin;  // Section开始的'{'位置
-//      _MyIterator   itEnd;    // Section结束的'}'位置
-//
-//#ifdef _DEBUG
-//      b32 DbgCheck() const
-//      {
-//        return ( ! IsValid() ) || nDepth == 0 || ((itBegin.marker[0] == '{' || itBegin == itBegin.pContainer->begin()) &&
-//          (itEnd.marker[0] == '}' || itEnd == itBegin.pContainer->end()));
-//      }
-//#else
-//      b32 DbgCheck() const { return TRUE; }
-//#endif
-//      SECTION(){}
-//      SECTION(StockT* pCoStock)
-//        : pStock  (pCoStock)
-//        , nDepth  (0)
-//        , itBegin(pCoStock->m_SmartStream.begin())
-//        , itEnd(pCoStock->m_SmartStream.end())
-//      {}
-//
-//      b32       IsValid             () const;
-//      _TStr     SectionName         () const;
-//      SECTION*  Open                (T_LPCSTR szSubPath); // 等价于StockT::Open()
-//      SECTION*  Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
-//      b32       NextSection         (T_LPCSTR szName = NULL);
-//      b32       Rename              (T_LPCSTR szNewName);
-//      b32       FirstKey            (ATTRIBUTE& param) const;
-//
-//      b32       GetKey              (T_LPCSTR szKey, ATTRIBUTE& param) const;
-//      int       GetKeyAsString      (T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount) const;
-//      _TStr     GetKeyAsString      (T_LPCSTR szKey, const _TStr& strDefault) const;
-//      int       GetKeyAsInteger     (T_LPCSTR szKey, int nDefault) const;
-//      float     GetKeyAsFloat       (T_LPCSTR szKey, float fDefault) const;
-//      b32       GetKeyAsBoolean     (T_LPCSTR szKey, b32 bDefault) const;
-//      b32       SetKey              (T_LPCSTR szKey, T_LPCSTR szValue);
-//      b32       DeleteKey           (T_LPCSTR szKey);
-//
-//    };
-//
-
-    //
-    // 用于自动处理SECTION_DESC*的类
-    //
     class Section
     {
       friend class StockT;
+      typedef void (*unspecified_bool_type)(Section***);
     protected:
       StockT*       pStock;
       Section*      pParent;  // 父section
@@ -147,7 +91,7 @@ namespace clstd
 #ifdef _DEBUG
       b32 DbgCheck() const
       {
-        return ( ! IsValid() ) || nDepth == 0 || ((itBegin.marker[0] == '{' || itBegin == itBegin.pContainer->begin()) &&
+        return ( empty() ) || nDepth == 0 || ((itBegin.marker[0] == '{' || itBegin == itBegin.pContainer->begin()) &&
           (itEnd.marker[0] == '}' || itEnd == itBegin.pContainer->end()));
       }
 #else
@@ -165,7 +109,9 @@ namespace clstd
       //{
       //  return pStock;
       //}
-      b32       IsValid             () const;
+      b32       empty               () const;
+      void      clear               ();
+
       _TStr     SectionName         () const;
       Section   Open                (T_LPCSTR szSubPath) const; // 等价于StockT::Open()
       Section   Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
@@ -179,17 +125,17 @@ namespace clstd
       int       GetKeyAsInteger     (T_LPCSTR szKey, int nDefault) const;
       float     GetKeyAsFloat       (T_LPCSTR szKey, float fDefault) const;
       b32       GetKeyAsBoolean     (T_LPCSTR szKey, b32 bDefault) const;
-      b32       SetKey              (T_LPCSTR szKey, T_LPCSTR szValue);
+      b32       SetKey              (T_LPCSTR szKey, T_LPCSTR val);
+      b32       SetKey              (T_LPCSTR szKey, int val);
+      b32       SetKey              (T_LPCSTR szKey, size_t val);
+      b32       SetKey              (T_LPCSTR szKey, float val);
+      b32       SetKey              (T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse);
       b32       DeleteKey           (T_LPCSTR szKey);
 
-      //b32 IsValid() const;
-      void Close();
-      //Section   operator=(const Section& desc);
-      //Section   operator->() const;
-      //Section   operator&() const;
-      //SECTION&  operator*() const;
       void      operator++();
       ATTRIBUTE operator[](T_LPCSTR name) const;
+                operator unspecified_bool_type() const;
+
 
       ATTRIBUTE begin ();
       ATTRIBUTE end   ();
@@ -218,7 +164,6 @@ namespace clstd
 
     //////////////////////////////////////////////////////////////////////////
 
-    //b32 CloseSection(Section& desc);
 
     //************************************
     // Method:    Create 创建section
@@ -275,12 +220,6 @@ namespace clstd
     b32      RelocateSection   (Section* pSection, T_LPCSTR lpOldPtr, T_LPCSTR lpNewPtr, clsize uActPos, clsize sizeReplaced, clsize sizeInsert);
     void     TrimFrontTab      (clsize& uOffset);
   };
-
-  //template<class _STR>
-  //_STR FromProfileString(const _STR& str);
-  //
-  //template<class _STR>
-  //_STR ToProfileString(const _STR& str);
 
   class StockA : public StockT<clStringA> {};
   class StockW : public StockT<clStringW> {};

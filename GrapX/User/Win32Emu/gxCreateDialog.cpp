@@ -234,7 +234,7 @@ namespace DlgXM
   GXHRESULT DlgSmartFile::LoadBtnSpriteCfg(StockW::Section hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite)  // hHandle 是父句柄
   {
     StockW::Section hSprite = hHandle.Open(szSect);
-    if(hSprite.IsValid())
+    if(hSprite)
     {
       pBtnSprite->strResource = hSprite.GetKeyAsString(L"Resource", L"");
       pBtnSprite->strNormal   = hSprite.GetKeyAsString(L"Normal", L"");
@@ -252,7 +252,7 @@ namespace DlgXM
   GXHRESULT DlgSmartFile::LoadSliderSpriteCfg(StockW::Section hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pBtnSprite)  // hHandle 是父句柄
   {
     StockW::Section hSprite = hHandle.Open(szSect);
-    if(hSprite.IsValid())
+    if(hSprite)
     {
       pBtnSprite->strResource   = hSprite.GetKeyAsString(L"Resource", L"");
       pBtnSprite->strHandle     = hSprite.GetKeyAsString(L"Handle", L"");
@@ -344,7 +344,7 @@ namespace DlgXM
     if(dwType != LPS_WNDITEM)
     {
       Section hItemSect = hHandle.Open(NULL);
-      if(hItemSect.IsValid())
+      if(hItemSect)
       {
         do 
         {
@@ -380,7 +380,7 @@ namespace DlgXM
   {
     Section hSect = hHandle.Open(NULL);
     GXHRESULT hval = GX_FAIL;
-    if(hSect.IsValid())
+    if(hSect)
     {
       do 
       {
@@ -437,7 +437,7 @@ namespace DlgXM
   GXHRESULT DlgSmartFile::LoadTBButton(StockW::Section hHandle, TBButtonArray& aTBButton)
   {
     StockW::Section hButtons = hHandle.Open(L"Button");
-    if(hButtons.IsValid())
+    if(hButtons)
     {
       do {
         GXTBBUTTON btn = {-1};
@@ -1107,7 +1107,7 @@ GXHWND gxIntCreateDialogFromFileW(
   gxRegisterClassExW(&WndClassEx_DialogEx);
 
   hDlgSect = file.Open(strDialogSection);
-  if( ! hDlgSect.IsValid())  {
+  if( ! hDlgSect)  {
     TRACE("Error gxIntCreateDialogFromFileW, 指定的段不存在.\n");
     return NULL;
   }
@@ -1174,10 +1174,10 @@ GXHWND gxIntCreateDialogFromFileW(
 
   // 加载对话框模板资源
   hTemplate = file.Open(L"Template");
-  if(hTemplate.IsValid())
+  if(hTemplate)
   {
     Section hButton = hTemplate.Open(L"Button");
-    if(hButton.IsValid())
+    if(hButton)
     {
       file.LoadBtnSpriteCfg(hButton, L"Sprite", &sDlgTemplateBtnSprite);
       sDlgTemplateBtnSprite.strResource = lpStation->ConvertAbsPathW(sDlgTemplateBtnSprite.strResource);
@@ -1185,7 +1185,7 @@ GXHWND gxIntCreateDialogFromFileW(
     }
 
     Section hSlider = hTemplate.Open(L"Slide");
-    if(hSlider.IsValid())
+    if(hSlider)
     {
       file.LoadSliderSpriteCfg(hSlider, L"Sprite", &sDlgTemplateSldSprite);
       sDlgTemplateSldSprite.strResource = lpStation->ConvertAbsPathW(sDlgTemplateSldSprite.strResource);
@@ -1198,7 +1198,7 @@ GXHWND gxIntCreateDialogFromFileW(
   hDlgItem = file.Open(strDialogSection).Open(NULL);
   //SP_HANDLE hDlgItem = file.FindFirstSection(hDlgSect, NULL, NULL);
 
-  if(hDlgItem.IsValid())
+  if(hDlgItem)
   {
     do 
     {

@@ -99,15 +99,22 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL
-  b32 _SSP_IMPL::ATTRIBUTE::IsValid() const
+  b32 _SSP_IMPL::ATTRIBUTE::empty() const
   {
     return ( ! pSection) || ( ! pSection->pStock) || (pSection->nModify != pSection->pStock->m_nModify);
+    //return pSection && pSection->pStock && (pSection->nModify == pSection->pStock->m_nModify);
+  }
+
+  _SSP_TEMPL
+  typename _SSP_IMPL::ATTRIBUTE::operator unspecified_bool_type() const
+  {
+    return empty() ? 0 : __unspecified_bool_type<ATTRIBUTE>;
   }
 
   _SSP_TEMPL
     b32 _SSP_IMPL::ATTRIBUTE::NextKey()
   {
-    if(IsValid()) {
+    if(empty()) {
       return FALSE;
     }
 
@@ -181,12 +188,20 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::ATTRIBUTE::ToBoolean() const
+  b32 _SSP_IMPL::ATTRIBUTE::ToBoolean() const
   {
     _TStr str;
     SmartStreamUtility::TranslateQuotation(itValue, str);
     return _CheckBoolean((T_LPCSTR)str);
   }
+
+  //_SSP_TEMPL
+  //void _SSP_IMPL::ATTRIBUTE::SetValue(T_LPCSTR str)
+  //{
+  //  _TStr strValue;
+  //  SmartStreamUtility::MakeQuotation(strValue, str);
+  //  pSection->pStock->Replace(this, itValue.offset(), itValue.length, strValue, strValue.GetLength());
+  //}
 
   _SSP_TEMPL
   b32 _SSP_IMPL::ATTRIBUTE::operator==(const ATTRIBUTE& attr) const
@@ -207,12 +222,32 @@ namespace clstd
   {
     if( ! NextKey()) {
       itKey = itValue = pSection->itEnd;
+      pSection = NULL;
     }
     return *this;
   }
 
-  //////////////////////////////////////////////////////////////////////////
+  //_SSP_TEMPL
+  //typename _SSP_IMPL::T_LPCSTR _SSP_IMPL::ATTRIBUTE::operator=(T_LPCSTR str)
+  //{
+  //}
 
+  //_SSP_TEMPL
+  //int _SSP_IMPL::ATTRIBUTE::operator=(int val)
+  //{
+  //}
+
+  //_SSP_TEMPL
+  //float _SSP_IMPL::ATTRIBUTE::operator=(float val)
+  //{
+  //}
+
+  //_SSP_TEMPL
+  //unsigned int _SSP_IMPL::ATTRIBUTE::operator=(unsigned int val)
+  //{
+  //}
+
+  //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL 
     _SSP_IMPL::StockT()
@@ -294,6 +329,7 @@ namespace clstd
         pNewBuffer->Resize(m_pBuffer->GetSize(), FALSE);
 
         clsize size = wcstombs((char*)pNewBuffer->GetPtr(), (const wchar_t*)m_pBuffer->GetPtr(), pNewBuffer->GetSize());
+        ASSERT(size != (clsize)-1); // TODO: 需要 setlocale(LC_ALL,"");
 
         pNewBuffer->Resize(size, FALSE);
         delete m_pBuffer;
@@ -445,9 +481,16 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::Section::IsValid() const
+  b32 _SSP_IMPL::Section::empty() const
   {
-    return this && pStock && (nModify == pStock->m_nModify) && nDepth >= 0;
+    // return this && pStock && (nModify == pStock->m_nModify) && nDepth >= 0;
+    return ( ! pStock) || (nModify != pStock->m_nModify) || nDepth < 0;
+  }
+
+  _SSP_TEMPL
+  _SSP_IMPL::Section::operator unspecified_bool_type() const
+  {
+    return empty() ? 0 : __unspecified_bool_type<Section>;
   }
 
   _SSP_TEMPL
@@ -475,7 +518,7 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::NextSection(T_LPCSTR szName)
   {
-    if( ! IsValid()) {
+    if(empty()) {
       return FALSE;
     }
     ASSERT(DbgCheck());
@@ -509,7 +552,7 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::Rename( T_LPCSTR szNewName )
   {
-    if( ! IsValid() || itSectionName.marker == NULL || itSectionName.length == 0) {
+    if(empty() || itSectionName.marker == NULL || itSectionName.length == 0) {
       return FALSE;
     }
 
@@ -519,7 +562,7 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::FirstKey( ATTRIBUTE& param ) const
   {
-    if( ! IsValid()) {
+    if(empty()) {
       return FALSE;
     }
     ASSERT(DbgCheck());
@@ -535,7 +578,7 @@ namespace clstd
 
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::Section::GetKey( T_LPCSTR szKey, ATTRIBUTE& param ) const
+  b32 _SSP_IMPL::Section::GetKey( T_LPCSTR szKey, ATTRIBUTE& param ) const
   {
     IS_OUT_OF_DATE;
     if( ! FirstKey(param)) {
@@ -625,7 +668,7 @@ namespace clstd
   //}
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::Section::SetKey( T_LPCSTR szKey, T_LPCSTR szValue )
+  b32 _SSP_IMPL::Section::SetKey( T_LPCSTR szKey, T_LPCSTR szValue )
   {
     ATTRIBUTE param;
     IS_OUT_OF_DATE;
@@ -655,8 +698,35 @@ namespace clstd
     }
     return TRUE;
   }
+  
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, int val)
+  {
+    _TStr str(val);
+    return SetKey(szKey, str);
+  }
 
-  _SSP_TEMPL 
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, size_t val)
+  {
+    _TStr str(val);
+    return SetKey(szKey, str);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, float val)
+  {
+    _TStr str(val);
+    return SetKey(szKey, str);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse)
+  {
+    return SetKey(szKey, bValue ? szTrue : szFalse);
+  }
+
+  _SSP_TEMPL
     b32 _SSP_IMPL::Section::DeleteKey( T_LPCSTR szKey )
   {
     ATTRIBUTE param;
@@ -693,7 +763,7 @@ namespace clstd
   _SSP_TEMPL
     typename _SSP_IMPL::Section _SSP_IMPL::Create(Section* desc, T_LPCSTR szPath)
   {
-    if(desc && ( ! desc->IsValid() || ! szPath || szPath[0] == '\0')) {
+    if(desc && (desc->empty() || ! szPath || szPath[0] == '\0')) {
       return Section();
     }
 
@@ -756,7 +826,7 @@ namespace clstd
     // OpenChild(sect, NULL); 返回sect下的第一个Section
     // OpenChild(NULL, "sect1/sect0"); 返回根下的"sect1/sect0"
 
-    if(desc && ( ! desc->IsValid() || desc->pStock != this)) {
+    if(desc && (desc->empty() || desc->pStock != this)) {
       return Section();
     }
 
@@ -770,7 +840,7 @@ namespace clstd
     Section sDesc;
     Section sResult;
 
-    if(desc && desc->IsValid())
+    if(desc && ( ! desc->empty()))
     {
       sDesc = *desc;
       if(szPath == NULL)
@@ -1110,24 +1180,14 @@ namespace clstd
   _SSP_TEMPL
   _SSP_IMPL::Section::~Section()
   {
-    Close();
+    clear();
   }
 
-  //_SSP_TEMPL
-  //b32 _SSP_IMPL::Section::IsValid() const
-  //{
-  //  return m_desc != NULL && m_desc->IsValid();
-  //}
-
   _SSP_TEMPL
-    void _SSP_IMPL::Section::Close()
+    void _SSP_IMPL::Section::clear()
   {
     pStock = NULL;
     pParent = NULL;
-    //if(m_desc) {
-    //  m_desc->pStock->CloseSection(m_desc);
-    //  m_desc = NULL;
-    //}
   }
 
   //_SSP_TEMPL
@@ -1168,7 +1228,7 @@ namespace clstd
     void _SSP_IMPL::Section::operator++()
   {
     if( ! NextSection(NULL)) {
-      Close();
+      clear();
     }
   }
 

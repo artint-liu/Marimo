@@ -71,6 +71,7 @@
     <ClInclude Include="..\..\clBuffer.H" />
     <ClInclude Include="..\..\clColorSpace.h" />
     <ClInclude Include="..\..\clCompress.h" />
+    <ClInclude Include="..\..\clStaticStringsDict.h" />
     <ClInclude Include="..\..\clCrypt.h" />
     <ClInclude Include="..\..\clfifo.h" />
     <ClInclude Include="..\..\clFile.H" />

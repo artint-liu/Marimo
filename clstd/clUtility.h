@@ -332,7 +332,7 @@ namespace clstd
   template <class _String, class _TCh, class _TStringList>
   void AssembleString(_String& str, _TCh ch, const _TStringList& aStr)
   {
-    str.Empty();
+    str.Clear();
 
     auto it = aStr.begin();
     auto itEnd = aStr.end();

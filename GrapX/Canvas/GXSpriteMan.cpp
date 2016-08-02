@@ -102,7 +102,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
   //
 
   clstd::StockA::Section hSpriteArray = ss.Open("SpriteArray");
-  if(hSpriteArray.IsValid())
+  if(hSpriteArray)
   {
     clStringW strImageFile;
     strImageFile    = hSpriteArray.GetKeyAsString("File", "");
@@ -161,12 +161,12 @@ GXHRESULT IntLoadModules(StockA& ss, GXSpriteDescImpl* pDescObj )
 
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hModule.IsValid()) {
+  if( ! hModule) {
     hModule = ss.Open("Image/Module/rect");
   }
 
 
-  if(hModule.IsValid())
+  if(hModule)
   {
     GXSprite::MODULE sModule;
     clStringA strModuleName;
@@ -215,11 +215,11 @@ GXHRESULT IntLoadFrames(StockA& ss, GXSpriteDescImpl* pDescObj )
   StockA::Section hFrame = ss.Open("Sprite/Frame");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hFrame.IsValid()) {
+  if( ! hFrame) {
     hFrame = ss.Open("Image/Frame");
   }
 
-  if(hFrame.IsValid())
+  if(hFrame)
   {
     StockA::ATTRIBUTE valueName;
 
@@ -238,7 +238,7 @@ GXHRESULT IntLoadFrames(StockA& ss, GXSpriteDescImpl* pDescObj )
       sFrame.id = hFrame.GetKeyAsInteger("id", 0);
 
       StockA::Section hFrameModule = hFrame.Open("module");
-      if(hFrameModule.IsValid())
+      if(hFrameModule)
       {
         GXSprite::FRAME_MODULE sFrameModule = {0};
         do {
@@ -274,11 +274,11 @@ GXHRESULT IntLoadAnimations(StockA &ss, GXSpriteDescImpl* pDescObj )
   StockA::Section hAnim = ss.Open("Sprite/Animation");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hAnim.IsValid()) {
+  if( ! hAnim) {
     hAnim = ss.Open("Image/Animation");
   }
 
-  if(hAnim.IsValid())
+  if(hAnim)
   {
     StockA::ATTRIBUTE valueName;
     GXSprite::ANIMATION sAnimation = {0};
@@ -351,18 +351,18 @@ GXHRESULT IntLoadSpriteDesc(StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** p
   // 这里用了兼容写法，如果Sprite段不存在则尝试读取就的Image段定义
   // 以后去掉
   // TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
-  if( ! hSprite.IsValid()) {
+  if( ! hSprite) {
     hSprite = ss.Open("Image");
   }
 
 
-  if(hSprite.IsValid())
+  if(hSprite)
   {
     //
     // 读取纹理文件名
     //
     StockA::ATTRIBUTE valueFile;
-    if(hSprite.IsValid())
+    if(hSprite)
     {
       if(hSprite.GetKey("File", valueFile) == TRUE) {
         clStringW strSpriteDir = szSpriteFile;

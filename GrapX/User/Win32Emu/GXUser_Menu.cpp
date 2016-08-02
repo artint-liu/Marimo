@@ -87,7 +87,7 @@ GXBOOL LoadMenuTemplateFromStockSectionW(
   GXSIZE_T nLastOffset = 0;
 
   clStockW::Section hItems = hPopup.Open(NULL);
-  while(hItems.IsValid())
+  while(hItems)
   {
     clStringW strSectName = hItems.SectionName();
     
@@ -134,7 +134,7 @@ GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIde
   if(sp.LoadW(szFilename))
   {
     clStockW::Section hDef = sp.Open(szSmartPath);
-    if(hDef.IsValid()) {
+    if(hDef) {
       return FALSE;
     }
 
@@ -161,7 +161,7 @@ GXBOOL LoadMenuTemplateFromStockW(clStockW* pSmart, GXLPCWSTR szName, clBuffer* 
 {
   clStockW::Section hSect = NULL;
   hSect = pSmart->Open(szName);
-  if(hSect.IsValid())
+  if(hSect)
   {
     clStockW::ATTRIBUTE val;
     TIdentifyDefination DefTable;

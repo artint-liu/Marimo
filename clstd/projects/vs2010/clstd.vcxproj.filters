@@ -161,6 +161,7 @@
     <ClInclude Include="..\..\smart\Stock.h">
       <Filter>Smart</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\clStaticStringsDict.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

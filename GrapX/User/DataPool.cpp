@@ -244,7 +244,7 @@ namespace Marimo
       MOVariable var;
       VarDict sVarDict;
 
-      if(sect.IsValid())
+      if(sect)
       {
         do {
           clStringA strVarName = (GXLPCWSTR)sect.SectionName();

@@ -124,7 +124,7 @@ int CreateSectAndSave()
 
     // 测试遍历Section
     hRoot = s.Open("root");
-    if(hRoot.IsValid())
+    if(hRoot)
     {
         hRoot.SetKey("TestKey1", "abc");
         hRoot.NextSection("root");
@@ -156,7 +156,7 @@ void TestRoot()
   StockA s;
   s.LoadW(L"TestSave.txt");
   auto pSect = s.Open(NULL);
-  ASSERT(pSect.IsValid());
+  ASSERT(pSect);
   StockA::ATTRIBUTE p;
   if(pSect.FirstKey(p))
   {
@@ -168,7 +168,7 @@ void TestRoot()
   printf("\n");
 
   auto pSectChild = s.Open(&pSect, NULL);
-  ASSERT(pSectChild.IsValid());
+  ASSERT(pSectChild);
   do {
     printf("pSectChild:%s\n", pSectChild.SectionName());
   }while(pSectChild.NextSection(NULL));
@@ -196,7 +196,7 @@ void test2_write()
   }
 
   StockA::Section anim_sect = ss.Create("anim");
-  ASSERT( ! rect_sect.IsValid());
+  ASSERT( ! rect_sect);
   for(int i = 0; i < 10; i++)
   {
     StockA::Section point_sect = anim_sect.Create("point");
@@ -217,7 +217,7 @@ void test2_read()
   }
 
   StockA::Section root_sect = ss.Open(NULL);
-  if( ! root_sect.IsValid()) {
+  if( ! root_sect) {
     return;
   }
   //////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ void test2_read()
     n += 1000;
     ++rect_sect;
   }
-  ASSERT( ! rect_sect.IsValid());
+  ASSERT( ! rect_sect);
 
   StockA::Section point_sect = ss.Open("anim/point");
   for(int i = 0; i < 10; i++)
@@ -251,14 +251,14 @@ void test2_read()
     n += 500;
     ++point_sect;
   }
-  ASSERT( ! point_sect.IsValid());
+  ASSERT( ! point_sect);
 
   //////////////////////////////////////////////////////////////////////////
 
   root_sect = root_sect.Open(NULL);
-  while(root_sect.IsValid()) {
+  while(root_sect) {
     StockA::Section child_sect = root_sect.Open(NULL);
-    while(child_sect.IsValid())
+    while(child_sect)
     {
       StockA::ATTRIBUTE attr     = child_sect.begin();
       StockA::ATTRIBUTE end_attr = child_sect.end();
@@ -303,10 +303,10 @@ void test_outofdate()
   child_c.SetKey("BB", "bb");
   child_c.SetKey("CC", "cc");
 
-  ASSERT( ! child_a.IsValid()); // 失效
-  ASSERT( ! child_b.IsValid()); // 失效
-  ASSERT(child_c.IsValid());    // 有效
-  ASSERT(root.IsValid());       // 有效
+  ASSERT( ! child_a); // 失效
+  ASSERT( ! child_b); // 失效
+  ASSERT(child_c);    // 有效
+  ASSERT(root);       // 有效
 
   ss.SaveA("test_04.txt");
 }
