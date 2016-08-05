@@ -168,6 +168,7 @@ namespace Marimo
   struct DATAPOOL_VARIABLE_DESC;
   struct DATAPOOL_ENUM_DESC;
 
+
   struct DATAPOOL_TYPE_DESC
   {
 #ifdef DEBUG_DECL_NAME
@@ -198,6 +199,7 @@ namespace Marimo
       return (const DATAPOOL_ENUM_DESC*)((GXINT_PTR)&Member + Member);
     }
   };
+
 
   struct DATAPOOL_VARIABLE_DESC
   {
@@ -289,45 +291,6 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-//#ifdef ENABLE_OLD_DATA_ACTION
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//  class DataPoolWatcher : public GUnknown
-//  {
-//  public:
-//#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-//    GXSTDINTERFACE(GXHRESULT AddRef   ());
-//    GXSTDINTERFACE(GXHRESULT Release  ());
-//#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-//    //************************************
-//    // Method:    GetClassName
-//    // FullName:  GetClassName
-//    // Access:    public 
-//    // Returns:   返回用于标识不同Watcher的字符串
-//    // Qualifier:
-//    // Parameter: clStringA GetClassName 
-//    //************************************
-//    GXSTDINTERFACE(clStringA GetClassName       ());
-//
-//    //************************************
-//    // Method:    RegisterPrivate
-//    // FullName:  RegisterPrivate
-//    // Access:    public 
-//    // Returns:   成功返回GX_OK,否则返回GX_FAIL
-//    // Qualifier: 用来注册Watcher私有数据的接口, 比如UI Watcher会把HWND
-//    //            注册在相同的Watcher内部,而不是为每个HWND产生一个Watcher,
-//    //            如果是一个专用的Watcher也可以不去实现这个接口的功能.
-//    // Parameter: GXLPVOID pIndentify
-//    //************************************
-//    GXSTDINTERFACE(GXHRESULT RegisterPrivate    (GXLPVOID pIndentify));
-//    GXSTDINTERFACE(GXHRESULT UnregisterPrivate  (GXLPVOID pIndentify));
-//    GXSTDINTERFACE(GXHRESULT OnKnock            (KNOCKACTION* pKnock));
-//  };
-//#else
-//  class DataPoolWatcher : public GUnknown
-//  {
-//  };
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//#else
   class DataPoolWatcher : public GUnknown
   {
   public:
@@ -354,289 +317,20 @@ namespace Marimo
     //struct ENUM_DESC;
 
     typedef GXLPCSTR              LPCSTR;
-    //typedef DATAPOOL_VARIABLE_DESC*        LPVD;
     typedef const DATAPOOL_VARIABLE_DESC*  LPCVD;
-    //typedef const DATAPOOL_ENUM_DESC*      LPCED;
-    //typedef const DATAPOOL_TYPE_DESC*      LPCTD;
     typedef DataPoolUtility::iterator                 iterator;
     typedef DataPoolUtility::named_iterator           named_iterator;
 
     typedef GXVOID (GXCALLBACK *ImpulseProc)(DATAPOOL_IMPULSE* pImpulse);
 
-    //typedef DataPoolUtility::element_iterator         element_iterator;
-    //typedef DataPoolUtility::element_reverse_iterator relement_iterator;
-//
-//    enum RuntimeFlag
-//    {
-//      RuntimeFlag_Fixed     = 0x00000001,   // 只要出现动态数组，object或者string，就为false
-//      RuntimeFlag_Readonly  = 0x00000002,   // 只读模式，这个牛逼在于，所有一切都在一块内存上，不用析构了
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//      RuntimeFlag_AutoKnock = 0x00000004,
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//    };
-//
-//
-//    struct TYPE_DESC : DATAPOOL_TYPE_DESC
-//    {
-//      inline DataPool::LPCSTR GetName() const
-//      {
-//#ifdef DEBUG_DECL_NAME
-//        // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
-//        ASSERT((DataPool::LPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
-//#endif // #ifdef DEBUG_DECL_NAME
-//        return (DataPool::LPCSTR)((GXINT_PTR)&nName + nName);
-//      }
-//
-//      inline DataPool::LPCVD GetMembers() const
-//      {
-//        return (DataPool::LPCVD)((GXINT_PTR)&Member + Member);
-//      }
-//
-//      inline DataPool::LPCED GetEnumMembers() const
-//      {
-//        return (DataPool::LPCED)((GXINT_PTR)&Member + Member);
-//      }
-//
-//      inline GXUINT GetMemberIndex(LPCVD aGlobalMemberTab) const  // 获得自己成员变量在全局成员变量表的位置
-//      {
-//        LPCVD const aMembers = GetMembers();
-//        return (GXUINT)(aMembers - aGlobalMemberTab);
-//      }
-//
-//      inline GXUINT GetEnumIndex(LPCED aGlobalEnumTab) const
-//      {
-//        LPCED const aEnums = GetEnumMembers();
-//        return (GXUINT)(aEnums - aGlobalEnumTab);
-//      }
-//    };
-//
-//    struct VARIABLE_DESC : DATAPOOL_VARIABLE_DESC
-//    {
-//      typedef GXLPCVOID    VTBL;
-//
-//      DataPoolArray** GetAsBufferPtr(GXBYTE* pBaseData) const
-//      {
-//        ASSERT(IsDynamicArray()); // 动态数组
-//        return (DataPoolArray**)(pBaseData + nOffset);
-//      }
-//
-//      DataPoolArray* CreateAsBuffer(DataPool* pDataPool, clBufferBase* pParent, GXBYTE* pBaseData, int nInitCount) const
-//      {
-//        ASSERT(IsDynamicArray()); // 一定是动态数组
-//        ASSERT(nInitCount >= 0);
-//
-//        DataPoolArray** ppBuffer = GetAsBufferPtr(pBaseData);  // 动态数组
-//        if(*ppBuffer == NULL && TEST_FLAG_NOT(pDataPool->m_dwRuntimeFlags, RuntimeFlag_Readonly))
-//        {
-//          // 这里ArrayBuffer只能使用指针形式
-//          *ppBuffer = new DataPoolArray(TypeSize() * 10);  // 十倍类型大小
-//          (*ppBuffer)->Resize(nInitCount * TypeSize(), TRUE);
-//
-//#ifdef _DEBUG
-//          pDataPool->m_nDbgNumOfArray++;
-//#endif // #ifdef _DEBUG
-//        }
-//        return *ppBuffer;
-//      }
-//
-//      inline LPCTD GetTypeDesc() const
-//      {
-//        const TYPE_DESC* pRetTypeDesc = (TYPE_DESC*)((GXINT_PTR)&TypeDesc - TypeDesc);
-//        return pRetTypeDesc;
-//      }
-//
-//      inline GXUINT TypeSize() const
-//      {
-//        //return ((TYPE_DESC*)((GXLONG_PTR)pTypeDesc & (~3)))->cbSize;
-//        return GetTypeDesc()->cbSize;
-//      }
-//
-//      inline TypeCategory GetTypeCategory() const
-//      {
-//        //return ((TYPE_DESC*)((GXLONG_PTR)pTypeDesc & (~3)))->Cate;
-//        return GetTypeDesc()->Cate;
-//      }
-//
-//      inline DataPool::LPCSTR VariableName() const
-//      {
-//#ifdef DEBUG_DECL_NAME
-//        // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
-//        ASSERT((DataPool::LPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
-//#endif // #ifdef DEBUG_DECL_NAME
-//        return (DataPool::LPCSTR)((GXINT_PTR)&nName + nName);
-//      }
-//
-//      inline DataPool::LPCSTR TypeName() const
-//      {
-//        return GetTypeDesc()->GetName();
-//      }
-//
-//      inline LPCVD MemberBeginPtr() const
-//      {
-//        //return ((TYPE_DESC*)((GXLONG_PTR)pTypeDesc & (~3)))->nMemberIndex;
-//        LPCTD pTypeDesc = GetTypeDesc();
-//        return pTypeDesc->GetMembers();
-//      }
-//
-//      inline GXUINT MemberCount() const
-//      {
-//        //return ((TYPE_DESC*)((GXLONG_PTR)pTypeDesc & (~3)))->nMemberCount;
-//        LPCTD pTypeDesc = GetTypeDesc();
-//        return pTypeDesc->nMemberCount;
-//      }
-//
-//      inline GXBOOL IsDynamicArray() const
-//      {
-//        //return pTypeDesc->Name[0] == '#';
-//        return bDynamic;
-//      }
-//
-//      DataPoolArray* GetAsBuffer(GXBYTE* pBaseData) const
-//      {
-//        return *GetAsBufferPtr(pBaseData);
-//      }
-//
-//      GXLPVOID GetAsPtr(GXBYTE* pBaseData) const
-//      {
-//        return pBaseData + nOffset;
-//      }
-//
-//      GUnknown** GetAsObject(GXBYTE* pBaseData) const
-//      {
-//        ASSERT(GetTypeCategory() == T_OBJECT); // object
-//        return (GUnknown**)(pBaseData + nOffset);
-//      }
-//
-//      clStringW* GetAsStringW(GXBYTE* pBaseData) const
-//      {
-//        ASSERT(GetTypeCategory() == T_STRING); // Unicode 字符串
-//        return (clStringW*)(pBaseData + nOffset);
-//      }
-//
-//      clStringA* GetAsStringA(GXBYTE* pBaseData) const
-//      {
-//        ASSERT(GetTypeCategory() == T_STRINGA); // ANSI 字符串
-//        return (clStringA*)(pBaseData + nOffset);
-//      }
-//
-//      GXUINT GetUsageSize() const // 运行时的内存尺寸，动态数组在32/64位下不一致
-//      {
-//        if(IsDynamicArray()) {
-//          return sizeof(clBuffer*);
-//        }
-//        return GetSize();
-//      }
-//
-//      GXUINT GetSize() const  // 稳定的变量描述尺寸，对照GetMemorySize()
-//      {
-//        ASSERT( ! IsDynamicArray()); // 不应该是动态数组
-//        return nCount * TypeSize();
-//      }
-//
-//      VTBL* GetUnaryMethod() const;
-//      VTBL* GetMethod() const;
-//    };
-//
-//    // 枚举成员
-//    struct ENUM_DESC : DATAPOOL_ENUM_DESC
-//    {
-//      inline DataPool::LPCSTR GetName() const
-//      {
-//#ifdef DEBUG_DECL_NAME
-//        // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
-//        ASSERT((DataPool::LPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
-//#endif // #ifdef DEBUG_DECL_NAME
-//        return (DataPool::LPCSTR)((GXINT_PTR)&nName + nName);
-//      }
-//    };
-//    //typedef const ENUM_DESC* LPCENUMDESC;
-//
-//
-//    struct VARIABLE // 用于内部查询传递的结构体
-//    {
-//      typedef GXLPCVOID           VTBL;
-//      typedef const VARIABLE_DESC DPVDD;
-//      VTBL*         vtbl;
-//      DPVDD*        pVdd;
-//      clBufferBase* pBuffer;
-//      GXUINT        AbsOffset;
-//
-//      void Set(VTBL* _vtbl, DPVDD* _pVdd, clBufferBase* _pBuffer, GXUINT _AbsOffset)
-//      {
-//        vtbl      = _vtbl;
-//        pVdd      = _pVdd;
-//        pBuffer   = _pBuffer;
-//        AbsOffset = _AbsOffset;
-//      }
-//
-//      GXBOOL IsValid()
-//      {
-//        // 只读模式下，未使用的动态数组pBuffer有可能是NULL, 所以这里不检查pBuffer
-//        return vtbl && pVdd;
-//      }
-//    };
-//
     typedef i32                 Enum;         // 数据池所使用的枚举类型的C++表示
     typedef u32                 Flag;         // 数据池所使用的标志类型的C++表示
     typedef u32                 EnumFlag;     // 枚举和标志类型的统一表示
     typedef clstd::FixedBuffer  clFixedBuffer;
     typedef clstd::RefBuffer    clRefBuffer;
-    //typedef DataPoolBuildTime   BUILDTIME;
     typedef GXUINT              SortedIndexType;
-//
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//    typedef clvector<DataPoolWatcher*>  WatcherArray;
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//
-//
 
   protected:
-//    clStringA           m_Name;             // 如果是具名对象的话，储存DataPool的名字
-//
-//    // LocalizePtr根据这些参数重定位下面的指针
-//    clFixedBuffer       m_Buffer;
-//    GXUINT              m_nNumOfTypes;
-//    GXUINT              m_nNumOfVar;
-//    GXUINT              m_nNumOfMember;
-//    GXUINT              m_nNumOfEnums;
-//    // =====================
-//
-//    // 这些可以被LocalizePtr方法重定位
-//    TYPE_DESC*          m_aTypes;
-//    SortedIndexType*    m_aGSIT;            // Grouped sorted index table, 详细见下
-//    VARIABLE_DESC*      m_aVariables;       // 所有变量描述表
-//    VARIABLE_DESC*      m_aMembers;         // 所有的结构体成员描述都存在这张表上
-//    ENUM_DESC*          m_aEnums;           // 所有枚举成员都在这个表上
-//    // =====================
-//
-//    clRefBuffer         m_VarBuffer;        // 变量空间开始地址, 这个指向了m_Buffer
-//
-//#ifdef _DEBUG
-//    GXUINT              m_nDbgNumOfArray;   // 动态数组的缓冲区
-//    GXUINT              m_nDbgNumOfString;  // 动态数组的缓冲区
-//#endif // #ifdef _DEBUG
-//
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//    //WatcherArray        m_aWatchers;
-//    typedef clset<GXLPCVOID> KnockingSet;
-//    KnockingSet         m_ImpulsingSet;    // 记录正在发送更改通知的Variable列表,防止多个相同指向的Variable反复递归.
-//
-//    struct WATCH_FIXED // 固定变量监视器
-//    {
-//      ImpulseProc pCallback;
-//      GXLPARAM    lParam;
-//
-//      bool operator<(const WATCH_FIXED& t) const;
-//    };
-//    typedef clset<WATCH_FIXED>  WatchFixedList;
-//    typedef clhash_map<GXLPVOID, WatchFixedList> WatchFixedDict;
-//
-//    WatchFixedDict      m_FixedDict;
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//
-//
-//    GXDWORD           m_dwRuntimeFlags;
-
 
     // COMMENT:
     // GSIT:
@@ -645,56 +339,7 @@ namespace Marimo
     //     VarDesc[m_aGSIT[i]].nName 是按照递增顺序增加的,这样成员变量可以使用二分法查找
     // #.m_aGSIT与m_aVariables+m_aMembers按分组顺序对应
 
-
-    //DataPool(GXLPCSTR szName);
     virtual ~DataPool(){};
-//    GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl);
-//    GXBOOL  Cleanup           (GXLPVOID lpBuffer, LPCVD pVarDesc, int nVarDescCount);
-//    GXBOOL  CleanupArray      (LPCVD pVarDesc, GXLPVOID lpFirstElement, int nElementCount);
-//    GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
-//    LPCVD   IntGetVariable    (LPCVD pVdd, GXLPCSTR szName);
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//    GXBOOL  IntIsImpulsing    (const DataPoolVariable* pVar) const;
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//    void    LocalizeTables    (BUILDTIME& bt, GXSIZE_T cbVarSpace);
-//    clsize  LocalizePtr       ();
-//    template<class DescT>
-//    void    SortNames         (const DescT* pDescs, SortedIndexType* pDest, int nBeign, int nCount);
-//
-//    template<class DescT>
-//    void    SelfLocalizable   (DescT* pDescs, int nCount, GXINT_PTR lpBase);
-//
-//    template<class _TIter>
-//    _TIter& first_iterator    (_TIter& it);
-//
-//
-//    void    GenGSIT           ();
-//
-//    const clBufferBase* IntGetEntryBuffer   () const; // 获得数据池最基础的buffer
-//    LPCTD         FindType            (GXLPCSTR szTypeName) const;
-//    void          CopyVariables       (VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const clstd::STRINGSETDESC* pTable, GXINT_PTR lpBase);
-//    GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar);
-//    //GXBOOL        IntQuery            (clBufferBase* pBuffer, LPCVD pParentVdd, GXLPCSTR szVariable, int nOffsetAdd, VARIABLE* pVar, clBufferBase** ppArrayBuffer);
-//    GXBOOL        IntQuery            (GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
-//    GXINT         IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//    //int           FindWatcher         (DataPoolWatcher* pWatcher);
-//    //int           FindWatcherByName   (GXLPCSTR szClassName);
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//    //LPCENUMDESC   IntGetEnum          (GXUINT nPackIndex) const;  // m_aEnumPck中的索引
-//    LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
-//    GXBOOL        IntWatch            (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
-//    GXBOOL        IntIgnore           (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
-//
-//    GXSIZE_T      IntGetRTDescHeader    ();   // 获得运行时描述表大小
-//    GXSIZE_T      IntGetRTDescNames     ();   // 获得运行时描述表字符串表所占的大小
-//    static GXUINT IntChangePtrSize      (GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount);
-//    static void   IntClearChangePtrFlag (TYPE_DESC* pTypeDesc, GXUINT nCount);
-//    void          DbgIntDump            ();
-//
-//    //void          Generate              (GXLPVOID lpBuffer, LPCVD pVarDesc, int nVarCount);
-//
-//    GXBOOL IntFindEnumFlagValue(LPCTD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag) GXCONST;
 
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE

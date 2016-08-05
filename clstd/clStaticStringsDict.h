@@ -101,7 +101,7 @@ namespace clstd
           break;
         }
 
-        len_t local_hash = HashString(str, len) % bucket;
+        len_t local_hash = clstd::HashStringT(str, len) % bucket;
 
         if(m_aCountsTab[local_hash] > 1) {
           return FALSE;
@@ -158,18 +158,6 @@ namespace clstd
     }
 
     //////////////////////////////////////////////////////////////////////////
-
-    static size_t HashString(const char* str, len_t len)
-    {
-      u32 _Val = 2166136261U;
-
-      const char* pBegin = str;
-      const char* pEnd = str + len;
-      while (pBegin != pEnd) {
-        _Val = 16777619U * _Val ^ (u32)*pBegin++;
-      }
-      return (_Val);
-    }
 
     static len_t HashChar(CLLPCSTR str, len_t len, int pos)
     {

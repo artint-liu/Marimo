@@ -1466,13 +1466,14 @@ namespace clstd
   _CLSTR_TEMPL
     u32 _CLSTR_IMPL::GetHash() const
   {
-    u32 _Val = 2166136261U;
+    return HashStringT(&m_pBuf[0], CLSTR_LENGTH(m_pBuf));
+    //u32 _Val = 2166136261U;
 
-    _TCh* pBegin = &m_pBuf[0];
-    _TCh* pEnd = &m_pBuf[CLSTR_LENGTH(m_pBuf)];
-    while (pBegin != pEnd)
-      _Val = 16777619U * _Val ^ (u32)*pBegin++;
-    return (_Val);
+    //_TCh* pBegin = &m_pBuf[0];
+    //_TCh* pEnd = &m_pBuf[CLSTR_LENGTH(m_pBuf)];
+    //while (pBegin != pEnd)
+    //  _Val = 16777619U * _Val ^ (u32)*pBegin++;
+    //return (_Val);
   }
 
   _CLSTR_TEMPL
@@ -2611,6 +2612,25 @@ namespace clstd
       }
     }
     return TRUE;
+  }
+
+  template<typename _TCh>
+  u32 HashStringT(const _TCh* str, clsize len)
+  {
+    clsize _Val = 2166136261U;
+
+    const _TCh* pBegin = str;
+    const _TCh* pEnd = str + len;
+    while (pBegin != pEnd) {
+      _Val = 16777619U * _Val ^ (u32)*pBegin++;
+    }
+    return (u32)_Val;
+  }
+
+  template<typename _TCh>
+  u32 HashStringT(const _TCh* str)
+  {
+    return HashString(str, strlenT(str));
   }
 
 } // namespace clstd

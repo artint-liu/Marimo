@@ -132,6 +132,12 @@ namespace clstd
 
   template<typename _TCh>
   b32 IsNumericT(const _TCh* str, i32 radix = 10, clsize len = -1);  // 遇到\0或者达到len时退出
+
+  template<typename _TCh>
+  u32 HashStringT(const _TCh* str, clsize len);
+
+  template<typename _TCh>
+  u32 HashStringT(const _TCh* str);
 }
 
 

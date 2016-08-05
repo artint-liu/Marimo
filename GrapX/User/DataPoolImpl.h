@@ -123,6 +123,7 @@ namespace Marimo
     struct FILE_HEADER // 文件头
     {
       GXDWORD dwFlags;          // 标志，64位指针
+      GXDWORD dwHashMagic;      // "DataPool" hash值，用来校验hash算法的一致性
 
       GXUINT  nBufHeaderOffset; // 数据缓冲头（包括global var）描述开始地址
       GXUINT  nDescOffset;      // 运行时描述信息表在文件中的偏移, 就是Buffer在文件中写入的位置
@@ -364,7 +365,7 @@ namespace Marimo
     //void    IntImportKeys     (IMPORT& import, Section sect, MOVariable* var);
     GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl);
     GXBOOL  Cleanup           (GXLPVOID lpBuffer, const DATAPOOL_VARIABLE_DESC* pVarDesc, int nVarDescCount);
-    GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXSIZE_T nElementCount);
+    GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXUINT nElementCount);
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
     LPCVD   IntGetVariable    (LPCVD pVdd, GXLPCSTR szName);
 #ifndef DISABLE_DATAPOOL_WATCHER

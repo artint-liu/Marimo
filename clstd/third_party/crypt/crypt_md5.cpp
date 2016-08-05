@@ -200,7 +200,7 @@ CLVOID MD5Final( MD5_CTX *ctx )
  */
 static void MD5Transform( unsigned int buf[4], const unsigned int in[16] )
 {
-    register unsigned int a, b, c, d;
+    unsigned int a, b, c, d;
 
     a = buf[0];
     b = buf[1];

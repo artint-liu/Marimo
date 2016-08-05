@@ -2,6 +2,7 @@
 #include "GrapX.Hxx"
 
 #include "clStringSet.h"
+#include "clStaticStringsDict.h"
 
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
@@ -182,7 +183,7 @@ namespace Marimo
   }
 
 
-  GXBOOL DataPoolImpl::CleanupArray(const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXSIZE_T nElementCount)
+  GXBOOL DataPoolImpl::CleanupArray(const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXUINT nElementCount)
   {
     switch(pVarDesc->GetTypeCategory())
     {
@@ -191,7 +192,7 @@ namespace Marimo
         clStringW* pString = reinterpret_cast<clStringW*>(lpFirstElement);
 
         // 依次调用析构函数
-        for(int nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
+        for(GXUINT nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
         {
           if(pString[nStringIndex]) {
             pString[nStringIndex].~StringX();
@@ -208,7 +209,7 @@ namespace Marimo
         clStringA* pString = reinterpret_cast<clStringA*>(lpFirstElement);
 
         // 依次调用析构函数
-        for(GXSIZE_T nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
+        for(GXUINT nStringIndex = 0; nStringIndex < nElementCount; nStringIndex++)
         {
           if(pString[nStringIndex]) {
             pString[nStringIndex].~StringX();
@@ -225,7 +226,7 @@ namespace Marimo
         GUnknown** pObjArray = reinterpret_cast<GUnknown**>(lpFirstElement);
 
         // 依次调用析构函数
-        for(int i = 0; i < nElementCount; i++) {
+        for(GXUINT i = 0; i < nElementCount; i++) {
           SAFE_RELEASE(pObjArray[i]);
         }
       }
@@ -233,7 +234,7 @@ namespace Marimo
 
     case T_STRUCT:
       {
-        for(int nStructIndex = 0; nStructIndex < nElementCount; nStructIndex++)
+        for(GXUINT nStructIndex = 0; nStructIndex < nElementCount; nStructIndex++)
         {
           Cleanup(lpFirstElement, pVarDesc->MemberBeginPtr(), pVarDesc->MemberCount());
           lpFirstElement = (GXLPBYTE)lpFirstElement + pVarDesc->TypeSize();
@@ -1823,6 +1824,7 @@ namespace Marimo
     // ...
     FILE_HEADER header;
     header.dwFlags          = 0;
+    header.dwHashMagic      = clstd::HashStringT("DataPool", 8);
     header.nNumOfTypes      = m_nNumOfTypes;
     header.nNumOfVar        = m_nNumOfVar;
     header.nNumOfMember     = m_nNumOfMember;
@@ -2123,6 +2125,11 @@ namespace Marimo
 
     FILE_HEADER header;
     V_READ(file.Read(&header, sizeof(FILE_HEADER)), "Can not load file header.");
+
+    if(header.dwHashMagic != clstd::HashStringT("DataPool", 8)) {
+      CLOG_ERROR("%s : Hash magic does not match.\n", __FUNCTION__);
+      return FALSE;
+    }
 
     m_nNumOfTypes  = header.nNumOfTypes;
     m_nNumOfVar    = header.nNumOfVar;

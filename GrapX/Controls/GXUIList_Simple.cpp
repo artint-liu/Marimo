@@ -146,7 +146,7 @@ namespace GXUI
 
     //TRACE("===================\n");
 
-    for(; ItemStrDesc.item < nCount; ++ItemStrDesc.item)
+    for(; ItemStrDesc.item < (GXINT)nCount; ++ItemStrDesc.item)
     {
       ItemStrDesc.name    = NULL;
       ItemStrDesc.element = 0;
