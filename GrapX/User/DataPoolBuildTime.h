@@ -15,9 +15,10 @@ namespace Marimo
       GXDWORD dwFlags; // BuildtimeTypeDeclarationFlags
     };
 
-    struct BT_TYPE_DESC : public DataPoolImpl::TYPE_DESC
+    struct BT_TYPE_DESC : public DataPoolImpl::STRUCT_DESC
     {
-      GXUINT nIndex;
+      GXUINT _nIndex;
+      GXINT_PTR nTypeAddress;
     };
 
     struct BT_VARIABLE_DESC : public DATAPOOL_VARIABLE_DESC
@@ -75,10 +76,11 @@ namespace Marimo
     BTVarDescArray      m_aStructMember;    // 所有的结构体成员描述都存在这张表上
     EnumDescArray       m_aEnumPck;         // 所有枚举成员都在这个表上
     clstd::StringSetA   NameSet;
+    size_t              m_nNumOfStructs;    // m_TypeDict.size() > m_nNumOfStructs
     GXUINT              m_bPtr64 : 1;       // 64位指针兼容模式
     GXUINT              m_bFixedPool : 1;
 
-    DataPoolBuildTime() : m_bPtr64(0), m_bFixedPool(1) {}
+    DataPoolBuildTime() : m_bPtr64(0), m_bFixedPool(1), m_nNumOfStructs(0) {}
   };
 
 

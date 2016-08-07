@@ -114,7 +114,7 @@ namespace Marimo
     inline GXBOOL InlCleanupArray(LPCVD pVarDesc, GXLPVOID lpBuffer, GXSIZE_T nCount)
     {
       DataPoolImpl* pDataPoolImpl = (DataPoolImpl*)m_pDataPool;
-      return pDataPoolImpl->CleanupArray(reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc), lpBuffer, nCount);
+      return pDataPoolImpl->CleanupArray(reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc), lpBuffer, (GXUINT)nCount);
     }
 
     inline GXBOOL IsReadOnly() GXCONST
@@ -154,19 +154,19 @@ namespace Marimo
 
     inline DataPoolImpl::LPCED InlGetEnum(GXUINT nIndex) GXCONST
     {
-      return reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetTypeDesc()->GetEnumMembers()) + nIndex;
+      return reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetStructDesc()->GetEnumMembers()) + nIndex;
     }
 
     inline GXBOOL InlFindEnumFlagValue(DataPool::LPCSTR szName, DataPool::EnumFlag* pOutEnumFlag) GXCONST
     {
       GXBOOL bval = reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntFindEnumFlagValue(
-        reinterpret_cast<DataPoolImpl::LPCTD>(m_pVdd->GetTypeDesc()), szName, pOutEnumFlag);
+        reinterpret_cast<DataPoolImpl::LPCSD>(m_pVdd->GetStructDesc()), szName, pOutEnumFlag);
 
 #ifdef _DEBUG
       // 使用传统函数验证二分法查找
-      for(GXUINT i = 0; i < m_pVdd->GetTypeDesc()->nMemberCount; ++i)
+      for(GXUINT i = 0; i < m_pVdd->GetStructDesc()->nMemberCount; ++i)
       {
-        DataPoolImpl::LPCED pair = reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetTypeDesc()->GetEnumMembers()) + i;
+        DataPoolImpl::LPCED pair = reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetStructDesc()->GetEnumMembers()) + i;
           //m_pDataPool->IntGetEnum(m_pVdd->GetTypeDesc()->nMemberIndex + i);
         if(GXSTRCMP(szName, pair->GetName()) == 0)
         {
@@ -248,12 +248,12 @@ namespace Marimo
     template <class _Fn>
     GXBOOL ForEachEnum(DataPool::Enum& eValue, _Fn func) const
     {
-      const auto nCount = InlGetVDD()->GetTypeDesc()->nMemberCount;
+      const auto nCount = InlGetVDD()->GetStructDesc()->nMemberCount;
       eValue = (DataPool::Enum)*(u32*)GetPtr();
       for (GXUINT i = 0; i < nCount; i++)
       {
         //auto sDesc = m_pDataPool->IntGetEnum(m_pVdd->GetTypeDesc()->nMemberIndex + i);
-        auto sDesc = reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetTypeDesc()->GetEnumMembers()) + i;
+        auto sDesc = reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetStructDesc()->GetEnumMembers()) + i;
         if( ! func(sDesc, eValue)) {
           return TRUE;
         }
@@ -1042,7 +1042,7 @@ namespace Marimo
   template<class _TString>
   _TString Flag_ToStringT(GXCONST VarImpl* pThis)
   {
-    const auto nCount = pThis->InlGetVDD()->GetTypeDesc()->nMemberCount;
+    const auto nCount = pThis->InlGetVDD()->GetStructDesc()->nMemberCount;
     //const auto StringBase = pThis->InlStringBase();
     DataPool::Flag dwFlags = *(DataPool::Flag*)pThis->GetPtr();
     DataPool::Flag dwOriFlags = dwFlags;

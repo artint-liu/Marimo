@@ -45,7 +45,8 @@ namespace Marimo
     //sDesc.nMemberIndex = -1;
     sDesc.Member       = 0;
     sDesc.nMemberCount = 0;
-    sDesc.nIndex       = -1;
+    sDesc._nIndex       = -1;
+    sDesc.nTypeAddress = 0;
 
     // 这里要先在字典中加入这个类型，原因是：
     // 对于T_STRUCT类型，可能会在其中定义了自己类型的动态数组
@@ -94,6 +95,7 @@ namespace Marimo
         //t.nMemberIndex = (GXUINT)m_aStructMember.size();
         t.Member = (GXUINT)m_aStructMember.size();
         m_aStructMember.insert(m_aStructMember.end(), aMemberDesc.begin(), aMemberDesc.end());
+        m_nNumOfStructs++;
       }
       break;
 
@@ -110,14 +112,13 @@ namespace Marimo
           sEnum.Value = type.as.Enum[t.nMemberCount].Value;
           m_aEnumPck.push_back(sEnum);
         }
+        m_nNumOfStructs++;
       }
       break;
     default:
       ASSERT(0); // 增加了新类型或者类型异常
       break;
     }
-    
-    //m_TypeDict[szTypeName] = TypeDesc;
   }
 
   GXINT DataPoolBuildTime::CalculateVarSize(LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc)
@@ -149,7 +150,7 @@ namespace Marimo
       }
 
       VarDesc.nName = (GXUINT)NameSet.index(var.Name);
-      VarDesc.pTypeDesc = &itType->second;
+      VarDesc.pTypeDesc = static_cast<DataPoolImpl::TYPE_DESC*>(&itType->second);
       VarDesc.TypeDesc  = 0;
       ASSERT(((GXLONG_PTR)VarDesc.pTypeDesc & 3) == 0); // 一定是4字节对齐的
 

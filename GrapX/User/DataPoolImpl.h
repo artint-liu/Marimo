@@ -96,13 +96,15 @@ namespace Marimo
 
   public:
     struct VARIABLE_DESC;
-    struct TYPE_DESC;
+    struct STRUCT_DESC;
     struct ENUM_DESC;
 
+    typedef DATAPOOL_TYPE_DESC    TYPE_DESC;
     typedef VARIABLE_DESC*        LPVD;
     typedef const VARIABLE_DESC*  LPCVD;
     typedef const ENUM_DESC*      LPCED;
     typedef const TYPE_DESC*      LPCTD;
+    typedef const STRUCT_DESC*    LPCSD;
 
 
 
@@ -131,6 +133,7 @@ namespace Marimo
       GXUINT  nBuffersOffset;   // Buffer数据在文件中的偏移
 
       GXUINT  nNumOfTypes;      // 类型描述数量
+      GXUINT  nNumOfStructs;    // 结构/枚举/标志描述数量
       GXUINT  nNumOfVar;        // 变量描述数量
       GXUINT  nNumOfMember;     // 成员变量描述数量
       GXUINT  nNumOfEnums;      // 枚举描述数量
@@ -164,8 +167,10 @@ namespace Marimo
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     };
 
+    //typedef DATAPOOL_TYPE_DESC TYPE_DESC;
+    //struct TYPE_DESC : DATAPOOL_TYPE_DESC{};
 
-    struct TYPE_DESC : DATAPOOL_TYPE_DESC
+    struct STRUCT_DESC : DATAPOOL_STRUCT_DESC
     {
       inline GXUINT GetMemberIndex(DataPoolImpl::LPCVD aGlobalMemberTab) const  // 获得自己成员变量在全局成员变量表的位置
       {
@@ -323,7 +328,7 @@ namespace Marimo
 
     //virtual GXHRESULT ImportDataFromFileW (GXLPCWSTR szFilename);
     virtual LPCSTR    GetVariableName     (GXUINT nIndex) const override; // 获得变量的名字
-    virtual GXHRESULT GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout) override;
+    //virtual GXHRESULT GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout) override;
 
     virtual GXBOOL    IsFixedPool         () const override; // 池中不含有字符串和动态数组
 #ifndef DISABLE_DATAPOOL_WATCHER
@@ -402,10 +407,12 @@ namespace Marimo
     GXSIZE_T      IntGetRTDescHeader    ();   // 获得运行时描述表大小
     GXSIZE_T      IntGetRTDescNames     ();   // 获得运行时描述表字符串表所占的大小
     static GXUINT IntChangePtrSize      (GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount);
-    static void   IntClearChangePtrFlag (TYPE_DESC* pTypeDesc, GXUINT nCount);
+
+    template<class _Ty>
+    static void   IntClearChangePtrFlag (_Ty* pTypeDesc, GXUINT nCount);
     void          DbgIntDump            ();
 
-    GXBOOL          IntFindEnumFlagValue  (LPCTD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag) GXCONST;
+    GXBOOL          IntFindEnumFlagValue  (LPCSD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag) GXCONST;
     DataPoolArray*  IntCreateArrayBuffer  (clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount);
 
     protected:
@@ -413,14 +420,16 @@ namespace Marimo
 
       // LocalizePtr根据这些参数重定位下面的指针
       clFixedBuffer       m_Buffer;
-      GXUINT              m_nNumOfTypes;
+      GXUINT              _m_nNumOfTypes;
+      GXUINT              m_nNumOfStructs;
       GXUINT              m_nNumOfVar;
       GXUINT              m_nNumOfMember;
       GXUINT              m_nNumOfEnums;
       // =====================
 
       // 这些可以被LocalizePtr方法重定位
-      TYPE_DESC*          m_aTypes;
+      TYPE_DESC*          _m_aTypes;
+      STRUCT_DESC*        m_aStructs;
       SortedIndexType*    m_aGSIT;            // Grouped sorted index table, 详细见下
       VARIABLE_DESC*      m_aVariables;       // 所有变量描述表
       VARIABLE_DESC*      m_aMembers;         // 所有的结构体成员描述都存在这张表上

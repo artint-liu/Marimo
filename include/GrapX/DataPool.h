@@ -168,26 +168,34 @@ namespace Marimo
   struct DATAPOOL_VARIABLE_DESC;
   struct DATAPOOL_ENUM_DESC;
 
+#ifdef DEBUG_DECL_NAME
+# define DATAPOOL_DECL_STRING_NAME GXLPCSTR Name
+#else
+# define DATAPOOL_DECL_STRING_NAME
+#endif // #ifdef DEBUG_DECL_NAME
 
   struct DATAPOOL_TYPE_DESC
   {
-#ifdef DEBUG_DECL_NAME
-    GXLPCSTR     Name;
-#endif
+    DATAPOOL_DECL_STRING_NAME;
     GXUINT       nName;   // 自定位
     TypeCategory Cate;
     GXUINT       cbSize;
-    GXUINT       Member;  // 自定位
-    GXUINT       nMemberCount;
 
     inline GXINT_PTR GetName() const // 返回值依赖于DataPool的Variable类型
     {
 #ifdef DEBUG_DECL_NAME
       // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
-      ASSERT((DataPool::LPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
+      ASSERT((GXLPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
 #endif // #ifdef DEBUG_DECL_NAME
       return ((GXINT_PTR)&nName + nName);
     }
+  };
+
+
+  struct DATAPOOL_STRUCT_DESC : public DATAPOOL_TYPE_DESC
+  {
+    GXUINT       Member;  // 自定位
+    GXUINT       nMemberCount;
 
     inline const DATAPOOL_VARIABLE_DESC* GetMembers() const
     {
@@ -204,9 +212,7 @@ namespace Marimo
   struct DATAPOOL_VARIABLE_DESC
   {
     GXUINT      TypeDesc;           // 减法自定位，指向(TYPE_DESC*)类型
-#ifdef DEBUG_DECL_NAME
-    GXLPCSTR    Name;
-#endif // DEBUG_DECL_NAME
+    DATAPOOL_DECL_STRING_NAME;
     GXUINT      nName;              // StringBase偏移
     GXUINT      nOffset;            // 全局变量是绝对偏移，成员变量是结构体内偏移
     GXUINT      nCount   : 30;      // 数组大小,一元变量应该是1,动态数组暂定为0
@@ -217,7 +223,7 @@ namespace Marimo
     {
 #ifdef DEBUG_DECL_NAME
       // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
-      ASSERT((DataPool::LPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
+      ASSERT((GXLPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
 #endif // #ifdef DEBUG_DECL_NAME
       return ((GXINT_PTR)&nName + nName);
     }
@@ -233,6 +239,16 @@ namespace Marimo
       return pRetTypeDesc;
     }
 
+    inline const DATAPOOL_STRUCT_DESC* GetStructDesc() const
+    {
+      const DATAPOOL_TYPE_DESC* pTypeDesc = GetTypeDesc();
+      ASSERT(
+        (pTypeDesc->Cate & T_CATE_MASK) == T_STRUCT ||
+        (pTypeDesc->Cate & T_CATE_MASK) == T_ENUM ||
+        (pTypeDesc->Cate & T_CATE_MASK) == T_FLAG );
+      return static_cast<const DATAPOOL_STRUCT_DESC*>(pTypeDesc);
+    }
+
     inline GXUINT TypeSize() const
     {
       return GetTypeDesc()->cbSize;
@@ -245,17 +261,13 @@ namespace Marimo
 
     inline const DATAPOOL_VARIABLE_DESC* MemberBeginPtr() const
     {
-      auto pTypeDesc = GetTypeDesc();
-    
-      ASSERT((pTypeDesc->Cate & T_CATE_MASK) == T_STRUCT || 
-        (pTypeDesc->Cate & T_CATE_MASK) == T_ENUM || (pTypeDesc->Cate & T_CATE_MASK) == T_FLAG);
-
+      auto pTypeDesc = GetStructDesc();
       return pTypeDesc->GetMembers();
     }
 
     inline GXUINT MemberCount() const
     {
-      auto pTypeDesc = GetTypeDesc();
+      auto pTypeDesc = GetStructDesc();
       return pTypeDesc->nMemberCount;
     }
 
@@ -269,9 +281,7 @@ namespace Marimo
 
   struct DATAPOOL_ENUM_DESC
   {
-#ifdef DEBUG_DECL_NAME
-    GXLPCSTR    Name;     // 名字
-#endif // DEBUG_DECL_NAME
+    DATAPOOL_DECL_STRING_NAME;
     GXUINT      nName;
     GXINT       Value;    // 值
   };
@@ -280,9 +290,10 @@ namespace Marimo
   STATIC_ASSERT(sizeof(TypeCategory) == 4);
 #ifdef DEBUG_DECL_NAME
 #else
-  STATIC_ASSERT(sizeof(DATAPOOL_TYPE_DESC) == 20);
-  STATIC_ASSERT(sizeof(DATAPOOL_VARIABLE_DESC) == 16);
   STATIC_ASSERT(sizeof(DATAPOOL_ENUM_DESC) == 8);
+  STATIC_ASSERT(sizeof(DATAPOOL_TYPE_DESC) == 12);
+  STATIC_ASSERT(sizeof(DATAPOOL_STRUCT_DESC) == 20);
+  STATIC_ASSERT(sizeof(DATAPOOL_VARIABLE_DESC) == 16);
 #endif // DEBUG_DECL_NAME
 
   //////////////////////////////////////////////////////////////////////////
@@ -352,7 +363,7 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL      Load                (clFile& file, GXDWORD dwFlag));
 
     GXSTDINTERFACE(GXLPCSTR    GetVariableName     (GXUINT nIndex) const); // 获得变量的名字
-    GXSTDINTERFACE(GXHRESULT   GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout));
+    //GXSTDINTERFACE(GXHRESULT   GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout));
     GXSTDINTERFACE(GXHRESULT   ImportDataFromFileW (GXLPCWSTR szFilename));
 
     GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组

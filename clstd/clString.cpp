@@ -492,6 +492,23 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const size_t val)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, MAX_DIGITS);
+
+#if defined(_X86) || defined(_ARM)
+      _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, val, 0);
+#elif defined(_X64) || defined(_ARM64)
+      _Traits::Unsigned64ToString(m_pBuf, MAX_DIGITS, val, 0);
+#else
+# error 缺少CPU架构定义
+#endif
+
+    reduceLength(_Traits::StringLength(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
     _CLSTR_IMPL::~StringX()
   {
     _TAllocator* const pAlloc = CLSTR_ALLOCATOR(m_pBuf);

@@ -654,7 +654,7 @@ int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, GXSIZE_T nCount)
       CLBREAK;
     }
   }
-  return i;
+  return (int)i;
 }
 
 GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, GXSIZE_T nCount)
