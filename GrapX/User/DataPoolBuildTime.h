@@ -9,6 +9,16 @@ namespace Marimo
   {
     friend class DataPoolImpl;
     //typedef clmap<clStringA, TYPE_DESC> TypeDict;
+    typedef clstd::StaticStringsDict::HashType HashType;
+    typedef clstd::StaticStringsDict::len_t    len_t;
+    struct HASH_ALGORITHM
+    {
+      typedef clvector<int> IntArray;
+      HashType eType;
+      len_t    nBucket;
+      int      nPos;
+      IntArray indices;
+    };
 
     struct BUILDTIME_TYPE_DECLARATION : public TYPE_DECLARATION
     {
@@ -17,8 +27,8 @@ namespace Marimo
 
     struct BT_TYPE_DESC : public DataPoolImpl::STRUCT_DESC
     {
-      GXUINT _nIndex;
-      GXINT_PTR nTypeAddress;
+      HASH_ALGORITHM HashInfo;
+      GXINT_PTR      nTypeAddress;
     };
 
     struct BT_VARIABLE_DESC : public DATAPOOL_VARIABLE_DESC

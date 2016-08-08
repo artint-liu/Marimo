@@ -420,7 +420,7 @@ namespace Marimo
 
       // LocalizePtr根据这些参数重定位下面的指针
       clFixedBuffer       m_Buffer;
-      GXUINT              _m_nNumOfTypes;
+      GXUINT              m_nNumOfTypes;
       GXUINT              m_nNumOfStructs;
       GXUINT              m_nNumOfVar;
       GXUINT              m_nNumOfMember;
@@ -428,7 +428,7 @@ namespace Marimo
       // =====================
 
       // 这些可以被LocalizePtr方法重定位
-      TYPE_DESC*          _m_aTypes;
+      TYPE_DESC*          m_aTypes;
       STRUCT_DESC*        m_aStructs;
       SortedIndexType*    m_aGSIT;            // Grouped sorted index table, 详细见下
       VARIABLE_DESC*      m_aVariables;       // 所有变量描述表

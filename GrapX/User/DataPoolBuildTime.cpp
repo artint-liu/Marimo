@@ -2,6 +2,7 @@
 #include "GrapX.Hxx"
 
 #include "clStringSet.h"
+#include "clStaticStringsDict.h"
 
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"
@@ -42,10 +43,8 @@ namespace Marimo
 
     sDesc.nName   = (GXUINT)NameSet.index(szTypeName);
     sDesc.Cate    = type.Cate;
-    //sDesc.nMemberIndex = -1;
     sDesc.Member       = 0;
     sDesc.nMemberCount = 0;
-    sDesc._nIndex       = -1;
     sDesc.nTypeAddress = 0;
 
     // 这里要先在字典中加入这个类型，原因是：
@@ -92,7 +91,6 @@ namespace Marimo
         BTVarDescArray aMemberDesc;
         t.cbSize = CalculateVarSize(type.as.Struct, aMemberDesc);
         t.nMemberCount = (GXUINT)aMemberDesc.size();
-        //t.nMemberIndex = (GXUINT)m_aStructMember.size();
         t.Member = (GXUINT)m_aStructMember.size();
         m_aStructMember.insert(m_aStructMember.end(), aMemberDesc.begin(), aMemberDesc.end());
         m_nNumOfStructs++;

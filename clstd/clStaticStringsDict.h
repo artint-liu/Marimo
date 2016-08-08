@@ -8,7 +8,6 @@
 
 namespace clstd
 {
-  template<class _Fn>
   class StaticStringsDict
   {
   public:
@@ -23,23 +22,24 @@ namespace clstd
     };
 
     HashType  eType;
-    int       nPos; // HashType_Local 才有用
     len_t     nBucket;
+    int       nPos; // HashType_Local 才有用
 
-  private:
+  protected:
     len_t     m_count;
     IntArray  m_indices;
     IntArray  m_aCountsTab;
-    _Fn       m_fn;
+    //_Fn       m_fn;
 
-    len_t GetMaxLength()
+    template<class _Fn>
+    len_t GetMaxLength(_Fn fn)
     {
       len_t nMaxLength = 0;
       len_t len;
       CLLPCSTR str;
 
       for(len_t i = 0; i < m_count; i++) {
-        if( ! m_fn(i, &str, &len) || (len == 0)) {
+        if( ! fn(i, &str, &len) || (len == 0)) {
           break;
         }
         nMaxLength = clMax(nMaxLength, len);
@@ -47,16 +47,8 @@ namespace clstd
       return nMaxLength;
     }
 
-  public:
-    StaticStringsDict(len_t count, _Fn fn)
-      : m_count(count)
-      , m_fn(fn)
-    {
-      m_indices.insert(m_indices.end(), count * 2, 0);
-      m_aCountsTab.insert(m_aCountsTab.end(), count * 2, 0);
-    }
-
-    b32 TestStep(int n, len_t bucket)
+    template<class _Fn>
+    b32 TestStep(int n, len_t bucket, _Fn fn)
     {
       len_t len;
       CLLPCSTR str;
@@ -67,7 +59,7 @@ namespace clstd
 
       for(len_t i = 0; i < m_count; i++)
       {
-        if( ! m_fn(i, &str, &len) || (len == 0)) {
+        if( ! fn(i, &str, &len) || (len == 0)) {
           break;
         }
 
@@ -86,7 +78,8 @@ namespace clstd
       return TRUE;
     }
 
-    b32 TestStep(len_t bucket)
+    template<class _Fn>
+    b32 TestStep(len_t bucket, _Fn fn)
     {
       len_t len;
       CLLPCSTR str;
@@ -97,7 +90,7 @@ namespace clstd
 
       for(len_t i = 0; i < m_count; i++)
       {
-        if( ! m_fn(i, &str, &len) || (len == 0)) {
+        if( ! fn(i, &str, &len) || (len == 0)) {
           break;
         }
 
@@ -113,10 +106,27 @@ namespace clstd
 
       return TRUE;
     }
+  
+  public:
+    StaticStringsDict()
+    {}
 
+    StaticStringsDict(len_t count)
+      : m_count(count)
+      //, m_fn(fn)
+    {
+      Reset(count);
+    }
 
-
-    b32 TestHashable()
+    void Reset(len_t count)
+    {
+      m_count = count;
+      m_indices.insert(m_indices.end(), count * 2, 0);
+      m_aCountsTab.insert(m_aCountsTab.end(), count * 2, 0);
+    }
+    
+    template<class _Fn>
+    b32 TestHashable(_Fn fn)
     {
       len_t nMaxLength = GetMaxLength();
       len_t nDualCount = m_count * 2;
@@ -176,34 +186,33 @@ namespace clstd
 
       return val ^ (len << 5);
     }
+    
+    //static len_t HashChars4(CLLPCSTR str, len_t len, int pos)
+    //{
+    //  if(len == 1) {
+    //    return (len_t)str[0];
+    //  }
+    //  else if(len == 2) {
+    //    return (len_t)((str[1] << 8) | str[0]);
+    //  }
+    //  else if(len == 3) {
+    //    return (len_t)((str[2] << 16) | (str[1] << 8) | str[0]);
+    //  }
+    //  else if(len == 4) {
+    //    return (len_t)((str[3] << 24) | (str[2] << 16) | (str[1] << 8) | str[0]);
+    //  }
 
-
-    static len_t HashChars4(CLLPCSTR str, len_t len, int pos)
-    {
-      if(len == 1) {
-        return (len_t)str[0];
-      }
-      else if(len == 2) {
-        return (len_t)((str[1] << 8) | str[0]);
-      }
-      else if(len == 3) {
-        return (len_t)((str[2] << 16) | (str[1] << 8) | str[0]);
-      }
-      else if(len == 4) {
-        return (len_t)((str[3] << 24) | (str[2] << 16) | (str[1] << 8) | str[0]);
-      }
-
-      if(pos >= 0)
-      {
-        return (len_t)(((len_t)pos + 4 < len)
-          ? (*(short*)&str[pos]) : str[len - 5]);
-      }
-      else {
-        pos = -pos;
-        return (len_t)(((len_t)pos <= len)
-          ? (*(short*)&str[len - pos]) : str[0]);
-      }
-    }
+    //  if(pos >= 0)
+    //  {
+    //    return (len_t)(((len_t)pos + 4 < len)
+    //      ? (*(short*)&str[pos]) : str[len - 5]);
+    //  }
+    //  else {
+    //    pos = -pos;
+    //    return (len_t)(((len_t)pos <= len)
+    //      ? (*(short*)&str[len - pos]) : str[0]);
+    //  }
+    //}
   };
 } // namespace clstd
 
