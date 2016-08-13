@@ -471,15 +471,15 @@ namespace clstd
     reduceLength(_Traits::StringLength(m_pBuf));
   }
 
-  _CLSTR_TEMPL
-    _CLSTR_IMPL::StringX(const unsigned int uInteger)
-    : m_pBuf(NULL)
-  {
-    allocLength(&_Alloc, MAX_DIGITS);
+  //_CLSTR_TEMPL
+  //  _CLSTR_IMPL::StringX(const unsigned int uInteger)
+  //  : m_pBuf(NULL)
+  //{
+  //  allocLength(&_Alloc, MAX_DIGITS);
 
-    _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
-  }
+  //  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
+  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //}
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const unsigned long uLong)

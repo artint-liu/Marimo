@@ -399,6 +399,9 @@
     <ClInclude Include="..\..\Controls\ListDataAdapter.h">
       <Filter>Lib\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\MOSprite.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Platform\GXApp.cpp">

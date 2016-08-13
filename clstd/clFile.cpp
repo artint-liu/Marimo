@@ -3,8 +3,8 @@
 #include "clStd.H"
 #include "clString.H"
 #include "clmemory.h"
-#include "clFile.H"
-#include "clBuffer.H"
+//#include "clFile.H"
+//#include "clBuffer.H"
 #include "clUtility.H"
 
 #ifdef _WINDOWS

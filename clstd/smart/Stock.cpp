@@ -3,8 +3,8 @@
 #include "../clstd.h"
 #include "../clmemory.h"
 #include "../clString.H"
-#include "../clFile.H"
-#include "../clBuffer.H"
+//#include "../clFile.H"
+//#include "../clBuffer.H"
 #include "smartstream.h"
 #include "Stock.h"
 #include "../clUtility.H"
@@ -677,24 +677,24 @@ namespace clstd
     }
 
     //ASSERT(DbgCheck());
-    _TStr strValue;
-    SmartStreamUtility::MakeQuotation(strValue, szValue);
-
     if(GetKey(szKey, param)) {
+      _TStr strValue;
+      SmartStreamUtility::MakeQuotation(strValue, szValue);
       return pStock->Replace(this, param.itValue.offset(), param.itValue.length, strValue, strValue.GetLength());
     }
     else {
-      _TStr strBuffer;
-      strBuffer.Append(' ', nDepth);
-      strBuffer.Append(szKey);
-      strBuffer.Append('=');
-      strBuffer.Append(strValue);
-      strBuffer.Append(';');
-      strBuffer.Append('\r');
-      strBuffer.Append('\n');
+      return InsertKey(szKey, szValue);
+      //_TStr strBuffer;
+      //strBuffer.Append(' ', nDepth);
+      //strBuffer.Append(szKey);
+      //strBuffer.Append('=');
+      //strBuffer.Append(strValue);
+      //strBuffer.Append(';');
+      //strBuffer.Append('\r');
+      //strBuffer.Append('\n');
 
-      clsize nPos = pStock->InsertString(this, itEnd, strBuffer);
-      ASSERT(DbgCheck());
+      //clsize nPos = pStock->InsertString(this, itEnd, strBuffer);
+      //ASSERT(DbgCheck());
     }
     return TRUE;
   }
@@ -750,6 +750,26 @@ namespace clstd
       //return TRUE;
     }
     return FALSE;
+  }
+
+  _SSP_TEMPL
+  b32 _SSP_IMPL::Section::InsertKey(T_LPCSTR szKey, T_LPCSTR val)
+  {
+    _TStr strValue;
+    SmartStreamUtility::MakeQuotation(strValue, val);
+
+    _TStr strBuffer;
+    strBuffer.Append(' ', nDepth);
+    strBuffer.Append(szKey);
+    strBuffer.Append('=');
+    strBuffer.Append(strValue);
+    strBuffer.Append(';');
+    strBuffer.Append('\r');
+    strBuffer.Append('\n');
+
+    clsize nPos = pStock->InsertString(this, itEnd, strBuffer);
+    ASSERT(DbgCheck());
+    return TRUE;
   }
 
   //////////////////////////////////////////////////////////////////////////

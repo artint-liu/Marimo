@@ -2,7 +2,7 @@
 #include "clstd.h"
 #include "clString.H"
 #include "clCrypt.h"
-#include "clBuffer.H"
+//#include "clBuffer.H"
 
 namespace clstd
 {

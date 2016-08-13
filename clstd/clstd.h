@@ -271,16 +271,16 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 #endif
 
 #if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
-#include <windows.h>
+//#include <windows.h>
 #define CL_CALLBACK  __stdcall
 #else
-#include <pthread.h>
-#define CL_CALLBACK
+# include <pthread.h>
+# define CL_CALLBACK
 #endif
 
 
 #ifndef MAX_PATH
-#define MAX_PATH          260
+# define MAX_PATH          260
 #endif
 
 #define CLCONST const
@@ -329,6 +329,10 @@ namespace clstd
   }
 
 } // namespace clstd
+
+// 常用的头文件
+#include "clFile.h"
+#include "clBuffer.h"
 
 #include "clMathVector.h"
 #include "floatx.h"

@@ -2,9 +2,9 @@
 #define _CLSTD_LOCKER_H_
 
 #if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
-#include <windows.h>
+//#include <windows.h>
 #else
-#include <pthread.h>
+# include <pthread.h>
 #endif
 
 namespace clstd

@@ -131,6 +131,7 @@ namespace clstd
       b32       SetKey              (T_LPCSTR szKey, float val);
       b32       SetKey              (T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse);
       b32       DeleteKey           (T_LPCSTR szKey);
+      b32       InsertKey           (T_LPCSTR szKey, T_LPCSTR val); // SetKey 替换原来键值，InsertKey 可以插入新的键值
 
       void      operator++();
       ATTRIBUTE operator[](T_LPCSTR name) const;

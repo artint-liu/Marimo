@@ -71,11 +71,11 @@ public:
   GXSTDINTERFACE(GXSIZE_T  GetAnimationCount    () const);
   GXSTDINTERFACE(GXBOOL    GetNameA             (IndexType eType, GXUINT nIndex, clStringA* pstrName) const);
 
-  GXSTDINTERFACE(GXBOOL    GetModule           (GXINT nIndex, MODULE* pModule) const);
-  GXSTDINTERFACE(GXBOOL    GetFrame            (GXINT nIndex, FRAME* pFrame) const);
-  GXSTDINTERFACE(GXUINT    GetFrameModule      (GXINT nIndex, FRAME_MODULE* pFrameModule, int nCount) const);
-  GXSTDINTERFACE(GXBOOL    GetAnimation        (GXINT nIndex, ANIMATION* pAnimation) const);
-  GXSTDINTERFACE(GXUINT    GetAnimFrame        (GXINT nIndex, ANIM_FRAME* pAnimFrame, int nCount) const);
+  GXSTDINTERFACE(GXBOOL    GetModule            (GXINT nIndex, MODULE* pModule) const);
+  GXSTDINTERFACE(GXBOOL    GetFrame             (GXINT nIndex, FRAME* pFrame) const);
+  GXSTDINTERFACE(GXUINT    GetFrameModule       (GXINT nIndex, FRAME_MODULE* pFrameModule, int nCount) const);
+  GXSTDINTERFACE(GXBOOL    GetAnimation         (GXINT nIndex, ANIMATION* pAnimation) const);
+  GXSTDINTERFACE(GXUINT    GetAnimFrame         (GXINT nIndex, ANIM_FRAME* pAnimFrame, int nCount) const);
   
   GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXINT nIndex, GXRECT *rcSprite) const);  // 获得Module在Image中的位置
   GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXINT nIndex, GXREGN *rgSprite) const);
@@ -90,8 +90,6 @@ public:
                                           
   GXSTDINTERFACE(int       FindByNameA          (GXLPCSTR szName) const);
   GXSTDINTERFACE(int       FindByNameW          (GXLPCWSTR szName) const);
-
-
 };
 
 struct GXSPRITE_DESCW

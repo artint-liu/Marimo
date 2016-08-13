@@ -264,6 +264,7 @@
     <ClInclude Include="..\..\..\include\GrapX\MOComponent.h" />
     <ClInclude Include="..\..\..\include\GrapX\MOConsoleStaff.h" />
     <ClInclude Include="..\..\..\include\GrapX\MOLogger.h" />
+    <ClInclude Include="..\..\..\include\GrapX\MOSprite.h" />
     <ClInclude Include="..\..\..\include\GrapX\Platform.h" />
     <ClInclude Include="..\..\..\include\GrapX\StdMtl.h" />
     <ClInclude Include="..\..\..\include\GrapX\VertexDecl.h" />
