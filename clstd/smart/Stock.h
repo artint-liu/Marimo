@@ -146,7 +146,7 @@ namespace clstd
     //typedef clvector<SECTION*>  SectionArray;
 
     _SmartStreamT m_SmartStream;
-    Buffer*       m_pBuffer;
+    Buffer        m_Buffer;
     int           m_nModify;
     //SectionArray  m_aHandles;
 
@@ -160,6 +160,8 @@ namespace clstd
     b32 SaveA(const ch* lpProfile) const;
     b32 LoadW(const wch* lpProfile);
     b32 SaveW(const wch* lpProfile) const;
+
+    b32 Attach(BufferBase* pBuffer); // 内部会复制一份
 
     b32 Close();
 
@@ -209,6 +211,7 @@ namespace clstd
   protected:
     //b32      Append            (Section* pSect, T_LPCSTR szText, clsize nCount);
     //b32      Insert            (Section* pSect, clsize nPos, T_LPCSTR szText, clsize nCount);
+    b32      ToNativeCodec     (); // 根据BOM转为本地编码，StockA为ANSI，StockW为Unicode-16
     b32      Replace           (Section* pSect, clsize nPos, clsize nReplaced, T_LPCSTR szText, clsize nCount);
     b32      FindSingleSection (Section* pFindSect, T_LPCSTR szName, Section& pOutSect) const; // szName为NULL表示查找任何Section;
     b32      NewSection        (Section* pSection, T_LPCSTR szName, Section& pNewSect);

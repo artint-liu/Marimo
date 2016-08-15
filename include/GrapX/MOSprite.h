@@ -98,6 +98,8 @@ namespace Marimo : public GUnknown
     GXSTDINTERFACE(GXHRESULT GetImage             (GXImage** pImage, GXINT index) const);
     GXSTDINTERFACE(clStringW GetImageFileW        (GXINT index) const);
     GXSTDINTERFACE(clStringA GetImageFileA        (GXINT index) const);
+
+    static GXBOOL CreateFromStockA(Sprite** ppSprite, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
   };
 } // namespace Marimo
 

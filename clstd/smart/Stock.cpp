@@ -251,8 +251,7 @@ namespace clstd
 
   _SSP_TEMPL 
     _SSP_IMPL::StockT()
-    : m_pBuffer(NULL)
-    , m_nModify(0)
+    : m_nModify(0)
   {
   }
 
@@ -272,8 +271,8 @@ namespace clstd
   //  strBuffer.Append((_TCh)L'}');
   //
   //  m_pBuffer = new clBuffer;
-  //  m_pBuffer->Append((CLLPVOID)&strBuffer.Front(), strBuffer.GetLength() * sizeof(_TCh));
-  //  m_SmartStream.Initialize((_TCh*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(_TCh));
+  //  m_Buffer.Append((CLLPVOID)&strBuffer.Front(), strBuffer.GetLength() * sizeof(_TCh));
+  //  m_SmartStream.Initialize((_TCh*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(_TCh));
   //  m_SmartStream.SetFlags(SmartStream::F_SYMBOLBREAK);
   //  return true;
   //}
@@ -286,89 +285,15 @@ namespace clstd
       return FALSE;
     }
 
-    if(file.MapToBuffer(&m_pBuffer) == FALSE) {
+    if( ! file.ReadToBuffer(&m_Buffer)) {
       // 如果Load一个空文件，则自己创建一个缓冲
-      ASSERT(m_pBuffer == NULL);
-      m_pBuffer = new Buffer();
-      m_pBuffer->Resize(0, FALSE);
-      m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(TChar));
+      m_Buffer.Resize(0, FALSE);
+      m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
       return TRUE;
     }
 
-    u32 dwBOM = *(u32*)m_pBuffer->GetPtr();
-    if(sizeof(TChar) == 1)
-    {
-      b32 bUnicode = FALSE;
-      if((dwBOM & 0xFFFF) == BOM_UNICODE)   {  // UNICODE 格式头
-        m_pBuffer->Replace(0, 2, NULL, 0);
-        bUnicode = TRUE;
-      }
-      else if((dwBOM & 0xFFFF) == BOM_UNICODE_BIGENDIAN)
-      {
-        m_pBuffer->Replace(0, 2, NULL, 0);
-
-        // 以16字节方式交换高低字节
-        u16* ptr = (u16*)m_pBuffer->GetPtr();
-        clsize nCount = m_pBuffer->GetSize() / sizeof(u16);
-        ReverseByteOrder16(ptr, nCount);
-        bUnicode = TRUE;
-      }
-      else if((dwBOM & 0xFFFFFF) == BOM_UTF8)
-      {
-        CLBREAK; // FIXME: 暂时不支持
-        bUnicode = TRUE;
-        return FALSE;
-      }
-
-      if(bUnicode)
-      {
-        CLBREAK; // TODO: 测试过这段代码后去掉 CLBREAK
-        wch chEnd[] = L"\0";
-        Buffer* pNewBuffer = new Buffer;
-        m_pBuffer->Append(chEnd, sizeof(chEnd));
-        pNewBuffer->Resize(m_pBuffer->GetSize(), FALSE);
-
-        clsize size = wcstombs((char*)pNewBuffer->GetPtr(), (const wchar_t*)m_pBuffer->GetPtr(), pNewBuffer->GetSize());
-        ASSERT(size != (clsize)-1); // TODO: 需要 setlocale(LC_ALL,"");
-
-        pNewBuffer->Resize(size, FALSE);
-        delete m_pBuffer;
-        m_pBuffer = pNewBuffer;
-      }
-    }
-    else if(sizeof(TChar) == 2)  // UNICODE
-    {
-      if((dwBOM & 0xFFFF) == BOM_UNICODE)   {  // UNICODE 格式头
-        m_pBuffer->Replace(0, 2, NULL, 0);
-      }
-      else if((dwBOM & 0xFFFF) == BOM_UNICODE_BIGENDIAN)
-      {
-        m_pBuffer->Replace(0, 2, NULL, 0);
-
-        // 以16字节方式交换高低字节
-        u16* ptr = (u16*)m_pBuffer->GetPtr();
-        clsize nCount = m_pBuffer->GetSize() / sizeof(u16);
-        ReverseByteOrder16(ptr, nCount);
-      }
-      else if((dwBOM & 0xFFFFFF) == BOM_UTF8)
-      {
-        CLBREAK; // FIXME: 暂时不支持
-        return FALSE;
-      }
-      else {
-        ch chEnd[] = "\0";
-        Buffer* pNewBuffer = new Buffer;
-        m_pBuffer->Append(chEnd, sizeof(chEnd));
-        pNewBuffer->Resize(m_pBuffer->GetSize() * 2, FALSE);
-
-        clsize size = mbstowcs((wchar_t*)pNewBuffer->GetPtr(), (const char*)m_pBuffer->GetPtr(), m_pBuffer->GetSize());
-
-        pNewBuffer->Resize(size * sizeof(TChar), FALSE);
-        delete m_pBuffer;
-        m_pBuffer = pNewBuffer;
-      }
-    }
-    m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize()/sizeof(TChar));
+    ToNativeCodec();
+    m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
     return TRUE;
   }
 
@@ -386,11 +311,21 @@ namespace clstd
       file.Write(&wFlag, 2);
     }
 
-    if(m_pBuffer) {
-      file.Write(m_pBuffer->GetPtr(), (u32)m_pBuffer->GetSize());
+    if(m_Buffer.GetSize()) {
+      file.Write(m_Buffer.GetPtr(), (u32)m_Buffer.GetSize());
     }
 
     return true;
+  }
+
+  _SSP_TEMPL 
+  b32 _SSP_IMPL::Attach(BufferBase* pBuffer)
+  {
+    m_Buffer.Append(pBuffer->GetPtr(), pBuffer->GetSize());
+    if(ToNativeCodec()) {
+      return m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
+    }
+    return FALSE;
   }
 
   _SSP_TEMPL 
@@ -402,7 +337,7 @@ namespace clstd
     //  SAFE_DELETE(*it);
     //}
     //m_aHandles.clear();
-    SAFE_DELETE(m_pBuffer);
+    //SAFE_DELETE(m_pBuffer);
     return TRUE;
   }
 
@@ -477,7 +412,7 @@ namespace clstd
   _SSP_TEMPL 
     void _SSP_IMPL::TrimFrontTab(clsize& uOffset)
   {
-    while(uOffset > 0 && (((TChar*)m_pBuffer->GetPtr())[uOffset - 1]) == (TChar)L'\t') uOffset--;
+    while(uOffset > 0 && (((TChar*)m_Buffer.GetPtr())[uOffset - 1]) == (TChar)L'\t') uOffset--;
   }
 
   _SSP_TEMPL
@@ -788,15 +723,9 @@ namespace clstd
     }
 
     // 初始化Smart对象
-    if(m_pBuffer == NULL) {
-      m_pBuffer = new Buffer();
-
-      if(m_pBuffer == NULL) {
-        CLOG_ERROR("%s: Out of memory.\r\n", __FUNCTION__);
-        return NULL;
-      }
-      m_pBuffer->Reserve(1024);
-      m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), m_pBuffer->GetSize() / sizeof(TChar));
+    if(m_Buffer.GetSize()) {
+      m_Buffer.Reserve(1024);
+      m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
     }
 
     Section sDesc;
@@ -850,7 +779,7 @@ namespace clstd
       return Section();
     }
 
-    if((szPath != NULL && szPath[0] == L'\0') || m_pBuffer == NULL)
+    if((szPath != NULL && szPath[0] == L'\0') || m_Buffer.GetSize())
     {
       return Section((StockT*)this);
     }
@@ -983,6 +912,88 @@ namespace clstd
     }
   }
 
+  _SSP_TEMPL
+    b32 _SSP_IMPL::ToNativeCodec()
+  {
+    u32 dwBOM = *(u32*)m_Buffer.GetPtr();
+    if(sizeof(TChar) == 1)
+    {
+      b32 bUnicode = FALSE;
+      if((dwBOM & 0xFFFF) == BOM_UNICODE)   {  // UNICODE 格式头
+        m_Buffer.Replace(0, 2, NULL, 0);
+        bUnicode = TRUE;
+      }
+      else if((dwBOM & 0xFFFF) == BOM_UNICODE_BIGENDIAN)
+      {
+        m_Buffer.Replace(0, 2, NULL, 0);
+
+        // 以16字节方式交换高低字节
+        u16* ptr = (u16*)m_Buffer.GetPtr();
+        clsize nCount = m_Buffer.GetSize() / sizeof(u16);
+        ReverseByteOrder16(ptr, nCount);
+        bUnicode = TRUE;
+      }
+      else if((dwBOM & 0xFFFFFF) == BOM_UTF8)
+      {
+        CLBREAK; // FIXME: 暂时不支持
+        bUnicode = TRUE;
+        return FALSE;
+      }
+
+      if(bUnicode)
+      {
+        CLBREAK; // TODO: 测试过这段代码后去掉 CLBREAK
+        wch chEnd[] = L"\0";
+        Buffer sNewBuffer;
+        m_Buffer.Append(chEnd, sizeof(chEnd));
+        sNewBuffer.Resize(m_Buffer.GetSize(), FALSE);
+
+        clsize size = wcstombs((char*)sNewBuffer.GetPtr(), (const wchar_t*)m_Buffer.GetPtr(), sNewBuffer.GetSize());
+        ASSERT(size != (clsize)-1); // TODO: 需要 setlocale(LC_ALL,"");
+
+        //sNewBuffer.Resize(size, FALSE);
+        //delete m_pBuffer;
+        //m_pBuffer = pNewBuffer;
+        //m_Buffer.Resize(size);
+        m_Buffer.Replace(0, m_Buffer.GetSize(), sNewBuffer.GetPtr(), size);
+      }
+    }
+    else if(sizeof(TChar) == 2)  // UNICODE
+    {
+      if((dwBOM & 0xFFFF) == BOM_UNICODE)   {  // UNICODE 格式头
+        m_Buffer.Replace(0, 2, NULL, 0);
+      }
+      else if((dwBOM & 0xFFFF) == BOM_UNICODE_BIGENDIAN)
+      {
+        m_Buffer.Replace(0, 2, NULL, 0);
+
+        // 以16字节方式交换高低字节
+        u16* ptr = (u16*)m_Buffer.GetPtr();
+        clsize nCount = m_Buffer.GetSize() / sizeof(u16);
+        ReverseByteOrder16(ptr, nCount);
+      }
+      else if((dwBOM & 0xFFFFFF) == BOM_UTF8)
+      {
+        CLBREAK; // FIXME: 暂时不支持
+        return FALSE;
+      }
+      else {
+        ch chEnd[] = "\0";
+        Buffer sNewBuffer;
+        m_Buffer.Append(chEnd, sizeof(chEnd));
+        sNewBuffer.Resize(m_Buffer.GetSize() * 2, FALSE);
+
+        clsize size = mbstowcs((wchar_t*)sNewBuffer.GetPtr(), (const char*)m_Buffer.GetPtr(), m_Buffer.GetSize());
+
+        //sNewBuffer.Resize(size * sizeof(TChar), FALSE);
+        //delete m_pBuffer;
+        //m_pBuffer = pNewBuffer;
+        m_Buffer.Replace(0, m_Buffer.GetSize(), sNewBuffer.GetPtr(), size * sizeof(TChar));
+      }
+    }
+    return TRUE;
+  }
+
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -1106,7 +1117,7 @@ namespace clstd
   {
     clsize nPos;
     if(it == m_SmartStream.end()) {
-      nPos = m_pBuffer->GetSize();
+      nPos = m_Buffer.GetSize();
       //Append(str, str.GetLength());
       Replace(pSect, -1, 0, str, str.GetLength());
     }
@@ -1117,7 +1128,7 @@ namespace clstd
       // 用来向前跳过空白，尽量插入的Section在上一个换行符号之后
       while(--pMarker >= pStreamPtr && (*pMarker == ' ' || *pMarker == '\t')) {}
       nPos = pMarker - pStreamPtr + 1;
-      ASSERT(nPos < m_pBuffer->GetSize());
+      ASSERT(nPos < m_Buffer.GetSize());
       //Insert(nPos, str, str.GetLength());
       Replace(pSect, nPos, 0, str, str.GetLength());
     }
@@ -1131,20 +1142,20 @@ namespace clstd
       nPos = m_SmartStream.GetStreamCount();
     }
 
-    TChar* pOldPtr = (TChar*)m_pBuffer->GetPtr();
+    TChar* pOldPtr = (TChar*)m_Buffer.GetPtr();
     const clsize cbSize = nCount * sizeof(TChar);
     const clsize cbReplaced = nReplaced * sizeof(TChar);
     const clsize cbPos = nPos * sizeof(TChar);
 
-    m_pBuffer->Replace(cbPos, cbReplaced, (CLLPCVOID)szText, cbSize);
+    m_Buffer.Replace(cbPos, cbReplaced, (CLLPCVOID)szText, cbSize);
 
     // 重新设置SmartStream：指针变化，大小变化都要重新初始化
-    m_SmartStream.Initialize((TChar*)m_pBuffer->GetPtr(), m_pBuffer->GetSize() / sizeof(TChar));
+    m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
 
     // m_SmartStream.Initialize()之后会修正end()，RelocateSection内部断言检查需要准确的end()
     m_nModify++;
     do {
-      RelocateSection(pSect, pOldPtr, (TChar*)m_pBuffer->GetPtr(), nPos, nReplaced, nCount);
+      RelocateSection(pSect, pOldPtr, (TChar*)m_Buffer.GetPtr(), nPos, nReplaced, nCount);
       pSect->nModify = m_nModify;
       pSect = pSect->pParent;
     } while(pSect);
@@ -1168,9 +1179,9 @@ namespace clstd
   typename _SSP_IMPL::T_LPCSTR _SSP_IMPL::GetText(clsize* length) const
   {
     if(length) {
-      *length = m_pBuffer->GetSize() / sizeof(TChar);
+      *length = m_Buffer.GetSize() / sizeof(TChar);
     }
-    return (T_LPCSTR)m_pBuffer->GetPtr();
+    return (T_LPCSTR)m_Buffer.GetPtr();
   }
 
 
