@@ -41,6 +41,7 @@ namespace Marimo
 
     BT_TYPE_DESC sDesc;
 
+    sDesc.szName       = szTypeName;
     sDesc.nNameIndex   = (GXUINT)NameSet.index(szTypeName);
     sDesc.Cate         = type.Cate;
     sDesc.nMemberIndex = 0;
@@ -89,10 +90,15 @@ namespace Marimo
     case T_STRUCTALWAYS:
       {
         BTVarDescArray aMemberDesc;
+        aMemberDesc.reserve(20);
         t.cbSize = CalculateVarSize(type.as.Struct, aMemberDesc);
         t.nMemberCount = (GXUINT)aMemberDesc.size();
         t.nMemberIndex = (GXUINT)m_aStructMember.size();
         m_aStructMember.insert(m_aStructMember.end(), aMemberDesc.begin(), aMemberDesc.end());
+
+        TryHash(t.HashInfo, aMemberDesc);
+
+        m_nNumOfBuckets += t.HashInfo.indices.size();
         m_nNumOfStructs++;
       }
       break;
@@ -134,19 +140,20 @@ namespace Marimo
       const int nDim = var.Count < 0 ? 0 : 
         (var.Count <= 1 ? 1 : var.Count);
 
-      clStringA strTypeName = var.Type;
+      //clStringA strTypeName = var.Type;
       //if(var.Count < 0) {  // 变长数组
       //  strTypeName.Insert(0, '#');
       //}
-      auto itType = m_TypeDict.find(strTypeName);
+      auto itType = m_TypeDict.find(var.Type);
 
       if(itType == m_TypeDict.end())
       {
-        PutTypeToDict(strTypeName);
-        itType = m_TypeDict.find(strTypeName);
+        PutTypeToDict(var.Type);
+        itType = m_TypeDict.find(var.Type);
         ASSERT(itType != m_TypeDict.end());
       }
 
+      VarDesc.szName     = var.Name;
       VarDesc.nNameIndex = (GXUINT)NameSet.index(var.Name);
       VarDesc.pTypeDesc = &itType->second;
       //VarDesc.TypeDesc  = 0;
@@ -234,6 +241,24 @@ namespace Marimo
       i++;
     }
     return i > 0 && result; // 不能为空
+  }
+
+  void DataPoolBuildTime::TryHash(HASH_ALGORITHM& hash_info, const BTVarDescArray& aDescs)
+  {
+    clstd::StaticStringsDict ssd(aDescs.size());
+
+    ssd.TestHashable([&aDescs](clsize index, CLLPCSTR* str, clsize* len) -> b32
+    {
+      *str = aDescs[index].szName;
+      *len = GXSTRLEN(*str);
+      return TRUE;
+    });
+
+    hash_info.eType   = ssd.eType;
+    hash_info.nBucket = ssd.nBucket;
+    hash_info.nPos    = ssd.nPos;
+    hash_info.indices.clear();
+    ssd.Copy(hash_info.indices);
   }
 
   //////////////////////////////////////////////////////////////////////////

@@ -162,6 +162,8 @@ namespace Marimo
       return FALSE;
     }
 
+    DataPoolBuildTime::TryHash(sBuildTime.m_VarHashInfo, sBuildTime.m_aVar);
+
     // 定位各种描述表
     LocalizeTables(sBuildTime, nBufferSize);
     

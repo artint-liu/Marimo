@@ -208,6 +208,14 @@ namespace Marimo
     }
   };
 
+  struct DATAPOOL_HASH_ALGORITHM
+  {
+    u16  eType   : 2; // clstd::StaticStringsDict::HashType
+    u16  nBucket : 14;
+    s16  nPos;
+    u16  nOffset;     // ×Ô¶¨Î»
+    //IntArray indices;
+  };
 
   struct DATAPOOL_VARIABLE_DESC
   {
@@ -290,6 +298,7 @@ namespace Marimo
   STATIC_ASSERT(sizeof(TypeCategory) == 4);
 #ifdef DEBUG_DECL_NAME
 #else
+  STATIC_ASSERT(sizeof(DATAPOOL_HASH_ALGORITHM) == 6);
   STATIC_ASSERT(sizeof(DATAPOOL_ENUM_DESC) == 8);
   STATIC_ASSERT(sizeof(DATAPOOL_TYPE_DESC) == 12);
   STATIC_ASSERT(sizeof(DATAPOOL_STRUCT_DESC) == 20);

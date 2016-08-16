@@ -67,7 +67,7 @@ namespace clstd
         ASSERT(local_hash != 0);
         local_hash %= bucket;
 
-        if(m_aCountsTab[local_hash] > 1) {
+        if(m_aCountsTab[local_hash] > 0) {
           return FALSE;
         }
 
@@ -128,14 +128,14 @@ namespace clstd
     template<class _Fn>
     b32 TestHashable(_Fn fn)
     {
-      len_t nMaxLength = GetMaxLength();
+      len_t nMaxLength = GetMaxLength(fn);
       len_t nDualCount = m_count * 2;
 
       // ¾Ö²¿hash
       for(len_t bucket = m_count; bucket < nDualCount; bucket++)
       {
         for(len_t n = 1; n < nMaxLength; n++) {
-          if(TestStep(-(int)n, bucket)) {
+          if(TestStep(-(int)n, bucket, fn)) {
             nPos = -(int)n;
             nBucket = bucket;
             eType = HashType_Local;
@@ -144,7 +144,7 @@ namespace clstd
         }
 
         for(len_t n = 0; n < nMaxLength; n++) {
-          if(TestStep((int)n, bucket)) {
+          if(TestStep((int)n, bucket, fn)) {
             nPos = n;
             nBucket = bucket;
             eType = HashType_Local;
@@ -155,7 +155,7 @@ namespace clstd
 
       // ×Ö·û´®hash
       for(len_t bucket = m_count; bucket < nDualCount; bucket++) {
-        if(TestStep(bucket)) {
+        if(TestStep(bucket, fn)) {
           nPos = -1;
           nBucket = bucket;
           eType = HashType_String;
@@ -165,6 +165,12 @@ namespace clstd
 
       eType = HashType_Failed;
       return FALSE;
+    }
+
+    template<class _TList>
+    void Copy(_TList& _list)
+    {
+      _list.insert(_list.end(), m_indices.begin(), m_indices.begin() + nBucket);
     }
 
     //////////////////////////////////////////////////////////////////////////
