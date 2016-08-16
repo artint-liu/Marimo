@@ -315,7 +315,16 @@ namespace Marimo
 //#ifdef ENABLE_DATAPOOL_WATCHER
     typedef clvector<DataPoolWatcher*>  WatcherArray;
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-
+    struct SIZELIST
+    {
+      GXSIZE_T cbTypes;
+      GXSIZE_T cbStructs;
+      GXSIZE_T cbGVSIT;
+      GXSIZE_T cbVariables;
+      GXSIZE_T cbMembers;
+      GXSIZE_T cbEnums;
+      GXSIZE_T cbNameTable;
+    };
 
 
   public:
@@ -404,7 +413,7 @@ namespace Marimo
     LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
     GXBOOL        IntIgnore           (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
 
-    GXSIZE_T      IntGetRTDescHeader    ();   // 获得运行时描述表大小
+    GXSIZE_T      IntGetRTDescHeader    (SIZELIST* pSizeList);   // 获得运行时描述表大小
     GXSIZE_T      IntGetRTDescNames     ();   // 获得运行时描述表字符串表所占的大小
     static GXUINT IntChangePtrSize      (GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount);
 

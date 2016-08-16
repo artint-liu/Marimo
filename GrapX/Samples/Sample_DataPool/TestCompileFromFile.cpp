@@ -75,12 +75,27 @@ void TestCompileFromFile()
 #endif // #ifdef _X86
     pDataPool->SaveW(szFilename);
 
+    DataPool* pDataPoolReadOnly = NULL;
+    DataPool::CreateFromFileW(&pDataPoolReadOnly, NULL, szFilename, DataPoolLoad_ReadOnly);
+
     DataPool* pDataPoolFromFile = NULL;
-    DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolLoad_ReadOnly);
+    DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, 0);
+
+    //pDataPool->begin()
+
+    // 和自己比较，测试比较算法
+    CompareDataPool(pDataPool, pDataPool);
+
+    // 和加载文件比较，测试文件读写算法
+    CompareDataPool(pDataPool, pDataPoolReadOnly);
+    CompareDataPool(pDataPool, pDataPoolFromFile);
 
     ENUM_DATAPOOL(pDataPool);
-    ENUM_DATAPOOL(pDataPoolFromFile);
+    ENUM_DATAPOOL(pDataPoolReadOnly);
+
     SAFE_RELEASE(pDataPool);
+    SAFE_RELEASE(pDataPoolReadOnly);
     SAFE_RELEASE(pDataPoolFromFile);
+
   }
 }

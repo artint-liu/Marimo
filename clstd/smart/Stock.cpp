@@ -723,7 +723,7 @@ namespace clstd
     }
 
     // 初始化Smart对象
-    if(m_Buffer.GetSize()) {
+    if( ! m_Buffer.GetSize()) {
       m_Buffer.Reserve(1024);
       m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
     }
@@ -779,7 +779,7 @@ namespace clstd
       return Section();
     }
 
-    if((szPath != NULL && szPath[0] == L'\0') || m_Buffer.GetSize())
+    if((szPath != NULL && szPath[0] == L'\0') || ! m_Buffer.GetSize())
     {
       return Section((StockT*)this);
     }

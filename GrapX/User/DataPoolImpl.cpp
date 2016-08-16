@@ -756,21 +756,31 @@ namespace Marimo
   }
 
 
-  GXSIZE_T DataPoolImpl::IntGetRTDescHeader()
+  GXSIZE_T DataPoolImpl::IntGetRTDescHeader(SIZELIST* pSizeList)
   {
-    auto cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
-    auto cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
-    auto cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
-    auto cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
-    auto cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
-    auto cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
-    auto cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
-    return (cbTypes + cbStructs + cbGVSIT + cbVariables + cbMembers + cbEnums + cbNameTable);
+    ASSERT(m_nNumOfTypes);
+    ASSERT(m_nNumOfVar);
+    ASSERT(
+      (m_nNumOfStructs == 0 && (m_nNumOfMember == 0 && m_nNumOfEnums == 0)) ||
+      (m_nNumOfStructs != 0 && (m_nNumOfMember != 0 || m_nNumOfEnums != 0)) );
+    ASSERT(m_pNamesTabEnd && m_pNamesTabBegin < m_pNamesTabEnd);  // m_pNamesTabBegin 在构建时暂时为0
+
+    pSizeList->cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
+    pSizeList->cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
+    pSizeList->cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
+    pSizeList->cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
+    pSizeList->cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
+    pSizeList->cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
+    pSizeList->cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
+
+    return (pSizeList->cbTypes + pSizeList->cbStructs + pSizeList->cbGVSIT +
+      pSizeList->cbVariables + pSizeList->cbMembers + pSizeList->cbEnums + pSizeList->cbNameTable);
   }
 
   GXSIZE_T DataPoolImpl::IntGetRTDescNames()
   {
-    return m_Buffer.GetSize() - IntGetRTDescHeader() - m_VarBuffer.GetSize();
+    SIZELIST sSizeList;
+    return m_Buffer.GetSize() - IntGetRTDescHeader(&sSizeList) - m_VarBuffer.GetSize();
   }
 
   GXUINT DataPoolImpl::IntChangePtrSize(GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount)
@@ -1105,7 +1115,7 @@ namespace Marimo
       VARIABLE_DESC& sDesc = pDestVarDesc[i];
       //sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - (GXINT_PTR)&m_aTypes[((BUILDTIME::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nIndex]);
       sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - ((BUILDTIME::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nTypeAddress);
-      sDesc.nName     = ConvertToNewOffsetFromOldIndex(pTable, (int)sBtDesc.nName);
+      sDesc.nName     = ConvertToNewOffsetFromOldIndex(pTable, (int)sBtDesc.nNameIndex);
       sDesc.nOffset   = sBtDesc.nOffset;
       sDesc.nCount    = sBtDesc.nCount;
       sDesc.bDynamic  = sBtDesc.bDynamic;
@@ -1121,41 +1131,42 @@ namespace Marimo
   clsize DataPoolImpl::LocalizePtr()
   {
     GXLPBYTE ptr = (GXLPBYTE)m_Buffer.GetPtr();
-
-    auto cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
-    auto cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
-    auto cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
-    auto cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
-    auto cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
-    auto cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
-    auto cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
+    SIZELIST s;
+    //const GXSIZE_T cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
+    const GXSIZE_T nSumSize = IntGetRTDescHeader(&s);
+    //auto cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
+    //auto cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
+    //auto cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
+    //auto cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
+    //auto cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
+    //auto cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
 
     m_aTypes = (TYPE_DESC*)ptr;
-    ptr += cbTypes;
+    ptr += s.cbTypes;
 
     m_aStructs = (STRUCT_DESC*)ptr;
-    ptr += cbStructs;
+    ptr += s.cbStructs;
 
     m_aGSIT = (SortedIndexType*)ptr;
-    ptr += cbGVSIT;
+    ptr += s.cbGVSIT;
 
     m_aVariables = (VARIABLE_DESC*)(ptr);
-    ptr += cbVariables;
+    ptr += s.cbVariables;
 
     if(m_nNumOfMember) {
       m_aMembers = (VARIABLE_DESC*)ptr;
-      ptr += cbMembers;
+      ptr += s.cbMembers;
     }
 
     if(m_nNumOfEnums) {
       m_aEnums = (ENUM_DESC*)ptr;
-      ptr += cbEnums;
+      ptr += s.cbEnums;
     }
 
     m_pNamesTabBegin = (GXUINT*)ptr;
-    m_pNamesTabEnd   = (GXUINT*)((GXUINT_PTR)m_pNamesTabBegin + cbNameTable);
+    m_pNamesTabEnd   = (GXUINT*)((GXUINT_PTR)m_pNamesTabBegin + s.cbNameTable);
 
-    return cbTypes + cbStructs + cbGVSIT + cbVariables + cbMembers + cbEnums + cbNameTable;
+    return nSumSize;
   }
 
   void DataPoolImpl::DbgIntDump()
@@ -1206,20 +1217,25 @@ namespace Marimo
     // #.Strings                    描述表中所有字符串的字符串表
     // #.Variable Data Space        变量空间
 
-    m_nNumOfTypes  = (GXUINT)bt.m_TypeDict.size() - (GXUINT)bt.m_nNumOfStructs;
-    m_nNumOfStructs= (GXUINT)bt.m_nNumOfStructs;
-    m_nNumOfVar    = (GXUINT)bt.m_aVar.size();
-    m_nNumOfMember = (GXUINT)bt.m_aStructMember.size();
-    m_nNumOfEnums  = (GXUINT)bt.m_aEnumPck.size();
+    const GXSIZE_T cbNameTable = bt.NameSet.size() * sizeof(GXUINT);
 
-    GXSIZE_T cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
-    GXSIZE_T cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
-    GXSIZE_T cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
-    GXSIZE_T cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
-    GXSIZE_T cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
-    GXSIZE_T cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
-    GXSIZE_T cbNameTable = bt.NameSet.size() * sizeof(GXUINT);
-    GXSIZE_T cbHeader    = cbTypes + cbStructs + cbGVSIT+ cbVariables + cbMembers + cbEnums + cbNameTable;
+    m_nNumOfTypes    = (GXUINT)bt.m_TypeDict.size() - (GXUINT)bt.m_nNumOfStructs;
+    m_nNumOfStructs  = (GXUINT)bt.m_nNumOfStructs;
+    m_nNumOfVar      = (GXUINT)bt.m_aVar.size();
+    m_nNumOfMember   = (GXUINT)bt.m_aStructMember.size();
+    m_nNumOfEnums    = (GXUINT)bt.m_aEnumPck.size();
+    m_pNamesTabBegin = (GXUINT*)0;
+    m_pNamesTabEnd   = (GXUINT*)cbNameTable;
+
+    SIZELIST s;
+    const GXSIZE_T cbHeader = IntGetRTDescHeader(&s);
+    //GXSIZE_T cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
+    //GXSIZE_T cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
+    //GXSIZE_T cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
+    //GXSIZE_T cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
+    //GXSIZE_T cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
+    //GXSIZE_T cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
+    //GXSIZE_T cbHeader    = cbTypes + cbStructs + cbGVSIT+ cbVariables + cbMembers + cbEnums + cbNameTable;
     m_Buffer.Resize(cbHeader + bt.NameSet.buffer_size() + cbVarSpace, FALSE);
 
 #ifdef _DEBUG
@@ -1240,8 +1256,6 @@ namespace Marimo
 
     ASSERT(cbDbgSave == m_Buffer.GetSize()); // 确保GatherToBuffer不会改变Buffer的长度
 
-    m_pNamesTabBegin = (GXUINT*)0;
-    m_pNamesTabEnd   = (GXUINT*)cbNameTable;
     LocalizePtr();
     //ASSERT(m_StringBase == lpBase);
     //for(auto p = m_pNamesTabBegin; p != m_pNamesTabEnd; ++p)
@@ -1263,22 +1277,19 @@ namespace Marimo
         STRUCT_DESC* pStruct = &m_aStructs[nStructIndex++];
         pType = pStruct;
         pStruct->nMemberCount = sBtType.nMemberCount;
-        pStruct->Member = (GXUINT)((GXUINT_PTR)&m_aMembers[sBtType.Member] - (GXUINT_PTR)&pStruct->Member);
-        //sBtType._nIndex = nStructIndex;
+        pStruct->Member = (GXUINT)((GXUINT_PTR)&m_aMembers[sBtType.nMemberIndex] - (GXUINT_PTR)&pStruct->Member);
       }
       else if(sBtType.Cate == T_ENUM || sBtType.Cate == T_FLAG) {
         STRUCT_DESC* pStruct = &m_aStructs[nStructIndex++];
         pType = pStruct;
         pStruct->nMemberCount = sBtType.nMemberCount;
-        pStruct->Member = (GXUINT)((GXUINT_PTR)&m_aEnums[sBtType.Member] - (GXUINT_PTR)&pStruct->Member);
-        //sBtType._nIndex = nStructIndex;
+        pStruct->Member = (GXUINT)((GXUINT_PTR)&m_aEnums[sBtType.nMemberIndex] - (GXUINT_PTR)&pStruct->Member);
       }
       else {
         pType = &m_aTypes[nTypeIndex++];
-        //sBtType._nIndex = nTypeIndex;
       }
 
-      pType->nName        = ConvertToNewOffsetFromOldIndex(pTable, (int)sBtType.nName);
+      pType->nName        = ConvertToNewOffsetFromOldIndex(pTable, (int)sBtType.nNameIndex);
       pType->Cate         = sBtType.Cate;
       pType->cbSize       = sBtType.cbSize;
 
@@ -2163,7 +2174,9 @@ namespace Marimo
 #else
 
     FILE_HEADER header;
-    V_READ(file.Read(&header, sizeof(FILE_HEADER)), "Can not load file header.");
+    u32 uNumOfBytesRead;
+    V_READ(file.Read(&header, sizeof(FILE_HEADER), &uNumOfBytesRead), "Can not load file header.");
+    ASSERT(uNumOfBytesRead == sizeof(FILE_HEADER));
 
     if(header.dwHashMagic != clstd::HashStringT("DataPool", 8)) {
       CLOG_ERROR("%s : Hash magic does not match.\n", __FUNCTION__);
@@ -2198,14 +2211,18 @@ namespace Marimo
 
     // 读入文件记录的所有BufferHeader数据
     BufHeaders.insert(BufHeaders.begin(), nNumOfBuffers, BufHeader);
-    V_READ(file.Read(&BufHeaders.front(), sizeof(FILE_BUFFERHEADER) * nNumOfBuffers), "Can not load buffer header.");
+    V_READ(file.Read(&BufHeaders.front(), sizeof(FILE_BUFFERHEADER) * nNumOfBuffers, &uNumOfBytesRead), "Can not load buffer header.");
+    ASSERT(uNumOfBytesRead == sizeof(FILE_BUFFERHEADER) * nNumOfBuffers);
 
 
 
 
 
     // 这个计算参考[MAIN BUFFER 结构表]
-    const GXSIZE_T nDescHeaderSize = IntGetRTDescHeader() + header.cbNames;
+    SIZELIST sSizeList;
+    //const GXSIZE_T cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
+    const GXSIZE_T nDescHeaderSize = IntGetRTDescHeader(&sSizeList) + header.cbNames;
+    //const GXSIZE_T nDescHeaderSize = IntGetRTDescHeader(&sSizeList) + header.cbNames;
     const GXSIZE_T cbGlobalVariable = header.cbVariableSpace + BUFFER_SAVELOAD_DESC::GetPtrAdjustSize(header.nNumOfPtrVars);
     const GXSIZE_T nMainBufferSize_0 = nDescHeaderSize + cbGlobalVariable;
     GXSIZE_T nMainBufferSize = nMainBufferSize_0;
@@ -2241,7 +2258,8 @@ namespace Marimo
     }
 
     // 一次读入除了全局变量以外的数据，包括各种描述表，名字字符串列表等
-    V_READ(file.Read(m_Buffer.GetPtr(), (GXUINT)nDescHeaderSize), "Can not load desc header.");
+    V_READ(file.Read(m_Buffer.GetPtr(), (GXUINT)nDescHeaderSize, &uNumOfBytesRead), "Can not load desc header.");
+    ASSERT(uNumOfBytesRead == nDescHeaderSize);
 
     const clsize cbDesc = LocalizePtr();
     new(&m_VarBuffer) clstd::RefBuffer((GXLPBYTE)m_Buffer.GetPtr() + cbDesc + header.cbNames, cbGlobalVariable);
@@ -2280,7 +2298,8 @@ namespace Marimo
         StringVarBuf.Resize(header.cbStringSpace, FALSE);
         pStringBegin = (GXLPBYTE)StringVarBuf.GetPtr();
       }
-      V_READ(file.Read(pStringBegin, header.cbStringSpace), "Can not load variable strings.");
+      V_READ(file.Read(pStringBegin, header.cbStringSpace, &uNumOfBytesRead), "Can not load variable strings.");
+      ASSERT(uNumOfBytesRead == header.cbStringSpace);
     }
     
 
@@ -2374,7 +2393,8 @@ namespace Marimo
       //  ASSERT(rbd.pBuffer->GetSize() >= (rbd.RelTable.back() & BUFFER_SAVELOAD_DESC::RelocalizeOffsetMask))
       //}
 
-      V_READ(file.Read(BufferForRead.GetPtr(), (GXUINT)BufferForRead.GetSize()), "Can not load buffer data.");
+      V_READ(file.Read(BufferForRead.GetPtr(), (GXUINT)BufferForRead.GetSize(), &uNumOfBytesRead), "Can not load buffer data.");
+      ASSERT(uNumOfBytesRead == BufferForRead.GetSize());
 
       const auto nCheck = bd.RelocalizePtr(bd.pBuffer, &BufferForRead, [&, this]
       (BUFFER_SAVELOAD_DESC::RelocalizeType type, GXUINT nOffset, GXLPBYTE& pDest, GXLPCBYTE& pSrc)
@@ -2447,6 +2467,12 @@ namespace Marimo
       });
       ASSERT(nCheck == bd.pBuffer->GetSize());
     }
+# if _DEBUG
+    u32 uFilePointer = file.GetPointer();
+    u32 uFileSize = file.GetSize(NULL);
+    ASSERT(uFileSize == uFilePointer);
+# endif // #if _DEBUG
+
 #endif // #ifdef DEBUG_DECL_NAME
     return TRUE;
   }

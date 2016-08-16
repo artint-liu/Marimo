@@ -25,31 +25,44 @@ namespace Marimo
       GXDWORD dwFlags; // BuildtimeTypeDeclarationFlags
     };
 
-    struct BT_TYPE_DESC : public DataPoolImpl::STRUCT_DESC
+    struct BT_TYPE_DESC // : public DataPoolImpl::STRUCT_DESC
     {
+      GXUINT       nNameIndex;   // NameSet 加入的索引
+      TypeCategory Cate;
+      GXUINT       cbSize;
+
+      GXUINT       nMemberIndex; // m_aStructMember 索引
+      GXUINT       nMemberCount;
+
       HASH_ALGORITHM HashInfo;
       GXINT_PTR      nTypeAddress;
     };
 
-    struct BT_VARIABLE_DESC : public DATAPOOL_VARIABLE_DESC
+    struct BT_VARIABLE_DESC // : public DATAPOOL_VARIABLE_DESC
     {
-      // 基类中TypeDesc成员不起作用!
-      DataPoolImpl::TYPE_DESC* pTypeDesc;
+      //GXUINT      TypeDesc;         // 减法自定位，指向(TYPE_DESC*)类型
+      GXUINT      nNameIndex;         // NameSet 的索引
+      GXUINT      nOffset;            // 全局变量是绝对偏移，成员变量是结构体内偏移
+      GXUINT      nCount   : 30;      // 数组大小,一元变量应该是1,动态数组暂定为0
+      GXUINT      bDynamic : 1;       // 应该使用IsDynamicArray()接口
+      GXUINT      bConst   : 1;
 
-      inline const DataPoolImpl::TYPE_DESC* GetTypeDesc() const
+      // 基类中TypeDesc成员不起作用!
+      //DataPoolImpl::TYPE_DESC* pTypeDesc;
+      const BT_TYPE_DESC* pTypeDesc;
+
+      inline const BT_TYPE_DESC* GetTypeDesc() const
       {
         return pTypeDesc;
       }
 
       inline GXUINT TypeSize() const
       {
-        //return ((TYPE_DESC*)((GXLONG_PTR)pTypeDesc & (~3)))->cbSize;
         return GetTypeDesc()->cbSize;
       }
 
       inline GXBOOL IsDynamicArray() const
       {
-        //return pTypeDesc->Name[0] == '#';
         return bDynamic;
       }
 

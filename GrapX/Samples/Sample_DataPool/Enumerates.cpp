@@ -109,11 +109,107 @@ void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBeg
   }
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 void EnumerateVariables(DataPool* pDataPool)
 {
   TRACE("=======================================================\n");
   EnumerateVariables(pDataPool, 0, pDataPool->named_begin(), pDataPool->named_end());
   TRACE("=======================================================\n");
+}
+
+struct ITER_DESC
+{
+  DataPool* pDataPool;
+  DataPoolIterator itBegin;
+  DataPoolIterator itEnd;
+};
+
+struct ITER_ELEMENT_DESC
+{
+  DataPool* pDataPool;
+  DataPoolElementIterator itBegin;
+  DataPoolElementIterator itEnd;
+};
+
+void CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB);
+
+
+void CompareDataPoolArray(int nDepth, ITER_ELEMENT_DESC* pDescA, ITER_ELEMENT_DESC* pDescB)
+{
+  auto itA = pDescA->itBegin;
+  auto itB = pDescB->itBegin;
+
+  for(; itA != pDescA->itEnd; ++itA, ++itB)
+  {
+    ITER_DESC desc_A = {pDescA->pDataPool, itA.begin(), itA.end()};
+    ITER_DESC desc_B = {pDescB->pDataPool, itB.begin(), itB.end()};
+    CompareDataPool(nDepth + 1, &desc_A, &desc_B);
+  }
+
+  ASSERT(itB == pDescB->itEnd);
+}
+
+
+void CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB)
+{
+  auto itA = pDescA->itBegin;
+  auto itB = pDescB->itBegin;
+  for(; itA != pDescA->itEnd; ++itA, ++itB)
+  {
+    if(GXSTRCMP(itA.TypeName(), itB.TypeName()) != 0) {
+      TRACE("[TypeName] %s != %s\n", itA.TypeName(), itB.TypeName());
+      CLBREAK;
+    }
+
+    if(GXSTRCMP(itA.VariableName(), itB.VariableName()) != 0) {
+      TRACE("[VariableName] %s != %s\n", itA.VariableName(), itB.VariableName());
+      CLBREAK;
+    }
+
+    DataPoolVariable varA = itA.ToVariable();
+    DataPoolVariable varB = itB.ToVariable();
+    clStringW strA = varA.ToStringW();
+    clStringW strB = varB.ToStringW();
+    if(strA != strB) {
+      TRACE("[Var] %s != %s(值不相同)\n", strA, strB);
+      CLBREAK;
+    }
+
+    if(itA.IsArray() && itB.IsArray())
+    {
+      if(varA.GetLength() != varB.GetLength()) {
+        TRACE("数组长度不一致(%d != %d)\n", varA.GetLength(), varB.GetLength());
+        CLBREAK;
+      }
+
+      ITER_ELEMENT_DESC desc_A = {pDescA->pDataPool, itA.array_begin(), itA.array_end()};
+      ITER_ELEMENT_DESC desc_B = {pDescB->pDataPool, itB.array_begin(), itB.array_end()};
+      CompareDataPoolArray(nDepth + 1, &desc_A, &desc_B);
+    }
+    else if( ! itA.IsArray() && ! itB.IsArray())
+    {
+      ITER_DESC desc_A = {pDescA->pDataPool, itA.begin(), itA.end()};
+      ITER_DESC desc_B = {pDescB->pDataPool, itB.begin(), itB.end()};
+      CompareDataPool(nDepth + 1, &desc_A, &desc_B);
+    }
+    else
+    {
+      CLBREAK;
+    }
+  }
+
+  if(itB != pDescB->itEnd) {
+    TRACE("长度不一致\n");
+    CLBREAK;
+  }
+}
+
+void CompareDataPool(DataPool* pDataPoolA, DataPool* pDataPoolB)
+{
+  ITER_DESC desc_A = {pDataPoolA, pDataPoolA->named_begin(), pDataPoolA->named_end()};
+  ITER_DESC desc_B = {pDataPoolB, pDataPoolB->named_begin(), pDataPoolB->named_end()};
+  CompareDataPool(0, &desc_A, &desc_B);
 }
 
 //////////////////////////////////////////////////////////////////////////

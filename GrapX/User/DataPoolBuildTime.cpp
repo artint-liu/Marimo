@@ -41,9 +41,9 @@ namespace Marimo
 
     BT_TYPE_DESC sDesc;
 
-    sDesc.nName   = (GXUINT)NameSet.index(szTypeName);
-    sDesc.Cate    = type.Cate;
-    sDesc.Member       = 0;
+    sDesc.nNameIndex   = (GXUINT)NameSet.index(szTypeName);
+    sDesc.Cate         = type.Cate;
+    sDesc.nMemberIndex = 0;
     sDesc.nMemberCount = 0;
     sDesc.nTypeAddress = 0;
 
@@ -91,7 +91,7 @@ namespace Marimo
         BTVarDescArray aMemberDesc;
         t.cbSize = CalculateVarSize(type.as.Struct, aMemberDesc);
         t.nMemberCount = (GXUINT)aMemberDesc.size();
-        t.Member = (GXUINT)m_aStructMember.size();
+        t.nMemberIndex = (GXUINT)m_aStructMember.size();
         m_aStructMember.insert(m_aStructMember.end(), aMemberDesc.begin(), aMemberDesc.end());
         m_nNumOfStructs++;
       }
@@ -102,7 +102,7 @@ namespace Marimo
       {
         t.cbSize = sizeof(DataPool::Enum);
         //t.nMemberIndex = m_aEnumPck.size();
-        t.Member = (GXUINT)m_aEnumPck.size();
+        t.nMemberIndex = (GXUINT)m_aEnumPck.size();
         DATAPOOL_ENUM_DESC sEnum;
         for(t.nMemberCount = 0; type.as.Enum[t.nMemberCount].Name != NULL; t.nMemberCount++)
         {
@@ -147,9 +147,9 @@ namespace Marimo
         ASSERT(itType != m_TypeDict.end());
       }
 
-      VarDesc.nName = (GXUINT)NameSet.index(var.Name);
-      VarDesc.pTypeDesc = static_cast<DataPoolImpl::TYPE_DESC*>(&itType->second);
-      VarDesc.TypeDesc  = 0;
+      VarDesc.nNameIndex = (GXUINT)NameSet.index(var.Name);
+      VarDesc.pTypeDesc = &itType->second;
+      //VarDesc.TypeDesc  = 0;
       ASSERT(((GXLONG_PTR)VarDesc.pTypeDesc & 3) == 0); // 一定是4字节对齐的
 
       //VarDesc.bDynamic = var.Count < 0 ? 1 : 0;

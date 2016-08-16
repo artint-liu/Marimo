@@ -9,6 +9,7 @@ void EnumeratePtrControl(DataPool* pDataPool);
 void EnumeratePtrControl2(DataPool* pDataPool);
 
 void CompareVariable(const DataPoolVariable& var1, const DataPoolVariable& var2);
+void CompareDataPool(DataPool* pDataPoolA, DataPool* pDataPoolB);
 
 #define ENUM_DATAPOOL(x)   EnumerateVariables(x)
 //#define ENUM_DATAPOOL(x)  EnumeratePtrControl(x)
