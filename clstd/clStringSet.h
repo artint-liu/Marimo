@@ -146,6 +146,11 @@ namespace clstd
       gather(ptr);
       return ptr;
     }
+
+    static inline clsize IndexToOffset(const STRINGSETDESC* pTable, int nOldIndex)
+    {
+      return pTable[nOldIndex].offset;
+    }
   };
 
   typedef StringSetT<clStringW>  StringSetW;

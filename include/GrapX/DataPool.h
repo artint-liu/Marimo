@@ -208,12 +208,19 @@ namespace Marimo
     }
   };
 
-  struct DATAPOOL_HASH_ALGORITHM
+  struct DATAPOOL_HASHALGO
   {
     u16  eType   : 2; // clstd::StaticStringsDict::HashType
     u16  nBucket : 14;
     s16  nPos;
     u16  nOffset;     // ×Ô¶¨Î»
+
+    GXSIZE_T HashString(GXLPCSTR str) const;
+
+    inline u8* HashToIndex(GXSIZE_T _hash) const
+    {
+      return (u8*)((GXINT_PTR)&nOffset + nOffset) + (_hash % nBucket) * 2;
+    }
     //IntArray indices;
   };
 
@@ -298,7 +305,7 @@ namespace Marimo
   STATIC_ASSERT(sizeof(TypeCategory) == 4);
 #ifdef DEBUG_DECL_NAME
 #else
-  STATIC_ASSERT(sizeof(DATAPOOL_HASH_ALGORITHM) == 6);
+  STATIC_ASSERT(sizeof(DATAPOOL_HASHALGO) == 6);
   STATIC_ASSERT(sizeof(DATAPOOL_ENUM_DESC) == 8);
   STATIC_ASSERT(sizeof(DATAPOOL_TYPE_DESC) == 12);
   STATIC_ASSERT(sizeof(DATAPOOL_STRUCT_DESC) == 20);

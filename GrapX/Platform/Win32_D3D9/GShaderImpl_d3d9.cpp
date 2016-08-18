@@ -231,20 +231,20 @@ namespace D3D9
       return GX_FAIL;
     }
 
-    hr = lpd3dDevice->CreateVertexShader((GXDWORD*)pVertexBuf->GetPtr(),&m_pVertexShader);
+    hr = lpd3dDevice->CreateVertexShader((DWORD*)pVertexBuf->GetPtr(),&m_pVertexShader);
     if(SUCCEEDED(hr))
     {
-      D3DXGetShaderConstantTable((GXDWORD*)pVertexBuf->GetPtr(), &m_pvct);
+      D3DXGetShaderConstantTable((DWORD*)pVertexBuf->GetPtr(), &m_pvct);
       m_dwFlag |= GXSHADERCAP_VERTEX;
     }
     else {
       return hr;
     }
 
-    hr = lpd3dDevice->CreatePixelShader((GXDWORD*)pPixelBuf->GetPtr(),&m_pPixelShader);
+    hr = lpd3dDevice->CreatePixelShader((DWORD*)pPixelBuf->GetPtr(),&m_pPixelShader);
     if(SUCCEEDED(hr))
     {
-      D3DXGetShaderConstantTable((GXDWORD*)pPixelBuf->GetPtr(), &m_ppct);
+      D3DXGetShaderConstantTable((DWORD*)pPixelBuf->GetPtr(), &m_ppct);
       m_dwFlag |= GXSHADERCAP_PIXEL;
     }
     else {

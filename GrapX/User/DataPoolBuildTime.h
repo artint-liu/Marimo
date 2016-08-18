@@ -110,8 +110,9 @@ namespace Marimo
     GXUINT              m_bPtr64 : 1;       // 64位指针兼容模式
     GXUINT              m_bFixedPool : 1;
 
-    DataPoolBuildTime() : m_bPtr64(0), m_bFixedPool(1), m_nNumOfStructs(0), m_nNumOfBuckets(0) {}
+    DataPoolBuildTime();
   };
+
 
 
 

@@ -13,6 +13,16 @@ using namespace clstd;
 
 namespace Marimo
 {
+  DataPoolBuildTime::DataPoolBuildTime() : m_bPtr64(0)
+    , m_bFixedPool(1)
+    , m_nNumOfStructs(0)
+    , m_nNumOfBuckets(0)
+  {
+    m_VarHashInfo.eType   = StaticStringsDict::HashType_Failed;
+    m_VarHashInfo.nBucket = 0;
+    m_VarHashInfo.nPos    = 0;
+  }
+
   GXBOOL DataPoolBuildTime::IntCheckTypeDecl(LPCTYPEDECL pTypeDecl, GXBOOL bCheck)
   {
     STATIC_ASSERT(sizeof(BUILDTIME_TYPE_DECLARATION) >= sizeof(TYPE_DECLARATION)); // 这个断言不能完全保证数据正确，但至少不会大出错
@@ -47,6 +57,9 @@ namespace Marimo
     sDesc.nMemberIndex = 0;
     sDesc.nMemberCount = 0;
     sDesc.nTypeAddress = 0;
+    sDesc.HashInfo.eType   = StaticStringsDict::HashType_Failed;
+    sDesc.HashInfo.nBucket = 0;
+    sDesc.HashInfo.nPos    = 0;
 
     // 这里要先在字典中加入这个类型，原因是：
     // 对于T_STRUCT类型，可能会在其中定义了自己类型的动态数组
@@ -246,19 +259,23 @@ namespace Marimo
   void DataPoolBuildTime::TryHash(HASH_ALGORITHM& hash_info, const BTVarDescArray& aDescs)
   {
     clstd::StaticStringsDict ssd(aDescs.size());
-
-    ssd.TestHashable([&aDescs](clsize index, CLLPCSTR* str, clsize* len) -> b32
+    b32 bResult = ssd.TestHashable([&aDescs](clsize index, CLLPCSTR* str, clsize* len) -> b32
     {
       *str = aDescs[index].szName;
       *len = GXSTRLEN(*str);
       return TRUE;
     });
 
-    hash_info.eType   = ssd.eType;
-    hash_info.nBucket = ssd.nBucket;
-    hash_info.nPos    = ssd.nPos;
-    hash_info.indices.clear();
-    ssd.Copy(hash_info.indices);
+    if(bResult) {
+      hash_info.eType   = ssd.eType;
+      hash_info.nBucket = ssd.nBucket;
+      hash_info.nPos    = ssd.nPos;
+      hash_info.indices.clear();
+      ssd.Copy(hash_info.indices);
+    }
+    else {
+      hash_info.eType = clstd::StaticStringsDict::HashType_Failed;
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////

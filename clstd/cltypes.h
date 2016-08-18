@@ -119,8 +119,8 @@ typedef wchar_t             wch;
 
 typedef u8                CLBYTE;
 typedef u8*               CLLPBYTE;
-typedef unsigned short    CLWORD;
-typedef unsigned long     CLDWORD;
+typedef u16               CLWORD;
+typedef u32               CLDWORD;
 typedef u32               CLUINT;
 typedef u32*              CLLPUINT;
 typedef u32               CLULONG;

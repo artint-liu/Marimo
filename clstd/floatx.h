@@ -495,7 +495,7 @@ namespace clstd
     _float4(const _float3& v){x = v.x; y = v.y; z = v.z; w = 1.0f;}
     _float4(const _float3& v, float vw){x = v.x; y = v.y; z = v.z; w = vw;}
     _float4(const _float4& v){x = v.x; y = v.y; z = v.z; w = v.w;}
-    _float4(const unsigned long dwColor)
+    _float4(const u32 dwColor)
     { 
       rgba.a = (float)((dwColor >> 24) & 0xff) / 255.0f;
       rgba.r = (float)((dwColor >> 16) & 0xff) / 255.0f;
@@ -571,7 +571,7 @@ namespace clstd
     _float4& operator = (const float v)  {x = y = z = w = v; return *this;}
     _float4& operator = (const _float3 v){x = v.x; y = v.y; z = v.z; w = 1.0f; return *this;}
     _float4& operator = (const _float4 v){x = v.x; y = v.y; z = v.z; w = v.w; return *this;}
-    _float4& operator = (const unsigned long dwColor)
+    _float4& operator = (const CLDWORD dwColor)
     { 
       rgba.a = (float)((dwColor >> 24) & 0xff) / 255.0f;
       rgba.r = (float)((dwColor >> 16) & 0xff) / 255.0f;

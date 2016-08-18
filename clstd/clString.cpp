@@ -96,6 +96,9 @@ namespace clstd
 
   template b32    IsNumericT(const wch* str, i32 radix, clsize len);
   template b32    IsNumericT(const  ch* str, i32 radix, clsize len);
+
+  template u32    HashStringT(const wch* str);
+  template u32    HashStringT(const  ch* str);
 }
 
 //const static CLALLOCPLOY aclAllocPloyW[] =
@@ -471,39 +474,39 @@ namespace clstd
     reduceLength(_Traits::StringLength(m_pBuf));
   }
 
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const u32 uInteger)
+    : m_pBuf(NULL)
+  {
+    allocLength(&_Alloc, MAX_DIGITS);
+
+    _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
+    reduceLength(_Traits::StringLength(m_pBuf));
+  }
+
   //_CLSTR_TEMPL
-  //  _CLSTR_IMPL::StringX(const unsigned int uInteger)
+  //  _CLSTR_IMPL::StringX(const unsigned long uLong)
   //  : m_pBuf(NULL)
   //{
   //  allocLength(&_Alloc, MAX_DIGITS);
 
-  //  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
+  //  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
   //  reduceLength(_Traits::StringLength(m_pBuf));
   //}
 
   _CLSTR_TEMPL
-    _CLSTR_IMPL::StringX(const unsigned long uLong)
+    _CLSTR_IMPL::StringX(const u64 val)
     : m_pBuf(NULL)
   {
     allocLength(&_Alloc, MAX_DIGITS);
 
-    _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
-  }
-
-  _CLSTR_TEMPL
-    _CLSTR_IMPL::StringX(const size_t val)
-    : m_pBuf(NULL)
-  {
-    allocLength(&_Alloc, MAX_DIGITS);
-
-#if defined(_X86) || defined(_ARM)
-      _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, val, 0);
-#elif defined(_X64) || defined(_ARM64)
+//#if defined(_X86) || defined(_ARM)
+//      _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, val, 0);
+//#elif defined(_X64) || defined(_ARM64)
       _Traits::Unsigned64ToString(m_pBuf, MAX_DIGITS, val, 0);
-#else
-# error 缺少CPU架构定义
-#endif
+//#else
+//# error 缺少CPU架构定义
+//#endif
 
     reduceLength(_Traits::StringLength(m_pBuf));
   }
@@ -2647,7 +2650,7 @@ namespace clstd
   template<typename _TCh>
   u32 HashStringT(const _TCh* str)
   {
-    return HashString(str, strlenT(str));
+    return HashStringT(str, strlenT(str));
   }
 
 } // namespace clstd

@@ -60,23 +60,79 @@ namespace Marimo
     extern DataPoolVariable::VTBL* s_pStructVtbl;
     extern DataPoolVariable::VTBL* s_pStaticArrayVtbl;
     extern DataPoolVariable::VTBL* s_pDynamicArrayVtbl;
+
+    //inline GXUINT ConvertToNewOffsetFromOldIndex(const STRINGSETDESC* pTable, int nOldIndex)
+    //{
+    //  return (GXUINT)pTable[nOldIndex].offset;
+    //}
+
+    void CopyVariables(DataPoolImpl::VARIABLE_DESC* pDestVarDesc, const DataPoolBuildTime::BTVarDescArray* pSrcVector, const STRINGSETDESC* pTable, GXINT_PTR lpBase)
+    {
+      int i = 0;
+      for(auto it = pSrcVector->begin(); it != pSrcVector->end(); ++it, ++i)
+      {
+        const DataPoolBuildTime::BT_VARIABLE_DESC& sBtDesc = *it;
+        DataPoolImpl::VARIABLE_DESC& sDesc = pDestVarDesc[i];
+        //sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - (GXINT_PTR)&m_aTypes[((BUILDTIME::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nIndex]);
+        sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - ((DataPoolBuildTime::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nTypeAddress);
+        sDesc.nName     = (GXUINT)clstd::StringSetA::IndexToOffset(pTable, (int)sBtDesc.nNameIndex);
+        sDesc.nOffset   = sBtDesc.nOffset;
+        sDesc.nCount    = sBtDesc.nCount;
+        sDesc.bDynamic  = sBtDesc.bDynamic;
+        sDesc.bConst    = sBtDesc.bConst;
+
+#ifdef DEBUG_DECL_NAME
+        sDesc.Name      = (DataPool::LPCSTR)(lpBase + sDesc.nName);
+        TRACE("VAR:%16s %16s %8d\n", sDesc.GetTypeDesc()->Name, sDesc.Name, sDesc.nOffset);
+#endif // DEBUG_DECL_NAME
+      }
+    }
+
+    GXUINT CopyHashAlgo(DATAPOOL_HASHALGO* pAlgo, DataPoolBuildTime::HASH_ALGORITHM* pBTAlgo, u8* aBuckets, GXUINT cbBuckets)
+    {
+      ASSERT(pBTAlgo->nBucket < 256); // 目前m_aHashBuckets是8位的，如果出现这个断言就改成u8/u16自适应的
+
+      if(pBTAlgo->nBucket >= (1 << 14) || pBTAlgo->nPos >= (1 << 16)) {
+        pAlgo->eType = 0;
+      }
+      else {
+        GXINT_PTR offset = (GXINT_PTR)(aBuckets + cbBuckets) - (GXINT_PTR)&pAlgo->nOffset;
+        ASSERT(offset < (1 << (sizeof(pAlgo->nOffset) * 8)));
+        pAlgo->eType   = pBTAlgo->eType;
+        pAlgo->nBucket = pBTAlgo->nBucket;
+        pAlgo->nPos    = pBTAlgo->nPos;
+        pAlgo->nOffset = (u16)offset;
+
+        ASSERT(pBTAlgo->nBucket * 2 == pBTAlgo->indices.size());
+        std::for_each(pBTAlgo->indices.begin(), pBTAlgo->indices.end(), [&aBuckets, &cbBuckets](int index){
+          aBuckets[cbBuckets++] = index;
+        });
+      }
+
+      return cbBuckets;
+    }
+
   } // namespace Implement
   
+
   //////////////////////////////////////////////////////////////////////////
 
   DataPoolImpl::DataPoolImpl(GXLPCSTR szName)
-    : m_Name         (szName ? szName : "")
-    , m_nNumOfTypes  (0)
-    , m_aTypes       (NULL)
-    , m_nNumOfStructs(0)
-    , m_aStructs     (NULL)
-    , m_nNumOfVar    (0)
-    , m_aVariables   (NULL)
-    , m_nNumOfMember (0)
-    , m_aMembers     (NULL)
-    , m_nNumOfEnums  (0)
-    , m_aEnums       (NULL)
-    , m_aGSIT        (NULL)
+    : m_Name           (szName ? szName : "")
+    , m_nNumOfTypes    (0)
+    , m_aTypes         (NULL)
+    , m_nNumOfStructs  (0)
+    , m_aStructs       (NULL)
+    , m_cbHashBuckets  (0)
+    , m_aHashAlgos     (NULL)
+    , m_aHashBuckets   (NULL)
+    , m_nNumOfVar      (0)
+    , m_aVariables     (NULL)
+    , m_nNumOfMember   (0)
+    , m_aMembers       (NULL)
+    , m_nNumOfEnums    (0)
+    , m_aEnums         (NULL)
+    , m_aGSIT          (NULL)
     , m_dwRuntimeFlags (RuntimeFlag_Fixed)
     , m_pNamesTabBegin (NULL)
     , m_pNamesTabEnd   (NULL)
@@ -163,6 +219,7 @@ namespace Marimo
     }
 
     DataPoolBuildTime::TryHash(sBuildTime.m_VarHashInfo, sBuildTime.m_aVar);
+    sBuildTime.m_nNumOfBuckets += sBuildTime.m_VarHashInfo.indices.size();
 
     // 定位各种描述表
     LocalizeTables(sBuildTime, nBufferSize);
@@ -311,6 +368,7 @@ namespace Marimo
     // TODO: 这里可以改为比较Name Id的方式，Name Id可以就是m_Buffer中的偏移
     LPCVD pDesc = NULL;
     int begin = 0, end;
+    int nHashIndex = 0;
     if(pVdd != NULL) {
 
       // 只有结构体才有成员, 其他情况直接返回
@@ -318,53 +376,84 @@ namespace Marimo
         return NULL;
       }
       end   = pVdd->MemberCount();
-      pDesc = reinterpret_cast<LPCVD>(pVdd->MemberBeginPtr());
-      //ASSERT(nEnd <= (int)m_nNumOfMember);
+      pDesc = static_cast<LPCVD>(pVdd->MemberBeginPtr());
+      nHashIndex = (int)((STRUCT_DESC*)pVdd->GetTypeDesc() - m_aStructs) + 1;
+
+      if(nHashIndex <= 0 || nHashIndex > (int)m_nNumOfStructs) {
+        LPCSTR szName = (LPCSTR)pVdd->TypeName();
+        CLBREAK; // 临时
+        return NULL;
+      }
     }
     else {
       end   = m_nNumOfVar;
       pDesc = m_aVariables;
     }
 
-    SortedIndexType* p = m_aGSIT + (pDesc - m_aVariables);
+    ASSERT(pVdd == NULL ||
+      pVdd->GetTypeCategory() == T_STRUCT || pVdd->GetTypeCategory() == T_ENUM || pVdd->GetTypeCategory() == T_FLAG);
 
 #ifdef _DEBUG
     GXUINT count = (GXUINT)end;
-    //for(int i = begin; i < end; ++i)
-    //{
-    //  TRACE("%2d %*s %s\n", i, -32, pDesc[i].VariableName(), pDesc[p[i]].VariableName());
-    //}
+    LPCVD pDescBegin = pDesc;
 #endif // #ifdef _DEBUG
-    //*
-    while(begin <= end - 1)
+
+    // Hash Find
+    const HASHALGO& h = m_aHashAlgos[nHashIndex];
+    if(h.eType == (u16)StaticStringsDict::HashType_Local || h.eType == (u16)StaticStringsDict::HashType_String)
     {
-      int mid = (begin + end) >> 1;
-      ASSERT(p[mid] < count); // 索引肯定低于总大小
-      LPCVD pCurDesc = pDesc + p[mid];
-      //TRACE("%s\n", pCurDesc->VariableName());
-      int result = GXSTRCMP(szName, (DataPool::LPCSTR)pCurDesc->VariableName());
-      if(result < 0) {
-        end = mid;
+      STATIC_ASSERT(StaticStringsDict::HashType_Local == 1);
+      StaticStringsDict::len_t _hash = h.HashString(szName);
+
+      const u8* p = h.HashToIndex(_hash);
+      ASSERT(h.nBucket >= count);
+      ASSERT(count > *p);
+
+      LPCVD pDesc2 = pDesc + (GXUINT)p[1];
+      pDesc = pDesc + (GXUINT)*p;
+
+      if(GXSTRCMP((GXLPCSTR)pDesc->VariableName(), szName) == 0) {
+        return pDesc;
       }
-      else if(result > 0){
-        if(begin == mid) {
-          break;
+      else if(GXSTRCMP((GXLPCSTR)pDesc2->VariableName(), szName) == 0) {
+        return pDesc2;
+      }
+    }
+    else // B-Find
+    {
+      SortedIndexType* p = m_aGSIT + (pDesc - m_aVariables);
+      while(begin <= end - 1)
+      {
+        int mid = (begin + end) >> 1;
+        ASSERT(p[mid] < count); // 索引肯定低于总大小
+        LPCVD pCurDesc = pDesc + p[mid];
+        //TRACE("%s\n", pCurDesc->VariableName());
+        int result = GXSTRCMP(szName, (DataPool::LPCSTR)pCurDesc->VariableName());
+        if(result < 0) {
+          end = mid;
         }
-        begin = mid;
+        else if(result > 0){
+          if(begin == mid) {
+            break;
+          }
+          begin = mid;
+        }
+        else {
+          return pCurDesc;
+        }
       }
-      else {
-        return pCurDesc;
-      }
-    }//*/
+    }
+
 #ifdef _DEBUG
     for(int i = begin; i < (int)count; i++)
     {
-      if(GXSTRCMP((DataPool::LPCSTR)pDesc[i].VariableName(), szName) == 0) {
+      if(GXSTRCMP((DataPool::LPCSTR)pDescBegin[i].VariableName(), szName) == 0) {
         CLBREAK;
-        return &pDesc[i];
+        return &pDescBegin[i];
       }
     }
 #endif // #ifdef _DEBUG
+
     return NULL;
   }
 
@@ -766,17 +855,19 @@ namespace Marimo
       (m_nNumOfStructs == 0 && (m_nNumOfMember == 0 && m_nNumOfEnums == 0)) ||
       (m_nNumOfStructs != 0 && (m_nNumOfMember != 0 || m_nNumOfEnums != 0)) );
     ASSERT(m_pNamesTabEnd && m_pNamesTabBegin < m_pNamesTabEnd);  // m_pNamesTabBegin 在构建时暂时为0
+    ASSERT(m_cbHashBuckets != 0);
 
     pSizeList->cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
     pSizeList->cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
+    pSizeList->cbHashAlgo  = (m_nNumOfStructs + 1) * sizeof(HASHALGO);
     pSizeList->cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
     pSizeList->cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
     pSizeList->cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
     pSizeList->cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
     pSizeList->cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
 
-    return (pSizeList->cbTypes + pSizeList->cbStructs + pSizeList->cbGVSIT +
-      pSizeList->cbVariables + pSizeList->cbMembers + pSizeList->cbEnums + pSizeList->cbNameTable);
+    return (pSizeList->cbTypes + pSizeList->cbStructs + pSizeList->cbHashAlgo + m_cbHashBuckets +
+      pSizeList->cbGVSIT + pSizeList->cbVariables + pSizeList->cbMembers + pSizeList->cbEnums + pSizeList->cbNameTable);
   }
 
   GXSIZE_T DataPoolImpl::IntGetRTDescNames()
@@ -846,124 +937,6 @@ namespace Marimo
       RESET_FLAG(*(GXUINT*)&pTypeDesc[i].Cate, TYPE_CHANGED_FLAG);
     }
   }
-
-
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//#ifdef ENABLE_OLD_DATA_ACTION
-//  int DataPool::FindWatcher(DataPoolWatcher* pWatcher)
-//  {
-//    int nIndex = 0;
-//    for(WatcherArray::iterator it = m_aWatchers.begin();
-//      it != m_aWatchers.end(); ++it, ++nIndex)
-//    {
-//      if(*it == pWatcher) {
-//        return nIndex;
-//      }
-//    }
-//    return -1;
-//  }
-//
-//  int DataPool::FindWatcherByName(GXLPCSTR szClassName)
-//  {
-//    int nIndex = 0;
-//    for(WatcherArray::iterator it = m_aWatchers.begin();
-//      it != m_aWatchers.end(); ++it, ++nIndex)
-//    {
-//      if((*it)->GetClassName() == szClassName) {
-//        return nIndex;
-//      }
-//    }
-//    return -1;
-//  }
-//
-//  GXHRESULT DataPool::CreateWatcher(GXLPCSTR szClassName)
-//  {
-//    if(FindWatcherByName(szClassName) >= 0) {
-//      // 重复创建
-//      return GX_FAIL;
-//    }
-//    // TODO: ...
-//
-//    DataPoolWatcher* pWatcher = NULL;
-//    if(clStringA(szClassName) == STR_DATAPOOL_WATCHER_UI)
-//    {
-//      pWatcher = new DataPoolUIWatcher;
-//    }
-//    if( ! InlCheckNewAndIncReference(pWatcher)) {
-//      return GX_FAIL;
-//    }
-//    m_aWatchers.push_back(pWatcher);
-//    return (GXHRESULT)(m_aWatchers.size() - 1);
-//  }
-//
-//  GXHRESULT DataPool::RemoveWatcherByName(GXLPCSTR szClassName)
-//  {
-//    const int nIndex = FindWatcherByName(szClassName);
-//    if(nIndex < 0) {
-//      return GX_FAIL;
-//    }
-//    WatcherArray::iterator it = m_aWatchers.begin() + nIndex;
-//    SAFE_RELEASE(*it);
-//    m_aWatchers.erase(it);
-//    return GX_OK;
-//  }
-//
-//  GXHRESULT DataPool::AddWatcher(DataPoolWatcher* pWatcher)
-//  {
-//    if(FindWatcher(pWatcher) >= 0) {
-//      return GX_FAIL;
-//    }
-//
-//    GXHRESULT hval = pWatcher->AddRef();
-//    if(GXSUCCEEDED(hval))
-//    {
-//      m_aWatchers.push_back(pWatcher);
-//    }
-//    return hval;
-//  }
-//
-//  GXHRESULT DataPool::RemoveWatcher(DataPoolWatcher* pWatcher)
-//  {
-//    int nIndex = FindWatcher(pWatcher);
-//    if(nIndex < 0 || nIndex >= (int)m_aWatchers.size()) {
-//      return GX_FAIL;
-//    }
-//
-//    m_aWatchers.erase(m_aWatchers.begin() + nIndex);
-//    return pWatcher->Release();
-//  }
-//
-//  GXHRESULT DataPool::RegisterIdentify(GXLPCSTR szClassName, GXLPVOID pIndentify)
-//  {
-//    if(szClassName == NULL) {
-//      return GX_FAIL;
-//    }
-//
-//    int nIndex = FindWatcherByName(szClassName);
-//    if(nIndex < 0) {
-//      nIndex = CreateWatcher(szClassName);
-//      if(nIndex < 0) {
-//        return GX_FAIL;
-//      }
-//    }
-//
-//    return m_aWatchers[nIndex]->RegisterPrivate(pIndentify);
-//  }
-//
-//  GXHRESULT DataPool::UnregisterIdentify(GXLPCSTR szClassName, GXLPVOID pIndentify)
-//  {
-//    if(szClassName == NULL) {
-//      return GX_FAIL;
-//    }
-//
-//    const int nIndex = FindWatcherByName(szClassName);
-//    if(nIndex < 0) {
-//      return GX_FAIL;
-//    }
-//
-//    return m_aWatchers[nIndex]->UnregisterPrivate(pIndentify);
-//  }
-//#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
 #ifndef DISABLE_DATAPOOL_WATCHER
   void DataPoolImpl::IntImpulse(WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse)
@@ -1053,6 +1026,8 @@ namespace Marimo
     if(pVarDesc == NULL) {
       return FALSE;
     }
+
+    ASSERT(GXSTRCMP((DataPool::LPCSTR)pVarDesc->VariableName(), szVariableName) == 0);
     const GXUINT nMemberOffset = pVar->AbsOffset + pVarDesc->nOffset; // 后面多出用到，这里算一下
 
     if(pVarDesc->IsDynamicArray()) { // 动态数组
@@ -1102,52 +1077,46 @@ namespace Marimo
     return &m_VarBuffer;
   }
 
-  inline GXUINT ConvertToNewOffsetFromOldIndex(const STRINGSETDESC* pTable, int nOldIndex)
-  {
-    return (GXUINT)pTable[nOldIndex].offset;
-  }
-
-  void DataPoolImpl::CopyVariables(VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const STRINGSETDESC* pTable, GXINT_PTR lpBase)
-  {
-    const BUILDTIME::BTVarDescArray& SrcVector = *(BUILDTIME::BTVarDescArray*)pSrcVector;
-    int i = 0;
-    for(auto it = SrcVector.begin(); it != SrcVector.end(); ++it, ++i)
-    {
-      const BUILDTIME::BT_VARIABLE_DESC& sBtDesc = *it;
-      VARIABLE_DESC& sDesc = pDestVarDesc[i];
-      //sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - (GXINT_PTR)&m_aTypes[((BUILDTIME::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nIndex]);
-      sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - ((BUILDTIME::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nTypeAddress);
-      sDesc.nName     = ConvertToNewOffsetFromOldIndex(pTable, (int)sBtDesc.nNameIndex);
-      sDesc.nOffset   = sBtDesc.nOffset;
-      sDesc.nCount    = sBtDesc.nCount;
-      sDesc.bDynamic  = sBtDesc.bDynamic;
-      sDesc.bConst    = sBtDesc.bConst;
-
-#ifdef DEBUG_DECL_NAME
-      sDesc.Name      = (DataPool::LPCSTR)(lpBase + sDesc.nName);
-      TRACE("VAR:%16s %16s %8d\n", sDesc.GetTypeDesc()->Name, sDesc.Name, sDesc.nOffset);
-#endif // DEBUG_DECL_NAME
-    }
-  }
+//  void DataPoolImpl::CopyVariables(VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const STRINGSETDESC* pTable, GXINT_PTR lpBase)
+//  {
+//    const BUILDTIME::BTVarDescArray& SrcVector = *(BUILDTIME::BTVarDescArray*)pSrcVector;
+//    int i = 0;
+//    for(auto it = SrcVector.begin(); it != SrcVector.end(); ++it, ++i)
+//    {
+//      const BUILDTIME::BT_VARIABLE_DESC& sBtDesc = *it;
+//      VARIABLE_DESC& sDesc = pDestVarDesc[i];
+//      //sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - (GXINT_PTR)&m_aTypes[((BUILDTIME::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nIndex]);
+//      sDesc.TypeDesc = (GXUINT)((GXINT_PTR)&sDesc.TypeDesc - ((BUILDTIME::BT_TYPE_DESC*)sBtDesc.GetTypeDesc())->nTypeAddress);
+//      sDesc.nName     = Implement::ConvertToNewOffsetFromOldIndex(pTable, (int)sBtDesc.nNameIndex);
+//      sDesc.nOffset   = sBtDesc.nOffset;
+//      sDesc.nCount    = sBtDesc.nCount;
+//      sDesc.bDynamic  = sBtDesc.bDynamic;
+//      sDesc.bConst    = sBtDesc.bConst;
+//
+//#ifdef DEBUG_DECL_NAME
+//      sDesc.Name      = (DataPool::LPCSTR)(lpBase + sDesc.nName);
+//      TRACE("VAR:%16s %16s %8d\n", sDesc.GetTypeDesc()->Name, sDesc.Name, sDesc.nOffset);
+//#endif // DEBUG_DECL_NAME
+//    }
+//  }
 
   clsize DataPoolImpl::LocalizePtr()
   {
     GXLPBYTE ptr = (GXLPBYTE)m_Buffer.GetPtr();
     SIZELIST s;
-    //const GXSIZE_T cbNameTable = (GXSIZE_T)m_pNamesTabEnd - (GXSIZE_T)m_pNamesTabBegin;
     const GXSIZE_T nSumSize = IntGetRTDescHeader(&s);
-    //auto cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
-    //auto cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
-    //auto cbGVSIT     = (m_nNumOfVar + m_nNumOfMember + m_nNumOfEnums) * sizeof(SortedIndexType);
-    //auto cbVariables = m_nNumOfVar * sizeof(VARIABLE_DESC);
-    //auto cbMembers   = m_nNumOfMember * sizeof(VARIABLE_DESC);
-    //auto cbEnums     = m_nNumOfEnums * sizeof(ENUM_DESC);
 
     m_aTypes = (TYPE_DESC*)ptr;
     ptr += s.cbTypes;
 
     m_aStructs = (STRUCT_DESC*)ptr;
     ptr += s.cbStructs;
+
+    m_aHashAlgos = (HASHALGO*)ptr;
+    ptr += s.cbHashAlgo;
+
+    m_aHashBuckets = (u8*)ptr;
+    ptr += m_cbHashBuckets;
 
     m_aGSIT = (SortedIndexType*)ptr;
     ptr += s.cbGVSIT;
@@ -1210,7 +1179,10 @@ namespace Marimo
   void DataPoolImpl::LocalizeTables(BUILDTIME& bt, GXSIZE_T cbVarSpace)
   {
     // [MAIN BUFFER 结构表]:
-    // #.Type desc table            类型描述表
+    // #.Type desc table            类型描述表 - 1
+    // #.Struct desc table          类型描述表 - 2
+    // #.Hash Algorithm table
+    // #.Hash buckets
     // #.GVSIT
     // #.Variable desc table        变量描述表
     // #.Struct members desc table  成员变量描述表
@@ -1226,6 +1198,7 @@ namespace Marimo
     m_nNumOfVar      = (GXUINT)bt.m_aVar.size();
     m_nNumOfMember   = (GXUINT)bt.m_aStructMember.size();
     m_nNumOfEnums    = (GXUINT)bt.m_aEnumPck.size();
+    m_cbHashBuckets  = (GXUINT)bt.m_nNumOfBuckets;
     m_pNamesTabBegin = (GXUINT*)0;
     m_pNamesTabEnd   = (GXUINT*)cbNameTable;
 
@@ -1265,6 +1238,19 @@ namespace Marimo
     //  TRACE("%d %s\n", *p, (LPCSTR)m_pNamesTabEnd + (*p));
     //}
 
+    //HASHALGO* pAlgo = &m_aHashAlgos[0];
+    //DataPoolBuildTime::HASH_ALGORITHM* pBTAlgo = bt.m_VarHashInfo;
+    //if(pBTAlgo->nBucket >= (1 << 14) || pBTAlgo->nPos >= (1 << 16)) {
+    //  pAlgo->eType = 0;
+    //}
+    //else {
+    //  pAlgo->eType   = pBTAlgo->eType;
+    //  pAlgo->nBucket = pBTAlgo->nBucket;
+    //  pAlgo->nPos    = pBTAlgo->nPos;
+
+    //}
+    GXUINT cbBuckets = 0;
+    cbBuckets = Implement::CopyHashAlgo(&m_aHashAlgos[0], &bt.m_VarHashInfo, m_aHashBuckets, cbBuckets);
 
     // * 以下复制表的操作中均包含字符串重定位
 
@@ -1273,13 +1259,14 @@ namespace Marimo
     TYPE_DESC* pType = NULL;
 
     for(auto it = bt.m_TypeDict.begin(); it != bt.m_TypeDict.end(); ++it) {
-      BUILDTIME::BT_TYPE_DESC& sBtType = it->second;      
+      BUILDTIME::BT_TYPE_DESC& sBtType = it->second;
 
       if(sBtType.Cate == T_STRUCT) {
         STRUCT_DESC* pStruct = &m_aStructs[nStructIndex++];
         pType = pStruct;
         pStruct->nMemberCount = sBtType.nMemberCount;
         pStruct->Member = (GXUINT)((GXUINT_PTR)&m_aMembers[sBtType.nMemberIndex] - (GXUINT_PTR)&pStruct->Member);
+        cbBuckets = Implement::CopyHashAlgo(&m_aHashAlgos[nStructIndex], &sBtType.HashInfo, m_aHashBuckets, cbBuckets);
       }
       else if(sBtType.Cate == T_ENUM || sBtType.Cate == T_FLAG) {
         STRUCT_DESC* pStruct = &m_aStructs[nStructIndex++];
@@ -1291,7 +1278,7 @@ namespace Marimo
         pType = &m_aTypes[nTypeIndex++];
       }
 
-      pType->nName        = ConvertToNewOffsetFromOldIndex(pTable, (int)sBtType.nNameIndex);
+      pType->nName        = (GXUINT)clstd::StringSetA::IndexToOffset(pTable, (int)sBtType.nNameIndex);
       pType->Cate         = sBtType.Cate;
       pType->cbSize       = sBtType.cbSize;
 
@@ -1306,10 +1293,11 @@ namespace Marimo
 
     ASSERT(m_nNumOfTypes == nTypeIndex);
     ASSERT(m_nNumOfStructs == nStructIndex);
+    ASSERT(m_cbHashBuckets == cbBuckets);
 
     // 复制变量和成员变量描述表
-    CopyVariables(m_aVariables, &bt.m_aVar, pTable, lpBase);
-    CopyVariables(m_aMembers, &bt.m_aStructMember, pTable, lpBase);
+    Implement::CopyVariables(m_aVariables, &bt.m_aVar, pTable, lpBase);
+    Implement::CopyVariables(m_aMembers, &bt.m_aStructMember, pTable, lpBase);
 
     // 复制枚举描述表
     GXUINT nIndex = 0;
@@ -1317,7 +1305,7 @@ namespace Marimo
       const ENUM_DESC& sBtDesc = reinterpret_cast<ENUM_DESC&>(*it);
       ENUM_DESC& sDesc = m_aEnums[nIndex];
 
-      sDesc.nName = ConvertToNewOffsetFromOldIndex(pTable, (int)sBtDesc.nName);
+      sDesc.nName = (GXUINT)clstd::StringSetA::IndexToOffset(pTable, (int)sBtDesc.nName);
       sDesc.Value = sBtDesc.Value;
 
 #ifdef DEBUG_DECL_NAME
@@ -1881,6 +1869,7 @@ namespace Marimo
     header.nNumOfMember     = m_nNumOfMember;
     header.nNumOfEnums      = m_nNumOfEnums;
     header.cbNames          = (GXUINT)IntGetRTDescNames();
+    header.cbHashBuckets    = m_cbHashBuckets;
     header.cbVariableSpace  = (GXUINT)m_VarBuffer.GetSize();
     header.nNumOfStrings    = 0;
     header.cbStringSpace    = 0;
@@ -2190,6 +2179,7 @@ namespace Marimo
     m_nNumOfVar      = header.nNumOfVar;
     m_nNumOfMember   = header.nNumOfMember;
     m_nNumOfEnums    = header.nNumOfEnums;
+    m_cbHashBuckets  = header.cbHashBuckets;
     m_pNamesTabBegin = (GXUINT*)0;
     m_pNamesTabEnd   = (GXUINT*)(header.nNumOfNames * sizeof(GXUINT));
 
@@ -2604,6 +2594,16 @@ namespace Marimo
     }
     return 0;
   }
+
+
+  GXSIZE_T DATAPOOL_HASHALGO::HashString(GXLPCSTR str) const
+  {
+    ASSERT(eType == 1 || eType == 2);
+    return (eType == (u16)StaticStringsDict::HashType_Local)
+      ? StaticStringsDict::HashChar(str, GXSTRLEN(str), nPos)
+      : clstd::HashStringT(str);
+  }
+
 
 } // namespace Marimo
 

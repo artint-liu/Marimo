@@ -185,9 +185,9 @@ namespace clstd
     explicit StringX(const int nInteger);
     explicit StringX(const float fFloat, char mode = 'F');
     explicit StringX(const long lLong);
-    //explicit StringX(const unsigned int uInteger);
-    explicit StringX(const unsigned long uLong);
-    explicit StringX(const size_t val);
+    explicit StringX(const u32 uInteger);
+    //explicit StringX(const unsigned long uLong);
+    explicit StringX(const u64 val);
     ~StringX();
 
     StringX& operator=(const _TCh* pStr);

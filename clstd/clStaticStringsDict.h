@@ -22,8 +22,8 @@ namespace clstd
     };
 
     HashType  eType;
-    len_t     nBucket;
-    int       nPos; // HashType_Local 才有用
+    len_t     nBucket;  // 索引表是两倍桶数量
+    int       nPos;     // HashType_Local 才有用
 
   protected:
     len_t     m_count;
@@ -55,7 +55,7 @@ namespace clstd
 
       // IntArray 可以这么清！
       memset(&m_aCountsTab.front(), 0, sizeof(int) * m_aCountsTab.size());
-      memset(&m_indices.front(), 0, sizeof(int) * m_indices.size());
+      memset(&m_indices.front(), -1, sizeof(int) * m_indices.size());
 
       for(len_t i = 0; i < m_count; i++)
       {
@@ -64,15 +64,20 @@ namespace clstd
         }
 
         len_t local_hash = HashChar(str, len, n);
+        //TRACE("hash(%s,%d,%d)=%d %% %d=%d\n", str, len, n, local_hash, bucket, local_hash % bucket);
+
         ASSERT(local_hash != 0);
         local_hash %= bucket;
 
-        if(m_aCountsTab[local_hash] > 0) {
+        if(m_aCountsTab[local_hash] > 1) {
           return FALSE;
         }
 
-        m_aCountsTab[local_hash]++;
-        m_indices[local_hash] = i;
+        if(m_aCountsTab[local_hash]++ == 0) {
+          m_indices[local_hash * 2] = (int)i;
+        } else {
+          m_indices[local_hash * 2 + 1] = (int)i;
+        }
       }
 
       return TRUE;
@@ -86,7 +91,7 @@ namespace clstd
 
       // IntArray 可以这么清！
       memset(&m_aCountsTab.front(), 0, sizeof(int) * m_aCountsTab.size());
-      memset(&m_indices.front(), 0, sizeof(int) * m_indices.size());
+      memset(&m_indices.front(), -1, sizeof(int) * m_indices.size());
 
       for(len_t i = 0; i < m_count; i++)
       {
@@ -95,13 +100,17 @@ namespace clstd
         }
 
         len_t local_hash = clstd::HashStringT(str, len) % bucket;
+        //TRACE("hash(%s,%d)=%d %% %d=%d\n", str, len, clstd::HashStringT(str, len), bucket, local_hash);
 
         if(m_aCountsTab[local_hash] > 1) {
           return FALSE;
         }
 
-        m_aCountsTab[local_hash]++;
-        m_indices[local_hash] = i;
+        if(m_aCountsTab[local_hash]++ == 0) {
+          m_indices[local_hash * 2] = (int)i;
+        } else {
+          m_indices[local_hash * 2 + 1] = (int)i;
+        }
       }
 
       return TRUE;
@@ -121,8 +130,8 @@ namespace clstd
     void Reset(len_t count)
     {
       m_count = count;
-      m_indices.insert(m_indices.end(), count * 2, 0);
-      m_aCountsTab.insert(m_aCountsTab.end(), count * 2, 0);
+      m_indices.insert(m_indices.end(), count * 4, -1);
+      m_aCountsTab.insert(m_aCountsTab.end(), count * 4, 0);
     }
     
     template<class _Fn>
@@ -145,7 +154,7 @@ namespace clstd
 
         for(len_t n = 0; n < nMaxLength; n++) {
           if(TestStep((int)n, bucket, fn)) {
-            nPos = n;
+            nPos = (int)n;
             nBucket = bucket;
             eType = HashType_Local;
             return TRUE;
@@ -170,7 +179,7 @@ namespace clstd
     template<class _TList>
     void Copy(_TList& _list)
     {
-      _list.insert(_list.end(), m_indices.begin(), m_indices.begin() + nBucket);
+      _list.insert(_list.end(), m_indices.begin(), m_indices.begin() + nBucket * 2);
     }
 
     //////////////////////////////////////////////////////////////////////////

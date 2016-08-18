@@ -99,13 +99,13 @@ namespace Marimo
     struct STRUCT_DESC;
     struct ENUM_DESC;
 
+    typedef DATAPOOL_HASHALGO     HASHALGO;
     typedef DATAPOOL_TYPE_DESC    TYPE_DESC;
     typedef VARIABLE_DESC*        LPVD;
     typedef const VARIABLE_DESC*  LPCVD;
     typedef const ENUM_DESC*      LPCED;
     typedef const TYPE_DESC*      LPCTD;
     typedef const STRUCT_DESC*    LPCSD;
-
 
 
     //struct IMPORT
@@ -139,6 +139,7 @@ namespace Marimo
       GXUINT  nNumOfEnums;      // 枚举描述数量
       GXUINT  nNumOfNames;      // 所有描述表中名字(字符串)数量
       GXUINT  cbNames;          // 所有描述表中名字(字符串)占用的总尺寸
+      GXUINT  cbHashBuckets;
 
       GXUINT  cbVariableSpace;  // 全局变量占用的空间
       GXUINT  nNumOfPtrVars;    // 全局变量中包含的指针数，用来在不同平台下调整cbVariableSpace的尺寸
@@ -195,27 +196,6 @@ namespace Marimo
         ASSERT(IsDynamicArray()); // 动态数组
         return (DataPoolArray**)(pBaseData + nOffset);
       }
-
-//      DataPoolArray* CreateAsBuffer(DataPoolImpl* pDataPool, clBufferBase* pParent, GXBYTE* pBaseData, int nInitCount) const
-//      {
-//        ASSERT(IsDynamicArray()); // 一定是动态数组
-//        ASSERT(nInitCount >= 0);
-//
-//        DataPoolArray** ppBuffer = GetAsBufferObjPtr(pBaseData);  // 动态数组
-//        if(*ppBuffer == NULL && TEST_FLAG_NOT(pDataPool->m_dwRuntimeFlags, RuntimeFlag_Readonly))
-//        {
-//          // 这里ArrayBuffer只能使用指针形式
-//          *ppBuffer = new DataPoolArray(TypeSize() * 10);  // 十倍类型大小
-//          (*ppBuffer)->Resize(nInitCount * TypeSize(), TRUE);
-//
-////#ifdef _DEBUG
-////          pDataPool->m_nDbgNumOfArray++;
-////#endif // #ifdef _DEBUG
-//        }
-//        return *ppBuffer;
-//      }
-
-
 
       DataPoolArray* GetAsBuffer(GXBYTE* pBaseData) const
       {
@@ -319,6 +299,7 @@ namespace Marimo
     {
       GXSIZE_T cbTypes;
       GXSIZE_T cbStructs;
+      GXSIZE_T cbHashAlgo;
       GXSIZE_T cbGVSIT;
       GXSIZE_T cbVariables;
       GXSIZE_T cbMembers;
@@ -401,7 +382,7 @@ namespace Marimo
 
     const clBufferBase* IntGetEntryBuffer   () const; // 获得数据池最基础的buffer
     LPCTD         FindType            (GXLPCSTR szTypeName) const;
-    void          CopyVariables       (VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const clstd::STRINGSETDESC* pTable, GXINT_PTR lpBase);
+    //void          CopyVariables       (VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const clstd::STRINGSETDESC* pTable, GXINT_PTR lpBase);
     GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar);
     GXBOOL        IntQuery            (GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
     GXINT         IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
@@ -434,11 +415,14 @@ namespace Marimo
       GXUINT              m_nNumOfVar;
       GXUINT              m_nNumOfMember;
       GXUINT              m_nNumOfEnums;
+      GXUINT              m_cbHashBuckets;      // Hash Buckets
       // =====================
 
       // 这些可以被LocalizePtr方法重定位
       TYPE_DESC*          m_aTypes;
       STRUCT_DESC*        m_aStructs;
+      HASHALGO*           m_aHashAlgos;       // 1 + m_nNumOfStructs
+      u8*                 m_aHashBuckets;     // var, struct1, struct2, ...
       SortedIndexType*    m_aGSIT;            // Grouped sorted index table, 详细见下
       VARIABLE_DESC*      m_aVariables;       // 所有变量描述表
       VARIABLE_DESC*      m_aMembers;         // 所有的结构体成员描述都存在这张表上

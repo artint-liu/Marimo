@@ -54,6 +54,7 @@ using namespace clstd;
 
 namespace Marimo
 {
+  class DataPoolVariableImpl;
   // 类型重定义
   typedef DataPoolVariable                          Variable;
   typedef DataPoolVariableImpl                      VarImpl;

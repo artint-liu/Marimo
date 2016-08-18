@@ -11,7 +11,7 @@
 #include "GrapX/GXKernel.H"
 
 #include "DataPoolErrorMsg.h"
-#include "DataPoolImpl.h"
+//#include "DataPoolImpl.h"
 
 namespace Marimo
 {

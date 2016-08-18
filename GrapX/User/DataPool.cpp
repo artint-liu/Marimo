@@ -544,8 +544,6 @@ namespace Marimo
         //strDefine.Format("#FILE %s\n#LINE 1\n", (clStringA::LPCSTR)strFilenameA);
         //pBuffer->Insert(0, (GXLPCSTR)strDefine, strDefine.GetLength());
 
-        //hval = CompileFromMemory(ppDataPool, szName, , , );
-
         GXLPCSTR szDefinitionCodes = (GXLPCSTR)pBuffer->GetPtr();
         DataPoolCompiler* pResolver = NULL;
         if(szDefinitionCodes == NULL || pBuffer->GetSize() == 0) {
