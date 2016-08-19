@@ -284,6 +284,7 @@
     <ClInclude Include="..\..\Canvas\GXMaterialImpl.h" />
     <ClInclude Include="..\..\Canvas\GXResourceMgr.h" />
     <ClInclude Include="..\..\Canvas\GXSpriteImpl.h" />
+    <ClInclude Include="..\..\Canvas\MOSpriteImpl.h" />
     <ClInclude Include="..\..\Console.h" />
     <ClInclude Include="..\..\Controls\GXUIButton.h" />
     <ClInclude Include="..\..\Controls\GXUICtrlBase.h" />
@@ -364,6 +365,8 @@
     <ClCompile Include="..\..\Canvas\GXSpriteImpl.cpp" />
     <ClCompile Include="..\..\Canvas\GXSpriteMan.cpp" />
     <ClCompile Include="..\..\Canvas\GXWndCanvas.cpp" />
+    <ClCompile Include="..\..\Canvas\MOSpriteImpl.cpp" />
+    <ClCompile Include="..\..\Canvas\MOSpriteManf.cpp" />
     <ClCompile Include="..\..\Console.cpp" />
     <ClCompile Include="..\..\Controls\GXUIButton.cpp" />
     <ClCompile Include="..\..\Controls\GXUICtrlBase.cpp" />

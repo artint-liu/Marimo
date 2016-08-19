@@ -1,3 +1,4 @@
+#ifdef ENABLE_GRAPHICS_API_DX9
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 // 全局头文件
 #include <GrapX.H>
@@ -253,3 +254,4 @@ namespace D3D9
 
 } // namespace D3D9
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#endif // #ifdef ENABLE_GRAPHICS_API_DX9

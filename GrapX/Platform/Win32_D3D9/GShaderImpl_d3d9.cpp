@@ -24,7 +24,6 @@
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
 #include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.h"
 
-
 // 私有头文件
 #include <GrapX/VertexDecl.H>
 #include "Canvas/GXResourceMgr.h"
@@ -36,6 +35,8 @@
 #include "GDI/GXShaderMgr.h"
 //#define PS_REG_IDX_SHIFT 16
 //#define PS_REG_IDX_PART  (1 << PS_REG_IDX_SHIFT)
+#ifdef ENABLE_GRAPHICS_API_DX9
+
 #define PS_HANDLE_SHIFT 16
 
 using namespace clstd;
@@ -427,6 +428,7 @@ namespace D3D9
   }
 #endif // #ifdef REFACTOR_SHADER
 } // namespace D3D9
+#endif // #ifdef ENABLE_GRAPHICS_API_DX9
 
 #include <Smart/smartstream.h>
 #include <Smart/Stock.h>

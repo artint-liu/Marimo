@@ -1,3 +1,4 @@
+#ifdef ENABLE_GRAPHICS_API_DX9
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
 // 全局头文件
@@ -884,3 +885,4 @@ GXLPCRENDERSTATE GXDLLAPI MOGetDefaultRenderState()
 
 STATIC_ASSERT(sizeof(GXRENDERSTATE) == 8);
 //STATIC_ASSERT(sizeof(D3D9::GXSAMPLERSTAGE) == sizeof(GXDWORD) * 14);
+#endif // #ifdef ENABLE_GRAPHICS_API_DX9

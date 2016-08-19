@@ -1,3 +1,4 @@
+#ifdef ENABLE_GRAPHICS_API_DX9
 //#define D3D9_LOW_DEBUG
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 #define _GXGRAPHICS_INLINE_CANVAS_D3D9_
@@ -1335,3 +1336,4 @@ namespace MarimoVerifier
     }
   } // namespace Texture
 } // namespace MarimoVerifier
+#endif // #ifdef ENABLE_GRAPHICS_API_DX9

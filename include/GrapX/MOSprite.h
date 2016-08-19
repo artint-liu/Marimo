@@ -1,9 +1,11 @@
 #ifndef _MARIMO_SPRITE_HEADER_FILE_
 #define _MARIMO_SPRITE_HEADER_FILE_
 
-namespace Marimo : public GUnknown
+class GXImage;
+
+namespace Marimo
 {
-  class Sprite
+  class Sprite : public GUnknown
   {
   public:
     enum Type
@@ -13,6 +15,7 @@ namespace Marimo : public GUnknown
       Type_Frame,
       Type_Animation,
     };
+
     struct MODULE
     {
       GXINT    id;    // 0 是无效id
@@ -45,16 +48,22 @@ namespace Marimo : public GUnknown
     };
 
     typedef GXUINT    ANIM_UNIT;
-    typedef GXINT     ID;         // id 不能为 0, module/frame/animation 不能相同
     typedef GXUINT    TIME_T;
+    typedef GXINT     ID;         // id 不能为 0, module/frame/animation 不能相同
+
+    typedef clvector<MODULE>      ModuleArray;
+    typedef clvector<FRAME>       FrameArray;
+    typedef clvector<ANIMATION>   AnimationArray;
+    typedef clvector<FRAME_UNIT>  FrameUnitArray;
+    typedef clvector<ANIM_UNIT>   AnimUnitArray;
 
   public:
     GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
     GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
     GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
 
-    GXSTDINTERFACE(GXLONG    PaintModule3H        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-    GXSTDINTERFACE(GXLONG    PaintModule3V        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+    GXSTDINTERFACE(GXVOID    PaintModule3H        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+    GXSTDINTERFACE(GXVOID    PaintModule3V        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
     GXSTDINTERFACE(GXVOID    PaintModule3x3       (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
 
     GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
@@ -95,11 +104,11 @@ namespace Marimo : public GUnknown
     GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPCREGN lprg) const);
 
     GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // 含有的图片数量
-    GXSTDINTERFACE(GXHRESULT GetImage             (GXImage** pImage, GXINT index) const);
+    GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXINT index) const);
     GXSTDINTERFACE(clStringW GetImageFileW        (GXINT index) const);
     GXSTDINTERFACE(clStringA GetImageFileA        (GXINT index) const);
 
-    static GXBOOL CreateFromStockA(Sprite** ppSprite, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
+    static GXBOOL GXDLLAPI CreateFromStockA(Sprite** ppSprite, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
   };
 } // namespace Marimo
 

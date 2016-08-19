@@ -39,8 +39,8 @@ namespace clstd
     {
       typedef void (*unspecified_bool_type)(ATTRIBUTE***);
       const Section* pSection;
-      _MyIterator   itKey;   // 键
-      _MyIterator   itValue; // 值
+      _MyIterator   key;   // 键
+      _MyIterator   value; // 值
 
       ATTRIBUTE(){}
       ATTRIBUTE(Section* pCoSection) : pSection(pCoSection){}
@@ -82,17 +82,17 @@ namespace clstd
       int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
 
     public:
-      _MyIterator   itSectionName;
-      _MyIterator   itBegin;  // Section开始的'{'位置
-      _MyIterator   itEnd;    // Section结束的'}'位置
+      _MyIterator   name;        // Section Name
+      _MyIterator   iter_begin;  // Section开始的'{'位置
+      _MyIterator   iter_end;    // Section结束的'}'位置
 
       //SECTION* m_desc;
     protected:
 #ifdef _DEBUG
       b32 DbgCheck() const
       {
-        return ( empty() ) || nDepth == 0 || ((itBegin.marker[0] == '{' || itBegin == itBegin.pContainer->begin()) &&
-          (itEnd.marker[0] == '}' || itEnd == itBegin.pContainer->end()));
+        return ( empty() ) || nDepth == 0 || ((iter_begin.marker[0] == '{' || iter_begin == iter_begin.pContainer->begin()) &&
+          (iter_end.marker[0] == '}' || iter_end == iter_begin.pContainer->end()));
       }
 #else
       b32 DbgCheck() const { return TRUE; }

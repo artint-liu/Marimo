@@ -32,39 +32,41 @@ GXHRESULT GXApp::Go(GXAPP_DESC* pDesc)
   {
   case GXPLATFORM_UNKNOWN:
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#ifdef ENABLE_GRAPHICS_API_DX9
   case GXPLATFORM_WIN32_DIRECT3D9:
     {
       m_pIPlatform = (IGXPlatform*)AppCreateD3D9Platform(this, pDesc, &m_pGraphics);
     }
     break;
+#endif // #ifdef ENABLE_GRAPHICS_API_DX9
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
-#ifdef ENABLE_DX11
+#ifdef ENABLE_GRAPHICS_API_DX11
   case GXPLATFORM_WIN32_DIRECT3D11:
     {
       m_pIPlatform = (IGXPlatform*)AppCreateD3D11Platform(this, pDesc, &m_pGraphics);
     }
     break;
-#endif // #ifdef ENABLE_DX11
+#endif // #ifdef ENABLE_GRAPHICS_API_DX11
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
   case GXPLATFORM_WIN32_OPENGL:
     {
-#ifdef ENABLE_WOGL
+#ifdef ENABLE_GRAPHICS_API_WOGL
       m_pIPlatform = (IGXPlatform*)AppCreateOpenGLPlatform(this, pDesc, &m_pGraphics);
 #else
       return GX_FAIL;
-#endif // ENABLE_WOGL
+#endif // ENABLE_GRAPHICS_API_WOGL
     }
     break;
   case GXPLATFORM_X_OPENGLES2:
     {
-#ifdef ENABLE_GLES2
+#ifdef ENABLE_GRAPHICS_API_GLES2
       m_pIPlatform = (IGXPlatform*)AppCreateOpenGLES2Platform(this, pDesc, &m_pGraphics);
 #else
       return GX_FAIL;
-#endif // ENABLE_GLES2
+#endif // ENABLE_GRAPHICS_API_GLES2
     }
     break;
   default:

@@ -22,6 +22,7 @@
 
 using namespace clstd;
 void GXDestroyRootFrame();
+#pragma comment(lib, "shell32.lib")
 
 inline void InlPrepareActionInfo(GXAPPACTIONINFO& Info, GXWPARAM wParam, LPARAM lParam, DWORD dwAction)
 {
@@ -416,7 +417,81 @@ GXLRESULT GXSTATION::AppHandle(GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
   return (static_cast<IMOPlatform_Win32Base*>(lpPlatform))->
     AppHandle(message, wParam, lParam);
 }
+
 //////////////////////////////////////////////////////////////////////////
+
+void IntWin32ResizeWindow(HWND hWnd, GXApp* pApp)
+{
+  RECT rect;
+  GetClientRect(hWnd, &rect);
+  GXUIResizeStation(rect.right, rect.bottom);
+
+  GXSIZE size;
+  size.cx = rect.right;
+  size.cy = rect.bottom;
+  pApp->OnResizing(&size);
+}
+
+GXBOOL IntWin32SwitchFullScreen(HWND hWnd)
+{
+  DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
+  if(TEST_FLAGS_ALL(dwStyle, WS_OVERLAPPEDWINDOW))
+  {
+    SetWindowLong(hWnd, GWL_STYLE, dwStyle & (~WS_OVERLAPPEDWINDOW));
+    SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, -1);
+    return TRUE;
+  }
+  else
+  {
+    SetWindowLong(hWnd, GWL_STYLE, dwStyle | WS_OVERLAPPEDWINDOW);
+    SendMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, -1);
+    return FALSE;
+  }
+}
+
+#ifndef _DEV_DISABLE_UI_CODE
+GXBOOL IntSetCursor(GXWPARAM wParam, LPARAM lParam)
+{
+  GXHWND hWnd   = (GXHWND)wParam;
+  const int nHittest  = GXLOWORD(lParam);
+  const int wMouseMsg = GXHIWORD(lParam);
+  HCURSOR& hCursor = IntGetStationPtr()->hCursor;
+
+  switch(nHittest)
+  {
+  case GXHTCLIENT:
+    hCursor = (HCURSOR)gxGetClassLongW(hWnd, GXGCL_HCURSOR);
+    break;
+
+  case GXHTLEFT:
+  case GXHTRIGHT:
+    hCursor = LoadCursor(NULL, IDC_SIZEWE);
+    break;
+
+  case GXHTTOP:
+  case GXHTBOTTOM:
+    hCursor = LoadCursor(NULL, IDC_SIZENS);
+    break;
+
+  case GXHTTOPLEFT:
+  case GXHTBOTTOMRIGHT:
+    hCursor = LoadCursor(NULL, IDC_SIZENWSE);
+    break;
+
+  case GXHTTOPRIGHT:
+  case GXHTBOTTOMLEFT:
+    hCursor = LoadCursor(NULL, IDC_SIZENESW);
+    break;
+  default:
+    hCursor = LoadCursor(NULL, IDC_ARROW);
+    break;
+  }
+  return TRUE; 
+}
+#endif // #ifndef _DEV_DISABLE_UI_CODE
+
+//////////////////////////////////////////////////////////////////////////
+
 i32 GXUIMsgThread::Run()
 {
 #ifndef _DEV_DISABLE_UI_CODE

@@ -263,7 +263,7 @@ namespace Marimo
                 //CLOG_WARNINGW(L"%s(%d): %s下面不存在名为\"%s\"的结构体\n", import.ErrorMsg.GetCurrentFilenameW(), nLine, clStringW(varParent->GetName()), clStringW(strVarName));
                 clStringW strParent = varParent->GetName();
                 clStringW strVarNameW = (GXLPCSTR)strVarName;
-                import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_STRUCT_NOT_EXIST_IN_STRUCT, (GXLPCWSTR)strParent, (GXLPCWSTR)strVarNameW);
+                import.ErrorMsg.WriteErrorW(FALSE, sect.name.offset(), ERROR_CODE_STRUCT_NOT_EXIST_IN_STRUCT, (GXLPCWSTR)strParent, (GXLPCWSTR)strVarNameW);
                 continue;
               }
             }
@@ -273,7 +273,7 @@ namespace Marimo
                 //nLine = import.ErrorMsg.LineFromPtr(sect->itSectionName.marker);
                 //CLOG_WARNINGW(L"%s(%d): 不存在名为\"%s\"的结构体\n", import.ErrorMsg.GetCurrentFilenameW(), nLine, clStringW(strVarName));
                 clStringW strVarNameW = (GXLPCSTR)strVarName;
-                import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_STRUCT_NOT_EXIST, (GXLPCWSTR)strVarNameW);
+                import.ErrorMsg.WriteErrorW(FALSE, sect.name.offset(), ERROR_CODE_STRUCT_NOT_EXIST, (GXLPCWSTR)strVarNameW);
                 continue;
               }
             }
@@ -300,7 +300,7 @@ namespace Marimo
               //import.tl->PosFromPtr(sect->itSectionName.marker, &nLine, &nRow);
               //CLOG_WARNINGW(L"%s(%d): 静态数组\"%s\"导入数据已经超过了它的最大容量(%d).\n", import.szFilename, nLine, clStringW(strVarName), var.GetLength());
               clStringW strVarNameW = (GXLPCSTR)strVarName;
-              import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_OUTOF_STATIC_ARRAY, (GXLPCWSTR)strVarNameW, var.GetLength());
+              import.ErrorMsg.WriteErrorW(FALSE, sect.name.offset(), ERROR_CODE_OUTOF_STATIC_ARRAY, (GXLPCWSTR)strVarNameW, var.GetLength());
               continue;
             }
 
@@ -312,7 +312,7 @@ namespace Marimo
               //import.tl->PosFromPtr(sect->itSectionName.marker, &nLine, &nRow);
               //CLOG_WARNINGW(L"%s(%d): \"%s\"变量声明为数组才可以重复导入数据.\n", import.szFilename, nLine, clStringW(strVarName));
               clStringW strVarNameW = (GXLPCSTR)strVarName;
-              import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_NOT_ARRAY, (GXLPCWSTR)strVarNameW);
+              import.ErrorMsg.WriteErrorW(FALSE, sect.name.offset(), ERROR_CODE_NOT_ARRAY, (GXLPCWSTR)strVarNameW);
               continue;
             }
             varNew = var;
@@ -321,7 +321,7 @@ namespace Marimo
           // 结构体属性检查
           if(TEST_FLAG_NOT(varNew.GetCaps(), MOVariable::CAPS_STRUCT)) {
             clStringW strVarNameW = (GXLPCSTR)strVarName;
-            import.ErrorMsg.WriteErrorW(FALSE, sect.itSectionName.offset(), ERROR_CODE_NOT_STRUCT, (GXLPCWSTR)strVarNameW);
+            import.ErrorMsg.WriteErrorW(FALSE, sect.name.offset(), ERROR_CODE_NOT_STRUCT, (GXLPCWSTR)strVarNameW);
             continue;
           }
 
@@ -367,13 +367,13 @@ namespace Marimo
             if( ! varMember.ParseW(strValue, 0))
             {
               // variable 无法解析字符串
-              import.ErrorMsg.WriteErrorW(FALSE, param.itKey.offset(), ERROR_CODE_CANT_PARSE_DATA, (GXLPCWSTR)strKey, (GXLPCWSTR)strValue);
+              import.ErrorMsg.WriteErrorW(FALSE, param.key.offset(), ERROR_CODE_CANT_PARSE_DATA, (GXLPCWSTR)strKey, (GXLPCWSTR)strValue);
             }
           }
           else
           {
             // 没找到对应的variable
-            import.ErrorMsg.WriteErrorW(FALSE, param.itKey.offset(), ERROR_CODE_NOT_FOUND_VAR, (GXLPCWSTR)strKey, (GXLPCWSTR)param.ToString(strValue));
+            import.ErrorMsg.WriteErrorW(FALSE, param.key.offset(), ERROR_CODE_NOT_FOUND_VAR, (GXLPCWSTR)strKey, (GXLPCWSTR)param.ToString(strValue));
           }
         } while (param.NextKey());
       }

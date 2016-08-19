@@ -118,15 +118,15 @@ namespace clstd
       return FALSE;
     }
 
-    auto it = itValue;
+    auto it = value;
     auto itNext = it;
 
-    if(itNext == pSection->itEnd) { return FALSE; }
+    if(itNext == pSection->iter_end) { return FALSE; }
 
-    while(++itNext != pSection->itEnd) {
+    while(++itNext != pSection->iter_end) {
       if(itNext.marker[0] == '=') {
-        itKey = it;
-        itValue = ++itNext;
+        key = it;
+        value = ++itNext;
         return TRUE;
       }
       else if(itNext.marker[0] == '{') {
@@ -146,20 +146,20 @@ namespace clstd
     _TStr _SSP_IMPL::ATTRIBUTE::SectionName() const
   {
     _TStr str;
-    return SmartStreamUtility::TranslateQuotation(pSection->itSectionName, str);
+    return SmartStreamUtility::TranslateQuotation(pSection->name, str);
   }
 
   _SSP_TEMPL
     _TStr _SSP_IMPL::ATTRIBUTE::KeyName() const
   {
     _TStr str;
-    return SmartStreamUtility::TranslateQuotation(itKey, str);
+    return SmartStreamUtility::TranslateQuotation(key, str);
   }
 
   _SSP_TEMPL
     _TStr& _SSP_IMPL::ATTRIBUTE::KeyName(_TStr& str) const
   {
-    return SmartStreamUtility::TranslateQuotation(itKey, str);
+    return SmartStreamUtility::TranslateQuotation(key, str);
   }
 
   _SSP_TEMPL
@@ -172,13 +172,13 @@ namespace clstd
     _TStr _SSP_IMPL::ATTRIBUTE::ToString() const
   {
     _TStr str;
-    return SmartStreamUtility::TranslateQuotation(itValue, str);
+    return SmartStreamUtility::TranslateQuotation(value, str);
   }
 
   _SSP_TEMPL
     _TStr& _SSP_IMPL::ATTRIBUTE::ToString(_TStr& str) const
   {
-    return SmartStreamUtility::TranslateQuotation(itValue, str);
+    return SmartStreamUtility::TranslateQuotation(value, str);
   }
 
   _SSP_TEMPL
@@ -191,7 +191,7 @@ namespace clstd
   b32 _SSP_IMPL::ATTRIBUTE::ToBoolean() const
   {
     _TStr str;
-    SmartStreamUtility::TranslateQuotation(itValue, str);
+    SmartStreamUtility::TranslateQuotation(value, str);
     return _CheckBoolean((T_LPCSTR)str);
   }
 
@@ -200,7 +200,7 @@ namespace clstd
   //{
   //  _TStr strValue;
   //  SmartStreamUtility::MakeQuotation(strValue, str);
-  //  pSection->pStock->Replace(this, itValue.offset(), itValue.length, strValue, strValue.GetLength());
+  //  pSection->pStock->Replace(this, value.offset(), value.length, strValue, strValue.GetLength());
   //}
 
   _SSP_TEMPL
@@ -214,14 +214,14 @@ namespace clstd
   b32 _SSP_IMPL::ATTRIBUTE::operator!=(const ATTRIBUTE& attr) const
   {
     ASSERT(pSection == attr.pSection);
-    return itKey != attr.itKey || itValue != attr.itValue;
+    return key != attr.key || value != attr.value;
   }
 
   _SSP_TEMPL
   typename _SSP_IMPL::ATTRIBUTE& _SSP_IMPL::ATTRIBUTE::operator++()
   {
     if( ! NextKey()) {
-      itKey = itValue = pSection->itEnd;
+      key = value = pSection->iter_end;
       pSection = NULL;
     }
     return *this;
@@ -357,13 +357,13 @@ namespace clstd
 
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::Remove( Section* pSect, const _MyIterator& itBegin, const _MyIterator& itEnd )
+    b32 _SSP_IMPL::Remove( Section* pSect, const _MyIterator& itBegin, const _MyIterator& iter_end )
   {
     auto pStreamPtr = m_SmartStream.GetStreamPtr();
     auto nStreamEndPtr = pStreamPtr + m_SmartStream.GetStreamCount();
 
     auto pBegin = itBegin.marker;
-    auto pEnd = itEnd.marker + itEnd.length;
+    auto pEnd = iter_end.marker + iter_end.length;
 
     while(--pBegin >= pStreamPtr && (*pBegin == ' ' || *pBegin == '\t')) {} // 向前，跳过空白
     ++pBegin;
@@ -433,7 +433,7 @@ namespace clstd
   {
     _TStr str;
     IS_OUT_OF_DATE;
-    return itSectionName.pContainer == NULL ? "" : SmartStreamUtility::TranslateQuotation(itSectionName, str);
+    return name.pContainer == NULL ? "" : SmartStreamUtility::TranslateQuotation(name, str);
   }
 
   _SSP_TEMPL
@@ -458,7 +458,7 @@ namespace clstd
     }
     ASSERT(DbgCheck());
 
-    auto it = itEnd;
+    auto it = iter_end;
     auto itNext = ++it;
     auto itGlobalEnd = pStock->m_SmartStream.end();
 
@@ -470,11 +470,11 @@ namespace clstd
 
     while(++itNext != itGlobalEnd) {
       if((szName == NULL || it == szName) && itNext.marker[0] == '{') {
-        itSectionName = it;
+        name = it;
 
         // itNext应该与输出的ItBegin是同一个值
         return SmartStreamUtility::FindPair(itNext,
-          itBegin, itEnd, (TChar*)L"{", (TChar*)L"}");
+          iter_begin, iter_end, (TChar*)L"{", (TChar*)L"}");
       }
       else if(it.marker[0] == '}') {
         break;
@@ -487,11 +487,11 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::Rename( T_LPCSTR szNewName )
   {
-    if(empty() || itSectionName.marker == NULL || itSectionName.length == 0) {
+    if(empty() || name.marker == NULL || name.length == 0) {
       return FALSE;
     }
 
-    return pStock->Replace(this, itSectionName.offset(), itSectionName.length, szNewName, clstd::strlenT(szNewName));
+    return pStock->Replace(this, name.offset(), name.length, szNewName, clstd::strlenT(szNewName));
   }
 
   _SSP_TEMPL
@@ -502,11 +502,11 @@ namespace clstd
     }
     ASSERT(DbgCheck());
     param.pSection = this;
-    param.itValue = itBegin;
+    param.value = iter_begin;
 
     if(nDepth > 0) {
-      ASSERT(param.itValue.marker[0] == '{');
-      ++param.itValue;
+      ASSERT(param.value.marker[0] == '{');
+      ++param.value;
     }
     return param.NextKey();
   }
@@ -521,7 +521,7 @@ namespace clstd
     }
 
     do {
-      if(param.itKey == szKey) {
+      if(param.key == szKey) {
         return TRUE;
       }
     } while(param.NextKey());
@@ -534,8 +534,8 @@ namespace clstd
     T_LPCSTR pSource = NULL;
     ATTRIBUTE p;
     if(GetKey(szKey, p)) {
-      pSource = p.itValue.marker;
-      nCount = clMin(nCount, (int)p.itValue.length);
+      pSource = p.value.marker;
+      nCount = clMin(nCount, (int)p.value.length);
     }
     else {
       pSource = szDefault;
@@ -615,7 +615,7 @@ namespace clstd
     if(GetKey(szKey, param)) {
       _TStr strValue;
       SmartStreamUtility::MakeQuotation(strValue, szValue);
-      return pStock->Replace(this, param.itValue.offset(), param.itValue.length, strValue, strValue.GetLength());
+      return pStock->Replace(this, param.value.offset(), param.value.length, strValue, strValue.GetLength());
     }
     else {
       return InsertKey(szKey, szValue);
@@ -667,13 +667,13 @@ namespace clstd
     ATTRIBUTE param;
     if(GetKey(szKey, param))
     {
-      auto it = pStock->m_SmartStream.find(param.itValue, 1, L";");
+      auto it = pStock->m_SmartStream.find(param.value, 1, L";");
 
-      return pStock->Remove(this, param.itKey, it);
+      return pStock->Remove(this, param.key, it);
 
       //auto pStreamPtr = pStock->m_SmartStream.GetStreamPtr();
       //auto nStreamEndPtr = pStreamPtr + pStock->m_SmartStream.GetStreamCount();
-      //auto pBegin = param.itKey.marker;
+      //auto pBegin = param.key.marker;
       //auto pEnd = it.marker + it.length;
       //while(--pBegin >= pStreamPtr && (*pBegin == ' ' || *pBegin == '\t')) {} // 向前，跳过空白
       //++pBegin;
@@ -702,7 +702,7 @@ namespace clstd
     strBuffer.Append('\r');
     strBuffer.Append('\n');
 
-    clsize nPos = pStock->InsertString(this, itEnd, strBuffer);
+    clsize nPos = pStock->InsertString(this, iter_end, strBuffer);
     ASSERT(DbgCheck());
     return TRUE;
   }
@@ -853,8 +853,8 @@ namespace clstd
 
     if(sResult.pStock) {
       sResult.pParent = NULL;
-      return Remove(&sResult, sResult.itSectionName, sResult.itEnd);
-      //return Replace(sResult.itSectionName.offset(), sResult.itEnd.offset() - sResult.itSectionName.offset() + sResult.itEnd.length, NULL, 0);
+      return Remove(&sResult, sResult.name, sResult.iter_end);
+      //return Replace(sResult.section.offset(), sResult.itEnd.offset() - sResult.section.offset() + sResult.itEnd.length, NULL, 0);
     }
     return FALSE;
   }
@@ -890,9 +890,9 @@ namespace clstd
     //for(auto it = m_aHandles.begin(); it != m_aHandles.end(); ++it)
     //{
     //  Section* pSection = (Section*)*it;
-      if(( ! RelocateIterator(pSection->itBegin,        lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) ||
-        ( ! RelocateIterator(pSection->itEnd,          lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) ||
-        ( ! RelocateIterator(pSection->itSectionName,  lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) )
+      if(( ! RelocateIterator(pSection->iter_begin, lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) ||
+        ( ! RelocateIterator(pSection->iter_end,    lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) ||
+        ( ! RelocateIterator(pSection->name,        lpOldPtr, lpNewPtr, uActPos, sizeReplaced, sizeInsert)) )
       {
         // 如果改变的区间与Iterator范围重叠，则使这个Section失效
         pSection->nDepth = -1;
@@ -1069,14 +1069,14 @@ namespace clstd
     strBuffer.Append('\r');
     strBuffer.Append('\n');
 
-    clsize nPos = InsertString(pSection, pSection->itEnd, strBuffer);
+    clsize nPos = InsertString(pSection, pSection->iter_end, strBuffer);
 
-    pNewSect.pStock        = this;
-    pNewSect.pParent       = NULL;
-    pNewSect.nModify       = m_nModify;
-    pNewSect.itSectionName = m_SmartStream.nearest(nPos);
-    pNewSect.nDepth        = pSection->nDepth + 1;
-    SmartStreamUtility::FindPair(pNewSect.itSectionName, pNewSect.itBegin, pNewSect.itEnd, (TChar*)L"{", (TChar*)L"}");
+    pNewSect.pStock  = this;
+    pNewSect.pParent = NULL;
+    pNewSect.nModify = m_nModify;
+    pNewSect.name    = m_SmartStream.nearest(nPos);
+    pNewSect.nDepth  = pSection->nDepth + 1;
+    SmartStreamUtility::FindPair(pNewSect.name, pNewSect.iter_begin, pNewSect.iter_end, (TChar*)L"{", (TChar*)L"}");
     return TRUE;
   }
 
@@ -1085,27 +1085,27 @@ namespace clstd
   {
     //ASSERT(pFindSect != NULL);
 
-    if(pFindSect->itBegin == pFindSect->itEnd) {
+    if(pFindSect->iter_begin == pFindSect->iter_end) {
       return FALSE;
     }
 
     ASSERT(pFindSect->DbgCheck());
 
-    auto it = pFindSect->itBegin;
+    auto it = pFindSect->iter_begin;
     auto itNext = pFindSect->nDepth == 0 ? it : ++it; // 如果是根，itBegin指向的就不是'{'标记，否则跳过'{'标记
 
-    if(itNext == pFindSect->itEnd) { return FALSE; }
+    if(itNext == pFindSect->iter_end) { return FALSE; }
 
-    while(++itNext != pFindSect->itEnd) {
+    while(++itNext != pFindSect->iter_end) {
       if((szName == NULL || it == szName) && itNext.marker[0] == '{') {
         pOutSect.pStock  = (StockT*)this;
         pOutSect.pParent = pFindSect;
         pOutSect.nModify = m_nModify;
-        pOutSect.itSectionName = it;
+        pOutSect.name    = it;
         pOutSect.nDepth  = pFindSect->nDepth + 1;
 
         // itNext应该与输出的ItBegin是同一个值
-        return SmartStreamUtility::FindPair(itNext, pOutSect.itBegin, pOutSect.itEnd, (TChar*)L"{", (TChar*)L"}");
+        return SmartStreamUtility::FindPair(itNext, pOutSect.iter_begin, pOutSect.iter_end, (TChar*)L"{", (TChar*)L"}");
       }
       it = itNext;
     }
@@ -1198,8 +1198,8 @@ namespace clstd
     , pParent (NULL)
     , nModify (pCoStock->m_nModify)
     , nDepth  (0)
-    , itBegin(pCoStock->m_SmartStream.begin())
-    , itEnd(pCoStock->m_SmartStream.end())
+    , iter_begin(pCoStock->m_SmartStream.begin())
+    , iter_end(pCoStock->m_SmartStream.end())
   {}
 
   //_SSP_TEMPL
@@ -1278,8 +1278,8 @@ namespace clstd
   {
     ATTRIBUTE attr;
     attr.pSection = this;
-    attr.itKey    = itEnd;
-    attr.itValue  = itEnd;
+    attr.key    = iter_end;
+    attr.value  = iter_end;
     return attr;
   }
 

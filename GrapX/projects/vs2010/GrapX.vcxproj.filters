@@ -402,6 +402,9 @@
     <ClInclude Include="..\..\..\include\GrapX\MOSprite.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Canvas\MOSpriteImpl.h">
+      <Filter>Lib\Canvas</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Platform\GXApp.cpp">
@@ -778,6 +781,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Controls\GXUIEdit_WE1.9.4.cpp">
       <Filter>Lib\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\MOSpriteImpl.cpp">
+      <Filter>Lib\Canvas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Canvas\MOSpriteManf.cpp">
+      <Filter>Lib\Canvas</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,3 +1,4 @@
+#ifdef ENABLE_GRAPHICS_API_DX9
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 #define _GXGRAPHICS_INLINE_EFFECT_D3D9_
 #define _GXGRAPHICS_INLINE_SHADER_D3D9_
@@ -156,3 +157,4 @@ namespace D3D9
 } // namespace D3D9
 
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#endif // #ifdef ENABLE_GRAPHICS_API_DX9

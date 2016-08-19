@@ -1,3 +1,4 @@
+#ifdef ENABLE_GRAPHICS_API_DX9
 #if (defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)) && ! defined(__clang__)
 
 // 全局头文件
@@ -31,7 +32,6 @@
 #include "thread/clMessageThread.h"
 #include "User/gxMessage.hxx"
 
-#pragma comment(lib, "shell32.lib")
 //////////////////////////////////////////////////////////////////////////
 
 IGXPlatform_Win32D3D9::IGXPlatform_Win32D3D9()
@@ -164,76 +164,6 @@ GXLPCWSTR IGXPlatform_Win32D3D9::GetRootDir()
 {
   return m_strRootDir;
 }
-
-void IntWin32ResizeWindow(HWND hWnd, GXApp* pApp)
-{
-  RECT rect;
-  GetClientRect(hWnd, &rect);
-  GXUIResizeStation(rect.right, rect.bottom);
-
-  GXSIZE size;
-  size.cx = rect.right;
-  size.cy = rect.bottom;
-  pApp->OnResizing(&size);
-}
-
-GXBOOL IntWin32SwitchFullScreen(HWND hWnd)
-{
-  DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
-  if(TEST_FLAGS_ALL(dwStyle, WS_OVERLAPPEDWINDOW))
-  {
-    SetWindowLong(hWnd, GWL_STYLE, dwStyle & (~WS_OVERLAPPEDWINDOW));
-    SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, -1);
-    return TRUE;
-  }
-  else
-  {
-    SetWindowLong(hWnd, GWL_STYLE, dwStyle | WS_OVERLAPPEDWINDOW);
-    SendMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, -1);
-    return FALSE;
-  }
-}
-#ifndef _DEV_DISABLE_UI_CODE
-GXBOOL IntSetCursor(GXWPARAM wParam, LPARAM lParam)
-{
-  GXHWND hWnd   = (GXHWND)wParam;
-  const int nHittest  = GXLOWORD(lParam);
-  const int wMouseMsg = GXHIWORD(lParam);
-  HCURSOR& hCursor = IntGetStationPtr()->hCursor;
-  
-  switch(nHittest)
-  {
-    case GXHTCLIENT:
-      hCursor = (HCURSOR)gxGetClassLongW(hWnd, GXGCL_HCURSOR);
-      break;
-
-    case GXHTLEFT:
-    case GXHTRIGHT:
-      hCursor = LoadCursor(NULL, IDC_SIZEWE);
-      break;
-
-    case GXHTTOP:
-    case GXHTBOTTOM:
-      hCursor = LoadCursor(NULL, IDC_SIZENS);
-      break;
-
-    case GXHTTOPLEFT:
-    case GXHTBOTTOMRIGHT:
-      hCursor = LoadCursor(NULL, IDC_SIZENWSE);
-      break;
-
-    case GXHTTOPRIGHT:
-    case GXHTBOTTOMLEFT:
-      hCursor = LoadCursor(NULL, IDC_SIZENESW);
-      break;
-    default:
-      hCursor = LoadCursor(NULL, IDC_ARROW);
-      break;
-  }
-  return TRUE; 
-}
-#endif // #ifndef _DEV_DISABLE_UI_CODE
-
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -383,3 +313,4 @@ STATIC_ASSERT(MK_CONTROL == GXMK_CONTROL);
 STATIC_ASSERT(MK_MBUTTON == GXMK_MBUTTON);
 
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#endif // #ifdef ENABLE_GRAPHICS_API_DX9
