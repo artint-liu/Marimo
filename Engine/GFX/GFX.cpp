@@ -80,7 +80,7 @@ namespace GFX
     GXHRESULT hval = GX_OK;
     //clStockW::Section handle = sp.FindFirstSection(NULL, FALSE, NULL, NULL);
     clStockW::Section handle = sp.Open(NULL);
-    if(handle.IsValid()) {
+    if(handle) {
       do {
         clStringW strSect = handle.SectionName(); // sp.GetSectionName(handle);
         TypeId eTypeId = Empty;
@@ -101,7 +101,7 @@ namespace GFX
           GXDefinitionArray aParams;
           aParams.reserve(30);
 
-          if(val.IsValid())
+          if(val)
           {
             do {
               GXDefinition def;
