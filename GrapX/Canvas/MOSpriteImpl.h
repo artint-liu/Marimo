@@ -90,12 +90,12 @@ public:
   GXBOOL    GetAnimation         (GXINT nIndex, ANIMATION* pAnimation) const override;
   GXSIZE_T  GetAnimFrame         (GXINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const override;
 
-  GXBOOL    GetModuleRect        (GXINT nIndex, GXLPCRECT rcSprite) const override;  // 获得Module在Image中的位置
-  GXBOOL    GetModuleRegion      (GXINT nIndex, GXLPCREGN rgSprite) const override;
-  GXBOOL    GetFrameBounding     (GXINT nIndex, GXLPCRECT lprc) const override;
-  GXBOOL    GetAnimBounding      (GXINT nIndex, GXLPCRECT lprc) const override;
-  Type      GetBounding          (ID id, GXLPCRECT lprc) const override; // 对于Module，返回值的left和top都应该是0
-  Type      GetBounding          (ID id, GXLPCREGN lprg) const override;
+  GXBOOL    GetModuleRect        (GXINT nIndex, GXLPRECT rcSprite) const override;  // 获得Module在Image中的位置
+  GXBOOL    GetModuleRegion      (GXINT nIndex, GXLPREGN rgSprite) const override;
+  GXBOOL    GetFrameBounding     (GXINT nIndex, GXLPRECT lprc) const override;
+  GXBOOL    GetAnimBounding      (GXINT nIndex, GXLPRECT lprc) const override;
+  Type      GetBounding          (ID id, GXLPRECT lprc) const override; // 对于Module，返回值的left和top都应该是0
+  Type      GetBounding          (ID id, GXLPREGN lprg) const override;
 
   GXSIZE_T  GetImageCount        () const override;  // 含有的图片数量
   GXBOOL    GetImage             (GXImage** pImage, GXINT index) const override;

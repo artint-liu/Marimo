@@ -39,6 +39,7 @@
 #include <GrapX/GXFont.H>
 #include <GrapX/GXImage.H>
 #include <GrapX/GXSprite.H>
+#include <GrapX/MOSprite.H>
 #include <GrapX/GXCanvas.H>
 #include <GrapX/GXCanvas3D.h>
 #include <GrapX/GXGraphics.h>

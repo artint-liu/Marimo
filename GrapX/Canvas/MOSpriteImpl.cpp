@@ -457,32 +457,32 @@ GXSIZE_T MOSpriteImpl::GetAnimFrame(GXINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_
   return 0;
 }
 
-GXBOOL MOSpriteImpl::GetModuleRect(GXINT nIndex, GXLPCRECT rcSprite) const 
+GXBOOL MOSpriteImpl::GetModuleRect(GXINT nIndex, GXLPRECT rcSprite) const 
 {
   return FALSE;
 }
 
-GXBOOL MOSpriteImpl::GetModuleRegion(GXINT nIndex, GXLPCREGN rgSprite) const 
+GXBOOL MOSpriteImpl::GetModuleRegion(GXINT nIndex, GXLPREGN rgSprite) const 
 {
   return FALSE;
 }
 
-GXBOOL MOSpriteImpl::GetFrameBounding(GXINT nIndex, GXLPCRECT lprc) const 
+GXBOOL MOSpriteImpl::GetFrameBounding(GXINT nIndex, GXLPRECT lprc) const 
 {
   return FALSE;
 }
 
-GXBOOL MOSpriteImpl::GetAnimBounding(GXINT nIndex, GXLPCRECT lprc) const 
+GXBOOL MOSpriteImpl::GetAnimBounding(GXINT nIndex, GXLPRECT lprc) const 
 {
   return FALSE;
 }
 
-MOSprite::Type MOSpriteImpl::GetBounding(ID id, GXLPCRECT lprc) const 
+MOSprite::Type MOSpriteImpl::GetBounding(ID id, GXLPRECT lprc) const 
 {
   return Type_Error;
 }
 
-MOSprite::Type MOSpriteImpl::GetBounding(ID id, GXLPCREGN lprg) const 
+MOSprite::Type MOSpriteImpl::GetBounding(ID id, GXLPREGN lprg) const 
 {
   return Type_Error;
 }

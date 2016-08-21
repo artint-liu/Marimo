@@ -35,9 +35,9 @@ namespace Marimo
     {
       GXINT    id;
       GXLPCSTR name;
+      GXUINT   rate;
       GXINT    start;
       GXINT    count;
-      GXUINT   rate;
     };
 
     struct FRAME_UNIT   // 描述单一的Module在Frame中的位置和旋转
@@ -96,12 +96,12 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL    GetAnimation         (GXINT nIndex, ANIMATION* pAnimation) const);
     GXSTDINTERFACE(GXSIZE_T  GetAnimFrame         (GXINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const);
 
-    GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXINT nIndex, GXLPCRECT rcSprite) const);  // 获得Module在Image中的位置
-    GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXINT nIndex, GXLPCREGN rgSprite) const);
-    GXSTDINTERFACE(GXBOOL    GetFrameBounding     (GXINT nIndex, GXLPCRECT lprc) const);
-    GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXINT nIndex, GXLPCRECT lprc) const);
-    GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPCRECT lprc) const); // 对于Module，返回值的left和top都应该是0
-    GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPCREGN lprg) const);
+    GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXINT nIndex, GXLPRECT rcSprite) const);  // 获得Module在Image中的位置
+    GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXINT nIndex, GXLPREGN rgSprite) const);
+    GXSTDINTERFACE(GXBOOL    GetFrameBounding     (GXINT nIndex, GXLPRECT lprc) const);
+    GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXINT nIndex, GXLPRECT lprc) const);
+    GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+    GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPREGN lprg) const);
 
     GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // 含有的图片数量
     GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXINT index) const);
