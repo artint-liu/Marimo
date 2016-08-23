@@ -92,6 +92,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
   GXHRESULT hval = GX_FAIL;
 
   if( ! ss.LoadW(szSpriteFile)) {
+    CLOG_ERRORW(L"%s : Can not open file(\"%s\").", __FUNCTIONW__, szSpriteFile);
     return GX_E_OPEN_FAILED;
   }
   
@@ -127,6 +128,9 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
     if(GXSUCCEEDED(hval)) {
       GXSPRITE_DESCW sDesc = pSpriteDesc->ToDesc();
       hval = GXCreateSpriteEx(pGraphics, &sDesc, ppSprite);
+      if (GXFAILED(hval)) {
+        CLOG_ERRORW(L"%s : (\"%s\").\n", __FUNCTIONW__, szSpriteFile);
+      }
     }
     SAFE_DELETE(pSpriteDesc);
   }

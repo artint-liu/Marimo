@@ -228,7 +228,7 @@ struct EDITSTATE
   GXLRESULT EM_PosFromChar(GXINT index, GXBOOL after_wrap);
   GXINT     EM_LineLength(GXINT index);
   GXBOOL    EM_LineScroll_internal(GXINT dx, GXINT dy);
-  void      EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL send_update, GXBOOL honor_limit);
+  void      EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL send_update, GXBOOL honor_limit, GXBOOL bImpulse);
   GXINT     EM_GetLine(GXINT line, GXLPWSTR dst, GXBOOL unicode);
   void      EM_SetMargins(GXINT action, GXWORD left, GXWORD right, GXBOOL repaint);
   GXBOOL    EM_Undo();
@@ -2486,7 +2486,7 @@ GXLRESULT EDITSTATE::EM_GetSel(GXLPUINT start, GXLPUINT end)
 *  FIXME: handle ES_NUMBER and ES_OEMCONVERT here
 *
 */
-void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL send_update, GXBOOL honor_limit)
+void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL send_update, GXBOOL honor_limit, GXBOOL bImpulse)
 {
   GXUINT strl = GXSTRLEN(lpsz_replace);
   GXUINT tl = get_text_length();
@@ -2678,7 +2678,7 @@ void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL se
   UpdateScrollInfo();
 
 
-  if(m_VarText.IsValid()) {
+  if(bImpulse && m_VarText.IsValid()) {
     m_VarText.ParseW(m_pText, 0);
   }
 
@@ -2957,7 +2957,7 @@ GXBOOL EDITSTATE::EM_Undo()
 
   EM_SetSel(undo_position, undo_position + undo_insert_count, FALSE);
   EM_EmptyUndoBuffer();
-  EM_ReplaceSel(TRUE, utext, TRUE, TRUE);
+  EM_ReplaceSel(TRUE, utext, TRUE, TRUE, TRUE);
   EM_SetSel(undo_position, undo_position + undo_insert_count, FALSE);
 
   /* send the notification after the selection start and end are set */
@@ -3001,12 +3001,12 @@ void EDITSTATE::WM_Paste()
   gxOpenClipboard(hwndSelf);
   if ((hsrc = (GXHGLOBAL)gxGetClipboardData(CF_UNICODETEXT))) {
     src = (GXLPWSTR)gxGlobalLock(hsrc);
-    EM_ReplaceSel(TRUE, src, TRUE, TRUE);
+    EM_ReplaceSel(TRUE, src, TRUE, TRUE, TRUE);
     gxGlobalUnlock((GXHLOCAL)hsrc);
   }
   else if (m_dwStyle & ES_PASSWORD) {
     /* clear selected text in password edit box even with empty clipboard */
-    EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE);
+    EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE, TRUE);
   }
   gxCloseClipboard();
 }
@@ -3052,7 +3052,7 @@ inline void EDITSTATE::WM_Clear()
   if(m_dwStyle & ES_READONLY)
     return;
 
-  EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE);
+  EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE, TRUE);
 }
 
 
@@ -3094,7 +3094,7 @@ GXLRESULT EDITSTATE::WM_Char(GXWCHAR c)
         MoveDown_ML(FALSE);
       } else {
         static const GXWCHAR cr_lfW[] = {'\r','\n',0};
-        EM_ReplaceSel(TRUE, cr_lfW, TRUE, TRUE);
+        EM_ReplaceSel(TRUE, cr_lfW, TRUE, TRUE, TRUE);
       }
     }
     break;
@@ -3104,7 +3104,7 @@ GXLRESULT EDITSTATE::WM_Char(GXWCHAR c)
       static const GXWCHAR tabW[] = {'\t',0};
       if (IsInsideDialog())
         break;
-      EM_ReplaceSel(TRUE, tabW, TRUE, TRUE);
+      EM_ReplaceSel(TRUE, tabW, TRUE, TRUE, TRUE);
     }
     break;
   case VK_BACK:
@@ -3145,7 +3145,7 @@ GXLRESULT EDITSTATE::WM_Char(GXWCHAR c)
       GXWCHAR str[2];
       str[0] = c;
       str[1] = '\0';
-      EM_ReplaceSel(TRUE, str, TRUE, TRUE);
+      EM_ReplaceSel(TRUE, str, TRUE, TRUE, TRUE);
     }
     break;
   }
@@ -3817,14 +3817,14 @@ void EDITSTATE::WM_SetText(GXLPCWSTR text, GXBOOL unicode)
   if (text) 
   {
     TRACE("%s\n", debugstr_w(text));
-    EM_ReplaceSel(FALSE, text, FALSE, FALSE);
+    EM_ReplaceSel(FALSE, text, FALSE, FALSE, TRUE);
     if(!unicode)
       gxHeapFree(gxGetProcessHeap(), 0, textW);
   } 
   else 
   {
     TRACE("<NULL>\n");
-    EM_ReplaceSel(FALSE, empty_stringW, FALSE, FALSE);
+    EM_ReplaceSel(FALSE, empty_stringW, FALSE, FALSE, TRUE);
   }
   x_offset = 0;
   flags &= ~EF_MODIFIED;
@@ -4286,7 +4286,7 @@ void EDITSTATE::GetCompositionStr(GXHIMC hIMC, GXLPARAM CompFlag)
   else
     selection_end = selection_start;
 
-  EM_ReplaceSel(FALSE, lpCompStr, TRUE, TRUE);
+  EM_ReplaceSel(FALSE, lpCompStr, TRUE, TRUE, TRUE);
   composition_len = abs(composition_start - selection_end);
 
   selection_start = composition_start;
@@ -4323,7 +4323,7 @@ void EDITSTATE::GetResultStr(GXHIMC hIMC)
 
   selection_start = composition_start;
   selection_end = composition_start + composition_len;
-  EM_ReplaceSel(TRUE, lpResultStr, TRUE, TRUE);
+  EM_ReplaceSel(TRUE, lpResultStr, TRUE, TRUE, TRUE);
   composition_start = selection_end;
   composition_len = 0;
 
@@ -4337,7 +4337,7 @@ void EDITSTATE::ImeComposition(GXHWND hwnd, GXLPARAM CompFlag)
 
   if (composition_len == 0 && selection_start != selection_end)
   {
-    EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE);
+    EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE, TRUE);
     composition_start = selection_end;
   }
 
@@ -4497,7 +4497,7 @@ GXLRESULT EDITSTATE::WM_Create(GXLPCWSTR name)
   SetRectNP(&clientRect);
 
   if (name && *name) {
-    EM_ReplaceSel(FALSE, name, FALSE, FALSE);
+    EM_ReplaceSel(FALSE, name, FALSE, FALSE, TRUE);
     /* if we insert text to the editline, the text scrolls out
     * of the window, as the caret is placed after the insert
     * pos normally; thus we reset selection... to 0 and
@@ -4583,7 +4583,10 @@ GXLRESULT EDITSTATE::SetVariable(MOVariable* pVariable)
 
 GXVOID EDITSTATE::OnImpulse(LPCDATAIMPULSE pImpulse)
 {
-  CLBREAK;
+  clStringW str = pImpulse->sponsor->ToStringW();
+  if (str != m_pText) {
+    EM_ReplaceSel(FALSE, str, FALSE, TRUE, FALSE);
+  }
 }
 
 GXBOOL EDITSTATE::SolveDefinition( const GXDefinitionArrayW& aDefinitions )
@@ -4733,7 +4736,7 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
         gxMultiByteToWideChar(CP_ACP, 0, textA, -1, textW, countW);
       }
 
-      es->EM_ReplaceSel((GXBOOL)wParam, textW, TRUE, TRUE);
+      es->EM_ReplaceSel((GXBOOL)wParam, textW, TRUE, TRUE, TRUE);
       result = 1;
 
       if(!unicode)
@@ -5136,7 +5139,7 @@ static GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, G
   case GXWM_IME_ENDCOMPOSITION:
     if (es->composition_len > 0)
     {
-      es->EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE);
+      es->EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE, TRUE);
       es->selection_end = es->selection_start;
       es->composition_len= 0;
     }

@@ -18,26 +18,26 @@ namespace Marimo
 
     struct MODULE
     {
-      GXINT    id;    // 0 是无效id
+      GXUINT   id;    // 0 是无效id
       GXLPCSTR name;
-      GXREGN   regn;
+      GXREGN   regn;  // regn.top 的值确定使用哪个Image
     };
 
     struct FRAME
     {
-      GXINT    id;
+      GXUINT   id;
       GXLPCSTR name;
-      GXINT    start;   // 在aFrameDescs数组中的开始位置
-      GXINT    count;
+      GXINT    begin;   // 在aFrameDescs数组中的开始位置
+      GXINT    end;
     };
 
     struct ANIMATION
     {
-      GXINT    id;
+      GXUINT   id;
       GXLPCSTR name;
       GXUINT   rate;
-      GXINT    start;
-      GXINT    count;
+      GXINT    begin;
+      GXINT    end;
     };
 
     struct FRAME_UNIT   // 描述单一的Module在Frame中的位置和旋转
@@ -49,7 +49,7 @@ namespace Marimo
 
     typedef GXUINT    ANIM_UNIT;
     typedef GXUINT    TIME_T;
-    typedef GXINT     ID;         // id 不能为 0, module/frame/animation 不能相同
+    typedef GXUINT    ID;         // id 不能为 0, module/frame/animation 不能相同
 
     typedef clvector<MODULE>      ModuleArray;
     typedef clvector<FRAME>       FrameArray;
@@ -104,12 +104,48 @@ namespace Marimo
     GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPREGN lprg) const);
 
     GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // 含有的图片数量
-    GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXINT index) const);
+    GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXUINT index) const);
     GXSTDINTERFACE(clStringW GetImageFileW        (GXINT index) const);
     GXSTDINTERFACE(clStringA GetImageFileA        (GXINT index) const);
 
-    static GXBOOL GXDLLAPI CreateFromStockA(Sprite** ppSprite, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
+    static GXBOOL GXDLLAPI CreateFromStockA       (Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
+    //static GXBOOL GXDLLAPI CreateFromStockW       (Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
+    static GXBOOL GXDLLAPI CreateFromStockFileA   (Sprite** ppSprite, GXGraphics* pGraphics, GXLPCSTR szFilename, GXLPCSTR szSection = "sprite");
+    //static GXBOOL GXDLLAPI CreateFromStockFileW   (Sprite** ppSprite, GXGraphics* pGraphics, GXLPCSTR szFilename, GXLPCSTR szSection = "sprite");
   };
+
+  //
+  // 用于在加载/储存时使用的描述结构
+  //
+  struct GXDLL SPRITE_DESC
+  {
+    struct TYPEIDX{
+      Sprite::Type type;
+      union {
+        GXUINT             index;
+        Sprite::MODULE*    pModel;
+        Sprite::FRAME*     pFrame;
+        Sprite::ANIMATION* pAnination;
+      };
+    };
+
+    typedef clmap<Sprite::ID, TYPEIDX>  IDDict;
+    typedef clmap<GXLPCSTR, TYPEIDX>    NameDict;
+
+    clStringArrayA          aFiles;
+    Sprite::ModuleArray     aModules;
+    Sprite::FrameArray      aFrames;
+    Sprite::AnimationArray  aAnims;
+    Sprite::FrameUnitArray  aFrameUnits;
+    Sprite::AnimUnitArray   aAnimUnits;
+
+    IDDict                  sIDDict;
+    NameDict                sNameDict;
+
+    static SPRITE_DESC* Create  (clstd::StockA* pStock, GXLPCSTR szSection);
+    static void         Destroy (SPRITE_DESC* pDesc);
+  };
+
 } // namespace Marimo
 
 typedef Marimo::Sprite MOSprite;

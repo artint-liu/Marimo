@@ -75,6 +75,10 @@ inline void InlSetZeroT(_Ty& t) {
 #define SAFE_RELEASE(pobj)    if((pobj) != NULL)  {(pobj)->Release(); (pobj) = NULL; }
 #endif // SAFE_RELEASE
 
+#ifndef SAFE_ADDREF
+#define SAFE_ADDREF(pobj)    if((pobj) != NULL)  { (pobj)->AddRef(); }
+#endif // SAFE_ADDREF
+
 #if __cplusplus < 201103L
 # define TRIVIAL_DEFAULT {}
 #else

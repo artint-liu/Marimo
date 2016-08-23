@@ -236,7 +236,7 @@ namespace GXUI
 
   int List::OnTimer(GXUINT nIDTimer)
   {
-    TRACE("OnTimer\n");
+    //TRACE("OnTimer\n");
 
     switch(nIDTimer)
     {
@@ -874,7 +874,7 @@ namespace GXUI
     //  m_pAdapter->Release();
     //  m_pAdapter = NULL;
     //}
-    SAFE_DELETE(m_pAdapter);
+    SAFE_RELEASE(m_pAdapter);
     m_pAdapter = pAdapter;
 
     if(m_pAdapter) {

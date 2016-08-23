@@ -253,10 +253,11 @@ namespace GXUI
       clStringW   sString;
     };
   protected:
+    virtual ~IListDataAdapter();
     GXHWND  m_hWnd;
+
   public:
     IListDataAdapter(GXHWND hWnd);
-    virtual ~IListDataAdapter();
 
     //virtual GXHRESULT AddRef  ();
     //virtual GXHRESULT Release ();

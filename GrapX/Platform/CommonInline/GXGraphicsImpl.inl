@@ -499,6 +499,7 @@ GXFont* GXGraphicsImpl::CreateFontIndirectA(const GXLPLOGFONTA lpLogFont)
   if(pFont->CreateFont(lpLogFont->lfWidth, lpLogFont->lfHeight, lpLogFont->lfFaceName) == FALSE)
   {
     SAFE_RELEASE(pFont);
+    CLOG_ERROR("GXGraphics::CreateFontIndirectA : Failed to create font(\"%s\").\n", lpLogFont->lfFaceName);
     m_pLogger->OutputFormatW(L"...Failed.\n");
     return NULL;
   }

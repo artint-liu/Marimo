@@ -945,7 +945,7 @@ namespace Marimo
     if(it_result != sDict.end())
     {
 
-      // 加入到推送集合里，放置自己被无限推送
+      // 加入到推送集合里，防止自己被无限推送
       ImpulsingSet::iterator itThisImpulse = m_ImpulsingSet.insert(key).first; // FIXME: 这个如果是动态数组的话，key是偏移，可能在多个动态数组中出现重合
 
       for(auto it = it_result->second.begin(); it != it_result->second.end(); ++it)
