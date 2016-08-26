@@ -171,6 +171,10 @@ namespace clstd
 
   void rgb2hsv(float r, float g, float b, float* h, float* s, float* v);
   void hsv2rgb(float h, float s, float v, float* r, float* g, float* b);
+
+  void rgb2hsl(float r, float g, float b, float* h, float* s, float* l);
+  void hsl2rgb(float h, float s, float l, float* r, float* g, float* b);
+
   void rgb2yuv(float r, float g, float b, float* y, float* u, float* v);
   void yuv2rgb(float y, float u, float v, float* r, float* g, float* b);
   float getgray(float r, float g, float b);

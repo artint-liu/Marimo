@@ -349,6 +349,11 @@ namespace clstd
       return x * v.x + y * v.y + z * v.z; 
     }
 
+    float dot(float _x, float _y, float _z) const
+    { 
+      return x * _x + y * _y + z * _z; 
+    }
+
     static float dot(const _float3& v1, const _float3& v2)
     { 
       return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;

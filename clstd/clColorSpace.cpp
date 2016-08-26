@@ -73,44 +73,116 @@ namespace clstd
     *pMagic = s_matHue2RGB;
   }
 
+  //////////////////////////////////////////////////////////////////////////
+
   void rgb2hsv(float r, float g, float b, float* h, float* s, float* v)
   {
-    //const float fInv2PI = 1.0f / (D3DX_PI * 2.0f);
-
     float3 v3(r, g, b);
-    float4 v4;
-    Vec3TransformCoord(&v4, &v3, &s_matRGB2Hue);
-    //D3DXVECTOR4 v4;
-    //D3DXVec3Transform(&v4, &v3, &matMagic);
 
-    //v3 *= s_matRGB2Hue;
+    float x = v3.dot(-0.81649661f, 0.40824831f, 0.40824831f);
+    float y = v3.dot(0.0f, -0.70710677f, 0.70710677f);
 
-    *h = (atan2(v4.y, v4.x) + CL_PI) * CL_INVERSE2PI;
+    *h = (atan2(y, x) + CL_PI) * CL_INVERSE2PI;
 
     float fMax = clMax(v3.x, clMax(v3.y, v3.z));
     float fMin = clMin(v3.x, clMin(v3.y, v3.z));
 
     *v = fMax;
 
-    if (fMax == 0)
+    if (fMax == 0) {
       *s = 0;
-    else
+    } else {
       *s = (fMax - fMin) / fMax;
+    }
   }
 
   void hsv2rgb(float h, float s, float v, float* r, float* g, float* b)
   {
-    const float c_fMid = 1.73205081f * 0.5f;
     const float th = (h + 0.5f) * CL_2PI;
-    float3 v3(cos(th), sin(th), c_fMid);
-    float4 v4;
-    Vec3TransformCoord(&v4, &v3, &s_matHue2RGB);
-    const float c_fScale = s * v;
-    const float c_fBase = v - c_fScale;
-    *r = v4.x * c_fScale + c_fBase;
-    *g = v4.y * c_fScale + c_fBase;
-    *b = v4.z * c_fScale + c_fBase;
+    float3 v3(cos(th), sin(th), 0);
+
+    float x = v3.y * 0.00000000f - v3.x * 0.81649655f;
+    float y = v3.x * 0.40824828f - v3.y * 0.70710677f;
+    float z = v3.x * 0.40824828f + v3.y * 0.70710677f;
+
+    float _a = clMin(x, clMin(y, z));
+    float _b = clMax(x, clMax(y, z)) - _a;
+
+    s = s * v;
+    const float scale = s / _b;
+    const float base = v - s - _a * scale;
+
+    *r = x * scale + base;
+    *g = y * scale + base;
+    *b = z * scale + base;
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  void rgb2hsl(float r, float g, float b, float* h, float* s, float* l)
+  {
+    float3 v3(r, g, b);
+
+    float x = v3.dot(-0.81649661f, 0.40824831f, 0.40824831f);
+    float y = v3.dot(0.0f, -0.70710677f, 0.70710677f);
+
+    *h = (atan2(y, x) + CL_PI) * CL_INVERSE2PI;
+
+    float fMax = clMax(v3.x, clMax(v3.y, v3.z));
+    float fMin = clMin(v3.x, clMin(v3.y, v3.z));
+    float delta = fMax - fMin;
+
+    *l = (fMin + fMax) * 0.5f;
+    if(delta == 0) {
+      *s = 0.0f;
+    } else {
+      *s = delta / (1 - fabs(2 * (*l) - 1));
+      // L < 0.5  : delta / (2.0 * L)
+      // L >= 0.5 : delta / (2.0 - 2.0 * L)
+    }
+  }
+
+  void hsl2rgb(float h, float s, float l, float* r, float* g, float* b)
+  {
+    const float th = (h + 0.5f) * CL_2PI;
+    float3 v3(cos(th), sin(th), 0);
+
+    const float x = v3.y * 0.00000000f - v3.x * 0.81649655f;
+    const float y = v3.x * 0.40824828f - v3.y * 0.70710677f;
+    const float z = v3.x * 0.40824828f + v3.y * 0.70710677f;
+
+    //if(l < 0.5) {
+    //  k = l;
+    //} else {
+    //  k = 1 - l;
+    //}
+
+    //const float k = 0.5f - fabs(0.5f - l);
+    //const float _a = l - s * k;
+    //const float _b = 2.0f * s * k;
+
+    //const float _min = clMin(x, clMin(y, z));
+    //const float delta = _b / (clMax(x, clMax(y, z)) - _min);
+
+
+    //*r = (x - _min) * delta + _a;
+    //*g = (y - _min) * delta + _a;
+    //*b = (z - _min) * delta + _a;
+
+    const float k = 0.5f - fabs(0.5f - l);
+    const float _a = l - s * k;
+    const float _b = 2.0f * s * k;
+
+    const float _min = clMin(x, clMin(y, z));
+    const float delta = (clMax(x, clMax(y, z)) - _min);
+
+
+    *r = (x - _min) / delta * _b + _a;
+    *g = (y - _min) / delta * _b + _a;
+    *b = (z - _min) / delta * _b + _a;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   void rgb2yuv(float r, float g, float b, float* y, float* u, float* v)
   {
