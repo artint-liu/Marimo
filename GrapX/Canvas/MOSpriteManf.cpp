@@ -256,7 +256,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL GXDLLAPI Sprite::CreateFromStockA(Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szSection)
+  GXBOOL GXDLLAPI Sprite::CreateFromStockA(Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szImageDir, GXLPCSTR szSection)
   {
     MOSpriteImpl* pSprite = new MOSpriteImpl;
     if( ! InlCheckNewAndIncReference(pSprite)) {
@@ -264,6 +264,8 @@ namespace Marimo
     }
 
     SPRITE_DESC_LOADER spr;
+    spr.strImageDir = szImageDir;
+
     if (spr.Load(pStock, szSection)) {
       if (pSprite->Initialize(pGraphics, &spr)) {
         *ppSprite = pSprite;
@@ -282,7 +284,11 @@ namespace Marimo
       CLOG_ERROR("%s : Can not open stock file(\"%s\").\n", __FUNCTION__, szFilename);
       return FALSE;
     }
-    
-    return CreateFromStockA(ppSprite, pGraphics, &stock, szSection);
+    clsize pos = clpathfile::FindFileNameA(szFilename);
+    clStringA strImageDir;
+    if(pos != 0) {
+      strImageDir.Append(szFilename, pos);
+    }
+    return CreateFromStockA(ppSprite, pGraphics, &stock, strImageDir, szSection);
   }
 } // namespace Marimo

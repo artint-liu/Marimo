@@ -87,7 +87,7 @@ namespace Marimo
 
   GXVOID MOSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
   {
-
+    CLBREAK;
   }
 
   //GXVOID MOSpriteImpl::PaintModuleH(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth) const
@@ -317,18 +317,18 @@ namespace Marimo
 
 
 
-  GXBOOL MOSpriteImpl::GetModule(GXINT nIndex, MODULE* pModule) const
+  GXBOOL MOSpriteImpl::GetModule(GXUINT nIndex, MODULE* pModule) const
   {
-    if (nIndex >= 0 && nIndex < (GXINT)m_loader.aModules.size() && pModule != NULL) {
+    if (nIndex < (GXINT)m_loader.aModules.size() && pModule != NULL) {
       *pModule = m_loader.aModules[nIndex];
       return TRUE;
     }
     return FALSE;
   }
 
-  GXBOOL MOSpriteImpl::GetFrame(GXINT nIndex, FRAME* pFrame) const
+  GXBOOL MOSpriteImpl::GetFrame(GXUINT nIndex, FRAME* pFrame) const
   {
-    if (nIndex >= 0 && nIndex < (GXINT)m_loader.aFrames.size() && pFrame != NULL) {
+    if (nIndex < (GXINT)m_loader.aFrames.size() && pFrame != NULL) {
       *pFrame = m_loader.aFrames[nIndex];
       return TRUE;
     }
@@ -337,156 +337,206 @@ namespace Marimo
 
   GXVOID MOSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const
   {
-
+    CLBREAK;
   }
 
   GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
   {
-
+    CLBREAK;
   }
 
   GXINT MOSpriteImpl::Find(ID id) const
   {
+    CLBREAK;
     return -1;
   }
 
   GXINT MOSpriteImpl::Find(GXLPCSTR szName) const
   {
+    CLBREAK;
     return -1;
   }
 
   GXSIZE_T MOSpriteImpl::GetModuleCount() const
   {
-    return 0;
+    return m_loader.aModules.size();
   }
 
   GXSIZE_T MOSpriteImpl::GetFrameCount() const
   {
-    return 0;
+    return m_loader.aFrames.size();
   }
 
   GXSIZE_T MOSpriteImpl::GetAnimationCount() const
   {
-    return 0;
+    return m_loader.aAnims.size();
   }
 
-  GXSIZE_T MOSpriteImpl::GetAnimFrameCount(GXINT nIndex) const
+  GXSIZE_T MOSpriteImpl::GetAnimFrameCount(GXUINT nIndex) const
   {
-    return 0;
+    if(nIndex >= (GXUINT)m_loader.aAnims.size()) {
+      return 0;
+    }
+    const ANIMATION& a = m_loader.aAnims[nIndex];
+    return a.end - a.begin;
   }
 
-  GXSIZE_T MOSpriteImpl::GetFrameModule(GXINT nIndex, FRAME_UNIT* pFrameModule, GXSIZE_T nCount) const
+  GXSIZE_T MOSpriteImpl::GetFrameModule(GXUINT nIndex, FRAME_UNIT* pFrameModule, GXSIZE_T nCount) const
   {
-    return 0;
+    if(nIndex >= (GXUINT)m_loader.aFrames.size()) {
+      return 0;
+    }
+
+    const FRAME& f = m_loader.aFrames[nIndex];
+    nCount = clMin(nCount, f.end - f.begin);
+
+    for(GXSIZE_T i = 0; i < nCount; i++)
+    {
+      FRAME_UNIT& dst = pFrameModule[i];
+      const FRAME_UNIT& src = m_loader.aFrameUnits[f.begin + i];
+      dst.nModuleIdx = src.nModuleIdx;
+      dst.regn       = src.regn;
+      dst.rotate     = src.rotate;
+    }
+    return nCount;
+    //return m_loader.aFrameUnits.size();
   }
 
-  GXBOOL MOSpriteImpl::GetAnimation(GXINT nIndex, ANIMATION* pAnimation) const
+  GXBOOL MOSpriteImpl::GetAnimation(GXUINT nIndex, ANIMATION* pAnimation) const
   {
+    if(nIndex >= (GXUINT)m_loader.aAnims.size()) {
+      return FALSE;
+    }
+    const ANIMATION& a = m_loader.aAnims[nIndex];
+    pAnimation->id    = a.id;
+    pAnimation->name  = a.name;
+    pAnimation->rate  = a.rate;
+    pAnimation->begin = a.begin;
+    pAnimation->end   = a.end;
+    return TRUE;
+  }
+
+  GXSIZE_T MOSpriteImpl::GetAnimFrame(GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const
+  {
+    if(nIndex >= m_loader.aAnims.size()) {
+      return 0;
+    }
+    
+    const ANIMATION& a = m_loader.aAnims[nIndex];
+    if(pAnimFrame == NULL || nCount == 0) {
+      return a.end - a.begin;
+    }
+
+    nCount = clMin(nCount, a.end - a.begin);
+    for(GXSIZE_T i = 0; i < nCount; i++) {
+      pAnimFrame[i] = m_loader.aAnimUnits[a.begin + i];
+    }
+    return nCount;
+  }
+
+  GXBOOL MOSpriteImpl::GetModuleRect(GXUINT nIndex, GXLPRECT rcSprite) const
+  {
+    CLBREAK;
     return FALSE;
   }
 
-  GXSIZE_T MOSpriteImpl::GetAnimFrame(GXINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const
+  GXBOOL MOSpriteImpl::GetModuleRegion(GXUINT nIndex, GXLPREGN rgSprite) const
   {
-    return 0;
-  }
-
-  GXBOOL MOSpriteImpl::GetModuleRect(GXINT nIndex, GXLPRECT rcSprite) const
-  {
+    CLBREAK;
     return FALSE;
   }
 
-  GXBOOL MOSpriteImpl::GetModuleRegion(GXINT nIndex, GXLPREGN rgSprite) const
+  GXBOOL MOSpriteImpl::GetFrameBounding(GXUINT nIndex, GXLPRECT lprc) const
   {
+    CLBREAK;
     return FALSE;
   }
 
-  GXBOOL MOSpriteImpl::GetFrameBounding(GXINT nIndex, GXLPRECT lprc) const
+  GXBOOL MOSpriteImpl::GetAnimBounding(GXUINT nIndex, GXLPRECT lprc) const
   {
-    return FALSE;
-  }
-
-  GXBOOL MOSpriteImpl::GetAnimBounding(GXINT nIndex, GXLPRECT lprc) const
-  {
+    CLBREAK;
     return FALSE;
   }
 
   MOSprite::Type MOSpriteImpl::GetBounding(ID id, GXLPRECT lprc) const
   {
+    CLBREAK;
     return Type_Error;
   }
 
   MOSprite::Type MOSpriteImpl::GetBounding(ID id, GXLPREGN lprg) const
   {
+    CLBREAK;
     return Type_Error;
   }
 
@@ -505,23 +555,43 @@ namespace Marimo
     return TRUE;
   }
 
-  clStringW MOSpriteImpl::GetImageFileW(GXINT index) const
+  clStringW MOSpriteImpl::GetImageFileW(GXUINT index) const
   {
-    return L"";
+    if(index >= m_loader.aFiles.size()) {
+      return L"";
+    }
+    return clStringW(m_loader.aFiles[index]);
   }
 
-  clStringA MOSpriteImpl::GetImageFileA(GXINT index) const
+  clStringA MOSpriteImpl::GetImageFileA(GXUINT index) const
   {
-    return "";
+    if(index >= m_loader.aFiles.size()) {
+      return L"";
+    }
+    return m_loader.aFiles[index];
   }
 
   GXBOOL MOSpriteImpl::Initialize(GXGraphics* pGraphics, const SPRITE_DESC_LOADER* pDesc)
   {
     m_loader = *pDesc;
     m_ImageArray.reserve(pDesc->aFiles.size());
-    std::for_each(pDesc->aFiles.begin(), pDesc->aFiles.end(), [&](const clStringA& str){
-      GXImage* pImage = pGraphics->CreateImageFromFile(clStringW(str));
+    int i = 0;
+
+    std::for_each(pDesc->aFiles.begin(), pDesc->aFiles.end(), [&](const clStringA& str)
+    {
+      GXImage* pImage = NULL;
+
+      if(clpathfile::IsRelativeA(str)) {
+        clStringA strFullPath;
+        clpathfile::CombinePathA(strFullPath, pDesc->strImageDir, str);
+        m_loader.aFiles[i] = strFullPath;
+        pImage = pGraphics->CreateImageFromFile(clStringW(strFullPath));
+      }
+      else {
+        pImage = pGraphics->CreateImageFromFile(clStringW(str));
+      }
       m_ImageArray.push_back(pImage);
+      i++;
     });
 
     ASSERT(m_ImageArray.size() == pDesc->aFiles.size());

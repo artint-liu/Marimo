@@ -12,7 +12,7 @@
 
 CMOListBox::CMOListBox()
   : CMODlgItem(NULL)
-  //, m_pDelegate(NULL)
+  , m_pReceiver(NULL)
 {
 }
 

@@ -27,8 +27,8 @@ namespace Marimo
     {
       GXUINT   id;
       GXLPCSTR name;
-      GXINT    begin;   // 在aFrameDescs数组中的开始位置
-      GXINT    end;
+      GXUINT   begin;   // 在aFrameDescs数组中的开始位置
+      GXUINT   end;
     };
 
     struct ANIMATION
@@ -36,8 +36,8 @@ namespace Marimo
       GXUINT   id;
       GXLPCSTR name;
       GXUINT   rate;
-      GXINT    begin;
-      GXINT    end;
+      GXUINT   begin;
+      GXUINT   end;
     };
 
     struct FRAME_UNIT   // 描述单一的Module在Frame中的位置和旋转
@@ -88,27 +88,27 @@ namespace Marimo
     GXSTDINTERFACE(GXSIZE_T  GetModuleCount       () const);
     GXSTDINTERFACE(GXSIZE_T  GetFrameCount        () const);
     GXSTDINTERFACE(GXSIZE_T  GetAnimationCount    () const);
-    GXSTDINTERFACE(GXSIZE_T  GetAnimFrameCount    (GXINT nIndex) const);
+    GXSTDINTERFACE(GXSIZE_T  GetAnimFrameCount    (GXUINT nIndex) const);
 
-    GXSTDINTERFACE(GXBOOL    GetModule            (GXINT nIndex, MODULE* pModule) const);
-    GXSTDINTERFACE(GXBOOL    GetFrame             (GXINT nIndex, FRAME* pFrame) const);
-    GXSTDINTERFACE(GXSIZE_T  GetFrameModule       (GXINT nIndex, FRAME_UNIT* pFrameModule, GXSIZE_T nCount) const);
-    GXSTDINTERFACE(GXBOOL    GetAnimation         (GXINT nIndex, ANIMATION* pAnimation) const);
-    GXSTDINTERFACE(GXSIZE_T  GetAnimFrame         (GXINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const);
+    GXSTDINTERFACE(GXBOOL    GetModule            (GXUINT nIndex, MODULE* pModule) const);
+    GXSTDINTERFACE(GXBOOL    GetFrame             (GXUINT nIndex, FRAME* pFrame) const);
+    GXSTDINTERFACE(GXSIZE_T  GetFrameModule       (GXUINT nIndex, FRAME_UNIT* pFrameModule, GXSIZE_T nCount) const);
+    GXSTDINTERFACE(GXBOOL    GetAnimation         (GXUINT nIndex, ANIMATION* pAnimation) const);
+    GXSTDINTERFACE(GXSIZE_T  GetAnimFrame         (GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const);
 
-    GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXINT nIndex, GXLPRECT rcSprite) const);  // 获得Module在Image中的位置
-    GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXINT nIndex, GXLPREGN rgSprite) const);
-    GXSTDINTERFACE(GXBOOL    GetFrameBounding     (GXINT nIndex, GXLPRECT lprc) const);
-    GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXINT nIndex, GXLPRECT lprc) const);
+    GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXUINT nIndex, GXLPRECT rcSprite) const);  // 获得Module在Image中的位置
+    GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXUINT nIndex, GXLPREGN rgSprite) const);
+    GXSTDINTERFACE(GXBOOL    GetFrameBounding     (GXUINT nIndex, GXLPRECT lprc) const);
+    GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXUINT nIndex, GXLPRECT lprc) const);
     GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
     GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPREGN lprg) const);
 
     GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // 含有的图片数量
     GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXUINT index) const);
-    GXSTDINTERFACE(clStringW GetImageFileW        (GXINT index) const);
-    GXSTDINTERFACE(clStringA GetImageFileA        (GXINT index) const);
+    GXSTDINTERFACE(clStringW GetImageFileW        (GXUINT index) const);
+    GXSTDINTERFACE(clStringA GetImageFileA        (GXUINT index) const);
 
-    static GXBOOL GXDLLAPI CreateFromStockA       (Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
+    static GXBOOL GXDLLAPI CreateFromStockA       (Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szImageDir, GXLPCSTR szSection = "sprite");
     //static GXBOOL GXDLLAPI CreateFromStockW       (Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");
     static GXBOOL GXDLLAPI CreateFromStockFileA   (Sprite** ppSprite, GXGraphics* pGraphics, GXLPCSTR szFilename, GXLPCSTR szSection = "sprite");
     //static GXBOOL GXDLLAPI CreateFromStockFileW   (Sprite** ppSprite, GXGraphics* pGraphics, GXLPCSTR szFilename, GXLPCSTR szSection = "sprite");

@@ -1079,8 +1079,8 @@ GXBOOL SceneContext::LoadTextureFromFile(GXLPCWSTR szFilename, GTexture** ppText
     return TRUE;
   }
 
-  int nPath = clpathfile::FindFileNameW(m_FileName);
-  int nFile = clpathfile::FindFileNameW(szFilename);
+  clsize nPath = clpathfile::FindFileNameW(m_FileName);
+  clsize nFile = clpathfile::FindFileNameW(szFilename);
 
   clStringW strFilename(m_FileName, nPath);
   strFilename += &szFilename[nFile];
