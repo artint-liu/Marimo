@@ -1277,12 +1277,12 @@ namespace Marimo
     }
 
     DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
-    
+
     THIS_IMPULSE_DATA(DATACT_Deleting, nIndex, nCount);
 
     if(nIndex == (GXUINT)-1)     // 全部删除
     {
-      pThis->InlCleanupArray(pVdd, pThis->GetPtr(), nLength);
+      pThis->InlCleanupArray(pVdd, pArrayBuffer->GetPtr(), nLength);
       pArrayBuffer->Resize(0, FALSE);
     }
     else    // 从指定位置删除
