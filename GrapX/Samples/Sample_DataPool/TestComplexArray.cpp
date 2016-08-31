@@ -306,9 +306,14 @@ void TestComplexArray()
   if(PathFileExists(szFilename2))
   {
     DataPool* pAlternative = NULL;
-    DataPool::CreateFromFileW(&pAlternative, NULL, szFilename2, DataPoolLoad_ReadOnly);
-    TestGetNameId(pAlternative);
-    ENUM_DATAPOOL(pAlternative);
-    SAFE_RELEASE(pAlternative);
+    result = DataPool::CreateFromFileW(&pAlternative, NULL, szFilename2, DataPoolLoad_ReadOnly);
+    if(GXSUCCEEDED(result)) {
+      TestGetNameId(pAlternative);
+      ENUM_DATAPOOL(pAlternative);
+      SAFE_RELEASE(pAlternative);
+    }
+    else {
+      CLBREAK;
+    }
   }
 }

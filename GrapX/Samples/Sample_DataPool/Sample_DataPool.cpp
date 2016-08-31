@@ -1179,12 +1179,12 @@ int _tmain(int argc, _TCHAR* argv[])
   TestStringCutter();
 
   // Data pool test
-  //TestHugeArray();
-  //TestComplexArray();
-  //TestSelfContainStruct();
-  //TestBaseProperty();
-  //test();
-  //TestDataPool_CompileFromCode();
+  TestHugeArray();
+  TestComplexArray();
+  TestSelfContainStruct();
+  TestBaseProperty();
+  test();
+  TestDataPool_CompileFromCode();
 
   // 下面这个抽取自真实游戏的样本数据，数据文本大约32MB，90万行数据
   // 由于版权问题无法提供样例文本

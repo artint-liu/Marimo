@@ -3,6 +3,7 @@
 #include "GrapX/DataPoolIterator.h"
 #include "TestDataPool.h"
 #define CHECK_VAR
+#define LOG //TRACE
 void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBegin, DataPoolIterator& itEnd);
 
 void EunmerateArray(DataPool* pDataPool, int nDepth, DataPoolElementIterator& itBegin, DataPoolElementIterator& itEnd)
@@ -18,7 +19,7 @@ void EunmerateArray(DataPool* pDataPool, int nDepth, DataPoolElementIterator& it
     pDataPool->QueryByExpression(it.FullNameA(), &varCheck);
 #endif // #ifdef CHECK_VAR
 
-    TRACE("%*c%s[%08x:%d] %*s=\"%s\"\n", nDepth * 2, '!', it.TypeName(), 
+    LOG("%*c%s[%08x:%d] %*s=\"%s\"\n", nDepth * 2, '!', it.TypeName(), 
       it.pBuffer ? (GXINT_PTR)it.pBuffer->GetPtr() : NULL, it.offset(),
       30, it.FullNameA(), var.IsValid() ? var.ToStringA() : "<null>");
 
@@ -54,7 +55,7 @@ void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBeg
     pDataPool->QueryByExpression(name, &varCheck);
 #endif // #ifdef CHECK_VAR
 
-    TRACE("%*c%s %s[%08x:%d])(x%d) %*s=\"%s\"\n", nDepth * 2, '+', it.TypeName(), it.VariableName(), 
+    LOG("%*c%s %s[%08x:%d])(x%d) %*s=\"%s\"\n", nDepth * 2, '+', it.TypeName(), it.VariableName(), 
       it.pBuffer ? (GXINT_PTR)it.pBuffer->GetPtr() : NULL, it.offset(),
       length, 30, name, var.IsValid() ? var.ToStringA() : "<null>");
 
@@ -92,7 +93,7 @@ void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBeg
       {
         auto v1 = itVar.ToVariable();
         auto v2 = var[itVar - var.array_begin()];
-        TRACE("[]name:%s\n", var.GetName());
+        LOG("[]name:%s\n", var.GetName());
         CompareVariable(v1, v2);
       }
     }

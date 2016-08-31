@@ -849,7 +849,7 @@ namespace Marimo
 
   GXSIZE_T DataPoolImpl::IntGetRTDescHeader(SIZELIST* pSizeList)
   {
-    ASSERT(m_nNumOfTypes);
+    ASSERT(m_nNumOfTypes || m_nNumOfStructs);
     ASSERT(m_nNumOfVar);
     ASSERT(
       (m_nNumOfStructs == 0 && (m_nNumOfMember == 0 && m_nNumOfEnums == 0)) ||

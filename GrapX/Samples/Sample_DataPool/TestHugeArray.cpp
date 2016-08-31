@@ -52,6 +52,7 @@ void TestHugeArray()
     "};                              \n"
     "                                \n"
     "ANIMATION aAnimations[];        \n"
+    "object obj_array[];             \n"
     "object obj;";
 
   DataPool* pDataPool = NULL;
@@ -151,6 +152,40 @@ void TestHugeArray()
   varObj.Retain(pObj0);
   SAFE_RELEASE(pObj0);
   SAFE_RELEASE(pObj1);
+
+  //////////////////////////////////////////////////////////////////////////
+  {
+    typedef clvector<TestObject*> ObjArray;
+    ObjArray aObjs;
+    const int nObjCount = 100;
+    aObjs.reserve(nObjCount);
+    MOVariable var_obj_array;
+    pDataPool->QueryByExpression("obj_array", &var_obj_array);
+
+    for(int i = 0; i < nObjCount; i++)
+    {
+      TestObject* pObj = new TestObject;
+      aObjs.push_back(pObj);
+      var_obj_array.NewBack().Retain(pObj);
+    }
+
+    static int aRange[] = {30, 40, 0, 15, 70, 75, 20, 30};
+    for(int n = 0; n < sizeof(aRange) / sizeof(aRange[0]); n += 2)
+    {
+      var_obj_array.Remove(aRange[n], aRange[n + 1] - aRange[n]);
+
+      for(int i = aRange[n]; i < aRange[n + 1]; i++)
+      {
+        aObjs[i] = NULL;
+      }
+      aObjs.erase(aObjs.begin() + aRange[n], aObjs.begin() + aRange[n + 1]);
+      ASSERT(var_obj_array.GetLength() == aObjs.size());
+    }
+
+    var_obj_array.Remove(-1, 0);
+    aObjs.clear();
+  }
+  //////////////////////////////////////////////////////////////////////////
 
   GXLPCWSTR szFilename = L"test\\TestHugeArray.DTP";
 
