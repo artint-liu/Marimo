@@ -216,13 +216,14 @@ namespace clpathfile
   clsize FindFileNameT(const _TString& strPath)
   {
     size_t p = strPath.ReverseFind((typename _TString::TChar)s_PathSlash);
-    if(p == _TString::npos)
+    if(p == _TString::npos) {
       return 0;
-    else if(p == strPath.GetLength() - 1)
-    {
-      p = strPath.ReverseFind((typename  _TString::TChar)s_PathSlash);
-      if(p == _TString::npos)
+    }
+    else if(p == strPath.GetLength() - 1) {
+      p = strPath.ReverseFind((typename _TString::TChar)s_PathSlash);
+      if(p == _TString::npos) {
         return 0;
+      }
     }
     return (p + 1);
   }

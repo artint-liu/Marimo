@@ -856,25 +856,24 @@ namespace GXUI
 
   GXBOOL List::SetAdapter(IListDataAdapter* pAdapter)
   {
-    //MODataPool* pDataPool = NULL;
+    MODataPool* pDataPool = NULL;
 
     if(m_pAdapter == pAdapter) {
       return FALSE;
     }
 
-    //if(m_pAdapter)
-    //{
-    //  if(GXSUCCEEDED(m_pAdapter->GetDataPool(&pDataPool)))
-    //  {
-    //    pDataPool->Ignore(&m_pAdapter->GetVariable(), m_hWnd);
-    //    pDataPool->Release();
-    //    pDataPool = NULL;
-    //  }
+    if(m_pAdapter) {
+      if(GXSUCCEEDED(m_pAdapter->GetDataPool(&pDataPool)))
+      {
+        pDataPool->Ignore(&m_pAdapter->GetVariable(), m_hWnd);
+        pDataPool->Release();
+        pDataPool = NULL;
+      }
 
-    //  m_pAdapter->Release();
-    //  m_pAdapter = NULL;
-    //}
-    SAFE_RELEASE(m_pAdapter);
+      m_pAdapter->Release();
+      m_pAdapter = NULL;
+    }
+
     m_pAdapter = pAdapter;
 
     if(m_pAdapter) {
@@ -894,12 +893,11 @@ namespace GXUI
       sCreateAdapter.hTemplateWnd = NULL;
       sCreateAdapter.pAdapter     = pAdapter;
 
-      //if(GXSUCCEEDED(pAdapter->GetDataPool(&pDataPool)))
-      //{
-      //  pDataPool->Watch(&pAdapter->GetVariable(), m_hWnd);
-      //  pDataPool->Release();
-      //  pDataPool = NULL;
-      //}
+      if(GXSUCCEEDED(pAdapter->GetDataPool(&pDataPool))) {
+        pDataPool->Watch(&pAdapter->GetVariable(), m_hWnd);
+        pDataPool->Release();
+        pDataPool = NULL;
+      }
 
       gxSendMessage(m_hWnd, GXWM_NOTIFY, sCreateAdapter.hdr.idFrom, (GXLPARAM)&sCreateAdapter);    
 
@@ -1150,7 +1148,7 @@ namespace GXUI
       m_aItems.insert(m_aItems.begin() + begin, count, sItem);
 
       HeightToBottom(dwStyle, rect, begin);
-      ASSERT(m_nColumnCount == DbgCalcColumnCount());
+      ASSERT(m_aItems.size() < (size_t)m_nColumnCount || m_nColumnCount == DbgCalcColumnCount());
     }
     else
     {
@@ -1234,8 +1232,8 @@ namespace GXUI
     auto nPrevBottom = begin == 0 ? 0 : m_aItems[begin - 1].nBottom;
     for(auto it = m_aItems.begin() + begin; it != m_aItems.end(); ++it)
     {
-      const auto nItemHeight = it->nBottom;
-      it->nBottom = nPrevBottom + it->nBottom;
+      const GXINT nItemHeight = it->nBottom;
+      it->nBottom = nPrevBottom + nItemHeight;
       if(it->nBottom > rcClient.bottom) {
         it->nBottom = nItemHeight;
         ++m_nColumnCount;
@@ -1247,16 +1245,19 @@ namespace GXUI
   GXINT List::DbgCalcColumnCount()
   {
     GXINT nColumnCount = 1;
-    if( ! m_aItems.empty()) {
-      auto nPrevBottom = m_aItems.front().nBottom;
-      for(auto it = m_aItems.begin() + 1; it != m_aItems.end(); ++it)
-      {
-        if(nPrevBottom >= it->nBottom) {
-          nColumnCount++;
-        }
-        nPrevBottom = it->nBottom;
-      }
+    if(m_aItems.empty()) {
+      return nColumnCount;
     }
+
+    auto nPrevBottom = m_aItems.front().nBottom;
+    for(auto it = m_aItems.begin() + 1; it != m_aItems.end(); ++it)
+    {
+      if(nPrevBottom >= it->nBottom) {
+        nColumnCount++;
+      }
+      nPrevBottom = it->nBottom;
+    }
+
     return nColumnCount;
   }
 

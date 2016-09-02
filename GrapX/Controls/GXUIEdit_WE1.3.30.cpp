@@ -3052,7 +3052,7 @@ inline void EDITSTATE::WM_Clear()
   if(m_dwStyle & ES_READONLY)
     return;
 
-  EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE, TRUE);
+  EM_ReplaceSel(TRUE, empty_stringW, TRUE, TRUE, FALSE);
 }
 
 
@@ -3145,7 +3145,7 @@ GXLRESULT EDITSTATE::WM_Char(GXWCHAR c)
       GXWCHAR str[2];
       str[0] = c;
       str[1] = '\0';
-      EM_ReplaceSel(TRUE, str, TRUE, TRUE, TRUE);
+      EM_ReplaceSel(TRUE, str, TRUE, TRUE, FALSE);
     }
     break;
   }
@@ -4585,6 +4585,7 @@ GXVOID EDITSTATE::OnImpulse(LPCDATAIMPULSE pImpulse)
 {
   clStringW str = pImpulse->sponsor->ToStringW();
   if (str != m_pText) {
+    EM_SetSel(0, (GXUINT)-1, FALSE);
     EM_ReplaceSel(FALSE, str, FALSE, TRUE, FALSE);
   }
 }

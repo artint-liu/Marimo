@@ -114,7 +114,7 @@ namespace clpathfile
 
   // 移除路径中的文件名和最后一个路径符号
   template<typename _TString>
-  b32 RemoveFileSpecT (_TString&   strPath);
+  b32 RemoveFileSpecT (_TString&  strPath);
   b32 RemoveFileSpecA (clStringA& strPath);
   b32 RemoveFileSpecW (clStringW& strPath);
 

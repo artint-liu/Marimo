@@ -232,9 +232,9 @@ namespace GXUI
         Recycle(nBegin);
         nCount++;
       }
-      else if(nCount) { // 防止第一个hItem为NULL时返回
-        break;
-      }
+      //else if(nCount) { // 防止第一个hItem为NULL时返回
+      //  break;
+      //}
       nBegin += nDir;
     }
     return nCount;
@@ -416,7 +416,7 @@ namespace GXUI
     clStringW strItem;
     GXRECT  rcItem = {0,0,0,0};
     GXSIZE_T i = m_nTopIndex;
-    Recycle(i - 1, -1);
+    Recycle(i == 0 ? 0 : i - 1, -1);
     for(; i < nCount; i++)
     {
       //GXINT nStrLen = m_pAdapter->GetStringW(i, NULL, strItem);
@@ -589,7 +589,7 @@ namespace GXUI
   //GXHRESULT CustomizeList::OnKnock(KNOCKACTION* pAction)
   GXVOID RichList::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
-    CLBREAK;
+    //CLBREAK;
     List::OnImpulse(pImpulse);
     //if(hval == 0)
     {

@@ -1540,7 +1540,8 @@ namespace Marimo
     // (1)改变了结构体的成员函数，无法回溯到它的结构体再推送事件，或者说这样做不经济
     // (2)无法通过地址来区别是结构体还是结构体第一个成员
 
-    if(pVar->GetTypeCategory() == T_STRUCT) {
+    if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_STRUCT)) {
+      CLBREAK;
       return FALSE;
     }
 
