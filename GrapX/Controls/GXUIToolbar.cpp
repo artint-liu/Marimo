@@ -544,7 +544,8 @@ namespace GXUI
 
     int nBtnSize = ox;
     if(m_pSprite && btn.nSprite >= 0) {
-      m_pSprite->PaintModule(canvas.GetCanvasUnsafe(), btn.nSprite, x + ox, y + oy, m_BitmapSize.cx, m_BitmapSize.cy);
+      GXRegn regn(x + ox, y + oy, m_BitmapSize.cx, m_BitmapSize.cy);
+      m_pSprite->PaintModule(canvas.GetCanvasUnsafe(), btn.nSprite, regn);
       nBtnSize = m_ButtonSize.cx;
     }
     

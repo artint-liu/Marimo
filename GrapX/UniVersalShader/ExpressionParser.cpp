@@ -433,7 +433,7 @@ namespace UVShader
     return NULL;
   }
 
-  void CodeParser::GetNext(iterator& it, TOKEN& token)
+  void CodeParser::GetNext(iterator& it, TOKEN& token) // TODO: it 与 token 合并为 token
   {
     if(m_ExpandedStream.empty()) {
       token.ClearMarker();
@@ -443,7 +443,14 @@ namespace UVShader
     }
     else {
       token = m_ExpandedStream.front();
-      it = token.marker;
+
+      if(token.marker.marker == NULL) {
+        // m_ExpandedStream 最后一个token可能记录的是结尾
+        ASSERT(m_ExpandedStream.size() == 1);
+        it = end();
+      } else {
+        it = token.marker;
+      }
       token.semi_scope = -1;
       token.scope = -1;
       m_ExpandedStream.pop_front();

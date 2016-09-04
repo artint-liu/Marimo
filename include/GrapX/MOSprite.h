@@ -82,8 +82,16 @@ namespace Marimo
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
        
-    GXSTDINTERFACE(GXINT     Find                 (ID id) const);
-    GXSTDINTERFACE(GXINT     Find                 (GXLPCSTR szName) const);
+    GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType 可以设置为NULL, 不返回类型
+    GXSTDINTERFACE(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType = NULL) const);
+    GXSTDINTERFACE(GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const);
+    GXSTDINTERFACE(GXLPCSTR  FindName             (ID id) const);           // 用 ID 查找 Name
+    GXSTDINTERFACE(ID        FindID               (GXLPCSTR szName) const); // 用 Name 查找 ID
+    GXSTDINTERFACE(ID        FindID               (GXLPCWSTR szName) const); // 用 Name 查找 ID
+
+    //GXSTDINTERFACE(GXUINT    PackIndex            (Type type, GXUINT index) const);   // 将不同类型的索引打包为统一类型的索引
+    //GXSTDINTERFACE(GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const); // 将统一索引拆解为类型和类型索引
+
 
     GXSTDINTERFACE(GXSIZE_T  GetModuleCount       () const);
     GXSTDINTERFACE(GXSIZE_T  GetFrameCount        () const);
@@ -102,6 +110,10 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXUINT nIndex, GXLPRECT lprc) const);
     GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
     GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPREGN lprg) const);
+    GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+    GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPREGN lprg) const);
+    GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+    GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
     GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // 含有的图片数量
     GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXUINT index) const);

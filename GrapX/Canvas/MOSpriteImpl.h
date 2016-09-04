@@ -126,8 +126,12 @@ namespace Marimo
     GXVOID    Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const override;
     GXVOID    Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const override;
 
-    GXINT     Find(ID id) const override;
-    GXINT     Find(GXLPCSTR szName) const override;
+    GXINT     Find(ID id, Type* pType) const override;
+    GXINT     Find(GXLPCSTR szName, Type* pType) const override;
+    GXSTDIMPLEMENT(GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const);
+    GXSTDIMPLEMENT(GXLPCSTR  FindName             (ID id) const);           // 用 ID 查找 Name
+    GXSTDIMPLEMENT(ID        FindID               (GXLPCSTR szName) const); // 用 Name 查找 ID
+    GXSTDIMPLEMENT(ID        FindID               (GXLPCWSTR szName) const); // 用 Name 查找 ID
 
     GXSIZE_T  GetModuleCount    () const override;
     GXSIZE_T  GetFrameCount     () const override;
@@ -144,8 +148,18 @@ namespace Marimo
     GXBOOL    GetModuleRegion   (GXUINT nIndex, GXLPREGN rgSprite) const override;
     GXBOOL    GetFrameBounding  (GXUINT nIndex, GXLPRECT lprc) const override;
     GXBOOL    GetAnimBounding   (GXUINT nIndex, GXLPRECT lprc) const override;
-    Type      GetBounding(ID id, GXLPRECT lprc) const override; // 对于Module，返回值的left和top都应该是0
-    Type      GetBounding(ID id, GXLPREGN lprg) const override;
+
+    template<typename _TID>
+    MOSprite::Type GetBoundingT(_TID id, GXLPRECT lprc) const;
+    template<typename _TID>
+    MOSprite::Type GetBoundingT(_TID id, GXLPREGN lprg) const;
+
+    GXSTDIMPLEMENT(Type      GetBounding(ID id, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+    GXSTDIMPLEMENT(Type      GetBounding(ID id, GXLPREGN lprg) const);
+    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCSTR szName, GXLPREGN lprg) const);
+    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
     GXSIZE_T  GetImageCount() const override;  // 含有的图片数量
     GXBOOL    GetImage(GXImage** pImage, GXUINT index) const override;

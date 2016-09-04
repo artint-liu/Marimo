@@ -104,31 +104,31 @@ namespace GXUI
 
     if(GXSUCCEEDED(GXCreateSpriteFromFileW(pGraphics, szSpriteFile, &m_pSprite)))
     {
-      m_nNormal   = m_pSprite->FindByNameW(szNormal);
+      m_nNormal   = m_pSprite->Find(szNormal);
       if(m_nNormal < 0) {
         bval = FALSE;
         m_nNormal = 0;
       }
 
-      m_nHover    = m_pSprite->FindByNameW(szHover);
+      m_nHover    = m_pSprite->Find(szHover);
       if(m_nHover < 0) {
         bval = FALSE;
         m_nHover = 0;
       }
 
-      m_nPressed  = m_pSprite->FindByNameW(szPressed);
+      m_nPressed  = m_pSprite->Find(szPressed);
       if(m_nPressed < 0) {
         bval = FALSE;
         m_nPressed = 0;
       }
 
-      m_nDisabled = m_pSprite->FindByNameW(szDisabled);
+      m_nDisabled = m_pSprite->Find(szDisabled);
       if(m_nDisabled < 0) {
         bval = FALSE;
         m_nDisabled = 0;
       }
 
-      m_nDefault  = m_pSprite->FindByNameW(szDefault);
+      m_nDefault  = m_pSprite->Find(szDefault);
       if(m_nDefault < 0) {
         bval = FALSE;
         m_nDefault = 0;

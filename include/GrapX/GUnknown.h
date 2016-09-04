@@ -7,6 +7,7 @@
 #define GXSUCCEEDED(r)      (((GXHRESULT)(r)) >= 0)
 #define GXFAILED(r)         (!GXSUCCEEDED(r))
 #define GXSTDINTERFACE(x)  virtual x = 0
+#define GXSTDIMPLEMENT(x)  x override
 
 // 虚函数化的AddRef和Release
 #define ENABLE_VIRTUALIZE_ADDREF_RELEASE

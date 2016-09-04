@@ -44,7 +44,7 @@ public:
   GXBOOL SetSpriteByFilenameW   (GXLPCWSTR szSpriteFile);
   GXBOOL SetSprite              (GXSprite* pSprite);
   GXBOOL SetModuleByNameW       (GXLPCWSTR szModuleName);
-  GXBOOL SetModuleByIndex       (int nModuleIndex);
+  GXBOOL SetModuleByIndex       (GXUINT nModuleIndex);
 };
 
 //class CGXToolbarDelegate : public CGXDelegate

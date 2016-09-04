@@ -147,7 +147,7 @@ namespace GXUI
       break;
     } // switch
 
-    if(pThis->GetType() == Sprite)
+    if(pThis->GetType() == Type_Sprite)
     {
       StaticSprite* pSprite = static_cast<StaticSprite*>(pThis);
       switch(message)
@@ -162,13 +162,15 @@ namespace GXUI
           return 0;
         }
         break;
+      
       case GXSSM_SETMODULEBYNAMEW:
         if(pSprite->SetByNameW((GXLPCWSTR)lParam)) {
           return 0;
         }
         break;
+      
       case GXSSM_SETMODULEBYINDEX:
-        if(pSprite->SetByIndex((int)wParam)) {
+        if(pSprite->SetByIndex((GXUINT)wParam)) {
           return 0;
         }
         break;
@@ -190,6 +192,10 @@ namespace GXUI
         break;
       case GXSSM_GETMODULEBYINDEX:
         return pSprite->GetByIndex();
+
+      //default:
+      //  CLBREAK;
+      //  break;
       }
     }
     return CtrlBase::DefWndProc(hWnd, message, wParam, lParam, pThis);
@@ -219,7 +225,7 @@ namespace GXUI
   //}
   //////////////////////////////////////////////////////////////////////////
   StaticLabel::StaticLabel(GXLPCWSTR szIdName)
-    : Static    (szIdName, Static::Label)
+    : Static    (szIdName, Static::Type_Label)
     , m_crText  (0xff000000)
   {
 
@@ -353,7 +359,7 @@ namespace GXUI
   }
   //////////////////////////////////////////////////////////////////////////
   StaticRectangle::StaticRectangle(GXLPCWSTR szIdName)
-    : Static    (szIdName, Static::Rectangle)
+    : Static    (szIdName, Static::Type_Rectangle)
     , m_crMeta  (0xff000000)
   {
 
@@ -390,7 +396,7 @@ namespace GXUI
   }
   //////////////////////////////////////////////////////////////////////////
   StaticSprite::StaticSprite(GXLPCWSTR szIdName)
-    : Static      (szIdName, Static::Sprite)
+    : Static      (szIdName, Static::Type_Sprite)
     , m_pSprite   (NULL)
     , m_nSpriteIdx(-1)
   {
@@ -404,13 +410,17 @@ namespace GXUI
       gxGetClientRect(m_hWnd, &rect);
 
       GXREGN regn;
-      if(m_pSprite->GetSpriteBounding(m_nSpriteIdx, &regn))
+
+      // 这个断言用来提醒没有实现 m_nSpriteIdx 拆解，因为 m_nSpriteIdx 还可能代表Frame/Animation索引
+      ASSERT(m_nSpriteIdx < (GXINT)m_pSprite->GetModuleCount());
+
+      if(m_pSprite->GetModuleRegion(m_nSpriteIdx, &regn))
       {
         const float xScale = (float)rect.right / regn.width;
         const float yScale = (float)rect.bottom / regn.height;
 
-        m_pSprite->PaintSprite(canvas.GetCanvasUnsafe(), m_nSpriteIdx, 0,
-          -(GXINT)(regn.left * xScale), -(GXINT)(regn.top * yScale), xScale, yScale);
+        GXRegn regn(-(GXINT)(regn.left * xScale), -(GXINT)(regn.top * yScale), (GXINT)xScale, (GXINT)yScale);
+        m_pSprite->PaintModule(canvas.GetCanvasUnsafe(), m_nSpriteIdx, regn);
       }
     }
     return 0;
@@ -446,7 +456,7 @@ namespace GXUI
 
   GXBOOL StaticSprite::SetSprite(GXSprite* pSprite)
   {
-    if(pSprite != NULL) 
+    if(pSprite != NULL)
     {
       ClearSprite();
       m_pSprite = pSprite;
@@ -458,8 +468,20 @@ namespace GXUI
 
   GXBOOL StaticSprite::SetByNameW(LPCWSTR szName)
   {
-    m_nSpriteIdx = m_pSprite->FindByNameW(szName);
-    if(m_nSpriteIdx >= 0)
+    GXSprite::Type type;
+    m_nSpriteIdx = m_pSprite->Find(szName, &type);
+    
+    if(type == GXSprite::Type_Frame) {
+      m_nSpriteIdx += (GXINT)m_pSprite->GetModuleCount();
+    }
+    else if(type == GXSprite::Type_Animation) {
+      m_nSpriteIdx += (GXINT)(m_pSprite->GetModuleCount() + m_pSprite->GetFrameCount());
+    }
+    else {
+      ASSERT(type == GXSprite::Type_Module);
+    }
+
+    if(m_nSpriteIdx != -1)
     {
       m_strSpriteName = szName;
       Invalidate(FALSE);
@@ -468,10 +490,10 @@ namespace GXUI
     return FALSE;
   }
 
-  GXBOOL StaticSprite::SetByIndex(int nIndex)
+  GXBOOL StaticSprite::SetByIndex(GXINT index)
   {
     m_strSpriteName.Clear();
-    m_nSpriteIdx = nIndex;
+    m_nSpriteIdx = index;
     Invalidate(FALSE);
     return TRUE;
   }
@@ -498,7 +520,7 @@ namespace GXUI
     return TRUE;
   }
 
-  int StaticSprite::GetByIndex()
+  GXINT StaticSprite::GetByIndex()
   {
     return m_nSpriteIdx;
   }

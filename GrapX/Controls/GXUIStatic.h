@@ -14,9 +14,9 @@ namespace GXUI
   public:
     enum Type
     {
-      Label     = GXUISS_TYPE_LABEL,
-      Sprite    = GXUISS_TYPE_SPRITE,
-      Rectangle = GXUISS_TYPE_RECT,
+      Type_Label     = GXUISS_TYPE_LABEL,
+      Type_Sprite    = GXUISS_TYPE_SPRITE,
+      Type_Rectangle = GXUISS_TYPE_RECT,
     };
   private:
     Type    m_eType;
@@ -96,7 +96,8 @@ namespace GXUI
     clStringW   m_strSpriteFile;
     clStringW   m_strSpriteName;
     GXSprite*   m_pSprite;
-    int         m_nSpriteIdx;
+    //int         m_nSpriteIdx;
+    GXINT       m_nSpriteIdx;
   protected:
     virtual GXLRESULT   OnPaint       (GXWndCanvas& canvas);
     virtual GXLRESULT   Destroy       ();
@@ -111,11 +112,11 @@ namespace GXUI
     GXBOOL SetSpriteByFilenameW   (GXLPCWSTR szSpriteFile);
     GXBOOL SetSprite              (GXSprite* pSprite);
     GXBOOL SetByNameW             (GXLPCWSTR szName);
-    GXBOOL SetByIndex             (int nIndex);
+    GXBOOL SetByIndex             (GXINT index);
     GXBOOL GetSpriteByFilenameW   (GXLPWSTR szSpriteFile, GXINT nMaxBuffer);
     GXBOOL GetSprite              (GXSprite** ppSprite);
     GXBOOL GetByNameW             (GXLPWSTR szName, GXINT nMaxBuffer);
-    int    GetByIndex             ();
+    GXINT  GetByIndex             ();
   };
 
   //////////////////////////////////////////////////////////////////////////

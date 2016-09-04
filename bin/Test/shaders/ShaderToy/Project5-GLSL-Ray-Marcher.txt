@@ -1,4 +1,4 @@
-﻿// https://www.shadertoy.com/view/4ljXzV
+// https://www.shadertoy.com/view/4ljXzV
 // ======================= Global Definition =======================
 #define DEPTH_VIEW 0
 #define ITERATION_VIEW 0

@@ -45,7 +45,18 @@ public:
   //};
 
   //typedef clvector<MODULE>      ModuleArray;
-  typedef clmap<clStringA, int>             NameDict;
+  struct IDATTR{
+    GXSprite::Type type;
+    union {
+      GXUINT               index;
+      GXSprite::MODULE*    pModel;
+      GXSprite::FRAME*     pFrame;
+      GXSprite::ANIMATION* pAnination;
+    };
+  };
+
+  typedef clmap<clStringA, IDATTR>          NameDict;
+  typedef clmap<ID, IDATTR>                 IDDict;
 
   typedef clvector<GXSprite::MODULE>        ModuleArray;
   typedef clvector<GXSprite::FRAME>         FrameArray;
@@ -67,7 +78,8 @@ private:
   AnimationArray    m_aAnimations;
   AnimFrameArray    m_aAnimFrames;
 
-  NameDict          m_SpriteDict;
+  NameDict          m_NameDict;
+  IDDict            m_IDDict;
   int IntGetSpriteCount() const;
 protected:
   virtual ~GXSpriteImpl();
@@ -84,26 +96,41 @@ public:
 
   //virtual GXHRESULT SaveW             (GXLPCWSTR szFilename) const;
 
-  virtual GXVOID    PaintModule         (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const;
-  virtual GXVOID    PaintModule         (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const;
-//virtual GXVOID    PaintModuleH        (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth) const;
-//virtual GXVOID    PaintModuleV        (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nHeight) const;
+  GXSTDIMPLEMENT(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
+  
+  GXSTDIMPLEMENT(GXVOID    PaintModule3H        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule3V        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule3x3       (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const);
+  
+  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const);
 
-  virtual GXLONG    PaintModule3H       (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const;
-  virtual GXLONG    PaintModule3V       (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const;
-  virtual GXVOID    PaintModule3x3      (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const;
+  GXSTDIMPLEMENT(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
 
-  virtual GXVOID    PaintFrame          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const;
-  virtual GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXINT idxAnim, GXINT idxFrame, GXINT x, GXINT y) const;
-
-  virtual GXVOID    PaintSprite         (GXCanvas *pCanvas, GXINT nUnifiedIndex, GXINT nMinorIndex, GXINT x, GXINT y, float xScale, float yScale) const;
-//virtual GXVOID    PaintByUniformIndex (GXCanvas *pCanvas, GXINT nIndex, GXINT nMinorIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const;
-
+  GXSTDIMPLEMENT(GXINT     Find                 (ID id, GXOUT Type* pType) const); // pType 可以设置为NULL, 不返回类型
+  GXSTDIMPLEMENT(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType) const);
+  GXSTDIMPLEMENT(GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType) const);
+  GXSTDIMPLEMENT(GXLPCSTR  FindName             (ID id) const);           // 用 ID 查找 Name
+  GXSTDIMPLEMENT(ID        FindID               (GXLPCSTR szName) const); // 用 Name 查找 ID
+  GXSTDIMPLEMENT(ID        FindID               (GXLPCWSTR szName) const); // 用 Name 查找 ID
 
   virtual GXSIZE_T  GetModuleCount    () const;
   virtual GXSIZE_T  GetFrameCount     () const;
   virtual GXSIZE_T  GetAnimationCount () const;
-  virtual GXBOOL    GetNameA          (IndexType eType, GXUINT nIndex, clStringA* pstrName) const;
+  //virtual GXBOOL    GetNameA          (IndexType eType, GXUINT nIndex, clStringA* pstrName) const;
 
   virtual GXBOOL    GetModule           (GXINT nIndex, MODULE* pModule) const;
   virtual GXBOOL    GetFrame            (GXINT nIndex, FRAME* pFrame) const;
@@ -116,15 +143,33 @@ public:
   virtual GXBOOL    GetModuleRegion   (GXINT nIndex, REGN *rgSprite) const;
   virtual GXBOOL    GetFrameBounding  (GXINT nIndex, GXRECT* lprc) const;
   virtual GXBOOL    GetAnimBounding   (GXINT nIndex, GXRECT* lprc) const;
-  virtual GXBOOL    GetSpriteBounding (GXINT nUnifiedIndex, GXRECT* lprc) const;
-  virtual GXBOOL    GetSpriteBounding (GXINT nUnifiedIndex, GXREGN* lprg) const;
+
+  template<typename _TID>
+  Type GetBoundingT(_TID id, GXLPRECT lprc) const;
+  template<typename _TID>
+  Type GetBoundingT(_TID id, GXLPREGN lprg) const;
+
+  GXSTDIMPLEMENT(Type      GetBounding          (ID id, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+  GXSTDIMPLEMENT(Type      GetBounding          (ID id, GXLPREGN lprg) const);
+  GXSTDIMPLEMENT(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+  GXSTDIMPLEMENT(Type      GetBounding          (GXLPCSTR szName, GXLPREGN lprg) const);
+  GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+  GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
   virtual GXHRESULT GetImage          (GXImage** ppImage);
   virtual clStringW GetImageFileW     () const;
   virtual clStringA GetImageFileA     () const;
 
-  virtual int FindByNameA             (GXLPCSTR szName) const;
-  virtual int FindByNameW             (GXLPCWSTR szName) const;
+  //virtual int FindByNameA             (GXLPCSTR szName) const;
+  //virtual int FindByNameW             (GXLPCWSTR szName) const;
+
+  template<class _TArray, class _TDesc>
+  void Add(_TArray& aArray, Type type, _TDesc& desc);
+
+  const IDATTR* IntFind(ID id) const;
+  const IDATTR* IntFind(GXLPCSTR szName) const;
+  GXINT AttrToIndex(const IDATTR* pAttr) const;
+  void  IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const;
 
   friend GXHRESULT GXDLLAPI GXCreateSprite          (GXGraphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN*  aRegion, GXINT nCount, GXSprite** ppSprite);
   friend GXHRESULT GXDLLAPI GXCreateSpriteEx        (GXGraphics* pGraphics, const GXSPRITE_DESCW* pDesc, GXSprite** ppSprite);

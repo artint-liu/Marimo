@@ -201,43 +201,43 @@ namespace GXUI
 
     if(GXSUCCEEDED(GXCreateSpriteFromFileW(pGraphics, Desc.strResource, &m_pSprite)))
     {
-      m_idHandle = m_pSprite->FindByNameW(Desc.strHandle);
+      m_idHandle = m_pSprite->Find(Desc.strHandle);
       if(m_idHandle < 0) {
         bval = FALSE;
         m_idHandle = 0;
       }
 
-      m_idFullBar = m_pSprite->FindByNameW(Desc.strFull);
+      m_idFullBar = m_pSprite->Find(Desc.strFull);
       if(m_idFullBar < 0) {
         bval = FALSE;
         m_idFullBar = 0;
       }
 
-      m_idEmptyBar = m_pSprite->FindByNameW(Desc.strEmpty);
+      m_idEmptyBar = m_pSprite->Find(Desc.strEmpty);
       if(m_idEmptyBar < 0) {
         bval = FALSE;
         m_idEmptyBar = 0;
       }
 
-      m_idDial = m_pSprite->FindByNameW(Desc.strDial);
+      m_idDial = m_pSprite->Find(Desc.strDial);
       if(m_idDial < 0) {
         bval = FALSE;
         m_idDial = 0;
       }
 
-      m_idVertFullBar = m_pSprite->FindByNameW(Desc.strVertFull);
+      m_idVertFullBar = m_pSprite->Find(Desc.strVertFull);
       if(m_idVertFullBar < 0) {
         bval = FALSE;
         m_idVertFullBar = 0;
       }
 
-      m_idVertEmptyBar = m_pSprite->FindByNameW(Desc.strVertEmpty);
+      m_idVertEmptyBar = m_pSprite->Find(Desc.strVertEmpty);
       if(m_idVertEmptyBar < 0) {
         bval = FALSE;
         m_idVertEmptyBar = 0;
       }
 
-      m_idVertDial = m_pSprite->FindByNameW(Desc.strVertDial);
+      m_idVertDial = m_pSprite->Find(Desc.strVertDial);
       if(m_idVertDial < 0) {
         bval = FALSE;
         m_idVertDial = 0;
@@ -672,7 +672,8 @@ namespace GXUI
       }
     }
 
-    m_pSprite->PaintModule(pCanvas, m_idHandle, regn[HTS_HANDLE].left, regn[HTS_HANDLE].top, regn[HTS_HANDLE].width, regn[HTS_HANDLE].height);
+    //m_pSprite->PaintModule(pCanvas, m_idHandle, regn[HTS_HANDLE].left, regn[HTS_HANDLE].top, regn[HTS_HANDLE].width, regn[HTS_HANDLE].height);
+    m_pSprite->PaintModule(pCanvas, m_idHandle, &regn[HTS_HANDLE]);
 
     return 0;
   }

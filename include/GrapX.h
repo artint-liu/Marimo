@@ -5248,12 +5248,14 @@ extern "C"
 #define GXSSM_SETSPRITEBYFILENAMEW  (GXWM_USER + 20)  // lParam: 文件名
 #define GXSSM_SETSPRITE             (GXWM_USER + 21)  // lParam: Sprite对象
 #define GXSSM_SETMODULEBYNAMEW      (GXWM_USER + 22)  // lParam: Module名字
-#define GXSSM_SETMODULEBYINDEX      (GXWM_USER + 23)  // wParam: 索引
+#define GXSSM_SETMODULEBYINDEX      (GXWM_USER + 23)  // wParam: 索引,统一索引（Module，Frame，Animation连续在一起）
+//#define GXSSM_SETMODULEBYID         (GXWM_USER + 24)  // wParam: ID
 
-#define GXSSM_GETSPRITEBYFILENAMEW  (GXWM_USER + 24)  // lParam: 文件名, wParam 缓冲大小
-#define GXSSM_GETSPRITE             (GXWM_USER + 25)  // lParam: Sprite**对象, 用完要释放引用
-#define GXSSM_GETMODULEBYNAMEW      (GXWM_USER + 26)  // lParam: Module名字, wParam 缓冲大小
-#define GXSSM_GETMODULEBYINDEX      (GXWM_USER + 27)  // 返回值: 索引
+#define GXSSM_GETSPRITEBYFILENAMEW  (GXWM_USER + 30)  // lParam: 文件名, wParam 缓冲大小
+#define GXSSM_GETSPRITE             (GXWM_USER + 31)  // lParam: Sprite**对象, 用完要释放引用
+#define GXSSM_GETMODULEBYNAMEW      (GXWM_USER + 32)  // lParam: Module名字, wParam 缓冲大小
+#define GXSSM_GETMODULEBYINDEX      (GXWM_USER + 33)  // 返回值: 索引
+//#define GXSSM_GETMODULEBYID         (GXWM_USER + 34)  // 返回值: ID
 
 
 #include <GrapX/GXKernel.h>

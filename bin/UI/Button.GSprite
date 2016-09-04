@@ -201,7 +201,7 @@ Image
 			top = 32;
 			right = 5;
 			bottom = 36;
-			name = " PBS_DISABLED";
+			name = "PBS_DISABLED";
 		};
 		rect{
 			id = 0;

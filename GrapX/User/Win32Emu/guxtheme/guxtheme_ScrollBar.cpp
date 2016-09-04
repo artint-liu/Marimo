@@ -38,7 +38,7 @@ DRAWTHEMEBKG(DrawThemeBkg_SBP_ArrowBtn)
   ASSERT((unsigned long)iStateId <= s_SpriteIdxMap_AB[0]);
   s_pUxThemeSprite_ScrollBar->PaintModule(
     /*GXGDI_DC_PTR(hdc)->*/pCanvas, s_SpriteIdxMap_AB[iStateId], 
-    pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+    pRect->left, pRect->top, pRect->right, pRect->bottom);
   return 1L;
 }
 
@@ -100,7 +100,7 @@ DRAWTHEMEBKG(DrawThemeBkg_SBP_TrackHorz)
   s_pUxThemeSprite_ScrollBar->PaintModule(
     /*GXGDI_DC_PTR(hdc)->*/pCanvas, 
     s_SpriteIdxMap_SCRBS_H_TRACK[iStateId],
-    pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+    pRect->left, pRect->top, pRect->right, pRect->bottom);
   return 1L;
 }
 
@@ -119,7 +119,7 @@ DRAWTHEMEBKG(DrawThemeBkg_SBP_TrackVert)
   s_pUxThemeSprite_ScrollBar->PaintModule(
     /*GXGDI_DC_PTR(hdc)->*/pCanvas, 
     s_SpriteIdxMap_SCRBS_V_TRACK[iStateId],
-    pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+    pRect->left, pRect->top, pRect->right, pRect->bottom);
   return 1L;
 }
 

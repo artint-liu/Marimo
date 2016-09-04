@@ -473,13 +473,14 @@ namespace GXUI
           case GXUISS_TYPE_SPRITE:
             {
               clStringA strSprite;
-              clStringA strUniformIndex;
-              element.strName.DivideBy('@', strUniformIndex, strSprite);
+              clStringA strIndex;
+              element.strName.DivideBy('@', strIndex, strSprite);
 
-              if(strUniformIndex.IsNotEmpty() && strSprite.IsNotEmpty())
+              if(strIndex.IsNotEmpty() && strSprite.IsNotEmpty())
               {
                 MOVariable varSprite = var.MemberOf(strSprite);
-                MOVariable varIndex = var.MemberOf(strUniformIndex);
+                MOVariable varIndex = var.MemberOf(strIndex);
+                ASSERT(varSprite.IsValid() && varIndex.IsValid());
 
                 if(varSprite.IsValid() && varIndex.IsValid())
                 {

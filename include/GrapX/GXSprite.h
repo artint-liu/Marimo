@@ -8,24 +8,25 @@ class GXImage;
 class GXSprite : public GUnknown
 {
 public:
-  enum IndexType  // 索引类型
+  enum Type  // 索引类型
   {
-    IndexType_Module    = 0,  // Module类型索引
-    IndexType_Frame     = 1,  // Frame类型索引
-    IndexType_Animation = 2,  // 动画类型索引
-    IndexType_Unified   = 3,  // 统一类型索引
+    Type_Empty     = 0,  // Module类型索引
+    Type_Module    = 1,  // Module类型索引
+    Type_Frame     = 2,  // Frame类型索引
+    Type_Animation = 3,  // 动画类型索引
+    Type_Unified   = 4,  // 统一类型索引
   };
 
   struct MODULE
   {
-    GXINT    id;    // 0 是无效id
+    GXUINT   id;    // 0 是无效id
     GXLPCSTR name;
     GXREGN   regn;
   };
 
   struct FRAME
   {
-    GXINT    id;
+    GXUINT   id;
     GXLPCSTR name;
     GXINT    start;   // 在aFrameDescs数组中的开始位置
     GXINT    count;
@@ -33,7 +34,7 @@ public:
 
   struct ANIMATION
   {
-    GXINT    id;
+    GXUINT   id;
     GXLPCSTR name;
     GXUINT   rate;
     GXINT    start;
@@ -48,28 +49,48 @@ public:
   };
 
   typedef GXUINT ANIM_FRAME; // 描述一段动画的帧序列
+  typedef GXUINT    TIME_T;
+  typedef GXUINT    ID;         // id 不能为 0, module/frame/animation 不能相同
+
+
 public:
   //GXSTDINTERFACE(GXHRESULT SaveW              (GXLPCWSTR szFilename) const);
                                               
   GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-//GXSTDINTERFACE(GXVOID    PaintModuleH         (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth) const);
-//GXSTDINTERFACE(GXVOID    PaintModuleV         (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nHeight) const);
-                                                
-  GXSTDINTERFACE(GXLONG    PaintModule3H        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDINTERFACE(GXLONG    PaintModule3V        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDINTERFACE(GXVOID    PaintModule3x3       (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
+
+  GXSTDINTERFACE(GXVOID    PaintModule3H        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3V        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3x3       (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
 
   GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXINT idxAnim, GXINT idxFrame, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
 
-  GXSTDINTERFACE(GXVOID    PaintSprite          (GXCanvas *pCanvas, GXINT nUnifiedIndex, GXINT nMinorIndex, GXINT x, GXINT y, float xScale, float yScale) const); // x,y canvas坐标，不受Scale影响。
-//GXSTDINTERFACE(GXVOID    PaintByUniformIndex  (GXCanvas *pCanvas, GXINT nIndex, GXINT nMinorIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-                                          
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const);
+
+  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+
+  GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType 可以设置为NULL, 不返回类型
+  GXSTDINTERFACE(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType = NULL) const);
+  GXSTDINTERFACE(GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const);
+  GXSTDINTERFACE(GXLPCSTR  FindName             (ID id) const);           // 用 ID 查找 Name
+  GXSTDINTERFACE(ID        FindID               (GXLPCSTR szName) const); // 用 Name 查找 ID
+  GXSTDINTERFACE(ID        FindID               (GXLPCWSTR szName) const); // 用 Name 查找 ID
+
   GXSTDINTERFACE(GXSIZE_T  GetModuleCount       () const);
   GXSTDINTERFACE(GXSIZE_T  GetFrameCount        () const);
   GXSTDINTERFACE(GXSIZE_T  GetAnimationCount    () const);
-  GXSTDINTERFACE(GXBOOL    GetNameA             (IndexType eType, GXUINT nIndex, clStringA* pstrName) const);
+  //GXSTDINTERFACE(GXBOOL    GetNameA             (IndexType eType, GXUINT nIndex, clStringA* pstrName) const);
 
   GXSTDINTERFACE(GXBOOL    GetModule            (GXINT nIndex, MODULE* pModule) const);
   GXSTDINTERFACE(GXBOOL    GetFrame             (GXINT nIndex, FRAME* pFrame) const);
@@ -81,15 +102,22 @@ public:
   GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXINT nIndex, GXREGN *rgSprite) const);
   GXSTDINTERFACE(GXBOOL    GetFrameBounding     (GXINT nIndex, GXRECT* lprc) const);
   GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXINT nIndex, GXRECT* lprc) const);
-  GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXRECT* lprc) const); // 对于Module，返回值的left和top都应该是0
-  GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXREGN* lprg) const);
+  GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+  GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPREGN lprg) const);
+  GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+  GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPREGN lprg) const);
+  GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
+  GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
+
+  //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXRECT* lprc) const); // 对于Module，返回值的left和top都应该是0
+  //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXREGN* lprg) const);
 
   GXSTDINTERFACE(GXHRESULT GetImage             (GXImage** pImage));
   GXSTDINTERFACE(clStringW GetImageFileW        () const);
   GXSTDINTERFACE(clStringA GetImageFileA        () const);
                                           
-  GXSTDINTERFACE(int       FindByNameA          (GXLPCSTR szName) const);
-  GXSTDINTERFACE(int       FindByNameW          (GXLPCWSTR szName) const);
+  //GXSTDINTERFACE(int       FindByNameA          (GXLPCSTR szName) const);
+  //GXSTDINTERFACE(int       FindByNameW          (GXLPCWSTR szName) const);
 };
 
 struct GXSPRITE_DESCW

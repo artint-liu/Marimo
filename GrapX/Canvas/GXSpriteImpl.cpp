@@ -35,7 +35,9 @@ GXSpriteImpl::~GXSpriteImpl()
   SAFE_RELEASE(m_pImage);
   //SAFE_DELETE_ARRAY(m_pRect);
   m_aModules.clear();
-  m_SpriteDict.clear();
+  m_NameDict.clear();
+  m_IDDict.clear();
+  //m_SpriteDict.clear();
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -72,13 +74,22 @@ GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT
   }
 }
 
-GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
+{
+  if(nIndex < (GXINT)m_aModules.size()) {
+    pCanvas->DrawImage(m_pImage, lpRegn, &m_aModules[nIndex].regn);
+  }
+}
+
+GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const
 {
   REGN rcDest;
-  rcDest.left = x;
-  rcDest.top = y;
-  rcDest.width = nWidth;
-  rcDest.height = nHeight;
+  rcDest.left   = x;
+  rcDest.top    = y;
+  rcDest.width  = right - x;
+  rcDest.height = height - y;
+  ASSERT(rcDest.width >= 0 && rcDest.height >= 0);
+
   if(nIndex < (GXINT)m_aModules.size()) {
     pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nIndex].regn);
   }
@@ -110,12 +121,12 @@ GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT
 //  }
 //}
 
-GXLONG GXSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+void GXSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
 {
   if(nStartIdx + 3 > IntGetSpriteCount())
   {
-    ASSERT(FALSE);
-    return -1;
+    CLBREAK;
+    //return -1;
   }
   GXLONG nMaxHeight = clMax(m_aModules[nStartIdx].regn.height, clMax(m_aModules[nStartIdx + 1].regn.height, m_aModules[nStartIdx + 2].regn.height));
   float fVertScale = (float)nHeight / (float)nMaxHeight;
@@ -170,15 +181,15 @@ GXLONG GXSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, 
   }
   pCanvas->DrawImage(m_pImage, &rgTip0, &m_aModules[nStartIdx    ].regn);
   pCanvas->DrawImage(m_pImage, &rgTip1, &m_aModules[nStartIdx + 2].regn);
-  return rgDest.width;  // 返回值是中间可缩放Sprite的宽度
+  //return rgDest.width;  // 返回值是中间可缩放Sprite的宽度
 }
 
-GXLONG GXSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+void GXSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
 {
   if(nStartIdx + 3 > IntGetSpriteCount())
   {
-    ASSERT(FALSE);
-    return -1;
+    CLBREAK;
+    //return -1;
   }
   GXLONG nMaxWidth = clMax(m_aModules[nStartIdx].regn.width, clMax(m_aModules[nStartIdx + 1].regn.width, m_aModules[nStartIdx + 2].regn.width));
   float fHorzScale = (float)nWidth / (float)nMaxWidth;
@@ -233,7 +244,7 @@ GXLONG GXSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, 
   }
   pCanvas->DrawImage(m_pImage, &rgTip0, &m_aModules[nStartIdx    ].regn);
   pCanvas->DrawImage(m_pImage, &rgTip1, &m_aModules[nStartIdx + 2].regn);
-  return rgDest.height;  // 返回值是中间可缩放Sprite的宽度
+  //return rgDest.height;  // 返回值是中间可缩放Sprite的宽度
 }
 
 GXVOID GXSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const
@@ -298,31 +309,31 @@ GXSIZE_T GXSpriteImpl::GetModuleCount() const
   return m_aModules.size();
 }
 
-GXBOOL GXSpriteImpl::GetNameA(IndexType eType, GXUINT nIndex, clStringA* pstrName) const
-{
-  switch(eType)
-  {
-  case GXSprite::IndexType_Module:
-    if(nIndex >= m_aModules.size()) {
-      return FALSE;
-    }
-
-    if(m_aModules[nIndex].name) {
-      *pstrName = m_aModules[nIndex].name;
-    }
-    else {
-      pstrName->Clear();
-    }
-    break;
-
-  case GXSprite::IndexType_Frame:
-  case GXSprite::IndexType_Animation:
-  case GXSprite::IndexType_Unified:
-    CLBREAK;
-    break;
-  }
-  return pstrName->IsEmpty();
-}
+//GXBOOL GXSpriteImpl::GetNameA(IndexType eType, GXUINT nIndex, clStringA* pstrName) const
+//{
+//  switch(eType)
+//  {
+//  case GXSprite::IndexType_Module:
+//    if(nIndex >= m_aModules.size()) {
+//      return FALSE;
+//    }
+//
+//    if(m_aModules[nIndex].name) {
+//      *pstrName = m_aModules[nIndex].name;
+//    }
+//    else {
+//      pstrName->Clear();
+//    }
+//    break;
+//
+//  case GXSprite::IndexType_Frame:
+//  case GXSprite::IndexType_Animation:
+//  case GXSprite::IndexType_Unified:
+//    CLBREAK;
+//    break;
+//  }
+//  return pstrName->IsEmpty();
+//}
 
 GXBOOL GXSpriteImpl::GetModuleRect(GXINT nIndex, GXRECT *rcSprite) const
 {
@@ -349,20 +360,54 @@ GXHRESULT GXSpriteImpl::GetImage(GXImage** ppImage)
   return m_pImage->AddRef();
 }
 
-int GXSpriteImpl::FindByNameA(GXLPCSTR szName) const
+//int GXSpriteImpl::FindByNameA(GXLPCSTR szName) const
+//{
+//  //clStringA strName = szName; // 改为直接的hash函数
+//  NameDict::const_iterator it = m_SpriteDict.find(szName);
+//  if(it == m_SpriteDict.end()) {
+//    return -1;
+//  }
+//  return it->second;
+//}
+//
+//int GXSpriteImpl::FindByNameW(GXLPCWSTR szName) const
+//{
+//  clStringA strName = szName;
+//  return FindByNameA(strName);
+//}
+
+const GXSpriteImpl::IDATTR* GXSpriteImpl::IntFind(ID id) const
 {
-  //clStringA strName = szName; // 改为直接的hash函数
-  NameDict::const_iterator it = m_SpriteDict.find(szName);
-  if(it == m_SpriteDict.end()) {
-    return -1;
+  auto it = m_IDDict.find(id);
+  if(it == m_IDDict.end()) {
+    return NULL;
   }
-  return it->second;
+  return &it->second;
 }
 
-int GXSpriteImpl::FindByNameW(GXLPCWSTR szName) const
+const GXSpriteImpl::IDATTR* GXSpriteImpl::IntFind(GXLPCSTR szName) const
 {
-  clStringA strName = szName;
-  return FindByNameA(strName);
+  auto it = m_NameDict.find(szName);
+  if(it == m_NameDict.end()) {
+    return NULL;
+  }
+  return &it->second;
+}
+
+GXINT GXSpriteImpl::AttrToIndex(const IDATTR* pAttr) const
+{
+  switch(pAttr->type)
+  {
+  case GXSprite::Type_Empty:
+    return pAttr->index;
+  case GXSprite::Type_Module:
+    return pAttr->pModel - &m_aModules.front();
+  case GXSprite::Type_Frame:
+    return pAttr->pFrame - &m_aFrames.front();
+  case GXSprite::Type_Animation:
+    return pAttr->pAnination- &m_aAnimations.front();
+  }
+  return -1;
 }
 
 //GXHRESULT GXSpriteImpl::SaveW(GXLPCWSTR szFilename) const
@@ -440,51 +485,242 @@ GXVOID GXSpriteImpl::PaintFrame( GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT
   CLBREAK;
 }
 
-GXVOID GXSpriteImpl::PaintAnimationFrame( GXCanvas *pCanvas, GXINT idxAnim, GXINT idxFrame, GXINT x, GXINT y ) const
+GXVOID GXSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
 {
   CLBREAK;
 }
 
-GXVOID GXSpriteImpl::PaintSprite( GXCanvas *pCanvas, GXINT nUnifiedIndex, GXINT nMinorIndex, GXINT x, GXINT y, float xScale, float yScale ) const
+GXVOID GXSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const
 {
-  if(nUnifiedIndex < 0) {
-    return;
+  CLBREAK;
+}
+
+
+//GXVOID GXSpriteImpl::PaintAnimationFrame( GXCanvas *pCanvas, GXINT idxAnim, GXINT idxFrame, GXINT x, GXINT y ) const
+//{
+//  CLBREAK;
+//}
+
+GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const
+{
+}
+
+GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const
+{
+}
+
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
+{
+}
+
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
+{
+}
+
+GXVOID GXSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const
+{
+}
+
+GXVOID GXSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const
+{
+}
+
+GXVOID GXSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+{
+}
+
+GXVOID GXSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const
+{
+}
+
+GXVOID GXSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const
+{
+}
+
+GXVOID GXSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+{
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+GXINT GXSpriteImpl::Find(ID id, GXOUT Type* pType) const
+{
+  auto pAttr = IntFind(id);
+  if(pType) {
+    *pType = pAttr->type;
   }
-  else if(nUnifiedIndex < (GXINT)m_aModules.size()) {
-    const GXREGN& regn = m_aModules[nUnifiedIndex].regn;
-    PaintModule(pCanvas, nUnifiedIndex, x, y, (GXINT)(regn.width * xScale), (GXINT)(regn.height * yScale));
+  return AttrToIndex(pAttr);
+}
+
+GXINT GXSpriteImpl::Find(GXLPCSTR szName, GXOUT Type* pType) const
+{
+  auto pAttr = IntFind(szName);
+  if(pType) {
+    *pType = pAttr->type;
+  }
+  return AttrToIndex(pAttr);
+}
+
+GXINT GXSpriteImpl::Find(GXLPCWSTR szName, GXOUT Type* pType) const
+{
+  return Find(clStringA(szName), pType);
+}
+
+GXLPCSTR GXSpriteImpl::FindName(ID id) const
+{
+  auto pAttr = IntFind(id);
+  switch(pAttr->type)
+  {
+  case GXSprite::Type_Module:
+    return pAttr->pModel->name;
+  case GXSprite::Type_Frame:
+    return pAttr->pFrame->name;
+  case GXSprite::Type_Animation:
+    return pAttr->pAnination->name;
+  }
+  return NULL;
+}
+
+GXSprite::ID GXSpriteImpl::FindID(GXLPCSTR szName) const
+{
+  auto pAttr = IntFind(szName);
+  switch(pAttr->type)
+  {
+  case GXSprite::Type_Module:
+    return pAttr->pModel->id;
+  case GXSprite::Type_Frame:
+    return pAttr->pFrame->id;
+  case GXSprite::Type_Animation:
+    return pAttr->pAnination->id;
+  }
+  return 0;
+}
+
+GXSprite::ID GXSpriteImpl::FindID(GXLPCWSTR szName) const
+{
+  return FindID(clStringA(szName));
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+//GXVOID GXSpriteImpl::PaintSprite( GXCanvas *pCanvas, GXINT nUnifiedIndex, GXINT nMinorIndex, GXINT x, GXINT y, float xScale, float yScale ) const
+//{
+//  if(nUnifiedIndex < 0) {
+//    return;
+//  }
+//  else if(nUnifiedIndex < (GXINT)m_aModules.size()) {
+//    const GXREGN& regn = m_aModules[nUnifiedIndex].regn;
+//    PaintModule(pCanvas, nUnifiedIndex, x, y, (GXINT)(regn.width * xScale), (GXINT)(regn.height * yScale));
+//  }
+//}
+
+//////////////////////////////////////////////////////////////////////////
+
+void GXSpriteImpl::IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const
+{
+  switch(pAttr->type)
+  {
+  case GXSprite::Type_Module:
+    ASSERT(pAttr->pModel >= &m_aModules.front() &&
+      pAttr->pModel <= &m_aModules.back());
+
+    *lprg = pAttr->pModel->regn;
+    break;
+  case GXSprite::Type_Frame:
+    {
+      ASSERT(pAttr->pFrame>= &m_aFrames.front() &&
+        pAttr->pFrame <= &m_aFrames.back());
+
+      const FRAME& f = *pAttr->pFrame;
+      GXREGN rg = m_aModules[f.start].regn;
+      for(GXINT i = 1; i < f.count; i++)
+      {
+        gxUnionRegn(&rg, &rg, &m_aModules[i].regn);
+      }
+      *lprg = rg;
+    }
+    break;
+  case GXSprite::Type_Animation:
+    ASSERT(pAttr->pAnination>= &m_aAnimations.front() &&
+      pAttr->pAnination <= &m_aAnimations.back());
+    CLBREAK; // 没实现
+    break;
   }
 }
 
-GXBOOL GXSpriteImpl::GetSpriteBounding( GXINT nIndex, GXRECT* lprc ) const
+template<typename _TID>
+GXSprite::Type GXSpriteImpl::GetBoundingT(_TID id, GXLPRECT lprc) const
 {
-  if(nIndex < 0) {
-    return FALSE;
+  auto pAttr = IntFind(id);
+  if( ! pAttr) {
+    return GXSprite::Type_Empty;
   }
-  else if(nIndex < (GXINT)m_aModules.size()) {
-    const GXREGN& regn = m_aModules[nIndex].regn;
-    lprc->left   = 0;
-    lprc->top    = 0;
-    lprc->right  = regn.width;
-    lprc->bottom = regn.height;
-  }
-  return TRUE;
+  GXREGN regn;
+  IntGetBounding(pAttr, &regn);
+  gxRegnToRect(lprc, &regn);
+  return pAttr->type;
 }
 
-GXBOOL GXSpriteImpl::GetSpriteBounding( GXINT nIndex, GXREGN* lprg ) const
+template<typename _TID>
+GXSprite::Type GXSpriteImpl::GetBoundingT(_TID id, GXLPREGN lprg) const
 {
-  if(nIndex < 0) {
-    return FALSE;
+  auto pAttr = IntFind(id);
+  if( ! pAttr) {
+    return GXSprite::Type_Empty;
   }
-  else if(nIndex < (GXINT)m_aModules.size()) {
-    const GXREGN& regn = m_aModules[nIndex].regn;
-    lprg->left   = 0;
-    lprg->top    = 0;
-    lprg->width  = regn.width;
-    lprg->height = regn.height;
-  }
-  return TRUE;
+
+  IntGetBounding(pAttr, lprg);
+  return pAttr->type;
 }
+
+
+GXSprite::Type GXSpriteImpl::GetBounding(ID id, GXRECT* lprc) const
+{
+  return GetBoundingT(id, lprc);
+}
+
+GXSprite::Type GXSpriteImpl::GetBounding(ID id, GXREGN* lprg) const
+{
+  return GetBoundingT(id, lprg);
+}
+
+GXSprite::Type GXSpriteImpl::GetBounding(GXLPCSTR szName, GXLPRECT lprc) const
+{
+  return GetBoundingT(szName, lprc);
+}
+
+GXSprite::Type GXSpriteImpl::GetBounding(GXLPCSTR szName, GXLPREGN lprg) const
+{
+  return GetBoundingT(szName, lprg);
+}
+
+GXSprite::Type GXSpriteImpl::GetBounding(GXLPCWSTR szName, GXLPRECT lprc) const
+{
+  return GetBoundingT(clStringA(szName), lprc);
+}
+
+GXSprite::Type GXSpriteImpl::GetBounding(GXLPCWSTR szName, GXLPREGN lprg) const
+{
+  return GetBoundingT(clStringA(szName), lprg);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+template<class _TArray, class _TDesc>
+void GXSpriteImpl::Add(_TArray& aArray, GXSprite::Type type, _TDesc& desc)
+{
+  IDATTR attr = {type, aArray.size()};
+  if(desc.name) {
+    desc.name = m_NameSet.add(desc.name);
+    m_NameDict.insert(clmake_pair(desc.name, attr));
+  }
+
+  if(desc.id) {
+    m_IDDict.insert(clmake_pair(desc.id, attr));
+  }
+  aArray.push_back(desc);
+}
+
 
 GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDesc)
 {
@@ -508,11 +744,17 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   for(GXUINT i = 0; i < pDesc->nNumOfModules; i++)
   {
     sModule = pDesc->aModules[i];
-    if(sModule.name) {
-      sModule.name = m_NameSet.add(sModule.name);
-      m_SpriteDict[sModule.name] = i;
-    }
-    m_aModules.push_back(sModule);
+    //IDATTR attr = {GXSprite::Type_Module, m_aModules.size()};
+    //if(sModule.name) {
+    //  sModule.name = m_NameSet.add(sModule.name);
+    //  //m_SpriteDict[sModule.name] = i;
+    //  m_NameDict.insert(clmake_pair(sModule.name, attr));
+    //}
+    //if(sModule.id) {
+    //  m_IDDict.insert(clmake_pair(sModule.id, attr));
+    //}
+    //m_aModules.push_back(sModule);
+    Add(m_aModules, GXSprite::Type_Module, sModule);
   }
 
 
@@ -523,11 +765,12 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   for(GXUINT i = 0; i < pDesc->nNumOfFrames; i++)
   {
     sFrame = pDesc->aFrames[i];
-    if(sFrame.name) {
-      sFrame.name = m_NameSet.add(sFrame.name);
-      m_SpriteDict[sFrame.name] = (int)(m_aModules.size() + i);
-    }
-    m_aFrames.push_back(sFrame);
+    //if(sFrame.name) {
+    //  sFrame.name = m_NameSet.add(sFrame.name);
+    //  m_SpriteDict[sFrame.name] = (int)(m_aModules.size() + i);
+    //}
+    //m_aFrames.push_back(sFrame);
+    Add(m_aFrames, GXSprite::Type_Frame, sFrame);
   }
 
   for(GXUINT i = 0; i < pDesc->nNumOfFrameModules; i++)
@@ -542,11 +785,12 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   for(GXUINT i = 0; i < pDesc->nNumOfAnimations; i++)
   {
     sAnimation = pDesc->aAnimations[i];
-    if(sAnimation.name) {
-      sAnimation.name = m_NameSet.add(sAnimation.name);
-      m_SpriteDict[sAnimation.name] = (int)(m_aModules.size() + m_aFrames.size() + i);
-    }
-    m_aAnimations.push_back(sAnimation);
+    //if(sAnimation.name) {
+    //  sAnimation.name = m_NameSet.add(sAnimation.name);
+    //  m_SpriteDict[sAnimation.name] = (int)(m_aModules.size() + m_aFrames.size() + i);
+    //}
+    //m_aAnimations.push_back(sAnimation);
+    Add(m_aAnimations, GXSprite::Type_Animation, sAnimation);
   }
 
   for(GXUINT i = 0; i < pDesc->nNumOfAnimFrames; i++)

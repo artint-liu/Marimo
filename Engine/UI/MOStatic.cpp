@@ -107,7 +107,7 @@ GXBOOL CGXStaticSprite::SetModuleByNameW(GXLPCWSTR szModuleName)
   return (hval == 0);
 }
 
-GXBOOL CGXStaticSprite::SetModuleByIndex(int nModuleIndex)
+GXBOOL CGXStaticSprite::SetModuleByIndex(GXUINT nModuleIndex)
 {
   GXHRESULT hval = gxSendMessage(m_hWnd, GXSSM_SETMODULEBYINDEX, (GXWPARAM)nModuleIndex, NULL);
   return (hval == 0);

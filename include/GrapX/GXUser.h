@@ -1637,7 +1637,8 @@ extern "C" {
 extern "C" {
 #endif // __cplusplus
 
-GXBOOL      GXDLLAPI gxUnionRect        (GXLPRECT,GXCONST GXRECT *,GXCONST GXRECT *);
+GXBOOL      GXDLLAPI gxUnionRect        (GXLPRECT lpOut, GXLPCRECT lprc1, GXLPCRECT lprc2);
+GXBOOL      GXDLLAPI gxUnionRegn        (GXLPREGN lpOut, GXLPCREGN lprg1, GXLPCREGN lprg2);
 GXBOOL      GXDLLAPI gxIntersectRect    (GXLPRECT,GXCONST GXRECT *,GXCONST GXRECT *);
 GXBOOL      GXDLLAPI gxIsRectEmpty      (GXCONST GXRECT *lprc);
 GXBOOL      GXDLLAPI gxIsRegnEmpty      (GXCONST GXREGN *lprg);

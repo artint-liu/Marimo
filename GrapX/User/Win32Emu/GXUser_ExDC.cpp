@@ -747,11 +747,11 @@ GXBOOL GXWndCanvas::DrawFrameControl(GXLPRECT lprc,GXUINT uType,GXUINT uState)
       break;
     case GXDFCS_BUTTONCHECK:
       if((uState & 0xff00) == 0)
-        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_CHECK_NORMAL, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
+        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_CHECK_NORMAL, lprc->left, lprc->top, lprc->right, lprc->bottom);
       else if(uState & GXDFCS_CHECKED)
-        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_CHECK_SELECT, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
+        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_CHECK_SELECT, lprc->left, lprc->top, lprc->right, lprc->bottom);
       else if(uState & GXDFCS_PUSHED)
-        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_CHECK_PRESSED, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
+        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_CHECK_PRESSED, lprc->left, lprc->top, lprc->right, lprc->bottom);
       else
       {
         //gxFillRect(hdc, lprc, gxGetCtrlBrush(CTLBRUSH_EDIT));
@@ -764,11 +764,11 @@ GXBOOL GXWndCanvas::DrawFrameControl(GXLPRECT lprc,GXUINT uType,GXUINT uState)
       break;
     case GXDFCS_BUTTONRADIO:
       if((uState & 0xff00) == 0)
-        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_RADIO_NORMAL, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
+        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_RADIO_NORMAL, lprc->left, lprc->top, lprc->right, lprc->bottom);
       else if(uState & GXDFCS_CHECKED)
-        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_RADIO_SELECT, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
+        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_RADIO_SELECT, lprc->left, lprc->top, lprc->right, lprc->bottom);
       else if(uState & GXDFCS_PUSHED)
-        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_RADIO_PRESSED, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
+        GXWnd::s_pCommonSpr->PaintModule(m_pNative, IDCOMMON_RADIO_PRESSED, lprc->left, lprc->top, lprc->right, lprc->bottom);
       else
       {
         GXHBRUSH hBrush = gxGetCtrlBrush(CTLBRUSH_LISTBOX);

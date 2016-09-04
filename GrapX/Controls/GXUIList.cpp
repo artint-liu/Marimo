@@ -1148,7 +1148,7 @@ namespace GXUI
       m_aItems.insert(m_aItems.begin() + begin, count, sItem);
 
       HeightToBottom(dwStyle, rect, begin);
-      ASSERT(m_aItems.size() < (size_t)m_nColumnCount || m_nColumnCount == DbgCalcColumnCount());
+      //ASSERT(m_aItems.size() < (size_t)m_nColumnCount || m_nColumnCount == DbgCalcColumnCount());
     }
     else
     {

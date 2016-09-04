@@ -415,17 +415,61 @@ namespace Marimo
     CLBREAK;
   }
 
-  GXINT MOSpriteImpl::Find(ID id) const
+  //////////////////////////////////////////////////////////////////////////
+
+  GXINT MOSpriteImpl::Find(ID id, Type* pType) const
   {
     CLBREAK;
     return -1;
   }
 
-  GXINT MOSpriteImpl::Find(GXLPCSTR szName) const
+  GXINT MOSpriteImpl::Find(GXLPCSTR szName, Type* pType) const
   {
     CLBREAK;
     return -1;
   }
+
+  GXINT MOSpriteImpl::Find(GXLPCWSTR szName, GXOUT Type* pType) const
+  {
+    return Find(clStringA(szName), pType);
+  }
+  
+  GXLPCSTR MOSpriteImpl::FindName(ID id) const
+  {
+    //auto pAttr = IntFind(id);
+    //switch(pAttr->type)
+    //{
+    //case MOSprite::Type_Module:
+    //  return pAttr->pModel->name;
+    //case MOSprite::Type_Frame:
+    //  return pAttr->pFrame->name;
+    //case MOSprite::Type_Animation:
+    //  return pAttr->pAnination->name;
+    //}
+    return NULL;
+  }
+
+  MOSprite::ID MOSpriteImpl::FindID(GXLPCSTR szName) const
+  {
+    //auto pAttr = IntFind(szName);
+    //switch(pAttr->type)
+    //{
+    //case MOSprite::Type_Module:
+    //  return pAttr->pModel->id;
+    //case MOSprite::Type_Frame:
+    //  return pAttr->pFrame->id;
+    //case MOSprite::Type_Animation:
+    //  return pAttr->pAnination->id;
+    //}
+    return 0;
+  }
+
+  MOSprite::ID MOSpriteImpl::FindID(GXLPCWSTR szName) const
+  {
+    return FindID(clStringA(szName));
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   GXSIZE_T MOSpriteImpl::GetModuleCount() const
   {
@@ -528,6 +572,36 @@ namespace Marimo
     return FALSE;
   }
 
+  //////////////////////////////////////////////////////////////////////////
+
+  template<typename _TID>
+  MOSprite::Type MOSpriteImpl::GetBoundingT(_TID id, GXLPRECT lprc) const
+  {
+    //auto pAttr = IntFind(id);
+    //if( ! pAttr) {
+    //  return MOSprite::Type_Empty;
+    //}
+    //GXREGN regn;
+    //IntGetBounding(pAttr, &regn);
+    //gxRegnToRect(lprc, &regn);
+    //return pAttr->type;
+    return Type_Error;
+  }
+
+  template<typename _TID>
+  MOSprite::Type MOSpriteImpl::GetBoundingT(_TID id, GXLPREGN lprg) const
+  {
+    //auto pAttr = IntFind(id);
+    //if( ! pAttr) {
+    //  return MOSprite::Type_Empty;
+    //}
+
+    //IntGetBounding(pAttr, lprg);
+    //return pAttr->type;
+    return Type_Error;
+  }
+
+
   MOSprite::Type MOSpriteImpl::GetBounding(ID id, GXLPRECT lprc) const
   {
     CLBREAK;
@@ -539,6 +613,28 @@ namespace Marimo
     CLBREAK;
     return Type_Error;
   }
+
+  MOSprite::Type MOSpriteImpl::GetBounding(GXLPCSTR szName, GXLPRECT lprc) const
+  {
+    return GetBoundingT(szName, lprc);
+  }
+
+  MOSprite::Type MOSpriteImpl::GetBounding(GXLPCSTR szName, GXLPREGN lprg) const
+  {
+    return GetBoundingT(szName, lprg);
+  }
+
+  MOSprite::Type MOSpriteImpl::GetBounding(GXLPCWSTR szName, GXLPRECT lprc) const
+  {
+    return GetBoundingT(clStringA(szName), lprc);
+  }
+
+  MOSprite::Type MOSpriteImpl::GetBounding(GXLPCWSTR szName, GXLPREGN lprg) const
+  {
+    return GetBoundingT(clStringA(szName), lprg);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   GXSIZE_T MOSpriteImpl::GetImageCount() const
   {    

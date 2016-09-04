@@ -22,14 +22,14 @@ DRAWTHEMEBKG(DrawThemeBkg_WP_FrameLeft)
 {
   //GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GXCanvas::CM_SourceCopy);
   s_pUxThemeSprite_Window->PaintModule(/*GXGDI_DC_PTR(hdc)->*/pCanvas, 3, 
-    pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+    pRect->left, pRect->top, pRect->right, pRect->bottom);
   return 1L;
 }
 DRAWTHEMEBKG(DrawThemeBkg_WP_FrameRight)
 {
   //GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GXCanvas::CM_SourceCopy);
   s_pUxThemeSprite_Window->PaintModule(/*GXGDI_DC_PTR(hdc)->*/pCanvas, 5, 
-    pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+    pRect->left, pRect->top, pRect->right, pRect->bottom);
   return 1L;
 }
 DRAWTHEMEBKG(DrawThemeBkg_WP_FrameBottom)
@@ -44,7 +44,7 @@ DRAWTHEMEBKG(DrawThemeBkg_WP_Dialog)
   //LPGXGDIDC lpDC = GXGDI_DC_PTR(hdc);
   //lpDC->pCanvas->SetCompositingMode(GXCanvas::CM_SourceCopy);
   s_pUxThemeSprite_Window->PaintModule(/*GXGDI_DC_PTR(hdc)->*/pCanvas, 4, 
-    pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+    pRect->left, pRect->top, pRect->right, pRect->bottom);
   return 1L;
 }
 

@@ -33,10 +33,10 @@ extern "C"
       return 1;
     }
 
-    lprcDst->left   = lprcSrc1->left  < lprcSrc2->left  ? lprcSrc1->left  : lprcSrc2->left;
+    lprcDst->left   = lprcSrc1->left   < lprcSrc2->left   ? lprcSrc1->left   : lprcSrc2->left;
     lprcDst->right  = lprcSrc1->right  > lprcSrc2->right  ? lprcSrc1->right  : lprcSrc2->right;
     lprcDst->top    = lprcSrc1->top    < lprcSrc2->top    ? lprcSrc1->top    : lprcSrc2->top;
-    lprcDst->bottom = lprcSrc1->bottom  > lprcSrc2->bottom  ? lprcSrc1->bottom  : lprcSrc2->bottom;
+    lprcDst->bottom = lprcSrc1->bottom > lprcSrc2->bottom ? lprcSrc1->bottom : lprcSrc2->bottom;
 
     //if(  lprcDst->left >= lprcDst->right  || 
     //  lprcDst->top >= lprcDst->bottom  )
@@ -49,6 +49,40 @@ extern "C"
     //}
     return 1;
   }
+
+  GXBOOL GXDLLAPI gxUnionRegn(GXLPREGN lpOut, GXLPCREGN lprg1, GXLPCREGN lprg2)
+  {
+    if(lprg1 == NULL) {
+      if(lprg2 == NULL) {
+        lpOut->left   = 0;
+        lpOut->top    = 0;
+        lpOut->width  = 0;
+        lpOut->height = 0;
+        return 0;
+      }
+      else {
+        *lpOut = *lprg2;
+        return 1;
+      }
+    }
+    else if(lprg2 == NULL) {
+      *lpOut = *lprg1;
+      return 1;
+    }
+
+    // 防止lpOut与lprg1/lprg2地址一样时left/top被提前改写
+    const GXLONG right1 = lprg1->left + lprg1->width;
+    const GXLONG right2 = lprg2->left + lprg2->width;
+    const GXLONG bottom1 = lprg1->top + lprg1->height;
+    const GXLONG bottom2 = lprg2->top + lprg2->height;
+
+    lpOut->left   = clMin(lprg1->left, lprg2->left);
+    lpOut->top    = clMin(lprg1->top,  lprg2->top);
+    lpOut->width  = clMax(right1, right2) - lpOut->left;
+    lpOut->height = clMax(bottom1, bottom2) - lpOut->top;
+    return 1;
+  }
+
   //////////////////////////////////////////////////////////////////////////
   GXBOOL GXDLLAPI gxIntersectRect(
     GXLPRECT lprcDst,      // address of structure for intersection

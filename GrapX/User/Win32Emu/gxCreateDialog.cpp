@@ -736,7 +736,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
 
   clstd::TranslateEscapeCharacter(dbpItem.strCaption);
 
-  GXUI::StaticLabel* pLabel = (GXUI::StaticLabel*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Label, dbpItem.strName, &dbpItem, &aDefinitions);
+  GXUI::StaticLabel* pLabel = (GXUI::StaticLabel*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Type_Label, dbpItem.strName, &dbpItem, &aDefinitions);
   hItemWnd = pLabel->Get();
   //gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
@@ -765,7 +765,7 @@ GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, Section hDlgItem, 
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  GXUI::StaticRectangle* pRectangle = (GXUI::StaticRectangle*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Rectangle, dbpItem.strName, &dbpItem, &aDefinitions);
+  GXUI::StaticRectangle* pRectangle = (GXUI::StaticRectangle*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Type_Rectangle, dbpItem.strName, &dbpItem, &aDefinitions);
   hItemWnd = pRectangle->Get();
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
@@ -796,7 +796,7 @@ GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
     dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"GXUISS_", DlgXM::CMC_StaticLabel);
   }
 
-  GXUI::StaticSprite* pSprite = (GXUI::StaticSprite*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Sprite, dbpItem.strName, &dbpItem, &aDefinitions);
+  GXUI::StaticSprite* pSprite = (GXUI::StaticSprite*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Type_Sprite, dbpItem.strName, &dbpItem, &aDefinitions);
   hItemWnd = pSprite->Get();
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 

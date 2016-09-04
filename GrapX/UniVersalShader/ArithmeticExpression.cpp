@@ -1042,6 +1042,12 @@ namespace UVShader
       if(opcode == "&&") {
         return t1 && t2;
       }
+      else if(opcode == "||") {
+        return t1 || t2;
+      }
+      else if(opcode == "==") {
+        return t1 == t2;
+      }
       else {
         TRACE("Unsupport opcode(%c).\n", opcode);
         CLBREAK;
@@ -1141,6 +1147,7 @@ namespace UVShader
     symbol.Clear();
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
     marker.marker = 0;
+    marker.length = 0;
     type = TokenType_Undefine;
     bInStringSet = 0;
   }
