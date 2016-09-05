@@ -296,7 +296,7 @@ TOOLTIPS_Refresh (GXHWND hwnd, GXHDC hdc)
 
     if (infoPtr->pszTitle)
     {
-      GXRECT rcTitle = {rc.left, rc.top, rc.right, rc.bottom};
+      GXRECT rcTitle(rc.left, rc.top, rc.right, rc.bottom);
       int height;
       GXBOOL icon_present;
 
@@ -503,7 +503,7 @@ TOOLTIPS_CalcTipSize (GXHWND hwnd, const TOOLTIPS_INFO *infoPtr, GXLPSIZE lpSize
   GXHFONT hOldFont;
   GXDWORD style = gxGetWindowLongW(hwnd, GXGWL_STYLE);
   GXUINT uFlags = GXDT_EXTERNALLEADING | GXDT_CALCRECT;
-  GXRECT rc = {0, 0, 0, 0};
+  GXRECT rc(0, 0, 0, 0);
   GXSIZE title = {0, 0};
 
   if (infoPtr->nMaxTipWidth > -1) {
@@ -517,7 +517,7 @@ TOOLTIPS_CalcTipSize (GXHWND hwnd, const TOOLTIPS_INFO *infoPtr, GXLPSIZE lpSize
   hdc = gxGetDC (hwnd);
   if (infoPtr->pszTitle)
   {
-    GXRECT rcTitle = {0, 0, 0, 0};
+    GXRECT rcTitle(0, 0, 0, 0);
     TRACE("title %s\n", debugstr_w(infoPtr->pszTitle));
     if (infoPtr->hTitleIcon)
     {

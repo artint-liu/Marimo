@@ -320,15 +320,14 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -338,7 +337,8 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x64;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x64;$(DXSDK_DIR)lib/x64;$(VLDDIR)/lib/Win64</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libcmtd.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -349,9 +349,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -367,7 +365,8 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x64;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x64;$(DXSDK_DIR)lib/x64;$(VLDDIR)/lib/Win64</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libcmtd.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_CLI|x64'">
@@ -443,6 +442,7 @@
     <ClInclude Include="..\..\..\include\GrapX\GPrimitive.h" />
     <ClInclude Include="..\..\..\include\GrapX\GrapVR.h" />
     <ClInclude Include="..\..\..\include\GrapX\GRegion.h" />
+    <ClInclude Include="..\..\..\include\GrapX\GRect.h" />
     <ClInclude Include="..\..\..\include\GrapX\GResource.h" />
     <ClInclude Include="..\..\..\include\GrapX\GShader.h" />
     <ClInclude Include="..\..\..\include\GrapX\GStateBlock.h" />

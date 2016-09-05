@@ -414,7 +414,7 @@ namespace GXUI
 
 
     clStringW strItem;
-    GXRECT  rcItem = {0,0,0,0};
+    GXRECT rcItem(0,0,0,0);
     GXSIZE_T i = m_nTopIndex;
     Recycle(i == 0 ? 0 : i - 1, -1);
     for(; i < nCount; i++)

@@ -147,7 +147,7 @@ namespace GXUI
     VarArray.Impulse(Marimo::DATACT_Deleted, -1);
     }
     else */{
-      VarArray.Remove(-1);
+      VarArray.Remove(-1, 0);
     }
 //#else
 //    VarArray.Remove(-1);
@@ -1178,6 +1178,14 @@ namespace GXUI
   GXBOOL List::OnSyncRemove( GXSIZE_T begin, GXSIZE_T count )
   {
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+
+    // begin == -1时表示全部删除, count必须是0
+    if(begin == (GXSIZE_T)-1) {
+      ASSERT(count == 0);
+      m_aItems.clear();
+      return TRUE;
+    }
+
     //ASSERT(TEST_FLAG_NOT(dwStyle, GXLBS_MULTICOLUMN));
     ASSERT(m_pAdapter->GetCount() + count == m_aItems.size());
 

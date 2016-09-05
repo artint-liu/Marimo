@@ -1474,7 +1474,7 @@ namespace clstd
   _CLSTR_TEMPL
     i32 _CLSTR_IMPL::ToInteger(int nRadix) const
   {
-    return clstd::xtou(m_pBuf, nRadix);
+    return clstd::xtoi(m_pBuf, nRadix);
   }
 
   _CLSTR_TEMPL

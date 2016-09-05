@@ -88,7 +88,7 @@ RGNCOMPLEX GXWindowsSurface::InvalidateRect(GXRECT* lpRect)
   GRegion* pRegion;
   GXGraphics* pGraphics = m_lpStation->pGraphics;
 
-  GXRECT rcUpdate = {0, 0};
+  GXRECT rcUpdate(0);
 
   if(lpRect == NULL)
     m_pRenderTar->GetTextureUnsafe()->GetDimension((GXUINT*)&rcUpdate.right, (GXUINT*)&rcUpdate.bottom);

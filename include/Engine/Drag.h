@@ -80,7 +80,7 @@ namespace EditorUtility
     public:
       DragImpl(_Fn f) : func(f){}
     }drag(DragFunc);
-    return drag.Track(ptOrigin, ptOrigin);
+    return drag.Track(ptCursor, ptOrigin);
   }
 } // namespace EditorUtility
 

@@ -405,6 +405,9 @@
     <ClInclude Include="..\..\Canvas\MOSpriteImpl.h">
       <Filter>Lib\Canvas</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\GrapX\GRect.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Platform\GXApp.cpp">

@@ -340,37 +340,47 @@ namespace Marimo
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
+  {
+    CLBREAK;
+  }
+
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
+  {
+    CLBREAK;
+  }
+
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) const
   {
     CLBREAK;
   }
@@ -471,6 +481,49 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
+  GXINT MOSpriteImpl::PackIndex(Type type, GXUINT index) const
+  {
+    switch(type)
+    {
+    case Sprite::Type_Module:
+      return index;
+    case Sprite::Type_Frame:
+      return (GXINT)m_loader.aModules.size() + (GXINT)index;
+    case Sprite::Type_Animation:
+      return (GXINT)m_loader.aModules.size() + (GXINT)m_loader.aFrames.size() + (GXINT)index;
+    }
+    return -1;
+  }
+
+  GXINT MOSpriteImpl::UnpackIndex(GXUINT nUniqueIndex, Type* pType) const
+  {
+    const GXUINT nModuleCount = m_loader.aModules.size();
+    const GXUINT nModuleFrameCount = nModuleCount + m_loader.aFrames.size();
+    const GXUINT nModuleFrameAnimCount = nModuleFrameCount + m_loader.aAnims.size();
+
+    if(nUniqueIndex < nModuleCount) {
+      if(pType) {
+        *pType = Sprite::Type_Module;
+      }
+      return nUniqueIndex;
+    }
+    else if(nUniqueIndex < nModuleFrameCount) {
+      if(pType) {
+        *pType = Sprite::Type_Frame;
+      }
+      return nUniqueIndex - nModuleCount;
+    }
+    else if(nUniqueIndex < nModuleFrameAnimCount) {
+      if(pType) {
+        *pType = Sprite::Type_Animation;
+      }
+      return nUniqueIndex - nModuleFrameCount;
+    }
+    return -1;
+  }
+  
+  //////////////////////////////////////////////////////////////////////////
+
   GXSIZE_T MOSpriteImpl::GetModuleCount() const
   {
     return m_loader.aModules.size();
@@ -479,6 +532,15 @@ namespace Marimo
   GXSIZE_T MOSpriteImpl::GetFrameCount() const
   {
     return m_loader.aFrames.size();
+  }
+  
+  GXSIZE_T MOSpriteImpl::GetFrameModuleCount(GXUINT nFrameIndex) const 
+  {
+    if(nFrameIndex >= (GXUINT)m_loader.aFrames.size()) {
+      return 0;
+    }
+    const FRAME& f = m_loader.aFrames[nFrameIndex];
+    return f.end - f.begin;
   }
 
   GXSIZE_T MOSpriteImpl::GetAnimationCount() const
@@ -502,6 +564,10 @@ namespace Marimo
     }
 
     const FRAME& f = m_loader.aFrames[nIndex];
+    if( ! pFrameModule || ! nCount) {
+      return (f.end - f.begin);
+    }
+
     nCount = clMin(nCount, f.end - f.begin);
 
     for(GXSIZE_T i = 0; i < nCount; i++)

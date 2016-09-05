@@ -80,9 +80,9 @@ inline void InlSetZeroT(_Ty& t) {
 #endif // SAFE_ADDREF
 
 #if __cplusplus < 201103L
-# define TRIVIAL_DEFAULT {}
+# define CLTRIVIAL_DEFAULT {}
 #else
-# define TRIVIAL_DEFAULT = default
+# define CLTRIVIAL_DEFAULT = default
 #endif
 
 #define SETBIT(_DW, _IDX)       ((_DW) |= (1 << (_IDX)))

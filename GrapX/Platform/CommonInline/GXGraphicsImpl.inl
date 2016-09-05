@@ -1065,7 +1065,7 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
       ? m_pBackBufferTex 
       : lpstd->pTempTex;
 
-    GXRECT rcTarget = {0, 0};
+    GXRECT rcTarget(0);
     GXUINT nBackWidth, nBackHeight;
 
     pTarget->GetDimension((GXUINT*)&rcTarget.right, (GXUINT*)&rcTarget.bottom);

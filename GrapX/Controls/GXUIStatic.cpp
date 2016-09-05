@@ -258,7 +258,7 @@ namespace GXUI
     {
       const GXUINT uDrawStyle = GetDrawTextFlag();
       if(TEST_FLAG(dwStyle, GXUISS_CONTRAST)) {
-        GXRECT rcContrast = {rect.left + 1, rect.top + 1, rect.right + 1, rect.bottom + 1};
+        GXRECT rcContrast(rect.left + 1, rect.top + 1, rect.right + 1, rect.bottom + 1);
         canvas.DrawTextW(m_pFont, lpText, nLen, &rcContrast, uDrawStyle, 
           m_crText ^ 0xffffff);
       }
@@ -410,17 +410,54 @@ namespace GXUI
       gxGetClientRect(m_hWnd, &rect);
 
       GXREGN regn;
+      GXSprite::Type type;
+      GXINT index = m_pSprite->UnpackIndex(m_nSpriteIdx, &type);
 
-      // 这个断言用来提醒没有实现 m_nSpriteIdx 拆解，因为 m_nSpriteIdx 还可能代表Frame/Animation索引
-      ASSERT(m_nSpriteIdx < (GXINT)m_pSprite->GetModuleCount());
-
-      if(m_pSprite->GetModuleRegion(m_nSpriteIdx, &regn))
+      // TODO: 这个以后想想怎么改, 重新设计接口
+      switch(type)
       {
-        const float xScale = (float)rect.right / regn.width;
-        const float yScale = (float)rect.bottom / regn.height;
+      case GXSprite::Type_Module:
+        if(m_pSprite->GetModuleRegion(index, &regn))
+        {
+          //const float xScale = (float)rect.right / regn.width;
+          //const float yScale = (float)rect.bottom / regn.height;
 
-        GXRegn regn(-(GXINT)(regn.left * xScale), -(GXINT)(regn.top * yScale), (GXINT)xScale, (GXINT)yScale);
-        m_pSprite->PaintModule(canvas.GetCanvasUnsafe(), m_nSpriteIdx, regn);
+          //GXRegn regn(-(GXINT)(regn.left * xScale), -(GXINT)(regn.top * yScale), (GXINT)xScale, (GXINT)yScale);
+          m_pSprite->PaintModule(canvas.GetCanvasUnsafe(), index, rect.left, rect.top, rect.right, rect.bottom);
+        }
+        break;
+
+      case GXSprite::Type_Frame:
+        {
+          //GXRECT rcFrame;
+          //m_pSprite->GetFrameBounding(index, &rcFrame);
+          regn = rect;
+          m_pSprite->PaintFrame(canvas.GetCanvasUnsafe(), index, &rect);
+        }
+        //if(m_pSprite->GetFrameBounding(index, &regn))
+        //{
+        //  const float xScale = (float)rect.right / regn.width;
+        //  const float yScale = (float)rect.bottom / regn.height;
+
+        //  GXRegn regn(-(GXINT)(regn.left * xScale), -(GXINT)(regn.top * yScale), (GXINT)xScale, (GXINT)yScale);
+        //  m_pSprite->PaintFrame(canvas.GetCanvasUnsafe(), index, &regn);
+        //}
+        break;
+
+      case GXSprite::Type_Animation:
+        m_pSprite->PaintAnimationFrame(canvas.GetCanvasUnsafe(), index, 0, &rect);
+        //if(m_pSprite->GetModuleRegion(index, &regn))
+        //{
+        //  const float xScale = (float)rect.right / regn.width;
+        //  const float yScale = (float)rect.bottom / regn.height;
+
+        //  GXRegn regn(-(GXINT)(regn.left * xScale), -(GXINT)(regn.top * yScale), (GXINT)xScale, (GXINT)yScale);
+        //  m_pSprite->PaintModule(canvas.GetCanvasUnsafe(), index, regn);
+        //}
+        break;
+      default:
+        CLBREAK;
+        break;
       }
     }
     return 0;
@@ -492,6 +529,7 @@ namespace GXUI
 
   GXBOOL StaticSprite::SetByIndex(GXINT index)
   {
+    ASSERT(index >= 0);
     m_strSpriteName.Clear();
     m_nSpriteIdx = index;
     Invalidate(FALSE);

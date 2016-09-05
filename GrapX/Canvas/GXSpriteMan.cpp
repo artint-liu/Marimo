@@ -572,7 +572,7 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
       //file.WritefA("    start=\"%d\"; count=\"%d\";\r\n", f.start, f.count);
 
       // Frame描述信息
-      for(GXINT n = 0; n < f.count; n++)
+      for(GXUINT n = 0; n < f.count; n++)
       {
         GXSprite::FRAME_MODULE& fd = pDesc->aFrameModules[n + f.start];
         file.WritefA("    module {\r\n");
@@ -598,7 +598,7 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
       file.WritefA("      rate=\"%d\"; start=\"%d\"; count=\"%d\";\r\n", a.rate, a.start, a.count);
 
       strFrameList.Clear();
-      for(GXINT n = 0; n < a.count; n++) {
+      for(GXUINT n = 0; n < a.count; n++) {
         strFrameList.AppendFormat("%d,", pDesc->aAnimFrames[n + a.start]);
       }
       strFrameList.TrimRight(',');
@@ -673,7 +673,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
       pFrameSection.SetKey("count",  clStringA(f.count));
 
       // Frame描述信息
-      for(GXINT n = 0; n < f.count; n++)
+      for(GXUINT n = 0; n < f.count; n++)
       {
         GXSprite::FRAME_MODULE& fd = pDesc->aFrameModules[n + f.start];
         clStockA::Section pFrameModuleSection = stock.Create(&pFrameSection, "module");
@@ -705,7 +705,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
       pAnimSection.SetKey("count",  clStringA(a.count));
 
       strFrameList.Clear();
-      for(GXINT n = 0; n < a.count; n++) {
+      for(GXUINT n = 0; n < a.count; n++) {
         strFrameList.AppendFormat("%d,", pDesc->aAnimFrames[n + a.start]);
       }
       pAnimSection.SetKey("frames", strFrameList);

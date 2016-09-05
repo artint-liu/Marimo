@@ -697,7 +697,7 @@ namespace GXUI
 
   GXLRESULT Layout::OnSize(GXDWORD fwSizeType, GXSIZE& size)
   {
-    GXRECT rect = {0, 0, size.cx, size.cy};
+    GXRECT rect(0, 0, size.cx, size.cy);
     return m_pRoot->OnSize(&rect);
     //return CMOWnd::OnSize(fwSizeType, size);
   }

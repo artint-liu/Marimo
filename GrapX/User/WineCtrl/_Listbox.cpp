@@ -1080,7 +1080,7 @@ static GXLRESULT LISTBOX_Paint( GXLB_DESCR *descr, GXHDC hdc )
 {
     GXINT i, col_pos = descr->page_size - 1;
     GXRECT rect;
-    GXRECT focusRect = {-1, -1, -1, -1};
+    GXRECT focusRect(-1, -1, -1, -1);
     GXHFONT oldFont = 0;
     GXHBRUSH hbrush, oldBrush = 0;
 

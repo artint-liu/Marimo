@@ -95,7 +95,7 @@ namespace Marimo
     DataPoolVariable  IndexOf         (GXSIZE_T nIndex) GXCONST;     // 获得特定索引的变量
     GXSIZE_T          GetLength       () GXCONST;                   // 获得数组的成员个数, 注意与GetSize区别
     DataPoolVariable  NewBack         (GXUINT nIncrease = 1);       // 在动态数组上追加数据, 动态数组专用, 如果inc大于1，返回第一个新增变量，如果inc为0，不会新增变量，返回最后一个数据
-    GXBOOL            Remove          (GXSIZE_T nIndex, GXSIZE_T nCount = 1);        // 移出动态数组指定索引的数据, 动态数组专用
+    GXBOOL            Remove          (GXSIZE_T nIndex, GXSIZE_T nCount = 1);        // 移出动态数组指定索引的数据, 动态数组专用, index=-1时表示全部删除，此时count必须为0
 
     // 变量专用
     GXBOOL            ParseW          (GXLPCWSTR szString, GXUINT length); // 按照变量类型转值, length=0表示按照'\0'结尾

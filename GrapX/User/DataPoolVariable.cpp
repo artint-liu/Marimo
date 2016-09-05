@@ -1266,6 +1266,8 @@ namespace Marimo
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     const GXSIZE_T nLength = pThis->GetLength();
 
+    ASSERT(nIndex != (GXSIZE_T)-1 || (nIndex == (GXSIZE_T)-1 && nCount == 0));
+
     if(
       (nLength == 0) || 
       ( (nIndex != (GXUINT)-1) && 

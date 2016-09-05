@@ -721,7 +721,7 @@ RET_IMMT:
 
   GXLONG GXCanvasImpl::TabbedTextOutW(GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
   {
-    GXRECT rect = {x, y};
+    GXRECT rect(x, y, 0, 0);
     //GXPOINT ptPos = {x, y};
     INTMEASURESTRING m;
     m.pFont = pFTFont;

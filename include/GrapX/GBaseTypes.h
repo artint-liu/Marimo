@@ -148,7 +148,7 @@ public:
       GXBYTE a;
     };
   };
-  GXColor32() TRIVIAL_DEFAULT;
+  GXColor32() CLTRIVIAL_DEFAULT;
   GXColor32(int _r, int _g, int _b) : b(_b), g(_g), r(_r), a(255) {}
   GXColor32(int _a, int _r, int _g, int _b) : b(_b), g(_g), r(_r), a(_a) {}
   GXColor32(const GXColor32& clr) : color(clr.color){}

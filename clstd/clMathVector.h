@@ -18,7 +18,7 @@ namespace clstd
     static _vector2 AxisY;
     static _vector2 Origin;
 
-    _vector2() TRIVIAL_DEFAULT;
+    _vector2() CLTRIVIAL_DEFAULT;
     _vector2(const _Ty v){x = y = v;};
     _vector2(const _Ty x, const _Ty y){this->x = x; this->y = y;};
     _vector2(const _vector2& v){x = v.x; y = v.y;};
@@ -61,7 +61,7 @@ namespace clstd
       _Ty m[3];
     };
 
-    _vector3() TRIVIAL_DEFAULT;
+    _vector3() CLTRIVIAL_DEFAULT;
     _vector3(const _Ty v){x = y = z = v;}
     _vector3(const _Ty x, const _Ty y, const _Ty z) {this->x = x; this->y = y; this->z = z;}
     _vector3(const _vector3& v){x = v.x; y = v.y; z = v.z;}
@@ -262,7 +262,7 @@ namespace clstd
       _Ty m[4];
     };
 
-    _vector4() TRIVIAL_DEFAULT;
+    _vector4() CLTRIVIAL_DEFAULT;
     _vector4(const _Ty v){x = y = z = w = v;}
     _vector4(const _Ty x, const _Ty y, const _Ty z, const _Ty w) {this->x = x; this->y = y; this->z = z; this->w = w;}
     _vector4(const _vector4& v){x = v.x; y = v.y; z = v.z; w = v.w;}

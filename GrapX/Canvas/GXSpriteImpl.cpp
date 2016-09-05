@@ -335,7 +335,7 @@ GXSIZE_T GXSpriteImpl::GetModuleCount() const
 //  return pstrName->IsEmpty();
 //}
 
-GXBOOL GXSpriteImpl::GetModuleRect(GXINT nIndex, GXRECT *rcSprite) const
+GXBOOL GXSpriteImpl::GetModuleRect(GXUINT nIndex, GXRECT *rcSprite) const
 {
   rcSprite->left   = m_aModules[nIndex].regn.left;
   rcSprite->top    = m_aModules[nIndex].regn.top;
@@ -344,7 +344,7 @@ GXBOOL GXSpriteImpl::GetModuleRect(GXINT nIndex, GXRECT *rcSprite) const
   return TRUE;
 }
 
-GXBOOL GXSpriteImpl::GetModuleRegion(GXINT nIndex, REGN *rgSprite) const
+GXBOOL GXSpriteImpl::GetModuleRegion(GXUINT nIndex, REGN *rgSprite) const
 {
   *rgSprite  = m_aModules[nIndex].regn;
   return TRUE;
@@ -401,11 +401,11 @@ GXINT GXSpriteImpl::AttrToIndex(const IDATTR* pAttr) const
   case GXSprite::Type_Empty:
     return pAttr->index;
   case GXSprite::Type_Module:
-    return pAttr->pModel - &m_aModules.front();
+    return (GXINT)(pAttr->pModel - &m_aModules.front());
   case GXSprite::Type_Frame:
-    return pAttr->pFrame - &m_aFrames.front();
+    return (GXINT)(pAttr->pFrame - &m_aFrames.front());
   case GXSprite::Type_Animation:
-    return pAttr->pAnination- &m_aAnimations.front();
+    return (GXINT)(pAttr->pAnination- &m_aAnimations.front());
   }
   return -1;
 }
@@ -463,34 +463,50 @@ GXSIZE_T GXSpriteImpl::GetFrameCount() const
   return m_aFrames.size();
 }
 
+GXSIZE_T GXSpriteImpl::GetFrameModuleCount(GXUINT nFrameIndex) const
+{
+  if(nFrameIndex >= (GXUINT)m_aFrames.size()) {
+    return 0;
+  }
+  return m_aFrames[nFrameIndex].count;
+}
+
 GXSIZE_T GXSpriteImpl::GetAnimationCount() const
 {
   return m_aAnimations.size();
 }
 
-GXBOOL GXSpriteImpl::GetFrameBounding( GXINT nIndex, GXRECT* lprc ) const
+GXSIZE_T GXSpriteImpl::GetAnimFrameCount(GXUINT nAnimIndex) const
+{
+  if(nAnimIndex >= (GXUINT)m_aAnimations.size()) {
+    return 0;
+  }
+  return m_aAnimations[nAnimIndex].count;
+}
+
+GXBOOL GXSpriteImpl::GetFrameBounding( GXUINT nIndex, GXRECT* lprc ) const
 {
   CLBREAK;
   return FALSE;
 }
 
-GXBOOL GXSpriteImpl::GetAnimBounding( GXINT nIndex, GXRECT* lprc ) const
+GXBOOL GXSpriteImpl::GetAnimBounding( GXUINT nIndex, GXRECT* lprc ) const
 {
   CLBREAK;
   return FALSE;
 }
 
-GXVOID GXSpriteImpl::PaintFrame( GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y ) const
+GXVOID GXSpriteImpl::PaintFrame( GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y ) const
 {
   CLBREAK;
 }
 
-GXVOID GXSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const
 {
   CLBREAK;
 }
 
-GXVOID GXSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+GXVOID GXSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const
 {
   CLBREAK;
 }
@@ -501,19 +517,27 @@ GXVOID GXSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT 
 //  CLBREAK;
 //}
 
-GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const
+GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
+GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
+{
+}
+
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
+{
+}
+
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) const
 {
 }
 
@@ -603,6 +627,49 @@ GXSprite::ID GXSpriteImpl::FindID(GXLPCWSTR szName) const
 
 //////////////////////////////////////////////////////////////////////////
 
+GXINT GXSpriteImpl::PackIndex(Type type, GXUINT index) const
+{
+  switch(type)
+  {
+  case GXSprite::Type_Module:
+    return index;
+  case GXSprite::Type_Frame:
+    return (GXINT)m_aModules.size() + (GXINT)index;
+  case GXSprite::Type_Animation:
+    return (GXINT)m_aModules.size() + (GXINT)m_aFrames.size() + (GXINT)index;
+  }
+  return -1;
+}
+
+GXINT GXSpriteImpl::UnpackIndex(GXUINT nUniqueIndex, Type* pType) const
+{
+  const GXUINT nModuleCount = m_aModules.size();
+  const GXUINT nModuleFrameCount = nModuleCount + m_aFrames.size();
+  const GXUINT nModuleFrameAnimCount = nModuleFrameCount + m_aAnimations.size();
+
+  if(nUniqueIndex < nModuleCount) {
+    if(pType) {
+      *pType = GXSprite::Type_Module;
+    }
+    return nUniqueIndex;
+  }
+  else if(nUniqueIndex < nModuleFrameCount) {
+    if(pType) {
+      *pType = GXSprite::Type_Frame;
+    }
+    return nUniqueIndex - nModuleCount;
+  }
+  else if(nUniqueIndex < nModuleFrameAnimCount) {
+    if(pType) {
+      *pType = GXSprite::Type_Animation;
+    }
+    return nUniqueIndex - nModuleFrameCount;
+  }
+  return -1;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 //GXVOID GXSpriteImpl::PaintSprite( GXCanvas *pCanvas, GXINT nUnifiedIndex, GXINT nMinorIndex, GXINT x, GXINT y, float xScale, float yScale ) const
 //{
 //  if(nUnifiedIndex < 0) {
@@ -633,7 +700,7 @@ void GXSpriteImpl::IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const
 
       const FRAME& f = *pAttr->pFrame;
       GXREGN rg = m_aModules[f.start].regn;
-      for(GXINT i = 1; i < f.count; i++)
+      for(GXUINT i = 1; i < f.count; i++)
       {
         gxUnionRegn(&rg, &rg, &m_aModules[i].regn);
       }
@@ -709,7 +776,10 @@ GXSprite::Type GXSpriteImpl::GetBounding(GXLPCWSTR szName, GXLPREGN lprg) const
 template<class _TArray, class _TDesc>
 void GXSpriteImpl::Add(_TArray& aArray, GXSprite::Type type, _TDesc& desc)
 {
-  IDATTR attr = {type, aArray.size()};
+  IDATTR attr;
+  attr.type = type;
+  attr.index = (GXUINT)aArray.size();
+
   if(desc.name) {
     desc.name = m_NameSet.add(desc.name);
     m_NameDict.insert(clmake_pair(desc.name, attr));
@@ -817,7 +887,7 @@ GXBOOL GXSpriteImpl::Initialize( GXGraphics* pGraphics, GXLPCWSTR szTextureFile,
   return TRUE;
 }
 
-GXBOOL GXSpriteImpl::GetModule( GXINT nIndex, MODULE* pModule ) const
+GXBOOL GXSpriteImpl::GetModule( GXUINT nIndex, MODULE* pModule ) const
 {
   if(nIndex >= 0 && nIndex < (GXINT)m_aModules.size() && pModule != NULL) {
     *pModule = m_aModules[nIndex];
@@ -826,7 +896,7 @@ GXBOOL GXSpriteImpl::GetModule( GXINT nIndex, MODULE* pModule ) const
   return FALSE;
 }
 
-GXBOOL GXSpriteImpl::GetFrame( GXINT nIndex, FRAME* pFrame ) const
+GXBOOL GXSpriteImpl::GetFrame( GXUINT nIndex, FRAME* pFrame ) const
 {
   if(nIndex >= 0 && nIndex < (GXINT)m_aFrames.size() && pFrame != NULL) {
     *pFrame = m_aFrames[nIndex];
@@ -835,7 +905,7 @@ GXBOOL GXSpriteImpl::GetFrame( GXINT nIndex, FRAME* pFrame ) const
   return FALSE;
 }
 
-GXUINT GXSpriteImpl::GetFrameModule( GXINT nIndex, FRAME_MODULE* pFrameModule, int nCount ) const
+GXUINT GXSpriteImpl::GetFrameModule( GXUINT nIndex, FRAME_MODULE* pFrameModule, GXSIZE_T nCount ) const
 {
   if(nIndex < 0 || nIndex >= (GXINT)m_aFrames.size()) {
     return 0;
@@ -845,12 +915,12 @@ GXUINT GXSpriteImpl::GetFrameModule( GXINT nIndex, FRAME_MODULE* pFrameModule, i
     return m_aFrames[nIndex].count;
   }
 
-  const GXUINT nNumOfCopy = clMin(nCount, m_aFrames[nIndex].count);
+  const GXUINT nNumOfCopy = clMin((GXUINT)nCount, m_aFrames[nIndex].count);
   memcpy(pFrameModule, &m_aFrameModules[m_aFrames[nIndex].start], sizeof(FRAME_MODULE) * nNumOfCopy);
   return nNumOfCopy;
 }
 
-GXBOOL GXSpriteImpl::GetAnimation( GXINT nIndex, ANIMATION* pAnimation ) const
+GXBOOL GXSpriteImpl::GetAnimation( GXUINT nIndex, ANIMATION* pAnimation ) const
 {
   if(nIndex >= 0 && nIndex < (GXINT)m_aAnimations.size() && pAnimation != NULL) {
     *pAnimation = m_aAnimations[nIndex];
@@ -859,7 +929,7 @@ GXBOOL GXSpriteImpl::GetAnimation( GXINT nIndex, ANIMATION* pAnimation ) const
   return FALSE;
 }
 
-GXUINT GXSpriteImpl::GetAnimFrame( GXINT nIndex, ANIM_FRAME* pAnimFrame, int nCount ) const
+GXUINT GXSpriteImpl::GetAnimFrame( GXUINT nIndex, ANIM_FRAME* pAnimFrame, GXSIZE_T nCount ) const
 {
   if(nIndex < 0 || nIndex >= (GXINT)m_aAnimations.size()) {
     return 0;

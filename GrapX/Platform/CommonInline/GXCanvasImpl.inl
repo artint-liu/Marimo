@@ -1654,7 +1654,7 @@ GXBOOL GXCanvasImpl::DrawTexture(GTexture*pTexture, const GXREGN *rcDest, const 
 
 GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest)
 {
-  GXREGN rcSrc = {0,0};
+  GXREGN rcSrc(0);
   pImage->GetDimension((GXINT*)&rcSrc.width, (GXINT*)&rcSrc.height);
   return DrawTexture(pImage->GetTextureUnsafe(), rgDest, &rcSrc);
 }

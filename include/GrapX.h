@@ -72,6 +72,7 @@ typedef clstd::SmartRepository  clSmartRepository;
 //
 // 基础数据结构
 //
+#include "GrapX/GRect.h"
 typedef struct __tagGXPOINT
 {
   GXLONG  x;
@@ -99,6 +100,18 @@ typedef struct __tagGXSIZEF
   GXFLOAT  cy;
 }GXSIZEF, *GXLPSIZEF, *LPGXSIZEF;
 
+#ifdef REFACTOR_RECTREGN
+typedef Marimo::RectT<GXLONG> GXRECT;
+typedef Marimo::RectT<GXFLOAT> GXRECTF;
+typedef GXRECT* GXLPRECT;
+typedef GXRECT* LPGXRECT;
+typedef GXCONST GXRECT* GXLPCRECT;
+typedef GXCONST GXRECT* LPGXCRECT;
+typedef GXRECTF* GXLPRECTF;
+typedef GXRECTF* LPGXRECTF;
+typedef GXCONST GXRECTF* GXLPCRECTF;
+typedef GXCONST GXRECTF* LPGXCRECTF;
+#else
 template<typename _T>
 struct RECTX
 {
@@ -114,6 +127,7 @@ typedef GXRECTF* GXLPRECTF;
 typedef GXRECTF* LPGXRECTF;
 typedef GXCONST GXRECTF* GXLPCRECTF;
 typedef GXCONST GXRECTF* LPGXCRECTF;
+#endif // #ifndef REFACTOR_RECTREGN
 
 
 struct GXDEFINITION;
@@ -217,6 +231,16 @@ class GXFont;
 //#define GXSCREEN_WIDTH_D2  (GXSCREEN_WIDTH / 2)
 //#define GXSCREEN_HEIGHT_D2  (GXSCREEN_HEIGHT / 2)
 
+#ifdef REFACTOR_RECTREGN
+typedef Marimo::RegnT<GXLONG> REGN;
+typedef REGN GXREGN;
+typedef REGN* LPREGN;
+typedef REGN* LPGXREGN;
+typedef REGN* GXLPREGN;
+typedef GXCONST REGN* GXLPCREGN;
+typedef GXCONST REGN* LPGXCREGN;
+typedef GXCONST REGN* LPCREGN;
+#else
 template<typename _T>
 struct REGNX
 {
@@ -230,6 +254,7 @@ typedef REGN* GXLPREGN;
 typedef GXCONST REGN* GXLPCREGN;
 typedef GXCONST REGN* LPGXCREGN;
 typedef GXCONST REGN* LPCREGN;
+#endif // #ifdef REFACTOR_RECTREGN
 
 //typedef struct __tagREGN
 //{

@@ -524,8 +524,8 @@ void HeightfieldTerrainBlock::SetHeight(HeightfieldTerrain* pTerrain, const floa
   int x = (int)floor(vLocal.x / m_fStride + 0.5f) - (nWidth  >> 1);
   int y = (int)floor(vLocal.z / m_fStride + 0.5f) - (nHeight >> 1);
 
-  GXRECT rcBrush = {x, y, x + nWidth, y + nHeight};
-  GXRECT rcVert = {0, 0, m_nVertCountX, m_nVertCountY};
+  GXRECT rcBrush(x, y, x + nWidth, y + nHeight);
+  GXRECT rcVert(0, 0, m_nVertCountX, m_nVertCountY);
   GXRECT rcClip;
 
   gxIntersectRect(&rcClip, &rcBrush, &rcVert);

@@ -320,22 +320,22 @@ GXBOOL GXDLLAPI gxBitBlt(
         )
 {
   ASSERT(dwRop == GXSRCCOPY);
-  GXREGN rgDest = {nXDest,nYDest,nWidth,nHeight};
-  GXREGN rgSrc = {nXSrc,nYSrc,nWidth,nHeight};
-  if(GXGDI_DC_PTR(hdcDest)->emObjType == GXGDIOBJ_DC && GXGDI_DC_PTR(hdcSrc )->emObjType == GXGDIOBJ_MEMDC)
+  GXREGN rgDest(nXDest,nYDest,nWidth,nHeight);
+  GXREGN rgSrc(nXSrc,nYSrc,nWidth,nHeight);
+  if(GXGDI_DC_PTR(hdcDest)->emObjType == GXGDIOBJ_DC && GXGDI_DC_PTR(hdcSrc)->emObjType == GXGDIOBJ_MEMDC)
   {
     GXGDI_DC_PTR(hdcDest)->pCanvas->DrawImage(
       ((LPGXGDIBITMAP)(GXGDI_DC_PTR(hdcSrc))->lpBitmap)->pImage,
       &rgSrc, &rgDest);
   }
-  else if (GXGDI_DC_PTR(hdcDest)->emObjType == GXGDIOBJ_MEMDC && GXGDI_DC_PTR(hdcSrc )->emObjType == GXGDIOBJ_MEMDC)
+  else if (GXGDI_DC_PTR(hdcDest)->emObjType == GXGDIOBJ_MEMDC && GXGDI_DC_PTR(hdcSrc)->emObjType == GXGDIOBJ_MEMDC)
   {
     LPGXGDIDC lpDC = GXGDI_DC_PTR(hdcDest);
-    GXREGN rgSrc;
-    rgSrc.left = nXSrc;
-    rgSrc.top  = nYSrc;
-    rgSrc.width = nWidth;
-    rgSrc.height = nHeight;
+    GXREGN rgSrc(nXSrc, nYSrc, nWidth, nHeight);
+    //rgSrc.left = nXSrc;
+    //rgSrc.top  = nYSrc;
+    //rgSrc.width = nWidth;
+    //rgSrc.height = nHeight;
     lpDC->pCanvas->DrawImage((GXImage*)GXGDI_BITMAP_PTR(GXGDI_DC_PTR(hdcSrc)->lpBitmap)->pImage, nXDest, nYDest, &rgSrc);
     //ASSERT(FALSE);
   }
@@ -452,11 +452,11 @@ GXBOOL GXDLLAPI gxStretchBlt(
   ASSERT(GXGDI_DC_PTR(hdcDest)->emObjType == GXGDIOBJ_DC);
   ASSERT(GXGDI_DC_PTR(hdcSrc )->emObjType == GXGDIOBJ_MEMDC);
 
-  GXREGN rgDest = {nXOriginDest,nYOriginDest,nWidthDest,nHeightDest};
-  GXREGN rgSrc = {nXOriginSrc,nYOriginSrc,nWidthSrc,nHeightSrc};
+  Marimo::REGNT<GXLONG> rgDest = {nXOriginDest,nYOriginDest,nWidthDest,nHeightDest};
+  Marimo::REGNT<GXLONG> rgSrc = {nXOriginSrc,nYOriginSrc,nWidthSrc,nHeightSrc};
   GXGDI_DC_PTR(hdcDest)->pCanvas->DrawImage(
     ((LPGXGDIBITMAP)(GXGDI_DC_PTR(hdcSrc))->lpBitmap)->pImage,
-    &rgSrc, &rgDest);
+    rgSrc, rgDest);
   //ASSERT(FALSE);
   return TRUE;
 }
@@ -972,7 +972,7 @@ GXBOOL GXDLLAPI gxGetTextExtentPoint32W(
   ////lpSize->cx = (GXLONG)(flAspect * lpSize->cx);
   ////lpSize->cy = (GXLONG)(flAspect * lpSize->cy);
   //return bRet;
-  GXRECT rect = {0,0,0,0};
+  GXRECT rect(0);
 
   LPGXGDIDC  lpDC  = GXGDI_DC_PTR(hdc);
   LPGXGDIFONT lpFont  = GXGDI_FONT_PTR(lpDC->hFont);

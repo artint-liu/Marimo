@@ -175,7 +175,7 @@ namespace GXUI
         //  rcItem.left, rcItem.top, rcItem.right, rcItem.bottom);
 
         if(m_bShowButtonBox) {
-          GXRECT rcBtnBox  = {1, rcItem.top, CHECKBOX_SIZE + 2, rcItem.bottom};
+          GXRECT rcBtnBox(1, rcItem.top, CHECKBOX_SIZE + 2, rcItem.bottom);
           GXDWORD dwState = DFCS_BUTTONRADIO;
           if(gxGetWindowLong(m_hWnd, GXGWL_STYLE) & GXLBS_MULTIPLESEL) {
             dwState = GXDFCS_BUTTONCHECK;
@@ -192,7 +192,7 @@ namespace GXUI
 
         if(m_aColumns.empty()) {
           if(bContrast) {
-            GXRECT rcContrast = {rcItem.left + 1, rcItem.top + 1, rcItem.right + 1, rcItem.bottom + 1};
+            GXRECT rcContrast(rcItem.left + 1, rcItem.top + 1, rcItem.right + 1, rcItem.bottom + 1);
             canvas.DrawTextW(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcContrast, DT_SINGLELINE|DT_VCENTER, crText.color ^ 0xFFFFFF);
           }
           canvas.DrawTextW(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcItem, DT_SINGLELINE|DT_VCENTER, crText.color);

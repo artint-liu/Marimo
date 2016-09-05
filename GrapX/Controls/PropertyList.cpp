@@ -863,46 +863,48 @@ RESET_PARAM:
       {
       case TIMER_ID_SPINUP:
       case TIMER_ID_SPINDOWN:
-        GXRECT rcClient;
-        if(m_nEditing >= 0 && m_nEditing < (int)m_pCurPage->GetList().size())
         {
-          ITEM& item = m_pCurPage->GetList()[m_nEditing];
-          m_pCurPage->GetItemRect(m_nEditing, &rcClient);
-          if(item.eType == PST_INTEGER)
+          GXRECT rcClient;
+          if(m_nEditing >= 0 && m_nEditing < (int)m_pCurPage->GetList().size())
           {
-            if(dwTiemrID == TIMER_ID_SPINUP)
-              item.nVal++;
-            else
-              item.nVal--;
-          }
-          else if(item.eType == PST_UINTEGER)
-          {
-            if(dwTiemrID == TIMER_ID_SPINUP)
-              item.nVal++;
-            else
-              item.nVal--;
-          }
-          else if(item.eType == PST_FLOAT)
-          {
-            if(dwTiemrID == TIMER_ID_SPINUP)
-              item.fVal += item.fIncrease;
-            else
-              item.fVal -= item.fIncrease;
-          }
-          else ASSERT(0);
+            ITEM& item = m_pCurPage->GetList()[m_nEditing];
+            m_pCurPage->GetItemRect(m_nEditing, &rcClient);
+            if(item.eType == PST_INTEGER)
+            {
+              if(dwTiemrID == TIMER_ID_SPINUP)
+                item.nVal++;
+              else
+                item.nVal--;
+            }
+            else if(item.eType == PST_UINTEGER)
+            {
+              if(dwTiemrID == TIMER_ID_SPINUP)
+                item.nVal++;
+              else
+                item.nVal--;
+            }
+            else if(item.eType == PST_FLOAT)
+            {
+              if(dwTiemrID == TIMER_ID_SPINUP)
+                item.fVal += item.fIncrease;
+              else
+                item.fVal -= item.fIncrease;
+            }
+            else ASSERT(0);
 
-          NotifyParent(GXNM_CLICK, item);
+            NotifyParent(GXNM_CLICK, item);
 
-          GXHDC hdc = gxGetDC(m_hWnd);
-          //int nSplit = (rcClient.left + rcClient.right) >> 1;
+            GXHDC hdc = gxGetDC(m_hWnd);
+            //int nSplit = (rcClient.left + rcClient.right) >> 1;
 
-          gxSelectObject(hdc, m_hFont);
-          gxSetBkColor(hdc, m_nEditing & 1 ? COLOR_A_LIGHT : COLOR_B_LIGHT);
-          rcClient.left = m_pCurPage->GetSplit();
-          gxFillRect(hdc, &rcClient, m_nEditing & 1 ? m_hBrush[2] : m_hBrush[3]);
-          item.DrawAsNumber(hdc, &rcClient, dwTiemrID == TIMER_ID_SPINUP ? 1 : 2);
-          gxReleaseDC(m_hWnd, hdc);
-          m_bChangedNumber = TRUE;
+            gxSelectObject(hdc, m_hFont);
+            gxSetBkColor(hdc, m_nEditing & 1 ? COLOR_A_LIGHT : COLOR_B_LIGHT);
+            rcClient.left = m_pCurPage->GetSplit();
+            gxFillRect(hdc, &rcClient, m_nEditing & 1 ? m_hBrush[2] : m_hBrush[3]);
+            item.DrawAsNumber(hdc, &rcClient, dwTiemrID == TIMER_ID_SPINUP ? 1 : 2);
+            gxReleaseDC(m_hWnd, hdc);
+            m_bChangedNumber = TRUE;
+          }
         }
         break;
       case TIMER_ID_PAGESLIDELEFT:
@@ -1193,7 +1195,7 @@ SUM_HEIGHT:
             pCanvas = GXGetWndCanvas(hdc);
             if(pCanvas)
             {
-              GXREGN rgDest = {rcItem.left, rcItem.top, rect.right, item.nHeight};
+              GXREGN rgDest(rcItem.left, rcItem.top, rect.right, item.nHeight);
               pCanvas->DrawImage(item.pImage, &rgDest, NULL);
             }
           }

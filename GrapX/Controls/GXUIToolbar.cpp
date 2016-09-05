@@ -588,7 +588,7 @@ namespace GXUI
 
     if(TEST_FLAG(pTBBtn->fsStyle, BTNS_SHOWTEXT)) {
       ASSERT(pCanvas != NULL);
-      GXRECT rect = {0,0,0,0};
+      GXRECT rect(0);
       pCanvas->DrawTextW(m_pFont, pTBBtn->strText, -1, &rect, 
         GXDT_SINGLELINE | GXDT_CALCRECT, 0);
       return clMin(m_nMaxBtnWidth, nBtnSize + rect.right + (m_ButtonSize.cx - m_BitmapSize.cx) / 2);

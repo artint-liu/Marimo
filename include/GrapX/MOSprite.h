@@ -66,14 +66,16 @@ namespace Marimo
     GXSTDINTERFACE(GXVOID    PaintModule3V        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
     GXSTDINTERFACE(GXVOID    PaintModule3x3       (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
 
-    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
-    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
-    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
+    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const); // 这里REGN不是显示区域，(left,top)是原点位置，位于中心，(width,height)是参考尺寸
+    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const); // Frame显示在RECT中，而忽略它本身的偏移
     
-    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const);
-    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const);
-    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const);
-    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const);
+    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
+    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const); // 同PaintFrame中REGN含义
+    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const); // 同PaintFrame中RECT含义
+    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const);
+    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const); // 同PaintFrame中REGN含义
+    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) const); // 同PaintFrame中RECT含义
 
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
@@ -89,14 +91,14 @@ namespace Marimo
     GXSTDINTERFACE(ID        FindID               (GXLPCSTR szName) const); // 用 Name 查找 ID
     GXSTDINTERFACE(ID        FindID               (GXLPCWSTR szName) const); // 用 Name 查找 ID
 
-    //GXSTDINTERFACE(GXUINT    PackIndex            (Type type, GXUINT index) const);   // 将不同类型的索引打包为统一类型的索引
-    //GXSTDINTERFACE(GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const); // 将统一索引拆解为类型和类型索引
-
+    GXSTDINTERFACE(GXINT     PackIndex            (Type type, GXUINT index) const);   // 将不同类型的索引打包为统一类型的索引
+    GXSTDINTERFACE(GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const); // 将统一索引拆解为类型和类型索引
 
     GXSTDINTERFACE(GXSIZE_T  GetModuleCount       () const);
     GXSTDINTERFACE(GXSIZE_T  GetFrameCount        () const);
+    GXSTDINTERFACE(GXSIZE_T  GetFrameModuleCount  (GXUINT nFrameIndex) const);
     GXSTDINTERFACE(GXSIZE_T  GetAnimationCount    () const);
-    GXSTDINTERFACE(GXSIZE_T  GetAnimFrameCount    (GXUINT nIndex) const);
+    GXSTDINTERFACE(GXSIZE_T  GetAnimFrameCount    (GXUINT nAnimIndex) const);
 
     GXSTDINTERFACE(GXBOOL    GetModule            (GXUINT nIndex, MODULE* pModule) const);
     GXSTDINTERFACE(GXBOOL    GetFrame             (GXUINT nIndex, FRAME* pFrame) const);

@@ -110,14 +110,16 @@ namespace Marimo
     GXVOID    PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const override;
     GXVOID    PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const override;
 
-    GXVOID    PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const override;
-    GXVOID    PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const override;
-    GXVOID    PaintFrame(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT bottom) const override;
+    GXVOID    PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const override;
+    GXVOID    PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const override;
+    GXVOID    PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const override;
 
-    GXVOID    PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXINT x, GXINT y) const override;
-    GXVOID    PaintAnimationFrame(GXCanvas *pCanvas, GXINT nAnimIndex, GXINT nFrameIndex, GXLPCREGN lpRegn) const override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const override;
+    GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const override;
+    GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const override;
+    GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const override;
+    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const override;
+    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const override;
+    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) const override;
 
     GXVOID    Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const override;
     GXVOID    Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const override;
@@ -126,17 +128,21 @@ namespace Marimo
     GXVOID    Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const override;
     GXVOID    Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const override;
 
-    GXINT     Find(ID id, Type* pType) const override;
-    GXINT     Find(GXLPCSTR szName, Type* pType) const override;
-    GXSTDIMPLEMENT(GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const);
-    GXSTDIMPLEMENT(GXLPCSTR  FindName             (ID id) const);           // 用 ID 查找 Name
-    GXSTDIMPLEMENT(ID        FindID               (GXLPCSTR szName) const); // 用 Name 查找 ID
-    GXSTDIMPLEMENT(ID        FindID               (GXLPCWSTR szName) const); // 用 Name 查找 ID
+    GXINT     Find                 (ID id, Type* pType) const override;
+    GXINT     Find                 (GXLPCSTR szName, Type* pType) const override;
+    GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const override;
+    GXLPCSTR  FindName             (ID id) const override;             // 用 ID 查找 Name
+    ID        FindID               (GXLPCSTR szName) const override;   // 用 Name 查找 ID
+    ID        FindID               (GXLPCWSTR szName) const override;  // 用 Name 查找 ID
 
-    GXSIZE_T  GetModuleCount    () const override;
-    GXSIZE_T  GetFrameCount     () const override;
-    GXSIZE_T  GetAnimationCount () const override;
-    GXSIZE_T  GetAnimFrameCount (GXUINT nIndex) const override;
+    GXINT     PackIndex            (Type type, GXUINT index) const override;   // 将不同类型的索引打包为统一类型的索引
+    GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const override; // 将统一索引拆解为类型和类型索引
+
+    GXSIZE_T  GetModuleCount       () const override;
+    GXSIZE_T  GetFrameCount        () const override;
+    GXSIZE_T  GetFrameModuleCount  (GXUINT nFrameIndex) const override;
+    GXSIZE_T  GetAnimationCount    () const override;
+    GXSIZE_T  GetAnimFrameCount    (GXUINT nIndex) const override;
 
     GXBOOL    GetModule     (GXUINT nIndex, MODULE* pModule) const override;
     GXBOOL    GetFrame      (GXUINT nIndex, FRAME* pFrame) const override;
