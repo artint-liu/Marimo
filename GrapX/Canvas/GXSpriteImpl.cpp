@@ -405,7 +405,7 @@ GXINT GXSpriteImpl::AttrToIndex(const IDATTR* pAttr) const
   case GXSprite::Type_Frame:
     return (GXINT)(pAttr->pFrame - &m_aFrames.front());
   case GXSprite::Type_Animation:
-    return (GXINT)(pAttr->pAnination- &m_aAnimations.front());
+    return (GXINT)(pAttr->pAnimation - &m_aAnimations.front());
   }
   return -1;
 }
@@ -600,7 +600,7 @@ GXLPCSTR GXSpriteImpl::FindName(ID id) const
   case GXSprite::Type_Frame:
     return pAttr->pFrame->name;
   case GXSprite::Type_Animation:
-    return pAttr->pAnination->name;
+    return pAttr->pAnimation->name;
   }
   return NULL;
 }
@@ -615,7 +615,7 @@ GXSprite::ID GXSpriteImpl::FindID(GXLPCSTR szName) const
   case GXSprite::Type_Frame:
     return pAttr->pFrame->id;
   case GXSprite::Type_Animation:
-    return pAttr->pAnination->id;
+    return pAttr->pAnimation->id;
   }
   return 0;
 }
@@ -708,8 +708,8 @@ void GXSpriteImpl::IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const
     }
     break;
   case GXSprite::Type_Animation:
-    ASSERT(pAttr->pAnination>= &m_aAnimations.front() &&
-      pAttr->pAnination <= &m_aAnimations.back());
+    ASSERT(pAttr->pAnimation>= &m_aAnimations.front() &&
+      pAttr->pAnimation <= &m_aAnimations.back());
     CLBREAK; // 没实现
     break;
   }
@@ -811,19 +811,8 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   // Module 列表
   //
   GXSprite::MODULE sModule;
-  for(GXUINT i = 0; i < pDesc->nNumOfModules; i++)
-  {
+  for(GXUINT i = 0; i < pDesc->nNumOfModules; i++) {
     sModule = pDesc->aModules[i];
-    //IDATTR attr = {GXSprite::Type_Module, m_aModules.size()};
-    //if(sModule.name) {
-    //  sModule.name = m_NameSet.add(sModule.name);
-    //  //m_SpriteDict[sModule.name] = i;
-    //  m_NameDict.insert(clmake_pair(sModule.name, attr));
-    //}
-    //if(sModule.id) {
-    //  m_IDDict.insert(clmake_pair(sModule.id, attr));
-    //}
-    //m_aModules.push_back(sModule);
     Add(m_aModules, GXSprite::Type_Module, sModule);
   }
 
@@ -832,14 +821,8 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   // Frame 列表
   //
   GXSprite::FRAME sFrame;
-  for(GXUINT i = 0; i < pDesc->nNumOfFrames; i++)
-  {
+  for(GXUINT i = 0; i < pDesc->nNumOfFrames; i++) {
     sFrame = pDesc->aFrames[i];
-    //if(sFrame.name) {
-    //  sFrame.name = m_NameSet.add(sFrame.name);
-    //  m_SpriteDict[sFrame.name] = (int)(m_aModules.size() + i);
-    //}
-    //m_aFrames.push_back(sFrame);
     Add(m_aFrames, GXSprite::Type_Frame, sFrame);
   }
 
@@ -852,21 +835,43 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   // Animation 列表
   //
   GXSprite::ANIMATION sAnimation;
-  for(GXUINT i = 0; i < pDesc->nNumOfAnimations; i++)
-  {
+  for(GXUINT i = 0; i < pDesc->nNumOfAnimations; i++) {
     sAnimation = pDesc->aAnimations[i];
-    //if(sAnimation.name) {
-    //  sAnimation.name = m_NameSet.add(sAnimation.name);
-    //  m_SpriteDict[sAnimation.name] = (int)(m_aModules.size() + m_aFrames.size() + i);
-    //}
-    //m_aAnimations.push_back(sAnimation);
     Add(m_aAnimations, GXSprite::Type_Animation, sAnimation);
   }
 
-  for(GXUINT i = 0; i < pDesc->nNumOfAnimFrames; i++)
-  {
+  for(GXUINT i = 0; i < pDesc->nNumOfAnimFrames; i++) {
     m_aAnimFrames.push_back(pDesc->aAnimFrames[i]);    
   }
+
+
+  // 地址定位
+
+  auto loc = [&](IDATTR& attr){
+    switch(attr.type)
+    {
+    case GXSprite::Type_Module:
+      attr.pModel = &m_aModules[attr.index];
+      break;
+    case GXSprite::Type_Frame:
+      attr.pFrame = &m_aFrames[attr.index];
+      break;
+    case GXSprite::Type_Animation:
+      attr.pAnimation = &m_aAnimations[attr.index];
+      break;
+    default:
+      CLBREAK;
+    }
+  };
+
+  for(auto it = m_NameDict.begin(); it != m_NameDict.end(); ++it) {
+    loc(it->second);
+  }
+
+  for(auto it = m_IDDict.begin(); it != m_IDDict.end(); ++it) {
+    loc(it->second);
+  }
+
   return TRUE;
 }
 

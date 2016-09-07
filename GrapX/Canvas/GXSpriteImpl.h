@@ -51,7 +51,7 @@ public:
       GXUINT               index;
       GXSprite::MODULE*    pModel;
       GXSprite::FRAME*     pFrame;
-      GXSprite::ANIMATION* pAnination;
+      GXSprite::ANIMATION* pAnimation;
     };
   };
 
