@@ -1369,21 +1369,23 @@ GXHWND GXDLLAPI gxChildWindowFromPoint(
   GXBOOL bEnabled;
   LPGXWND lpWnd = GXWND_PTR(hWndParent);
   lpWnd = lpWnd->ChildWindowFromPoint(&Point, &ht, &bEnabled);
-  if(lpWnd == NULL)
+  if(lpWnd == NULL) {
     return NULL;
+  }
   return GXWND_HANDLE(lpWnd);
 }
 
 GXBOOL GXDLLAPI gxAdjustWindowRectEx(
             GXLPRECT lpRect,  // pointer to client-rectangle structure
             GXDWORD dwStyle,  // window styles
-            GXBOOL bMenu,  // menu-present flag
-            GXDWORD dwExStyle   // extended style
+            GXBOOL bMenu,     // menu-present flag
+            GXDWORD dwExStyle // extended style
             )
 {
   NOT_IMPLEMENT_FUNC_MAKER;
   return NULL;
 }
+
 int GXDLLAPI gxGetDlgCtrlID(
          GXHWND hwndCtl   // handle of control  
          )
@@ -1393,8 +1395,8 @@ int GXDLLAPI gxGetDlgCtrlID(
 }
 
 GXBOOL GXDLLAPI gxEnableWindow(
-          GXHWND hWnd,  // handle to window
-          GXBOOL bEnable   // flag for enabling or disabling input
+          GXHWND hWnd,    // handle to window
+          GXBOOL bEnable  // flag for enabling or disabling input
           )
 {
   // TODO: 如果 disable window 则去掉 Capture 属性
