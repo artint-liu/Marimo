@@ -436,6 +436,7 @@ namespace GXUI
           rcItem.right  = nPassPos + TemplProtoWidth;
           rcItem.bottom = rcItem.top + TemplProtoHeight;
 
+          //ASSERT(rect.IsIntersecting(rcItem));
           PlantCustItem(i, &rcItem);
 
           if(yi + 1 == m_nColumnCount) {
@@ -452,6 +453,7 @@ namespace GXUI
           rcItem.bottom = nPassPos + TemplProtoHeight;
 
           rcGap.bottom = rcItem.bottom;
+          //ASSERT(rect.IsIntersecting(rcItem));
           PlantCustItem(i, &rcItem);
 
           if(xi + 1 == m_nColumnCount) {
@@ -494,6 +496,7 @@ namespace GXUI
         i++;  // 回收从这个开始
         break;
       }
+      //ASSERT(rect.IsIntersecting(rcItem));
     } // for each item
 
 

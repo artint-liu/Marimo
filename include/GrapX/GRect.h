@@ -148,6 +148,29 @@ namespace Marimo
       return bottom - top;
     }
 
+    GXBOOL Intersect(const RectT& rect)
+    {
+      left   = clMax(left,   rect.left);
+      top    = clMax(top,    rect.top);
+      right  = clMin(right,  rect.right);
+      bottom = clMin(bottom, rect.bottom);
+      return ((left < right) && (top < bottom));
+    }
+
+    GXBOOL Intersect(const RectT& rect1, const RectT& rect2)
+    {
+      left   = clMax(rect1.left,   rect2.left);
+      top    = clMax(rect1.top,    rect2.top);
+      right  = clMin(rect1.right,  rect2.right);
+      bottom = clMin(rect1.bottom, rect2.bottom);
+      return ((left < right) && (top < bottom));
+    }
+
+    GXBOOL IsIntersecting(const RectT& rect) const
+    {
+      return ((clMax(left, rect.left) < clMin(right, rect.right)) &&
+        (clMax(top, rect.top) < clMin(bottom, rect.bottom)));
+    }
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -236,6 +259,24 @@ namespace Marimo
     {
       return top + height;
     }
+
+    //GXBOOL Intersect(const RegnT& regn)
+    //{
+    //  left   = clMax(left,   rect.left);
+    //  top    = clMax(top,    rect.top);
+    //  right  = clMin(right,  rect.right);
+    //  bottom = clMin(bottom, rect.bottom);
+    //  return ((left < right) && (top < bottom));
+    //}
+
+    //GXBOOL Intersect(const RegnT& regn1, const RegnT& regn2)
+    //{
+    //  left   = clMax(rect1.left,   rect2.left);
+    //  top    = clMax(rect1.top,    rect2.top);
+    //  right  = clMin(rect1.right,  rect2.right);
+    //  bottom = clMin(rect1.bottom, rect2.bottom);
+    //  return ((left < right) && (top < bottom));
+    //}
 
   };
 

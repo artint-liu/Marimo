@@ -1022,7 +1022,7 @@ namespace GXUI
     else if(m_bRichList && TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)/* || m_pAdapter->IsFixedHeight()*/)
     {
       m_nTopIndex = nScrolled / GetItemHeight(0) * m_nColumnCount;
-      clClamp((GXSIZE_T)0, m_pAdapter->GetCount() - 1, &m_nTopIndex);
+      clClamp((GXINT_PTR)0, (GXINT_PTR)m_pAdapter->GetCount() - 1, (GXINT_PTR*)&m_nTopIndex);
       return TRUE;
     }
     else {

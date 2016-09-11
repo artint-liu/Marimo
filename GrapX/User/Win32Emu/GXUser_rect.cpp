@@ -85,7 +85,7 @@ extern "C"
 
   //////////////////////////////////////////////////////////////////////////
   GXBOOL GXDLLAPI gxIntersectRect(
-    GXLPRECT lprcDst,      // address of structure for intersection
+    GXLPRECT lprcDst,          // address of structure for intersection
     GXCONST GXRECT *lprcSrc1,  // address of structure with first rectangle
     GXCONST GXRECT *lprcSrc2   // address of structure with second rectangle
     )
@@ -103,9 +103,7 @@ extern "C"
     lprcDst->top    = lprcSrc1->top     > lprcSrc2->top     ? lprcSrc1->top     : lprcSrc2->top;
     lprcDst->bottom = lprcSrc1->bottom  < lprcSrc2->bottom  ? lprcSrc1->bottom  : lprcSrc2->bottom;
 
-    if(  lprcDst->left >= lprcDst->right || 
-      lprcDst->top >= lprcDst->bottom)
-    {
+    if(lprcDst->left >= lprcDst->right || lprcDst->top >= lprcDst->bottom) {
       lprcDst->left   = 0;
       lprcDst->top    = 0;
       lprcDst->right  = 0;
