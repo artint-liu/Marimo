@@ -4,20 +4,26 @@
 template<typename _T1, typename _T2>
 inline _T2 clClamp(CLCONST _T1 nMin, CLCONST _T1 nMax, _T2 *pValue)
 {
-  if(*pValue < nMin)
+  ASSERT(nMin <= nMax);
+  if(*pValue < nMin) {
     *pValue = (_T2)nMin;
-  else if(*pValue > nMax)
+  }
+  else if(*pValue > nMax) {
     *pValue = (_T2)nMax;
+  }
   return *pValue;
 }
 
 template<typename _Ty>
 inline _Ty clClamp(CLCONST _Ty nMin, CLCONST _Ty nMax, _Ty Value)
 {
-  if(Value < nMin)
+  ASSERT(nMin <= nMax);
+  if(Value < nMin) {
     return (_Ty)nMin;
-  else if(Value > nMax)
+  }
+  else if(Value > nMax) {
     return (_Ty)nMax;
+  }
   return Value;
 }
 

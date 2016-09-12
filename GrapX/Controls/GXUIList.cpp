@@ -1022,7 +1022,9 @@ namespace GXUI
     else if(m_bRichList && TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)/* || m_pAdapter->IsFixedHeight()*/)
     {
       m_nTopIndex = nScrolled / GetItemHeight(0) * m_nColumnCount;
-      clClamp((GXINT_PTR)0, (GXINT_PTR)m_pAdapter->GetCount() - 1, (GXINT_PTR*)&m_nTopIndex);
+      if(m_pAdapter->GetCount() > 1) {
+        clClamp((GXINT_PTR)0, (GXINT_PTR)m_pAdapter->GetCount() - 1, (GXINT_PTR*)&m_nTopIndex);
+      }
       return TRUE;
     }
     else {
@@ -1227,9 +1229,11 @@ namespace GXUI
         nPrevBottom = nBottom;
       }
       else {
-        // 此时 it->nBottom = it->nBottom; 这个就是高度
-        nPrevBottom = it->nBottom;
-        --m_nColumnCount;
+        if( ! m_bRichList) {
+          // 此时 it->nBottom = it->nBottom; 这个就是高度
+          nPrevBottom = it->nBottom;
+          --m_nColumnCount; // 已经忘了为啥写这个，在RichList下会有问题
+        }
       }
     }
   }
@@ -1242,9 +1246,12 @@ namespace GXUI
     {
       const GXINT nItemHeight = it->nBottom;
       it->nBottom = nPrevBottom + nItemHeight;
-      if(it->nBottom > rcClient.bottom) {
-        it->nBottom = nItemHeight;
-        ++m_nColumnCount;
+
+      if( ! m_bRichList) {
+        if(it->nBottom > rcClient.bottom) {
+          it->nBottom = nItemHeight;
+          ++m_nColumnCount; // 已经忘了为啥写这个，在RichList下会有问题
+        }
       }
       nPrevBottom = it->nBottom;
     }    

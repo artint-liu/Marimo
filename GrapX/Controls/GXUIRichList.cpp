@@ -563,11 +563,11 @@ namespace GXUI
         gxGetWindowRect(m_hPrototype, &rcItemTemplate);
 
         if(IS_LTORRICHLIST(dwStyle)) {
-          const int nItemSize = rcItemTemplate.bottom - rcItemTemplate.top;
+          const int nItemSize = rcItemTemplate.GetHeight();
           m_nColumnCount = nItemSize <= 0 ? 1 : cy / nItemSize;
         }
         else {
-          const int nItemSize = rcItemTemplate.right - rcItemTemplate.left;
+          const int nItemSize = rcItemTemplate.GetWidth();
           m_nColumnCount = nItemSize <= 0 ? 1 : cx / nItemSize;
         }
 
