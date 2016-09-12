@@ -148,9 +148,9 @@ extern "C"
   GXBOOL GXUXTHEME_Initialize(GXGraphics* pGraphics)
   {
     // TODO: 抽取资源
-    GXCreateSpriteFromFileW(pGraphics, L"UI/WindowFrame.GSprite",    &s_pUxThemeSprite_Window);
-    GXCreateSpriteFromFileW(pGraphics, L"UI/ScrollBar.GSprite", &s_pUxThemeSprite_ScrollBar);
-    GXCreateSpriteFromFileW(pGraphics, L"UI/Button.GSprite",    &s_pUxThemeSprite_Button);
+    GXCreateSpriteFromFileW(pGraphics, L"UI/WindowFrame.GSprite", &s_pUxThemeSprite_Window);
+    GXCreateSpriteFromFileW(pGraphics, L"UI/ScrollBar.GSprite",   &s_pUxThemeSprite_ScrollBar);
+    GXCreateSpriteFromFileW(pGraphics, L"UI/Button.GSprite",      &s_pUxThemeSprite_Button);
     return TRUE;
   }
 

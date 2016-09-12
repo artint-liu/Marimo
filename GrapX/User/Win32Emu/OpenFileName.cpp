@@ -262,7 +262,7 @@ extern "C"
 
   GXBOOL GXDLLAPI gxGetOpenFileNameW(GXLPOPENFILENAMEW lpOFN)
   {
-    gxDialogBoxParamW(NULL, L"@Resource\\OpenFileName.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
+    gxDialogBoxParamW(NULL, L"@UI\\browserfiles.dlg.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
     return FALSE;
   }
 }

@@ -5,6 +5,8 @@
 #include "Sample_MOUI.h"
 #include "Engine/UniversalDialog.h"
 
+#define SPRITE_FILE_FILTER L"marimo sprite(*.sprite;*.stock)\0*.sprite;*.stock\0all files(*.*)\0*.*\0"
+
 // 这个表与命令表一一对应,因为控制台系统可以返回命令
 // 在staff中的索引,使用索引可以更快执行命令
 enum CMDLIST
@@ -26,6 +28,7 @@ static STAFFCAPSDESC s_aStaffDesc[] = {
   {L"NewWordList",      L"生词表"},
   {L"WordSelect",       L"选择单词"},
   {L"WordDiselect",     L"移除生词"},
+  {L"browsefiles",      L"打开文件"},
   {NULL}
 };
 
@@ -114,6 +117,21 @@ GXHRESULT MOUIStaff::Execute(int nCmdIndex, const clStringW* argv, int argc)
       m_WordSel.clear();
     }
     break;
+  }
+
+  if(argv[0] == L"browsefiles")
+  {
+    GXOPENFILENAMEW gxofn = {0};
+    GXWCHAR szFilename[MAX_PATH] = {0};
+
+
+    gxofn.lpstrFilter = SPRITE_FILE_FILTER;
+    gxofn.lpstrFile = szFilename;
+    gxofn.nMaxFile = MAX_PATH;
+    gxofn.lpstrTitle = L"Open Sprite File";
+    gxofn.Flags = OFN_FILEMUSTEXIST|OFN_EXPLORER;
+
+    gxGetOpenFileNameW(&gxofn);
   }
   return GX_OK;
 }
