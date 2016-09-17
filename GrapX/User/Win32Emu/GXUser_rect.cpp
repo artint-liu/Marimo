@@ -253,51 +253,52 @@ false_ret:
       lprg->top + lprg->height > pt.y );
   }
 
-#ifdef ENABLE_ASSEMBLE
-  __declspec(naked)GXBOOL GXDLLAPI gxEqualRect(
-    GXCONST GXRECT *lprc1,  // pointer to structure with first rectangle
-    GXCONST GXRECT *lprc2   // pointer to structure with second rectangle
-    )
-  {
-    __asm push esi
-    __asm push edi
-    __asm mov esi, [esp + 4 * 3]
-    __asm mov edi, [esp + 4 * 4]
-    __asm mov eax, [esi]
-    __asm mov edx, [esi + 4]
-    __asm sub eax, [edi]
-    __asm sub edx, [edi + 4]
-    __asm mov ecx, [esi + 4 * 2]
-    __asm add eax, edx
-    __asm mov edx, [esi + 4 * 3]
-    __asm sub ecx, [edi + 4 * 2]
-    __asm sub edx, [edi + 4 * 3]
-    __asm add eax, ecx
-    __asm add eax, edx
-
-    // 下面三行从VC编译结果上抄的，比较玄妙
-                      // eax = 0  | eax != 0
-    __asm neg eax     // CF = 0   | CF = 1
-    __asm sbb eax,eax // eax = 0  | eax = 0xffffffff
-    __asm inc eax     // eax = 1  | eax = 0
-
-    __asm pop edi
-    __asm pop esi
-    __asm ret 8
-  }
-#else
+// 用减法获得结果再相加这种方法是错误的
+//#ifdef ENABLE_ASSEMBLE
+//  __declspec(naked)GXBOOL GXDLLAPI gxEqualRect(
+//    GXCONST GXRECT *lprc1,  // pointer to structure with first rectangle
+//    GXCONST GXRECT *lprc2   // pointer to structure with second rectangle
+//    )
+//  {
+//    __asm push esi
+//    __asm push edi
+//    __asm mov esi, [esp + 4 * 3]
+//    __asm mov edi, [esp + 4 * 4]
+//    __asm mov eax, [esi]
+//    __asm mov edx, [esi + 4]
+//    __asm sub eax, [edi]
+//    __asm sub edx, [edi + 4]
+//    __asm mov ecx, [esi + 4 * 2]
+//    __asm add eax, edx
+//    __asm mov edx, [esi + 4 * 3]
+//    __asm sub ecx, [edi + 4 * 2]
+//    __asm sub edx, [edi + 4 * 3]
+//    __asm add eax, ecx
+//    __asm add eax, edx
+//
+//    // 下面三行从VC编译结果上抄的，比较玄妙
+//                      // eax = 0  | eax != 0
+//    __asm neg eax     // CF = 0   | CF = 1
+//    __asm sbb eax,eax // eax = 0  | eax = 0xffffffff
+//    __asm inc eax     // eax = 1  | eax = 0
+//
+//    __asm pop edi
+//    __asm pop esi
+//    __asm ret 8
+//  }
+//#else
   GXBOOL GXDLLAPI gxEqualRect(
     GXCONST GXRECT *lprc1,  // pointer to structure with first rectangle
     GXCONST GXRECT *lprc2   // pointer to structure with second rectangle
     )
   {
     return (
-      lprc1->left    - lprc2->left + 
-      lprc1->top    - lprc2->top +
-      lprc1->right  - lprc2->right +
-      lprc1->bottom  - lprc2->bottom) == 0;
+      (lprc1->left   - lprc2->left) |  
+      (lprc1->top    - lprc2->top) | 
+      (lprc1->right  - lprc2->right) |
+      (lprc1->bottom - lprc2->bottom) ) == 0;
   }
-#endif // ENABLE_ASSEMBLE
+//#endif // ENABLE_ASSEMBLE
 
   GXBOOL GXDLLAPI gxOffsetRect(
     GXLPRECT lprc,  // pointer to structure with rectangle
@@ -305,10 +306,10 @@ false_ret:
     GXINT dy     // vertical offset
     )
   {
-    lprc->left    += dx;
+    lprc->left   += dx;
     lprc->top    += dy;
-    lprc->right    += dx;
-    lprc->bottom    += dy;
+    lprc->right  += dx;
+    lprc->bottom += dy;
     return TRUE;
   }
   GXBOOL GXDLLAPI gxInflateRect(

@@ -60,11 +60,15 @@ namespace Marimo
       return reinterpret_cast<RegnT<_T>*>(this);
     }
   };    
+  
   //////////////////////////////////////////////////////////////////////////
 
   template<typename _T>
   struct RectT
   {
+    typedef clvector<RectT<_T> >  Array;
+    typedef cllist<RectT<_T> >    List;
+
     _T left, top, right, bottom;
 
     RectT() CLTRIVIAL_DEFAULT;
@@ -180,6 +184,30 @@ namespace Marimo
       return ((clMax(left, rect.left) < clMin(right, rect.right)) &&
         (clMax(top, rect.top) < clMin(bottom, rect.bottom)));
     }
+
+    GXBOOL IsEqual(const RectT& rect) const
+    {
+      return left == rect.left && top == rect.top && right == rect.right && bottom == rect.bottom;
+    }
+
+    RectT& Offset(_T x, _T y)
+    {
+      left   += x;
+      top    += y;
+      right  += x;
+      bottom += y;
+      return *this;
+    }
+
+    RectT& Inflate(_T dx, _T dy)
+    {
+      left   -= dx;
+      top    -= dy;
+      right  += dx;
+      bottom += dy;
+      return *this;
+    }
+
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -187,6 +215,9 @@ namespace Marimo
   template<typename _T>
   struct RegnT
   {
+    typedef clvector<RegnT<_T> >  Array;
+    typedef cllist<RegnT<_T> >    List;
+
     _T left, top, width, height;
 
     RegnT() CLTRIVIAL_DEFAULT;
@@ -296,6 +327,27 @@ namespace Marimo
     //  bottom = clMin(rect1.bottom, rect2.bottom);
     //  return ((left < right) && (top < bottom));
     //}
+
+    GXBOOL IsEqual(const RegnT& regn) const
+    {
+      return left == regn.left && top == regn.top && width == regn.width && height == regn.height;
+    }
+
+    RegnT& Offset(_T x, _T y)
+    {
+      left += x;
+      top  += y;
+      return *this;
+    }
+
+    RegnT& Inflate(_T dx, _T dy)
+    {
+      left   -= dx;
+      top    -= dy;
+      width  += (dx * (_T)2);
+      height += (dy * (_T)2);
+      return *this;
+    }
 
   };
 

@@ -1,4 +1,4 @@
-// Sample_String.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+ï»¿// Sample_String.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 #include <tchar.h>
@@ -7,8 +7,21 @@
 #include "clString.H"
 #include "clPathFile.h"
 
+void TestString()
+{
+  b32 bresult;
+  clStringA str("abcd-efgh-ijkl-mnop");
+
+  bresult = str.BeginsWith("ab");
+  ASSERT(bresult == TRUE);
+
+  bresult = str.EndsWith("mnop");
+  ASSERT(bresult == TRUE);
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+  // æ–‡ä»¶åŒ¹é…
   b32 bresult;
   bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq");
   ASSERT(bresult == FALSE);
@@ -21,6 +34,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
   bresult = clpathfile::MatchSpec("abcdefghijklmnopq.rst", "*.rst");
   ASSERT(bresult == TRUE);
+
+  TestString();
 
 	return 0;
 }
