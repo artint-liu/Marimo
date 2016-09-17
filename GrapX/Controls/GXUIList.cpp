@@ -73,22 +73,23 @@ namespace GXUI
 
   GXSIZE_T List::AddStringW(GXLPCWSTR lpString)
   {
-    ASSERT(m_pAdapter != NULL);
-    /*if(m_pAdapter == NULL)
-    {
-      DefaultListDataAdapter* pListAdapter = new DefaultListDataAdapter(m_hWnd);
-      if( ! InlCheckNewAndIncReference(pListAdapter)) {
-      return -1;
-    }
+    //ASSERT(m_pAdapter != NULL);
+    //*
+    if(m_pAdapter == NULL) {
+      CDefListDataAdapter* pListAdapter = new CDefListDataAdapter(m_hWnd);
 
-    if( ! pListAdapter->Initialize()) {
-      CLBREAK;
+      if(InlIsFailedToNewObject(pListAdapter)) {
+        return -1;
+      }
+
+      if( ! pListAdapter->Initialize()) {
+        CLBREAK;
+        SAFE_RELEASE(pListAdapter);
+        return -1;
+      }
+      SetAdapter(pListAdapter);
       SAFE_RELEASE(pListAdapter);
-      return -1;
-    }
-    SetAdapter(pListAdapter);
-    SAFE_RELEASE(pListAdapter);
-    }*/
+    }//*/
 
     const GXSIZE_T nval = m_pAdapter->AddStringW(NULL, lpString);
     Invalidate(FALSE);
@@ -444,10 +445,11 @@ namespace GXUI
           pThis->GetAdapter((IListDataAdapter**)lParam);
           break;
         default:
+          CLOG_ERROR("%s : Bad DATAPOOLOPERATION Param(%d)\n", __FUNCTION__, wParam);
           return -1;
         }
       }
-      break;
+      return 0;
 
       //case GXWM_GETADAPTER:
       //  pThis->GetAdapter((ListDataAdapter**)lParam);

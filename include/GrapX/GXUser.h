@@ -1240,14 +1240,16 @@ typedef GXHELPINFO *GXLPHELPINFO;
 typedef GXHELPINFO *LPGXHELPINFO;
 
 
+#define GXOFN_SIMPLEBROWSER  0x00000001
+
 struct GXOPENFILENAMEW {
-  GXDWORD        lStructSize;
+  GXDWORD        lStructSize;         // 数组长度
   GXHWND         hwndOwner;
-  GXHINSTANCE    hInstance;
+  //GXHINSTANCE  hInstance;
   GXLPCWSTR      lpstrFilter;
-  GXLPWSTR       lpstrCustomFilter;
+  //GXLPWSTR     lpstrCustomFilter;
   GXDWORD        nMaxCustFilter;
-  GXDWORD        nFilterIndex;
+  //GXDWORD      nFilterIndex;
   GXLPWSTR       lpstrFile;
   GXDWORD        nMaxFile;
   GXLPWSTR       lpstrFileTitle;
@@ -1258,9 +1260,9 @@ struct GXOPENFILENAMEW {
   GXWORD         nFileOffset;
   GXWORD         nFileExtension;
   GXLPCWSTR      lpstrDefExt;
-  GXLPARAM       lCustData;
+  //GXLPARAM     lCustData;
   //GXLPOFNHOOKPROC lpfnHook;
-  GXLPCWSTR      lpTemplateName;
+  //GXLPCWSTR    lpTemplateName;
 };
 typedef GXOPENFILENAMEW*       GXLPOPENFILENAMEW;
 

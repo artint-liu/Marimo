@@ -126,10 +126,10 @@ GXHRESULT MOUIStaff::Execute(int nCmdIndex, const clStringW* argv, int argc)
 
 
     gxofn.lpstrFilter = SPRITE_FILE_FILTER;
-    gxofn.lpstrFile = szFilename;
-    gxofn.nMaxFile = MAX_PATH;
-    gxofn.lpstrTitle = L"Open Sprite File";
-    gxofn.Flags = OFN_FILEMUSTEXIST|OFN_EXPLORER;
+    gxofn.lpstrFile   = szFilename;
+    gxofn.nMaxFile    = MAX_PATH;
+    gxofn.lpstrTitle  = L"Open Sprite File";
+    gxofn.Flags       = GXOFN_SIMPLEBROWSER; //OFN_FILEMUSTEXIST|OFN_EXPLORER;
 
     gxGetOpenFileNameW(&gxofn);
   }

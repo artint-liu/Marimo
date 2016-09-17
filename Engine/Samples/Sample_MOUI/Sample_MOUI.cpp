@@ -21,6 +21,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
   clpathfile::LocalWorkingDirW(L"..");
 
+  clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq");
+
   GXAPP_DESC sAppDesc = {0};
   sAppDesc.cbSize = sizeof(GXAPP_DESC);
   sAppDesc.lpName = L"Test Marimo Windows";

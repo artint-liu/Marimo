@@ -5155,7 +5155,7 @@ struct NM_PROPSHEETW
 //}
 
 template<class _TIUnknown>
-inline GXBOOL InlCheckNewAndIncReference(_TIUnknown* pIUnknown)
+inline GXBOOL InlCheckNewAndIncReference(_TIUnknown* pIUnknown) // TODO: 准备废掉这个，用InlIsFailedToNewObj代替，注意返回值相反
 {
   if(pIUnknown == NULL) {
     CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
@@ -5163,6 +5163,18 @@ inline GXBOOL InlCheckNewAndIncReference(_TIUnknown* pIUnknown)
   }
   pIUnknown->AddRef();
   return TRUE;
+}
+
+template<class _TIUnknown>
+inline GXBOOL InlIsFailedToNewObject(_TIUnknown* pIUnknown)
+{
+  if(pIUnknown == NULL) {
+    CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
+    return TRUE;
+  }
+
+  pIUnknown->AddRef();
+  return FALSE;
 }
 
 template<class _TObj>

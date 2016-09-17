@@ -131,11 +131,20 @@ namespace Marimo
       return *this;
     }
 
-
     RectT& set(_T l, _T t, _T r, _T b)
     {
       left = l; top = t; right = r; bottom = b;
       return *this;
+    }
+
+    GXBOOL IsEmpty() const
+    {
+      return (left <= right) || (top <= bottom);
+    }
+
+    GXBOOL IsPointIn(_T x, _T y) const
+    {
+      return (left <= x && right > x && top <= y && bottom > y);
     }
 
     _T GetWidth() const
@@ -248,6 +257,16 @@ namespace Marimo
     {
       left = l; top = t; width = w; height = h;
       return *this;
+    }
+
+    GXBOOL IsEmpty() const
+    {
+      return (width <= 0) || (height <= 0);
+    }
+
+    GXBOOL IsPointIn(_T x, _T y) const
+    {
+      return (left <= x && (left + width) > x && top <= y && (top + height) > y);
     }
 
     _T GetRight() const

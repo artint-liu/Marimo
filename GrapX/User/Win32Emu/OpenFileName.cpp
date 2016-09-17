@@ -1,7 +1,11 @@
 ﻿#include <GrapX.H>
 //#include "GrapX/GUnknown.H"
+#include "clPathFile.h"
 #include "GrapX/MOLogger.h"
 #include "GrapX/GXUser.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/DataInfrastructure.h"
 
 
 void GetPathFromItem(const GXHWND hTree, const GXHTREEITEM hItem, clStringW& strDir)
@@ -250,6 +254,103 @@ GXINT_PTR GXCALLBACK IntBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM wParam,
   return (GXINT_PTR)FALSE;
 }
 
+GXINT_PTR GXCALLBACK IntSimpleBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
+{
+  UNREFERENCED_PARAMETER(lParam);
+  switch (message)
+  {
+  case WM_INITDIALOG:
+    {
+      //SendDlgItemMessage(hDlg, IDC_COMBOBOXEX1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
+      //SendDlgItemMessage(hDlg, IDC_COMBO1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
+      GXOPENFILENAMEW* lpofn = (GXOPENFILENAMEW*)lParam;
+
+      gxSetWindowTextW(hDlg, lpofn->lpstrTitle);
+
+      // FindFirstFile 访问无磁盘的读卡器时会弹出MessageBox， 这个用来修改错误模式屏蔽掉
+      SetErrorMode(SEM_FAILCRITICALERRORS);
+
+
+      GXHWND hListView = GXGetDlgItemByName(hDlg, L"FileList");
+
+      clstd::FindFile find("*.*");
+      clstd::FINDFILEDATAW ffd;
+      clStringArrayW aFilter;
+
+      GXLPCWSTR szFilter = lpofn->lpstrFilter;
+      GXSIZE_T len = GXSTRLEN(szFilter);
+      szFilter += (len + 1); // 有点临时
+
+      clstd::ResolveString(clStringW(szFilter), ';', aFilter);
+
+      while(find.GetFileW(&ffd))
+      {
+        if(ffd.Filename[0] == '.') {
+          if(ffd.Filename[1] == '\0') {
+            continue;
+          }
+          //else if(ffd.Filename[1] == '.') {
+          //  gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
+          //}
+        }
+        
+        for(auto it = aFilter.begin(); it != aFilter.end(); ++it)
+        {
+          if(TEST_FLAG(ffd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY) || clpathfile::MatchSpec(ffd.Filename, *it)) {
+            gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
+            break;
+          }
+        }        
+      }
+      //Marimo::DataPool* pPool = NULL;
+      //GXUI::IDataAdapter* pAdapter = NULL;
+      //gxSendMessage(hListView, GXWM_DATAPOOLOPERATION, DPO_GETADAPTER, (GXLPARAM)&pAdapter);
+      //if(pAdapter) {
+
+      //}
+      //
+      //CLNOP
+      //InitTree(hDlg);
+      //InitListView(hDlg);
+    }
+    return (INT_PTR)TRUE;
+
+  case WM_NOTIFY:
+    //CLBREAK; // 测试下面的wParam值
+    //if(wParam == IDT_DIR) // FIXME: 修复这个判断
+    {
+      NMHDR* pnmh = (NMHDR*)lParam;
+      if(pnmh->code == GXTVN_ITEMEXPANDING)
+      {
+        GXNMTREEVIEW* pnmtv = (GXNMTREEVIEW*)pnmh;
+        //GXHWND hListView = GXGetDlgItemByName(hWnd, L"FileList");
+        GXHWND hTree = GXGetDlgItemByName(hDlg, L"Directory");
+
+        if(pnmtv->action == TVE_EXPAND) {
+          FillItem(hTree, pnmtv->itemNew.hItem);
+        }
+        else if(pnmtv->action == TVE_COLLAPSE) {
+          DeleteItem(hTree, pnmtv->itemNew.hItem);
+        }
+
+      }
+      else if(pnmh->code == GXTVN_SELCHANGED)
+      {
+        GXNMTREEVIEW* pnmtv = (GXNMTREEVIEW*)pnmh;
+        FillFile(hDlg, pnmtv->itemNew.hItem);
+      }
+    }
+    break;
+  case WM_COMMAND:
+    if (GXLOWORD(wParam) == IDOK || GXLOWORD(wParam) == IDCANCEL)
+    {
+      gxEndDialog(hDlg, LOWORD(wParam));
+      return (GXINT_PTR)TRUE;
+    }
+    break;
+  }
+  return (GXINT_PTR)FALSE;
+}
 //
 
 //////////////////////////////////////////////////////////////////////////
@@ -262,7 +363,12 @@ extern "C"
 
   GXBOOL GXDLLAPI gxGetOpenFileNameW(GXLPOPENFILENAMEW lpOFN)
   {
-    gxDialogBoxParamW(NULL, L"@UI\\browserfiles.dlg.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
+    if(TEST_FLAG(lpOFN->Flags, GXOFN_SIMPLEBROWSER)) {
+      gxDialogBoxParamW(NULL, L"@UI\\simplebrowser.dlg.txt", lpOFN->hwndOwner, IntSimpleBrowseFile, (GXLPARAM)lpOFN);
+    }
+    else {
+      gxDialogBoxParamW(NULL, L"@UI\\browserfiles.dlg.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
+    }
     return FALSE;
   }
 }

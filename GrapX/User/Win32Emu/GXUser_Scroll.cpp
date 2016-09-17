@@ -153,6 +153,7 @@ DONOT_REDRAW:;
     ASSERT(FALSE);
     return NULL;
   }
+
   int GXDLLAPI gxGetScrollPos(
     GXHWND hWnd,    // handle of window with scroll bar
     int nBar       // scroll bar flags

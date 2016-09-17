@@ -88,9 +88,9 @@ GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT
   rcDest.top    = y;
   rcDest.width  = right - x;
   rcDest.height = height - y;
-  ASSERT(rcDest.width >= 0 && rcDest.height >= 0);
+  //ASSERT(rcDest.width >= 0 && rcDest.height >= 0);
 
-  if(nIndex < (GXINT)m_aModules.size()) {
+  if( ! rcDest.IsEmpty() && (nIndex < (GXINT)m_aModules.size()) ) {
     pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nIndex].regn);
   }
 }

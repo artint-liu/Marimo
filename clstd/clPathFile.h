@@ -132,6 +132,22 @@ namespace clpathfile
   b32 RelativePathToT(_TString& strOutput, const _TCh* szFromPath, b32 bFromIsDir, const _TCh* szToPath, b32 bToIsDir);
   b32 RelativePathToA(clStringA& strOutput, const ch* szFromPath, b32 bFromIsDir, const ch* szToPath, b32 bToIsDir);
   b32 RelativePathToW(clStringW& strOutput, const wch* szFromPath, b32 bFromIsDir, const wch* szToPath, b32 bToIsDir);
+
+  template<typename _TCh>
+  b32 MatchSpecT(const _TCh* szFile, const _TCh* szSpec); // 大小写敏感
+  b32 MatchSpec (const ch* szFile, const ch* szSpec);
+  b32 MatchSpec (const wch* szFile, const wch* szSpec);
+
+  enum MatchSpecFlags
+  {
+    MatchSpec_NORMAL   = 0x00000000,
+    MatchSpec_MULTIPLE = 0x00000001,
+  };
+
+  template<typename _TCh>
+  b32 MatchSpecExT(const _TCh* szFile, const _TCh* szSpec, u32 dwFlags);
+  b32 MatchSpecEx (const ch* szFile, const ch* szSpec, u32 dwFlags);
+  b32 MatchSpecEx (const wch* szFile, const wch* szSpec, u32 dwFlags);
 } // namespace clpathfile
 
 //#ifdef _UNICODE

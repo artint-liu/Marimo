@@ -569,6 +569,80 @@ namespace clpathfile
   {
     return RelativePathToT(strOutput, szFromPath, bFromIsDir, szToPath, bToIsDir);
   }
+  //////////////////////////////////////////////////////////////////////////
+  template<typename _TCh>
+  b32 MatchSpecT(const _TCh* szFile, const _TCh* szSpec)
+  {
+    while(*szFile && *szSpec) {
+      if(*szSpec == '*') {
+        const _TCh* pSpecEnd = ++szSpec;
+
+        // '*' 是最后一个符号
+        if(*pSpecEnd == '\0') {
+          return TRUE;
+        }
+
+        // 测量夹在两个'*'之间的字符串长度
+        while(*pSpecEnd != '*' && *pSpecEnd != '\0') {
+          pSpecEnd++;
+        }
+        
+        do {
+          // TODO: 其实szFile长度可能会小于（pSpecEnd - szSpec）长度
+          if(clstd::strncmpT(szFile, szSpec, pSpecEnd - szSpec) == 0) {
+            szFile += (pSpecEnd - szSpec);
+            szSpec = pSpecEnd;
+            break;
+          }
+        } while (*(++szFile));
+
+        if(*szFile == '\0') {
+          return *szSpec == '\0';
+        }
+        continue;
+      }
+      else if(*szSpec != '?' && *szSpec != *szFile) {
+        return FALSE;
+      }
+      szFile++;
+      szSpec++;
+    }
+    return (*szFile == '\0' && *szSpec == '\0');
+  }
+
+  b32 MatchSpec(const ch* szFile, const ch* szSpec)
+  {
+    return MatchSpecT(szFile, szSpec);
+  }
+
+  b32 MatchSpec(const wch* szFile, const wch* szSpec)
+  {
+    return MatchSpecT(szFile, szSpec);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  template<typename _TCh>
+  b32 MatchSpecExT(const _TCh* szFile, const _TCh* szSpec, u32 dwFlags)
+  {
+    if(dwFlags == MatchSpec_NORMAL) {
+      return MatchSpec(szFile, szSpec);
+    }
+    else if(dwFlags == MatchSpec_MULTIPLE) {
+      CLBREAK; // 未实现
+    }
+    return FALSE;
+  }
+  
+  b32 MatchSpecEx(const ch* szFile, const ch* szSpec, u32 dwFlags)
+  {
+    return MatchSpecExT(szFile, szSpec, dwFlags);
+  }
+
+  b32 MatchSpecEx(const wch* szFile, const wch* szSpec, u32 dwFlags)
+  {
+    return MatchSpecExT(szFile, szSpec, dwFlags);
+  }
+
 
 
 #ifdef _WINDOWS

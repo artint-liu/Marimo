@@ -507,16 +507,17 @@ namespace GXUI
   {
     GXSprite::Type type;
     m_nSpriteIdx = m_pSprite->Find(szName, &type);
-    
-    if(type == GXSprite::Type_Frame) {
-      m_nSpriteIdx += (GXINT)m_pSprite->GetModuleCount();
-    }
-    else if(type == GXSprite::Type_Animation) {
-      m_nSpriteIdx += (GXINT)(m_pSprite->GetModuleCount() + m_pSprite->GetFrameCount());
-    }
-    else {
-      ASSERT(type == GXSprite::Type_Module);
-    }
+    m_nSpriteIdx = m_pSprite->PackIndex(type, m_nSpriteIdx);
+
+    //if(type == GXSprite::Type_Frame) {
+    //  m_nSpriteIdx += (GXINT)m_pSprite->GetModuleCount();
+    //}
+    //else if(type == GXSprite::Type_Animation) {
+    //  m_nSpriteIdx += (GXINT)(m_pSprite->GetModuleCount() + m_pSprite->GetFrameCount());
+    //}
+    //else {
+    //  ASSERT(type == GXSprite::Type_Module);
+    //}
 
     if(m_nSpriteIdx != -1)
     {
