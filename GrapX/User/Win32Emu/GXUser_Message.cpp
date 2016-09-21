@@ -27,18 +27,19 @@ GXBOOL IntMakeActionMessage(
   GXLPWND   lpWnd,
   GXINOUT GXMSG* msg, 
   GXWndMsg  message,
-  GXWndMsg  msgNClient,      // 非客户区的消息
+  GXWndMsg  msgNClient,   // 非客户区的消息
   GXWPARAM  wParam, 
   GXLPARAM  lParam, 
-  GXBOOL    bActiveWnd) // 以后需要标志扩展,可以考虑共用"SWP_*"或"SW_*" 标志
+  GXBOOL    bActiveWnd)   // 以后需要标志扩展,可以考虑共用"SWP_*"或"SW_*" 标志
 {
   ASSERT(hWnd != NULL);
   ASSERT(hWnd == GXWND_HANDLE(lpWnd));
   STATIC_ASSERT(GXWM_LBUTTONDOWN - GXWM_LBUTTONDOWN + GXWM_NCLBUTTONDOWN == GXWM_NCLBUTTONDOWN);
+  STATIC_ASSERT(GXWM_MBUTTONDOWN - GXWM_MBUTTONDOWN + GXWM_NCMBUTTONDOWN == GXWM_NCMBUTTONDOWN);
   STATIC_ASSERT(GXWM_RBUTTONDOWN - GXWM_LBUTTONDOWN + GXWM_NCLBUTTONDOWN == GXWM_NCRBUTTONDOWN);
   STATIC_ASSERT(GXWM_LBUTTONUP - GXWM_LBUTTONUP + GXWM_NCLBUTTONUP == GXWM_NCLBUTTONUP);
+  STATIC_ASSERT(GXWM_MBUTTONUP - GXWM_MBUTTONUP + GXWM_NCMBUTTONUP == GXWM_NCMBUTTONUP);
   STATIC_ASSERT(GXWM_RBUTTONUP - GXWM_LBUTTONUP + GXWM_NCLBUTTONUP == GXWM_NCRBUTTONUP);
-
 
   GXPOINT pt;
   GXPOINT ptClient;
@@ -65,8 +66,10 @@ GXBOOL IntMakeActionMessage(
   {
     //STATIC_ASSERT(GXWM_LBUTTONDOWN - GXWM_LBUTTONDOWN + GXWM_NCLBUTTONDOWN == GXWM_NCLBUTTONDOWN);
     //STATIC_ASSERT(GXWM_RBUTTONDOWN - GXWM_LBUTTONDOWN + GXWM_NCLBUTTONDOWN == GXWM_NCRBUTTONDOWN);
+    GXLPSTATION lpStation = GXLPWND_STATION_PTR(lpWnd);
+
     msg->hwnd    = hWnd;
-    msg->message = msgNClient;//message - GXWM_LBUTTONDOWN + GXWM_NCLBUTTONDOWN;
+    msg->message = lpStation->DoDoubleClick(msgNClient, lpWnd);//message - GXWM_LBUTTONDOWN + GXWM_NCLBUTTONDOWN;
     msg->wParam  = ht;
     msg->lParam  = GXMAKELPARAM(pt.x, pt.y);
   }
@@ -75,8 +78,13 @@ GXBOOL IntMakeActionMessage(
     ptClient = pt;
     lpWnd->ScreenToClient(&ptClient, 1);
 
-    msg->hwnd   = hWnd;
-    msg->lParam = GXMAKELPARAM(ptClient.x, ptClient.y);
+    ASSERT(message == GXWM_LBUTTONDOWN || message == GXWM_MBUTTONDOWN || message == GXWM_RBUTTONDOWN ||
+      message == GXWM_LBUTTONUP || message == GXWM_MBUTTONUP || message == GXWM_RBUTTONUP);
+
+    GXLPSTATION lpStation = GXLPWND_STATION_PTR(lpWnd);
+    msg->message = lpStation->DoDoubleClick((GXWndMsg)msg->message, lpWnd);
+    msg->hwnd    = hWnd;
+    msg->lParam  = GXMAKELPARAM(ptClient.x, ptClient.y);
   }
   return TRUE;
 }
@@ -138,20 +146,17 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
     }
     break;
 
-  case GXWM_RBUTTONDOWN:
   case GXWM_LBUTTONDOWN:
+  case GXWM_MBUTTONDOWN:
+  case GXWM_RBUTTONDOWN:
     {
       const GXWndMsg msgNoClient = (GXWndMsg)(message - GXWM_LBUTTONDOWN + GXWM_NCLBUTTONDOWN);
 
-      if(hCapture != NULL)
-      {
-        bRet = IntMakeActionMessage(hCapture, pCapture, msg, (GXWndMsg)message, 
-          msgNoClient, wParam, lParam, TRUE);
+      if(hCapture != NULL) {
+        bRet = IntMakeActionMessage(hCapture, pCapture, msg, (GXWndMsg)message, msgNoClient, wParam, lParam, TRUE);
       }
-      else if(hMouseFocus != NULL)
-      {
-        bRet = IntMakeActionMessage(hMouseFocus, pMouseFocus, msg, (GXWndMsg)message, 
-          msgNoClient, wParam, lParam, TRUE);
+      else if(hMouseFocus != NULL) {
+        bRet = IntMakeActionMessage(hMouseFocus, pMouseFocus, msg, (GXWndMsg)message, msgNoClient, wParam, lParam, TRUE);
       }
 
       if( ! bRet) {
@@ -160,20 +165,17 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
     }
     break;
 
-  case GXWM_RBUTTONUP:
   case GXWM_LBUTTONUP:
+  case GXWM_MBUTTONUP:
+  case GXWM_RBUTTONUP:
     {
       const GXWndMsg msgNoClient = (GXWndMsg)(message - GXWM_LBUTTONUP + GXWM_NCLBUTTONUP);
 
-      if(hCapture != NULL)
-      {
-        bRet = IntMakeActionMessage(hCapture, pCapture, msg, (GXWndMsg)message, 
-          msgNoClient, wParam, lParam, FALSE);
+      if(hCapture != NULL) {
+        bRet = IntMakeActionMessage(hCapture, pCapture, msg, (GXWndMsg)message, msgNoClient, wParam, lParam, FALSE);
       }
-      else if(hMouseFocus != NULL)
-      {
-        bRet = IntMakeActionMessage(hMouseFocus, pMouseFocus, msg, (GXWndMsg)message, 
-          msgNoClient, wParam, lParam, FALSE);
+      else if(hMouseFocus != NULL) {
+        bRet = IntMakeActionMessage(hMouseFocus, pMouseFocus, msg, (GXWndMsg)message, msgNoClient, wParam, lParam, FALSE);
       }
 
       if( ! bRet) {
@@ -566,9 +568,7 @@ GXBOOL GXDLLAPI gxGetMessage(
         lpStation->AppHandle(uOriginMessage, lpMsg->wParam, lpMsg->lParam);
         break;
       }
-    }
-    else
-    {
+    } else {
       lpStation->AppRender();
     }
   }

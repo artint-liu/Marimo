@@ -386,9 +386,10 @@ extern "C" GXBOOL GXDLLAPI GXUIPostRootMessage(GXHWND hWnd, GXUINT message, GXWP
     ptCursor.x = (GXLONG)(GXSHORT)GXLOWORD(lParam);
     ptCursor.y = (GXLONG)(GXSHORT)GXHIWORD(lParam);
     lpStation->SetCursorPos(&ptCursor);
-  }
-  else
+  } else {
     gxGetCursorPos(&ptCursor);
+  }
+
 #if defined(_WIN32) || defined(_WINDOWS)
   ASSERT((GXLPVOID)hWnd != (GXLPVOID)lpStation->hBindWin32Wnd);
 #endif // defined(_WIN32) || defined(_WINDOWS)

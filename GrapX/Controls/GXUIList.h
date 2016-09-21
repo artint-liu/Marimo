@@ -73,6 +73,7 @@ namespace GXUI
     virtual GXUINT    GetColumnsWidth     (GXUINT* pColumns, GXUINT nCount);
     virtual int       OnLButtonDown       (int fwKeys, int x, int y);
     virtual int       OnLButtonUp         (int fwKeys, int x, int y);
+    virtual int       OnLButtonDblClk     (int fwKeys, int x, int y);
     virtual int       OnMouseMove         (int fwKeys, int x, int y);
     virtual int       OnMouseWheel        (int fwKeys, int nDelta);
     virtual int       OnSize              (int cx, int cy) GXPURE;

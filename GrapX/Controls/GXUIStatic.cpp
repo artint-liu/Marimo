@@ -412,6 +412,10 @@ namespace GXUI
       GXREGN regn;
       GXSprite::Type type;
       GXINT index = m_pSprite->UnpackIndex(m_nSpriteIdx, &type);
+      if(index < 0) {
+        CLBREAK;
+        return GX_FAIL;
+      }
 
       // TODO: 这个以后想想怎么改, 重新设计接口
       switch(type)

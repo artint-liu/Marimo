@@ -161,7 +161,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
       DragAcceptFiles(hWnd, TRUE);
     }
     break;
-  case GXWM_DESTROY:
+  case WM_DESTROY:
     PostQuitMessage(0);
     break;
 #ifdef _UPDATE_WIN32_CARET
@@ -313,11 +313,14 @@ GXLRESULT IMOPlatform_Win32Base::AppHandle(GXUINT message, GXWPARAM wParam, GXLP
 GXHRESULT IMOPlatform_Win32Base::MainLoop()
 {
   MSG msg;
+
   while (1)
   {
     GXBOOL bval = GetMessage(&msg, NULL, 0, 0);
-    if(bval <= 0)
+    if(bval <= 0) {
       break;
+    }
+
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }

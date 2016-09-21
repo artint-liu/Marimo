@@ -299,14 +299,14 @@ namespace GXUI
   {
     GXDWORD dwStyle = GXWS_VISIBLE | GXWS_CHILD | pDlgParam->dwStyle;
 
-    GXDWORD      dwExStyle = NULL;
+    GXDWORD      dwExStyle  = NULL;
     GXLPCWSTR    lpWindowName =  pDlgParam->strCaption;
-    const GXRegn*pRegn =  &pDlgParam->regn;
+    const GXRegn*pRegn      =  &pDlgParam->regn;
     GXHWND       hWndParent =  hParent;
-    GXHMENU      hMenu =  NULL;
-    GXHINSTANCE  hInstance =  hInst;
-    GXLPCWSTR    szIdName=  pDlgParam->strName;
-    GXLPVOID     lpParam =  NULL;
+    GXHMENU      hMenu      =  NULL;
+    GXHINSTANCE  hInstance  =  hInst;
+    GXLPCWSTR    szIdName   =  pDlgParam->strName;
+    GXLPVOID     lpParam    =  NULL;
 
     // ×¢²á¿Ø¼þÀà
     TryRegisterClass(hInstance, WndProc, GXUICLASSNAME_LIST);
@@ -462,6 +462,9 @@ namespace GXUI
         pThis->OnLButtonDown((int)wParam, x, y);
       }
       return 0;
+
+    case GXWM_LBUTTONDBLCLK:
+      return pThis->OnLButtonDblClk((int)wParam, GXGET_X_LPARAM(lParam), GXGET_Y_LPARAM(lParam));
 
     case GXWM_MOUSEWHEEL:
       {
@@ -712,6 +715,12 @@ namespace GXUI
 
   int List::OnLButtonUp(int fwKeys, int x, int y)
   {
+    return 0;
+  }
+
+  int List::OnLButtonDblClk(int fwKeys, int x, int y)
+  {
+    NotifyParent(GXLBN_DBLCLK);
     return 0;
   }
 

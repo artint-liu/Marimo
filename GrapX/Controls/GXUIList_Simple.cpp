@@ -199,7 +199,7 @@ namespace GXUI
         }
         else {
           DrawTextWithColumnsW(canvas, m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcItem, 
-            DT_SINGLELINE|DT_VCENTER, crText.color, bContrast ? crText.color ^ 0xFFFFFF : 0);
+            GXDT_SINGLELINE | GXDT_VCENTER, crText.color, bContrast ? crText.color ^ 0xFFFFFF : 0);
         }
       }
 

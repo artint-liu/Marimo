@@ -294,13 +294,19 @@ GXINT_PTR GXCALLBACK IntSimpleBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM w
           //}
         }
         
-        for(auto it = aFilter.begin(); it != aFilter.end(); ++it)
-        {
-          if(TEST_FLAG(ffd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY) || clpathfile::MatchSpec(ffd.Filename, *it)) {
-            gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
-            break;
-          }
-        }        
+        if(TEST_FLAG(ffd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY)) {
+          gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
+        }
+        else {
+          for(auto it = aFilter.begin(); it != aFilter.end(); ++it) {
+            if(clpathfile::MatchSpec(ffd.Filename, *it)) {
+              clStringW str((wch)0x20, 2);
+              str.Append(ffd.Filename);
+              gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)(GXLPCWSTR)str);
+              break;
+            }
+          }        
+        }
       }
       //Marimo::DataPool* pPool = NULL;
       //GXUI::IDataAdapter* pAdapter = NULL;
@@ -342,7 +348,11 @@ GXINT_PTR GXCALLBACK IntSimpleBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM w
     }
     break;
   case WM_COMMAND:
-    if (GXLOWORD(wParam) == IDOK || GXLOWORD(wParam) == IDCANCEL)
+    if(GXHIWORD(wParam) == GXLBN_DBLCLK)
+    {
+      CLNOP
+    }
+    else if (GXLOWORD(wParam) == IDOK || GXLOWORD(wParam) == IDCANCEL)
     {
       gxEndDialog(hDlg, LOWORD(wParam));
       return (GXINT_PTR)TRUE;

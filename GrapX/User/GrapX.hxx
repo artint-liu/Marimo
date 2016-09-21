@@ -299,6 +299,7 @@ struct GXLOCALMEM_STRUCT
 typedef struct __tagGXWNDCLSATOM
 {
   GXINT       nRefCount;  // 有多少窗口引用了这个类
+  GXUINT      style;
   GXWNDPROC   lpfnWndProc; 
   GXINT       cbClsExtra; 
   GXINT       cbWndExtra; 
@@ -384,12 +385,17 @@ struct GXSTATION
   GXLPWND             m_pCapture;
   STOCKOBJECT*        m_pStockObject;
 
+  // 记录双击信息
+  GXLPWND             m_pBtnDown;       // 第一次按下的窗口，一定带有CS_DBLCLKS属性
+  GXWndMsg            m_eDownMsg;       // Null, LBtn, MBtn, RBtn, NCLBtn, NCMBtn, NCRBtn
+  GXDWORD             m_dwBtnDownTime;
+
   GXPOINT             m_ptCursor;      // 储存的鼠标位置
   GXVOID*             m_HotKeyChain;
   GXULONG             m_uFrameCount;    // UI的帧计数器
   DesktopWindowsMgr*  m_pDesktopWindowsMgr;
   GXLPWND_LIST        m_aActiveWnds;
-  RichFXMgr*          m_pRichFXMgr;
+  //RichFXMgr*          m_pRichFXMgr;
   //GXDWORD             m_emCursorResult;
 
   GXHWND              m_hConsole;
@@ -428,6 +434,7 @@ struct GXSTATION
   GXLRESULT   CleanupActiveWnd(GXLPWND lpWnd);
   GXLPWND     GetActiveWnd();
 #endif // #ifndef _DEV_DISABLE_UI_CODE
+  GXWndMsg    DoDoubleClick   (GXWndMsg msg, GXLPWND lpWnd);
 };
 typedef GXSTATION*        GXLPSTATION;
 typedef const GXSTATION*  GXLPCSTATION;

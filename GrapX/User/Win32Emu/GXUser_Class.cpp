@@ -15,7 +15,7 @@ extern "C"
 GXVOID ClsAtomToWndCls(LPGXWNDCLASSEX lpWndCls, GXCONST LPGXWNDCLSATOM lpClsAtom)
 {
   lpWndCls->cbSize        = sizeof(GXWNDCLASSEX);
-  lpWndCls->style         = NULL;
+  lpWndCls->style         = lpClsAtom->style;
   lpWndCls->lpfnWndProc   = lpClsAtom->lpfnWndProc;
   lpWndCls->cbClsExtra    = lpClsAtom->cbClsExtra;
   lpWndCls->cbWndExtra    = lpClsAtom->cbWndExtra;
@@ -35,6 +35,7 @@ GXVOID ClsAtomToWndCls(LPGXWNDCLASSEX lpWndCls, GXCONST LPGXWNDCLSATOM lpClsAtom
 GXVOID WndClsToClsAtom(LPGXWNDCLSATOM lpClsAtom, GXCONST LPGXWNDCLASSEX lpWndCls)
 {
   lpClsAtom->nRefCount = 0;
+  lpClsAtom->style = lpWndCls->style;
   lpClsAtom->lpfnWndProc = lpWndCls->lpfnWndProc;
   lpClsAtom->cbClsExtra = lpWndCls->cbClsExtra; 
   lpClsAtom->cbWndExtra = lpWndCls->cbWndExtra; 

@@ -207,6 +207,7 @@ GXLRESULT GXSTATION::CleanupRecord(GXHWND hWnd)
     gxDestroyCaret();
   }
 
+  m_pBtnDown = NULL;
 
   // 如果涉及到焦点或者捕获窗口则清除
   if(m_pMouseFocus == lpWnd)  {
@@ -277,6 +278,57 @@ GXLPWND GXSTATION::GetActiveWnd()
   return NULL;
 }
 #endif // #ifndef _DEV_DISABLE_UI_CODE
+
+
+GXWndMsg GXSTATION::DoDoubleClick(GXWndMsg msg, GXLPWND lpWnd)
+{
+  if( TEST_FLAG_NOT(lpWnd->m_lpClsAtom->style, GXCS_DBLCLKS) || (
+    msg != GXWM_NCLBUTTONDOWN && msg != GXWM_NCMBUTTONDOWN && msg != GXWM_NCRBUTTONDOWN &&
+    msg != GXWM_LBUTTONDOWN && msg != GXWM_MBUTTONDOWN && msg != GXWM_RBUTTONDOWN )) {
+      return msg;
+  }
+
+  const int msg_delta = 2;
+  STATIC_ASSERT (
+    (GXWM_LBUTTONDBLCLK - GXWM_LBUTTONDOWN) == msg_delta &&
+    (GXWM_MBUTTONDBLCLK - GXWM_MBUTTONDOWN) == msg_delta &&
+    (GXWM_RBUTTONDBLCLK - GXWM_RBUTTONDOWN) == msg_delta &&
+    (GXWM_NCLBUTTONDBLCLK - GXWM_NCLBUTTONDOWN) == msg_delta &&
+    (GXWM_NCMBUTTONDBLCLK - GXWM_NCMBUTTONDOWN) == msg_delta &&
+    (GXWM_NCRBUTTONDBLCLK - GXWM_NCRBUTTONDOWN) == msg_delta );
+
+
+
+  if(m_eDownMsg == GXWM_NULL) {
+    ASSERT(m_pBtnDown == NULL);
+    m_pBtnDown      = lpWnd;
+    m_eDownMsg      = msg;
+    m_dwBtnDownTime = gxGetTickCount();
+  }
+  else {
+    if(m_eDownMsg == msg && m_pBtnDown == lpWnd)
+    {
+      const GXDWORD dwTick = gxGetTickCount();
+      if((dwTick - m_dwBtnDownTime) < GetDoubleClickTime())
+      {
+        msg = (GXWndMsg)(msg + msg_delta);
+        m_eDownMsg = GXWM_NULL;
+        m_pBtnDown = NULL;
+      }
+      else {
+        TRACE("%d\n", dwTick - m_dwBtnDownTime);
+        m_dwBtnDownTime = dwTick;
+      }
+    }
+    else {
+      m_eDownMsg = msg;
+      m_pBtnDown = lpWnd;
+      m_dwBtnDownTime = gxGetTickCount();
+    }
+  }
+  return msg;
+}
+
 //////////////////////////////////////////////////////////////////////////
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 GXSTATION::GXSTATION(HWND hWnd, IGXPlatform* lpPlatform)
@@ -291,7 +343,7 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
   , dwUIThreadId          (NULL)
   , pGraphics             (lpPlatform->m_pApp->GetGraphicsUnsafe())
   , m_uFrameCount         (0)
-  , m_pRichFXMgr          (NULL)
+  //, m_pRichFXMgr          (NULL)
   , hClassDPA             (NULL)
   , pInstApp              (NULL)
   , m_pMouseFocus         (NULL)
@@ -303,6 +355,9 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
   , pBackDownSampTexA     (NULL)
   , pBackDownSampTexB     (NULL)
   , m_pLogger             (NULL)
+  , m_pBtnDown            (NULL)
+  , m_eDownMsg            (GXWM_NULL)
+  , m_dwBtnDownTime       (NULL)
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
   , hBindWin32Wnd     (hWnd)
   , hCursor           (NULL)

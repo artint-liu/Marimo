@@ -45,7 +45,7 @@ namespace GXUI
 
     wcex.cbSize = sizeof(GXWNDCLASSEX);
 
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
+    wcex.style          = GXCS_HREDRAW | GXCS_VREDRAW | GXCS_DBLCLKS;
     wcex.lpfnWndProc    = lpWndProc;
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = sizeof(CtrlBase*);

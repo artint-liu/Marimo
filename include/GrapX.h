@@ -3180,11 +3180,18 @@ enum GXWndMsg
   GXWM_NCACTIVATE             = 0x0086,
   GXWM_GETDLGCODE             = 0x0087,
   GXWM_NCMOUSEMOVE            = 0x00A0,
+  
   GXWM_NCLBUTTONDOWN          = 0x00A1,
   GXWM_NCLBUTTONUP            = 0x00A2,
   GXWM_NCLBUTTONDBLCLK        = 0x00A3,
+
   GXWM_NCRBUTTONDOWN          = 0x00A4,
   GXWM_NCRBUTTONUP            = 0x00A5,
+  GXWM_NCRBUTTONDBLCLK        = 0x00A6,
+
+  GXWM_NCMBUTTONDOWN          = 0x00A7,
+  GXWM_NCMBUTTONUP            = 0x00A8,
+  GXWM_NCMBUTTONDBLCLK        = 0x00A9,
 
   // Edit Control Messages
   GXEM_GETSEL                 = 0x00B0,
@@ -3395,6 +3402,7 @@ enum GXWndMsg
   GXWM_RBUTTONDBLCLK          = 0x0206,
   GXWM_MBUTTONDOWN            = 0x0207,
   GXWM_MBUTTONUP              = 0x0208,
+  GXWM_MBUTTONDBLCLK          = 0x0209,
   GXWM_MOUSEWHEEL             = 0x020A,
   GXWM_MOUSELAST              = 0x020E,
 
