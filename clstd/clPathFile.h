@@ -80,9 +80,9 @@ namespace clpathfile
   b32 AddSlashW      (clStringW& strPath);
 
   template<typename _TString>
-  _TString&  CombinePathT  (_TString& strDestPath, const _TString& strDir, const _TString& strFile);
-  clStringA& CombinePathA  (clStringA& strDestPath, const clStringA& strDir, const clStringA& strFile);
-  clStringW& CombinePathW  (clStringW& strDestPath, const clStringW& strDir, const clStringW& strFile);
+  _TString&  CombinePathT  (_TString& strDestPath, typename _TString::LPCSTR szDir, typename _TString::LPCSTR szFile);
+  clStringA& CombinePathA  (clStringA& strDestPath, clStringA::LPCSTR szDir, clStringA::LPCSTR szFile);
+  clStringW& CombinePathW  (clStringW& strDestPath, clStringW::LPCSTR szDir, clStringW::LPCSTR szFile);
 
   template<typename _TString>
   _TString&  CombineAbsPathToT(_TString& strDestPath, const _TString& strSrcPath);

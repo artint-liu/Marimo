@@ -242,13 +242,14 @@ GXVOID _gxDestroyWindow(GXHWND hWnd)
       lpWnd->m_pNextWnd->m_pPrevWnd = lpWnd->m_pPrevWnd;
     }
   }
-  if(TEST_FLAG(lpWnd->m_uStyle, GXWS_CHILD))
-  {
-
+  
+  if(TEST_FLAG(lpWnd->m_uStyle, GXWS_CHILD)) {
+    if( ! IS_IDENTIFY(lpWnd->m_pMenu)) {
+      clStringW* pNameStr = reinterpret_cast<clStringW*>(&lpWnd->m_pMenu);
+      pNameStr->~StringX();
+    }
   }
-  else if(lpWnd->m_pMenu)
-  {
-    //if(IS_IDENTIFY(lpWnd->m_pMenu) == FALSE)
+  else if(lpWnd->m_pMenu) {
     gxDestroyMenu(lpWnd->m_pMenu);
   }
   lpWnd->m_lpClsAtom->nRefCount--;
@@ -398,18 +399,26 @@ GXHWND GXDLLAPI gxCreateWindowExW(GXDWORD dwExStyle,GXLPCWSTR lpClassName,GXLPCW
     //gxSendMessage(hNewWnd, GXWM_SETTEXT, NULL, (GXLPARAM)lpWindowName);
   }
 
-  if(hWndParent == NULL)
-  {
-    //ASSERT(IS_IDENTIFY(hMenu));
-    //TODO: 这里有内存泄露，但是由于WineMenu采用了gxHeapAlloc分配内存，因此无法检测
-    //pNewWnd->m_pMenu = gxLoadMenuW(hInstance, (GXLPCWSTR)hMenu);
+  //if(hWndParent == NULL)
+  //{
+  //  //ASSERT(IS_IDENTIFY(hMenu));
+  //  //TODO: 这里有内存泄露，但是由于WineMenu采用了gxHeapAlloc分配内存，因此无法检测
+  //  //pNewWnd->m_pMenu = gxLoadMenuW(hInstance, (GXLPCWSTR)hMenu);
+  //  pNewWnd->m_pMenu = hMenu;
+  //}
+  //else
+  //{
+  //  //ASSERT(hMenu != NULL && dwStyle & WS_CHILD);
+  //  pNewWnd->m_pMenu = hMenu;
+  //}
+
+  if(TEST_FLAG(dwStyle, GXWS_CHILD) && ! IS_IDENTIFY(hMenu)) {
+    new (&pNewWnd->m_pMenu) clStringW((GXLPCWSTR)hMenu);
+  }
+  else {
     pNewWnd->m_pMenu = hMenu;
   }
-  else
-  {
-    //ASSERT(hMenu != NULL && dwStyle & WS_CHILD);
-    pNewWnd->m_pMenu = hMenu;
-  }
+
   // FIXME: WS_CHILD模式下, 字符串形式的Control Id应该单独分配内存保存, 不应该直接引用指针.
 
   if(IntSendCreateMessage(hNewWnd, hWndParent, lpClassName, dwExStyle, dwStyle, x, y, nWidth, nHeight, hMenu, lpParam) == FALSE)

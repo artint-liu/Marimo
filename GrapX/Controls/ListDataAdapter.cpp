@@ -99,7 +99,7 @@ namespace GXUI
 //      newstr.Impulse(Marimo::DATACT_Insert);
 //    }
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-    return m_DynArray.GetLength();
+    return m_DynArray.GetLength() - 1;
   }
 
   GXBOOL CDefListDataAdapter::GetStringW(GETSTRW* pItemStrDesc)
@@ -111,6 +111,14 @@ namespace GXUI
     //pItemStrDesc->dwStatus  = 0;
     return TRUE;
   }
+  
+  //GXBOOL CDefListDataAdapter::SetItemData(GETSTRW* pItemStrDesc, GXLPARAM lParam)
+  //{
+  //}
+
+  //GXLPARAM CDefListDataAdapter::GetItemData(GETSTRW* pItemStrDesc)
+  //{
+  //}
 
   MOVariable CDefListDataAdapter::GetVariable()
   {

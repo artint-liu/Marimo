@@ -99,7 +99,7 @@ namespace GXUI
   GXSIZE_T List::GetStringW(GXSIZE_T nIndex, clStringW& str)
   {
     if(/*nIndex < 0 || */nIndex >= m_pAdapter->GetCount()) {
-      return -1;
+      return GXLB_ERR;
     }
     IListDataAdapter::GETSTRW gs;
     gs.item     = (GXINT)nIndex;
@@ -110,6 +110,25 @@ namespace GXUI
     m_pAdapter->GetStringW(&gs);
     str = gs.sString;
     return (GXINT)gs.sString.GetLength();
+  }
+
+  GXLRESULT List::SetItemData(GXSIZE_T index, GXLPARAM lParam)
+  {
+    if(index >= m_pAdapter->GetCount()) {
+      return GXLB_ERR;
+    }
+
+    m_aItems[index].lParam = lParam;
+    return 0;
+  }
+
+  GXLPARAM List::GetItemData(GXSIZE_T index)
+  {
+    if(index >= m_pAdapter->GetCount()) {
+      return GXLB_ERR;
+    }
+
+    return m_aItems[index].lParam;
   }
 
   GXSIZE_T List::DeleteString(GXSIZE_T nIndex)
@@ -140,19 +159,15 @@ namespace GXUI
       return;
     }
     MOVariable VarArray = m_pAdapter->GetVariable();
-
-//#ifdef ENABLE_DATAPOOL_WATCHER
-    /*if( ! m_pAdapter->IsAutoKnock()) {
-    VarArray.Impulse(Marimo::DATACT_Deleting, -1);
-    VarArray.Remove(-1);
-    VarArray.Impulse(Marimo::DATACT_Deleted, -1);
-    }
-    else */{
-      VarArray.Remove(-1, 0);
-    }
-//#else
-//    VarArray.Remove(-1);
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
+    
+    m_nTopIndex      = 0;
+    m_nColumnCount   = 1;
+    m_nLastSelected  = -1;
+    m_nScrolled      = 0;
+    m_nPrevScrolled  = 0;
+    m_bShowScrollBar = 0;
+    m_bShowButtonBox = 0;
+    VarArray.Remove(-1, 0);
     Invalidate(FALSE);
   }
 
@@ -387,6 +402,12 @@ namespace GXUI
 
     case GXLB_DELETESTRING:
       return (GXLRESULT)pThis->DeleteString((GXINT)wParam);
+
+    case GXLB_SETITEMDATA:
+      return (GXLRESULT)pThis->SetItemData((GXSIZE_T)wParam, lParam);
+
+    case GXLB_GETITEMDATA:
+      return (GXLRESULT)pThis->GetItemData((GXSIZE_T)wParam);
 
     case GXLB_GETTEXT:
       {

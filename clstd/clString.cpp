@@ -1393,10 +1393,12 @@ namespace clstd
     size_t _CLSTR_IMPL::ReverseFind(_TCh cFind) const
   {
     size_t uIdx = CLSTR_LENGTH(m_pBuf);
-    while((int)--uIdx >= 0)
-      if(m_pBuf[uIdx] == cFind)
+    while((int)--uIdx >= 0) {
+      if(m_pBuf[uIdx] == cFind) {
         return uIdx;
-    return (size_t)-1;
+      }
+    }
+    return npos;
   }
 
   _CLSTR_TEMPL
@@ -1404,13 +1406,30 @@ namespace clstd
   {
     size_t uIdx = CLSTR_LENGTH(m_pBuf);
 
-    if(nEnd > 0)
+    if(nEnd > 0) {
       uIdx = (size_t)nEnd;
+    }
 
-    while((int)--uIdx >= nStart)
-      if(m_pBuf[uIdx] == cFind)
+    while((int)--uIdx >= nStart) {
+      if(m_pBuf[uIdx] == cFind) {
         return uIdx;
-    return (size_t)-1;
+    } }
+    return npos;
+  }
+
+  _CLSTR_TEMPL
+  size_t _CLSTR_IMPL::ReverseFindAny(const _TCh* pFindCharList) const
+  {
+    size_t uIdx = CLSTR_LENGTH(m_pBuf);
+    while((int)--uIdx >= 0) {
+      const _TCh* l = pFindCharList;
+      while(*l) {
+        if(m_pBuf[uIdx] == *l++) {
+          return uIdx;
+        }
+      }
+    }
+    return npos;
   }
 
   _CLSTR_TEMPL

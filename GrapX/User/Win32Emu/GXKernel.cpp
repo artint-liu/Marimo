@@ -422,7 +422,7 @@ GXDWORD GXDLLAPI gxGetCurrentThreadId()
 }
 #endif // #if defined(_WIN32) && defined(_X86)
 
-GXBOOL GXDLLAPI GXUIGetStationDesc(GXStationDesc eDesc, GXWPARAM wParam, GXLPARAM lParam)
+GXDWORD GXDLLAPI GXUIGetStationDesc(GXStationDesc eDesc, GXWPARAM wParam, GXLPARAM lParam)
 {
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
   switch(eDesc)
@@ -439,15 +439,34 @@ GXBOOL GXDLLAPI GXUIGetStationDesc(GXStationDesc eDesc, GXWPARAM wParam, GXLPARA
     {
       ASSERT(wParam == 0);
       GXHWND hWnd = GXWND_HANDLE(lpStation->m_pMouseFocus);
-      if(lParam != NULL)
+      if(lParam != NULL) {
         *(GXHWND*)lParam = hWnd;
+      }
       return hWnd != NULL;
     }
   case GXSD_ROOTDIR:
     {
       GXSTRCPYN<GXWCHAR>((GXLPWSTR)lParam, lpStation->lpPlatform->GetRootDir(), wParam);
-      return TRUE;
     }
+    return TRUE;
+
+  case GXSD_CONFIGPATH:
+    {
+      clStringW strCfgPath;
+      GetModuleFileNameW(NULL, strCfgPath.GetBuffer(MAX_PATH), MAX_PATH);
+      strCfgPath.ReleaseBuffer();
+
+      clpathfile::RenameExtensionW(strCfgPath, L".config");
+      GXSTRCPYN<GXWCHAR>((GXLPWSTR)lParam, (GXLPCWSTR)strCfgPath, wParam);
+
+      if(strCfgPath.GetLength() > wParam) {
+        return wParam;
+      }
+      else {
+        return strCfgPath.GetLength();
+      }
+    }
+    break; // 运行不到这里
   }
   return FALSE;
 }

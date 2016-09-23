@@ -274,11 +274,10 @@ namespace GXUI
     //GXSTDINTERFACE(GXBOOL GetItemStatistics (GXINT nIdx, LISTBOXITEMSTAT* pStatictist) const);
     GXSTDINTERFACE(GXSIZE_T   AddStringW        (GXLPCWSTR szName, GXLPCWSTR lpString));
     GXSTDINTERFACE(GXBOOL     GetStringW        (GETSTRW* pItemStrDesc));   // 返回TRUE代表List将进行默认的显示操作，如ListSimple中绘制字符串，ListCustomize中SetWindowText，返回false表示GetStringW已经自己处理了显示方式。
+    //GXSTDINTERFACE(GXBOOL     SetItemData       (GETSTRW* pItemStrDesc, GXLPARAM lParam));
+    //GXSTDINTERFACE(GXLPARAM   GetItemData       (GETSTRW* pItemStrDesc));
     GXSTDINTERFACE(MOVariable GetVariable       ());
     GXSTDINTERFACE(GXHRESULT  GetDataPool       (MODataPool** ppDataPool));
-
-    //virtual GXHWND    GetLastWndSender  () const;  // 这个其实没用了
-    //virtual GXHRESULT     ReflectKnock     (LPCREFLECTKNOCK pReflectKnock) const;
   };
 } // namespace GXUI
 

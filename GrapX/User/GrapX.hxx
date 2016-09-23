@@ -379,6 +379,7 @@ struct GXSTATION
   GXUINT              nHeight;  // TODO: 
   GXCARET             SysCaret;      // 系统使用的光标
   GXHDPA              hClassDPA;
+  GXUINT              dwDoubleClickTime; // 鼠标双击的响应时间
 
   GXLPWND             m_pMouseFocus;    // 只限于TopLevel Frame
   GXLPWND             m_pKeyboardFocus;

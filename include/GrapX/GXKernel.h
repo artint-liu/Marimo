@@ -5,9 +5,10 @@
 
 enum GXStationDesc
 {
-  GXSD_EXTENT = 0,    // Station 的尺寸, GXLPARAM = GXSIZE*
+  GXSD_EXTENT        = 0,   // Station 的尺寸, GXLPARAM = GXSIZE*
   GXSD_MOUSEHOVERWND = 1,
-  GXSD_ROOTDIR = 2,
+  GXSD_ROOTDIR       = 2,
+  GXSD_CONFIGPATH    = 3,   // 配置文件路径
 };
 
 enum GXInstanceType
@@ -118,7 +119,7 @@ extern "C"
 
 
   GXHINSTANCE GXDLLAPI GXGetInstance            (GXInstanceType eType);
-  GXBOOL      GXDLLAPI GXUIGetStationDesc       (GXStationDesc eDesc, GXWPARAM wParam, GXLPARAM lParam);
+  GXDWORD     GXDLLAPI GXUIGetStationDesc       (GXStationDesc eDesc, GXWPARAM wParam, GXLPARAM lParam);
   GXHSTATION  GXDLLAPI GXUIGetStation           ();
   GXBOOL      GXDLLAPI MOExecuteFileW           (GXLPCWSTR szFilename);
   GXBOOL      GXDLLAPI MOExecuteBatchCmdW       (GXLPCWSTR* szCommand, int nCount);

@@ -1,6 +1,8 @@
 ﻿#include <GrapX.H>
 //#include "GrapX/GUnknown.H"
 #include "clPathFile.h"
+#include "smart/smartstream.h"
+#include "smart/Stock.h"
 #include "GrapX/MOLogger.h"
 #include "GrapX/GXUser.H"
 #include "GrapX/DataPool.h"
@@ -254,113 +256,200 @@ GXINT_PTR GXCALLBACK IntBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM wParam,
   return (GXINT_PTR)FALSE;
 }
 
-GXINT_PTR GXCALLBACK IntSimpleBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
+//////////////////////////////////////////////////////////////////////////
+class CSimpleBrowseFile
 {
-  UNREFERENCED_PARAMETER(lParam);
-  switch (message)
+  clStringW m_strPath;
+  GXOPENFILENAMEW* m_lpofn;
+public:
+  const static GXLPARAM DriverSign = -1;
+
+  CSimpleBrowseFile(GXOPENFILENAMEW* lpofn)
+    : m_lpofn(lpofn)
   {
-  case WM_INITDIALOG:
-    {
-      //SendDlgItemMessage(hDlg, IDC_COMBOBOXEX1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
-      //SendDlgItemMessage(hDlg, IDC_COMBO1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
-      GXOPENFILENAMEW* lpofn = (GXOPENFILENAMEW*)lParam;
-
-      gxSetWindowTextW(hDlg, lpofn->lpstrTitle);
-
-      // FindFirstFile 访问无磁盘的读卡器时会弹出MessageBox， 这个用来修改错误模式屏蔽掉
-      SetErrorMode(SEM_FAILCRITICALERRORS);
-
-
-      GXHWND hListView = GXGetDlgItemByName(hDlg, L"FileList");
-
-      clstd::FindFile find("*.*");
-      clstd::FINDFILEDATAW ffd;
-      clStringArrayW aFilter;
-
-      GXLPCWSTR szFilter = lpofn->lpstrFilter;
-      GXSIZE_T len = GXSTRLEN(szFilter);
-      szFilter += (len + 1); // 有点临时
-
-      clstd::ResolveString(clStringW(szFilter), ';', aFilter);
-
-      while(find.GetFileW(&ffd))
-      {
-        if(ffd.Filename[0] == '.') {
-          if(ffd.Filename[1] == '\0') {
-            continue;
-          }
-          //else if(ffd.Filename[1] == '.') {
-          //  gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
-          //}
-        }
-        
-        if(TEST_FLAG(ffd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY)) {
-          gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
-        }
-        else {
-          for(auto it = aFilter.begin(); it != aFilter.end(); ++it) {
-            if(clpathfile::MatchSpec(ffd.Filename, *it)) {
-              clStringW str((wch)0x20, 2);
-              str.Append(ffd.Filename);
-              gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)(GXLPCWSTR)str);
-              break;
-            }
-          }        
-        }
-      }
-      //Marimo::DataPool* pPool = NULL;
-      //GXUI::IDataAdapter* pAdapter = NULL;
-      //gxSendMessage(hListView, GXWM_DATAPOOLOPERATION, DPO_GETADAPTER, (GXLPARAM)&pAdapter);
-      //if(pAdapter) {
-
-      //}
-      //
-      //CLNOP
-      //InitTree(hDlg);
-      //InitListView(hDlg);
-    }
-    return (INT_PTR)TRUE;
-
-  case WM_NOTIFY:
-    //CLBREAK; // 测试下面的wParam值
-    //if(wParam == IDT_DIR) // FIXME: 修复这个判断
-    {
-      NMHDR* pnmh = (NMHDR*)lParam;
-      if(pnmh->code == GXTVN_ITEMEXPANDING)
-      {
-        GXNMTREEVIEW* pnmtv = (GXNMTREEVIEW*)pnmh;
-        //GXHWND hListView = GXGetDlgItemByName(hWnd, L"FileList");
-        GXHWND hTree = GXGetDlgItemByName(hDlg, L"Directory");
-
-        if(pnmtv->action == TVE_EXPAND) {
-          FillItem(hTree, pnmtv->itemNew.hItem);
-        }
-        else if(pnmtv->action == TVE_COLLAPSE) {
-          DeleteItem(hTree, pnmtv->itemNew.hItem);
-        }
-
-      }
-      else if(pnmh->code == GXTVN_SELCHANGED)
-      {
-        GXNMTREEVIEW* pnmtv = (GXNMTREEVIEW*)pnmh;
-        FillFile(hDlg, pnmtv->itemNew.hItem);
-      }
-    }
-    break;
-  case WM_COMMAND:
-    if(GXHIWORD(wParam) == GXLBN_DBLCLK)
-    {
-      CLNOP
-    }
-    else if (GXLOWORD(wParam) == IDOK || GXLOWORD(wParam) == IDCANCEL)
-    {
-      gxEndDialog(hDlg, LOWORD(wParam));
-      return (GXINT_PTR)TRUE;
-    }
-    break;
+    ASSERT(lpofn->lpstrInitialDir);
+    m_strPath = lpofn->lpstrInitialDir;
   }
-  return (GXINT_PTR)FALSE;
-}
+
+  void FillDirvers(GXHWND hListView)
+  {
+    DWORD dwDriverMask = GetLogicalDrives();
+    GXWCHAR szVolume[64];
+    GXWCHAR szBuffer[512];
+
+    GXWCHAR szPathName[] = _T("A:\\");
+    GXTVINSERTSTRUCT tis;
+    memset(&tis, 0, sizeof(tis));
+
+    for(int i = 0; i < 26; i++)
+    {
+      if(((1 << i) & dwDriverMask) != 0)
+      {
+        szPathName[0] = i + _T('A');
+        UINT nType = GetDriveTypeW(szPathName);
+
+        szVolume[0] = _T('\0');
+        DWORD dwFileSystemFlag;
+        GXWCHAR szFilesystem[32];
+        szFilesystem[0] = '\0';
+        GetVolumeInformationW(szPathName, szVolume, 64, NULL, NULL, &dwFileSystemFlag, szFilesystem, sizeof(szFilesystem) / sizeof(szFilesystem[0]));
+
+        static GXWCHAR *aType[] = {
+          _T("Unknown"), _T("NoRootDir"), _T("Removable"), _T("Fixed"), _T("Remote"), _T("CD-ROM"), _T("RamDisk")};
+
+          if(szVolume[0] != _T('\0')) {
+            wsprintfW(szBuffer, _T("%s (%c:)"), szVolume, _T('A') + i);
+          }
+          else {
+            wsprintfW(szBuffer, _T("%s (%c:)"), aType[nType], _T('A') + i);
+          }
+
+          int index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, 0, (GXLPARAM)szBuffer);
+          gxSendMessage(hListView, GXLB_SETITEMDATA, index, DriverSign);
+      }
+    }
+  }
+
+  void FillList(GXHWND hDlg)
+  {
+    GXHWND hListView = GXGetDlgItemByName(hDlg, L"FileList");
+    gxSendMessage(hListView, GXLB_RESETCONTENT, 0, 0);
+
+    GXHWND hPath = GXGetDlgItemByName(hDlg, L"Path");
+    gxSetWindowTextW(hPath, m_strPath);
+
+    if(m_strPath.EndsWith(L":\\")) {
+      FillDirvers(hListView);
+    }
+
+    clstd::FindFile find(m_strPath + L"\\*");
+    clstd::FINDFILEDATAW ffd;
+    clStringArrayW aFilter;
+
+    GXLPCWSTR szFilter = m_lpofn->lpstrFilter;
+    GXSIZE_T len = GXSTRLEN(szFilter);
+    szFilter += (len + 1); // 有点临时
+
+    clstd::ResolveString(clStringW(szFilter), ';', aFilter);
+    std::for_each(aFilter.begin(), aFilter.end(), [](clStringW& str){
+      str.MakeUpper();
+    });
+
+    while(find.GetFileW(&ffd))
+    {
+      if(ffd.Filename[0] == '.') {
+        if(ffd.Filename[1] == '\0') {
+          continue;
+        }
+      }
+
+      int index = -1;
+      if(TEST_FLAG(ffd.dwAttributes, FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)) {
+        continue;
+      }
+
+      if(TEST_FLAG(ffd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY)) {
+        index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
+      }
+      else {
+        for(auto it = aFilter.begin(); it != aFilter.end(); ++it) {
+          clStringW str((wch)0x20, 2);
+          str.Append(ffd.Filename);
+          str.MakeUpper();
+          if(clpathfile::MatchSpec(str, *it)) {
+            index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
+            break;
+          }
+        }
+      }
+      gxSendMessage(hListView, GXLB_SETITEMDATA, index, (GXLPARAM)ffd.dwAttributes);
+    }
+  }
+
+  void TrueClose()
+  {
+    m_lpofn->lpstrInitialDir = m_strPath;
+  }
+
+  static GXINT_PTR GXCALLBACK IntSimpleBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
+  {
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+      {
+        //SendDlgItemMessage(hDlg, IDC_COMBOBOXEX1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
+        //SendDlgItemMessage(hDlg, IDC_COMBO1, CB_DIR, DDL_ARCHIVE, (LPARAM)_T("*.*"));
+        //GXOPENFILENAMEW* lpofn = (GXOPENFILENAMEW*)lParam;
+        CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)lParam;
+        gxSetWindowLong(hDlg, GXGWL_USERDATA, lParam);
+        gxSetWindowTextW(hDlg, psbf->m_lpofn->lpstrTitle);
+
+        // FindFirstFile 访问无磁盘的读卡器时会弹出MessageBox， 这个用来修改错误模式屏蔽掉
+        SetErrorMode(SEM_FAILCRITICALERRORS);
+        psbf->FillList(hDlg);
+      }
+      return (INT_PTR)TRUE;
+
+    case WM_NOTIFY:
+      {
+        NMHDR* pnmh = (NMHDR*)lParam;
+      }
+      break;
+    case WM_COMMAND:
+      {
+        if(GXHIWORD(wParam) == GXLBN_DBLCLK)
+        {
+          GXHWND hListView = GXGetDlgItemByName(hDlg, L"FileList");
+          int nSel = (int)gxSendMessage(hListView, GXLB_GETCURSEL, 0, 0);
+
+          GXWCHAR szFile[MAX_PATH];
+          gxSendMessage(hListView, GXLB_GETTEXT, nSel, (GXLPARAM)szFile);
+          GXDWORD dwAttr = gxSendMessage(hListView, GXLB_GETITEMDATA, nSel, 0);
+
+          if(dwAttr == CSimpleBrowseFile::DriverSign)
+          {
+            size_t len = GXSTRLEN(szFile);
+            CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
+            psbf->m_strPath.Clear();
+            psbf->m_strPath.Format(L"%c:\\", szFile[len - 3]);
+            psbf->FillList(hDlg);
+          }
+          else if(TEST_FLAG(dwAttr, FILE_ATTRIBUTE_DIRECTORY))
+          {
+            CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
+            clpathfile::CombinePathW(psbf->m_strPath, psbf->m_strPath, szFile);
+            psbf->FillList(hDlg);
+          }
+        }
+        else if(GXHIWORD(wParam) == GXBN_CLICKED)
+        {
+          GXLONG_PTR l = gxGetWindowLong((GXHWND)lParam, GXGWL_ID);
+          if( ! IS_IDENTIFY(l)) {
+            GXLPCWSTR szName = (GXLPCWSTR)l;
+            if(GXSTRCMP(szName, L"Open") == 0) {
+              CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
+              psbf->TrueClose();
+              gxEndDialog(hDlg, TRUE);
+            }
+            else if(GXSTRCMP(szName, L"Cancel") == 0) {
+              gxEndDialog(hDlg, FALSE);
+            }
+          }
+        }
+        //else if (GXLOWORD(wParam) == IDOK || GXLOWORD(wParam) == IDCANCEL)
+        //{
+        //  gxEndDialog(hDlg, LOWORD(wParam));
+        //  return (GXINT_PTR)TRUE;
+        //}
+      }
+      break;
+    }
+    return (GXINT_PTR)FALSE;
+  }
+};
+
+
 //
 
 //////////////////////////////////////////////////////////////////////////
@@ -373,12 +462,47 @@ extern "C"
 
   GXBOOL GXDLLAPI gxGetOpenFileNameW(GXLPOPENFILENAMEW lpOFN)
   {
+    int result = 0;
+    GXWCHAR szConfig[MAX_PATH];
+    //GXWCHAR szInitDir[MAX_PATH];
+    clStringW strInitDir;
+    clstd::StockW stock;
+    GXBOOL bConfig = FALSE;
+    GXUIGetStationDesc(GXSD_CONFIGPATH, MAX_PATH, (GXLPARAM)szConfig);
+    bConfig = stock.LoadW(szConfig);
+
+    // 初始化起始路径
+    if( ! lpOFN->lpstrInitialDir) {
+      if(bConfig) {
+        clstd::StockW::Section sect = stock.Open(NULL);
+        strInitDir = sect.GetKeyAsString(L"GetOpenFileName", L"");
+      }
+      
+      // 缺省
+      if(strInitDir.IsEmpty()) {
+        GXUIGetStationDesc(GXSD_ROOTDIR, MAX_PATH, (GXLPARAM)strInitDir.GetBuffer(MAX_PATH));
+        strInitDir.ReleaseBuffer();
+      }
+
+      lpOFN->lpstrInitialDir = strInitDir;
+    }
+
     if(TEST_FLAG(lpOFN->Flags, GXOFN_SIMPLEBROWSER)) {
-      gxDialogBoxParamW(NULL, L"@UI\\simplebrowser.dlg.txt", lpOFN->hwndOwner, IntSimpleBrowseFile, (GXLPARAM)lpOFN);
+      CSimpleBrowseFile sbf(lpOFN);
+      result = gxDialogBoxParamW(NULL, L"@UI\\simplebrowser.dlg.txt", lpOFN->hwndOwner,
+        CSimpleBrowseFile::IntSimpleBrowseFile, (GXLPARAM)&sbf);
     }
     else {
-      gxDialogBoxParamW(NULL, L"@UI\\browserfiles.dlg.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
+      result = gxDialogBoxParamW(NULL, L"@UI\\browserfiles.dlg.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
     }
-    return FALSE;
+
+    // 保存起始路径
+    if(result) {
+      clstd::StockW::Section sect = stock.Create(NULL);
+      sect.SetKey(L"GetOpenFileName", lpOFN->lpstrInitialDir);
+      stock.SaveW(szConfig);
+    }
+
+    return result;
   }
 }

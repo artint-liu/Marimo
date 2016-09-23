@@ -1375,6 +1375,29 @@ GXHWND GXDLLAPI gxChildWindowFromPoint(
   return GXWND_HANDLE(lpWnd);
 }
 
+GXUINT GXDLLAPI gxGetDoubleClickTime()
+{
+#ifdef _WINDOWS
+  return GetDoubleClickTime();
+#else
+  GXLPSTATION lpStation = IntGetStationPtr();
+  return lpStation->dwDoubleClickTime;
+#endif
+}
+
+GXBOOL GXDLLAPI gxSetDoubleClickTime(GXUINT dwTime)
+{
+  GXLPSTATION lpStation = IntGetStationPtr();
+  lpStation->dwDoubleClickTime = dwTime;
+
+#ifdef _WINDOWS
+  return SetDoubleClickTime(dwTime);
+#else
+  return TRUE;
+#endif
+}
+
+
 GXBOOL GXDLLAPI gxAdjustWindowRectEx(
             GXLPRECT lpRect,  // pointer to client-rectangle structure
             GXDWORD dwStyle,  // window styles
@@ -1423,11 +1446,6 @@ GXBOOL GXDLLAPI gxEndDialog(
   GXWND_PTR(hDlg)->m_uState |= WIS_ENDDIALOG;
   gxSetWindowLong(hDlg, GXDWL_MSGRESULT, nResult);
   return TRUE;
-}
-
-GXUINT GXDLLAPI gxGetDoubleClickTime()
-{
-  return 500; // TODO: 放到系统配置里面
 }
 
 GXSHORT GXDLLAPI gxGetAsyncKeyState(

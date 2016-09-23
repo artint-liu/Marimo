@@ -30,6 +30,8 @@ namespace GXUI
 
     virtual GXSIZE_T    AddStringW          (GXLPCWSTR szName, GXLPCWSTR lpString);
     virtual GXBOOL      GetStringW          (GETSTRW* pItemStrDesc);
+    //virtual GXBOOL      SetItemData         (GETSTRW* pItemStrDesc, GXLPARAM lParam);
+    //virtual GXLPARAM    GetItemData         (GETSTRW* pItemStrDesc);
     //virtual GXDWORD     GetStatus           (GXINT item) GXCONST;
     //virtual GXDWORD     SetStatus           (GXINT item, GXDWORD dwNewStatus);
     virtual MOVariable  GetVariable         ();

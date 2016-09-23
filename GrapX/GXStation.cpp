@@ -309,7 +309,7 @@ GXWndMsg GXSTATION::DoDoubleClick(GXWndMsg msg, GXLPWND lpWnd)
     if(m_eDownMsg == msg && m_pBtnDown == lpWnd)
     {
       const GXDWORD dwTick = gxGetTickCount();
-      if((dwTick - m_dwBtnDownTime) < GetDoubleClickTime())
+      if((dwTick - m_dwBtnDownTime) < gxGetDoubleClickTime())
       {
         msg = (GXWndMsg)(msg + msg_delta);
         m_eDownMsg = GXWM_NULL;
@@ -361,6 +361,9 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
   , hBindWin32Wnd     (hWnd)
   , hCursor           (NULL)
+  , dwDoubleClickTime     (GetDoubleClickTime())
+#else
+  , dwDoubleClickTime     (500) // Windows Ä¬ÈÏÖµ
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 {
   GXGRAPHICSDEVICE_DESC sGraphDesc;

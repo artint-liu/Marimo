@@ -7,6 +7,47 @@
 #include "clString.H"
 #include "clPathFile.h"
 
+void TestCombinePath()
+{
+  clStringA strPath;
+  clpathfile::CombinePathA(strPath, "abc", "def");
+  ASSERT(strPath == "abc\\def");
+
+  clpathfile::CombinePathA(strPath, "abc\\", "def");
+  ASSERT(strPath == "abc\\def");
+
+  clpathfile::CombinePathA(strPath, "abc\\", "//def");
+  ASSERT(strPath == "abc\\def");
+
+  clpathfile::CombinePathA(strPath, "abc\\def", "ghi");
+  ASSERT(strPath == "abc\\def\\ghi");
+
+  clpathfile::CombinePathA(strPath, "abc\\def", "./ghi");
+  ASSERT(strPath == "abc\\def\\ghi");
+
+  clpathfile::CombinePathA(strPath, "abc\\def", "../ghi");
+  ASSERT(strPath == "abc\\ghi");
+
+  clpathfile::CombinePathA(strPath, "abc", "./def");
+  ASSERT(strPath == "abc\\def");
+
+  clpathfile::CombinePathA(strPath, "abc", "../def");
+  ASSERT(strPath == "def");
+
+  clpathfile::CombinePathA(strPath, "", "./abc");
+  ASSERT(strPath == "abc");
+
+  clpathfile::CombinePathA(strPath, "", "../abc");
+  ASSERT(strPath == "../abc");
+
+  clpathfile::CombinePathA(strPath, NULL, "./abc");
+  ASSERT(strPath == "abc");
+
+  clpathfile::CombinePathA(strPath, NULL, "../abc");
+  ASSERT(strPath == "../abc");
+
+}
+
 void TestString()
 {
   b32 bresult;
@@ -19,7 +60,7 @@ void TestString()
   ASSERT(bresult == TRUE);
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+void TestMatchSpec()
 {
   // 文件匹配
   b32 bresult;
@@ -28,13 +69,18 @@ int _tmain(int argc, _TCHAR* argv[])
 
   bresult = clpathfile::MatchSpec("abcdefghijklmnopq", "abcd*opq");
   ASSERT(bresult == TRUE);
-  
+
   bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq*");
   ASSERT(bresult == TRUE);
 
   bresult = clpathfile::MatchSpec("abcdefghijklmnopq.rst", "*.rst");
   ASSERT(bresult == TRUE);
+}
 
+int _tmain(int argc, _TCHAR* argv[])
+{
+  TestCombinePath();
+  TestMatchSpec();
   TestString();
 
 	return 0;

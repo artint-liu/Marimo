@@ -1421,14 +1421,14 @@ GXBOOL DLGLOG::AddItem(GXLPCWSTR szName, GXHWND hWnd)
 
 GXHWND DLGLOG::GetItem(GXLPCWSTR szName) const
 {
-    if(szName != NULL && szName[0] != '\0')
+  if(szName != NULL && szName[0] != '\0')
+  {
+    NameToWndDict::const_iterator it = CtrlItemDict.find(szName);
+    if(it != CtrlItemDict.end())
     {
-        NameToWndDict::const_iterator it = CtrlItemDict.find(szName);
-        if(it != CtrlItemDict.end())
-        {
-            return it->second;
-        }
+      return it->second;
     }
-    return NULL;
+  }
+  return NULL;
 }
 #endif // _DEV_DISABLE_UI_CODE

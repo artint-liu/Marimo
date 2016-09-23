@@ -174,7 +174,7 @@ namespace clpathfile
     }
     else
     {
-      strPath.Replace(p + 1, -1, (const typename _TString::TChar*)pszExt);
+      strPath.Replace(p, -1, (const typename _TString::TChar*)pszExt);
     }
     return TRUE;
   }
@@ -279,29 +279,81 @@ namespace clpathfile
   }
 
   template<typename _TString>
-  _TString& CombinePathT(_TString& strDestPath, const _TString& strDir, const _TString& strFile)
+  _TString& CombinePathT(_TString& strDestPath, typename _TString::LPCSTR szDir, typename _TString::LPCSTR szFile)
   {
-    if(strDir.IsEmpty())
-    {
-      strDestPath = strFile;
+    if( ! szDir && ! szFile) {
+      strDestPath.Clear();
+      return strDestPath;
     }
-    else if(strDir.Back() == (typename _TString::TChar)s_PathSlash)
-    {
-      strDestPath = strDir + strFile;
+    else if( ! szFile) {
+      strDestPath = szDir;
+
+      if(strDestPath.IsNotEmpty() &&
+        strDestPath.Back() != (typename _TString::TChar)s_PathSlash &&
+        strDestPath.Back() != (typename _TString::TChar)s_VicePathSlash) {
+          strDestPath.Append((typename _TString::TChar)s_PathSlash);
+      }
+      return strDestPath;
     }
-    else
-    {
-      strDestPath = strDir + (typename _TString::TChar)s_PathSlash + strFile;
+    
+    _TString strTempPath;
+    strTempPath = szDir;
+    strTempPath.TrimRight((typename _TString::TChar)s_PathSlash);
+    strTempPath.TrimRight((typename _TString::TChar)s_VicePathSlash);
+
+    static _TString::TChar s_aFindList[] = {'\\', '/', 0};
+    while(szFile[0] != '\0') {
+      switch(szFile[0])
+      {
+      case '.':
+        if(szFile[1] == '.') { // "..*"
+          size_t pos = strTempPath.ReverseFindAny(s_aFindList);
+          if(pos != _TString::npos) {
+            strTempPath.Remove(pos, -1);
+          }
+          else if(strTempPath.IsNotEmpty()) {
+            strTempPath.Clear();
+          }
+          else {
+            break;
+          }
+          szFile += 2;
+          continue;
+        }
+        else { // ".*"
+          szFile += 1;
+          continue;
+        }
+        break;
+
+      case '\\': // "\\*"
+      case '/':  // "/*"
+        {
+          szFile++;
+          continue;
+        }
+      }
+      break;
     }
+
+    if(strTempPath.IsNotEmpty() &&
+      strTempPath.Back() != (typename _TString::TChar)s_PathSlash &&
+      strTempPath.Back() != (typename _TString::TChar)s_VicePathSlash) {
+        strTempPath.Append((typename _TString::TChar)s_PathSlash);
+    }
+
+    strTempPath.Append(szFile);
+    
+    strDestPath = strTempPath;
     return strDestPath;
   }
-  clStringA& CombinePathA(clStringA& strDestPath, const clStringA& strDir, const clStringA& strFile)
+  clStringA& CombinePathA(clStringA& strDestPath, clStringA::LPCSTR szDir, clStringA::LPCSTR szFile)
   {
-    return CombinePathT(strDestPath, strDir, strFile);
+    return CombinePathT(strDestPath, szDir, szFile);
   }
-  clStringW& CombinePathW(clStringW& strDestPath, const clStringW& strDir, const clStringW& strFile)
+  clStringW& CombinePathW(clStringW& strDestPath, clStringW::LPCSTR szDir, clStringW::LPCSTR szFile)
   {
-    return CombinePathT(strDestPath, strDir, strFile);
+    return CombinePathT(strDestPath, szDir, szFile);
   }
 
   template<typename _TString>

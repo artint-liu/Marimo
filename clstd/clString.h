@@ -303,6 +303,7 @@ namespace clstd
     size_t      FindAnyFromList (const _TCh* pCharList, size_t uStart = 0) const; // 列表字母顺序优先查找
     size_t      ReverseFind     (_TCh cFind) const;
     size_t      ReverseFind     (_TCh cFind, int nStart, int nEnd) const;
+    size_t      ReverseFindAny  (const _TCh* pFindCharList) const;                // 字符串顺序反向查找
     StringX     Left            (size_t uCount) const;
     StringX     Right           (size_t uCount) const;
     StringX     SubString       (size_t uStart, size_t uCount) const;

@@ -1333,6 +1333,9 @@ extern "C" {
   GXHWND      GXDLLAPI gxWindowFromPoint        (GXPOINT *lpPoint);
   GXHWND      GXDLLAPI gxChildWindowFromPoint   (GXHWND hWndParent,GXPOINT Point);
 
+  GXUINT      GXDLLAPI gxGetDoubleClickTime     ();
+  GXBOOL      GXDLLAPI gxSetDoubleClickTime     (GXUINT dwTime);
+
   GXBOOL      GXDLLAPI gxEnableWindow           (GXHWND hWnd,GXBOOL bEnable);
 
   GXBOOL      GXDLLAPI gxShowWindow             (GXHWND hWnd,int nCmdShow);
@@ -1532,7 +1535,6 @@ extern "C" {
   GXHANDLE    GXDLLAPI gxRemovePropW            (GXHWND hWnd,GXLPCWSTR lpString);
 
   GXBOOL      GXDLLAPI gxAdjustWindowRectEx     (GXLPRECT lpRect, GXDWORD dwStyle, GXBOOL bMenu, GXDWORD dwExStyle);
-  GXUINT      GXDLLAPI gxGetDoubleClickTime     ();
 
   GXSHORT     GXDLLAPI gxGetAsyncKeyState       (int vKey);
   GXSHORT     GXDLLAPI gxGetKeyState            (int nVirtKey);

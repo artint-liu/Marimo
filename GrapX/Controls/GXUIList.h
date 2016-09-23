@@ -25,10 +25,11 @@ namespace GXUI
     
     struct ITEMSTATUS
     {
-      GXINT   nBottom;
-      GXHWND  hItem;
-      GXDWORD bSelected : 1;
-      GXDWORD bValidate : 1;  // Item的有效标志, 如果为0表示要重新从Adapter获取
+      GXINT    nBottom;
+      GXHWND   hItem;
+      GXLPARAM lParam;
+      GXDWORD  bSelected : 1;
+      GXDWORD  bValidate : 1;  // Item的有效标志, 如果为0表示要重新从Adapter获取
       ITEMSTATUS() : nBottom(-1), hItem(NULL), bSelected(0), bValidate(0){}
     };
 
@@ -107,6 +108,8 @@ namespace GXUI
     GXBOOL      UpdateTopIndex      ();
     GXSIZE_T    AddStringW          (GXLPCWSTR lpString);
     GXSIZE_T    GetStringW          (GXSIZE_T nIndex, clStringW& str);
+    GXLRESULT   SetItemData         (GXSIZE_T index, GXLPARAM lParam);
+    GXLPARAM    GetItemData         (GXSIZE_T index);
     GXSIZE_T    DeleteString        (GXSIZE_T nIndex);
     GXVOID      ResetContent        ();
     GXSIZE_T    GetCount            () const;

@@ -396,6 +396,9 @@ FINAL_RET:
   {
     int i = 0;
     int d = 0;
+    if(str.IsEmpty()) {
+      return;
+    }
     typename _String::TChar* pStr = str.GetBuffer();
     do {
       if(pStr[i] == '\\') {

@@ -198,6 +198,15 @@ namespace GXUI
       //  break;
       }
     }
+    else if(pThis->GetType() == Type_Label) {
+      switch(message)
+      {
+      case GXWM_SETTEXT:
+        GXLRESULT lr = CtrlBase::DefWndProc(hWnd, message, wParam, lParam, pThis);
+        pThis->Invalidate(FALSE);
+        return lr;
+      }
+    }
     return CtrlBase::DefWndProc(hWnd, message, wParam, lParam, pThis);
   }
 
