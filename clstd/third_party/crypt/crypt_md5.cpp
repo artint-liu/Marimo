@@ -85,7 +85,7 @@ CLVOID MD5Init( MD5_CTX *ctx )
  */
 CLVOID MD5Update( MD5_CTX *ctx, const unsigned char *buf, unsigned int len )
 {
-    register unsigned int t;
+    unsigned int t;
 
     /* Update bitcount */
     t = ctx->i[0];

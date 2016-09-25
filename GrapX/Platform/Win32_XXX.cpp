@@ -46,6 +46,10 @@ IMOPlatform_Win32Base::IMOPlatform_Win32Base()
   m_strRootDir = szWorkingPath;
 }
 
+IMOPlatform_Win32Base::~IMOPlatform_Win32Base()
+{
+}
+
 GXHRESULT IMOPlatform_Win32Base::Finalize(GXINOUT GXGraphics** ppGraphics)
 {
   SAFE_RELEASE(m_pLogger);

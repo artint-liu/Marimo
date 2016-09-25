@@ -510,10 +510,17 @@ namespace clstd
 #endif // #ifdef _DEBUG
 
     *(clsize*)ptr = nCapacity;
-    *pCapacity = nCapacity;
+    *pCapacity = nCapacity - sizeof(clsize);
 
 #ifdef _DEBUG
+    /*
     memset((CLBYTE*)ptr + nCapacity, 0xcc, STD_ALLOC_EXTRA_LENGTH);
+    /*/
+    for(int i = 0; i < STD_ALLOC_EXTRA_LENGTH; i++)
+    {
+      ((CLBYTE*)ptr + nCapacity)[i] = (i + 1);
+    }
+    //*/
 #endif // #ifdef _DEBUG
 
     return ((clsize*)ptr) + 1;
@@ -525,9 +532,15 @@ namespace clstd
 #ifdef _DEBUG
     CLBYTE* pCheck = (CLBYTE*)ptr + *(clsize*)ptr;
     for(int i = 0; i < STD_ALLOC_EXTRA_LENGTH; ++i) {
+      /*
       if(*pCheck != 0xcc) {
         CLBREAK; // 内存写入溢出
       }
+      /*/
+      if(*pCheck != (i + 1)) {
+        CLBREAK;
+      }
+      //*/
       ++pCheck;
     }
 #endif // #ifdef _DEBUG

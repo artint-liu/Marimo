@@ -375,8 +375,8 @@ namespace clstd
 int SimpleASCIItoUnicode(wch* pDestStr, int nCount, const ch* pSrcStr);
 int SimpleUnicodeToASCII(ch* pDestStr, int nCount, const wch* pSrcStr);
 
-typedef clstd::StringX<wch, clstd::Allocator,    g_Alloc_clStringW, clstd::StringW_traits> clStringW;
-typedef clstd::StringX<ch, clstd::Allocator,     g_Alloc_clStringA, clstd::StringA_traits> clStringA;
+typedef clstd::StringX<wch, clstd::StdAllocator, g_StdAlloc, clstd::StringW_traits> clStringW;
+typedef clstd::StringX<ch, clstd::StdAllocator,  g_StdAlloc, clstd::StringA_traits> clStringA;
 typedef clstd::StringX<wch, clstd::StdAllocator, g_StdAlloc, clstd::StringW_traits> clTextBufferW;
 typedef clstd::StringX<ch, clstd::StdAllocator,  g_StdAlloc, clstd::StringA_traits> clTextBufferA;
 

@@ -106,7 +106,7 @@ namespace clstd
   }
 
   _SSP_TEMPL
-  typename _SSP_IMPL::ATTRIBUTE::operator unspecified_bool_type() const
+  _SSP_IMPL::ATTRIBUTE::operator unspecified_bool_type() const
   {
     return empty() ? 0 : __unspecified_bool_type<ATTRIBUTE>;
   }

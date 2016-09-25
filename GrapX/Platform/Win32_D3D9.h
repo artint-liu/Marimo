@@ -15,6 +15,7 @@ public:
   LPDIRECT3D9 m_pd3d9;
 
   IGXPlatform_Win32D3D9();
+  virtual ~IGXPlatform_Win32D3D9();
 
   virtual GXHRESULT Initialize    (GXIN GXApp* pApp, GXIN GXAPP_DESC* pDesc, GXOUT GXGraphics** ppGraphics);
   virtual GXHRESULT Finalize      (GXINOUT GXGraphics** ppGraphics);

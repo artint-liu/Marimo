@@ -301,7 +301,7 @@ namespace clpathfile
     strTempPath.TrimRight((typename _TString::TChar)s_PathSlash);
     strTempPath.TrimRight((typename _TString::TChar)s_VicePathSlash);
 
-    static _TString::TChar s_aFindList[] = {'\\', '/', 0};
+    static typename _TString::TChar s_aFindList[] = {'\\', '/', 0};
     while(szFile[0] != '\0') {
       switch(szFile[0])
       {

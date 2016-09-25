@@ -38,9 +38,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.cpp">
       <Filter>Smart</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartStock.cpp">
-      <Filter>Smart</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.cpp">
       <Filter>Smart</Filter>
     </ClCompile>
@@ -82,6 +79,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\smart\Stock.cpp">
+      <Filter>Smart</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)clstdX.h" />
@@ -101,9 +101,6 @@
       <Filter>Smart</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.h">
-      <Filter>Smart</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartStock.h">
       <Filter>Smart</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.h">
@@ -153,6 +150,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\smart\Stock.h">
+      <Filter>Smart</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3D">

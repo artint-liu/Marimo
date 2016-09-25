@@ -643,9 +643,9 @@ GXINT GXSpriteImpl::PackIndex(Type type, GXUINT index) const
 
 GXINT GXSpriteImpl::UnpackIndex(GXUINT nUniqueIndex, Type* pType) const
 {
-  const GXUINT nModuleCount = m_aModules.size();
-  const GXUINT nModuleFrameCount = nModuleCount + m_aFrames.size();
-  const GXUINT nModuleFrameAnimCount = nModuleFrameCount + m_aAnimations.size();
+  const GXUINT nModuleCount          = (GXUINT)m_aModules.size();
+  const GXUINT nModuleFrameCount     = (GXUINT)(nModuleCount + m_aFrames.size());
+  const GXUINT nModuleFrameAnimCount = (GXUINT)(nModuleFrameCount + m_aAnimations.size());
 
   if(nUniqueIndex < nModuleCount) {
     if(pType) {
@@ -944,9 +944,9 @@ GXUINT GXSpriteImpl::GetAnimFrame( GXUINT nIndex, ANIM_FRAME* pAnimFrame, GXSIZE
     return m_aAnimations[nIndex].count;
   }
 
-  const GXUINT nNumOfCopy = clMin(nCount, m_aAnimations[nIndex].count);
+  const size_t nNumOfCopy = clMin(nCount, m_aAnimations[nIndex].count);
   memcpy(pAnimFrame, &m_aAnimFrames[m_aAnimations[nIndex].start], sizeof(ANIM_FRAME) * nNumOfCopy);
-  return nNumOfCopy;
+  return (GXUINT)nNumOfCopy;
 }
 
 //GXVOID GXSpriteImpl::PaintByUniformIndex( GXCanvas *pCanvas, GXINT nIndex, GXINT nMinorIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight ) const

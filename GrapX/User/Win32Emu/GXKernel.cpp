@@ -460,10 +460,10 @@ GXDWORD GXDLLAPI GXUIGetStationDesc(GXStationDesc eDesc, GXWPARAM wParam, GXLPAR
       GXSTRCPYN<GXWCHAR>((GXLPWSTR)lParam, (GXLPCWSTR)strCfgPath, wParam);
 
       if(strCfgPath.GetLength() > wParam) {
-        return wParam;
+        return (GXDWORD)wParam;
       }
       else {
-        return strCfgPath.GetLength();
+        return (GXDWORD)strCfgPath.GetLength();
       }
     }
     break; // 运行不到这里

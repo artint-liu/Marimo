@@ -16,6 +16,7 @@ protected:
 protected:
   // 这个因为头文件包含问题, 要注意不支持析构函数的调用
   IMOPlatform_Win32Base();
+  virtual ~IMOPlatform_Win32Base();
 
   virtual GXHRESULT Finalize      (GXINOUT GXGraphics** ppGraphics);
   virtual GXHRESULT MainLoop      ();

@@ -40,6 +40,10 @@ IGXPlatform_Win32D3D9::IGXPlatform_Win32D3D9()
   m_pApp = NULL;
 }
 
+IGXPlatform_Win32D3D9::~IGXPlatform_Win32D3D9()
+{
+}
+
 GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
 {
   const static GXLPWSTR lpClassName = L"GrapX_Win32_D3D9_Class";

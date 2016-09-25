@@ -393,7 +393,7 @@ public:
 
     case WM_NOTIFY:
       {
-        NMHDR* pnmh = (NMHDR*)lParam;
+        GXNMHDR* pnmh = (GXNMHDR*)lParam;
       }
       break;
     case WM_COMMAND:
@@ -405,7 +405,7 @@ public:
 
           GXWCHAR szFile[MAX_PATH];
           gxSendMessage(hListView, GXLB_GETTEXT, nSel, (GXLPARAM)szFile);
-          GXDWORD dwAttr = gxSendMessage(hListView, GXLB_GETITEMDATA, nSel, 0);
+          GXDWORD dwAttr = (GXDWORD)gxSendMessage(hListView, GXLB_GETITEMDATA, nSel, 0);
 
           if(dwAttr == CSimpleBrowseFile::DriverSign)
           {
@@ -424,9 +424,11 @@ public:
         }
         else if(GXHIWORD(wParam) == GXBN_CLICKED)
         {
-          GXLONG_PTR l = gxGetWindowLong((GXHWND)lParam, GXGWL_ID);
-          if( ! IS_IDENTIFY(l)) {
-            GXLPCWSTR szName = (GXLPCWSTR)l;
+          GXLONG_PTR id = gxGetWindowLong((GXHWND)lParam, GXGWL_ID);
+          if( ! IS_IDENTIFY(id))
+          {
+            GXLPCWSTR szName = (GXLPCWSTR)id;
+
             if(GXSTRCMP(szName, L"Open") == 0) {
               CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
               psbf->TrueClose();
@@ -437,11 +439,6 @@ public:
             }
           }
         }
-        //else if (GXLOWORD(wParam) == IDOK || GXLOWORD(wParam) == IDCANCEL)
-        //{
-        //  gxEndDialog(hDlg, LOWORD(wParam));
-        //  return (GXINT_PTR)TRUE;
-        //}
       }
       break;
     }
@@ -491,6 +488,7 @@ extern "C"
       CSimpleBrowseFile sbf(lpOFN);
       result = gxDialogBoxParamW(NULL, L"@UI\\simplebrowser.dlg.txt", lpOFN->hwndOwner,
         CSimpleBrowseFile::IntSimpleBrowseFile, (GXLPARAM)&sbf);
+      strInitDir = lpOFN->lpstrInitialDir;
     }
     else {
       result = gxDialogBoxParamW(NULL, L"@UI\\browserfiles.dlg.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
@@ -499,7 +497,7 @@ extern "C"
     // 保存起始路径
     if(result) {
       clstd::StockW::Section sect = stock.Create(NULL);
-      sect.SetKey(L"GetOpenFileName", lpOFN->lpstrInitialDir);
+      sect.SetKey(L"GetOpenFileName", strInitDir);
       stock.SaveW(szConfig);
     }
 

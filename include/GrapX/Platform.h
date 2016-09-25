@@ -10,6 +10,7 @@ class IGXPlatform
 {
 public:
   GXApp* m_pApp;
+  virtual ~IGXPlatform() {}
   GXSTDINTERFACE(GXHRESULT    Initialize    (GXApp* m_pApp, GXAPP_DESC* pDesc, GXOUT GXGraphics** ppGraphics));
   GXSTDINTERFACE(GXHRESULT    Finalize      (GXINOUT GXGraphics** ppGraphics));
   GXSTDINTERFACE(GXHRESULT    MainLoop      ());

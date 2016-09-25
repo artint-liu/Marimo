@@ -497,9 +497,9 @@ namespace Marimo
 
   GXINT MOSpriteImpl::UnpackIndex(GXUINT nUniqueIndex, Type* pType) const
   {
-    const GXUINT nModuleCount = m_loader.aModules.size();
-    const GXUINT nModuleFrameCount = nModuleCount + m_loader.aFrames.size();
-    const GXUINT nModuleFrameAnimCount = nModuleFrameCount + m_loader.aAnims.size();
+    const GXUINT nModuleCount          = (GXUINT)m_loader.aModules.size();
+    const GXUINT nModuleFrameCount     = (GXUINT)(nModuleCount + m_loader.aFrames.size());
+    const GXUINT nModuleFrameAnimCount = (GXUINT)(nModuleFrameCount + m_loader.aAnims.size());
 
     if(nUniqueIndex < nModuleCount) {
       if(pType) {

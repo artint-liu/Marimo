@@ -30,9 +30,9 @@ template<typename _TCh>
 static _TCh*
 cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
 {
-  register int r2;
+  int r2;
   double fi, fj;
-  register _TCh *p, *p1;
+  _TCh *p, *p1;
   static _TCh buf[NDIG];
   //double modf();
 
