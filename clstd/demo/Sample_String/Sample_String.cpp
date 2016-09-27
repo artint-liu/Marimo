@@ -7,6 +7,20 @@
 #include "clString.H"
 #include "clPathFile.h"
 
+void TestPathFile()
+{
+  clStringA strPath;
+
+  strPath = "abc";
+  clpathfile::RenameExtensionA(strPath, ".exe");
+  ASSERT(strPath == "abc.exe");
+
+  clpathfile::RenameExtensionA(strPath, "txt");
+  ASSERT(strPath == "abc.txt");
+
+  //////////////////////////////////////////////////////////////////////////
+}
+
 void TestCombinePath()
 {
   clStringA strPath;
@@ -82,6 +96,7 @@ int _tmain(int argc, _TCHAR* argv[])
   TestCombinePath();
   TestMatchSpec();
   TestString();
+  TestPathFile();
 
 	return 0;
 }

@@ -162,55 +162,32 @@ namespace clpathfile
 #define IS_ANY_SLASH(_CH) (_CH == s_PathSlash || _CH == s_VicePathSlash)
 
   template<typename _TString>
-  b32 RenameExtensionT(_TString& strPath, typename _TString::LPCSTR pszExt)
+  b32 RenameExtensionT(_TString& strPath, typename _TString::LPCSTR szExt)
   {
     size_t p = FindExtensionT<typename _TString::TChar>(strPath);
-    if(p == _TString::npos)
-    {
-      if(pszExt[0] != '.') {
+    if(p == _TString::npos) {
+      if(szExt[0] != '.') {
         strPath.Append('.');
       }
-      strPath.Append(pszExt);
+      strPath.Append(szExt);
     }
-    else
-    {
-      strPath.Replace(p, -1, (const typename _TString::TChar*)pszExt);
+    else {
+      strPath.Replace(p + 1, -1, 
+        (typename _TString::LPCSTR)((szExt[0] == '.') ? (szExt + 1) : szExt));
     }
     return TRUE;
   }
-  b32 RenameExtensionA(clStringA& strPath, clStringA::LPCSTR  pszExt)
+
+  b32 RenameExtensionA(clStringA& strPath, clStringA::LPCSTR  szExt)
   {
-    return RenameExtensionT(strPath, pszExt);
+    return RenameExtensionT(strPath, szExt);
   }
-  b32 RenameExtensionW(clStringW& strPath, clStringW::LPCSTR  pszExt)
+  b32 RenameExtensionW(clStringW& strPath, clStringW::LPCSTR  szExt)
   {
-    return RenameExtensionT(strPath, pszExt);
+    return RenameExtensionT(strPath, szExt);
   }
 
-  //template<typename _TCh>
-  //b32 RenameExtensionT(_TCh* szPath, CLLPCTSTR pszExt)
-  //{
-  //  size_t p = strPath.ReverseFind('.');
-  //  if(p == _TString::npos)
-  //  {
-  //    strPath.Append('.');
-  //    strPath.Append(pszExt);
-  //  }
-  //  else
-  //  {
-  //    strPath.Replace(p + 1, -1, (const typename _TString::TChar*)pszExt);
-  //  }
-  //  return TRUE;
-  //}
-
-  //b32 RenameExtensionA(ch* szPath, CLLPCTSTR pszExt)
-  //{
-  //  return RenameExtensionT(szPath, pszExt);
-  //}
-  //b32 RenameExtensionW(wch* szPath, CLLPCTSTR pszExt)
-  //{
-  //  return RenameExtensionT(szPath, pszExt);
-  //}
+  //////////////////////////////////////////////////////////////////////////
 
   template<typename _TString>
   clsize FindFileNameT(const _TString& strPath)
@@ -232,10 +209,13 @@ namespace clpathfile
   {
     return FindFileNameT(strPath);
   }
+  
   clsize FindFileNameW(const clStringW& strPath)
   {
     return FindFileNameT(strPath);
   }
+
+  //////////////////////////////////////////////////////////////////////////
 
   template<typename _TCh>
   clsize FindExtensionT(const _TCh* szPath)
@@ -251,32 +231,41 @@ namespace clpathfile
     }
     return -1;
   }
+
   clsize FindExtensionA(const ch* szPath)
   {
     return FindExtensionT(szPath);
   }
+  
   clsize FindExtensionW(const wch* szPath)
   {
     return FindExtensionT(szPath);
   }
 
+  //////////////////////////////////////////////////////////////////////////
+
   template<typename _TString>
   b32 AddSlashT(_TString& strPath)
   {
     strPath.Replace((typename _TString::TChar)s_VicePathSlash, (typename _TString::TChar)s_PathSlash, 0);
-    if(strPath.Back() == (typename _TString::TChar)s_PathSlash)
+    if(strPath.Back() == (typename _TString::TChar)s_PathSlash) {
       return FALSE;
+    }
     strPath.Append((typename _TString::TChar)s_PathSlash);
     return TRUE;
   }
+
   b32 AddSlashA(clStringA& strPath)
   {
     return AddSlashT(strPath);
   }
+
   b32 AddSlashW(clStringW& strPath)
   {
     return AddSlashT(strPath);
   }
+
+  //////////////////////////////////////////////////////////////////////////
 
   template<typename _TString>
   _TString& CombinePathT(_TString& strDestPath, typename _TString::LPCSTR szDir, typename _TString::LPCSTR szFile)
@@ -347,14 +336,18 @@ namespace clpathfile
     strDestPath = strTempPath;
     return strDestPath;
   }
+  
   clStringA& CombinePathA(clStringA& strDestPath, clStringA::LPCSTR szDir, clStringA::LPCSTR szFile)
   {
     return CombinePathT(strDestPath, szDir, szFile);
   }
+
   clStringW& CombinePathW(clStringW& strDestPath, clStringW::LPCSTR szDir, clStringW::LPCSTR szFile)
   {
     return CombinePathT(strDestPath, szDir, szFile);
   }
+
+  //////////////////////////////////////////////////////////////////////////
 
   template<typename _TString>
   _TString& CombineAbsPathToT(_TString& strDestPath, const _TString& strSrcPath)
@@ -415,6 +408,8 @@ namespace clpathfile
     return MakeFullPath(strPath);
   }
 
+  //////////////////////////////////////////////////////////////////////////
+
   template<typename _TString>
   _TString CanonicalizeT(const _TString& strPath)
   {
@@ -449,10 +444,12 @@ namespace clpathfile
     str.Replace((typename _TString::TChar)s_VicePathSlash, (typename _TString::TChar)s_PathSlash);
     return str;
   }
+  
   clStringA CanonicalizeA(const clStringA& strPath)
   {
     return CanonicalizeT(strPath);
   }
+
   clStringW CanonicalizeW(const clStringW& strPath)
   {
     return CanonicalizeT(strPath);
@@ -462,15 +459,18 @@ namespace clpathfile
   b32 IsFileSpecT (const _TCh* szPath)
   {
     if(_Traits::StringSearchChar(szPath, (_TCh)s_PathSlash) != NULL || 
+      _Traits::StringSearchChar(szPath, (_TCh)s_VicePathSlash) != NULL || 
       _Traits::StringSearchChar(szPath, ':') != NULL) {
       return FALSE;
     }
     return TRUE;
   }
+
   b32 IsFileSpecA(const  ch* szPath)
   {
     return IsFileSpecT<clstd::StringA_traits, ch>(szPath);
   }
+
   b32 IsFileSpecW(const wch* szPath)
   {
     return IsFileSpecT<clstd::StringW_traits, wch>(szPath);
@@ -526,6 +526,8 @@ namespace clpathfile
     return IsRelativeT<wch>(szPath);
   }
 
+  //////////////////////////////////////////////////////////////////////////
+
   template<typename _TString, typename _TCh>
   int CommonPrefixT(_TString& strCommDir, const _TCh* szPath1, const _TCh* szPath2)
   {
@@ -567,6 +569,8 @@ namespace clpathfile
   {
     return CommonPrefixT(strCommDir, szPath1, szPath2);
   }
+
+  //////////////////////////////////////////////////////////////////////////
 
   template<class _TString, typename _TCh>
   b32 RelativePathToT(_TString& strOutput, const _TCh* szFromPath, b32 bFromIsDir, const _TCh* szToPath, b32 bToIsDir)
@@ -621,7 +625,9 @@ namespace clpathfile
   {
     return RelativePathToT(strOutput, szFromPath, bFromIsDir, szToPath, bToIsDir);
   }
+
   //////////////////////////////////////////////////////////////////////////
+
   template<typename _TCh>
   b32 MatchSpecT(const _TCh* szFile, const _TCh* szSpec)
   {

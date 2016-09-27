@@ -242,61 +242,70 @@ namespace clstd
 
     operator const _TCh*() const;
 
-    size_t      GetLength       () const;
-    size_t      GetCapacity     () const;
-    _TCh*       GetBuffer       () const;
-    _TCh*       GetBuffer       (size_t nSize);
-    void        Reserve         (size_t nSize);
-    void        ReleaseBuffer   ();
-    size_t      Format          (const _TCh *pFmt, ...);
-    void        Replace         (size_t idx, size_t uCount, const _TCh* pStr);
-    size_t      Replace         (_TCh cFind, _TCh cReplaceWith, size_t uStart = 0);
-    StringX&    Append          (const _XCh* pStrX);
-    StringX&    Append          (const _XCh* pStrX, size_t uCount);
-    StringX&    Append          (const _TCh* pStr);
-    StringX&    Append          (const _TCh* pStr, size_t uCount);       // 追加字符串，如果长度大于count会被截断
-    StringX&    Append          (const _TCh* pStr, _TCh c, long nWidth);  // 追加字符串，如果长度小于width会以指定字符填充, width > 0 填充到头部，width < 0 填充尾部，width == 0按实际大小填充
-    StringX&    Append          (_TCh cCh);
-    StringX&    Append          (_TCh cCh, size_t uCount);
-    StringX&    Append          (const StringX& clStr);
-    StringX&    AppendFloat     (float val, char mode = 'F'); // mode是转换模式，'F'标准浮点模式，'E'科学计数模式，'R'阅读增强模式
-    StringX&    AppendInteger32 (s32 val, int nNumGroup = 0);
+    size_t      GetLength       () const; // 获得字符串长度，不包括'\0'
+    size_t      GetCapacity     () const; // 获得字符串缓冲区容量，一般没啥卵用
+
+    _TCh*       GetBuffer       () const;       // 获得可直接操作的缓冲缓冲区指针，完成后需要调用ReleaseBuffer
+    _TCh*       GetBuffer       (size_t nSize); // 分配一个指定长度的缓冲区，操作完成后调用ReleaseBuffer
+    void        Reserve         (size_t nSize); // 缓冲区扩充到指定容量
+    void        ReleaseBuffer   ();             // 重新规整缓冲区
+
+    size_t      Format          (const _TCh *pFmt, ...);  // 按照指定格式生成字符串（原来的内容会被替代）
+
+    void        Replace         (size_t idx, size_t uCount, const _TCh* pStr);      // 从 idx 开始把 uCount 个字符替换为 pStr
+    size_t      Replace         (_TCh cFind, _TCh cReplaceWith, size_t uStart = 0); // 查找某个字符，替换为另一个
+
+    StringX&    Append          (const _XCh* pStrX);                          // 追加不同编码的字符串
+    StringX&    Append          (const _XCh* pStrX, size_t uCount);           // 还用解释么？
+    StringX&    Append          (const _TCh* pStr);                           // 追加字符串
+    StringX&    Append          (const _TCh* pStr, size_t uCount);            // 追加字符串，如果长度大于count会被截断
+    StringX&    Append          (const _TCh* pStr, _TCh cFill, long nWidth);  // 追加字符串，如果长度小于width会以指定字符填充, width > 0 填充到头部，width < 0 填充尾部，width == 0按实际大小填充
+    StringX&    Append          (_TCh cCh);                                   // 追加一个字符
+    StringX&    Append          (_TCh cCh, size_t uCount);                    // 追加N个字符
+    StringX&    Append          (const StringX& clStr);                       // 这个还能看不懂？
+    StringX&    AppendFloat     (float val, char mode = 'F');                 // mode是转换模式，'F'标准浮点模式，'E'科学计数模式，'R'阅读增强模式
+    StringX&    AppendInteger32 (s32 val, int nNumGroup = 0);                 // 后面几个自己猜
     StringX&    AppendUInt32    (u32 val, int nNumGroup = 0);
     StringX&    AppendInteger64 (s64 val, int nNumGroup = 0);
     StringX&    AppendUInt64    (u64 val, int nNumGroup = 0);
-    StringX&    AppendFormat    (const _TCh *pFmt, ...);
-    void        MakeReverser    ();
-    void        MakeUpper       ();
-    void        MakeLower       ();
+    StringX&    AppendFormat    (const _TCh *pFmt, ...);                      // 追加格式化字符串，这个保留原来的内容
 
-    int         Compare         (const _TCh* pStr) const;
-    int         CompareNoCase   (const _TCh* pStr) const;
+    void        MakeReverser    (); // 卧槽，全反了
+    void        MakeUpper       (); // 全部大写化
+    void        MakeLower       (); // 全部小写化
+
+    int         Compare         (const _TCh* pStr) const;                 // 比较字符串，返回0是全部相同
+    int         CompareNoCase   (const _TCh* pStr) const;                 // 忽略大小写敏感的比较
     int         Compare         (const _TCh* pStr, size_t count) const;
     int         CompareNoCase   (const _TCh* pStr, size_t count) const;
-    b32         BeginsWith      (const _TCh c) const;
-    b32         BeginsWith      (const _TCh* pStr) const;
-    b32         BeginsWith      (const _XCh* pStr) const;
+    b32         BeginsWith      (const _TCh c) const;                     // 检查是否以 c 开头？
+    b32         BeginsWith      (const _TCh* pStr) const;                 // 检查是否以 pStr 中的字符串开头？
+    b32         BeginsWith      (const _XCh* pStr) const;                 // 同上，只是另一个字符集的字符
     b32         EndsWith        (const _TCh c) const;
-    b32         EndsWith        (const _TCh* pStr) const;
+    b32         EndsWith        (const _TCh* pStr) const;                 // 检查是否以 pStr 字符串结尾
     b32         EndsWith        (const _XCh* pStr) const;
 
-    size_t      Insert          (size_t idx, _TCh cCh);
-    size_t      Insert          (size_t idx, _TCh cCh, size_t count);
-    size_t      Insert          (size_t idx, const _TCh* pStr);
-    size_t      Remove          (_TCh cCh);
-    size_t      Remove          (size_t idx, size_t uCount);  // 返回值是剩余长度
-    void        TrimLeft        (_TCh cTarget);
-    void        TrimLeft        (const _TCh* pTarget);
-    void        TrimRight       (_TCh cTarget);
+    size_t      Insert          (size_t idx, _TCh cCh);                   // 在指定位置插入字符
+    size_t      Insert          (size_t idx, _TCh cCh, size_t count);     // 在指定位置插入N个字符
+    size_t      Insert          (size_t idx, const _TCh* pStr);           // 在指定位置插入字符串
+
+    size_t      Remove          (_TCh cCh);                   // 移除字符串中指定字符
+    size_t      Remove          (size_t idx, size_t uCount);  // 移除字符串中某一串字符，返回值是剩余长度
+    void        TrimLeft        (_TCh cTarget);               // 如果字符串开头有连续的特定字符，则裁掉
+    void        TrimLeft        (const _TCh* pTarget);        // 裁剪以pTarget列表中为开头的字符
+    void        TrimRight       (_TCh cTarget);               // 裁剪结尾
     void        TrimRight       (const _TCh* pTarget);
-    void        TrimBoth        (_TCh cTarget);   // 修剪两端的字符, 如果两端存在连续的cTarget将都会被修剪掉
+    void        TrimBoth        (_TCh cTarget);               // 修剪两端的字符, 如果两端存在连续的cTarget将都会被修剪掉
     void        Augment         (const _TCh* szLeft, const _TCh* szRight);   // 扩充两端
-    b32         IsEmpty         () const;
-    b32         IsNotEmpty      () const;
+
+    b32         IsEmpty         () const; // 判断为空（完全等价于" ! IsNotEmpty()"）
+    b32         IsNotEmpty      () const; // 判断不为空，吼吼
+
     b32         IsFloat         () const; // 以'+'or'-'开头，'0'-'9',只出现一次的'.'，'F'或'f'结尾的形式，暂时不支持"1e2"这种科学计数形式
     b32         IsInteger       () const; // 判断是否是整数形式的字符串，以'+'or'-'开头，后面全是数字
     b32         IsAlphanumeric  () const; // 判断字符串是否只包含['a'-'z', 'A'-'Z', '0'-'9', '_']这些字符
-    void        Clear           ();
+    void        Clear           ();       // 清除字符串内容
+
     size_t      Find            (_TCh cFind, size_t uStart = 0) const;
     size_t      Find            (const _TCh* pFind, size_t uStart = 0) const;
     size_t      FindAny         (const _TCh* pCharList, size_t uStart = 0) const; // 字符串字母顺序优先查找
@@ -304,16 +313,18 @@ namespace clstd
     size_t      ReverseFind     (_TCh cFind) const;
     size_t      ReverseFind     (_TCh cFind, int nStart, int nEnd) const;
     size_t      ReverseFindAny  (const _TCh* pFindCharList) const;                // 字符串顺序反向查找
-    StringX     Left            (size_t uCount) const;
-    StringX     Right           (size_t uCount) const;
-    StringX     SubString       (size_t uStart, size_t uCount) const;
-    size_t      DivideBy        (_TCh cCh, StringX& strFront, StringX& strBack) const;
-    size_t      ReverseDivideBy (_TCh cCh, StringX& strFront, StringX& strBack) const;
-    i32         ToInteger       (int nRadix = 10) const;
-    double      ToFloat         () const;
-    u32         GetHash         () const;
-    u32         GetCRC32        () const;
-    size_t      VarFormat       (const _TCh *pFmt, va_list arglist);
+    StringX     Left            (size_t uCount) const;                            // 将前N个字符生成一个新字符串
+    StringX     Right           (size_t uCount) const;                            // 将后N个字符生成一个新字符串
+    StringX     SubString       (size_t uStart, size_t uCount) const;             // 将指定的某段儿生成一个新字符串
+    size_t      DivideBy        (_TCh cCh, StringX& strFront, StringX& strBack) const; // 查找特定字符并切为前后两段
+    size_t      ReverseDivideBy (_TCh cCh, StringX& strFront, StringX& strBack) const; // 从结尾开始搜索特定字符并切为前后两段
+
+    i32         ToInteger       (int nRadix = 10) const;  // 尝试将字符串转换为有符号整数，参数描述这个字符串的进制
+    double      ToFloat         () const;                 // 尝试转换为浮点数
+
+    u32         GetHash         () const; // 计算字符串的hash，这个算法是独立且平台一致的
+    u32         GetCRC32        () const; // 计算字符串的CRC32
+    size_t      VarFormat       (const _TCh *pFmt, va_list arglist);  // 在原始内容后面，使用变参列表追加格式化字符串
   };
 
   struct StringW_traits

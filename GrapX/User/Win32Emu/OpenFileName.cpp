@@ -407,19 +407,25 @@ public:
           gxSendMessage(hListView, GXLB_GETTEXT, nSel, (GXLPARAM)szFile);
           GXDWORD dwAttr = (GXDWORD)gxSendMessage(hListView, GXLB_GETITEMDATA, nSel, 0);
 
+          CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
+
           if(dwAttr == CSimpleBrowseFile::DriverSign)
           {
             size_t len = GXSTRLEN(szFile);
-            CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
             psbf->m_strPath.Clear();
             psbf->m_strPath.Format(L"%c:\\", szFile[len - 3]);
             psbf->FillList(hDlg);
           }
           else if(TEST_FLAG(dwAttr, FILE_ATTRIBUTE_DIRECTORY))
           {
-            CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
             clpathfile::CombinePathW(psbf->m_strPath, psbf->m_strPath, szFile);
             psbf->FillList(hDlg);
+          }
+          else
+          {
+            clpathfile::CombinePathW(psbf->m_strPath, psbf->m_strPath, szFile);
+            psbf->TrueClose();
+            gxEndDialog(hDlg, TRUE);
           }
         }
         else if(GXHIWORD(wParam) == GXBN_CLICKED)

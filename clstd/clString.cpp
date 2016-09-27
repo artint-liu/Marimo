@@ -1570,6 +1570,7 @@ namespace clstd
     const clsize uInputLen = _Traits::StringLength(pStr);
     return Append(pStr, uInputLen);
   }
+
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::Append(const _XCh *pStrX)
   {

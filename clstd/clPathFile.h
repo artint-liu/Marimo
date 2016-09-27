@@ -54,46 +54,49 @@ namespace clpathfile
     return s_VicePathSlash;
   }
 
+  // 修改路径中的扩展名, 参数中的扩展名接受".exe"或者"exe"两种形式的写法
   template<typename _TString>
-  b32 RenameExtensionT  (_TString& strPath, typename _TString::LPCSTR pszExt);
-  b32 RenameExtensionA  (clStringA& strPath, clStringA::LPCSTR pszExt);
-  b32 RenameExtensionW  (clStringW& strPath, clStringW::LPCSTR  pszExt);
+  b32 RenameExtensionT  (_TString& strPath, typename _TString::LPCSTR szExt);
+  b32 RenameExtensionA  (clStringA& strPath, clStringA::LPCSTR szExt);
+  b32 RenameExtensionW  (clStringW& strPath, clStringW::LPCSTR  szExt);
 
-  //template<typename _TCh>
-  //b32 RenameExtensionT  (_TCh* szPath, CLLPCTSTR pszExt);
-  //b32 RenameExtensionA  (ch*   szPath, CLLPCTSTR pszExt);
-  //b32 RenameExtensionW  (wch*  szPath, CLLPCTSTR pszExt);
-
+  // 在路径中查找文件名的位置
   template<typename _TString>
   clsize FindFileNameT    (const _TString& strPath);
   clsize FindFileNameA    (const clStringA& strPath);
   clsize FindFileNameW    (const clStringW& strPath);
 
+  // 在路径中查找扩展名的位置
   template<typename _TCh>
   clsize FindExtensionT    (const _TCh* szPath);
   clsize FindExtensionA    (const ch* szPath);
   clsize FindExtensionW    (const wch* szPath);
 
+  // vice slash 替换为 slash, 并在末尾添加 slash （如果末尾没有）
   template<typename _TString>
   b32 AddSlashT      (_TString& strPath);
   b32 AddSlashA      (clStringA& strPath);
   b32 AddSlashW      (clStringW& strPath);
 
+  // 合并路径和文件名, 如果 szFile 开头（仅在开头）含有相对路径"."和"..", 合并过程中也会整理路径
   template<typename _TString>
   _TString&  CombinePathT  (_TString& strDestPath, typename _TString::LPCSTR szDir, typename _TString::LPCSTR szFile);
   clStringA& CombinePathA  (clStringA& strDestPath, clStringA::LPCSTR szDir, clStringA::LPCSTR szFile);
   clStringW& CombinePathW  (clStringW& strDestPath, clStringW::LPCSTR szDir, clStringW::LPCSTR szFile);
 
+  // TODO: 考察准备废掉？
   template<typename _TString>
   _TString&  CombineAbsPathToT(_TString& strDestPath, const _TString& strSrcPath);
   clStringA& CombineAbsPathToA(clStringA& strDestPath, const clStringA& strSrcPath);
   clStringW& CombineAbsPathToW(clStringW& strDestPath, const clStringW& strSrcPath);
 
+  // TODO: 考察准备废掉？
   template<typename _TString>
   clsize CombineAbsPathT(_TString& strPath);
   clsize CombineAbsPathA(clStringA& strPath);
   clsize CombineAbsPathW(clStringW& strPath);
 
+  // TODO: 考察准备废掉？
   // 如果strPath是相对路径，则转换为基于当前路径的完整路径
   // 返回0表示失败，strPath可能已经是完整路径
   // 大于0表示成功，数值是转换后的字符串长度
@@ -102,11 +105,13 @@ namespace clpathfile
   clsize MakeFullPathA(clStringA& strPath);
   clsize MakeFullPathW(clStringW& strPath);
 
+  // 整理路径名, 消除"."和".."表示的相对路径, vice slash 替换为 slash
   template<typename _TString>
   _TString  CanonicalizeT  (const _TString& strPath);
   clStringA CanonicalizeA  (const clStringA& strPath);
   clStringW CanonicalizeW  (const clStringW& strPath);
 
+  // 判断这个路径只是单纯文件名，是返回1，否则返回0
   template<class _Traits, typename _TCh>
   b32 IsFileSpecT (const _TCh* szPath);
   b32 IsFileSpecA (const  ch* szPath);
@@ -118,21 +123,25 @@ namespace clpathfile
   b32 RemoveFileSpecA (clStringA& strPath);
   b32 RemoveFileSpecW (clStringW& strPath);
 
+  // 判断是否为相对路径
   template<typename _TCh>
   b32 IsRelativeT (const _TCh* szPath);
   b32 IsRelativeA (const  ch* szPath);
   b32 IsRelativeW (const wch* szPath);
 
+  // 获得两个路径相同的路径前缀
   template<typename _TString, typename _TCh>
   int CommonPrefixT(_TString& strCommDir, const _TCh* szPath1, const _TCh* szPath2);
   int CommonPrefixA(clStringA& strCommDir, const  ch* szPath1, const  ch* szPath2);
   int CommonPrefixW(clStringW& strCommDir, const wch* szPath1, const wch* szPath2);
 
+  // 获得一个路径对另一个路径的相对路径（绕口令？）
   template<class _TString, typename _TCh>
   b32 RelativePathToT(_TString& strOutput, const _TCh* szFromPath, b32 bFromIsDir, const _TCh* szToPath, b32 bToIsDir);
   b32 RelativePathToA(clStringA& strOutput, const ch* szFromPath, b32 bFromIsDir, const ch* szToPath, b32 bToIsDir);
   b32 RelativePathToW(clStringW& strOutput, const wch* szFromPath, b32 bFromIsDir, const wch* szToPath, b32 bToIsDir);
 
+  // 含有通配符的比较, "?"表示任意一个字母, "*"表示任意字母
   template<typename _TCh>
   b32 MatchSpecT(const _TCh* szFile, const _TCh* szSpec); // 大小写敏感
   b32 MatchSpec (const ch* szFile, const ch* szSpec);
@@ -144,18 +153,11 @@ namespace clpathfile
     MatchSpec_MULTIPLE = 0x00000001,
   };
 
+  // FIXME: 部分实现
   template<typename _TCh>
   b32 MatchSpecExT(const _TCh* szFile, const _TCh* szSpec, u32 dwFlags);
   b32 MatchSpecEx (const ch* szFile, const ch* szSpec, u32 dwFlags);
   b32 MatchSpecEx (const wch* szFile, const wch* szSpec, u32 dwFlags);
 } // namespace clpathfile
-
-//#ifdef _UNICODE
-//#define GetFileExtension GetFileExtensionW
-//#define SplitPath SplitPathW
-//#else
-//#define GetFileExtension GetFileExtensionA
-//#define SplitPath SplitPathA
-//#endif // _UNICODE
 
 #endif // _FILEPATH_H_

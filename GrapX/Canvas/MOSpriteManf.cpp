@@ -19,8 +19,7 @@
 #include <clStringSet.H>
 #include <Smart/SmartStream.h>
 #include <Smart/Stock.h>
-#include <Canvas/MOSpriteImpl.H>
-#include "clStringSet.h"
+#include "MOSpriteImpl.h"
 
 namespace Marimo
 {
