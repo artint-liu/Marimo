@@ -85,13 +85,14 @@ namespace GXUI
       m_hToolTip = NULL;
     }
 
-    for(ToolBtnArray::iterator it = m_aButtons.begin(); 
-      it != m_aButtons.begin(); ++it) {
-        if( ! IS_IDENTIFY(it->idCommand)) {
-          clStringW& str = *(clStringW*)it->idCommand;
-          str.~clStringW();
-        }
-    }
+    std::for_each(m_aButtons.begin(), m_aButtons.end(), [](TOOLBARBUTTON& tb)
+    {
+      if( ! IS_IDENTIFY(tb.idCommand)) {
+        clStringW& str = *(clStringW*)&tb.idCommand;
+        str.~clStringW();
+      }
+    });
+
     m_aButtons.clear();
     SAFE_RELEASE(m_pSprite);
     return CtrlBase::Destroy();
@@ -176,8 +177,8 @@ namespace GXUI
       tbb.idCommand = (GXLPCWSTR)pTBButton->idCommand;
     }
     else {
-      clStringW* pStr = new(&tbb.idCommand) clStringW();
-      *pStr = (GXLPCWSTR)pTBButton->idCommand;
+      clStringW* pStr = new(&tbb.idCommand) clStringW((GXLPCWSTR)pTBButton->idCommand);
+      //*pStr = (GXLPCWSTR)pTBButton->idCommand;
       m_bIndexedCommand = 1;
     }
     tbb.fsState   = pTBButton->fsState;

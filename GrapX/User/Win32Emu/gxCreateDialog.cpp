@@ -960,7 +960,8 @@ GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, Section hDlgItem, Dl
         clStringW& str = *(clStringW*)&itTBBtn->idCommand;
         str.~clStringW();
       }
-      else if(itTBBtn->iString) {
+      
+      if(itTBBtn->iString) {
         clStringW& str = *(clStringW*)&itTBBtn->iString;
         str.~clStringW();
       }

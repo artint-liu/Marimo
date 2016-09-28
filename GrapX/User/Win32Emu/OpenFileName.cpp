@@ -423,7 +423,9 @@ public:
           }
           else
           {
-            clpathfile::CombinePathW(psbf->m_strPath, psbf->m_strPath, szFile);
+            clStringW strFilePath;
+            clpathfile::CombinePathW(strFilePath, psbf->m_strPath, szFile);
+            GXSTRCPYN(psbf->m_lpofn->lpstrFile, (GXLPCWSTR)strFilePath, psbf->m_lpofn->nMaxFile);
             psbf->TrueClose();
             gxEndDialog(hDlg, TRUE);
           }
