@@ -18,7 +18,7 @@
 #include <clUtility.H>
 #include <clStringSet.H>
 #include <Smart/SmartStream.h>
-#include <Smart/Stock.h>
+#include <clStock.h>
 #include "MOSpriteImpl.h"
 
 namespace Marimo

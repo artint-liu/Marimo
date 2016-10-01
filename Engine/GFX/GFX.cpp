@@ -16,7 +16,7 @@
 #include "clTree.H"
 #include "clTransform.H"
 #include <Smart/smartstream.h>
-#include "Smart/Stock.h"
+#include "clStock.h"
 #include <GrapX/VertexDecl.H>
 #include "GrapX/gxError.H"
 
@@ -36,7 +36,7 @@ namespace GFX
 {
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
-  GXHRESULT Create(Element** ppElement, GXGraphics* pGraphics, TypeId eId, GXDEFINITION* aDefines, GXUINT nCount)
+  GXHRESULT Create(Element** ppElement, GXGraphics* pGraphics, TypeId eId, GXDEFINITION* aDefines, GXSIZE_T nCount)
   {
     Element* pElement = NULL;
     switch (eId)

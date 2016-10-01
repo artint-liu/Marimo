@@ -176,7 +176,7 @@ namespace GFX
 
 
 
-  GXHRESULT GAMEENGINE_API Create         (Element** ppElement, GXGraphics* pGraphics, TypeId eId, GXDEFINITION* aDefines, GXUINT nCount);
+  GXHRESULT GAMEENGINE_API Create         (Element** ppElement, GXGraphics* pGraphics, TypeId eId, GXDEFINITION* aDefines, GXSIZE_T nCount);
   GXHRESULT GAMEENGINE_API CreateFromFileA(Element** ppElement, GXGraphics* pGraphics, GXLPCSTR szFilename);
   GXHRESULT GAMEENGINE_API CreateFromFileW(Element** ppElement, GXGraphics* pGraphics, GXLPCWSTR szFilename);
 } // namespace GFX

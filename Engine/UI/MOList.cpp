@@ -45,7 +45,7 @@ GXDWORD CMOListBox::GetClassNameCode() const
 
 GXHRESULT CMOListBox::GetDataAdapter( GXUI::IListDataAdapter** ppAdapter )
 {
-  return gxSendMessage(m_hWnd, GXWM_DATAPOOLOPERATION, 
+  return (GXHRESULT)gxSendMessage(m_hWnd, GXWM_DATAPOOLOPERATION, 
     (GXWPARAM)DPO_GETADAPTER, (GXLPARAM)ppAdapter);
 }
 
@@ -63,7 +63,7 @@ GXHRESULT CMOListBox::GetArrayElement(GXUI::MOVariable* pVariable)
 {
   GXUI::IListDataAdapter* pAdapter = NULL;
   //GXUI::MODataPool* pDataPool;
-  GXHRESULT hval = gxSendMessage(m_hWnd, GXWM_DATAPOOLOPERATION, 
+  GXHRESULT hval = (GXHRESULT)gxSendMessage(m_hWnd, GXWM_DATAPOOLOPERATION, 
     (GXWPARAM)DPO_GETADAPTER, (GXLPARAM)&pAdapter);
   //GXHRESULT hval = pAdapter->GetDataPool(&pDataPool);
   *pVariable = pAdapter->GetVariable();
@@ -73,7 +73,7 @@ GXHRESULT CMOListBox::GetArrayElement(GXUI::MOVariable* pVariable)
 
 GXINT CMOListBox::AddStringW(GXLPCWSTR lpString)
 {
-  return gxSendMessage(m_hWnd, GXLB_ADDSTRINGW, 0, (GXLPARAM)lpString);
+  return (GXINT)gxSendMessage(m_hWnd, GXLB_ADDSTRINGW, 0, (GXLPARAM)lpString);
 }
 
 GXINT CMOListBox::AddStringA(GXLPCSTR lpString)
@@ -84,7 +84,7 @@ GXINT CMOListBox::AddStringA(GXLPCSTR lpString)
 
 GXINT CMOListBox::GetStringLength(GXINT nIndex)
 {
-  return gxSendMessage(m_hWnd, GXLB_GETTEXTLEN, nIndex, NULL);
+  return (GXINT)gxSendMessage(m_hWnd, GXLB_GETTEXTLEN, nIndex, NULL);
 }
 
 GXLRESULT CMOListBox::GetStringW(GXINT nIndex, clStringW& str)
@@ -109,7 +109,7 @@ GXLRESULT CMOListBox::GetStringA(GXINT nIndex, clStringA& str)
 
 GXINT CMOListBox::DeleteString(GXINT nIndex)
 {
-  return gxSendMessage(m_hWnd, GXLB_DELETESTRING, nIndex, NULL);
+  return (GXINT)gxSendMessage(m_hWnd, GXLB_DELETESTRING, nIndex, NULL);
 }
 
 void CMOListBox::ResetContent()
@@ -119,17 +119,17 @@ void CMOListBox::ResetContent()
 
 GXINT CMOListBox::GetCount() const
 {
-  return gxSendMessage(m_hWnd, GXLB_GETCOUNT, NULL, NULL);
+  return (GXINT)gxSendMessage(m_hWnd, GXLB_GETCOUNT, NULL, NULL);
 }
 
 GXINT CMOListBox::GetCurSel() const
 {
-  return gxSendMessage(m_hWnd, GXLB_GETCURSEL, NULL, NULL);
+  return (GXINT)gxSendMessage(m_hWnd, GXLB_GETCURSEL, NULL, NULL);
 }
 
 GXHRESULT CMOListBox::SetAdapter(GXUI::IListDataAdapter* pAdapter)
 {
-  return gxSendMessage(m_hWnd, GXWM_DATAPOOLOPERATION, (GXWPARAM)DPO_SETADAPTER, (GXLPARAM)pAdapter);
+  return (GXHRESULT)gxSendMessage(m_hWnd, GXWM_DATAPOOLOPERATION, (GXWPARAM)DPO_SETADAPTER, (GXLPARAM)pAdapter);
 }
 
 #ifdef REFACTOR_GXFC

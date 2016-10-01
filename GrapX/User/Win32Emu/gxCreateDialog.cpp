@@ -4,7 +4,7 @@
 #include <User/GrapX.Hxx>
 
 #include <Smart/smartstream.h>
-#include <Smart/Stock.h>
+#include <clStock.h>
 
 // 平台相关
 //#include "GrapX/GUnknown.H"

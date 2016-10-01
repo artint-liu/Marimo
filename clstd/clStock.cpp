@@ -1,13 +1,13 @@
 ﻿#include <stdlib.h>
 
-#include "../clstd.h"
-#include "../clmemory.h"
-#include "../clString.H"
+#include "clstd.h"
+#include "clmemory.h"
+#include "clString.H"
 //#include "../clFile.H"
 //#include "../clBuffer.H"
-#include "smartstream.h"
-#include "Stock.h"
-#include "../clUtility.H"
+#include "smart/smartstream.h"
+#include "clStock.h"
+#include "clUtility.H"
 
 namespace clstd
 {

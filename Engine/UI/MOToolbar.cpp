@@ -158,7 +158,7 @@ GXINT CMOToolbar::GetButtonBitmapByIndex(GXINT_PTR id)
 
 GXBOOL CMOToolbar::HideButton(GXINT_PTR idCommand, GXBOOL bHide)
 {
-  return gxSendMessage(m_hWnd, GXTB_HIDEBUTTON, (GXWPARAM)idCommand, (GXLPARAM)bHide);
+  return (GXBOOL)gxSendMessage(m_hWnd, GXTB_HIDEBUTTON, (GXWPARAM)idCommand, (GXLPARAM)bHide);
 }
 
 GXLPCWSTR CMOToolbar::GetIdentifierName( GXINT nButtonID ) const

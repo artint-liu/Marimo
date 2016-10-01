@@ -3,7 +3,7 @@
 
 #include "clTextLines.h"
 #include "Smart/smartstream.h"
-#include "Smart/Stock.h"
+#include "clStock.h"
 
 #include "GrapX/DataPool.H"
 #include "GrapX/DataPoolVariable.H"

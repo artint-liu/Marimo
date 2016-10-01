@@ -6,7 +6,7 @@
 #include "res/resource.h"
 
 #include <Smart/smartstream.h>
-#include <Smart/Stock.h>
+#include <clStock.h>
 #include <clPathFile.H>
 
 //#pragma comment(lib, "user32.lib")

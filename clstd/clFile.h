@@ -182,5 +182,5 @@ typedef clstd::File clFile;
 //#endif
 
 #else
-#pragma message(__FILE__": warning : Duplicate included this file.")
+# pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CL_FILE_H_

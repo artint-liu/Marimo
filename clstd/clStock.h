@@ -229,6 +229,6 @@ namespace clstd
   class StockW : public StockT<clStringW> {};
 } // namespace clstd
 
-
-
+#else
+# pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CLSTD_STOCK_H_

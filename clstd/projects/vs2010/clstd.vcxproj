@@ -36,7 +36,9 @@
     <ClCompile Include="..\..\clPathFile.cpp" />
     <ClCompile Include="..\..\clQuaternion.cpp" />
     <ClCompile Include="..\..\clstd.CPP" />
+    <ClCompile Include="..\..\clStock.cpp" />
     <ClCompile Include="..\..\clString.cpp" />
+    <ClCompile Include="..\..\clToken.cpp" />
     <ClCompile Include="..\..\clTransform.cpp" />
     <ClCompile Include="..\..\clTree.CPP" />
     <ClCompile Include="..\..\clUtility.cpp" />
@@ -46,7 +48,6 @@
     <ClCompile Include="..\..\PrimeNum.cpp" />
     <ClCompile Include="..\..\Smart\SmartRepository.cpp" />
     <ClCompile Include="..\..\Smart\smartstream.cpp" />
-    <ClCompile Include="..\..\smart\Stock.cpp" />
     <ClCompile Include="..\..\Socket\clSocketClient.cpp" />
     <ClCompile Include="..\..\Socket\clSocketServer.cpp" />
     <ClCompile Include="..\..\third_party\crypt\crypt_arc4.cpp" />
@@ -84,9 +85,11 @@
     <ClInclude Include="..\..\clPathFile.h" />
     <ClInclude Include="..\..\clQuaternion.h" />
     <ClInclude Include="..\..\clstd.h" />
+    <ClInclude Include="..\..\clStock.h" />
     <ClInclude Include="..\..\clString.H" />
     <ClInclude Include="..\..\clStringSet.h" />
     <ClInclude Include="..\..\clTextLines.h" />
+    <ClInclude Include="..\..\clToken.h" />
     <ClInclude Include="..\..\clTransform.h" />
     <ClInclude Include="..\..\clTree.H" />
     <ClInclude Include="..\..\cltypes.h" />
@@ -95,7 +98,6 @@
     <ClInclude Include="..\..\clGeometry2D.h" />
     <ClInclude Include="..\..\Smart\SmartRepository.h" />
     <ClInclude Include="..\..\Smart\smartstream.h" />
-    <ClInclude Include="..\..\smart\Stock.h" />
     <ClInclude Include="..\..\Socket\clSocket.h" />
     <ClInclude Include="..\..\Socket\clSocketClient.h" />
     <ClInclude Include="..\..\Socket\clSocketServer.h" />

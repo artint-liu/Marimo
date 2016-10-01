@@ -91,25 +91,25 @@ GXLRESULT CMOStatic::Invoke(CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID
 
 GXBOOL CGXStaticSprite::SetSpriteByFilenameW(GXLPCWSTR szSpriteFile)
 {
-  GXHRESULT hval = gxSendMessage(m_hWnd, GXSSM_SETSPRITEBYFILENAMEW, NULL, (GXLPARAM)szSpriteFile);
+  GXHRESULT hval = (GXHRESULT)gxSendMessage(m_hWnd, GXSSM_SETSPRITEBYFILENAMEW, NULL, (GXLPARAM)szSpriteFile);
   return (hval == 0);
 }
 
 GXBOOL CGXStaticSprite::SetSprite(GXSprite* pSprite)
 {
-  GXHRESULT hval = gxSendMessage(m_hWnd, GXSSM_SETSPRITE, NULL, (GXLPARAM)pSprite);
+  GXHRESULT hval = (GXHRESULT)gxSendMessage(m_hWnd, GXSSM_SETSPRITE, NULL, (GXLPARAM)pSprite);
   return (hval == 0);
 }
 
 GXBOOL CGXStaticSprite::SetModuleByNameW(GXLPCWSTR szModuleName)
 {
-  GXHRESULT hval = gxSendMessage(m_hWnd, GXSSM_SETMODULEBYNAMEW, NULL, (GXLPARAM)szModuleName);
+  GXHRESULT hval = (GXHRESULT)gxSendMessage(m_hWnd, GXSSM_SETMODULEBYNAMEW, NULL, (GXLPARAM)szModuleName);
   return (hval == 0);
 }
 
 GXBOOL CGXStaticSprite::SetModuleByIndex(GXUINT nModuleIndex)
 {
-  GXHRESULT hval = gxSendMessage(m_hWnd, GXSSM_SETMODULEBYINDEX, (GXWPARAM)nModuleIndex, NULL);
+  GXHRESULT hval = (GXHRESULT)gxSendMessage(m_hWnd, GXSSM_SETMODULEBYINDEX, (GXWPARAM)nModuleIndex, NULL);
   return (hval == 0);
 }
 

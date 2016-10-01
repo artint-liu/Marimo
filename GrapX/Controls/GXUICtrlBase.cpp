@@ -2,7 +2,7 @@
 #include "GrapX.H"
 
 #include <Smart/smartstream.h>
-#include <Smart/Stock.h>
+#include <clStock.h>
 
 #include "User/GrapX.Hxx"
 #include "User/GXWindow.h"

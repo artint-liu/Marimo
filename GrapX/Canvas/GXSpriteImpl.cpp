@@ -14,7 +14,7 @@
 #include <clUtility.H>
 #include <clStringSet.h>
 #include <Smart/SmartStream.h>
-#include <Smart/Stock.h>
+#include <clStock.h>
 #include <Canvas/GXSpriteImpl.H>
 
 //using namespace std;
