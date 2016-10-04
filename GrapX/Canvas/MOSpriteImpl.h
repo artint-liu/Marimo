@@ -52,6 +52,8 @@ namespace Marimo
     b32 LoadRegion(GXREGN& regn, const clstd::StockA::ATTRIBUTE& attr, GXDWORD& dwFlag);
   };
 
+  //////////////////////////////////////////////////////////////////////////
+
   class MOSpriteImpl : public Marimo::Sprite
   {
   public:
@@ -60,9 +62,21 @@ namespace Marimo
     //  clStringA name;
     //  Regn      regn;
     //};
+    struct IDATTR{
+      MOSprite::Type type;
+      union {
+        GXUINT               index;
+        MOSprite::MODULE*    pModel;
+        MOSprite::FRAME*     pFrame;
+        MOSprite::ANIMATION* pAnimation;
+        void*                pAny;
+      };
+    };
+
 
     //typedef clvector<MODULE>      ModuleArray;
-    typedef clmap<clStringA, int>             NameDict;
+    typedef clmap<clStringA, IDATTR>          NameDict;
+    typedef clmap<ID, IDATTR>                 IDDict;
 
     typedef clvector<MOSprite::MODULE>       ModuleArray;
     typedef clvector<MOSprite::FRAME>        FrameArray;
@@ -72,7 +86,7 @@ namespace Marimo
     typedef clstd::StringSetA                clStringSetA;
     typedef clvector<GXImage*>               ImageArray;
   private:
-    clStringW           m_strImageFile;
+    //clStringW           m_strImageFile;
     ImageArray          m_ImageArray;
     SPRITE_DESC_LOADER  m_loader;
     //GXImage*          m_pImage;
@@ -88,6 +102,8 @@ namespace Marimo
     //AnimFrameArray    m_aAnimFrames;
 
     //NameDict          m_SpriteDict;
+    NameDict          m_NameDict;
+    IDDict            m_IDDict;
     //int IntGetSpriteCount() const;
   protected:
     virtual ~MOSpriteImpl();
@@ -117,9 +133,9 @@ namespace Marimo
     GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const override;
     GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const override;
     GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) const override;
+    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) override;
+    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) override;
+    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) override;
 
     GXVOID    Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const override;
     GXVOID    Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const override;
@@ -171,6 +187,15 @@ namespace Marimo
     GXBOOL    GetImage(GXImage** pImage, GXUINT index) const override;
     clStringW GetImageFileW(GXUINT index) const override;
     clStringA GetImageFileA(GXUINT index) const override;
+
+    protected:
+      template <class _UnitT>
+      void IntBuildNameIdDict(const clvector<_UnitT>& _array, MOSprite::Type type);
+
+      const IDATTR* IntFind(ID id) const;
+      const IDATTR* IntFind(GXLPCSTR szName) const;
+      GXINT IntAttrToIndex(const IDATTR* pAttr) const;
+      void IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const;
 
     //virtual GXHRESULT SaveW             (GXLPCWSTR szFilename) const;
   };

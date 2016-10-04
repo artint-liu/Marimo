@@ -529,15 +529,15 @@ GXVOID GXSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, G
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y)
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) const
+GXVOID GXSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
 {
 }
 
@@ -702,7 +702,7 @@ void GXSpriteImpl::IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const
       GXREGN rg = m_aModules[f.start].regn;
       for(GXUINT i = 1; i < f.count; i++)
       {
-        gxUnionRegn(&rg, &rg, &m_aModules[i].regn);
+        gxUnionRegn(&rg, &rg, &m_aModules[f.start + i].regn);
       }
       *lprg = rg;
     }

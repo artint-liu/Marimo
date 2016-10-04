@@ -17,6 +17,8 @@
 #include <clStock.h>
 #include <Canvas/MOSpriteImpl.H>
 
+#define _测试后删除这行_ CLBREAK
+
 //using namespace std;
 //////////////////////////////////////////////////////////////////////////
 extern "C" GXBOOL GXDLLAPI gxSetRegn(GXLPREGN lprg, GXINT xLeft, GXINT yTop, GXINT xWidth, GXINT yHeight);
@@ -62,7 +64,6 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-
   GXVOID MOSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
   {
     //const GXREGN& regn = ;
@@ -87,7 +88,10 @@ namespace Marimo
 
   GXVOID MOSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
   {
-    CLBREAK;
+    if(nIndex < (GXINT)m_loader.aModules.size()) {
+      const MODULE& m = m_loader.aModules[nIndex];
+      pCanvas->DrawImage(m_ImageArray[GXHIWORD(m.id)], lpRegn, &m.regn);
+    }
   }
 
   //GXVOID MOSpriteImpl::PaintModuleH(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth) const
@@ -370,17 +374,17 @@ namespace Marimo
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y)
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) const
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
   {
     CLBREAK;
   }
@@ -429,14 +433,22 @@ namespace Marimo
 
   GXINT MOSpriteImpl::Find(ID id, Type* pType) const
   {
-    CLBREAK;
-    return -1;
+    _测试后删除这行_;
+    auto pAttr = IntFind(id);
+    if(pType) {
+      *pType = pAttr->type;
+    }
+    return IntAttrToIndex(pAttr);
   }
 
   GXINT MOSpriteImpl::Find(GXLPCSTR szName, Type* pType) const
   {
-    CLBREAK;
-    return -1;
+    _测试后删除这行_;
+    auto pAttr = IntFind(szName);
+    if(pType) {
+      *pType = pAttr->type;
+    }
+    return IntAttrToIndex(pAttr);
   }
 
   GXINT MOSpriteImpl::Find(GXLPCWSTR szName, GXOUT Type* pType) const
@@ -446,31 +458,33 @@ namespace Marimo
   
   GXLPCSTR MOSpriteImpl::FindName(ID id) const
   {
-    //auto pAttr = IntFind(id);
-    //switch(pAttr->type)
-    //{
-    //case MOSprite::Type_Module:
-    //  return pAttr->pModel->name;
-    //case MOSprite::Type_Frame:
-    //  return pAttr->pFrame->name;
-    //case MOSprite::Type_Animation:
-    //  return pAttr->pAnination->name;
-    //}
+    _测试后删除这行_
+    auto pAttr = IntFind(id);
+    switch(pAttr->type)
+    {
+    case MOSprite::Type_Module:
+      return pAttr->pModel->name;
+    case MOSprite::Type_Frame:
+      return pAttr->pFrame->name;
+    case MOSprite::Type_Animation:
+      return pAttr->pAnimation->name;
+    }
     return NULL;
   }
 
   MOSprite::ID MOSpriteImpl::FindID(GXLPCSTR szName) const
   {
-    //auto pAttr = IntFind(szName);
-    //switch(pAttr->type)
-    //{
-    //case MOSprite::Type_Module:
-    //  return pAttr->pModel->id;
-    //case MOSprite::Type_Frame:
-    //  return pAttr->pFrame->id;
-    //case MOSprite::Type_Animation:
-    //  return pAttr->pAnination->id;
-    //}
+    _测试后删除这行_
+    auto pAttr = IntFind(szName);
+    switch(pAttr->type)
+    {
+    case MOSprite::Type_Module:
+      return pAttr->pModel->id;
+    case MOSprite::Type_Frame:
+      return pAttr->pFrame->id;
+    case MOSprite::Type_Animation:
+      return pAttr->pAnimation->id;
+    }
     return 0;
   }
 
@@ -640,31 +654,63 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
+  void MOSpriteImpl::IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const
+  {
+    switch(pAttr->type)
+    {
+    case MOSprite::Type_Module:
+      ASSERT(pAttr->pModel >= &m_loader.aModules.front() &&
+        pAttr->pModel <= &m_loader.aModules.back());
+
+      *lprg = pAttr->pModel->regn;
+      break;
+    case MOSprite::Type_Frame:
+      {
+        ASSERT(pAttr->pFrame>= &m_loader.aFrames.front() &&
+          pAttr->pFrame <= &m_loader.aFrames.back());
+
+        const FRAME& f = *pAttr->pFrame;
+        GXREGN rg = m_loader.aModules[f.begin].regn;
+        for(GXUINT i = f.begin + 1; i < f.end; i++)
+        {
+          gxUnionRegn(&rg, &rg, &m_loader.aModules[i].regn);
+        }
+        *lprg = rg;
+      }
+      break;
+    case MOSprite::Type_Animation:
+      ASSERT(pAttr->pAnimation>= &m_loader.aAnims.front() &&
+        pAttr->pAnimation <= &m_loader.aAnims.back());
+      CLBREAK; // 没实现
+      break;
+    }
+  }
+
   template<typename _TID>
   MOSprite::Type MOSpriteImpl::GetBoundingT(_TID id, GXLPRECT lprc) const
   {
-    //auto pAttr = IntFind(id);
-    //if( ! pAttr) {
-    //  return MOSprite::Type_Empty;
-    //}
-    //GXREGN regn;
-    //IntGetBounding(pAttr, &regn);
-    //gxRegnToRect(lprc, &regn);
-    //return pAttr->type;
-    return Type_Error;
+    _测试后删除这行_;
+    auto pAttr = IntFind(id);
+    if( ! pAttr) {
+      return MOSprite::Type_Error;
+    }
+    GXREGN regn;
+    IntGetBounding(pAttr, &regn);
+    gxRegnToRect(lprc, &regn);
+    return pAttr->type;
   }
 
   template<typename _TID>
   MOSprite::Type MOSpriteImpl::GetBoundingT(_TID id, GXLPREGN lprg) const
   {
-    //auto pAttr = IntFind(id);
-    //if( ! pAttr) {
-    //  return MOSprite::Type_Empty;
-    //}
+    _测试后删除这行_;
+    auto pAttr = IntFind(id);
+    if( ! pAttr) {
+      return MOSprite::Type_Error;
+    }
 
-    //IntGetBounding(pAttr, lprg);
-    //return pAttr->type;
-    return Type_Error;
+    IntGetBounding(pAttr, lprg);
+    return pAttr->type;
   }
 
 
@@ -757,7 +803,69 @@ namespace Marimo
     });
 
     ASSERT(m_ImageArray.size() == pDesc->aFiles.size());
+
+    //std::for_each(m_loader.aModules.begin(), m_loader.aModules.end(), [const MODULE& m](){
+    //});
+    IntBuildNameIdDict(m_loader.aModules, MOSprite::Type_Module);
+    IntBuildNameIdDict(m_loader.aFrames, MOSprite::Type_Frame);
+    IntBuildNameIdDict(m_loader.aAnims, MOSprite::Type_Animation);
+
     return TRUE;
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  template <class _UnitT>
+  void MOSpriteImpl::IntBuildNameIdDict(const clvector<_UnitT>& _array, MOSprite::Type type)
+  {
+    IDATTR attr;
+    attr.type = type;
+    //int n = 0;
+    std::for_each(_array.begin(), _array.end(), [&attr, this](const _UnitT& m) {
+      attr.pAny = (void*)&m;
+      if(m.id) {
+        m_IDDict.insert(clmake_pair(m.id, attr));
+      }
+      if(m.name) {
+        m_NameDict.insert(clmake_pair(m.name, attr));
+      }
+    });
+  }
+
+  const MOSpriteImpl::IDATTR* MOSpriteImpl::IntFind(ID id) const
+  {
+    auto it = m_IDDict.find(id);
+    if(it == m_IDDict.end()) {
+      return NULL;
+    }
+    return &it->second;
+  }
+
+  const MOSpriteImpl::IDATTR* MOSpriteImpl::IntFind(GXLPCSTR szName) const
+  {
+    auto it = m_NameDict.find(szName);
+    if(it == m_NameDict.end()) {
+      return NULL;
+    }
+    return &it->second;
+  }
+
+  GXINT MOSpriteImpl::IntAttrToIndex(const IDATTR* pAttr) const
+  {
+    switch(pAttr->type)
+    {
+    case MOSprite::Type_Error:
+      CLBREAK;
+      return pAttr->index;
+    case MOSprite::Type_Module:
+      return (GXINT)(pAttr->pModel - &m_loader.aModules.front());
+    case MOSprite::Type_Frame:
+      return (GXINT)(pAttr->pFrame - &m_loader.aFrames.front());
+    case MOSprite::Type_Animation:
+      return (GXINT)(pAttr->pAnimation - &m_loader.aAnims.front());
+    }
+    return -1;
+  }
+
 } // namespace Marimo 
 
