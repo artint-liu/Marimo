@@ -82,8 +82,8 @@
       <Filter>Thread</Filter>
     </ClCompile>
     <ClCompile Include="..\..\clGeometry2D.cpp" />
-    <ClCompile Include="..\..\clToken.cpp" />
     <ClCompile Include="..\..\clStock.cpp" />
+    <ClCompile Include="..\..\clTokens.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clBuffer.H" />
@@ -158,8 +158,8 @@
     </ClInclude>
     <ClInclude Include="..\..\clGeometry2D.h" />
     <ClInclude Include="..\..\clStaticStringsDict.h" />
-    <ClInclude Include="..\..\clToken.h" />
     <ClInclude Include="..\..\clStock.h" />
+    <ClInclude Include="..\..\clTokens.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

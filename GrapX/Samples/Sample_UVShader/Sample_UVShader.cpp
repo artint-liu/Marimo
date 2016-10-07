@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <Marimo.H>
 #include <Smart/SmartStream.h>
+#include <clTokens.h>
 #include <clPathFile.h>
 #include <clStringSet.h>
 #include "../../../GrapX/UniVersalShader/ArithmeticExpression.h"
@@ -326,7 +327,9 @@ void TestShaderToys(GXBOOL bShowList)
 
 // ²âÊÔ¿ª¹Ø
 //#define TEST_ARITHMETIC_PARSING
-//#define TEST_ALL_SHADERTOYS
+#define TEST_ALL_SHADERTOYS
+//#define TEST_STD_SAMPLE
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -366,7 +369,6 @@ int _tmain(int argc, _TCHAR* argv[])
   MakeGraphicalExpression("Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", "Test\\shaders\\output.png");
 #endif // #ifdef ENABLE_GRAPH
 
-//#define TEST_STD_SAMPLE
 #ifdef TEST_STD_SAMPLE
   TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt", "Test\\shaders\\std_samples[reference].txt");
 #endif // #ifdef TEST_STD_SAMPLE

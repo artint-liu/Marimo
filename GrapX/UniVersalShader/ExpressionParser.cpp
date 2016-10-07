@@ -1,6 +1,7 @@
 ﻿#include <grapx.h>
 #include <clUtility.h>
 #include <Smart/SmartStream.h>
+#include <clTokens.h>
 #include <clStringSet.h>
 #include "ArithmeticExpression.h"
 #include "ExpressionParser.h"
@@ -157,7 +158,7 @@ namespace UVShader
       }
       m_pMsg->GenerateCurLines(szExpression, nSize);
     }
-    return SmartStreamA::Initialize(szExpression, nSize);
+    return CTokens::Initialize(szExpression, nSize);
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -167,6 +168,9 @@ namespace UVShader
   u32 CALLBACK CodeParser::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
   {
     GXBOOL bENotation = FALSE;
+    if(TEST_FLAG(m_aCharSem[it.marker[0]], M_CALLBACK)) {
+      return MultiByteOperatorProc(it, remain, lParam);
+    }
 
     if(it.marker[0] == '#' && TEST_FLAG_NOT(((CodeParser*)it.pContainer)->m_dwState, AttachFlag_Preprocess))
     {
@@ -178,7 +182,7 @@ namespace UVShader
       }
       SET_FLAG(pThis->m_dwState, State_InPreprocess);
 
-      if( ! SmartStreamUtility::IsHeadOfLine(it.pContainer, it.marker)) {
+      if( ! TOKENSUTILITY::IsHeadOfLine(it.pContainer, it.marker)) {
         ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
       }
 
@@ -277,7 +281,12 @@ namespace UVShader
     token.ClearMarker();
     token.precedence = 0;
     token.unary      = 0;
+
+#ifdef USE_CLSTD_TOKENS
+#else
     SetTriggerCallBack(MultiByteOperatorProc, (u32_ptr)&token);
+#endif // USE_CLSTD_TOKENS
+
     SetIteratorCallBack(IteratorProc, (u32_ptr)&token);
 
     PairStack sStack[s_nPairMark];
@@ -358,7 +367,10 @@ namespace UVShader
       }
     }
 
+#ifdef USE_CLSTD_TOKENS
+#else
     SetTriggerCallBack(MultiByteOperatorProc, NULL);
+#endif // #ifdef USE_CLSTD_TOKENS
     SetIteratorCallBack(IteratorProc, NULL);
 
     // 如果是子解析器，这里借用了父对象的信息定位，退出时要清空，避免析构时删除

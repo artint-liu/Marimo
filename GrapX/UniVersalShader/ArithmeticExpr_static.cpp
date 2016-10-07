@@ -1,6 +1,7 @@
 ﻿#include <grapx.h>
 #include <clUtility.h>
 #include <Smart/SmartStream.h>
+#include <clTokens.h>
 #include <clStringSet.h>
 #include "ArithmeticExpression.h"
 #include "ExpressionParser.h"

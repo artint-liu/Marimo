@@ -1,29 +1,29 @@
-#ifndef _CLSTD_TOKEN_H_
+ï»¿#ifndef _CLSTD_TOKEN_H_
 #define _CLSTD_TOKEN_H_
 
 namespace clstd {
 
   template<class _TStr>
-  class TokenT
+  class TokensT
   {
   public:
     //enum MARK
     //{
-    //  M_ESCAPE      = 0x0800,  // ×ªÒå·û
-    //  M_SYMBOL      = 0x0000,  // ·ûºÅ
-    //  M_GAP         = 0x0001,  // ¿Õ°×
-    //  M_QUOT        = 0x0002,  // ÒýºÅ
-    //  M_OPN_BRAKETS = 0x0004,  // ¿ªÀ¨ºÅ
-    //  M_CLS_BRAKETS = 0x0008,  // ±ÕÀ¨ºÅ
-    //  M_LABEL       = 0x0010,  // ±êÇ©
-    //  M_TYPE_MASK   = 0x001F,  // ÀàÐÍÑÚÂë
-    //  M_CALLBACK    = 0x0020,  // ´¥·¢»Øµ÷, ±ØÐëÊÇ iterator µÄÊ××Ö½Ú
-    //  M_GROUP_MASK  = 0xF000,  // ×éÑÚÂë, Ö»ÊÊÓÃÓÚÒýºÅÀ¨ºÅ
+    //  M_ESCAPE      = 0x0800,  // è½¬ä¹‰ç¬¦
+    //  M_SYMBOL      = 0x0000,  // ç¬¦å·
+    //  M_GAP         = 0x0001,  // ç©ºç™½
+    //  M_QUOT        = 0x0002,  // å¼•å·
+    //  M_OPN_BRAKETS = 0x0004,  // å¼€æ‹¬å·
+    //  M_CLS_BRAKETS = 0x0008,  // é—­æ‹¬å·
+    //  M_LABEL       = 0x0010,  // æ ‡ç­¾
+    //  M_TYPE_MASK   = 0x001F,  // ç±»åž‹æŽ©ç 
+    //  M_CALLBACK    = 0x0020,  // è§¦å‘å›žè°ƒ, å¿…é¡»æ˜¯ iterator çš„é¦–å­—èŠ‚
+    //  M_GROUP_MASK  = 0xF000,  // ç»„æŽ©ç , åªé€‚ç”¨äºŽå¼•å·æ‹¬å·
     //};
 
     enum FLAGS
     {
-      F_SYMBOLBREAK = 0x0001,    // ÇÐ¿ª Symbol, ¶ÔÓÚÁ¬ÐøµÄ Symbol ½«·Ö³É¶ÀÁ¢µÄ×Ö·û·Ö±ð·µ»Ø.
+      F_SYMBOLBREAK = 0x0001,    // åˆ‡å¼€ Symbol, å¯¹äºŽè¿žç»­çš„ Symbol å°†åˆ†æˆç‹¬ç«‹çš„å­—ç¬¦åˆ†åˆ«è¿”å›ž.
     };
 
     typedef typename _TStr::LPCSTR T_LPCSTR;
@@ -33,7 +33,7 @@ namespace clstd {
     struct iterator
     {
     public:
-      const TokenT*   pContainer;
+      const TokensT*  pContainer;
       T_LPCSTR        marker;
       clsize          length;
 
@@ -42,7 +42,7 @@ namespace clstd {
         , marker    (NULL)
         , length    (0){}
 
-      iterator(const TokenT*  _pContainer) 
+      iterator(const TokensT*  _pContainer) 
         : pContainer(_pContainer)
         , marker    (_pContainer->m_pBegin)
         , length    (0){}
@@ -56,7 +56,7 @@ namespace clstd {
       iterator&  operator++(int);
       b32  operator==(const _TStr& str) const;
       b32  operator==(T_LPCSTR pStr) const;
-      b32  operator==(TChar ch) const;            // Èç¹ûiteratorÊÇ¶à×Ö½Ú½«·µ»ØFALSE
+      b32  operator==(TChar ch) const;            // å¦‚æžœiteratoræ˜¯å¤šå­—èŠ‚å°†è¿”å›žFALSE
       b32  operator!=(const _TStr& str) const;
       b32  operator!=(T_LPCSTR pStr) const;
       b32  operator!=(TChar ch) const;
@@ -67,11 +67,11 @@ namespace clstd {
       b32  operator>(const iterator& it) const;
       b32  operator<(const iterator& it) const;
       iterator&  operator=(const iterator& it);
-      iterator  operator+(const size_t n) const;  // Ö»ÄÜÊ¹ÓÃÔöÁ¿
+      iterator  operator+(const size_t n) const;  // åªèƒ½ä½¿ç”¨å¢žé‡
 
-      clsize  offset      () const;   // ·µ»ØÖµ TChar µÄÀàÐÍÆ«ÒÆ£¬ ²»ÊÇ×Ö½ÚÆ«ÒÆ
-      _TStr   ToRawString () const;   // ·µ»ØÔ­Ê¼×Ö·û´®
-      _TStr   ToString    () const;   // ·µ»Ø×Ö·û´®£¬Èç¹û×Ö·û´®´øÓÐµ¥ÒýºÅ»òÕßË«ÒýºÅ£¬»á±»È¥µô¡£
+      clsize  offset      () const;   // è¿”å›žå€¼ TChar çš„ç±»åž‹åç§»ï¼Œ ä¸æ˜¯å­—èŠ‚åç§»
+      _TStr   ToRawString () const;   // è¿”å›žåŽŸå§‹å­—ç¬¦ä¸²
+      _TStr   ToString    () const;   // è¿”å›žå­—ç¬¦ä¸²ï¼Œå¦‚æžœå­—ç¬¦ä¸²å¸¦æœ‰å•å¼•å·æˆ–è€…åŒå¼•å·ï¼Œä¼šè¢«åŽ»æŽ‰ã€‚
       b32     BeginsWith  (TChar ch) const;
       b32     EndsWith    (TChar ch) const;
       b32     BeginsWith  (T_LPCSTR str) const;
@@ -80,7 +80,7 @@ namespace clstd {
       b32     EndsWith    (T_LPCSTR str, clsize count) const;
 
       //
-      // ·ûºÏSTL¹æ·¶µÄ½Ó¿Ú
+      // ç¬¦åˆSTLè§„èŒƒçš„æŽ¥å£
       //
       inline const TChar& front() const {
         return marker[0];
@@ -98,7 +98,7 @@ namespace clstd {
         return marker + length;
       }
     };
-    typedef size_t (CALLBACK *IteratorProc)(iterator& it, clsize nRemain, u32_ptr lParam); // nRemain ÊÇit.marker[0]µ½ÎÄ¼þ½áÎ²µÄ(Ê£Óà)³¤¶È. Ä¿Ç°²»¹ØÐÄ·µ»ØÖµ
+    typedef size_t (CALLBACK *IteratorProc)(iterator& it, clsize nRemain, u32_ptr lParam); // nRemain æ˜¯it.marker[0]åˆ°æ–‡ä»¶ç»“å°¾çš„(å‰©ä½™)é•¿åº¦. ç›®å‰ä¸å…³å¿ƒè¿”å›žå€¼
     typedef const iterator const_iterator; 
 
   protected:
@@ -108,13 +108,13 @@ namespace clstd {
     //SemType       m_aCharSem[c_nCharTabCount];
     u32           m_dwFlags;
     iterator      m_itEnd;
-    IteratorProc  m_pCallBack;        // Õë¶ÔÃ¿Ò»¸ö Iterator
+    IteratorProc  m_pCallBack;        // é’ˆå¯¹æ¯ä¸€ä¸ª Iterator
     u32_ptr       m_lParam;
-    //IteratorProc  m_pTriggerCallBack; // ´øÓÐ´¥·¢±êÖ¾µÄ Iterator Ê××Ö½Ú
+    //IteratorProc  m_pTriggerCallBack; // å¸¦æœ‰è§¦å‘æ ‡å¿—çš„ Iterator é¦–å­—èŠ‚
     u32_ptr       m_lParamTrigger;
 
   public:
-    TokenT(T_LPCSTR pStream = NULL, clsize uCountOfChar = 0);
+    TokensT(T_LPCSTR pStream = NULL, clsize uCountOfChar = 0);
 
     b32      Initialize        (T_LPCSTR pStream, clsize uCountOfChar);
     //void     GetCharSemantic   (SemType* pCharSem, clsize uStart, clsize uEnd) const;
@@ -124,8 +124,8 @@ namespace clstd {
     b32      IsEndOfStream     (T_LPCSTR pPointer) const;
     b32      IsHeadOfStream    (T_LPCSTR pPointer) const;
     T_LPCSTR GetStreamPtr      () const;
-    clsize   GetStreamCount    () const; // ·µ»ØµÄÊÇTCharµÄÀàÐÍ³¤¶È£¬²»ÊÇ×Ö½ÚÊý GetStreamEnd() - GetStreamPtr()
-    b32      Get               (T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) const;    // È¡Ö¸Õëµ±Ç°´¦µÄÄÚÈÝ
+    clsize   GetStreamCount    () const; // è¿”å›žçš„æ˜¯TCharçš„ç±»åž‹é•¿åº¦ï¼Œä¸æ˜¯å­—èŠ‚æ•° GetStreamEnd() - GetStreamPtr()
+    b32      Get               (T_LPCSTR pPointer, T_LPCSTR* ppOutPointer, clsize* pOutCount) const;    // å–æŒ‡é’ˆå½“å‰å¤„çš„å†…å®¹
     u32      SetFlags          (u32 dwFlags);
     u32      GetFlags          () const;
 
@@ -133,12 +133,18 @@ namespace clstd {
     //IteratorProc SetTriggerCallBack (IteratorProc pTrigger, u32_ptr lParam);
 
     iterator&       next      (iterator& it) const;
-    iterator        nearest   (clsize nOffset) const; // °´ÕÕnOffset²éÕÒ×î½üµÄiterator£¬iteratorµÄÆ«ÒÆ´óÓÚµÈÓÚnOffset
+    iterator        nearest   (clsize nOffset) const; // æŒ‰ç…§nOffsetæŸ¥æ‰¾æœ€è¿‘çš„iteratorï¼Œiteratorçš„åç§»å¤§äºŽç­‰äºŽnOffset
     iterator        begin     () const;
     const_iterator& end       () const;
-    const_iterator  find      (const iterator& itBegin, int nCount, ...) const; // ´Ó itBegin ¿ªÊ¼²éÕÒ, Èç¹ûÕÒµ½²ÎÊýÁÐ±íµÄÈÎÒâÒ»¸ö¾ÍÂíÉÏ·µ»Ø
+    const_iterator  find      (const iterator& itBegin, int nCount, ...) const; // ä»Ž itBegin å¼€å§‹æŸ¥æ‰¾, å¦‚æžœæ‰¾åˆ°å‚æ•°åˆ—è¡¨çš„ä»»æ„ä¸€ä¸ªå°±é©¬ä¸Šè¿”å›ž
     b32             find_pair (const iterator& itCurrent, iterator& itOpen, iterator& itClose, T_LPCSTR chOpen, T_LPCSTR chClose) const;
   };
+
+  namespace TokensUtility
+  {
+    template<class _TStr>
+    b32 IsHeadOfLine(const TokensT<_TStr>* pToken, typename _TStr::LPCSTR pChar);
+  }
 
 } // namespace clstd
 

@@ -1,6 +1,7 @@
 ﻿#include <grapx.h>
 #include <clUtility.h>
 #include <Smart/SmartStream.h>
+#include <clTokens.h>
 #include <clStringSet.h>
 #include "ArithmeticExpression.h"
 //#include "ExpressionParser.h"
@@ -61,6 +62,10 @@
 
 namespace UVShader
 {
+#ifdef USE_CLSTD_TOKENS
+  u32 ArithmeticExpression::m_aCharSem[128];
+#endif // USE_CLSTD_TOKENS
+
   ArithmeticExpression::ArithmeticExpression()
     : m_pMsg(NULL)
     //, m_nMaxPrecedence(0)
@@ -73,9 +78,12 @@ namespace UVShader
     }
 #endif // #ifdef _DEBUG
 
+#ifdef USE_CLSTD_TOKENS
+    u32* aCharSem = m_aCharSem; // TODO: 其实初始化一次就可以
+#else
     u32 aCharSem[128];
     GetCharSemantic(aCharSem, 0, 128);
-
+#endif
     int nMaxPrecedence = 0;
 
     FOR_EACH_MBO(1, i) {
@@ -98,7 +106,12 @@ namespace UVShader
     ASSERT(s_MaxPrecedence == nMaxPrecedence); // 如果两个不一致，修改 s_MaxPrecedence 的值
 
     SetFlags(GetFlags() | F_SYMBOLBREAK);
+
+#ifdef USE_CLSTD_TOKENS
+#else
     SetCharSemantic(aCharSem, 0, 128);
+#endif // USE_CLSTD_TOKENS
+
     //SetIteratorCallBack(IteratorProc, 0);
     //SetTriggerCallBack(MultiByteOperatorProc, 0);
   }

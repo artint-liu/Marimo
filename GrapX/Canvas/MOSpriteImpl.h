@@ -1,4 +1,4 @@
-#ifndef _IMPLEMENT_MARIMO_SPRITE_HEADER_FILE_
+ï»¿#ifndef _IMPLEMENT_MARIMO_SPRITE_HEADER_FILE_
 #define _IMPLEMENT_MARIMO_SPRITE_HEADER_FILE_
 
 class GXImage;
@@ -91,7 +91,7 @@ namespace Marimo
     SPRITE_DESC_LOADER  m_loader;
     //GXImage*          m_pImage;
 
-    //clStringSetA      m_NameSet; // TODO: Õâ¸ö½«À´¿ÉÒÔÈ¡Ïû£¬Ê¹ÓÃÑ¹ÊµµÄÒ»´ó¿éÄÚ´æ´¢´æ×Ö·û´®ĞòÁĞ
+    //clStringSetA      m_NameSet; // TODO: è¿™ä¸ªå°†æ¥å¯ä»¥å–æ¶ˆï¼Œä½¿ç”¨å‹å®çš„ä¸€å¤§å—å†…å­˜å‚¨å­˜å­—ç¬¦ä¸²åºåˆ—
 
     //ModuleArray       m_aModules;
 
@@ -147,12 +147,12 @@ namespace Marimo
     GXINT     Find                 (ID id, Type* pType) const override;
     GXINT     Find                 (GXLPCSTR szName, Type* pType) const override;
     GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const override;
-    GXLPCSTR  FindName             (ID id) const override;             // ÓÃ ID ²éÕÒ Name
-    ID        FindID               (GXLPCSTR szName) const override;   // ÓÃ Name ²éÕÒ ID
-    ID        FindID               (GXLPCWSTR szName) const override;  // ÓÃ Name ²éÕÒ ID
+    GXLPCSTR  FindName             (ID id) const override;             // ç”¨ ID æŸ¥æ‰¾ Name
+    ID        FindID               (GXLPCSTR szName) const override;   // ç”¨ Name æŸ¥æ‰¾ ID
+    ID        FindID               (GXLPCWSTR szName) const override;  // ç”¨ Name æŸ¥æ‰¾ ID
 
-    GXINT     PackIndex            (Type type, GXUINT index) const override;   // ½«²»Í¬ÀàĞÍµÄË÷Òı´ò°üÎªÍ³Ò»ÀàĞÍµÄË÷Òı
-    GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const override; // ½«Í³Ò»Ë÷Òı²ğ½âÎªÀàĞÍºÍÀàĞÍË÷Òı
+    GXINT     PackIndex            (Type type, GXUINT index) const override;   // å°†ä¸åŒç±»å‹çš„ç´¢å¼•æ‰“åŒ…ä¸ºç»Ÿä¸€ç±»å‹çš„ç´¢å¼•
+    GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const override; // å°†ç»Ÿä¸€ç´¢å¼•æ‹†è§£ä¸ºç±»å‹å’Œç±»å‹ç´¢å¼•
 
     GXSIZE_T  GetModuleCount       () const override;
     GXSIZE_T  GetFrameCount        () const override;
@@ -166,7 +166,7 @@ namespace Marimo
     GXBOOL    GetAnimation  (GXUINT nIndex, ANIMATION* pAnimation) const override;
     GXSIZE_T  GetAnimFrame  (GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const override;
 
-    GXBOOL    GetModuleRect     (GXUINT nIndex, GXLPRECT rcSprite) const override;  // »ñµÃModuleÔÚImageÖĞµÄÎ»ÖÃ
+    GXBOOL    GetModuleRect     (GXUINT nIndex, GXLPRECT rcSprite) const override;  // è·å¾—Moduleåœ¨Imageä¸­çš„ä½ç½®
     GXBOOL    GetModuleRegion   (GXUINT nIndex, GXLPREGN rgSprite) const override;
     GXBOOL    GetFrameBounding  (GXUINT nIndex, GXLPRECT lprc) const override;
     GXBOOL    GetAnimBounding   (GXUINT nIndex, GXLPRECT lprc) const override;
@@ -176,14 +176,14 @@ namespace Marimo
     template<typename _TID>
     MOSprite::Type GetBoundingT(_TID id, GXLPREGN lprg) const;
 
-    GXSTDIMPLEMENT(Type      GetBounding(ID id, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+    GXSTDIMPLEMENT(Type      GetBounding(ID id, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
     GXSTDIMPLEMENT(Type      GetBounding(ID id, GXLPREGN lprg) const);
-    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
     GXSTDIMPLEMENT(Type      GetBounding          (GXLPCSTR szName, GXLPREGN lprg) const);
-    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+    GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
     GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
-    GXSIZE_T  GetImageCount() const override;  // º¬ÓĞµÄÍ¼Æ¬ÊıÁ¿
+    GXSIZE_T  GetImageCount() const override;  // å«æœ‰çš„å›¾ç‰‡æ•°é‡
     GXBOOL    GetImage(GXImage** pImage, GXUINT index) const override;
     clStringW GetImageFileW(GXUINT index) const override;
     clStringA GetImageFileA(GXUINT index) const override;

@@ -1,11 +1,11 @@
-//
+ï»¿//
 // Sprite Manufacture
-// Sprite Éú²úÀàº¯Êı
+// Sprite ç”Ÿäº§ç±»å‡½æ•°
 //
-// È«¾ÖÍ·ÎÄ¼ş
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 #include "GrapX/GResource.H"
 #include "GrapX/GXImage.H"
 #include "GrapX/GXCanvas.H"
@@ -13,7 +13,7 @@
 #include "GrapX/GXGraphics.H"
 #include "GrapX/GXKernel.H"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <clPathFile.h>
 #include <clUtility.H>
 #include <clStringSet.H>
@@ -75,7 +75,7 @@ namespace Marimo
         }
       }
 
-      // ¼ÇÂ¼Ë³ĞòÎŞ¹Ø
+      // è®°å½•é¡ºåºæ— å…³
       if(TEST_FLAG(dwFlag, HAS_LOADED_RIGHT)) {
         module.regn.width = module.regn.width - module.regn.left;
       }
@@ -124,7 +124,7 @@ namespace Marimo
               continue;
             }
             else if(unit_attr.key == "id") {
-              unit.nModuleIdx = unit_attr.ToInt(); // IDÔİ´æµ½indexÖĞ
+              unit.nModuleIdx = unit_attr.ToInt(); // IDæš‚å­˜åˆ°indexä¸­
             }
           }
           aFrameUnits.push_back(unit);

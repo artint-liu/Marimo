@@ -1,7 +1,7 @@
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.H>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 #include "GrapX/GResource.H"
 #include "GrapX/GXImage.H"
 #include "GrapX/GXCanvas.H"
@@ -9,7 +9,7 @@
 #include "GrapX/GXGraphics.H"
 #include "GrapX/GXKernel.H"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include <clPathFile.h>
 #include <clUtility.H>
 #include <clStringSet.h>
@@ -17,7 +17,7 @@
 #include <clStock.h>
 #include <Canvas/MOSpriteImpl.H>
 
-#define _²âÊÔºóÉ¾³ıÕâĞĞ_ CLBREAK
+#define _æµ‹è¯•ååˆ é™¤è¿™è¡Œ_ CLBREAK
 
 //using namespace std;
 //////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ namespace Marimo
   //  }
   //  pCanvas->DrawImage(m_pImage, &rgTip0, &m_loader.aModules[nStartIdx    ].regn);
   //  pCanvas->DrawImage(m_pImage, &rgTip1, &m_loader.aModules[nStartIdx + 2].regn);
-  //  return rgDest.width;  // ·µ»ØÖµÊÇÖĞ¼ä¿ÉËõ·ÅSpriteµÄ¿í¶È
+  //  return rgDest.width;  // è¿”å›å€¼æ˜¯ä¸­é—´å¯ç¼©æ”¾Spriteçš„å®½åº¦
   //}
   //
   //GXLONG MOSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
@@ -243,7 +243,7 @@ namespace Marimo
   //  }
   //  pCanvas->DrawImage(m_pImage, &rgTip0, &m_loader.aModules[nStartIdx    ].regn);
   //  pCanvas->DrawImage(m_pImage, &rgTip1, &m_loader.aModules[nStartIdx + 2].regn);
-  //  return rgDest.height;  // ·µ»ØÖµÊÇÖĞ¼ä¿ÉËõ·ÅSpriteµÄ¿í¶È
+  //  return rgDest.height;  // è¿”å›å€¼æ˜¯ä¸­é—´å¯ç¼©æ”¾Spriteçš„å®½åº¦
   //}
   //
   //GXVOID MOSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const
@@ -261,10 +261,10 @@ namespace Marimo
   //  const GXINT top = rect->top;
   //  //const GXINT bottom = rect->bottom;
   //
-  //  /*×óÉÏ½Ç*/pCanvas->DrawImage(m_pImage, rect->left, rect->top, &m_loader.aModules[nStartIdx].regn);
-  //  /*ÓÒÉÏ½Ç*/pCanvas->DrawImage(m_pImage, rect->right - m_loader.aModules[nStartIdx + 2].regn.width, rect->top, &m_loader.aModules[nStartIdx + 2].regn);
-  //  /*×óÏÂ½Ç*/pCanvas->DrawImage(m_pImage, rect->left, rect->bottom - m_loader.aModules[nStartIdx + 6].regn.height, &m_loader.aModules[nStartIdx + 6].regn);
-  //  /*ÓÒÏÂ½Ç*/pCanvas->DrawImage(m_pImage, rect->right - m_loader.aModules[nStartIdx + 8].regn.width, rect->bottom - m_loader.aModules[nStartIdx + 8].regn.height, &m_loader.aModules[nStartIdx + 8].regn);
+  //  /*å·¦ä¸Šè§’*/pCanvas->DrawImage(m_pImage, rect->left, rect->top, &m_loader.aModules[nStartIdx].regn);
+  //  /*å³ä¸Šè§’*/pCanvas->DrawImage(m_pImage, rect->right - m_loader.aModules[nStartIdx + 2].regn.width, rect->top, &m_loader.aModules[nStartIdx + 2].regn);
+  //  /*å·¦ä¸‹è§’*/pCanvas->DrawImage(m_pImage, rect->left, rect->bottom - m_loader.aModules[nStartIdx + 6].regn.height, &m_loader.aModules[nStartIdx + 6].regn);
+  //  /*å³ä¸‹è§’*/pCanvas->DrawImage(m_pImage, rect->right - m_loader.aModules[nStartIdx + 8].regn.width, rect->bottom - m_loader.aModules[nStartIdx + 8].regn.height, &m_loader.aModules[nStartIdx + 8].regn);
   //
   ////*
   //  rcDest.left   = rect->left + m_loader.aModules[nStartIdx].regn.width;
@@ -279,14 +279,14 @@ namespace Marimo
   //  rcDest.height = m_loader.aModules[nStartIdx + 7].regn.height;
   //  pCanvas->DrawImage(m_pImage, &rcDest, &m_loader.aModules[nStartIdx + 7].regn);
   //
-  //  // ×ó±ß
+  //  // å·¦è¾¹
   //  rcDest.left   = rect->left;
   //  rcDest.top    = rect->top + m_loader.aModules[nStartIdx   ].regn.height;
   //  rcDest.width  = m_loader.aModules[nStartIdx + 3].regn.width;
   //  rcDest.height = height - m_loader.aModules[nStartIdx].regn.height - m_loader.aModules[nStartIdx + 6].regn.height;
   //  pCanvas->DrawImage(m_pImage, &rcDest, &m_loader.aModules[nStartIdx + 3].regn);
   //
-  //  // ÓÒ±ß
+  //  // å³è¾¹
   //  rcDest.left   = rect->right - m_loader.aModules[nStartIdx + 5].regn.width;
   //  rcDest.top    = rect->top + m_loader.aModules[nStartIdx + 2].regn.height;
   //  rcDest.width  = m_loader.aModules[nStartIdx + 5].regn.width;
@@ -433,7 +433,7 @@ namespace Marimo
 
   GXINT MOSpriteImpl::Find(ID id, Type* pType) const
   {
-    _²âÊÔºóÉ¾³ıÕâĞĞ_;
+    _æµ‹è¯•ååˆ é™¤è¿™è¡Œ_;
     auto pAttr = IntFind(id);
     if(pType) {
       *pType = pAttr->type;
@@ -443,7 +443,7 @@ namespace Marimo
 
   GXINT MOSpriteImpl::Find(GXLPCSTR szName, Type* pType) const
   {
-    _²âÊÔºóÉ¾³ıÕâĞĞ_;
+    _æµ‹è¯•ååˆ é™¤è¿™è¡Œ_;
     auto pAttr = IntFind(szName);
     if(pType) {
       *pType = pAttr->type;
@@ -458,7 +458,7 @@ namespace Marimo
   
   GXLPCSTR MOSpriteImpl::FindName(ID id) const
   {
-    _²âÊÔºóÉ¾³ıÕâĞĞ_
+    _æµ‹è¯•ååˆ é™¤è¿™è¡Œ_
     auto pAttr = IntFind(id);
     switch(pAttr->type)
     {
@@ -474,7 +474,7 @@ namespace Marimo
 
   MOSprite::ID MOSpriteImpl::FindID(GXLPCSTR szName) const
   {
-    _²âÊÔºóÉ¾³ıÕâĞĞ_
+    _æµ‹è¯•ååˆ é™¤è¿™è¡Œ_
     auto pAttr = IntFind(szName);
     switch(pAttr->type)
     {
@@ -681,7 +681,7 @@ namespace Marimo
     case MOSprite::Type_Animation:
       ASSERT(pAttr->pAnimation>= &m_loader.aAnims.front() &&
         pAttr->pAnimation <= &m_loader.aAnims.back());
-      CLBREAK; // Ã»ÊµÏÖ
+      CLBREAK; // æ²¡å®ç°
       break;
     }
   }
@@ -689,7 +689,7 @@ namespace Marimo
   template<typename _TID>
   MOSprite::Type MOSpriteImpl::GetBoundingT(_TID id, GXLPRECT lprc) const
   {
-    _²âÊÔºóÉ¾³ıÕâĞĞ_;
+    _æµ‹è¯•ååˆ é™¤è¿™è¡Œ_;
     auto pAttr = IntFind(id);
     if( ! pAttr) {
       return MOSprite::Type_Error;
@@ -703,7 +703,7 @@ namespace Marimo
   template<typename _TID>
   MOSprite::Type MOSpriteImpl::GetBoundingT(_TID id, GXLPREGN lprg) const
   {
-    _²âÊÔºóÉ¾³ıÕâĞĞ_;
+    _æµ‹è¯•ååˆ é™¤è¿™è¡Œ_;
     auto pAttr = IntFind(id);
     if( ! pAttr) {
       return MOSprite::Type_Error;

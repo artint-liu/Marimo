@@ -38,7 +38,7 @@
     <ClCompile Include="..\..\clstd.CPP" />
     <ClCompile Include="..\..\clStock.cpp" />
     <ClCompile Include="..\..\clString.cpp" />
-    <ClCompile Include="..\..\clToken.cpp" />
+    <ClCompile Include="..\..\clTokens.cpp" />
     <ClCompile Include="..\..\clTransform.cpp" />
     <ClCompile Include="..\..\clTree.CPP" />
     <ClCompile Include="..\..\clUtility.cpp" />
@@ -89,7 +89,7 @@
     <ClInclude Include="..\..\clString.H" />
     <ClInclude Include="..\..\clStringSet.h" />
     <ClInclude Include="..\..\clTextLines.h" />
-    <ClInclude Include="..\..\clToken.h" />
+    <ClInclude Include="..\..\clTokens.h" />
     <ClInclude Include="..\..\clTransform.h" />
     <ClInclude Include="..\..\clTree.H" />
     <ClInclude Include="..\..\cltypes.h" />

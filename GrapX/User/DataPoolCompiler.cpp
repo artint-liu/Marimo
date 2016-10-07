@@ -177,23 +177,6 @@ namespace Marimo
     return GX_OK;
   }
 
-  //template<class SmartStreamT, typename _Ty>
-  //GXBOOL IsHeadOfLine(SmartStreamT* pStream, _Ty* pCurrent)
-  //{
-  //  auto* ptr = pStream->GetStreamPtr();
-  //  auto* p = pCurrent - 1;
-  //  while(p >= ptr) {
-  //    if(*p == '\n') {
-  //      return TRUE;
-  //    }
-  //    else if(TEST_FLAG_NOT(pStream->GetCharSemantic(*p), SmartStreamT::M_GAP)) {
-  //      return FALSE;
-  //    }
-  //    --p;
-  //  }
-  //  return TRUE; // 到文档开头了
-  //}
-
   template<class _Iter>
   GXBOOL IsDifferentLines(const _Iter& first, const _Iter& second) {
     ASSERT(first.pContainer == second.pContainer);

@@ -33,6 +33,7 @@
 #define ENABLE_VSYNTAX_FLAG       // syntax flag 可视化
 #define OPP(_PRE) (ArithmeticExpression::TOKEN::FIRST_OPCODE_PRECEDENCE + _PRE)
 
+#define USE_CLSTD_TOKENS
 
 namespace Marimo
 {
@@ -42,7 +43,16 @@ namespace Marimo
 
 namespace UVShader
 {
-  class ArithmeticExpression : public SmartStreamA
+  //class ArithmeticExpression : public SmartStreamA
+#ifdef USE_CLSTD_TOKENS
+  typedef clstd::TokensT<clStringA> CTokens;
+# define TOKENSUTILITY clstd::TokensUtility
+#else
+  typedef SmartStreamA CTokens;
+# define TOKENSUTILITY SmartStreamUtility
+#endif // USE_CLSTD_TOKENS
+
+  class ArithmeticExpression : public CTokens
   {
   public:
     typedef cllist<iterator> IterList;
@@ -159,10 +169,15 @@ namespace UVShader
         return TRUE;
       }
 
-    };
+    }; // struct TOKEN
     //typedef clvector<TOKEN> TokenArray;
     //typedef cllist<TOKEN> TokenList;
 
+#ifdef USE_CLSTD_TOKENS
+    enum {
+      M_CALLBACK = 1,
+    };
+#endif // USE_CLSTD_TOKENS
 
     struct MBO // 静态定义符号属性用的结构体
     {
@@ -434,6 +449,9 @@ namespace UVShader
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     clStringArrayA      m_aDbgExpressionOperStack;
 
+#ifdef USE_CLSTD_TOKENS
+    static u32 m_aCharSem[128];
+#endif // USE_CLSTD_TOKENS
   protected:
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);

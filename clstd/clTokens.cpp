@@ -1,12 +1,12 @@
-#include <stdarg.h>
+ï»¿#include <stdarg.h>
 #include "clstd.h"
 #include "clString.H"
-#include "clToken.H"
+#include "clTokens.H"
 #include "clUtility.H"
 
 //using namespace clstd;
 
-//TokenT<char *,*>::iterator {
+//TokensT<char *,*>::iterator {
 //  preview  (#(#("[",$e.length,"]"),[$e.marker, s]))
 //
 //  children (
@@ -25,10 +25,15 @@ namespace clstd
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÏÔÊ½ÉùÃ÷Ä£°åÀà
+// æ˜¾å¼å£°æ˜æ¨¡æ¿ç±»
 //
-  template class TokenT<clStringA>;
-  template class TokenT<clStringW>;
+  template class TokensT<clStringA>;
+  template class TokensT<clStringW>;
+
+  namespace TokensUtility {
+    template b32 IsHeadOfLine<clStringA>(const TokensT<clStringA>* pToken, clStringA::LPCSTR pChar);
+    template b32 IsHeadOfLine<clStringW>(const TokensT<clStringW>* pToken, clStringW::LPCSTR pChar);
+  } // namespace TokensUtility
 
 
 
@@ -64,9 +69,9 @@ namespace clstd
 #define SET_SYMBOL(ch)    m_aCharSem[(int)ch] = M_SYMBOL
 
 #define _TOEKN_TEMPL template<class _TStr>
-#define _TOKEN_IMPL  TokenT<_TStr>
+#define _TOKEN_IMPL  TokensT<_TStr>
 
-  _TOEKN_TEMPL _TOKEN_IMPL::TokenT(T_LPCSTR pStream /* = NULL */, clsize uCountOfChar /* = NULL */)
+  _TOEKN_TEMPL _TOKEN_IMPL::TokensT(T_LPCSTR pStream /* = NULL */, clsize uCountOfChar /* = NULL */)
     : m_pBegin          (pStream)
     , m_pEnd            (pStream + uCountOfChar)
     , m_dwFlags         (0)
@@ -202,7 +207,7 @@ namespace clstd
       //&m_pFirst[m_uPointer];
     }
 
-    // ¿ªÀ¨ºÅ±ÕÀ¨ºÅµÄ»°£¬Ö±½Ó·µ»Ø
+    // å¼€æ‹¬å·é—­æ‹¬å·çš„è¯ï¼Œç›´æ¥è¿”å›
     if(IS_OPEN_BRAKERS(pPointer) || IS_CLOSE_BRAKERS(pPointer))
     {
       if(pOutCount != NULL) {
@@ -214,7 +219,7 @@ namespace clstd
     {
       //const u32 grp = QUOT_GROUP(pPointer);
       const TChar c = *pPointer;
-      //const clsize uBegin = m_uPointer;  // ²»¼ÇÂ¼Õâ¸öÓÃÖ¸ÕëÏà¼õÒ²¿ÉÒÔ,µ«Òª³ıÒÔCHARµÄ´óĞ¡
+      //const clsize uBegin = m_uPointer;  // ä¸è®°å½•è¿™ä¸ªç”¨æŒ‡é’ˆç›¸å‡ä¹Ÿå¯ä»¥,ä½†è¦é™¤ä»¥CHARçš„å¤§å°
       T_LPCSTR pInQuot = pPointer + 1;
       //m_uPointer++;
       while( ! IsEndOfStream(pInQuot))
@@ -230,7 +235,7 @@ namespace clstd
             *pOutCount = pInQuot + 1 - pPointer;
             //(m_uPointer + 1) - uBegin;
           }
-          //m_uPointer = uBegin;  // »¹Ô­
+          //m_uPointer = uBegin;  // è¿˜åŸ
           return true;
         }
         //m_uPointer++;
@@ -266,7 +271,7 @@ namespace clstd
       if(pOutCount != NULL) {
         *pOutCount = pPointer - pBegin;
       }
-      //m_uPointer = uBegin;  // »¹Ô­Ö¸Õë
+      //m_uPointer = uBegin;  // è¿˜åŸæŒ‡é’ˆ
       return true;
     }
     //else
@@ -323,7 +328,7 @@ namespace clstd
     typename _TOKEN_IMPL::iterator _TOKEN_IMPL::begin() const
   {
     iterator itBegin(this);
-    return next(itBegin); // ÕâÀïÕâÃ´Ğ´ÊÇÎªÁË±£Ö¤beginÒ²ÄÜ´¥·¢ÌØÊâ·ûºÅ»Øµ÷º¯Êı
+    return next(itBegin); // è¿™é‡Œè¿™ä¹ˆå†™æ˜¯ä¸ºäº†ä¿è¯beginä¹Ÿèƒ½è§¦å‘ç‰¹æ®Šç¬¦å·å›è°ƒå‡½æ•°
   }
 
 #if defined(__clang__)
@@ -619,5 +624,28 @@ namespace clstd
     }
     return false;
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  namespace TokensUtility
+  {
+    template<class _TStr>
+    b32 IsHeadOfLine(const TokensT<_TStr>* pToken, typename _TStr::LPCSTR pChar)
+    {
+      auto* ptr = pToken->GetStreamPtr();
+      auto* p = pChar - 1;
+      while(p >= ptr) {
+        if(*p == '\n') {
+          return TRUE;
+        }
+        else if( ! IS_GAP(p)) {
+          return FALSE;
+        }
+        --p;
+      }
+      return TRUE; // åˆ°æ–‡æ¡£å¼€å¤´äº†
+    }
+
+  } // namespace TokenUtility
 
 } // namespace clstd
