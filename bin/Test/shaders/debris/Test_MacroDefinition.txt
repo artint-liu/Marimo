@@ -1,0 +1,36 @@
+#define ENABLE_MACRO 1
+#define DISABLE_THIS 0
+
+#if ENABLE_MACRO
+string EnableThisOne = "One";
+#endif
+
+#if ENABLE_MACRO
+string EnableThisOne_1 = "This";
+#else
+string DisableThis = "843289ryfpihd;vnxk ehfriwh/sdhi\\sudhuh";
+#endif
+
+#if ! ENABLE_MACRO
+string DisableThis = "fhe\tskdako";
+#else
+string EnableThisOne_2 = "Enable";
+#endif
+
+
+
+#if DISABLE_THIS
+string DisableThis = "";
+#endif
+
+#if DISABLE_THIS
+string DisableThis = "";
+#else
+string NotDisableThis_0 = "Hello";
+#endif
+
+#if ! DISABLE_THIS
+string NotDisableThis_1 = "World";
+#else
+string DisableThis = "";
+#endif

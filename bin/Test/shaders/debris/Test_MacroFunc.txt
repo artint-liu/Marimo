@@ -1,0 +1,17 @@
+#define ADD(a,b) a+b
+#define MUL(a,b) a*b
+#define ADD_MUL(a,b,c,d) MUL(ADD(a,b), ADD(c,d))
+
+// #define  AAA \
+//      3+4
+
+int a=ADD(24,34);
+int b=MUL(11,12);
+int c=ADD(ADD(2,3), 4);
+int d=MUL(ADD(ADD(2,3), 4), ADD(5,6));
+int e=MUL(ADD(ADD(2,3), 4), MUL(5,6));
+int f=ADD_MUL(1,2,3,4);
+
+#undef ADD_MUL
+#define ADD_MUL(a,b,c,d) MUL((ADD(a,b)), (ADD(c,d)))
+int g=ADD_MUL(1,2,3,4);

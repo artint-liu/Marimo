@@ -1,0 +1,35 @@
+
+
+
+#define __STR2__(x) #x
+#define __STR1__(x) __STR2__(x)
+#define __STR0__ __STR1__(__LINE__)
+#define __STR4__ __STR2__(__LINE__)
+
+#define __LOC_A__ __FILE__ "("__STR1__(__LINE__)") : Warning Msg: "
+#define __LOC_B__ __FILE__ "("__STR2__(__LINE__)") : Warning Msg: "
+#define __LOC_C__ __FILE__ "("__STR0__") : Warning Msg: "
+
+#define TEST_LINE __LINE__
+#define TEST_FILE __FILE__
+
+int a = __LINE__;
+int b = TEST_LINE;
+string s="abc";
+
+string f0=__FILE__;
+string f2 = TEST_FILE;
+string f3=__STR2__(__LOC_B__);
+string f4=__STR1__(__LOC_B__);
+
+string str0 = __STR0__;
+string str4 = __STR4__;
+
+string locA = __LOC_A__;
+string locB = __LOC_B__;
+string locC = __LOC_C__;
+
+#define ADD(a,b) (a+b)
+string exp1 = __STR1__(ADD(2,3));
+string exp2 = __STR2__(ADD(2,3));
+

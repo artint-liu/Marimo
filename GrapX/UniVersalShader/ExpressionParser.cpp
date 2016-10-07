@@ -2135,6 +2135,7 @@ NOT_INC_P:
     ASSERT(sizeof(PREPROCESS_define) - 1 == 6);
 
     if(CompareString(begin, PREPROCESS_define, sizeof(PREPROCESS_define) - 1) ||
+      CompareString(begin, PREPROCESS_undef, sizeof(PREPROCESS_undef) - 1) ||
       CompareString(begin, PREPROCESS_ifdef, sizeof(PREPROCESS_ifdef) - 1) ||
       CompareString(begin, PREPROCESS_ifndef, sizeof(PREPROCESS_ifndef) - 1)) {
       dwFlags |= AttachFlag_NotExpandMacro;
@@ -2149,7 +2150,8 @@ NOT_INC_P:
     const auto& tokens = *pParse->GetTokensArray();
 
 #ifdef _DEBUG
-    if(tokens.front() == PREPROCESS_define || tokens.front() == PREPROCESS_ifdef || tokens.front() == PREPROCESS_ifndef) {
+    if(tokens.front() == PREPROCESS_define || tokens.front() == PREPROCESS_undef || 
+      tokens.front() == PREPROCESS_ifdef || tokens.front() == PREPROCESS_ifndef) {
       ASSERT(TEST_FLAG(dwFlags, AttachFlag_NotExpandMacro));
     }
     else {

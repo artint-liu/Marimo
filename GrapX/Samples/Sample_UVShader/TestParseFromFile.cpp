@@ -17,7 +17,7 @@ GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
   case UVShader::CodeParser::InputModifier_out:
     return "out ";
   case UVShader::CodeParser::InputModifier_inout:
-    return "intout ";
+    return "inout ";
   case UVShader::CodeParser::InputModifier_uniform:
     return "uniform ";
   default:
