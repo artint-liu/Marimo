@@ -1,4 +1,4 @@
-#ifndef _EDITOR_UTILITY_AXIS_H_
+﻿#ifndef _EDITOR_UTILITY_AXIS_H_
 #define _EDITOR_UTILITY_AXIS_H_
 
 namespace EditorUtility

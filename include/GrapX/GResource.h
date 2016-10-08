@@ -1,4 +1,4 @@
-#ifndef _GRAPX_RESOURCE_H_
+﻿#ifndef _GRAPX_RESOURCE_H_
 #define _GRAPX_RESOURCE_H_
 
 
@@ -18,7 +18,7 @@ if(pDesc->szCmdString != NULL && pDesc->dwCmdCode != NULL)\
 { CLOG_ERROR("%s : Bad script desc param.\n", __FUNCTION__); return GX_FAIL; }
 
 enum {
-  RESTYPE_UNKNOWN,            // [���ȼ�]
+  RESTYPE_UNKNOWN,            // [优先级]
   RESTYPE_SHADER,             //    0
   RESTYPE_SHADER_STUB,        //    1
   RESTYPE_SHADER_EFFECT,      //    2
@@ -44,17 +44,17 @@ enum {
 
 struct GRESKETCH // resource sketch
 {
-  GXDWORD   dwCategoryId;     // ���ID, ����ַ�����Hashֵ����MakFourCCֵ
-  clStringW strResourceName;  // ��ԴID, ��Դ���Լ�������ض�ʶ���, �ձ�ʾ���಻��ID���ֶ���
+  GXDWORD   dwCategoryId;     // 类别ID, 类别字符串的Hash值或者MakFourCC值
+  clStringW strResourceName;  // 资源ID, 资源类自己计算的特定识别符, 空表示该类不以ID区分对象
 };
 
 struct GRESCRIPTDESC
 {
-  GXLPCSTR  szCmdString;  // �����ַ���, ����ʹ��Сд, �� dwCmdCode ����
-  GXDWORD   dwCmdCode;    // �������, �� szCmdString ��ѡ��һʹ��, ʹ��ǰӦ�ü�����߲���ͬʱ��0
-  GXBOOL    bBroadcast;   // �Ƿ�Ϊ�㲥����
-  GXDWORD   dwTime;       // ����ʱ��, �������Cmdʵ������ѡ���Ƿ���д
-  GXLPCSTR  szParameters; // Parameter ���ղ�ͬ�������ò�ͬ
+  GXLPCSTR  szCmdString;  // 命令字符串, 建议使用小写, 和 dwCmdCode 互斥
+  GXDWORD   dwCmdCode;    // 命令代码, 和 szCmdString 任选其一使用, 使用前应该检测两者不能同时非0
+  GXBOOL    bBroadcast;   // 是否为广播命令
+  GXDWORD   dwTime;       // 发送时间, 这个根据Cmd实际需求选择是否填写
+  GXLPCSTR  szParameters; // Parameter 按照不同命令作用不同
   GXWPARAM  wParam;
   GXLPARAM  lParam;
 };
@@ -76,7 +76,7 @@ protected:
   virtual ~GResource(){}
 
 public:
-  GXDWORD         m_dwPriority : 2; // ֵԽС���ȼ�Խ��, �ڹ㲥ʱԽ�ȴ���
+  GXDWORD         m_dwPriority : 2; // 值越小优先级越高, 在广播时越先处理
   GXDWORD         m_dwResType  : 8;
   GXSTDINTERFACE(GXHRESULT  Invoke            (GRESCRIPTDESC* pDesc));
 

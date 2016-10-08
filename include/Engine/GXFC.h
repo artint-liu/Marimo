@@ -1,4 +1,4 @@
-#ifndef _GX_FOUNDATION_CLASS_H_
+﻿#ifndef _GX_FOUNDATION_CLASS_H_
 #define _GX_FOUNDATION_CLASS_H_
 #include "GXFCAgent.H"
 

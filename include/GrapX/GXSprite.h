@@ -1,4 +1,4 @@
-#ifndef _GRAPH_X_SPRITE_HEADER_FILE_
+ï»¿#ifndef _GRAPH_X_SPRITE_HEADER_FILE_
 #define _GRAPH_X_SPRITE_HEADER_FILE_
 
 class GXCanvas;
@@ -8,18 +8,18 @@ class GXImage;
 class GXSprite : public GUnknown
 {
 public:
-  enum Type  // Ë÷ÒıÀàĞÍ
+  enum Type  // ç´¢å¼•ç±»å‹
   {
-    Type_Empty     = 0,  // ModuleÀàĞÍË÷Òı
-    Type_Module    = 1,  // ModuleÀàĞÍË÷Òı
-    Type_Frame     = 2,  // FrameÀàĞÍË÷Òı
-    Type_Animation = 3,  // ¶¯»­ÀàĞÍË÷Òı
-    Type_Unified   = 4,  // Í³Ò»ÀàĞÍË÷Òı
+    Type_Empty     = 0,  // Moduleç±»å‹ç´¢å¼•
+    Type_Module    = 1,  // Moduleç±»å‹ç´¢å¼•
+    Type_Frame     = 2,  // Frameç±»å‹ç´¢å¼•
+    Type_Animation = 3,  // åŠ¨ç”»ç±»å‹ç´¢å¼•
+    Type_Unified   = 4,  // ç»Ÿä¸€ç±»å‹ç´¢å¼•
   };
 
   struct MODULE
   {
-    GXUINT   id;    // 0 ÊÇÎŞĞ§id
+    GXUINT   id;    // 0 æ˜¯æ— æ•ˆid
     GXLPCSTR name;
     GXREGN   regn;
   };
@@ -28,7 +28,7 @@ public:
   {
     GXUINT   id;
     GXLPCSTR name;
-    GXUINT   start;   // ÔÚaFrameDescsÊı×éÖĞµÄ¿ªÊ¼Î»ÖÃ
+    GXUINT   start;   // åœ¨aFrameDescsæ•°ç»„ä¸­çš„å¼€å§‹ä½ç½®
     GXUINT   count;
   };
 
@@ -41,16 +41,16 @@ public:
     GXUINT   count;
   };
 
-  struct FRAME_MODULE   // ÃèÊöµ¥Ò»µÄModuleÔÚFrameÖĞµÄÎ»ÖÃºÍĞı×ª
+  struct FRAME_MODULE   // æè¿°å•ä¸€çš„Moduleåœ¨Frameä¸­çš„ä½ç½®å’Œæ—‹è½¬
   {
     GXUINT  nModuleIdx;
-    GXDWORD rotate;      // Ğı×ª·­×ª±êÖ¾
+    GXDWORD rotate;      // æ—‹è½¬ç¿»è½¬æ ‡å¿—
     GXPOINT offset;
   };
 
-  typedef GXUINT ANIM_FRAME; // ÃèÊöÒ»¶Î¶¯»­µÄÖ¡ĞòÁĞ
+  typedef GXUINT ANIM_FRAME; // æè¿°ä¸€æ®µåŠ¨ç”»çš„å¸§åºåˆ—
   typedef GXUINT    TIME_T;
-  typedef GXUINT    ID;         // id ²»ÄÜÎª 0, module/frame/animation ²»ÄÜÏàÍ¬
+  typedef GXUINT    ID;         // id ä¸èƒ½ä¸º 0, module/frame/animation ä¸èƒ½ç›¸åŒ
 
 
 public:
@@ -82,15 +82,15 @@ public:
   GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
   GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
 
-  GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType ¿ÉÒÔÉèÖÃÎªNULL, ²»·µ»ØÀàĞÍ
+  GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType å¯ä»¥è®¾ç½®ä¸ºNULL, ä¸è¿”å›ç±»å‹
   GXSTDINTERFACE(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType = NULL) const);
   GXSTDINTERFACE(GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const);
-  GXSTDINTERFACE(GXLPCSTR  FindName             (ID id) const);           // ÓÃ ID ²éÕÒ Name
-  GXSTDINTERFACE(ID        FindID               (GXLPCSTR szName) const); // ÓÃ Name ²éÕÒ ID
-  GXSTDINTERFACE(ID        FindID               (GXLPCWSTR szName) const); // ÓÃ Name ²éÕÒ ID
+  GXSTDINTERFACE(GXLPCSTR  FindName             (ID id) const);           // ç”¨ ID æŸ¥æ‰¾ Name
+  GXSTDINTERFACE(ID        FindID               (GXLPCSTR szName) const); // ç”¨ Name æŸ¥æ‰¾ ID
+  GXSTDINTERFACE(ID        FindID               (GXLPCWSTR szName) const); // ç”¨ Name æŸ¥æ‰¾ ID
 
-  GXSTDINTERFACE(GXINT     PackIndex            (Type type, GXUINT index) const);   // ½«²»Í¬ÀàĞÍµÄË÷Òı´ò°üÎªÍ³Ò»ÀàĞÍµÄË÷Òı
-  GXSTDINTERFACE(GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const); // ½«Í³Ò»Ë÷Òı²ğ½âÎªÀàĞÍºÍÀàĞÍË÷Òı
+  GXSTDINTERFACE(GXINT     PackIndex            (Type type, GXUINT index) const);   // å°†ä¸åŒç±»å‹çš„ç´¢å¼•æ‰“åŒ…ä¸ºç»Ÿä¸€ç±»å‹çš„ç´¢å¼•
+  GXSTDINTERFACE(GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const); // å°†ç»Ÿä¸€ç´¢å¼•æ‹†è§£ä¸ºç±»å‹å’Œç±»å‹ç´¢å¼•
 
   GXSTDINTERFACE(GXSIZE_T  GetModuleCount       () const);
   GXSTDINTERFACE(GXSIZE_T  GetFrameCount        () const);
@@ -106,18 +106,18 @@ public:
   GXSTDINTERFACE(GXBOOL    GetAnimation         (GXUINT nIndex, ANIMATION* pAnimation) const);
   GXSTDINTERFACE(GXUINT    GetAnimFrame         (GXUINT nIndex, ANIM_FRAME* pAnimFrame, GXSIZE_T nCount) const);
   
-  GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXUINT nIndex, GXRECT *rcSprite) const);  // »ñµÃModuleÔÚImageÖĞµÄÎ»ÖÃ
+  GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXUINT nIndex, GXRECT *rcSprite) const);  // è·å¾—Moduleåœ¨Imageä¸­çš„ä½ç½®
   GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXUINT nIndex, GXREGN *rgSprite) const);
   GXSTDINTERFACE(GXBOOL    GetFrameBounding     (GXUINT nIndex, GXRECT* lprc) const);
   GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXUINT nIndex, GXRECT* lprc) const);
-  GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+  GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
   GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPREGN lprg) const);
-  GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+  GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
   GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPREGN lprg) const);
-  GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+  GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
   GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
-  //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXRECT* lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+  //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXRECT* lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
   //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXREGN* lprg) const);
 
   GXSTDINTERFACE(GXHRESULT GetImage             (GXImage** pImage));
@@ -152,7 +152,7 @@ struct GXSPRITE_DESCW
   GXUINT        nNumOfAnimations;
   ANIMATION*    aAnimations;
 
-  // ÓÃÓÚ¶¯»­µÄÖ¡ÁĞ±í
+  // ç”¨äºåŠ¨ç”»çš„å¸§åˆ—è¡¨
   GXUINT        nNumOfAnimFrames;
   ANIM_FRAME*   aAnimFrames;
 };

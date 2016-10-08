@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_WINE_LISTBOX_H_
+﻿#ifndef _GRAP_X_WINE_LISTBOX_H_
 #define _GRAP_X_WINE_LISTBOX_H_
 
 //class CMOWnd;

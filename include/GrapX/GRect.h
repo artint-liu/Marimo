@@ -1,4 +1,4 @@
-#ifndef _GRAPX_REGN_H_
+﻿#ifndef _GRAPX_REGN_H_
 #define _GRAPX_REGN_H_
 
 #define REFACTOR_RECTREGN
@@ -13,7 +13,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
   //
-  // �ۺ���
+  // 聚合类
   //
   template<typename _T>
   struct RECTT
@@ -159,6 +159,24 @@ namespace Marimo
     _T GetHeight() const
     {
       return bottom - top;
+    }
+
+    GXBOOL Union(const RectT& rect)
+    {
+      left   = clMin(left,   rect.left);
+      top    = clMin(top,    rect.top);
+      right  = clMax(right,  rect.right);
+      bottom = clMax(bottom, rect.bottom);
+      return ((left < right) && (top < bottom));
+    }
+
+    GXBOOL Union(const RectT& rect1, const RectT& rect2)
+    {
+      left   = clMin(rect1.left,   rect2.left);
+      top    = clMin(rect1.top,    rect2.top);
+      right  = clMax(rect1.right,  rect2.right);
+      bottom = clMax(rect1.bottom, rect2.bottom);
+      return ((left < right) && (top < bottom));
     }
 
     GXBOOL Intersect(const RectT& rect)
@@ -310,23 +328,65 @@ namespace Marimo
       return top + height;
     }
 
-    //GXBOOL Intersect(const RegnT& regn)
-    //{
-    //  left   = clMax(left,   rect.left);
-    //  top    = clMax(top,    rect.top);
-    //  right  = clMin(right,  rect.right);
-    //  bottom = clMin(bottom, rect.bottom);
-    //  return ((left < right) && (top < bottom));
-    //}
+    GXBOOL Union(const RegnT& regn)
+    {
+      const _T right1  = GetRight();
+      const _T right2  = regn.GetRight();
+      const _T bottom1 = GetBottom();
+      const _T bottom2 = regn.GetBottom();
 
-    //GXBOOL Intersect(const RegnT& regn1, const RegnT& regn2)
-    //{
-    //  left   = clMax(rect1.left,   rect2.left);
-    //  top    = clMax(rect1.top,    rect2.top);
-    //  right  = clMin(rect1.right,  rect2.right);
-    //  bottom = clMin(rect1.bottom, rect2.bottom);
-    //  return ((left < right) && (top < bottom));
-    //}
+      // 必须这么写，防止left/top发生变化
+
+      left   = clMin(left, regn.left);
+      top    = clMin(top,  regn.top);
+      width  = clMax(right1, right2) - left;
+      height = clMax(bottom1, bottom2) - top;
+      return ((width > 0) && (height > 0));
+    }
+
+    GXBOOL Union(const RegnT& regn1, const RegnT& regn2)
+    {
+      const _T right1  = regn1.GetRight();
+      const _T right2  = regn2.GetRight();
+      const _T bottom1 = regn1.GetBottom();
+      const _T bottom2 = regn2.GetBottom();
+
+      left   = clMin(regn1.left, regn2.left);
+      top    = clMin(regn1.top,  regn2.top);
+      width  = clMax(right1, right2) - left;
+      height = clMax(bottom1, bottom2) - top;
+      return ((width > 0) && (height > 0));
+    }
+
+    GXBOOL Intersect(const RegnT& regn)
+    {
+      const _T right1  = GetRight();
+      const _T right2  = regn.GetRight();
+      const _T bottom1 = GetBottom();
+      const _T bottom2 = regn.GetBottom();
+
+      // 必须这么写，防止left/top发生变化
+
+      left   = clMax(left, regn.left);
+      top    = clMax(top,  regn.top);
+      width  = clMin(right1, right2) - left;
+      height = clMin(bottom1, bottom2) - top;
+      return ((left < right) && (top < bottom));
+    }
+
+    GXBOOL Intersect(const RegnT& regn1, const RegnT& regn2)
+    {
+      const _T right1  = regn1.GetRight();
+      const _T right2  = regn2.GetRight();
+      const _T bottom1 = regn1.GetBottom();
+      const _T bottom2 = regn2.GetBottom();
+
+      left   = clMax(regn1.left, regn2.left);
+      top    = clMax(regn1.top,  regn2.top);
+      width  = clMin(right1, right2) - left;
+      height = clMin(bottom1, bottom2) - top;
+      return ((left < right) && (top < bottom));
+    }
 
     GXBOOL IsEqual(const RegnT& regn) const
     {
@@ -353,7 +413,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
   //
-  // ��֤ת����һ����  
+  // 保证转换的一致性  
   //
   STATIC_ASSERT(sizeof(RegnT<long>) == sizeof(REGNT<long>));
   STATIC_ASSERT(offsetof(RegnT<long>, left)   == offsetof(REGNT<long>, left));

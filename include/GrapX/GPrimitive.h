@@ -1,17 +1,17 @@
-#ifndef _GRAPHX_PRIMITIVE_H_
+ï»¿#ifndef _GRAPHX_PRIMITIVE_H_
 #define _GRAPHX_PRIMITIVE_H_
 
-// <¹ıÊ±×¢ÊÍ>
-// 1.Ê¹ÓÃÁË Primitive Õâ¸öÃû×Ö ÊÇÎªÁË±ÜÃâºÍÒÔºóµÄStreamÖØÃû
-//    ÒòÎª Stream ¿ÉÄÜ»á´Ó Graphics3D ´´½¨³öÀ´
+// <è¿‡æ—¶æ³¨é‡Š>
+// 1.ä½¿ç”¨äº† Primitive è¿™ä¸ªåå­— æ˜¯ä¸ºäº†é¿å…å’Œä»¥åçš„Streamé‡å
+//    å› ä¸º Stream å¯èƒ½ä¼šä» Graphics3D åˆ›å»ºå‡ºæ¥
 
 //////////////////////////////////////////////////////////////////////////
-// TODO: ×·¼ÓÊı¾İ½«À´µ¥¶À·ÖÀëÒ»¸öCollectorÀà
-// Èç¹û×·¼ÓÊı¾İ»áÒç³ö»º³å,Ôò·µ»Ø FALSE
+// TODO: è¿½åŠ æ•°æ®å°†æ¥å•ç‹¬åˆ†ç¦»ä¸€ä¸ªCollectorç±»
+// å¦‚æœè¿½åŠ æ•°æ®ä¼šæº¢å‡ºç¼“å†²,åˆ™è¿”å› FALSE
 //GXBOOL  Append  (GXLPVOID lpPrimitiveData, GXUINT uElementCount);
 //GXBOOL  Append  (GXLPVOID lpPrimitiveData, GXUINT uElementCount, WORD* pIndices, GXUINT uIndexCount);
 //GXBOOL  Reset  ();
-// </¹ıÊ±×¢ÊÍ>
+// </è¿‡æ—¶æ³¨é‡Š>
 
 class GVertexDeclaration;
 
@@ -38,7 +38,7 @@ public:
   GXSTDINTERFACE(GXLPVOID   GetVerticesBuffer ());
   GXSTDINTERFACE(GXUINT     GetVerticesCount  ());
   GXSTDINTERFACE(GXUINT     GetVertexStride   ());
-  GXSTDINTERFACE(GXBOOL     UpdateResouce     (ResEnum eRes));  // ½«ÄÚ´æÊı¾İ¸üĞÂµ½Éè±¸ÉÏ
+  GXSTDINTERFACE(GXBOOL     UpdateResouce     (ResEnum eRes));  // å°†å†…å­˜æ•°æ®æ›´æ–°åˆ°è®¾å¤‡ä¸Š
   GXSTDINTERFACE(GXHRESULT  GetVertexDeclaration(GVertexDeclaration** ppDeclaration));
   GXSTDINTERFACE(GXGraphics*GetGraphicsUnsafe ());
   GXSTDINTERFACE(GXINT      GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc = NULL));
@@ -86,6 +86,6 @@ public:
 };
 //
 // EnableDiscard()
-// È·¶¨ÊÇ·ñ¿ÉÒÔÔÚLostDeviceÊ±¶ªÆú, Ä¬ÈÏÎªTRUE
+// ç¡®å®šæ˜¯å¦å¯ä»¥åœ¨LostDeviceæ—¶ä¸¢å¼ƒ, é»˜è®¤ä¸ºTRUE
 //
 #endif // _GRAPHX_PRIMITIVE_H_

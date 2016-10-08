@@ -1,11 +1,11 @@
-#ifndef _DEV_DISABLE_UI_CODE
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
 #ifndef _GX_USER_H_
 #define _GX_USER_H_
 
 #define POPUPMENU_CLASS_ATOM L"#32768"    // PopupMenu
 #define DESKTOP_CLASS_ATOM   L"#32769"    // Desktop
 #define DIALOG_CLASS_ATOM    L"#32770"    // Dialog
-#define DIALOG_CLASS_ATOM_EX L"#32780"    // Dialog Ex ´ÓÎÄ¼þ´´½¨µÄ¶Ô»°¿òÀà
+#define DIALOG_CLASS_ATOM_EX L"#32780"    // Dialog Ex ä»Žæ–‡ä»¶åˆ›å»ºçš„å¯¹è¯æ¡†ç±»
 #define WINSWITCH_CLASS_ATOM L"#32771"    // WinSwitch
 #define ICONTITLE_CLASS_ATOM L"#32772"    // IconTitle
 
@@ -18,8 +18,8 @@
 #define GXWE_STATICW              _T("Static")
 #define GXWE_LISTVIEWW            _T("SysListView32")
 #define GXWE_TREEVIEWW            _T("SysTreeView32")
-#define GXUICLASSNAME_EDIT        _T("GXUIEdit")       // Õâ¸öÊÇ´ÓWineµÄEdit¿Ø¼þÐÞ¸ÄÀ´µÄ
-#define GXUICLASSNAME_EDIT_1_9_4  _T("GXUIEdit_1.9.4")       // Õâ¸öÊÇ´ÓWineµÄEdit¿Ø¼þÐÞ¸ÄÀ´µÄ
+#define GXUICLASSNAME_EDIT        _T("GXUIEdit")       // è¿™ä¸ªæ˜¯ä»ŽWineçš„EditæŽ§ä»¶ä¿®æ”¹æ¥çš„
+#define GXUICLASSNAME_EDIT_1_9_4  _T("GXUIEdit_1.9.4")       // è¿™ä¸ªæ˜¯ä»ŽWineçš„EditæŽ§ä»¶ä¿®æ”¹æ¥çš„
 #define GXUICLASSNAME_STATIC      _T("GXUIStatic")
 #define GXUICLASSNAME_SLIDER      _T("GXUISlider")
 #define GXUICLASSNAME_BUTTON      _T("GXUIButton")
@@ -375,10 +375,10 @@
 #define GXLBN_SETFOCUS        4
 #define GXLBN_KILLFOCUS       5
 
-// FIXME: Õâ¸öÃ¶¾ÙÖµËÆºõ»áºÍÆäËûWM_NOTIFYÏûÏ¢ÖØ¸´ÁË
-#define GXLBN_CUSTCTRLCMD     6 // GXUI À©Õ¹: WM_NOTIFYÏûÏ¢, ×Ô¶¨ÒåÁÐ±íµÄ¿Ø¼þÏûÏ¢£¬Õâ¸öÊÇÍ¸´«¿Ø¼þµÄWM_COMMANDÏûÏ¢£¬ ½á¹¹Ìå:GXNMCUSTLISTCTRLCMD
-#define GXLBN_CREATEADAPTER   7 // GXUI À©Õ¹: WM_NOTIFYÏûÏ¢, ´´½¨ÊÊÅäÆ÷Í¨Öª,½á¹¹Ìå:GXNMLISTADAPTER
-#define GXLBN_ADAPTERCHANGED  8 // GXUI À©Õ¹: WM_NOTIFYÏûÏ¢, ÊÊÅäÆ÷±»ÖØÐÂÉèÖÃ,½á¹¹Ìå:GXNMLISTADAPTER
+// FIXME: è¿™ä¸ªæžšä¸¾å€¼ä¼¼ä¹Žä¼šå’Œå…¶ä»–WM_NOTIFYæ¶ˆæ¯é‡å¤äº†
+#define GXLBN_CUSTCTRLCMD     6 // GXUI æ‰©å±•: WM_NOTIFYæ¶ˆæ¯, è‡ªå®šä¹‰åˆ—è¡¨çš„æŽ§ä»¶æ¶ˆæ¯ï¼Œè¿™ä¸ªæ˜¯é€ä¼ æŽ§ä»¶çš„WM_COMMANDæ¶ˆæ¯ï¼Œ ç»“æž„ä½“:GXNMCUSTLISTCTRLCMD
+#define GXLBN_CREATEADAPTER   7 // GXUI æ‰©å±•: WM_NOTIFYæ¶ˆæ¯, åˆ›å»ºé€‚é…å™¨é€šçŸ¥,ç»“æž„ä½“:GXNMLISTADAPTER
+#define GXLBN_ADAPTERCHANGED  8 // GXUI æ‰©å±•: WM_NOTIFYæ¶ˆæ¯, é€‚é…å™¨è¢«é‡æ–°è®¾ç½®,ç»“æž„ä½“:GXNMLISTADAPTER
 
 
 //
@@ -408,7 +408,7 @@
 #define GXLBS_NODATA            0x2000L
 #define GXLBS_NOSEL             0x4000L
 #define GXLBS_COMBOBOX          0x8000L
-#define GXLBS_LTRSCROLLED       0x0040L // left to right scrolled ÓëGXLBS_HASSTRINGS±êÖ¾ÖØºÏ£¬ÒòÎªrich list(customized list box)Ã»ÓÐÕâ¸öÊôÐÔ
+#define GXLBS_LTRSCROLLED       0x0040L // left to right scrolled ä¸ŽGXLBS_HASSTRINGSæ ‡å¿—é‡åˆï¼Œå› ä¸ºrich list(customized list box)æ²¡æœ‰è¿™ä¸ªå±žæ€§
 #define GXLBS_STANDARD          (GXLBS_NOTIFY | GXLBS_SORT | GXWS_VSCROLL | GXWS_BORDER)
 
 /*
@@ -733,7 +733,7 @@ typedef GXTPMPARAMS *GXLPTPMPARAMS;
 typedef GXTPMPARAMS *LPGXTPMPARAMS;
 
 
-// GetMenuDefaultItem() ²ÎÊý
+// GetMenuDefaultItem() å‚æ•°
 #define GXGMDI_USEDISABLED    0x0001L
 #define GXGMDI_GOINTOPOPUPS   0x0002L
 
@@ -1243,7 +1243,7 @@ typedef GXHELPINFO *LPGXHELPINFO;
 #define GXOFN_SIMPLEBROWSER  0x00000001
 
 struct GXOPENFILENAMEW {
-  GXDWORD        lStructSize;         // Êý×é³¤¶È
+  GXDWORD        lStructSize;         // æ•°ç»„é•¿åº¦
   GXHWND         hwndOwner;
   //GXHINSTANCE  hInstance;
   GXLPCWSTR      lpstrFilter;
@@ -1286,7 +1286,7 @@ typedef GXOPENFILENAMEW*       GXLPOPENFILENAMEW;
 #define GXUISS_NOPREFIX     0x00000100
 #define GXUISS_SINGLELINE   0x00000200
 #define GXUISS_WORDBREAK    0x00000400
-#define GXUISS_SIMPLE       0x00000800  // ¼òµ¥×Ö·û´®, ÎÞÊÓÉÏ±ßËùÓÐÌØÐÔ
+#define GXUISS_SIMPLE       0x00000800  // ç®€å•å­—ç¬¦ä¸², æ— è§†ä¸Šè¾¹æ‰€æœ‰ç‰¹æ€§
 #define GXUISS_NOTIFY       0x00001000
 #define GXUISS_CONTRAST     0x00002000
 #define GXUISS_EXPANDTABS   0x00004000
@@ -1295,14 +1295,14 @@ typedef GXOPENFILENAMEW*       GXLPOPENFILENAMEW;
 //
 // GXUI Slider Style
 //
-#define GXUISLDS_HORZ         0x00000000  // Ë®Æ½Ìõ
-#define GXUISLDS_VERT         0x00000001  // ÊúÖ±Ìõ
-#define GXUISLDS_TRACKMINOR   0x00000002  // µÚ¶þ½ø¶ÈÌõ¸úËæHandleÎ»ÖÃ
-#define GXUISLDS_DISCRETE     0x00000004  // ¶ÔÆëÀëÉ¢Î»ÖÃ
-#define GXUISLDS_SCALING      0x00000008  // ¸ù¾Ý³ß´çËõ·Å
-#define GXUISLDS_THUMB        0x00000010  // µ¥»÷½ø¶ÈÌõÊ±µ÷ÕûHandleÎ»ÖÃ  
-#define GXUISLDS_NOTIFY       0x00000020  // Í¨Öª¸¸´°Ìå
-#define GXUISLDS_FLOAT        0x00000040  // ¸¡µãÊýÖµ
+#define GXUISLDS_HORZ         0x00000000  // æ°´å¹³æ¡
+#define GXUISLDS_VERT         0x00000001  // ç«–ç›´æ¡
+#define GXUISLDS_TRACKMINOR   0x00000002  // ç¬¬äºŒè¿›åº¦æ¡è·ŸéšHandleä½ç½®
+#define GXUISLDS_DISCRETE     0x00000004  // å¯¹é½ç¦»æ•£ä½ç½®
+#define GXUISLDS_SCALING      0x00000008  // æ ¹æ®å°ºå¯¸ç¼©æ”¾
+#define GXUISLDS_THUMB        0x00000010  // å•å‡»è¿›åº¦æ¡æ—¶è°ƒæ•´Handleä½ç½®  
+#define GXUISLDS_NOTIFY       0x00000020  // é€šçŸ¥çˆ¶çª—ä½“
+#define GXUISLDS_FLOAT        0x00000040  // æµ®ç‚¹æ•°å€¼
 
 
 
@@ -1359,7 +1359,7 @@ extern "C" {
 
   //GXVOID    GXDLLAPI GXGetClip                (GXHWND hWnd, GXBOOL bClient, GXLPRECT lprcOut);
   GXBOOL      GXDLLAPI gxGetWindowRect          (GXHWND hWnd, GXLPRECT lpRect);
-  GXBOOL      GXDLLAPI GXInvalidateWindowRgn    (GXHWND hWnd, GRegion* pRegion, GXBOOL bErase); // pRegionÊÇwindow¿Õ¼äµÄ
+  GXBOOL      GXDLLAPI GXInvalidateWindowRgn    (GXHWND hWnd, GRegion* pRegion, GXBOOL bErase); // pRegionæ˜¯windowç©ºé—´çš„
   GXBOOL      GXDLLAPI GXInvalidateWindowRect   (GXHWND hWnd, GXLPCRECT lpRect, GXBOOL bErase);
   GXBOOL      GXDLLAPI gxInvalidateRect         (GXHWND hWnd, GXLPCRECT lpRect, GXBOOL bErase);
   GXBOOL      GXDLLAPI gxInvalidateRgn          (GXHWND hWnd, GXHRGN hRegion, GXBOOL bErase);

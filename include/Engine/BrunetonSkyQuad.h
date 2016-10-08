@@ -1,4 +1,4 @@
-#ifndef _BRUNETON_SKY_QUAD_H_
+﻿#ifndef _BRUNETON_SKY_QUAD_H_
 #define _BRUNETON_SKY_QUAD_H_
 
 namespace Scene

@@ -1,4 +1,4 @@
-const int c_D3D_INCLUDE_LOCAL  = 0;
+ï»¿const int c_D3D_INCLUDE_LOCAL  = 0;
 const int c_D3D_INCLUDE_SYSTEM = 1;
 
 template<class _ID3DIncludeT, typename _IncludeTypeT>
@@ -52,7 +52,7 @@ public:
         strFullPath = pFileName;
       }
 
-      // ²éÕÒ Include ÊÇ·ñÒÑ¾­´æÔÚ
+      // æŸ¥æ‰¾ Include æ˜¯å¦å·²ç»å­˜åœ¨
       IncDict::iterator it = m_IncFiles.find(strFullPath);
       if(it != m_IncFiles.end()) {
         *ppData = it->second->GetPtr();
@@ -60,7 +60,7 @@ public:
         return S_OK;
       }
 
-      // ´ò¿ª²¢Ó³ÉäÎÄ¼þ
+      // æ‰“å¼€å¹¶æ˜ å°„æ–‡ä»¶
       if(file.OpenExistingA(strFullPath))
       {
         clBuffer* pBuffer = NULL;
@@ -127,7 +127,7 @@ GXHRESULT GShaderImpl::LoadFromFile(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
         int i = 0;
         pShaderMacro = new GXDEFINITION[aMacros.size() + 1];
 
-        // Õâ¸öÊÇÎªÁË°ÑºêÊý×éµÄ½áÎ²ÌîÎª NULL, clString ÎÞ·¨×öµ½ÕâÒ»µã.
+        // è¿™ä¸ªæ˜¯ä¸ºäº†æŠŠå®æ•°ç»„çš„ç»“å°¾å¡«ä¸º NULL, clString æ— æ³•åšåˆ°è¿™ä¸€ç‚¹.
         for(GXDefinitionArray::iterator it = aMacros.begin();
           it != aMacros.end(); ++it, ++i) {
             pShaderMacro[i].szName = it->Name;
@@ -140,7 +140,7 @@ GXHRESULT GShaderImpl::LoadFromFile(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
       pInclude = new IHLSLInclude(m_pGraphicsImpl, NULL);
     }
 
-    // ×¢Òâ: ÊäÈëµÄpVertexBufferºÍpPixelBuffer»á¸Ä±ä
+    // æ³¨æ„: è¾“å…¥çš„pVertexBufferå’ŒpPixelBufferä¼šæ”¹å˜
     if( ! bCompiledVS)
     {
       const GXBOOL bComposing = pSdrElementSrc->strVSComposer.IsNotEmpty();

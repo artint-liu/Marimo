@@ -1,4 +1,4 @@
-#ifndef _GRAPHICS_X_VERTEX_DECL_H_
+ï»¿#ifndef _GRAPHICS_X_VERTEX_DECL_H_
 #define _GRAPHICS_X_VERTEX_DECL_H_
 
 struct GXVERTEX_P3F_C1D
@@ -9,8 +9,8 @@ struct GXVERTEX_P3F_C1D
       GXColor32 color;
     };
     struct {
-      float   x, y, z;      // Î»ÖÃ
-      GXBYTE  b, g, r, a;   // ÑÕÉ«
+      float   x, y, z;      // ä½ç½®
+      GXBYTE  b, g, r, a;   // é¢œè‰²
     };
   };
 };
@@ -24,9 +24,9 @@ struct GXVERTEX_P3T2C4F
       GXColor       color;
     };
     struct {
-      float   x, y, z;      // Î»ÖÃ
-      float   u, v;         // ÎÆÀí×ø±ê
-      float   r, g, b, a;   // ÑÕÉ«
+      float   x, y, z;      // ä½ç½®
+      float   u, v;         // çº¹ç†åæ ‡
+      float   r, g, b, a;   // é¢œè‰²
     };
   };
 };
@@ -40,9 +40,9 @@ struct GXVERTEX_P4T2C4F
       GXColor color;
     };
     struct {
-      float   x, y, z, w;   // Î»ÖÃ
-      float   u, v;         // ÎÆÀí×ø±ê
-      float   r, g, b, a;   // ÑÕÉ«
+      float   x, y, z, w;   // ä½ç½®
+      float   u, v;         // çº¹ç†åæ ‡
+      float   r, g, b, a;   // é¢œè‰²
     };
   };
 };
@@ -56,9 +56,9 @@ struct GXVERTEX_P3T2F_C1D
       GXColor32 color;
     };
     struct {
-      float   x, y, z;      // Î»ÖÃ
-      float   u, v;         // ÎÆÀí×ø±ê
-      GXBYTE  b, g, r, a;   // ÑÕÉ«
+      float   x, y, z;      // ä½ç½®
+      float   u, v;         // çº¹ç†åæ ‡
+      GXBYTE  b, g, r, a;   // é¢œè‰²
     };
   };
 };
@@ -72,9 +72,9 @@ struct GXVERTEX_P4T2F_C1D
       GXColor32 color;
     };
     struct {
-      float   x, y, z, w;   // Î»ÖÃ
-      float   u, v;         // ÎÆÀí×ø±ê
-      GXBYTE  b, g, r, a;   // ÑÕÉ«
+      float   x, y, z, w;   // ä½ç½®
+      float   u, v;         // çº¹ç†åæ ‡
+      GXBYTE  b, g, r, a;   // é¢œè‰²
     };
   };
 };
@@ -89,10 +89,10 @@ struct GXVERTEX_P3T2N3F_C1D
       GXColor32 color;
     };
     struct {
-      float   x, y, z;   // Î»ÖÃ
-      float   u, v;         // ÎÆÀí×ø±ê
+      float   x, y, z;   // ä½ç½®
+      float   u, v;         // çº¹ç†åæ ‡
       float   nx, ny, nz;
-      GXBYTE  b, g, r, a;   // ÑÕÉ«
+      GXBYTE  b, g, r, a;   // é¢œè‰²
     };
   };
 };
@@ -134,6 +134,6 @@ typedef clvector<VIndex32>        Indices32Array;
 typedef clvector<INDEXEDTRIANGLE> IndexedTrianglesArray;
 
 extern "C" void GXDLL MOVIndex16To32(const VIndex* pIndices16, int nIndexCount, VIndex32* pIndices32);
-extern "C" int  GXDLL MOVIndex32To16(const VIndex32* pIndices32, int nIndexCount, VIndex* pIndices16);  // ·µ»ØÖµÊÇ×ª»»µÄË÷ÒıÊıÁ¿,Èç¹ûÓëÊäÈë²»Ò»ÖÂ,ÔòËµÃ÷Õâ¸öÎ»ÖÃµÄË÷ÒıÓĞÎÊÌâ¿ÉÄÜÊÇ´óÓÚ65535
+extern "C" int  GXDLL MOVIndex32To16(const VIndex32* pIndices32, int nIndexCount, VIndex* pIndices16);  // è¿”å›å€¼æ˜¯è½¬æ¢çš„ç´¢å¼•æ•°é‡,å¦‚æœä¸è¾“å…¥ä¸ä¸€è‡´,åˆ™è¯´æ˜è¿™ä¸ªä½ç½®çš„ç´¢å¼•æœ‰é—®é¢˜å¯èƒ½æ˜¯å¤§äº65535
 
 #endif // _GRAPHICS_X_VERTEX_DECL_H_

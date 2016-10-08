@@ -1,9 +1,9 @@
-#ifndef _MARIMO_DATA_POOL_H_
+﻿#ifndef _MARIMO_DATA_POOL_H_
 #define _MARIMO_DATA_POOL_H_
 
-// ���뿪��
-//#define ENABLE_DATAPOOL_WATCHER     // DataPool ������
-//#define DEBUG_DECL_NAME           // ʹ���ַ���ָ�봢���Զ�λ�����������������Խ����ܱ���ͼ���
+// 编译开关
+//#define ENABLE_DATAPOOL_WATCHER     // DataPool 监视器
+//#define DEBUG_DECL_NAME           // 使用字符串指针储存自定位副本，如果打开这个调试将不能保存和加载
 //#ifdef ENABLE_DATAPOOL_WATCHER
 //# define STR_DATAPOOL_WATCHER_UI       "DataPool/Watcher/UI"
 //# define ON_KNOCKVAR(_KNOCKACT, _VAR)  (_KNOCKACT->pSponsor != &_VAR && _KNOCKACT->Name == _VAR.GetName())
@@ -37,7 +37,7 @@ namespace Marimo
 
   enum TypeCategory
   {
-    T_UNDEFINE = 0, // ��β�õ�
+    T_UNDEFINE = 0, // 结尾用的
     T_BYTE,         // 1 byte
     T_WORD,         // 2 bytes
     T_DWORD,        // 4 bytes
@@ -50,12 +50,12 @@ namespace Marimo
     T_STRING,
     T_STRINGA,      // ANSI string
     T_OBJECT,       // GUnknown*
-    T_ENUM,         // ö��
-    T_FLAG,         // ��־��ö��
+    T_ENUM,         // 枚举
+    T_FLAG,         // 标志型枚举
     T_STRUCT,
-    T_STRUCTALWAYS, // ��ʹ�����û��ʹ��, Ҳ�ᱣ�����ĸ�ʽ
+    T_STRUCTALWAYS, // 即使定义后没有使用, 也会保留它的格式
     T_MAX,
-    T_CATE_MASK = 0x1f, // 64λ����ָ��ʱ���� TYPE_CHANGED_FLAG�������ð�ȫ����ȥ�� TYPE_CHANGED_FLAG ���
+    T_CATE_MASK = 0x1f, // 64位调整指针时会标记 TYPE_CHANGED_FLAG，这里用安全掩码去除 TYPE_CHANGED_FLAG 标记
   };
 
   enum DataPoolLoad
@@ -63,7 +63,7 @@ namespace Marimo
     DataPoolLoad_ReadOnly = 0x00000001,
   };
 
-  // ��û����
+  // 还没用上
   enum TypeCategoryFlag
   {
     TypeCategoryFlag_Byte         = 1 << T_BYTE,
@@ -89,30 +89,30 @@ namespace Marimo
     DATACT_Undefined,
     DATACT_Change,
     DATACT_Insert,
-    DATACT_Deleting,  // ���ڸı䣬��Ա��ûɾ
-    DATACT_Deleted,   // ɾ�����֪ͨ
+    DATACT_Deleting,  // 正在改变，成员还没删
+    DATACT_Deleted,   // 删除后的通知
   };
 
 //#define ENABLE_OLD_DATA_ACTION
 //#ifdef ENABLE_OLD_DATA_ACTION
 //  struct KNOCKACTION
 //  {
-//    const DataPoolVariable* pSponsor; // ������
+//    const DataPoolVariable* pSponsor; // 发起者
 //    DataPool*   pDataPool;
 //    DataAction  Action;
 //    clStringW   Name;
 //    GXLPCVOID   ptr;
-//    GXINT       Index;  // ֻ�ж�̬�������Ч
+//    GXINT       Index;  // 只有动态数组才有效
 //  };
 //#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   struct DATAPOOL_IMPULSE
   {
-    const DataPoolVariable* sponsor; // ������
-    DataAction reason;  // ���ݸı�����
-    GXUINT     index;   // ���������Ԫ�أ���ǿ�ʼ����
-    GXUINT     count;   // ���������Ԫ�أ����Ԫ������
-    GXLPARAM   param;   // �û�����
+    const DataPoolVariable* sponsor; // 发起者
+    DataAction reason;  // 数据改变类型
+    GXUINT     index;   // 如果是数组元素，标记开始索引
+    GXUINT     count;   // 如果是数组元素，标记元素数量
+    GXLPARAM   param;   // 用户参数
   };
   typedef const DATAPOOL_IMPULSE* LPCDATAIMPULSE;
 
@@ -120,38 +120,38 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  // DataPool ���������ṹ��
+  // DataPool 变量声明结构体
   struct VARIABLE_DECLARATION
   {
-    GXLPCSTR  Type;       // ��������
-    GXLPCSTR  Name;       // ������
-    GXDWORD   Flags;      // ��־,"VarDeclFlag_*"
-    GXINT     Count;      // ���ȶ�,0,1��ʾ1��Ԫ��
-                          // ����1��ʾn������
-                          // С��0��ʾ�䳤����,�䳤��������ݲ���ͳһ��ַ��
-                          // ��̬�����ʼ��ʱ, 
-                          //   ���Init��Ϊ��, ���ʼ�Ķ�̬�����СΪabs(Count);
-                          //   ���InitΪ��, ���ʼ��̬�����СΪ0.
-    GXLPVOID  Init;       // ��ʼֵ,�����Ϊ NULL, count �ľ���ֵ����Ԫ�ظ���,
-                          // �������㹻���ȵ�����, �������string����
+    GXLPCSTR  Type;       // 类型名字
+    GXLPCSTR  Name;       // 变量名
+    GXDWORD   Flags;      // 标志,"VarDeclFlag_*"
+    GXINT     Count;      // 长度度,0,1表示1个元素
+                          // 大于1表示n个长度
+                          // 小于0表示变长数组,变长数组的内容不在统一地址中
+                          // 动态数组初始化时, 
+                          //   如果Init不为空, 则初始的动态数组大小为abs(Count);
+                          //   如果Init为空, 则初始动态数组大小为0.
+    GXLPVOID  Init;       // 初始值,如果不为 NULL, count 的绝对值就是元素个数,
+                          // 必须有足够长度的数据, 尤其对于string数据
   };
   typedef const VARIABLE_DECLARATION* LPCVARDECL;
 
-  // DataPool ö�������ṹ��
-  struct ENUM_DECLARATION // ö�٣���־��ö�ٶ������
+  // DataPool 枚举声明结构体
+  struct ENUM_DECLARATION // 枚举，标志型枚举都是这个
   {
-    GXLPCSTR  Name;       // ������
-    GXINT     Value;      // ֵ������int��
+    GXLPCSTR  Name;       // 变量名
+    GXINT     Value;      // 值，都是int型
   };
   typedef const ENUM_DECLARATION* LPCENUMDECL;
 
-  // ���������ṹ��
+  // 类型声明结构体
   struct TYPE_DECLARATION
   {
     TypeCategory          Cate;
     GXLPCSTR              Name;
     union {
-      VARIABLE_DECLARATION* Struct; // �ṹ�� ��Ա
+      VARIABLE_DECLARATION* Struct; // 结构体 成员
       ENUM_DECLARATION*     Enum;
     }as;
   };
@@ -159,10 +159,10 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  // �ڲ����������ṹ��, ͬʱҲ���ļ�����Ľṹ������
-  // �ַ�����Ա����ʹ�����Զ�λ��������������ڽṹ���������ڴ��е�λ��
-  // ����ʹ��ʱҪע����ڲ�ȡ��������Ҫʹ��ָ�룬���ܸ���ʵ����
-  // ��ʹ�����÷���ʱ��release�����Ż�Ҳ���ܸı���ʱ�������ڴ�λ�ö�������Ҫע��
+  // 内部储存描述结构体, 同时也是文件储存的结构体声明
+  // 字符串成员变量使用了自定位方法，这个依赖于结构体自身在内存中的位置
+  // 所以使用时要注意从内部取出的描述要使用指针，不能复制实体类
+  // 当使用引用方法时，release版下优化也可能改变临时变量的内存位置而出错，要注意
 
 #pragma pack(push, 1)
   struct DATAPOOL_VARIABLE_DESC;
@@ -177,14 +177,14 @@ namespace Marimo
   struct DATAPOOL_TYPE_DESC
   {
     DATAPOOL_DECL_STRING_NAME;
-    GXUINT       nName;   // �Զ�λ
+    GXUINT       nName;   // 自定位
     TypeCategory Cate;
     GXUINT       cbSize;
 
-    inline GXINT_PTR GetName() const // ����ֵ������DataPool��Variable����
+    inline GXINT_PTR GetName() const // 返回值依赖于DataPool的Variable类型
     {
 #ifdef DEBUG_DECL_NAME
-      // �Զ�λ�����������Ա������ַ��أ�����ʹ�����û���ָ����������������ṹ��
+      // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
       ASSERT((GXLPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
 #endif // #ifdef DEBUG_DECL_NAME
       return ((GXINT_PTR)&nName + nName);
@@ -194,7 +194,7 @@ namespace Marimo
 
   struct DATAPOOL_STRUCT_DESC : public DATAPOOL_TYPE_DESC
   {
-    GXUINT       Member;  // �Զ�λ
+    GXUINT       Member;  // 自定位
     GXUINT       nMemberCount;
 
     inline const DATAPOOL_VARIABLE_DESC* GetMembers() const
@@ -213,7 +213,7 @@ namespace Marimo
     u16  eType   : 2; // clstd::StaticStringsDict::HashType
     u16  nBucket : 14;
     s16  nPos;
-    u16  nOffset;     // �Զ�λ
+    u16  nOffset;     // 自定位
 
     GXSIZE_T HashString(GXLPCSTR str) const;
 
@@ -226,18 +226,18 @@ namespace Marimo
 
   struct DATAPOOL_VARIABLE_DESC
   {
-    GXUINT      TypeDesc;           // �����Զ�λ��ָ��(TYPE_DESC*)����
+    GXUINT      TypeDesc;           // 减法自定位，指向(TYPE_DESC*)类型
     DATAPOOL_DECL_STRING_NAME;
-    GXUINT      nName;              // StringBaseƫ��
-    GXUINT      nOffset;            // ȫ�ֱ����Ǿ���ƫ�ƣ���Ա�����ǽṹ����ƫ��
-    GXUINT      nCount   : 30;      // �����С,һԪ����Ӧ����1,��̬�����ݶ�Ϊ0
-    GXUINT      bDynamic : 1;       // Ӧ��ʹ��IsDynamicArray()�ӿ�
+    GXUINT      nName;              // StringBase偏移
+    GXUINT      nOffset;            // 全局变量是绝对偏移，成员变量是结构体内偏移
+    GXUINT      nCount   : 30;      // 数组大小,一元变量应该是1,动态数组暂定为0
+    GXUINT      bDynamic : 1;       // 应该使用IsDynamicArray()接口
     GXUINT      bConst   : 1;
 
     inline GXINT_PTR VariableName() const
     {
 #ifdef DEBUG_DECL_NAME
-      // �Զ�λ�����������Ա������ַ��أ�����ʹ�����û���ָ����������������ṹ��
+      // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
       ASSERT((GXLPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
 #endif // #ifdef DEBUG_DECL_NAME
       return ((GXINT_PTR)&nName + nName);
@@ -298,7 +298,7 @@ namespace Marimo
   {
     DATAPOOL_DECL_STRING_NAME;
     GXUINT      nName;
-    GXINT       Value;    // ֵ
+    GXINT       Value;    // 值
   };
 #pragma pack(pop)
 
@@ -350,9 +350,9 @@ namespace Marimo
 
     typedef GXVOID (GXCALLBACK *ImpulseProc)(DATAPOOL_IMPULSE* pImpulse);
 
-    typedef i32                 Enum;         // ���ݳ���ʹ�õ�ö�����͵�C++��ʾ
-    typedef u32                 Flag;         // ���ݳ���ʹ�õı�־���͵�C++��ʾ
-    typedef u32                 EnumFlag;     // ö�ٺͱ�־���͵�ͳһ��ʾ
+    typedef i32                 Enum;         // 数据池所使用的枚举类型的C++表示
+    typedef u32                 Flag;         // 数据池所使用的标志类型的C++表示
+    typedef u32                 EnumFlag;     // 枚举和标志类型的统一表示
     typedef clstd::FixedBuffer  clFixedBuffer;
     typedef clstd::RefBuffer    clRefBuffer;
     typedef GXUINT              SortedIndexType;
@@ -361,10 +361,10 @@ namespace Marimo
 
     // COMMENT:
     // GSIT:
-    // #.�Ƕ�һ��variable / Enum��nName����������λ��, "һ��variable"��ָȫ�ֱ������ϻ��߽ṹ��Ա����
+    // #.是对一组variable / Enum的nName排序后的索引位置, "一组variable"是指全局变量集合或者结构成员集合
     // #.for each(i)
-    //     VarDesc[m_aGSIT[i]].nName �ǰ��յ���˳�����ӵ�,������Ա��������ʹ�ö��ַ�����
-    // #.m_aGSIT��m_aVariables+m_aMembers������˳���Ӧ
+    //     VarDesc[m_aGSIT[i]].nName 是按照递增顺序增加的,这样成员变量可以使用二分法查找
+    // #.m_aGSIT与m_aVariables+m_aMembers按分组顺序对应
 
     virtual ~DataPool(){};
 
@@ -378,16 +378,16 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL      Save                (clFile& file));
     GXSTDINTERFACE(GXBOOL      Load                (clFile& file, GXDWORD dwFlag));
 
-    GXSTDINTERFACE(GXLPCSTR    GetVariableName     (GXUINT nIndex) const); // ��ñ���������
+    GXSTDINTERFACE(GXLPCSTR    GetVariableName     (GXUINT nIndex) const); // 获得变量的名字
     //GXSTDINTERFACE(GXHRESULT   GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout));
     GXSTDINTERFACE(GXHRESULT   ImportDataFromFileW (GXLPCWSTR szFilename));
 
-    GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // ���в������ַ����Ͷ�̬����
-    GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ());                 // ������RawPool�ŷ���ָ��
-    GXSTDINTERFACE(GXUINT      GetNameId           (LPCSTR szName));  // ����Type, Variable, Enum���ڲ��ȶ��ַ�����id
+    GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组
+    GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ());                 // 必须是RawPool才返回指针
+    GXSTDINTERFACE(GXUINT      GetNameId           (LPCSTR szName));  // 返回Type, Variable, Enum等内部稳定字符串的id
     GXSTDINTERFACE(GXBOOL      QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar));
-    GXSTDINTERFACE(GXBOOL      FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset)); // ���ұ���ȫ��
+    GXSTDINTERFACE(GXBOOL      FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset)); // 查找变量全名
 
 #ifndef DISABLE_DATAPOOL_WATCHER
     GXSTDINTERFACE(GXBOOL      IsAutoKnock         ());
@@ -415,10 +415,10 @@ namespace Marimo
     GXSTDINTERFACE(named_iterator  named_end   ());
 
     //
-    // �߼�Ӧ��
+    // 高级应用
     //
   private:
-    // ���ﶨ����watch��lambda����ʽ�÷����õ����࣬�ڲ�ʹ��
+    // 这里定义了watch的lambda表达式用法所用到了类，内部使用
     template<class _Fn>
     class StaticLambdaWatcher : public DataPoolWatcher
     {
@@ -433,12 +433,12 @@ namespace Marimo
     };
 
   public:
-    // ������[]���ţ����űȽϷ��㣬���ǲ���QueryByExpression���ܺ�.
+    // 重载了[]符号，用着比较方便，但是不如QueryByExpression性能好.
     DataPoolVariable operator[](GXLPCSTR szExpression);
 
-    // ����lambda����ʽ��watch����������ΪWatchFor��Ϊ�˷�ֹ��Watchϵ�к�����������ȷ�����غ�����������
-    // _TVarId�ȿ�����GXLPCSTR��Ҳ������DataPoolVariable*
-    // ���ص�DataPoolWatcher��Ҫ������Ĵ�����ֻ����ע��Watcher����
+    // 基于lambda表达式的watch方法，改名为WatchFor是为了防止与Watch系列函数发生不明确的重载函数调用问题
+    // _TVarId既可以是GXLPCSTR，也可以是DataPoolVariable*
+    // 返回的DataPoolWatcher不要做额外的处理，只用于注销Watcher而用
     template<typename _TVarId, class _Fn>
     DataPoolWatcher* WatchFor(_TVarId Id, _Fn fn)
     {
@@ -450,7 +450,7 @@ namespace Marimo
     }
 
     //
-    // ������ĸ��ַ���
+    // 创建类的各种方法
     //
   public:
     static  GXHRESULT   FindDataPool        (DataPool** ppDataPool, GXLPCSTR szName);
@@ -460,26 +460,26 @@ namespace Marimo
     static  GXHRESULT   CreateFromFileW     (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, GXDWORD dwFlag);
     static  GXHRESULT   CompileFromMemory   (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength = 0);
     static  GXHRESULT   CompileFromFileW    (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude = NULL);
-    static  GXBOOL      IsIllegalName       (GXLPCSTR szName); // �������/���������Ƿ����Ҫ��
+    static  GXBOOL      IsIllegalName       (GXLPCSTR szName); // 检查类型/变量命名是否符合要求
 
-    // ע�ⲻ֧�� struct ���԰���, ֧�ֶ�̬������԰�������:
+    // 注意不支持 struct 的自包含, 支持动态数组的自包含功能:
     // struct A
     //{
-    //  A a[];    // ֧����������, ��ʾ���Ƕ�̬����,������ʽ��������֧��, ��������.
-    //  A ab[10]; // ��֧����������, ���������޵ݹ�����ĳ���
+    //  A a[];    // 支持这种声明, 表示它是动态数组,其它形式的声明不支持, 例子如下.
+    //  A ab[10]; // 不支持这种声明, 这样会无限递归数组的长度
     //};
 
-    // ���ڶ�̬����,�κγ�Ա��ȡַ"&"�����������ǲ���ȫ��, �����ַ����Ϊ��̬�����Ա����ɾ���ı�
+    // 对于动态数组,任何成员的取址"&"操作都可能是不安全的, 这个地址会因为动态数组成员的增删而改变
 
-    // ��(DataPool)�д����ֵ:
-    // �������ֺͽṹ��, ����ȫ������˳��ֲ�, ���ְ���������Сռ��Ӧ�ֽ�,�ṹ�尴�ո�����Ա����ռ�������Ŀռ�.
-    // ���ڹ̶����ȵ�����(��������,�ṹ��������߽ṹ��������), ����չ��������˳��ֲ�,ռ�ÿռ����ͬ��.
-    // �����ַ���(string)����, ��������˳��ֲ�,ռ��4�ֽ�, ָ���ַ�����ַ, �����ַ�ǿɱ��.
-    // ���ڶ�̬��������, ����ȫ������˳��ֲ�,ռ��4�ֽ�,������(clBuffer*)��ָ��.
+    // 池(DataPool)中储存的值:
+    // 对于数字和结构体, 按照全局声明顺序分布, 数字按照声明大小占相应字节,结构体按照各个成员声明占用连续的空间.
+    // 对于固定长度的数组(数字数组,结构体数组或者结构体中数组), 按照展开的声明顺序分布,占用空间情况同上.
+    // 对于字符串(string)类型, 按照声明顺序分布,占用4字节, 指向字符串地址, 这个地址是可变的.
+    // 对于动态数组类型, 按照全局声明顺序分布,占用4字节,内容是(clBuffer*)的指针.
   };
 
   //
-  // DataPool ������ʹ�õ�ͷ�ļ��򿪷���
+  // DataPool 编译器使用的头文件打开方法
   //
   class DataPoolInclude
   {
@@ -493,7 +493,7 @@ namespace Marimo
   };
 
   //
-  // DataPool ������
+  // DataPool 编译器
   //
   class DataPoolCompiler : public GUnknown
   {

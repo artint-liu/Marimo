@@ -1,4 +1,4 @@
-#ifndef _SKY_QUAD_H_
+﻿#ifndef _SKY_QUAD_H_
 #define _SKY_QUAD_H_
 
 #define _ENABLE_DATAPOOL

@@ -1,6 +1,6 @@
-// GrapX 3D »æÍ¼¶ÔÏó
-// ÓëGXCanvas²»Í¬µÄÊÇ, GXCanvasÔÚ»æÍ¼Ê±Ëø¶¨, ÓÃÍêÊÍ·Å. GXCanvas3D ĞèÒª³¤ÆÚ³ÖÓĞ, ÍêÈ«²»ÓÃÊ±²ÅÄÜÊÍ·Å
-// GetXXX ·µ»ØÖ¸ÕëÎª Canvas3D ÄÚ²¿Êı¾İ
+ï»¿// GrapX 3D ç»˜å›¾å¯¹è±¡
+// ä¸GXCanvasä¸åŒçš„æ˜¯, GXCanvasåœ¨ç»˜å›¾æ—¶é”å®š, ç”¨å®Œé‡Šæ”¾. GXCanvas3D éœ€è¦é•¿æœŸæŒæœ‰, å®Œå…¨ä¸ç”¨æ—¶æ‰èƒ½é‡Šæ”¾
+// GetXXX è¿”å›æŒ‡é’ˆä¸º Canvas3D å†…éƒ¨æ•°æ®
 #ifndef _GRAP_X_CANVAS_3D_INTERFACE_H_
 #define _GRAP_X_CANVAS_3D_INTERFACE_H_
 
@@ -49,7 +49,7 @@ public:
   GXSTDINTERFACE(const FrustumPlanes*     GetViewFrustum        () GXCONST);
 #ifdef REFACTOR_SHADER
 #else
-  GXSTDINTERFACE(STANDARDMTLUNIFORMTABLE* GetStandardUniform    ());  // ·µ»ØµÄÊı¾İ¿ÉÒÔÔÚÓ¦ÓÃ³ÌĞòÖĞĞŞ¸Ä
+  GXSTDINTERFACE(STANDARDMTLUNIFORMTABLE* GetStandardUniform    ());  // è¿”å›çš„æ•°æ®å¯ä»¥åœ¨åº”ç”¨ç¨‹åºä¸­ä¿®æ”¹
 #endif // #ifdef REFACTOR_SHADER
 
   GXSTDINTERFACE(GXHRESULT      UpdateCommonUniforms  ());

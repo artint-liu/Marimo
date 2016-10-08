@@ -1,4 +1,4 @@
-
+ï»¿
 //////////////////////////////////////////////////////////////////////////
 GXCanvasImpl::GXCanvasImpl(GXGraphicsImpl* pGraphics, GXBOOL bStatic)
   : GXCanvasCoreImpl    (pGraphics, 2, RESTYPE_CANVAS2D)
@@ -106,7 +106,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, GXCONST REGN* pRegn)
       m_pCamera = GCamera_ScreenAligned::Create((GXCanvasCore*)(GXCanvas*)this);
     }
 
-    // ³õÊ¼»¯äÖÈ¾Ä£Ê½
+    // åˆå§‹åŒ–æ¸²æŸ“æ¨¡å¼
     m_LastState.eCompMode = CM_SourceOver;
     m_LastState.dwColorAdditive = 0;
     m_aBatch[m_uBatchCount++].Set(CF_CompositingMode, 0, 0, CM_SourceOver);
@@ -116,15 +116,15 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, GXCONST REGN* pRegn)
 
     //GXUIGetStock()->pSimpleShader->SetColor(0xffffffff);
 
-    // ³õÊ¼»¯¿ÕÎÆÀíÊ±µÄÌæ»»ÎÆÀí
+    // åˆå§‹åŒ–ç©ºçº¹ç†æ—¶çš„æ›¿æ¢çº¹ç†
     if(m_pWhiteTex == NULL) {
       GXHRESULT hval = m_pGraphics->CreateTexture(&m_pWhiteTex, "CanvasWhiteTex8x8", 8, 8, 0, GXFMT_A8R8G8B8, GXRU_DEFAULT);
-      if(hval == 0) { // Ö»ÓĞÔÚÊ×´Î´´½¨Ê±²ÅÇå³ıÑÕÉ«
+      if(hval == 0) { // åªæœ‰åœ¨é¦–æ¬¡åˆ›å»ºæ—¶æ‰æ¸…é™¤é¢œè‰²
         m_pWhiteTex->Clear(NULL, 0xffffffff);
       }
     }
 
-    // ´´½¨BlendState
+    // åˆ›å»ºBlendState
     if(m_pBlendingState[0] == NULL || m_pBlendingState[1] == NULL ||
       m_pOpaqueState[0] == NULL || m_pOpaqueState[1] == NULL)
     {
@@ -172,7 +172,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, GXCONST REGN* pRegn)
       m_pGraphics->CreateDepthStencilState((GDepthStencilState**)&m_pCanvasStencil[1], &DepthStencil);
     }
 
-    // ³õÊ¼»¯¼Ä´æÆ÷³£Á¿
+    // åˆå§‹åŒ–å¯„å­˜å™¨å¸¸é‡
     GCAMERACONETXT gcc;
     gcc.dwMask = GCC_WORLD;
     m_pCamera->GetContext(&gcc);
@@ -234,12 +234,12 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
         m_pClipRegion->GetBounding(&m_rcClip);
         //m_LastState.rcClip = m_rcClip;
 
-        // Èç¹û²»ÏÈÉèÖÃClearÔÚÇøÓòÖ®ÍâµÄ»áÊ§°Ü
+        // å¦‚æœä¸å…ˆè®¾ç½®Clearåœ¨åŒºåŸŸä¹‹å¤–çš„ä¼šå¤±è´¥
         gxRectToRegn(&rgClip, &m_rcClip);
         m_pGraphics->SetSafeClip(&rgClip);
 
-        // TODO: ¿¼ÂÇÊÇ·ñÔÚÒÔºóÓÃ¿ìËÙRegionÇó²¹À´Ìî³ä¿Õ°×ÇøÓòÄØ?
-        // ÈçÏÂÌî³äÊµÏÖÁË: ÔÚÒ»¸ö¾ØĞÎÇøÓòÄÚ,ĞèÒª»æÖÆÍ¼ĞÎµÄ²¿·ÖÄ£°åÖµ>1,ÆäËû²¿·ÖÄ£°åÖµÎª0
+        // TODO: è€ƒè™‘æ˜¯å¦åœ¨ä»¥åç”¨å¿«é€ŸRegionæ±‚è¡¥æ¥å¡«å……ç©ºç™½åŒºåŸŸå‘¢?
+        // å¦‚ä¸‹å¡«å……å®ç°äº†: åœ¨ä¸€ä¸ªçŸ©å½¢åŒºåŸŸå†…,éœ€è¦ç»˜åˆ¶å›¾å½¢çš„éƒ¨åˆ†æ¨¡æ¿å€¼>1,å…¶ä»–éƒ¨åˆ†æ¨¡æ¿å€¼ä¸º0
         const GXDWORD dwFlags = GXCLEAR_STENCIL;
         //const GXDWORD dwFlags = GXCLEAR_STENCIL|GXCLEAR_TARGET;
         m_pGraphics->Clear(&m_rcClip, 1, dwFlags, 0xff0000ff, 0, 0);
@@ -268,7 +268,7 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
 
 GXBOOL GXCanvasImpl::Initialize(GXImage* pImage, GXCONST REGN* pRegn)
 {
-  // TODO: Èç¹û²»Ö§³ÖRenderableÔò½«ÄÚ²¿ÎÆÀíÖØĞÂ´´½¨ÎªRenderTarget
+  // TODO: å¦‚æœä¸æ”¯æŒRenderableåˆ™å°†å†…éƒ¨çº¹ç†é‡æ–°åˆ›å»ºä¸ºRenderTarget
   ASSERT(m_pTargetImage == NULL);
   m_pTargetImage = pImage;
   if(pImage != NULL)
@@ -286,12 +286,12 @@ GXHRESULT GXCanvasImpl::Release()
     Flush();
   }
 
-  // ×î¶àÁ½¸öÒıÓÃ
+  // æœ€å¤šä¸¤ä¸ªå¼•ç”¨
   ASSERT(m_uRefCount > 0 && m_uRefCount <= 3);
   m_uRefCount--;
 
-  // Graphics ÄÚÖÃ Canvas ÔÚÒ»¸öÒıÓÃ¼ÆÊıÊ±ÊÍ·Å
-  // ·ñÔòÔÚÒıÓÃ¼ÆÊıÎª 0 Ê±ÊÍ·Å
+  // Graphics å†…ç½® Canvas åœ¨ä¸€ä¸ªå¼•ç”¨è®¡æ•°æ—¶é‡Šæ”¾
+  // å¦åˆ™åœ¨å¼•ç”¨è®¡æ•°ä¸º 0 æ—¶é‡Šæ”¾
   if((m_bStatic == TRUE && m_uRefCount == 1) ||
     m_uRefCount == 0)
   {
@@ -355,16 +355,16 @@ GXBOOL GXCanvasImpl::_CanFillBatch(GXUINT uVertCount, GXUINT uIndexCount)
     (m_uBatchCount + 1) < m_uBatchSize);
 }
 
-// ·µ»ØÖµÊÇIndexµÄË÷Òı»ùÖµ
+// è¿”å›å€¼æ˜¯Indexçš„ç´¢å¼•åŸºå€¼
 GXUINT GXCanvasImpl::PrepareBatch(CanvasFunc eFunc, GXUINT uVertCount, GXUINT uIndexCount, GXLPARAM lParam)
 {
   if(_CanFillBatch(uVertCount, uIndexCount) == FALSE)
     Flush();
 
-  // ¶ÓÁĞÎª¿Õ»òÕßÓëÉÏÒ»¸öÃüÁî²»·û,ÔòĞÂ½¨Ò»¸öÃüÁî
+  // é˜Ÿåˆ—ä¸ºç©ºæˆ–è€…ä¸ä¸Šä¸€ä¸ªå‘½ä»¤ä¸ç¬¦,åˆ™æ–°å»ºä¸€ä¸ªå‘½ä»¤
   if(m_uBatchCount == 0 || m_aBatch[m_uBatchCount - 1].eFunc != eFunc ||
-    (eFunc == CF_Textured && m_aBatch[m_uBatchCount - 1].comm.lParam != lParam))    // TODO: ÊÇ²»ÊÇÎªÁËÍ¨ÓÃ,ÒÔºó¿ÉÒÔ¸Ä³É½ö½ö±È½ÏlParam²ÎÊı?
-    //        ÒòÎª lParam ²»Í¬¿Ï¶¨ÊÇ²»Í¬µÄ¶ÓÁĞ
+    (eFunc == CF_Textured && m_aBatch[m_uBatchCount - 1].comm.lParam != lParam))    // TODO: æ˜¯ä¸æ˜¯ä¸ºäº†é€šç”¨,ä»¥åå¯ä»¥æ”¹æˆä»…ä»…æ¯”è¾ƒlParamå‚æ•°?
+    //        å› ä¸º lParam ä¸åŒè‚¯å®šæ˜¯ä¸åŒçš„é˜Ÿåˆ—
   {
     m_aBatch[m_uBatchCount++].Set(eFunc, uVertCount, uIndexCount, lParam);
     return 0;
@@ -387,7 +387,7 @@ void GXCanvasImpl::_SetPrimitivePos(GXUINT nIndex, const GXINT _x, const GXINT _
 {
   //m_lpLockedVertex[nIndex].x = (GXFLOAT)_x;
   //m_lpLockedVertex[nIndex].y = (GXFLOAT)_y;
-  // TODO: Ã²ËÆÕâÀïÓ¦¸ÃÊÇm_xOrigin, m_yOrigin, ÒòÎª m_LastState ÒÑ¾­ÊÇ×îºóµÄ½á¹ûÁË, m_xOriginÊÇÖĞ¼ä½á¹û
+  // TODO: è²Œä¼¼è¿™é‡Œåº”è¯¥æ˜¯m_xOrigin, m_yOrigin, å› ä¸º m_LastState å·²ç»æ˜¯æœ€åçš„ç»“æœäº†, m_xOriginæ˜¯ä¸­é—´ç»“æœ
   m_lpLockedVertex[nIndex].x = (GXFLOAT)m_LastState.xOrigin + _x;
   m_lpLockedVertex[nIndex].y = (GXFLOAT)m_LastState.yOrigin + _y;
 }
@@ -433,7 +433,7 @@ GXBOOL GXCanvasImpl::CommitState()
 {
   REGN regn;
 
-  // Èç¹û·µ»Ø0, ËµÃ÷GraphicsÊ¹ÓÃµÄ¾ÍÊÇµ±Ç°µÄ Canvas, ËùÒÔ²»ÓÃ³õÊ¼»¯ÕâĞ©¶«¶«
+  // å¦‚æœè¿”å›0, è¯´æ˜Graphicsä½¿ç”¨çš„å°±æ˜¯å½“å‰çš„ Canvas, æ‰€ä»¥ä¸ç”¨åˆå§‹åŒ–è¿™äº›ä¸œä¸œ
   if(m_pGraphics->InlSetCanvas(this) > 0)
   {
     m_pGraphics->SetPrimitive(m_pPrimitive);
@@ -446,7 +446,7 @@ GXBOOL GXCanvasImpl::CommitState()
     UpdateStencil(m_pClipRegion);
 
     gxRectToRegn(&regn, &m_rcClip);
-    m_pGraphics->SetSafeClip(&regn);  // TODO: ÊÇ²»ÊÇÓ¦¸Ã°ÑÕâ¸ö¸ÄÎªGXRECT
+    m_pGraphics->SetSafeClip(&regn);  // TODO: æ˜¯ä¸æ˜¯åº”è¯¥æŠŠè¿™ä¸ªæ”¹ä¸ºGXRECT
     m_pGraphics->SetViewport(NULL);
 
     float4 vColorAdditive = m_dwColorAdditive;
@@ -509,7 +509,7 @@ GXBOOL GXCanvasImpl::GetTransform(float4x4* matTransform) GXCONST
 
 GXBOOL GXCanvasImpl::SetViewportOrg(GXINT x, GXINT y, GXLPPOINT lpPoint)
 {
-  // !!! Ã»²âÊÔ¹ı
+  // !!! æ²¡æµ‹è¯•è¿‡
   if(lpPoint)
   {
     if(m_uBatchCount > 0)
@@ -522,7 +522,7 @@ GXBOOL GXCanvasImpl::SetViewportOrg(GXINT x, GXINT y, GXLPPOINT lpPoint)
 
     m_xOrigin = m_xAbsOrigin - x;
     m_yOrigin = m_yAbsOrigin - y;
-    ASSERT(0);  // TODO: ÑéÖ¤ Õâ¸ö²»¾ÍÊÇ m_LastState(xOrigin/yOrigin) ÀïµÄÖµÂğ?
+    ASSERT(0);  // TODO: éªŒè¯ è¿™ä¸ªä¸å°±æ˜¯ m_LastState(xOrigin/yOrigin) é‡Œçš„å€¼å—?
   }
   else
   {
@@ -565,7 +565,7 @@ GXBOOL GXCanvasImpl::Flush()
     m_lpLockedVertex = NULL;
   }
   m_pGraphics->Enter();
-  CommitState();  // TODO: Èç¹û bEmptyRect Îª TRUE, Ôò²»Ìá½»×´Ì¬
+  CommitState();  // TODO: å¦‚æœ bEmptyRect ä¸º TRUE, åˆ™ä¸æäº¤çŠ¶æ€
 
   GXUINT nBaseVertex = 0;
   GXUINT nStartIndex = 0;
@@ -632,7 +632,7 @@ GXBOOL GXCanvasImpl::Flush()
     case CF_RenderState:
       {
         TRACE_BATCH("CF_RenderState\n");
-        ASSERT(0); // ÒÑ¾­È¥µôÁË
+        ASSERT(0); // å·²ç»å»æ‰äº†
         //m_pRenderState->Set(
         //  (GXRenderStateType)m_aBatch[i].nRenderStateCode, m_aBatch[i].dwStateValue);
       }
@@ -675,7 +675,7 @@ GXBOOL GXCanvasImpl::Flush()
         //LPGXRENDERSTATE lpRenderStateBlock = NULL;
         GBlendStateImpl* pBlendState = NULL;
 
-        // ÅĞ¶ÏÊÇ²»ÊÇ×îÖÕäÖÈ¾Ä¿±ê
+        // åˆ¤æ–­æ˜¯ä¸æ˜¯æœ€ç»ˆæ¸²æŸ“ç›®æ ‡
         if(m_pTargetTex == NULL)
         {
           if(m_aBatch[i].comm.lParam == CM_SourceCopy)
@@ -767,7 +767,7 @@ GXBOOL GXCanvasImpl::Flush()
     //  break;
 #elif defined(D3D11_CANVAS_IMPL)
 #else
-#error ĞèÒª¶¨ÒåinlµÄ»·¾³
+#error éœ€è¦å®šä¹‰inlçš„ç¯å¢ƒ
 #endif
     case CF_SetViewportOrg:
       TRACE_BATCH("CF_SetViewportOrg\n");
@@ -838,7 +838,7 @@ GXBOOL GXCanvasImpl::Flush()
       break;
     case CF_NoOperation:
       TRACE_BATCH("CF_NoOperation\n");
-      // É¶Ò²Ã»ÓĞ!!
+      // å•¥ä¹Ÿæ²¡æœ‰!!
       break;
     case CF_SetExtTexture:
       {
@@ -890,7 +890,7 @@ GXBOOL GXCanvasImpl::SetSamplerState(GXUINT Sampler, GXSAMPLERDESC* pDesc)
   if(!((m_uBatchCount + 1) < m_uBatchSize))
     Flush();
   m_aBatch[m_uBatchCount].eFunc = CF_SetSamplerState;
-  m_aBatch[m_uBatchCount].comm.dwFlag = Sampler;  // ·´Õı¶àÓà, ¶¼Ğ´³ÉÒ»ÑùÁË
+  m_aBatch[m_uBatchCount].comm.dwFlag = Sampler;  // åæ­£å¤šä½™, éƒ½å†™æˆä¸€æ ·äº†
   m_aBatch[m_uBatchCount].comm.wParam = Sampler;
   m_aBatch[m_uBatchCount].comm.lParam = (GXLPARAM)pDescStore;
   m_uBatchCount++;
@@ -903,13 +903,13 @@ GXBOOL GXCanvasImpl::SetRenderState(GXRenderStateType eType, GXDWORD dwValue)
 {
   if(!((m_uBatchCount + 1) < m_uBatchSize))
     Flush();
-  // TODO: Ïë°ì·¨±£Ö¤, µ±GXCanvasImpl²»ÔÚÉè±¸ÉÏÊ±Ö»¸Ä±äGRenderStateµÄ±äÁ¿.
+  // TODO: æƒ³åŠæ³•ä¿è¯, å½“GXCanvasImplä¸åœ¨è®¾å¤‡ä¸Šæ—¶åªæ”¹å˜GRenderStateçš„å˜é‡.
   m_aBatch[m_uBatchCount++].SetRenderState(eType, dwValue);
   return TRUE;
 }
 GXBOOL GXCanvasImpl::SetRenderStateBlock(GXLPCRENDERSTATE lpBlock)
 {
-  ASSERT(0); // ÒÑ¾­È¥µôÁË
+  ASSERT(0); // å·²ç»å»æ‰äº†
   return TRUE;
   //return m_pRenderState->SetBlock(lpBlock);
 }
@@ -985,7 +985,7 @@ GXBOOL GXCanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount
   return FALSE;
 }
 #else
-#error ĞèÒª¶¨ÒåinlµÄ»·¾³
+#error éœ€è¦å®šä¹‰inlçš„ç¯å¢ƒ
 #endif
 
 GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam)
@@ -1007,10 +1007,10 @@ GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, 
       dwRet = m_LastState.dwColorAdditive;
       m_LastState.dwColorAdditive = (GXDWORD)uParam;
 
-      // ¼ì²âÊÇ·ñÊÇĞÂµÄµş¼ÓÑÕÉ«
+      // æ£€æµ‹æ˜¯å¦æ˜¯æ–°çš„å åŠ é¢œè‰²
       if(m_LastState.dwColorAdditive != dwRet)
       {
-        // Èç¹ûÉÏÒ»¸öÃüÁîÒ²ÊÇÉèÖÃµş¼ÓÑÕÉ«
+        // å¦‚æœä¸Šä¸€ä¸ªå‘½ä»¤ä¹Ÿæ˜¯è®¾ç½®å åŠ é¢œè‰²
         if( m_uBatchCount > 0 && 
           m_aBatch[m_uBatchCount - 1].eFunc == CF_ColorAdditive &&
           m_aBatch[m_uBatchCount - 1].comm.lParam == (GXDWORD)uParam)
@@ -1033,9 +1033,9 @@ GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, 
         Flush();
 
       GXLPRECT lpRect = (GXLPRECT)pParam;
-      // Õâ¸öº¯ÊıÀïÃæ½« RECTµÄleft ºÍ right, top ºÍ bottom Ñ¹Ëõ´¢´æ
+      // è¿™ä¸ªå‡½æ•°é‡Œé¢å°† RECTçš„left å’Œ right, top å’Œ bottom å‹ç¼©å‚¨å­˜
 
-      if(lpRect == NULL)  // ¸´Î»Ä£Ê½
+      if(lpRect == NULL)  // å¤ä½æ¨¡å¼
       {
         m_aBatch[m_uBatchCount].eFunc       = CF_ResetTextClip;
         m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
@@ -1043,13 +1043,13 @@ GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, 
         m_aBatch[m_uBatchCount].comm.lParam = NULL;
         m_uBatchCount++;
       }
-      else  // ÓÃ»§ÉèÖÃ
+      else  // ç”¨æˆ·è®¾ç½®
       {
-        // ×ª»»Îª RenderTarget ¿Õ¼äµÄ×ø±ê
+        // è½¬æ¢ä¸º RenderTarget ç©ºé—´çš„åæ ‡
         GXRECT rcUserClip = *lpRect;
         gxOffsetRect(&rcUserClip, m_LastState.xOrigin, m_LastState.yOrigin);
 
-        // ÓëÏµÍ³ÇøÓò²Ã¼ô
+        // ä¸ç³»ç»ŸåŒºåŸŸè£å‰ª
         gxIntersectRect(&rcUserClip, &m_rcAbsClip, &rcUserClip);    
 
         m_aBatch[m_uBatchCount].eFunc       = CF_SetTextClip;
@@ -1103,16 +1103,16 @@ GXBOOL GXCanvasImpl::Clear(GXCOLORREF crClear)
 {
   if(m_uBatchCount > 0)
   {
-    // Èç¹ûµ÷ÓÃÁËClear, Ö®Ç°µÄËùÓĞ»æÍ¼»º³åÈ«²¿Ê§Ğ§ÁË
+    // å¦‚æœè°ƒç”¨äº†Clear, ä¹‹å‰çš„æ‰€æœ‰ç»˜å›¾ç¼“å†²å…¨éƒ¨å¤±æ•ˆäº†
     for(GXINT i = m_uBatchCount - 1; i >= 0; i--)
     {
-      if(m_aBatch[i].eFunc == CF_SetRegion)  // ÉèÖÃ²Ã¼ôÇøÖ®Ç°µÄ»æÍ¼ÃüÁî»¹ÊÇÓĞĞ§µÄ,
-        goto FLUSH_CMD;            // ÒòÎªĞÂµÄ²Ã¼ôÇøÈç¹û½ÏĞ¡,Ö®Ç°µÄ»æÍ¼²Ù×÷»áÁôÔÚ¾ÉµÄ²Ã¼ôÇø
+      if(m_aBatch[i].eFunc == CF_SetRegion)  // è®¾ç½®è£å‰ªåŒºä¹‹å‰çš„ç»˜å›¾å‘½ä»¤è¿˜æ˜¯æœ‰æ•ˆçš„,
+        goto FLUSH_CMD;            // å› ä¸ºæ–°çš„è£å‰ªåŒºå¦‚æœè¾ƒå°,ä¹‹å‰çš„ç»˜å›¾æ“ä½œä¼šç•™åœ¨æ—§çš„è£å‰ªåŒº
       else if(m_aBatch[i].eFunc > CF_DrawFirst && m_aBatch[i].eFunc < CF_DrawLast)
         m_aBatch[i].eFunc = CF_NoOperation;
     }
 
-    // Çå¿Õ¶¥µãºÍË÷Òı
+    // æ¸…ç©ºé¡¶ç‚¹å’Œç´¢å¼•
     m_uVertCount  = 0;
     m_uIndexCount = 0;
   }
@@ -1120,7 +1120,7 @@ FLUSH_CMD:
   if(!((m_uBatchCount + 1) < m_uBatchSize))
     Flush();
 
-  // Èç¹ûÉÏÒ»¸öÃüÁîÓĞÇå³ı¹¦ÄÜ,ÔòÖ±½Ó·µ»Ø!
+  // å¦‚æœä¸Šä¸€ä¸ªå‘½ä»¤æœ‰æ¸…é™¤åŠŸèƒ½,åˆ™ç›´æ¥è¿”å›!
   if(m_aBatch[m_uBatchCount - 1].eFunc == CF_Clear)
   {
     if((m_aBatch[m_uBatchCount - 1].comm.dwFlag & GXCLEAR_TARGET) != 0)
@@ -1145,8 +1145,8 @@ GXINT GXCanvasImpl::SetCompositingMode(CompositingMode eMode)
   if(!((m_uBatchCount + 1) < m_uBatchSize))
     Flush();
 
-  // Èç¹ûÓëÉÏÒ»ÌõÃüÁîÏàÍ¬Ôò³åÏúµô
-  // Èç¹ûÁ½¸öCF_CompositingModeÃüÁî¼äÈ«²¿ÊÇ·Ç»æÍ¼ÃüÁîÔò²»ÄÜ³åÏú
+  // å¦‚æœä¸ä¸Šä¸€æ¡å‘½ä»¤ç›¸åŒåˆ™å†²é”€æ‰
+  // å¦‚æœä¸¤ä¸ªCF_CompositingModeå‘½ä»¤é—´å…¨éƒ¨æ˜¯éç»˜å›¾å‘½ä»¤åˆ™ä¸èƒ½å†²é”€
   if(m_uBatchCount > 0 && m_aBatch[m_uBatchCount - 1].eFunc == CF_CompositingMode)
     m_aBatch[m_uBatchCount - 1].Set(CF_CompositingMode, 0, 0, eMode);
   else
@@ -1164,7 +1164,7 @@ GXBOOL GXCanvasImpl::SetRegion(GRegion* pRegion, GXBOOL bAbsOrigin)
     Flush();
   if(pRegion != NULL)
   {
-    // TODO: ²âÊÔÈç¹ûÇøÓòĞ¡ÓÚÆÁÄ»Çø,¾Í²»ÓÃÕâ¸öÆÁÄ»ÇøµÄRegion²Ã¼ô
+    // TODO: æµ‹è¯•å¦‚æœåŒºåŸŸå°äºå±å¹•åŒº,å°±ä¸ç”¨è¿™ä¸ªå±å¹•åŒºçš„Regionè£å‰ª
     m_pGraphics->CreateRectRgn(&pSurfaceRegion, 0, 0, m_xExt, m_yExt);
 
     if(bAbsOrigin == TRUE)
@@ -1192,9 +1192,9 @@ GXBOOL GXCanvasImpl::SetClipBox(const GXLPRECT lpRect)
   if(!((m_uBatchCount + 1) < m_uBatchSize))
     Flush();
 
-  // Õâ¸öº¯ÊıÀïÃæ½« RECTµÄleft ºÍ right, top ºÍ bottom Ñ¹Ëõ´¢´æ
+  // è¿™ä¸ªå‡½æ•°é‡Œé¢å°† RECTçš„left å’Œ right, top å’Œ bottom å‹ç¼©å‚¨å­˜
 
-  if(lpRect == NULL)  // ¸´Î»Ä£Ê½
+  if(lpRect == NULL)  // å¤ä½æ¨¡å¼
   {
     m_aBatch[m_uBatchCount].eFunc       = CF_ResetClipBox;
     m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
@@ -1204,13 +1204,13 @@ GXBOOL GXCanvasImpl::SetClipBox(const GXLPRECT lpRect)
 
     m_LastState.rcClip = m_rcAbsClip;
   }
-  else  // ÓÃ»§ÉèÖÃ
+  else  // ç”¨æˆ·è®¾ç½®
   {
-    // ×ª»»Îª RenderTarget ¿Õ¼äµÄ×ø±ê
+    // è½¬æ¢ä¸º RenderTarget ç©ºé—´çš„åæ ‡
     GXRECT rcUserClip = *lpRect;
     gxOffsetRect(&rcUserClip, m_LastState.xOrigin, m_LastState.yOrigin);
 
-    // ÓëÏµÍ³ÇøÓò²Ã¼ô
+    // ä¸ç³»ç»ŸåŒºåŸŸè£å‰ª
     gxIntersectRect(&m_LastState.rcClip, &m_rcAbsClip, &rcUserClip);    
 
     m_aBatch[m_uBatchCount].eFunc       = CF_SetClipBox;
@@ -1512,7 +1512,7 @@ GXBOOL GXCanvasImpl::DrawTexture(GTexture*pTexture, const GXREGN *rcDest)
   m_lpLockedVertex[m_uVertCount + 2].SetTexcoord(1, 1);
   m_lpLockedVertex[m_uVertCount + 3].SetTexcoord(0, 1);
 #else
-#error ĞèÒª¶¨ÒåinlµÄ»·¾³
+#error éœ€è¦å®šä¹‰inlçš„ç¯å¢ƒ
 #endif
 
   _SetPrimitivePos(m_uVertCount + 0, rcDest->left,                 rcDest->top);
@@ -1586,8 +1586,8 @@ GXBOOL GXCanvasImpl::DrawTexture(GTexture*pTexture, const GXREGN *rcDest, const 
 }
 
 //
-// GXCanvasImpl::DrawTexture ¸ù¾İ¶¨Òå×öÁËÌØÊâÓÅ»¯£¬²»ÄÜËæ±ãĞŞ¸Ä
-// ²»¿ÉÒÔĞŞ¸ÄÕâ¸ö¶¨ÒåË³Ğò£¬²»¿ÉÒÔËæ±ãÌí¼Ó¶¨Òå£¬Ğ¡ĞÄ³ö´í£¡
+// GXCanvasImpl::DrawTexture æ ¹æ®å®šä¹‰åšäº†ç‰¹æ®Šä¼˜åŒ–ï¼Œä¸èƒ½éšä¾¿ä¿®æ”¹
+// ä¸å¯ä»¥ä¿®æ”¹è¿™ä¸ªå®šä¹‰é¡ºåºï¼Œä¸å¯ä»¥éšä¾¿æ·»åŠ å®šä¹‰ï¼Œå°å¿ƒå‡ºé”™ï¼
 STATIC_ASSERT(Rotate_None           == 0);
 STATIC_ASSERT(Rotate_CW90           == 1);
 STATIC_ASSERT(Rotate_180            == 2);
@@ -1703,5 +1703,5 @@ GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN* rgDest, const GXREG
 #elif defined(D3D9_CANVAS_IMPL)
 #elif defined(D3D11_CANVAS_IMPL)
 #else
-#error ĞèÒª¶¨ÒåinlµÄ»·¾³
+#error éœ€è¦å®šä¹‰inlçš„ç¯å¢ƒ
 #endif

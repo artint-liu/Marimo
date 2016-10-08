@@ -1,4 +1,4 @@
-#ifndef _GRAPX_DIALOG_ITEM_BASE_H_
+Ôªø#ifndef _GRAPX_DIALOG_ITEM_BASE_H_
 #define _GRAPX_DIALOG_ITEM_BASE_H_
 
 #define RECEIVER_REFUSED ((CGXReceiver*)-1)
@@ -31,11 +31,11 @@ public:
   CMODlgItem(GXHWND hWnd);
   ~CMODlgItem();
 
-  virtual CGXReceiver*  GetReceiver  (); // ∑µªÿ”––ßµƒ Receiver ªÚ’ﬂ NULL ªÚ’ﬂ RECEIVER_REFUSED
+  virtual CGXReceiver*  GetReceiver  (); // ËøîÂõûÊúâÊïàÁöÑ Receiver ÊàñËÄÖ NULL ÊàñËÄÖ RECEIVER_REFUSED
   virtual void          SetReceiver  (CGXReceiver* pReceiver);
 
-  virtual GXLRESULT     InvokeReceiver(GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // ¥¶¿ÌWM_COMMAND
-  virtual GXLRESULT     InvokeReceiver(GXNMHDR* pnmhdr);  // ¥¶¿Ì WM_NOTIFY
+  virtual GXLRESULT     InvokeReceiver(GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // Â§ÑÁêÜWM_COMMAND
+  virtual GXLRESULT     InvokeReceiver(GXNMHDR* pnmhdr);  // Â§ÑÁêÜ WM_NOTIFY
 };
 #endif // #ifdef REFACTOR_GXFC
 

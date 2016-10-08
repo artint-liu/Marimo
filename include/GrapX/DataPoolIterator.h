@@ -1,11 +1,11 @@
-#ifndef _MARIMO_DATA_POOL_ITERATOR_H_
+ï»¿#ifndef _MARIMO_DATA_POOL_ITERATOR_H_
 #define _MARIMO_DATA_POOL_ITERATOR_H_
 
 #ifndef _MARIMO_DATA_POOL_H_
-#error ±ØĞëÔÚÖ®Ç°°üº¬"DataPool.h"ÎÄ¼ş
+#error å¿…é¡»åœ¨ä¹‹å‰åŒ…å«"DataPool.h"æ–‡ä»¶
 #endif // #ifndef _MARIMO_DATA_POOL_H_
 
-// Data Pool µü´úÆ÷
+// Data Pool è¿­ä»£å™¨
 
 namespace Marimo
 {
@@ -19,17 +19,17 @@ namespace Marimo
     struct named_iterator;
     struct named_element_iterator;
     struct named_element_reverse_iterator;
-    // ÄäÃûµü´úÆ÷
+    // åŒ¿åè¿­ä»£å™¨
     //
-    // ÔÚµü´ú¹ı³ÌÖĞ²»¼ÇÂ¼À´Ô´Ãû³Æ£¬¾ÍÊÇÎŞ·¨»ñµÃµ±Ç°µü´úÊ½´ÓÉÏ²ãÄÄ¸ö±äÁ¿»ñµÃµÄ
-    // ÒòÎªÃ»ÓĞ×Ö·û´®´«µİ¹ı³Ì£¬Õâ¸öµü´úÆ÷Ğ§ÂÊÉÔÎ¢¸ßĞ©
+    // åœ¨è¿­ä»£è¿‡ç¨‹ä¸­ä¸è®°å½•æ¥æºåç§°ï¼Œå°±æ˜¯æ— æ³•è·å¾—å½“å‰è¿­ä»£å¼ä»ä¸Šå±‚å“ªä¸ªå˜é‡è·å¾—çš„
+    // å› ä¸ºæ²¡æœ‰å­—ç¬¦ä¸²ä¼ é€’è¿‡ç¨‹ï¼Œè¿™ä¸ªè¿­ä»£å™¨æ•ˆç‡ç¨å¾®é«˜äº›
 
-    // ±ê×¼µü´ú
-    // Õâ¸öÓÃÓÚ±éÀúËùÓĞÍ¬¼¶µÄ±äÁ¿
-    // Èç¹ûÊÇ½á¹¹ÀàĞÍ£¬Ê¹ÓÃbegin¿ÉÒÔ»ñµÃ½á¹¹ÌåµÚÒ»¸ö³ÉÔ±±äÁ¿µÄµü´ú
-    // ½á¹¹ÌåÊı×éÊ¹ÓÃbegin·½·¨£¬½«¶ÔÆäµÚÒ»¸öÔªËØÏÂµÄ³ÉÔ±±äÁ¿½øĞĞ±éÀú
-    // ×¢Òâ¶ÔÓÚ¿ÕµÄ¶¯Ì¬Êı×é£¬ToVariable·½·¨·µ»ØµÄ¿ÉÄÜÊÇÒ»¸öÎŞĞ§±äÁ¿
-    // Èç¹ûÏë¶ÔÊı×éÖĞÃ¿¸öÔªËØ½øĞĞµü´ú£¬Ê¹ÓÃarray_begin»òÕßrarray_begin·½·¨
+    // æ ‡å‡†è¿­ä»£
+    // è¿™ä¸ªç”¨äºéå†æ‰€æœ‰åŒçº§çš„å˜é‡
+    // å¦‚æœæ˜¯ç»“æ„ç±»å‹ï¼Œä½¿ç”¨beginå¯ä»¥è·å¾—ç»“æ„ä½“ç¬¬ä¸€ä¸ªæˆå‘˜å˜é‡çš„è¿­ä»£
+    // ç»“æ„ä½“æ•°ç»„ä½¿ç”¨beginæ–¹æ³•ï¼Œå°†å¯¹å…¶ç¬¬ä¸€ä¸ªå…ƒç´ ä¸‹çš„æˆå‘˜å˜é‡è¿›è¡Œéå†
+    // æ³¨æ„å¯¹äºç©ºçš„åŠ¨æ€æ•°ç»„ï¼ŒToVariableæ–¹æ³•è¿”å›çš„å¯èƒ½æ˜¯ä¸€ä¸ªæ— æ•ˆå˜é‡
+    // å¦‚æœæƒ³å¯¹æ•°ç»„ä¸­æ¯ä¸ªå…ƒç´ è¿›è¡Œè¿­ä»£ï¼Œä½¿ç”¨array_beginæˆ–è€…rarray_beginæ–¹æ³•
     struct GXDLL iterator
     {
       typedef const DATAPOOL_VARIABLE_DESC*  LPCVD;
@@ -40,8 +40,8 @@ namespace Marimo
       //clStringA         ParentName;
       LPCVD             pVarDesc;
       clBufferBase*     pBuffer;
-      GXUINT            nOffset;  // ParentÔÚbufferÀïµÄÆ«ÒÆ£¬È«¾Ö±äÁ¿Ò»¶¨ÊÇ0£¬³ÉÔ±±äÁ¿ÊÇ³ÉÔ±ËùÊôstructÔÚbufferµÄÆ«ÒÆ
-      GXUINT            index;    // Êı×é³ÉÔ±Ë÷Òı,(GXUINT)-1±íÊ¾·ÇÊı×é»òÕßÊı×é¶ÔÏó£¬ÆäËüÖµ±íÊ¾Êı×éÔªËØ
+      GXUINT            nOffset;  // Parentåœ¨bufferé‡Œçš„åç§»ï¼Œå…¨å±€å˜é‡ä¸€å®šæ˜¯0ï¼Œæˆå‘˜å˜é‡æ˜¯æˆå‘˜æ‰€å±structåœ¨bufferçš„åç§»
+      GXUINT            index;    // æ•°ç»„æˆå‘˜ç´¢å¼•,(GXUINT)-1è¡¨ç¤ºéæ•°ç»„æˆ–è€…æ•°ç»„å¯¹è±¡ï¼Œå…¶å®ƒå€¼è¡¨ç¤ºæ•°ç»„å…ƒç´ 
 
 
       iterator& operator++()
@@ -53,7 +53,7 @@ namespace Marimo
       GXBOOL operator==(const iterator& it) const
       {
         ASSERT(pDataPool == it.pDataPool && pBuffer == it.pBuffer && nOffset == it.nOffset);
-        // ÔÚÕâÖÖÇé¿öÏÂnOffset²»Í¬£¬µ«ÊÇpVarDescÏàÍ¬
+        // åœ¨è¿™ç§æƒ…å†µä¸‹nOffsetä¸åŒï¼Œä½†æ˜¯pVarDescç›¸åŒ
         // struct A{ int a; };
         // A a1;  A a2;
         return pVarDesc == it.pVarDesc;
@@ -68,13 +68,13 @@ namespace Marimo
 
       iterator  begin           () const;
       iterator  end             () const;
-      GXUINT            offset          () const; // ÔÚBufferÖĞµÄ¾ø¶ÔÆ«ÒÆ, Êı×éµÄ»°ÊÇµÚÒ»¸öÔªËØ¿ªÊ¼µÄÎ»ÖÃ
-      element_iterator  array_begin     () const; // Èç¹ûÊÇÊı×éµÄ»°£¬ÕâÊÇÊı×éÔªËØµÄµü´ú·½·¨£¬Ò»Ôª±äÁ¿Õâ¸ö²»»á±¨´í
+      GXUINT            offset          () const; // åœ¨Bufferä¸­çš„ç»å¯¹åç§», æ•°ç»„çš„è¯æ˜¯ç¬¬ä¸€ä¸ªå…ƒç´ å¼€å§‹çš„ä½ç½®
+      element_iterator  array_begin     () const; // å¦‚æœæ˜¯æ•°ç»„çš„è¯ï¼Œè¿™æ˜¯æ•°ç»„å…ƒç´ çš„è¿­ä»£æ–¹æ³•ï¼Œä¸€å…ƒå˜é‡è¿™ä¸ªä¸ä¼šæŠ¥é”™
       element_iterator  array_end       () const;
-      relement_iterator rarray_begin    () const; // Êı×éµÄ·´Ïòµü´ú£¬´Ó×îºóÒ»¸öÔªËØ¿ªÊ¼
+      relement_iterator rarray_begin    () const; // æ•°ç»„çš„åå‘è¿­ä»£ï¼Œä»æœ€åä¸€ä¸ªå…ƒç´ å¼€å§‹
       relement_iterator rarray_end      () const;
       GXUINT            array_length    () const;
-      clBufferBase*     child_buffer    () const; // ¶¯Ì¬Êı×é·µ»ØËüËù³ÖÓĞµÄ»º³åÇø£¬·Ç¶¯Ì¬Êı×é·µ»ØNULL
+      clBufferBase*     child_buffer    () const; // åŠ¨æ€æ•°ç»„è¿”å›å®ƒæ‰€æŒæœ‰çš„ç¼“å†²åŒºï¼ŒéåŠ¨æ€æ•°ç»„è¿”å›NULL
 
       DataPoolVariable  ToVariable      () const;
       DataPoolVariable& ToVariable      (DataPoolVariable& var) const;
@@ -85,8 +85,8 @@ namespace Marimo
       DataPool::LPCSTR  TypeName        () const;
       GXBOOL            IsArray         () const;
 
-      void              StepArrayMember (iterator& it); // ³ÉÔ±±äÁ¿²½½ø£¬itÊÇthis½á¹¹ÌåÊı×éµÄÒ»¸ö³ÉÔ±±äÁ¿£¬
-      //                                                           Õâ¸ö·½·¨½«itµ÷ÕûÎªÊı×éÏÂÒ»¸öÔªËØµÄ³ÉÔ±±äÁ¿
+      void              StepArrayMember (iterator& it); // æˆå‘˜å˜é‡æ­¥è¿›ï¼Œitæ˜¯thisç»“æ„ä½“æ•°ç»„çš„ä¸€ä¸ªæˆå‘˜å˜é‡ï¼Œ
+      //                                                           è¿™ä¸ªæ–¹æ³•å°†itè°ƒæ•´ä¸ºæ•°ç»„ä¸‹ä¸€ä¸ªå…ƒç´ çš„æˆå‘˜å˜é‡
 
     protected:
       void first_child    (iterator& it) const;
@@ -94,9 +94,9 @@ namespace Marimo
       clBufferBase* child_buffer_unsafe() const;
     };
 
-    // Êı×éÔªËØµü´ú
-    // iterator::array_begin·½·¨¿ÉÒÔµÃµ½Õâ¸öÊı×éµÄµÚÒ»¸öÔªËØ
-    // Èç¹ûÊÇÒ»ÔªÊı×é£¬ÔªËØµü´úÈÔÈ»ÓĞĞ§£¬µ«µü´úÑ­»·Ö»½øĞĞÒ»´Î
+    // æ•°ç»„å…ƒç´ è¿­ä»£
+    // iterator::array_beginæ–¹æ³•å¯ä»¥å¾—åˆ°è¿™ä¸ªæ•°ç»„çš„ç¬¬ä¸€ä¸ªå…ƒç´ 
+    // å¦‚æœæ˜¯ä¸€å…ƒæ•°ç»„ï¼Œå…ƒç´ è¿­ä»£ä»ç„¶æœ‰æ•ˆï¼Œä½†è¿­ä»£å¾ªç¯åªè¿›è¡Œä¸€æ¬¡
     struct GXDLL element_iterator : iterator
     {
       element_iterator& operator++();
@@ -121,8 +121,8 @@ namespace Marimo
       }
     };
 
-    // Êı×éÔªËØ·´Ïòµü´ú
-    // ¾ÍÊÇ´ÓÊı×éµÄ×îºóÒ»¸öÔªËØ¿ªÊ¼ÏòÇ°µü´ú
+    // æ•°ç»„å…ƒç´ åå‘è¿­ä»£
+    // å°±æ˜¯ä»æ•°ç»„çš„æœ€åä¸€ä¸ªå…ƒç´ å¼€å§‹å‘å‰è¿­ä»£
     struct GXDLL element_reverse_iterator : element_iterator
     {
       element_reverse_iterator& operator++();
@@ -130,14 +130,14 @@ namespace Marimo
 
     //////////////////////////////////////////////////////////////////////////
 
-    // ¾ßÃûµü´úÆ÷
-    // Õâ¸öµü´ú¹ı³ÌÖĞ¼ÇÂ¼ÁË¸¸ÏµVariableµÄÃû×ÖºÍË÷Òı£¬¿ÉÒÔµÃµ½ÍêÕûÃüÃû
-    // FullNameAµÃµ½µÄÃüÃûÊ¹ÓÃDataPool::QueryByExpression½Ó¿Ú»ñµÃµÄ±äÁ¿Óëµü´úÆ÷
-    // ToVariableµÃµ½µÄµÄ±äÁ¿¶ÔÏóÊÇÍ¬Ò»¸ö¡£
-    // ×¢Òâ£ºDataPool::QueryByExpression·½·¨»ñµÃ±äÁ¿£¬Èç¹û±äÁ¿ÊÇ¿ÕµÄ¶¯Ì¬Êı×é£¬Ëü½«
-    //      »áÎª¶¯Ì¬Êı×é´´½¨±ØÒªµÄ·ÃÎÊ»º³åÇø¡£¶øµü´úÆ÷´Ó¿Õ°×¶¯Ì¬Êı×é»ñ×ª»»µÃµ½µÄ
-    //      ±äÁ¿£¬¿ÉÄÜÊÇÎŞĞ§µÄ£¬ËùÒÔÔÚÊ¹ÓÃÖ®Ç°ÒªÊ¹ÓÃDataPoolVariable::IsValidÅĞ¶Ï
-    //      ËüÊÇ·ñÓĞĞ§¡£
+    // å…·åè¿­ä»£å™¨
+    // è¿™ä¸ªè¿­ä»£è¿‡ç¨‹ä¸­è®°å½•äº†çˆ¶ç³»Variableçš„åå­—å’Œç´¢å¼•ï¼Œå¯ä»¥å¾—åˆ°å®Œæ•´å‘½å
+    // FullNameAå¾—åˆ°çš„å‘½åä½¿ç”¨DataPool::QueryByExpressionæ¥å£è·å¾—çš„å˜é‡ä¸è¿­ä»£å™¨
+    // ToVariableå¾—åˆ°çš„çš„å˜é‡å¯¹è±¡æ˜¯åŒä¸€ä¸ªã€‚
+    // æ³¨æ„ï¼šDataPool::QueryByExpressionæ–¹æ³•è·å¾—å˜é‡ï¼Œå¦‚æœå˜é‡æ˜¯ç©ºçš„åŠ¨æ€æ•°ç»„ï¼Œå®ƒå°†
+    //      ä¼šä¸ºåŠ¨æ€æ•°ç»„åˆ›å»ºå¿…è¦çš„è®¿é—®ç¼“å†²åŒºã€‚è€Œè¿­ä»£å™¨ä»ç©ºç™½åŠ¨æ€æ•°ç»„è·è½¬æ¢å¾—åˆ°çš„
+    //      å˜é‡ï¼Œå¯èƒ½æ˜¯æ— æ•ˆçš„ï¼Œæ‰€ä»¥åœ¨ä½¿ç”¨ä¹‹å‰è¦ä½¿ç”¨DataPoolVariable::IsValidåˆ¤æ–­
+    //      å®ƒæ˜¯å¦æœ‰æ•ˆã€‚
 
     struct GXDLL named_iterator : iterator
     {
@@ -145,7 +145,7 @@ namespace Marimo
       //typedef DataPoolUtility::named_element_iterator  element_iterator;
       //typedef DataPoolUtility::named_element_reverse_iterator relement_iterator;
 
-      clStringA     ParentName; // ÉÏ²ã±äÁ¿µÄÈ«Ãû
+      clStringA     ParentName; // ä¸Šå±‚å˜é‡çš„å…¨å
 
       named_iterator& operator++()
       {
@@ -156,7 +156,7 @@ namespace Marimo
       GXBOOL operator==(const named_iterator& it) const
       {
         ASSERT(pDataPool == it.pDataPool && pBuffer == it.pBuffer && nOffset == it.nOffset);
-        // ÔÚÕâÖÖÇé¿öÏÂnOffset²»Í¬£¬µ«ÊÇpVarDescÏàÍ¬
+        // åœ¨è¿™ç§æƒ…å†µä¸‹nOffsetä¸åŒï¼Œä½†æ˜¯pVarDescç›¸åŒ
         // struct A{ int a; };
         // A a1;  A a2;
         return pVarDesc == it.pVarDesc;
@@ -171,13 +171,13 @@ namespace Marimo
 
       named_iterator    begin           () const;
       named_iterator    end             () const;
-      //GXUINT            offset          () const; // ÔÚBufferÖĞµÄ¾ø¶ÔÆ«ÒÆ, Êı×éµÄ»°ÊÇµÚÒ»¸öÔªËØ¿ªÊ¼µÄÎ»ÖÃ
-      named_element_iterator         array_begin     () const; // Èç¹ûÊÇÊı×éµÄ»°£¬ÕâÊÇÊı×éÔªËØµÄµü´ú·½·¨£¬Ò»Ôª±äÁ¿Õâ¸ö²»»á±¨´í
+      //GXUINT            offset          () const; // åœ¨Bufferä¸­çš„ç»å¯¹åç§», æ•°ç»„çš„è¯æ˜¯ç¬¬ä¸€ä¸ªå…ƒç´ å¼€å§‹çš„ä½ç½®
+      named_element_iterator         array_begin     () const; // å¦‚æœæ˜¯æ•°ç»„çš„è¯ï¼Œè¿™æ˜¯æ•°ç»„å…ƒç´ çš„è¿­ä»£æ–¹æ³•ï¼Œä¸€å…ƒå˜é‡è¿™ä¸ªä¸ä¼šæŠ¥é”™
       named_element_iterator         array_end       () const;
-      named_element_reverse_iterator rarray_begin    () const; // Êı×éµÄ·´Ïòµü´ú£¬´Ó×îºóÒ»¸öÔªËØ¿ªÊ¼
+      named_element_reverse_iterator rarray_begin    () const; // æ•°ç»„çš„åå‘è¿­ä»£ï¼Œä»æœ€åä¸€ä¸ªå…ƒç´ å¼€å§‹
       named_element_reverse_iterator rarray_end      () const;
       //GXUINT            array_length    () const;
-      //clBufferBase*     child_buffer    () const; // ¶¯Ì¬Êı×é·µ»ØËüËù³ÖÓĞµÄ»º³åÇø£¬·Ç¶¯Ì¬Êı×é·µ»ØNULL
+      //clBufferBase*     child_buffer    () const; // åŠ¨æ€æ•°ç»„è¿”å›å®ƒæ‰€æŒæœ‰çš„ç¼“å†²åŒºï¼ŒéåŠ¨æ€æ•°ç»„è¿”å›NULL
 
       //DataPoolVariable  ToVariable      () const;
       //DataPoolVariable& ToVariable      (DataPoolVariable& var) const;
@@ -188,8 +188,8 @@ namespace Marimo
       //DataPool::LPCSTR  TypeName        () const;
       //GXBOOL            IsArray         () const;
 
-      void              StepArrayMember (named_iterator& it); // ³ÉÔ±±äÁ¿²½½ø£¬itÊÇthis½á¹¹ÌåÊı×éµÄÒ»¸ö³ÉÔ±±äÁ¿£¬
-      //                                                           Õâ¸ö·½·¨½«itµ÷ÕûÎªÊı×éÏÂÒ»¸öÔªËØµÄ³ÉÔ±±äÁ¿
+      void              StepArrayMember (named_iterator& it); // æˆå‘˜å˜é‡æ­¥è¿›ï¼Œitæ˜¯thisç»“æ„ä½“æ•°ç»„çš„ä¸€ä¸ªæˆå‘˜å˜é‡ï¼Œ
+      //                                                           è¿™ä¸ªæ–¹æ³•å°†itè°ƒæ•´ä¸ºæ•°ç»„ä¸‹ä¸€ä¸ªå…ƒç´ çš„æˆå‘˜å˜é‡
 
     protected:
       //void first_child    (named_iterator& it) const;
@@ -229,7 +229,7 @@ namespace Marimo
 
     //////////////////////////////////////////////////////////////////////////
 
-    // ½á¹¹ÌåÓÅÏÈµÄ±éÀú£¬Éî¶ÈÓÅÏÈ
+    // ç»“æ„ä½“ä¼˜å…ˆçš„éå†ï¼Œæ·±åº¦ä¼˜å…ˆ
     template<class TArrayFunc, class TVarFunc>
     void EnumerateVariables(int nDepth, DataPool::iterator& itBegin, DataPool::iterator& itEnd, TArrayFunc _arrayFunc, TVarFunc _varFunc)
     {
@@ -275,10 +275,10 @@ namespace Marimo
 
     //////////////////////////////////////////////////////////////////////////
 
-    // »º³åÇøÓÅÏÈµÄ±éÀú£¬»áÏÈ±éÀúÔÚÍ¬Ò»¸ö»º³åÖĞµÄ±äÁ¿
-    // »Øµ÷ÖĞ»á°´ÕÕ±äÁ¿ËùÔÚ»º³åÇøÅÅĞò
-    // Èç¹û»Øµ÷ÖĞµÃµ½ÁËÒ»¸ö¶¯Ì¬Êı×é£¬µÚÒ»¸ö²ÎÊıÎª1£¬ÄÇÃ´ËüÒ»¶¨ÊÇ¶¯Ì¬Êı×é£¬²¢ÇÒÔÚÖ®ºó»áÊÕµ½Õâ¸ö¶¯Ì¬Êı×éÏÂµÄËùÓĞ±äÁ¿
-    // »Øµ÷ÖĞµÚÒ»¸ö²ÎÊıÎª0Ê±£¬ËùÓĞ±äÁ¿Ò»¶¨¶¼ÊÇ·Ç½á¹¹ÌåÀàĞÍ±äÁ¿£¬½á¹¹ÌåÀàĞÍ»áÔÚÕâ¸ö±éÀúÖĞ±»·Ö½â¡£
+    // ç¼“å†²åŒºä¼˜å…ˆçš„éå†ï¼Œä¼šå…ˆéå†åœ¨åŒä¸€ä¸ªç¼“å†²ä¸­çš„å˜é‡
+    // å›è°ƒä¸­ä¼šæŒ‰ç…§å˜é‡æ‰€åœ¨ç¼“å†²åŒºæ’åº
+    // å¦‚æœå›è°ƒä¸­å¾—åˆ°äº†ä¸€ä¸ªåŠ¨æ€æ•°ç»„ï¼Œç¬¬ä¸€ä¸ªå‚æ•°ä¸º1ï¼Œé‚£ä¹ˆå®ƒä¸€å®šæ˜¯åŠ¨æ€æ•°ç»„ï¼Œå¹¶ä¸”åœ¨ä¹‹åä¼šæ”¶åˆ°è¿™ä¸ªåŠ¨æ€æ•°ç»„ä¸‹çš„æ‰€æœ‰å˜é‡
+    // å›è°ƒä¸­ç¬¬ä¸€ä¸ªå‚æ•°ä¸º0æ—¶ï¼Œæ‰€æœ‰å˜é‡ä¸€å®šéƒ½æ˜¯éç»“æ„ä½“ç±»å‹å˜é‡ï¼Œç»“æ„ä½“ç±»å‹ä¼šåœ¨è¿™ä¸ªéå†ä¸­è¢«åˆ†è§£ã€‚
     template<class _TIter, class _TEleIter, class _TEleRIter, class TVarFunc>
     void EnumerateVariables2(_TIter& itBegin, _TIter& itEnd, TVarFunc _varFunc)
     {
@@ -329,7 +329,7 @@ NEW_LOOP:
         const int nDepth = sStack.top().nDepth;
         while(itMember != sStack.top().itEnd) {
 
-          // ¶¯Ì¬Êı×éÏÈ·¢Ò»¸ö¹ØÓÚËüµÄÍ¨Öª£¬²¢¼ÇÂ¼ÏÂÀ´ÔÚÖ®ºó±éÀú
+          // åŠ¨æ€æ•°ç»„å…ˆå‘ä¸€ä¸ªå…³äºå®ƒçš„é€šçŸ¥ï¼Œå¹¶è®°å½•ä¸‹æ¥åœ¨ä¹‹åéå†
           if(itMember.pVarDesc->IsDynamicArray()) {
             ASSERT(itMember.index == (GXUINT)-1);
             if(itMember.child_buffer()) {
@@ -345,12 +345,12 @@ NEW_LOOP:
           switch(itMember.pVarDesc->GetTypeCategory())
           {
           case T_STRUCT:
-            // ·Ö½â½á¹¹Ìå
+            // åˆ†è§£ç»“æ„ä½“
             if(itMember.pVarDesc->nCount > 1) {
-              // ÕâÀïÊÇµ¹Ğòµü´úÈëÕ»,ÕıĞò³öÕ»
+              // è¿™é‡Œæ˜¯å€’åºè¿­ä»£å…¥æ ˆ,æ­£åºå‡ºæ ˆ
               const relement_iterator itElementEnd = itMember.rarray_end();
               auto itElement = itMember.rarray_begin();
-              ++itMember; // Õâ¸öÑÏÖØÒÀÀµÓÚÉÏÏÂ´úÂë£¬ÌØ±ğ×¢Òâ
+              ++itMember; // è¿™ä¸ªä¸¥é‡ä¾èµ–äºä¸Šä¸‹ä»£ç ï¼Œç‰¹åˆ«æ³¨æ„
               for(; itElement != itElementEnd; ++itElement) {
                 auto _it_begin = itElement.begin();
                 auto _it_end = itElement.end();
@@ -362,14 +362,14 @@ NEW_LOOP:
               auto _it_begin = itMember.begin();
               auto _it_end = itMember.end();
               c.set(nDepth + 1, _it_begin, _it_end);
-              ++itMember; // Õâ¸öÑÏÖØÒÀÀµÓÚÉÏÃæµÄ´úÂë£¬ÌØ±ğ×¢Òâ
+              ++itMember; // è¿™ä¸ªä¸¥é‡ä¾èµ–äºä¸Šé¢çš„ä»£ç ï¼Œç‰¹åˆ«æ³¨æ„
               sStack.push(c);
               goto NEW_LOOP;
             }
             break;
 
           default:
-            // ·Ç½á¹¹ÌåÀàĞÍÖ±½Óµ÷ÓÃ»Øµ÷
+            // éç»“æ„ä½“ç±»å‹ç›´æ¥è°ƒç”¨å›è°ƒ
             if(itMember.pVarDesc->nCount > 1) {
               const element_iterator itElementEnd = itMember.array_end();
               for(auto itElement = itMember.array_begin(); itElement != itElementEnd; ++itElement)
@@ -387,7 +387,7 @@ NEW_LOOP:
 
         sStack.pop();        
 
-        if(sStack.empty()) // Èç¹û¶ÑÕ»¿ÕÁË£¬±íÊ¾»ùÓÚÕâÒ»¸ö»º³åµÄËùÓĞ±äÁ¿¶¼ÒÑ¾­±éÀúÍê±Ï
+        if(sStack.empty()) // å¦‚æœå †æ ˆç©ºäº†ï¼Œè¡¨ç¤ºåŸºäºè¿™ä¸€ä¸ªç¼“å†²çš„æ‰€æœ‰å˜é‡éƒ½å·²ç»éå†å®Œæ¯•
         {
           while( ! sDynArray.empty())
           {

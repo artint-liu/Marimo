@@ -1,4 +1,4 @@
-#ifndef _GX_THEME_EMU_H_
+ï»¿#ifndef _GX_THEME_EMU_H_
 #define _GX_THEME_EMU_H_
 
 typedef GXHANDLE GXHTHEME;
@@ -34,7 +34,7 @@ extern "C"
     GXHDC hdc,
     int iPartId,
     int iStateId,
-    const GXRECT *pRect,  // Á½¸ö¶ËµãµÄ×ø±ê
+    const GXRECT *pRect,  // ä¸¤ä¸ªç«¯ç‚¹çš„åæ ‡
     const GXRECT *pClipRect
     );
   
@@ -43,7 +43,7 @@ extern "C"
     GXCanvas* canvas,
     int iPartId,
     int iStateId,
-    const GXRECT *pRect,  // Á½¸ö¶ËµãµÄ×ø±ê
+    const GXRECT *pRect,  // ä¸¤ä¸ªç«¯ç‚¹çš„åæ ‡
     const GXRECT *pClipRect
     );
 
@@ -67,7 +67,7 @@ GXHRESULT GXDLLAPI GXDrawThemeBackground(
   GXWndCanvas& canvas,
   int iPartId,
   int iStateId,
-  const GXRECT *pRect,  // Á½¸ö¶ËµãµÄ×ø±ê
+  const GXRECT *pRect,  // ä¸¤ä¸ªç«¯ç‚¹çš„åæ ‡
   const GXRECT *pClipRect
   );
 

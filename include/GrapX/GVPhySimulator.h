@@ -1,8 +1,8 @@
-#ifndef _GRAPVR_PHYSICAL_SIMULATOR_INTERFACE_H_
+ï»¿#ifndef _GRAPVR_PHYSICAL_SIMULATOR_INTERFACE_H_
 #define _GRAPVR_PHYSICAL_SIMULATOR_INTERFACE_H_
 //
-// Õâ¸öÎÄ¼şÖ»ÔÚGrapX¿âÖĞÉùÃ÷ÁËÎïÀíÒıÇæµÄ½Ó¿Ú£¬ÒÔ±ãSceneÊ¹ÓÃ
-// ÊµÏÖ·½·¨Ôò·ÅÔÚÁËEngine¿âÖĞ
+// è¿™ä¸ªæ–‡ä»¶åªåœ¨GrapXåº“ä¸­å£°æ˜äº†ç‰©ç†å¼•æ“çš„æ¥å£ï¼Œä»¥ä¾¿Sceneä½¿ç”¨
+// å®ç°æ–¹æ³•åˆ™æ”¾åœ¨äº†Engineåº“ä¸­
 //
 
 class GVNode;
@@ -37,12 +37,12 @@ public:
   GXSTDINTERFACE(GXHRESULT Release  ());
 
   GXSTDINTERFACE(GXHRESULT DeleteNode(GVNode* pNode));
-  GXSTDINTERFACE(GXBOOL    CollisionDetection(GXBOOL bCollisionDetection)); // Ö´ĞĞÅö×²¼ì²âÇ°Îñ±Øµ÷ÓÃÕâ¸öº¯Êı£¬bCollisionDetection±íÊ¾ÊÇ·ñÁ¢¼´¼ì²âcontact point
+  GXSTDINTERFACE(GXBOOL    CollisionDetection(GXBOOL bCollisionDetection)); // æ‰§è¡Œç¢°æ’æ£€æµ‹å‰åŠ¡å¿…è°ƒç”¨è¿™ä¸ªå‡½æ•°ï¼ŒbCollisionDetectionè¡¨ç¤ºæ˜¯å¦ç«‹å³æ£€æµ‹contact point
   GXSTDINTERFACE(GXBOOL    ContactTest(GVNode* pNode, float3* vDist));
   GXSTDINTERFACE(GXBOOL    ContactPairTest(GVNode* pNodeA, GVNode* pNodeB));
   GXSTDINTERFACE(GXHRESULT Simulation(float fStep));
 
-  // Ôİ¶¨½Ó¿Ú
+  // æš‚å®šæ¥å£
   GXSTDINTERFACE(GXBOOL    SetLinearVelocity  (GVNode* pNode, CFloat3& vVelocity));
   GXSTDINTERFACE(GXBOOL    SetAngularVelocity (GVNode* pNode, CFloat3& vVelocity));
   GXSTDINTERFACE(GXBOOL    Translate          (GVNode* pNode, CFloat3& v));

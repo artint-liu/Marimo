@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_UI_EDIT_H_
+ï»¿#ifndef _GRAP_X_UI_EDIT_H_
 #define _GRAP_X_UI_EDIT_H_
 
 //class CMOWnd;
@@ -13,7 +13,7 @@ public:
   GXUINT SetLimitText (GXUINT nMaxLength);
   GXUINT GetLimitText ();
 
-  // TODO: Ôö¼ÓÒ»¸öÖ±½ÓÉèÖÃIntµÄ½Ó¿Ú
+  // TODO: å¢åŠ ä¸€ä¸ªç›´æ¥è®¾ç½®Intçš„æ¥å£
 
   virtual GXSIZE_T    GetThisSizeOf       () const;
   virtual clStringW   GetClassName        () const;

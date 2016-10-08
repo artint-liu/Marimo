@@ -1,4 +1,4 @@
-#ifndef _MARIMO_SPRITE_HEADER_FILE_
+ï»¿#ifndef _MARIMO_SPRITE_HEADER_FILE_
 #define _MARIMO_SPRITE_HEADER_FILE_
 
 class GXImage;
@@ -18,16 +18,16 @@ namespace Marimo
 
     struct MODULE
     {
-      GXUINT   id;    // 0 ÊÇÎŞĞ§id
+      GXUINT   id;    // 0 æ˜¯æ— æ•ˆid
       GXLPCSTR name;
-      GXREGN   regn;  // regn.top µÄÖµÈ·¶¨Ê¹ÓÃÄÄ¸öImage
+      GXREGN   regn;  // regn.top çš„å€¼ç¡®å®šä½¿ç”¨å“ªä¸ªImage
     };
 
     struct FRAME
     {
       GXUINT   id;
       GXLPCSTR name;
-      GXUINT   begin;   // ÔÚaFrameDescsÊı×éÖĞµÄ¿ªÊ¼Î»ÖÃ
+      GXUINT   begin;   // åœ¨aFrameDescsæ•°ç»„ä¸­çš„å¼€å§‹ä½ç½®
       GXUINT   end;
     };
 
@@ -40,16 +40,16 @@ namespace Marimo
       GXUINT   end;
     };
 
-    struct FRAME_UNIT   // ÃèÊöµ¥Ò»µÄModuleÔÚFrameÖĞµÄÎ»ÖÃºÍĞı×ª
+    struct FRAME_UNIT   // æè¿°å•ä¸€çš„Moduleåœ¨Frameä¸­çš„ä½ç½®å’Œæ—‹è½¬
     {
       GXUINT  nModuleIdx;
-      GXDWORD rotate;      // Ğı×ª·­×ª±êÖ¾
+      GXDWORD rotate;      // æ—‹è½¬ç¿»è½¬æ ‡å¿—
       GXREGN  regn;
     };
 
     typedef GXUINT    ANIM_UNIT;
     typedef GXUINT    TIME_T;
-    typedef GXUINT    ID;         // id ²»ÄÜÎª 0, module/frame/animation ²»ÄÜÏàÍ¬
+    typedef GXUINT    ID;         // id ä¸èƒ½ä¸º 0, module/frame/animation ä¸èƒ½ç›¸åŒ
 
     typedef clvector<MODULE>      ModuleArray;
     typedef clvector<FRAME>       FrameArray;
@@ -67,15 +67,15 @@ namespace Marimo
     GXSTDINTERFACE(GXVOID    PaintModule3x3       (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
 
     GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
-    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const); // ÕâÀïREGN²»ÊÇÏÔÊ¾ÇøÓò£¬(left,top)ÊÇÔ­µãÎ»ÖÃ£¬Î»ÓÚÖĞĞÄ£¬(width,height)ÊÇ²Î¿¼³ß´ç
-    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const); // FrameÏÔÊ¾ÔÚRECTÖĞ£¬¶øºöÂÔËü±¾ÉíµÄÆ«ÒÆ
+    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const); // è¿™é‡ŒREGNä¸æ˜¯æ˜¾ç¤ºåŒºåŸŸï¼Œ(left,top)æ˜¯åŸç‚¹ä½ç½®ï¼Œä½äºä¸­å¿ƒï¼Œ(width,height)æ˜¯å‚è€ƒå°ºå¯¸
+    GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const); // Frameæ˜¾ç¤ºåœ¨RECTä¸­ï¼Œè€Œå¿½ç•¥å®ƒæœ¬èº«çš„åç§»
     
     GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
-    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const); // Í¬PaintFrameÖĞREGNº¬Òå
-    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const); // Í¬PaintFrameÖĞRECTº¬Òå
+    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const); // åŒPaintFrameä¸­REGNå«ä¹‰
+    GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const); // åŒPaintFrameä¸­RECTå«ä¹‰
     GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y));
-    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)); // Í¬PaintFrameÖĞREGNº¬Òå
-    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)); // Í¬PaintFrameÖĞRECTº¬Òå
+    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)); // åŒPaintFrameä¸­REGNå«ä¹‰
+    GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)); // åŒPaintFrameä¸­RECTå«ä¹‰
 
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
@@ -84,15 +84,15 @@ namespace Marimo
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
     GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
        
-    GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType ¿ÉÒÔÉèÖÃÎªNULL, ²»·µ»ØÀàĞÍ
+    GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType å¯ä»¥è®¾ç½®ä¸ºNULL, ä¸è¿”å›ç±»å‹
     GXSTDINTERFACE(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType = NULL) const);
     GXSTDINTERFACE(GXINT     Find                 (GXLPCWSTR szName, GXOUT Type* pType = NULL) const);
-    GXSTDINTERFACE(GXLPCSTR  FindName             (ID id) const);           // ÓÃ ID ²éÕÒ Name
-    GXSTDINTERFACE(ID        FindID               (GXLPCSTR szName) const); // ÓÃ Name ²éÕÒ ID
-    GXSTDINTERFACE(ID        FindID               (GXLPCWSTR szName) const); // ÓÃ Name ²éÕÒ ID
+    GXSTDINTERFACE(GXLPCSTR  FindName             (ID id) const);           // ç”¨ ID æŸ¥æ‰¾ Name
+    GXSTDINTERFACE(ID        FindID               (GXLPCSTR szName) const); // ç”¨ Name æŸ¥æ‰¾ ID
+    GXSTDINTERFACE(ID        FindID               (GXLPCWSTR szName) const); // ç”¨ Name æŸ¥æ‰¾ ID
 
-    GXSTDINTERFACE(GXINT     PackIndex            (Type type, GXUINT index) const);   // ½«²»Í¬ÀàĞÍµÄË÷Òı´ò°üÎªÍ³Ò»ÀàĞÍµÄË÷Òı
-    GXSTDINTERFACE(GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const); // ½«Í³Ò»Ë÷Òı²ğ½âÎªÀàĞÍºÍÀàĞÍË÷Òı
+    GXSTDINTERFACE(GXINT     PackIndex            (Type type, GXUINT index) const);   // å°†ä¸åŒç±»å‹çš„ç´¢å¼•æ‰“åŒ…ä¸ºç»Ÿä¸€ç±»å‹çš„ç´¢å¼•
+    GXSTDINTERFACE(GXINT     UnpackIndex          (GXUINT nUniqueIndex, Type* pType) const); // å°†ç»Ÿä¸€ç´¢å¼•æ‹†è§£ä¸ºç±»å‹å’Œç±»å‹ç´¢å¼•
 
     GXSTDINTERFACE(GXSIZE_T  GetModuleCount       () const);
     GXSTDINTERFACE(GXSIZE_T  GetFrameCount        () const);
@@ -106,18 +106,18 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL    GetAnimation         (GXUINT nIndex, ANIMATION* pAnimation) const);
     GXSTDINTERFACE(GXSIZE_T  GetAnimFrame         (GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const);
 
-    GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXUINT nIndex, GXLPRECT rcSprite) const);  // »ñµÃModuleÔÚImageÖĞµÄÎ»ÖÃ
+    GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXUINT nIndex, GXLPRECT rcSprite) const);  // è·å¾—Moduleåœ¨Imageä¸­çš„ä½ç½®
     GXSTDINTERFACE(GXBOOL    GetModuleRegion      (GXUINT nIndex, GXLPREGN rgSprite) const);
     GXSTDINTERFACE(GXBOOL    GetFrameBounding     (GXUINT nIndex, GXLPRECT lprc) const);
     GXSTDINTERFACE(GXBOOL    GetAnimBounding      (GXUINT nIndex, GXLPRECT lprc) const);
-    GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+    GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
     GXSTDINTERFACE(Type      GetBounding          (ID id, GXLPREGN lprg) const);
-    GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+    GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
     GXSTDINTERFACE(Type      GetBounding          (GXLPCSTR szName, GXLPREGN lprg) const);
-    GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // ¶ÔÓÚModule£¬·µ»ØÖµµÄleftºÍtop¶¼Ó¦¸ÃÊÇ0
+    GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // å¯¹äºModuleï¼Œè¿”å›å€¼çš„leftå’Œtopéƒ½åº”è¯¥æ˜¯0
     GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
-    GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // º¬ÓĞµÄÍ¼Æ¬ÊıÁ¿
+    GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // å«æœ‰çš„å›¾ç‰‡æ•°é‡
     GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXUINT index) const);
     GXSTDINTERFACE(clStringW GetImageFileW        (GXUINT index) const);
     GXSTDINTERFACE(clStringA GetImageFileA        (GXUINT index) const);
@@ -129,7 +129,7 @@ namespace Marimo
   };
 
   //
-  // ÓÃÓÚÔÚ¼ÓÔØ/´¢´æÊ±Ê¹ÓÃµÄÃèÊö½á¹¹
+  // ç”¨äºåœ¨åŠ è½½/å‚¨å­˜æ—¶ä½¿ç”¨çš„æè¿°ç»“æ„
   //
   struct GXDLL SPRITE_DESC
   {

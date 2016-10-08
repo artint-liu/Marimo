@@ -1,4 +1,4 @@
-#ifndef _GRAPVR_SEQUENCE_H_
+ï»¿#ifndef _GRAPVR_SEQUENCE_H_
 #define _GRAPVR_SEQUENCE_H_
 
 // Background   1000
@@ -8,7 +8,7 @@
 // Overlay      4000
 // Max          4095
 
-// Render queue - ²Î¿¼Unity3DÎÄµµµÄ¶¨Òå
+// Render queue - å‚è€ƒUnity3Dæ–‡æ¡£çš„å®šä¹‰
 enum RenderQueue {
   RenderQueue_Background  = 1000,
   RenderQueue_Geometry    = 2000,
@@ -27,15 +27,15 @@ protected:
   const static int c_nNumRQSlot = 4096;
 
   //RenderDescArray   m_aRenderDesc;
-  //RenderDescArray   m_aRenderDesc2; // Õâ¸öĞèÒªÅÅĞò
+  //RenderDescArray   m_aRenderDesc2; // è¿™ä¸ªéœ€è¦æ’åº
   RenderQueue       m_mapRenderQueue;
 
-  // Õâ¸öÊÇÁÙÊ±µÄ£¬Ä¿Ç°½ö·ÖÁË5¼¶äÖÈ¾Ë³Ğò£¬»¹Ã»ÏëºÃÔõÃ´Éè¼ÆäÖÈ¾ĞòÁĞÕâ¸öÎÊÌâ£¬ Êµ¼ÊÉÏÓ¦¸ÃÊÇ4096¼¶£¬²¢ÇÒ²ÄÖÊÅÅĞòµÄ
+  // è¿™ä¸ªæ˜¯ä¸´æ—¶çš„ï¼Œç›®å‰ä»…åˆ†äº†5çº§æ¸²æŸ“é¡ºåºï¼Œè¿˜æ²¡æƒ³å¥½æ€ä¹ˆè®¾è®¡æ¸²æŸ“åºåˆ—è¿™ä¸ªé—®é¢˜ï¼Œ å®é™…ä¸Šåº”è¯¥æ˜¯4096çº§ï¼Œå¹¶ä¸”æè´¨æ’åºçš„
   const static int c_nNeedRefactorRenderDescCount = 6;
   RenderDescArray   m_aRenderDesc[6];
   // </Comment>
 
-//void*             m_aRenderQueueSlot[c_nNumRQSlot]; // void* ÊÇÁÙÊ±µÄ,Ã»ÏëºÃÊÇÉ¶ÀàĞÍ
+//void*             m_aRenderQueueSlot[c_nNumRQSlot]; // void* æ˜¯ä¸´æ—¶çš„,æ²¡æƒ³å¥½æ˜¯å•¥ç±»å‹
 
 protected:
   GVSequence();

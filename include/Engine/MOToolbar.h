@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_UI_TOOLBAR_H_
+Ôªø#ifndef _GRAP_X_UI_TOOLBAR_H_
 #define _GRAP_X_UI_TOOLBAR_H_
 
 class GXSprite;
@@ -34,7 +34,7 @@ public:
   GXBOOL    SetButtonSize       (int cx, int cy);
   GXBOOL    HideButton          (GXINT_PTR idCommand, GXBOOL bHide);
   GXBOOL    SetCommandProc      (LPCOMMANDPROC pCmd);
-  GXLPCWSTR GetIdentifierName   (GXINT nButtonID) const;  // ’‚∏ˆ «¿©’π
+  GXLPCWSTR GetIdentifierName   (GXINT nButtonID) const;  // Ëøô‰∏™ÊòØÊâ©Â±ï
 
 #ifdef REFACTOR_GXFC
 #else
@@ -52,7 +52,7 @@ public:
 #ifdef REFACTOR_GXFC
 #else
   virtual GXLRESULT   InvokeReceiver(GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);
-  virtual GXLRESULT   Invoke(CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // ¥¶¿ÌWM_COMMAND
+  virtual GXLRESULT   Invoke(CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // Â§ÑÁêÜWM_COMMAND
 #endif // #ifdef REFACTOR_GXFC
 
 };

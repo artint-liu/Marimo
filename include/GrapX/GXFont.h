@@ -1,14 +1,14 @@
-#ifndef _GRAP_X_FONT_H_
+ï»¿#ifndef _GRAP_X_FONT_H_
 #define _GRAP_X_FONT_H_
 
 class GTexture;
 class GXFont : public GResource
 {
 public:
-  typedef struct __tagCHARDESC  // ×Ö·ûÃèÊö
+  typedef struct __tagCHARDESC  // å­—ç¬¦æè¿°
   {
-    GTexture*   pTex;  // ËùÔÚµÄÎÆÀí
-    REGN        rgSrc;  // ËùÔÚÎÆÀíµÄÇøÓò
+    GTexture*   pTex;  // æ‰€åœ¨çš„çº¹ç†
+    REGN        rgSrc;  // æ‰€åœ¨çº¹ç†çš„åŒºåŸŸ
     GXPOINT     ptDest;
     GXINT       nAdvWidth;
   }CHARDESC, *LPCHARDESC;
@@ -22,9 +22,9 @@ public:
   GXSTDINTERFACE(GXBOOL   QueryCharDescFromCache (GXWCHAR ch, LPCHARDESC pCC));
   GXSTDINTERFACE(GXBOOL   QueryCharDesc          (GXWCHAR ch, LPCHARDESC pCC));
   GXSTDINTERFACE(GXINT    QueryCharWidth         (GXWCHAR ch));
-  GXSTDINTERFACE(GXLONG   GetMetricsHeight       () const);    // ´øÓĞ¶ÎÂäµÄ¸ß¶È
-  GXSTDINTERFACE(GXLONG   GetWidth               () const);    // ´´½¨×ÖÌåµÄ¿í¶È
-  GXSTDINTERFACE(GXLONG   GetHeight              () const);    // ´´½¨×ÖÌåµÄ¸ß¶È
+  GXSTDINTERFACE(GXLONG   GetMetricsHeight       () const);    // å¸¦æœ‰æ®µè½çš„é«˜åº¦
+  GXSTDINTERFACE(GXLONG   GetWidth               () const);    // åˆ›å»ºå­—ä½“çš„å®½åº¦
+  GXSTDINTERFACE(GXLONG   GetHeight              () const);    // åˆ›å»ºå­—ä½“çš„é«˜åº¦
   GXSTDINTERFACE(GXBOOL   GetMetricW             (GXLPTEXTMETRICW lptm) const);
 };
 

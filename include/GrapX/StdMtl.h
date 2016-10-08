@@ -1,4 +1,4 @@
-#ifndef _STANDARD_MATERIAL_DEFINE_H_
+ï»¿#ifndef _STANDARD_MATERIAL_DEFINE_H_
 #define _STANDARD_MATERIAL_DEFINE_H_
 
 #ifdef REFACTOR_SHADER
@@ -22,7 +22,7 @@ struct STD_CANVAS_UNIFORM
   GXINT_PTR id_matWorldView;            // WorldView;
   GXINT_PTR id_matWorldViewInv;         // WorldViewInverse;
 
-  GXINT_PTR id_matMainLight;            // Ö÷¹â¿Õ¼äµÄ±ä»»¾ØÕó
+  GXINT_PTR id_matMainLight;            // ä¸»å…‰ç©ºé—´çš„å˜æ¢çŸ©é˜µ
 
   GXINT_PTR id_vTime;                    // x: sin(vTime.z), y: cos(vTime.z), z: (TickCount % 10000) * 1e-3f * 2 * PI, w:TickCount * 1e-3f
   GXINT_PTR id_fFPS;                     // FPS;
@@ -39,11 +39,11 @@ struct STD_CANVAS_UNIFORM
   GXINT_PTR id_vViewDir;                 // ViewDirection;
   GXINT_PTR id_vViewPos;                 // ViewPosition;
 
-  // TODO: ¹âÔ´Ïà¹ØµÄ²»Òª·ÅÔÚÒıÇæÀï£¬Òª·ÅÔÚ¿Í»§¶Ë£¬ÒòÎª¿Í»§¶ËÒÑ¾­¾ß±¸ÁË×Ô¶¨ÒåÍ¨ÓÃ³£Á¿µÄÄÜÁ¦
-  GXINT_PTR id_vMainLightDir;            // TODO: ÒÆ×ß£¡
-  GXINT_PTR id_vLightDiffuse;            // TODO: ÒÆ×ß£¡
-  GXINT_PTR id_fLightIntensity;          // TODO: ÒÆ×ß£¡ 
-  GXINT_PTR id_vLightAmbient;            // TODO: ÒÆ×ß£¡ »·¾³¹âÑÕÉ«
+  // TODO: å…‰æºç›¸å…³çš„ä¸è¦æ”¾åœ¨å¼•æ“é‡Œï¼Œè¦æ”¾åœ¨å®¢æˆ·ç«¯ï¼Œå› ä¸ºå®¢æˆ·ç«¯å·²ç»å…·å¤‡äº†è‡ªå®šä¹‰é€šç”¨å¸¸é‡çš„èƒ½åŠ›
+  GXINT_PTR id_vMainLightDir;            // TODO: ç§»èµ°ï¼
+  GXINT_PTR id_vLightDiffuse;            // TODO: ç§»èµ°ï¼
+  GXINT_PTR id_fLightIntensity;          // TODO: ç§»èµ°ï¼ 
+  GXINT_PTR id_vLightAmbient;            // TODO: ç§»èµ°ï¼ ç¯å¢ƒå…‰é¢œè‰²
 };
 #endif
 
@@ -67,7 +67,7 @@ struct STANDARDMTLUNIFORMTABLE
   float4x4 g_matWorldView;            // WorldView;
   float4x4 g_matWorldViewInv;         // WorldViewInverse;
   
-  float4x4 g_matMainLight;            // Ö÷¹â¿Õ¼äµÄ±ä»»¾ØÕó
+  float4x4 g_matMainLight;            // ä¸»å…‰ç©ºé—´çš„å˜æ¢çŸ©é˜µ
 
   //float4x4 g_matViewProjInvTran;      // ViewProjectionInverseTranspose;
   //float4x4 g_matViewProjTran;         // ViewProjectionTranspose;
@@ -100,7 +100,7 @@ struct STANDARDMTLUNIFORMTABLE
   float3  g_vMainLightDir;            //
   float3  g_vLightDiffuse;            //
   float   g_fLightIntensity;
-  float3  g_vLightAmbient;            // »·¾³¹âÑÕÉ«
+  float3  g_vLightAmbient;            // ç¯å¢ƒå…‰é¢œè‰²
 };
 
 #endif // _STANDARD_MATERIAL_DEFINE_H_

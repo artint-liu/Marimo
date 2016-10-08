@@ -1,4 +1,4 @@
-GXBOOL GXGraphicsImpl::InitCommon()
+ï»¿GXBOOL GXGraphicsImpl::InitCommon()
 {
   ASSERT(m_pGraphicsLocker == NULL);
 
@@ -6,7 +6,7 @@ GXBOOL GXGraphicsImpl::InitCommon()
 
   m_pShaderConstName = new Marimo::ShaderConstName(this);
 
-  // Canvas »º³å
+  // Canvas ç¼“å†²
   m_aCanvasPtrCache = new GXCanvasImpl*[s_uCanvasCacheCount];
   for(GXUINT i = 0; i < s_uCanvasCacheCount; i++)
     m_aCanvasPtrCache[i] = new GXCanvasImpl(this, TRUE);
@@ -32,7 +32,7 @@ GXBOOL GXGraphicsImpl::InitCommon()
   // --Rasterizer State
 
   // Blend State
-  GXBLENDDESC BlendDesc;  // ×Ô¶¯¹¹ÔìÄ¬ÈÏ²ÎÊı
+  GXBLENDDESC BlendDesc;  // è‡ªåŠ¨æ„é€ é»˜è®¤å‚æ•°
   if(GXFAILED(CreateBlendState((GBlendState**)&m_pDefaultBlendState, &BlendDesc, 1))) {
     CLOG_ERROR("%s : Create default blend state error.\n", __FUNCTION__);
   }
@@ -59,7 +59,7 @@ GXBOOL GXGraphicsImpl::InitCommon()
   //m_pShaderMgr = new GXShaderMgr(this);
   //m_pShaderMgr->Initialize();
 
-  // ´´½¨Éè±¸Ïà¹Ø¶ÔÏó
+  // åˆ›å»ºè®¾å¤‡ç›¸å…³å¯¹è±¡
   //OnDeviceEvent(DE_ResetDevice);
   INVOKE_RESET_DEVICE; // TODO: make D3D9 only!!
   return TRUE;
@@ -67,7 +67,7 @@ GXBOOL GXGraphicsImpl::InitCommon()
 
 GXBOOL GXGraphicsImpl::ReleaseCommon()
 {
-  GXMaterialInstImpl::FinalizeMtlStateDict(); // Õâ¸ö²»Ó¦¸ÃÔÚÕâ¶ù, Èç¹û¶à¸öGXGraphicsµÚÒ»¸ö±»ÊÍ·ÅµÄ»°»áµ¼ÖÂµÚ¶ş¸ö²ÄÖÊ³ö´í.
+  GXMaterialInstImpl::FinalizeMtlStateDict(); // è¿™ä¸ªä¸åº”è¯¥åœ¨è¿™å„¿, å¦‚æœå¤šä¸ªGXGraphicsç¬¬ä¸€ä¸ªè¢«é‡Šæ”¾çš„è¯ä¼šå¯¼è‡´ç¬¬äºŒä¸ªæè´¨å‡ºé”™.
   SAFE_RELEASE(m_pDefaultRasterizerState);
   SAFE_RELEASE(m_pDefaultBlendState);
   SAFE_RELEASE(m_pDefaultDepthStencilState);
@@ -80,7 +80,7 @@ GXBOOL GXGraphicsImpl::ReleaseCommon()
 
   SAFE_DELETE(m_pShaderConstName);
 
-  // ÊÍ·Å Canvas »º³å
+  // é‡Šæ”¾ Canvas ç¼“å†²
   if(m_aCanvasPtrCache != NULL)
   {
     for(GXUINT i = 0; i < s_uCanvasCacheCount; i++)
@@ -129,7 +129,7 @@ GXBOOL GXGraphicsImpl::ConvertToRelativePathW(clStringW& strFilename)
     return TRUE;
   }
   
-  // Ã»ÓĞÊµÏÖ¼ÆËãÏà¶ÔÄ¿Â¼
+  // æ²¡æœ‰å®ç°è®¡ç®—ç›¸å¯¹ç›®å½•
   CLBREAK; 
 
   ASSERT(m_strResourceDir.IsNotEmpty());
@@ -282,7 +282,7 @@ GXHRESULT GXGraphicsImpl::CreatePrimitiveV(
     SAFE_RELEASE(pPrimitiveImpl);
   }
 
-  // new Ê§°Ü
+  // new å¤±è´¥
   CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
   *ppPrimitive = pPrimitiveImpl;
   return GX_FAIL;
@@ -303,7 +303,7 @@ GXHRESULT GXGraphicsImpl::CreatePrimitiveVI(
 
   if((pIdxInitData == NULL && pVertInitData != NULL) ||
     (pIdxInitData != NULL && pVertInitData == NULL)) {
-      CLOG_ERROR("CreatePrimitiveVI: ¶¥µãÓëÊı×é³õÊ¼»¯Êı¾İ±ØĞëÍ¬Ê±Ìá¹©,»òÈ«Í¬Ê±Îª¿Õ.\n");
+      CLOG_ERROR("CreatePrimitiveVI: é¡¶ç‚¹ä¸æ•°ç»„åˆå§‹åŒ–æ•°æ®å¿…é¡»åŒæ—¶æä¾›,æˆ–å…¨åŒæ—¶ä¸ºç©º.\n");
       return GX_FAIL;
   }
 
@@ -324,7 +324,7 @@ GXHRESULT GXGraphicsImpl::CreatePrimitiveVI(
     SAFE_RELEASE(pPrimitiveImpl);
   }
 
-  // new Ê§°Ü
+  // new å¤±è´¥
   CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
   *ppPrimitive = pPrimitiveImpl;
   return GX_FAIL;
@@ -388,7 +388,7 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFileW(GXMaterialInst** ppMtlInst, GX
 
   if(eLoadType == MLT_REFERENCE)
   {
-    // Ö»ÓĞszShaderDescÍêÈ«Ò»ÖÂÊ±²ÅÄÜÒıÓÃ, Ëü²»¶ÔÎÄ¼şÃûºÍºê½øĞĞÅÅĞò(¹æ·¶»¯)
+    // åªæœ‰szShaderDescå®Œå…¨ä¸€è‡´æ—¶æ‰èƒ½å¼•ç”¨, å®ƒä¸å¯¹æ–‡ä»¶åå’Œå®è¿›è¡Œæ’åº(è§„èŒƒåŒ–)
     GrapXInternal::ResourceSketch::GenerateMaterialDescW(&ResFeatDesc, szShaderDesc);
     GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
     if(pResource != NULL)
@@ -433,7 +433,7 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFileW(GXMaterialInst** ppMtlInst, GX
         }
       }
 
-      // ´´½¨³É¹¦¾Í×¢²á
+      // åˆ›å»ºæˆåŠŸå°±æ³¨å†Œ
       if(eLoadType == MLT_REFERENCE) {
         m_ResMgr.Register(&ResFeatDesc, *ppMtlInst);
       }
@@ -538,7 +538,7 @@ GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXImage* pImag
   GXHRESULT hval = GX_OK;
   GXLPCSTR  c_szError_NoSameSize = __FUNCTION__": Image and DepthStencil-texture must be in same size.\n";
 
-  // »ñµÃ Image µÄ³ß´ç, Èç¹ûÊÇ NULL ÔòÈ¡ºóÌ¨»º³åµÄ³ß´ç
+  // è·å¾— Image çš„å°ºå¯¸, å¦‚æœæ˜¯ NULL åˆ™å–åå°ç¼“å†²çš„å°ºå¯¸
   if(pImage != NULL && pDepthStencil != NULL) {
     regn.width = pImage->GetWidth();
     regn.height = pImage->GetHeight();
@@ -602,7 +602,7 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szS
 
   IntAttachComposerSdrDesc(&ses);
 
-  // ¸ù¾İ·ÖÁ¿ÔªËØ²éÕÒ×ÊÔ´
+  // æ ¹æ®åˆ†é‡å…ƒç´ æŸ¥æ‰¾èµ„æº
   if( ! (ses.strVS.IsEmpty() || ses.strPS.IsEmpty()))
   {
     hval = IntCreateSdrFromElement(ppShader, &ses);
@@ -643,12 +643,12 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
 {
   GRESKETCH ResFeatDesc;
 
-  // ×ÊÔ´ÌØÕ÷ÌáÈ¡
+  // èµ„æºç‰¹å¾æå–
   GrapXInternal::ResourceSketch::GenerateShaderElementA(&ResFeatDesc, pSdrElementSrc, NULL);
 
   m_pLogger->OutputFormatA("Load shader from file: %s(vs), %s(ps)", pSdrElementSrc->strVS, pSdrElementSrc->strPS);
 
-  // ×ÊÔ´²éÕÒ
+  // èµ„æºæŸ¥æ‰¾
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
   if(pResource != NULL) {
     GXHRESULT hval = pResource->AddRef();
@@ -657,10 +657,10 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
     return GX_OK;
   }
 
-  // ´´½¨ Ôö¼ÓÒıÓÃ¼ÆÊı
+  // åˆ›å»º å¢åŠ å¼•ç”¨è®¡æ•°
   GShader* pShader = new GShaderImpl(this);
 
-  // ³õÊ¼»¯ ÑéÖ¤
+  // åˆå§‹åŒ– éªŒè¯
   GXHRESULT hval = pShader->LoadFromFile(pSdrElementSrc);
   if(GXFAILED(hval))
   {
@@ -697,7 +697,7 @@ GXHRESULT GXGraphicsImpl::CreateShaderStub(GShaderStub** ppShaderStub)
 
 GXHRESULT GXGraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement)
 {
-  // ×ÊÔ´ÌØÕ÷ÌáÈ¡
+  // èµ„æºç‰¹å¾æå–
   GRESKETCH ResFeatDesc;
   GrapXInternal::ResourceSketch::GenerateVertexDecl(&ResFeatDesc, lpVertexElement);
 
@@ -768,7 +768,7 @@ GXHRESULT GXGraphicsImpl::CreateRoundRectRgn(GRegion** ppRegion, const GXRECT& r
 
 GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn, float fNear, float fFar)
 {
-  // Èç¹û pImage Îª NULL, ÔòºöÂÔ eDepthStencil ²ÎÊı
+  // å¦‚æœ pImage ä¸º NULL, åˆ™å¿½ç•¥ eDepthStencil å‚æ•°
   GXINT nWidth = 0, nHeight = 0;
   if(pImage != NULL) {
     pImage->GetDimension(&nWidth, &nHeight);
@@ -814,7 +814,7 @@ GXDWORD GXGraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
 
 GXCanvas* GXGraphicsImpl::LockCanvas(GXImage* pImage, GXCONST LPREGN lpRegn, GXDWORD dwFlags)
 {
-  // ÔÊĞí lpRegn ÊÇ¿ÕµÄ, ±ÈÈçEdit¿Ø¼ş»áÒòÎªµ÷Õû´óĞ¡¶ø´´½¨DC.´ËÊ±ĞèÒªÉè±¸µÄFontĞÅÏ¢.
+  // å…è®¸ lpRegn æ˜¯ç©ºçš„, æ¯”å¦‚Editæ§ä»¶ä¼šå› ä¸ºè°ƒæ•´å¤§å°è€Œåˆ›å»ºDC.æ­¤æ—¶éœ€è¦è®¾å¤‡çš„Fontä¿¡æ¯.
   if( ! TEST_FLAG(m_dwFlags, F_ACTIVATE))
   {
     ASSERT(0);
@@ -998,7 +998,7 @@ void GXGraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
 {
   ++(*pdwStencil);
 
-  // Õâ¸öËã·¨±£Ö¤ pdwStencil ²»»áµÈÓÚ0
+  // è¿™ä¸ªç®—æ³•ä¿è¯ pdwStencil ä¸ä¼šç­‰äº0
   *pdwStencil = ((*pdwStencil) & 0xff) + ((*pdwStencil) >> 8);
 }
 
@@ -1021,7 +1021,7 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
   GXImageImpl* pImage = NULL;
   pImage = new GXImageImpl(this);
   pImage->AddRef();
-  // TODO: ÕâÀïÊÇ²»ÊÇ¸Ã¼ÓËø?
+  // TODO: è¿™é‡Œæ˜¯ä¸æ˜¯è¯¥åŠ é”?
   RegisterResource(pImage, NULL);
   if(pImage->Initialize(pTexture) == FALSE)
   {
@@ -1051,11 +1051,11 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
   GXBOOL GXGraphicsImpl::ScrollTexture(const SCROLLTEXTUREDESC* lpstd)
   {
     GXBOOL bresult = FALSE;
-    // ¸Ãº¯Êı²»¶ÔÆ«ÒÆÁ¿Îª(0,0)µÄÇé¿ö½øĞĞ¼ì²â
+    // è¯¥å‡½æ•°ä¸å¯¹åç§»é‡ä¸º(0,0)çš„æƒ…å†µè¿›è¡Œæ£€æµ‹
     ASSERT(lpstd->dx != 0 || lpstd->dy != 0);
     Enter();
 
-    // È·¶¨¹ö¶¯ÇøÊÇ·ñÎªÒ»¸ö¼òµ¥¾ØĞÎ
+    // ç¡®å®šæ»šåŠ¨åŒºæ˜¯å¦ä¸ºä¸€ä¸ªç®€å•çŸ©å½¢
     GXBOOL bSimpleRect = FALSE;
 
     GTexture* const pTarget  = lpstd->pOperationTex == NULL 
@@ -1076,11 +1076,11 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
     GRegion* prgnInvMoveClip  = NULL;
 
 #ifdef _DEBUG
-    // ¼ì²âºóÌ¨ÁÙÊ±»º³åÒª´óÓÚ²Ù×÷ÓÃµÄ»º³åÎÆÀí
+    // æ£€æµ‹åå°ä¸´æ—¶ç¼“å†²è¦å¤§äºæ“ä½œç”¨çš„ç¼“å†²çº¹ç†
     ASSERT((GXUINT)rcTarget.right <= nBackWidth && (GXUINT)rcTarget.bottom <= nBackHeight);  
 #endif
 
-    // ²Ã¼ôÇøÊÇÒ»¸öSimple Rect
+    // è£å‰ªåŒºæ˜¯ä¸€ä¸ªSimple Rect
     if(lpstd->lprgnClip != NULL && lpstd->lprgnClip->GetRectCount() == 1)
     {
       GXRECT rcClip;
@@ -1092,11 +1092,11 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
     if(bSimpleRect)
     {
       GXRECT rcSrc, rcDst;
-      GXRECT rcInvMoveTar = rcTarget;  // rcTarget ÏòÏà·´ÒÆ¶¯µÄÇøÓò
+      GXRECT rcInvMoveTar = rcTarget;  // rcTarget å‘ç›¸åç§»åŠ¨çš„åŒºåŸŸ
 
       gxOffsetRect(&rcInvMoveTar, -lpstd->dx, -lpstd->dy);
 
-      // È·¶¨Ô´¾ØĞÎ·¶Î§
+      // ç¡®å®šæºçŸ©å½¢èŒƒå›´
       if(lpstd->lprcScroll != NULL)
         gxIntersectRect(&rcSrc, &rcTarget, lpstd->lprcScroll);
       else
@@ -1106,7 +1106,7 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
         goto FUNC_RET_0;
       }
 
-      // Ä¿±ê¾ØĞÎ·¶Î§
+      // ç›®æ ‡çŸ©å½¢èŒƒå›´
       rcDst = rcSrc;
       gxOffsetRect(&rcDst, lpstd->dx, lpstd->dy);
 
@@ -1153,7 +1153,7 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
       //prgnSrc->GetData(aRects);
       /*
       //for(vector<GXRECT>::iterator it = aRects.begin(); it != aRects.end(); ++it)
-      // Õâ¸öÓĞBug°¡
+      // è¿™ä¸ªæœ‰Bugå•Š
       for(GXUINT i = 0; i < nRectCount; i++)
       {
       GXRECT& rect = lpRects[i];

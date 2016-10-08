@@ -1,4 +1,4 @@
-// #define _WIN32_WINDOWS 0x0400
+﻿// #define _WIN32_WINDOWS 0x0400
 // #define _WIN32_WINNT  0x0400
 
 #ifndef    _WINE_COMMON_DFEINE_FILE_
@@ -37,7 +37,7 @@ typedef GXINT16   (CALLBACK *EDITWORDBREAKPROC16)(GXLPSTR,GXINT16,GXINT16,GXINT1
 #define debugstr_wn(___TEXT, ___N)    (___TEXT)
 #define debugstr_an(___TEXT, ___N)    (___TEXT)
 
-// TODO: ȥ��!
+// TODO: 去掉!
 #define strcpyW    lstrcpyW
 #define strcmpW    lstrcmpW
 #define strcatW    lstrcatW

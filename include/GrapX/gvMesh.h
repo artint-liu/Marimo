@@ -1,4 +1,4 @@
-// GrapVR
+ï»¿// GrapVR
 #ifndef _GRAPVR_SCENE_NODE_MESH_H_
 #define _GRAPVR_SCENE_NODE_MESH_H_
 
@@ -7,25 +7,25 @@ class GPrimitiveVI;
 
 struct GVMESHDATA
 {
-  GXSIZE_T   nVertexCount;     // ¶¥µãÊıÁ¿, ³ıË÷ÒıÁĞ±íÍâ, ÏÂÃæµÄÔªËØ±ØĞë¶¼ÓëÕâ¸öÊıÁ¿Ò»ÖÂ
-  GXSIZE_T   nIndexCount;      // Ë÷ÒıÊıÁ¿
-  float3*     pVertices;        // ¶¥µã, Õâ¸ö±ØĞëÓĞ
-  float3*     pNormals;         // ·¨Ïß, ¿ÉÑ¡
-  float3*     pTangents;        // ÇĞÏß, ¿ÉÑ¡
-  float3*     pBinormals;       // ¸±·¨Ïß, ¿ÉÑ¡
-  float2*     pTexcoord0;       // µÚÒ»²ãUV, ¿ÉÑ¡
-  float2*     pTexcoord1;       // µÚ¶ş²ãUV, ¿ÉÑ¡
-  float3*     pBoneWeights;     // ¹Ç÷ÀÈ¨ÖØ, float3ºÍDWORDÈÎÑ¡ÆäÒ», ÄÚ²¿½«×Ô¶¯×ª»»
-  GXDWORD*    pBoneWeights32;   // ²Î¿¼pBoneWeights, Í¬Ê±´æÔÚÊ±ÒÔ´ËÎª×¼
-  int*        pBoneIndices;     // ¹Ç÷ÀË÷Òı
-  GXDWORD*    pBoneIndices32;   // ¹Ç÷ÀË÷Òı
-  GXColor*    pColors;          // ¶¥µãÉ«, Õâ¸ö²»»á±»×ª»»ÎªpColors32
-  GXColor32*  pColors32;        // ¶¥µãÉ«, Èç¹ûpColorsÒ²²»Îª¿Õ,ÔòÒÔpColors32Îª×¼
-  VIndex*     pIndices;         // Ë÷ÒıÁĞ±í,ĞèÒªÓëË÷ÒıÊıÁ¿Ò»ÖÂ
+  GXSIZE_T   nVertexCount;     // é¡¶ç‚¹æ•°é‡, é™¤ç´¢å¼•åˆ—è¡¨å¤–, ä¸‹é¢çš„å…ƒç´ å¿…é¡»éƒ½ä¸è¿™ä¸ªæ•°é‡ä¸€è‡´
+  GXSIZE_T   nIndexCount;      // ç´¢å¼•æ•°é‡
+  float3*     pVertices;        // é¡¶ç‚¹, è¿™ä¸ªå¿…é¡»æœ‰
+  float3*     pNormals;         // æ³•çº¿, å¯é€‰
+  float3*     pTangents;        // åˆ‡çº¿, å¯é€‰
+  float3*     pBinormals;       // å‰¯æ³•çº¿, å¯é€‰
+  float2*     pTexcoord0;       // ç¬¬ä¸€å±‚UV, å¯é€‰
+  float2*     pTexcoord1;       // ç¬¬äºŒå±‚UV, å¯é€‰
+  float3*     pBoneWeights;     // éª¨éª¼æƒé‡, float3å’ŒDWORDä»»é€‰å…¶ä¸€, å†…éƒ¨å°†è‡ªåŠ¨è½¬æ¢
+  GXDWORD*    pBoneWeights32;   // å‚è€ƒpBoneWeights, åŒæ—¶å­˜åœ¨æ—¶ä»¥æ­¤ä¸ºå‡†
+  int*        pBoneIndices;     // éª¨éª¼ç´¢å¼•
+  GXDWORD*    pBoneIndices32;   // éª¨éª¼ç´¢å¼•
+  GXColor*    pColors;          // é¡¶ç‚¹è‰², è¿™ä¸ªä¸ä¼šè¢«è½¬æ¢ä¸ºpColors32
+  GXColor32*  pColors32;        // é¡¶ç‚¹è‰², å¦‚æœpColorsä¹Ÿä¸ä¸ºç©º,åˆ™ä»¥pColors32ä¸ºå‡†
+  VIndex*     pIndices;         // ç´¢å¼•åˆ—è¡¨,éœ€è¦ä¸ç´¢å¼•æ•°é‡ä¸€è‡´
 
   static void   Destroy   (GVMESHDATA* pMeshData);
   static GXBOOL Check     (const GVMESHDATA* pMeshData);
-  static GXSIZE_T Build     (const GVMESHDATA* pMeshData, GXLPVERTEXELEMENT lpVertDelement); // Òª¸øÒ»¸ö×ã¹»´óµÄÊı×é,½¨Òé64¸ö
+  static GXSIZE_T Build     (const GVMESHDATA* pMeshData, GXLPVERTEXELEMENT lpVertDelement); // è¦ç»™ä¸€ä¸ªè¶³å¤Ÿå¤§çš„æ•°ç»„,å»ºè®®64ä¸ª
 };
 
 class GXDLL GVMesh : public GVNode
@@ -66,7 +66,7 @@ public:
   //virtual float   RayTrace        (const Ray& ray, float3* pHit);
   virtual GXHRESULT Clone( GVNode** ppClonedNode/*, GXBOOL bRecursive*/ );
 
-  // ÎÄ¼ş´æÈ¡Ïà¹ØµÄ
+  // æ–‡ä»¶å­˜å–ç›¸å…³çš„
   virtual GXHRESULT SaveFile (clSmartRepository* pStorage);
   virtual GXHRESULT SetMaterialInstDirect     (GXMaterialInst* pMtlInst);
 
@@ -75,12 +75,12 @@ public:
   virtual GXHRESULT GetMaterialInstFilenameW(clStringW* pstrFilename);
   //virtual GXHRESULT SetMaterialInstFromFileW(GXLPCWSTR szFilename, GXDWORD dwFlags);
 
-  void ApplyTransform(); // ½«±ä»»Ó¦ÓÃµ½¶¥µã
+  void ApplyTransform(); // å°†å˜æ¢åº”ç”¨åˆ°é¡¶ç‚¹
 
   static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh);
   static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive, GVMesh** ppMesh);
   static GXHRESULT CreateMesh             (GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh);
-  static GXHRESULT CreateContainer        (GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh); // ²»Ôö¼ÓpNodesArrayÖĞNodeµÄÒıÓÃ¼ÆÊı
+  static GXHRESULT CreateContainer        (GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh); // ä¸å¢åŠ pNodesArrayä¸­Nodeçš„å¼•ç”¨è®¡æ•°
   //static GXHRESULT Clone                  (GVMesh** pNewMesh, GVMesh* pSourceMesh);
   static GXHRESULT LoadObjFromFileA       (GXGraphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
   static GXHRESULT LoadObjFromFileW       (GXGraphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
@@ -105,12 +105,12 @@ namespace mesh
 
   GXBOOL GXDLL ValidateIndex(VIndex* pIndices, int nIndexCount, int nVertexCount);
   GXBOOL GXDLL ClearVertexElement(GXLPVOID lpFirstElement, GXSIZE_T cbElement, GXUINT nStride, GXSIZE_T nVertCount);
-  GXBOOL GXDLL CopyVertexElementFromStream(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID lpSourceStream, GXSIZE_T nVertCount); // lpSourceStream µÄ´óĞ¡ÊÇ cbElementStride
+  GXBOOL GXDLL CopyVertexElementFromStream(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID lpSourceStream, GXSIZE_T nVertCount); // lpSourceStream çš„å¤§å°æ˜¯ cbElementStride
   GXBOOL GXDLL SetVertexElement(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID pValue, GXSIZE_T nVertCount);
   GXBOOL GXDLL TransformPosition(const float4x4& mat, float3* pVertices, GXUINT nCount, GXUINT nStride = 0);
   GXBOOL GXDLL TransformVectors(const float4x4& mat, float3* pVertors, GXUINT nCount, GXUINT nStride = 0);
 
-  // ·­×ªpVerticesÖĞµÄ¶¥µãË³Ğò£¬Èç¹ûpIndices²»ÎªNULLÒ²»áµ÷ÕûË÷Òı
+  // ç¿»è½¬pVerticesä¸­çš„é¡¶ç‚¹é¡ºåºï¼Œå¦‚æœpIndicesä¸ä¸ºNULLä¹Ÿä¼šè°ƒæ•´ç´¢å¼•
   GXBOOL GXDLL ReverseVerticesArray(float3* pVertices, GXSIZE_T nBegin, GXSIZE_T nCount, VIndex* pIndices, GXSIZE_T nFaceCount);
   GXBOOL GXDLL ReverseVerticesArray(float3* pVertices, GXSIZE_T nBegin, GXSIZE_T nCount, VIndex32* pIndices, GXSIZE_T nFaceCount);
 

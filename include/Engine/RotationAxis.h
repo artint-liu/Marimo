@@ -1,4 +1,4 @@
-#ifndef _EDITOR_UTILITY_ROTATION_AXIS_H_
+ï»¿#ifndef _EDITOR_UTILITY_ROTATION_AXIS_H_
 #define _EDITOR_UTILITY_ROTATION_AXIS_H_
 
 namespace EditorUtility
@@ -8,7 +8,7 @@ namespace EditorUtility
   public:
     enum AxisHitTest{
       HT_NONE,
-      HT_AXIS_X,  // ÈÆxÖáÐý×ª
+      HT_AXIS_X,  // ç»•xè½´æ—‹è½¬
       HT_AXIS_Y,
       HT_AXIS_Z,
       //HT_PLANE_YZ,

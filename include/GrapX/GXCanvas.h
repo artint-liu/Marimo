@@ -1,4 +1,4 @@
-#ifndef _GRAPH_X_CANVAS_H_
+ï»¿#ifndef _GRAPH_X_CANVAS_H_
 #define _GRAPH_X_CANVAS_H_
 
 class GTexture;
@@ -12,8 +12,8 @@ class GXEffect;
 struct GXSTATION;
 
 //////////////////////////////////////////////////////////////////////////
-// GXCanvasCore ´ÓGUnknown¼Ì³Ğ¸ÄÎª´ÓGResource¼Ì³Ğ
-// ÕâÊÇÎªÁË±ãÓÚÔÚGraphicsÖĞ½øĞĞ¹ÜÀí£¬Í¨¹ıÏûÏ¢·Ö·¢µÃµ½ÖîÈçÉè±¸³ß´ç¸Ä±äµÈÏµÍ³ĞÅÏ¢¡£
+// GXCanvasCore ä»GUnknownç»§æ‰¿æ”¹ä¸ºä»GResourceç»§æ‰¿
+// è¿™æ˜¯ä¸ºäº†ä¾¿äºåœ¨Graphicsä¸­è¿›è¡Œç®¡ç†ï¼Œé€šè¿‡æ¶ˆæ¯åˆ†å‘å¾—åˆ°è¯¸å¦‚è®¾å¤‡å°ºå¯¸æ”¹å˜ç­‰ç³»ç»Ÿä¿¡æ¯ã€‚
 class GXCanvasCore : public GResource
 {
 public:
@@ -30,13 +30,13 @@ public:
 
 enum CanvasParamInfo
 {
-  CPI_SETTEXTURECOLOR  = 1,    // uParam ÉèÖÃÎÆÀíÑÕÉ«
-  CPI_SETCOLORADDITIVE = 2,    // uParam ÉèÖÃÑÕÉ«ÀÛ¼ÓÖµ
-  CPI_SETTEXTCLIP      = 3,    // ÉèÖÃÎÄ×ÖµÄ²Ã¼ô, Ö»ÊÇÁÙÊ±¸Ä±äÉè±¸µÄ¾ØĞÎ²Ã¼ôÇø, pParamÖ¸ÏòGXRECT,
-                               // Èç¹ûÊ¹ÓÃÈÎºÎ²Ã¼ôº¯ÊıÉèÖÃ, ½«Çå³ıÕâ¸öº¯ÊıµÄĞ§¹û
-  //CPI_SETPIXELSIZEINV  = 4,  // ÏñËØ³ß´çµÄµ¹Êı, Ïàµ±ÓÚÎÆÀí×ø±êÉÏÒ»¸öÏñËØµÄ¿ç¶È, pParam Ö¸ÏòÁËfloat2½á¹¹
-  CPI_SETEXTTEXTURE    = 5,    // ÉèÖÃ¶îÍâµÄÎÆÀí, uParam ÊÇÎÆÀíµÄStage, pParam Ö¸ÏòÎÆÀí¶ÔÏó
-                               // ÓÉÓÚµÚÒ»¸öÎÆÀíÓÃÓÚ»æÖÆÍ¼Ïñ, ËùÒÔ0ºÅÎ»ÖÃ²»ÄÜÉèÖÃ
+  CPI_SETTEXTURECOLOR  = 1,    // uParam è®¾ç½®çº¹ç†é¢œè‰²
+  CPI_SETCOLORADDITIVE = 2,    // uParam è®¾ç½®é¢œè‰²ç´¯åŠ å€¼
+  CPI_SETTEXTCLIP      = 3,    // è®¾ç½®æ–‡å­—çš„è£å‰ª, åªæ˜¯ä¸´æ—¶æ”¹å˜è®¾å¤‡çš„çŸ©å½¢è£å‰ªåŒº, pParamæŒ‡å‘GXRECT,
+                               // å¦‚æœä½¿ç”¨ä»»ä½•è£å‰ªå‡½æ•°è®¾ç½®, å°†æ¸…é™¤è¿™ä¸ªå‡½æ•°çš„æ•ˆæœ
+  //CPI_SETPIXELSIZEINV  = 4,  // åƒç´ å°ºå¯¸çš„å€’æ•°, ç›¸å½“äºçº¹ç†åæ ‡ä¸Šä¸€ä¸ªåƒç´ çš„è·¨åº¦, pParam æŒ‡å‘äº†float2ç»“æ„
+  CPI_SETEXTTEXTURE    = 5,    // è®¾ç½®é¢å¤–çš„çº¹ç†, uParam æ˜¯çº¹ç†çš„Stage, pParam æŒ‡å‘çº¹ç†å¯¹è±¡
+                               // ç”±äºç¬¬ä¸€ä¸ªçº¹ç†ç”¨äºç»˜åˆ¶å›¾åƒ, æ‰€ä»¥0å·ä½ç½®ä¸èƒ½è®¾ç½®
 };
 enum CompositingMode
 {
@@ -64,23 +64,23 @@ enum RotateType
   Rotate_180_Flip       = 6,
   Rotate_CCW90_Flip     = 7,
 
-  // ÖØÃüÃûÒÑÓĞµÄ¶¨Òå
+  // é‡å‘½åå·²æœ‰çš„å®šä¹‰
   Rotate_CW270        = Rotate_CCW90,
   Rotate_CCW270       = Rotate_CW90,
   Rotate_FlipVertical = Rotate_180_Flip,
 };
 
 //
-// ¶ÔĞı×ª±êÖ¾µÄ²Ù×÷ºê
+// å¯¹æ—‹è½¬æ ‡å¿—çš„æ“ä½œå®
 //
 
-// »ñµÃ·­×ª±êÖ¾
+// è·å¾—ç¿»è½¬æ ‡å¿—
 #define CANVAS_GET_FLIP(_ROTATE) ((_ROTATE) & 4)
 
-// »ñµÃË³Ê±Õë/ÄæÊ±ÕëĞı×ª90¶È±êÖ¾
+// è·å¾—é¡ºæ—¶é’ˆ/é€†æ—¶é’ˆæ—‹è½¬90åº¦æ ‡å¿—
 #define CANVAS_GET_90(_ROTATE)  ((_ROTATE) & 1)
 
-// µ÷ÕûĞı×ªÖĞĞÄ
+// è°ƒæ•´æ—‹è½¬ä¸­å¿ƒ
 #define CANVAS_ROTATE_AROUND_CENTER(_ROTATE, _X, _Y, _WIDTH, _HEIGHT) {\
   int nDelta = (((_WIDTH) - (_HEIGHT)) >> 1);\
   if(((_ROTATE) & 1) == 0) {\
@@ -90,7 +90,7 @@ enum RotateType
   _Y -= nDelta;\
   }
 
-// Ë³Ê±ÕëĞı×ª90¶È
+// é¡ºæ—¶é’ˆæ—‹è½¬90åº¦
 #define CANVAS_ROTATE_90(_ROTATE, _X, _Y, _WIDTH, _HEIGHT) {\
   const int nFlip = CANVAS_GET_FLIP(_ROTATE);\
   (_ROTATE)++;\
@@ -98,7 +98,7 @@ enum RotateType
   CANVAS_ROTATE_AROUND_CENTER(_ROTATE, _X, _Y, _WIDTH, _HEIGHT);\
   }
 
-// Ë³Ê±ÕëĞı×ª270¶È/ÄæÊ±Õë90¶È
+// é¡ºæ—¶é’ˆæ—‹è½¬270åº¦/é€†æ—¶é’ˆ90åº¦
 #define CANVAS_ROTATE_270(_ROTATE, _X, _Y, _WIDTH, _HEIGHT) {\
   const int nFlip = CANVAS_GET_FLIP(_ROTATE);\
   (_ROTATE)--;\
@@ -106,13 +106,13 @@ enum RotateType
   CANVAS_ROTATE_AROUND_CENTER(_ROTATE, _X, _Y, _WIDTH, _HEIGHT);\
   }
 
-// ´¹Ö±·­×ª
+// å‚ç›´ç¿»è½¬
 #define CANVAS_FLIP_V(_ROTATE) {\
   int nRotate90 = CANVAS_GET_90(_ROTATE);\
   (_ROTATE) = nRotate90 ? ((_ROTATE) ^ 4) : ((_ROTATE) ^ (2|4));\
   }
 
-// Ë®Æ½·­×ª
+// æ°´å¹³ç¿»è½¬
 #define CANVAS_FLIP_H(_ROTATE) {\
   int nRotate90 = CANVAS_GET_90(_ROTATE);\
   (_ROTATE) = nRotate90 ? ((_ROTATE) ^ (2|4)) : ((_ROTATE) ^ 4);\
@@ -139,7 +139,7 @@ public:
   GXSTDINTERFACE(GXBOOL      SetRenderState       (GXRenderStateType eType, GXDWORD dwValue));
   GXSTDINTERFACE(GXBOOL      SetRenderStateBlock  (GXLPCRENDERSTATE lpBlock));
   GXSTDINTERFACE(GXBOOL      SetEffect            (GXEffect* pEffect));
-  GXSTDINTERFACE(GXBOOL      SetEffectConst       (GXLPCSTR lpName, void* pData, int nPackCount));  // ÁÙÊ±
+  GXSTDINTERFACE(GXBOOL      SetEffectConst       (GXLPCSTR lpName, void* pData, int nPackCount));  // ä¸´æ—¶
   GXSTDINTERFACE(GXDWORD     SetParametersInfo    (CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam));
   GXSTDINTERFACE(PenStyle    SetPenStyle          (PenStyle eStyle));
 
@@ -173,7 +173,7 @@ public:
   GXSTDINTERFACE(GXBOOL      TextOutA             (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCSTR lpString, GXINT cbString, GXCOLORREF crText));
   GXSTDINTERFACE(GXBOOL      TextOutW             (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCWSTR lpString, GXINT cbString, GXCOLORREF crText));
   GXSTDINTERFACE(GXLONG      TabbedTextOutA       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText));
-  GXSTDINTERFACE(GXLONG      TabbedTextOutW       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)); // Èç¹ûÑÕÉ«µÄAlphaÊÇ0Ôò±íÊ¾²âÁ¿×Ö·û´®³ß´ç
+  GXSTDINTERFACE(GXLONG      TabbedTextOutW       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)); // å¦‚æœé¢œè‰²çš„Alphaæ˜¯0åˆ™è¡¨ç¤ºæµ‹é‡å­—ç¬¦ä¸²å°ºå¯¸
 
   GXSTDINTERFACE(GXINT       SetCompositingMode   (CompositingMode eMode));
   GXSTDINTERFACE(GXBOOL      SetRegion            (GRegion* pRegion, GXBOOL bAbsOrigin));
@@ -204,17 +204,17 @@ private:
   GXCanvas*  m_pNative;
   GXHWND    m_hWnd;
   GXSTATION*    m_lpStation;
-  GRegion*    m_pSystemRegion;    // Windows Manager È·¶¨µÄ Region
-  GRegion*    m_pUpdateRegion;    // ĞèÒª¸üĞÂµÄ Region
-  GRegion*    m_pClipRegion;      // ÓÃ»§Éè¶¨µÄ Region
-  GRegion*    m_pEffectiveRegion; // Êµ¼ÊµÄ, ÓĞĞ§µÄ Region, ²»ÄÜÎª NULL
+  GRegion*    m_pSystemRegion;    // Windows Manager ç¡®å®šçš„ Region
+  GRegion*    m_pUpdateRegion;    // éœ€è¦æ›´æ–°çš„ Region
+  GRegion*    m_pClipRegion;      // ç”¨æˆ·è®¾å®šçš„ Region
+  GRegion*    m_pEffectiveRegion; // å®é™…çš„, æœ‰æ•ˆçš„ Region, ä¸èƒ½ä¸º NULL
 
   GXINT        UpdateRegion();
   GXLRESULT   Initialize  (GXHWND hWnd, GRegion* pRegion, GXDWORD dwFlags);
 public:
   GXWndCanvas(GXHWND hWnd);
-  GXWndCanvas(GXHWND hWnd, GRegion* pRegion);  // pRegion ÆÁÄ»¿Õ¼ä
-  GXWndCanvas(GXHWND hWnd, GRegion* pRegion, GXDWORD dwFlags);  // pRegion ÆÁÄ»¿Õ¼ä
+  GXWndCanvas(GXHWND hWnd, GRegion* pRegion);  // pRegion å±å¹•ç©ºé—´
+  GXWndCanvas(GXHWND hWnd, GRegion* pRegion, GXDWORD dwFlags);  // pRegion å±å¹•ç©ºé—´
   virtual ~GXWndCanvas();
 
   GXBOOL    DrawFrameControl(GXLPRECT lprc,GXUINT uType,GXUINT uState);  
@@ -234,14 +234,14 @@ public:
   GXVOID    DrawLine        (GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF Color);
   GXBOOL    SetViewportOrg  (GXINT x, GXINT y, GXLPPOINT lpPoint);
   GXINT     GetClipBox      (GXLPRECT lpRect);
-  GXBOOL    GetPaintRect    (GXLPRECT lpRect);  // »ñµÃ¿É»æÍ¼µÄRectÇøÓò
+  GXBOOL    GetPaintRect    (GXLPRECT lpRect);  // è·å¾—å¯ç»˜å›¾çš„RectåŒºåŸŸ
 
   GXCanvas* GetCanvasUnsafe ();
 
   void      EnableAlphaBlend(GXBOOL bEnable);
 
   static GXVOID GXGetRenderSurfaceExt (GXHWND GXIN hTopLevel, GXINT* GXOUT nWidth, GXINT* GXOUT nHeight);
-  static GXVOID GXGetRenderingRect    (GXHWND GXIN hTopLevel, GXHWND GXIN hChild, GXDWORD GXIN flags, GXLPRECT GXOUT lprcOut);  //TODO: ĞèÒªÕûºÏµ½CanvasÀàÖĞ
+  static GXVOID GXGetRenderingRect    (GXHWND GXIN hTopLevel, GXHWND GXIN hChild, GXDWORD GXIN flags, GXLPRECT GXOUT lprcOut);  //TODO: éœ€è¦æ•´åˆåˆ°Canvasç±»ä¸­
 };
 #endif // #ifndef _DEV_DISABLE_UI_CODE
 

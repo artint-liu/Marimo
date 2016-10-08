@@ -1,8 +1,8 @@
-#ifndef _MARIMO_DATA_POOL_VARIABLE_
+ï»¿#ifndef _MARIMO_DATA_POOL_VARIABLE_
 #define _MARIMO_DATA_POOL_VARIABLE_
 
 #ifndef _MARIMO_DATA_POOL_H_
-#error ±ØĞëÔÚÖ®Ç°°üº¬"DataPool.h"ÎÄ¼ş
+#error å¿…é¡»åœ¨ä¹‹å‰åŒ…å«"DataPool.h"æ–‡ä»¶
 #endif // #ifndef _MARIMO_DATA_POOL_H_
 
 namespace Marimo
@@ -19,25 +19,25 @@ namespace Marimo
     enum CAPS
     {
       CAPS_FIXED    = 0x00000001,
-      // CAPS_FIXED: ÄÚ´æµØÖ·²»±ä, ÎÈ¶¨±äÁ¿µÄGetPtr()·µ»ØµÄµØÖ·ÊÇ¹Ì¶¨µÄ£¬»ùÓÚ¶¯Ì¬Êı×éµÄ±äÁ¿¿ÉÄÜËæÊı¾İÔö¼Ó¶ø¸Ä±ä
-      //             ÕâÀïĞèÒª×¢Òâ£¬¶¯Ì¬Êı×é¶ÔÏóÈç¹ûÊÇ¸ù±äÁ¿ËüÒ²¾ßÓĞCAPS_FIXEDÊôĞÔ£¬¶øËüµÄÊı×éÔªËØ²»¾ßÓĞCAPS_FIXEDÊôĞÔ
-      CAPS_STRUCT   = 0x00000002, // ½á¹¹Ìå
-      CAPS_ARRAY    = 0x00000004, // ¾²Ì¬Êı×é£¬Ò²¿ÉÒÔ"GetLength() > 1"À´ÅĞ¶Ï
-      CAPS_DYNARRAY = 0x00000008, // ¶¯Ì¬Êı×é
+      // CAPS_FIXED: å†…å­˜åœ°å€ä¸å˜, ç¨³å®šå˜é‡çš„GetPtr()è¿”å›çš„åœ°å€æ˜¯å›ºå®šçš„ï¼ŒåŸºäºåŠ¨æ€æ•°ç»„çš„å˜é‡å¯èƒ½éšæ•°æ®å¢åŠ è€Œæ”¹å˜
+      //             è¿™é‡Œéœ€è¦æ³¨æ„ï¼ŒåŠ¨æ€æ•°ç»„å¯¹è±¡å¦‚æœæ˜¯æ ¹å˜é‡å®ƒä¹Ÿå…·æœ‰CAPS_FIXEDå±æ€§ï¼Œè€Œå®ƒçš„æ•°ç»„å…ƒç´ ä¸å…·æœ‰CAPS_FIXEDå±æ€§
+      CAPS_STRUCT   = 0x00000002, // ç»“æ„ä½“
+      CAPS_ARRAY    = 0x00000004, // é™æ€æ•°ç»„ï¼Œä¹Ÿå¯ä»¥"GetLength() > 1"æ¥åˆ¤æ–­
+      CAPS_DYNARRAY = 0x00000008, // åŠ¨æ€æ•°ç»„
     };
   protected:
     VTBL*         m_vtbl;
     DataPool*     m_pDataPool;
     LPCVD         m_pVdd;
     clBufferBase* m_pBuffer;
-    GXUINT        m_AbsOffset; // Ïà¶ÔÓÚ m_pBuffer Ö¸ÕëµÄÆ«ÒÆ
+    GXUINT        m_AbsOffset; // ç›¸å¯¹äº m_pBuffer æŒ‡é’ˆçš„åç§»
 
   public:
     DataPoolVariable(VTBL* vtbl, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nOffset);
     DataPoolVariable(VTBL* vtbl, DataPool* pDataPool, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nOffset);
     DataPoolVariable(const DataPoolVariable& val);
     DataPoolVariable();
-    ~DataPoolVariable(); // ²»ÄÜÉùÃ÷ÎªĞéº¯Êı!
+    ~DataPoolVariable(); // ä¸èƒ½å£°æ˜ä¸ºè™šå‡½æ•°!
 
   public:
     inline DataPoolVariable operator[](int nIndex)
@@ -59,61 +59,61 @@ namespace Marimo
   public:
     //DataPoolVariable& operator=   (const DataPoolVariable& val);
 
-    // ·Ö£¡±ğ£¡ÖØÔØ²»Í¬ÀàĞÍ£¬Èç¹ûÊ¹ÓÃÄ£°å¿ÉÄÜ»á½ÓÊÜÆäËû²»ÆÚÍûµÄÀàĞÍ
+    // åˆ†ï¼åˆ«ï¼é‡è½½ä¸åŒç±»å‹ï¼Œå¦‚æœä½¿ç”¨æ¨¡æ¿å¯èƒ½ä¼šæ¥å—å…¶ä»–ä¸æœŸæœ›çš„ç±»å‹
     DataPoolVariable& operator=   (GXLPCWSTR szString);
     DataPoolVariable& operator=   (GXLPCSTR szString);
     DataPoolVariable& operator=   (float val);
-    DataPoolVariable& operator=   (i32 val);            // Èç¹û±äÁ¿²»×ã32Î»»á±»½Ø¶Ï
+    DataPoolVariable& operator=   (i32 val);            // å¦‚æœå˜é‡ä¸è¶³32ä½ä¼šè¢«æˆªæ–­
     DataPoolVariable& operator=   (i64 val);
-    DataPoolVariable& operator=   (u32 val);            // Èç¹û±äÁ¿²»×ã32Î»»á±»½Ø¶Ï
+    DataPoolVariable& operator=   (u32 val);            // å¦‚æœå˜é‡ä¸è¶³32ä½ä¼šè¢«æˆªæ–­
     DataPoolVariable& operator=   (u64 val);
-    DataPoolVariable& operator=   (const DataPoolVariable& var);  // var µÄÃèÊöĞÅÏ¢¸´ÖÆ¸øĞÂµÄÄ¿±ê
+    DataPoolVariable& operator=   (const DataPoolVariable& var);  // var çš„æè¿°ä¿¡æ¯å¤åˆ¶ç»™æ–°çš„ç›®æ ‡
 
-    //DataPoolVariable& operator*   (DataPoolVariable* pVar);       // var µÄÄÚÈİ¸´ÖÆ¸øĞÂµÄÄ¿±ê
+    //DataPoolVariable& operator*   (DataPoolVariable* pVar);       // var çš„å†…å®¹å¤åˆ¶ç»™æ–°çš„ç›®æ ‡
 
 
-    GXBOOL            Impulse         (DataAction reason, GXSIZE_T index = 0, GXSIZE_T count = 0); // indexºÍcountÖ»ÓĞÊÇÊı×éÊ±²ÅÓĞĞ§
+    GXBOOL            Impulse         (DataAction reason, GXSIZE_T index = 0, GXSIZE_T count = 0); // indexå’Œcountåªæœ‰æ˜¯æ•°ç»„æ—¶æ‰æœ‰æ•ˆ
     GXHRESULT         GetPool         (DataPool** ppDataPool) GXCONST;
     DataPool*         GetPoolUnsafe   () GXCONST;
     GXBOOL            IsSamePool      (DataPool* pDataPool) GXCONST;
     GXVOID            Free            ();
-    GXBOOL            IsValid         () GXCONST;  // ·µ»ØÕâ¸ö Variable ÊÇ·ñÓĞĞ§
-    GXLPVOID          GetPtr          () GXCONST;  // Ö¸Õë, Òª×¢Òâ¶¯Ì¬Êı¾İÖ¸Õë»áÒòÎª NewBack ²Ù×÷¸Ä±ä
-    GXUINT            GetSize         () GXCONST;  // ×Ö½Ú´óĞ¡, Êı×éÊÇÊı×é´óĞ¡, ¶¯Ì¬Êı¾İ´óĞ¡¿É±ä, ½á¹¹ÊÇ½á¹¹Ìå´óĞ¡
-    GXUINT            GetOffset       () GXCONST;  // Æ«ÒÆ,È«¾Ö±äÁ¿ÊÇÈ«¾ÖÆ«ÒÆ, ½á¹¹Ìå±äÁ¿ÊÇ½á¹¹ÌåÄÚÆ«ÒÆ
-    DataPool::LPCSTR  GetName         () GXCONST;  // »ñµÃ¶¨ÒåÃû, ±äÁ¿Ãû, Êı×é±äÁ¿Ãû»òÕß½á¹¹Ìå±äÁ¿Ãû
-    DataPool::LPCSTR  GetTypeName     () GXCONST;  // ÀàĞÍ, ±äÁ¿Îª±äÁ¿Ãû, Êı×éÎª"Type[n]"ĞÎÊ½, ¶¯Ì¬Êı×éÎª"Type[]"ĞÎÊ½, ½á¹¹ÌåÎª"struct Name"ĞÎÊ½
-    TypeCategory      GetTypeCategory () GXCONST;  // ±äÁ¿µÄ·ÖÀà
-    GXDWORD           GetCaps         () GXCONST;  // ²Î¿¼CAPSÃ¶¾Ù
-    clStringA         GetFullName     () GXCONST;  // £¨Ã»ÊµÏÖ£©»ñµÃ±äÁ¿µÄÈ«³Æ,Èç¹ûÔÚ½á¹¹ÌåÖĞ£¬°üÀ¨½á¹¹ÌåÃû£¬Èç¹ûÔÚÊı×éÖĞ»á°üº¬Êı×éË÷Òı,ÈçÍ¬DataPool::QueryByExpression()²ÎÊıÄÇÑù.
+    GXBOOL            IsValid         () GXCONST;  // è¿”å›è¿™ä¸ª Variable æ˜¯å¦æœ‰æ•ˆ
+    GXLPVOID          GetPtr          () GXCONST;  // æŒ‡é’ˆ, è¦æ³¨æ„åŠ¨æ€æ•°æ®æŒ‡é’ˆä¼šå› ä¸º NewBack æ“ä½œæ”¹å˜
+    GXUINT            GetSize         () GXCONST;  // å­—èŠ‚å¤§å°, æ•°ç»„æ˜¯æ•°ç»„å¤§å°, åŠ¨æ€æ•°æ®å¤§å°å¯å˜, ç»“æ„æ˜¯ç»“æ„ä½“å¤§å°
+    GXUINT            GetOffset       () GXCONST;  // åç§»,å…¨å±€å˜é‡æ˜¯å…¨å±€åç§», ç»“æ„ä½“å˜é‡æ˜¯ç»“æ„ä½“å†…åç§»
+    DataPool::LPCSTR  GetName         () GXCONST;  // è·å¾—å®šä¹‰å, å˜é‡å, æ•°ç»„å˜é‡åæˆ–è€…ç»“æ„ä½“å˜é‡å
+    DataPool::LPCSTR  GetTypeName     () GXCONST;  // ç±»å‹, å˜é‡ä¸ºå˜é‡å, æ•°ç»„ä¸º"Type[n]"å½¢å¼, åŠ¨æ€æ•°ç»„ä¸º"Type[]"å½¢å¼, ç»“æ„ä½“ä¸º"struct Name"å½¢å¼
+    TypeCategory      GetTypeCategory () GXCONST;  // å˜é‡çš„åˆ†ç±»
+    GXDWORD           GetCaps         () GXCONST;  // å‚è€ƒCAPSæšä¸¾
+    clStringA         GetFullName     () GXCONST;  // ï¼ˆæ²¡å®ç°ï¼‰è·å¾—å˜é‡çš„å…¨ç§°,å¦‚æœåœ¨ç»“æ„ä½“ä¸­ï¼ŒåŒ…æ‹¬ç»“æ„ä½“åï¼Œå¦‚æœåœ¨æ•°ç»„ä¸­ä¼šåŒ…å«æ•°ç»„ç´¢å¼•,å¦‚åŒDataPool::QueryByExpression()å‚æ•°é‚£æ ·.
     clBufferBase*     GetBuffer       () GXCONST;
 
-    // ½á¹¹Ìå×¨ÓÃ
-    DataPoolVariable  MemberOf        (GXLPCSTR szName) GXCONST;     // »ñµÃ³ÉÔ±
+    // ç»“æ„ä½“ä¸“ç”¨
+    DataPoolVariable  MemberOf        (GXLPCSTR szName) GXCONST;     // è·å¾—æˆå‘˜
 
-    // Êı×é»ò¶¯Ì¬Êı×é×¨ÓÃ 
-    DataPoolVariable  IndexOf         (GXSIZE_T nIndex) GXCONST;     // »ñµÃÌØ¶¨Ë÷ÒıµÄ±äÁ¿
-    GXSIZE_T          GetLength       () GXCONST;                   // »ñµÃÊı×éµÄ³ÉÔ±¸öÊı, ×¢ÒâÓëGetSizeÇø±ğ
-    DataPoolVariable  NewBack         (GXUINT nIncrease = 1);       // ÔÚ¶¯Ì¬Êı×éÉÏ×·¼ÓÊı¾İ, ¶¯Ì¬Êı×é×¨ÓÃ, Èç¹ûinc´óÓÚ1£¬·µ»ØµÚÒ»¸öĞÂÔö±äÁ¿£¬Èç¹ûincÎª0£¬²»»áĞÂÔö±äÁ¿£¬·µ»Ø×îºóÒ»¸öÊı¾İ
-    GXBOOL            Remove          (GXSIZE_T nIndex, GXSIZE_T nCount = 1);        // ÒÆ³ö¶¯Ì¬Êı×éÖ¸¶¨Ë÷ÒıµÄÊı¾İ, ¶¯Ì¬Êı×é×¨ÓÃ, index=-1Ê±±íÊ¾È«²¿É¾³ı£¬´ËÊ±count±ØĞëÎª0
+    // æ•°ç»„æˆ–åŠ¨æ€æ•°ç»„ä¸“ç”¨ 
+    DataPoolVariable  IndexOf         (GXSIZE_T nIndex) GXCONST;     // è·å¾—ç‰¹å®šç´¢å¼•çš„å˜é‡
+    GXSIZE_T          GetLength       () GXCONST;                   // è·å¾—æ•°ç»„çš„æˆå‘˜ä¸ªæ•°, æ³¨æ„ä¸GetSizeåŒºåˆ«
+    DataPoolVariable  NewBack         (GXUINT nIncrease = 1);       // åœ¨åŠ¨æ€æ•°ç»„ä¸Šè¿½åŠ æ•°æ®, åŠ¨æ€æ•°ç»„ä¸“ç”¨, å¦‚æœincå¤§äº1ï¼Œè¿”å›ç¬¬ä¸€ä¸ªæ–°å¢å˜é‡ï¼Œå¦‚æœincä¸º0ï¼Œä¸ä¼šæ–°å¢å˜é‡ï¼Œè¿”å›æœ€åä¸€ä¸ªæ•°æ®
+    GXBOOL            Remove          (GXSIZE_T nIndex, GXSIZE_T nCount = 1);        // ç§»å‡ºåŠ¨æ€æ•°ç»„æŒ‡å®šç´¢å¼•çš„æ•°æ®, åŠ¨æ€æ•°ç»„ä¸“ç”¨, index=-1æ—¶è¡¨ç¤ºå…¨éƒ¨åˆ é™¤ï¼Œæ­¤æ—¶countå¿…é¡»ä¸º0
 
-    // ±äÁ¿×¨ÓÃ
-    GXBOOL            ParseW          (GXLPCWSTR szString, GXUINT length); // °´ÕÕ±äÁ¿ÀàĞÍ×ªÖµ, length=0±íÊ¾°´ÕÕ'\0'½áÎ²
+    // å˜é‡ä¸“ç”¨
+    GXBOOL            ParseW          (GXLPCWSTR szString, GXUINT length); // æŒ‰ç…§å˜é‡ç±»å‹è½¬å€¼, length=0è¡¨ç¤ºæŒ‰ç…§'\0'ç»“å°¾
     GXBOOL            ParseA          (GXLPCSTR szString, GXUINT length);
 
-    clStringW         ToStringW       () GXCONST;           // ±äÁ¿°´ÕÕÆäº¬Òå×ªÖµ, Êı×éºÍ½á¹¹ÌåµÈÍ¬ÓÚGetTypeName()
+    clStringW         ToStringW       () GXCONST;           // å˜é‡æŒ‰ç…§å…¶å«ä¹‰è½¬å€¼, æ•°ç»„å’Œç»“æ„ä½“ç­‰åŒäºGetTypeName()
     clStringA         ToStringA       () GXCONST;
 
-    GXBOOL            Set             (const DataPoolVariable& var);  // ×¢ÒâÕâ¸öºÍ¡°operator=¡±º¬Òå²»Í¬
+    GXBOOL            Set             (const DataPoolVariable& var);  // æ³¨æ„è¿™ä¸ªå’Œâ€œoperator=â€å«ä¹‰ä¸åŒ
     GXBOOL            Set             (GXLPCWSTR szString);
     GXBOOL            Set             (GXLPCSTR szString);
     GXBOOL            Set             (float val);
-    GXBOOL            Set             (i32 val);            // Èç¹û±äÁ¿²»×ã32Î»»á±»½Ø¶Ï
+    GXBOOL            Set             (i32 val);            // å¦‚æœå˜é‡ä¸è¶³32ä½ä¼šè¢«æˆªæ–­
     GXBOOL            Set             (i64 val);
-    GXBOOL            Set             (u32 val);            // Èç¹û±äÁ¿²»×ã32Î»»á±»½Ø¶Ï
+    GXBOOL            Set             (u32 val);            // å¦‚æœå˜é‡ä¸è¶³32ä½ä¼šè¢«æˆªæ–­
     GXBOOL            Set             (u64 val);
 
-    GXBOOL            Retain          (GUnknown* pUnknown); // °²È«µÄ´¢´æGUnknown¶ÔÏó£¬ÉèÖÃNULLÊ±ÊÍ·ÅGUnknown¶ÔÏó¡£
+    GXBOOL            Retain          (GUnknown* pUnknown); // å®‰å…¨çš„å‚¨å­˜GUnknownå¯¹è±¡ï¼Œè®¾ç½®NULLæ—¶é‡Šæ”¾GUnknownå¯¹è±¡ã€‚
     GXBOOL            Query           (GUnknown** ppUnknown) GXCONST;
 
     float             ToFloat         () GXCONST;
@@ -137,7 +137,7 @@ namespace Marimo
     typedef DataPoolVariable Variable;
 
     //
-    // »ù´¡ÀàĞÍµÄÄ£°åÌ×ÓÃ
+    // åŸºç¡€ç±»å‹çš„æ¨¡æ¿å¥—ç”¨
     //
     template<typename _Ty>
     class VarPrimaryT : public Variable
@@ -178,7 +178,7 @@ namespace Marimo
     };
 
     //
-    // ½á¹¹ÌåÀàĞÍÌ×ÓÃ
+    // ç»“æ„ä½“ç±»å‹å¥—ç”¨
     //
     template<class _Ty>
     class VarComplexT : public Variable
@@ -229,8 +229,8 @@ typedef Marimo::Implement::VarComplexT<float3>    MOVarFloat3;
 typedef Marimo::Implement::VarComplexT<float4>    MOVarFloat4;
 typedef Marimo::Implement::VarComplexT<float4x4>  MOVarMatrix4;
 
-// ÎŞ·¨ÊµÏÖ×Ö·û´®ÀàĞÍ£¬ÒòÎª×Ö·û´®ÀàĞÍÔÚÊ¹ÓÃÇ°¿ÉÄÜĞèÒªÕıÈ·³õÊ¼»¯
-// ¶øÕâ¸öÄ£°åµÄ¡°=¡±²Ù×÷ÖØÔØÃ»ÓĞÒşÊ½³õÊ¼»¯×Ö·û´®ÀàĞÍ
+// æ— æ³•å®ç°å­—ç¬¦ä¸²ç±»å‹ï¼Œå› ä¸ºå­—ç¬¦ä¸²ç±»å‹åœ¨ä½¿ç”¨å‰å¯èƒ½éœ€è¦æ­£ç¡®åˆå§‹åŒ–
+// è€Œè¿™ä¸ªæ¨¡æ¿çš„â€œ=â€æ“ä½œé‡è½½æ²¡æœ‰éšå¼åˆå§‹åŒ–å­—ç¬¦ä¸²ç±»å‹
 //typedef Marimo::Implement::VarPrimaryT<clStringA> MOVarStringA;
 //typedef Marimo::Implement::VarPrimaryT<clStringW> MOVarStringW;
 

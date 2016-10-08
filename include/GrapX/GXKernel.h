@@ -1,14 +1,14 @@
-#ifndef _GRAPHICS_X_KERNEL_H_
+Ôªø#ifndef _GRAPHICS_X_KERNEL_H_
 #define _GRAPHICS_X_KERNEL_H_
 
 #define GXHEAP_ZERO_MEMORY                0x00000008      
 
 enum GXStationDesc
 {
-  GXSD_EXTENT        = 0,   // Station µƒ≥ﬂ¥Á, GXLPARAM = GXSIZE*
+  GXSD_EXTENT        = 0,   // Station ÁöÑÂ∞∫ÂØ∏, GXLPARAM = GXSIZE*
   GXSD_MOUSEHOVERWND = 1,
   GXSD_ROOTDIR       = 2,
-  GXSD_CONFIGPATH    = 3,   // ≈‰÷√Œƒº˛¬∑æ∂
+  GXSD_CONFIGPATH    = 3,   // ÈÖçÁΩÆÊñá‰ª∂Ë∑ØÂæÑ
 };
 
 enum GXInstanceType

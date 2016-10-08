@@ -2,7 +2,7 @@
 
 #include "clStd.H"
 #include "clString.H"
-#include "clmemory.h"
+//#include "clmemory.h"
 //#include "clFile.H"
 //#include "clBuffer.H"
 #include "clUtility.H"

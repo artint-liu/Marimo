@@ -1,4 +1,4 @@
-#ifndef _GREGION_H_
+Ôªø#ifndef _GREGION_H_
 #define _GREGION_H_
 
 // WIN32
@@ -11,19 +11,19 @@
 class GRegion : public GUnknown
 {
 public:
-  // ª˘¿‡Ω”ø⁄
+  // Âü∫Á±ªÊé•Âè£
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   GXSTDINTERFACE(GXHRESULT  AddRef         ());
   GXSTDINTERFACE(GXHRESULT  Release        ());
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  // …Ë÷√–Œ◊¥
+  // ËÆæÁΩÆÂΩ¢Áä∂
   GXSTDINTERFACE(GXVOID     SetEmpty       ());
   GXSTDINTERFACE(GXVOID     SetRect        (const GXRECT* lprect));
   GXSTDINTERFACE(GXVOID     SetRoundRect   (const GXRECT* lprect, GXUINT nWidthEllipse, GXUINT nHeightEllipse));
   GXSTDINTERFACE(RGNCOMPLEX Offset         (GXINT xOffset, GXINT yOffset));
 
-  // ◊¥Ã¨∑÷Œˆ
+  // Áä∂ÊÄÅÂàÜÊûê
   GXSTDINTERFACE(GXBOOL     Equal          (const GRegion* pRegion) const);
   GXSTDINTERFACE(GXBOOL     IsEmpty        () const);
   GXSTDINTERFACE(GXBOOL     IsRectangle    () const);
@@ -36,7 +36,7 @@ public:
   GXSTDINTERFACE(GXBOOL     PtInRegion     (int x, int y) const);
   GXSTDINTERFACE(GXBOOL     RectInRegion   (const GXRECT* rect) const);
 
-  // ¬ﬂº≠≤Ÿ◊˜
+  // ÈÄªËæëÊìç‰Ωú
   GXSTDINTERFACE(GRegion*   Clone           () const);
   GXSTDINTERFACE(GRegion*   CreateIntersect (const GRegion* pRegion) const);
   GXSTDINTERFACE(GRegion*   CreateXor       (const GRegion* pRegion) const);

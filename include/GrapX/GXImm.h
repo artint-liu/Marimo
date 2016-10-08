@@ -1,4 +1,4 @@
-// parameter of ImmGetCompositionString
+﻿// parameter of ImmGetCompositionString
 #define GXGCS_COMPREADSTR                 0x0001
 #define GXGCS_COMPREADATTR                0x0002
 #define GXGCS_COMPREADCLAUSE              0x0004

@@ -381,6 +381,16 @@ namespace clstd
     return _Str.GetHash();
   }
 
+  inline size_t hash_value(const clstd::StringX<wch, clstd::StdAllocator, g_StdAlloc, clstd::StringW_traits>& _Str)
+  {
+    return _Str.GetHash();
+  }
+
+  inline size_t hash_value(const  clstd::StringX<ch, clstd::StdAllocator, g_StdAlloc, clstd::StringA_traits>& _Str)
+  {
+    return _Str.GetHash();
+  }
+
 } // namespace clstd
 
 int SimpleASCIItoUnicode(wch* pDestStr, int nCount, const ch* pSrcStr);
@@ -455,5 +465,6 @@ clStringA UnicodeStringToAnsiString(const clStringW& str);
 #define AS2WS(STR)  (const wch*)AnsiStringToUnicodeString(STR)
 #define WS2AS(STR)  (const ch*)UnicodeStringToAnsiString(STR)
 
-
+#else
+# pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CL_STRING_H_

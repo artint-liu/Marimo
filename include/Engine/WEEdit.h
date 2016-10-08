@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_WINE_EDIT_H_
+ï»¿#ifndef _GRAP_X_WINE_EDIT_H_
 #define _GRAP_X_WINE_EDIT_H_
 
 //class CMOWnd;
@@ -10,7 +10,7 @@ public:
   void SetSelect      (GXINT nStart, GXINT nEnd);
   void ReplaceSelectW (GXLPCWSTR szReplace, GXBOOL bCanUndo);
 
-  // TODO: Ôö¼ÓÒ»¸öÖ±½ÓÉèÖÃIntµÄ½Ó¿Ú
+  // TODO: å¢åŠ ä¸€ä¸ªç›´æ¥è®¾ç½®Intçš„æ¥å£
 
   virtual GXSIZE_T    GetThisSizeOf       () const;
   virtual clStringW   GetClassName        () const;

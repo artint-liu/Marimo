@@ -1,4 +1,4 @@
-// GrapVR µÄ»ù´¡¶ÔÏó¶¨ÒåÎÄ¼ş, ÆäËû³¡¾°µÄ½Úµã¾ùÔÚ´Ë¼Ì³Ğ
+ï»¿// GrapVR çš„åŸºç¡€å¯¹è±¡å®šä¹‰æ–‡ä»¶, å…¶ä»–åœºæ™¯çš„èŠ‚ç‚¹å‡åœ¨æ­¤ç»§æ‰¿
 #ifndef _GRAPVR_NODE_H_
 #define _GRAPVR_NODE_H_
 
@@ -10,34 +10,34 @@ class GXMaterialInst;
 struct GVSCENEUPDATE;
 //enum GXPRIMITIVETYPE;
 
-//enum GVModelClass // TODO[9]: ¸ÄÎªGXDWORD È»ºóÊÇ MAKEFOURCC Éú³É
+//enum GVModelClass // TODO[9]: æ”¹ä¸ºGXDWORD ç„¶åæ˜¯ MAKEFOURCC ç”Ÿæˆ
 //{
 //  GVMC_UNKNOWN,
 //  GVMC_GEOMETRY,
 //  GVMC_MESH,
-//  GVMC_APPIMPL,   // Ó¦ÓÃ³ÌĞòÊµÏÖ,ÓÃ»§À©Õ¹
+//  GVMC_APPIMPL,   // åº”ç”¨ç¨‹åºå®ç°,ç”¨æˆ·æ‰©å±•
 //};
 
-// TODO[8]: Raytrace ²»Ö§³Ö´øWorldMatµÄÎïÌå
+// TODO[8]: Raytrace ä¸æ”¯æŒå¸¦WorldMatçš„ç‰©ä½“
 
 enum GVNodeFlags
 {
-  GVNF_VISIBLE        = 0x00000001,     // ÓÃ»§ÉèÖÃµÄ¿É¼û±êÖ¾, Èç¹ûÃ»ÓĞ´Ë±êÖ¾Ôò²»²ÎÓë¿É¼ûĞÔ¼ì²â
-  GVNF_NORAYTRACE     = 0x00000004,     // ±ÜÃâRayTrace½Ó¿ÚµÄÌ½²â, Ó°Ïì×Ó¶ÔÏó
-  GVNF_UPDATEWORLDMAT = 0x00000008,     // ¸üĞÂWorldMatrix, ·ñÔò°´ÕÕµ¥Î»¾ØÕó¸üĞÂ
-  GVNF_CONTAINER      = 0x00000010,     // ²»°üº¬PrimitiveÊı¾İµÄÈİÆ÷
-  GVNF_NOCLIP         = 0x00000020,     // ÎŞAABBÓëÊÓ×¶µÄÔ¤²Ã¼ô
-  GVNF_PHYSICALBODY   = 0x00000040,     // »ùÓÚÎïÀíÏµÍ³µÄ½Úµã, Î»ÖÃ¿ÉÄÜ²»ÊÜ Node µÄ¸¸×Ó¹ØÏµÓ°Ïì
-  GVNF_CASTSHADOW     = 0x00000080,     // ÒõÓ°Í¶Ó°±êÖ¾
+  GVNF_VISIBLE        = 0x00000001,     // ç”¨æˆ·è®¾ç½®çš„å¯è§æ ‡å¿—, å¦‚æœæ²¡æœ‰æ­¤æ ‡å¿—åˆ™ä¸å‚ä¸å¯è§æ€§æ£€æµ‹
+  GVNF_NORAYTRACE     = 0x00000004,     // é¿å…RayTraceæ¥å£çš„æ¢æµ‹, å½±å“å­å¯¹è±¡
+  GVNF_UPDATEWORLDMAT = 0x00000008,     // æ›´æ–°WorldMatrix, å¦åˆ™æŒ‰ç…§å•ä½çŸ©é˜µæ›´æ–°
+  GVNF_CONTAINER      = 0x00000010,     // ä¸åŒ…å«Primitiveæ•°æ®çš„å®¹å™¨
+  GVNF_NOCLIP         = 0x00000020,     // æ— AABBä¸è§†é”¥çš„é¢„è£å‰ª
+  GVNF_PHYSICALBODY   = 0x00000040,     // åŸºäºç‰©ç†ç³»ç»Ÿçš„èŠ‚ç‚¹, ä½ç½®å¯èƒ½ä¸å— Node çš„çˆ¶å­å…³ç³»å½±å“
+  GVNF_CASTSHADOW     = 0x00000080,     // é˜´å½±æŠ•å½±æ ‡å¿—
   
-  //TODO: ÓÃGVIC_UPDATE´úÌæ
-  //GVNF_DONOTUPDATE    = 0x00000100,     // ±ÜÃâµ÷ÓÃ½ÚµãµÄUpdate½Ó¿Ú£¬Õâ¸ö±êÖ¾Ö»ÆÁ±Îµ±Ç°½ÚµãUpdate£¬²»Ó°Ïì×Ó½Úµã
+  //TODO: ç”¨GVIC_UPDATEä»£æ›¿
+  //GVNF_DONOTUPDATE    = 0x00000100,     // é¿å…è°ƒç”¨èŠ‚ç‚¹çš„Updateæ¥å£ï¼Œè¿™ä¸ªæ ‡å¿—åªå±è”½å½“å‰èŠ‚ç‚¹Updateï¼Œä¸å½±å“å­èŠ‚ç‚¹
 
-  GVNF_STATIC         = 0x00000200,     // ¾²Ì¬ÎïÌå£¬²»Ö§³ÖSetPosition
-  GVNF_COLLIDER       = 0x00000400,     // ÓĞÅö×²
+  GVNF_STATIC         = 0x00000200,     // é™æ€ç‰©ä½“ï¼Œä¸æ”¯æŒSetPosition
+  GVNF_COLLIDER       = 0x00000400,     // æœ‰ç¢°æ’
 
 
-  GVNF_USER_0         = 0x01000000,     // ÓÃ»§¶¨Òå±êÖ¾
+  GVNF_USER_0         = 0x01000000,     // ç”¨æˆ·å®šä¹‰æ ‡å¿—
   GVNF_USER_1         = 0x02000000,
   GVNF_USER_2         = 0x04000000,
   GVNF_USER_3         = 0x08000000,
@@ -49,9 +49,9 @@ enum GVNodeFlags
   GVNF_DEFAULT        = GVNF_VISIBLE|GVNF_CASTSHADOW,
 };
 
-// FIXME: Õâ¸ö»¹Ã»¿ªÊ¼ÓÃ
-// ½Ó¿ÚÊµÏÖ³Ì¶È±êÖ¾£¬ÔÚµ÷ÓÃNode½Ó¿ÚÊ±»á¼ì²â¶ÔÓ¦±êÖ¾£¬Èç¹û±êÖ¾Îª¿ÕÔò²»µ÷ÓÃNodeµÄvirtual½Ó¿Ú¡£
-// »ùÀà½Ó¿ÚÊµÏÖÖĞ»áÈ¥µô¶ÔÓ¦±êÖ¾£¬ËùÒÔÔÚµÚÒ»´Îµ÷ÓÃ½Ó¿Úºó²»»áÔÙµ÷ÓÃÁË¡£
+// FIXME: è¿™ä¸ªè¿˜æ²¡å¼€å§‹ç”¨
+// æ¥å£å®ç°ç¨‹åº¦æ ‡å¿—ï¼Œåœ¨è°ƒç”¨Nodeæ¥å£æ—¶ä¼šæ£€æµ‹å¯¹åº”æ ‡å¿—ï¼Œå¦‚æœæ ‡å¿—ä¸ºç©ºåˆ™ä¸è°ƒç”¨Nodeçš„virtualæ¥å£ã€‚
+// åŸºç±»æ¥å£å®ç°ä¸­ä¼šå»æ‰å¯¹åº”æ ‡å¿—ï¼Œæ‰€ä»¥åœ¨ç¬¬ä¸€æ¬¡è°ƒç”¨æ¥å£åä¸ä¼šå†è°ƒç”¨äº†ã€‚
 enum GVNodeInterfaceCaps
 {
   GVIC_UPDATE    = 0x00000001,
@@ -61,33 +61,33 @@ enum GVNodeInterfaceCaps
 
 enum GVRenderType
 {
-  GVRT_Normal  = 0x100, // Õâ¸öÃû×Ö²»¹»¿á, Ïë×ÅÒÔºó¸ÄÒ»ÏÂ
+  GVRT_Normal  = 0x100, // è¿™ä¸ªåå­—ä¸å¤Ÿé…·, æƒ³ç€ä»¥åæ”¹ä¸€ä¸‹
   GVRT_Reflact = 0x200,
   GVRT_Reflect = 0x300,
   GVRT_Shadow  = 0x400,
 };
 //
-// GVNode::SetMaterialInst ºÍ
-// GVNode::SetMaterialInstFromFileW ±êÖ¾:
+// GVNode::SetMaterialInst å’Œ
+// GVNode::SetMaterialInstFromFileW æ ‡å¿—:
 //
-#define NODEMTL_SETCHILDREN   0x00000001  // ÉèÖÃ×ÓËï½ÚµãµÄ²ÄÖÊ
-#define NODEMTL_SETSONONLY    0x00000002  // ºöÂÔNODEMTL_SETCHILDREN±êÖ¾, Ö»ÉèÖÃ¶ù×Ó(µÚÒ»¼¶×Ó½Úµã)µÄ²ÄÖÊ
-#define NODEMTL_CLONEINST     0x00000004  // ¶ÔÔ­ÓĞ²ÄÖÊ¿ËÂ¡Ò»·İĞÂµÄÊµÀı
-#define NODEMTL_IGNOREVERT    0x00000008  // ²»²âÁ¿¶¥µã¸ñÊ½
+#define NODEMTL_SETCHILDREN   0x00000001  // è®¾ç½®å­å­™èŠ‚ç‚¹çš„æè´¨
+#define NODEMTL_SETSONONLY    0x00000002  // å¿½ç•¥NODEMTL_SETCHILDRENæ ‡å¿—, åªè®¾ç½®å„¿å­(ç¬¬ä¸€çº§å­èŠ‚ç‚¹)çš„æè´¨
+#define NODEMTL_CLONEINST     0x00000004  // å¯¹åŸæœ‰æè´¨å…‹éš†ä¸€ä»½æ–°çš„å®ä¾‹
+#define NODEMTL_IGNOREVERT    0x00000008  // ä¸æµ‹é‡é¡¶ç‚¹æ ¼å¼
 
-enum NodeRayTraceType // Ïà½»¼¶±ğ, °´ÕÕ¾«È·µÈ¼¶µİÔö
+enum NodeRayTraceType // ç›¸äº¤çº§åˆ«, æŒ‰ç…§ç²¾ç¡®ç­‰çº§é€’å¢
 {
   NRTT_NONE,
-  NRTT_AABB,      // °üÎ§ºĞÏà½»
-  NRTT_MESHFACE,  // ¾«È·Ïà½»
+  NRTT_AABB,      // åŒ…å›´ç›’ç›¸äº¤
+  NRTT_MESHFACE,  // ç²¾ç¡®ç›¸äº¤
 };
 
 struct NODERAYTRACE
 {
   NodeRayTraceType eType;
   float   fSquareDist;
-  float3  vLocalHit;    // Ä£ĞÍ¿Õ¼äµÄ×ø±ê
-  int     nFaceIndex;   // ²»Ò»¶¨×ÜÓĞ
+  float3  vLocalHit;    // æ¨¡å‹ç©ºé—´çš„åæ ‡
+  int     nFaceIndex;   // ä¸ä¸€å®šæ€»æœ‰
 };
 
 struct NODENOTIFY
@@ -101,10 +101,10 @@ struct GVRENDERDESC
   GPrimitive*       pPrimitive;
   GXPrimitiveType   ePrimType;
   GXMaterialInst*   pMaterial;
-  float4x4          matWorld;   // È«¾Ö±ä»», Õâ¸öÓ¦¸Ã·µ»ØTRANSFORM::GlobalMatrix, ·ñÔò²Ã¼ô»áÓĞÎÊÌâ
+  float4x4          matWorld;   // å…¨å±€å˜æ¢, è¿™ä¸ªåº”è¯¥è¿”å›TRANSFORM::GlobalMatrix, å¦åˆ™è£å‰ªä¼šæœ‰é—®é¢˜
 
-  GXDWORD dwFlags;              // ²Î¿¼ GVModelFlags ¶¨Òå
-  GXUINT  RenderQueue;          // äÖÈ¾¶ÓÁĞ, ÉĞÎ´Ê¹ÓÃ, Õâ¸öÄ¬ÈÏÈ¡×ÔMaterialÖĞµÄ¼ÇÂ¼
+  GXDWORD dwFlags;              // å‚è€ƒ GVModelFlags å®šä¹‰
+  GXUINT  RenderQueue;          // æ¸²æŸ“é˜Ÿåˆ—, å°šæœªä½¿ç”¨, è¿™ä¸ªé»˜è®¤å–è‡ªMaterialä¸­çš„è®°å½•
   GXINT   BaseVertexIndex;      // StartVertex
   GXUINT  MinIndex;
   GXUINT  NumVertices;
@@ -127,7 +127,7 @@ public:
   enum ESpace {
     S_ABSOLUTE = clstd::S_World,
     S_RELATIVE = clstd::S_Self,
-    S_PHYSICALBODY,   // ÊäÈë²ÎÊı×÷Îª T_ABSOLUTE, µ«²»¸üĞÂ×Ó½ÚµãÎ»ÖÃ, Ïà¶Ô¾ØÕó±»ºöÂÔ
+    S_PHYSICALBODY,   // è¾“å…¥å‚æ•°ä½œä¸º T_ABSOLUTE, ä½†ä¸æ›´æ–°å­èŠ‚ç‚¹ä½ç½®, ç›¸å¯¹çŸ©é˜µè¢«å¿½ç•¥
   };
 protected:
   GXDWORD       m_ClsCode;
@@ -136,9 +136,9 @@ protected:
   GXDWORD       m_dwInterfaceCaps;
   AABB          m_aabbLocal;
 
-  // TODO: ¿¼ÂÇ²»ÓÃ¾ØÕó¶ø¸ÄÓÃÆ½ÒÆ/Ğı×ª/Ëõ·ÅÀ´±íÊ¾
-  //float4x4      m_matRelative;    // Ïà¶ÔÓÚ¸¸½ÚµãµÄ±ä»»¾ØÕó
-  //float4x4      m_matAbsolute;    // ×îÖÕµÄ±ä»»¾ØÕó, m_matRelative * pParent->m_matAbsolute
+  // TODO: è€ƒè™‘ä¸ç”¨çŸ©é˜µè€Œæ”¹ç”¨å¹³ç§»/æ—‹è½¬/ç¼©æ”¾æ¥è¡¨ç¤º
+  //float4x4      m_matRelative;    // ç›¸å¯¹äºçˆ¶èŠ‚ç‚¹çš„å˜æ¢çŸ©é˜µ
+  //float4x4      m_matAbsolute;    // æœ€ç»ˆçš„å˜æ¢çŸ©é˜µ, m_matRelative * pParent->m_matAbsolute
   TRANSFORM     m_Transformation;
   // Coordinate
   virtual    ~GVNode();
@@ -153,8 +153,8 @@ public:
   GVNode   (GVScene* pScene, GXDWORD dwClassCode);
 
   GXBOOL    Show                      (GXBOOL bShow);
-  GXDWORD   SetFlags                  (GXDWORD dwNewFlags); // ÉèÖÃĞÂ±êÖ¾, Õâ¸ö»áÇå³ıÔ­À´µÄ±êÖ¾
-  GXDWORD   CombineFlags              (GXDWORD dwFlags);    // ÓëÔ­ÓĞ±êÖ¾ºÏ²¢
+  GXDWORD   SetFlags                  (GXDWORD dwNewFlags); // è®¾ç½®æ–°æ ‡å¿—, è¿™ä¸ªä¼šæ¸…é™¤åŸæ¥çš„æ ‡å¿—
+  GXDWORD   CombineFlags              (GXDWORD dwFlags);    // ä¸åŸæœ‰æ ‡å¿—åˆå¹¶
 //void      CombineRecursiveFlags    (GXDWORD dwFlags);
 //void      RemoveRecursiveFlags     (GXDWORD dwFlags);
   GXVOID    GetAbsoluteAABB           (AABB& aabb) const;
@@ -173,14 +173,14 @@ public:
   void      SetPosition               (CFloat3& vPos, ESpace eTransform = S_RELATIVE);
 
   void      SetTransform              (const float4x4& matTransform, ESpace eTransform = S_RELATIVE);
-  void      SetTransform              (const float3* pScaling, const quaternion* pRotation, const float3* pTranslation); // ²ÎÊıÎªNULLÔòÊ¹ÓÃ×ÔÉíµÄ·ÖÁ¿
-  void      SetTransformR             (const float3* pScaling, const float3* pEuler, const float3* pTranslation); // ²ÎÊıÎªNULLÔòÊ¹ÓÃ×ÔÉíµÄ·ÖÁ¿
+  void      SetTransform              (const float3* pScaling, const quaternion* pRotation, const float3* pTranslation); // å‚æ•°ä¸ºNULLåˆ™ä½¿ç”¨è‡ªèº«çš„åˆ†é‡
+  void      SetTransformR             (const float3* pScaling, const float3* pEuler, const float3* pTranslation); // å‚æ•°ä¸ºNULLåˆ™ä½¿ç”¨è‡ªèº«çš„åˆ†é‡
 
   GXBOOL    SetDirection              (CFloat3& vDir, CFloat3& vUp/*, ESpace eTransform = S_RELATIVE*/);
   GVNode*   FindChild                 (GVNode* pStart, GXLPCSTR szName);
   GVNode*   SetParent                 (GVNode* pNewParent, bool bLast = false);
-  GXHRESULT SetMaterialInst           (GXMaterialInst* pMtlInst, GXDWORD dwFlags);  // ²Î¿¼ NODEMTL_* ±êÖ¾
-  GXHRESULT SetMaterialInstFromFileW  (GXGraphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags);  // ²Î¿¼ NODEMTL_* ±êÖ¾
+  GXHRESULT SetMaterialInst           (GXMaterialInst* pMtlInst, GXDWORD dwFlags);  // å‚è€ƒ NODEMTL_* æ ‡å¿—
+  GXHRESULT SetMaterialInstFromFileW  (GXGraphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags);  // å‚è€ƒ NODEMTL_* æ ‡å¿—
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef    ();
@@ -195,8 +195,8 @@ public:
   virtual GXBOOL    RayTrace                  (const Ray& ray, NODERAYTRACE* pRayTrace);
   virtual GXHRESULT SetMaterialInstDirect     (GXMaterialInst* pMtlInst);
   virtual GXHRESULT GetMaterialInst           (GXMaterialInst** ppMtlInst);
-  virtual GXHRESULT GetMaterialInstFilenameW  (clStringW* pstrFilename); // ²ÎÊı¿ÉÒÔÎªNULL, ´ËÊ±ÓÃÀ´Ì½²âÊÇ·ñº¬ÓĞ²ÄÖÊ, ·µ»ØÖµ¾ö¶¨ÁËÊÇ·ñº¬ÓĞ²ÄÖÊ
-  virtual GXHRESULT Clone                     (GVNode** ppClonedNode/*, GXBOOL bRecursive*/); // Ğ´µÄ²»ºÃ£¬ÒªÖØ¹¹£¬1.¼Ì³ĞÀàÓ¦¸Ã¿ÉÒÔÖ±½ÓÊ¹ÓÃ»ùÀàµÄcloneº¯Êı£¬¶ÔÀ©Õ¹µÄ³ÉÔ±±äÁ¿½øĞĞ´¦Àí 2.Ö§³Öµİ¹é
+  virtual GXHRESULT GetMaterialInstFilenameW  (clStringW* pstrFilename); // å‚æ•°å¯ä»¥ä¸ºNULL, æ­¤æ—¶ç”¨æ¥æ¢æµ‹æ˜¯å¦å«æœ‰æè´¨, è¿”å›å€¼å†³å®šäº†æ˜¯å¦å«æœ‰æè´¨
+  virtual GXHRESULT Clone                     (GVNode** ppClonedNode/*, GXBOOL bRecursive*/); // å†™çš„ä¸å¥½ï¼Œè¦é‡æ„ï¼Œ1.ç»§æ‰¿ç±»åº”è¯¥å¯ä»¥ç›´æ¥ä½¿ç”¨åŸºç±»çš„cloneå‡½æ•°ï¼Œå¯¹æ‰©å±•çš„æˆå‘˜å˜é‡è¿›è¡Œå¤„ç† 2.æ”¯æŒé€’å½’
 
   virtual GXHRESULT SaveFileA(GXLPCSTR szFilename);
   virtual GXHRESULT SaveFileW(GXLPCWSTR szFilename);
@@ -208,7 +208,7 @@ public:
   inline GXDWORD          GetFlags          () const;
   inline const AABB&      GetLocalAABB      () const;
   inline GXVOID           SetLocalAABB      (const AABB& aabb);
-  inline GXVOID           GetRelativeAABB   (AABB& aabb) const; // ×Ó½ÚµãÔÚ¸¸¿Õ¼äµÄAABB
+  inline GXVOID           GetRelativeAABB   (AABB& aabb) const; // å­èŠ‚ç‚¹åœ¨çˆ¶ç©ºé—´çš„AABB
   inline float4x4         GetRelativeMatrix () const;
   inline CFloat4x4&       GetAbsoluteMatrix () const;
   inline GXDWORD          GetClass          () const;
@@ -220,7 +220,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 //
 //  GVNode::Release():
-//    ÔÚ³ÌĞòÍË³öÊ±,Èç¹ûÃ»ÓĞÊÍ·ÅÕâ¸ö½Úµã,Ëæºó»áÔÚÊÍ·Å¸ù½ÚµãµÄ±éÀúÖĞÊÍ·Å,ËùÒÔ²»»áÔì³ÉÄÚ´æĞ¹Â©.
+//    åœ¨ç¨‹åºé€€å‡ºæ—¶,å¦‚æœæ²¡æœ‰é‡Šæ”¾è¿™ä¸ªèŠ‚ç‚¹,éšåä¼šåœ¨é‡Šæ”¾æ ¹èŠ‚ç‚¹çš„éå†ä¸­é‡Šæ”¾,æ‰€ä»¥ä¸ä¼šé€ æˆå†…å­˜æ³„æ¼.
 //
 //////////////////////////////////////////////////////////////////////////
 //
@@ -251,7 +251,7 @@ GXVOID GVNode::SetLocalAABB(const AABB& aabb)
   m_aabbLocal = aabb;
 }
 
-GXVOID GVNode::GetRelativeAABB(AABB& aabb) const // ×Ó½ÚµãÔÚ¸¸¿Õ¼äµÄAABB
+GXVOID GVNode::GetRelativeAABB(AABB& aabb) const // å­èŠ‚ç‚¹åœ¨çˆ¶ç©ºé—´çš„AABB
 {
   //const float4& v4 = m_matRelative.GetRow(3);
   //float3 vTranslation(v4.x, v4.y, v4.z);

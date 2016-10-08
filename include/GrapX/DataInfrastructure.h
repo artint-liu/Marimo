@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+ï»¿#ifndef _DEV_DISABLE_UI_CODE
 #ifndef _GX_DATA_INFRASTRUCTURE_H_
 #define _GX_DATA_INFRASTRUCTURE_H_
 class GUnknown;
@@ -19,7 +19,7 @@ namespace GXUI
   enum DataAction
   {
     DA_Change,
-    DA_PotentialChange,   // TODO: È¥µôÕâ¸ö
+    DA_PotentialChange,   // TODO: å»æ‰è¿™ä¸ª
     DA_Insert,
     DA_Delete,
   };
@@ -30,7 +30,7 @@ namespace GXUI
     const IDataPool*   pOccurDP;
     DataAction        eAction;
     GXLPVOID          lpData;
-    GXINT             nIndex;     // ArrayDataPoolÒ»¶¨ÓĞ, ÆäËû²»Ò»¶¨×ÜÊÇÓĞĞ§
+    GXINT             nIndex;     // ArrayDataPoolä¸€å®šæœ‰, å…¶ä»–ä¸ä¸€å®šæ€»æ˜¯æœ‰æ•ˆ
   };
   typedef REFLECTKNOCK*        LPREFLECTKNOCK;
   typedef const REFLECTKNOCK*  LPCREFLECTKNOCK;
@@ -59,7 +59,7 @@ namespace GXUI
     return m_hWndOwner;
   }
   //////////////////////////////////////////////////////////////////////////
-  // Êı¾İÊÊÅäÆ÷
+  // æ•°æ®é€‚é…å™¨
   class IDataAdapter : public IDataOutlet
   {
   public:
@@ -73,7 +73,7 @@ namespace GXUI
   //  //typedef clvector<GXHWND>  WndHandleArray;
   //protected:
   //private:
-  //  //WndHandleArray  m_aHandles; // TODO:Ò»¸öContainerÖ»ÊôÓÚÒ»¸öWnd
+  //  //WndHandleArray  m_aHandles; // TODO:ä¸€ä¸ªContaineråªå±äºä¸€ä¸ªWnd
   //public:
   //  //GXHRESULT RegisterWnd   (GXHWND hWnd);
   //  //GXHRESULT UnregisterWnd (GXHWND hWnd);
@@ -87,7 +87,7 @@ namespace GXUI
   //  typedef clvector<IDataOutlet*> OutletArray;
   //protected:
   //  size_t      m_uSelfSize;
-  //  OutletArray* m_pOutlets;  // ÓÃÖ¸ÕëÊÇÒòÎªvectorÔÚlibºÍappÖĞ´´½¨ĞŞ¸ÄÏú»Ù,×îºóÎŞ·¨ÕıÈ·Î¬»¤ÄÚ´æ¶ø³ö´í
+  //  OutletArray* m_pOutlets;  // ç”¨æŒ‡é’ˆæ˜¯å› ä¸ºvectoråœ¨libå’Œappä¸­åˆ›å»ºä¿®æ”¹é”€æ¯,æœ€åæ— æ³•æ­£ç¡®ç»´æŠ¤å†…å­˜è€Œå‡ºé”™
   //private:
   //public:
   //  GXSTDINTERFACE(GXHRESULT AddRef  ());
@@ -112,12 +112,12 @@ namespace GXUI
   //  //typedef clvector<DataOutlet*> OutletArray;
   //protected:
   //  //size_t      m_uSelfSize;
-  //  //OutletArray* m_pOutlets;  // ÓÃÖ¸ÕëÊÇÒòÎªvectorÔÚlibºÍappÖĞ´´½¨ĞŞ¸ÄÏú»Ù,×îºóÎŞ·¨ÕıÈ·Î¬»¤ÄÚ´æ¶ø³ö´í
+  //  //OutletArray* m_pOutlets;  // ç”¨æŒ‡é’ˆæ˜¯å› ä¸ºvectoråœ¨libå’Œappä¸­åˆ›å»ºä¿®æ”¹é”€æ¯,æœ€åæ— æ³•æ­£ç¡®ç»´æŠ¤å†…å­˜è€Œå‡ºé”™
   //  _TCls*        m_pData;
-  //  size_t        m_uCapacity;  // Êı×éÈİÁ¿
-  //  size_t        m_uSize;      // Êı¾İ´óĞ¡
-  //  size_t        m_uCursor;    // ÓÎ±ê
-  //  const size_t  m_uIncrease;  // ÔöÁ¿
+  //  size_t        m_uCapacity;  // æ•°ç»„å®¹é‡
+  //  size_t        m_uSize;      // æ•°æ®å¤§å°
+  //  size_t        m_uCursor;    // æ¸¸æ ‡
+  //  const size_t  m_uIncrease;  // å¢é‡
   //private:
   //  size_t GrowTo(size_t uNewSize)
   //  {
@@ -224,7 +224,7 @@ namespace GXUI
   //    return m_pData[m_uSize - 1];
   //  }
 
-  //  _TCls& operator[](int idx)  // TODO: Õâ¸ö¸ÄÎªconstÏŞÖÆ
+  //  _TCls& operator[](int idx)  // TODO: è¿™ä¸ªæ”¹ä¸ºconsté™åˆ¶
   //  {
   //    ASSERT(idx < (int)m_uSize);
   //    Knock(NULL, DA_PotentialChange, &m_pData[idx], idx);
@@ -238,17 +238,17 @@ namespace GXUI
   public:
     struct GETSTRW
     {
-      // ²ÎÊıÖµ
-      GXINT     item;       // list item Ë÷Òı
-      GXINT     element;    // rich listÓĞĞ§£¬item ÖĞ¿Ø¼şµÄË÷Òı
-      GXLPCWSTR name;       // rich listÓĞĞ§£¬item ÖĞ¿Ø¼şÃû
-      GXHWND    hItemWnd;   // rich listÓĞĞ§£¬item ÖĞ¿Ø¼ş¾ä±ú
-      GXRECT    rect;       // itemµÄ´óĞ¡£¬list box client¿Õ¼äµÄ×ø±ê
+      // å‚æ•°å€¼
+      GXINT     item;       // list item ç´¢å¼•
+      GXINT     element;    // rich listæœ‰æ•ˆï¼Œitem ä¸­æ§ä»¶çš„ç´¢å¼•
+      GXLPCWSTR name;       // rich listæœ‰æ•ˆï¼Œitem ä¸­æ§ä»¶å
+      GXHWND    hItemWnd;   // rich listæœ‰æ•ˆï¼Œitem ä¸­æ§ä»¶å¥æŸ„
+      GXRECT    rect;       // itemçš„å¤§å°ï¼Œlist box clientç©ºé—´çš„åæ ‡
 
-      // rich list ¿Ø¼şÖĞ£º
-      // hItemWndÎªNULLÊ±±íÊ¾ĞèÒª»ñµÃÄ¬ÈÏ×Ö·û´®£¬Ò»°ã³öÏÖÔÚLB_GETTEXTÏûÏ¢ÖĞ
+      // rich list æ§ä»¶ä¸­ï¼š
+      // hItemWndä¸ºNULLæ—¶è¡¨ç¤ºéœ€è¦è·å¾—é»˜è®¤å­—ç¬¦ä¸²ï¼Œä¸€èˆ¬å‡ºç°åœ¨LB_GETTEXTæ¶ˆæ¯ä¸­
 
-      // ·µ»ØÖµ
+      // è¿”å›å€¼
       MOVariable  VarString;
       clStringW   sString;
     };
@@ -264,16 +264,16 @@ namespace GXUI
 
     //virtual GXHRESULT Knock         (GXHWND hSender, GXLPVOID lpData) const;
 
-    // ÒªÖ§³ÖszName == NULL
+    // è¦æ”¯æŒszName == NULL
 //#ifdef ENABLE_DATAPOOL_WATCHER
 //    GXSTDINTERFACE(GXBOOL     IsAutoKnock       () GXCONST);
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     GXSTDINTERFACE(GXSIZE_T   GetCount          () GXCONST);
-    //GXSTDINTERFACE(GXBOOL     IsFixedHeight     () GXCONST);  // MultiColumn ÊôĞÔÊ±Õâ¸öÎŞĞ§,ÈÏÎªÊÇÍ³Ò»¸ß¶È
+    //GXSTDINTERFACE(GXBOOL     IsFixedHeight     () GXCONST);  // MultiColumn å±æ€§æ—¶è¿™ä¸ªæ— æ•ˆ,è®¤ä¸ºæ˜¯ç»Ÿä¸€é«˜åº¦
     //GXSTDINTERFACE(GXINT      GetItemHeight     (GXINT nIdx) GXCONST); 
     //GXSTDINTERFACE(GXBOOL GetItemStatistics (GXINT nIdx, LISTBOXITEMSTAT* pStatictist) const);
     GXSTDINTERFACE(GXSIZE_T   AddStringW        (GXLPCWSTR szName, GXLPCWSTR lpString));
-    GXSTDINTERFACE(GXBOOL     GetStringW        (GETSTRW* pItemStrDesc));   // ·µ»ØTRUE´ú±íList½«½øĞĞÄ¬ÈÏµÄÏÔÊ¾²Ù×÷£¬ÈçListSimpleÖĞ»æÖÆ×Ö·û´®£¬ListCustomizeÖĞSetWindowText£¬·µ»Øfalse±íÊ¾GetStringWÒÑ¾­×Ô¼º´¦ÀíÁËÏÔÊ¾·½Ê½¡£
+    GXSTDINTERFACE(GXBOOL     GetStringW        (GETSTRW* pItemStrDesc));   // è¿”å›TRUEä»£è¡¨Listå°†è¿›è¡Œé»˜è®¤çš„æ˜¾ç¤ºæ“ä½œï¼Œå¦‚ListSimpleä¸­ç»˜åˆ¶å­—ç¬¦ä¸²ï¼ŒListCustomizeä¸­SetWindowTextï¼Œè¿”å›falseè¡¨ç¤ºGetStringWå·²ç»è‡ªå·±å¤„ç†äº†æ˜¾ç¤ºæ–¹å¼ã€‚
     //GXSTDINTERFACE(GXBOOL     SetItemData       (GETSTRW* pItemStrDesc, GXLPARAM lParam));
     //GXSTDINTERFACE(GXLPARAM   GetItemData       (GETSTRW* pItemStrDesc));
     GXSTDINTERFACE(MOVariable GetVariable       ());

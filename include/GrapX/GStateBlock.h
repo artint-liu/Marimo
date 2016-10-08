@@ -1,4 +1,4 @@
-#ifndef _GRAPHX_STATE_BLOCK_H_
+﻿#ifndef _GRAPHX_STATE_BLOCK_H_
 #define _GRAPHX_STATE_BLOCK_H_
 
 class GRasterizerState : public GResource

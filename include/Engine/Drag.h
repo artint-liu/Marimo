@@ -1,9 +1,9 @@
-#ifndef _EDITOR_UTILITY_DRAG_H_
+ï»¿#ifndef _EDITOR_UTILITY_DRAG_H_
 #define _EDITOR_UTILITY_DRAG_H_
 
 namespace EditorUtility
 {
-  // TODO:¸ÉµôÕâ¸ö£¡
+  // TODO:å¹²æ‰è¿™ä¸ªï¼
   //struct DRAG
   //{
   //  GXDWORD	dwStartTime;	//	Start dragging time
@@ -42,33 +42,33 @@ namespace EditorUtility
   // 3     4
   // 5  6  7
 
-  // ÓÉÒ»¸öRECTÉú³É²Ù×÷Õâ¸öRECTµÄ°Ë¸ö¾ä±úÇøÓò
+  // ç”±ä¸€ä¸ªRECTç”Ÿæˆæ“ä½œè¿™ä¸ªRECTçš„å…«ä¸ªå¥æŸ„åŒºåŸŸ
   void GAMEENGINE_API GenerateRectHandles (GXLPCRECT lprc, int nHandleSize, GXLPREGN rgHandles);
 
-  // µãRectHandlesÉÏµÄĞü¸¡²âÊÔ, Ã»ÓĞÔò·µ»Ø-1
+  // ç‚¹RectHandlesä¸Šçš„æ‚¬æµ®æµ‹è¯•, æ²¡æœ‰åˆ™è¿”å›-1
   int  GAMEENGINE_API HitTestRectHandles  (GXLPCREGN rgHandles, GXLPCPOINT pt);
 
-  //// Èç¹ûµãÔÚRectHandlesÉÏĞü¸¡
+  //// å¦‚æœç‚¹åœ¨RectHandlesä¸Šæ‚¬æµ®
   //int  GAMEENGINE_API DragRectHandles     ();
 
   //////////////////////////////////////////////////////////////////////////
 
-  // »Øµ÷ĞÎÊ½µÄÍÏ¶¯´¦Àí
-  // ptCursor ÊÇ½øÈëÍÏ¶¯×´Ì¬Ê±Êó±êµÄÎ»ÖÃ
-  // ptOrigin ÊÇÓÃ»§¶¨ÒåµÄĞèÒªÍÏ¶¯ÎïÌåµÄÎ»ÖÃ
-  // ptDelta ÊÇÍÏ¶¯²úÉúµÄÆ«ÒÆ£¬Õâ¸öÆ«ÒÆÊÇÏà¶ÔÓÚptCursorµÄ£¬²»ÊÇÏà¶ÔÉÏÒ»´Î»Øµ÷µÄÎ»ÖÃ
+  // å›è°ƒå½¢å¼çš„æ‹–åŠ¨å¤„ç†
+  // ptCursor æ˜¯è¿›å…¥æ‹–åŠ¨çŠ¶æ€æ—¶é¼ æ ‡çš„ä½ç½®
+  // ptOrigin æ˜¯ç”¨æˆ·å®šä¹‰çš„éœ€è¦æ‹–åŠ¨ç‰©ä½“çš„ä½ç½®
+  // ptDelta æ˜¯æ‹–åŠ¨äº§ç”Ÿçš„åç§»ï¼Œè¿™ä¸ªåç§»æ˜¯ç›¸å¯¹äºptCursorçš„ï¼Œä¸æ˜¯ç›¸å¯¹ä¸Šä¸€æ¬¡å›è°ƒçš„ä½ç½®
   typedef GXBOOL (GXCALLBACK *DragProc)(GXLPCPOINT ptDelta, GXLPCPOINT ptOrigin, GXLPARAM lParam);
   GXLRESULT GAMEENGINE_API TrackDragAction(GXLPCPOINT ptCursor, GXLPCPOINT ptOrigin, DragProc lpDragFunc, GXLPARAM lParam);
 
-  // ½Ó¿ÚĞÎÊ½µÄÍÏ¶¯´¦Àí
+  // æ¥å£å½¢å¼çš„æ‹–åŠ¨å¤„ç†
   class GAMEENGINE_DLL CDrag
   {
   public:
     GXLRESULT Track(GXLPCPOINT ptCursor, GXLPCPOINT ptOrigin);
-    virtual GXBOOL OnDrag(GXLPCPOINT ptAbsoluteDelta, GXLPCPOINT ptOrigin) = NULL;  // ptAbsoluteDeltaÊÇµ±Ç°CursorÎ»ÖÃÓëTrack¿ªÊ¼Ê±CursorÎ»ÖÃÖ®²î
+    virtual GXBOOL OnDrag(GXLPCPOINT ptAbsoluteDelta, GXLPCPOINT ptOrigin) = NULL;  // ptAbsoluteDeltaæ˜¯å½“å‰Cursorä½ç½®ä¸Trackå¼€å§‹æ—¶Cursorä½ç½®ä¹‹å·®
   };
 
-  // Lambda±í´ïÊ½µÄÍÏ¶¯
+  // Lambdaè¡¨è¾¾å¼çš„æ‹–åŠ¨
   template<class _Fn>
   GXLRESULT TrackDragAction(GXLPCPOINT ptCursor, GXLPCPOINT ptOrigin, _Fn DragFunc)
   {

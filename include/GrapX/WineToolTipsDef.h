@@ -1,4 +1,4 @@
-#define INFOTIPSIZE 1024
+ï»¿#define INFOTIPSIZE 1024
 
 #define TTN_FIRST               (0U-520U)       // tooltips
 #define TTN_LAST                (0U-549U)
@@ -8,7 +8,7 @@
 #define IDI_TT_ERROR_SM      1001
 //////////////////////////////////////////////////////////////////////////
 //
-// ÒÔÏÂ´Ó Visual Studio µÄ Commctrl.h ¸´ÖÆ¹ıÀ´µÄ ToolTips ¿Ø¼şÏà¹Ø¶¨Òå
+// ä»¥ä¸‹ä» Visual Studio çš„ Commctrl.h å¤åˆ¶è¿‡æ¥çš„ ToolTips æ§ä»¶ç›¸å…³å®šä¹‰
 //
 //#define NOTOOLTIPS
 #ifndef NOTOOLTIPS

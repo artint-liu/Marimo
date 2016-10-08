@@ -1,4 +1,4 @@
-#ifndef _GRAPH_X_GRAPHICS_H_
+ï»¿#ifndef _GRAPH_X_GRAPHICS_H_
 #define _GRAPH_X_GRAPHICS_H_
 
 class GXImage;
@@ -29,11 +29,11 @@ struct MTLFILEPARAMDESC;
 enum GXPlaformIdentity;
 //enum GXPRIMITIVETYPE;
 
-// GXGRAPHICSPARAM µÄ±êÖ¾Î»
+// GXGRAPHICSPARAM çš„æ ‡å¿—ä½
 //enum GXGRAPHICSPARAMFLAG
 //{
-//    GPF_VSYNC    = 0x00000001,    // ´¹Ö±Í¬²½
-//    GPF_SIZEABLE = 0x00000002,    // ¿É¸Ä±ä´°¿ÚµÄ´óĞ¡³ß´ç
+//    GPF_VSYNC    = 0x00000001,    // å‚ç›´åŒæ­¥
+//    GPF_SIZEABLE = 0x00000002,    // å¯æ”¹å˜çª—å£çš„å¤§å°å°ºå¯¸
 //};
 
 //struct GXIMAGE_LOAD_INFO
@@ -50,38 +50,38 @@ enum GXPlaformIdentity;
 
 //struct GXGRAPHICSPARAM
 //{
-//    GXUINT                cbSize;                // ½á¹¹Ìå´óĞ¡, ÓÃÀ´Çø·ÖºóĞøµÄ°æ±¾
-//    GXUINT                BackBufferWidth;    // ºóÌ¨»º³åµÄ¿í¶È
-//    GXUINT                BackBufferHeight;    // ºóÌ¨»º³åµÄ¸ß¶È
-//    D3DFORMAT           BackBufferFormat;    // ºóÌ¨»º³åµÄ¸ñÊ½
-//    GXUINT                BackBufferCount;    // ºóÌ¨»º³åÊıÁ¿
-//    D3DFORMAT           DepthStencilFormat;    // Éî¶È»º³å¸ñÊ½, Õâ¸öÊÇÒ»¶¨Òª´´½¨µÄ
-//    GXDWORD                dwFlags;            // ±êÖ¾Î», ²Î¿¼ GXGRAPHICSPARAMFLAG
+//    GXUINT                cbSize;                // ç»“æ„ä½“å¤§å°, ç”¨æ¥åŒºåˆ†åç»­çš„ç‰ˆæœ¬
+//    GXUINT                BackBufferWidth;    // åå°ç¼“å†²çš„å®½åº¦
+//    GXUINT                BackBufferHeight;    // åå°ç¼“å†²çš„é«˜åº¦
+//    D3DFORMAT           BackBufferFormat;    // åå°ç¼“å†²çš„æ ¼å¼
+//    GXUINT                BackBufferCount;    // åå°ç¼“å†²æ•°é‡
+//    D3DFORMAT           DepthStencilFormat;    // æ·±åº¦ç¼“å†²æ ¼å¼, è¿™ä¸ªæ˜¯ä¸€å®šè¦åˆ›å»ºçš„
+//    GXDWORD                dwFlags;            // æ ‡å¿—ä½, å‚è€ƒ GXGRAPHICSPARAMFLAG
 //};
 
-// GXImage ºÍ GTexture µÄ¹ØÏµ:
-// 1. GTexture Ö±½ÓÒıÓÃD3DTexture, GXImageÒıÓÃ GTexture
-// 2. GTexture ÊÇ´´½¨µÄÔ­Ê¼ÎÆÀí, ÓÉÎÄ¼ş´´½¨Ê±²»»á±»¸ü¸Ä, GXImage ÓÉÎÄ¼ş´´½¨Ê±,Èç¹û±»×÷Îª»æÍ¼Ä¿±ê³öÏÖ,
-//        Ôò¸´ÖÆÔ­À´µÄÎÊÌâ,ÖØĞÂ´´½¨ÎªRenderTargetÊôĞÔµÄGTexture
-// 3. GTexture Æ«ÏòÓÚĞ§ÂÊ, GXImageÆ«ÏòÓÚÊµÓÃ
+// GXImage å’Œ GTexture çš„å…³ç³»:
+// 1. GTexture ç›´æ¥å¼•ç”¨D3DTexture, GXImageå¼•ç”¨ GTexture
+// 2. GTexture æ˜¯åˆ›å»ºçš„åŸå§‹çº¹ç†, ç”±æ–‡ä»¶åˆ›å»ºæ—¶ä¸ä¼šè¢«æ›´æ”¹, GXImage ç”±æ–‡ä»¶åˆ›å»ºæ—¶,å¦‚æœè¢«ä½œä¸ºç»˜å›¾ç›®æ ‡å‡ºç°,
+//        åˆ™å¤åˆ¶åŸæ¥çš„é—®é¢˜,é‡æ–°åˆ›å»ºä¸ºRenderTargetå±æ€§çš„GTexture
+// 3. GTexture åå‘äºæ•ˆç‡, GXImageåå‘äºå®ç”¨
 
-// ½«À´µÄÃüÃû¹æÔò,GX---ÃæÏò¸ß¼¶º¯Êı, G---ÃæÏòD3DµÄÖ±½Óº¯Êı,GXGraphics³ıÍâ
+// å°†æ¥çš„å‘½åè§„åˆ™,GX---é¢å‘é«˜çº§å‡½æ•°, G---é¢å‘D3Dçš„ç›´æ¥å‡½æ•°,GXGraphicsé™¤å¤–
 
 //////////////////////////////////////////////////////////////////////////
 class GXGraphics : public GResource
 {
 public:
     GXGraphics() : GResource(0, RESTYPE_GRAPHICS){}
-    // ½Ó¿ÚÊµÏÖ
+    // æ¥å£å®ç°
     GXSTDINTERFACE(GXHRESULT AddRef());
     GXSTDINTERFACE(GXHRESULT Release());
 
-    // Éè±¸ÊÂ¼ş
+    // è®¾å¤‡äº‹ä»¶
     GXSTDINTERFACE(GXHRESULT Invoke             (GRESCRIPTDESC* pDesc));
     GXSTDINTERFACE(void      GetPlatformID      (GXPlaformIdentity* pIdentity));
 
 
-    // ¼¤»îº¯Êı,Ö®ºóµÄËùÓĞD3D²Ù×÷±ØĞëÓÉGraphics½Ó¿ÚÊµÏÖ
+    // æ¿€æ´»å‡½æ•°,ä¹‹åçš„æ‰€æœ‰D3Dæ“ä½œå¿…é¡»ç”±Graphicsæ¥å£å®ç°
     GXSTDINTERFACE(GXBOOL    Activate           (GXBOOL bActive));
     GXSTDINTERFACE(GXHRESULT Begin              ());
     GXSTDINTERFACE(GXHRESULT End                ());
@@ -98,7 +98,7 @@ public:
     GXSTDINTERFACE(GXHRESULT SetPrimitiveV      (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0));
     GXSTDINTERFACE(GXHRESULT SetPrimitiveVI     (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0));
 
-    // ÀíÂÛÉÏGXGraphicsÃ»ÓĞ Set** Ààº¯Êı, SetTexture ÀıÍâ, ÒòÎª SetTexture Í¬Ê±¼ç¸ºÕâÇå¿ÕÖ¸¶¨Éè±¸ÎÆÀíµÄÈÎÎñ
+    // ç†è®ºä¸ŠGXGraphicsæ²¡æœ‰ Set** ç±»å‡½æ•°, SetTexture ä¾‹å¤–, å› ä¸º SetTexture åŒæ—¶è‚©è´Ÿè¿™æ¸…ç©ºæŒ‡å®šè®¾å¤‡çº¹ç†çš„ä»»åŠ¡
     GXSTDINTERFACE(GXHRESULT SetTexture           (GTextureBase* pTexture, GXUINT uStage = 0));
     GXSTDINTERFACE(GXHRESULT SetRasterizerState   (GRasterizerState* pRasterizerState));
     GXSTDINTERFACE(GXHRESULT SetBlendState        (GBlendState* pBlendState));
@@ -110,18 +110,18 @@ public:
     GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXINT BaseVertexIndex, const GXUINT MinIndex, const GXUINT NumVertices, const GXUINT StartIndex, const GXUINT PrimitiveCount));
 
     //////////////////////////////////////////////////////////////////////////
-    // µÍ¼¶º¯Êı
+    // ä½çº§å‡½æ•°
     // GTexture
 
-    // CreateTexture Ö§³Ö TEXSIZE_* ×åµÄ²ÎÊı×÷ÎªÎÆÀíµÄ¿í»ò¸ß.
-    // Èç¹ûszName²»ÎªNULL, ·µ»ØÖµÎª0Ê±±íÊ¾µÚÒ»´Î´´½¨, >1Ê±ÊÇÖØ¸´×ÊÔ´±»ÒıÓÃµÄ´ÎÊı
+    // CreateTexture æ”¯æŒ TEXSIZE_* æ—çš„å‚æ•°ä½œä¸ºçº¹ç†çš„å®½æˆ–é«˜.
+    // å¦‚æœszNameä¸ä¸ºNULL, è¿”å›å€¼ä¸º0æ—¶è¡¨ç¤ºç¬¬ä¸€æ¬¡åˆ›å»º, >1æ—¶æ˜¯é‡å¤èµ„æºè¢«å¼•ç”¨çš„æ¬¡æ•°
 
     // 2D Texture
     GXSTDINTERFACE(GXHRESULT CreateTexture(
-      GTexture**  ppTexture,      // ·µ»ØµÄÎÆÀíÖ¸Õë
-      GXLPCSTR    szName,         // ×ÊÔ´Ãû×Ö, Èç¹ûÎªNULL, ÔòÄ¬ÈÏË½ÓĞÃû×Ö, ·ñÔò°´ÕÕÓÃ»§Ö¸¶¨ÃüÃû, 
-                                  // Èç¹ûÒÑ´æÔÚ¸ÃÃû×Ö,ÔòÖ±½Ó·µ»Ø¶ÔÏó,ÒıÓÃ¼ÓÒ», ºóÃæµÄ²ÎÊı½«±»ºöÂÔ
-      GXUINT      Width,          // ¿í¶ÈºÍ¸ß¶È, Ö§³Ö TEXSIZE_* µÄ¶¨Òå
+      GTexture**  ppTexture,      // è¿”å›çš„çº¹ç†æŒ‡é’ˆ
+      GXLPCSTR    szName,         // èµ„æºåå­—, å¦‚æœä¸ºNULL, åˆ™é»˜è®¤ç§æœ‰åå­—, å¦åˆ™æŒ‰ç…§ç”¨æˆ·æŒ‡å®šå‘½å, 
+                                  // å¦‚æœå·²å­˜åœ¨è¯¥åå­—,åˆ™ç›´æ¥è¿”å›å¯¹è±¡,å¼•ç”¨åŠ ä¸€, åé¢çš„å‚æ•°å°†è¢«å¿½ç•¥
+      GXUINT      Width,          // å®½åº¦å’Œé«˜åº¦, æ”¯æŒ TEXSIZE_* çš„å®šä¹‰
       GXUINT      Height,
       GXUINT      MipLevels, 
       GXFormat    Format, 
@@ -147,7 +147,7 @@ public:
     GXSTDINTERFACE(GXHRESULT CreateTexture3D(
       GTexture3D**  ppTexture, 
       GXLPCSTR      szName,
-      GXUINT        Width,          // ¿í¶È,¸ß¶ÈºÍÉî¶È
+      GXUINT        Width,          // å®½åº¦,é«˜åº¦å’Œæ·±åº¦
       GXUINT        Height,
       GXUINT        Depth,
       GXUINT        MipLevels, 
@@ -199,13 +199,13 @@ public:
 
     // GPrimitive
     GXSTDINTERFACE(GXHRESULT CreatePrimitiveV(
-      GPrimitiveV**       pPrimitive,           // ·µ»Ø¶ÔÏó
-      GXLPCSTR            szName,               // ×ÊÔ´Ãû, NULLÎªÄäÃû¶ÔÏó, ¾ßÃû¶ÔÏó½öÔÚµÚÒ»´Î´´½¨Ê±Ê¹ÓÃÏÂÃæµÄ²ÎÊı
-      LPCGXVERTEXELEMENT  pVertexDecl,          // ¶¥µãÉùÃ÷
-      GXDWORD             ResUsage,             // ×ÊÔ´ÀàĞÍ/ÊôĞÔ
-      GXUINT              uVertexCount,         // ¶¥µãÊı
-      GXUINT              uVertexStride = 0,    // Ã¿¸ö¶¥µãµÄ×Ö½ÚÊı
-      GXLPVOID            pVertInitData = NULL  // ³õÊ¼»¯Êı¾İ
+      GPrimitiveV**       pPrimitive,           // è¿”å›å¯¹è±¡
+      GXLPCSTR            szName,               // èµ„æºå, NULLä¸ºåŒ¿åå¯¹è±¡, å…·åå¯¹è±¡ä»…åœ¨ç¬¬ä¸€æ¬¡åˆ›å»ºæ—¶ä½¿ç”¨ä¸‹é¢çš„å‚æ•°
+      LPCGXVERTEXELEMENT  pVertexDecl,          // é¡¶ç‚¹å£°æ˜
+      GXDWORD             ResUsage,             // èµ„æºç±»å‹/å±æ€§
+      GXUINT              uVertexCount,         // é¡¶ç‚¹æ•°
+      GXUINT              uVertexStride = 0,    // æ¯ä¸ªé¡¶ç‚¹çš„å­—èŠ‚æ•°
+      GXLPVOID            pVertInitData = NULL  // åˆå§‹åŒ–æ•°æ®
       ));
 
     GXSTDINTERFACE(GXHRESULT CreatePrimitiveVI(
@@ -213,11 +213,11 @@ public:
       GXLPCSTR            szName, 
       LPCGXVERTEXELEMENT  pVertexDecl,
       GXDWORD             ResUsage, 
-      GXUINT              uIndexCount,          // Ë÷ÒıÊıÁ¿
+      GXUINT              uIndexCount,          // ç´¢å¼•æ•°é‡
       GXUINT              uVertexCount,
       GXUINT              uVertexStride = 0,
-      GXLPCVOID           pIdxInitData = NULL,  // Ë÷Òı³õÊ¼»¯Êı¾İ
-      GXLPCVOID           pVertInitData = NULL  // ¶¥µãºÍË÷Òı³õÊ¼»¯Êı¾İ±ØĞëÍ¬Ê±ÓĞĞ§»òÕßÍ¬Ê±ÎªNULL.
+      GXLPCVOID           pIdxInitData = NULL,  // ç´¢å¼•åˆå§‹åŒ–æ•°æ®
+      GXLPCVOID           pVertInitData = NULL  // é¡¶ç‚¹å’Œç´¢å¼•åˆå§‹åŒ–æ•°æ®å¿…é¡»åŒæ—¶æœ‰æ•ˆæˆ–è€…åŒæ—¶ä¸ºNULL.
       ));
 
     // GSahder
@@ -234,12 +234,12 @@ public:
 
     GXSTDINTERFACE(GXHRESULT    CreateVertexDeclaration    (GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement));
     //////////////////////////////////////////////////////////////////////////
-    // ¸ß¼¶º¯Êı
+    // é«˜çº§å‡½æ•°
 
     // GXCanvas
     GXSTDINTERFACE(GXCanvas*    LockCanvas                 (GXImage* pImage, GXCONST LPREGN lpRegn, GXDWORD dwFlags));
 
-    // Èç¹û pImage Îª NULL, ÔòºöÂÔ DepthStencil ²ÎÊı
+    // å¦‚æœ pImage ä¸º NULL, åˆ™å¿½ç•¥ DepthStencil å‚æ•°
     GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
     GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXImage* pImage, GTexture* pDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
 
@@ -254,8 +254,8 @@ public:
     GXSTDINTERFACE(GXHRESULT    CreateSamplerState         (GSamplerState** ppSamplerState));
 
     // GXImage
-    // TODO: ¼´Ê¹´´½¨Ê§°Ü,Ò²»á·µ»ØÒ»¸öÄ¬ÈÏÍ¼Æ¬
-    // CreateImage Ö§³Ö TEXSIZE_* ×åµÄ²ÎÊıÖ¸¶¨ImageµÄ¿í»òÕß¸ß
+    // TODO: å³ä½¿åˆ›å»ºå¤±è´¥,ä¹Ÿä¼šè¿”å›ä¸€ä¸ªé»˜è®¤å›¾ç‰‡
+    // CreateImage æ”¯æŒ TEXSIZE_* æ—çš„å‚æ•°æŒ‡å®šImageçš„å®½æˆ–è€…é«˜
     GXSTDINTERFACE(GXImage*    CreateImage                 (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits));
     GXSTDINTERFACE(GXImage*    CreateImageFromFile         (GXLPCWSTR lpwszFilename));
     GXSTDINTERFACE(GXImage*    CreateImageFromTexture      (GTexture* pTexture));
@@ -283,7 +283,7 @@ public:
 
     GXSTDINTERFACE(GXBOOL     SwitchConsole                ());
 
-    // ÏÂÃæÁ½¸ö½Ó¿Ú GRESCRIPTDESC ÖĞbBroadcastºÍdwTime»á±»ÉèÖÃ
+    // ä¸‹é¢ä¸¤ä¸ªæ¥å£ GRESCRIPTDESC ä¸­bBroadcastå’ŒdwTimeä¼šè¢«è®¾ç½®
     GXSTDINTERFACE(GXHRESULT  BroadcastScriptCommand       (GRESCRIPTDESC* pDesc));
     GXSTDINTERFACE(GXHRESULT  BroadcastCategoryCommand     (GXDWORD dwCategoryID, GRESCRIPTDESC* pDesc));
 };

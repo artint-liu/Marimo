@@ -1,4 +1,4 @@
-typedef struct tagGXCOLORSCHEME {
+Ôªøtypedef struct tagGXCOLORSCHEME {
   GXDWORD            dwSize;
   GXCOLORREF         clrBtnHighlight;       // highlight color
   GXCOLORREF         clrBtnShadow;          // shadow color
@@ -501,7 +501,7 @@ typedef struct {
 #define GXTB_GETSTRING            GXTB_GETSTRINGA
 #endif
 
-// GXUI µƒ Toolbar œ˚œ¢
+// GXUI ÁöÑ Toolbar Ê∂àÊÅØ
 #define GXUITB_SETSPRITEFILE    (GXWM_USER + 101) // lParam sprite file
 #define GXUITB_SETSPRITEOBJ     (GXWM_USER + 102) // lParam sprite Object
 

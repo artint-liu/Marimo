@@ -1,4 +1,4 @@
-#ifndef _GRAPVR_SKELETON_H_
+ï»¿#ifndef _GRAPVR_SKELETON_H_
 #define _GRAPVR_SKELETON_H_
 
 #ifdef FBX_SDK
@@ -36,14 +36,14 @@ struct Bone
 class GXDLL GVAnimationTrack : public GUnknown
 {
 public:
-  struct BONEINFO   // Ã¿¸ö¹Ç÷ÀµÄ¶¯»­Êı¾İÔÚÁĞ±íÖĞµÄË÷Òı
+  struct BONEINFO   // æ¯ä¸ªéª¨éª¼çš„åŠ¨ç”»æ•°æ®åœ¨åˆ—è¡¨ä¸­çš„ç´¢å¼•
   {
     float3      vTranslation;
     quaternion  vQuaternion;
     float3      vScaling;
 
-    // Õâ¸ö BONE ÔÚ GVAnimationTrack::Array ÁĞ±íÀïµÄ¿ªÊ¼Î»ÖÃ
-    // ÒªÃ´²»´æ, ÒªÃ´¾ÍÊÇºÍ nFrameCount ÏàµÈÊıÁ¿
+    // è¿™ä¸ª BONE åœ¨ GVAnimationTrack::Array åˆ—è¡¨é‡Œçš„å¼€å§‹ä½ç½®
+    // è¦ä¹ˆä¸å­˜, è¦ä¹ˆå°±æ˜¯å’Œ nFrameCount ç›¸ç­‰æ•°é‡
     int nTranslationIdx;
     int nQuaternionIdx;
     int nScalingIdx;
@@ -169,7 +169,7 @@ protected:
   BoneArray         m_aBones;
   OrderArray        m_aUpdateOrder;
 
-  // Dict ÖĞµÄ Id Òª¼õÒ»ºó²ÅÊÇArrayµÄ Idx Ë÷Òı
+  // Dict ä¸­çš„ Id è¦å‡ä¸€åæ‰æ˜¯Arrayçš„ Idx ç´¢å¼•
   NameIdDict        m_NameIdDict;
   AnimTrackArray    m_aTracks;
   GVAnimationTrack* m_pCurrTrack;
@@ -177,7 +177,7 @@ protected:
   int               m_idCurTrack;
 
   int               m_nRefFrame;
-  float             m_fResidue;   // Á½Ö¡Ö®¼äµÄ²åÖµ
+  float             m_fResidue;   // ä¸¤å¸§ä¹‹é—´çš„æ’å€¼
 public:
   virtual void    GetRenderDesc   (GVRenderType eType, GVRENDERDESC* pRenderDesc);
 protected:
@@ -199,9 +199,9 @@ public:
   CFloat4x4&  UpdateBone            (int nBoneIndex, GXBOOL bUpdateParent);
   GXBOOL      BuildRenderData       (GXGraphics* pGraphics);
   void        DbgDump               ();
-  int         SetTrackData          (GXLPCSTR szName, GVAnimationTrack* pTrack); // szName ¿ÉÒÔÎª NULL
+  int         SetTrackData          (GXLPCSTR szName, GVAnimationTrack* pTrack); // szName å¯ä»¥ä¸º NULL
   GXBOOL      PlayByName            (GXLPCSTR szName);
-  GXBOOL      PlayById              (int nId);  // ÓÃÕâ¸ö½Ó¿ÚÉèÖÃ¶¯×÷Ãû½«»áÎª¿Õ
+  GXBOOL      PlayById              (int nId);  // ç”¨è¿™ä¸ªæ¥å£è®¾ç½®åŠ¨ä½œåå°†ä¼šä¸ºç©º
 
 
   virtual GXHRESULT SaveFile(clSmartRepository* pStorage);

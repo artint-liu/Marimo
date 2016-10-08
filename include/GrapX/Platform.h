@@ -1,4 +1,4 @@
-#ifndef _GRAPHX_PLATFORM_H_
+ï»¿#ifndef _GRAPHX_PLATFORM_H_
 #define _GRAPHX_PLATFORM_H_
 
 enum   GXPlaformIdentity;
@@ -16,10 +16,10 @@ public:
   GXSTDINTERFACE(GXHRESULT    MainLoop      ());
   GXSTDINTERFACE(GXVOID       GetPlatformID (GXPlaformIdentity* pIdentity));
   GXSTDINTERFACE(GXLPCWSTR    GetRootDir    ());
-  GXSTDINTERFACE(GXHRESULT    QueryFeature  (GXDWORD dwFeatureCode, GXVOID** ppUnknown)); // ²éÑ¯Æ½Ì¨Ïà¹ØµÄÌØÕ÷Öµ, Õâ¸öÓëÆ½Ì¨Ïà¹ØµÄÀ©Õ¹, ppUnknown ¿ÉÄÜÊÇ¶ÔÏó»òÕßÖ¸Õë
+  GXSTDINTERFACE(GXHRESULT    QueryFeature  (GXDWORD dwFeatureCode, GXVOID** ppUnknown)); // æŸ¥è¯¢å¹³å°ç›¸å…³çš„ç‰¹å¾å€¼, è¿™ä¸ªä¸å¹³å°ç›¸å…³çš„æ‰©å±•, ppUnknown å¯èƒ½æ˜¯å¯¹è±¡æˆ–è€…æŒ‡é’ˆ
 };
 
-// Æ½Ì¨·½±ã´´½¨µÄÄ£°å
+// å¹³å°æ–¹ä¾¿åˆ›å»ºçš„æ¨¡æ¿
 template<class _TIPlatform>
 _TIPlatform* AppCreatePlatformT(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
 {

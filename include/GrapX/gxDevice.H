@@ -1,10 +1,10 @@
-#ifndef _GRAPX_DEVICE_H_
+ï»¿#ifndef _GRAPX_DEVICE_H_
 #define _GRAPX_DEVICE_H_
 class GXGraphics;
 class GXWnd;
 class IGXPlatform;
 
-// TODO: ÔİÊ±²»ÓÃ
+// TODO: æš‚æ—¶ä¸ç”¨
 //struct INPUTDEVICESPARAM
 //{
 //  enum MouseKey
@@ -36,7 +36,7 @@ extern "C"
   GXVOID          GXDLLAPI GXUIDestroyStation     ();
   GXBOOL          GXDLLAPI GXUIResizeStation      (int nWidth, int nHeight);
   //GXBOOL          GXDLLAPI GXUITestStation        ();
-  GXVOID          GXDLLAPI GXUIUpdateTimerEvent   ();  // TODO: ¸Ğ¾õÕâ¸öÒªÕûºÏ·â×°ÆğÀ´
+  GXVOID          GXDLLAPI GXUIUpdateTimerEvent   ();  // TODO: æ„Ÿè§‰è¿™ä¸ªè¦æ•´åˆå°è£…èµ·æ¥
   LPSTOCKOBJECT   GXDLLAPI GXUIGetStock           ();
   GXBOOL          GXDLLAPI GXUISwitchConsole      ();
   GXBOOL          GXDLLAPI GXUIMakeCurrent        ();

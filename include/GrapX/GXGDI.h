@@ -1,4 +1,4 @@
-#ifndef _DEV_DISABLE_UI_CODE
+Ôªø#ifndef _DEV_DISABLE_UI_CODE
 /* Device Parameters for GetDeviceCaps() */
 //#define GXDRIVERVERSION 0     /* Device driver version                    */
 //#define GXTECHNOLOGY    2     /* Device classification                    */
@@ -200,7 +200,7 @@ extern "C"
   GXBOOL      GXDLLAPI gxExtTextOutW            (GXHDC hdc, GXINT,GXINT,GXUINT,GXCONST GXRECT*,GXLPCWSTR,GXUINT,GXCONST GXINT *);
   GXHBRUSH    GXDLLAPI gxCreateSolidBrush       (GXCOLORREF);
   GXCOLORREF  GXDLLAPI gxSetBkColor             (GXHDC hdc, GXCOLORREF crBack);
-  GXCOLORREF  GXDLLAPI GXSetBkColor             (GXHDC hdc, GXCOLORREF crBack); // GrapX Ãÿ”–£¨÷ß≥÷Õ∏√˜…´
+  GXCOLORREF  GXDLLAPI GXSetBkColor             (GXHDC hdc, GXCOLORREF crBack); // GrapX ÁâπÊúâÔºåÊîØÊåÅÈÄèÊòéËâ≤
   GXBOOL      GXDLLAPI gxDeleteDC               (GXHDC hdc);
 
   GXINT       GXDLLAPI gxGetClipRgn             (GXHDC hdc, GXHRGN hRgn);

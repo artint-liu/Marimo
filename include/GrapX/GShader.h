@@ -1,13 +1,13 @@
-#ifndef _SHADER_CLASS_HEADER_DEFINE_FILE_
+ï»¿#ifndef _SHADER_CLASS_HEADER_DEFINE_FILE_
 #define _SHADER_CLASS_HEADER_DEFINE_FILE_
 
 //////////////////////////////////////////////////////////////////////////
-// ¹ØÓÚShaderConstºÍUniformµÄº¬Òå:
-// Const±íÊ¾³£Á¿,VertexShader ºÍ PixelShader ·Ö±ğ°üº¬¸÷×ÔµÄConst³£Á¿
-// µ±Á½¸öShaderºÏ²¢Ê¹ÓÃÊ±, Í¬ÃûÍ¬³¤¶È(²»Í¬³¤¶ÈÓ¦¸ÃÔÚÒÔºó¼ì²â±¨´í)µÄConst»áºÏ
-// ²¢ÎªÒ»¸ö¼ÇÂ¼, Õâ³ÆÎª Uniform
-// Canvas3D ¿ÉÒÔ½«Ö¸¶¨Ãû×ÖµÄUniform¸³ÓèÈ«¾ÖÊôĞÔ£¬Ê¹ÆäÔÚCanvas3DÖĞ¾ßÓĞÒ»ÖÂµÄÖµ£¬
-// Õâ³ÆÎª Canvas-Uniform
+// å…³äºShaderConstå’ŒUniformçš„å«ä¹‰:
+// Constè¡¨ç¤ºå¸¸é‡,VertexShader å’Œ PixelShader åˆ†åˆ«åŒ…å«å„è‡ªçš„Constå¸¸é‡
+// å½“ä¸¤ä¸ªShaderåˆå¹¶ä½¿ç”¨æ—¶, åŒååŒé•¿åº¦(ä¸åŒé•¿åº¦åº”è¯¥åœ¨ä»¥åæ£€æµ‹æŠ¥é”™)çš„Constä¼šåˆ
+// å¹¶ä¸ºä¸€ä¸ªè®°å½•, è¿™ç§°ä¸º Uniform
+// Canvas3D å¯ä»¥å°†æŒ‡å®šåå­—çš„Uniformèµ‹äºˆå…¨å±€å±æ€§ï¼Œä½¿å…¶åœ¨Canvas3Dä¸­å…·æœ‰ä¸€è‡´çš„å€¼ï¼Œ
+// è¿™ç§°ä¸º Canvas-Uniform
 namespace Marimo {
   class DataPool;
 }
@@ -32,11 +32,11 @@ public:
 
   GXSTDINTERFACE(GXHRESULT          AddRef            ());
   GXSTDINTERFACE(GXHRESULT          Release           ());
-  GXSTDINTERFACE(GXUINT             GetStride         ());  // ¶¥µã¸ñÊ½ËùĞèÒªµÄ×îĞ¡³¤¶È
+  GXSTDINTERFACE(GXUINT             GetStride         ());  // é¡¶ç‚¹æ ¼å¼æ‰€éœ€è¦çš„æœ€å°é•¿åº¦
   GXSTDINTERFACE(GXINT              GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc = NULL));
   GXSTDINTERFACE(GXLPCVERTEXELEMENT GetVertexElement  ());
-  // TODO: ½«À´ÊµÏÖ GXSTDINTERFACE(GXINT        GetOffset         (GXIN GXDeclUsage Usage, GXIN GXUINT UsageIndex, GXOUT LPGXVERTEXELEMENT lpDesc = NULL));
-  // TODO: ½«À´ÊµÏÖ GXSTDINTERFACE(GXUINT       GetElementCount   ());
+  // TODO: å°†æ¥å®ç° GXSTDINTERFACE(GXINT        GetOffset         (GXIN GXDeclUsage Usage, GXIN GXUINT UsageIndex, GXOUT LPGXVERTEXELEMENT lpDesc = NULL));
+  // TODO: å°†æ¥å®ç° GXSTDINTERFACE(GXUINT       GetElementCount   ());
 };
 
 class GUniformBinderDecl : public GResource
@@ -64,7 +64,7 @@ public:
   //GXSTDINTERFACE(GXDWORD      GetFlags          () GXCONST);
   GXSTDINTERFACE(GXINT        GetCacheSize      () GXCONST);
   GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe () GXCONST);
-  GXSTDINTERFACE(GXLPCWSTR    GetProfileDesc    () GXCONST);  // È¡ÅäÖÃÎÄ¼ş(°üº¬¸÷¸öÆ½Ì¨ShaderÎÄ¼ş)µÄÃû×Ö,Èç¹ûÊÇ´ÓÄÚ´æ¼ÓÔØ,ÔòÎªNULL
+  GXSTDINTERFACE(GXLPCWSTR    GetProfileDesc    () GXCONST);  // å–é…ç½®æ–‡ä»¶(åŒ…å«å„ä¸ªå¹³å°Shaderæ–‡ä»¶)çš„åå­—,å¦‚æœæ˜¯ä»å†…å­˜åŠ è½½,åˆ™ä¸ºNULL
 public:
   static GXDLL GXVOID     ResolveProfileDescW (GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros);
   static GXDLL GXHRESULT  Load                (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam);
@@ -91,7 +91,7 @@ public:
 
   GXSTDINTERFACE(GXHRESULT      SetShaderRef            (GShader* pShader));
   GXSTDINTERFACE(GXHRESULT      BindData                (MODataPool* pDataPool, GXLPCSTR szStruct));
-  GXSTDINTERFACE(GXHRESULT      FindDataPoolByName      (GXLPCSTR szName, MODataPool** ppDataPool));  // DataPool ²»ÓÃºóÒª Release
+  GXSTDINTERFACE(GXHRESULT      FindDataPoolByName      (GXLPCSTR szName, MODataPool** ppDataPool));  // DataPool ä¸ç”¨åè¦ Release
   GXSTDINTERFACE(GXHRESULT      BindCommonUniform       (LPCDATALAYOUT lpDataLayout));
   GXSTDINTERFACE(GXINT          FindUniformDef          (LPCDATALAYOUT lpDataLayout));
   GXSTDINTERFACE(GXBOOL         CommitUniform           (int nDefIdx, GXLPCVOID lpData, GXUINT uCommonOffset));
@@ -111,11 +111,11 @@ public:
 #endif // #ifdef REFACTOR_SHADER
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  // ½Ó¿ÚÊµÏÖ
+  // æ¥å£å®ç°
   GXSTDINTERFACE(GXHRESULT      AddRef              ());
   GXSTDINTERFACE(GXHRESULT      Release             ());
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  // TODO: Õâ¸öÃ»Ì«ÏëºÃ, µÈÊµÏÖ OpenGL/ES Ê±ÔÙ¿¼ÂÇ
+  // TODO: è¿™ä¸ªæ²¡å¤ªæƒ³å¥½, ç­‰å®ç° OpenGL/ES æ—¶å†è€ƒè™‘
   //GXSTDINTERFACE(GXHRESULT      SetTextureSlot      (GXLPCSTR pName, GXINT nSlot));
   //GXSTDINTERFACE(GXINT          GetTextureSlot      (GXLPCSTR pName));
 };
@@ -132,7 +132,7 @@ public:
   GXSTDINTERFACE(GXHRESULT  SetTextureSlot        (GXLPCSTR pName, GXINT nSlot));
   GXSTDINTERFACE(GXINT      GetTextureSlot        (GXLPCSTR pName));
 
-  GXSTDINTERFACE(GXUINT     GetConstantBufferSize ()); // »òÕß½Ğcontext?
+  GXSTDINTERFACE(GXUINT     GetConstantBufferSize ()); // æˆ–è€…å«context?
 };
 
 class GXMaterialInst : public GResource
@@ -151,7 +151,7 @@ public:
   GXSTDINTERFACE(GXHRESULT  Release                     ());
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  GXSTDINTERFACE(GXBOOL     IsSequential                ()); // ·Ïµô
+  GXSTDINTERFACE(GXBOOL     IsSequential                ()); // åºŸæ‰
   GXSTDINTERFACE(int        GetRenderQueue              () const);
   GXSTDINTERFACE(GXGraphics*GetGraphicsUnsafe           ());
   GXSTDINTERFACE(GXHRESULT  GetFilenameW                (clStringW* pstrFilename));
@@ -163,12 +163,12 @@ public:
   GXSTDINTERFACE(GXHRESULT  LoadFileW                   (GXGraphics* pGraphics, GXLPCWSTR szFilename));
   GXSTDINTERFACE(GXHRESULT  LoadRepository              (GXGraphics* pGraphics, clSmartRepository* pStorage));
 
-  // ³õÊ¼»¯½Ó¿Ú
-  // ÕâĞ©º¯Êı½¨Òé¶¼²»ÒªÆµ·±µ÷ÓÃ, ¿ÉÄÜ»áÑÏÖØÓ°ÏìĞÔÄÜ.
+  // åˆå§‹åŒ–æ¥å£
+  // è¿™äº›å‡½æ•°å»ºè®®éƒ½ä¸è¦é¢‘ç¹è°ƒç”¨, å¯èƒ½ä¼šä¸¥é‡å½±å“æ€§èƒ½.
   GXSTDINTERFACE(GXHRESULT  GetUniformList              (UniformArray* pUniforms));
   GXSTDINTERFACE(GXHRESULT  BindData                    (MODataPool* pDataPool, GXLPCSTR szStruct));
   GXSTDINTERFACE(GXHRESULT  BindDataByName              (GXLPCSTR szPoolName, GXLPCSTR szStruct));
-  GXSTDINTERFACE(GXHRESULT  SetParameters               (ParamType eType, GXDEFINITION* pParameters, int nCount = 0));  // ¸üĞÂÁĞ±íÖĞµÄ²ÎÊıÖµ, Èç¹ûnCountÎª0, ÔòÁĞ±íµÄ½áÎ²±ØĞëÒÔ¿Õ×Ö·û´®»òÕßNULL½áÎ²
+  GXSTDINTERFACE(GXHRESULT  SetParameters               (ParamType eType, GXDEFINITION* pParameters, int nCount = 0));  // æ›´æ–°åˆ—è¡¨ä¸­çš„å‚æ•°å€¼, å¦‚æœnCountä¸º0, åˆ™åˆ—è¡¨çš„ç»“å°¾å¿…é¡»ä»¥ç©ºå­—ç¬¦ä¸²æˆ–è€…NULLç»“å°¾
   GXSTDINTERFACE(GXHRESULT  SetFloat1ByName             (GXLPCSTR szName, float val));
   GXSTDINTERFACE(GXHRESULT  SetFloat2ByName             (GXLPCSTR szName, const float2& vFloat2));
   GXSTDINTERFACE(GXHRESULT  SetFloat3ByName             (GXLPCSTR szName, const float3& vFloat3));
@@ -179,13 +179,13 @@ public:
   GXSTDINTERFACE(GXHRESULT  SetTextureByIndex           (GXUINT nIndex, GTextureBase* pTexture));
   GXSTDINTERFACE(GXHRESULT  SetTextureByNameFromFileW   (GXLPCSTR szName, GXLPCWSTR szFilename));
   GXSTDINTERFACE(GXHRESULT  SetTextureByIndexFromFileW  (GXUINT nIndex, GXLPCWSTR szFilename));
-  // -- ³õÊ¼»¯½Ó¿Ú
+  // -- åˆå§‹åŒ–æ¥å£
 };
 
 //////////////////////////////////////////////////////////////////////////
 typedef GXMaterialInst* GXLPMATERIALINST;
 
-// ¸ù¾İ°ó¶¨ÉùÃ÷Éú³ÉÉùÃ÷Ô´´úÂë
+// æ ¹æ®ç»‘å®šå£°æ˜ç”Ÿæˆå£°æ˜æºä»£ç 
 GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpDataLayout, GXDWORD dwPlatfomCode, clBuffer** ppBuffer);
 
 #endif // end of _SHADER_CLASS_HEADER_DEFINE_FILE_

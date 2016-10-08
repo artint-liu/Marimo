@@ -105,14 +105,16 @@ namespace Marimo
     NameDict          m_NameDict;
     IDDict            m_IDDict;
     //int IntGetSpriteCount() const;
+
+    int AdjustDrawingRegn(GXREGN& regn) const;
+
   protected:
     virtual ~MOSpriteImpl();
   public:
     MOSpriteImpl();
     GXBOOL Initialize(GXGraphics* pGraphics, const SPRITE_DESC_LOADER* pDesc);
     //GXBOOL Initialize(GXGraphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount);
-
-
+    
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     virtual GXHRESULT AddRef();
     virtual GXHRESULT Release();
@@ -196,6 +198,7 @@ namespace Marimo
       const IDATTR* IntFind(GXLPCSTR szName) const;
       GXINT IntAttrToIndex(const IDATTR* pAttr) const;
       void IntGetBounding(const IDATTR* pAttr, GXREGN* lprg) const;
+      GXUINT IntGetAnimationFrameIndex(const ANIMATION& a, TIME_T time);
 
     //virtual GXHRESULT SaveW             (GXLPCWSTR szFilename) const;
   };

@@ -1,4 +1,4 @@
-#ifndef _GRAPX_UTILITY_H_
+ï»¿#ifndef _GRAPX_UTILITY_H_
 #define _GRAPX_UTILITY_H_
 
 struct GVRENDERDESC;
@@ -33,40 +33,40 @@ namespace ObjMeshUtility
 
 namespace PrimitiveUtility
 {
-  // TODO: ½«ÒªÊµÏÖ
+  // TODO: å°†è¦å®ç°
   // ConvertToplogyType();
   //ResolveToMeshData(GVMESHDATA*);
 
   //************************************
-  // ÉèÖÃPrimitiveÖĞµÄDiffuseÖµ£¬Èç¹û´æÔÚµÄ»°¡£
+  // è®¾ç½®Primitiveä¸­çš„Diffuseå€¼ï¼Œå¦‚æœå­˜åœ¨çš„è¯ã€‚
   // Method:    SetDiffuse
   // FullName:  PrimitiveUtility::SetDiffuse
   // Returns:   GXBOOL
   // Qualifier:
   // Parameter: GPrimitive* pPrimitive
   // Parameter: GXColor32 crDiffuse
-  // Parameter: GXBOOL bManualUpdate ÊÇ·ñÊÖ¶¯µ÷ÓÃUpdateResource
+  // Parameter: GXBOOL bManualUpdate æ˜¯å¦æ‰‹åŠ¨è°ƒç”¨UpdateResource
   //************************************
   GXBOOL GXDLL SetUnifiedDiffuse(GPrimitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate);
 }
 
 namespace PrimitiveIndicesUtility
 {
-  // ËÄ±ßĞÎ¶¥µãÕóÁĞË÷ÒıÌî³ä, clvector±ØĞëÌáÇ°µ÷ÓÃreserveÔ¤ÏÈ·ÖÅäÄÚ´æ!
-  // xSeg, ySegÊÇ·Ö¶ÎÊı£¬Èç¹ûÍø¸ñÊÇm*n¸ö¶¥µãµÄ»°£¬xSeg = m - 1, ySeg = n - 1
+  // å››è¾¹å½¢é¡¶ç‚¹é˜µåˆ—ç´¢å¼•å¡«å……, clvectorå¿…é¡»æå‰è°ƒç”¨reserveé¢„å…ˆåˆ†é…å†…å­˜!
+  // xSeg, ySegæ˜¯åˆ†æ®µæ•°ï¼Œå¦‚æœç½‘æ ¼æ˜¯m*nä¸ªé¡¶ç‚¹çš„è¯ï¼ŒxSeg = m - 1, ySeg = n - 1
   void GXDLL FillIndicesAsQuadVertexArrayCW16 (int xSeg, int ySeg, int nBaseIndex, clvector<u32>& aIndices, int nPitch = 0);
   void GXDLL FillIndicesAsQuadVertexArrayCW32 (int xSeg, int ySeg, int nBaseIndex, clvector<u16>& aIndices, int nPitch = 0);
   void GXDLL FillIndicesAsQuadVertexArrayCCW16(int xSeg, int ySeg, int nBaseIndex, clvector<u16>& aIndices, int nPitch = 0);
   void GXDLL FillIndicesAsQuadVertexArrayCCW32(int xSeg, int ySeg, int nBaseIndex, clvector<u32>& aIndices, int nPitch = 0);
 
-  // Ñ­»·¶¥µãÕóÁĞË÷ÒıÌî³ä
+  // å¾ªç¯é¡¶ç‚¹é˜µåˆ—ç´¢å¼•å¡«å……
   void GXDLL FillIndicesAsCycleVertexArray(int nHeightSeg, int nSides, int nBaseIndex, clvector<GXWORD>& aIndices);
 
 } // namespace PrimitiveIndicesUtility
 
 namespace TextureUtility
 {
-  GXBOOL GXDLL TextureFormatToClstdImageFormat(char* fmt, int* nDepth, GXFormat eFmt); // fmtÖÁÉÙÓ¦¸Ã4¸ö×Ö½Ú
+  GXBOOL GXDLL TextureFormatToClstdImageFormat(char* fmt, int* nDepth, GXFormat eFmt); // fmtè‡³å°‘åº”è¯¥4ä¸ªå­—èŠ‚
   GXDLL clstd::Image* CreateImage(GTexture* pTexture);
 } // namespace TextureUtility
 

@@ -1,4 +1,4 @@
-#ifndef _MARIMO_GRAPHICS_EFFECT_X_H_
+﻿#ifndef _MARIMO_GRAPHICS_EFFECT_X_H_
 #define _MARIMO_GRAPHICS_EFFECT_X_H_
 
 namespace GFX
@@ -50,7 +50,7 @@ namespace GFX
     Pause,
     Step,
     Freeze,
-    //UpdateOnce = 0x8000,  // ��Ҫ����һ�β���ת����ȷ״̬
+    //UpdateOnce = 0x8000,  // 需要更新一次才能转入正确状态
   };
 
   enum TypeId
@@ -78,8 +78,8 @@ namespace GFX
       T_RANGEI,
       T_STRINGW,
       T_STRINGA,
-      T_HALFFLOAT,  // ����Ϊfloat�����0.5
-      T_USER,       // �û����Դ�����
+      T_HALFFLOAT,  // 解析为float后乘以0.5
+      T_USER,       // 用户独自处理的
 #ifdef _UNICODE
       T_STRING = T_STRINGW,
 #else
@@ -111,7 +111,7 @@ namespace GFX
     GAMEENGINE_DLL size_t SizeOf();
   };
 
-  class Element : public GVMesh // �����Ժ�Ҫ��GVNode�̳�
+  class Element : public GVMesh // 可能以后要从GVNode继承
   {
   public:
     const static GXDWORD ClassCode = GXMAKEFOURCC('V','G','F','X');
@@ -154,8 +154,8 @@ namespace GFX
   };
 
   // Element::SolveParams
-  //  ����ӿ�Ҫ���ж���������������������.һ��Elementӵ�����ɲ���,�ӿ��ڲ���Ҫ��֤,��update֮ǰ��ͬ���߳�������ı���һһ���򼸸�
-  //  ��������Э���ò����䶯�����Ĺ����ԸĶ�.�ڲ����Ϸ�������±�֤����ȷ������һ����������.
+  //  这个接口要求有独立解析处理参数的能力.一个Element拥有若干参数,接口内部需要保证,在update之前相同的线程里独立改变任一一个或几个
+  //  参数都能协调好参数变动引发的关联性改动.在参数合法的情况下保证能正确处理任一个参数输入.
 
   inline TypeId Element::GetGFXType()
   {

@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_WND_CLASS_H_
+ï»¿#ifndef _GRAP_X_WND_CLASS_H_
 #define _GRAP_X_WND_CLASS_H_
 
 typedef GXLRESULT (CMOWnd::*LPCOMMANDPROC)(GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);
@@ -101,7 +101,7 @@ public:
   virtual GXLRESULT OnAppMessage      (GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
   virtual GXDWORD   GetClassNameCode  () const;
 #ifdef REFACTOR_GXFC
-  virtual CGXReceiver* TryCastReceiver (GXHWND hDlgItem); // ³¢ÊÔÓ³Éä³ÉÎªDlgItemµÄ½ÓÊÕÆ÷
+  virtual CGXReceiver* TryCastReceiver (GXHWND hDlgItem); // å°è¯•æ˜ å°„æˆä¸ºDlgItemçš„æ¥æ”¶å™¨
 #endif // #ifdef REFACTOR_GXFC
   //virtual LRESULT 
 public:

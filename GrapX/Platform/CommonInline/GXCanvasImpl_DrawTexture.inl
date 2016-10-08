@@ -1,4 +1,4 @@
-if( ! pTexture) {
+ï»¿if( ! pTexture) {
   return FALSE;
 }
 
@@ -36,7 +36,7 @@ const GXFLOAT fTop    = fInvTexHeight * rcSrc->top;
 const GXFLOAT fRight  = fInvTexWidth  * (rcSrc->left + rcSrc->width);
 const GXFLOAT fBottom = fInvTexHeight * (rcSrc->top  + rcSrc->height);
 #else
-#error ĞèÒª¶¨ÒåinlµÄ»·¾³
+#error éœ€è¦å®šä¹‰inlçš„ç¯å¢ƒ
 #endif
 
 m_lpLockedVertex[m_uVertCount    ].SetTexcoord(fLeft, fTop);

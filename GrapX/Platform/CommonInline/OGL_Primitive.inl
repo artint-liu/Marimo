@@ -1,4 +1,4 @@
-GPrimImpl::GPrimImpl(GXGraphics* pGraphics)
+ï»¿GPrimImpl::GPrimImpl(GXGraphics* pGraphics)
   : m_pGraphicsImpl   ((GXGraphicsImpl*)pGraphics)
   , m_uVerticesBuffer   (NULL)
   , m_uElementSize    (0)
@@ -78,13 +78,13 @@ GXLRESULT GPrimitiveVImpl::Release()
 
 GXBOOL GPrimitiveVImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCount, GXUINT uElementSize, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
 {
-  ASSERT(pVertInitData == NULL); // TODO: ÉÔºóÖ§³Ö³õÊ¼»¯Êı¾İ
+  ASSERT(pVertInitData == NULL); // TODO: ç¨åæ”¯æŒåˆå§‹åŒ–æ•°æ®
   //ASSERT(pVertexDecl == NULL);
   m_uElementCount = uElementCount;
   m_uElementSize  = uElementSize;
   m_dwResUsage    = ResUsage;
 
-  // ´´½¨¶¥µãÉùÃ÷
+  // åˆ›å»ºé¡¶ç‚¹å£°æ˜
   if(pVertexDecl != NULL)
   {
     GVertexDeclaration* pInterface;
@@ -95,7 +95,7 @@ GXBOOL GPrimitiveVImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCo
       //SET_FLAG(m_dwFlag, GXSHADERCAP_VERTDECL);
     }
   }
-  // </´´½¨¶¥µãÉùÃ÷>
+  // </åˆ›å»ºé¡¶ç‚¹å£°æ˜>
 
   if(OnDeviceEvent(DE_ResetDevice) == GX_OK)
     return TRUE;
@@ -141,13 +141,13 @@ GXBOOL GPrimitiveVImpl::Unlock()
   }
   else
   {
-    ASSERT(0);  // TODO: ÑéÖ¤ºóÈ¥³ı
+    ASSERT(0);  // TODO: éªŒè¯åå»é™¤
     GLVERIFY(glBindBuffer(GL_ARRAY_BUFFER, m_uVerticesBuffer));
     GLVERIFY(glBufferSubData(
       GL_ARRAY_BUFFER,
       m_uLockedOffset,
       m_uLockedSize, 
-      (GXBYTE*)m_pLockedVertex + m_uLockedOffset));  // TODO: ¿ÉÄÜÊÇÕâÑù
+      (GXBYTE*)m_pLockedVertex + m_uLockedOffset));  // TODO: å¯èƒ½æ˜¯è¿™æ ·
   }
 
   if(IsDiscardable() != FALSE)
@@ -268,7 +268,7 @@ GXLRESULT GPrimitiveVIImpl::OnDeviceEvent(DeviceEvent eEvent)
 
 GXBOOL GPrimitiveVIImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uVertexCount, GXUINT uVertexSize, GXLPVOID pIndexInitData, GXUINT uIndexCount, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
 {
-  ASSERT(pIndexInitData == NULL && pVertInitData == NULL); // TODO: ÉÔºóÖ§³Ö³õÊ¼»¯Êı¾İ
+  ASSERT(pIndexInitData == NULL && pVertInitData == NULL); // TODO: ç¨åæ”¯æŒåˆå§‹åŒ–æ•°æ®
   //ASSERT(pVertexDecl == NULL);
   if(uVertexCount == 0 || uVertexSize == 0 || uIndexCount == 0)
     return FALSE;
@@ -279,7 +279,7 @@ GXBOOL GPrimitiveVIImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uVertexCo
   m_dwResUsage    = ResUsage;
   //m_ePool      = ePool;
 
-  // ´´½¨¶¥µãÉùÃ÷
+  // åˆ›å»ºé¡¶ç‚¹å£°æ˜
   if(pVertexDecl != NULL)
   {
     GVertexDeclaration* pInterface;
@@ -290,7 +290,7 @@ GXBOOL GPrimitiveVIImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uVertexCo
       //SET_FLAG(m_dwFlag, GXSHADERCAP_VERTDECL);
     }
   }
-  // </´´½¨¶¥µãÉùÃ÷>
+  // </åˆ›å»ºé¡¶ç‚¹å£°æ˜>
 
 
   if(OnDeviceEvent(DE_ResetDevice) == GX_OK)
@@ -362,14 +362,14 @@ GXBOOL GPrimitiveVIImpl::Unlock()
   }
   else
   {
-    ASSERT(0);  // TODO: ÑéÖ¤ºóÈ¥³ı
+    ASSERT(0);  // TODO: éªŒè¯åå»é™¤
     GLVERIFY(glBindBuffer(GL_ARRAY_BUFFER, m_uVerticesBuffer));
 
     GLVERIFY(glBufferSubData(
       GL_ARRAY_BUFFER,
       m_uLockedVerticesOffset,
       m_uLockedVerticesSize, 
-      m_pLockedVertex));  // TODO: ¿ÉÄÜÊÇÕâÑù
+      m_pLockedVertex));  // TODO: å¯èƒ½æ˜¯è¿™æ ·
   }
 
   if(m_uLockedIndicesSize == 0)
@@ -384,14 +384,14 @@ GXBOOL GPrimitiveVIImpl::Unlock()
   }
   else
   {
-    ASSERT(0);  // TODO: ÑéÖ¤ºóÈ¥³ı
+    ASSERT(0);  // TODO: éªŒè¯åå»é™¤
     GLVERIFY(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_uIndicesBuffer));
 
     GLVERIFY(glBufferSubData(
       GL_ELEMENT_ARRAY_BUFFER,
       m_uLockedIndicesOffset,
       m_uLockedIndicesSize, 
-      m_pLockedIndex));  // TODO: ¿ÉÄÜÊÇÕâÑù
+      m_pLockedIndex));  // TODO: å¯èƒ½æ˜¯è¿™æ ·
   }
 
   if(IsDiscardable() != FALSE)

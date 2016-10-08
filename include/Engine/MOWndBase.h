@@ -1,4 +1,4 @@
-#ifndef _GRAPX_WND_FOUNDATION_CLASS_BASE_H_
+ï»¿#ifndef _GRAPX_WND_FOUNDATION_CLASS_BASE_H_
 #define _GRAPX_WND_FOUNDATION_CLASS_BASE_H_
 
 class GXGraphics;
@@ -10,8 +10,8 @@ struct GXWINDOWPOS;
 
 class GAMEENGINE_API CMOWnd
 {
-  // CMOWndÒª´øÓĞĞéº¯Êı±í£¬²»È»¼Ì³ĞÀàCMOWndProcedure×öÀàĞÍ×ª»»Ê±»áÓöµ½ºÜ¶àÎÊÌâ¡£
-  // ±ÈÈçCMOWndProcedure*ÎªNULLµÄ¶ÔÏó×ª»»µ½CMOWnd*Ö®ºóthisÊÇ0x00000004£¨32Î»ÏÂ£©
+  // CMOWndè¦å¸¦æœ‰è™šå‡½æ•°è¡¨ï¼Œä¸ç„¶ç»§æ‰¿ç±»CMOWndProcedureåšç±»å‹è½¬æ¢æ—¶ä¼šé‡åˆ°å¾ˆå¤šé—®é¢˜ã€‚
+  // æ¯”å¦‚CMOWndProcedure*ä¸ºNULLçš„å¯¹è±¡è½¬æ¢åˆ°CMOWnd*ä¹‹åthisæ˜¯0x00000004ï¼ˆ32ä½ä¸‹ï¼‰
 
 protected:
   GXHWND      m_hWnd;
@@ -55,9 +55,9 @@ public:
   //template<class _CReceiverT>
   //inline _CReceiverT* TryCastReceiver     (CGXReceiver* pReceiver, _CReceiverT* pClsRetained = NULL)
   //{
-  //  // ÕâÀïÍüÁËÎªÉ¶ÒªÕâÑùĞ´ÁË°¡°¡°¡°¡°¡!
-  //  // ºÃÏñÊÇÒòÎªDialogÀàÖĞµÃµ½µÄDlgItemÊµ¼ÊÉÏ²»´¢´æReceiver,
-  //  // ÕæÊµµÄReceiver´æÔÚÓÚHWND¶ÔÏóµÄÄÚ²¿COBJµÄReceiverÖĞ.
+  //  // è¿™é‡Œå¿˜äº†ä¸ºå•¥è¦è¿™æ ·å†™äº†å•Šå•Šå•Šå•Šå•Š!
+  //  // å¥½åƒæ˜¯å› ä¸ºDialogç±»ä¸­å¾—åˆ°çš„DlgItemå®é™…ä¸Šä¸å‚¨å­˜Receiver,
+  //  // çœŸå®çš„Receiverå­˜åœ¨äºHWNDå¯¹è±¡çš„å†…éƒ¨COBJçš„Receiverä¸­.
   //  return (pReceiver == pClsRetained)
   //    ? pClsRetained : dynamic_cast<_CReceiverT*>(pReceiver);
   //}
@@ -99,9 +99,9 @@ public:
   //template<class _CReceiverT>
   //inline _CReceiverT* TryCastReceiver     (CGXReceiver* pReceiver, _CReceiverT* pClsRetained = NULL)
   //{
-  //  // ÕâÀïÍüÁËÎªÉ¶ÒªÕâÑùĞ´ÁË°¡°¡°¡°¡°¡!
-  //  // ºÃÏñÊÇÒòÎªDialogÀàÖĞµÃµ½µÄDlgItemÊµ¼ÊÉÏ²»´¢´æReceiver,
-  //  // ÕæÊµµÄReceiver´æÔÚÓÚHWND¶ÔÏóµÄÄÚ²¿COBJµÄReceiverÖĞ.
+  //  // è¿™é‡Œå¿˜äº†ä¸ºå•¥è¦è¿™æ ·å†™äº†å•Šå•Šå•Šå•Šå•Š!
+  //  // å¥½åƒæ˜¯å› ä¸ºDialogç±»ä¸­å¾—åˆ°çš„DlgItemå®é™…ä¸Šä¸å‚¨å­˜Receiver,
+  //  // çœŸå®çš„Receiverå­˜åœ¨äºHWNDå¯¹è±¡çš„å†…éƒ¨COBJçš„Receiverä¸­.
   //  return (pReceiver == pClsRetained)
   //    ? pClsRetained : dynamic_cast<_CReceiverT*>(pReceiver);
   //}

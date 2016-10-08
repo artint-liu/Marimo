@@ -1,5 +1,5 @@
-// GrapVR ³¡¾°¹ÜÀí
-// ¿ª·¢³õÆÚÊ¹ÓÃÏßÐÔ³¡¾°»®·Ö
+ï»¿// GrapVR åœºæ™¯ç®¡ç†
+// å¼€å‘åˆæœŸä½¿ç”¨çº¿æ€§åœºæ™¯åˆ’åˆ†
 #ifndef _GRAPVR_SCENE_MANAGER_H_
 #define _GRAPVR_SCENE_MANAGER_H_
 

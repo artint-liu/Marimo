@@ -1,4 +1,4 @@
-//GXSAMPLERSTAGE GSamplerStateImpl::s_DefaultSamplerState;
+﻿//GXSAMPLERSTAGE GSamplerStateImpl::s_DefaultSamplerState;
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 GXHRESULT GSamplerStateImpl::AddRef()

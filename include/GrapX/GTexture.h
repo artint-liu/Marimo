@@ -1,4 +1,4 @@
-#ifndef _GRAPX_TEXTURE_H_
+﻿#ifndef _GRAPX_TEXTURE_H_
 #define _GRAPX_TEXTURE_H_
 
 class GXGraphics;
@@ -13,7 +13,7 @@ public:
   GXSTDINTERFACE(GXDWORD      GetUsage          ());
   GXSTDINTERFACE(GXFormat     GetFormat         ());
   GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // �����������ü���
+  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
   GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
 };
 
@@ -31,20 +31,20 @@ public:
   GXSTDINTERFACE(GXHRESULT    AddRef            ());
   GXSTDINTERFACE(GXHRESULT    Release           ());
 
-  GXSTDINTERFACE(GXBOOL       Clear             (GXCONST GXLPRECT lpRect, GXCOLOR dwColor));  // ʵ�ֲ�ͬ, ���鲻Ҫ������ʱ����ʹ��!
-  GXSTDINTERFACE(GXBOOL       GetRatio          (GXINT* pWidthRatio, GXINT* pHeightRatio));   // ȥ��Ļ����,�������Ļ��������,���ظ�ֵ�ı���,���򷵻������ߴ�,������ļ���ȡ��������ԭʼ�ļ��Ĵ�С
-  GXSTDINTERFACE(GXUINT       GetWidth          ());    // ȡm_nWidth��Ա��ֵ
-  GXSTDINTERFACE(GXUINT       GetHeight         ());    // ȡm_nHeight��Ա��ֵ, �ο�GetWidth()
-  GXSTDINTERFACE(GXBOOL       GetDimension      (GXUINT* pWidth, GXUINT* pHeight));  // ȡ�����ĳߴ�,���ֵ���ܻ����Ļ�ߴ�仯
+  GXSTDINTERFACE(GXBOOL       Clear             (GXCONST GXLPRECT lpRect, GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
+  GXSTDINTERFACE(GXBOOL       GetRatio          (GXINT* pWidthRatio, GXINT* pHeightRatio));   // 去屏幕比例,如果是屏幕对齐纹理,返回负值的比率,否则返回纹理尺寸,如果从文件读取的纹理是原始文件的大小
+  GXSTDINTERFACE(GXUINT       GetWidth          ());    // 取m_nWidth成员的值
+  GXSTDINTERFACE(GXUINT       GetHeight         ());    // 取m_nHeight成员的值, 参考GetWidth()
+  GXSTDINTERFACE(GXBOOL       GetDimension      (GXUINT* pWidth, GXUINT* pHeight));  // 取纹理的尺寸,这个值可能会跟屏幕尺寸变化
   //GXSTDINTERFACE(GXDWORD      GetUsage          ());
   //GXSTDINTERFACE(GXFormat     GetFormat         ());
   //GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
   GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));
   GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination));
   GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
-  GXSTDINTERFACE(GXBOOL       LockRect          (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)); // TODO: �����Ժ��ǲ��ǲ�Ҫ��lock, ����Χ�Ľӿڴ���
+  GXSTDINTERFACE(GXBOOL       LockRect          (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
   GXSTDINTERFACE(GXBOOL       UnlockRect        ());
-  //GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // �����������ü���
+  //GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
                                               
   //GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
 };
@@ -84,9 +84,9 @@ public:
   //GXSTDINTERFACE(GXFormat     GetFormat         ());
   //GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
   GXSTDINTERFACE(GXBOOL       CopyBox           (GTexture3D* pSrc, GXCONST LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z));
-  GXSTDINTERFACE(GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, GXCONST LPBOX lpBox, GXDWORD Flags)); // TODO: �����Ժ��ǲ��ǲ�Ҫ��lock, ����Χ�Ľӿڴ���
+  GXSTDINTERFACE(GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, GXCONST LPBOX lpBox, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
   GXSTDINTERFACE(GXBOOL       UnlockBox         ());
-  //GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // �����������ü���
+  //GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
   //GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
 };
 
@@ -105,16 +105,16 @@ public:
   GXSTDINTERFACE(GXHRESULT    AddRef            ());
   GXSTDINTERFACE(GXHRESULT    Release           ());
 
-  GXSTDINTERFACE(GXBOOL       Clear             (GXCONST GXLPRECT lpRect, GXCOLOR dwColor));  // ʵ�ֲ�ͬ, ���鲻Ҫ������ʱ����ʹ��!
-  GXSTDINTERFACE(GXUINT       GetSize           ());    // ȡm_nWidth��Ա��ֵ
+  GXSTDINTERFACE(GXBOOL       Clear             (GXCONST GXLPRECT lpRect, GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
+  GXSTDINTERFACE(GXUINT       GetSize           ());    // 取m_nWidth成员的值
   GXSTDINTERFACE(GXDWORD      GetUsage          ());
   GXSTDINTERFACE(GXFormat     GetFormat         ());
   GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
   //GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination));
   //GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
-  //GXSTDINTERFACE(GXBOOL       LockRect          (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)); // TODO: �����Ժ��ǲ��ǲ�Ҫ��lock, ����Χ�Ľӿڴ���
+  //GXSTDINTERFACE(GXBOOL       LockRect          (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
   //GXSTDINTERFACE(GXBOOL       UnlockRect        ());
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // �����������ü���
+  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
 
   GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));
 };

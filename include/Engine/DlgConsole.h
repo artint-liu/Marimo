@@ -1,4 +1,4 @@
-#ifndef _MARIMO_DIALOG_CONSOLE_H_
+﻿#ifndef _MARIMO_DIALOG_CONSOLE_H_
 #define _MARIMO_DIALOG_CONSOLE_H_
 class IStreamLogger;
 class GAMEENGINE_API CDlgConsole : public CMODialog, public CMOButtonReceiver//, public CGXListBoxReceiver

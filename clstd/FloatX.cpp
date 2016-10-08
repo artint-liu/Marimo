@@ -1,4 +1,4 @@
-#include "clstd.h"
+﻿#include "clstd.h"
 //#include "clUtility.H"
 //#include "FloatX.h"
 
@@ -196,7 +196,7 @@ namespace clstd
   }
 } // namespace clstd
 
-// ���˳�򲻶�,Ҫ�޸�!!!
+// 这个顺序不对,要修改!!!
 //public static Vector3 QuaternionToEuclidean(Quaternion rotation)
 //{
 //  Vector3 rotationaxes = new Vector3();

@@ -1,4 +1,4 @@
-//#define _GRAPHX_FOUNDATION_CLASS_H_ // ох╫Шж╧уБ╦Жнд╪Ч
+О╩©//#define _GRAPHX_FOUNDATION_CLASS_H_ // Е┘┬Г╕│Ф╜╒Х©≥Д╦╙Ф√┤Д╩╤
 //#ifndef _GRAPHX_FOUNDATION_CLASS_H_
 //#define _GRAPHX_FOUNDATION_CLASS_H_
 //

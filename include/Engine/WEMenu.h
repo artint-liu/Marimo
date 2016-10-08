@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_WINE_MENU_H_
+﻿#ifndef _GRAP_X_WINE_MENU_H_
 #define _GRAP_X_WINE_MENU_H_
 
 class GAMEENGINE_API CWEMenu

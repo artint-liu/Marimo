@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_UI_PROPERTY_SHEET_H_
+Ôªø#ifndef _GRAP_X_UI_PROPERTY_SHEET_H_
 #define _GRAP_X_UI_PROPERTY_SHEET_H_
 
 class GXSprite;
@@ -38,7 +38,7 @@ public:
   virtual GXLRESULT     InvokeReceiver(GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);
   virtual GXLRESULT     InvokeReceiver(GXNMHDR* pnmhdr);
 
-  virtual GXLRESULT     Invoke        (CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // ¥¶¿ÌWM_COMMAND
+  virtual GXLRESULT     Invoke        (CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // Â§ÑÁêÜWM_COMMAND
   virtual GXLRESULT     Invoke        (CGXReceiver* pReceiver, GXNMHDR* pnmhdr);
 #endif // #ifdef REFACTOR_GXFC
 

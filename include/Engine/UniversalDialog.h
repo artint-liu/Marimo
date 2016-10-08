@@ -1,4 +1,4 @@
-#ifndef _GAMEENGINE_UNIVERSAL_DIALOG_H_
+﻿#ifndef _GAMEENGINE_UNIVERSAL_DIALOG_H_
 #define _GAMEENGINE_UNIVERSAL_DIALOG_H_
 
 class GAMEENGINE_API CUniversalDialog : public CMODialog, public CMOButtonReceiver, public CMOListBoxReceiver

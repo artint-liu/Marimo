@@ -1,4 +1,4 @@
-//GXLRESULT GTextureImpl::OnDeviceEvent(DeviceEvent eEvent)
+ï»¿//GXLRESULT GTextureImpl::OnDeviceEvent(DeviceEvent eEvent)
 //{
 //  if(m_Format == GXFMT_UNKNOWN)
 //    return GX_FAIL;
@@ -71,7 +71,7 @@
 //        break;
 //      }
 //
-//      GLint level  = 0;  // ¶Ô»ù²ãÎÆÀí½øĞĞ²Ù×÷
+//      GLint level  = 0;  // å¯¹åŸºå±‚çº¹ç†è¿›è¡Œæ“ä½œ
 //      const GXFormatCategory eFmtCate = GetGraphicsFormatCategory(m_Format);
 //
 //      //GXUINT nWidth, nHeight;
@@ -97,7 +97,7 @@
 //
 //        GLVERIFY(GLBindTexture(GL_TEXTURE_2D, m_uTexture));
 //        GLASSERT(glTexImage2D(GL_TEXTURE_2D, level, m_glInternalFormat, m_nWidth, m_nHeight, 0, m_glFormat, m_glType, (GLvoid*)m_pLockedData));
-//        // ²ÉÑùÆ÷
+//        // é‡‡æ ·å™¨
 //        GLVERIFY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
 //        GLVERIFY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 //        GLVERIFY(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
@@ -182,7 +182,7 @@ GXLRESULT GTextureImpl::Release()
     //OnDeviceEvent(DE_LostDevice);
     INVOKE_LOST_DEVICE;
 
-    // m_uTexture Îª¿ÕËµÃ÷´´½¨Ê§°Ü,´ËÊ±»¹Ã»ÓĞ×¢²á
+    // m_uTexture ä¸ºç©ºè¯´æ˜åˆ›å»ºå¤±è´¥,æ­¤æ—¶è¿˜æ²¡æœ‰æ³¨å†Œ
     if(m_uTexture != NULL)
     {
       m_pGraphics->UnregisterResource(this);
@@ -323,7 +323,7 @@ GXBOOL GTextureImpl::CopyRect(GTexture* pSrc, const GXLPCRECT lpRect)
   else
   {
     //GLuint uFrameBuffer = m_pGraphics->GetFrameBuffer();
-    // ! ÆäÊµÕâÀïÃæµÄ Height ¾ÍÏàµ±ÓÚ GXGraphics µÄ m_uTargetHeight
+    // ! å…¶å®è¿™é‡Œé¢çš„ Height å°±ç›¸å½“äº GXGraphics çš„ m_uTargetHeight
     GXUINT uSrcRectHeight = rect.bottom - rect.top;
 
     GLuint uPrevTexture = m_pGraphics->IntSetTargetTexture(pSrcImpl->m_uTexture);
@@ -374,7 +374,7 @@ GXBOOL GTextureImpl::StretchRect(GTexture* pSrc, const GXLPCRECT lpDestRect, con
   GLuint uTexture = 0;
   //GLVERIFY(glGenTextures(1, &uTexture));
 
-  // Õë¶ÔÃ»ÓĞËõ·ÅÇé¿öµÄ´¦Àí
+  // é’ˆå¯¹æ²¡æœ‰ç¼©æ”¾æƒ…å†µçš„å¤„ç†
   if(rcDst.right - rcDst.left == rcSrc.right - rcSrc.left && 
     rcDst.bottom - rcDst.top == rcSrc.bottom - rcSrc.top )
   {
@@ -394,7 +394,7 @@ GXBOOL GTextureImpl::StretchRect(GTexture* pSrc, const GXLPCRECT lpDestRect, con
       m_pGraphics->IntSetTargetTexture(uPrevTexture);
     return TRUE;
   }
-  TRACE(">error: GTextureImpl::StretchRect: Ã»ÊµÏÖËõ·Å¿½±´.\n");
+  TRACE(">error: GTextureImpl::StretchRect: æ²¡å®ç°ç¼©æ”¾æ‹·è´.\n");
   GLuint uPrevTexture = m_pGraphics->IntSetTargetTexture(pSrcImpl->m_uTexture);
   //GLVERIFY(glBindFramebuffer(GL_FRAMEBUFFER, uFrameBuffer));
   //GLVERIFY(glFramebufferTexture2D(GL_FRAMEBUFFER, 
@@ -580,7 +580,7 @@ GXHRESULT GTextureImpl::Create(
   m_nHeight      = TexSize->cy;
   if(ImageSize == NULL)
   {
-    // TexSize ¿ÉÄÜÊÇ±ÈÂÊ
+    // TexSize å¯èƒ½æ˜¯æ¯”ç‡
     m_nWidthRatio  = (GXSHORT)TexSize->cx;
     m_nHeightRatio = (GXSHORT)TexSize->cy;
   }
@@ -589,12 +589,12 @@ GXHRESULT GTextureImpl::Create(
     m_nWidthRatio  = (GXSHORT)ImageSize->cx;
     m_nHeightRatio = (GXSHORT)ImageSize->cy;
 
-    // TexSize ÊÇÈ·¶¨µÄÖµ
+    // TexSize æ˜¯ç¡®å®šçš„å€¼
     ASSERT(TexSize->cx > 0 && TexSize->cy > 0);
   }
-  ASSERT(MipLevels == 1);  // ÔİÊ±²»Ö§³Ö¶àÖØÎÆÀí
+  ASSERT(MipLevels == 1);  // æš‚æ—¶ä¸æ”¯æŒå¤šé‡çº¹ç†
 
-  // ´«µİ³õÊ¼»¯Í¼ÏóÊı¾İ
+  // ä¼ é€’åˆå§‹åŒ–å›¾è±¡æ•°æ®
   m_pLockedData = (GXBYTE*)lpBits;
   //OnDeviceEvent(DE_ResetDevice);
 

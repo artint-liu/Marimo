@@ -1,4 +1,4 @@
-//#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+ï»¿//#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 #ifdef _GXGRAPHICS_INLINE_
 #error Duplicate include this file
 #else
@@ -111,10 +111,10 @@ GXHRESULT GXGraphicsImpl::InlSetCanvas(GXCanvasCore *pCanvasCore)
   if(m_pCurCanvasCore == (GXCanvasCore*)pCanvasCore)
     return GX_OK;
 
-  // ÊÍ·ÅÉÏÒ»¸ö¶ÔÏó
+  // é‡Šæ”¾ä¸Šä¸€ä¸ªå¯¹è±¡
   SAFE_RELEASE(m_pCurCanvasCore);
 
-  // ÒıÓÃÕâ¸ö¶ÔÏó
+  // å¼•ç”¨è¿™ä¸ªå¯¹è±¡
   GXHRESULT hr = 0;
   m_pCurCanvasCore = (GXCanvasCore*)pCanvasCore;
   if(pCanvasCore != NULL)
@@ -444,7 +444,7 @@ inline GXBOOL GXGraphicsImpl::InlSetStateT(_TState*& pCurState, _TState* pState)
     return TRUE;
   }
 
-  // Èç¹ûÊ§°Ü¾Í»»»ØÀ´
+  // å¦‚æœå¤±è´¥å°±æ¢å›æ¥
   pCurState = pPrevState;
   return FALSE;
 }
@@ -471,11 +471,11 @@ inline GXBOOL GXGraphicsImpl::InlSetRasterizerState(GRasterizerStateImpl* pRaste
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
 
 #ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
-// TODO: Õâ¸ö¿ÉÒÔºÍInlSetDepthStencilStateºÏ²¢ÎªÄ£°å
+// TODO: è¿™ä¸ªå¯ä»¥å’ŒInlSetDepthStencilStateåˆå¹¶ä¸ºæ¨¡æ¿
 GXBOOL GXGraphicsImpl::InlSetBlendState(GBlendStateImpl* pBlendState)
 {
   return InlSetStateT(m_pCurBlendState, pBlendState);
-  //ASSERT(pBlendState != NULL); // ²»ÄÜÎª¿Õ
+  //ASSERT(pBlendState != NULL); // ä¸èƒ½ä¸ºç©º
 
   //if(m_pCurBlendState == pBlendState) {
   //  return TRUE;
@@ -491,7 +491,7 @@ GXBOOL GXGraphicsImpl::InlSetBlendState(GBlendStateImpl* pBlendState)
   //  return TRUE;
   //}
 
-  //// Èç¹ûÊ§°Ü¾Í»»»ØÀ´
+  //// å¦‚æœå¤±è´¥å°±æ¢å›æ¥
   //m_pCurBlendState = pPrevState;
   //return FALSE;
 }
@@ -501,7 +501,7 @@ GXBOOL GXGraphicsImpl::InlSetBlendState(GBlendStateImpl* pBlendState)
 inline GXBOOL GXGraphicsImpl::InlSetDepthStencilState (GDepthStencilStateImpl* pDepthStencilState)
 {
   return InlSetStateT(m_pCurDepthStencilState, pDepthStencilState);
-  //ASSERT(pDepthStencilState != NULL); // ²»ÄÜÎª¿Õ
+  //ASSERT(pDepthStencilState != NULL); // ä¸èƒ½ä¸ºç©º
 
   //if(m_pCurDepthStencilState == pDepthStencilState) {
   //  return TRUE;
@@ -517,7 +517,7 @@ inline GXBOOL GXGraphicsImpl::InlSetDepthStencilState (GDepthStencilStateImpl* p
   //  return TRUE;
   //}
 
-  //// Èç¹ûÊ§°Ü¾Í»»»ØÀ´
+  //// å¦‚æœå¤±è´¥å°±æ¢å›æ¥
   //m_pCurDepthStencilState = pPrevState;
   //return FALSE;
 }
@@ -533,19 +533,19 @@ GXBOOL GXGraphicsImpl::InlSetSamplerState(GSamplerStateImpl* pSamplerState)
   //if(pSamplerState == m_pCurSamplerState)
   //  return TRUE;
 
-  //// ·ÅÖÃĞÂµÄ SamplerState µ½ Graphics ÉÏ
+  //// æ”¾ç½®æ–°çš„ SamplerState åˆ° Graphics ä¸Š
   //GSamplerStateImpl* pPrevSamplerState = m_pCurSamplerState;
   //m_pCurSamplerState = pSamplerState;
 
   //if(pSamplerState->Activate(pPrevSamplerState) != FALSE)
   //{
-  //  // ³É¹¦µÄ»°,ÊÍ·ÅÖ®Ç°µÄ,¶ÔĞÂµÄÔö¼ÓÒıÓÃ
+  //  // æˆåŠŸçš„è¯,é‡Šæ”¾ä¹‹å‰çš„,å¯¹æ–°çš„å¢åŠ å¼•ç”¨
   //  SAFE_RELEASE(pPrevSamplerState);
   //  m_pCurSamplerState->AddRef();
   //  return TRUE;
   //}
 
-  //// Èç¹ûÊ§°Ü¾Í»»»ØÀ´
+  //// å¦‚æœå¤±è´¥å°±æ¢å›æ¥
   //m_pCurSamplerState = pPrevSamplerState;
   //return FALSE;
 }

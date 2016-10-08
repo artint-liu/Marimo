@@ -11,7 +11,7 @@
 #include "GrapX/GXCanvas.H"
 #include "GrapX/MOSprite.H"
 #include "GrapX/GXGraphics.H"
-#include "GrapX/GXKernel.H"
+//#include "GrapX/GXKernel.H"
 
 // 私有头文件
 #include <clPathFile.h>
@@ -112,7 +112,7 @@ namespace Marimo
       for(auto unit_sect = sect.Open(NULL); unit_sect; ++unit_sect)
       {
         Sprite::FRAME_UNIT unit = {0};
-        gxSetRegn(&unit.regn, -1, -1, -1, -1);
+        unit.regn.set(-1);
 
         if(unit_sect.SectionName() == "module")
         {
@@ -125,6 +125,9 @@ namespace Marimo
             }
             else if(unit_attr.key == "id") {
               unit.nModuleIdx = unit_attr.ToInt(); // ID暂存到index中
+            }
+            else if(unit_attr.key == "rotate") {
+              unit.rotate = unit_attr.ToInt();
             }
           }
           aFrameUnits.push_back(unit);
@@ -152,6 +155,9 @@ namespace Marimo
       {
         if(LoadCommon(anim, attr)) {
           continue;
+        }
+        else if(attr.key == "rate") {
+          anim.rate = attr.ToInt();
         }
         else if(attr.key == "frames")
         {

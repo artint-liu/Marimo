@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////
 GShader* GShaderStubImpl::GetShaderUnsafe() GXCONST
 {
   return m_pShaderImpl;
@@ -35,7 +35,7 @@ GXUINT GShaderStubImpl::GetSamplerStageByHandle(GXUINT handle) GXCONST
 
 GXBOOL GShaderStubImpl::SetUniformByHandle(clBufferBase* pUnusualUnifom, GXUINT uHandle, float* fValue, GXINT nFloatCount)
 {
-  // Ӧ����֤�Ƿǰ󶨱���
+  // 应该验证是非绑定变量
   return IntSetUniform(&(m_pShaderImpl->GetConstantDescTable().front()),
     uHandle, fValue, nFloatCount, pUnusualUnifom ? (float4*)pUnusualUnifom->GetPtr() : NULL);
 }

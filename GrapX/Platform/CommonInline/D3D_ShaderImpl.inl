@@ -1,4 +1,4 @@
-
+﻿
 GXGraphics* GShaderImpl::GetGraphicsUnsafe() GXCONST
 {
   return m_pGraphicsImpl;

@@ -1,4 +1,4 @@
-#ifndef _GRAPH_X_IMAGE_H_
+ï»¿#ifndef _GRAPH_X_IMAGE_H_
 #define _GRAPH_X_IMAGE_H_
 
 class GTexture;
@@ -6,10 +6,10 @@ class GRegion;
 
 enum HelperState
 {
-  HS_Create,    // ´´½¨Helper¶ÔÏó
-  HS_Release,   // ÊÍ·Å
-  HS_Hold,      // ±£´æÖ÷ÎÆÀí¶ÔÏóÄÚÈİ
-  HS_Fetch,     // ½«HelperÄÚÈİ¸üĞÂµ½Ö÷ÎÆÀí
+  HS_Create,    // åˆ›å»ºHelperå¯¹è±¡
+  HS_Release,   // é‡Šæ”¾
+  HS_Hold,      // ä¿å­˜ä¸»çº¹ç†å¯¹è±¡å†…å®¹
+  HS_Fetch,     // å°†Helperå†…å®¹æ›´æ–°åˆ°ä¸»çº¹ç†
 };
 
 class GXImage : public GResource
@@ -25,11 +25,11 @@ public:
   GXSTDINTERFACE(GXHRESULT SetHelperState   (HelperState eState, GXLPARAM lParam));
   GXSTDINTERFACE(GXBOOL    BitBltRegion     (GXImage* pSource, int xDest, int yDest, GRegion* lprgnSource));
   GXSTDINTERFACE(GXBOOL    Scroll           (int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate));
-  GXSTDINTERFACE(GXHRESULT GetTexture       (GTexture** ppTexture) const);              // Õâ¸öÄã¶®µÄ,ÓÃÍêÒªÊÍ·Å!
+  GXSTDINTERFACE(GXHRESULT GetTexture       (GTexture** ppTexture) const);              // è¿™ä¸ªä½ æ‡‚çš„,ç”¨å®Œè¦é‡Šæ”¾!
 
   // =====================================================================================
-  GXSTDINTERFACE(GTexture* GetTextureUnsafe ());                          // ÓÃÓÚ¿ìËÙÈ¡ÎÆÀí¶ÔÏó, Õâ¸ö½Ó¿Ú²»»áÔö¼ÓÎÆÀíµÄÒıÓÃ¼ÆÊı
-  GXSTDINTERFACE(GXBOOL    SaveToFileW      (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));  // µ÷ÊÔÓÃµÄº¯Êı, ¿ÉÒÔ½«ÎÆÀí±£´æµ½Ò»¸öÍ¼ÏñÎÄ¼şÖĞ, ¸ñÊ½¿ÉÒÔÎª"BMP","PNG"»ò"DDS"µÈ, ºöÂÔ´óĞ¡Ğ´
+  GXSTDINTERFACE(GTexture* GetTextureUnsafe ());                          // ç”¨äºå¿«é€Ÿå–çº¹ç†å¯¹è±¡, è¿™ä¸ªæ¥å£ä¸ä¼šå¢åŠ çº¹ç†çš„å¼•ç”¨è®¡æ•°
+  GXSTDINTERFACE(GXBOOL    SaveToFileW      (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));  // è°ƒè¯•ç”¨çš„å‡½æ•°, å¯ä»¥å°†çº¹ç†ä¿å­˜åˆ°ä¸€ä¸ªå›¾åƒæ–‡ä»¶ä¸­, æ ¼å¼å¯ä»¥ä¸º"BMP","PNG"æˆ–"DDS"ç­‰, å¿½ç•¥å¤§å°å†™
 
 };
 

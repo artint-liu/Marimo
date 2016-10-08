@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_WINE_TREEVIEW_H_
+﻿#ifndef _GRAP_X_WINE_TREEVIEW_H_
 #define _GRAP_X_WINE_TREEVIEW_H_
 
 //class CMOWnd;
@@ -70,14 +70,14 @@ public:
   virtual GXLRESULT InvokeNotify  (GXNMHDR* pnmhdr);
 #endif // #ifdef REFACTOR_GXFC
 
-  virtual void    DeleteItem    (CWETreeView* pTreeView);  // TODO: ûʵ��
-  virtual void    GetDispInfo   (CWETreeView* pTreeView);  // TODO: ûʵ��
+  virtual void    DeleteItem    (CWETreeView* pTreeView);  // TODO: 没实现
+  virtual void    GetDispInfo   (CWETreeView* pTreeView);  // TODO: 没实现
   virtual void    ItemExpanded  (CWETreeView* pTreeView, CWETreeView::Expand eAction, GXTV_ITEM* tvi);
   virtual GXBOOL  ItemExpanding (CWETreeView* pTreeView, CWETreeView::Expand eAction, GXTV_ITEM* tvi);
-  virtual void    KeyDown       (CWETreeView* pTreeView);  // TODO: ûʵ��
+  virtual void    KeyDown       (CWETreeView* pTreeView);  // TODO: 没实现
   virtual void    SelChanged    (CWETreeView* pTreeView, CWETreeView::Change eAction, GXTV_ITEM* tviPrev, GXTV_ITEM* tviNew);
   virtual GXBOOL  SelChanging   (CWETreeView* pTreeView, CWETreeView::Change eAction, GXTV_ITEM* tviPrev, GXTV_ITEM* tviNew);
-  virtual void    SetDispInfo   (CWETreeView* pTreeView);  // TODO: ûʵ��
+  virtual void    SetDispInfo   (CWETreeView* pTreeView);  // TODO: 没实现
 };
 
 typedef CWETreeView *LPWETREEVIEW, *PWETREEVIEW;

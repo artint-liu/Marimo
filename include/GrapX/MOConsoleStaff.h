@@ -1,4 +1,4 @@
-#ifndef _MARIMO_CONSOLE_STAFF_H_
+ï»¿#ifndef _MARIMO_CONSOLE_STAFF_H_
 #define _MARIMO_CONSOLE_STAFF_H_
 
 struct STAFFCAPSDESC
@@ -16,10 +16,10 @@ public:
   GXSTDINTERFACE(GXHRESULT        AddRef      ());
   GXSTDINTERFACE(GXHRESULT        Release     ());
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXSTDINTERFACE(LPCSTAFFCAPSDESC GetCapacity () const); // »ñµÃCommandÊµÏÖÁĞ±í£¬CommandÈ«¾Ö±ØĞëÎ¨Ò»
-  //GXSTDINTERFACE(GXHRESULT        Execute     (int nCmdIndex, const clStringArray* pCmdList)); // Ö´ĞĞÃüÁînCmdIndexÊÇCommandÊµÏÖÁĞ±íÖĞµÄË÷Òı£¬ÓÃÀ´¿ìËÙ¶¨Î», pCmdListÓĞ¿ÉÄÜÎªNULL
-  GXSTDINTERFACE(GXHRESULT        Execute     (int nCmdIndex, const clStringW* argv, int argc)); // Ö´ĞĞÃüÁînCmdIndexÊÇCommandÊµÏÖÁĞ±íÖĞµÄË÷Òı£¬ÓÃÀ´¿ìËÙ¶¨Î», pCmdListÓĞ¿ÉÄÜÎªNULL
-  //GXSTDINTERFACE(const clStringA& GetName     ()); // µ±Ç°StaffµÄÃû×Ö£¬CommandÈ«¾Ö±ØĞëÎ¨Ò»
+  GXSTDINTERFACE(LPCSTAFFCAPSDESC GetCapacity () const); // è·å¾—Commandå®ç°åˆ—è¡¨ï¼ŒCommandå…¨å±€å¿…é¡»å”¯ä¸€
+  //GXSTDINTERFACE(GXHRESULT        Execute     (int nCmdIndex, const clStringArray* pCmdList)); // æ‰§è¡Œå‘½ä»¤nCmdIndexæ˜¯Commandå®ç°åˆ—è¡¨ä¸­çš„ç´¢å¼•ï¼Œç”¨æ¥å¿«é€Ÿå®šä½, pCmdListæœ‰å¯èƒ½ä¸ºNULL
+  GXSTDINTERFACE(GXHRESULT        Execute     (int nCmdIndex, const clStringW* argv, int argc)); // æ‰§è¡Œå‘½ä»¤nCmdIndexæ˜¯Commandå®ç°åˆ—è¡¨ä¸­çš„ç´¢å¼•ï¼Œç”¨æ¥å¿«é€Ÿå®šä½, pCmdListæœ‰å¯èƒ½ä¸ºNULL
+  //GXSTDINTERFACE(const clStringA& GetName     ()); // å½“å‰Staffçš„åå­—ï¼ŒCommandå…¨å±€å¿…é¡»å”¯ä¸€
 };
 
 class MOKeyboardStaff : public IConsoleStaff

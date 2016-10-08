@@ -1,4 +1,4 @@
-#ifndef _GRAPHICS_X_ERROR_DEFINE_H_
+﻿#ifndef _GRAPHICS_X_ERROR_DEFINE_H_
 #define _GRAPHICS_X_ERROR_DEFINE_H_
 
 #define GXERROR_INVALID_PARAMETER          87L    // dderror

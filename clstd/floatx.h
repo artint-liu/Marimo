@@ -1,4 +1,4 @@
-#ifndef _FLOAT_X_IMPL_H_
+ï»¿#ifndef _FLOAT_X_IMPL_H_
 #define _FLOAT_X_IMPL_H_
 
 #ifndef _CL_STD_CODE_
@@ -20,9 +20,9 @@ namespace clstd
 
   struct _float2
   {
-    // [¶şÎ¬Ö±½Ç×ø±êÏµ]
-    // ÓÒÊÖ×ø±êÏµ£ºxÖáÏòÓÒ£¬yÖáÏòÉÏ£¬³£¼ûÓÚÆ½Ãæ½âÎö¼¸ºÎ×ø±êÏµ
-    // ×óÊÖ×ø±êÏµ£ºxÖáÏòÓÒ£¬yÖáÏòÏÂ£¬³£¼ûÓÚÆÁÄ»×ø±êÏµ
+    // [äºŒç»´ç›´è§’åæ ‡ç³»]
+    // å³æ‰‹åæ ‡ç³»ï¼šxè½´å‘å³ï¼Œyè½´å‘ä¸Šï¼Œå¸¸è§äºå¹³é¢è§£æå‡ ä½•åæ ‡ç³»
+    // å·¦æ‰‹åæ ‡ç³»ï¼šxè½´å‘å³ï¼Œyè½´å‘ä¸‹ï¼Œå¸¸è§äºå±å¹•åæ ‡ç³»
 
     typedef float Type;
     union
@@ -149,8 +149,8 @@ namespace clstd
       return l;
     }
 
-    // ÉèÖÃÎªp0Ö¸Ïòp1µÄÏòÁ¿µÄ´¹Ïß
-    // ÓÒÊÖ×ø±êÏµÀï·¨ÏßÔÚ(p1-p0)µÄË³Ê±Õë·½Ïò
+    // è®¾ç½®ä¸ºp0æŒ‡å‘p1çš„å‘é‡çš„å‚çº¿
+    // å³æ‰‹åæ ‡ç³»é‡Œæ³•çº¿åœ¨(p1-p0)çš„é¡ºæ—¶é’ˆæ–¹å‘
     _float2& perpendicular(const _float2& p0, const _float2& p1)
     {
       x = p1.y - p0.y;
@@ -158,16 +158,16 @@ namespace clstd
       return *this;
     }
 
-    // ÉèÖÃÎªp0Ö¸Ïòp1µÄÏòÁ¿µÄ·¨Ïß, ·µ»ØÖµÊÇÄ£
-    // ÓÒÊÖ×ø±êÏµÀï·¨ÏßÔÚ(p1-p0)µÄË³Ê±Õë·½Ïò
+    // è®¾ç½®ä¸ºp0æŒ‡å‘p1çš„å‘é‡çš„æ³•çº¿, è¿”å›å€¼æ˜¯æ¨¡
+    // å³æ‰‹åæ ‡ç³»é‡Œæ³•çº¿åœ¨(p1-p0)çš„é¡ºæ—¶é’ˆæ–¹å‘
     float normal(const _float2& p0, const _float2& p1)
     {
       perpendicular(p0, p1);
       return normalize();
     }
 
-    // Çó×÷ÎªÏòÁ¿Ê±£¬vÊÇ·ñÔÚthisµÄË³Ê±Õë·½Ïò, 
-    // ÓÒÊÖ×ø±êÏµ£¬´óÓÚ0ÊÇË³Ê±Õë£¬µÈÓÚ0ÊÇÖØºÏ£¬Ğ¡ÓÚ0ÊÇÄæÊ±Õë
+    // æ±‚ä½œä¸ºå‘é‡æ—¶ï¼Œvæ˜¯å¦åœ¨thisçš„é¡ºæ—¶é’ˆæ–¹å‘, 
+    // å³æ‰‹åæ ‡ç³»ï¼Œå¤§äº0æ˜¯é¡ºæ—¶é’ˆï¼Œç­‰äº0æ˜¯é‡åˆï¼Œå°äº0æ˜¯é€†æ—¶é’ˆ
     float IsClockwise(const _float2& v) const
     {
       return y * v.x - x * v.y;
@@ -182,12 +182,12 @@ namespace clstd
       return fabs(x - v.x) < epsilon && fabs(y - v.y) < epsilon;
     }
 
-    Type GetMinScalar() const // »ñµÃ·ÖÁ¿ÖĞ×îĞ¡µÄ±êÁ¿
+    Type GetMinScalar() const // è·å¾—åˆ†é‡ä¸­æœ€å°çš„æ ‡é‡
     {
       return x < y ? x : y;
     }
 
-    Type GetMaxScalar() const // »ñµÃ·ÖÁ¿ÖĞ×î´óµÄ±êÁ¿
+    Type GetMaxScalar() const // è·å¾—åˆ†é‡ä¸­æœ€å¤§çš„æ ‡é‡
     {
       return x > y ? x : y;
     }
@@ -459,12 +459,12 @@ namespace clstd
     void Min(const _float3& v);
     void Max(const _float3& v);
 
-    Type GetMinScalar() const // »ñµÃ·ÖÁ¿ÖĞ×îĞ¡µÄ±êÁ¿
+    Type GetMinScalar() const // è·å¾—åˆ†é‡ä¸­æœ€å°çš„æ ‡é‡
     {
       return x < y ? (x < z ? x : z) : (y < z ? y : z);
     }
 
-    Type GetMaxScalar() const // »ñµÃ·ÖÁ¿ÖĞ×î´óµÄ±êÁ¿
+    Type GetMaxScalar() const // è·å¾—åˆ†é‡ä¸­æœ€å¤§çš„æ ‡é‡
     {
       return x > y ? (x > z ? x : z) : (y > z ? y : z);
     }
@@ -633,7 +633,7 @@ namespace clstd
       return l;
     }
 
-    Type GetMinScalar() const // »ñµÃ·ÖÁ¿ÖĞ×îĞ¡µÄ±êÁ¿
+    Type GetMinScalar() const // è·å¾—åˆ†é‡ä¸­æœ€å°çš„æ ‡é‡
     {
       Type t = x < y ? x : y;
       t = t < z ? t : z;
@@ -641,7 +641,7 @@ namespace clstd
       return t;
     }
 
-    Type GetMaxScalar() const // »ñµÃ·ÖÁ¿ÖĞ×î´óµÄ±êÁ¿
+    Type GetMaxScalar() const // è·å¾—åˆ†é‡ä¸­æœ€å¤§çš„æ ‡é‡
     {
       Type t = x > y ? x : y;
       t = t > z ? t : z;

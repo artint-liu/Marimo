@@ -1,10 +1,10 @@
-#ifndef _G_CAMERA_H_
+ï»¿#ifndef _G_CAMERA_H_
 #define _G_CAMERA_H_
 
 class GXCanvasCore;
 #include <3D/Camera.h>
 //
-// GCAMERACONETXT µÄÑÚÂë
+// GCAMERACONETXT çš„æ©ç 
 enum
 {
   GCC_WORLD       = 0x00000001,
@@ -16,7 +16,7 @@ enum
 
 struct GCAMERACONETXT
 {
-  GXDWORD   dwMask;         // In/Out ÊäÈë±íÊ¾ĞèÇó, ·µ»ØµÄÊÇÊµ¼Ê¼ÆËãµÄ
+  GXDWORD   dwMask;         // In/Out è¾“å…¥è¡¨ç¤ºéœ€æ±‚, è¿”å›çš„æ˜¯å®é™…è®¡ç®—çš„
   float4x4  matWorld;       // Out
   float4x4  matView;        // Out
   float4x4  matProjection;  // Out
@@ -43,16 +43,16 @@ public:
   virtual GXHRESULT GetContext (GCAMERACONETXT* pCamContext);
 
   GXSTDINTERFACE(CameraType    GetType           () GXCONST);
-  GXSTDINTERFACE(void          DeltaPitch        (float fDelta));   // ÆÁÄ»xÖá
-  GXSTDINTERFACE(void          DeltaYaw          (float fDelta));   // ÆÁÄ»yÖá
-  GXSTDINTERFACE(void          DeltaRoll         (float fDelta));   // ÆÁÄ»zÖá
+  GXSTDINTERFACE(void          DeltaPitch        (float fDelta));   // å±å¹•xè½´
+  GXSTDINTERFACE(void          DeltaYaw          (float fDelta));   // å±å¹•yè½´
+  GXSTDINTERFACE(void          DeltaRoll         (float fDelta));   // å±å¹•zè½´
   GXSTDINTERFACE(void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll));
-  GXSTDINTERFACE(void          Translation       (const float2& vOffset));  // ÆÁÄ»¿Õ¼äÆ½ÒÆ
+  GXSTDINTERFACE(void          Translation       (const float2& vOffset));  // å±å¹•ç©ºé—´å¹³ç§»
   GXSTDINTERFACE(void          SetPos            (const float3& vPos));
   GXSTDINTERFACE(void          SetPosFront       (const float3& vPos, const float3& vFront));
   GXSTDINTERFACE(CFloat3&      GetPos            () GXCONST);
-  GXSTDINTERFACE(CFloat3&      GetUp             () GXCONST); // ³õÊ¼»¯Ê±µÄÏòÉÏµÄ·½Ïò
-  GXSTDINTERFACE(CFloat3&      GetTop            () GXCONST); // ÉãÏñ»úµÄ¶¥·½Ïò,²»ÊÇUp,¸©Ñö½Ç¸Ä±äµÄ»°Õâ¸ö»á¸Ä±ä
+  GXSTDINTERFACE(CFloat3&      GetUp             () GXCONST); // åˆå§‹åŒ–æ—¶çš„å‘ä¸Šçš„æ–¹å‘
+  GXSTDINTERFACE(CFloat3&      GetTop            () GXCONST); // æ‘„åƒæœºçš„é¡¶æ–¹å‘,ä¸æ˜¯Up,ä¿¯ä»°è§’æ”¹å˜çš„è¯è¿™ä¸ªä¼šæ”¹å˜
   GXSTDINTERFACE(CFloat3&      GetRight          () GXCONST);
   GXSTDINTERFACE(CFloat3&      GetFront          () GXCONST);
   GXSTDINTERFACE(float         GetFov            () GXCONST);
@@ -73,16 +73,16 @@ public:
 public:
   virtual CameraType    GetType           () GXCONST;
   virtual GXHRESULT     GetContext        (GCAMERACONETXT* pCamContext);
-  virtual void          DeltaPitch        (float fDelta);   // ÆÁÄ»xÖá
-  virtual void          DeltaYaw          (float fDelta);   // ÆÁÄ»yÖá
-  virtual void          DeltaRoll         (float fDelta);   // ÆÁÄ»zÖá
+  virtual void          DeltaPitch        (float fDelta);   // å±å¹•xè½´
+  virtual void          DeltaYaw          (float fDelta);   // å±å¹•yè½´
+  virtual void          DeltaRoll         (float fDelta);   // å±å¹•zè½´
   virtual void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll);
   virtual void          Translation       (const float2& vOffset);
   virtual void          SetPos            (const float3& vPos);
   virtual void          SetPosFront       (const float3& vPos, const float3& vFront);
   virtual CFloat3&      GetPos            () GXCONST;
   virtual CFloat3&      GetUp             () GXCONST;
-  virtual CFloat3&      GetTop            () GXCONST; // ÉãÏñ»úµÄ¶¥·½Ïò,²»ÊÇUp
+  virtual CFloat3&      GetTop            () GXCONST; // æ‘„åƒæœºçš„é¡¶æ–¹å‘,ä¸æ˜¯Up
   virtual CFloat3&      GetRight          () GXCONST;
   virtual CFloat3&      GetFront          () GXCONST;
   virtual float         GetFov            () GXCONST;
@@ -106,16 +106,16 @@ public:
 public:
   virtual CameraType    GetType           () GXCONST;
   virtual GXHRESULT     GetContext        (GCAMERACONETXT* pCamContext);
-  virtual void          DeltaPitch        (float fDelta);   // ÆÁÄ»xÖá
-  virtual void          DeltaYaw          (float fDelta);   // ÆÁÄ»yÖá
-  virtual void          DeltaRoll         (float fDelta);   // ÆÁÄ»zÖá
+  virtual void          DeltaPitch        (float fDelta);   // å±å¹•xè½´
+  virtual void          DeltaYaw          (float fDelta);   // å±å¹•yè½´
+  virtual void          DeltaRoll         (float fDelta);   // å±å¹•zè½´
   virtual void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll);
   virtual void          Translation       (const float2& vOffset);
   virtual void          SetPos            (const float3& vPos);
   virtual void          SetPosFront       (const float3& vPos, const float3& vFront);
   virtual CFloat3&      GetPos            () GXCONST;
   virtual CFloat3&      GetUp             () GXCONST;
-  virtual CFloat3&      GetTop            () GXCONST; // ÉãÏñ»úµÄ¶¥·½Ïò,²»ÊÇUp
+  virtual CFloat3&      GetTop            () GXCONST; // æ‘„åƒæœºçš„é¡¶æ–¹å‘,ä¸æ˜¯Up
   virtual CFloat3&      GetRight          () GXCONST;
   virtual CFloat3&      GetFront          () GXCONST;
   virtual float         GetFov            () GXCONST;
@@ -134,16 +134,16 @@ public:
 public:
   virtual CameraType    GetType           () GXCONST;
   virtual GXHRESULT     GetContext        (GCAMERACONETXT* pCamContext);
-  virtual void          DeltaPitch        (float fDelta);   // ÆÁÄ»xÖá
-  virtual void          DeltaYaw          (float fDelta);   // ÆÁÄ»yÖá
-  virtual void          DeltaRoll         (float fDelta);   // ÆÁÄ»zÖá
+  virtual void          DeltaPitch        (float fDelta);   // å±å¹•xè½´
+  virtual void          DeltaYaw          (float fDelta);   // å±å¹•yè½´
+  virtual void          DeltaRoll         (float fDelta);   // å±å¹•zè½´
   virtual void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll);
   virtual void          Translation       (const float2& vOffset);
   virtual void          SetPos            (const float3& vPos);
   virtual void          SetPosFront       (const float3& vPos, const float3& vFront);
   virtual CFloat3&      GetPos            () GXCONST;
   virtual CFloat3&      GetUp             () GXCONST;
-  virtual CFloat3&      GetTop            () GXCONST; // ÉãÏñ»úµÄ¶¥·½Ïò,²»ÊÇUp
+  virtual CFloat3&      GetTop            () GXCONST; // æ‘„åƒæœºçš„é¡¶æ–¹å‘,ä¸æ˜¯Up
   virtual CFloat3&      GetRight          () GXCONST;
   virtual CFloat3&      GetFront          () GXCONST;
   virtual float         GetFov            () GXCONST;

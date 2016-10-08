@@ -1,4 +1,4 @@
-#ifndef _MARIMO_ENGINE_HEIGHTFIELD_TERRAIN_H_
+ï»¿#ifndef _MARIMO_ENGINE_HEIGHTFIELD_TERRAIN_H_
 #define _MARIMO_ENGINE_HEIGHTFIELD_TERRAIN_H_
 
 namespace clstd
@@ -14,21 +14,21 @@ public:
   struct BLOCKDESC
   {
     GXSIZE_T      cbSize;
-    float3        vPos;           // ³õÊ¼Î»ÖÃ£¬Õâ¸öÎ»ÖÃÊÇÍø¸ñµÄÒ»¸ö½ÇÂä£¬²»ÊÇÖĞĞÄÎ»ÖÃ
-    int           nSegmentX;      // XÖá·Ö¶ÎÊı
-    int           nSegmentY;      // YÖá·Ö¶ÎÊı
-    float         fStride;        // Ã¿¸ö¶ÎµÄ²½·ù
-    const float*  pHeightfield;   // ¸ß¶È³¡Êı¾İ
-    int           cbHFPitch;      // pHeightfieldDataÃ¿ĞĞµÄ³¤¶È(bytes)
+    float3        vPos;           // åˆå§‹ä½ç½®ï¼Œè¿™ä¸ªä½ç½®æ˜¯ç½‘æ ¼çš„ä¸€ä¸ªè§’è½ï¼Œä¸æ˜¯ä¸­å¿ƒä½ç½®
+    int           nSegmentX;      // Xè½´åˆ†æ®µæ•°
+    int           nSegmentY;      // Yè½´åˆ†æ®µæ•°
+    float         fStride;        // æ¯ä¸ªæ®µçš„æ­¥å¹…
+    const float*  pHeightfield;   // é«˜åº¦åœºæ•°æ®
+    int           cbHFPitch;      // pHeightfieldDataæ¯è¡Œçš„é•¿åº¦(bytes)
     const float3* pNormals;
     int           cbNormalsPitch;
-    GXPOINT       ptID;           // Î»ÖÃID£¬Õâ¸ö¿ÉÄÜÊÇĞĞÁĞµÄÕûÊı×ø±ê£¬Ò²ÓĞ¿ÉÄÜÊÇĞĞÁĞË÷Òı£¬¾ßÌåÓÉËùÓĞÕß¾ö¶¨
-    GXDWORD       dwFlags;        // ²Î¿¼CREATIONFLAGS
+    GXPOINT       ptID;           // ä½ç½®IDï¼Œè¿™ä¸ªå¯èƒ½æ˜¯è¡Œåˆ—çš„æ•´æ•°åæ ‡ï¼Œä¹Ÿæœ‰å¯èƒ½æ˜¯è¡Œåˆ—ç´¢å¼•ï¼Œå…·ä½“ç”±æ‰€æœ‰è€…å†³å®š
+    GXDWORD       dwFlags;        // å‚è€ƒCREATIONFLAGS
     HeightfieldTerrain* pTerrain;
-    // #.pHeightfield ¸ß¶È³¡Êı¾İ
-    // 1.±ê×¼Ä£Ê½ÏÂÕâ¸öÊı¾İ³¤¶ÈÓ¦¸ÃÊÇ(nSegmentX + 1) * (nSegmentY + 1)
-    // 2.CreationFlag_EditableMeshÄ£Ê½ÏÂ³¤¶ÈÊÇ(nSegmentX + 3) * (nSegmentY + 3)
-    //   ±ßÔµÖ»»áÓÃÓë¼ÆËã·¨Ïß£¬²»»áÓÃÓÚ¹¹½¨Ä£ĞÍ¡£
+    // #.pHeightfield é«˜åº¦åœºæ•°æ®
+    // 1.æ ‡å‡†æ¨¡å¼ä¸‹è¿™ä¸ªæ•°æ®é•¿åº¦åº”è¯¥æ˜¯(nSegmentX + 1) * (nSegmentY + 1)
+    // 2.CreationFlag_EditableMeshæ¨¡å¼ä¸‹é•¿åº¦æ˜¯(nSegmentX + 3) * (nSegmentY + 3)
+    //   è¾¹ç¼˜åªä¼šç”¨ä¸è®¡ç®—æ³•çº¿ï¼Œä¸ä¼šç”¨äºæ„å»ºæ¨¡å‹ã€‚
   };
 
 
@@ -36,17 +36,17 @@ protected:
   GXPOINT m_ptID;
   int m_nVertCountX;
   int m_nVertCountY;
-  float m_fStride;  // Ã¿¸ö¶ÎµÄ²½·ù
+  float m_fStride;  // æ¯ä¸ªæ®µçš„æ­¥å¹…
 
 protected:
   HeightfieldTerrainBlock(GXGraphics* pGraphics);
 
-  // pNormalsÊı¾İĞèÒªÔÚpHeightfieldDataÒ²ÓĞĞ§µÄÇ°ÌáÏÂ²ÅÄÜÊ¹ÓÃ
+  // pNormalsæ•°æ®éœ€è¦åœ¨pHeightfieldDataä¹Ÿæœ‰æ•ˆçš„å‰æä¸‹æ‰èƒ½ä½¿ç”¨
   GXBOOL Initialize(GXGraphics* pGraphics, const BLOCKDESC* pDesc);
 
 public:
-  void SetColor(const float3& vPos);  // ÁÙÊ±
-  void SetHeight(HeightfieldTerrain* pTerrain, const float3& vPos, int nWidth, int nHeight, const float* pBrush);  // ÁÙÊ±
+  void SetColor(const float3& vPos);  // ä¸´æ—¶
+  void SetHeight(HeightfieldTerrain* pTerrain, const float3& vPos, int nWidth, int nHeight, const float* pBrush);  // ä¸´æ—¶
 public:
   static const GXDWORD Code = GXMAKEFOURCC('H','T','R','B');
   //************************************
@@ -54,7 +54,7 @@ public:
   // FullName:  HeightfieldTerrain::Create
   // Returns:   GXHRESULT
   // Qualifier:
-  // Parameter: HeightfieldTerrain** ppTerrain  µØĞÎ¶ÔÏó
+  // Parameter: HeightfieldTerrain** ppTerrain  åœ°å½¢å¯¹è±¡
   //************************************
   static GXHRESULT Create(GXGraphics* pGraphics, HeightfieldTerrainBlock** ppTerrain, const BLOCKDESC* pDesc);
 };
@@ -66,10 +66,10 @@ class GAMEENGINE_DLL HeightfieldTerrain : public GVMesh
 public:
   enum CREATIONFLAGS
   {
-    CreationFlag_EditableMesh = 0x00000001,  // ¿É±à¼­Íø¸ñ
+    CreationFlag_EditableMesh = 0x00000001,  // å¯ç¼–è¾‘ç½‘æ ¼
 
     // CreationFlag_EditableMesh
-    // ±à¼­Ä£Ê½ÏÂ£¬ËùÓĞÊ¹ÓÃµÄÍø¸ñ»áÏòÍâÀ©³äÒ»¸ñ£¬·½±ã·¨Ïß¼ÆËã
+    // ç¼–è¾‘æ¨¡å¼ä¸‹ï¼Œæ‰€æœ‰ä½¿ç”¨çš„ç½‘æ ¼ä¼šå‘å¤–æ‰©å……ä¸€æ ¼ï¼Œæ–¹ä¾¿æ³•çº¿è®¡ç®—
   };
 
   struct GROUPDESC
@@ -81,7 +81,7 @@ public:
     int       nBlockSegmentX;
     int       nBlockSegmentY;
     float     fStride;
-    const float* pHeightfieldData; // ³¤¶ÈÓ¦¸ÃÊÇ nWidth * nHeight
+    const float* pHeightfieldData; // é•¿åº¦åº”è¯¥æ˜¯ nWidth * nHeight
     int       cbPitch;
     CREATIONFLAGS dwFlags;
   };
@@ -97,7 +97,7 @@ protected:
   int       m_yCount;
   float     m_fBlockExtX;
   float     m_fBlockExtY;
-  IndicesArray  m_aIndices; // ±à¼­Ä£Ê½ÏÂÓÃÀ´¼ÆËã·¨ÏßµÄË÷Òı
+  IndicesArray  m_aIndices; // ç¼–è¾‘æ¨¡å¼ä¸‹ç”¨æ¥è®¡ç®—æ³•çº¿çš„ç´¢å¼•
 
   //float     m_fStride;
   CREATIONFLAGS m_dwFlags;

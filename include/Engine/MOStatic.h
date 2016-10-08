@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_UI_STATIC_H_
+Ôªø#ifndef _GRAP_X_UI_STATIC_H_
 #define _GRAP_X_UI_STATIC_H_
 
 class GXSprite;
@@ -35,7 +35,7 @@ public:
   //CMOWnd& operator=(CMOWnd* pWnd);
   //CMOWnd& operator=(CMOWnd& Wnd);
 
-  virtual GXLRESULT   Invoke(CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // ¥¶¿ÌWM_COMMAND
+  virtual GXLRESULT   Invoke(CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // Â§ÑÁêÜWM_COMMAND
 };
 
 class GAMEENGINE_API CGXStaticSprite : public CMOStatic

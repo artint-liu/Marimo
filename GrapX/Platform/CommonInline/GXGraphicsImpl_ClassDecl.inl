@@ -1,16 +1,16 @@
-public:
-  // ¹¹Ôìº¯Êı, ÉèÖÃ³ÉÔ±±äÁ¿µÄÄ¬ÈÏÖµ
+ï»¿public:
+  // æ„é€ å‡½æ•°, è®¾ç½®æˆå‘˜å˜é‡çš„é»˜è®¤å€¼
   GXGraphicsImpl();
 
   virtual GXHRESULT AddRef();
-  // ÊÍ·ÅËùÓĞ×ÊÔ´²¢×ÔÉ¾³ı
+  // é‡Šæ”¾æ‰€æœ‰èµ„æºå¹¶è‡ªåˆ é™¤
   virtual GXHRESULT Release();
 
-  // Éè±¸ÊÂ¼ş
+  // è®¾å¤‡äº‹ä»¶
   virtual GXHRESULT Invoke              (GRESCRIPTDESC* pDesc);
   virtual void      GetPlatformID       (GXPlaformIdentity* pIdentity);
 
-  // ¼¤»îº¯Êı,Ö®ºóµÄËùÓĞD3D²Ù×÷±ØĞëÓÉGraphics½Ó¿ÚÊµÏÖ
+  // æ¿€æ´»å‡½æ•°,ä¹‹åçš„æ‰€æœ‰D3Dæ“ä½œå¿…é¡»ç”±Graphicsæ¥å£å®ç°
   virtual GXBOOL    Activate            (GXBOOL bActive);
   virtual GXHRESULT Begin               ();
   virtual GXHRESULT End                 ();
@@ -28,7 +28,7 @@ public:
   virtual GXHRESULT SetPrimitiveV       (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0);
   virtual GXHRESULT SetPrimitiveVI      (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0);
 
-  // ÀíÂÛÉÏGXGraphicsÃ»ÓĞ Set** Ààº¯Êı, SetTexture ÀıÍâ, ÒòÎª SetTexture Í¬Ê±¼ç¸ºÕâÇå¿ÕÖ¸¶¨Éè±¸ÎÆÀíµÄÈÎÎñ
+  // ç†è®ºä¸ŠGXGraphicsæ²¡æœ‰ Set** ç±»å‡½æ•°, SetTexture ä¾‹å¤–, å› ä¸º SetTexture åŒæ—¶è‚©è´Ÿè¿™æ¸…ç©ºæŒ‡å®šè®¾å¤‡çº¹ç†çš„ä»»åŠ¡
   virtual GXHRESULT SetTexture            (GTextureBase* pTexture, GXUINT uStage = 0);
   virtual GXHRESULT SetRasterizerState    (GRasterizerState* pRasterizerState);
   virtual GXHRESULT SetBlendState         (GBlendState* pBlendState);
@@ -40,10 +40,10 @@ public:
   virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXINT BaseVertexIndex, const GXUINT MinIndex, const GXUINT NumVertices, const GXUINT StartIndex, const GXUINT PrimitiveCount);
 
   //////////////////////////////////////////////////////////////////////////
-  // µÍ¼¶º¯Êı
+  // ä½çº§å‡½æ•°
   // GTexture
 
-  // CreateTexture Ö§³Ö TEXSIZE_* ×åµÄ²ÎÊı×÷ÎªÎÆÀíµÄ¿í»ò¸ß.
+  // CreateTexture æ”¯æŒ TEXSIZE_* æ—çš„å‚æ•°ä½œä¸ºçº¹ç†çš„å®½æˆ–é«˜.
 
   // 2D Texture
   virtual GXHRESULT CreateTexture            (GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
@@ -86,7 +86,7 @@ public:
 
   virtual GXHRESULT   CreateVertexDeclaration (GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement);
   //////////////////////////////////////////////////////////////////////////
-  // ¸ß¼¶º¯Êı
+  // é«˜çº§å‡½æ•°
 
   // GXCanvas
   virtual GXCanvas*   LockCanvas              (GXImage* pImage, GXCONST LPREGN lpRegn, GXDWORD dwFlags);
@@ -104,8 +104,8 @@ public:
   virtual GXHRESULT   CreateSamplerState      (GSamplerState** ppSamplerState);
 
   // GXImage
-  // TODO: ¼´Ê¹´´½¨Ê§°Ü,Ò²»á·µ»ØÒ»¸öÄ¬ÈÏÍ¼Æ¬
-  // CreateImage Ö§³Ö TEXSIZE_* ×åµÄ²ÎÊıÖ¸¶¨ImageµÄ¿í»òÕß¸ß
+  // TODO: å³ä½¿åˆ›å»ºå¤±è´¥,ä¹Ÿä¼šè¿”å›ä¸€ä¸ªé»˜è®¤å›¾ç‰‡
+  // CreateImage æ”¯æŒ TEXSIZE_* æ—çš„å‚æ•°æŒ‡å®šImageçš„å®½æˆ–è€…é«˜
   virtual GXImage*    CreateImage             (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits);
   virtual GXImage*    CreateImageFromFile     (GXLPCWSTR lpwszFilename);
   virtual GXImage*    CreateImageFromTexture  (GTexture* pTexture);
@@ -142,7 +142,7 @@ private:
   void      IntAttachComposerSdrDesc  (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc);
   GXHRESULT IntCreateSdrFromElement   (GShader** ppShader, MOSHADER_ELEMENT_SOURCE* pSdrElementSrc);
   GXHRESULT IntCreateSdrPltDescW      (GShader** ppShader, GXLPCWSTR szShaderDesc, GXLPCSTR szPlatformSect, MTLFILEPARAMDESC* pMtlParam);
-  GXLPCWSTR IntToAbsPathW             (clStringW& strOutput, GXLPCWSTR szPath); // µ± szPath ÒÑ¾­ÊÇ¾ø¶ÔÂ·¾¶Ê± strOutput ²»»á±»ÉèÖÃ
+  GXLPCWSTR IntToAbsPathW             (clStringW& strOutput, GXLPCWSTR szPath); // å½“ szPath å·²ç»æ˜¯ç»å¯¹è·¯å¾„æ—¶ strOutput ä¸ä¼šè¢«è®¾ç½®
   GXBOOL    SetSafeClip               (const GXREGN* pRegn);
   GXCanvas* AllocCanvas               ();
   //GResIter  FindResource              (GResource* pResource);
@@ -178,13 +178,13 @@ public:
   inline GXBOOL     InlIsActiveSamplerState       (GSamplerStateImpl* pSamplerState);
   inline Marimo::ShaderConstName* InlGetShaderConstantNameObj();
 
-private: // ÓÃÓÚ¹ÜÀíµÄ¶ÔÏó
+private: // ç”¨äºç®¡ç†çš„å¯¹è±¡
   GXCanvasImpl**          m_aCanvasPtrCache;
   //GResourceArray          m_aResource;
   GXResourceMgr           m_ResMgr;
   GAllocator*             m_pRgnAllocator;
 
-private:  // ×´Ì¬¶ÔÏó
+private:  // çŠ¶æ€å¯¹è±¡
   GRasterizerStateImpl*   m_pDefaultRasterizerState;
   GBlendStateImpl*        m_pDefaultBlendState;
   GDepthStencilStateImpl* m_pDefaultDepthStencilState;
@@ -203,7 +203,7 @@ private:  // ×´Ì¬¶ÔÏó
   GSamplerStateImpl*      m_pCurSamplerState;
   GVertexDeclImpl*        m_pCurVertexDecl;
 
-private:  // ¶ÔÏóµÄ(¼¸¸öÆ½Ì¨¹²ÓÃµÄ)´æ´¢
+private:  // å¯¹è±¡çš„(å‡ ä¸ªå¹³å°å…±ç”¨çš„)å­˜å‚¨
   GXDWORD                 m_dwFlags;
   GXPlaformIdentity       m_pIdentity;
   //GXConsole*              m_pConsole;

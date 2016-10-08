@@ -1,7 +1,7 @@
-#ifndef _MARIMO_LOGGER_H_
+ï»¿#ifndef _MARIMO_LOGGER_H_
 #define _MARIMO_LOGGER_H_
 
-// TODO: ĞŞ¸ÄÏà¹ØµÄÍ·ÎÄ¼şÒıÓÃ
+// TODO: ä¿®æ”¹ç›¸å…³çš„å¤´æ–‡ä»¶å¼•ç”¨
 class ILogger : public GUnknown
 {
 public:

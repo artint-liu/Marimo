@@ -1,4 +1,4 @@
-#ifndef _GRAPX_BASE_TYPES_H_
+Ôªø#ifndef _GRAPX_BASE_TYPES_H_
 #define _GRAPX_BASE_TYPES_H_
 
 #if defined(GXDLL_API_EXPORTS)
@@ -92,7 +92,7 @@ typedef GXCONST GXDWORD*  GXLPCDWORD;
 
 typedef i64               GXLONGLONG;
 
-// —‹…˙¿‡–Õ∂®“Â
+// Ë°çÁîüÁ±ªÂûãÂÆö‰πâ
 #ifdef _X86
 typedef _GXW64 GXUINT   GXUINT_PTR;
 typedef _GXW64 GXINT    GXINT_PTR;

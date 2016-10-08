@@ -1,4 +1,4 @@
-// GrapVR Module Geometry
+ï»¿// GrapVR Module Geometry
 #ifndef _GRAPVR_SCENE_MODULE_GEOMETRY_H_
 #define _GRAPVR_SCENE_MODULE_GEOMETRY_H_
 
@@ -84,7 +84,7 @@ public:
     int           nSides, 
     GXBOOL        bSmooth, 
     GXColor32     color, 
-    const float3& vDir,     // ĞèÒª¹éÒ»»¯
+    const float3& vDir,     // éœ€è¦å½’ä¸€åŒ–
     GVGeometry**  ppGeometry, 
     GXDWORD       dwTBS = 0x7,
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
@@ -102,15 +102,15 @@ public:
     GXColor32     color, 
     GVGeometry**  ppGeometry, 
     float4x4*     pTransform = NULL, 
-    GXDWORD       dwTBS = 0x7,  // TODO: ÕâÁ½¸öDWORDÓ¦¸ÃºÏÎªÒ»¸öFlags
+    GXDWORD       dwTBS = 0x7,  // TODO: è¿™ä¸¤ä¸ªDWORDåº”è¯¥åˆä¸ºä¸€ä¸ªFlags
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateTorus(
     GXGraphics*   pGraphics,
-    float         fRadius1,   // ×ÜÌå°ë¾¶, Ô²»·Ïàµ±ÓÚÒ»¸öÅ¤ÍäµÄÔ²ÖùÌå
-    float         fRadius2,   // »·Ìå°ë¾¶,¾ÍÊÇÄÚÍâ¾¶²îÖµµÄÒ»°ë
-    int           nSegment,   // ÑØ»·ÌåµÄ¶ÎÊı
-    int           nSides,     // »·ÌåµÄÃæÊı
+    float         fRadius1,   // æ€»ä½“åŠå¾„, åœ†ç¯ç›¸å½“äºä¸€ä¸ªæ‰­å¼¯çš„åœ†æŸ±ä½“
+    float         fRadius2,   // ç¯ä½“åŠå¾„,å°±æ˜¯å†…å¤–å¾„å·®å€¼çš„ä¸€åŠ
+    int           nSegment,   // æ²¿ç¯ä½“çš„æ®µæ•°
+    int           nSides,     // ç¯ä½“çš„é¢æ•°
     GXColor32     color, 
     GVGeometry**  ppGeometry,
     float4x4*     pTransform = NULL,
@@ -135,12 +135,12 @@ public:
     float         fHeight,
     int           nSides,
     int           nHeightSeg,
-    int           nParallelSeg, // ÇòµÄÎ¬¶È·Ö¶Î, Õâ¸ö·Ö¶ÎÊÇÏà¶ÔÓÚÍêÕûÇòÌåµÄ£¬ÀıÈç10£¬ÔòÃ¿¸ö°ëÇò´óÔ¼±»·Ö³É5¶Î
+    int           nParallelSeg, // çƒçš„ç»´åº¦åˆ†æ®µ, è¿™ä¸ªåˆ†æ®µæ˜¯ç›¸å¯¹äºå®Œæ•´çƒä½“çš„ï¼Œä¾‹å¦‚10ï¼Œåˆ™æ¯ä¸ªåŠçƒå¤§çº¦è¢«åˆ†æˆ5æ®µ
     GXBOOL        bSmooth, 
     GXColor32     color, 
     GVGeometry**  ppGeometry, 
     float4x4*     pTransform = NULL, 
-    GXDWORD       dwTBS = 0x7,  // TODO: ÕâÁ½¸öDWORDÓ¦¸ÃºÏÎªÒ»¸öFlags
+    GXDWORD       dwTBS = 0x7,  // TODO: è¿™ä¸¤ä¸ªDWORDåº”è¯¥åˆä¸ºä¸€ä¸ªFlags
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateConvex(

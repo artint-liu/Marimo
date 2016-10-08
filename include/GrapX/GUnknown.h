@@ -1,4 +1,4 @@
-#ifndef _GRAPH_UNKNOWN_H_
+ï»¿#ifndef _GRAPH_UNKNOWN_H_
 #define _GRAPH_UNKNOWN_H_
 
 #pragma warning(disable : 4275)
@@ -9,7 +9,7 @@
 #define GXSTDINTERFACE(x)  virtual x = 0
 #define GXSTDIMPLEMENT(x)  x override
 
-// Ğéº¯Êı»¯µÄAddRefºÍRelease
+// è™šå‡½æ•°åŒ–çš„AddRefå’ŒRelease
 #define ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
 class GUnknown
@@ -46,7 +46,7 @@ public:
 };
 
 //
-// Ê¾Àı:
+// ç¤ºä¾‹:
 //GXHRESULT GUnknown::AddRef()
 //{
 //  m_uRefCount++;
@@ -67,7 +67,7 @@ public:
 //  m_uRefCount--;
 //  if(m_uRefCount == 0)
 //  {
-//    // ÕâÀïĞ´ÊÍ·Å´úÂë
+//    // è¿™é‡Œå†™é‡Šæ”¾ä»£ç 
 //    delete this;
 //    return GX_OK;
 //  }

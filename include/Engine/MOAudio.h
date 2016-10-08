@@ -1,4 +1,4 @@
-#ifndef _MARIMO_AUDIO_H_
+﻿#ifndef _MARIMO_AUDIO_H_
 #define _MARIMO_AUDIO_H_
 
 #define MARIMO_AUDIO_OPENAL_1             GXMAKEFOURCC('O','A','L','1')
@@ -8,8 +8,8 @@ struct MOAUDIO_DESC
   int       nBits;
   int       nChannels;
   int       nFrequency;
-  GXSIZE_T  nBufferSize;  // ����Դ�ṩ�Ľ��黺������С��
-                          // ����Ļ������ᵼ�½���ʱ���������С�ᵼ�²���ʱ��̶ܶ����ݿ��ܻ�û�в���������
+  GXSIZE_T  nBufferSize;  // 数据源提供的建议缓冲区大小，
+                          // 过大的缓冲区会导致解码时间过长，过小会导致播放时间很短而数据可能还没有补充上来。
 };
 
 class MOAudio : public GUnknown

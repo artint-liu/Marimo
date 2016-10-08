@@ -7,7 +7,7 @@
 #include "GrapX/GXCanvas.H"
 #include "GrapX/MOSprite.H"
 #include "GrapX/GXGraphics.H"
-#include "GrapX/GXKernel.H"
+//#include "GrapX/GXKernel.H"
 
 // 私有头文件
 #include <clPathFile.h>
@@ -15,7 +15,7 @@
 #include <clStringSet.h>
 #include <Smart/SmartStream.h>
 #include <clStock.h>
-#include <Canvas/MOSpriteImpl.H>
+#include "MOSpriteImpl.H"
 
 #define _测试后删除这行_ CLBREAK
 
@@ -63,6 +63,7 @@ namespace Marimo
   //}
 
   //////////////////////////////////////////////////////////////////////////
+
 
   GXVOID MOSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
   {
@@ -344,9 +345,40 @@ namespace Marimo
     CLBREAK;
   }
 
+  int MOSpriteImpl::AdjustDrawingRegn(GXREGN& regn) const
+  {
+    int image_index = 0;
+    while(image_index < (int)m_ImageArray.size()) {
+      const GXINT height = m_ImageArray[image_index]->GetHeight();
+      if(regn.top < height) {
+        return image_index;
+      }
+      regn.top -= height;
+      image_index++;
+    }
+    return -1;
+  }
+
   GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const
   {
-    CLBREAK;
+    if(nIndex >= m_loader.aFrames.size()) {
+      return;
+    }
+    const FRAME& f = m_loader.aFrames[nIndex];
+    GXREGN rgDest;
+    GXREGN rgSrc;
+    for(GXUINT i = f.begin; i < f.end; i++)
+    {
+      const FRAME_UNIT& fu = m_loader.aFrameUnits[i];
+      rgDest.set(x + fu.regn.left, y + fu.regn.top, fu.regn.width, fu.regn.height);
+      rgSrc = m_loader.aModules[fu.nModuleIdx].regn;
+      int nIndex = AdjustDrawingRegn(rgSrc);
+      if(nIndex >= 0) {
+        pCanvas->DrawImage(m_ImageArray[nIndex], &rgDest, &rgSrc);
+      }
+    }
+    //pCanvas->DrawImage();
+    //__asm nop
   }
 
   GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const
@@ -366,7 +398,16 @@ namespace Marimo
 
   GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const
   {
-    CLBREAK;
+    if(nAnimIndex >= (GXUINT)m_loader.aAnims.size()) {
+      return;
+    }
+
+    const ANIMATION& a = m_loader.aAnims[nAnimIndex];
+    if(nFrameIndex >= (a.end - a.begin)) {
+      return;
+    }
+
+    PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex], x, y);
   }
 
   GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
@@ -381,7 +422,17 @@ namespace Marimo
 
   GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y)
   {
-    CLBREAK;
+    if(nAnimIndex >= (GXUINT)m_loader.aAnims.size()) {
+      return;
+    }
+
+    const ANIMATION& a = m_loader.aAnims[nAnimIndex];
+    GXUINT nFrameIndex = IntGetAnimationFrameIndex(a, time);
+    if(nFrameIndex >= (a.end - a.begin)) {
+      return;
+    }
+
+    PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex], x, y);
   }
 
   GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
@@ -673,7 +724,8 @@ namespace Marimo
         GXREGN rg = m_loader.aModules[f.begin].regn;
         for(GXUINT i = f.begin + 1; i < f.end; i++)
         {
-          gxUnionRegn(&rg, &rg, &m_loader.aModules[i].regn);
+          rg.Union(m_loader.aModules[i].regn);
+          //gxUnionRegn(&rg, &rg, &m_loader.aModules[i].regn);
         }
         *lprg = rg;
       }
@@ -696,7 +748,8 @@ namespace Marimo
     }
     GXREGN regn;
     IntGetBounding(pAttr, &regn);
-    gxRegnToRect(lprc, &regn);
+    //gxRegnToRect(lprc, &regn);
+    *lprc = regn;
     return pAttr->type;
   }
 
@@ -802,6 +855,11 @@ namespace Marimo
       i++;
     });
 
+    std::for_each(m_loader.aFrameUnits.begin(), m_loader.aFrameUnits.end(), [](FRAME_UNIT& fu){
+      fu.regn.top = -fu.regn.top;
+      fu.regn.height = -fu.regn.height;
+    });
+
     ASSERT(m_ImageArray.size() == pDesc->aFiles.size());
 
     //std::for_each(m_loader.aModules.begin(), m_loader.aModules.end(), [const MODULE& m](){
@@ -865,6 +923,11 @@ namespace Marimo
       return (GXINT)(pAttr->pAnimation - &m_loader.aAnims.front());
     }
     return -1;
+  }
+
+  GXUINT MOSpriteImpl::IntGetAnimationFrameIndex(const ANIMATION& a, TIME_T time)
+  {
+    return (time / a.rate) % (a.end - a.begin);
   }
 
 } // namespace Marimo 

@@ -1,4 +1,4 @@
-#ifndef _GRAPVR_SCENE_H_
+ï»¿#ifndef _GRAPVR_SCENE_H_
 #define _GRAPVR_SCENE_H_
 
 class GXGraphics;
@@ -14,17 +14,17 @@ enum GVRenderType;
 //  class Component;
 //} // namespace Marimo
 
-// GVScene Ö÷Òª´¢´æModelµÄÂß¼­¹ØÏµ, Âß¼­¹ÜÀí
-// GVSceneMgr Ö÷ÒªÊÇ³¡¾°äÖÈ¾¹ÜÀí, ÏÔÊ¾¹ÜÀí
+// GVScene ä¸»è¦å‚¨å­˜Modelçš„é€»è¾‘å…³ç³», é€»è¾‘ç®¡ç†
+// GVSceneMgr ä¸»è¦æ˜¯åœºæ™¯æ¸²æŸ“ç®¡ç†, æ˜¾ç¤ºç®¡ç†
 
-struct GVSCENEUPDATE // Node updateÖĞÕâ¸ö¾ßÓĞconstÏŞÖÆ,²»ÄÜ¸Ä±äCanvasºÍCameraµÄ×´Ì¬
+struct GVSCENEUPDATE // Node updateä¸­è¿™ä¸ªå…·æœ‰consté™åˆ¶,ä¸èƒ½æ”¹å˜Canvaså’ŒCameraçš„çŠ¶æ€
 {
   GXCanvas3D* pCanvas3D;
-  GCamera*    pCamera;        // ¾ÍÊÇ´¢´æÔÚCanvas3DÖĞµÄ¶ÔÏó
+  GCamera*    pCamera;        // å°±æ˜¯å‚¨å­˜åœ¨Canvas3Dä¸­çš„å¯¹è±¡
   GXUINT      uDrawCallCount;
-  GXDWORD     dwDeltaTime;    // µ±Ç°Update´«ÈëµÄDeltaTime(µ¥Î»:ms)
-  float       fDeltaTime;     // ¸¡µã±ê¼ÇµÄDeltaTime(µ¥Î»:s)
-  GXDWORD     dwAbsTime;      // ¾ø¶ÔÊ±¼ä
+  GXDWORD     dwDeltaTime;    // å½“å‰Updateä¼ å…¥çš„DeltaTime(å•ä½:ms)
+  float       fDeltaTime;     // æµ®ç‚¹æ ‡è®°çš„DeltaTime(å•ä½:s)
+  GXDWORD     dwAbsTime;      // ç»å¯¹æ—¶é—´
 };
 
 class GXDLL GVScene : public GUnknown
@@ -33,14 +33,14 @@ class GXDLL GVScene : public GUnknown
   //typedef cllist<Component*> ComponentList;
   //typedef clmap<GVNode*, ComponentList> NodeComDict;
   enum ECmd {
-    CMD_SetSelfTranslation, // ×ÔÉíµÄÆ½ÒÆ
+    CMD_SetSelfTranslation, // è‡ªèº«çš„å¹³ç§»
     CMD_SetWorldTranslation,
-    CMD_SetRotationgEuler,  // Å·À­
-    CMD_SetRotationgQuat,   // ËÄÔªÊı
+    CMD_SetRotationgEuler,  // æ¬§æ‹‰
+    CMD_SetRotationgQuat,   // å››å…ƒæ•°
     CMD_SetScaling,
-    CMD_SetSelfTransform,   // Õ¼ÓÃËÄ¸öCMDBUFFER
-    CMD_SetWorldTransform,  // Õ¼ÓÃËÄ¸öCMDBUFFER
-    CMD_Postfix,            // Ç°ÃæÃüÁîµÄºó×º
+    CMD_SetSelfTransform,   // å ç”¨å››ä¸ªCMDBUFFER
+    CMD_SetWorldTransform,  // å ç”¨å››ä¸ªCMDBUFFER
+    CMD_Postfix,            // å‰é¢å‘½ä»¤çš„åç¼€
   };
 
   struct CMDBUFFER
@@ -58,7 +58,7 @@ private:
   GVPhySimulator*   m_pPhysWorld;
   GVNode*           m_pRoot;
   GXUINT            m_uDrawCallCount;
-  GXDWORD           m_dwDeltaTime;    // µ±Ç°Update´«ÈëµÄDeltaTime
+  GXDWORD           m_dwDeltaTime;    // å½“å‰Updateä¼ å…¥çš„DeltaTime
   float             m_fDeltaTime;
   GXDWORD           m_dwAbsTime;
   CmdBufList        m_CmdBuffer;
@@ -95,13 +95,13 @@ public:
 
   GXBOOL    IsChild     (GVNode* pNode);
   GXHRESULT Add         (GVNode* pNode, GVNode* pParent = NULL);
-  GXHRESULT Delete      (GVNode* pNode); // Model±ØĞëÔÚGVSceneÖĞ
-  GXHRESULT RenderAll   (GXCanvas3D* pCanvas, GVRenderType eType);  // ²»×ö²Ã¼ô,»á½«Õû¸ö³¡¾°ÖĞµÄËùÓĞ¿ÉäÖÈ¾Îï¶¼äÖÈ¾³öÀ´
+  GXHRESULT Delete      (GVNode* pNode); // Modelå¿…é¡»åœ¨GVSceneä¸­
+  GXHRESULT RenderAll   (GXCanvas3D* pCanvas, GVRenderType eType);  // ä¸åšè£å‰ª,ä¼šå°†æ•´ä¸ªåœºæ™¯ä¸­çš„æ‰€æœ‰å¯æ¸²æŸ“ç‰©éƒ½æ¸²æŸ“å‡ºæ¥
   GXHRESULT SaveToFileW (GXLPCWSTR szFilename);
   GXHRESULT GetRoot     (GVNode** ppRootNode);
   
-  // ²Î¿¼ GVNodeFlags, Èç¹û dwRequired ²»ÊÇ GVNode ·µ»Ø±êÖ¾µÄ×Ó¼¯, Ôò²»»á±»¼Óµ½äÖÈ¾¶ÓÁĞÖĞ
-  // dwRequired ²»±ØÖ¸¶¨ GVNF_VISIBLE ±êÖ¾, Õâ¸ö±êÖ¾ÊÇÄ¬ÈÏµÄ
+  // å‚è€ƒ GVNodeFlags, å¦‚æœ dwRequired ä¸æ˜¯ GVNode è¿”å›æ ‡å¿—çš„å­é›†, åˆ™ä¸ä¼šè¢«åŠ åˆ°æ¸²æŸ“é˜Ÿåˆ—ä¸­
+  // dwRequired ä¸å¿…æŒ‡å®š GVNF_VISIBLE æ ‡å¿—, è¿™ä¸ªæ ‡å¿—æ˜¯é»˜è®¤çš„
   GXHRESULT Generate (GXCanvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired);
   void      Update      (GXCanvas3D* pCanvas, GXDWORD dwDeltaTime);
 

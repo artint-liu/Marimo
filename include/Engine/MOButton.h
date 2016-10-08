@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_UI_BUTTON_H_
+Ôªø#ifndef _GRAP_X_UI_BUTTON_H_
 #define _GRAP_X_UI_BUTTON_H_
 
 class GXSprite;
@@ -36,7 +36,7 @@ public:
   virtual CGXReceiver*  GetReceiver   ();
   virtual void          SetReceiver   (CGXReceiver* pReceiver);
   virtual GXLRESULT     InvokeReceiver(GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);
-  virtual GXLRESULT     Invoke        (CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // ¥¶¿ÌWM_COMMAND
+  virtual GXLRESULT     Invoke        (CGXReceiver* pReceiver, GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);  // Â§ÑÁêÜWM_COMMAND
 #endif // #ifdef REFACTOR_GXFC
 };
 

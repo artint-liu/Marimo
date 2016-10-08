@@ -1,4 +1,4 @@
-#define GXTVN_FIRST               ((GXINT)0U-(GXINT)400U)       // treeview
+ï»¿#define GXTVN_FIRST               ((GXINT)0U-(GXINT)400U)       // treeview
 #define GXTVN_LAST                ((GXINT)0U-(GXINT)499U)
 #define GXTV_FIRST                0x1100      // TreeView messages
 
@@ -24,7 +24,7 @@ enum{
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ÒÔÏÂ´Ó Visual Studio µÄ Commctrl.h ¸´ÖÆ¹ıÀ´µÄ TreeView ¿Ø¼şÏà¹Ø¶¨Òå
+// ä»¥ä¸‹ä» Visual Studio çš„ Commctrl.h å¤åˆ¶è¿‡æ¥çš„ TreeView æ§ä»¶ç›¸å…³å®šä¹‰
 //
 
 #ifndef NOTREEVIEW

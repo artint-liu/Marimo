@@ -1,4 +1,4 @@
-#ifndef _MARIMO_H_
+ï»¿#ifndef _MARIMO_H_
 #define _MARIMO_H_
 
 #ifdef GAMEENGINE_EXPORTS
@@ -17,10 +17,10 @@
 #include "socket/clSocket.h"
 //#include "3D/GrapVR.H"
 
-// fbx ÎÄ¼ş½âÎö¿â, À´×Ô Autodesk
+// fbx æ–‡ä»¶è§£æåº“, æ¥è‡ª Autodesk
 //#include "GameEngine\third_party\FBX SDK\2013.2\include\fbxsdk.h"
 
-// ode ÎïÀí·ÂÕæ/Åö×²¼ì²â¿â, À´×Ôode.org
+// ode ç‰©ç†ä»¿çœŸ/ç¢°æ’æ£€æµ‹åº“, æ¥è‡ªode.org
 //#include "GameEngine\third_party\include\ode\ode.h"
 
 //////////////////////////////////////////////////////////////////////////

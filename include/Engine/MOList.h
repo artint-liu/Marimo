@@ -1,4 +1,4 @@
-#ifndef _GRAP_X_UI_LIST_H_
+ï»¿#ifndef _GRAP_X_UI_LIST_H_
 #define _GRAP_X_UI_LIST_H_
 
 //class CMOWnd;
@@ -35,7 +35,7 @@ public:
   GXLRESULT   GetStringW      (GXINT nIndex, clStringW& str);
   GXLRESULT   GetStringA      (GXINT nIndex, clStringA& str);
   GXINT       DeleteString    (GXINT nIndex);
-  void        ResetContent    ();   // Çå³ýËùÓÐÏîÄ¿
+  void        ResetContent    ();   // æ¸…é™¤æ‰€æœ‰é¡¹ç›®
   GXINT       GetCount        () const;
   GXINT       GetCurSel       () const;
   GXBOOL      IsSelected      (GXSIZE_T index) const;
