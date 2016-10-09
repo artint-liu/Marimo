@@ -1,7 +1,6 @@
 ﻿#include <stdlib.h>
 
 #include "clstd.h"
-#include "clmemory.h"
 #include "clString.H"
 //#include "../clFile.H"
 //#include "../clBuffer.H"
@@ -99,22 +98,27 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL
-  b32 _SSP_IMPL::ATTRIBUTE::empty() const
+    _SSP_IMPL::ATTRIBUTE::~ATTRIBUTE()
+  {
+    pSection = NULL;
+  }
+
+  _SSP_TEMPL
+  b32 _SSP_IMPL::ATTRIBUTE::IsEmpty() const
   {
     return ( ! pSection) || ( ! pSection->pStock) || (pSection->nModify != pSection->pStock->m_nModify);
-    //return pSection && pSection->pStock && (pSection->nModify == pSection->pStock->m_nModify);
   }
 
   _SSP_TEMPL
   _SSP_IMPL::ATTRIBUTE::operator unspecified_bool_type() const
   {
-    return empty() ? 0 : __unspecified_bool_type<ATTRIBUTE>;
+    return IsEmpty() ? 0 : __unspecified_bool_type<ATTRIBUTE>;
   }
 
   _SSP_TEMPL
     b32 _SSP_IMPL::ATTRIBUTE::NextKey()
   {
-    if(empty()) {
+    if(IsEmpty()) {
       return FALSE;
     }
 
@@ -318,10 +322,20 @@ namespace clstd
     return true;
   }
 
-  _SSP_TEMPL 
+  _SSP_TEMPL
   b32 _SSP_IMPL::Attach(BufferBase* pBuffer)
   {
     m_Buffer.Append(pBuffer->GetPtr(), pBuffer->GetSize());
+    if(ToNativeCodec()) {
+      return m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
+    }
+    return FALSE;
+  }
+
+  _SSP_TEMPL 
+  b32 _SSP_IMPL::Attach(T_LPCSTR str, clsize nCount)
+  {
+    m_Buffer.Append(str, nCount * sizeof(TChar));
     if(ToNativeCodec()) {
       return m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
     }
@@ -511,6 +525,13 @@ namespace clstd
     return param.NextKey();
   }
 
+  _SSP_TEMPL
+    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::FirstKey() const
+  {
+    ATTRIBUTE attr;
+    FirstKey(attr);
+    return attr;
+  }
 
   _SSP_TEMPL
   b32 _SSP_IMPL::Section::GetKey( T_LPCSTR szKey, ATTRIBUTE& param ) const
@@ -1251,7 +1272,11 @@ namespace clstd
   typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::operator[](T_LPCSTR name) const
   {
     ATTRIBUTE attr;
-    GetKey(name, attr);
+    if( ! GetKey(name, attr)) {
+      attr.pSection = NULL;
+      attr.key.length = 0;
+      attr.value.length = 0;
+    }
     return attr;
   }
 
@@ -1263,24 +1288,24 @@ namespace clstd
     }
   }
 
-  _SSP_TEMPL
-    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::begin()
-  {
-    ATTRIBUTE attr;
-    if(FirstKey(attr)) {
-      return attr;
-    }
-    return end();
-  }
+  //_SSP_TEMPL
+  //  typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::begin()
+  //{
+  //  ATTRIBUTE attr;
+  //  if(FirstKey(attr)) {
+  //    return attr;
+  //  }
+  //  return end();
+  //}
 
-  _SSP_TEMPL
-    typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::end()
-  {
-    ATTRIBUTE attr;
-    attr.pSection = this;
-    attr.key    = iter_end;
-    attr.value  = iter_end;
-    return attr;
-  }
+  //_SSP_TEMPL
+  //  typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::end()
+  //{
+  //  ATTRIBUTE attr;
+  //  attr.pSection = this;
+  //  attr.key    = iter_end;
+  //  attr.value  = iter_end;
+  //  return attr;
+  //}
 
 } // namespace clstd

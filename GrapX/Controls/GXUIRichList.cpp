@@ -216,10 +216,10 @@ namespace GXUI
     m_aItems[nIndex].hItem = NULL;
   }
 
-  int RichList::Recycle(GXSIZE_T nBegin, int nDir)
+  int RichList::Recycle(GXINT nBegin, int nDir)
   {
     ASSERT(nDir == -1 || nDir == 1);
-    ASSERT(nBegin != (GXSIZE_T)-1);
+    ASSERT(nBegin >= -1);
     int nEnd = -1;
     int nCount = 0;
     if(nDir == 1) {
@@ -416,7 +416,7 @@ namespace GXUI
     clStringW strItem;
     GXRECT rcItem(0,0,0,0);
     GXSIZE_T i = m_nTopIndex;
-    Recycle(i == 0 ? 0 : i - 1, -1);
+    Recycle((GXINT)(i - 1), -1);
     for(; i < nCount; i++)
     {
       //GXINT nStrLen = m_pAdapter->GetStringW(i, NULL, strItem);

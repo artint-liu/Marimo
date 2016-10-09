@@ -9,7 +9,7 @@
 #include <clString.H>
 #include <clUtility.H>
 #include <Smart\smartstream.h>
-#include <Smart\Stock.h>
+#include <clStock.h>
 
 #pragma warning(disable : 4996)
 using namespace clstd;
@@ -220,6 +220,12 @@ void test2_read()
   if( ! root_sect) {
     return;
   }
+
+  StockA::ATTRIBUTE attr = root_sect["not_exist"];
+  ASSERT( ! attr);
+  auto strMustBeEmpty = attr.ToString();
+  ASSERT(strMustBeEmpty.IsEmpty());
+
   //////////////////////////////////////////////////////////////////////////
   // 值读取检查，这个应该与test2_write()中的算法保持一致
   int n = 1000;
@@ -231,6 +237,7 @@ void test2_read()
     int b = rect_sect["b"].ToInt();
     int c = rect_sect["c"].ToInt();
     int d = rect_sect["d"].ToInt();
+
     ASSERT(a == (n % 640));
     ASSERT(b == (n % 481));
     ASSERT(c == (n % 639));
@@ -260,11 +267,8 @@ void test2_read()
     StockA::Section child_sect = root_sect.Open(NULL);
     while(child_sect)
     {
-      StockA::ATTRIBUTE attr     = child_sect.begin();
-      StockA::ATTRIBUTE end_attr = child_sect.end();
-
       printf("%s\n", child_sect.SectionName());
-      for(; attr != end_attr; ++attr)
+      for(StockA::ATTRIBUTE attr = child_sect.FirstKey(); ! attr.IsEmpty(); ++attr)
       {
         printf(" %s=%s\n", attr.KeyName(), attr.ToString());
       }

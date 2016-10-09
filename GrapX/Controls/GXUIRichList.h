@@ -60,7 +60,7 @@ namespace GXUI
     //GXINT     GetItemHeight       (GXINT nIdx) const;
     GXHWND    PlantCustItem       (GXSIZE_T nIndex, GXLPCRECT lprect);
     void      Recycle             (GXSIZE_T nIndex);
-    int       Recycle             (GXSIZE_T nBegin, int nDir); // °üº¬ nBegin
+    int       Recycle             (GXINT nBegin, int nDir); // °üº¬ nBegin
     GXBOOL    UpdateCustItemText  (GXSIZE_T nIndex, GXLPCRECT rcItem);
     GXLRESULT SetItemTemplate     (GXLPCWSTR szTemplate);
 

@@ -91,12 +91,31 @@ void TestMatchSpec()
   ASSERT(bresult == TRUE);
 }
 
+void TestStringResolve()
+{
+  char* test1 = "as,hello,world";
+  char* test2 = "as,,,hello,world";
+  clstd::StringUtility::Resolve(test1, clstd::strlenT(test1), ',', [](const char* str, size_t len){
+    clStringA sub_str(str, len);
+    printf("%s\n", sub_str);
+  });
+
+  printf("--------------------\n");
+
+  clstd::StringUtility::Resolve(test2, clstd::strlenT(test2), ',', [](const char* str, size_t len){
+    clStringA sub_str(str, len);
+    printf("%s\n", sub_str);
+  });
+
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   TestCombinePath();
   TestMatchSpec();
   TestString();
   TestPathFile();
+  TestStringResolve();
 
 	return 0;
 }

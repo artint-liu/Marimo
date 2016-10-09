@@ -500,7 +500,7 @@ namespace SmartStreamUtility
   {
     typename _TString::TChar* pTemp = str.GetBuffer(it.length + 1);
     u32 i = 0, n = 0;
-    if(it.marker[0] == '\"' || it.marker[0] == '\'')
+    if(it.length && (it.marker[0] == '\"' || it.marker[0] == '\''))
     {
       ++i;
 

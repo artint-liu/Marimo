@@ -44,9 +44,9 @@ namespace clstd
 
       ATTRIBUTE(){}
       ATTRIBUTE(Section* pCoSection) : pSection(pCoSection){}
+      ~ATTRIBUTE();
 
-      b32     empty       () const;
-
+      b32     IsEmpty     () const;
       b32     NextKey     ();
       _TStr   SectionName () const;
       _TStr   KeyName     () const;
@@ -56,6 +56,13 @@ namespace clstd
       b32     ToBoolean   () const;
       _TStr&  KeyName     (_TStr& str) const;
       _TStr&  ToString    (_TStr& str) const;
+
+      template<class _TFn>
+      void ToArray(TChar ch, _TFn fn) const
+      {
+        _TStr strValue;
+        StringUtility::Resolve(ToString(strValue), ch, fn);
+      }
       //void    SetValue    (T_LPCSTR str);
 
                   operator unspecified_bool_type() const;
@@ -118,6 +125,7 @@ namespace clstd
       b32       NextSection         (T_LPCSTR szName = NULL);
       b32       Rename              (T_LPCSTR szNewName);
       b32       FirstKey            (ATTRIBUTE& param) const;
+      ATTRIBUTE FirstKey            () const;
 
       b32       GetKey              (T_LPCSTR szKey, ATTRIBUTE& param) const;
       int       GetKeyAsString      (T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount) const;
@@ -137,9 +145,6 @@ namespace clstd
       ATTRIBUTE operator[](T_LPCSTR name) const;
                 operator unspecified_bool_type() const;
 
-
-      ATTRIBUTE begin ();
-      ATTRIBUTE end   ();
     };
 
   protected:
@@ -162,6 +167,7 @@ namespace clstd
     b32 SaveW(const wch* lpProfile) const;
 
     b32 Attach(BufferBase* pBuffer); // 内部会复制一份
+    b32 Attach(T_LPCSTR str, clsize nCount); // 内部会复制一份
 
     b32 Close();
 
@@ -203,10 +209,6 @@ namespace clstd
     // b32 DeleteSection(Section* desc); // TODO: 没实现
 
     T_LPCSTR GetText(clsize* length) const;
-
-    // std
-    //begin();
-    //end();
 
   protected:
     //b32      Append            (Section* pSect, T_LPCSTR szText, clsize nCount);

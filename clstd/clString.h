@@ -325,7 +325,7 @@ namespace clstd
     u32         GetHash         () const; // 计算字符串的hash，这个算法是独立且平台一致的
     u32         GetCRC32        () const; // 计算字符串的CRC32
     size_t      VarFormat       (const _TCh *pFmt, va_list arglist);  // 在原始内容后面，使用变参列表追加格式化字符串
-  };
+  }; // class StringX
 
   struct StringW_traits
   {
@@ -390,6 +390,41 @@ namespace clstd
   {
     return _Str.GetHash();
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  namespace StringUtility
+  {
+    // 按照ch分割分解字符串
+    template<typename _TCh, class _Fn>
+    void Resolve(const _TCh* str, size_t len, _TCh ch, _Fn fn)
+    {
+      if( ! len) {
+        return;
+      }
+
+      const _TCh* str_begin = str;
+      const _TCh* str_end   = str + len;
+
+      while(str < str_end) {
+        if(*str == ch) {
+          fn(str_begin, str - str_begin);
+          str_begin = ++str;
+          continue;
+        }
+        str++;
+      }
+      fn(str_begin, str - str_begin);
+    }
+
+    // 按照ch分割分解字符串
+    template<typename _TStr, class _Fn>
+    void Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn)
+    {
+      Resolve((_TStr::LPCSTR)str, str.GetLength(), ch, fn);
+    }
+
+  } // namespace StringUtility
 
 } // namespace clstd
 
