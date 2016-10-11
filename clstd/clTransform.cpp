@@ -226,7 +226,7 @@ namespace clstd
     //GlobalMatrix.DecomposeScaling(&GlobalScaling);
   }
 
-  float4x4 TRANSFORM::ToRelativeMatrix() CLCONST
+  float4x4 TRANSFORM::ToRelativeMatrix() const
   {
     float4x4 s, r, t;
     s.Scale(scaling);

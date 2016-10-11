@@ -3112,12 +3112,12 @@ typedef struct tagGXLVSETINFOTIP
 
 #define GXSTRCMP          clstd::strcmpT
 #define GXSTRNCMP         clstd::strncmpT
-#define GXSTRLEN          (int)clstd::strlenT
+#define GXSTRLEN          clstd::strlenT
 #define GXSTRCPY          clstd::strcpyT
 #define GXSTRCPYN         clstd::strcpyn
 #define GXSTRCMPI         clstd::strcmpiT
 #define GXSTRNCMPI        clstd::strncmpiT
-#define GXATOI            clstd::_xstrtoi<i32>
+#define GXATOI(_STR)      clstd::xtoi(10, _STR, -1)
 
 
 //

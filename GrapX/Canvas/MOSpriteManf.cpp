@@ -157,17 +157,37 @@ namespace Marimo
           continue;
         }
         else if(attr.key == "rate") {
-          anim.rate = attr.ToInt();
+          //clvector<int> aRates;
+          size_t count = aRates.size();
+          const size_t nAnimUnitsCount = aAnimUnits.size();
+
+          if(aRates.size() < nAnimUnitsCount) {
+            aRates.reserve(nAnimUnitsCount);
+          }
+
+          attr.ToArray(',', [this](clstd::StockA::T_LPCSTR str, size_t len){
+            aRates.push_back(clstd::xtou(10, str, len));
+          });          
+
+          //
+          // rate 如果少于帧数就按最后一个rate值补齐，多了就裁掉
+          //
+          const size_t nRatesCount = aRates.size();
+          if(nRatesCount < nAnimUnitsCount) {
+            aRates.insert(aRates.end(), nAnimUnitsCount - nRatesCount, aRates.back());
+          }
+          else if(nRatesCount > nAnimUnitsCount) {
+            aRates.erase(aRates.end() - (nRatesCount - nAnimUnitsCount), aRates.end());
+          }
+
+          ASSERT(aAnimUnits.size() == nAnimUnitsCount);
         }
         else if(attr.key == "frames")
         {
-          clStringListA str_list;
-          clstd::ResolveString(attr.value.ToString(), ',', str_list);
-          
           anim.begin = (GXUINT)aAnimUnits.size();
-          for(auto it = str_list.begin(); it != str_list.end(); ++it) {
-            aAnimUnits.push_back(it->ToInteger());
-          }
+          attr.ToArray(',', [this](clstd::StockA::T_LPCSTR str, size_t len){
+            aAnimUnits.push_back(clstd::xtoi(10, str, len));
+          });
           anim.end = (GXUINT)aAnimUnits.size();
         }
       }
@@ -218,8 +238,8 @@ namespace Marimo
   b32 SPRITE_DESC_LOADER::Load(clstd::StockA* pStock, GXLPCSTR szSection)
   {
     clstd::StockA::Section main_sect = pStock->Open(szSection);
-    if (!main_sect) {
-      CLOG_ERROR("Can not open \"%s\" section.\n", szSection);
+    if ( ! main_sect) {
+      CLOG_ERROR("SPRITE_DESC_LOADER : Can not open \"%s\" section.\n", szSection);
       return FALSE;
     }
 

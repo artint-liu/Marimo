@@ -287,8 +287,6 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 # define MAX_PATH          260
 #endif
 
-#define CLCONST const
-
 #ifndef _T
 #ifdef _UNICODE
 #define _T(x)      L ## x

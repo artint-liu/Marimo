@@ -357,9 +357,9 @@ namespace clstd
 
     _COLOR_RGBTEMPL_F& operator/=(float v);
 
-    b32 operator==(const _COLOR_RGBTEMPL_F& rgb) CLCONST;
+    b32 operator==(const _COLOR_RGBTEMPL_F& rgb) const;
 
-    b32 operator!=(const _COLOR_RGBTEMPL_F& rgb) CLCONST;
+    b32 operator!=(const _COLOR_RGBTEMPL_F& rgb) const;
 
     //operator Internal::COLOR_ARGB () const
     //{

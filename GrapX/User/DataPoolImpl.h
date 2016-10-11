@@ -483,28 +483,28 @@ namespace Marimo
     if(str[0] == '0') {
       if(str[1] == 'x' || str[1] == 'X')
       {
-        if(clstd::IsNumericT(str + 2, 16, len - 2)) {
-          *pInteger = GXATOI(str + 2, 16, len - 2);
+        if(clstd::IsNumericT(str + 2, len - 2, 16)) {
+          *pInteger = clstd::xtoi(16, str + 2, len - 2);
           return TRUE;
         }
       }
       else if(str[1] == 'b' || str[1] == 'B')
       {
-        if(clstd::IsNumericT(str + 2, 2, len - 2)) {
-          *pInteger = GXATOI(str + 2, 2, len - 2);
+        if(clstd::IsNumericT(str + 2, len - 2, 2)) {
+          *pInteger = clstd::xtoi(2, str + 2, len - 2);
           return TRUE;
         }
       }
       else
       {
-        if(clstd::IsNumericT(str + 1, 8, len - 1)) {
-          *pInteger = GXATOI(str + 1, 8, len - 1);
+        if(clstd::IsNumericT(str + 1, len - 1), 8) {
+          *pInteger = clstd::xtoi(8, str + 1, len - 1);
           return TRUE;
         }
       }
     }
-    else if(clstd::IsNumericT(str, 10, len)) {
-      *pInteger = GXATOI(str, 10, len);
+    else if(clstd::IsNumericT(str, len, 10)) {
+      *pInteger = GXATOI(str, len);
       return TRUE;
     }
     return FALSE;

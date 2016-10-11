@@ -21,17 +21,17 @@ namespace clstd
     _quaternion(float f): x(f), y(f), z(f), w(f){}
     _quaternion(float x, float y, float z, float w) {this->x = x; this->y = y; this->z = z; this->w = w;}
 
-    bool operator==(const _quaternion& q) CLCONST
+    bool operator==(const _quaternion& q) const
     {
       return q.x == x && q.y == y && q.z == z && q.w == w;
     }
 
-    bool operator!=(const _quaternion& q) CLCONST
+    bool operator!=(const _quaternion& q) const
     {
       return q.x != x || q.y != y || q.z != z || q.w != w;
     }
 
-    _float3 operator*(CLCONST _float3& v) CLCONST
+    _float3 operator*(const _float3& v) const
     {
       // nVidia SDK implementation
       _float3 uv, uuv;
@@ -44,13 +44,13 @@ namespace clstd
       return v + uv + uuv;
     }
 
-    _quaternion operator*(CLCONST _quaternion& q) CLCONST;
-    _quaternion& operator*=(CLCONST _quaternion& q);
+    _quaternion operator*(const _quaternion& q) const;
+    _quaternion& operator*=(const _quaternion& q);
 
     _quaternion& normalize();
 
-    _quaternion& FromRotationMatrix(CLCONST _float4x4& m);
-    _quaternion& FromRotationMatrix(CLCONST _float3x3& m);
+    _quaternion& FromRotationMatrix(const _float4x4& m);
+    _quaternion& FromRotationMatrix(const _float3x3& m);
 
     float3x3 ToMatrix3x3() const;
     float4x4 ToMatrix() const;
@@ -118,12 +118,12 @@ namespace clstd
   };
 
 
-  inline float QuaternionLengthSq(CLCONST _quaternion *pQ)
+  inline float QuaternionLengthSq(const _quaternion *pQ)
   {
     return pQ->x * pQ->x + pQ->y * pQ->y + pQ->z * pQ->z + pQ->w * pQ->w;
   }
 
-  inline float QuaternionLength(CLCONST _quaternion *pQ)
+  inline float QuaternionLength(const _quaternion *pQ)
   {
 #ifdef __cplusplus
     return sqrtf(pQ->x * pQ->x + pQ->y * pQ->y + pQ->z * pQ->z + pQ->w * pQ->w);
@@ -132,24 +132,24 @@ namespace clstd
 #endif
   }
 
-  inline float QuaternionDot(CLCONST _quaternion *pQ1, CLCONST _quaternion *pQ2)
+  inline float QuaternionDot(const _quaternion *pQ1, const _quaternion *pQ2)
   {
     return pQ1->x * pQ2->x + pQ1->y * pQ2->y + pQ1->z * pQ2->z + pQ1->w * pQ2->w;
   }
 
 
-  _quaternion* QuaternionBaryCentric          (_quaternion *pout, CLCONST _quaternion *pq1, CLCONST _quaternion *pq2, CLCONST _quaternion *pq3, float f, float g);
-  _quaternion* QuaternionExp                  (_quaternion *pout, CLCONST _quaternion *pq);
-  _quaternion* QuaternionInverse              (_quaternion *pout, CLCONST _quaternion *pq);
-  _quaternion* QuaternionLn                   (_quaternion *pout, CLCONST _quaternion *pq);
-  _quaternion* QuaternionMultiply             (_quaternion *pout, CLCONST _quaternion *pq1, CLCONST _quaternion *pq2);
-  _quaternion* QuaternionRotationAxis         (_quaternion *pout, CLCONST _float3 *pv, float angle);
-  _quaternion* QuaternionRotationMatrix       (_quaternion *pout, CLCONST _float4x4 *pm);
+  _quaternion* QuaternionBaryCentric          (_quaternion *pout, const _quaternion *pq1, const _quaternion *pq2, const _quaternion *pq3, float f, float g);
+  _quaternion* QuaternionExp                  (_quaternion *pout, const _quaternion *pq);
+  _quaternion* QuaternionInverse              (_quaternion *pout, const _quaternion *pq);
+  _quaternion* QuaternionLn                   (_quaternion *pout, const _quaternion *pq);
+  _quaternion* QuaternionMultiply             (_quaternion *pout, const _quaternion *pq1, const _quaternion *pq2);
+  _quaternion* QuaternionRotationAxis         (_quaternion *pout, const _float3 *pv, float angle);
+  _quaternion* QuaternionRotationMatrix       (_quaternion *pout, const _float4x4 *pm);
   _quaternion* QuaternionRotationYawPitchRoll (_quaternion *pout, float yaw, float pitch, float roll);
-  _quaternion* QuaternionSlerp                (_quaternion *pout, CLCONST _quaternion *pq1, CLCONST _quaternion *pq2, float t);
-  _quaternion* QuaternionSquad                (_quaternion *pout, CLCONST _quaternion *pq1, CLCONST _quaternion *pq2, CLCONST _quaternion *pq3, CLCONST _quaternion *pq4, float t);
-  _quaternion* QuaternionNormalize            (_quaternion *pout, CLCONST _quaternion *pq);
-  void         QuaternionToAxisAngle          (CLCONST _quaternion *pq, _float3 *paxis, float *pangle);
+  _quaternion* QuaternionSlerp                (_quaternion *pout, const _quaternion *pq1, const _quaternion *pq2, float t);
+  _quaternion* QuaternionSquad                (_quaternion *pout, const _quaternion *pq1, const _quaternion *pq2, const _quaternion *pq3, const _quaternion *pq4, float t);
+  _quaternion* QuaternionNormalize            (_quaternion *pout, const _quaternion *pq);
+  void         QuaternionToAxisAngle          (const _quaternion *pq, _float3 *paxis, float *pangle);
 } // namespace clstd
 
 typedef clstd::_quaternion quaternion;

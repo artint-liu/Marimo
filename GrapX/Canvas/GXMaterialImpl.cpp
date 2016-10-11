@@ -621,7 +621,7 @@ int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, GXSIZE_T nCount)
       }
       else if(strName == "$BORDERCOLOR")
       {
-        GXDWORD dwColor = clstd::xtou(pParameters[i].szValue, 16);
+        GXDWORD dwColor = clstd::xtou(16, pParameters[i].szValue);
         Desc.BorderColor = dwColor;
       }
       else {

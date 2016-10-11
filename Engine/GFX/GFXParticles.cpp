@@ -246,7 +246,7 @@ namespace GFX
         continue;
       }
       else if(CMP_PARAM("quota")) {
-        nNumParticles = clstd::_xstrtoi<i32>(aDefines[i].szValue, 10);
+        nNumParticles = clstd::xtoi(10, aDefines[i].szValue);
       }
     }
 

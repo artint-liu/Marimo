@@ -500,13 +500,13 @@ namespace clstd
   }
 
   template<class _TDataDef>
-  b32 _COLOR_RGBTEMPL_F<_TDataDef>::operator==(const _COLOR_RGBTEMPL_F& rgb) CLCONST
+  b32 _COLOR_RGBTEMPL_F<_TDataDef>::operator==(const _COLOR_RGBTEMPL_F& rgb) const
   {
     return (this->r == rgb.r && this->g == rgb.g && this->b == rgb.b && this->a == rgb.a);
   }
 
   template<class _TDataDef>
-  b32 _COLOR_RGBTEMPL_F<_TDataDef>::operator!=(const _COLOR_RGBTEMPL_F& rgb) CLCONST
+  b32 _COLOR_RGBTEMPL_F<_TDataDef>::operator!=(const _COLOR_RGBTEMPL_F& rgb) const
   {
     return (this->r != rgb.r || this->g != rgb.g || this->b != rgb.b || this->a != rgb.a);
   }

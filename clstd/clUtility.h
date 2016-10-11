@@ -2,7 +2,7 @@
 #define _CL_UTILITY_
 
 template<typename _T1, typename _T2>
-inline _T2 clClamp(CLCONST _T1 nMin, CLCONST _T1 nMax, _T2 *pValue)
+inline _T2 clClamp(const _T1 nMin, const _T1 nMax, _T2 *pValue)
 {
   ASSERT(nMin <= nMax);
   if(*pValue < nMin) {
@@ -15,7 +15,7 @@ inline _T2 clClamp(CLCONST _T1 nMin, CLCONST _T1 nMax, _T2 *pValue)
 }
 
 template<typename _Ty>
-inline _Ty clClamp(CLCONST _Ty nMin, CLCONST _Ty nMax, _Ty Value)
+inline _Ty clClamp(const _Ty nMin, const _Ty nMax, _Ty Value)
 {
   ASSERT(nMin <= nMax);
   if(Value < nMin) {
@@ -28,7 +28,7 @@ inline _Ty clClamp(CLCONST _Ty nMin, CLCONST _Ty nMax, _Ty Value)
 }
 
 template<typename _T1, typename _T2>
-inline _T1 clLerp(CLCONST _T1 First, CLCONST _T1 Second, _T2 Value)
+inline _T1 clLerp(const _T1 First, const _T1 Second, _T2 Value)
 {
   return (_T1)((Second - First) * Value) + First;
 }
@@ -530,9 +530,9 @@ FINAL_RET:
   public:
     TimeTrace();
     void                Begin();
-    CLCONST TimeTrace&  End();
-    double              GetDeltaTime() CLCONST;
-    double              Dump(CLLPCSTR szName) CLCONST;
+    const TimeTrace&    End();
+    double              GetDeltaTime() const;
+    double              Dump(CLLPCSTR szName) const;
   };
 
   // 基于作用域的时间差计算 

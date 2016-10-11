@@ -69,13 +69,13 @@ namespace clstd
   _TInt _xstrtoi(const _TCh *String);
 
   template<typename _TInt, typename _TCh>
-  _TInt _xstrtoi(const _TCh *str, i32 radix, clsize len = -1);  // (2-36进制)字符串转带符号整数
+  _TInt _xstrtoi(i32 radix, const _TCh *str, clsize len = -1);  // (2-36进制)字符串转带符号整数
 
   template<typename _TUInt, typename _TCh>
   _TUInt _xstrtou(const _TCh *str);
 
   template<typename _TUInt, typename _TCh>
-  _TUInt _xstrtou(const _TCh *str, i32 radix, clsize len = -1);  // (2-36进制)字符串转无符号整数
+  _TUInt _xstrtou(i32 radix, const _TCh *str, clsize len = -1);  // (2-36进制)字符串转无符号整数
 
 
   template<typename _TCh>
@@ -86,16 +86,16 @@ namespace clstd
   int _ftoxstr(double value, _TCh* ascii, int width, int prec1, ch format);
 
   // string to integer
-  i32 xtoi(CLCONST wch* str);
-  i32 xtoi(CLCONST ch* str);
-  i32 xtoi(CLCONST wch* str, i32 radix, clsize len = -1);
-  i32 xtoi(CLCONST ch* str, i32 radix, clsize len = -1);
+  i32 xtoi(const wch* str);
+  i32 xtoi(const ch* str);
+  i32 xtoi(i32 radix, const wch* str, clsize len = -1);
+  i32 xtoi(i32 radix, const ch* str, clsize len = -1);
 
   // string to unsigned integer
-  u32 xtou(CLCONST wch* str);
-  u32 xtou(CLCONST ch* str);
-  u32 xtou(CLCONST wch* str, i32 radix, clsize len = -1);
-  u32 xtou(CLCONST ch* str, i32 radix, clsize len = -1);
+  u32 xtou(const wch* str);
+  u32 xtou(const ch* str);
+  u32 xtou(i32 radix, const wch* str, clsize len = -1);
+  u32 xtou(i32 radix, const ch* str, clsize len = -1);
 
   // integer to string
   void ltox(i32 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
@@ -131,7 +131,7 @@ namespace clstd
   clsize strlenT(const _TCh* str);
 
   template<typename _TCh>
-  b32 IsNumericT(const _TCh* str, i32 radix = 10, clsize len = -1);  // 遇到\0或者达到len时退出
+  b32 IsNumericT(const _TCh* str, clsize len = -1, i32 radix = 10);  // 遇到\0或者达到len时退出
 
   template<typename _TCh>
   u32 HashStringT(const _TCh* str, clsize len);

@@ -145,6 +145,7 @@ namespace Marimo
 
     typedef clmap<Sprite::ID, TYPEIDX>  IDDict;
     typedef clmap<GXLPCSTR, TYPEIDX>    NameDict;
+    typedef clvector<int>               UIntArray;
 
     clStringArrayA          aFiles;
     Sprite::ModuleArray     aModules;
@@ -152,6 +153,7 @@ namespace Marimo
     Sprite::AnimationArray  aAnims;
     Sprite::FrameUnitArray  aFrameUnits;
     Sprite::AnimUnitArray   aAnimUnits;
+    UIntArray               aRates; // 应该和aAnimUnits长度相等
 
     IDDict                  sIDDict;
     NameDict                sNameDict;

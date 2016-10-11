@@ -51,23 +51,23 @@ namespace clstd
 
   template u32    _xstrtou<u32>(const wch* String);
   template u32    _xstrtou<u32>(const  ch* String);
-  template u32    _xstrtou<u32>(const wch* str, i32 radix, clsize len);
-  template u32    _xstrtou<u32>(const  ch* str, i32 radix, clsize len);
+  template u32    _xstrtou<u32>(i32 radix, const wch* str, clsize len);
+  template u32    _xstrtou<u32>(i32 radix, const  ch* str, clsize len);
 
   template u64    _xstrtou<u64>(const wch* String);
   template u64    _xstrtou<u64>(const  ch* String);
-  template u64    _xstrtou<u64>(const wch* str, i32 radix, clsize len);
-  template u64    _xstrtou<u64>(const  ch* str, i32 radix, clsize len);
+  template u64    _xstrtou<u64>(i32 radix, const wch* str, clsize len);
+  template u64    _xstrtou<u64>(i32 radix, const  ch* str, clsize len);
 
   template i32    _xstrtoi<i32>(const wch* str);
   template i32    _xstrtoi<i32>(const  ch* str);
-  template i32    _xstrtoi<i32>(const wch* str, i32 radix, clsize len);
-  template i32    _xstrtoi<i32>(const  ch* str, i32 radix, clsize len);
+  template i32    _xstrtoi<i32>(i32 radix, const wch* str, clsize len);
+  template i32    _xstrtoi<i32>(i32 radix, const  ch* str, clsize len);
 
   template i64    _xstrtoi<i64>(const wch* str);
   template i64    _xstrtoi<i64>(const  ch* str);
-  template i64    _xstrtoi<i64>(const wch* str, i32 radix, clsize len);
-  template i64    _xstrtoi<i64>(const  ch* str, i32 radix, clsize len);
+  template i64    _xstrtoi<i64>(i32 radix, const wch* str, clsize len);
+  template i64    _xstrtoi<i64>(i32 radix, const  ch* str, clsize len);
 
   template int _ftoxstr(double value, wch* ascii, int width, int prec1, ch format);
   template int _ftoxstr(double value,  ch* ascii, int width, int prec1, ch format);
@@ -94,8 +94,8 @@ namespace clstd
   template ch     tolowerT  (ch c);
   template wch    tolowerT  (wch c);
 
-  template b32    IsNumericT(const wch* str, i32 radix, clsize len);
-  template b32    IsNumericT(const  ch* str, i32 radix, clsize len);
+  template b32    IsNumericT(const wch* str, clsize len, i32 radix);
+  template b32    IsNumericT(const  ch* str, clsize len, i32 radix);
 
   template u32    HashStringT(const wch* str);
   template u32    HashStringT(const  ch* str);
@@ -1493,7 +1493,7 @@ namespace clstd
   _CLSTR_TEMPL
     i32 _CLSTR_IMPL::ToInteger(int nRadix) const
   {
-    return clstd::xtoi(m_pBuf, nRadix);
+    return clstd::xtoi(nRadix, m_pBuf);
   }
 
   _CLSTR_TEMPL
@@ -2180,11 +2180,11 @@ namespace clstd
     }
 
     while ((c = *String++) != '\0') {
-
-      if (c >= '0' && c <= '9')
+      if (c >= '0' && c <= '9') {
         Digit = (_TInt) (c - '0');
-      else
+      } else {
         break;
+      }
 
       Value = (Value * 10) + Digit;
     }
@@ -2192,10 +2192,11 @@ namespace clstd
   }
 
   template<typename _TInt, typename _TCh>
-  _TInt _xstrtoi(const _TCh *str, i32 radix, clsize len)
+  _TInt _xstrtoi(i32 radix, const _TCh *str, clsize len)
   {
-    if(radix < 2 || radix > 36)
+    if(radix < 2 || radix > 36) {
       return 0;
+    }
 
     clsize i = 0;
     _TInt Value = 0, Digit;
@@ -2244,7 +2245,7 @@ namespace clstd
   }
 
   template<typename _TUInt, typename _TCh>
-  _TUInt _xstrtou(const _TCh *str, i32 radix, clsize len)
+  _TUInt _xstrtou(i32 radix, const _TCh *str, clsize len)
   {
     if(radix < 2 || radix > 36)
       return 0;
@@ -2497,44 +2498,44 @@ namespace clstd
     _ltox_t<ch, i32, u32>(value, pDest, uSize, radix, upper);
   }
   
-  i32 xtoi(CLCONST wch* str)
+  i32 xtoi(const wch* str)
   {
     return _xstrtoi<i32>(str);
   }
 
-  i32 xtoi(CLCONST ch* str)
+  i32 xtoi(const ch* str)
   {
     return _xstrtoi<i32>(str);
   }
 
-  i32 xtoi(CLCONST wch* str, i32 radix, clsize len)
+  i32 xtoi(i32 radix, const wch* str, clsize len)
   {
-    return _xstrtoi<i32>(str, radix, len);
+    return _xstrtoi<i32>(radix, str, len);
   }
 
-  i32 xtoi(CLCONST ch* str, i32 radix, clsize len)
+  i32 xtoi(i32 radix, const ch* str, clsize len)
   {
-    return _xstrtoi<i32>(str, radix, len);
+    return _xstrtoi<i32>(radix, str, len);
   }
 
-  u32 xtou(CLCONST wch* str)
+  u32 xtou(const wch* str)
   {
     return _xstrtou<u32>(str);
   }
 
-  u32 xtou(CLCONST ch* str)
+  u32 xtou(const ch* str)
   {
     return _xstrtou<u32>(str);
   }
 
-  u32 xtou(CLCONST wch* str, i32 radix, clsize len)
+  u32 xtou(i32 radix, const wch* str, clsize len)
   {
-    return _xstrtou<u32>(str, radix, len);
+    return _xstrtou<u32>(radix, str, len);
   }
   
-  u32 xtou(CLCONST ch* str, i32 radix, clsize len)
+  u32 xtou(i32 radix, const ch* str, clsize len)
   {
-    return _xstrtou<u32>(str, radix, len);
+    return _xstrtou<u32>(radix, str, len);
   }
   
   void l64tox(i64 value, wch* pDest, size_t uSize, i32 radix, i32 upper)
@@ -2625,7 +2626,7 @@ namespace clstd
   }
 
   template<typename _TCh>
-  b32 IsNumericT(const _TCh* str, i32 radix, clsize len) // 没测
+  b32 IsNumericT(const _TCh* str, clsize len, i32 radix) // 没测
   {
     if(radix < 2 && radix > 36) {
       return FALSE;

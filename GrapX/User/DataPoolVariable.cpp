@@ -851,16 +851,16 @@ namespace Marimo
       case T_BYTE:
       case T_WORD:
       case T_DWORD:
-        return pThis->Set((u32)clstd::xtou(szString, 10, length));
+        return pThis->Set((u32)clstd::xtou(10, szString, length));
       case T_QWORD:
-        return pThis->Set((u64)clstd::_xstrtou<u64>(szString, 10, length));
+        return pThis->Set((u64)clstd::_xstrtou<u64>(10, szString, length));
 
       case T_SBYTE:
       case T_SWORD:
       case T_SDWORD:
-        return pThis->Set((i32)clstd::xtoi(szString, 10, length));
+        return pThis->Set((i32)clstd::xtoi(10, szString, length));
       case T_SQWORD:
-        return pThis->Set((i64)clstd::_xstrtoi<i64>(szString, 10, length));
+        return pThis->Set((i64)clstd::_xstrtoi<i64>(10, szString, length));
       case T_FLOAT:
         ASSERT(length == -1);
         return pThis->Set((float)clstd::_xstrtof(szString));

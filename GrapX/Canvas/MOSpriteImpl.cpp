@@ -374,7 +374,7 @@ namespace Marimo
       rgSrc = m_loader.aModules[fu.nModuleIdx].regn;
       int nIndex = AdjustDrawingRegn(rgSrc);
       if(nIndex >= 0) {
-        pCanvas->DrawImage(m_ImageArray[nIndex], &rgDest, &rgSrc);
+        pCanvas->DrawImage(m_ImageArray[nIndex], &rgDest, &rgSrc, (RotateType)fu.rotate);
       }
     }
     //pCanvas->DrawImage();
@@ -494,8 +494,11 @@ namespace Marimo
 
   GXINT MOSpriteImpl::Find(GXLPCSTR szName, Type* pType) const
   {
-    _测试后删除这行_;
     auto pAttr = IntFind(szName);
+    if( ! pAttr) {
+      return -1;
+    }
+
     if(pType) {
       *pType = pAttr->type;
     }
@@ -855,10 +858,10 @@ namespace Marimo
       i++;
     });
 
-    std::for_each(m_loader.aFrameUnits.begin(), m_loader.aFrameUnits.end(), [](FRAME_UNIT& fu){
+    /*std::for_each(m_loader.aFrameUnits.begin(), m_loader.aFrameUnits.end(), [](FRAME_UNIT& fu){
       fu.regn.top = -fu.regn.top;
       fu.regn.height = -fu.regn.height;
-    });
+    });//*/
 
     ASSERT(m_ImageArray.size() == pDesc->aFiles.size());
 

@@ -104,18 +104,18 @@ namespace clstd
     QueryPerformanceCounter(&m_Begin);
   }
   
-  CLCONST TimeTrace& TimeTrace::End()
+  const TimeTrace& TimeTrace::End()
   {      
     QueryPerformanceCounter(&m_End);
     return *this;
   }
 
-  double TimeTrace::GetDeltaTime() CLCONST
+  double TimeTrace::GetDeltaTime() const
   {
     return ((double)(m_End.QuadPart - m_Begin.QuadPart) / (double)m_Frequency.QuadPart);
   }
 
-  double TimeTrace::Dump(CLLPCSTR szName) CLCONST
+  double TimeTrace::Dump(CLLPCSTR szName) const
   {
     clStringA str;
     const double fTime = GetDeltaTime();

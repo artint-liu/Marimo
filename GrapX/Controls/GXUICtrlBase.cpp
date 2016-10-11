@@ -588,7 +588,7 @@ namespace DlgXM
   {
     if(szMark[0] == '#')
     {
-      return clstd::xtou((wch*)&szMark[1], 16);
+      return clstd::xtou(16, (wch*)&szMark[1]);
     }
 
     clStringW strMark = szMark;

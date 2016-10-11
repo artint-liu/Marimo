@@ -320,7 +320,7 @@ LAST_STR:
 
     for(clStringArrayW::iterator it = aInteger.begin();
       it != aInteger.end(); ++it) {
-      GXUINT nWidth = clstd::xtou(*it, 10);
+      GXUINT nWidth = clstd::xtou(10, *it);
       aWidth.push_back(nWidth);
     }
     return SetColumnsWidth(&aWidth.front(), (GXUINT)aWidth.size());

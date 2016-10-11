@@ -90,15 +90,15 @@ namespace clstd
     b32 LoadSubNodeW  (CLLPCWSTR szFile, CLLPCSTR szKeys);
 
     SmartNode*  CreateNode      (CLLPCSTR szKeys);
-    SmartNode*  GetNode         (CLLPCSTR szKeys) CLCONST;
+    SmartNode*  GetNode         (CLLPCSTR szKeys) const;
     u32         SetFlags        (u32 dwFlags);  // 查看 SRF_ 标志
 
     b32     Write       (SmartNode* pSmart, CLLPCSTR szKey, CLLPCVOID lpData, u32 cbSize);
     b32     Write64     (SmartNode* pSmart, CLLPCSTR szKey, u32 dwLow, u32 dwHigh);
-    s32     GetLength   (CLCONST SmartNode* pSmart, CLLPCSTR szKey) CLCONST;
-    s32     Read        (CLCONST SmartNode* pSmart, CLLPCSTR szKey, CLLPVOID lpData, u32 cbSize) CLCONST; // 如果传入的cbSize过大会被截断
-    b32     Read64      (CLCONST SmartNode* pSmart, CLLPCSTR szKey, u32* dwLow, u32* dwHigh) CLCONST;
-    s32     ReadToBuffer(CLCONST SmartNode* pSmart, CLLPCSTR szKey, Buffer* pBuffer) CLCONST;
+    s32     GetLength   (const SmartNode* pSmart, CLLPCSTR szKey) const;
+    s32     Read        (const SmartNode* pSmart, CLLPCSTR szKey, CLLPVOID lpData, u32 cbSize) const; // 如果传入的cbSize过大会被截断
+    b32     Read64      (const SmartNode* pSmart, CLLPCSTR szKey, u32* dwLow, u32* dwHigh) const;
+    s32     ReadToBuffer(const SmartNode* pSmart, CLLPCSTR szKey, Buffer* pBuffer) const;
 
     // 字符串存取函数不检查Key的属性, 如果用错了则可能出错
     b32     WriteStringW(SmartNode* pSmart, CLLPCSTR szKey, CLLPCWSTR szString);

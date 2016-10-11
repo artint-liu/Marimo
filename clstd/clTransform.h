@@ -69,7 +69,7 @@ namespace clstd
     // float3 InverseTransformDirection (CFloat3& direction); // Transforms a direction from world space to local space.
     // float3 TransformPoint            (CFloat3& position);  // Transforms position from local space to world space.
     // float3 InverseTransformPoint     (CFloat3& position);  // Transforms position from world space to local space.
-    float4x4    ToRelativeMatrix        () CLCONST;
+    float4x4    ToRelativeMatrix        () const;
     CFloat4x4&  UpdateAbsoluteMatrix    (CFloat4x4& Coordinate);
     euler       GetEuler                (RotationOrder eOrder) const;
 

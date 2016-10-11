@@ -38,7 +38,7 @@ namespace clstd
       _31 = m31; _32 = m32; _33 = m33;
     }
 
-    friend _float3x3 operator*(CLCONST _float3x3& m1, CLCONST _float3x3& m2);
+    friend _float3x3 operator*(const _float3x3& m1, const _float3x3& m2);
     _float3x3& transpose();
     _float3x3& set(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33);
 
@@ -51,21 +51,21 @@ namespace clstd
     // The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
     // where yaw is rotation about the Up vector, pitch is rotation about the
     // Right axis, and roll is rotation about the Direction axis.
-    b32   ToEulerAnglesXYZ    (_euler& eur) CLCONST;
-    b32   ToEulerAnglesXZY    (_euler& eur) CLCONST;
-    b32   ToEulerAnglesYXZ    (_euler& eur) CLCONST;
-    b32   ToEulerAnglesYZX    (_euler& eur) CLCONST;
-    b32   ToEulerAnglesZXY    (_euler& eur) CLCONST;
-    b32   ToEulerAnglesZYX    (_euler& eur) CLCONST;
+    b32   ToEulerAnglesXYZ    (_euler& eur) const;
+    b32   ToEulerAnglesXZY    (_euler& eur) const;
+    b32   ToEulerAnglesYXZ    (_euler& eur) const;
+    b32   ToEulerAnglesYZX    (_euler& eur) const;
+    b32   ToEulerAnglesZXY    (_euler& eur) const;
+    b32   ToEulerAnglesZYX    (_euler& eur) const;
 
-    void  FromEulerAnglesXYZ  (CLCONST _euler& eur);
-    void  FromEulerAnglesXZY  (CLCONST _euler& eur);
-    void  FromEulerAnglesYXZ  (CLCONST _euler& eur);
-    void  FromEulerAnglesYZX  (CLCONST _euler& eur);
-    void  FromEulerAnglesZXY  (CLCONST _euler& eur);
-    void  FromEulerAnglesZYX  (CLCONST _euler& eur);
+    void  FromEulerAnglesXYZ  (const _euler& eur);
+    void  FromEulerAnglesXZY  (const _euler& eur);
+    void  FromEulerAnglesYXZ  (const _euler& eur);
+    void  FromEulerAnglesYZX  (const _euler& eur);
+    void  FromEulerAnglesZXY  (const _euler& eur);
+    void  FromEulerAnglesZYX  (const _euler& eur);
 
-    _float3x3& FromQuaternion(CLCONST _quaternion *pq);
+    _float3x3& FromQuaternion(const _quaternion *pq);
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -113,9 +113,9 @@ namespace clstd
       _41 = m41; _42 = m42; _43 = m43; _44 = m44;
     }
 
-    _float4x4(CLCONST _float3x3& m3);
+    _float4x4(const _float3x3& m3);
 
-    _float4x4& operator=(CLCONST _float3x3& m3);
+    _float4x4& operator=(const _float3x3& m3);
 
     void identity()
     {
@@ -199,40 +199,40 @@ namespace clstd
     _float4     GetColumn(const int l) const;
     const _float4& GetRow(const int r) const;
 
-    _float4x4& LookAtLH(CLCONST _float3& vEye, CLCONST _float3& vLookAt, CLCONST _float3& vUp);
-    _float4x4& FromDirection(CLCONST _float3& vDir, CLCONST _float3& vUp);  // vDir 和 vUp 都是已经归一化的
+    _float4x4& LookAtLH(const _float3& vEye, const _float3& vLookAt, const _float3& vUp);
+    _float4x4& FromDirection(const _float3& vDir, const _float3& vUp);  // vDir 和 vUp 都是已经归一化的
     _float4x4& PerspectiveFovLH(float fovy, float fAspect, float fNear, float fFar);
     _float4x4& OrthoLH(float w, float h, float fNear, float fFar);
-    _float4x4& RotationQuaternion(CLCONST _quaternion *pq);
+    _float4x4& RotationQuaternion(const _quaternion *pq);
     _float4x4& RotationYawPitchRollA(float yaw, float pitch, float roll); // 基于角度
     _float4x4& RotationYawPitchRollR(float yaw, float pitch, float roll); // 基于弧度 y(yaw)->x(pitch)->z(roll)
 
-    _float4x4& AffineTransformation (CLCONST _float3* scaling, CLCONST _float3* rotationcenter, CLCONST _quaternion* rotation, CLCONST _float3* translation);
-    void       DecomposeScaling     (_float3* pOutScale) CLCONST;
-    void       DecomposeTranslation (_float3* pOutTranslation) CLCONST;
-    b32        Decompose            (_float3* pOutScale, _quaternion* pOutRotation) CLCONST;
-    b32        Decompose            (_float3* pOutScale, _quaternion* pOutRotation, _float3* pOutTranslation) CLCONST;
+    _float4x4& AffineTransformation (const _float3* scaling, const _float3* rotationcenter, const _quaternion* rotation, const _float3* translation);
+    void       DecomposeScaling     (_float3* pOutScale) const;
+    void       DecomposeTranslation (_float3* pOutTranslation) const;
+    b32        Decompose            (_float3* pOutScale, _quaternion* pOutRotation) const;
+    b32        Decompose            (_float3* pOutScale, _quaternion* pOutRotation, _float3* pOutTranslation) const;
   };
 
   //////////////////////////////////////////////////////////////////////////
   _float4x4*  MatrixInverse             (_float4x4* pout, float* pDeterminant, const _float4x4* pin);
   _float4x4*  MatrixInverseGaussJordan  (_float4x4* pout, float* pDeterminant, const _float4x4* pin);
-  b32         MatrixDecompose           (_float3* poutscale, _quaternion* poutrotation, _float3 *pouttranslation, CLCONST _float4x4 *pm);
-  void        MatrixDecomposeScaling          (CLCONST _float4x4 *pm, _float3* poutscale);
-  b32         MatrixDecomposeScalingRotation  (CLCONST _float4x4 *pm, _float3* poutscale, _quaternion* poutrotation);
-  void        MatrixDecomposeTranslation      (CLCONST _float4x4 *pm, _float3 *pouttranslation);
-  _float4x4*  MatrixLookAtLH            (_float4x4* pout, CLCONST _float3 *peye, CLCONST _float3 *pat, CLCONST _float3 *pup);
+  b32         MatrixDecompose           (_float3* poutscale, _quaternion* poutrotation, _float3 *pouttranslation, const _float4x4 *pm);
+  void        MatrixDecomposeScaling          (const _float4x4 *pm, _float3* poutscale);
+  b32         MatrixDecomposeScalingRotation  (const _float4x4 *pm, _float3* poutscale, _quaternion* poutrotation);
+  void        MatrixDecomposeTranslation      (const _float4x4 *pm, _float3 *pouttranslation);
+  _float4x4*  MatrixLookAtLH            (_float4x4* pout, const _float3 *peye, const _float3 *pat, const _float3 *pup);
   _float4x4*  MatrixRotationX           (_float4x4* pout, float angle);
   _float4x4*  MatrixRotationY           (_float4x4* pout, float angle);
   _float4x4*  MatrixRotationZ           (_float4x4* pout, float angle);
-  _float4x4*  MatrixMultiply            (_float4x4* pout, CLCONST _float4x4 *pm1, CLCONST _float4x4 *pm2);
+  _float4x4*  MatrixMultiply            (_float4x4* pout, const _float4x4 *pm1, const _float4x4 *pm2);
   _float4x4*  MatrixRotationYawPitchRoll(_float4x4* pout, float yaw, float pitch, float roll);
   void        MatrixIdentity            (_float4x4* pout);
-  _float4x4*  MatrixRotationAxis        (_float4x4* pout, CLCONST _float3 *pv, float angle);
+  _float4x4*  MatrixRotationAxis        (_float4x4* pout, const _float3 *pv, float angle);
   _float4x4*  MatrixPerspectiveFovLH    (_float4x4* pout, float fovy, float aspect, float zn, float zf);
   _float4x4*  MatrixOrthoLH             (_float4x4* pout, float w, float h, float zn, float zf);
-  _float4x4*  MatrixRotationQuaternion  (_float4x4* pout, CLCONST _quaternion *pq);
-  _float4x4*  MatrixAffineTransformation(_float4x4* pout, CLCONST _float3* scaling, CLCONST _float3* rotationcenter, CLCONST _quaternion* rotation, CLCONST _float3* translation);
+  _float4x4*  MatrixRotationQuaternion  (_float4x4* pout, const _quaternion *pq);
+  _float4x4*  MatrixAffineTransformation(_float4x4* pout, const _float3* scaling, const _float3* rotationcenter, const _quaternion* rotation, const _float3* translation);
 
 } // namespace clstd
 

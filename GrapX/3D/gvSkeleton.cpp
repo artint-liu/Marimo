@@ -59,7 +59,7 @@ void Dump(const float4x4& m)
     m._41, m._42, m._43, m._44);
 }
 
-inline float3* VectorLerp(float3* pout, CLCONST float3* pq1, CLCONST float3* pq2, float t)
+inline float3* VectorLerp(float3* pout, const float3* pq1, const float3* pq2, float t)
 {
   *pout = ((*pq2) - (*pq1)) * t + (*pq1);
   return pout;

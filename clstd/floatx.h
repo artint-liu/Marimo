@@ -682,15 +682,15 @@ inline _Tv Lerp(const _Tv& t1, const _Tv& t2, const _Tl& l)
 
 namespace clstd
 {
-  _float4*    Vec3TransformCoord        (_float4* pout, CLCONST _float3* pv, CLCONST _float4x4* pm);
-  float3*     Vec3TransformNormal       (_float3* pout, CLCONST _float3* pv, CLCONST _float4x4* pm);
-  _float3*    Vec3Normalize             (_float3* pout, CLCONST _float3* pv);
-  _float3*    Vec3Subtract              (_float3* pOut, CLCONST _float3* pV1, CLCONST _float3* pV2);
-  _float3*    Vec3Cross                 (_float3* pOut, CLCONST _float3* pV1, CLCONST _float3* pV2);
-  float       Vec3Dot                   (CLCONST _float3* pV1, CLCONST _float3* pV2);
-  float       Vec3Length                (CLCONST _float3 *pV);
+  _float4*    Vec3TransformCoord        (_float4* pout, const _float3* pv, const _float4x4* pm);
+  float3*     Vec3TransformNormal       (_float3* pout, const _float3* pv, const _float4x4* pm);
+  _float3*    Vec3Normalize             (_float3* pout, const _float3* pv);
+  _float3*    Vec3Subtract              (_float3* pOut, const _float3* pV1, const _float3* pV2);
+  _float3*    Vec3Cross                 (_float3* pOut, const _float3* pV1, const _float3* pV2);
+  float       Vec3Dot                   (const _float3* pV1, const _float3* pV2);
+  float       Vec3Length                (const _float3 *pV);
 
-  float4*     Vec4Transform             (_float4 *pout, CLCONST _float4 *pv, CLCONST _float4x4 *pm);
+  float4*     Vec4Transform             (_float4 *pout, const _float4 *pv, const _float4x4 *pm);
 
   //float3*     Vec3TransformNormal3x3(float3* pout, CLCONST float3* pv, CLCONST float3x3 *pm);
   //float QuaternionLengthSq(CLCONST _quaternion *pQ);

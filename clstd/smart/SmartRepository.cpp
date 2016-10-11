@@ -374,7 +374,7 @@ namespace clstd
     return pSmart;
   }
 
-  SmartNode* SmartRepository::GetNode(CLLPCSTR szKeys) CLCONST
+  SmartNode* SmartRepository::GetNode(CLLPCSTR szKeys) const
   {
     clStringArrayA aPathKeys;
     ResolveString<clStringA>(szKeys, '\\', aPathKeys);
@@ -408,7 +408,7 @@ namespace clstd
     return uPrev;
   }
 
-  s32 SmartRepository::GetLength(CLCONST SmartNode* pSmart, CLLPCSTR szKey) CLCONST
+  s32 SmartRepository::GetLength(const SmartNode* pSmart, CLLPCSTR szKey) const
   {
     pSmart = pSmart == NULL ? this : pSmart;
     KeyDict::const_iterator it = pSmart->Keys.find(szKey);
@@ -477,7 +477,7 @@ namespace clstd
     return TRUE;
   }
 
-  s32 SmartRepository::Read(CLCONST SmartNode* pSmart, CLLPCSTR szKey, CLLPVOID lpData, u32 cbSize) CLCONST
+  s32 SmartRepository::Read(const SmartNode* pSmart, CLLPCSTR szKey, CLLPVOID lpData, u32 cbSize) const
   {
     s32 ret = 0;
     pSmart = pSmart == NULL ? this : pSmart;
@@ -486,7 +486,7 @@ namespace clstd
     if(it == pSmart->Keys.end()) {
       return ret;
     }
-    CLCONST KEYDESC& Desc = it->second;
+    const KEYDESC& Desc = it->second;
     if(Desc.eType == KT_Varible)
     {
       ret = clMin(Desc.v.cbSize, cbSize);
@@ -555,7 +555,7 @@ namespace clstd
     return TRUE;
   }
 
-  b32 SmartRepository::Read64(CLCONST SmartNode* pSmart, CLLPCSTR szKey, u32* dwLow, u32* dwHigh) CLCONST
+  b32 SmartRepository::Read64(const SmartNode* pSmart, CLLPCSTR szKey, u32* dwLow, u32* dwHigh) const
   {
     pSmart = pSmart == NULL ? this : pSmart;
 
@@ -576,7 +576,7 @@ namespace clstd
     return FALSE;
   }
 
-  s32 SmartRepository::ReadToBuffer(CLCONST SmartNode* pSmart, CLLPCSTR szKey, Buffer* pBuffer) CLCONST
+  s32 SmartRepository::ReadToBuffer(const SmartNode* pSmart, CLLPCSTR szKey, Buffer* pBuffer) const
   {
     s32 ret = 0;
     pSmart = pSmart == NULL ? this : pSmart;
@@ -585,7 +585,7 @@ namespace clstd
     if(it == pSmart->Keys.end()) {
       return ret;
     }
-    CLCONST KEYDESC& Desc = it->second;
+    const KEYDESC& Desc = it->second;
     if(Desc.eType == KT_Varible)
     {
       pBuffer->Resize(Desc.v.cbSize, FALSE);

@@ -40,12 +40,12 @@ namespace clstd
     Update((u8*)pBuffer->GetPtr(), pBuffer->GetSize());
   }
 
-  b32 MD5Calculater::operator=(CLCONST MD5Calculater& md5) CLCONST
+  b32 MD5Calculater::operator=(const MD5Calculater& md5) const
   {
     return Compare(md5) == 0;
   }
 
-  int MD5Calculater::Compare(CLCONST MD5Calculater& md5) CLCONST
+  int MD5Calculater::Compare(const MD5Calculater& md5) const
   {
     i8 r = 0;
     for(int i = 0; i < 16; i++) {

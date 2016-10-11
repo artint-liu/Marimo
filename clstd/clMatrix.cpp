@@ -18,7 +18,7 @@ namespace clstd
     _31 = m4x4._31;    _32 = m4x4._32;    _33 = m4x4._33;
   }
 
-  _float3x3 operator*(CLCONST _float3x3& m1, CLCONST _float3x3& m2)
+  _float3x3 operator*(const _float3x3& m1, const _float3x3& m2)
   {
     _float3x3 t;
     for (size_t iRow = 0; iRow < 3; iRow++)
@@ -34,7 +34,7 @@ namespace clstd
     return t;
   }
 
-  b32 _float3x3::ToEulerAnglesXYZ(_euler& eur) CLCONST
+  b32 _float3x3::ToEulerAnglesXYZ(_euler& eur) const
   {
     // 这个函数来自Orge，计算公式需要转置才能对应float3x3的分量
     // rot =  cy*cz          -cy*sz           sy
@@ -69,7 +69,7 @@ namespace clstd
     }
   }
 
-  b32 _float3x3::ToEulerAnglesXZY(_euler& eur) CLCONST
+  b32 _float3x3::ToEulerAnglesXZY(_euler& eur) const
   {
     // 这个函数来自Orge，计算公式需要转置才能对应float3x3的分量
     // rot =  cy*cz          -sz              cz*sy
@@ -104,7 +104,7 @@ namespace clstd
     }
   }
 
-  b32 _float3x3::ToEulerAnglesYXZ(_euler& eur) CLCONST
+  b32 _float3x3::ToEulerAnglesYXZ(_euler& eur) const
   {
     // 这个函数来自Orge，计算公式需要转置才能对应float3x3的分量
     // rot =  cy*cz+sx*sy*sz  cz*sx*sy-cy*sz  cx*sy
@@ -139,7 +139,7 @@ namespace clstd
     }
   }
 
-  b32 _float3x3::ToEulerAnglesYZX(_euler& eur) CLCONST
+  b32 _float3x3::ToEulerAnglesYZX(_euler& eur) const
   {
     // 这个函数来自Orge，计算公式需要转置才能对应float3x3的分量
     // rot =  cy*cz           sx*sy-cx*cy*sz  cx*sy+cy*sx*sz
@@ -174,7 +174,7 @@ namespace clstd
     }
   }
 
-  b32 _float3x3::ToEulerAnglesZXY(_euler& eur) CLCONST // debug:transpose
+  b32 _float3x3::ToEulerAnglesZXY(_euler& eur) const // debug:transpose
   {
     // 这个函数来自Orge，计算公式需要转置才能对应float3x3的分量
     // rot =  cy*cz-sx*sy*sz -cx*sz           cz*sy+cy*sx*sz
@@ -209,7 +209,7 @@ namespace clstd
     }
   }
 
-  b32 _float3x3::ToEulerAnglesZYX(_euler& eur) CLCONST
+  b32 _float3x3::ToEulerAnglesZYX(_euler& eur) const
   {
     // 这个函数来自Orge，计算公式需要转置才能对应float3x3的分量
     // rot =  cy*cz           cz*sx*sy-cx*sz  cx*cz*sy+sx*sz
@@ -246,7 +246,7 @@ namespace clstd
 
   //////////////////////////////////////////////////////////////////////////
 
-  void _float3x3::FromEulerAnglesXYZ(CLCONST _euler& eur)
+  void _float3x3::FromEulerAnglesXYZ(const _euler& eur)
   {
     float3x3 mx, my, mz;
     mx.RotationX(eur.x);
@@ -256,7 +256,7 @@ namespace clstd
     *this = mz * my * mx;
   }
 
-  void _float3x3::FromEulerAnglesXZY(CLCONST _euler& eur)
+  void _float3x3::FromEulerAnglesXZY(const _euler& eur)
   {
     float3x3 mx, my, mz;
     mx.RotationX(eur.x);
@@ -266,7 +266,7 @@ namespace clstd
     *this = my * mz * mx;
   }
 
-  void _float3x3::FromEulerAnglesYXZ(CLCONST _euler& eur)
+  void _float3x3::FromEulerAnglesYXZ(const _euler& eur)
   {
     float3x3 mx, my, mz;
     mx.RotationX(eur.x);
@@ -276,7 +276,7 @@ namespace clstd
     *this = mz * mx * my;
   }
 
-  void _float3x3::FromEulerAnglesYZX(CLCONST _euler& eur)
+  void _float3x3::FromEulerAnglesYZX(const _euler& eur)
   {
     float3x3 mx, my, mz;
     mx.RotationX(eur.x);
@@ -286,7 +286,7 @@ namespace clstd
     *this = mx * mz * my;
   }
 
-  void _float3x3::FromEulerAnglesZXY(CLCONST _euler& eur)
+  void _float3x3::FromEulerAnglesZXY(const _euler& eur)
   {
     float3x3 mx, my, mz;
     mx.RotationX(eur.x);
@@ -296,7 +296,7 @@ namespace clstd
     *this = my * mx * mz;
   }
 
-  void _float3x3::FromEulerAnglesZYX(CLCONST _euler& eur)
+  void _float3x3::FromEulerAnglesZYX(const _euler& eur)
   {
     float3x3 mx, my, mz;
     mx.RotationX(eur.x);
@@ -306,7 +306,7 @@ namespace clstd
     *this = mx * my * mz;
   }
 
-  _float3x3& _float3x3::FromQuaternion( CLCONST _quaternion *pq )
+  _float3x3& _float3x3::FromQuaternion( const _quaternion *pq )
   {
     float4x4 mat;
     MatrixRotationQuaternion(&mat, pq);
@@ -355,7 +355,7 @@ namespace clstd
   }
 
   //////////////////////////////////////////////////////////////////////////
-  _float4x4::_float4x4(CLCONST _float3x3& m3)
+  _float4x4::_float4x4(const _float3x3& m3)
   {
     _11 = m3._11; _12 = m3._12; _13 = m3._13; _14 = 0;
     _21 = m3._21; _22 = m3._22; _23 = m3._23; _24 = 0;
@@ -363,7 +363,7 @@ namespace clstd
     _41 = 0; _42 = 0; _43 = 0; _44 = 1;
   }
 
-  _float4x4& _float4x4::operator=(CLCONST _float3x3& m3)
+  _float4x4& _float4x4::operator=(const _float3x3& m3)
   {
     _11 = m3._11; _12 = m3._12; _13 = m3._13;
     _21 = m3._21; _22 = m3._22; _23 = m3._23;
@@ -603,7 +603,7 @@ namespace clstd
     return ((float4*)this)[r];
   }
 
-  _float4x4& _float4x4::LookAtLH(CLCONST float3& vEye, CLCONST float3& vLookAt, CLCONST float3& vUp)
+  _float4x4& _float4x4::LookAtLH(const float3& vEye, const float3& vLookAt, const float3& vUp)
   {
     MatrixLookAtLH((_float4x4*)this, (const float3*)&vEye, (const float3*)&vLookAt, (const float3*)&vUp);
     return *this;
@@ -620,7 +620,7 @@ namespace clstd
     return *MatrixOrthoLH(this, w, h, fNear, fFar);
   }
 
-  _float4x4& _float4x4::RotationQuaternion(CLCONST _quaternion *pq)
+  _float4x4& _float4x4::RotationQuaternion(const _quaternion *pq)
   {
     return *MatrixRotationQuaternion(this, pq);
   }
@@ -641,27 +641,27 @@ namespace clstd
     return *MatrixRotationQuaternion(this, &q);
   }
 
-  _float4x4& _float4x4::AffineTransformation(CLCONST float3* scaling, CLCONST float3* rotationcenter, CLCONST quaternion* rotation, CLCONST float3* translation)
+  _float4x4& _float4x4::AffineTransformation(const float3* scaling, const float3* rotationcenter, const quaternion* rotation, const float3* translation)
   {
     return *MatrixAffineTransformation(this, scaling, rotationcenter, rotation, translation);
   }
   
-  void _float4x4::DecomposeScaling(_float3* pOutScale) CLCONST
+  void _float4x4::DecomposeScaling(_float3* pOutScale) const
   {
     MatrixDecomposeScaling(this, pOutScale);
   }
 
-  void _float4x4::DecomposeTranslation(_float3* pOutTranslation) CLCONST
+  void _float4x4::DecomposeTranslation(_float3* pOutTranslation) const
   {
     MatrixDecomposeTranslation(this, pOutTranslation);
   }
 
-  b32 _float4x4::Decompose(_float3* pOutScale, _quaternion* pOutRotation) CLCONST
+  b32 _float4x4::Decompose(_float3* pOutScale, _quaternion* pOutRotation) const
   {
     return MatrixDecomposeScalingRotation(this, pOutScale, pOutRotation);
   }
 
-  b32 _float4x4::Decompose(_float3* pOutScale, _quaternion* pOutRotation, _float3* pOutTranslation) CLCONST
+  b32 _float4x4::Decompose(_float3* pOutScale, _quaternion* pOutRotation, _float3* pOutTranslation) const
   {
     return MatrixDecompose(pOutScale, pOutRotation, pOutTranslation, this);
   }
@@ -787,7 +787,7 @@ namespace clstd
     //*/
   }
 
-  _float4x4& _float4x4::FromDirection( CLCONST _float3& vDir, CLCONST _float3& vUp )
+  _float4x4& _float4x4::FromDirection( const _float3& vDir, const _float3& vUp )
   {
     float3 right, rightn, top, topn;
 
@@ -851,7 +851,7 @@ namespace clstd
   }
 
   //////////////////////////////////////////////////////////////////////////
-  _float4x4* MatrixLookAtLH(_float4x4 *pout, CLCONST float3 *peye, CLCONST float3 *pat, CLCONST float3 *pup)
+  _float4x4* MatrixLookAtLH(_float4x4 *pout, const float3 *peye, const float3 *pat, const float3 *pup)
   {
     float3 right, rightn, up, upn, vec, vec2;
 
@@ -910,7 +910,7 @@ namespace clstd
     return pout;
   }
 
-  _float4x4* MatrixMultiply(_float4x4 *pout, CLCONST _float4x4 *pm1, CLCONST _float4x4 *pm2)
+  _float4x4* MatrixMultiply(_float4x4 *pout, const _float4x4 *pm1, const _float4x4 *pm2)
   {
     _float4x4 out;
     /*
@@ -976,7 +976,7 @@ namespace clstd
     pout->_11 = pout->_22 = pout->_33 = pout->_44 = 1;
   }
 
-  float4x4* MatrixAffineTransformation(float4x4 *pout, CLCONST float3* scaling, CLCONST float3* rotationcenter, CLCONST quaternion* rotation, CLCONST float3* translation)
+  float4x4* MatrixAffineTransformation(float4x4 *pout, const float3* scaling, const float3* rotationcenter, const quaternion* rotation, const float3* translation)
   {
     _float4x4 m1, m2, m3, m4, m5;
 
@@ -1015,7 +1015,7 @@ namespace clstd
     *pout = m1 * m2 * m3 * m4 * m5;
     return pout;
   }
-  _float4x4* MatrixRotationAxis(_float4x4 *pout, CLCONST float3 *pv, float angle)
+  _float4x4* MatrixRotationAxis(_float4x4 *pout, const float3 *pv, float angle)
   {
     float3 v;
 
@@ -1058,7 +1058,7 @@ namespace clstd
     return pout;
   }
 
-  _float4x4* MatrixRotationQuaternion(_float4x4 *pout, CLCONST _quaternion *pq) // from WINE
+  _float4x4* MatrixRotationQuaternion(_float4x4 *pout, const _quaternion *pq) // from WINE
   {
     MatrixIdentity(pout);
     const float xx = pq->x * pq->x;
@@ -1216,7 +1216,7 @@ namespace clstd
     return pout;
   }
 
-  b32 MatrixDecompose(float3* poutscale, quaternion* poutrotation, float3 *pouttranslation, CLCONST float4x4 *pm)
+  b32 MatrixDecompose(float3* poutscale, quaternion* poutrotation, float3 *pouttranslation, const float4x4 *pm)
   {
     //float4x4 normalized;
     //float3 vec;
@@ -1260,7 +1260,7 @@ namespace clstd
     return MatrixDecomposeScalingRotation(pm, poutscale, poutrotation);
   }
 
-  void MatrixDecomposeScaling(CLCONST _float4x4 *pm, _float3* poutscale)
+  void MatrixDecomposeScaling(const _float4x4 *pm, _float3* poutscale)
   {
     float3 vec;
     /*Compute the scaling part.*/
@@ -1280,7 +1280,7 @@ namespace clstd
     poutscale->z = float3::length(vec);
   }
 
-  b32 MatrixDecomposeScalingRotation(CLCONST _float4x4 *pm, _float3* poutscale, _quaternion* poutrotation)
+  b32 MatrixDecomposeScalingRotation(const _float4x4 *pm, _float3* poutscale, _quaternion* poutrotation)
   {
     float3 vec;
     float4x4 normalized;
@@ -1317,7 +1317,7 @@ namespace clstd
     return TRUE;
   }
 
-  void MatrixDecomposeTranslation(CLCONST _float4x4 *pm, _float3 *pouttranslation)
+  void MatrixDecomposeTranslation(const _float4x4 *pm, _float3 *pouttranslation)
   {
     /*Compute the translation part.*/
     pouttranslation->x = pm->dm[3][0];
