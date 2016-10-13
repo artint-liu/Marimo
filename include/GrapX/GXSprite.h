@@ -48,7 +48,12 @@ public:
     GXPOINT offset;
   };
 
-  typedef GXUINT ANIM_FRAME; // 描述一段动画的帧序列
+  struct ANIM_FRAME // 描述一段动画的帧序列
+  {
+    GXUINT nFrameIdx; // 帧索引
+    GXUINT nDuration; // 持续时间
+  };
+
   typedef GXUINT    TIME_T;
   typedef GXUINT    ID;         // id 不能为 0, module/frame/animation 不能相同
 
@@ -154,7 +159,7 @@ struct GXSPRITE_DESCW
 
   // 用于动画的帧列表
   GXUINT        nNumOfAnimFrames;
-  ANIM_FRAME*   aAnimFrames;
+  GXUINT*       aAnimFrames;
 };
 
 

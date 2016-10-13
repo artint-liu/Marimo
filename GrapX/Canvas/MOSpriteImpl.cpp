@@ -14,6 +14,7 @@
 #include <clUtility.H>
 #include <clStringSet.h>
 #include <Smart/SmartStream.h>
+#include <clTokens.h>
 #include <clStock.h>
 #include "MOSpriteImpl.H"
 
@@ -407,7 +408,7 @@ namespace Marimo
       return;
     }
 
-    PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex], x, y);
+    PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex].frame, x, y);
   }
 
   GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
@@ -432,7 +433,7 @@ namespace Marimo
       return;
     }
 
-    PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex], x, y);
+    PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex].frame, x, y);
   }
 
   GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
@@ -676,8 +677,13 @@ namespace Marimo
     }
 
     nCount = clMin(nCount, a.end - a.begin);
+
+    // 每帧的信息中，累计时间转换为间隔时间
+    GXUINT duration = 0;
     for(GXSIZE_T i = 0; i < nCount; i++) {
       pAnimFrame[i] = m_loader.aAnimUnits[a.begin + i];
+      pAnimFrame[i].duration -= duration;
+      duration = m_loader.aAnimUnits[a.begin + i].duration;
     }
     return nCount;
   }
@@ -841,6 +847,7 @@ namespace Marimo
     m_ImageArray.reserve(pDesc->aFiles.size());
     int i = 0;
 
+    // 加载纹理
     std::for_each(pDesc->aFiles.begin(), pDesc->aFiles.end(), [&](const clStringA& str)
     {
       GXImage* pImage = NULL;
@@ -865,8 +872,22 @@ namespace Marimo
 
     ASSERT(m_ImageArray.size() == pDesc->aFiles.size());
 
-    //std::for_each(m_loader.aModules.begin(), m_loader.aModules.end(), [const MODULE& m](){
-    //});
+    if(TEST_FLAG(m_loader.dwCapsFlags, SPRITE_DESC::Caps_VariableRate)) {
+      for(auto it_anim = m_loader.aAnims.begin(); it_anim != m_loader.aAnims.end(); ++it_anim)
+      {
+        ANIM_UNIT* au = &m_loader.aAnimUnits[it_anim->begin];
+        ANIM_UNIT* au_end = au + (it_anim->end - it_anim->begin);
+        GXUINT dur = 0;
+
+        while(au < au_end) {
+          au->duration += dur;
+          dur = au->duration;
+          au++;
+        }        
+      } // for
+    }
+
+    // name和id加入字典
     IntBuildNameIdDict(m_loader.aModules, MOSprite::Type_Module);
     IntBuildNameIdDict(m_loader.aFrames, MOSprite::Type_Frame);
     IntBuildNameIdDict(m_loader.aAnims, MOSprite::Type_Animation);
@@ -930,7 +951,28 @@ namespace Marimo
 
   GXUINT MOSpriteImpl::IntGetAnimationFrameIndex(const ANIMATION& a, TIME_T time)
   {
-    return (time / a.rate) % (a.end - a.begin);
+    if(TEST_FLAG(m_loader.dwCapsFlags, SPRITE_DESC::Caps_VariableRate))
+    {
+      const ANIM_UNIT* au_begin = &m_loader.aAnimUnits[a.begin];
+      const ANIM_UNIT* au_end   = au_begin + a.end;
+      const ANIM_UNIT* au       = au_begin;
+
+      if(au < au_end)
+      {
+        time %= (au_end - 1)->duration;
+
+        // TODO: 改为步进方式
+        while(au < au_end) {
+          if(time < au->duration) {
+            return au - au_begin;
+          }
+        }
+      }
+    }
+    else {
+      return (time / a.rate) % (a.end - a.begin);
+    }
+    return 0;
   }
 
 } // namespace Marimo 

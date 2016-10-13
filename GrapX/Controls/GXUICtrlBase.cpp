@@ -2,6 +2,7 @@
 #include "GrapX.H"
 
 #include <Smart/smartstream.h>
+#include <clTokens.h>
 #include <clStock.h>
 
 #include "User/GrapX.Hxx"

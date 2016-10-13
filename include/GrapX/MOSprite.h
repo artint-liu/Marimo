@@ -43,11 +43,16 @@ namespace Marimo
     struct FRAME_UNIT   // 描述单一的Module在Frame中的位置和旋转
     {
       GXUINT  nModuleIdx;
-      GXDWORD rotate;      // 旋转翻转标志
+      GXDWORD rotate;   // 旋转翻转标志
       GXREGN  regn;
     };
 
-    typedef GXUINT    ANIM_UNIT;
+    struct ANIM_UNIT    // 描述一段动画的帧序列
+    {
+      GXUINT frame;     // 帧索引
+      GXUINT duration;  // 持续时间
+    };
+
     typedef GXUINT    TIME_T;
     typedef GXUINT    ID;         // id 不能为 0, module/frame/animation 不能相同
 
@@ -145,18 +150,25 @@ namespace Marimo
 
     typedef clmap<Sprite::ID, TYPEIDX>  IDDict;
     typedef clmap<GXLPCSTR, TYPEIDX>    NameDict;
-    typedef clvector<int>               UIntArray;
+
+    enum Caps
+    {
+      Caps_VariableRate = 0x00000001, // 动画中帧与帧间的时间间隔是变化的
+    };
 
     clStringArrayA          aFiles;
+    GXDWORD                 dwCapsFlags; // 参考 Caps 定义
     Sprite::ModuleArray     aModules;
     Sprite::FrameArray      aFrames;
     Sprite::AnimationArray  aAnims;
     Sprite::FrameUnitArray  aFrameUnits;
     Sprite::AnimUnitArray   aAnimUnits;
-    UIntArray               aRates; // 应该和aAnimUnits长度相等
 
     IDDict                  sIDDict;
     NameDict                sNameDict;
+
+    SPRITE_DESC() : dwCapsFlags(0) {}
+    virtual ~SPRITE_DESC() {}
 
     static SPRITE_DESC* Create  (clstd::StockA* pStock, GXLPCSTR szSection);
     static void         Destroy (SPRITE_DESC* pDesc);

@@ -4,6 +4,7 @@
 #include <User/GrapX.Hxx>
 
 #include <Smart/smartstream.h>
+#include <clTokens.h>
 #include <clStock.h>
 
 // 平台相关

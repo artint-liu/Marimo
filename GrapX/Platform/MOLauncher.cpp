@@ -6,6 +6,7 @@
 #include "res/resource.h"
 
 #include <Smart/smartstream.h>
+#include <clTokens.h>
 #include <clStock.h>
 #include <clPathFile.H>
 

@@ -27,8 +27,8 @@ namespace clstd
   {
   public:
     //typedef typename _Traits::_TCh _TCh;
-    typedef SmartStreamT<_TStr> _SmartStreamT;
-    typedef typename _SmartStreamT::iterator _MyIterator;
+    typedef TokensT<_TStr> _TTokens;
+    typedef typename _TTokens::iterator _MyIterator;
     typedef typename _TStr::LPCSTR T_LPCSTR;
     typedef typename _TStr::TChar  TChar;
 
@@ -150,9 +150,9 @@ namespace clstd
   protected:
     //typedef clvector<SECTION*>  SectionArray;
 
-    _SmartStreamT m_SmartStream;
-    Buffer        m_Buffer;
-    int           m_nModify;
+    _TTokens m_SmartStream;
+    Buffer   m_Buffer;
+    int      m_nModify;
     //SectionArray  m_aHandles;
 
     static void ReverseByteOrder16(u16* ptr, clsize nCount);

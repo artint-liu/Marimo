@@ -1667,7 +1667,7 @@ namespace Marimo
   //
   // 保存用的内部结构体
   //
-  typedef clvector<GXUINT>      UIntArray;
+  //typedef clvector<GXUINT>      UIntArray;
   struct BUFFER_SAVELOAD_DESC // 用于读写时临时储存的buffer描述
   {
     enum RelocalizeType : GXDWORD// 重定位表附加描述（32位）
@@ -1683,7 +1683,7 @@ namespace Marimo
     clBufferBase* pBuffer;
     //UIntArray     RelTable;   // 重定位表, 参考RelocalizeType
     // 2号重定位表，用来开发从函数收集的方法，这个成熟后去掉1号表，去掉文件记录
-    UIntArray     RelTable;  // 重定位表, 参考RelocalizeType, 这个是平台无关的，指针按照32位计算
+    GXUIntArray   RelTable;  // 重定位表, 参考RelocalizeType, 这个是平台无关的，指针按照32位计算
     //DataPoolImpl::LPCTD    pTypeDesc;
     const DATAPOOL_TYPE_DESC* pTypeDesc;
 

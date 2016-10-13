@@ -12,7 +12,7 @@ class GXSpriteDescImpl : public GXSpriteDesc
   typedef clvector<GXSprite::FRAME>         FrameArray;
   typedef clvector<GXSprite::FRAME_MODULE>  FrameModuleArray;
   typedef clvector<GXSprite::ANIMATION>     AnimationArray;
-  typedef clvector<GXSprite::ANIM_FRAME>    AnimFrameArray;
+  typedef clvector<GXUINT>                  AnimFrameArray;
   typedef clstd::StringSetA                 clStringSetA;
 
 protected:
@@ -62,7 +62,7 @@ public:
   typedef clvector<GXSprite::FRAME>         FrameArray;
   typedef clvector<GXSprite::FRAME_MODULE>  FrameModuleArray;
   typedef clvector<GXSprite::ANIMATION>     AnimationArray;
-  typedef clvector<GXSprite::ANIM_FRAME>    AnimFrameArray;
+  typedef clvector<GXUINT>                  AnimFrameArray;
   typedef clstd::StringSetA                 clStringSetA;
 private:
   clStringW         m_strImageFile;

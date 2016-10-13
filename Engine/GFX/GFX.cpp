@@ -16,6 +16,7 @@
 #include "clTree.H"
 #include "clTransform.H"
 #include <Smart/smartstream.h>
+#include "clTokens.h"
 #include "clStock.h"
 #include <GrapX/VertexDecl.H>
 #include "GrapX/gxError.H"

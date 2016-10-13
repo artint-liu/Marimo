@@ -18,12 +18,12 @@
 #include <clUtility.H>
 #include <clStringSet.H>
 #include <Smart/SmartStream.h>
+#include <clTokens.h>
 #include <clStock.h>
 #include "MOSpriteImpl.h"
 
 namespace Marimo
 {
-
 
   b32 SPRITE_DESC_LOADER::LoadRegion(GXREGN& regn, const clstd::StockA::ATTRIBUTE& attr, GXDWORD& dwFlag)
   {
@@ -54,8 +54,6 @@ namespace Marimo
     }
     return TRUE;
   }
-
-
 
   b32 SPRITE_DESC_LOADER::LoadModule(const clstd::StockA::Section& sect)
   {
@@ -151,46 +149,53 @@ namespace Marimo
     if(sect.SectionName() == "animation")
     {
       Sprite::ANIMATION anim = {0};
+      GXUIntList aFrames;
+      GXUIntList aRates;
+
       for (sect.FirstKey(attr); attr; ++attr)
       {
         if(LoadCommon(anim, attr)) {
           continue;
         }
         else if(attr.key == "rate") {
-          //clvector<int> aRates;
-          size_t count = aRates.size();
-          const size_t nAnimUnitsCount = aAnimUnits.size();
-
-          if(aRates.size() < nAnimUnitsCount) {
-            aRates.reserve(nAnimUnitsCount);
-          }
-
-          attr.ToArray(',', [this](clstd::StockA::T_LPCSTR str, size_t len){
+          attr.ToArray(',', [&aRates](clstd::StockA::T_LPCSTR str, size_t len){
             aRates.push_back(clstd::xtou(10, str, len));
-          });          
-
-          //
-          // rate 如果少于帧数就按最后一个rate值补齐，多了就裁掉
-          //
-          const size_t nRatesCount = aRates.size();
-          if(nRatesCount < nAnimUnitsCount) {
-            aRates.insert(aRates.end(), nAnimUnitsCount - nRatesCount, aRates.back());
-          }
-          else if(nRatesCount > nAnimUnitsCount) {
-            aRates.erase(aRates.end() - (nRatesCount - nAnimUnitsCount), aRates.end());
-          }
-
-          ASSERT(aAnimUnits.size() == nAnimUnitsCount);
+          });
         }
         else if(attr.key == "frames")
         {
-          anim.begin = (GXUINT)aAnimUnits.size();
-          attr.ToArray(',', [this](clstd::StockA::T_LPCSTR str, size_t len){
-            aAnimUnits.push_back(clstd::xtoi(10, str, len));
+          attr.ToArray(',', [&aFrames](clstd::StockA::T_LPCSTR str, size_t len){
+            aFrames.push_back(clstd::xtoi(10, str, len));
           });
-          anim.end = (GXUINT)aAnimUnits.size();
         }
       }
+      
+      anim.begin = (GXUINT)aAnimUnits.size();
+      anim.end   = anim.begin + (GXUINT)aFrames.size();
+      aAnimUnits.reserve(anim.end);
+      
+      Sprite::ANIM_UNIT au;
+      auto it_end = aFrames.end();
+      auto it_rate = aRates.begin();
+      auto it_rate_end = aRates.end();
+      anim.rate = *it_rate;
+
+      // frame unit按照 aFrame 的数量处理
+      // aRates 数量大于 aFrame 就截断，小于就以 aRates 最后一个值补全
+      au.duration = *it_rate;
+      for(auto it = aFrames.begin(); it != it_end; ++it)
+      {
+        au.frame = *it;
+        if(it_rate != it_rate_end) {
+          if(au.duration != *it_rate) {
+            au.duration = *it_rate;
+            SET_FLAG(dwCapsFlags, Caps_VariableRate);
+          }
+          ++it_rate;
+        }
+        aAnimUnits.push_back(au);        
+      }
+      //*/
 
       TYPEIDX ti = {Sprite::Type_Animation};
       ti.index = (GXUINT)aAnims.size();
@@ -220,15 +225,17 @@ namespace Marimo
     });
   }
 
-  void SPRITE_DESC_LOADER::TranslateAnimUnit()
+  void SPRITE_DESC_LOADER::TranslateAnimUnit() // frame id 到 index 转换
   {
-    std::for_each(aAnimUnits.begin(), aAnimUnits.end(), [&](Sprite::ANIM_UNIT& unit){
-      auto it = sIDDict.find(unit);
+    std::for_each(aAnimUnits.begin(), aAnimUnits.end(),
+      [&](Sprite::ANIM_UNIT& unit)
+    {
+      auto it = sIDDict.find(unit.frame);
       if(it == sIDDict.end() || it->second.type != Sprite::Type_Frame) {
-        unit = -1;
+        unit.frame = -1;
       }
       else {
-        unit = it->second.index;
+        unit.frame = it->second.index;
       }
     });
   }

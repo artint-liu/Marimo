@@ -2,6 +2,7 @@
 //#include "GrapX/GUnknown.H"
 #include "clPathFile.h"
 #include "smart/smartstream.h"
+#include <clTokens.h>
 #include "clStock.h"
 #include "GrapX/MOLogger.h"
 #include "GrapX/GXUser.H"

@@ -44,6 +44,7 @@
 #include "Canvas/GXEffectImpl.h"
 //#include "Console.h"
 #include <Smart/SmartStream.h>
+#include <clTokens.h>
 #include <clStock.h>
 
 #include "GrapX/GXKernel.H"

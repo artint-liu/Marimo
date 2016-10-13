@@ -28,7 +28,6 @@ namespace clstd {
 
     typedef typename _TStr::LPCSTR T_LPCSTR;
     typedef typename _TStr::TChar  TChar;
-    //typedef u32                    SemType;
 
     struct iterator
     {
@@ -82,19 +81,23 @@ namespace clstd {
       //
       // 符合STL规范的接口
       //
-      inline const TChar& front() const {
+      inline const TChar& front() const
+      {
         return marker[0];
       }
 
-      inline const TChar& back() const {
+      inline const TChar& back() const
+      {
         return marker[length - 1];
       }
 
-      inline T_LPCSTR begin() const {
+      inline T_LPCSTR begin() const
+      {
         return marker;
       }
 
-      inline T_LPCSTR end() const {
+      inline T_LPCSTR end() const
+      {
         return marker + length;
       }
     };
@@ -105,22 +108,16 @@ namespace clstd {
     static const u32     c_nCharTabCount = 128;
     T_LPCSTR      m_pBegin;
     T_LPCSTR      m_pEnd;
-    //SemType       m_aCharSem[c_nCharTabCount];
     u32           m_dwFlags;
     iterator      m_itEnd;
     IteratorProc  m_pCallBack;        // 针对每一个 Iterator
     u32_ptr       m_lParam;
-    //IteratorProc  m_pTriggerCallBack; // 带有触发标志的 Iterator 首字节
     u32_ptr       m_lParamTrigger;
 
   public:
     TokensT(T_LPCSTR pStream = NULL, clsize uCountOfChar = 0);
 
     b32      Initialize        (T_LPCSTR pStream, clsize uCountOfChar);
-    //void     GetCharSemantic   (SemType* pCharSem, clsize uStart, clsize uEnd) const;
-    //void     SetCharSemantic   (const SemType* pCharSem, clsize uStart, clsize uEnd);
-    //SemType  GetCharSemantic   (TChar ch) const;
-    //SemType  SetCharSemantic   (TChar ch, SemType flagCharSem);
     b32      IsEndOfStream     (T_LPCSTR pPointer) const;
     b32      IsHeadOfStream    (T_LPCSTR pPointer) const;
     T_LPCSTR GetStreamPtr      () const;
@@ -130,7 +127,6 @@ namespace clstd {
     u32      GetFlags          () const;
 
     IteratorProc SetIteratorCallBack(IteratorProc pNew, u32_ptr lParam);
-    //IteratorProc SetTriggerCallBack (IteratorProc pTrigger, u32_ptr lParam);
 
     iterator&       next      (iterator& it) const;
     iterator        nearest   (clsize nOffset) const; // 按照nOffset查找最近的iterator，iterator的偏移大于等于nOffset

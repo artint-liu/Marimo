@@ -134,6 +134,11 @@ typedef GXLPSTR   GXLPTSTR;
 typedef GXCHAR    GXTCHAR;
 #endif // _UNICODE
 
+typedef clvector<GXINT>  GXIntArray;
+typedef clvector<GXUINT> GXUIntArray;
+typedef cllist<GXINT>    GXIntList;
+typedef cllist<GXUINT>   GXUIntList;
+
 class GXColor32
 {
 public:

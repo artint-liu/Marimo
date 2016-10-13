@@ -504,7 +504,7 @@ namespace Marimo
       }
     }
     else if(clstd::IsNumericT(str, len, 10)) {
-      *pInteger = GXATOI(str, len);
+      *pInteger = clstd::xtoi(10, str, len);
       return TRUE;
     }
     return FALSE;

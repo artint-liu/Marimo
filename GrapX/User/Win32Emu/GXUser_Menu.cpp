@@ -1,6 +1,7 @@
 ﻿#include "GrapX.H"
 #include "User/GrapX.Hxx"
 #include "Smart/smartstream.h"
+#include <clTokens.h>
 #include "clStock.h"
 
 //#include "GrapX/GUnknown.H"

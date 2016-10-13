@@ -5,6 +5,7 @@
 //#include "../clFile.H"
 //#include "../clBuffer.H"
 #include "smart/smartstream.h"
+#include "clTokens.h"
 #include "clStock.h"
 #include "clUtility.H"
 
@@ -1079,16 +1080,10 @@ namespace clstd
   {
     ASSERT(pSection != NULL && pSection->DbgCheck());
     _TStr strBuffer;
-    //strBuffer.Format("%s {\r\n};\r\n", szName);
-    strBuffer.Append(' ', pSection->nDepth);
-    strBuffer.Append(szName);
-    strBuffer.Append('{');
-    strBuffer.Append('\r');
-    strBuffer.Append('\n');
-    strBuffer.Append(' ', pSection->nDepth);
-    strBuffer.Append('}');
-    strBuffer.Append('\r');
-    strBuffer.Append('\n');
+    static TChar szSectBegin[] = {'{', '\r', '\n'};
+    static TChar szSectEnd[]   = {'}', '\r', '\n'};
+    strBuffer.Append(' ', pSection->nDepth).Append(szName)
+      .Append(szSectBegin).Append(' ', pSection->nDepth).Append(szSectEnd);
 
     clsize nPos = InsertString(pSection, pSection->iter_end, strBuffer);
 
@@ -1104,8 +1099,6 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::FindSingleSection(Section* pFindSect, T_LPCSTR szName, Section& pOutSect ) const /* szName为NULL表示查找任何Section */
   {
-    //ASSERT(pFindSect != NULL);
-
     if(pFindSect->iter_begin == pFindSect->iter_end) {
       return FALSE;
     }
@@ -1287,25 +1280,5 @@ namespace clstd
       clear();
     }
   }
-
-  //_SSP_TEMPL
-  //  typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::begin()
-  //{
-  //  ATTRIBUTE attr;
-  //  if(FirstKey(attr)) {
-  //    return attr;
-  //  }
-  //  return end();
-  //}
-
-  //_SSP_TEMPL
-  //  typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::end()
-  //{
-  //  ATTRIBUTE attr;
-  //  attr.pSection = this;
-  //  attr.key    = iter_end;
-  //  attr.value  = iter_end;
-  //  return attr;
-  //}
 
 } // namespace clstd

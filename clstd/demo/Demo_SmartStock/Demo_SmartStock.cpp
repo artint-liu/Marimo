@@ -9,6 +9,7 @@
 #include <clString.H>
 #include <clUtility.H>
 #include <Smart\smartstream.h>
+#include <clTokens.h>
 #include <clStock.h>
 
 #pragma warning(disable : 4996)
@@ -324,7 +325,7 @@ int _tmain(int argc, _TCHAR* argv[])
     CreateSectAndSave();
     test_outofdate();
 
-    //TestRoot();
+    TestRoot();
     test2_write();
     test2_read();
     printf("Press any key to continue...\n");

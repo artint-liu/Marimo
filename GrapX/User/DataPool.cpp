@@ -4,6 +4,7 @@
 #include "clPathFile.h"
 #include "clTextLines.h"
 #include "Smart/smartstream.h"
+#include <clTokens.h>
 #include "clStock.h"
 
 #include "GrapX/DataPool.H"

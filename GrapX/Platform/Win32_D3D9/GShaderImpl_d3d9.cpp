@@ -431,6 +431,7 @@ namespace D3D9
 #endif // #ifdef ENABLE_GRAPHICS_API_DX9
 
 #include <Smart/smartstream.h>
+#include <clTokens.h>
 #include <clStock.h>
 
 GXVOID GShader::ResolveProfileDescW(GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros)
