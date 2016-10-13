@@ -966,6 +966,7 @@ namespace Marimo
           if(time < au->duration) {
             return au - au_begin;
           }
+          au++;
         }
       }
     }
