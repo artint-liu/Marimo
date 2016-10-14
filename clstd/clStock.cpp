@@ -168,36 +168,53 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    int _SSP_IMPL::ATTRIBUTE::ToInt() const
+    int _SSP_IMPL::ATTRIBUTE::ToInt(int nDefault) const
   {
-    return ToString().ToInteger();
+    if(value.length) {
+      _TStr str;
+      return SmartStreamUtility::TranslateQuotation(value, str).ToInteger();
+    }
+    return nDefault;
   }
 
   _SSP_TEMPL
-    _TStr _SSP_IMPL::ATTRIBUTE::ToString() const
+    _TStr _SSP_IMPL::ATTRIBUTE::ToString(T_LPCSTR szDefault) const
   {
-    _TStr str;
-    return SmartStreamUtility::TranslateQuotation(value, str);
+    if(value.length) {
+      _TStr str;
+      return SmartStreamUtility::TranslateQuotation(value, str);
+    }
+    return szDefault;
   }
 
   _SSP_TEMPL
-    _TStr& _SSP_IMPL::ATTRIBUTE::ToString(_TStr& str) const
+    _TStr& _SSP_IMPL::ATTRIBUTE::ToString(_TStr& str, T_LPCSTR szDefault = NULL) const
   {
-    return SmartStreamUtility::TranslateQuotation(value, str);
+    if(value.length) {
+      return SmartStreamUtility::TranslateQuotation(value, str);
+    }
+    str = szDefault;
+    return str;
   }
 
   _SSP_TEMPL
-    float _SSP_IMPL::ATTRIBUTE::ToFloat() const
+    float _SSP_IMPL::ATTRIBUTE::ToFloat(float fDefault) const
   {
-    return (float)ToString().ToFloat();
+    if(value.length) {
+      _TStr str;
+      return (float)SmartStreamUtility::TranslateQuotation(value, str).ToFloat();
+    }
+    return fDefault;
   }
 
   _SSP_TEMPL
-  b32 _SSP_IMPL::ATTRIBUTE::ToBoolean() const
+  b32 _SSP_IMPL::ATTRIBUTE::ToBoolean(b32 bDefault) const
   {
-    _TStr str;
-    SmartStreamUtility::TranslateQuotation(value, str);
-    return _CheckBoolean((T_LPCSTR)str);
+    if(value.length) {
+      _TStr str;
+      return _CheckBoolean((T_LPCSTR)SmartStreamUtility::TranslateQuotation(value, str));
+    }
+    return bDefault;
   }
 
   //_SSP_TEMPL

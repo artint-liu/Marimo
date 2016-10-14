@@ -50,12 +50,12 @@ namespace clstd
       b32     NextKey     ();
       _TStr   SectionName () const;
       _TStr   KeyName     () const;
-      int     ToInt       () const;
-      _TStr   ToString    () const;
-      float   ToFloat     () const;
-      b32     ToBoolean   () const;
+      int     ToInt       (int nDefault = 0) const;
+      _TStr   ToString    (T_LPCSTR szDefault = NULL) const;
+      float   ToFloat     (float fDefault = 0.0f) const;
+      b32     ToBoolean   (b32 bDefault = false) const;
       _TStr&  KeyName     (_TStr& str) const;
-      _TStr&  ToString    (_TStr& str) const;
+      _TStr&  ToString    (_TStr& str, T_LPCSTR szDefault = NULL) const;
 
       template<class _TFn>
       void ToArray(TChar ch, _TFn fn) const
