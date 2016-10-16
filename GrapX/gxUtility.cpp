@@ -209,7 +209,7 @@ namespace ObjMeshUtility
         {
           ++it;
           clStringA strMarker = it.ToString();
-          v.m[i] = (float)clstd::_xstrtof((const ch*)strMarker);
+          v.m[i] = (float)clstd::xtof((const ch*)strMarker);
           //TRACE("%s=%f\t", strMarker, v.m[i]);
         }
         //TRACE("\n");
@@ -260,9 +260,9 @@ namespace ObjMeshUtility
           clstd::ResolveString(str, '/', aString);
           ASSERT(aString.size() == 3);
 
-          int nVertIdx   = clstd::_xstrtoi<i32>((const char*)aString[0]) - 1;
-          int nUVIdx     = clstd::_xstrtoi<i32>((const char*)aString[1]) - 1;
-          int nNormalIdx = clstd::_xstrtoi<i32>((const char*)aString[2]) - 1;
+          int nVertIdx   = clstd::xtoi((const char*)aString[0]) - 1;
+          int nUVIdx     = clstd::xtoi((const char*)aString[1]) - 1;
+          int nNormalIdx = clstd::xtoi((const char*)aString[2]) - 1;
           Vertex.pos = aVertices[nVertIdx];
           if(nUVIdx < 0) {
             Vertex.texcoord.set(0,0);

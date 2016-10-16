@@ -509,7 +509,7 @@ FALSE_RET:
     if(hFind == INVALID_HANDLE_VALUE) {
       return FALSE;
     }
-    clstd::strcpyn(FindFileData->Filename, wfd.cFileName, MAX_PATH);
+    clstd::strcpynT(FindFileData->Filename, wfd.cFileName, MAX_PATH);
     FindFileData->dwAttributes  = wfd.dwFileAttributes;
     FindFileData->nFileSizeHigh = wfd.nFileSizeHigh;
     FindFileData->nFileSizeLow  = wfd.nFileSizeLow;

@@ -66,7 +66,7 @@ GXHRESULT ConsoleAssistant::Execute(int nCmdIndex, const clStringW* argv, int ar
       for(CmdDict::iterator it = lpStation->m_CommandDict.begin();
         it != lpStation->m_CommandDict.end(); ++it) {
           LPCSTAFFCAPSDESC pCapsDesc = it->second.pStaff->GetCapacity();
-          nWidth = clMax(GXSTRLEN<GXCHAR>(it->first), nWidth);
+          nWidth = clMax((int)GXSTRLEN<GXCHAR>(it->first), nWidth);
       }
 
       for(CmdDict::iterator it = lpStation->m_CommandDict.begin();

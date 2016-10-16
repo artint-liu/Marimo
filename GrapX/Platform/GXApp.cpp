@@ -136,16 +136,16 @@ extern "C"
     switch (ePlatform)
     {
     case GXPLATFORM_WIN32_DIRECT3D9:
-      clstd::strcpyn(szName, L"D3D9", nSize);
+      clstd::strcpynT(szName, L"D3D9", nSize);
       return TRUE;
     case GXPLATFORM_WIN32_DIRECT3D11:
-      clstd::strcpyn(szName, L"D3D11", nSize);
+      clstd::strcpynT(szName, L"D3D11", nSize);
       return TRUE;
     case GXPLATFORM_WIN32_OPENGL:
-      clstd::strcpyn(szName, L"WGL2", nSize);
+      clstd::strcpynT(szName, L"WGL2", nSize);
       return TRUE;
     case GXPLATFORM_X_OPENGLES2:
-      clstd::strcpyn(szName, L"GLES2", nSize);
+      clstd::strcpynT(szName, L"GLES2", nSize);
       return TRUE;
     }
     return FALSE;

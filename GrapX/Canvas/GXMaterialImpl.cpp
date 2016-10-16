@@ -684,34 +684,34 @@ GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, GXSIZE_T nC
     switch(eType)
     {
     case GXUB_FLOAT:
-      mat._11 = (float)clstd::_xstrtof(pParameters[i].szValue);
+      mat._11 = (float)clstd::xtof(pParameters[i].szValue);
       m_pShaderStub->SetUniformByHandle(&m_Buffer, handle, &mat._11, 1);
       break;
     case GXUB_FLOAT2:
       ResolveString(clStringA(pParameters[i].szValue), ',', aStrings);
       if(aStrings.size() != 2)
         break;
-      mat._11 = (float)clstd::_xstrtof<ch>(aStrings[0]);
-      mat._12 = (float)clstd::_xstrtof<ch>(aStrings[1]);
+      mat._11 = (float)clstd::xtof(aStrings[0]);
+      mat._12 = (float)clstd::xtof(aStrings[1]);
       m_pShaderStub->SetUniformByHandle(&m_Buffer, handle, (float*)&mat, 2);
       break;
     case GXUB_FLOAT3:
       ResolveString(clStringA(pParameters[i].szValue), ',', aStrings);
       if(aStrings.size() != 3)
         break;
-      mat._11 = (float)clstd::_xstrtof<ch>(aStrings[0]);
-      mat._12 = (float)clstd::_xstrtof<ch>(aStrings[1]);
-      mat._13 = (float)clstd::_xstrtof<ch>(aStrings[2]);
+      mat._11 = (float)clstd::xtof(aStrings[0]);
+      mat._12 = (float)clstd::xtof(aStrings[1]);
+      mat._13 = (float)clstd::xtof(aStrings[2]);
       m_pShaderStub->SetUniformByHandle(&m_Buffer, handle, (float*)&mat, 3);
       break;
     case GXUB_FLOAT4:
       ResolveString(clStringA(pParameters[i].szValue), ',', aStrings);
       if(aStrings.size() != 4)
         break;
-      mat._11 = (float)clstd::_xstrtof<ch>(aStrings[0]);
-      mat._12 = (float)clstd::_xstrtof<ch>(aStrings[1]);
-      mat._13 = (float)clstd::_xstrtof<ch>(aStrings[2]);
-      mat._14 = (float)clstd::_xstrtof<ch>(aStrings[3]);
+      mat._11 = (float)clstd::xtof(aStrings[0]);
+      mat._12 = (float)clstd::xtof(aStrings[1]);
+      mat._13 = (float)clstd::xtof(aStrings[2]);
+      mat._14 = (float)clstd::xtof(aStrings[3]);
       m_pShaderStub->SetUniformByHandle(&m_Buffer, handle, (float*)&mat, 4);
       break;
     case GXUB_MATRIX4:
@@ -719,7 +719,7 @@ GXHRESULT GXMaterialInstImpl::SetUniforms(GXDEFINITION* pParameters, GXSIZE_T nC
       if(aStrings.size() != 16)
         break;
       for(int n = 0; n < 16; n++) {
-        mat.m[n] = (float)clstd::_xstrtof<ch>(aStrings[n]);
+        mat.m[n] = (float)clstd::xtof(aStrings[n]);
       }
       m_pShaderStub->SetUniformByHandle(&m_Buffer, handle, (float*)&mat, 4 * 4);
       break;

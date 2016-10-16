@@ -3114,7 +3114,7 @@ typedef struct tagGXLVSETINFOTIP
 #define GXSTRNCMP         clstd::strncmpT
 #define GXSTRLEN          clstd::strlenT
 #define GXSTRCPY          clstd::strcpyT
-#define GXSTRCPYN         clstd::strcpyn
+#define GXSTRCPYN         clstd::strcpynT
 #define GXSTRCMPI         clstd::strcmpiT
 #define GXSTRNCMPI        clstd::strncmpiT
 #define GXATOI(_STR)      clstd::xtoi(10, _STR, -1)

@@ -98,11 +98,11 @@ namespace clstd
   _vector2<_Ty> strtovec2i(const _TCh* str) // "a,b"字符串解析为向量
   {
     _vector2<_Ty> v2(0);
-    v2.x = (_Ty)_xstrtoi<i32>(str);
+    v2.x = (_Ty)xtoi(str);
     str = strchrT(str, ',');
 
     if(str) {
-      v2.y = (_Ty)_xstrtoi<i32>(++str);
+      v2.y = (_Ty)xtoi(++str);
       str = strchrT(str, ',');
     }
 
@@ -113,16 +113,16 @@ namespace clstd
   _vector3<_Ty> strtovec3i(const _TCh* str) // "a,b,c"字符串解析为向量
   {
     _vector3<_Ty> v3(0);
-    v3.x = (_Ty)_xstrtoi<i32>(str);
+    v3.x = (_Ty)xtoi(str);
     str = strchrT(str, ',');
 
     if(str) {
 
-      v3.y = (_Ty)_xstrtoi<i32>(++str);
+      v3.y = (_Ty)xtoi(++str);
       str = strchrT(str, ',');
 
       if(str) {
-        v3.z = (_Ty)_xstrtoi<i32>(++str);
+        v3.z = (_Ty)xtoi(++str);
       }
     }
 
@@ -133,11 +133,11 @@ namespace clstd
   float2 strtovec2f(const _TCh* str) // "a,b"字符串解析为向量
   {
     float2 v2(0.0f);
-    v2.x = (float)_xstrtof(str);
+    v2.x = (float)xtof(str);
     str = strchrT(str, ',');
 
     if(str) {
-      v2.y = (float)_xstrtof(++str);
+      v2.y = (float)xtof(++str);
       str = strchrT(str, ',');
     }
 
@@ -148,16 +148,16 @@ namespace clstd
   float3 strtovec3f(const _TCh* str) // "a,b,c"字符串解析为向量
   {
     float3 v3(0.0f);
-    v3.x = (float)_xstrtof(str);
+    v3.x = (float)xtof(str);
     str = strchrT(str, ',');
 
     if(str) {
 
-      v3.y = (float)_xstrtof(++str);
+      v3.y = (float)xtof(++str);
       str = strchrT(str, ',');
 
       if(str) {
-        v3.z = (float)_xstrtof(++str);
+        v3.z = (float)xtof(++str);
       }
     }
 

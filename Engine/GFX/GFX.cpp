@@ -275,7 +275,7 @@ namespace GFX
         case PROPERTY::T_FLOAT:
           {
             auto& i = p.ToVar<float>(pBasePtr);
-            i = (float)clstd::_xstrtof(d.szValue);
+            i = (float)clstd::xtof(d.szValue);
           }
           break;
 
@@ -344,7 +344,7 @@ namespace GFX
         case PROPERTY::T_HALFFLOAT:
           {
             auto& v = p.ToVar<float>(pBasePtr);
-            v = (float)clstd::_xstrtof(d.szValue) * 0.5f;
+            v = (float)clstd::xtof(d.szValue) * 0.5f;
           }
           break;
 

@@ -350,7 +350,7 @@ PROCESS_IT:
             item.nVal = clstd::xtou(pbuf);
           }
           else if(item.eType == PST_FLOAT) {
-            item.fVal = (float)clstd::_xstrtof(pbuf);
+            item.fVal = (float)clstd::xtof(pbuf);
             //sscanf(pbuf, "%f", &item.fVal);  // TODO: 换成clString支持的
           }
           SAFE_DELETE_ARRAY(pbuf);

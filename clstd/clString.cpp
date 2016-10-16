@@ -28,8 +28,8 @@ const size_t  MAX_DIGITS = 80;
 #define CLSTR_EXTRA                 (CLSTD_HEADER_SIZE + sizeof(_TCh))  // 头尺寸 + 结尾符号
 #define IS_EMPTY_MODEL_STR          ((u32_ptr)m_pBuf == (u32_ptr)s_EmptyStr.buf || CLSTR_ALLOCATOR(m_pBuf) == NULL)
 
-#define _CLSTR_TEMPL template<typename _TCh, class _TAllocator, _TAllocator& _Alloc, class _Traits>
-#define _CLSTR_IMPL StringX<_TCh, _TAllocator, _Alloc, _Traits>
+#define _CLSTR_TEMPL template<typename _TCh, class _TAllocator, _TAllocator& alloc, class _Traits>
+#define _CLSTR_IMPL StringX<_TCh, _TAllocator, alloc, _Traits>
 
 //#ifdef _IOS
 //clStringX<wch, g_Alloc_clStringW, clStringW_traits> g_clStringInstW;
@@ -46,38 +46,80 @@ void ReadlizeFloatString(_TCh* str, int nSignificance = 5); // nSignificance就�
 
 namespace clstd
 {
-  template double _xstrtof(const wch* str);
-  template double _xstrtof(const  ch* str);
+  template<typename _TReal, typename _TCh>
+  _TReal _xstrtofT(const _TCh *str);
 
-  template u32    _xstrtou<u32>(const wch* String);
-  template u32    _xstrtou<u32>(const  ch* String);
-  template u32    _xstrtou<u32>(i32 radix, const wch* str, clsize len);
-  template u32    _xstrtou<u32>(i32 radix, const  ch* str, clsize len);
+  template<typename _TUInt, typename _TCh>
+  _TUInt _xstrtouT(const _TCh *str);
 
-  template u64    _xstrtou<u64>(const wch* String);
-  template u64    _xstrtou<u64>(const  ch* String);
-  template u64    _xstrtou<u64>(i32 radix, const wch* str, clsize len);
-  template u64    _xstrtou<u64>(i32 radix, const  ch* str, clsize len);
+  template<typename _TUInt, typename _TCh>
+  _TUInt _xstrtouT(i32 radix, const _TCh *str, clsize len = -1);  // (2-36进制)字符串转无符号整数
 
-  template i32    _xstrtoi<i32>(const wch* str);
-  template i32    _xstrtoi<i32>(const  ch* str);
-  template i32    _xstrtoi<i32>(i32 radix, const wch* str, clsize len);
-  template i32    _xstrtoi<i32>(i32 radix, const  ch* str, clsize len);
+  // string to integer
+  template<typename _TInt, typename _TCh>
+  _TInt _xstrtoiT(const _TCh *String);
 
-  template i64    _xstrtoi<i64>(const wch* str);
-  template i64    _xstrtoi<i64>(const  ch* str);
-  template i64    _xstrtoi<i64>(i32 radix, const wch* str, clsize len);
-  template i64    _xstrtoi<i64>(i32 radix, const  ch* str, clsize len);
+  template<typename _TInt, typename _TCh>
+  _TInt _xstrtoiT(i32 radix, const _TCh *str, clsize len = -1);  // (2-36进制)字符串转带符号整数
 
-  template int _ftoxstr(double value, wch* ascii, int width, int prec1, ch format);
-  template int _ftoxstr(double value,  ch* ascii, int width, int prec1, ch format);
+  // double(float) to string
+  template<typename _TCh>
+  int _ftoxstrT(double value, _TCh* ascii, int width, int prec1, ch format);
+
+  // 有符号数字 => 字符串
+  template<typename _TCh, typename _TNum, typename _TUNum>
+  void _ltoxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper);
+
+  // 无符号数字 => 字符串
+  template<typename _TCh, typename _TNum>
+  void _ultoxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper);
+
+  // 数学分组：12345678 => 12,345,678
+
+  // 有符号数字 => 字符串(带数学分组)
+  template<typename _TCh, typename _TNum, typename _TUNum>
+  void _ltogxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper);
+
+  // 无符号数字 => 字符串(带数学分组)
+  template<typename _TCh, typename _TNum>
+  void _ultogxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper);
+  
+  //////////////////////////////////////////////////////////////////////////
+
+  template float  _xstrtofT<float>(const wch* str);
+  template float  _xstrtofT<float>(const  ch* str);
+  template double _xstrtofT<double>(const wch* str);
+  template double _xstrtofT<double>(const  ch* str);
+
+  template u32    _xstrtouT<u32>(const wch* String);
+  template u32    _xstrtouT<u32>(const  ch* String);
+  template u32    _xstrtouT<u32>(i32 radix, const wch* str, clsize len);
+  template u32    _xstrtouT<u32>(i32 radix, const  ch* str, clsize len);
+
+  template u64    _xstrtouT<u64>(const wch* String);
+  template u64    _xstrtouT<u64>(const  ch* String);
+  template u64    _xstrtouT<u64>(i32 radix, const wch* str, clsize len);
+  template u64    _xstrtouT<u64>(i32 radix, const  ch* str, clsize len);
+
+  template i32    _xstrtoiT<i32>(const wch* str);
+  template i32    _xstrtoiT<i32>(const  ch* str);
+  template i32    _xstrtoiT<i32>(i32 radix, const wch* str, clsize len);
+  template i32    _xstrtoiT<i32>(i32 radix, const  ch* str, clsize len);
+
+  template i64    _xstrtoiT<i64>(const wch* str);
+  template i64    _xstrtoiT<i64>(const  ch* str);
+  template i64    _xstrtoiT<i64>(i32 radix, const wch* str, clsize len);
+  template i64    _xstrtoiT<i64>(i32 radix, const  ch* str, clsize len);
+
+  template int _ftoxstrT(double value, wch* ascii, int width, int prec1, ch format);
+  template int _ftoxstrT(double value,  ch* ascii, int width, int prec1, ch format);
 
   template wch*   strcpyT   (wch* pDest, const wch* pSrc);
   template  ch*   strcpyT   ( ch* pDest, const  ch* pSrc);
   template wch*   strstrT   (wch* pStr, const wch* pSubStr);
   template  ch*   strstrT   ( ch* pStr, const  ch* pSubStr);
-  template wch*   strcpyn   (wch* pDest, const wch* pSrc, clsize uCount);
-  template  ch*   strcpyn   ( ch* pDest, const  ch* pSrc, clsize uCount);
+  template wch*   strcpynT  (wch* pDest, const wch* pSrc, clsize uCount);
+  template  ch*   strcpynT  ( ch* pDest, const  ch* pSrc, clsize uCount);
   template int    strncmpiT ( const wch* str1, const wch* str2, clsize n);
   template int    strncmpiT ( const  ch* str1, const  ch* str2, clsize n);
   template int    strcmpiT  ( const wch* str1, const wch* str2);
@@ -138,23 +180,27 @@ clsize clstd::StringW_traits::StringLength(const wch* pStr)
 {
   return wcslen(pStr);
 }
+
 clsize clstd::StringW_traits::XStringLength(const _XCh* pStrX)
 {
   return strlen(pStrX);
 }
+
 wch* clstd::StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uLength)
 {
-  return clstd::strcpyn(pStrDest, pStrSrc, uLength);
+  return clstd::strcpynT(pStrDest, pStrSrc, uLength);
 }
+
 i32 clstd::StringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
 {
   return wcscmp(pStr1, pStr2);
 }
+
 i32 clstd::StringW_traits::CompareStringNoCase(const wch* pStr1, const wch* pStr2)
 {
-  //return _wcsicmp(pStr1, pStr2);
-    return clstd::strcmpiT(pStr1, pStr2);
+  return clstd::strcmpiT(pStr1, pStr2);
 }
+
 const wch* clstd::StringW_traits::StringSearchChar(const wch* pStr, wch cCh)
 {
   return wcschr(pStr, cCh);
@@ -166,7 +212,7 @@ void clstd::StringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength,
     clstd::ultox(uNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ultoxg_t(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
 
@@ -176,22 +222,22 @@ void clstd::StringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, 
     clstd::ltox(iNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ltoxg_t<wch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ltogxstrT<wch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
 
 i32 clstd::StringW_traits::StringToInteger32(wch* pString)
 {
-  return clstd::_xstrtoi<i32>(pString);
+  return clstd::_xstrtoiT<i32>(pString);
 }
 
 void clstd::StringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, float fNum, char mode)
 {
   if(mode == 'F' || mode == 'E') {
-    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, mode);
+    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, mode);
   }
   else {
-    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, 'F');
+    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, 'F');
     ReadlizeFloatString(pDestStr);
   }
 }
@@ -202,34 +248,40 @@ void clstd::StringW_traits::Unsigned64ToString(wch* pDestStr, size_t uMaxLength,
     clstd::ul64tox(uNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ultoxg_t(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
+
 void clstd::StringW_traits::Integer64ToString(wch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
 {
   if(nNumGroup <= 0) {
     clstd::l64tox(iNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ltoxg_t<wch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ltogxstrT<wch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
+
 void clstd::StringW_traits::HexToLowerString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 16);
 }
+
 void clstd::StringW_traits::HexToUpperString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 16, 1);
 }
+
 void clstd::StringW_traits::BinaryToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 2);
 }
+
 void clstd::StringW_traits::OctalToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 8);
 }
+
 size_t clstd::StringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
 {
 #if defined(_WIN32) && !defined(_C_STANDARD)
@@ -246,13 +298,15 @@ clsize clstd::StringA_traits::StringLength(const ch* pStr)
 {
   return strlen(pStr);
 }
+
 clsize clstd::StringA_traits::XStringLength(const _XCh* pStrX)
 {
   return wcslen(pStrX);
 }
+
 ch* clstd::StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uLength)
 {
-  return clstd::strcpyn(pStrDest, pStrSrc, uLength);
+  return clstd::strcpynT(pStrDest, pStrSrc, uLength);
 }
 
 i32 clstd::StringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
@@ -262,8 +316,7 @@ i32 clstd::StringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
 
 i32 clstd::StringA_traits::CompareStringNoCase(const ch* pStr1, const ch* pStr2)
 {
-  //return _strcmpi(pStr1, pStr2);
-    return clstd::strcmpiT(pStr1, pStr2);
+  return clstd::strcmpiT(pStr1, pStr2);
 }
 
 const ch* clstd::StringA_traits::StringSearchChar(const ch* pStr, ch cCh)
@@ -277,7 +330,7 @@ void clstd::StringA_traits::Unsigned32ToString(ch* pDestStr, size_t uMaxLength, 
     clstd::ultox(uNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ultoxg_t(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
 
@@ -287,7 +340,7 @@ void clstd::StringA_traits::Integer32ToString(ch* pDestStr, size_t uMaxLength, i
     clstd::ltox(iNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ltoxg_t<ch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ltogxstrT<ch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
 
@@ -302,7 +355,7 @@ void clstd::StringA_traits::Unsigned64ToString(ch* pDestStr, size_t uMaxLength, 
     clstd::ul64tox(uNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ultoxg_t(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
 
@@ -312,17 +365,17 @@ void clstd::StringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i
     clstd::l64tox(iNum, pDestStr, uMaxLength, 10);
   }
   else {
-    clstd::_ltoxg_t<ch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    clstd::_ltogxstrT<ch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
   }
 }
 
 void clstd::StringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, float fNum, char mode)
 {
   if(mode == 'F' || mode == 'E') {
-    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, mode);
+    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, mode);
   }
   else {
-    clstd::_ftoxstr(fNum, pDestStr, (int)uMaxLength, 10, 'F');
+    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, 'F');
     ReadlizeFloatString(pDestStr);
   }
 }
@@ -336,14 +389,17 @@ void clstd::StringA_traits::HexToUpperString(ch* pDestStr, size_t uMaxLength, u3
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 16, 1);
 }
+
 void clstd::StringA_traits::BinaryToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 2);
 }
+
 void clstd::StringA_traits::OctalToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
 {
   clstd::ultox(uValue, pDestStr, uMaxLength, 8);
 }
+
 size_t clstd::StringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
 {
 #if defined(_WIN32) && !defined(_C_STANDARD)
@@ -376,7 +432,7 @@ namespace clstd
     }
     else {
       const clsize uStrLen = _Traits::StringLength(pStr);
-      allocLength(&_Alloc, uStrLen);
+      _AllocBuffer(&alloc, uStrLen);
       _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
     }
   }
@@ -385,10 +441,10 @@ namespace clstd
     _CLSTR_IMPL::StringX(const _TCh* pStr, size_t uCount)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, uCount);
-
+    _AllocBuffer(&alloc, uCount);
     _Traits::CopyStringN(m_pBuf, pStr, uCount);
   }
+
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const _XCh* pStrX)
     : m_pBuf(NULL)
@@ -399,7 +455,7 @@ namespace clstd
     else {
       const size_t uInputLength = _Traits::XStringLength(pStrX);
       size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
-      allocLength(&_Alloc, uLength);
+      _AllocBuffer(&alloc, uLength);
 
       _Traits::XStringToNative(m_pBuf, uLength, pStrX, uInputLength);
     }
@@ -412,7 +468,7 @@ namespace clstd
       ? _Traits::XStringLength(pStrX) : uCount;
 
     size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
-    allocLength(&_Alloc, uLength);
+    _AllocBuffer(&alloc, uLength);
 
     _Traits::XStringToNative(
       m_pBuf, uLength, pStrX, uInputLength);
@@ -422,7 +478,7 @@ namespace clstd
     _CLSTR_IMPL::StringX(const _TCh cCh, size_t uCount)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, uCount);
+    _AllocBuffer(&alloc, uCount);
 
     for(size_t i = 0; i < uCount; i++)
       m_pBuf[i] = cCh;
@@ -438,8 +494,7 @@ namespace clstd
     _CLSTR_IMPL::StringX(const StringX& clStr)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, clStr.GetLength());
-
+    _AllocBuffer(&alloc, clStr.GetLength());
     _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
   }
 
@@ -447,10 +502,10 @@ namespace clstd
     _CLSTR_IMPL::StringX(const int nInteger)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, MAX_DIGITS);
+    _AllocBuffer(&alloc, MAX_DIGITS);
 
     _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, nInteger, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
   }
 
 
@@ -458,47 +513,47 @@ namespace clstd
     _CLSTR_IMPL::StringX(const float fFloat, char mode)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, MAX_DIGITS);
+    _AllocBuffer(&alloc, MAX_DIGITS);
 
     _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, mode);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
   }
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const long lLong)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, MAX_DIGITS);
+    _AllocBuffer(&alloc, MAX_DIGITS);
 
     _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, lLong, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
   }
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const u32 uInteger)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, MAX_DIGITS);
+    _AllocBuffer(&alloc, MAX_DIGITS);
 
     _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
   }
 
   //_CLSTR_TEMPL
   //  _CLSTR_IMPL::StringX(const unsigned long uLong)
   //  : m_pBuf(NULL)
   //{
-  //  allocLength(&_Alloc, MAX_DIGITS);
+  //  _Alloc(&alloc, MAX_DIGITS);
 
   //  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
-  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  _Reduce(_Traits::StringLength(m_pBuf));
   //}
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const u64 val)
     : m_pBuf(NULL)
   {
-    allocLength(&_Alloc, MAX_DIGITS);
+    _AllocBuffer(&alloc, MAX_DIGITS);
 
 //#if defined(_X86) || defined(_ARM)
 //      _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, val, 0);
@@ -508,7 +563,7 @@ namespace clstd
 //# error 缺少CPU架构定义
 //#endif
 
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
   }
 
   _CLSTR_TEMPL
@@ -537,7 +592,7 @@ namespace clstd
     }
     else {
       const clsize uStrLen = _Traits::StringLength(pStr);
-      resizeLengthNoCopy(uStrLen);
+      _ResizeLengthNoCopy(uStrLen);
       _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
     }
     return *this;
@@ -552,7 +607,7 @@ namespace clstd
     else {
       const size_t uInputLength = _Traits::XStringLength(pStrX);
       size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
-      resizeLengthNoCopy(uLength);
+      _ResizeLengthNoCopy(uLength);
       _Traits::XStringToNative(m_pBuf, uLength, pStrX, uInputLength);
     }
     return *this;
@@ -561,7 +616,7 @@ namespace clstd
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const _TCh ch)
   {
-    resizeLengthNoCopy(1);
+    _ResizeLengthNoCopy(1);
     *m_pBuf = ch;
     return *this;
   }
@@ -569,7 +624,7 @@ namespace clstd
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const StringX& clStr)
   {
-    resizeLengthNoCopy(clStr.GetLength());
+    _ResizeLengthNoCopy(clStr.GetLength());
     _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
     return *this;
   }
@@ -577,45 +632,45 @@ namespace clstd
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const int nInteger)
   {
-    resizeLengthNoCopy(MAX_DIGITS);
+    _ResizeLengthNoCopy(MAX_DIGITS);
     _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, nInteger, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const float fFloat)
   {
-    resizeLengthNoCopy(MAX_DIGITS);
+    _ResizeLengthNoCopy(MAX_DIGITS);
     _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, 'F');
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const long lLong)
   {
-    resizeLengthNoCopy(MAX_DIGITS);
+    _ResizeLengthNoCopy(MAX_DIGITS);
     _Traits::Integer32ToString(m_pBuf, MAX_DIGITS, lLong, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const unsigned int uInteger)
   {
-    resizeLengthNoCopy(MAX_DIGITS);
+    _ResizeLengthNoCopy(MAX_DIGITS);
     _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uInteger, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const unsigned long uLong)
   {
-    resizeLengthNoCopy(MAX_DIGITS);
+    _ResizeLengthNoCopy(MAX_DIGITS);
     _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
@@ -626,7 +681,7 @@ namespace clstd
   //}
 
   _CLSTR_TEMPL
-    bool _CLSTR_IMPL::operator==(const _CLSTR_IMPL& clStr) const
+    bool _CLSTR_IMPL::operator==(const StringX& clStr) const
   {
     return (CLSTR_LENGTH(m_pBuf) == CLSTR_LENGTH(clStr.m_pBuf) &&
       Compare(clStr.m_pBuf) == 0);
@@ -669,7 +724,7 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
-    _CLSTR_IMPL _CLSTR_IMPL::operator+(const _CLSTR_IMPL& clStr2) const
+    _CLSTR_IMPL _CLSTR_IMPL::operator+(const StringX& clStr2) const
   {
     _CLSTR_IMPL strTemp = *this;
     strTemp.Append(clStr2);
@@ -721,7 +776,7 @@ namespace clstd
   {
     const clsize uInputLen = _Traits::StringLength(pStr);
     const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLen + uInputLen);
+    _ResizeLength(uStrLen + uInputLen);
     _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uInputLen);
     return *this;
   }
@@ -736,7 +791,7 @@ namespace clstd
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator+=(const _TCh cCh)
   {
-    resizeLength(CLSTR_LENGTH(m_pBuf) + 1);
+    _ResizeLength(CLSTR_LENGTH(m_pBuf) + 1);
     m_pBuf[CLSTR_LENGTH(m_pBuf) - 1] = cCh;
     return *this;
   }
@@ -745,7 +800,7 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::operator+=(const StringX& clStr)
   {
     const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLen + clStr.GetLength());
+    _ResizeLength(uStrLen + clStr.GetLength());
     _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, clStr.GetLength());
     return *this;
   }
@@ -754,9 +809,9 @@ namespace clstd
   //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const int nInteger)
   //{
   //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _ResizeLength(uStrLength + MAX_DIGITS);
   //  _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, nInteger);
-  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  _Reduce(_Traits::StringLength(m_pBuf));
   //  return *this;
   //}
 
@@ -764,9 +819,9 @@ namespace clstd
   //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const float fFloat)
   //{
   //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _ResizeLength(uStrLength + MAX_DIGITS);
   //  _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, fFloat);
-  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  _Reduce(_Traits::StringLength(m_pBuf));
   //  return *this;
   //}
 
@@ -774,18 +829,18 @@ namespace clstd
   //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const long lLong)
   //{
   //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _ResizeLength(uStrLength + MAX_DIGITS);
   //  _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, lLong);
-  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  _Reduce(_Traits::StringLength(m_pBuf));
   //  return *this;
   //}
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::AppendFloat(float val, char mode)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLength + MAX_DIGITS);
+    _ResizeLength(uStrLength + MAX_DIGITS);
     _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, val, mode);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
@@ -793,9 +848,9 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::AppendInteger32(s32 val, int nNumGroup)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLength + MAX_DIGITS);
+    _ResizeLength(uStrLength + MAX_DIGITS);
     _Traits::Integer32ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
@@ -803,9 +858,9 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::AppendUInt32(u32 val, int nNumGroup)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLength + MAX_DIGITS);
+    _ResizeLength(uStrLength + MAX_DIGITS);
     _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
@@ -813,9 +868,9 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::AppendInteger64(s64 val, int nNumGroup)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLength + MAX_DIGITS);
+    _ResizeLength(uStrLength + MAX_DIGITS);
     _Traits::Integer64ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
@@ -823,9 +878,9 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::AppendUInt64(u64 val, int nNumGroup)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLength + MAX_DIGITS);
+    _ResizeLength(uStrLength + MAX_DIGITS);
     _Traits::Unsigned64ToString(m_pBuf + uStrLength, MAX_DIGITS, val, nNumGroup);
-    reduceLength(_Traits::StringLength(m_pBuf));
+    _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
 
@@ -833,9 +888,9 @@ namespace clstd
   //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const unsigned int uInteger)
   //{
   //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _ResizeLength(uStrLength + MAX_DIGITS);
   //  _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, uInteger);
-  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  _Reduce(_Traits::StringLength(m_pBuf));
   //  return *this;
   //}
   //
@@ -843,9 +898,9 @@ namespace clstd
   //_CLSTR_IMPL& _CLSTR_IMPL::operator+=(const unsigned long uLong)
   //{
   //  const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-  //  resizeLength(uStrLength + MAX_DIGITS);
+  //  _ResizeLength(uStrLength + MAX_DIGITS);
   //  _Traits::Unsigned32ToString(m_pBuf + uStrLength, MAX_DIGITS, uLong);
-  //  reduceLength(_Traits::StringLength(m_pBuf));
+  //  _Reduce(_Traits::StringLength(m_pBuf));
   //  return *this;
   //}
 
@@ -875,11 +930,13 @@ namespace clstd
   {
     return m_pBuf[0];
   }
+
   _CLSTR_TEMPL
     _TCh& _CLSTR_IMPL::Back() const
   {
     return m_pBuf[CLSTR_LENGTH(m_pBuf) - 1];
   }
+
   _CLSTR_TEMPL
     _CLSTR_IMPL::operator const _TCh*() const
   {
@@ -909,7 +966,7 @@ namespace clstd
     _TCh* _CLSTR_IMPL::GetBuffer(size_t nSize)
   {
     if(nSize > 0) {
-      resizeLength(nSize);
+      _ResizeLength(nSize);
     }
     return m_pBuf;
   }
@@ -919,7 +976,7 @@ namespace clstd
   {
     if(nSize > CLSTR_CAPACITY(m_pBuf)) {
       const size_t length = CLSTR_LENGTH(m_pBuf);
-      inflateCapacity(nSize);
+      _Grow(nSize);
       CLSTR_LENGTH(m_pBuf) = length;
       if(length == 0) {
         // 空字符串在扩容时没有复制操作，新空间可能没有正确的结尾
@@ -1026,7 +1083,7 @@ namespace clstd
     size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLength + 1);
+    _ResizeLength(uStrLength + 1);
     if(idx >= uStrLength)
     {
       m_pBuf[uStrLength] = cCh;
@@ -1044,7 +1101,7 @@ namespace clstd
     size_t _CLSTR_IMPL::Insert(size_t idx, _TCh cCh, size_t count)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLength + count);
+    _ResizeLength(uStrLength + count);
     if(idx >= uStrLength)
     {
       m_pBuf[uStrLength] = cCh;
@@ -1065,7 +1122,7 @@ namespace clstd
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
     const size_t uInputLength = _Traits::StringLength(pStr);
-    resizeLength(uStrLength + uInputLength);
+    _ResizeLength(uStrLength + uInputLength);
     if(idx >= uStrLength)
     {
       _Traits::CopyStringN(m_pBuf + uStrLength, pStr, uInputLength);
@@ -1093,7 +1150,7 @@ namespace clstd
       }
     }
     if(i != d)
-      reduceLength(d);
+      _Reduce(d);
     return d;
   }
 
@@ -1103,11 +1160,11 @@ namespace clstd
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
     if(uCount == (size_t)-1 || idx + uCount >= uStrLength)
     {
-      reduceLength(idx);
+      _Reduce(idx);
       return idx;
     }
     _Traits::CopyStringN(m_pBuf + idx, m_pBuf + idx + uCount, uStrLength - idx - uCount);
-    reduceLength(uStrLength - uCount);
+    _Reduce(uStrLength - uCount);
     return uStrLength - uCount;
   }
 
@@ -1125,7 +1182,7 @@ namespace clstd
     if(i != 0)
     {
       _Traits::CopyStringN(m_pBuf, m_pBuf + i, uStrLen - i);
-      reduceLength(uStrLen - i);
+      _Reduce(uStrLen - i);
     }
   }
 
@@ -1146,7 +1203,7 @@ namespace clstd
     if(i != 0)
     {
       _Traits::CopyStringN(m_pBuf, m_pBuf + i, uStrLen - i);
-      reduceLength(uStrLen - i);
+      _Reduce(uStrLen - i);
     }
   }
 
@@ -1159,7 +1216,7 @@ namespace clstd
       if(m_pBuf[i] != cTarget)
         break;
     if(++i != uStrLen)
-      reduceLength(i);
+      _Reduce(i);
   }
 
   _CLSTR_TEMPL
@@ -1177,7 +1234,7 @@ namespace clstd
         break;
     }
     if(++i != uStrLen)
-      reduceLength(i);
+      _Reduce(i);
   }
 
   _CLSTR_TEMPL
@@ -1207,7 +1264,7 @@ namespace clstd
     {
       i1 = i1 - i0 + 1; // 这里转换为长度
       _Traits::CopyStringN(m_pBuf, m_pBuf + i0, i1);
-      reduceLength(i1);
+      _Reduce(i1);
     }
   }
 
@@ -1217,7 +1274,7 @@ namespace clstd
     const clsize left  = szLeft ? _Traits::StringLength(szLeft) : 0;
     const clsize right = szRight ?  _Traits::StringLength(szRight) : 0;
     const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
-    resizeLength(left + uStrLen + right);
+    _ResizeLength(left + uStrLen + right);
 
     if(szLeft) {
       _Traits::CopyStringN(m_pBuf + left, m_pBuf, uStrLen);
@@ -1330,7 +1387,7 @@ namespace clstd
   _CLSTR_TEMPL
     void _CLSTR_IMPL::Clear()
   {
-    reduceLength(0);
+    _Reduce(0);
   }
 
   _CLSTR_TEMPL
@@ -1499,7 +1556,7 @@ namespace clstd
   _CLSTR_TEMPL
     double _CLSTR_IMPL::ToFloat() const
   {
-    return clstd::_xstrtof(m_pBuf);
+    return clstd::_xstrtofT<double>(m_pBuf);
   }
 
   _CLSTR_TEMPL
@@ -1534,14 +1591,14 @@ namespace clstd
       uCount = uStrLength - idx;
 
     if(uCount < uInputLength)
-      resizeLength(uStrLength - uCount + uInputLength);
+      _ResizeLength(uStrLength - uCount + uInputLength);
 
     if(uStrLength - idx - uCount != 0 && uInputLength != uCount)
       memcpy(m_pBuf + idx + uInputLength, 
       m_pBuf + idx + uCount, (uStrLength - idx - uCount) * sizeof(_TCh));
 
     if(uCount > uInputLength)
-      reduceLength(uStrLength - uCount + uInputLength);
+      _Reduce(uStrLength - uCount + uInputLength);
     if(pStr != NULL)
       _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
   }
@@ -1579,7 +1636,7 @@ namespace clstd
 
     size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
 
-    resizeLength(uLength + uStrLen);
+    _ResizeLength(uLength + uStrLen);
     _Traits::XStringToNative(
       m_pBuf + uStrLen, uLength, pStrX, uInputLength);
 
@@ -1593,7 +1650,7 @@ namespace clstd
 
     size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uCount);
 
-    resizeLength(uLength + uStrLen);
+    _ResizeLength(uLength + uStrLen);
     _Traits::XStringToNative(
       m_pBuf + uStrLen, uLength, pStrX, uCount);
 
@@ -1604,7 +1661,7 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr, size_t uCount)
   {
     const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLen + uCount);
+    _ResizeLength(uStrLen + uCount);
     _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uCount);
     return *this;
   }
@@ -1639,7 +1696,7 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::Append(_TCh cCh)
   {
     const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLen + 1);
+    _ResizeLength(uStrLen + 1);
     m_pBuf[uStrLen] = cCh;
     return *this;
   }
@@ -1648,7 +1705,7 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::Append(_TCh cCh, size_t uCount)
   {
     const size_t uPrevLength = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uPrevLength + uCount);
+    _ResizeLength(uPrevLength + uCount);
     for(size_t i = 0; i < uCount; i++) {
       m_pBuf[uPrevLength + i] = cCh;
     }
@@ -1659,7 +1716,7 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::Append(const StringX& clStr)
   {
     const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-    resizeLength(uStrLen + clStr.GetLength());
+    _ResizeLength(uStrLen + clStr.GetLength());
     _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, clStr.GetLength());
     return *this;
   }
@@ -1913,13 +1970,15 @@ FUNC_RET:
     va_end(arglist);
     return CLSTR_LENGTH(m_pBuf);
   }
+
   //////////////////////////////////////////////////////////////////////////
+
   _CLSTR_TEMPL
-    void _CLSTR_IMPL::resizeLength(size_t uLength)
+    void _CLSTR_IMPL::_ResizeLength(size_t uLength)
   {
     if(uLength > CLSTR_CAPACITY(m_pBuf))
     {
-      inflateCapacity(uLength);
+      _Grow(uLength);
     }
     else if(CLSTR_LENGTH(m_pBuf) == uLength) {
       return;
@@ -1930,11 +1989,11 @@ FUNC_RET:
   }
 
   _CLSTR_TEMPL
-    void _CLSTR_IMPL::resizeLengthNoCopy(size_t uLength)
+    void _CLSTR_IMPL::_ResizeLengthNoCopy(size_t uLength)
   {
     _TAllocator* pAlloc = CLSTR_ALLOCATOR(m_pBuf);
     if(pAlloc == NULL) {
-      pAlloc = &_Alloc;
+      pAlloc = &alloc;
     }
 #ifdef _X86
     ASSERT((int)pAlloc >= 0);
@@ -1945,7 +2004,7 @@ FUNC_RET:
       if(CLSTR_CAPACITY(m_pBuf) != 0)
         pAlloc->Free(CLSTR_PTR(m_pBuf));
 
-      allocLength(pAlloc, uLength);
+      _AllocBuffer(pAlloc, uLength);
     }
     else if(uLength == 0) {
       if(CLSTR_CAPACITY(m_pBuf) != 0)
@@ -1961,7 +2020,7 @@ FUNC_RET:
   }
 
   _CLSTR_TEMPL
-    void _CLSTR_IMPL::reduceLength(size_t uLength)
+    void _CLSTR_IMPL::_Reduce(size_t uLength)
   {
     ASSERT(uLength <= CLSTR_LENGTH(m_pBuf));
     if(CLSTR_LENGTH(m_pBuf) != uLength) {
@@ -1971,14 +2030,14 @@ FUNC_RET:
   }
 
   _CLSTR_TEMPL
-    void _CLSTR_IMPL::inflateCapacity(size_t uLength)
+    void _CLSTR_IMPL::_Grow(size_t uNewCapacity)
   {
     // 注意：这里重新分配缓冲后没有设置 CLSTR_LENGTH(m_pBuf) 这个要在外面设置
-    ASSERT(uLength > CLSTR_CAPACITY(m_pBuf));
+    ASSERT(uNewCapacity > CLSTR_CAPACITY(m_pBuf));
 
     _TAllocator* pAlloc = CLSTR_ALLOCATOR(m_pBuf);
     if(pAlloc == NULL) {
-      pAlloc = &_Alloc;
+      pAlloc = &alloc;
     }
 
 #ifdef _X86
@@ -1987,7 +2046,7 @@ FUNC_RET:
 
     clsize uCapacity;
     // 最后加上 CLSTD_HEADER_SIZE, 得到 string buffer 的实际地址
-    void* ptrNew = (u8*)pAlloc->Alloc(uLength * sizeof(_TCh) + CLSTR_EXTRA, &uCapacity) + CLSTD_HEADER_SIZE;
+    void* ptrNew = (u8*)pAlloc->Alloc(uNewCapacity * sizeof(_TCh) + CLSTR_EXTRA, &uCapacity) + CLSTD_HEADER_SIZE;
 
     const size_t uStrLen = CLSTR_LENGTH(m_pBuf);
     if(uStrLen > 0) {
@@ -2003,7 +2062,7 @@ FUNC_RET:
   }
 
   _CLSTR_TEMPL
-    void _CLSTR_IMPL::allocLength(_TAllocator* pAlloc, size_t uLength)
+    void _CLSTR_IMPL::_AllocBuffer(_TAllocator* pAlloc, size_t uLength)
   {
     clsize uCapacity;
     if(uLength == 0) {
@@ -2029,7 +2088,7 @@ namespace clstd
     {"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"},};
 
   template<typename _TCh>
-  _TCh* strcpyn(_TCh* pDest, const _TCh* pSrc, size_t uCount)
+  _TCh* strcpynT(_TCh* pDest, const _TCh* pSrc, size_t uCount)
   {
     _TCh* start = pDest;
 
@@ -2076,7 +2135,7 @@ namespace clstd
   }
 
   template<typename _TCh, typename _TNum, typename _TUNum>
-  void _ltox_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper)
+  void _ltoxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper)
   {
     if(radix == 10 && value < 0)
     {
@@ -2084,11 +2143,11 @@ namespace clstd
       uSize--;
       value = -value;
     }
-    _ultox_t((_TUNum)value, pDest, uSize, radix, upper);
+    _ultoxstrT((_TUNum)value, pDest, uSize, radix, upper);
   }
 
   template<typename _TCh, typename _TNum>
-  void _ultox_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper)
+  void _ultoxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper)
   {
     size_t l = 0;
     uSize--;
@@ -2118,7 +2177,7 @@ namespace clstd
   // 有符号数字 => 字符串(带数学分组)
   //
   template<typename _TCh, typename _TNum, typename _TUNum>
-  void _ltoxg_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper)
+  void _ltogxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper)
   {
     if(radix == 10 && value < 0)
     {
@@ -2126,12 +2185,12 @@ namespace clstd
       uSize--;
       value = -value;
     }
-    _ultoxg_t((_TUNum)value, pDest, uSize, radix, group, upper);
+    _ultogxstrT((_TUNum)value, pDest, uSize, radix, group, upper);
   }
 
   // 无符号数字 => 字符串(带数学分组)
   template<typename _TCh, typename _TNum>
-  void _ultoxg_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper)
+  void _ultogxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper)
   {
     size_t l = 0;
     i32 g = 0;
@@ -2169,7 +2228,7 @@ namespace clstd
   }
 
   template<typename _TInt, typename _TCh>
-  _TInt _xstrtoi(const _TCh *String)
+  _TInt _xstrtoiT(const _TCh *String)
   {
     _TInt Value = 0, Digit;
     b32 bNeg = false;
@@ -2192,7 +2251,7 @@ namespace clstd
   }
 
   template<typename _TInt, typename _TCh>
-  _TInt _xstrtoi(i32 radix, const _TCh *str, clsize len)
+  _TInt _xstrtoiT(i32 radix, const _TCh *str, clsize len)
   {
     if(radix < 2 || radix > 36) {
       return 0;
@@ -2227,7 +2286,7 @@ namespace clstd
   }
 
   template<typename _TUInt, typename _TCh>
-  _TUInt _xstrtou(const _TCh *str)
+  _TUInt _xstrtouT(const _TCh *str)
   {
     _TUInt Value = 0, Digit;
     _TCh c;
@@ -2245,7 +2304,7 @@ namespace clstd
   }
 
   template<typename _TUInt, typename _TCh>
-  _TUInt _xstrtou(i32 radix, const _TCh *str, clsize len)
+  _TUInt _xstrtouT(i32 radix, const _TCh *str, clsize len)
   {
     if(radix < 2 || radix > 36)
       return 0;
@@ -2273,56 +2332,66 @@ namespace clstd
   }
 
 
-  template<typename _TCh>
-  double _xstrtof(const _TCh *str)
+  template<typename _TReal, typename _TCh>
+  _TReal _xstrtofT(const _TCh *str)
   {
-    double a = 0.0;
+    _TReal a(0.0);
     int e = 0;
     int c;
     b32 bNeg = false;
+
     if(*str == '-') {
       bNeg = true;
       str++;
     }
-    while ((c = *str++) != '\0' && isdigit(c)) {
-      a = a*10.0 + (c - '0');
+
+    while ((c = *str++) != '\0' && (c >= '0' && c <= '9')) {
+      a = a * _TReal(10.0) + (c - '0');
     }
+
     if (c == '.') {
-      while ((c = *str++) != '\0' && isdigit(c)) {
-        a = a*10.0 + (c - '0');
-        e = e-1;
+      while ((c = *str++) != '\0' && (c >= '0' && c <= '9')) {
+        a = a * _TReal(10.0) + (c - '0');
+        e--;
       }
     }
+
     if (c == 'e' || c == 'E') {
       int sign = 1;
       int i = 0;
       c = *str++;
-      if (c == '+')
+
+      if (c == '+') {
         c = *str++;
-      else if (c == '-') {
+      } else if (c == '-') {
         c = *str++;
         sign = -1;
       }
+
       while (isdigit(c)) {
-        i = i*10 + (c - '0');
+        i = i * 10 + (c - '0');
         c = *str++;
       }
-      e += i*sign;
+
+      e += i * sign;
     }
+
     while (e > 0) {
-      a *= 10.0;
+      a *= _TReal(10.0);
       e--;
     }
+
     while (e < 0) {
-      a *= 0.1;
+      a *= _TReal(0.1);
       e++;
     }
+
     return bNeg ? -a : a;
   }
 
   // ftoa 代码主要来自 2.11BSD
   template<typename _TCh>
-  int _ftoxstr(double value, _TCh* ascii, int width, int prec1, ch format)
+  int _ftoxstrT(double value, _TCh* ascii, int width, int prec1, ch format)
   {
      int             expon;
      int             sign;
@@ -2489,84 +2558,144 @@ namespace clstd
      return (avail);
    }
 
+  //////////////////////////////////////////////////////////////////////////
+
   void ltox(i32 value, wch* pDest, size_t uSize, i32 radix, i32 upper)
   {
-    _ltox_t<wch, i32, u32>(value, pDest, uSize, radix, upper);
+    _ltoxstrT<wch, i32, u32>(value, pDest, uSize, radix, upper);
   }
+
   void ltox(i32 value, ch* pDest, size_t uSize, i32 radix, i32 upper)
   {
-    _ltox_t<ch, i32, u32>(value, pDest, uSize, radix, upper);
+    _ltoxstrT<ch, i32, u32>(value, pDest, uSize, radix, upper);
   }
+
+  void l64tox(i64 value, wch* pDest, size_t uSize, i32 radix, i32 upper)
+  {
+    _ltoxstrT<wch, i64, u64>(value, pDest, uSize, radix, upper);
+  }
+
+  void l64tox(i64 value, ch* pDest, size_t uSize, i32 radix, i32 upper)
+  {
+    _ltoxstrT<ch, i64, u64>(value, pDest, uSize, radix, upper);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
   
   i32 xtoi(const wch* str)
   {
-    return _xstrtoi<i32>(str);
+    return _xstrtoiT<i32>(str);
   }
 
   i32 xtoi(const ch* str)
   {
-    return _xstrtoi<i32>(str);
+    return _xstrtoiT<i32>(str);
   }
 
   i32 xtoi(i32 radix, const wch* str, clsize len)
   {
-    return _xstrtoi<i32>(radix, str, len);
+    return _xstrtoiT<i32>(radix, str, len);
   }
 
   i32 xtoi(i32 radix, const ch* str, clsize len)
   {
-    return _xstrtoi<i32>(radix, str, len);
+    return _xstrtoiT<i32>(radix, str, len);
   }
+
+  i64 xtoi64(i32 radix, const wch* str, clsize len)
+  {
+    return _xstrtoiT<i64>(radix, str, len);
+  }
+
+  i64 xtoi64(i32 radix, const ch* str, clsize len)
+  {
+    return _xstrtoiT<i64>(radix, str, len);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   u32 xtou(const wch* str)
   {
-    return _xstrtou<u32>(str);
+    return _xstrtouT<u32>(str);
   }
 
   u32 xtou(const ch* str)
   {
-    return _xstrtou<u32>(str);
+    return _xstrtouT<u32>(str);
   }
 
   u32 xtou(i32 radix, const wch* str, clsize len)
   {
-    return _xstrtou<u32>(radix, str, len);
+    return _xstrtouT<u32>(radix, str, len);
   }
   
   u32 xtou(i32 radix, const ch* str, clsize len)
   {
-    return _xstrtou<u32>(radix, str, len);
+    return _xstrtouT<u32>(radix, str, len);
   }
-  
-  void l64tox(i64 value, wch* pDest, size_t uSize, i32 radix, i32 upper)
+
+  u64 xtou64(i32 radix, const wch* str, clsize len)
   {
-    _ltox_t<wch, i64, u64>(value, pDest, uSize, radix, upper);
+    return _xstrtouT<u64>(radix, str, len);
   }
-  void l64tox(i64 value, ch* pDest, size_t uSize, i32 radix, i32 upper)
+
+  u64 xtou64(i32 radix, const ch* str, clsize len)
   {
-    _ltox_t<ch, i64, u64>(value, pDest, uSize, radix, upper);
+    return _xstrtouT<u64>(radix, str, len);
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
   void ultox(u32 value, wch* pDest, size_t uSize, i32 radix, i32 upper)
   {
-    _ultox_t<wch, u32>(value, pDest, uSize, radix, upper);
+    _ultoxstrT<wch, u32>(value, pDest, uSize, radix, upper);
   }
+
   void ultox(u32 value, ch* pDest, size_t uSize, i32 radix, i32 upper)
   {
-    _ultox_t<ch, u32>(value, pDest, uSize, radix, upper);
+    _ultoxstrT<ch, u32>(value, pDest, uSize, radix, upper);
   }
+
   void ul64tox(u64 value, wch* pDest, size_t uSize, i32 radix, i32 upper)
   {
-    _ultox_t<wch, u64>(value, pDest, uSize, radix, upper);
+    _ultoxstrT<wch, u64>(value, pDest, uSize, radix, upper);
   }
+
   void ul64tox(u64 value, ch* pDest, size_t uSize, i32 radix, i32 upper)
   {
-    _ultox_t<ch, u64>(value, pDest, uSize, radix, upper);
+    _ultoxstrT<ch, u64>(value, pDest, uSize, radix, upper);
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  float xtof(const ch* str)
+  {
+    return clstd::_xstrtofT<float>(str);
+  }
+ 
+  float xtof(const wch* str)
+  {
+    return clstd::_xstrtofT<float>(str);
+  }
+
+  double xtod(const ch* str)
+  {
+    return clstd::_xstrtofT<double>(str);
+  }
+
+  double xtod(const wch* str)
+  {
+    return clstd::_xstrtofT<double>(str);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
   template<typename _TCh>
   _TCh tolowerT(_TCh ch)
   {
     return ch + wine_casemap_lower[wine_casemap_lower[ch >> 8] + (ch & 0xff)];
   }
+
   template<typename _TCh>
   int strncmpiT( const _TCh *str1, const _TCh *str2, clsize n )
   {
@@ -2763,6 +2892,7 @@ int SimpleASCIItoUnicode(wch* pDestStr, int nCount, const ch* pSrcStr)
     pDestStr[n] = '\0';
   return n;
 }
+
 int SimpleUnicodeToASCII(ch* pDestStr, int nCount, const wch* pSrcStr)
 {
   if(pSrcStr == NULL)
@@ -2783,8 +2913,8 @@ int SimpleUnicodeToASCII(ch* pDestStr, int nCount, const wch* pSrcStr)
   return n;
 }
 
-template class clstd::StringX<wch, clstd::Allocator, g_Alloc_clStringW, clstd::StringW_traits>;
-template class clstd::StringX<ch, clstd::Allocator, g_Alloc_clStringA, clstd::StringA_traits>;
+//template class clstd::StringX<wch, clstd::Allocator, g_Alloc_clStringW, clstd::StringW_traits>;
+//template class clstd::StringX<ch, clstd::Allocator, g_Alloc_clStringA, clstd::StringA_traits>;
 template class clstd::StringX<wch, clstd::StdAllocator, g_StdAlloc, clstd::StringW_traits>;
 template class clstd::StringX<ch, clstd::StdAllocator, g_StdAlloc, clstd::StringA_traits>;
 

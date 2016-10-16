@@ -36,8 +36,8 @@ const static clstd::ALLOCPLOY aclAllocPloyA[] =
 };
 
 // s_strRootDir 要在 alloc 之前析构
-clstd::Allocator g_Alloc_clStringW("StringPoolW", aclAllocPloyW);
-clstd::Allocator g_Alloc_clStringA("StringPoolA", aclAllocPloyA);
+//clstd::Allocator g_Alloc_clStringW("StringPoolW", aclAllocPloyW);
+//clstd::Allocator g_Alloc_clStringA("StringPoolA", aclAllocPloyA);
 clstd::StdAllocator g_StdAlloc;
 clStringW s_strRootDir;
 

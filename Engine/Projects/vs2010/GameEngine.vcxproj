@@ -205,6 +205,7 @@
       <PreprocessorDefinitions>_X86;_DEBUG;_WIN32;_WINDOWS;_USRDLL;GAMEENGINE_EXPORTS;_GXUI;SQLITE_API=__declspec(dllexport);dSINGLE;FBXSDK_NEW_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\third_party\;$(ProjectDir)..\..\third_party\Bullet\include\;$(ProjectDir)..\..\third_party\FBX SDK\2013.2\include;$(ProjectDir)..\..\third_party/ffmpeg/include/;$(ProjectDir)..\..\third_party\OpenAL\Include;$(ProjectDir)..\..\third_party\OggVorbis\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

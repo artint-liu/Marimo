@@ -38,76 +38,13 @@
 namespace clstd
 {
   template<typename _TCh>
-  _TCh* strcpyn(_TCh* pDest, const _TCh* pSrc, size_t uCount);
+  _TCh* strcpynT(_TCh* pDest, const _TCh* pSrc, size_t uCount);
 
   template<typename _TCh>
   _TCh* strcpyT(_TCh* pDest, const _TCh* pSrc);
 
   template<typename _TCh>
   _TCh* strstrT(_TCh* pStr, const _TCh* pSubStr);
-
-  // 有符号数字 => 字符串
-  template<typename _TCh, typename _TNum, typename _TUNum>
-  void _ltox_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper);
-
-  // 无符号数字 => 字符串
-  template<typename _TCh, typename _TNum>
-  void _ultox_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 upper);
-
-  // 数学分组：12345678 => 12,345,678
-
-  // 有符号数字 => 字符串(带数学分组)
-  template<typename _TCh, typename _TNum, typename _TUNum>
-  void _ltoxg_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper);
-
-  // 无符号数字 => 字符串(带数学分组)
-  template<typename _TCh, typename _TNum>
-  void _ultoxg_t(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper);
-
-  // string to integer
-  template<typename _TInt, typename _TCh>
-  _TInt _xstrtoi(const _TCh *String);
-
-  template<typename _TInt, typename _TCh>
-  _TInt _xstrtoi(i32 radix, const _TCh *str, clsize len = -1);  // (2-36进制)字符串转带符号整数
-
-  template<typename _TUInt, typename _TCh>
-  _TUInt _xstrtou(const _TCh *str);
-
-  template<typename _TUInt, typename _TCh>
-  _TUInt _xstrtou(i32 radix, const _TCh *str, clsize len = -1);  // (2-36进制)字符串转无符号整数
-
-
-  template<typename _TCh>
-  double _xstrtof(const _TCh *str);
-
-  // double(float) to string
-  template<typename _TCh>
-  int _ftoxstr(double value, _TCh* ascii, int width, int prec1, ch format);
-
-  // string to integer
-  i32 xtoi(const wch* str);
-  i32 xtoi(const ch* str);
-  i32 xtoi(i32 radix, const wch* str, clsize len = -1);
-  i32 xtoi(i32 radix, const ch* str, clsize len = -1);
-
-  // string to unsigned integer
-  u32 xtou(const wch* str);
-  u32 xtou(const ch* str);
-  u32 xtou(i32 radix, const wch* str, clsize len = -1);
-  u32 xtou(i32 radix, const ch* str, clsize len = -1);
-
-  // integer to string
-  void ltox(i32 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
-  void ltox(i32 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
-  void l64tox(i64 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
-  void l64tox(i64 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
-
-  // unsigned integer to string
-  void ultox(u32 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
-  void ultox(u32 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
-  void ul64tox(u64 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
-  void ul64tox(u64 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
 
   template<typename _TCh>
   _TCh tolowerT(_TCh ch);
@@ -138,19 +75,52 @@ namespace clstd
 
   template<typename _TCh>
   u32 HashStringT(const _TCh* str);
+
+  // string to integer
+  i32 xtoi(const wch* str);
+  i32 xtoi(const ch* str);
+  i32 xtoi(i32 radix, const wch* str, clsize len = -1);
+  i32 xtoi(i32 radix, const ch* str, clsize len = -1);
+  i64 xtoi64(i32 radix, const wch* str, clsize len = -1);
+  i64 xtoi64(i32 radix, const ch* str, clsize len = -1);
+
+  // string to unsigned integer
+  u32 xtou(const wch* str);
+  u32 xtou(const ch* str);
+  u32 xtou(i32 radix, const wch* str, clsize len = -1);
+  u32 xtou(i32 radix, const ch* str, clsize len = -1);
+  u64 xtou64(i32 radix, const wch* str, clsize len = -1);
+  u64 xtou64(i32 radix, const ch* str, clsize len = -1);
+
+  // integer to string
+  void ltox(i32 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+  void ltox(i32 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+  void l64tox(i64 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+  void l64tox(i64 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+
+  // unsigned integer to string
+  void ultox(u32 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+  void ultox(u32 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+  void ul64tox(u64 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+  void ul64tox(u64 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
+
+  float xtof(const ch* str);
+  float xtof(const wch* str);
+  double xtod(const ch* str);
+  double xtod(const wch* str);
 }
 
 
 //typedef std::string AString;
 //typedef std::wstring WString;
 
-extern clstd::Allocator g_Alloc_clStringW;
-extern clstd::Allocator g_Alloc_clStringA;
+//extern clstd::Allocator g_Alloc_clStringW;
+//extern clstd::Allocator g_Alloc_clStringA;
 extern clstd::StdAllocator g_StdAlloc;
 
 namespace clstd
 {
-  template<typename _TCh, class _TAllocator, _TAllocator& _Alloc, class _Traits>
+  template<typename _TCh, class _TAllocator, _TAllocator& alloc, class _Traits>
   class StringX
   {
   public:
@@ -166,14 +136,17 @@ namespace clstd
     typedef _TCh        TChar;
     typedef _XCh        XChar;
     typedef const _TCh* LPCSTR;
+
   private:
     _TCh*        m_pBuf;  // 只能有一个变量, 否则作为Format参数时会把多余的成员变量也压入堆栈, 出现问题.
-    //clAllocator* m_pAlloc;
-    void  resizeLength        (size_t uLength);
-    void  resizeLengthNoCopy  (size_t uLength);
-    void  reduceLength        (size_t uLength);
-    void  inflateCapacity     (size_t uLength);
-    void  allocLength         (_TAllocator* pAlloc, size_t uLength);
+
+  private:
+    void  _AllocBuffer        (_TAllocator* pAlloc, size_t uLength);
+    void  _ResizeLength       (size_t uLength);
+    void  _ResizeLengthNoCopy (size_t uLength);
+    void  _Reduce             (size_t uLength);
+    void  _Grow               (size_t uCapacity);
+
   public:
     StringX();
     StringX(const _TCh* pStr);
@@ -371,15 +344,15 @@ namespace clstd
     static size_t     XStringToNative     (ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX);
   };
 
-  inline size_t hash_value(const clstd::StringX<wch, clstd::Allocator, g_Alloc_clStringW, clstd::StringW_traits>& _Str)
-  {
-    return _Str.GetHash();
-  }
+  //inline size_t hash_value(const clstd::StringX<wch, clstd::Allocator, g_Alloc_clStringW, clstd::StringW_traits>& _Str)
+  //{
+  //  return _Str.GetHash();
+  //}
 
-  inline size_t hash_value(const  clstd::StringX<ch, clstd::Allocator, g_Alloc_clStringA, clstd::StringA_traits>& _Str)
-  {
-    return _Str.GetHash();
-  }
+  //inline size_t hash_value(const  clstd::StringX<ch, clstd::Allocator, g_Alloc_clStringA, clstd::StringA_traits>& _Str)
+  //{
+  //  return _Str.GetHash();
+  //}
 
   inline size_t hash_value(const clstd::StringX<wch, clstd::StdAllocator, g_StdAlloc, clstd::StringW_traits>& _Str)
   {
@@ -399,9 +372,7 @@ namespace clstd
     template<typename _TCh, class _Fn>
     void Resolve(const _TCh* str, size_t len, _TCh ch, _Fn fn)
     {
-      if( ! len) {
-        return;
-      }
+      if( ! len) { return; }
 
       const _TCh* str_begin = str;
       const _TCh* str_end   = str + len;

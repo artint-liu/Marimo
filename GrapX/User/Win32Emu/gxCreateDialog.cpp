@@ -294,7 +294,7 @@ namespace DlgXM
         {
           const clStringW& strValue = Value.ToString();
           if(strValue.Back() == L'%') {
-            pPanel->fScale[nScaleIdx] = (float)clstd::_xstrtof((const wch*)strValue) * 0.01f;
+            pPanel->fScale[nScaleIdx] = (float)clstd::xtof((const wch*)strValue) * 0.01f;
             clClamp(0.0f, 1.0f, &pPanel->fScale[nScaleIdx]);
             nScaleIdx++;
           }
