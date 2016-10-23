@@ -2,7 +2,7 @@
 #define _ARITHMETIC_EXPRESSION_H_
 
 #define IDX2ITER(_IDX)                           m_aTokens[_IDX]
-#define ERROR_MSG__MISSING_SEMICOLON(_token)      m_pMsg->WriteErrorW(TRUE, (_token).marker.offset(), 1000)
+#define ERROR_MSG__MISSING_SEMICOLON(_token)      m_pMsg->WriteErrorW(TRUE, (_token).offset(), 1000)
 #define ERROR_MSG__MISSING_OPENBRACKET    CLBREAK
 #define ERROR_MSG__MISSING_CLOSEDBRACKET  CLBREAK
 
@@ -57,7 +57,8 @@ namespace UVShader
   public:
     typedef cllist<iterator> IterList;
 
-    struct TOKEN // 运行时记录符号和操作符等属性
+    // 运行时记录符号和操作符等属性
+    struct TOKEN : iterator
     {
       typedef cllist<TOKEN>   List;
       typedef clvector<TOKEN> Array;
@@ -80,7 +81,7 @@ namespace UVShader
 #ifdef ENABLE_STRINGED_SYMBOL
       clStringA symbol;
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
-      iterator  marker;
+      //iterator  marker;
       int       scope;                          // 括号匹配索引
       int       semi_scope   : scope_bits;      // 分号作用域
       int       precedence   : precedence_bits; // 符号优先级
@@ -497,8 +498,8 @@ namespace stdext
   {
     u32 _Val = 2166136261U;
 
-    auto* pBegin = _token.marker.marker;
-    auto* pEnd   = _token.marker.end();
+    auto* pBegin = _token.marker;
+    auto* pEnd   = _token.end();
     while (pBegin != pEnd) {
       _Val = 16777619U * _Val ^ (u32)*pBegin++;
     }

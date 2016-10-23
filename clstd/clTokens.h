@@ -136,6 +136,11 @@ namespace clstd {
     b32             find_pair (const iterator& itCurrent, iterator& itOpen, iterator& itClose, T_LPCSTR chOpen, T_LPCSTR chClose) const;
   };
 
+  //////////////////////////////////////////////////////////////////////////
+  typedef TokensT<clStringA> TokensA;
+  typedef TokensT<clStringW> TokensW;
+  //////////////////////////////////////////////////////////////////////////
+
   namespace TokensUtility
   {
     template<class _TStr>

@@ -61,7 +61,7 @@ int MeasureStringsWidth(GXLPCSTR* aStrings)
   int i = 0;
   int nWidth = 0;
   while(aStrings[i]) {
-    nWidth = clMax(nWidth, GXSTRLEN(aStrings[i++]));
+    nWidth = clMax(nWidth, (int)GXSTRLEN(aStrings[i++]));
   }
   return nWidth;
 }
@@ -220,8 +220,8 @@ namespace DigitalParsing
     {
       TOKEN token;
       VALUE value;
-      token.marker.marker = aSampleDigitals[i].str;
-      token.marker.length = GXSTRLEN(aSampleDigitals[i].str);
+      token.marker = aSampleDigitals[i].str;
+      token.length = GXSTRLEN(aSampleDigitals[i].str);
 
       VALUE v;
       State state = v.set(token);

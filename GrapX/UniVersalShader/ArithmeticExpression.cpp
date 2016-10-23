@@ -176,8 +176,8 @@ namespace UVShader
       token.scope = -1;
       token.semi_scope = -1;
 
-      ASSERT(m_CurSymInfo.marker.marker == NULL ||
-        m_CurSymInfo.marker.marker == it.marker); // 遍历时一定这个要保持一致
+      ASSERT(m_CurSymInfo.marker == NULL ||
+        m_CurSymInfo.marker == it.marker); // 遍历时一定这个要保持一致
 
       token.SetArithOperatorInfo(m_CurSymInfo);
 
@@ -240,7 +240,7 @@ namespace UVShader
 
       if(token.precedence == 0)
       {
-        auto iter_token = m_Macros.find(token.marker.ToString());
+        auto iter_token = m_Macros.find(token.ToString());
         if(iter_token != m_Macros.end())
         {
           token.Set(iter_token->second.value.marker);
@@ -338,7 +338,7 @@ namespace UVShader
     {
       TOKEN& l_token = *(TOKEN*)lParam;
       //CodeParser* pParser = (CodeParser*)it.pContainer;
-      ASSERT(l_token.marker.marker == NULL); // 每次用完外面都要清理这个
+      ASSERT(l_token.marker == NULL); // 每次用完外面都要清理这个
 
       const MBO* pProp = NULL;
       // 从多字节到单字节符号匹配,其中有一个返回TRUE就不执行后面的匹配了
@@ -684,9 +684,9 @@ namespace UVShader
 
     if( ! ParseFunctionIndexCall(scope, pDesc))
     {
-      GXINT_PTR len = (m_aTokens[scope.end - 1].marker.marker - m_aTokens[scope.begin].marker.marker) + m_aTokens[scope.end - 1].marker.length;
+      GXINT_PTR len = (m_aTokens[scope.end - 1].marker - m_aTokens[scope.begin].marker) + m_aTokens[scope.end - 1].length;
       ASSERT(len >= 0);
-      clStringA strMsg(m_aTokens[scope.begin].marker.marker, len);
+      clStringA strMsg(m_aTokens[scope.begin].marker, len);
       TRACE("ERROR: 无法解析\"%s\"\n", strMsg);
       return FALSE;
     }
@@ -789,10 +789,10 @@ namespace UVShader
     {
       PAIRMARK& c = s_PairMark[i];
       PairStack&    s = sStack[i];
-      if(token.marker == c.chOpen) {
+      if(token == c.chOpen) {
         s.push(c_size);
       }
-      else if(token.marker == c.chClosed) {
+      else if(token == c.chClosed) {
         if(s.empty()) {
           if(c.bCloseAE) {
             ASSERT(token == ':'); // 目前只有这个
@@ -835,8 +835,8 @@ namespace UVShader
     if(bRaw)
     {
       if(begin < end) {
-        str.Append(m_aTokens[begin].marker.marker,
-          (m_aTokens[end - 1].marker.marker - m_aTokens[begin].marker.marker) + m_aTokens[end - 1].marker.length);
+        str.Append(m_aTokens[begin].marker,
+          (m_aTokens[end - 1].marker - m_aTokens[begin].marker) + m_aTokens[end - 1].length);
       }
       else {
         str.Clear();
@@ -895,8 +895,8 @@ namespace UVShader
     // X是任意内容，D是指数字
     // "-X" "+X" ".X" "Xf"
     // "De-D" "DeD"
-    auto ptr     = token.marker.marker;
-    size_t count = token.marker.length;
+    auto ptr     = token.marker;
+    size_t count = token.length;
     GXDWORD dwFlags = 0;
     GXQWORD digi[3] = {0}; // [0]是整数部分，[1]是小数部分, [2]是指数
     size_t p = 0; // part
@@ -1034,9 +1034,9 @@ namespace UVShader
   template<typename _Ty>
   typename _Ty ArithmeticExpression::VALUE::CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2)
   {
-    if(opcode.marker.length == 1)
+    if(opcode.length == 1)
     {
-      switch(opcode.marker.marker[0])
+      switch(opcode.marker[0])
       {
       case '+': return t1 + t2;
       case '-': return t1 - t2;
@@ -1159,8 +1159,8 @@ namespace UVShader
 #ifdef ENABLE_STRINGED_SYMBOL
     symbol.Clear();
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
-    marker.marker = 0;
-    marker.length = 0;
+    marker = 0;
+    length = 0;
     type = TokenType_Undefine;
     bInStringSet = 0;
   }
@@ -1174,7 +1174,11 @@ namespace UVShader
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
       scope = -1;
       semi_scope = -1;
-      marker = _iter;
+      //marker = _iter;
+      pContainer = _iter.pContainer;
+      marker     = _iter.marker;
+      length     = _iter.length;
+
       bInStringSet = 0;
     }
   }
@@ -1185,9 +1189,9 @@ namespace UVShader
 #ifdef ENABLE_STRINGED_SYMBOL
     symbol = str;
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
-    marker.pContainer = NULL;
-    marker.marker     = sStrSet.add(str);
-    marker.length     = str.GetLength();
+    pContainer = NULL;
+    marker     = sStrSet.add(str);
+    length     = str.GetLength();
     bInStringSet      = 1;
   }
 
@@ -1200,10 +1204,10 @@ namespace UVShader
 
   clStringA ArithmeticExpression::TOKEN::ToString() const
   {
-    if(type == TokenType_String && ! marker.BeginsWith('\"')) {
-      return clStringA("\"") + marker.ToRawString() + '\"';
+    if(type == TokenType_String && ! BeginsWith('\"')) {
+      return clStringA("\"") + ToRawString() + '\"';
     }
-    return marker.ToRawString();
+    return ToRawString();
   }
 
   int ArithmeticExpression::TOKEN::GetScope() const
@@ -1214,36 +1218,36 @@ namespace UVShader
   GXBOOL ArithmeticExpression::TOKEN::operator==(const TOKEN& t) const
   {
     // 不可能出现指向同一地址却长度不同的情况
-    ASSERT((marker.marker == t.marker.marker && marker.length == t.marker.length) || 
-      (marker.marker != t.marker.marker));
+    ASSERT((marker == t.marker && length == t.length) || 
+      (marker != t.marker));
 
-    return (marker.marker == t.marker.marker) || (marker.length == t.marker.length
-      && GXSTRNCMP(marker.marker, t.marker.marker, marker.length) == 0);
+    return (marker == t.marker) || (length == t.length
+      && GXSTRNCMP(marker, t.marker, length) == 0);
   }
 
   GXBOOL ArithmeticExpression::TOKEN::operator==(SmartStreamA::T_LPCSTR str) const
   {
-    return (marker == str);
+    return (*static_cast<const iterator*>(this) == str);
   }
 
   GXBOOL ArithmeticExpression::TOKEN::operator==(SmartStreamA::TChar ch) const
   {
-    return (marker == ch);
+    return (*static_cast<const iterator*>(this) == ch);
   }
 
   GXBOOL ArithmeticExpression::TOKEN::operator!=(SmartStreamA::T_LPCSTR str) const
   {
-    return (marker != str);
+    return (*static_cast<const iterator*>(this) != str);
   }
 
   GXBOOL ArithmeticExpression::TOKEN::operator!=(SmartStreamA::TChar ch) const
   {
-    return (marker != ch);
+    return (*static_cast<const iterator*>(this) != ch);
   }
 
   b32 ArithmeticExpression::TOKEN::operator<(const TOKEN& _token) const
   {
-    return (b32)(marker < _token.marker);
+    return (b32)(*static_cast<const iterator*>(this) < _token);
   }
 
 } // namespace UVShader

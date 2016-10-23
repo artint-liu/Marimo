@@ -360,13 +360,16 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       //{
       //  CLNOP
       //}
+
+      // ½âÎöÓï·¨
       expp.Parse();
+
       if(szOutput != NULL)
       {
         clstd::File file;
         if(file.CreateAlwaysA(szOutput))
         {
-          auto stats = expp.GetStatments();
+          const UVShader::CodeParser::StatementArray& stats = expp.GetStatments();
           for(auto it = stats.begin(); it != stats.end(); ++it)
           {
             const auto& s = *it;
@@ -485,6 +488,32 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 
       file.MapToBuffer(&pRefBuffer);
       sOutFile.MapToBuffer(&pOutBuffer);
+
+      clstd::TokensA tokens_ref;
+      clstd::TokensA tokens_out;
+
+      tokens_ref.Initialize((GXLPCSTR)pRefBuffer->GetPtr(), pRefBuffer->GetSize());
+      tokens_out.Initialize((GXLPCSTR)pOutBuffer->GetPtr(), pOutBuffer->GetSize());
+
+      clstd::TokensA::iterator it_ref = tokens_ref.begin();
+      clstd::TokensA::iterator it_out = tokens_out.begin();
+
+      for(; it_ref != tokens_ref.end() && it_out != tokens_out.end(); ++it_ref, ++it_out)
+      {
+        if(it_ref.ToString() != it_out.ToString())
+        {
+          printf("\"%s\" not equals \"%s\"\n", it_out.ToString(), it_ref.ToString());
+          CLBREAK;
+        }
+      }
+
+      if(it_ref != tokens_ref.end() || it_out != tokens_out.end())
+      {
+        printf("Not same end.\n");
+        CLBREAK;
+      }
+
+      /*
       clStringA strRef((GXLPCSTR)pRefBuffer->GetPtr(), pRefBuffer->GetSize());
       clStringA strOut((GXLPCSTR)pOutBuffer->GetPtr(), pOutBuffer->GetSize());
 
@@ -523,7 +552,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
           break;
         }
       }
-
+      //*/
 
       SAFE_DELETE(pRefBuffer);
       SAFE_DELETE(pOutBuffer);

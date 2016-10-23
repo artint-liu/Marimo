@@ -341,7 +341,7 @@ namespace UVShader
       }
 
       // 可能被宏展开后清除
-      if(token.marker.marker) {
+      if(token.marker) {
         if( ! MergeStringToken(token)){
           m_aTokens.push_back(token);
         }
@@ -392,15 +392,15 @@ namespace UVShader
     if(token.type == TOKEN::TokenType_String && last_one.type == TOKEN::TokenType_String)
     {
       // 合并代码中原有字符串token，这样保持了原文的空白信息
-      if(last_one.marker.pContainer && token.marker.pContainer && last_one.marker.marker < token.marker.marker &&
-        ! last_one.marker.BeginsWith('\"') && ! last_one.marker.EndsWith('\"') && ! token.marker.BeginsWith('\"') && ! token.marker.EndsWith('\"'))
+      if(last_one.pContainer && token.pContainer && last_one.marker < token.marker &&
+        ! last_one.BeginsWith('\"') && ! last_one.EndsWith('\"') && ! token.BeginsWith('\"') && ! token.EndsWith('\"'))
       {
-        ASSERT(last_one.marker.marker < m_pEnd && token.marker.marker < m_pEnd);
-        last_one.marker.length = (clsize)token.marker.marker + token.marker.length - (clsize)last_one.marker.marker;
+        ASSERT(last_one.marker < m_pEnd && token.marker < m_pEnd);
+        last_one.length = (clsize)token.marker + token.length - (clsize)last_one.marker;
       }
       else {
         clStringA str;
-        const iterator* aTonkens[] = {&last_one.marker, &token.marker};
+        const iterator* aTonkens[] = {&last_one, &token};
         
         // TODO: 优化处理分号
         for(int i = 0; i < 2; i++)
@@ -416,8 +416,8 @@ namespace UVShader
             str.Remove(str.GetLength() - 1, 1);
           }
         }
-        //str.Append(last_one.marker.marker, last_one.marker.length);
-        //str.Append(token.marker.marker, token.marker.length);
+        //str.Append(last_one.marker, last_one.length);
+        //str.Append(token.marker, token.length);
         last_one.Set(m_pContext->Strings, str);
       }
 #ifdef ENABLE_STRINGED_SYMBOL
@@ -450,18 +450,18 @@ namespace UVShader
     if(m_ExpandedStream.empty()) {
       token.ClearMarker();
       token.ClearArithOperatorInfo();
-      ++it;
+      ++it; // next(it);
       token.Set(it);
     }
     else {
       token = m_ExpandedStream.front();
 
-      if(token.marker.marker == NULL) {
+      if(token.marker == NULL) {
         // m_ExpandedStream 最后一个token可能记录的是结尾
         ASSERT(m_ExpandedStream.size() == 1);
         it = end();
       } else {
-        it = token.marker;
+        it = token;
       }
       token.semi_scope = -1;
       token.scope = -1;
@@ -494,7 +494,7 @@ namespace UVShader
     //}
     
     //MACRO* pMacro = &itMacro->second;
-    iterator it = token.marker;
+    iterator it = token;
     TOKEN::List stream;
 
     if(pMacro->aFormalParams.empty())
@@ -549,7 +549,7 @@ namespace UVShader
       token.Set(it);
     } // if(ctx.pMacro->aFormalParams.empty())
 
-    ASSERT(token.marker.pContainer);
+    ASSERT(token.pContainer);
     //ctx.pLineNumRef = &token;
     //ExpandMacro(ctx);
     //m_ExpandedStream = ctx.stream;
@@ -1162,9 +1162,9 @@ NOT_INC_P:
     for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i)
     {
       const INTRINSIC_TYPE& t = s_aIntrinsicType[i];
-      if(pSym->marker.BeginsWith(t.name, t.name_len)) {
-        const auto* pElement = pSym->marker.marker + t.name_len;
-        const int   remain   = pSym->marker.length - (int)t.name_len;
+      if(pSym->BeginsWith(t.name, t.name_len)) {
+        const auto* pElement = pSym->marker + t.name_len;
+        const int   remain   = pSym->length - (int)t.name_len;
         sType.name = t.name;
 
         // [(1..4)[x(1..4)]]
@@ -2198,7 +2198,7 @@ NOT_INC_P:
       if(nLine > 0)
       {
         m_pMsg->SetCurrentTopLine(0);
-        GXINT nCurLine = m_pMsg->LineFromPtr(tokens[1].marker.marker);
+        GXINT nCurLine = m_pMsg->LineFromPtr(tokens[1].marker);
         m_pMsg->SetCurrentTopLine(nLine - nCurLine - 1);
       }
       else {
@@ -2218,7 +2218,7 @@ NOT_INC_P:
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && tokens.front() == PREPROCESS_define);
     const auto count = tokens.size();
-    clStringA strMacroName(tokens[1].marker.marker, tokens[1].marker.length);
+    clStringA strMacroName(tokens[1].marker, tokens[1].length);
     //m_MacrosSet.insert(strMacroName);
 
     if(count == 1) {
@@ -2243,7 +2243,7 @@ NOT_INC_P:
       int l_define = 2;
 
       // 宏定义名后不是开括号并且紧跟在宏定义名后则报错
-      if(tokens[1].marker.end() == tokens[2].marker.marker)
+      if(tokens[1].end() == tokens[2].marker)
       {
         if(tokens[2] != '(') {
           OutputErrorW(tokens[2], E2008_宏定义中的意外_vs, clStringW(tokens[2].ToString()));
@@ -2631,7 +2631,7 @@ NOT_INC_P:
 
   GXBOOL CodeParser::ExpandInnerMacro(TOKEN& token, const TOKEN& line_num)
   {
-    ASSERT(line_num.marker.pContainer); // 这个必须是流中的token
+    ASSERT(line_num.pContainer); // 这个必须是流中的token
     if(token.type == TOKEN::TokenType_String) {
       return FALSE;
     }
@@ -2649,7 +2649,7 @@ NOT_INC_P:
     }
     else if(token == MACRO_LINE)
     {
-      str.AppendInteger32(m_pMsg->LineFromPtr(line_num.marker.marker));
+      str.AppendInteger32(m_pMsg->LineFromPtr(line_num.marker));
       token.type = ArithmeticExpression::TOKEN::TokenType_Numeric;
       token.Set(m_pContext->Strings, str);
       return TRUE;
@@ -2684,10 +2684,10 @@ NOT_INC_P:
   void CodeParser::OutputErrorW(GXUINT code, ...)
   {
     for (auto it = m_aTokens.rbegin(); it != m_aTokens.rend(); ++it) {
-      if(it->marker.pContainer) {
+      if(it->pContainer) {
         va_list arglist;
         va_start(arglist, code);
-        m_pMsg->VarWriteErrorW(TRUE, it->marker.marker, code, arglist);
+        m_pMsg->VarWriteErrorW(TRUE, it->marker, code, arglist);
         va_end(arglist);
         return;
       }
@@ -2698,7 +2698,7 @@ NOT_INC_P:
   {
     va_list  arglist;
     va_start(arglist, code);
-    m_pMsg->VarWriteErrorW(TRUE, token.marker.marker, code, arglist);
+    m_pMsg->VarWriteErrorW(TRUE, token.marker, code, arglist);
     va_end(arglist);
   }
 
@@ -2788,10 +2788,10 @@ NOT_INC_P:
   void CodeParser::MACRO::ClearContainer()
   {
     for(auto it = aTokens.begin(); it != aTokens.end(); ++it) {
-      it->marker.pContainer = NULL;
+      it->pContainer = NULL;
     }
     for(auto it = aFormalParams.begin(); it != aFormalParams.end(); ++it) {
-      it->marker.pContainer = NULL;
+      it->pContainer = NULL;
     }
   }
 
