@@ -117,7 +117,7 @@ namespace clstd {
   public:
     TokensT(T_LPCSTR pStream = NULL, clsize uCountOfChar = 0);
 
-    b32      Initialize        (T_LPCSTR pStream, clsize uCountOfChar);
+    b32      Attach            (T_LPCSTR pStream, clsize uCountOfChar);
     b32      IsEndOfStream     (T_LPCSTR pPointer) const;
     b32      IsHeadOfStream    (T_LPCSTR pPointer) const;
     T_LPCSTR GetStreamPtr      () const;

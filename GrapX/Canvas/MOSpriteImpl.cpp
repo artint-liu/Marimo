@@ -665,6 +665,35 @@ namespace Marimo
     return TRUE;
   }
 
+  MOSprite::TIME_T MOSpriteImpl::GetAnimDuration(GXUINT nIndex, GXUINT nIndexBegin, GXUINT nIndexEnd) const
+  {
+    if(nIndex >= m_loader.aAnims.size()) {
+      return 0;
+    }
+    
+    const ANIMATION& a = m_loader.aAnims[nIndex];
+    const GXUINT count = (a.end - a.begin);
+
+    if(nIndexBegin >= count) {
+      return 0;
+    }
+
+    if(TEST_FLAG(m_loader.dwCapsFlags, SPRITE_DESC::Caps_VariableRate))
+    {
+      // duration 记录的是累计时间
+      if(nIndexEnd >= count) {
+        return m_loader.aAnimUnits[a.end - 1].duration;
+      }
+
+      GXUINT uBegin = nIndexBegin == 0 ? 0 : m_loader.aAnimUnits[a.begin + nIndexBegin - 1].duration;
+      return m_loader.aAnimUnits[a.end - 1].duration - uBegin;
+    }
+    else
+    {
+      return (clMin(nIndexEnd, count) - nIndexBegin) * a.rate;
+    }
+  }
+
   GXSIZE_T MOSpriteImpl::GetAnimFrame(GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const
   {
     if(nIndex >= m_loader.aAnims.size()) {
@@ -954,7 +983,7 @@ namespace Marimo
     if(TEST_FLAG(m_loader.dwCapsFlags, SPRITE_DESC::Caps_VariableRate))
     {
       const ANIM_UNIT* au_begin = &m_loader.aAnimUnits[a.begin];
-      const ANIM_UNIT* au_end   = au_begin + a.end;
+      const ANIM_UNIT* au_end   = au_begin + (a.end - a.begin);
       const ANIM_UNIT* au       = au_begin;
 
       if(au < au_end)

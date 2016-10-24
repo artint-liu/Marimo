@@ -370,29 +370,32 @@ namespace clstd
   {
     // 按照ch分割分解字符串
     template<typename _TCh, class _Fn>
-    void Resolve(const _TCh* str, size_t len, _TCh ch, _Fn fn)
+    size_t Resolve(const _TCh* str, size_t len, _TCh ch, _Fn fn)
     {
-      if( ! len) { return; }
+      if( ! len) { return 0; }
 
       const _TCh* str_begin = str;
       const _TCh* str_end   = str + len;
+      size_t index = 0;
 
       while(str < str_end) {
         if(*str == ch) {
-          fn(str_begin, str - str_begin);
+          fn(index++, str_begin, str - str_begin);
           str_begin = ++str;
           continue;
         }
         str++;
       }
-      fn(str_begin, str - str_begin);
+
+      fn(index++, str_begin, str - str_begin);
+      return index;
     }
 
     // 按照ch分割分解字符串
     template<typename _TStr, class _Fn>
-    void Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn)
+    size_t Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn)
     {
-      Resolve((_TStr::LPCSTR)str, str.GetLength(), ch, fn);
+      return Resolve((_TStr::LPCSTR)str, str.GetLength(), ch, fn);
     }
 
   } // namespace StringUtility

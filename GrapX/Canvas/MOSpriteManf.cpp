@@ -158,13 +158,13 @@ namespace Marimo
           continue;
         }
         else if(attr.key == "rate") {
-          attr.ToArray(',', [&aRates](clstd::StockA::T_LPCSTR str, size_t len){
+          attr.ToArray([&aRates](size_t index, clstd::StockA::T_LPCSTR str, size_t len){
             aRates.push_back(clstd::xtou(10, str, len));
           });
         }
         else if(attr.key == "frames")
         {
-          attr.ToArray(',', [&aFrames](clstd::StockA::T_LPCSTR str, size_t len){
+          attr.ToArray([&aFrames](size_t index, clstd::StockA::T_LPCSTR str, size_t len){
             aFrames.push_back(clstd::xtoi(10, str, len));
           });
         }

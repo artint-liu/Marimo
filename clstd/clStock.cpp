@@ -310,12 +310,13 @@ namespace clstd
     if( ! file.ReadToBuffer(&m_Buffer)) {
       // 如果Load一个空文件，则自己创建一个缓冲
       m_Buffer.Resize(0, FALSE);
-      m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
+      m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
       return TRUE;
     }
 
+    m_nModify++;
     ToNativeCodec();
-    m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
+    m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
     return TRUE;
   }
 
@@ -341,21 +342,23 @@ namespace clstd
   }
 
   _SSP_TEMPL
-  b32 _SSP_IMPL::Attach(BufferBase* pBuffer)
+  b32 _SSP_IMPL::Set(BufferBase* pBuffer)
   {
     m_Buffer.Append(pBuffer->GetPtr(), pBuffer->GetSize());
+    m_nModify++;
     if(ToNativeCodec()) {
-      return m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
+      return m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
     }
     return FALSE;
   }
 
   _SSP_TEMPL 
-  b32 _SSP_IMPL::Attach(T_LPCSTR str, clsize nCount)
+  b32 _SSP_IMPL::Set(T_LPCSTR str, clsize nCount)
   {
     m_Buffer.Append(str, nCount * sizeof(TChar));
+    m_nModify++;
     if(ToNativeCodec()) {
-      return m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
+      return m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
     }
     return FALSE;
   }
@@ -363,13 +366,7 @@ namespace clstd
   _SSP_TEMPL 
     b32 _SSP_IMPL::Close()
   {
-    // 没有释放所有Handle
-    //ASSERT(m_aHandles.size() == 0);
-    //for(auto it = m_aHandles.begin(); it != m_aHandles.end(); ++it) {
-    //  SAFE_DELETE(*it);
-    //}
-    //m_aHandles.clear();
-    //SAFE_DELETE(m_pBuffer);
+    m_nModify++;
     return TRUE;
   }
 
@@ -764,7 +761,7 @@ namespace clstd
     // 初始化Smart对象
     if( ! m_Buffer.GetSize()) {
       m_Buffer.Reserve(1024);
-      m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
+      m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
     }
 
     Section sDesc;
@@ -1181,7 +1178,7 @@ namespace clstd
     m_Buffer.Replace(cbPos, cbReplaced, (CLLPCVOID)szText, cbSize);
 
     // 重新设置SmartStream：指针变化，大小变化都要重新初始化
-    m_SmartStream.Initialize((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
+    m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
 
     // m_SmartStream.Initialize()之后会修正end()，RelocateSection内部断言检查需要准确的end()
     m_nModify++;

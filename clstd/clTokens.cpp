@@ -65,7 +65,7 @@ namespace clstd
   }
 
   _TOEKN_TEMPL
-    b32 _TOKEN_IMPL::Initialize(T_LPCSTR pStream, clsize uCountOfChar)
+    b32 _TOKEN_IMPL::Attach(T_LPCSTR pStream, clsize uCountOfChar)
   {
     m_pBegin = pStream;
     m_pEnd   = pStream + uCountOfChar;

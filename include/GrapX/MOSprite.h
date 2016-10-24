@@ -109,6 +109,7 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL    GetFrame             (GXUINT nIndex, FRAME* pFrame) const);
     GXSTDINTERFACE(GXSIZE_T  GetFrameModule       (GXUINT nIndex, FRAME_UNIT* pFrameModule, GXSIZE_T nCount) const);
     GXSTDINTERFACE(GXBOOL    GetAnimation         (GXUINT nIndex, ANIMATION* pAnimation) const);
+    GXSTDINTERFACE(TIME_T    GetAnimDuration      (GXUINT nIndex, GXUINT nIndexBegin, GXUINT nIndexEnd) const);
     GXSTDINTERFACE(GXSIZE_T  GetAnimFrame         (GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const);
 
     GXSTDINTERFACE(GXBOOL    GetModuleRect        (GXUINT nIndex, GXLPRECT rcSprite) const);  // 获得Module在Image中的位置

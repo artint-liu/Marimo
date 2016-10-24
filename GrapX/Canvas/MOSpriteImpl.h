@@ -162,11 +162,12 @@ namespace Marimo
     GXSIZE_T  GetAnimationCount    () const override;
     GXSIZE_T  GetAnimFrameCount    (GXUINT nIndex) const override;
 
-    GXBOOL    GetModule     (GXUINT nIndex, MODULE* pModule) const override;
-    GXBOOL    GetFrame      (GXUINT nIndex, FRAME* pFrame) const override;
-    GXSIZE_T  GetFrameModule(GXUINT nIndex, FRAME_UNIT* pFrameModule, GXSIZE_T nCount) const override;
-    GXBOOL    GetAnimation  (GXUINT nIndex, ANIMATION* pAnimation) const override;
-    GXSIZE_T  GetAnimFrame  (GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const override;
+    GXBOOL    GetModule       (GXUINT nIndex, MODULE* pModule) const override;
+    GXBOOL    GetFrame        (GXUINT nIndex, FRAME* pFrame) const override;
+    GXSIZE_T  GetFrameModule  (GXUINT nIndex, FRAME_UNIT* pFrameModule, GXSIZE_T nCount) const override;
+    GXBOOL    GetAnimation    (GXUINT nIndex, ANIMATION* pAnimation) const override;
+    TIME_T    GetAnimDuration (GXUINT nIndex, GXUINT nIndexBegin, GXUINT nIndexEnd) const override;
+    GXSIZE_T  GetAnimFrame    (GXUINT nIndex, ANIM_UNIT* pAnimFrame, GXSIZE_T nCount) const override;
 
     GXBOOL    GetModuleRect     (GXUINT nIndex, GXLPRECT rcSprite) const override;  // 获得Module在Image中的位置
     GXBOOL    GetModuleRegion   (GXUINT nIndex, GXLPREGN rgSprite) const override;

@@ -11,9 +11,13 @@
 // 2.结构简单，使用方便。
 // 3.访问内容时不需要分配额外内存，不调用new操作。
 
-#ifndef _SMARTSTREAM_2_H_
-#error Must be include "smartstream.h" first.
-#endif // _SMARTSTREAM_2_H_
+//#ifndef _SMARTSTREAM_2_H_
+//#error Must be include "smartstream.h" first.
+//#endif // _SMARTSTREAM_2_H_
+
+#ifndef _CLSTD_TOKEN_H_
+#error Must be include "clTokens.h" first.
+#endif // _CLSTD_TOKEN_H_
 
 
 namespace clstd
@@ -21,6 +25,8 @@ namespace clstd
   class Buffer;
 
   //////////////////////////////////////////////////////////////////////////
+  // TODO: 增加 StockReaderT 类，作为只读方式加载
+  // TODO: StockT 改善写入时 buffer 内存增长策略
 
   template<class _TStr>
   class StockT
@@ -58,7 +64,7 @@ namespace clstd
       _TStr&  ToString    (_TStr& str, T_LPCSTR szDefault = NULL) const;
 
       template<class _TFn>
-      void ToArray(TChar ch, _TFn fn) const
+      void ToArray(_TFn fn, TChar ch = TChar(',')) const
       {
         _TStr strValue;
         StringUtility::Resolve(ToString(strValue), ch, fn);
@@ -166,8 +172,8 @@ namespace clstd
     b32 LoadW(const wch* lpProfile);
     b32 SaveW(const wch* lpProfile) const;
 
-    b32 Attach(BufferBase* pBuffer); // 内部会复制一份
-    b32 Attach(T_LPCSTR str, clsize nCount); // 内部会复制一份
+    b32 Set(BufferBase* pBuffer);         // 内部会复制一份
+    b32 Set(T_LPCSTR str, clsize nCount); // 内部会复制一份
 
     b32 Close();
 

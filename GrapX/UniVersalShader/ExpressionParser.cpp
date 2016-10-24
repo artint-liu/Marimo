@@ -158,7 +158,7 @@ namespace UVShader
       }
       m_pMsg->GenerateCurLines(szExpression, nSize);
     }
-    return CTokens::Initialize(szExpression, nSize);
+    return CTokens::Attach(szExpression, nSize);
   }
 
   //////////////////////////////////////////////////////////////////////////
