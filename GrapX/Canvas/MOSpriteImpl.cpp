@@ -685,8 +685,9 @@ namespace Marimo
         return m_loader.aAnimUnits[a.end - 1].duration;
       }
 
-      GXUINT uBegin = nIndexBegin == 0 ? 0 : m_loader.aAnimUnits[a.begin + nIndexBegin - 1].duration;
-      return m_loader.aAnimUnits[a.end - 1].duration - uBegin;
+      const GXUINT uBegin = (nIndexBegin == 0) ? 0 : m_loader.aAnimUnits[a.begin + nIndexBegin - 1].duration;
+      const GXUINT uEnd   = (nIndexEnd   == 0) ? 0 : m_loader.aAnimUnits[a.begin + nIndexEnd - 1].duration;
+      return (uEnd - uBegin);
     }
     else
     {

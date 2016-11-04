@@ -15,8 +15,8 @@ namespace clstd
   //
   // 显式声明模板类
   //
-  template class StockT<clStringA>;
-  template class StockT<clStringW>;
+  // template class StockT<clStringA>;
+  // template class StockT<clStringW>;
 
 #define _SSP_TEMPL template<class _TStr>
 #define _SSP_IMPL StockT<_TStr>
@@ -188,7 +188,7 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    _TStr& _SSP_IMPL::ATTRIBUTE::ToString(_TStr& str, T_LPCSTR szDefault = NULL) const
+    _TStr& _SSP_IMPL::ATTRIBUTE::ToString(_TStr& str, T_LPCSTR szDefault) const
   {
     if(value.length) {
       return SmartStreamUtility::TranslateQuotation(value, str);
@@ -1294,5 +1294,8 @@ namespace clstd
       clear();
     }
   }
+
+  template class StockT<clStringA>;
+  template class StockT<clStringW>;
 
 } // namespace clstd

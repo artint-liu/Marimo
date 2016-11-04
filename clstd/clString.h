@@ -395,7 +395,7 @@ namespace clstd
     template<typename _TStr, class _Fn>
     size_t Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn)
     {
-      return Resolve((_TStr::LPCSTR)str, str.GetLength(), ch, fn);
+      return Resolve((typename _TStr::LPCSTR)str, str.GetLength(), ch, fn);
     }
 
   } // namespace StringUtility

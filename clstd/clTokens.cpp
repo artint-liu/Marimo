@@ -27,8 +27,8 @@ namespace clstd
 //
 // 显式声明模板类
 //
-  template class TokensT<clStringA>;
-  template class TokensT<clStringW>;
+  //template class TokensT<clStringA>;
+  //template class TokensT<clStringW>;
 
   namespace TokensUtility {
     template b32 IsHeadOfLine<clStringA>(const TokensT<clStringA>* pToken, clStringA::LPCSTR pChar);
@@ -209,7 +209,7 @@ namespace clstd
     return next(itBegin); // 这里这么写是为了保证begin也能触发特殊符号回调函数
   }
 
-#if defined(__clang__)
+#if defined(__clang__) || defined(__GNUC__)
   _TOEKN_TEMPL 
     typename _TOKEN_IMPL::const_iterator& _TOKEN_IMPL::end() const
 #else
@@ -437,7 +437,7 @@ namespace clstd
   }
 
 
-#if defined(__clang__)
+#if defined(__clang__) || defined(__GNUC__)
   _TOEKN_TEMPL
     typename _TOKEN_IMPL::const_iterator _TOKEN_IMPL::find(const iterator& itBegin, int nCount, ...) const
 #else
@@ -453,7 +453,7 @@ namespace clstd
       va_start(arglist, nCount);
       for(int i = 0; i < nCount; i++)
       {
-        if(it == *(T_LPCSTR*)arglist)
+        if(it == va_arg(arglist, T_LPCSTR)) // *(T_LPCSTR*)arglist)
         {
           va_end(arglist);
           return it;
@@ -493,6 +493,9 @@ namespace clstd
     }
     return false;
   }
+
+  template class TokensT<clStringA>;
+  template class TokensT<clStringW>;
 
   //////////////////////////////////////////////////////////////////////////
 

@@ -542,7 +542,7 @@ namespace SmartStreamUtility
   _TString& MakeQuotation(_TString& str, typename _TString::LPCSTR szText)
   {
     // 极端情况下所有字符都变成"转义符+字符"形式，再加上首尾引号
-    clsize length = clstd::strlenT<_TString::TChar>(szText);
+    clsize length = clstd::strlenT<typename _TString::TChar>(szText);
     typename _TString::TChar* pTemp = str.GetBuffer(length * 2 + 2 + 1);
     size_t n = 1;
     pTemp[0] = '\"';

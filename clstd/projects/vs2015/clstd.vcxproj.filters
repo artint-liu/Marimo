@@ -71,9 +71,6 @@
     <ClCompile Include="..\..\PrimeNum.cpp" />
     <ClCompile Include="..\..\clImage.cpp" />
     <ClCompile Include="..\..\clMesh.cpp" />
-    <ClCompile Include="..\..\Smart\SmartStock.cpp">
-      <Filter>Smart</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\thread\clMessageThread.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
@@ -88,6 +85,7 @@
       <Filter>Thread</Filter>
     </ClCompile>
     <ClCompile Include="..\..\clGeometry2D.cpp" />
+    <ClCompile Include="..\..\clStock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clBuffer.H" />
@@ -147,9 +145,6 @@
     <ClInclude Include="..\..\clPathFile.h" />
     <ClInclude Include="..\..\clImage.h" />
     <ClInclude Include="..\..\clMesh.h" />
-    <ClInclude Include="..\..\Smart\SmartStock.h">
-      <Filter>Smart</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\clTextLines.h" />
     <ClInclude Include="..\..\clStringSet.h" />
     <ClInclude Include="..\..\clMathExpressionParser.h" />
@@ -167,6 +162,7 @@
       <Filter>Thread</Filter>
     </ClInclude>
     <ClInclude Include="..\..\clGeometry2D.h" />
+    <ClInclude Include="..\..\clStock.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

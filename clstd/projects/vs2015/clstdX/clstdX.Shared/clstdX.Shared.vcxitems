@@ -37,7 +37,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\smart\Stock.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketClient.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketServer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\third_party\crypt\crypt_arc4.cpp" />
@@ -78,7 +77,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\smart\Stock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocket.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketClient.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Socket\clSocketServer.h" />
