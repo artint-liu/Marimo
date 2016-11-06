@@ -135,18 +135,39 @@ namespace DlgXM
     typedef clStockW::ATTRIBUTE ATTRIBUTE;
     typedef clvector<GXTBBUTTON> TBButtonArray;
   private:
+    GXHINSTANCE m_hInstance;
+    GXLPCWSTR   m_szFilename;
+
+    DLGBTNSPRITE     m_sDlgTemplateBtnSprite;
+    DLGSLIDERSPRITE  m_sDlgTemplateSldSprite;
+
     //GXHRESULT LoadLayoutBinaryItem(HANDLE hHandle, GXUI::DlgLayout::BINARYITEM* pBinaryItemDesc);
     //GXHRESULT LoadLayoutBinary(HANDLE hHandle, GXUI::DlgLayout::BINARY* pBinaryDesc);
     GXHRESULT LoadLayoutPanel     (clStockW::Section hHandle, GXUI::DLGPANEL* pPanel);
     GXHRESULT LoadTBButtonItem    (clStockW::Section hHandle, GXTBBUTTON& sTBButton);
   public:
+    DlgSmartFile(GXHINSTANCE hInstance, GXLPCWSTR szFilename);
     GXHRESULT GetBasicParam       (clStockW::Section hHandle, DLGBASICPARAMW* pwbp, GXDefinitionArrayW* pDefinitions = NULL);
     GXHRESULT GetFontParam        (clStockW::Section hHandle, DLGFONTPARAMW* pwfp);
     GXHRESULT LoadBtnSpriteCfg    (clStockW::Section hHandle, GXLPCWSTR szSect, DLGBTNSPRITE* pBtnSprite);  // hHandle 是父句柄
     GXHRESULT LoadSliderSpriteCfg (clStockW::Section hHandle, GXLPCWSTR szSect, DLGSLIDERSPRITE* pSliderSprite);  // hHandle 是父句柄
     GXHRESULT LoadLayout          (clStockW::Section hHandle, GXUI::DLGPANEL* pPanel);
     GXHRESULT LoadTBButton        (clStockW::Section hHandle, TBButtonArray& aTBButton);
+
+    void LoadTemplate(GXLPSTATION lpStation, const Section& sTemplateSect);
+    GXHWND CreateCtrl(const clStringW& strClassName, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp);
+
+    inline GXHINSTANCE GetInstance() const;
+    inline GXLPCWSTR GetFilename() const;
+    const DLGBTNSPRITE&     GetButtonTemplate() const;
+    const DLGSLIDERSPRITE&  GetSliderTemplate() const;
   };
+
+  DlgSmartFile::DlgSmartFile(GXHINSTANCE hInstance, GXLPCWSTR szFilename)
+    : m_hInstance(hInstance)
+    , m_szFilename(szFilename)
+  {
+  }
 
   GXHRESULT DlgSmartFile::GetBasicParam(StockW::Section hHandle, DLGBASICPARAMW* pwbp, GXDefinitionArrayW* pDefinitions)
   {
@@ -449,6 +470,44 @@ namespace DlgXM
     }
     return GX_OK;
   }
+
+  void DlgSmartFile::LoadTemplate(GXLPSTATION lpStation , const Section& sTemplateSect)
+  {
+    Section hButton = sTemplateSect.Open(L"Button");
+    if(hButton)
+    {
+      LoadBtnSpriteCfg(hButton, L"Sprite", &m_sDlgTemplateBtnSprite);
+      m_sDlgTemplateBtnSprite.strResource = lpStation->ConvertAbsPathW(m_sDlgTemplateBtnSprite.strResource);
+    }
+
+    Section hSlider = sTemplateSect.Open(L"Slide");
+    if(hSlider)
+    {
+      LoadSliderSpriteCfg(hSlider, L"Sprite", &m_sDlgTemplateSldSprite);
+      m_sDlgTemplateSldSprite.strResource = lpStation->ConvertAbsPathW(m_sDlgTemplateSldSprite.strResource);
+    }
+  }
+
+  GXHINSTANCE DlgSmartFile::GetInstance() const
+  {
+    return m_hInstance;
+  }
+
+  GXLPCWSTR DlgSmartFile::GetFilename() const
+  {
+    return m_szFilename;
+  }
+
+  const DLGBTNSPRITE& DlgSmartFile::GetButtonTemplate() const
+  {
+    return m_sDlgTemplateBtnSprite;
+  }
+
+  const DLGSLIDERSPRITE& DlgSmartFile::GetSliderTemplate() const
+  {
+    return m_sDlgTemplateSldSprite;
+  }
+
 } // namespace DlgXM
 
 GXHWND GXDLLAPI gxCreateDialogParamW(
@@ -721,7 +780,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
 
 typedef DlgXM::DlgSmartFile::Section Section;
 
-GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
 {
   GXHWND hItemWnd = NULL;
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -737,7 +796,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
 
   clstd::TranslateEscapeCharacter(dbpItem.strCaption);
 
-  GXUI::StaticLabel* pLabel = (GXUI::StaticLabel*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Type_Label, dbpItem.strName, &dbpItem, &aDefinitions);
+  GXUI::StaticLabel* pLabel = (GXUI::StaticLabel*)GXUI::Static::Create(file.GetInstance(), hDlgWnd, GXUI::Static::Type_Label, dbpItem.strName, &dbpItem, &aDefinitions);
   hItemWnd = pLabel->Get();
   //gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
@@ -758,7 +817,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -766,7 +825,7 @@ GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, Section hDlgItem, 
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  GXUI::StaticRectangle* pRectangle = (GXUI::StaticRectangle*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Type_Rectangle, dbpItem.strName, &dbpItem, &aDefinitions);
+  GXUI::StaticRectangle* pRectangle = (GXUI::StaticRectangle*)GXUI::Static::Create(file.GetInstance(), hDlgWnd, GXUI::Static::Type_Rectangle, dbpItem.strName, &dbpItem, &aDefinitions);
   hItemWnd = pRectangle->Get();
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
@@ -786,7 +845,7 @@ GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, Section hDlgItem, 
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
+GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -797,7 +856,7 @@ GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
     dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"GXUISS_", DlgXM::CMC_StaticLabel);
   }
 
-  GXUI::StaticSprite* pSprite = (GXUI::StaticSprite*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Type_Sprite, dbpItem.strName, &dbpItem, &aDefinitions);
+  GXUI::StaticSprite* pSprite = (GXUI::StaticSprite*)GXUI::Static::Create(file.GetInstance(), hDlgWnd, GXUI::Static::Type_Sprite, dbpItem.strName, &dbpItem, &aDefinitions);
   hItemWnd = pSprite->Get();
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
@@ -817,7 +876,7 @@ GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGBTNSPRITE sDlgTemplateBtnSprite, DlgXM::DLGFONTPARAMW dfp ) 
+GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, const DlgXM::DLGBTNSPRITE& sDlgTemplateBtnSprite, DlgXM::DLGFONTPARAMW dfp ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -830,7 +889,7 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
     dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUIBS_", DlgXM::CMC_ButtonStyle);
   }
 
-  GXUI::Button* pButton = GXUI::Button::Create(hInstance, hDlgWnd, dbpItem.strCaption, dbpItem.dwStyle, dbpItem.strName, &dbpItem.regn, &aDefinitions);
+  GXUI::Button* pButton = GXUI::Button::Create(file.GetInstance(), hDlgWnd, dbpItem.strCaption, dbpItem.dwStyle, dbpItem.strName, &dbpItem.regn, &aDefinitions);
   hItemWnd = pButton->Get();
 
   // 载入Sprite配置
@@ -850,7 +909,7 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_WETree( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
+GXHWND CreateDialogItem_WETree( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -859,11 +918,11 @@ GXHWND CreateDialogItem_WETree( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
 
   hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWE_TREEVIEWW, dbpItem.strCaption, 
     dbpItem.dwStyle | GXWS_VISIBLE | GXWS_CHILD, 
-    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, hInstance, NULL);
+    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, file.GetInstance(), NULL);
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_WEListView( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
+GXHWND CreateDialogItem_WEListView( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -871,11 +930,11 @@ GXHWND CreateDialogItem_WEListView( DlgXM::DlgSmartFile &file, Section hDlgItem,
 
   hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWE_LISTVIEWW, dbpItem.strCaption, 
     dbpItem.dwStyle | GXWS_VISIBLE | GXWS_CHILD, 
-    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, hInstance, NULL);
+    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, file.GetInstance(), NULL);
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance ) 
+GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -888,7 +947,7 @@ GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
 
   hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXWE_EDITW_1_3_30, dbpItem.strCaption, 
     dbpItem.dwStyle | GXWS_VISIBLE | GXWS_CHILD, 
-    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, hInstance, NULL);
+    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, file.GetInstance(), NULL);
 
   //GXUI::StaticRectangle* pEdit = (GXUI::StaticRectangle*)GXUI::Static::Create(hInstance, hDlgWnd, GXUI::Static::Rectangle, dbpItem.strName, &dbpItem);
   //hItemWnd = pEdit->Get();
@@ -912,31 +971,31 @@ GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_PropSheet( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
+GXHWND CreateDialogItem_PropSheet( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
   file.GetBasicParam(hDlgItem, &dbpItem);
 
   auto pForm = GXUIEXT::PropertySheet::Form::Create(
-    hInstance, hDlgWnd, dbpItem.strName, &dbpItem, NULL);
+    file.GetInstance(), hDlgWnd, dbpItem.strName, &dbpItem, NULL);
   hItemWnd = pForm->Get();
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_PropList( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd ) 
+GXHWND CreateDialogItem_PropList( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
   file.GetBasicParam(hDlgItem, &dbpItem);
 
   auto pForm = GXUIEXT::PropertyList::Form::Create(
-    hInstance, hDlgWnd, dbpItem.strName, &dbpItem, NULL);
+    file.GetInstance(), hDlgWnd, dbpItem.strName, &dbpItem, NULL);
   hItemWnd = pForm->Get();
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -949,7 +1008,7 @@ GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, Section hDlgItem, Dl
 
   dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"TBSTYLE_", DlgXM::CMC_ToolbarStyle);
 
-  GXUI::Toolbar* pToolbar = GXUI::Toolbar::Create(hInstance, hDlgWnd, &dbpItem, &aDefinitions);
+  GXUI::Toolbar* pToolbar = GXUI::Toolbar::Create(file.GetInstance(), hDlgWnd, &dbpItem, &aDefinitions);
   if(pToolbar) {
     for(TBButtonArray::iterator itTBBtn = aTBButtons.begin();
       itTBBtn != aTBButtons.end(); ++itTBBtn)
@@ -978,7 +1037,7 @@ GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, Section hDlgItem, Dl
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGSLIDERSPRITE sDlgTemplateSldSprite ) 
+GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGSLIDERSPRITE sDlgTemplateSldSprite ) 
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -986,7 +1045,7 @@ GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
   dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"GXUISLDS_", DlgXM::CMC_SliderStyle);
-  GXUI::Slider* pSlider = GXUI::Slider::Create(hInstance, hDlgWnd, &dbpItem, &aDefinitions);
+  GXUI::Slider* pSlider = GXUI::Slider::Create(file.GetInstance(), hDlgWnd, &dbpItem, &aDefinitions);
   hItemWnd = pSlider->Get();
 
   // 载入Sprite配置
@@ -997,7 +1056,7 @@ GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, GXHINSTANCE hInstance, DlgXM::DLGFONTPARAMW dfp ) 
+GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW dfp ) 
 {
   GXHWND hItemWnd;
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -1012,7 +1071,7 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM
 
   hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXUICLASSNAME_EDIT, dbpItem.strCaption, 
     dbpItem.dwStyle | GXWS_VISIBLE | GXWS_CHILD, 
-    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, hInstance, NULL);
+    dbpItem.regn.left, dbpItem.regn.top, dbpItem.regn.width, dbpItem.regn.height, hDlgWnd, NULL, file.GetInstance(), NULL);
 
   for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
     it != aDefinitions.end(); ++it)
@@ -1043,7 +1102,7 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM
   return hItemWnd;
 }
 
-GXHWND CreateDialogItem_List( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, const clStringW& strItemTemplate, GXHINSTANCE hInstance, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp ) 
+GXHWND CreateDialogItem_List( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, const clStringW& strItemTemplate, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp )
 {
   GXHWND hItemWnd = NULL;        
   DlgXM::DLGFONTPARAMW  dfpItem;
@@ -1053,8 +1112,8 @@ GXHWND CreateDialogItem_List( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM
   dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"GXLBS_", DlgXM::CMC_StdListBox);
 
   GXUI::List* pList = strItemTemplate.IsEmpty()
-     ? GXUI::List::Create(hInstance, hDlgWnd, &dbpItem, &aDefinitions)
-     : GXUI::List::CreateRich(hInstance, hDlgWnd, &dbpItem, &aDefinitions);
+     ? GXUI::List::Create(file.GetInstance(), hDlgWnd, &dbpItem, &aDefinitions)
+     : GXUI::List::CreateRich(file.GetInstance(), hDlgWnd, &dbpItem, &aDefinitions);
 
   hItemWnd = pList->Get();
 
@@ -1071,8 +1130,87 @@ struct RICHLIST_PARAM
   GXHWND  hWnd;
   clStringW strItemTemplate;
 };
-
 typedef cllist<RICHLIST_PARAM> RichListParams;
+
+GXHWND CreateDialogItem_RichList(DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp)
+{
+  RICHLIST_PARAM sParam;
+  sParam.strItemTemplate = hDlgItem.GetKeyAsString(L"ItemTemplate", L"");
+  if(sParam.strItemTemplate.IsNotEmpty() && clpathfile::IsFileSpecW(sParam.strItemTemplate)) {
+    sParam.strItemTemplate = clStringW(file.GetFilename()) + L":" + sParam.strItemTemplate;
+  }
+
+  GXHWND hItemWnd = CreateDialogItem_List(file, hDlgItem, dbpItem, sParam.strItemTemplate, hDlgWnd, dfp);
+
+  if(sParam.strItemTemplate.IsNotEmpty()) {
+    gxSendMessageW(hItemWnd, GXLB_SETITEMTEMPLATE, NULL, (GXLPARAM)(GXLPCWSTR)sParam.strItemTemplate);
+  }
+
+  return hItemWnd;
+}
+
+//////////////////////////////////////////////////////////////////////////
+namespace DlgXM
+{
+  GXHWND DlgSmartFile::CreateCtrl(const clStringW& strClassName, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp)
+  {
+    GXHWND hItemWnd;
+    if(strClassName == L"Label") // GXUI Label
+    {
+      hItemWnd = CreateDialogItem_Label(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
+    }
+    else if(strClassName == L"Rectangle") // GXUI Rectangle
+    {
+      hItemWnd = CreateDialogItem_Rectangle(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
+    }
+    else if(strClassName == L"Sprite") // GXUI Sprite
+    {
+      hItemWnd = CreateDialogItem_Sprite(*this, hDlgItem, dbpItem, hDlgWnd);
+    }
+    else if(strClassName == L"Button") // GXUI Button
+    {
+      hItemWnd = CreateDialogItem_Button(*this, hDlgItem, dbpItem, hDlgWnd, GetButtonTemplate(), dfp);
+    }
+    else if(strClassName == L"WETree") // Wine Tree
+    {
+      hItemWnd = CreateDialogItem_WETree(*this, hDlgItem, dbpItem, hDlgWnd);
+    }
+    else if(strClassName == L"WEListView")
+    {
+      hItemWnd = CreateDialogItem_WEListView(*this, hDlgItem, dbpItem, hDlgWnd);
+    }
+    else if(strClassName == L"WEEdit") // Wine Edit
+    {
+      hItemWnd = CreateDialogItem_WEEdit(*this, hDlgItem, dbpItem, hDlgWnd);
+    }
+    else if(strClassName == L"Edit") // GXUI Edit
+    {
+      hItemWnd = CreateDialogItem_Edit(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
+    }
+    else if(strClassName == L"PropSheet") // Property Sheet
+    {
+      hItemWnd = CreateDialogItem_PropSheet(*this, hDlgItem, dbpItem, hDlgWnd);
+    }
+    else if(strClassName == L"PropList") // PropList
+    {
+      hItemWnd = CreateDialogItem_PropList(*this, hDlgItem, dbpItem, hDlgWnd);
+    }
+    else if(strClassName == L"Toolbar")
+    {
+      hItemWnd = CreateDialogItem_Toolbar(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
+    }
+    else if(strClassName == L"List") // GXUI List Box
+    {
+      hItemWnd = CreateDialogItem_RichList(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
+    }
+    else if(strClassName == L"Slide")
+    {
+      hItemWnd = CreateDialogItem_Slide(*this, hDlgItem, dbpItem, hDlgWnd, GetSliderTemplate());
+    }
+    return hItemWnd;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 GXHWND gxIntCreateDialogFromFileW(
@@ -1091,7 +1229,7 @@ GXHWND gxIntCreateDialogFromFileW(
 
   GXLPCWSTR szDlgFilename = lpFilename[0] == '@' ? &lpFilename[1] : lpFilename;
 
-  DlgXM::DlgSmartFile file;
+  DlgXM::DlgSmartFile file(hInstance, lpFilename);
   Section hDlgSect;
   Section hDlgItem;
   clStringW strDialogSection = clStringW(L"Dialogs/") + lpDlgName;
@@ -1116,8 +1254,8 @@ GXHWND gxIntCreateDialogFromFileW(
   GXUI::DLGPANEL          DlgPanel;
   DlgXM::DLGBASICPARAMW   wbp;
   DlgXM::DLGFONTPARAMW    dfp;
-  DlgXM::DLGBTNSPRITE     sDlgTemplateBtnSprite;
-  DlgXM::DLGSLIDERSPRITE  sDlgTemplateSldSprite;
+  //DlgXM::DLGBTNSPRITE     sDlgTemplateBtnSprite;
+  //DlgXM::DLGSLIDERSPRITE  sDlgTemplateSldSprite;
   file.GetBasicParam(hDlgSect, &wbp);
   file.GetFontParam(hDlgSect, &dfp);
   
@@ -1178,22 +1316,7 @@ GXHWND gxIntCreateDialogFromFileW(
   hTemplate = file.Open(L"Template");
   if(hTemplate)
   {
-    Section hButton = hTemplate.Open(L"Button");
-    if(hButton)
-    {
-      file.LoadBtnSpriteCfg(hButton, L"Sprite", &sDlgTemplateBtnSprite);
-      sDlgTemplateBtnSprite.strResource = lpStation->ConvertAbsPathW(sDlgTemplateBtnSprite.strResource);
-      //file.FindClose(hButton);
-    }
-
-    Section hSlider = hTemplate.Open(L"Slide");
-    if(hSlider)
-    {
-      file.LoadSliderSpriteCfg(hSlider, L"Sprite", &sDlgTemplateSldSprite);
-      sDlgTemplateSldSprite.strResource = lpStation->ConvertAbsPathW(sDlgTemplateSldSprite.strResource);
-      //file.FindClose(hSlider);
-    }
-
+    file.LoadTemplate(lpStation, hTemplate);
     //file.FindClose(hTemplate);
   }
 
@@ -1202,91 +1325,17 @@ GXHWND gxIntCreateDialogFromFileW(
 
   if(hDlgItem)
   {
-    do 
-    {
+    do {
       DlgXM::DLGBASICPARAMW dbpItem;
       GXHWND hItemWnd = NULL;
 
       clStringW strItemName = hDlgItem.SectionName();
 
       //////////////////////////////////////////////////////////////////////////
-      if(strItemName == L"Label") // GXUI Label
+      if(strItemName == "Item")
       {
-        hItemWnd = CreateDialogItem_Label(file, hDlgItem, dbpItem, hInstance, hDlgWnd, dfp);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"Rectangle") // GXUI Rectangle
-      {
-        hItemWnd = CreateDialogItem_Rectangle(file, hDlgItem, dbpItem, hInstance, hDlgWnd, dfp);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"Sprite") // GXUI Sprite
-      {
-        hItemWnd = CreateDialogItem_Sprite(file, hDlgItem, dbpItem, hInstance, hDlgWnd);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"Button") // GXUI Button
-      {
-        hItemWnd = CreateDialogItem_Button(file, hDlgItem, dbpItem, hInstance, hDlgWnd, sDlgTemplateBtnSprite, dfp);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"WETree") // Wine Tree
-      {
-        hItemWnd = CreateDialogItem_WETree(file, hDlgItem, dbpItem, hDlgWnd, hInstance);
-      }
-      else if(strItemName == L"WEListView")
-      {
-        hItemWnd = CreateDialogItem_WEListView(file, hDlgItem, dbpItem, hDlgWnd, hInstance);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      
-      else if(strItemName == L"WEEdit") // Wine Edit
-      {
-        hItemWnd = CreateDialogItem_WEEdit(file, hDlgItem, dbpItem, hDlgWnd, hInstance);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      
-      else if(strItemName == L"Edit") // GXUI Edit
-      {
-        hItemWnd = CreateDialogItem_Edit(file, hDlgItem, dbpItem, hDlgWnd, hInstance, dfp);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      
-      else if(strItemName == L"PropSheet") // Property Sheet
-      {
-        hItemWnd = CreateDialogItem_PropSheet(file, hDlgItem, dbpItem, hInstance, hDlgWnd);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"PropList") // PropList
-      {
-        hItemWnd = CreateDialogItem_PropList(file, hDlgItem, dbpItem, hInstance, hDlgWnd);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"Toolbar")
-      {
-        hItemWnd = CreateDialogItem_Toolbar(file, hDlgItem, dbpItem, hInstance, hDlgWnd, dfp);
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"List") // GXUI List Box
-      {
-        RICHLIST_PARAM sParam;
-        sParam.strItemTemplate = hDlgItem.GetKeyAsString(L"ItemTemplate", L"");
-        if(sParam.strItemTemplate.IsNotEmpty() && clpathfile::IsFileSpecW(sParam.strItemTemplate)) {
-          sParam.strItemTemplate = clStringW(lpFilename) + L":" + sParam.strItemTemplate;
-        }
-
-        hItemWnd = CreateDialogItem_List(file, hDlgItem, dbpItem, sParam.strItemTemplate, hInstance, hDlgWnd, dfp);
-
-        if(sParam.strItemTemplate.IsNotEmpty()) {
-          gxSendMessageW(hItemWnd, GXLB_SETITEMTEMPLATE, NULL, (GXLPARAM)(GXLPCWSTR)sParam.strItemTemplate);
-          //sParam.hWnd = hItemWnd;
-          //sRichListParams.push_back(sParam);
-        }
-      }
-      //////////////////////////////////////////////////////////////////////////
-      else if(strItemName == L"Slide")
-      {
-        hItemWnd = CreateDialogItem_Slide(file, hDlgItem, dbpItem, hInstance, hDlgWnd, sDlgTemplateSldSprite);
+        clStringW strClassName = hDlgItem[L"Class"].ToString();
+        hItemWnd = file.CreateCtrl(strClassName, hDlgItem, dbpItem, hDlgWnd, dfp);
       }
       //////////////////////////////////////////////////////////////////////////
       // Layout
@@ -1302,6 +1351,9 @@ GXHWND gxIntCreateDialogFromFileW(
         }
         file.LoadLayout(hDlgItem, &DlgPanel);
         continue; // 跳过 AddItem 语句
+      }
+      else {
+        hItemWnd = file.CreateCtrl(strItemName, hDlgItem, dbpItem, hDlgWnd, dfp);
       }
 
       pDlgLog->AddItem(dbpItem.strName, hItemWnd);
