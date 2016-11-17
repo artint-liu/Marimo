@@ -73,6 +73,95 @@ namespace clstd
 
   //////////////////////////////////////////////////////////////////////////
   //
+  // 局部 Buffer
+  // 这个类在定义时会带有附带一段缓冲区，在定义局部实体对象时如果使用的缓冲不大就
+  // 可以直接使用这段堆栈上的缓冲区，避免了不必要的内存分配
+  // 如果定义为指针，在使用缓冲尺寸不大的情况下也会减少一次内存分配
+  //
+  template<size_t _count>
+  class LocalBuffer : public BufferBase
+  {
+    typedef CLBYTE _Ty;
+    clsize m_nCapacity;  // 容量大小
+    _Ty m_data[_count];
+
+  public:
+    LocalBuffer()
+      : BufferBase(m_data, 0)
+      , m_nCapacity(sizeof(_Ty) * _count)
+    {}
+
+    virtual ~LocalBuffer()
+    {
+      if( ! IsLocalPtr() && m_lpBuffer) {
+        delete[] m_lpBuffer;
+      }
+      m_uSize = 0;
+    }
+
+    b32 IsLocalPtr() const
+    {
+      return (size_t)m_data == (size_t)m_lpBuffer;
+    }
+
+    b32 Reserve(clsize uNewCapacity) // 扩充容量（而不是尺寸）
+    {
+      ASSERT(m_uSize <= m_nCapacity); // 数据尺寸一定小于缓冲区容量
+      if(uNewCapacity <= m_nCapacity) {
+        return FALSE;
+      }
+
+      if(IsLocalPtr()) {
+        ASSERT((sizeof(_Ty) * _count) == m_nCapacity); // 局部指针容量一定与局部缓冲的容量相等
+
+        m_lpBuffer = new CLBYTE[uNewCapacity];
+        memcpy(m_lpBuffer, m_data, m_uSize);
+      }
+      else {
+        CLBYTE* pNewBuffer = new CLBYTE[uNewCapacity];
+        memcpy(pNewBuffer, m_lpBuffer, m_uSize);
+        delete[] m_lpBuffer;
+        m_lpBuffer = pNewBuffer;
+      }
+      m_nCapacity = uNewCapacity;
+      return TRUE;
+    }
+
+    b32 Resize(clsize dwSize, b32 bZeroInit)
+    {
+      ASSERT(m_uSize <= m_nCapacity); // 数据尺寸一定小于缓冲区容量
+
+      if(dwSize > m_uSize)
+      {
+        if(dwSize > m_nCapacity) {
+          // 对齐到n倍局部缓冲尺寸
+          Reserve((dwSize / (sizeof(_Ty) * _count) + 1) * (sizeof(_Ty) * _count));
+        }
+
+        ASSERT(m_uSize <= dwSize && dwSize <= m_nCapacity);
+
+        if(bZeroInit) {
+          memset((CLBYTE*)m_lpBuffer + m_uSize, 0, dwSize - m_uSize);
+        }
+      }
+
+      m_uSize = dwSize;
+      return TRUE;
+    }
+
+    LocalBuffer& Append(CLLPCVOID lpData, clsize dwSize)
+    {
+      const clsize dwTail = m_uSize;
+      Resize(m_uSize + dwSize, FALSE);
+      memcpy(m_lpBuffer + dwTail, lpData, dwSize);
+      return *this;
+    }
+
+
+  };
+
+  //////////////////////////////////////////////////////////////////////////
+  //
   // 通用 Buffer
   //
   class Buffer : public BufferBase
@@ -89,7 +178,7 @@ namespace clstd
     CLLPVOID  GetPtr    () const;
     clsize    GetSize   () const;
     //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
-    b32       Append    (CLLPCVOID lpData, clsize dwSize);
+    Buffer&   Append    (CLLPCVOID lpData, clsize dwSize);
     b32       Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
     b32       Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
   };

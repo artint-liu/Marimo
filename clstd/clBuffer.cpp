@@ -153,12 +153,12 @@ namespace clstd
   //  return TRUE;
   //}
 
-  b32 Buffer::Append(CLLPCVOID lpData, clsize dwSize)
+  Buffer& Buffer::Append(CLLPCVOID lpData, clsize dwSize)
   {
-    clsize dwTail = m_uSize;
+    const clsize dwTail = m_uSize;
     Resize(m_uSize + dwSize, FALSE);
     memcpy(m_lpBuffer + dwTail, lpData, dwSize);
-    return TRUE;
+    return *this;
   }
 
   b32 Buffer::Replace(clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize)

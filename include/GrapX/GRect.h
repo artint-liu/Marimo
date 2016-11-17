@@ -63,6 +63,33 @@ namespace Marimo
   
   //////////////////////////////////////////////////////////////////////////
 
+  template<typename _Ty>
+  struct TRANNUMERIC
+  {
+    _Ty operator()(GXLPCWSTR str, GXSIZE_T len) const;
+    _Ty operator()(GXLPCSTR str, GXSIZE_T len) const;
+  };
+
+  template<> struct TRANNUMERIC<int>
+  {
+    int operator()(GXLPCWSTR str, GXSIZE_T len) const   { return clstd::xtoi(10, str, len); }
+    int operator()(GXLPCSTR str, GXSIZE_T len) const    { return clstd::xtoi(10, str, len); }
+  };
+
+  template<> struct TRANNUMERIC<long>
+  {
+    long operator()(GXLPCWSTR str, GXSIZE_T len) const  { return clstd::xtoi(10, str, len); }
+    long operator()(GXLPCSTR str, GXSIZE_T len) const   { return clstd::xtoi(10, str, len); }
+  };
+
+  template<> struct TRANNUMERIC<i64>
+  {
+    i64 operator()(GXLPCWSTR str, GXSIZE_T len) const  { return clstd::xtoi64(10, str, len); }
+    i64 operator()(GXLPCSTR str, GXSIZE_T len) const   { return clstd::xtoi64(10, str, len); }
+  };
+
+  //////////////////////////////////////////////////////////////////////////
+
   template<typename _T>
   struct RectT
   {
@@ -226,6 +253,21 @@ namespace Marimo
       return *this;
     }
 
+    RectT& Parse(GXLPCWSTR str, GXSIZE_T len = -1, GXWCHAR ch = L',')
+    {
+      if(len == -1) {
+        len = clstd::strlenT(str);
+      }
+
+      TRANNUMERIC<typename _T> t;
+      clstd::StringUtility::Resolve(str, len, ch, [&t, this](GXSIZE_T i, GXLPCWSTR szText, GXSIZE_T sub_len){
+        if(i < 4)
+        {
+          ((_T*)this)[i] = t(szText, sub_len);
+        }
+      });
+      return *this;
+    }
   };
 
   //////////////////////////////////////////////////////////////////////////

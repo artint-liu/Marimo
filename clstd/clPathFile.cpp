@@ -1,5 +1,7 @@
 ﻿#if defined(_WINDOWS) || defined(_WIN32)
 #include <Windows.h>
+#include <Shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
 #endif // defined(_WINDOWS) || defined(_WIN32)
 
 #include "clstd.h"
@@ -701,6 +703,7 @@ namespace clpathfile
     return MatchSpecExT(szFile, szSpec, dwFlags);
   }
 
+//////////////////////////////////////////////////////////////////////////
 
 
 #ifdef _WINDOWS
@@ -744,6 +747,24 @@ namespace clpathfile
     ::GetCurrentDirectoryW(MAX_PATH, str);
     strDir.ReleaseBuffer();
     return strDir;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  template<typename _TCh>
+  b32 IsPathExistT(const _TCh* szPath)
+  {
+
+  }
+
+  b32 IsPathExist(const ch* szPath)
+  {
+    return PathFileExistsA(szPath);
+  }
+
+  b32 IsPathExist(const wch* szPath)
+  {
+    return PathFileExistsW(szPath);
   }
 
 #else

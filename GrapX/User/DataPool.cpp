@@ -216,7 +216,7 @@ namespace Marimo
         clsize length;
         const GXWCHAR* pText = import.ss.GetText(&length);
         //clstd::TextLinesW tl(pText, length);
-        auto sectRoot = import.ss.Open(NULL);
+        auto sectRoot = import.ss.OpenSection(NULL);
         //import.ErrorMsg.SetCurrentFilenameW(szFilename);
         import.ErrorMsg.PushFile(szFilename);
         import.ErrorMsg.GenerateCurLines(pText, length);
@@ -446,12 +446,14 @@ namespace Marimo
     if(IS_VALID_NAME(szName))
     {
       GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
-      GXSTATION::NamedInterfaceDict::iterator it = lpStation->m_NamedPool.find(szName);
+      if(lpStation) {
+        GXSTATION::NamedInterfaceDict::iterator it = lpStation->m_NamedPool.find(szName);
 
-      // 有的话直接增加引用计数然后返回
-      if(it != lpStation->m_NamedPool.end()) {
-        *ppDataPool = static_cast<DataPool*>(it->second);
-        return it->second->AddRef();
+        // 有的话直接增加引用计数然后返回
+        if(it != lpStation->m_NamedPool.end()) {
+          *ppDataPool = static_cast<DataPool*>(it->second);
+          return it->second->AddRef();
+        }
       }
     }
     return GX_FAIL;
@@ -611,7 +613,7 @@ namespace Marimo
     }
 
     DataPoolObject<DataPoolImpl>* pDataPoolObj = new DataPoolObject<DataPoolImpl>(szName);
-    if( ! InlCheckNewAndIncReference(pDataPoolObj)) {
+    if(InlIsFailedToNewObject(pDataPoolObj)) {
       return GX_FAIL;
     }
 

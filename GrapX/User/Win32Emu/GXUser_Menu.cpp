@@ -134,7 +134,7 @@ GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIde
   clStockW sp;
   if(sp.LoadW(szFilename))
   {
-    clStockW::Section hDef = sp.Open(szSmartPath);
+    clStockW::Section hDef = sp.OpenSection(szSmartPath);
     if(hDef) {
       return FALSE;
     }
@@ -161,7 +161,7 @@ GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIde
 GXBOOL LoadMenuTemplateFromStockW(clStockW* pSmart, GXLPCWSTR szName, clBuffer* pBuffer)
 {
   clStockW::Section hSect = NULL;
-  hSect = pSmart->Open(szName);
+  hSect = pSmart->OpenSection(szName);
   if(hSect)
   {
     clStockW::ATTRIBUTE val;

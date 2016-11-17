@@ -87,41 +87,30 @@ void _cl_vtraceT(const _TCh *fmt, va_list val)
   ASSERT(nWriteToBuf < MAX_TRACE_BUFFER * nTimes - 1 && nWriteToBuf >= 0);
 }
 
+template<typename _TCh,
+  int vsnprintfT(_TCh*, size_t, const _TCh*, va_list),
+  void __stdcall OutputDebugStringT(const _TCh*),
+  int printfT(const _TCh*, ...)>
+  void _cl_vlogT(const _TCh* prefix, const _TCh* fmt, va_list val)
+{
+  size_t prefix_len = clstd::strlenT(prefix);
+  size_t fmt_len = clstd::strlenT(fmt);
+  size_t len = prefix_len + fmt_len + (sizeof('\r') + sizeof('\n') + sizeof('\0'));
+
+  clstd::LocalBuffer<MAX_TRACE_BUFFER> buffer;
+  static _TCh s_szCRLF[] = {'\r', '\n', '\0'};
+
+  buffer
+    .Append(prefix, prefix_len * sizeof(_TCh))
+    .Append(fmt, fmt_len * sizeof(_TCh))
+    .Append(s_szCRLF, sizeof(s_szCRLF));
+
+  _cl_vtraceT<_TCh, vsnprintfT, OutputDebugStringT, printfT>((const _TCh*)buffer.GetPtr(), val);
+}
+
 // 不能用clString,因为clString使用的分配池会调用TRACE
 extern "C" void _cl_traceA(const char *fmt, ...)
 {
-  //if(IsDebuggerPresent() == FALSE)
-  //  return;
-
-  //va_list val;
-  //int nTimes = 1;
-  //int nWriteToBuf;
-  //char buffer[MAX_TRACE_BUFFER];
-
-  //// 流程描述:
-  //// * 用原始缓冲尝试生成Trace信息
-  //// * 如果失败尝试分配使用两倍大小的缓冲生成
-  //// * 如果再失败尝试分配使用三倍大小的缓冲生成
-  //// ! 所以越大越慢
-  //do {
-  //  const int nBufferSize = MAX_TRACE_BUFFER * nTimes;
-  //  char* pBuffer = nTimes == 1 ? buffer : new char[nBufferSize];
-  //  va_start(val, fmt);
-  //  nWriteToBuf = vsnprintf(pBuffer, nBufferSize, fmt, val);
-  //  va_end(val);
-  //  nTimes++;
-
-  //  if(nWriteToBuf >= 0) {
-  //    OutputDebugStringA(pBuffer);
-  //  }
-
-  //  if(pBuffer != buffer && pBuffer != NULL) {
-  //    delete[] pBuffer;
-  //    pBuffer = NULL;
-  //  }
-  //} while(nWriteToBuf < 0);
-
-  //ASSERT(nWriteToBuf < MAX_TRACE_BUFFER * nTimes - 1 && nWriteToBuf >= 0);
   va_list val;
   va_start(val, fmt);
   _cl_vtraceT<char, vsnprintf, OutputDebugStringA, printf>(fmt, val);
@@ -130,22 +119,60 @@ extern "C" void _cl_traceA(const char *fmt, ...)
 
 extern "C" void _cl_traceW(const wchar_t *fmt, ...)
 {
-  //if(IsDebuggerPresent() == FALSE)
-  //  return;
-
-  //WCHAR buffer[MAX_TRACE_BUFFER];
-  //va_list val;
-  //va_start(val, fmt);
-  //int nWriteToBuf = wvnsprintfW(buffer, MAX_TRACE_BUFFER, fmt, val);
-  //va_end(val);
-
-  //ASSERT(nWriteToBuf < MAX_TRACE_BUFFER - 1 && nWriteToBuf >= 0);
-  //OutputDebugStringW(buffer);
   va_list val;
   va_start(val, fmt);
   _cl_vtraceT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(fmt, val);
   va_end(val);
 }
+
+extern "C" void _cl_log_infoA(const char *fmt, ...)
+{
+  va_list val;
+  va_start(val, fmt);
+  _cl_vlogT<char, vsnprintf, OutputDebugStringA, printf>("[INFO] ", fmt, val);
+  va_end(val);
+}
+
+extern "C" void _cl_log_errorA(const char *fmt, ...)
+{
+  va_list val;
+  va_start(val, fmt);
+  _cl_vlogT<char, vsnprintf, OutputDebugStringA, printf>("[ERROR] ", fmt, val);
+  va_end(val);
+}
+
+extern "C" void _cl_log_warningA(const char *fmt, ...)
+{
+  va_list val;
+  va_start(val, fmt);
+  _cl_vlogT<char, vsnprintf, OutputDebugStringA, printf>("[WARN] ", fmt, val);
+  va_end(val);
+}
+
+extern "C" void _cl_log_infoW(const wchar_t *fmt, ...)
+{
+  va_list val;
+  va_start(val, fmt);
+  _cl_vlogT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(L"[INFO] ", fmt, val);
+  va_end(val);
+}
+
+extern "C" void _cl_log_errorW(const wchar_t *fmt, ...)
+{
+  va_list val;
+  va_start(val, fmt);
+  _cl_vlogT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(L"[ERROR] ", fmt, val);
+  va_end(val);
+}
+
+extern "C" void _cl_log_warningW(const wchar_t *fmt, ...)
+{
+  va_list val;
+  va_start(val, fmt);
+  _cl_vlogT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(L"[WARN] ", fmt, val);
+  va_end(val);
+}
+
 /*/
 extern "C" void _cl_traceA(char *fmt, ...)
 {

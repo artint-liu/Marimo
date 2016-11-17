@@ -85,24 +85,24 @@ int CreateSectAndSave()
     //s.CloseHandle(hNew);
 
     // 创建Section
-    StockA::Section hRoot = s.Create("root");
+    StockA::Section hRoot = s.CreateSection("root");
     //s.CloseSection(hRoot);
 
-    auto hWillBeDelete = s.Create("WillBeDelete");
+    auto hWillBeDelete = s.CreateSection("WillBeDelete");
 
-    hRoot = s.Create("AfterWillBeDelete");
+    hRoot = s.CreateSection("AfterWillBeDelete");
     //s.CloseSection(hRoot);
 
     // 创建重名Section
-    hRoot = s.Create("root");
+    hRoot = s.CreateSection("root");
     //s.CloseSection(hRoot);
 
     // 创建子Section
-    auto hSub = s.Create("root/sub2/sub1/sub0");
+    auto hSub = s.CreateSection("root/sub2/sub1/sub0");
     //s.CloseSection(hSub);
 
     // 设置键值测试
-    hSub = s.Open("root/sub2/sub1/sub0");
+    hSub = s.OpenSection("root/sub2/sub1/sub0");
     hSub.SetKey("Key1", "123");
     hSub.SetKey("Key2", "4567");
     hSub.SetKey("Key1", "3498");
@@ -124,7 +124,7 @@ int CreateSectAndSave()
     s.DeleteSection("WillBeDelete");
 
     // 测试遍历Section
-    hRoot = s.Open("root");
+    hRoot = s.OpenSection("root");
     if(hRoot)
     {
         hRoot.SetKey("TestKey1", "abc");
@@ -137,7 +137,7 @@ int CreateSectAndSave()
     }
 
     // 在根写入Key
-    auto pSect = s.Open(NULL);
+    auto pSect = s.OpenSection(NULL);
     //ASSERT(pSect);
     pSect.SetKey("testRootKey", "Hello world");
     pSect.SetKey("testRootKey2", "Hello world, again");
@@ -156,7 +156,7 @@ void TestRoot()
 {
   StockA s;
   s.LoadW(L"TestSave.txt");
-  auto pSect = s.Open(NULL);
+  auto pSect = s.OpenSection(NULL);
   ASSERT(pSect);
   StockA::ATTRIBUTE p;
   if(pSect.FirstKey(p))
@@ -168,7 +168,7 @@ void TestRoot()
 
   printf("\n");
 
-  auto pSectChild = s.Open(&pSect, NULL);
+  auto pSectChild = s.OpenSection(&pSect, NULL);
   ASSERT(pSectChild);
   do {
     printf("pSectChild:%s\n", pSectChild.SectionName());
@@ -181,7 +181,7 @@ void TestRoot()
 void test2_write()
 {
   StockA ss;
-  StockA::Section frames_sect = ss.Create("frames");
+  StockA::Section frames_sect = ss.CreateSection("frames");
   //clstd::Rand r;
   int n = 1000;
 
@@ -196,7 +196,7 @@ void test2_write()
     n += 1000;
   }
 
-  StockA::Section anim_sect = ss.Create("anim");
+  StockA::Section anim_sect = ss.CreateSection("anim");
   ASSERT( ! rect_sect);
   for(int i = 0; i < 10; i++)
   {
@@ -217,7 +217,7 @@ void test2_read()
     return;
   }
 
-  StockA::Section root_sect = ss.Open(NULL);
+  StockA::Section root_sect = ss.OpenSection(NULL);
   if( ! root_sect) {
     return;
   }
@@ -231,7 +231,7 @@ void test2_read()
   // 值读取检查，这个应该与test2_write()中的算法保持一致
   int n = 1000;
 
-  StockA::Section rect_sect = ss.Open("frames/rect");
+  StockA::Section rect_sect = ss.OpenSection("frames/rect");
   for(int i = 0; i < 10; i++)
   {
     int a = rect_sect["a"].ToInt();
@@ -248,7 +248,7 @@ void test2_read()
   }
   ASSERT( ! rect_sect);
 
-  StockA::Section point_sect = ss.Open("anim/point");
+  StockA::Section point_sect = ss.OpenSection("anim/point");
   for(int i = 0; i < 10; i++)
   {
     int x = point_sect.GetKeyAsInteger("x", 0);
@@ -287,7 +287,7 @@ void test_outofdate()
 {
   StockA ss;
 
-  StockA::Section root = ss.Create(NULL);
+  StockA::Section root = ss.CreateSection(NULL);
   root.SetKey("AAA", "aaa");
   root.SetKey("BBB", "bbb");
   root.SetKey("CCC", "ccc");

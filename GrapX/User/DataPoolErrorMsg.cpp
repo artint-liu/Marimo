@@ -65,7 +65,7 @@ namespace Marimo
     clstd::StockW ss;
     if(ss.LoadW(szErrorFile))
     {
-      clstd::StockW::Section sectRoot = ss.Open(NULL);
+      clstd::StockW::Section sectRoot = ss.OpenSection(NULL);
       if(sectRoot)
       {
         clstd::StockW::ATTRIBUTE param;
@@ -137,6 +137,9 @@ namespace Marimo
   _DPEM_TEMPL
   void _DPEM_CLS::WriteErrorW(GXBOOL bError, GXSIZE_T nOffset, GXUINT nCode, ...)
   {
+    if(m_Sources.empty()) {
+      //CLOG_ERROR();
+    }
     va_list  arglist;
     va_start(arglist, nCode);
     VarWriteErrorW(bError, m_Sources.back()->tl.GetPtr() + nOffset, nCode, arglist);

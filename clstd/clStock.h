@@ -181,7 +181,7 @@ namespace clstd
 
 
     //************************************
-    // Method:    Create 创建section
+    // Method:    CreateSection 创建section
     // Qualifier:
     // Parameter: _TCh * szPath
     // szPath支持"sect3/sect2/sect1/sect0"和"sect"两种格式
@@ -190,18 +190,18 @@ namespace clstd
     // 如果不带路径，则直接在根上创建sect
     // 注意：不再使用时需要用CloseSection关闭
     //************************************
-    Section Create(T_LPCSTR szPath);
-    Section Create(Section* desc, T_LPCSTR szSubPath); // 等价于SECTION::Create
+    Section CreateSection(T_LPCSTR szPath);
+    Section CreateSection(Section* desc, T_LPCSTR szSubPath); // 等价于SECTION::Create
 
     //************************************
-    // Method:    Open 打开指定的Section
+    // Method:    OpenSection 打开指定的Section
     // Qualifier:
     // Parameter: _TCh * szPath
     // 打开Section的路径名，如"sect1/sect0"或者"sect"
     // 注意：不再使用时需要用CloseSection关闭
     //************************************
-    Section Open(T_LPCSTR szPath) const;
-    Section Open(Section* desc, T_LPCSTR szSubPath) const; // 等价于SECTION::Open
+    Section OpenSection(T_LPCSTR szPath) const;
+    Section OpenSection(Section* desc, T_LPCSTR szSubPath) const; // 等价于SECTION::Open
 
     //************************************
     // Method:    DeleteSection 删除指定的Section

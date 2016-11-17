@@ -153,12 +153,14 @@ namespace Marimo
     if(m_Name.IsNotEmpty())
     {
       GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
-      GXSTATION::NamedInterfaceDict::iterator it = lpStation->m_NamedPool.find(m_Name);
-      if(it != lpStation->m_NamedPool.end()) {
-        lpStation->m_NamedPool.erase(it);
-      }
-      else {
-        CLBREAK; // 不应该啊, 肿么找不到了呢?
+      if(lpStation) {
+        GXSTATION::NamedInterfaceDict::iterator it = lpStation->m_NamedPool.find(m_Name);
+        if(it != lpStation->m_NamedPool.end()) {
+          lpStation->m_NamedPool.erase(it);
+        }
+        else {
+          CLBREAK; // 不应该啊, 肿么找不到了呢?
+        }
       }
     }
 
@@ -407,16 +409,19 @@ namespace Marimo
 
       const u8* p = h.HashToIndex(_hash);
       ASSERT(h.nBucket >= count);
-      ASSERT(count > *p);
+      
+      // hash 索引允许两次重叠，在p[0],p[1]中
+      if(count > p[0])
+      {
+        LPCVD pDesc2 = pDesc + (GXUINT)p[1];
+        pDesc = pDesc + (GXUINT)p[0];
 
-      LPCVD pDesc2 = pDesc + (GXUINT)p[1];
-      pDesc = pDesc + (GXUINT)*p;
-
-      if(GXSTRCMP((GXLPCSTR)pDesc->VariableName(), szName) == 0) {
-        return pDesc;
-      }
-      else if(GXSTRCMP((GXLPCSTR)pDesc2->VariableName(), szName) == 0) {
-        return pDesc2;
+        if(GXSTRCMP((GXLPCSTR)pDesc->VariableName(), szName) == 0) {
+          return pDesc;
+        }
+        else if(count > p[1] && GXSTRCMP((GXLPCSTR)pDesc2->VariableName(), szName) == 0) {
+          return pDesc2;
+        }
       }
     }
     else // B-Find

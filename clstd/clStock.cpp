@@ -469,14 +469,14 @@ namespace clstd
   typename _SSP_IMPL::Section _SSP_IMPL::Section::Open(T_LPCSTR szSubPath) const
   {
     IS_OUT_OF_DATE;
-    return pStock->Open((Section*)this, szSubPath);
+    return pStock->OpenSection((Section*)this, szSubPath);
   }
 
   _SSP_TEMPL
     typename _SSP_IMPL::Section _SSP_IMPL::Section::Create(T_LPCSTR szSubPath)
   {
     IS_OUT_OF_DATE;
-    return pStock->Create(this, szSubPath);
+    return pStock->CreateSection(this, szSubPath);
   }
 
   _SSP_TEMPL
@@ -746,13 +746,13 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::Create( T_LPCSTR szPath )
+    typename _SSP_IMPL::Section _SSP_IMPL::CreateSection( T_LPCSTR szPath )
   {
-    return Create(NULL, szPath);
+    return CreateSection(NULL, szPath);
   }
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::Create(Section* desc, T_LPCSTR szPath)
+    typename _SSP_IMPL::Section _SSP_IMPL::CreateSection(Section* desc, T_LPCSTR szPath)
   {
     if(desc && (desc->empty() || ! szPath || szPath[0] == '\0')) {
       return Section();
@@ -798,13 +798,13 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::Open( T_LPCSTR szPath ) const
+    typename _SSP_IMPL::Section _SSP_IMPL::OpenSection( T_LPCSTR szPath ) const
   {
-    return Open(NULL, szPath);
+    return OpenSection(NULL, szPath);
   }
 
   _SSP_TEMPL
-    typename _SSP_IMPL::Section _SSP_IMPL::Open(Section* desc, T_LPCSTR szPath) const
+    typename _SSP_IMPL::Section _SSP_IMPL::OpenSection(Section* desc, T_LPCSTR szPath) const
   {
     // sect != NULL
     // OpenChild(NULL, NULL); 返回根Section

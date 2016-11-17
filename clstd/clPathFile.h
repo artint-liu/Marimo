@@ -158,6 +158,12 @@ namespace clpathfile
   b32 MatchSpecExT(const _TCh* szFile, const _TCh* szSpec, u32 dwFlags);
   b32 MatchSpecEx (const ch* szFile, const ch* szSpec, u32 dwFlags);
   b32 MatchSpecEx (const wch* szFile, const wch* szSpec, u32 dwFlags);
+
+  template<typename _TCh>
+  b32 IsPathExistT(const _TCh* szPath);
+  b32 IsPathExist(const ch* szPath);
+  b32 IsPathExist(const wch* szPath);
+
 } // namespace clpathfile
 
 #endif // _FILEPATH_H_

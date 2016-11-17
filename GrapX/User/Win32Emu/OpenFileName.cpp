@@ -480,7 +480,7 @@ extern "C"
     // 初始化起始路径
     if( ! lpOFN->lpstrInitialDir) {
       if(bConfig) {
-        clstd::StockW::Section sect = stock.Open(NULL);
+        clstd::StockW::Section sect = stock.OpenSection(NULL);
         strInitDir = sect.GetKeyAsString(L"GetOpenFileName", L"");
       }
       
@@ -505,7 +505,7 @@ extern "C"
 
     // 保存起始路径
     if(result) {
-      clstd::StockW::Section sect = stock.Create(NULL);
+      clstd::StockW::Section sect = stock.CreateSection(NULL);
       sect.SetKey(L"GetOpenFileName", strInitDir);
       stock.SaveW(szConfig);
     }

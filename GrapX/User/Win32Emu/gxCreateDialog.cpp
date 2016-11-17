@@ -1246,7 +1246,7 @@ GXHWND gxIntCreateDialogFromFileW(
   // 注册对话框资源
   gxRegisterClassExW(&WndClassEx_DialogEx);
 
-  hDlgSect = file.Open(strDialogSection);
+  hDlgSect = file.OpenSection(strDialogSection);
   if( ! hDlgSect)  {
     TRACE("Error gxIntCreateDialogFromFileW, 指定的段不存在.\n");
     return NULL;
@@ -1313,14 +1313,14 @@ GXHWND gxIntCreateDialogFromFileW(
   }
 
   // 加载对话框模板资源
-  hTemplate = file.Open(L"Template");
+  hTemplate = file.OpenSection(L"Template");
   if(hTemplate)
   {
     file.LoadTemplate(lpStation, hTemplate);
     //file.FindClose(hTemplate);
   }
 
-  hDlgItem = file.Open(strDialogSection).Open(NULL);
+  hDlgItem = file.OpenSection(strDialogSection).Open(NULL);
   //SP_HANDLE hDlgItem = file.FindFirstSection(hDlgSect, NULL, NULL);
 
   if(hDlgItem)

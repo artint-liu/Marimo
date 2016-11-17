@@ -80,7 +80,7 @@ namespace GFX
 
     GXHRESULT hval = GX_OK;
     //clStockW::Section handle = sp.FindFirstSection(NULL, FALSE, NULL, NULL);
-    clStockW::Section handle = sp.Open(NULL);
+    clStockW::Section handle = sp.OpenSection(NULL);
     if(handle) {
       do {
         clStringW strSect = handle.SectionName(); // sp.GetSectionName(handle);

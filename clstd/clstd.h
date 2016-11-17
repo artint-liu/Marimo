@@ -114,6 +114,7 @@ inline void InlSetZeroT(_Ty& t) {
 #define MEMBER_OFFSET(_CLS, _MEMBER)  ((size_t)(&(((_CLS*)0)->_MEMBER)))
 #define CLARRAYSIZE(_ARRAY)           (sizeof(_ARRAY)/sizeof(_ARRAY[0]))
 
+
 #ifdef _DEBUG
 # if defined(_WINDOWS) || defined(_CONSOLE)
 #   ifdef __clang__
@@ -137,20 +138,31 @@ inline void InlSetZeroT(_Ty& t) {
 #     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
 #   elif defined(_MSC_VER)
 #     ifdef _X86
-extern "C" void _cl_traceA(const char *fmt, ...);
-extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
 extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
+
+// 数据格式化后原始消息
+extern "C" void _cl_traceA(const char *fmt, ...);
+extern "C" void _cl_traceW(const wchar_t *fmt, ...);
+
+// 输出日志格式消息，一般是"[ERROR]错误信息\r\n"
+extern "C" void _cl_log_infoA(const char *fmt, ...);
+extern "C" void _cl_log_errorA(const char *fmt, ...);
+extern "C" void _cl_log_warningA(const char *fmt, ...);
+
+extern "C" void _cl_log_infoW(const wchar_t *fmt, ...);
+extern "C" void _cl_log_errorW(const wchar_t *fmt, ...);
+extern "C" void _cl_log_warningW(const wchar_t *fmt, ...);
 
 #       define TRACEW        _cl_traceW
 #       define TRACEA        _cl_traceA
 #       define TRACE         TRACEA
-#       define CLOG_WARNING  TRACEA
-#       define CLOG_ERROR    TRACEA
-#       define CLOG          TRACEA
-#       define CLOG_WARNINGW TRACEW
-#       define CLOG_ERRORW   TRACEW
-#       define CLOGW         TRACEW
+#       define CLOG_WARNING  _cl_log_warningA
+#       define CLOG_ERROR    _cl_log_errorA
+#       define CLOG          _cl_log_infoA
+#       define CLOG_WARNINGW _cl_log_warningW
+#       define CLOG_ERRORW   _cl_log_errorW
+#       define CLOGW         _cl_log_infoW
 #       define CLBREAK       {__asm int 3}
 #       define CLABORT       {__asm int 3}
 

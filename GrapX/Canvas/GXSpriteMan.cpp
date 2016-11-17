@@ -103,7 +103,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
   // 未来不排除增加同时读取两种格式并合并为同一个Sprite对象的可能
   //
 
-  clstd::StockA::Section hSpriteArray = ss.Open("SpriteArray");
+  clstd::StockA::Section hSpriteArray = ss.OpenSection("SpriteArray");
   if(hSpriteArray)
   {
     clStringW strImageFile;
@@ -162,12 +162,12 @@ GXHRESULT IntLoadModules(StockA& ss, GXSpriteDescImpl* pDescObj )
   //}
 
   //clvector<REGN> aRegns;
-  StockA::Section hModule = ss.Open("Sprite/Module/rect");
+  StockA::Section hModule = ss.OpenSection("Sprite/Module/rect");
 
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
   if( ! hModule) {
-    hModule = ss.Open("Image/Module/rect");
+    hModule = ss.OpenSection("Image/Module/rect");
   }
 
 
@@ -217,11 +217,11 @@ GXHRESULT IntLoadModules(StockA& ss, GXSpriteDescImpl* pDescObj )
 GXHRESULT IntLoadFrames(StockA& ss, GXSpriteDescImpl* pDescObj ) 
 {
   GXHRESULT hval = GX_OK;
-  StockA::Section hFrame = ss.Open("Sprite/Frame");
+  StockA::Section hFrame = ss.OpenSection("Sprite/Frame");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
   if( ! hFrame) {
-    hFrame = ss.Open("Image/Frame");
+    hFrame = ss.OpenSection("Image/Frame");
   }
 
   if(hFrame)
@@ -276,11 +276,11 @@ GXHRESULT IntLoadFrames(StockA& ss, GXSpriteDescImpl* pDescObj )
 GXHRESULT IntLoadAnimations(StockA &ss, GXSpriteDescImpl* pDescObj ) 
 {
   GXHRESULT hval = GX_OK;
-  StockA::Section hAnim = ss.Open("Sprite/Animation");
+  StockA::Section hAnim = ss.OpenSection("Sprite/Animation");
 
   // 参考TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
   if( ! hAnim) {
-    hAnim = ss.Open("Image/Animation");
+    hAnim = ss.OpenSection("Image/Animation");
   }
 
   if(hAnim)
@@ -350,14 +350,14 @@ GXHRESULT IntLoadSpriteDesc(StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** p
   }
 
 
-  StockA::Section hSprite = ss.Open("Sprite");
+  StockA::Section hSprite = ss.OpenSection("Sprite");
 
   // TODO: 之前Sprite描述定义在Image段, 后来改为Sprite
   // 这里用了兼容写法，如果Sprite段不存在则尝试读取就的Image段定义
   // 以后去掉
   // TAG:{B1363AEA-3BB3-4E2E-9C90-55A3CAF07E78}
   if( ! hSprite) {
-    hSprite = ss.Open("Image");
+    hSprite = ss.OpenSection("Image");
   }
 
 
@@ -627,11 +627,11 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     CLOG_ERROR("%s : Bad input argument.\r\n", __FUNCTION__);
   }
 
-  clStockA::Section pSmartSection = stock.Create("smart");
+  clStockA::Section pSmartSection = stock.CreateSection("smart");
   pSmartSection.SetKey("version", "0.0.1.0");
   //stock.CloseSection(pSmartSection);
 
-  auto pSpriteSection = stock.Create("Sprite");
+  auto pSpriteSection = stock.CreateSection("Sprite");
 
   clStringW strRelativePath;
   clpathfile::RelativePathToW(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
@@ -648,7 +648,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     for(GXUINT i = 0; i < pDesc->nNumOfModules; i++)
     {
       GXSprite::MODULE& m = pDesc->aModules[i];
-      auto pRectSection = stock.Create("Sprite/Module/rect");
+      auto pRectSection = stock.CreateSection("Sprite/Module/rect");
       pRectSection.SetKey("name",    m.name);
       pRectSection.SetKey("id",      clStringA(m.id));
       pRectSection.SetKey("left",    clStringA(m.regn.left));
@@ -667,7 +667,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     for(GXUINT i = 0; i < pDesc->nNumOfFrames; i++)
     {
       GXSprite::FRAME& f = pDesc->aFrames[i];
-      auto pFrameSection = stock.Create("Sprite/Frame");
+      auto pFrameSection = stock.CreateSection("Sprite/Frame");
       pFrameSection.SetKey("name",   f.name);
       pFrameSection.SetKey("id",     clStringA(f.id));
       pFrameSection.SetKey("start",  clStringA(f.start));
@@ -677,7 +677,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
       for(GXUINT n = 0; n < f.count; n++)
       {
         GXSprite::FRAME_MODULE& fd = pDesc->aFrameModules[n + f.start];
-        clStockA::Section pFrameModuleSection = stock.Create(&pFrameSection, "module");
+        clStockA::Section pFrameModuleSection = stock.CreateSection(&pFrameSection, "module");
         pFrameModuleSection.SetKey("index",  clStringA(fd.nModuleIdx));
         pFrameModuleSection.SetKey("flags",  clStringA(fd.rotate));
         pFrameModuleSection.SetKey("x",      clStringA(fd.offset.x));
@@ -698,7 +698,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     for(GXUINT i = 0; i < pDesc->nNumOfAnimations; i++)
     {
       GXSprite::ANIMATION& a = pDesc->aAnimations[i];
-      auto pAnimSection = stock.Create("Sprite/Animation");
+      auto pAnimSection = stock.CreateSection("Sprite/Animation");
       pAnimSection.SetKey("name",   a.name);
       pAnimSection.SetKey("id",     clStringA(a.id));
       pAnimSection.SetKey("rate",   clStringA(a.rate));

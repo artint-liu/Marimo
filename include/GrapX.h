@@ -59,7 +59,6 @@ namespace clstd
   class SmartRepository;
   class StockA;
   class StockW;
-
 } // namespace clstd
 
 typedef clstd::Buffer           clBuffer;

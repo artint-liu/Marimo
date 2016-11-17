@@ -244,7 +244,7 @@ namespace Marimo
 
   b32 SPRITE_DESC_LOADER::Load(clstd::StockA* pStock, GXLPCSTR szSection)
   {
-    clstd::StockA::Section main_sect = pStock->Open(szSection);
+    clstd::StockA::Section main_sect = pStock->OpenSection(szSection);
     if ( ! main_sect) {
       CLOG_ERROR("SPRITE_DESC_LOADER : Can not open \"%s\" section.\n", szSection);
       return FALSE;
