@@ -76,7 +76,7 @@ GXHRESULT GXSTATION::Initialize()
   ConsoleAssistant* pBaseStaff = new ConsoleAssistant();
   MORegisterConsoleStaff(pBaseStaff);
 
-  if(GXFAILED(lpPlatform->QueryFeature(GXMAKEFOURCC('L','O','G','R'), (GXVOID**)&m_pLogger))) {
+  if( ! lpPlatform || GXFAILED(lpPlatform->QueryFeature(GXMAKEFOURCC('L','O','G','R'), (GXVOID**)&m_pLogger))) {
     ASSERT(m_pLogger == NULL);
     MOCreateFileLoggerW(&m_pLogger, L"station.log", FALSE);
   }
@@ -106,8 +106,11 @@ GXHRESULT GXSTATION::Initialize()
   GXSTRCPYN(lpDesktopWnd->m_lpClsAtom->szClassName, L"GrapX Desktop Class", 
     sizeof(lpDesktopWnd->m_lpClsAtom->szClassName) / sizeof(lpDesktopWnd->m_lpClsAtom->szClassName[0]));
 
-  m_pDesktopWindowsMgr = new DesktopWindowsMgr(this);
-  hClassDPA            = gxDPA_Create(8);
+  if(pGraphics) {
+    m_pDesktopWindowsMgr = new DesktopWindowsMgr(this);
+  }
+
+  hClassDPA = gxDPA_Create(8);
 
   InlSetZeroT(m_HotKeyChain);
 
@@ -341,7 +344,7 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
   , m_hConsole            (NULL)
   , lpPlatform            (lpPlatform)
   , dwUIThreadId          (NULL)
-  , pGraphics             (lpPlatform->m_pApp->GetGraphicsUnsafe())
+  , pGraphics             (lpPlatform ? lpPlatform->m_pApp->GetGraphicsUnsafe() : NULL)
   , m_uFrameCount         (0)
   //, m_pRichFXMgr          (NULL)
   , hClassDPA             (NULL)
@@ -367,15 +370,35 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 {
   GXGRAPHICSDEVICE_DESC sGraphDesc;
-  pGraphics->GetDesc(&sGraphDesc);
 
-  nWidth                       = sGraphDesc.BackBufferWidth;
-  nHeight                      = sGraphDesc.BackBufferHeight;
-  MonitorInfo.rcMonitor.left   = 0;
-  MonitorInfo.rcMonitor.top    = 0;
-  MonitorInfo.rcMonitor.right  = sGraphDesc.BackBufferWidth;
-  MonitorInfo.rcMonitor.bottom = sGraphDesc.BackBufferHeight;
-  MonitorInfo.rcWork           = MonitorInfo.rcMonitor;
+  if(pGraphics)
+  {
+    pGraphics->GetDesc(&sGraphDesc);
+
+    nWidth                       = sGraphDesc.BackBufferWidth;
+    nHeight                      = sGraphDesc.BackBufferHeight;
+    MonitorInfo.rcMonitor.left   = 0;
+    MonitorInfo.rcMonitor.top    = 0;
+    MonitorInfo.rcMonitor.right  = sGraphDesc.BackBufferWidth;
+    MonitorInfo.rcMonitor.bottom = sGraphDesc.BackBufferHeight;
+    MonitorInfo.rcWork           = MonitorInfo.rcMonitor;
+  }
+  else
+  {
+#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+    MONITORINFO mi = {sizeof(MONITORINFO)};
+    HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY);
+
+    GetMonitorInfo(hMonitor, &mi);
+
+    nWidth                = mi.rcMonitor.right;
+    nHeight               = mi.rcMonitor.bottom;
+    MonitorInfo.rcMonitor = *(GXRECT*)&mi.rcMonitor;
+    MonitorInfo.rcWork    = *(GXRECT*)&mi.rcWork;
+#else
+    CLOG_ERROR("can not get monitor info.");
+#endif
+  }
 
   m_ptCursor.x = 0;
   m_ptCursor.y = 0;

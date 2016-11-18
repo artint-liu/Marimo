@@ -111,35 +111,41 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
 
     //g_Instance.lpStation = g_pCurStation;
 
+    if(lpPlatform)
+    {
 #ifndef _DEV_DISABLE_UI_CODE
-    GXWin32APIEmu::SetScreen(g_pCurStation->nWidth, g_pCurStation->nHeight);
-    GXWin32APIEmu::InitializeStatic();
-    GXUSER_InitializeWndProperty();
+      GXWin32APIEmu::SetScreen(g_pCurStation->nWidth, g_pCurStation->nHeight);
+      GXWin32APIEmu::InitializeStatic();
+      GXUSER_InitializeWndProperty();
 
 #if defined(_WIN32) || defined(_WINDOWS)
-    if(g_hGlbRects == NULL)
-      g_hGlbRects = GlobalAlloc(GMEM_MOVEABLE, sizeof(GXRECT) * g_uRectCapacity);
+      if(g_hGlbRects == NULL)
+        g_hGlbRects = GlobalAlloc(GMEM_MOVEABLE, sizeof(GXRECT) * g_uRectCapacity);
 #else
-    if (g_hGlbRects == NULL) 
-      g_hGlbRects = (GXHANDLE)new GXRECT[g_uRectCapacity];
+      if (g_hGlbRects == NULL) 
+        g_hGlbRects = (GXHANDLE)new GXRECT[g_uRectCapacity];
 #endif // defined(_WIN32) || defined(_WINDOWS)
 
 #ifdef ENABLE_AERO
 
-    g_pCurStation->pGraphics->CreateTexture(&g_pCurStation->pBackDownSampTexA, NULL, TEXSIZE_HALF, TEXSIZE_HALF,
-      1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
+      g_pCurStation->pGraphics->CreateTexture(&g_pCurStation->pBackDownSampTexA, NULL, TEXSIZE_HALF, TEXSIZE_HALF,
+        1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
 
-    g_pCurStation->pGraphics->CreateTexture(&g_pCurStation->pBackDownSampTexB, NULL, TEXSIZE_HALF, TEXSIZE_HALF,
-      1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
+      g_pCurStation->pGraphics->CreateTexture(&g_pCurStation->pBackDownSampTexB, NULL, TEXSIZE_HALF, TEXSIZE_HALF,
+        1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
 
-    ASSERT(g_pCurStation->pBackDownSampTexA && g_pCurStation->pBackDownSampTexB);
+      ASSERT(g_pCurStation->pBackDownSampTexA && g_pCurStation->pBackDownSampTexB);
 #endif // ENABLE_AERO
 
-    GXWnd::CreateDesktop(g_pCurStation);
-    CreateStockObject(g_pCurStation);
-    GXUSER_InitializeCtrlRegMap();
-    GXUXTHEME_Initialize(g_pCurStation->pGraphics);
+      GXWnd::CreateDesktop(g_pCurStation);
+      CreateStockObject(g_pCurStation);
+      GXUSER_InitializeCtrlRegMap();
+      GXUXTHEME_Initialize(g_pCurStation->pGraphics);
 #endif // _DEV_DISABLE_UI_CODE
+    }
+    else {
+      CLOG("create GXUI station without GXPlatform.");
+    }
 
     //g_pCurStation->m_hConsole = gxCreateDialogParamW(NULL, L"@Resource\\console.dlg.txt", NULL, &ConsoleDlgProc, NULL);
     //gxShowWindow(g_pCurStation->m_hConsole, GXSW_HIDE);

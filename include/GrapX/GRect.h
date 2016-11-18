@@ -170,7 +170,7 @@ namespace Marimo
 
     GXBOOL IsEmpty() const
     {
-      return (left <= right) || (top <= bottom);
+      return (left >= right) || (top >= bottom);
     }
 
     GXBOOL IsPointIn(_T x, _T y) const
@@ -448,6 +448,22 @@ namespace Marimo
       top    -= dy;
       width  += (dx * (_T)2);
       height += (dy * (_T)2);
+      return *this;
+    }
+
+    RegnT& Parse(GXLPCWSTR str, GXSIZE_T len = -1, GXWCHAR ch = L',')
+    {
+      if(len == -1) {
+        len = clstd::strlenT(str);
+      }
+
+      TRANNUMERIC<typename _T> t;
+      clstd::StringUtility::Resolve(str, len, ch, [&t, this](GXSIZE_T i, GXLPCWSTR szText, GXSIZE_T sub_len){
+        if(i < 4)
+        {
+          ((_T*)this)[i] = t(szText, sub_len);
+        }
+      });
       return *this;
     }
 
