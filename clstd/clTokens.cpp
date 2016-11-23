@@ -295,13 +295,13 @@ namespace clstd
   _TOEKN_TEMPL
     b32 _TOKEN_IMPL::iterator::BeginsWith(TChar ch) const
   {
-    return (length > 1) && (marker[0] == ch);
+    return (length >= 1) && (marker[0] == ch);
   }
 
   _TOEKN_TEMPL
     b32 _TOKEN_IMPL::iterator::EndsWith(TChar ch) const
   {
-    return (length > 1) && (marker[length - 1] == ch);
+    return (length >= 1) && (marker[length - 1] == ch);
   }
 
   _TOEKN_TEMPL

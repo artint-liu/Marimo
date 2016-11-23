@@ -40,12 +40,12 @@ namespace Marimo
     ~DataPoolVariable(); // 不能声明为虚函数!
 
   public:
-    inline DataPoolVariable operator[](int nIndex)
+    inline DataPoolVariable operator[](int nIndex) const
     {
       return IndexOf((GXSIZE_T)nIndex);
     }
 
-    inline DataPoolVariable operator[](GXLPCSTR szMemberName)
+    inline DataPoolVariable operator[](GXLPCSTR szMemberName) const
     {
       return MemberOf(szMemberName);
     }
@@ -123,10 +123,10 @@ namespace Marimo
     GXBOOL            SetData         (GXLPCVOID lpData, GXUINT cbSize);
     GXBOOL            GetData         (GXLPVOID lpData, GXUINT cbSize) GXCONST;
 
-    iterator          begin           ();
-    iterator          end             ();
-    element_iterator  array_begin     ();
-    element_iterator  array_end       ();
+    iterator          begin           () const;
+    iterator          end             () const;
+    element_iterator  array_begin     () const;
+    element_iterator  array_end       () const;
   };
 
 

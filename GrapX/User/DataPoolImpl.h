@@ -316,9 +316,7 @@ namespace Marimo
     virtual GXBOOL Save(clFile& file) override;
     virtual GXBOOL Load(clFile& file, GXDWORD dwFlag) override;
 
-    //virtual GXHRESULT ImportDataFromFileW (GXLPCWSTR szFilename);
     virtual LPCSTR    GetVariableName     (GXUINT nIndex) const override; // 获得变量的名字
-    //virtual GXHRESULT GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout) override;
 
     virtual GXBOOL    IsFixedPool         () const override; // 池中不含有字符串和动态数组
 #ifndef DISABLE_DATAPOOL_WATCHER

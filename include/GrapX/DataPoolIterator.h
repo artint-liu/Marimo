@@ -228,7 +228,7 @@ namespace Marimo
     };
 
     //////////////////////////////////////////////////////////////////////////
-
+    /*
     // 结构体优先的遍历，深度优先
     template<class TArrayFunc, class TVarFunc>
     void EnumerateVariables(int nDepth, DataPool::iterator& itBegin, DataPool::iterator& itEnd, TArrayFunc _arrayFunc, TVarFunc _varFunc)
@@ -271,7 +271,7 @@ namespace Marimo
           break;
         }
       } // for
-    } // EnumerateVariables
+    } // EnumerateVariables//*/
 
     //////////////////////////////////////////////////////////////////////////
 

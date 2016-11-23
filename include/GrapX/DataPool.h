@@ -379,12 +379,18 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL      Load                (clFile& file, GXDWORD dwFlag));
 
     GXSTDINTERFACE(GXLPCSTR    GetVariableName     (GXUINT nIndex) const); // 获得变量的名字
-    //GXSTDINTERFACE(GXHRESULT   GetLayout           (GXLPCSTR szStructName, DataLayoutArray* pLayout));
-    GXSTDINTERFACE(GXHRESULT   ImportDataFromFileW (GXLPCWSTR szFilename));
+
+    // 从stock格式文件或者内存数据导入/导出的接口
+    GXSTDINTERFACE(GXHRESULT   ImportDataFromFile  (GXLPCWSTR szFilename));
+    GXSTDINTERFACE(GXHRESULT   ImportDataFromFile  (GXLPCSTR szFilename));
+    GXSTDINTERFACE(GXHRESULT   ImportDataFromMemory(clstd::Buffer* pBuffer, GXLPCWSTR szRefFilename = NULL));
+    GXSTDINTERFACE(GXHRESULT   ExportDataToFile    (GXLPCWSTR szFilename));
+    GXSTDINTERFACE(GXHRESULT   ExportDataToFile    (GXLPCSTR szFilename));
+    GXSTDINTERFACE(GXHRESULT   ExportDataToMemory  (clstd::Buffer* pBuffer));
 
     GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组
     GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ());                 // 必须是RawPool才返回指针
-    GXSTDINTERFACE(GXUINT      GetNameId           (LPCSTR szName));  // 返回Type, Variable, Enum等内部稳定字符串的id
+    GXSTDINTERFACE(GXUINT      GetNameId           (LPCSTR szName));    // 返回Type, Variable, Enum等内部稳定字符串的id
     GXSTDINTERFACE(GXBOOL      QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset)); // 查找变量全名

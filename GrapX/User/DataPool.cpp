@@ -71,6 +71,8 @@ using namespace clstd;
 # define ASSERT_X64(x)
 #endif // #ifdef _X86
 
+#define DPC_MESSAGE_FILE L"dpcmsg.txt"
+
 namespace Marimo
 {
   typedef DataPoolVariable              Variable;
@@ -201,37 +203,88 @@ namespace Marimo
       typedef DataPoolErrorMsg<GXWCHAR> DataPoolErrorMsgW;
       clstd::StockW ss;
       DataPoolErrorMsgW  ErrorMsg;
+
+      GXBOOL PrepareLines(GXLPCWSTR szRefFilename)
+      {
+        clsize length;
+        const GXWCHAR* pText = ss.GetText(&length);
+        ErrorMsg.PushFile(szRefFilename);
+        ErrorMsg.GenerateCurLines(pText, length);
+        ErrorMsg.SetMessageSign('I');
+        return TRUE;
+      }
     };
 
   public:
     DataPoolObject(GXLPCSTR szName) : _TDataPoolImpl(szName) {}
     virtual ~DataPoolObject() {}
 
-    virtual GXHRESULT ImportDataFromFileW (GXLPCWSTR szFilename)
+    virtual GXHRESULT ImportDataFromFile(GXLPCSTR szFilename) override
     {
-      CLOGW(L"Import data from \"%s\".\n", szFilename);
+      return ImportDataFromFile(clStringW(szFilename));
+    }
+
+    virtual GXHRESULT ExportDataToFile(GXLPCSTR szFilename) override
+    {
+      return ExportDataToFile(clStringW(szFilename));
+    }
+
+    virtual GXHRESULT ImportDataFromMemory(clstd::Buffer* pBuffer, GXLPCWSTR szRefFilename) override
+    {
+      GXLPCWSTR szFilename = (szRefFilename == NULL ? L"<memory>" : szRefFilename);
+      CLOGW(L"Import data from memory (reference filename: \"%s\").\n", szFilename);
       IMPORT import;
-      import.ErrorMsg.LoadErrorMessageW(L"dpcmsg.txt");
-      if(import.ss.LoadW(szFilename)) {
-        clsize length;
-        const GXWCHAR* pText = import.ss.GetText(&length);
-        //clstd::TextLinesW tl(pText, length);
+      import.ErrorMsg.LoadErrorMessageW(DPC_MESSAGE_FILE);
+      if(import.ss.Set(pBuffer) && import.PrepareLines(szFilename)) {
         auto sectRoot = import.ss.OpenSection(NULL);
-        //import.ErrorMsg.SetCurrentFilenameW(szFilename);
-        import.ErrorMsg.PushFile(szFilename);
-        import.ErrorMsg.GenerateCurLines(pText, length);
-        import.ErrorMsg.SetMessageSign('I');
-        //import.ErrorMsg.SetSilentMode(TRUE);  // Debug!!
-        //import.szFilename = szFilename;
-        //import.tl = &tl;
-
         IntImportSections(import, sectRoot, NULL);
-
-        //import.ss.CloseSection(sectRoot);
         return GX_OK;
       }
       else {
         import.ErrorMsg.WriteErrorW(TRUE, 0, ERROR_CODE_CANT_OPEN_FILE, szFilename);
+      }
+      return GX_FAIL;
+    }
+
+    virtual GXHRESULT ImportDataFromFile(GXLPCWSTR szFilename) override
+    {
+      CLOGW(L"Import data from \"%s\".\n", szFilename);
+      IMPORT import;
+      import.ErrorMsg.LoadErrorMessageW(DPC_MESSAGE_FILE);
+      if(import.ss.LoadW(szFilename)) {
+        if(import.PrepareLines(szFilename)) {
+          auto sectRoot = import.ss.OpenSection(NULL);
+          IntImportSections(import, sectRoot, NULL);
+          return GX_OK;
+        }
+      }
+      else {
+        import.ErrorMsg.WriteErrorW(TRUE, 0, ERROR_CODE_CANT_OPEN_FILE, szFilename);
+      }
+      return GX_FAIL;
+    }
+
+    virtual GXHRESULT ExportDataToMemory(clstd::Buffer* pBuffer) override
+    {
+      IntExportToBuffer(pBuffer, begin(), end());
+      return GX_OK;
+    }
+
+    virtual GXHRESULT ExportDataToFile(GXLPCWSTR szFilename) override
+    {
+      clstd::Buffer buffer(4096);
+      if(GXSUCCEEDED(ExportDataToMemory(&buffer))) {
+        clstd::File file;
+        if( ! file.CreateAlwaysW(szFilename)) {
+          CLOG_ERRORW(L"Can not create file (\"%s\").", szFilename);
+          return GX_FAIL;
+        }
+        
+        u32 uNumOfWrites = 0;
+        if(file.Write(buffer.GetPtr(), buffer.GetSize(), &uNumOfWrites) && buffer.GetSize() == uNumOfWrites) {
+          return TRUE;
+        }
+        CLOG_ERRORW(L"%s : Not write properly (\"%s\").", __FUNCTIONW__, szFilename);
       }
       return GX_FAIL;
     }
@@ -379,23 +432,67 @@ namespace Marimo
         } while (param.NextKey());
       }
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    void IntExportVariableToBuffer(clstd::Buffer* pBuffer, const DataPoolVariable& var, int nDepth)
+    {
+      // TODO: 目前遍历需要在iterator与variable之间来回转换才能顺利遍历，以后消除这个问题
+      const size_t nBytesOfChar = sizeof(clStringW::TChar);
+      clStringW str;
+      switch(var.GetTypeCategory())
+      {
+      case T_STRUCT:
+      case T_STRUCTALWAYS:
+        {
+          str.Clear();
+          str.Append(0x20, nDepth * 2);
+          str.AppendFormat(L"%s {\r\n", clStringW(var.GetName()));
+          pBuffer->Append(str, str.GetLength() * nBytesOfChar);
+          //TRACEW(str);
+
+          IntExportToBuffer(pBuffer, var.begin(), var.end(), nDepth + 1);
+
+          str.Clear();
+          str.Append(0x20, nDepth * 2);
+          str.Append(L"}\r\n");
+          pBuffer->Append(str, str.GetLength() * nBytesOfChar);
+          //TRACEW(str);
+        }
+        break;;
+      default:
+        str.Clear();
+        str.Append(0x20, nDepth * 2);
+        str.AppendFormat(L"%s=\"%s\";\r\n", clStringW(var.GetName()), var.ToStringW());
+        pBuffer->Append(str, str.GetLength() * nBytesOfChar);
+        //TRACEW(str);
+        break;
+      }
+    }
+
+    void IntExportToBuffer(clstd::Buffer* pBuffer, DataPool::iterator it_begin, DataPool::iterator it_end, int nDepth = 0)
+    {
+      DataPoolVariable var;
+      for(auto it = it_begin; it != it_end; ++it)
+      {
+        if(it.IsArray())
+        {
+          DataPoolUtility::element_iterator it_arr_begin = it.array_begin();
+          DataPoolUtility::element_iterator it_arr_end = it.array_end();
+          for(auto it_arr = it_arr_begin; it_arr != it_arr_end; ++it_arr)
+          {
+            it_arr.ToVariable(var);
+            IntExportVariableToBuffer(pBuffer, var, nDepth);
+          }
+        }
+        else
+        {
+          it.ToVariable(var);
+          IntExportVariableToBuffer(pBuffer, var, nDepth);
+        }
+      } // for
+    }
   };
 
-  //GXHRESULT DataPoolImportImpl::ImportDataFromFileW( GXLPCWSTR szFilename )
-  //void DataPoolImportImpl::IntImportSections(
-  //  IMPORT&     import,
-  //  Section     sectParent,
-  //  MOVariable* varParent)
-  //void DataPoolImportImpl::IntImportKeys(
-  //  IMPORT&     import,
-  //  Section     sect,
-  //  MOVariable* var)
-  
-
-
-  //class DataPoolObject : public DataPoolImpl, public DataPoolImportImpl
-  //{
-  //};
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -504,7 +601,7 @@ namespace Marimo
           for(auto it = sManifest.pImportFiles->begin(); it != sManifest.pImportFiles->end(); ++it)
           {
             // 出错也继续导入
-            (*ppDataPool)->ImportDataFromFileW((GXLPCWSTR)*it);
+            (*ppDataPool)->ImportDataFromFile((GXLPCWSTR)*it);
           }
         }
         return GX_OK;

@@ -280,7 +280,7 @@ void TestComplexArray()
   TestWatcher(pDataPool);
   TestRemoveItem(pDataPool);
 
-  //ENUM_DATAPOOL(pDataPool);
+  ENUM_DATAPOOL(pDataPool);
 
 #ifdef _X86
   GXLPCWSTR szFilename = L"Test\\TestComplexArray.DPL";
@@ -294,6 +294,7 @@ void TestComplexArray()
   DataPool* pDataPoolFromFile = NULL;
   DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolLoad_ReadOnly);
 
+  pDataPool->ExportDataToFile(L"Test\\TestComplexArray_export.txt");
 
   TestGetNameId(pDataPoolFromFile);
   TestGetNameId(pDataPool);

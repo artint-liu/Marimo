@@ -395,8 +395,8 @@ namespace Marimo
     ASSERT(pVdd == NULL ||
       pVdd->GetTypeCategory() == T_STRUCT || pVdd->GetTypeCategory() == T_ENUM || pVdd->GetTypeCategory() == T_FLAG);
 
+    const GXUINT count = (GXUINT)end;
 #ifdef _DEBUG
-    GXUINT count = (GXUINT)end;
     LPCVD pDescBegin = pDesc;
 #endif // #ifdef _DEBUG
 
@@ -1546,7 +1546,8 @@ namespace Marimo
     // (2)无法通过地址来区别是结构体还是结构体第一个成员
 
     if(TEST_FLAG(dwFlags, DataPoolVariable::CAPS_STRUCT)) {
-      CLBREAK;
+      //CLBREAK;
+      CLOG_ERROR("can not watch datapool struct(\"%s\").", pVar->GetName());
       return FALSE;
     }
 

@@ -458,6 +458,12 @@ namespace clstd
   }
 
   _SSP_TEMPL
+    StockT<_TStr>* _SSP_IMPL::Section::GetStock() const
+  {
+    return pStock;
+  }
+
+  _SSP_TEMPL
     _TStr _SSP_IMPL::Section::SectionName() const
   {
     _TStr str;

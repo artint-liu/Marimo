@@ -86,7 +86,7 @@ namespace Marimo
       first_child(it);
       it.index = -1;
 
-      ASSERT(it.pVarDesc != NULL); // 下面的判断好像不准确，这里断言一下验证
+      ASSERT(it.pVarDesc != NULL || pVarDesc->GetTypeDesc()->Cate != T_STRUCT); // 下面的判断好像不准确，这里断言一下验证
 
       if(it.pVarDesc != NULL) {
         // 如果是结构体，把pVarDesc调整到结构体末尾
@@ -281,6 +281,7 @@ namespace Marimo
       it.index = -1;
 
       //ASSERT(it.pVarDesc != NULL); // 下面的判断好像不准确，这里断言一下验证
+      ASSERT(it.pVarDesc != NULL || pVarDesc->GetTypeDesc()->Cate != T_STRUCT); // 下面的判断好像不准确，这里断言一下验证
 
       if(it.pVarDesc != NULL) {
         // 如果是结构体，把pVarDesc调整到结构体末尾

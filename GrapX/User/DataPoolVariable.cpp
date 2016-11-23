@@ -262,7 +262,7 @@ namespace Marimo
       return FALSE;
     }
 
-    void first_child(iterator& iter)
+    void first_child(iterator& iter) const
     {
       if(m_pVdd->GetTypeCategory() == T_STRUCT)
       {
@@ -281,7 +281,7 @@ namespace Marimo
       }
     }
 
-    void first_element(element_iterator& iter)
+    void first_element(element_iterator& iter) const
     {
       iter.pDataPool = m_pDataPool;
       iter.pVarDesc  = m_pVdd;
@@ -303,34 +303,34 @@ namespace Marimo
   STATIC_ASSERT(sizeof(DataPoolVariableImpl) == sizeof(DataPoolVariable)); // 确保DataPoolVariableImpl不会增加新的成员变量
 
   //////////////////////////////////////////////////////////////////////////
-  Marimo::DataPoolUtility::iterator DataPoolVariable::begin()
+  Marimo::DataPoolUtility::iterator DataPoolVariable::begin() const
   {
     iterator iter;
-    reinterpret_cast<DataPoolVariableImpl*>(this)->first_child(iter);
+    reinterpret_cast<const DataPoolVariableImpl*>(this)->first_child(iter);
     return iter;
   }
 
-  Marimo::DataPoolUtility::iterator DataPoolVariable::end()
+  Marimo::DataPoolUtility::iterator DataPoolVariable::end() const
   {
     iterator iter;
-    reinterpret_cast<DataPoolVariableImpl*>(this)->first_child(iter);
+    reinterpret_cast<const DataPoolVariableImpl*>(this)->first_child(iter);
     if(iter.pVarDesc) {
       iter.pVarDesc += m_pVdd->MemberCount();
     }
     return iter;
   }
   
-  Marimo::DataPoolUtility::element_iterator DataPoolVariable::array_begin()
+  Marimo::DataPoolUtility::element_iterator DataPoolVariable::array_begin() const
   {
     element_iterator iter;
-    reinterpret_cast<DataPoolVariableImpl*>(this)->first_element(iter);
+    reinterpret_cast<const DataPoolVariableImpl*>(this)->first_element(iter);
     return iter;
   }
 
-  Marimo::DataPoolUtility::element_iterator DataPoolVariable::array_end()
+  Marimo::DataPoolUtility::element_iterator DataPoolVariable::array_end() const
   {
     element_iterator iter;
-    reinterpret_cast<DataPoolVariableImpl*>(this)->first_element(iter);
+    reinterpret_cast<const DataPoolVariableImpl*>(this)->first_element(iter);
     iter.index = (GXUINT)GetLength();
     return iter;
   }

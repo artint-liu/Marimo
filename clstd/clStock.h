@@ -122,9 +122,10 @@ namespace clstd
       //{
       //  return pStock;
       //}
-      b32       empty               () const;
+      b32       empty               () const; // TODO: IsEmpty()
       void      clear               ();
 
+      StockT*   GetStock            () const;
       _TStr     SectionName         () const;
       Section   Open                (T_LPCSTR szSubPath) const; // 等价于StockT::Open()
       Section   Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
