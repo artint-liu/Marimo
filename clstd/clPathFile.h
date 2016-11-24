@@ -84,6 +84,11 @@ namespace clpathfile
   clStringA& CombinePathA  (clStringA& strDestPath, clStringA::LPCSTR szDir, clStringA::LPCSTR szFile);
   clStringW& CombinePathW  (clStringW& strDestPath, clStringW::LPCSTR szDir, clStringW::LPCSTR szFile);
 
+  template<typename _TString>
+  _TString  CombinePathT (typename _TString::LPCSTR szDir, typename _TString::LPCSTR szFile);
+  clStringA CombinePath  (clStringA::LPCSTR szDir, clStringA::LPCSTR szFile);
+  clStringW CombinePath  (clStringW::LPCSTR szDir, clStringW::LPCSTR szFile);
+
   // TODO: 考察准备废掉？
   template<typename _TString>
   _TString&  CombineAbsPathToT(_TString& strDestPath, const _TString& strSrcPath);

@@ -384,9 +384,9 @@ namespace Marimo
     GXSTDINTERFACE(GXHRESULT   ImportDataFromFile  (GXLPCWSTR szFilename));
     GXSTDINTERFACE(GXHRESULT   ImportDataFromFile  (GXLPCSTR szFilename));
     GXSTDINTERFACE(GXHRESULT   ImportDataFromMemory(clstd::Buffer* pBuffer, GXLPCWSTR szRefFilename = NULL));
-    GXSTDINTERFACE(GXHRESULT   ExportDataToFile    (GXLPCWSTR szFilename));
-    GXSTDINTERFACE(GXHRESULT   ExportDataToFile    (GXLPCSTR szFilename));
-    GXSTDINTERFACE(GXHRESULT   ExportDataToMemory  (clstd::Buffer* pBuffer));
+    GXSTDINTERFACE(GXHRESULT   ExportDataToFile    (GXLPCWSTR szFilename, GXLPCSTR szCodec = NULL)); // "ansi", "unicode"不区分大小写，默认为unicode
+    GXSTDINTERFACE(GXHRESULT   ExportDataToFile    (GXLPCSTR szFilename, GXLPCSTR szCodec = NULL));
+    GXSTDINTERFACE(GXHRESULT   ExportDataToMemory  (clstd::Buffer* pBuffer, GXLPCSTR szCodec = NULL));
 
     GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组
     GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ());                 // 必须是RawPool才返回指针

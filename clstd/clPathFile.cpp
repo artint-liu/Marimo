@@ -349,6 +349,18 @@ namespace clpathfile
     return CombinePathT(strDestPath, szDir, szFile);
   }
 
+  clStringA CombinePath(clStringA::LPCSTR szDir, clStringA::LPCSTR szFile)
+  {
+    clStringA str;
+    return CombinePathT(str, szDir, szFile);
+  }
+
+  clStringW CombinePath(clStringW::LPCSTR szDir, clStringW::LPCSTR szFile)
+  {
+    clStringW str;
+    return CombinePathT(str, szDir, szFile);
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   template<typename _TString>

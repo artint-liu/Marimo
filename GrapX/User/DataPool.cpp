@@ -224,9 +224,9 @@ namespace Marimo
       return ImportDataFromFile(clStringW(szFilename));
     }
 
-    virtual GXHRESULT ExportDataToFile(GXLPCSTR szFilename) override
+    virtual GXHRESULT ExportDataToFile(GXLPCSTR szFilename, GXLPCSTR szCodec) override
     {
-      return ExportDataToFile(clStringW(szFilename));
+      return ExportDataToFile(clStringW(szFilename), szCodec);
     }
 
     virtual GXHRESULT ImportDataFromMemory(clstd::Buffer* pBuffer, GXLPCWSTR szRefFilename) override
@@ -264,16 +264,35 @@ namespace Marimo
       return GX_FAIL;
     }
 
-    virtual GXHRESULT ExportDataToMemory(clstd::Buffer* pBuffer) override
-    {
-      IntExportToBuffer(pBuffer, begin(), end());
+    virtual GXHRESULT ExportDataToMemory(clstd::Buffer* pBuffer, GXLPCSTR szCodec) override
+    {      
+      if( ! szCodec || GXSTRCMPI(szCodec, "UNICODE") == 0){
+        IntExportToBuffer<clStringW>(pBuffer, begin(), end());
+      }
+      else if(GXSTRCMPI(szCodec, "ANSI") == 0) {
+        IntExportToBuffer<clStringA>(pBuffer, begin(), end());
+      }
+      else {
+        return GX_FAIL;
+      }
       return GX_OK;
     }
 
-    virtual GXHRESULT ExportDataToFile(GXLPCWSTR szFilename) override
+    virtual GXHRESULT ExportDataToFile(GXLPCWSTR szFilename, GXLPCSTR szCodec) override
     {
       clstd::Buffer buffer(4096);
-      if(GXSUCCEEDED(ExportDataToMemory(&buffer))) {
+      if( ! szCodec || GXSTRCMPI(szCodec, "UNICODE") == 0) {
+        GXDWORD dwBOM = BOM_UNICODE;
+        buffer.Append(&dwBOM, 2);
+      }
+      else if(GXSTRCMPI(szCodec, "ANSI") == 0){
+        // 没有BOM
+      }
+      else {
+        return GX_FAIL;
+      }
+
+      if(GXSUCCEEDED(ExportDataToMemory(&buffer, szCodec))) {
         clstd::File file;
         if( ! file.CreateAlwaysW(szFilename)) {
           CLOG_ERRORW(L"Can not create file (\"%s\").", szFilename);
@@ -434,11 +453,15 @@ namespace Marimo
     }
 
     //////////////////////////////////////////////////////////////////////////
+    template<class _TString>
     void IntExportVariableToBuffer(clstd::Buffer* pBuffer, const DataPoolVariable& var, int nDepth)
     {
       // TODO: 目前遍历需要在iterator与variable之间来回转换才能顺利遍历，以后消除这个问题
-      const size_t nBytesOfChar = sizeof(clStringW::TChar);
-      clStringW str;
+      const size_t nBytesOfChar = sizeof(_TString::TChar);
+      static _TString::TChar s_szSectionBeginFmt[] = {'%','s',' ','{','\r','\n','\0'};
+      static _TString::TChar s_szSectionEndFmt[] = {'}','\r','\n','\0'};
+      static _TString::TChar s_szVariableExprFmt[] = {'%','s','=','\"','%','s','\"',';','\r','\n','\0'};
+      _TString str;
       switch(var.GetTypeCategory())
       {
       case T_STRUCT:
@@ -446,29 +469,27 @@ namespace Marimo
         {
           str.Clear();
           str.Append(0x20, nDepth * 2);
-          str.AppendFormat(L"%s {\r\n", clStringW(var.GetName()));
+          str.AppendFormat(s_szSectionBeginFmt, _TString(var.GetName()));
           pBuffer->Append(str, str.GetLength() * nBytesOfChar);
-          //TRACEW(str);
 
-          IntExportToBuffer(pBuffer, var.begin(), var.end(), nDepth + 1);
+          IntExportToBuffer<_TString>(pBuffer, var.begin(), var.end(), nDepth + 1);
 
           str.Clear();
           str.Append(0x20, nDepth * 2);
-          str.Append(L"}\r\n");
+          str.Append(s_szSectionEndFmt);
           pBuffer->Append(str, str.GetLength() * nBytesOfChar);
-          //TRACEW(str);
         }
         break;;
       default:
         str.Clear();
         str.Append(0x20, nDepth * 2);
-        str.AppendFormat(L"%s=\"%s\";\r\n", clStringW(var.GetName()), var.ToStringW());
+        str.AppendFormat(s_szVariableExprFmt, _TString(var.GetName()), _TString(var.ToStringW()));
         pBuffer->Append(str, str.GetLength() * nBytesOfChar);
-        //TRACEW(str);
         break;
       }
     }
 
+    template<class _TString>
     void IntExportToBuffer(clstd::Buffer* pBuffer, DataPool::iterator it_begin, DataPool::iterator it_end, int nDepth = 0)
     {
       DataPoolVariable var;
@@ -481,13 +502,13 @@ namespace Marimo
           for(auto it_arr = it_arr_begin; it_arr != it_arr_end; ++it_arr)
           {
             it_arr.ToVariable(var);
-            IntExportVariableToBuffer(pBuffer, var, nDepth);
+            IntExportVariableToBuffer<_TString>(pBuffer, var, nDepth);
           }
         }
         else
         {
           it.ToVariable(var);
-          IntExportVariableToBuffer(pBuffer, var, nDepth);
+          IntExportVariableToBuffer<_TString>(pBuffer, var, nDepth);
         }
       } // for
     }
