@@ -1090,8 +1090,7 @@ namespace clstd
     }
     else
     {
-      memcpy(m_pBuf + idx + 1, m_pBuf + idx, 
-        (uStrLength - idx + 1) * sizeof(_TCh));
+      memcpy(m_pBuf + idx + 1, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
       m_pBuf[idx] = cCh;
     }
     return uStrLength + 1;
@@ -1590,8 +1589,9 @@ namespace clstd
     if(idx + uCount > uStrLength || ((i32)uCount) < 0)
       uCount = uStrLength - idx;
 
-    if(uCount < uInputLength)
+    if(uCount < uInputLength) {
       _ResizeLength(uStrLength - uCount + uInputLength);
+    }
 
     if(uStrLength - idx - uCount != 0 && uInputLength != uCount)
       memcpy(m_pBuf + idx + uInputLength, 
@@ -1637,8 +1637,7 @@ namespace clstd
     size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uInputLength);
 
     _ResizeLength(uLength + uStrLen);
-    _Traits::XStringToNative(
-      m_pBuf + uStrLen, uLength, pStrX, uInputLength);
+    _Traits::XStringToNative(m_pBuf + uStrLen, uLength, pStrX, uInputLength);
 
     return *this;
   }
@@ -1651,8 +1650,7 @@ namespace clstd
     size_t uLength = _Traits::XStringToNative(NULL, 0, pStrX, uCount);
 
     _ResizeLength(uLength + uStrLen);
-    _Traits::XStringToNative(
-      m_pBuf + uStrLen, uLength, pStrX, uCount);
+    _Traits::XStringToNative(m_pBuf + uStrLen, uLength, pStrX, uCount);
 
     return *this;
   }

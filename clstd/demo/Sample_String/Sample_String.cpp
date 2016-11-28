@@ -30,8 +30,8 @@ void TestCombinePath()
   clpathfile::CombinePathA(strPath, "abc\\", "def");
   ASSERT(strPath == "abc\\def");
 
-  clpathfile::CombinePathA(strPath, "abc\\", "//def");
-  ASSERT(strPath == "abc\\def");
+  clpathfile::CombinePathA(strPath, "abc\\", "/def");
+  ASSERT(strPath == "\\def");
 
   clpathfile::CombinePathA(strPath, "abc\\def", "ghi");
   ASSERT(strPath == "abc\\def\\ghi");
@@ -52,14 +52,19 @@ void TestCombinePath()
   ASSERT(strPath == "abc");
 
   clpathfile::CombinePathA(strPath, "", "../abc");
-  ASSERT(strPath == "../abc");
+  ASSERT(strPath == "..\\abc");
 
   clpathfile::CombinePathA(strPath, NULL, "./abc");
   ASSERT(strPath == "abc");
 
   clpathfile::CombinePathA(strPath, NULL, "../abc");
-  ASSERT(strPath == "../abc");
+  ASSERT(strPath == "..\\abc");
 
+  clpathfile::CombinePathA(strPath, "c:\\abc\\def", "d:\\ghi\\jkl");
+  ASSERT(strPath == "d:\\ghi\\jkl");
+
+  clpathfile::CombinePathA(strPath, "c:\\abc\\def", "\\ghi\\jkl");
+  ASSERT(strPath == "c:\\ghi\\jkl");
 }
 
 void TestString()

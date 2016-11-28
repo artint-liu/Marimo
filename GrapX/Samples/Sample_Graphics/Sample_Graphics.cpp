@@ -143,8 +143,8 @@ public:
     m_pEmptyTex->Clear(NULL, 0xff000000);
 //    m_pTarget->GetTextureUnsafe()->Clear(NULL, -1);
 
-    GXRECT rect1 = {40, 40, 404, 265};
-    GXRECT rect2 = {262, 184, 675, 437};
+    GXRECT rect1(40, 40, 404, 265);
+    GXRECT rect2(262, 184, 675, 437);
     GRegion* prgnTemp;
     m_pGraphics->CreateRoundRectRgn(&m_pRegion, rect1, 10, 10);
     m_pGraphics->CreateRoundRectRgn(&prgnTemp, rect2, 10, 10);
@@ -202,7 +202,7 @@ public:
     m_bAction = FALSE;
     m_ptAction.x = pActionInfo->ptCursor.x;
     m_ptAction.y = pActionInfo->ptCursor.y;
-    GXRECT rect = {0,0,100,100};
+    GXRECT rect(0,0,100,100);
     if(gxPtInRect(&rect, m_ptAction))
     {
       m_nPage++;
@@ -408,8 +408,8 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   pCanvas->SetRegion(NULL, FALSE);
   // Draw Rotated Texture
   {
-    GXREGN rgSrc = {0};
-    GXREGN rgDest = {0, 0, 128, 128};
+    GXREGN rgSrc(0);
+    GXREGN rgDest(0, 0, 128, 128);
     m_pTestIcon->GetDimension((GXUINT*)&rgSrc.width, (GXUINT*)&rgSrc.height);
 
     rgDest.left = 210;
@@ -616,7 +616,7 @@ void MyGraphicsTest::TestScroll(GXRECT& rect)
   //pCanvas->SetSamplerState(0, GXSAMP_MAGFILTER, GXTEXFILTER_POINT);
 
   REGN regnDst, regnSrc;
-  GXRECT rcScroll = {30, 50, 300, 300};
+  GXRECT rcScroll(30, 50, 300, 300);
 
   regnDst.left   = 0;//fRadius + cos(m_fTime) * fRadius;
   regnDst.top    = 0;//fRadius + sin(m_fTime) * fRadius;
@@ -633,7 +633,7 @@ void MyGraphicsTest::TestScroll(GXRECT& rect)
   }
   else if(s_nIndex == 1)
   {
-    GXRECT rcClip = {50, 70, 650, 250};
+    GXRECT rcClip(50, 70, 650, 250);
     GRegion* prgnUpdate = NULL;
     pCanvas->Scroll(100, 70, &rcScroll, &rcClip, &prgnUpdate, NULL);
     pCanvas->DrawRectangle(rcScroll.left, rcScroll.top, rcScroll.right - rcScroll.left, rcScroll.bottom - rcScroll.top, 0xff00ff00);

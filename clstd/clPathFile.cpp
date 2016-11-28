@@ -287,45 +287,61 @@ namespace clpathfile
       return strDestPath;
     }
     
-    _TString strTempPath;
-    strTempPath = szDir;
-    strTempPath.TrimRight((typename _TString::TChar)s_PathSlash);
-    strTempPath.TrimRight((typename _TString::TChar)s_VicePathSlash);
-
     static typename _TString::TChar s_aFindList[] = {'\\', '/', 0};
-    while(szFile[0] != '\0') {
-      switch(szFile[0])
-      {
-      case '.':
-        if(szFile[1] == '.') { // "..*"
-          size_t pos = strTempPath.ReverseFindAny(s_aFindList);
-          if(pos != _TString::npos) {
-            strTempPath.Remove(pos, -1);
+    _TString strTempPath;
+    if(IsRelativeT(szFile))
+    {
+      strTempPath = szDir;
+      strTempPath.TrimRight((typename _TString::TChar)s_PathSlash);
+      strTempPath.TrimRight((typename _TString::TChar)s_VicePathSlash);
+
+      while(szFile[0] != '\0') {
+        switch(szFile[0])
+        {
+        case '.':
+          if(szFile[1] == '.') { // "..*"
+            size_t pos = strTempPath.ReverseFindAny(s_aFindList);
+            if(pos != _TString::npos) {
+              strTempPath.Remove(pos, -1);
+            }
+            else if(strTempPath.IsNotEmpty()) {
+              strTempPath.Clear();
+            }
+            else {
+              break;
+            }
+            szFile += 2;
+            continue;
           }
-          else if(strTempPath.IsNotEmpty()) {
-            strTempPath.Clear();
+          else { // ".*"
+            szFile += 1;
+            continue;
           }
-          else {
-            break;
+          break;
+
+        case '\\': // "\\*"
+        case '/':  // "/*"
+          {
+            szFile++;
+            continue;
           }
-          szFile += 2;
-          continue;
-        }
-        else { // ".*"
-          szFile += 1;
-          continue;
         }
         break;
-
-      case '\\': // "\\*"
-      case '/':  // "/*"
-        {
-          szFile++;
-          continue;
-        }
       }
-      break;
     }
+#if defined(_WIN32) || defined(_WINDOWS)
+    else {
+      // 如果是 szFile 没有指定盘符，szDir指定了盘符，就复制这个盘符路径
+      if((szFile[0] == '\\' || szFile[0] == '/') && szDir[0] != '\0' &&
+        ((szDir[0] >= 'A' && szDir[0] <= 'Z') || (szDir[0] >= 'a' && szDir[0] <= 'z')) &&
+        szDir[1] == ':' && szDir[2] == '\\') {
+          strTempPath.Append(szDir, 3);
+          szFile++;
+      }
+    }
+#endif
+    // else: strDestPath = szFile
+
 
     if(strTempPath.IsNotEmpty() &&
       strTempPath.Back() != (typename _TString::TChar)s_PathSlash &&
@@ -333,7 +349,23 @@ namespace clpathfile
         strTempPath.Append((typename _TString::TChar)s_PathSlash);
     }
 
-    strTempPath.Append(szFile);
+    //clsize len = strTempPath.GetLength();
+    //_TString::LPCSTR pBack = strTempPath.GetBuffer(len + )
+    strTempPath.Reserve(strTempPath.GetLength() + clstd::strlenT(szFile));
+
+    while(*szFile) {
+      if(*szFile == (typename _TString::TChar)s_VicePathSlash) {
+        if(strTempPath.EndsWith((typename _TString::TChar)s_VicePathSlash)) {
+          strTempPath.Back() = (typename _TString::TChar)s_PathSlash;
+        } else if( ! strTempPath.EndsWith((typename _TString::TChar)s_PathSlash)) {
+          strTempPath.Append((typename _TString::TChar)s_PathSlash);
+        }
+      } else {
+        strTempPath.Append(*szFile);
+      }
+      szFile++;
+    }
+    //strTempPath.Append(szFile);
     
     strDestPath = strTempPath;
     return strDestPath;
