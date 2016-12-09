@@ -8,6 +8,21 @@
 #elif defined(_ARM64)
 #endif
 
+// 预定义宏
+// https://technet.microsoft.com/zh-cn/subscriptions/b0084kay(v=vs.80).aspx#_predir_table_1..3
+// https://msdn.microsoft.com/en-us/library/b0084kay.aspx
+// https://gcc.gnu.org/onlinedocs/cpp/Predefined-Macros.html
+// clang:clang -dM -E -x c /dev/null
+// https://sourceforge.net/p/predef/wiki/Architectures/
+
+#if defined(_M_IX86)
+#define _CL_ARCH_X86
+#elif defined(_M_X64)
+#define _CL_ARCH_X64
+#else
+# error 这是一个意料之外的CPU构架
+#endif
+
 // 操作系统平台
 #ifdef _WINDOWS
 #elif defined(_IOS)

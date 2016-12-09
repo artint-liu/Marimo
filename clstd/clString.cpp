@@ -529,9 +529,17 @@ namespace clstd
     _Reduce(_Traits::StringLength(m_pBuf));
   }
 
+#if defined(_CL_ARCH_X86)
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const size_t uInteger)
+    : m_pBuf(NULL)
+#elif defined(_CL_ARCH_X64)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const u32 uInteger)
     : m_pBuf(NULL)
+#else
+# error Missing cpu architecture
+#endif
   {
     _AllocBuffer(&alloc, MAX_DIGITS);
 
@@ -539,30 +547,21 @@ namespace clstd
     _Reduce(_Traits::StringLength(m_pBuf));
   }
 
-  //_CLSTR_TEMPL
-  //  _CLSTR_IMPL::StringX(const unsigned long uLong)
-  //  : m_pBuf(NULL)
-  //{
-  //  _Alloc(&alloc, MAX_DIGITS);
-
-  //  _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, uLong, 0);
-  //  _Reduce(_Traits::StringLength(m_pBuf));
-  //}
-
+#if defined(_CL_ARCH_X86)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const u64 val)
     : m_pBuf(NULL)
+#elif defined(_CL_ARCH_X64)
+  _CLSTR_TEMPL
+    _CLSTR_IMPL::StringX(const size_t val)
+    : m_pBuf(NULL)
+#else
+# error Missing cpu architecture
+#endif
   {
     _AllocBuffer(&alloc, MAX_DIGITS);
 
-//#if defined(_X86) || defined(_ARM)
-//      _Traits::Unsigned32ToString(m_pBuf, MAX_DIGITS, val, 0);
-//#elif defined(_X64) || defined(_ARM64)
-      _Traits::Unsigned64ToString(m_pBuf, MAX_DIGITS, val, 0);
-//#else
-//# error 缺少CPU架构定义
-//#endif
-
+    _Traits::Unsigned64ToString(m_pBuf, MAX_DIGITS, val, 0);
     _Reduce(_Traits::StringLength(m_pBuf));
   }
 

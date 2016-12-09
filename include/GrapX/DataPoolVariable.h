@@ -45,7 +45,12 @@ namespace Marimo
       return IndexOf((GXSIZE_T)nIndex);
     }
 
-    inline DataPoolVariable operator[](GXLPCSTR szMemberName) const
+    inline DataPoolVariable operator[](GXLPCSTR szMemberName) const // 废弃
+    {
+      return MemberOf(szMemberName);
+    }
+
+    inline DataPoolVariable operator()(GXLPCSTR szMemberName) const
     {
       return MemberOf(szMemberName);
     }

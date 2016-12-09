@@ -158,9 +158,15 @@ namespace clstd
     explicit StringX(const int nInteger);
     explicit StringX(const float fFloat, char mode = 'F');
     explicit StringX(const long lLong);
-    explicit StringX(const u32 uInteger);
-    //explicit StringX(const unsigned long uLong);
+#if defined(_CL_ARCH_X86)
+    explicit StringX(const size_t val);
     explicit StringX(const u64 val);
+#elif defined(_CL_ARCH_X64)
+    explicit StringX(const u32 uInteger);
+    explicit StringX(const size_t val);
+#else
+# error Missing cpu architecture
+#endif
     ~StringX();
 
     StringX& operator=(const _TCh* pStr);
@@ -370,7 +376,7 @@ namespace clstd
   {
     // 按照ch分割分解字符串
     template<typename _TCh, class _Fn>
-    size_t Resolve(const _TCh* str, size_t len, _TCh ch, _Fn fn)
+    size_t Resolve(const _TCh* str, size_t len, _TCh ch, _Fn fn) // fn(size_t index, const _TCh* str, size_t len)
     {
       if( ! len) { return 0; }
 
@@ -393,7 +399,7 @@ namespace clstd
 
     // 按照ch分割分解字符串
     template<typename _TStr, class _Fn>
-    size_t Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn)
+    size_t Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn) // // fn(size_t index, const _TCh* str, size_t len)
     {
       return Resolve((typename _TStr::LPCSTR)str, str.GetLength(), ch, fn);
     }
