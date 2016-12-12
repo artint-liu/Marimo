@@ -113,7 +113,7 @@ namespace clstd
   _SSP_TEMPL
   _SSP_IMPL::ATTRIBUTE::operator unspecified_bool_type() const
   {
-    return IsEmpty() ? 0 : __unspecified_bool_type<ATTRIBUTE>;
+    return IsEmpty() ? 0 : clstd::__unspecified_bool_type<ATTRIBUTE>;
   }
 
   _SSP_TEMPL
@@ -454,7 +454,7 @@ namespace clstd
   _SSP_TEMPL
   _SSP_IMPL::Section::operator unspecified_bool_type() const
   {
-    return empty() ? 0 : __unspecified_bool_type<Section>;
+    return empty() ? 0 : clstd::__unspecified_bool_type<Section>;
   }
 
   _SSP_TEMPL

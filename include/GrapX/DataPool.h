@@ -439,8 +439,11 @@ namespace Marimo
     };
 
   public:
-    // 重载了[]符号，用着比较方便，但是不如QueryByExpression性能好.
-    DataPoolVariable operator[](GXLPCSTR szExpression);
+    // 重载了()符号，用着比较方便，等价于QueryByExpression，但是不如QueryByExpression性能好.
+    DataPoolVariable operator()(GXLPCSTR szExpression);
+
+    // 重载了[]符号，等价于QueryByName.
+    DataPoolVariable operator[](GXLPCSTR szVarName);
 
     // 基于lambda表达式的watch方法，改名为WatchFor是为了防止与Watch系列函数发生不明确的重载函数调用问题
     // _TVarId既可以是GXLPCSTR，也可以是DataPoolVariable*

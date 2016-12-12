@@ -769,17 +769,19 @@ namespace Marimo
 
 
 
-
-
-
-
-  Marimo::DataPoolVariable DataPool::operator[]( GXLPCSTR szExpression )
+  DataPoolVariable DataPool::operator()( GXLPCSTR szExpression )
   {
     DataPoolVariable var;
     QueryByExpression(szExpression, &var);
     return var;
   }
 
+  DataPoolVariable DataPool::operator[](GXLPCSTR szVarName)
+  {
+    DataPoolVariable var;
+    QueryByName(szVarName, &var);
+    return var;
+  }
 
   //////////////////////////////////////////////////////////////////////////
 

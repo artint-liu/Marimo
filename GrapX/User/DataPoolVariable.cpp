@@ -64,6 +64,26 @@ namespace Marimo
   Variable Struct_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName);
   Variable Array_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex);
 
+  //////////////////////////////////////////////////////////////////////////
+
+  template<class _TStoString> // 返回字符串类型和自身储存的字符串类型
+  typename _TStoString::LPCSTR String_ToCStringT(GXCONST VarImpl* pThis)
+  {
+    ASSERT(pThis->InlGetCategory() == T_STRING || pThis->InlGetCategory() == T_STRINGA);
+
+    GXLPBYTE pStringData = (GXBYTE*)pThis->GetPtr();// InlGetBufferPtr() + pThis->GetOffset());
+    if((*(void**)pStringData) == NULL) {
+      return (typename _TStoString::LPCSTR)("\0\0");
+    }
+    else if(pThis->IsReadOnly()) {
+      return *(typename _TStoString::LPCSTR*)((GXBYTE*)pStringData);
+    }
+    return (typename _TStoString::LPCSTR)(*(_TStoString*)((GXBYTE*)pStringData));
+  }
+
+
+  //////////////////////////////////////////////////////////////////////////
+
   DataPoolVariable::DataPoolVariable( VTBL* vtbl, LPCVD pVdd, clBufferBase* pBufferBase, GXUINT nAbsOffset )
     : m_vtbl(vtbl), m_pVdd(pVdd), m_pBuffer(pBufferBase), m_AbsOffset(nAbsOffset)
   {
@@ -95,6 +115,11 @@ namespace Marimo
   {
     Free();
   }
+
+  //DataPoolVariable::operator unspecified_bool_type() const
+  //{
+  //  return IsEmpty() ? NULL : clstd::__unspecified_bool_type<DataPoolVariable>;
+  //}
 
   //////////////////////////////////////////////////////////////////////////
   // 这个类里面不储存成员变量，只是用来扩展访问DataPoolVariable
@@ -485,8 +510,101 @@ namespace Marimo
 
   GXBOOL Variable::Set(const DataPoolVariable& var)
   {
-    // TODO: 这个是临时写法
-    return Set(var.ToStringW());
+    //return Set(var.ToStringW());
+
+    // TODO: 没测试过
+    const TypeCategory eDestCate = GetTypeCategory();
+    const TypeCategory eSrcCate = var.GetTypeCategory();
+    union _CTX {
+      u8  _u8;
+      u16 _u16;
+      u32 _u32;
+      u64 _u64;
+      float fval;
+    } c;
+
+    c._u64 = 0;
+
+    switch(eSrcCate)
+    {
+    case T_BYTE:
+    case T_SBYTE:
+      c._u8 = *(u8*)var.GetPtr();
+      break;
+
+    case T_WORD:
+    case T_SWORD:
+      c._u16 = *(u16*)var.GetPtr();
+      break;
+
+    case T_DWORD:
+    case T_SDWORD:
+      c._u32 = *(u32*)var.GetPtr();
+      break;
+
+    case T_QWORD:
+    case T_SQWORD:
+      c._u64 = *(u64*)var.GetPtr();
+      break;
+
+    case T_FLOAT:
+      c.fval = *(float*)var.GetPtr();
+      break;
+
+    case T_STRING:
+    case T_STRINGA:
+    case T_OBJECT:
+    case T_ENUM:
+    case T_FLAG:
+    case T_STRUCT:
+    default:
+      CLBREAK;
+      return FALSE;
+    }
+
+    switch(eDestCate)
+    {
+    case T_BYTE:
+    case T_SBYTE:
+    case T_WORD:
+    case T_SWORD:
+    case T_DWORD:
+    case T_SDWORD:
+    case T_ENUM:
+    case T_FLAG:
+      return m_vtbl->SetAsInteger(CAST2VARPTR(this), var.m_vtbl->ToInteger(CAST2VARPTRC(&var)));
+
+    case T_QWORD:
+    case T_SQWORD:
+      return m_vtbl->SetAsInt64(CAST2VARPTR(this), var.m_vtbl->ToInt64(CAST2VARPTRC(&var)));
+
+    case T_FLOAT:
+      return m_vtbl->SetAsFloat(CAST2VARPTR(this), var.m_vtbl->ToFloat(CAST2VARPTRC(&var)));
+
+    case T_STRING:
+      if(eSrcCate == T_STRING) {
+        m_vtbl->SetAsStringW(CAST2VARPTR(this), String_ToCStringT<clStringW>(CAST2VARPTRC(&var)));
+      }
+      else if(eSrcCate == T_STRINGA) {
+        m_vtbl->SetAsStringA(CAST2VARPTR(this), String_ToCStringT<clStringA>(CAST2VARPTRC(&var)));
+      }
+      return m_vtbl->SetAsStringW(CAST2VARPTR(this), var.m_vtbl->ToStringW(CAST2VARPTRC(&var)));
+
+    case T_STRINGA:
+      if(eSrcCate == T_STRING) {
+        m_vtbl->SetAsStringW(CAST2VARPTR(this), String_ToCStringT<clStringW>(CAST2VARPTRC(&var)));
+      }
+      else if(eSrcCate == T_STRINGA) {
+        m_vtbl->SetAsStringA(CAST2VARPTR(this), String_ToCStringT<clStringA>(CAST2VARPTRC(&var)));
+      }
+      return m_vtbl->SetAsStringA(CAST2VARPTR(this), var.m_vtbl->ToStringA(CAST2VARPTRC(&var)));
+
+    case T_OBJECT:
+    case T_STRUCT:
+    default:
+      CLOG_ERROR("DataPoolVariable::Set : Unsupport destination type category(%d).", eDestCate);
+    }
+    return FALSE;
   }
 
   GXVOID Variable::Free()
@@ -496,8 +614,13 @@ namespace Marimo
 
   GXBOOL Variable::IsValid() GXCONST
   {
-    return m_pDataPool != NULL && m_vtbl != NULL && m_pBuffer != NULL;
+    return (m_pDataPool && m_vtbl && m_pBuffer);
   }
+
+  //GXBOOL Variable::IsEmpty() GXCONST
+  //{
+  //  return ! (m_pDataPool != NULL && m_vtbl != NULL && m_pBuffer != NULL);
+  //}
 
   GXLPVOID Variable::GetPtr() GXCONST
   {
@@ -1146,14 +1269,15 @@ namespace Marimo
   template<class _TRetString, class _TStoString> // 返回字符串类型和自身储存的字符串类型
   _TRetString String_ToStringT(GXCONST VarImpl* pThis)
   {
-    GXLPBYTE pStringData = (GXBYTE*)pThis->GetPtr();// InlGetBufferPtr() + pThis->GetOffset());
-    if((*(void**)pStringData) == NULL) {
-      return "";
-    }
-    else if(pThis->IsReadOnly()) {
-      return _TRetString(*(typename _TStoString::LPCSTR*)((GXBYTE*)pStringData));
-    }
-    return _TRetString(*(_TStoString*)((GXBYTE*)pStringData));
+    return _TRetString(String_ToCStringT<_TStoString>(pThis));
+    //GXLPBYTE pStringData = (GXBYTE*)pThis->GetPtr();// InlGetBufferPtr() + pThis->GetOffset());
+    //if((*(void**)pStringData) == NULL) {
+    //  return "";
+    //}
+    //else if(pThis->IsReadOnly()) {
+    //  return _TRetString(*(typename _TStoString::LPCSTR*)((GXBYTE*)pStringData));
+    //}
+    //return _TRetString(*(_TStoString*)((GXBYTE*)pStringData));
   }
 
   template<typename T_LPCSTR, class _TStoString>

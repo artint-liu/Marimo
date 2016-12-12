@@ -123,7 +123,7 @@ void TestWatcher(DataPool* pDataPool)
   });
 
   // ÐÞ¸ÄVarÊý¾Ý
-  auto var = (*pDataPool)["sTestC.name"];
+  auto var = (*pDataPool)("sTestC.name");
   TRACE("before:%s\n", var.ToStringA());
   var.Set("set new string.");
 

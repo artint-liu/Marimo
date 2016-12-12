@@ -11,14 +11,17 @@
 // 预定义宏
 // https://technet.microsoft.com/zh-cn/subscriptions/b0084kay(v=vs.80).aspx#_predir_table_1..3
 // https://msdn.microsoft.com/en-us/library/b0084kay.aspx
+// https://blogs.msdn.microsoft.com/c/2015/12/08/vs-2015-update-1-clang/
 // https://gcc.gnu.org/onlinedocs/cpp/Predefined-Macros.html
 // clang:clang -dM -E -x c /dev/null
 // https://sourceforge.net/p/predef/wiki/Architectures/
 
-#if defined(_M_IX86)
+#if defined(_M_IX86) || defined(__i386__)
 #define _CL_ARCH_X86
-#elif defined(_M_X64)
+#elif defined(_M_X64) || defined(__amd64__)
 #define _CL_ARCH_X64
+#elif defined(__aarch64__)
+#define _CL_ARCH_ARM64
 #else
 # error 这是一个意料之外的CPU构架
 #endif
@@ -99,6 +102,16 @@ inline void InlSetZeroT(_Ty& t) {
 #else
 # define CLTRIVIAL_DEFAULT = default
 #endif
+
+// 弃用标记
+#if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
+#define CLDEPRECATED_ATTRIBUTE __attribute__((deprecated))
+#elif _MSC_VER >= 1400 //vs 2005 or higher
+#define CLDEPRECATED_ATTRIBUTE __declspec(deprecated) 
+#else
+#define CLDEPRECATED_ATTRIBUTE
+#endif 
+
 
 #define SETBIT(_DW, _IDX)       ((_DW) |= (1 << (_IDX)))
 #define RESETBIT(_DW, _IDX)     ((_DW) &= (~(1 << (_IDX))))

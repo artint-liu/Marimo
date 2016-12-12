@@ -72,10 +72,11 @@ namespace Marimo
     DataPoolVariable& operator=   (i64 val);
     DataPoolVariable& operator=   (u32 val);            // 如果变量不足32位会被截断
     DataPoolVariable& operator=   (u64 val);
-    DataPoolVariable& operator=   (const DataPoolVariable& var);  // var 的描述信息复制给新的目标
+    DataPoolVariable& operator=   (const DataPoolVariable& var);  // var对象复制， 描述信息复制给新的目标
 
-    //DataPoolVariable& operator*   (DataPoolVariable* pVar);       // var 的内容复制给新的目标
-
+    // 编译提示: warning C4800: “Marimo::DataPoolVariable::unspecified_bool_type”: 将值强制为布尔值“true”或“false”(性能警告)
+    //typedef void (*unspecified_bool_type)(DataPoolVariable***);
+    //                  operator unspecified_bool_type() const;
 
     GXBOOL            Impulse         (DataAction reason, GXSIZE_T index = 0, GXSIZE_T count = 0); // index和count只有是数组时才有效
     GXHRESULT         GetPool         (DataPool** ppDataPool) GXCONST;
@@ -83,6 +84,7 @@ namespace Marimo
     GXBOOL            IsSamePool      (DataPool* pDataPool) GXCONST;
     GXVOID            Free            ();
     GXBOOL            IsValid         () GXCONST;  // 返回这个 Variable 是否有效
+    //GXBOOL            IsEmpty         () GXCONST;  // 返回这个 Variable 是否无效
     GXLPVOID          GetPtr          () GXCONST;  // 指针, 要注意动态数据指针会因为 NewBack 操作改变
     GXUINT            GetSize         () GXCONST;  // 字节大小, 数组是数组大小, 动态数据大小可变, 结构是结构体大小
     GXUINT            GetOffset       () GXCONST;  // 偏移,全局变量是全局偏移, 结构体变量是结构体内偏移
@@ -109,7 +111,9 @@ namespace Marimo
     clStringW         ToStringW       () GXCONST;           // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
     clStringA         ToStringA       () GXCONST;
 
-    GXBOOL            Set             (const DataPoolVariable& var);  // 注意这个和“operator=”含义不同
+    //GXBOOL            CopyFrom        (const DataPoolVariable& var);  // 从一个变量对象拷贝值，如果是变量，变量类型一致才能成功，如果是结构体，会遍历同层成员变量，类型与名一致才能拷贝，否则就跳过。
+    // 没实现 GXBOOL            TransferFrom    (const DataPoolVariable& var);  // 从一个变量对象传送值，如果是变量，会尽量解析到目标变量，如果是结构体，按照同名变量尽量解析到目标变量.
+    GXBOOL            Set             (const DataPoolVariable& var);  // 注意这个和“operator=”含义不同, 只有非结构体，非数组对象才能赋值成功
     GXBOOL            Set             (GXLPCWSTR szString);
     GXBOOL            Set             (GXLPCSTR szString);
     GXBOOL            Set             (float val);
