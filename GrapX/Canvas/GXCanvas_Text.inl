@@ -400,7 +400,7 @@ RET_IMMT:
     GXSIZE sizeExtent;
     //GXINT nStrLength = (p->nCount == -1) ? GXSTRLEN(p->lpString) : p->nCount;
     INTMEASURESTRING m = *p;
-    m.cString = (p->cString == -1) ? GXSTRLEN(p->lpString) : p->cString;
+    m.cString = (p->cString == -1) ? (GXINT)GXSTRLEN(p->lpString) : p->cString;
 
     // Ö»¼ÆËã×Ö·û´®³ß´ç
     if(p->uFormat & GXDT_CALCRECT)

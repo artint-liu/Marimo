@@ -158,10 +158,10 @@ namespace clstd
     explicit StringX(const int nInteger);
     explicit StringX(const float fFloat, char mode = 'F');
     explicit StringX(const long lLong);
-#if defined(_CL_ARCH_X86)
+#if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
     explicit StringX(const size_t val);
     explicit StringX(const u64 val);
-#elif defined(_CL_ARCH_X64)
+#elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
     explicit StringX(const u32 uInteger);
     explicit StringX(const size_t val);
 #else

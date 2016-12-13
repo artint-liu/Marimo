@@ -1,13 +1,6 @@
 ﻿#ifndef _CL_STD_CODE_
 #define _CL_STD_CODE_
 
-// 处理器平台
-#ifdef _X86
-#elif defined(_X64)
-#elif defined(_ARM)
-#elif defined(_ARM64)
-#endif
-
 // 预定义宏
 // https://technet.microsoft.com/zh-cn/subscriptions/b0084kay(v=vs.80).aspx#_predir_table_1..3
 // https://msdn.microsoft.com/en-us/library/b0084kay.aspx
@@ -16,39 +9,47 @@
 // clang:clang -dM -E -x c /dev/null
 // https://sourceforge.net/p/predef/wiki/Architectures/
 
+// 避免使用"PLATFORM"做为库定义宏，这个单词可能指构架平台，操作系统平台或者支付平台，容易引起歧异
+
+// 处理器平台
 #if defined(_M_IX86) || defined(__i386__)
-#define _CL_ARCH_X86
+# define _CL_ARCH_X86
 #elif defined(_M_X64) || defined(__amd64__)
-#define _CL_ARCH_X64
+# define _CL_ARCH_X64
+#elif defined(__arm__)
+#define _CL_ARCH_ARM
 #elif defined(__aarch64__)
-#define _CL_ARCH_ARM64
+# define _CL_ARCH_ARM64
 #else
 # error 这是一个意料之外的CPU构架
 #endif
 
 // 操作系统平台
-#ifdef _WINDOWS
-#elif defined(_IOS)
-#elif defined(_ANDROID)
+#if defined(_WIN32)
+# define _CL_SYSTEM_WINDOWS
 #endif
 
-#if !defined(_X86) && !defined(_X64) && !defined(_ARM) && !defined(_ARM64)
-# define _X86
+#if defined(_CL_SYSTEM_WINDOWS)   // 桌面windows
+#elif defined(_CL_SYSTEM_UWP)     // Universal windows platform
+#elif defined(_CL_SYSTEM_IOS)
+#elif defined(_CL_SYSTEM_IOS_SIM) // ios 模拟器
+#elif defined(_CL_SYSTEM_ANDROID)
 #endif
 
-#if ! defined(_WINDOWS) && ! defined(_IOS) && ! defined(_ANDROID)
-# define _WINDOWS
-#endif
 
-#if defined(_WINDOWS)
+//#if ! defined(_WINDOWS) && ! defined(_IOS) && ! defined(_ANDROID)
+//# define _WINDOWS
+//#endif
+
+#if defined(_CL_SYSTEM_WINDOWS)
 # include <windows.h>
 //# if !defined(_WIN32) && !defined(_WIN64)
 //# define _WIN32
-//# endif // #if !defined(_X86) && !defined(_X64)
+//# endif // #if !defined(_CL_ARCH_X86) && !defined(_CL_ARCH_X64)
 
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
 # include <assert.h>
-#elif defined(_ANDROID)
+#elif defined(_CL_SYSTEM_ANDROID)
 # include <wchar.h>
 #else
 # error 未知平台或者新增加的平台
@@ -144,7 +145,7 @@ inline void InlSetZeroT(_Ty& t) {
 
 
 #ifdef _DEBUG
-# if defined(_WINDOWS) || defined(_CONSOLE)
+# if defined(_CL_SYSTEM_WINDOWS) || defined(_CONSOLE)
 #   ifdef __clang__
 #     include <assert.h>
 #     define TRACEW        wprintf
@@ -165,7 +166,7 @@ inline void InlSetZeroT(_Ty& t) {
 #     define V(x)              if(FAILED(x)) { CLBREAK; }
 #     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
 #   elif defined(_MSC_VER)
-#     ifdef _X86
+#     ifdef _CL_ARCH_X86
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
 extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
 
@@ -204,7 +205,7 @@ extern "C" void _cl_log_warningW(const wchar_t *fmt, ...);
 #       define STATIC_ASSERT(x)    static_assert(x, #x);
 #       define V(x)              if(FAILED(x)) { CLBREAK; }
 #       define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
-#     elif defined(_X64)
+#     elif defined(_CL_ARCH_X64)
 extern "C" void _cl_traceA(const char *fmt, ...);
 extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
@@ -229,10 +230,10 @@ extern "C" void _cl_NoOperation();
 #       define STATIC_ASSERT(x)    static_assert(x, #x);
 #       define V(x)              if(FAILED(x)) { _cl_Break(); }
 #       define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}
-#     endif // #ifdef _X86
+#     endif // #ifdef _CL_ARCH_X86
 #   endif  // #   ifdef __clang__
 
-# elif defined(_IOS) || defined(_ANDROID)
+# elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)
 #	include <assert.h>
 void _cl_traceA(const char *fmt, ...);
 void _cl_traceW(const wchar_t *fmt, ...);
@@ -258,15 +259,15 @@ void _cl_traceW(const wchar_t *fmt, ...);
 #	error 新平台
 # endif // #if defined(_WINDOWS) || defined(_CONSOLE)
 #else  // _DEBUG
-#  if defined(_WINDOWS) || defined(_WIN32)
+#  if defined(_CL_SYSTEM_WINDOWS)
 extern "C" void _cl_traceA(const char *fmt, ...);
 extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
 extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
-#  elif defined(_IOS)
+#  elif defined(_CL_SYSTEM_IOS)
 void _cl_traceA(const char *fmt, ...);
 void _cl_traceW(const wchar_t *fmt, ...);
-#  elif defined(_ANDROID)
+#  elif defined(_CL_SYSTEM_ANDROID)
 extern "C" void _cl_traceA(const char *fmt, ...);
 extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 #  endif // #if defined(_WINDOWS) || defined(_WIN32)
@@ -306,7 +307,7 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 #define INVALID_HANDLE_VALUE ((HANDLE)(u32_ptr)-1)
 #endif // INVALID_HANDLE_VALUE
 
-#if defined(_WINDOWS) || defined(_WIN32)
+#if defined(_CL_SYSTEM_WINDOWS)
 #  ifndef CALLBACK
 #    define CALLBACK __stdcall
 #  endif
@@ -314,7 +315,7 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 #define CALLBACK
 #endif
 
-#if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
+#if defined(_CL_SYSTEM_WINDOWS) && !defined(POSIX_THREAD)
 //#include <windows.h>
 #define CL_CALLBACK  __stdcall
 #else

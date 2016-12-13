@@ -300,7 +300,7 @@ namespace Marimo
         }
         
         u32 uNumOfWrites = 0;
-        if(file.Write(buffer.GetPtr(), buffer.GetSize(), &uNumOfWrites) && buffer.GetSize() == uNumOfWrites) {
+        if(file.Write(buffer.GetPtr(), (u32)buffer.GetSize(), &uNumOfWrites) && buffer.GetSize() == uNumOfWrites) {
           return TRUE;
         }
         CLOG_ERRORW(L"%s : Not write properly (\"%s\").", __FUNCTIONW__, szFilename);

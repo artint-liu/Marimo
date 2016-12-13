@@ -51,7 +51,7 @@ GXBOOL GXDLLAPI gxStr_SetPtrW (GXLPWSTR *lppDest, GXLPCWSTR lpSrc)
   TRACE("(%p %p)\n", lppDest, lpSrc);
 
   if (lpSrc) {
-    GXINT len = GXSTRLEN(lpSrc) + 1;
+    GXINT len = (GXINT)GXSTRLEN(lpSrc) + 1;
     Free(*lppDest);
     GXLPWSTR ptr = (GXLPWSTR)Alloc (len * sizeof(GXWCHAR));
     if (!ptr)
@@ -78,7 +78,7 @@ GXINT GXDLLAPI gxStr_GetPtrW(GXLPCWSTR lpSrc, GXLPWSTR lpDest, GXINT nMaxLen)
   TRACE("(%p %p %d)\n", lpSrc, lpDest, nMaxLen);
 
   if (!lpDest && lpSrc)
-    return GXSTRLEN (lpSrc);
+    return (GXINT)GXSTRLEN (lpSrc);
 
   if (nMaxLen == 0)
     return 0;
@@ -88,7 +88,7 @@ GXINT GXDLLAPI gxStr_GetPtrW(GXLPCWSTR lpSrc, GXLPWSTR lpDest, GXINT nMaxLen)
     return 0;
   }
 
-  len = GXSTRLEN (lpSrc);
+  len = (GXINT)GXSTRLEN (lpSrc);
   if (len >= nMaxLen)
     len = nMaxLen - 1;
 

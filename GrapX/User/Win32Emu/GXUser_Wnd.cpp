@@ -599,7 +599,7 @@ int GXDLLAPI gxInternalGetWindowText(
                   int nMaxCount
                   )
 {
-  GXINT nLen = GXSTRLEN(GXWND_PTR(hWnd)->m_pText) + 1;
+  GXINT nLen = (GXINT)GXSTRLEN(GXWND_PTR(hWnd)->m_pText) + 1;
   nLen = nLen < nMaxCount ? nLen : nMaxCount;
   GXSTRCPYN(lpString, GXWND_PTR(hWnd)->m_pText, (int)nLen);
   return nLen;

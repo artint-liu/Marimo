@@ -510,7 +510,7 @@ FINAL_RET:
     }
   };
 
-#if defined(_ANDROID) || defined(_IOS)
+#if defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
 	typedef union _LARGE_INTEGER {
 		struct {
 			CLDWORD LowPart;

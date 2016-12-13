@@ -767,7 +767,7 @@ void EDITSTATE::BuildLineDefs_ML(GXINT istart, GXINT iend, GXINT delta, GXHRGN h
 inline GXUINT EDITSTATE::get_text_length()
 {
   if(m_nTextLength == (GXUINT)-1)
-    m_nTextLength = GXSTRLEN(m_pText);
+    m_nTextLength = (GXUINT)GXSTRLEN(m_pText);
   return m_nTextLength;
 }
 
@@ -809,7 +809,7 @@ void EDITSTATE::CalcLineWidth_SL()
   if (m_hFont)
     old_font = (GXHFONT)gxSelectObject(dc, m_hFont);
 
-  gxGetTextExtentPoint32W(dc, text, GXSTRLEN(text), &size);
+  gxGetTextExtentPoint32W(dc, text, (GXUINT)GXSTRLEN(text), &size);
 
   if (m_hFont)
     gxSelectObject(dc, old_font);
@@ -2488,7 +2488,7 @@ GXLRESULT EDITSTATE::EM_GetSel(GXLPUINT start, GXLPUINT end)
 */
 void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL send_update, GXBOOL honor_limit, GXBOOL bImpulse)
 {
-  GXUINT strl = GXSTRLEN(lpsz_replace);
+  GXUINT strl = (GXUINT)GXSTRLEN(lpsz_replace);
   GXUINT tl = get_text_length();
   GXUINT utl;
   GXUINT s;
@@ -2594,7 +2594,7 @@ void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL se
 
   if (e != s) {
     if (can_undo) {
-      utl = GXSTRLEN(undo_text);
+      utl = (GXUINT)GXSTRLEN(undo_text);
       if (!undo_insert_count && (*undo_text && (s == undo_position))) {
         /* undo-buffer is extended to the right */
         MakeUndoFit(utl + e - s);
@@ -2946,7 +2946,7 @@ GXBOOL EDITSTATE::EM_Undo()
   if( m_dwStyle & ES_READONLY )
     return !(m_dwStyle & GXES_MULTILINE);
 
-  ulength = GXSTRLEN(undo_text);
+  ulength = (GXUINT)GXSTRLEN(undo_text);
 
   utext = (GXLPWSTR)gxHeapAlloc(gxGetProcessHeap(), 0, (ulength + 1) * sizeof(GXWCHAR));
 
@@ -3258,7 +3258,7 @@ GXINT EDITSTATE::WM_GetText(GXINT count, GXLPWSTR dst, GXBOOL unicode) const
   if(unicode)
   {
     lstrcpynW(dst, m_pText, count);
-    return GXSTRLEN(dst);
+    return (GXUINT)GXSTRLEN(dst);
   }
   else
   {

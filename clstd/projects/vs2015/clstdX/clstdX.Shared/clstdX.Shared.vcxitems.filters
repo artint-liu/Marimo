@@ -147,6 +147,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\cltypes.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3D">

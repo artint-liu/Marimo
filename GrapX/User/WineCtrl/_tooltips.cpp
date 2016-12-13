@@ -1089,7 +1089,7 @@ GXLRESULT TOOLTIPS_INFO::AddToolW(GXHWND hWnd, GXWPARAM wParam, GXLPARAM lParam)
       toolPtr->lpszText = GXLPSTR_TEXTCALLBACKW;
     }
     else {
-      GXINT len = GXSTRLEN (lpToolInfo->lpszText);
+      GXINT len = (GXINT)GXSTRLEN(lpToolInfo->lpszText);
       TRACE("add text %s!\n",
         debugstr_w(lpToolInfo->lpszText));
       toolPtr->lpszText =  (GXLPWSTR)Alloc ((len + 1)*sizeof(GXWCHAR));
@@ -1935,7 +1935,7 @@ TOOLTIPS_SetTitleW (GXHWND hwnd, GXWPARAM wParam, GXLPARAM lParam)
 
   if (pszTitle)
   {
-    size = (GXSTRLEN(pszTitle)+1)*sizeof(GXWCHAR);
+    size = ((GXUINT)GXSTRLEN(pszTitle)+1)*sizeof(GXWCHAR);
     infoPtr->pszTitle = (GXLPWSTR)Alloc(size);
     if (!infoPtr->pszTitle)
       return FALSE;
@@ -2055,7 +2055,7 @@ TOOLTIPS_SetToolInfoW (GXHWND hwnd, GXWPARAM wParam, GXLPARAM lParam)
           toolPtr->lpszText = NULL;
       }
       if (lpToolInfo->lpszText) {
-        GXINT len = GXSTRLEN (lpToolInfo->lpszText);
+        GXINT len = (GXINT)GXSTRLEN(lpToolInfo->lpszText);
         toolPtr->lpszText = (GXLPWSTR)Alloc ((len+1)*sizeof(GXWCHAR));
         GXSTRCPY (toolPtr->lpszText, lpToolInfo->lpszText);
       }
@@ -2240,7 +2240,7 @@ TOOLTIPS_UpdateTipTextW (GXHWND hwnd, GXWPARAM wParam, GXLPARAM lParam)
           toolPtr->lpszText = NULL;
       }
       if (lpToolInfo->lpszText) {
-        GXINT len = GXSTRLEN (lpToolInfo->lpszText);
+        GXINT len = (GXINT)GXSTRLEN(lpToolInfo->lpszText);
         toolPtr->lpszText = (GXLPWSTR)Alloc ((len+1)*sizeof(GXWCHAR));
         GXSTRCPY (toolPtr->lpszText, lpToolInfo->lpszText);
       }

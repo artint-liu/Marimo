@@ -19,7 +19,7 @@
 # else
 #   define GXAPI                  __stdcall
 # endif
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
 #define _GXW64
 #define GXCALLBACK
 #define GXAPI

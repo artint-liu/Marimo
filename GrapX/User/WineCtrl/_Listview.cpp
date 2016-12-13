@@ -522,7 +522,7 @@ static inline GXBOOL is_textT(GXLPCWSTR text, GXBOOL isW)
 static inline int textlenT(GXLPCWSTR text, GXBOOL isW)
 {
   return !is_textT(text, isW) ? 0 :
-    isW ? GXSTRLEN(text) : GXSTRLEN((GXLPCSTR)text);
+    (int)(isW ? GXSTRLEN(text) : GXSTRLEN((GXLPCSTR)text));
 }
 
 static inline void textcpynT(GXLPWSTR dest, GXBOOL isDestW, GXLPCWSTR src, GXBOOL isSrcW, GXINT max)
@@ -6354,7 +6354,7 @@ static GXINT LISTVIEW_GetStringWidthT(const LISTVIEW_INFO *infoPtr, GXLPCWSTR lp
     GXHFONT hOldFont = (GXHFONT)gxSelectObject(hdc, hFont);
 
     if (isW)
-      gxGetTextExtentPointW(hdc, lpszText, GXSTRLEN(lpszText), &stringSize);
+      gxGetTextExtentPointW(hdc, lpszText, (GXINT)GXSTRLEN(lpszText), &stringSize);
     //else
     //GetTextExtentPointA(hdc, (GXLPCSTR)lpszText, lstrlenA((GXLPCSTR)lpszText), &stringSize);
     gxSelectObject(hdc, hOldFont);
@@ -7123,7 +7123,7 @@ static GXBOOL LISTVIEW_SetColumnWidth(LISTVIEW_INFO *infoPtr, GXINT nColumn, GXI
         GXHFONT old_font = (GXHFONT)gxSelectObject(hdc, (GXHFONT)gxSendMessageW(infoPtr->hwndHeader, GXWM_GETFONT, 0, 0));
         GXSIZE size;
 
-        if (gxGetTextExtentPoint32W(hdc, hdi.pszText, GXSTRLEN(hdi.pszText), &size))
+        if (gxGetTextExtentPoint32W(hdc, hdi.pszText, (GXINT)GXSTRLEN(hdi.pszText), &size))
           cx = size.cx + TRAILING_HEADER_PADDING;
         /* FIXME: Take into account the header image, if one is present */
         gxSelectObject(hdc, old_font);
@@ -10227,7 +10227,7 @@ static GXLRESULT LISTVIEW_Command(const LISTVIEW_INFO *infoPtr, GXWPARAM wParam,
         hOldFont = (GXHFONT)gxSelectObject(hdc, hFont);
       }
 
-      if (gxGetTextExtentPoint32W(hdc, buffer, GXSTRLEN(buffer), &sz))
+      if (gxGetTextExtentPoint32W(hdc, buffer, (GXINT)GXSTRLEN(buffer), &sz))
       {
         GXTEXTMETRICW textMetric;
 
@@ -10408,7 +10408,7 @@ static GXHWND CreateEditLabelT(LISTVIEW_INFO *infoPtr, GXLPCWSTR text, GXDWORD s
     hOldFont = (GXHDC)gxSelectObject(hdc, infoPtr->hFont);
 
   /*Get String Length in pixels */
-  gxGetTextExtentPoint32W(hdc, text, GXSTRLEN(text), &sz);
+  gxGetTextExtentPoint32W(hdc, text, (GXINT)GXSTRLEN(text), &sz);
 
   /*Add Extra spacing for the next character */
   gxGetTextMetricsW(hdc, &textMetric);

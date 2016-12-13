@@ -819,7 +819,7 @@ TREEVIEW_UpdateDispInfo(const GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *wineIte
       /* If ReAlloc fails we have nothing to do, but keep original text */
     }
     else {
-      int len = max(GXSTRLEN(callback.item.pszText) + 1,
+      int len = max((int)GXSTRLEN(callback.item.pszText) + 1,
         (int)TEXT_CALLBACK_SIZE);
       GXLPWSTR newText = (GXLPWSTR)ReAlloc(wineItem->pszText, len);
 
@@ -941,7 +941,7 @@ TREEVIEW_ComputeTextWidth(const GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *item,
     hOldFont = (GXHFONT)gxSelectObject(hdc, TREEVIEW_FontForItem(infoPtr, item));
   }
 
-  gxGetTextExtentPoint32W(hdc, item->pszText, GXSTRLEN(item->pszText), &sz);
+  gxGetTextExtentPoint32W(hdc, item->pszText, (GXINT)GXSTRLEN(item->pszText), &sz);
   item->textWidth = sz.cx;
 
   if (hDC == 0)
@@ -1170,7 +1170,7 @@ TREEVIEW_DoSetItemT(const GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *wineItem,
       int len;
       GXLPWSTR newText;
       if (isW)
-        len = GXSTRLEN(tvItem->pszText) + 1;
+        len = (int)GXSTRLEN(tvItem->pszText) + 1;
       else
         len = gxMultiByteToWideChar(GXCP_ACP, 0, (GXLPSTR)tvItem->pszText, -1, NULL, 0);
 
@@ -2634,7 +2634,7 @@ TREEVIEW_DrawItem(const GXTREEVIEW_INFO *infoPtr, GXHDC hdc, GXTREEVIEW_ITEM *wi
         GXETO_CLIPPED | GXETO_OPAQUE,
         &rcText,
         wineItem->pszText,
-        GXSTRLEN(wineItem->pszText),
+        (GXUINT)GXSTRLEN(wineItem->pszText),
         NULL);
 
       /* Draw the box around the selected item */
@@ -3643,7 +3643,7 @@ TREEVIEW_Command(GXTREEVIEW_INFO *infoPtr, GXWPARAM wParam, GXLPARAM lParam)
         hOldFont = (GXHFONT)gxSelectObject(hdc, hFont);
       }
 
-      if (gxGetTextExtentPoint32W(hdc, buffer, GXSTRLEN(buffer), &sz))
+      if (gxGetTextExtentPoint32W(hdc, buffer, (GXINT)GXSTRLEN(buffer), &sz))
       {
         GXTEXTMETRICW textMetric;
 
@@ -3716,8 +3716,7 @@ TREEVIEW_EditLabel(GXTREEVIEW_INFO *infoPtr, GXHTREEITEM hItem)
   }
 
   /* Get string length in pixels */
-  gxGetTextExtentPoint32W(hdc, editItem->pszText, GXSTRLEN(editItem->pszText),
-    &sz);
+  gxGetTextExtentPoint32W(hdc, editItem->pszText, (GXINT)GXSTRLEN(editItem->pszText), &sz);
 
   /* Add Extra spacing for the next character */
   gxGetTextMetricsW(hdc, &textMetric);
@@ -4241,7 +4240,7 @@ TREEVIEW_CreateDragImage(GXTREEVIEW_INFO *infoPtr, GXWPARAM wParam, GXLPARAM lPa
   hdc = gxCreateCompatibleDC(htopdc);
 
   hOldFont = (GXHFONT)gxSelectObject(hdc, infoPtr->hFont);
-  gxGetTextExtentPoint32W(hdc, dragItem->pszText, GXSTRLEN(dragItem->pszText), &size);
+  gxGetTextExtentPoint32W(hdc, dragItem->pszText, (GXINT)GXSTRLEN(dragItem->pszText), &size);
   TRACE("%ld %ld %ls %d\n", size.cx, size.cy, debugstr_w(dragItem->pszText), GXSTRLEN(dragItem->pszText));
 
   hbmp = gxCreateCompatibleBitmap(htopdc, size.cx, size.cy);
@@ -4264,8 +4263,7 @@ TREEVIEW_CreateDragImage(GXTREEVIEW_INFO *infoPtr, GXWPARAM wParam, GXLPARAM lPa
   /* draw item text */
 
   gxSetRect(&rc, cx, 0, size.cx, size.cy);
-  gxDrawTextW(hdc, dragItem->pszText, GXSTRLEN(dragItem->pszText), &rc,
-    GXDT_LEFT);
+  gxDrawTextW(hdc, dragItem->pszText, (GXINT)GXSTRLEN(dragItem->pszText), &rc, GXDT_LEFT);
   gxSelectObject(hdc, hOldFont);
   gxSelectObject(hdc, hOldbmp);
 

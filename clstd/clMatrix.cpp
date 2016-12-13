@@ -1,10 +1,11 @@
 ﻿#include "clstd.h"
 #include "clString.H"
 #include "clUtility.H"
+#include <math.h>
 
-#if defined(_WINDOWS) && defined(_X86) && ! defined(__clang__)
+#if defined(_WINDOWS) && defined(_CL_ARCH_X86) && ! defined(__clang__)
 #define _X86_SSE_ENABLE
-#endif // #ifdef _X86
+#endif // #ifdef _CL_ARCH_X86
 
 namespace clstd
 {

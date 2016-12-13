@@ -4,6 +4,98 @@
 namespace clstd
 {
 
+#if defined(_CPLUSPLUS_11_THREAD)
+  namespace c11
+  {
+    const i32 Signal::eTimeOut;
+
+    Signal::Signal()
+    {
+    }
+
+    Signal::~Signal()
+    {
+    }
+
+    i32 Signal::Set()
+    {
+      m_cond.notify_all();
+      return 1;
+    }
+
+    i32 Signal::Wait()
+    {
+      std::unique_lock<std::mutex> _lock(m_mutex);
+      m_cond.wait(_lock);
+      return 0;
+    }
+
+    i32 Signal::WaitTimeOut(u32 dwMilliSec)
+    {
+      std::unique_lock<std::mutex> _lock(m_mutex);
+      return static_cast<i32>(m_cond.wait_for(_lock, std::chrono::microseconds(dwMilliSec)));
+    }
+  } // namespace c11
+#elif defined(POSIX_THREAD)
+  namespace _posix
+  {
+    //
+    // 没测试过!!
+    //
+    Signal::Signal()
+      : m_cond(NULL)
+      , m_mutex(NULL)
+    {
+      pthread_cond_init(&m_cond, NULL);
+      pthread_mutex_init(&m_mutex, NULL);
+    }
+
+    Signal::~Signal()
+    {
+      pthread_cond_destroy(&m_cond);
+      pthread_mutex_destroy(&m_mutex);
+    }
+
+    i32 Signal::Set()
+    {
+      return pthread_cond_signal(&m_cond);
+    }
+
+    i32 Signal::Wait()
+    {
+      return pthread_cond_wait(&m_cond, &m_mutex);
+    }
+
+    i32 Signal::WaitTimeOut(u32 dwMilliSec)
+    {
+      timespec timeout;
+
+#if 0
+      // 这个算法不精确!
+      // TODO: windows版下这个tv_nsec时间貌似是无效的, 所以用了近似值来代替, 注意要实现其他平台的版本
+      timeout.tv_sec = time(0) + (dwMilliSec + 999) / 1000;
+      timeout.tv_nsec = 0;
+#else
+      timespec timeout;
+      timeval now;
+      gettimeofday(&now, NULL);
+      int nsec = now.tv_usec * 1000 + (dwMilliSec % 1000) * 1000000;
+      timeout.tv_nsec = nsec % 1000000000;
+      timeout.tv_sec = now.tv_sec + nsec / 1000000000 + dwMilliSec / 1000;
+#endif
+
+      const int ret = pthread_cond_timedwait(&m_cond, &m_mutex, &timeout);
+      return ret;
+  }
+
+    //i32 Signal::Reset()
+    //{
+    //  STATIC_ASSERT(0);
+    //}
+
+}
+#endif
+
 #ifdef _WIN32
   namespace _win32
   {
@@ -39,55 +131,4 @@ namespace clstd
     //}
   } // namespace _win32
 #endif // #ifdef _WIN32
-
-#ifdef POSIX_THREAD
-  namespace _posix
-  {
-    //
-    // 没测试过!!
-    //
-    Signal::Signal()
-      : m_cond(NULL)
-      , m_mutex(NULL)
-    {
-      pthread_cond_init(&m_cond, NULL);
-      pthread_mutex_init(&m_mutex, NULL);
-    }
-
-    Signal::~Signal()
-    {
-      pthread_cond_destroy(&m_cond);
-      pthread_mutex_destroy(&m_mutex);
-    }
-
-    i32 Signal::Set()
-    {
-      return pthread_cond_signal(&m_cond);
-    }
-
-    i32 Signal::Wait()
-    {
-      return pthread_cond_wait(&m_cond, &m_mutex);
-    }
-
-    i32 Signal::WaitTimeOut(u32 dwMilliSec)
-    {
-      timespec timeout;
-
-      // 这个算法不精确!
-      // TODO: windows版下这个tv_nsec时间貌似是无效的, 所以用了近似值来代替, 注意要实现其他平台的版本
-      timeout.tv_sec = time(0) + (dwMilliSec + 999) / 1000;
-      timeout.tv_nsec = 0;
-
-      const int ret = pthread_cond_timedwait(&m_cond, &m_mutex, &timeout);
-      return ret;
-    }
-
-    //i32 Signal::Reset()
-    //{
-    //  STATIC_ASSERT(0);
-    //}
-
-  }
-#endif // #ifdef POSIX_THREAD
 } // namespace clstd

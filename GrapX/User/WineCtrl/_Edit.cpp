@@ -413,7 +413,7 @@ static GXDWORD get_app_version()
 static inline GXUINT get_text_length(EDITSTATE *es)
 {
   if(es->text_length == (GXUINT)-1)
-    es->text_length = GXSTRLEN(es->text);
+    es->text_length = (GXUINT)GXSTRLEN(es->text);
   return es->text_length;
 }
 
@@ -1219,7 +1219,7 @@ static void EDIT_BuildLineDefs_ML(EDITSTATE *es, GXINT istart, GXINT iend, GXINT
     /* Mark type of line termination */
     if (!(*cp)) {
       current_line->ending = END_0;
-      current_line->net_length = GXSTRLEN(current_position);
+      current_line->net_length = (GXINT)GXSTRLEN(current_position);
     } else if ((cp > current_position) && (*(cp - 1) == '\r')) {
       current_line->ending = END_SOFT;
       current_line->net_length = cp - current_position - 1;
@@ -1405,7 +1405,7 @@ static void EDIT_CalcLineWidth_SL(EDITSTATE *es)
   if (es->font)
     old_font = (GXHFONT)gxSelectObject(dc, es->font);
 
-  gxGetTextExtentPoint32W(dc, text, GXSTRLEN(text), &size);
+  gxGetTextExtentPoint32W(dc, text, (GXINT)GXSTRLEN(text), &size);
 
   if (es->font)
     gxSelectObject(dc, old_font);
@@ -3189,7 +3189,7 @@ static GXLRESULT EDIT_EM_PosFromChar(EDITSTATE *es, GXINT index, GXBOOL after_wr
 */
 static void EDIT_EM_ReplaceSel(EDITSTATE *es, GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL send_update, GXBOOL honor_limit)
 {
-  GXUINT strl = GXSTRLEN(lpsz_replace);
+  GXUINT strl = (GXUINT)GXSTRLEN(lpsz_replace);
   GXUINT tl = get_text_length(es);
   GXUINT utl;
   GXUINT s;
@@ -3297,7 +3297,7 @@ static void EDIT_EM_ReplaceSel(EDITSTATE *es, GXBOOL can_undo, GXLPCWSTR lpsz_re
 
   if (e != s) {
     if (can_undo) {
-      utl = GXSTRLEN(es->undo_text);
+      utl = (GXUINT)GXSTRLEN(es->undo_text);
       if (!es->undo_insert_count && (*es->undo_text && (s == es->undo_position))) {
         /* undo-buffer is extended to the right */
         EDIT_MakeUndoFit(es, utl + e - s);
@@ -3959,7 +3959,7 @@ static GXBOOL EDIT_EM_Undo(EDITSTATE *es)
   if( es->style & GXES_READONLY )
     return !(es->style & GXES_MULTILINE);
 
-  ulength = GXSTRLEN(es->undo_text);
+  ulength = (GXUINT)GXSTRLEN(es->undo_text);
 
   utext = (GXLPWSTR)gxHeapAlloc(gxGetProcessHeap(), 0, (ulength + 1) * sizeof(GXWCHAR));
 
@@ -4297,7 +4297,7 @@ static GXINT EDIT_WM_GetText(const EDITSTATE *es, GXINT count, GXLPWSTR dst, GXB
   if(unicode)
   {
     GXSTRCPYN(dst, es->text, (int)count);
-    return GXSTRLEN(dst);
+    return (GXINT)GXSTRLEN(dst);
   }
   else
   {

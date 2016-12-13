@@ -63,7 +63,44 @@ namespace clstd
   } // namespace _win32
 #endif // #ifdef _WIN32
 
-#ifdef POSIX_THREAD
+#ifdef _CPLUSPLUS_11_THREAD
+  namespace c11
+  {
+    Thread::Thread()
+    {
+    }
+
+    Thread::~Thread()
+    {
+
+    }
+
+    i32 Thread::Run()
+    {
+      return 0;
+    }
+
+    b32 Thread::Start()
+    {
+      new(&m_thread) std::thread(std::bind(&Thread::Run, this));
+      return TRUE;
+    }
+
+    u32 Thread::Wait(u32 nMilliSec)
+    {
+      if (nMilliSec == -1) {
+        CLOG_ERROR("std::thread does not support wait for timeout.");
+      }
+
+      if (m_thread.joinable()) {
+        m_thread.join();
+      }
+      return 0;
+    }
+  } // namespace c11
+#endif // #ifdef _CPLUSPLUS_11_THREAD
+
+#if defined(POSIX_THREAD) && 0
   namespace _posix
   {
     //

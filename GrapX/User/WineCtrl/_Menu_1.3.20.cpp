@@ -3778,7 +3778,7 @@ GXINT GXDLLAPI GetMenuStringA(
       return 0;
     }
     if (!item->text) return 0;
-    if (!str || !nMaxSiz) return GXSTRLEN(item->text);
+    if (!str || !nMaxSiz) return (GXINT)GXSTRLEN(item->text);
     if (!WideCharToMultiByte( CP_ACP, 0, item->text, -1, str, nMaxSiz, NULL, NULL ))
       str[nMaxSiz-1] = 0;
     TRACE("returning %s\n", debugstr_a(str));
@@ -3800,14 +3800,14 @@ GXINT GXDLLAPI GetMenuStringW( GXHMENU hMenu, GXUINT wItemID,
     gxSetLastError( ERROR_MENU_ITEM_NOT_FOUND);
     return 0;
   }
-  if (!str || !nMaxSiz) return item->text ? GXSTRLEN(item->text) : 0;
+  if (!str || !nMaxSiz) return item->text ? (GXINT)GXSTRLEN(item->text) : 0;
   if( !(item->text)) {
     str[0] = 0;
     return 0;
   }
   lstrcpynW( str, item->text, nMaxSiz );
   TRACE("returning %s\n", debugstr_w(str));
-  return GXSTRLEN(str);
+  return (GXINT)GXSTRLEN(str);
 }
 
 
@@ -4581,7 +4581,7 @@ static GXBOOL GetMenuItemInfo_common ( GXHMENU hmenu, GXUINT item, GXBOOL bypos,
       int len;
       if (unicode)
       {
-        len = GXSTRLEN(menu->text);
+        len = (GXINT)GXSTRLEN(menu->text);
         if(lpmii->dwTypeData && lpmii->cch)
           lstrcpynW(lpmii->dwTypeData, menu->text, lpmii->cch);
       }

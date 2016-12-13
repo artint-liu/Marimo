@@ -253,7 +253,7 @@ namespace GXUI
     lpText = IntGetText();
     //}
     //gxInternalGetWindowText(m_hWnd, lpText, nLen);
-    int nLen = GXSTRLEN(lpText);
+    int nLen = (int)GXSTRLEN(lpText);
 
     GXRECT rect;
     gxGetClientRect(m_hWnd, &rect);

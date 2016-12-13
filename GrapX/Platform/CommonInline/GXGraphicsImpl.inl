@@ -795,13 +795,13 @@ GXDWORD GXGraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
   switch(eCate)
   {
   case GXGRAPCAPS_TEXTURE:
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 #ifdef GLES2_GRAPHICS_IMPL
     return NULL;
 #elif defined(D3D9_GRAPHICS_IMPL)
     return GXTEXTURECAPS_NONPOW2;
 #endif // GLES2_GRAPHICS_IMPL
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
     return NULL;
 #endif // defined(_WIN32) || defined(_WINDOWS)
     break;

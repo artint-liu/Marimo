@@ -65,7 +65,7 @@ int GXDLLAPI gxGetClassNameW(
   if(nMaxCount > 0) {
     GXLPWND lpWnd = GXWND_PTR(hWnd);
     GXSTRCPYN(lpClassName, lpWnd->m_lpClsAtom->szClassName, nMaxCount);
-    return GXSTRLEN(lpClassName);
+    return (int)GXSTRLEN(lpClassName);
   }
 
   return 0;

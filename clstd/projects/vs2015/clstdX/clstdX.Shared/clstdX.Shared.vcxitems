@@ -74,6 +74,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\cltypes.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.h" />

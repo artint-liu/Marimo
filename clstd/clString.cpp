@@ -31,10 +31,10 @@ const size_t  MAX_DIGITS = 80;
 #define _CLSTR_TEMPL template<typename _TCh, class _TAllocator, _TAllocator& alloc, class _Traits>
 #define _CLSTR_IMPL StringX<_TCh, _TAllocator, alloc, _Traits>
 
-//#ifdef _IOS
+//#ifdef _CL_SYSTEM_IOS
 //clStringX<wch, g_Alloc_clStringW, clStringW_traits> g_clStringInstW;
 //clStringX<ch, g_Alloc_clStringA, clstd::StringA_traits> g_clStringInstA;
-//#endif // _IOS
+//#endif // _CL_SYSTEM_IOS
 
 template<typename _TCh>
 _TCh* fcvt(double arg, int ndigits, int *decpt, int *sign);
@@ -402,11 +402,11 @@ void clstd::StringA_traits::OctalToString(ch* pDestStr, size_t uMaxLength, u32 u
 
 size_t clstd::StringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
 {
-#if defined(_WIN32) && !defined(_C_STANDARD)
+#if defined(_CL_SYSTEM) && !defined(_C_STANDARD)
   return (size_t)
     WideCharToMultiByte(CP_ACP, NULL, 
     pStrX, (int)cchX, pNativeStr, (int)uLength, NULL, NULL);
-//#elif defined(_IOS)
+//#elif defined(_CL_SYSTEM_IOS)
 //  return (size_t)SimpleUnicodeToASCII(pNativeStr, uLength, pStrX);
 #else
   setlocale(LC_ALL, "");
@@ -529,11 +529,11 @@ namespace clstd
     _Reduce(_Traits::StringLength(m_pBuf));
   }
 
-#if defined(_CL_ARCH_X86)
+#if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const size_t uInteger)
     : m_pBuf(NULL)
-#elif defined(_CL_ARCH_X64)
+#elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const u32 uInteger)
     : m_pBuf(NULL)
@@ -547,11 +547,11 @@ namespace clstd
     _Reduce(_Traits::StringLength(m_pBuf));
   }
 
-#if defined(_CL_ARCH_X86)
+#if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const u64 val)
     : m_pBuf(NULL)
-#elif defined(_CL_ARCH_X64)
+#elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const size_t val)
     : m_pBuf(NULL)
@@ -1992,9 +1992,9 @@ FUNC_RET:
     if(pAlloc == NULL) {
       pAlloc = &alloc;
     }
-#ifdef _X86
+#ifdef _CL_ARCH_X86
     ASSERT((int)pAlloc >= 0);
-#endif // #ifdef _X86
+#endif // #ifdef _CL_ARCH_X86
 
     if(uLength > CLSTR_CAPACITY(m_pBuf))
     {
@@ -2037,9 +2037,9 @@ FUNC_RET:
       pAlloc = &alloc;
     }
 
-#ifdef _X86
+#ifdef _CL_ARCH_X86
     ASSERT((int)pAlloc >= 0);
-#endif // #ifdef _X86
+#endif // #ifdef _CL_ARCH_X86
 
     clsize uCapacity;
     // 最后加上 CLSTD_HEADER_SIZE, 得到 string buffer 的实际地址

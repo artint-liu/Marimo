@@ -1,6 +1,5 @@
 ﻿#include "clstd.h"
 #include "clLocker.h"
-#undef ETIMEDOUT
 #include "Thread/clSignal.H"
 #include "clThread.h"
 #include "clMessageThread.h"
@@ -16,15 +15,24 @@ namespace clstd
 {
   namespace thread
   {
-    size_t GetCurrentId()
-    {
 #if _CPLUSPLUS_11_THREAD
-      return (size_t)std::this_thread::get_id();
-#elif (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
-      return GetCurrentThreadId();
-#else
-      return (u32)pthread_self().p;
-#endif // #if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
+    typedef std::thread::id id;
+    std::thread::id GetCurrentId()
+    {
+      return std::this_thread::get_id();
     }
+#elif (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
+    typedef size_t id;
+    id GetCurrentId()
+    {
+      return GetCurrentThreadId();
+    }
+#else
+    typedef size_t id;
+    id GetCurrentId()
+    {
+      return (id)pthread_self().p;
+    }
+#endif // #if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
   } // namespace thread
 } // namespace clstd

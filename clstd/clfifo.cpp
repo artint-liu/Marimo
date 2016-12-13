@@ -4,7 +4,7 @@
 #include "clfifo.h"
 
 #if defined(_WINDOWS) && ! defined(__clang__)
-#ifdef _X86
+#ifdef _CL_ARCH_X86
 static inline void barrier(void)
 {
   __asm nop
@@ -15,12 +15,12 @@ static inline void barrier(void)
 
 #define smp_mb()  barrier()
 #define smp_wmb() barrier()
-#elif defined(_X64)
+#elif defined(_CL_ARCH_X64)
 extern "C" void barrier(void);
 #define smp_mb()  barrier()
 #define smp_wmb() barrier()
-#endif // #ifdef _X86
-#elif defined(_IOS) || defined(_ANDROID) || defined(__clang__)
+#endif // #ifdef _CL_ARCH_X86
+#elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(__clang__)
 static inline void barrier(void)
 {
   asm volatile("" : : : "memory");

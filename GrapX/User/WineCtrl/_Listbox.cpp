@@ -638,14 +638,14 @@ static void LISTBOX_PaintItem( GXLB_DESCR *descr, GXHDC hdc, const GXRECT *rect,
         else if (!(descr->style & GXLBS_USETABSTOPS))
             gxExtTextOutW( hdc, rect->left + 1, rect->top,
                          GXETO_OPAQUE | GXETO_CLIPPED, rect, item->str,
-                         GXSTRLEN(item->str), NULL );
+                         (GXUINT)GXSTRLEN(item->str), NULL );
         else
   {
       /* Output empty string to paint background in the full width. */
             gxExtTextOutW( hdc, rect->left + 1, rect->top,
                          GXETO_OPAQUE | GXETO_CLIPPED, rect, NULL, 0, NULL );
             gxTabbedTextOutW( hdc, rect->left + 1 , rect->top,
-                            item->str, GXSTRLEN(item->str),
+                            item->str, (GXINT)GXSTRLEN(item->str),
                             descr->nb_tabs, descr->tabs, 0);
   }
         if (item && item->selected)
@@ -836,7 +836,7 @@ static GXLRESULT LISTBOX_GetText( GXLB_DESCR *descr, GXINT index, GXLPWSTR buffe
     {
         if (!buffer)
         {
-            GXDWORD len = GXSTRLEN(descr->items[index].str);
+            GXDWORD len = (GXDWORD)GXSTRLEN(descr->items[index].str);
             if( unicode )
                 return len;
             return gxWideCharToMultiByte( GXCP_ACP, 0, descr->items[index].str, (int)len,
@@ -996,7 +996,7 @@ static GXINT LISTBOX_FindString( GXLB_DESCR *descr, GXINT start, GXLPCWSTR str, 
         return i; \
     }
 
-            GXINT len = GXSTRLEN(str);
+            GXINT len = (GXINT)GXSTRLEN(str);
             for (i = start + 1; i < descr->nb_items; i++, item++)
             {
                if (!strncmpiW( str, item->str, len )) return i;
@@ -2778,7 +2778,7 @@ static GXLRESULT GXAPI ListBoxWndProc_common( GXHWND hwnd, GXUINT msg,
         if (!HAS_STRINGS(descr)) return sizeof(GXDWORD);
         if (unicode) return GXSTRLEN( descr->items[wParam].str );
         return gxWideCharToMultiByte( GXCP_ACP, 0, descr->items[wParam].str,
-                                    GXSTRLEN(descr->items[wParam].str), NULL, 0, NULL, NULL );
+                                    (int)GXSTRLEN(descr->items[wParam].str), NULL, 0, NULL, NULL );
 
     //case GXLB_GETCURSEL16:
     case GXLB_GETCURSEL:

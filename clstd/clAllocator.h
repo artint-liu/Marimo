@@ -110,6 +110,30 @@ namespace clstd
     void    Free              (void* ptr);
     void*   Realloc           (void* ptr, clsize nOldRefBytes, clsize nBytes, clsize* pCapacity);
   };
+
+  template<size_t _count>
+  class LocalAllocator
+  {
+    s8 m_buffer[_count];
+  public:
+    void*   Alloc             (clsize nBytes, clsize* pCapacity);
+    void    Free              (void* ptr);
+    void*   Realloc           (void* ptr, clsize nOldRefBytes, clsize nBytes, clsize* pCapacity);
+  };
+
+  template<size_t _count>
+  void* clstd::LocalAllocator<_count>::Alloc( clsize nBytes, clsize* pCapacity )
+  {
+    if(nBytes <= _count) {
+      *pCapacity = _count;
+      return m_buffer;
+    }
+    else {
+      *pCapacity = nBytes;
+      return malloc(nBytes);
+    }
+  }
+
 } // namespace clstd
 
 #else

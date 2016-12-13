@@ -1080,9 +1080,9 @@ GXBOOL GXDLLAPI gxSystemParametersInfoW(
                   GXLPVOID pvParam, 
                   GXUINT fWinIni)
 {
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
   GXBOOL bRet = SystemParametersInfoW((GXUINT)uiAction, (GXUINT)uiParam, (GXLPVOID)pvParam, (GXUINT)fWinIni);
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
   GXBOOL bRet = TRUE;
 #endif // #if defined(_WIN32) || defined(_WINDOWS)
 
@@ -1117,7 +1117,7 @@ GXBOOL GXDLLAPI gxSystemParametersInfoW(
   return bRet;
 }
 
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 GXHCURSOR GXDLLAPI gxLoadCursorW(
            GXHINSTANCE hInstance,  // handle of application instance
            GXLPCWSTR lpCursorName   // name string or cursor resource identifier  
@@ -1133,7 +1133,7 @@ GXHCURSOR GXDLLAPI gxLoadCursorA(
 {
   return (GXHCURSOR)LoadCursorA((HINSTANCE)hInstance, (GXLPCSTR)lpCursorName);
 }
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
 GXHCURSOR GXDLLAPI gxLoadCursorW(
                                  GXHINSTANCE hInstance,  // handle of application instance
                                  GXLPCWSTR lpCursorName   // name string or cursor resource identifier  
@@ -1156,13 +1156,13 @@ GXHCURSOR GXDLLAPI gxSetCursor(
           GXHCURSOR hCursor   // handle of cursor
           )
 {
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
   GXLPSTATION lpStation = IntGetStationPtr();
   GXHCURSOR hPrevCursor = (GXHCURSOR)lpStation->hCursor;
   lpStation->hCursor = (HCURSOR)hCursor;
   return hPrevCursor;
   //return (GXHCURSOR)SetCursor((HCURSOR)hCursor);
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
   return NULL;  
 #endif // defined(_WIN32) || defined(_WINDOWS)
 }
@@ -1171,10 +1171,10 @@ int GXDLLAPI gxShowCursor(
   GXBOOL bShow   // cursor visibility flag  
   )
 {
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
   int nval = ShowCursor(bShow);
   return nval;
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
   return NULL;  
 #endif // defined(_WIN32) || defined(_WINDOWS)
 }
@@ -1187,11 +1187,11 @@ GXBOOL GXDLLAPI gxGetCursorPos(
   *lpPoint = lpStation->m_ptCursor;
   return TRUE;
 
-//#if defined(_WIN32) || defined(_WINDOWS)
+//#if defined(_CL_SYSTEM_WINDOWS)
 //  GXBOOL r = GetCursorPos((LPPOINT)lpPoint);
 //  ScreenToClient(IntGetStationPtr()->hBindWin32Wnd, (LPPOINT)lpPoint);
 //  return (GXBOOL)r;
-//#elif defined(_IOS)
+//#elif defined(_CL_SYSTEM_IOS)
 //  return TRUE;
 //#endif // defined(_WIN32) || defined(_WINDOWS)
 }

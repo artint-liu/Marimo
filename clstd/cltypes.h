@@ -54,34 +54,34 @@ typedef size_t              clsize;
 typedef size_t              clsize_t;
 #endif
 
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 # ifdef __clang__
 #   define _w64
 # endif // #if __clang__
-# if defined(_X86)
+# if defined(_CL_ARCH_X86)
 typedef _w64 i32            i32_ptr;
 typedef _w64 s32            s32_ptr;
 typedef _w64 u32            u32_ptr;
-# elif defined(_X64)
+# elif defined(_CL_ARCH_X64)
 typedef i64                 i32_ptr;
 typedef s64                 s32_ptr;
 typedef u64                 u32_ptr;
 # endif
-#elif defined(_ANDROID) || defined(_IOS)
+#elif defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
 typedef intptr_t            i32_ptr;
 typedef intptr_t            s32_ptr;
 typedef uintptr_t           u32_ptr;
 #else
 #error 需要定义新平台
-#endif // #if defined(_X86)
+#endif // #if defined(_CL_ARCH_X86)
 
 typedef char                ch;
 typedef char                ach;
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WIN32) || defined(_CL_SYSTEM_WINDOWS)
 typedef wchar_t             wch;
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
 typedef wchar_t             wch;
-#elif defined(_ANDROID)
+#elif defined(_CL_SYSTEM_ANDROID)
 typedef wchar_t             wch;
 #endif
 
@@ -252,7 +252,7 @@ typedef CLULONG           CLULONG_PTR;
 #define FLT_MIN         1.175494351e-38F        /* min positive value */
 #endif
 
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 # include <vector>
 #if __cplusplus >= 199711L
 # include <unordered_map>
@@ -283,7 +283,7 @@ typedef CLULONG           CLULONG_PTR;
 # define cllist          std::list
 # define clist           std::list
 # define clmake_pair     std::make_pair
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
 # include <vector>
 # include <hash_map.h>
 # include <hash_set.h>
@@ -302,7 +302,7 @@ typedef CLULONG           CLULONG_PTR;
 # define cllist          std::list
 # define clist           std::list
 # define clmake_pair     std::make_pair
-#elif defined(_ANDROID)
+#elif defined(_CL_SYSTEM_ANDROID)
 # include <vector>
 # include <unordered_map>
 # include <unordered_set>

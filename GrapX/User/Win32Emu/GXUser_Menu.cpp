@@ -59,7 +59,7 @@ GXBOOL IntEnumMenuKeys(
       {
         //TRACEW(L"%s\n", val.ToString());
         GXSTRCPYN<wch>(MenuItem.szText, val.ToString(), 1024);
-        nTextLength = GXSTRLEN(MenuItem.szText);
+        nTextLength = (GXINT)GXSTRLEN(MenuItem.szText);
       }
       else if(strKeyName == L"Name")
       {

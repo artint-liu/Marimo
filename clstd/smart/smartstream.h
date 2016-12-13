@@ -35,10 +35,10 @@
 #pragma warning(disable: 4661)
 #endif // #ifdef _WINDOWS
 
-#ifdef _X64
+#ifdef _CL_ARCH_X64
 #pragma pack(push)
 #pragma pack(8)
-#endif // #ifdef _X64
+#endif // #ifdef _CL_ARCH_X64
 
 //#include <vector>
 //using namespace std;
@@ -569,8 +569,8 @@ namespace SmartStreamUtility
   }
 } // namespace SmartStreamUtility
 
-#ifdef _X64
+#ifdef _CL_ARCH_X64
 #pragma pack(pop)
-#endif // #ifdef _X64
+#endif // #ifdef _CL_ARCH_X64
 
 #endif  // _SMARTSTREAM_2_H_

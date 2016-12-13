@@ -161,9 +161,9 @@ namespace clstd
 
   u64 GetTime64()
   {
-#if (defined(_WIN32) || defined(_WINDOWS)) && (_WIN32_WINNT >= 0x0600)
+#if defined(_CL_SYSTEM_WINDOWS) && (_WIN32_WINNT >= 0x0600)
     return GetTickCount64();
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
     return 0;
     //return TickCount();
 #else
@@ -176,13 +176,13 @@ namespace clstd
 
   u32 GetNumberOfProcessors()
   {
-#if defined(_WINDOWS) || defined(_WIN32)
+#if defined(_CL_SYSTEM_WINDOWS)
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     return si.dwNumberOfProcessors;
 #else
     return 1;
-#endif // #if defined(_WINDOWS) || defined(_WIN32)
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
   }
 
   clStringA ToStringA( const float4x4& m )

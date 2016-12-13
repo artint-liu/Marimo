@@ -547,7 +547,7 @@ namespace GXUI
     if(m_bShowScrollBar) {
       DrawScrollBar(canvas, &rect, m_aItems.back().nBottom, m_aItems.size(), dwStyle);
     }
-    Recycle(i, 1);
+    Recycle((GXINT)i, 1);
     return 0;
   }
 

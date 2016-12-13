@@ -994,7 +994,7 @@ namespace Marimo
         // TODO: 改为步进方式
         while(au < au_end) {
           if(time < au->duration) {
-            return au - au_begin;
+            return (GXUINT)(au - au_begin);
           }
           au++;
         }

@@ -80,7 +80,7 @@ GXLRESULT DEFWNDPROC_GetTextLength(GXHWND hWnd)
 
   LPGXWND lpWnd = GXWND_PTR(hWnd);
   CHECK_LPWND_VAILD(lpWnd);
-  GXINT nLength = GXSTRLEN(lpWnd->m_pText);
+  GXINT nLength = (GXINT)GXSTRLEN(lpWnd->m_pText);
   return nLength;
 }
 
@@ -93,7 +93,7 @@ GXLRESULT DEFWNDPROC_GetText(GXHWND hWnd, GXLPWSTR pszName, int ccTextMax)
   }
   CHECK_LPWND_VAILD(lpWnd);
 
-  GXINT nLength = GXSTRLEN(lpWnd->m_pText) + 1;
+  GXINT nLength = (GXINT)GXSTRLEN(lpWnd->m_pText) + 1;
 
   if(nLength > ccTextMax)
   {

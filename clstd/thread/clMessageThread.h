@@ -150,7 +150,7 @@ namespace clstd
       }
       m_locker.Unlock();
       const DWORD ret = m_signal.WaitTimeOut(nMSec);
-      if(ret == WAIT_TIMEOUT) {
+      if(ret == Signal::eTimeOut) {
         return -1;
       }
     }

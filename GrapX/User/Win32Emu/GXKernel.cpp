@@ -74,9 +74,9 @@ int GXDLLAPI gxWideCharToMultiByte(
 
 GXDWORD GXDLLAPI gxGetTickCount()
 {
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
   return GetTickCount();
-#elif defined(_IOS)
+#elif defined(_CL_SYSTEM_IOS)
   clock_t t = clock();
   return (GXDWORD)(t / (CLOCKS_PER_SEC / 1000));
 #else
@@ -89,7 +89,7 @@ u64 GXDLLAPI gxGetTickCount64()
 {
 //#if (defined(_WIN32) || defined(_WINDOWS)) && (_WIN32_WINNT >= 0x0600)
 //  return GetTickCount64();
-//#elif defined(_IOS)
+//#elif defined(_CL_SYSTEM_IOS)
 //  return 0;
 //  //return TickCount();
 //#else

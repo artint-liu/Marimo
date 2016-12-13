@@ -328,7 +328,7 @@ void TestShaderToys(GXBOOL bShowList)
 // ²âÊÔ¿ª¹Ø
 //#define TEST_ARITHMETIC_PARSING
 #define TEST_ALL_SHADERTOYS
-//#define TEST_STD_SAMPLE
+#define TEST_STD_SAMPLE
 
 
 int _tmain(int argc, _TCHAR* argv[])

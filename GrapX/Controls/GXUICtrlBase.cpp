@@ -577,7 +577,7 @@ namespace DlgXM
 
   GXINT GetPixelSizeFromMarkW(const GXWCHAR* szString)
   {
-    int nLen = GXSTRLEN(szString);
+    int nLen = (int)GXSTRLEN(szString);
     int nValue = GXATOI(szString);
     if(szString[nLen - 2] == 'p' && szString[nLen - 1] == 'x') {
       return nValue;

@@ -1,4 +1,4 @@
-ifndef _X64
+ifndef _CL_ARCH_X64
 .686p
 .XMM
 .model flat, C
