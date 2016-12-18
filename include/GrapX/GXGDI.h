@@ -197,7 +197,7 @@ extern "C"
   GXDWORD     GXDLLAPI gxGetObjectType          (GXHGDIOBJ hgdiobj);  
 
   GXHGDIOBJ   GXDLLAPI gxSelectObject           (GXHDC hdc, GXHGDIOBJ hgdiobj);
-  GXBOOL      GXDLLAPI gxExtTextOutW            (GXHDC hdc, GXINT,GXINT,GXUINT,GXCONST GXRECT*,GXLPCWSTR,GXUINT,GXCONST GXINT *);
+  GXBOOL      GXDLLAPI gxExtTextOutW            (GXHDC hdc, GXINT,GXINT,GXUINT,const GXRECT*,GXLPCWSTR,GXUINT,const GXINT *);
   GXHBRUSH    GXDLLAPI gxCreateSolidBrush       (GXCOLORREF);
   GXCOLORREF  GXDLLAPI gxSetBkColor             (GXHDC hdc, GXCOLORREF crBack);
   GXCOLORREF  GXDLLAPI GXSetBkColor             (GXHDC hdc, GXCOLORREF crBack); // GrapX 特有，支持透明色
@@ -219,15 +219,15 @@ extern "C"
 
   GXINT       GXDLLAPI gxIntersectClipRect      (GXHDC hdc, GXINT nLeftRect, GXINT nTopRect, GXINT nRightRect, GXINT nBottomRect);
   GXHRGN      GXDLLAPI gxCreateRectRgn          (GXINT nLeftRect, GXINT nTopRect, GXINT nRightRect, GXINT nBottomRect);  
-  GXHPEN      GXDLLAPI gxExtCreatePen           (GXDWORD dwPenStyle,GXDWORD dwWidth,GXCONST GXLOGBRUSH *lplb,GXDWORD dwStyleCount, GXCONST GXDWORD *lpStyle);
+  GXHPEN      GXDLLAPI gxExtCreatePen           (GXDWORD dwPenStyle,GXDWORD dwWidth,const GXLOGBRUSH *lplb,GXDWORD dwStyleCount, const GXDWORD *lpStyle);
   GXHPEN      GXDLLAPI gxCreatePen              (int fnPenStyle,int nWidth,GXCOLORREF crColor);
 
 
-  GXHRGN      GXDLLAPI gxCreateRectRgnIndirect  (GXCONST GXRECT *lprc);
+  GXHRGN      GXDLLAPI gxCreateRectRgnIndirect  (const GXRECT *lprc);
   GXBOOL      GXDLLAPI gxGetTextExtentPointW    (GXHDC hdc, GXLPCWSTR, GXINT, GXLPSIZE);
   GXBOOL      GXDLLAPI gxSetWindowOrgEx         (GXHDC hdc, GXINT, GXINT, GXLPPOINT);
 
-  GXHRGN      GXDLLAPI gxCreateRectRgnIndirect  (GXCONST GXRECT *lprc);
+  GXHRGN      GXDLLAPI gxCreateRectRgnIndirect  (const GXRECT *lprc);
   GXBOOL      GXDLLAPI gxGetTextExtentPointW    (GXHDC hdc, GXLPCWSTR, GXINT, GXLPSIZE);
   GXBOOL      GXDLLAPI gxSetWindowOrgEx         (GXHDC hdc, GXINT, GXINT, GXLPPOINT);
   GXBOOL      GXDLLAPI gxOffsetWindowOrgEx      (GXHDC hdc, int nXOffset, int nYOffset, GXLPPOINT lpPoint);
@@ -241,7 +241,7 @@ extern "C"
   GXCOLORREF  GXDLLAPI gxGetBkColor             (GXHDC hdc);
   GXINT       GXDLLAPI gxGetBkMode              (GXHDC hdc);
   GXHGDIOBJ   GXDLLAPI gxGetStockObject         (int fnObject);
-  GXHFONT     GXDLLAPI gxCreateFontIndirectW    (GXCONST GXLOGFONTW* lplf);
+  GXHFONT     GXDLLAPI gxCreateFontIndirectW    (const GXLOGFONTW* lplf);
   GXINT       GXDLLAPI gxCombineRgn             (GXHRGN hrgn, GXHRGN hrgnSrc1, GXHRGN hrgnSrc2, GXINT fnCombineMode);
   GXBOOL      GXDLLAPI gxGetTextMetricsW        (GXHDC hdc, GXLPTEXTMETRICW);
   GXINT       GXDLLAPI gxGetClipBox             (GXHDC hdc, GXLPRECT);
@@ -255,18 +255,18 @@ extern "C"
   GXBOOL      GXDLLAPI gxSetViewportOrgEx       (GXHDC hdc, int X, int Y, LPGXPOINT lpPoint);
 
   GXHBITMAP   GXDLLAPI gxCreateCompatibleBitmap (GXHDC hdc,int nWidth,int nHeight);
-  GXHBITMAP   GXDLLAPI gxCreateBitmap           (int nWidth,int nHeight,GXUINT cPlanes,GXUINT cBitsPerPel,GXCONST GXVOID *lpvBits);
+  GXHBITMAP   GXDLLAPI gxCreateBitmap           (int nWidth,int nHeight,GXUINT cPlanes,GXUINT cBitsPerPel,const GXVOID *lpvBits);
   GXHBRUSH    GXDLLAPI gxCreatePatternBrush     (GXHBITMAP hbmp);
 
   GXCOLORREF  GXDLLAPI gxSetPixel               (GXHDC hdc, int X, int Y, GXCOLORREF crColor);
   GXCOLORREF  GXDLLAPI gxGetPixel               (GXHDC hdc, int XPos, int nYPos);
-  GXHBITMAP   GXDLLAPI gxCreateDIBSection       (GXHDC hdc, GXCONST GXBITMAPINFO *pbmi, GXUINT iUsage, GXVOID *ppvBits, GXHANDLE hSection, GXDWORD dwOffset);
+  GXHBITMAP   GXDLLAPI gxCreateDIBSection       (GXHDC hdc, const GXBITMAPINFO *pbmi, GXUINT iUsage, GXVOID *ppvBits, GXHANDLE hSection, GXDWORD dwOffset);
   GXUINT      GXDLLAPI gxGetPaletteEntries      (GXHPALETTE hpal, GXUINT iStartIndex, GXUINT nEntries, GXLPPALETTEENTRY lppe);
   int         GXDLLAPI gxGetDeviceCaps          (GXHDC hdc, int nIndex);
-  GXBOOL      GXDLLAPI gxRectVisible            (GXHDC hdc, GXCONST GXRECT *lprc);
+  GXBOOL      GXDLLAPI gxRectVisible            (GXHDC hdc, const GXRECT *lprc);
 
   int         GXDLLAPI gxSetROP2                (GXHDC hdc, int fnDrawMode);
-  GXBOOL      GXDLLAPI gxPolyPolyline           (GXHDC hdc, GXCONST GXPOINT *lppt, GXCONST GXDWORD *lpdwPolyPoints, GXDWORD cCount);
+  GXBOOL      GXDLLAPI gxPolyPolyline           (GXHDC hdc, const GXPOINT *lppt, const GXDWORD *lpdwPolyPoints, GXDWORD cCount);
 
   GXVOID      _gxInitDefGXDC(GXHDC);
 #ifdef __cplusplus

@@ -597,10 +597,10 @@ GXBOOL GXDLLAPI gxWaitMessage()
 // Method:    gxTranslateMessage
 // Returns:   GXBOOL
 // Qualifier:
-// Parameter: GXCONST GXMSG * lpMsg
+// Parameter: const GXMSG * lpMsg
 //************************************
 GXBOOL GXDLLAPI gxTranslateMessage(
-  GXCONST GXMSG *lpMsg   // address of structure with message
+  const GXMSG *lpMsg   // address of structure with message
   )
 {
   TRACE_UNACHIEVE("=== gxTranslateMessage ===\n");

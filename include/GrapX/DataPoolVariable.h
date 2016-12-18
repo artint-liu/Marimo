@@ -79,28 +79,28 @@ namespace Marimo
     //                  operator unspecified_bool_type() const;
 
     GXBOOL            Impulse         (DataAction reason, GXSIZE_T index = 0, GXSIZE_T count = 0); // index和count只有是数组时才有效
-    GXHRESULT         GetPool         (DataPool** ppDataPool) GXCONST;
-    DataPool*         GetPoolUnsafe   () GXCONST;
-    GXBOOL            IsSamePool      (DataPool* pDataPool) GXCONST;
+    GXHRESULT         GetPool         (DataPool** ppDataPool) const;
+    DataPool*         GetPoolUnsafe   () const;
+    GXBOOL            IsSamePool      (DataPool* pDataPool) const;
     GXVOID            Free            ();
-    GXBOOL            IsValid         () GXCONST;  // 返回这个 Variable 是否有效
-    //GXBOOL            IsEmpty         () GXCONST;  // 返回这个 Variable 是否无效
-    GXLPVOID          GetPtr          () GXCONST;  // 指针, 要注意动态数据指针会因为 NewBack 操作改变
-    GXUINT            GetSize         () GXCONST;  // 字节大小, 数组是数组大小, 动态数据大小可变, 结构是结构体大小
-    GXUINT            GetOffset       () GXCONST;  // 偏移,全局变量是全局偏移, 结构体变量是结构体内偏移
-    DataPool::LPCSTR  GetName         () GXCONST;  // 获得定义名, 变量名, 数组变量名或者结构体变量名
-    DataPool::LPCSTR  GetTypeName     () GXCONST;  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
-    TypeCategory      GetTypeCategory () GXCONST;  // 变量的分类
-    GXDWORD           GetCaps         () GXCONST;  // 参考CAPS枚举
-    clStringA         GetFullName     () GXCONST;  // （没实现）获得变量的全称,如果在结构体中，包括结构体名，如果在数组中会包含数组索引,如同DataPool::QueryByExpression()参数那样.
-    clBufferBase*     GetBuffer       () GXCONST;
+    GXBOOL            IsValid         () const;  // 返回这个 Variable 是否有效
+    //GXBOOL            IsEmpty         () const;  // 返回这个 Variable 是否无效
+    GXLPVOID          GetPtr          () const;  // 指针, 要注意动态数据指针会因为 NewBack 操作改变
+    GXUINT            GetSize         () const;  // 字节大小, 数组是数组大小, 动态数据大小可变, 结构是结构体大小
+    GXUINT            GetOffset       () const;  // 偏移,全局变量是全局偏移, 结构体变量是结构体内偏移
+    DataPool::LPCSTR  GetName         () const;  // 获得定义名, 变量名, 数组变量名或者结构体变量名
+    DataPool::LPCSTR  GetTypeName     () const;  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
+    TypeCategory      GetTypeCategory () const;  // 变量的分类
+    GXDWORD           GetCaps         () const;  // 参考CAPS枚举
+    clStringA         GetFullName     () const;  // （没实现）获得变量的全称,如果在结构体中，包括结构体名，如果在数组中会包含数组索引,如同DataPool::QueryByExpression()参数那样.
+    clBufferBase*     GetBuffer       () const;
 
     // 结构体专用
-    DataPoolVariable  MemberOf        (GXLPCSTR szName) GXCONST;    // 获得成员
+    DataPoolVariable  MemberOf        (GXLPCSTR szName) const;    // 获得成员
 
     // 数组或动态数组专用 
-    DataPoolVariable  IndexOf         (GXSIZE_T nIndex) GXCONST;    // 获得特定索引的变量
-    GXSIZE_T          GetLength       () GXCONST;                   // 获得数组的成员个数, 注意与GetSize区别
+    DataPoolVariable  IndexOf         (GXSIZE_T nIndex) const;    // 获得特定索引的变量
+    GXSIZE_T          GetLength       () const;                   // 获得数组的成员个数, 注意与GetSize区别
     DataPoolVariable  NewBack         (GXUINT nIncrease = 1);       // 在动态数组上追加数据, 动态数组专用, 如果inc大于1，返回第一个新增变量，如果inc为0，不会新增变量，返回最后一个数据
     GXBOOL            Remove          (GXSIZE_T nIndex, GXSIZE_T nCount = 1);        // 移出动态数组指定索引的数据, 动态数组专用, index=-1时表示全部删除，此时count必须为0
 
@@ -108,8 +108,8 @@ namespace Marimo
     GXBOOL            ParseW          (GXLPCWSTR szString, GXUINT length); // 按照变量类型转值, length=0表示按照'\0'结尾
     GXBOOL            ParseA          (GXLPCSTR szString, GXUINT length);
 
-    clStringW         ToStringW       () GXCONST;           // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
-    clStringA         ToStringA       () GXCONST;
+    clStringW         ToStringW       () const;           // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
+    clStringA         ToStringA       () const;
 
     //GXBOOL            CopyFrom        (const DataPoolVariable& var);  // 从一个变量对象拷贝值，如果是变量，变量类型一致才能成功，如果是结构体，会遍历同层成员变量，类型与名一致才能拷贝，否则就跳过。
     // 没实现 GXBOOL            TransferFrom    (const DataPoolVariable& var);  // 从一个变量对象传送值，如果是变量，会尽量解析到目标变量，如果是结构体，按照同名变量尽量解析到目标变量.
@@ -123,14 +123,14 @@ namespace Marimo
     GXBOOL            Set             (u64 val);
 
     GXBOOL            Retain          (GUnknown* pUnknown); // 安全的储存GUnknown对象，设置NULL时释放GUnknown对象。
-    GXBOOL            Query           (GUnknown** ppUnknown) GXCONST;
+    GXBOOL            Query           (GUnknown** ppUnknown) const;
 
-    float             ToFloat         () GXCONST;
-    u32               ToInteger       () GXCONST;
-    u64               ToInteger64     () GXCONST;
+    float             ToFloat         () const;
+    u32               ToInteger       () const;
+    u64               ToInteger64     () const;
 
     GXBOOL            SetData         (GXLPCVOID lpData, GXUINT cbSize);
-    GXBOOL            GetData         (GXLPVOID lpData, GXUINT cbSize) GXCONST;
+    GXBOOL            GetData         (GXLPVOID lpData, GXUINT cbSize) const;
 
     iterator          begin           () const;
     iterator          end             () const;

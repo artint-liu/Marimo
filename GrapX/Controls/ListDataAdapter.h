@@ -26,13 +26,13 @@ namespace GXUI
     //virtual GXBOOL      IsAutoKnock         () const;
     //virtual GXINT       SetReferenceHeight  (GXINT nItemHeight);
     virtual GXSIZE_T    GetCount        () const;
-    //virtual GXINT       GetItemBottoms      (GXINT* bottoms, const GXINT* indices, int count) GXCONST;
+    //virtual GXINT       GetItemBottoms      (GXINT* bottoms, const GXINT* indices, int count) const;
 
     virtual GXSIZE_T    AddStringW          (GXLPCWSTR szName, GXLPCWSTR lpString);
     virtual GXBOOL      GetStringW          (GETSTRW* pItemStrDesc);
     //virtual GXBOOL      SetItemData         (GETSTRW* pItemStrDesc, GXLPARAM lParam);
     //virtual GXLPARAM    GetItemData         (GETSTRW* pItemStrDesc);
-    //virtual GXDWORD     GetStatus           (GXINT item) GXCONST;
+    //virtual GXDWORD     GetStatus           (GXINT item) const;
     //virtual GXDWORD     SetStatus           (GXINT item, GXDWORD dwNewStatus);
     virtual MOVariable  GetVariable         ();
     virtual GXHRESULT   GetDataPool         (MODataPool** ppDataPool);

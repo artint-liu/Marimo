@@ -61,10 +61,10 @@ public:
 
   GXSTDINTERFACE(GXHRESULT    LoadFromFile      (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc));
   GXSTDINTERFACE(GXHRESULT    LoadFromMemory    (const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf));
-  //GXSTDINTERFACE(GXDWORD      GetFlags          () GXCONST);
-  GXSTDINTERFACE(GXINT        GetCacheSize      () GXCONST);
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe () GXCONST);
-  GXSTDINTERFACE(GXLPCWSTR    GetProfileDesc    () GXCONST);  // 取配置文件(包含各个平台Shader文件)的名字,如果是从内存加载,则为NULL
+  //GXSTDINTERFACE(GXDWORD      GetFlags          () const);
+  GXSTDINTERFACE(GXINT        GetCacheSize      () const);
+  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe () const);
+  GXSTDINTERFACE(GXLPCWSTR    GetProfileDesc    () const);  // 取配置文件(包含各个平台Shader文件)的名字,如果是从内存加载,则为NULL
 public:
   static GXDLL GXVOID     ResolveProfileDescW (GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros);
   static GXDLL GXHRESULT  Load                (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam);
@@ -95,13 +95,13 @@ public:
   GXSTDINTERFACE(GXHRESULT      BindCommonUniform       (LPCDATALAYOUT lpDataLayout));
   GXSTDINTERFACE(GXINT          FindUniformDef          (LPCDATALAYOUT lpDataLayout));
   GXSTDINTERFACE(GXBOOL         CommitUniform           (int nDefIdx, GXLPCVOID lpData, GXUINT uCommonOffset));
-  GXSTDINTERFACE(GShader*       GetShaderUnsafe         () GXCONST);
-  GXSTDINTERFACE(GXUINT         GetHandleByName         (GXLPCSTR szName) GXCONST);
-  GXSTDINTERFACE(GXUINT         GetHandleByIndex        (GXUINT nIndex) GXCONST);
-  GXSTDINTERFACE(GXUniformType  GetHandleType           (GXUINT handle) GXCONST);
-  GXSTDINTERFACE(GXUINT         GetSamplerStageByHandle (GXUINT handle) GXCONST);
+  GXSTDINTERFACE(GShader*       GetShaderUnsafe         () const);
+  GXSTDINTERFACE(GXUINT         GetHandleByName         (GXLPCSTR szName) const);
+  GXSTDINTERFACE(GXUINT         GetHandleByIndex        (GXUINT nIndex) const);
+  GXSTDINTERFACE(GXUniformType  GetHandleType           (GXUINT handle) const);
+  GXSTDINTERFACE(GXUINT         GetSamplerStageByHandle (GXUINT handle) const);
   GXSTDINTERFACE(GXBOOL         SetUniformByHandle      (clBufferBase* pUnusualUnifom, GXUINT uHandle, float* fValue, GXINT nFloatCount));
-  GXSTDINTERFACE(GXBOOL         GetUniformByIndex       (GXUINT nIndex, UNIFORMDESC* pDesc) GXCONST);
+  GXSTDINTERFACE(GXBOOL         GetUniformByIndex       (GXUINT nIndex, UNIFORMDESC* pDesc) const);
   GXSTDINTERFACE(GXBOOL         SetTextureByHandle      (GTextureBase** pTextureArray, GXUINT uHandle, GTextureBase* pTexture));
   GXSTDINTERFACE(GXBOOL         SetTextureByIndex       (GTextureBase** pTextureArray, GXUINT nIndex, GTextureBase* pTexture));
 #ifdef REFACTOR_SHADER

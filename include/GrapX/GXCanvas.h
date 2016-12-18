@@ -21,9 +21,9 @@ public:
   //virtual ~GXCanvasCore() = NULL;
 
   GXSTDINTERFACE(GXHRESULT    AddRef              ());
-  GXSTDINTERFACE(GXVOID       GetTargetDimension  (GXSIZE* pSize) GXCONST);
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe   () GXCONST);
-  GXSTDINTERFACE(GTexture*    GetTargetUnsafe     () GXCONST);
+  GXSTDINTERFACE(GXVOID       GetTargetDimension  (GXSIZE* pSize) const);
+  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe   () const);
+  GXSTDINTERFACE(GTexture*    GetTargetUnsafe     () const);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -130,9 +130,9 @@ public:
   GXSTDINTERFACE(GXHRESULT   Invoke               (GRESCRIPTDESC* pDesc));
 
   GXSTDINTERFACE(GXBOOL      SetTransform         (const float4x4* matTransform));
-  GXSTDINTERFACE(GXBOOL      GetTransform         (float4x4* matTransform) GXCONST);
+  GXSTDINTERFACE(GXBOOL      GetTransform         (float4x4* matTransform) const);
   GXSTDINTERFACE(GXBOOL      SetViewportOrg       (GXINT x, GXINT y, GXLPPOINT lpPoint));
-  GXSTDINTERFACE(GXBOOL      GetViewportOrg       (GXLPPOINT lpPoint) GXCONST);
+  GXSTDINTERFACE(GXBOOL      GetViewportOrg       (GXLPPOINT lpPoint) const);
   GXSTDINTERFACE(GXVOID      EnableAlphaBlend     (GXBOOL bEnable));
   GXSTDINTERFACE(GXBOOL      Flush                ());
   GXSTDINTERFACE(GXBOOL      SetSamplerState      (GXUINT Sampler, GXSAMPLERDESC* pDesc));

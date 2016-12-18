@@ -64,13 +64,13 @@ GXHRESULT GXCanvasCoreImpl::Invoke(GRESCRIPTDESC* pDesc)
   return GX_OK;
 }
 
-GXVOID GXCanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) GXCONST
+GXVOID GXCanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const
 {
   pSize->cx = m_xExt;
   pSize->cy = m_yExt;
 }
 
-GTexture* GXCanvasCoreImpl::GetTargetUnsafe() GXCONST
+GTexture* GXCanvasCoreImpl::GetTargetUnsafe() const
 {
   return m_pTargetTex;
 }

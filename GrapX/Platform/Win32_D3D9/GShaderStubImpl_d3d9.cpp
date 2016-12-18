@@ -414,7 +414,7 @@ namespace D3D9
     if(uPixel != NULL)
     {
       const GXD3DXCONSTDESC& ShaderConst = lpConstDesc[uPixel - 1];
-      GXCONST INT nPixelBufferIndex = m_pShaderImpl->GetPixelIndexOffset() + ShaderConst.RegisterIndex;
+      const INT nPixelBufferIndex = m_pShaderImpl->GetPixelIndexOffset() + ShaderConst.RegisterIndex;
       ASSERT((ShaderConst.Bytes >> 2) == nFloatCount);
       ASSERT(ShaderConst.RegisterCount == ((nFloatCount + 3) >> 2));
       //ASSERT(UniformBuffer.GetSize() >= nPixelBufferIndex * sizeof(float4));
@@ -466,7 +466,7 @@ namespace D3D9
     if(uPixel != NULL)
     {
       const GXD3DXCONSTDESC& ShaderConst = lpConstDesc[uPixel - 1];
-      GXCONST INT nPixelBufferIndex = m_pShaderImpl->GetPixelIndexOffset() + ShaderConst.RegisterIndex;
+      const INT nPixelBufferIndex = m_pShaderImpl->GetPixelIndexOffset() + ShaderConst.RegisterIndex;
       ASSERT((ShaderConst.Bytes >> 2) == nFloatCount);
       ASSERT(ShaderConst.RegisterCount == ((nFloatCount + 3) >> 2));
       //ASSERT(UniformBuffer.GetSize() >= nPixelBufferIndex * sizeof(float4));
@@ -486,7 +486,7 @@ namespace D3D9
     return true;  
   }
 
-  GXBOOL GShaderStubImpl::GetUniformByIndex(GXUINT nIndex, UNIFORMDESC* pDesc) GXCONST
+  GXBOOL GShaderStubImpl::GetUniformByIndex(GXUINT nIndex, UNIFORMDESC* pDesc) const
   {
     if(nIndex >= m_aCommonUniforms.size()) {
       return FALSE;

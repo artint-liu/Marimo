@@ -201,7 +201,7 @@ int GXDLLAPI gxDrawTextA(
 //////////////////////////////////////////////////////////////////////////
 int GXDLLAPI gxFrameRect(
         GXHDC hDC,        // handle to device context 
-        GXCONST GXRECT *lprc,    // pointer to rectangle coordinates  
+        const GXRECT *lprc,    // pointer to rectangle coordinates  
         GXHBRUSH hbr       // handle to brush 
         )
 {
@@ -792,8 +792,8 @@ GXBOOL GXDLLAPI gxCheckRadioButton(
 //gxIntersectRect
 //GXBOOL gxIntersectRect(
 //           GXLPRECT lprcDst,      // address of structure for intersection
-//           GXCONST GXRECT *lprcSrc1,  // address of structure with first rectangle
-//           GXCONST GXRECT *lprcSrc2   // address of structure with second rectangle
+//           const GXRECT *lprcSrc1,  // address of structure with first rectangle
+//           const GXRECT *lprcSrc2   // address of structure with second rectangle
 //           )
 //{
 //  ASSERT(FALSE);
@@ -860,8 +860,8 @@ GXBOOL GXDLLAPI gxScrollWindow(
   GXHWND hWnd,                 // handle of window to scroll
   int XAmount,                 // amount of horizontal scrolling
   int YAmount,                 // amount of vertical scrolling
-  GXCONST GXRECT *lpRect,      // address of structure with scroll rectangle
-  GXCONST GXRECT *lpClipRect   // address of structure with clip rectangle
+  const GXRECT *lpRect,      // address of structure with scroll rectangle
+  const GXRECT *lpClipRect   // address of structure with clip rectangle
   )
 {
   return gxScrollWindowEx(hWnd, XAmount, YAmount, lpRect, lpClipRect, NULL, 

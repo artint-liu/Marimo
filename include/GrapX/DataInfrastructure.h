@@ -266,11 +266,11 @@ namespace GXUI
 
     // 要支持szName == NULL
 //#ifdef ENABLE_DATAPOOL_WATCHER
-//    GXSTDINTERFACE(GXBOOL     IsAutoKnock       () GXCONST);
+//    GXSTDINTERFACE(GXBOOL     IsAutoKnock       () const);
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-    GXSTDINTERFACE(GXSIZE_T   GetCount          () GXCONST);
-    //GXSTDINTERFACE(GXBOOL     IsFixedHeight     () GXCONST);  // MultiColumn 属性时这个无效,认为是统一高度
-    //GXSTDINTERFACE(GXINT      GetItemHeight     (GXINT nIdx) GXCONST); 
+    GXSTDINTERFACE(GXSIZE_T   GetCount          () const);
+    //GXSTDINTERFACE(GXBOOL     IsFixedHeight     () const);  // MultiColumn 属性时这个无效,认为是统一高度
+    //GXSTDINTERFACE(GXINT      GetItemHeight     (GXINT nIdx) const); 
     //GXSTDINTERFACE(GXBOOL GetItemStatistics (GXINT nIdx, LISTBOXITEMSTAT* pStatictist) const);
     GXSTDINTERFACE(GXSIZE_T   AddStringW        (GXLPCWSTR szName, GXLPCWSTR lpString));
     GXSTDINTERFACE(GXBOOL     GetStringW        (GETSTRW* pItemStrDesc));   // 返回TRUE代表List将进行默认的显示操作，如ListSimple中绘制字符串，ListCustomize中SetWindowText，返回false表示GetStringW已经自己处理了显示方式。

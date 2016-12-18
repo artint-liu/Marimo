@@ -351,8 +351,8 @@ GRegionImpl* GRegionImpl::Union_NoOverlap(GRegionImpl* pNewRegion, const GRegion
 
   GXLONG nTouchBottom = m_rcBounding.bottom;
 
-  REGIONLINEHEAD* GXCONST prlhSrc1 = (REGIONLINEHEAD*)&m_aData.front();
-  REGIONLINEHEAD* GXCONST prlhSrc2 = (REGIONLINEHEAD*)&pRegion->m_aData.front();
+  REGIONLINEHEAD* const prlhSrc1 = (REGIONLINEHEAD*)&m_aData.front();
+  REGIONLINEHEAD* const prlhSrc2 = (REGIONLINEHEAD*)&pRegion->m_aData.front();
 
   if(m_rcBounding.top >= pRegion->m_rcBounding.bottom)
   {
@@ -364,7 +364,7 @@ GRegionImpl* GRegionImpl::Union_NoOverlap(GRegionImpl* pNewRegion, const GRegion
   // 复制第一个区域
   Line_Copy(pNewRegion->m_aData, (const GXLONG*)prlhSrc1, nCount1);
 
-  REGIONLINEHEAD* GXCONST prlhDest = (REGIONLINEHEAD*)&pNewRegion->m_aData.end();
+  REGIONLINEHEAD* const prlhDest = (REGIONLINEHEAD*)&pNewRegion->m_aData.end();
   prlhDest->nBottom = clMax(m_rcBounding.top, pRegion->m_rcBounding.top);
 
   // 避免在两个边界恰好相邻的区域插入空行

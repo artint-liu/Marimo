@@ -286,7 +286,7 @@ GXBOOL GXDLLAPI GXSaveTextureToFileW(GXLPCWSTR szFileName, GXLPCSTR szDestFormat
   return FALSE;
 }
 //////////////////////////////////////////////////////////////////////////
-GXBOOL GTextureImpl::Clear(GXCONST GXLPRECT lpRect, GXCOLOR dwColor)
+GXBOOL GTextureImpl::Clear(const GXLPRECT lpRect, GXCOLOR dwColor)
 {
   return FALSE;
 }

@@ -19,8 +19,8 @@
 
 
 
-GXBOOL GXDLLAPI gxIntersectRect(GXLPRECT,GXCONST GXRECT *,GXCONST GXRECT *);
-GXBOOL GXDLLAPI gxUnionRect(GXLPRECT,GXCONST GXRECT *,GXCONST GXRECT *);
+GXBOOL GXDLLAPI gxIntersectRect(GXLPRECT,const GXRECT *,const GXRECT *);
+GXBOOL GXDLLAPI gxUnionRect(GXLPRECT,const GXRECT *,const GXRECT *);
 GXBOOL GXDLLAPI gxOffsetRect    (GXLPRECT lprc,GXINT dx,GXINT dy);
 GXHANDLE  GXDLLAPI gxCopyImage    (GXHANDLE hImage,GXUINT uType,int cxDesired,int cyDesired,GXUINT fuFlags);
 
@@ -122,7 +122,7 @@ GXHDC GXDLLAPI gxBeginPaint(
 //////////////////////////////////////////////////////////////////////////
 GXBOOL GXDLLAPI gxEndPaint(
         GXHWND hWnd,        // handle to window
-        GXCONST GXPAINTSTRUCT *lpPaint   // pointer to structure for paint data  
+        const GXPAINTSTRUCT *lpPaint   // pointer to structure for paint data  
         )
 {
   if(lpPaint->hdc == NULL) {
@@ -192,10 +192,10 @@ GXBOOL GXDLLAPI gxExtTextOutW(
           GXINT X,        // x-coordinate of reference point 
           GXINT Y,        // y-coordinate of reference point 
           GXUINT fuOptions,    // text-output options 
-          GXCONST GXRECT *lprc,  // optional clipping and/or opaquing rectangle 
+          const GXRECT *lprc,  // optional clipping and/or opaquing rectangle 
           GXLPCWSTR lpString,    // points to string 
           GXUINT cbCount,      // number of characters in string 
-          GXCONST GXINT *lpDx    // pointer to array of intercharacter spacing values  
+          const GXINT *lpDx    // pointer to array of intercharacter spacing values  
           )
 {
   //ASSERT(lpDx == NULL);
@@ -583,7 +583,7 @@ GXHRGN GXDLLAPI gxCreateRectRgn(
 //gxGetTextExtentPointW
 //gxSetWindowOrgEx
 GXHRGN GXDLLAPI gxCreateRectRgnIndirect(
-               GXCONST GXRECT *lprc   // pointer to the rectangle  
+               const GXRECT *lprc   // pointer to the rectangle  
                )
 {
   if(lprc == NULL)
@@ -780,7 +780,7 @@ int GXDLLAPI gxGetObjectW(
 //////////////////////////////////////////////////////////////////////////
 //gxCreateFontIndirectW
 GXHFONT GXDLLAPI gxCreateFontIndirectW(
-             GXCONST GXLOGFONTW *lplf   // pointer to logical font structure  
+             const GXLOGFONTW *lplf   // pointer to logical font structure  
              )
 {
   //D3DXFONT_DESC d3dfd;
@@ -801,9 +801,9 @@ GXHFONT GXDLLAPI gxCreateFontIndirectW(
 
   //pFont->lpFont = NEW GXFont(&d3dfd);
 
-  pFont->lpFont = IntGetStationPtr()->pGraphics->CreateFontIndirectW((GXCONST GXLPLOGFONTW)lplf);
+  pFont->lpFont = IntGetStationPtr()->pGraphics->CreateFontIndirectW((const GXLPLOGFONTW)lplf);
 
-  //GXCreateFreeTypeFontIndirectW((GXCONST LPLOGFONTW)lplf, &pFont->lpFont);
+  //GXCreateFreeTypeFontIndirectW((const LPLOGFONTW)lplf, &pFont->lpFont);
 
   //GXWin32APIEmu::MapGXGdiObj(GXGDIOBJ_FONT, pFont, NULL);
 
@@ -1101,7 +1101,7 @@ GXHBITMAP GXDLLAPI gxCreateBitmap(
                  int nHeight,      // bitmap height, in pixels 
                  GXUINT cPlanes,    // number of color planes used by device 
                  GXUINT cBitsPerPel,  // number of bits required to identify a color  
-                 GXCONST GXVOID *lpvBits   // pointer to array containing color data 
+                 const GXVOID *lpvBits   // pointer to array containing color data 
                  )
 {
   GXLPVOID lpTBits = NULL;
@@ -1187,7 +1187,7 @@ GXCOLORREF GXDLLAPI gxGetPixel(
 }
 GXHBITMAP GXDLLAPI gxCreateDIBSection(
              GXHDC hdc,          // handle to device context
-             GXCONST GXBITMAPINFO *pbmi,  // pointer to structure containing bitmap size, format, and color data
+             const GXBITMAPINFO *pbmi,  // pointer to structure containing bitmap size, format, and color data
              GXUINT iUsage,        // color data type indicator: RGB values or palette indices
              GXVOID *ppvBits,      // pointer to variable to receive a pointer to the bitmap's bit values
              GXHANDLE hSection,      // optional handle to a file mapping object
@@ -1235,7 +1235,7 @@ int GXDLLAPI gxGetDeviceCaps(
 
 GXBOOL GXDLLAPI gxRectVisible(
          GXHDC hdc,  // handle of the device context 
-         GXCONST GXRECT *lprc   // address of rectangle structure  
+         const GXRECT *lprc   // address of rectangle structure  
          )
 {
   GXRECT rect;
@@ -1256,9 +1256,9 @@ int GXDLLAPI gxSetROP2(
 GXHPEN GXDLLAPI gxExtCreatePen(
           GXDWORD dwPenStyle,  // pen style 
           GXDWORD dwWidth,  // pen width 
-          GXCONST GXLOGBRUSH *lplb,  // pointer to structure for brush attributes 
+          const GXLOGBRUSH *lplb,  // pointer to structure for brush attributes 
           GXDWORD dwStyleCount,  // length of array containing custom style bits 
-          GXCONST GXDWORD *lpStyle   // optional array of custom style bits 
+          const GXDWORD *lpStyle   // optional array of custom style bits 
           )
 {
   LPGXGDIPEN lpPen;
@@ -1286,8 +1286,8 @@ GXHPEN GXDLLAPI gxCreatePen(
 }
 GXBOOL GXDLLAPI gxPolyPolyline(
           GXHDC hdc,  // handle of a device context 
-          GXCONST GXPOINT *lppt,  // address of an array of points 
-          GXCONST GXDWORD *lpdwPolyPoints,  // address of an array of values 
+          const GXPOINT *lppt,  // address of an array of points 
+          const GXDWORD *lpdwPolyPoints,  // address of an array of values 
           GXDWORD cCount   // number of counts in the second array 
           )
 {

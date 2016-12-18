@@ -49,13 +49,13 @@ GXHRESULT GXCanvas3DImpl::Release()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXVOID GXCanvas3DImpl::GetTargetDimension(GXSIZE* pSize) GXCONST
+GXVOID GXCanvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
 {
   pSize->cx = m_xExt;
   pSize->cy = m_yExt;
 }
 
-GTexture* GXCanvas3DImpl::GetTargetUnsafe() GXCONST
+GTexture* GXCanvas3DImpl::GetTargetUnsafe() const
 {
   return m_pTargetTex;
 }
@@ -116,7 +116,7 @@ GXBOOL GXCanvas3DImpl::Initialize(GXImage* pImage, GTexture* pDepthStencil, GXLP
   return FALSE;
 }
 
-GXGraphics* GXCanvas3DImpl::GetGraphicsUnsafe() GXCONST
+GXGraphics* GXCanvas3DImpl::GetGraphicsUnsafe() const
 {
   return m_pGraphicsImpl;
 }
@@ -352,7 +352,7 @@ GXHRESULT GXCanvas3DImpl::Activate()
   return GX_OK;
 }
 
-GXLPCVIEWPORT GXCanvas3DImpl::GetViewport() GXCONST
+GXLPCVIEWPORT GXCanvas3DImpl::GetViewport() const
 {
   return &m_Viewport;
 }
@@ -432,7 +432,7 @@ GXHRESULT GXCanvas3DImpl::RayFromScreen(const GXPOINT* pScreen, GXOUT Ray* pRay)
 }
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil) GXCONST
+GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil) const
 {
   if(m_pDepthStencil == NULL) {
     return GX_FAIL;
@@ -442,7 +442,7 @@ GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil) GXCONST
   return m_pDepthStencil->AddRef();
 }
 
-const FrustumPlanes* GXCanvas3DImpl::GetViewFrustum() GXCONST
+const FrustumPlanes* GXCanvas3DImpl::GetViewFrustum() const
 {
   return &m_ViewFrustum;
 }

@@ -1,10 +1,10 @@
 ﻿//////////////////////////////////////////////////////////////////////////
-GShader* GShaderStubImpl::GetShaderUnsafe() GXCONST
+GShader* GShaderStubImpl::GetShaderUnsafe() const
 {
   return m_pShaderImpl;
 }
 
-GXUINT GShaderStubImpl::GetHandleByName(GXCONST GXCHAR* pName) GXCONST
+GXUINT GShaderStubImpl::GetHandleByName(const GXCHAR* pName) const
 {
   if(pName == NULL || m_pShaderImpl == NULL)
   {
@@ -14,7 +14,7 @@ GXUINT GShaderStubImpl::GetHandleByName(GXCONST GXCHAR* pName) GXCONST
   return m_pShaderImpl->GetHandle(pName);
 }
 
-GXUINT GShaderStubImpl::GetHandleByIndex(GXUINT nIndex) GXCONST
+GXUINT GShaderStubImpl::GetHandleByIndex(GXUINT nIndex) const
 {
   ASSERT(m_aCommonUniforms.size() == m_pShaderImpl->GetConstantDescTable().size());
   if(nIndex >= m_aCommonUniforms.size()) {
@@ -23,12 +23,12 @@ GXUINT GShaderStubImpl::GetHandleByIndex(GXUINT nIndex) GXCONST
   return m_aCommonUniforms[nIndex].pConstDesc->dwHandle;
 }
 
-GXUniformType GShaderStubImpl::GetHandleType(GXUINT handle) GXCONST
+GXUniformType GShaderStubImpl::GetHandleType(GXUINT handle) const
 {
   return m_pShaderImpl->GetHandleType(handle);
 }
 
-GXUINT GShaderStubImpl::GetSamplerStageByHandle(GXUINT handle) GXCONST
+GXUINT GShaderStubImpl::GetSamplerStageByHandle(GXUINT handle) const
 {
   return m_pShaderImpl->GetStageByHandle(handle);
 }

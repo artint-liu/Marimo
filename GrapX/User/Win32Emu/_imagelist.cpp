@@ -2939,7 +2939,7 @@ static GXHBITMAP gxImageList_CreateImage(GXHDC hdc, GXHIMAGELIST himl, GXUINT co
 */
 
 GXUINT GXDLLAPI
-gxImageList_SetColorTable (GXHIMAGELIST himl, GXUINT uStartIndex, GXUINT cEntries, GXCONST GXRGBQUAD * prgb)
+gxImageList_SetColorTable (GXHIMAGELIST himl, GXUINT uStartIndex, GXUINT cEntries, const GXRGBQUAD * prgb)
 {
   ASSERT(FALSE);
   return 0;

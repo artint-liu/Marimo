@@ -50,21 +50,21 @@ namespace D3D9
 
   public:
     GShaderStubImpl(GXGraphics* pGraphics);
-    virtual GXHRESULT     SetShaderRef            (GShader* pShader);
-    virtual GXHRESULT     BindData                (MODataPool* pDataPool, GXLPCSTR szStruct);
-    virtual GXHRESULT     FindDataPoolByName      (GXLPCSTR szName, MODataPool** ppDataPool);
-    virtual GXHRESULT     BindCommonUniform       (LPCDATALAYOUT lpUniformDef);
-    virtual GXINT         FindUniformDef          (LPCDATALAYOUT lpUniformDef);
-    virtual GXBOOL        CommitUniform           (int nDefIdx, GXLPCVOID lpData, GXUINT uCommonOffset);
-    virtual GShader*      GetShaderUnsafe         () GXCONST;
-    virtual GXUINT        GetHandleByName         (GXLPCSTR pName) GXCONST;
-    virtual GXUINT        GetHandleByIndex        (GXUINT nIndex) GXCONST;
-    virtual GXUniformType GetHandleType           (GXUINT handle) GXCONST;
-    virtual GXUINT        GetSamplerStageByHandle (GXUINT handle) GXCONST;
-    virtual GXBOOL        GetUniformByIndex       (GXUINT nIndex, UNIFORMDESC* pDesc) GXCONST;
-    virtual GXBOOL        SetUniformByHandle      (clBufferBase* pUnusualUnifom, GXUINT uHandle, float* fValue, GXINT nFloatCount);
-    virtual GXBOOL        SetTextureByHandle      (GTextureBase** pTextureArray, GXUINT uHandle, GTextureBase* pTexture);
-    virtual GXBOOL        SetTextureByIndex       (GTextureBase** pTextureArray, GXUINT uIndex, GTextureBase* pTexture);
+    virtual GXHRESULT     SetShaderRef            (GShader* pShader) override;
+    virtual GXHRESULT     BindData                (MODataPool* pDataPool, GXLPCSTR szStruct) override;
+    virtual GXHRESULT     FindDataPoolByName      (GXLPCSTR szName, MODataPool** ppDataPool) override;
+    virtual GXHRESULT     BindCommonUniform       (LPCDATALAYOUT lpUniformDef) override;
+    virtual GXINT         FindUniformDef          (LPCDATALAYOUT lpUniformDef) override;
+    virtual GXBOOL        CommitUniform           (int nDefIdx, GXLPCVOID lpData, GXUINT uCommonOffset) override;
+    virtual GShader*      GetShaderUnsafe         () const override;
+    virtual GXUINT        GetHandleByName         (GXLPCSTR pName) const override;
+    virtual GXUINT        GetHandleByIndex        (GXUINT nIndex) const override;
+    virtual GXUniformType GetHandleType           (GXUINT handle) const override;
+    virtual GXUINT        GetSamplerStageByHandle (GXUINT handle) const override;
+    virtual GXBOOL        GetUniformByIndex       (GXUINT nIndex, UNIFORMDESC* pDesc) const override;
+    virtual GXBOOL        SetUniformByHandle      (clBufferBase* pUnusualUnifom, GXUINT uHandle, float* fValue, GXINT nFloatCount) override;
+    virtual GXBOOL        SetTextureByHandle      (GTextureBase** pTextureArray, GXUINT uHandle, GTextureBase* pTexture) override;
+    virtual GXBOOL        SetTextureByIndex       (GTextureBase** pTextureArray, GXUINT uIndex, GTextureBase* pTexture) override;
 #ifdef REFACTOR_SHADER
     virtual GXBOOL        CommitToDevice          (GXLPVOID lpUniform, GXSIZE_T cbSize) override;
     virtual GXBOOL        UpdateCanvasUniform     (GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize) override;
@@ -73,10 +73,10 @@ namespace D3D9
 
     // 接口实现
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT     AddRef                  ();
-    virtual GXHRESULT     Release                 ();
+    virtual GXHRESULT     AddRef                  () override;
+    virtual GXHRESULT     Release                 () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT     Invoke                  (GRESCRIPTDESC* pDesc);
+    virtual GXHRESULT     Invoke                  (GRESCRIPTDESC* pDesc) override;
 
     virtual GXHRESULT     SetTextureSlot          (GXLPCSTR pName, GXINT nSlot);
     virtual GXINT         GetTextureSlot          (GXLPCSTR pName);

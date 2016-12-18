@@ -23,24 +23,24 @@ namespace D3D9
 
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT    AddRef            ();
-    virtual GXHRESULT    Release           ();
+    virtual GXHRESULT    AddRef            () override;
+    virtual GXHRESULT    Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    virtual GXBOOL       Clear             (GXCONST LPBOX lpRect, GXCOLOR dwColor);
-    virtual GXUINT       GetWidth          ();
-    virtual GXUINT       GetHeight         ();
-    virtual GXUINT       GetDepth          ();
-    virtual GXBOOL       GetDimension      (GXUINT* pWidth, GXUINT* pHeight, GXUINT* pDepth);
-    virtual GXDWORD      GetUsage          ();
-    virtual GXFormat     GetFormat         ();
-    virtual GXVOID       GenerateMipMaps   ();
-    virtual GXBOOL       CopyBox           (GTexture3D* pSrc, GXCONST LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z);
-    virtual GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, GXCONST LPBOX lpBox, GXDWORD Flags);
-    virtual GXBOOL       UnlockBox         ();
-    virtual GXGraphics*  GetGraphicsUnsafe ();      // 不会增加引用计数
+    virtual GXBOOL       Clear             (const LPBOX lpRect, GXCOLOR dwColor) override;
+    virtual GXUINT       GetWidth          () override;
+    virtual GXUINT       GetHeight         () override;
+    virtual GXUINT       GetDepth          () override;
+    virtual GXBOOL       GetDimension      (GXUINT* pWidth, GXUINT* pHeight, GXUINT* pDepth) override;
+    virtual GXDWORD      GetUsage          () override;
+    virtual GXFormat     GetFormat         () override;
+    virtual GXVOID       GenerateMipMaps   () override;
+    virtual GXBOOL       CopyBox           (GTexture3D* pSrc, const LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z) override;
+    virtual GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, const LPBOX lpBox, GXDWORD Flags) override;
+    virtual GXBOOL       UnlockBox         () override;
+    virtual GXGraphics*  GetGraphicsUnsafe () override;      // 不会增加引用计数
 
-    virtual GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat);
+    virtual GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat) override;
 
     GTexture3DImpl(GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, 
       GXDWORD ResUsage, GXGraphics* pGraphics);

@@ -61,13 +61,13 @@ namespace Marimo
 
   // 函数声明
   Variable DynamicArray_NewBack(VarImpl* pThis, GXUINT nIncrease);
-  Variable Struct_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName);
-  Variable Array_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex);
+  Variable Struct_GetMember(const VarImpl* pThis, GXLPCSTR szName);
+  Variable Array_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex);
 
   //////////////////////////////////////////////////////////////////////////
 
   template<class _TStoString> // 返回字符串类型和自身储存的字符串类型
-  typename _TStoString::LPCSTR String_ToCStringT(GXCONST VarImpl* pThis)
+  typename _TStoString::LPCSTR String_ToCStringT(const VarImpl* pThis)
   {
     ASSERT(pThis->InlGetCategory() == T_STRING || pThis->InlGetCategory() == T_STRINGA);
 
@@ -127,12 +127,12 @@ namespace Marimo
   class DataPoolVariableImpl : public DataPoolVariable
   {
   public:
-    inline VTBL* InlGetVtbl() GXCONST
+    inline VTBL* InlGetVtbl() const
     {
       return m_vtbl;
     }
 
-    inline DataPoolImpl::LPCVD InlGetVDD() GXCONST
+    inline DataPoolImpl::LPCVD InlGetVDD() const
     {
       return reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd);
     }
@@ -143,7 +143,7 @@ namespace Marimo
       return pDataPoolImpl->CleanupArray(reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc), lpBuffer, (GXUINT)nCount);
     }
 
-    inline GXBOOL IsReadOnly() GXCONST
+    inline GXBOOL IsReadOnly() const
     {
       return TEST_FLAG(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly);
     }    
@@ -178,12 +178,12 @@ namespace Marimo
       return TRUE;
     }
 
-    inline DataPoolImpl::LPCED InlGetEnum(GXUINT nIndex) GXCONST
+    inline DataPoolImpl::LPCED InlGetEnum(GXUINT nIndex) const
     {
       return reinterpret_cast<DataPoolImpl::LPCED>(m_pVdd->GetStructDesc()->GetEnumMembers()) + nIndex;
     }
 
-    inline GXBOOL InlFindEnumFlagValue(DataPool::LPCSTR szName, DataPool::EnumFlag* pOutEnumFlag) GXCONST
+    inline GXBOOL InlFindEnumFlagValue(DataPool::LPCSTR szName, DataPool::EnumFlag* pOutEnumFlag) const
     {
       GXBOOL bval = reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntFindEnumFlagValue(
         reinterpret_cast<DataPoolImpl::LPCSD>(m_pVdd->GetStructDesc()), szName, pOutEnumFlag);
@@ -208,14 +208,14 @@ namespace Marimo
       return bval;
     }
 
-    inline TypeCategory InlGetCategory() GXCONST
+    inline TypeCategory InlGetCategory() const
     {
       return (m_pVdd == NULL || m_pVdd->GetTypeDesc() == NULL)
         ? T_UNDEFINE
         : m_pVdd->GetTypeCategory();
     }
 
-    inline GXBOOL InlIsPrimaryType() GXCONST
+    inline GXBOOL InlIsPrimaryType() const
     {
       // 判断是否为基础类型，struct和object不认为是基础类型
       const TypeCategory cate = InlGetCategory();
@@ -228,7 +228,7 @@ namespace Marimo
         cate == T_ENUM || cate == T_FLAG);
     }
 
-    inline GXHRESULT InlQuery(GXLPCSTR szName, DataPoolVariable* pBase) GXCONST
+    inline GXHRESULT InlQuery(GXLPCSTR szName, DataPoolVariable* pBase) const
     {
       ASSERT(m_pBuffer != NULL);
       DataPoolImpl::VARIABLE var = {0};
@@ -243,7 +243,7 @@ namespace Marimo
       return GX_FAIL;
     }
 
-    inline GXHRESULT InlSetupUnary(GXSIZE_T nIndex, DataPoolVariable* pBase) GXCONST
+    inline GXHRESULT InlSetupUnary(GXSIZE_T nIndex, DataPoolVariable* pBase) const
     {
       ASSERT(m_pBuffer != NULL);
       DataPoolImpl::VARIABLE var = {0};
@@ -257,7 +257,7 @@ namespace Marimo
       return GX_FAIL;
     }
 
-    inline GXHRESULT InlDynSetupUnary(clBufferBase* pBuffer, GXSIZE_T nIndex, DataPoolVariable* pBase) GXCONST
+    inline GXHRESULT InlDynSetupUnary(clBufferBase* pBuffer, GXSIZE_T nIndex, DataPoolVariable* pBase) const
     {
       ASSERT(m_pBuffer != NULL);
       DataPoolImpl::VARIABLE var = {0};
@@ -475,7 +475,7 @@ namespace Marimo
   }
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
-  GXHRESULT Variable::GetPool(DataPool** ppDataPool) GXCONST
+  GXHRESULT Variable::GetPool(DataPool** ppDataPool) const
   {
     if(m_pDataPool != NULL)
     {
@@ -486,19 +486,19 @@ namespace Marimo
     return GX_FAIL;
   }
 
-  DataPool* Variable::GetPoolUnsafe() GXCONST
+  DataPool* Variable::GetPoolUnsafe() const
   {
     return m_pDataPool;
   }
 
-  GXBOOL Variable::IsSamePool(DataPool* pDataPool) GXCONST
+  GXBOOL Variable::IsSamePool(DataPool* pDataPool) const
   {
     return m_pDataPool == pDataPool;
   }
 
 #define IMPLEMENT_EQUAL_OPERATOR_FUNC(t, v) DataPoolVariable& DataPoolVariable::operator=(t v) { Set(v); return *this; }
 #define CAST2VARPTR  reinterpret_cast<VarImpl*>
-#define CAST2VARPTRC reinterpret_cast<GXCONST VarImpl*>
+#define CAST2VARPTRC reinterpret_cast<const VarImpl*>
 
   IMPLEMENT_EQUAL_OPERATOR_FUNC(GXLPCWSTR, szString);
   IMPLEMENT_EQUAL_OPERATOR_FUNC(GXLPCSTR, szString);
@@ -612,22 +612,22 @@ namespace Marimo
     SAFE_RELEASE(m_pDataPool);
   }
 
-  GXBOOL Variable::IsValid() GXCONST
+  GXBOOL Variable::IsValid() const
   {
     return (m_pDataPool && m_vtbl && m_pBuffer);
   }
 
-  //GXBOOL Variable::IsEmpty() GXCONST
+  //GXBOOL Variable::IsEmpty() const
   //{
   //  return ! (m_pDataPool != NULL && m_vtbl != NULL && m_pBuffer != NULL);
   //}
 
-  GXLPVOID Variable::GetPtr() GXCONST
+  GXLPVOID Variable::GetPtr() const
   {
     return (GXLPBYTE)m_pBuffer->GetPtr() + m_AbsOffset;
   }
 
-  GXDWORD Variable::GetCaps() GXCONST
+  GXDWORD Variable::GetCaps() const
   {
     //m_pVdd->IsDynamicArray()
     GXDWORD r = 0;
@@ -653,7 +653,7 @@ namespace Marimo
     return r;
   }
 
-  clStringA Variable::GetFullName() GXCONST
+  clStringA Variable::GetFullName() const
   {
     clStringA str;
     if(m_pDataPool->FindFullName(&str, m_pVdd, m_pBuffer, m_AbsOffset)) {
@@ -662,60 +662,60 @@ namespace Marimo
     return "";
   }
 
-  clBufferBase* Variable::GetBuffer() GXCONST
+  clBufferBase* Variable::GetBuffer() const
   {
     return m_pBuffer;
   }
 
-  GXUINT Variable::GetOffset() GXCONST
+  GXUINT Variable::GetOffset() const
   {
     return m_AbsOffset;
   }
   
-  GXLPCSTR Variable::GetName() GXCONST
+  GXLPCSTR Variable::GetName() const
   {
     return reinterpret_cast<DataPool::LPCSTR>(m_pVdd->VariableName());
   }
   
-  GXLPCSTR Variable::GetTypeName() GXCONST
+  GXLPCSTR Variable::GetTypeName() const
   {
     return reinterpret_cast<DataPool::LPCSTR>(m_pVdd->TypeName());
   }
 
-  TypeCategory Variable::GetTypeCategory() GXCONST
+  TypeCategory Variable::GetTypeCategory() const
   {
     return CAST2VARPTRC(this)->InlGetCategory();
   }
 
 
-  GXUINT    Variable::GetSize     () GXCONST                              { return m_vtbl->GetSize     (CAST2VARPTRC(this));                    }
-  Variable  Variable::MemberOf    (GXLPCSTR szName) GXCONST               { return m_vtbl->GetMember   (CAST2VARPTRC(this), szName);            }
-  Variable  Variable::IndexOf     (GXSIZE_T nIndex) GXCONST               { return m_vtbl->GetIndex    (CAST2VARPTRC(this), nIndex);            }
-  GXSIZE_T  Variable::GetLength   () GXCONST                              { return m_vtbl->GetLength   (CAST2VARPTRC(this));                    }
-  Variable  Variable::NewBack     (GXUINT nIncrease)                      { return m_vtbl->NewBack     (CAST2VARPTR (this), nIncrease);         }
-  GXBOOL    Variable::Remove      (GXSIZE_T nIndex, GXSIZE_T nCount)      { return m_vtbl->Remove      (CAST2VARPTR (this), nIndex, nCount);    }
-  clStringW Variable::ToStringW   () GXCONST                              { return m_vtbl->ToStringW   (CAST2VARPTRC(this));                    }
-  clStringA Variable::ToStringA   () GXCONST                              { return m_vtbl->ToStringA   (CAST2VARPTRC(this));                    }
-  GXBOOL    Variable::ParseW      (GXLPCWSTR szString, GXUINT length)     { return m_vtbl->ParseW      (CAST2VARPTR (this), szString, length);  }
-  GXBOOL    Variable::ParseA      (GXLPCSTR szString, GXUINT length)      { return m_vtbl->ParseA      (CAST2VARPTR (this), szString, length);  }
+  GXUINT    Variable::GetSize     () const                              { return m_vtbl->GetSize     (CAST2VARPTRC(this));                    }
+  Variable  Variable::MemberOf    (GXLPCSTR szName) const               { return m_vtbl->GetMember   (CAST2VARPTRC(this), szName);            }
+  Variable  Variable::IndexOf     (GXSIZE_T nIndex) const               { return m_vtbl->GetIndex    (CAST2VARPTRC(this), nIndex);            }
+  GXSIZE_T  Variable::GetLength   () const                              { return m_vtbl->GetLength   (CAST2VARPTRC(this));                    }
+  Variable  Variable::NewBack     (GXUINT nIncrease)                    { return m_vtbl->NewBack     (CAST2VARPTR (this), nIncrease);         }
+  GXBOOL    Variable::Remove      (GXSIZE_T nIndex, GXSIZE_T nCount)    { return m_vtbl->Remove      (CAST2VARPTR (this), nIndex, nCount);    }
+  clStringW Variable::ToStringW   () const                              { return m_vtbl->ToStringW   (CAST2VARPTRC(this));                    }
+  clStringA Variable::ToStringA   () const                              { return m_vtbl->ToStringA   (CAST2VARPTRC(this));                    }
+  GXBOOL    Variable::ParseW      (GXLPCWSTR szString, GXUINT length)   { return m_vtbl->ParseW      (CAST2VARPTR (this), szString, length);  }
+  GXBOOL    Variable::ParseA      (GXLPCSTR szString, GXUINT length)    { return m_vtbl->ParseA      (CAST2VARPTR (this), szString, length);  }
 
-  GXBOOL    Variable::Set         (GXLPCWSTR szString)                    { return m_vtbl->SetAsStringW(CAST2VARPTR (this), szString);          }
-  GXBOOL    Variable::Set         (GXLPCSTR szString)                     { return m_vtbl->SetAsStringA(CAST2VARPTR (this), szString);          }
-  GXBOOL    Variable::Set         (float val)                             { return m_vtbl->SetAsFloat  (CAST2VARPTR (this), val);               }
-  GXBOOL    Variable::Set         (i32 val)                               { return m_vtbl->SetAsInteger(CAST2VARPTR (this), val);               }
-  GXBOOL    Variable::Set         (i64 val)                               { return m_vtbl->SetAsInt64  (CAST2VARPTR (this), val);               }
-  GXBOOL    Variable::Set         (u32 val)                               { return m_vtbl->SetAsInteger(CAST2VARPTR (this), val);               }
-  GXBOOL    Variable::Set         (u64 val)                               { return m_vtbl->SetAsInt64  (CAST2VARPTR (this), val);               }
+  GXBOOL    Variable::Set         (GXLPCWSTR szString)                  { return m_vtbl->SetAsStringW(CAST2VARPTR (this), szString);          }
+  GXBOOL    Variable::Set         (GXLPCSTR szString)                   { return m_vtbl->SetAsStringA(CAST2VARPTR (this), szString);          }
+  GXBOOL    Variable::Set         (float val)                           { return m_vtbl->SetAsFloat  (CAST2VARPTR (this), val);               }
+  GXBOOL    Variable::Set         (i32 val)                             { return m_vtbl->SetAsInteger(CAST2VARPTR (this), val);               }
+  GXBOOL    Variable::Set         (i64 val)                             { return m_vtbl->SetAsInt64  (CAST2VARPTR (this), val);               }
+  GXBOOL    Variable::Set         (u32 val)                             { return m_vtbl->SetAsInteger(CAST2VARPTR (this), val);               }
+  GXBOOL    Variable::Set         (u64 val)                             { return m_vtbl->SetAsInt64  (CAST2VARPTR (this), val);               }
 
-  float     Variable::ToFloat     () GXCONST                              { return m_vtbl->ToFloat     (CAST2VARPTRC(this));                    }
-  u32       Variable::ToInteger   () GXCONST                              { return m_vtbl->ToInteger   (CAST2VARPTRC(this));                    }
-  u64       Variable::ToInteger64 () GXCONST                              { return m_vtbl->ToInt64     (CAST2VARPTRC(this));                    }
+  float     Variable::ToFloat     () const                              { return m_vtbl->ToFloat     (CAST2VARPTRC(this));                    }
+  u32       Variable::ToInteger   () const                              { return m_vtbl->ToInteger   (CAST2VARPTRC(this));                    }
+  u64       Variable::ToInteger64 () const                              { return m_vtbl->ToInt64     (CAST2VARPTRC(this));                    }
 
-  GXBOOL    Variable::Retain      (GUnknown* pUnknown)                    { return m_vtbl->Retain      (CAST2VARPTR (this), pUnknown);          }
-  GXBOOL    Variable::Query       (GUnknown** ppUnknown) GXCONST          { return m_vtbl->Query       (CAST2VARPTRC(this), ppUnknown);         }
+  GXBOOL    Variable::Retain      (GUnknown* pUnknown)                  { return m_vtbl->Retain      (CAST2VARPTR (this), pUnknown);          }
+  GXBOOL    Variable::Query       (GUnknown** ppUnknown) const          { return m_vtbl->Query       (CAST2VARPTRC(this), ppUnknown);         }
 
-  GXBOOL    Variable::SetData     (GXLPCVOID lpData, GXUINT cbSize)       { return m_vtbl->SetData     (CAST2VARPTR (this), lpData, cbSize);    }
-  GXBOOL    Variable::GetData     (GXLPVOID lpData, GXUINT cbSize) GXCONST{ return m_vtbl->GetData     (CAST2VARPTRC(this), lpData, cbSize);    }
+  GXBOOL    Variable::SetData     (GXLPCVOID lpData, GXUINT cbSize)     { return m_vtbl->SetData     (CAST2VARPTR (this), lpData, cbSize);    }
+  GXBOOL    Variable::GetData     (GXLPVOID lpData, GXUINT cbSize) const{ return m_vtbl->GetData     (CAST2VARPTRC(this), lpData, cbSize);    }
 
   //////////////////////////////////////////////////////////////////////////
   //Exception_...
@@ -735,19 +735,19 @@ namespace Marimo
     return FALSE;
   }
 
-  float Exception_ToFloat(GXCONST VarImpl* pThis )
+  float Exception_ToFloat(const VarImpl* pThis )
   {
     CLOG_ERROR("%s exception\n", __FUNCTION__);
     return 0;
   }
 
-  u32 Exception_ToInteger(GXCONST VarImpl* pThis )
+  u32 Exception_ToInteger(const VarImpl* pThis )
   {
     CLOG_ERROR("%s exception\n", __FUNCTION__);
     return FALSE;
   }
 
-  u64 Exception_ToInt64(GXCONST VarImpl* pThis )
+  u64 Exception_ToInt64(const VarImpl* pThis )
   {
     CLOG_ERROR("%s exception\n", __FUNCTION__);
     return FALSE;
@@ -772,14 +772,14 @@ namespace Marimo
   }
 
   // 结构体访问异常
-  Variable Exception_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName)
+  Variable Exception_GetMember(const VarImpl* pThis, GXLPCSTR szName)
   {
     CLOG_ERROR("DataPool exception: Can not get member (\"%s\") from a unary type(\"%s\").\r\n", szName, pThis->GetName());
     return Variable();
   }
 
   // 数组访问异常
-  Variable Exception_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex)
+  Variable Exception_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex)
   {
     CLOG_ERROR("%s %s %s\n", __FUNCTION__, pThis->GetTypeName(), pThis->GetName());
     throw("This variable does not support \"IndexOf()\" method.");
@@ -806,13 +806,13 @@ namespace Marimo
     return FALSE;
   }
 
-  GXBOOL Exception_Query(GXCONST VarImpl* pThis, GUnknown** ppUnknown)
+  GXBOOL Exception_Query(const VarImpl* pThis, GUnknown** ppUnknown)
   {
     CLOG_ERROR("DataPool exception: Can not query \"%s\" as \"object\" type.\r\n", pThis->GetTypeName());
     return FALSE;
   }
 
-  GXBOOL Exception_GetData(GXCONST VarImpl* pThis, GXLPVOID lpData, GXUINT cbSize)
+  GXBOOL Exception_GetData(const VarImpl* pThis, GXLPVOID lpData, GXUINT cbSize)
   {
     CLOG_ERROR("%s exception\n", __FUNCTION__);
     return FALSE;
@@ -838,7 +838,7 @@ namespace Marimo
     return FALSE;
   }
 
-  GXBOOL Object_Query(GXCONST VarImpl* pThis, GUnknown** ppUnknown)
+  GXBOOL Object_Query(const VarImpl* pThis, GUnknown** ppUnknown)
   {
     ASSERT(pThis->InlGetVDD()->GetTypeCategory() == T_OBJECT);
 
@@ -849,28 +849,28 @@ namespace Marimo
     return TRUE;
   }
 
-  GXUINT Unary_GetSize(GXCONST VarImpl* pThis)
+  GXUINT Unary_GetSize(const VarImpl* pThis)
   {
     return pThis->InlGetVDD()->TypeSize();
   }
 
-  GXUINT StaticArray_GetSize(GXCONST VarImpl* pThis)
+  GXUINT StaticArray_GetSize(const VarImpl* pThis)
   {
     return pThis->InlGetVDD()->GetSize();
   }
 
-  GXUINT DynamicArray_GetSize(GXCONST VarImpl* pThis)
+  GXUINT DynamicArray_GetSize(const VarImpl* pThis)
   {
     DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
     return (GXUINT)pBuffer->GetSize();
   }
 
-  GXSIZE_T Unary_GetLength(GXCONST VarImpl* pThis)
+  GXSIZE_T Unary_GetLength(const VarImpl* pThis)
   {
     return 1;
   }
 
-  Variable Array_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex)
+  Variable Array_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex)
   {
     ASSERT(( ! pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
     Variable val;
@@ -881,7 +881,7 @@ namespace Marimo
     return val;
   }
 
-  Variable DynArray_GetIndex(GXCONST VarImpl* pThis, GXSIZE_T nIndex)
+  Variable DynArray_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex)
   {
     ASSERT(pThis->InlGetVDD()->IsDynamicArray());
     //ASSERT(( ! pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
@@ -895,7 +895,7 @@ namespace Marimo
     return val;
   }
 
-  Variable Struct_GetMember(GXCONST VarImpl* pThis, GXLPCSTR szName)
+  Variable Struct_GetMember(const VarImpl* pThis, GXLPCSTR szName)
   {
     Variable var;
     if(GXSUCCEEDED(pThis->InlQuery(szName, &var))){
@@ -906,7 +906,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  clStringA Primary_ToStringA(GXCONST VarImpl* pThis)
+  clStringA Primary_ToStringA(const VarImpl* pThis)
   {
     DataPoolVariable::LPCVD pVDD = pThis->InlGetVDD();
     clStringA str = "(null)";
@@ -952,7 +952,7 @@ namespace Marimo
     return str;
   }
 
-  clStringW Primary_ToStringW(GXCONST VarImpl* pThis)
+  clStringW Primary_ToStringW(const VarImpl* pThis)
   {
     return clStringW(Primary_ToStringA(pThis));
   }
@@ -994,7 +994,7 @@ namespace Marimo
     return FALSE;
   }
 
-  float Primary_ToFloat(GXCONST VarImpl* pThis )
+  float Primary_ToFloat(const VarImpl* pThis )
   {
     return (pThis->InlGetCategory() == T_FLOAT)
       ? *(float*)pThis->GetPtr() : 0.0f;
@@ -1010,7 +1010,7 @@ namespace Marimo
     return FALSE;
   }
 
-  u32 Primary_ToInteger(GXCONST VarImpl* pThis)
+  u32 Primary_ToInteger(const VarImpl* pThis)
   {
     GXLPCVOID pData = pThis->GetPtr();
     switch(pThis->InlGetCategory())
@@ -1069,7 +1069,7 @@ namespace Marimo
     return TRUE;
   }
 
-  u64 Primary_ToInt64(GXCONST VarImpl* pThis )
+  u64 Primary_ToInt64(const VarImpl* pThis )
   {
     GXLPCVOID pData = pThis->GetPtr();
     switch(pThis->InlGetCategory())
@@ -1101,7 +1101,7 @@ namespace Marimo
     return TRUE;
   }
 
-  GXBOOL Primary_GetData(GXCONST VarImpl* pThis, GXLPVOID lpData, GXUINT cbSize)
+  GXBOOL Primary_GetData(const VarImpl* pThis, GXLPVOID lpData, GXUINT cbSize)
   {
     memcpy(lpData, pThis->GetPtr(), pThis->GetSize() < cbSize ? pThis->GetSize() : cbSize);
     return TRUE;
@@ -1144,7 +1144,7 @@ namespace Marimo
   }
 
   template<class _TString>
-  _TString Enum_ToStringT(GXCONST VarImpl* pThis)
+  _TString Enum_ToStringT(const VarImpl* pThis)
   {
     _TString str;
     DataPool::Enum e;
@@ -1164,7 +1164,7 @@ namespace Marimo
   //////////////////////////////////////////////////////////////////////////
 
   template<class _TString>
-  _TString Flag_ToStringT(GXCONST VarImpl* pThis)
+  _TString Flag_ToStringT(const VarImpl* pThis)
   {
     const auto nCount = pThis->InlGetVDD()->GetStructDesc()->nMemberCount;
     //const auto StringBase = pThis->InlStringBase();
@@ -1267,7 +1267,7 @@ namespace Marimo
   }
 
   template<class _TRetString, class _TStoString> // 返回字符串类型和自身储存的字符串类型
-  _TRetString String_ToStringT(GXCONST VarImpl* pThis)
+  _TRetString String_ToStringT(const VarImpl* pThis)
   {
     return _TRetString(String_ToCStringT<_TStoString>(pThis));
     //GXLPBYTE pStringData = (GXBYTE*)pThis->GetPtr();// InlGetBufferPtr() + pThis->GetOffset());
@@ -1293,7 +1293,7 @@ namespace Marimo
   //////////////////////////////////////////////////////////////////////////
 
   template<class _TString>
-  _TString Struct_ToStringT(GXCONST VarImpl* pThis)
+  _TString Struct_ToStringT(const VarImpl* pThis)
   {
     static typename _TString::TChar szStruct[] = {'s','t','r','u','c','t',' ','\0'};
     _TString str = szStruct;
@@ -1303,7 +1303,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
   template<class _TString>
-  _TString Object_ToStringT(GXCONST VarImpl* pThis)
+  _TString Object_ToStringT(const VarImpl* pThis)
   {
     //clStringW str = L"object ";
     static typename _TString::TChar szObject[] = {'o','b','j','e','c','t',' ','\0'};
@@ -1328,13 +1328,13 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXSIZE_T StaticArray_GetLength(GXCONST VarImpl* pThis )
+  GXSIZE_T StaticArray_GetLength(const VarImpl* pThis )
   {
     return pThis->InlGetVDD()->nCount;
   }
 
   template<class _TString>
-  _TString StaticArray_ToStringT(GXCONST VarImpl* pThis)
+  _TString StaticArray_ToStringT(const VarImpl* pThis)
   {
     static typename _TString::TChar szFmt[] = {'[','%','d',']','\0'};
     _TString str = pThis->GetTypeName();
@@ -1356,7 +1356,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXSIZE_T DynamicArray_GetLength(GXCONST VarImpl* pThis)
+  GXSIZE_T DynamicArray_GetLength(const VarImpl* pThis)
   {
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     //clBufferBase* pBuffer = pThis->InlGetBufferObj();
@@ -1421,12 +1421,12 @@ namespace Marimo
     return TRUE;
   }
 
-  clStringW DynamicArray_ToStringW(GXCONST VarImpl* pThis)
+  clStringW DynamicArray_ToStringW(const VarImpl* pThis)
   {
     return clStringW(pThis->GetTypeName());
   }
 
-  clStringA DynamicArray_ToStringA(GXCONST VarImpl* pThis)
+  clStringA DynamicArray_ToStringA(const VarImpl* pThis)
   {
     return pThis->GetTypeName();
   }

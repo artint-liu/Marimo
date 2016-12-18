@@ -12,7 +12,7 @@ extern "C"
 {
 #endif // __cplusplus
 
-GXVOID ClsAtomToWndCls(LPGXWNDCLASSEX lpWndCls, GXCONST LPGXWNDCLSATOM lpClsAtom)
+GXVOID ClsAtomToWndCls(LPGXWNDCLASSEX lpWndCls, const LPGXWNDCLSATOM lpClsAtom)
 {
   lpWndCls->cbSize        = sizeof(GXWNDCLASSEX);
   lpWndCls->style         = lpClsAtom->style;
@@ -32,7 +32,7 @@ GXVOID ClsAtomToWndCls(LPGXWNDCLASSEX lpWndCls, GXCONST LPGXWNDCLSATOM lpClsAtom
   ASSERT(lpClsAtom->nRefCount >= 0);
 }
 
-GXVOID WndClsToClsAtom(LPGXWNDCLSATOM lpClsAtom, GXCONST LPGXWNDCLASSEX lpWndCls)
+GXVOID WndClsToClsAtom(LPGXWNDCLSATOM lpClsAtom, const LPGXWNDCLASSEX lpWndCls)
 {
   lpClsAtom->nRefCount = 0;
   lpClsAtom->style = lpWndCls->style;
@@ -73,7 +73,7 @@ int GXDLLAPI gxGetClassNameW(
 
 
 GXDWORD GXDLLAPI gxRegisterClassExW(
-                 GXCONST GXWNDCLASSEX *lpwcx  // address of structure with class data
+                 const GXWNDCLASSEX *lpwcx  // address of structure with class data
                  )
 {
   if(gxGetClassInfoExW(NULL, lpwcx->lpszClassName, NULL) != NULL)
@@ -82,7 +82,7 @@ GXDWORD GXDLLAPI gxRegisterClassExW(
   }
   
   GXLPWNDCLSATOM lpWndClsAtom = (GXLPWNDCLSATOM)new GXBYTE[sizeof(GXWNDCLSATOM) + lpwcx->cbClsExtra];
-  WndClsToClsAtom(lpWndClsAtom, (GXCONST LPGXWNDCLASSEX)lpwcx);
+  WndClsToClsAtom(lpWndClsAtom, (const LPGXWNDCLASSEX)lpwcx);
 
   if(gxDPA_InsertPtr(g_pCurStation->hClassDPA, 0, lpWndClsAtom) == -1)
   {

@@ -38,51 +38,51 @@ protected:
 public:
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT   AddRef                ();
-  GXHRESULT   Release               ();
+  GXHRESULT   AddRef                () override;
+  GXHRESULT   Release               () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT   Invoke                (GRESCRIPTDESC* pDesc);
-  GXVOID      GetTargetDimension    (GXSIZE* pSize) GXCONST;
-  GXGraphics* GetGraphicsUnsafe     () GXCONST;
-  GTexture*   GetTargetUnsafe       () GXCONST;
+  GXHRESULT   Invoke                (GRESCRIPTDESC* pDesc) override;
+  GXVOID      GetTargetDimension    (GXSIZE* pSize) const override;
+  GXGraphics* GetGraphicsUnsafe     () const override;
+  GTexture*   GetTargetUnsafe       () const override;
   GXBOOL      Initialize            (GXImage* pImage, GTexture* pDepthStencil, GXLPCVIEWPORT pViewport);
 
-  GXHRESULT   Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil);
-  GXHRESULT   TransformPosition     (const float3* pPos, GXOUT float4* pView); // Transform world position to screen
-  GXHRESULT   PositionToView        (const float3* pPos, GXOUT float3* pView); // like transform but it is float3 pos
+  GXHRESULT   Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil) override;
+  GXHRESULT   TransformPosition     (const float3* pPos, GXOUT float4* pView) override; // Transform world position to screen
+  GXHRESULT   PositionToView        (const float3* pPos, GXOUT float3* pView) override; // like transform but it is float3 pos
   GXHRESULT   PositionToScreen      (const float3* pPos, GXOUT GXPOINT* ptScreen); // like transform but it is float3 pos
-  GXHRESULT   PositionFromScreen    (const GXPOINT* pScreen, float fDepth, GXOUT float3* pWorldPos);
-  GXHRESULT   PositionFromView      (const float3* pView, GXOUT float3* pWorldPos);
-  GXHRESULT   RayFromScreen         (const GXPOINT* pScreen, GXOUT Ray* pRay);
+  GXHRESULT   PositionFromScreen    (const GXPOINT* pScreen, float fDepth, GXOUT float3* pWorldPos) override;
+  GXHRESULT   PositionFromView      (const float3* pView, GXOUT float3* pWorldPos) override;
+  GXHRESULT   RayFromScreen         (const GXPOINT* pScreen, GXOUT Ray* pRay) override;
   
-  void        SetWorldMatrix        (const float4x4& matWorld);
+  void        SetWorldMatrix        (const float4x4& matWorld) override;
 
-  GXDWORD     GetGlobalHandle       (GXLPCSTR szName);
+  GXDWORD     GetGlobalHandle       (GXLPCSTR szName) override;
   
   template<typename _Ty>
   inline GXHRESULT   SetCanvasUniformT     (GXDWORD dwGlobalHandle, const _Ty& rUniform);
 
-  GXHRESULT   SetCanvasFloat        (GXDWORD dwGlobalHandle, float fValue);
-  GXHRESULT   SetCanvasVector       (GXDWORD dwGlobalHandle, const float4& rVector);
-  GXHRESULT   SetCanvasMatrix       (GXDWORD dwGlobalHandle, const float4x4& rMatrix);
-  GXHRESULT   SetCanvasFloat        (GXLPCSTR szName, float fValue);
-  GXHRESULT   SetCanvasVector       (GXLPCSTR szName, const float4& rVector);
-  GXHRESULT   SetCanvasMatrix       (GXLPCSTR szName, const float4x4& rMatrix);
+  GXHRESULT   SetCanvasFloat        (GXDWORD dwGlobalHandle, float fValue) override;
+  GXHRESULT   SetCanvasVector       (GXDWORD dwGlobalHandle, const float4& rVector) override;
+  GXHRESULT   SetCanvasMatrix       (GXDWORD dwGlobalHandle, const float4x4& rMatrix) override;
+  GXHRESULT   SetCanvasFloat        (GXLPCSTR szName, float fValue) override;
+  GXHRESULT   SetCanvasVector       (GXLPCSTR szName, const float4& rVector) override;
+  GXHRESULT   SetCanvasMatrix       (GXLPCSTR szName, const float4x4& rMatrix) override;
 
-  void        SetViewport           (GXVIEWPORT* pViewport);
-  GXLPCVIEWPORT GetViewport() GXCONST;
+  void        SetViewport           (GXVIEWPORT* pViewport) override;
+  GXLPCVIEWPORT GetViewport() const;
 
-  GXHRESULT   SetMaterialInst       (GXMaterialInst* pMaterial);
-  GXHRESULT   SetPrimitive          (GPrimitive* pPrimitive);
-  GXHRESULT   SetCamera             (GCamera* pCamera);
-  GCamera*    GetCameraUnsafe       ();
-  GXHRESULT   Activate              ();
-  GXHRESULT   UpdateCommonUniforms  ();
-  GXHRESULT   Draw                  (GVSequence* pSequence);
+  GXHRESULT   SetMaterialInst       (GXMaterialInst* pMaterial) override;
+  GXHRESULT   SetPrimitive          (GPrimitive* pPrimitive) override;
+  GXHRESULT   SetCamera             (GCamera* pCamera) override;
+  GCamera*    GetCameraUnsafe       () override;
+  GXHRESULT   Activate              () override;
+  GXHRESULT   UpdateCommonUniforms  () override;
+  GXHRESULT   Draw                  (GVSequence* pSequence) override;
 
-  GXHRESULT   GetDepthStencil       (GTexture** ppDepthStencil) GXCONST;
+  GXHRESULT   GetDepthStencil       (GTexture** ppDepthStencil) const override;
 
-  const FrustumPlanes*      GetViewFrustum        () GXCONST;
+  const FrustumPlanes*      GetViewFrustum        () const;
 #ifdef REFACTOR_SHADER
 #else
   STANDARDMTLUNIFORMTABLE*  GetStandardUniform    ();

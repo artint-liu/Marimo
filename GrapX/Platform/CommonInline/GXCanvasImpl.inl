@@ -41,7 +41,7 @@ GXCanvasImpl::~GXCanvasImpl()
 {
 }
 
-GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, GXCONST REGN* pRegn)
+GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
 {
   ASSERT(m_uBatchCount == 0);
 
@@ -266,7 +266,7 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
   return (GXINT)eCompx;
 }
 
-GXBOOL GXCanvasImpl::Initialize(GXImage* pImage, GXCONST REGN* pRegn)
+GXBOOL GXCanvasImpl::Initialize(GXImage* pImage, const REGN* pRegn)
 {
   // TODO: 如果不支持Renderable则将内部纹理重新创建为RenderTarget
   ASSERT(m_pTargetImage == NULL);
@@ -476,7 +476,7 @@ GXBOOL GXCanvasImpl::CommitState()
 }
 
 
-GXGraphics* GXCanvasImpl::GetGraphicsUnsafe() GXCONST
+GXGraphics* GXCanvasImpl::GetGraphicsUnsafe() const
 {
   return m_pGraphics;
 }
@@ -501,7 +501,7 @@ GXBOOL GXCanvasImpl::SetTransform(const float4x4* matTransform)
   return TRUE;
 }
 
-GXBOOL GXCanvasImpl::GetTransform(float4x4* matTransform) GXCONST
+GXBOOL GXCanvasImpl::GetTransform(float4x4* matTransform) const
 {
   *matTransform = m_LastState.matTransform;
   return TRUE;
@@ -536,7 +536,7 @@ GXBOOL GXCanvasImpl::SetViewportOrg(GXINT x, GXINT y, GXLPPOINT lpPoint)
   return TRUE;
 }
 
-GXBOOL GXCanvasImpl::GetViewportOrg(GXLPPOINT lpPoint) GXCONST
+GXBOOL GXCanvasImpl::GetViewportOrg(GXLPPOINT lpPoint) const
 {
   if(lpPoint == NULL)
     return FALSE;
@@ -928,7 +928,7 @@ GXBOOL GXCanvasImpl::SetEffect(GXEffect* pEffect)
   m_LastState.pEffectImpl = (GXEffectImpl*)pEffect;
 
   const GShaderImpl* pShaderImpl = (GShaderImpl*)m_LastState.pEffectImpl->GetShaderUnsafe();
-  GXCONST GXINT nCacheSize = pShaderImpl->GetCacheSize();
+  const GXINT nCacheSize = pShaderImpl->GetCacheSize();
   if((GXINT)m_UniformBuffer.GetSize() < nCacheSize)
   {
     m_UniformBuffer.Resize(nCacheSize, TRUE);
@@ -1690,7 +1690,7 @@ GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN* rgDest, const GXREG
   return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc, eRotation);
 }
 //
-//GXCONST GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst()
+//const GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst()
 //{
 //  return m_CanvasCommConst;
 //}

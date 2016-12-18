@@ -1,10 +1,10 @@
 ﻿
-GXGraphics* GShaderImpl::GetGraphicsUnsafe() GXCONST
+GXGraphics* GShaderImpl::GetGraphicsUnsafe() const
 {
   return m_pGraphicsImpl;
 }
 
-GXLPCWSTR GShaderImpl::GetProfileDesc() GXCONST
+GXLPCWSTR GShaderImpl::GetProfileDesc() const
 {
   return m_strProfileDesc;
 }

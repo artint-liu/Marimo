@@ -80,7 +80,7 @@ public:
   GXDWORD         m_dwResType  : 8;
   GXSTDINTERFACE(GXHRESULT  Invoke            (GRESCRIPTDESC* pDesc));
 
-  virtual GXUINT  GetPriority () GXCONST
+  virtual GXUINT  GetPriority () const
   {
     return (GXUINT)m_dwPriority;
   }
@@ -92,7 +92,7 @@ public:
     return nPrevPriority;
   }
 
-  virtual GXDWORD GetType     () GXCONST
+  virtual GXDWORD GetType     () const
   {
     return (GXDWORD)m_dwResType;
   }

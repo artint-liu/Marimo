@@ -134,7 +134,7 @@ namespace GXUI
     return GX_FAIL;
   }
 
-  //GXINT CDefListDataAdapter::GetItemBottoms( GXINT* bottoms, const GXINT* indices, int count ) GXCONST
+  //GXINT CDefListDataAdapter::GetItemBottoms( GXINT* bottoms, const GXINT* indices, int count ) const
   //{
   //  // 参数合法性要有调用者保证,这里只是校验
   //  ASSERT(count >= 1);
@@ -154,7 +154,7 @@ namespace GXUI
   //  return nPrev;
   //}
 
-  //GXDWORD CDefListDataAdapter::GetStatus(GXINT item) GXCONST
+  //GXDWORD CDefListDataAdapter::GetStatus(GXINT item) const
   //{
   //  return 0;
   //}

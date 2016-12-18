@@ -159,7 +159,7 @@ public:
           GXLPWND   GetForeground         ();
           GXBOOL    SetForeground         ();
 
-          GXINT     Scroll                (GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXRECT * prcClip, GXHRGN hrgnUpdate, GXLPRECT prcUpdate, GXUINT flags);
+          GXINT     Scroll                (GXINT dx, GXINT dy, const GXRECT *prcScroll, const GXRECT * prcClip, GXHRGN hrgnUpdate, GXLPRECT prcUpdate, GXUINT flags);
           GXBOOL    SetPos                (GXHWND hWndInsertAfter, int x, int y, int cx, int cy, GXUINT uFlags);
           GXBOOL    Move                  (int x, int y, int cx, int cy, GXBOOL bRepaint);
           GXBOOL    Size                  (GXINT x, GXINT y, GXINT nWidth, GXINT nHeight);
@@ -182,7 +182,7 @@ public:
 
   static  GXBOOL    gxGetCursorPos        (GXLPPOINT pt);
 
-          GXBOOL    InvalidateRect        (GXCONST GXRECT* lpRect, GXBOOL bErase);
+          GXBOOL    InvalidateRect        (const GXRECT* lpRect, GXBOOL bErase);
           GXBOOL    InvalidateRgn         (GRegion* pRegion, GXBOOL bErase);
           GXHWND    GXGetTopLevel         ();
 

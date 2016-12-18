@@ -64,10 +64,10 @@ namespace D3D9
     GXRASTERIZERDESC  m_RasterizerDesc;
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT AddRef        ();
-    virtual GXHRESULT Release       ();
+    virtual GXHRESULT AddRef        () override;
+    virtual GXHRESULT Release       () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc){ return GX_OK; }
+    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) override { return GX_OK; }
 
   public:
     GRasterizerStateImpl(GXGraphicsImpl*        pGraphicsImpl);
@@ -85,8 +85,8 @@ namespace D3D9
 
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT AddRef            ();
-    virtual GXHRESULT Release           ();
+    virtual GXHRESULT AddRef            () override;
+    virtual GXHRESULT Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) { return GX_OK; }
 
@@ -116,10 +116,10 @@ namespace D3D9
 
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT AddRef            ();
-    virtual GXHRESULT Release           ();
+    virtual GXHRESULT AddRef            () override;
+    virtual GXHRESULT Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) { return GX_OK; }
+    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) override { return GX_OK; }
 
 
   public:
@@ -129,7 +129,7 @@ namespace D3D9
     GXBOOL  Activate        (GDepthStencilStateImpl* pPrevState);
     GXBOOL  CheckStencilOp  (GXDEPTHSTENCILOP* pStencilOp, GXLPCSTR szPrefix);
 
-    virtual GXDWORD SetStencilRef  (GXDWORD dwStencilRef);
+    virtual GXDWORD SetStencilRef  (GXDWORD dwStencilRef) override;
   };
   //////////////////////////////////////////////////////////////////////////
 
@@ -167,7 +167,7 @@ namespace D3D9
   //typedef GXSAMPLERSTATE* LPGXSAMPLERSTATE;
   //typedef GXSAMPLERSTATE* GXLPSAMPLERSTATE;
   //typedef GXSAMPLERSTAGE* GXLPSAMPLERSTAGE;
-  //typedef GXCONST GXSAMPLERSTAGE* GXLPCSAMPLERSTAGE;
+  //typedef const GXSAMPLERSTAGE* GXLPCSAMPLERSTAGE;
   //void IntSetSamplerToDefault(GXLPSAMPLERSTAGE lpSampStage);
 
   class GSamplerStateImpl : public GSamplerState
@@ -191,13 +191,13 @@ namespace D3D9
     //void              SetStateToDevice  (DWORD dwStage, D3DSAMPLERSTATETYPE eType);
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT AddRef          ();
-    virtual GXHRESULT Release         ();
+    virtual GXHRESULT AddRef          () override;
+    virtual GXHRESULT Release         () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT Invoke          (GRESCRIPTDESC* pDesc) { return GX_OK; }
-    virtual GXHRESULT SetState        (GXUINT nSamplerSlot, GXSAMPLERDESC* pSamplerDesc);
-    virtual GXHRESULT SetStateArray   (GXUINT nStartSlot, GXSAMPLERDESC* pSamplerDesc, int nCount);
-    virtual GXHRESULT ResetToDefault  ();
+    virtual GXHRESULT Invoke          (GRESCRIPTDESC* pDesc) override { return GX_OK; }
+    virtual GXHRESULT SetState        (GXUINT nSamplerSlot, GXSAMPLERDESC* pSamplerDesc) override;
+    virtual GXHRESULT SetStateArray   (GXUINT nStartSlot, GXSAMPLERDESC* pSamplerDesc, int nCount) override;
+    virtual GXHRESULT ResetToDefault  () override;
     //GXBOOL            ResetToDefault    ();
 
     GXBOOL            Set               (GXDWORD Sampler, D3DSAMPLERSTATETYPE eType, GXDWORD dwValue);

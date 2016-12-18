@@ -35,7 +35,7 @@
 //#define TRUE                 1
 //#define FALSE                0
 //#define NULL                 0
-#define GXCONST                const
+//#define GXCONST                const
 #define GXPURE                 = 0
 
 
@@ -50,7 +50,7 @@ typedef unsigned long   GXULONG;
 typedef float           GXFLOAT;
 typedef void            GXVOID;
 typedef void*           GXLPVOID;
-typedef GXCONST void*   GXLPCVOID;
+typedef const void*     GXLPCVOID;
 
 typedef i8              GXINT8;
 typedef u8              GXUINT8;
@@ -83,12 +83,12 @@ typedef GXSHORT*          GXLPSHORT;
 typedef GXDWORD*          GXLPDWORD;
 typedef GXBOOL*           GXLPBOOL;
 
-typedef GXCONST GXINT*    GXLPCINT;
-typedef GXCONST GXUINT*   GXLPCUINT;
-typedef GXCONST GXLONG*   GXLPCLONG;
-typedef GXCONST GXBYTE*   GXLPCBYTE;
-typedef GXCONST GXSHORT*  GXLPCSHORT;
-typedef GXCONST GXDWORD*  GXLPCDWORD;
+typedef const GXINT*      GXLPCINT;
+typedef const GXUINT*     GXLPCUINT;
+typedef const GXLONG*     GXLPCLONG;
+typedef const GXBYTE*     GXLPCBYTE;
+typedef const GXSHORT*    GXLPCSHORT;
+typedef const GXDWORD*    GXLPCDWORD;
 
 typedef i64               GXLONGLONG;
 
@@ -119,8 +119,8 @@ typedef GXLONG          GXHRESULT;
 
 typedef GXWCHAR         *GXLPWSTR, *LPGXWSTR, *GXLPWCHAR;
 typedef GXCHAR          *GXLPSTR, *LPGXSTR, *GXLPCHAR;
-typedef GXCONST GXWCHAR *GXLPCWSTR, *LPGXCWSTR;
-typedef GXCONST GXCHAR  *GXLPCSTR, *LPGXCSTR;
+typedef const GXWCHAR   *GXLPCWSTR, *LPGXCWSTR;
+typedef const GXCHAR    *GXLPCSTR, *LPGXCSTR;
 //typedef void            *HGXRGN;
 //typedef void            *HGXMENU,*GXHMENU;
 

@@ -161,7 +161,7 @@ namespace D3D9
     return GXSUCCEEDED(D3DXSaveTextureToFileW(szFileName, d3diff, ((GTextureImpl*)pTexture)->D3DTexture(), NULL));    
   }
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL GTextureImpl::Clear(GXCONST GXLPRECT lpRect, GXCOLOR dwColor)
+  GXBOOL GTextureImpl::Clear(const GXLPRECT lpRect, GXCOLOR dwColor)
   {
     GXHRESULT hr;
     GXRECT    rect;
@@ -241,7 +241,7 @@ namespace D3D9
     return FALSE;
   }
 
-  GXBOOL GTextureImpl::FillSystemMemSurface(LPDIRECT3DSURFACE9 pSurface, D3DFORMAT fmt, GXCONST GXLPRECT lpRect, GXCOLOR dwColor)
+  GXBOOL GTextureImpl::FillSystemMemSurface(LPDIRECT3DSURFACE9 pSurface, D3DFORMAT fmt, const GXLPRECT lpRect, GXCOLOR dwColor)
   {
 #ifdef _DEBUG
     D3DSURFACE_DESC SurfaceDesc;
@@ -689,7 +689,7 @@ namespace D3D9
     return hval;
   }
 
-  GXBOOL GTextureFromUser::Clear(GXCONST GXLPRECT lpRect, GXCOLOR dwColor)
+  GXBOOL GTextureFromUser::Clear(const GXLPRECT lpRect, GXCOLOR dwColor)
   {
     LPDIRECT3DDEVICE9 lpd3dDevice = m_pGraphicsImpl->D3DGetDevice();
     GXRECT    rect;

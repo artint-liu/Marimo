@@ -509,7 +509,7 @@ GXFont* GXGraphicsImpl::CreateFontIndirectA(const GXLPLOGFONTA lpLogFont)
   return pFont;
 }
 
-GXFont* GXGraphicsImpl::CreateFontW(GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXLPCWSTR pFileName)
+GXFont* GXGraphicsImpl::CreateFontW(const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName)
 {
   GXLOGFONTW LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTW));
@@ -519,7 +519,7 @@ GXFont* GXGraphicsImpl::CreateFontW(GXCONST GXULONG nWidth, GXCONST GXULONG nHei
   return CreateFontIndirectW(&LogFont);
 }
 
-GXFont* GXGraphicsImpl::CreateFontA(GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXLPCSTR pFileName)
+GXFont* GXGraphicsImpl::CreateFontA(const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName)
 {
   GXLOGFONTA LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTA));
@@ -812,7 +812,7 @@ GXDWORD GXGraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
   return NULL;
 }
 
-GXCanvas* GXGraphicsImpl::LockCanvas(GXImage* pImage, GXCONST LPREGN lpRegn, GXDWORD dwFlags)
+GXCanvas* GXGraphicsImpl::LockCanvas(GXImage* pImage, const LPREGN lpRegn, GXDWORD dwFlags)
 {
   // 允许 lpRegn 是空的, 比如Edit控件会因为调整大小而创建DC.此时需要设备的Font信息.
   if( ! TEST_FLAG(m_dwFlags, F_ACTIVATE))

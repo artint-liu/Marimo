@@ -25,10 +25,10 @@ public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef              ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXVOID    GetTargetDimension  (GXSIZE* pSize) GXCONST;
-  virtual GTexture* GetTargetUnsafe     () GXCONST;
+  virtual GXVOID    GetTargetDimension  (GXSIZE* pSize) const override;
+  virtual GTexture* GetTargetUnsafe     () const override;
   virtual GXBOOL    Initialize          (GTexture* pTexture);
-  virtual GXHRESULT Invoke              (GRESCRIPTDESC* pDesc);
+  virtual GXHRESULT Invoke              (GRESCRIPTDESC* pDesc) override;
 };
 
 #endif // _IMPLEMENT_GRAP_X_CANVAS_CORE_H_

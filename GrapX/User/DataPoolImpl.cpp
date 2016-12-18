@@ -1443,7 +1443,7 @@ namespace Marimo
     SAFE_DELETE_ARRAY(pContext);
   }
 
-  GXBOOL DataPoolImpl::IntFindEnumFlagValue( LPCSD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag ) GXCONST
+  GXBOOL DataPoolImpl::IntFindEnumFlagValue( LPCSD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag ) const
   {
     const auto* p = GSIT_Enums + pTypeDesc->GetEnumIndex(m_aEnums);
     int begin = 0;

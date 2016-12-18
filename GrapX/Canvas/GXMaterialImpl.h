@@ -41,9 +41,9 @@ protected:
 public:
   GXMaterialInstImpl(GXGraphics* pGraphics);
   GXHRESULT     SetShaderRef        (GShader* pShader);
-  GShader*      GetShaderUnsafe     () GXCONST;
-  GShaderStub*  GetShaderStubUnsafe () GXCONST;
-  GXUINT        GetHandle           (GXLPCSTR szName) GXCONST;
+  GShader*      GetShaderUnsafe     () const;
+  GShaderStub*  GetShaderStubUnsafe () const;
+  GXUINT        GetHandle           (GXLPCSTR szName) const;
 #ifdef REFACTOR_SHADER
   GXHRESULT     IntCommit           (GXLPCBYTE lpCanvasUniform);
 #else
@@ -52,49 +52,49 @@ public:
 
   // 接口实现
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT   AddRef            ();
-  virtual GXHRESULT   Release           ();
+  virtual GXHRESULT   AddRef            () override;
+  virtual GXHRESULT   Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT   Invoke            (GRESCRIPTDESC* pDesc);
+  virtual GXHRESULT   Invoke            (GRESCRIPTDESC* pDesc) override;
   virtual GXHRESULT   SetTextureSlot    (GXLPCSTR szName, GXINT nSlot);
   virtual GXINT       GetTextureSlot    (GXLPCSTR szName);
-  virtual GXBOOL      IsSequential      ();
-  virtual int         GetRenderQueue    () const;
-  virtual GXGraphics* GetGraphicsUnsafe ();
-  virtual GXHRESULT   GetFilenameW      (clStringW* pstrFilename);
-  virtual GXHRESULT   Clone             (GXMaterialInst** ppCuplicateMtlInst);
+  virtual GXBOOL      IsSequential      () override;
+  virtual int         GetRenderQueue    () const override;
+  virtual GXGraphics* GetGraphicsUnsafe () override;
+  virtual GXHRESULT   GetFilenameW      (clStringW* pstrFilename) override;
+  virtual GXHRESULT   Clone             (GXMaterialInst** ppCuplicateMtlInst) override;
 
-  virtual GXHRESULT   SaveFileW         (GXLPCWSTR szFilename);
-  virtual GXHRESULT   SaveRepository    (clSmartRepository* pStorage);
+  virtual GXHRESULT   SaveFileW         (GXLPCWSTR szFilename) override;
+  virtual GXHRESULT   SaveRepository    (clSmartRepository* pStorage) override;
 
-  virtual GXHRESULT   LoadFileW         (GXGraphics* pGraphics, GXLPCWSTR szFilename);
-  virtual GXHRESULT   LoadRepository    (GXGraphics* pGraphics, clSmartRepository* pStorage);
+  virtual GXHRESULT   LoadFileW         (GXGraphics* pGraphics, GXLPCWSTR szFilename) override;
+  virtual GXHRESULT   LoadRepository    (GXGraphics* pGraphics, clSmartRepository* pStorage) override;
 
-  virtual GXHRESULT GetUniformList    (UniformArray* pUniforms);
-  virtual GXHRESULT BindData          (MODataPool* pDataPool, GXLPCSTR szStruct);
-  virtual GXHRESULT BindDataByName    (GXLPCSTR szPoolName, GXLPCSTR szStruct);
-  virtual GXHRESULT SetParameters     (ParamType eType, GXDEFINITION* pParameters, int nCount);
-  virtual GXHRESULT SetFloat1ByName   (GXLPCSTR szName, float val);
-  virtual GXHRESULT SetFloat2ByName   (GXLPCSTR szName, const float2& vFloat2);
-  virtual GXHRESULT SetFloat3ByName   (GXLPCSTR szName, const float3& vFloat3);
-  virtual GXHRESULT SetFloat4ByName   (GXLPCSTR szName, const float4& vFloat4);
-  virtual GXHRESULT SetMatrixByName   (GXLPCSTR szName, const float4x4& mat);
+  virtual GXHRESULT GetUniformList    (UniformArray* pUniforms) override;
+  virtual GXHRESULT BindData          (MODataPool* pDataPool, GXLPCSTR szStruct) override;
+  virtual GXHRESULT BindDataByName    (GXLPCSTR szPoolName, GXLPCSTR szStruct) override;
+  virtual GXHRESULT SetParameters     (ParamType eType, GXDEFINITION* pParameters, int nCount) override;
+  virtual GXHRESULT SetFloat1ByName   (GXLPCSTR szName, float val) override;
+  virtual GXHRESULT SetFloat2ByName   (GXLPCSTR szName, const float2& vFloat2) override;
+  virtual GXHRESULT SetFloat3ByName   (GXLPCSTR szName, const float3& vFloat3) override;
+  virtual GXHRESULT SetFloat4ByName   (GXLPCSTR szName, const float4& vFloat4) override;
+  virtual GXHRESULT SetMatrixByName   (GXLPCSTR szName, const float4x4& mat) override;
 
-  virtual GXHRESULT SetTextureByName            (GXLPCSTR szName, GTextureBase* pTexture);
-  virtual GXHRESULT SetTextureByIndex           (GXUINT nIndex, GTextureBase* pTexture);
-  virtual GXHRESULT SetTextureByNameFromFileW   (GXLPCSTR szName, GXLPCWSTR szFilename);
-  virtual GXHRESULT SetTextureByIndexFromFileW  (GXUINT nIndex, GXLPCWSTR szFilename);
+  virtual GXHRESULT SetTextureByName            (GXLPCSTR szName, GTextureBase* pTexture) override;
+  virtual GXHRESULT SetTextureByIndex           (GXUINT nIndex, GTextureBase* pTexture) override;
+  virtual GXHRESULT SetTextureByNameFromFileW   (GXLPCSTR szName, GXLPCWSTR szFilename) override;
+  virtual GXHRESULT SetTextureByIndexFromFileW  (GXUINT nIndex, GXLPCWSTR szFilename) override;
 
-  inline  GShader*      InlGetShaderUnsafe    () GXCONST;
-  inline  GShaderStub*  InlGetShaderStubUnsafe() GXCONST;
+  inline  GShader*      InlGetShaderUnsafe    () const;
+  inline  GShaderStub*  InlGetShaderStubUnsafe() const;
 };
 //////////////////////////////////////////////////////////////////////////
-inline GShader* GXMaterialInstImpl::InlGetShaderUnsafe() GXCONST
+inline GShader* GXMaterialInstImpl::InlGetShaderUnsafe() const
 {
   return m_pShaderStub->GetShaderUnsafe();
 }
 
-inline GShaderStub* GXMaterialInstImpl::InlGetShaderStubUnsafe() GXCONST
+inline GShaderStub* GXMaterialInstImpl::InlGetShaderStubUnsafe() const
 {
   return m_pShaderStub;
 }

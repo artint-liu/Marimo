@@ -707,7 +707,7 @@ typedef struct GXMENUINFO
   GXDWORD       dwContextHelpID;
   GXULONG_PTR   dwMenuData;
 }*GXLPMENUINFO, *LPGXMENUINFO;
-typedef GXMENUINFO GXCONST *GXLPCMENUINFO;
+typedef GXMENUINFO const *GXLPCMENUINFO;
 
 /*
  * Menubar information
@@ -1319,10 +1319,10 @@ extern "C" {
   int         GXDLLAPI gxLoadStringW            (GXHINSTANCE hInstance,GXUINT uID,GXLPWSTR lpBuffer,int nBufferMax);
   GXHWND      GXDLLAPI gxGetParent              (GXHWND);
   GXBOOL      GXDLLAPI gxIsWindowEnabled        (GXHWND);
-  GXINT       GXDLLAPI gxFillRect               (GXHDC,GXCONST GXRECT*,GXHBRUSH);  
+  GXINT       GXDLLAPI gxFillRect               (GXHDC,const GXRECT*,GXHBRUSH);  
   GXINT       GXDLLAPI gxDrawTextW              (GXHDC hDC, GXLPCWSTR lpString, int nCount, GXLPRECT lpRect, GXUINT uFormat);
   GXINT       GXDLLAPI gxDrawTextA              (GXHDC hDC, GXLPCSTR lpString, int nCount, GXLPRECT lpRect, GXUINT uFormat);
-  GXINT       GXDLLAPI gxFrameRect              (GXHDC,GXCONST GXRECT *,GXHBRUSH);  
+  GXINT       GXDLLAPI gxFrameRect              (GXHDC,const GXRECT *,GXHBRUSH);  
   GXBOOL      GXDLLAPI gxDrawIconEx             (GXHDC,GXINT,GXINT,GXHICON,GXINT,GXINT,GXUINT,GXHBRUSH,GXUINT);  
   GXBOOL      GXDLLAPI gxDrawEdge               (GXHDC,GXLPRECT,GXUINT,GXUINT);
 
@@ -1351,7 +1351,7 @@ extern "C" {
   GXBOOL      GXDLLAPI gxShowScrollBar          (GXHWND hWnd,int wBar,GXBOOL bShow);
 
   int         GXDLLAPI gxSetWindowRgn           (GXHWND hWnd,GXHRGN hRgn,GXBOOL bRedraw);
-  GXHRGN      GXDLLAPI gxCreatePolygonRgn       (GXCONST GXPOINT *lppt,int cPoints,int fnPolyFillMode);
+  GXHRGN      GXDLLAPI gxCreatePolygonRgn       (const GXPOINT *lppt,int cPoints,int fnPolyFillMode);
   GXHRGN      GXDLLAPI gxCreateRoundRectRgn     (int nLeftRect,int nTopRect,int nRightRect,int nBottomRect,int nWidthEllipse,int nHeightEllipse);
   int         GXDLLAPI gxGetWindowRgn           (GXHWND hWnd,GXHRGN hRgn);
   GXBOOL      GXDLLAPI gxFillRgn                (GXHDC hdc,GXHRGN hrgn,GXHBRUSH hbr);
@@ -1393,7 +1393,7 @@ extern "C" {
   GXBOOL      GXDLLAPI gxKillTimer              (GXHWND, GXUINT nIDEvent);
 
   GXHBRUSH    GXDLLAPI gxGetSysColorBrush       (GXINT nIndex);
-  GXBOOL      GXDLLAPI gxDrawFocusRect          (GXHDC,GXCONST GXRECT *);
+  GXBOOL      GXDLLAPI gxDrawFocusRect          (GXHDC,const GXRECT *);
   GXBOOL      GXDLLAPI gxDrawIcon               (GXHDC hDC,int X,int Y,GXHICON hIcon);
   GXLONG      GXDLLAPI gxTabbedTextOutW         (GXHDC,GXINT,GXINT,GXLPCWSTR,GXINT,GXINT,GXLPINT,GXINT);
   GXDWORD     GXDLLAPI gxGetTabbedTextExtentW   (GXHDC,GXLPCWSTR,GXINT,GXINT,GXINT*);
@@ -1462,7 +1462,7 @@ extern "C" {
   GXBOOL      GXDLLAPI gxEndDialog              (GXHWND hDlg, int nResult);
 
   GXHDC       GXDLLAPI gxBeginPaint             (GXHWND hwnd, GXLPPAINTSTRUCT lpPaint);
-  GXBOOL      GXDLLAPI gxEndPaint               (GXHWND, GXCONST GXPAINTSTRUCT*);
+  GXBOOL      GXDLLAPI gxEndPaint               (GXHWND, const GXPAINTSTRUCT*);
   GXHDC       GXDLLAPI gxGetDC                  (GXHWND hWnd);
   GXHDC       GXDLLAPI gxGetDCEx                (GXHWND hWnd, GXHRGN hrgn, GXDWORD dwFlags);
   GXHDC       GXDLLAPI gxGetWindowDC            (GXHWND hWnd);
@@ -1471,11 +1471,11 @@ extern "C" {
   void        GXDLLAPI gxPostQuitMessage        (int nExitCode);
   GXBOOL      GXDLLAPI gxPostMessageW           (GXHWND hWnd, GXUINT Msg, GXWPARAM wParam, GXLPARAM lParam);
   GXBOOL      GXDLLAPI gxPeekMessageW           (GXLPMSG lpMsg,GXHWND hWnd,GXUINT wMsgFilterMin,GXUINT wMsgFilterMax,GXUINT wRemoveMsg);
-  GXBOOL      GXDLLAPI gxTranslateMessage       (GXCONST GXMSG *lpMsg);
+  GXBOOL      GXDLLAPI gxTranslateMessage       (const GXMSG *lpMsg);
   GXBOOL      GXDLLAPI gxWaitMessage            ();
 
-  GXBOOL      GXDLLAPI gxScrollWindow           (GXHWND hWnd, int XAmount,int YAmount,GXCONST GXRECT *lpRect,GXCONST GXRECT *lpClipRect);
-  GXINT       GXDLLAPI gxScrollWindowEx         (GXHWND hWnd, GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXRECT * prcClip, GXHRGN hrgnUpdate, GXLPRECT prcUpdate, GXUINT flags);
+  GXBOOL      GXDLLAPI gxScrollWindow           (GXHWND hWnd, int XAmount,int YAmount,const GXRECT *lpRect,const GXRECT *lpClipRect);
+  GXINT       GXDLLAPI gxScrollWindowEx         (GXHWND hWnd, GXINT dx, GXINT dy, const GXRECT *prcScroll, const GXRECT * prcClip, GXHRGN hrgnUpdate, GXLPRECT prcUpdate, GXUINT flags);
   GXBOOL      GXDLLAPI gxScrollDC               (GXHDC hDC, int dx, int dy, const GXRECT *lprcScroll, const GXRECT *lprcClip, GXHRGN hrgnUpdate, LPGXRECT lprcUpdate);
 
   GXBOOL      GXDLLAPI gxIsIconic               (GXHWND hWnd);
@@ -1490,7 +1490,7 @@ extern "C" {
   int         GXDLLAPI gxGetWindowTextLengthW   (GXHWND hWnd);
   int         GXDLLAPI gxGetWindowTextLengthA   (GXHWND hWnd);
   GXDWORD     GXDLLAPI gxGetWindowThreadProcessId (GXHWND hWnd, GXLPDWORD lpdwProcessId);
-  GXDWORD     GXDLLAPI gxRegisterClassExW       (GXCONST GXWNDCLASSEX *lpwcx);
+  GXDWORD     GXDLLAPI gxRegisterClassExW       (const GXWNDCLASSEX *lpwcx);
   int         GXDLLAPI gxGetClassNameW          (GXHWND hWnd,GXLPWSTR lpClassName,int nMaxCount);
   GXBOOL      GXDLLAPI gxUnregisterClassW       (GXLPCWSTR lpClassName,GXHINSTANCE hInstance);
   GXDWORD     GXDLLAPI gxGetClassInfoExW        (GXHINSTANCE hinst,GXLPCWSTR lpszClass,GXLPWNDCLASSEX lpwcx);
@@ -1643,19 +1643,19 @@ extern "C" {
 
 GXBOOL      GXDLLAPI gxUnionRect        (GXLPRECT lpOut, GXLPCRECT lprc1, GXLPCRECT lprc2);
 GXBOOL      GXDLLAPI gxUnionRegn        (GXLPREGN lpOut, GXLPCREGN lprg1, GXLPCREGN lprg2);
-GXBOOL      GXDLLAPI gxIntersectRect    (GXLPRECT,GXCONST GXRECT *,GXCONST GXRECT *);
-GXBOOL      GXDLLAPI gxIsRectEmpty      (GXCONST GXRECT *lprc);
-GXBOOL      GXDLLAPI gxIsRegnEmpty      (GXCONST GXREGN *lprg);
+GXBOOL      GXDLLAPI gxIntersectRect    (GXLPRECT,const GXRECT *,const GXRECT *);
+GXBOOL      GXDLLAPI gxIsRectEmpty      (const GXRECT *lprc);
+GXBOOL      GXDLLAPI gxIsRegnEmpty      (const GXREGN *lprg);
 GXBOOL      GXDLLAPI gxSetRect          (GXLPRECT lprc, GXINT xLeft, GXINT yTop, GXINT xRight, GXINT yBottom);
 GXBOOL      GXDLLAPI gxSetRegn          (GXLPREGN lprg, GXINT xLeft, GXINT yTop, GXINT xWidth, GXINT yHeight);
-GXBOOL      GXDLLAPI gxCopyRect         (GXLPRECT,GXCONST GXRECT *);
-GXBOOL      GXDLLAPI gxPtInRect         (GXCONST GXRECT *lprc,GXPOINT pt);
-GXBOOL      GXDLLAPI gxPtInRegn         (GXCONST GXREGN *lpgn,GXPOINT pt);
-GXBOOL      GXDLLAPI gxEqualRect        (GXCONST GXRECT *lprc1,GXCONST GXRECT *lprc2);
+GXBOOL      GXDLLAPI gxCopyRect         (GXLPRECT,const GXRECT *);
+GXBOOL      GXDLLAPI gxPtInRect         (const GXRECT *lprc,GXPOINT pt);
+GXBOOL      GXDLLAPI gxPtInRegn         (const GXREGN *lpgn,GXPOINT pt);
+GXBOOL      GXDLLAPI gxEqualRect        (const GXRECT *lprc1,const GXRECT *lprc2);
 GXBOOL      GXDLLAPI gxOffsetRect       (GXLPRECT lprc,GXINT dx,GXINT dy);
 GXBOOL      GXDLLAPI gxInflateRect      (GXLPRECT lprc,GXINT dx,GXINT dy);
-GXVOID      GXDLLAPI gxRegnToRect       (GXLPRECT lprc, GXCONST GXLPREGN lpregn);
-GXVOID      GXDLLAPI gxRectToRegn       (GXLPREGN lpregn, GXCONST GXLPRECT lprc);
+GXVOID      GXDLLAPI gxRegnToRect       (GXLPRECT lprc, const GXLPREGN lpregn);
+GXVOID      GXDLLAPI gxRectToRegn       (GXLPREGN lpregn, const GXLPRECT lprc);
 GXBOOL      GXDLLAPI gxSetRectEmpty     (GXLPRECT lprc);
 GXBOOL      GXDLLAPI gxSetRegnEmpty     (GXLPREGN lprc);
 

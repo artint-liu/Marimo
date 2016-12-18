@@ -86,8 +86,8 @@ int GXDLLAPI gxScrollWindowEx(
   GXHWND hWnd,                 // handle of window to scroll
   int dx,                      // amount of horizontal scrolling
   int dy,                      // amount of vertical scrolling
-  GXCONST GXRECT *prcScroll,   // address of structure with scroll rectangle
-  GXCONST GXRECT *prcClip,     // address of structure with clip rectangle
+  const GXRECT *prcScroll,   // address of structure with scroll rectangle
+  const GXRECT *prcClip,     // address of structure with clip rectangle
   GXHRGN hrgnUpdate,           // handle of update region
   GXLPRECT prcUpdate,          // address of structure for update rectangle
   GXUINT flags                 // scrolling flags
@@ -114,7 +114,7 @@ GXHBRUSH GXDLLAPI gxGetSysColorBrush(
 
 GXBOOL GXDLLAPI gxDrawFocusRect(
            GXHDC hDC,        // handle to device context
-           GXCONST GXRECT *lprc      // pointer to structure for rectangle  
+           const GXRECT *lprc      // pointer to structure for rectangle  
            )
 {
   //ASSERT(FALSE);
@@ -211,7 +211,7 @@ GXDWORD GXDLLAPI gxGetTabbedTextExtentW(
 }
 int GXDLLAPI gxFillRect(
          GXHDC hDC,        // handle to device context 
-         GXCONST GXRECT *lprc,    // pointer to structure with rectangle  
+         const GXRECT *lprc,    // pointer to structure with rectangle  
          GXHBRUSH hbr      // handle to brush 
          )
 {

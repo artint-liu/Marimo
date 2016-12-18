@@ -4,8 +4,8 @@ class GXCanvasImpl : public GXCanvasCoreImpl
 public:
   GXCanvasImpl(GXGraphicsImpl* pGraphics, GXBOOL bStatic);
   virtual ~GXCanvasImpl();
-  GXBOOL  Initialize(GTexture* pTexture, GXCONST REGN* pRegn);
-  GXBOOL  Initialize(GXImage* pImage, GXCONST REGN* pRegn);
+  GXBOOL  Initialize(GTexture* pTexture, const REGN* pRegn);
+  GXBOOL  Initialize(GXImage* pImage, const REGN* pRegn);
 
   GXINT   UpdateStencil    (GRegion* pClipRegion);
 
@@ -22,78 +22,78 @@ public:
 
 
 public:
-  virtual GXGraphics* GetGraphicsUnsafe   () GXCONST;
-  virtual GXBOOL      SetTransform        (const float4x4* matTransform);
-  virtual GXBOOL      GetTransform        (float4x4* matTransform) GXCONST;
-  virtual GXBOOL      SetViewportOrg      (GXINT x, GXINT y, GXLPPOINT lpPoint);
-  virtual GXBOOL      GetViewportOrg      (GXLPPOINT lpPoint) GXCONST;
-  virtual GXVOID      EnableAlphaBlend    (GXBOOL bEnable);
-  virtual GXBOOL      Flush               ();
-  virtual GXBOOL      SetSamplerState     (GXUINT Sampler, GXSAMPLERDESC* pDesc);
-  virtual GXBOOL      SetRenderState      (GXRenderStateType eType, GXDWORD dwValue);
-  virtual GXBOOL      SetRenderStateBlock (GXLPCRENDERSTATE lpBlock);
-  virtual GXBOOL      SetEffect           (GXEffect* pEffect);
-  virtual GXBOOL      SetEffectConst      (GXLPCSTR lpName, void* pData, int nPackCount);
-  virtual GXDWORD     SetParametersInfo   (CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam);
-  virtual PenStyle    SetPenStyle         (PenStyle eStyle);
+  virtual GXGraphics* GetGraphicsUnsafe   () const override;
+  virtual GXBOOL      SetTransform        (const float4x4* matTransform) override;
+  virtual GXBOOL      GetTransform        (float4x4* matTransform) const override;
+  virtual GXBOOL      SetViewportOrg      (GXINT x, GXINT y, GXLPPOINT lpPoint) override;
+  virtual GXBOOL      GetViewportOrg      (GXLPPOINT lpPoint) const override;
+  virtual GXVOID      EnableAlphaBlend    (GXBOOL bEnable) override;
+  virtual GXBOOL      Flush               () override;
+  virtual GXBOOL      SetSamplerState     (GXUINT Sampler, GXSAMPLERDESC* pDesc) override;
+  virtual GXBOOL      SetRenderState      (GXRenderStateType eType, GXDWORD dwValue) override;
+  virtual GXBOOL      SetRenderStateBlock (GXLPCRENDERSTATE lpBlock) override;
+  virtual GXBOOL      SetEffect           (GXEffect* pEffect) override;
+  virtual GXBOOL      SetEffectConst      (GXLPCSTR lpName, void* pData, int nPackCount) override;
+  virtual GXDWORD     SetParametersInfo   (CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam) override;
+  virtual PenStyle    SetPenStyle         (PenStyle eStyle) override;
 
-  virtual GXBOOL      Clear               (GXCOLORREF crClear);
+  virtual GXBOOL      Clear               (GXCOLORREF crClear) override;
 
-  virtual GXBOOL      SetPixel            (GXINT xPos, GXINT yPos, GXCOLORREF crPixel);
-  virtual GXBOOL      DrawLine            (GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF crLine);
+  virtual GXBOOL      SetPixel            (GXINT xPos, GXINT yPos, GXCOLORREF crPixel) override;
+  virtual GXBOOL      DrawLine            (GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF crLine) override;
   
   inline GXBOOL       InlDrawRectangle    (GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF crRect);
   inline GXBOOL       InlFillRectangle    (GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF crFill);
 
-  virtual GXBOOL      DrawRectangle       (GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crRect);
-  virtual GXBOOL      DrawRectangle       (GXLPCRECT lprc, GXCOLORREF crRect);
-  virtual GXBOOL      DrawRectangle       (GXLPCREGN lprg, GXCOLORREF crRect);
+  virtual GXBOOL      DrawRectangle       (GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crRect) override;
+  virtual GXBOOL      DrawRectangle       (GXLPCRECT lprc, GXCOLORREF crRect) override;
+  virtual GXBOOL      DrawRectangle       (GXLPCREGN lprg, GXCOLORREF crRect) override;
 
-  virtual GXBOOL      FillRectangle       (GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crFill);
-  virtual GXBOOL      FillRectangle       (GXLPCRECT lprc, GXCOLORREF crFill);
-  virtual GXBOOL      FillRectangle       (GXLPCREGN lprg, GXCOLORREF crFill);
-  virtual GXBOOL      InvertRect          (GXINT x, GXINT y, GXINT w, GXINT h);
+  virtual GXBOOL      FillRectangle       (GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crFill) override;
+  virtual GXBOOL      FillRectangle       (GXLPCRECT lprc, GXCOLORREF crFill) override;
+  virtual GXBOOL      FillRectangle       (GXLPCREGN lprg, GXCOLORREF crFill) override;
+  virtual GXBOOL      InvertRect          (GXINT x, GXINT y, GXINT w, GXINT h) override;
 
-  virtual GXBOOL      ColorFillRegion     (GRegion* pRegion, GXCOLORREF crFill);
+  virtual GXBOOL      ColorFillRegion     (GRegion* pRegion, GXCOLORREF crFill) override;
 
-  virtual GXBOOL      DrawUserPrimitive   (GTexture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount);
-  virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest);
-  virtual GXBOOL      DrawTexture         (GTexture*pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc);
-  virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc);
-  virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation);
+  virtual GXBOOL      DrawUserPrimitive   (GTexture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount) override;
+  virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest) override;
+  virtual GXBOOL      DrawTexture         (GTexture*pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc) override;
+  virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc) override;
+  virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation) override;
 
-  virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest);
-  virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc);
-  virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest, const GXREGN *rgSrc);
-  virtual GXBOOL      DrawImage           (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation);
+  virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest) override;
+  virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc) override;
+  virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest, const GXREGN *rgSrc) override;
+  virtual GXBOOL      DrawImage           (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation) override;
 
-  virtual GXINT       DrawTextA           (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText);
-  virtual GXINT       DrawTextW           (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText);
-  virtual GXBOOL      TextOutA            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText);
-  virtual GXBOOL      TextOutW            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText);
-  virtual GXLONG      TabbedTextOutA      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText);
-  virtual GXLONG      TabbedTextOutW      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText);
+  virtual GXINT       DrawTextA           (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText) override;
+  virtual GXINT       DrawTextW           (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText) override;
+  virtual GXBOOL      TextOutA            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText) override;
+  virtual GXBOOL      TextOutW            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText) override;
+  virtual GXLONG      TabbedTextOutA      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
+  virtual GXLONG      TabbedTextOutW      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
 
 
-  virtual GXINT       SetCompositingMode  (CompositingMode eMode);
-  virtual GXBOOL      SetRegion           (GRegion* pRegion, GXBOOL bAbsOrigin);
-  virtual GXBOOL      SetClipBox          (const GXLPRECT lpRect);
-  virtual GXINT       GetClipBox          (GXLPRECT lpRect);
-  virtual GXDWORD     GetStencilLevel     ();
-  virtual GXBOOL      GetUniformData      (CANVASUNIFORM* pCanvasUniform);
+  virtual GXINT       SetCompositingMode  (CompositingMode eMode) override;
+  virtual GXBOOL      SetRegion           (GRegion* pRegion, GXBOOL bAbsOrigin) override;
+  virtual GXBOOL      SetClipBox          (const GXLPRECT lpRect) override;
+  virtual GXINT       GetClipBox          (GXLPRECT lpRect) override;
+  virtual GXDWORD     GetStencilLevel     () override;
+  virtual GXBOOL      GetUniformData      (CANVASUNIFORM* pCanvasUniform) override;
 
-  virtual GXBOOL      Scroll              (int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcClip, GRegion** lpprgnUpdate, LPGXRECT lprcUpdate);
+  virtual GXBOOL      Scroll              (int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcClip, GRegion** lpprgnUpdate, LPGXRECT lprcUpdate) override;
 
-  virtual GXBOOL      SetEffectUniformByName1f (const GXCHAR* pName, const float fValue);
-  virtual GXBOOL      SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue);
-  virtual GXBOOL      SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue);
-  virtual GXBOOL      SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue);
-  virtual GXBOOL      SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue);
+  virtual GXBOOL      SetEffectUniformByName1f (const GXCHAR* pName, const float fValue) override;
+  virtual GXBOOL      SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue) override;
+  virtual GXBOOL      SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue) override;
+  virtual GXBOOL      SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue) override;
+  virtual GXBOOL      SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue) override;
 
-  virtual GXBOOL      SetEffectUniform1f       (const GXINT nIndex, const float fValue);
-  virtual GXBOOL      SetEffectUniform2f       (const GXINT nIndex, const float2* vValue);
-  virtual GXBOOL      SetEffectUniform3f       (const GXINT nIndex, const float3* fValue);
-  virtual GXBOOL      SetEffectUniform4f       (const GXINT nIndex, const float4* fValue);
+  virtual GXBOOL      SetEffectUniform1f       (const GXINT nIndex, const float fValue) override;
+  virtual GXBOOL      SetEffectUniform2f       (const GXINT nIndex, const float2* vValue) override;
+  virtual GXBOOL      SetEffectUniform3f       (const GXINT nIndex, const float3* fValue) override;
+  virtual GXBOOL      SetEffectUniform4f       (const GXINT nIndex, const float4* fValue) override;
 
 private:
   enum CanvasFunc
@@ -214,7 +214,7 @@ private:
 
   void    SetStencil        (GXDWORD dwStencil);
 public:
-  inline GXCONST GXCANVASCOMMCONST& GetCommonConst() GXCONST;
+  inline const GXCANVASCOMMCONST& GetCommonConst() const;
   inline clBuffer&                  GetUniformBuffer();
   inline void                       GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer);
 
@@ -273,7 +273,7 @@ private:
 //{
 
 //};
-GXCONST GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst() GXCONST
+const GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst() const
 {
   return m_CanvasCommConst;
 }

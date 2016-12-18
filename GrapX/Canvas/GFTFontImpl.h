@@ -52,38 +52,38 @@ private:
   typedef clhash_map<short, FTFONTDESC>  CharToFontDesc;
   CharToFontDesc*        m_pmapCode2FMatrix;
 
-  _GFTFont  (GXGraphics* pGraphics, GXCONST GXLPLOGFONTA lpLogFont);
+  _GFTFont  (GXGraphics* pGraphics, const GXLPLOGFONTA lpLogFont);
   virtual ~_GFTFont();
 
   inline GXVOID FontDescToCharDesc    (const FTFONTDESC &fm, LPCHARDESC lpCD);
   GXBOOL    _CreateTexture            ();
   GXVOID    UpdateTexBuffer           (GXUINT idxTex, LPGXREGN prgDest, unsigned char* pBuffer);
 public:
-  virtual GXBOOL    CreateFont        (GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXCONST GXCHAR *pFileName);
+  virtual GXBOOL    CreateFont        (const GXULONG nWidth, const GXULONG nHeight, const GXCHAR *pFileName);
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT AddRef            ();
-  virtual GXHRESULT Release           ();
+  virtual GXHRESULT AddRef            () override;
+  virtual GXHRESULT Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  virtual GXHRESULT Invoke            (GRESCRIPTDESC* pDesc);
+  virtual GXHRESULT Invoke            (GRESCRIPTDESC* pDesc) override;
 
-  virtual GXBOOL    GetDescW          (GXLPLOGFONTW lpLogFont) const;
-  virtual GXBOOL    GetDescA          (GXLPLOGFONTA lpLogFont) const;
+  virtual GXBOOL    GetDescW          (GXLPLOGFONTW lpLogFont) const override;
+  virtual GXBOOL    GetDescA          (GXLPLOGFONTA lpLogFont) const override;
 
-  virtual GXLPVOID  GetTexture        (GXUINT idx) const;
-  virtual GXINT     QueryCharWidth    (GXWCHAR ch);
-  virtual GXBOOL    QueryCharDescFromCache  (GXWCHAR ch, LPCHARDESC pCC);
-  virtual GXBOOL    QueryCharDesc     (GXWCHAR ch, LPCHARDESC pCC);
-  virtual GXLONG    GetMetricsHeight  () const;    // 带有段落的高度
-  virtual GXLONG    GetWidth          () const;    // 创建字体的宽度
-  virtual GXLONG    GetHeight         () const;    // 创建字体的高度
-  virtual GXBOOL    GetMetricW        (GXLPTEXTMETRICW lptm) const;
+  virtual GXLPVOID  GetTexture        (GXUINT idx) const override;
+  virtual GXINT     QueryCharWidth    (GXWCHAR ch) override;
+  virtual GXBOOL    QueryCharDescFromCache  (GXWCHAR ch, LPCHARDESC pCC) override;
+  virtual GXBOOL    QueryCharDesc     (GXWCHAR ch, LPCHARDESC pCC) override;
+  virtual GXLONG    GetMetricsHeight  () const override;    // 带有段落的高度
+  virtual GXLONG    GetWidth          () const override;    // 创建字体的宽度
+  virtual GXLONG    GetHeight         () const override;    // 创建字体的高度
+  virtual GXBOOL    GetMetricW        (GXLPTEXTMETRICW lptm) const override;
 
 public:
   friend GXLRESULT GXDLLAPI GXCreateFreeTypeFontIndirectW(GXLPLOGFONTW lpLogFont, GXFont **ppFont);
   friend GXLRESULT GXDLLAPI GXCreateFreeTypeFontIndirectA(GXLPLOGFONTA lpLogFont, GXFont **ppFont);
-  friend GXLRESULT GXDLLAPI GXCreateFreeTypeFontW(GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXLPCWSTR pFileName, GXFont **ppFont);
-  friend GXLRESULT GXDLLAPI GXCreateFreeTypeFontA(GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXLPCSTR pFileName, GXFont **ppFont);
+  friend GXLRESULT GXDLLAPI GXCreateFreeTypeFontW(const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName, GXFont **ppFont);
+  friend GXLRESULT GXDLLAPI GXCreateFreeTypeFontA(const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName, GXFont **ppFont);
 };
 
 

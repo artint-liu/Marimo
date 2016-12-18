@@ -796,7 +796,7 @@ GXVOID GXWnd::IntMoveChild(GXINT dx, GXINT dy)
   }
 }
 
-GXINT GXWnd::Scroll(GXINT dx, GXINT dy, GXCONST GXRECT *prcScroll, GXCONST GXRECT * prcClip, GXHRGN hrgnUpdate, GXLPRECT prcUpdate, GXUINT flags)
+GXINT GXWnd::Scroll(GXINT dx, GXINT dy, const GXRECT *prcScroll, const GXRECT * prcClip, GXHRGN hrgnUpdate, GXLPRECT prcUpdate, GXUINT flags)
 {
   SCROLLTEXTUREDESC stdesc;
 
@@ -1301,7 +1301,7 @@ void GXWnd::UpdateWholeWindow(GXWindowsSurface* pWinsSurface, GRegion* prgnPaint
   SAFE_RELEASE(prgnWindow);
 }
 
-GXBOOL GXWnd::InvalidateRect(GXCONST GXRECT* lpRect, GXBOOL bErase)
+GXBOOL GXWnd::InvalidateRect(const GXRECT* lpRect, GXBOOL bErase)
 {
   GXRECT rcUpdate;
   GetBoundingRect(FALSE, &rcUpdate);

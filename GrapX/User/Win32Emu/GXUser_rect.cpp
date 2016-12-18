@@ -4,7 +4,7 @@
 extern "C"
 {
   GXBOOL GXDLLAPI gxIsRectEmpty(
-    GXCONST GXRECT *lprc   // address of structure with rectangle
+    const GXRECT *lprc   // address of structure with rectangle
     )
   {
     return (lprc == NULL || (lprc->left >= lprc->right) || (lprc->top >= lprc->bottom));
@@ -12,8 +12,8 @@ extern "C"
 
   GXBOOL GXDLLAPI gxUnionRect(
     GXLPRECT lprcDst,         // address of structure for union
-    GXCONST GXRECT *lprcSrc1, // address of structure with first rectangle
-    GXCONST GXRECT *lprcSrc2  // address of structure with second rectangle
+    const GXRECT *lprcSrc1, // address of structure with first rectangle
+    const GXRECT *lprcSrc2  // address of structure with second rectangle
     )
   {
     if(lprcSrc1 == NULL || lprcSrc1->left >= lprcSrc1->right || lprcSrc1->top >= lprcSrc1->bottom) {
@@ -86,8 +86,8 @@ extern "C"
   //////////////////////////////////////////////////////////////////////////
   GXBOOL GXDLLAPI gxIntersectRect(
     GXLPRECT lprcDst,          // address of structure for intersection
-    GXCONST GXRECT *lprcSrc1,  // address of structure with first rectangle
-    GXCONST GXRECT *lprcSrc2   // address of structure with second rectangle
+    const GXRECT *lprcSrc1,  // address of structure with first rectangle
+    const GXRECT *lprcSrc2   // address of structure with second rectangle
     )
   {
     if(lprcSrc1 == NULL || lprcSrc2 == NULL) {
@@ -113,7 +113,7 @@ extern "C"
     return 1;
   }
 
-  GXBOOL GXDLLAPI gxIsRegnEmpty(GXCONST GXREGN *lprg)
+  GXBOOL GXDLLAPI gxIsRegnEmpty(const GXREGN *lprg)
   {
     return lprg == NULL || lprg->width <= 0 || lprg->height <= 0;
   }
@@ -168,7 +168,7 @@ extern "C"
 #ifdef ENABLE_ASSEMBLE
   __declspec(naked)GXBOOL GXDLLAPI gxCopyRect(
     GXLPRECT lprcDst,  // pointer to structure for destination rectangle
-    GXCONST GXRECT *lprcSrc   // pointer to structure with source rectangle
+    const GXRECT *lprcSrc   // pointer to structure with source rectangle
     )
   {
     __asm push esi
@@ -192,7 +192,7 @@ extern "C"
 #else
   GXBOOL GXDLLAPI gxCopyRect(
     GXLPRECT lprcDst,  // pointer to structure for destination rectangle
-    GXCONST GXRECT *lprcSrc   // pointer to structure with source rectangle
+    const GXRECT *lprcSrc   // pointer to structure with source rectangle
     )
   {
     *lprcDst = *lprcSrc;
@@ -202,7 +202,7 @@ extern "C"
 
 #ifdef ENABLE_ASSEMBLE
   __declspec(naked)GXBOOL GXDLLAPI gxPtInRect(
-    GXCONST GXRECT *lprc,  // address of structure with rectangle
+    const GXRECT *lprc,  // address of structure with rectangle
     GXPOINT pt        // structure with point
     )
   {
@@ -232,7 +232,7 @@ false_ret:
   }
 #else
   GXBOOL GXDLLAPI gxPtInRect(
-    GXCONST GXRECT *lprc,  // address of structure with rectangle
+    const GXRECT *lprc,  // address of structure with rectangle
     GXPOINT pt        // structure with point
     )
   {
@@ -244,7 +244,7 @@ false_ret:
   }
 #endif // ENABLE_ASSEMBLE
 
-  GXBOOL GXDLLAPI gxPtInRegn(GXCONST GXREGN *lprg,GXPOINT pt)
+  GXBOOL GXDLLAPI gxPtInRegn(const GXREGN *lprg,GXPOINT pt)
   {
     return (
       lprg->left <= pt.x &&
@@ -256,8 +256,8 @@ false_ret:
 // 用减法获得结果再相加这种方法是错误的
 //#ifdef ENABLE_ASSEMBLE
 //  __declspec(naked)GXBOOL GXDLLAPI gxEqualRect(
-//    GXCONST GXRECT *lprc1,  // pointer to structure with first rectangle
-//    GXCONST GXRECT *lprc2   // pointer to structure with second rectangle
+//    const GXRECT *lprc1,  // pointer to structure with first rectangle
+//    const GXRECT *lprc2   // pointer to structure with second rectangle
 //    )
 //  {
 //    __asm push esi
@@ -288,8 +288,8 @@ false_ret:
 //  }
 //#else
   GXBOOL GXDLLAPI gxEqualRect(
-    GXCONST GXRECT *lprc1,  // pointer to structure with first rectangle
-    GXCONST GXRECT *lprc2   // pointer to structure with second rectangle
+    const GXRECT *lprc1,  // pointer to structure with first rectangle
+    const GXRECT *lprc2   // pointer to structure with second rectangle
     )
   {
     return (
@@ -327,7 +327,7 @@ false_ret:
     return TRUE;
   }
 
-  GXVOID GXDLLAPI gxRegnToRect(GXLPRECT lprc, GXCONST GXLPREGN lpregn)
+  GXVOID GXDLLAPI gxRegnToRect(GXLPRECT lprc, const GXLPREGN lpregn)
   {
     lprc->left = lpregn->left;
     lprc->top = lpregn->top;
@@ -335,7 +335,7 @@ false_ret:
     lprc->bottom = lpregn->top + lpregn->height;
   }
 
-  GXVOID GXDLLAPI gxRectToRegn(GXLPREGN lpregn, GXCONST GXLPRECT lprc)
+  GXVOID GXDLLAPI gxRectToRegn(GXLPREGN lpregn, const GXLPRECT lprc)
   {
     lpregn->left   = lprc->left;
     lpregn->top    = lprc->top;

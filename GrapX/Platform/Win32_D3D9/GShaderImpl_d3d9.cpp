@@ -329,12 +329,12 @@ namespace D3D9
     return GX_OK;
   }
 
-  const GShaderImpl::ConstantDescArray& GShaderImpl::GetConstantDescTable() GXCONST
+  const GShaderImpl::ConstantDescArray& GShaderImpl::GetConstantDescTable() const
   {
     return m_aConstDesc;
   }
 
-  GXUINT GShaderImpl::GetHandle(GXLPCSTR pName) GXCONST
+  GXUINT GShaderImpl::GetHandle(GXLPCSTR pName) const
   {
     GXDWORD dwHashId = clStringA(pName).GetHash();
     GXUINT uHandle = 0;
@@ -354,7 +354,7 @@ namespace D3D9
     return uHandle;
   }
 
-  GXUniformType GShaderImpl::GetHandleType(GXUINT handle) GXCONST
+  GXUniformType GShaderImpl::GetHandleType(GXUINT handle) const
   {
     const int nID = ((handle & 0xffff) != 0 ? (handle & 0xffff) : (handle >> 16));
     const GXD3DXCONSTDESC& Desc = m_aConstDesc[nID - 1];
@@ -405,7 +405,7 @@ namespace D3D9
     return GXUB_UNDEFINED;
   }
 
-  GXUINT GShaderImpl::GetStageByHandle(GXUINT handle) GXCONST
+  GXUINT GShaderImpl::GetStageByHandle(GXUINT handle) const
   {
     //ASSERT(GetHandleType(handle) == GXUB_SAMPLER2D);
     ASSERT((handle & 0xffff) == 0);

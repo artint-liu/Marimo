@@ -237,7 +237,7 @@ public:
     // 高级函数
 
     // GXCanvas
-    GXSTDINTERFACE(GXCanvas*    LockCanvas                 (GXImage* pImage, GXCONST LPREGN lpRegn, GXDWORD dwFlags));
+    GXSTDINTERFACE(GXCanvas*    LockCanvas                 (GXImage* pImage, const LPREGN lpRegn, GXDWORD dwFlags));
 
     // 如果 pImage 为 NULL, 则忽略 DepthStencil 参数
     GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
@@ -263,8 +263,8 @@ public:
     // GXFTFont
     GXSTDINTERFACE(GXFont*    CreateFontIndirectW          (const GXLPLOGFONTW lpLogFont));
     GXSTDINTERFACE(GXFont*    CreateFontIndirectA          (const GXLPLOGFONTA lpLogFont));
-    GXSTDINTERFACE(GXFont*    CreateFontW                  (GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXLPCWSTR pFileName));
-    GXSTDINTERFACE(GXFont*    CreateFontA                  (GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXLPCSTR pFileName));
+    GXSTDINTERFACE(GXFont*    CreateFontW                  (const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName));
+    GXSTDINTERFACE(GXFont*    CreateFontA                  (const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName));
 
     GXSTDINTERFACE(GXImage*   GetBackBufferImg             ());
     GXSTDINTERFACE(GTexture*  GetBackBufferTex             ());

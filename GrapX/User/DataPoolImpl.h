@@ -15,39 +15,39 @@ namespace Marimo
     typedef DataPoolVariableImpl VarImpl;
 
 
-    GXUINT    (*GetSize     )(GXCONST VarImpl* pThis);  // 字节大小, 数组是数组大小, 动态数据大小可变, 结构是是结构体大小
-    //GXUINT    (*GetOffset   )(GXCONST VarImpl* pThis);  // 偏移,全局变量是全局偏移, 结构体变量是结构体内偏移
-    //GXLPCSTR  (*GetName     )(GXCONST VarImpl* pThis);  // 获得定义名, 变量名, 数组变量名或者结构体变量名
-    //GXLPCSTR  (*GetTypeName )(GXCONST VarImpl* pThis);  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
+    GXUINT    (*GetSize     )(const VarImpl* pThis);  // 字节大小, 数组是数组大小, 动态数据大小可变, 结构是是结构体大小
+    //GXUINT    (*GetOffset   )(const VarImpl* pThis);  // 偏移,全局变量是全局偏移, 结构体变量是结构体内偏移
+    //GXLPCSTR  (*GetName     )(const VarImpl* pThis);  // 获得定义名, 变量名, 数组变量名或者结构体变量名
+    //GXLPCSTR  (*GetTypeName )(const VarImpl* pThis);  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
 
     // 结构体专用
-    Variable  (*GetMember   )(GXCONST VarImpl* pThis, GXLPCSTR szName);    // 获得成员
+    Variable  (*GetMember   )(const VarImpl* pThis, GXLPCSTR szName);    // 获得成员
 
     // 数组或动态数组专用 
-    Variable  (*GetIndex    )(GXCONST VarImpl* pThis, GXSIZE_T nIndex);    // 获得特定索引的变量
-    GXSIZE_T  (*GetLength   )(GXCONST VarImpl* pThis);                     // 获得数组的成员个数, 注意与GetSize区别
-    Variable  (*NewBack     )(        VarImpl* pThis, GXUINT nIncrease);   // 在动态数组上追加数据, 动态数组专用
-    GXBOOL    (*Remove      )(        VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount);      // 移出动态数组指定索引的数据, 动态数组专用
+    Variable  (*GetIndex    )(const VarImpl* pThis, GXSIZE_T nIndex);    // 获得特定索引的变量
+    GXSIZE_T  (*GetLength   )(const VarImpl* pThis);                     // 获得数组的成员个数, 注意与GetSize区别
+    Variable  (*NewBack     )(      VarImpl* pThis, GXUINT nIncrease);   // 在动态数组上追加数据, 动态数组专用
+    GXBOOL    (*Remove      )(      VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount);      // 移出动态数组指定索引的数据, 动态数组专用
 
     // 变量专用
-    //clStringW (*ToStringW   )(GXCONST VarImpl* pThis);                   // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
-    //clStringA (*ToStringA   )(GXCONST VarImpl* pThis);
-    GXBOOL    (*ParseW      )(        VarImpl* pThis, GXLPCWSTR szString, GXUINT length); // 按照变量类型转值(unicode)
-    GXBOOL    (*ParseA      )(        VarImpl* pThis, GXLPCSTR szString, GXUINT length);  // 按照变量类型转值
-    u32       (*ToInteger   )(GXCONST VarImpl* pThis);
-    u64       (*ToInt64     )(GXCONST VarImpl* pThis);
-    float     (*ToFloat     )(GXCONST VarImpl* pThis);
-    clStringW (*ToStringW   )(GXCONST VarImpl* pThis);
-    clStringA (*ToStringA   )(GXCONST VarImpl* pThis);
-    GXBOOL    (*SetAsInteger)(        VarImpl* pThis, u32 val);             // 如果变量不足32位会被截断
-    GXBOOL    (*SetAsInt64  )(        VarImpl* pThis, u64 val);
-    GXBOOL    (*SetAsFloat  )(        VarImpl* pThis, float val);
-    GXBOOL    (*SetAsStringW)(        VarImpl* pThis, GXLPCWSTR szString);
-    GXBOOL    (*SetAsStringA)(        VarImpl* pThis, GXLPCSTR szString);
-    GXBOOL    (*Retain      )(        VarImpl* pThis, GUnknown* pUnknown);
-    GXBOOL    (*Query       )(GXCONST VarImpl* pThis, GUnknown** ppUnknown);
-    GXBOOL    (*GetData     )(GXCONST VarImpl* pThis, GXLPVOID lpData, GXUINT cbSize);
-    GXBOOL    (*SetData     )(        VarImpl* pThis, GXLPCVOID lpData, GXUINT cbSize);
+    //clStringW (*ToStringW   )(const VarImpl* pThis);                   // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
+    //clStringA (*ToStringA   )(const VarImpl* pThis);
+    GXBOOL    (*ParseW      )(      VarImpl* pThis, GXLPCWSTR szString, GXUINT length); // 按照变量类型转值(unicode)
+    GXBOOL    (*ParseA      )(      VarImpl* pThis, GXLPCSTR szString, GXUINT length);  // 按照变量类型转值
+    u32       (*ToInteger   )(const VarImpl* pThis);
+    u64       (*ToInt64     )(const VarImpl* pThis);
+    float     (*ToFloat     )(const VarImpl* pThis);
+    clStringW (*ToStringW   )(const VarImpl* pThis);
+    clStringA (*ToStringA   )(const VarImpl* pThis);
+    GXBOOL    (*SetAsInteger)(      VarImpl* pThis, u32 val);             // 如果变量不足32位会被截断
+    GXBOOL    (*SetAsInt64  )(      VarImpl* pThis, u64 val);
+    GXBOOL    (*SetAsFloat  )(      VarImpl* pThis, float val);
+    GXBOOL    (*SetAsStringW)(      VarImpl* pThis, GXLPCWSTR szString);
+    GXBOOL    (*SetAsStringA)(      VarImpl* pThis, GXLPCSTR szString);
+    GXBOOL    (*Retain      )(      VarImpl* pThis, GUnknown* pUnknown);
+    GXBOOL    (*Query       )(const VarImpl* pThis, GUnknown** ppUnknown);
+    GXBOOL    (*GetData     )(const VarImpl* pThis, GXLPVOID lpData, GXUINT cbSize);
+    GXBOOL    (*SetData     )(      VarImpl* pThis, GXLPCVOID lpData, GXUINT cbSize);
   };
 
   class DataPoolArray : public clBuffer
@@ -400,7 +400,7 @@ namespace Marimo
     static void   IntClearChangePtrFlag (_Ty* pTypeDesc, GXUINT nCount);
     void          DbgIntDump            ();
 
-    GXBOOL          IntFindEnumFlagValue  (LPCSD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag) GXCONST;
+    GXBOOL          IntFindEnumFlagValue  (LPCSD pTypeDesc, LPCSTR szName, EnumFlag* pOutEnumFlag) const;
     DataPoolArray*  IntCreateArrayBuffer  (clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount);
 
     protected:

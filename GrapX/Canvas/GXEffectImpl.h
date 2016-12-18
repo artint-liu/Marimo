@@ -19,33 +19,33 @@ private:
 public:
   GXHRESULT     SetShaderRef        (GShader* pShader);
   bool          CommitUniform       (GXCanvas* pCanvas, GXUINT uCommonOffset);
-  GShader*      GetShaderUnsafe     () GXCONST;
-  GShaderStub*  GetShaderStubUnsafe () GXCONST;
-  GXUINT        GetHandle           (GXCONST GXCHAR* pName) GXCONST;
+  GShader*      GetShaderUnsafe     () const;
+  GShaderStub*  GetShaderStubUnsafe () const;
+  GXUINT        GetHandle           (const GXCHAR* pName) const;
   bool          SetUniformByHandle  (GXCanvas* pCanvas, GXUINT uHandle, float* fValue, GXINT nFloatCount);
 
   // 接口实现
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT     AddRef                ();
-  virtual GXHRESULT     Release               ();
+  virtual GXHRESULT     AddRef                () override;
+  virtual GXHRESULT     Release               () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT     Invoke                (GRESCRIPTDESC* pDesc);
+  virtual GXHRESULT     Invoke                (GRESCRIPTDESC* pDesc) override;
 
-  virtual GXHRESULT     SetTextureSlot        (GXLPCSTR pName, GXINT nSlot);
-  virtual GXINT         GetTextureSlot        (GXLPCSTR pName);
+  virtual GXHRESULT     SetTextureSlot        (GXLPCSTR pName, GXINT nSlot) override;
+  virtual GXINT         GetTextureSlot        (GXLPCSTR pName) override;
 
-  virtual GXUINT        GetConstantBufferSize ();
+  virtual GXUINT        GetConstantBufferSize () override;
 
-  inline  GShader*      InlGetShaderUnsafe    () GXCONST;
-  inline  GShaderStub*  InlGetShaderStubUnsafe() GXCONST;
+  inline  GShader*      InlGetShaderUnsafe    () const;
+  inline  GShaderStub*  InlGetShaderStubUnsafe() const;
 };
 //////////////////////////////////////////////////////////////////////////
-inline GShader* GXEffectImpl::InlGetShaderUnsafe() GXCONST
+inline GShader* GXEffectImpl::InlGetShaderUnsafe() const
 {
   return m_pShaderStub->GetShaderUnsafe();
 }
 
-inline GShaderStub* GXEffectImpl::InlGetShaderStubUnsafe() GXCONST
+inline GShaderStub* GXEffectImpl::InlGetShaderStubUnsafe() const
 {
   return m_pShaderStub;
 }

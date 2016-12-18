@@ -104,12 +104,12 @@ typedef Marimo::RectT<GXLONG> GXRECT;
 typedef Marimo::RectT<GXFLOAT> GXRECTF;
 typedef GXRECT* GXLPRECT;
 typedef GXRECT* LPGXRECT;
-typedef GXCONST GXRECT* GXLPCRECT;
-typedef GXCONST GXRECT* LPGXCRECT;
+typedef const GXRECT* GXLPCRECT;
+typedef const GXRECT* LPGXCRECT;
 typedef GXRECTF* GXLPRECTF;
 typedef GXRECTF* LPGXRECTF;
-typedef GXCONST GXRECTF* GXLPCRECTF;
-typedef GXCONST GXRECTF* LPGXCRECTF;
+typedef const GXRECTF* GXLPCRECTF;
+typedef const GXRECTF* LPGXCRECTF;
 #else
 template<typename _T>
 struct RECTX
@@ -120,12 +120,12 @@ typedef RECTX<GXLONG> GXRECT;
 typedef RECTX<GXFLOAT> GXRECTF;
 typedef GXRECT* GXLPRECT;
 typedef GXRECT* LPGXRECT;
-typedef GXCONST GXRECT* GXLPCRECT;
-typedef GXCONST GXRECT* LPGXCRECT;
+typedef const GXRECT* GXLPCRECT;
+typedef const GXRECT* LPGXCRECT;
 typedef GXRECTF* GXLPRECTF;
 typedef GXRECTF* LPGXRECTF;
-typedef GXCONST GXRECTF* GXLPCRECTF;
-typedef GXCONST GXRECTF* LPGXCRECTF;
+typedef const GXRECTF* GXLPCRECTF;
+typedef const GXRECTF* LPGXCRECTF;
 #endif // #ifndef REFACTOR_RECTREGN
 
 
@@ -141,9 +141,9 @@ public:
     return (GXDEFINITION*)this;
   }
 
-  operator GXCONST GXDEFINITION*()
+  operator const GXDEFINITION*()
   {
-    return (GXCONST GXDEFINITION*)this;
+    return (const GXDEFINITION*)this;
   }
 
   operator GXDEFINITION&()
@@ -186,7 +186,7 @@ STATIC_ASSERT(sizeof(GXGUID) == 16);
 //  GXLONG  right;
 //  GXLONG  bottom;
 //}GXRECT, *GXLPRECT, *LPGXRECT;
-//typedef GXCONST GXLPRECT  GXLPCRECT;
+//typedef const GXLPRECT  GXLPCRECT;
 //
 //typedef struct __tagGXRECTF
 //{
@@ -195,7 +195,7 @@ STATIC_ASSERT(sizeof(GXGUID) == 16);
 //  GXFLOAT  right;
 //  GXFLOAT  bottom;
 //}GXRECTF, *GXLPRECTF, *LPGXRECTF;
-//typedef GXCONST GXLPRECTF  GXLPCRECTF;
+//typedef const GXLPRECTF  GXLPCRECTF;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -236,9 +236,9 @@ typedef REGN GXREGN;
 typedef REGN* LPREGN;
 typedef REGN* LPGXREGN;
 typedef REGN* GXLPREGN;
-typedef GXCONST REGN* GXLPCREGN;
-typedef GXCONST REGN* LPGXCREGN;
-typedef GXCONST REGN* LPCREGN;
+typedef const REGN* GXLPCREGN;
+typedef const REGN* LPGXCREGN;
+typedef const REGN* LPCREGN;
 #else
 template<typename _T>
 struct REGNX
@@ -250,9 +250,9 @@ typedef REGN GXREGN;
 typedef REGN* LPREGN;
 typedef REGN* LPGXREGN;
 typedef REGN* GXLPREGN;
-typedef GXCONST REGN* GXLPCREGN;
-typedef GXCONST REGN* LPGXCREGN;
-typedef GXCONST REGN* LPCREGN;
+typedef const REGN* GXLPCREGN;
+typedef const REGN* LPGXCREGN;
+typedef const REGN* LPCREGN;
 #endif // #ifdef REFACTOR_RECTREGN
 
 //typedef struct __tagREGN
@@ -304,7 +304,7 @@ public:
   RegnX(){}
   RegnX(_T v) : x(v), y(v), w(v), h(v){}
   RegnX(_T _x, _T _y, _T _w, _T _h) : x(_x),y(_y),w(_w),h(_h){}
-  RegnX(GXCONST RegnX& rr) : x(rr.x),y(rr.y),w(rr.w),h(rr.h){}
+  RegnX(const RegnX& rr) : x(rr.x),y(rr.y),w(rr.w),h(rr.h){}
   void Offset(_T dx, _T dy){ x += dx; y += dy;}
   void Empty()
   {
@@ -962,8 +962,8 @@ typedef struct __tagGXSCROLLINFO
   GXINT     nPos;
   GXINT     nTrackPos;
 }   GXSCROLLINFO, *GXLPSCROLLINFO,*LPGXSCROLLINFO;
-typedef GXSCROLLINFO GXCONST *GXLPCSCROLLINFO;
-typedef GXSCROLLINFO GXCONST *LPGXCSCROLLINFO;
+typedef GXSCROLLINFO const *GXLPCSCROLLINFO;
+typedef GXSCROLLINFO const *LPGXCSCROLLINFO;
 
 
 typedef struct __tagGXTRACKMOUSEEVENT {
@@ -4529,7 +4529,7 @@ struct GXRENDERSTATE
 
 typedef GXRENDERSTATE* LPGXRENDERSTATE;
 typedef GXRENDERSTATE* GXLPRENDERSTATE;
-typedef GXCONST GXRENDERSTATE* GXLPCRENDERSTATE;
+typedef const GXRENDERSTATE* GXLPCRENDERSTATE;
 
 #define BEGIN_RENDERSTATE_BLOCK(STATENAME)  GXRENDERSTATE STATENAME[] = {
 #define RENDERSTATE_BLOCK(RENDERSTATE, VAL)  {RENDERSTATE, VAL},

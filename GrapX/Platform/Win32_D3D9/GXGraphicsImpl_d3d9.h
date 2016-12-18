@@ -125,7 +125,7 @@ namespace D3D9
   {
     return m_pGraphicsLocker;
   }
-  inline GXLPCSTR GXGraphicsImpl::InlGetPlatformStringA() GXCONST
+  inline GXLPCSTR GXGraphicsImpl::InlGetPlatformStringA() const
   {
     return "d3d9";
   }

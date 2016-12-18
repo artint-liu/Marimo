@@ -15,7 +15,7 @@ public:
 
 public:
   GXFont() : GResource(1, RESTYPE_FONT){}
-  GXSTDINTERFACE(GXBOOL   CreateFont             (GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXCONST GXCHAR *pFileName));
+  GXSTDINTERFACE(GXBOOL   CreateFont             (const GXULONG nWidth, const GXULONG nHeight, const GXCHAR *pFileName));
   GXSTDINTERFACE(GXBOOL   GetDescW               (GXLPLOGFONTW lpLogFont) const);
   GXSTDINTERFACE(GXBOOL   GetDescA               (GXLPLOGFONTA lpLogFont) const);
   GXSTDINTERFACE(GXLPVOID GetTexture             (GXUINT idx) const);

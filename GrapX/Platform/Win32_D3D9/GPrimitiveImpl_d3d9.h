@@ -42,29 +42,29 @@ namespace D3D9
     virtual ~GPrimitiveVImpl();
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT AddRef        ();
-    virtual GXHRESULT Release       ();
+    virtual GXHRESULT AddRef        () override;
+    virtual GXHRESULT Release       () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc);
+    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) override;
 
 
     GXBOOL  InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCount, GXUINT uElementSize, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage);
 
     // 确定是否可以在LostDevice时丢弃, 默认为TRUE
-    GXBOOL  EnableDiscard(GXBOOL bDiscard);
-    GXBOOL  IsDiscardable();
+    GXBOOL  EnableDiscard(GXBOOL bDiscard) override;
+    GXBOOL  IsDiscardable() override;
 
-    GXLPVOID      Lock      (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE));
-    GXBOOL        Unlock    ();
+    GXLPVOID      Lock      (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE)) override;
+    GXBOOL        Unlock    () override;
 
-    virtual GXLPVOID    GetVerticesBuffer     ();
-    virtual GXUINT      GetVerticesCount      ();
-    virtual GXUINT      GetVertexStride       ();
-    virtual GXBOOL      UpdateResouce         (ResEnum eRes);
-    virtual GXHRESULT   GetVertexDeclaration  (GVertexDeclaration** ppDeclaration);
-    virtual GXGraphics* GetGraphicsUnsafe     ();
-    virtual GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
+    virtual GXLPVOID    GetVerticesBuffer     () override;
+    virtual GXUINT      GetVerticesCount      () override;
+    virtual GXUINT      GetVertexStride       () override;
+    virtual GXBOOL      UpdateResouce         (ResEnum eRes) override;
+    virtual GXHRESULT   GetVertexDeclaration  (GVertexDeclaration** ppDeclaration) override;
+    virtual GXGraphics* GetGraphicsUnsafe     () override;
+    virtual GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
   };
 
   //

@@ -45,7 +45,7 @@ namespace D3D9
   }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  GXBOOL GTexture3DImpl::Clear (GXCONST LPBOX lpRect, GXCOLOR dwColor)
+  GXBOOL GTexture3DImpl::Clear (const LPBOX lpRect, GXCOLOR dwColor)
   {
     CLBREAK;
     return FALSE;
@@ -95,13 +95,13 @@ namespace D3D9
     CLBREAK;
   }
 
-  GXBOOL GTexture3DImpl::CopyBox(GTexture3D* pSrc, GXCONST LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z)
+  GXBOOL GTexture3DImpl::CopyBox(GTexture3D* pSrc, const LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z)
   {
     CLBREAK;
     return FALSE;
   }
 
-  GXBOOL GTexture3DImpl::LockBox(LPLOCKEDBOX lpLockRect, GXCONST LPBOX lpBox, GXDWORD Flags)
+  GXBOOL GTexture3DImpl::LockBox(LPLOCKEDBOX lpLockRect, const LPBOX lpBox, GXDWORD Flags)
   {
     CLBREAK;
     return FALSE;

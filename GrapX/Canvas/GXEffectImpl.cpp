@@ -51,23 +51,23 @@ bool GXEffectImpl::CommitUniform(GXCanvas* pCanvas, GXUINT uCommonOffset)
   float4* pConstBuffer = (float4*)UniformBuffer.GetPtr();
   m_pShaderStub->CommitUniform(-1, pConstBuffer, uCommonOffset);
 
-  GXCONST GXCANVASCOMMCONST& CommConst = CanUni.pCommon;
+  const GXCANVASCOMMCONST& CommConst = CanUni.pCommon;
   m_pShaderStub->CommitUniform(0, (GXLPCVOID)&CommConst, uCommonOffset);
 
   return true;
 }
 
-GShader* GXEffectImpl::GetShaderUnsafe()  GXCONST
+GShader* GXEffectImpl::GetShaderUnsafe()  const
 {
   return InlGetShaderUnsafe();
 }
 
-GShaderStub* GXEffectImpl::GetShaderStubUnsafe() GXCONST
+GShaderStub* GXEffectImpl::GetShaderStubUnsafe() const
 {
   return m_pShaderStub;
 }
 
-GXUINT GXEffectImpl::GetHandle(GXCONST GXCHAR* pName) GXCONST
+GXUINT GXEffectImpl::GetHandle(const GXCHAR* pName) const
 {
   if(pName == NULL || m_pShaderStub == NULL)
   {

@@ -59,7 +59,7 @@ GCamera_ScreenAligned* GCamera_ScreenAligned::Create(GXCanvasCore* pCanvasCore)
   return pCamScrAligned;
 }
 
-CameraType GCamera_ScreenAligned::GetType() GXCONST
+CameraType GCamera_ScreenAligned::GetType() const
 {
   return CAM_SCRALIGNED;
 }
@@ -107,32 +107,32 @@ void GCamera_ScreenAligned::SetPosFront(const float3& vPos, const float3& vFront
 {
 }
 
-const float3& GCamera_ScreenAligned::GetPos() GXCONST
+const float3& GCamera_ScreenAligned::GetPos() const
 {
   return float3::Origin;
 }
 
-const float3& GCamera_ScreenAligned::GetUp() GXCONST
+const float3& GCamera_ScreenAligned::GetUp() const
 {
   return m_vTop;
 }
 
-const float3& GCamera_ScreenAligned::GetTop() GXCONST
+const float3& GCamera_ScreenAligned::GetTop() const
 {
   return m_vTop;
 }
 
-const float3& GCamera_ScreenAligned::GetRight() GXCONST
+const float3& GCamera_ScreenAligned::GetRight() const
 {
   return float3::AxisX;
 }
 
-const float3& GCamera_ScreenAligned::GetFront() GXCONST
+const float3& GCamera_ScreenAligned::GetFront() const
 {
   return float3::AxisZ;
 }
 
-float GCamera_ScreenAligned::GetFov() GXCONST
+float GCamera_ScreenAligned::GetFov() const
 {
   return 0.0f;
 }
@@ -142,7 +142,7 @@ float GCamera_ScreenAligned::SetFov( float fFov )
   return 0.0f;
 }
 
-//CFloat3& GCamera_ScreenAligned::GetDir() GXCONST
+//CFloat3& GCamera_ScreenAligned::GetDir() const
 //{
 //  return float3::AxisZ;
 //}
@@ -170,7 +170,7 @@ GXHRESULT GCamera_Trackball::InitializeOrtho(const float3& vEye, const float3& v
   return GX_OK;
 }
 
-const float3& GCamera_Trackball::GetLookAt() GXCONST
+const float3& GCamera_Trackball::GetLookAt() const
 {
   return m_vLookatPt;
 }
@@ -190,7 +190,7 @@ void GCamera_Trackball::SetLookAt(const float3& vEye, CFloat3& vLookAt)
   UpdateMat();
 }
 
-CameraType GCamera_Trackball::GetType() GXCONST
+CameraType GCamera_Trackball::GetType() const
 {
   return CAM_TRACKBALL;
 }
@@ -256,31 +256,31 @@ void GCamera_Trackball::SetPosFront(const float3& vPos, const float3& vFront)
   UpdateMat();
 }
 
-const float3& GCamera_Trackball::GetPos() GXCONST
+const float3& GCamera_Trackball::GetPos() const
 {
   return m_vEyePt;
 }
 
-const float3& GCamera_Trackball::GetUp() GXCONST
+const float3& GCamera_Trackball::GetUp() const
 {
   return m_vUpVec;
 }
 
-const float3& GCamera_Trackball::GetTop() GXCONST
+const float3& GCamera_Trackball::GetTop() const
 {
   return m_vTop;
 }
-const float3& GCamera_Trackball::GetRight() GXCONST
+const float3& GCamera_Trackball::GetRight() const
 {
   return m_vRight;
 }
 
-const float3& GCamera_Trackball::GetFront() GXCONST
+const float3& GCamera_Trackball::GetFront() const
 {
   return m_vFront;
 }
 
-//CFloat3& GCamera_Trackball::GetDir() GXCONST
+//CFloat3& GCamera_Trackball::GetDir() const
 //{
 //
 //}
@@ -294,7 +294,7 @@ GXHRESULT GCamera_Trackball::Create(GCamera_Trackball** ppCamera)
   return GX_OK;
 }
 
-float GCamera_Trackball::GetFov() GXCONST
+float GCamera_Trackball::GetFov() const
 {
   return m_fovy;
 }
@@ -330,7 +330,7 @@ GXHRESULT GCamera_FirstPerson::Initialize(const float3& vEye, const float3& vLoo
   return GX_OK;
 }
 
-CameraType GCamera_FirstPerson::GetType() GXCONST
+CameraType GCamera_FirstPerson::GetType() const
 {
   return CAM_FIRSTPERSON;
 }
@@ -389,31 +389,31 @@ void GCamera_FirstPerson::SetPosFront(const float3& vPos, const float3& vFront)
   UpdateMat();
 }
 
-const float3& GCamera_FirstPerson::GetPos() GXCONST
+const float3& GCamera_FirstPerson::GetPos() const
 {
   return m_vEyePt;
 }
 
-const float3& GCamera_FirstPerson::GetUp() GXCONST
+const float3& GCamera_FirstPerson::GetUp() const
 {
   return m_vUpVec;
 }
 
-const float3& GCamera_FirstPerson::GetTop() GXCONST
+const float3& GCamera_FirstPerson::GetTop() const
 {
   return m_vTop;
 }
-const float3& GCamera_FirstPerson::GetRight() GXCONST
+const float3& GCamera_FirstPerson::GetRight() const
 {
   return m_vRight;
 }
 
-const float3& GCamera_FirstPerson::GetFront() GXCONST
+const float3& GCamera_FirstPerson::GetFront() const
 {
   return m_vFront;
 }
 
-float GCamera_FirstPerson::GetFov() GXCONST
+float GCamera_FirstPerson::GetFov() const
 {
   return m_fovy;
 }
@@ -426,7 +426,7 @@ float GCamera_FirstPerson::SetFov( float fFov )
   return fPrev;
 }
 
-//CFloat3& GCamera_FirstPerson::GetDir() GXCONST
+//CFloat3& GCamera_FirstPerson::GetDir() const
 //{
 //
 //}

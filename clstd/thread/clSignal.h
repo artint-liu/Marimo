@@ -23,9 +23,9 @@ namespace clstd
       virtual ~Signal();
 
       //i32 Reset       ();
-      i32 Set();
-      i32 Wait();
-      i32 WaitTimeOut(u32 dwMilliSec);
+      i32 Set         ();
+      i32 Wait        ();
+      i32 WaitTimeOut (u32 dwMilliSec);
     };
   } // namespace c11
 #elif defined(POSIX_THREAD)
@@ -43,9 +43,9 @@ namespace clstd
       virtual ~Signal();
 
       //i32 Reset       ();
-      i32 Set();
-      i32 Wait();
-      i32 WaitTimeOut(u32 dwMilliSec);
+      i32 Set         ();
+      i32 Wait        ();
+      i32 WaitTimeOut (u32 dwMilliSec);
     };
   }
 #endif // #if defined(_CPLUSPLUS_11_THREAD)

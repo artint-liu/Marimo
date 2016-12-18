@@ -23,15 +23,15 @@ namespace D3D9
     GXHRESULT Activate();
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT           AddRef            ();
-    virtual GXHRESULT           Release           ();
+    virtual GXHRESULT           AddRef            () override;
+    virtual GXHRESULT           Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     //virtual GXHRESULT           OnDeviceEvent     (DeviceEvent eEvent);
-    virtual GXHRESULT           Invoke            (GRESCRIPTDESC* pDesc) { return GX_OK; }
+    virtual GXHRESULT           Invoke            (GRESCRIPTDESC* pDesc) override { return GX_OK; }
 
-    virtual GXUINT              GetStride         ();
-    virtual GXINT               GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
-    virtual GXLPCVERTEXELEMENT  GetVertexElement  ();
+    virtual GXUINT              GetStride         () override;
+    virtual GXINT               GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
+    virtual GXLPCVERTEXELEMENT  GetVertexElement  () override;
   };
 } // namespace D3D9
 

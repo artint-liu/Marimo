@@ -357,7 +357,7 @@ namespace GXUI
     //  return nPrev;
     //}
 
-    //virtual GXINT GetItemBottoms(GXINT* bottoms, const GXINT* indices, int count) GXCONST
+    //virtual GXINT GetItemBottoms(GXINT* bottoms, const GXINT* indices, int count) const
     //{
     //  // 参数合法性要有调用者保证,这里只是校验
     //  ASSERT(count >= 1);
@@ -370,7 +370,7 @@ namespace GXUI
     //  return i;
     //}
 
-    //virtual GXDWORD GetStatus(GXINT item) GXCONST
+    //virtual GXDWORD GetStatus(GXINT item) const
     //{
     //  return 0;
     //}

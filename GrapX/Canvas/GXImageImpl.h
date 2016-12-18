@@ -26,22 +26,22 @@ public:
   GXBOOL Initialize(GXBOOL bRenderable, LPGXIMAGEINFOX pSrcFile, GXLPVOID lpBits);
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT AddRef            ();
-  virtual GXHRESULT Release           ();
+  virtual GXHRESULT AddRef            () override;
+  virtual GXHRESULT Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT Invoke            (GRESCRIPTDESC* pDesc);
-  virtual GXImage*  Clone             () const;
-  virtual GXBOOL    GetDesc           (GXBITMAP*lpBitmap) GXCONST;
-  virtual GXINT     GetWidth          () GXCONST;
-  virtual GXINT     GetHeight         () GXCONST;
-  virtual void      GetDimension      (GXINT* pWidth, GXINT* pHeight) GXCONST;
+  virtual GXHRESULT Invoke            (GRESCRIPTDESC* pDesc) override;
+  virtual GXImage*  Clone             () const override;
+  virtual GXBOOL    GetDesc           (GXBITMAP*lpBitmap) const override;
+  virtual GXINT     GetWidth          () const override;
+  virtual GXINT     GetHeight         () const override;
+  virtual void      GetDimension      (GXINT* pWidth, GXINT* pHeight) const override;
   virtual GXHRESULT SetHelperState    (HelperState eState, GXLPARAM lParam);
-  virtual GXBOOL    BitBltRegion      (GXImage* pSource, int xDest, int yDest, GRegion* lprgnSource);
-  virtual GXBOOL    Scroll            (int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate);
-  virtual GXHRESULT GetTexture        (GTexture** ppTexture) GXCONST;
+  virtual GXBOOL    BitBltRegion      (GXImage* pSource, int xDest, int yDest, GRegion* lprgnSource) override;
+  virtual GXBOOL    Scroll            (int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate) override;
+  virtual GXHRESULT GetTexture        (GTexture** ppTexture) const override;
 
-  virtual GTexture* GetTextureUnsafe  ();
-  virtual GXBOOL    SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat);
+  virtual GTexture* GetTextureUnsafe  () override;
+  virtual GXBOOL    SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat) override;
 private:
   void UpdateDimension();
   void UpdateFlags();

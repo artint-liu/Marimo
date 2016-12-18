@@ -629,7 +629,7 @@ namespace D3D9
     m_matWorld._41 = -1.0f - ((float)pRegn->left * 2.0f / (float)Viewport.Width);
     m_matWorld._42 =  1.0f + ((float)pRegn->top  * 2.0f / (float)Viewport.Height);
 
-    //SetVertexShaderConstantF(FXVCOMMREG(matWVProj), (GXCONST float*)&m_matWorld, 4);
+    //SetVertexShaderConstantF(FXVCOMMREG(matWVProj), (const float*)&m_matWorld, 4);
 
 #ifdef _DEBUG
     if(m_pCurCanvas != NULL && m_pCurCanvas->m_pTargetTex != NULL)
@@ -664,7 +664,7 @@ namespace D3D9
     return GXSUCCEEDED(hval);
 #endif
   }
-  GXBOOL GXGraphicsImpl::SetViewport(GXCONST GXVIEWPORT* pViewport)
+  GXBOOL GXGraphicsImpl::SetViewport(const GXVIEWPORT* pViewport)
   {
     D3DVIEWPORT9 Viewport;
     if(pViewport != NULL)

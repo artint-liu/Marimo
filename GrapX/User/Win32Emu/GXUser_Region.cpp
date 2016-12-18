@@ -12,7 +12,7 @@
 #include <User/GXWindow.h>
 extern "C" {
   GXHRGN GXDLLAPI gxCreatePolygonRgn(
-    GXCONST GXPOINT *lppt,  // pointer to array of points 
+    const GXPOINT *lppt,  // pointer to array of points 
     int cPoints,  // number of points in array 
     int fnPolyFillMode   // polygon-filling mode 
     )

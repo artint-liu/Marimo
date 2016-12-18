@@ -21,7 +21,7 @@ public:
   GXSTDINTERFACE(GXHRESULT      SetPrimitive          (GPrimitive* pPrimitive));
   GXSTDINTERFACE(GXHRESULT      SetCamera             (GCamera* pCamera));
   GXSTDINTERFACE(GCamera*       GetCameraUnsafe       ());
-  GXSTDINTERFACE(GXHRESULT      GetDepthStencil       (GTexture** ppDepthStencil) GXCONST);
+  GXSTDINTERFACE(GXHRESULT      GetDepthStencil       (GTexture** ppDepthStencil) const);
   GXSTDINTERFACE(void           SetWorldMatrix        (const float4x4& matWorld));
 
 #ifdef REFACTOR_SHADER
@@ -44,9 +44,9 @@ public:
   GXSTDINTERFACE(GXHRESULT      RayFromScreen         (const GXPOINT* pScreen, GXOUT Ray* pRay));
 
   GXSTDINTERFACE(void           SetViewport           (GXVIEWPORT* pViewport));
-  GXSTDINTERFACE(GXLPCVIEWPORT  GetViewport           () GXCONST);
+  GXSTDINTERFACE(GXLPCVIEWPORT  GetViewport           () const);
 
-  GXSTDINTERFACE(const FrustumPlanes*     GetViewFrustum        () GXCONST);
+  GXSTDINTERFACE(const FrustumPlanes*     GetViewFrustum        () const);
 #ifdef REFACTOR_SHADER
 #else
   GXSTDINTERFACE(STANDARDMTLUNIFORMTABLE* GetStandardUniform    ());  // 返回的数据可以在应用程序中修改

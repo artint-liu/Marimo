@@ -49,7 +49,7 @@ GXVOID _GFTFont::FontDescToCharDesc(const FTFONTDESC &fm, LPCHARDESC lpCD)
 }
 //////////////////////////////////////////////////////////////////////////
 
-GXBOOL _GFTFont::CreateFont(GXCONST GXULONG nWidth, GXCONST GXULONG nHeight, GXCONST GXCHAR *pFileName)
+GXBOOL _GFTFont::CreateFont(const GXULONG nWidth, const GXULONG nHeight, const GXCHAR *pFileName)
 {
   if( FT_Init_FreeType( &m_Library ) )
   {
@@ -171,7 +171,7 @@ GXBOOL _GFTFont::GetDescA(GXLPLOGFONTA lpLogFont) const
   return TRUE;
 }
 
-_GFTFont::_GFTFont(GXGraphics* pGraphics, GXCONST GXLPLOGFONTA lpLogFont)
+_GFTFont::_GFTFont(GXGraphics* pGraphics, const GXLPLOGFONTA lpLogFont)
   : GXFont        ()
   //, m_pFaceName   (NULL)
   , m_pGraphics   (pGraphics)

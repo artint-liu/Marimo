@@ -61,34 +61,34 @@ namespace D3D9
     D3DXCONSTANTTABLE_DESC        m_PixelShaderConstTabDesc;
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT   AddRef            ();
-    virtual GXHRESULT   Release           ();
+    virtual GXHRESULT   AddRef            () override;
+    virtual GXHRESULT   Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT   Invoke            (GRESCRIPTDESC* pDesc);
-    virtual GXHRESULT   LoadFromFile      (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc);
-    virtual GXHRESULT   LoadFromMemory    (const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf);
-    virtual GXGraphics* GetGraphicsUnsafe () GXCONST;
-    virtual GXLPCWSTR   GetProfileDesc    () GXCONST;
+    virtual GXHRESULT   Invoke            (GRESCRIPTDESC* pDesc) override;
+    virtual GXHRESULT   LoadFromFile      (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc) override;
+    virtual GXHRESULT   LoadFromMemory    (const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf) override;
+    virtual GXGraphics* GetGraphicsUnsafe () const override;
+    virtual GXLPCWSTR   GetProfileDesc    () const override;
     static  GXHRESULT   CompileShader     (clBuffer* pBuffer, LPD3DXINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled); // 编译后buffer将被二进制代码替换
 
   public:
     GXHRESULT       Activate            ();
-    ConstDescArray& GetConstantDescTable() GXCONST;
-    GXINT           GetCacheSize        () GXCONST;
-    inline GXINT    GetPixelIndexOffset () GXCONST;
-    GXUINT          GetHandle           (GXLPCSTR pName) GXCONST;
-    GXUniformType   GetHandleType       (GXUINT handle) GXCONST;
-    GXUINT          GetStageByHandle    (GXUINT handle) GXCONST;
+    ConstDescArray& GetConstantDescTable() const;
+    GXINT           GetCacheSize        () const;
+    inline GXINT    GetPixelIndexOffset () const;
+    GXUINT          GetHandle           (GXLPCSTR pName) const;
+    GXUniformType   GetHandleType       (GXUINT handle) const;
+    GXUINT          GetStageByHandle    (GXUINT handle) const;
 #ifdef REFACTOR_SHADER
     GXBOOL          CommitToDevice      (GXLPVOID lpUniform, GXSIZE_T cbSize);
 #endif // #ifdef REFACTOR_SHADER
   };
   //////////////////////////////////////////////////////////////////////////
-  inline GXINT GShaderImpl::GetCacheSize() GXCONST
+  inline GXINT GShaderImpl::GetCacheSize() const
   {
     return m_cbCacheSize;
   }
-  inline GXINT GShaderImpl::GetPixelIndexOffset() GXCONST
+  inline GXINT GShaderImpl::GetPixelIndexOffset() const
   {
     return (m_cbPixelTopIndex >> 2) >> 2;
   }

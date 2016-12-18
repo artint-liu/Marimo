@@ -54,27 +54,27 @@ namespace D3D9
   protected:
     virtual GXHRESULT CreateRes     ();
     virtual GXHRESULT DestroyRes    ();
-    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc);
+    virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) override;
 
-    static  GXBOOL    FillSystemMemSurface(LPDIRECT3DSURFACE9 pSurface, D3DFORMAT fmt, GXCONST GXLPRECT lpRect, GXCOLOR dwColor);
+    static  GXBOOL    FillSystemMemSurface(LPDIRECT3DSURFACE9 pSurface, D3DFORMAT fmt, const GXLPRECT lpRect, GXCOLOR dwColor);
   public:
     friend GXBOOL      GXDLLAPI GXSaveTextureToFileW      (GXLPCWSTR pszFileName, GXLPCWSTR pszDestFormat, GTexture* pTexture);
 
 
-    virtual GXBOOL      Clear         (GXCONST GXLPRECT lpRect, GXCOLOR dwColor);
-    virtual GXBOOL      GetRatio      (GXINT* pWidthRatio, GXINT* pHeightRatio);
-    virtual GXUINT      GetWidth      ();
-    virtual GXUINT      GetHeight     ();
-    virtual GXBOOL      GetDimension  (GXUINT* pWidth, GXUINT* pHeight);
-    virtual GXDWORD     GetUsage      ();
-    virtual GXFormat    GetFormat     ();
-    virtual GXVOID      GenerateMipMaps();
-    virtual GXBOOL      GetDesc       (GXBITMAP*lpBitmap);
-    virtual GXBOOL      CopyRect      (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination);
-    virtual GXBOOL      StretchRect   (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter);
-    virtual GXBOOL      LockRect      (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags);
-    virtual GXBOOL      UnlockRect        ();
-    virtual GXGraphics* GetGraphicsUnsafe ();
+    virtual GXBOOL      Clear         (const GXLPRECT lpRect, GXCOLOR dwColor) override;
+    virtual GXBOOL      GetRatio      (GXINT* pWidthRatio, GXINT* pHeightRatio) override;
+    virtual GXUINT      GetWidth      () override;
+    virtual GXUINT      GetHeight     () override;
+    virtual GXBOOL      GetDimension  (GXUINT* pWidth, GXUINT* pHeight) override;
+    virtual GXDWORD     GetUsage      () override;
+    virtual GXFormat    GetFormat     () override;
+    virtual GXVOID      GenerateMipMaps() override;
+    virtual GXBOOL      GetDesc       (GXBITMAP*lpBitmap) override;
+    virtual GXBOOL      CopyRect      (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination) override;
+    virtual GXBOOL      StretchRect   (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter) override;
+    virtual GXBOOL      LockRect      (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags) override;
+    virtual GXBOOL      UnlockRect        () override;
+    virtual GXGraphics* GetGraphicsUnsafe () override;
 
     //inline LPDIRECT3DTEXTURE9  D3DTexture();
     inline LPDIRECT3DSURFACE9  D3DSurface();
@@ -141,7 +141,7 @@ namespace D3D9
     virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc);
     virtual GXHRESULT CreateRes     ();
     virtual GXHRESULT DestroyRes    ();
-    virtual GXBOOL    Clear         (GXCONST GXLPRECT lpRect, GXCOLOR dwColor);
+    virtual GXBOOL    Clear         (const GXLPRECT lpRect, GXCOLOR dwColor);
     virtual GXBOOL    CopyRect      (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination);
     virtual GXBOOL    LockRect      (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags);
     virtual GXBOOL    UnlockRect    ();

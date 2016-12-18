@@ -382,17 +382,17 @@ GXHRESULT GXMaterialInstImpl::SetShaderRef(GShader* pShader)
   return GX_OK;
 }
 
-GShader* GXMaterialInstImpl::GetShaderUnsafe()  GXCONST
+GShader* GXMaterialInstImpl::GetShaderUnsafe() const
 {
   return InlGetShaderUnsafe();
 }
 
-GShaderStub* GXMaterialInstImpl::GetShaderStubUnsafe() GXCONST
+GShaderStub* GXMaterialInstImpl::GetShaderStubUnsafe() const
 {
   return InlGetShaderStubUnsafe();
 }
 
-GXUINT GXMaterialInstImpl::GetHandle(GXLPCSTR szName) GXCONST
+GXUINT GXMaterialInstImpl::GetHandle(GXLPCSTR szName) const
 {
   if(szName == NULL || m_pShaderStub == NULL)
   {
