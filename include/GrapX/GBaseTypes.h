@@ -93,21 +93,21 @@ typedef const GXDWORD*    GXLPCDWORD;
 typedef i64               GXLONGLONG;
 
 // 衍生类型定义
-#ifdef _X86
+#if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
 typedef _GXW64 GXUINT   GXUINT_PTR;
 typedef _GXW64 GXINT    GXINT_PTR;
 typedef _GXW64 GXLONG   GXLONG_PTR;
 typedef _GXW64 GXULONG  GXULONG_PTR;
 typedef _GXW64 GXDWORD  GXDWORD_PTR;
 
-#elif _X64
+#elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
 typedef u64             GXUINT_PTR;
 typedef i64             GXINT_PTR;
 typedef i64             GXLONG_PTR;
 typedef u64             GXULONG_PTR;
 typedef u64             GXDWORD_PTR;
 
-#elif _ARM
+//#elif _CL_ARCH_ARM
 #else
 #error must define instruction platform.
 #endif // #ifdef _X86

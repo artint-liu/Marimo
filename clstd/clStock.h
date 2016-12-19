@@ -127,9 +127,9 @@ namespace clstd
 
       StockT*   GetStock            () const;
       _TStr     SectionName         () const;
-      Section   Open                (T_LPCSTR szSubPath) const; // 等价于StockT::Open()
-      Section   Create              (T_LPCSTR szSubPath); // 等价于StockT::Create()
-      b32       NextSection         (T_LPCSTR szName = NULL);
+      Section   Open                (T_LPCSTR szSubPath) const; // 等价于StockT::OpenSection()
+      Section   Create              (T_LPCSTR szSubPath); // 等价于StockT::CreateSection()
+      b32       NextSection         (T_LPCSTR szName = NULL); // 如果失败，表示没有后续Section，不会改变当前section内容，这与operator++行为不同
       b32       Rename              (T_LPCSTR szNewName);
       b32       FirstKey            (ATTRIBUTE& param) const;
       ATTRIBUTE FirstKey            () const;
@@ -159,7 +159,7 @@ namespace clstd
 
     _TTokens m_SmartStream;
     Buffer   m_Buffer;
-    int      m_nModify;
+    size_t   m_nModify;
     //SectionArray  m_aHandles;
 
     static void ReverseByteOrder16(u16* ptr, clsize nCount);
@@ -175,6 +175,8 @@ namespace clstd
 
     b32 Set(BufferBase* pBuffer);         // 内部会复制一份
     b32 Set(T_LPCSTR str, clsize nCount); // 内部会复制一份
+
+    b32 IsModified() const;
 
     b32 Close();
 

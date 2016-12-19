@@ -364,6 +364,12 @@ namespace clstd
   }
 
   _SSP_TEMPL 
+  b32 _SSP_IMPL::IsModified() const
+  {
+    return (m_nModify != 0);
+  }
+
+  _SSP_TEMPL 
     b32 _SSP_IMPL::Close()
   {
     m_nModify++;
@@ -505,11 +511,13 @@ namespace clstd
 
     while(++itNext != itGlobalEnd) {
       if((szName == NULL || it == szName) && itNext.marker[0] == '{') {
-        name = it;
-
         // itNext应该与输出的ItBegin是同一个值
-        return SmartStreamUtility::FindPair(itNext,
-          iter_begin, iter_end, (TChar*)L"{", (TChar*)L"}");
+        if( ! SmartStreamUtility::FindPair(itNext, iter_begin, iter_end, (TChar*)L"{", (TChar*)L"}"))
+        {
+          break;
+        }
+        name = it;
+        return TRUE;
       }
       else if(it.marker[0] == '}') {
         break;
@@ -1151,7 +1159,7 @@ namespace clstd
   {
     clsize nPos;
     if(it == m_SmartStream.end()) {
-      nPos = m_Buffer.GetSize();
+      nPos = m_Buffer.GetSize() / sizeof(TChar);
       //Append(str, str.GetLength());
       Replace(pSect, -1, 0, str, str.GetLength());
     }

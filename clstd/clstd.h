@@ -4,6 +4,7 @@
 // 预定义宏
 // https://technet.microsoft.com/zh-cn/subscriptions/b0084kay(v=vs.80).aspx#_predir_table_1..3
 // https://msdn.microsoft.com/en-us/library/b0084kay.aspx
+// https://msdn.microsoft.com/zh-cn/library/79yewefw.aspx
 // https://blogs.msdn.microsoft.com/c/2015/12/08/vs-2015-update-1-clang/
 // https://gcc.gnu.org/onlinedocs/cpp/Predefined-Macros.html
 // clang:clang -dM -E -x c /dev/null
