@@ -492,6 +492,39 @@ namespace clstd
   }
 
   _SSP_TEMPL
+    typename _SSP_IMPL::Section _SSP_IMPL::Section::Query(
+      T_LPCSTR szSubSection, T_LPCSTR szMainKey, T_LPCSTR szMatchValue, QueryType eType)
+  {
+    IS_OUT_OF_DATE;
+    Section sub_sect = Open(szSubSection);
+    if(sub_sect) {
+      ATTRIBUTE attr;
+      _TStr strValue;
+      do {
+        // 查找主键
+        if( ! sub_sect.GetKey(szMainKey, attr)) {
+          continue;
+        }
+
+        // 匹配值
+        if(attr.ToString(strValue) == szMatchValue) {
+          return sub_sect;
+        }
+      } while (sub_sect.NextSection(szSubSection));
+    }
+
+    // 没找到的处理
+    if(eType == StockT::Section::QueryType_FindAlways) {
+      sub_sect = Create(szSubSection);
+      sub_sect.SetKey(szMainKey, szMatchValue);
+    } else {
+      sub_sect.clear();
+    }
+    return sub_sect;
+
+  }
+
+  _SSP_TEMPL
     b32 _SSP_IMPL::Section::NextSection(T_LPCSTR szName)
   {
     if(empty()) {

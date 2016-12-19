@@ -140,13 +140,13 @@ typedef float             CLFLOAT;
 typedef void              CLVOID;
 typedef u16               CLUSHORT;
 
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 typedef __int64           CLLONGLONG;
 #else
 typedef int64_t           CLLONGLONG;
 #endif
 
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 typedef _w64 CLDWORD      CLDWORD_PTR;
 typedef _w64 CLINT        CLINT_PTR;
 typedef _w64 CLLONG       CLLONG_PTR;

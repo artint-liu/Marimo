@@ -99,6 +99,11 @@ namespace clstd
       _MyIterator   iter_begin;  // Section开始的'{'位置
       _MyIterator   iter_end;    // Section结束的'}'位置
 
+      enum QueryType {
+        QueryType_Default = 0,    // 如果查询失败，则返回一个无效的Section
+        QueryType_FindAlways = 1, // 如果查询失败，会新建一个Section
+      };
+
       //SECTION* m_desc;
     protected:
 #ifdef _DEBUG
@@ -129,6 +134,7 @@ namespace clstd
       _TStr     SectionName         () const;
       Section   Open                (T_LPCSTR szSubPath) const; // 等价于StockT::OpenSection()
       Section   Create              (T_LPCSTR szSubPath); // 等价于StockT::CreateSection()
+      Section   Query               (T_LPCSTR szSubSection, T_LPCSTR szMainKey, T_LPCSTR szMatchValue, QueryType eType = QueryType_Default);
       b32       NextSection         (T_LPCSTR szName = NULL); // 如果失败，表示没有后续Section，不会改变当前section内容，这与operator++行为不同
       b32       Rename              (T_LPCSTR szNewName);
       b32       FirstKey            (ATTRIBUTE& param) const;
