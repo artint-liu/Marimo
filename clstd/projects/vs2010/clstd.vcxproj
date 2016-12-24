@@ -191,7 +191,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;_X86;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -204,8 +204,8 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\pthread\lib\x86;$(ProjectDir)..\..\third_party\zlib\lib\x86;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pthreadVSE2.lib;zlibstat_d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\iconv\lib\x86;$(ProjectDir)..\..\third_party\pthread\lib\x86;$(ProjectDir)..\..\third_party\zlib\lib\x86;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>iconv.lib;pthreadVSE2.lib;zlibstat_d.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
     </Lib>
@@ -221,7 +221,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
@@ -252,7 +252,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WINDOWS;_X86;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -263,7 +263,7 @@
     <Lib>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalDependencies>zlibstat.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\pthread\lib;$(ProjectDir)..\..\third_party\zlib\lib\x86;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\iconv\lib\x86;$(ProjectDir)..\..\third_party\pthread\lib\x86;$(ProjectDir)..\..\third_party\zlib\lib\x86;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -278,7 +278,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -5,6 +5,15 @@
 #include <locale.h>
 #include <ctype.h>
 
+#if defined(_CL_SYSTEM_IOS) && ! defined(_CL_ENABLE_ICONV)
+# define _CL_ENABLE_ICONV
+#endif
+
+#if defined(_CL_ENABLE_ICONV)
+# include "iconv.h"
+# define ICONV_LOCALE "GBK"
+#endif
+
 // 设置区域
 // setlocale (LC_ALL,"");
 //typedef clstd::Allocator clAllocator;
@@ -175,10 +184,68 @@ namespace clstd
 //extern clstd::StdAllocator g_StdAlloc;
 
 //////////////////////////////////////////////////////////////////////////
+#if defined(_CL_ENABLE_ICONV)
+# define INVALID_ICONV ((iconv_t)(-1))
+class CIconvOffer
+{
+protected:
+  iconv_t m_cd;
+public:
+  CIconvOffer(const ch* tocode, const ch* fromcode)
+  {
+    m_cd = iconv_open(tocode, fromcode);
+    CLOG("iconv_open from \"%s\" to \"%s\"(handle:%x).", fromcode, tocode, m_cd);
+  }
+
+  ~CIconvOffer()
+  {
+    iconv_close(m_cd);
+    CLOG("iconv_close handle(%x).", m_cd);
+  }
+
+  // 如果pNativeStr或者uLength为空，返回编码转换需要的空间，否则返回转换的字符数
+  template<typename _TOutChar, typename _TInChar>
+  size_t StringConvert(_TOutChar* pNativeStr, size_t uLength, const _TInChar* pStrX, size_t cchX)
+  {
+    if(m_cd == INVALID_ICONV) {
+      return 0;
+    }
+
+    size_t tran = 0;
+    cchX *= sizeof(_TInChar);
+
+    if( ! pNativeStr || ! uLength) // 测量模式
+    {
+      const size_t buf_len = 1024;
+      char buffer[buf_len];
+      size_t out_len = buf_len;
+      char*  out_ptr = buffer;
+
+      while(cchX) {
+        iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
+        tran += (buf_len - out_len);
+        out_ptr = buffer;
+        out_len = buf_len;
+      }
+    }
+    else { // 转换模式
+      uLength *= sizeof(_TOutChar); // iconv 长度参数都是基于字节的
+      tran = uLength;
+      iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+      tran -= uLength;
+    }
+    return tran / sizeof(_TOutChar);
+  }
+
+};
+
+#endif // #if defined(_CL_ENABLE_ICONV)
+//////////////////////////////////////////////////////////////////////////
 
 clsize clstd::StringW_traits::StringLength(const wch* pStr)
 {
-  return wcslen(pStr);
+  //return wcslen(pStr);
+  return clstd::strlenT(pStr);
 }
 
 clsize clstd::StringW_traits::XStringLength(const _XCh* pStrX)
@@ -193,7 +260,8 @@ wch* clstd::StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_
 
 i32 clstd::StringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
 {
-  return wcscmp(pStr1, pStr2);
+  //return wcscmp(pStr1, pStr2);
+  return clstd::strcmpT(pStr1, pStr2);
 }
 
 i32 clstd::StringW_traits::CompareStringNoCase(const wch* pStr1, const wch* pStr2)
@@ -203,7 +271,8 @@ i32 clstd::StringW_traits::CompareStringNoCase(const wch* pStr1, const wch* pStr
 
 const wch* clstd::StringW_traits::StringSearchChar(const wch* pStr, wch cCh)
 {
-  return wcschr(pStr, cCh);
+  return clstd::strchrT(pStr, cCh);
+  //return wcschr(pStr, cCh);
 }
 
 void clstd::StringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
@@ -284,7 +353,15 @@ void clstd::StringW_traits::OctalToString(wch* pDestStr, size_t uMaxLength, u32 
 
 size_t clstd::StringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
 {
-#if defined(_WIN32) && !defined(_C_STANDARD)
+#if defined(_CL_ENABLE_ICONV)
+  // 其实并不希望使用这种静态方式储存编码转换对象，但是又没找到合适的全局方式来解决
+  // 这里需要注意的是，clstd作为静态库可能被多个动态库引用，同时又被主程序引用，所以在
+  // 运行时一个静态对象在不同模块中有各自独立的空间。
+  static CIconvOffer offer("UCS-2LE", ICONV_LOCALE);
+  const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
+  return ret;
+
+#elif defined(_WIN32) && !defined(_C_STANDARD)
    return (size_t)
      MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, 
      pStrX, (int)cchX, pNativeStr, (int)uLength);
@@ -301,7 +378,8 @@ clsize clstd::StringA_traits::StringLength(const ch* pStr)
 
 clsize clstd::StringA_traits::XStringLength(const _XCh* pStrX)
 {
-  return wcslen(pStrX);
+  //return wcslen(pStrX);
+  return clstd::strlenT(pStrX);
 }
 
 ch* clstd::StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uLength)
@@ -402,7 +480,13 @@ void clstd::StringA_traits::OctalToString(ch* pDestStr, size_t uMaxLength, u32 u
 
 size_t clstd::StringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
 {
-#if defined(_CL_SYSTEM) && !defined(_C_STANDARD)
+#if defined(_CL_ENABLE_ICONV)
+
+  static CIconvOffer offer(ICONV_LOCALE, "UCS-2LE");
+  const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
+  return ret;
+
+#elif defined(_CL_SYSTEM) && !defined(_C_STANDARD)
   return (size_t)
     WideCharToMultiByte(CP_ACP, NULL, 
     pStrX, (int)cchX, pNativeStr, (int)uLength, NULL, NULL);

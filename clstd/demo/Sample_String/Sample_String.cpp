@@ -116,8 +116,25 @@ void TestStringResolve()
 
 }
 
+void TestCodec()
+{
+  const ch* szSampleStringA  =  "测试中文转换的简单字符串没有奇怪的字符，1234567890abcABC";
+  const wch* szSampleStringW = L"测试中文转换的简单字符串没有奇怪的字符，1234567890abcABC";
+  {
+    clStringA strA = szSampleStringA;
+    clStringW strW = strA;
+    ASSERT(strW == szSampleStringW);
+  }
+  {
+    clStringW strW = szSampleStringW;
+    clStringA strA = strW;
+    ASSERT(strA == szSampleStringA);
+  }
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+  TestCodec();
   TestCombinePath();
   TestMatchSpec();
   TestString();
