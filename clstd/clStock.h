@@ -38,6 +38,13 @@ namespace clstd
     typedef typename _TStr::LPCSTR T_LPCSTR;
     typedef typename _TStr::TChar  TChar;
 
+    // Section::Query
+    enum QueryType {
+      QueryType_Default = 0,    // 如果查询失败，则返回一个无效的Section
+      QueryType_FindAlways = 1, // 如果查询失败，会新建一个Section
+    };
+
+
   public:
     //struct SECTION;
     class Section;
@@ -98,11 +105,6 @@ namespace clstd
       _MyIterator   name;        // Section Name
       _MyIterator   iter_begin;  // Section开始的'{'位置
       _MyIterator   iter_end;    // Section结束的'}'位置
-
-      enum QueryType {
-        QueryType_Default = 0,    // 如果查询失败，则返回一个无效的Section
-        QueryType_FindAlways = 1, // 如果查询失败，会新建一个Section
-      };
 
       //SECTION* m_desc;
     protected:

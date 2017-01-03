@@ -514,7 +514,7 @@ namespace clstd
     }
 
     // 没找到的处理
-    if(eType == StockT::Section::QueryType_FindAlways) {
+    if(eType == StockT::QueryType_FindAlways) {
       sub_sect = Create(szSubSection);
       sub_sect.SetKey(szMainKey, szMatchValue);
     } else {
@@ -785,7 +785,7 @@ namespace clstd
     strBuffer.Append('\r');
     strBuffer.Append('\n');
 
-    clsize nPos = pStock->InsertString(this, iter_end, strBuffer);
+    pStock->InsertString(this, iter_end, strBuffer);
     ASSERT(DbgCheck());
     return TRUE;
   }
@@ -1026,12 +1026,15 @@ namespace clstd
       if(bUnicode)
       {
         CLBREAK; // TODO: 测试过这段代码后去掉 CLBREAK
-        wch chEnd[] = L"\0";
+        wch chEnd[] = _CLTEXT("\0");
         Buffer sNewBuffer;
         m_Buffer.Append(chEnd, sizeof(chEnd));
         sNewBuffer.Resize(m_Buffer.GetSize(), FALSE);
 
-        clsize size = wcstombs((char*)sNewBuffer.GetPtr(), (const wchar_t*)m_Buffer.GetPtr(), sNewBuffer.GetSize());
+        clsize size = StringA_traits::XStringToNative(
+          (char*)sNewBuffer.GetPtr(), sNewBuffer.GetSize(),
+          (const wch*)m_Buffer.GetPtr(), m_Buffer.GetSize());
+        //clsize size = wcstombs((char*)sNewBuffer.GetPtr(), (const wch*)m_Buffer.GetPtr(), sNewBuffer.GetSize());
         ASSERT(size != (clsize)-1); // TODO: 需要 setlocale(LC_ALL,"");
 
         //sNewBuffer.Resize(size, FALSE);
@@ -1066,7 +1069,10 @@ namespace clstd
         m_Buffer.Append(chEnd, sizeof(chEnd));
         sNewBuffer.Resize(m_Buffer.GetSize() * 2, FALSE);
 
-        clsize size = mbstowcs((wchar_t*)sNewBuffer.GetPtr(), (const char*)m_Buffer.GetPtr(), m_Buffer.GetSize());
+        clsize size = StringW_traits::XStringToNative(
+          (wch*)sNewBuffer.GetPtr(), sNewBuffer.GetSize(),
+          (const ch*)m_Buffer.GetPtr(), m_Buffer.GetSize());
+        //clsize size = mbstowcs((wch*)sNewBuffer.GetPtr(), (const char*)m_Buffer.GetPtr(), m_Buffer.GetSize());
 
         //sNewBuffer.Resize(size * sizeof(TChar), FALSE);
         //delete m_pBuffer;

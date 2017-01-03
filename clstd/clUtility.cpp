@@ -2,6 +2,10 @@
 #include "clString.H"
 #include "clUtility.H"
 
+#if ! defined(_CL_SYSTEM_WINDOWS)
+# include <sys/time.h>
+#endif
+
 u32 crc_tab[256] = {
   0x00000000,0x77073096,0xee0e612c,0x990951ba, 0x076dc419,0x706af48f,0xe963a535,0x9e6495a3,
   0x0edb8832,0x79dcb8a4,0xe0d5e91e,0x97d2d988, 0x09b64c2b,0x7eb17cbd,0xe7b82d07,0x90bf1d91,
@@ -46,7 +50,7 @@ u32 crc_tab[256] = {
  */
 u32 chksum_crc32(unsigned char *block, unsigned int length)
 {
-   register unsigned long crc;
+   CLREGISTER unsigned long crc;
    unsigned long i;
 
    crc = 0xFFFFFFFF;
@@ -94,6 +98,7 @@ namespace clstd
     return chksum_crc32(pData, nLength);
   }
 
+#if defined(_CL_SYSTEM_WINDOWS)
   TimeTrace::TimeTrace()
   {
     QueryPerformanceFrequency(&m_Frequency);
@@ -123,6 +128,36 @@ namespace clstd
     _cl_traceA(str);
     return fTime;
   }
+#else
+  TimeTrace::TimeTrace()
+  {
+  }
+  
+  void TimeTrace::Begin()
+  {
+    gettimeofday(&m_Begin, NULL);
+  }
+  
+  const TimeTrace& TimeTrace::End()
+  {
+    gettimeofday(&m_End, NULL);
+    return *this;
+  }
+  
+  double TimeTrace::GetDeltaTime() const
+  {
+    return (double)(m_End.tv_sec - m_Begin.tv_sec) + (double)(m_End.tv_usec - m_Begin.tv_usec) * (1e-6);
+  }
+  
+  double TimeTrace::Dump(CLLPCSTR szName) const
+  {
+    clStringA str;
+    const double fTime = GetDeltaTime();
+    str.Format("%s:%f Sec.\n", szName, fTime);
+    _cl_traceA(str);
+    return fTime;
+  }
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 
   //ScopeTimeTrace::ScopeTimeTrace(CLLPCSTR szName)
   //{
@@ -163,14 +198,14 @@ namespace clstd
   {
 #if defined(_CL_SYSTEM_WINDOWS) && (_WIN32_WINNT >= 0x0600)
     return GetTickCount64();
-#elif defined(_CL_SYSTEM_IOS)
-    return 0;
-    //return TickCount();
-#else
+#elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)
+    u64 time_ms;
     struct timeval current;
     gettimeofday(&current, NULL);
-    currentTime = current.tv_sec * 1000 + current.tv_usec/1000;
-    return currentTime;
+    time_ms = current.tv_sec * 1000 + current.tv_usec / 1000;
+    return time_ms;
+#else
+# error implement this func.
 #endif // (defined(_WIN32) || defined(_WINDOWS)) && _WIN32_WINNT >= 0x0600)
   }
 

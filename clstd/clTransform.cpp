@@ -1,5 +1,6 @@
 ﻿#include "clstd.h"
 #include "clTransform.h"
+#include <float.h>
 #ifdef _DEBUG
 #include "clString.H"
 #include "clUtility.H"
@@ -23,11 +24,9 @@ namespace clstd
 
 
   TRANSFORM::TRANSFORM()
-    : translation(0.0f)
-    //, rotationEuler(0.0f)
-    //, rotationQuaternion(0.0f)
-    , rotation(0.0f,0.0f,0.0f,1.0f)
-    , scaling(1.0f)
+    : scaling(1.0f)
+	, rotation(0.0f, 0.0f, 0.0f, 1.0f)
+	, translation(0.0f)
     //, GlobalScaling(1.0f)
   {
     GlobalMatrix.identity();
@@ -188,7 +187,7 @@ namespace clstd
     {
       GlobalMatrix.SetRow(3, float4(vPos));
       float4x4 matLocal = float4x4::inverse(Coordinate) * GlobalMatrix;
-      translation = GlobalMatrix.GetRow(3);
+      translation = matLocal.GetRow(3);
     }
     else CLBREAK;
     //DBGCHECKGLOBALSCALINGCHANGED;

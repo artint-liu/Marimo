@@ -8,6 +8,7 @@
 #pragma warning(disable : 4996)
 #endif // #if defined(_WINDOWS) || defined(_WIN32)
 
+#if 0
 const static clstd::ALLOCPLOY aclAllocPloyW[] =
 {
   {32, 1024},
@@ -34,6 +35,7 @@ const static clstd::ALLOCPLOY aclAllocPloyA[] =
   {1024, 32},
   {0,0},
 };
+#endif
 
 // s_strRootDir 要在 alloc 之前析构
 //clstd::Allocator g_Alloc_clStringW("StringPoolW", aclAllocPloyW);
@@ -117,11 +119,11 @@ extern "C" void _cl_traceA(const char *fmt, ...)
   va_end(val);
 }
 
-extern "C" void _cl_traceW(const wchar_t *fmt, ...)
+extern "C" void _cl_traceW(const wch *fmt, ...)
 {
   va_list val;
   va_start(val, fmt);
-  _cl_vtraceT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(fmt, val);
+  _cl_vtraceT<wch, _vsnwprintf, OutputDebugStringW, wprintf>(fmt, val);
   va_end(val);
 }
 
@@ -149,27 +151,27 @@ extern "C" void _cl_log_warningA(const char *fmt, ...)
   va_end(val);
 }
 
-extern "C" void _cl_log_infoW(const wchar_t *fmt, ...)
+extern "C" void _cl_log_infoW(const wch *fmt, ...)
 {
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(L"[INFO] ", fmt, val);
+  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, wprintf>(L"[INFO] ", fmt, val);
   va_end(val);
 }
 
-extern "C" void _cl_log_errorW(const wchar_t *fmt, ...)
+extern "C" void _cl_log_errorW(const wch *fmt, ...)
 {
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(L"[ERROR] ", fmt, val);
+  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, wprintf>(L"[ERROR] ", fmt, val);
   va_end(val);
 }
 
-extern "C" void _cl_log_warningW(const wchar_t *fmt, ...)
+extern "C" void _cl_log_warningW(const wch *fmt, ...)
 {
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<wchar_t, _vsnwprintf, OutputDebugStringW, wprintf>(L"[WARN] ", fmt, val);
+  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, wprintf>(L"[WARN] ", fmt, val);
   va_end(val);
 }
 
@@ -190,7 +192,7 @@ extern "C" void _cl_traceA(char *fmt, ...)
   OutputDebugStringA(buffer);
 }
 
-extern "C" void _cl_traceW(wchar_t *fmt, ...)
+extern "C" void _cl_traceW(wch *fmt, ...)
 {
   if(IsDebuggerPresent() == FALSE)
     return;
@@ -242,10 +244,10 @@ extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile,
 #endif
 }
 
-extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile,int nLine)
+extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile,int nLine)
 {
-  const wchar_t* pwszCaption = L"Assert failed";
-  _cl_traceW(L"================== %s ==================\n>%s(%d): assert failed: \"%s\"\n\n\n",
+  const wch* pwszCaption = _CLTEXT("Assert failed");
+  _cl_traceW(_CLTEXT("================== %s ==================\n>%s(%d): assert failed: \"%s\"\n\n\n"),
     pwszCaption,pszSrcFile, nLine, pszSrc);
 }
 

@@ -286,9 +286,9 @@ namespace clstd
     typedef typename _TString::TChar  T_CHAR;
     //size_t      m_start;
     size_t      m_pos;
-    size_t      m_length;
     T_LPCSTR    m_str;
-      
+	size_t      m_length;
+
   public:
     StringCutter() : m_pos(0), m_str(""), m_length(0) {}
     StringCutter(T_LPCSTR str, size_t len = 0) : m_pos(0), m_str(str), m_length(len) {}
@@ -523,9 +523,14 @@ FINAL_RET:
   // 手动控制的时间差计算
   class TimeTrace
   {
+#if defined(_CL_SYSTEM_WINDOWS)
     LARGE_INTEGER m_Frequency;
     LARGE_INTEGER m_Begin;
     LARGE_INTEGER m_End;
+#else
+    timeval m_Begin;
+    timeval m_End;
+#endif
 
   public:
     TimeTrace();

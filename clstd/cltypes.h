@@ -77,19 +77,20 @@ typedef uintptr_t           u32_ptr;
 
 typedef char                ch;
 typedef char                ach;
-#if defined(_CL_SYSTEM_WIN32) || defined(_CL_SYSTEM_WINDOWS)
+
+#if __cplusplus >= 201103L
+typedef char16_t            wch;
+# define _CLTEXT(_str_)     u##_str_
+#else
+# if defined(_MSC_VER)
 typedef wchar_t             wch;
-#elif defined(_CL_SYSTEM_IOS)
-typedef wchar_t             wch;
-#elif defined(_CL_SYSTEM_ANDROID)
-typedef wchar_t             wch;
+# define _CLTEXT(_str_)     L##_str_
+# elif defined(__GNUC__) || defined(__clang__)
+typedef wchar_t             wch; // 32 Bits
+# define _CLTEXT(_str_)     L##_str_
+# endif
 #endif
 
-//#ifdef _UNICODE
-//typedef wch                 tch;
-//#else
-//typedef ch                  tch;
-//#endif // _UNICODE
 
 //namespace clstd
 //{
@@ -252,75 +253,103 @@ typedef CLULONG           CLULONG_PTR;
 #define FLT_MIN         1.175494351e-38F        /* min positive value */
 #endif
 
-#if defined(_CL_SYSTEM_WINDOWS)
-# include <vector>
 #if __cplusplus >= 199711L
 # include <unordered_map>
 # include <unordered_set>
-#else
-# include <hash_map>
-# include <hash_set>
-#endif // #if __cplusplus >= 199711L
-# include <map>
-# include <stack>
-# include <queue>
-# include <list>
-# include <set>
-# define clvector        std::vector
-#if __cplusplus >= 199711L
 # define clhash_map      std::unordered_map
 # define clhash_set      std::unordered_set
 # define clhash_multimap std::unordered_multimap
 #else
-# define clhash_map      stdext::hash_map
-# define clhash_set      stdext::hash_set
-# define clhash_multimap stdext::hash_multimap
-#endif // #if __cplusplus >= 199711L
-# define clmap           std::map
-# define clstack         std::stack
-# define clset           std::set
-# define clqueue         std::queue
-# define cllist          std::list
-# define clist           std::list
-# define clmake_pair     std::make_pair
-#elif defined(_CL_SYSTEM_IOS)
-# include <vector>
-# include <hash_map.h>
-# include <hash_set.h>
-# include <map>
-# include <stack>
-# include <list>
-# define clmake_pair     std::make_pair
-# define clvector        std::vector
-# define clhash_map      hash_map
-# define clhash_set      hash_set
-# define clhash_multimap hash_multimap
-# define clset           std::set
-# define clmap           std::map
-# define clstack         std::stack
-# define clqueue         std::queue
-# define cllist          std::list
-# define clist           std::list
-# define clmake_pair     std::make_pair
-#elif defined(_CL_SYSTEM_ANDROID)
-# include <vector>
-# include <unordered_map>
-# include <unordered_set>
-# include <map>
-# include <stack>
-# include <list>
-# define clvector        std::vector
-# define clhash_map      hash_map
-# define clhash_set      std::unordered_set
-# define clhash_multimap hash_multimap
-# define clmap           std::map
-# define clset           std::set
-# define clstack         std::stack
-# define clqueue         std::queue
-# define cllist          std::list
-# define clist           std::list
-# define clmake_pair     std::make_pair
-#endif 
+# error 没有定义
+#endif
+
+#include <vector>
+#include <map>
+#include <stack>
+#include <queue>
+#include <list>
+#include <set>
+
+#define clvector        std::vector
+#define clmap           std::map
+#define clstack         std::stack
+#define clset           std::set
+#define clqueue         std::queue
+#define cllist          std::list
+#define clist           std::list
+#define clmake_pair     std::make_pair
+
+//#else
+//#if defined(_CL_SYSTEM_WINDOWS)
+//# include <vector>
+//#if __cplusplus >= 199711L
+//# include <unordered_map>
+//# include <unordered_set>
+//#else
+//# include <hash_map>
+//# include <hash_set>
+//#endif // #if __cplusplus >= 199711L
+//# include <map>
+//# include <stack>
+//# include <queue>
+//# include <list>
+//# include <set>
+//# define clvector        std::vector
+//#if __cplusplus >= 199711L
+//# define clhash_map      std::unordered_map
+//# define clhash_set      std::unordered_set
+//# define clhash_multimap std::unordered_multimap
+//#else
+//# define clhash_map      stdext::hash_map
+//# define clhash_set      stdext::hash_set
+//# define clhash_multimap stdext::hash_multimap
+//#endif // #if __cplusplus >= 199711L
+//# define clmap           std::map
+//# define clstack         std::stack
+//# define clset           std::set
+//# define clqueue         std::queue
+//# define cllist          std::list
+//# define clist           std::list
+//# define clmake_pair     std::make_pair
+//#elif defined(_CL_SYSTEM_IOS)
+//# include <vector>
+//# include <hash_map.h>
+//# include <hash_set.h>
+//# include <map>
+//# include <stack>
+//# include <list>
+//# define clmake_pair     std::make_pair
+//# define clvector        std::vector
+//# define clhash_map      hash_map
+//# define clhash_set      hash_set
+//# define clhash_multimap hash_multimap
+//# define clset           std::set
+//# define clmap           std::map
+//# define clstack         std::stack
+//# define clqueue         std::queue
+//# define cllist          std::list
+//# define clist           std::list
+//# define clmake_pair     std::make_pair
+//#elif defined(_CL_SYSTEM_ANDROID)
+//# include <vector>
+//# include <unordered_map>
+//# include <unordered_set>
+//# include <map>
+//# include <stack>
+//# include <list>
+//# define clvector        std::vector
+//# define clhash_map      hash_map
+//# define clhash_set      std::unordered_set
+//# define clhash_multimap hash_multimap
+//# define clmap           std::map
+//# define clset           std::set
+//# define clstack         std::stack
+//# define clqueue         std::queue
+//# define cllist          std::list
+//# define clist           std::list
+//# define clmake_pair     std::make_pair
+//#endif
+//#endif
 
 #else
 #pragma message(__FILE__ ": warning : Duplicate included this file.")

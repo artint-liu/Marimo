@@ -5,7 +5,7 @@
 #include <locale.h>
 #include <ctype.h>
 
-#if defined(_CL_SYSTEM_IOS) && ! defined(_CL_ENABLE_ICONV)
+#if (defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)) && ! defined(_CL_ENABLE_ICONV)
 # define _CL_ENABLE_ICONV
 #endif
 
@@ -25,7 +25,7 @@ static const struct STR_HEADER_EXP{
   size_t        capacity;   // 最大容纳的字符数量(不含'\0')
   size_t        size;       // 字符串实际字符数量(不含'\0')
   ch            buf[4];
-}s_EmptyStr = {NULL, 0, 0, '\0', '\0', '\0', '\0'};
+}s_EmptyStr = { NULL, 0, 0, {'\0', '\0', '\0', '\0'} };
 
 const size_t  MAX_DIGITS = 80;
 
@@ -1372,13 +1372,14 @@ namespace clstd
   _CLSTR_TEMPL
     b32 _CLSTR_IMPL::IsEmpty() const
   {
-    return this == 0 || CLSTR_LENGTH(m_pBuf) == 0;
+    // 直接写this在某些编译器下会提示“写的没错this不会为空”类似这样的话
+    return reinterpret_cast<u32_ptr>(this) == 0 || CLSTR_LENGTH(m_pBuf) == 0;
   }
 
   _CLSTR_TEMPL
     b32 _CLSTR_IMPL::IsNotEmpty() const
   {
-    return this && CLSTR_LENGTH(m_pBuf) > 0;
+    return reinterpret_cast<u32_ptr>(this) && CLSTR_LENGTH(m_pBuf) > 0;
   }
 
   _CLSTR_TEMPL
@@ -2474,14 +2475,14 @@ namespace clstd
   template<typename _TCh>
   int _ftoxstrT(double value, _TCh* ascii, int width, int prec1, ch format)
   {
-     int             expon;
-     int             sign;
-     register int    avail;
-     register _TCh   *a;
-     register _TCh   *p;
-     ch              mode;
-     int             lowercase;
-     int             prec;
+     int    expon;
+     int    sign;
+     int    avail;
+     _TCh*  a;
+     _TCh*  p;
+     ch     mode;
+     int    lowercase;
+     int    prec;
      //_TCh            *fcvt(), *ecvt();
 
      static _TCh nan[] = {'#','N','A','N', 0};

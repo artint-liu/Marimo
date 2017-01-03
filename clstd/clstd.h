@@ -169,20 +169,20 @@ inline void InlSetZeroT(_Ty& t) {
 #   elif defined(_MSC_VER)
 #     ifdef _CL_ARCH_X86
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
-extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
+extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine);
 
 // 数据格式化后原始消息
 extern "C" void _cl_traceA(const char *fmt, ...);
-extern "C" void _cl_traceW(const wchar_t *fmt, ...);
+extern "C" void _cl_traceW(const wch *fmt, ...);
 
 // 输出日志格式消息，一般是"[ERROR]错误信息\r\n"
 extern "C" void _cl_log_infoA(const char *fmt, ...);
 extern "C" void _cl_log_errorA(const char *fmt, ...);
 extern "C" void _cl_log_warningA(const char *fmt, ...);
 
-extern "C" void _cl_log_infoW(const wchar_t *fmt, ...);
-extern "C" void _cl_log_errorW(const wchar_t *fmt, ...);
-extern "C" void _cl_log_warningW(const wchar_t *fmt, ...);
+extern "C" void _cl_log_infoW(const wch *fmt, ...);
+extern "C" void _cl_log_errorW(const wch *fmt, ...);
+extern "C" void _cl_log_warningW(const wch *fmt, ...);
 
 #       define TRACEW        _cl_traceW
 #       define TRACEA        _cl_traceA
@@ -208,9 +208,9 @@ extern "C" void _cl_log_warningW(const wchar_t *fmt, ...);
 #       define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
 #     elif defined(_CL_ARCH_X64)
 extern "C" void _cl_traceA(const char *fmt, ...);
-extern "C" void _cl_traceW(const wchar_t *fmt, ...);
+extern "C" void _cl_traceW(const wch *fmt, ...);
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
-extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
+extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine);
 extern "C" void _cl_Break();
 extern "C" void _cl_NoOperation();
 #       define TRACEW        _cl_traceW
@@ -237,7 +237,7 @@ extern "C" void _cl_NoOperation();
 # elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)
 #	include <assert.h>
 void _cl_traceA(const char *fmt, ...);
-void _cl_traceW(const wchar_t *fmt, ...);
+void _cl_traceW(const wch *fmt, ...);
 
 #   define TRACEW  _cl_traceW
 #   define TRACEA  _cl_traceA
@@ -262,20 +262,20 @@ void _cl_traceW(const wchar_t *fmt, ...);
 #else  // _DEBUG
 #  if defined(_CL_SYSTEM_WINDOWS)
 extern "C" void _cl_traceA(const char *fmt, ...);
-extern "C" void _cl_traceW(const wchar_t *fmt, ...);
+extern "C" void _cl_traceW(const wch *fmt, ...);
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
-extern "C" void _cl_assertW(const wchar_t *pszSrc, const wchar_t *pszSrcFile, int nLine);
+extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine);
 #  elif defined(_CL_SYSTEM_IOS)
 void _cl_traceA(const char *fmt, ...);
-void _cl_traceW(const wchar_t *fmt, ...);
+void _cl_traceW(const wch *fmt, ...);
 #  elif defined(_CL_SYSTEM_ANDROID)
 extern "C" void _cl_traceA(const char *fmt, ...);
-extern "C" void _cl_traceW(const wchar_t *fmt, ...);
+extern "C" void _cl_traceW(const wch *fmt, ...);
 #  endif // #if defined(_WINDOWS) || defined(_WIN32)
 
-#  define TRACEW
-#  define TRACEA
-#  define TRACE  TRACEA
+#  define TRACEW        _cl_traceW
+#  define TRACEA        _cl_traceA
+#  define TRACE         TRACEA
 #  define CLOG_WARNING  _cl_traceA
 #  define CLOG_ERROR    _cl_traceA
 #  define CLOG          _cl_traceA
@@ -327,6 +327,12 @@ extern "C" void _cl_traceW(const wchar_t *fmt, ...);
 
 #ifndef MAX_PATH
 # define MAX_PATH          260
+#endif
+
+#if defined(_MSC_VER)
+# define CLREGISTER register
+#else
+# define CLREGISTER
 #endif
 
 #ifndef _T

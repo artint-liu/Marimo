@@ -98,7 +98,7 @@ void TestMatchSpec()
   bresult = clpathfile::MatchSpec("fgg\\eyr\\abcd\\efg\\eqkl\\swj", "*\\abcd\\efg\\*");
 }
 
-void TestStringResolve()
+void TestStringResolve() // 测试字符串切分
 {
   char* test1 = "as,hello,world";
   char* test2 = "as,,,hello,world";
@@ -113,7 +113,24 @@ void TestStringResolve()
     clStringA sub_str(str, len);
     printf("%s\n", sub_str);
   });
+}
 
+void TestCodec() // 测试unicode到ansi转换
+{
+  const ch* szTestStringA  =  "这是测试的简单中文字符串啊没有奇怪的字符，1234567890ABCabc";
+  const wch* szTestStringW = L"这是测试的简单中文字符串啊没有奇怪的字符，1234567890ABCabc";
+
+  {
+    clStringA strA = szTestStringA;
+    clStringW strW = strA;
+    ASSERT(strW == szTestStringW);
+  }
+
+  {
+    clStringW strW = szTestStringW;
+    clStringA strA = strW;
+    ASSERT(strA == szTestStringA);
+  }
 }
 
 void TestCodec()
@@ -140,6 +157,7 @@ int _tmain(int argc, _TCHAR* argv[])
   TestString();
   TestPathFile();
   TestStringResolve();
+  TestCodec();
 
 	return 0;
 }
