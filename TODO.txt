@@ -1,0 +1,2 @@
+1.统一 grapx 返回值，重新定义MORESULT
+2.string支持<<解析

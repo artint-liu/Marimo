@@ -492,8 +492,8 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       clstd::TokensA tokens_ref;
       clstd::TokensA tokens_out;
 
-      tokens_ref.Initialize((GXLPCSTR)pRefBuffer->GetPtr(), pRefBuffer->GetSize());
-      tokens_out.Initialize((GXLPCSTR)pOutBuffer->GetPtr(), pOutBuffer->GetSize());
+      tokens_ref.Attach((GXLPCSTR)pRefBuffer->GetPtr(), pRefBuffer->GetSize());
+      tokens_out.Attach((GXLPCSTR)pOutBuffer->GetPtr(), pOutBuffer->GetSize());
 
       clstd::TokensA::iterator it_ref = tokens_ref.begin();
       clstd::TokensA::iterator it_out = tokens_out.begin();

@@ -1,11 +1,15 @@
 ﻿#include <string>
 
-#include "clStd.H"
+#include "clstd.H"
 #include "clString.H"
 //#include "clmemory.h"
 //#include "clFile.H"
 //#include "clBuffer.H"
 #include "clUtility.H"
+
+#ifdef _CRT_FINDFILE
+# include <io.h>
+#endif
 
 #ifdef _WINDOWS
 #pragma warning(disable:4355)
@@ -470,7 +474,7 @@ FALSE_RET:
   //  return *this;
   //}
   //////////////////////////////////////////////////////////////////////////
-#if defined(_WINDOWS) || defined(_WIN32)
+#if (defined(_WINDOWS) || defined(_WIN32)) && ! defined(_CRT_FINDFILE)
   FindFile::FindFile()
     : hFind(INVALID_HANDLE_VALUE)
   {
@@ -480,16 +484,16 @@ FALSE_RET:
   FindFile::FindFile(CLLPCSTR szFilename)
     : hFind(INVALID_HANDLE_VALUE)
   {
-    NewFindA(szFilename);
+    NewFind(szFilename);
   }
 
   FindFile::FindFile(CLLPCWSTR szFilename)
     : hFind(INVALID_HANDLE_VALUE)
   {
-    NewFindW(szFilename);
+    NewFind(szFilename);
   }
 
-  b32 FindFile::NewFindW(CLLPCWSTR szFilename)
+  b32 FindFile::NewFind(CLLPCWSTR szFilename)
   {
     if(hFind != INVALID_HANDLE_VALUE) {
       FindClose(hFind);
@@ -498,19 +502,19 @@ FALSE_RET:
     return (hFind != INVALID_HANDLE_VALUE);
   }
 
-  b32 FindFile::NewFindA(CLLPCSTR szFilename)
+  b32 FindFile::NewFind(CLLPCSTR szFilename)
   {
     clStringW strFilename = szFilename;
-    return NewFindW(strFilename);
+    return NewFind(strFilename);
   }
 
-  b32 FindFile::GetFileW(FINDFILEDATAW* FindFileData)
+  b32 FindFile::GetFile(FINDFILEDATAW* FindFileData)
   {
     if(hFind == INVALID_HANDLE_VALUE) {
       return FALSE;
     }
     clstd::strcpynT(FindFileData->Filename, wfd.cFileName, MAX_PATH);
-    FindFileData->dwAttributes  = wfd.dwFileAttributes;
+    FindFileData->dwAttributes  = IntTranslateAttr(wfd.dwFileAttributes);
     FindFileData->nFileSizeHigh = wfd.nFileSizeHigh;
     FindFileData->nFileSizeLow  = wfd.nFileSizeLow;
     if( ! FindNextFileW(hFind, &wfd))
@@ -521,17 +525,115 @@ FALSE_RET:
     return TRUE;
   }
 
-  b32 FindFile::GetFileA(FINDFILEDATAA* FindFileData)
+  b32 FindFile::GetFile(FINDFILEDATAA* FindFileData)
   {
     FINDFILEDATAW ffdW;
-    const b32 bval = GetFileW(&ffdW);
+    const b32 bval = GetFile(&ffdW);
     WideCharToMultiByte(CP_ACP, NULL, ffdW.Filename, -1, FindFileData->Filename, MAX_PATH, NULL, NULL);
-    FindFileData->dwAttributes  = ffdW.dwAttributes;
+    FindFileData->dwAttributes  = IntTranslateAttr(ffdW.dwAttributes);
     FindFileData->nFileSizeHigh = ffdW.nFileSizeHigh;
     FindFileData->nFileSizeLow  = ffdW.nFileSizeLow;
     return bval;
   }
 
+  CLDWORD FindFile::IntTranslateAttr(CLDWORD uNativeAttr)
+  {
+    CLDWORD dwAttr = 0;
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_READONLY)) {
+      SET_FLAG(dwAttr, FileAttribute_ReadOnly);
+    }
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_HIDDEN)) {
+      SET_FLAG(dwAttr, FileAttribute_Hidden);
+    }
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_SYSTEM)) {
+      SET_FLAG(dwAttr, FileAttribute_System);
+    }
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_DIRECTORY)) {
+      SET_FLAG(dwAttr, FileAttribute_Directory);
+    }
+    return dwAttr;
+  }
+
 #else
+  FindFile::FindFile()
+    : handle(InvalidHandleValue)
+  {
+    InlSetZeroT(finddata);
+  }
+
+  FindFile::FindFile(CLLPCSTR szFilename)
+    : handle(InvalidHandleValue)
+  {
+    NewFind(szFilename);
+  }
+
+  FindFile::FindFile(CLLPCWSTR szFilename)
+    : handle(InvalidHandleValue)
+  {
+    NewFind(szFilename);
+  }
+
+  b32 FindFile::NewFind(CLLPCWSTR szFilename)
+  {
+    clStringA strFilename = szFilename;
+    return NewFind(strFilename);
+  }
+
+  b32 FindFile::NewFind(CLLPCSTR szFilename)
+  {
+    if(handle != InvalidHandleValue) {
+      _findclose(handle);
+    }
+    handle = _findfirst(szFilename, &finddata);
+    return (handle != InvalidHandleValue);
+  }
+
+  b32 FindFile::GetFile(FINDFILEDATAW* FindFileData)
+  {
+    FINDFILEDATAA finddataA;
+    if( ! GetFile(&finddataA)) {
+      return FALSE;
+    }
+    clStringW str(finddataA.Filename);
+    clstd::strcpynT(FindFileData->Filename, (const wch*)str, MAX_PATH);
+
+    return TRUE;
+  }
+
+  b32 FindFile::GetFile(FINDFILEDATAA* FindFileData)
+  {
+    if(handle == InvalidHandleValue) {
+      return FALSE;
+    }
+
+    clstd::strcpynT(FindFileData->Filename, finddata.name, MAX_PATH);
+    FindFileData->dwAttributes  = IntTranslateAttr(finddata.attrib);
+    FindFileData->nFileSizeHigh = 0;
+    FindFileData->nFileSizeLow  = finddata.size;
+    if(_findnext(handle, &finddata)) // 非0表示Done!
+    {
+      _findclose(handle);
+      handle = InvalidHandleValue;
+    }
+    return TRUE;
+  }
+
+  CLDWORD FindFile::IntTranslateAttr(CLDWORD uNativeAttr)
+  {
+    CLDWORD dwAttr = 0;
+    if(TEST_FLAG(uNativeAttr, _A_RDONLY)) {
+      SET_FLAG(dwAttr, FileAttribute_ReadOnly);
+    }
+    if(TEST_FLAG(uNativeAttr, _A_HIDDEN)) {
+      SET_FLAG(dwAttr, FileAttribute_Hidden);
+    }
+    if(TEST_FLAG(uNativeAttr, _A_SYSTEM)) {
+      SET_FLAG(dwAttr, FileAttribute_System);
+    }
+    if(TEST_FLAG(uNativeAttr, _A_SUBDIR)) {
+      SET_FLAG(dwAttr, FileAttribute_Directory);
+    }
+    return dwAttr;
+  }
 #endif // #if defined(_WINDOWS) || defined(_WIN32)
 } // namespace clstd

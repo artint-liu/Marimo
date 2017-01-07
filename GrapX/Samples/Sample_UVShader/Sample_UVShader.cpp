@@ -226,7 +226,7 @@ namespace Test{
     clstd::FindFile find(strFindTarget);
     clstd::FINDFILEDATAA find_data;
 
-    while(find.GetFileA(&find_data))
+    while(find.GetFile(&find_data))
     {
       ITEM item;
       item.strName      = find_data.Filename;
