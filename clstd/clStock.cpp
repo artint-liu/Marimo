@@ -364,9 +364,9 @@ namespace clstd
   }
 
   _SSP_TEMPL 
-  b32 _SSP_IMPL::IsModified() const
+  size_t _SSP_IMPL::GetModification() const
   {
-    return (m_nModify != 0);
+    return m_nModify;
   }
 
   _SSP_TEMPL 

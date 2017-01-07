@@ -12,6 +12,7 @@
 #if defined(_CL_ENABLE_ICONV)
 # include "iconv.h"
 # define ICONV_LOCALE "GBK"
+# pragma comment(lib, "iconv.lib")
 #endif
 
 // 设置区域

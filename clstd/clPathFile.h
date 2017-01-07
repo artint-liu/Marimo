@@ -72,6 +72,14 @@ namespace clpathfile
   clsize FindExtensionA    (const ch* szPath);
   clsize FindExtensionW    (const wch* szPath);
 
+  // 比较文件扩展名（区分大小写）
+  // 等于返回true，szExtList是扩展名列表，用竖线分割，例如"jpg|png"形式
+  template<typename _TCh>
+  b32 CompareExtensionT  (const _TCh* szPath, const _TCh* szExtList);
+  b32 CompareExtension   (const ch*  szPath, const ch* szExtList);
+  b32 CompareExtension   (const wch* szPath, const wch* szExtList);
+
+
   // vice slash 替换为 slash, 并在末尾添加 slash （如果末尾没有）
   template<typename _TString>
   b32 AddSlashT      (_TString& strPath);
@@ -169,6 +177,69 @@ namespace clpathfile
   b32 IsPathExist(const ch* szPath);
   b32 IsPathExist(const wch* szPath);
 
+} // namespace clpathfile
+
+//////////////////////////////////////////////////////////////////////////
+
+namespace clpathfile {
+#if defined(_CL_SYSTEM_WINDOWS)
+  namespace Win32 {
+    template<class _TString, class _Fn>
+    void RecursiveSearchDir(typename _TString::LPCSTR szStartDir, _Fn fn)
+    {
+      WIN32_FIND_DATA wfd;
+      typename _TString::TChar szFilename[] = {'*','.','*','\0'};
+      _TString strDir = szStartDir;
+      _TString strSearch;
+      if(strDir.Back() != '\\' && strDir.Back() != '/') {
+        strDir += "\\";
+      }
+      strSearch = strDir + szFilename;
+
+      HANDLE hFind = FindFirstFile(strSearch, &wfd);
+      if(hFind != INVALID_HANDLE_VALUE)
+      {
+        do {
+          if(wfd.cFileName[0] == '.') {
+            continue;
+          }
+
+          fn(strDir, wfd);
+          if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+          {
+            _TString strChildDir = strDir + wfd.cFileName;
+            RecursiveSearchDir<_TString>(strChildDir, fn);
+          }
+        } while (FindNextFile(hFind, &wfd));
+      }
+    }
+
+    // 从一个路径收集文件，
+    // 如果这个路径是目录，则遍历子目录，如果是文件，就填入list后返回
+    template<class _TString, typename _TCh, typename _TStringList, class _Fn>
+    void GenerateFiles(_TStringList& rFileList, const _TCh* szPath, _Fn fn)
+    {
+      DWORD dwAttri = GetFileAttributes(szPath);
+      if(dwAttri == 0xffffffff) {
+        return;
+      }
+
+      if(dwAttri & FILE_ATTRIBUTE_DIRECTORY)
+      {
+        RecursiveSearchDir<_TString>(szPath, [&rFileList, &fn](_TString& strDir, const WIN32_FIND_DATA& wfd) {
+          if(fn(wfd)) {
+            _TString str;
+            str = strDir + wfd.cFileName;
+            rFileList.push_back(str);
+          }
+        });
+      }
+      else {
+        rFileList.push_back(szPath);
+      }
+    }
+  } // namespace Win32
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 } // namespace clpathfile
 
 #endif // _FILEPATH_H_

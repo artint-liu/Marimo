@@ -246,6 +246,46 @@ namespace clpathfile
 
   //////////////////////////////////////////////////////////////////////////
 
+  template<typename _TCh>
+  b32 CompareExtensionT(const _TCh* szPath, const _TCh* szExtList)
+  {
+    clsize pos = FindExtensionT(szPath);
+    if(pos == (clsize)-1) {
+      return FALSE;
+    }
+
+    szPath += (pos + 1);
+
+    // 与 StringUtility::Resolve 实现基本一直，只是在匹配到符合的字符串时直接返回
+    const _TCh* str_begin = szExtList;
+    const _TCh* str_end   = szExtList + clstd::strlenT(szExtList);
+
+    while(szExtList < str_end) {
+      if(*szExtList == '|') {
+        if(clstd::strncmpT(str_begin, szPath, szExtList - str_begin) == 0) {
+          return TRUE;
+        }
+        str_begin = ++szExtList;
+        continue;
+      }
+      szExtList++;
+    }
+
+    return (clstd::strncmpT(str_begin, szPath, szExtList - str_begin) == 0);
+  }
+
+  b32 CompareExtension(const ch* szPath, const ch* szExtList)
+  {
+    return CompareExtensionT(szPath, szExtList);
+  }
+
+  b32 CompareExtension(const wch* szPath, const wch* szExtList)
+  {
+    return CompareExtensionT(szPath, szExtList);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
   template<typename _TString>
   b32 AddSlashT(_TString& strPath)
   {

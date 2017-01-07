@@ -205,7 +205,7 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\iconv\lib\x86;$(ProjectDir)..\..\third_party\pthread\lib\x86;$(ProjectDir)..\..\third_party\zlib\lib\x86;$(VLDDIR)\lib\Win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>iconv.lib;pthreadVSE2.lib;zlibstat_d.lib</AdditionalDependencies>
+      <AdditionalDependencies>pthreadVSE2.lib;zlibstat_d.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
     </Lib>
