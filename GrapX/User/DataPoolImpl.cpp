@@ -88,7 +88,7 @@ namespace Marimo
       }
     }
 
-    GXUINT CopyHashAlgo(DATAPOOL_HASHALGO* pAlgo, DataPoolBuildTime::HASH_ALGORITHM* pBTAlgo, u8* aBuckets, GXUINT cbBuckets)
+    GXUINT CopyHashAlgo(DATAPOOL_HASHALGO* pAlgo, const DataPoolBuildTime::HASH_ALGORITHM* pBTAlgo, u8* aBuckets, GXUINT cbBuckets)
     {
       ASSERT(pBTAlgo->nBucket < 256); // 目前m_aHashBuckets是8位的，如果出现这个断言就改成u8/u16自适应的
 
@@ -187,13 +187,14 @@ namespace Marimo
     //SAFE_DELETE(m_pBuffer);
   }
   //////////////////////////////////////////////////////////////////////////
-    GXBOOL DataPoolImpl::Initialize(LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl)
+    GXBOOL DataPoolImpl::Initialize(LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolLoad dwFlags)
   {
     if(pVarDecl == NULL) {
       return FALSE;
     }
+    m_dwRuntimeFlags = dwFlags;
     //FloatVarTypeDict FloatDict; // 很多事情还没有确定下来的类型表, 浮动的
-    DataPoolBuildTime sBuildTime;   // 构建时使用的结构
+    DataPoolBuildTime sBuildTime(dwFlags);   // 构建时使用的结构
 
     // 创建浮动类型表
     // -- 内置类型表示是被信任的,不进行合法性检查,Debug版还是要稍微检查下的
@@ -220,8 +221,12 @@ namespace Marimo
       return FALSE;
     }
 
-    DataPoolBuildTime::TryHash(sBuildTime.m_VarHashInfo, sBuildTime.m_aVar);
-    sBuildTime.m_nNumOfBuckets += sBuildTime.m_VarHashInfo.indices.size();
+    if(TEST_FLAG(sBuildTime.m_dwBuildFlags, DataPoolLoad_NoHashTable)) {
+      // nothing...
+    } else {
+      DataPoolBuildTime::TryHash(sBuildTime.m_VarHashInfo, sBuildTime.m_aVar);
+      sBuildTime.m_nNumOfBuckets += sBuildTime.m_VarHashInfo.indices.size();
+    }
 
     // 定位各种描述表
     LocalizeTables(sBuildTime, nBufferSize);
@@ -860,7 +865,7 @@ namespace Marimo
       (m_nNumOfStructs == 0 && (m_nNumOfMember == 0 && m_nNumOfEnums == 0)) ||
       (m_nNumOfStructs != 0 && (m_nNumOfMember != 0 || m_nNumOfEnums != 0)) );
     ASSERT(m_pNamesTabEnd && m_pNamesTabBegin < m_pNamesTabEnd);  // m_pNamesTabBegin 在构建时暂时为0
-    ASSERT(m_cbHashBuckets != 0);
+    ASSERT(m_cbHashBuckets != 0 || TEST_FLAG(m_dwRuntimeFlags, DataPoolLoad_NoHashTable));
 
     pSizeList->cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
     pSizeList->cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
@@ -1838,7 +1843,7 @@ namespace Marimo
   GXBOOL DataPoolImpl::SaveW( GXLPCWSTR szFilename )
   {
     clFile file;
-    if(file.CreateAlwaysW(szFilename)) {
+    if(file.CreateAlways(szFilename)) {
       return Save(file);
     }
     CLOG_ERRORW(L"can not open file \"%s\".", szFilename);
@@ -1868,7 +1873,8 @@ namespace Marimo
     // #.Array Buffer[1] 的重定位表 + data
     // ...
     FILE_HEADER header;
-    header.dwFlags          = 0;
+    const GXDWORD dwFlagsMask = DataPoolLoad_NoHashTable;
+    header.dwFlags          = m_dwRuntimeFlags & dwFlagsMask; // 只接受储存部分标志，因为有些标志是运行态的，文件态没有意义
     header.dwHashMagic      = clstd::HashStringT("DataPool", 8);
     header.nNumOfTypes      = m_nNumOfTypes;
     header.nNumOfStructs    = m_nNumOfStructs;
@@ -2159,7 +2165,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL DataPoolImpl::Load( clFile& file, GXDWORD dwFlag )
+  GXBOOL DataPoolImpl::Load( clFile& file, DataPoolLoad dwFlags )
   {
     //
     // TODO: 改为SmartRepository加载
@@ -2181,6 +2187,7 @@ namespace Marimo
       return FALSE;
     }
 
+    m_dwRuntimeFlags |= header.dwFlags; // TODO: 检查
     m_nNumOfTypes    = header.nNumOfTypes;
     m_nNumOfStructs  = header.nNumOfStructs;
     m_nNumOfVar      = header.nNumOfVar;
@@ -2235,7 +2242,7 @@ namespace Marimo
 
 
     //*
-    if(TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
+    if(TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
     {
       //m_bReadOnly = 1;
       SET_FLAG(m_dwRuntimeFlags, RuntimeFlag_Readonly);
@@ -2288,7 +2295,7 @@ namespace Marimo
       if(file.GetPointer() != header.nStringVarOffset) {
         file.SetPointer(header.nStringVarOffset, 0);
       }
-      if(TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
+      if(TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
       {
         pStringBegin = (GXLPBYTE)m_Buffer.GetPtr() + nMainBufferSize_0;
       }
@@ -2304,7 +2311,7 @@ namespace Marimo
 
     // 非只读模式下，在这里初始化缓冲区
     ASSERT(m_aTypes != NULL);
-    if(TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
+    if(TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
     {
       GXLPBYTE lpBufferPtr = (GXLPBYTE)m_Buffer.GetPtr() + nMainBufferSize_0 + header.cbStringSpace;
 
@@ -2403,7 +2410,7 @@ namespace Marimo
         case BUFFER_SAVELOAD_DESC::RelocalizeType_String:
         {
           GXLPCWSTR str = (GXLPCWSTR)((GXINT_PTR)pStringBegin + *(GXUINT*)pSrc - header.nStringVarOffset);
-          if (TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
+          if (TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
           {
             *(GXLPCWSTR*)pDest = str;
             //INC_DBGNUMOFSTRING;
@@ -2421,7 +2428,7 @@ namespace Marimo
         case BUFFER_SAVELOAD_DESC::RelocalizeType_StringA:
         {
           GXLPCSTR str = (GXLPCSTR)((GXINT_PTR)pStringBegin + *(GXUINT*)pSrc - header.nStringVarOffset);
-          if (TEST_FLAG(dwFlag, DataPoolLoad_ReadOnly))
+          if (TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
           {
             *(GXLPCSTR*)pDest = str;
           }

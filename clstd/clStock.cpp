@@ -303,7 +303,7 @@ namespace clstd
     b32 _SSP_IMPL::LoadW(const wch* lpProfile)
   {
     clFile file;
-    if(file.OpenExistingW(lpProfile) == FALSE) {
+    if(file.OpenExisting(lpProfile) == FALSE) {
       return FALSE;
     }
 
@@ -324,7 +324,7 @@ namespace clstd
     b32 _SSP_IMPL::SaveW(const wch* lpProfile) const
   {
     clFile file;
-    if(file.CreateAlwaysW(lpProfile) == FALSE) {
+    if(file.CreateAlways(lpProfile) == FALSE) {
       return FALSE;
     }
 

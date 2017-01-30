@@ -529,7 +529,7 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
     CLOG_ERROR("%s : Bad input argument.\r\n", __FUNCTION__);
   }
 
-  if( ! file.CreateAlwaysW(szFilename)) {
+  if( ! file.CreateAlways(szFilename)) {
     CLOG_ERROR("%s : Can't create file.\r\n", __FUNCTION__);
     return FALSE;
   }

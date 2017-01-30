@@ -22,7 +22,7 @@
 
 namespace clstd
 {
-  class Buffer;
+  class MemBuffer;
 
   //////////////////////////////////////////////////////////////////////////
   // TODO: 增加 StockReaderT 类，作为只读方式加载

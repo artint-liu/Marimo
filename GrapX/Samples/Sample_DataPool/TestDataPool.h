@@ -4,12 +4,12 @@
 using namespace Marimo;
 
 extern GXLPCWSTR s_szExampleString[];
-void EnumerateVariables(DataPool* pDataPool);
-void EnumeratePtrControl(DataPool* pDataPool);
+size_t EnumerateVariables(DataPool* pDataPool);
+size_t EnumeratePtrControl(DataPool* pDataPool);
 void EnumeratePtrControl2(DataPool* pDataPool);
 
 void CompareVariable(const DataPoolVariable& var1, const DataPoolVariable& var2);
-void CompareDataPool(DataPool* pDataPoolA, DataPool* pDataPoolB);
+size_t CompareDataPool(DataPool* pDataPoolA, DataPool* pDataPoolB);
 
 #define ENUM_DATAPOOL(x)   EnumerateVariables(x)
 //#define ENUM_DATAPOOL(x)  EnumeratePtrControl(x)

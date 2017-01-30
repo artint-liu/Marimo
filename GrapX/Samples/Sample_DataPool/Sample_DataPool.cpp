@@ -39,6 +39,7 @@ void TestHugeArray();
 void TestBaseProperty();
 void TestCompileFromFile();
 void TestComplexArray();
+void TestHashBuckets();
 
 GXUINT_PTR GetFirstElementPtr(const DataPoolVariable& var) // 获得数组对象第一个元素的指针地址
 {
@@ -1170,6 +1171,22 @@ void TestStringCutter()
   }
 }
 
+void TestHeaderSize()
+{
+  static VARIABLE_DECLARATION s_aVariable[] = 
+  {
+    {"float", "fFactor", 0,},
+    {NULL, NULL}
+  };
+
+  DataPool* pDataPool = NULL;
+  GXHRESULT hr = DataPool::CreateDataPool(&pDataPool, NULL, NULL, s_aVariable);
+  if(GXSUCCEEDED(hr)) {
+    pDataPool->SaveW(L"Test\\HeaderSize.dpl");
+    SAFE_RELEASE(pDataPool);
+  }
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   clpathfile::LocalWorkingDirW(L"..");
@@ -1179,6 +1196,8 @@ int _tmain(int argc, _TCHAR* argv[])
   TestStringCutter();
 
   // Data pool test
+  TestHashBuckets();
+  TestHeaderSize();
   TestHugeArray();
   TestComplexArray();
   TestSelfContainStruct();

@@ -176,23 +176,38 @@ extern "C" void _cl_traceA(const char *fmt, ...);
 extern "C" void _cl_traceW(const wch *fmt, ...);
 
 // 输出日志格式消息，一般是"[ERROR]错误信息\r\n"
-extern "C" void _cl_log_infoA(const char *fmt, ...);
-extern "C" void _cl_log_errorA(const char *fmt, ...);
+extern "C" void _cl_log_infoA   (const char *fmt, ...);
+extern "C" void _cl_log_errorA  (const char *fmt, ...);
 extern "C" void _cl_log_warningA(const char *fmt, ...);
 
-extern "C" void _cl_log_infoW(const wch *fmt, ...);
-extern "C" void _cl_log_errorW(const wch *fmt, ...);
+extern "C" void _cl_log_infoW   (const wch *fmt, ...);
+extern "C" void _cl_log_errorW  (const wch *fmt, ...);
 extern "C" void _cl_log_warningW(const wch *fmt, ...);
+
+namespace clstd
+{
+  void _cl_log_info   (const char *fmt, ...);
+  void _cl_log_error  (const char *fmt, ...);
+  void _cl_log_warning(const char *fmt, ...);
+
+  void _cl_log_info   (const wch *fmt, ...);
+  void _cl_log_error  (const wch *fmt, ...);
+  void _cl_log_warning(const wch *fmt, ...);
+}
+
 
 #       define TRACEW        _cl_traceW
 #       define TRACEA        _cl_traceA
 #       define TRACE         TRACEA
-#       define CLOG_WARNING  _cl_log_warningA
-#       define CLOG_ERROR    _cl_log_errorA
-#       define CLOG          _cl_log_infoA
+#       define CLOG_WARNING  clstd::_cl_log_warning
+#       define CLOG_ERROR    clstd::_cl_log_error
+#       define CLOG          clstd::_cl_log_info
 #       define CLOG_WARNINGW _cl_log_warningW
 #       define CLOG_ERRORW   _cl_log_errorW
 #       define CLOGW         _cl_log_infoW
+#       define CLOG_WARNINGA _cl_log_warningA
+#       define CLOG_ERRORA   _cl_log_errorA
+#       define CLOGA         _cl_log_infoA
 #       define CLBREAK       {__asm int 3}
 #       define CLABORT       {__asm int 3}
 

@@ -83,7 +83,7 @@ GXBOOL GVMesh::InitializeAsObjFromFile(GXGraphics* pGraphics, GXLPCWSTR szFilena
   if(szFilename == NULL) {
     return bval;
   }
-  if(file.OpenExistingW(szFilename)) {
+  if(file.OpenExisting(szFilename)) {
     clBuffer* pBuffer = NULL;
     file.MapToBuffer(&pBuffer);
     m_strName = szFilename;

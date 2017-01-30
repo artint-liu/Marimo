@@ -400,7 +400,7 @@ long OggVorbisFromFile::StreamTell()
 
 bool OggVorbisFromFile::OpenFromFile(const char* szFile)
 {
-  if(file.OpenExistingA(szFile))
+  if(file.OpenExisting(szFile))
   {
     Initialize();
     return true;

@@ -250,6 +250,76 @@ namespace clstd
       else break;
     };
   }
+
+  // 二分查找
+  // fn = [](A* a, B key) -> int{}
+  template<class _Ty, class _TKey, class _TFunc>
+  _Ty* BinarySearch(_Ty* pArrayBegin, _Ty* pArrayEnd, const _TKey& key, _TFunc fn)
+  {
+    _Ty* pBegin = pArrayBegin;
+    _Ty* pEnd   = pArrayEnd;
+
+    while(pBegin + 1 < pEnd)
+    {
+      _Ty* pMid = pBegin + ((pEnd - pBegin) >> 1);
+      const int r = fn(pMid, key);
+      if(r < 0) {
+        pBegin = pMid;
+      }
+      else if(r > 0) {
+        pEnd = pMid;
+      }
+      else {
+        return pMid;
+      }
+    }
+
+    if(pBegin == pArrayBegin && fn(pBegin, key) == 0) {
+      return pBegin;
+    }
+    return NULL;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  //
+  // 二分查找插入位置（不执行插入动作）
+  // bInsert == FALSE 表示键值已经存在，返回键值位置
+  // bInsert != FALSE 表示键值不存在，返回插入位置
+  // fn = [](A* a, B key) -> int{}
+  //
+  template<class _Ty, class _TKey, class _TFunc>
+  _Ty* BinaryInsertPos(_Ty* pArrayBegin, _Ty* pArrayEnd, const _TKey& key, b32* bInsert, _TFunc fn)
+  {
+    _Ty* pBegin = pArrayBegin;
+    _Ty* pEnd   = pArrayEnd;
+
+    while(pBegin + 1 < pEnd)
+    {
+      _Ty* pMid = pBegin + ((pEnd - pBegin) >> 1);
+      const int r = fn(pMid, key);
+      if(r < 0) {
+        pBegin = pMid;
+      }
+      else if(r > 0) {
+        pEnd = pMid;
+      }
+      else {
+        *bInsert = FALSE;
+        return pMid;
+      }
+    }
+
+    if(pBegin == pArrayBegin) {
+      const int r = fn(pBegin, key);
+      *bInsert = (r != 0);
+      return r >= 0 ? pBegin : pEnd;
+    }
+
+    *bInsert = TRUE;
+    return pEnd;
+  }
+
+
   //////////////////////////////////////////////////////////////////////////
   //************************************
   // Method:    ResolveString 分解字符串到一个数组中
@@ -560,6 +630,7 @@ FINAL_RET:
   clStringA ToStringA(const float3& v);
   clStringA ToStringA(const float4& v);
 
+  void DumpMemory(const void* ptr, size_t count);
   extern int s_aPrimeNum[];
 } // namespace clstd
 

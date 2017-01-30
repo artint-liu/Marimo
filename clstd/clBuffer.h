@@ -164,24 +164,26 @@ namespace clstd
   //
   // 通用 Buffer
   //
-  class Buffer : public BufferBase
+  class MemBuffer : public BufferBase
   {
   protected:
     clsize m_nCapacity;  // 容量大小
     clsize m_nPageSize;  // 页大小, 大小不够将按照这个长度增加
   public:
-    Buffer(u32 nPageSize = 512);
-    virtual ~Buffer();
+    MemBuffer(u32 nPageSize = 512);
+    virtual ~MemBuffer();
 
     b32       Reserve   (clsize dwSize);
-    b32       Resize    (clsize dwSize, b32 bZeroInit);
+    size_t    Resize    (clsize dwSize, b32 bZeroInit); // 地址没变化返回0，否则返回一个补码的地址差
     CLLPVOID  GetPtr    () const;
     clsize    GetSize   () const;
     //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
-    Buffer&   Append    (CLLPCVOID lpData, clsize dwSize);
+    MemBuffer&Append    (CLLPCVOID lpData, clsize dwSize);
     b32       Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
     b32       Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
   };
+
+  typedef MemBuffer Buffer;
 
   // 宽字符buffer
   // TODO: 这个从clStringW继承吧，重新实现Allocator

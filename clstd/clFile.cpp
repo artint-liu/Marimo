@@ -92,28 +92,28 @@ namespace clstd
     Close();
   }
 
-  b32 File::OpenExistingA(CLLPCSTR pszFileName)
+  b32 File::OpenExisting(CLLPCSTR pszFileName)
   {
     Close();
-    const b32 bval = CreateFileA(pszFileName, DA_Read, SM_Read, CD_OpenExisting, A_Archive);
+    const b32 bval = CreateFile(pszFileName, DA_Read, SM_Read, CD_OpenExisting, A_Archive);
     return bval;
   }
 
-  b32 File::CreateAlwaysA(CLLPCSTR pszFileName)
+  b32 File::CreateAlways(CLLPCSTR pszFileName)
   {
     Close();
-    const b32 bval = CreateFileA(pszFileName, DA_Write, SM_Read, CD_CreateAlways, A_Archive);
+    const b32 bval = CreateFile(pszFileName, DA_Write, SM_Read, CD_CreateAlways, A_Archive);
     return bval;
   }
 
-  b32 File::CreateNewA(CLLPCSTR pszFileName)
+  b32 File::CreateNew(CLLPCSTR pszFileName)
   {
     Close();
-    const b32 bval = CreateFileA(pszFileName, DA_Write, SM_Read, CD_CreateNew, A_Archive);
+    const b32 bval = CreateFile(pszFileName, DA_Write, SM_Read, CD_CreateNew, A_Archive);
     return bval;
   }
 
-  b32 File::CreateFileA(
+  b32 File::CreateFile(
     CLLPCSTR        pszFileName, 
     DesiredAccess      eDesiredAccess, 
     ShareMode        eShareMode, 
@@ -135,28 +135,28 @@ namespace clstd
 #endif // _WINDOWS
 
   }
-  b32 File::OpenExistingW(CLLPCWSTR pszFileName)
+  b32 File::OpenExisting(CLLPCWSTR pszFileName)
   {
     Close();
-    const b32 bval = CreateFileW(pszFileName, DA_Read, SM_Read, CD_OpenExisting, A_Archive);
+    const b32 bval = CreateFile(pszFileName, DA_Read, SM_Read, CD_OpenExisting, A_Archive);
     return bval;
   }
 
-  b32 File::CreateAlwaysW(CLLPCWSTR pszFileName)
+  b32 File::CreateAlways(CLLPCWSTR pszFileName)
   {
     Close();
-    const b32 bval = CreateFileW(pszFileName, DA_Write, SM_Read, CD_CreateAlways, A_Archive);
+    const b32 bval = CreateFile(pszFileName, DA_Write, SM_Read, CD_CreateAlways, A_Archive);
     return bval;
   }
 
-  b32 File::CreateNewW(CLLPCWSTR pszFileName)
+  b32 File::CreateNew(CLLPCWSTR pszFileName)
   {
     Close();
-    const b32 bval = CreateFileW(pszFileName, DA_Write, SM_Read, CD_CreateNew, A_Archive);
+    const b32 bval = CreateFile(pszFileName, DA_Write, SM_Read, CD_CreateNew, A_Archive);
     return bval;
   }
 
-  b32 File::CreateFileW(
+  b32 File::CreateFile(
     CLLPCWSTR        pszFileName, 
     DesiredAccess      eDesiredAccess, 
     ShareMode        eShareMode, 

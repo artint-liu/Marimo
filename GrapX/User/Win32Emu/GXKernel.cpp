@@ -250,7 +250,7 @@ GXHRSRC GXDLLAPI gxFindResourceA(GXHMODULE hModule, GXLPCSTR lpName, GXLPCSTR lp
   clpathfile::CombinePathA(strFilename, lpModule->strRootDir, strFilename);
 
   clFile file;
-  if(file.OpenExistingA(strFilename)) {
+  if(file.OpenExisting(strFilename)) {
     GXRSRC* pRSrc = new GXRSRC(strFilename);
     lpModule->sResCodeDict[dwCode] = pRSrc;
 

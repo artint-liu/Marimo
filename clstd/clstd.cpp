@@ -175,6 +175,58 @@ extern "C" void _cl_log_warningW(const wch *fmt, ...)
   va_end(val);
 }
 
+namespace clstd
+{
+  void _cl_log_info(const char *fmt, ...)
+  {
+    va_list val;
+    va_start(val, fmt);
+    _cl_vlogT<char, vsnprintf, OutputDebugStringA, printf>("[INFO] ", fmt, val);
+    va_end(val);
+  }
+
+  void _cl_log_error(const char *fmt, ...)
+  {
+    va_list val;
+    va_start(val, fmt);
+    _cl_vlogT<char, vsnprintf, OutputDebugStringA, printf>("[ERROR] ", fmt, val);
+    va_end(val);
+  }
+
+  void _cl_log_warning(const char *fmt, ...)
+  {
+    va_list val;
+    va_start(val, fmt);
+    _cl_vlogT<char, vsnprintf, OutputDebugStringA, printf>("[WARN] ", fmt, val);
+    va_end(val);
+  }
+
+  void _cl_log_info(const wch *fmt, ...)
+  {
+    va_list val;
+    va_start(val, fmt);
+    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, wprintf>(L"[INFO] ", fmt, val);
+    va_end(val);
+  }
+
+  void _cl_log_error(const wch *fmt, ...)
+  {
+    va_list val;
+    va_start(val, fmt);
+    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, wprintf>(L"[ERROR] ", fmt, val);
+    va_end(val);
+  }
+
+  void _cl_log_warning(const wch *fmt, ...)
+  {
+    va_list val;
+    va_start(val, fmt);
+    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, wprintf>(L"[WARN] ", fmt, val);
+    va_end(val);
+  }
+}
+
+
 /*/
 extern "C" void _cl_traceA(char *fmt, ...)
 {

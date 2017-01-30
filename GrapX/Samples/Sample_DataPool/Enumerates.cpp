@@ -4,15 +4,16 @@
 #include "TestDataPool.h"
 #define CHECK_VAR
 #define LOG //TRACE
-void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBegin, DataPoolIterator& itEnd);
+size_t EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBegin, DataPoolIterator& itEnd);
 
-void EunmerateArray(DataPool* pDataPool, int nDepth, DataPoolElementIterator& itBegin, DataPoolElementIterator& itEnd)
+size_t EunmerateArray(DataPool* pDataPool, int nDepth, DataPoolElementIterator& itBegin, DataPoolElementIterator& itEnd)
 {
+  size_t count = 0;
   MOVariable var;
 #ifdef CHECK_VAR
   MOVariable varCheck;
 #endif // #ifdef CHECK_VAR
-  for(auto it = itBegin; it != itEnd; ++it)
+  for(auto it = itBegin; it != itEnd; ++it, ++count)
   {
     it.ToVariable(var);
 #ifdef CHECK_VAR
@@ -30,18 +31,20 @@ void EunmerateArray(DataPool* pDataPool, int nDepth, DataPoolElementIterator& it
 
     var.GetFullName();
 
-    EnumerateVariables(pDataPool, nDepth + 1, it.begin(), it.end());
+    count += EnumerateVariables(pDataPool, nDepth + 1, it.begin(), it.end());
   }
+  return count;
 }
 
-void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBegin, DataPoolIterator& itEnd)
+size_t EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBegin, DataPoolIterator& itEnd)
 {
+  size_t count = 0;
   MOVariable var;
 #ifdef CHECK_VAR
   MOVariable varCheck;
 #endif // #ifdef CHECK_VAR
   clStringW nameCheck;
-  for(auto it = itBegin; it != itEnd; ++it)
+  for(auto it = itBegin; it != itEnd; ++it, ++count)
   {
     MOVariable var = it.ToVariable();
     auto length = it.array_length();
@@ -88,7 +91,7 @@ void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBeg
 #endif // #ifdef CHECK_VAR
 
     if(bArray) {
-      EunmerateArray(pDataPool, nDepth + 1, it.array_begin(), it.array_end());
+      count += EunmerateArray(pDataPool, nDepth + 1, it.array_begin(), it.array_end());
       for(auto itVar = var.array_begin(); itVar != var.array_end(); ++itVar)
       {
         auto v1 = itVar.ToVariable();
@@ -98,7 +101,7 @@ void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBeg
       }
     }
     else {
-      EnumerateVariables(pDataPool, nDepth + 1, it.begin(), it.end());
+      count += EnumerateVariables(pDataPool, nDepth + 1, it.begin(), it.end());
 
       for(auto itVar = var.begin(); itVar != var.end(); ++itVar)
       {
@@ -108,15 +111,17 @@ void EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBeg
       }
     }
   }
+  return count;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void EnumerateVariables(DataPool* pDataPool)
+size_t EnumerateVariables(DataPool* pDataPool)
 {
   TRACE("=======================================================\n");
-  EnumerateVariables(pDataPool, 0, pDataPool->named_begin(), pDataPool->named_end());
+  const size_t count = EnumerateVariables(pDataPool, 0, pDataPool->named_begin(), pDataPool->named_end());
   TRACE("=======================================================\n");
+  return count;
 }
 
 struct ITER_DESC
@@ -133,30 +138,33 @@ struct ITER_ELEMENT_DESC
   DataPoolElementIterator itEnd;
 };
 
-void CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB);
+size_t CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB);
 
 
-void CompareDataPoolArray(int nDepth, ITER_ELEMENT_DESC* pDescA, ITER_ELEMENT_DESC* pDescB)
+size_t CompareDataPoolArray(int nDepth, ITER_ELEMENT_DESC* pDescA, ITER_ELEMENT_DESC* pDescB)
 {
   auto itA = pDescA->itBegin;
   auto itB = pDescB->itBegin;
+  size_t count = 0;
 
-  for(; itA != pDescA->itEnd; ++itA, ++itB)
+  for(; itA != pDescA->itEnd; ++itA, ++itB, ++count)
   {
     ITER_DESC desc_A = {pDescA->pDataPool, itA.begin(), itA.end()};
     ITER_DESC desc_B = {pDescB->pDataPool, itB.begin(), itB.end()};
-    CompareDataPool(nDepth + 1, &desc_A, &desc_B);
+    count += CompareDataPool(nDepth + 1, &desc_A, &desc_B);
   }
 
   ASSERT(itB == pDescB->itEnd);
+  return count;
 }
 
 
-void CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB)
+size_t CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB)
 {
+  size_t count = 0; // count of variable
   auto itA = pDescA->itBegin;
   auto itB = pDescB->itBegin;
-  for(; itA != pDescA->itEnd; ++itA, ++itB)
+  for(; itA != pDescA->itEnd; ++itA, ++itB, ++count)
   {
     if(GXSTRCMP(itA.TypeName(), itB.TypeName()) != 0) {
       TRACE("[TypeName] %s != %s\n", itA.TypeName(), itB.TypeName());
@@ -186,13 +194,13 @@ void CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB)
 
       ITER_ELEMENT_DESC desc_A = {pDescA->pDataPool, itA.array_begin(), itA.array_end()};
       ITER_ELEMENT_DESC desc_B = {pDescB->pDataPool, itB.array_begin(), itB.array_end()};
-      CompareDataPoolArray(nDepth + 1, &desc_A, &desc_B);
+      count += CompareDataPoolArray(nDepth + 1, &desc_A, &desc_B);
     }
     else if( ! itA.IsArray() && ! itB.IsArray())
     {
       ITER_DESC desc_A = {pDescA->pDataPool, itA.begin(), itA.end()};
       ITER_DESC desc_B = {pDescB->pDataPool, itB.begin(), itB.end()};
-      CompareDataPool(nDepth + 1, &desc_A, &desc_B);
+      count += CompareDataPool(nDepth + 1, &desc_A, &desc_B);
     }
     else
     {
@@ -204,13 +212,14 @@ void CompareDataPool(int nDepth, ITER_DESC* pDescA, ITER_DESC* pDescB)
     TRACE("长度不一致\n");
     CLBREAK;
   }
+  return count;
 }
 
-void CompareDataPool(DataPool* pDataPoolA, DataPool* pDataPoolB)
+size_t CompareDataPool(DataPool* pDataPoolA, DataPool* pDataPoolB)
 {
   ITER_DESC desc_A = {pDataPoolA, pDataPoolA->named_begin(), pDataPoolA->named_end()};
   ITER_DESC desc_B = {pDataPoolB, pDataPoolB->named_begin(), pDataPoolB->named_end()};
-  CompareDataPool(0, &desc_A, &desc_B);
+  return CompareDataPool(0, &desc_A, &desc_B);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -401,13 +410,14 @@ b32 EnumeratePtrControl(ENUMERATE_CONTEXT& ctx, int nDepth, DataPoolIterator* pP
   return bval;
 }
 
-void EnumeratePtrControl(DataPool* pDataPool)
+size_t EnumeratePtrControl(DataPool* pDataPool)
 {
   ENUMERATE_CONTEXT ctx = {0};
   TRACE("=======================================================\n");
-  EnumeratePtrControl(ctx, 0, NULL, pDataPool->named_begin(), pDataPool->named_end());
+  const size_t count = EnumeratePtrControl(ctx, 0, NULL, pDataPool->named_begin(), pDataPool->named_end());
   TRACE("Arrays:%d Strings:%d\n", ctx.nNumArray, ctx.nNumString);
   TRACE("=======================================================\n");
+  return count;
 }
 
 void EnumeratePtrControl2(DataPool* pDataPool)

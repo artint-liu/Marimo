@@ -594,7 +594,7 @@ inline GXBOOL IntLoadShaderComponent(const clStringA& strFilename, clFile& File,
 {
   if(strFilename.IsNotEmpty())
   {
-    if(File.OpenExistingA(strFilename)) {
+    if(File.OpenExisting(strFilename)) {
       if(File.MapToBuffer(ppComponentBuf)) {
         // TODO: 应该优化,避免插入的内存复制
         if( ! bCompiled)  // 不是编译格式的话就插入 #line 宏

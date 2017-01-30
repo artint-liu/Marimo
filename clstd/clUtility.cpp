@@ -288,4 +288,71 @@ namespace clstd
 
   }
 
-}
+  void DumpMemory(const void* ptr, size_t count)
+  {
+    // "0123456789ABCDEF 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00 ...............\r\n"
+    char buffer[sizeof(void*) + 80];
+    CLUINT_PTR nDisplay = ((CLUINT_PTR)ptr) & (~0xf);
+    const char HexTab[] = "0123456789ABCDEF";
+    const int offset = 49; // 16进制区与字符区的偏移
+    size_t n = 0;
+
+    while(n < count) {
+      size_t i = 0;
+      size_t i2 = 0;
+
+      for(; i < (sizeof(void*) * 2); i++)
+      {
+        CLUINT_PTR mask = nDisplay >> ((sizeof(void*) * 8) - (i * 4) - 4);
+        buffer[i] = HexTab[mask & 0xf];
+      }
+
+      buffer[i++] = 0x20;
+      buffer[i++] = 0x20;
+      i2 = i + offset;
+
+      for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
+      {
+        buffer[i2++] = 0x20;
+        buffer[i++] = 0x20;
+        buffer[i++] = 0x20;
+        buffer[i++] = 0x20;
+      }
+
+      ptr = (void*)(((CLUINT_PTR)ptr & (~0xf)) + 16);
+      for(; n < count && nDisplay < (CLUINT_PTR)ptr; n++, nDisplay++)
+      {
+        u8 c = *(u8*)nDisplay;
+        if(c < 0x20) {
+          buffer[i2++] = '.';
+        }
+        else if(c < 128) {
+          buffer[i2++] = c;
+        }
+        else {
+          buffer[i2++] = '?';
+        }
+
+        buffer[i++] = HexTab[(c >> 4) & 0xf];
+        buffer[i++] = HexTab[c & 0xf];
+        buffer[i++] = 0x20;
+      }
+
+      for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
+      {
+        buffer[i2++] = 0x20;
+        buffer[i++] = 0x20;
+        buffer[i++] = 0x20;
+        buffer[i++] = 0x20;
+      }
+
+      buffer[i++] = 0x20;
+      buffer[i2++] = '\r';
+      buffer[i2++] = '\n';
+      buffer[i2++] = '\0';
+
+      TRACE(buffer);
+    }
+  }
+
+} // namespace clstd

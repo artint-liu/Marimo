@@ -54,7 +54,7 @@ namespace GXUI
 
 namespace clstd
 {
-  class Buffer;
+  class MemBuffer;
   class BufferBase;
   class SmartRepository;
   class StockA;

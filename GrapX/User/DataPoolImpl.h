@@ -161,10 +161,10 @@ namespace Marimo
 
     enum RuntimeFlag
     {
-      RuntimeFlag_Fixed     = 0x00000001,   // 只要出现动态数组，object或者string，就为false
-      RuntimeFlag_Readonly  = 0x00000002,   // 只读模式，这个牛逼在于，所有一切都在一块内存上，不用析构了
+      RuntimeFlag_Fixed     = 0x10000000,   // 只要出现动态数组，object或者string，就为false
+      RuntimeFlag_Readonly  = 0x20000000,   // 只读模式，这个牛逼在于，所有一切都在一块内存上，不用析构了
 //#ifdef ENABLE_DATAPOOL_WATCHER
-      RuntimeFlag_AutoKnock = 0x00000004,
+      RuntimeFlag_AutoKnock = 0x40000000,
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
     };
 
@@ -314,7 +314,7 @@ namespace Marimo
 
     virtual GXBOOL SaveW(GXLPCWSTR szFilename) override;
     virtual GXBOOL Save(clFile& file) override;
-    virtual GXBOOL Load(clFile& file, GXDWORD dwFlag) override;
+    virtual GXBOOL Load(clFile& file, DataPoolLoad dwFlags) override;
 
     virtual LPCSTR    GetVariableName     (GXUINT nIndex) const override; // 获得变量的名字
 
@@ -356,7 +356,7 @@ namespace Marimo
   protected:
     //void    IntImportSections (IMPORT& import, Section sectParent, MOVariable* varParent);
     //void    IntImportKeys     (IMPORT& import, Section sect, MOVariable* var);
-    GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl);
+    GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolLoad dwFlags);
     GXBOOL  Cleanup           (GXLPVOID lpBuffer, const DATAPOOL_VARIABLE_DESC* pVarDesc, int nVarDescCount);
     GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXUINT nElementCount);
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
@@ -470,7 +470,7 @@ namespace Marimo
           void    IntCleanupWatchObj      (WatchFixedDict& sWatchDict);
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-      GXDWORD           m_dwRuntimeFlags;
+      GXDWORD           m_dwRuntimeFlags; // RuntimeFlag 与 DataPoolLoad 供用，注意不要冲突
   }; // class DataPoolImpl
 
   // 如果是数字类型，则转换返回TRUE，否则返回FALSE

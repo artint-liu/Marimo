@@ -336,7 +336,7 @@ public:
       str.MakeUpper();
     });
 
-    while(find.GetFileW(&ffd))
+    while(find.GetFile(&ffd))
     {
       if(ffd.Filename[0] == '.') {
         if(ffd.Filename[1] == '\0') {

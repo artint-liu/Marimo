@@ -79,7 +79,7 @@ void TestCompileFromFile()
     DataPool::CreateFromFileW(&pDataPoolReadOnly, NULL, szFilename, DataPoolLoad_ReadOnly);
 
     DataPool* pDataPoolFromFile = NULL;
-    DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, 0);
+    DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolLoad_Default);
 
     //pDataPool->begin()
 

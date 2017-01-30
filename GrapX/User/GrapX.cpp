@@ -1060,7 +1060,7 @@ GXRSRC::~GXRSRC()
 GXBOOL GXRSRC::Load()
 {
   clFile file;
-  if(file.OpenExistingA(strFilename))
+  if(file.OpenExisting(strFilename))
   {
     file.MapToBuffer(&pBuffer);
     return TRUE;

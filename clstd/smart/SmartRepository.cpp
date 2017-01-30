@@ -92,7 +92,7 @@ namespace clstd
   {
     ClearRecursive(this);
     clFile file;
-    if( ! file.OpenExistingW(szFile)) {
+    if( ! file.OpenExisting(szFile)) {
       // 文件打开失败通过返回值体现,返回值已经足够体现错误信息,这里不输出LOG.
       return FALSE;
     }
@@ -102,7 +102,7 @@ namespace clstd
   b32 SmartRepository::SaveW(CLLPCWSTR szFile)
   {
     clFile file;
-    if( ! file.CreateAlwaysW(szFile)) {
+    if( ! file.CreateAlways(szFile)) {
       return FALSE; // 返回值已经足够体现错误信息,这里不输出LOG.
     }
     return SaveRecursive(this, ROOT_NAME, file);

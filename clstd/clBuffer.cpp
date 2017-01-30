@@ -84,21 +84,21 @@ namespace clstd
   }
 
   //////////////////////////////////////////////////////////////////////////  
-  Buffer::Buffer(u32 nPageSize)
+  MemBuffer::MemBuffer(u32 nPageSize)
     : BufferBase(NULL, 0)
     , m_nCapacity(0)
     , m_nPageSize(nPageSize)
   {
   }
 
-  Buffer::~Buffer()
+  MemBuffer::~MemBuffer()
   {
     SAFE_DELETE(m_lpBuffer);
     m_uSize = 0;
     m_nCapacity = 0;
   }
 
-  b32 Buffer::Reserve(clsize dwSize)
+  b32 MemBuffer::Reserve(clsize dwSize)
   {
     if(dwSize > m_uSize)
     {
@@ -110,8 +110,9 @@ namespace clstd
     return FALSE;
   }
 
-  b32 Buffer::Resize(clsize dwSize, b32 bZeroInit)
+  size_t MemBuffer::Resize(clsize dwSize, b32 bZeroInit)
   {
+    CLBYTE*const pPrevBuffer = m_lpBuffer;
     if(dwSize >= m_nCapacity)
     {
       m_nCapacity = ((dwSize / m_nPageSize) + 1) * m_nPageSize;
@@ -127,15 +128,15 @@ namespace clstd
     }
 
     m_uSize = dwSize;
-    return TRUE;
+    return ((size_t)m_lpBuffer - (size_t)pPrevBuffer);
   }
 
-  clsize Buffer::GetSize() const
+  clsize MemBuffer::GetSize() const
   {
     return m_uSize;
   }
 
-  CLLPVOID Buffer::GetPtr() const
+  CLLPVOID MemBuffer::GetPtr() const
   {
     return m_lpBuffer;  
   }
@@ -153,7 +154,7 @@ namespace clstd
   //  return TRUE;
   //}
 
-  Buffer& Buffer::Append(CLLPCVOID lpData, clsize dwSize)
+  MemBuffer& MemBuffer::Append(CLLPCVOID lpData, clsize dwSize)
   {
     const clsize dwTail = m_uSize;
     Resize(m_uSize + dwSize, FALSE);
@@ -161,7 +162,7 @@ namespace clstd
     return *this;
   }
 
-  b32 Buffer::Replace(clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize)
+  b32 MemBuffer::Replace(clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize)
   {
     if(nPos + nLen >= m_uSize)
     {
@@ -183,7 +184,7 @@ namespace clstd
     return TRUE;
   }
 
-  b32 Buffer::Insert(clsize nPos, CLLPCVOID lpData, clsize cbSize)
+  b32 MemBuffer::Insert(clsize nPos, CLLPCVOID lpData, clsize cbSize)
   {
     return Replace(nPos, 0, lpData, cbSize);
   }

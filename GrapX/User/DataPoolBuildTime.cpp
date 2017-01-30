@@ -13,7 +13,9 @@ using namespace clstd;
 
 namespace Marimo
 {
-  DataPoolBuildTime::DataPoolBuildTime() : m_bPtr64(0)
+  DataPoolBuildTime::DataPoolBuildTime(DataPoolLoad dwFlags)
+    : m_dwBuildFlags(dwFlags)
+    , m_bPtr64(0)
     , m_bFixedPool(1)
     , m_nNumOfStructs(0)
     , m_nNumOfBuckets(0)
@@ -109,9 +111,14 @@ namespace Marimo
         t.nMemberIndex = (GXUINT)m_aStructMember.size();
         m_aStructMember.insert(m_aStructMember.end(), aMemberDesc.begin(), aMemberDesc.end());
 
-        TryHash(t.HashInfo, aMemberDesc);
+        if(TEST_FLAG(m_dwBuildFlags, DataPoolLoad_NoHashTable))
+        {
+          // do nothing...
+        } else {
+          TryHash(t.HashInfo, aMemberDesc);
+          m_nNumOfBuckets += t.HashInfo.indices.size();
+        }
 
-        m_nNumOfBuckets += t.HashInfo.indices.size();
         m_nNumOfStructs++;
       }
       break;

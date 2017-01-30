@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\clGeometry2D.cpp" />
     <ClCompile Include="..\..\clStock.cpp" />
     <ClCompile Include="..\..\clTokens.cpp" />
+    <ClCompile Include="..\..\clRepository.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clBuffer.H" />
@@ -160,6 +161,7 @@
     <ClInclude Include="..\..\clStaticStringsDict.h" />
     <ClInclude Include="..\..\clStock.h" />
     <ClInclude Include="..\..\clTokens.h" />
+    <ClInclude Include="..\..\clRepository.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

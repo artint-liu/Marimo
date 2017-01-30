@@ -61,7 +61,7 @@ public:
       }
 
       // 打开并映射文件
-      if(file.OpenExistingA(strFullPath))
+      if(file.OpenExisting(strFullPath))
       {
         clBuffer* pBuffer = NULL;
         if(file.GetSize(NULL) == 0)

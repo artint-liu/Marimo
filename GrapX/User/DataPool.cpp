@@ -40,6 +40,10 @@ using namespace clstd;
 // [C]20.迭代器分为具名和匿名两种实现
 // 21.clStringA 的支持
 // 22.多编码支持
+// 23.Variable/Member可以选择不储存hash表
+// 24.未找到的variable可以选择抛异常和log
+// 25.array iterator 考虑去掉
+// 26.支持数据结构与数据分离模式
 
 //#define GSIT_Variables (m_aGSIT)
 //#define GSIT_Members   (m_aGSIT + m_nNumOfVar)
@@ -158,7 +162,7 @@ namespace Marimo
     GXHRESULT Open(IncludeType eIncludeType, GXLPCWSTR pFileName, GXLPVOID lpParentData, GXLPCVOID *ppData, GXUINT *pBytes)
     {
       clstd::File file;
-      if(file.OpenExistingW(pFileName) && file.MapToBuffer((CLBYTE**)ppData, 0, 0, pBytes)) {
+      if(file.OpenExisting(pFileName) && file.MapToBuffer((CLBYTE**)ppData, 0, 0, pBytes)) {
         return GX_OK;
       }
       return GX_FAIL;
@@ -232,7 +236,7 @@ namespace Marimo
     virtual GXHRESULT ImportDataFromMemory(clstd::Buffer* pBuffer, GXLPCWSTR szRefFilename) override
     {
       GXLPCWSTR szFilename = (szRefFilename == NULL ? L"<memory>" : szRefFilename);
-      CLOGW(L"Import data from memory (reference filename: \"%s\").\n", szFilename);
+      CLOGW(L"Import data from memory (reference filename: \"%s\").", szFilename);
       IMPORT import;
       import.ErrorMsg.LoadErrorMessageW(DPC_MESSAGE_FILE);
       if(import.ss.Set(pBuffer) && import.PrepareLines(szFilename)) {
@@ -248,7 +252,7 @@ namespace Marimo
 
     virtual GXHRESULT ImportDataFromFile(GXLPCWSTR szFilename) override
     {
-      CLOGW(L"Import data from \"%s\".\n", szFilename);
+      CLOGW(L"Import data from \"%s\".", szFilename);
       IMPORT import;
       import.ErrorMsg.LoadErrorMessageW(DPC_MESSAGE_FILE);
       if(import.ss.LoadW(szFilename)) {
@@ -294,7 +298,7 @@ namespace Marimo
 
       if(GXSUCCEEDED(ExportDataToMemory(&buffer, szCodec))) {
         clstd::File file;
-        if( ! file.CreateAlwaysW(szFilename)) {
+        if( ! file.CreateAlways(szFilename)) {
           CLOG_ERRORW(L"Can not create file (\"%s\").", szFilename);
           return GX_FAIL;
         }
@@ -610,12 +614,12 @@ namespace Marimo
     return GX_FAIL;
   }
 
-  GXHRESULT DataPool::CreateFromResolver(DataPool** ppDataPool, GXLPCSTR szName, DataPoolCompiler* pResolver)
+  GXHRESULT DataPool::CreateFromResolver(DataPool** ppDataPool, GXLPCSTR szName, DataPoolCompiler* pResolver, DataPoolLoad dwFlags)
   {    
     if(pResolver) {
       DataPoolCompiler::MANIFEST sManifest;
       if(GXSUCCEEDED(pResolver->GetManifest(&sManifest)) &&
-         GXSUCCEEDED(CreateDataPool(ppDataPool, szName, sManifest.pTypes, sManifest.pVariables)))
+         GXSUCCEEDED(CreateDataPool(ppDataPool, szName, sManifest.pTypes, sManifest.pVariables, dwFlags)))
       {
         if(sManifest.pImportFiles)
         {
@@ -635,26 +639,26 @@ namespace Marimo
     return GX_FAIL;
   }
 
-  GXHRESULT DataPool::CompileFromMemory(DataPool** ppDataPool, GXLPCSTR szName, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength)
+  GXHRESULT DataPool::CompileFromMemory(DataPool** ppDataPool, GXLPCSTR szName, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength, DataPoolLoad dwFlags)
   {
     DataPoolCompiler* pResolver = NULL;
     GXHRESULT hval = szDefinitionCodes == NULL ? GX_OK :
       DataPoolCompiler::CreateFromMemory(&pResolver, NULL, pInclude, szDefinitionCodes, nCodeLength);
     if(GXSUCCEEDED(hval))
     {
-      hval = CreateFromResolver(ppDataPool, szName, pResolver);
+      hval = CreateFromResolver(ppDataPool, szName, pResolver, dwFlags);
     }
     SAFE_RELEASE(pResolver);
     return hval;
   }
 
-  GXHRESULT DataPool::CompileFromFileW(DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude)
+  GXHRESULT DataPool::CompileFromFileW(DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude, DataPoolLoad dwFlags)
   {
     clstd::File file;
     GXHRESULT hval = GX_FAIL;
     clStringW strFilenameW = szFilename;
     clpathfile::MakeFullPath(strFilenameW);
-    if(file.OpenExistingW(strFilenameW))
+    if(file.OpenExisting(strFilenameW))
     {
       clBuffer* pBuffer;
       DefaultDataPoolInclude IncludeImpl;
@@ -673,7 +677,7 @@ namespace Marimo
         else {
           hval = DataPoolCompiler::CreateFromMemory(&pResolver, strFilenameW, pInclude ? pInclude : &IncludeImpl, szDefinitionCodes, pBuffer->GetSize());
           if(GXSUCCEEDED(hval)) {
-            hval = CreateFromResolver(ppDataPool, szName, pResolver);
+            hval = CreateFromResolver(ppDataPool, szName, pResolver, dwFlags);
           }
           SAFE_RELEASE(pResolver);
         }
@@ -688,7 +692,7 @@ namespace Marimo
     return hval;
   }
 
-  GXHRESULT DataPool::CreateFromFileW(DataPool** ppDataPool, GXLPCSTR szName, GXLPCWSTR szFilename, GXDWORD dwFlag)
+  GXHRESULT DataPool::CreateFromFileW(DataPool** ppDataPool, GXLPCSTR szName, GXLPCWSTR szFilename, DataPoolLoad dwFlags)
   {
     ASSERT(szName == NULL);  // 暂时这个不支持命名方式
     GXHRESULT hval = GX_OK;
@@ -700,11 +704,11 @@ namespace Marimo
 
     clFile file;
 
-    if( ! file.OpenExistingW(szFilename)) {
+    if( ! file.OpenExisting(szFilename)) {
       hval = GX_E_OPEN_FAILED;
     }
     else {
-      if( ! pDataPool->Load(file, dwFlag)) {
+      if( ! pDataPool->Load(file, dwFlags)) {
         hval = GX_E_OPEN_FAILED;
       }
     }
@@ -715,7 +719,7 @@ namespace Marimo
     return hval;
   }
 
-  GXHRESULT DataPool::CreateDataPool(DataPool** ppDataPool, GXLPCSTR szName, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl)
+  GXHRESULT DataPool::CreateDataPool(DataPool** ppDataPool, GXLPCSTR szName, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl, DataPoolLoad dwFlags)
   {
     GXLPSTATION lpStation = NULL;
     GXHRESULT hval = GX_OK;
@@ -736,7 +740,7 @@ namespace Marimo
     }
 
     // 初始化
-    if( ! pDataPoolObj->Initialize(pTypeDecl, pVarDecl)) {
+    if( ! pDataPoolObj->Initialize(pTypeDecl, pVarDecl, dwFlags)) {
       pDataPoolObj->Release();
       pDataPoolObj = NULL;
       hval = GX_FAIL;

@@ -329,7 +329,7 @@ public:
   GXBOOL SaveToFileW (GXLPCWSTR szFilename)
   {
     clstd::File file;
-    if( ! file.CreateAlwaysW(szFilename)) {
+    if( ! file.CreateAlways(szFilename)) {
       CLOG_ERROR("%s : Can not create file(%s).\n", __FUNCTION__, (GXLPCSTR)clStringA(szFilename));
       return FALSE;
     }

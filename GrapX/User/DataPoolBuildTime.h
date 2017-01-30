@@ -98,6 +98,7 @@ namespace Marimo
     void    TryHash           (HASH_ALGORITHM& hash_info, const BTVarDescArray& aDescs);
 
   protected:
+    GXDWORD             m_dwBuildFlags;
     BuildTimeTypeDeclarationDict sBuildTimeTypeDeclDict;
     BTTypeDict          m_TypeDict;         // 类型
     BTVarDescArray      m_aVar;             // 全局变量
@@ -110,7 +111,7 @@ namespace Marimo
     GXUINT              m_bPtr64 : 1;       // 64位指针兼容模式
     GXUINT              m_bFixedPool : 1;
 
-    DataPoolBuildTime();
+    DataPoolBuildTime(DataPoolLoad dwFlags);
   };
 
 

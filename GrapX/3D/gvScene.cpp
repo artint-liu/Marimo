@@ -487,7 +487,7 @@ GXHRESULT GVScene::SaveFileRecursive(clFile* pFile, GVNode* pParent, GXINOUT u32
 GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
 {
   clFile file;
-  if(file.CreateAlwaysW(szFilename)) {
+  if(file.CreateAlways(szFilename)) {
     u32 nVertBase = 1;
     return SaveFileRecursive(&file, m_pRoot, nVertBase);
   }

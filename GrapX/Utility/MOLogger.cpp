@@ -31,7 +31,7 @@ private:
 
   GXBOOL Initialize()
   {
-    return m_file.CreateAlwaysW(m_strFilename);
+    return m_file.CreateAlways(m_strFilename);
   }
 
 public:

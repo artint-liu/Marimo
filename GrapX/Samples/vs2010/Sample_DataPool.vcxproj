@@ -28,6 +28,7 @@
     <ClCompile Include="..\Sample_DataPool\TestCompileFromFile.cpp" />
     <ClCompile Include="..\Sample_DataPool\Sample_DataPool.cpp" />
     <ClCompile Include="..\Sample_DataPool\TestComplexArray.cpp" />
+    <ClCompile Include="..\Sample_DataPool\TestHashBuckets.cpp" />
     <ClCompile Include="..\Sample_DataPool\TestHugeArray.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

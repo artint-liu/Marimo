@@ -98,6 +98,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -107,6 +108,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -116,6 +118,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -125,6 +128,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -134,6 +138,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,6 +148,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -152,6 +158,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -161,6 +168,7 @@
       <AdditionalOptions>-D PLATFORM=0 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\..\..\Include;$(ProjectDir)..\..\..\..\..\clstd;$(ProjectDir)..\..\..\..\..\GrapX;$(ProjectDir)../../../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CL_SYSTEM_ANDROID;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CppLanguageStandard>gnu++11</CppLanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -144,7 +144,7 @@ namespace ObjMeshUtility
     if(szFilename == NULL) {
       return bval;
     }
-    if(file.OpenExistingW(szFilename)) {
+    if(file.OpenExisting(szFilename)) {
       clBuffer* pBuffer = NULL;
       file.MapToBuffer(&pBuffer);
       bval = LoadFromMemory(pBuffer, pTransform, aMeshs);

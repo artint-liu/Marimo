@@ -455,7 +455,7 @@ GXHRESULT GXDLLAPI MOUnregisterConsoleStaff(IConsoleStaff* pStaff)
 GXBOOL GXDLLAPI MOExecuteFileW(GXLPCWSTR szFilename)
 {
   clstd::File file;
-  if( ! file.OpenExistingW(szFilename)) {
+  if( ! file.OpenExisting(szFilename)) {
     CLOG_ERRORW(L"MOExecuteFileW: Can not open specify file(%s).\n", szFilename);
     return FALSE;
   }
