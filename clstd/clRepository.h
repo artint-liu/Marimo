@@ -24,8 +24,8 @@ namespace clstd
       {
         //KT_Node,    // 节点
         KT_Varible,   // 变长数据
-        //KT_Octet_0,   // 8字节数据，长度可以为0，仅存键值
-        //KT_Octet_8,   // 8字节数据，长度8字节
+        KT_Octet_0 = 10,   // 8字节数据，长度可以为0，仅存键值
+        KT_Octet_8 = 18,   // 8字节数据，长度8字节
       };
 
       struct KEY 
@@ -38,6 +38,41 @@ namespace clstd
         LPCSTR GetName(LPCSTR szFirstName) const
         {
           return szFirstName + name;
+        }
+        
+        CLBYTE* GetDataPtr(CLBYTE* pDataBase) const
+        {
+          if(type >= KT_Octet_0 && type <= KT_Octet_8) {
+            return (CLBYTE*)&offset;
+          } else if(type == KT_Varible) {
+            return pDataBase + offset;
+          }
+          CLBREAK;
+          return NULL;
+        }
+
+        CLBYTE* GetDataPtr(CLBYTE* pDataBase, size_t* pSizeOut) const
+        {
+          if(type >= KT_Octet_0 && type <= KT_Octet_8) {
+            *pSizeOut = (size_t)(type - KT_Octet_0);
+            return (CLBYTE*)&offset;
+          } else if(type == KT_Varible) {
+            *pSizeOut = length;
+            return pDataBase + offset;
+          }
+          CLBREAK;
+          return NULL;
+        }
+
+        size_t GetDataSize() const
+        {
+          if(type >= KT_Octet_0 && type <= KT_Octet_8) {
+            return (size_t)(type - KT_Octet_0);
+          } else if(type == KT_Varible) {
+            return length;
+          }
+          CLBREAK;
+          return 0;
         }
       };
 
@@ -63,7 +98,7 @@ namespace clstd
     b32       _InsertKey    ( KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength );
     b32       _ReplaceKey   (KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength);
     void      _Initialize   (size_t cbDataLen);
-    KEY*      FindKey       (LPCSTR szKey) const;      
+    KEY*      _FindKey       (LPCSTR szKey) const;      
 
     LPCSTR GetNamesBegin() const
     {

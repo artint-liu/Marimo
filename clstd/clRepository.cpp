@@ -81,7 +81,7 @@ namespace clstd
     return true;
   }
 
-  Repository::KEY* Repository::FindKey(LPCSTR szKey) const
+  Repository::KEY* Repository::_FindKey(LPCSTR szKey) const
   {
     LPCSTR szNamesFront = GetNamesBegin();
     KEY*const result =
@@ -215,9 +215,9 @@ namespace clstd
     m_pKeysEnd      = m_pKeys;
     m_pKeysCapacity = m_pKeys + KEYINCCOUNT;
 
-    m_pNamesEnd       = GetNamesBegin();
-    m_pData           = (CLBYTE*)GetNamesBegin() + sizeof(TChar) * NAMEINCCOUNT;          // Name capacity
-    m_cbDataLen       = 0;
+    m_pNamesEnd     = GetNamesBegin();
+    m_pData         = (CLBYTE*)GetNamesBegin() + sizeof(TChar) * NAMEINCCOUNT;          // Name capacity
+    m_cbDataLen     = 0;
   }
 
   b32 Repository::LoadFromFile( CLLPCSTR szFilename )
@@ -270,17 +270,28 @@ namespace clstd
 
   size_t Repository::GetKey( LPCSTR szKey, void* pData, size_t nLength ) const
   {
+    KEY* pKey = _FindKey(szKey);
+    if(pKey) {
+      size_t copy_size = 0;
+      CLBYTE*const pSrcData = pKey->GetDataPtr(m_pData, &copy_size);
+
+      if(pData == NULL || nLength == NULL) {
+        return copy_size;
+      }
+
+      copy_size = clMin(copy_size, nLength);
+      memcpy(pData, pSrcData, copy_size);
+      return copy_size;
+    }
     return 0;
   }
 
   void* Repository::GetDataPtr( LPCSTR szKey, size_t* pLength ) const
   {
-    KEY* pKey = FindKey(szKey);
+    KEY* pKey = _FindKey(szKey);
     if(pKey) {
-      if(pLength) {
-        *pLength = pKey->length;
-      }
-      return m_pData + pKey->offset;
+      size_t len = 0;
+      return pKey->GetDataPtr(m_pData, pLength ? pLength : &len);
     }
     return NULL;
   }
@@ -323,12 +334,12 @@ namespace clstd
 
   void* Repository::iterator::ptr() const
   {
-    return repo->m_pData + key->offset;
+    return key->GetDataPtr(repo->m_pData);
   }
 
   size_t Repository::iterator::size() const
   {
-    return key->length;
+    return key->GetDataSize();
   }
 
   Repository::iterator& Repository::iterator::operator++()
