@@ -11,9 +11,9 @@
 # include <io.h>
 #endif
 
-#ifdef _WINDOWS
-#pragma warning(disable:4355)
-#endif // #ifdef _WINDOWS
+//#ifdef _WINDOWS
+//#pragma warning(disable:4355)
+//#endif // #ifdef _WINDOWS
 
 namespace clstd
 {
@@ -121,7 +121,7 @@ namespace clstd
     FlagsAndAttributes    eFlagAttr)
   {
     Close();
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     m_hFile = ::CreateFileA(pszFileName, eDesiredAccess, eShareMode, NULL, 
       eCreationDistribution, eFlagAttr, NULL);
     return (m_hFile != INVALID_HANDLE_VALUE);
@@ -164,7 +164,7 @@ namespace clstd
     FlagsAndAttributes    eFlagAttr)
   {
     Close();
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     m_hFile = ::CreateFileW(pszFileName, eDesiredAccess, eShareMode, NULL, 
       eCreationDistribution, eFlagAttr, NULL);
     return (m_hFile != INVALID_HANDLE_VALUE);
@@ -184,7 +184,7 @@ namespace clstd
   {
     if(m_hFile != NULL)
     {
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
       CloseHandle(m_hFile);
 #else
       fclose(m_hFile);
@@ -200,7 +200,7 @@ namespace clstd
 
   u32 File::SetPointer(u32 uMove, u32 uMode)
   {
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     return ::SetFilePointer(m_hFile, uMove, NULL, uMode);
 #else
     return fseek(m_hFile, uMove, uMode);
@@ -215,7 +215,7 @@ namespace clstd
 
   u64 File::SetPointer64(u64 uMove, u32 uMode)
   {
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     union {
       struct {
         LONG lLow;
@@ -234,7 +234,7 @@ namespace clstd
 
   u32 File::GetSize(u32* pdwFileSizeHight)
   {
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     return ::GetFileSize(m_hFile, (LPDWORD)pdwFileSizeHight);
 #else
     u32 dwLength;
@@ -250,7 +250,7 @@ namespace clstd
 
   void File::GetTime(TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime)
   {
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     FILETIME sCreationTime;
     FILETIME sLastAccessTime;
     FILETIME sLastWriteTime;
@@ -279,7 +279,7 @@ namespace clstd
   b32 File::Read(CLLPVOID lpBuffer, u32 nNumOfBytesToRead,  u32* lpNumberOfBytesRead)
   {
     u32 dwNumRead;
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     const b32 bRet = ::ReadFile(m_hFile, lpBuffer, nNumOfBytesToRead, (LPDWORD)&dwNumRead, NULL);
 #else
     dwNumRead = fread(lpBuffer, nNumOfBytesToRead, 1, m_hFile);
@@ -295,7 +295,7 @@ namespace clstd
   b32 File::Write(CLLPCVOID lpBuffer, u32 nNumberOfBytesToWrite, u32* lpNumberOfBytesWritten)
   {
     u32 dwNumWrite;
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     const b32 bRet = ::WriteFile(m_hFile, lpBuffer, nNumberOfBytesToWrite, (LPDWORD)&dwNumWrite, NULL);
 #else
     dwNumWrite = fwrite(lpBuffer, nNumberOfBytesToWrite, 1, m_hFile);

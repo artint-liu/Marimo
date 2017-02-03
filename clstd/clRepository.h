@@ -9,71 +9,33 @@ namespace clstd
     typedef const TChar* LPCSTR;
 
   protected:
-      template<typename T_LPCSTR>
-      b32 LoadFromFileT(T_LPCSTR szFilename);
-
-      struct FILE_HEADER
-      {
-        CLDWORD dwMagic; // CLRP
-        CLDWORD nKeys;
-        CLDWORD cbNames;
-        CLDWORD cbData;
-      };
-
       enum KeyType
       {
         //KT_Node,    // 节点
-        KT_Varible,   // 变长数据
-        KT_Octet_0 = 10,   // 8字节数据，长度可以为0，仅存键值
-        KT_Octet_8 = 18,   // 8字节数据，长度8字节
+        KeyType_Varible = 1,               // 变长数据
+        KeyType_Octet   = 0x0010,          // 标志
+        KeyType_Octet_0 = (0 | KeyType_Octet),  // 8字节数据，长度可以为0，仅存键值
+        KeyType_Octet_8 = (8 | KeyType_Octet),  // 8字节数据，长度8字节
       };
 
       struct KEY 
       {
         u32     name; // 字母偏移，不是字节
         KeyType type;
-        u32     offset;
-        u32     length;
-
-        LPCSTR GetName(LPCSTR szFirstName) const
+        union 
         {
-          return szFirstName + name;
-        }
-        
-        CLBYTE* GetDataPtr(CLBYTE* pDataBase) const
-        {
-          if(type >= KT_Octet_0 && type <= KT_Octet_8) {
-            return (CLBYTE*)&offset;
-          } else if(type == KT_Varible) {
-            return pDataBase + offset;
-          }
-          CLBREAK;
-          return NULL;
-        }
-
-        CLBYTE* GetDataPtr(CLBYTE* pDataBase, size_t* pSizeOut) const
-        {
-          if(type >= KT_Octet_0 && type <= KT_Octet_8) {
-            *pSizeOut = (size_t)(type - KT_Octet_0);
-            return (CLBYTE*)&offset;
-          } else if(type == KT_Varible) {
-            *pSizeOut = length;
-            return pDataBase + offset;
-          }
-          CLBREAK;
-          return NULL;
-        }
-
-        size_t GetDataSize() const
-        {
-          if(type >= KT_Octet_0 && type <= KT_Octet_8) {
-            return (size_t)(type - KT_Octet_0);
-          } else if(type == KT_Varible) {
-            return length;
-          }
-          CLBREAK;
-          return 0;
-        }
+          struct {
+            u32 offset;
+            u32 length;
+          }v; // varible
+          struct {
+            CLBYTE data[8];
+          }o; // octet
+        };
+        LPCSTR  GetName     (LPCSTR szFirstName) const;
+        CLBYTE* GetDataPtr  (CLBYTE* pDataBase) const;
+        CLBYTE* GetDataPtr  (CLBYTE* pDataBase, size_t* pSizeOut) const;
+        size_t  GetDataSize () const;
       };
 
       struct KEYPAIR
@@ -91,29 +53,27 @@ namespace clstd
     CLBYTE* m_pData;      // 也是m_pNamesCapacity
     size_t m_cbDataLen;
 
-    b32 ParseFromBuffer();
+    template<typename T_LPCSTR>
+    b32 LoadFromFileT(T_LPCSTR szFilename); // load 表示一次性从文件加载，read表示一点点从文件加载
+    b32 _WriteToFile(File& file) const;
+
+    b32       _DbgCheckDataOverlay() const;
+    b32       _ParseFromBuffer();
+    void      _ResizeKey    (KEY*& rKey, size_t delta);
+    b32       _ReallocData  (KEY*& rKey, size_t new_length);
     KEYPAIR*  _PreInsertKey (KEYPAIR* pPair, LPCSTR szKey);
     void      _Locate       (size_t memdelta);
-    b32       _AllocKey     (size_t cbKeyNameLen, const void* pData, size_t nLength, KEY*& rPos);
+    b32       _AllocKey     (size_t cbKeyNameLen/*, const void* pData*/, size_t nLength, KEY*& rPos);
     b32       _InsertKey    ( KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength );
     b32       _ReplaceKey   (KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength);
     void      _Initialize   (size_t cbDataLen);
     KEY*      _FindKey       (LPCSTR szKey) const;      
+    size_t    _ResizeGlobalBuf       (size_t delta, KEY*& rpKey);
+    u32       _GetSeqOffset  (KEY* pPos);
 
-    LPCSTR GetNamesBegin() const
-    {
-      return reinterpret_cast<LPCSTR>(m_pKeysCapacity);
-    }
-
-    LPCSTR GetNamesCapacity() const
-    {
-      return reinterpret_cast<LPCSTR>(m_pData);
-    }
-
-    size_t GetDataCapacity() const
-    {
-      return ((size_t)m_Buffer.GetPtr() + m_Buffer.GetSize()) - (size_t)m_pData;
-    }
+    LPCSTR GetNamesBegin() const;
+    LPCSTR GetNamesCapacity() const;
+    size_t GetDataCapacity() const;
 
   public:
       class iterator
@@ -148,7 +108,7 @@ namespace clstd
       b32 LoadFromMemory( const void* pData, size_t nLength );
       b32 SaveToFile( CLLPCSTR szFilename ) const;
       b32 SaveToFile( CLLPCWSTR szFilename ) const;
-      b32 SaveToMemory( const void* pData, size_t nLength ) const;
+      //b32 SaveToMemory( const void* pData, size_t nLength ) const;
 
       size_t GetNumOfKeys() const;
       b32 SetKey( LPCSTR szKey, const void* pData, size_t nLength );

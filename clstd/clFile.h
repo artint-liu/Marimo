@@ -79,7 +79,7 @@ namespace clstd
     //  File::TextStream&  operator <<(const _TString&);
     //};
   private:
-#ifdef _WINDOWS
+#ifdef _CL_SYSTEM_WINDOWS
     HANDLE    m_hFile;
 #else
     FILE*    m_hFile;

@@ -362,7 +362,7 @@ size_t clstd::StringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, c
   const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
   return ret;
 
-#elif defined(_WIN32) && !defined(_C_STANDARD)
+#elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)
    return (size_t)
      MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, 
      pStrX, (int)cchX, pNativeStr, (int)uLength);
@@ -487,7 +487,7 @@ size_t clstd::StringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, co
   const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
   return ret;
 
-#elif defined(_CL_SYSTEM) && !defined(_C_STANDARD)
+#elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)
   return (size_t)
     WideCharToMultiByte(CP_ACP, NULL, 
     pStrX, (int)cchX, pNativeStr, (int)uLength, NULL, NULL);

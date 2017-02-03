@@ -98,7 +98,7 @@ namespace clstd
     protected:
       StockT*       pStock;
       Section*      pParent;  // 父section
-      int           nModify;  // 修改次数，如果与Stock不一致，则说明这个section已经过期，不再可用
+      size_t        nModify;  // 修改次数，如果与Stock不一致，则说明这个section已经过期，不再可用
       int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
 
     public:

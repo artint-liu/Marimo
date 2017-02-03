@@ -3,7 +3,7 @@
 #include "clUtility.H"
 #include "clfifo.h"
 
-#if defined(_WINDOWS) && ! defined(__clang__)
+#if defined(_CL_SYSTEM_WINDOWS) && ! defined(__clang__)
 #ifdef _CL_ARCH_X86
 static inline void barrier(void)
 {

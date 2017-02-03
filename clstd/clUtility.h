@@ -367,7 +367,7 @@ namespace clstd
 
     _TString& Cut(_TString& strOut, T_CHAR ch)
     {
-      T_CHAR c;
+      T_CHAR c = '\0';
       const size_t start = m_pos;
       while((m_length == 0 || m_pos < m_length) && (c = m_str[m_pos]) != '\0') {
         if(c == ch) {

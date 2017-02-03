@@ -285,71 +285,87 @@ namespace clstd
     //0.00019117	0.00655965	0.05472157	0.11098164	0.05472157	0.00655965	0.00019117
     //0.00002292	0.00078633	0.00655965	0.01330373	0.00655965	0.00078633	0.00002292
     //0.00000067	0.00002292	0.00019117	0.00038771	0.00019117	0.00002292	0.00000067
-
   }
 
   void DumpMemory(const void* ptr, size_t count)
   {
-    // "0123456789ABCDEF 00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00 ...............\r\n"
-    char buffer[sizeof(void*) + 80];
+    // "0123456789ABCDEF  00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  ........ .......\r\n"
+    char buffer[sizeof(void*) + 800];
     CLUINT_PTR nDisplay = ((CLUINT_PTR)ptr) & (~0xf);
     const char HexTab[] = "0123456789ABCDEF";
-    const int offset = 49; // 16进制区与字符区的偏移
+    const int offset = 51; // 16进制区与字符区的偏移
     size_t n = 0;
+
+    if(*(CLBYTE*)ptr == 0x7b) {
+      __asm nop
+    }
 
     while(n < count) {
       size_t i = 0;
       size_t i2 = 0;
 
+      // 地址转换为可见文字
       for(; i < (sizeof(void*) * 2); i++)
       {
         CLUINT_PTR mask = nDisplay >> ((sizeof(void*) * 8) - (i * 4) - 4);
         buffer[i] = HexTab[mask & 0xf];
       }
 
+      // 地址后面两个空格
       buffer[i++] = 0x20;
       buffer[i++] = 0x20;
       i2 = i + offset;
 
+      const b32 bHideSep = ((size_t)ptr & 0xf) > 8 || (count - n) < 7; // 显示分割线，每八字节用减号分一下
+      buffer[i + 24] = bHideSep ? 0x20 : '-';
+      buffer[i + 25] = 0x20;
+      buffer[i2 + 8] = 0x20;
+
+      // 开头没对齐在16字节处时，填补空白
       for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
       {
-        buffer[i2++] = 0x20;
-        buffer[i++] = 0x20;
-        buffer[i++] = 0x20;
-        buffer[i++] = 0x20;
+        const size_t g = ((nDisplay & 0x8) >> 3);
+        buffer[g + i2++] = 0x20;
+        buffer[(g << 1) + i++] = 0x20;
+        buffer[(g << 1) + i++] = 0x20;
+        buffer[(g << 1) + i++] = 0x20;
       }
 
       ptr = (void*)(((CLUINT_PTR)ptr & (~0xf)) + 16);
       for(; n < count && nDisplay < (CLUINT_PTR)ptr; n++, nDisplay++)
       {
         u8 c = *(u8*)nDisplay;
+        const size_t g = ((nDisplay & 0x8) >> 3);
         if(c < 0x20) {
-          buffer[i2++] = '.';
+          buffer[g + i2++] = '.';
         }
         else if(c < 128) {
-          buffer[i2++] = c;
+          buffer[g + i2++] = c;
         }
         else {
-          buffer[i2++] = '?';
+          buffer[g + i2++] = '?';
         }
 
-        buffer[i++] = HexTab[(c >> 4) & 0xf];
-        buffer[i++] = HexTab[c & 0xf];
-        buffer[i++] = 0x20;
+        buffer[(g << 1) + i++] = HexTab[(c >> 4) & 0xf];
+        buffer[(g << 1) + i++] = HexTab[c & 0xf];
+        buffer[(g << 1) + i++] = 0x20;
       }
 
+      // 结尾没对齐在16字节处时，填补空白
       for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
       {
-        buffer[i2++] = 0x20;
-        buffer[i++] = 0x20;
-        buffer[i++] = 0x20;
-        buffer[i++] = 0x20;
+        const size_t g = ((nDisplay & 0x8) >> 3);
+        buffer[g + i2++] = 0x20;
+        buffer[(g << 1) + i++] = 0x20;
+        buffer[(g << 1) + i++] = 0x20;
+        buffer[(g << 1) + i++] = 0x20;
       }
 
-      buffer[i++] = 0x20;
-      buffer[i2++] = '\r';
-      buffer[i2++] = '\n';
-      buffer[i2++] = '\0';
+      buffer[1 + i++] = 0x20;
+      buffer[1 + i++] = 0x20;
+      buffer[1 + i2++] = '\r';
+      buffer[1 + i2++] = '\n';
+      buffer[1 + i2++] = '\0';
 
       TRACE(buffer);
     }

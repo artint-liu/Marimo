@@ -156,6 +156,16 @@ void TestBianryInsertPos()
 }
 
 //////////////////////////////////////////////////////////////////////////
+void DumpRepoMem(clstd::Repository& repo)
+{
+  auto it_end = repo.end();
+  for(auto it = repo.begin(); it != it_end; ++it)
+  {
+    CLOG("%s(%d:%d)", it.name(), it.ptr(), it.size());
+    clstd::DumpMemory(it.ptr(), it.size());
+  }
+}
+
 void TestRepository1()
 {
   clstd::Repository repo;
@@ -163,7 +173,7 @@ void TestRepository1()
   {
     clstd::Repository::LPCSTR name;
     int num_samples;
-    char sample;
+    unsigned char sample;
   };
   TESTKEY test[] = {
     {"test1", 100, 0x12},
@@ -171,8 +181,12 @@ void TestRepository1()
     {"testtest1", 34, 0x56},
     {"test5", 100, 0x78},
     {"test4", 8, 0x7a},
+    {"test2", 32, 0x35},
     {"test3", 8, 0x7b},
     {"helloworld", 90, 0x23},
+    {"test5", 100, 0x77},
+    {"testtest1", 32, 0xA6},
+    {"test2", 8, 0x33},
     {NULL}
   };
 
@@ -184,14 +198,13 @@ void TestRepository1()
     SAFE_DELETE_ARRAY(pData)
   }
 
-  auto it_end = repo.end();
-  for(auto it = repo.begin(); it != it_end; ++it)
-  {
-    CLOG("%s(%d)", it.name(), it.size());
-    clstd::DumpMemory(it.ptr(), it.size());
-  }
+  DumpRepoMem(repo);
 
-  CLNOP
+  repo.SaveToFile("test.repo");
+
+  repo.LoadFromFile("test.repo");
+  CLOG("=========================");
+  DumpRepoMem(repo);
 }
 
 int main(int argc, char* argv[])
