@@ -7,6 +7,7 @@
 #include "clstd.h"
 #include "clString.H"
 #include "clPathFile.H"
+#include <direct.h>
 using namespace clstd;
 
 //template class clStringX<wch, g_Alloc_clStringW, clstd::StringW_traits>;
@@ -866,19 +867,21 @@ namespace clpathfile
   }
 #endif // #ifdef _WINDOWS
 
-
-  b32 CreateDirectoryAlways(const wch* szDirName)
+  //////////////////////////////////////////////////////////////////////////
+  template<typename _TCh, class _Tmkdir>
+  b32 CreateDirectoryAlwaysT(const _TCh* szDirName, _Tmkdir __mkdir)
   {
     size_t len = clstd::strlenT(szDirName);
     LocalBuffer<1024> buf;
-    buf.Resize(len + 1, FALSE);
-    wch* szDir = reinterpret_cast<wch*>(buf.GetPtr());
+    buf.Resize((len + 1) * sizeof(_TCh), FALSE);
+    _TCh* szSubDir = reinterpret_cast<_TCh*>(buf.GetPtr());
+
     for(size_t i = 0;; i++)
     {
       if (szDirName[i] == s_PathSlash || szDirName[i] == s_VicePathSlash || szDirName[i] == '\0') {
-        szDir[i] = '\0';
-        if( ! IsPathExist(szDir)) {
-          int result = _wmkdir(szDir);
+        szSubDir[i] = '\0';
+        if( ! IsPathExist(szSubDir)) {
+          int result = __mkdir(szSubDir);
           if(result != 0) {
             return FALSE;
           }
@@ -888,10 +891,20 @@ namespace clpathfile
           break;
         }
       }
-      szDir[i] = szDirName[i];
+      szSubDir[i] = szDirName[i];
     }
     return TRUE;
   }
 
+
+  b32 CreateDirectoryAlways(const wch* szDirName)
+  {
+    return CreateDirectoryAlwaysT(szDirName, _wmkdir);
+  }
+
+  b32 CreateDirectoryAlways(const ch* szDirName)
+  {
+    return CreateDirectoryAlwaysT(szDirName, _mkdir);
+  }
   //_findfirst
 }

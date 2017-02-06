@@ -11,13 +11,143 @@ namespace clstd
 {
   namespace
   {
+    enum HeaderFlag{
+      HeaderFlag_KeyFieldMask     = 0x0003,
+      HeaderFlag_KeyField_1Byte   = 0x0003, // 255 Keys
+      HeaderFlag_KeyField_2Bytes  = 0x0002, // 65535 Keys
+      HeaderFlag_KeyField_4Bytes  = 0x0000,
+
+      HeaderFlag_NameFieldMask    = 0x000c,
+      HeaderFlag_NameField_1Byte  = 0x000c, // 255 Bytes names buffer
+      HeaderFlag_NameField_2Bytes = 0x0008,
+      HeaderFlag_NameField_4Bytes = 0x0000,
+
+      HeaderFlag_DataFieldMask    = 0x00010,
+      HeaderFlag_DataField_64KB   = 0x00010, // 64K buffer
+      HeaderFlag_DataField_4GB    = 0x00000, // 4G buffer
+      
+      HeaderFlag_AllFieldMask     = HeaderFlag_KeyFieldMask | HeaderFlag_NameFieldMask | HeaderFlag_DataFieldMask
+    };
+
     struct FILE_HEADER
     {
       CLDWORD dwMagic; // CLRP
+      CLDWORD dwFlags; // HeaderFlag
       CLDWORD nKeys;
       CLDWORD cbNames;
       CLDWORD cbData;
     };
+
+    template<typename _key_t, typename _name_t, typename _data_t>
+    struct FILE_HEADERT
+    {
+      CLDWORD dwMagic; // CLRP
+      CLDWORD dwFlags; // HeaderFlag
+      _key_t  nKeys;
+      _name_t cbNames;
+      _data_t cbData;
+
+      size_t CopyFrom(const FILE_HEADER& h, CLDWORD dwAddFlags)
+      {
+        dwMagic = h.dwMagic;
+        dwFlags = h.dwFlags | dwAddFlags;
+        nKeys   = (_key_t)h.nKeys;
+        cbNames = (_name_t)h.cbNames;
+        cbData  = (_data_t)h.cbData;
+        return sizeof(FILE_HEADERT);
+      }
+
+      size_t CopyTo(FILE_HEADER& h) const
+      {
+        h.dwMagic = dwMagic;
+        h.dwFlags = dwFlags & (~HeaderFlag_AllFieldMask);
+        h.nKeys   = (CLDWORD)nKeys;
+        h.cbNames = (CLDWORD)cbNames;
+        h.cbData  = (CLDWORD)cbData;
+        return sizeof(FILE_HEADERT);
+      }
+    };
+
+
+
+    template<typename _key_t, typename _name_t> 
+    size_t _PackHeader_DataT(const FILE_HEADER& header, u32 dwFlags, CLBYTE* pBuffer)
+    {
+      if(header.cbData <= 0xffff) {
+        typedef FILE_HEADERT<_key_t, _name_t, u16> HEADER_INST;
+        HEADER_INST* packed_header = reinterpret_cast<HEADER_INST*>(pBuffer);
+        return packed_header->CopyFrom(header, dwFlags | HeaderFlag_DataField_64KB);
+      }
+      else
+      {
+        typedef FILE_HEADERT<_key_t, _name_t, u32> HEADER_INST;
+        HEADER_INST* packed_header = reinterpret_cast<HEADER_INST*>(pBuffer);
+        return packed_header->CopyFrom(header, dwFlags | HeaderFlag_DataField_4GB);
+      }
+    }
+
+    template<typename _key_t> 
+    size_t _PackHeader_NameDataT(const FILE_HEADER& header, u32 dwFlags, CLBYTE* pBuffer)
+    {
+      if(header.cbNames <= 0xff) {
+        return _PackHeader_DataT<_key_t, u8>(header, dwFlags | HeaderFlag_NameField_1Byte, pBuffer);
+      } else if(header.cbNames <= 0xffff) {
+        return _PackHeader_DataT<_key_t, u16>(header, dwFlags | HeaderFlag_NameField_2Bytes, pBuffer);
+      }
+      return _PackHeader_DataT<_key_t, u32>(header, dwFlags | HeaderFlag_NameField_4Bytes, pBuffer);
+    }
+
+    size_t _PackHeader( const FILE_HEADER& header, CLBYTE* pBuffer )
+    {
+      if(header.nKeys <= 0xff) {
+        return _PackHeader_NameDataT<u8>(header, HeaderFlag_KeyField_1Byte, pBuffer);
+      } else if(header.nKeys <= 0xffff) {
+        return _PackHeader_NameDataT<u16>(header, HeaderFlag_KeyField_2Bytes, pBuffer);
+      }
+      return _PackHeader_NameDataT<u32>(header, HeaderFlag_KeyField_4Bytes, pBuffer);
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    template<typename _key_t, typename _name_t> 
+    size_t _UnpackHeader_DataT(FILE_HEADER& header, const CLBYTE* pBuffer)
+    {
+      if((header.dwFlags & HeaderFlag_DataFieldMask) == HeaderFlag_DataField_64KB) {
+        typedef FILE_HEADERT<_key_t, _name_t, u16> HEADER_INST;
+        const HEADER_INST* packed_header = reinterpret_cast<const HEADER_INST*>(pBuffer);
+        return packed_header->CopyTo(header);
+      }
+      else
+      {
+        typedef FILE_HEADERT<_key_t, _name_t, u32> HEADER_INST;
+        const HEADER_INST* packed_header = reinterpret_cast<const HEADER_INST*>(pBuffer);
+        return packed_header->CopyTo(header);
+      }
+    }
+
+    template<typename _key_t> 
+    size_t _UnpackHeader_NameDataT(FILE_HEADER& header, const CLBYTE* pBuffer)
+    {
+      if((header.dwFlags & HeaderFlag_NameFieldMask) == HeaderFlag_NameField_1Byte) {
+        return _UnpackHeader_DataT<_key_t, u8>(header, pBuffer);
+      } else if((header.dwFlags & HeaderFlag_NameFieldMask) == HeaderFlag_NameField_2Bytes) {
+        return _UnpackHeader_DataT<_key_t, u16>(header, pBuffer);
+      }
+      ASSERT((header.dwFlags & HeaderFlag_NameFieldMask) == HeaderFlag_NameField_4Bytes);
+      return _UnpackHeader_DataT<_key_t, u32>(header, pBuffer);
+    }
+
+    size_t _UnpackHeader( FILE_HEADER& header, const CLBYTE* pBuffer )
+    {
+      if((header.dwFlags & HeaderFlag_KeyFieldMask) == HeaderFlag_KeyField_1Byte) {
+        return _UnpackHeader_NameDataT<u8>(header, pBuffer);
+      } else if((header.dwFlags & HeaderFlag_KeyFieldMask) == HeaderFlag_KeyField_1Byte) {
+        return _UnpackHeader_NameDataT<u16>(header, pBuffer);
+      }
+      return _UnpackHeader_NameDataT<u32>(header, pBuffer);
+    }
+
+
   } // namespace
 
   template<typename T_LPCSTR>
@@ -45,7 +175,10 @@ namespace clstd
     header.cbNames = (m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
     header.cbData = m_cbDataLen;
 
-    file.Write(&header, sizeof(FILE_HEADER));
+    CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
+    size_t packed_header_size = _PackHeader(header, packed_header);
+
+    file.Write(packed_header, packed_header_size);
     file.Write(m_pKeys, (size_t)m_pKeysEnd - (size_t)m_pKeys);
     file.Write(GetNamesBegin(), header.cbNames);
     file.Write(m_pData, m_cbDataLen);
@@ -116,21 +249,23 @@ namespace clstd
   b32 Repository::_ParseFromBuffer()
   {
     size_t pData = reinterpret_cast<size_t>(m_Buffer.GetPtr());
-    const FILE_HEADER* pHeader = reinterpret_cast<const FILE_HEADER*>(pData);
-    if(pHeader->dwMagic != CLMAKEFOURCC('C','L','R','P')) {
+    FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
+    size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
+    if(header.dwMagic != CLMAKEFOURCC('C','L','R','P')) {
       // ERROR: bad file magic
       return false;
     }
+    pData += packed_header_size;
 
-    m_pKeys = reinterpret_cast<KEY*>(pData + sizeof(FILE_HEADER));
-    m_pKeysEnd = m_pKeys + pHeader->nKeys;
+    m_pKeys = reinterpret_cast<KEY*>(pData);
+    m_pKeysEnd = m_pKeys + header.nKeys;
     m_pKeysCapacity = m_pKeysEnd;
 
-    m_pNamesEnd = reinterpret_cast<LPCSTR>(reinterpret_cast<size_t>(m_pKeysEnd) + pHeader->cbNames);
+    m_pNamesEnd = reinterpret_cast<LPCSTR>(reinterpret_cast<size_t>(m_pKeysEnd) + header.cbNames);
     m_pData     = (CLBYTE*)m_pNamesEnd;
-    m_cbDataLen = pHeader->cbData;
+    m_cbDataLen = header.cbData;
 
-    size_t nCheckLen = sizeof(FILE_HEADER) + sizeof(KEY) * pHeader->nKeys + pHeader->cbNames + pHeader->cbData;
+    size_t nCheckLen = packed_header_size + sizeof(KEY) * header.nKeys + header.cbNames + header.cbData;
     if(nCheckLen > m_Buffer.GetSize()) {
       // ERROR: not enough data
       return false;
@@ -281,16 +416,6 @@ namespace clstd
       pPos->name = m_pNamesEnd - GetNamesBegin();
       pPos->type = (KeyType)(KeyType_Octet_0 + nLength);
       memcpy(pPos->o.data, pData, nLength);
-      //pPos->v.offset = _GetSeqOffset(pPos);
-      //pPos->v.length = 0;
-
-
-      //ASSERT((CLBYTE*)m_Buffer.GetPtr() + m_Buffer.GetSize() == m_pData + m_cbDataLen + nLength);
-      //_ResizeKey(pPos, nLength);
-      //ASSERT(_DbgCheckDataOverlay());
-      //memcpy(m_pData + pPos->v.offset, pData, nLength);
-
-
     }
     else
     {
@@ -307,12 +432,6 @@ namespace clstd
       pPos->type = KeyType_Varible;
       pPos->v.offset = _GetSeqOffset(pPos);
       pPos->v.length = 0;
-
-      //// Copy name
-      //CLBYTE*const pName = (CLBYTE*)GetNamesBegin() + pPos->name;
-      //memset(pName, 0, cbKeyNameLen);
-      //strcpyT((TChar*)pName, szKey);
-      //m_pNamesEnd = (LPCSTR)((CLBYTE*)m_pNamesEnd + cbKeyNameLen);
 
       ASSERT((CLBYTE*)m_Buffer.GetPtr() + m_Buffer.GetSize() == m_pData + m_cbDataLen + nLength);
       _ResizeKey(pPos, nLength);

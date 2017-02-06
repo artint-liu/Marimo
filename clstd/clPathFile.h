@@ -177,7 +177,11 @@ namespace clpathfile
   b32 IsPathExist(const ch* szPath);
   b32 IsPathExist(const wch* szPath);
 
-  b32 CreateDirectoryAlways(const wch* szDirName); // 创建目录，如果中间层路径不存在，则逐级创建每层目录
+  // 创建目录，如果中间层路径不存在，则逐级创建每层目录
+  template<typename _TCh, class _Tmkdir>
+  b32 CreateDirectoryAlwaysT(const _TCh* szDirName, _Tmkdir __mkdir);
+  b32 CreateDirectoryAlways(const wch* szDirName);
+  b32 CreateDirectoryAlways(const ch* szDirName);
 } // namespace clpathfile
 
 //////////////////////////////////////////////////////////////////////////
