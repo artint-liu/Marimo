@@ -63,7 +63,7 @@ namespace clstd
     return (u32*)ctx.digest;
   }
 
-  clStringA MD5Calculater::GetAsGUID()
+  clStringA MD5Calculater::GetAsGUIDA()
   {
     clStringA t;
     CheckFinal();
@@ -74,11 +74,34 @@ namespace clstd
     return t;
   }
 
-  clStringA MD5Calculater::ToString()
+  clStringW MD5Calculater::GetAsGUIDW()
+  {
+    clStringW t;
+    CheckFinal();
+    t.Format(_CLTEXT("%08X-%04X-%04X-%2X%2X-%2X%2X%2X%2X%2X%2X"),
+      *(u32*)ctx.digest, (u32)*(u16*)&ctx.digest[4], (u32)*(u16*)&ctx.digest[6],
+      ctx.digest[8], ctx.digest[9], ctx.digest[10], ctx.digest[11], ctx.digest[12],
+      ctx.digest[13], ctx.digest[14], ctx.digest[15]);
+    return t;
+  }
+
+  clStringA MD5Calculater::ToStringA()
   {
     clStringA t;
     CheckFinal();
     t.Format("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+      ctx.digest[0], ctx.digest[1], ctx.digest[2], ctx.digest[3],
+      ctx.digest[4], ctx.digest[5], ctx.digest[6], ctx.digest[7],
+      ctx.digest[8], ctx.digest[9], ctx.digest[10], ctx.digest[11],
+      ctx.digest[12], ctx.digest[13], ctx.digest[14], ctx.digest[15]);
+    return t;
+  }
+
+  clStringW MD5Calculater::ToStringW()
+  {
+    clStringW t;
+    CheckFinal();
+    t.Format(_CLTEXT("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X"),
       ctx.digest[ 0], ctx.digest[ 1], ctx.digest[ 2], ctx.digest[ 3], 
       ctx.digest[ 4], ctx.digest[ 5], ctx.digest[ 6], ctx.digest[ 7], 
       ctx.digest[ 8], ctx.digest[ 9], ctx.digest[10], ctx.digest[11], 

@@ -40,8 +40,10 @@ namespace clstd
     int       Compare(const MD5Calculater& md5) const;  // return 0 if equal
 
     u32*      Get128Bits();
-    clStringA GetAsGUID();// "48961C27-CE71-44CC-8F20-73D3D2A460B5"    {0x48961c27, 0xce71, 0x44cc, 0x8f, 0x20, 0x73, 0xd3, 0xd2, 0xa4, 0x60, 0xb5};
-    clStringA ToString();
+    clStringA GetAsGUIDA();// "48961C27-CE71-44CC-8F20-73D3D2A460B5"    {0x48961c27, 0xce71, 0x44cc, 0x8f, 0x20, 0x73, 0xd3, 0xd2, 0xa4, 0x60, 0xb5};
+    clStringW GetAsGUIDW();// "48961C27-CE71-44CC-8F20-73D3D2A460B5"    {0x48961c27, 0xce71, 0x44cc, 0x8f, 0x20, 0x73, 0xd3, 0xd2, 0xa4, 0x60, 0xb5};
+    clStringA ToStringA();
+    clStringW ToStringW();
 
   };
 } // namespace clstd

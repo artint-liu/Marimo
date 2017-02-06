@@ -848,20 +848,50 @@ namespace clpathfile
 
   b32 IsPathExist(const wch* szPath)
   {
-    return PathFileExistsW(szPath);
+    BOOL bresult = PathFileExistsW(szPath);
+    return bresult;
   }
 
 #else
   b32 LocalWorkingDirA(CLLPCSTR szDir)
   {
+    CLBREAK;
     return FALSE;
   }
 
   b32 LocalWorkingDirW(CLLPCWSTR szDir)
   {
+    CLBREAK;
     return FALSE;
   }
 #endif // #ifdef _WINDOWS
+
+
+  b32 CreateDirectoryAlways(const wch* szDirName)
+  {
+    size_t len = clstd::strlenT(szDirName);
+    LocalBuffer<1024> buf;
+    buf.Resize(len + 1, FALSE);
+    wch* szDir = reinterpret_cast<wch*>(buf.GetPtr());
+    for(size_t i = 0;; i++)
+    {
+      if (szDirName[i] == s_PathSlash || szDirName[i] == s_VicePathSlash || szDirName[i] == '\0') {
+        szDir[i] = '\0';
+        if( ! IsPathExist(szDir)) {
+          int result = _wmkdir(szDir);
+          if(result != 0) {
+            return FALSE;
+          }
+        }
+
+        if (szDirName[i] == '\0') {
+          break;
+        }
+      }
+      szDir[i] = szDirName[i];
+    }
+    return TRUE;
+  }
 
   //_findfirst
 }

@@ -277,6 +277,7 @@ typedef CLULONG           CLULONG_PTR;
 #define clqueue         std::queue
 #define cllist          std::list
 #define clist           std::list
+#define clpair          std::pair
 #define clmake_pair     std::make_pair
 
 //#else

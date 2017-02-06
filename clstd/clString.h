@@ -1,5 +1,5 @@
-﻿#ifndef _CL_STRING_H_
-#define _CL_STRING_H_
+﻿#ifndef _CLSTD_STRING_H_
+#define _CLSTD_STRING_H_
 
 #ifndef _CL_ALLOCATOR_H_
 #error Must be include "clAllocator.h" first.
@@ -482,4 +482,4 @@ clStringA UnicodeStringToAnsiString(const clStringW& str);
 
 #else
 # pragma message(__FILE__": warning : Duplicate included this file.")
-#endif // _CL_STRING_H_
+#endif // _CLSTD_STRING_H_

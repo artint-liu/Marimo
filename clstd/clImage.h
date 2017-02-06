@@ -43,7 +43,7 @@ namespace clstd
     int m_channel;    // 通道数, 1, 2, 3, 4
     int m_pitch;      // 一行像素占的字节长度
     int m_depth;      // 通道位数，8bit/16bit/32bits
-    union
+    union PIXELFORMAT
     {
       u8  name[4];    // 通道格式 'R','G','B','A','X'
       u32 code;
@@ -52,26 +52,30 @@ namespace clstd
     const static int s_nMaxChannel = 4;
 
     static b32 IntParseFormat(const char* fmt, u32* pFmtCode, int* pChannel);
+    static int IntGetChanelIndex(const PIXELFORMAT& fmt, char chChannelCode); // 大写字母
 
   public:
     Image();
+    Image(const Image& image);
     virtual ~Image();
 
   public:
-    b32       CompareFormat (const char* fmt) const;
-    b32       Set           (int nWidth, int nHeight, const char* fmt, const void* pData);
-    b32       Set           (int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData);
-    int       GetWidth      () const;
-    int       GetHeight     () const;
+    b32         CompareFormat (const char* fmt) const;
+    b32         Set           (int nWidth, int nHeight, const char* fmt, const void* pData);
+    b32         Set           (int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData);
+    int         GetWidth      () const;
+    int         GetHeight     () const;
 /*没实现*/int       Inflate       (int left, int top, int right, int bottom); // 调整Image尺寸，参数是四个边缘扩展的像素数，可以是负数
     const void* GetPixelPtr   (int x, int y) const;
     void*       GetPixelPtr   (int x, int y);
+    size_t      GetDataSize   () const;
     const void* GetLine       (int y) const;
     void*       GetLine       (int y);
-    int       GetChannelOffset(char chChannel);   // 通道在像素中的偏移量
-    b32       GetChannelPlane (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
-    b32       ScaleNearest    (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
+    int         GetChannelOffset(char chChannel);   // 通道在像素中的偏移量
+    b32         GetChannelPlane (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
+    b32         ScaleNearest    (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
     const char* GetFormat     () const;
+    b32         SetFormat     (const char* fmt); // 更改通道顺序或者删除通道
   private:
     template<typename _Ty>
     void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );
@@ -82,8 +86,14 @@ namespace clstd
     template<typename _Ty>
     void IntStretchCopyMulti( Image* pDestImage, int nWidth, int nHeight, int nCount );
 
+    template<typename _TPixel>
+    void ChangePixel(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch);
+
+    template<typename _TChannel>
+    void ChangeFormat(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch);
     //template<typename _Ty>
     //void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );
+
 
   public:
     static void BlockTransfer(IMAGEDESC* pDest, int x, int y, int nCopyWidth, int nCopyHeight, const IMAGEDESC* pSrc);

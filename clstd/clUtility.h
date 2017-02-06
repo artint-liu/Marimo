@@ -625,11 +625,14 @@ FINAL_RET:
   u64 GetTime64(); // Milli Seconds
   u32 GetNumberOfProcessors();  // 获得处理器数量
 
+#if defined(_CLSTD_STRING_H_)
   clStringA ToStringA(const float4x4& m);
   clStringA ToStringA(const float3x3& m);
   clStringA ToStringA(const float3& v);
   clStringA ToStringA(const float4& v);
+#endif // _CLSTD_STRING_H_
 
+  size_t ViewMemory16(ch* szBuffer, size_t cBuffer, const void* ptr, size_t count, const void* ptrBase = NULL);
   void DumpMemory(const void* ptr, size_t count);
   extern int s_aPrimeNum[];
 } // namespace clstd
