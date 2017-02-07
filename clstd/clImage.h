@@ -52,7 +52,7 @@ namespace clstd
     const static int s_nMaxChannel = 4;
 
     static b32 IntParseFormat(const char* fmt, u32* pFmtCode, int* pChannel);
-    static int IntGetChanelIndex(const PIXELFORMAT& fmt, char chChannelCode); // 大写字母
+    static int IntGetChanelIndex(const PIXELFORMAT& fmt, int nNumOfChannels, char chChannelCode); // 大写字母
 
   public:
     Image();
@@ -71,7 +71,7 @@ namespace clstd
     size_t      GetDataSize   () const;
     const void* GetLine       (int y) const;
     void*       GetLine       (int y);
-    int         GetChannelOffset(char chChannel);   // 通道在像素中的偏移量
+    int         GetChannelOffset(char chChannel) const;   // 通道在像素中的偏移量, 对于"AAAX"这种格式只能返回第一个Alpha通道的偏移
     b32         GetChannelPlane (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
     b32         ScaleNearest    (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
     const char* GetFormat     () const;

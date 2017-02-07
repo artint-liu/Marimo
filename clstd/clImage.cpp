@@ -164,9 +164,11 @@ namespace clstd
     return TRUE;
   }
 
-  int Image::IntGetChanelIndex(const PIXELFORMAT& fmt, char chChannelCode)
+  int Image::IntGetChanelIndex(const PIXELFORMAT& fmt, int nNumOfChannels, char chChannelCode)
   {
-    for (int i = 0; i < s_nMaxChannel; i++) {
+    for (int i = 0; i < nNumOfChannels; i++) {
+      ASSERT(fmt.name[i] == 'R' || fmt.name[i] == 'G' ||
+        fmt.name[i] == 'B' || fmt.name[i] == 'A' || fmt.name[i] == 'X');
       if (fmt.name[i] == chChannelCode) {
         return i;
       }
@@ -191,19 +193,10 @@ namespace clstd
     return 0;
   }
 
-  int Image::GetChannelOffset(char chChannel)
+  int Image::GetChannelOffset(char chChannel) const
   {
-    for (int i = 0; i < m_channel; i++)
-    {
-      const u8& c = m_format.name[i];
-      if (c == 0x20 || c == '\0') {
-        break;
-      }
-      else if (c == chChannel || c == chChannel + delta) {
-        return i * (m_depth >> 3);
-      }
-    }
-    return -1;
+    const int index = IntGetChanelIndex(m_format, m_channel, chChannel);
+    return index >= 0 ? (index * (m_depth >> 3)) : -1;
   }
 
   b32 Image::GetChannelPlane(Image* pDestImage, char chChannel)
@@ -457,7 +450,11 @@ namespace clstd
 
     for (int i = 0; i < nNewChannel; i++)
     {
-      nChannelMapTab[i] = IntGetChanelIndex(m_format, NewFormat.name[i]);
+      nChannelMapTab[i] = IntGetChanelIndex(m_format, m_channel, NewFormat.name[i]);
+    }
+
+    if (nChannelMapTab[0] < 0 && nChannelMapTab[1] < 0 && nChannelMapTab[2] < 0 && nChannelMapTab[3] < 0) {
+      return FALSE;
     }
 
     int nNewPitch = MIN_PITCH_PARAM(m_width, nNewChannel, m_depth);
