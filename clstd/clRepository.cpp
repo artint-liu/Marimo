@@ -171,17 +171,17 @@ namespace clstd
   {
     FILE_HEADER header = {};
     header.dwMagic = CLMAKEFOURCC('C','L','R','P');
-    header.nKeys = m_pKeysEnd - m_pKeys;
-    header.cbNames = (m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
-    header.cbData = m_cbDataLen;
+    header.nKeys = (CLDWORD)(m_pKeysEnd - m_pKeys);
+    header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
+    header.cbData = (CLDWORD)m_cbDataLen;
 
     CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
     size_t packed_header_size = _PackHeader(header, packed_header);
 
-    file.Write(packed_header, packed_header_size);
-    file.Write(m_pKeys, (size_t)m_pKeysEnd - (size_t)m_pKeys);
+    file.Write(packed_header, (u32)packed_header_size);
+    file.Write(m_pKeys, (u32)((size_t)m_pKeysEnd - (size_t)m_pKeys));
     file.Write(GetNamesBegin(), header.cbNames);
-    file.Write(m_pData, m_cbDataLen);
+    file.Write(m_pData, (u32)m_cbDataLen);
     return TRUE;
   }
 
@@ -413,7 +413,7 @@ namespace clstd
         memcpy(pPos + 1, pPos, cbKeyLen);
       }
       m_pKeysEnd++;
-      pPos->name = m_pNamesEnd - GetNamesBegin();
+      pPos->name = (u32)(m_pNamesEnd - GetNamesBegin());
       pPos->type = (KeyType)(KeyType_Octet_0 + nLength);
       memcpy(pPos->o.data, pData, nLength);
     }
@@ -428,7 +428,7 @@ namespace clstd
         memcpy(pPos + 1, pPos, cbKeyLen);
       }
       m_pKeysEnd++;
-      pPos->name = m_pNamesEnd - GetNamesBegin();
+      pPos->name = (u32)(m_pNamesEnd - GetNamesBegin());
       pPos->type = KeyType_Varible;
       pPos->v.offset = _GetSeqOffset(pPos);
       pPos->v.length = 0;
@@ -462,7 +462,7 @@ namespace clstd
         pIter->v.offset += static_cast<u32>(delta);
       }
     }
-    rKey->v.length += delta;
+    rKey->v.length += (u32)delta;
     //return m_pData + rKey->v.offset + rKey->v.length; // 返回当前键值数据的结尾
     if(m_cbDataLen > nDataEndian) {
       memcpy(pDataEndian + delta, pDataEndian, m_cbDataLen - nDataEndian);

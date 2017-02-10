@@ -98,16 +98,16 @@ namespace clstd
     m_nCapacity = 0;
   }
 
-  b32 MemBuffer::Reserve(clsize dwSize)
+  size_t MemBuffer::Reserve(clsize dwSize)
   {
     if(dwSize > m_uSize)
     {
       auto nOriginSize = m_uSize;
-      b32 r = Resize(dwSize, FALSE);
+      size_t delta = Resize(dwSize, FALSE);
       m_uSize = nOriginSize;
-      return r;
+      return delta;
     }
-    return FALSE;
+    return 0;
   }
 
   size_t MemBuffer::Resize(clsize dwSize, b32 bZeroInit)

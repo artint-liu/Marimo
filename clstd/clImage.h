@@ -69,6 +69,7 @@ namespace clstd
     const void* GetPixelPtr   (int x, int y) const;
     void*       GetPixelPtr   (int x, int y);
     size_t      GetDataSize   () const;
+    int         GetDepth      () const;
     const void* GetLine       (int y) const;
     void*       GetLine       (int y);
     int         GetChannelOffset(char chChannel) const;   // 通道在像素中的偏移量, 对于"AAAX"这种格式只能返回第一个Alpha通道的偏移

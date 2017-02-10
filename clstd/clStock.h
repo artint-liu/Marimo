@@ -64,6 +64,7 @@ namespace clstd
       _TStr   SectionName () const;
       _TStr   KeyName     () const;
       int     ToInt       (int nDefault = 0) const;
+      u32     ToUInt      (u32 nDefault = 0) const;
       _TStr   ToString    (T_LPCSTR szDefault = NULL) const;
       float   ToFloat     (float fDefault = 0.0f) const;
       b32     ToBoolean   (b32 bDefault = false) const;
@@ -153,6 +154,14 @@ namespace clstd
       b32       SetKey              (T_LPCSTR szKey, size_t val);
       b32       SetKey              (T_LPCSTR szKey, float val);
       b32       SetKey              (T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse);
+
+      // 比较并设置键值，如果值已经存在并且与原来值一直，则不更改数据，目的是为了避免修改Modification值
+      b32       ComparedSetKey      (T_LPCSTR szKey, T_LPCSTR val);
+      b32       ComparedSetKey      (T_LPCSTR szKey, int val);
+      b32       ComparedSetKey      (T_LPCSTR szKey, size_t val);
+      b32       ComparedSetKey      (T_LPCSTR szKey, float val);
+      b32       ComparedSetKey      (T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse);
+
       b32       DeleteKey           (T_LPCSTR szKey);
       b32       InsertKey           (T_LPCSTR szKey, T_LPCSTR val); // SetKey 替换原来键值，InsertKey 可以插入新的键值
 

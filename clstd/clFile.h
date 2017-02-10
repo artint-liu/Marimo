@@ -113,8 +113,8 @@ namespace clstd
     u32  SetPointer   (u32 uMove, u32 uMode);
     u64  GetPointer64 ();
     u64  SetPointer64 (u64 uMove, u32 uMode);
-    u32  GetSize      (u32* pdwFileSizeHight);
-    void GetTime      (TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime);
+    u32  GetSize      (u32* pdwFileSizeHight) const;
+    void GetTime      (TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime) const;
     b32  Read         (CLLPVOID lpBuffer, u32 nNumOfBytesToRead,  u32* lpNumberOfBytesRead = NULL);
     b32  Write        (CLLPCVOID lpBuffer, u32 nNumberOfBytesToWrite, u32* lpNumberOfBytesWritten = NULL);
 

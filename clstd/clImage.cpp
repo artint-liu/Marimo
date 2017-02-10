@@ -65,6 +65,11 @@ namespace clstd
     return (size_t)(m_pitch * m_height);
   }
 
+  int Image::GetDepth() const
+  {
+    return m_depth;
+  }
+
   b32 Image::Set(int nWidth, int nHeight, const char* fmt, const void* pData)
   {
     if (m_width != nWidth || m_height != nHeight || m_depth != 8 ||

@@ -173,7 +173,7 @@ namespace clstd
     MemBuffer(u32 nPageSize = 512);
     virtual ~MemBuffer();
 
-    b32       Reserve   (clsize dwSize);
+    size_t    Reserve   (clsize dwSize); // 地址没变化返回0，否则返回一个补码的地址差
     size_t    Resize    (clsize dwSize, b32 bZeroInit); // 地址没变化返回0，否则返回一个补码的地址差
     CLLPVOID  GetPtr    () const;
     clsize    GetSize   () const;

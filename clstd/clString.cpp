@@ -1638,6 +1638,12 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
+    u32 _CLSTR_IMPL::ToUInteger(int nRadix) const
+  {
+    return clstd::xtou(nRadix, m_pBuf, CLSTR_LENGTH(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
     double _CLSTR_IMPL::ToFloat() const
   {
     return clstd::_xstrtofT<double>(m_pBuf);

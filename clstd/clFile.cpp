@@ -239,7 +239,7 @@ namespace clstd
   }
 
 
-  u32 File::GetSize(u32* pdwFileSizeHight)
+  u32 File::GetSize(u32* pdwFileSizeHight) const
   {
 #ifdef _CL_SYSTEM_WINDOWS
     return ::GetFileSize(m_hFile, (LPDWORD)pdwFileSizeHight);
@@ -255,7 +255,7 @@ namespace clstd
 #endif
   }
 
-  void File::GetTime(TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime)
+  void File::GetTime(TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime) const
   {
 #ifdef _CL_SYSTEM_WINDOWS
     FILETIME sCreationTime;
@@ -438,6 +438,7 @@ FALSE_RET:
     u32 nNumBytes = 0;
     pBuffer->Resize(nReadSize, FALSE);
 
+    SetPointer64(nFileOffset, 0);
     return Read(pBuffer->GetPtr(), nReadSize, &nNumBytes) && (nReadSize == nNumBytes);
   }
 

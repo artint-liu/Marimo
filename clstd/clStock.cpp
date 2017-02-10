@@ -178,6 +178,16 @@ namespace clstd
   }
 
   _SSP_TEMPL
+    u32 _SSP_IMPL::ATTRIBUTE::ToUInt(u32 nDefault) const
+  {
+    if (value.length) {
+      _TStr str;
+      return SmartStreamUtility::TranslateQuotation(value, str).ToUInteger();
+    }
+    return nDefault;
+  }
+
+  _SSP_TEMPL
     _TStr _SSP_IMPL::ATTRIBUTE::ToString(T_LPCSTR szDefault) const
   {
     if(value.length) {
@@ -702,21 +712,12 @@ namespace clstd
     }
     else {
       return InsertKey(szKey, szValue);
-      //_TStr strBuffer;
-      //strBuffer.Append(' ', nDepth);
-      //strBuffer.Append(szKey);
-      //strBuffer.Append('=');
-      //strBuffer.Append(strValue);
-      //strBuffer.Append(';');
-      //strBuffer.Append('\r');
-      //strBuffer.Append('\n');
-
-      //clsize nPos = pStock->InsertString(this, itEnd, strBuffer);
-      //ASSERT(DbgCheck());
     }
     return TRUE;
   }
   
+  //////////////////////////////////////////////////////////////////////////
+
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, int val)
   {
@@ -743,6 +744,58 @@ namespace clstd
   {
     return SetKey(szKey, bValue ? szTrue : szFalse);
   }
+
+  //////////////////////////////////////////////////////////////////////////
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, T_LPCSTR szValue)
+  {
+    ATTRIBUTE param;
+    IS_OUT_OF_DATE;
+    if(szValue == NULL || szValue[0] == L'\0') {
+      return FALSE;
+    }
+
+    if(GetKey(szKey, param)) {
+      _TStr strValue;
+      SmartStreamUtility::MakeQuotation(strValue, szValue);
+      if(strValue.Compare(param.value.marker, param.value.length)) {
+        return pStock->Replace(this, param.value.offset(), param.value.length, strValue, strValue.GetLength());
+      }
+    }
+    else {
+      return InsertKey(szKey, szValue);
+    }
+    return TRUE;
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, int val)
+  {
+    _TStr str(val);
+    return ComparedSetKey(szKey, str);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, size_t val)
+  {
+    _TStr str(val);
+    return ComparedSetKey(szKey, str);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, float val)
+  {
+    _TStr str(val);
+    return ComparedSetKey(szKey, str);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse)
+  {
+    return ComparedSetKey(szKey, bValue ? szTrue : szFalse);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::DeleteKey( T_LPCSTR szKey )
