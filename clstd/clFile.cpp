@@ -124,9 +124,9 @@ namespace clstd
 #ifdef _CL_SYSTEM_WINDOWS
     m_hFile = ::CreateFileA(pszFileName, eDesiredAccess, eShareMode, NULL, 
       eCreationDistribution, eFlagAttr, NULL);
-    if (m_hFile == INVALID_HANDLE_VALUE) {
-      _cl_WinVerifyFailure("Win32::CreateFileA()", __FILE__, __LINE__, GetLastError());
-    }
+    //if (m_hFile == INVALID_HANDLE_VALUE) {
+    //  _cl_WinVerifyFailure("Win32::CreateFileA()", __FILE__, __LINE__, GetLastError());
+    //}
     return (m_hFile != INVALID_HANDLE_VALUE);
 #else
     // TODO: 这个没测试过
@@ -171,9 +171,9 @@ namespace clstd
     m_hFile = ::CreateFileW(pszFileName, eDesiredAccess, eShareMode, NULL, 
       eCreationDistribution, eFlagAttr, NULL);
 
-    if (m_hFile == INVALID_HANDLE_VALUE) {
-      _cl_WinVerifyFailure("Win32::CreateFileW()", __FILE__, __LINE__, GetLastError());
-    }
+    //if (m_hFile == INVALID_HANDLE_VALUE) {
+    //  _cl_WinVerifyFailure("Win32::CreateFileW()", __FILE__, __LINE__, GetLastError());
+    //}
     return (m_hFile != INVALID_HANDLE_VALUE);
 #else
     // TODO: 这个没测试过

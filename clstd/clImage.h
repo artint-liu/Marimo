@@ -60,6 +60,7 @@ namespace clstd
     virtual ~Image();
 
   public:
+    Image& operator=(const Image& image);
     b32         CompareFormat (const char* fmt) const;
     b32         Set           (int nWidth, int nHeight, const char* fmt, const void* pData);
     b32         Set           (int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData);

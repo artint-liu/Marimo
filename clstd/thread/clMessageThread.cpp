@@ -13,23 +13,20 @@
 
 namespace clstd
 {
-  namespace thread
+  namespace this_thread
   {
 #if _CPLUSPLUS_11_THREAD
-    typedef std::thread::id id;
-    std::thread::id GetCurrentId()
+    id GetId()
     {
       return std::this_thread::get_id();
     }
 #elif (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
-    typedef size_t id;
-    id GetCurrentId()
+    id GetId()
     {
       return GetCurrentThreadId();
     }
 #else
-    typedef size_t id;
-    id GetCurrentId()
+    id GetId()
     {
       return (id)pthread_self().p;
     }

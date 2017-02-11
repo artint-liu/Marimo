@@ -40,6 +40,24 @@ namespace clstd
     SAFE_DELETE_ARRAY(m_ptr);
   }
 
+  Image& Image::operator=(const Image& image)
+  {
+    SAFE_DELETE_ARRAY(m_ptr);
+
+    m_width       = image.m_width;
+    m_height      = image.m_height;
+    m_channel     = image.m_channel;
+    m_pitch       = image.m_pitch;
+    m_depth       = image.m_depth;
+    m_format.code = image.m_format.code;
+    if (image.m_ptr)
+    {
+      m_ptr = new u8[GetDataSize()];
+      memcpy(m_ptr, image.m_ptr, GetDataSize());
+    }
+    return *this;
+   }
+
   int Image::GetWidth() const
   {
     return m_width;

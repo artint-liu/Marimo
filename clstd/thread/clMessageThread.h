@@ -26,7 +26,7 @@ typedef u32 (CL_CALLBACK *CLTHREADCALLBACK)(CLMTCREATESTRUCT*);
 
 namespace clstd
 {
-  namespace thread
+  /*namespace thread
   {
     class Context
     {
@@ -37,6 +37,7 @@ namespace clstd
       ~Context();
     };
   } // namespace thread
+  //*/
 
   //class MessageQueue
   //class MsgQueue

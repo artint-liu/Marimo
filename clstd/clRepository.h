@@ -99,16 +99,18 @@ namespace clstd
       Repository();
       ~Repository();
 
+      Repository& operator=(const Repository& repo);
+
       iterator begin  () const;
       iterator end    () const;
       
-
+      void Clear();
       b32 LoadFromFile( CLLPCSTR szFilename );
       b32 LoadFromFile( CLLPCWSTR szFilename );
       b32 LoadFromMemory( const void* pData, size_t nLength );
       b32 SaveToFile( CLLPCSTR szFilename ) const;
       b32 SaveToFile( CLLPCWSTR szFilename ) const;
-      //b32 SaveToMemory( const void* pData, size_t nLength ) const;
+      b32 SaveToMemory(MemBuffer& buffer) const;
 
       size_t GetNumOfKeys() const;
       b32 SetKey( LPCSTR szKey, const void* pData, size_t nLength );

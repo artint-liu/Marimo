@@ -234,6 +234,22 @@ namespace clstd
   {
   }
 
+  Repository& Repository::operator=(const Repository& repo)
+  {
+    m_Buffer.Replace(0, m_Buffer.GetSize(), repo.m_Buffer.GetPtr(), repo.m_Buffer.GetSize());
+
+    m_pKeys         = repo.m_pKeys;
+    m_pKeysEnd      = repo.m_pKeysEnd;
+    m_pKeysCapacity = repo.m_pKeysCapacity;
+    m_pNamesEnd     = repo.m_pNamesEnd;
+    m_pData         = repo.m_pData;
+    m_cbDataLen     = m_cbDataLen;
+
+    const size_t delta = (size_t)m_Buffer.GetPtr() - (size_t)repo.m_Buffer.GetPtr();
+    _Locate(delta);
+    return *this;
+  }
+
   Repository::iterator Repository::begin() const
   {
     iterator it(this, m_pKeys);
@@ -244,6 +260,17 @@ namespace clstd
   {
     iterator it(this, m_pKeysEnd);
     return it;
+  }
+
+  void Repository::Clear()
+  {
+    m_Buffer.Resize(0, FALSE);
+    m_pKeys         = NULL;
+    m_pKeysEnd      = NULL;
+    m_pKeysCapacity = NULL;
+    m_pNamesEnd     = NULL;
+    m_pData         = NULL;
+    m_cbDataLen     = 0;
   }
 
   b32 Repository::_ParseFromBuffer()
@@ -609,10 +636,26 @@ namespace clstd
   }
 
 
-  //b32 Repository::SaveToMemory( const void* pData, size_t nLength ) const
-  //{
-  //  return false;
-  //}
+  b32 Repository::SaveToMemory(MemBuffer& buffer) const
+  {
+    FILE_HEADER header = {};
+    header.dwMagic = CLMAKEFOURCC('C', 'L', 'R', 'P');
+    header.nKeys = (CLDWORD)(m_pKeysEnd - m_pKeys);
+    header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
+    header.cbData = (CLDWORD)m_cbDataLen;
+
+    CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
+    size_t packed_header_size = _PackHeader(header, packed_header);
+
+    buffer.Reserve(packed_header_size + (m_pKeysEnd - m_pKeys) * sizeof(KEY) +
+      header.cbNames + m_cbDataLen);
+
+    buffer.Append(packed_header, (u32)packed_header_size);
+    buffer.Append(m_pKeys, (u32)((size_t)m_pKeysEnd - (size_t)m_pKeys));
+    buffer.Append(GetNamesBegin(), header.cbNames);
+    buffer.Append(m_pData, (u32)m_cbDataLen);
+    return TRUE;
+  }
 
   size_t Repository::GetNumOfKeys() const
   {

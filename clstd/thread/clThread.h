@@ -37,17 +37,17 @@ namespace clstd
 
 namespace clstd
 {
-  namespace thread
+  namespace this_thread
   {
 #if _CPLUSPLUS_11_THREAD
-    typedef std::thread::id id;
+    typedef std::this_thread::id id;
 #elif defined(POSIX_THREAD)
     typedef size_t id;
 #elif (defined(_WINDOWS) || defined(_WIN32))
     typedef size_t id;
 #endif // #if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
 
-    id GetCurrentId();
+    id GetId();
   } // namespace thread
 #ifdef _WIN32
   namespace _win32
