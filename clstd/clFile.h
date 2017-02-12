@@ -122,7 +122,7 @@ namespace clstd
     int  WritefA      (const ch* format, ...);
     int  WritefW      (const wch* format, ...);
 
-    b32  ReadToBuffer (MemBuffer* pBuffer, int nFileOffset = 0, int cbSize = 0);
+    b32  ReadToBuffer (MemBuffer* pBuffer, int nFileOffset = 0, u32 cbSize = 0);
     b32  MapToBuffer  (CLBYTE** pBuffer, int nFileOffset, int cbSize, u32* pcbSize); // 从nFileOffset偏移开始读cbSize（0表示读到文件末尾）字节到pBuffer缓冲中，实际读入大小是pcbSize
     b32  MapToBuffer  (MemBuffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
     //TextStream& 

@@ -424,11 +424,11 @@ FALSE_RET:
     return TRUE;
   }
 
-  b32 File::ReadToBuffer(Buffer* pBuffer, int nFileOffset, int cbSize)
+  b32 File::ReadToBuffer(Buffer* pBuffer, int nFileOffset, u32 cbSize)
   {
     u32 dwSizeHigh;
     const i32 nReadSize = cbSize == 0 ? GetSize(&dwSizeHigh) 
-      : clMin((i32)(GetSize(&dwSizeHigh) - (u32)nFileOffset), cbSize);
+      : clMin((u32)(GetSize(&dwSizeHigh) - (u32)nFileOffset), cbSize);
 
     // return false if file size great than 2GB.
     if(nReadSize <= 0 || dwSizeHigh != 0) {

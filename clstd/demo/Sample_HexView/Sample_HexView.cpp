@@ -31,7 +31,7 @@ int nNumOfBlocks = 32;
 int APIENTRY _tWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nShowCmd )
 {
   int argc = 0;
-  LPWSTR* argv = CommandLineToArgvW(lpCmdLine, &argc);
+  LPWSTR* argv = lpCmdLine[0] == '\0' ? NULL : CommandLineToArgvW(lpCmdLine, &argc);
 
   if(argc != 1) {
     printf("HexView <filename>");
@@ -103,6 +103,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 void OnPaint(HWND hWnd, HDC hdc)
 {
+  if( ! HexBuffer.GetPtr()) {
+    return;
+  }
+
   HFONT hFont = CreateFont(20, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_CHARACTER_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, L"Consolas");
   HGDIOBJ hOldFont = SelectObject(hdc, hFont);
   RECT rcClient;
@@ -216,6 +220,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     WCHAR szFilepath[MAX_PATH];
     DragQueryFile((HDROP)wParam, 0, szFilepath, MAX_PATH);
     OpenFile(szFilepath);
+    ReadBuffer(nNumOfBlocks);
     InvalidateRect(hWnd, NULL, FALSE);
   }
   break;
@@ -308,10 +313,12 @@ BOOL OpenFile(LPCWSTR szFilepath)
 BOOL ReadBuffer(int nNumOfBlocks) // block = 16 bytes
 {
   const int cbBlock = 16;
-  const int cbViewSize = nNumOfBlocks * cbBlock;
+  int cbViewSize = nNumOfBlocks * cbBlock;
   clstd::MemBuffer buf;
   if (file.ReadToBuffer(&buf, 0, cbViewSize)) {
+    cbViewSize = buf.GetSize();
     HexBuffer.Resize(clstd::ViewMemory16(NULL, 0, buf.GetPtr(), cbViewSize, buf.GetPtr()), FALSE);
+    //memset(HexBuffer.GetPtr(), '$', HexBuffer.GetSize());
     clstd::ViewMemory16((ch*)HexBuffer.GetPtr(), HexBuffer.GetSize(), buf.GetPtr(), cbViewSize, buf.GetPtr());
     return TRUE;
   }

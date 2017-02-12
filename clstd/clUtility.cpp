@@ -291,11 +291,14 @@ namespace clstd
   {
     const size_t nGroupStride = 8;
     const size_t nLineStride = 16;
+    const size_t G = 0x8;
+    const size_t nLineStrideMask = nLineStride - 1;
     STATIC_ASSERT(nGroupStride != nLineStride && (nLineStride % nGroupStride) == 0);
     // <地址>             <16进制字符>                                        <字符>
     // "0123456789ABCDEF  00 00 00 00 00 00 00 00 - 00 00 00 00 00 00 00 00  ........ .......\r\n"
     if(szBuffer == NULL || cBuffer == 0) {
-      size_t nAlignedCount = ALIGN_16(count);
+      //size_t nAlignedCount = (count + nLineStride - 1) & (~(nLineStride - 1));
+      size_t nAlignedCount = (count + nLineStrideMask) & (~nLineStrideMask);
       const size_t nLineBuffer = 
         (sizeof(void*) * 2 + 2) // 地址带两个空格
         + nLineStride * 3  // 16进制字符+空格
@@ -311,7 +314,10 @@ namespace clstd
 
     CLUINT_PTR nDisplay = ((CLUINT_PTR)ptr) & (~0xf);
     const char HexTab[] = "0123456789ABCDEF";
-    const int offset = 51; // 16进制区与字符区的偏移
+    const int offset =
+      nLineStride * 3  // 16进制字符+空格
+      + ((nLineStride / nGroupStride) - 1) * 2 // 分组符号
+      + 1; // 16进制与字符之间的空格
     size_t n = 0;
     size_t i = 0;
 
@@ -339,18 +345,18 @@ namespace clstd
       // 开头没对齐在16字节处时，填补空白
       for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
       {
-        const size_t g = ((nDisplay & 0x8) >> 3);
+        const size_t g = ((nDisplay & G) >> 3);
         szBuffer[g + i2++] = 0x20;
         szBuffer[(g << 1) + i++] = 0x20;
         szBuffer[(g << 1) + i++] = 0x20;
         szBuffer[(g << 1) + i++] = 0x20;
       }
 
-      ptr = (void*)(((CLUINT_PTR)ptr & (~0xf)) + 16);
+      ptr = (void*)(((CLUINT_PTR)ptr & (~0xf)) + nLineStride);
       for(; n < count && nDisplay < (CLUINT_PTR)ptr; n++, nDisplay++)
       {
         u8 c = ((u8*)ptrBase)[nDisplay];
-        const size_t g = ((nDisplay & 0x8) >> 3);
+        const size_t g = ((nDisplay & G) >> 3);
 
         szBuffer[g + i2++] = c < 0x20 ? '.' : (c < 0x80 ? c : '?');
 
@@ -362,7 +368,7 @@ namespace clstd
       // 结尾没对齐在16字节处时，填补空白
       for(; nDisplay < (CLUINT_PTR)ptr; nDisplay++)
       {
-        const size_t g = ((nDisplay & 0x8) >> 3);
+        const size_t g = ((nDisplay & G) >> 3);
         szBuffer[g + i2++] = 0x20;
         szBuffer[(g << 1) + i++] = 0x20;
         szBuffer[(g << 1) + i++] = 0x20;

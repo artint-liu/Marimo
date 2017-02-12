@@ -7,13 +7,13 @@
 #define SOCKET_ERROR_LOG(_STAT, _MSG) if (_STAT == SOCKET_ERROR) { CLOG_ERROR(_MSG); }
 #define MAX_RECV_BUF 4096
 
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 #pragma comment(lib, "Ws2_32.lib")
-#endif // #if defined(_WINDOWS)
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 
 namespace clstd
 {
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
   TCPServer::TCPServer()
     : m_ServerSocket (0)
   {
@@ -237,7 +237,7 @@ namespace clstd
   {
   }
 
-  SocketResult UDPSocket::OpenPort(u32 dwFlags, u32 port)
+  SocketResult UDPSocket::OpenPort(PropertyFlags dwFlags, u32 port)
   {
     WSADATA		Data;
     m_dwFlags = dwFlags;
@@ -323,6 +323,15 @@ namespace clstd
     return result;
   }
 
+  i32 UDPSocket::SendBroadCast(u32 wPort, CLLPCVOID pData, u32 nLen)
+  {
+    if ( ! TEST_FLAGS_ALL(m_dwFlags, PM_Broadcast)) {
+      return -1;
+    }
+
+    return Send((u32_ptr)-1, wPort, pData, nLen);
+  }
+
   i32 UDPSocket::Recv(CLLPCVOID pData, u32 nLen, u32_ptr* uIPAddress, u32* wPort)
   {
     if(TEST_FLAG_NOT(m_dwFlags, PM_Recv)) {
@@ -337,7 +346,7 @@ namespace clstd
     }
 
     if(wPort) {
-      *wPort = SenderAddr.sin_port;
+      *wPort = ntohs(SenderAddr.sin_port);
     }
     return result;
   }
@@ -377,6 +386,6 @@ namespace clstd
     return result;
   }
 
-#endif // #if defined(_WINDOWS)
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
   //////////////////////////////////////////////////////////////////////////
 } // namespace clstd

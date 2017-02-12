@@ -8,7 +8,7 @@
 namespace clstd
 {
   enum SocketEvent;
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
   class TCPServer : public Thread
   {
   public:
@@ -63,7 +63,7 @@ namespace clstd
     UDPSocket();
     virtual ~UDPSocket();
 
-    SocketResult OpenPort(u32 dwFlags, u32 uRecvPort);
+    SocketResult OpenPort(PropertyFlags dwFlags, u32 uRecvPort);
 
     // 关闭网络套接字
     // dwMilliSec: 等待线程超时
@@ -73,6 +73,7 @@ namespace clstd
     int Close (u32 nMilliSec);
     i32 Send(CLLPCSTR szIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen);
     i32 Send(u32_ptr uIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen);
+    i32 SendBroadCast(u32 wPort, CLLPCVOID pData, u32 nLen);
     i32 Recv(CLLPCVOID pData, u32 nLen, u32_ptr* uIPAddress, u32* wPort);
 
     template<class _StringT>
@@ -85,7 +86,7 @@ namespace clstd
   public:
     virtual void OnEvent(SOCKET sock, SocketEvent eEvent) = 0;
   };
-#endif // #if defined(_WINDOWS)
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 } // namespace clstd
 
 #endif // _SOCKET_SERVER_H_
