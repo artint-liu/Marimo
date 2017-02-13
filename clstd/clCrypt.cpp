@@ -1,8 +1,8 @@
 ﻿
 #include "clstd.h"
-#include "clString.H"
+#include "clString.h"
 #include "clCrypt.h"
-//#include "clBuffer.H"
+//#include "clBuffer.h"
 
 namespace clstd
 {

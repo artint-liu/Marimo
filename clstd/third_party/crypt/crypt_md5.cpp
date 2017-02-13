@@ -37,7 +37,7 @@
 //
 //#include "windef.h"
 #include "clstd.h"
-#include "clString.H"
+#include "clString.h"
 #include "clCrypt.h"
 
 //typedef struct

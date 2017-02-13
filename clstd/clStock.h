@@ -151,14 +151,16 @@ namespace clstd
       b32       GetKeyAsBoolean     (T_LPCSTR szKey, b32 bDefault) const;
       b32       SetKey              (T_LPCSTR szKey, T_LPCSTR val);
       b32       SetKey              (T_LPCSTR szKey, int val);
-      b32       SetKey              (T_LPCSTR szKey, size_t val);
+      b32       SetKey              (T_LPCSTR szKey, u32 val);
+      b32       SetKey              (T_LPCSTR szKey, u64 val);
       b32       SetKey              (T_LPCSTR szKey, float val);
       b32       SetKey              (T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse);
 
       // 比较并设置键值，如果值已经存在并且与原来值一直，则不更改数据，目的是为了避免修改Modification值
       b32       ComparedSetKey      (T_LPCSTR szKey, T_LPCSTR val);
       b32       ComparedSetKey      (T_LPCSTR szKey, int val);
-      b32       ComparedSetKey      (T_LPCSTR szKey, size_t val);
+      b32       ComparedSetKey      (T_LPCSTR szKey, u32 val);
+      b32       ComparedSetKey      (T_LPCSTR szKey, u64 val);
       b32       ComparedSetKey      (T_LPCSTR szKey, float val);
       b32       ComparedSetKey      (T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse);
 

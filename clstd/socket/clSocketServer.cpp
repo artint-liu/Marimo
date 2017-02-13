@@ -1,5 +1,5 @@
 #include "clstd.h"
-#include "clString.H"
+#include "clString.h"
 #include "thread/clThread.h"
 #include "clSocket.h"
 #include "clSocketServer.h"

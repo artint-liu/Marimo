@@ -1,5 +1,5 @@
 ﻿#include "clstd.h"
-#include "clString.H"
+#include "clString.h"
 #if defined(_WINDOWS) || defined(_WIN32)
 #include <Windows.h>
 #include <Shlwapi.h>

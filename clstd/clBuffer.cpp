@@ -1,8 +1,8 @@
 ﻿#include "clstd.h"
-//#include "clBuffer.H"
+//#include "clBuffer.h"
 #include "clmemory.h"
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 //#include "third_party/zlib/zlib.h"
 
 //int zlib_compress (

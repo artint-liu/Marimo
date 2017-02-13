@@ -2,7 +2,7 @@
 #include "../clstd.h"
 #include "cl3d.h"
 //#include "../floatx.h"
-#include "Camera.H"
+#include "Camera.h"
 
 namespace clstd
 {

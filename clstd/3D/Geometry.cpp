@@ -1,6 +1,6 @@
 ﻿#include "../clstd.h"
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 namespace clstd
 {
   int _AABBF::IntersectAABB(const _AABBF& aabb) const

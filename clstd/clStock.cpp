@@ -1,13 +1,13 @@
 ﻿#include <stdlib.h>
 
 #include "clstd.h"
-#include "clString.H"
-//#include "../clFile.H"
-//#include "../clBuffer.H"
+#include "clString.h"
+//#include "../clFile.h"
+//#include "../clBuffer.h"
 #include "smart/smartstream.h"
 #include "clTokens.h"
 #include "clStock.h"
-#include "clUtility.H"
+#include "clUtility.h"
 
 namespace clstd
 {
@@ -726,7 +726,14 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, size_t val)
+    b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, u32 val)
+  {
+    _TStr str(val);
+    return SetKey(szKey, str);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, u64 val)
   {
     _TStr str(val);
     return SetKey(szKey, str);
@@ -776,7 +783,14 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, size_t val)
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, u32 val)
+  {
+    _TStr str(val);
+    return ComparedSetKey(szKey, str);
+  }
+
+  _SSP_TEMPL
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, u64 val)
   {
     _TStr str(val);
     return ComparedSetKey(szKey, str);

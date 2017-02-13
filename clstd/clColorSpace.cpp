@@ -2,8 +2,8 @@
 //#include "cltypes.h"
 #include "clColorSpace.h"
 //#include "floatx.h"
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 
 #include <stdlib.h>
 

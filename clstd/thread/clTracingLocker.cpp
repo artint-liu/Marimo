@@ -1,7 +1,7 @@
 ﻿#include "clstd.h"
 #include "clLocker.h"
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 #include "clTracingLocker.h"
 
 namespace clstd

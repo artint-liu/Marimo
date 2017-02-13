@@ -1,6 +1,6 @@
 ﻿#include "clstd.h"
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 #include <math.h>
 
 #if defined(_WINDOWS) && defined(_CL_ARCH_X86) && ! defined(__clang__)

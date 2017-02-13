@@ -5,8 +5,8 @@
 #endif // defined(_WINDOWS) || defined(_WIN32)
 
 #include "clstd.h"
-#include "clString.H"
-#include "clPathFile.H"
+#include "clString.h"
+#include "clPathFile.h"
 #include <direct.h>
 using namespace clstd;
 

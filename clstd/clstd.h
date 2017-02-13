@@ -168,9 +168,6 @@ inline void InlSetZeroT(_Ty& t) {
 #     define V(x)              if(FAILED(x)) { CLBREAK; }
 #     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
 #   elif defined(_MSC_VER)
-#     ifdef _CL_ARCH_X86
-extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
-extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine);
 
 // 数据格式化后原始消息
 extern "C" void _cl_traceA(const char *fmt, ...);
@@ -196,19 +193,25 @@ namespace clstd
   void _cl_log_warning(const wch *fmt, ...);
 }
 
+#     define TRACEW        _cl_traceW
+#     define TRACEA        _cl_traceA
+#     define TRACE         TRACEA
+#     define CLOG_WARNING  clstd::_cl_log_warning
+#     define CLOG_ERROR    clstd::_cl_log_error
+#     define CLOG          clstd::_cl_log_info
+#     define CLOG_WARNINGW _cl_log_warningW
+#     define CLOG_ERRORW   _cl_log_errorW
+#     define CLOGW         _cl_log_infoW
+#     define CLOG_WARNINGA _cl_log_warningA
+#     define CLOG_ERRORA   _cl_log_errorA
+#     define CLOGA         _cl_log_infoA
 
-#       define TRACEW        _cl_traceW
-#       define TRACEA        _cl_traceA
-#       define TRACE         TRACEA
-#       define CLOG_WARNING  clstd::_cl_log_warning
-#       define CLOG_ERROR    clstd::_cl_log_error
-#       define CLOG          clstd::_cl_log_info
-#       define CLOG_WARNINGW _cl_log_warningW
-#       define CLOG_ERRORW   _cl_log_errorW
-#       define CLOGW         _cl_log_infoW
-#       define CLOG_WARNINGA _cl_log_warningA
-#       define CLOG_ERRORA   _cl_log_errorA
-#       define CLOGA         _cl_log_infoA
+#     ifdef _CL_ARCH_X86
+extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
+extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine);
+
+
+
 #       define CLBREAK       {__asm int 3}
 #       define CLABORT       {__asm int 3}
 
@@ -223,21 +226,21 @@ namespace clstd
 #       define V(x)              if(FAILED(x)) { CLBREAK; }
 #       define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
 #     elif defined(_CL_ARCH_X64)
-extern "C" void _cl_traceA(const char *fmt, ...);
-extern "C" void _cl_traceW(const wch *fmt, ...);
+//extern "C" void _cl_traceA(const char *fmt, ...);
+//extern "C" void _cl_traceW(const wch *fmt, ...);
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
 extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine);
 extern "C" void _cl_Break();
 extern "C" void _cl_NoOperation();
-#       define TRACEW        _cl_traceW
-#       define TRACEA        _cl_traceA
-#       define TRACE         TRACEA
-#       define CLOG_WARNING  TRACEA
-#       define CLOG_ERROR    TRACEA
-#       define CLOG          TRACEA
-#       define CLOG_WARNINGW TRACEW
-#       define CLOG_ERRORW   TRACEW
-#       define CLOGW         TRACEW
+//#       define TRACEW        _cl_traceW
+//#       define TRACEA        _cl_traceA
+//#       define TRACE         TRACEA
+//#       define CLOG_WARNING  TRACEA
+//#       define CLOG_ERROR    TRACEA
+//#       define CLOG          TRACEA
+//#       define CLOG_WARNINGW TRACEW
+//#       define CLOG_ERRORW   TRACEW
+//#       define CLOGW         TRACEW
 #       define CLBREAK       { _cl_Break(); }
 #       define CLABORT       { _cl_Break(); }
 #       define CLUNIQUEBREAK CLBREAK

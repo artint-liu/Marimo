@@ -1,7 +1,7 @@
-﻿#include "../clstd.H"
+﻿#include "../clstd.h"
 //#include "../FloatX.h"
 //#include "Geometry.h"
-//#include "GeoOp.H"
+//#include "GeoOp.h"
 
 namespace clstd
 {

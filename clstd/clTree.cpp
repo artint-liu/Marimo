@@ -1,8 +1,8 @@
 ﻿//#include "stdafx.h"
-//#include <clTypes.H>
+//#include <clTypes.h>
 #include "clMemory.h"
-#include "clStd.H"
-#include "clTree.H"
+#include "clStd.h"
+#include "clTree.h"
 
 namespace clstd
 {

@@ -1,10 +1,10 @@
 ﻿#include "clstd.h"
 #include "clLocker.h"
-#include "Thread/clSignal.H"
+#include "Thread/clSignal.h"
 #include "clThread.h"
 #include "clMessageThread.h"
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 //#include <sys/time.h>
 
 #ifdef _CPLUSPLUS_11_THREAD

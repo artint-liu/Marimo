@@ -1,6 +1,6 @@
 ﻿#include "clstd.h"
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 #include "clfifo.h"
 
 #if defined(_CL_SYSTEM_WINDOWS) && ! defined(__clang__)

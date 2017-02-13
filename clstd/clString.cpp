@@ -1,5 +1,5 @@
 ﻿#include "clstd.h"
-#include "clString.H"
+#include "clString.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>

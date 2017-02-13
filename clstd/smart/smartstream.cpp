@@ -1,8 +1,8 @@
 ﻿#include <stdarg.h>
 #include "../clstd.h"
-#include "../clString.H"
-#include "SmartStream.H"
-#include "../clUtility.H"
+#include "../clString.h"
+#include "SmartStream.h"
+#include "../clUtility.h"
 
 //using namespace clstd;
 

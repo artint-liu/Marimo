@@ -1,8 +1,8 @@
 ﻿#include <stdarg.h>
 #include "clstd.h"
-#include "clString.H"
-#include "clTokens.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clTokens.h"
+#include "clUtility.h"
 
 //using namespace clstd;
 

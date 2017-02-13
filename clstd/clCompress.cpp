@@ -1,5 +1,5 @@
 ﻿#include "clstd.h"
-//#include "clBuffer.H"
+//#include "clBuffer.h"
 #include "clCompress.h"
 
 #include "third_party/zlib/include/zlib.h"

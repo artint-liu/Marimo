@@ -1,9 +1,9 @@
 ﻿#include "../clstd.h"
-#include "../clString.H"
-//#include "../clFile.H"
+#include "../clString.h"
+//#include "../clFile.h"
 #include "SmartRepository.h"
-#include "../clUtility.H"
-//#include "../clBuffer.H"
+#include "../clUtility.h"
+//#include "../clBuffer.h"
 #include "../clCompress.h"
 
 // SSDB = Simple Storage DataBase

@@ -1,5 +1,5 @@
 ﻿#include "clstd.h"
-#include "Thread/clSignal.H"
+#include "Thread/clSignal.h"
 
 namespace clstd
 {

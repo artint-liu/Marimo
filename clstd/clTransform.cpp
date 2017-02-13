@@ -2,8 +2,8 @@
 #include "clTransform.h"
 #include <float.h>
 #ifdef _DEBUG
-#include "clString.H"
-#include "clUtility.H"
+#include "clString.h"
+#include "clUtility.h"
 #define DBGCHECKGLOBALSCALINGCHANGED ASSERT(DbgCheckGlobalScalingChanged());
 #else
 #define DBGCHECKGLOBALSCALINGCHANGED

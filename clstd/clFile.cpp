@@ -1,11 +1,11 @@
 ﻿#include <string>
 
-#include "clstd.H"
-#include "clString.H"
+#include "clstd.h"
+#include "clString.h"
 //#include "clmemory.h"
-//#include "clFile.H"
-//#include "clBuffer.H"
-#include "clUtility.H"
+//#include "clFile.h"
+//#include "clBuffer.h"
+#include "clUtility.h"
 
 #ifdef _CRT_FINDFILE
 # include <io.h>
