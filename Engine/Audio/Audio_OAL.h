@@ -81,8 +81,8 @@ extern ALenum eXRAMAuto, eXRAMHardware, eXRAMAccessible;
 #define OALERRLOG(_MSG, _ERR)   CLOG_ERROR("OpenAL:"_MSG"(code:%s).\r\n", FormatError(_ERR));
 
 #ifdef _DEBUG
-#define SETUP_THREAD_ID       s_idOpenALThread = clstd::thread::GetCurrentId()
-#define CHECK_THREAD_CONTEXT  ASSERT(s_idOpenALThread == clstd::thread::GetCurrentId())
+#define SETUP_THREAD_ID       s_idOpenALThread = clstd::this_thread::GetId()
+#define CHECK_THREAD_CONTEXT  ASSERT(s_idOpenALThread == clstd::this_thread::GetId())
 #else
 #define SETUP_THREAD_ID
 #define CHECK_THREAD_CONTEXT

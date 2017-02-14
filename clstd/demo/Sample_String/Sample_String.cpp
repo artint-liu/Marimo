@@ -12,10 +12,10 @@ void TestPathFile()
   clStringA strPath;
 
   strPath = "abc";
-  clpathfile::RenameExtensionA(strPath, ".exe");
+  clpathfile::RenameExtension(strPath, ".exe");
   ASSERT(strPath == "abc.exe");
 
-  clpathfile::RenameExtensionA(strPath, "txt");
+  clpathfile::RenameExtension(strPath, "txt");
   ASSERT(strPath == "abc.txt");
 
   //////////////////////////////////////////////////////////////////////////
@@ -24,46 +24,46 @@ void TestPathFile()
 void TestCombinePath()
 {
   clStringA strPath;
-  clpathfile::CombinePathA(strPath, "abc", "def");
+  clpathfile::CombinePath(strPath, "abc", "def");
   ASSERT(strPath == "abc\\def");
 
-  clpathfile::CombinePathA(strPath, "abc\\", "def");
+  clpathfile::CombinePath(strPath, "abc\\", "def");
   ASSERT(strPath == "abc\\def");
 
-  clpathfile::CombinePathA(strPath, "abc\\", "/def");
+  clpathfile::CombinePath(strPath, "abc\\", "/def");
   ASSERT(strPath == "\\def");
 
-  clpathfile::CombinePathA(strPath, "abc\\def", "ghi");
+  clpathfile::CombinePath(strPath, "abc\\def", "ghi");
   ASSERT(strPath == "abc\\def\\ghi");
 
-  clpathfile::CombinePathA(strPath, "abc\\def", "./ghi");
+  clpathfile::CombinePath(strPath, "abc\\def", "./ghi");
   ASSERT(strPath == "abc\\def\\ghi");
 
-  clpathfile::CombinePathA(strPath, "abc\\def", "../ghi");
+  clpathfile::CombinePath(strPath, "abc\\def", "../ghi");
   ASSERT(strPath == "abc\\ghi");
 
-  clpathfile::CombinePathA(strPath, "abc", "./def");
+  clpathfile::CombinePath(strPath, "abc", "./def");
   ASSERT(strPath == "abc\\def");
 
-  clpathfile::CombinePathA(strPath, "abc", "../def");
+  clpathfile::CombinePath(strPath, "abc", "../def");
   ASSERT(strPath == "def");
 
-  clpathfile::CombinePathA(strPath, "", "./abc");
+  clpathfile::CombinePath(strPath, "", "./abc");
   ASSERT(strPath == "abc");
 
-  clpathfile::CombinePathA(strPath, "", "../abc");
+  clpathfile::CombinePath(strPath, "", "../abc");
   ASSERT(strPath == "..\\abc");
 
-  clpathfile::CombinePathA(strPath, NULL, "./abc");
+  clpathfile::CombinePath(strPath, NULL, "./abc");
   ASSERT(strPath == "abc");
 
-  clpathfile::CombinePathA(strPath, NULL, "../abc");
+  clpathfile::CombinePath(strPath, NULL, "../abc");
   ASSERT(strPath == "..\\abc");
 
-  clpathfile::CombinePathA(strPath, "c:\\abc\\def", "d:\\ghi\\jkl");
+  clpathfile::CombinePath(strPath, "c:\\abc\\def", "d:\\ghi\\jkl");
   ASSERT(strPath == "d:\\ghi\\jkl");
 
-  clpathfile::CombinePathA(strPath, "c:\\abc\\def", "\\ghi\\jkl");
+  clpathfile::CombinePath(strPath, "c:\\abc\\def", "\\ghi\\jkl");
   ASSERT(strPath == "c:\\ghi\\jkl");
 }
 
@@ -130,22 +130,6 @@ void TestCodec() // 测试unicode到ansi转换
     clStringW strW = szTestStringW;
     clStringA strA = strW;
     ASSERT(strA == szTestStringA);
-  }
-}
-
-void TestCodec()
-{
-  const ch* szSampleStringA  =  "测试中文转换的简单字符串没有奇怪的字符，1234567890abcABC";
-  const wch* szSampleStringW = L"测试中文转换的简单字符串没有奇怪的字符，1234567890abcABC";
-  {
-    clStringA strA = szSampleStringA;
-    clStringW strW = strA;
-    ASSERT(strW == szSampleStringW);
-  }
-  {
-    clStringW strW = szSampleStringW;
-    clStringA strA = strW;
-    ASSERT(strA == szSampleStringA);
   }
 }
 

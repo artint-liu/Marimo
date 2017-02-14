@@ -310,7 +310,7 @@ namespace clstd
   //}
 
   _SSP_TEMPL 
-    b32 _SSP_IMPL::LoadW(const wch* lpProfile)
+    b32 _SSP_IMPL::LoadFromFile(const wch* lpProfile)
   {
     clFile file;
     if(file.OpenExisting(lpProfile) == FALSE) {
@@ -331,7 +331,7 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SaveW(const wch* lpProfile) const
+    b32 _SSP_IMPL::SaveToFile(const wch* lpProfile) const
   {
     clFile file;
     if(file.CreateAlways(lpProfile) == FALSE) {
@@ -387,17 +387,17 @@ namespace clstd
   }
 
   _SSP_TEMPL 
-    b32 _SSP_IMPL::LoadA(const ch* lpProfile)
+    b32 _SSP_IMPL::LoadFromFile(const ch* lpProfile)
   {
     clStringW strProfileW = lpProfile;
-    return LoadW(strProfileW);
+    return LoadFromFile(strProfileW);
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::SaveA(const ch* lpProfile) const
+    b32 _SSP_IMPL::SaveToFile(const ch* lpProfile) const
   {
     clStringW strProfileW = lpProfile;
-    return SaveW(strProfileW);
+    return SaveToFile(strProfileW);
   }
 
 

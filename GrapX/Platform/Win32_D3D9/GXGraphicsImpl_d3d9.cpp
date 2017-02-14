@@ -165,7 +165,7 @@ namespace D3D9
     }
     else {
       clStringW strFilePath;
-      clpathfile::CombinePathW(strFilePath, pDesc->szRootDir, L"grapx.log");
+      clpathfile::CombinePath(strFilePath, pDesc->szRootDir, L"grapx.log");
       MOCreateFileLoggerW(&m_pLogger, strFilePath, FALSE);
     }
 

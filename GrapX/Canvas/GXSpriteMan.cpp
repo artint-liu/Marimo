@@ -92,7 +92,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
   clstd::StockA ss;
   GXHRESULT hval = GX_FAIL;
 
-  if( ! ss.LoadW(szSpriteFile)) {
+  if( ! ss.LoadFromFile(szSpriteFile)) {
     CLOG_ERRORW(L"%s : Can not open file(\"%s\").", __FUNCTIONW__, szSpriteFile);
     return GX_E_OPEN_FAILED;
   }
@@ -117,8 +117,8 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSp
 
     clStringW strImageFileW = szSpriteFile;//;
     strImageFileW.Replace(clpathfile::ViceSlash(), clpathfile::Slash());
-    clpathfile::RemoveFileSpecW(strImageFileW);
-    clpathfile::CombinePathW(strImageFileW, strImageFileW, clStringW(strImageFile));
+    clpathfile::RemoveFileSpec(strImageFileW);
+    clpathfile::CombinePath(strImageFileW, strImageFileW, clStringW(strImageFile));
     hval = GXCreateSpriteArray(pGraphics, strImageFileW, xStart, yStart, nTileWidth, nTileHeight, nGapWidth, nGapHeight, ppSprite);
     //ss.FindClose(hSpriteArray);
   } // if(hSpriteArray)
@@ -371,9 +371,9 @@ GXHRESULT IntLoadSpriteDesc(StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** p
     {
       if(hSprite.GetKey("File", valueFile) == TRUE) {
         clStringW strSpriteDir = szSpriteFile;
-        clpathfile::RemoveFileSpecW(strSpriteDir);
+        clpathfile::RemoveFileSpec(strSpriteDir);
         pDescObj->m_strImageFile = AS2WS(valueFile.ToString());
-        clpathfile::CombinePathW(pDescObj->m_strImageFile, strSpriteDir, pDescObj->m_strImageFile);
+        clpathfile::CombinePath(pDescObj->m_strImageFile, strSpriteDir, pDescObj->m_strImageFile);
       }
     }
     //ss.FindClose(hSprite);
@@ -400,7 +400,7 @@ GXHRESULT GXDLLAPI GXLoadSpriteDescW(GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDe
 {
   StockA ss;
 
-  if( ! ss.LoadW(szSpriteFile)) {
+  if( ! ss.LoadFromFile(szSpriteFile)) {
     return GX_E_OPEN_FAILED;
   }
   
@@ -538,7 +538,7 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
   file.WritefA("Sprite {\r\n"); // <Sprite>
 
   clStringW strRelativePath;
-  clpathfile::RelativePathToW(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
+  clpathfile::RelativePathTo(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
   clStringA strFilenameA(strRelativePath);
   file.WritefA("  File=\"%s\";\r\n", (const char*)strFilenameA);
   file.WritefA("  Module {\r\n"); // <Module>
@@ -634,7 +634,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
   auto pSpriteSection = stock.CreateSection("Sprite");
 
   clStringW strRelativePath;
-  clpathfile::RelativePathToW(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
+  clpathfile::RelativePathTo(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
   clStringA strFilenameA(strRelativePath);
 
   pSpriteSection.SetKey("File", strFilenameA);
@@ -714,7 +714,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
     }
   }
 
-  if( ! stock.SaveW(szFilename))
+  if( ! stock.SaveToFile(szFilename))
   {
     CLOG_ERROR("%s : Can not save file(%s).\r\n", __FUNCTION__, (const char*)szFilename);
     return FALSE;

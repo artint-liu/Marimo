@@ -2287,11 +2287,11 @@ NOT_INC_P:
   void CodeParser::PP_Include(const TOKEN::Array& aTokens)
   {
     clStringW strPath = m_pMsg->GetFilePathW();
-    clpathfile::RemoveFileSpecW(strPath);
+    clpathfile::RemoveFileSpec(strPath);
     clStringW strHeader = aTokens[1].ToString();
     strHeader.TrimBoth('\"');
 
-    clpathfile::CombinePathW(strPath, strPath, strHeader);
+    clpathfile::CombinePath(strPath, strPath, strHeader);
 
     CodeParser* pRoot = GetRootParser();
 
@@ -2798,7 +2798,7 @@ NOT_INC_P:
   GXHRESULT DefaultInclude::Open(IncludeType eIncludeType, GXLPCWSTR szFileName, clBuffer** ppBuffer)
   {
     clFile file;
-    if( ! file.OpenExistingW(szFileName)) {
+    if( ! file.OpenExisting(szFileName)) {
       return GX_FAIL;
     }
 

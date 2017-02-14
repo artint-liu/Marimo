@@ -146,7 +146,7 @@ int CreateSectAndSave()
 
     //s.CloseSection(hWillBeDelete);
 
-    s.SaveW(L"TestSave.txt");
+    s.SaveToFile(L"TestSave.txt");
 
     //getch();
     return 0;
@@ -155,7 +155,7 @@ int CreateSectAndSave()
 void TestRoot()
 {
   StockA s;
-  s.LoadW(L"TestSave.txt");
+  s.LoadFromFile(L"TestSave.txt");
   auto pSect = s.OpenSection(NULL);
   ASSERT(pSect);
   StockA::ATTRIBUTE p;
@@ -207,13 +207,13 @@ void test2_write()
     n += 500;
   }
 
-  ss.SaveA("framelist.txt");
+  ss.SaveToFile("framelist.txt");
 }
 
 void test2_read()
 {
   StockA ss;
-  if( ! ss.LoadA("framelist.txt")) {
+  if( ! ss.LoadFromFile("framelist.txt")) {
     return;
   }
 
@@ -313,7 +313,7 @@ void test_outofdate()
   ASSERT(child_c);    // 有效
   ASSERT(root);       // 有效
 
-  ss.SaveA("test_04.txt");
+  ss.SaveToFile("test_04.txt");
 }
 
 int _tmain(int argc, _TCHAR* argv[])

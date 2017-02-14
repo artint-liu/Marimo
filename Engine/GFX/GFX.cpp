@@ -72,7 +72,7 @@ namespace GFX
   GXHRESULT GAMEENGINE_API CreateFromFileW( Element** ppElement, GXGraphics* pGraphics, GXLPCWSTR szFilename )
   {
     clStockW sp;
-    if( ! sp.LoadW(szFilename)) {
+    if( ! sp.LoadFromFile(szFilename)) {
       return GX_E_OPEN_FAILED;
     }
     typedef cllist<Element*> ElementList;

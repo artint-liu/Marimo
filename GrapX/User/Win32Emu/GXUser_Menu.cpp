@@ -132,7 +132,7 @@ GXBOOL LoadMenuTemplateFromStockSectionW(
 GXBOOL LoadIdentifyDefinationW(GXLPCWSTR szFilename, GXLPCWSTR szSmartPath, TIdentifyDefination& DefTable)
 {
   clStockW sp;
-  if(sp.LoadW(szFilename))
+  if(sp.LoadFromFile(szFilename))
   {
     clStockW::Section hDef = sp.OpenSection(szSmartPath);
     if(hDef) {

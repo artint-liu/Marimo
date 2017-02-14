@@ -53,18 +53,18 @@ b32 _SplitPathT(const _TString& strPath, _TString* pstrDir, _TString* pstrFile)
   return TRUE;
 }
 
-b32 SplitPathA(const clStringA& strPath, clStringA* pstrDir, clStringA* pstrFile)
+b32 SplitPath(const clStringA& strPath, clStringA* pstrDir, clStringA* pstrFile)
 {
   return _SplitPathT(strPath, pstrDir, pstrFile);
 }
 
-b32 SplitPathW(const clStringW& strPath, clStringW* pstrDir, clStringW* pstrFile)
+b32 SplitPath(const clStringW& strPath, clStringW* pstrDir, clStringW* pstrFile)
 {
   return _SplitPathT(strPath, pstrDir, pstrFile);
 }
 
 template<typename _TString>
-b32 IsFullPath(const _TString& strFilename)
+b32 IsFullPathT(const _TString& strFilename)
 {
   typename _TString::TChar c = strFilename[0];
   if(c == '\\' || c == '/')
@@ -77,13 +77,13 @@ b32 IsFullPath(const _TString& strFilename)
   return FALSE;
 }
 
-b32 IsFullPathA(const clStringA& strFilename)
+b32 IsFullPath(const clStringA& strFilename)
 {
-  return IsFullPath(strFilename);
+  return IsFullPathT(strFilename);
 }
-b32 IsFullPathW(const clStringW& strFilename)
+b32 IsFullPath(const clStringW& strFilename)
 {
-  return IsFullPath(strFilename);
+  return IsFullPathT(strFilename);
 }
 
 //void LocateRootDir()
@@ -105,7 +105,7 @@ void ResetWorkingDir()
   clStringW strDir;
   clStringW strFile;
   GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
-  SplitPathW(clStringW(szModulePath), &strDir, &strFile);
+  SplitPath(clStringW(szModulePath), &strDir, &strFile);
   s_strRootDir = clpathfile::CanonicalizeT(strDir);
   SetCurrentDirectoryW(strDir);
 #endif // _WINDOWS
@@ -181,11 +181,11 @@ namespace clpathfile
     return TRUE;
   }
 
-  b32 RenameExtensionA(clStringA& strPath, clStringA::LPCSTR  szExt)
+  b32 RenameExtension(clStringA& strPath, clStringA::LPCSTR  szExt)
   {
     return RenameExtensionT(strPath, szExt);
   }
-  b32 RenameExtensionW(clStringW& strPath, clStringW::LPCSTR  szExt)
+  b32 RenameExtension(clStringW& strPath, clStringW::LPCSTR  szExt)
   {
     return RenameExtensionT(strPath, szExt);
   }
@@ -208,14 +208,24 @@ namespace clpathfile
     return (p + 1);
   }
 
-  clsize FindFileNameA(const clStringA& strPath)
+  clsize FindFileName(const clStringA& strPath)
   {
     return FindFileNameT(strPath);
   }
   
-  clsize FindFileNameW(const clStringW& strPath)
+  clsize FindFileName(const clStringW& strPath)
   {
     return FindFileNameT(strPath);
+  }
+
+  clsize FindFileName(const  ch* szPath)
+  {
+    return FindFileNameT<clStringA>(szPath);
+  }
+
+  clsize FindFileName(const wch* szPath)
+  {
+    return FindFileNameT<clStringW>(szPath);
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -235,12 +245,12 @@ namespace clpathfile
     return -1;
   }
 
-  clsize FindExtensionA(const ch* szPath)
+  clsize FindExtension(const ch* szPath)
   {
     return FindExtensionT(szPath);
   }
   
-  clsize FindExtensionW(const wch* szPath)
+  clsize FindExtension(const wch* szPath)
   {
     return FindExtensionT(szPath);
   }
@@ -298,12 +308,12 @@ namespace clpathfile
     return TRUE;
   }
 
-  b32 AddSlashA(clStringA& strPath)
+  b32 AddSlash(clStringA& strPath)
   {
     return AddSlashT(strPath);
   }
 
-  b32 AddSlashW(clStringW& strPath)
+  b32 AddSlash(clStringW& strPath)
   {
     return AddSlashT(strPath);
   }
@@ -412,12 +422,12 @@ namespace clpathfile
     return strDestPath;
   }
   
-  clStringA& CombinePathA(clStringA& strDestPath, clStringA::LPCSTR szDir, clStringA::LPCSTR szFile)
+  clStringA& CombinePath(clStringA& strDestPath, clStringA::LPCSTR szDir, clStringA::LPCSTR szFile)
   {
     return CombinePathT(strDestPath, szDir, szFile);
   }
 
-  clStringW& CombinePathW(clStringW& strDestPath, clStringW::LPCSTR szDir, clStringW::LPCSTR szFile)
+  clStringW& CombinePath(clStringW& strDestPath, clStringW::LPCSTR szDir, clStringW::LPCSTR szFile)
   {
     return CombinePathT(strDestPath, szDir, szFile);
   }
@@ -444,11 +454,11 @@ namespace clpathfile
       (const _TString&)s_strRootDir, 
       (const _TString&)strSrcPath);
   }
-  clStringA& CombineAbsPathToA(clStringA& strDestPath, const clStringA& strSrcPath)
+  clStringA& CombineAbsPathTo(clStringA& strDestPath, const clStringA& strSrcPath)
   {
     return CombineAbsPathToT(strDestPath, strSrcPath);
   }
-  clStringW& CombineAbsPathToW(clStringW& strDestPath, const clStringW& strSrcPath)
+  clStringW& CombineAbsPathTo(clStringW& strDestPath, const clStringW& strSrcPath)
   {
     return CombineAbsPathToT(strDestPath, strSrcPath);
   }
@@ -465,17 +475,17 @@ namespace clpathfile
     }
     return strPath.GetLength();
   }
-  clsize CombineAbsPathA(clStringA& strPath)
+  clsize CombineAbsPath(clStringA& strPath)
   {
     return CombineAbsPathT(strPath);
   }
-  clsize CombineAbsPathW(clStringW& strPath)
+  clsize CombineAbsPath(clStringW& strPath)
   {
     return CombineAbsPathT(strPath);
   }
 
   template<typename _TString>
-  clsize MakeFullPath(_TString& strPath)
+  clsize MakeFullPathT(_TString& strPath)
   {
     if(IsRelativeT<typename _TString::TChar>(strPath)) {
       _TString strCurrDir;
@@ -485,14 +495,14 @@ namespace clpathfile
     return 0;
   }
 
-  clsize MakeFullPathA(clStringA& strPath)
+  clsize MakeFullPath(clStringA& strPath)
   {
-    return MakeFullPath(strPath);
+    return MakeFullPathT(strPath);
   }
 
-  clsize MakeFullPathW(clStringW& strPath)
+  clsize MakeFullPath(clStringW& strPath)
   {
-    return MakeFullPath(strPath);
+    return MakeFullPathT(strPath);
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -532,12 +542,12 @@ namespace clpathfile
     return str;
   }
   
-  clStringA CanonicalizeA(const clStringA& strPath)
+  clStringA Canonicalize(const clStringA& strPath)
   {
     return CanonicalizeT(strPath);
   }
 
-  clStringW CanonicalizeW(const clStringW& strPath)
+  clStringW Canonicalize(const clStringW& strPath)
   {
     return CanonicalizeT(strPath);
   }
@@ -553,12 +563,12 @@ namespace clpathfile
     return TRUE;
   }
 
-  b32 IsFileSpecA(const  ch* szPath)
+  b32 IsFileSpec(const  ch* szPath)
   {
     return IsFileSpecT<clstd::StringA_traits, ch>(szPath);
   }
 
-  b32 IsFileSpecW(const wch* szPath)
+  b32 IsFileSpec(const wch* szPath)
   {
     return IsFileSpecT<clstd::StringW_traits, wch>(szPath);
   }
@@ -582,12 +592,12 @@ namespace clpathfile
     return (strPath.Remove(p, -1) - nLen != 0);
   }
 
-  b32 RemoveFileSpecA(clStringA& strPath)
+  b32 RemoveFileSpec(clStringA& strPath)
   {
     return RemoveFileSpecT(strPath);
   }
 
-  b32 RemoveFileSpecW(clStringW& strPath)
+  b32 RemoveFileSpec(clStringW& strPath)
   {
     return RemoveFileSpecT(strPath);
   }
@@ -603,12 +613,12 @@ namespace clpathfile
 #endif
   }
 
-  b32 IsRelativeA(const  ch* szPath)
+  b32 IsRelative(const  ch* szPath)
   {
     return IsRelativeT<ch>(szPath);
   }
 
-  b32 IsRelativeW(const wch* szPath)
+  b32 IsRelative(const wch* szPath)
   {
     return IsRelativeT<wch>(szPath);
   }
@@ -647,12 +657,12 @@ namespace clpathfile
     return nSlash;
   }
 
-  int CommonPrefixA(clStringA& strCommDir, const  ch* szPath1, const  ch* szPath2)
+  int CommonPrefix(clStringA& strCommDir, const  ch* szPath1, const  ch* szPath2)
   {
     return CommonPrefixT(strCommDir, szPath1, szPath2);
   }
 
-  int CommonPrefixW(clStringW& strCommDir, const wch* szPath1, const wch* szPath2)
+  int CommonPrefix(clStringW& strCommDir, const wch* szPath1, const wch* szPath2)
   {
     return CommonPrefixT(strCommDir, szPath1, szPath2);
   }
@@ -703,12 +713,12 @@ namespace clpathfile
     return TRUE;
   }
 
-  b32 RelativePathToA(clStringA& strOutput, const ch* szFromPath, b32 bFromIsDir, const ch* szToPath, b32 bToIsDir)
+  b32 RelativePathTo(clStringA& strOutput, const ch* szFromPath, b32 bFromIsDir, const ch* szToPath, b32 bToIsDir)
   {
     return RelativePathToT(strOutput, szFromPath, bFromIsDir, szToPath, bToIsDir);
   }
 
-  b32 RelativePathToW(clStringW& strOutput, const wch* szFromPath, b32 bFromIsDir, const wch* szToPath, b32 bToIsDir)
+  b32 RelativePathTo(clStringW& strOutput, const wch* szFromPath, b32 bFromIsDir, const wch* szToPath, b32 bToIsDir)
   {
     return RelativePathToT(strOutput, szFromPath, bFromIsDir, szToPath, bToIsDir);
   }
@@ -803,16 +813,16 @@ namespace clpathfile
 
   b32 LocalWorkingDirW(CLLPCWSTR szDir)
   {
-    if( ! IsRelativeW(szDir)) {
+    if( ! IsRelative(szDir)) {
       return SetCurrentDirectoryW(szDir);
     }
     wch szModulePath[MAX_PATH];
     clStringW strDir;
     clStringW strFile;
     GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
-    SplitPathW(clStringW(szModulePath), &strDir, &strFile);
+    SplitPath(clStringW(szModulePath), &strDir, &strFile);
     if(szDir) {
-      CombinePathW(strDir, strDir, szDir);
+      CombinePath(strDir, strDir, szDir);
     }
     s_strRootDir = clpathfile::CanonicalizeT(strDir);
     return SetCurrentDirectoryW(strDir);

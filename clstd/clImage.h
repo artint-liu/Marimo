@@ -61,26 +61,30 @@ namespace clstd
 
   public:
     Image& operator=(const Image& image);
-    b32         CompareFormat (const char* fmt) const;
-    b32         Set           (int nWidth, int nHeight, const char* fmt, const void* pData);
-    b32         Set           (int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData);
-    int         GetWidth      () const;
-    int         GetHeight     () const;
-/*没实现*/int       Inflate       (int left, int top, int right, int bottom); // 调整Image尺寸，参数是四个边缘扩展的像素数，可以是负数
-    const void* GetPixelPtr   (int x, int y) const;
-    void*       GetPixelPtr   (int x, int y);
-    size_t      GetDataSize   () const;
-    int         GetDepth      () const;
-    const void* GetLine       (int y) const;
-    void*       GetLine       (int y);
-    int         GetChannelOffset(char chChannel) const;   // 通道在像素中的偏移量, 对于"AAAX"这种格式只能返回第一个Alpha通道的偏移
-    b32         GetChannelPlane (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
-    b32         ScaleNearest    (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
-    const char* GetFormat     () const;
-    b32         SetFormat     (const char* fmt); // 更改通道顺序或者删除通道
+    b32         CompareFormat       (const char* fmt) const;
+    b32         Set                 (int nWidth, int nHeight, const char* fmt, const void* pData);
+    b32         Set                 (int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData);
+    int         GetWidth            () const;
+    int         GetHeight           () const;
+    int         GetDepth            () const;
+    int         GetPitch            () const;
+/*没实现*/int       Inflate             (int left, int top, int right, int bottom); // 调整Image尺寸，参数是四个边缘扩展的像素数，可以是负数
+    const void* GetPixelPtr         (int x, int y) const;
+    void*       GetPixelPtr         (int x, int y);
+    size_t      GetDataSize         () const;
+    const void* GetLine             (int y) const;
+    void*       GetLine             (int y);
+    int         GetChannelOffset    (char chChannel) const;   // 通道在像素中的偏移量, 对于"AAAX"这种格式只能返回第一个Alpha通道的偏移
+    b32         GetChannelPlane     (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
+    b32         ReplaceChannel      (char chReplacedChannel, const Image* pSource, char chSrcChannel); // 从一个图像拷贝通道，如果指定的通道在源图像中不存在，会失败。
+    b32         ScaleNearest        (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
+    const char* GetFormat           () const;
+    b32         SetFormat           (const char* fmt); // 更改通道顺序或者删除通道
   private:
-    template<typename _Ty>
-    void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );
+    //template<typename _Ty>
+    //void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );
+    template<typename _TChannel>
+    static void IntCopyChannel(Image* pDestImage, int nDestIndex, const Image* pSrcImage, int nSrcIndex);
 
     template<typename _Ty>
     void IntStretchCopy( Image* pDestImage, int nWidth, int nHeight );

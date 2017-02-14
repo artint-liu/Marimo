@@ -1,12 +1,12 @@
 #if defined(_WIN32) || defined(_WINDOWS)
-#include <GrapX.H>
+#include <GrapX.h>
 #include "User/GrapX.Hxx"
 
-#include <clPathFile.H>
-#include <clString.H>
+#include <clPathFile.h>
+//#include <clString.H>
 
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
 
 #include <GDI/GXShaderMgr.h>
 

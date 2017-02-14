@@ -475,10 +475,10 @@ GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCST
   }
   
   if( ! IsFullPath(strFilename)) {
-    clpathfile::CombinePathW(strFilename, szResourceDir, strFilename);
+    clpathfile::CombinePath(strFilename, szResourceDir, strFilename);
   }
 
-  if( ! sp.LoadW(strFilename)) {
+  if( ! sp.LoadFromFile(strFilename)) {
     CLOG_WARNINGW(L"GShader : Can not open file(%s).\n", strFilename);
     return GX_E_OPEN_FAILED;
   }
@@ -489,22 +489,22 @@ GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCST
   ses.strMacros = strMacros;
 
   if(pElement->strPreVS.IsNotEmpty() && ! IsFullPath(ses.strPreVS))
-    clpathfile::CombinePathA(ses.strPreVS, strResourceDirA, ses.strPreVS);
+    clpathfile::CombinePath(ses.strPreVS, strResourceDirA, ses.strPreVS);
   
   if(ses.strVS.IsNotEmpty() && ! IsFullPath(ses.strVS))
-    clpathfile::CombinePathA(ses.strVS, strResourceDirA, ses.strVS);
+    clpathfile::CombinePath(ses.strVS, strResourceDirA, ses.strVS);
   
   //if(ses.strVSExtra.IsNotEmpty() && ! IsFullPath(ses.strVSExtra))
   //  clpathfile::CombinePathA(ses.strVSExtra, strResourceDirA, ses.strVSExtra);
   
   if(ses.strPS.IsNotEmpty() && ! IsFullPath(ses.strPS))
-    clpathfile::CombinePathA(ses.strPS, strResourceDirA, ses.strPS);
+    clpathfile::CombinePath(ses.strPS, strResourceDirA, ses.strPS);
   
   if(ses.strVSComposer.IsNotEmpty() && ! IsFullPath(ses.strVSComposer))
-    clpathfile::CombinePathA(ses.strVSComposer, strResourceDirA, ses.strVSComposer);
+    clpathfile::CombinePath(ses.strVSComposer, strResourceDirA, ses.strVSComposer);
   
   if(ses.strPSComposer.IsNotEmpty() && ! IsFullPath(ses.strPSComposer))
-    clpathfile::CombinePathA(ses.strPSComposer, strResourceDirA, ses.strPSComposer);
+    clpathfile::CombinePath(ses.strPSComposer, strResourceDirA, ses.strPSComposer);
 
   //for(clStringArrayA::iterator it = ses.aPSComponent.begin();
   //  it != ses.aPSComponent.end(); ++it) {
@@ -600,7 +600,7 @@ inline GXBOOL IntLoadShaderComponent(const clStringA& strFilename, clFile& File,
         if( ! bCompiled)  // 不是编译格式的话就插入 #line 宏
         {
           clStringA strFileDesc;
-          ASSERT( ! clpathfile::IsRelativeA(strFilename));
+          ASSERT( ! clpathfile::IsRelative(strFilename));
           strFileDesc.Format("\r\n#line 1 \"%s\"\r\n", strFilename);
           (*ppComponentBuf)->Insert(0, (CLLPVOID)strFileDesc.GetBuffer(), strFileDesc.GetLength());
         }
@@ -628,9 +628,9 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
 
   clsize pos;
   // 只有扩展名为"HLSL"才认为是源代码
-  pos = clpathfile::FindExtensionA(pSrcComponent->strVS);
+  pos = clpathfile::FindExtension(pSrcComponent->strVS);
   const GXBOOL bCompiledVS = (pos <= 0 || GXSTRCMPI(&pSrcComponent->strVS[(int)pos], ".hlsl") != 0);
-  pos = clpathfile::FindExtensionA(pSrcComponent->strPS);
+  pos = clpathfile::FindExtension(pSrcComponent->strPS);
   const GXBOOL bCompiledPS = (pos <= 0 || GXSTRCMPI(&pSrcComponent->strPS[(int)pos], ".hlsl") != 0);
 
   // TODO: 二进制数据和源码数据可能会有混合错误的问题...

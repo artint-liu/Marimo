@@ -164,9 +164,9 @@ GXHRESULT GXSTATION::Finalize()
 
 clStringW GXSTATION::ConvertAbsPathW(GXLPCWSTR szPath)
 {
-  if(clpathfile::IsRelativeW(szPath)) {
+  if(clpathfile::IsRelative(szPath)) {
     clStringW strAbs;
-    return clpathfile::CombinePathW(strAbs, lpPlatform->GetRootDir(), szPath);
+    return clpathfile::CombinePath(strAbs, lpPlatform->GetRootDir(), szPath);
   }
   return szPath;
 }

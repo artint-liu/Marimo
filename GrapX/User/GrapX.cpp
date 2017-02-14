@@ -1076,12 +1076,12 @@ GXBOOL GXINSTANCE::Initialize(GXLPSTATION _lpStation, HINSTANCE hInst)
   lpStation = _lpStation;
   hInstance = hInst;
 
-  CHAR szModuleName[MAX_PATH];
-  GetModuleFileNameA(hInstance, szModuleName, MAX_PATH);
-  strModuleName = clpathfile::CanonicalizeA(szModuleName);
+  GetModuleFileNameA(hInstance, strModuleName.GetBuffer(MAX_PATH), MAX_PATH);
+  strModuleName.ReleaseBuffer();
+  clpathfile::Canonicalize(strModuleName);
 
-  clsize nFileExt = clpathfile::FindExtensionA(strModuleName);
-  clsize nFileName = clpathfile::FindFileNameA(strModuleName);
+  clsize nFileExt = clpathfile::FindExtension(strModuleName);
+  clsize nFileName = clpathfile::FindFileName(strModuleName);
   //strModuleName[nFileExt] = '\0';
   strRootDir = strModuleName.SubString(0, nFileName);
   strModuleName = strModuleName.SubString(nFileName, nFileExt - nFileName);

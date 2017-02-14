@@ -233,7 +233,7 @@ namespace Test{
       item.strOutput    = find_data.Filename;
       item.strReference = find_data.Filename;
 
-      clpathfile::RenameExtensionA(item.strName, "");
+      clpathfile::RenameExtension(item.strName, "");
 
       // 跳过输出文件和屏蔽文件
       if(item.strOutput.EndsWith("[output].txt") || item.strOutput.EndsWith("[reference].txt") ||
@@ -241,14 +241,14 @@ namespace Test{
         continue;
       }
 
-      clsize pos = clpathfile::FindExtensionA(item.strOutput);
+      clsize pos = clpathfile::FindExtension(item.strOutput);
       if(pos != clStringA::npos)
       {
         item.strOutput.Insert(pos, "[output]");
         item.strReference.Insert(pos, "[reference]");
-        clpathfile::CombinePathA(item.strInput, szDir, find_data.Filename);
-        clpathfile::CombinePathA(item.strOutput, szDir, item.strOutput);
-        clpathfile::CombinePathA(item.strReference, szDir, item.strReference);
+        clpathfile::CombinePath(item.strInput, szDir, find_data.Filename);
+        clpathfile::CombinePath(item.strOutput, szDir, item.strOutput);
+        clpathfile::CombinePath(item.strReference, szDir, item.strReference);
         toy_list.push_back(item);
       }
     }

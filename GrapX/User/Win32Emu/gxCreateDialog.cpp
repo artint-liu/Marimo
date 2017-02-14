@@ -1136,7 +1136,7 @@ GXHWND CreateDialogItem_RichList(DlgXM::DlgSmartFile &file, Section hDlgItem, Dl
 {
   RICHLIST_PARAM sParam;
   sParam.strItemTemplate = hDlgItem.GetKeyAsString(L"ItemTemplate", L"");
-  if(sParam.strItemTemplate.IsNotEmpty() && clpathfile::IsFileSpecW(sParam.strItemTemplate)) {
+  if(sParam.strItemTemplate.IsNotEmpty() && clpathfile::IsFileSpec(sParam.strItemTemplate)) {
     sParam.strItemTemplate = clStringW(file.GetFilename()) + L":" + sParam.strItemTemplate;
   }
 
@@ -1237,7 +1237,7 @@ GXHWND gxIntCreateDialogFromFileW(
 
   //RichListParams sRichListParams; // 参数队列，用来在InitDialog消息之后初始化Rich List Box控件
 
-  if( ! file.LoadW(strDialogFile))
+  if( ! file.LoadFromFile(strDialogFile))
   {
     TRACEW(L"Error gxIntCreateDialogFromFileW, 无法加载文件(%s).\n", lpFilename);
     return NULL;

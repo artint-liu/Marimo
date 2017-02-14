@@ -245,9 +245,9 @@ GXHRSRC GXDLLAPI gxFindResourceA(GXHMODULE hModule, GXLPCSTR lpName, GXLPCSTR lp
   }
 
   clStringA strFilename;
-  clpathfile::CombinePathA(strFilename, lpModule->strModuleName, strName);
-  clpathfile::CombinePathA(strFilename, "Resource", strFilename);
-  clpathfile::CombinePathA(strFilename, lpModule->strRootDir, strFilename);
+  clpathfile::CombinePath(strFilename, lpModule->strModuleName, strName);
+  clpathfile::CombinePath(strFilename, "Resource", strFilename);
+  clpathfile::CombinePath(strFilename, lpModule->strRootDir, strFilename);
 
   clFile file;
   if(file.OpenExisting(strFilename)) {
@@ -418,7 +418,7 @@ __declspec(naked) GXDWORD GXDLLAPI gxGetCurrentThreadId()
 #else
 GXDWORD GXDLLAPI gxGetCurrentThreadId()
 {
-  return (GXDWORD)clstd::thread::GetCurrentId();
+  return (GXDWORD)clstd::this_thread::GetId();
 }
 #endif // #if defined(_WIN32) && defined(_X86)
 
@@ -456,7 +456,7 @@ GXDWORD GXDLLAPI GXUIGetStationDesc(GXStationDesc eDesc, GXWPARAM wParam, GXLPAR
       GetModuleFileNameW(NULL, strCfgPath.GetBuffer(MAX_PATH), MAX_PATH);
       strCfgPath.ReleaseBuffer();
 
-      clpathfile::RenameExtensionW(strCfgPath, L".config");
+      clpathfile::RenameExtension(strCfgPath, L".config");
       GXSTRCPYN<GXWCHAR>((GXLPWSTR)lParam, (GXLPCWSTR)strCfgPath, wParam);
 
       if(strCfgPath.GetLength() > wParam) {

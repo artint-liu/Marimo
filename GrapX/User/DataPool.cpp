@@ -255,7 +255,7 @@ namespace Marimo
       CLOGW(L"Import data from \"%s\".", szFilename);
       IMPORT import;
       import.ErrorMsg.LoadErrorMessageW(DPC_MESSAGE_FILE);
-      if(import.ss.LoadW(szFilename)) {
+      if(import.ss.LoadFromFile(szFilename)) {
         if(import.PrepareLines(szFilename)) {
           auto sectRoot = import.ss.OpenSection(NULL);
           IntImportSections(import, sectRoot, NULL);

@@ -419,13 +419,13 @@ public:
           }
           else if(TEST_FLAG(dwAttr, FILE_ATTRIBUTE_DIRECTORY))
           {
-            clpathfile::CombinePathW(psbf->m_strPath, psbf->m_strPath, szFile);
+            clpathfile::CombinePath(psbf->m_strPath, psbf->m_strPath, szFile);
             psbf->FillList(hDlg);
           }
           else
           {
             clStringW strFilePath;
-            clpathfile::CombinePathW(strFilePath, psbf->m_strPath, szFile);
+            clpathfile::CombinePath(strFilePath, psbf->m_strPath, szFile);
             GXSTRCPYN(psbf->m_lpofn->lpstrFile, (GXLPCWSTR)strFilePath, psbf->m_lpofn->nMaxFile);
             psbf->TrueClose();
             gxEndDialog(hDlg, TRUE);
@@ -475,7 +475,7 @@ extern "C"
     clstd::StockW stock;
     GXBOOL bConfig = FALSE;
     GXUIGetStationDesc(GXSD_CONFIGPATH, MAX_PATH, (GXLPARAM)szConfig);
-    bConfig = stock.LoadW(szConfig);
+    bConfig = stock.LoadFromFile(szConfig);
 
     // 初始化起始路径
     if( ! lpOFN->lpstrInitialDir) {
@@ -507,7 +507,7 @@ extern "C"
     if(result) {
       clstd::StockW::Section sect = stock.CreateSection(NULL);
       sect.SetKey(L"GetOpenFileName", strInitDir);
-      stock.SaveW(szConfig);
+      stock.SaveToFile(szConfig);
     }
 
     return result;

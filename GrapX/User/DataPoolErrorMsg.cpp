@@ -63,7 +63,7 @@ namespace Marimo
     GXBOOL _DPEM_CLS::LoadErrorMessageW(GXLPCWSTR szErrorFile)
   {
     clstd::StockW ss;
-    if(ss.LoadW(szErrorFile))
+    if(ss.LoadFromFile(szErrorFile))
     {
       clstd::StockW::Section sectRoot = ss.OpenSection(NULL);
       if(sectRoot)

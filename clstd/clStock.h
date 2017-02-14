@@ -187,10 +187,10 @@ namespace clstd
     StockT();
     virtual ~StockT();
 
-    b32 LoadA(const ch* lpProfile);
-    b32 SaveA(const ch* lpProfile) const;
-    b32 LoadW(const wch* lpProfile);
-    b32 SaveW(const wch* lpProfile) const;
+    b32 LoadFromFile(const ch* lpProfile);
+    b32 LoadFromFile(const wch* lpProfile);
+    b32 SaveToFile(const ch* lpProfile) const;
+    b32 SaveToFile(const wch* lpProfile) const;
 
     b32 Set(BufferBase* pBuffer);         // 内部会复制一份
     b32 Set(T_LPCSTR str, clsize nCount); // 内部会复制一份

@@ -90,9 +90,9 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
   clStringW strProfile;
   GetModuleFileNameW(hInstance, buffer, MAX_PATH);
   strProfile = buffer;
-  clpathfile::RenameExtensionW(strProfile, L".smartfile");
+  clpathfile::RenameExtension(strProfile, L".smartfile");
   pDesc->idPlatform = GXPLATFORM_WIN32_DIRECT3D9;
-  if(sp.LoadW(strProfile)) {
+  if(sp.LoadFromFile(strProfile)) {
     Section handle = sp.OpenSection("Startup/Info");
     if(handle)
     {
@@ -119,7 +119,7 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
     handle.SetKey("Platform", strPlatform);
     //sp.Close(handle);
     handle.clear();
-    sp.SaveW(strProfile);
+    sp.SaveToFile(strProfile);
   }
 
   return val == 0;

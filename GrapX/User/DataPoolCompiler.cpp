@@ -286,8 +286,8 @@ namespace Marimo
 
         // 根据当前文件路径计算include文件路径
         clStringW str = pThis->m_ErrorMsg.GetFilePathW();
-        clpathfile::RemoveFileSpecW(str);
-        clpathfile::CombinePathW(str, str, clStringW(it.ToString()));
+        clpathfile::RemoveFileSpec(str);
+        clpathfile::CombinePath(str, str, clStringW(it.ToString()));
 
         if(pThis->CheckIncludeLoop(str, it.offset()) && GXSUCCEEDED(pThis->m_pInclude->Open(
           DataPoolInclude::IncludeType_Local, str, NULL, &pData, &nBytes)))
@@ -322,8 +322,8 @@ namespace Marimo
             // 导入数据文件
             
             clStringW str = pThis->m_ErrorMsg.GetFilenameW();
-            clpathfile::RemoveFileSpecW(str);
-            clpathfile::CombinePathW(str, str, clStringW(argv[1].ToString()));
+            clpathfile::RemoveFileSpec(str);
+            clpathfile::CombinePath(str, str, clStringW(argv[1].ToString()));
 
             pThis->m_ImportFiles.push_back(str);
             //TRACEW(L"Import file: %s\n", pThis->m_ImportFiles.back());

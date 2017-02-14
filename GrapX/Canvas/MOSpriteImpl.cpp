@@ -882,9 +882,9 @@ namespace Marimo
     {
       GXImage* pImage = NULL;
 
-      if(clpathfile::IsRelativeA(str)) {
+      if(clpathfile::IsRelative(str)) {
         clStringA strFullPath;
-        clpathfile::CombinePathA(strFullPath, pDesc->strImageDir, str);
+        clpathfile::CombinePath(strFullPath, pDesc->strImageDir, str);
         m_loader.aFiles[i] = strFullPath;
         pImage = pGraphics->CreateImageFromFile(clStringW(strFullPath));
       }

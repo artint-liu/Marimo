@@ -84,7 +84,7 @@ GXHRESULT SaveObject(_IObjectT* pObject, GXLPCWSTR szFilename, GXLPCWSTR szExt)
     strMeshName = L"_";
     strMeshName += pObject->GetName();
   }
-  clpathfile::RenameExtensionW(strSavedFilename, szExt);
+  clpathfile::RenameExtension(strSavedFilename, szExt);
   strSavedFilename.Insert(strSavedFilename.GetLength() - (clstd::strlenT(szExt) + 1), strMeshName);
   return pObject->SaveFileW(strSavedFilename);
 }

@@ -312,11 +312,11 @@ namespace Marimo
   GXBOOL GXDLLAPI Sprite::CreateFromStockFileA(Sprite** ppSprite, GXGraphics* pGraphics, GXLPCSTR szFilename, GXLPCSTR szSection)
   {
     clstd::StockA stock;
-    if( ! stock.LoadA(szFilename)) {
+    if( ! stock.LoadFromFile(szFilename)) {
       CLOG_ERROR("%s : Can not open stock file(\"%s\").\n", __FUNCTION__, szFilename);
       return FALSE;
     }
-    clsize pos = clpathfile::FindFileNameA(szFilename);
+    clsize pos = clpathfile::FindFileName(szFilename);
     clStringA strImageDir;
     if(pos != 0) {
       strImageDir.Append(szFilename, pos);

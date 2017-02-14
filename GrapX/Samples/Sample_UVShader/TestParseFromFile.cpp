@@ -321,7 +321,7 @@ void DumpMemory(const void* ptr, size_t count)
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 {
   clFile file;
-  if(file.OpenExistingA(szFilename))
+  if(file.OpenExisting(szFilename))
   {
     clBuffer* pBuffer = NULL;
     if(file.MapToBuffer(&pBuffer))
@@ -329,7 +329,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       UVShader::CodeParser expp(NULL, NULL);
       const UVShader::CodeParser::TOKEN::Array* pTokens;
       clStringW strFullname = szFilename;
-      clpathfile::CombineAbsPathW(strFullname);
+      clpathfile::CombineAbsPath(strFullname);
       expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize(), 0, strFullname);
 
       expp.GenerateTokens();
@@ -367,7 +367,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       if(szOutput != NULL)
       {
         clstd::File file;
-        if(file.CreateAlwaysA(szOutput))
+        if(file.CreateAlways(szOutput))
         {
           const UVShader::CodeParser::StatementArray& stats = expp.GetStatments();
           for(auto it = stats.begin(); it != stats.end(); ++it)
@@ -477,12 +477,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 
   // TODO: 对比输出文件与参考文件
   do {
-    if(file.OpenExistingA(szReference)) {
+    if(file.OpenExisting(szReference)) {
       clBuffer* pRefBuffer = NULL;
       clBuffer* pOutBuffer = NULL;
       clFile sOutFile;
 
-      if( ! sOutFile.OpenExistingA(szOutput)) {
+      if( ! sOutFile.OpenExisting(szOutput)) {
         break;
       }
 

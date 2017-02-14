@@ -88,6 +88,11 @@ namespace clstd
     return m_depth;
   }
 
+  int Image::GetPitch() const
+  {
+    return m_pitch;
+  }
+
   b32 Image::Set(int nWidth, int nHeight, const char* fmt, const void* pData)
   {
     if (m_width != nWidth || m_height != nHeight || m_depth != 8 ||
@@ -224,8 +229,8 @@ namespace clstd
 
   b32 Image::GetChannelPlane(Image* pDestImage, char chChannel)
   {
-    int nOffset = GetChannelOffset(chChannel);
-    if (nOffset < 0) {
+    int nChannelIndex = IntGetChanelIndex(m_format, m_channel, chChannel);
+    if (nChannelIndex < 0) {
       return FALSE;
     }
 
@@ -240,15 +245,55 @@ namespace clstd
     switch (m_depth)
     {
     case 8:
-      IntCopyChannel<u8>(pDestImage, nOffset, nPixelSize);
+      IntCopyChannel<u8>(pDestImage, 0, this, nChannelIndex);
       break;
 
     case 16:
-      IntCopyChannel<u16>(pDestImage, nOffset, nPixelSize);
+      IntCopyChannel<u16>(pDestImage, 0, this, nChannelIndex);
       break;
 
     case 32:
-      IntCopyChannel<u32>(pDestImage, nOffset, nPixelSize);
+      IntCopyChannel<u32>(pDestImage, 0, this, nChannelIndex);
+      break;
+
+    default:
+      CLBREAK;
+      return FALSE;
+    }
+    return TRUE;
+  }
+
+  b32 Image::ReplaceChannel(char chReplacedChannel, const Image* pSource, char chSrcChannel)
+  {
+    if(m_depth != pSource->m_depth) {
+      CLOG_ERROR("%s : 暂时不支持不同深度的替换", __FUNCTION__);
+      return FALSE;
+    }
+
+    const int nDestChannel = IntGetChanelIndex(m_format, m_channel, chReplacedChannel);
+    const int nSrcChannel  = IntGetChanelIndex(pSource->m_format, pSource->m_channel, chSrcChannel);
+    if(nDestChannel < 0 || nSrcChannel < 0) {
+      CLOG_ERROR("%s : 指定的通道不存在", __FUNCTION__);
+      return FALSE;
+    }
+
+    if(m_width !=  pSource->m_width || m_height != pSource->m_height) {
+      CLOG_ERROR("%s : 尺寸不一致", __FUNCTION__);
+      return FALSE;
+    }
+
+    switch (m_depth)
+    {
+    case 8:
+      IntCopyChannel<u8>(this, nDestChannel, pSource, nSrcChannel);
+      break;
+
+    case 16:
+      IntCopyChannel<u16>(this, nDestChannel, pSource, nSrcChannel);
+      break;
+
+    case 32:
+      IntCopyChannel<u32>(this, nDestChannel, pSource, nSrcChannel);
       break;
 
     default:
@@ -318,19 +363,41 @@ namespace clstd
     CLBREAK;
   }
 
-  template<typename _Ty>
-  void Image::IntCopyChannel(Image* pDestImage, int nOffset, const int nPixelSize)
+  //template<typename _Ty>
+  //void Image::IntCopyChannel(Image* pDestImage, int nOffset, const int nPixelSize)
+  //{
+  //  _Ty* pDestData;
+  //  _Ty* pSrcData;
+  //  for (int y = 0; y < m_height; y++)
+  //  {
+  //    pDestData = (_Ty*)((CLLPBYTE)pDestImage->GetLine(y));
+  //    pSrcData = (_Ty*)((CLLPBYTE)GetLine(y) + nOffset);
+  //    for (int x = 0; x < m_width; x++)
+  //    {
+  //      *pDestData++ = *pSrcData;
+  //      pSrcData = (_Ty*)((CLLPBYTE)pSrcData + nPixelSize);
+  //    }
+  //  }
+  //}
+
+  template<typename _TChannel>
+  void Image::IntCopyChannel(Image* pDestImage, int nDestIndex, const Image* pSrcImage, int nSrcIndex)
   {
-    _Ty* pDestData;
-    _Ty* pSrcData;
-    for (int y = 0; y < m_height; y++)
+    ASSERT(pDestImage->m_width == pSrcImage->m_width);
+    ASSERT(pDestImage->m_height == pSrcImage->m_height);
+    ASSERT(pDestImage->m_depth == pSrcImage->m_depth);
+
+    _TChannel* pDestData;
+    _TChannel* pSrcData;
+    for (int y = 0; y < pDestImage->m_height; y++)
     {
-      pDestData = (_Ty*)((CLLPBYTE)pDestImage->GetLine(y));
-      pSrcData = (_Ty*)((CLLPBYTE)GetLine(y) + nOffset);
-      for (int x = 0; x < m_width; x++)
+      pDestData = (_TChannel*)pDestImage->GetLine(y) + nDestIndex;
+      pSrcData  = (_TChannel*)pSrcImage->GetLine(y) + nSrcIndex;
+      for (int x = 0; x < pDestImage->m_width; x++)
       {
-        *pDestData++ = *pSrcData;
-        pSrcData = (_Ty*)((CLLPBYTE)pSrcData + nPixelSize);
+        *pDestData = *pSrcData;
+        pDestData += pDestImage->m_channel;
+        pSrcData  += pSrcImage->m_channel;
       }
     }
   }

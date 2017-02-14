@@ -35,14 +35,14 @@ public:
       clFile file;
       clStringA strFullPath;
 
-      if(clpathfile::IsRelativeA(pFileName))
+      if(clpathfile::IsRelative(pFileName))
       {
         if(m_pGraphics != NULL) {
           strFullPath = pFileName;
           m_pGraphics->ConvertToAbsolutePathA(strFullPath);
         }
         else if(m_strBaseDir.IsNotEmpty()) {
-          clpathfile::CombinePathA(strFullPath, m_strBaseDir, pFileName);
+          clpathfile::CombinePath(strFullPath, m_strBaseDir, pFileName);
         }
         else {
           strFullPath = pFileName;

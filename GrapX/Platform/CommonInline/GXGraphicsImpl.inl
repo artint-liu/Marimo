@@ -95,8 +95,8 @@ GXBOOL GXGraphicsImpl::ReleaseCommon()
 GXLPCWSTR GXGraphicsImpl::IntToAbsPathW(clStringW& strOutput, GXLPCWSTR szPath)
 {
   ASSERT(m_strResourceDir.IsNotEmpty());
-  if(clpathfile::IsRelativeW(szPath)) {
-    clpathfile::CombinePathW(strOutput, m_strResourceDir, szPath);
+  if(clpathfile::IsRelative(szPath)) {
+    clpathfile::CombinePath(strOutput, m_strResourceDir, szPath);
     return strOutput;
   }
   return szPath;
@@ -105,10 +105,10 @@ GXLPCWSTR GXGraphicsImpl::IntToAbsPathW(clStringW& strOutput, GXLPCWSTR szPath)
 GXBOOL GXGraphicsImpl::ConvertToAbsolutePathW(clStringW& strFilename)
 {
   ASSERT(m_strResourceDir.IsNotEmpty());
-  if(strFilename.IsEmpty() || IsFullPathW(strFilename) == TRUE) {
+  if(strFilename.IsEmpty() || IsFullPath(strFilename) == TRUE) {
     return FALSE;
   }
-  clpathfile::CombinePathW(strFilename, m_strResourceDir, strFilename);
+  clpathfile::CombinePath(strFilename, m_strResourceDir, strFilename);
   return TRUE;
 }
 
@@ -125,7 +125,7 @@ GXBOOL GXGraphicsImpl::ConvertToAbsolutePathA(clStringA& strFilename)
 
 GXBOOL GXGraphicsImpl::ConvertToRelativePathW(clStringW& strFilename)
 {
-  if(clpathfile::IsRelativeW(strFilename)) {
+  if(clpathfile::IsRelative(strFilename)) {
     return TRUE;
   }
   
@@ -133,10 +133,10 @@ GXBOOL GXGraphicsImpl::ConvertToRelativePathW(clStringW& strFilename)
   CLBREAK; 
 
   ASSERT(m_strResourceDir.IsNotEmpty());
-  if(strFilename.IsEmpty() || IsFullPathW(strFilename) == TRUE) {
+  if(strFilename.IsEmpty() || IsFullPath(strFilename) == TRUE) {
     return FALSE;
   }
-  clpathfile::CombinePathW(strFilename, m_strResourceDir, strFilename);
+  clpathfile::CombinePath(strFilename, m_strResourceDir, strFilename);
   return TRUE;
 }
 
