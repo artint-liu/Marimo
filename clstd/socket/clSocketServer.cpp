@@ -146,11 +146,11 @@ namespace clstd
       }
 
       result = select(0, &ReadSet, 0, &ExceptSet, 0);
-      ASSERT(ExceptSet.fd_count == 0);
 
       if(result == 0)
       {
         // Time Out
+        ASSERT(ExceptSet.fd_count == 0);
       }
       else if(result == SOCKET_ERROR)
       {
@@ -163,6 +163,7 @@ namespace clstd
       }
       else if(result != 0)
       {
+        ASSERT(ExceptSet.fd_count == 0);
         if(FD_ISSET(m_ServerSocket, &ReadSet))
         {
           SOCKADDR_IN clientSockAddr;
@@ -170,13 +171,15 @@ namespace clstd
 
           // accept the connection request when one is received
           SOCKET client = accept(m_ServerSocket, (LPSOCKADDR)&clientSockAddr, &addrLen);
-          if(m_ClientList.size() < FD_SETSIZE - 1) {
-            CLOG("Got the connection(%d)...\r\n", client);
-            OnEvent(client, SE_ACCEPT);
-            m_ClientList.push_back(client);
-          }
-          else {
-            closesocket(client);
+          if(client != INVALID_SOCKET) {
+            if(m_ClientList.size() < FD_SETSIZE - 1) {
+              CLOG("Got the connection(%d)...\r\n", client);
+              OnEvent(client, SE_ACCEPT);
+              m_ClientList.push_back(client);
+            }
+            else {
+              closesocket(client);
+            }
           }
         }
         

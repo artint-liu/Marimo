@@ -24,5 +24,128 @@ namespace clstd
     size_t  size        ();
   };
 
+  template<class _Ty>
+  class WIRO // Writer Input & Reader Output
+  {
+  protected:
+    _Ty*    m_pElementArray;
+    size_t  m_size;
+    volatile size_t  m_in;
+    volatile size_t  m_out;
+#ifdef _DEBUG
+    this_thread::id m_idReader;
+    this_thread::id m_idWriter;
+#endif // _DEBUG
+  public:
+    WIRO(int nSizeShift) // (1 << nSizeShift) - 1是容量数，必须小于32
+      : m_pElementArray(NULL)
+      , m_size(0)
+      , m_in
+      , m_out
+#ifdef _DEBUG
+      , m_idReader(0)
+      , m_idWriter(0)
+#endif // _DEBUG
+    {
+      SetSize(nSizeShift);
+    }
+
+    WIRO()
+      : m_pElementArray(NULL)
+      , m_size(0)
+      , m_in(0)
+      , m_out(0)
+#ifdef _DEBUG
+      , m_idReader(0)
+      , m_idWriter(0)
+#endif // _DEBUG
+    {
+    }
+
+    ~WIRO()
+    {
+      SAFE_DELETE_ARRAY(m_pElementArray);
+      m_size = m_in = m_out = 0;
+    }
+
+    b32 SetSize(int nSizeShift)
+    {
+      // 写入线程一旦开始工作，SetSize将不再安全
+      ASSERT( ! m_idWriter &&
+        ( ! m_idReader || m_idReader == this_thread::GetId()));
+
+      if(nSizeShift >= 32) {
+        return FALSE;
+      }
+      m_size = (1 << nSizeShift) - 1;
+      SAFE_DELETE_ARRAY(m_pElementArray);
+      m_pElementArray = new _Ty[m_size];
+      m_in = 0;
+      m_out = 0;
+#ifdef _DEBUG
+      m_idReader = 0;
+      m_idWriter = 0;
+#endif // _DEBUG
+      return TRUE;
+    }
+    
+    b32 Put(const _Ty& element)
+    {
+#ifdef _DEBUG
+      if(m_idWriter == 0) {
+        m_idWriter = this_thread::GetId();
+      }
+      ASSERT(m_idWriter == this_thread::GetId()); // 有且只有一个写入线程
+#endif // _DEBUG
+      
+      if(m_pElementArray) {
+        const size_t next_in = (m_in + 1) & m_size;
+        if(next_in == m_out) {
+          return FALSE;
+        }
+
+        m_pElementArray[m_in] = element;
+        m_in = next_in;
+      }
+    }
+    
+    b32 Get(_Ty& element)
+    {
+#ifdef _DEBUG
+      if(m_idReader == 0) {
+        m_idReader = this_thread::GetId();
+      }
+      ASSERT(m_idReader == this_thread::GetId()); // 有且只有一个读取线程
+#endif // _DEBUG
+
+      if(m_pElementArray && m_out != m_in) {
+        element = m_pElementArray[m_out];
+        m_out = (m_out + 1) & m_size;
+        return TRUE;
+      }
+      return FALSE;
+    }
+
+    size_t GetSize() const
+    {
+      // 只有读取或者写入线程才能调用这个
+      const this_thread::id _id = this_thread::GetId();
+      if(m_idReader == _id || m_idWriter == _id); {
+        return m_in - m_out;
+      }
+      return 0;
+    }
+
+    b32 IsEmpty() const
+    {
+      // 只有读取或者写入线程才能调用这个
+      const this_thread::id _id = this_thread::GetId();
+      if(m_idReader == _id || m_idWriter == _id) {
+        return m_in == m_out;
+      }
+      return 0;
+    }
+  };
+
 } // namespace clstd
 #endif // _CLSTD_FIFO_H_

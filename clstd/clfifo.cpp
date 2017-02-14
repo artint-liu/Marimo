@@ -1,6 +1,7 @@
 ﻿#include "clstd.h"
 #include "clString.h"
 #include "clUtility.h"
+#include "thread/clThread.h"
 #include "clfifo.h"
 
 #if defined(_CL_SYSTEM_WINDOWS) && ! defined(__clang__)
@@ -54,7 +55,7 @@ namespace clstd
       if(size > 0x80000000) {
         return FALSE;
       }
-      size = clstd::RoundupPowOfTwo(size);   
+      size = clstd::RoundupPowOfTwo(size);
     }
     m_size = size;
 
