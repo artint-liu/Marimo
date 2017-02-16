@@ -85,6 +85,9 @@
     <ClCompile Include="..\..\clStock.cpp" />
     <ClCompile Include="..\..\clTokens.cpp" />
     <ClCompile Include="..\..\clRepository.cpp" />
+    <ClCompile Include="..\..\socket\clSocket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clBuffer.H" />

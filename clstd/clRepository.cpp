@@ -1,11 +1,13 @@
 #include "clstd.h"
-#include "clRepository.h"
 #include "clString.h"
+#include "clRepository.h"
 #include "clUtility.h"
 
 #define KEYINCCOUNT 8
 #define NAMEINCCOUNT 128
 #define OCTETSIZE 8
+
+#define REPO_MAGIC CLMAKEFOURCC('C','L','R','P')
 
 namespace clstd
 {
@@ -36,6 +38,16 @@ namespace clstd
       CLDWORD nKeys;
       CLDWORD cbNames;
       CLDWORD cbData;
+
+      size_t _GetSize() const
+      {
+        class _R : public Repository
+        {
+        public:
+          typedef Repository::KEY KEY;
+        };
+        return nKeys * sizeof(_R::KEY) + cbNames + cbData;
+      }
     };
 
     template<typename _key_t, typename _name_t, typename _data_t>
@@ -170,7 +182,7 @@ namespace clstd
   b32 Repository::_WriteToFile(File& file) const
   {
     FILE_HEADER header = {};
-    header.dwMagic = CLMAKEFOURCC('C','L','R','P');
+    header.dwMagic = REPO_MAGIC;
     header.nKeys = (CLDWORD)(m_pKeysEnd - m_pKeys);
     header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
     header.cbData = (CLDWORD)m_cbDataLen;
@@ -278,7 +290,7 @@ namespace clstd
     size_t pData = reinterpret_cast<size_t>(m_Buffer.GetPtr());
     FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
     size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
-    if(header.dwMagic != CLMAKEFOURCC('C','L','R','P')) {
+    if(header.dwMagic != REPO_MAGIC) {
       // ERROR: bad file magic
       return false;
     }
@@ -617,7 +629,13 @@ namespace clstd
     return _ParseFromBuffer();
   }
 
-  b32 Repository::SaveToFile( CLLPCSTR szFilename ) const
+  b32 Repository::LoadFromMemory(const BufferBase& buf)
+  {
+    m_Buffer.Append(buf.GetPtr(), buf.GetSize());
+    return _ParseFromBuffer();
+  }
+
+  b32 Repository::SaveToFile(CLLPCSTR szFilename) const
   {
     File file;
     if(file.CreateAlways(szFilename)) {
@@ -679,6 +697,48 @@ namespace clstd
     return false;
   }
 
+  b32 Repository::SetKey(LPCSTR szKey, const wch* str)
+  {
+    const size_t len = (strlenT(str) + 1) * sizeof(wch);
+    return SetKey(szKey, str, len);
+  }
+  
+  b32 Repository::SetKey(LPCSTR szKey, const ch* str)
+  {
+    const size_t len = (strlenT(str) + 1) * sizeof(ch);
+    return SetKey(szKey, str, len);
+  }
+
+  b32 Repository::SetKey(LPCSTR szKey, const clStringW& str)
+  {
+    return SetKey(szKey, str, (str.GetLength() + 1) * sizeof(clStringW::TChar));
+  }
+
+  b32 Repository::SetKey(LPCSTR szKey, const clStringA& str)
+  {
+    return SetKey(szKey, str, (str.GetLength() + 1) * sizeof(clStringA::TChar));
+  }
+
+  b32 Repository::SetKey(LPCSTR szKey, i32 value)
+  {
+    return SetKey(szKey, &value, sizeof(value));
+  }
+
+  b32 Repository::SetKey(LPCSTR szKey, u32 value)
+  {
+    return SetKey(szKey, &value, sizeof(value));
+  }
+
+  b32 Repository::SetKey(LPCSTR szKey, i64 value)
+  {
+    return SetKey(szKey, &value, sizeof(value));
+  }
+
+  b32 Repository::SetKey(LPCSTR szKey, u64 value)
+  {
+    return SetKey(szKey, &value, sizeof(value));
+  }
+
   size_t Repository::GetKey( LPCSTR szKey, void* pData, size_t nLength ) const
   {
     KEY* pKey = _FindKey(szKey);
@@ -705,6 +765,18 @@ namespace clstd
       return pKey->GetDataPtr(m_pData, pLength ? pLength : &len);
     }
     return NULL;
+  }
+
+  size_t Repository::GetRequiredSize(void* pData, size_t nLength)
+  {
+    // 这个长度限制其实没有那么严格，因为文件头长度是可变的，最长20字节
+    if(nLength < sizeof(FILE_HEADER) || *(u32*)pData != REPO_MAGIC) {
+      return 0;
+    }
+
+    FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
+    size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
+    return header._GetSize();
   }
 
   //b32 Repository::RemoveKey( LPCSTR szKey )

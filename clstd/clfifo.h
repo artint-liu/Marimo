@@ -37,7 +37,7 @@ namespace clstd
     this_thread::id m_idWriter;
 #endif // _DEBUG
   public:
-    WIRO(int nSizeShift) // (1 << nSizeShift) - 1是容量数，必须小于32
+    WIRO(size_t size) // 容量数，必须是 2^n - 1
       : m_pElementArray(NULL)
       , m_size(0)
       , m_in
@@ -47,7 +47,7 @@ namespace clstd
       , m_idWriter(0)
 #endif // _DEBUG
     {
-      SetSize(nSizeShift);
+      SetSize(size);
     }
 
     WIRO()
@@ -68,16 +68,17 @@ namespace clstd
       m_size = m_in = m_out = 0;
     }
 
-    b32 SetSize(int nSizeShift)
+    b32 SetSize(size_t size)
     {
       // 写入线程一旦开始工作，SetSize将不再安全
       ASSERT( ! m_idWriter &&
         ( ! m_idReader || m_idReader == this_thread::GetId()));
 
-      if(nSizeShift >= 32) {
+      // is not pow of 2
+      if(size & (size + 1)) {
         return FALSE;
       }
-      m_size = (1 << nSizeShift) - 1;
+      m_size = size;
       SAFE_DELETE_ARRAY(m_pElementArray);
       m_pElementArray = new _Ty[m_size];
       m_in = 0;
@@ -107,6 +108,7 @@ namespace clstd
         m_pElementArray[m_in] = element;
         m_in = next_in;
       }
+      return TRUE;
     }
     
     b32 Get(_Ty& element)

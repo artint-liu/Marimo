@@ -88,6 +88,11 @@ namespace clstd
     return m_depth;
   }
 
+  int Image::GetChannels() const
+  {
+    return m_channel;
+  }
+
   int Image::GetPitch() const
   {
     return m_pitch;

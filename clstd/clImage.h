@@ -67,6 +67,7 @@ namespace clstd
     int         GetWidth            () const;
     int         GetHeight           () const;
     int         GetDepth            () const;
+    int         GetChannels         () const;
     int         GetPitch            () const;
 /*没实现*/int       Inflate             (int left, int top, int right, int bottom); // 调整Image尺寸，参数是四个边缘扩展的像素数，可以是负数
     const void* GetPixelPtr         (int x, int y) const;

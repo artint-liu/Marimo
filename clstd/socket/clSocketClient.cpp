@@ -9,10 +9,13 @@
 #define SOCKET_ERROR_LOG(_STAT, _MSG) if (_STAT == SOCKET_ERROR) { CLOG_ERROR(_MSG); }
 #define MAX_RECV_BUF 4096
 
-#if defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
 #pragma comment(lib, "Ws2_32.lib")
 namespace clstd
 {
+
+
+  //////////////////////////////////////////////////////////////////////////
 
   TCPClient::TCPClient()
     : m_clientSocket (0)
@@ -41,6 +44,8 @@ namespace clstd
   {
     WSADATA		Data;
     SOCKADDR_IN SockAddr;
+
+    ASSERT(net_sockets::IsStartup());
 
     //	
     //
@@ -164,4 +169,4 @@ namespace clstd
   //{
   //}
 } // namespace clstd
-#endif // #if defined(_WINDOWS)
+#endif // #if defined(_CL_SYSTEM_WINDOWS)

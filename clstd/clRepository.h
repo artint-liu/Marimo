@@ -107,15 +107,31 @@ namespace clstd
       void Clear();
       b32 LoadFromFile( CLLPCSTR szFilename );
       b32 LoadFromFile( CLLPCWSTR szFilename );
-      b32 LoadFromMemory( const void* pData, size_t nLength );
+      b32 LoadFromMemory(const void* pData, size_t nLength);
+      b32 LoadFromMemory(const BufferBase& buf);
       b32 SaveToFile( CLLPCSTR szFilename ) const;
       b32 SaveToFile( CLLPCWSTR szFilename ) const;
       b32 SaveToMemory(MemBuffer& buffer) const;
 
-      size_t GetNumOfKeys() const;
-      b32 SetKey( LPCSTR szKey, const void* pData, size_t nLength );
-      size_t GetKey( LPCSTR szKey, void* pData, size_t nLength ) const;
-      void* GetDataPtr( LPCSTR szKey, size_t* pLength ) const;
+      size_t  GetNumOfKeys() const;
+      b32     SetKey(LPCSTR szKey, const void* pData, size_t nLength);
+      b32     SetKey(LPCSTR szKey, const wch* str);
+      b32     SetKey(LPCSTR szKey, const ch* str);
+#ifdef _CLSTD_STRING_H_
+      b32     SetKey(LPCSTR szKey, const clStringW& str);
+      b32     SetKey(LPCSTR szKey, const clStringA& str);
+#endif // _CLSTD_STRING_H_
+      b32     SetKey(LPCSTR szKey, i32 value);
+      b32     SetKey(LPCSTR szKey, u32 value);
+      b32     SetKey(LPCSTR szKey, i64 value);
+      b32     SetKey(LPCSTR szKey, u64 value);
+
+
+      size_t GetKey     (LPCSTR szKey, void* pData, size_t nLength) const;
+      void* GetDataPtr  (LPCSTR szKey, size_t* pLength = NULL) const;
+
+      // 传入一定量数据用来计算整个文件的大小，数据长度至少要20字节，前四个字节必须是"CLRP"
+      static size_t GetRequiredSize(void* pData, size_t nLength);
       
 
       //b32 RemoveKey( LPCSTR szKey );

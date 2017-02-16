@@ -49,6 +49,7 @@
     <ClCompile Include="..\..\PrimeNum.cpp" />
     <ClCompile Include="..\..\Smart\SmartRepository.cpp" />
     <ClCompile Include="..\..\Smart\smartstream.cpp" />
+    <ClCompile Include="..\..\socket\clSocket.cpp" />
     <ClCompile Include="..\..\Socket\clSocketClient.cpp" />
     <ClCompile Include="..\..\Socket\clSocketServer.cpp" />
     <ClCompile Include="..\..\third_party\crypt\crypt_arc4.cpp" />

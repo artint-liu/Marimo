@@ -25,45 +25,47 @@ namespace clstd
   
   SocketResult TCPServer::OpenPort(CLUSHORT port)
   {
-  	WSADATA		Data;
+  	//WSADATA		Data;
   	SOCKADDR_IN serverSockAddr;
-  	
+    ASSERT(net_sockets::IsStartup());
+
   //	
   //
- 
-  	int status = WSAStartup(CLMAKEWORD(1, 1), &Data);
-  	if (status != 0) {
-  		CLOG_ERROR("ERROR: WSAStartup unsuccessful\r\n");
-    }
+
+    int status = 0;
+    //int status = WSAStartup(CLMAKEWORD(1, 1), &Data);
+    //if (status != 0) {
+    //  CLOG_ERROR("ERROR: WSAStartup unsuccessful\r\n");
+    //}
   
-  	// zero the sockaddr_in structure
-  	memset(&serverSockAddr, 0, sizeof(serverSockAddr));
+    // zero the sockaddr_in structure
+    memset(&serverSockAddr, 0, sizeof(serverSockAddr));
   
-  	// specify the port portion of the address
-  	serverSockAddr.sin_port = htons(port);
-  	// specify the address family as Internet
-  	serverSockAddr.sin_family = AF_INET;
-  	// specify that the address does not matter
-  	serverSockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    // specify the port portion of the address
+    serverSockAddr.sin_port = htons(port);
+    // specify the address family as Internet
+    serverSockAddr.sin_family = AF_INET;
+    // specify that the address does not matter
+    serverSockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   
-  	// create a socket  socket(通信发生的区域,套接字的类型,套接字使用的特定协议)
-  	m_ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
-  	if (m_ServerSocket == INVALID_SOCKET) {
-      _ChkWSACleanup(status);
-  		CLOG_ERROR("ERROR: socket unsuccessful\r\n");
+    // create a socket  socket(通信发生的区域,套接字的类型,套接字使用的特定协议)
+    m_ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (m_ServerSocket == INVALID_SOCKET) {
+      //_ChkWSACleanup(status);
+      CLOG_ERROR("ERROR: socket unsuccessful\r\n");
       return SocketResult_CreateFailed;
     }
   
-  	// associate the socket with the address
-  	status = bind(m_ServerSocket, (LPSOCKADDR)&serverSockAddr, sizeof(serverSockAddr));
+    // associate the socket with the address
+    status = bind(m_ServerSocket, (LPSOCKADDR)&serverSockAddr, sizeof(serverSockAddr));
     if (status == SOCKET_ERROR) { 
-      _ChkWSACleanup(status);
+      //_ChkWSACleanup(status);
       CLOG_ERROR("ERROR: bind unsuccessful\r\n"); 
       return SocketResult_CanotBind;
     }
   
   //FD_ISSET
-  	return SocketResult_Ok;
+    return SocketResult_Ok;
   }
   
   int TCPServer::Close(u32 nMilliSec)
@@ -81,7 +83,7 @@ namespace clstd
       }
 
       m_ServerSocket = 0;
-      _ChkWSACleanup(status);
+      //_ChkWSACleanup(status);
     }
     return status;
   }
@@ -178,7 +180,7 @@ namespace clstd
               m_ClientList.push_back(client);
             }
             else {
-              closesocket(client);
+              ::closesocket(client);
             }
           }
         }
@@ -197,7 +199,7 @@ namespace clstd
               // 如果客户端在Debug下出现断点并关闭，这里会无法收到close消息
               OnEvent(*it, SE_CLOSE);
 
-              result = closesocket(*it);
+              result = ::closesocket(*it);
               CLOG("Close socket(%d).\r\n", *it);
 
               it = m_ClientList.erase(it);
@@ -242,17 +244,19 @@ namespace clstd
 
   SocketResult UDPSocket::OpenPort(PropertyFlags dwFlags, u32 port)
   {
-    WSADATA		Data;
+    //WSADATA		Data;
     m_dwFlags = dwFlags;
+    ASSERT(net_sockets::IsStartup());
 
-    int status = WSAStartup(CLMAKEWORD(1, 1), &Data);
-    if (status != 0) {
-      CLOG_ERROR("ERROR: WSAStartup unsuccessful\r\n");
-    }
+    int status = 0;
+    //int status = WSAStartup(CLMAKEWORD(1, 1), &Data);
+    //if (status != 0) {
+    //  CLOG_ERROR("ERROR: WSAStartup unsuccessful\r\n");
+    //}
 
     m_Socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (m_Socket == INVALID_SOCKET) {
-      _ChkWSACleanup(status);
+      //_ChkWSACleanup(status);
       CLOG_ERROR("ERROR: socket unsuccessful\r\n");
       return SocketResult_CreateFailed;
     }
@@ -274,7 +278,7 @@ namespace clstd
 
       status = bind(m_Socket, (LPSOCKADDR)&RecvSockAddr, sizeof(RecvSockAddr));
       if (status == SOCKET_ERROR) { 
-        _ChkWSACleanup(status);
+        //_ChkWSACleanup(status);
         CLOG_ERROR("ERROR: bind unsuccessful\r\n"); 
         return SocketResult_CanotBind;
       }
@@ -300,7 +304,7 @@ namespace clstd
 
       m_Socket = NULL; // 退出前线程可能还需要Socket
 
-      _ChkWSACleanup(status);
+      //_ChkWSACleanup(status);
     }
     return status;
   }

@@ -527,6 +527,12 @@ FINAL_RET:
     return ((_Ty)1 << i);
   }
 
+  template<typename _Ty>
+  b32 IsPowOfTwo(_Ty num)
+  {
+    return (num & (num - 1)) == 0;
+  }
+
   class Rand
   {
   private:
