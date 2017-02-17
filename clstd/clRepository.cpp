@@ -625,13 +625,14 @@ namespace clstd
 
   b32 Repository::LoadFromMemory( const void* pData, size_t nLength )
   {
-    m_Buffer.Append(pData, nLength);
+    m_Buffer.Replace(0, m_Buffer.GetSize(), pData, nLength);
     return _ParseFromBuffer();
   }
 
   b32 Repository::LoadFromMemory(const BufferBase& buf)
   {
-    m_Buffer.Append(buf.GetPtr(), buf.GetSize());
+    //m_Buffer = buf;
+    m_Buffer.Replace(0, m_Buffer.GetSize(), buf.GetPtr(), buf.GetSize());
     return _ParseFromBuffer();
   }
 
