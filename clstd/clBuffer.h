@@ -17,26 +17,13 @@ namespace clstd
       : m_lpBuffer((CLBYTE*)pData), m_uSize(uLength){}
 
     virtual ~BufferBase(){} // 析构是私有的, 防止用户 delete clBufferBase
+
+    BufferBase& operator=(const BufferBase& buf);
   public:
     inline CLLPVOID   GetPtr    () const;
     inline clsize     GetSize   () const;
     inline CLBYTE*    Set       (int val);
   };
-
-  CLLPVOID BufferBase::GetPtr() const
-  {
-    return m_lpBuffer;
-  }
-
-  clsize BufferBase::GetSize() const
-  {
-    return m_uSize;
-  }
-
-  CLBYTE* BufferBase::Set(int val)
-  {
-    return (CLBYTE*)memset(m_lpBuffer, val, m_uSize);
-  }
 
   //////////////////////////////////////////////////////////////////////////
   //
@@ -181,6 +168,8 @@ namespace clstd
     MemBuffer&Append    (CLLPCVOID lpData, clsize dwSize);
     b32       Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
     b32       Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
+
+    MemBuffer& operator=(const MemBuffer& buf);
   };
 
   typedef MemBuffer Buffer;

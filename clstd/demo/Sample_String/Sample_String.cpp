@@ -2,6 +2,7 @@
 //
 
 #include <tchar.h>
+#include <locale.h>
 
 #include "clstd.h"
 #include "clString.H"
@@ -133,8 +134,32 @@ void TestCodec() // 测试unicode到ansi转换
   }
 }
 
+void TestLog()
+{
+  CLOG("log test");
+  CLOG("日志输出测试");
+
+  CLOG_WARNING("log test");
+  CLOG_WARNING("日志输出测试");
+
+  CLOG_ERROR("log test");
+  CLOG_ERROR("日志输出测试");
+
+  CLOGW(_CLTEXT("log test"));
+  CLOGW(_CLTEXT("日志输出测试"));
+
+  CLOG_WARNINGW(_CLTEXT("log test"));
+  CLOG_WARNINGW(_CLTEXT("日志输出测试"));
+
+  CLOG_ERRORW(_CLTEXT("log test"));
+  CLOG_ERRORW(_CLTEXT("日志输出测试"));
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+  setlocale(LC_ALL, "");
+  //cprintf();
+  TestLog();
   TestCodec();
   TestCombinePath();
   TestMatchSpec();

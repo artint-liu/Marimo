@@ -8,6 +8,13 @@
 #pragma warning(disable : 4996)
 #endif // #if defined(_WINDOWS) || defined(_WIN32)
 
+#define SET_TEXT_COLOR(_CR)     CONSOLE_SCREEN_BUFFER_INFO bi;  \
+                                HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE); \
+                                GetConsoleScreenBufferInfo(hStdout, &bi); \
+                                SetConsoleTextAttribute(hStdout, _CR);
+
+#define RESTORE_TEXT_COLOR()    SetConsoleTextAttribute(hStdout, bi.wAttributes);
+
 #if 0
 const static clstd::ALLOCPLOY aclAllocPloyW[] =
 {
@@ -135,18 +142,26 @@ extern "C" void _cl_log_infoA(const char *fmt, ...)
 
 extern "C" void _cl_log_errorA(const char *fmt, ...)
 {
+  SET_TEXT_COLOR(0x0C);
+
   va_list val;
   va_start(val, fmt);
   _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[ERROR] ", fmt, val);
   va_end(val);
+
+  RESTORE_TEXT_COLOR();
 }
 
 extern "C" void _cl_log_warningA(const char *fmt, ...)
 {
+  SET_TEXT_COLOR(0x0E);
+
   va_list val;
   va_start(val, fmt);
   _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[WARN] ", fmt, val);
   va_end(val);
+
+  RESTORE_TEXT_COLOR();
 }
 
 extern "C" void _cl_log_infoW(const wch *fmt, ...)
@@ -159,18 +174,26 @@ extern "C" void _cl_log_infoW(const wch *fmt, ...)
 
 extern "C" void _cl_log_errorW(const wch *fmt, ...)
 {
+  SET_TEXT_COLOR(0x0C);
+
   va_list val;
   va_start(val, fmt);
   _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[ERROR] ", fmt, val);
   va_end(val);
+
+  RESTORE_TEXT_COLOR();
 }
 
 extern "C" void _cl_log_warningW(const wch *fmt, ...)
 {
+  SET_TEXT_COLOR(0x0E);
+
   va_list val;
   va_start(val, fmt);
   _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[WARN] ", fmt, val);
   va_end(val);
+
+  RESTORE_TEXT_COLOR();
 }
 
 namespace clstd
@@ -185,18 +208,26 @@ namespace clstd
 
   void _cl_log_error(const char *fmt, ...)
   {
+    SET_TEXT_COLOR(0x0C);
+
     va_list val;
     va_start(val, fmt);
     _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[ERROR] ", fmt, val);
     va_end(val);
+
+    RESTORE_TEXT_COLOR();
   }
 
   void _cl_log_warning(const char *fmt, ...)
   {
+    SET_TEXT_COLOR(0x0E);
+
     va_list val;
     va_start(val, fmt);
     _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[WARN] ", fmt, val);
     va_end(val);
+
+    RESTORE_TEXT_COLOR();
   }
 
   void _cl_log_info(const wch *fmt, ...)
@@ -209,18 +240,26 @@ namespace clstd
 
   void _cl_log_error(const wch *fmt, ...)
   {
+    SET_TEXT_COLOR(0x0C);
+
     va_list val;
     va_start(val, fmt);
     _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[ERROR] ", fmt, val);
     va_end(val);
+
+    RESTORE_TEXT_COLOR();
   }
 
   void _cl_log_warning(const wch *fmt, ...)
   {
+    SET_TEXT_COLOR(0x0E);
+
     va_list val;
     va_start(val, fmt);
     _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[WARN] ", fmt, val);
     va_end(val);
+   
+    RESTORE_TEXT_COLOR();
   }
 }
 

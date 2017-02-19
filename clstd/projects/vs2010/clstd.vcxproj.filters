@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\clBuffer.CPP" />
-    <ClCompile Include="..\..\clFile.CPP" />
-    <ClCompile Include="..\..\clstd.CPP" />
     <ClCompile Include="..\..\FloatX.cpp" />
     <ClCompile Include="..\..\User32Ex.CPP" />
     <ClCompile Include="..\..\Smart\smartstream.cpp">
@@ -88,9 +85,11 @@
     <ClCompile Include="..\..\socket\clSocket.cpp">
       <Filter>Socket</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\clFile.cpp" />
+    <ClCompile Include="..\..\clstd.cpp" />
+    <ClCompile Include="..\..\clBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\clBuffer.H" />
     <ClInclude Include="..\..\clFile.H" />
     <ClInclude Include="..\..\clstd.h" />
     <ClInclude Include="..\..\floatx.h" />
@@ -165,6 +164,7 @@
     <ClInclude Include="..\..\clStock.h" />
     <ClInclude Include="..\..\clTokens.h" />
     <ClInclude Include="..\..\clRepository.h" />
+    <ClInclude Include="..\..\clBuffer.H" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

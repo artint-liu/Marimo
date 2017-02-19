@@ -343,7 +343,7 @@ namespace clstd
 
       if(m_socket)
       {
-        CLOG("Close server socket...\r\n");
+        CLOG("Close server socket...");
         const SOCKET local_socket = m_socket;
         m_socket = 0;
         result = ::closesocket(local_socket);

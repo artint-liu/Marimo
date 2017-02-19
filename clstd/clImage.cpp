@@ -206,6 +206,12 @@ namespace clstd
         return i;
       }
     }
+
+    // 如果新通道不存在，Alpha通道返回-2，其他返回-1，
+    // 在后续的设置中，Alpha通道默认填1.0，其它通道默认是0.0
+    if(chChannelCode == 'A') {
+      return -2;
+    }
     return -1;
   }
 
@@ -478,25 +484,25 @@ namespace clstd
     case 1:
     {
       struct PIXEL { _TChannel channel[1]; };
-      ChangePixel<PIXEL>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     case 2:
     {
       struct PIXEL { _TChannel channel[2]; };
-      ChangePixel<PIXEL>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     case 3:
     {
       struct PIXEL { _TChannel channel[3]; };
-      ChangePixel<PIXEL>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     case 4:
     {
       struct PIXEL { _TChannel channel[4]; };
-      ChangePixel<PIXEL>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     default:
@@ -504,22 +510,27 @@ namespace clstd
     }
   }
 
-  template<typename _TPixel>
-  void Image::ChangePixel(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch)
+  template<typename _TPixel, typename _TChannel>
+  void Image::ChangePixel(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch) const
   {
     _TPixel* pDstPixel;
     _TPixel* pSrcPixel;
     _TPixel  tmp_pixel;
+    const size_t nSrcPixelSize = GETPIXELSIZE;
+
     for (int y = 0; y < m_height; y++)
     {
-      pDstPixel = (_TPixel*)GetLine(y);
-      pSrcPixel = (_TPixel*)(pDestData + y * nNewPitch);
+      pSrcPixel = (_TPixel*)GetLine(y);
+      pDstPixel = (_TPixel*)(pDestData + y * nNewPitch);
       for (int x = 0; x < m_width; x++)
       {
-        tmp_pixel = *pSrcPixel++;
+        tmp_pixel = *pSrcPixel;
+        pSrcPixel = (_TPixel*)((size_t)pSrcPixel + nSrcPixelSize);
         for (int c = 0; c < nNewChannel; c++)
         {
-          (*pDstPixel).channel[c] = aMapTab[c] >= 0 ? tmp_pixel.channel[aMapTab[c]] : 0;
+          (*pDstPixel).channel[c] = aMapTab[c] >= 0
+            ? tmp_pixel.channel[aMapTab[c]]
+            : (_TChannel)(aMapTab[c] + 1);
         }
         pDstPixel++;
       }
@@ -571,9 +582,30 @@ namespace clstd
       }
     }
     else {
-      CLBREAK; // 暂时不支持
+      const int nNewSize = nNewPitch * m_height;
+      CLBYTE* pNewPtr = new CLBYTE[nNewSize];
+
+      switch(m_depth)
+      {
+      case 8:
+        ChangeFormat<u8>(nChannelMapTab, nNewChannel, pNewPtr, nNewPitch);
+        break;
+      case 16:
+        ChangeFormat<u16>(nChannelMapTab, nNewChannel, pNewPtr, nNewPitch);
+        break;
+      case 32:
+        ChangeFormat<u32>(nChannelMapTab, nNewChannel, pNewPtr, nNewPitch);
+        break;
+      default:
+        break;
+      }
+
+      delete[] m_ptr;
+      m_ptr = pNewPtr;
+      //CLBREAK; // 暂时不支持
     }
 
+    m_channel = nNewChannel;
     m_pitch = nNewPitch;
     m_channel = nNewChannel;
     m_format.code = NewFormat.code;

@@ -29,6 +29,29 @@
 //////////////////////////////////////////////////////////////////////////
 namespace clstd
 {
+  BufferBase& BufferBase::operator=(const BufferBase& buf)
+  {
+    CLBREAK;
+    return *this;
+  }
+
+  CLLPVOID BufferBase::GetPtr() const
+  {
+    return m_lpBuffer;
+  }
+
+  clsize BufferBase::GetSize() const
+  {
+    return m_uSize;
+  }
+
+  CLBYTE* BufferBase::Set(int val)
+  {
+    return (CLBYTE*)memset(m_lpBuffer, val, m_uSize);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
   FixedBuffer::FixedBuffer()
     : BufferBase(NULL, 0)
   {
@@ -188,6 +211,13 @@ namespace clstd
   {
     return Replace(nPos, 0, lpData, cbSize);
   }
+
+  MemBuffer& MemBuffer::operator=(const MemBuffer& buf)
+  {
+    Replace(0, m_uSize, buf.GetPtr(), buf.GetSize());
+    return *this;
+  }
+
 } // namespace clstd
 //////////////////////////////////////////////////////////////////////////
 clQueueBuffer::clQueueBuffer(u32 uElementSize)

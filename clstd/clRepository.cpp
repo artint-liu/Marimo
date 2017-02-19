@@ -39,7 +39,7 @@ namespace clstd
       CLDWORD cbNames;
       CLDWORD cbData;
 
-      size_t _GetSize() const
+      size_t _GetRecordSize() const
       {
         class _R : public Repository
         {
@@ -777,7 +777,7 @@ namespace clstd
 
     FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
     size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
-    return header._GetSize();
+    return header._GetRecordSize() + packed_header_size;
   }
 
   //b32 Repository::RemoveKey( LPCSTR szKey )

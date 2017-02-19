@@ -73,7 +73,7 @@ namespace clstd
     int status = 0;
     if(m_ServerSocket)
     {
-      CLOG("Close server socket...\r\n");
+      CLOG("Close server socket...");
       status = closesocket(m_ServerSocket);
       SOCKET_ERROR_LOG(status, "Error for closing server socket...\r\n");
 
@@ -292,7 +292,7 @@ namespace clstd
 
     if(m_Socket)
     {
-      CLOG("Close UDP socket...\r\n");
+      CLOG("Close UDP socket...");
       status = closesocket(m_Socket);
       SOCKET_ERROR_LOG(status, "Error for closing UDP socket...\r\n");
     

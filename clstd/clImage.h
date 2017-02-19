@@ -93,8 +93,8 @@ namespace clstd
     template<typename _Ty>
     void IntStretchCopyMulti( Image* pDestImage, int nWidth, int nHeight, int nCount );
 
-    template<typename _TPixel>
-    void ChangePixel(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch);
+    template<typename _TPixel, typename _TChannel>
+    void ChangePixel(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch) const;
 
     template<typename _TChannel>
     void ChangeFormat(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch);

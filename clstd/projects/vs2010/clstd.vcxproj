@@ -23,12 +23,12 @@
     <ClCompile Include="..\..\3D\Geometry.cpp" />
     <ClCompile Include="..\..\3D\GeoOp.cpp" />
     <ClCompile Include="..\..\clAllocator.cpp" />
-    <ClCompile Include="..\..\clBuffer.CPP" />
+    <ClCompile Include="..\..\clBuffer.cpp" />
     <ClCompile Include="..\..\clColorSpace.cpp" />
     <ClCompile Include="..\..\clCompress.cpp" />
     <ClCompile Include="..\..\clCrypt.cpp" />
     <ClCompile Include="..\..\clfifo.cpp" />
-    <ClCompile Include="..\..\clFile.CPP" />
+    <ClCompile Include="..\..\clFile.cpp" />
     <ClCompile Include="..\..\clGeometry2D.cpp" />
     <ClCompile Include="..\..\clImage.cpp" />
     <ClCompile Include="..\..\clMatrix.cpp" />
@@ -36,7 +36,7 @@
     <ClCompile Include="..\..\clPathFile.cpp" />
     <ClCompile Include="..\..\clQuaternion.cpp" />
     <ClCompile Include="..\..\clRepository.cpp" />
-    <ClCompile Include="..\..\clstd.CPP" />
+    <ClCompile Include="..\..\clstd.cpp" />
     <ClCompile Include="..\..\clStock.cpp" />
     <ClCompile Include="..\..\clString.cpp" />
     <ClCompile Include="..\..\clTokens.cpp" />
