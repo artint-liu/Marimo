@@ -10,7 +10,7 @@ typedef clvector<int> IntArray;
 typedef clset<int> IntSet;
 
 
-
+// 二分查找模板测试
 void TestBianrySearch()
 {
   IntArray aSamples;

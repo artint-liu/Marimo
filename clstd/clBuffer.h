@@ -160,16 +160,25 @@ namespace clstd
     MemBuffer(u32 nPageSize = 512);
     virtual ~MemBuffer();
 
-    size_t    Reserve   (clsize dwSize); // 地址没变化返回0，否则返回一个补码的地址差
-    size_t    Resize    (clsize dwSize, b32 bZeroInit); // 地址没变化返回0，否则返回一个补码的地址差
-    CLLPVOID  GetPtr    () const;
-    clsize    GetSize   () const;
+    size_t      Reserve   (clsize dwSize); // 地址没变化返回0，否则返回一个补码的地址差
+    size_t      Resize    (clsize dwSize, b32 bZeroInit); // 地址没变化返回0，否则返回一个补码的地址差
+    CLLPVOID    GetPtr    () const;
+    clsize      GetSize   () const;
     //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
-    MemBuffer&Append    (CLLPCVOID lpData, clsize dwSize);
-    b32       Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
-    b32       Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
+    MemBuffer&  Append    (CLLPCVOID lpData, clsize dwSize);
+    b32         Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
+    b32         Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
 
     MemBuffer& operator=(const MemBuffer& buf);
+
+    //
+    // 封装的模板
+    //
+    template <class _Ty>
+    MemBuffer& Append(const _Ty& t)
+    {
+      return Append(&t, sizeof(_Ty));
+    }
   };
 
   typedef MemBuffer Buffer;

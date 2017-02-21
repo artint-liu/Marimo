@@ -183,9 +183,9 @@ namespace clstd
   {
     FILE_HEADER header = {};
     header.dwMagic = REPO_MAGIC;
-    header.nKeys = (CLDWORD)(m_pKeysEnd - m_pKeys);
+    header.nKeys   = (CLDWORD)(m_pKeysEnd - m_pKeys);
     header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
-    header.cbData = (CLDWORD)m_cbDataLen;
+    header.cbData  = (CLDWORD)m_cbDataLen;
 
     CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
     size_t packed_header_size = _PackHeader(header, packed_header);
@@ -766,6 +766,28 @@ namespace clstd
       return pKey->GetDataPtr(m_pData, pLength ? pLength : &len);
     }
     return NULL;
+  }
+
+  size_t Repository::GetRawData(RAWDATA* pRaw) const
+  {
+    if(pRaw == NULL) {
+      return 0;
+    }
+
+    FILE_HEADER header = { REPO_MAGIC };
+    header.nKeys   = (CLDWORD)(m_pKeysEnd - m_pKeys);
+    header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
+    header.cbData  = (CLDWORD)m_cbDataLen;
+
+    pRaw->keys      = m_pKeys;
+    pRaw->cbKeys    = header.nKeys * sizeof(KEY);
+    pRaw->names     = GetNamesBegin();
+    pRaw->cbNames   = header.cbNames;
+    pRaw->data      = m_pData;
+    pRaw->cbData    = header.cbData;
+    pRaw->cbHeader  = _PackHeader(header, pRaw->header);
+
+    return pRaw->cbHeader + pRaw->cbKeys + pRaw->cbNames + pRaw->cbData;
   }
 
   size_t Repository::GetRequiredSize(void* pData, size_t nLength)
