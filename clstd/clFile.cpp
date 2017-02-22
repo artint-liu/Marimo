@@ -313,6 +313,11 @@ namespace clstd
     return bRet;
   }
 
+  b32 File::Write(const BufferBase& buffer, u32* lpNumberOfBytesWritten /*= NULL*/)
+  {
+    return Write(buffer.GetPtr(), buffer.GetSize(), lpNumberOfBytesWritten);
+  }
+
   //int File::Writef(const tch* format, ...)
   //{
   //  va_list arglist;

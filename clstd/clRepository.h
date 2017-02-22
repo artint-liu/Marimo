@@ -1,4 +1,4 @@
-#ifndef _CLSTD_SMART_REPOSITORY_H_
+#ifndef _CLSTD_REPOSITORY_H_
 
 namespace clstd
 {
@@ -157,4 +157,4 @@ namespace clstd
   };
 } // namespace clstd
 
-#endif
+#endif // _CLSTD_REPOSITORY_H_

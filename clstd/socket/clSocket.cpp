@@ -1,6 +1,9 @@
+#include <functional>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"
+#include "thread/clSignal.h"
+#include "clRepository.h"
 #include "clSocket.h"
 #include "clSocketServer.h"
 
@@ -50,7 +53,12 @@ namespace clstd
     //////////////////////////////////////////////////////////////////////////
 
     TCPClient::TCPClient()
-      : m_socket (0)
+      : m_socket (INVALID_SOCKET)
+    {
+    }
+
+    TCPClient::TCPClient(SOCKET socket)
+      : m_socket(socket)
     {
     }
 
@@ -65,7 +73,7 @@ namespace clstd
       clStringA strAddrPort = addr_port;
       clStringA strAddr;
       clStringA strPort;
-      strAddr.DivideBy(':', strAddr, strPort);
+      strAddrPort.DivideBy(':', strAddr, strPort);
       return Connect(inet_addr(strAddr), strPort.ToInteger());
     }
 
@@ -81,6 +89,9 @@ namespace clstd
 
       ASSERT(IsStartup());
 
+      if(m_socket != INVALID_SOCKET) {
+        CloseSocket();
+      }
       //	
       //
       int status = 0;
@@ -103,15 +114,16 @@ namespace clstd
       if (m_socket == INVALID_SOCKET) {
         //_ChkWSACleanup(status);
         CLOG_ERROR("ERROR: socket unsuccessful\n");
-        m_socket = 0;
+        m_socket = INVALID_SOCKET;
         return SocketResult_CreateFailed;
       }
 
+      // 阻塞模式下，返回的是尝试连接的结果，服务器应答不在这里体现
       status = ::connect(m_socket, (SOCKADDR*)&SockAddr, sizeof(SockAddr));
       if(status == SOCKET_ERROR) {
         //_ChkWSACleanup(status);
         CLOG_ERROR("ERROR: can not connect the server.\n");
-        m_socket = 0;
+        m_socket = INVALID_SOCKET;
         return SocketResult_CanotConnect;
       }
       //OnEvent(/*m_clientSocket, */SE_CONNECT);
@@ -119,33 +131,69 @@ namespace clstd
       return SocketResult_Ok;
     }
 
-    int TCPClient::WaitSocket()
+    b32 TCPClient::IsInvalidSocket() const
+    {
+      return m_socket == INVALID_SOCKET;
+    }
+
+    int TCPClient::WaitSocket(long timeout_sec)
     {
       fd_set read_set;
       FD_ZERO(&read_set);
       FD_SET(m_socket, &read_set);
-      int result = ::select(0, &read_set, 0, 0, 0);
+
+      timeval tv = {timeout_sec, 0};
+
+      // 返回结果是read_set里需要处理的socket数量，这里肯定是1
+      // 如果是0代表超时, SOCKET_ERROR表示出错
+      int result = ::select(0, &read_set, 0, 0, timeout_sec ? &tv : 0);
       
-      if(result == SOCKET_ERROR || result == 0) {
-        CLOG("socket error : disconnected(%d) ...", result);
-        CloseSocket();
-        return result;
-      }
-      else if(m_socket == 0) 
+      if(result > 0)
       {
-        CLOG("user disconnected(%d) ...", result);
-        return SocketResult_Disconnected;
+        ASSERT(result == 1); // read_set 只填了1个
       }
+      else if(result == 0)
+      {
+        CLOG("socket timeout(%d).", result);
+      }
+      else if(result == SOCKET_ERROR)
+      {
+        if(m_socket == INVALID_SOCKET)
+        {
+          CLOG("user disconnected(%d) ...", result);
+        }
+        else
+        {
+          CLOG("socket error : disconnected(%d:%d) ...", result, WSAGetLastError());
+          CloseSocket();
+        }
+      }
+      else {
+        CLOG_ERROR("Unexpected socket result(%d).", result);
+        CLBREAK; // 意外的结果
+      }
+
       return result;
+      //if(result == SOCKET_ERROR || result == 0) {
+      //  CLOG("socket error : disconnected(%d:%d) ...", result, WSAGetLastError());
+      //  CloseSocket();
+      //  return result;
+      //}
+      //else if(m_socket == INVALID_SOCKET) 
+      //{
+      //  CLOG("user disconnected(%d) ...", result);
+      //  return SocketResult_Disconnected;
+      //}
+      //return result;
     }
 
     int TCPClient::CloseSocket()
     {
       int status = 0;
-      if(m_socket)
+      if(m_socket != INVALID_SOCKET)
       {
         const SOCKET local_socket = m_socket;
-        m_socket = 0;
+        m_socket = INVALID_SOCKET;
         status = ::closesocket(local_socket);
         CLOG("closesocket(%d)", status);
 
@@ -154,24 +202,78 @@ namespace clstd
       return status;
     }
 
-    i32 TCPClient::Send(CLLPCVOID pData, CLINT nLen)
+    i32 TCPClient::Send(CLLPCVOID pData, CLINT nLen) const
     {
-      return send(m_socket, (const char*)pData, nLen, 0);
+      return ::send(m_socket, (const char*)pData, nLen, 0);
     }
 
-    i32 TCPClient::Recv(CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize)
+    i32 TCPClient::Send(const BufferBase& buf) const
+    {
+      return Send(buf.GetPtr(), buf.GetSize());
+    }
+
+    i32 TCPClient::Send(const Repository& repo)
+    {
+      Repository::RAWDATA raw;
+      repo.GetRawData(&raw);
+      int result = 0;
+      int r = 0;
+      do {
+        r = ::send(m_socket, (const char*)raw.header, raw.cbHeader, 0);
+        if(r != raw.cbHeader) {
+          CLOG_ERROR("can not send repository header(%d).", r);
+          break;
+        }
+        result += r;
+
+        r = ::send(m_socket, (const char*)raw.keys, raw.cbKeys, 0);
+        if(r != raw.cbKeys) {
+          CLOG_ERROR("can not send repository keys(%d).", r);
+          break;
+        }
+        result += r;
+
+        r = ::send(m_socket, (const char*)raw.names, raw.cbNames, 0);
+        if(r != raw.cbNames) {
+          CLOG_ERROR("can not send repository names(%d).", r);
+          break;
+        }
+        result += r;
+
+        r = ::send(m_socket, (const char*)raw.data, raw.cbData, 0);
+        if(r != raw.cbData) {
+          CLOG_ERROR("can not send repository data(%d).", r);
+          break;
+        }
+        return result + r;
+      } while(0);
+
+      CloseSocket();
+      return r;
+    }
+
+    //i32 TCPClient::Send(const StockA& stock) const
+    //{
+    //}
+
+    //i32 TCPClient::Send(const StockW& stock) const
+    //{
+    //}
+
+    i32 TCPClient::Recv(CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize) const
     {
       if(bRecvSpecifySize == FALSE)
       {
-        return recv(m_socket, (char*)pData, nLen, 0);
+        return ::recv(m_socket, (char*)pData, nLen, 0);
       }
       else
       {
         u32 nSpecifySize = nLen;
         do {
-          int result = recv(m_socket, (char*)pData, nSpecifySize, 0);
+          int result = ::recv(m_socket, (char*)pData, nSpecifySize, 0);
 
-          if(result == SOCKET_ERROR) {
+          // 返回0表示温和地断开了链接
+          if(result == SOCKET_ERROR || result == 0) {
             return result;
           }
 
@@ -184,13 +286,84 @@ namespace clstd
 
     //////////////////////////////////////////////////////////////////////////
 
+    namespace Internal {
+      TCPClientThread::TCPClientThread(TCPListener* pListener, SOCKET socket, TCPClientProc fn)
+        : TCPClient(socket)
+        , m_tid(0)
+        , m_pListener(pListener)
+        , m_func(fn)
+        , m_pWaiting(NULL)
+      {
+      }
+      
+      i32 TCPClientThread::Run()
+      {
+        ASSERT(m_tid == 0 && m_pWaiting == NULL);
+        m_pWaiting = new Signal;
+        m_tid      = this_thread::GetId();
+
+        while(true)
+        {
+          if(m_socket == INVALID_SOCKET) {
+            break;
+          }
+          
+          m_func(*this);          
+          m_pListener->CloseClientSocket(this);
+          m_pWaiting->Wait();
+        }
+
+        return 0;
+      }
+
+      void TCPClientThread::SetSocket(SOCKET socket)
+      {
+        ASSERT(m_socket == INVALID_SOCKET);
+        m_socket = socket;
+        m_pWaiting->Set();
+      }
+
+      SOCKET TCPClientThread::GetSocket() const
+      {
+        return m_socket;
+      }
+
+      TCPClientThread::~TCPClientThread()
+      {
+        SAFE_DELETE(m_pWaiting);
+      }
+
+    } // namespace Internal
+
+    //////////////////////////////////////////////////////////////////////////
+
     TCPListener::TCPListener()
+      : m_socket(INVALID_SOCKET)
+      , m_tid(0)
+      , m_nIdelThread(0)
     {
+      if( ! IsStartup()) {
+        CLOG_ERROR("must be call net_socket::Startup() first.");
+      }
       ASSERT(IsStartup());
     }
 
     TCPListener::~TCPListener()
     {
+      for(auto it = m_ClientList.begin(); it != m_ClientList.end(); ++it)
+      {
+        (*it)->m_pWaiting->Set();
+        (*it)->Wait(-1);
+        SAFE_DELETE(*it);
+      }
+      
+      for(auto it = m_RecyclePool.begin(); it != m_RecyclePool.end(); ++it)
+      {
+        (*it)->m_pWaiting->Set();
+        (*it)->Wait(-1);
+        SAFE_DELETE(*it);
+      }
+      m_ClientList.clear();
     }
 
     clstd::SocketResult TCPListener::OpenPort(CLUSHORT port)
@@ -198,7 +371,7 @@ namespace clstd
       SOCKADDR_IN serverSockAddr = {};
       ASSERT(net_sockets::IsStartup());
 
-      int status = 0;
+      int result = 0;
 
       serverSockAddr.sin_port = htons(port);
       serverSockAddr.sin_family = AF_INET;
@@ -213,10 +386,10 @@ namespace clstd
       }
 
       // associate the socket with the address
-      status = bind(m_socket, (LPSOCKADDR)&serverSockAddr, sizeof(serverSockAddr));
-      if (status == SOCKET_ERROR) { 
+      result = ::bind(m_socket, (LPSOCKADDR)&serverSockAddr, sizeof(serverSockAddr));
+      if (result == SOCKET_ERROR) { 
         //_ChkWSACleanup(status);
-        CLOG_ERROR("ERROR: bind unsuccessful\r\n"); 
+        CLOG_ERROR("bind unsuccessful(%d:%d)", result, WSAGetLastError()); 
         return SocketResult_CanotBind;
       }
 
@@ -230,7 +403,7 @@ namespace clstd
       result = ::listen(m_socket, 1);
       if(result == SOCKET_ERROR)
       {
-        CLOG_ERROR("ERROR: listen unsuccessful(%d)", result);
+        CLOG_ERROR("listen unsuccessful(%d:%d)", result, WSAGetLastError());
         return SocketResult_CanotListen;
       }
 
@@ -327,10 +500,106 @@ namespace clstd
       return result;
     }
 
+    int TCPListener::WaitSocketAsync(long timeout_sec, TCPClientProc proc)
+    {
+      fd_set ReadSet;
+      fd_set ExceptSet;
+      int result = 0;
+      if( ! m_tid) {
+        m_tid = this_thread::GetId();
+      }
+      else if(m_tid != this_thread::GetId()) {
+        CLOG_ERROR("call %s in different thread.");
+        return -1;
+      }
+
+      FD_ZERO(&ReadSet);
+      FD_SET(m_socket, &ReadSet);
+
+      FD_ZERO(&ExceptSet);
+      FD_SET(m_socket, &ExceptSet);
+
+      if(m_nIdelThread)
+      {
+        for(auto it = m_ClientList.begin(); it != m_ClientList.end();)
+        {
+          auto const pClient = *it;
+          if(pClient->m_socket == INVALID_SOCKET) {
+            m_RecyclePool.push_back(pClient);
+            m_ClientList.erase(it++);
+          }
+          else {
+            ++it;
+          }
+        }
+        m_nIdelThread = 0;
+      }
+
+      timeval tv = {timeout_sec, 0};
+      result = ::select(0, &ReadSet, 0, &ExceptSet, &tv);
+
+      if(result == 0)
+      {
+        // Time Out
+        ASSERT(ExceptSet.fd_count == 0);
+      }
+      else if(result == SOCKET_ERROR)
+      {
+        std::for_each(m_ClientList.begin(), m_ClientList.end(),
+          [](Internal::TCPClientThread* pClient)
+        {
+          pClient->CloseSocket();
+        });
+
+        if(FD_ISSET(m_socket, &ReadSet))
+        {
+          return result;
+        }
+      }
+      else if(result != 0)
+      {
+        ASSERT(ExceptSet.fd_count == 0);
+        if(FD_ISSET(m_socket, &ReadSet))
+        {
+          SOCKADDR_IN clientSockAddr;
+          int addrLen = sizeof(SOCKADDR_IN);
+
+          // accept the connection request when one is received
+          SOCKET client = ::accept(m_socket, (LPSOCKADDR)&clientSockAddr, &addrLen);
+          if(client != INVALID_SOCKET) {
+            CLOG("Got the connection(socket:%d)...", client);
+            if(OnAccept(client, clientSockAddr)) {
+              //m_SocketList.push_back(client);
+              Internal::TCPClientThread* pClient = NULL;
+              if(m_RecyclePool.empty())
+              {
+                pClient = new Internal::TCPClientThread(this, client, proc);
+                pClient->Start();
+              }
+              else
+              {
+                pClient = m_RecyclePool.front();
+                m_RecyclePool.pop_front();
+                pClient->SetSocket(client);
+              }
+              m_ClientList.push_back(pClient);
+            }
+            else {
+              CLOG_WARNING("user refused connection(from %s:%d)",
+                inet_ntoa(clientSockAddr.sin_addr), ntohs(clientSockAddr.sin_port));
+              ::closesocket(client);
+            }
+          }
+        }
+      }
+      return result;
+    }
+
     int TCPListener::CloseSocket()
     {
       int result = 0;
 
+      /*
       // 退出时清理客户端端口
       for(auto it = m_SocketList.begin(); it != m_SocketList.end(); ++it)
       {
@@ -339,7 +608,7 @@ namespace clstd
           CLOG_ERROR("Error for closing socket(socket:%d, result:%d)...\r\n", *it, result);
         }
       }
-      m_SocketList.clear();
+      m_SocketList.clear();//*/
 
       if(m_socket)
       {
@@ -363,6 +632,7 @@ namespace clstd
       do {
         const int result = send(sock, (const char*)pData + nSent, nLen - nSent, 0);
         if(result < 0) {
+          CLOG_ERROR("%s send error(%d:%d)", __FUNCTION__, result, WSAGetLastError());
           return result;
         }
         nSent += result;
@@ -375,12 +645,52 @@ namespace clstd
       return recv(sock, (char*)pData, nLen, 0);
     }
 
+    i32 TCPListener::GetClientCount() const
+    {
+      const auto tid = this_thread::GetId();
+      if(tid != m_tid)
+      {
+        CLOG_ERROR("call %s in unexpected thread(tid:%d).", __FUNCTION__, tid);
+        return -1;
+      }
+
+      if( ! m_SocketList.empty()) {
+        return m_SocketList.size() - 1;
+      }
+      return m_ClientList.size();
+    }
+
+    void TCPListener::CloseClientSocket(TCPClient* pClient)
+    {
+      auto pClientTh = static_cast<Internal::TCPClientThread*>(pClient);
+      pClient->CloseSocket();
+      auto tid = this_thread::GetId();
+      if(tid == pClientTh->m_tid)
+      {
+        ++m_nIdelThread;
+      }
+      else if(tid == m_tid)
+      {
+        m_ClientList.erase(std::find(m_ClientList.begin(), m_ClientList.end(), pClientTh));
+        m_RecyclePool.push_back(pClientTh);
+      }
+      else
+      {
+        CLOG_ERROR("call %s in unexpected thread(tid:%d).", __FUNCTION__, tid);
+        CLBREAK;
+      }
+    }
+
     b32 TCPListener::OnAccept(SOCKET socket, const SOCKADDR_IN& addr_in)
     {
       return TRUE;
     }
 
     void TCPListener::OnDisconnect(SOCKET socket)
+    {
+    }
+
+    void TCPListener::OnRecv(SOCKET socket)
     {
     }
 

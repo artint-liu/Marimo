@@ -29,12 +29,6 @@
 //////////////////////////////////////////////////////////////////////////
 namespace clstd
 {
-  BufferBase& BufferBase::operator=(const BufferBase& buf)
-  {
-    CLBREAK;
-    return *this;
-  }
-
   CLLPVOID BufferBase::GetPtr() const
   {
     return m_lpBuffer;
@@ -48,6 +42,11 @@ namespace clstd
   CLBYTE* BufferBase::Set(int val)
   {
     return (CLBYTE*)memset(m_lpBuffer, val, m_uSize);
+  }
+
+  BufferBase& BufferBase::operator=(const BufferBase&)
+  {
+    CLBREAK; // 不能使用基类赋值
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -182,6 +181,12 @@ namespace clstd
     const clsize dwTail = m_uSize;
     Resize(m_uSize + dwSize, FALSE);
     memcpy(m_lpBuffer + dwTail, lpData, dwSize);
+    return *this;
+  }
+
+  MemBuffer& MemBuffer::Append(const BufferBase& buf)
+  {
+    Append(buf.GetPtr(), buf.GetSize());
     return *this;
   }
 

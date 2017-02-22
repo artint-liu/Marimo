@@ -197,6 +197,8 @@ namespace clstd
     StringX operator+(const _TCh ch) const;
     StringX operator+(const StringX& clStr2) const;
     StringX operator+(const _XCh* pStrX) const;
+
+    // 下面这些有歧义 (str + n) 不确定是字符串后面追加数字还是字符串数组索引
     //StringX operator+(int nInteger) const;
     //StringX operator+(float fFloat) const;
     //StringX operator+(long lLong) const;

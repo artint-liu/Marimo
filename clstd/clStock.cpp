@@ -1332,6 +1332,11 @@ namespace clstd
     return (T_LPCSTR)m_Buffer.GetPtr();
   }
 
+  _SSP_TEMPL
+  const MemBuffer& _SSP_IMPL::GetBuffer() const
+  {
+    return m_Buffer;
+  }
 
   //////////////////////////////////////////////////////////////////////////
   _SSP_TEMPL

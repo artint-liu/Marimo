@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo_SmartStock", "Demo_SmartStock.vcxproj", "{3E71E6C0-0B32-4F83-BA05-9B0A80AC56E8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6} = {C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}
@@ -27,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample_String", "Sample_Str
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd", "..\..\projects\vs2010\clstd.vcxproj", "{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample_Sockets", "Sample_Sockets.vcxproj", "{34E3F61B-9B2E-413D-B875-740FFD82AAE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,6 +78,12 @@ Global
 		{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}.Release|Win32.Build.0 = Release|Win32
 		{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}.Release|x64.ActiveCfg = Release|x64
 		{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}.Release|x64.Build.0 = Release|x64
+		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Debug|Win32.Build.0 = Debug|Win32
+		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Debug|x64.ActiveCfg = Debug|Win32
+		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Release|Win32.ActiveCfg = Release|Win32
+		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Release|Win32.Build.0 = Release|Win32
+		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

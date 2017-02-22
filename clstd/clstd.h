@@ -397,6 +397,14 @@ namespace clstd
   {
   }
 
+  class NonCopyable
+  {
+  protected:
+    NonCopyable() {}
+  private:
+    NonCopyable(const NonCopyable& ) {}
+    NonCopyable& operator=(const NonCopyable& ) {}
+  };
 } // namespace clstd
 
 // 常用的头文件

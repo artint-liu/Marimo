@@ -176,9 +176,9 @@ namespace clstd
   protected:
     //typedef clvector<SECTION*>  SectionArray;
 
-    _TTokens m_SmartStream;
-    Buffer   m_Buffer;
-    size_t   m_nModify;
+    _TTokens  m_SmartStream;
+    MemBuffer m_Buffer;
+    size_t    m_nModify;
     //SectionArray  m_aHandles;
 
     static void ReverseByteOrder16(u16* ptr, clsize nCount);
@@ -237,6 +237,8 @@ namespace clstd
     // b32 DeleteSection(Section* desc); // TODO: 没实现
 
     T_LPCSTR GetText(clsize* length) const;
+
+    const MemBuffer& GetBuffer() const;
 
   protected:
     //b32      Append            (Section* pSect, T_LPCSTR szText, clsize nCount);

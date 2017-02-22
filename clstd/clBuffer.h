@@ -166,6 +166,7 @@ namespace clstd
     clsize      GetSize   () const;
     //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
     MemBuffer&  Append    (CLLPCVOID lpData, clsize dwSize);
+    MemBuffer&  Append    (const BufferBase& buf);
     b32         Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
     b32         Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
 
@@ -175,7 +176,7 @@ namespace clstd
     // 封装的模板
     //
     template <class _Ty>
-    MemBuffer& Append(const _Ty& t)
+    MemBuffer& AppendStruct(const _Ty& t)
     {
       return Append(&t, sizeof(_Ty));
     }

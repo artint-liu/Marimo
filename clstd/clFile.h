@@ -8,9 +8,10 @@
 
 namespace clstd
 {
+  class BufferBase;
   class MemBuffer;
 
-  class File
+  class File : public NonCopyable
   {
   public:
 #ifdef __clang__
@@ -117,6 +118,7 @@ namespace clstd
     void GetTime      (TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime) const;
     b32  Read         (CLLPVOID lpBuffer, u32 nNumOfBytesToRead,  u32* lpNumberOfBytesRead = NULL);
     b32  Write        (CLLPCVOID lpBuffer, u32 nNumberOfBytesToWrite, u32* lpNumberOfBytesWritten = NULL);
+    b32  Write        (const BufferBase& buffer, u32* lpNumberOfBytesWritten = NULL);
 
     //int  Writef       (const tch* format, ...);
     int  WritefA      (const ch* format, ...);

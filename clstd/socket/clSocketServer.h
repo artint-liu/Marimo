@@ -53,6 +53,11 @@ namespace clstd
       SendBC       = PM_Send | PM_Broadcast,
       SendRecvBC   = PM_Send | PM_Recv | PM_Broadcast,
     };
+
+    typedef u32_ptr IPAddr;
+
+    const static IPAddr BroadcastAddress = -1;
+
   protected:
     SOCKET        m_Socket;
     u32           m_dwFlags;
@@ -72,9 +77,9 @@ namespace clstd
     // 其它: 等待超时时间
     int Close (u32 nMilliSec);
     i32 Send(CLLPCSTR szIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen);
-    i32 Send(u32_ptr uIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen);
-    i32 SendBroadCast(u32 wPort, CLLPCVOID pData, u32 nLen);
-    i32 Recv(CLLPCVOID pData, u32 nLen, u32_ptr* uIPAddress, u32* wPort);
+    i32 Send(IPAddr uIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen);
+    //i32 SendBroadCast(u32 wPort, CLLPCVOID pData, u32 nLen);
+    i32 Recv(CLLPCVOID pData, u32 nLen, IPAddr* uIPAddress, u32* wPort);
 
     template<class _StringT>
     static size_t SockAddrToString(_StringT& str, u32_ptr uIPAddress)

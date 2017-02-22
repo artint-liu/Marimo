@@ -76,7 +76,8 @@ namespace clstd
 #if defined(_CPLUSPLUS_11_THREAD)
   typedef c11::Signal Signal;
 #elif defined(_WIN32) && !defined(POSIX_THREAD)
-  typedef _win32::Signal Signal;
+  //typedef _win32::Signal Signal;
+  class Signal : public _win32::Signal{};
 #else
   typedef _posix::Signal Signal;
 #endif // #if defined(_Win32) && !defined(POSIX_THREAD)

@@ -1,3 +1,4 @@
+#include <functional>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"

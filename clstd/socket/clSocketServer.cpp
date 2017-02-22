@@ -1,3 +1,4 @@
+#include <functional>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"
@@ -315,9 +316,16 @@ namespace clstd
     return result;
   }
 
-  i32 UDPSocket::Send(u32_ptr uIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen)
+  i32 UDPSocket::Send(IPAddr uIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen)
   {
     if(TEST_FLAG_NOT(m_dwFlags, PM_Send)) {
+      CLOG_ERROR("UDP Socket didn't has send flag.");
+      return -1;
+    }
+    
+    if(uIPAddress == BroadcastAddress && TEST_FLAG_NOT(m_dwFlags, PM_Broadcast))
+    {
+      CLOG_ERROR("UDP Socket didn't has broadcast flag.");
       return -1;
     }
 
@@ -330,16 +338,16 @@ namespace clstd
     return result;
   }
 
-  i32 UDPSocket::SendBroadCast(u32 wPort, CLLPCVOID pData, u32 nLen)
-  {
-    if ( ! TEST_FLAGS_ALL(m_dwFlags, PM_Broadcast)) {
-      return -1;
-    }
+  //i32 UDPSocket::SendBroadCast(u32 wPort, CLLPCVOID pData, u32 nLen)
+  //{
+  //  if ( ! TEST_FLAGS_ALL(m_dwFlags, PM_Broadcast)) {
+  //    return -1;
+  //  }
 
-    return Send((u32_ptr)-1, wPort, pData, nLen);
-  }
+  //  return Send((u32_ptr)-1, wPort, pData, nLen);
+  //}
 
-  i32 UDPSocket::Recv(CLLPCVOID pData, u32 nLen, u32_ptr* uIPAddress, u32* wPort)
+  i32 UDPSocket::Recv(CLLPCVOID pData, u32 nLen, IPAddr* uIPAddress, u32* wPort)
   {
     if(TEST_FLAG_NOT(m_dwFlags, PM_Recv)) {
       return -1;
