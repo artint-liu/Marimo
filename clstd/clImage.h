@@ -63,10 +63,11 @@ namespace clstd
     Image& operator=(const Image& image);
     b32         CompareFormat       (const char* fmt) const;
     b32         Set                 (int nWidth, int nHeight, const char* fmt, const void* pData);
-    b32         Set                 (int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData);
+    b32         Set                 (int nWidth, int nHeight, const char* fmt, int nChannelDepth, const void* pData, int nPitch = 0);
     int         GetWidth            () const;
     int         GetHeight           () const;
-    int         GetDepth            () const;
+    b32         SetChannelDepth     (int nDepth); // 设置新的深度
+    int         GetChannelDepth     () const;
     int         GetChannels         () const;
     int         GetPitch            () const;
 /*没实现*/int       Inflate             (int left, int top, int right, int bottom); // 调整Image尺寸，参数是四个边缘扩展的像素数，可以是负数
@@ -98,6 +99,10 @@ namespace clstd
 
     template<typename _TChannel>
     void ChangeFormat(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch);
+
+    template<typename _TDestChannel, typename _TSrcChannel>
+    void ChangeDepth(CLLPBYTE pDestPtr, size_t nDestPitch, int right_shift);
+
     //template<typename _Ty>
     //void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );
 

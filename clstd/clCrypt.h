@@ -33,7 +33,7 @@ namespace clstd
     MD5Calculater();
     void Clear();
     //void End();
-    void Update(const u8* pBuffer, clsize cbSize);
+    void Update(const void* pBuffer, clsize cbSize);
     void Update(const BufferBase* pBuffer);
 
     b32       operator=(const MD5Calculater& md5) const;

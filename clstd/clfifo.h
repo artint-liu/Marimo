@@ -29,7 +29,9 @@ namespace clstd
   {
   protected:
     _Ty*    m_pElementArray;
-    size_t  m_size;
+    //size_t  m_size;
+    size_t  m_mask;
+    size_t  m_capacity;
     volatile size_t  m_in;
     volatile size_t  m_out;
 #ifdef _DEBUG
@@ -39,7 +41,8 @@ namespace clstd
   public:
     WIRO(size_t size) // 容量数，必须是 2^n - 1
       : m_pElementArray(NULL)
-      , m_size(0)
+      , m_mask(0)
+      , m_capacity(0)
       , m_in
       , m_out
 #ifdef _DEBUG
@@ -52,7 +55,8 @@ namespace clstd
 
     WIRO()
       : m_pElementArray(NULL)
-      , m_size(0)
+      , m_mask(0)
+      , m_capacity(0)
       , m_in(0)
       , m_out(0)
 #ifdef _DEBUG
@@ -65,7 +69,7 @@ namespace clstd
     ~WIRO()
     {
       SAFE_DELETE_ARRAY(m_pElementArray);
-      m_size = m_in = m_out = 0;
+      m_capacity = m_mask = m_in = m_out = 0;
     }
 
     b32 SetSize(size_t size)
@@ -75,12 +79,14 @@ namespace clstd
         ( ! m_idReader || m_idReader == this_thread::GetId()));
 
       // is not pow of 2
-      if(size & (size + 1)) {
+      if(size & (size - 1)) {
         return FALSE;
       }
-      m_size = size;
+      //m_size = size;
+      m_capacity = size;
+      m_mask = size - 1;
       SAFE_DELETE_ARRAY(m_pElementArray);
-      m_pElementArray = new _Ty[m_size];
+      m_pElementArray = new _Ty[m_capacity];
       m_in = 0;
       m_out = 0;
 #ifdef _DEBUG
@@ -100,7 +106,7 @@ namespace clstd
 #endif // _DEBUG
       
       if(m_pElementArray) {
-        const size_t next_in = (m_in + 1) & m_size;
+        const size_t next_in = (m_in + 1) & m_mask;
         if(next_in == m_out) {
           return FALSE;
         }
@@ -122,7 +128,7 @@ namespace clstd
 
       if(m_pElementArray && m_out != m_in) {
         element = m_pElementArray[m_out];
-        m_out = (m_out + 1) & m_size;
+        m_out = (m_out + 1) & m_mask;
         return TRUE;
       }
       return FALSE;

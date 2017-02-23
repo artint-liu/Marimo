@@ -30,9 +30,9 @@ namespace clstd
     }
   }
 
-  void MD5Calculater::Update(const u8* pBuffer, clsize cbSize)
+  void MD5Calculater::Update(const void* pBuffer, clsize cbSize)
   {
-    MD5Update(&ctx, pBuffer, (unsigned long)cbSize);
+    MD5Update(&ctx, (const u8*)pBuffer, (unsigned long)cbSize);
   }
 
   void MD5Calculater::Update(const BufferBase* pBuffer)

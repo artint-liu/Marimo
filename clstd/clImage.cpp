@@ -68,6 +68,83 @@ namespace clstd
     return m_height;
   }
 
+  template<typename _TDestChannel, typename _TSrcChannel>
+  void Image::ChangeDepth(CLLPBYTE pDestPtr, size_t nDestPitch, int right_shift)
+  {
+    STATIC_ASSERT(sizeof(_TSrcChannel) / sizeof(_TDestChannel) == 2 || sizeof(_TSrcChannel) / sizeof(_TDestChannel) == 4);
+    // TODO: 未来加入四舍五入
+    for(int y = 0; y < m_height; y++)
+    {
+      _TDestChannel* pDest = (_TDestChannel*)pDestPtr + nDestPitch * y;
+      _TSrcChannel*  pSrc  = (_TSrcChannel*)GetLine(y);
+      for(int x = 0; x < m_width; x++)
+      {
+        for(int chl = 0; chl < m_channel; chl++)
+        {
+          *pDest = *pSrc >> right_shift;
+          pDest++;
+          pSrc++;
+        }
+      }
+    }
+  }
+
+  b32 Image::SetChannelDepth(int nDepth)
+  {
+    if(nDepth == m_depth) {
+      return TRUE;
+    }
+
+    CLLPBYTE pDestPtr = m_ptr;
+    const size_t nDestPitch = MIN_PITCH_PARAM(m_width, m_channel, nDepth);
+    if(m_depth < nDepth) {
+      pDestPtr = new CLBYTE[nDestPitch * m_height];
+    }
+
+    if(m_depth == 8)
+    {
+      CLBREAK; // 没实现
+    }
+    else if(m_depth == 16)
+    {
+      switch(nDepth)
+      {
+      case 8:
+        ChangeDepth<u8, u16>(pDestPtr, nDestPitch, 8);
+        break;
+      case 32:
+      default:
+        CLBREAK; // 没实现
+        break;
+      }
+    }
+    else if(m_depth == 32)
+    {
+      switch(nDepth)
+      {
+      case 8:
+        ChangeDepth<u8, u16>(pDestPtr, nDestPitch, 24);
+        break;
+      case 16:
+        ChangeDepth<u8, u16>(pDestPtr, nDestPitch, 16);
+        break;
+      default:
+        CLBREAK;
+        break;
+      }
+    }
+
+    if(pDestPtr != m_ptr) {
+      SAFE_DELETE_ARRAY(m_ptr);
+      m_ptr = pDestPtr;
+    }
+
+    m_pitch = nDestPitch;
+    m_depth = nDepth;
+
+    return TRUE;
+  }
+
   const void* Image::GetPixelPtr(int x, int y) const
   {
     return (CLLPBYTE)m_ptr + m_pitch * y + x;
@@ -83,7 +160,7 @@ namespace clstd
     return (size_t)(m_pitch * m_height);
   }
 
-  int Image::GetDepth() const
+  int Image::GetChannelDepth() const
   {
     return m_depth;
   }
@@ -121,9 +198,9 @@ namespace clstd
     return true;
   }
 
-  b32 Image::Set(int nWidth, int nHeight, const char* fmt, int nPitch, int nDepth, const void* pData)
+  b32 Image::Set(int nWidth, int nHeight, const char* fmt, int nChannelDepth, const void* pData, int nPitch)
   {
-    if (m_width != nWidth || m_height != nHeight || m_depth != nDepth ||
+    if (m_width != nWidth || m_height != nHeight || m_depth != nChannelDepth ||
       m_pitch != nPitch || !CompareFormat(fmt))
     {
       u32 fmtcode;
@@ -133,9 +210,9 @@ namespace clstd
       }
 
       if (nPitch == 0) {
-        nPitch = MIN_PITCH_PARAM(nWidth, channel, nDepth);
+        nPitch = MIN_PITCH_PARAM(nWidth, channel, nChannelDepth);
       }
-      else if (MIN_PITCH_PARAM(nWidth, channel, nDepth) < nPitch) {
+      else if (MIN_PITCH_PARAM(nWidth, channel, nChannelDepth) < nPitch) {
         return FALSE;
       }
 
@@ -144,7 +221,7 @@ namespace clstd
       m_height = nHeight;
       m_pitch = nPitch;
       m_channel = channel;
-      m_depth = nDepth;
+      m_depth = nChannelDepth;
       m_ptr = new u8[GetDataSize()];
       m_format.code = fmtcode;
     }
@@ -248,7 +325,7 @@ namespace clstd
     char fmt[8] = { 0 };
     fmt[0] = chChannel;
 
-    if (!pDestImage->Set(m_width, m_height, fmt, 0, m_depth, NULL)) {
+    if (!pDestImage->Set(m_width, m_height, fmt, m_depth, NULL, 0)) {
       return FALSE;
     }
     const int nPixelSize = GETPIXELSIZE;
@@ -316,7 +393,7 @@ namespace clstd
 
   b32 Image::ScaleNearest(Image* pDestImage, int nWidth, int nHeight)
   {
-    if (!pDestImage->Set(nWidth, nHeight, (const char*)m_format.name, 0, m_depth, NULL)) {
+    if (!pDestImage->Set(nWidth, nHeight, (const char*)m_format.name, m_depth, NULL, 0)) {
       return FALSE;
     }
 
@@ -617,12 +694,12 @@ namespace clstd
 
   b32 ImageFilterF::Set( int nWidth, int nHeight, const char* fmt, const void* pData )
   {
-    return Image::Set(nWidth, nHeight, fmt, 0, 32, pData);
+    return Image::Set(nWidth, nHeight, fmt, 32, pData, 0);
   }
 
   b32 ImageFilterF::Set( ImageFilterI8* pSrcImage, float fLevel /*= (1.0f / 255.0f)*/ )
   {
-    if( ! Image::Set(pSrcImage->GetWidth(), pSrcImage->GetHeight(), pSrcImage->GetFormat(), 0, 32, NULL)) {
+    if( ! Image::Set(pSrcImage->GetWidth(), pSrcImage->GetHeight(), pSrcImage->GetFormat(), 32, NULL, 0)) {
       return FALSE;
     }
 
