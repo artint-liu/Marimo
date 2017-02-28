@@ -96,7 +96,7 @@ namespace clstd
     }
 
     CLLPBYTE pDestPtr = m_ptr;
-    const size_t nDestPitch = MIN_PITCH_PARAM(m_width, m_channel, nDepth);
+    const int nDestPitch = MIN_PITCH_PARAM(m_width, m_channel, nDepth);
     if(m_depth < nDepth) {
       pDestPtr = new CLBYTE[nDestPitch * m_height];
     }

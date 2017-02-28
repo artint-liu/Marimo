@@ -315,7 +315,7 @@ namespace clstd
 
   b32 File::Write(const BufferBase& buffer, u32* lpNumberOfBytesWritten /*= NULL*/)
   {
-    return Write(buffer.GetPtr(), buffer.GetSize(), lpNumberOfBytesWritten);
+    return Write(buffer.GetPtr(), (u32)buffer.GetSize(), lpNumberOfBytesWritten);
   }
 
   //int File::Writef(const tch* format, ...)

@@ -134,10 +134,14 @@ extern "C" void _cl_traceW(const wch *fmt, ...)
 
 extern "C" void _cl_log_infoA(const char *fmt, ...)
 {
+  SET_TEXT_COLOR(0x07);
+
   va_list val;
   va_start(val, fmt);
   _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[INFO] ", fmt, val);
   va_end(val);
+
+  RESTORE_TEXT_COLOR();
 }
 
 extern "C" void _cl_log_errorA(const char *fmt, ...)
@@ -166,10 +170,14 @@ extern "C" void _cl_log_warningA(const char *fmt, ...)
 
 extern "C" void _cl_log_infoW(const wch *fmt, ...)
 {
+  SET_TEXT_COLOR(0x07);
+
   va_list val;
   va_start(val, fmt);
   _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[INFO] ", fmt, val);
   va_end(val);
+
+  RESTORE_TEXT_COLOR();
 }
 
 extern "C" void _cl_log_errorW(const wch *fmt, ...)
@@ -200,10 +208,14 @@ namespace clstd
 {
   void _cl_log_info(const char *fmt, ...)
   {
+    SET_TEXT_COLOR(0x07);
+
     va_list val;
     va_start(val, fmt);
     _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[INFO] ", fmt, val);
     va_end(val);
+
+    RESTORE_TEXT_COLOR();
   }
 
   void _cl_log_error(const char *fmt, ...)

@@ -147,11 +147,15 @@ namespace clstd
     b32 IsEmpty() const
     {
       // 只有读取或者写入线程才能调用这个
+#ifdef _DEBUG
       const this_thread::id _id = this_thread::GetId();
       if(m_idReader == _id || m_idWriter == _id) {
         return m_in == m_out;
       }
       return 0;
+#else
+      return m_in == m_out;
+#endif
     }
   };
 

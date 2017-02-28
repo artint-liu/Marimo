@@ -47,6 +47,7 @@ namespace clstd
   BufferBase& BufferBase::operator=(const BufferBase&)
   {
     CLBREAK; // 不能使用基类赋值
+    return *this;
   }
 
   //////////////////////////////////////////////////////////////////////////
