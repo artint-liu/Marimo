@@ -7,12 +7,50 @@
 #define NAMEINCCOUNT 128
 #define OCTETSIZE 8
 
-#define REPO_MAGIC CLMAKEFOURCC('C','L','R','P')
+#define REPO_MAGIC           CLMAKEFOURCC('C','L','R','P')
+#define REPO_MAGIC_BIGENDIAN CLMAKEFOURCC('P','R','L','C')
 
 namespace clstd
 {
   namespace
   {
+    enum KeyType
+    {
+      //KT_Node,    // 节点
+      KeyType_Varible = 1,               // 变长数据
+      KeyType_Octet   = 0x0010,          // 标志
+      KeyType_Octet_0 = (0 | KeyType_Octet),  // 8字节数据，长度可以为0，仅存键值
+      KeyType_Octet_8 = (8 | KeyType_Octet),  // 8字节数据，长度8字节
+    };
+
+    struct KEY 
+    {
+      u32     name; // 字母偏移，不是字节
+      KeyType type;
+      union 
+      {
+        struct {
+          u32 offset;
+          u32 length;
+        }v; // varible
+        struct {
+          CLBYTE data[8];
+        }o; // octet
+      };
+      LPCSTR  GetName     (LPCSTR szFirstName) const;
+      CLBYTE* GetDataPtr  (CLBYTE* pDataBase) const;
+      CLBYTE* GetDataPtr  (CLBYTE* pDataBase, size_t* pSizeOut) const;
+      size_t  GetDataSize () const;
+    };
+
+    struct KEYPAIR
+    {
+      KEY* pTable;
+      b32 bInsert;
+    };
+
+    //////////////////////////////////////////////////////////////////////////
+
     enum HeaderFlag{
       HeaderFlag_KeyFieldMask     = 0x0003,
       HeaderFlag_KeyField_1Byte   = 0x0003, // 255 Keys
@@ -44,9 +82,9 @@ namespace clstd
         class _R : public Repository
         {
         public:
-          typedef Repository::KEY KEY;
+          //typedef Repository::KEY KEY;
         };
-        return nKeys * sizeof(_R::KEY) + cbNames + cbData;
+        return nKeys * sizeof(KEY) + cbNames + cbData;
       }
     };
 
@@ -158,9 +196,141 @@ namespace clstd
       }
       return _UnpackHeader_NameDataT<u32>(header, pBuffer);
     }
-
-
   } // namespace
+
+  //////////////////////////////////////////////////////////////////////////
+
+  RepoReader::RepoReader()
+    : m_pKeys    (NULL)
+    , m_pKeysEnd (NULL)
+    , m_pKeysCapacity(NULL)
+    , m_pNamesEnd (NULL)
+    , m_pData     (NULL)
+    , m_cbDataLen (0)
+  {
+  }
+
+  b32 RepoReader::Attach(void* pData, size_t nLength)
+  {
+    size_t nDataPtr = reinterpret_cast<size_t>(pData);
+    FILE_HEADER header = { 0, ((CLDWORD*)nDataPtr)[1] }; // 需要设置dwFlags作为解压参数
+    size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)nDataPtr);
+    if(header.dwMagic != REPO_MAGIC) {
+      // ERROR: bad file magic
+      return false;
+    }
+    nDataPtr += packed_header_size;
+
+    m_pKeys         = reinterpret_cast<KEY*>(nDataPtr);
+    m_pKeysEnd      = m_pKeys + header.nKeys;
+    m_pKeysCapacity = m_pKeysEnd;
+    m_pNamesEnd     = reinterpret_cast<LPCSTR>(reinterpret_cast<size_t>(m_pKeysEnd) + header.cbNames);
+    m_pData         = (CLBYTE*)m_pNamesEnd;
+    m_cbDataLen     = header.cbData;
+
+    size_t nCheckLen = packed_header_size + sizeof(KEY) * header.nKeys + header.cbNames + header.cbData;
+    if(nCheckLen > nLength) {
+      // ERROR: not enough data
+      return false;
+    }
+    else if(nCheckLen < nLength)
+    {
+      // WARNING: has redundancy data
+      return true;
+    }
+    return true;
+  }
+
+  size_t RepoReader::GetNumOfKeys() const
+  {
+    return m_pKeysEnd - m_pKeys;
+  }
+
+  size_t RepoReader::GetKey(LPCSTR szKey, void* pData, size_t nLength) const
+  {
+    KEY* pKey = _FindKey(szKey);
+    if(pKey) {
+      size_t copy_size = 0;
+      CLBYTE*const pSrcData = pKey->GetDataPtr(m_pData, &copy_size);
+
+      if(pData == NULL || nLength == NULL) {
+        return copy_size;
+      }
+
+      copy_size = clMin(copy_size, nLength);
+      memcpy(pData, pSrcData, copy_size);
+      return copy_size;
+    }
+    return 0;
+  }
+
+  void* RepoReader::GetDataPtr( LPCSTR szKey, size_t* pLength ) const
+  {
+    KEY* pKey = _FindKey(szKey);
+    if(pKey) {
+      size_t len = 0;
+      return pKey->GetDataPtr(m_pData, pLength ? pLength : &len);
+    }
+    return NULL;
+  }
+
+  size_t RepoReader::GetRawData(RAWDATA* pRaw) const
+  {
+    if(pRaw == NULL) {
+      return 0;
+    }
+
+    FILE_HEADER header = { REPO_MAGIC };
+    header.nKeys   = (CLDWORD)(m_pKeysEnd - m_pKeys);
+    header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
+    header.cbData  = (CLDWORD)m_cbDataLen;
+
+    pRaw->keys      = m_pKeys;
+    pRaw->cbKeys    = header.nKeys * sizeof(KEY);
+    pRaw->names     = _GetNamesBegin();
+    pRaw->cbNames   = header.cbNames;
+    pRaw->data      = m_pData;
+    pRaw->cbData    = header.cbData;
+    pRaw->cbHeader  = _PackHeader(header, pRaw->header);
+
+    return pRaw->cbHeader + pRaw->cbKeys + pRaw->cbNames + pRaw->cbData;
+  }
+
+  KEY* RepoReader::_FindKey(LPCSTR szKey) const
+  {
+    LPCSTR szNamesFront = _GetNamesBegin();
+    KEY*const result =
+      clstd::BinarySearch(m_pKeys, m_pKeysEnd, szKey,
+        [szNamesFront](KEY* pMid, LPCSTR key) -> int
+    {
+      return strcmpT(pMid->GetName(szNamesFront), key);
+    });
+    return result;
+  }
+
+  LPCSTR RepoReader::_GetNamesBegin() const
+  {
+    return reinterpret_cast<LPCSTR>(m_pKeysCapacity);
+  }
+
+  LPCSTR RepoReader::_GetNamesCapacity() const
+  {
+    return reinterpret_cast<LPCSTR>(m_pData);
+  }
+
+  RepoReader::iterator RepoReader::begin() const
+  {
+    iterator it(this, m_pKeys);
+    return it;
+  }
+
+  RepoReader::iterator RepoReader::end() const
+  {
+    iterator it(this, m_pKeysEnd);
+    return it;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   template<typename T_LPCSTR>
   b32 Repository::LoadFromFileT(T_LPCSTR szFilename)
@@ -184,7 +354,7 @@ namespace clstd
     FILE_HEADER header = {};
     header.dwMagic = REPO_MAGIC;
     header.nKeys   = (CLDWORD)(m_pKeysEnd - m_pKeys);
-    header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
+    header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
     header.cbData  = (CLDWORD)m_cbDataLen;
 
     CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
@@ -192,7 +362,7 @@ namespace clstd
 
     file.Write(packed_header, (u32)packed_header_size);
     file.Write(m_pKeys, (u32)((size_t)m_pKeysEnd - (size_t)m_pKeys));
-    file.Write(GetNamesBegin(), header.cbNames);
+    file.Write(_GetNamesBegin(), header.cbNames);
     file.Write(m_pData, (u32)m_cbDataLen);
     return TRUE;
   }
@@ -233,12 +403,6 @@ namespace clstd
   }
 
   Repository::Repository()
-    : m_pKeys    (NULL)
-    , m_pKeysEnd (NULL)
-    , m_pKeysCapacity(NULL)
-    , m_pNamesEnd  (NULL)
-    , m_pData     (NULL)
-    , m_cbDataLen (0)
   {
   }
 
@@ -262,18 +426,6 @@ namespace clstd
     return *this;
   }
 
-  Repository::iterator Repository::begin() const
-  {
-    iterator it(this, m_pKeys);
-    return it;
-  }
-
-  Repository::iterator Repository::end() const
-  {
-    iterator it(this, m_pKeysEnd);
-    return it;
-  }
-
   void Repository::Clear()
   {
     m_Buffer.Resize(0, FALSE);
@@ -287,46 +439,34 @@ namespace clstd
 
   b32 Repository::_ParseFromBuffer()
   {
-    size_t pData = reinterpret_cast<size_t>(m_Buffer.GetPtr());
-    FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
-    size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
-    if(header.dwMagic != REPO_MAGIC) {
-      // ERROR: bad file magic
-      return false;
-    }
-    pData += packed_header_size;
+    return Attach(m_Buffer.GetPtr(), m_Buffer.GetSize());
+    //size_t pData = reinterpret_cast<size_t>(m_Buffer.GetPtr());
+    //FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
+    //size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
+    //if(header.dwMagic != REPO_MAGIC) {
+    //  // ERROR: bad file magic
+    //  return false;
+    //}
+    //pData += packed_header_size;
 
-    m_pKeys = reinterpret_cast<KEY*>(pData);
-    m_pKeysEnd = m_pKeys + header.nKeys;
-    m_pKeysCapacity = m_pKeysEnd;
+    //m_pKeys         = reinterpret_cast<KEY*>(pData);
+    //m_pKeysEnd      = m_pKeys + header.nKeys;
+    //m_pKeysCapacity = m_pKeysEnd;
+    //m_pNamesEnd     = reinterpret_cast<LPCSTR>(reinterpret_cast<size_t>(m_pKeysEnd) + header.cbNames);
+    //m_pData         = (CLBYTE*)m_pNamesEnd;
+    //m_cbDataLen     = header.cbData;
 
-    m_pNamesEnd = reinterpret_cast<LPCSTR>(reinterpret_cast<size_t>(m_pKeysEnd) + header.cbNames);
-    m_pData     = (CLBYTE*)m_pNamesEnd;
-    m_cbDataLen = header.cbData;
-
-    size_t nCheckLen = packed_header_size + sizeof(KEY) * header.nKeys + header.cbNames + header.cbData;
-    if(nCheckLen > m_Buffer.GetSize()) {
-      // ERROR: not enough data
-      return false;
-    }
-    else if(nCheckLen < m_Buffer.GetSize())
-    {
-      // WARNING: has redundancy data
-      return true;
-    }
-    return true;
-  }
-
-  Repository::KEY* Repository::_FindKey(LPCSTR szKey) const
-  {
-    LPCSTR szNamesFront = GetNamesBegin();
-    KEY*const result =
-      clstd::BinarySearch(m_pKeys, m_pKeysEnd, szKey,
-      [szNamesFront](KEY* pMid, LPCSTR key) -> int
-    {
-      return strcmpT(pMid->GetName(szNamesFront), key);
-    });
-    return result;
+    //size_t nCheckLen = packed_header_size + sizeof(KEY) * header.nKeys + header.cbNames + header.cbData;
+    //if(nCheckLen > m_Buffer.GetSize()) {
+    //  // ERROR: not enough data
+    //  return false;
+    //}
+    //else if(nCheckLen < m_Buffer.GetSize())
+    //{
+    //  // WARNING: has redundancy data
+    //  return true;
+    //}
+    //return true;
   }
 
   size_t Repository::_ResizeGlobalBuf(size_t delta, KEY*& rpKey)
@@ -351,24 +491,14 @@ namespace clstd
     return 0;
   }
 
-  LPCSTR Repository::GetNamesBegin() const
-  {
-    return reinterpret_cast<LPCSTR>(m_pKeysCapacity);
-  }
-
-  LPCSTR Repository::GetNamesCapacity() const
-  {
-    return reinterpret_cast<LPCSTR>(m_pData);
-  }
-
-  size_t Repository::GetDataCapacity() const
+  size_t Repository::_GetDataCapacity() const
   {
     return ((size_t)m_Buffer.GetPtr() + m_Buffer.GetSize()) - (size_t)m_pData;
   }
 
-  Repository::KEYPAIR* Repository::_PreInsertKey(KEYPAIR* pPair, LPCSTR szKey)
+  KEYPAIR* Repository::_PreInsertKey(KEYPAIR* pPair, LPCSTR szKey)
   {
-    LPCSTR szNamesFront = GetNamesBegin();
+    LPCSTR szNamesFront = _GetNamesBegin();
     pPair->pTable =
       clstd::BinaryInsertPos(m_pKeys, m_pKeysEnd, szKey, &pPair->bInsert,
       [szNamesFront](KEY* pMid, LPCSTR key) -> int
@@ -393,19 +523,19 @@ namespace clstd
     size_t key_inc = 0;
     size_t name_inc = 0;
     ASSERT(m_pKeysEnd <= m_pKeysCapacity);
-    ASSERT(m_pNamesEnd <= GetNamesCapacity());
+    ASSERT(m_pNamesEnd <= _GetNamesCapacity());
 
     if(m_pKeysEnd == m_pKeysCapacity) {
       key_inc = KEYINCCOUNT * sizeof(KEY);
       extened += key_inc;
     }
 
-    if((size_t)m_pNamesEnd + cbKeyNameLen > (size_t)GetNamesCapacity()) {
-      name_inc = (cbKeyNameLen + NAMEINCCOUNT * sizeof(TChar));
+    if((size_t)m_pNamesEnd + cbKeyNameLen > (size_t)_GetNamesCapacity()) {
+      name_inc = (cbKeyNameLen + NAMEINCCOUNT * sizeof(CHAR));
       extened += name_inc;
     }
 
-    if(m_cbDataLen + nLength > GetDataCapacity()) {
+    if(m_cbDataLen + nLength > _GetDataCapacity()) {
       extened += nLength;
     }
 
@@ -417,16 +547,16 @@ namespace clstd
         memcpy(m_pData + key_inc + name_inc, m_pData, m_cbDataLen);
 
         if(key_inc > 0) {
-          const size_t cbNamesLen = (GetNamesCapacity() - GetNamesBegin()) * sizeof(TChar);
-          memcpy((CLBYTE*)GetNamesBegin() + key_inc, GetNamesBegin(), cbNamesLen);
+          const size_t cbNamesLen = (_GetNamesCapacity() - _GetNamesBegin()) * sizeof(CHAR);
+          memcpy((CLBYTE*)_GetNamesBegin() + key_inc, _GetNamesBegin(), cbNamesLen);
           m_pKeysCapacity = (KEY*)((CLBYTE*)m_pKeysCapacity + key_inc);
         }
 
         m_pData += (key_inc + name_inc);
       }
       else if(key_inc > 0) {
-        const size_t cbNamesLen = (GetNamesCapacity() - GetNamesBegin()) * sizeof(TChar);
-        memcpy((CLBYTE*)GetNamesBegin() + key_inc, GetNamesBegin(), cbNamesLen + m_cbDataLen);
+        const size_t cbNamesLen = (_GetNamesCapacity() - _GetNamesBegin()) * sizeof(CHAR);
+        memcpy((CLBYTE*)_GetNamesBegin() + key_inc, _GetNamesBegin(), cbNamesLen + m_cbDataLen);
         m_pKeysCapacity = (KEY*)((CLBYTE*)m_pKeysCapacity + key_inc);
       }
       return TRUE;
@@ -439,7 +569,7 @@ namespace clstd
   b32 Repository::_InsertKey( KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength )
   {
     ASSERT(pPos >= m_pKeys && pPos <= m_pKeysEnd);
-    const size_t cbKeyNameLen = ALIGN_2((strlenT(szKey) + 1) * sizeof(TChar));// 算上结尾'\0'，按照两字节对齐
+    const size_t cbKeyNameLen = ALIGN_2((strlenT(szKey) + 1) * sizeof(CHAR));// 算上结尾'\0'，按照两字节对齐
     if(nLength < OCTETSIZE)
     {
 
@@ -452,7 +582,7 @@ namespace clstd
         memcpy(pPos + 1, pPos, cbKeyLen);
       }
       m_pKeysEnd++;
-      pPos->name = (u32)(m_pNamesEnd - GetNamesBegin());
+      pPos->name = (u32)(m_pNamesEnd - _GetNamesBegin());
       pPos->type = (KeyType)(KeyType_Octet_0 + nLength);
       memcpy(pPos->o.data, pData, nLength);
     }
@@ -467,7 +597,7 @@ namespace clstd
         memcpy(pPos + 1, pPos, cbKeyLen);
       }
       m_pKeysEnd++;
-      pPos->name = (u32)(m_pNamesEnd - GetNamesBegin());
+      pPos->name = (u32)(m_pNamesEnd - _GetNamesBegin());
       pPos->type = KeyType_Varible;
       pPos->v.offset = _GetSeqOffset(pPos);
       pPos->v.length = 0;
@@ -479,9 +609,9 @@ namespace clstd
     }
 
     // Copy name
-    CLBYTE*const pName = (CLBYTE*)GetNamesBegin() + pPos->name;
+    CLBYTE*const pName = (CLBYTE*)_GetNamesBegin() + pPos->name;
     memset(pName, 0, cbKeyNameLen);
-    strcpyT((TChar*)pName, szKey);
+    strcpyT((CHAR*)pName, szKey);
     m_pNamesEnd = (LPCSTR)((CLBYTE*)m_pNamesEnd + cbKeyNameLen);
 
     return true;
@@ -603,13 +733,13 @@ namespace clstd
   void Repository::_Initialize(size_t cbDataLen)
   {
     ASSERT(m_pKeys == NULL);
-    m_Buffer.Resize(sizeof(KEY) * KEYINCCOUNT + sizeof(TChar) * NAMEINCCOUNT + cbDataLen, TRUE);
+    m_Buffer.Resize(sizeof(KEY) * KEYINCCOUNT + sizeof(CHAR) * NAMEINCCOUNT + cbDataLen, TRUE);
     m_pKeys         = reinterpret_cast<KEY*>(m_Buffer.GetPtr());
     m_pKeysEnd      = m_pKeys;
     m_pKeysCapacity = m_pKeys + KEYINCCOUNT;
 
-    m_pNamesEnd     = GetNamesBegin();
-    m_pData         = (CLBYTE*)GetNamesBegin() + sizeof(TChar) * NAMEINCCOUNT;          // Name capacity
+    m_pNamesEnd     = _GetNamesBegin();
+    m_pData         = (CLBYTE*)_GetNamesBegin() + sizeof(CHAR) * NAMEINCCOUNT;          // Name capacity
     m_cbDataLen     = 0;
   }
 
@@ -660,7 +790,7 @@ namespace clstd
     FILE_HEADER header = {};
     header.dwMagic = CLMAKEFOURCC('C', 'L', 'R', 'P');
     header.nKeys = (CLDWORD)(m_pKeysEnd - m_pKeys);
-    header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
+    header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
     header.cbData = (CLDWORD)m_cbDataLen;
 
     CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
@@ -671,14 +801,9 @@ namespace clstd
 
     buffer.Append(packed_header, (u32)packed_header_size);
     buffer.Append(m_pKeys, (u32)((size_t)m_pKeysEnd - (size_t)m_pKeys));
-    buffer.Append(GetNamesBegin(), header.cbNames);
+    buffer.Append(_GetNamesBegin(), header.cbNames);
     buffer.Append(m_pData, (u32)m_cbDataLen);
     return TRUE;
-  }
-
-  size_t Repository::GetNumOfKeys() const
-  {
-    return m_pKeysEnd - m_pKeys;
   }
 
   b32 Repository::SetKey( LPCSTR szKey, const void* pData, size_t nLength )
@@ -740,56 +865,6 @@ namespace clstd
     return SetKey(szKey, &value, sizeof(value));
   }
 
-  size_t Repository::GetKey( LPCSTR szKey, void* pData, size_t nLength ) const
-  {
-    KEY* pKey = _FindKey(szKey);
-    if(pKey) {
-      size_t copy_size = 0;
-      CLBYTE*const pSrcData = pKey->GetDataPtr(m_pData, &copy_size);
-
-      if(pData == NULL || nLength == NULL) {
-        return copy_size;
-      }
-
-      copy_size = clMin(copy_size, nLength);
-      memcpy(pData, pSrcData, copy_size);
-      return copy_size;
-    }
-    return 0;
-  }
-
-  void* Repository::GetDataPtr( LPCSTR szKey, size_t* pLength ) const
-  {
-    KEY* pKey = _FindKey(szKey);
-    if(pKey) {
-      size_t len = 0;
-      return pKey->GetDataPtr(m_pData, pLength ? pLength : &len);
-    }
-    return NULL;
-  }
-
-  size_t Repository::GetRawData(RAWDATA* pRaw) const
-  {
-    if(pRaw == NULL) {
-      return 0;
-    }
-
-    FILE_HEADER header = { REPO_MAGIC };
-    header.nKeys   = (CLDWORD)(m_pKeysEnd - m_pKeys);
-    header.cbNames = (CLDWORD)(m_pNamesEnd - GetNamesBegin()) * sizeof(TChar);
-    header.cbData  = (CLDWORD)m_cbDataLen;
-
-    pRaw->keys      = m_pKeys;
-    pRaw->cbKeys    = header.nKeys * sizeof(KEY);
-    pRaw->names     = GetNamesBegin();
-    pRaw->cbNames   = header.cbNames;
-    pRaw->data      = m_pData;
-    pRaw->cbData    = header.cbData;
-    pRaw->cbHeader  = _PackHeader(header, pRaw->header);
-
-    return pRaw->cbHeader + pRaw->cbKeys + pRaw->cbNames + pRaw->cbData;
-  }
-
   size_t Repository::GetRequiredSize(void* pData, size_t nLength)
   {
     // 这个长度限制其实没有那么严格，因为文件头长度是可变的，最长20字节
@@ -800,6 +875,20 @@ namespace clstd
     FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
     size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
     return header._GetRecordSize() + packed_header_size;
+  }
+
+  i32 Repository::IsRepository(const void* pData, size_t nLength)
+  {
+    if(nLength < 4) {
+      return 0;
+    }
+    else if(*reinterpret_cast<const u32*>(pData) == REPO_MAGIC) {
+      return 1;
+    }
+    else if(*reinterpret_cast<const u32*>(pData) == REPO_MAGIC_BIGENDIAN) {
+      return -1;
+    }
+    return 0;
   }
 
   //b32 Repository::RemoveKey( LPCSTR szKey )
@@ -822,7 +911,7 @@ namespace clstd
   //  return false;
   //}
 
-  Repository::iterator::iterator( const Repository* _repo, KEY* _key )
+  Repository::iterator::iterator( const RepoReader* _repo, KEY* _key )
     : repo(_repo)
     , key(_key)
   {    
@@ -830,7 +919,7 @@ namespace clstd
 
   LPCSTR Repository::iterator::name() const
   {
-    return key->GetName(repo->GetNamesBegin());
+    return key->GetName(repo->_GetNamesBegin());
   }
 
   void* Repository::iterator::ptr() const
@@ -876,12 +965,12 @@ namespace clstd
   }
 
   //////////////////////////////////////////////////////////////////////////
-  LPCSTR Repository::KEY::GetName(LPCSTR szFirstName) const
+  LPCSTR KEY::GetName(LPCSTR szFirstName) const
   {
     return szFirstName + name;
   }
 
-  CLBYTE* Repository::KEY::GetDataPtr(CLBYTE* pDataBase, size_t* pSizeOut) const
+  CLBYTE* KEY::GetDataPtr(CLBYTE* pDataBase, size_t* pSizeOut) const
   {
     if(TEST_FLAG(type, KeyType_Octet)) {
       *pSizeOut = (size_t)(type - KeyType_Octet_0);
@@ -894,7 +983,7 @@ namespace clstd
     return NULL;
   }
 
-  CLBYTE* Repository::KEY::GetDataPtr(CLBYTE* pDataBase) const
+  CLBYTE* KEY::GetDataPtr(CLBYTE* pDataBase) const
   {
     if(TEST_FLAG(type, KeyType_Octet)) {
       return (CLBYTE*)o.data;
@@ -905,7 +994,7 @@ namespace clstd
     return NULL;
   }
 
-  size_t Repository::KEY::GetDataSize() const
+  size_t KEY::GetDataSize() const
   {
     if(TEST_FLAG(type, KeyType_Octet)) {
       return (size_t)(type - KeyType_Octet_0);

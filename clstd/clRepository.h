@@ -2,121 +2,110 @@
 
 namespace clstd
 {
-  class Repository
+  namespace
+  {
+    struct KEY;
+    struct KEYPAIR;
+  } // namespace
+
+  class RepoReader
   {
   public:
-    typedef ch TChar;
-    typedef const TChar* LPCSTR;
+    typedef ch CHAR;
+    typedef const CHAR* LPCSTR;
 
   protected:
-      enum KeyType
-      {
-        //KT_Node,    // 节点
-        KeyType_Varible = 1,               // 变长数据
-        KeyType_Octet   = 0x0010,          // 标志
-        KeyType_Octet_0 = (0 | KeyType_Octet),  // 8字节数据，长度可以为0，仅存键值
-        KeyType_Octet_8 = (8 | KeyType_Octet),  // 8字节数据，长度8字节
-      };
+    KEY*      m_pKeys;
+    KEY*      m_pKeysEnd;
+    KEY*      m_pKeysCapacity; // 也是m_pNamesBegin
+    LPCSTR    m_pNamesEnd;
+    CLBYTE*   m_pData;      // 也是m_pNamesCapacity
+    size_t    m_cbDataLen;
 
-      struct KEY 
-      {
-        u32     name; // 字母偏移，不是字节
-        KeyType type;
-        union 
-        {
-          struct {
-            u32 offset;
-            u32 length;
-          }v; // varible
-          struct {
-            CLBYTE data[8];
-          }o; // octet
-        };
-        LPCSTR  GetName     (LPCSTR szFirstName) const;
-        CLBYTE* GetDataPtr  (CLBYTE* pDataBase) const;
-        CLBYTE* GetDataPtr  (CLBYTE* pDataBase, size_t* pSizeOut) const;
-        size_t  GetDataSize () const;
-      };
+  public:
+    class iterator
+    {
+      const RepoReader* repo;
+      KEY* key;
 
-      struct KEYPAIR
-      {
-        KEY* pTable;
-        b32 bInsert;
-      };
+    public:
+      iterator( const RepoReader* _repo, KEY* _key );
 
+      LPCSTR  name  () const;
+      void*   ptr   () const;
+      size_t  size  () const;
+      iterator& operator++();
+      iterator& operator++(int);
+      b32 operator==(const iterator& it);
+      b32 operator!=(const iterator& it);
+      b32 operator==(LPCSTR szKey);
+      b32 operator!=(LPCSTR szKey);
+    };
+
+    // 获得各个段的有效数据
+    struct RAWDATA
+    {
+      CLBYTE  header[20];
+      size_t  cbHeader;    // header的有效长度，最大20字节
+      KEY*    keys;
+      size_t  cbKeys;
+      LPCSTR  names;
+      size_t  cbNames;
+      CLBYTE* data;
+      size_t  cbData;
+    };
+
+  protected:
+    KEY*      _FindKey          (LPCSTR szKey) const;
+    LPCSTR    _GetNamesBegin    () const;
+    LPCSTR    _GetNamesCapacity () const;
+
+  public:
+    RepoReader();
+    b32     Attach        (void* pData, size_t nLength); // 附加到内存数据
+    size_t  GetNumOfKeys  () const;
+    size_t  GetKey        (LPCSTR szKey, void* pData, size_t nLength) const;
+    void*   GetDataPtr    (LPCSTR szKey, size_t* pLength = NULL) const;
+    size_t  GetRawData    (RAWDATA* pRaw) const;
+
+    iterator begin  () const;
+    iterator end    () const;
+  };
+
+  //////////////////////////////////////////////////////////////////////////
+
+  class Repository : public RepoReader
+  {
   protected:
     MemBuffer m_Buffer;
-    KEY* m_pKeys;
-    KEY* m_pKeysEnd;
-    KEY* m_pKeysCapacity; // 也是m_pNamesBegin
-    LPCSTR m_pNamesEnd;
-    CLBYTE* m_pData;      // 也是m_pNamesCapacity
-    size_t m_cbDataLen;
 
     template<typename T_LPCSTR>
     b32 LoadFromFileT(T_LPCSTR szFilename); // load 表示一次性从文件加载，read表示一点点从文件加载
     b32 _WriteToFile(File& file) const;
 
     b32       _DbgCheckDataOverlay() const;
-    b32       _ParseFromBuffer();
-    void      _ResizeKey    (KEY*& rKey, size_t delta);
-    b32       _ReallocData  (KEY*& rKey, size_t new_length);
-    KEYPAIR*  _PreInsertKey (KEYPAIR* pPair, LPCSTR szKey);
-    void      _Locate       (size_t memdelta);
-    b32       _AllocKey     (size_t cbKeyNameLen/*, const void* pData*/, size_t nLength, KEY*& rPos);
-    b32       _InsertKey    ( KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength );
-    b32       _ReplaceKey   (KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength);
-    void      _Initialize   (size_t cbDataLen);
-    KEY*      _FindKey       (LPCSTR szKey) const;      
-    size_t    _ResizeGlobalBuf       (size_t delta, KEY*& rpKey);
-    u32       _GetSeqOffset  (KEY* pPos);
-
-    LPCSTR GetNamesBegin() const;
-    LPCSTR GetNamesCapacity() const;
-    size_t GetDataCapacity() const;
-
-  public:
-      class iterator
-      {
-        const Repository* repo;
-        KEY* key;
-
-      public:
-        iterator( const Repository* _repo, KEY* _key );
-
-        LPCSTR  name  () const;
-        void*   ptr   () const;
-        size_t  size  () const;
-        iterator& operator++();
-        iterator& operator++(int);
-        b32 operator==(const iterator& it);
-        b32 operator!=(const iterator& it);
-        b32 operator==(LPCSTR szKey);
-        b32 operator!=(LPCSTR szKey);
-      };
-
-      // 获得各个段的有效数据
-      struct RAWDATA
-      {
-        CLBYTE  header[20];
-        size_t  cbHeader;    // header的有效长度，最大20字节
-        KEY*    keys;
-        size_t  cbKeys;
-        LPCSTR  names;
-        size_t  cbNames;
-        CLBYTE* data;
-        size_t  cbData;
-      };
+    b32       _ParseFromBuffer  ();
+    void      _ResizeKey        (KEY*& rKey, size_t delta);
+    b32       _ReallocData      (KEY*& rKey, size_t new_length);
+    KEYPAIR*  _PreInsertKey     (KEYPAIR* pPair, LPCSTR szKey);
+    void      _Locate           (size_t memdelta);
+    b32       _AllocKey         (size_t cbKeyNameLen/*, const void* pData*/, size_t nLength, KEY*& rPos);
+    b32       _InsertKey        ( KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength );
+    b32       _ReplaceKey       (KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength);
+    void      _Initialize       (size_t cbDataLen);
+    //KEY*      _FindKey          (LPCSTR szKey) const;
+    size_t    _ResizeGlobalBuf  (size_t delta, KEY*& rpKey);
+    u32       _GetSeqOffset     (KEY* pPos);
+    //LPCSTR    _GetNamesBegin    () const;
+    //LPCSTR    _GetNamesCapacity () const;
+    size_t    _GetDataCapacity  () const;
 
   public:
       Repository();
       ~Repository();
 
       Repository& operator=(const Repository& repo);
-
-      iterator begin  () const;
-      iterator end    () const;
-      
+    
       void    Clear         ();
 
       b32     LoadFromFile  (CLLPCSTR szFilename );
@@ -127,7 +116,6 @@ namespace clstd
       b32     SaveToFile    (CLLPCWSTR szFilename) const;
       b32     SaveToMemory  (MemBuffer& buffer) const;
 
-      size_t  GetNumOfKeys  () const;
       b32     SetKey        (LPCSTR szKey, const void* pData, size_t nLength);
       b32     SetKey        (LPCSTR szKey, const wch* str);
       b32     SetKey        (LPCSTR szKey, const ch* str);
@@ -140,12 +128,13 @@ namespace clstd
       b32     SetKey        (LPCSTR szKey, i64 value);
       b32     SetKey        (LPCSTR szKey, u64 value);
 
-      size_t  GetKey        (LPCSTR szKey, void* pData, size_t nLength) const;
-      void*   GetDataPtr    (LPCSTR szKey, size_t* pLength = NULL) const;
-      size_t  GetRawData    (RAWDATA* pRaw) const;
+      //size_t  GetKey        (LPCSTR szKey, void* pData, size_t nLength) const;
+      //void*   GetDataPtr    (LPCSTR szKey, size_t* pLength = NULL) const;
+      //size_t  GetRawData    (RAWDATA* pRaw) const;
 
       // 传入一定量数据用来计算整个文件的大小，数据长度至少要20字节，前四个字节必须是"CLRP"
       static size_t GetRequiredSize(void* pData, size_t nLength);
+      static i32    IsRepository(const void* pData, size_t nLength); // nLength 只是校验，小于4时返回false，little-endian的头返回1，big-endian返回-1
       
 
       //b32 RemoveKey( LPCSTR szKey );

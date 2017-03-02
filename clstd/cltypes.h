@@ -37,7 +37,7 @@ typedef size_t              clsize_t;
 
 typedef signed char         s8, i8;
 typedef signed short        s16, i16;
-typedef signed long         s32, i32;
+typedef signed int          s32, i32;
 typedef signed long long    s64, i64;
 //typedef __int128      s128, i128;
 

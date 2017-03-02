@@ -209,7 +209,7 @@ namespace clstd
 
     i32 TCPClient::Send(const BufferBase& buf) const
     {
-      return Send(buf.GetPtr(), buf.GetSize());
+      return Send(buf.GetPtr(), (CLINT)buf.GetSize());
     }
 
     i32 TCPClient::Send(const Repository& repo)
@@ -219,28 +219,28 @@ namespace clstd
       int result = 0;
       int r = 0;
       do {
-        r = ::send(m_socket, (const char*)raw.header, raw.cbHeader, 0);
+        r = ::send(m_socket, (const char*)raw.header, (int)raw.cbHeader, 0);
         if(r != raw.cbHeader) {
           CLOG_ERROR("can not send repository header(%d).", r);
           break;
         }
         result += r;
 
-        r = ::send(m_socket, (const char*)raw.keys, raw.cbKeys, 0);
+        r = ::send(m_socket, (const char*)raw.keys, (int)raw.cbKeys, 0);
         if(r != raw.cbKeys) {
           CLOG_ERROR("can not send repository keys(%d).", r);
           break;
         }
         result += r;
 
-        r = ::send(m_socket, (const char*)raw.names, raw.cbNames, 0);
+        r = ::send(m_socket, (const char*)raw.names, (int)raw.cbNames, 0);
         if(r != raw.cbNames) {
           CLOG_ERROR("can not send repository names(%d).", r);
           break;
         }
         result += r;
 
-        r = ::send(m_socket, (const char*)raw.data, raw.cbData, 0);
+        r = ::send(m_socket, (const char*)raw.data, (int)raw.cbData, 0);
         if(r != raw.cbData) {
           CLOG_ERROR("can not send repository data(%d).", r);
           break;
@@ -655,9 +655,9 @@ namespace clstd
       }
 
       if( ! m_SocketList.empty()) {
-        return m_SocketList.size() - 1;
+        return (i32)m_SocketList.size() - 1;
       }
-      return m_ClientList.size();
+      return (i32)m_ClientList.size();
     }
 
     void TCPListener::CloseClientSocket(TCPClient* pClient)

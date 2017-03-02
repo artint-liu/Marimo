@@ -18,7 +18,7 @@
 #elif defined(_M_X64) || defined(__amd64__)
 # define _CL_ARCH_X64
 #elif defined(__arm__)
-#define _CL_ARCH_ARM
+# define _CL_ARCH_ARM
 #elif defined(__aarch64__)
 # define _CL_ARCH_ARM64
 #else
@@ -145,29 +145,10 @@ inline void InlSetZeroT(_Ty& t) {
 #define MEMBER_OFFSET(_CLS, _MEMBER)  ((size_t)(&(((_CLS*)0)->_MEMBER)))
 #define CLARRAYSIZE(_ARRAY)           (sizeof(_ARRAY)/sizeof(_ARRAY[0]))
 
-
-#ifdef _DEBUG
-# if defined(_CL_SYSTEM_WINDOWS) || defined(_CONSOLE)
-#   ifdef __clang__
-#     include <assert.h>
-#     define TRACEW        wprintf
-#     define TRACEA        printf
-#     define TRACE         TRACEA
-#     define CLOG_WARNING  TRACEA
-#     define CLOG_ERROR    TRACEA
-#     define CLOG          TRACEA
-#     define CLOG_WARNINGW TRACEW
-#     define CLOG_ERRORW   TRACEW
-#     define CLOGW         TRACEW
-#     define CLBREAK       abort()
-#     define CLUNIQUEBREAK abort()      // 只中断一次的断点
-#     define CLNOP         ;
-#     define VERIFY(v)     (v)
-#     define ASSERT(x)     assert(x)
-#     define STATIC_ASSERT(x)    static_assert(x, #x);
-#     define V(x)              if(FAILED(x)) { CLBREAK; }
-#     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
-#   elif defined(_MSC_VER)
+//////////////////////////////////////////////////////////////////////////
+//
+// logs
+//
 
 // 数据格式化后原始消息
 extern "C" void _cl_traceA(const char *fmt, ...);
@@ -193,18 +174,39 @@ namespace clstd
   void _cl_log_warning(const wch *fmt, ...);
 }
 
+#define CLOG_WARNING  clstd::_cl_log_warning
+#define CLOG_ERROR    clstd::_cl_log_error
+#define CLOG          clstd::_cl_log_info
+#define CLOG_WARNINGW _cl_log_warningW
+#define CLOG_ERRORW   _cl_log_errorW
+#define CLOGW         _cl_log_infoW
+#define CLOG_WARNINGA _cl_log_warningA
+#define CLOG_ERRORA   _cl_log_errorA
+#define CLOGA         _cl_log_infoA
+
+
+
+#ifdef _DEBUG
+# if defined(_CL_SYSTEM_WINDOWS) || defined(_CONSOLE)
+#   ifdef __clang__
+#     include <assert.h>
+#     define TRACEW        wprintf
+#     define TRACEA        printf
+#     define TRACE         TRACEA
+#     define CLBREAK       abort()
+#     define CLUNIQUEBREAK abort()      // 只中断一次的断点
+#     define CLNOP         ;
+#     define VERIFY(v)     (v)
+#     define ASSERT(x)     assert(x)
+#     define STATIC_ASSERT(x)    static_assert(x, #x);
+#     define V(x)              if(FAILED(x)) { CLBREAK; }
+#     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
+#   elif defined(_MSC_VER)
+
+
 #     define TRACEW        _cl_traceW
 #     define TRACEA        _cl_traceA
 #     define TRACE         TRACEA
-#     define CLOG_WARNING  clstd::_cl_log_warning
-#     define CLOG_ERROR    clstd::_cl_log_error
-#     define CLOG          clstd::_cl_log_info
-#     define CLOG_WARNINGW _cl_log_warningW
-#     define CLOG_ERRORW   _cl_log_errorW
-#     define CLOGW         _cl_log_infoW
-#     define CLOG_WARNINGA _cl_log_warningA
-#     define CLOG_ERRORA   _cl_log_errorA
-#     define CLOGA         _cl_log_infoA
 
 #     ifdef _CL_ARCH_X86
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
@@ -235,12 +237,6 @@ extern "C" void _cl_NoOperation();
 //#       define TRACEW        _cl_traceW
 //#       define TRACEA        _cl_traceA
 //#       define TRACE         TRACEA
-//#       define CLOG_WARNING  TRACEA
-//#       define CLOG_ERROR    TRACEA
-//#       define CLOG          TRACEA
-//#       define CLOG_WARNINGW TRACEW
-//#       define CLOG_ERRORW   TRACEW
-//#       define CLOGW         TRACEW
 #       define CLBREAK       { _cl_Break(); }
 #       define CLABORT       { _cl_Break(); }
 #       define CLUNIQUEBREAK CLBREAK
@@ -261,12 +257,6 @@ void _cl_traceW(const wch *fmt, ...);
 #   define TRACEW  _cl_traceW
 #   define TRACEA  _cl_traceA
 #   define TRACE				 TRACEA
-#   define CLOG_WARNING	 TRACEA
-#   define CLOG_ERROR    TRACEA
-#   define CLOG          TRACEA
-#   define CLOG_WARNINGW TRACEW
-#   define CLOG_ERRORW   TRACEW
-#   define CLOGW         TRACEA
 #   define CLBREAK       ASSERT(0)
 #   define CLABORT       abort()
 #   define CLNOP
@@ -295,12 +285,6 @@ extern "C" void _cl_traceW(const wch *fmt, ...);
 #  define TRACEW        _cl_traceW
 #  define TRACEA        _cl_traceA
 #  define TRACE         TRACEA
-#  define CLOG_WARNING  _cl_traceA
-#  define CLOG_ERROR    _cl_traceA
-#  define CLOG          _cl_traceA
-#  define CLOG_WARNINGW _cl_traceW
-#  define CLOG_ERRORW   _cl_traceW
-#  define CLOGW         _cl_traceW
 #  define CLBREAK       {;}
 #  define CLUNIQUEBREAK CLBREAK
 #  define CLNOP

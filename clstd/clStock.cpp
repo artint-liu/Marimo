@@ -1094,7 +1094,7 @@ namespace clstd
       {
         CLBREAK; // TODO: 测试过这段代码后去掉 CLBREAK
         wch chEnd[] = _CLTEXT("\0");
-        Buffer sNewBuffer;
+        MemBuffer sNewBuffer;
         m_Buffer.Append(chEnd, sizeof(chEnd));
         sNewBuffer.Resize(m_Buffer.GetSize(), FALSE);
 
@@ -1132,7 +1132,7 @@ namespace clstd
       }
       else {
         ch chEnd[] = "\0";
-        Buffer sNewBuffer;
+        MemBuffer sNewBuffer;
         m_Buffer.Append(chEnd, sizeof(chEnd));
         sNewBuffer.Resize(m_Buffer.GetSize() * 2, FALSE);
 

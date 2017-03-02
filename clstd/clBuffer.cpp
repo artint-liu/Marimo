@@ -1,6 +1,6 @@
 ﻿#include "clstd.h"
 //#include "clBuffer.h"
-#include "clmemory.h"
+//#include "clmemory.h"
 #include "clString.h"
 #include "clUtility.h"
 //#include "third_party/zlib/zlib.h"
