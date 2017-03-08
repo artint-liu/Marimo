@@ -71,6 +71,7 @@ namespace clstd {
       clsize  offset      () const;   // 返回值 TChar 的类型偏移， 不是字节偏移
       _TStr   ToRawString () const;   // 返回原始字符串
       _TStr   ToString    () const;   // 返回字符串，如果字符串带有单引号或者双引号，会被去掉。
+      b32     IsEqual     (T_LPCSTR str, clsize count) const;
       b32     BeginsWith  (TChar ch) const;
       b32     EndsWith    (TChar ch) const;
       b32     BeginsWith  (T_LPCSTR str) const;

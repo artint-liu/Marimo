@@ -102,7 +102,7 @@ template<typename _TCh,
 {
   size_t prefix_len = clstd::strlenT(prefix);
   size_t fmt_len = clstd::strlenT(fmt);
-  size_t len = prefix_len + fmt_len + (sizeof('\r') + sizeof('\n') + sizeof('\0'));
+  //size_t len = prefix_len + fmt_len + (sizeof('\r') + sizeof('\n') + sizeof('\0'));
 
   clstd::LocalBuffer<MAX_TRACE_BUFFER> buffer;
   static _TCh s_szCRLF[] = {'\r', '\n', '\0'};

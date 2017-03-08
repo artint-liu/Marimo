@@ -19,7 +19,7 @@ namespace clstd
     KEY*      m_pKeysEnd;
     KEY*      m_pKeysCapacity; // 也是m_pNamesBegin
     LPCSTR    m_pNamesEnd;
-    CLBYTE*   m_pData;      // 也是m_pNamesCapacity
+    CLBYTE*   m_pData;         // 也是m_pNamesCapacity
     size_t    m_cbDataLen;
 
   public:
@@ -62,7 +62,9 @@ namespace clstd
 
   public:
     RepoReader();
-    b32     Attach        (void* pData, size_t nLength); // 附加到内存数据
+    RepoReader(const void* pData, size_t nLength); // 附加到内存数据
+
+    b32     Attach        (const void* pData, size_t nLength); // 附加到内存数据
     size_t  GetNumOfKeys  () const;
     size_t  GetKey        (LPCSTR szKey, void* pData, size_t nLength) const;
     void*   GetDataPtr    (LPCSTR szKey, size_t* pLength = NULL) const;

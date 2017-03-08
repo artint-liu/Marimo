@@ -223,7 +223,7 @@ public:
       char*  out_ptr = buffer;
 
       while(cchX) {
-        iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
+        iconv(m_cd, (char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
         tran += (buf_len - out_len);
         out_ptr = buffer;
         out_len = buf_len;
@@ -232,7 +232,7 @@ public:
     else { // 转换模式
       uLength *= sizeof(_TOutChar); // iconv 长度参数都是基于字节的
       tran = uLength;
-      iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+      iconv(m_cd, (char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
       tran -= uLength;
     }
     return tran / sizeof(_TOutChar);
@@ -620,7 +620,7 @@ namespace clstd
     : m_pBuf(NULL)
 #elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
   _CLSTR_TEMPL
-    _CLSTR_IMPL::StringX(const u32 uInteger)
+    _CLSTR_IMPL::StringX(const U32 uInteger)
     : m_pBuf(NULL)
 #else
 # error Missing cpu architecture
@@ -634,7 +634,7 @@ namespace clstd
 
 #if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
   _CLSTR_TEMPL
-    _CLSTR_IMPL::StringX(const u64 val)
+    _CLSTR_IMPL::StringX(const U64 val)
     : m_pBuf(NULL)
 #elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
   _CLSTR_TEMPL

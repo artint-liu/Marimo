@@ -136,6 +136,13 @@ namespace clstd
     typedef _TCh        TChar;
     typedef _XCh        XChar;
     typedef const _TCh* LPCSTR;
+#if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
+    typedef size_t      U32;
+    typedef u64         U64;
+#elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
+    typedef u32         U32;
+    typedef size_t      U64;
+#endif
 
   private:
     _TCh*        m_pBuf;  // 只能有一个变量, 否则作为Format参数时会把多余的成员变量也压入堆栈, 出现问题.
@@ -160,9 +167,9 @@ namespace clstd
     explicit StringX(const long lLong);
 #if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
     explicit StringX(const size_t val);
-    explicit StringX(const u64 val);
+    explicit StringX(const U64 val);
 #elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
-    explicit StringX(const u32 uInteger);
+    explicit StringX(const U32 uInteger);
     explicit StringX(const size_t val);
 #else
 # error Missing cpu architecture

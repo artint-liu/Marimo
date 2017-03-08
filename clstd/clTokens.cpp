@@ -293,6 +293,12 @@ namespace clstd
   }
 
   _TOEKN_TEMPL
+    b32 _TOKEN_IMPL::iterator::IsEqual(T_LPCSTR str, clsize count) const
+  {
+    return (count == length && ! clstd::strncmpT(marker, str, (int)length));
+  }
+  
+  _TOEKN_TEMPL
     b32 _TOKEN_IMPL::iterator::BeginsWith(TChar ch) const
   {
     return (length >= 1) && (marker[0] == ch);
@@ -347,7 +353,8 @@ namespace clstd
   _TOEKN_TEMPL
     b32 _TOKEN_IMPL::iterator::operator==(T_LPCSTR pStr) const
   {
-    return (_TStr(pStr).GetLength() == length && ! clstd::strncmpT(marker, pStr, (int)length));
+    const size_t nStrLength = clstd::strlenT(pStr);
+    return (nStrLength == length && ! clstd::strncmpT(marker, pStr, (int)length));
   }
 
   _TOEKN_TEMPL

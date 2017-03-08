@@ -210,7 +210,12 @@ namespace clstd
   {
   }
 
-  b32 RepoReader::Attach(void* pData, size_t nLength)
+  RepoReader::RepoReader(const void* pData, size_t nLength)
+  {
+    Attach(pData, nLength);
+  }
+
+  b32 RepoReader::Attach(const void* pData, size_t nLength)
   {
     size_t nDataPtr = reinterpret_cast<size_t>(pData);
     FILE_HEADER header = { 0, ((CLDWORD*)nDataPtr)[1] }; // 需要设置dwFlags作为解压参数

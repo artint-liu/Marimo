@@ -70,7 +70,7 @@ namespace clstd
     int         GetChannelDepth     () const;
     int         GetChannels         () const;
     int         GetPitch            () const;
-/*没实现*/int       Inflate             (int left, int top, int right, int bottom); // 调整Image尺寸，参数是四个边缘扩展的像素数，可以是负数
+    Image&      Inflate             (int left, int top, int right, int bottom); // 调整Image尺寸，参数是四个边缘扩展的像素数，可以是负数
     const void* GetPixelPtr         (int x, int y) const;
     void*       GetPixelPtr         (int x, int y);
     size_t      GetDataSize         () const;
@@ -102,6 +102,9 @@ namespace clstd
 
     template<typename _TDestChannel, typename _TSrcChannel>
     void ChangeDepth(CLLPBYTE pDestPtr, size_t nDestPitch, int right_shift);
+
+    template<typename _TPixel> // 块传送，dest与src必须像素格式一致，位置参数必须裁剪正确
+    static void BlockTransferT(IMAGEDESC* pDest, int xDest, int yDest, IMAGEDESC* pSrc, int xSrc, int ySrc, int nCopyWidth, int nCopyHeight);
 
     //template<typename _Ty>
     //void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );

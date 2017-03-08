@@ -207,15 +207,18 @@ namespace SmartStreamUtility
     _Iter it = itCurrent;
     itOpen = itCurrent;
     int nDepth = 0;
+    const size_t nStrOpenLen  = clstd::strlenT(chOpen);
+    const size_t nStrCloseLen = clstd::strlenT(chClose);
+
     while(it != it.pContainer->end())
     {
-      if(it == chOpen)
+      if(it.IsEqual(chOpen, nStrOpenLen))
       {
         if(nDepth == 0)
           itOpen = it;
         nDepth++;
       }
-      else if(it == chClose)
+      else if(it.IsEqual(chClose, nStrCloseLen))
       {
         nDepth--;
         if(nDepth <= 0)

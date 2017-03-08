@@ -387,7 +387,7 @@ namespace clstd
     NonCopyable() {}
   private:
     NonCopyable(const NonCopyable& ) {}
-    NonCopyable& operator=(const NonCopyable& ) {}
+    NonCopyable& operator=(const NonCopyable& ) { return *this; }
   };
 } // namespace clstd
 

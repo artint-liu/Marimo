@@ -1,5 +1,6 @@
 ﻿#include "clstd.h"
 #include "clImage.h"
+#include "clUtility.h"
 const int delta = 'a' - 'A';
 
 #define CMP_CHANNEL(_IDX)                           (m_format.name[_IDX] == fmt[_IDX] || m_format.name[_IDX] + delta == fmt[_IDX])
@@ -85,6 +86,30 @@ namespace clstd
           pDest++;
           pSrc++;
         }
+      }
+    }
+  }
+
+  template<typename _TPixel>
+  void Image::BlockTransferT(IMAGEDESC* pDest, int xDest, int yDest, IMAGEDESC* pSrc, int xSrc, int ySrc, int nCopyWidth, int nCopyHeight)
+  {
+    // 格式必须一致
+    ASSERT(pDest->channel == pSrc->channel && pDest->depth == pSrc->depth && 
+      pDest->format.code == pSrc->format.code && pDest->ptr != pSrc->ptr);
+
+    // 参数必须合法，裁剪需要在外面做好
+    ASSERT(xDest >= 0 && xDest < pDest->width && yDest >= 0 && yDest < pDest->height);
+    ASSERT(xDest + nCopyWidth <= pDest->width && yDest + nCopyHeight <= pDest->height);
+    ASSERT(xSrc >= 0 && xSrc < pSrc->width && ySrc >= 0 && ySrc < pSrc->height);
+    ASSERT(xSrc + nCopyWidth <= pSrc->width && ySrc + nCopyHeight <= pSrc->height);
+
+    for(int y = 0; y < nCopyHeight; y++)
+    {
+      _TPixel* d = (_TPixel*)((CLLPBYTE)pDest->ptr + pDest->pitch * (yDest + y) + xDest);
+      const _TPixel* s = (const _TPixel*)((CLLPBYTE)pSrc->ptr + pSrc->pitch * (ySrc + y) + xSrc);
+      for(int x = 0; x < nCopyWidth; x++)
+      {
+        *d++ = *s++;
       }
     }
   }
@@ -212,7 +237,7 @@ namespace clstd
       if (nPitch == 0) {
         nPitch = MIN_PITCH_PARAM(nWidth, channel, nChannelDepth);
       }
-      else if (MIN_PITCH_PARAM(nWidth, channel, nChannelDepth) < nPitch) {
+      else if (MIN_PITCH_PARAM(nWidth, channel, nChannelDepth) > nPitch) {
         return FALSE;
       }
 
@@ -302,11 +327,104 @@ namespace clstd
     return (CLLPBYTE)m_ptr + m_pitch * y;
   }
 
-  int Image::Inflate(int left, int top, int right, int bottom)
+  Image& Image::Inflate(int left, int top, int right, int bottom)
   {
-    // 没实现
-    CLBREAK;
-    return 0;
+    if(left == 0 && top == 0 && right == 0 && bottom == 0) {
+      return *this;
+    }
+
+    IMAGEDESC src = {};
+    IMAGEDESC dest = {};
+    src.ptr      = m_ptr;
+    src.width    = m_width;
+    src.height   = m_height;
+    src.channel  = m_channel;
+    src.pitch    = m_pitch;
+    src.depth    = m_depth;
+    src.format.code = m_format.code;
+
+    dest.width   = m_width + left + right;
+    dest.height  = m_height + top + bottom;
+    if(dest.width <= 0 || dest.height <= 0) {
+      m_width  = 0;
+      m_height = 0;
+      m_pitch  = 0;
+      SAFE_DELETE_ARRAY(m_ptr);
+      return *this;
+    }
+    dest.channel = src.channel;
+    dest.depth   = src.depth;
+    dest.pitch   = MIN_PITCH_PARAM(dest.width, dest.channel, dest.depth);
+    dest.ptr     = new CLBYTE[dest.pitch * dest.height];
+    dest.format.code = src.format.code;
+
+    memset(dest.ptr, 0, dest.pitch * dest.height);
+
+    const int xDest = clMax(0, left);
+    const int yDest = clMax(0, top);
+    const int xSrc  = clMax(0, -left);
+    const int ySrc  = clMax(0, -top);
+    const int nCopyWidth  = m_width + clMin(0, left) + clMin(0, right); // 只有负值才会减少width
+    const int nCopyHeight = m_height + clMin(0, top) + clMin(0, bottom);
+
+    switch(m_depth)
+    {
+    case 8:
+    {
+      if(m_channel == 1) {
+        BlockTransferT<u8>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 2) {
+        BlockTransferT<u16>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 3) {
+        struct PIXEL { u8 c[3]; };
+        STATIC_ASSERT(sizeof(PIXEL) == 3);
+        BlockTransferT<PIXEL>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 4) {
+        BlockTransferT<u32>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      }
+      break;
+    }
+    case 16:
+    {
+      if(m_channel == 1) {
+        BlockTransferT<u16>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 2) {
+        BlockTransferT<u32>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 3) {
+        struct PIXEL { u16 c[3]; };
+        STATIC_ASSERT(sizeof(PIXEL) == 6);
+        BlockTransferT<PIXEL>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 4) {
+        BlockTransferT<u64>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      }
+      break;
+    }
+    case 32:
+    {
+      if(m_channel == 1) {
+        BlockTransferT<u32>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 2) {
+        BlockTransferT<u64>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 3) {
+        struct PIXEL { u32 c[3]; };
+        STATIC_ASSERT(sizeof(PIXEL) == 12);
+        BlockTransferT<PIXEL>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      } else if(m_channel == 4) {
+        struct PIXEL { u32 c[4]; };
+        BlockTransferT<PIXEL>(&dest, xDest, yDest, &src, xSrc, ySrc, nCopyWidth, nCopyHeight);
+      }
+      break;
+    }
+    default:
+      CLBREAK;
+    }
+
+    m_width  = dest.width;
+    m_height = dest.height;
+    m_pitch  = dest.pitch;
+    SAFE_DELETE_ARRAY(m_ptr);
+    m_ptr = (CLLPBYTE)dest.ptr;
+    return *this;
   }
 
   int Image::GetChannelOffset(char chChannel) const
