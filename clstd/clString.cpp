@@ -425,7 +425,7 @@ void clstd::StringA_traits::Integer32ToString(ch* pDestStr, size_t uMaxLength, i
 
 i32 clstd::StringA_traits::StringToInteger32(ch* pString)
 {
-  return atoi(pString);
+  return clstd::xtoi(pString);
 }
 
 void clstd::StringA_traits::Unsigned64ToString(ch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)

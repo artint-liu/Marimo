@@ -679,25 +679,25 @@ namespace clstd
     case 1:
     {
       struct PIXEL { _TChannel channel[1]; };
-      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangeFormat2<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     case 2:
     {
       struct PIXEL { _TChannel channel[2]; };
-      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangeFormat2<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     case 3:
     {
       struct PIXEL { _TChannel channel[3]; };
-      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangeFormat2<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     case 4:
     {
       struct PIXEL { _TChannel channel[4]; };
-      ChangePixel<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      ChangeFormat2<PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
       break;
     }
     default:
@@ -705,29 +705,65 @@ namespace clstd
     }
   }
 
-  template<typename _TPixel, typename _TChannel>
+  template<typename _TDstPixel, typename _TChannel>
+  void Image::ChangeFormat2(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch)
+  {
+    switch (m_channel)
+    {
+    case 1:
+    {
+      struct PIXEL { _TChannel channel[1]; };
+      ChangePixel<_TDstPixel, PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      break;
+    }
+    case 2:
+    {
+      struct PIXEL { _TChannel channel[2]; };
+      ChangePixel<_TDstPixel, PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      break;
+    }
+    case 3:
+    {
+      struct PIXEL { _TChannel channel[3]; };
+      ChangePixel<_TDstPixel, PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      break;
+    }
+    case 4:
+    {
+      struct PIXEL { _TChannel channel[4]; };
+      ChangePixel<_TDstPixel, PIXEL, _TChannel>(aMapTab, nNewChannel, pDestData, nNewPitch);
+      break;
+    }
+    default:
+      break;
+    }
+  }
+
+
+  template<typename _TDstPixel, typename _TSrcPixel, typename _TChannel>
   void Image::ChangePixel(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch) const
   {
-    _TPixel* pDstPixel;
-    _TPixel* pSrcPixel;
-    _TPixel  tmp_pixel;
+    _TDstPixel*pDstPixel;
+    _TSrcPixel* pSrcPixel;
+    _TSrcPixel  tmp; // 防止pDstPixel与pSrcPixel地址相同
     const size_t nSrcPixelSize = GETPIXELSIZE;
 
     for (int y = 0; y < m_height; y++)
     {
-      pSrcPixel = (_TPixel*)GetLine(y);
-      pDstPixel = (_TPixel*)(pDestData + y * nNewPitch);
+      pSrcPixel = (_TSrcPixel*)GetLine(y);
+      pDstPixel = (_TDstPixel*)(pDestData + y * nNewPitch);
       for (int x = 0; x < m_width; x++)
       {
-        tmp_pixel = *pSrcPixel;
-        pSrcPixel = (_TPixel*)((size_t)pSrcPixel + nSrcPixelSize);
+        tmp = *pSrcPixel;
         for (int c = 0; c < nNewChannel; c++)
         {
-          (*pDstPixel).channel[c] = aMapTab[c] >= 0
-            ? tmp_pixel.channel[aMapTab[c]]
+          (*pDstPixel).channel[c] = (aMapTab[c] >= 0)
+            ? tmp.channel[aMapTab[c]]
             : (_TChannel)(aMapTab[c] + 1);
         }
         pDstPixel++;
+        pSrcPixel++;
+        //pSrcPixel = (_TSrcPixel*)((size_t)pSrcPixel + nSrcPixelSize);
       }
     }
   }
