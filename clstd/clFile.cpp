@@ -81,11 +81,17 @@ namespace clstd
     }
   }
 
+#ifdef _CL_SYSTEM_WINDOWS
   File::File()
-    : m_hFile(NULL)
-    //, m_TextStream(this)
+    : m_hFile(INVALID_HANDLE_VALUE)
   {
   }
+#else
+  File::File()
+    : m_hFile(NULL)
+  {
+  }
+#endif
 
   File::~File()
   {
@@ -138,6 +144,19 @@ namespace clstd
 #endif // _WINDOWS
 
   }
+
+#ifdef _CL_SYSTEM_WINDOWS
+  b32 File::IsGood() const
+  {
+    return m_hFile != INVALID_HANDLE_VALUE;
+  }
+#else
+  b32 File::IsGood() const
+  {
+    return m_hFile != NULL;
+  }
+#endif
+
   b32 File::OpenExisting(CLLPCWSTR pszFileName)
   {
     Close();
@@ -185,15 +204,19 @@ namespace clstd
 
   void File::Close()
   {
+#ifdef _CL_SYSTEM_WINDOWS
+    if(m_hFile != INVALID_HANDLE_VALUE)
+    {
+      CloseHandle(m_hFile);
+      m_hFile = INVALID_HANDLE_VALUE;
+    }
+#else
     if(m_hFile != NULL)
     {
-#ifdef _CL_SYSTEM_WINDOWS
-      CloseHandle(m_hFile);
-#else
       fclose(m_hFile);
-#endif // _WINDOWS
       m_hFile = NULL;
     }
+#endif // _WINDOWS
   }
 
   u32 File::GetPointer()

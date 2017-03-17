@@ -138,6 +138,7 @@ namespace clstd
       Section   Open                (T_LPCSTR szSubPath) const; // 等价于StockT::OpenSection()
       Section   Create              (T_LPCSTR szSubPath); // 等价于StockT::CreateSection()
       Section   Query               (T_LPCSTR szSubSection, T_LPCSTR szMainKey, T_LPCSTR szMatchValue, QueryType eType = QueryType_Default);
+      void      Delete              ();
       b32       NextSection         (T_LPCSTR szName = NULL); // 如果失败，表示没有后续Section，不会改变当前section内容，这与operator++行为不同
       b32       Rename              (T_LPCSTR szNewName);
       b32       FirstKey            (ATTRIBUTE& param) const;

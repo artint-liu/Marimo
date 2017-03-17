@@ -321,7 +321,7 @@ namespace clstd
     typedef ch _XCh;
     static clsize     StringLength        (const wch* pStr);
     static clsize     XStringLength       (const _XCh* pStrX);
-    static wch*       CopyStringN         (wch* pStrDest, const wch* pStrSrc, size_t uLength);
+    static wch*       CopyStringN         (wch* pStrDest, const wch* pStrSrc, size_t uCopyLength);
     static i32        CompareString       (const wch* pStr1, const wch* pStr2);
     static i32        CompareStringNoCase (const wch* pStr1, const wch* pStr2);
     static const wch* StringSearchChar    (const wch* pStr, wch cCh);
@@ -343,7 +343,7 @@ namespace clstd
     typedef wch _XCh;
     static clsize     StringLength        (const ch* pStr);
     static clsize     XStringLength       (const _XCh* pStrX);
-    static ch*        CopyStringN         (ch* pStrDest, const ch* pStrSrc, size_t uLength);
+    static ch*        CopyStringN         (ch* pStrDest, const ch* pStrSrc, size_t uCopyLength);
     static const ch*  StringSearchChar    (const ch* pStr, ch cCh);
     static i32        CompareString       (const ch* pStr1, const ch* pStr2);
     static i32        CompareStringNoCase (const ch* pStr1, const ch* pStr2);

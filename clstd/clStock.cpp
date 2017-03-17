@@ -82,18 +82,37 @@ namespace clstd
 #endif
 
   template <typename _TCh>
-  b32 _CheckBoolean(const _TCh* pStr)
+  b32 _CheckBoolean(const _TCh* pStr, size_t len)
   {
-    static const _TCh sz_1[]    = {'1','\0'};
-    static const _TCh sz_ok[]   = {'o','k','\0'};
-    static const _TCh sz_yes[]  = {'y','e','s','\0'};
-    static const _TCh sz_true[] = {'t','r','u','e','\0'};
+    static const _TCh sz_1[]     = {'1','\0'};
+    static const _TCh sz_ok[]    = {'O','K','\0'};
+    static const _TCh sz_yes[]   = {'Y','E','S','\0'};
+    static const _TCh sz_true[]  = {'T','R','U','E','\0'};
+    static const _TCh sz_1Q[]    = {'\"', '1', '\"', '\0' };
+    static const _TCh sz_okQ[]   = {'\"', 'O','K', '\"', '\0' };
+    static const _TCh sz_yesQ[]  = {'\"', 'Y','E','S', '\"', '\0' };
+    static const _TCh sz_trueQ[] = {'\"', 'T','R','U','E', '\"', '\0' };
+    static const size_t max_len = sizeof(sz_trueQ) / sizeof(sz_trueQ[0]) - 1; // 不含结尾最长的一个
+    
+    if (len > max_len || len == 0) { return FALSE; }
+    _TCh szStr[max_len];
+
+    clstd::strcpynT(szStr, pStr, len + 1);
+    for (size_t i = 0; i < len && szStr[i] != '\0'; i++) {
+      if (szStr[i] >= 'a' && szStr[i] <= 'z') {
+        szStr[i] -= ('a' - 'A');
+      }
+    }
 
     return
-      clstd::strcmpiT(pStr, sz_1) == 0 ||
-      clstd::strcmpiT(pStr, sz_ok) == 0 ||
-      clstd::strcmpiT(pStr, sz_yes) == 0 ||
-      clstd::strcmpiT(pStr, sz_true) == 0 ;
+      clstd::strcmpT(szStr, sz_1) == 0 ||
+      clstd::strcmpT(szStr, sz_ok) == 0 ||
+      clstd::strcmpT(szStr, sz_yes) == 0 ||
+      clstd::strcmpT(szStr, sz_true) == 0 ||
+      clstd::strcmpT(szStr, sz_1Q) == 0 ||
+      clstd::strcmpT(szStr, sz_okQ) == 0 ||
+      clstd::strcmpT(szStr, sz_yesQ) == 0 ||
+      clstd::strcmpT(szStr, sz_trueQ) == 0 ;
   }
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
@@ -221,8 +240,7 @@ namespace clstd
   b32 _SSP_IMPL::ATTRIBUTE::ToBoolean(b32 bDefault) const
   {
     if(value.length) {
-      _TStr str;
-      return _CheckBoolean((T_LPCSTR)SmartStreamUtility::TranslateQuotation(value, str));
+      return _CheckBoolean(value.marker, value.length);
     }
     return bDefault;
   }
@@ -532,6 +550,13 @@ namespace clstd
     }
     return sub_sect;
 
+  }
+
+  _SSP_TEMPL
+    void _SSP_IMPL::Section::Delete()
+  {
+    pStock->Remove(this, name, iter_end);
+    clear();
   }
 
   _SSP_TEMPL

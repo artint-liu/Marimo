@@ -254,9 +254,10 @@ clsize clstd::StringW_traits::XStringLength(const _XCh* pStrX)
   return strlen(pStrX);
 }
 
-wch* clstd::StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uLength)
+wch* clstd::StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uCopyLength)
 {
-  return clstd::strcpynT(pStrDest, pStrSrc, uLength);
+  ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
+  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength + 1);
 }
 
 i32 clstd::StringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
@@ -383,9 +384,10 @@ clsize clstd::StringA_traits::XStringLength(const _XCh* pStrX)
   return clstd::strlenT(pStrX);
 }
 
-ch* clstd::StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uLength)
+ch* clstd::StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uCopyLength)
 {
-  return clstd::strcpynT(pStrDest, pStrSrc, uLength);
+  ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
+  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength + 1);
 }
 
 i32 clstd::StringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
@@ -579,8 +581,11 @@ namespace clstd
     _CLSTR_IMPL::StringX(const StringX& clStr)
     : m_pBuf(NULL)
   {
-    _AllocBuffer(&alloc, clStr.GetLength());
-    _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
+    const size_t nSrcLen = clStr.GetLength();
+    if(nSrcLen) {
+      _AllocBuffer(&alloc, nSrcLen);
+      _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, nSrcLen);
+    }
   }
 
   _CLSTR_TEMPL
@@ -1749,9 +1754,11 @@ namespace clstd
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::Append(const _TCh *pStr, size_t uCount)
   {
-    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-    _ResizeLength(uStrLen + uCount);
-    _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uCount);
+    if(uCount) {
+      const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+      _ResizeLength(uStrLen + uCount);
+      _Traits::CopyStringN(m_pBuf + uStrLen, pStr, uCount);
+    }
     return *this;
   }
 
@@ -2177,18 +2184,17 @@ namespace clstd
     {"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"},};
 
   template<typename _TCh>
-  _TCh* strcpynT(_TCh* pDest, const _TCh* pSrc, size_t uCount)
+  _TCh* strcpynT(_TCh* pDest, const _TCh* pSrc, size_t uMaxCount)
   {
+    if (uMaxCount == 0) {
+      return pDest;
+    }
     _TCh* start = pDest;
 
-    while (uCount && (*pDest++ = *pSrc++))    /* copy string */
-      uCount--;
+    while (--uMaxCount && (*pDest++ = *pSrc++));
 
-    if (uCount)                              /* pad out with zeroes */
-      while (--uCount)
-        *pDest++ = L'\0';
-
-    return(start);
+    *pDest = L'\0';
+    return start;
   }
   
   template<typename _TCh>

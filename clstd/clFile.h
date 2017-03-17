@@ -108,6 +108,7 @@ namespace clstd
       CreationDistribution eCreationDistribution, 
       FlagsAndAttributes eFlagAttr);
 
+    b32   IsGood      () const;
     void  Close       ();
 
     u32  GetPointer   ();

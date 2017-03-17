@@ -215,8 +215,7 @@ namespace clpathfile {
             continue;
           }
 
-          fn(strDir, wfd);
-          if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+          if(fn(strDir, wfd) && TEST_FLAG(wfd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY))
           {
             _TString strChildDir = strDir + wfd.cFileName;
             RecursiveSearchDir<_TString>(strChildDir, fn);
@@ -237,12 +236,20 @@ namespace clpathfile {
 
       if(dwAttri & FILE_ATTRIBUTE_DIRECTORY)
       {
-        RecursiveSearchDir<_TString>(szPath, [&rFileList, &fn](_TString& strDir, const WIN32_FIND_DATA& wfd) {
-          if(fn(wfd)) {
+        RecursiveSearchDir<_TString>(szPath, [&rFileList, &fn]
+        (const _TString& strDir, const WIN32_FIND_DATA& wfd) -> b32
+        {
+          if(TEST_FLAG(wfd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY))
+          {
+            return fn(strDir, wfd);
+          }
+          else if(fn(strDir, wfd))
+          {
             _TString str;
             str = strDir + wfd.cFileName;
             rFileList.push_back(str);
           }
+          return TRUE;
         });
       }
       else {
