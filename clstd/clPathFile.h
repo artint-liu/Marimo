@@ -215,12 +215,15 @@ namespace clpathfile {
             continue;
           }
 
+          // 目录：根据返回值决定是否遍历这个目录及子目录
+          // 文件：忽略返回值
           if(fn(strDir, wfd) && TEST_FLAG(wfd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY))
           {
             _TString strChildDir = strDir + wfd.cFileName;
             RecursiveSearchDir<_TString>(strChildDir, fn);
           }
         } while (FindNextFile(hFind, &wfd));
+        FindClose(hFind);
       }
     }
 
@@ -254,6 +257,37 @@ namespace clpathfile {
       }
       else {
         rFileList.push_back(szPath);
+      }
+    }
+
+    template<class _TString, typename _TCh, class _Fn>
+    void GenerateFiles(const _TCh* szPath, _Fn fn)
+    {
+      DWORD dwAttri = GetFileAttributes(szPath);
+      if (dwAttri == 0xffffffff) {
+        return;
+      }
+
+      if (dwAttri & FILE_ATTRIBUTE_DIRECTORY)
+      {
+        RecursiveSearchDir<_TString>(szPath, [&fn]
+        (const _TString& strDir, const WIN32_FIND_DATA& wfd) -> b32
+        {
+          // wfd是目录，返回FALSE会跳过目录及其子目录
+          // wfd是文件，忽略返回值
+          return fn(strDir, wfd);
+        });
+      }
+      else {
+        WIN32_FIND_DATA wfd = {};
+        HANDLE hFind = FindFirstFile(szPath, &wfd);
+        if (hFind != INVALID_HANDLE_VALUE)
+        {
+          clStringW strDir = szPath;
+          RemoveFileSpec(strDir);
+          fn(strDir, wfd);
+          FindClose(hFind);
+        }
       }
     }
   } // namespace Win32

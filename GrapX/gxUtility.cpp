@@ -523,7 +523,7 @@ GXDLL clstd::Image* TextureUtility::CreateImage( GTexture* pTexture )
 
   auto pImage = new clstd::Image();
 
-  if( ! pImage->Set(pTexture->GetWidth(), pTexture->GetHeight(), fmt, lr.Pitch, nDepth, lr.pBits))
+  if( ! pImage->Set(pTexture->GetWidth(), pTexture->GetHeight(), fmt, nDepth, lr.pBits, lr.Pitch))
   {
     CLOG_ERROR("%s : Failed to set image.\r\n", __FUNCTION__);
     SAFE_DELETE(pImage);

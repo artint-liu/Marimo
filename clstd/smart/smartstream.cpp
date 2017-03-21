@@ -397,6 +397,12 @@ _TStr _SS_IMPL::iterator::ToString() const
 }
 
 _SS_TEMPL
+b32 _SS_IMPL::iterator::IsEqual(T_LPCSTR str, clsize count) const
+{
+  return (count == length && !clstd::strncmpT(marker, str, (int)length));
+}
+
+_SS_TEMPL
 b32 _SS_IMPL::iterator::BeginsWith(TChar ch) const
 {
   return (length > 1) && (marker[0] == ch);

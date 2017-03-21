@@ -506,13 +506,13 @@ namespace clstd
 {
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX()
-    : m_pBuf  ((_TCh*)s_EmptyStr.buf)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
   }
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const _TCh* pStr)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     if(pStr == NULL) {
       m_pBuf = (_TCh*)s_EmptyStr.buf;
@@ -526,7 +526,7 @@ namespace clstd
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const _TCh* pStr, size_t uCount)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     _AllocBuffer(&alloc, uCount);
     _Traits::CopyStringN(m_pBuf, pStr, uCount);
@@ -534,7 +534,7 @@ namespace clstd
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const _XCh* pStrX)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     if(pStrX == NULL) {
       m_pBuf = (_TCh*)s_EmptyStr.buf;
@@ -563,7 +563,7 @@ namespace clstd
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const _TCh cCh, size_t uCount)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     _AllocBuffer(&alloc, uCount);
 
@@ -579,7 +579,7 @@ namespace clstd
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const StringX& clStr)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     const size_t nSrcLen = clStr.GetLength();
     if(nSrcLen) {
@@ -590,7 +590,7 @@ namespace clstd
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const int nInteger)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     _AllocBuffer(&alloc, MAX_DIGITS);
 
@@ -601,7 +601,7 @@ namespace clstd
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const float fFloat, char mode)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     _AllocBuffer(&alloc, MAX_DIGITS);
 
@@ -611,7 +611,7 @@ namespace clstd
 
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const long lLong)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     _AllocBuffer(&alloc, MAX_DIGITS);
 
@@ -622,11 +622,11 @@ namespace clstd
 #if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const size_t uInteger)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
 #elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const U32 uInteger)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
 #else
 # error Missing cpu architecture
 #endif
@@ -640,11 +640,11 @@ namespace clstd
 #if defined(_CL_ARCH_X86) || defined(_CL_ARCH_ARM)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const U64 val)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
 #elif defined(_CL_ARCH_X64) || defined(_CL_ARCH_ARM64)
   _CLSTR_TEMPL
     _CLSTR_IMPL::StringX(const size_t val)
-    : m_pBuf(NULL)
+    : m_pBuf((_TCh*)s_EmptyStr.buf)
 #else
 # error Missing cpu architecture
 #endif
