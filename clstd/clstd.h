@@ -100,6 +100,12 @@ inline void InlSetZeroT(_Ty& t) {
 #define SAFE_ADDREF(pobj)    if((pobj) != NULL)  { (pobj)->AddRef(); }
 #endif // SAFE_ADDREF
 
+#ifndef countof
+template<typename _Ty, size_t _count>
+char (&_cl_CountOfHelper(_Ty(&_array)[_count]))[_count];
+# define countof(_arr) (sizeof(_cl_CountOfHelper(_arr)))
+#endif
+
 #if __cplusplus < 201103L
 # define CLTRIVIAL_DEFAULT {}
 #else
