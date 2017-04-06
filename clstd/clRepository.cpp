@@ -88,36 +88,75 @@ namespace clstd
       }
     };
 
+    template<typename dest_t, typename src_t>
+    CLBYTE* WriteStream(CLBYTE* pDest, src_t src)
+    {
+      *reinterpret_cast<dest_t*>(pDest) = static_cast<dest_t>(src);
+      return (pDest + sizeof(dest_t));
+    }
+
+    template<typename src_t, typename dest_t>
+    const CLBYTE* ReadStream(dest_t& dest, const CLBYTE* pSrc)
+    {
+      dest = static_cast<dest_t>(*reinterpret_cast<const src_t*>(pSrc));
+      return (pSrc + sizeof(src_t));
+    }
+
     template<typename _key_t, typename _name_t, typename _data_t>
     struct FILE_HEADERT
     {
       CLDWORD dwMagic; // CLRP
       CLDWORD dwFlags; // HeaderFlag
-      _key_t  nKeys;
-      _name_t cbNames;
-      _data_t cbData;
+      //u32     data[1];
+      //_key_t  nKeys;
+      //_name_t cbNames;
+      //_data_t cbData;
 
       size_t CopyFrom(const FILE_HEADER& h, CLDWORD dwAddFlags)
       {
         dwMagic = h.dwMagic;
         dwFlags = h.dwFlags | dwAddFlags;
-        nKeys   = (_key_t)h.nKeys;
-        cbNames = (_name_t)h.cbNames;
-        cbData  = (_data_t)h.cbData;
-        return sizeof(FILE_HEADERT);
+        CLBYTE* pVariData = reinterpret_cast<CLBYTE*>(this) + sizeof(FILE_HEADERT);
+        //*reinterpret_cast<_key_t*>(pVariData) = static_cast<_key_t>(h.nKeys);
+        //pVariData += sizeof(_key_t);
+
+        //*reinterpret_cast<_name_t*>(pVariData) = static_cast<_name_t>(h.cbNames);
+        //pVariData += sizeof(_name_t);
+
+        //*reinterpret_cast<_data_t*>(pVariData) = static_cast<_data_t>(h.cbData);
+        pVariData = WriteStream<_key_t>(pVariData, h.nKeys);
+        pVariData = WriteStream<_name_t>(pVariData, h.cbNames);
+        pVariData = WriteStream<_data_t>(pVariData, h.cbData);
+
+        //cbNames = (_name_t)h.cbNames;
+        //cbData  = (_data_t)h.cbData;
+        return sizeof(FILE_HEADERT) + sizeof(_key_t) + sizeof(_name_t) + sizeof(_data_t);
       }
 
       size_t CopyTo(FILE_HEADER& h) const
       {
         h.dwMagic = dwMagic;
         h.dwFlags = dwFlags & (~HeaderFlag_AllFieldMask);
-        h.nKeys   = (CLDWORD)nKeys;
-        h.cbNames = (CLDWORD)cbNames;
-        h.cbData  = (CLDWORD)cbData;
-        return sizeof(FILE_HEADERT);
+        const CLBYTE* pVariData = reinterpret_cast<const CLBYTE*>(this) + sizeof(FILE_HEADERT);
+
+        //h.nKeys   = *reinterpret_cast<const _key_t*>(pVariData);
+        //pVariData += sizeof(_key_t);
+
+        //h.cbNames = *reinterpret_cast<const _name_t*>(pVariData);
+        //pVariData += sizeof(_name_t);
+        //
+        //h.cbData  = *reinterpret_cast<const _data_t*>(pVariData);
+
+        pVariData = ReadStream<_key_t>(h.nKeys, pVariData);
+        pVariData = ReadStream<_name_t>(h.cbNames, pVariData);
+        pVariData = ReadStream<_data_t>(h.cbData, pVariData);
+
+        //return sizeof(FILE_HEADERT);
+        return sizeof(FILE_HEADERT) + sizeof(_key_t) + sizeof(_name_t) + sizeof(_data_t);
       }
     };
 
+    STATIC_ASSERT(sizeof(FILE_HEADERT<u32, u32, u32>) == 8);
 
 
     template<typename _key_t, typename _name_t> 
@@ -149,12 +188,18 @@ namespace clstd
 
     size_t _PackHeader( const FILE_HEADER& header, CLBYTE* pBuffer )
     {
+      //*
       if(header.nKeys <= 0xff) {
         return _PackHeader_NameDataT<u8>(header, HeaderFlag_KeyField_1Byte, pBuffer);
       } else if(header.nKeys <= 0xffff) {
         return _PackHeader_NameDataT<u16>(header, HeaderFlag_KeyField_2Bytes, pBuffer);
       }
       return _PackHeader_NameDataT<u32>(header, HeaderFlag_KeyField_4Bytes, pBuffer);
+      /*/
+      typedef FILE_HEADERT<u32, u32, u32> HEADER_PACKED_T;
+      HEADER_PACKED_T* header_packed = reinterpret_cast<HEADER_PACKED_T*>(pBuffer);
+      return header_packed->CopyFrom(header, 0);
+      //*/
     }
 
     //////////////////////////////////////////////////////////////////////////
