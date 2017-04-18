@@ -67,7 +67,7 @@ typedef i64                 i32_ptr;
 typedef s64                 s32_ptr;
 typedef u64                 u32_ptr;
 # endif
-#elif defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
+#elif defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_LINUX)
 typedef intptr_t            i32_ptr;
 typedef intptr_t            s32_ptr;
 typedef uintptr_t           u32_ptr;
@@ -90,6 +90,10 @@ typedef wchar_t             wch; // 32 Bits
 # define _CLTEXT(_str_)     L##_str_
 # endif
 #endif
+
+// 用来做多重定义的如: #define __FUNCTIONW__ _CLTEXT2(__FUNCTION__)
+#define _CLTEXT2(_STR) _CLTEXT(_STR)
+
 
 
 //namespace clstd

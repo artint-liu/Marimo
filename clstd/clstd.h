@@ -53,6 +53,9 @@
 #elif defined(_CL_SYSTEM_ANDROID)
 # include <wchar.h>
 # include <corecrt_io.h> // _findfile
+#elif defined(_CL_SYSTEM_LINUX)
+# include <stdint.h>
+# include <stddef.h>
 #else
 # error 未知平台或者新增加的平台
 #endif
