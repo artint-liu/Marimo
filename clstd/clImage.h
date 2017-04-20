@@ -33,6 +33,15 @@ namespace clstd
     ImageFilter_Nearest = 0,
   };
 
+  enum ImageColorSpace
+  {
+    // 枚举值与通道顺序无关
+    ImageColorSpace_Unknown,  // 没有色彩空间，可能只储存了Alpha通道
+    ImageColorSpace_Mix,      // 混合模式，储存了不同色彩空间的值
+    ImageColorSpace_RGB,      // RGB色彩空间
+    ImageColorSpace_YUV,      // YUV色彩空间
+  };
+
   class Image
   {
     // 这里面包含了基本数据结构和方法，所有成员方法应当与数据类型无关
@@ -53,6 +62,7 @@ namespace clstd
 
     static b32 IntParseFormat(const char* fmt, u32* pFmtCode, int* pChannel);
     static int IntGetChanelIndex(const PIXELFORMAT& fmt, int nNumOfChannels, char chChannelCode); // 大写字母
+    static ImageColorSpace IntGetColorSpace(const PIXELFORMAT& fmt, int nNumOfChannels);
 
   public:
     Image();
@@ -77,11 +87,16 @@ namespace clstd
     const void* GetLine             (int y) const;
     void*       GetLine             (int y);
     int         GetChannelOffset    (char chChannel) const;   // 通道在像素中的偏移量, 对于"AAAX"这种格式只能返回第一个Alpha通道的偏移
+    char        GetChannelName      (int offset) const;
+    b32         RenameChannel       (int offset, char chChannel); // 通道改名，只改变通道名称，数据不做任何处理
+    b32         RenameChannel       (char* szChannel);
     b32         GetChannelPlane     (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
     b32         ReplaceChannel      (char chReplacedChannel, const Image* pSource, char chSrcChannel); // 从一个图像拷贝通道，如果指定的通道在源图像中不存在，会失败。
     b32         ScaleNearest        (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
     const char* GetFormat           () const;
     b32         SetFormat           (const char* fmt); // 更改通道顺序或者删除通道
+    ImageColorSpace GetColorSpace   () const;
+    b32         SetColorSpace       (ImageColorSpace eSpace);
   private:
     //template<typename _Ty>
     //void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );
@@ -105,6 +120,9 @@ namespace clstd
 
     template<typename _TDestChannel, typename _TSrcChannel>
     void ChangeDepth(CLLPBYTE pDestPtr, size_t nDestPitch, int right_shift);
+
+    template<typename _TChannel>
+    b32 RGBAToYUVA(CLLPBYTE pDestPtr, int nNewPixelSize, int nNewPitch, float mulval, int maxval, int* nChannelTable);
 
     template<typename _TPixel> // 块传送，dest与src必须像素格式一致，位置参数必须裁剪正确
     static void BlockTransferT(IMAGEDESC* pDest, int xDest, int yDest, IMAGEDESC* pSrc, int xSrc, int ySrc, int nCopyWidth, int nCopyHeight);

@@ -7,6 +7,16 @@ const int delta = 'a' - 'A';
 #define MIN_PITCH_PARAM(_WIDTH, _CHANNEL, _DEPTH)   ((_WIDTH) * (_CHANNEL) * ((_DEPTH) >> 3))
 #define MIN_PITCH                                   MIN_PITCH_PARAM(m_width, m_channel, m_depth)
 #define GETPIXELSIZE                                (m_channel * (m_depth >> 3))
+
+#define IS_RGB_COLORSPACE(_CHLNAME)     (_CHLNAME == 'R' || _CHLNAME == 'G' || _CHLNAME == 'B')
+#define IS_RGB_COLORSPACE_L(_CHLNAME)   (_CHLNAME == 'r' || _CHLNAME == 'g' || _CHLNAME == 'b')
+#define IS_YUV_COLORSPACE(_CHLNAME)     (_CHLNAME == 'Y' || _CHLNAME == 'U' || _CHLNAME == 'V')
+#define IS_YUV_COLORSPACE_L(_CHLNAME)   (_CHLNAME == 'y' || _CHLNAME == 'u' || _CHLNAME == 'v')
+#define IS_ALPHA_COLORSPACE(_CHLNAME)   (_CHLNAME == 'A' || _CHLNAME == 'a')
+#define IS_EMPTY_COLORSPACE(_CHLNAME)   (_CHLNAME == 'X' || _CHLNAME == 'x')
+#define IS_COLORCHANNLE(_CHLNAME)       (IS_RGB_COLORSPACE(_CHLNAME) || IS_RGB_COLORSPACE_L(_CHLNAME) || \
+                                  IS_YUV_COLORSPACE(_CHLNAME) || IS_YUV_COLORSPACE_L(_CHLNAME) || IS_ALPHA_COLORSPACE(_CHLNAME) || IS_EMPTY_COLORSPACE(_CHLNAME))
+
 namespace clstd
 {
   Image::Image()
@@ -282,10 +292,14 @@ namespace clstd
 
     for (int i = 0; i < 4; i++)
     {
-      if (fmt[i] == 'R' || fmt[i] == 'G' || fmt[i] == 'B' || fmt[i] == 'A' || fmt[i] == 'X') {
+      if(fmt[i] == 'R' || fmt[i] == 'G' || fmt[i] == 'B' ||
+        fmt[i] == 'Y' || fmt[i] == 'U' || fmt[i] == 'V' ||
+        fmt[i] == 'A' || fmt[i] == 'X') {
         format.name[i] = fmt[i];
       }
-      else if (fmt[i] == 'r' || fmt[i] == 'g' || fmt[i] == 'b' || fmt[i] == 'a' || fmt[i] == 'x') {
+      else if (fmt[i] == 'r' || fmt[i] == 'g' || fmt[i] == 'b' ||
+        fmt[i] == 'y' || fmt[i] == 'u' || fmt[i] == 'v' ||
+        fmt[i] == 'a' || fmt[i] == 'x') {
         format.name[i] = fmt[i] - ('a' - 'A');
       }
       else if (fmt[i] == '\0') { break; }
@@ -302,8 +316,9 @@ namespace clstd
   int Image::IntGetChanelIndex(const PIXELFORMAT& fmt, int nNumOfChannels, char chChannelCode)
   {
     for (int i = 0; i < nNumOfChannels; i++) {
-      ASSERT(fmt.name[i] == 'R' || fmt.name[i] == 'G' ||
-        fmt.name[i] == 'B' || fmt.name[i] == 'A' || fmt.name[i] == 'X');
+      ASSERT(fmt.name[i] == 'R' || fmt.name[i] == 'G' || fmt.name[i] == 'B' || 
+        fmt.name[i] == 'Y' || fmt.name[i] == 'U' || fmt.name[i] == 'V' ||
+        fmt.name[i] == 'A' || fmt.name[i] == 'X');
       if (fmt.name[i] == chChannelCode) {
         return i;
       }
@@ -315,6 +330,33 @@ namespace clstd
       return -2;
     }
     return -1;
+  }
+
+  ImageColorSpace Image::IntGetColorSpace(const PIXELFORMAT& fmt, int nNumOfChannels)
+  {
+    ImageColorSpace eSpace = ImageColorSpace_Unknown;
+    for (int i = 0; i < nNumOfChannels; i++)
+    {
+      ASSERT(fmt.name[i] == 'R' || fmt.name[i] == 'G' || fmt.name[i] == 'B' ||
+        fmt.name[i] == 'Y' || fmt.name[i] == 'U' || fmt.name[i] == 'V' ||
+        fmt.name[i] == 'A' || fmt.name[i] == 'X');
+      
+      if (fmt.name[i] == 'R' || fmt.name[i] == 'G' || fmt.name[i] == 'B')
+      {
+        if(eSpace == ImageColorSpace_YUV) {
+          return ImageColorSpace_Mix;
+        }
+        eSpace = ImageColorSpace_RGB;
+      }
+      else if (fmt.name[i] == 'Y' || fmt.name[i] == 'U' || fmt.name[i] == 'V')
+      {
+        if (eSpace == ImageColorSpace_RGB) {
+          return ImageColorSpace_Mix;
+        }
+        eSpace = ImageColorSpace_YUV;
+      }
+    }
+    return eSpace;
   }
 
   const void* Image::GetLine(int y) const
@@ -431,6 +473,41 @@ namespace clstd
   {
     const int index = IntGetChanelIndex(m_format, m_channel, chChannel);
     return index >= 0 ? (index * (m_depth >> 3)) : -1;
+  }
+
+  char Image::GetChannelName(int offset) const
+  {
+    if(offset >= 0 && offset < m_channel)
+    {
+      return m_format.name[offset];
+    }
+    return 0;
+  }
+
+  b32 Image::RenameChannel(int offset, char chChannel)
+  {
+    if (offset >= 0 && offset < m_channel) {
+      if(IS_COLORCHANNLE(chChannel)) {
+        if (chChannel >= 'a' && chChannel <= 'z') {
+          chChannel = chChannel - 'a' + 'A';
+        }
+        m_format.name[offset] = chChannel;
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  b32 Image::RenameChannel(char* szChannel)
+  {
+    PIXELFORMAT format;
+    int nChannel = 0;
+    if( ! IntParseFormat(szChannel, &format.code, &nChannel) || nChannel != m_channel) {
+      return FALSE;
+    }
+
+    m_format.code = format.code;
+    return TRUE;
   }
 
   b32 Image::GetChannelPlane(Image* pDestImage, char chChannel)
@@ -836,12 +913,107 @@ namespace clstd
       //CLBREAK; // 暂时不支持
     }
 
-    m_channel = nNewChannel;
     m_pitch = nNewPitch;
     m_channel = nNewChannel;
     m_format.code = NewFormat.code;
 
     return TRUE;
+  }
+
+  ImageColorSpace Image::GetColorSpace() const
+  {
+    return IntGetColorSpace(m_format, m_channel);
+  }
+
+  template<typename _TChannel>
+    b32 Image::RGBAToYUVA(CLLPBYTE pDestPtr, int nNewPixelSize, int nNewPitch, float mulval, int maxval, int* nChannelTable)
+    {
+      _TChannel Alpha = 0;
+      float r, g, b;
+      float y, u, v;
+      float inv_mulval = 1.0f / mulval;
+      const size_t pixel_size = GETPIXELSIZE;
+      ASSERT(nNewPixelSize * m_width <= nNewPitch);
+
+      for (int yy = 0; yy < m_height; yy++)
+      {
+        _TChannel* pDest  = (_TChannel*)(pDestPtr + nNewPitch * yy);
+        _TChannel* pPixel = (_TChannel*)GetLine(yy);
+        for (int x = 0; x < m_width; x++)
+        {
+          r = nChannelTable[0] < 0 ? 0.0f : pPixel[nChannelTable[0]] * inv_mulval;
+          g = nChannelTable[1] < 0 ? 0.0f : pPixel[nChannelTable[1]] * inv_mulval;
+          b = nChannelTable[2] < 0 ? 0.0f : pPixel[nChannelTable[2]] * inv_mulval;
+          if (nChannelTable[3] >= 0)
+          {
+            Alpha = pPixel[nChannelTable[3]];
+            pDest[3] = Alpha;
+          }
+          y = 0.299f * r + 0.587f * g + 0.114f * b;
+          u = -0.147f * r - 0.289f * g + 0.436f * b;
+          v = 0.615f * r - 0.515f * g - 0.100f * b;
+          pDest[0] = (y <= 0.0f) ? 0 : ((y >= 1.0f) ? (_TChannel)maxval : (_TChannel)(y * mulval));
+          pDest[1] = (u <= 0.0f) ? 0 : ((u >= 1.0f) ? (_TChannel)maxval : (_TChannel)(u * mulval));
+          pDest[2] = (v <= 0.0f) ? 0 : ((v >= 1.0f) ? (_TChannel)maxval : (_TChannel)(v * mulval));
+
+          pDest += nNewPixelSize;
+          pPixel += pixel_size;
+        }
+      }
+      return TRUE;
+    }
+
+  b32 Image::SetColorSpace(ImageColorSpace eSpace)
+  {
+    ImageColorSpace eCurrSpace = IntGetColorSpace(m_format, m_channel);
+    if (eCurrSpace == ImageColorSpace_Mix || eCurrSpace == ImageColorSpace_Unknown || eCurrSpace == eSpace)
+    {
+      return FALSE;
+    }
+
+    if(eCurrSpace == ImageColorSpace_RGB && eSpace == ImageColorSpace_YUV)
+    {
+      int nChannelTab[4] = { -1, -1, -1, -1 }; // 新通道在旧通道上的索引
+      nChannelTab[0] = IntGetChanelIndex(m_format, m_channel, 'R');
+      nChannelTab[1] = IntGetChanelIndex(m_format, m_channel, 'G');
+      nChannelTab[2] = IntGetChanelIndex(m_format, m_channel, 'B');
+      nChannelTab[3] = IntGetChanelIndex(m_format, m_channel, 'A');
+      int nNewChannel = nChannelTab[3] >= 0 ? 4 : 3; // YUVA or YUV
+      int nNewPitch = MIN_PITCH_PARAM(m_width, nNewChannel, m_depth);
+
+      CLBYTE* pNewPtr = m_ptr;
+      if (nNewChannel > m_channel) {
+        const size_t nNewSize = nNewPitch * m_height;
+        pNewPtr = new CLBYTE[nNewSize];
+      }
+
+      b32 result = FALSE;
+      switch (m_depth)
+      {
+      case 8:
+        result = RGBAToYUVA<u8>(pNewPtr, (m_depth * nNewChannel) >> 3, nNewPitch, 255.0f, 255, nChannelTab);
+        break;
+      case 16:
+        result = RGBAToYUVA<u16>(pNewPtr, (m_depth * nNewChannel) >> 3, nNewPitch, 65535.0f, 65535, nChannelTab);
+        break;
+      case 32:
+        result = FALSE;
+        break;
+      }
+
+      if(pNewPtr != m_ptr)
+      {
+        ASSERT(m_pitch != nNewPitch && m_channel != nNewChannel);
+        delete m_ptr;
+        m_ptr = pNewPtr;
+        m_pitch = nNewPitch;
+        m_channel = nNewChannel;
+      }
+      m_format.code = nChannelTab[3] >= 0 ? MAKEFOURCC('Y', 'U', 'V', 'A') : MAKEFOURCC('Y', 'U', 'V', 0);
+      return result;
+    }
+    CLBREAK;
+    return FALSE;
   }
 
   //////////////////////////////////////////////////////////////////////////
