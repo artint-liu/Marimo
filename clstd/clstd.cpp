@@ -367,6 +367,22 @@ extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile,int nLine)
 
 namespace clstd
 {
+  u16 bitswap(u16 w)
+  {
+    return ((w & 0xff) << 8) | ((w >> 8) & 0xff);
+  }
+
+  u32 bitswap(u32 dw)
+  {
+    return ((dw & 0xff) << 24) | ((dw & 0xff00) << 8) | ((dw >> 8) & 0xff00) | ((dw >> 24) & 0xff);
+  }
+
+  u64 bitswap(u64 qw)
+  {
+    return ((qw & 0xff) << 56) | ((qw & 0xff00) << 40) | ((qw & 0xff0000) << 24) | ((qw & 0xff000000) << 8) |
+      ((qw >> 8) & 0xff000000) | ((qw >> 24) & 0xff0000) | ((qw >> 40) & 0xff00) | ((qw >> 56) & 0xff);
+  }
+
 #ifdef _WIN32
   CLLONG InterlockedIncrement(CLLONG volatile *Addend)
   {

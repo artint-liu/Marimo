@@ -379,6 +379,11 @@ namespace clstd
     CLLONG nNumThreads;     // 线程数量, 这个是基于clstd方法创建的线程
   };
 
+  // 字节序交换
+  u16 bitswap(u16 w);
+  u32 bitswap(u32 dw);
+  u64 bitswap(u64 qw);
+
   CLLONG InterlockedIncrement       (CLLONG volatile *Addend);
   CLLONG InterlockedDecrement       (CLLONG volatile *Addend);
   CLLONG InterlockedExchange        (CLLONG volatile *Target, CLLONG Value);

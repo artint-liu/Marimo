@@ -73,7 +73,7 @@ namespace clstd
     Image& operator=(const Image& image);
     b32         CompareFormat       (const char* fmt) const;
     b32         Set                 (int nWidth, int nHeight, const char* fmt, const void* pData);
-    b32         Set                 (int nWidth, int nHeight, const char* fmt, int nChannelDepth, const void* pData, int nPitch = 0);
+    b32         Set                 (int nWidth, int nHeight, const char* fmt, int nChannelDepth, const void* pData = NULL, int nPitch = 0);
     int         GetWidth            () const;
     int         GetHeight           () const;
     b32         SetChannelDepth     (int nDepth); // 设置新的深度
@@ -97,6 +97,44 @@ namespace clstd
     b32         SetFormat           (const char* fmt); // 更改通道顺序或者删除通道
     ImageColorSpace GetColorSpace   () const;
     b32         SetColorSpace       (ImageColorSpace eSpace);
+
+    // ForEachPixel 目的是为了开发时快速验证算法，不保证效率，在实际产品中不建议使用这个方法
+    template<class _TPixel, class _TFunc>
+    b32 ForEachPixel(_TFunc fn)
+    {
+      // 如果提供的像素格式与实际长度不符，返回FALSE
+      if (sizeof(_TPixel) != (m_channel * m_depth / 8)) {
+        CLOG_ERROR("pixel format doesn't match.");
+        return FALSE;
+      }
+
+      for (int yy = 0; yy < m_height; yy++) {
+        _TPixel* p = reinterpret_cast<_TPixel*>(m_ptr + m_pitch * yy);
+        for (int xx = 0; xx < m_width; xx++) {
+          fn(*p++);
+        }
+      }
+      return TRUE;
+    }
+
+    template<class _TPixel, class _TFunc>
+    b32 ForEachPixelXY(_TFunc fn)
+    {
+      // 如果提供的像素格式与实际长度不符，返回FALSE
+      if (sizeof(_TPixel) != (m_channel * m_depth / 8)) {
+        CLOG_ERROR("pixel format doesn't match.");
+        return FALSE;
+      }
+
+      for (int yy = 0; yy < m_height; yy++) {
+        _TPixel* p = reinterpret_cast<_TPixel*>(m_ptr + m_pitch * yy);
+        for (int xx = 0; xx < m_width; xx++) {
+          fn(xx, yy, *p++);
+        }
+      }
+      return TRUE;
+    }
+
   private:
     //template<typename _Ty>
     //void IntCopyChannel( Image* pDestImage, int nOffset, const int nPixelSize );

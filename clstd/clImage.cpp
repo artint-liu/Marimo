@@ -264,6 +264,9 @@ namespace clstd
     if (pData) {
       memcpy(m_ptr, pData, GetDataSize());
     }
+    else {
+      memset(m_ptr, 0, GetDataSize());
+    }
     return true;
 
   }
