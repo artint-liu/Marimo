@@ -88,6 +88,7 @@
     <ClCompile Include="..\..\clFile.cpp" />
     <ClCompile Include="..\..\clstd.cpp" />
     <ClCompile Include="..\..\clBuffer.cpp" />
+    <ClCompile Include="..\..\clImageDecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clFile.H" />
@@ -165,6 +166,7 @@
     <ClInclude Include="..\..\clTokens.h" />
     <ClInclude Include="..\..\clRepository.h" />
     <ClInclude Include="..\..\clBuffer.H" />
+    <ClInclude Include="..\..\clImageDecoder.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">
