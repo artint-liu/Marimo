@@ -173,8 +173,10 @@ namespace clstd
       return y * v.x - x * v.y;
     }
 
-    _float2& set(float x, float y){this->x = x; this->y = y; return *this;}
-    _float2& set(int x, int y){this->x = (float)x; this->y = (float)y; return *this;}
+    _float2& set(float x) { this->x = x = this->y = x; return *this; }
+    _float2& set(float x, float y) { this->x = x; this->y = y; return *this; }
+    _float2& set(int x) { this->x = this->y = (float)x; return *this; }
+    _float2& set(int x, int y) { this->x = (float)x; this->y = (float)y; return *this; }
 
     b32 IsNearTo(const _float2& v, float epsilon) const
     {

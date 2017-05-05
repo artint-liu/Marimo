@@ -155,6 +155,105 @@ void TestLog()
   CLOG_ERRORW(_CLTEXT("日志输出测试"));
 }
 
+void TestStringToFloat()
+{
+  const char* sz123 = "1234\000e4321";
+  float v = clstd::xtof(sz123);
+  ASSERT(v == 1234.0f);
+
+  const char* szSamp001 = "123.456e-20";
+
+  {
+    v = clstd::xtof(szSamp001); // 1.23456013
+    ASSERT(v < 1.0f);
+
+    v = clstd::xtof(szSamp001, 0);
+    ASSERT(v == 0.f);
+
+    v = clstd::xtof(szSamp001, 1);
+    ASSERT(v == 1.f);
+
+    v = clstd::xtof(szSamp001, 2);
+    ASSERT(v == 12.f);
+
+    v = clstd::xtof(szSamp001, 3);
+    ASSERT(v == 123.f);
+
+    v = clstd::xtof(szSamp001, 4);
+    ASSERT(v == 123.f);
+
+    v = clstd::xtof(szSamp001, 5);
+    ASSERT(v == 123.400002f);
+
+    v = clstd::xtof(szSamp001, 6);
+    ASSERT(v == 123.450005f);
+
+    v = clstd::xtof(szSamp001, 7);
+    ASSERT(v == 123.456009f);
+
+    v = clstd::xtof(szSamp001, 8);
+    ASSERT(v == 123.456009f);
+
+    v = clstd::xtof(szSamp001, 9);
+    ASSERT(v == 123.456009f);
+
+    v = clstd::xtof(szSamp001, 10);
+    ASSERT(v == 1.23456013f);
+
+    v = clstd::xtof(szSamp001, 11);
+    ASSERT(v < 1.f);
+
+    v = clstd::xtof(szSamp001, 12);
+    ASSERT(v < 1.f);
+  }
+
+  const char* szSamp002 = "123.456e20";
+  {
+    v = clstd::xtof(szSamp002); // 1.23456013
+    ASSERT(v > 1.0e10f);
+
+    v = clstd::xtof(szSamp002, 0);
+    ASSERT(v == 0.f);
+
+    v = clstd::xtof(szSamp002, 1);
+    ASSERT(v == 1.f);
+
+    v = clstd::xtof(szSamp002, 2);
+    ASSERT(v == 12.f);
+
+    v = clstd::xtof(szSamp002, 3);
+    ASSERT(v == 123.f);
+
+    v = clstd::xtof(szSamp002, 4);
+    ASSERT(v == 123.f);
+
+    v = clstd::xtof(szSamp002, 5);
+    ASSERT(v == 123.400002f);
+
+    v = clstd::xtof(szSamp002, 6);
+    ASSERT(v == 123.450005f);
+
+    v = clstd::xtof(szSamp002, 7);
+    ASSERT(v == 123.456009f);
+
+    v = clstd::xtof(szSamp002, 8);
+    ASSERT(v == 123.456009f);
+
+    v = clstd::xtof(szSamp002, 9);
+    ASSERT(v == 12345.6006f);
+
+    v = clstd::xtof(szSamp002, 10);
+    ASSERT(v > 1.0e10f);
+
+    v = clstd::xtof(szSamp002, 11);
+    ASSERT(v > 1.0e10f);
+
+    v = clstd::xtof(szSamp002, 12);
+    ASSERT(v > 1.0e10f);
+  }
+
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   setlocale(LC_ALL, "");
@@ -167,6 +266,7 @@ int _tmain(int argc, _TCHAR* argv[])
   TestPathFile();
   TestStringResolve();
   TestCodec();
+  TestStringToFloat();
 
 	return 0;
 }

@@ -72,7 +72,7 @@ namespace clstd
       _TStr&  ToString    (_TStr& str, T_LPCSTR szDefault = NULL) const;
 
       template<class _TFn>
-      void ToArray(_TFn fn, TChar ch = TChar(',')) const
+      void ToArray(_TFn fn, TChar ch = TChar(',')) const // void fn(size_t index, const TChar* begin, size_t length)
       {
         _TStr strValue;
         StringUtility::Resolve(ToString(strValue), ch, fn);

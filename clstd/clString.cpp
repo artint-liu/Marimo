@@ -58,6 +58,8 @@ namespace clstd
 {
   template<typename _TReal, typename _TCh>
   _TReal _xstrtofT(const _TCh *str);
+  template<typename _TReal, typename _TCh>
+  _TReal _xstrtofT(const _TCh *str, size_t len);
 
   template<typename _TUInt, typename _TCh>
   _TUInt _xstrtouT(const _TCh *str);
@@ -529,7 +531,9 @@ namespace clstd
     : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
     _AllocBuffer(&alloc, uCount);
-    _Traits::CopyStringN(m_pBuf, pStr, uCount);
+    if(uCount) {
+      _Traits::CopyStringN(m_pBuf, pStr, uCount);
+    }
   }
 
   _CLSTR_TEMPL
@@ -682,7 +686,9 @@ namespace clstd
     else {
       const clsize uStrLen = _Traits::StringLength(pStr);
       _ResizeLengthNoCopy(uStrLen);
-      _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
+      if(uStrLen) {
+        _Traits::CopyStringN(m_pBuf, pStr, uStrLen);
+      }
     }
     return *this;
   }
@@ -2444,6 +2450,7 @@ namespace clstd
       a = a * _TReal(10.0) + (c - '0');
     }
 
+    // 如果这里是字符串结尾的话，c仍然为'\0'
     if (c == '.') {
       while ((c = *str++) != '\0' && (c >= '0' && c <= '9')) {
         a = a * _TReal(10.0) + (c - '0');
@@ -2463,7 +2470,70 @@ namespace clstd
         sign = -1;
       }
 
-      while (isdigit(c)) {
+      while ((c >= '0' && c <= '9')) {
+        i = i * 10 + (c - '0');
+        c = *str++;
+      }
+
+      e += i * sign;
+    }
+
+    while (e > 0) {
+      a *= _TReal(10.0);
+      e--;
+    }
+
+    while (e < 0) {
+      a *= _TReal(0.1);
+      e++;
+    }
+
+    return bNeg ? -a : a;
+  }
+
+  template<typename _TReal, typename _TCh>
+  _TReal _xstrtofT(const _TCh *str, size_t len)
+  {
+    _TReal a(0.0);
+    int e = 0;
+    int c = 0;
+    b32 bNeg = false;
+    const _TCh *str_end = str + len;
+
+    if(*str == '-') {
+      bNeg = true;
+      str++;
+    }
+
+    while ((str < str_end) && (c = *str++) != '\0' && (c >= '0' && c <= '9')) {
+      a = a * _TReal(10.0) + (c - '0');
+    }
+
+    // 如果这里是字符串结尾的话，c仍然为'\0'
+    if ((str < str_end) && c == '.') {
+      while ((str < str_end) && (c = *str++) != '\0' && (c >= '0' && c <= '9')) {
+        a = a * _TReal(10.0) + (c - '0');
+        e--;
+      }
+    }
+
+    if ((str < str_end) && c == 'e' || c == 'E') {
+      int sign = 1;
+      int i = 0;
+      c = *str++;
+
+      if(str < str_end)
+      {
+        if (c == '+') {
+          c = *str++;
+        }
+        else if (c == '-') {
+          c = *str++;
+          sign = -1;
+        }
+      }
+
+      while ((str <= str_end) && (c >= '0' && c <= '9')) {
         i = i * 10 + (c - '0');
         c = *str++;
       }
@@ -2781,6 +2851,26 @@ namespace clstd
   double xtod(const wch* str)
   {
     return clstd::_xstrtofT<double>(str);
+  }
+
+  float xtof(const ch* str, size_t len)
+  {
+    return clstd::_xstrtofT<float>(str, len);
+  }
+
+  float xtof(const wch* str, size_t len)
+  {
+    return clstd::_xstrtofT<float>(str, len);
+  }
+
+  double xtod(const ch* str, size_t len)
+  {
+    return clstd::_xstrtofT<double>(str, len);
+  }
+
+  double xtod(const wch* str, size_t len)
+  {
+    return clstd::_xstrtofT<double>(str, len);
   }
 
   //////////////////////////////////////////////////////////////////////////

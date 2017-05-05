@@ -108,6 +108,10 @@ namespace clstd
   float xtof(const wch* str);
   double xtod(const ch* str);
   double xtod(const wch* str);
+  float xtof(const ch* str, size_t len);
+  float xtof(const wch* str, size_t len);
+  double xtod(const ch* str, size_t len);
+  double xtod(const wch* str, size_t len);
 }
 
 
