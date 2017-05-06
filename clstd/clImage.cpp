@@ -230,6 +230,9 @@ namespace clstd
     if (pData) {
       memcpy(m_ptr, pData, GetDataSize());
     }
+    else {
+      memset(m_ptr, 0, GetDataSize());
+    }
     return true;
   }
 
@@ -608,7 +611,10 @@ namespace clstd
       break;
 
     case 3: // 8 depth 3 channel
-      IntStretchCopyMulti<u8>(pDestImage, nWidth, nHeight, 3);
+      {
+        struct u24_t { u8 m[3]; };
+        IntStretchCopy<u24_t>(pDestImage, nWidth, nHeight);
+      }
       break;
 
     case 4: // 32 depth 1 channel
@@ -618,7 +624,10 @@ namespace clstd
       break;
 
     case 6: // 16 depth 3 channel
-      IntStretchCopyMulti<u16>(pDestImage, nWidth, nHeight, 3);
+      {
+        struct u48_t { u16 m[3]; };
+        IntStretchCopy<u48_t>(pDestImage, nWidth, nHeight);
+      }
       break;
 
     case 8: // 16 depth 4 channel
@@ -627,11 +636,17 @@ namespace clstd
       break;
 
     case 12: // 32 depth 3 channel
-      IntStretchCopyMulti<u32>(pDestImage, nWidth, nHeight, 3);
+      {
+        struct u96_t { u32 m[3]; };
+        IntStretchCopy<u96_t>(pDestImage, nWidth, nHeight);
+      }
       break;
 
     case 16: // 32 depth 4 channel
-      IntStretchCopyMulti<u32>(pDestImage, nWidth, nHeight, 4);
+      {
+        struct u128_t { u64 m[2]; };
+        IntStretchCopy<u128_t>(pDestImage, nWidth, nHeight);
+      }
       break;
 
     default:
@@ -699,12 +714,14 @@ namespace clstd
 
     for (int x = 0; x < nWidth; x++) {
       aLine[x] = (int)floor(fx + 0.5f);
+      aLine[x] = aLine[x] < m_width ? aLine[x] : m_width - 1;
       fx += fStrideH;
     }
 
     for (int y = 0; y < nHeight; y++)
     {
-      const _Ty* pSrcData = (const _Ty*)GetLine((int)floor(fy + 0.5f));
+      int src_y = (int)floor(fy + 0.5f);
+      const _Ty* pSrcData = (const _Ty*)GetLine(src_y < m_height ? src_y : m_height - 1);
       _Ty* pDestData = (_Ty*)pDestImage->GetLine(y);
       for (int x = 0; x < nWidth; x++)
       {
@@ -716,35 +733,35 @@ namespace clstd
     SAFE_DELETE_ARRAY(aLine);
   }
 
-  template<typename _Ty>
-  void Image::IntStretchCopyMulti(Image* pDestImage, int nWidth, int nHeight, int nCount)
-  {
-    int* aLine = new int[nWidth];
-    const float fStrideH = (float)m_width / (float)nWidth;
-    //const float fStrideV = (float)m_height / (float)nHeight;
-    float fx = 0;
-    float fy = 0;
+  //template<typename _Ty>
+  //void Image::IntStretchCopyMulti(Image* pDestImage, int nWidth, int nHeight, int nCount)
+  //{
+  //  int* aLine = new int[nWidth];
+  //  const float fStrideH = (float)m_width / (float)nWidth;
+  //  //const float fStrideV = (float)m_height / (float)nHeight;
+  //  float fx = 0;
+  //  float fy = 0;
 
-    for (int x = 0; x < nWidth; x++) {
-      aLine[x] = (int)floor(fx + 0.5f);
-      fx += fStrideH;
-    }
+  //  for (int x = 0; x < nWidth; x++) {
+  //    aLine[x] = (int)floor(fx + 0.5f);
+  //    fx += fStrideH;
+  //  }
 
-    for (int y = 0; y < nHeight; y++)
-    {
-      const _Ty* pSrcData = (const _Ty*)GetLine((int)floor(fy + 0.5f));
-      _Ty* pDestData = (_Ty*)pDestImage->GetLine(y);
-      for (int x = 0; x < nWidth; x++)
-      {
-        for (int i = 0; i < nCount; i++)
-        {
-          *pDestData = pSrcData[aLine[x] + i];
-          pDestData++;
-        }
-      }
-    }
-    SAFE_DELETE_ARRAY(aLine);
-  }
+  //  for (int y = 0; y < nHeight; y++)
+  //  {
+  //    const _Ty* pSrcData = (const _Ty*)GetLine((int)floor(fy + 0.5f));
+  //    _Ty* pDestData = (_Ty*)pDestImage->GetLine(y);
+  //    for (int x = 0; x < nWidth; x++)
+  //    {
+  //      for (int i = 0; i < nCount; i++)
+  //      {
+  //        *pDestData = pSrcData[aLine[x]] + i;
+  //        pDestData++;
+  //      }
+  //    }
+  //  }
+  //  SAFE_DELETE_ARRAY(aLine);
+  //}
 
   const char* Image::GetFormat() const
   {

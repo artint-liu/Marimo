@@ -72,7 +72,7 @@ namespace clstd
   public:
     Image& operator=(const Image& image);
     b32         CompareFormat       (const char* fmt) const;
-    b32         Set                 (int nWidth, int nHeight, const char* fmt, const void* pData);
+    b32         Set                 (int nWidth, int nHeight, const char* fmt, const void* pData = NULL);
     b32         Set                 (int nWidth, int nHeight, const char* fmt, int nChannelDepth, const void* pData = NULL, int nPitch = 0);
     int         GetWidth            () const;
     int         GetHeight           () const;
@@ -118,7 +118,7 @@ namespace clstd
     }
 
     template<class _TPixel, class _TFunc>
-    b32 ForEachPixelXY(_TFunc fn)
+    b32 ForEachPixelXY(_TFunc fn) // fu(int x, int y, _TPixel& p)
     {
       // 如果提供的像素格式与实际长度不符，返回FALSE
       if (sizeof(_TPixel) != (m_channel * m_depth / 8)) {
@@ -144,8 +144,8 @@ namespace clstd
     template<typename _Ty>
     void IntStretchCopy( Image* pDestImage, int nWidth, int nHeight );
 
-    template<typename _Ty>
-    void IntStretchCopyMulti( Image* pDestImage, int nWidth, int nHeight, int nCount );
+    //template<typename _Ty>
+    //void IntStretchCopyMulti( Image* pDestImage, int nWidth, int nHeight, int nCount );
 
     template<typename _TDstPixel, typename _TSrcPixel, typename _TChannel>
     void ChangePixel(int* aMapTab, int nNewChannel, CLBYTE* pDestData, int nNewPitch) const;

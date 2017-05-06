@@ -32,6 +32,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd", "..\..\projects\vs2
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample_Sockets", "Sample_Sockets.vcxproj", "{34E3F61B-9B2E-413D-B875-740FFD82AAE8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample_Image", "Sample_Image.vcxproj", "{30C8914F-D814-4534-93C8-F103AD2FFC5A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6} = {C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -84,6 +89,14 @@ Global
 		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Release|Win32.ActiveCfg = Release|Win32
 		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Release|Win32.Build.0 = Release|Win32
 		{34E3F61B-9B2E-413D-B875-740FFD82AAE8}.Release|x64.ActiveCfg = Release|Win32
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Debug|Win32.Build.0 = Debug|Win32
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Debug|x64.ActiveCfg = Debug|x64
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Debug|x64.Build.0 = Debug|x64
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Release|Win32.ActiveCfg = Release|Win32
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Release|Win32.Build.0 = Release|Win32
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Release|x64.ActiveCfg = Release|x64
+		{30C8914F-D814-4534-93C8-F103AD2FFC5A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
