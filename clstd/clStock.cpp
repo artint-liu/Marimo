@@ -822,9 +822,9 @@ namespace clstd
   }
 
   _SSP_TEMPL
-    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, float val)
+    b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, float val, char mode = 'F')
   {
-    _TStr str(val);
+    _TStr str(val, mode);
     return ComparedSetKey(szKey, str);
   }
 

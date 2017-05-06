@@ -72,10 +72,10 @@ namespace clstd
       _TStr&  ToString    (_TStr& str, T_LPCSTR szDefault = NULL) const;
 
       template<class _TFn>
-      void ToArray(_TFn fn, TChar ch = TChar(',')) const // void fn(size_t index, const TChar* begin, size_t length)
+      size_t ToArray(_TFn fn, TChar ch = TChar(',')) const // void fn(size_t index, const TChar* begin, size_t length)
       {
         _TStr strValue;
-        StringUtility::Resolve(ToString(strValue), ch, fn);
+        return StringUtility::Resolve(ToString(strValue), ch, fn);
       }
       //void    SetValue    (T_LPCSTR str);
 
@@ -162,7 +162,7 @@ namespace clstd
       b32       ComparedSetKey      (T_LPCSTR szKey, int val);
       b32       ComparedSetKey      (T_LPCSTR szKey, u32 val);
       b32       ComparedSetKey      (T_LPCSTR szKey, u64 val);
-      b32       ComparedSetKey      (T_LPCSTR szKey, float val);
+      b32       ComparedSetKey      (T_LPCSTR szKey, float val, char mode = 'F'); // F/E/R 模式，参考clString
       b32       ComparedSetKey      (T_LPCSTR szKey, b32 bValue, T_LPCSTR szTrue, T_LPCSTR szFalse);
 
       b32       DeleteKey           (T_LPCSTR szKey);
