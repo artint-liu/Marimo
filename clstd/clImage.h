@@ -93,10 +93,13 @@ namespace clstd
     b32         GetChannelPlane     (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
     b32         ReplaceChannel      (char chReplacedChannel, const Image* pSource, char chSrcChannel); // 从一个图像拷贝通道，如果指定的通道在源图像中不存在，会失败。
     b32         ScaleNearest        (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
+    b32         ScaleFastLinear     (Image* pDestImage, int nWidth, int nHeight); // 快速线性插值，从原始图像的相邻像素进行插值得出新像素
     const char* GetFormat           () const;
     b32         SetFormat           (const char* fmt); // 更改通道顺序或者删除通道
     ImageColorSpace GetColorSpace   () const;
     b32         SetColorSpace       (ImageColorSpace eSpace);
+
+    // 备注: 不应该有Resize接口，使用ScaleXXX或者Inflate接口实现了两种Resize功能
 
     // ForEachPixel 目的是为了开发时快速验证算法，不保证效率，在实际产品中不建议使用这个方法
     template<class _TPixel, class _TFunc>
@@ -144,6 +147,9 @@ namespace clstd
     template<typename _Ty>
     void IntStretchCopy( Image* pDestImage, int nWidth, int nHeight );
 
+    template<typename _TChannel, int _channel, int _shift>
+    void IntFastLinearScaling(Image* pDestImage, int nWidth, int nHeight);
+
     //template<typename _Ty>
     //void IntStretchCopyMulti( Image* pDestImage, int nWidth, int nHeight, int nCount );
 
@@ -170,7 +176,7 @@ namespace clstd
 
 
   public:
-    static void BlockTransfer(IMAGEDESC* pDest, int x, int y, int nCopyWidth, int nCopyHeight, const IMAGEDESC* pSrc);
+    //static void BlockTransfer(IMAGEDESC* pDest, int x, int y, int nCopyWidth, int nCopyHeight, const IMAGEDESC* pSrc);
   };
 
   //

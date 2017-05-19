@@ -114,7 +114,12 @@ void OnPaint(HWND hWnd, HDC hdc)
   GetClientRect(hWnd, &rcClient);
 
   DrawTextA(hdc, (char*)HexBuffer.GetPtr(), HexBuffer.GetSize(), &rcText, DT_LEFT | DT_TOP | DT_CALCRECT);
-  nNumOfBlocks = rcClient.bottom / (rcText.bottom / nNumOfBlocks);
+  if(rcText.bottom / nNumOfBlocks == 0) {
+    nNumOfBlocks = 1;
+  }
+  else {
+    nNumOfBlocks = rcClient.bottom / (rcText.bottom / nNumOfBlocks);
+  }
   ReadBuffer(nNumOfBlocks);
 
   DrawTextA(hdc, (char*)HexBuffer.GetPtr(), HexBuffer.GetSize(), &rcClient, DT_LEFT | DT_TOP);

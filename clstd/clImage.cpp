@@ -227,11 +227,13 @@ namespace clstd
       m_ptr = new u8[GetDataSize()];
     }
 
-    if (pData) {
-      memcpy(m_ptr, pData, GetDataSize());
-    }
-    else {
+    // pData == -1     不初始化内存数据
+    // pData == NULL   初始化内存为0
+    // pData == [else] 拷贝pData数据
+    if( ! pData) {
       memset(m_ptr, 0, GetDataSize());
+    } else if (pData != (const void*)-1) {
+      memcpy(m_ptr, pData, GetDataSize());
     }
     return true;
   }
@@ -264,11 +266,13 @@ namespace clstd
       m_format.code = fmtcode;
     }
 
-    if (pData) {
-      memcpy(m_ptr, pData, GetDataSize());
-    }
-    else {
+    // pData == -1     不初始化内存数据
+    // pData == NULL   初始化内存为0
+    // pData == [else] 拷贝pData数据
+    if( ! pData) {
       memset(m_ptr, 0, GetDataSize());
+    } else if (pData != (const void*)-1) {
+      memcpy(m_ptr, pData, GetDataSize());
     }
     return true;
 
@@ -594,7 +598,7 @@ namespace clstd
 
   b32 Image::ScaleNearest(Image* pDestImage, int nWidth, int nHeight)
   {
-    if (!pDestImage->Set(nWidth, nHeight, (const char*)m_format.name, m_depth, NULL, 0)) {
+    if( ! pDestImage->Set(nWidth, nHeight, (const char*)m_format.name, m_depth, (const void*)-1, 0)) {
       return FALSE;
     }
 
@@ -659,10 +663,171 @@ namespace clstd
   }
 
   //////////////////////////////////////////////////////////////////////////
-  void Image::BlockTransfer(IMAGEDESC* pDest, int x, int y, int nCopyWidth, int nCopyHeight, const IMAGEDESC* pSrc)
+
+  template<typename _TChannel, int _channel, int _shift>
+  void Image::IntFastLinearScaling(Image* pDestImage, int nWidth, int nHeight)
   {
-    CLBREAK;
+    typedef i32 t32;
+    const t32 _max = (1 << _shift);
+    const t32 _mask = _max - 1;
+
+    t32* aLine = new t32[nWidth];
+    const t32 stride_fix_x = (m_width << _shift) / nWidth;
+    const t32 stride_fix_y = (m_height << _shift) / nHeight;
+    t32 fix_x = m_width > nWidth ? (1 << (_shift - 1)) : -(1 << (_shift - 1));
+    t32 fix_y = m_height > nHeight ? (1 << (_shift - 1)) : -(1 << (_shift - 1));
+    const _TChannel* pSrcLast = (const _TChannel*)GetLine(m_height - 1);
+
+    struct PIXEL_T { _TChannel m[_channel]; };
+
+
+    for (int w = 0; w < nWidth; w++) {
+      aLine[w] = clClamp(t32(0), (t32)(m_width - 1) << _shift, fix_x);
+      fix_x += stride_fix_x;
+    }
+
+    int y = 0;
+    for (; y < nHeight; y++)
+    {
+      if ((fix_y >> _shift) >= (t32)(m_height - 1)) {
+        break;
+      }
+      //const PIXEL_T* pSrcData = (const PIXEL_T*)GetLine(clMax(0, fix_y >> _shift));
+      const PIXEL_T* pSrcData = (const PIXEL_T*)GetLine(clMax(0, fix_y >> _shift));
+      const PIXEL_T* pSrcData2 = (const PIXEL_T*)((size_t)pSrcData + m_pitch);
+      _TChannel* pDestData = (_TChannel*)pDestImage->GetLine(y);
+      int x = 0;
+      for (; x < nWidth; x++)
+      {
+        const t32 mh = aLine[x];
+        const t32 xi = (mh >> _shift);
+        if (xi + 1 > t32(m_width - 1)) {
+          break;
+        }
+        const t32 xf = mh & _mask;
+        const t32 yf = fix_y & _mask;
+        const PIXEL_T& a = pSrcData[xi];
+        const PIXEL_T& b = (&a)[1];//pSrcData[xi + 1];
+        const PIXEL_T& c = pSrcData2[xi];
+        const PIXEL_T& d = (&c)[1];//pSrcData2[xi + 1];
+
+        for(int i = 0; i < _channel; i++) {
+          *pDestData++ = (
+            ((a.m[i] * (_max - xf) + b.m[i] * xf) >> _shift) * (_max - yf) +
+            ((c.m[i] * (_max - xf) + d.m[i] * xf) >> _shift) * yf) >> _shift;
+        }
+        //pDestData->g = (((a.g * (255 - xf) + b.g * xf) >> 8) * (255 - yf) + ((c.g * (255 - xf) + d.g * xf) >> 8) * yf) >> 8;
+        //pDestData->b = (((a.b * (255 - xf) + b.b * xf) >> 8) * (255 - yf) + ((c.b * (255 - xf) + d.b * xf) >> 8) * yf) >> 8;
+        //pDestData++;
+      }
+
+      // 最后一列
+      for (; x < nWidth; x++)
+      {
+        const t32 mh = aLine[x];
+        const t32 xi = (mh >> _shift);
+        const t32 yf = fix_y & _mask;
+        const PIXEL_T& a = pSrcData[xi];
+        const PIXEL_T& c = pSrcData2[xi];
+
+        for (int i = 0; i < _channel; i++) {
+          // 16位颜色这里会有溢出变为负值，但是看起来被截断后似乎也没什么问题
+          *pDestData++ = (a.m[i] * (_max - yf) + c.m[i] * yf) >> _shift;
+        }
+        //pDestData->g = (a.g * (255 - yf) + c.g * yf) >> 8;
+        //pDestData->b = (a.b * (255 - yf) + c.b * yf) >> 8;
+        //pDestData++;
+      }
+
+      fix_y += stride_fix_y;
+    }
+
+    // 最后一行
+    for (; y < nHeight; y++)
+    {
+      const PIXEL_T* pSrcData = (const PIXEL_T*)GetLine(m_height - 1);
+      _TChannel* pDestData = (_TChannel*)pDestImage->GetLine(y);
+      for (int x = 0; x < nWidth; x++)
+      {
+        const t32 mh = aLine[x];
+        const t32 xf = mh & _mask;
+        const t32 xi = (mh >> _shift);
+        //const i32 yf = fix_y & 0xff;
+        const PIXEL_T& a = pSrcData[xi];
+        const PIXEL_T& b = xi == m_width - 1 ? a : (&a)[1];
+
+        for (int i = 0; i < _channel; i++) {
+          *pDestData++ = (a.m[i] * (_max - xf) + b.m[i] * xf) >> _shift;
+        }
+        //pDestData->g = (a.g * (255 - xf) + b.g * xf) >> 8;
+        //pDestData->b = (a.b * (255 - xf) + b.b * xf) >> 8;
+        //pDestData++;
+      }
+    }
+
+    SAFE_DELETE_ARRAY(aLine);
   }
+
+  b32 Image::ScaleFastLinear(Image* pDestImage, int nWidth, int nHeight)
+  {
+    if(m_width == nWidth && m_height == nHeight) {
+      *pDestImage = *this;
+    }
+    else if( ! pDestImage->Set(nWidth, nHeight, (const char*)m_format.name, m_depth, (const void*)-1, 0)) {
+      return FALSE;
+    }
+
+    switch (m_depth)
+    {
+    case 8:
+      if (m_channel == 1) {
+        IntFastLinearScaling<u8, 1, 8>(pDestImage, nWidth, nHeight);
+      }
+      else if (m_channel == 2) {
+        IntFastLinearScaling<u8, 2, 8>(pDestImage, nWidth, nHeight);
+      }
+      else if(m_channel == 3) {
+        IntFastLinearScaling<u8, 3, 8>(pDestImage, nWidth, nHeight);
+      }
+      else if(m_channel == 4) {
+        IntFastLinearScaling<u8, 4, 8>(pDestImage, nWidth, nHeight);
+      }
+      else {
+        CLBREAK;
+      }
+      break;
+    case 16:
+      if (m_channel == 1) {
+        IntFastLinearScaling<u16, 1, 16>(pDestImage, nWidth, nHeight);
+      }
+      else if (m_channel == 2) {
+        IntFastLinearScaling<u16, 2, 16>(pDestImage, nWidth, nHeight);
+      }
+      else if (m_channel == 3) {
+        IntFastLinearScaling<u16, 3, 16>(pDestImage, nWidth, nHeight);
+      }
+      else if (m_channel == 4) {
+        IntFastLinearScaling<u16, 4, 16>(pDestImage, nWidth, nHeight);
+      }
+      else {
+        CLBREAK;
+      }
+      break;
+    case 32: // TODO: 没想好这个应改为32位整数还是32位浮点数呢
+      CLBREAK;
+      break;
+    default:
+      CLBREAK;
+    }
+
+    return TRUE;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  //void Image::BlockTransfer(IMAGEDESC* pDest, int x, int y, int nCopyWidth, int nCopyHeight, const IMAGEDESC* pSrc)
+  //{
+  //  CLBREAK;
+  //}
 
   //template<typename _Ty>
   //void Image::IntCopyChannel(Image* pDestImage, int nOffset, const int nPixelSize)
@@ -707,28 +872,42 @@ namespace clstd
   void Image::IntStretchCopy(Image* pDestImage, int nWidth, int nHeight)
   {
     int* aLine = new int[nWidth];
-    const float fStrideH = (float)m_width / (float)nWidth;
-    const float fStrideV = (float)m_height / (float)nHeight;
-    float fx = 0;
-    float fy = 0;
+    int delta = 0;
+    int step = 0;
+    //const float fStrideH = (float)m_width / (float)nWidth;
+    //const float fStrideV = (float)m_height / (float)nHeight;
+    //float fx = 0;
+    //float fy = 0;
 
-    for (int x = 0; x < nWidth; x++) {
-      aLine[x] = (int)floor(fx + 0.5f);
-      aLine[x] = aLine[x] < m_width ? aLine[x] : m_width - 1;
-      fx += fStrideH;
+    for (int x = 0; x < nWidth; x++) {      
+      ASSERT(step < m_width); // 如果断言在这里，就限制一下
+      aLine[x] = step;
+      delta += m_width;
+      while(delta >= nWidth) {
+        step++;
+        delta -= nWidth;
+      }
     }
 
+    delta = 0;
+    step = 0;
     for (int y = 0; y < nHeight; y++)
     {
-      int src_y = (int)floor(fy + 0.5f);
-      const _Ty* pSrcData = (const _Ty*)GetLine(src_y < m_height ? src_y : m_height - 1);
+      //int src_y = (int)floor(fy + 0.5f);
+      const _Ty* pSrcData = (const _Ty*)GetLine(step < m_height ? step : m_height - 1);
       _Ty* pDestData = (_Ty*)pDestImage->GetLine(y);
       for (int x = 0; x < nWidth; x++)
       {
         *pDestData = pSrcData[aLine[x]];
         pDestData++;
       }
-      fy += fStrideV;
+      //fy += fStrideV;
+      delta += m_height;
+      while (delta >= nHeight)
+      {
+        step++;
+        delta -= nHeight;
+      }
     }
     SAFE_DELETE_ARRAY(aLine);
   }
