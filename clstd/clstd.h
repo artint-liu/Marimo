@@ -358,6 +358,9 @@ extern "C" void _cl_traceW(const wch *fmt, ...);
 #define clrand    rand
 #define clrand_s  rand_s
 
+#define clmemcpy  memcpy
+#define clmemmove memmove
+
 //
 // Byte Order Mark
 //

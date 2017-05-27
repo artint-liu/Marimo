@@ -254,6 +254,23 @@ void TestStringToFloat()
 
 }
 
+void TestFormatString()
+{
+  clStringA str;
+  char buffer[1024];
+
+
+  {
+    sprintf(buffer, "%+d %+.f %+u %+x %+d %+.f", 12, 12.0, 12, 0x12, 0, 0.0);
+    CLOG("   sprintf:%s", buffer);
+
+    str.Format("%+d %+.f %+u %+x %+d %+.f", 12, 12.0, 12, 0x12, 0, 0.0);
+    CLOG("str format:%s", str);
+
+    ASSERT(str == buffer);
+  }
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   setlocale(LC_ALL, "");
@@ -267,6 +284,7 @@ int _tmain(int argc, _TCHAR* argv[])
   TestStringResolve();
   TestCodec();
   TestStringToFloat();
+  TestFormatString();
 
 	return 0;
 }

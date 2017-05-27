@@ -1185,7 +1185,7 @@ namespace clstd
     }
     else
     {
-      memcpy(m_pBuf + idx + 1, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
+      clmemmove(m_pBuf + idx + 1, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
       m_pBuf[idx] = cCh;
     }
     return uStrLength + 1;
@@ -1202,7 +1202,7 @@ namespace clstd
     }
     else
     {
-      memcpy(m_pBuf + idx + count, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
+      clmemmove(m_pBuf + idx + count, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
 
       for(size_t i = 0; i < count; i++) {
         m_pBuf[i] = cCh;
@@ -1223,7 +1223,7 @@ namespace clstd
     }
     else
     {
-      memcpy(m_pBuf + idx + uInputLength, m_pBuf + idx, 
+      clmemmove(m_pBuf + idx + uInputLength, m_pBuf + idx,
         (uStrLength - idx + 1) * sizeof(_TCh));
       _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
     }
@@ -1696,7 +1696,7 @@ namespace clstd
     }
 
     if(uStrLength - idx - uCount != 0 && uInputLength != uCount)
-      memcpy(m_pBuf + idx + uInputLength, 
+      clmemmove(m_pBuf + idx + uInputLength,
       m_pBuf + idx + uCount, (uStrLength - idx - uCount) * sizeof(_TCh));
 
     if(uCount > uInputLength)
@@ -1882,6 +1882,8 @@ namespace clstd
     const _TCh* ptr = pFmt;
     _TCh        buffer[MAX_DIGITS];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于16
     int         i;
+    _TCh        _sign = 0; // '+'
+
 
     while (*ptr != '\0')
     {
@@ -1898,6 +1900,7 @@ namespace clstd
         b32 bZeroPrefix = FALSE;
         Append(ptr, ptr2 - ptr);
         ptr = ptr2 + 1;
+        _sign = 0;
 SEQUENCE:
         switch(*ptr)
         {
@@ -1922,13 +1925,24 @@ SEQUENCE:
 
         case 'd':
           if(nLong == 2) {
-            _Traits::Integer64ToString(buffer, MAX_DIGITS, va_arg(arglist, i64), 0);
+            i64 va_value = va_arg(arglist, i64);
+            _Traits::Integer64ToString(buffer, MAX_DIGITS, va_value, 0);
+
+            if(_sign == '+' && va_value >= 0) {
+              Append(_sign);
+            }
           }
           else {
-            _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int), 0);
+            int val = va_arg(arglist, int);
+            _Traits::Integer32ToString(buffer, MAX_DIGITS, val, 0);
+            
+            if(_sign == '+' && val >= 0) {
+              Append(_sign);
+            }
           }
           Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
           break;
+
         case 'u':
           if(nLong == 2) {
             _Traits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
@@ -1938,12 +1952,17 @@ SEQUENCE:
           }
           Append(buffer);
           break;
+
         case 'f':
-          //_gcvt_s(buffer, 16, va_arg(arglist, double), 5);
-          //swprintf_s(buffer, MAX_DIGITS, L"%f", va_arg(arglist, double));
-          _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
+        {
+          double va_value = va_arg(arglist, double);
+          _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
+          if(_sign == '+' && va_value >= 0) {
+            Append(_sign);
+          }
           Append(buffer);
           break;
+        }
 
         case 'o':
           _Traits::OctalToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
@@ -1985,6 +2004,11 @@ SEQUENCE:
           ptr++;
           goto SEQUENCE;
 
+        case '+':
+          _sign = *ptr;
+          ptr++;
+          goto SEQUENCE;
+
         case '.':  // "%.3f"
           i = 0;
           while(1)
@@ -1998,27 +2022,20 @@ SEQUENCE:
             {
               buffer[i] = '\0';
               nWidth = _Traits::StringToInteger32(buffer);
+              double va_value = va_arg(arglist, double);
 
-              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_arg(arglist, double), 'F');
+              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
               const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
               if(pDot != NULL) {
                 int nn = nWidth;
-                while(*++pDot != '\0' && nn--)        ; // 没错，就是分号！
+                while(nn-- && *++pDot != '\0'); // 没错，就是分号！
                 *(_TCh*)pDot = '\0';
-              }            
-              Append(buffer);
+              }
 
-              //size_t nPos = ReverseFind('.');
-              //if(nPos != npos)
-              //{
-              //  nPos = GetLength() - nPos - 1;
-              //  if(nPos < sizeof(buffer))
-              //  {
-              //    nLen -= (int)nPos;
-              //    if(nLen > 0)
-              //      Append('\0', nLen);
-              //  }
-              //}
+              if(_sign == '+' && va_value >= 0.0) {
+                Append(_sign);
+              }
+              Append(buffer);
               break;
             }
             else
@@ -2043,27 +2060,13 @@ SEQUENCE:
                 nWidth = _Traits::StringToInteger32(buffer);
                 goto SEQUENCE;
               }
-              //else if(*ptr == 'd' || i >= sizeof(buffer))
-              //{
-              //  buffer[i] = '\0';
-              //  int nLen = _Traits::StringToInteger32(buffer);
-
-              //  //_itow_s(va_arg(arglist, int), buffer, MAX_DIGITS, 10);
-              //  _Traits::Integer32ToString(buffer, MAX_DIGITS, va_arg(arglist, int));
-
-              //  nLen -= (int)_Traits::StringLength(buffer);
-              //  if(nLen > 0)
-              //    Append('0', nLen);
-
-              //  operator+=(buffer);
-              //  break;
-              //}
               else
                 break;
               ptr++;
             }
-          }
-        }
+          } // if
+          break;
+        } // switch
       }
       ptr++;
     }
