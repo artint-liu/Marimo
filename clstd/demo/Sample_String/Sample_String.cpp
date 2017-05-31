@@ -259,16 +259,62 @@ void TestFormatString()
   clStringA str;
   char buffer[1024];
 
+  const ch* fmt_flags[] = {
+    "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
+  };
+  const ch* fmt_width[] = {
+    "5", "8",
+  };
+  const ch* fmt_specifier[] = {
+    "d", "i", "u", "o", "x", "X",
+  };
 
+  const int samp_int[] = {
+    0, 3, 12, 125, 1234, 13456, 237643, -3, -12, -125, -1234, -13456, -237643
+  };
+
+  int index = 0;
+  for(int f = 0; f < countof(fmt_flags); f++)
   {
-    sprintf(buffer, "%+d %+.f %+u %+x %+d %+.f", 12, 12.0, 12, 0x12, 0, 0.0);
-    CLOG("   sprintf:%s", buffer);
+    for(int w = 0; w < countof(fmt_width); w++)
+    {
+      for(int s = 0; s < countof(fmt_specifier); s++)
+      {
+        for(int i = 0; i < countof(samp_int); i++)
+        {
+          clStringA format_str;
+          format_str.Reserve(20);
+          format_str.Append('%');
+          format_str.Append(fmt_flags[f]);
+          format_str.Append(fmt_width[w]);
+          format_str.Append(fmt_specifier[s]);
 
-    str.Format("%+d %+.f %+u %+x %+d %+.f", 12, 12.0, 12, 0x12, 0, 0.0);
-    CLOG("str format:%s", str);
+          // >>>>>>>>>>> Debug
+          if(index == 0)
+          {
+            CLNOP
+          }
+          // <<<<<<<<<<< Debug
 
-    ASSERT(str == buffer);
+          sprintf(buffer, format_str, samp_int[i]);
+          str.Format(format_str, samp_int[i]);
+
+          CLOG("[sprintf]:\"%s\"", buffer);
+          CLOG("[ string]:\"%s\"", str);
+          if(str == buffer) {
+            CLOG("[%d]%s <match>\n", index, format_str);
+          }
+          else {
+            CLOG_WARNING("[%d]%s !NOT match!\n", index, format_str);
+            CLBREAK;
+          }
+
+          index++;
+        }
+      }
+    }
   }
+
 }
 
 int _tmain(int argc, _TCHAR* argv[])

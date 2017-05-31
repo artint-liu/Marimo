@@ -1882,7 +1882,6 @@ namespace clstd
     const _TCh* ptr = pFmt;
     _TCh        buffer[MAX_DIGITS];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于16
     int         i;
-    _TCh        _sign = 0; // '+'
 
 
     while (*ptr != '\0')
@@ -1897,10 +1896,13 @@ namespace clstd
       {
         int nWidth = 0;
         int nLong = 0;
-        b32 bZeroPrefix = FALSE;
+        b32 bLeftAlign = FALSE;  // '-' 左对齐
+        b32 bZeroPrefix = FALSE; // '0' 不足位用0填充, 比'-'优先级低
+        b32 bForceSign = FALSE;  // '+' 强制显示符号
+        b32 bSpace = FALSE;      // ' ' 符号位占位，与'+'同时出现时比'+'优先级低
+        b32 bPound = FALSE;      // '#' 显示八进制或者十六进制前缀
         Append(ptr, ptr2 - ptr);
         ptr = ptr2 + 1;
-        _sign = 0;
 SEQUENCE:
         switch(*ptr)
         {
@@ -1924,23 +1926,56 @@ SEQUENCE:
           break;
 
         case 'd':
+        case 'i':
           if(nLong == 2) {
             i64 va_value = va_arg(arglist, i64);
-            _Traits::Integer64ToString(buffer, MAX_DIGITS, va_value, 0);
 
-            if(_sign == '+' && va_value >= 0) {
-              Append(_sign);
+            if(va_value >= 0 && bForceSign) {
+              buffer[0] = '+';
+              _Traits::Integer64ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
             }
+            else if(va_value >= 0 && bSpace) {
+              buffer[0] = 0x20;
+              _Traits::Integer64ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+            }
+            else {
+              _Traits::Integer64ToString(buffer, MAX_DIGITS, va_value, 0);
+            }
+
           }
           else {
-            int val = va_arg(arglist, int);
-            _Traits::Integer32ToString(buffer, MAX_DIGITS, val, 0);
+            int va_value = va_arg(arglist, int);
             
-            if(_sign == '+' && val >= 0) {
-              Append(_sign);
+            if(va_value >= 0 && bForceSign) {
+              buffer[0] = '+';
+              _Traits::Integer32ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+            }
+            else if(va_value >= 0 && bSpace) {
+              buffer[0] = 0x20;
+              _Traits::Integer32ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+            }
+            else {
+              _Traits::Integer32ToString(buffer, MAX_DIGITS, va_value, 0);
             }
           }
-          Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+
+          ASSERT(buffer[0] == '+' || buffer[0] == '-' || buffer[0] == 0x20 || 
+            (buffer[0] >= '0' && buffer[0] <= '9') );
+
+          if(bZeroPrefix && nWidth > 0)
+          {
+            if(buffer[0] == '+' || buffer[0] == '-' || buffer[0] == 0x20) {
+              Append(buffer[0]);
+              Append(buffer + 1, '0', nWidth -1);
+            }
+            else {
+              Append(buffer, '0', nWidth);
+            }
+          }
+          else
+          {
+            Append(buffer, ' ', nWidth);
+          }
           break;
 
         case 'u':
@@ -1950,49 +1985,97 @@ SEQUENCE:
           else {
             _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
           }
-          Append(buffer);
+          //Append(buffer);
+          Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
           break;
 
         case 'f':
         {
           double va_value = va_arg(arglist, double);
-          _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
-          if(_sign == '+' && va_value >= 0) {
-            Append(_sign);
+          if(bForceSign && va_value >= 0) {
+            buffer[0] = '+';
+            _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
+          } else {
+            _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
           }
           Append(buffer);
           break;
         }
 
         case 'o':
-          _Traits::OctalToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
-          Append(buffer);
+        {
+          unsigned long va_value = va_arg(arglist, unsigned long);
+          if(bPound && va_value) {
+            buffer[0] = '0'; // 进制前缀
+            _Traits::OctalToString(buffer + 1, MAX_DIGITS - 1, va_value);
+          }
+          else {
+            _Traits::OctalToString(buffer, MAX_DIGITS, va_value);
+          }
+          Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
           break;
+        }
 
         case 'b':
           _Traits::BinaryToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
-          Append(buffer);
+          Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
           break;
 
         case 'X':
-          _Traits::HexToUpperString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
-
-          nWidth -= (int)_Traits::StringLength(buffer);
-          if(nWidth > 0)
-            Append('0', nWidth);
-
-          Append(buffer);
-          break;
-
         case 'x':
-          _Traits::HexToLowerString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
+        {
+          unsigned long va_value = va_arg(arglist, unsigned long);          
 
-          nWidth -= (int)_Traits::StringLength(buffer);
-          if(nWidth > 0)
-            Append('0', nWidth);
+          if(va_value)
+          {            
+            buffer[0] = '0'; buffer[1] = *ptr;
+            if(*ptr == 'X') {
+              _Traits::HexToUpperString(buffer + 2, MAX_DIGITS - 2, va_value);
+            }
+            else {
+              _Traits::HexToLowerString(buffer + 2, MAX_DIGITS - 2, va_value);
+            }
 
-          Append(buffer);
+            if(bPound && bZeroPrefix)
+            {
+              Append(buffer, 2);
+
+              // 因为前面加了前缀，如果设定了宽度，这里要把宽度缩短两个字符
+              if(nWidth > 2) {
+                Append(buffer + 2, '0', nWidth - 2);
+              }
+              else if(nWidth < -2) {
+                Append(buffer + 2, 0x20, nWidth + 2);
+              }
+              else {
+                Append(buffer + 2);
+              }
+            }
+            else if(bPound)
+            {
+              Append(buffer, 0x20, nWidth);
+            }
+            else if(bZeroPrefix)
+            {
+              Append(buffer + 2, (nWidth > 0 ? '0' : 0x20), nWidth);
+            }
+            else {
+              Append(buffer + 2, 0x20, nWidth);
+            }
+          }
+          else
+          {
+            // 忽略 bZeroPerfix
+            if(nWidth) {
+              buffer[0] = '0'; buffer[1] = '\0';
+              Append(buffer, (bZeroPrefix && nWidth > 0 ? '0' : 0x20), nWidth);
+            }
+            else {
+              Append('0', nWidth < 0 ? -nWidth : nWidth); // abs(nWidth)
+            }
+          }
           break;
+        }
 
         case '*':
           nWidth = (int)va_arg(arglist, int);
@@ -2005,7 +2088,22 @@ SEQUENCE:
           goto SEQUENCE;
 
         case '+':
-          _sign = *ptr;
+          bForceSign = TRUE;
+          ptr++;
+          goto SEQUENCE;
+
+        case '-':
+          bLeftAlign = TRUE;
+          ptr++;
+          goto SEQUENCE;
+
+        case '#':
+          bPound = TRUE;
+          ptr++;
+          goto SEQUENCE;
+
+        case 0x20: // space
+          bSpace = TRUE;
           ptr++;
           goto SEQUENCE;
 
@@ -2024,7 +2122,12 @@ SEQUENCE:
               nWidth = _Traits::StringToInteger32(buffer);
               double va_value = va_arg(arglist, double);
 
-              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
+              if(bForceSign && va_value >= 0.0) {
+                buffer[0] = '+';
+                _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
+              } else {
+                _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
+              }
               const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
               if(pDot != NULL) {
                 int nn = nWidth;
@@ -2032,9 +2135,6 @@ SEQUENCE:
                 *(_TCh*)pDot = '\0';
               }
 
-              if(_sign == '+' && va_value >= 0.0) {
-                Append(_sign);
-              }
               Append(buffer);
               break;
             }
@@ -2054,10 +2154,15 @@ SEQUENCE:
                 goto FUNC_RET;
               else if(i >= sizeof(buffer))
                 break;
-              else if(*ptr == 'd' || *ptr == 'X' || *ptr == 'x')
+              else if(*ptr == 'd' || *ptr == 'i' || *ptr == 'u' || *ptr == 'o' || *ptr == 'X' || *ptr == 'x')
               {
                 buffer[i] = '\0';
                 nWidth = _Traits::StringToInteger32(buffer);
+                
+                if(bLeftAlign) {
+                  nWidth = -nWidth;
+                }
+
                 goto SEQUENCE;
               }
               else
