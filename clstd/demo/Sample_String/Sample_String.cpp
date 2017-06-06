@@ -254,33 +254,20 @@ void TestStringToFloat()
 
 }
 
-void TestFormatString()
+template<typename _Ty>
+void TestFormatStrFunc(const ch** fmt_flags, int num_flags, const ch** fmt_width, int num_width, const ch** fmt_specifier, int nem_specifier, const _Ty* samp_int, int num_int)
 {
+  int index = 0;
   clStringA str;
   char buffer[1024];
 
-  const ch* fmt_flags[] = {
-    "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
-  };
-  const ch* fmt_width[] = {
-    "5", "8",
-  };
-  const ch* fmt_specifier[] = {
-    "d", "i", "u", "o", "x", "X",
-  };
-
-  const int samp_int[] = {
-    0, 3, 12, 125, 1234, 13456, 237643, -3, -12, -125, -1234, -13456, -237643
-  };
-
-  int index = 0;
-  for(int f = 0; f < countof(fmt_flags); f++)
+  for(int f = 0; f < num_flags; f++)
   {
-    for(int w = 0; w < countof(fmt_width); w++)
+    for(int w = 0; w < num_width; w++)
     {
-      for(int s = 0; s < countof(fmt_specifier); s++)
+      for(int s = 0; s < nem_specifier; s++)
       {
-        for(int i = 0; i < countof(samp_int); i++)
+        for(int i = 0; i < num_int; i++)
         {
           clStringA format_str;
           format_str.Reserve(20);
@@ -289,18 +276,18 @@ void TestFormatString()
           format_str.Append(fmt_width[w]);
           format_str.Append(fmt_specifier[s]);
 
+          sprintf(buffer, format_str, samp_int[i]);
+          CLOG("[sprintf]:\"%s\"", buffer);
+
           // >>>>>>>>>>> Debug
-          if(index == 0)
-          {
+          if(index == 0) {
             CLNOP
           }
           // <<<<<<<<<<< Debug
 
-          sprintf(buffer, format_str, samp_int[i]);
           str.Format(format_str, samp_int[i]);
-
-          CLOG("[sprintf]:\"%s\"", buffer);
           CLOG("[ string]:\"%s\"", str);
+
           if(str == buffer) {
             CLOG("[%d]%s <match>\n", index, format_str);
           }
@@ -314,7 +301,35 @@ void TestFormatString()
       }
     }
   }
+}
 
+void TestFormatString()
+{
+  char buffer[1024];
+  sprintf(buffer, "%06.3x", 12);
+  const ch* fmt_flags[] = {
+    "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
+  };
+  const ch* fmt_width[] = {
+    "5", "8", ".5", "5.3", "4.3", "3.4", "3.5"
+  };
+  const ch* fmt_specifier[] = {
+    "d", "i", "u", "o", "x", "X",
+  };
+  const ch* fmt_specifier_float[] = {
+    "f",
+  };
+
+  const int samp_int[] = {
+    0, 3, 12, 125, 1234, 13456, 237643, -3, -12, -125, -1234, -13456, -237643
+  };
+
+  const float samp_float[] = {
+    0.0f, -0.0f, 1.0f, -1.0f, 12324.83747f, -12324.83747f
+  };
+
+  //TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier_float, countof(fmt_specifier_float), samp_float, countof(samp_float));
+  TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 }
 
 int _tmain(int argc, _TCHAR* argv[])

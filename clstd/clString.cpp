@@ -1875,6 +1875,63 @@ namespace clstd
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////
+
+  _CLSTR_TEMPL
+  void _CLSTR_IMPL::_AppendSpace(int len, int nPrefixLen, int nWidth, int nPrecision)
+  {
+    if(nWidth > nPrecision)
+    {
+      if(nPrecision > len) {
+        if(nWidth - nPrecision > nPrefixLen) {
+          Append(0x20, nWidth - nPrecision - nPrefixLen);
+        }
+      }
+      else if(nWidth > len) {
+        if(nWidth - len > nPrefixLen) {
+          Append(0x20, nWidth - len - nPrefixLen);
+        }
+      }
+    }
+  }
+
+  _CLSTR_TEMPL
+  void _CLSTR_IMPL::_AppendFormat(LPCSTR szPrefix, int nPrefixLen, LPCSTR szNumeric, int nWidth, int nPrecision)
+  {
+    int len = (int)_Traits::StringLength(szNumeric);
+    _AppendSpace(len, nPrefixLen, nWidth, nPrecision);
+    Append(szPrefix, nPrefixLen);
+    Append(szNumeric, '0', nPrecision);
+    _AppendSpace(len, nPrefixLen, -nWidth, nPrecision);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  _CLSTR_TEMPL
+  void _CLSTR_IMPL::_AppendSpace(int len, int nWidth, int nPrecision)
+  {
+    if(nWidth > nPrecision)
+    {
+      if(nPrecision > len) {
+        Append(0x20, nWidth - nPrecision);
+      }
+      else if(nWidth > len) {
+        Append(0x20, nWidth - len);
+      }
+    }
+  }
+
+  _CLSTR_TEMPL
+  void _CLSTR_IMPL::_AppendFormat(LPCSTR szNumeric, int nWidth, int nPrecision)
+  {
+    int len = (int)_Traits::StringLength(szNumeric);
+
+    _AppendSpace(len, nWidth, nPrecision);
+    Append(szNumeric, '0', nPrecision);
+    _AppendSpace(len, -nWidth, nPrecision);    
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   _CLSTR_TEMPL
     size_t _CLSTR_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
@@ -1895,12 +1952,14 @@ namespace clstd
       else
       {
         int nWidth = 0;
+        int nPrecision = 0;
         int nLong = 0;
         b32 bLeftAlign = FALSE;  // '-' 左对齐
         b32 bZeroPrefix = FALSE; // '0' 不足位用0填充, 比'-'优先级低
         b32 bForceSign = FALSE;  // '+' 强制显示符号
         b32 bSpace = FALSE;      // ' ' 符号位占位，与'+'同时出现时比'+'优先级低
         b32 bPound = FALSE;      // '#' 显示八进制或者十六进制前缀
+        b32 bPrecision = FALSE;  // 遇到'.'之后为True
         Append(ptr, ptr2 - ptr);
         ptr = ptr2 + 1;
 SEQUENCE:
@@ -1927,7 +1986,7 @@ SEQUENCE:
 
         case 'd':
         case 'i':
-          if(nLong == 2) {
+          if(nLong == 2) { // long long(64bits)
             i64 va_value = va_arg(arglist, i64);
 
             if(va_value >= 0 && bForceSign) {
@@ -1943,7 +2002,7 @@ SEQUENCE:
             }
 
           }
-          else {
+          else { // int(32bits)
             int va_value = va_arg(arglist, int);
             
             if(va_value >= 0 && bForceSign) {
@@ -1962,45 +2021,38 @@ SEQUENCE:
           ASSERT(buffer[0] == '+' || buffer[0] == '-' || buffer[0] == 0x20 || 
             (buffer[0] >= '0' && buffer[0] <= '9') );
 
-          if(bZeroPrefix && nWidth > 0)
+          if(bPrecision)
           {
+            // "%5.3d", 1 = "  001"
+            // "%3.5d", 1 = "00001"
+            // "%5.3d", -1 = " -001"
+            // "%3.5d", -1 = "-00001"
+
             if(buffer[0] == '+' || buffer[0] == '-' || buffer[0] == 0x20) {
-              Append(buffer[0]);
-              Append(buffer + 1, '0', nWidth -1);
+              _AppendFormat(buffer, 1, buffer + 1, nWidth, nPrecision);
             }
             else {
-              Append(buffer, '0', nWidth);
+              _AppendFormat(buffer, nWidth, nPrecision);
             }
           }
           else
           {
-            Append(buffer, ' ', nWidth);
+            if(bZeroPrefix && nWidth > 0)
+            {
+              if(buffer[0] == '+' || buffer[0] == '-' || buffer[0] == 0x20) {
+                Append(buffer[0]);
+                Append(buffer + 1, '0', nWidth - 1);
+              }
+              else {
+                Append(buffer, '0', nWidth);
+              }
+            }
+            else
+            {
+              Append(buffer, ' ', nWidth);
+            }
           }
           break;
-
-        case 'u':
-          if(nLong == 2) {
-            _Traits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
-          }
-          else {
-            _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
-          }
-          //Append(buffer);
-          Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
-          break;
-
-        case 'f':
-        {
-          double va_value = va_arg(arglist, double);
-          if(bForceSign && va_value >= 0) {
-            buffer[0] = '+';
-            _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
-          } else {
-            _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
-          }
-          Append(buffer);
-          break;
-        }
 
         case 'o':
         {
@@ -2012,7 +2064,64 @@ SEQUENCE:
           else {
             _Traits::OctalToString(buffer, MAX_DIGITS, va_value);
           }
-          Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+
+          if(bPrecision) {
+            _AppendFormat(buffer, nWidth, nPrecision);
+          }
+          else {
+            Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+          }
+          break;
+        }
+        case 'u':
+        {
+          if(nLong == 2) {
+            _Traits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
+          }
+          else {
+            _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
+          }
+
+          if(bPrecision) {
+            _AppendFormat(buffer, nWidth, nPrecision);
+          }
+          else {
+            Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+          }
+          break;
+        }
+
+        case 'f':
+        case 'F':
+        {
+          double va_value = va_arg(arglist, double);
+          if(nPrecision)
+          {
+            if(bForceSign && va_value >= 0.0) {
+              buffer[0] = '+';
+              _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
+            }
+            else {
+              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
+            }
+            const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
+            if(pDot != NULL) {
+              int nn = nPrecision;
+              while(nn-- && *++pDot != '\0'); // 没错，就是分号！
+              *(_TCh*)pDot = '\0';
+            }
+          }
+          else
+          {
+            if(bForceSign && va_value >= 0) {
+              buffer[0] = '+';
+              _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
+            }
+            else {
+              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
+            }
+          }
+          Append(buffer);
           break;
         }
 
@@ -2027,7 +2136,7 @@ SEQUENCE:
           unsigned long va_value = va_arg(arglist, unsigned long);          
 
           if(va_value)
-          {            
+          {
             buffer[0] = '0'; buffer[1] = *ptr;
             if(*ptr == 'X') {
               _Traits::HexToUpperString(buffer + 2, MAX_DIGITS - 2, va_value);
@@ -2036,7 +2145,16 @@ SEQUENCE:
               _Traits::HexToLowerString(buffer + 2, MAX_DIGITS - 2, va_value);
             }
 
-            if(bPound && bZeroPrefix)
+            if(bPrecision)
+            {
+              if(bPound) {
+                _AppendFormat(buffer, 2, buffer + 2, nWidth, nPrecision);
+              }
+              else {
+                _AppendFormat(buffer + 2, nWidth, nPrecision);
+              }
+            }
+            else if(bPound && bZeroPrefix)
             {
               Append(buffer, 2);
 
@@ -2065,20 +2183,40 @@ SEQUENCE:
           }
           else
           {
-            // 忽略 bZeroPerfix
-            if(nWidth) {
-              buffer[0] = '0'; buffer[1] = '\0';
-              Append(buffer, (bZeroPrefix && nWidth > 0 ? '0' : 0x20), nWidth);
+            if(bPrecision)
+            {
+              if(nWidth > nPrecision) {
+                Append(0x20, nWidth - nPrecision);
+              }
+
+              Append('0', nPrecision);
+
+              if(-nWidth > nPrecision) {
+                Append(0x20, -nWidth - nPrecision);
+              }
             }
-            else {
-              Append('0', nWidth < 0 ? -nWidth : nWidth); // abs(nWidth)
+            else
+            {
+              // 忽略 bZeroPerfix
+              if(nWidth) {
+                buffer[0] = '0'; buffer[1] = '\0';
+                Append(buffer, (bZeroPrefix && nWidth > 0 ? '0' : 0x20), nWidth);
+              }
+              else {
+                Append('0', nWidth < 0 ? -nWidth : nWidth); // abs(nWidth)
+              }
             }
           }
           break;
         }
 
         case '*':
-          nWidth = (int)va_arg(arglist, int);
+          if(bPrecision) {
+            nPrecision = (int)va_arg(arglist, int);
+          }
+          else {
+            nWidth = (int)va_arg(arglist, int);
+          }
           ptr++;
           goto SEQUENCE;
 
@@ -2108,61 +2246,44 @@ SEQUENCE:
           goto SEQUENCE;
 
         case '.':  // "%.3f"
-          i = 0;
-          while(1)
-          {
-            ptr++;
-            if(*ptr >= '0' && *ptr <= '9')
-              buffer[i++] = *ptr;
-            else if(*ptr == '\0')
-              goto FUNC_RET;
-            else if(*ptr == 'f' || i >= sizeof(buffer))
-            {
-              buffer[i] = '\0';
-              nWidth = _Traits::StringToInteger32(buffer);
-              double va_value = va_arg(arglist, double);
+          bPrecision = TRUE;
+          ptr++;
+          goto SEQUENCE;
 
-              if(bForceSign && va_value >= 0.0) {
-                buffer[0] = '+';
-                _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
-              } else {
-                _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
-              }
-              const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
-              if(pDot != NULL) {
-                int nn = nWidth;
-                while(nn-- && *++pDot != '\0'); // 没错，就是分号！
-                *(_TCh*)pDot = '\0';
-              }
-
-              Append(buffer);
-              break;
-            }
-            else
-              break;
-          }
-          break;
         default:
           if(*ptr >= '0' && *ptr <= '9')  // "%8d"
           {
             i = 0;
             while(1)
             {
-              if(*ptr >= '0' && *ptr <= '9')
+              if(*ptr >= '0' && *ptr <= '9') {
                 buffer[i++] = *ptr;
-              else if(*ptr == '\0')
+              }
+              else if(*ptr == '\0') {
                 goto FUNC_RET;
-              else if(i >= sizeof(buffer))
+              }
+              else if(i >= sizeof(buffer)) {
                 break;
-              else if(*ptr == 'd' || *ptr == 'i' || *ptr == 'u' || *ptr == 'o' || *ptr == 'X' || *ptr == 'x')
+              }
+              else if(*ptr == 'd' || *ptr == 'i' || *ptr == 'u' || *ptr == 'o' || *ptr == 'X' || *ptr == 'x' || *ptr == '.' || *ptr == 'f')
               {
                 buffer[i] = '\0';
-                nWidth = _Traits::StringToInteger32(buffer);
-                
-                if(bLeftAlign) {
-                  nWidth = -nWidth;
+
+                if(bPrecision) {
+                  nPrecision = _Traits::StringToInteger32(buffer);
+                } else {
+                  nWidth = _Traits::StringToInteger32(buffer);
+                  if(bLeftAlign) {
+                    nWidth = -nWidth;
+                  }
                 }
 
+                //if(*ptr != 'f' && nWidth == 0 && nPrecision != 0) {
+                //  bLeftAlign = FALSE;
+                //  bZeroPrefix = TRUE; // 例如 "%.5d" 要求按照5位填0扩充
+                //  nWidth = nPrecision;
+                //}
+                
                 goto SEQUENCE;
               }
               else
