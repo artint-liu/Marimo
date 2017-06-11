@@ -321,6 +321,18 @@ namespace Marimo
     return NULL;
   }
 
+  _DPEM_TEMPL
+  void _DPEM_CLS::Destroy(_DPEM_CLS* pErrorMsg)
+  {
+    delete pErrorMsg;
+  }
+
+  _DPEM_TEMPL
+  _DPEM_CLS* _DPEM_CLS::Create()
+  {
+    return new DataPoolErrorMsg;
+  }
+
   template class DataPoolErrorMsg<GXWCHAR>;
   template class DataPoolErrorMsg<GXCHAR>;
 

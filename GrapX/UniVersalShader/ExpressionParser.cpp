@@ -99,7 +99,7 @@ namespace UVShader
     m_pContext = NULL;
 
     SAFE_DELETE(m_pSubParser);
-    SAFE_DELETE(m_pMsg);
+    ErrorMessage::Destroy(m_pMsg);
 
     // 释放包含文件缓存
     ASSERT( ! m_pParent || (m_pParent && m_sIncludeFiles.empty())); // 只有 root parser 才有包含文件的缓存
@@ -151,7 +151,7 @@ namespace UVShader
     if(TEST_FLAG_NOT(dwFlags, AttachFlag_NotLoadMessage))
     {
       if( ! m_pMsg) {
-        m_pMsg = new ErrorMessage();
+        m_pMsg = ErrorMessage::Create();
         m_pMsg->LoadErrorMessageW(L"uvsmsg.txt");
         m_pMsg->SetMessageSign('C');
         m_pMsg->PushFile(szFilename);

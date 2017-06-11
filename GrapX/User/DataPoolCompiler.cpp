@@ -97,7 +97,11 @@ namespace Marimo
     typedef clhash_map<clStringA, StringType>     StringDict;
     typedef clhash_map<clStringA, DEFINE>         NameDict;
     typedef clhash_map<clStringA, DataPool::Enum> EnumDict;
-    typedef DataPoolErrorMsg<GXCHAR>              DataPoolErrorMsgA;
+    class DataPoolErrorMsgA : public DataPoolErrorMsg<GXCHAR>
+    {
+    public:
+      DataPoolErrorMsgA(){}
+    };
     //typedef clset<clStringA>                  TypeDeclArray;
 
   private:

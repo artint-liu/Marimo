@@ -29,9 +29,10 @@ namespace Marimo
 
   protected:
     GXHRESULT UpdateResult  (GXBOOL bError);
-  public:
     DataPoolErrorMsg();
     virtual ~DataPoolErrorMsg();
+
+  public:
     GXBOOL    LoadErrorMessageW   (GXLPCWSTR szErrorFile);
     void      SetMessageSign      (GXWCHAR cSign);
 
@@ -58,6 +59,10 @@ namespace Marimo
     void      SetSilentMode       (GXBOOL bSilent);
 
     const FILE_SECTION* SectionFromPtr(T_LPCSTR ptr) const; // 从指针找到来自哪一个文件
+
+  public:
+    static DataPoolErrorMsg* Create();
+    static void Destroy(DataPoolErrorMsg* pErrorMsg);
   };
 
 } // namespace Marimo

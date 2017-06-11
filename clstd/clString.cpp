@@ -719,8 +719,13 @@ namespace clstd
   _CLSTR_TEMPL
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const StringX& clStr)
   {
-    _ResizeLengthNoCopy(clStr.GetLength());
-    _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, clStr.GetLength());
+    const size_t src_len = clStr.GetLength();
+    if(src_len) {
+      _ResizeLengthNoCopy(src_len);
+      _Traits::CopyStringN(m_pBuf, clStr.m_pBuf, src_len);
+    } else {
+      Clear();
+    }
     return *this;
   }
 
@@ -1701,8 +1706,9 @@ namespace clstd
 
     if(uCount > uInputLength)
       _Reduce(uStrLength - uCount + uInputLength);
-    if(pStr != NULL)
+    if(pStr && uInputLength) {
       _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
+    }
   }
 
   _CLSTR_TEMPL
@@ -1818,8 +1824,11 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::Append(const StringX& clStr)
   {
     const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
-    _ResizeLength(uStrLen + clStr.GetLength());
-    _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, clStr.GetLength());
+    const clsize uSrcLen = clStr.GetLength();
+    if(uSrcLen) {
+      _ResizeLength(uStrLen + uSrcLen);
+      _Traits::CopyStringN(m_pBuf + uStrLen, clStr.m_pBuf, uSrcLen);
+    }
     return *this;
   }
 

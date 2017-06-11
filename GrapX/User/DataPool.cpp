@@ -204,7 +204,12 @@ namespace Marimo
   public:
     struct IMPORT
     {
-      typedef DataPoolErrorMsg<GXWCHAR> DataPoolErrorMsgW;
+      //typedef DataPoolErrorMsg<GXWCHAR> DataPoolErrorMsgW;
+      class DataPoolErrorMsgW : public DataPoolErrorMsg<GXWCHAR>
+      {
+      public:
+        DataPoolErrorMsgW(){}
+      };
       clstd::StockW ss;
       DataPoolErrorMsgW  ErrorMsg;
 
