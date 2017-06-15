@@ -155,6 +155,19 @@ void TestLog()
   CLOG_ERRORW(_CLTEXT("日志输出测试"));
 }
 
+// 测试基本字符串操作
+void TestBasicStringOp()
+{
+  clStringA str = "15";
+  ASSERT(str == "15");
+
+  str.Insert(1, "2");
+  ASSERT(str == "125");
+
+  str.Insert(2, "34");
+  ASSERT(str == "12345");
+}
+
 void TestStringToFloat()
 {
   const char* sz123 = "1234\000e4321";
@@ -337,6 +350,7 @@ int _tmain(int argc, _TCHAR* argv[])
   setlocale(LC_ALL, "");
   //cprintf();
   TestLog();
+  TestBasicStringOp();
   TestCodec();
   TestCombinePath();
   TestMatchSpec();

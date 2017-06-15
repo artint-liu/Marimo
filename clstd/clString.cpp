@@ -1224,13 +1224,13 @@ namespace clstd
     _ResizeLength(uStrLength + uInputLength);
     if(idx >= uStrLength)
     {
-      _Traits::CopyStringN(m_pBuf + uStrLength, pStr, uInputLength);
+      _CopyNakeString(m_pBuf + uStrLength, pStr, uInputLength);
     }
     else
     {
       clmemmove(m_pBuf + idx + uInputLength, m_pBuf + idx,
         (uStrLength - idx + 1) * sizeof(_TCh));
-      _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
+      _CopyNakeString(m_pBuf + idx, pStr, uInputLength);
     }
     return uStrLength + uInputLength;
   }
@@ -1912,6 +1912,14 @@ namespace clstd
     Append(szPrefix, nPrefixLen);
     Append(szNumeric, '0', nPrecision);
     _AppendSpace(len, nPrefixLen, -nWidth, nPrecision);
+  }
+
+  _CLSTR_TEMPL
+  void _CLSTR_IMPL::_CopyNakeString(_TCh* pStrDest, const _TCh* pStrSrc, size_t uCopyLength)
+  {
+    while(uCopyLength--) {
+      *pStrDest++ = *pStrSrc++;
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////

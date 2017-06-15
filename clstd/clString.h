@@ -161,6 +161,8 @@ namespace clstd
     void  _AppendFormat       (LPCSTR szPrefix, int nPrefixLen, LPCSTR szNumeric, int nWidth, int nPrecision);
     void  _AppendSpace        (int len, int nWidth, int nPrecision);
     void  _AppendFormat       (LPCSTR szNumeric, int nWidth, int nPrecision);
+    void  _CopyNakeString     (_TCh* pStrDest, const _TCh* pStrSrc, size_t uCopyLength); // 拷贝指定长度的字符串片段，结尾不填'\0'
+
   public:
     StringX();
     StringX(const _TCh* pStr);
