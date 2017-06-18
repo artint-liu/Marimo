@@ -165,7 +165,7 @@ GXBOOL CanBreak(GXWCHAR pch, GXWCHAR ch);
         }
       }
 
-      if(ptPen.x + m_LastState.xOrigin>= m_rcClip.right) {
+      if(ptPen.x + m_CallState.xOrigin>= m_CallState.rcClip.right) {
         break;
       }
 

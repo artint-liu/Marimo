@@ -52,13 +52,13 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
       GXRECT rcTexture;
 
       m_xAbsOrigin 
-        = m_LastState.xOrigin
+        = m_CallState.xOrigin
         = m_xOrigin 
         = m_rcClip.left 
         = pRegn->left;
 
       m_yAbsOrigin 
-        = m_LastState.yOrigin
+        = m_CallState.yOrigin
         = m_yOrigin 
         = m_rcClip.top
         = pRegn->top;
@@ -72,13 +72,13 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
     else
     {
       m_xAbsOrigin
-        = m_LastState.xOrigin
+        = m_CallState.xOrigin
         = m_xOrigin 
         = m_rcClip.left 
         = 0;
 
       m_yAbsOrigin
-        = m_LastState.yOrigin
+        = m_CallState.yOrigin
         = m_yOrigin 
         = m_rcClip.top
         = 0;
@@ -87,8 +87,8 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
     }
 
     m_rcAbsClip = m_rcClip;
-    m_LastState.rcClip = m_rcClip;
-    m_LastState.pEffectImpl = m_pEffectImpl;
+    m_CallState.rcClip = m_rcClip;
+    m_CallState.pEffectImpl = m_pEffectImpl;
 
     m_uVertIndexSize = s_uDefVertIndexSize;
     m_uBatchSize     = s_uDefBatchSize;
@@ -107,8 +107,8 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
     }
 
     // 初始化渲染模式
-    m_LastState.eCompMode = CM_SourceOver;
-    m_LastState.dwColorAdditive = 0;
+    m_CallState.eCompMode = CM_SourceOver;
+    m_CallState.dwColorAdditive = 0;
     m_aBatch[m_uBatchCount++].Set(CF_CompositingMode, 0, 0, CM_SourceOver);
     m_dwTexVertColor = (GXDWORD)-1;
     m_dwColorAdditive = 0;
@@ -176,7 +176,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
     GCAMERACONETXT gcc;
     gcc.dwMask = GCC_WORLD;
     m_pCamera->GetContext(&gcc);
-    m_LastState.matTransform = gcc.matWorld;
+    m_CallState.matTransform = gcc.matWorld;
     m_CanvasCommConst.matWVProj = gcc.matWorld;
     m_CanvasCommConst.colorMul.set(1,1,1,1);
     m_CanvasCommConst.colorAdd.set(0,0,0,1);
@@ -195,12 +195,13 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
   }
 
   RGNCOMPLEX eCompx = RC_SIMPLE;
-  REGN rgClip;
+  GXRECT rcClip;
+  GXREGN rgClip;
 
   if(m_pClipRegion == NULL)
   {
-    m_rcClip = m_rcAbsClip;
-    //m_LastState.rcClip = m_rcAbsClip;
+    rcClip = m_rcAbsClip;
+    //m_CallState.rcClip = m_rcAbsClip;
     //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
     m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
   }
@@ -210,18 +211,18 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
     switch(eCompx)
     {
     case RC_ERROR:
-      m_rcClip = m_rcAbsClip;
-      //m_LastState.rcClip = m_rcAbsClip;
+      rcClip = m_rcAbsClip;
+      //m_CallState.rcClip = m_rcAbsClip;
       //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
       m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
       break;
     case RC_NULL:
-      m_pClipRegion->GetBounding(&m_rcClip);
-      //m_LastState.rcClip = m_rcClip;
+      m_pClipRegion->GetBounding(&rcClip);
+      //m_CallState.rcClip = m_rcClip;
       break;
     case RC_SIMPLE:
-      m_pClipRegion->GetBounding(&m_rcClip);
-      //m_LastState.rcClip = m_rcClip;
+      m_pClipRegion->GetBounding(&rcClip);
+      //m_CallState.rcClip = m_rcClip;
       //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
       m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
       break;
@@ -231,18 +232,18 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
         GXRECT* lpRects = _GlbLockStaticRects(nRectCount);
 
         m_pClipRegion->GetRects(lpRects, nRectCount);
-        m_pClipRegion->GetBounding(&m_rcClip);
-        //m_LastState.rcClip = m_rcClip;
+        m_pClipRegion->GetBounding(&rcClip);
+        //m_CallState.rcClip = m_rcClip;
 
         // 如果不先设置Clear在区域之外的会失败
-        gxRectToRegn(&rgClip, &m_rcClip);
+        gxRectToRegn(&rgClip, &rcClip);
         m_pGraphics->SetSafeClip(&rgClip);
 
         // TODO: 考虑是否在以后用快速Region求补来填充空白区域呢?
         // 如下填充实现了: 在一个矩形区域内,需要绘制图形的部分模板值>1,其他部分模板值为0
         const GXDWORD dwFlags = GXCLEAR_STENCIL;
         //const GXDWORD dwFlags = GXCLEAR_STENCIL|GXCLEAR_TARGET;
-        m_pGraphics->Clear(&m_rcClip, 1, dwFlags, 0xff0000ff, 0, 0);
+        m_pGraphics->Clear(&rcClip, 1, dwFlags, 0xff0000ff, 0, 0);
         m_pGraphics->Clear(lpRects, nRectCount, dwFlags, 0xff00ff00, 0, m_dwStencil);
 
         //m_pRenderState->Set(GXRS_STENCILENABLE,    TRUE);
@@ -258,11 +259,13 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
 
         _GlbUnlockStaticRects(lpRects);
       }
+      IntUpdateClip(rcClip);
       return (GXINT)eCompx;
     }
   }
-  gxRectToRegn(&rgClip, &m_rcClip);
+  gxRectToRegn(&rgClip, &rcClip);
   m_pGraphics->SetSafeClip(&rgClip);
+  IntUpdateClip(rcClip);
   return (GXINT)eCompx;
 }
 
@@ -383,13 +386,19 @@ void GXCanvasImpl::SetStencil(GXDWORD dwStencil)
   m_dwStencil = dwStencil;
 }
 
+void GXCanvasImpl::IntUpdateClip(const GXRECT& rcClip)
+{
+  ASSERT(&m_rcClip != &rcClip);
+  m_rcClip = rcClip;
+}
+
 void GXCanvasImpl::_SetPrimitivePos(GXUINT nIndex, const GXINT _x, const GXINT _y)
 {
   //m_lpLockedVertex[nIndex].x = (GXFLOAT)_x;
   //m_lpLockedVertex[nIndex].y = (GXFLOAT)_y;
-  // TODO: 貌似这里应该是m_xOrigin, m_yOrigin, 因为 m_LastState 已经是最后的结果了, m_xOrigin是中间结果
-  m_lpLockedVertex[nIndex].x = (GXFLOAT)m_LastState.xOrigin + _x;
-  m_lpLockedVertex[nIndex].y = (GXFLOAT)m_LastState.yOrigin + _y;
+  // TODO: 貌似这里应该是m_xOrigin, m_yOrigin, 因为 m_CallState 已经是最后的结果了, m_xOrigin是中间结果
+  m_lpLockedVertex[nIndex].x = (GXFLOAT)m_CallState.xOrigin + _x;
+  m_lpLockedVertex[nIndex].y = (GXFLOAT)m_CallState.yOrigin + _y;
 }
 
 void GXCanvasImpl::BATCH::Set(CanvasFunc _eFunc, GXUINT _uVertexCount, GXUINT _uIndexCount, GXLPARAM _lParam)
@@ -497,13 +506,13 @@ GXBOOL GXCanvasImpl::SetTransform(const float4x4* matTransform)
   m_aBatch[m_uBatchCount++].SetFloat4(CF_SetTransform, m[ 8], m[ 9], m[10], m[11]);
   m_aBatch[m_uBatchCount++].SetFloat4(CF_SetTransform, m[12], m[13], m[14], m[15]);
 
-  m_LastState.matTransform = *matTransform;
+  m_CallState.matTransform = *matTransform;
   return TRUE;
 }
 
 GXBOOL GXCanvasImpl::GetTransform(float4x4* matTransform) const
 {
-  *matTransform = m_LastState.matTransform;
+  *matTransform = m_CallState.matTransform;
   return TRUE;
 }
 
@@ -517,12 +526,12 @@ GXBOOL GXCanvasImpl::SetViewportOrg(GXINT x, GXINT y, GXLPPOINT lpPoint)
     lpPoint->x = m_xAbsOrigin - m_xOrigin;
     lpPoint->y = m_yAbsOrigin - m_yOrigin;
 
-    ASSERT(m_xOrigin == m_LastState.xOrigin);
-    ASSERT(m_yOrigin == m_LastState.yOrigin);
+    ASSERT(m_xOrigin == m_CallState.xOrigin);
+    ASSERT(m_yOrigin == m_CallState.yOrigin);
 
     m_xOrigin = m_xAbsOrigin - x;
     m_yOrigin = m_yAbsOrigin - y;
-    ASSERT(0);  // TODO: 验证 这个不就是 m_LastState(xOrigin/yOrigin) 里的值吗?
+    ASSERT(0);  // TODO: 验证 这个不就是 m_CallState(xOrigin/yOrigin) 里的值吗?
   }
   else
   {
@@ -531,8 +540,8 @@ GXBOOL GXCanvasImpl::SetViewportOrg(GXINT x, GXINT y, GXLPPOINT lpPoint)
     }
     m_aBatch[m_uBatchCount++].Set2(CF_SetViewportOrg, m_xAbsOrigin - x, m_yAbsOrigin - y);
   }
-  m_LastState.xOrigin = m_xAbsOrigin - x;
-  m_LastState.yOrigin = m_yAbsOrigin - y;
+  m_CallState.xOrigin = m_xAbsOrigin - x;
+  m_CallState.yOrigin = m_yAbsOrigin - y;
   return TRUE;
 }
 
@@ -541,8 +550,8 @@ GXBOOL GXCanvasImpl::GetViewportOrg(GXLPPOINT lpPoint) const
   if(lpPoint == NULL)
     return FALSE;
 
-  lpPoint->x = m_xAbsOrigin - m_LastState.xOrigin;
-  lpPoint->y = m_yAbsOrigin - m_LastState.yOrigin;
+  lpPoint->x = m_xAbsOrigin - m_CallState.xOrigin;
+  lpPoint->y = m_yAbsOrigin - m_CallState.yOrigin;
 
   return TRUE;
 }
@@ -778,23 +787,26 @@ GXBOOL GXCanvasImpl::Flush()
       {
         TRACE_BATCH("CF_SetClipBox\n");
         GXREGN rgClip;
+        GXRECT rcClip;
         SAFE_RELEASE(m_pClipRegion);
 
-        m_rcClip.left   = GXLOWORD(m_aBatch[i].comm.wParam);
-        m_rcClip.right  = GXHIWORD(m_aBatch[i].comm.wParam);
+        rcClip.left   = GXLOWORD(m_aBatch[i].comm.wParam);
+        rcClip.right  = GXHIWORD(m_aBatch[i].comm.wParam);
 
-        m_rcClip.top    = GXLOWORD(m_aBatch[i].comm.lParam);
-        m_rcClip.bottom = GXHIWORD(m_aBatch[i].comm.lParam);
+        rcClip.top    = GXLOWORD(m_aBatch[i].comm.lParam);
+        rcClip.bottom = GXHIWORD(m_aBatch[i].comm.lParam);
 
-        //m_LastState.rcClip = m_rcClip;
+        //m_CallState.rcClip = m_rcClip;
         //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
         m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
 
-        gxRectToRegn(&rgClip, &m_rcClip);
+        gxRectToRegn(&rgClip, &rcClip);
         m_pGraphics->SetSafeClip(&rgClip);
 
-        if(gxIsRectEmpty(&m_rcClip) == TRUE)
+        if(gxIsRectEmpty(&rcClip) == TRUE)
           bEmptyRect = TRUE;
+
+        IntUpdateClip(rcClip);
       }
       break;
     case CF_ResetClipBox:
@@ -823,7 +835,8 @@ GXBOOL GXCanvasImpl::Flush()
         rcClip.right  = GXHIWORD(m_aBatch[i].comm.wParam);
         rcClip.top    = GXLOWORD(m_aBatch[i].comm.lParam);
         rcClip.bottom = GXHIWORD(m_aBatch[i].comm.lParam);
-        gxRectToRegn(&rgClip, &m_rcClip);
+        //gxRectToRegn(&rgClip, &m_rcClip); // ???: m_rcClip好像应该是rcClip
+        gxRectToRegn(&rgClip, &rcClip);
         m_pGraphics->SetSafeClip(&rgClip);
       }
       break;
@@ -878,6 +891,9 @@ GXBOOL GXCanvasImpl::Flush()
   m_uIndexCount = 0;
   m_uBatchCount = 0;
 
+  // 每次提交后两个clip应该是一致的，如果不一致说明中间的计算算法有差异
+  ASSERT(gxEqualRect(&m_CallState.rcClip, &m_rcClip));
+
   m_pGraphics->Leave();
   return TRUE;
 }
@@ -916,7 +932,7 @@ GXBOOL GXCanvasImpl::SetRenderStateBlock(GXLPCRENDERSTATE lpBlock)
 
 GXBOOL GXCanvasImpl::SetEffect(GXEffect* pEffect)
 {
-  if(m_LastState.pEffectImpl == pEffect)
+  if(m_CallState.pEffectImpl == pEffect)
   {
     return FALSE;
   }
@@ -925,9 +941,9 @@ GXBOOL GXCanvasImpl::SetEffect(GXEffect* pEffect)
   if(pEffect != NULL)
     pEffect->AddRef();
   m_aBatch[m_uBatchCount++].Set(CF_Effect, 0, 0, (GXLPARAM)pEffect);
-  m_LastState.pEffectImpl = (GXEffectImpl*)pEffect;
+  m_CallState.pEffectImpl = (GXEffectImpl*)pEffect;
 
-  const GShaderImpl* pShaderImpl = (GShaderImpl*)m_LastState.pEffectImpl->GetShaderUnsafe();
+  const GShaderImpl* pShaderImpl = (GShaderImpl*)m_CallState.pEffectImpl->GetShaderUnsafe();
   const GXINT nCacheSize = pShaderImpl->GetCacheSize();
   if((GXINT)m_UniformBuffer.GetSize() < nCacheSize)
   {
@@ -943,7 +959,7 @@ GXBOOL GXCanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount
 #elif defined(D3D9_CANVAS_IMPL)
 GXBOOL GXCanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
 {
-  //GXEffectImpl* pEffect = (GEffectImpl*)m_LastState.pEffect;
+  //GXEffectImpl* pEffect = (GEffectImpl*)m_CallState.pEffect;
   //if(pShader == NULL)
   //{
   //  ASSERT(0);
@@ -1004,11 +1020,11 @@ GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, 
     break;
   case CPI_SETCOLORADDITIVE:
     {
-      dwRet = m_LastState.dwColorAdditive;
-      m_LastState.dwColorAdditive = (GXDWORD)uParam;
+      dwRet = m_CallState.dwColorAdditive;
+      m_CallState.dwColorAdditive = (GXDWORD)uParam;
 
       // 检测是否是新的叠加颜色
-      if(m_LastState.dwColorAdditive != dwRet)
+      if(m_CallState.dwColorAdditive != dwRet)
       {
         // 如果上一个命令也是设置叠加颜色
         if( m_uBatchCount > 0 && 
@@ -1022,7 +1038,7 @@ GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, 
         {
           if(!((m_uBatchCount + 1) < m_uBatchSize))
             Flush();
-          m_aBatch[m_uBatchCount++].Set(CF_ColorAdditive, 0, dwRet, m_LastState.dwColorAdditive);
+          m_aBatch[m_uBatchCount++].Set(CF_ColorAdditive, 0, dwRet, m_CallState.dwColorAdditive);
         }
       }
     }
@@ -1047,7 +1063,7 @@ GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, 
       {
         // 转换为 RenderTarget 空间的坐标
         GXRECT rcUserClip = *lpRect;
-        gxOffsetRect(&rcUserClip, m_LastState.xOrigin, m_LastState.yOrigin);
+        gxOffsetRect(&rcUserClip, m_CallState.xOrigin, m_CallState.yOrigin);
 
         // 与系统区域裁剪
         gxIntersectRect(&rcUserClip, &m_rcAbsClip, &rcUserClip);    
@@ -1140,7 +1156,7 @@ FLUSH_CMD:
 
 GXINT GXCanvasImpl::SetCompositingMode(CompositingMode eMode)
 {
-  if(m_LastState.eCompMode == eMode)
+  if(m_CallState.eCompMode == eMode)
     return eMode;
   if(!((m_uBatchCount + 1) < m_uBatchSize))
     Flush();
@@ -1151,8 +1167,8 @@ GXINT GXCanvasImpl::SetCompositingMode(CompositingMode eMode)
     m_aBatch[m_uBatchCount - 1].Set(CF_CompositingMode, 0, 0, eMode);
   else
     m_aBatch[m_uBatchCount++].Set(CF_CompositingMode, 0, 0, eMode);
-  CompositingMode ePrevCompMode = m_LastState.eCompMode;
-  m_LastState.eCompMode = eMode;
+  CompositingMode ePrevCompMode = m_CallState.eCompMode;
+  m_CallState.eCompMode = eMode;
   return (GXINT)ePrevCompMode;
 }
 
@@ -1167,15 +1183,20 @@ GXBOOL GXCanvasImpl::SetRegion(GRegion* pRegion, GXBOOL bAbsOrigin)
     // TODO: 测试如果区域小于屏幕区,就不用这个屏幕区的Region裁剪
     m_pGraphics->CreateRectRgn(&pSurfaceRegion, 0, 0, m_xExt, m_yExt);
 
-    if(bAbsOrigin == TRUE)
+    if(bAbsOrigin == TRUE) {
       pSurfaceRegion->Intersect(pRegion);
+    }
     else
     {
       GRegion* pAbsRegion = pRegion->Clone();
-      pAbsRegion->Offset(m_LastState.xOrigin, m_LastState.yOrigin);
+      pAbsRegion->Offset(m_CallState.xOrigin, m_CallState.yOrigin);
       pSurfaceRegion->Intersect(pAbsRegion);
       SAFE_RELEASE(pAbsRegion);
     }
+    pSurfaceRegion->GetBounding(&m_CallState.rcClip);
+  }
+  else {
+    m_CallState.rcClip = m_rcAbsClip;
   }
 
   m_aBatch[m_uBatchCount].eFunc       = CF_SetRegion;
@@ -1202,22 +1223,22 @@ GXBOOL GXCanvasImpl::SetClipBox(const GXLPRECT lpRect)
     m_aBatch[m_uBatchCount].comm.lParam = NULL;
     m_uBatchCount++;
 
-    m_LastState.rcClip = m_rcAbsClip;
+    m_CallState.rcClip = m_rcAbsClip;
   }
   else  // 用户设置
   {
     // 转换为 RenderTarget 空间的坐标
     GXRECT rcUserClip = *lpRect;
-    gxOffsetRect(&rcUserClip, m_LastState.xOrigin, m_LastState.yOrigin);
+    gxOffsetRect(&rcUserClip, m_CallState.xOrigin, m_CallState.yOrigin);
 
     // 与系统区域裁剪
-    gxIntersectRect(&m_LastState.rcClip, &m_rcAbsClip, &rcUserClip);    
+    gxIntersectRect(&m_CallState.rcClip, &m_rcAbsClip, &rcUserClip);    
 
     m_aBatch[m_uBatchCount].eFunc       = CF_SetClipBox;
     m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
 
-    m_aBatch[m_uBatchCount].comm.wParam = GXMAKELONG(m_LastState.rcClip.left, m_LastState.rcClip.right);
-    m_aBatch[m_uBatchCount].comm.lParam = GXMAKELONG(m_LastState.rcClip.top, m_LastState.rcClip.bottom);
+    m_aBatch[m_uBatchCount].comm.wParam = GXMAKELONG(m_CallState.rcClip.left, m_CallState.rcClip.right);
+    m_aBatch[m_uBatchCount].comm.lParam = GXMAKELONG(m_CallState.rcClip.top, m_CallState.rcClip.bottom);
 
     m_uBatchCount++;
   }
@@ -1228,7 +1249,7 @@ GXINT GXCanvasImpl::GetClipBox(GXLPRECT lpRect)
 {
   if(lpRect != NULL)
   {
-    *lpRect = m_LastState.rcClip;
+    *lpRect = m_CallState.rcClip;
     gxOffsetRect(lpRect, -m_xAbsOrigin, -m_yAbsOrigin);
   }
   return RC_SIMPLE;
@@ -1462,8 +1483,8 @@ GXBOOL GXCanvasImpl::DrawUserPrimitive(GTexture*pTexture, GXLPVOID lpVertices, G
   for(GXUINT i = 0; i < uVertCount; i++, pVertex++)
   {
     *pVertex = *((PRIMITIVE*)lpVertices + i);
-    pVertex->x += (GXFLOAT)m_LastState.xOrigin;
-    pVertex->y += (GXFLOAT)m_LastState.yOrigin;
+    pVertex->x += (GXFLOAT)m_CallState.xOrigin;
+    pVertex->y += (GXFLOAT)m_CallState.yOrigin;
   }
 
   for(GXUINT i = 0; i < uIdxCount; i++) {

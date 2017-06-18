@@ -69,7 +69,7 @@ namespace D3D9
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
-    GXUINT uHandle = m_LastState.pEffectImpl->GetHandle(pName);
+    GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
     m_aBatch[m_uBatchCount].eFunc = CF_SetUniform1f;
     m_aBatch[m_uBatchCount].Handle = uHandle;
     m_aBatch[m_uBatchCount].PosF.x = fValue;
@@ -83,7 +83,7 @@ namespace D3D9
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
-    GXUINT uHandle = m_LastState.pEffectImpl->GetHandle(pName);
+    GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
     m_aBatch[m_uBatchCount].eFunc = CF_SetUniform2f;
     m_aBatch[m_uBatchCount].Handle = uHandle;
     m_aBatch[m_uBatchCount].PosF.x = vValue->x;
@@ -97,7 +97,7 @@ namespace D3D9
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
-    GXUINT uHandle = m_LastState.pEffectImpl->GetHandle(pName);
+    GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
     m_aBatch[m_uBatchCount].eFunc = CF_SetUniform3f;
     m_aBatch[m_uBatchCount].Handle = uHandle;
     m_aBatch[m_uBatchCount].PosF.x = fValue->x;
@@ -112,7 +112,7 @@ namespace D3D9
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
-    GXUINT uHandle = m_LastState.pEffectImpl->GetHandle(pName);
+    GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
     m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4f;
     m_aBatch[m_uBatchCount].Handle = uHandle;
     m_aBatch[m_uBatchCount].PosF.x = fValue->x;
@@ -127,7 +127,7 @@ namespace D3D9
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
-    GXUINT uHandle = m_LastState.pEffectImpl->GetHandle(pName);
+    GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
     float4x4* pMat = new float4x4;
     m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4x4f;
     m_aBatch[m_uBatchCount].Handle = uHandle;

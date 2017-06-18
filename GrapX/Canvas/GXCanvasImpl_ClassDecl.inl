@@ -175,9 +175,9 @@ private:
     inline void SetRenderState(GXUINT nCode, GXDWORD dwValue);
   };
 
-  // LASTSTATE 是用来检测是否重复设置的, 这里面的值是在接口设置后立即改变的
+  // CALLSTATE 是用来检测是否重复设置的, 这里面的值是在接口调用后立即改变的
   // 而对应类中的值是在Flush之后改变的。
-  struct LASTSTATE
+  struct CALLSTATE
   {
     GXINT           xOrigin;
     GXINT           yOrigin;
@@ -186,7 +186,7 @@ private:
     GXDWORD         dwColorAdditive;
     GXEffectImpl*   pEffectImpl;  // 不增加引用
     float4x4        matTransform;
-    LASTSTATE() 
+    CALLSTATE() 
       : xOrigin         (0)
       , yOrigin         (0)
       , eCompMode       (CM_SourceCopy)
@@ -213,6 +213,7 @@ private:
   GXINT    DrawText_WordBreak       (const INTMEASURESTRING* pMeasureStr, GXLPRECT lpRect);
 
   void    SetStencil        (GXDWORD dwStencil);
+  void    IntUpdateClip             (const GXRECT& rcClip);
 public:
   inline const GXCANVASCOMMCONST& GetCommonConst() const;
   inline clBuffer&                  GetUniformBuffer();
@@ -227,7 +228,7 @@ private:
 
   GXINT         m_xOrigin;        // 原点位置，可以通过函数设置  // [貌似这些值可以省略]
   GXINT         m_yOrigin;        // [貌似这些值可以省略]
-  GXRECT        m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间
+  GXRECT        m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在flush阶段，m_rcClip只能写入/写入后读取，不能只读取，因为m_rcClip不是上一条命令的结果
 
   GXDWORD       m_dwStencil;
   GXImage*      m_pTargetImage;
@@ -258,7 +259,7 @@ private:
   GXUINT      m_uBatchCount;  // 计数 这个必须小于m_uBatchSize(不能等于)
   GXUINT      m_uBatchSize;   // 尺寸
 
-  LASTSTATE    m_LastState;
+  CALLSTATE    m_CallState;   // User Call State
 
   GXDWORD      m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
   GTextureImpl*  m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0

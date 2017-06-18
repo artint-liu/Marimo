@@ -516,7 +516,7 @@ namespace clstd
     _CLSTR_IMPL::StringX(const _TCh* pStr)
     : m_pBuf((_TCh*)s_EmptyStr.buf)
   {
-    if(pStr == NULL) {
+    if(pStr == NULL || pStr[0] == '\0') {
       m_pBuf = (_TCh*)s_EmptyStr.buf;
     }
     else {
