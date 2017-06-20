@@ -39,9 +39,17 @@ namespace D3D9
       CompiledComponentPixelShder,
     };
 
+    enum ShaderFlag
+    {
+      ShaderFlag_PutInResourceManager = 0x00010000,
+      ShaderFlag_Mask = 0xffff0000,
+    };
+
+    STATIC_ASSERT((ShaderFlag_Mask & GXSHADERCAP_MASK) == 0);
+
   protected:
     GXGraphicsImpl*  m_pGraphicsImpl;
-    GXDWORD          m_dwFlag;
+    GXDWORD          m_dwFlag; // 高16位内部用(ShaderFlag)，低16位外部用(GXShaderCapability)
     GXINT            m_cbPixelTopIndex;
     GXINT            m_cbCacheSize;
     GXHRESULT        CleanUp              ();
@@ -69,7 +77,8 @@ namespace D3D9
     virtual GXHRESULT   LoadFromMemory    (const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf) override;
     virtual GXGraphics* GetGraphicsUnsafe () const override;
     virtual GXLPCWSTR   GetProfileDesc    () const override;
-    static  GXHRESULT   CompileShader     (clBuffer* pBuffer, LPD3DXINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled); // 编译后buffer将被二进制代码替换
+    CLDEPRECATED_ATTRIBUTE static  GXHRESULT   CompileShader     (clBuffer* pBuffer, LPD3DXINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled); // 编译后buffer将被二进制代码替换
+    static  GXHRESULT   CompileShader     (clBuffer* pIntermediateCode, GXLPCSTR szSourceCode, size_t nSourceLen, LPD3DXINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled);
 
   public:
     GXHRESULT       Activate            ();
@@ -79,6 +88,7 @@ namespace D3D9
     GXUINT          GetHandle           (GXLPCSTR pName) const;
     GXUniformType   GetHandleType       (GXUINT handle) const;
     GXUINT          GetStageByHandle    (GXUINT handle) const;
+    void            PutInResourceMgr    ();
 #ifdef REFACTOR_SHADER
     GXBOOL          CommitToDevice      (GXLPVOID lpUniform, GXSIZE_T cbSize);
 #endif // #ifdef REFACTOR_SHADER

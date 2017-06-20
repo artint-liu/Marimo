@@ -97,8 +97,9 @@ namespace D3D9
 
     GTexture*               m_pBackBufferTex;    // 内部使用的纹理缓冲
     GXImage*                m_pBackBufferImg;    // 引用 m_pBackBufferTex
-    GShader*                m_pSimpleShader;
-    GXEffect*               m_pSimpleEffect;
+    GShader*                m_pBaseShader;
+    //GShader*                m_pSimpleShader;
+    GXEffect*               m_pBaseEffect;
 
     RTTexSet                m_setRTTexture;       // 需要备份内容的RTTexture列表
 

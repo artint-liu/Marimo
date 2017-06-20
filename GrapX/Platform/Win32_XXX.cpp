@@ -375,6 +375,8 @@ GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndPro
     return GX_FAIL;
   }
 
+  SetProcessDPIAware();
+
   const GXBOOL bSizeable = TEST_FLAG(pDesc->dwStyle, GXADS_SIZABLE);
   if(bSizeable && pDesc->nWidth == 0)
   {

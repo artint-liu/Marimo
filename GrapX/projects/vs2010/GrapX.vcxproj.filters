@@ -791,6 +791,9 @@
     <ClCompile Include="..\..\Canvas\MOSpriteManf.cpp">
       <Filter>Lib\Canvas</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D9\BasicShader_d3d9.cpp">
+      <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Platform\Readme.txt">

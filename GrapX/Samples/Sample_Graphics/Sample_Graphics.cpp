@@ -476,6 +476,7 @@ void MyGraphicsTest::TestTextAndClip(GXRECT& rect)
 
   GXRECT rcText;
   gxSetRect(&rcText, 210, 20, 310, 100);
+  pCanvas->FillRectangle(&rcText, 0x80808080);
   pCanvas->DrawTextW(m_pFont, L"Hello World!", -1, &rcText, GXDT_SINGLELINE, 0xff00ff00);
 
 

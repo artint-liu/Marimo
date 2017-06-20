@@ -658,7 +658,10 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
   }
 
   // 创建 增加引用计数
-  GShader* pShader = new GShaderImpl(this);
+  GShaderImpl* pShader = new GShaderImpl(this);
+  if(InlIsFailedToNewObject(pShader)) {
+    return GX_ERROR_OUROFMEMORY;
+  }
 
   // 初始化 验证
   GXHRESULT hval = pShader->LoadFromFile(pSdrElementSrc);
@@ -670,10 +673,54 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
   }
 
   RegisterResource(pShader, &ResFeatDesc);
+  pShader->PutInResourceMgr();
 
   *ppShader = pShader;
   m_pLogger->OutputFormatA("...Succeeded.\n");
   return GX_OK;
+}
+
+GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)
+{
+  GShaderImpl* pShader = new GShaderImpl(this);
+  if(InlIsFailedToNewObject(pShader)) {
+    return GX_ERROR_OUROFMEMORY;
+  }
+
+  clBuffer sVertexBuffer;
+  clBuffer sPixelBuffer;
+  LPD3DXINCLUDE pInclude = NULL;
+  GXHRESULT hr = GX_OK;
+
+  if(nSourceLen == 0)
+  {
+    nSourceLen = GXSTRLEN(szShaderSource);
+  }
+
+  hr = pShader->CompileShader(&sVertexBuffer, szShaderSource, nSourceLen,
+    pInclude, pMacroDefinition, GShaderImpl::CompiledVertexShder);
+
+  if(GXSUCCEEDED(hr))
+  {
+    hr = pShader->CompileShader(&sPixelBuffer, szShaderSource, nSourceLen,
+      pInclude, pMacroDefinition, GShaderImpl::CompiledPixelShder);
+  }
+
+  if(GXSUCCEEDED(hr))
+  {
+    hr = pShader->LoadFromMemory(&sVertexBuffer, &sPixelBuffer);
+  }
+
+  if(GXSUCCEEDED(hr))
+  {
+    *ppShader = pShader; // 构造时已经加一
+  }
+  else
+  {
+    SAFE_RELEASE(pShader);
+  }
+
+  return hr;
 }
 
 GXHRESULT GXGraphicsImpl::CreateShaderFromFileW(GShader** ppShader, GXLPCWSTR szShaderDesc)
@@ -1230,7 +1277,7 @@ FUNC_RET_0:
 //////////////////////////////////////////////////////////////////////////
   GXEffect* GXGraphicsImpl::IntGetEffect()
   {
-    return m_pSimpleEffect;
+    return m_pBaseEffect;
   }
 
   void GXGraphicsImpl::Enter()

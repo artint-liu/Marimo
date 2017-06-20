@@ -599,6 +599,7 @@
     <ClCompile Include="..\..\Platform\GXApp.cpp" />
     <ClCompile Include="..\..\Platform\MOLauncher.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D9.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D9\BasicShader_d3d9.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.cpp" />
@@ -715,6 +716,7 @@ fxc /Od /Zi /Tps_3_0 /EAeroPS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).p
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\Utility\HLSL\Simple.fx">
       <FileType>Document</FileType>
@@ -728,6 +730,7 @@ fxc /Od /Zi /Tps_2_0 /ESimplePS /Fo$(ProjectDir)../../../bin/shaders/%(FileName)
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <None Include="res\idc_copy.cur" />
     <None Include="res\idc_divider.cur" />

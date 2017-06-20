@@ -67,17 +67,20 @@ namespace D3D9
   {    
     memset(&m_VertexShaderConstTabDesc, 0, sizeof(m_VertexShaderConstTabDesc));
     memset(&m_PixelShaderConstTabDesc, 0, sizeof(m_PixelShaderConstTabDesc));
-    AddRef();
   }
 
   GShaderImpl::~GShaderImpl()
   {
-    if( ! m_pVertexShader && ! m_pPixelShader && ! m_dwFlag) {
+    if( ! m_pVertexShader && ! m_pPixelShader && TEST_FLAG_NOT(m_dwFlag, GXSHADERCAP_MASK)) {
       // 走到这里应该是创建失败了，都应该是空的
       ASSERT( ! m_pvct && ! m_ppct);
       return;
     }
-    m_pGraphicsImpl->UnregisterResource(this);
+
+    if(TEST_FLAG(m_dwFlag, ShaderFlag_PutInResourceManager))
+    {
+      m_pGraphicsImpl->UnregisterResource(this);
+    }
     CleanUp();
   }
 
@@ -117,7 +120,8 @@ namespace D3D9
     SAFE_RELEASE(m_pvct);
     SAFE_RELEASE(m_pPixelShader);
     SAFE_RELEASE(m_pVertexShader);
-    m_dwFlag = NULL;
+    RESET_FLAG(m_dwFlag, GXSHADERCAP_MASK);
+    //m_dwFlag = NULL;
     return GX_OK;
   }
 
@@ -317,7 +321,68 @@ namespace D3D9
     SAFE_RELEASE(pShader);
     return hval;
   }
+  
+  GXHRESULT GShaderImpl::CompileShader(clBuffer* pIntermediateCode, GXLPCSTR szSourceCode, size_t nSourceLen, LPD3DXINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled)
+  {
+    LPD3DXBUFFER pShader = NULL;
+    LPD3DXBUFFER pErrorBuf = NULL;
+    GXHRESULT hval = GX_OK;
 
+    LPCSTR szFunctionName = NULL;
+    LPCSTR szProfile = NULL;
+
+    switch(eCompiled)
+    {
+    case CompiledComponentPixelShder:
+      szFunctionName = "compose_ps_main";
+      szProfile = "ps_3_0";
+      break;
+    case CompiledPixelShder:
+      szFunctionName = "ps_main";
+      szProfile = "ps_3_0";
+      break;
+    case CompiledComponentVertexShder:
+      szFunctionName = "compose_vs_main";
+      szProfile = "vs_3_0";
+      break;
+    case CompiledVertexShder:
+      szFunctionName = "vs_main";
+      szProfile = "vs_3_0";
+      break;
+    default:
+      return GX_FAIL;
+    }
+
+    if(FAILED(D3DXCompileShader((LPCSTR)szSourceCode, (UINT)nSourceLen,
+      (D3DXMACRO*)pMacros, pInclude, szFunctionName, szProfile, NULL, &pShader, &pErrorBuf, NULL)))
+    {
+      LPCSTR szErrorString = (LPCSTR)pErrorBuf->GetBufferPointer();
+      CLOG_ERROR("Shader compiled error:\n>%s\n", szErrorString);
+      hval = GX_FAIL;
+    }
+#if 0
+    // Test D3DXDisassembleShader
+    LPD3DXBUFFER pAsmBuffer = NULL;
+    GXHRESULT hval2 = D3DXDisassembleShader((DWORD*)pShader->GetBufferPointer(),
+      FALSE, NULL, &pAsmBuffer);
+    if(GXSUCCEEDED(hval2) && pAsmBuffer)
+    {
+      LPCSTR szAsmString = (LPCSTR)pAsmBuffer->GetBufferPointer();
+      TRACE(szAsmString);
+    }
+    SAFE_RELEASE(pAsmBuffer);
+#endif // #if
+
+    pIntermediateCode->Resize(0, FALSE);
+    if(pShader) {
+      pIntermediateCode->Append(pShader->GetBufferPointer(), pShader->GetBufferSize());
+    }
+
+    SAFE_RELEASE(pErrorBuf);
+    SAFE_RELEASE(pShader);
+    return hval;
+  }
+  
   GXHRESULT GShaderImpl::Activate()
   {
     LPDIRECT3DDEVICE9 const lpd3dDevice = m_pGraphicsImpl->D3DGetDevice();
@@ -414,6 +479,12 @@ namespace D3D9
     ASSERT(Desc.Type == D3DXPT_SAMPLER2D || Desc.Type == D3DXPT_SAMPLER3D);
     return Desc.RegisterIndex;
   }
+
+  void GShaderImpl::PutInResourceMgr()
+  {
+    SET_FLAG(m_dwFlag, ShaderFlag_PutInResourceManager);
+  }
+
 #ifdef REFACTOR_SHADER
   GXBOOL GShaderImpl::CommitToDevice(GXLPVOID lpUniform, GXSIZE_T cbSize)
   {

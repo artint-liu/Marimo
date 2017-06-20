@@ -77,6 +77,7 @@
 
 namespace D3D9
 {
+  extern const char* g_szBaseShader;
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
 #include "Platform/CommonInline/GXGraphicsImpl.inl"
 
@@ -102,8 +103,9 @@ namespace D3D9
     , m_pd3dDevice          (NULL)
     , m_dwFlags             (NULL)
     , m_pIdentity           (GXPLATFORM_UNKNOWN)
-    , m_pSimpleShader       (NULL)
-    , m_pSimpleEffect       (NULL)
+    , m_pBaseShader         (NULL)
+    //, m_pSimpleShader       (NULL)
+    , m_pBaseEffect         (NULL)
     , m_pD3DOriginSur       (NULL)
     , m_pD3DDepthStencilSur (NULL)
     , m_pDeviceOriginTex    (NULL)
@@ -216,14 +218,23 @@ namespace D3D9
       }
     }
 
-    if(GXSUCCEEDED(CreateShaderFromFileA(&m_pSimpleShader, "shaders\\Simple.shader.txt")))
+    if(GXFAILED(CreateShaderFromSource(&m_pBaseShader, g_szBaseShader, 0, NULL)))
     {
-      CreateEffect(&m_pSimpleEffect, m_pSimpleShader);
+      CLOG_ERROR("Create base shader failed");
     }
     else
     {
-      TRACE("初始化SimpleShader失败!\n");
+      CreateEffect(&m_pBaseEffect, m_pBaseShader);
     }
+
+    //if(GXSUCCEEDED(CreateShaderFromFileA(&m_pSimpleShader, "shaders\\Simple.shader.txt")))
+    //{
+    //  //CreateEffect(&m_pSimpleEffect, m_pSimpleShader);
+    //}
+    //else
+    //{
+    //  TRACE("初始化SimpleShader失败!\n");
+    //}
 
     return TRUE;
   }
@@ -245,8 +256,9 @@ namespace D3D9
       return nRefCount;
     }
 
-    SAFE_RELEASE(m_pSimpleEffect);
-    SAFE_RELEASE(m_pSimpleShader);
+    SAFE_RELEASE(m_pBaseEffect);
+    //SAFE_RELEASE(m_pSimpleShader);
+    SAFE_RELEASE(m_pBaseShader);
     SAFE_RELEASE(m_pCurShader);
 
     ReleaseCommon();

@@ -75,6 +75,7 @@
   virtual GXHRESULT   CreatePrimitiveVI (GPrimitiveVI** ppPrimitive, GXLPCSTR szName, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage, GXUINT uIndexCount, GXUINT uVertexCount, GXUINT uVertexStride, GXLPCVOID pIdxInitData, GXLPCVOID pVertInitData) override;
 
   // GShader
+  virtual GXHRESULT   CreateShaderFromSource  (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition) override;
   virtual GXHRESULT   CreateShaderFromFileW   (GShader** ppShader, GXLPCWSTR szShaderDesc) override;
   virtual GXHRESULT   CreateShaderFromFileA   (GShader** ppShader, GXLPCSTR szShaderDesc) override;
   virtual GXHRESULT   CreateShaderStub        (GShaderStub** ppShaderStub) override;

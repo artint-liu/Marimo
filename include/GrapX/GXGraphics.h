@@ -221,6 +221,7 @@ public:
       ));
 
     // GSahder
+    GXSTDINTERFACE(GXHRESULT    CreateShaderFromSource      (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)); // nSourceLen是字符长度，如果是0，szShaderSource必须以'\0'结尾
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromFileW       (GShader** ppShader, GXLPCWSTR szShaderDesc));
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromFileA       (GShader** ppShader, GXLPCSTR szShaderDesc));
     //GXSTDINTERFACE(GXHRESULT    CreateShader                (GShader** ppShader, MOSHADER_ELEMENT_SOURCE* pSdrElementSrc));

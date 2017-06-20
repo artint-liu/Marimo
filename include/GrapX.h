@@ -4583,6 +4583,7 @@ enum GXShaderCapability // TODO: 改名为 trait
   GXSHADERCAP_TEXCOORD1 = 0x0020,   // shader 支持第1层纹理
   GXSHADERCAP_TEXCOORD2 = 0x0040,   // shader 支持第2层纹理
   GXSHADERCAP_TEXCOORD3 = 0x0080,   // shader 支持第3层纹理
+  GXSHADERCAP_MASK      = 0xffff,   // 外部只能使用16位
 
   // 暂时不想支持这两个,会增加编译复杂度,如果要实现单独分shader
   // 而且我也不认为这两个是语义的基本类型

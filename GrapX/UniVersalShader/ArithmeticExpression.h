@@ -215,16 +215,16 @@ namespace UVShader
       {
         MODE_Undefined,
         MODE_Opcode,          // 操作符 + 操作数 模式
-        MODE_FunctionCall,    // 函数调用
-        MODE_ArrayIndex,      // 函数调用
-        MODE_Definition,      // 变量定义
-        MODE_DefinitionConst, // 常量量定义
-        MODE_StructDef,       // 结构定义
-        MODE_Flow_While,
+        MODE_FunctionCall,    // 函数调用: A(B)
+        MODE_ArrayIndex,      // 函数调用: A[B]
+        MODE_Definition,      // 变量定义: A B
+        MODE_DefinitionConst, // 常量量定义: const A B
+        MODE_StructDef,       // 结构定义:
+        MODE_Flow_While,      // while(A) {B}
         MODE_Flow_If,         // if(A) {B}
         MODE_Flow_ElseIf,
         MODE_Flow_Else,
-        MODE_Flow_For,            // [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]
+        MODE_Flow_For,            // for(A) {B} [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]
         MODE_Flow_ForInit,        // for 的初始化部分 [MODE_Flow_ForInit] [MODE_Flow_ForRunning]
         MODE_Flow_ForRunning,     // for 的条件和步进部分
         //MODE_Flow_Switch,
@@ -233,7 +233,7 @@ namespace UVShader
         MODE_Flow_Continue,
         MODE_Flow_Discard,
         MODE_Return,
-        MODE_Block,
+        MODE_Block,         // {A}B, B只可能是';'
         MODE_Chain,         // 表达式链表,链表中的应该属于同一个作用域, [A:statement][B:next chain]，在chain结尾应该是[A:statement][B:NULL]这样
       };
 
