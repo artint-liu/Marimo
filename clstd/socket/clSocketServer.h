@@ -2,8 +2,12 @@
 #define _SOCKET_SERVER_H_
 
 #ifndef _CLSTD_THREAD_H_
-#error Must be include "clThread.h" first.
+# error Must be include "clThread.h" first.
 #endif // #ifdef _CLSTD_THREAD_H_
+
+#ifndef _CLSTD_SOCKET_H_
+# error Must be include "clSocket.h" first.
+#endif
 
 namespace clstd
 {

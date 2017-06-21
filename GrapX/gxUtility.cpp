@@ -461,6 +461,62 @@ namespace ObjMeshUtility
 
     return FALSE;
   }
+
+  //PrimaryMeshsArray* PrimaryMeshsArray::Create()
+  //{
+  //  return new PrimaryMeshsArray;
+  //}
+
+  //void PrimaryMeshsArray::Destroy(PrimaryMeshsArray* pMesh)
+  //{
+  //  delete pMesh;
+  //}
+
+  PrimaryMeshsArray::PrimaryMeshsArray()
+    : m_pMeshs(NULL)
+  {
+    m_pMeshs = new PrimaryMeshsArray_t;
+  }
+
+  PrimaryMeshsArray::~PrimaryMeshsArray()
+  {
+    SAFE_DELETE(m_pMeshs);
+  }
+
+  void PrimaryMeshsArray::push_back(const PRIMARYMESH& m)
+  {
+    m_pMeshs->push_back(m);
+  }
+
+  GXBOOL PrimaryMeshsArray::empty() const
+  {
+    return m_pMeshs->empty();
+  }
+
+  size_t PrimaryMeshsArray::size() const
+  {
+    return m_pMeshs->size();
+  }
+
+  PrimaryMeshsArray::iterator PrimaryMeshsArray::begin() const
+  {
+    return m_pMeshs->begin();
+  }
+
+  PrimaryMeshsArray::iterator PrimaryMeshsArray::end() const
+  {
+    return m_pMeshs->end();
+  }
+
+  PRIMARYMESH& PrimaryMeshsArray::operator[](int index)
+  {
+    return (*m_pMeshs)[index];
+  }
+
+  const PRIMARYMESH& PrimaryMeshsArray::operator[](int index) const
+  {
+    return (*m_pMeshs)[index];
+  }
 } // namespace ObjMeshUtility
 
 GXBOOL GXDLL PrimitiveUtility::SetUnifiedDiffuse( GPrimitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate )

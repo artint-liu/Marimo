@@ -24,7 +24,30 @@ namespace ObjMeshUtility
     IndexedTrianglesArray aFaces;
   };
 
-  typedef clvector<PRIMARYMESH> PrimaryMeshsArray;
+  //typedef clvector<PRIMARYMESH> PrimaryMeshsArray;
+  class GXDLL PrimaryMeshsArray
+  {
+  protected:
+    typedef clvector<PRIMARYMESH> PrimaryMeshsArray_t;
+    PrimaryMeshsArray_t* m_pMeshs;
+
+  public:
+    typedef PrimaryMeshsArray_t::iterator iterator;
+
+    //static PrimaryMeshsArray* Create();
+    //static void Destroy(PrimaryMeshsArray* pMesh);
+    PrimaryMeshsArray();
+    virtual ~PrimaryMeshsArray();
+
+    void push_back(const PRIMARYMESH& m);
+    GXBOOL empty() const;
+    size_t size() const;
+    iterator begin() const;
+    iterator end() const;
+
+    PRIMARYMESH& operator[](int index);
+    const PRIMARYMESH& operator[](int index) const;
+  };
   GXBOOL GXDLL LoadFromFileA(GXLPCSTR szFilename, CFloat4x4* pTransform, GXOUT PrimaryMeshsArray& aMeshs);
   GXBOOL GXDLL LoadFromFileW(GXLPCWSTR szFilename, CFloat4x4* pTransform, GXOUT PrimaryMeshsArray& aMeshs);
   GXBOOL GXDLL LoadFromMemory(const clBufferBase* pBuffer, CFloat4x4* pTransform, GXOUT PrimaryMeshsArray& aMeshs);

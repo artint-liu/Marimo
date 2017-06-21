@@ -358,14 +358,14 @@ GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndPro
 
   m_hInstance        = GetModuleHandle(NULL);
   wcex.cbSize        = sizeof(WNDCLASSEX);
-  wcex.style         = GXCS_HREDRAW | GXCS_VREDRAW | CS_OWNDC;
+  wcex.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
   wcex.lpfnWndProc   = pWndProc;
   wcex.cbClsExtra    = 0;
   wcex.cbWndExtra    = sizeof(GXApp*);
   wcex.hInstance     = m_hInstance;
   wcex.hIcon         = NULL;
   wcex.hCursor       = LoadCursor(NULL, IDC_ARROW);
-  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
   wcex.lpszMenuName  = NULL;
   wcex.lpszClassName = lpClassName;
   wcex.hIconSm       = NULL;

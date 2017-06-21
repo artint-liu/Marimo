@@ -504,9 +504,9 @@ namespace clstd
   {
     const clsize nCapacity = ALIGN_4(nBytes + sizeof(clsize));
 #ifdef _DEBUG
-    void* ptr = new CLBYTE[nCapacity + STD_ALLOC_EXTRA_LENGTH];
+    void* ptr = malloc(sizeof(CLBYTE) * (nCapacity + STD_ALLOC_EXTRA_LENGTH)); // new CLBYTE[nCapacity + STD_ALLOC_EXTRA_LENGTH];
 #else
-    void* ptr = new CLBYTE[nCapacity];
+    void* ptr = malloc(sizeof(CLBYTE) * (nCapacity)); // new CLBYTE[nCapacity];
 #endif // #ifdef _DEBUG
 
     *(clsize*)ptr = nCapacity;
@@ -544,7 +544,8 @@ namespace clstd
       ++pCheck;
     }
 #endif // #ifdef _DEBUG
-    delete[] (u8*)ptr;
+    //delete[] (u8*)ptr;
+    free(ptr);
   }
 
   void* StdAllocator::Realloc( void* ptr, clsize nOldRefBytes, clsize nBytes, clsize* pCapacity )

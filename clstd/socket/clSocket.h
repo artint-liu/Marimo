@@ -1,6 +1,8 @@
 #ifndef _CLSTD_SOCKET_H_
 #define _CLSTD_SOCKET_H_
 
+#include <functional>
+
 namespace clstd
 {
   class Signal;
