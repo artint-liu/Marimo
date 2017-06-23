@@ -513,6 +513,21 @@ void MyGraphicsTest::TestDrawToRTInRegion(GXRECT& rect)
   regnDst.height = 200;
   pCanvas->DrawTexture(m_pTexture, &regnDst);
 
+  GXRECT rcText((gxGetTickCount() / 10) % 768, -20, 250, 100);
+  rcText.right += rcText.left;
+  pCanvas->TextOutW(m_pFont, rcText.left - 20, rcText.top, L"TextOutString!~", 15, 0xff000000);
+  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xffffffff);
+
+  rcText.top = 100;
+  rcText.bottom = 200;
+  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xff00ffff);
+
+  rcText.left -= 20;
+  rcText.top = 480;
+  rcText.bottom = rcText.top + 200;
+  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xffff00ff);
+
+
   //regnDst.left   = (GetTickCount() / 7) % 768;
   //regnDst.top    = 0;
   //regnDst.width  = 100;

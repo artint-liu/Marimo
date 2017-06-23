@@ -113,7 +113,7 @@ HRESULT SampleApp_MOUI::OnCreate()
   });
 
   // 这里才设置了真正的按钮名字
-  (*m_pBasicDataPool)["button[0]"] = "ButtonName";
+  (*m_pBasicDataPool)("button[0]") = "ButtonName";
 
   //
   // 通过推送修改通知，初始化绑定“fInvScaling”的滑动控件的状态

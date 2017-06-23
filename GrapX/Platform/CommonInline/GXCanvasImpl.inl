@@ -1066,7 +1066,8 @@ GXDWORD GXCanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, 
         gxOffsetRect(&rcUserClip, m_CallState.xOrigin, m_CallState.yOrigin);
 
         // 与系统区域裁剪
-        gxIntersectRect(&rcUserClip, &m_rcAbsClip, &rcUserClip);    
+        //gxIntersectRect(&rcUserClip, &m_rcAbsClip, &rcUserClip);
+        gxIntersectRect(&rcUserClip, &m_CallState.rcClip, &rcUserClip);
 
         m_aBatch[m_uBatchCount].eFunc       = CF_SetTextClip;
         m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
