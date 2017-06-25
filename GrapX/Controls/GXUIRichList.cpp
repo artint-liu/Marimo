@@ -593,6 +593,12 @@ namespace GXUI
   GXVOID RichList::OnImpulse(LPCDATAIMPULSE pImpulse)
   {
     //CLBREAK;
+    if(pImpulse->reason == Marimo::DATACT_Insert)
+    {
+      GXRECT rect;
+      gxGetClientRect(m_hWnd, &rect);
+      OnSize(rect.right, rect.bottom); // ¸üÐÂm_nColumnCount
+    }
     List::OnImpulse(pImpulse);
     //if(hval == 0)
     {

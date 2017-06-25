@@ -498,21 +498,26 @@ namespace clstd
   
   //////////////////////////////////////////////////////////////////////////
 
-#define STD_ALLOC_EXTRA_LENGTH 32
+#ifdef _DEBUG
+# define STD_ALLOC_EXTRA_LENGTH 32
+#else
+# define STD_ALLOC_EXTRA_LENGTH 0
+#endif
+
 
   void* StdAllocator::Alloc( clsize nBytes, clsize* pCapacity )
   {
     const clsize nCapacity = ALIGN_4(nBytes + sizeof(clsize));
-#ifdef _DEBUG
-    void* ptr = malloc(sizeof(CLBYTE) * (nCapacity + STD_ALLOC_EXTRA_LENGTH)); // new CLBYTE[nCapacity + STD_ALLOC_EXTRA_LENGTH];
+#ifdef _CL_SYSTEM_WINDOWS
+    void* ptr = HeapAlloc(GetProcessHeap(), 0, sizeof(CLBYTE) * (nCapacity + STD_ALLOC_EXTRA_LENGTH));
 #else
-    void* ptr = malloc(sizeof(CLBYTE) * (nCapacity)); // new CLBYTE[nCapacity];
-#endif // #ifdef _DEBUG
+    void* ptr = malloc(sizeof(CLBYTE) * (nCapacity + STD_ALLOC_EXTRA_LENGTH)); // new CLBYTE[nCapacity + STD_ALLOC_EXTRA_LENGTH];
+#endif
 
     *(clsize*)ptr = nCapacity;
     *pCapacity = nCapacity - sizeof(clsize);
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && (STD_ALLOC_EXTRA_LENGTH > 0)
     /*
     memset((CLBYTE*)ptr + nCapacity, 0xcc, STD_ALLOC_EXTRA_LENGTH);
     /*/
@@ -521,7 +526,7 @@ namespace clstd
       ((CLBYTE*)ptr + nCapacity)[i] = (i + 1);
     }
     //*/
-#endif // #ifdef _DEBUG
+#endif // #if defined(_DEBUG) && (STD_ALLOC_EXTRA_LENGTH > 0)
 
     return ((clsize*)ptr) + 1;
   }
@@ -529,7 +534,7 @@ namespace clstd
   void StdAllocator::Free( void* ptr )
   {
     ptr = ((clsize*)ptr) - 1;
-#ifdef _DEBUG
+#if defined(_DEBUG) && (STD_ALLOC_EXTRA_LENGTH > 0)
     CLBYTE* pCheck = (CLBYTE*)ptr + *(clsize*)ptr;
     for(int i = 0; i < STD_ALLOC_EXTRA_LENGTH; ++i) {
       /*
@@ -543,9 +548,13 @@ namespace clstd
       //*/
       ++pCheck;
     }
-#endif // #ifdef _DEBUG
+#endif // #if defined(_DEBUG) && (STD_ALLOC_EXTRA_LENGTH > 0)
     //delete[] (u8*)ptr;
+#ifdef _CL_SYSTEM_WINDOWS
+    HeapFree(GetProcessHeap(), 0, ptr);
+#else
     free(ptr);
+#endif
   }
 
   void* StdAllocator::Realloc( void* ptr, clsize nOldRefBytes, clsize nBytes, clsize* pCapacity )

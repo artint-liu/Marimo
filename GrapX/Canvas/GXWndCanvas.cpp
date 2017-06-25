@@ -58,6 +58,9 @@ GXLRESULT GXWndCanvas::Initialize(GXHWND hWnd, GRegion* pRegion, GXDWORD dwFlags
   m_lpStation->pGraphics->Begin();
   //m_lpStation->BeginGraphics();
 
+  // TODO: 子窗口与父窗口相交时，这个rect其实是子窗口区域，
+  // 在UpdateRegion()中才会调整为正确的裁剪区
+  // 这里是不是要考虑下改为一次计算好呢？
   gxRectToRegn(&regn, &rect);
   m_pNative = lpStation->pGraphics->LockCanvas(lpSurface->m_pRenderTar, &regn, NULL);
 

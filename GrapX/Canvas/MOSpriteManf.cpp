@@ -291,7 +291,7 @@ namespace Marimo
   GXBOOL GXDLLAPI Sprite::CreateFromStockA(Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szImageDir, GXLPCSTR szSection)
   {
     MOSpriteImpl* pSprite = new MOSpriteImpl;
-    if( ! InlCheckNewAndIncReference(pSprite)) {
+    if(InlIsFailedToNewObject(pSprite)) {
       return FALSE;
     }
 

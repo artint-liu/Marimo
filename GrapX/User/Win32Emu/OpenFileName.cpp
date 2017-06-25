@@ -269,7 +269,10 @@ public:
     : m_lpofn(lpofn)
   {
     ASSERT(lpofn->lpstrInitialDir);
-    m_strPath = lpofn->lpstrInitialDir;
+    if(clpathfile::IsPathExist(lpofn->lpstrInitialDir))
+    {
+      m_strPath = lpofn->lpstrInitialDir;
+    }
   }
 
   void FillDirvers(GXHWND hListView)
@@ -321,6 +324,10 @@ public:
 
     if(m_strPath.EndsWith(L":\\")) {
       FillDirvers(hListView);
+    }
+    else if(m_strPath.IsEmpty()) {
+      FillDirvers(hListView);
+      return;
     }
 
     clstd::FindFile find(m_strPath + L"\\*");
@@ -404,32 +411,35 @@ public:
           GXHWND hListView = GXGetDlgItemByName(hDlg, L"FileList");
           int nSel = (int)gxSendMessage(hListView, GXLB_GETCURSEL, 0, 0);
 
-          GXWCHAR szFile[MAX_PATH];
-          gxSendMessage(hListView, GXLB_GETTEXT, nSel, (GXLPARAM)szFile);
-          GXDWORD dwAttr = (GXDWORD)gxSendMessage(hListView, GXLB_GETITEMDATA, nSel, 0);
+          if(nSel >= 0)
+          {
+            GXWCHAR szFile[MAX_PATH];
+            gxSendMessage(hListView, GXLB_GETTEXT, nSel, (GXLPARAM)szFile);
+            GXDWORD dwAttr = (GXDWORD)gxSendMessage(hListView, GXLB_GETITEMDATA, nSel, 0);
 
-          CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
+            CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
 
-          if(dwAttr == CSimpleBrowseFile::DriverSign)
-          {
-            size_t len = GXSTRLEN(szFile);
-            psbf->m_strPath.Clear();
-            psbf->m_strPath.Format(L"%c:\\", szFile[len - 3]);
-            psbf->FillList(hDlg);
-          }
-          else if(TEST_FLAG(dwAttr, FILE_ATTRIBUTE_DIRECTORY))
-          {
-            clpathfile::CombinePath(psbf->m_strPath, psbf->m_strPath, szFile);
-            psbf->FillList(hDlg);
-          }
-          else
-          {
-            clStringW strFilePath;
-            clpathfile::CombinePath(strFilePath, psbf->m_strPath, szFile);
-            GXSTRCPYN(psbf->m_lpofn->lpstrFile, (GXLPCWSTR)strFilePath, psbf->m_lpofn->nMaxFile);
-            psbf->TrueClose();
-            gxEndDialog(hDlg, TRUE);
-          }
+            if(dwAttr == CSimpleBrowseFile::DriverSign)
+            {
+              size_t len = GXSTRLEN(szFile);
+              psbf->m_strPath.Clear();
+              psbf->m_strPath.Format(L"%c:\\", szFile[len - 3]);
+              psbf->FillList(hDlg);
+            }
+            else if(TEST_FLAG(dwAttr, FILE_ATTRIBUTE_DIRECTORY))
+            {
+              clpathfile::CombinePath(psbf->m_strPath, psbf->m_strPath, szFile);
+              psbf->FillList(hDlg);
+            }
+            else
+            {
+              clStringW strFilePath;
+              clpathfile::CombinePath(strFilePath, psbf->m_strPath, szFile);
+              GXSTRCPYN(psbf->m_lpofn->lpstrFile, (GXLPCWSTR)strFilePath, psbf->m_lpofn->nMaxFile);
+              psbf->TrueClose();
+              gxEndDialog(hDlg, TRUE);
+            }
+          } // if(nSel >= 0)
         }
         else if(GXHIWORD(wParam) == GXBN_CLICKED)
         {
