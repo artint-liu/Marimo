@@ -78,6 +78,7 @@
 namespace D3D9
 {
   extern const char* g_szBaseShader;
+
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
 #include "Platform/CommonInline/GXGraphicsImpl.inl"
 

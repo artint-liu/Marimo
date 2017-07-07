@@ -287,6 +287,12 @@ void test_outofdate()
 {
   StockA ss;
 
+  // 测试失效键值
+  // 按照一定顺序插入key/section时，由于数据连续性关系，section记录的
+  // 定位信息可能会发生改变，section中会通知所有的父section做出相应的
+  // 调整。但是无法调整兄弟section或者父section的兄弟section，这时
+  // 这些无法调整的section会被标记为失效，表示不再可用。
+
   StockA::Section root = ss.CreateSection(NULL);
   root.SetKey("AAA", "aaa");
   root.SetKey("BBB", "bbb");

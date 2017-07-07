@@ -229,7 +229,9 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
     case RC_COMPLEX:
       {
         const GXUINT nRectCount = m_pClipRegion->GetRectCount();
-        GXRECT* lpRects = _GlbLockStaticRects(nRectCount);
+        clstd::LocalBuffer<sizeof(GXRECT) * 128> _buf;
+        _buf.Resize(sizeof(GXRECT) * nRectCount, FALSE);
+        GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nRectCount);
 
         m_pClipRegion->GetRects(lpRects, nRectCount);
         m_pClipRegion->GetBounding(&rcClip);
@@ -257,7 +259,7 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
         m_pCanvasStencil[1]->SetStencilRef(m_dwStencil);
         m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[1]);
 
-        _GlbUnlockStaticRects(lpRects);
+        //_GlbUnlockStaticRects(lpRects);
       }
       IntUpdateClip(rcClip);
       return (GXINT)eCompx;
@@ -671,10 +673,13 @@ GXBOOL GXCanvasImpl::Flush()
         else
         {
           const GXUINT nRectCount = m_pClipRegion->GetRectCount();
-          GXRECT* lpRects = _GlbLockStaticRects(nRectCount);
+          clstd::LocalBuffer<sizeof(GXRECT) * 128> _buf;
+          _buf.Resize(sizeof(GXRECT) * nRectCount, FALSE);
+
+          GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nRectCount);
           m_pClipRegion->GetRects(lpRects, nRectCount);
           m_pGraphics->Clear(lpRects, nRectCount, m_aBatch[i].comm.dwFlag, (GXCOLOR)m_aBatch[i].comm.wParam, 1.0f, m_dwStencil);
-          _GlbUnlockStaticRects(lpRects);
+          //_GlbUnlockStaticRects(lpRects);
         }
       }
       break;
@@ -1459,7 +1464,10 @@ GXBOOL GXCanvasImpl::ColorFillRegion(GRegion* pRegion, GXCOLORREF crFill)
   if(pRegion == NULL)
     return FALSE;
   int nCount = pRegion->GetRectCount();
-  GXRECT* pRects = _GlbLockStaticRects(nCount);
+  clstd::LocalBuffer<sizeof(GXRECT) * 128> _buf;
+  _buf.Resize(sizeof(GXRECT) * nCount, FALSE);
+
+  GXRECT* pRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nCount);
   pRegion->GetRects(pRects, nCount);
 
   for(int i = 0; i < nCount; i++)
@@ -1468,7 +1476,7 @@ GXBOOL GXCanvasImpl::ColorFillRegion(GRegion* pRegion, GXCOLORREF crFill)
       pRects[i].right - pRects[i].left,
       pRects[i].bottom - pRects[i].top, crFill);
   }
-  _GlbUnlockStaticRects(pRects);
+  //_GlbUnlockStaticRects(pRects);
   return TRUE;
 }
 GXBOOL GXCanvasImpl::DrawUserPrimitive(GTexture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount)

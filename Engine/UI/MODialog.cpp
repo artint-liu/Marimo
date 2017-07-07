@@ -180,7 +180,8 @@ GXLRESULT CMODialog::DialogProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GX
         GXSIZE sizeScreen;
         sizeScreen.cx = GXLOWORD(lParam);
         sizeScreen.cy = GXHIWORD(lParam);
-        return (GXLRESULT)pDlgThis->OnDisplayChange((GXUINT)wParam, sizeScreen);
+        pDlgThis->OnDisplayChange((GXUINT)wParam, sizeScreen);
+        return 0;
       }
     case GXWM_WINDOWPOSCHANGING:
       return pDlgThis->OnWindowPosChanging((GXWINDOWPOS*)lParam);
@@ -438,9 +439,9 @@ GXLRESULT CMODialog::OnTimer(UINT uID)
   return CMOWndProcedure::OnTimer(uID);
 }
 
-GXLRESULT CMODialog::OnDisplayChange(GXUINT uColorDepth, GXSIZE sizeScreen)
+void CMODialog::OnDisplayChange(GXUINT uColorDepth, GXSIZE sizeScreen)
 {
-  return gxDefWindowProcW(m_hWnd, WM_DISPLAYCHANGE, uColorDepth, GXMAKELPARAM(sizeScreen.cx, sizeScreen.cy));
+  gxDefWindowProcW(m_hWnd, GXWM_DISPLAYCHANGE, uColorDepth, GXMAKELPARAM(sizeScreen.cx, sizeScreen.cy));
 }
 
 GXLRESULT CMODialog::OnPaint(GXPAINTSTRUCT* pps)

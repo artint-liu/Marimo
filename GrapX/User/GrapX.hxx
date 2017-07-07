@@ -497,8 +497,8 @@ typedef GXMODULE* GXLPMODULE;
 
 //extern "C" GXHSTATION GXDLLAPI GXUIGetStation();
 GXLPSTATION IntGetStationPtr();
-GXLPRECT _GlbLockStaticRects(GXUINT nCounts);
-GXVOID _GlbUnlockStaticRects(GXLPRECT lpRects);
+//GXLPRECT _GlbLockStaticRects(GXUINT nCounts);
+//GXVOID _GlbUnlockStaticRects(GXLPRECT lpRects);
 #if defined(_WIN32) || defined(_WINDOWS)
 void    IntWin32ResizeWindow    (HWND hWnd, GXApp* pApp);
 GXBOOL  IntWin32SwitchFullScreen(HWND hWnd);

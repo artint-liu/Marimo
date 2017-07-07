@@ -326,13 +326,12 @@ namespace DlgXM
           clstd::ResolveString(Value.ToString(), ';', aWndNames);
           pPanel->aPanels.reserve(aWndNames.size());
 
-          for(clStringArrayW::iterator it = aWndNames.begin();
-            it != aWndNames.end(); ++it)
+          for(auto it = aWndNames.begin(); it != aWndNames.end(); ++it)
           {
             if(it->IsEmpty()) {
               continue;
             }
-            else if(*it == L"\\n" && ! pPanel->aPanels.empty()) {
+            else if((*it == L"\n" || *it == L"\\n") && ! pPanel->aPanels.empty()) {
               pPanel->aPanels.back().dwStyle |= LPS_INT_RETURN;
               continue;
             }

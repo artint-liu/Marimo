@@ -18,6 +18,9 @@ public:
   {    
   }
 
+  // Dialog
+  void OnDisplayChange   (GXUINT uColorDepth, GXSIZE sizeScreen) override;
+
   // Button
   virtual GXVOID OnBtnClicked             (CMOButton* pSender);
 

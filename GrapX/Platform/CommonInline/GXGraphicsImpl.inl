@@ -1194,7 +1194,10 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
         prgnSrc->Intersect(prgnInvMoveClip);
       }
       const GXUINT nRectCount = prgnSrc->GetRectCount();
-      GXRECT* lpRects = _GlbLockStaticRects(nRectCount);
+      clstd::LocalBuffer<sizeof(GXRECT) * 128> _buf;
+      _buf.Resize(sizeof(GXRECT) * nRectCount, FALSE);
+
+      GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nRectCount);
       prgnSrc->GetRects(lpRects, nRectCount);
       //vector<GXRECT> aRects;
       //prgnSrc->GetData(aRects);
@@ -1232,7 +1235,7 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
         pTarget->StretchRect(pTempTex, &rcDest, &rect, GXTEXFILTER_POINT);
       }
       //*/
-      _GlbUnlockStaticRects(lpRects);
+      //_GlbUnlockStaticRects(lpRects);
     }
     //clipRgn & (updateRgn + offset(updateRgn-clipRgn)) - destRgn
     if(lpstd->lpprgnUpdate != NULL || lpstd->lprcUpdate != NULL)

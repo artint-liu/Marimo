@@ -128,9 +128,8 @@ GXLRESULT CMOWndProcedure::OnPaint(GXPAINTSTRUCT* pps)
   return 0L;
 }
 
-GXLRESULT CMOWndProcedure::OnDisplayChange(GXUINT uColorDepth,GXSIZE sizeScreen)
+void CMOWndProcedure::OnDisplayChange(GXUINT uColorDepth,GXSIZE sizeScreen)
 {
-  return 0L;
 }
 
 GXLRESULT CMOWndProcedure::OnCommand(GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl)

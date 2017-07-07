@@ -292,7 +292,9 @@ GXBOOL GXImageImpl::SaveToFileW(GXLPCWSTR szFileName, GXLPCSTR szDestFormat)
 GXBOOL GXImageImpl::BitBltRegion(GXImage* pSource, int xDest, int yDest, GRegion* lprgnSource)
 {
   int nCount = lprgnSource->GetRectCount();
-  GXRECT* lpRects = _GlbLockStaticRects(nCount);
+  clstd::LocalBuffer<sizeof(GXRECT) * 128> _buf;
+  _buf.Resize(sizeof(GXRECT) * nCount, FALSE);
+  GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); //_GlbLockStaticRects(nCount);
   GXRECT rcDest;
 
   lprgnSource->GetRects(lpRects, nCount);
@@ -308,6 +310,6 @@ GXBOOL GXImageImpl::BitBltRegion(GXImage* pSource, int xDest, int yDest, GRegion
 
   SetHelperState(HS_Hold, NULL);
 
-  _GlbUnlockStaticRects(lpRects);
+  //_GlbUnlockStaticRects(lpRects);
   return TRUE;
 }

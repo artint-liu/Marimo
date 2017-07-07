@@ -80,7 +80,7 @@ class GAMEENGINE_API CMOWndProcedure : public CMOWnd
 public:
   virtual GXLRESULT   OnSize              (GXDWORD fwSizeType, GXSIZE& size);
   virtual GXLRESULT   OnPaint             (GXPAINTSTRUCT* pps);
-  virtual GXLRESULT   OnDisplayChange     (GXUINT uColorDepth,GXSIZE sizeScreen);
+  virtual void        OnDisplayChange     (GXUINT uColorDepth,GXSIZE sizeScreen);
   virtual GXLRESULT   OnCommand           (GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);
   virtual GXBOOL      OnNCCreate          (GXLPCREATESTRUCT lpCreateParam);
   virtual GXLRESULT   OnCreate            (GXLPCREATESTRUCT lpCreateParam);

@@ -31,11 +31,16 @@
 GXLPSTATION g_pCurStation;
 static GXINSTANCE* g_pInstDll;
 
+namespace D3D9
+{
+  extern const char* g_szFastGaussianBlur;
+} // namespace D3D9
+
 #if defined(_WIN32) || defined(_WINDOWS)
 HINSTANCE g_hDLLModule = NULL;
-HGLOBAL   g_hGlbRects = NULL;
+//HGLOBAL   g_hGlbRects = NULL;
 #else
-GXHANDLE g_hGlbRects = NULL;
+//GXHANDLE g_hGlbRects = NULL;
 #endif // defined(_WIN32) || defined(_WINDOWS)
 
 GXLPRECT g_lpRects = NULL;
@@ -118,13 +123,13 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
       GXWin32APIEmu::InitializeStatic();
       GXUSER_InitializeWndProperty();
 
-#if defined(_WIN32) || defined(_WINDOWS)
-      if(g_hGlbRects == NULL)
-        g_hGlbRects = GlobalAlloc(GMEM_MOVEABLE, sizeof(GXRECT) * g_uRectCapacity);
-#else
-      if (g_hGlbRects == NULL) 
-        g_hGlbRects = (GXHANDLE)new GXRECT[g_uRectCapacity];
-#endif // defined(_WIN32) || defined(_WINDOWS)
+//#if defined(_WIN32) || defined(_WINDOWS)
+//      if(g_hGlbRects == NULL)
+//        g_hGlbRects = GlobalAlloc(GMEM_MOVEABLE, sizeof(GXRECT) * g_uRectCapacity);
+//#else
+//      if (g_hGlbRects == NULL) 
+//        g_hGlbRects = (GXHANDLE)new GXRECT[g_uRectCapacity];
+//#endif // defined(_WIN32) || defined(_WINDOWS)
 
 #ifdef ENABLE_AERO
 
@@ -157,19 +162,19 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
     //gxDestroyWindow(g_pCurStation->m_hConsole);
 #ifndef _DEV_DISABLE_UI_CODE
     
-#if defined(_WIN32) || defined(_WINDOWS)
-    if(g_hGlbRects != NULL)
-    {
-      GlobalFree(g_hGlbRects);
-      g_hGlbRects = NULL;
-    }
-#else
-    if (g_hGlbRects != NULL) 
-    {
-      delete (g_hGlbRects);
-      g_hGlbRects = NULL;
-    }
-#endif // defined(_WIN32) || defined(_WINDOWS)
+//#if defined(_WIN32) || defined(_WINDOWS)
+//    if(g_hGlbRects != NULL)
+//    {
+//      GlobalFree(g_hGlbRects);
+//      g_hGlbRects = NULL;
+//    }
+//#else
+//    if (g_hGlbRects != NULL) 
+//    {
+//      delete (g_hGlbRects);
+//      g_hGlbRects = NULL;
+//    }
+//#endif // defined(_WIN32) || defined(_WINDOWS)
 
     GXUXTHEME_Release();
     //GXDestroyRootFrame();
@@ -254,7 +259,7 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
       SAFE_RELEASE(prgnAfterSize);
       g_pCurStation->pGraphics->Leave();
 
-      gxSendMessage(GXHWND_BROADCAST, GXWM_DISPLAYCHANGE, 0, GXMAKELPARAM(nWidth, nHeight));
+      gxSendMessage(GXHWND_BROADCAST, GXWM_DISPLAYCHANGE, 32, GXMAKELPARAM(nWidth, nHeight));
       return TRUE;
     }
     return FALSE;
@@ -334,6 +339,13 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
     lpStockObject->pAeroEffect->SetTextureSlot("s_baseMap", 0);
     lpStockObject->pAeroEffect->SetTextureSlot("s_blurMap", 1);
   }
+  else if(PlatformId == GXPLATFORM_WIN32_DIRECT3D9)
+  {
+    pGraphics->CreateShaderFromSource(&lpStockObject->pFastGaussianBlurShader, D3D9::g_szFastGaussianBlur, 0, NULL);
+  }
+
+  lpStation->pGraphics->CreateEffect(&lpStockObject->pFastGaussianBlurEffect, lpStockObject->pFastGaussianBlurShader);
+
   lpStockObject->pDefaultFont = lpStation->pGraphics->CreateFontW(0, 16, DEFAULT_FONT_NAMEW);
 
   return TRUE;
@@ -347,6 +359,9 @@ GXBOOL DestroyStockObject(GXLPSTATION lpStation)
   }
 
   SAFE_RELEASE(lpStockObject->pDefaultFont);
+
+  SAFE_RELEASE(lpStockObject->pFastGaussianBlurEffect);
+  SAFE_RELEASE(lpStockObject->pFastGaussianBlurShader);
 
   SAFE_RELEASE(lpStockObject->pAeroEffect);
   SAFE_RELEASE(lpStockObject->pBlurEffect);
@@ -831,35 +846,35 @@ GXBOOL __stdcall DllMain(__in HANDLE _HDllHandle, __in DWORD _Reason, __in_opt L
 #endif // _WIN32
 //////////////////////////////////////////////////////////////////////////
 
-GXLPRECT _GlbLockStaticRects(GXUINT nCounts)
-{
-#if defined(_WIN32) || defined(_WINDOWS)
-  ASSERT(g_lpRects == 0);  // 只能锁定一次, 程序中也只能使用一次静态Rects数组
-  
-  if(nCounts > g_uRectCapacity || g_hGlbRects == NULL)
-    return new GXRECT[nCounts];
-
-  g_lpRects = (LPGXRECT)GlobalLock(g_hGlbRects);
-#else
-  //ASSERT(g_lpRects == 0);  // 只能锁定一次, 程序中也只能使用一次静态Rects数组
-  
-  if(nCounts > g_uRectCapacity || g_hGlbRects == NULL || g_lpRects != NULL)
-    return new GXRECT[nCounts];
-  
-  g_lpRects = (LPGXRECT)g_hGlbRects;
-#endif // defined(_WIN32) || defined(_WINDOWS)
-  return g_lpRects;
-}
-
-GXVOID _GlbUnlockStaticRects(GXLPRECT lpRects)
-{
-  if(lpRects != g_lpRects)
-    delete lpRects;
-  else
-  {
-#if defined(_WIN32) || defined(_WINDOWS)
-    GlobalUnlock(g_lpRects);
-#endif // defined(_WIN32) || defined(_WINDOWS)
-    g_lpRects = NULL;
-  }
-}
+//GXLPRECT _GlbLockStaticRects(GXUINT nCounts)
+//{
+//#if defined(_WIN32) || defined(_WINDOWS)
+//  ASSERT(g_lpRects == 0);  // 只能锁定一次, 程序中也只能使用一次静态Rects数组
+//  
+//  if(nCounts > g_uRectCapacity || g_hGlbRects == NULL)
+//    return new GXRECT[nCounts];
+//
+//  g_lpRects = (LPGXRECT)GlobalLock(g_hGlbRects);
+//#else
+//  //ASSERT(g_lpRects == 0);  // 只能锁定一次, 程序中也只能使用一次静态Rects数组
+//  
+//  if(nCounts > g_uRectCapacity || g_hGlbRects == NULL || g_lpRects != NULL)
+//    return new GXRECT[nCounts];
+//  
+//  g_lpRects = (LPGXRECT)g_hGlbRects;
+//#endif // defined(_WIN32) || defined(_WINDOWS)
+//  return g_lpRects;
+//}
+//
+//GXVOID _GlbUnlockStaticRects(GXLPRECT lpRects)
+//{
+//  if(lpRects != g_lpRects)
+//    delete lpRects;
+//  else
+//  {
+//#if defined(_WIN32) || defined(_WINDOWS)
+//    GlobalUnlock(g_lpRects);
+//#endif // defined(_WIN32) || defined(_WINDOWS)
+//    g_lpRects = NULL;
+//  }
+//}

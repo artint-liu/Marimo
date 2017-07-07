@@ -88,7 +88,7 @@ public:
   virtual GXLRESULT OnInitDialog      (GXHWND hWnd, GXLPARAM lParam){return 0L;};
   virtual GXVOID    OnClose           (){};
   virtual GXLRESULT OnPaint           (GXPAINTSTRUCT* pps);
-  virtual GXLRESULT OnDisplayChange   (GXUINT uColorDepth, GXSIZE sizeScreen);
+  virtual void      OnDisplayChange   (GXUINT uColorDepth, GXSIZE sizeScreen);
   virtual GXLRESULT OnCommand         (GXINT nNotifyCode, GXINT wID, GXHWND hwndCtrl);
   virtual GXBOOL    OnNCCreate        (GXLPCREATESTRUCT lpCreateParam) { return TRUE; };
   virtual GXLRESULT OnCreate          (GXLPCREATESTRUCT lpCreateParam) { return 0; };

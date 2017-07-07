@@ -3170,7 +3170,7 @@ enum GXWndMsg
   GXWM_CONTEXTMENU            = 0x007B,
   GXWM_STYLECHANGING          = 0x007C,  // WM_STYLECHANGING
   GXWM_STYLECHANGED           = 0x007D,  // WM_STYLECHANGED
-  GXWM_DISPLAYCHANGE          = 0x007E,
+  GXWM_DISPLAYCHANGE          = 0x007E,  // 无返回值
   GXWM_NCCREATE               = 0x0081,  // WM_NCCREATE
   GXWM_NCDESTROY              = 0x0082,  // WM_NCDESTROY
   GXWM_NCCALCSIZE             = 0x0083,
@@ -4901,9 +4901,12 @@ struct STOCKOBJECT
   GShader*  pAeroShader;
   GShader*  pBlurShader;
   GShader*  pSimpleShader;
+  GShader*  pFastGaussianBlurShader;
+
   GXEffect* pAeroEffect;
   GXEffect* pBlurEffect;
   GXEffect* pSimpleEffect;
+  GXEffect* pFastGaussianBlurEffect;
   GXFont*   pDefaultFont;
 };
 typedef STOCKOBJECT* LPSTOCKOBJECT;

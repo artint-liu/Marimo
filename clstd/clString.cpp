@@ -2172,7 +2172,7 @@ SEQUENCE:
         case 'X':
         case 'x':
         {
-          unsigned long va_value = va_arg(arglist, unsigned long);          
+          unsigned long va_value = va_arg(arglist, unsigned long);
 
           if(va_value)
           {
