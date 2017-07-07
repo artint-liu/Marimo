@@ -339,7 +339,7 @@ namespace clstd
     static i32        StringToInteger32   (wch* pString);
     static void       Unsigned64ToString  (wch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup);
     static void       Integer64ToString   (wch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup);
-    static void       FloatToString       (wch* pDestStr, size_t uMaxLength, float fNum, char mode);
+    static int        FloatToString       (wch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode);
     static void       HexToLowerString    (wch* pDestStr, size_t uMaxLength, u32 uValue);
     static void       HexToUpperString    (wch* pDestStr, size_t uMaxLength, u32 uValue);
     static void       BinaryToString      (wch* pDestStr, size_t uMaxLength, u32 uValue);
@@ -361,7 +361,7 @@ namespace clstd
     static i32        StringToInteger32   (ch* pString);
     static void       Unsigned64ToString  (ch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup);
     static void       Integer64ToString   (ch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup);
-    static void       FloatToString       (ch* pDestStr, size_t uMaxLength, float fNum, char mode);
+    static int        FloatToString       (ch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode);
     static void       HexToLowerString    (ch* pDestStr, size_t uMaxLength, u32 uValue);
     static void       HexToUpperString    (ch* pDestStr, size_t uMaxLength, u32 uValue);
     static void       BinaryToString      (ch* pDestStr, size_t uMaxLength, u32 uValue);

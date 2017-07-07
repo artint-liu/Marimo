@@ -1,6 +1,7 @@
 ﻿// Sample_String.cpp : 定义控制台应用程序的入口点。
 //
 
+#define _CRT_SECURE_NO_WARNINGS
 #include <tchar.h>
 #include <locale.h>
 
@@ -316,10 +317,54 @@ void TestFormatStrFunc(const ch** fmt_flags, int num_flags, const ch** fmt_width
   }
 }
 
-void TestFormatString()
+void TestFormatString0()
 {
-  char buffer[1024];
-  sprintf(buffer, "%06.3x", 12);
+  //char buffer[1024];
+  //sprintf(buffer, "%.1f", 0);
+  //sprintf(buffer, "%.0f", 0);
+  //sprintf(buffer, "%.f", 0);
+  const ch* fmt_flags[] = {
+    "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
+  };
+  const ch* fmt_width[] = {
+    ".5", "5.3", "4.3", "3.4", "3.5", ".1", "."
+  };
+  const ch* fmt_specifier[] = {
+    "f",
+  };
+
+  const float samp_float[] = {
+    0.0f, -0.0f, 1.0f, -1.0f, 12324.83747f, -12324.83747f, 35.9474945068f, -35.9474945068f
+  }; 
+
+  //gcvt(-0.0f, 10, buffer);
+  //gcvt(-35.9474945068, 10, buffer);
+  //int a, bSign;
+  //char* test = NULL;
+  //test = ecvt(0.0, 10, &a, &bSign);
+  //test = ecvt(-0.0, 10, &a, &bSign);
+  //
+  //test = fcvt(35.9474945068, 8, &a, &bSign);
+  //test = ecvt(35.9474945068, 8, &a, &bSign);
+  //
+  //test = fcvt(-35.9474945068, 10, &a, &bSign);
+  //test = ecvt(-35.9474945068, 10, &a, &bSign);
+
+  //test = fcvt(9.9999996, 6, &a, &bSign);
+  //test = ecvt(9.9999996, 6, &a, &bSign);
+
+  //clStringA str0(0, 'E');
+  //clStringA str1(-0, 'E');
+  //clStringA str2(35.9474945068, 'E');
+  //clStringA str3(-35.9474945068, 'E');
+
+  TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_float, countof(samp_float));
+}
+
+void TestFormatString1()
+{
+  //char buffer[1024];
+  //sprintf(buffer, "%06.3x", 12);
   const ch* fmt_flags[] = {
     "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
   };
@@ -359,7 +404,8 @@ int _tmain(int argc, _TCHAR* argv[])
   TestStringResolve();
   TestCodec();
   TestStringToFloat();
-  TestFormatString();
+  TestFormatString0();
+  TestFormatString1();
 
 	return 0;
 }

@@ -46,16 +46,17 @@ const size_t  MAX_DIGITS = 80;
 //clStringX<ch, g_Alloc_clStringA, clstd::StringA_traits> g_clStringInstA;
 //#endif // _CL_SYSTEM_IOS
 
-template<typename _TCh>
-_TCh* fcvt(double arg, int ndigits, int *decpt, int *sign);
-template<typename _TCh>
-_TCh* ecvt(double arg, int ndigits, int *decpt, int *sign);
 template <typename _TCh>
-void ReadlizeFloatString(_TCh* str, int nSignificance = 5); // nSignificance就是相当于一个容差
+int ReadlizeFloatString(_TCh* str, int nSignificance = 5); // nSignificance就是相当于一个容差
 
 
 namespace clstd
 {
+  template<typename _TCh, int _NDIG>
+  _TCh* fcvt(_TCh* buf, double arg, int ndigits, int *decpt, int *sign);
+  template<typename _TCh, int _NDIG>
+  _TCh* ecvt(_TCh* buf, double arg, int ndigits, int *decpt, int *sign);
+
   template<typename _TReal, typename _TCh>
   _TReal _xstrtofT(const _TCh *str);
   template<typename _TReal, typename _TCh>
@@ -304,14 +305,14 @@ i32 clstd::StringW_traits::StringToInteger32(wch* pString)
   return clstd::_xstrtoiT<i32>(pString);
 }
 
-void clstd::StringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, float fNum, char mode)
+int clstd::StringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
 {
   if(mode == 'F' || mode == 'E') {
-    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, mode);
+    return clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
   }
   else {
-    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, 'F');
-    ReadlizeFloatString(pDestStr);
+    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
+    return ReadlizeFloatString(pDestStr);
   }
 }
 
@@ -452,14 +453,14 @@ void clstd::StringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i
   }
 }
 
-void clstd::StringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, float fNum, char mode)
+int clstd::StringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
 {
   if(mode == 'F' || mode == 'E') {
-    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, mode);
+    return clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
   }
   else {
-    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, 10, 'F');
-    ReadlizeFloatString(pDestStr);
+    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
+    return ReadlizeFloatString(pDestStr);
   }
 }
 
@@ -614,7 +615,7 @@ namespace clstd
   {
     _AllocBuffer(&alloc, MAX_DIGITS);
 
-    _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, mode);
+    _Traits::FloatToString(m_pBuf, MAX_DIGITS, 10, fFloat, mode);
     _Reduce(_Traits::StringLength(m_pBuf));
   }
 
@@ -747,7 +748,7 @@ namespace clstd
     _CLSTR_IMPL& _CLSTR_IMPL::operator=(const float fFloat)
   {
     _ResizeLengthNoCopy(MAX_DIGITS);
-    _Traits::FloatToString(m_pBuf, MAX_DIGITS, fFloat, 'F');
+    _Traits::FloatToString(m_pBuf, MAX_DIGITS, 10, fFloat, 'F');
     _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
@@ -950,7 +951,7 @@ namespace clstd
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
     _ResizeLength(uStrLength + MAX_DIGITS);
-    _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, val, mode);
+    _Traits::FloatToString(m_pBuf + uStrLength, MAX_DIGITS, 10, val, mode);
     _Reduce(_Traits::StringLength(m_pBuf));
     return *this;
   }
@@ -1965,7 +1966,7 @@ namespace clstd
     size_t _CLSTR_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
   {
     const _TCh* ptr = pFmt;
-    _TCh        buffer[MAX_DIGITS];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于16
+    _TCh        buffer[MAX_DIGITS + 1];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于80
     int         i;
 
 
@@ -2123,32 +2124,42 @@ SEQUENCE:
         case 'F':
         {
           double va_value = va_arg(arglist, double);
-          if(nPrecision)
+          int avail = 0;
+          //if(nPrecision)
           {
-            if(bForceSign && va_value >= 0.0) {
+            if(bForceSign && *(i64*)&va_value >= 0) {
               buffer[0] = '+';
-              _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
+              avail = 1 + _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
+            }
+            else if(bSpace && *(i64*)&va_value >= 0) {
+              buffer[0] = 0x20;
+              avail = 1 + _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
             }
             else {
-              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
+              avail = _Traits::FloatToString(buffer, MAX_DIGITS, nPrecision, (float)va_value, 'F');
             }
-            const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
-            if(pDot != NULL) {
-              int nn = nPrecision;
-              while(nn-- && *++pDot != '\0'); // 没错，就是分号！
-              *(_TCh*)pDot = '\0';
-            }
+
+            //const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
+            //if(pDot != NULL) {
+            //  int nn = nPrecision + 1; // 包含'.'的个数
+            //  while(nn-- && *++pDot != '\0'); // 没错，就是分号！
+            //  *(_TCh*)pDot = '\0';
+            //}
           }
-          else
-          {
-            if(bForceSign && va_value >= 0) {
-              buffer[0] = '+';
-              _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, (float)va_value, 'F');
-            }
-            else {
-              _Traits::FloatToString(buffer, MAX_DIGITS, (float)va_value, 'F');
-            }
+
+          if( ! bPound && buffer[avail - 1] == '.') {
+            buffer[avail - 1] = '\0';
           }
+          //else
+          //{
+          //  if(bForceSign && va_value >= 0) {
+          //    buffer[0] = '+';
+          //    _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, 0, (float)va_value, 'F');
+          //  }
+          //  else {
+          //    _Traits::FloatToString(buffer, MAX_DIGITS, 0, (float)va_value, 'F');
+          //  }
+          //}
           Append(buffer);
           break;
         }
@@ -2823,7 +2834,7 @@ namespace clstd
      ch     mode;
      int    lowercase;
      int    prec;
-     //_TCh            *fcvt(), *ecvt();
+     _TCh   buf[MAX_DIGITS];
 
      static _TCh nan[] = {'#','N','A','N', 0};
      if(value != value) {
@@ -2849,7 +2860,7 @@ namespace clstd
      if (mode != 'E')
      {
        /* try 'F' style output */
-       p = fcvt<_TCh>(value, prec, &expon, &sign);
+       p = fcvt<_TCh, MAX_DIGITS>(buf, value, prec, &expon, &sign);
        avail = width;
        a = ascii;
  
@@ -2898,7 +2909,7 @@ namespace clstd
      if (mode != 'F')
      {
        /* try to do E style output */
-       p = ecvt<_TCh>(value, prec + 1, &expon, &sign);
+       p = ecvt<_TCh, MAX_DIGITS>(buf, value, prec + 1, &expon, &sign);
        avail = width - 5;
        a = ascii;
  
@@ -2931,8 +2942,9 @@ namespace clstd
      /* output the rhs */
      avail = 1;
  
-     frac_out:
+   frac_out:
      *a++ = '.';
+
      while (prec > 0)
      {
        prec--;
@@ -3263,12 +3275,12 @@ extern "C" b32 strcmpnW(const wch* lpString1, const wch* lpString2, int nCount)
 // 调整格式化后的字符串修改为更容易阅读的数值
 // 如"1.500000"改为"1.5", 或者"1.499999"改为"1.5"
 template <typename _TCh>
-void ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相当于一个容差
+int ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相当于一个容差
 {
   //TRACEW(L"%s => ", str);
   _TCh* c = clstd::strchrT(str, '.');
   if(c == NULL) {
-    return;
+    return clstd::strlenT(str);
   }
 
   _TCh* l0 = c;
@@ -3290,6 +3302,7 @@ void ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相
   {
     l0[2] = '\0';
     ASSERT(c >= &l0[2]);
+    return (&l0[2] - str);
   }
   else if(*l9 == '.')
   {
@@ -3298,21 +3311,28 @@ void ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相
       l9[2] = '\0';
       ASSERT(c >= &l9[2]);
       l9[-1]++;
+      return (&l9[2] - str);
     }
     else {
       l9[nSignificance] = '\0';
+      return (&l9[nSignificance] - str);
     }
   }
   else if(*l0 != '.' && l0[1] == '0' && l0 < l9)
   {
     l0[1] = '\0';
+    return (&l0[1] - str);
   }
   else if(*l9 != '.' && l9[1] == '9' && l9 < l0)
   {
     l9[1] = '\0';
     ASSERT(*l9 >= '0' && *l9 <= '8');
     (*l9)++;
+    return (&l9[1] - str);
   }
+
+  ASSERT((c - str) == clstd::strlenT(str)); // c应该就是字符串结尾
+  return (c - str);
 }
 
 int SimpleASCIItoUnicode(wch* pDestStr, int nCount, const ch* pSrcStr)
