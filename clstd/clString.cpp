@@ -49,6 +49,7 @@ const size_t  MAX_DIGITS = 80;
 template <typename _TCh>
 int ReadlizeFloatString(_TCh* str, int nSignificance = 5); // nSignificance就是相当于一个容差
 
+extern u32 chksum_crc32 (unsigned char *block, unsigned int length);
 
 namespace clstd
 {
@@ -1693,7 +1694,6 @@ namespace clstd
   _CLSTR_TEMPL
     u32 _CLSTR_IMPL::GetCRC32() const
   {
-    extern u32 chksum_crc32 (unsigned char *block, unsigned int length);
     return chksum_crc32((u8*)&m_pBuf[0], (unsigned int)CLSTR_LENGTH(m_pBuf));
   }
 

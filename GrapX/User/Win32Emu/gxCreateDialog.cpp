@@ -1287,6 +1287,8 @@ GXHWND gxIntCreateDialogFromFileW(
       wbp.regn.left = (lpStation->nWidth - wbp.regn.width) / 2;
       wbp.regn.top = (lpStation->nHeight - wbp.regn.height) / 2;
     }
+
+    wbp.dwStyle |= dwDlgStyle;
   }
 
   if(wbp.strMenu.IsNotEmpty())

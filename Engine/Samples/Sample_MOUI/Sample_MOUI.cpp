@@ -28,7 +28,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
   sAppDesc.lpName = L"Test Marimo Windows";
   sAppDesc.nWidth = 0;
   sAppDesc.nHeight = 0;
-  sAppDesc.dwStyle = GXADS_SIZABLE;
+  sAppDesc.dwStyle = GXADS_SIZABLE | GXADS_LAZY;
   sAppDesc.pLogger = app.m_pStreamLogger;
 
   int result = (int)app.Go(&sAppDesc);

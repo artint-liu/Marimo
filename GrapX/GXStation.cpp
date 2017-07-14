@@ -332,6 +332,12 @@ GXWndMsg GXSTATION::DoDoubleClick(GXWndMsg msg, GXLPWND lpWnd)
   return msg;
 }
 
+
+GXDWORD GXSTATION::GetAppDescStyle() const
+{
+  return lpPlatform->GetAppDescStyle();
+}
+
 //////////////////////////////////////////////////////////////////////////
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 GXSTATION::GXSTATION(HWND hWnd, IGXPlatform* lpPlatform)

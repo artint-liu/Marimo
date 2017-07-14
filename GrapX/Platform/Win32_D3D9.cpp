@@ -62,6 +62,8 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
     return GX_FAIL;
   }
 
+  m_dwAppDescStyle = pDesc->dwStyle;
+
   D3D9::GRAPHICS_CREATION_DESC sDesc;
   sDesc.hWnd       = m_hWnd;
   sDesc.bWaitForVSync = pDesc->dwStyle & GXADS_WAITFORVSYNC;
@@ -167,6 +169,11 @@ GXVOID IGXPlatform_Win32D3D9::GetPlatformID(GXPlaformIdentity* pIdentity)
 GXLPCWSTR IGXPlatform_Win32D3D9::GetRootDir()
 {
   return m_strRootDir;
+}
+
+GXDWORD IGXPlatform_Win32D3D9::GetAppDescStyle() const
+{
+  return m_dwAppDescStyle;
 }
 
 //////////////////////////////////////////////////////////////////////////

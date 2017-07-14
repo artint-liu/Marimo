@@ -11,12 +11,13 @@ class IGXPlatform
 public:
   GXApp* m_pApp;
   virtual ~IGXPlatform() {}
-  GXSTDINTERFACE(GXHRESULT    Initialize    (GXApp* m_pApp, GXAPP_DESC* pDesc, GXOUT GXGraphics** ppGraphics));
-  GXSTDINTERFACE(GXHRESULT    Finalize      (GXINOUT GXGraphics** ppGraphics));
-  GXSTDINTERFACE(GXHRESULT    MainLoop      ());
-  GXSTDINTERFACE(GXVOID       GetPlatformID (GXPlaformIdentity* pIdentity));
-  GXSTDINTERFACE(GXLPCWSTR    GetRootDir    ());
-  GXSTDINTERFACE(GXHRESULT    QueryFeature  (GXDWORD dwFeatureCode, GXVOID** ppUnknown)); // 查询平台相关的特征值, 这个与平台相关的扩展, ppUnknown 可能是对象或者指针
+  GXSTDINTERFACE(GXHRESULT    Initialize      (GXApp* m_pApp, GXAPP_DESC* pDesc, GXOUT GXGraphics** ppGraphics));
+  GXSTDINTERFACE(GXHRESULT    Finalize        (GXINOUT GXGraphics** ppGraphics));
+  GXSTDINTERFACE(GXHRESULT    MainLoop        ());
+  GXSTDINTERFACE(GXVOID       GetPlatformID   (GXPlaformIdentity* pIdentity));
+  GXSTDINTERFACE(GXLPCWSTR    GetRootDir      ());
+  GXSTDINTERFACE(GXHRESULT    QueryFeature    (GXDWORD dwFeatureCode, GXVOID** ppUnknown)); // 查询平台相关的特征值, 这个与平台相关的扩展, ppUnknown 可能是对象或者指针
+  GXSTDINTERFACE(GXDWORD      GetAppDescStyle () const);
 };
 
 // 平台方便创建的模板

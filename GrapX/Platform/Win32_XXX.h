@@ -12,6 +12,7 @@ protected:
   clStringArrayW  m_aDropFiles;
   clStringW       m_strRootDir;
   ILogger*        m_pLogger;
+  GXDWORD         m_dwAppDescStyle;
 
 protected:
   // 这个因为头文件包含问题, 要注意不支持析构函数的调用

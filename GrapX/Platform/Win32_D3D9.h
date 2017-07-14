@@ -17,10 +17,11 @@ public:
   IGXPlatform_Win32D3D9();
   virtual ~IGXPlatform_Win32D3D9();
 
-  virtual GXHRESULT Initialize    (GXIN GXApp* pApp, GXIN GXAPP_DESC* pDesc, GXOUT GXGraphics** ppGraphics);
-  virtual GXHRESULT Finalize      (GXINOUT GXGraphics** ppGraphics);
-  virtual GXVOID    GetPlatformID (GXPlaformIdentity* pIdentity);
-  virtual GXLPCWSTR GetRootDir    ();
+  GXHRESULT Initialize      (GXIN GXApp* pApp, GXIN GXAPP_DESC* pDesc, GXOUT GXGraphics** ppGraphics) override;
+  GXHRESULT Finalize        (GXINOUT GXGraphics** ppGraphics) override;
+  GXVOID    GetPlatformID   (GXPlaformIdentity* pIdentity) override;
+  GXLPCWSTR GetRootDir      () override;
+  GXDWORD   GetAppDescStyle () const override;
 };
 
 IGXPlatform_Win32D3D9* AppCreateD3D9Platform(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);

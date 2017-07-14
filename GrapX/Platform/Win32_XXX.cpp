@@ -39,6 +39,7 @@ IMOPlatform_Win32Base::IMOPlatform_Win32Base()
   : m_hInstance (NULL)
   , m_hWnd      (NULL)
   , m_pLogger   (NULL)
+  , m_dwAppDescStyle(0)
 {
   // 获得当前路径
   GXWCHAR szWorkingPath[MAX_PATH];

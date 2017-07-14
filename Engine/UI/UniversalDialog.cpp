@@ -12,6 +12,20 @@
 
 #include "Engine/UniversalDialog.h"
 
+void CUniversalDialog::OnDisplayChange(GXUINT uColorDepth, GXSIZE sizeScreen)
+{
+  const GXLONG_PTR dwStyle = gxGetWindowLong(m_hWnd, GXGWL_STYLE);
+
+  if(TEST_FLAG(dwStyle, GXDS_CENTER))
+  {
+    GXRECT rect;
+    GetWindowRect(&rect);
+    SetWindowPos(NULL,
+      (sizeScreen.cx - (rect.right - rect.left)) / 2,
+      (sizeScreen.cy - (rect.bottom - rect.top)) / 2, 0, 0, GXSWP_NOSIZE);
+  }
+}
+
 GXVOID CUniversalDialog::OnBtnClicked(CMOButton* pSender)
 {
   //MOExecuteConsoleCmdW(szBtnName);

@@ -436,6 +436,7 @@ struct GXSTATION
   GXLPWND     GetActiveWnd();
 #endif // #ifndef _DEV_DISABLE_UI_CODE
   GXWndMsg    DoDoubleClick   (GXWndMsg msg, GXLPWND lpWnd);
+  GXDWORD     GetAppDescStyle() const;
 };
 typedef GXSTATION*        GXLPSTATION;
 typedef const GXSTATION*  GXLPCSTATION;

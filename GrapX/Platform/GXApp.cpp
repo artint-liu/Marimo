@@ -19,6 +19,12 @@ GXHRESULT GXApp::Go(GXAPP_DESC* pDesc)
 {  
   m_pGraphics = NULL;
   m_pIPlatform = NULL;
+
+  if(pDesc->cbSize != sizeof(GXAPP_DESC)) {
+    CLOG_ERROR("pDesc->cbSize != sizeof(GXAPP_DESC)");
+    return GX_ERROR_OUTOFRANGE;
+  }
+
 //#ifdef _DEV_PROOF
 //  IGXPlatform_Win32D3D9* pPlatform = new IGXPlatform_Win32D3D9;
 //  IGXPlatform_Win32OpenGL* pPlatformDevProof = new IGXPlatform_Win32OpenGL;
