@@ -106,6 +106,13 @@ int CreateSectAndSave()
     hSub.SetKey("Key1", "123");
     hSub.SetKey("Key2", "4567");
     hSub.SetKey("Key1", "3498");
+    hSub.SetKey("Visible", "true");
+    b32 bResult = hSub.GetKeyAsBoolean("Visible", FALSE);
+    ASSERT(bResult);
+    hSub.SetKey("Visible", "false");
+    bResult = hSub.GetKeyAsBoolean("Visible", TRUE);
+    ASSERT( ! bResult);
+
 
     printf("Key1=%d\nKey2=%d\n", hSub.GetKeyAsInteger("Key1", 0), hSub.GetKeyAsInteger("Key2", 0));
 

@@ -261,7 +261,7 @@ clsize clstd::StringW_traits::XStringLength(const _XCh* pStrX)
 wch* clstd::StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uCopyLength)
 {
   ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
-  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength + 1);
+  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength);
 }
 
 i32 clstd::StringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
@@ -391,7 +391,7 @@ clsize clstd::StringA_traits::XStringLength(const _XCh* pStrX)
 ch* clstd::StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uCopyLength)
 {
   ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
-  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength + 1);
+  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength);
 }
 
 i32 clstd::StringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
@@ -1237,13 +1237,13 @@ namespace clstd
     _ResizeLength(uStrLength + uInputLength);
     if(idx >= uStrLength)
     {
-      _CopyNakeString(m_pBuf + uStrLength, pStr, uInputLength);
+      _Traits::CopyStringN(m_pBuf + uStrLength, pStr, uInputLength);
     }
     else
     {
       clmemmove(m_pBuf + idx + uInputLength, m_pBuf + idx,
         (uStrLength - idx + 1) * sizeof(_TCh));
-      _CopyNakeString(m_pBuf + idx, pStr, uInputLength);
+      _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
     }
     return uStrLength + uInputLength;
   }
@@ -1926,14 +1926,6 @@ namespace clstd
     _AppendSpace(len, nPrefixLen, -nWidth, nPrecision);
   }
 
-  _CLSTR_TEMPL
-  void _CLSTR_IMPL::_CopyNakeString(_TCh* pStrDest, const _TCh* pStrSrc, size_t uCopyLength)
-  {
-    while(uCopyLength--) {
-      *pStrDest++ = *pStrSrc++;
-    }
-  }
-
   //////////////////////////////////////////////////////////////////////////
 
   _CLSTR_TEMPL
@@ -2458,17 +2450,24 @@ namespace clstd
     {"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"},};
 
   template<typename _TCh>
-  _TCh* strcpynT(_TCh* pDest, const _TCh* pSrc, size_t uMaxCount)
+  _TCh* strcpynT(_TCh* pDest, const _TCh* pSrc, size_t uCount)
   {
-    if (uMaxCount == 0) {
-      return pDest;
-    }
+    // pSrc长度指截至到'\0'之前的部分
+    // pSrc长度大于等于uCount，不填'\0'
+    // pSrc长度小于uCount，剩余用0填满
     _TCh* start = pDest;
 
-    while (--uMaxCount && (*pDest++ = *pSrc++));
+    while(uCount && (*pDest++ = *pSrc++)) { // copy string
+      uCount--;
+    }
 
-    *pDest = L'\0';
-    return start;
+    if(uCount) {                            // pad out with zeroes
+      while(--uCount) {
+        *pDest++ = L'\0';
+      }
+    }
+
+    return(start);
   }
   
   template<typename _TCh>

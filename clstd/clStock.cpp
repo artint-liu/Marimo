@@ -95,9 +95,10 @@ namespace clstd
     static const size_t max_len = sizeof(sz_trueQ) / sizeof(sz_trueQ[0]) - 1; // 不含结尾最长的一个
     
     if (len > max_len || len == 0) { return FALSE; }
-    _TCh szStr[max_len];
+    _TCh szStr[max_len + 1];
 
     clstd::strcpynT(szStr, pStr, len + 1);
+    szStr[len] = L'\0';
     for (size_t i = 0; i < len && szStr[i] != '\0'; i++) {
       if (szStr[i] >= 'a' && szStr[i] <= 'z') {
         szStr[i] -= ('a' - 'A');

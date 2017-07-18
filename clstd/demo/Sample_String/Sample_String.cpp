@@ -4,6 +4,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <tchar.h>
 #include <locale.h>
+#include <conio.h>
 
 #include "clstd.h"
 #include "clString.H"
@@ -167,6 +168,23 @@ void TestBasicStringOp()
 
   str.Insert(2, "34");
   ASSERT(str == "12345");
+
+  clStringA strNew("1234567890", 5);
+  ASSERT(str == "12345");
+
+  str = "12345556789";
+  str.Replace(5, 2, "");
+  ASSERT(str = "123456789");
+
+  str = "1289";
+  str.Replace(2, 0, "34567");
+  ASSERT(str = "123456789");
+
+  str = "2H31hrJHtgK91LJ3gLk2jKJrh3skKkh69G97t9god2";
+  str.MakeLower();
+  ASSERT(str == "2h31hrjhtgk91lj3glk2jkjrh3skkkh69g97t9god2");
+  str.MakeUpper();
+  ASSERT(str == "2H31HRJHTGK91LJ3GLK2JKJRH3SKKKH69G97T9GOD2");
 }
 
 void TestStringToFloat()
@@ -308,6 +326,10 @@ void TestFormatStrFunc(const ch** fmt_flags, int num_flags, const ch** fmt_width
           else {
             CLOG_WARNING("[%d]%s !NOT match!\n", index, format_str);
             CLBREAK;
+          }
+
+          if(kbhit() && getch() == 27) {
+            return;
           }
 
           index++;
