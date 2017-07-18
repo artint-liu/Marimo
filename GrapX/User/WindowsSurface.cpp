@@ -79,6 +79,7 @@ GXWindowsSurface::~GXWindowsSurface()
 
 RGNCOMPLEX GXWindowsSurface::InvalidateRegion(const GRegion* pRegion)
 {
+  m_lpStation->SetLazyUpdate();
   // TODO: 应该检查传入的区域是否超出了可以绘图的面积
   return m_prgnUpdate->Union(pRegion);
 }
@@ -98,6 +99,7 @@ RGNCOMPLEX GXWindowsSurface::InvalidateRect(GXRECT* lpRect)
   pGraphics->CreateRectRgn(&pRegion, rcUpdate.left, rcUpdate.top, rcUpdate.right, rcUpdate.bottom);
   const RGNCOMPLEX r = m_prgnUpdate->Union(pRegion);
   SAFE_RELEASE(pRegion);
+  m_lpStation->SetLazyUpdate();
   return r;
 }
 
@@ -119,6 +121,8 @@ GXBOOL GXWindowsSurface::Scroll(int dx, int dy, LPGXCRECT lprcScroll, GRegion* l
     *lpprgnUpdate = prgnUpdate;
   else
     SAFE_RELEASE(prgnUpdate);
+
+  m_lpStation->SetLazyUpdate();
   return TRUE;
 }
 

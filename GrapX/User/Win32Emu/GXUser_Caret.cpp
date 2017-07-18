@@ -52,7 +52,7 @@ extern "C"
 #endif // #ifdef _UPDATE_WIN32_CARET
     LPGXCARET lpCaret = &(hWnd != NULL
       ? (lpStation->SysCaret)
-      : IntGetStationPtr()->SysCaret);
+      : GrapX::Internal::GetStationPtr()->SysCaret);
 
     if(lpCaret->flag & GXCARET_AVAILABLE)
     {

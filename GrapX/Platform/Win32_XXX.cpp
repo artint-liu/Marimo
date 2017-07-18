@@ -26,7 +26,8 @@ void GXDestroyRootFrame();
 
 inline void InlPrepareActionInfo(GXAPPACTIONINFO& Info, GXWPARAM wParam, LPARAM lParam, DWORD dwAction)
 {
-  Info.hUIHoverWnd = GXWND_HANDLE(IntGetStationPtr()->m_pMouseFocus);
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
+  Info.hUIHoverWnd = GXWND_HANDLE(lpStation->m_pMouseFocus);
   Info.dwAction    = dwAction;
   Info.Keys        = wParam;
   Info.Data        = 0;
@@ -39,7 +40,7 @@ IMOPlatform_Win32Base::IMOPlatform_Win32Base()
   : m_hInstance (NULL)
   , m_hWnd      (NULL)
   , m_pLogger   (NULL)
-  , m_dwAppDescStyle(0)
+  //, m_dwAppDescStyle(0)
 {
   // 获得当前路径
   GXWCHAR szWorkingPath[MAX_PATH];
@@ -77,7 +78,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     pGraphics = pApp->GetGraphicsUnsafe();
     if(pGraphics != NULL)
     {
-      lpStation = IntGetStationPtr();  // 下面用到
+      lpStation = GrapX::Internal::GetStationPtr();  // 下面用到
       GXUIPostRootMessage(NULL, message, wParam, lParam);
     }
   }
@@ -92,7 +93,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
   //  bTrack = 0;
   //  break;
 #ifndef _DEV_DISABLE_UI_CODE
-  case GXWM_SETCURSOR:
+  case WM_SETCURSOR:
     if(lpStation != NULL)
       return lpStation->SetCursor(wParam, lParam);
     break;
@@ -101,12 +102,19 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
   case WM_LBUTTONDOWN:
     SetCapture(hWnd);
     break;
+  case WM_PAINT:
+    if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
+    {
+      //lpStation->AppRender();
+    }
+    ValidateRect(hWnd, NULL);
+    break;
   case WM_LBUTTONUP:
     ReleaseCapture();
     break;
   case WM_CLOSE:
     {
-      lpStation = IntGetStationPtr();
+      lpStation = GrapX::Internal::GetStationPtr();
       lpStation->m_pMsgThread->PostQuitMessage(0);
       lpStation->m_pMsgThread->WaitThreadQuit(-1);
       SAFE_DELETE(lpStation->m_pMsgThread);
@@ -136,7 +144,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
   case WM_DROPFILES:
     {
       if(lpStation == NULL) {
-        lpStation = IntGetStationPtr();
+        lpStation = GrapX::Internal::GetStationPtr();
       }
       clStringArrayW& Strings = ((IMOPlatform_Win32Base*)lpStation->lpPlatform)->m_aDropFiles;
       GXWCHAR szFilename[MAX_PATH];
@@ -284,7 +292,7 @@ GXLRESULT IMOPlatform_Win32Base::AppHandle(GXUINT message, GXWPARAM wParam, GXLP
   case WM_ACTIVATEAPP:
     {
       GXAPPACTIONINFO Info;
-      Info.hUIHoverWnd = GXWND_HANDLE(IntGetStationPtr()->m_pMouseFocus);
+      Info.hUIHoverWnd = GXWND_HANDLE(GrapX::Internal::GetStationPtr()->m_pMouseFocus);
       Info.dwAction    = GXMAKEFOURCC('A','T','V','P');
       Info.Keys        = wParam; // BOOL fActive
       Info.Data        = lParam; // DWORD dwThreadID
@@ -300,7 +308,7 @@ GXLRESULT IMOPlatform_Win32Base::AppHandle(GXUINT message, GXWPARAM wParam, GXLP
         break;
       }
       GXAPPACTIONINFO Info;
-      Info.hUIHoverWnd = GXWND_HANDLE(IntGetStationPtr()->m_pMouseFocus);
+      Info.hUIHoverWnd = GXWND_HANDLE(GrapX::Internal::GetStationPtr()->m_pMouseFocus);
       Info.dwAction    = GXMAKEFOURCC('D','R','P','F');
       Info.Keys        = 0;
       Info.Data        = lParam;
@@ -465,7 +473,7 @@ GXBOOL IntSetCursor(GXWPARAM wParam, LPARAM lParam)
   GXHWND hWnd   = (GXHWND)wParam;
   const int nHittest  = GXLOWORD(lParam);
   const int wMouseMsg = GXHIWORD(lParam);
-  HCURSOR& hCursor = IntGetStationPtr()->hCursor;
+  HCURSOR& hCursor = GrapX::Internal::GetStationPtr()->hCursor;
 
   switch(nHittest)
   {

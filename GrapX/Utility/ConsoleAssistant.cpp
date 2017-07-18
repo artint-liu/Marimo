@@ -52,7 +52,7 @@ LPCSTAFFCAPSDESC ConsoleAssistant::GetCapacity() const
 GXHRESULT ConsoleAssistant::Execute(int nCmdIndex, const clStringW* argv, int argc)
 {
   ASSERT(GXSTRCMP<GXWCHAR>(s_aStaffDesc[nCmdIndex].szTitle, argv[0]) == 0);
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   switch(nCmdIndex)
   {
   case 0: // ver

@@ -272,7 +272,7 @@ GXBOOL GXWnd::AnalyzeMouseMoveMsg(GXINOUT GXMSG* msg, GXLPPOINT pptMSWinClient)
   GXLPWND    pNowFocus = NULL;
   GXPOINT    ptClient;
 
-  GXCLPSTATION  lpStation = IntGetStationPtr();
+  GXCLPSTATION  lpStation = GrapX::Internal::GetStationPtr();
   GXHWND        hMouseFocus = GXWND_HANDLE(lpStation->m_pMouseFocus);
   GXBOOL        bEnabled;
   GXLRESULT     ht;
@@ -378,7 +378,7 @@ extern "C" GXBOOL GXDLLAPI GXUIPostRootMessage(GXHWND hWnd, GXUINT message, GXWP
 //  STMT::SetTaskEvent(STMT::hDefHandle);
 //  STMT::YieldTask();
 //#else
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   MOUIMSG ThreadMsg;
   GXPOINT ptCursor;
   if(message == GXWM_MOUSEMOVE)
@@ -1345,7 +1345,7 @@ GXBOOL GXWnd::InvalidateRgn(GRegion* pRegion, GXBOOL bErase)
 
 GXBOOL GXDLLAPI gxIsTopLevelWindow(GXHWND hWnd)
 {
-  LPGXWND lpDesktop = IntGetStationPtr()->lpDesktopWnd;
+  LPGXWND lpDesktop = GrapX::Internal::GetStationPtr()->lpDesktopWnd;
   return ((GXWND_PTR(hWnd)->m_pParent == NULL) || (GXWND_PTR(hWnd)->m_pParent == lpDesktop));
 }
 //////////////////////////////////////////////////////////////////////////
@@ -1624,7 +1624,7 @@ GXBOOL GXWnd::IsAncestorVisible() const
 
   // 判断父窗口可见性
   GXLPWND lpPWnd = m_pParent;
-  LPGXWND lpDesktop = IntGetStationPtr()->lpDesktopWnd;
+  LPGXWND lpDesktop = GrapX::Internal::GetStationPtr()->lpDesktopWnd;
 
   while (lpPWnd != lpDesktop && lpPWnd != NULL)
   {

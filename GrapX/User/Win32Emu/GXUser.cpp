@@ -434,7 +434,7 @@ GXBOOL GXDLLAPI gxInvalidateRect(
           )
 {
   if( ! hWnd) {
-    GXLPSTATION lpStation = IntGetStationPtr();
+    GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
     GRegion* pRegion = NULL;
     if(lpRect) {
       lpStation->pGraphics->CreateRectRgn(&pRegion, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom);
@@ -577,7 +577,7 @@ GXBOOL GXDLLAPI gxIsChild(
 GXBOOL GXDLLAPI gxReleaseCapture()
 {
   // TODO: 发送失去窗口捕获信息
-  GXLPSTATION pStation = IntGetStationPtr();
+  GXLPSTATION pStation = GrapX::Internal::GetStationPtr();
   if(pStation->m_pCapture == NULL)
   {
     return FALSE;
@@ -614,7 +614,7 @@ GXHWND GXDLLAPI gxSetCapture(
 //gxGetCapture
 GXHWND GXDLLAPI gxGetCapture()
 {
-  GXCLPSTATION pStation = IntGetStationPtr();
+  GXCLPSTATION pStation = GrapX::Internal::GetStationPtr();
   return GXWND_HANDLE(pStation->m_pCapture);
 }
 //////////////////////////////////////////////////////////////////////////
@@ -628,7 +628,7 @@ GXHWND GXDLLAPI gxSetFocus(
   LPGXWND lpWnd = GXWND_PTR(hWnd);
 
   if(lpWnd == NULL) {
-    pStation = IntGetStationPtr();
+    pStation = GrapX::Internal::GetStationPtr();
   }
   else {
     if( ! lpWnd->IsVisible()) {
@@ -654,7 +654,7 @@ GXHWND GXDLLAPI gxSetFocus(
 
 GXHWND GXDLLAPI gxGetFocus()
 {
-  const GXLPSTATION pStation = IntGetStationPtr();
+  const GXLPSTATION pStation = GrapX::Internal::GetStationPtr();
   GXLPWND lpFocus = pStation->m_pKeyboardFocus;
   return GXWND_HANDLE(lpFocus);
 }
@@ -809,7 +809,7 @@ GXINT GXDLLAPI gxMapWindowPoints(
 {
   //GXPOINT  ptDelta;
   //GXLPPOINT  _lpPoints = lpPoints;
-  //GXLPWND lpDesktop = IntGetStationPtr()->lpRootFrame;
+  //GXLPWND lpDesktop = GrapX::Internal::GetStationPtr()->lpRootFrame;
   //GXHWND _hWndFrom = hWndFrom == GXHWND_DESKTOP 
   //  ? GXWND_HANDLE(lpDesktop) 
   //  : hWndFrom;
@@ -1020,7 +1020,7 @@ GXBOOL GXDLLAPI gxGetMonitorInfoW(
 
 GXHWND GXDLLAPI gxGetDesktopWindow()
 {
-  LPGXWND lpDesktop = IntGetStationPtr()->lpDesktopWnd;
+  LPGXWND lpDesktop = GrapX::Internal::GetStationPtr()->lpDesktopWnd;
   return GXWND_HANDLE(lpDesktop);
 }
 GXBOOL GXDLLAPI gxDestroyIcon(
@@ -1157,7 +1157,7 @@ GXHCURSOR GXDLLAPI gxSetCursor(
           )
 {
 #if defined(_CL_SYSTEM_WINDOWS)
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   GXHCURSOR hPrevCursor = (GXHCURSOR)lpStation->hCursor;
   lpStation->hCursor = (HCURSOR)hCursor;
   return hPrevCursor;
@@ -1183,7 +1183,7 @@ GXBOOL GXDLLAPI gxGetCursorPos(
               GXLPPOINT lpPoint   // address of structure for cursor position  
               )
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   *lpPoint = lpStation->m_ptCursor;
   return TRUE;
 
@@ -1198,7 +1198,7 @@ GXBOOL GXDLLAPI gxGetCursorPos(
 
 GXBOOL GXDLLAPI gxSetCursorPos(int X, int Y)
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   GXPOINT pos = {X, Y};
   if( ! lpStation->SetCursorPos(&pos))
     return FALSE;
@@ -1350,7 +1350,7 @@ GXHWND GXDLLAPI gxWindowFromPoint(
 {
   GXLRESULT ht;
   GXBOOL bEnabled;
-  LPGXWND lpDesktop = IntGetStationPtr()->lpDesktopWnd;
+  LPGXWND lpDesktop = GrapX::Internal::GetStationPtr()->lpDesktopWnd;
   LPGXWND lpWnd = lpDesktop->ChildWindowFromPoint(lpPoint, &ht, &bEnabled);
   CHECK_LPWND_VAILD(lpWnd);
 
@@ -1380,14 +1380,14 @@ GXUINT GXDLLAPI gxGetDoubleClickTime()
 #ifdef _WINDOWS
   return GetDoubleClickTime();
 #else
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   return lpStation->dwDoubleClickTime;
 #endif
 }
 
 GXBOOL GXDLLAPI gxSetDoubleClickTime(GXUINT dwTime)
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   lpStation->dwDoubleClickTime = dwTime;
 
 #ifdef _WINDOWS
@@ -1484,7 +1484,7 @@ LPGXGRAPHICS GXDLLAPI GXGetGraphics(GXHWND hWnd)
   GXLPWND lpWnd = GXWND_PTR(hWnd);
   if(lpWnd == NULL)
   {
-    GXLPSTATION pStation = IntGetStationPtr();
+    GXLPSTATION pStation = GrapX::Internal::GetStationPtr();
     return pStation->pGraphics;
   }
 

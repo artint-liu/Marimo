@@ -63,15 +63,19 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
 
 //extern "C"
 //{
-#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
-  GXBOOL GXDLLAPI GXUICreateStation(HWND hWnd, IGXPlatform* lpPlatform)
+//#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+  GXBOOL GXDLLAPI GXUICreateStation(const GXCREATESTATION* lpCreateStation)
   {
-    g_pCurStation = new GXSTATION(hWnd, lpPlatform);
-#else
-  GXBOOL GXDLLAPI GXUICreateStation(IGXPlatform* lpPlatform)
-  {
-    g_pCurStation = new GXSTATION(lpPlatform);
-#endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+    if(lpCreateStation == NULL || lpCreateStation->cbSize != sizeof(GXCREATESTATION)) {
+      return FALSE;
+    }
+
+    g_pCurStation = new GXSTATION(lpCreateStation);
+//#else
+//  GXBOOL GXDLLAPI GXUICreateStation(IGXPlatform* lpPlatform)
+//  {
+//    g_pCurStation = new GXSTATION(lpPlatform);
+//#endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
   //{
     //GXGRAPHICSDEVICE_DESC GraphDesc;
 
@@ -116,7 +120,7 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
 
     //g_Instance.lpStation = g_pCurStation;
 
-    if(lpPlatform)
+    if(lpCreateStation->lpPlatform)
     {
 #ifndef _DEV_DISABLE_UI_CODE
       GXWin32APIEmu::SetScreen(g_pCurStation->nWidth, g_pCurStation->nHeight);

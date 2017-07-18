@@ -5284,6 +5284,13 @@ enum GXPlaformIdentity // TODO: 以后去掉这个, 使用FOURCC来表示
   //GXPLATFORM_X_OPENGLES1A,
 };
 
+enum GXUpdateRate
+{
+  UpdateRate_Lazy         = 0, // 收到系统重绘时更新
+  UpdateRate_Active       = 1, // 活动时主动更新，非活动状态根据系统重绘通知更新
+  UpdateRate_RealTime     = 2, // 尽可能快地不断更新，有可能要等待垂直同步
+};
+
 
 // Platform id 与字符串互相转换的函数
 extern "C"

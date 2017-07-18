@@ -322,7 +322,7 @@ GXVOID GXDLLAPI MOLogW( GXLPCWSTR szFormat, ... )
   clStringW str;
   str.VarFormat(szFormat, arglist);
 
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   lpStation->m_pLogger->OutputW(str);
 }
 
@@ -335,20 +335,20 @@ GXVOID GXDLLAPI MOLogA( GXLPCSTR szFormat, ... )
   clStringA str;
   str.VarFormat(szFormat, arglist);
 
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   lpStation->m_pLogger->OutputA(str);
 }
 
 //////////////////////////////////////////////////////////////////////////
 GXVOID GXDLLAPI MOLogOutputW( GXLPCWSTR szText )
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   lpStation->m_pLogger->OutputW(szText);
 }
 
 //////////////////////////////////////////////////////////////////////////
 GXVOID GXDLLAPI MOLogOutputA( GXLPCSTR szText )
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   lpStation->m_pLogger->OutputA(szText);
 }

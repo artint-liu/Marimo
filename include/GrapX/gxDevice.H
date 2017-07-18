@@ -22,17 +22,29 @@ class IGXPlatform;
 //
 //typedef GXLRESULT (GXCALLBACK* GXMOUSEMOVE)(GXHWND, GXUINT, GXWPARAM, GXLPARAM);
 
+struct GXAPP_DESC;
+struct GXCREATESTATION
+{
+  size_t cbSize;
+#if defined(_CL_SYSTEM_WINDOWS)
+  HWND hWnd;
+#endif
+  IGXPlatform* lpPlatform;
+  GXAPP_DESC*  lpAppDesc;
+};
+
 extern "C"
 {
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
-  GXBOOL          GXDLLAPI GXUICreateStation      (HWND hWnd, IGXPlatform* lpPlatform);
+  //GXBOOL          GXDLLAPI GXUICreateStation      (HWND hWnd, IGXPlatform* lpPlatform);
 #ifndef _DEV_DISABLE_UI_CODE
   GXBOOL          GXDLLAPI GXUIPostRootMessage    (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
   GXLRESULT       GXDLLAPI GXUISetCursor          (GXWPARAM wParam, GXLPARAM lParam);
 #endif // _DEV_DISABLE_UI_CODE
-#else
-  GXBOOL          GXDLLAPI GXUICreateStation      (IGXPlatform* lpPlatform);
+//#else
+//  GXBOOL          GXDLLAPI GXUICreateStation      (IGXPlatform* lpPlatform);
 #endif // defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+  GXBOOL          GXDLLAPI GXUICreateStation      (const GXCREATESTATION* lpCreateStation);
   GXVOID          GXDLLAPI GXUIDestroyStation     ();
   GXBOOL          GXDLLAPI GXUIResizeStation      (int nWidth, int nHeight);
   //GXBOOL          GXDLLAPI GXUITestStation        ();

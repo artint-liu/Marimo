@@ -14,6 +14,7 @@
 #include "GrapX/MOConsoleStaff.h"
 
 #include "GrapX/Platform.h"
+#include "GrapX/gxDevice.H"
 #include "User/gxMessage.hxx"
 //#include "clMessageThread.h"
 #include "User/GXWindow.h"
@@ -332,23 +333,38 @@ GXWndMsg GXSTATION::DoDoubleClick(GXWndMsg msg, GXLPWND lpWnd)
   return msg;
 }
 
-
-GXDWORD GXSTATION::GetAppDescStyle() const
+GXUpdateRate GXSTATION::GetUpdateRate() const
 {
-  return lpPlatform->GetAppDescStyle();
+  return m_eUpdateRate;
+}
+
+void GXSTATION::SetLazyUpdate()
+{
+  SET_FLAG(m_dwFlags, GXSTATIONSTATEFLAG_LAZYUPDATE);
+}
+
+GXBOOL GXSTATION::CheckLazyUpdate()
+{
+  if(TEST_FLAG(m_dwFlags, GXSTATIONSTATEFLAG_LAZYUPDATE))
+  {
+    RESET_FLAG(m_dwFlags, GXSTATIONSTATEFLAG_LAZYUPDATE);
+    return TRUE;
+  }
+  return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////////
-#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
-GXSTATION::GXSTATION(HWND hWnd, IGXPlatform* lpPlatform)
-#else
-GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
-#endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+//#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+//GXSTATION::GXSTATION(HWND hWnd, IGXPlatform* lpPlatform)
+//#else
+//GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
+//#endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+GXSTATION::GXSTATION(const GXCREATESTATION* lpCreateStation)
   : dwMagic               (GXSTATION_MAGIC)
-  , m_dwFlags             (GXST_DRAWDEBUGMSG)
+  , m_dwFlags             (GXSTATIONSTATEFLAG_DRAWDEBUGMSG)
   , m_pMsgThread          (NULL)
   , m_hConsole            (NULL)
-  , lpPlatform            (lpPlatform)
+  , lpPlatform            (lpCreateStation->lpPlatform)
   , dwUIThreadId          (NULL)
   , pGraphics             (lpPlatform ? lpPlatform->m_pApp->GetGraphicsUnsafe() : NULL)
   , m_uFrameCount         (0)
@@ -368,12 +384,13 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
   , m_eDownMsg            (GXWM_NULL)
   , m_dwBtnDownTime       (NULL)
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
-  , hBindWin32Wnd     (hWnd)
+  , hBindWin32Wnd     (lpCreateStation->hWnd)
   , hCursor           (NULL)
   , dwDoubleClickTime     (GetDoubleClickTime())
 #else
   , dwDoubleClickTime     (500) // Windows Ä¬ÈÏÖµ
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+  , m_pTimerChain         (NULL)
 {
   GXGRAPHICSDEVICE_DESC sGraphDesc;
 
@@ -393,7 +410,7 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
   {
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
     MONITORINFO mi = {sizeof(MONITORINFO)};
-    HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY);
+    HMONITOR hMonitor = MonitorFromWindow(lpCreateStation->hWnd, MONITOR_DEFAULTTOPRIMARY);
 
     GetMonitorInfo(hMonitor, &mi);
 
@@ -406,6 +423,15 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
 #endif
   }
 
+  const GXDWORD dwAppStyle = lpCreateStation->lpAppDesc->dwStyle;
+  if(TEST_FLAGS_ALL(dwAppStyle, GXADS_REALTIME)) {
+    m_eUpdateRate = UpdateRate_RealTime;
+  } else if(TEST_FLAGS_ALL(dwAppStyle, GXADS_ACTIVE)) {
+    m_eUpdateRate = UpdateRate_Active;
+  } else if(TEST_FLAGS_ALL(dwAppStyle, GXADS_LAZY)) {
+     m_eUpdateRate = UpdateRate_Lazy;
+  }
+
   m_ptCursor.x = 0;
   m_ptCursor.y = 0;
 
@@ -416,7 +442,7 @@ GXSTATION::GXSTATION(IGXPlatform* lpPlatform)
 
 GXHRESULT GXDLLAPI MORegisterConsoleStaff(IConsoleStaff* pStaff)
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   LPCSTAFFCAPSDESC pDesc = pStaff->GetCapacity();
   
   typedef GXSTATION::CmdDict CmdDict;
@@ -440,7 +466,7 @@ GXHRESULT GXDLLAPI MORegisterConsoleStaff(IConsoleStaff* pStaff)
 
 GXHRESULT GXDLLAPI MOUnregisterConsoleStaff(IConsoleStaff* pStaff)
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   LPCSTAFFCAPSDESC pDesc = pStaff->GetCapacity();
 
   typedef GXSTATION::CmdDict CmdDict;
@@ -494,7 +520,7 @@ GXBOOL GXDLLAPI MOExecuteBatchCmdW(GXLPCWSTR* szCommand, int nCount)
 
   clStringArrayW aArgs;
 
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   CmdDict& sCmdDict = lpStation->m_CommandDict;
 
   for(int i = 0; i < nCount; i++)
@@ -525,7 +551,7 @@ GXBOOL GXDLLAPI MOExecuteConsoleCmdW(GXLPCWSTR szCommand)
     return FALSE;
   }
 
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   typedef GXSTATION::CmdDict CmdDict;
   CmdDict& sCmdDict = lpStation->m_CommandDict;
 
@@ -548,7 +574,7 @@ GXBOOL GXDLLAPI MOExecuteConsoleCmdA(GXLPCSTR szCommand)
 
 GXBOOL GXDLLAPI MOGetConsoleCmdInfoA(GXLPCSTR szCommand, int* nCmdIdx, IConsoleStaff** ppStaff)
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
 
   typedef GXSTATION::CmdDict CmdDict;
   CmdDict& sCmdDict = lpStation->m_CommandDict;

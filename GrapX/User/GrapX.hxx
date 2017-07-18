@@ -355,15 +355,20 @@ typedef cllist<GXLPWND>    GXLPWND_LIST;
 #define GXRSRC_HANDLE(RSRC_PTR)       ((GXHRSRC)RSRC_PTR)
 
 // GXSTATION 的标志
-#define  GXST_DRAWDEBUGMSG      0x00000001
+#define GXSTATIONSTATEFLAG_DRAWDEBUGMSG       0x00000001
+#define GXSTATIONSTATEFLAG_LAZYUPDATE         0x00000002    // UpdateRate_Lazy模式下，如果station需要重绘，则设置这个标志
 struct GXINSTANCE;
+struct GXCREATESTATION;
+struct GXTIMERCHAIN;
+
 struct GXSTATION
 {
   typedef clhash_map<clStringA, GUnknown*>  NamedInterfaceDict;
   typedef clhash_map<clStringA, CONSOLECMD> CmdDict;
   GXDWORD             dwMagic;
-  GXDWORD             m_dwFlags;
+  GXDWORD             m_dwFlags; // GXSTATIONSTATEFLAG_
   IGXPlatform*        lpPlatform;
+  GXUpdateRate        m_eUpdateRate;
   GXDWORD             dwUIThreadId;     // GXUI不支持多线程Wnd, 这里记录了UI线程ID, 用于校验
   GXMONITORINFO       MonitorInfo;
 #ifdef _WIN32
@@ -404,16 +409,18 @@ struct GXSTATION
   NamedInterfaceDict  m_NamedPool;
   CmdDict             m_CommandDict;
   GXUIMsgThread*      m_pMsgThread;
+  GXTIMERCHAIN*       m_pTimerChain;
 
 #ifdef ENABLE_AERO
   GTexture*        pBackDownSampTexA;    // 玻璃效果的缓冲纹理 - A
   GTexture*        pBackDownSampTexB;    // 玻璃效果的缓冲纹理 - B
 #endif // ENABLE_AERO
-#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
-  GXSTATION(HWND hWnd, IGXPlatform* lpPlatform);
-#else
-  GXSTATION(IGXPlatform* lpPlatform);
-#endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+//#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+//  GXSTATION(HWND hWnd, IGXPlatform* lpPlatform);
+//#else
+//  GXSTATION(IGXPlatform* lpPlatform);
+//#endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+  GXSTATION(const GXCREATESTATION* lpCreateStation);
   GXHRESULT    Initialize     ();
   GXHRESULT    Finalize       ();
 
@@ -436,7 +443,11 @@ struct GXSTATION
   GXLPWND     GetActiveWnd();
 #endif // #ifndef _DEV_DISABLE_UI_CODE
   GXWndMsg    DoDoubleClick   (GXWndMsg msg, GXLPWND lpWnd);
-  GXDWORD     GetAppDescStyle() const;
+  //GXDWORD     GetAppDescStyle() const;
+  GXUpdateRate GetUpdateRate() const;
+
+  void        SetLazyUpdate   (); // 设置lazy update标记
+  GXBOOL      CheckLazyUpdate (); // 检查并清空lazy update
 };
 typedef GXSTATION*        GXLPSTATION;
 typedef const GXSTATION*  GXLPCSTATION;
@@ -497,7 +508,14 @@ typedef GXINSTANCE GXMODULE;
 typedef GXMODULE* GXLPMODULE;
 
 //extern "C" GXHSTATION GXDLLAPI GXUIGetStation();
-GXLPSTATION IntGetStationPtr();
+namespace GrapX
+{
+  namespace Internal
+  {
+    GXLPSTATION GetStationPtr();
+  } // namespace Internal
+} // namespace GrapX
+
 //GXLPRECT _GlbLockStaticRects(GXUINT nCounts);
 //GXVOID _GlbUnlockStaticRects(GXLPRECT lpRects);
 #if defined(_WIN32) || defined(_WINDOWS)

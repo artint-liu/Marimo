@@ -269,7 +269,7 @@ GXVOID _gxDestroyWindow(GXHWND hWnd)
 //////////////////////////////////////////////////////////////////////////
 GXVOID GXDestroyRootFrame()
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   ASSERT(lpStation->dwUIThreadId == 0 || lpStation->dwUIThreadId == gxGetCurrentThreadId());
 
   LPGXWND lpDesktop = lpStation->lpDesktopWnd;
@@ -305,8 +305,9 @@ extern "C" GXHRESULT GXDLLAPI GXRenderRootFrame()
 
   if(pCanvas != NULL)
   {
-    if(lpStation->m_dwFlags & GXST_DRAWDEBUGMSG)
+    if(lpStation->m_dwFlags & GXSTATIONSTATEFLAG_DRAWDEBUGMSG) {
       GXDrawDebugMsg(GXSTATION_HANDLE(lpStation), pCanvas);
+    }
 
     lpStation->m_pDesktopWindowsMgr->SendPaintMessage();
     lpStation->m_pDesktopWindowsMgr->Render(pCanvas);

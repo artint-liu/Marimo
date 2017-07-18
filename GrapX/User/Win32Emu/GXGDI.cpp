@@ -566,7 +566,7 @@ GXHRGN GXDLLAPI gxCreateRectRgn(
     return NULL;
   }
 
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
 
   lpRegion->emObjType = GXGDIOBJ_REGION;
   lpRegion->rect.left   = nLeftRect;
@@ -728,7 +728,7 @@ GXBOOL GXDLLAPI gxSetRectRgn(
       lprgn->lpRegion->SetRect(&lprgn->rect);
     }
     else {
-      GXLPSTATION lpStation = IntGetStationPtr();
+      GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
       lpStation->pGraphics->CreateRectRgn(&lprgn->lpRegion, nLeftRect, nTopRect, nRightRect, nBottomRect);
     }
     return TRUE;
@@ -801,7 +801,7 @@ GXHFONT GXDLLAPI gxCreateFontIndirectW(
 
   //pFont->lpFont = NEW GXFont(&d3dfd);
 
-  pFont->lpFont = IntGetStationPtr()->pGraphics->CreateFontIndirectW((const GXLPLOGFONTW)lplf);
+  pFont->lpFont = GrapX::Internal::GetStationPtr()->pGraphics->CreateFontIndirectW((const GXLPLOGFONTW)lplf);
 
   //GXCreateFreeTypeFontIndirectW((const LPLOGFONTW)lplf, &pFont->lpFont);
 
@@ -1143,7 +1143,7 @@ GXHBITMAP GXDLLAPI gxCreateBitmap(
   //  else ASSERT(false);
   //}
 
-  pNewBitmap->pImage = IntGetStationPtr()->pGraphics->CreateImage(nWidth, nHeight, GXFMT_A8R8G8B8, TRUE, lpTBits);
+  pNewBitmap->pImage = GrapX::Internal::GetStationPtr()->pGraphics->CreateImage(nWidth, nHeight, GXFMT_A8R8G8B8, TRUE, lpTBits);
   //GXCreateImage(nWidth, nHeight, lpTBits, TRUE, &pNewBitmap->pImage);
   //if(cBitsPerPel != 32 && lpTBits != lpvBits)
   //  SAFE_DELETE(lpTBits);

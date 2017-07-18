@@ -297,16 +297,22 @@ GXBOOL GXUIMsgThread::CallSentMessageProc()
 }
 
 //////////////////////////////////////////////////////////////////////////
-GXLRESULT IntBroadcastToplevelWindowsMessage(GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
+namespace GrapX
 {
-  GXLPSTATION lpStation = IntGetStationPtr();
-  GXLPWND lpWnd = lpStation->lpDesktopWnd->m_pFirstChild;
-  while(lpWnd) {
-    gxSendMessage(lpWnd->m_hSelf, message, wParam, lParam);
-    lpWnd = lpWnd->m_pNextWnd;
-  }
-  return 0l;
-}
+  namespace Internal
+  {
+    GXLRESULT BroadcastToplevelWindowsMessage(GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
+    {
+      GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
+      GXLPWND lpWnd = lpStation->lpDesktopWnd->m_pFirstChild;
+      while(lpWnd) {
+        gxSendMessage(lpWnd->m_hSelf, message, wParam, lParam);
+        lpWnd = lpWnd->m_pNextWnd;
+      }
+      return 0l;
+    }
+  } // namespace Internal
+} // namespace GrapX
 
 
 //************************************
@@ -331,7 +337,7 @@ EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH){
   }
 #else
   if(hWnd == GXHWND_BROADCAST) {
-    return IntBroadcastToplevelWindowsMessage(Msg, wParam, lParam);
+    return GrapX::Internal::BroadcastToplevelWindowsMessage(Msg, wParam, lParam);
   }
 
   const GXLPWND lpWnd = GXWND_PTR(hWnd);  // FIXME: 其他线程访问这个Wnd的同时如果Wnd被释放有可能会出错
@@ -521,6 +527,23 @@ NEXT_PEEK:
   return bVal;
 }
 
+GXBOOL GXDLLAPI IntGetMessageX(GXLPMSG lpMsg, MOUIMSG &ThreadMsg, GXSTATION* lpStation)
+{
+  lpMsg->hwnd = (GXHWND)ThreadMsg.handle;
+  lpMsg->message = ThreadMsg.message;
+  lpMsg->wParam = ThreadMsg.wParam;
+  lpMsg->lParam = ThreadMsg.lParam;
+  lpMsg->time = ThreadMsg.dwTime;
+  lpMsg->pt.x = ThreadMsg.xPos;
+  lpMsg->pt.y = ThreadMsg.yPos;
+  if(ThreadMsg.message == -1 || ThreadMsg.message == GXWM_QUIT) {
+    lpMsg->message = GXWM_QUIT;
+    lpStation->m_pMsgThread->PostQuitMessage((u32_ptr)ThreadMsg.handle);
+    return FALSE;
+  }
+  return TRUE;
+}
+
 //************************************
 // Method:    gxGetMessage
 // Returns:   GXBOOL
@@ -543,22 +566,29 @@ GXBOOL GXDLLAPI gxGetMessage(
   MOUIMSG ThreadMsg;
   GXSTATION* lpStation = GXSTATION_PTR(GXUIGetStation());
 
-  while(1)
+  if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
   {
-    lpStation->m_pMsgThread->CallSentMessageProc();
-
-    if(lpStation->m_pMsgThread->PeekMessage(&ThreadMsg, hWnd, NULL, NULL, GXPM_REMOVE))
+    while(1)
     {
-      lpMsg->hwnd    = (GXHWND)ThreadMsg.handle;
-      lpMsg->message = ThreadMsg.message;
-      lpMsg->wParam  = ThreadMsg.wParam;
-      lpMsg->lParam  = ThreadMsg.lParam;
-      lpMsg->time    = ThreadMsg.dwTime;
-      lpMsg->pt.x    = ThreadMsg.xPos;
-      lpMsg->pt.y    = ThreadMsg.yPos;
-      if(ThreadMsg.message == -1 || ThreadMsg.message == GXWM_QUIT) {
-        lpMsg->message = GXWM_QUIT;
-        lpStation->m_pMsgThread->PostQuitMessage((u32_ptr)ThreadMsg.handle);
+      // 在消息到来前，尽可能清理掉所有重绘
+      while(lpStation->CheckLazyUpdate()) {
+        lpStation->AppRender();
+        if(lpStation->m_pMsgThread->PeekMessage(&ThreadMsg, hWnd, NULL, NULL, GXPM_REMOVE)) {
+          break;
+        }
+      }
+
+      lpStation->m_pMsgThread->CallSentMessageProc();
+      lpStation->m_pMsgThread->GetMessage(&ThreadMsg);
+      
+      // 系统发送的重绘
+      if(ThreadMsg.message == WM_PAINT)
+      {
+        lpStation->AppRender();
+        continue;
+      }
+
+      if(!IntGetMessageX(lpMsg, ThreadMsg, lpStation)) {
         return FALSE;
       }
 
@@ -566,10 +596,39 @@ GXBOOL GXDLLAPI gxGetMessage(
       if(IntAnalyzeMessage(lpMsg)) {
         // App消息先于UI消息处理, 保证得到正确的hUIHoverWnd信息
         lpStation->AppHandle(uOriginMessage, lpMsg->wParam, lpMsg->lParam);
-        break;
       }
-    } else {
-      lpStation->AppRender();
+      
+      // 消息处理之后产生的重绘
+      if(lpStation->CheckLazyUpdate()) {
+        lpStation->AppRender();
+      }
+
+      break;
+    }
+  }
+  else
+  {
+    while(1)
+    {
+      lpStation->m_pMsgThread->CallSentMessageProc();
+
+      if(lpStation->m_pMsgThread->PeekMessage(&ThreadMsg, hWnd, NULL, NULL, GXPM_REMOVE))
+      {
+        if( ! IntGetMessageX(lpMsg, ThreadMsg, lpStation)) {
+          return FALSE;
+        }
+
+        GXUINT uOriginMessage = lpMsg->message;
+        if(IntAnalyzeMessage(lpMsg)) {
+          // App消息先于UI消息处理, 保证得到正确的hUIHoverWnd信息
+          lpStation->AppHandle(uOriginMessage, lpMsg->wParam, lpMsg->lParam);
+          break;
+        }
+
+      }
+      else {
+        lpStation->AppRender();
+      }
     }
   }
 
@@ -584,12 +643,19 @@ GXBOOL GXDLLAPI gxGetMessage(
 GXBOOL GXDLLAPI gxWaitMessage()
 {
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
-  while(1)
+  if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
   {
-    GXBOOL bval = lpStation->m_pMsgThread->PeekMessage(NULL, NULL, NULL, NULL, GXPM_NOREMOVE);
-    if(bval != 0)  // 实际上是消息队列里消息的数量
-      return bval;
-    lpStation->AppRender();
+    return lpStation->m_pMsgThread->WaitMessage();
+  }
+  else
+  {
+    while(1)
+    {
+      GXBOOL bval = lpStation->m_pMsgThread->PeekMessage(NULL, NULL, NULL, NULL, GXPM_NOREMOVE);
+      if(bval != 0)  // 实际上是消息队列里消息的数量
+        return bval;
+      lpStation->AppRender();
+    }
   }
 }
 

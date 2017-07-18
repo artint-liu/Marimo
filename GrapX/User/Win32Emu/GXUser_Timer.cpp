@@ -5,17 +5,17 @@
 #include <GXStation.H>
 #include <User/GXWindow.h>
 
-typedef struct __tagGXTIMERCHAIN
+struct GXTIMERCHAIN
 {
   GXHWND        hWnd;
   GXUINT        nIDEvent;
   GXUINT        uElapse;
-  GXTIMERPROC    lpTimerFunc;
-  GXDWORD        uLastTick;
-  __tagGXTIMERCHAIN*  lpNext;
-}GXTIMERCHAIN, *LPGXTIMERCHAIN;
+  GXTIMERPROC   lpTimerFunc;
+  GXDWORD       uLastTick;
+  GXTIMERCHAIN* lpNext;
+};
 
-LPGXTIMERCHAIN g_lpgxTimerChain;
+//LPGXTIMERCHAIN g_lpgxTimerChain;
 
 GXUINT GXDLLAPI gxSetTimer(
         GXHWND hWnd,        // handle of window for timer messages
@@ -24,8 +24,18 @@ GXUINT GXDLLAPI gxSetTimer(
         GXTIMERPROC lpTimerFunc   // address of timer procedure
         )
 {
-  LPGXTIMERCHAIN pNewTimer;
-  LPGXTIMERCHAIN pTimer = g_lpgxTimerChain;
+  GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
+  if( ! lpStation) {
+    return 0;
+  }
+
+  if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
+  {
+    CLOG_WARNING("NOT implement in lazy mode.");
+  }
+
+  GXTIMERCHAIN* pNewTimer = NULL;
+  GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;
   pNewTimer = new GXTIMERCHAIN;
 
   pNewTimer->hWnd        = hWnd;
@@ -34,11 +44,12 @@ GXUINT GXDLLAPI gxSetTimer(
   pNewTimer->lpTimerFunc = lpTimerFunc;
   pNewTimer->uLastTick   = gxGetTickCount();
   pNewTimer->lpNext      = NULL;
-  if(g_lpgxTimerChain == NULL)
+  if(lpStation->m_pTimerChain == NULL)
   {
-    g_lpgxTimerChain = pNewTimer;
+    lpStation->m_pTimerChain = pNewTimer;
     return (GXUINT)(GXUINT_PTR)pNewTimer;
   }
+
   while(pTimer->lpNext != NULL)
   {
     if(pTimer->hWnd == hWnd && pTimer->nIDEvent == nIDEvent)
@@ -57,8 +68,13 @@ GXBOOL GXDLLAPI gxKillTimer(
          GXUINT uIDEvent       // timer identifier
          )
 {
-  LPGXTIMERCHAIN pPrev = NULL;
-  LPGXTIMERCHAIN pTimer = g_lpgxTimerChain;
+  GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
+  if(!lpStation) {
+    return 0;
+  }
+
+  GXTIMERCHAIN* pPrev = NULL;
+  GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;
   GXBOOL bRet = FALSE;
   while(pTimer != NULL)
   {
@@ -67,9 +83,9 @@ GXBOOL GXDLLAPI gxKillTimer(
       bRet = TRUE;
       if(pPrev == NULL)
       {
-        g_lpgxTimerChain = pTimer->lpNext;
+        lpStation->m_pTimerChain = pTimer->lpNext;
         delete pTimer;
-        pTimer = g_lpgxTimerChain;
+        pTimer = lpStation->m_pTimerChain;
         continue;
       }
       else
@@ -89,9 +105,14 @@ GXBOOL GXDLLAPI gxKillTimer(
 
 extern "C" GXVOID GXDLLAPI GXUIUpdateTimerEvent()
 {
-  LPGXTIMERCHAIN pPrevTimer = NULL;
-  LPGXTIMERCHAIN pTimer = g_lpgxTimerChain;
-  GXLPSTATION lpStation = IntGetStationPtr();
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
+  if(!lpStation) {
+    return;
+  }
+
+  GXTIMERCHAIN* pPrevTimer = NULL;
+  GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;
+  //GXLPSTATION lpStation = IntGetStationPtr();
   lpStation->Enter();
   GXDWORD uTick = gxGetTickCount();
   while (pTimer != NULL)
@@ -100,9 +121,9 @@ extern "C" GXVOID GXDLLAPI GXUIUpdateTimerEvent()
     {
       if(pPrevTimer == NULL)
       {
-        g_lpgxTimerChain = g_lpgxTimerChain->lpNext;
+        lpStation->m_pTimerChain = lpStation->m_pTimerChain->lpNext;
         SAFE_DELETE(pTimer);
-        pTimer = g_lpgxTimerChain;
+        pTimer = lpStation->m_pTimerChain;
       }
       else
       {

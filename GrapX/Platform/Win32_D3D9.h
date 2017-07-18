@@ -21,7 +21,7 @@ public:
   GXHRESULT Finalize        (GXINOUT GXGraphics** ppGraphics) override;
   GXVOID    GetPlatformID   (GXPlaformIdentity* pIdentity) override;
   GXLPCWSTR GetRootDir      () override;
-  GXDWORD   GetAppDescStyle () const override;
+  //GXDWORD   GetAppDescStyle () const override;
 };
 
 IGXPlatform_Win32D3D9* AppCreateD3D9Platform(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);

@@ -17,7 +17,7 @@ public:
   GXSTDINTERFACE(GXVOID       GetPlatformID   (GXPlaformIdentity* pIdentity));
   GXSTDINTERFACE(GXLPCWSTR    GetRootDir      ());
   GXSTDINTERFACE(GXHRESULT    QueryFeature    (GXDWORD dwFeatureCode, GXVOID** ppUnknown)); // 查询平台相关的特征值, 这个与平台相关的扩展, ppUnknown 可能是对象或者指针
-  GXSTDINTERFACE(GXDWORD      GetAppDescStyle () const);
+  //GXSTDINTERFACE(GXUpdateRate GetUpdateRate   () const);
 };
 
 // 平台方便创建的模板

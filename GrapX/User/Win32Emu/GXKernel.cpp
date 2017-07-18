@@ -488,10 +488,16 @@ GXHINSTANCE GXDLLAPI GXGetInstance(GXInstanceType eType)
   }
 }
 
-GXLPSTATION IntGetStationPtr()
+namespace GrapX
 {
-  return g_pCurStation;
-}
+  namespace Internal
+  {
+    GXLPSTATION GetStationPtr()
+    {
+      return g_pCurStation;
+    }
+  } // namespace Internal
+} // namespace GrapX
 
 GXHSTATION GXDLLAPI GXUIGetStation()
 {

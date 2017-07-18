@@ -62,7 +62,7 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
     return GX_FAIL;
   }
 
-  m_dwAppDescStyle = pDesc->dwStyle;
+  //m_dwAppDescStyle = pDesc->dwStyle;
 
   D3D9::GRAPHICS_CREATION_DESC sDesc;
   sDesc.hWnd       = m_hWnd;
@@ -82,7 +82,13 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
   if(m_pLogger) {
     m_pLogger->AddRef();
   }
-  GXUICreateStation(m_hWnd, this);
+
+  GXCREATESTATION stCrateStation;
+  stCrateStation.cbSize     = sizeof(GXCREATESTATION);
+  stCrateStation.hWnd       = m_hWnd;
+  stCrateStation.lpPlatform = this;
+  stCrateStation.lpAppDesc  = pDesc;
+  GXUICreateStation(&stCrateStation);
 
   //pGraphics->Activate(TRUE);  // ¿ªÊ¼²¶»ñGraphics×´Ì¬
   //m_pApp->OnCreate();
@@ -92,7 +98,7 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
 #ifdef _ENABLE_STMT
   STMT::CreateTask(1024 * 1024, UITask, NULL);
 #else
-  GXSTATION* pStation = IntGetStationPtr();
+  GXSTATION* pStation = GrapX::Internal::GetStationPtr();
   pStation->m_pMsgThread = new GXUIMsgThread(this);
   pStation->m_pMsgThread->Start();
     //static_cast<MessageThread*>(MessageThread::CreateThread((CLTHREADCALLBACK)UITask, this));
@@ -171,10 +177,10 @@ GXLPCWSTR IGXPlatform_Win32D3D9::GetRootDir()
   return m_strRootDir;
 }
 
-GXDWORD IGXPlatform_Win32D3D9::GetAppDescStyle() const
-{
-  return m_dwAppDescStyle;
-}
+//GXDWORD IGXPlatform_Win32D3D9::GetAppDescStyle() const
+//{
+//  return m_dwAppDescStyle;
+//}
 
 //////////////////////////////////////////////////////////////////////////
 

@@ -47,7 +47,7 @@ GXLRESULT GXWndCanvas::Initialize(GXHWND hWnd, GRegion* pRegion, GXDWORD dwFlags
   }
   else
   {
-    lpStation = IntGetStationPtr();
+    lpStation = GrapX::Internal::GetStationPtr();
     //lpStation->Enter();
     lpSurface = lpStation->m_pDesktopWindowsMgr->GetSurface(DWM_GS_DESKTOP);
     gxSetRect(&rect, 0, 0, lpStation->nWidth, lpStation->nHeight);

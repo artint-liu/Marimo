@@ -321,7 +321,7 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
   pBitmap = (LPGXGDIBITMAP)GXWin32APIEmu::GetGXGdiObj(GXGDIOBJ_BITMAP, (GXLPVOID)lpBitmapName);
   if(pBitmap == NULL)
   {
-    GXLPSTATION lpStation = IntGetStationPtr();
+    GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
     clStringW strFilename;
 
     pBitmap = new GXGDIBITMAP;
@@ -588,7 +588,7 @@ GXHICON GXDLLAPI GXCursorToIcon(GXHCURSOR hCursor)
   GXDWORD* lpColor = NULL;
   GXDWORD* lpMask = NULL;
   LPGXICON pIconRet = NULL;
-  GXGraphics* pGraphics = IntGetStationPtr()->pGraphics;
+  GXGraphics* pGraphics = GrapX::Internal::GetStationPtr()->pGraphics;
 
   HDC hdc;
 
