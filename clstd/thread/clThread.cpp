@@ -63,8 +63,8 @@ namespace clstd
   } // namespace _win32
 #endif // #ifdef _WIN32
 
-#ifdef _CPLUSPLUS_11_THREAD
-  namespace c11
+#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+  namespace cxx11
   {
     Thread::Thread()
     {
@@ -88,7 +88,7 @@ namespace clstd
 
     u32 Thread::Wait(u32 nMilliSec)
     {
-      if (nMilliSec == -1) {
+      if (nMilliSec != -1) {
         CLOG_ERROR("std::thread does not support wait for timeout.");
       }
 
@@ -97,10 +97,10 @@ namespace clstd
       }
       return 0;
     }
-  } // namespace c11
-#endif // #ifdef _CPLUSPLUS_11_THREAD
+  } // namespace cxx11
+#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
 
-#if defined(POSIX_THREAD) && 0
+#if defined(POSIX_THREAD)
   namespace _posix
   {
     //
@@ -110,19 +110,24 @@ namespace clstd
     void* ThreadStart(void* pParam)
     {
       Thread* pThread = static_cast<Thread*>(pParam);
-      pthread_cond_wait(&pThread->m_cond, NULL);
+      pthread_cond_wait(&pThread->m_cond, &pThread->m_mtx);
       return (void*)pThread->Run();
     }
 
     Thread::Thread()
       : m_cond(NULL)
-    {      
+    {
+      m_tidp.p = NULL;
+      m_tidp.x = 0;
     }
 
     Thread::~Thread()
     {
       if(m_cond) {
         pthread_cond_destroy(&m_cond);
+      }
+      if(m_mtx) {
+        pthread_mutex_destroy(&m_mtx);
       }
       if(m_tidp.p) {
         pthread_cancel(m_tidp);
@@ -137,6 +142,11 @@ namespace clstd
         memset(&m_tidp, 0, sizeof(m_tidp));
 
         err = pthread_cond_init(&m_cond, NULL);
+        if(err != 0) {
+          return FALSE;
+        }
+
+        err = pthread_mutex_init(&m_mtx, NULL);
         if(err != 0) {
           return FALSE;
         }

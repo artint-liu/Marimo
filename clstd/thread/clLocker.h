@@ -1,9 +1,7 @@
 ﻿#ifndef _CLSTD_LOCKER_H_
 #define _CLSTD_LOCKER_H_
 
-#if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
-//#include <windows.h>
-#else
+#if defined(POSIX_THREAD)
 # include <pthread.h>
 #endif
 

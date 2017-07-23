@@ -1,15 +1,15 @@
 ﻿#ifndef _CLSTD_SIGNAL_H_
 #define _CLSTD_SIGNAL_H_
 
-#if defined(_CPLUSPLUS_11_THREAD)
+#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
 #include <condition_variable>
 #include <mutex>
-#endif
+#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
 
 namespace clstd
 {
-#if defined(_CPLUSPLUS_11_THREAD)
-  namespace c11
+#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+  namespace cxx11
   {
     class Signal
     {
@@ -27,8 +27,10 @@ namespace clstd
       i32 Wait        ();
       i32 WaitTimeOut (u32 dwMilliSec);
     };
-  } // namespace c11
-#elif defined(POSIX_THREAD)
+  } // namespace cxx11
+#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+
+#if defined(POSIX_THREAD)
   namespace _posix
   {
     class Signal
@@ -39,6 +41,7 @@ namespace clstd
 
     public:
       static const i32 eTimeOut = ETIMEDOUT;
+      static const u32 TimeOut_Infinite = -1;
       Signal();
       virtual ~Signal();
 
@@ -48,7 +51,7 @@ namespace clstd
       i32 WaitTimeOut (u32 dwMilliSec);
     };
   }
-#endif // #if defined(_CPLUSPLUS_11_THREAD)
+#endif // #if defined(POSIX_THREAD)
 
 #ifdef _WIN32
   namespace _win32
@@ -60,6 +63,7 @@ namespace clstd
 
     public:
       static const i32 eTimeOut = WAIT_TIMEOUT;
+      static const u32 TimeOut_Infinite = -1;
       Signal();
       virtual ~Signal();
 
@@ -74,12 +78,11 @@ namespace clstd
 
   //////////////////////////////////////////////////////////////////////////
 #if defined(_CPLUSPLUS_11_THREAD)
-  typedef c11::Signal Signal;
+  class Signal : public cxx11::Signal{};
 #elif defined(_WIN32) && !defined(POSIX_THREAD)
-  //typedef _win32::Signal Signal;
   class Signal : public _win32::Signal{};
 #else
-  typedef _posix::Signal Signal;
+  class Signal : public _posix::Signal{};
 #endif // #if defined(_Win32) && !defined(POSIX_THREAD)
 
 } // namespace clstd

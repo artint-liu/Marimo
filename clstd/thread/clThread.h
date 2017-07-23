@@ -5,14 +5,14 @@
 #include <pthread.h>
 #endif // #ifdef POSIX_THREAD
 
-#ifdef _CPLUSPLUS_11_THREAD
-# if __cplusplus < 201103L
+#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+# if (__cplusplus < 201103L) && (_MSC_VER < 1900)
 #   error 低版本C++编译器没有将thread纳入标准库
-# endif // # if __cplusplus >= 201103L
+# endif // # if (__cplusplus < 201103L) || (_MSC_VER < 1900)
 #include <thread>
 namespace clstd
 {
-  namespace c11
+  namespace cxx11
   {
     class Thread
     {
@@ -30,15 +30,23 @@ namespace clstd
       b32   Start();
       u32   Wait(u32 nMilliSec);
     };
-  } // namespace c11
+  } // namespace cxx11
 } // namespace clstd
-#endif // #ifdef _CPP11_THREAD
+#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
 
 
 namespace clstd
 {
   namespace this_thread
   {
+#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+    namespace cxx11
+    {
+      typedef std::thread::id id;
+      id GetId();
+    }
+#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+
 #if _CPLUSPLUS_11_THREAD
     typedef std::this_thread::id id;
 #elif defined(POSIX_THREAD)
@@ -68,7 +76,7 @@ namespace clstd
   } // namespace _win32
 #endif // #ifdef _WIN32
 
-#if defined(POSIX_THREAD) && 0
+#if defined(POSIX_THREAD)
   namespace _posix
   {
     class Thread
@@ -77,6 +85,7 @@ namespace clstd
     protected:
       pthread_t       m_tidp;
       pthread_cond_t  m_cond;
+      pthread_mutex_t m_mtx;
     public:
       Thread();
       virtual ~Thread();
@@ -89,7 +98,7 @@ namespace clstd
 #endif // #ifdef POSIX_THREAD
 
 #if defined(_CPLUSPLUS_11_THREAD)
-  typedef c11::Thread Thread;
+  typedef cxx11::Thread Thread;
 #elif defined(_WIN32) && !defined(POSIX_THREAD)
   typedef _win32::Thread Thread;
 #else

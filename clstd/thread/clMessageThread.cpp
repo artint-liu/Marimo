@@ -7,18 +7,35 @@
 #include "clUtility.h"
 //#include <sys/time.h>
 
-#ifdef _CPLUSPLUS_11_THREAD
+#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
 # include <thread>
-#endif // #ifdef _CPP11_THREAD
 
 namespace clstd
 {
   namespace this_thread
   {
+    namespace cxx11
+    {
+
+      id GetId()
+      {
+        return std::this_thread::get_id();
+      }
+
+    } // namespace cxx11
+  } // namespace this_thread
+} // namespace clstd
+#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+
+namespace clstd
+{
+  namespace this_thread
+  {
+
 #if _CPLUSPLUS_11_THREAD
     id GetId()
     {
-      return std::this_thread::get_id();
+      return this_thread::cxx11::GetId();
     }
 #elif (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
     id GetId()

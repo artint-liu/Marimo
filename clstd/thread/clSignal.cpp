@@ -4,8 +4,8 @@
 namespace clstd
 {
 
-#if defined(_CPLUSPLUS_11_THREAD)
-  namespace c11
+#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+  namespace cxx11
   {
     const i32 Signal::eTimeOut;
 
@@ -35,8 +35,10 @@ namespace clstd
       std::unique_lock<std::mutex> _lock(m_mutex);
       return static_cast<i32>(m_cond.wait_for(_lock, std::chrono::microseconds(dwMilliSec)));
     }
-  } // namespace c11
-#elif defined(POSIX_THREAD)
+  } // namespace cxx11
+#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
+
+#if defined(POSIX_THREAD)
   namespace _posix
   {
     //
@@ -68,15 +70,20 @@ namespace clstd
 
     i32 Signal::WaitTimeOut(u32 dwMilliSec)
     {
+      if(dwMilliSec == TimeOut_Infinite)
+      {
+        return pthread_cond_wait(&m_cond, &m_mutex);
+      }
+
       timespec timeout;
 
-#if 0
+#if 1
       // 这个算法不精确!
       // TODO: windows版下这个tv_nsec时间貌似是无效的, 所以用了近似值来代替, 注意要实现其他平台的版本
       timeout.tv_sec = time(0) + (dwMilliSec + 999) / 1000;
       timeout.tv_nsec = 0;
 #else
-      timespec timeout;
+      //timespec timeout;
       timeval now;
       gettimeofday(&now, NULL);
       int nsec = now.tv_usec * 1000 + (dwMilliSec % 1000) * 1000000;
