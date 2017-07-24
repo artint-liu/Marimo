@@ -79,13 +79,15 @@ namespace clstd
 #if defined(POSIX_THREAD)
   namespace _posix
   {
+    class Signal;
     class Thread
     {
       friend void* ThreadStart(void* pParam);
     protected:
       pthread_t       m_tidp;
-      pthread_cond_t  m_cond;
-      pthread_mutex_t m_mtx;
+      Signal*         m_pSignal;
+      //pthread_cond_t  m_cond;
+      //pthread_mutex_t m_mtx;
     public:
       Thread();
       virtual ~Thread();

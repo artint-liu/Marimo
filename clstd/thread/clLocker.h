@@ -7,23 +7,51 @@
 
 namespace clstd
 {
-  class Locker
+#ifdef POSIX_THREAD
+  namespace _posix
   {
-  private:
-#ifdef _WIN32
-    CRITICAL_SECTION m_CriticalSection;
-#else
-    pthread_mutex_t m_mutex;
-    pthread_mutexattr_t m_mutexattr;
-#endif // _WINDOWS
-  public:
-    Locker();
-    ~Locker();
+    class Locker
+    {
+    private:
+      pthread_mutex_t m_mutex;
+      pthread_mutexattr_t m_mutexattr;
+    public:
+      Locker();
+      ~Locker();
 
-    void Lock();
-    void Unlock();
-    b32 TryLock();
-  };
+      void Lock();
+      void Unlock();
+      b32 TryLock();
+    };
+  } // namespace _posix
+#endif // #ifdef POSIX_THREAD
+
+  namespace _win32
+  {
+    class Locker
+    {
+    private:
+      CRITICAL_SECTION m_CriticalSection;
+
+    public:
+      Locker();
+      ~Locker();
+
+      void Lock();
+      void Unlock();
+      b32 TryLock();
+    };
+  } // namespace _win32
+
+
+#if defined(_CPLUSPLUS_11_THREAD)
+  class Locker : public cxx11::Locker {};
+#elif defined(_WIN32) && !defined(POSIX_THREAD)
+  class Locker : public _win32::Locker {};
+#else
+  class Locker : public _posix::Locker {};
+#endif // #if defined(_Win32) && !defined(POSIX_THREAD)
+
 
   //////////////////////////////////////////////////////////////////////////
 

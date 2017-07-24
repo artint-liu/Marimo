@@ -41,12 +41,11 @@ namespace clstd
 #if defined(POSIX_THREAD)
   namespace _posix
   {
-    //
-    // 没测试过!!
-    //
+
     Signal::Signal()
       : m_cond(NULL)
       , m_mutex(NULL)
+      , m_bSignaled(FALSE)
     {
       pthread_cond_init(&m_cond, NULL);
       pthread_mutex_init(&m_mutex, NULL);
@@ -60,19 +59,30 @@ namespace clstd
 
     i32 Signal::Set()
     {
+      pthread_mutex_lock(&m_mutex);
+      m_bSignaled = TRUE;
+      pthread_mutex_unlock(&m_mutex);
       return pthread_cond_signal(&m_cond);
     }
 
     i32 Signal::Wait()
     {
-      return pthread_cond_wait(&m_cond, &m_mutex);
+      i32 ret = 0;
+      pthread_mutex_lock(&m_mutex);
+      while( ! m_bSignaled)
+      {
+        ret = pthread_cond_wait(&m_cond, &m_mutex);
+      }
+      m_bSignaled = FALSE;
+      pthread_mutex_unlock(&m_mutex);
+      return ret;
     }
 
     i32 Signal::WaitTimeOut(u32 dwMilliSec)
     {
       if(dwMilliSec == TimeOut_Infinite)
       {
-        return pthread_cond_wait(&m_cond, &m_mutex);
+        return Wait();
       }
 
       timespec timeout;

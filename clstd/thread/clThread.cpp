@@ -1,5 +1,6 @@
 ﻿#include "clstd.h"
 #include "clThread.h"
+#include "clSignal.H"
 
 namespace clstd
 {
@@ -103,19 +104,17 @@ namespace clstd
 #if defined(POSIX_THREAD)
   namespace _posix
   {
-    //
-    // 没测试过!!!
-    //
 
     void* ThreadStart(void* pParam)
     {
       Thread* pThread = static_cast<Thread*>(pParam);
-      pthread_cond_wait(&pThread->m_cond, &pThread->m_mtx);
+      //pthread_cond_wait(&pThread->m_cond, &pThread->m_mtx);
+      pThread->m_pSignal->Wait();
       return (void*)pThread->Run();
     }
 
     Thread::Thread()
-      : m_cond(NULL)
+      : m_pSignal(NULL)
     {
       m_tidp.p = NULL;
       m_tidp.x = 0;
@@ -123,12 +122,13 @@ namespace clstd
 
     Thread::~Thread()
     {
-      if(m_cond) {
-        pthread_cond_destroy(&m_cond);
-      }
-      if(m_mtx) {
-        pthread_mutex_destroy(&m_mtx);
-      }
+      //if(m_cond) {
+      //  pthread_cond_destroy(&m_cond);
+      //}
+      //if(m_mtx) {
+      //  pthread_mutex_destroy(&m_mtx);
+      //}
+      SAFE_DELETE(m_pSignal);
       if(m_tidp.p) {
         pthread_cancel(m_tidp);
       }
@@ -136,31 +136,38 @@ namespace clstd
 
     b32 Thread::Start()
     {
-      if(m_cond == NULL && m_tidp.p == NULL)
+      if( ! m_pSignal)
       {
         int err;
         memset(&m_tidp, 0, sizeof(m_tidp));
 
-        err = pthread_cond_init(&m_cond, NULL);
-        if(err != 0) {
-          return FALSE;
-        }
+        //err = pthread_cond_init(&m_cond, NULL);
+        //if(err != 0) {
+        //  return FALSE;
+        //}
 
-        err = pthread_mutex_init(&m_mtx, NULL);
-        if(err != 0) {
+        //err = pthread_mutex_init(&m_mtx, NULL);
+        //if(err != 0) {
+        //  return FALSE;
+        //}
+        m_pSignal = new Signal;
+        if( ! m_pSignal) {
           return FALSE;
         }
 
         err = pthread_create(&m_tidp, NULL, ThreadStart, (void*)this);
         if(err != 0) {
-          pthread_cond_destroy(&m_cond);
-          m_cond = NULL;
+          //pthread_cond_destroy(&m_cond);
+          //m_cond = NULL;
+          SAFE_DELETE(m_pSignal);
           return FALSE;
         }
       }
       
-      if(m_cond && m_tidp.p) {
-        return pthread_cond_signal(&m_cond) == 0;
+      if(m_pSignal) {
+        m_pSignal->Set();
+        return TRUE;
+        //return pthread_cond_signal(&m_cond) == 0;
       }
       else {
         // m_cond 与 m_tidp.p 应该同时产生和释放, 不应该出现这种状态
@@ -176,6 +183,7 @@ namespace clstd
 
     u32 Thread::Wait(u32 nMilliSec)
     {
+      CLOG_WARNING("NOT IMPLEMENT");
       return 0;
     }
 

@@ -38,6 +38,7 @@ namespace clstd
     private:
       pthread_cond_t    m_cond;
       pthread_mutex_t   m_mutex;
+      volatile b32      m_bSignaled;
 
     public:
       static const i32 eTimeOut = ETIMEDOUT;
