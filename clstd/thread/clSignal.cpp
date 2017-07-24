@@ -100,8 +100,17 @@ namespace clstd
       timeout.tv_nsec = nsec % 1000000000;
       timeout.tv_sec = now.tv_sec + nsec / 1000000000 + dwMilliSec / 1000;
 #endif
+      i32 ret = 0;
+      pthread_mutex_lock(&m_mutex);
+      while(!m_bSignaled)
+      {
+        //ret = pthread_cond_wait(&m_cond, &m_mutex);
+        ret = pthread_cond_timedwait(&m_cond, &m_mutex, &timeout);
+      }
+      m_bSignaled = FALSE;
+      pthread_mutex_unlock(&m_mutex);
 
-      const int ret = pthread_cond_timedwait(&m_cond, &m_mutex, &timeout);
+      //const int ret = pthread_cond_timedwait(&m_cond, &m_mutex, &timeout);
       return ret;
   }
 

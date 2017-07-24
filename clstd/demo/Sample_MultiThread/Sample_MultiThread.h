@@ -181,3 +181,24 @@ public:
   }
 
 };
+
+// ²âÊÔclstd::SignalµÈ´ı³¬Ê±
+class SampleTimeout : public clstd::Thread
+{
+  clstd::Signal m_Signal;
+public:
+  virtual i32 Run() override
+  {
+    for(int i = 0; i < 5; i++)
+    {
+      u64 time_begin = clstd::GetTime64();
+      m_Signal.WaitTimeOut(3000);
+      u64 time_end = clstd::GetTime64();
+      i64 delta = (i64)(time_end - time_begin);
+      CLOG("thread: wait time:%ld", delta);
+    }
+    Sleep(5000);
+    return 0;
+  }
+};
+

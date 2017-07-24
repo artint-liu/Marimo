@@ -110,7 +110,9 @@ namespace clstd
       Thread* pThread = static_cast<Thread*>(pParam);
       //pthread_cond_wait(&pThread->m_cond, &pThread->m_mtx);
       pThread->m_pSignal->Wait();
-      return (void*)pThread->Run();
+      void* ret = (void*)pThread->Run();
+      pThread->m_pSignal->Set();
+      return ret;
     }
 
     Thread::Thread()
@@ -122,13 +124,8 @@ namespace clstd
 
     Thread::~Thread()
     {
-      //if(m_cond) {
-      //  pthread_cond_destroy(&m_cond);
-      //}
-      //if(m_mtx) {
-      //  pthread_mutex_destroy(&m_mtx);
-      //}
       SAFE_DELETE(m_pSignal);
+
       if(m_tidp.p) {
         pthread_cancel(m_tidp);
       }
@@ -141,15 +138,6 @@ namespace clstd
         int err;
         memset(&m_tidp, 0, sizeof(m_tidp));
 
-        //err = pthread_cond_init(&m_cond, NULL);
-        //if(err != 0) {
-        //  return FALSE;
-        //}
-
-        //err = pthread_mutex_init(&m_mtx, NULL);
-        //if(err != 0) {
-        //  return FALSE;
-        //}
         m_pSignal = new Signal;
         if( ! m_pSignal) {
           return FALSE;
@@ -157,8 +145,6 @@ namespace clstd
 
         err = pthread_create(&m_tidp, NULL, ThreadStart, (void*)this);
         if(err != 0) {
-          //pthread_cond_destroy(&m_cond);
-          //m_cond = NULL;
           SAFE_DELETE(m_pSignal);
           return FALSE;
         }
@@ -167,10 +153,8 @@ namespace clstd
       if(m_pSignal) {
         m_pSignal->Set();
         return TRUE;
-        //return pthread_cond_signal(&m_cond) == 0;
       }
       else {
-        // m_cond 与 m_tidp.p 应该同时产生和释放, 不应该出现这种状态
         CLBREAK;
       }
       return FALSE;
@@ -183,7 +167,12 @@ namespace clstd
 
     u32 Thread::Wait(u32 nMilliSec)
     {
-      CLOG_WARNING("NOT IMPLEMENT");
+      if(nMilliSec == -1) {
+        pthread_join(m_tidp, NULL);
+      }
+      else {
+        //m_pSignal->WaitTimeOut(nMilliSec);
+      }
       return 0;
     }
 

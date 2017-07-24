@@ -4,9 +4,9 @@
 namespace clstd
 {
 
+#ifdef POSIX_THREAD
   namespace _posix
   {
-#ifdef POSIX_THREAD
     Locker::Locker()
     {
       pthread_mutexattr_init(&m_mutexattr);

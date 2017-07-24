@@ -8,12 +8,12 @@
 
 #include "Sample_MultiThread.h"
 
-int main()
+void TestMessage()
 {
   const int COUNT_THREAD = 51;
   SampleClient* pArray[COUNT_THREAD] = {};
   CMessage::Initialize();
-  
+
   for(int i = 0; i < countof(pArray); i++)
   {
     pArray[i] = new SampleClient(i);
@@ -24,7 +24,7 @@ int main()
   while(exit_count != COUNT_THREAD)
   {
     CLDWORD code;
-    if( ! CMessage::GetMessage(&code))
+    if(!CMessage::GetMessage(&code))
     {
       exit_count++;
       CLOG("main: exit count(%d)", exit_count);
@@ -44,6 +44,19 @@ int main()
 
   CLOG("main: all thread exit.");
   CMessage::Finalize();
+}
+
+void TestWait()
+{
+  SampleTimeout t;
+  t.Start();
+  t.Wait(-1);
+}
+
+int main()
+{
+  TestWait();
+  TestMessage();
   return 0;
 }
 
