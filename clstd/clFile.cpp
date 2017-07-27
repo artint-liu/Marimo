@@ -7,10 +7,6 @@
 //#include "clBuffer.h"
 #include "clUtility.h"
 
-#ifdef _CRT_FINDFILE
-# include <io.h>
-#endif
-
 //#ifdef _WINDOWS
 //#pragma warning(disable:4355)
 //#endif // #ifdef _WINDOWS
@@ -588,19 +584,19 @@ FALSE_RET:
 
 #else
   FindFile::FindFile()
-    : handle(InvalidHandleValue)
+    : m_dir(NULL)
   {
-    InlSetZeroT(finddata);
+    //InlSetZeroT(finddata);
   }
 
   FindFile::FindFile(CLLPCSTR szFilename)
-    : handle(InvalidHandleValue)
+    : m_dir(NULL)
   {
     NewFind(szFilename);
   }
 
   FindFile::FindFile(CLLPCWSTR szFilename)
-    : handle(InvalidHandleValue)
+    : m_dir(NULL)
   {
     NewFind(szFilename);
   }
@@ -613,11 +609,12 @@ FALSE_RET:
 
   b32 FindFile::NewFind(CLLPCSTR szFilename)
   {
-    if(handle != InvalidHandleValue) {
-      _findclose(handle);
+    if(m_dir) {
+      closedir(m_dir);
+      m_dir = NULL;
     }
-    handle = _findfirst(szFilename, &finddata);
-    return (handle != InvalidHandleValue);
+    m_dir = opendir(szFilename);
+    return (m_dir != NULL);
   }
 
   b32 FindFile::GetFile(FINDFILEDATAW* FindFileData)
@@ -634,37 +631,45 @@ FALSE_RET:
 
   b32 FindFile::GetFile(FINDFILEDATAA* FindFileData)
   {
-    if(handle == InvalidHandleValue) {
+    if( ! m_dir) {
       return FALSE;
     }
 
-    clstd::strcpynT(FindFileData->Filename, finddata.name, MAX_PATH);
-    FindFileData->dwAttributes  = IntTranslateAttr(finddata.attrib);
-    FindFileData->nFileSizeHigh = 0;
-    FindFileData->nFileSizeLow  = finddata.size;
-    if(_findnext(handle, &finddata)) // 非0表示Done!
+    dirent* ptr = NULL;
+
+    ptr = readdir(m_dir);
+
+    if(ptr)
     {
-      _findclose(handle);
-      handle = InvalidHandleValue;
+      clstd::strcpynT(FindFileData->Filename, ptr->d_name, MAX_PATH);
+      FindFileData->dwAttributes = IntTranslateAttr(ptr->d_type);
+      FindFileData->nFileSizeHigh = 0;
+      FindFileData->nFileSizeLow = 0;//finddata.size;
     }
-    return TRUE;
+
+    //if(_findnext(handle, &finddata)) // 非0表示Done!
+    //{
+    //  _findclose(handle);
+    //  handle = InvalidHandleValue;
+    //}
+    return (ptr != NULL);
   }
 
   CLDWORD FindFile::IntTranslateAttr(CLDWORD uNativeAttr)
   {
     CLDWORD dwAttr = 0;
-    if(TEST_FLAG(uNativeAttr, _A_RDONLY)) {
-      SET_FLAG(dwAttr, FileAttribute_ReadOnly);
-    }
-    if(TEST_FLAG(uNativeAttr, _A_HIDDEN)) {
-      SET_FLAG(dwAttr, FileAttribute_Hidden);
-    }
-    if(TEST_FLAG(uNativeAttr, _A_SYSTEM)) {
-      SET_FLAG(dwAttr, FileAttribute_System);
-    }
-    if(TEST_FLAG(uNativeAttr, _A_SUBDIR)) {
-      SET_FLAG(dwAttr, FileAttribute_Directory);
-    }
+    //if(TEST_FLAG(uNativeAttr, _A_RDONLY)) {
+    //  SET_FLAG(dwAttr, FileAttribute_ReadOnly);
+    //}
+    //if(TEST_FLAG(uNativeAttr, _A_HIDDEN)) {
+    //  SET_FLAG(dwAttr, FileAttribute_Hidden);
+    //}
+    //if(TEST_FLAG(uNativeAttr, _A_SYSTEM)) {
+    //  SET_FLAG(dwAttr, FileAttribute_System);
+    //}
+    //if(TEST_FLAG(uNativeAttr, _A_SUBDIR)) {
+    //  SET_FLAG(dwAttr, FileAttribute_Directory);
+    //}
     return dwAttr;
   }
 #endif // #if defined(_WINDOWS) || defined(_WIN32)

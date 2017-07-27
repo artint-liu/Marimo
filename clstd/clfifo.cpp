@@ -21,7 +21,7 @@ extern "C" void barrier(void);
 #define smp_mb()  barrier()
 #define smp_wmb() barrier()
 #endif // #ifdef _CL_ARCH_X86
-#elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(__clang__)
+#elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_LINUX) || defined(__clang__)
 static inline void barrier(void)
 {
   asm volatile("" : : : "memory");

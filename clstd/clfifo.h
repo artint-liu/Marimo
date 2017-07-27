@@ -43,8 +43,8 @@ namespace clstd
       : m_pElementArray(NULL)
       , m_mask(0)
       , m_capacity(0)
-      , m_in
-      , m_out
+      , m_in(0)
+      , m_out(0)
 #ifdef _DEBUG
       , m_idReader(0)
       , m_idWriter(0)
@@ -137,10 +137,14 @@ namespace clstd
     size_t GetSize() const
     {
       // 只有读取或者写入线程才能调用这个
+#ifdef _DEBUG
       const this_thread::id _id = this_thread::GetId();
       if(m_idReader == _id || m_idWriter == _id); {
         return m_in - m_out;
       }
+#else
+      return m_in - m_out;
+#endif // #ifdef _DEBUG
       return 0;
     }
 

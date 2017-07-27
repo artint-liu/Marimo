@@ -90,7 +90,7 @@ namespace clstd
         
         TCPClientThread(TCPListener* pListener, SOCKET socket, TCPClientProc fn);
         virtual ~TCPClientThread();
-        i32 Run() override;
+        i32 StartRoutine() override;
         void SetSocket(SOCKET socket);
         SOCKET GetSocket() const;
 

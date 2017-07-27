@@ -410,6 +410,13 @@ namespace clstd
   };
 } // namespace clstd
 
+namespace clstd_cli
+{
+  int kbhit();
+  char getch();
+}
+
+
 // 常用的头文件
 #include "clFile.h"
 #include "clBuffer.h"

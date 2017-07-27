@@ -25,11 +25,18 @@ namespace clstd
     public:
       Thread();
       virtual ~Thread();
-      virtual i32 Run();
+      virtual i32 StartRoutine();
 
       b32   Start();
       u32   Wait(u32 nMilliSec);
     };
+
+    namespace this_thread
+    {
+      typedef std::thread::id id;
+      id GetId();
+    }
+
   } // namespace cxx11
 } // namespace clstd
 #endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
@@ -37,27 +44,7 @@ namespace clstd
 
 namespace clstd
 {
-  namespace this_thread
-  {
-#if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
-    namespace cxx11
-    {
-      typedef std::thread::id id;
-      id GetId();
-    }
-#endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
-
-#if _CPLUSPLUS_11_THREAD
-    typedef std::this_thread::id id;
-#elif defined(POSIX_THREAD)
-    typedef size_t id;
-#elif (defined(_WINDOWS) || defined(_WIN32))
-    typedef size_t id;
-#endif // #if (defined(_WINDOWS) || defined(_WIN32)) && !defined(POSIX_THREAD)
-
-    id GetId();
-  } // namespace thread
-#ifdef _WIN32
+#ifdef _CL_SYSTEM_WINDOWS
   namespace _win32
   {
     class Thread
@@ -68,13 +55,20 @@ namespace clstd
     public:
       Thread();
       virtual ~Thread();
-      virtual i32 Run();
+      virtual i32 StartRoutine();
 
       b32   Start ();
       u32   Wait  (u32 nMilliSec);
     };
+
+    namespace this_thread
+    {
+      typedef size_t id;
+      id GetId();
+    }
+
   } // namespace _win32
-#endif // #ifdef _WIN32
+#endif // #ifdef _CL_SYSTEM_WINDOWS
 
 #if defined(POSIX_THREAD)
   namespace _posix
@@ -84,29 +78,61 @@ namespace clstd
     {
       friend void* ThreadStart(void* pParam);
     protected:
-      pthread_t       m_tidp;
+      pthread_t*      m_tidp;
       Signal*         m_pSignal;
       //pthread_cond_t  m_cond;
       //pthread_mutex_t m_mtx;
     public:
       Thread();
       virtual ~Thread();
-      virtual i32 Run();
+      virtual i32 StartRoutine();
 
       b32 Start();
       u32 Wait(u32 nMilliSec);
     };
+
+    namespace this_thread
+    {
+      typedef size_t id;
+      id GetId();
+    }
+
+    void abs_time_after(timespec* t, u32 uMilliSec);
   } // namespace _posix
 #endif // #ifdef POSIX_THREAD
 
 #if defined(_CPLUSPLUS_11_THREAD)
   typedef cxx11::Thread Thread;
+  namespace this_thread
+  {
+    typedef cxx11::this_thread::id id;
+    inline id GetId()
+    {
+      return cxx11::this_thread::GetId();
+    }
+  }
 #elif defined(_WIN32) && !defined(POSIX_THREAD)
   typedef _win32::Thread Thread;
+  namespace this_thread
+  {
+    typedef _win32::this_thread::id id;
+    inline id GetId()
+    {
+      return _win32::this_thread::GetId();
+    }
+  }
 #else
   typedef _posix::Thread Thread;
+  namespace this_thread
+  {
+    typedef _posix::this_thread::id id;
+    inline id GetId()
+    {
+      return _posix::this_thread::GetId();
+    }
+  }
 #endif // #if defined(_Win32) && !defined(POSIX_THREAD)
-
+ 
 } // namespace clstd
 
 #endif // #ifndef _CLSTD_THREAD_H_

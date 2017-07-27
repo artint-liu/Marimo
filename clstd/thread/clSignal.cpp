@@ -1,5 +1,5 @@
 ﻿#include "clstd.h"
-#include "Thread/clSignal.h"
+#include "thread/clSignal.h"
 
 namespace clstd
 {
@@ -41,11 +41,10 @@ namespace clstd
 #if defined(POSIX_THREAD)
   namespace _posix
   {
+    void abs_time_after(timespec* t, u32 uMilliSec);
 
     Signal::Signal()
-      : m_cond(NULL)
-      , m_mutex(NULL)
-      , m_bSignaled(FALSE)
+      : m_bSignaled(FALSE)
     {
       pthread_cond_init(&m_cond, NULL);
       pthread_mutex_init(&m_mutex, NULL);
@@ -87,24 +86,24 @@ namespace clstd
 
       timespec timeout;
 
-#if 1
-      // 这个算法不精确!
-      // TODO: windows版下这个tv_nsec时间貌似是无效的, 所以用了近似值来代替, 注意要实现其他平台的版本
-      timeout.tv_sec = time(0) + (dwMilliSec + 999) / 1000;
-      timeout.tv_nsec = 0;
-#else
-      //timespec timeout;
-      timeval now;
-      gettimeofday(&now, NULL);
-      int nsec = now.tv_usec * 1000 + (dwMilliSec % 1000) * 1000000;
-      timeout.tv_nsec = nsec % 1000000000;
-      timeout.tv_sec = now.tv_sec + nsec / 1000000000 + dwMilliSec / 1000;
-#endif
+//#if defined(_CL_SYSTEM_WINDOWS)
+//      _timeb time1970;
+//      _ftime(&time1970);
+//
+//      timeout.tv_sec = time1970.time + (dwMilliSec / 1000);
+//      timeout.tv_nsec = (time1970.millitm + (dwMilliSec % 1000)) * 1000000;
+//#else
+//      timeval now;
+//      gettimeofday(&now, NULL);
+//      int nsec = now.tv_usec * 1000 + (dwMilliSec % 1000) * 1000000;
+//      timeout.tv_nsec = nsec % 1000000000;
+//      timeout.tv_sec = now.tv_sec + nsec / 1000000000 + dwMilliSec / 1000;
+//#endif
+      abs_time_after(&timeout, dwMilliSec);
       i32 ret = 0;
       pthread_mutex_lock(&m_mutex);
-      while(!m_bSignaled)
+      if( ! m_bSignaled)
       {
-        //ret = pthread_cond_wait(&m_cond, &m_mutex);
         ret = pthread_cond_timedwait(&m_cond, &m_mutex, &timeout);
       }
       m_bSignaled = FALSE;

@@ -26,6 +26,7 @@ namespace clstd
   } // namespace _posix
 #endif // #ifdef POSIX_THREAD
 
+#ifdef _CL_SYSTEM_WINDOWS
   namespace _win32
   {
     class Locker
@@ -42,16 +43,17 @@ namespace clstd
       b32 TryLock();
     };
   } // namespace _win32
-
+#endif // #ifdef _CL_SYSTEM_WINDOWS
 
 #if defined(_CPLUSPLUS_11_THREAD)
   class Locker : public cxx11::Locker {};
-#elif defined(_WIN32) && !defined(POSIX_THREAD)
+#elif defined(POSIX_THREAD)
+  class Locker : public _posix::Locker {};
+#elif defined(_CL_SYSTEM_WINDOWS)
   class Locker : public _win32::Locker {};
 #else
-  class Locker : public _posix::Locker {};
+# pragma message(__FILE__ ": warning : 没有合适的Locker定义")
 #endif // #if defined(_Win32) && !defined(POSIX_THREAD)
-
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -78,6 +80,7 @@ namespace clstd
   };
 
   // TODO: 应该增加一个对加锁解锁进行时间跟踪的Locker或者参数
+
 
 } // namespace clstd
 

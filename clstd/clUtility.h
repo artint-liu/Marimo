@@ -78,6 +78,9 @@ inline _Ty cuberoot(_Ty f)
 
 namespace clstd
 {
+  template<typename _TCh>
+  _TCh* strchrT(const _TCh *str, const i32 ch);
+
   template<typename _Ty>
   inline _Ty saturate(_Ty Value)
   {

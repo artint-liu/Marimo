@@ -1057,6 +1057,12 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
+  const _TCh* _CLSTR_IMPL::CStr() const
+  {
+    return m_pBuf;
+  }
+
+  _CLSTR_TEMPL
     size_t _CLSTR_IMPL::GetLength() const
   {
     ASSERT(CLSTR_LENGTH(m_pBuf) <= CLSTR_CAPACITY(m_pBuf));

@@ -1208,7 +1208,7 @@ namespace clstd
         m_pitch = nNewPitch;
         m_channel = nNewChannel;
       }
-      m_format.code = nChannelTab[3] >= 0 ? MAKEFOURCC('Y', 'U', 'V', 'A') : MAKEFOURCC('Y', 'U', 'V', 0);
+      m_format.code = nChannelTab[3] >= 0 ? CLMAKEFOURCC('Y', 'U', 'V', 'A') : CLMAKEFOURCC('Y', 'U', 'V', 0);
       return result;
     }
     CLBREAK;

@@ -6,6 +6,10 @@
 #define FILEATTRIBUTE_SYSTEM     0x00000004
 #define FILEATTRIBUTE_DIRECTORY  0x00000010
 
+#ifdef _CRT_FINDFILE
+# include <dirent.h>
+//# include <io.h>
+#endif
 namespace clstd
 {
   class BufferBase;
@@ -165,9 +169,10 @@ namespace clstd
     HANDLE           hFind;
     WIN32_FIND_DATAW wfd;
 #else
-    const static long InvalidHandleValue = -1L;
-    long        handle;
-    _finddata_t finddata;
+    //const static long InvalidHandleValue = -1L;
+    //long        handle;
+    //_finddata_t finddata;
+    DIR*      m_dir;
 #endif // #if defined(_WINDOWS) || defined(_WIN32)
     CLDWORD IntTranslateAttr(CLDWORD uNativeAttr);
   public:

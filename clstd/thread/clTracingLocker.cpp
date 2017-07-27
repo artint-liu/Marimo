@@ -14,7 +14,7 @@ namespace clstd
 
   TracingLocker::~TracingLocker()
   {
-    Locker::~Locker();
+    this->Locker::~Locker();
   }
 
   void TracingLocker::Lock()

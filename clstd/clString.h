@@ -237,6 +237,7 @@ namespace clstd
     _TCh&    Back      () const;
 
     operator const _TCh*() const;
+    const _TCh* CStr() const;
 
     size_t      GetLength       () const; // 获得字符串长度，不包括'\0'
     size_t      GetCapacity     () const; // 获得字符串缓冲区容量，一般没啥卵用

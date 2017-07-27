@@ -1,13 +1,17 @@
-﻿#if defined(_WINDOWS) || defined(_WIN32)
+﻿#include "clstd.h"
+
+#if defined(_CL_SYSTEM_WINDOWS)
 #include <Windows.h>
 #include <Shlwapi.h>
+#include <direct.h>
 #pragma comment(lib, "shlwapi.lib")
-#endif // defined(_WINDOWS) || defined(_WIN32)
+#elif defined(_CL_SYSTEM_LINUX)
+# include <sys/stat.h> 
+# include <unistd.h>
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 
-#include "clstd.h"
 #include "clString.h"
 #include "clPathFile.h"
-#include <direct.h>
 using namespace clstd;
 
 //template class clStringX<wch, g_Alloc_clStringW, clstd::StringW_traits>;
@@ -859,11 +863,43 @@ namespace clpathfile
 
   b32 IsPathExist(const wch* szPath)
   {
-    BOOL bresult = PathFileExistsW(szPath);
-    return bresult;
+    return PathFileExistsW(szPath);
+  }
+
+#elif defined(_CL_SYSTEM_LINUX)
+
+  clStringA& GetCurrentDirectory(clStringA& strDir)
+  {
+    auto str = strDir.GetBuffer(MAX_PATH);
+    int cnt = readlink("/proc/self/exe", str, MAX_PATH);
+    if(cnt < 0 || cnt > MAX_PATH)
+    {
+      strDir.ReleaseBuffer();
+      RemoveFileSpec(strDir);
+    }
+    return strDir;
+  }
+
+  clStringW& GetCurrentDirectory(clStringW& strDir)
+  {
+    clStringA strDirA;
+    strDir = GetCurrentDirectory(strDirA).CStr();
+    return strDir;
+  }
+
+  b32 IsPathExist(const ch* szPath)
+  {
+    return access(szPath, R_OK) == 0;
+  }
+
+  b32 IsPathExist(const wch* szPath)
+  {
+    clStringA str = szPath;
+    return IsPathExist(str);
   }
 
 #else
+
   b32 LocalWorkingDirA(CLLPCSTR szDir)
   {
     CLBREAK;
@@ -875,6 +911,7 @@ namespace clpathfile
     CLBREAK;
     return FALSE;
   }
+
 #endif // #ifdef _WINDOWS
 
   //////////////////////////////////////////////////////////////////////////
@@ -891,7 +928,11 @@ namespace clpathfile
       if (szDirName[i] == s_PathSlash || szDirName[i] == s_VicePathSlash || szDirName[i] == '\0') {
         szSubDir[i] = '\0';
         if( ! IsPathExist(szSubDir)) {
+#if defined(_CL_SYSTEM_WINDOWS)
           int result = __mkdir(szSubDir);
+#else
+          int result = __mkdir(szSubDir, S_IREAD | S_IWRITE | S_IRGRP | S_IWGRP);
+#endif
           if(result != 0) {
             return FALSE;
           }
@@ -909,12 +950,21 @@ namespace clpathfile
 
   b32 CreateDirectoryAlways(const wch* szDirName)
   {
+#if defined(_CL_SYSTEM_WINDOWS)
     return CreateDirectoryAlwaysT(szDirName, _wmkdir);
+#else
+    clStringA str(szDirName);
+    return CreateDirectoryAlwaysT((const ch*)str, mkdir);
+#endif
   }
 
   b32 CreateDirectoryAlways(const ch* szDirName)
   {
+#if defined(_CL_SYSTEM_WINDOWS)
     return CreateDirectoryAlwaysT(szDirName, _mkdir);
+#else
+    return CreateDirectoryAlwaysT(szDirName, mkdir);
+#endif
   }
   //_findfirst
 }

@@ -25,6 +25,16 @@ namespace clstd
     inline CLBYTE*    Set       (int val);
   };
 
+  CLLPVOID BufferBase::GetPtr() const
+  {
+    return m_lpBuffer;
+  }
+
+  clsize BufferBase::GetSize() const
+  {
+    return m_uSize;
+  }
+
   //////////////////////////////////////////////////////////////////////////
   //
   // 引用 Buffer , 在析构时不会释放指针.

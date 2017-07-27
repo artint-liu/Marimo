@@ -1,6 +1,12 @@
 ﻿#include "clstd.h"
 #include "clThread.h"
-#include "clSignal.H"
+#include "clSignal.h"
+
+#if defined(_CL_SYSTEM_WINDOWS)
+# include <sys/timeb.h>
+#else
+# include <sys/time.h>
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 
 namespace clstd
 {
@@ -10,7 +16,7 @@ namespace clstd
     DWORD WINAPI ThreadStartRoutine(LPVOID lpThreadParameter)
     {
       Thread* pThread = static_cast<Thread*>(lpThreadParameter);
-      return pThread->Run();
+      return pThread->StartRoutine();
     }
 
     Thread::Thread()
@@ -57,7 +63,7 @@ namespace clstd
       return dwThreadExitCode;
     }
     
-    i32 Thread::Run()
+    i32 Thread::StartRoutine()
     {
       return 0;
     }
@@ -76,14 +82,14 @@ namespace clstd
 
     }
 
-    i32 Thread::Run()
+    i32 Thread::StartRoutine()
     {
       return 0;
     }
 
     b32 Thread::Start()
     {
-      new(&m_thread) std::thread(std::bind(&Thread::Run, this));
+      new(&m_thread) std::thread(std::bind(&Thread::StartRoutine, this));
       return TRUE;
     }
 
@@ -109,25 +115,28 @@ namespace clstd
     {
       Thread* pThread = static_cast<Thread*>(pParam);
       //pthread_cond_wait(&pThread->m_cond, &pThread->m_mtx);
-      pThread->m_pSignal->Wait();
-      void* ret = (void*)pThread->Run();
+      pThread->m_pSignal->Wait();      
+      void* ret = reinterpret_cast<void*>(pThread->StartRoutine());
       pThread->m_pSignal->Set();
       return ret;
     }
 
     Thread::Thread()
-      : m_pSignal(NULL)
+      : m_tidp(NULL)
+      , m_pSignal(NULL)
     {
-      m_tidp.p = NULL;
-      m_tidp.x = 0;
+      //m_tidp.p = NULL;
+      //m_tidp.x = 0;
     }
 
     Thread::~Thread()
     {
       SAFE_DELETE(m_pSignal);
 
-      if(m_tidp.p) {
-        pthread_cancel(m_tidp);
+      if(m_tidp) {
+        pthread_cancel(*m_tidp);
+        delete m_tidp;
+        m_tidp = NULL;
       }
     }
 
@@ -136,14 +145,15 @@ namespace clstd
       if( ! m_pSignal)
       {
         int err;
-        memset(&m_tidp, 0, sizeof(m_tidp));
+        //memset(&m_tidp, 0, sizeof(m_tidp));
+        m_tidp = new pthread_t;
 
         m_pSignal = new Signal;
         if( ! m_pSignal) {
           return FALSE;
         }
 
-        err = pthread_create(&m_tidp, NULL, ThreadStart, (void*)this);
+        err = pthread_create(m_tidp, NULL, ThreadStart, (void*)this);
         if(err != 0) {
           SAFE_DELETE(m_pSignal);
           return FALSE;
@@ -160,7 +170,7 @@ namespace clstd
       return FALSE;
     }
 
-    i32 Thread::Run()
+    i32 Thread::StartRoutine()
     {
       return 0;
     }
@@ -168,12 +178,30 @@ namespace clstd
     u32 Thread::Wait(u32 nMilliSec)
     {
       if(nMilliSec == -1) {
-        pthread_join(m_tidp, NULL);
+        pthread_join(*m_tidp, NULL);
       }
       else {
         //m_pSignal->WaitTimeOut(nMilliSec);
       }
       return 0;
+    }
+
+
+    void abs_time_after(timespec* t, u32 uMilliSec)
+    {
+#if defined(_CL_SYSTEM_WINDOWS)
+      _timeb time1970;
+      _ftime(&time1970);
+
+      t->tv_sec = time1970.time + (uMilliSec / 1000);
+      t->tv_nsec = (time1970.millitm + (uMilliSec % 1000)) * 1000000;
+#else
+      timeval now;
+      gettimeofday(&now, NULL);
+      int nsec = now.tv_usec * 1000 + (uMilliSec % 1000) * 1000000;
+      t->tv_sec = now.tv_sec + nsec / 1000000000 + uMilliSec / 1000;
+      t->tv_nsec = nsec % 1000000000;
+#endif
     }
 
   } // namespace _posix

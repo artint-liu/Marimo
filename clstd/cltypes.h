@@ -184,10 +184,10 @@ typedef int64_t           LONGLONG;
 typedef u16               USHORT;
 
 typedef CLDWORD           CLDWORD_PTR;
-typedef CLINT             CLINT_PTR;
-typedef CLLONG            CLLONG_PTR;
-typedef CLUINT            CLUINT_PTR;
-typedef CLULONG           CLULONG_PTR;
+typedef intptr_t          CLINT_PTR;
+typedef intptr_t          CLLONG_PTR;
+typedef uintptr_t         CLUINT_PTR;
+typedef uintptr_t         CLULONG_PTR;
 #endif
 
 

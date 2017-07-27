@@ -2,12 +2,13 @@
 //
 
 #define _CRT_SECURE_NO_WARNINGS
-#include <tchar.h>
+//#ifdef WIN32
+//# include <tchar.h>
+//#endif
 #include <locale.h>
-#include <conio.h>
 
 #include "clstd.h"
-#include "clString.H"
+#include "clString.h"
 #include "clPathFile.h"
 
 void TestPathFile()
@@ -103,58 +104,58 @@ void TestMatchSpec()
 
 void TestStringResolve() // 测试字符串切分
 {
-  char* test1 = "as,hello,world";
-  char* test2 = "as,,,hello,world";
+  const char* test1 = "as,hello,world";
+  const char* test2 = "as,,,hello,world";
   clstd::StringUtility::Resolve(test1, clstd::strlenT(test1), ',', [](int i, const char* str, size_t len){
     clStringA sub_str(str, len);
-    printf("%s\n", sub_str);
+    printf("%s\n", (const char*)sub_str);
   });
 
   printf("--------------------\n");
 
   clstd::StringUtility::Resolve(test2, clstd::strlenT(test2), ',', [](int n, const char* str, size_t len){
     clStringA sub_str(str, len);
-    printf("%s\n", sub_str);
+    printf("%s\n", (const char*)sub_str);
   });
 }
 
 void TestCodec() // 测试unicode到ansi转换
 {
   const ch* szTestStringA  =  "这是测试的简单中文字符串啊没有奇怪的字符，1234567890ABCabc";
-  const wch* szTestStringW = L"这是测试的简单中文字符串啊没有奇怪的字符，1234567890ABCabc";
+  const wch* szTestStringW = _CLTEXT("这是测试的简单中文字符串啊没有奇怪的字符，1234567890ABCabc");
 
   {
     clStringA strA = szTestStringA;
-    clStringW strW = strA;
+    clStringW strW = strA.CStr();
     ASSERT(strW == szTestStringW);
   }
 
   {
     clStringW strW = szTestStringW;
-    clStringA strA = strW;
+    clStringA strA = strW.CStr();
     ASSERT(strA == szTestStringA);
   }
 }
 
 void TestLog()
 {
-  CLOG("log test");
-  CLOG("日志输出测试");
+  CLOG("1.log test");
+  CLOG("2.日志输出测试");
 
-  CLOG_WARNING("log test");
-  CLOG_WARNING("日志输出测试");
+  CLOG_WARNING("3.log test");
+  CLOG_WARNING("4.日志输出测试");
 
-  CLOG_ERROR("log test");
-  CLOG_ERROR("日志输出测试");
+  CLOG_ERROR("5.log test");
+  CLOG_ERROR("6.日志输出测试");
 
-  CLOGW(_CLTEXT("log test"));
-  CLOGW(_CLTEXT("日志输出测试"));
+  CLOGW(_CLTEXT("7.log test"));
+  CLOGW(_CLTEXT("8.日志输出测试"));
 
-  CLOG_WARNINGW(_CLTEXT("log test"));
-  CLOG_WARNINGW(_CLTEXT("日志输出测试"));
+  CLOG_WARNINGW(_CLTEXT("9.log test"));
+  CLOG_WARNINGW(_CLTEXT("10.日志输出测试"));
 
-  CLOG_ERRORW(_CLTEXT("log test"));
-  CLOG_ERRORW(_CLTEXT("日志输出测试"));
+  CLOG_ERRORW(_CLTEXT("11.log test"));
+  CLOG_ERRORW(_CLTEXT("12.日志输出测试"));
 }
 
 // 测试基本字符串操作
@@ -328,7 +329,7 @@ void TestFormatStrFunc(const ch** fmt_flags, int num_flags, const ch** fmt_width
             CLBREAK;
           }
 
-          if(kbhit() && getch() == 27) {
+          if(clstd_cli::kbhit() && clstd_cli::getch() == 27) {
             return;
           }
 
@@ -412,7 +413,7 @@ void TestFormatString1()
   TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
   setlocale(LC_ALL, "");
   //cprintf();

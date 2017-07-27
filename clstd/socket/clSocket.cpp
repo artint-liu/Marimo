@@ -296,7 +296,7 @@ namespace clstd
       {
       }
       
-      i32 TCPClientThread::Run()
+      i32 TCPClientThread::StartRoutine()
       {
         ASSERT(m_tid == 0 && m_pWaiting == NULL);
         m_pWaiting = new Signal;

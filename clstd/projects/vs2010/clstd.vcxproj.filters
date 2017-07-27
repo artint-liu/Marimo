@@ -2,11 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="..\..\FloatX.cpp" />
-    <ClCompile Include="..\..\User32Ex.CPP" />
+    <ClCompile Include="..\..\User32Ex.cpp" />
     <ClCompile Include="..\..\Smart\smartstream.cpp">
       <Filter>Smart</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\clTree.CPP" />
+    <ClCompile Include="..\..\clTree.cpp" />
     <ClCompile Include="..\..\3D\Camera.cpp">
       <Filter>3D</Filter>
     </ClCompile>
@@ -91,16 +91,16 @@
     <ClCompile Include="..\..\clImageDecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\clFile.H" />
+    <ClInclude Include="..\..\clFile.h" />
     <ClInclude Include="..\..\clstd.h" />
     <ClInclude Include="..\..\floatx.h" />
-    <ClInclude Include="..\..\User32Ex.H" />
+    <ClInclude Include="..\..\User32Ex.h" />
     <ClInclude Include="..\..\Smart\smartstream.h">
       <Filter>Smart</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\clmemory.h" />
-    <ClInclude Include="..\..\clString.H" />
-    <ClInclude Include="..\..\clTree.H" />
+    <ClInclude Include="..\..\clMemory.h" />
+    <ClInclude Include="..\..\clString.h" />
+    <ClInclude Include="..\..\clTree.h" />
     <ClInclude Include="..\..\3D\Camera.h">
       <Filter>3D</Filter>
     </ClInclude>
@@ -115,7 +115,7 @@
     <ClInclude Include="..\..\3D\cl3d.h">
       <Filter>3D</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\clUtility.H" />
+    <ClInclude Include="..\..\clUtility.h" />
     <ClInclude Include="..\..\clColorSpace.h" />
     <ClInclude Include="..\..\clMathVector.h" />
     <ClInclude Include="..\..\Smart\SmartRepository.h">
@@ -129,7 +129,7 @@
     <ClInclude Include="..\..\Socket\clSocketServer.h">
       <Filter>Socket</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Thread\clSignal.H">
+    <ClInclude Include="..\..\Thread\clSignal.h">
       <Filter>Thread</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Socket\clSocketClient.h">
@@ -165,7 +165,7 @@
     <ClInclude Include="..\..\clStock.h" />
     <ClInclude Include="..\..\clTokens.h" />
     <ClInclude Include="..\..\clRepository.h" />
-    <ClInclude Include="..\..\clBuffer.H" />
+    <ClInclude Include="..\..\clBuffer.h" />
     <ClInclude Include="..\..\clImageDecoder.h" />
   </ItemGroup>
   <ItemGroup>

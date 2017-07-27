@@ -39,6 +39,7 @@ namespace clstd
   } // namespace _posix
 #endif // #ifdef POSIX_THREAD
 
+#if defined(_CL_SYSTEM_WINDOWS)
   namespace _win32
   {
 
@@ -68,5 +69,6 @@ namespace clstd
     }
 
   } // namespace _win32
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 
 } // namespace clstd

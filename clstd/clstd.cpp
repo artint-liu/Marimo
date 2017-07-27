@@ -1,19 +1,56 @@
 ﻿#include "clstd.h"
 #include "clString.h"
-#if defined(_WINDOWS) || defined(_WIN32)
-#include <Windows.h>
-#include <Shlwapi.h>
-#  include <vld.h>
-#pragma comment(lib, "shlwapi.lib")
-#pragma warning(disable : 4996)
-#endif // #if defined(_WINDOWS) || defined(_WIN32)
 
+#if defined(_CL_SYSTEM_WINDOWS)
+# include <conio.h>
+# include <Windows.h>
+# include <Shlwapi.h>
+# include <vld.h>
+# pragma comment(lib, "shlwapi.lib")
+# pragma warning(disable : 4996)
+#elif defined(_CL_SYSTEM_LINUX)
+# include <stdio.h>
+# include <termios.h>
+# include <unistd.h>
+# include <fcntl.h>
+#endif
+
+#if defined(_CL_SYSTEM_WINDOWS)
 #define SET_TEXT_COLOR(_CR)     CONSOLE_SCREEN_BUFFER_INFO bi;  \
                                 HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE); \
                                 GetConsoleScreenBufferInfo(hStdout, &bi); \
                                 SetConsoleTextAttribute(hStdout, _CR);
 
 #define RESTORE_TEXT_COLOR()    SetConsoleTextAttribute(hStdout, bi.wAttributes);
+#else
+# define SET_TEXT_COLOR(_CR)
+# define RESTORE_TEXT_COLOR()
+
+extern "C" b32 IsDebuggerPresent()
+{
+  return FALSE;
+}
+
+extern "C" void OutputDebugStringA(CLLPCSTR lpOutputString)
+{
+}
+
+extern "C" void OutputDebugStringW(CLLPCWSTR lpOutputString)
+{
+}
+
+int _vsnwprintf(//_TCh*, size_t, const _TCh*, va_list
+  wch* string, size_t count, const wch* format, va_list ap )
+{
+  return 0;
+}
+
+int fputws(const wch *format, FILE *str)
+{
+  return 0;
+}
+
+#endif
 
 #if 0
 const static clstd::ALLOCPLOY aclAllocPloyW[] =
@@ -53,11 +90,24 @@ clStringW s_strRootDir;
 #define MAX_TRACE_BUFFER 4096
 //#ifdef _DEBUG
 
-#if defined(_WINDOWS) || defined(_WIN32)
+//#if defined(_WINDOWS) || defined(_WIN32)
+//#else
+//void OutputDebugStringA( CLLPCSTR lpOutputString )
+//{
+//  puts(lpOutputString);
+//}
+//
+//void OutputDebugStringW( CLLPCWSTR lpOutputString )
+//{
+//  puts("NOT implement OutputDebugStringW");
+//}
+//#endif
+
 template<typename _TCh,
   int vsnprintfT(_TCh*, size_t, const _TCh*, va_list),
-  void __stdcall OutputDebugStringT(const _TCh*),
-  int fprintfT(FILE*, const _TCh*, ...)>
+  void CL_CALLBACK OutputDebugStringT(const _TCh*),
+  //int fprintfT(FILE*, const _TCh*, ...)>
+  int fputsT(const _TCh*, FILE*)>
 void _cl_vtraceT(const _TCh *fmt, va_list val)
 {
   //if(IsDebuggerPresent() == FALSE)
@@ -82,7 +132,7 @@ void _cl_vtraceT(const _TCh *fmt, va_list val)
       if(IsDebuggerPresent()) {
         OutputDebugStringT(pBuffer);
       }
-      fprintfT(stdout, pBuffer); // TODO: 根据消息类型区分stdout/stderr
+      fputsT(pBuffer, stdout); // TODO: 根据消息类型区分stdout/stderr
     }
 
     if(pBuffer != buffer && pBuffer != NULL) {
@@ -96,8 +146,8 @@ void _cl_vtraceT(const _TCh *fmt, va_list val)
 
 template<typename _TCh,
   int vsnprintfT(_TCh*, size_t, const _TCh*, va_list),
-  void __stdcall OutputDebugStringT(const _TCh*),
-  int fprintfT(FILE*, const _TCh*, ...)>
+  void CL_CALLBACK OutputDebugStringT(const _TCh*),
+  int fputsT(const _TCh*, FILE*)>
   void _cl_vlogT(const _TCh* prefix, const _TCh* fmt, va_list val)
 {
   size_t prefix_len = clstd::strlenT(prefix);
@@ -112,7 +162,7 @@ template<typename _TCh,
     .Append(fmt, fmt_len * sizeof(_TCh))
     .Append(s_szCRLF, sizeof(s_szCRLF));
 
-  _cl_vtraceT<_TCh, vsnprintfT, OutputDebugStringT, fprintfT>((const _TCh*)buffer.GetPtr(), val);
+  _cl_vtraceT<_TCh, vsnprintfT, OutputDebugStringT, fputsT>((const _TCh*)buffer.GetPtr(), val);
 }
 
 // 不能用clString,因为clString使用的分配池会调用TRACE
@@ -120,7 +170,7 @@ extern "C" void _cl_traceA(const char *fmt, ...)
 {
   va_list val;
   va_start(val, fmt);
-  _cl_vtraceT<char, vsnprintf, OutputDebugStringA, fprintf>(fmt, val);
+  _cl_vtraceT<char, vsnprintf, OutputDebugStringA, fputs>(fmt, val);
   va_end(val);
 }
 
@@ -128,7 +178,7 @@ extern "C" void _cl_traceW(const wch *fmt, ...)
 {
   va_list val;
   va_start(val, fmt);
-  _cl_vtraceT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(fmt, val);
+  _cl_vtraceT<wch, _vsnwprintf, OutputDebugStringW, fputws>(fmt, val);
   va_end(val);
 }
 
@@ -138,7 +188,7 @@ extern "C" void _cl_log_infoA(const char *fmt, ...)
 
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[INFO] ", fmt, val);
+  _cl_vlogT<char, vsnprintf, OutputDebugStringA, fputs>("[INFO] ", fmt, val);
   va_end(val);
 
   RESTORE_TEXT_COLOR();
@@ -150,7 +200,7 @@ extern "C" void _cl_log_errorA(const char *fmt, ...)
 
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[ERROR] ", fmt, val);
+  _cl_vlogT<char, vsnprintf, OutputDebugStringA, fputs>("[ERROR] ", fmt, val);
   va_end(val);
 
   RESTORE_TEXT_COLOR();
@@ -162,7 +212,7 @@ extern "C" void _cl_log_warningA(const char *fmt, ...)
 
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[WARN] ", fmt, val);
+  _cl_vlogT<char, vsnprintf, OutputDebugStringA, fputs>("[WARN] ", fmt, val);
   va_end(val);
 
   RESTORE_TEXT_COLOR();
@@ -174,7 +224,7 @@ extern "C" void _cl_log_infoW(const wch *fmt, ...)
 
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[INFO] ", fmt, val);
+  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fputws>(_CLTEXT("[INFO] "), fmt, val);
   va_end(val);
 
   RESTORE_TEXT_COLOR();
@@ -186,7 +236,7 @@ extern "C" void _cl_log_errorW(const wch *fmt, ...)
 
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[ERROR] ", fmt, val);
+  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fputws>(_CLTEXT("[ERROR] "), fmt, val);
   va_end(val);
 
   RESTORE_TEXT_COLOR();
@@ -198,7 +248,7 @@ extern "C" void _cl_log_warningW(const wch *fmt, ...)
 
   va_list val;
   va_start(val, fmt);
-  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[WARN] ", fmt, val);
+  _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fputws>(_CLTEXT("[WARN] "), fmt, val);
   va_end(val);
 
   RESTORE_TEXT_COLOR();
@@ -212,7 +262,7 @@ namespace clstd
 
     va_list val;
     va_start(val, fmt);
-    _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[INFO] ", fmt, val);
+    _cl_vlogT<char, vsnprintf, OutputDebugStringA, fputs>("[INFO] ", fmt, val);
     va_end(val);
 
     RESTORE_TEXT_COLOR();
@@ -224,7 +274,7 @@ namespace clstd
 
     va_list val;
     va_start(val, fmt);
-    _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[ERROR] ", fmt, val);
+    _cl_vlogT<char, vsnprintf, OutputDebugStringA, fputs>("[ERROR] ", fmt, val);
     va_end(val);
 
     RESTORE_TEXT_COLOR();
@@ -236,7 +286,7 @@ namespace clstd
 
     va_list val;
     va_start(val, fmt);
-    _cl_vlogT<char, vsnprintf, OutputDebugStringA, fprintf>("[WARN] ", fmt, val);
+    _cl_vlogT<char, vsnprintf, OutputDebugStringA, fputs>("[WARN] ", fmt, val);
     va_end(val);
 
     RESTORE_TEXT_COLOR();
@@ -246,7 +296,7 @@ namespace clstd
   {
     va_list val;
     va_start(val, fmt);
-    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[INFO] ", fmt, val);
+    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fputws>(_CLTEXT("[INFO] "), fmt, val);
     va_end(val);
   }
 
@@ -256,7 +306,7 @@ namespace clstd
 
     va_list val;
     va_start(val, fmt);
-    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[ERROR] ", fmt, val);
+    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fputws>(_CLTEXT("[ERROR] "), fmt, val);
     va_end(val);
 
     RESTORE_TEXT_COLOR();
@@ -268,7 +318,7 @@ namespace clstd
 
     va_list val;
     va_start(val, fmt);
-    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fwprintf>(L"[WARN] ", fmt, val);
+    _cl_vlogT<wch, _vsnwprintf, OutputDebugStringW, fputws>(_CLTEXT("[WARN] "), fmt, val);
     va_end(val);
    
     RESTORE_TEXT_COLOR();
@@ -308,7 +358,7 @@ extern "C" void _cl_traceW(wch *fmt, ...)
   OutputDebugStringW(buffer);
 }
 //*/
-#endif //defined(_WINDOWS) || defined(_WIN32)
+//#endif //defined(_WINDOWS) || defined(_WIN32)
 
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum)
 {
@@ -446,3 +496,45 @@ namespace clstd
   }*/
 #endif // #ifdef _WIN32
 } // namespace clstd
+
+namespace clstd_cli
+{
+#if defined(_CL_SYSTEM_WINDOWS)
+  int kbhit()
+  {
+    return ::_kbhit();
+  }
+
+  char getch()
+  {
+    return ::_getch();
+  }
+#elif defined(_CL_SYSTEM_LINUX)
+  int kbhit()
+  {
+    struct termios oldt, newt;
+    int ch;
+    int oldf;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+    if(ch != EOF)
+    {
+      ungetc(ch, stdin);
+      return 1;
+    }
+    return 0;
+  }
+
+  char getch()
+  {
+    return ::getchar();
+  }
+#endif
+} // namespace clstd_cli

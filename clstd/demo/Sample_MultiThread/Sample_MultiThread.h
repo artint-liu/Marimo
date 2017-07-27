@@ -146,7 +146,7 @@ public:
   {
   }
 
-  virtual i32 Run() override
+  virtual i32 StartRoutine() override
   {
     clstd::Rand r;
     CLOG("thread[%d]: start.", m_index);
@@ -187,7 +187,7 @@ class SampleTimeout : public clstd::Thread
 {
   clstd::Signal m_Signal;
 public:
-  virtual i32 Run() override
+  virtual i32 StartRoutine() override
   {
     for(int i = 0; i < 5; i++)
     {

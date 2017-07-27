@@ -198,7 +198,7 @@ namespace clstd
   {
 #if defined(_CL_SYSTEM_WINDOWS) && (_WIN32_WINNT >= 0x0600)
     return GetTickCount64();
-#elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)
+#elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_LINUX)
     u64 time_ms;
     struct timeval current;
     gettimeofday(&current, NULL);

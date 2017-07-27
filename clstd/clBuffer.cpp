@@ -29,16 +29,6 @@
 //////////////////////////////////////////////////////////////////////////
 namespace clstd
 {
-  CLLPVOID BufferBase::GetPtr() const
-  {
-    return m_lpBuffer;
-  }
-
-  clsize BufferBase::GetSize() const
-  {
-    return m_uSize;
-  }
-
   CLBYTE* BufferBase::Set(int val)
   {
     return (CLBYTE*)memset(m_lpBuffer, val, m_uSize);
