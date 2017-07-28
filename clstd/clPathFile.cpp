@@ -968,4 +968,242 @@ namespace clpathfile
 #endif
   }
   //_findfirst
-}
+} // namespace clpathfile
+
+//////////////////////////////////////////////////////////////////////////
+
+namespace clstd
+{
+#if defined(_CL_SYSTEM_WINDOWS)
+  FindFile::FindFile()
+    : hFind(INVALID_HANDLE_VALUE)
+  {
+    InlSetZeroT(wfd);
+  }
+
+  FindFile::FindFile(CLLPCSTR szFilename)
+    : hFind(INVALID_HANDLE_VALUE)
+  {
+    NewFind(szFilename);
+  }
+
+  FindFile::FindFile(CLLPCWSTR szFilename)
+    : hFind(INVALID_HANDLE_VALUE)
+  {
+    NewFind(szFilename);
+  }
+
+  b32 FindFile::NewFind(CLLPCWSTR szFilename)
+  {
+    if(hFind != INVALID_HANDLE_VALUE) {
+      FindClose(hFind);
+    }
+    hFind = FindFirstFileW(szFilename, &wfd);
+    return (hFind != INVALID_HANDLE_VALUE);
+  }
+
+  b32 FindFile::NewFind(CLLPCSTR szFilename)
+  {
+    clStringW strFilename = szFilename;
+    return NewFind(strFilename);
+  }
+
+  b32 FindFile::GetFile(FINDFILEDATAW* FindFileData)
+  {
+    if(hFind == INVALID_HANDLE_VALUE) {
+      return FALSE;
+    }
+    clstd::strcpynT(FindFileData->Filename, wfd.cFileName, MAX_PATH);
+    FindFileData->dwAttributes = IntTranslateAttr(wfd.dwFileAttributes);
+    FindFileData->nFileSizeHigh   = wfd.nFileSizeHigh;
+    FindFileData->nFileSizeLow    = wfd.nFileSizeLow;
+    FindFileData->nCreationTime   = ((u64)wfd.ftCreationTime.dwHighDateTime << 32) | wfd.ftCreationTime.dwLowDateTime;
+    FindFileData->nLastAccessTime = ((u64)wfd.ftLastAccessTime.dwHighDateTime << 32) | wfd.ftLastAccessTime.dwLowDateTime;
+    FindFileData->nLastWriteTime  = ((u64)wfd.ftLastWriteTime.dwHighDateTime << 32) | wfd.ftLastWriteTime.dwLowDateTime;
+    if(!FindNextFileW(hFind, &wfd))
+    {
+      FindClose(hFind);
+      hFind = INVALID_HANDLE_VALUE;
+    }
+    return TRUE;
+  }
+
+  b32 FindFile::GetFile(FINDFILEDATAA* FindFileData)
+  {
+    FINDFILEDATAW ffdW;
+    const b32 bval = GetFile(&ffdW);
+    WideCharToMultiByte(CP_ACP, NULL, ffdW.Filename, -1, FindFileData->Filename, MAX_PATH, NULL, NULL);
+    FindFileData->dwAttributes = IntTranslateAttr(ffdW.dwAttributes);
+    FindFileData->nFileSizeHigh   = ffdW.nFileSizeHigh;
+    FindFileData->nFileSizeLow    = ffdW.nFileSizeLow;
+    FindFileData->nCreationTime   = ffdW.nCreationTime;
+    FindFileData->nLastAccessTime = ffdW.nLastAccessTime;
+    FindFileData->nLastWriteTime  = ffdW.nLastWriteTime;
+    return bval;
+  }
+
+  CLDWORD FindFile::IntTranslateAttr(CLDWORD uNativeAttr)
+  {
+    CLDWORD dwAttr = 0;
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_READONLY)) {
+      SET_FLAG(dwAttr, FileAttribute_ReadOnly);
+    }
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_HIDDEN)) {
+      SET_FLAG(dwAttr, FileAttribute_Hidden);
+    }
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_SYSTEM)) {
+      SET_FLAG(dwAttr, FileAttribute_System);
+    }
+    if(TEST_FLAG(uNativeAttr, FILEATTRIBUTE_DIRECTORY)) {
+      SET_FLAG(dwAttr, FileAttribute_Directory);
+    }
+    return dwAttr;
+  }
+
+#else
+  FindFile::FindFile()
+    : m_dir(NULL)
+  {
+    //InlSetZeroT(finddata);
+  }
+
+  FindFile::FindFile(CLLPCSTR szFilename)
+    : m_dir(NULL)
+  {
+    NewFind(szFilename);
+  }
+
+  FindFile::FindFile(CLLPCWSTR szFilename)
+    : m_dir(NULL)
+  {
+    NewFind(szFilename);
+  }
+
+  b32 FindFile::NewFind(CLLPCWSTR szFilename)
+  {
+    clStringA strFilename = szFilename;
+    return NewFind(strFilename);
+  }
+
+  b32 FindFile::NewFind(CLLPCSTR szFilename)
+  {
+    if(m_dir) {
+      closedir(m_dir);
+      m_dir = NULL;
+    }
+
+    clStringA strFullPath;
+    clStringA strFindDir;
+    if(strcmpT(szFilename, "*") == 0 || strcmpT(szFilename, "*.*") == 0)
+    {
+      m_strMatchName = "*";
+      szFilename = clpathfile::GetCurrentDirectory(strFindDir);
+      // CLOG("%s(%d): %s", __FUNCTION__, __LINE__, szFilename);
+    }
+    else if(clpathfile::IsFileSpec(szFilename))
+    {
+      m_strMatchName = szFilename;
+      szFilename = clpathfile::GetCurrentDirectory(strFindDir);
+    }
+    else if(clpathfile::IsRelative(szFilename))
+    {
+      clpathfile::CombinePath(strFullPath, 
+        clpathfile::GetCurrentDirectory(strFindDir), szFilename);
+      clsize pos = clpathfile::FindFileName(strFullPath);
+      
+      ASSERT(pos != clStringA::npos);
+
+      m_strMatchName = &strFullPath.CStr()[pos];
+      strFullPath.Remove(pos, -1);
+      szFilename = strFullPath;
+    }
+    else
+    {
+      clsize pos = clpathfile::FindFileName(szFilename);
+      
+      ASSERT(pos != clStringA::npos);
+
+      m_strMatchName = &szFilename[pos];
+      strFullPath.Append(szFilename, pos);
+      szFilename = strFullPath;
+    }
+
+    m_dir = opendir(szFilename);
+    return (m_dir != NULL);
+  }
+
+  b32 FindFile::GetFile(FINDFILEDATAW* FindFileData)
+  {
+    FINDFILEDATAA finddataA;
+    if(!GetFile(&finddataA)) {
+      return FALSE;
+    }
+    clStringW str(finddataA.Filename);
+    clstd::strcpynT(FindFileData->Filename, (const wch*)str, MAX_PATH);
+    FindFileData->dwAttributes    = finddataA.dwAttributes;
+    FindFileData->nFileSizeHigh   = finddataA.nFileSizeHigh;
+    FindFileData->nFileSizeLow    = finddataA.nFileSizeLow;
+    FindFileData->nCreationTime   = finddataA.nCreationTime;
+    FindFileData->nLastAccessTime = finddataA.nLastAccessTime;
+    FindFileData->nLastWriteTime  = finddataA.nLastWriteTime;
+
+    return TRUE;
+  }
+
+  b32 FindFile::GetFile(FINDFILEDATAA* FindFileData)
+  {
+    if(!m_dir) {
+      return FALSE;
+    }
+
+    dirent* ptr = NULL;
+
+    while(1)
+    {
+      ptr = readdir(m_dir);
+
+      if(ptr)
+      {
+        struct stat _sStat;
+
+        if(!clpathfile::MatchSpec(ptr->d_name, m_strMatchName)) {
+          continue;
+        }
+
+        clstd::strcpynT(FindFileData->Filename, ptr->d_name, MAX_PATH);
+        stat(ptr->d_name, &_sStat);
+
+        FindFileData->dwAttributes = IntTranslateAttr(_sStat.st_mode);
+        FindFileData->nFileSizeHigh = 0;
+        FindFileData->nFileSizeLow = _sStat.st_size;
+        FindFileData->nCreationTime = _sStat.st_ctime;
+        FindFileData->nLastAccessTime = _sStat.st_atime;
+        FindFileData->nLastWriteTime = _sStat.st_mtime;
+      }
+      break;
+    }
+
+    return (ptr != NULL);
+  }
+
+  CLDWORD FindFile::IntTranslateAttr(CLDWORD uNativeAttr)
+  {
+    CLDWORD dwAttr = 0;
+    if(S_ISDIR(uNativeAttr))
+    {
+      SET_FLAG(dwAttr, FileAttribute_Directory);
+    }
+    if(TEST_FLAG_NOT(uNativeAttr, S_IWUSR))
+    {
+      SET_FLAG(dwAttr, FileAttribute_ReadOnly);
+    }
+    //if(TEST_FLAG(uNativeAttr, _A_HIDDEN)) {
+    //  SET_FLAG(dwAttr, FileAttribute_Hidden);
+    //}
+    //if(TEST_FLAG(uNativeAttr, _A_SYSTEM)) {
+    //  SET_FLAG(dwAttr, FileAttribute_System);
+    //}
+    return dwAttr;
+  }
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
+} // namespace clstd

@@ -136,57 +136,6 @@ namespace clstd
     //    GetTextStream ();  
   };
 
-  //////////////////////////////////////////////////////////////////////////
-  enum FileAttribute
-  {
-    FileAttribute_ReadOnly  = 0x00000001,
-    FileAttribute_Hidden    = 0x00000002,
-    FileAttribute_System    = 0x00000004,
-    FileAttribute_Directory = 0x00000010,
-  };
-
-  struct FINDFILEDATAW
-  {
-    CLWCHAR Filename[MAX_PATH];
-    CLDWORD dwAttributes;
-    u32     nFileSizeHigh;
-    u32     nFileSizeLow;
-  };
-
-  struct FINDFILEDATAA
-  {
-    CLCHAR  Filename[MAX_PATH];
-    CLDWORD dwAttributes;
-    u32     nFileSizeHigh;
-    u32     nFileSizeLow;
-  };
-
-//#define _CRT_FINDFILE
-
-  class FindFile
-  {
-#if (defined(_WINDOWS) || defined(_WIN32)) && ! defined(_CRT_FINDFILE)
-    HANDLE           hFind;
-    WIN32_FIND_DATAW wfd;
-#else
-    //const static long InvalidHandleValue = -1L;
-    //long        handle;
-    //_finddata_t finddata;
-    DIR*      m_dir;
-#endif // #if defined(_WINDOWS) || defined(_WIN32)
-    CLDWORD IntTranslateAttr(CLDWORD uNativeAttr);
-  public:
-    FindFile();
-    FindFile(CLLPCSTR szFilename);
-    FindFile(CLLPCWSTR szFilename);
-
-    b32 NewFind(CLLPCWSTR szFilename);
-    b32 NewFind(CLLPCSTR szFilename);
-
-    b32 GetFile(FINDFILEDATAW* FindFileData);
-    b32 GetFile(FINDFILEDATAA* FindFileData);
-  };
-
 } // namespace clstd
 
 typedef clstd::File clFile;

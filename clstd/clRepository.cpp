@@ -303,7 +303,7 @@ namespace clstd
       size_t copy_size = 0;
       CLBYTE*const pSrcData = pKey->GetDataPtr(m_pData, &copy_size);
 
-      if(pData == NULL || nLength == NULL) {
+      if(pData == NULL || nLength == 0) {
         return copy_size;
       }
 

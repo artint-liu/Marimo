@@ -1,8 +1,19 @@
+
+Configuration = release
+
 PROJECT_DIR = .
 LIB_DIR=$(PROJECT_DIR)\Bin
 
 INCLUDES += -I$(PROJECT_DIR)
-CPPFLAGS += -D_DEBUG -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11 -fexec-charset=GBK
+
+ifeq ($(Configuration), debug)
+CPPFLAGS += -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11 -fexec-charset=GBK -D_DEBUG
+ProjectName = libclstd_d.a
+else
+CPPFLAGS += -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11 -fexec-charset=GBK 
+ProjectName = libclstd.a
+endif
+
 CXX := g++
 #LIBSRCS=\
 #	clString.cpp
@@ -51,7 +62,7 @@ LIBOBJS=\
 all: lib
 
 lib:$(LIBOBJS)
-	$(AR) crs libclstd.a $(LIBOBJS)
+	$(AR) crs $(ProjectName) $(LIBOBJS)
 	
 %.o : %.cpp
 	$(CXX) -c $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $< -o $@
