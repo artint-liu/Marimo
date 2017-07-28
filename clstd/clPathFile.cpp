@@ -610,7 +610,7 @@ namespace clpathfile
   template<typename _TCh>
   b32 IsRelativeT(const _TCh* szPath)
   {
-#if defined(_WIN32) || defined(_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS)
     return ( ! (IS_ANY_SLASH(szPath[0]) || szPath[1] == ':') );
 #else
     return ( ! IS_ANY_SLASH(szPath[0]));
@@ -871,10 +871,11 @@ namespace clpathfile
   clStringA& GetCurrentDirectory(clStringA& strDir)
   {
     auto str = strDir.GetBuffer(MAX_PATH);
-    int cnt = readlink("/proc/self/exe", str, MAX_PATH);
-    if(cnt < 0 || cnt > MAX_PATH)
-    {
-      strDir.ReleaseBuffer();
+    const int cnt = readlink("/proc/self/exe", str, MAX_PATH);
+    strDir.ReleaseBuffer();
+    if(cnt < 0 || cnt > MAX_PATH) {
+      strDir.Clear();
+    } else {
       RemoveFileSpec(strDir);
     }
     return strDir;

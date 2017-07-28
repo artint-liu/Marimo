@@ -2,7 +2,7 @@ PROJECT_DIR = .
 LIB_DIR=$(PROJECT_DIR)\Bin
 
 INCLUDES += -I$(PROJECT_DIR)
-CPPFLAGS += -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11
+CPPFLAGS += -D_DEBUG -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11 -fexec-charset=GBK
 CXX := g++
 #LIBSRCS=\
 #	clString.cpp
@@ -55,3 +55,6 @@ lib:$(LIBOBJS)
 	
 %.o : %.cpp
 	$(CXX) -c $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $< -o $@
+	
+clean:
+	-rm $(LIBOBJS)

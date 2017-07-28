@@ -25,56 +25,76 @@ void TestPathFile()
   //////////////////////////////////////////////////////////////////////////
 }
 
+#define CLPATHFILE_FUNC(__x) __x; CLOG("%s => %s", #__x, strPath.CStr());
+
 void TestCombinePath()
 {
+  CLOG(__FUNCTION__);
   clStringA strPath;
-  clpathfile::CombinePath(strPath, "abc", "def");
-  ASSERT(strPath == "abc\\def");
 
-  clpathfile::CombinePath(strPath, "abc\\", "def");
-  ASSERT(strPath == "abc\\def");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "def"));
+  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
 
-  clpathfile::CombinePath(strPath, "abc\\", "/def");
-  ASSERT(strPath == "\\def");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\", "def"));
+  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
 
-  clpathfile::CombinePath(strPath, "abc\\def", "ghi");
-  ASSERT(strPath == "abc\\def\\ghi");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\", "/def"));
+  ASSERT(strPath == "\\def" || strPath == "/def");
 
-  clpathfile::CombinePath(strPath, "abc\\def", "./ghi");
-  ASSERT(strPath == "abc\\def\\ghi");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "ghi"));
+  ASSERT(strPath == "abc\\def\\ghi" || strPath == "abc/def/ghi" || strPath == "abc\\def/ghi");
 
-  clpathfile::CombinePath(strPath, "abc\\def", "../ghi");
-  ASSERT(strPath == "abc\\ghi");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "./ghi"));
+  ASSERT(strPath == "abc\\def\\ghi" || strPath == "abc/def/ghi" || strPath == "abc\\def/ghi");
 
-  clpathfile::CombinePath(strPath, "abc", "./def");
-  ASSERT(strPath == "abc\\def");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "../ghi"));
+  ASSERT(strPath == "abc\\ghi" || strPath == "abc/ghi");
 
-  clpathfile::CombinePath(strPath, "abc", "../def");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "./def"));
+  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "../def"));
   ASSERT(strPath == "def");
 
-  clpathfile::CombinePath(strPath, "", "./abc");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "", "./abc"));
   ASSERT(strPath == "abc");
 
-  clpathfile::CombinePath(strPath, "", "../abc");
-  ASSERT(strPath == "..\\abc");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "", "../abc"));
+  ASSERT(strPath == "..\\abc" || strPath == "../abc");
 
-  clpathfile::CombinePath(strPath, NULL, "./abc");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, NULL, "./abc"));
   ASSERT(strPath == "abc");
 
-  clpathfile::CombinePath(strPath, NULL, "../abc");
-  ASSERT(strPath == "..\\abc");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, NULL, "../abc"));
+  ASSERT(strPath == "..\\abc" || strPath == "../abc");
 
-  clpathfile::CombinePath(strPath, "c:\\abc\\def", "d:\\ghi\\jkl");
+#if defined(_CL_SYSTEM_WINDOWS)
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "c:\\abc\\def", "d:\\ghi\\jkl"));
   ASSERT(strPath == "d:\\ghi\\jkl");
 
-  clpathfile::CombinePath(strPath, "c:\\abc\\def", "\\ghi\\jkl");
-  ASSERT(strPath == "c:\\ghi\\jkl");
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "c:\\abc\\def", "\\ghi\\jkl"));
+  ASSERT(strPath == "c:\\ghi\\jkl" || strPath == "c:/ghi/jkl");
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
 }
+
+class P
+{
+  char* p;
+public:
+  P(char* pp)
+  {
+    p = pp;
+  }
+};
+
 
 void TestString()
 {
+  CLOG(__FUNCTION__);
   b32 bresult;
   clStringA str("abcd-efgh-ijkl-mnop");
+
+  ASSERT(*(size_t*)&str == (size_t)str.CStr());
 
   bresult = str.BeginsWith("ab");
   ASSERT(bresult == TRUE);
@@ -85,6 +105,7 @@ void TestString()
 
 void TestMatchSpec()
 {
+  CLOG(__FUNCTION__);
   // 文件匹配
   b32 bresult;
   bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq");
@@ -104,23 +125,26 @@ void TestMatchSpec()
 
 void TestStringResolve() // 测试字符串切分
 {
+  CLOG(__FUNCTION__);
   const char* test1 = "as,hello,world";
   const char* test2 = "as,,,hello,world";
   clstd::StringUtility::Resolve(test1, clstd::strlenT(test1), ',', [](int i, const char* str, size_t len){
     clStringA sub_str(str, len);
-    printf("%s\n", (const char*)sub_str);
+    CLOG("%s", (const char*)sub_str);
   });
 
-  printf("--------------------\n");
+  CLOG("--------------------");
 
   clstd::StringUtility::Resolve(test2, clstd::strlenT(test2), ',', [](int n, const char* str, size_t len){
     clStringA sub_str(str, len);
-    printf("%s\n", (const char*)sub_str);
+    CLOG("%s", (const char*)sub_str);
   });
 }
 
 void TestCodec() // 测试unicode到ansi转换
 {
+  CLOG(__FUNCTION__);
+
   const ch* szTestStringA  =  "这是测试的简单中文字符串啊没有奇怪的字符，1234567890ABCabc";
   const wch* szTestStringW = _CLTEXT("这是测试的简单中文字符串啊没有奇怪的字符，1234567890ABCabc");
 
@@ -139,6 +163,7 @@ void TestCodec() // 测试unicode到ansi转换
 
 void TestLog()
 {
+  CLOG(__FUNCTION__);
   CLOG("1.log test");
   CLOG("2.日志输出测试");
 
@@ -161,6 +186,7 @@ void TestLog()
 // 测试基本字符串操作
 void TestBasicStringOp()
 {
+  CLOG(__FUNCTION__);
   clStringA str = "15";
   ASSERT(str == "15");
 
@@ -190,6 +216,7 @@ void TestBasicStringOp()
 
 void TestStringToFloat()
 {
+  CLOG(__FUNCTION__);
   const char* sz123 = "1234\000e4321";
   float v = clstd::xtof(sz123);
   ASSERT(v == 1234.0f);
@@ -319,13 +346,13 @@ void TestFormatStrFunc(const ch** fmt_flags, int num_flags, const ch** fmt_width
           // <<<<<<<<<<< Debug
 
           str.Format(format_str, samp_int[i]);
-          CLOG("[ string]:\"%s\"", str);
+          CLOG("[ string]:\"%s\"", str.CStr());
 
           if(str == buffer) {
-            CLOG("[%d]%s <match>\n", index, format_str);
+            CLOG("[%d]%s <match>\n", index, format_str.CStr());
           }
           else {
-            CLOG_WARNING("[%d]%s !NOT match!\n", index, format_str);
+            CLOG_WARNING("[%d]%s !NOT match!\n", index, format_str.CStr());
             CLBREAK;
           }
 
@@ -342,6 +369,8 @@ void TestFormatStrFunc(const ch** fmt_flags, int num_flags, const ch** fmt_width
 
 void TestFormatString0()
 {
+  CLOG(__FUNCTION__);
+
   //char buffer[1024];
   //sprintf(buffer, "%.1f", 0);
   //sprintf(buffer, "%.0f", 0);
@@ -386,6 +415,7 @@ void TestFormatString0()
 
 void TestFormatString1()
 {
+  CLOG(__FUNCTION__);
   //char buffer[1024];
   //sprintf(buffer, "%06.3x", 12);
   const ch* fmt_flags[] = {
@@ -416,6 +446,7 @@ void TestFormatString1()
 int main(int argc, char* argv[])
 {
   setlocale(LC_ALL, "");
+
   //cprintf();
   TestLog();
   TestBasicStringOp();

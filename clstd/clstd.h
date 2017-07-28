@@ -63,7 +63,6 @@
 #endif
 
 #include "cltypes.h"
-#include "thread/clLocker.h"
 #include <memory.h>
 
 #define CL_PI         ((float)3.141592654f)
@@ -260,7 +259,7 @@ extern "C" void _cl_NoOperation();
 #     endif // #ifdef _CL_ARCH_X86
 #   endif  // #   ifdef __clang__
 
-# elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)
+# elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_LINUX)
 #	include <assert.h>
 void _cl_traceA(const char *fmt, ...);
 void _cl_traceW(const wch *fmt, ...);
@@ -307,8 +306,6 @@ extern "C" void _cl_traceW(const wch *fmt, ...);
 #endif  // _DEBUG
 
 #define NOT_IMPLEMENT_FUNC_MAKER  TRACE("%s(%d): Not implement:%s()\n", __FILE__, __LINE__, __FUNCTION__)
-
-#include "clAllocator.h"
 
 #ifndef FALSE
 #define FALSE 0
@@ -418,6 +415,8 @@ namespace clstd_cli
 
 
 // 常用的头文件
+#include "thread/clLocker.h"
+#include "clAllocator.h"
 #include "clFile.h"
 #include "clBuffer.h"
 

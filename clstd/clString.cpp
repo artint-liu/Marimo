@@ -227,7 +227,11 @@ public:
       char*  out_ptr = buffer;
 
       while(cchX) {
+#if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
+        iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
+#else
         iconv(m_cd, (char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
+#endif
         tran += (buf_len - out_len);
         out_ptr = buffer;
         out_len = buf_len;
@@ -236,7 +240,11 @@ public:
     else { // 转换模式
       uLength *= sizeof(_TOutChar); // iconv 长度参数都是基于字节的
       tran = uLength;
+#if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
+      iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+#else
       iconv(m_cd, (char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+#endif
       tran -= uLength;
     }
     return tran / sizeof(_TOutChar);
