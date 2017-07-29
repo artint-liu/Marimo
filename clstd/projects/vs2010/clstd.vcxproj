@@ -92,6 +92,7 @@
     <ClInclude Include="..\..\clstd.h" />
     <ClInclude Include="..\..\clStock.h" />
     <ClInclude Include="..\..\clString.h" />
+    <ClInclude Include="..\..\clStringFormatted.h" />
     <ClInclude Include="..\..\clStringSet.h" />
     <ClInclude Include="..\..\clTextLines.h" />
     <ClInclude Include="..\..\clTokens.h" />

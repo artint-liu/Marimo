@@ -151,16 +151,16 @@ namespace clstd
   private:
     _TCh*        m_pBuf;  // 只能有一个变量, 否则作为Format参数时会把多余的成员变量也压入堆栈, 出现问题.
 
-  private:
+  protected:
     void  _AllocBuffer        (_TAllocator* pAlloc, size_t uLength);
     void  _ResizeLength       (size_t uLength);
     void  _ResizeLengthNoCopy (size_t uLength);
     void  _Reduce             (size_t uLength);
     void  _Grow               (size_t uCapacity);
-    void  _AppendSpace        (int len, int nPrefixLen, int nWidth, int nPrecision);
-    void  _AppendFormat       (LPCSTR szPrefix, int nPrefixLen, LPCSTR szNumeric, int nWidth, int nPrecision);
-    void  _AppendSpace        (int len, int nWidth, int nPrecision);
-    void  _AppendFormat       (LPCSTR szNumeric, int nWidth, int nPrecision);
+    //void  _AppendSpace        (int len, int nPrefixLen, int nWidth, int nPrecision);
+    //void  _AppendFormat       (LPCSTR szPrefix, int nPrefixLen, LPCSTR szNumeric, int nWidth, int nPrecision);
+    //void  _AppendSpace        (int len, int nWidth, int nPrecision);
+    //void  _AppendFormat       (LPCSTR szNumeric, int nWidth, int nPrecision);
 
   public:
     StringX();

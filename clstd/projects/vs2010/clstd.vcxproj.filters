@@ -167,6 +167,7 @@
     <ClInclude Include="..\..\clRepository.h" />
     <ClInclude Include="..\..\clBuffer.h" />
     <ClInclude Include="..\..\clImageDecoder.h" />
+    <ClInclude Include="..\..\clStringFormatted.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">
