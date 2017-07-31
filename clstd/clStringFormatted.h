@@ -3,22 +3,25 @@
 
 namespace clstd
 {
-  template<typename _TCh, class _Traits, class _TStr>
-  class StringFormatted : public _TStr
+  template<class _TStr>
+  class StringFormattedT : public _TStr
   {
+  public:
+    typedef typename _TStr::TChar    TChar;
+    typedef const TChar*             LPCSTR;
     const static int MAX_DIGITS = 80;
 
   public:
-    StringFormatted& VarFormat(const _TCh *pFmt, va_list arglist)  // 在原始内容后面，使用变参列表追加格式化字符串
+    StringFormattedT& VarFormat(LPCSTR pFmt, va_list arglist)  // 在原始内容后面，使用变参列表追加格式化字符串
     {
-      const _TCh* ptr = pFmt;
-      _TCh        buffer[MAX_DIGITS + 1];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于80
-      int         i;
+      LPCSTR ptr = pFmt;
+      TChar  buffer[MAX_DIGITS + 1];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于80
+      int    i;
 
 
       while(*ptr != '\0')
       {
-        const _TCh* ptr2 = _Traits::StringSearchChar(ptr, '%');
+        LPCSTR ptr2 = clstd::strchrT(ptr, '%');
         if(ptr2 == NULL)
         {
           _TStr::Append(ptr);
@@ -44,7 +47,7 @@ namespace clstd
           case '\0':
             goto FUNC_RET;
           case '%':
-            _TStr::Append((_TCh)'%');
+            _TStr::Append((TChar)'%');
             break;
           case 'l':
             ptr++;
@@ -54,10 +57,10 @@ namespace clstd
             }
             break;
           case 's':
-            _TStr::Append((_TCh*)va_arg(arglist, _TCh*), bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+            _TStr::Append((TChar*)va_arg(arglist, TChar*), bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
             break;
           case 'c':
-            _TStr::Append((_TCh)va_arg(arglist, int/*_TCh*/));
+            _TStr::Append((TChar)va_arg(arglist, int/*TChar*/));
             break;
 
           case 'd':
@@ -67,14 +70,17 @@ namespace clstd
 
               if(va_value >= 0 && bForceSign) {
                 buffer[0] = '+';
-                _Traits::Integer64ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                //MyTraits::Integer64ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                clstd::l64tox(va_value, buffer + 1, MAX_DIGITS - 1, 10, 0);
               }
               else if(va_value >= 0 && bSpace) {
                 buffer[0] = 0x20;
-                _Traits::Integer64ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                //MyTraits::Integer64ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                clstd::l64tox(va_value, buffer + 1, MAX_DIGITS - 1, 10, 0);
               }
               else {
-                _Traits::Integer64ToString(buffer, MAX_DIGITS, va_value, 0);
+                //MyTraits::Integer64ToString(buffer, MAX_DIGITS, va_value, 0);
+                clstd::l64tox(va_value, buffer, MAX_DIGITS, 10, 0);
               }
 
             }
@@ -83,14 +89,17 @@ namespace clstd
 
               if(va_value >= 0 && bForceSign) {
                 buffer[0] = '+';
-                _Traits::Integer32ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                //MyTraits::Integer32ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                clstd::ltox(va_value, buffer + 1, MAX_DIGITS - 1, 10, 0);
               }
               else if(va_value >= 0 && bSpace) {
                 buffer[0] = 0x20;
-                _Traits::Integer32ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                //MyTraits::Integer32ToString(buffer + 1, MAX_DIGITS - 1, va_value, 0);
+                clstd::ltox(va_value, buffer + 1, MAX_DIGITS - 1, 10, 0);
               }
               else {
-                _Traits::Integer32ToString(buffer, MAX_DIGITS, va_value, 0);
+                //MyTraits::Integer32ToString(buffer, MAX_DIGITS, va_value, 0);
+                clstd::ltox(va_value, buffer, MAX_DIGITS, 10, 0);
               }
             }
 
@@ -135,10 +144,12 @@ namespace clstd
             unsigned long va_value = va_arg(arglist, unsigned long);
             if(bPound && va_value) {
               buffer[0] = '0'; // 进制前缀
-              _Traits::OctalToString(buffer + 1, MAX_DIGITS - 1, va_value);
+              //MyTraits::OctalToString(buffer + 1, MAX_DIGITS - 1, va_value);
+              clstd::ultox(va_value, buffer + 1, MAX_DIGITS - 1, 8);
             }
             else {
-              _Traits::OctalToString(buffer, MAX_DIGITS, va_value);
+              //MyTraits::OctalToString(buffer, MAX_DIGITS, va_value);
+              clstd::ultox(va_value, buffer, MAX_DIGITS, 8);
             }
 
             if(bPrecision) {
@@ -152,10 +163,12 @@ namespace clstd
           case 'u':
           {
             if(nLong == 2) {
-              _Traits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
+              //MyTraits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
+              clstd::ul64tox(va_arg(arglist, u64), buffer, MAX_DIGITS, 10);
             }
             else {
-              _Traits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
+              //MyTraits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
+              clstd::ultox(va_arg(arglist, unsigned long), buffer, MAX_DIGITS, 10);
             }
 
             if(bPrecision) {
@@ -176,17 +189,20 @@ namespace clstd
             {
               if(bForceSign && *(i64*)&va_value >= 0) {
                 buffer[0] = '+';
-                avail = 1 + _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
+                //avail = 1 + MyTraits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
+                avail = 1 + clstd::ftox((float)va_value, buffer + 1, MAX_DIGITS - 1, nPrecision, 'F');
               }
               else if(bSpace && *(i64*)&va_value >= 0) {
                 buffer[0] = 0x20;
-                avail = 1 + _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
+                //avail = 1 + MyTraits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
+                avail = 1 + clstd::ftox((float)va_value, buffer + 1, MAX_DIGITS - 1, nPrecision, 'F');
               }
               else {
-                avail = _Traits::FloatToString(buffer, MAX_DIGITS, nPrecision, (float)va_value, 'F');
+                //avail = MyTraits::FloatToString(buffer, MAX_DIGITS, nPrecision, (float)va_value, 'F');
+                avail = clstd::ftox((float)va_value, buffer, MAX_DIGITS, nPrecision, 'F');
               }
 
-              //const _TCh* pDot = _Traits::StringSearchChar(buffer, '.');
+              //const _TCh* pDot = MyTraits::StringSearchChar(buffer, '.');
               //if(pDot != NULL) {
               //  int nn = nPrecision + 1; // 包含'.'的个数
               //  while(nn-- && *++pDot != '\0'); // 没错，就是分号！
@@ -201,10 +217,10 @@ namespace clstd
             //{
             //  if(bForceSign && va_value >= 0) {
             //    buffer[0] = '+';
-            //    _Traits::FloatToString(buffer + 1, MAX_DIGITS - 1, 0, (float)va_value, 'F');
+            //    MyTraits::FloatToString(buffer + 1, MAX_DIGITS - 1, 0, (float)va_value, 'F');
             //  }
             //  else {
-            //    _Traits::FloatToString(buffer, MAX_DIGITS, 0, (float)va_value, 'F');
+            //    MyTraits::FloatToString(buffer, MAX_DIGITS, 0, (float)va_value, 'F');
             //  }
             //}
             _TStr::Append(buffer);
@@ -212,7 +228,8 @@ namespace clstd
           }
 
           case 'b':
-            _Traits::BinaryToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
+            //MyTraits::BinaryToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long));
+            clstd::ultox(va_arg(arglist, unsigned long), buffer, MAX_DIGITS, 2);
             _TStr::Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
             break;
 
@@ -225,10 +242,12 @@ namespace clstd
             {
               buffer[0] = '0'; buffer[1] = *ptr;
               if(*ptr == 'X') {
-                _Traits::HexToUpperString(buffer + 2, MAX_DIGITS - 2, va_value);
+                //MyTraits::HexToUpperString(buffer + 2, MAX_DIGITS - 2, va_value);
+                clstd::ultox(va_value, buffer + 2, MAX_DIGITS - 2, 16, 1);
               }
               else {
-                _Traits::HexToLowerString(buffer + 2, MAX_DIGITS - 2, va_value);
+                //MyTraits::HexToLowerString(buffer + 2, MAX_DIGITS - 2, va_value);
+                clstd::ultox(va_value, buffer + 2, MAX_DIGITS - 2, 16);
               }
 
               if(bPrecision)
@@ -272,13 +291,13 @@ namespace clstd
               if(bPrecision)
               {
                 if(nWidth > nPrecision) {
-                  _TStr::Append(0x20, nWidth - nPrecision);
+                  _TStr::Append((TChar)0x20, nWidth - nPrecision);
                 }
 
                 _TStr::Append('0', nPrecision);
 
                 if(-nWidth > nPrecision) {
-                  _TStr::Append(0x20, -nWidth - nPrecision);
+                  _TStr::Append((TChar)0x20, -nWidth - nPrecision);
                 }
               }
               else
@@ -286,7 +305,7 @@ namespace clstd
                 // 忽略 bZeroPerfix
                 if(nWidth) {
                   buffer[0] = '0'; buffer[1] = '\0';
-                  _TStr::Append(buffer, (bZeroPrefix && nWidth > 0 ? '0' : 0x20), nWidth);
+                  _TStr::Append(buffer, (bZeroPrefix && nWidth > 0 ? '0' : (TChar)0x20), nWidth);
                 }
                 else {
                   _TStr::Append('0', nWidth < 0 ? -nWidth : nWidth); // abs(nWidth)
@@ -356,10 +375,12 @@ namespace clstd
                   buffer[i] = '\0';
 
                   if(bPrecision) {
-                    nPrecision = _Traits::StringToInteger32(buffer);
+                    //nPrecision = MyTraits::StringToInteger32(buffer);
+                    nPrecision = clstd::xtoi(buffer);
                   }
                   else {
-                    nWidth = _Traits::StringToInteger32(buffer);
+                    //nWidth = MyTraits::StringToInteger32(buffer);
+                    nWidth = clstd::xtoi(buffer);
                     if(bLeftAlign) {
                       nWidth = -nWidth;
                     }
@@ -417,9 +438,9 @@ namespace clstd
     // Parameter: nWidth        正值数字右对齐，负值左对齐
     // Parameter: nPrecision
     //************************************
-    void _AppendFormat(const _TCh* szPrefix, int nPrefixLen, const _TCh* szNumeric, int nWidth, int nPrecision)
+    void _AppendFormat(LPCSTR szPrefix, int nPrefixLen, LPCSTR szNumeric, int nWidth, int nPrecision)
     {
-      int len = (int)_Traits::StringLength(szNumeric);
+      int len = (int)strlenT(szNumeric);
       _AppendSpace(len, nPrefixLen, nWidth, nPrecision);
       _TStr::Append(szPrefix, nPrefixLen);
       _TStr::Append(szNumeric, '0', nPrecision);
@@ -441,9 +462,9 @@ namespace clstd
       }
     }
 
-    void _AppendFormat(const _TCh* szNumeric, int nWidth, int nPrecision)
+    void _AppendFormat(LPCSTR szNumeric, int nWidth, int nPrecision)
     {
-      int len = (int)_Traits::StringLength(szNumeric);
+      int len = (int)strlenT(szNumeric);
 
       _AppendSpace(len, nWidth, nPrecision);
       _TStr::Append(szNumeric, '0', nPrecision);

@@ -104,6 +104,9 @@ namespace clstd
   void ul64tox(u64 value, wch* pDest, size_t uSize, i32 radix, i32 upper = 0);
   void ul64tox(u64 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
 
+  int ftox(double value, wch* pDest, int uSize, int prec1 = 10, ch format = 'F');
+  int ftox(double value,  ch* pDest, int uSize, int prec1 = 10, ch format = 'F');
+
   float xtof(const ch* str);
   float xtof(const wch* str);
   double xtod(const ch* str);
@@ -137,6 +140,7 @@ namespace clstd
 #endif // #ifdef __clang__
     };
     typedef typename _Traits::_XCh _XCh;
+    typedef _Traits MyTraits;
     typedef _TCh        TChar;
     typedef _XCh        XChar;
     typedef const _TCh* LPCSTR;

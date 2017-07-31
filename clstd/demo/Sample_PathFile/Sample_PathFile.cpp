@@ -10,6 +10,74 @@
 # pragma comment(lib, "clstd.lib")
 #endif
 
+#define CLPATHFILE_FUNC(__x) __x; CLOG("%s => %s", #__x, strPath.CStr());
+
+void TestPathFile()
+{
+  CLOG(__FUNCTION__);
+  clStringA strPath;
+
+  strPath = "abc";
+  clpathfile::RenameExtension(strPath, ".exe");
+  ASSERT(strPath == "abc.exe");
+
+  clpathfile::RenameExtension(strPath, "txt");
+  ASSERT(strPath == "abc.txt");
+
+  //////////////////////////////////////////////////////////////////////////
+}
+
+void TestCombinePath()
+{
+  CLOG(__FUNCTION__);
+  clStringA strPath;
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "def"));
+  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\", "def"));
+  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\", "/def"));
+  ASSERT(strPath == "\\def" || strPath == "/def");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "ghi"));
+  ASSERT(strPath == "abc\\def\\ghi" || strPath == "abc/def/ghi" || strPath == "abc\\def/ghi");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "./ghi"));
+  ASSERT(strPath == "abc\\def\\ghi" || strPath == "abc/def/ghi" || strPath == "abc\\def/ghi");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "../ghi"));
+  ASSERT(strPath == "abc\\ghi" || strPath == "abc/ghi");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "./def"));
+  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "../def"));
+  ASSERT(strPath == "def");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "", "./abc"));
+  ASSERT(strPath == "abc");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "", "../abc"));
+  ASSERT(strPath == "..\\abc" || strPath == "../abc");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, NULL, "./abc"));
+  ASSERT(strPath == "abc");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, NULL, "../abc"));
+  ASSERT(strPath == "..\\abc" || strPath == "../abc");
+
+#if defined(_CL_SYSTEM_WINDOWS)
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "c:\\abc\\def", "d:\\ghi\\jkl"));
+  ASSERT(strPath == "d:\\ghi\\jkl");
+
+  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "c:\\abc\\def", "\\ghi\\jkl"));
+  ASSERT(strPath == "c:\\ghi\\jkl" || strPath == "c:/ghi/jkl");
+#endif // #if defined(_CL_SYSTEM_WINDOWS)
+}
+
+
 void TestFindFile()
 {
   CLOG(__FUNCTION__);
@@ -57,6 +125,8 @@ void TestFindFile()
 
 int main(int argc, char* argv[])
 {
+  TestPathFile();
+  TestCombinePath();
   TestFindFile();
 	return 0;
 }

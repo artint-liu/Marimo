@@ -12,7 +12,7 @@
 
 namespace clstd
 {
-  namespace
+  namespace _internal
   {
     enum KeyType
     {
@@ -23,7 +23,7 @@ namespace clstd
       KeyType_Octet_8 = (8 | KeyType_Octet),  // 8字节数据，长度8字节
     };
 
-    struct KEY 
+    struct KEY
     {
       u32     name; // 字母偏移，不是字节
       KeyType type;
@@ -263,7 +263,7 @@ namespace clstd
   b32 RepoReader::Attach(const void* pData, size_t nLength)
   {
     size_t nDataPtr = reinterpret_cast<size_t>(pData);
-    FILE_HEADER header = { 0, ((CLDWORD*)nDataPtr)[1] }; // 需要设置dwFlags作为解压参数
+    _internal::FILE_HEADER header = { 0, ((CLDWORD*)nDataPtr)[1] }; // 需要设置dwFlags作为解压参数
     size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)nDataPtr);
     if(header.dwMagic != REPO_MAGIC) {
       // ERROR: bad file magic
@@ -330,7 +330,7 @@ namespace clstd
       return 0;
     }
 
-    FILE_HEADER header = { REPO_MAGIC };
+    _internal::FILE_HEADER header = { REPO_MAGIC };
     header.nKeys   = (CLDWORD)(m_pKeysEnd - m_pKeys);
     header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
     header.cbData  = (CLDWORD)m_cbDataLen;
@@ -346,7 +346,7 @@ namespace clstd
     return pRaw->cbHeader + pRaw->cbKeys + pRaw->cbNames + pRaw->cbData;
   }
 
-  KEY* RepoReader::_FindKey(LPCSTR szKey) const
+  RepoReader::KEY* RepoReader::_FindKey(LPCSTR szKey) const
   {
     LPCSTR szNamesFront = _GetNamesBegin();
     KEY*const result =
@@ -401,13 +401,13 @@ namespace clstd
 
   b32 Repository::_WriteToFile(File& file) const
   {
-    FILE_HEADER header = {};
+    _internal::FILE_HEADER header = {};
     header.dwMagic = REPO_MAGIC;
     header.nKeys   = (CLDWORD)(m_pKeysEnd - m_pKeys);
     header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
     header.cbData  = (CLDWORD)m_cbDataLen;
 
-    CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
+    CLBYTE packed_header[sizeof(_internal::FILE_HEADER)]; // 打包Header肯定比展开得Header小
     size_t packed_header_size = _PackHeader(header, packed_header);
 
     file.Write(packed_header, (u32)packed_header_size);
@@ -428,7 +428,7 @@ namespace clstd
 
     KEY* pPrev = m_pKeys;
     while(pPrev < m_pKeysEnd) {
-      if(pPrev->type == KeyType_Varible) {
+      if(pPrev->type == _internal::KeyType_Varible) {
         break;
       }
       pPrev++;
@@ -440,7 +440,7 @@ namespace clstd
     }
 
     for(KEY* pIter = pPrev + 1; pIter < m_pKeysEnd; ++pIter) {
-      if(pIter->type != KeyType_Varible) {
+      if(pIter->type != _internal::KeyType_Varible) {
         continue;
       }
       if(pPrev->v.offset + pPrev->v.length != pIter->v.offset) {
@@ -534,7 +534,7 @@ namespace clstd
     ASSERT(pPos >= m_pKeys && pPos <= m_pKeysEnd);
 
     while(pPos > m_pKeys) {
-      if((--pPos)->type == KeyType_Varible) {
+      if((--pPos)->type == _internal::KeyType_Varible) {
         return (pPos->v.offset + pPos->v.length);
       }
     }
@@ -546,7 +546,7 @@ namespace clstd
     return ((size_t)m_Buffer.GetPtr() + m_Buffer.GetSize()) - (size_t)m_pData;
   }
 
-  KEYPAIR* Repository::_PreInsertKey(KEYPAIR* pPair, LPCSTR szKey)
+  Repository::KEYPAIR* Repository::_PreInsertKey(KEYPAIR* pPair, LPCSTR szKey)
   {
     LPCSTR szNamesFront = _GetNamesBegin();
     pPair->pTable =
@@ -633,7 +633,7 @@ namespace clstd
       }
       m_pKeysEnd++;
       pPos->name = (u32)(m_pNamesEnd - _GetNamesBegin());
-      pPos->type = (KeyType)(KeyType_Octet_0 + nLength);
+      pPos->type = (_internal::KeyType)(_internal::KeyType_Octet_0 + nLength);
       memcpy(pPos->o.data, pData, nLength);
     }
     else
@@ -648,7 +648,7 @@ namespace clstd
       }
       m_pKeysEnd++;
       pPos->name = (u32)(m_pNamesEnd - _GetNamesBegin());
-      pPos->type = KeyType_Varible;
+      pPos->type = _internal::KeyType_Varible;
       pPos->v.offset = _GetSeqOffset(pPos);
       pPos->v.length = 0;
 
@@ -669,14 +669,14 @@ namespace clstd
 
   void Repository::_ResizeKey(KEY*& rKey, size_t delta)
   {
-    ASSERT(rKey->type == KeyType_Varible);
+    ASSERT(rKey->type == _internal::KeyType_Varible);
     const size_t nDataEndian = rKey->v.offset + rKey->v.length;
     CLBYTE*const pDataEndian = m_pData + nDataEndian;
 
     // TODO: 如果保证数据顺序与Key顺序一致的话pIter可以从rKey开始
     for(KEY* pIter = m_pKeys; pIter < m_pKeysEnd; ++pIter)
     {
-      if(TEST_FLAG_NOT(pIter->type, KeyType_Octet) && pIter != rKey && pIter->v.offset >= rKey->v.offset) {
+      if(TEST_FLAG_NOT(pIter->type, _internal::KeyType_Octet) && pIter != rKey && pIter->v.offset >= rKey->v.offset) {
         ASSERT(rKey->v.offset + rKey->v.length <= pIter->v.offset); // 检查数据覆盖
         pIter->v.offset += static_cast<u32>(delta);
       }
@@ -692,7 +692,7 @@ namespace clstd
   b32 Repository::_ReallocData(KEY*& rKey, size_t new_length)
   {
     // 没有处理KT_Octet_0 ~ KT_Octet_8情况
-    ASSERT(rKey->type == KeyType_Varible);
+    ASSERT(rKey->type == _internal::KeyType_Varible);
     ASSERT((CLBYTE*)m_Buffer.GetPtr() + m_Buffer.GetSize() == m_pData + m_cbDataLen);
 
     size_t delta = new_length - static_cast<size_t>(rKey->GetDataSize());
@@ -731,17 +731,17 @@ namespace clstd
     ASSERT(pPos >= m_pKeys && pPos <= m_pKeysEnd);
     if(nLength <= OCTETSIZE)
     {
-      if(TEST_FLAG(pPos->type, KeyType_Octet)) {
-        pPos->type = (KeyType)(KeyType_Octet + nLength);
+      if(TEST_FLAG(pPos->type, _internal::KeyType_Octet)) {
+        pPos->type = (_internal::KeyType)(_internal::KeyType_Octet + nLength);
         memcpy(pPos->o.data, pData, nLength);
         ASSERT(_DbgCheckDataOverlay());
         return TRUE;
       }
-      else if(pPos->type == KeyType_Varible) {
+      else if(pPos->type == _internal::KeyType_Varible) {
         const size_t key_delta = 0 - pPos->v.length;
         _ResizeKey(pPos, key_delta);
         _ResizeGlobalBuf(key_delta, pPos);
-        pPos->type = (KeyType)(KeyType_Octet + nLength);
+        pPos->type = (_internal::KeyType)(_internal::KeyType_Octet + nLength);
         memcpy(pPos->o.data, pData, nLength);
         ASSERT(_DbgCheckDataOverlay());
         return TRUE;
@@ -752,8 +752,8 @@ namespace clstd
     }
     else
     {
-      if(TEST_FLAG(pPos->type, KeyType_Octet)) {
-        pPos->type = KeyType_Varible;
+      if(TEST_FLAG(pPos->type, _internal::KeyType_Octet)) {
+        pPos->type = _internal::KeyType_Varible;
         pPos->v.offset = _GetSeqOffset(pPos);
         pPos->v.length = 0;
 
@@ -764,7 +764,7 @@ namespace clstd
         }
 
       }
-      else if(pPos->type, KeyType_Varible) {
+      else if(pPos->type, _internal::KeyType_Varible) {
         if(pPos->v.length == nLength || _ReallocData(pPos, nLength)) {
           memcpy(m_pData + pPos->v.offset, pData, nLength);
           ASSERT(_DbgCheckDataOverlay());
@@ -837,13 +837,13 @@ namespace clstd
 
   b32 Repository::SaveToMemory(MemBuffer& buffer) const
   {
-    FILE_HEADER header = {};
+    _internal::FILE_HEADER header = {};
     header.dwMagic = CLMAKEFOURCC('C', 'L', 'R', 'P');
     header.nKeys = (CLDWORD)(m_pKeysEnd - m_pKeys);
     header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
     header.cbData = (CLDWORD)m_cbDataLen;
 
-    CLBYTE packed_header[sizeof(FILE_HEADER)]; // 打包Header肯定比展开得Header小
+    CLBYTE packed_header[sizeof(_internal::FILE_HEADER)]; // 打包Header肯定比展开得Header小
     size_t packed_header_size = _PackHeader(header, packed_header);
 
     buffer.Reserve(packed_header_size + (m_pKeysEnd - m_pKeys) * sizeof(KEY) +
@@ -918,11 +918,11 @@ namespace clstd
   size_t Repository::GetRequiredSize(void* pData, size_t nLength)
   {
     // 这个长度限制其实没有那么严格，因为文件头长度是可变的，最长20字节
-    if(nLength < sizeof(FILE_HEADER) || *(u32*)pData != REPO_MAGIC) {
+    if(nLength < sizeof(_internal::FILE_HEADER) || *(u32*)pData != REPO_MAGIC) {
       return 0;
     }
 
-    FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
+    _internal::FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // 需要设置dwFlags作为解压参数
     size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
     return header._GetRecordSize() + packed_header_size;
   }
@@ -1015,45 +1015,51 @@ namespace clstd
   }
 
   //////////////////////////////////////////////////////////////////////////
-  LPCSTR KEY::GetName(LPCSTR szFirstName) const
+  namespace _internal
   {
-    return szFirstName + name;
-  }
-
-  CLBYTE* KEY::GetDataPtr(CLBYTE* pDataBase, size_t* pSizeOut) const
-  {
-    if(TEST_FLAG(type, KeyType_Octet)) {
-      *pSizeOut = (size_t)(type - KeyType_Octet_0);
-      return (CLBYTE*)o.data;
-    } else if(type == KeyType_Varible) {
-      *pSizeOut = v.length;
-      return pDataBase + v.offset;
+    LPCSTR KEY::GetName(LPCSTR szFirstName) const
+    {
+      return szFirstName + name;
     }
-    CLBREAK;
-    return NULL;
-  }
 
-  CLBYTE* KEY::GetDataPtr(CLBYTE* pDataBase) const
-  {
-    if(TEST_FLAG(type, KeyType_Octet)) {
-      return (CLBYTE*)o.data;
-    } else if(type == KeyType_Varible) {
-      return pDataBase + v.offset;
+    CLBYTE* KEY::GetDataPtr(CLBYTE* pDataBase, size_t* pSizeOut) const
+    {
+      if(TEST_FLAG(type, KeyType_Octet)) {
+        *pSizeOut = (size_t)(type - KeyType_Octet_0);
+        return (CLBYTE*)o.data;
+      }
+      else if(type == KeyType_Varible) {
+        *pSizeOut = v.length;
+        return pDataBase + v.offset;
+      }
+      CLBREAK;
+      return NULL;
     }
-    CLBREAK;
-    return NULL;
-  }
 
-  size_t KEY::GetDataSize() const
-  {
-    if(TEST_FLAG(type, KeyType_Octet)) {
-      return (size_t)(type - KeyType_Octet_0);
-    } else if(type == KeyType_Varible) {
-      return v.length;
+    CLBYTE* KEY::GetDataPtr(CLBYTE* pDataBase) const
+    {
+      if(TEST_FLAG(type, KeyType_Octet)) {
+        return (CLBYTE*)o.data;
+      }
+      else if(type == KeyType_Varible) {
+        return pDataBase + v.offset;
+      }
+      CLBREAK;
+      return NULL;
     }
-    CLBREAK;
-    return 0;
-  }
+
+    size_t KEY::GetDataSize() const
+    {
+      if(TEST_FLAG(type, KeyType_Octet)) {
+        return (size_t)(type - KeyType_Octet_0);
+      }
+      else if(type == KeyType_Varible) {
+        return v.length;
+      }
+      CLBREAK;
+      return 0;
+    }
+  } // namespace _internal
   //////////////////////////////////////////////////////////////////////////
 
 } // namespace clstd

@@ -2,7 +2,7 @@
 
 namespace clstd
 {
-  namespace
+  namespace _internal
   {
     struct KEY;
     struct KEYPAIR;
@@ -13,6 +13,8 @@ namespace clstd
   public:
     typedef ch CHAR;
     typedef const CHAR* LPCSTR;
+    typedef _internal::KEY KEY;
+    typedef _internal::KEYPAIR KEYPAIR;
 
   protected:
     KEY*      m_pKeys;

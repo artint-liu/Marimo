@@ -1972,9 +1972,9 @@ namespace clstd
   _CLSTR_TEMPL
     size_t _CLSTR_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
   {
-    class StringXF : public StringFormatted<_TCh, _Traits, StringX> {};
+    class StringXF : public StringFormattedT<StringX> {};
     STATIC_ASSERT(sizeof(StringXF) == sizeof(StringX));
-    reinterpret_cast<StringXF*>(this)->StringFormatted<_TCh, _Traits, StringX>::VarFormat(pFmt, arglist);
+    reinterpret_cast<StringXF*>(this)->StringFormattedT<StringX>::VarFormat(pFmt, arglist);
 
 //    const _TCh* ptr = pFmt;
 //    _TCh        buffer[MAX_DIGITS + 1];  // 用来作为数字转换的缓冲区,对于32位整数和浮点数,转换为字符串后长度都不大于80
@@ -3116,6 +3116,16 @@ namespace clstd
   void ul64tox(u64 value, ch* pDest, size_t uSize, i32 radix, i32 upper)
   {
     _ultoxstrT<ch, u64>(value, pDest, uSize, radix, upper);
+  }
+
+  int ftox(double value, wch* pDest, int uSize, int prec1, ch format)
+  {
+    return _ftoxstrT(value, pDest, uSize, prec1, format);
+  }
+  
+  int ftox(double value, ch* pDest, int uSize, int prec1, ch format)
+  {
+    return _ftoxstrT(value, pDest, uSize, prec1, format);
   }
 
   //////////////////////////////////////////////////////////////////////////

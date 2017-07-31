@@ -20,6 +20,7 @@ CXX := g++
 	
 LIBOBJS=\
 	clString.o \
+	clStringAttach.o \
 	clBuffer.o \
 	clFile.o \
 	clAllocator.o \

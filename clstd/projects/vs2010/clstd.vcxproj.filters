@@ -89,6 +89,7 @@
     <ClCompile Include="..\..\clstd.cpp" />
     <ClCompile Include="..\..\clBuffer.cpp" />
     <ClCompile Include="..\..\clImageDecoder.cpp" />
+    <ClCompile Include="..\..\clStringAttach.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clFile.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="..\..\clBuffer.h" />
     <ClInclude Include="..\..\clImageDecoder.h" />
     <ClInclude Include="..\..\clStringFormatted.h" />
+    <ClInclude Include="..\..\clStringAttach.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

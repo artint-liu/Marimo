@@ -10,83 +10,7 @@
 #include "clstd.h"
 #include "clString.h"
 #include "clPathFile.h"
-
-void TestPathFile()
-{
-  clStringA strPath;
-
-  strPath = "abc";
-  clpathfile::RenameExtension(strPath, ".exe");
-  ASSERT(strPath == "abc.exe");
-
-  clpathfile::RenameExtension(strPath, "txt");
-  ASSERT(strPath == "abc.txt");
-
-  //////////////////////////////////////////////////////////////////////////
-}
-
-#define CLPATHFILE_FUNC(__x) __x; CLOG("%s => %s", #__x, strPath.CStr());
-
-void TestCombinePath()
-{
-  CLOG(__FUNCTION__);
-  clStringA strPath;
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "def"));
-  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\", "def"));
-  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\", "/def"));
-  ASSERT(strPath == "\\def" || strPath == "/def");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "ghi"));
-  ASSERT(strPath == "abc\\def\\ghi" || strPath == "abc/def/ghi" || strPath == "abc\\def/ghi");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "./ghi"));
-  ASSERT(strPath == "abc\\def\\ghi" || strPath == "abc/def/ghi" || strPath == "abc\\def/ghi");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc\\def", "../ghi"));
-  ASSERT(strPath == "abc\\ghi" || strPath == "abc/ghi");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "./def"));
-  ASSERT(strPath == "abc\\def" || strPath == "abc/def");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "abc", "../def"));
-  ASSERT(strPath == "def");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "", "./abc"));
-  ASSERT(strPath == "abc");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "", "../abc"));
-  ASSERT(strPath == "..\\abc" || strPath == "../abc");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, NULL, "./abc"));
-  ASSERT(strPath == "abc");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, NULL, "../abc"));
-  ASSERT(strPath == "..\\abc" || strPath == "../abc");
-
-#if defined(_CL_SYSTEM_WINDOWS)
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "c:\\abc\\def", "d:\\ghi\\jkl"));
-  ASSERT(strPath == "d:\\ghi\\jkl");
-
-  CLPATHFILE_FUNC(clpathfile::CombinePath(strPath, "c:\\abc\\def", "\\ghi\\jkl"));
-  ASSERT(strPath == "c:\\ghi\\jkl" || strPath == "c:/ghi/jkl");
-#endif // #if defined(_CL_SYSTEM_WINDOWS)
-}
-
-class P
-{
-  char* p;
-public:
-  P(char* pp)
-  {
-    p = pp;
-  }
-};
-
+#include "clStringAttach.h"
 
 void TestString()
 {
@@ -139,6 +63,22 @@ void TestStringResolve() // 测试字符串切分
     clStringA sub_str(str, len);
     CLOG("%s", (const char*)sub_str);
   });
+}
+
+void TestStringAttach()
+{
+  CLOG(__FUNCTION__);
+  wch buffer[10];
+  const wch sample[] = _CLTEXT("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  clStringAttachW stratt(buffer, sizeof(buffer), 0);
+
+  for(int i = 0; i < countof(sample); i++)
+  {
+    stratt.Append(sample[i]);
+    b32 b = stratt.IsAttached();
+    ASSERT((i < 9 && b) || (i >= 9 && ! b));
+    CLOG("[%3d::%c] %08x:%08x", i, b ? 'B' : 'P', stratt.CStr(), &buffer);
+  }
 }
 
 void TestCodec() // 测试unicode到ansi转换
@@ -314,11 +254,10 @@ void TestStringToFloat()
 
 }
 
-template<typename _Ty>
-void TestFormatStrFunc(const ch** fmt_flags, int num_flags, const ch** fmt_width, int num_width, const ch** fmt_specifier, int nem_specifier, const _Ty* samp_int, int num_int)
+template<class _TStr, typename _Ty>
+void TestFormatStrFunc(_TStr& str, const ch** fmt_flags, int num_flags, const ch** fmt_width, int num_width, const ch** fmt_specifier, int nem_specifier, const _Ty* samp_int, int num_int)
 {
   int index = 0;
-  clStringA str;
   char buffer[1024];
 
   for(int f = 0; f < num_flags; f++)
@@ -409,8 +348,13 @@ void TestFormatString0()
   //clStringA str1(-0, 'E');
   //clStringA str2(35.9474945068, 'E');
   //clStringA str3(-35.9474945068, 'E');
+  clStringA str;
 
-  TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_float, countof(samp_float));
+  TestFormatStrFunc<clStringA>(str, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_float, countof(samp_float));
+
+  char buffer[100];
+  clStringAttachA str_ath(buffer, sizeof(buffer));
+  TestFormatStrFunc<clStringAttachA >(str_ath, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_float, countof(samp_float));
 }
 
 void TestFormatString1()
@@ -440,7 +384,12 @@ void TestFormatString1()
   };
 
   //TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier_float, countof(fmt_specifier_float), samp_float, countof(samp_float));
-  TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
+  clStringA str;
+  TestFormatStrFunc<clStringA>(str, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
+
+  char buffer[100];
+  clStringAttachA str_ath(buffer, sizeof(buffer));
+  TestFormatStrFunc<clStringAttachA>(str_ath, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 }
 
 int main(int argc, char* argv[])
@@ -451,11 +400,12 @@ int main(int argc, char* argv[])
   TestLog();
   TestBasicStringOp();
   TestCodec();
-  TestCombinePath();
   TestMatchSpec();
+  
   TestString();
-  TestPathFile();
   TestStringResolve();
+  TestStringAttach();
+
   TestCodec();
   TestStringToFloat();
   TestFormatString0();
