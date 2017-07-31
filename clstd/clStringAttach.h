@@ -33,6 +33,8 @@ namespace clstd
 
     const _TCh* CStr() const;
     size_t GetLength() const;
+    b32 IsEmpty() const;
+    b32 IsNotEmpty() const;
     b32 IsAttached() const;
 
     StringAttachX& Clear();

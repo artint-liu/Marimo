@@ -161,10 +161,6 @@ namespace clstd
     void  _ResizeLengthNoCopy (size_t uLength);
     void  _Reduce             (size_t uLength);
     void  _Grow               (size_t uCapacity);
-    //void  _AppendSpace        (int len, int nPrefixLen, int nWidth, int nPrecision);
-    //void  _AppendFormat       (LPCSTR szPrefix, int nPrefixLen, LPCSTR szNumeric, int nWidth, int nPrecision);
-    //void  _AppendSpace        (int len, int nWidth, int nPrecision);
-    //void  _AppendFormat       (LPCSTR szNumeric, int nWidth, int nPrecision);
 
   public:
     StringX();

@@ -106,6 +106,18 @@ namespace clstd
   }
 
   _CLSTRATTACH_TEMPL
+    b32 _CLSTRATTACH_IMPL::IsEmpty() const
+  {
+    return (m_nCount == 0);
+  }
+
+  _CLSTRATTACH_TEMPL
+    b32 _CLSTRATTACH_IMPL::IsNotEmpty() const
+  {
+    return _SHOW_NOT_(IsEmpty());
+  }
+
+  _CLSTRATTACH_TEMPL
   b32 _CLSTRATTACH_IMPL::IsAttached() const
   {
     return m_pBuf == m_pAttached;
