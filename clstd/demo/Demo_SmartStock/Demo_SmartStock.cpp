@@ -153,7 +153,7 @@ int CreateSectAndSave()
 
     //s.CloseSection(hWillBeDelete);
 
-    s.SaveToFile(L"TestSave.txt");
+    s.SaveToFile(_CLTEXT("TestSave.txt"));
 
     //getch();
     return 0;
@@ -162,7 +162,7 @@ int CreateSectAndSave()
 void TestRoot()
 {
   StockA s;
-  s.LoadFromFile(L"TestSave.txt");
+  s.LoadFromFile(_CLTEXT("TestSave.txt"));
   auto pSect = s.OpenSection(NULL);
   ASSERT(pSect);
   StockA::ATTRIBUTE p;

@@ -306,7 +306,7 @@ void TestFormatString0()
     "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
   };
   const ch* fmt_width[] = {
-    ".5", "5.3", "4.3", "3.4", "3.5", ".1", "."
+    "", ".5", "5.3", "4.3", "3.4", "3.5", ".1", "."
   };
   const ch* fmt_specifier[] = {
     "f",
@@ -354,21 +354,14 @@ void TestFormatString1()
     "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
   };
   const ch* fmt_width[] = {
-    "5", "8", ".5", "5.3", "4.3", "3.4", "3.5"
+    "", "5", "8", ".5", "5.3", "4.3", "3.4", "3.5"
   };
   const ch* fmt_specifier[] = {
     "d", "i", "u", "o", "x", "X",
   };
-  const ch* fmt_specifier_float[] = {
-    "f",
-  };
 
   const int samp_int[] = {
     0, 3, 12, 125, 1234, 13456, 237643, -3, -12, -125, -1234, -13456, -237643
-  };
-
-  const float samp_float[] = {
-    0.0f, -0.0f, 1.0f, -1.0f, 12324.83747f, -12324.83747f
   };
 
   //TestFormatStrFunc(fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier_float, countof(fmt_specifier_float), samp_float, countof(samp_float));
@@ -380,28 +373,33 @@ void TestFormatString1()
   TestFormatStrFunc<clStringAttachA>(str_ath, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 }
 
+void pause()
+{
+  CLOG("press any key to continue ...");
+  clstd_cli::getch();
+}
+
 int main(int argc, char* argv[])
 {
   setlocale(LC_ALL, "");
 
-  //cprintf();
   TestLog();
-  clstd_cli::getch();
+  pause();
 
   TestBasicStringOp();
-  clstd_cli::getch();
-  
+  pause();
+
   TestCodec();
-  clstd_cli::getch();
-  
+  pause();
+
   TestString();
-  clstd_cli::getch();
+  pause();
 
   TestStringResolve();
-  clstd_cli::getch();
+  pause();
 
   TestStringAttach();
-  clstd_cli::getch();
+  pause();
 
   TestStringToFloat();
   TestFormatString0();

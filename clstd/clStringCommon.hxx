@@ -14,6 +14,7 @@ namespace clstd
       typedef typename _TStr::TChar    TChar;
       typedef const TChar*             LPCSTR;
       const static int MAX_DIGITS = 80;
+      const static int nDefaultDoublePrecision = 6;
 
     public:
       StringFormattedT& VarFormat(LPCSTR pFmt, va_list arglist)  // 在原始内容后面，使用变参列表追加格式化字符串
@@ -191,6 +192,10 @@ namespace clstd
               int avail = 0;
               //if(nPrecision)
               {
+                if( ! bPrecision) {
+                  nPrecision = nDefaultDoublePrecision;
+                }
+
                 if(bForceSign && *(i64*)&va_value >= 0) {
                   buffer[0] = '+';
                   //avail = 1 + MyTraits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
@@ -312,7 +317,7 @@ namespace clstd
                     _TStr::Append(buffer, (bZeroPrefix && nWidth > 0 ? '0' : (TChar)0x20), nWidth);
                   }
                   else {
-                    _TStr::Append('0', nWidth < 0 ? -nWidth : nWidth); // abs(nWidth)
+                    _TStr::Append('0');
                   }
                 }
               }
@@ -389,13 +394,6 @@ namespace clstd
                         nWidth = -nWidth;
                       }
                     }
-
-                    //if(*ptr != 'f' && nWidth == 0 && nPrecision != 0) {
-                    //  bLeftAlign = FALSE;
-                    //  bZeroPrefix = TRUE; // 例如 "%.5d" 要求按照5位填0扩充
-                    //  nWidth = nPrecision;
-                    //}
-
                     goto SEQUENCE;
                   }
                   else

@@ -2914,7 +2914,6 @@ extern "C" b32 strcmpnW(const wch* lpString1, const wch* lpString2, int nCount)
 template <typename _TCh>
 int ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相当于一个容差
 {
-  //TRACEW(L"%s => ", str);
   _TCh* c = clstd::strchrT(str, '.');
   if(c == NULL) {
     return clstd::strlenT(str);

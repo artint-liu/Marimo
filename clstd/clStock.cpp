@@ -27,53 +27,6 @@ namespace clstd
   //template clStringA  ToProfileString   (const clStringA&);
 
   //////////////////////////////////////////////////////////////////////////
-  //b32 SmartStock_TraitsW::_StrCmpN(const wch* pStr1, const wch* pStr2, int nCount)
-  //{
-  //  return wcsncmp(pStr1, pStr2, nCount) == 0;
-  //}
-  //clsize SmartStock_TraitsW::_StrLen(const wch* pStr)
-  //{
-  //  return wcslen(pStr);
-  //}
-  //clsize SmartStock_TraitsW::_TToI(const wch* pStr)
-  //{
-  //  return clstd::_xstrtoi(pStr);
-  //}
-  //double SmartStock_TraitsW::_TToD(const wch* pStr)
-  //{
-  //  return clstd::_xstrtof(pStr);
-  //}
-  //b32 SmartStock_TraitsW::_CheckBoolean(const wch* pStr)
-  //{
-  //  return clstd::strcmpiT(pStr, L"ok") == 0 ||
-  //    clstd::strcmpiT(pStr, L"true") == 0 ||
-  //    clstd::strcmpiT(pStr, L"yes") == 0 ||
-  //    clstd::strcmpiT(pStr, L"1") == 0;
-  //}
-
-  //b32 SmartStock_TraitsA::_StrCmpN(const ch* pStr1, const ch* pStr2, int nCount)
-  //{
-  //  return strncmp(pStr1, pStr2, nCount) == 0;
-  //}
-  //clsize SmartStock_TraitsA::_StrLen(const ch* pStr)
-  //{
-  //  return strlen(pStr);
-  //}
-  //clsize SmartStock_TraitsA::_TToI(const ch* pStr)
-  //{
-  //  return atoi(pStr);
-  //}
-  //double SmartStock_TraitsA::_TToD(const ch* pStr)
-  //{
-  //  return atof(pStr);
-  //}
-  //b32 SmartStock_TraitsA::_CheckBoolean(const ch* pStr)
-  //{
-  //  return clstd::strcmpiT(pStr, "ok") == 0 ||
-  //    clstd::strcmpiT(pStr, "true") == 0 ||
-  //    clstd::strcmpiT(pStr, "yes") == 0 ||
-  //    clstd::strcmpiT(pStr, "1") == 0;
-  //}
 
 #ifdef _DEBUG
 # define IS_OUT_OF_DATE ASSERT(nModify == pStock->m_nModify)
@@ -156,7 +109,7 @@ namespace clstd
       }
       else if(itNext.marker[0] == '{') {
         _MyIterator itBegin;
-        if( ! SmartStreamUtility::FindPair(itNext, itBegin, it, (TChar*)L"{", (TChar*)L"}")) {
+        if( ! SmartStreamUtility::FindPair(itNext, itBegin, it, (TChar*)_CLTEXT("{"), (TChar*)_CLTEXT("}"))) {
           return FALSE;
         }
         itNext = it;
@@ -581,7 +534,7 @@ namespace clstd
     while(++itNext != itGlobalEnd) {
       if((szName == NULL || it == szName) && itNext.marker[0] == '{') {
         // itNext应该与输出的ItBegin是同一个值
-        if( ! SmartStreamUtility::FindPair(itNext, iter_begin, iter_end, (TChar*)L"{", (TChar*)L"}"))
+        if( ! SmartStreamUtility::FindPair(itNext, iter_begin, iter_end, (TChar*)_CLTEXT("{"), (TChar*)_CLTEXT("}")))
         {
           break;
         }
@@ -843,7 +796,7 @@ namespace clstd
     ATTRIBUTE param;
     if(GetKey(szKey, param))
     {
-      auto it = pStock->m_SmartStream.find(param.value, 1, L";");
+      auto it = pStock->m_SmartStream.find(param.value, 1, _CLTEXT(";"));
 
       return pStock->Remove(this, param.key, it);
 
@@ -1252,7 +1205,7 @@ namespace clstd
     pNewSect.nModify = m_nModify;
     pNewSect.name    = m_SmartStream.nearest(nPos);
     pNewSect.nDepth  = pSection->nDepth + 1;
-    SmartStreamUtility::FindPair(pNewSect.name, pNewSect.iter_begin, pNewSect.iter_end, (TChar*)L"{", (TChar*)L"}");
+    SmartStreamUtility::FindPair(pNewSect.name, pNewSect.iter_begin, pNewSect.iter_end, (TChar*)_CLTEXT("{"), (TChar*)_CLTEXT("}"));
     return TRUE;
   }
 
@@ -1279,7 +1232,7 @@ namespace clstd
         pOutSect.nDepth  = pFindSect->nDepth + 1;
 
         // itNext应该与输出的ItBegin是同一个值
-        return SmartStreamUtility::FindPair(itNext, pOutSect.iter_begin, pOutSect.iter_end, (TChar*)L"{", (TChar*)L"}");
+        return SmartStreamUtility::FindPair(itNext, pOutSect.iter_begin, pOutSect.iter_end, (TChar*)_CLTEXT("{"), (TChar*)_CLTEXT("}"));
       }
       it = itNext;
     }
