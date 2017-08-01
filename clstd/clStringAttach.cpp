@@ -37,7 +37,7 @@ namespace clstd
   extern void ul64tox(u64 value, ch* pDest, size_t uSize, i32 radix, i32 upper = 0);
 } // namespace clstd
 
-#include "clStringFormatted.h"
+#include "clStringCommon.hxx"
 
 namespace clstd
 {
@@ -185,9 +185,9 @@ namespace clstd
   _CLSTRATTACH_TEMPL
     _CLSTRATTACH_IMPL& _CLSTRATTACH_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
   {
-    class StringXF : public StringFormattedT<StringAttachX> {};
+    class StringXF : public StringCommon::StringFormattedT<StringAttachX> {};
     STATIC_ASSERT(sizeof(StringXF) == sizeof(StringAttachX));
-    reinterpret_cast<StringXF*>(this)->StringFormattedT<StringAttachX>::VarFormat(pFmt, arglist);
+    reinterpret_cast<StringXF*>(this)->StringCommon::StringFormattedT<StringAttachX>::VarFormat(pFmt, arglist);
     return *this;
   }
 
@@ -286,6 +286,30 @@ namespace clstd
     return clstd::strncmpT(m_pBuf, szStr, count);
   }
 
+  namespace StringUtility
+  {
+
+    clStringAttachA& ConvertToUtf8(clStringAttachA& strUtf8, const clStringAttachW& strUnicode)
+    {
+      return StringCommon::ConvertToUtf8T<clStringAttachA>(strUtf8, strUnicode.CStr(), strUnicode.GetLength());
+    }
+
+    clStringAttachA& ConvertToUtf8(clStringAttachA& strUtf8, const wch* szUnicode, size_t nUnicode)
+    {
+      return StringCommon::ConvertToUtf8T<clStringAttachA>(strUtf8, szUnicode, nUnicode);
+    }
+
+    clStringAttachW& ConvertFromUtf8(clStringAttachW& strUnicode, const clStringAttachA& strUtf8)
+    {
+      return StringCommon::ConvertFromUtf8<clStringAttachW>(strUnicode, strUtf8.CStr(), strUtf8.GetLength());
+    }
+
+    clStringAttachW& ConvertFromUtf8(clStringAttachW& strUnicode, const ch* szUtf8, size_t nUtf8)
+    {
+      return StringCommon::ConvertFromUtf8<clStringAttachW>(strUnicode, szUtf8, nUtf8);
+    }
+
+  } // namespace StringUtility
   template class clstd::StringAttachX<wch>;
   template class clstd::StringAttachX<ch>;
 

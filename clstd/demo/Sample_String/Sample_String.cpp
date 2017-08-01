@@ -27,26 +27,6 @@ void TestString()
   ASSERT(bresult == TRUE);
 }
 
-void TestMatchSpec()
-{
-  CLOG(__FUNCTION__);
-  // 文件匹配
-  b32 bresult;
-  bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq");
-  ASSERT(bresult == FALSE);
-
-  bresult = clpathfile::MatchSpec("abcdefghijklmnopq", "abcd*opq");
-  ASSERT(bresult == TRUE);
-
-  bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq*");
-  ASSERT(bresult == TRUE);
-
-  bresult = clpathfile::MatchSpec("abcdefghijklmnopq.rst", "*.rst");
-  ASSERT(bresult == TRUE);
-
-  bresult = clpathfile::MatchSpec("fgg\\eyr\\abcd\\efg\\eqkl\\swj", "*\\abcd\\efg\\*");
-}
-
 void TestStringResolve() // 测试字符串切分
 {
   CLOG(__FUNCTION__);
@@ -98,6 +78,14 @@ void TestCodec() // 测试unicode到ansi转换
     clStringW strW = szTestStringW;
     clStringA strA = strW.CStr();
     ASSERT(strA == szTestStringA);
+  }
+
+  {
+    clStringA strUtf8;
+    clStringW strResult;
+    clstd::StringUtility::ConvertToUtf8(strUtf8, szTestStringW, clstd::strlenT(szTestStringW));
+    clstd::StringUtility::ConvertFromUtf8(strResult, strUtf8);
+    ASSERT(strResult == szTestStringW);
   }
 }
 
@@ -398,15 +386,23 @@ int main(int argc, char* argv[])
 
   //cprintf();
   TestLog();
+  clstd_cli::getch();
+
   TestBasicStringOp();
+  clstd_cli::getch();
+  
   TestCodec();
-  TestMatchSpec();
+  clstd_cli::getch();
   
   TestString();
-  TestStringResolve();
-  TestStringAttach();
+  clstd_cli::getch();
 
-  TestCodec();
+  TestStringResolve();
+  clstd_cli::getch();
+
+  TestStringAttach();
+  clstd_cli::getch();
+
   TestStringToFloat();
   TestFormatString0();
   TestFormatString1();

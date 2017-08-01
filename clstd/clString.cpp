@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <ctype.h>
-#include "clStringFormatted.h"
+#include "clStringCommon.hxx"
 
 #if (defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)) && ! defined(_CL_ENABLE_ICONV)
 # define _CL_ENABLE_ICONV
@@ -156,7 +156,32 @@ namespace clstd
 
   template u32    HashStringT(const wch* str);
   template u32    HashStringT(const  ch* str);
-}
+
+  namespace StringUtility
+  {
+    clStringA& ConvertToUtf8(clStringA& strUtf8, const clStringW& strUnicode)
+    {
+      return StringCommon::ConvertToUtf8T<clStringA>(strUtf8, strUnicode.CStr(), strUnicode.GetLength());
+    }
+
+    clStringA& ConvertToUtf8(clStringA& strUtf8, const wch* szUnicode, size_t nUnicode)
+    {
+      return StringCommon::ConvertToUtf8T<clStringA>(strUtf8, szUnicode, nUnicode);
+    }
+
+    clStringW& ConvertFromUtf8(clStringW& strUnicode, const clStringA& strUtf8)
+    {
+      return StringCommon::ConvertFromUtf8<clStringW>(strUnicode, strUtf8.CStr(), strUtf8.GetLength());
+    }
+
+    clStringW& ConvertFromUtf8(clStringW& strUnicode, const ch* szUtf8, size_t nUtf8)
+    {
+      return StringCommon::ConvertFromUtf8<clStringW>(strUnicode, szUtf8, nUtf8);
+    }
+
+  } // namespace StringUtility
+
+} // namespace clstd
 
 //const static CLALLOCPLOY aclAllocPloyW[] =
 //{
@@ -190,329 +215,341 @@ namespace clstd
 //extern clstd::StdAllocator g_StdAlloc;
 
 //////////////////////////////////////////////////////////////////////////
+
 #if defined(_CL_ENABLE_ICONV)
 # define INVALID_ICONV ((iconv_t)(-1))
-class CIconvOffer
+namespace clstd
 {
-protected:
-  iconv_t m_cd;
-public:
-  CIconvOffer(const ch* tocode, const ch* fromcode)
+  namespace StringCommon
   {
-    m_cd = iconv_open(tocode, fromcode);
-    CLOG("iconv_open from \"%s\" to \"%s\"(handle:%x).", fromcode, tocode, m_cd);
-  }
-
-  ~CIconvOffer()
-  {
-    iconv_close(m_cd);
-    CLOG("iconv_close handle(%x).", m_cd);
-  }
-
-  // 如果pNativeStr或者uLength为空，返回编码转换需要的空间，否则返回转换的字符数
-  template<typename _TOutChar, typename _TInChar>
-  size_t StringConvert(_TOutChar* pNativeStr, size_t uLength, const _TInChar* pStrX, size_t cchX)
-  {
-    if(m_cd == INVALID_ICONV) {
-      return 0;
-    }
-
-    size_t tran = 0;
-    cchX *= sizeof(_TInChar);
-
-    if( ! pNativeStr || ! uLength) // 测量模式
+    class CIconvOffer
     {
-      const size_t buf_len = 1024;
-      char buffer[buf_len];
-      size_t out_len = buf_len;
-      char*  out_ptr = buffer;
-
-      while(cchX) {
-#if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
-        iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
-#else
-        iconv(m_cd, (char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
-#endif
-        tran += (buf_len - out_len);
-        out_ptr = buffer;
-        out_len = buf_len;
+    protected:
+      iconv_t m_cd;
+    public:
+      CIconvOffer(const ch* tocode, const ch* fromcode)
+      {
+        m_cd = iconv_open(tocode, fromcode);
+        TRACE("iconv_open from \"%s\" to \"%s\"(handle:%x).\n", fromcode, tocode, m_cd);
       }
-    }
-    else { // 转换模式
-      uLength *= sizeof(_TOutChar); // iconv 长度参数都是基于字节的
-      tran = uLength;
+
+      ~CIconvOffer()
+      {
+        iconv_close(m_cd);
+        TRACE("iconv_close handle(%x).\n", m_cd);
+      }
+
+      // 如果pNativeStr或者uLength为空，返回编码转换需要的空间，否则返回转换的字符数
+      template<typename _TOutChar, typename _TInChar>
+      size_t StringConvert(_TOutChar* pNativeStr, size_t uLength, const _TInChar* pStrX, size_t cchX)
+      {
+        if(m_cd == INVALID_ICONV) {
+          return 0;
+        }
+
+        size_t tran = 0;
+        cchX *= sizeof(_TInChar);
+
+        if(!pNativeStr || !uLength) // 测量模式
+        {
+          const size_t buf_len = 1024;
+          char buffer[buf_len];
+          size_t out_len = buf_len;
+          char*  out_ptr = buffer;
+
+          while(cchX) {
 #if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
-      iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+            iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
 #else
-      iconv(m_cd, (char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+            iconv(m_cd, (char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
 #endif
-      tran -= uLength;
-    }
-    return tran / sizeof(_TOutChar);
-  }
+            if((buf_len - out_len) == 0) {
+              break;
+            }
+            tran += (buf_len - out_len);
+            out_ptr = buffer;
+            out_len = buf_len;
+          }
+        }
+        else { // 转换模式
+          uLength *= sizeof(_TOutChar); // iconv 长度参数都是基于字节的
+          tran = uLength;
+#if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
+          iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+#else
+          iconv(m_cd, (char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+#endif
+          tran -= uLength;
+        }
+        return tran / sizeof(_TOutChar);
+      }
 
-};
-
+    };
+  } // namespace StringCommon
+} // namespace clstd
 #endif // #if defined(_CL_ENABLE_ICONV)
+
 //////////////////////////////////////////////////////////////////////////
-
-clsize clstd::StringW_traits::StringLength(const wch* pStr)
+namespace clstd
 {
-  //return wcslen(pStr);
-  return clstd::strlenT(pStr);
-}
-
-clsize clstd::StringW_traits::XStringLength(const _XCh* pStrX)
-{
-  return strlen(pStrX);
-}
-
-wch* clstd::StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uCopyLength)
-{
-  ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
-  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength);
-}
-
-i32 clstd::StringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
-{
-  //return wcscmp(pStr1, pStr2);
-  return clstd::strcmpT(pStr1, pStr2);
-}
-
-i32 clstd::StringW_traits::CompareStringNoCase(const wch* pStr1, const wch* pStr2)
-{
-  return clstd::strcmpiT(pStr1, pStr2);
-}
-
-const wch* clstd::StringW_traits::StringSearchChar(const wch* pStr, wch cCh)
-{
-  return clstd::strchrT(pStr, cCh);
-  //return wcschr(pStr, cCh);
-}
-
-void clstd::StringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::ultox(uNum, pDestStr, uMaxLength, 10);
+  clsize StringW_traits::StringLength(const wch* pStr)
+  {
+    //return wcslen(pStr);
+    return strlenT(pStr);
   }
-  else {
-    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+
+  clsize StringW_traits::XStringLength(const _XCh* pStrX)
+  {
+    return strlen(pStrX);
   }
-}
 
-void clstd::StringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::ltox(iNum, pDestStr, uMaxLength, 10);
+  wch* StringW_traits::CopyStringN(wch* pStrDest, const wch* pStrSrc, size_t uCopyLength)
+  {
+    ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
+    return strcpynT(pStrDest, pStrSrc, uCopyLength);
   }
-  else {
-    clstd::_ltogxstrT<wch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+
+  i32 StringW_traits::CompareString(const wch* pStr1, const wch* pStr2)
+  {
+    //return wcscmp(pStr1, pStr2);
+    return strcmpT(pStr1, pStr2);
   }
-}
 
-i32 clstd::StringW_traits::StringToInteger32(wch* pString)
-{
-  return clstd::_xstrtoiT<i32>(pString);
-}
-
-int clstd::StringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
-{
-  if(mode == 'F' || mode == 'E') {
-    return clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
+  i32 StringW_traits::CompareStringNoCase(const wch* pStr1, const wch* pStr2)
+  {
+    return strcmpiT(pStr1, pStr2);
   }
-  else {
-    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
-    return ReadlizeFloatString(pDestStr);
+
+  const wch* StringW_traits::StringSearchChar(const wch* pStr, wch cCh)
+  {
+    return strchrT(pStr, cCh);
+    //return wcschr(pStr, cCh);
   }
-}
 
-void clstd::StringW_traits::Unsigned64ToString(wch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::ul64tox(uNum, pDestStr, uMaxLength, 10);
+  void StringW_traits::Unsigned32ToString(wch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      ultox(uNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
   }
-  else {
-    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+
+  void StringW_traits::Integer32ToString(wch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      ltox(iNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ltogxstrT<wch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
   }
-}
 
-void clstd::StringW_traits::Integer64ToString(wch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::l64tox(iNum, pDestStr, uMaxLength, 10);
+  i32 StringW_traits::StringToInteger32(wch* pString)
+  {
+    return _xstrtoiT<i32>(pString);
   }
-  else {
-    clstd::_ltogxstrT<wch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+
+  int StringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
+  {
+    if(mode == 'F' || mode == 'E') {
+      return _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
+    }
+    else {
+      _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
+      return ReadlizeFloatString(pDestStr);
+    }
   }
-}
 
-void clstd::StringW_traits::HexToLowerString(wch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 16);
-}
+  void StringW_traits::Unsigned64ToString(wch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      ul64tox(uNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
+  }
 
-void clstd::StringW_traits::HexToUpperString(wch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 16, 1);
-}
+  void StringW_traits::Integer64ToString(wch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      l64tox(iNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ltogxstrT<wch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
+  }
 
-void clstd::StringW_traits::BinaryToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 2);
-}
+  void StringW_traits::HexToLowerString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 16);
+  }
 
-void clstd::StringW_traits::OctalToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 8);
-}
+  void StringW_traits::HexToUpperString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 16, 1);
+  }
 
-size_t clstd::StringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
-{
+  void StringW_traits::BinaryToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 2);
+  }
+
+  void StringW_traits::OctalToString(wch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 8);
+  }
+
+  size_t StringW_traits::XStringToNative(wch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
+  {
 #if defined(_CL_ENABLE_ICONV)
-  // 其实并不希望使用这种静态方式储存编码转换对象，但是又没找到合适的全局方式来解决
-  // 这里需要注意的是，clstd作为静态库可能被多个动态库引用，同时又被主程序引用，所以在
-  // 运行时一个静态对象在不同模块中有各自独立的空间。
-  static CIconvOffer offer("UCS-2LE", ICONV_LOCALE);
-  const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
-  return ret;
+    // 其实并不希望使用这种静态方式储存编码转换对象，但是又没找到合适的全局方式来解决
+    // 这里需要注意的是，clstd作为静态库可能被多个动态库引用，同时又被主程序引用，所以在
+    // 运行时一个静态对象在不同模块中有各自独立的空间。
+    static StringCommon::CIconvOffer offer("UCS-2LE", ICONV_LOCALE);
+    const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
+    return ret;
 
 #elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)
-   return (size_t)
-     MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, 
-     pStrX, (int)cchX, pNativeStr, (int)uLength);
+    return (size_t)
+      MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED,
+        pStrX, (int)cchX, pNativeStr, (int)uLength);
 #else
     setlocale(LC_ALL, "C");
     return (size_t)mbstowcs(pNativeStr, pStrX, uLength);
 #endif // _WINDOWS
-}
-//////////////////////////////////////////////////////////////////////////
-clsize clstd::StringA_traits::StringLength(const ch* pStr)
-{
-  return strlen(pStr);
-}
-
-clsize clstd::StringA_traits::XStringLength(const _XCh* pStrX)
-{
-  //return wcslen(pStrX);
-  return clstd::strlenT(pStrX);
-}
-
-ch* clstd::StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uCopyLength)
-{
-  ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
-  return clstd::strcpynT(pStrDest, pStrSrc, uCopyLength);
-}
-
-i32 clstd::StringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
-{
-  return strcmp(pStr1, pStr2);
-}
-
-i32 clstd::StringA_traits::CompareStringNoCase(const ch* pStr1, const ch* pStr2)
-{
-  return clstd::strcmpiT(pStr1, pStr2);
-}
-
-const ch* clstd::StringA_traits::StringSearchChar(const ch* pStr, ch cCh)
-{
-  return strchr(pStr, cCh);
-}
-
-void clstd::StringA_traits::Unsigned32ToString(ch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::ultox(uNum, pDestStr, uMaxLength, 10);
   }
-  else {
-    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+  //////////////////////////////////////////////////////////////////////////
+  clsize StringA_traits::StringLength(const ch* pStr)
+  {
+    return strlen(pStr);
   }
-}
 
-void clstd::StringA_traits::Integer32ToString(ch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::ltox(iNum, pDestStr, uMaxLength, 10);
+  clsize StringA_traits::XStringLength(const _XCh* pStrX)
+  {
+    //return wcslen(pStrX);
+    return strlenT(pStrX);
   }
-  else {
-    clstd::_ltogxstrT<ch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+
+  ch* StringA_traits::CopyStringN(ch* pStrDest, const ch* pStrSrc, size_t uCopyLength)
+  {
+    ASSERT(uCopyLength != 0); // 如果断在这里，要从外部调用防止进入这个函数
+    return strcpynT(pStrDest, pStrSrc, uCopyLength);
   }
-}
 
-i32 clstd::StringA_traits::StringToInteger32(ch* pString)
-{
-  return clstd::xtoi(pString);
-}
-
-void clstd::StringA_traits::Unsigned64ToString(ch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::ul64tox(uNum, pDestStr, uMaxLength, 10);
+  i32 StringA_traits::CompareString(const ch* pStr1, const ch* pStr2)
+  {
+    return strcmp(pStr1, pStr2);
   }
-  else {
-    clstd::_ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+
+  i32 StringA_traits::CompareStringNoCase(const ch* pStr1, const ch* pStr2)
+  {
+    return strcmpiT(pStr1, pStr2);
   }
-}
 
-void clstd::StringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
-{
-  if(nNumGroup <= 0) {
-    clstd::l64tox(iNum, pDestStr, uMaxLength, 10);
+  const ch* StringA_traits::StringSearchChar(const ch* pStr, ch cCh)
+  {
+    return strchr(pStr, cCh);
   }
-  else {
-    clstd::_ltogxstrT<ch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+
+  void StringA_traits::Unsigned32ToString(ch* pDestStr, size_t uMaxLength, u32 uNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      ultox(uNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
   }
-}
 
-int clstd::StringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
-{
-  if(mode == 'F' || mode == 'E') {
-    return clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
+  void StringA_traits::Integer32ToString(ch* pDestStr, size_t uMaxLength, i32 iNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      ltox(iNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ltogxstrT<ch, i32, u32>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
   }
-  else {
-    clstd::_ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
-    return ReadlizeFloatString(pDestStr);
+
+  i32 StringA_traits::StringToInteger32(ch* pString)
+  {
+    return xtoi(pString);
   }
-}
 
-void clstd::StringA_traits::HexToLowerString(ch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 16);
-}
+  void StringA_traits::Unsigned64ToString(ch* pDestStr, size_t uMaxLength, u64 uNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      ul64tox(uNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ultogxstrT(uNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
+  }
 
-void clstd::StringA_traits::HexToUpperString(ch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 16, 1);
-}
+  void StringA_traits::Integer64ToString(ch* pDestStr, size_t uMaxLength, i64 iNum, i32 nNumGroup)
+  {
+    if(nNumGroup <= 0) {
+      l64tox(iNum, pDestStr, uMaxLength, 10);
+    }
+    else {
+      _ltogxstrT<ch, i64, u64>(iNum, pDestStr, uMaxLength, 10, nNumGroup, 0);
+    }
+  }
 
-void clstd::StringA_traits::BinaryToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 2);
-}
+  int StringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
+  {
+    if(mode == 'F' || mode == 'E') {
+      return _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
+    }
+    else {
+      _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
+      return ReadlizeFloatString(pDestStr);
+    }
+  }
 
-void clstd::StringA_traits::OctalToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
-{
-  clstd::ultox(uValue, pDestStr, uMaxLength, 8);
-}
+  void StringA_traits::HexToLowerString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 16);
+  }
 
-size_t clstd::StringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
-{
+  void StringA_traits::HexToUpperString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 16, 1);
+  }
+
+  void StringA_traits::BinaryToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 2);
+  }
+
+  void StringA_traits::OctalToString(ch* pDestStr, size_t uMaxLength, u32 uValue)
+  {
+    ultox(uValue, pDestStr, uMaxLength, 8);
+  }
+
+  size_t StringA_traits::XStringToNative(ch* pNativeStr, size_t uLength, const _XCh* pStrX, size_t cchX)
+  {
 #if defined(_CL_ENABLE_ICONV)
 
-  static CIconvOffer offer(ICONV_LOCALE, "UCS-2LE");
-  const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
-  return ret;
+    static StringCommon::CIconvOffer offer(ICONV_LOCALE, "UCS-2LE");
+    const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
+    return ret;
 
 #elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)
-  return (size_t)
-    WideCharToMultiByte(CP_ACP, NULL, 
-    pStrX, (int)cchX, pNativeStr, (int)uLength, NULL, NULL);
-//#elif defined(_CL_SYSTEM_IOS)
-//  return (size_t)SimpleUnicodeToASCII(pNativeStr, uLength, pStrX);
+    return (size_t)
+      WideCharToMultiByte(CP_ACP, NULL,
+        pStrX, (int)cchX, pNativeStr, (int)uLength, NULL, NULL);
+    //#elif defined(_CL_SYSTEM_IOS)
+    //  return (size_t)SimpleUnicodeToASCII(pNativeStr, uLength, pStrX);
 #else
-  setlocale(LC_ALL, "");
-  return (size_t)wcstombs(pNativeStr, pStrX, uLength);
+    setlocale(LC_ALL, "");
+    return (size_t)wcstombs(pNativeStr, pStrX, uLength);
 #endif // _WINDOWS
-}
+  }
+} // namespace clstd
 //////////////////////////////////////////////////////////////////////////
 
 namespace clstd
@@ -1918,9 +1955,9 @@ namespace clstd
   _CLSTR_TEMPL
     size_t _CLSTR_IMPL::VarFormat(const _TCh *pFmt, va_list arglist)
   {
-    class StringXF : public StringFormattedT<StringX> {};
+    class StringXF : public StringCommon::StringFormattedT<StringX> {};
     STATIC_ASSERT(sizeof(StringXF) == sizeof(StringX));
-    reinterpret_cast<StringXF*>(this)->StringFormattedT<StringX>::VarFormat(pFmt, arglist);
+    reinterpret_cast<StringXF*>(this)->StringCommon::StringFormattedT<StringX>::VarFormat(pFmt, arglist);
     return CLSTR_LENGTH(m_pBuf);
   }
 

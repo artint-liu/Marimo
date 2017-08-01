@@ -16,6 +16,7 @@
 #endif
 
 #include "clStringAttach.h"
+#define MAX_TRACE_BUFFER 2048
 
 namespace clstd
 {
@@ -61,13 +62,49 @@ namespace clstd
 
 namespace clstd
 {
-  void OutputString(const ch* szString)
-  {
-    fputs(szString, stdout); // TODO: 根据消息类型区分stdout/stderr
-  }
+  void DumpMemory(const void* ptr, size_t count);
 
   void OutputString(const wch* szString)
   {
+    const size_t count = strlenT(szString);
+    if(count)
+    {
+      char buffer[MAX_TRACE_BUFFER];
+      clStringAttachA str(buffer, sizeof(buffer), 0);
+      StringUtility::ConvertToUtf8(str, szString, count);
+      fputs(str.CStr(), stdout);
+    }
+  }
+
+  void OutputString(const ch* szString)
+  {
+    size_t count = 0;
+    b32 bASCII = TRUE;
+    const ch* p = szString;
+    while(*p) {
+      if(*p++ & 0x80) {
+        bASCII = FALSE;
+      }
+    }
+    count = p - szString;
+
+    if(count)
+    {
+      if(bASCII) {
+        fputs(szString, stdout);
+      }
+      else
+      {
+        LocalBuffer<MAX_TRACE_BUFFER> buf;
+
+        const size_t req_count = StringW_traits::XStringToNative(NULL, 0, szString, count);
+        buf.Resize((req_count + 1) * sizeof(wch), FALSE);
+        StringW_traits::XStringToNative((wch*)buf.GetPtr(), req_count, szString, count);
+        ((wch*)buf.GetPtr())[req_count] = '\0';
+
+        OutputString((const wch*)buf.GetPtr());
+      }
+    }
   }
 }
 
@@ -109,7 +146,6 @@ const static clstd::ALLOCPLOY aclAllocPloyA[] =
 clstd::StdAllocator g_StdAlloc;
 clStringW s_strRootDir;
 
-#define MAX_TRACE_BUFFER 2048
 //#ifdef _DEBUG
 
 template<typename _TCh>

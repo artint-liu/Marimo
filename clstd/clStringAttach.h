@@ -59,4 +59,16 @@ namespace clstd
 typedef clstd::StringAttachX<wch> clStringAttachW;
 typedef clstd::StringAttachX<ch> clStringAttachA;
 
+namespace clstd
+{
+  namespace StringUtility
+  {
+    clStringAttachA& ConvertToUtf8(clStringAttachA& strUtf8, const clStringAttachW& strUnicode);
+    clStringAttachA& ConvertToUtf8(clStringAttachA& strUtf8, const wch* szUnicode, size_t nUnicode);
+    clStringAttachW& ConvertFromUtf8(clStringAttachW& strUnicode, const clStringAttachA& strUtf8);
+    clStringAttachW& ConvertFromUtf8(clStringAttachW& strUnicode, const ch* szUtf8, size_t nUtf8);
+  } // namespace StringUtility
+} // namespace clstd
+
+
 #endif // _CLSTD_STRING_ATTACH_H_

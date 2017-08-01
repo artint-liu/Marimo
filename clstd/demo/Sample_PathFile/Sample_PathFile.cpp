@@ -77,6 +77,26 @@ void TestCombinePath()
 #endif // #if defined(_CL_SYSTEM_WINDOWS)
 }
 
+void TestMatchSpec()
+{
+  CLOG(__FUNCTION__);
+  // ÎÄ¼þÆ¥Åä
+  b32 bresult;
+  bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq");
+  ASSERT(bresult == FALSE);
+
+  bresult = clpathfile::MatchSpec("abcdefghijklmnopq", "abcd*opq");
+  ASSERT(bresult == TRUE);
+
+  bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq*");
+  ASSERT(bresult == TRUE);
+
+  bresult = clpathfile::MatchSpec("abcdefghijklmnopq.rst", "*.rst");
+  ASSERT(bresult == TRUE);
+
+  bresult = clpathfile::MatchSpec("fgg\\eyr\\abcd\\efg\\eqkl\\swj", "*\\abcd\\efg\\*");
+}
+
 
 void TestFindFile()
 {
@@ -127,6 +147,7 @@ int main(int argc, char* argv[])
 {
   TestPathFile();
   TestCombinePath();
+  TestMatchSpec();
   TestFindFile();
 	return 0;
 }

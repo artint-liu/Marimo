@@ -499,6 +499,17 @@ clStringA UnicodeStringToAnsiString(const clStringW& str);
 #define AS2WS(STR)  (const wch*)AnsiStringToUnicodeString(STR)
 #define WS2AS(STR)  (const ch*)UnicodeStringToAnsiString(STR)
 
+namespace clstd
+{
+  namespace StringUtility
+  {
+    clStringA& ConvertToUtf8(clStringA& strUtf8, const clStringW& strUnicode);
+    clStringA& ConvertToUtf8(clStringA& strUtf8, const wch* szUnicode, size_t nUnicode);
+    clStringW& ConvertFromUtf8(clStringW& strUnicode, const clStringA& strUtf8);
+    clStringW& ConvertFromUtf8(clStringW& strUnicode, const ch* szUtf8, size_t nUtf8);
+  } // namespace StringUtility
+} // namespace clstd
+
 #else
 # pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CLSTD_STRING_H_

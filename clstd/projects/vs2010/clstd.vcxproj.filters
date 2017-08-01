@@ -168,8 +168,8 @@
     <ClInclude Include="..\..\clRepository.h" />
     <ClInclude Include="..\..\clBuffer.h" />
     <ClInclude Include="..\..\clImageDecoder.h" />
-    <ClInclude Include="..\..\clStringFormatted.h" />
     <ClInclude Include="..\..\clStringAttach.h" />
+    <ClInclude Include="..\..\clStringCommon.hxx" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">
