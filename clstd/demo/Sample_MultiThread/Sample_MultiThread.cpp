@@ -57,12 +57,30 @@ void TestWait()
   CLOG(__FUNCTION__);
   SampleTimeout t;
   t.Start();
-  t.Wait(-1);
+  while(t.Wait(2000) == clstd::Thread::Result_TimeOut) {
+    CLOG_WARNING("main: has been waited 2000ms");
+  }
+  CLOG("main: has been exited");
+  u32 code = 0;
+  clstd::Thread::Result result = t.GetExitCode(&code);
+  ASSERT(result == clstd::Thread::Result_Ok);
+  ASSERT(code == 8282);
 }
+
+namespace sample
+{
+  void pause()
+  {
+    CLOG("press any key to continue ...");
+    clstd_cli::getch();
+  }
+} // namespace sample
 
 int main()
 {
   TestWait();
+  sample::pause();
+
   TestMessage();
   return 0;
 }

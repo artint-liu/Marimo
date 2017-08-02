@@ -21,7 +21,8 @@ namespace clstd
 
     Thread::Thread()
       : m_handle(NULL)
-      , m_ThreadId(NULL)
+      , m_ThreadId(0)
+      , m_dwExitCode(0)
     {
     }
 
@@ -32,7 +33,7 @@ namespace clstd
         TerminateThread(m_handle, 0);
         CloseHandle(m_handle);
         m_handle = NULL;
-        m_ThreadId = NULL;
+        m_ThreadId = 0;
       }
     }
 
@@ -49,20 +50,37 @@ namespace clstd
       return ResumeThread(m_handle) != 0xffffffff;
     }
 
-    u32 Thread::Wait(u32 nMilliSec)
+    Thread::Result Thread::Wait(u32 nMilliSec)
     {
-      DWORD dwThreadExitCode = 0;
       if(m_handle)
       {
         DWORD dwRet = WaitForSingleObject(m_handle, nMilliSec);
-        GetExitCodeThread(m_handle, &dwThreadExitCode);
+        if(dwRet == WAIT_TIMEOUT) {
+          return Result_TimeOut;
+        }
+
+        BOOL bResult = GetExitCodeThread(m_handle, &m_dwExitCode);
+        ASSERT(bResult);
+
         CloseHandle(m_handle);
         m_handle = NULL;
-        m_ThreadId = NULL;
+        m_ThreadId = 0;
       }
-      return dwThreadExitCode;
+      return Result_Ok;
     }
     
+    Thread::Result Thread::GetExitCode(u32* pExitCode) const
+    {
+      if(m_handle) {
+        return Result_Running;
+      }
+      ASSERT(m_ThreadId == 0);
+      if(pExitCode != NULL) {
+        *pExitCode = m_dwExitCode;
+      }
+      return Result_Ok;
+    }
+
     i32 Thread::StartRoutine()
     {
       return 0;
@@ -79,7 +97,6 @@ namespace clstd
 
     Thread::~Thread()
     {
-
     }
 
     i32 Thread::StartRoutine()
@@ -116,14 +133,17 @@ namespace clstd
       Thread* pThread = static_cast<Thread*>(pParam);
       //pthread_cond_wait(&pThread->m_cond, &pThread->m_mtx);
       pThread->m_pSignal->Wait();      
-      void* ret = reinterpret_cast<void*>(pThread->StartRoutine());
-      pThread->m_pSignal->Set();
-      return ret;
+      pThread->m_dwExitCode = static_cast<u32>(pThread->StartRoutine());
+      pThread->m_pWaitExit->Set();
+
+      return static_cast<void*>(0);
     }
 
     Thread::Thread()
       : m_tidp(NULL)
       , m_pSignal(NULL)
+      , m_pWaitExit(NULL)
+      , m_dwExitCode(0)
     {
       //m_tidp.p = NULL;
       //m_tidp.x = 0;
@@ -131,13 +151,14 @@ namespace clstd
 
     Thread::~Thread()
     {
-      SAFE_DELETE(m_pSignal);
-
       if(m_tidp) {
         pthread_cancel(*m_tidp);
         delete m_tidp;
         m_tidp = NULL;
       }
+
+      SAFE_DELETE(m_pWaitExit);
+      SAFE_DELETE(m_pSignal);
     }
 
     b32 Thread::Start()
@@ -150,6 +171,11 @@ namespace clstd
 
         m_pSignal = new Signal;
         if( ! m_pSignal) {
+          return FALSE;
+        }
+
+        m_pWaitExit = new Signal;
+        if( ! m_pWaitExit) {
           return FALSE;
         }
 
@@ -175,15 +201,29 @@ namespace clstd
       return 0;
     }
 
-    u32 Thread::Wait(u32 nMilliSec)
+    Thread::Result Thread::Wait(u32 nMilliSec)
     {
-      if(nMilliSec == -1) {
-        pthread_join(*m_tidp, NULL);
+      if(nMilliSec != -1 && m_pWaitExit->WaitTimeOut(nMilliSec) == Signal::eTimeOut) {
+        return Result_TimeOut;
       }
-      else {
-        //m_pSignal->WaitTimeOut(nMilliSec);
+
+      pthread_join(*m_tidp, NULL);
+
+      delete m_tidp;
+      m_tidp = NULL;
+
+      return Result_Ok;
+    }
+
+    Thread::Result Thread::GetExitCode(u32* pExitCode) const
+    {
+      if(m_tidp) {
+        return Result_Running;
       }
-      return 0;
+      if(pExitCode) {
+        *pExitCode = m_dwExitCode;
+      }
+      return Result_Ok;
     }
 
 

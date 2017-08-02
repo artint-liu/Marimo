@@ -52,13 +52,24 @@ namespace clstd
     protected:
       HANDLE m_handle;
       DWORD  m_ThreadId;
+      DWORD  m_dwExitCode;
+
+    public:
+      enum Result
+      {
+        Result_Ok = 0,
+        Result_Running = 1,
+        Result_TimeOut = 258L,
+      };
+
     public:
       Thread();
       virtual ~Thread();
       virtual i32 StartRoutine();
 
-      b32   Start ();
-      u32   Wait  (u32 nMilliSec);
+      b32     Start ();
+      Result  Wait  (u32 nMilliSec);
+      Result  GetExitCode(u32* pExitCode) const;
     };
 
     namespace this_thread
@@ -80,15 +91,27 @@ namespace clstd
     protected:
       pthread_t*      m_tidp;
       Signal*         m_pSignal;
+      Signal*         m_pWaitExit;
+      u32             m_dwExitCode;
       //pthread_cond_t  m_cond;
       //pthread_mutex_t m_mtx;
+
+    public:
+      enum Result
+      {
+        Result_Ok = 0,
+        Result_Running = 1,
+        Result_TimeOut = 258L,
+      };
+
     public:
       Thread();
       virtual ~Thread();
       virtual i32 StartRoutine();
 
       b32 Start();
-      u32 Wait(u32 nMilliSec);
+      Result Wait(u32 nMilliSec);
+      Result GetExitCode(u32* pExitCode) const;
     };
 
     namespace this_thread

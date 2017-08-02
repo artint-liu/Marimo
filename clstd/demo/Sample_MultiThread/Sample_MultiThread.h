@@ -189,7 +189,7 @@ class SampleTimeout : public clstd::Thread
 public:
   virtual i32 StartRoutine() override
   {
-    CLOG("等待1100毫秒x5次");
+    CLOG("thread: 等待1100毫秒x5次");
     for(int i = 0; i < 5; i++)
     {
       u64 time_begin = clstd::GetTime64();
@@ -199,10 +199,10 @@ public:
       CLOG("thread: wait time:%ld", delta);
     }
 
-    CLOG("等待5秒退出");
+    CLOG("thread: 等待5秒退出");
     __SLEEP_0(5000);
-    CLOG("退出...");
-    return 0;
+    CLOG("thread: exit...");
+    return 8282;
   }
 };
 
