@@ -7,7 +7,7 @@ LIB_DIR=$(PROJECT_DIR)\Bin
 INCLUDES += -I$(PROJECT_DIR)
 
 ifeq ($(Configuration), debug)
-CPPFLAGS += -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11 -fexec-charset=GBK -D_DEBUG
+CPPFLAGS += -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11 -fexec-charset=GBK -D_DEBUG -g
 ProjectName = libclstd_d.a
 else
 CPPFLAGS += -D_CL_SYSTEM_LINUX -DPOSIX_THREAD -D_CRT_FINDFILE -D_CL_ENABLE_ICONV -std=gnu++11 -fexec-charset=GBK 

@@ -1,4 +1,4 @@
-#ifndef _STRING_FORMATTED_H_
+ï»¿#ifndef _STRING_FORMATTED_H_
 #define _STRING_FORMATTED_H_
 
 namespace clstd
@@ -17,10 +17,10 @@ namespace clstd
       const static int nDefaultDoublePrecision = 6;
 
     public:
-      StringFormattedT& VarFormat(LPCSTR pFmt, va_list arglist)  // ÔÚÔ­Ê¼ÄÚÈİºóÃæ£¬Ê¹ÓÃ±ä²ÎÁĞ±í×·¼Ó¸ñÊ½»¯×Ö·û´®
+      StringFormattedT& VarFormat(LPCSTR pFmt, va_list arglist)  // åœ¨åŸå§‹å†…å®¹åé¢ï¼Œä½¿ç”¨å˜å‚åˆ—è¡¨è¿½åŠ æ ¼å¼åŒ–å­—ç¬¦ä¸²
       {
         LPCSTR ptr = pFmt;
-        TChar  buffer[MAX_DIGITS + 1];  // ÓÃÀ´×÷ÎªÊı×Ö×ª»»µÄ»º³åÇø,¶ÔÓÚ32Î»ÕûÊıºÍ¸¡µãÊı,×ª»»Îª×Ö·û´®ºó³¤¶È¶¼²»´óÓÚ80
+        TChar  buffer[MAX_DIGITS + 1];  // ç”¨æ¥ä½œä¸ºæ•°å­—è½¬æ¢çš„ç¼“å†²åŒº,å¯¹äº32ä½æ•´æ•°å’Œæµ®ç‚¹æ•°,è½¬æ¢ä¸ºå­—ç¬¦ä¸²åé•¿åº¦éƒ½ä¸å¤§äº80
         int    i;
 
 
@@ -38,12 +38,12 @@ namespace clstd
             int nWidth = 0;
             int nPrecision = 0;
             int nLong = 0;
-            b32 bLeftAlign = FALSE;  // '-' ×ó¶ÔÆë
-            b32 bZeroPrefix = FALSE; // '0' ²»×ãÎ»ÓÃ0Ìî³ä, ±È'-'ÓÅÏÈ¼¶µÍ
-            b32 bForceSign = FALSE;  // '+' Ç¿ÖÆÏÔÊ¾·ûºÅ
-            b32 bSpace = FALSE;      // ' ' ·ûºÅÎ»Õ¼Î»£¬Óë'+'Í¬Ê±³öÏÖÊ±±È'+'ÓÅÏÈ¼¶µÍ
-            b32 bPound = FALSE;      // '#' ÏÔÊ¾°Ë½øÖÆ»òÕßÊ®Áù½øÖÆÇ°×º
-            b32 bPrecision = FALSE;  // Óöµ½'.'Ö®ºóÎªTrue
+            b32 bLeftAlign = FALSE;  // '-' å·¦å¯¹é½
+            b32 bZeroPrefix = FALSE; // '0' ä¸è¶³ä½ç”¨0å¡«å……, æ¯”'-'ä¼˜å…ˆçº§ä½
+            b32 bForceSign = FALSE;  // '+' å¼ºåˆ¶æ˜¾ç¤ºç¬¦å·
+            b32 bSpace = FALSE;      // ' ' ç¬¦å·ä½å ä½ï¼Œä¸'+'åŒæ—¶å‡ºç°æ—¶æ¯”'+'ä¼˜å…ˆçº§ä½
+            b32 bPound = FALSE;      // '#' æ˜¾ç¤ºå…«è¿›åˆ¶æˆ–è€…åå…­è¿›åˆ¶å‰ç¼€
+            b32 bPrecision = FALSE;  // é‡åˆ°'.'ä¹‹åä¸ºTrue
             _TStr::Append(ptr, ptr2 - ptr);
             ptr = ptr2 + 1;
           SEQUENCE:
@@ -148,7 +148,7 @@ namespace clstd
             {
               unsigned long va_value = va_arg(arglist, unsigned long);
               if(bPound && va_value) {
-                buffer[0] = '0'; // ½øÖÆÇ°×º
+                buffer[0] = '0'; // è¿›åˆ¶å‰ç¼€
                 //MyTraits::OctalToString(buffer + 1, MAX_DIGITS - 1, va_value);
                 clstd::ultox(va_value, buffer + 1, MAX_DIGITS - 1, 8);
               }
@@ -213,8 +213,8 @@ namespace clstd
 
                 //const _TCh* pDot = MyTraits::StringSearchChar(buffer, '.');
                 //if(pDot != NULL) {
-                //  int nn = nPrecision + 1; // °üº¬'.'µÄ¸öÊı
-                //  while(nn-- && *++pDot != '\0'); // Ã»´í£¬¾ÍÊÇ·ÖºÅ£¡
+                //  int nn = nPrecision + 1; // åŒ…å«'.'çš„ä¸ªæ•°
+                //  while(nn-- && *++pDot != '\0'); // æ²¡é”™ï¼Œå°±æ˜¯åˆ†å·ï¼
                 //  *(_TCh*)pDot = '\0';
                 //}
               }
@@ -272,7 +272,7 @@ namespace clstd
                 {
                   _TStr::Append(buffer, 2);
 
-                  // ÒòÎªÇ°Ãæ¼ÓÁËÇ°×º£¬Èç¹ûÉè¶¨ÁË¿í¶È£¬ÕâÀïÒª°Ñ¿í¶ÈËõ¶ÌÁ½¸ö×Ö·û
+                  // å› ä¸ºå‰é¢åŠ äº†å‰ç¼€ï¼Œå¦‚æœè®¾å®šäº†å®½åº¦ï¼Œè¿™é‡Œè¦æŠŠå®½åº¦ç¼©çŸ­ä¸¤ä¸ªå­—ç¬¦
                   if(nWidth > 2) {
                     _TStr::Append(buffer + 2, '0', nWidth - 2);
                   }
@@ -311,7 +311,7 @@ namespace clstd
                 }
                 else
                 {
-                  // ºöÂÔ bZeroPerfix
+                  // å¿½ç•¥ bZeroPerfix
                   if(nWidth) {
                     buffer[0] = '0'; buffer[1] = '\0';
                     _TStr::Append(buffer, (bZeroPrefix && nWidth > 0 ? '0' : (TChar)0x20), nWidth);
@@ -434,10 +434,10 @@ namespace clstd
       //************************************
       // Method:    _AppendFormat
       // Qualifier:
-      // Parameter: szPrefix      Ç°×º·ûºÅ£¬±ÈÈç'+'£¬'-'£¬'0x'
-      // Parameter: nPrefixLen    Ç°×º³¤¶È
-      // Parameter: szNumeric     Êı×Ö×Ö·û
-      // Parameter: nWidth        ÕıÖµÊı×ÖÓÒ¶ÔÆë£¬¸ºÖµ×ó¶ÔÆë
+      // Parameter: szPrefix      å‰ç¼€ç¬¦å·ï¼Œæ¯”å¦‚'+'ï¼Œ'-'ï¼Œ'0x'
+      // Parameter: nPrefixLen    å‰ç¼€é•¿åº¦
+      // Parameter: szNumeric     æ•°å­—å­—ç¬¦
+      // Parameter: nWidth        æ­£å€¼æ•°å­—å³å¯¹é½ï¼Œè´Ÿå€¼å·¦å¯¹é½
       // Parameter: nPrecision
       //************************************
       void _AppendFormat(LPCSTR szPrefix, int nPrefixLen, LPCSTR szNumeric, int nWidth, int nPrecision)
@@ -535,7 +535,7 @@ namespace clstd
 
               if(c & 0x10)
               {
-                // 1111xxxx ... ²»Ö§³Ö
+                // 1111xxxx ... ä¸æ”¯æŒ
                 break;
               }
               else

@@ -1,4 +1,4 @@
-// Sample_FileView.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+ï»¿// Sample_FileView.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 //#include "stdafx.h"
@@ -55,7 +55,7 @@ int APIENTRY _tWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstan
     DispatchMessage(&msg);
   }
 
-  file.Close(); // ÆäÊµÃ»±ØÒª
+  file.Close(); // å…¶å®æ²¡å¿…è¦
 	return 0;
 }
 
@@ -85,7 +85,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
   HWND hWnd;
 
-  hInst = hInstance; // ½«ÊµÀı¾ä±ú´æ´¢ÔÚÈ«¾Ö±äÁ¿ÖĞ
+  hInst = hInstance; // å°†å®ä¾‹å¥æŸ„å­˜å‚¨åœ¨å…¨å±€å˜é‡ä¸­
 
   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
     CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
@@ -139,7 +139,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   case WM_COMMAND:
   //  wmId = LOWORD(wParam);
   //  wmEvent = HIWORD(wParam);
-  //  // ·ÖÎö²Ëµ¥Ñ¡Ôñ:
+  //  // åˆ†æèœå•é€‰æ‹©:
   //  switch (wmId)
   //  {
   //  case IDM_ABOUT:

@@ -1,14 +1,14 @@
-// Demo_SmartStock.cpp : Defines the entry point for the console application.
+ï»¿// Demo_SmartStock.cpp : Defines the entry point for the console application.
 //
 // Test_SmartStock.cpp : Defines the entry point for the console application.
 //
 
-#include <tchar.h>
+//#include <tchar.h>
 #include <clstd.h>
-#include <conio.h>
-#include <clString.H>
-#include <clUtility.H>
-#include <Smart\smartstream.h>
+//#include <conio.h>
+#include <clString.h>
+#include <clUtility.h>
+//#include <smart\smartstream.h>
 #include <clTokens.h>
 #include <clStock.h>
 
@@ -62,105 +62,112 @@ int EnumAllSectKey()
     return 0;
 }
 
+void StockToText(clStringA& strStockText, const StockA& stock)
+{
+  strStockText.Clear();
+  strStockText.Append((clStringA::LPCSTR)stock.GetBuffer().GetPtr(), stock.GetBuffer().GetSize() / sizeof(clStringA::TChar));
+
+  strStockText.Remove('\r');
+  strStockText.Remove('\n');
+  strStockText.Remove('\t');
+  strStockText.Remove(0x20);
+}
+
 int CreateSectAndSave()
 {
-    StockA s;
+  CLOG(__FUNCTION__);
+  StockA s;
+  clStringA strStock;
+    
+  // åˆ›å»ºSection
+  StockA::Section hRoot = s.CreateSection("root");
+  StockToText(strStock, s);
+  ASSERT(strStock == "root{}");
+  //s.CloseSection(hRoot);
 
-    //SmartStockA::HANDLE hNew = s.CreateSection("123", "456");
-    //s.Load(_T("Window.GSprite"));
+  
 
-    //SmartStockA::HANDLE hFind;
-    //hFind = s.FindFirstSection(NULL, FALSE, ("Image\\Module"), ("rect"));
-    //SmartStockA::HANDLE hNewSect1 = s.CreateSection("smart", "newsection");
-    //SmartStockA::HANDLE hNewSect2 = s.CreateSection("smart\\newsection", "newsection2");
-    //s.SetKey(hNewSect2, "identify", "123456");
-    //s.SetKey(hNewSect2, "whatkey", "abcdef");
-    //s.SetKey(hNewSect2, "identify", "daskjl");
+  auto hWillBeDelete = s.CreateSection("WillBeDelete");
+
+  hRoot = s.CreateSection("AfterWillBeDelete");
+  //s.CloseSection(hRoot);
+
+  // åˆ›å»ºé‡åSection
+  hRoot = s.CreateSection("root");
+  
+  //s.CloseSection(hRoot);
+
+  // åˆ›å»ºå­Section
+  auto hSub = s.CreateSection("root/sub2/sub1/sub0");
+  StockToText(strStock, s);
+  ASSERT(strStock == "root{sub2{sub1{sub0{}}}}WillBeDelete{}AfterWillBeDelete{}root{}");
+
+  // è®¾ç½®é”®å€¼æµ‹è¯•
+  hSub = s.OpenSection("root/sub2/sub1/sub0");
+  ASSERT(hSub);
+  
+  hSub.SetKey("Key1", "123");  
+  hSub.SetKey("Key2", "4567");  
+  hSub.SetKey("Key1", "3498");  
+  hSub.SetKey("Visible", "true");
+  
+  b32 bResult = hSub.GetKeyAsBoolean("Visible", FALSE);
+  ASSERT(bResult);
+  hSub.SetKey("Visible", "false");
+  bResult = hSub.GetKeyAsBoolean("Visible", TRUE);
+  ASSERT(!bResult);
 
 
-    //s.FindClose(hFind);
-    //s.FindClose(hNewSect1);
-    //s.FindClose(hNewSect2);
+  CLOG("Key1=%d\nKey2=%d\n", hSub.GetKeyAsInteger("Key1", 0), hSub.GetKeyAsInteger("Key2", 0));
 
-    //s.CloseHandle(hNew);
+  hSub.DeleteKey("Key1");
+  hSub.DeleteKey("Key2");
+  hSub.DeleteKey("Key3"); // è¿™ä¸ªåº”è¯¥å¤±è´¥
 
-    // ´´½¨Section
-    StockA::Section hRoot = s.CreateSection("root");
+  hSub.SetKey("NewKey2", "4567");
+  hSub.SetKey("NewKey1", "3498");
+  hSub.SetKey("NewKey2", "abc");
+  hSub.SetKey("NewKey1", "bcd");
+
+  hSub.Rename("sub0renamed");
+  //s.CloseSection(hSub);
+
+  s.DeleteSection("WillBeDelete");
+
+  // æµ‹è¯•éå†Section
+  hRoot = s.OpenSection("root");
+  if(hRoot)
+  {
+    hRoot.SetKey("TestKey1", "abc");
+    hRoot.NextSection("root");
+    hRoot.SetKey("TestKey2", "abcd");
     //s.CloseSection(hRoot);
+  }
+  else {
+    CLOG("%s(%d) : hRoot == NULL", __FILE__, __LINE__);
+    CLBREAK;
+  }
 
-    auto hWillBeDelete = s.CreateSection("WillBeDelete");
+  // åœ¨æ ¹å†™å…¥Key
+  auto pSect = s.OpenSection(NULL);
+  //ASSERT(pSect);
+  pSect.SetKey("testRootKey", "Hello world");
+  pSect.SetKey("testRootKey2", "Hello world, again");
+  //s.CloseSection(pSect);
 
-    hRoot = s.CreateSection("AfterWillBeDelete");
-    //s.CloseSection(hRoot);
-
-    // ´´½¨ÖØÃûSection
-    hRoot = s.CreateSection("root");
-    //s.CloseSection(hRoot);
-
-    // ´´½¨×ÓSection
-    auto hSub = s.CreateSection("root/sub2/sub1/sub0");
-    //s.CloseSection(hSub);
-
-    // ÉèÖÃ¼üÖµ²âÊÔ
-    hSub = s.OpenSection("root/sub2/sub1/sub0");
-    hSub.SetKey("Key1", "123");
-    hSub.SetKey("Key2", "4567");
-    hSub.SetKey("Key1", "3498");
-    hSub.SetKey("Visible", "true");
-    b32 bResult = hSub.GetKeyAsBoolean("Visible", FALSE);
-    ASSERT(bResult);
-    hSub.SetKey("Visible", "false");
-    bResult = hSub.GetKeyAsBoolean("Visible", TRUE);
-    ASSERT( ! bResult);
-
-
-    printf("Key1=%d\nKey2=%d\n", hSub.GetKeyAsInteger("Key1", 0), hSub.GetKeyAsInteger("Key2", 0));
-
-    hSub.DeleteKey("Key1");
-    hSub.DeleteKey("Key2");
-    hSub.DeleteKey("Key3"); // Õâ¸öÓ¦¸ÃÊ§°Ü
-
-    hSub.SetKey("NewKey2", "4567");
-    hSub.SetKey("NewKey1", "3498");
-    hSub.SetKey("NewKey2", "abc");
-    hSub.SetKey("NewKey1", "bcd");
-
-    hSub.Rename("sub0renamed");
-    //s.CloseSection(hSub);
-
-    s.DeleteSection("WillBeDelete");
-
-    // ²âÊÔ±éÀúSection
-    hRoot = s.OpenSection("root");
-    if(hRoot)
-    {
-        hRoot.SetKey("TestKey1", "abc");
-        hRoot.NextSection("root");
-        hRoot.SetKey("TestKey2", "abcd");
-        //s.CloseSection(hRoot);
-    }
-    else {
-        CLBREAK;
-    }
-
-    // ÔÚ¸ùĞ´ÈëKey
-    auto pSect = s.OpenSection(NULL);
-    //ASSERT(pSect);
-    pSect.SetKey("testRootKey", "Hello world");
-    pSect.SetKey("testRootKey2", "Hello world, again");
-    //s.CloseSection(pSect);
-
-
-    //s.CloseSection(hWillBeDelete);
 
     s.SaveToFile(_CLTEXT("TestSave.txt"));
 
-    //getch();
-    return 0;
+  s.SaveToFile(_CLTEXT("TestSave.txt"));
+
+  //getch();
+  return 0;
 }
 
 void TestRoot()
 {
+  CLOG(__FUNCTION__);
+
   StockA s;
   s.LoadFromFile(_CLTEXT("TestSave.txt"));
   auto pSect = s.OpenSection(NULL);
@@ -169,16 +176,16 @@ void TestRoot()
   if(pSect.FirstKey(p))
   {
     do {
-      printf("key:%s=%s\n", p.KeyName(), p.ToString());
+      CLOG("key:%s=%s", p.KeyName().CStr(), p.ToString().CStr());
     } while (p.NextKey());
   }
 
-  printf("\n");
+  CLOG("");
 
   auto pSectChild = s.OpenSection(&pSect, NULL);
   ASSERT(pSectChild);
   do {
-    printf("pSectChild:%s\n", pSectChild.SectionName());
+    CLOG("pSectChild:%s", pSectChild.SectionName().CStr());
   }while(pSectChild.NextSection(NULL));
 
   //s.CloseSection(pSectChild);
@@ -187,6 +194,8 @@ void TestRoot()
 
 void test2_write()
 {
+  CLOG(__FUNCTION__);
+
   StockA ss;
   StockA::Section frames_sect = ss.CreateSection("frames");
   //clstd::Rand r;
@@ -219,6 +228,7 @@ void test2_write()
 
 void test2_read()
 {
+  CLOG(__FUNCTION__);
   StockA ss;
   if( ! ss.LoadFromFile("framelist.txt")) {
     return;
@@ -235,7 +245,7 @@ void test2_read()
   ASSERT(strMustBeEmpty.IsEmpty());
 
   //////////////////////////////////////////////////////////////////////////
-  // Öµ¶ÁÈ¡¼ì²é£¬Õâ¸öÓ¦¸ÃÓëtest2_write()ÖĞµÄËã·¨±£³ÖÒ»ÖÂ
+  // å€¼è¯»å–æ£€æŸ¥ï¼Œè¿™ä¸ªåº”è¯¥ä¸test2_write()ä¸­çš„ç®—æ³•ä¿æŒä¸€è‡´
   int n = 1000;
 
   StockA::Section rect_sect = ss.OpenSection("frames/rect");
@@ -275,10 +285,10 @@ void test2_read()
     StockA::Section child_sect = root_sect.Open(NULL);
     while(child_sect)
     {
-      printf("%s\n", child_sect.SectionName());
+      CLOG("%s", child_sect.SectionName().CStr());
       for(StockA::ATTRIBUTE attr = child_sect.FirstKey(); ! attr.IsEmpty(); ++attr)
       {
-        printf(" %s=%s\n", attr.KeyName(), attr.ToString());
+        CLOG(" %s=%s", attr.KeyName().CStr(), attr.ToString().CStr());
       }
 
       if( ! child_sect.NextSection(NULL)) {
@@ -292,13 +302,14 @@ void test2_read()
 
 void test_outofdate()
 {
+  CLOG(__FUNCTION__);
   StockA ss;
 
-  // ²âÊÔÊ§Ğ§¼üÖµ
-  // °´ÕÕÒ»¶¨Ë³Ğò²åÈëkey/sectionÊ±£¬ÓÉÓÚÊı¾İÁ¬ĞøĞÔ¹ØÏµ£¬section¼ÇÂ¼µÄ
-  // ¶¨Î»ĞÅÏ¢¿ÉÄÜ»á·¢Éú¸Ä±ä£¬sectionÖĞ»áÍ¨ÖªËùÓĞµÄ¸¸section×ö³öÏàÓ¦µÄ
-  // µ÷Õû¡£µ«ÊÇÎŞ·¨µ÷ÕûĞÖµÜsection»òÕß¸¸sectionµÄĞÖµÜsection£¬ÕâÊ±
-  // ÕâĞ©ÎŞ·¨µ÷ÕûµÄsection»á±»±ê¼ÇÎªÊ§Ğ§£¬±íÊ¾²»ÔÙ¿ÉÓÃ¡£
+  // æµ‹è¯•å¤±æ•ˆé”®å€¼
+  // æŒ‰ç…§ä¸€å®šé¡ºåºæ’å…¥key/sectionæ—¶ï¼Œç”±äºæ•°æ®è¿ç»­æ€§å…³ç³»ï¼Œsectionè®°å½•çš„
+  // å®šä½ä¿¡æ¯å¯èƒ½ä¼šå‘ç”Ÿæ”¹å˜ï¼Œsectionä¸­ä¼šé€šçŸ¥æ‰€æœ‰çš„çˆ¶sectionåšå‡ºç›¸åº”çš„
+  // è°ƒæ•´ã€‚ä½†æ˜¯æ— æ³•è°ƒæ•´å…„å¼Ÿsectionæˆ–è€…çˆ¶sectionçš„å…„å¼Ÿsectionï¼Œè¿™æ—¶
+  // è¿™äº›æ— æ³•è°ƒæ•´çš„sectionä¼šè¢«æ ‡è®°ä¸ºå¤±æ•ˆï¼Œè¡¨ç¤ºä¸å†å¯ç”¨ã€‚
 
   StockA::Section root = ss.CreateSection(NULL);
   root.SetKey("AAA", "aaa");
@@ -321,29 +332,30 @@ void test_outofdate()
   child_c.SetKey("BB", "bb");
   child_c.SetKey("CC", "cc");
 
-  ASSERT( ! child_a); // Ê§Ğ§
-  ASSERT( ! child_b); // Ê§Ğ§
-  ASSERT(child_c);    // ÓĞĞ§
-  ASSERT(root);       // ÓĞĞ§
+  ASSERT( ! child_a); // å¤±æ•ˆ
+  ASSERT( ! child_b); // å¤±æ•ˆ
+  ASSERT(child_c);    // æœ‰æ•ˆ
+  ASSERT(root);       // æœ‰æ•ˆ
 
   ss.SaveToFile("test_04.txt");
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
-    // ²âÊÔSetKey("key", NULL);
-    // ²âÊÔSetKey("key", "");
-    // ÕâÁ½ÖÖºöÂÔĞ´Èë£¬µ«ÊÇStockÎÄ¼şÖĞÈç¹ûÓĞ¡°key=;¡±ÕâÖÖÄ£Ê½»¹Ó¦¸ÃÄÜÕı³£¶ÁÈ¡
+  // æµ‹è¯•SetKey("key", NULL);
+  // æµ‹è¯•SetKey("key", "");
+  // è¿™ä¸¤ç§å¿½ç•¥å†™å…¥ï¼Œä½†æ˜¯Stockæ–‡ä»¶ä¸­å¦‚æœæœ‰â€œkey=;â€è¿™ç§æ¨¡å¼è¿˜åº”è¯¥èƒ½æ­£å¸¸è¯»å–
+  CLOG(__FUNCTION__);
 
-    CreateSectAndSave();
-    test_outofdate();
+  CreateSectAndSave();
+  test_outofdate();
 
-    TestRoot();
-    test2_write();
-    test2_read();
-    printf("Press any key to continue...\n");
-    getch();
-    //return GeneralRead();
-    //return EnumAllSectKey();
+  TestRoot();
+  test2_write();
+  test2_read();
+  printf("Press any key to continue...\n");
+  clstd_cli::getch();
+  //return GeneralRead();
+  //return EnumAllSectKey();
 }
 

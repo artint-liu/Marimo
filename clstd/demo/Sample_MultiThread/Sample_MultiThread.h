@@ -1,19 +1,19 @@
-#define __SLEEP_0 Sleep
+ï»¿#define __SLEEP_0(x) clstd::Sleep(x)
 
 class CMessage
 {
   static CMessage* s_pInstance;
   
-  clstd::this_thread::id  m_id;     // ÏûÏ¢´¦ÀíÏß³Ìid
-  clstd::Signal           m_signal; // ÏûÏ¢ĞÅºÅ
+  clstd::this_thread::id  m_id;     // æ¶ˆæ¯å¤„ç†çº¿ç¨‹id
+  clstd::Signal           m_signal; // æ¶ˆæ¯ä¿¡å·
 
-  clstd::Locker m_RemoteLocker;     // Ô¶³ÌÏûÏ¢Ëø£¬±£Ö¤Í¬Ê±Ö»ÓĞÒ»¸öÔ¶³ÌÏûÏ¢ÔÚ´¦ÀíÖĞ
-  clstd::Signal m_RemoteSignal;     // Ô¶³ÌÏûÏ¢Íê³ÉµÄĞÅºÅ
+  clstd::Locker m_RemoteLocker;     // è¿œç¨‹æ¶ˆæ¯é”ï¼Œä¿è¯åŒæ—¶åªæœ‰ä¸€ä¸ªè¿œç¨‹æ¶ˆæ¯åœ¨å¤„ç†ä¸­
+  clstd::Signal m_RemoteSignal;     // è¿œç¨‹æ¶ˆæ¯å®Œæˆçš„ä¿¡å·
   volatile CLDWORD m_RemoteCode;
   volatile CLDWORD m_RemoteResult;
 
   clstd::Locker m_QueueLocker;
-  cllist<CLDWORD> m_Queue;          // PostµÄÏûÏ¢¶ÓÁĞ
+  cllist<CLDWORD> m_Queue;          // Postçš„æ¶ˆæ¯é˜Ÿåˆ—
 
   CMessage()
     : m_RemoteCode(0)
@@ -33,8 +33,8 @@ public:
     SAFE_DELETE(s_pInstance);
   }
 
-  // ²âÊÔÓÃµÄËã·¨£¬Ö÷Ïß³ÌºÍ×ÓÏß³ÌÊ¹ÓÃÏàÍ¬Ëã·¨¼ÆËã
-  // È»ºó±È½ÏÖ÷Ïß³ÌµÄ¼ÆËã½á¹ûÊÇ·ñ±»ÆäËü×ÓÏß³Ì¸ÉÈÅ
+  // æµ‹è¯•ç”¨çš„ç®—æ³•ï¼Œä¸»çº¿ç¨‹å’Œå­çº¿ç¨‹ä½¿ç”¨ç›¸åŒç®—æ³•è®¡ç®—
+  // ç„¶åæ¯”è¾ƒä¸»çº¿ç¨‹çš„è®¡ç®—ç»“æœæ˜¯å¦è¢«å…¶å®ƒå­çº¿ç¨‹å¹²æ‰°
   static CLDWORD MyDemoProc(CLDWORD code)
   {
     ASSERT(clstd::this_thread::GetId() == s_pInstance->m_id);
@@ -48,7 +48,7 @@ public:
     return result;
   }
 
-  static CLDWORD SendMessage(CLDWORD code) // ÈÎºÎÏß³Ì¶¼¿ÉÒÔµ÷ÓÃ
+  static CLDWORD SendMessage(CLDWORD code) // ä»»ä½•çº¿ç¨‹éƒ½å¯ä»¥è°ƒç”¨
   {
     return s_pInstance->SendMsg(code);
   }
@@ -57,7 +57,7 @@ public:
   {
     ASSERT(code != 0);
 
-    if(clstd::this_thread::GetId() == m_id) // ±¾µØµ÷ÓÃÊÇÖ±½Óµ÷ÓÃº¯Êı
+    if(clstd::this_thread::GetId() == m_id) // æœ¬åœ°è°ƒç”¨æ˜¯ç›´æ¥è°ƒç”¨å‡½æ•°
     {
       return MyDemoProc(code);
     }
@@ -68,8 +68,8 @@ public:
       __SLEEP_0(5);       CLDWORD result = 0;
       __SLEEP_0(5);       m_RemoteResult = 0;
 
-                          // ×¢ÒâÕâÀïÃ»ÓĞËø£¬ÏûÏ¢´¦ÀíÏß³Ì¸ù¾İm_RemoteCodeÓĞĞ§ĞÔÀ´´¦Àí
-                          // ËùÒÔm_RemoteCodeÒªÔÚËùÓĞ¹¤×÷×¼±¸ºÃÒÔºóÔÙÉèÖÃ
+                          // æ³¨æ„è¿™é‡Œæ²¡æœ‰é”ï¼Œæ¶ˆæ¯å¤„ç†çº¿ç¨‹æ ¹æ®m_RemoteCodeæœ‰æ•ˆæ€§æ¥å¤„ç†
+                          // æ‰€ä»¥m_RemoteCodeè¦åœ¨æ‰€æœ‰å·¥ä½œå‡†å¤‡å¥½ä»¥åå†è®¾ç½®
       __SLEEP_0(5);       m_RemoteCode = code;
       __SLEEP_0(5);       m_signal.Set();
       __SLEEP_0(5);       m_RemoteSignal.Wait();        ASSERT(m_RemoteResult != 0);
@@ -92,13 +92,13 @@ public:
     return TRUE;
   }
 
-  static b32 GetMessage(CLDWORD* pCode) // Ö÷Ïß³Ìµ÷ÓÃ
+  static b32 GetMessage(CLDWORD* pCode) // ä¸»çº¿ç¨‹è°ƒç”¨
   {
     ASSERT(clstd::this_thread::GetId() == s_pInstance->m_id);
     return s_pInstance->GetMsg(pCode);
   }
 
-  b32 GetMsg(CLDWORD* pCode) // Ö÷Ïß³Ìµ÷ÓÃ
+  b32 GetMsg(CLDWORD* pCode) // ä¸»çº¿ç¨‹è°ƒç”¨
   {
     ASSERT(clstd::this_thread::GetId() == s_pInstance->m_id);
     while(1)
@@ -182,22 +182,26 @@ public:
 
 };
 
-// ²âÊÔclstd::SignalµÈ´ı³¬Ê±
+// æµ‹è¯•clstd::Signalç­‰å¾…è¶…æ—¶
 class SampleTimeout : public clstd::Thread
 {
   clstd::Signal m_Signal;
 public:
   virtual i32 StartRoutine() override
   {
+    CLOG("ç­‰å¾…1100æ¯«ç§’x5æ¬¡");
     for(int i = 0; i < 5; i++)
     {
       u64 time_begin = clstd::GetTime64();
-      m_Signal.WaitTimeOut(3000);
+      m_Signal.WaitTimeOut(1100);
       u64 time_end = clstd::GetTime64();
       i64 delta = (i64)(time_end - time_begin);
       CLOG("thread: wait time:%ld", delta);
     }
-    Sleep(5000);
+
+    CLOG("ç­‰å¾…5ç§’é€€å‡º");
+    __SLEEP_0(5000);
+    CLOG("é€€å‡º...");
     return 0;
   }
 };

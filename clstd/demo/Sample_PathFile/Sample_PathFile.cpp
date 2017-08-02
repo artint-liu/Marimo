@@ -1,4 +1,4 @@
-// Sample_PathFile.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+ï»¿// Sample_PathFile.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 #include "clstd.h"
 #include "clString.h"
@@ -80,7 +80,7 @@ void TestCombinePath()
 void TestMatchSpec()
 {
   CLOG(__FUNCTION__);
-  // ÎÄ¼şÆ¥Åä
+  // æ–‡ä»¶åŒ¹é…
   b32 bresult;
   bresult = clpathfile::MatchSpec("abcdefghijklmnopqrst", "abcd*opq");
   ASSERT(bresult == FALSE);

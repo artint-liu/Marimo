@@ -7,7 +7,7 @@
 # include <Shlwapi.h>
 # include <vld.h>
 # pragma comment(lib, "shlwapi.lib")
-# pragma warning(disable : 4996)
+//# pragma warning(disable : 4996)
 #elif defined(_CL_SYSTEM_LINUX)
 # include <stdio.h>
 # include <termios.h>
@@ -313,6 +313,37 @@ namespace clstd
 
     RESTORE_TEXT_COLOR();
   }
+
+  void* MemCopy(void* pDest, const void* pSrc, size_t count)
+  {
+    if(pDest == pSrc || count == 0) {
+      return pDest;
+    }
+    else if(pDest > pSrc && (size_t)pDest < (size_t)pSrc + count) {
+      // 覆盖内存拷贝
+      for(size_t i = count - 1; i != (size_t)-1; i--) {
+        static_cast<u8*>(pDest)[i] = static_cast<const u8*>(pSrc)[i];
+      }
+    }
+    else {
+      for(size_t i = 0; i < count; i++) {
+        static_cast<u8*>(pDest)[i] = static_cast<const u8*>(pSrc)[i];
+      }
+    }
+    return pDest;
+  }
+
+#if defined(_CL_SYSTEM_WINDOWS)
+  void Sleep(u32 dwMilliseconds)
+  {
+    ::Sleep(dwMilliseconds);
+  }
+#else
+  void Sleep(u32 dwMilliseconds)
+  {
+    usleep(dwMilliseconds * 1000);
+  }
+#endif
 
   void _cl_log_info(const wch *fmt, ...)
   {

@@ -1,4 +1,4 @@
-#ifndef _CLSTD_STRING_ATTACH_H_
+ï»¿#ifndef _CLSTD_STRING_ATTACH_H_
 #define _CLSTD_STRING_ATTACH_H_
 
 namespace clstd
@@ -12,21 +12,21 @@ namespace clstd
     //typedef _Traits MyTraits;
 
   private:
-    _TCh*   m_pBuf;         // ×Ö·û´®»º³å
-    size_t  m_nCount;       // ×Ö·û´®³¤¶È£¬²»°üº¬'\0'£¬×Ö·ûÊı
-    size_t  m_nCapacity;    // »º³åÇøÈİÁ¿³¤¶È£¬°üº¬'\0'£¬×Ö·ûÊı
-    void* const   m_pAttached;    // Íâ²¿¸½¼Ó»º³åÇø£¬Èç¹ûÍâ²¿¸½¼Ó»º³åÇøÓĞĞ§£¬²¢ÇÒ×Ö·û´®Ã»ÓĞ³¬³ö³ß´ç£¬ÔòÓÅÏÈÊ¹ÓÃÕâ¸ö
-    const size_t  m_cbAttached;   // ¸½¼Ó»º³åÇø³ß´ç£¬×Ö½ÚÊı
+    _TCh*   m_pBuf;         // å­—ç¬¦ä¸²ç¼“å†²
+    size_t  m_nCount;       // å­—ç¬¦ä¸²é•¿åº¦ï¼Œä¸åŒ…å«'\0'ï¼Œå­—ç¬¦æ•°
+    size_t  m_nCapacity;    // ç¼“å†²åŒºå®¹é‡é•¿åº¦ï¼ŒåŒ…å«'\0'ï¼Œå­—ç¬¦æ•°
+    void* const   m_pAttached;    // å¤–éƒ¨é™„åŠ ç¼“å†²åŒºï¼Œå¦‚æœå¤–éƒ¨é™„åŠ ç¼“å†²åŒºæœ‰æ•ˆï¼Œå¹¶ä¸”å­—ç¬¦ä¸²æ²¡æœ‰è¶…å‡ºå°ºå¯¸ï¼Œåˆ™ä¼˜å…ˆä½¿ç”¨è¿™ä¸ª
+    const size_t  m_cbAttached;   // é™„åŠ ç¼“å†²åŒºå°ºå¯¸ï¼Œå­—èŠ‚æ•°
 
-    // Íâ²¿¸½¼Ó»º³åÇøÔÚÀà¹¹Ôìºó²»»á¸Ä±ä£¬ÕâÑù±£Ö¤ÁËÀàµÄÉúÃüÖÜÆÚĞ¡ÓÚµÈÓÚÍâ²¿»º³åÇøµÄÖÜÆÚ
+    // å¤–éƒ¨é™„åŠ ç¼“å†²åŒºåœ¨ç±»æ„é€ åä¸ä¼šæ”¹å˜ï¼Œè¿™æ ·ä¿è¯äº†ç±»çš„ç”Ÿå‘½å‘¨æœŸå°äºç­‰äºå¤–éƒ¨ç¼“å†²åŒºçš„å‘¨æœŸ
 
   private:
     void _Resize(size_t count);
 
   public:
     StringAttachX();
-    StringAttachX(void* pAttachedBuffer, size_t cbAttached); // »º³åÇø£¬×Ö½Ú³¤¶È
-    StringAttachX(void* pAttachedBuffer, size_t cbAttached, size_t nLength); // »º³åÇø£¬×Ö½Ú³¤¶È£¬³õÊ¼»¯×Ö·û³¤¶È
+    StringAttachX(void* pAttachedBuffer, size_t cbAttached); // ç¼“å†²åŒºï¼Œå­—èŠ‚é•¿åº¦
+    StringAttachX(void* pAttachedBuffer, size_t cbAttached, size_t nLength); // ç¼“å†²åŒºï¼Œå­—èŠ‚é•¿åº¦ï¼Œåˆå§‹åŒ–å­—ç¬¦é•¿åº¦
     ~StringAttachX();
 
     bool operator==(LPCSTR szStr) const;

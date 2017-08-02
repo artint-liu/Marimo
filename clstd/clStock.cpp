@@ -1193,8 +1193,9 @@ namespace clstd
   {
     ASSERT(pSection != NULL && pSection->DbgCheck());
     _TStr strBuffer;
-    static TChar szSectBegin[] = {'{', '\r', '\n'};
-    static TChar szSectEnd[]   = {'}', '\r', '\n'};
+    static TChar szSectBegin[] = {'{', '\r', '\n', '\0'};
+    static TChar szSectEnd[]   = {'}', '\r', '\n', '\0'};
+
     strBuffer.Append(' ', pSection->nDepth).Append(szName)
       .Append(szSectBegin).Append(' ', pSection->nDepth).Append(szSectEnd);
 

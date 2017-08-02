@@ -679,7 +679,7 @@ namespace clpathfile
     _TString strCommon;
     _TString strFromPath = szFromPath;
     _TString strToPath = szToPath;
-    static _TCh szParentPath[] = {'.', '.', '\\'};
+    static _TCh szParentPath[] = {'.', '.', '\\', '\0'};
     
     CanonicalizeT(strFromPath);
     CanonicalizeT(strToPath);

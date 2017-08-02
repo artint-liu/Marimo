@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include "clString.h"
 #include "clRepository.h"
 #include "clUtility.h"
@@ -16,16 +16,16 @@ namespace clstd
   {
     enum KeyType
     {
-      //KT_Node,    // ½Úµã
-      KeyType_Varible = 1,               // ±ä³¤Êı¾İ
-      KeyType_Octet   = 0x0010,          // ±êÖ¾
-      KeyType_Octet_0 = (0 | KeyType_Octet),  // 8×Ö½ÚÊı¾İ£¬³¤¶È¿ÉÒÔÎª0£¬½ö´æ¼üÖµ
-      KeyType_Octet_8 = (8 | KeyType_Octet),  // 8×Ö½ÚÊı¾İ£¬³¤¶È8×Ö½Ú
+      //KT_Node,    // èŠ‚ç‚¹
+      KeyType_Varible = 1,               // å˜é•¿æ•°æ®
+      KeyType_Octet   = 0x0010,          // æ ‡å¿—
+      KeyType_Octet_0 = (0 | KeyType_Octet),  // 8å­—èŠ‚æ•°æ®ï¼Œé•¿åº¦å¯ä»¥ä¸º0ï¼Œä»…å­˜é”®å€¼
+      KeyType_Octet_8 = (8 | KeyType_Octet),  // 8å­—èŠ‚æ•°æ®ï¼Œé•¿åº¦8å­—èŠ‚
     };
 
     struct KEY
     {
-      u32     name; // ×ÖÄ¸Æ«ÒÆ£¬²»ÊÇ×Ö½Ú
+      u32     name; // å­—æ¯åç§»ï¼Œä¸æ˜¯å­—èŠ‚
       KeyType type;
       union 
       {
@@ -263,7 +263,7 @@ namespace clstd
   b32 RepoReader::Attach(const void* pData, size_t nLength)
   {
     size_t nDataPtr = reinterpret_cast<size_t>(pData);
-    _internal::FILE_HEADER header = { 0, ((CLDWORD*)nDataPtr)[1] }; // ĞèÒªÉèÖÃdwFlags×÷Îª½âÑ¹²ÎÊı
+    _internal::FILE_HEADER header = { 0, ((CLDWORD*)nDataPtr)[1] }; // éœ€è¦è®¾ç½®dwFlagsä½œä¸ºè§£å‹å‚æ•°
     size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)nDataPtr);
     if(header.dwMagic != REPO_MAGIC) {
       // ERROR: bad file magic
@@ -308,7 +308,7 @@ namespace clstd
       }
 
       copy_size = clMin(copy_size, nLength);
-      memcpy(pData, pSrcData, copy_size);
+      clmemmove(pData, pSrcData, copy_size);
       return copy_size;
     }
     return 0;
@@ -387,12 +387,12 @@ namespace clstd
   {
     File file;
     if( ! file.OpenExisting(szFilename)) {
-      // ERROR:ÎŞ·¨´ò¿ªÎÄ¼ş
+      // ERROR:æ— æ³•æ‰“å¼€æ–‡ä»¶
       return false;
     }
 
     if( ! file.ReadToBuffer(&m_Buffer)) {
-      // ERROR:ÎŞ·¨¶ÁÈ¡ÎÄ¼ş
+      // ERROR:æ— æ³•è¯»å–æ–‡ä»¶
       return false;
     }
 
@@ -407,7 +407,7 @@ namespace clstd
     header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
     header.cbData  = (CLDWORD)m_cbDataLen;
 
-    CLBYTE packed_header[sizeof(_internal::FILE_HEADER)]; // ´ò°üHeader¿Ï¶¨±ÈÕ¹¿ªµÃHeaderĞ¡
+    CLBYTE packed_header[sizeof(_internal::FILE_HEADER)]; // æ‰“åŒ…Headerè‚¯å®šæ¯”å±•å¼€å¾—Headerå°
     size_t packed_header_size = _PackHeader(header, packed_header);
 
     file.Write(packed_header, (u32)packed_header_size);
@@ -434,7 +434,7 @@ namespace clstd
       pPrev++;
     }
 
-    // Ã»ÕÒµ½KeyType_Varible
+    // æ²¡æ‰¾åˆ°KeyType_Varible
     if(pPrev == m_pKeysEnd) {
       return TRUE;
     }
@@ -491,7 +491,7 @@ namespace clstd
   {
     return Attach(m_Buffer.GetPtr(), m_Buffer.GetSize());
     //size_t pData = reinterpret_cast<size_t>(m_Buffer.GetPtr());
-    //FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // ĞèÒªÉèÖÃdwFlags×÷Îª½âÑ¹²ÎÊı
+    //FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // éœ€è¦è®¾ç½®dwFlagsä½œä¸ºè§£å‹å‚æ•°
     //size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
     //if(header.dwMagic != REPO_MAGIC) {
     //  // ERROR: bad file magic
@@ -593,12 +593,12 @@ namespace clstd
       _ResizeGlobalBuf(extened, rPos);
 
       if(name_inc > 0) {
-        // ×¢ÒâÇ¶Ì×µ÷Õû
-        memcpy(m_pData + key_inc + name_inc, m_pData, m_cbDataLen);
+        // æ³¨æ„åµŒå¥—è°ƒæ•´
+        clmemmove(m_pData + key_inc + name_inc, m_pData, m_cbDataLen);
 
         if(key_inc > 0) {
           const size_t cbNamesLen = (_GetNamesCapacity() - _GetNamesBegin()) * sizeof(CHAR);
-          memcpy((CLBYTE*)_GetNamesBegin() + key_inc, _GetNamesBegin(), cbNamesLen);
+          clmemmove((CLBYTE*)_GetNamesBegin() + key_inc, _GetNamesBegin(), cbNamesLen);
           m_pKeysCapacity = (KEY*)((CLBYTE*)m_pKeysCapacity + key_inc);
         }
 
@@ -606,7 +606,7 @@ namespace clstd
       }
       else if(key_inc > 0) {
         const size_t cbNamesLen = (_GetNamesCapacity() - _GetNamesBegin()) * sizeof(CHAR);
-        memcpy((CLBYTE*)_GetNamesBegin() + key_inc, _GetNamesBegin(), cbNamesLen + m_cbDataLen);
+        clmemmove((CLBYTE*)_GetNamesBegin() + key_inc, _GetNamesBegin(), cbNamesLen + m_cbDataLen);
         m_pKeysCapacity = (KEY*)((CLBYTE*)m_pKeysCapacity + key_inc);
       }
       return TRUE;
@@ -619,7 +619,7 @@ namespace clstd
   b32 Repository::_InsertKey( KEY* pPos, LPCSTR szKey, const void* pData, size_t nLength )
   {
     ASSERT(pPos >= m_pKeys && pPos <= m_pKeysEnd);
-    const size_t cbKeyNameLen = ALIGN_2((strlenT(szKey) + 1) * sizeof(CHAR));// ËãÉÏ½áÎ²'\0'£¬°´ÕÕÁ½×Ö½Ú¶ÔÆë
+    const size_t cbKeyNameLen = ALIGN_2((strlenT(szKey) + 1) * sizeof(CHAR));// ç®—ä¸Šç»“å°¾'\0'ï¼ŒæŒ‰ç…§ä¸¤å­—èŠ‚å¯¹é½
     if(nLength < OCTETSIZE)
     {
 
@@ -629,12 +629,12 @@ namespace clstd
 
       const size_t cbKeyLen = (m_pKeysEnd - pPos) * sizeof(KEY);
       if(cbKeyLen) {
-        memcpy(pPos + 1, pPos, cbKeyLen);
+        clmemmove(pPos + 1, pPos, cbKeyLen);
       }
       m_pKeysEnd++;
       pPos->name = (u32)(m_pNamesEnd - _GetNamesBegin());
       pPos->type = (_internal::KeyType)(_internal::KeyType_Octet_0 + nLength);
-      memcpy(pPos->o.data, pData, nLength);
+      clmemmove(pPos->o.data, pData, nLength);
     }
     else
     {
@@ -644,7 +644,7 @@ namespace clstd
 
       const size_t cbKeyLen = (m_pKeysEnd - pPos) * sizeof(KEY);
       if(cbKeyLen) {
-        memcpy(pPos + 1, pPos, cbKeyLen);
+        clmemmove(pPos + 1, pPos, cbKeyLen);
       }
       m_pKeysEnd++;
       pPos->name = (u32)(m_pNamesEnd - _GetNamesBegin());
@@ -655,7 +655,7 @@ namespace clstd
       ASSERT((CLBYTE*)m_Buffer.GetPtr() + m_Buffer.GetSize() == m_pData + m_cbDataLen + nLength);
       _ResizeKey(pPos, nLength);
       ASSERT(_DbgCheckDataOverlay());
-      memcpy(m_pData + pPos->v.offset, pData, nLength);
+      clmemmove(m_pData + pPos->v.offset, pData, nLength);
     }
 
     // Copy name
@@ -673,25 +673,25 @@ namespace clstd
     const size_t nDataEndian = rKey->v.offset + rKey->v.length;
     CLBYTE*const pDataEndian = m_pData + nDataEndian;
 
-    // TODO: Èç¹û±£Ö¤Êı¾İË³ĞòÓëKeyË³ĞòÒ»ÖÂµÄ»°pIter¿ÉÒÔ´ÓrKey¿ªÊ¼
+    // TODO: å¦‚æœä¿è¯æ•°æ®é¡ºåºä¸Keyé¡ºåºä¸€è‡´çš„è¯pIterå¯ä»¥ä»rKeyå¼€å§‹
     for(KEY* pIter = m_pKeys; pIter < m_pKeysEnd; ++pIter)
     {
       if(TEST_FLAG_NOT(pIter->type, _internal::KeyType_Octet) && pIter != rKey && pIter->v.offset >= rKey->v.offset) {
-        ASSERT(rKey->v.offset + rKey->v.length <= pIter->v.offset); // ¼ì²éÊı¾İ¸²¸Ç
+        ASSERT(rKey->v.offset + rKey->v.length <= pIter->v.offset); // æ£€æŸ¥æ•°æ®è¦†ç›–
         pIter->v.offset += static_cast<u32>(delta);
       }
     }
     rKey->v.length += (u32)delta;
-    //return m_pData + rKey->v.offset + rKey->v.length; // ·µ»Øµ±Ç°¼üÖµÊı¾İµÄ½áÎ²
+    //return m_pData + rKey->v.offset + rKey->v.length; // è¿”å›å½“å‰é”®å€¼æ•°æ®çš„ç»“å°¾
     if(m_cbDataLen > nDataEndian) {
-      memcpy(pDataEndian + delta, pDataEndian, m_cbDataLen - nDataEndian);
+      clmemmove(pDataEndian + delta, pDataEndian, m_cbDataLen - nDataEndian);
     }
     m_cbDataLen += delta;
   }
 
   b32 Repository::_ReallocData(KEY*& rKey, size_t new_length)
   {
-    // Ã»ÓĞ´¦ÀíKT_Octet_0 ~ KT_Octet_8Çé¿ö
+    // æ²¡æœ‰å¤„ç†KT_Octet_0 ~ KT_Octet_8æƒ…å†µ
     ASSERT(rKey->type == _internal::KeyType_Varible);
     ASSERT((CLBYTE*)m_Buffer.GetPtr() + m_Buffer.GetSize() == m_pData + m_cbDataLen);
 
@@ -717,7 +717,7 @@ namespace clstd
       _ResizeGlobalBuf(delta, rKey);
     }
     else {
-      CLBREAK; // µÈÓÚÇé¿öÍâÃæ´¦Àí£¬ÕâÀïÏŞÖÆ
+      CLBREAK; // ç­‰äºæƒ…å†µå¤–é¢å¤„ç†ï¼Œè¿™é‡Œé™åˆ¶
     }
 
     //m_cbDataLen += delta;
@@ -733,16 +733,16 @@ namespace clstd
     {
       if(TEST_FLAG(pPos->type, _internal::KeyType_Octet)) {
         pPos->type = (_internal::KeyType)(_internal::KeyType_Octet + nLength);
-        memcpy(pPos->o.data, pData, nLength);
+        clmemmove(pPos->o.data, pData, nLength);
         ASSERT(_DbgCheckDataOverlay());
         return TRUE;
       }
       else if(pPos->type == _internal::KeyType_Varible) {
-        const size_t key_delta = 0 - pPos->v.length;
+        const size_t key_delta = 0 - (size_t)pPos->v.length;
         _ResizeKey(pPos, key_delta);
         _ResizeGlobalBuf(key_delta, pPos);
         pPos->type = (_internal::KeyType)(_internal::KeyType_Octet + nLength);
-        memcpy(pPos->o.data, pData, nLength);
+        clmemmove(pPos->o.data, pData, nLength);
         ASSERT(_DbgCheckDataOverlay());
         return TRUE;
       }
@@ -758,7 +758,7 @@ namespace clstd
         pPos->v.length = 0;
 
         if(_ReallocData(pPos, nLength)) {
-          memcpy(m_pData + pPos->v.offset, pData, nLength);
+          clmemmove(m_pData + pPos->v.offset, pData, nLength);
           ASSERT(_DbgCheckDataOverlay());
           return TRUE;
         }
@@ -766,7 +766,7 @@ namespace clstd
       }
       else if(pPos->type, _internal::KeyType_Varible) {
         if(pPos->v.length == nLength || _ReallocData(pPos, nLength)) {
-          memcpy(m_pData + pPos->v.offset, pData, nLength);
+          clmemmove(m_pData + pPos->v.offset, pData, nLength);
           ASSERT(_DbgCheckDataOverlay());
           return TRUE;
         }
@@ -843,7 +843,7 @@ namespace clstd
     header.cbNames = (CLDWORD)(m_pNamesEnd - _GetNamesBegin()) * sizeof(CHAR);
     header.cbData = (CLDWORD)m_cbDataLen;
 
-    CLBYTE packed_header[sizeof(_internal::FILE_HEADER)]; // ´ò°üHeader¿Ï¶¨±ÈÕ¹¿ªµÃHeaderĞ¡
+    CLBYTE packed_header[sizeof(_internal::FILE_HEADER)]; // æ‰“åŒ…Headerè‚¯å®šæ¯”å±•å¼€å¾—Headerå°
     size_t packed_header_size = _PackHeader(header, packed_header);
 
     buffer.Reserve(packed_header_size + (m_pKeysEnd - m_pKeys) * sizeof(KEY) +
@@ -917,12 +917,12 @@ namespace clstd
 
   size_t Repository::GetRequiredSize(void* pData, size_t nLength)
   {
-    // Õâ¸ö³¤¶ÈÏŞÖÆÆäÊµÃ»ÓĞÄÇÃ´ÑÏ¸ñ£¬ÒòÎªÎÄ¼şÍ·³¤¶ÈÊÇ¿É±äµÄ£¬×î³¤20×Ö½Ú
+    // è¿™ä¸ªé•¿åº¦é™åˆ¶å…¶å®æ²¡æœ‰é‚£ä¹ˆä¸¥æ ¼ï¼Œå› ä¸ºæ–‡ä»¶å¤´é•¿åº¦æ˜¯å¯å˜çš„ï¼Œæœ€é•¿20å­—èŠ‚
     if(nLength < sizeof(_internal::FILE_HEADER) || *(u32*)pData != REPO_MAGIC) {
       return 0;
     }
 
-    _internal::FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // ĞèÒªÉèÖÃdwFlags×÷Îª½âÑ¹²ÎÊı
+    _internal::FILE_HEADER header = { 0, ((CLDWORD*)pData)[1] }; // éœ€è¦è®¾ç½®dwFlagsä½œä¸ºè§£å‹å‚æ•°
     size_t packed_header_size = _UnpackHeader(header, (const CLBYTE*)pData);
     return header._GetRecordSize() + packed_header_size;
   }

@@ -1,4 +1,4 @@
-#ifndef _CLSTD_REPOSITORY_H_
+ï»¿#ifndef _CLSTD_REPOSITORY_H_
 
 namespace clstd
 {
@@ -19,9 +19,9 @@ namespace clstd
   protected:
     KEY*      m_pKeys;
     KEY*      m_pKeysEnd;
-    KEY*      m_pKeysCapacity; // Ò²ÊÇm_pNamesBegin
+    KEY*      m_pKeysCapacity; // ä¹Ÿæ˜¯m_pNamesBegin
     LPCSTR    m_pNamesEnd;
-    CLBYTE*   m_pData;         // Ò²ÊÇm_pNamesCapacity
+    CLBYTE*   m_pData;         // ä¹Ÿæ˜¯m_pNamesCapacity
     size_t    m_cbDataLen;
 
   public:
@@ -44,11 +44,11 @@ namespace clstd
       b32 operator!=(LPCSTR szKey);
     };
 
-    // »ñµÃ¸÷¸ö¶ÎµÄÓĞĞ§Êı¾İ
+    // è·å¾—å„ä¸ªæ®µçš„æœ‰æ•ˆæ•°æ®
     struct RAWDATA
     {
       CLBYTE  header[20];
-      size_t  cbHeader;    // headerµÄÓĞĞ§³¤¶È£¬×î´ó20×Ö½Ú
+      size_t  cbHeader;    // headerçš„æœ‰æ•ˆé•¿åº¦ï¼Œæœ€å¤§20å­—èŠ‚
       KEY*    keys;
       size_t  cbKeys;
       LPCSTR  names;
@@ -64,9 +64,9 @@ namespace clstd
 
   public:
     RepoReader();
-    RepoReader(const void* pData, size_t nLength); // ¸½¼Óµ½ÄÚ´æÊı¾İ
+    RepoReader(const void* pData, size_t nLength); // é™„åŠ åˆ°å†…å­˜æ•°æ®
 
-    b32     Attach        (const void* pData, size_t nLength); // ¸½¼Óµ½ÄÚ´æÊı¾İ
+    b32     Attach        (const void* pData, size_t nLength); // é™„åŠ åˆ°å†…å­˜æ•°æ®
     size_t  GetNumOfKeys  () const;
     size_t  GetKey        (LPCSTR szKey, void* pData, size_t nLength) const;
     void*   GetDataPtr    (LPCSTR szKey, size_t* pLength = NULL) const;
@@ -84,7 +84,7 @@ namespace clstd
     MemBuffer m_Buffer;
 
     template<typename T_LPCSTR>
-    b32 LoadFromFileT(T_LPCSTR szFilename); // load ±íÊ¾Ò»´ÎĞÔ´ÓÎÄ¼ş¼ÓÔØ£¬read±íÊ¾Ò»µãµã´ÓÎÄ¼ş¼ÓÔØ
+    b32 LoadFromFileT(T_LPCSTR szFilename); // load è¡¨ç¤ºä¸€æ¬¡æ€§ä»æ–‡ä»¶åŠ è½½ï¼Œreadè¡¨ç¤ºä¸€ç‚¹ç‚¹ä»æ–‡ä»¶åŠ è½½
     b32 _WriteToFile(File& file) const;
 
     b32       _DbgCheckDataOverlay() const;
@@ -136,9 +136,9 @@ namespace clstd
       //void*   GetDataPtr    (LPCSTR szKey, size_t* pLength = NULL) const;
       //size_t  GetRawData    (RAWDATA* pRaw) const;
 
-      // ´«ÈëÒ»¶¨Á¿Êı¾İÓÃÀ´¼ÆËãÕû¸öÎÄ¼şµÄ´óĞ¡£¬Êı¾İ³¤¶ÈÖÁÉÙÒª20×Ö½Ú£¬Ç°ËÄ¸ö×Ö½Ú±ØĞëÊÇ"CLRP"
+      // ä¼ å…¥ä¸€å®šé‡æ•°æ®ç”¨æ¥è®¡ç®—æ•´ä¸ªæ–‡ä»¶çš„å¤§å°ï¼Œæ•°æ®é•¿åº¦è‡³å°‘è¦20å­—èŠ‚ï¼Œå‰å››ä¸ªå­—èŠ‚å¿…é¡»æ˜¯"CLRP"
       static size_t GetRequiredSize(void* pData, size_t nLength);
-      static i32    IsRepository(const void* pData, size_t nLength); // nLength Ö»ÊÇĞ£Ñé£¬Ğ¡ÓÚ4Ê±·µ»Øfalse£¬little-endianµÄÍ··µ»Ø1£¬big-endian·µ»Ø-1
+      static i32    IsRepository(const void* pData, size_t nLength); // nLength åªæ˜¯æ ¡éªŒï¼Œå°äº4æ—¶è¿”å›falseï¼Œlittle-endiançš„å¤´è¿”å›1ï¼Œbig-endianè¿”å›-1
       
 
       //b32 RemoveKey( LPCSTR szKey );

@@ -4,7 +4,11 @@
 #include "clString.h"
 #include "clUtility.h"
 #include "clRepository.h"
+#if defined(_CL_ARCH_X86)
 #pragma comment(lib, "clstd_d.lib")
+#elif defined(_CL_ARCH_X64)
+#pragma comment(lib, "clstd_x64d.lib")
+#endif
 
 typedef clvector<int> IntArray;
 typedef clset<int> IntSet;
@@ -13,6 +17,8 @@ typedef clset<int> IntSet;
 // 二分查找模板测试
 void TestBianrySearch()
 {
+  CLOG(__FUNCTION__);
+
   IntArray aSamples;
   IntSet aSort;
 
@@ -71,6 +77,8 @@ void TestBianrySearch()
 
 void TestBianryInsertPos()
 {
+  CLOG(__FUNCTION__);
+
   IntArray aSamples;
   IntSet aSort;
 
@@ -168,6 +176,8 @@ void DumpRepoMem(clstd::Repository& repo)
 
 void TestRepository1()
 {
+  CLOG(__FUNCTION__);
+
   clstd::Repository repo;
   struct TESTKEY
   {
@@ -175,6 +185,7 @@ void TestRepository1()
     int num_samples;
     unsigned char sample;
   };
+
   TESTKEY test[] = {
     {"test1", 100, 0x12},
     {"test2", 16, 0x34},
@@ -194,7 +205,9 @@ void TestRepository1()
   {
     CLBYTE* pData = new CLBYTE[test[i].num_samples];
     memset(pData, test[i].sample, test[i].num_samples);
+    CLOG("test[i].name: %s, %x, %d", test[i].name, pData, test[i].num_samples);
     repo.SetKey(test[i].name, pData, test[i].num_samples);
+    CLOG("test[i].name: %s, %x, %d", test[i].name, pData, test[i].num_samples);
     SAFE_DELETE_ARRAY(pData)
   }
 
@@ -209,6 +222,8 @@ void TestRepository1()
 
 int main(int argc, char* argv[])
 {
+  size_t n = 0 - 10;
+  CLOG("%llu", n);
   TestBianrySearch();
   TestBianryInsertPos();
   TestRepository1();

@@ -1,4 +1,4 @@
-// Sample_MultiThread.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+ï»¿// Sample_MultiThread.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 #include "clstd.h"
@@ -6,10 +6,16 @@
 #include "thread/clSignal.h"
 #include "clUtility.h"
 
+#if defined(_CL_SYSTEM_LINUX)
+#include <unistd.h>
+#endif
+
 #include "Sample_MultiThread.h"
 
 void TestMessage()
 {
+  CLOG(__FUNCTION__);
+
   const int COUNT_THREAD = 51;
   SampleClient* pArray[COUNT_THREAD] = {};
   CMessage::Initialize();
@@ -48,6 +54,7 @@ void TestMessage()
 
 void TestWait()
 {
+  CLOG(__FUNCTION__);
   SampleTimeout t;
   t.Start();
   t.Wait(-1);

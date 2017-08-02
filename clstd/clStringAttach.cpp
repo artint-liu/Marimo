@@ -1,4 +1,4 @@
-#include "clstd.h"
+ï»¿#include "clstd.h"
 #include <stdarg.h>
 #include "clStringAttach.h"
 
@@ -17,7 +17,7 @@ namespace clstd
   template<typename _TCh>
   clsize strlenT(const _TCh* str);
 
-  template<typename _TCh> // ±È½Ïstr1µÄÇ°n¸ö×Ö·û,Èç¹ûÓöµ½'\0'ÔòÌáÇ°½áÊø
+  template<typename _TCh> // æ¯”è¾ƒstr1çš„å‰nä¸ªå­—ç¬¦,å¦‚æœé‡åˆ°'\0'åˆ™æå‰ç»“æŸ
   int strncmpT(const _TCh *str1, const _TCh *str2, clsize n);
 
   template<typename _TCh>
@@ -58,7 +58,7 @@ namespace clstd
     , m_pAttached(pAttachedBuffer)
     , m_cbAttached(cbAttached)
   {
-    // ÕâÀï²»Ê¹ÓÃstrlenÀ´¼ì²â³¤¶È£¬±£Ö¤m_nCount <= m_nCapacity
+    // è¿™é‡Œä¸ä½¿ç”¨strlenæ¥æ£€æµ‹é•¿åº¦ï¼Œä¿è¯m_nCount <= m_nCapacity
     size_t i = 0;
     while(m_pBuf[i] != '\0' && i + 1 < m_nCapacity) {
       i++;
@@ -156,7 +156,7 @@ namespace clstd
     {
       memcpy(pNewBuf, m_pBuf, (m_nCount + 1) * sizeof(_TCh));
 
-      // ¹¹Ôìº¯ÊıÖĞÈç¹ûÒıÓÃattach»º³åÄÚÈİ£¬Ôò½áÎ²¿ÉÄÜ²»ÊÇ'\0'
+      // æ„é€ å‡½æ•°ä¸­å¦‚æœå¼•ç”¨attachç¼“å†²å†…å®¹ï¼Œåˆ™ç»“å°¾å¯èƒ½ä¸æ˜¯'\0'
       if(pNewBuf[m_nCount] != '\0') {
         pNewBuf[m_nCount] = '\0';
       }
@@ -175,7 +175,7 @@ namespace clstd
   _CLSTRATTACH_TEMPL
   void _CLSTRATTACH_IMPL::_Resize(size_t count)
   {
-    ASSERT(count >= m_nCount); // Õâ¸öÄÚ²¿º¯ÊıÖ÷ÒªÊÇÀ©³ä³¤¶ÈµÄ£¬±ÜÃâËõ¼õ¹¦ÄÜµÄµ÷ÓÃ
+    ASSERT(count >= m_nCount); // è¿™ä¸ªå†…éƒ¨å‡½æ•°ä¸»è¦æ˜¯æ‰©å……é•¿åº¦çš„ï¼Œé¿å…ç¼©å‡åŠŸèƒ½çš„è°ƒç”¨
     Reserve(count);
     ASSERT(m_nCount < m_nCapacity && count < m_nCapacity);
     m_pBuf[count] = '\0';

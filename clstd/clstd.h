@@ -182,6 +182,9 @@ namespace clstd
   void _cl_log_info   (const wch *fmt, ...);
   void _cl_log_error  (const wch *fmt, ...);
   void _cl_log_warning(const wch *fmt, ...);
+
+  void* MemCopy(void* pDest, const void* pSrc, size_t count); // 兼容性内存拷贝，支持覆盖内存拷贝
+  void Sleep(u32 dwMilliseconds);
 }
 
 #define CLOG_WARNING  clstd::_cl_log_warning
@@ -264,17 +267,17 @@ extern "C" void _cl_NoOperation();
 void _cl_traceA(const char *fmt, ...);
 void _cl_traceW(const wch *fmt, ...);
 
-#   define TRACEW  _cl_traceW
-#   define TRACEA  _cl_traceA
-#   define TRACE				 TRACEA
-#   define CLBREAK       ASSERT(0)
-#   define CLABORT       abort()
+#   define TRACEW           _cl_traceW
+#   define TRACEA           _cl_traceA
+#   define TRACE				      TRACEA
+#   define CLBREAK          ASSERT(0)
+#   define CLABORT          abort()
 #   define CLNOP
-#   define VERIFY(v)  (v)
-#   define ASSERT(x)  assert(x)
-#   define STATIC_ASSERT(x)
-#   define V(x)      (x)
-#   define V_RETURN(x)  (x)
+#   define VERIFY(v)        (v)
+#   define ASSERT(x)        assert(x)
+#   define STATIC_ASSERT(x) static_assert(x, #x)
+#   define V(x)             (x)
+#   define V_RETURN(x)      (x)
 # else
 #	error 新平台
 # endif // #if defined(_WINDOWS) || defined(_CONSOLE)
