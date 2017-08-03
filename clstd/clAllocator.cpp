@@ -358,7 +358,7 @@ namespace clstd
       delete m_pMemPoolObj;
       m_pMemPoolObj = NULL;
     }
-    TRACE("# Allocator(%s) total allocate %d bytes.\n", 
+    TRACE("# Allocator(%s) total allocate %lu bytes.\n", 
       m_szPoolName, (m_nMaxPoolIndex + 1) * m_nMemPoolSize);
   }
 

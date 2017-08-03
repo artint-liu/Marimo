@@ -230,13 +230,13 @@ namespace clstd
       CIconvOffer(const ch* tocode, const ch* fromcode)
       {
         m_cd = iconv_open(tocode, fromcode);
-        TRACE("iconv_open from \"%s\" to \"%s\"(handle:%x).\n", fromcode, tocode, m_cd);
+        TRACE("iconv_open from \"%s\" to \"%s\"(handle:%p).\n", fromcode, tocode, m_cd);
       }
 
       ~CIconvOffer()
       {
         iconv_close(m_cd);
-        TRACE("iconv_close handle(%x).\n", m_cd);
+        TRACE("iconv_close handle(%p).\n", m_cd);
       }
 
       // 如果pNativeStr或者uLength为空，返回编码转换需要的空间，否则返回转换的字符数

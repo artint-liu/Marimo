@@ -299,15 +299,16 @@ namespace clstd
               {
                 if(bPrecision)
                 {
-                  if(nWidth > nPrecision) {
-                    _TStr::Append((TChar)0x20, nWidth - nPrecision);
-                  }
+                  //if(nWidth > nPrecision) {
+                  //  _TStr::Append((TChar)0x20, nWidth - nPrecision);
+                  //}
 
-                  _TStr::Append('0', nPrecision);
+                  //_TStr::Append('0', nPrecision);
 
-                  if(-nWidth > nPrecision) {
-                    _TStr::Append((TChar)0x20, -nWidth - nPrecision);
-                  }
+                  //if(-nWidth > nPrecision) {
+                  //  _TStr::Append((TChar)0x20, -nWidth - nPrecision);
+                  //}
+                  _AppendChar('0', nWidth, nPrecision);
                 }
                 else
                 {
@@ -323,6 +324,46 @@ namespace clstd
               }
               break;
             }
+
+            case 'p':
+            case 'P':
+              
+              buffer[0] = '0';
+              buffer[1] = 'X';
+              buffer[2] = '\0';
+              if(sizeof(void*) == 4)
+              {
+                nPrecision = 8;
+                u32 va_value = va_arg(arglist, u32);
+                if(va_value) {
+                  ultox(va_value, buffer + 2, MAX_DIGITS - 2, 16, 1);
+                }
+              }
+              else if(sizeof(void*) == 8)
+              {
+                nPrecision = 16;
+                u64 va_value = va_arg(arglist, u64);
+                if(va_value) {
+                  ul64tox(va_value, buffer + 2, MAX_DIGITS - 2, 16, 1);
+                }
+              }
+              else
+              {
+                CLBREAK; // 既不是32位也不是64位平台
+              }
+
+              if(buffer[2] == '\0') {
+                _AppendChar('0', nWidth, nPrecision);
+                break;
+              }
+
+              if(bPound) {
+                _AppendFormat(buffer, 2, buffer + 2, nWidth, nPrecision);
+              }
+              else {
+                _AppendFormat(buffer + 2, nWidth, nPrecision);
+              }
+              break;
 
             case '*':
               if(bPrecision) {
@@ -379,7 +420,7 @@ namespace clstd
                   else if(i >= sizeof(buffer)) {
                     break;
                   }
-                  else if(*ptr == 'd' || *ptr == 'i' || *ptr == 'u' || *ptr == 'o' || *ptr == 'X' || *ptr == 'x' || *ptr == '.' || *ptr == 'f')
+                  else if(*ptr == 'd' || *ptr == 'i' || *ptr == 'u' || *ptr == 'o' || *ptr == 'X' || *ptr == 'x' || *ptr == 'p' || *ptr == '.' || *ptr == 'f')
                   {
                     buffer[i] = '\0';
 
@@ -396,8 +437,9 @@ namespace clstd
                     }
                     goto SEQUENCE;
                   }
-                  else
-                    break;
+                  else {
+                    goto SEQUENCE;
+                  }
                   ptr++;
                 }
               } // if
@@ -471,6 +513,19 @@ namespace clstd
         _AppendSpace(len, nWidth, nPrecision);
         _TStr::Append(szNumeric, '0', nPrecision);
         _AppendSpace(len, -nWidth, nPrecision);
+      }
+
+      void _AppendChar(TChar c, int nWidth, int nPrecision)
+      {
+        if(nWidth > nPrecision) {
+          _TStr::Append((TChar)0x20, nWidth - nPrecision);
+        }
+
+        _TStr::Append(c, nPrecision);
+
+        if(-nWidth > nPrecision) {
+          _TStr::Append((TChar)0x20, -nWidth - nPrecision);
+        }
       }
     };
 

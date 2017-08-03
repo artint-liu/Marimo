@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo_SmartStock", "Demo_SmartStock.vcxproj", "{3E71E6C0-0B32-4F83-BA05-9B0A80AC56E8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6} = {C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}
@@ -100,7 +102,8 @@ Global
 		{2BBB75EC-56C9-4A7F-AD93-99A74DE769D7}.Release|x64.ActiveCfg = Release|Win32
 		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Debug|Win32.Build.0 = Debug|Win32
-		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Debug|x64.ActiveCfg = Debug|Win32
+		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Debug|x64.ActiveCfg = Debug|x64
+		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Debug|x64.Build.0 = Debug|x64
 		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Release|Win32.ActiveCfg = Release|Win32
 		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Release|Win32.Build.0 = Release|Win32
 		{7FB45E64-69D2-4BC3-97EB-8A0611B94E9E}.Release|x64.ActiveCfg = Release|Win32

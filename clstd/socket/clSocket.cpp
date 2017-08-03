@@ -369,7 +369,7 @@ namespace clstd
     TCPListener::TCPListener()
       : m_socket(INVALID_SOCKET)
       , m_tid(0)
-      , m_nIdelThread(0)
+      , m_nIdleThread(0)
     {
       if( ! IsStartup()) {
         CLOG_ERROR("must be call net_socket::Startup() first.");
@@ -548,7 +548,7 @@ namespace clstd
       //FD_ZERO(&ExceptSet);
       //FD_SET(m_socket, &ExceptSet);
 
-      if(m_nIdelThread)
+      if(m_nIdleThread)
       {
         for(auto it = m_ClientList.begin(); it != m_ClientList.end();)
         {
@@ -561,7 +561,7 @@ namespace clstd
             ++it;
           }
         }
-        m_nIdelThread = 0;
+        m_nIdleThread = 0;
       }
 
       timeval tv = {timeout_sec, 0};
@@ -699,7 +699,7 @@ namespace clstd
       auto tid = this_thread::GetId();
       if(tid == pClientTh->m_tid)
       {
-        ++m_nIdelThread;
+        ++m_nIdleThread;
       }
       else if(tid == m_tid)
       {

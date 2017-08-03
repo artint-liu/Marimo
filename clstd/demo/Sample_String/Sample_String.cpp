@@ -348,16 +348,16 @@ void TestFormatString0()
 void TestFormatString1()
 {
   CLOG(__FUNCTION__);
-  //char buffer[1024];
+  char buffer[1024];
   //sprintf(buffer, "%06.3x", 12);
   const ch* fmt_flags[] = {
     "", "-", "+", "#", " ", "0", "-0", "+0", "#0", "0#", "-#", "+#", "-+", "+-", "- ", " -", "+ ", " +"
   };
   const ch* fmt_width[] = {
-    "", "5", "8", ".5", "5.3", "4.3", "3.4", "3.5"
+    "", "5", "10", ".5", "5.3", "4.3", "3.4", "3.5"
   };
   const ch* fmt_specifier[] = {
-    "d", "i", "u", "o", "x", "X",
+    "d", "i", "u", "o", "x", "X", "p",
   };
 
   const int samp_int[] = {
@@ -368,7 +368,6 @@ void TestFormatString1()
   clStringA str;
   TestFormatStrFunc<clStringA>(str, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 
-  char buffer[100];
   clStringAttachA str_ath(buffer, sizeof(buffer));
   TestFormatStrFunc<clStringAttachA>(str_ath, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 }
@@ -405,6 +404,6 @@ int main(int argc, char* argv[])
   TestFormatString0();
   TestFormatString1();
 
-	return 0;
+  return 0;
 }
 
