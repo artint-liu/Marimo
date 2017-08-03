@@ -4,16 +4,53 @@
 #include "thread/clThread.h"
 #include "thread/clSignal.h"
 #include "clRepository.h"
+
+#if defined(_CL_SYSTEM_LINUX)
+# include <errno.h>
+# include <arpa/inet.h>
+# include <unistd.h>
+# include <algorithm> // std::for_each
+#endif // #if defined(_CL_SYSTEM_LINUX)
+
 #include "clSocket.h"
 #include "clSocketServer.h"
 
 #define SOCKET_ERROR_LOG(_STAT, _MSG) if (_STAT == SOCKET_ERROR) { CLOG_ERROR(_MSG); }
 
+#if defined(_CL_SYSTEM_WINDOWS)
+typedef int socklen_t;
+#elif defined(_CL_SYSTEM_LINUX)
+struct WSADATA
+{
+  void* xxx;
+};
+
+int WSAStartup(WORD ver, WSADATA* pData)
+{
+  return 0;
+}
+
+int WSACleanup()
+{
+  return 0;
+}
+
+int WSAGetLastError()
+{
+  return 0;
+}
+
+int closesocket(SOCKET s)
+{
+  ::close(s);
+}
+#endif
+
 namespace clstd
 {
   namespace net_sockets
   {
-#if defined(_CL_SYSTEM_WINDOWS)
+//#if defined(_CL_SYSTEM_WINDOWS)
     u32 g_nWSAStartup = 0;
     int Startup()
     {
@@ -136,7 +173,7 @@ namespace clstd
       return m_socket == INVALID_SOCKET;
     }
 
-    int TCPClient::WaitSocket(long timeout_sec)
+    SocketResult TCPClient::WaitSocket(long timeout_sec)
     {
       fd_set read_set;
       FD_ZERO(&read_set);
@@ -154,7 +191,8 @@ namespace clstd
       }
       else if(result == 0)
       {
-        CLOG("socket timeout(%d).", result);
+        //CLOG("socket timeout(%d).", result);
+        return SocketResult_TimeOut;
       }
       else if(result == SOCKET_ERROR)
       {
@@ -167,24 +205,15 @@ namespace clstd
           CLOG("socket error : disconnected(%d:%d) ...", result, WSAGetLastError());
           CloseSocket();
         }
+        return SocketResult_Disconnected;
       }
       else {
         CLOG_ERROR("Unexpected socket result(%d).", result);
         CLBREAK; // 意外的结果
+        return SocketResult_UnknownError;
       }
 
-      return result;
-      //if(result == SOCKET_ERROR || result == 0) {
-      //  CLOG("socket error : disconnected(%d:%d) ...", result, WSAGetLastError());
-      //  CloseSocket();
-      //  return result;
-      //}
-      //else if(m_socket == INVALID_SOCKET) 
-      //{
-      //  CLOG("user disconnected(%d) ...", result);
-      //  return SocketResult_Disconnected;
-      //}
-      //return result;
+      return SocketResult_Ok;
     }
 
     int TCPClient::CloseSocket()
@@ -451,7 +480,7 @@ namespace clstd
         if(FD_ISSET(m_socket, &ReadSet))
         {
           SOCKADDR_IN clientSockAddr;
-          int addrLen = sizeof(SOCKADDR_IN);
+          socklen_t addrLen = sizeof(SOCKADDR_IN);
 
           // accept the connection request when one is received
           SOCKET client = ::accept(m_socket, (LPSOCKADDR)&clientSockAddr, &addrLen);
@@ -503,21 +532,21 @@ namespace clstd
     int TCPListener::WaitSocketAsync(long timeout_sec, TCPClientProc proc)
     {
       fd_set ReadSet;
-      fd_set ExceptSet;
+      //fd_set ExceptSet;
       int result = 0;
       if( ! m_tid) {
         m_tid = this_thread::GetId();
       }
       else if(m_tid != this_thread::GetId()) {
-        CLOG_ERROR("call %s in different thread.");
+        CLOG_ERROR("call %s in different thread.", __FUNCTION__);
         return -1;
       }
 
       FD_ZERO(&ReadSet);
       FD_SET(m_socket, &ReadSet);
 
-      FD_ZERO(&ExceptSet);
-      FD_SET(m_socket, &ExceptSet);
+      //FD_ZERO(&ExceptSet);
+      //FD_SET(m_socket, &ExceptSet);
 
       if(m_nIdelThread)
       {
@@ -536,12 +565,12 @@ namespace clstd
       }
 
       timeval tv = {timeout_sec, 0};
-      result = ::select(0, &ReadSet, 0, &ExceptSet, &tv);
+      result = ::select(m_socket + 1, &ReadSet, NULL, NULL, &tv);
 
       if(result == 0)
       {
         // Time Out
-        ASSERT(ExceptSet.fd_count == 0);
+        //ASSERT(ExceptSet.fd_count == 0);
       }
       else if(result == SOCKET_ERROR)
       {
@@ -558,11 +587,11 @@ namespace clstd
       }
       else if(result != 0)
       {
-        ASSERT(ExceptSet.fd_count == 0);
+        //ASSERT(ExceptSet.fd_count == 0);
         if(FD_ISSET(m_socket, &ReadSet))
         {
           SOCKADDR_IN clientSockAddr;
-          int addrLen = sizeof(SOCKADDR_IN);
+          socklen_t addrLen = sizeof(SOCKADDR_IN);
 
           // accept the connection request when one is received
           SOCKET client = ::accept(m_socket, (LPSOCKADDR)&clientSockAddr, &addrLen);
@@ -589,6 +618,9 @@ namespace clstd
                 inet_ntoa(clientSockAddr.sin_addr), ntohs(clientSockAddr.sin_port));
               ::closesocket(client);
             }
+          }
+          else {
+            CLOG_ERROR("accept return INVALID_SOCKET");
           }
         }
       }
@@ -650,7 +682,7 @@ namespace clstd
       const auto tid = this_thread::GetId();
       if(tid != m_tid)
       {
-        CLOG_ERROR("call %s in unexpected thread(tid:%d).", __FUNCTION__, tid);
+        CLOG_ERROR("call %s in unexpected thread(tid:%u).", __FUNCTION__, (u32)tid);
         return -1;
       }
 
@@ -676,7 +708,7 @@ namespace clstd
       }
       else
       {
-        CLOG_ERROR("call %s in unexpected thread(tid:%d).", __FUNCTION__, tid);
+        CLOG_ERROR("call %s in unexpected thread(tid:%d).", __FUNCTION__, (u32)tid);
         CLBREAK;
       }
     }
@@ -694,6 +726,6 @@ namespace clstd
     {
     }
 
-#endif // _CL_SYSTEM_WINDOWS
+//#endif // _CL_SYSTEM_WINDOWS
   } // namespace net_sockets
 } // namespace clstd

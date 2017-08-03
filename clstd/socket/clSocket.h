@@ -3,6 +3,18 @@
 
 #include <functional>
 
+#if defined(_CL_SYSTEM_LINUX)
+# include <sys/socket.h>
+# include <netinet/in.h>
+
+typedef int SOCKET;
+typedef sockaddr_in SOCKADDR_IN;
+typedef sockaddr SOCKADDR;
+typedef sockaddr* LPSOCKADDR;
+# define INVALID_SOCKET -1
+# define SOCKET_ERROR -1
+#endif
+
 namespace clstd
 {
   class Signal;
@@ -21,13 +33,16 @@ namespace clstd
   enum SocketResult
   {
     SocketResult_Ok = 0,
-    SocketResult_Error = -1,
-    SocketResult_Disconnected = -2,
+    SocketResult_Disconnected = -1,
+    SocketResult_Error = -2,
+    SocketResult_UnknownError = -3,   // 没有在封装中处理的错误
 
-    SocketResult_CreateFailed = -3,
-    SocketResult_CanotBind = -4,
-    SocketResult_CanotListen = -5,
-    SocketResult_CanotConnect = -6,
+    SocketResult_CreateFailed = -4,
+    SocketResult_CanotBind = -5,
+    SocketResult_CanotListen = -6,
+    SocketResult_CanotConnect = -7,
+
+    SocketResult_TimeOut = 100,
   };
 
 #define _ChkWSACleanup(_status) _status = WSACleanup(); ASSERT(_status != WSANOTINITIALISED)
@@ -42,7 +57,7 @@ namespace clstd
     int Cleanup();
     b32 IsStartup();
 
-#if defined(_CL_SYSTEM_WINDOWS)
+//#if defined(_CL_SYSTEM_WINDOWS)
     //class TCPSocket
     //{
     //protected:
@@ -71,11 +86,11 @@ namespace clstd
       SocketResult Connect (u32 addr, CLUSHORT port);
 
       b32 IsInvalidSocket() const;
-      int WaitSocket  (long timeout_sec = 0);
+      SocketResult WaitSocket  (long timeout_sec = 0);
       int CloseSocket ();
 
       i32 Send    (CLLPCVOID pData, CLINT nLen) const;
-      i32 Recv    (CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize) const;
+      i32 Recv    (CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize) const;  // 返回收到了字节数，返回SOCKET_ERROR表示端口错误，0表示断开连接
       i32 Send    (const BufferBase& buf) const;
       //i32 Send    (const StockA& stock) const;
       //i32 Send    (const StockW& stock) const;
@@ -86,7 +101,7 @@ namespace clstd
 
       class TCPClientThread : public clstd::Thread, TCPClient
       {
-        friend class TCPListener;
+        friend class clstd::net_sockets::TCPListener;
         
         TCPClientThread(TCPListener* pListener, SOCKET socket, TCPClientProc fn);
         virtual ~TCPClientThread();
@@ -113,7 +128,7 @@ namespace clstd
       this_thread::id   m_tid;
       ClientList        m_ClientList;
       ClientList        m_RecyclePool;
-      volatile size_t   m_nIdelThread; // 异步模式下空闲的客户端线程，可能不准
+      volatile size_t   m_nIdleThread; // 异步模式下空闲的客户端线程，可能不准
       //Signal      m_IdleSig;
 
     public:
@@ -138,7 +153,7 @@ namespace clstd
       virtual void OnRecv(SOCKET socket);
     };
 
-#endif // _CL_SYSTEM_WINDOWS
+//#endif // _CL_SYSTEM_WINDOWS
   } // namespace net_sockets
 
 } // namespace clstd

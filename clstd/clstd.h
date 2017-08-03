@@ -118,11 +118,14 @@ char (&_cl_CountOfHelper(_Ty(&_array)[_count]))[_count];
 
 // 弃用标记
 #if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
-#define CLDEPRECATED_ATTRIBUTE __attribute__((deprecated))
+# define CLDEPRECATED_ATTRIBUTE __attribute__((deprecated))
+# define CLPRINTFLIKE(fmtarg, firstvararg) __attribute__((__format__(__printf__, fmtarg, firstvararg)))
 #elif _MSC_VER >= 1400 //vs 2005 or higher
-#define CLDEPRECATED_ATTRIBUTE __declspec(deprecated) 
+# define CLDEPRECATED_ATTRIBUTE __declspec(deprecated) 
+# define CLPRINTFLIKE(fmtarg, firstvararg)
 #else
-#define CLDEPRECATED_ATTRIBUTE
+# define CLDEPRECATED_ATTRIBUTE
+# define CLPRINTFLIKE(fmtarg, firstvararg)
 #endif 
 
 
@@ -161,13 +164,13 @@ char (&_cl_CountOfHelper(_Ty(&_array)[_count]))[_count];
 //
 
 // 数据格式化后原始消息
-extern "C" void _cl_traceA(const char *fmt, ...);
+extern "C" void _cl_traceA(const char *fmt, ...) CLPRINTFLIKE(1, 2);
 extern "C" void _cl_traceW(const wch *fmt, ...);
 
 // 输出日志格式消息，一般是"[ERROR]错误信息\r\n"
-extern "C" void _cl_log_infoA   (const char *fmt, ...);
-extern "C" void _cl_log_errorA  (const char *fmt, ...);
-extern "C" void _cl_log_warningA(const char *fmt, ...);
+extern "C" void _cl_log_infoA   (const char *fmt, ...) CLPRINTFLIKE(1, 2);
+extern "C" void _cl_log_errorA  (const char *fmt, ...) CLPRINTFLIKE(1, 2);
+extern "C" void _cl_log_warningA(const char *fmt, ...) CLPRINTFLIKE(1, 2);
 
 extern "C" void _cl_log_infoW   (const wch *fmt, ...);
 extern "C" void _cl_log_errorW  (const wch *fmt, ...);
@@ -175,9 +178,9 @@ extern "C" void _cl_log_warningW(const wch *fmt, ...);
 
 namespace clstd
 {
-  void _cl_log_info   (const char *fmt, ...);
-  void _cl_log_error  (const char *fmt, ...);
-  void _cl_log_warning(const char *fmt, ...);
+  void _cl_log_info   (const char *fmt, ...) CLPRINTFLIKE(1, 2);
+  void _cl_log_error  (const char *fmt, ...) CLPRINTFLIKE(1, 2);
+  void _cl_log_warning(const char *fmt, ...) CLPRINTFLIKE(1, 2);
 
   void _cl_log_info   (const wch *fmt, ...);
   void _cl_log_error  (const wch *fmt, ...);

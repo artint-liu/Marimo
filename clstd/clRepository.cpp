@@ -421,8 +421,8 @@ namespace clstd
   {
     if((CLBYTE*)m_Buffer.GetPtr() + m_Buffer.GetSize() != m_pData + m_cbDataLen)
     {
-      CLOG_ERROR("Buffer size doesn't match:\"m_Buffer.GetSize()\" is %d, m_cbDataLen is %d\n", 
-        m_Buffer.GetSize(), m_pData - (CLBYTE*)m_Buffer.GetPtr() + m_cbDataLen);
+      CLOG_ERROR("Buffer size doesn't match:\"m_Buffer.GetSize()\" is %u, m_cbDataLen is %u\n", 
+        (u32)m_Buffer.GetSize(), (u32)(m_pData - (CLBYTE*)m_Buffer.GetPtr() + m_cbDataLen));
       return FALSE;
     }
 

@@ -154,7 +154,7 @@ namespace clstd
     clStringA str;
     const double fTime = GetDeltaTime();
     str.Format("%s:%f Sec.\n", szName, fTime);
-    _cl_traceA(str);
+    _cl_traceA("%s", str.CStr());
     return fTime;
   }
 #endif // #if defined(_CL_SYSTEM_WINDOWS)
@@ -464,7 +464,7 @@ namespace clstd
       buffer[1 + i2++] = '\n';
       buffer[1 + i2++] = '\0';
 
-      TRACE(buffer);
+      TRACE("%s", buffer);
     }
   }
 

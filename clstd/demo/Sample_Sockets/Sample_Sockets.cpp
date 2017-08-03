@@ -1,7 +1,7 @@
 ﻿// Sample_Sockets.cpp : 定义控制台应用程序的入口点。
 //
 #include <functional>
-#include <conio.h>
+//#include <conio.h>
 
 #include <clstd.h>
 #include <thread/clThread.h>
@@ -11,6 +11,10 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
+#ifndef VK_ESCAPE
+# define VK_ESCAPE 0x1B
+#endif
+
 void StartAsServer();
 void StartAsClient();
 void PrintUsage();
@@ -19,6 +23,7 @@ int main(int argc, char* argv[])
 {
   if(argc != 2) {
     PrintUsage();
+    return 0;
   }
 
   clstd::net_sockets::Startup();
@@ -66,7 +71,7 @@ void StartAsServer()
         if(result > 0) {
           clstd::DumpMemory(buffer, result);
         }
-        else if(result == SOCKET_ERROR) {
+        else if(result == 0 || result == SOCKET_ERROR) {
           break;
         }
         CLOG("%s(%d) %s: %d", __FILE__, __LINE__, __FUNCTION__, result);
@@ -74,7 +79,7 @@ void StartAsServer()
     });
 
     //CLOG("%s(%d) %s: %d", __FILE__, __LINE__, __FUNCTION__, result);
-    if(_kbhit() && _getch() == VK_ESCAPE) {
+    if(clstd_cli::kbhit() && clstd_cli::getch() == VK_ESCAPE) {
       break;
     }
   }
@@ -93,6 +98,8 @@ void StartAsClient()
   client.Connect("127.0.0.1:34001");
   CLOG("client: connected OK");
 
+  CLOG("输入字符后按回车发送，ESC退出");
+
   while(1) {
     int result = 0;
     
@@ -102,26 +109,25 @@ void StartAsClient()
       break;
     }
 
-    //result = client.Recv(buffer, 4096, FALSE);
-    //if(result == SOCKET_ERROR) {
-    //  break;
-    //}
-    //else if(result == 0) {
-    //  break;
-    //}
-
-    if(_kbhit()) {
-      int c = _getch();
+    while(clstd_cli::kbhit()) {
+      int c = clstd_cli::getch();
       if(c == VK_ESCAPE)
       {
-        break;
+        return;
       }
 
-      str.Append(c);
-      CLOG("Input:%s", str);
-      if(str.GetLength() > 8) {
-        client.Send(str, str.GetLength());
-        str.Clear();
+      if(c == '\r' || c == '\n'){
+        if(str.IsNotEmpty())
+        {
+          result = client.Send(str, str.GetLength());
+          CLOG("sent(result=%d):%s", result, str.CStr());
+          str.Clear();
+        }
+      }
+      else
+      {
+        str.Append(c);
+        CLOG("Input:%s", str.CStr());
       }
     }
   }
