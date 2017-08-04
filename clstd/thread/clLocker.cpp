@@ -3,6 +3,30 @@
 
 namespace clstd
 {
+#if defined(_CPLUSPLUS_11_THREAD)
+  namespace cxx11
+  {
+    Locker::Locker()
+    {
+    }
+    Locker::~Locker()
+    {
+    }
+
+    void Locker::Lock()
+    {
+      m_mutex.lock();
+    }
+    void Locker::Unlock()
+    {
+      m_mutex.unlock();
+    }
+    b32 Locker::TryLock()
+    {
+      m_mutex.try_lock();
+    }
+  } // namespace _posix
+#endif // #if defined(_CPLUSPLUS_11_THREAD)
 
 #ifdef POSIX_THREAD
   namespace _posix

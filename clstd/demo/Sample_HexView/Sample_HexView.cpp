@@ -317,7 +317,7 @@ BOOL OpenFile(LPCWSTR szFilepath)
 
 BOOL ReadBuffer(int nNumOfBlocks) // block = 16 bytes
 {
-  const int cbBlock = 16;
+  const int cbBlock = 32;
   int cbViewSize = nNumOfBlocks * cbBlock;
   clstd::MemBuffer buf;
   if (file.ReadToBuffer(&buf, 0, cbViewSize)) {

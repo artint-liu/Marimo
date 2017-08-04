@@ -23,7 +23,8 @@ namespace clstd
     {
       id GetId()
       {
-        return std::this_thread::get_id();
+        std::thread::id _id = std::this_thread::get_id();
+        return *(id*)&_id;
       }
     }
   }

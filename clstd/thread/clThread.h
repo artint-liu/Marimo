@@ -14,28 +14,39 @@ namespace clstd
 {
   namespace cxx11
   {
+    class Signal;
+
+    namespace this_thread
+    {
+      typedef u32 id;
+      id GetId();
+    }
+
     class Thread
     {
+      friend void* ThreadStart(void* pParam);
     protected:
-      //HANDLE m_handle;
-      //DWORD  m_ThreadId;
-      //std::condition_variable m_cond;
-      std::thread m_thread;
-      //std::mutex m_mutex;
+      std::thread*  m_pThread;
+      Signal*       m_pWaitExit;
+      u32           m_dwExitCode;
+    public:
+      enum Result
+      {
+        Result_Ok = 0,
+        Result_Running = 1,
+        Result_TimeOut = 258L,
+      };
+
     public:
       Thread();
       virtual ~Thread();
       virtual i32 StartRoutine();
 
       b32   Start();
-      u32   Wait(u32 nMilliSec);
+      Result  Wait(u32 nMilliSec);
+      Result  GetExitCode(u32* pExitCode) const;
+      this_thread::id GetId() const;
     };
-
-    namespace this_thread
-    {
-      typedef std::thread::id id;
-      id GetId();
-    }
 
   } // namespace cxx11
 } // namespace clstd
@@ -47,6 +58,12 @@ namespace clstd
 #ifdef _CL_SYSTEM_WINDOWS
   namespace _win32
   {
+    namespace this_thread
+    {
+      typedef u32 id;
+      id GetId();
+    }
+
     class Thread
     {
     protected:
@@ -70,13 +87,8 @@ namespace clstd
       b32     Start ();
       Result  Wait  (u32 nMilliSec);
       Result  GetExitCode(u32* pExitCode) const;
+      this_thread::id GetId() const;
     };
-
-    namespace this_thread
-    {
-      typedef size_t id;
-      id GetId();
-    }
 
   } // namespace _win32
 #endif // #ifdef _CL_SYSTEM_WINDOWS
@@ -85,6 +97,13 @@ namespace clstd
   namespace _posix
   {
     class Signal;
+
+    namespace this_thread
+    {
+      typedef u32 id;
+      id GetId();
+    }
+
     class Thread
     {
       friend void* ThreadStart(void* pParam);
@@ -112,13 +131,8 @@ namespace clstd
       b32 Start();
       Result Wait(u32 nMilliSec);
       Result GetExitCode(u32* pExitCode) const;
+      this_thread::id GetId() const;
     };
-
-    namespace this_thread
-    {
-      typedef size_t id;
-      id GetId();
-    }
 
     void abs_time_after(timespec* t, u32 uMilliSec);
   } // namespace _posix
@@ -134,7 +148,17 @@ namespace clstd
       return cxx11::this_thread::GetId();
     }
   }
-#elif defined(_WIN32) && !defined(POSIX_THREAD)
+#elif defined(POSIX_THREAD)
+  typedef _posix::Thread Thread;
+  namespace this_thread
+  {
+    typedef _posix::this_thread::id id;
+    inline id GetId()
+    {
+      return _posix::this_thread::GetId();
+    }
+  }
+#elif defined(_CL_SYSTEM_WINDOWS)
   typedef _win32::Thread Thread;
   namespace this_thread
   {
@@ -145,15 +169,7 @@ namespace clstd
     }
   }
 #else
-  typedef _posix::Thread Thread;
-  namespace this_thread
-  {
-    typedef _posix::this_thread::id id;
-    inline id GetId()
-    {
-      return _posix::this_thread::GetId();
-    }
-  }
+# pragma message(__FILE__ ": warning : 没有合适的this_thread定义")
 #endif // #if defined(_Win32) && !defined(POSIX_THREAD)
  
 } // namespace clstd

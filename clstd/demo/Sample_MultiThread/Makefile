@@ -20,7 +20,7 @@ all:$(OBJS)
 #	$(LD) -o test.out $(OBJS) $(LDFLAGS)
 	
 Sample_MultiThread.o : Sample_MultiThread.cpp $(CLSTD_DIR)/libclstd.a
-	$(CXX) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $< $(LDFLAGS)
+	$(CXX) $(INCLUDES) $(CFLAGS) $(CPPFLAGS) $< -o $@ $(LDFLAGS)
 
 clean:
 	-rm $(OBJS)

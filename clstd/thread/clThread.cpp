@@ -81,6 +81,11 @@ namespace clstd
       return Result_Ok;
     }
 
+    this_thread::id Thread::GetId() const
+    {
+      return this_thread::GetId();
+    }
+
     i32 Thread::StartRoutine()
     {
       return 0;
@@ -91,12 +96,26 @@ namespace clstd
 #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
   namespace cxx11
   {
+
+    void* ThreadStart(void* pParam)
+    {
+      Thread* pThread = reinterpret_cast<Thread*>(pParam);
+      pThread->m_dwExitCode = static_cast<u32>(pThread->StartRoutine());
+      pThread->m_pWaitExit->Set();
+
+      return static_cast<void*>(0);
+    }
+
     Thread::Thread()
+      : m_pThread(NULL)
+      , m_pWaitExit(NULL)
+      , m_dwExitCode(0)
     {
     }
 
     Thread::~Thread()
     {
+      SAFE_DELETE(m_pWaitExit);
     }
 
     i32 Thread::StartRoutine()
@@ -106,21 +125,59 @@ namespace clstd
 
     b32 Thread::Start()
     {
-      new(&m_thread) std::thread(std::bind(&Thread::StartRoutine, this));
-      return TRUE;
+      //new(&m_thread) std::thread(std::bind(&Thread::StartRoutine, this));
+      if(m_pThread == NULL)
+      {
+        if(m_pWaitExit == NULL) {
+          m_pWaitExit = new Signal;
+          if(m_pWaitExit == NULL) {
+            return FALSE;
+          }
+        }
+
+        m_pThread = new std::thread(ThreadStart, this);
+        if(m_pThread == NULL) {
+          return FALSE;
+        }
+
+        return TRUE;
+      }
+      return FALSE;
     }
 
-    u32 Thread::Wait(u32 nMilliSec)
+    Thread::Result Thread::Wait(u32 nMilliSec)
     {
-      if (nMilliSec != -1) {
-        CLOG_ERROR("std::thread does not support wait for timeout.");
+      if(nMilliSec != -1 && m_pWaitExit->WaitTimeOut(nMilliSec) == Signal::eTimeOut) {
+        return Result_TimeOut;
       }
 
-      if (m_thread.joinable()) {
-        m_thread.join();
+      if (m_pThread->joinable()) {
+        m_pThread->join();
       }
-      return 0;
+
+      delete m_pThread;
+      m_pThread = NULL;
+      return Result_Ok;
     }
+
+    Thread::Result Thread::GetExitCode(u32* pExitCode) const
+    {
+      if(m_pThread) {
+        return Result_Running;
+      }
+      
+      if(pExitCode) {
+        *pExitCode = m_dwExitCode;
+      }
+
+      return Result_Ok;
+    }
+
+    this_thread::id Thread::GetId() const
+    {
+      return this_thread::GetId();
+    }
+
   } // namespace cxx11
 #endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)
 
@@ -135,7 +192,8 @@ namespace clstd
       pThread->m_pSignal->Wait();      
       pThread->m_dwExitCode = static_cast<u32>(pThread->StartRoutine());
       pThread->m_pWaitExit->Set();
-
+      
+      SAFE_DELETE(pThread->m_pSignal);
       return static_cast<void*>(0);
     }
 
@@ -226,6 +284,10 @@ namespace clstd
       return Result_Ok;
     }
 
+    this_thread::id Thread::GetId() const
+    {
+      return this_thread::GetId();
+    }
 
     void abs_time_after(timespec* t, u32 uMilliSec)
     {

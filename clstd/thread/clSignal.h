@@ -19,6 +19,7 @@ namespace clstd
 
     public:
       static const i32 eTimeOut = static_cast<i32>(std::cv_status::timeout);
+      static const u32 TimeOut_Infinite = -1;
       Signal();
       virtual ~Signal();
 
@@ -80,10 +81,12 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
 #if defined(_CPLUSPLUS_11_THREAD)
   class Signal : public cxx11::Signal{};
-#elif defined(_WIN32) && !defined(POSIX_THREAD)
-  class Signal : public _win32::Signal{};
+#elif defined(POSIX_THREAD)
+  class Signal : public _posix::Signal {};
+#elif defined(_CL_SYSTEM_WINDOWS)
+  class Signal : public _win32::Signal {};
 #else
-  class Signal : public _posix::Signal{};
+# pragma message(__FILE__ ": warning : 没有合适的Signal定义")
 #endif // #if defined(_Win32) && !defined(POSIX_THREAD)
 
 } // namespace clstd

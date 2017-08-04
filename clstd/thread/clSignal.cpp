@@ -33,7 +33,7 @@ namespace clstd
     i32 Signal::WaitTimeOut(u32 dwMilliSec)
     {
       std::unique_lock<std::mutex> _lock(m_mutex);
-      return static_cast<i32>(m_cond.wait_for(_lock, std::chrono::microseconds(dwMilliSec)));
+      return static_cast<i32>(m_cond.wait_for(_lock, std::chrono::milliseconds(dwMilliSec)));
     }
   } // namespace cxx11
 #endif // #if defined(_CPLUSPLUS_11_THREAD) || (__cplusplus >= 201103L) || (_MSC_VER >= 1900)

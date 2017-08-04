@@ -1,12 +1,36 @@
 ﻿#ifndef _CLSTD_LOCKER_H_
 #define _CLSTD_LOCKER_H_
 
+#if defined(_CPLUSPLUS_11_THREAD)
+# include <mutex>
+#endif
+
 #if defined(POSIX_THREAD)
 # include <pthread.h>
 #endif
 
 namespace clstd
 {
+#if defined(_CPLUSPLUS_11_THREAD)
+  namespace cxx11
+  {
+    class Locker
+    {
+    private:
+      std::recursive_mutex m_mutex;
+      //pthread_mutex_t m_mutex;
+      //pthread_mutexattr_t m_mutexattr;
+    public:
+      Locker();
+      ~Locker();
+
+      void Lock();
+      void Unlock();
+      b32 TryLock();
+    };
+  } // namespace _posix
+#endif // #if defined(_CPLUSPLUS_11_THREAD)
+
 #ifdef POSIX_THREAD
   namespace _posix
   {
