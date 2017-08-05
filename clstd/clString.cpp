@@ -256,13 +256,16 @@ namespace clstd
           char buffer[buf_len];
           size_t out_len = buf_len;
           char*  out_ptr = buffer;
-
-          while(cchX) {
+          size_t in_len = cchX;
 #if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
-            iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
+          const char* in_ptr = (const char*)pStrX;
 #else
-            iconv(m_cd, (char**)&pStrX, &cchX, (char**)&out_ptr, &out_len);
+          char* in_ptr = (char*)pStrX;
 #endif
+
+          while(in_len) {
+            size_t r = iconv(m_cd, &in_ptr, &in_len, (char**)&out_ptr, &out_len);
+            ASSERT(buf_len >= out_len);
             if((buf_len - out_len) == 0) {
               break;
             }
@@ -285,6 +288,13 @@ namespace clstd
       }
 
     };
+
+    // 注意：这个要放在全局初始化
+    // 原来放在函数中作为静态变量初始化，在linux下多线程启动打印MultiBytes版log时
+    // 因为用到编码转换，可能会多次初始化这个静态变量而产生冲突
+    CIconvOffer g_offerU2L("UCS-2LE", ICONV_LOCALE);
+    CIconvOffer g_offerL2U(ICONV_LOCALE, "UCS-2LE");
+
   } // namespace StringCommon
 } // namespace clstd
 #endif // #if defined(_CL_ENABLE_ICONV)
@@ -408,8 +418,8 @@ namespace clstd
     // 其实并不希望使用这种静态方式储存编码转换对象，但是又没找到合适的全局方式来解决
     // 这里需要注意的是，clstd作为静态库可能被多个动态库引用，同时又被主程序引用，所以在
     // 运行时一个静态对象在不同模块中有各自独立的空间。
-    static StringCommon::CIconvOffer offer("UCS-2LE", ICONV_LOCALE);
-    const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
+    //static StringCommon::CIconvOffer offer("UCS-2LE", ICONV_LOCALE);
+    const size_t ret = StringCommon::g_offerU2L.StringConvert(pNativeStr, uLength, pStrX, cchX);
     return ret;
 
 #elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)
@@ -534,8 +544,8 @@ namespace clstd
   {
 #if defined(_CL_ENABLE_ICONV)
 
-    static StringCommon::CIconvOffer offer(ICONV_LOCALE, "UCS-2LE");
-    const size_t ret = offer.StringConvert(pNativeStr, uLength, pStrX, cchX);
+    //static StringCommon::CIconvOffer offer(ICONV_LOCALE, "UCS-2LE");
+    const size_t ret = StringCommon::g_offerL2U.StringConvert(pNativeStr, uLength, pStrX, cchX);
     return ret;
 
 #elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)

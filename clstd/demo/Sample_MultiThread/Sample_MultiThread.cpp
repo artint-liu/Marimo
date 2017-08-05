@@ -55,6 +55,35 @@ void TestMessage()
 void TestWait()
 {
   CLOG(__FUNCTION__);
+  const int sample_count = 10;
+  SampleWait* t[sample_count];
+  clstd::Signal s;
+
+  for(int i = 0; i < sample_count; i++)
+  {
+    t[i] = new SampleWait(&s);
+    t[i]->Start();
+  }
+
+  // 这句放在这里希望上面能够测试多线程中文log输出
+  CLOG("测试多线程使用同一个信号等待时，激活信号的逻辑，设计上希望只有一个线程醒来");
+
+  for(int i = 0; i < sample_count; i++)
+  {
+    clstd_cli::getch();
+    CLOG("main: notify");
+    s.Set();
+  }
+
+  for(int i = 0; i < sample_count; i++)
+  {
+    SAFE_DELETE(t[i]);
+  }
+}
+
+void TestWaitTimeout()
+{
+  CLOG(__FUNCTION__);
   SampleTimeout t;
   t.Start();
   while(t.Wait(2000) == clstd::Thread::Result_TimeOut) {
@@ -79,6 +108,9 @@ namespace sample
 int main()
 {
   TestWait();
+  sample::pause();
+
+  TestWaitTimeout();
   sample::pause();
 
   TestMessage();

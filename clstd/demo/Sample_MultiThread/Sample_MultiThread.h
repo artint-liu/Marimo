@@ -182,6 +182,25 @@ public:
 
 };
 
+// 测试clstd::Signal等待
+class SampleWait : public clstd::Thread
+{
+  clstd::Signal* m_pSignal;
+public:
+  SampleWait(clstd::Signal* pSignal)
+    : m_pSignal(pSignal) {}
+
+  virtual i32 StartRoutine() override
+  {
+    CLOG("thread(%u): 就绪", GetId());
+    m_pSignal->Wait();
+    CLOG("thread(%u): 收到通知!", GetId());
+    CLOG("thread(%u): exit...", GetId());
+    return 8282;
+  }
+};
+
+
 // 测试clstd::Signal等待超时
 class SampleTimeout : public clstd::Thread
 {

@@ -443,29 +443,29 @@ namespace clstd
     int TCPListener::WaitSocket()
     {
       fd_set ReadSet;
-      fd_set ExceptSet;
+      //fd_set ExceptSet;
       int result = 0;
 
       FD_ZERO(&ReadSet);
       FD_SET(m_socket, &ReadSet);
 
-      FD_ZERO(&ExceptSet);
-      FD_SET(m_socket, &ExceptSet);
+      //FD_ZERO(&ExceptSet);
+      //FD_SET(m_socket, &ExceptSet);
 
       ASSERT(m_SocketList.size() < FD_SETSIZE - 1); // ServerSocket 要占用一个
       for(auto it = m_SocketList.begin(); it != m_SocketList.end(); ++it)
       {
-        ASSERT(*it != NULL);
+        ASSERT(*it != 0);
         FD_SET(*it, &ReadSet);
-        FD_SET(*it, &ExceptSet);
+        //FD_SET(*it, &ExceptSet);
       }
 
-      result = ::select(0, &ReadSet, 0, &ExceptSet, 0);
+      result = ::select(m_socket + 1, &ReadSet, 0, 0, 0);
 
       if(result == 0)
       {
         // Time Out
-        ASSERT(ExceptSet.fd_count == 0);
+        //ASSERT(ExceptSet.fd_count == 0);
       }
       else if(result == SOCKET_ERROR)
       {
@@ -476,7 +476,7 @@ namespace clstd
       }
       else if(result != 0)
       {
-        ASSERT(ExceptSet.fd_count == 0);
+        //ASSERT(ExceptSet.fd_count == 0);
         if(FD_ISSET(m_socket, &ReadSet))
         {
           SOCKADDR_IN clientSockAddr;
