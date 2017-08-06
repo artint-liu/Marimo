@@ -197,7 +197,11 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
     break;
 
   case GXWM_CLOSE:
+#ifdef REFACTOR_SYSQUEUE
+    GXUIPostSysMessage(GXSysMessage_Quit, NULL, NULL);
+#else
     GXUIPostRootMessage(NULL, GXWM_QUIT, NULL, NULL);
+#endif // #ifdef REFACTOR_SYSQUEUE
     return FALSE;
 
   case GXWM_KEYDOWN:
@@ -251,6 +255,8 @@ inline void InlSetUIMSG(MOUIMSG& Msg, GXHWND hWnd, GXUINT message, GXWPARAM wPar
   Msg.yPos = ptCursor.y;
 }
 
+//#ifdef REFACTOR_SYSQUEUE
+//#else
 GXLRESULT GXUIMsgThread::SendRemoteMessage( GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam )
 {
   // TODO: 这个没有进行过多线程同时向UI线程SendMessage的测试
@@ -295,7 +301,7 @@ GXBOOL GXUIMsgThread::CallSentMessageProc()
   m_SendingWaiter.Set();
   return TRUE;
 }
-
+//#endif // #ifdef REFACTOR_SYSQUEUE
 //////////////////////////////////////////////////////////////////////////
 namespace GrapX
 {
@@ -459,16 +465,7 @@ GXBOOL GXDLLAPI gxPostMessageW(
 {
   GXSTATION* pStation = GXSTATION_PTR(GXUIGetStation());
   MOUIMSG ThreadMsg;
-  //GXPOINT ptCursor;
-  //gxGetCursorPos(&ptCursor);
 
-  //ThreadMsg.handle = hWnd;
-  //ThreadMsg.message = Msg;
-  //ThreadMsg.wParam = wParam;
-  //ThreadMsg.lParam = lParam;
-  //ThreadMsg.dwTime = gxGetTickCount();
-  //ThreadMsg.xPos = ptCursor.x;
-  //ThreadMsg.yPos = ptCursor.y;
   InlSetUIMSG(ThreadMsg, hWnd, Msg, wParam, lParam);
 
   GXBOOL bval = pStation->m_pMsgThread->PostMessage(&ThreadMsg); // FIXME: 退出时pStation->m_pMsgThread可能会为NULL

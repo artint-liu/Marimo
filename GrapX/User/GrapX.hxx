@@ -36,6 +36,14 @@ namespace GXUI
   class Layout;
 }
 
+namespace GrapX
+{
+  namespace Internal
+  {
+    class SystemMessage;
+  }
+}
+
 struct STOCKOBJECT;
 
 #define GXSTATION_MAGIC      ((GXDWORD)0x54535847)  // "GXST"
@@ -323,6 +331,23 @@ struct MOUIMSG
   i32       yPos;
 };
 
+struct GXSYSMSG
+{
+  void*       handle;
+  GXUINT      message; // GXWndMsg, GXSysMessage
+  GXWPARAM    wParam;
+  GXLPARAM    lParam;
+  u32         dwTime;
+  //i32         xPos;
+  //i32         yPos;
+};
+
+STATIC_ASSERT(sizeof(GXSYSMSG) == 
+  sizeof(void*) +
+  sizeof(GXUINT) +
+  sizeof(GXWPARAM) +
+  sizeof(GXLPARAM) +
+  sizeof(u32));
 
 #define GXCARET_AVAILABLE     0x80000000L        // 可用标志
 #define GXCARET_VISIBLE       0x00000001L        // 是否被用户设置为显示
@@ -365,6 +390,7 @@ struct GXSTATION
 {
   typedef clhash_map<clStringA, GUnknown*>  NamedInterfaceDict;
   typedef clhash_map<clStringA, CONSOLECMD> CmdDict;
+  typedef GrapX::Internal::SystemMessage SystemMessage;
   GXDWORD             dwMagic;
   GXDWORD             m_dwFlags; // GXSTATIONSTATEFLAG_
   IGXPlatform*        lpPlatform;
@@ -409,6 +435,7 @@ struct GXSTATION
   NamedInterfaceDict  m_NamedPool;
   CmdDict             m_CommandDict;
   GXUIMsgThread*      m_pMsgThread;
+  SystemMessage*      m_pSysMsg;
   GXTIMERCHAIN*       m_pTimerChain;
 
 #ifdef ENABLE_AERO

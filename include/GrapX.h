@@ -1,6 +1,5 @@
 ﻿//////////////////////////////////////////////////////////////////////////
 // GrapX.H
-
 //////////////////////////////////////////////////////////////////////////
 // 
 // _GRAPX_DEF_HEADER_ 定义头文件
@@ -3403,6 +3402,9 @@ enum GXWndMsg
   GXWM_MBUTTONUP              = 0x0208,
   GXWM_MBUTTONDBLCLK          = 0x0209,
   GXWM_MOUSEWHEEL             = 0x020A,
+  GXWM_XBUTTONDOWN            = 0x020B,
+  GXWM_XBUTTONUP              = 0x020C,
+  GXWM_XBUTTONDBLCLK          = 0x020D,
   GXWM_MOUSELAST              = 0x020E,
 
   GXWM_PARENTNOTIFY           = 0x0210,
@@ -3452,6 +3454,23 @@ enum GXWndMsg
   GXWM_APP                    = 0x8000,  // WM_APP
   GXWM_STRING                 = 0xC000,  // 0xC000 through 0xFFFF String messages for use by applications.
 }; // enum GXWndMsg
+
+// 操作系统消息
+enum GXSysMessage
+{
+  GXSysMessage_Bits        = 0x00010000,
+  GXSysMessage_Quit        = GXSysMessage_Bits | GXWM_QUIT,
+  GXSysMessage_LButtonDown = GXSysMessage_Bits | GXWM_LBUTTONDOWN,
+  GXSysMessage_LButtonUp   = GXSysMessage_Bits | GXWM_LBUTTONUP,
+  GXSysMessage_MButtonDown = GXSysMessage_Bits | GXWM_MBUTTONDOWN,
+  GXSysMessage_MButtonUp   = GXSysMessage_Bits | GXWM_MBUTTONUP,
+  GXSysMessage_RButtonDown = GXSysMessage_Bits | GXWM_RBUTTONDOWN,
+  GXSysMessage_RButtonUp   = GXSysMessage_Bits | GXWM_RBUTTONUP,
+  GXSysMessage_XButtonDown = GXSysMessage_Bits | GXWM_XBUTTONDOWN,
+  GXSysMessage_XButtonUp   = GXSysMessage_Bits | GXWM_XBUTTONUP,
+  GXSysMessage_MouseMove   = GXSysMessage_Bits | GXWM_MOUSEMOVE,
+  GXSysMessage_Drop        = GXSysMessage_Bits | GXWM_DROPFILES,
+};
 
 // GXWM_DATAPOOLOPERATION wParam 参数
 enum DataPoolOperation

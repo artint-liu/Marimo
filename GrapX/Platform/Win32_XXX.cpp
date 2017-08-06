@@ -79,7 +79,10 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     if(pGraphics != NULL)
     {
       lpStation = GrapX::Internal::GetStationPtr();  // 下面用到
+#ifdef REFACTOR_SYSQUEUE
+#else
       GXUIPostRootMessage(NULL, message, wParam, lParam);
+#endif // #ifdef REFACTOR_SYSQUEUE
     }
   }
 #endif // _DEV_DISABLE_UI_CODE
@@ -99,9 +102,49 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     break;
     //return GXUISetCursor(wParam, lParam);
 #endif // _DEV_DISABLE_UI_CODE
+
   case WM_LBUTTONDOWN:
+  case WM_MBUTTONDOWN:
+  case WM_RBUTTONDOWN:
+  case WM_XBUTTONDOWN:
+#ifdef REFACTOR_SYSQUEUE
+    if(message == WM_LBUTTONDOWN) {
+      GXUIPostSysMessage(GXSysMessage_LButtonDown, wParam, lParam);
+    }
+    else if(message == WM_MBUTTONDOWN) {
+      GXUIPostSysMessage(GXSysMessage_MButtonDown, wParam, lParam);
+    }
+    if(message == WM_RBUTTONDOWN) {
+      GXUIPostSysMessage(GXSysMessage_RButtonDown, wParam, lParam);
+    }
+    if(message == WM_XBUTTONDOWN) {
+      GXUIPostSysMessage(GXSysMessage_XButtonDown, wParam, lParam);
+    }
+#endif // #ifdef REFACTOR_SYSQUEUE
     SetCapture(hWnd);
     break;
+
+  case WM_LBUTTONUP:
+  case WM_MBUTTONUP:
+  case WM_RBUTTONUP:
+  case WM_XBUTTONUP:
+#ifdef REFACTOR_SYSQUEUE
+    if(message == WM_LBUTTONUP) {
+      GXUIPostSysMessage(GXSysMessage_LButtonUp, wParam, lParam);
+    }
+    else if(message == WM_MBUTTONUP) {
+      GXUIPostSysMessage(GXSysMessage_MButtonUp, wParam, lParam);
+    }
+    if(message == WM_RBUTTONUP) {
+      GXUIPostSysMessage(GXSysMessage_RButtonUp, wParam, lParam);
+    }
+    if(message == WM_XBUTTONUP) {
+      GXUIPostSysMessage(GXSysMessage_XButtonUp, wParam, lParam);
+    }
+#endif // #ifdef REFACTOR_SYSQUEUE
+    ReleaseCapture();
+    break;
+
   case WM_PAINT:
     if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
     {
@@ -109,9 +152,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     }
     ValidateRect(hWnd, NULL);
     break;
-  case WM_LBUTTONUP:
-    ReleaseCapture();
-    break;
+
   case WM_CLOSE:
     {
       lpStation = GrapX::Internal::GetStationPtr();
@@ -121,6 +162,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
       DestroyWindow(hWnd);
     }
     break;
+
   case GXWM_EXITSIZEMOVE:
     {
       TRACE("GXWM_EXITSIZEMOVE\n");
@@ -141,6 +183,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
       }
       return lval;
     }
+
   case WM_DROPFILES:
     {
       if(lpStation == NULL) {
@@ -157,9 +200,14 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
         Strings.push_back(szFilename);
       }
       DragFinish((HDROP)wParam);
+#ifdef REFACTOR_SYSQUEUE
+      GXUIPostSysMessage(GXSysMessage_Drop, NULL, (GXLPARAM)&Strings);
+#else
       GXUIPostRootMessage(NULL, WM_DROPFILES, NULL, (GXLPARAM)&Strings);
+#endif // #ifdef REFACTOR_SYSQUEUE
     }
     break;
+
   case WM_SYSKEYDOWN:
     if(wParam == VK_RETURN)
     {
@@ -509,8 +557,9 @@ GXBOOL IntSetCursor(GXWPARAM wParam, LPARAM lParam)
 #endif // #ifndef _DEV_DISABLE_UI_CODE
 
 //////////////////////////////////////////////////////////////////////////
+#ifdef REFACTOR_SYSQUEUE
 
-i32 GXUIMsgThread::Run()
+i32 GXUIMsgThread::StartRoutine()
 {
 #ifndef _DEV_DISABLE_UI_CODE
   GXApp* pApp = (GXApp*)m_pPlatform->m_pApp;
@@ -538,6 +587,39 @@ i32 GXUIMsgThread::Run()
   GXDestroyRootFrame();
   return NULL;
 }
+
+#else
+
+i32 GXUIMsgThread::StartRoutine()
+{
+#ifndef _DEV_DISABLE_UI_CODE
+  GXApp* pApp = (GXApp*)m_pPlatform->m_pApp;
+  GXGraphics* pGraphics = pApp->GetGraphicsUnsafe();
+
+  pGraphics->Activate(TRUE);  // 开始捕获Graphics状态
+  GXHRESULT hval = pApp->OnCreate();
+  pGraphics->Activate(FALSE);
+
+  if(GXFAILED(hval)) {
+    return hval;
+  }
+
+  GXMSG gxmsg;
+  while(gxGetMessage(&gxmsg, NULL))
+  {
+    // 在处理拖拽消息时, 这个函数可能要很久才返回
+    gxDispatchMessageW(&gxmsg);
+  }
+#endif // _DEV_DISABLE_UI_CODE
+
+  pApp->OnDestroy();
+
+  // Station在UI线程内的清理
+  GXDestroyRootFrame();
+  return NULL;
+}
+
+#endif
 //////////////////////////////////////////////////////////////////////////
 void ResolverMacroStringToD3DMacro(GXLPCSTR szMacros, GXDefinitionArray& aMacros)
 {

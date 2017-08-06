@@ -361,23 +361,36 @@ GXBOOL GXWnd::AnalyzeMouseMoveMsg(GXINOUT GXMSG* msg, GXLPPOINT pptMSWinClient)
   }
   return TRUE;
 }
+#ifdef REFACTOR_SYSQUEUE
+
 extern "C" GXBOOL GXDLLAPI GXUIPostRootMessage(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
 {
-//#ifdef _ENABLE_STMT
-//  GXWnd::s_msg[GXWnd::s_idxMsgStackBottom].hwnd    = hWnd;
-//  GXWnd::s_msg[GXWnd::s_idxMsgStackBottom].message  = message;
-//  GXWnd::s_msg[GXWnd::s_idxMsgStackBottom].wParam    = wParam;
-//  GXWnd::s_msg[GXWnd::s_idxMsgStackBottom].lParam    = lParam;
-//  GXWnd::s_msg[GXWnd::s_idxMsgStackBottom].time    = gxGetTickCount();
-//  GetCursorPos((LPPOINT)&GXWnd::s_msg[GXWnd::s_idxMsgStackBottom].pt);
-//  ScreenToClient(hWnd, (LPPOINT)&GXWnd::s_msg[GXWnd::s_idxMsgStackBottom].pt);
-//
-//  GXWnd::s_idxMsgStackBottom++;
-//  GXWnd::s_idxMsgStackBottom &= 63;
-//
-//  STMT::SetTaskEvent(STMT::hDefHandle);
-//  STMT::YieldTask();
-//#else
+  GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
+  GXSYSMSG msg;
+
+  msg.handle = hWnd;
+  msg.message = message;
+  msg.wParam = wParam;
+  msg.lParam = lParam;
+  msg.dwTime = gxGetTickCount();
+
+  if(lpStation->m_pSysMsg == NULL) {
+    return FALSE;
+  }
+
+  lpStation->m_pSysMsg->Post(msg);
+  return TRUE;
+}
+
+extern "C" GXBOOL GXDLLAPI GXUIPostSysMessage(GXSysMessage message, GXWPARAM wParam, GXLPARAM lParam)
+{
+  return GXUIPostRootMessage(NULL, message, wParam, lParam);
+}
+
+#else
+
+extern "C" GXBOOL GXDLLAPI GXUIPostRootMessage(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
+{
   GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   MOUIMSG ThreadMsg;
   GXPOINT ptCursor;
@@ -405,9 +418,10 @@ extern "C" GXBOOL GXDLLAPI GXUIPostRootMessage(GXHWND hWnd, GXUINT message, GXWP
   if(lpStation->m_pMsgThread == NULL)
     return FALSE;
   lpStation->m_pMsgThread->PostMessage(&ThreadMsg);
-//#endif // #ifdef _ENABLE_STMT
   return TRUE;
 }
+
+#endif // #ifdef REFACTOR_SYSQUEUE
 
 //////////////////////////////////////////////////////////////////////////
 //GXLPWND GXWnd::GetActive()

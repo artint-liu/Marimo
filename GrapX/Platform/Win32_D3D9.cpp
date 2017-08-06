@@ -99,8 +99,14 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
   STMT::CreateTask(1024 * 1024, UITask, NULL);
 #else
   GXSTATION* pStation = GrapX::Internal::GetStationPtr();
+
+# ifdef REFACTOR_SYSQUEUE
+  pStation->m_pSysMsg = new GrapX::Internal::SystemMessage(this);
+  //pStation->m_pSysMsg->Start();
+# else
   pStation->m_pMsgThread = new GXUIMsgThread(this);
   pStation->m_pMsgThread->Start();
+# endif
     //static_cast<MessageThread*>(MessageThread::CreateThread((CLTHREADCALLBACK)UITask, this));
 #endif // #ifdef _ENABLE_STMT
 //#endif // _DEV_DISABLE_UI_CODE

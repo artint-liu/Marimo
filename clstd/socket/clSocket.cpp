@@ -440,7 +440,7 @@ namespace clstd
       return SocketResult_Ok;
     }
 
-    int TCPListener::WaitSocket()
+    int TCPListener::WaitSocket() // TODO: 和WaitSocketAsync()合并
     {
       fd_set ReadSet;
       //fd_set ExceptSet;
@@ -529,7 +529,7 @@ namespace clstd
       return result;
     }
 
-    int TCPListener::WaitSocketAsync(long timeout_sec, TCPClientProc proc)
+    int TCPListener::WaitSocketAsync(long timeout_sec, TCPClientProc proc) // TODO: 和WaitSocket()合并
     {
       fd_set ReadSet;
       //fd_set ExceptSet;
