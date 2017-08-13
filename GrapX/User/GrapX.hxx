@@ -475,6 +475,10 @@ struct GXSTATION
 
   void        SetLazyUpdate   (); // 设置lazy update标记
   GXBOOL      CheckLazyUpdate (); // 检查并清空lazy update
+
+  GXBOOL      ConvMessageX    (GXLPMSG lpMsg, GXSYSMSG &SysMsg);
+  GXBOOL      ConvMessageX    (GXLPMSG lpMsg, MOUIMSG  &PostMsg);
+  GXBOOL      IntPeekMessage   (GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessage);
 };
 typedef GXSTATION*        GXLPSTATION;
 typedef const GXSTATION*  GXLPCSTATION;

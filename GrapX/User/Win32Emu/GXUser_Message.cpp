@@ -113,7 +113,7 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
   //  ( ! pMouseFocus->IsEnabled())) {
   //    return FALSE;
   //}
-  GXDWORD ht = HTERROR;
+  GXDWORD ht = GXHTERROR;
   GXBOOL  bRet = TRUE; // 这个初始值关系到后面的消息处理逻辑
 
   switch(message)
@@ -259,46 +259,43 @@ inline void InlSetUIMSG(MOUIMSG& Msg, GXHWND hWnd, GXUINT message, GXWPARAM wPar
 //#else
 GXLRESULT GXUIMsgThread::SendRemoteMessage( GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam )
 {
-  // TODO: 这个没有进行过多线程同时向UI线程SendMessage的测试
-  MOUIMSG Msg;
-  GXLRESULT result;
-  InlSetUIMSG(Msg, hWnd, message, wParam, lParam);
+  MOUIMSG msg;
+  GXLRESULT result = 0;
+  InlSetUIMSG(msg, hWnd, message, wParam, lParam);
 
-  m_locker.Lock();
-  while(m_pResult) {
-    m_locker.Unlock();
-    m_SendingWaiter.Wait();
-    m_locker.Lock();
-  }
-  m_pSendingMsg = &Msg;
-  m_pResult = &result;
-  m_locker.Unlock();
+  ASSERT(gxGetCurrentThreadId() != m_dwThreadId);
 
+  clstd::ScopedLocker __locker(m_RemoteLocker);
+
+  m_pRemoteResult = &result;
+
+  // 注意这里没有锁，消息处理线程根据m_pRemoteMsg有效性来处理
+  // 所以m_pRemoteMsg要在所有工作准备好以后再设置
+  m_pRemoteMsg = &msg;
   m_signal.Set();
-  m_SendingWaiter.Wait();
+  m_RemoteSignal.Wait();
   return result;
 }
 
-GXBOOL GXUIMsgThread::CallSentMessageProc()
+GXBOOL GXUIMsgThread::ResponseSentMessage() // 其它线程Send过来的消息
 {
-  m_locker.Lock();
-  if(m_pResult == NULL) {
-    m_locker.Unlock();
+  if(_CL_NOT_(m_pRemoteMsg)) {
     return FALSE;
   }
 
-  const GXLPWND lpWnd = GXWND_PTR(m_pSendingMsg->handle);
+  const GXLPWND lpWnd = GXWND_PTR(m_pRemoteMsg->handle);
   if(lpWnd && lpWnd->m_lpWndProc) {
-    *m_pResult = lpWnd->m_lpWndProc((GXHWND)m_pSendingMsg->handle, m_pSendingMsg->message, 
-      m_pSendingMsg->wParam, m_pSendingMsg->lParam);
+    *m_pRemoteResult = lpWnd->m_lpWndProc((GXHWND)m_pRemoteMsg->handle, m_pRemoteMsg->message, 
+      m_pRemoteMsg->wParam, m_pRemoteMsg->lParam);
   }
   else {
-    *m_pResult = 0;
+    *m_pRemoteResult= 0;
   }
-  m_pResult = NULL;
-  m_pSendingMsg = NULL;
-  m_locker.Unlock();
-  m_SendingWaiter.Set();
+  
+  m_pRemoteResult = NULL;
+  m_pRemoteMsg = NULL;
+  m_RemoteSignal.Set();
+
   return TRUE;
 }
 //#endif // #ifdef REFACTOR_SYSQUEUE
@@ -496,7 +493,7 @@ GXBOOL GXDLLAPI gxPeekMessageW(
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
 
 NEXT_PEEK:
-  lpStation->m_pMsgThread->CallSentMessageProc();
+  lpStation->m_pMsgThread->ResponseSentMessage();
   GXBOOL bVal = lpStation->m_pMsgThread->PeekMessage(&ThreadMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
   if( ! bVal) {
     return bVal;
@@ -526,13 +523,13 @@ NEXT_PEEK:
 
 GXBOOL GXDLLAPI IntGetMessageX(GXLPMSG lpMsg, MOUIMSG &ThreadMsg, GXSTATION* lpStation)
 {
-  lpMsg->hwnd = (GXHWND)ThreadMsg.handle;
+  lpMsg->hwnd    = (GXHWND)ThreadMsg.handle;
   lpMsg->message = ThreadMsg.message;
-  lpMsg->wParam = ThreadMsg.wParam;
-  lpMsg->lParam = ThreadMsg.lParam;
-  lpMsg->time = ThreadMsg.dwTime;
-  lpMsg->pt.x = ThreadMsg.xPos;
-  lpMsg->pt.y = ThreadMsg.yPos;
+  lpMsg->wParam  = ThreadMsg.wParam;
+  lpMsg->lParam  = ThreadMsg.lParam;
+  lpMsg->time    = ThreadMsg.dwTime;
+  lpMsg->pt.x    = ThreadMsg.xPos;
+  lpMsg->pt.y    = ThreadMsg.yPos;
   if(ThreadMsg.message == -1 || ThreadMsg.message == GXWM_QUIT) {
     lpMsg->message = GXWM_QUIT;
     lpStation->m_pMsgThread->PostQuitMessage((u32_ptr)ThreadMsg.handle);
@@ -548,7 +545,7 @@ GXBOOL GXDLLAPI IntGetMessageX(GXLPMSG lpMsg, MOUIMSG &ThreadMsg, GXSTATION* lpS
 // Parameter: GXLPMSG lpMsg
 // Parameter: GXHWND hWnd
 //************************************
-// messages are processed in the following order: 
+// 消息按照以下顺序（优先级）处理：
 //   Sent messages 
 //   Posted messages 
 //   Input (hardware) messages and system internal events 
@@ -575,7 +572,7 @@ GXBOOL GXDLLAPI gxGetMessage(
         }
       }
 
-      lpStation->m_pMsgThread->CallSentMessageProc();
+      lpStation->m_pMsgThread->ResponseSentMessage();
       lpStation->m_pMsgThread->GetMessage(&ThreadMsg);
       
       // 系统发送的重绘
@@ -607,7 +604,7 @@ GXBOOL GXDLLAPI gxGetMessage(
   {
     while(1)
     {
-      lpStation->m_pMsgThread->CallSentMessageProc();
+      lpStation->m_pMsgThread->ResponseSentMessage();
 
       if(lpStation->m_pMsgThread->PeekMessage(&ThreadMsg, hWnd, NULL, NULL, GXPM_REMOVE))
       {

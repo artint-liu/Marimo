@@ -3459,7 +3459,7 @@ enum GXWndMsg
 enum GXSysMessage
 {
   GXSysMessage_Bits        = 0x00010000,
-  GXSysMessage_Quit        = GXSysMessage_Bits | GXWM_QUIT,
+  //GXSysMessage_Quit        = GXSysMessage_Bits | GXWM_QUIT,
   GXSysMessage_LButtonDown = GXSysMessage_Bits | GXWM_LBUTTONDOWN,
   GXSysMessage_LButtonUp   = GXSysMessage_Bits | GXWM_LBUTTONUP,
   GXSysMessage_MButtonDown = GXSysMessage_Bits | GXWM_MBUTTONDOWN,

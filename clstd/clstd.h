@@ -78,6 +78,7 @@
   ((CLDWORD)(CLBYTE)(ch2) << 16) | ((CLDWORD)(CLBYTE)(ch3) << 24 ))
 #define CLMAKEWORD(a, b)      ((CLWORD)(((CLBYTE)(((CLDWORD_PTR)(a)) & 0xff)) | ((CLWORD)((CLBYTE)(((CLDWORD_PTR)(b)) & 0xff))) << 8))
 #define CLMAKELONG(a, b)      ((CLLONG)(((CLWORD)(((CLDWORD_PTR)(a)) & 0xffff)) | ((CLDWORD)((CLWORD)(((CLDWORD_PTR)(b)) & 0xffff))) << 16))
+#define _CL_NOT_(x)           (!(x)) // 这样醒目！
 
 template<class _Ty>
 inline void InlSetZeroT(_Ty& t) {

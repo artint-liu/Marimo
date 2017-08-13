@@ -354,6 +354,84 @@ GXBOOL GXSTATION::CheckLazyUpdate()
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+GXBOOL GXSTATION::ConvMessageX(GXLPMSG lpMsg, GXSYSMSG &SysMsg)
+{
+  lpMsg->hwnd    = NULL; // 考虑去掉 SysMsg.handle;
+  lpMsg->message = SysMsg.message & (~GXSysMessage_Bits); // GXWndMsg, GXSysMessage
+  lpMsg->wParam  = SysMsg.wParam;
+  lpMsg->lParam  = SysMsg.lParam;
+  lpMsg->time    = SysMsg.dwTime;
+  gxGetCursorPos(&lpMsg->pt);
+  //if(SysMsg.message == GXSysMessage_Quit)
+  //{
+  //  lpMsg->message = GXWM_QUIT;
+  //  m_pMsgThread->PostQuitMessage((u32_ptr)SysMsg.wParam);
+  //  return FALSE;
+  //}
+  return TRUE;
+}
+
+GXBOOL GXSTATION::ConvMessageX(GXLPMSG lpMsg, MOUIMSG &UIMsg)
+{
+  lpMsg->hwnd = (GXHWND)UIMsg.handle;
+  lpMsg->message = UIMsg.message;
+  lpMsg->wParam = UIMsg.wParam;
+  lpMsg->lParam = UIMsg.lParam;
+  lpMsg->time = UIMsg.dwTime;
+  lpMsg->pt.x = UIMsg.xPos;
+  lpMsg->pt.y = UIMsg.yPos;
+  if(UIMsg.message == -1 || UIMsg.message == GXWM_QUIT) {
+    lpMsg->message = GXWM_QUIT;
+    m_pMsgThread->PostQuitMessage((u32_ptr)UIMsg.handle);
+    return FALSE;
+  }
+  return TRUE;
+}
+
+GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg);
+//////////////////////////////////////////////////////////////////////////
+// 消息按照以下顺序（优先级）处理：
+//   Sent messages 
+//   Posted messages 
+//   Input (hardware) messages and system internal events 
+//   Sent messages (again) 
+//   WM_PAINT messages 
+//   WM_TIMER messages 
+GXBOOL GXSTATION::IntPeekMessage(GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessage)
+{
+  MOUIMSG PostMsg;
+  GXSYSMSG SysMsg;
+
+  m_pMsgThread->ResponseSentMessage();
+
+  if(m_pMsgThread->PeekMessage(&PostMsg, hWnd, NULL, NULL, bRemoveMessage ? GXPM_REMOVE : FALSE))
+  {
+    return ConvMessageX(lpMsg, PostMsg);
+  }
+
+  if(m_pSysMsg->Peek(&SysMsg, NULL, NULL, bRemoveMessage))
+  {
+
+    GXUINT uOriginMessage = lpMsg->message;
+    if(IntAnalyzeMessage(lpMsg)) {
+      // App消息先于UI消息处理, 保证得到正确的hUIHoverWnd信息
+      if(bRemoveMessage)
+      {
+        AppHandle(uOriginMessage, lpMsg->wParam, lpMsg->lParam);
+      }
+      //break;
+    }
+
+    //if( ! ConvMessageX(lpMsg, SysMsg))
+    //{
+    //  return FALSE;
+    //}
+  }
+  return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////////
 //#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 //GXSTATION::GXSTATION(HWND hWnd, IGXPlatform* lpPlatform)
 //#else
