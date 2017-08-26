@@ -197,11 +197,11 @@ GXBOOL GXDLLAPI IntAnalyzeMessage(GXINOUT GXMSG* msg)
     break;
 
   case GXWM_CLOSE:
-#ifdef REFACTOR_SYSQUEUE
-    GXUIPostSysMessage(GXSysMessage_Quit, NULL, NULL);
-#else
+//#ifdef REFACTOR_SYSQUEUE
+//    GXUIPostSysMessage(GXSysMessage_Quit, NULL, NULL);
+//#else
     GXUIPostRootMessage(NULL, GXWM_QUIT, NULL, NULL);
-#endif // #ifdef REFACTOR_SYSQUEUE
+//#endif // #ifdef REFACTOR_SYSQUEUE
     return FALSE;
 
   case GXWM_KEYDOWN:
@@ -257,6 +257,12 @@ inline void InlSetUIMSG(MOUIMSG& Msg, GXHWND hWnd, GXUINT message, GXWPARAM wPar
 
 //#ifdef REFACTOR_SYSQUEUE
 //#else
+
+clstd::Signal* GXUIMsgThread::GetMessageSignal()
+{
+  return &m_signal;
+}
+
 GXLRESULT GXUIMsgThread::SendRemoteMessage( GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam )
 {
   MOUIMSG msg;
@@ -557,9 +563,29 @@ GXBOOL GXDLLAPI gxGetMessage(
   GXLPMSG lpMsg,
   GXHWND  hWnd)
 {
-  MOUIMSG ThreadMsg;
   GXSTATION* lpStation = GXSTATION_PTR(GXUIGetStation());
 
+#ifdef REFACTOR_SYSQUEUE
+  if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
+  {
+    CLBREAK;
+  }
+  else
+  {
+    while(_CL_NOT_(lpStation->IntPeekMessage(lpMsg, hWnd, TRUE)))
+    {
+      lpStation->AppRender();
+    }
+
+    if(lpMsg->message == GXWM_QUIT) {
+      lpStation->m_pMsgThread->PostQuitMessage((u32_ptr)lpMsg->lParam);
+      return FALSE;
+    }
+  }
+  return TRUE;
+
+#else
+  MOUIMSG ThreadMsg;
   if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
   {
     while(1)
@@ -625,7 +651,7 @@ GXBOOL GXDLLAPI gxGetMessage(
       }
     }
   }
-
+#endif
   return TRUE;
 }
 

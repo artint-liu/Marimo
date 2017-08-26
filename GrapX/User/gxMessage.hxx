@@ -13,31 +13,16 @@ namespace GrapX
       typedef cllist<GXSYSMSG> SysMsgList;
       IGXPlatform*  m_pPlatform;
 
-      clstd::Signal         m_signal;
+      clstd::Signal*        m_pSignal;
       clstd::Locker         m_locker;
       SysMsgList            m_messages;
 
     public:
-      SystemMessage(IGXPlatform* pPlatform)
+      SystemMessage(IGXPlatform* pPlatform, clstd::Signal* pSignal)
         : m_pPlatform(pPlatform)
-        //, m_pSendingMsg(NULL)
-        //, m_pResult(NULL)
+        , m_pSignal(pSignal)
       {
       }
-      //GXLRESULT   SendRemoteMessage   (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
-      //GXBOOL      CallSentMessageProc ();
-      //void PostQuitMessage(u32_ptr nExitCode)
-      //{
-      //  GXSYSMSG msg = {};
-      //  msg.message = GXSysMessage_Quit;
-      //  msg.wParam  = nExitCode;
-      //  msg.dwTime = gxGetTickCount();
-
-      //  m_locker.Lock();
-      //  m_messages.insert(m_messages.begin(), msg);
-      //  m_locker.Unlock();
-      //  m_signal.Set();
-      //}
 
       void Post(const GXSYSMSG& msg)
       {
@@ -45,7 +30,7 @@ namespace GrapX
         m_messages.push_back(msg);
         m_messages.back().dwTime = gxGetTickCount();
         m_locker.Unlock();
-        m_signal.Set();
+        m_pSignal->Set();
       }
 
       void Post(GXSysMessage message, GXWPARAM wParam, GXLPARAM lParam)
@@ -61,13 +46,39 @@ namespace GrapX
         m_messages.push_back(msg);
         m_locker.Unlock();
 
-        m_signal.Set();
+        m_pSignal->Set();
       }
 
       GXBOOL Peek(GXSYSMSG* msg, GXUINT wMsgFilterMin, GXUINT wMsgFilterMax, GXBOOL bRemoveMsg)
       {
-        CLBREAK;
+        m_locker.Lock();
+        size_t uMsgCount = m_messages.size();
+        if(uMsgCount > 0)
+        {
+          for(auto it = m_messages.begin(); it != m_messages.end(); ++it)
+          {
+            if(static_cast<GXUINT>(it->message) >= wMsgFilterMin && (static_cast<GXUINT>(it->message) <= wMsgFilterMax || wMsgFilterMax == 0))
+            {
+              if(msg != NULL) {
+                *msg = *it;
+              }
+
+              if(bRemoveMsg == 0x0001/*PM_REMOVE*/) {
+                m_messages.erase(it);
+              }
+
+              m_locker.Unlock();
+              ASSERT(uMsgCount >= 1);
+              return (b32)uMsgCount;
+            }
+          }
+        }
+        //ASSERT(m_aMessage.size() == 0);
+        m_locker.Unlock();
         return FALSE;
+
+        //CLBREAK;
+        //return FALSE;
       }
 
       GXBOOL Get(GXSYSMSG* msg, GXUINT wMsgFilterMin, GXUINT wMsgFilterMax)
@@ -116,6 +127,7 @@ public:
     m_dwThreadId = gxGetCurrentThreadId();
   }
 
+  clstd::Signal* GetMessageSignal();
   GXLRESULT   SendRemoteMessage(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
   GXBOOL      ResponseSentMessage();
   i32         StartRoutine() override;

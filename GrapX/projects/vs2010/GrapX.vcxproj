@@ -201,35 +201,8 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <UndefinePreprocessorDefinitions>
-      </UndefinePreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-    </ClCompile>
-    <Link>
-      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9d.lib;d3d9.lib;winmm.lib;clstd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <TargetMachine>MachineX86</TargetMachine>
-      <Profile>true</Profile>
-      <IgnoreSpecificDefaultLibraries>
-      </IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../third_party/FreeType/lib/x86;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x86;$(DXSDK_DIR)Lib\x86;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -239,7 +212,6 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ExceptionHandling>Async</ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -249,8 +221,36 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <Profile>true</Profile>
-      <IgnoreSpecificDefaultLibraries>
-      </IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../third_party/FreeType/lib/x86;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x86;$(DXSDK_DIR)Lib\x86;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9d.lib;d3d9.lib;winmm.lib;clstd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <Profile>true</Profile>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../third_party/FreeType/lib/x86;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x86;$(DXSDK_DIR)Lib\x86;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -320,14 +320,15 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -337,8 +338,7 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x64;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x64;$(DXSDK_DIR)lib/x64;$(VLDDIR)/lib/Win64</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>
-      </IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -349,7 +349,9 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -365,8 +367,7 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>$(ProjectDir)../../third_party/FreeType/lib/x64;$(ProjectDir)../../../clstd/bin/;$(ProjectDir)../../../clstd/third_party/pthread/lib;$(ProjectDir)../../../clstd/third_party/zlib/lib/x64;$(DXSDK_DIR)lib/x64;$(VLDDIR)/lib/Win64</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>
-      </IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>libcmtd.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_CLI|x64'">
@@ -459,8 +460,8 @@
     <ClInclude Include="..\..\..\include\GrapX\gvSkinnedMesh.h" />
     <ClInclude Include="..\..\..\include\GrapX\GXCanvas.h" />
     <ClInclude Include="..\..\..\include\GrapX\GXCanvas3D.h" />
-    <ClInclude Include="..\..\..\include\GrapX\gxDevice.H" />
-    <ClInclude Include="..\..\..\include\GrapX\gxError.H" />
+    <ClInclude Include="..\..\..\include\GrapX\gxDevice.h" />
+    <ClInclude Include="..\..\..\include\GrapX\gxError.h" />
     <ClInclude Include="..\..\..\include\GrapX\GXFont.h" />
     <ClInclude Include="..\..\..\include\GrapX\GXGDI.h" />
     <ClInclude Include="..\..\..\include\GrapX\GXGraphics.h" />
@@ -526,7 +527,7 @@
     <ClInclude Include="..\..\User\DataPoolErrorMsg.h" />
     <ClInclude Include="..\..\User\DataPoolImpl.h" />
     <ClInclude Include="..\..\User\DesktopWindowsMgr.h" />
-    <ClInclude Include="..\..\User\GrapX.Hxx" />
+    <ClInclude Include="..\..\User\GrapX.hxx" />
     <ClInclude Include="..\..\User\GrapXDef.h" />
     <ClInclude Include="..\..\User\gxAdvancedUI.h" />
     <ClInclude Include="..\..\User\gxMessage.hxx" />

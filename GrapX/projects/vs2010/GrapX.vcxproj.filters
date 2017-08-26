@@ -150,7 +150,7 @@
     <ClInclude Include="..\..\User\DesktopWindowsMgr.h">
       <Filter>Lib\User</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\User\GrapX.Hxx">
+    <ClInclude Include="..\..\User\GrapX.hxx">
       <Filter>Lib\User</Filter>
     </ClInclude>
     <ClInclude Include="..\..\User\GrapXDef.h">
@@ -270,10 +270,10 @@
     <ClInclude Include="..\..\..\include\GrapX\GXCanvas3D.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\GrapX\gxDevice.H">
+    <ClInclude Include="..\..\..\include\GrapX\gxDevice.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\GrapX\gxError.H">
+    <ClInclude Include="..\..\..\include\GrapX\gxError.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX\GXFont.h">

@@ -3460,6 +3460,8 @@ enum GXSysMessage
 {
   GXSysMessage_Bits        = 0x00010000,
   //GXSysMessage_Quit        = GXSysMessage_Bits | GXWM_QUIT,
+  GXSysMessage_MouseFirst  = GXSysMessage_Bits | GXWM_MOUSEFIRST,
+  GXSysMessage_MouseMove   = GXSysMessage_Bits | GXWM_MOUSEMOVE,
   GXSysMessage_LButtonDown = GXSysMessage_Bits | GXWM_LBUTTONDOWN,
   GXSysMessage_LButtonUp   = GXSysMessage_Bits | GXWM_LBUTTONUP,
   GXSysMessage_MButtonDown = GXSysMessage_Bits | GXWM_MBUTTONDOWN,
@@ -3468,7 +3470,7 @@ enum GXSysMessage
   GXSysMessage_RButtonUp   = GXSysMessage_Bits | GXWM_RBUTTONUP,
   GXSysMessage_XButtonDown = GXSysMessage_Bits | GXWM_XBUTTONDOWN,
   GXSysMessage_XButtonUp   = GXSysMessage_Bits | GXWM_XBUTTONUP,
-  GXSysMessage_MouseMove   = GXSysMessage_Bits | GXWM_MOUSEMOVE,
+  GXSysMessage_MouseLast   = GXSysMessage_Bits | GXWM_MOUSELAST,
   GXSysMessage_Drop        = GXSysMessage_Bits | GXWM_DROPFILES,
 };
 

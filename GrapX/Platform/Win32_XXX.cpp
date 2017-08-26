@@ -103,6 +103,12 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     //return GXUISetCursor(wParam, lParam);
 #endif // _DEV_DISABLE_UI_CODE
 
+#ifdef REFACTOR_SYSQUEUE
+  case WM_MOUSEMOVE:
+    GXUIPostSysMessage(GXSysMessage_MouseMove, wParam, lParam);
+    break;
+#endif // #ifdef REFACTOR_SYSQUEUE
+
   case WM_LBUTTONDOWN:
   case WM_MBUTTONDOWN:
   case WM_RBUTTONDOWN:

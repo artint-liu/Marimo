@@ -90,19 +90,19 @@ inline void InlSetZeroT(_Ty& t) {
 #define __WFILE__ WIDEN(__FILE__)
 
 #ifndef SAFE_DELETE
-#define SAFE_DELETE(x)        if((x) != NULL) {delete (x); (x) = 0;}
+# define SAFE_DELETE(x)        if((x) != NULL) {delete (x); (x) = 0;}
 #endif // SAFE_DELETE
 
 #ifndef SAFE_DELETE_ARRAY
-#define SAFE_DELETE_ARRAY(x)  if((x) != NULL) {delete[](x); (x) = 0;}
+# define SAFE_DELETE_ARRAY(x)  if((x) != NULL) {delete[](x); (x) = 0;}
 #endif // SAFE_DELETE_ARRAY
 
 #ifndef SAFE_RELEASE
-#define SAFE_RELEASE(pobj)    if((pobj) != NULL)  {(pobj)->Release(); (pobj) = NULL; }
+# define SAFE_RELEASE(pobj)    if((pobj) != NULL)  {(pobj)->Release(); (pobj) = NULL; }
 #endif // SAFE_RELEASE
 
 #ifndef SAFE_ADDREF
-#define SAFE_ADDREF(pobj)    if((pobj) != NULL)  { (pobj)->AddRef(); }
+# define SAFE_ADDREF(pobj)    if((pobj) != NULL)  { (pobj)->AddRef(); }
 #endif // SAFE_ADDREF
 
 #ifndef countof

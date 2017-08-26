@@ -7,6 +7,7 @@
 #ifndef _GRAPHICS_X_USER_INTERFACE_GLOBAL_DEFINE_
 #define _GRAPHICS_X_USER_INTERFACE_GLOBAL_DEFINE_
 
+#define REFACTOR_SYSQUEUE
 //#include <vector>
 
 //////////////////////////////////////////////////////////////////////////
@@ -338,8 +339,6 @@ struct GXSYSMSG
   GXWPARAM    wParam;
   GXLPARAM    lParam;
   u32         dwTime;
-  //i32         xPos;
-  //i32         yPos;
 };
 
 STATIC_ASSERT(sizeof(GXSYSMSG) == 

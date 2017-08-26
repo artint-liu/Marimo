@@ -124,6 +124,9 @@ GXHRESULT GXSTATION::Finalize()
   delete (lpDesktopWnd);
   delete (lpClsAtom);
   delete (m_pMsgThread);
+#ifdef REFACTOR_SYSQUEUE
+  delete (m_pSysMsg);
+#endif // #ifdef REFACTOR_SYSQUEUE
 
   if(hClassDPA)
   {
@@ -355,23 +358,6 @@ GXBOOL GXSTATION::CheckLazyUpdate()
 
 //////////////////////////////////////////////////////////////////////////
 
-GXBOOL GXSTATION::ConvMessageX(GXLPMSG lpMsg, GXSYSMSG &SysMsg)
-{
-  lpMsg->hwnd    = NULL; // 考虑去掉 SysMsg.handle;
-  lpMsg->message = SysMsg.message & (~GXSysMessage_Bits); // GXWndMsg, GXSysMessage
-  lpMsg->wParam  = SysMsg.wParam;
-  lpMsg->lParam  = SysMsg.lParam;
-  lpMsg->time    = SysMsg.dwTime;
-  gxGetCursorPos(&lpMsg->pt);
-  //if(SysMsg.message == GXSysMessage_Quit)
-  //{
-  //  lpMsg->message = GXWM_QUIT;
-  //  m_pMsgThread->PostQuitMessage((u32_ptr)SysMsg.wParam);
-  //  return FALSE;
-  //}
-  return TRUE;
-}
-
 GXBOOL GXSTATION::ConvMessageX(GXLPMSG lpMsg, MOUIMSG &UIMsg)
 {
   lpMsg->hwnd = (GXHWND)UIMsg.handle;
@@ -383,9 +369,35 @@ GXBOOL GXSTATION::ConvMessageX(GXLPMSG lpMsg, MOUIMSG &UIMsg)
   lpMsg->pt.y = UIMsg.yPos;
   if(UIMsg.message == -1 || UIMsg.message == GXWM_QUIT) {
     lpMsg->message = GXWM_QUIT;
-    m_pMsgThread->PostQuitMessage((u32_ptr)UIMsg.handle);
-    return FALSE;
+    lpMsg->lParam  = (GXLPARAM)UIMsg.handle; // 退出代码存在MessageThread中的handle里面
+    lpMsg->hwnd    = NULL;
+    //m_pMsgThread->PostQuitMessage((u32_ptr)UIMsg.handle);
+  //  return FALSE;
   }
+  return TRUE;
+}
+
+GXBOOL GXSTATION::ConvMessageX(GXLPMSG lpMsg, GXSYSMSG &SysMsg)
+{
+  lpMsg->hwnd = NULL; // 考虑去掉 SysMsg.handle;
+  lpMsg->message = SysMsg.message & (~GXSysMessage_Bits); // GXWndMsg, GXSysMessage
+  gxGetCursorPos(&lpMsg->pt);
+  if(SysMsg.message >= GXSysMessage_MouseFirst && SysMsg.message >= GXSysMessage_MouseLast)
+  {
+    lpMsg->lParam = GXMAKELPARAM(lpMsg->pt.x, lpMsg->pt.y);
+  }
+  else
+  {
+    lpMsg->lParam = SysMsg.lParam;
+  }
+  lpMsg->wParam = SysMsg.wParam;
+  lpMsg->time = SysMsg.dwTime;
+  //if(SysMsg.message == GXSysMessage_Quit)
+  //{
+  //  lpMsg->message = GXWM_QUIT;
+  //  m_pMsgThread->PostQuitMessage((u32_ptr)SysMsg.wParam);
+  //  return FALSE;
+  //}
   return TRUE;
 }
 
@@ -412,6 +424,7 @@ GXBOOL GXSTATION::IntPeekMessage(GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessa
 
   if(m_pSysMsg->Peek(&SysMsg, NULL, NULL, bRemoveMessage))
   {
+    ConvMessageX(lpMsg, SysMsg);
 
     GXUINT uOriginMessage = lpMsg->message;
     if(IntAnalyzeMessage(lpMsg)) {
@@ -420,6 +433,7 @@ GXBOOL GXSTATION::IntPeekMessage(GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessa
       {
         AppHandle(uOriginMessage, lpMsg->wParam, lpMsg->lParam);
       }
+      return TRUE;
       //break;
     }
 
@@ -428,7 +442,7 @@ GXBOOL GXSTATION::IntPeekMessage(GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessa
     //  return FALSE;
     //}
   }
-  return TRUE;
+  return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////////

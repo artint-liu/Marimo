@@ -384,6 +384,14 @@ extern "C" GXBOOL GXDLLAPI GXUIPostRootMessage(GXHWND hWnd, GXUINT message, GXWP
 
 extern "C" GXBOOL GXDLLAPI GXUIPostSysMessage(GXSysMessage message, GXWPARAM wParam, GXLPARAM lParam)
 {
+  if(message == GXSysMessage_MouseMove)
+  {
+    GXPOINT ptCursor;
+    GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
+    ptCursor.x = (GXLONG)(GXSHORT)GXLOWORD(lParam);
+    ptCursor.y = (GXLONG)(GXSHORT)GXHIWORD(lParam);
+    lpStation->SetCursorPos(&ptCursor);
+  }
   return GXUIPostRootMessage(NULL, message, wParam, lParam);
 }
 

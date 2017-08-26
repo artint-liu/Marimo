@@ -103,6 +103,8 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
 # ifdef REFACTOR_SYSQUEUE
   pStation->m_pSysMsg = new GrapX::Internal::SystemMessage(this);
   //pStation->m_pSysMsg->Start();
+  pStation->m_pMsgThread = new GXUIMsgThread(this);
+  pStation->m_pMsgThread->Start();
 # else
   pStation->m_pMsgThread = new GXUIMsgThread(this);
   pStation->m_pMsgThread->Start();

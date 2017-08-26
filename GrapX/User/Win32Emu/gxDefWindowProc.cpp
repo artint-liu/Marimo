@@ -354,12 +354,14 @@ GXLRESULT DEFWNDPROC_SysCommand_SizeMove(GXHWND hWnd, GXUINT uCmdType, GXINT xSc
     gxShowCursor(FALSE);
   }
 #endif // ENABLE_DYNMAIC_EFFECT
+  gxSetCapture(hWnd);
   while(1)
   {
     GXMSG gxmsg;
     gxGetMessage(&gxmsg, NULL);
     if(gxmsg.message == GXWM_NCLBUTTONUP || gxmsg.message == GXWM_LBUTTONUP)
     {
+      gxReleaseCapture();
       GXUIPostRootMessage(gxmsg.hwnd, GXWM_LBUTTONUP, gxmsg.wParam, gxmsg.lParam);
       g_hSensorWnd = NULL;
       if(g_hSensorCursor != NULL)
