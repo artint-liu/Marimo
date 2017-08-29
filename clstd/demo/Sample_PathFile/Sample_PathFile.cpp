@@ -4,10 +4,18 @@
 #include "clString.h"
 #include "clPathFile.h"
 
-#ifdef _DEBUG
-# pragma comment(lib, "clstd_d.lib")
-#else
-# pragma comment(lib, "clstd.lib")
+#if defined(_CL_ARCH_X86)
+# ifdef _DEBUG
+#   pragma comment(lib, "clstd.Win32.Debug_MD.lib")
+# else
+#   pragma comment(lib, "clstd.Win32.Release_MD.lib")
+# endif
+#elif defined(_CL_ARCH_X64)
+# ifdef _DEBUG
+#   pragma comment(lib, "clstd.x64.Debug_MD.lib")
+# else
+#   pragma comment(lib, "clstd.x64.Release_MD.lib")
+# endif
 #endif
 
 #define CLPATHFILE_FUNC(__x) __x; CLOG("%s => %s", #__x, strPath.CStr());

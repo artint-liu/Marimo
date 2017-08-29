@@ -4,10 +4,19 @@
 #include "clString.h"
 #include "clUtility.h"
 #include "clRepository.h"
+
 #if defined(_CL_ARCH_X86)
-#pragma comment(lib, "clstd_d.lib")
+# ifdef _DEBUG
+#   pragma comment(lib, "clstd.Win32.Debug_MD.lib")
+# else
+#   pragma comment(lib, "clstd.Win32.Release_MD.lib")
+# endif
 #elif defined(_CL_ARCH_X64)
-#pragma comment(lib, "clstd_x64d.lib")
+# ifdef _DEBUG
+#   pragma comment(lib, "clstd.x64.Debug_MD.lib")
+# else
+#   pragma comment(lib, "clstd.x64.Release_MD.lib")
+# endif
 #endif
 
 typedef clvector<int> IntArray;

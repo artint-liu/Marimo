@@ -332,6 +332,7 @@ struct MOUIMSG
   i32       yPos;
 };
 
+#pragma pack(push, 4)
 struct GXSYSMSG
 {
   void*       handle;
@@ -340,6 +341,7 @@ struct GXSYSMSG
   GXLPARAM    lParam;
   u32         dwTime;
 };
+#pragma pack(pop)
 
 STATIC_ASSERT(sizeof(GXSYSMSG) == 
   sizeof(void*) +
