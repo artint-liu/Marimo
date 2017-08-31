@@ -151,6 +151,14 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     ReleaseCapture();
     break;
 
+  case WM_KEYDOWN:
+    GXUIPostSysMessage(GXSysMessage_KeyDown, wParam, lParam);
+    break;
+
+  case WM_KEYUP:
+    GXUIPostSysMessage(GXSysMessage_KeyUp, wParam, lParam);
+    break;
+
   case WM_PAINT:
     if(lpStation->GetUpdateRate() == UpdateRate_Lazy)
     {

@@ -3471,6 +3471,12 @@ enum GXSysMessage
   GXSysMessage_XButtonDown = GXSysMessage_Bits | GXWM_XBUTTONDOWN,
   GXSysMessage_XButtonUp   = GXSysMessage_Bits | GXWM_XBUTTONUP,
   GXSysMessage_MouseLast   = GXSysMessage_Bits | GXWM_MOUSELAST,
+
+  GXSysMessage_KeyFirst    = GXSysMessage_Bits | GXWM_KEYFIRST,
+  GXSysMessage_KeyDown     = GXSysMessage_Bits | GXWM_KEYDOWN,
+  GXSysMessage_KeyUp       = GXSysMessage_Bits | GXWM_KEYUP,
+  GXSysMessage_KeyLast     = GXSysMessage_Bits | GXWM_KEYLAST,
+
   GXSysMessage_Drop        = GXSysMessage_Bits | GXWM_DROPFILES,
 };
 
