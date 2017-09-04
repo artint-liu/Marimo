@@ -90,6 +90,7 @@
     <ClCompile Include="..\..\clBuffer.cpp" />
     <ClCompile Include="..\..\clImageDecoder.cpp" />
     <ClCompile Include="..\..\clStringAttach.cpp" />
+    <ClCompile Include="..\..\clSchedule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clFile.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="..\..\clImageDecoder.h" />
     <ClInclude Include="..\..\clStringAttach.h" />
     <ClInclude Include="..\..\clStringCommon.hxx" />
+    <ClInclude Include="..\..\clSchedule.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

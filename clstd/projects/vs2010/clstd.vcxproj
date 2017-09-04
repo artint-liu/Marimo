@@ -53,6 +53,7 @@
     <ClCompile Include="..\..\clPathFile.cpp" />
     <ClCompile Include="..\..\clQuaternion.cpp" />
     <ClCompile Include="..\..\clRepository.cpp" />
+    <ClCompile Include="..\..\clSchedule.cpp" />
     <ClCompile Include="..\..\clstd.cpp" />
     <ClCompile Include="..\..\clStock.cpp" />
     <ClCompile Include="..\..\clString.cpp" />
@@ -94,6 +95,7 @@
     <ClInclude Include="..\..\clCompress.h" />
     <ClInclude Include="..\..\clImageDecoder.h" />
     <ClInclude Include="..\..\clRepository.h" />
+    <ClInclude Include="..\..\clSchedule.h" />
     <ClInclude Include="..\..\clStaticStringsDict.h" />
     <ClInclude Include="..\..\clCrypt.h" />
     <ClInclude Include="..\..\clfifo.h" />
