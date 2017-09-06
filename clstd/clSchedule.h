@@ -11,22 +11,24 @@ namespace clstd
     {
       TimerFlag_Useless = 0x0001,   // 销毁
     };
-    TIMER* pNext;
-    void* handle;
-    TimerProc proc;
-    u32   flags;
-    u32   id;
-    u32   elapse;
-    u32   count_down;
+    typedef u32 tick_t;
 
-    TIMER(void* _handle, u32 _id, u32 _elapse, TimerProc _proc)
+    TIMER*    pNext;
+    void*     handle;
+    TimerProc proc;
+    u32       flags;
+    u32       id;
+    tick_t    elapse;
+    tick_t    timing;
+
+    TIMER(void* _handle, u32 _id, tick_t _elapse, TimerProc _proc)
       : pNext(NULL)
       , handle(_handle)
       , proc(_proc)
       , flags(0)
       , id(_id)
       , elapse(_elapse)
-      , count_down(0)
+      , timing(0)
     {}
 
     //TIMER()
@@ -46,12 +48,19 @@ namespace clstd
   
     HandleDict m_Handles;
     CountDownOrder m_Order;
-  protected:
-    TIMER* Find(void* handle, u32 id);
+    //TIMER::tick_t m_CurrTick;
 
+  protected:
+    TIMER* Find(void* handle, u32 id) const;
+    void InsertInOrder(TIMER* t);
   public:
-    void CreateTimer(void* handle, u32 id, u32 elapse, TimerProc proc);
+    Schedule();
+    virtual ~Schedule();
+
+    void CreateTimer(void* handle, u32 id, TIMER::tick_t elapse, TimerProc proc);
     void DestroyTimer(void* handle, u32 id);
+    void RemoveByHandle(void* handle);
+    TIMER::tick_t GetNearestTick(TIMER::tick_t curr_tick) const;
   };
 } // namespace clstd
 
