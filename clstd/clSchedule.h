@@ -74,7 +74,7 @@ namespace clstd
     //TIMER::tick_t m_CurrTick;
 
   protected:
-    TIMER* Find(void* handle, u32 id) const;
+    TIMER* Find(void* handle, u32 id, b32 bRemove);
     void InsertInOrder(TIMER* t);
     //TIMER* RemoveFrontFromTimerChain(CountDownOrder::iterator& it);
   public:

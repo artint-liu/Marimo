@@ -3,19 +3,31 @@
 
 namespace clstd
 {
-  TIMER* Schedule::Find(void* handle, u32 id) const
+  TIMER* Schedule::Find(void* handle, u32 id, b32 bRemove)
   {
-    HandleDict::const_iterator iterHandle = m_Handles.find(handle);
+    HandleDict::iterator iterHandle = m_Handles.find(handle);
     if(iterHandle == m_Handles.end()) {
       return NULL;
     }
 
-    IdDict::const_iterator iterId = iterHandle->second.find(id);
+    IdDict::iterator iterId = iterHandle->second.find(id);
     if(iterId == iterHandle->second.end()) {
       return NULL;
     }
 
-    return iterId->second;
+    TIMER* pTimer = iterId->second;
+
+    // 删除对象，但不释放内存
+    if(bRemove)
+    {
+      iterHandle->second.erase(iterId);
+
+      if(iterHandle->second.empty()) {
+        m_Handles.erase(iterHandle);
+      }
+    }
+
+    return pTimer;
   }
 
   void Schedule::InsertInOrder(TIMER* t) // 按发生顺序插入到表里
@@ -67,7 +79,7 @@ namespace clstd
       return;
     }
 
-    TIMER* t = Find(handle, id);
+    TIMER* t = Find(handle, id, FALSE);
     if(t) {
       t->elapse = elapse;
       t->proc = proc;
@@ -97,10 +109,8 @@ namespace clstd
       t->pNext  = NULL;     
       t->timing = 0;
 
-      // 去掉删除标记
-      if(TEST_FLAG(t->flags, TIMER::TimerFlag_Useless)) {
-        RESET_FLAG(t->flags, TIMER::TimerFlag_Useless);
-      }
+      // 肯定没有删除标记
+      ASSERT(TEST_FLAG_NOT(t->flags, TIMER::TimerFlag_Useless));
     }
     else {
       t = new TIMER(handle, id, elapse, proc);
@@ -121,7 +131,7 @@ namespace clstd
 
   void Schedule::DestroyTimer(void* handle, u32 id)
   {
-    TIMER* t = Find(handle, id);
+    TIMER* t = Find(handle, id, TRUE);
     if(t) {
       SET_FLAG(t->flags, TIMER::TimerFlag_Useless);
     }
@@ -303,6 +313,7 @@ namespace clstd
     else if(m_pFront == pTimer)
     {
       pop_front();
+      return TRUE;
     }
 
     TIMER* pPrev = m_pFront;
