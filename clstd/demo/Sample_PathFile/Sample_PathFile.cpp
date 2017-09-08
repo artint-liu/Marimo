@@ -138,13 +138,13 @@ void TestFindFile()
         if(TEST_FLAG(sFindFileData.dwAttributes, clstd::FileAttribute_Directory))
         {
           //CLOGW(_CLTEXT("(%d)\t%s\t%s"), index++, _CLTEXT("   <DIR>"), sFindFileData.Filename);
-          CLOG("(%d)\t%s\t%s", index++, ("   <DIR>"), sFindFileData.Filename);
+          CLOG("(%d)\t%s\t%s", index++, ("   <DIR>"), sFindFileData.cFileName);
         }
         else
         {
           //CLOGW(_CLTEXT("(%d)\t%8d\t%s"), index++, sFindFileData.nFileSizeLow, sFindFileData.Filename);
           clStringA strTime((clStringA::U64)sFindFileData.nLastAccessTime);
-          CLOG("(%d)\t%8d\t%s\t%s", index++, sFindFileData.nFileSizeLow, sFindFileData.Filename, strTime.CStr());
+          CLOG("(%d)\t%20d\t%s\t%s", index++, sFindFileData.nFileSize, sFindFileData.cFileName, strTime.CStr());
         }
       }
     }

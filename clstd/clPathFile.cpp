@@ -14,6 +14,8 @@
 #include "clPathFile.h"
 using namespace clstd;
 
+#define CLMAKE64FROM32(_LOW32, _HIGH32)  ((((u64)_HIGH32) << 32) | _LOW32)
+
 //template class clStringX<wch, g_Alloc_clStringW, clstd::StringW_traits>;
 //template class clStringX<ch, g_Alloc_clStringA, clStringA_traits>;
 
@@ -968,6 +970,98 @@ namespace clpathfile
 #endif
   }
   //_findfirst
+
+#ifdef _CL_SYSTEM_WINDOWS
+  CLDWORD GetFileAttributes(const wch* szPath)
+  {
+    const DWORD attr = ::GetFileAttributesW(szPath);
+    // Win32 文档: 函数如果失败，返回0xffffffff
+    if(attr == 0xffffffff) {
+      return attr;
+    }
+    return FindFile::IntTranslateAttr(attr);
+  }
+
+  CLDWORD GetFileAttributes(const ch* szPath)
+  {
+    const DWORD attr = ::GetFileAttributesA(szPath);
+    // Win32 文档: 函数如果失败，返回0xffffffff
+    if(attr == 0xffffffff) {
+      return attr;
+    }
+    return FindFile::IntTranslateAttr(attr);
+  }
+ 
+  b32 GetFileDescription(const wch* szPath, FILEATTRIBUTE* pFileAttr)
+  {
+    WIN32_FILE_ATTRIBUTE_DATA wfad;
+    BOOL bresult = ::GetFileAttributesExW(szPath, GetFileExInfoStandard, &wfad);
+    if(_CL_NOT_(bresult))
+    {
+      CLOG_ERRORW(_CLTEXT("GetFileDescription(\"%s\") failed."), szPath);
+      return FALSE;
+    }
+
+    pFileAttr->dwFileAttributes = FindFile::IntTranslateAttr(wfad.dwFileAttributes);
+    pFileAttr->nCreationTime = CLMAKE64FROM32(wfad.ftCreationTime.dwLowDateTime, wfad.ftCreationTime.dwHighDateTime);
+    pFileAttr->nLastAccessTime = CLMAKE64FROM32(wfad.ftLastAccessTime.dwLowDateTime, wfad.ftLastAccessTime.dwHighDateTime);
+    pFileAttr->nLastWriteTime = CLMAKE64FROM32(wfad.ftLastWriteTime.dwLowDateTime, wfad.ftLastWriteTime.dwHighDateTime);
+    pFileAttr->nFileSize = CLMAKE64FROM32(wfad.nFileSizeLow, wfad.nFileSizeHigh);       
+
+    return bresult;
+  }
+
+  b32 GetFileDescription(const ch* szPath, FILEATTRIBUTE* pFileAttr)
+  {
+    clStringW strPath = szPath;
+    return GetFileDescription(strPath, pFileAttr);
+  }
+
+#else
+  CLDWORD GetFileAttributes(const wch* szPath)
+  {
+    clStringA strPath = szPath;
+    return GetFileAttributes(strPath);
+  }
+
+  CLDWORD GetFileAttributes(const ch* szPath)
+  {
+    struct stat st_stat;
+    int result = stat(szPath, st_stat); // to utf-8
+    if(result != 0)
+    {
+      CLOG_ERROR("GetFileAttributes(%s) failed.", szPath);
+      return 0xffffffff;
+    }
+
+    return FindFile::IntTranslateAttr(st_stat.st_mode);
+  }
+
+  b32 GetFileDescription(const wch* szPath, FILEATTRIBUTE* pFileAttr)
+  {
+    clStringA strPath = szPath;
+    return GetFileDescription(strPath, pFileAttr);
+  }
+
+  b32 GetFileDescription(const ch* szPath, FILEATTRIBUTE* pFileAttr)
+  {
+    struct stat st_stat;
+    int result = stat(szPath, st_stat); // to utf-8
+    if(result != 0)
+    {
+      CLOG_ERROR("GetFileDescription(%s) failed.", szPath);
+      return FALSE;
+    }
+
+    pFileAttr->dwFileAttributes = FindFile::IntTranslateAttr(st_stat.st_mode);
+    pFileAttr->nCreationTime    = st_stat.st_ctime;
+    pFileAttr->nLastAccessTime  = st_stat.st_atime;
+    pFileAttr->nLastWriteTime   = st_stat.st_mtime;
+    pFileAttr->nFileSize        = st_stat.st_size;
+    return TRUE;
+  }
+#endif
+
 } // namespace clpathfile
 
 //////////////////////////////////////////////////////////////////////////
@@ -1013,13 +1107,12 @@ namespace clstd
     if(hFind == INVALID_HANDLE_VALUE) {
       return FALSE;
     }
-    clstd::strcpynT(FindFileData->Filename, wfd.cFileName, MAX_PATH);
+    clstd::strcpynT(FindFileData->cFileName, wfd.cFileName, MAX_PATH);
     FindFileData->dwAttributes = IntTranslateAttr(wfd.dwFileAttributes);
-    FindFileData->nFileSizeHigh   = wfd.nFileSizeHigh;
-    FindFileData->nFileSizeLow    = wfd.nFileSizeLow;
-    FindFileData->nCreationTime   = ((u64)wfd.ftCreationTime.dwHighDateTime << 32) | wfd.ftCreationTime.dwLowDateTime;
-    FindFileData->nLastAccessTime = ((u64)wfd.ftLastAccessTime.dwHighDateTime << 32) | wfd.ftLastAccessTime.dwLowDateTime;
-    FindFileData->nLastWriteTime  = ((u64)wfd.ftLastWriteTime.dwHighDateTime << 32) | wfd.ftLastWriteTime.dwLowDateTime;
+    FindFileData->nFileSize       = CLMAKE64FROM32(wfd.nFileSizeLow, wfd.nFileSizeHigh);
+    FindFileData->nCreationTime   = CLMAKE64FROM32(wfd.ftCreationTime.dwLowDateTime, wfd.ftCreationTime.dwHighDateTime);
+    FindFileData->nLastAccessTime = CLMAKE64FROM32(wfd.ftLastAccessTime.dwLowDateTime, wfd.ftLastAccessTime.dwHighDateTime);
+    FindFileData->nLastWriteTime  = CLMAKE64FROM32(wfd.ftLastWriteTime.dwLowDateTime, wfd.ftLastWriteTime.dwHighDateTime);
     if(!FindNextFileW(hFind, &wfd))
     {
       FindClose(hFind);
@@ -1032,10 +1125,9 @@ namespace clstd
   {
     FINDFILEDATAW ffdW;
     const b32 bval = GetFile(&ffdW);
-    WideCharToMultiByte(CP_ACP, NULL, ffdW.Filename, -1, FindFileData->Filename, MAX_PATH, NULL, NULL);
+    WideCharToMultiByte(CP_ACP, NULL, ffdW.cFileName, -1, FindFileData->cFileName, MAX_PATH, NULL, NULL);
     FindFileData->dwAttributes = IntTranslateAttr(ffdW.dwAttributes);
-    FindFileData->nFileSizeHigh   = ffdW.nFileSizeHigh;
-    FindFileData->nFileSizeLow    = ffdW.nFileSizeLow;
+    FindFileData->nFileSize       = ffdW.nFileSize;
     FindFileData->nCreationTime   = ffdW.nCreationTime;
     FindFileData->nLastAccessTime = ffdW.nLastAccessTime;
     FindFileData->nLastWriteTime  = ffdW.nLastWriteTime;
@@ -1138,8 +1230,8 @@ namespace clstd
     if(!GetFile(&finddataA)) {
       return FALSE;
     }
-    clStringW str(finddataA.Filename);
-    clstd::strcpynT(FindFileData->Filename, (const wch*)str, MAX_PATH);
+    clStringW str(finddataA.cFilename);
+    clstd::strcpynT(FindFileData->szFilename, (const wch*)str, MAX_PATH);
     FindFileData->dwAttributes    = finddataA.dwAttributes;
     FindFileData->nFileSizeHigh   = finddataA.nFileSizeHigh;
     FindFileData->nFileSizeLow    = finddataA.nFileSizeLow;
@@ -1170,7 +1262,7 @@ namespace clstd
           continue;
         }
 
-        clstd::strcpynT(FindFileData->Filename, ptr->d_name, MAX_PATH);
+        clstd::strcpynT(FindFileData->szFilename, ptr->d_name, MAX_PATH);
         stat(ptr->d_name, &_sStat);
 
         FindFileData->dwAttributes = IntTranslateAttr(_sStat.st_mode);

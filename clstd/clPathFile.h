@@ -188,6 +188,22 @@ namespace clpathfile
   b32 CreateDirectoryAlwaysT(const _TCh* szDirName, _Tmkdir __mkdir);
   b32 CreateDirectoryAlways(const wch* szDirName);
   b32 CreateDirectoryAlways(const ch* szDirName);
+
+  // 获取文件属性，属性参考 clstd::FileAttribute 枚举
+  CLDWORD GetFileAttributes(const wch* szPath);
+  CLDWORD GetFileAttributes(const ch* szPath);
+
+  struct FILEATTRIBUTE
+  {
+    u32 dwFileAttributes; // 参考 clstd::FileAttribute 枚举
+    u64 nCreationTime;
+    u64 nLastAccessTime;
+    u64 nLastWriteTime;
+    u64 nFileSize;
+  };
+
+  b32 GetFileDescription(const wch* szPath, FILEATTRIBUTE* pFileAttr);
+  b32 GetFileDescription(const ch* szPath, FILEATTRIBUTE* pFileAttr);
 } // namespace clpathfile
 
 //////////////////////////////////////////////////////////////////////////
@@ -300,18 +316,17 @@ namespace clstd
 {
   enum FileAttribute
   {
-    FileAttribute_ReadOnly = 0x00000001,
-    FileAttribute_Hidden = 0x00000002,
-    FileAttribute_System = 0x00000004,
+    FileAttribute_ReadOnly  = 0x00000001,
+    FileAttribute_Hidden    = 0x00000002,
+    FileAttribute_System    = 0x00000004,
     FileAttribute_Directory = 0x00000010,
   };
 
   struct FINDFILEDATAW
   {
-    CLWCHAR Filename[MAX_PATH];
+    CLWCHAR cFileName[MAX_PATH];
     CLDWORD dwAttributes;
-    u32     nFileSizeHigh;
-    u32     nFileSizeLow;
+    u64     nFileSize;
     u64     nCreationTime;
     u64     nLastAccessTime;
     u64     nLastWriteTime;
@@ -319,10 +334,9 @@ namespace clstd
 
   struct FINDFILEDATAA
   {
-    CLCHAR  Filename[MAX_PATH];
+    CLCHAR  cFileName[MAX_PATH];
     CLDWORD dwAttributes;
-    u32     nFileSizeHigh;
-    u32     nFileSizeLow;
+    u64     nFileSize;
     u64     nCreationTime;
     u64     nLastAccessTime;
     u64     nLastWriteTime;
@@ -342,7 +356,9 @@ namespace clstd
     DIR*      m_dir;
     clStringA m_strMatchName;
 #endif // #if defined(_WINDOWS) || defined(_WIN32)
-    CLDWORD IntTranslateAttr(CLDWORD uNativeAttr);
+  public:
+    static CLDWORD IntTranslateAttr(CLDWORD uNativeAttr);
+
   public:
     FindFile();
     FindFile(CLLPCSTR szFilename);
@@ -356,5 +372,124 @@ namespace clstd
   };
 
 } // namespace clstd
+
+namespace clpathfile
+{
+  template<class _TString, class FINDFILEDATAT, class _Fn>
+  void RecursiveSearchDir(typename _TString::LPCSTR szStartDir, _Fn fn)
+  {
+    //WIN32_FIND_DATA wfd;
+    FINDFILEDATAT ff_data;
+    clstd::FindFile ff;
+    typename _TString::TChar szFilename[] = { '*','.','*','\0' };
+    _TString strDir = szStartDir;
+    _TString strSearch;
+    if(strDir.Back() != '\\' && strDir.Back() != '/') {
+      strDir += "\\";
+    }
+    strSearch = strDir + szFilename;
+
+    //HANDLE hFind = FindFirstFile(strSearch, &wfd);
+    if(ff.NewFind(strSearch))
+    {
+      while(ff.GetFile(&ff_data)) {
+        if(ff_data.cFileName[0] == '.') {
+          continue;
+        }
+
+        // 目录：根据返回值决定是否遍历这个目录及子目录
+        // 文件：忽略返回值
+        if(fn(strDir, ff_data) && TEST_FLAG(ff_data.dwAttributes, clstd::FileAttribute_Directory))
+        {
+          _TString strChildDir = strDir + ff_data.cFileName;
+          RecursiveSearchDir<_TString, FINDFILEDATAT>(strChildDir, fn);
+        }
+      }
+    }
+  }
+
+  // 从一个路径收集文件，
+  // 如果这个路径是目录，则遍历子目录，如果是文件，就填入list后返回
+  template<class _TString, class FINDFILEDATAT, typename _TCh, typename _TStringList, class _Fn>
+  void GenerateFiles(_TStringList& rFileList, const _TCh* szPath, _Fn fn)
+  {
+    CLDWORD dwAttri = clpathfile::GetFileAttributes(szPath);
+    if(dwAttri == 0xffffffff) {
+      return;
+    }
+
+    if(dwAttri & clstd::FileAttribute_Directory)
+    {
+      RecursiveSearchDir<_TString>(szPath, [&rFileList, &fn]
+      (const _TString& strDir, const FINDFILEDATAT& wfd) -> b32
+      {
+        if(TEST_FLAG(wfd.dwFileAttributes, clstd::FileAttribute_Directory))
+        {
+          return fn(strDir, wfd);
+        }
+        else if(fn(strDir, wfd))
+        {
+          _TString str;
+          str = strDir + wfd.cFileName;
+          rFileList.push_back(str);
+        }
+        return TRUE;
+      });
+    }
+    else {
+      rFileList.push_back(szPath);
+    }
+  }
+
+  template<class _TString, class FINDFILEDATAT, typename _TCh, class _Fn>
+  void GenerateFiles(const _TCh* szPath, _Fn fn)
+  {
+    CLDWORD dwAttri = clpathfile::GetFileAttributes(szPath);
+    if(dwAttri == 0xffffffff) {
+      return;
+    }
+
+    if(TEST_FLAG(dwAttri, clstd::FileAttribute_Directory))
+    {
+      RecursiveSearchDir<_TString, FINDFILEDATAT>(szPath, [&fn]
+      (const _TString& strDir, const FINDFILEDATAT& wfd) -> b32
+      {
+        // wfd是目录，返回FALSE会跳过目录及其子目录
+        // wfd是文件，忽略返回值
+        return fn(strDir, wfd);
+      });
+    }
+    else {
+      FILEATTRIBUTE file_attr;
+      FINDFILEDATAT file_data;
+      clpathfile::GetFileDescription(szPath, &file_attr);
+
+      file_data.dwAttributes    = file_attr.dwFileAttributes;
+      file_data.nFileSize       = file_attr.nFileSize;
+      file_data.nCreationTime   = file_attr.nCreationTime;
+      file_data.nLastAccessTime = file_attr.nLastAccessTime;
+      file_data.nLastWriteTime  = file_attr.nLastWriteTime;
+
+      clStringW strDir;
+      clsize pos = FindFileName(szPath);
+      if(pos != (clsize)-1)
+      {
+        clstd::strcpyT(file_data.cFileName, szPath + pos);
+        strDir.Append(szPath, pos);
+      }
+
+      fn(strDir, file_data);
+
+      //WIN32_FIND_DATA wfd = {};
+      //HANDLE hFind = FindFirstFile(szPath, &wfd);
+      //if(hFind != INVALID_HANDLE_VALUE)
+      //{
+      //  clStringW strDir = szPath;
+      //  RemoveFileSpec(strDir);
+      //  FindClose(hFind);
+      //}
+    }
+  }
+} // namespace clpathfile
 
 #endif // _FILEPATH_H_
