@@ -3468,6 +3468,7 @@ enum GXSysMessage
   GXSysMessage_MButtonUp   = GXSysMessage_Bits | GXWM_MBUTTONUP,
   GXSysMessage_RButtonDown = GXSysMessage_Bits | GXWM_RBUTTONDOWN,
   GXSysMessage_RButtonUp   = GXSysMessage_Bits | GXWM_RBUTTONUP,
+  GXSysMessage_MouseWheel  = GXSysMessage_Bits | GXWM_MOUSEWHEEL,
   GXSysMessage_XButtonDown = GXSysMessage_Bits | GXWM_XBUTTONDOWN,
   GXSysMessage_XButtonUp   = GXSysMessage_Bits | GXWM_XBUTTONUP,
   GXSysMessage_MouseLast   = GXSysMessage_Bits | GXWM_MOUSELAST,

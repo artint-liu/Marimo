@@ -8,12 +8,19 @@
 #define _GRAPHICS_X_USER_INTERFACE_GLOBAL_DEFINE_
 
 #define REFACTOR_SYSQUEUE
+//#define REFACTOR_TIMER
 //#include <vector>
 
 //////////////////////////////////////////////////////////////////////////
 //
 // 类声明
 //
+
+namespace clstd
+{
+  class Schedule;
+} // namespace clstd
+
 class GXWnd;
 class GXImage;
 class GUnknown;
@@ -437,7 +444,11 @@ struct GXSTATION
   CmdDict             m_CommandDict;
   GXUIMsgThread*      m_pMsgThread;
   SystemMessage*      m_pSysMsg;
+#ifdef REFACTOR_TIMER
+  clstd::Schedule*    m_pShcedule;
+#else
   GXTIMERCHAIN*       m_pTimerChain;
+#endif
 
 #ifdef ENABLE_AERO
   GTexture*        pBackDownSampTexA;    // 玻璃效果的缓冲纹理 - A
@@ -480,6 +491,9 @@ struct GXSTATION
   GXBOOL      ConvMessageX    (GXLPMSG lpMsg, GXSYSMSG &SysMsg);
   GXBOOL      ConvMessageX    (GXLPMSG lpMsg, MOUIMSG  &PostMsg);
   GXBOOL      IntPeekMessage   (GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessage);
+#ifdef REFACTOR_TIMER
+  GXDWORD     UpdateTimerLoop(GXLPMSG msg);
+#endif // REFACTOR_TIMER
 };
 typedef GXSTATION*        GXLPSTATION;
 typedef const GXSTATION*  GXLPCSTATION;

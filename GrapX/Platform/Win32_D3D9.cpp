@@ -31,7 +31,7 @@
 #include "GrapX/GXUser.H"
 #include "thread/clMessageThread.h"
 #include "User/gxMessage.hxx"
-
+#include "clSchedule.h"
 //////////////////////////////////////////////////////////////////////////
 
 IGXPlatform_Win32D3D9::IGXPlatform_Win32D3D9()
@@ -112,6 +112,10 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
     //static_cast<MessageThread*>(MessageThread::CreateThread((CLTHREADCALLBACK)UITask, this));
 #endif // #ifdef _ENABLE_STMT
 //#endif // _DEV_DISABLE_UI_CODE
+
+#ifdef  REFACTOR_TIMER
+  pStation->m_pShcedule = new clstd::Schedule;
+#endif
 
   // 这个必须放在最后, 所有初始化完毕, 刷新窗口
   ShowWindow(m_hWnd, GXSW_SHOWDEFAULT);

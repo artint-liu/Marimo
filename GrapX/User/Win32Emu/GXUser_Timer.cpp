@@ -1,5 +1,6 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
 #include <GrapX.H>
+#include <clSchedule.h>
 #include <User/GrapX.Hxx>
 #include "GrapX/GXUser.H"
 #include <GXStation.H>
@@ -33,7 +34,9 @@ GXUINT GXDLLAPI gxSetTimer(
   {
     CLOG_WARNING("NOT implement in lazy mode.");
   }
-
+#ifdef REFACTOR_TIMER
+  lpStation->m_pShcedule->CreateTimer(hWnd, nIDEvent, uElapse, (clstd::TimerProc)lpTimerFunc);
+#else
   GXTIMERCHAIN* pNewTimer = NULL;
   GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;
   pNewTimer = new GXTIMERCHAIN;
@@ -61,6 +64,7 @@ GXUINT GXDLLAPI gxSetTimer(
   }
   pTimer->lpNext = pNewTimer;
   return (GXUINT)(GXUINT_PTR)pNewTimer;
+#endif // REFACTOR_TIMER
 }
 
 GXBOOL GXDLLAPI gxKillTimer(
@@ -72,7 +76,9 @@ GXBOOL GXDLLAPI gxKillTimer(
   if(!lpStation) {
     return 0;
   }
-
+#ifdef REFACTOR_TIMER
+  lpStation->m_pShcedule->DestroyTimer(hWnd, uIDEvent);
+#else
   GXTIMERCHAIN* pPrev = NULL;
   GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;
   GXBOOL bRet = FALSE;
@@ -101,15 +107,17 @@ GXBOOL GXDLLAPI gxKillTimer(
   }
 
    return bRet;
+#endif // #ifdef REFACTOR_TIMER
 }
 
 extern "C" GXVOID GXDLLAPI GXUIUpdateTimerEvent()
 {
+#ifdef REFACTOR_TIMER
+#else
   GXLPSTATION lpStation = GrapX::Internal::GetStationPtr();
   if(!lpStation) {
     return;
   }
-
   GXTIMERCHAIN* pPrevTimer = NULL;
   GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;
   //GXLPSTATION lpStation = IntGetStationPtr();
@@ -145,5 +153,6 @@ extern "C" GXVOID GXDLLAPI GXUIUpdateTimerEvent()
     pTimer = pTimer->lpNext;
   }
   lpStation->Leave();
+#endif // #ifdef REFACTOR_TIMER
 }
 #endif // _DEV_DISABLE_UI_CODE

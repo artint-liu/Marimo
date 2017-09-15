@@ -151,6 +151,11 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     ReleaseCapture();
     break;
 
+#ifdef REFACTOR_SYSQUEUE
+  case WM_MOUSEWHEEL:
+    GXUIPostSysMessage(GXSysMessage_MouseWheel, wParam, lParam);
+    break;
+
   case WM_KEYDOWN:
     GXUIPostSysMessage(GXSysMessage_KeyDown, wParam, lParam);
     break;
@@ -158,6 +163,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
   case WM_KEYUP:
     GXUIPostSysMessage(GXSysMessage_KeyUp, wParam, lParam);
     break;
+#endif // #ifdef REFACTOR_SYSQUEUE
 
   case WM_PAINT:
     if(lpStation->GetUpdateRate() == UpdateRate_Lazy)

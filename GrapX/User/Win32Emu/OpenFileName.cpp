@@ -345,8 +345,8 @@ public:
 
     while(find.GetFile(&ffd))
     {
-      if(ffd.Filename[0] == '.') {
-        if(ffd.Filename[1] == '\0') {
+      if(ffd.cFileName[0] == '.') {
+        if(ffd.cFileName[1] == '\0') {
           continue;
         }
       }
@@ -357,15 +357,15 @@ public:
       }
 
       if(TEST_FLAG(ffd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY)) {
-        index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
+        index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.cFileName);
       }
       else {
         for(auto it = aFilter.begin(); it != aFilter.end(); ++it) {
           clStringW str((wch)0x20, 2);
-          str.Append(ffd.Filename);
+          str.Append(ffd.cFileName);
           str.MakeUpper();
           if(clpathfile::MatchSpec(str, *it)) {
-            index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.Filename);
+            index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, NULL, (GXLPARAM)ffd.cFileName);
             break;
           }
         }

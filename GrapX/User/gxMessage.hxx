@@ -1,8 +1,6 @@
 ﻿#ifndef _GRAPX_INTERNAL_MESSAGE_H_
 #define _GRAPX_INTERNAL_MESSAGE_H_
 
-//#define REFACTOR_SYSQUEUE
-
 namespace GrapX
 {
   namespace Internal

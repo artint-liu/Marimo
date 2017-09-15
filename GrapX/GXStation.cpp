@@ -22,6 +22,8 @@
 #include <User/DesktopWindowsMgr.h>
 #include "Utility/ConsoleAssistant.h"
 
+#include "clSchedule.h"
+
 #ifndef _DEV_DISABLE_UI_CODE
 namespace DlgXM
 {
@@ -127,6 +129,10 @@ GXHRESULT GXSTATION::Finalize()
 #ifdef REFACTOR_SYSQUEUE
   delete (m_pSysMsg);
 #endif // #ifdef REFACTOR_SYSQUEUE
+
+#ifdef REFACTOR_TIMER
+  SAFE_DELETE(m_pShcedule);
+#endif
 
   if(hClassDPA)
   {
@@ -445,6 +451,29 @@ GXBOOL GXSTATION::IntPeekMessage(GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessa
   return FALSE;
 }
 
+#ifdef REFACTOR_TIMER
+GXDWORD GXSTATION::UpdateTimerLoop(GXLPMSG msg)
+{
+  clstd::TIMER t;
+  GXDWORD dwTick = gxGetTickCount();
+  GXDWORD dwDeltaTime = m_pShcedule->GetTimer(dwTick, &t);
+  if(dwDeltaTime) {
+    return dwDeltaTime;
+  }
+
+  msg->hwnd    = (GXHWND)t.handle;
+  msg->message = GXWM_TIMER;
+  msg->wParam  = t.id;
+  msg->lParam  = (GXLPARAM)t.proc;
+  msg->time    = dwTick;
+  msg->pt.x    = 0;
+  msg->pt.y    = 0;
+
+  ASSERT(dwDeltaTime == 0);
+  return 0;
+}
+#endif // REFACTOR_TIMER
+
 //////////////////////////////////////////////////////////////////////////
 //#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 //GXSTATION::GXSTATION(HWND hWnd, IGXPlatform* lpPlatform)
@@ -483,7 +512,11 @@ GXSTATION::GXSTATION(const GXCREATESTATION* lpCreateStation)
 #else
   , dwDoubleClickTime     (500) // Windows Ä¬ÈÏÖµ
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#ifdef  REFACTOR_TIMER
+  , m_pShcedule           (NULL)
+#else
   , m_pTimerChain         (NULL)
+#endif
 {
   GXGRAPHICSDEVICE_DESC sGraphDesc;
 
