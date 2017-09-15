@@ -8,7 +8,7 @@
 #define _GRAPHICS_X_USER_INTERFACE_GLOBAL_DEFINE_
 
 #define REFACTOR_SYSQUEUE
-//#define REFACTOR_TIMER
+#define REFACTOR_TIMER
 //#include <vector>
 
 //////////////////////////////////////////////////////////////////////////

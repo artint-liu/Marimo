@@ -421,13 +421,16 @@ GXBOOL GXSTATION::IntPeekMessage(GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessa
   MOUIMSG PostMsg;
   GXSYSMSG SysMsg;
 
+  // Send messages
   m_pMsgThread->ResponseSentMessage();
 
+  // Posted messages
   if(m_pMsgThread->PeekMessage(&PostMsg, hWnd, NULL, NULL, bRemoveMessage ? GXPM_REMOVE : FALSE))
   {
     return ConvMessageX(lpMsg, PostMsg);
   }
 
+  // Input messages
   if(m_pSysMsg->Peek(&SysMsg, NULL, NULL, bRemoveMessage))
   {
     ConvMessageX(lpMsg, SysMsg);
@@ -448,6 +451,17 @@ GXBOOL GXSTATION::IntPeekMessage(GXLPMSG lpMsg, GXHWND hWnd, GXBOOL bRemoveMessa
     //  return FALSE;
     //}
   }
+
+  // Send messages, again
+  m_pMsgThread->ResponseSentMessage();
+#ifdef REFACTOR_TIMER
+  // WM_TIMER messages
+  GXDWORD dwDelta = UpdateTimerLoop(lpMsg);
+  if(dwDelta == 0) {
+    gxGetCursorPos(&lpMsg->pt);
+    return TRUE;
+  }
+#endif // REFACTOR_TIMER
   return FALSE;
 }
 

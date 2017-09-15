@@ -167,67 +167,15 @@ GXVOID _gxDestroyWindow(GXHWND hWnd)
     _gxDestroyWindow(GXWND_HANDLE(lpWnd->m_pFirstChild));
   }
 
-  ////////////////////////////////////////////////////////////////////////////
-  ////
-  //// 清理 Station 的记录
-  ////
 
-  //// 如果涉及到焦点或者捕获窗口则清除
-  //if(lpStation->m_pMouseFocus == lpWnd)  {
-  //  // 发送失去鼠标焦点信息
-  //  gxSendMessageW(lpStation->m_pMouseFocus, GXWM_NCMOUSELEAVE, NULL, NULL);
-  //  gxSendMessageW(lpStation->m_pMouseFocus, GXWM_MOUSELEAVE, NULL, NULL);
-  //  lpStation->m_pMouseFocus = NULL;
-  //}
-  //if(lpStation->m_pKeyboardFocus == lpWnd)  {
-  //  // 发送失去键盘焦点信息
-  //  gxSetFocus(NULL);
-  //}
-  //if(lpStation->m_pCapture == lpWnd)  {
-  //  // 发送失去窗口捕获信息
-  //  gxReleaseCapture();
-  //}
-
-  //// 如果是顶层窗口, 则要清除激活列表里的记录
-  //if(gxIsTopLevelWindow(hWnd) == TRUE)
-  //{
-  //  GXLPWND_ARRAY& aWnds = lpStation->m_aActiveWnds;
-
-  //  // 如果是激活窗口,则先更换掉它,使其非激活
-  //  if(lpWnd->GetActive() == lpWnd)
-  //  {
-  //    for(GXLPWND_ARRAY::reverse_iterator it = aWnds.rbegin();
-  //      it != aWnds.rend(); ++it)
-  //    {
-  //      const GXULONG uStyle = (*it)->m_uStyle;
-  //      if((uStyle & (GXWS_DISABLED | GXWS_VISIBLE)) == GXWS_VISIBLE &&
-  //        (*it) != lpWnd)
-  //      {
-  //        (*it)->SetActive();
-  //        break;
-  //      }
-  //    }
-  //  }
-
-  //  for(GXLPWND_ARRAY::iterator it = aWnds.begin();
-  //    it != aWnds.end(); ++it)
-  //  {
-  //    if((*it) == lpWnd)
-  //    {
-  //      aWnds.erase(it);
-  //      break;
-  //    }
-  //  }
-  //}
-  //lpStation->CleanupRecord(hWnd);
-
-  //gxSendMessage(hWnd, GXWM_NCDESTROY, 0, 0);
-
+  // 清理窗口链
   if(lpWnd->m_pPrevWnd == NULL)
   {
     pParent = lpWnd->m_pParent;
-    if(pParent == NULL)
+    if(pParent == NULL) {
       pParent = lpDesktop;
+    }
+
     pParent->m_pFirstChild = lpWnd->m_pNextWnd;
     if(lpWnd->m_pNextWnd != NULL)
     {
