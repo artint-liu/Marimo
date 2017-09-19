@@ -2,6 +2,7 @@
 #include "User/GrapX.Hxx"
 
 //#include "GrapX/GUnknown.H"
+#include "GXStation.h"
 #include "GrapX/GXKernel.H"
 #include "GrapX/MOLogger.H"
 #include "clfifo.h"

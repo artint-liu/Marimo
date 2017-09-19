@@ -3,6 +3,7 @@
 #include "User/GrapX.Hxx"
 
 //#include "GrapX/GUnknown.H"
+#include "GXStation.h"
 #include "GrapX/GXKernel.H"
 #include "GrapX/GXUser.H"
 #include "GrapX/MOLogger.h"

@@ -43,7 +43,7 @@
 //#include "wine/port.h"
 #include <GrapX.H>
 #include <User/GrapX.Hxx>
-#include <GXStation.H>
+//#include <GXStation.H>
 //#include <User/GXWindow.h>
 #include "GrapX/GXUser.H"
 #include "GrapX/GXKernel.h"

@@ -11,6 +11,8 @@
 
 #include "DataPoolImpl.h"
 #include "DataPoolBuildTime.h"
+
+#include "GXStation.h"
 using namespace clstd;
 
 #define GSIT_Variables (m_aGSIT)

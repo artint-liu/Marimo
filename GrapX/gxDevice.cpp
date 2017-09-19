@@ -17,6 +17,7 @@
 #include "GrapX/Platform.h"
 
 // 私有头文件
+#include "GXStation.h"
 #include <User/GXWindow.h>
 #include "GrapX/gUxtheme.h"
 #include <User/Win32Emu/_dpa.H>
@@ -27,6 +28,9 @@
 #include <Utility/Shader/SimpleShader.H>
 //#include <clMessageThread.h>
 #include "GrapX/gxDevice.H"
+//#include "thread/clMessageThread.h"
+//#include "User/gxMessage.hxx"
+//#include "clSchedule.h"
 
 GXLPSTATION g_pCurStation;
 static GXINSTANCE* g_pInstDll;
@@ -150,6 +154,8 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
       CreateStockObject(g_pCurStation);
       GXUSER_InitializeCtrlRegMap();
       GXUXTHEME_Initialize(g_pCurStation->pGraphics);
+
+      g_pCurStation->StartUserThread();
 #endif // _DEV_DISABLE_UI_CODE
     }
     else {

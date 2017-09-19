@@ -13,6 +13,7 @@
 #include <GrapX/GRegion.H>
 
 // 私有头文件
+#include "GXStation.h"
 #include <User/GXWindow.h>
 #include "GrapX/GXGDI.H"
 #include "GrapX/GXUser.H"

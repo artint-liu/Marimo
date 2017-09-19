@@ -188,7 +188,7 @@ public:
 
           GXBOOL    IsAncestorVisible     () const; // 检查祖先和自己的 WS_VISIBLE 属性
 
-  inline  LPGXWND   GetDesktop            () const;
+          LPGXWND   GetDesktop            () const;
 
   GXVOID _GetSystemMinMaxInfo(GXLPMINMAXINFO lpmmi);
   GXVOID IntMoveChild(GXINT dx, GXINT dy);
@@ -208,10 +208,6 @@ private:
 //
 // Inline function
 //
-inline LPGXWND GXWnd::GetDesktop() const
-{
-  return GXLPWND_STATION_PTR(this)->lpDesktopWnd;
-}
 
 //////////////////////////////////////////////////////////////////////////
 // int  GXWnd::GetWindowRegion(GRegion** ppRegion);

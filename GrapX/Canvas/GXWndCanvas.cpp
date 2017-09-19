@@ -24,6 +24,7 @@
 #include "GrapX/GXUser.H"
 #include "User/WindowsSurface.h"
 #include "User/DesktopWindowsMgr.h"
+#include "GXStation.h"
 #include "User/GXWindow.h"
 
 #ifndef _DEV_DISABLE_UI_CODE

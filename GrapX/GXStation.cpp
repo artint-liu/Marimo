@@ -17,6 +17,7 @@
 #include "GrapX/gxDevice.H"
 #include "User/gxMessage.hxx"
 //#include "clMessageThread.h"
+#include "GXStation.h"
 #include "User/GXWindow.h"
 #include "User/Win32Emu/_dpa.H"
 #include <User/DesktopWindowsMgr.h>
@@ -117,6 +118,32 @@ GXHRESULT GXSTATION::Initialize()
 
   InlSetZeroT(m_HotKeyChain);
 
+
+#ifdef _ENABLE_STMT
+  STMT::CreateTask(1024 * 1024, UITask, NULL);
+#else
+
+#ifdef  REFACTOR_TIMER
+  m_pShcedule = new clstd::Schedule;
+#endif
+
+  return GX_OK;
+}
+
+GXHRESULT GXSTATION::StartUserThread()
+{
+# ifdef REFACTOR_SYSQUEUE
+  //pStation->m_pSysMsg->Start();
+  m_pMsgThread = new GXUIMsgThread(lpPlatform);
+  m_pSysMsg = new GrapX::Internal::SystemMessage(lpPlatform, m_pMsgThread->GetMessageSignal());
+  m_pMsgThread->Start();
+# else
+  pStation->m_pMsgThread = new GXUIMsgThread(this);
+  pStation->m_pMsgThread->Start();
+# endif
+  //static_cast<MessageThread*>(MessageThread::CreateThread((CLTHREADCALLBACK)UITask, this));
+#endif // #ifdef _ENABLE_STMT
+  //#endif // _DEV_DISABLE_UI_CODE
   return GX_OK;
 }
 

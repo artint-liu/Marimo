@@ -2,8 +2,8 @@
 #include <GrapX.H>
 #include <clSchedule.h>
 #include <User/GrapX.Hxx>
-#include "GrapX/GXUser.H"
 #include <GXStation.H>
+#include "GrapX/GXUser.H"
 #include <User/GXWindow.h>
 
 struct GXTIMERCHAIN

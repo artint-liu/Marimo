@@ -11,6 +11,7 @@
 
 // 私有头文件
 #include <clUtility.H>
+#include <GXStation.H>
 #include <User/GXWindow.h>
 #include <User/WindowsSurface.h>
 #include "GrapX/gxuser.h"

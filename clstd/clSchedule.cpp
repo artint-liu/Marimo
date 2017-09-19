@@ -1,4 +1,5 @@
 ﻿#include "clstd.h"
+#include "clLinkedList.h"
 #include "clSchedule.h"
 
 namespace clstd

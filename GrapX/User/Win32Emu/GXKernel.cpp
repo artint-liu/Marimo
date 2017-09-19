@@ -1,5 +1,6 @@
 ﻿#include "GrapX.H"
 #include "User/GrapX.Hxx"
+#include "GXStation.h"
 #include "clPathFile.H"
 #include "GrapX/GXKernel.H"
 #include "GrapX/GXUser.H"  // TODO: 只是为了包含CP_ACP, 想办法去掉这个包含

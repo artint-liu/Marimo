@@ -29,9 +29,6 @@
 #include "Canvas/GXResourceMgr.h"
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
 #include "GrapX/GXUser.H"
-#include "thread/clMessageThread.h"
-#include "User/gxMessage.hxx"
-#include "clSchedule.h"
 //////////////////////////////////////////////////////////////////////////
 
 IGXPlatform_Win32D3D9::IGXPlatform_Win32D3D9()
@@ -95,27 +92,6 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
   //pGraphics->Activate(FALSE);
 
 //#ifndef _DEV_DISABLE_UI_CODE
-#ifdef _ENABLE_STMT
-  STMT::CreateTask(1024 * 1024, UITask, NULL);
-#else
-  GXSTATION* pStation = GrapX::Internal::GetStationPtr();
-
-# ifdef REFACTOR_SYSQUEUE
-  //pStation->m_pSysMsg->Start();
-  pStation->m_pMsgThread = new GXUIMsgThread(this);
-  pStation->m_pSysMsg = new GrapX::Internal::SystemMessage(this, pStation->m_pMsgThread->GetMessageSignal());
-  pStation->m_pMsgThread->Start();
-# else
-  pStation->m_pMsgThread = new GXUIMsgThread(this);
-  pStation->m_pMsgThread->Start();
-# endif
-    //static_cast<MessageThread*>(MessageThread::CreateThread((CLTHREADCALLBACK)UITask, this));
-#endif // #ifdef _ENABLE_STMT
-//#endif // _DEV_DISABLE_UI_CODE
-
-#ifdef  REFACTOR_TIMER
-  pStation->m_pShcedule = new clstd::Schedule;
-#endif
 
   // 这个必须放在最后, 所有初始化完毕, 刷新窗口
   ShowWindow(m_hWnd, GXSW_SHOWDEFAULT);

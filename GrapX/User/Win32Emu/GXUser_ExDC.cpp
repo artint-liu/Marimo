@@ -13,6 +13,7 @@
 #include <GrapX/GXSprite.H>
 
 // 私有头文件
+#include <GXStation.H>
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"
 #include <User/GXWindow.h>

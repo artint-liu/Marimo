@@ -172,6 +172,7 @@
     <ClInclude Include="..\..\clStringAttach.h" />
     <ClInclude Include="..\..\clStringCommon.hxx" />
     <ClInclude Include="..\..\clSchedule.h" />
+    <ClInclude Include="..\..\clLinkedList.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">
@@ -197,6 +198,7 @@
     <None Include="..\..\third_party\crypt\COPYRIGHT.txt">
       <Filter>crypt</Filter>
     </None>
+    <None Include="..\..\clLinkedList.inl" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\..\clstd_x64.asm" />

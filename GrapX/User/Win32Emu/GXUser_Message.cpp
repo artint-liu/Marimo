@@ -11,6 +11,7 @@
 #include <GrapX/GXCanvas.H>
 
 // 私有头文件
+#include <GXStation.H>
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
 #include "GrapX/GXUser.H"

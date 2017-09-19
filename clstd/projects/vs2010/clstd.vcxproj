@@ -94,6 +94,7 @@
     <ClInclude Include="..\..\clColorSpace.h" />
     <ClInclude Include="..\..\clCompress.h" />
     <ClInclude Include="..\..\clImageDecoder.h" />
+    <ClInclude Include="..\..\clLinkedList.h" />
     <ClInclude Include="..\..\clRepository.h" />
     <ClInclude Include="..\..\clSchedule.h" />
     <ClInclude Include="..\..\clStaticStringsDict.h" />
@@ -145,6 +146,7 @@
       <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Debug_MD|x64'">false</GenerateDebugInformation>
       <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Debug_MT|x64'">false</GenerateDebugInformation>
     </MASM>
+    <None Include="..\..\clLinkedList.inl" />
     <None Include="..\..\third_party\crypt\COPYRIGHT.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

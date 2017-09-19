@@ -13,6 +13,7 @@
 #include <GrapX/GXImage.H>
 
 // 私有头文件
+#include "GXStation.h"
 #include "GrapX/GXKernel.H"
 #include "GrapX/GXUser.H"
 #include "GrapX/GXGDI.H"

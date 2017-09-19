@@ -15,6 +15,7 @@
 
 #include "DataPoolErrorMsg.h"
 #include "DataPoolImpl.h"
+#include "GXStation.h"
 using namespace clstd;
 
 // TODO:

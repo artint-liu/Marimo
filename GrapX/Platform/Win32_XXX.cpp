@@ -13,6 +13,7 @@
 // 私有头文件
 #include <User32Ex.H>
 //#include "Console.h"
+#include "GXStation.h"
 #include "GrapX/gxDevice.H"
 #include "GrapX/Platform.h"
 #include "Win32_XXX.h"

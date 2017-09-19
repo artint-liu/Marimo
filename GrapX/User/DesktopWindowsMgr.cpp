@@ -13,6 +13,7 @@
 #include <GrapX/GXImage.H>
 
 // 私有头文件
+#include "GXStation.h"
 #include <User/GXWindow.h>
 #include "GrapX/GXUser.H"
 #include <User/WindowsSurface.h>

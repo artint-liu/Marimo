@@ -19,6 +19,7 @@
 
 #include "thread/clMessageThread.h"
 #include "User/gxMessage.hxx"
+#include "GXStation.h"
 
 GXHICON GXDLLAPI GXCursorToIcon(GXHCURSOR hCursor);
 //GXHWND GXGetParentClip(HGXWND hWnd, GXBOOL bClient, GXLPRECT lprcOut);
@@ -1658,6 +1659,11 @@ GXBOOL GXWnd::IsAncestorVisible() const
     lpPWnd = lpPWnd->m_pParent;
   }
   return TRUE;
+}
+
+LPGXWND GXWnd::GetDesktop() const
+{
+  return GXLPWND_STATION_PTR(this)->lpDesktopWnd;
 }
 
 void GXWnd::SetVisibleStateRecursive(GXBOOL bVisible)
