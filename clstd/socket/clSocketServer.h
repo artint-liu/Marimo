@@ -21,7 +21,7 @@ namespace clstd
     SOCKET		  m_ServerSocket;
     SocketList  m_ClientList;
     int MainLoop  ();
-    i32 Run       ();
+    i32 StartRoutine() override;
 
   public:
     	TCPServer();
@@ -67,7 +67,7 @@ namespace clstd
     u32           m_dwFlags;
 
     int MainLoop();
-    i32 Run();
+    i32 StartRoutine() override;
   public:
     UDPSocket();
     virtual ~UDPSocket();

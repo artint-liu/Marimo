@@ -26,7 +26,7 @@ namespace clstd
     i32 Send    (CLLPCVOID pData, CLINT nLen);
     i32 Recv    (CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize);
 
-    i32 Run     ();
+    i32 StartRoutine() override;
 
   public:
     virtual void OnEvent(/*SOCKET sock, */SocketEvent eEvent) = 0;

@@ -82,7 +82,7 @@ namespace clstd
     public:
       Thread();
       virtual ~Thread();
-      virtual i32 StartRoutine();
+      virtual i32 StartRoutine() = 0;
 
       b32     Start ();
       Result  Wait  (u32 nMilliSec);

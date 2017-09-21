@@ -132,7 +132,7 @@ namespace clstd
     }
   }
 
-  i32 TCPClient::Run()
+  i32 TCPClient::StartRoutine()
   {
     int addrLen = sizeof(SOCKADDR_IN);
     CLOG("Got the connection...\r\n");

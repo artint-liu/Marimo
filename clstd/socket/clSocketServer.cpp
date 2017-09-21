@@ -107,7 +107,7 @@ namespace clstd
     return recv(sock, (char*)pData, nLen, 0);
   }
   
-  i32 TCPServer::Run()
+  i32 TCPServer::StartRoutine()
   {
     int status;
 
@@ -366,7 +366,7 @@ namespace clstd
     return result;
   }
 
-  i32 UDPSocket::Run()
+  i32 UDPSocket::StartRoutine()
   {
     if(TEST_FLAG(m_dwFlags, PM_Recv)) {
       MainLoop();

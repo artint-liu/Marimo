@@ -86,10 +86,10 @@ namespace clstd
       return this_thread::GetId();
     }
 
-    i32 Thread::StartRoutine()
-    {
-      return 0;
-    }
+    //i32 Thread::StartRoutine()
+    //{
+    //  return 0;
+    //}
   } // namespace _win32
 #endif // #ifdef _WIN32
 
