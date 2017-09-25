@@ -690,7 +690,9 @@ GXBOOL GXDLLAPI gxTranslateMessage(
   const GXMSG *lpMsg   // address of structure with message
   )
 {
-  TRACE_UNACHIEVE("=== gxTranslateMessage ===\n");
+  if(lpMsg->message == GXWM_KEYDOWN) {
+    //gxPostMessageW(lpMsg->hwnd, GXWM_CHAR, );
+  }
   return FALSE;
 }
 

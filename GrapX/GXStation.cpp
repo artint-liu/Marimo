@@ -497,10 +497,14 @@ GXDWORD GXSTATION::UpdateTimerLoop(GXLPMSG msg)
 {
   clstd::TIMER t;
   GXDWORD dwTick = gxGetTickCount();
-  GXDWORD dwDeltaTime = m_pShcedule->GetTimer(dwTick, &t);
-  if(dwDeltaTime) {
-    return dwDeltaTime;
-  }
+  GXDWORD dwDeltaTime;
+
+  do {
+    dwDeltaTime = m_pShcedule->GetTimer(dwTick, &t);
+    if(dwDeltaTime) {
+      return dwDeltaTime;
+    }
+  } while(TEST_FLAG(t.flags, clstd::TIMER::TimerFlag_FirstTime));
 
   msg->hwnd    = (GXHWND)t.handle;
   msg->message = GXWM_TIMER;

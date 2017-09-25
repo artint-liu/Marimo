@@ -247,6 +247,7 @@ namespace GXUI
     SetScrolledVal(nScrolled);
 
     gxSetTimer(m_hWnd, IDT_WHEELCHECK, 100, NULL);
+    m_bShowScrollBar = TRUE;
     return 0;
   }
 
@@ -782,7 +783,9 @@ namespace GXUI
         nMinScroll = rect.right - m_nColumnCount * m_nColumnWidth;
       }
       else { // [简单|单列] [复杂|单列|竖直滚动]
-        nMinScroll = rect.bottom - m_aItems.back().nBottom;
+        if(_CL_NOT_(m_aItems.empty())){
+          nMinScroll = rect.bottom - m_aItems.back().nBottom;
+        }
       }
     }
 

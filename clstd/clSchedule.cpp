@@ -127,6 +127,7 @@ namespace clstd
     ASSERT(t->timing == 0);
     ASSERT(t->pNext == NULL);
 
+    SET_FLAG(t->flags, TIMER::TimerFlag_FirstTime);
     InsertInOrder(t);
   }
 
@@ -208,15 +209,13 @@ namespace clstd
       pOutTimer->proc   = t->proc;
       pOutTimer->elapse = t->elapse;
 
-      //if(t->pNext == NULL)
-      //{
-      //  m_Order.erase(m_Order.begin());
-      //}
-      //else
-      //{
-      //  m_Order.begin()->second = t->pNext;
-      //  t->pNext = NULL;
-      //}
+      const u32 filter = (TIMER::TimerFlag_FirstTime);
+      pOutTimer->flags  = t->flags & filter;
+
+      if(TEST_FLAG(t->flags, TIMER::TimerFlag_FirstTime)) {
+        RESET_FLAG(t->flags, TIMER::TimerFlag_FirstTime);
+      }
+
       m_Order.begin()->second.pop_front();
 
       if(t->timing == 0) {

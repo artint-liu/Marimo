@@ -9,7 +9,8 @@ namespace clstd
   {
     enum TimerFlag
     {
-      TimerFlag_Useless = 0x0001,   // 销毁
+      TimerFlag_FirstTime = 0x0001,   // 刚第一次触发
+      TimerFlag_Useless   = 0x8000,   // 销毁
     };
     typedef u32 tick_t;
 
@@ -86,7 +87,7 @@ namespace clstd
     void DestroyTimer(void* handle, u32 id);
     void RemoveByHandle(void* handle);
     //TIMER::tick_t GetNearestTick(TIMER::tick_t curr_tick) const;
-    TIMER::tick_t GetTimer(TIMER::tick_t curr_tick, TIMER* pOutTimer); // 只会改写handle, proc, id, elapse这四个成员变量
+    TIMER::tick_t GetTimer(TIMER::tick_t curr_tick, TIMER* pOutTimer); // 只会改写flags, handle, proc, id, elapse这5个成员变量
   };
 
   //////////////////////////////////////////////////////////////////////////
