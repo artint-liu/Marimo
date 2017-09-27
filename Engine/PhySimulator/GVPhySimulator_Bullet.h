@@ -21,7 +21,7 @@ public:
     : m_pSimulator(pSmlt)
   {
   }
-  i32 Run();
+  i32 StartRoutine();
 };
 
 class GVRigidBodyBt : public GVRigidBody

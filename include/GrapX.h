@@ -778,6 +778,22 @@ struct GXNONCLIENTMETRICSW
 typedef GXNONCLIENTMETRICSW *GXLPNONCLIENTMETRICSW;
 typedef GXNONCLIENTMETRICSW *LPGXNONCLIENTMETRICSW;
 
+//*
+//* Accessibility support
+//*
+struct GXFILTERKEYS
+{
+  GXUINT  cbSize;
+  GXDWORD dwFlags;
+  GXDWORD iWaitMSec;            // Acceptance Delay
+  GXDWORD iDelayMSec;           // Delay Until Repeat
+  GXDWORD iRepeatMSec;          // Repeat Rate
+  GXDWORD iBounceMSec;          // Debounce Time
+};
+
+typedef GXFILTERKEYS *GXLPFILTERKEYS;
+
+
 typedef struct tagGXPANOSE
 {
   GXBYTE    bFamilyType;

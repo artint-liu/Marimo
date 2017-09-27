@@ -1,0 +1,79 @@
+smart{version = "0.0.1.0";}
+Image
+{
+	File = "window_frame.png";
+	Module{
+		rect{
+			id = 100;
+			left = 0;
+			top = 0;
+			right = 6;
+			bottom = 30;
+			name = "TopLeft";
+		};
+		rect{
+			id = 101;
+			left = 6;
+			top = 0;
+			right = 58;
+			bottom = 30;
+			name = "Top";
+		};
+		rect{
+			id = 102;
+			left = 58;
+			top = 0;
+			right = 64;
+			bottom = 30;
+			name = "TopRight";
+		};
+		rect{
+			id = 103;
+			left = 0;
+			top = 22;
+			right = 6;
+			bottom = 58;
+			name = "Left";
+		};
+		rect{
+			id = 104;
+			left = 6;
+			top = 22;
+			right = 58;
+			bottom = 58;
+			name = "Center";
+		};
+		rect{
+			id = 105;
+			left = 58;
+			top = 22;
+			right = 64;
+			bottom = 58;
+			name = "Right";
+		};
+		rect{
+			id = 106;
+			left = 0;
+			top = 58;
+			right = 6;
+			bottom = 64;
+			name = "BottomLeft";
+		};
+		rect{
+			id = 107;
+			left = 6;
+			top = 58;
+			right = 58;
+			bottom = 64;
+			name = "Bottom";
+		};
+		rect{
+			id = 108;
+			left = 58;
+			top = 58;
+			right = 64;
+			bottom = 64;
+			name = "BottomRight";
+		};
+	};
+};

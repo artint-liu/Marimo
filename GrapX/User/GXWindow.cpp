@@ -233,13 +233,15 @@ GXHRESULT GXWnd::CreateDesktop(GXLPSTATION lpStation)
   lpWnd->m_lpWndProc = (GXWNDPROC)gxDefWindowProcW;
 
   InitializeSysCursor();
-  return _gxInitializeCommonSprite(lpStation->pGraphics);
+  return GX_OK;
+  //return _gxInitializeCommonSprite(lpStation->pGraphics);
 }
 
 GXHRESULT GXWnd::DestroyDesktop(GXLPSTATION lpStation)
 {
   ReleaseSysCursor();
-  return _gxReleaseCommonSprite();
+  return GX_OK;
+  //return _gxReleaseCommonSprite();
 }
 GXHRESULT GXWnd::InitializeSysCursor()
 {

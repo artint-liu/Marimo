@@ -22,8 +22,8 @@ GXVOID GXDLLAPI GXGetOverlappedRect(GXLPCRECT IN, GXLPRECT OUT);
 
 GXVOID _GXDrawFrameEdge(GXWndCanvas*, GXLPRECT, GXDWORD, GXDWORD, GXDWORD);
 GXVOID _GXDrawBackground(GXWndCanvas*, GXLPRECT);
-GXHRESULT _gxInitializeCommonSprite(GXGraphics* pGraphics);
-GXHRESULT _gxReleaseCommonSprite();
+//GXHRESULT _gxInitializeCommonSprite(GXGraphics* pGraphics);
+//GXHRESULT _gxReleaseCommonSprite();
 
 
 //窗口之外外发光的距离

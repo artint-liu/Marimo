@@ -14,7 +14,7 @@
 #include "Engine/DlgConsole.h"
 //#include "grapx/Console.h"
 
-LPCWSTR CDlgConsole::idTemplate = {L"@UI/console.dlg.txt"};
+LPCWSTR CDlgConsole::idTemplate = {L"file://ui/console.dlg.txt"};
 GXLONG_PTR CDlgConsole::s_OldWndProc;
 GXVOID CDlgConsole::OnInitDialog()
 {

@@ -809,7 +809,7 @@ GXBOOL GVPhySimulatorBt::ContactPairTest( GVNode* pNodeA, GVNode* pNodeB )
 
 //////////////////////////////////////////////////////////////////////////
 //u32 CL_CALLBACK GVPhySimulatorBt::SimulationProc(CLMTCREATESTRUCT* pParam)
-i32 SimulationThread::Run()
+i32 SimulationThread::StartRoutine()
 {
   //GVPhySimulatorBt* pThis    = static_cast<GVPhySimulatorBt*>(pParam->pUserParam);
   //SimulationThread* pContext = static_cast<SimulationThread*>(pParam->pThis);

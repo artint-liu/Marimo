@@ -89,6 +89,9 @@ struct GXSTATION
   CmdDict             m_CommandDict;
   GXUIMsgThread*      m_pMsgThread;
   SystemMessage*      m_pSysMsg;
+
+  GXFILTERKEYS        m_stFilterKeys;
+
 #ifdef REFACTOR_TIMER
   clstd::Schedule*    m_pShcedule;
 #else

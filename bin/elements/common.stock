@@ -1,0 +1,1102 @@
+smart{version = "0.0.1.0";}
+Image
+{
+	File = "common.png";
+	Module{
+		rect{
+			id = 100;
+			left = 0;
+			top = 0;
+			right = 32;
+			bottom = 35;
+			name = "TopLeft";
+		};
+		rect{
+			id = 101;
+			left = 32;
+			top = 0;
+			right = 205;
+			bottom = 35;
+			name = "Top";
+		};
+		rect{
+			id = 102;
+			left = 205;
+			top = 0;
+			right = 324;
+			bottom = 35;
+			name = "TopRight";
+		};
+		rect{
+			id = 103;
+			left = 0;
+			top = 36;
+			right = 18;
+			bottom = 254;
+			name = "Left";
+		};
+		rect{
+			id = 104;
+			left = 304;
+			top = 36;
+			right = 324;
+			bottom = 254;
+			name = "Right";
+		};
+		rect{
+			id = 105;
+			left = 0;
+			top = 255;
+			right = 32;
+			bottom = 276;
+			name = "BottomLeft";
+		};
+		rect{
+			id = 106;
+			left = 32;
+			top = 255;
+			right = 292;
+			bottom = 276;
+			name = "Bottom";
+		};
+		rect{
+			id = 107;
+			left = 292;
+			top = 255;
+			right = 324;
+			bottom = 276;
+			name = "BottomRight";
+		};
+		rect{
+			id = 108;
+			left = 324;
+			top = 0;
+			right = 356;
+			bottom = 35;
+			name = "ITopLeft";
+		};
+		rect{
+			id = 109;
+			left = 356;
+			top = 0;
+			right = 529;
+			bottom = 35;
+			name = "ITop";
+		};
+		rect{
+			id = 110;
+			left = 529;
+			top = 0;
+			right = 648;
+			bottom = 35;
+			name = "ITopRight";
+		};
+		rect{
+			id = 111;
+			left = 324;
+			top = 36;
+			right = 342;
+			bottom = 254;
+			name = "ILeft";
+		};
+		rect{
+			id = 112;
+			left = 628;
+			top = 36;
+			right = 648;
+			bottom = 254;
+			name = "IRight";
+		};
+		rect{
+			id = 113;
+			left = 324;
+			top = 255;
+			right = 356;
+			bottom = 276;
+			name = "IBottomLeft";
+		};
+		rect{
+			id = 114;
+			left = 356;
+			top = 255;
+			right = 616;
+			bottom = 276;
+			name = "IBottom";
+		};
+		rect{
+			id = 115;
+			left = 616;
+			top = 255;
+			right = 648;
+			bottom = 276;
+			name = "IBottomRight";
+		};
+		rect{
+			id = 116;
+			left = 20;
+			top = 37;
+			right = 46;
+			bottom = 52;
+		};
+		rect{
+			id = 117;
+			left = 46;
+			top = 37;
+			right = 72;
+			bottom = 52;
+		};
+		rect{
+			id = 118;
+			left = 72;
+			top = 37;
+			right = 98;
+			bottom = 52;
+		};
+		rect{
+			id = 119;
+			left = 98;
+			top = 37;
+			right = 124;
+			bottom = 52;
+		};
+		rect{
+			id = 120;
+			left = 20;
+			top = 52;
+			right = 46;
+			bottom = 67;
+		};
+		rect{
+			id = 121;
+			left = 46;
+			top = 52;
+			right = 72;
+			bottom = 67;
+		};
+		rect{
+			id = 122;
+			left = 72;
+			top = 52;
+			right = 98;
+			bottom = 67;
+		};
+		rect{
+			id = 123;
+			left = 98;
+			top = 52;
+			right = 124;
+			bottom = 67;
+		};
+		rect{
+			id = 124;
+			left = 20;
+			top = 67;
+			right = 46;
+			bottom = 82;
+		};
+		rect{
+			id = 125;
+			left = 46;
+			top = 67;
+			right = 72;
+			bottom = 82;
+		};
+		rect{
+			id = 126;
+			left = 72;
+			top = 67;
+			right = 98;
+			bottom = 82;
+		};
+		rect{
+			id = 127;
+			left = 98;
+			top = 67;
+			right = 124;
+			bottom = 82;
+		};
+		rect{
+			id = 128;
+			left = 20;
+			top = 82;
+			right = 63;
+			bottom = 97;
+		};
+		rect{
+			id = 129;
+			left = 63;
+			top = 82;
+			right = 106;
+			bottom = 97;
+		};
+		rect{
+			id = 130;
+			left = 106;
+			top = 82;
+			right = 149;
+			bottom = 97;
+		};
+		rect{
+			id = 131;
+			left = 149;
+			top = 82;
+			right = 192;
+			bottom = 97;
+		};
+		rect{
+			id = 132;
+			left = 172;
+			top = 68;
+			right = 180;
+			bottom = 76;
+		};
+		rect{
+			id = 133;
+			left = 124;
+			top = 37;
+			right = 172;
+			bottom = 73;
+		};
+		rect{
+			id = 134;
+			left = 172;
+			top = 37;
+			right = 231;
+			bottom = 68;
+		};
+		rect{
+			id = 135;
+			left = 20;
+			top = 97;
+			right = 33;
+			bottom = 110;
+		};
+		rect{
+			id = 136;
+			left = 20;
+			top = 110;
+			right = 33;
+			bottom = 123;
+			name = "CHECK_NORMAL";
+		};
+		rect{
+			id = 137;
+			left = 20;
+			top = 123;
+			right = 33;
+			bottom = 136;
+		};
+		rect{
+			id = 138;
+			left = 20;
+			top = 136;
+			right = 33;
+			bottom = 149;
+		};
+		rect{
+			id = 139;
+			left = 20;
+			top = 149;
+			right = 33;
+			bottom = 162;
+		};
+		rect{
+			id = 140;
+			left = 20;
+			top = 162;
+			right = 33;
+			bottom = 175;
+			name = "CHECK_SELECT";
+		};
+		rect{
+			id = 141;
+			left = 20;
+			top = 175;
+			right = 33;
+			bottom = 188;
+		};
+		rect{
+			id = 142;
+			left = 20;
+			top = 188;
+			right = 33;
+			bottom = 201;
+		};
+		rect{
+			id = 143;
+			left = 20;
+			top = 201;
+			right = 33;
+			bottom = 214;
+		};
+		rect{
+			id = 144;
+			left = 20;
+			top = 214;
+			right = 33;
+			bottom = 227;
+			name = "CHECK_PRESSED";
+		};
+		rect{
+			id = 145;
+			left = 20;
+			top = 227;
+			right = 33;
+			bottom = 240;
+		};
+		rect{
+			id = 146;
+			left = 20;
+			top = 240;
+			right = 33;
+			bottom = 253;
+		};
+		rect{
+			id = 147;
+			left = 33;
+			top = 97;
+			right = 46;
+			bottom = 110;
+		};
+		rect{
+			id = 148;
+			left = 33;
+			top = 110;
+			right = 46;
+			bottom = 123;
+			name = "RADIO_NORMAL";
+		};
+		rect{
+			id = 149;
+			left = 33;
+			top = 123;
+			right = 46;
+			bottom = 136;
+			name = "RADIO_PRESSED";
+		};
+		rect{
+			id = 150;
+			left = 33;
+			top = 136;
+			right = 46;
+			bottom = 149;
+		};
+		rect{
+			id = 151;
+			left = 33;
+			top = 201;
+			right = 46;
+			bottom = 214;
+		};
+		rect{
+			id = 152;
+			left = 33;
+			top = 162;
+			right = 46;
+			bottom = 175;
+			name = "RADIO_SELECT";
+		};
+		rect{
+			id = 153;
+			left = 33;
+			top = 175;
+			right = 46;
+			bottom = 188;
+		};
+		rect{
+			id = 154;
+			left = 33;
+			top = 188;
+			right = 46;
+			bottom = 201;
+		};
+		rect{
+			id = 155;
+			left = 46;
+			top = 97;
+			right = 50;
+			bottom = 101;
+			name = "BTN_NORMAL_TOPLEFT";
+		};
+		rect{
+			id = 156;
+			left = 50;
+			top = 97;
+			right = 70;
+			bottom = 101;
+		};
+		rect{
+			id = 157;
+			left = 70;
+			top = 97;
+			right = 74;
+			bottom = 101;
+		};
+		rect{
+			id = 158;
+			left = 46;
+			top = 101;
+			right = 50;
+			bottom = 116;
+		};
+		rect{
+			id = 159;
+			left = 50;
+			top = 101;
+			right = 70;
+			bottom = 116;
+		};
+		rect{
+			id = 160;
+			left = 70;
+			top = 101;
+			right = 74;
+			bottom = 116;
+		};
+		rect{
+			id = 161;
+			left = 46;
+			top = 116;
+			right = 50;
+			bottom = 120;
+		};
+		rect{
+			id = 162;
+			left = 50;
+			top = 116;
+			right = 70;
+			bottom = 120;
+		};
+		rect{
+			id = 163;
+			left = 70;
+			top = 116;
+			right = 74;
+			bottom = 120;
+		};
+		rect{
+			id = 164;
+			left = 74;
+			top = 97;
+			right = 78;
+			bottom = 101;
+			name = "BTN_OVER_TOPLEFT";
+		};
+		rect{
+			id = 165;
+			left = 78;
+			top = 97;
+			right = 98;
+			bottom = 101;
+		};
+		rect{
+			id = 166;
+			left = 98;
+			top = 97;
+			right = 102;
+			bottom = 101;
+		};
+		rect{
+			id = 167;
+			left = 74;
+			top = 101;
+			right = 78;
+			bottom = 116;
+		};
+		rect{
+			id = 168;
+			left = 78;
+			top = 101;
+			right = 98;
+			bottom = 116;
+		};
+		rect{
+			id = 169;
+			left = 98;
+			top = 101;
+			right = 102;
+			bottom = 116;
+		};
+		rect{
+			id = 170;
+			left = 74;
+			top = 116;
+			right = 78;
+			bottom = 120;
+		};
+		rect{
+			id = 171;
+			left = 78;
+			top = 116;
+			right = 98;
+			bottom = 120;
+		};
+		rect{
+			id = 172;
+			left = 98;
+			top = 116;
+			right = 102;
+			bottom = 120;
+		};
+		rect{
+			id = 173;
+			left = 102;
+			top = 97;
+			right = 106;
+			bottom = 101;
+			name = "BTN_DISABLE_TOPLEFT";
+		};
+		rect{
+			id = 174;
+			left = 106;
+			top = 97;
+			right = 126;
+			bottom = 101;
+		};
+		rect{
+			id = 175;
+			left = 126;
+			top = 97;
+			right = 130;
+			bottom = 101;
+		};
+		rect{
+			id = 176;
+			left = 102;
+			top = 101;
+			right = 106;
+			bottom = 116;
+		};
+		rect{
+			id = 177;
+			left = 106;
+			top = 101;
+			right = 126;
+			bottom = 116;
+		};
+		rect{
+			id = 178;
+			left = 126;
+			top = 101;
+			right = 130;
+			bottom = 116;
+		};
+		rect{
+			id = 179;
+			left = 102;
+			top = 116;
+			right = 106;
+			bottom = 120;
+		};
+		rect{
+			id = 180;
+			left = 106;
+			top = 116;
+			right = 126;
+			bottom = 120;
+		};
+		rect{
+			id = 181;
+			left = 126;
+			top = 116;
+			right = 130;
+			bottom = 120;
+		};
+		rect{
+			id = 182;
+			left = 130;
+			top = 97;
+			right = 134;
+			bottom = 101;
+			name = "BTN_PRESSED_TOPLEFT";
+		};
+		rect{
+			id = 183;
+			left = 134;
+			top = 97;
+			right = 154;
+			bottom = 101;
+		};
+		rect{
+			id = 184;
+			left = 154;
+			top = 97;
+			right = 158;
+			bottom = 101;
+		};
+		rect{
+			id = 185;
+			left = 130;
+			top = 101;
+			right = 134;
+			bottom = 116;
+		};
+		rect{
+			id = 186;
+			left = 134;
+			top = 101;
+			right = 154;
+			bottom = 116;
+		};
+		rect{
+			id = 187;
+			left = 154;
+			top = 101;
+			right = 158;
+			bottom = 116;
+		};
+		rect{
+			id = 188;
+			left = 130;
+			top = 116;
+			right = 134;
+			bottom = 120;
+		};
+		rect{
+			id = 189;
+			left = 134;
+			top = 116;
+			right = 154;
+			bottom = 120;
+		};
+		rect{
+			id = 190;
+			left = 154;
+			top = 116;
+			right = 158;
+			bottom = 120;
+		};
+		rect{
+			id = 191;
+			left = 158;
+			top = 97;
+			right = 162;
+			bottom = 101;
+			name = "BTN_DEFAULT_TOPLEFT";
+		};
+		rect{
+			id = 192;
+			left = 162;
+			top = 97;
+			right = 182;
+			bottom = 101;
+		};
+		rect{
+			id = 193;
+			left = 182;
+			top = 97;
+			right = 186;
+			bottom = 101;
+		};
+		rect{
+			id = 194;
+			left = 158;
+			top = 101;
+			right = 162;
+			bottom = 116;
+		};
+		rect{
+			id = 195;
+			left = 162;
+			top = 101;
+			right = 182;
+			bottom = 116;
+		};
+		rect{
+			id = 196;
+			left = 182;
+			top = 101;
+			right = 186;
+			bottom = 116;
+		};
+		rect{
+			id = 197;
+			left = 158;
+			top = 116;
+			right = 162;
+			bottom = 120;
+		};
+		rect{
+			id = 198;
+			left = 162;
+			top = 116;
+			right = 182;
+			bottom = 120;
+		};
+		rect{
+			id = 199;
+			left = 182;
+			top = 116;
+			right = 186;
+			bottom = 120;
+		};
+		rect{
+			id = 200;
+			left = 231;
+			top = 37;
+			right = 237;
+			bottom = 41;
+			name = "GroupBox_TopLeft";
+		};
+		rect{
+			id = 201;
+			left = 237;
+			top = 37;
+			right = 247;
+			bottom = 41;
+		};
+		rect{
+			id = 202;
+			left = 247;
+			top = 37;
+			right = 253;
+			bottom = 41;
+		};
+		rect{
+			id = 203;
+			left = 231;
+			top = 41;
+			right = 234;
+			bottom = 53;
+		};
+		rect{
+			id = 0;
+			left = 235;
+			top = 42;
+			right = 249;
+			bottom = 52;
+		};
+		rect{
+			id = 204;
+			left = 250;
+			top = 41;
+			right = 253;
+			bottom = 53;
+		};
+		rect{
+			id = 205;
+			left = 231;
+			top = 53;
+			right = 237;
+			bottom = 57;
+		};
+		rect{
+			id = 206;
+			left = 237;
+			top = 53;
+			right = 247;
+			bottom = 57;
+		};
+		rect{
+			id = 207;
+			left = 247;
+			top = 53;
+			right = 253;
+			bottom = 57;
+		};
+		rect{
+			id = 208;
+			left = 47;
+			top = 122;
+			right = 64;
+			bottom = 138;
+			name = "HSCROLL_NORMAL_BTN_LEFT";
+		};
+		rect{
+			id = 209;
+			left = 64;
+			top = 122;
+			right = 81;
+			bottom = 138;
+			name = "HSCROLL_OVER_BTN_LEFT";
+		};
+		rect{
+			id = 210;
+			left = 81;
+			top = 122;
+			right = 98;
+			bottom = 138;
+			name = "HSCROLL_DISABLE_BTN_LEFT";
+		};
+		rect{
+			id = 211;
+			left = 98;
+			top = 122;
+			right = 115;
+			bottom = 138;
+			name = "HSCROLL_PRESSED_BTN_LEFT";
+		};
+		rect{
+			id = 212;
+			left = 115;
+			top = 122;
+			right = 132;
+			bottom = 138;
+			name = "HSCROLL_NORMAL_BTN_RIGHT";
+		};
+		rect{
+			id = 213;
+			left = 132;
+			top = 122;
+			right = 149;
+			bottom = 138;
+			name = "HSCROLL_OVER_BTN_RIGHT";
+		};
+		rect{
+			id = 214;
+			left = 149;
+			top = 122;
+			right = 166;
+			bottom = 138;
+			name = "HSCROLL_DISABLE_BTN_RIGHT";
+		};
+		rect{
+			id = 215;
+			left = 166;
+			top = 122;
+			right = 183;
+			bottom = 138;
+			name = "HSCROLL_PRESSED_BTN_RIGHT";
+		};
+		rect{
+			id = 216;
+			left = 48;
+			top = 138;
+			right = 64;
+			bottom = 155;
+			name = "VSCROLL_NORMAL_BTN_LEFT";
+		};
+		rect{
+			id = 217;
+			left = 65;
+			top = 138;
+			right = 81;
+			bottom = 155;
+			name = "VSCROLL_OVER_BTN_LEFT";
+		};
+		rect{
+			id = 218;
+			left = 82;
+			top = 138;
+			right = 98;
+			bottom = 155;
+			name = "VSCROLL_DISABLE_BTN_LEFT";
+		};
+		rect{
+			id = 219;
+			left = 99;
+			top = 138;
+			right = 115;
+			bottom = 155;
+			name = "VSCROLL_PRESSED_BTN_LEFT";
+		};
+		rect{
+			id = 220;
+			left = 116;
+			top = 138;
+			right = 132;
+			bottom = 155;
+			name = "VSCROLL_NORMAL_BTN_RIGHT";
+		};
+		rect{
+			id = 221;
+			left = 133;
+			top = 138;
+			right = 149;
+			bottom = 155;
+			name = "VSCROLL_OVER_BTN_RIGHT";
+		};
+		rect{
+			id = 222;
+			left = 150;
+			top = 138;
+			right = 166;
+			bottom = 155;
+			name = "VSCROLL_DISABLE_BTN_RIGHT";
+		};
+		rect{
+			id = 223;
+			left = 167;
+			top = 138;
+			right = 183;
+			bottom = 155;
+			name = "VSCROLL_PRESSED_BTN_RIGHT";
+		};
+		rect{
+			id = 224;
+			left = 47;
+			top = 156;
+			right = 64;
+			bottom = 172;
+			name = "HSCROLL_DISABLE_SHAFT";
+		};
+		rect{
+			id = 225;
+			left = 64;
+			top = 156;
+			right = 81;
+			bottom = 172;
+			name = "HSCROLL_NORMAL_SHAFT";
+		};
+		rect{
+			id = 226;
+			left = 82;
+			top = 155;
+			right = 98;
+			bottom = 172;
+			name = "VSCROLL_DISABLE_SHAFT";
+		};
+		rect{
+			id = 227;
+			left = 99;
+			top = 155;
+			right = 115;
+			bottom = 172;
+			name = "VSCROLL_NORMAL_SHAFT";
+		};
+		rect{
+			id = 228;
+			left = 116;
+			top = 156;
+			right = 120;
+			bottom = 172;
+			name = "HSCROLL_NORMAL_BOX_LEFT";
+		};
+		rect{
+			id = 229;
+			left = 120;
+			top = 156;
+			right = 134;
+			bottom = 172;
+			name = "HSCROLL_NORMAL_BOX";
+		};
+		rect{
+			id = 230;
+			left = 134;
+			top = 156;
+			right = 138;
+			bottom = 172;
+			name = "HSCROLL_NORMAL_BOX_RIGHT";
+		};
+		rect{
+			id = 231;
+			left = 138;
+			top = 156;
+			right = 142;
+			bottom = 172;
+			name = "HSCROLL_PRESSED_BOX_LEFT";
+		};
+		rect{
+			id = 232;
+			left = 142;
+			top = 156;
+			right = 156;
+			bottom = 172;
+			name = "HSCROLL_PRESSED_BOX";
+		};
+		rect{
+			id = 233;
+			left = 156;
+			top = 156;
+			right = 160;
+			bottom = 172;
+			name = "HSCROLL_PRESSED_BOX_RIGHT";
+		};
+		rect{
+			id = 234;
+			left = 160;
+			top = 156;
+			right = 164;
+			bottom = 172;
+			name = "HSCROLL_OVER_BOX_LEFT";
+		};
+		rect{
+			id = 235;
+			left = 164;
+			top = 156;
+			right = 178;
+			bottom = 172;
+			name = "HSCROLL_OVER_BOX";
+		};
+		rect{
+			id = 236;
+			left = 178;
+			top = 156;
+			right = 182;
+			bottom = 172;
+			name = "HSCROLL_OVER_BOX_RIGHT";
+		};
+		rect{
+			id = 237;
+			left = 48;
+			top = 173;
+			right = 64;
+			bottom = 176;
+			name = "VSCROLL_NORMAL_BOX_TOP";
+		};
+		rect{
+			id = 238;
+			left = 48;
+			top = 176;
+			right = 64;
+			bottom = 190;
+			name = "VSCROLL_NORMAL_BOX";
+		};
+		rect{
+			id = 239;
+			left = 48;
+			top = 190;
+			right = 64;
+			bottom = 193;
+			name = "VSCROLL_NORMAL_BOX_BOTTOM";
+		};
+		rect{
+			id = 240;
+			left = 65;
+			top = 173;
+			right = 81;
+			bottom = 176;
+			name = "VSCROLL_PRESSED_BOX_TOP";
+		};
+		rect{
+			id = 241;
+			left = 65;
+			top = 176;
+			right = 81;
+			bottom = 190;
+			name = "VSCROLL_PRESSED_BOX";
+		};
+		rect{
+			id = 242;
+			left = 65;
+			top = 190;
+			right = 81;
+			bottom = 193;
+			name = "VSCROLL_PRESSED_BOX_BOTTOM";
+		};
+		rect{
+			id = 243;
+			left = 82;
+			top = 173;
+			right = 98;
+			bottom = 176;
+			name = "VSCROLL_OVER_BOX_TOP";
+		};
+		rect{
+			id = 244;
+			left = 82;
+			top = 176;
+			right = 98;
+			bottom = 190;
+			name = "VSCROLL_OVER_BOX";
+		};
+		rect{
+			id = 245;
+			left = 82;
+			top = 190;
+			right = 98;
+			bottom = 193;
+			name = "VSCROLL_OVER_BOX_BOTTOM";
+		};
+	};
+};

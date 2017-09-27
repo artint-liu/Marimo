@@ -148,9 +148,10 @@ extern "C"
   GXBOOL GXUXTHEME_Initialize(GXGraphics* pGraphics)
   {
     // TODO: 抽取资源
-    GXCreateSpriteFromFileW(pGraphics, L"UI/WindowFrame.GSprite", &s_pUxThemeSprite_Window);
-    GXCreateSpriteFromFileW(pGraphics, L"UI/ScrollBar.GSprite",   &s_pUxThemeSprite_ScrollBar);
-    GXCreateSpriteFromFileW(pGraphics, L"UI/Button.GSprite",      &s_pUxThemeSprite_Button);
+    GXCreateSpriteFromFileW(pGraphics, L"elements/common.stock",       &GXWnd::s_pCommonSpr);
+    GXCreateSpriteFromFileW(pGraphics, L"elements/window_frame.stock", &s_pUxThemeSprite_Window);
+    GXCreateSpriteFromFileW(pGraphics, L"elements/scroll_bar.stock",   &s_pUxThemeSprite_ScrollBar);
+    GXCreateSpriteFromFileW(pGraphics, L"elements/button.stock",       &s_pUxThemeSprite_Button);
     return TRUE;
   }
 
@@ -159,6 +160,7 @@ extern "C"
     SAFE_RELEASE(s_pUxThemeSprite_Button);
     SAFE_RELEASE(s_pUxThemeSprite_ScrollBar);
     SAFE_RELEASE(s_pUxThemeSprite_Window);
+    SAFE_RELEASE(GXWnd::s_pCommonSpr);
   }
 };
 

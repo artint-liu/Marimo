@@ -178,7 +178,7 @@ namespace OAL1
     ~MOAudioOAL_MTImpl();
     GXBOOL    Initialize    ();
     GXBOOL    Finalize      ();
-    i32       Run           ();
+    i32       StartRoutine  ();
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     virtual GXHRESULT AddRef        ();

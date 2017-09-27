@@ -531,7 +531,7 @@ namespace OAL1
   }
 
   //////////////////////////////////////////////////////////////////////////
-  i32 MOAudioOAL_MTImpl::Run()
+  i32 MOAudioOAL_MTImpl::StartRoutine()
   {
     m_pAudio->Initialize();
     AUDIOTHREADMSG msg;

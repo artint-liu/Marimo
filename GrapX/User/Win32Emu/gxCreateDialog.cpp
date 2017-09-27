@@ -518,7 +518,11 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
                 GXLPARAM    lParam
                 )
 {
-  if(hInstance == NULL || (IS_PTR(lpTemplate) && lpTemplate[0] == '@'))  {
+  const GXWCHAR szFileProtocol[] = _CLTEXT("file://");
+
+  ASSERT(lpTemplate[0] != '@'); // 重构前是用@作为文件前缀的，这里放断言是为了督促修改
+
+  if(hInstance == NULL || (IS_PTR(lpTemplate) && GXSTRNCMP(lpTemplate, szFileProtocol, countof(szFileProtocol) - 1) == 0))  {
     return gxIntCreateDialogFromFileW(NULL, lpTemplate, _T("Dialog"), hParent, lpDialogFunc, lParam);
   }
 
@@ -1222,12 +1226,16 @@ GXHWND gxIntCreateDialogFromFileW(
   GXLPARAM    lParam
   )
 {
+  const GXWCHAR szFileProtocol[] = _CLTEXT("file://");
   ASSERT(hInstance == NULL);
   
 
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
-
-  GXLPCWSTR szDlgFilename = lpFilename[0] == '@' ? &lpFilename[1] : lpFilename;
+  GXLPCWSTR szDlgFilename = lpFilename; //lpFilename[0] == '@' ? &lpFilename[1] : lpFilename;
+  if(GXSTRNCMP(szDlgFilename, szFileProtocol, countof(szFileProtocol) - 1) == 0)
+  {
+    szDlgFilename += countof(szFileProtocol) - 1;
+  }
 
   DlgXM::DlgSmartFile file(hInstance, lpFilename);
   Section hDlgSect;

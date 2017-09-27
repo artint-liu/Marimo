@@ -136,7 +136,7 @@ int GXDLLAPI gxMessageBoxW(
   {
     sText.szBtnText[0] = L"OK";
     sText.szBtnID[0] = IDOK;
-    return gxDialogBoxParamW(NULL, L"@Resource\\MessageBox_Btn_1.txt", hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
+    return gxDialogBoxParamW(NULL, _CLTEXT("file://Resource/MessageBox_Btn_1.txt"), hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
   }
   else if(uBtnType == GXMB_OKCANCEL || uBtnType == GXMB_YESNO || uBtnType == GXMB_RETRYCANCEL)
   {
@@ -158,7 +158,7 @@ int GXDLLAPI gxMessageBoxW(
       sText.szBtnText[1] = L"Cancel";
       sText.szBtnID[1] = IDCANCEL;
     }
-    return gxDialogBoxParamW(NULL, L"@Resource\\MessageBox_Btn_2.txt", hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
+    return gxDialogBoxParamW(NULL, _CLTEXT("file://Resource/MessageBox_Btn_2.txt"), hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
   }
   else if(uBtnType == GXMB_ABORTRETRYIGNORE || uBtnType == GXMB_YESNOCANCEL)
   {
@@ -178,7 +178,7 @@ int GXDLLAPI gxMessageBoxW(
       sText.szBtnText[2] = L"Cancel";
       sText.szBtnID[2] = IDCANCEL;
     }
-    return gxDialogBoxParamW(NULL, L"@Resource\\MessageBox_Btn_3.txt", hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
+    return gxDialogBoxParamW(NULL, _CLTEXT("file://Resource/MessageBox_Btn_3.txt"), hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
   }
   return -1;
   //gxIntCreateDialogFromFileW(NULL, , _T("Dialog"), hWnd, , );

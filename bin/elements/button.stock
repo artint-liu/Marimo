@@ -1,0 +1,327 @@
+smart{version = "0.0.1.0";}
+Image
+{
+	File = "button.png";
+	Module{
+		rect{
+			id = 100;
+			left = 0;
+			top = 1;
+			right = 5;
+			bottom = 5;
+			name = "PBS_NORMAL";
+		};
+		rect{
+			id = 101;
+			left = 5;
+			top = 1;
+			right = 23;
+			bottom = 5;
+		};
+		rect{
+			id = 102;
+			left = 23;
+			top = 1;
+			right = 28;
+			bottom = 5;
+		};
+		rect{
+			id = 103;
+			left = 0;
+			top = 5;
+			right = 5;
+			bottom = 18;
+		};
+		rect{
+			id = 104;
+			left = 5;
+			top = 5;
+			right = 23;
+			bottom = 18;
+		};
+		rect{
+			id = 105;
+			left = 23;
+			top = 5;
+			right = 28;
+			bottom = 18;
+		};
+		rect{
+			id = 106;
+			left = 0;
+			top = 18;
+			right = 5;
+			bottom = 22;
+		};
+		rect{
+			id = 107;
+			left = 5;
+			top = 18;
+			right = 23;
+			bottom = 22;
+		};
+		rect{
+			id = 108;
+			left = 23;
+			top = 18;
+			right = 28;
+			bottom = 22;
+		};
+		rect{
+			id = 109;
+			left = 28;
+			top = 1;
+			right = 33;
+			bottom = 5;
+			name = "PBS_DEFAULTED";
+		};
+		rect{
+			id = 110;
+			left = 33;
+			top = 1;
+			right = 51;
+			bottom = 5;
+		};
+		rect{
+			id = 111;
+			left = 51;
+			top = 1;
+			right = 56;
+			bottom = 5;
+		};
+		rect{
+			id = 112;
+			left = 28;
+			top = 5;
+			right = 33;
+			bottom = 18;
+		};
+		rect{
+			id = 113;
+			left = 33;
+			top = 5;
+			right = 51;
+			bottom = 18;
+		};
+		rect{
+			id = 114;
+			left = 51;
+			top = 5;
+			right = 56;
+			bottom = 18;
+		};
+		rect{
+			id = 115;
+			left = 28;
+			top = 18;
+			right = 33;
+			bottom = 22;
+		};
+		rect{
+			id = 116;
+			left = 33;
+			top = 18;
+			right = 51;
+			bottom = 22;
+		};
+		rect{
+			id = 117;
+			left = 51;
+			top = 18;
+			right = 56;
+			bottom = 22;
+		};
+		rect{
+			id = 118;
+			left = 28;
+			top = 22;
+			right = 33;
+			bottom = 26;
+			name = "PBS_HOT";
+		};
+		rect{
+			id = 119;
+			left = 33;
+			top = 22;
+			right = 51;
+			bottom = 26;
+		};
+		rect{
+			id = 0;
+			left = 51;
+			top = 22;
+			right = 56;
+			bottom = 26;
+		};
+		rect{
+			id = 0;
+			left = 28;
+			top = 26;
+			right = 33;
+			bottom = 39;
+		};
+		rect{
+			id = 0;
+			left = 33;
+			top = 26;
+			right = 51;
+			bottom = 39;
+		};
+		rect{
+			id = 0;
+			left = 51;
+			top = 26;
+			right = 56;
+			bottom = 39;
+		};
+		rect{
+			id = 0;
+			left = 28;
+			top = 39;
+			right = 33;
+			bottom = 43;
+		};
+		rect{
+			id = 0;
+			left = 33;
+			top = 39;
+			right = 51;
+			bottom = 43;
+		};
+		rect{
+			id = 0;
+			left = 51;
+			top = 39;
+			right = 56;
+			bottom = 43;
+		};
+		rect{
+			id = 0;
+			left = 0;
+			top = 32;
+			right = 5;
+			bottom = 36;
+			name = "PBS_DISABLED";
+		};
+		rect{
+			id = 0;
+			left = 5;
+			top = 32;
+			right = 23;
+			bottom = 36;
+		};
+		rect{
+			id = 0;
+			left = 23;
+			top = 32;
+			right = 28;
+			bottom = 36;
+		};
+		rect{
+			id = 0;
+			left = 0;
+			top = 36;
+			right = 5;
+			bottom = 49;
+		};
+		rect{
+			id = 0;
+			left = 5;
+			top = 36;
+			right = 23;
+			bottom = 49;
+		};
+		rect{
+			id = 0;
+			left = 23;
+			top = 36;
+			right = 28;
+			bottom = 49;
+		};
+		rect{
+			id = 0;
+			left = 0;
+			top = 49;
+			right = 5;
+			bottom = 53;
+		};
+		rect{
+			id = 0;
+			left = 5;
+			top = 49;
+			right = 23;
+			bottom = 53;
+		};
+		rect{
+			id = 0;
+			left = 23;
+			top = 49;
+			right = 28;
+			bottom = 53;
+		};
+		rect{
+			id = 0;
+			left = 28;
+			top = 43;
+			right = 33;
+			bottom = 47;
+			name = "PBS_PRESSED";
+		};
+		rect{
+			id = 0;
+			left = 33;
+			top = 43;
+			right = 51;
+			bottom = 47;
+		};
+		rect{
+			id = 0;
+			left = 51;
+			top = 43;
+			right = 56;
+			bottom = 47;
+		};
+		rect{
+			id = 0;
+			left = 28;
+			top = 47;
+			right = 33;
+			bottom = 60;
+		};
+		rect{
+			id = 0;
+			left = 33;
+			top = 47;
+			right = 51;
+			bottom = 60;
+		};
+		rect{
+			id = 0;
+			left = 51;
+			top = 47;
+			right = 56;
+			bottom = 60;
+		};
+		rect{
+			id = 0;
+			left = 28;
+			top = 60;
+			right = 33;
+			bottom = 64;
+		};
+		rect{
+			id = 0;
+			left = 33;
+			top = 60;
+			right = 51;
+			bottom = 64;
+		};
+		rect{
+			id = 0;
+			left = 51;
+			top = 60;
+			right = 56;
+			bottom = 64;
+		};
+	};
+};

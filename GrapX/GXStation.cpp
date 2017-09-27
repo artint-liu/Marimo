@@ -118,6 +118,24 @@ GXHRESULT GXSTATION::Initialize()
 
   InlSetZeroT(m_HotKeyChain);
 
+#ifdef _CL_SYSTEM_WINDOWS
+  FILTERKEYS filter_key = {sizeof(FILTERKEYS)};
+  SystemParametersInfo(SPI_GETFILTERKEYS, sizeof(FILTERKEYS), &filter_key, 0);
+  m_stFilterKeys.cbSize      = sizeof(GXFILTERKEYS);
+  m_stFilterKeys.dwFlags     = filter_key.dwFlags;
+  m_stFilterKeys.iWaitMSec   = filter_key.iWaitMSec;
+  m_stFilterKeys.iDelayMSec  = filter_key.iDelayMSec;
+  m_stFilterKeys.iRepeatMSec = filter_key.iRepeatMSec;
+  m_stFilterKeys.iBounceMSec = filter_key.iBounceMSec;
+#else
+  m_stFilterKeys.cbSize      = sizeof(GXFILTERKEYS);
+  m_stFilterKeys.dwFlags	     = 114;
+  m_stFilterKeys.iWaitMSec   = 1000;
+  m_stFilterKeys.iDelayMSec  = 1000;
+  m_stFilterKeys.iRepeatMSec = 500;
+  m_stFilterKeys.iBounceMSec	 = 0;
+#endif
+
 
 #ifdef _ENABLE_STMT
   STMT::CreateTask(1024 * 1024, UITask, NULL);
