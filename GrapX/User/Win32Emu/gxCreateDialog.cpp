@@ -1436,6 +1436,7 @@ int GXDLLAPI gxDialogBoxParamW(
       gxMessageBeep(0);
       continue;
     }
+    gxTranslateMessage(&gxmsg);
     gxDispatchMessageW(&gxmsg);
 
     if((GXWND_PTR(hDlg)->m_uState & WIS_ENDDIALOG) != 0) {

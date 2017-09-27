@@ -236,10 +236,12 @@ public:
     str.VarFormat(szFormat, arglist);
     if(m_bUnicode) {
       nRet = m_fifo.put((const u8*)(const wch*)str, str.GetLength());
+      CLOGW(str.CStr());
     }
     else {
       clStringA strA(str, str.GetLength());
       nRet = m_fifo.put((const u8*)(const ch*)strA, strA.GetLength());
+      CLOG(str.CStr());
     }
     CallStreamProc();
     return nRet;

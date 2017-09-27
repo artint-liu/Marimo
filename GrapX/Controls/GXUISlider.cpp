@@ -303,6 +303,7 @@ namespace GXUI
           gxReleaseCapture();
           break;
         }
+        gxTranslateMessage(&msg);
         gxDispatchMessageW(&msg);
       } // while
 

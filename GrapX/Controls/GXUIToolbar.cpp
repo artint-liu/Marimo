@@ -298,6 +298,7 @@ namespace GXUI
         IntOnMouseMove(nPressdItem, GXGET_X_LPARAM(msg.lParam), GXGET_Y_LPARAM(msg.lParam));
       }
       else {
+        gxTranslateMessage(&msg);
         gxDispatchMessageW(&msg);
       }
     }

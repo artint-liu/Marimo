@@ -3922,6 +3922,7 @@ TREEVIEW_TrackMouse(const GXTREEVIEW_INFO *infoPtr, GXPOINT pt)
         break;
       }
 
+      gxTranslateMessage(&msg);
       gxDispatchMessageW(&msg);
     }
 

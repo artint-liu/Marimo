@@ -105,6 +105,7 @@ GXINT gxIntDestroyChildWnd(GXLPWND lpWnd)
 
   // flush message queue
   while(gxPeekMessageW(&msg, hWnd, 0, 0, GXPM_REMOVE)) {
+    gxTranslateMessage(&msg);
     gxDispatchMessageW(&msg);
   }
 

@@ -691,7 +691,11 @@ GXBOOL GXDLLAPI gxTranslateMessage(
   )
 {
   if(lpMsg->message == GXWM_KEYDOWN) {
-    //gxPostMessageW(lpMsg->hwnd, GXWM_CHAR, );
+    int nVirKey = (int)lpMsg->wParam;
+    if(nVirKey >= 0x20 && nVirKey < 128)
+    {
+      gxPostMessageW(lpMsg->hwnd, GXWM_CHAR, (GXWPARAM)nVirKey, lpMsg->lParam);
+    }
   }
   return FALSE;
 }

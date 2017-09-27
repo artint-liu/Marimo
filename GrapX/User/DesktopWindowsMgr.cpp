@@ -346,7 +346,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
   GXREGN regn(0);
   m_pDesktopWindows->m_pRenderTar->GetTextureUnsafe()->GetDimension((GXUINT*)&regn.width, (GXUINT*)&regn.height);
 
-  if(TEST_FLAG(m_dwFlags, GXDWM_AERO))
+  if(TEST_FLAG(m_dwFlags, GXDWM_AERO) && m_lpStation->m_pStockObject->pAeroEffect)
   {
     // AERO 效果绘制窗口层
     m_lpStation->pBackDownSampTexA->StretchRect(

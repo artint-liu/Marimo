@@ -169,14 +169,23 @@ namespace GXUI
     GXHWND hWnd;
     if(m_HandlesPool.empty())
     {
-      m_strTemplate.Find(L':');
-      clStringArrayW aString;
-      ResolveString(m_strTemplate, L':', aString);
-      if(aString.size() != 2) {
-        return NULL;
+      clStringW strFilename;
+      clStringW strDialogName;
+      m_strTemplate.ReverseDivideBy(_CLTEXT(':'), strFilename, strDialogName);
+      if(strFilename.IsNotEmpty() && strDialogName.IsNotEmpty()) {
+
+      //m_strTemplate.Find(L':');
+      //clStringArrayW aString;
+      //ResolveString(m_strTemplate, L':', aString);
+      //if(aString.size() != 2) {
+      //  return NULL;
+      //}
+        hWnd = gxIntCreateDialogFromFileW(NULL, strFilename, strDialogName, m_hWnd, (GXDLGPROC)CustomWndProc, NULL);
+        gxShowWindow(hWnd, GXSW_SHOW);
       }
-      hWnd = gxIntCreateDialogFromFileW(NULL, aString[0], aString[1], m_hWnd, (GXDLGPROC)CustomWndProc, NULL);
-      gxShowWindow(hWnd, GXSW_SHOW);
+      else {
+        CLOG_ERRORW(_CLTEXT("%s : can not parse template(%s)"), __FUNCTIONW__, m_strTemplate.CStr());
+      }
     }
     else {
       hWnd = m_HandlesPool.front();
@@ -664,12 +673,15 @@ namespace GXUI
     GXLRESULT result = 0;
     m_strTemplate = szTemplate;
 
-    m_strTemplate.Find(L':');
-    clvector<clStringW> aString;
-    ResolveString(m_strTemplate, L':', aString);
-    if(aString.size() == 2) {
+    //m_strTemplate.Find(L':');
+    //clvector<clStringW> aString;
+    //ResolveString(m_strTemplate, L':', aString);
+    clStringW strFilename;
+    clStringW strDialogName;
+    m_strTemplate.ReverseDivideBy(_CLTEXT(':'), strFilename, strDialogName);
+    if(strFilename.IsNotEmpty() && strDialogName.IsNotEmpty()) {
       GXRECT rect;
-      m_hPrototype = gxIntCreateDialogFromFileW(NULL, aString[0], aString[1], m_hWnd, (GXDLGPROC)CustomWndProc, NULL);
+      m_hPrototype = gxIntCreateDialogFromFileW(NULL, strFilename, strDialogName, m_hWnd, (GXDLGPROC)CustomWndProc, NULL);
       gxGetClientRect(m_hPrototype, &rect);
       m_nColumnWidth = rect.right - rect.left;
       m_nItemHeight = rect.bottom - rect.top;
@@ -703,6 +715,10 @@ namespace GXUI
       GXRECT rcClient;
       gxGetClientRect(m_hWnd, &rcClient);
       OnSize(rcClient.right, rcClient.bottom);
+    }
+    else
+    {
+      CLOG_ERRORW(_CLTEXT("%s : can not parse template(%s)"), __FUNCTIONW__, szTemplate);
     }
     return result;
   }

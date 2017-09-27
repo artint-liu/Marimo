@@ -793,7 +793,7 @@ namespace Scene
     if(GXSUCCEEDED(hval))
     {
       GXMaterialInst* pSkyMtl = NULL;
-      hval = pGraphics->CreateMaterialFromFileW(&pSkyMtl, L"Shaders\\szCraft_SkyAtmoScatt.txt", MLT_REFERENCE);
+      hval = pGraphics->CreateMaterialFromFileW(&pSkyMtl, L"shaders\\szCraft_SkyAtmoScatt.txt", MLT_REFERENCE);
       if(GXSUCCEEDED(hval))
       {
         pSkyMtl->SetFloat3ByName("v3LightPos", float3(0.01f,1.0f,0.01f));

@@ -3249,7 +3249,8 @@ static GXBOOL MENU_TrackMenu( GXHMENU hmenu, GXUINT wFlags, GXINT x, GXINT y,
     else
     {
       gxPeekMessageW( &msg, 0, msg.message, msg.message, GXPM_REMOVE );
-      gxDispatchMessageW( &msg );
+      gxTranslateMessage(&msg);
+      gxDispatchMessageW(&msg);
       continue;
     }
 
