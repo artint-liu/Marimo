@@ -41,7 +41,7 @@ namespace Scene
 #ifdef ENABLE_OLD_DATA_ACTION
       GXHRESULT OnKnock             (Marimo::KNOCKACTION* pKnock);
 #else
-      GXVOID    OnImpulse           (Marimo::LPCDATAIMPULSE pImpulse);
+      GXVOID    OnImpulse           (Marimo::LPCDATAIMPULSE pImpulse) override;
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
 
     private:
@@ -97,7 +97,7 @@ namespace Scene
 #ifdef ENABLE_OLD_DATA_ACTION
       GXHRESULT OnKnock                 (Marimo::KNOCKACTION* pKnock);
 #else
-      GXVOID    OnImpulse               (Marimo::LPCDATAIMPULSE pImpulse);
+      GXVOID    OnImpulse               (Marimo::LPCDATAIMPULSE pImpulse) override;
 #endif // #ifdef ENABLE_OLD_DATA_ACTION
     private:
       MODataPool* m_pDataPool;

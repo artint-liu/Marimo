@@ -808,7 +808,7 @@ GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray*
   typedef clStockA::Section Section;
   typedef clStockA::ATTRIBUTE ATTRIBUTE;
 
-  clStringA strSection = clStringA(szSection) + "\\parameter";
+  clStringA strSection = clStringA(szSection) + "/" + "parameter";
 
   //for(int i = 0; i < 2; i++)
   {
@@ -831,24 +831,29 @@ GXBOOL GShader::LoadUniformSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray*
 
       if(hSect)
       {
-        do {
-          if(hSect.FirstKey(val))
-          {
-            Def.Name = "SAMPLER";
-            Def.Value = hSect.SectionName();
-            aUniforms->push_back(Def);
-            do {
-              Def.Name = val.KeyName();
-              Def.Value = val.ToString();
+        hSect = hSect.Open(NULL);
+
+        if(hSect)
+        {
+          do {
+            if(hSect.FirstKey(val))
+            {
+              Def.Name = "SAMPLER";
+              Def.Value = hSect.SectionName();
               aUniforms->push_back(Def);
-            } while(val.NextKey());
-          }
-          Def.Name = "SAMPLER";
-          Def.Value = "";
-          aUniforms->push_back(Def);
-          //pSmart->CloseHandle(hKeySampler);
-        } while (hSect.NextSection());
-        //pSmart->CloseHandle(hSect);
+              do {
+                Def.Name = val.KeyName();
+                Def.Value = val.ToString();
+                aUniforms->push_back(Def);
+              } while(val.NextKey());
+            }
+            Def.Name = "SAMPLER";
+            Def.Value = "";
+            aUniforms->push_back(Def);
+            //pSmart->CloseHandle(hKeySampler);
+          } while(hSect.NextSection());
+          //pSmart->CloseHandle(hSect);
+        }
       }
       //pSmart->CloseHandle(hKey);
       //pSmart->CloseHandle(hParam);

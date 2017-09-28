@@ -69,27 +69,27 @@ ov_callbacks OggVorbis::s_Callbacks = {
 
 int OggVorbis::Clear()
 {
-  return ov_clear(&m_OVFile);
+  return ov_clear(m_pOVFile);
 }
 
 long OggVorbis::Read(char *buffer,int length,int bigendianp,int word,int sgned,int *bitstream)
 {
-  return ov_read(&m_OVFile, buffer, length, bigendianp, word, sgned, bitstream);
+  return ov_read(m_pOVFile, buffer, length, bigendianp, word, sgned, bitstream);
 }
 
 ogg_int64_t OggVorbis::PCMTotal(int i)
 {
-  return ov_pcm_total(&m_OVFile, i);
+  return ov_pcm_total(m_pOVFile, i);
 }
 
 vorbis_info* OggVorbis::Info(int link)
 {
-  return ov_info(&m_OVFile, link);
+  return ov_info(m_pOVFile, link);
 }
 
 vorbis_comment* OggVorbis::Comment(int link)
 {
-  return ov_comment(&m_OVFile, link);
+  return ov_comment(m_pOVFile, link);
 }
 
 //int OggVorbis::OpenCallbacks(void *datasource, char *initial, long ibytes, ov_callbacks callbacks)
@@ -98,7 +98,8 @@ vorbis_comment* OggVorbis::Comment(int link)
 //}
 
 OggVorbis::OggVorbis()
-  : m_pVorbisInfo(NULL)
+  : m_pOVFile(NULL)
+  , m_pVorbisInfo(NULL)
   , m_uFrequency(0)
   , m_uFormat(0)
   , m_uChannels(0)
@@ -160,15 +161,17 @@ GXBOOL OggVorbis::Initialize()
       fn_comment        = (LPOVCOMMENT)       GetProcAddress(s_hVorbisFileDLL, "ov_comment");
       fn_open_callbacks = (LPOVOPENCALLBACKS) GetProcAddress(s_hVorbisFileDLL, "ov_open_callbacks");
 
-      int nret = fn_open_callbacks(this, &m_OVFile, NULL, 0, s_Callbacks);
+      int nret = fn_open_callbacks(this, m_pOVFile, NULL, 0, s_Callbacks);
       m_pVorbisInfo = fn_info(&vf, -1);
       return true;
     }
   }
 #else
-  InlSetZeroT(m_OVFile);
-  int nret = ov_open_callbacks(this, &m_OVFile, NULL, 0, s_Callbacks);
-  m_pVorbisInfo = ov_info(&m_OVFile, -1);
+  m_pOVFile = new OggVorbis_File;
+  InlSetZeroT(*m_pOVFile);
+  
+  int nret = ov_open_callbacks(this, m_pOVFile, NULL, 0, s_Callbacks);
+  m_pVorbisInfo = ov_info(m_pOVFile, -1);
 #endif // #ifdef DELAY_LOAD_OGGVORBIS
 
   if( ! m_pVorbisInfo) {
@@ -186,7 +189,7 @@ GXBOOL OggVorbis::Initialize()
   if ( ! m_pDecodeBuffer)
   {
     CLOG_ERROR("Failed to allocate memory for decoded OggVorbis data\n");
-    ov_clear(&m_OVFile);
+    ov_clear(m_pOVFile);
     //ShutdownVorbisFile();
     //ALFWShutdownOpenAL();
     //ALFWShutdown();
@@ -323,7 +326,9 @@ GXBOOL OggVorbis::BuildBuffer()
 GXBOOL OggVorbis::Finalize()
 {
   SAFE_DELETE(m_pDecodeBuffer);
-  ov_clear(&m_OVFile);
+  if(m_pOVFile) {
+    ov_clear(m_pOVFile);
+  }
   return TRUE;
 }
 
@@ -337,7 +342,7 @@ u32 OggVorbis::DecodeOggVorbis(char *pDecodeBuffer, size_t uBufferSize)
   u32 uBytesDone = 0;
   while (1)
   {
-    lDecodeSize = ov_read(&m_OVFile, pDecodeBuffer + uBytesDone, uBufferSize - uBytesDone, 0, 2, 1, &current_section);
+    lDecodeSize = ov_read(m_pOVFile, pDecodeBuffer + uBytesDone, uBufferSize - uBytesDone, 0, 2, 1, &current_section);
     if (lDecodeSize > 0)
     {
       uBytesDone += lDecodeSize;

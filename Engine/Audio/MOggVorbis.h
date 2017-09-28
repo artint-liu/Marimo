@@ -7,6 +7,7 @@
 #include "OggVorbis\include\vorbis\vorbisfile.h"
 
 struct MOAUDIO_DESC;
+struct OggVorbis_File;
 
 class MOAudioData : public GUnknown
 {
@@ -20,7 +21,7 @@ public:
 
 class OggVorbis : public MOAudioData
 {
-  OggVorbis_File  m_OVFile;
+  OggVorbis_File* m_pOVFile;
   vorbis_info*    m_pVorbisInfo;
 
   u32             m_uFrequency;

@@ -67,7 +67,7 @@ namespace clstd
       u32     ToUInt      (u32 nDefault = 0) const;
       _TStr   ToString    (T_LPCSTR szDefault = NULL) const;
       float   ToFloat     (float fDefault = 0.0f) const;
-      b32     ToBoolean   (b32 bDefault = false) const;
+      b32     ToBoolean   (b32 bDefault = false) const; // 如果不存在则返回默认值，如果是“1”,“OK”,“yes”,"true"（不区分大小写）返回TRUE，否则返回false
       _TStr&  KeyName     (_TStr& str) const;
       _TStr&  ToString    (_TStr& str, T_LPCSTR szDefault = NULL) const;
 
