@@ -42,11 +42,13 @@ namespace GXUI
     //};
   protected:
     IListDataAdapter* m_pAdapter;
-    GXSIZE_T          m_nTopIndex;
+    GXSIZE_T          m_nTopIndex;      // Item索引
+    GXINT             m_nScrolled;      // Item滚动过去的像素,稳定时<=0
+    GXSIZE_T          m_nExtend;        // Item整体占用的像素，横向滚动时为宽度，纵向滚动时为高度
+
     GXINT             m_nColumnCount;
-    GXINT             m_nColumnWidth;
+    GXINT             m_nColumnWidth;   // 只有simple list才用??
     GXINT             m_nLastSelected;
-    GXINT             m_nScrolled;      // Item 滚动过去的数量,稳定时<=0
     GXINT             m_nPrevScrolled;  // 拖动开始时的Scrolled
     GXINT             m_nItemHeight;
     GXCOLORREF        m_crBackground;

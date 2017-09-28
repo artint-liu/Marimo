@@ -26,7 +26,15 @@
 #define ITEM_LINE_POS(_ITEM, _SIZE)  (m_nScrolled + _ITEM / m_nColumnCount * _SIZE) // LEFTTORIGHT 时是Left位置，否则是Top位置
 #define ITEM_COLUMN_POS(_ITEM, _SIZE)  (_ITEM % m_nColumnCount * _SIZE)             // LEFTTORIGHT 时是Top位置，否则是Left位置
 #define IS_LTORRICHLIST(_STYLE)  TEST_FLAG(_STYLE, GXLBS_LTRSCROLLED)
+#define IS_MULTICOLUMN(_STYLE)  TEST_FLAG(_STYLE, GXLBS_MULTICOLUMN)
+//#define CEIL(_A, _B)    _B ((_A + (_B - 1)) / _B)
 using namespace clstd;
+
+int Ceil(int a, int b)
+{
+  ASSERT(b > 0); // 除数
+  return b == 1 ? a : (a + (b - 1)) / b;
+}
 
 GXHWND gxIntCreateDialogFromFileW(GXHINSTANCE  hInstance, GXLPCWSTR lpFilename, GXLPCWSTR lpDlgName, GXHWND hParent, GXDLGPROC lpDialogFunc, GXLPARAM lParam);
 //#ifdef _DEBUG
@@ -315,7 +323,7 @@ namespace GXUI
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     ItemStatusArray::const_iterator it = m_aItems.begin() + m_nTopIndex;
 
-    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
+    if(IS_MULTICOLUMN(dwStyle))
     {
       for(; it < m_aItems.end(); ++it)
       {
@@ -395,7 +403,7 @@ namespace GXUI
       rcGap.right = m_nColumnCount * TemplProtoWidth/* - SCROLLBAR_WIDTH*/;
     }
 
-    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN)) 
+    if(IS_MULTICOLUMN(dwStyle)) 
     {
       if(IS_LTORRICHLIST(dwStyle)) {
         //nPassPos = m_nScrolled + m_nTopIndex / m_nColumnCount * TemplProtoWidth;
@@ -435,7 +443,7 @@ namespace GXUI
         crText = 0xffffffff;
       }
       
-      if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
+      if(IS_MULTICOLUMN(dwStyle))
       {
         if(IS_LTORRICHLIST(dwStyle))
         {
@@ -542,7 +550,7 @@ namespace GXUI
     }
 
     if(rcGap.right < rect.right) {
-      if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN) || IS_LTORRICHLIST(dwStyle)) {
+      if(IS_MULTICOLUMN(dwStyle) || IS_LTORRICHLIST(dwStyle)) {
         canvas.FillRect(rcGap.right, rcGap.top, rect.right - rcGap.right, rcGap.bottom - rcGap.top, 0xffffffff);
       }
       // 单列,上下滚动模式如果宽度不足，会用上面逐条判断是否在选择高亮状态下的方法填充
@@ -554,7 +562,7 @@ namespace GXUI
     }
     //////////////////////////////////////////////////////////////////////////
     if(m_bShowScrollBar) {
-      DrawScrollBar(canvas, &rect, m_aItems.back().nBottom, m_aItems.size(), dwStyle);
+      DrawScrollBar(canvas, &rect, m_nExtend, m_aItems.size(), dwStyle);
     }
     Recycle((GXINT)i, 1);
     return 0;
@@ -564,20 +572,25 @@ namespace GXUI
   {
     const GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     GXINT nPrevColumn = m_nColumnCount;
-    if(TEST_FLAG(dwStyle, GXLBS_MULTICOLUMN))
+    auto nCount = m_pAdapter ? m_pAdapter->GetCount() : 0;
+    GXRECT rcItemTemplate;
+    gxGetWindowRect(m_hPrototype, &rcItemTemplate);
+
+    if(IS_MULTICOLUMN(dwStyle))
     {
-      GXRECT rcItemTemplate;
       if(m_hPrototype != NULL)
       {
-        gxGetWindowRect(m_hPrototype, &rcItemTemplate);
+
+        const int nItemWidth = rcItemTemplate.GetWidth();
+        const int nItemHeight = rcItemTemplate.GetHeight();
 
         if(IS_LTORRICHLIST(dwStyle)) {
-          const int nItemSize = rcItemTemplate.GetHeight();
-          m_nColumnCount = nItemSize <= 0 ? 1 : cy / nItemSize;
+          m_nColumnCount = nItemHeight <= 0 ? 1 : cy / nItemHeight;
+          m_nExtend = Ceil(nCount, m_nColumnCount) * nItemWidth;
         }
         else {
-          const int nItemSize = rcItemTemplate.GetWidth();
-          m_nColumnCount = nItemSize <= 0 ? 1 : cx / nItemSize;
+          m_nColumnCount = nItemWidth <= 0 ? 1 : cx / nItemWidth;
+          m_nExtend = Ceil(nCount, m_nColumnCount) * nItemHeight;
         }
 
         m_nColumnCount = clMax(m_nColumnCount, 1);
@@ -594,6 +607,12 @@ namespace GXUI
     }
     else {
       m_nColumnCount = 1;
+      if(IS_LTORRICHLIST(dwStyle)) {
+        m_nExtend = nCount * rcItemTemplate.GetWidth();
+      }
+      else {
+        m_nExtend = nCount * rcItemTemplate.GetHeight();
+      }
     }
     return 0;
   }
@@ -619,6 +638,7 @@ namespace GXUI
         Recycle(clMax(index, 0), 1);
       }
     }
+
     //return hval;
   }
 
@@ -655,8 +675,8 @@ namespace GXUI
   }
 
   RichList::RichList(GXLPCWSTR szIdName)
-    : List         (szIdName, TRUE)
-    , m_hPrototype (NULL)
+    : List          (szIdName, TRUE)
+    , m_hPrototype  (NULL)
   {
   }
 

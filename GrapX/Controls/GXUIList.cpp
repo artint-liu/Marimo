@@ -161,6 +161,7 @@ namespace GXUI
     MOVariable VarArray = m_pAdapter->GetVariable();
     
     m_nTopIndex      = 0;
+    m_nExtend        = 0;
     m_nColumnCount   = 1;
     m_nLastSelected  = -1;
     m_nScrolled      = 0;
@@ -580,10 +581,11 @@ namespace GXUI
     : CtrlBase(szIdName)
     , m_pAdapter      (NULL)
     , m_nTopIndex     (0)
+    , m_nExtend       (0)
+    , m_nScrolled     (0)
     , m_nColumnCount  (1)
     , m_nColumnWidth  (1)
     , m_nLastSelected (-1)
-    , m_nScrolled     (0)
     , m_nPrevScrolled (0)
     , m_nItemHeight   (-1)
     , m_bShowScrollBar(0)
@@ -819,25 +821,11 @@ namespace GXUI
     {
       CLBREAK;
       ASSERT(m_pAdapter->GetCount() == m_aItems.size());
-      //const GXINT index = pImpulse->index;
-      //(GXINT)((GXINT_PTR)pImpulse->ptr - (GXINT_PTR)varArray.GetPtr()) / (varArray.GetSize()/varArray.GetLength());
-      //ASSERT(index >= 0);
-      //UpdateItemStatus(index, index);
     }
     else if(pImpulse->reason == Marimo::DATACT_Insert)
     {
       OnSyncInsert(pImpulse->index, pImpulse->count);
       ASSERT(m_pAdapter->GetCount() == m_aItems.size());
-      //ASSERT(pAction->idx < m_pAdapter->GetCount());
-      //SyncItemStatCount();
-
-      ////CLBREAK; // 重新搞定!
-      //// 判断是否在中间插入
-      //if(pImpulse->index != m_pAdapter->GetCount() - 1)
-      //{
-      //  UpdateItemStatus(pImpulse->index, -1);
-      //}
-      //UpdateItemStat(0, -1);
     }
     else if(pImpulse->reason == Marimo::DATACT_Deleting)
     {

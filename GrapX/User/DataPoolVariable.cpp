@@ -515,52 +515,52 @@ namespace Marimo
     // TODO: 没测试过
     const TypeCategory eDestCate = GetTypeCategory();
     const TypeCategory eSrcCate = var.GetTypeCategory();
-    union _CTX {
-      u8  _u8;
-      u16 _u16;
-      u32 _u32;
-      u64 _u64;
-      float fval;
-    } c;
+    //union _CTX {
+    //  u8  _u8;
+    //  u16 _u16;
+    //  u32 _u32;
+    //  u64 _u64;
+    //  float fval;
+    //} c;
 
-    c._u64 = 0;
+    //c._u64 = 0;
 
-    switch(eSrcCate)
-    {
-    case T_BYTE:
-    case T_SBYTE:
-      c._u8 = *(u8*)var.GetPtr();
-      break;
+    //switch(eSrcCate)
+    //{
+    //case T_BYTE:
+    //case T_SBYTE:
+    //  c._u8 = *(u8*)var.GetPtr();
+    //  break;
 
-    case T_WORD:
-    case T_SWORD:
-      c._u16 = *(u16*)var.GetPtr();
-      break;
+    //case T_WORD:
+    //case T_SWORD:
+    //  c._u16 = *(u16*)var.GetPtr();
+    //  break;
 
-    case T_DWORD:
-    case T_SDWORD:
-      c._u32 = *(u32*)var.GetPtr();
-      break;
+    //case T_DWORD:
+    //case T_SDWORD:
+    //  c._u32 = *(u32*)var.GetPtr();
+    //  break;
 
-    case T_QWORD:
-    case T_SQWORD:
-      c._u64 = *(u64*)var.GetPtr();
-      break;
+    //case T_QWORD:
+    //case T_SQWORD:
+    //  c._u64 = *(u64*)var.GetPtr();
+    //  break;
 
-    case T_FLOAT:
-      c.fval = *(float*)var.GetPtr();
-      break;
+    //case T_FLOAT:
+    //  c.fval = *(float*)var.GetPtr();
+    //  break;
 
-    case T_STRING:
-    case T_STRINGA:
-    case T_OBJECT:
-    case T_ENUM:
-    case T_FLAG:
-    case T_STRUCT:
-    default:
-      CLBREAK;
-      return FALSE;
-    }
+    //case T_STRING:
+    //case T_STRINGA:
+    //case T_OBJECT:
+    //case T_ENUM:
+    //case T_FLAG:
+    //case T_STRUCT:
+    //default:
+    //  CLBREAK;
+    //  return FALSE;
+    //}
 
     switch(eDestCate)
     {

@@ -11,16 +11,6 @@ namespace DlgXM
 namespace GXUI
 {
   ////////////////////////////////////////////////////////////////////////////
-
-  //struct CUSTOMIZEITEMSTAT
-  //{
-  //  GXINT   nBottom;
-  //  GXHWND  hItem;
-  //  GXDWORD bSelected : 1;
-  //  GXDWORD bValidate : 1;  // Item的有效标志, 如果为0表示要重新从Adapter获取
-  //  CUSTOMIZEITEMSTAT() : nBottom(-1), hItem(NULL), bSelected(0), bValidate(0){}
-  //};
-
   struct ITEMELEMENT   // item中的子窗口信息
   {
     clStringW strName;
@@ -31,22 +21,19 @@ namespace GXUI
 
   typedef clvector<ITEMELEMENT> ItemElementArray;
   
-  //typedef clvector<CUSTOMIZEITEMSTAT>  CustItemStatArray;
-
   class RichList : public List
   {
   public:
     typedef clvector<GXHWND>        GXHWndArray;
     typedef cllist<GXHWND>          WndHandleList;
-    //typedef clvector<ITEMELEMENT>   ItemElementArray;
+  
   private:
     clStringW         m_strTemplate;
     GXHWND            m_hPrototype;
     clStringArrayW    m_aElementName;   // Item 中的控件名
     WndHandleList     m_HandlesPool;    // Windows 句柄池
-    //GXSIZE_T          m_FirstItem;      // m_ItemHandles第一个对应的item索引
-    //WndHandleList     m_ItemHandles;
     MOVariable        m_VarList;
+
   private:
     static GXLRESULT GXCALLBACK CustomWndProc         (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
     static GXBOOL    GXCALLBACK EnumChildProc         (GXHWND hWnd, GXLPARAM lParam);
@@ -56,6 +43,7 @@ namespace GXUI
     GXLRESULT SetupAdapter  ();
     GXHWND    GetItemWnd    (GXSIZE_T item);
     GXHWND    CreateItemWnd (GXSIZE_T item);
+
   public:
     //GXINT     GetItemHeight       (GXINT nIdx) const;
     GXHWND    PlantCustItem       (GXSIZE_T nIndex, GXLPCRECT lprect);
