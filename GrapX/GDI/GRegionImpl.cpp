@@ -676,7 +676,7 @@ GRegion* GRegionImpl::CreateSubtract(const GRegion* pIRegion) const
 
   DBG_FAST_CHECK;
 
-  if(IsEmpty() != FALSE)
+  if(IsEmpty() != FALSE) // TODO: 这个地方设计的可能有些问题，0-B结果是B
     return new(m_pAllocator) GRegionImpl(EstimateSize(this, pRegion), m_pAllocator);
   else if(pRegion->IsEmpty() != FALSE)
     return Clone();
@@ -1367,6 +1367,7 @@ GXBOOL GRegionImpl::PtInRegion(int x, int y) const
           return TRUE;
         prl++;
       }
+      break;
     }
 
     if(prlh->nBottom == m_rcBounding.bottom) {

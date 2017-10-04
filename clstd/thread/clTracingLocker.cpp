@@ -3,6 +3,7 @@
 #include "clString.h"
 #include "clUtility.h"
 #include "clTracingLocker.h"
+#include "clThread.h"
 
 namespace clstd
 {
@@ -47,7 +48,7 @@ namespace clstd
     Locker::Unlock();
     if(dwDeltaTime > rCriticalTime)
     {
-      CLOG_WARNING(">%s(%d): Lock time:%f\r\n", m_szFile ? m_szFile : "", m_nLine, dwDeltaTime);
+      TRACE(">%s(%d): Lock time:%f(%d)\r\n", m_szFile ? m_szFile : "", m_nLine, dwDeltaTime, this_thread::GetId());
       return TRUE;
     }
     return FALSE;
