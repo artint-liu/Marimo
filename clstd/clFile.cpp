@@ -444,6 +444,25 @@ FALSE_RET:
     return TRUE;
   }
 
+  void File::GetSystemTime(TIME* pTime)
+  {
+    // UTC时间
+#ifdef _CL_SYSTEM_WINDOWS
+    SYSTEMTIME st;
+    FILETIME ft;
+
+    ::GetSystemTime(&st);
+    ::SystemTimeToFileTime(&st, &ft);
+
+    pTime->dwHighDateTime = ft.dwHighDateTime;
+    pTime->dwLowDateTime  = ft.dwLowDateTime;
+#else
+    time_t t = time(NULL);
+    pTime->dwHighDateTime = (t & 0xffffffff);
+    pTime->dwLowDateTime  = (t >> 32);
+#endif
+  }
+
   b32 File::ReadToBuffer(Buffer* pBuffer, int nFileOffset, u32 cbSize)
   {
     u32 dwSizeHigh;

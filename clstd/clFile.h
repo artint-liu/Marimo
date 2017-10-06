@@ -112,7 +112,7 @@ namespace clstd
       CreationDistribution eCreationDistribution, 
       FlagsAndAttributes eFlagAttr);
 
-    b32   IsGood      () const;
+    b32   IsGood      () const; // 判断文件是否在打开状态
     void  Close       ();
 
     u32  GetPointer   ();
@@ -132,6 +132,8 @@ namespace clstd
     b32  ReadToBuffer (MemBuffer* pBuffer, int nFileOffset = 0, u32 cbSize = 0);
     b32  MapToBuffer  (CLBYTE** pBuffer, int nFileOffset, int cbSize, u32* pcbSize); // 从nFileOffset偏移开始读cbSize（0表示读到文件末尾）字节到pBuffer缓冲中，实际读入大小是pcbSize
     b32  MapToBuffer  (MemBuffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
+
+    static void GetSystemTime(TIME* pTime); // 以文件时间形式获得当前时间(UTC)
     //TextStream& 
     //    GetTextStream ();  
   };
