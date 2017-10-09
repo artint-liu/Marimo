@@ -372,6 +372,43 @@ void TestFormatString1()
   TestFormatStrFunc<clStringAttachA>(str_ath, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 }
 
+void TestExpandString()
+{
+  clmap<clStringA, clStringA> EnvDict;
+  EnvDict["WorkName"] = "Allen";
+  EnvDict["GameName"] = "GameBox";
+  EnvDict["Scene"] = "classroom";
+
+  clStringA str = "$(WorkName).$(GameName).$(NotDefine).$(Scene)";
+  clStringA strDest;
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(strDest, str, EnvDict, "$(", ")");
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(str, str, EnvDict, "$(", ")");
+  CLOG("%s", str.CStr());
+  CLOG("%s", strDest.CStr());
+  ASSERT(str == strDest);
+
+  str = "$(WorkName)";
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(strDest, str, EnvDict, "$(", ")");
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(str, str, EnvDict, "$(", ")");
+  CLOG("%s", str.CStr());
+  CLOG("%s", strDest.CStr());
+  ASSERT(str == strDest);
+
+  str = "$(WorkName HelloWorld";
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(strDest, str, EnvDict, "$(", ")");
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(str, str, EnvDict, "$(", ")");
+  CLOG("%s", str.CStr());
+  CLOG("%s", strDest.CStr());
+  ASSERT(str == strDest);
+
+  str = "$(WorkName))->>";
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(strDest, str, EnvDict, "$(", ")");
+  clstd::StringUtility::ExpandEnvironmentStringsFromSet(str, str, EnvDict, "$(", ")");
+  CLOG("%s", str.CStr());
+  CLOG("%s", strDest.CStr());
+  ASSERT(str == strDest);
+}
+
 void pause()
 {
   CLOG("press any key to continue ...");
@@ -403,6 +440,8 @@ int main(int argc, char* argv[])
   TestStringToFloat();
   TestFormatString0();
   TestFormatString1();
+
+  TestExpandString();
 
   return 0;
 }

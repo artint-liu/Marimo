@@ -179,6 +179,32 @@ namespace clstd
       return StringCommon::ConvertFromUtf8<clStringW>(strUnicode, szUtf8, nUtf8);
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    clStringW& ExpandEnvironmentStringsFromSet(clStringW& strDestination, const clStringW& strSource,
+      const clmap<clStringW, clStringW>& dict, clStringW::LPCSTR szTranslateBegin, clStringW::LPCSTR szTranslateEnd)
+    {
+      return StringCommon::ExpandEnvironmentStringsFromSet(strDestination, strSource, dict, szTranslateBegin, szTranslateEnd);
+    }
+
+    clStringA& ExpandEnvironmentStringsFromSet(clStringA& strDestination, const clStringA& strSource,
+      const clmap<clStringA, clStringA>& dict, clStringA::LPCSTR szTranslateBegin, clStringA::LPCSTR szTranslateEnd)
+    {
+      return StringCommon::ExpandEnvironmentStringsFromSet(strDestination, strSource, dict, szTranslateBegin, szTranslateEnd);
+    }
+
+    clStringW& ExpandEnvironmentStringsFromSet(clStringW& strDestination, const clStringW& strSource,
+      const clhash_map<clStringW, clStringW>& dict, clStringW::LPCSTR szTranslateBegin, clStringW::LPCSTR szTranslateEnd)
+    {
+      return StringCommon::ExpandEnvironmentStringsFromSet(strDestination, strSource, dict, szTranslateBegin, szTranslateEnd);
+    }
+
+    clStringA& ExpandEnvironmentStringsFromSet(clStringA& strDestination, const clStringA& strSource,
+      const clhash_map<clStringA, clStringA>& dict, clStringA::LPCSTR szTranslateBegin, clStringA::LPCSTR szTranslateEnd)
+    {
+      return StringCommon::ExpandEnvironmentStringsFromSet(strDestination, strSource, dict, szTranslateBegin, szTranslateEnd);
+    }
+
+
   } // namespace StringUtility
 
 } // namespace clstd
@@ -1568,6 +1594,9 @@ namespace clstd
   _CLSTR_TEMPL
     size_t _CLSTR_IMPL::Find(_TCh cFind, size_t uStart /* = 0 */) const
   {
+    if(uStart >= CLSTR_LENGTH(m_pBuf)) {
+      return npos;
+    }
     const _TCh* pFind = _Traits::StringSearchChar(m_pBuf + uStart, cFind);
     return pFind == NULL ? npos : pFind - m_pBuf;
   }
@@ -1575,6 +1604,9 @@ namespace clstd
   _CLSTR_TEMPL
     size_t _CLSTR_IMPL::Find(const _TCh* pFind, size_t uStart /* = 0 */) const
   {
+    if(uStart >= CLSTR_LENGTH(m_pBuf)) {
+      return npos;
+    }
     const _TCh* pFindResult = clstd::strstrT<_TCh>(m_pBuf + uStart, pFind);
     return pFindResult == NULL ? npos : pFindResult - m_pBuf;
   }

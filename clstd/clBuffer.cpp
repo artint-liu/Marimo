@@ -3,6 +3,7 @@
 //#include "clmemory.h"
 #include "clString.h"
 #include "clUtility.h"
+#include "clStringCommon.hxx"
 //#include "third_party/zlib/zlib.h"
 
 //int zlib_compress (
@@ -213,6 +214,33 @@ namespace clstd
     Replace(0, m_uSize, buf.GetPtr(), buf.GetSize());
     return *this;
   }
+
+
+  namespace StringUtility
+  {
+    template<typename _TChar>
+    class _DelegateBuffer : public MemBuffer
+    {
+    public:
+      typedef _TChar TChar;
+      void Append(TChar c) {
+        MemBuffer::Append(&c, sizeof(TChar));
+      }
+    };
+
+    MemBuffer& ConvertToUtf8(MemBuffer& strUtf8, const wch* szUnicode, size_t nUnicode)
+    {
+      _DelegateBuffer<ch>* local_buffer = (_DelegateBuffer<ch>*)&strUtf8;
+      return StringCommon::ConvertToUtf8T(*local_buffer, szUnicode, nUnicode);
+    }
+    
+    MemBuffer& ConvertFromUtf8(MemBuffer& strUnicode, const ch* szUtf8, size_t nUtf8)
+    {
+      _DelegateBuffer<wch>* local_buffer = (_DelegateBuffer<wch>*)&strUnicode;
+      return StringCommon::ConvertFromUtf8(*local_buffer, szUtf8, nUtf8);
+    }
+  } // namespace StringUtility
+
 
 } // namespace clstd
 //////////////////////////////////////////////////////////////////////////

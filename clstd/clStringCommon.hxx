@@ -535,7 +535,7 @@ namespace clstd
     template<class _TStrUtf8>
     _TStrUtf8& ConvertToUtf8T(_TStrUtf8& strUtf8, const wch* szUnicode, size_t nUnicode)
     {
-      strUtf8.Clear();
+      //strUtf8.Clear();
       for(size_t i = 0; i < nUnicode; i++)
       {
         u16 c = szUnicode[i];
@@ -560,7 +560,7 @@ namespace clstd
     template<class _TStrUnicode>
     _TStrUnicode& ConvertFromUtf8(_TStrUnicode& strUnicode, const ch* szUtf8, size_t cbUtf8)
     {
-      strUnicode.Clear();
+      //strUnicode.Clear();
 
       for(size_t i = 0; i < cbUtf8; i++)
       {
@@ -624,6 +624,80 @@ namespace clstd
     }
 
     //////////////////////////////////////////////////////////////////////////
+
+    template<class _TStr, class _TDict>
+    _TStr& ExpandEnvironmentStringsFromSet(_TStr& strDestination, const _TStr& strSource, const _TDict& dict, typename _TStr::LPCSTR szTranslateBegin, typename _TStr::LPCSTR szTranslateEnd)
+    {
+      size_t pos0 = 0;
+      size_t pos1 = 0;
+      size_t nBegin = strlenT(szTranslateBegin);
+      size_t nEnd = strlenT(szTranslateEnd);
+      _TStr strEnv;
+      if(&strDestination == &strSource)
+      {
+        while(1)
+        {
+          pos0 = strSource.Find(szTranslateBegin, pos0);
+          if(pos0 == typename _TStr::npos) {
+            break;
+          }
+
+          pos1 = strSource.Find(szTranslateEnd, pos0 + nBegin);
+          if(pos1 == typename _TStr::npos) {
+            break;
+          }
+
+          if(pos0 + nBegin < pos1) {
+            strEnv.Clear();
+            strEnv.Append(&strSource[pos0 + nBegin], pos1 - (pos0 + nBegin));
+            auto it = dict.find(strEnv);
+            if(it != dict.end()) {
+              strDestination.Replace(pos0, (pos1 - pos0) + nEnd, it->second);
+              pos1 = pos0 - nEnd + it->second.GetLength(); // 补偿替换后的长度
+            }
+          }
+          pos0 = pos1 + nEnd;
+        }
+      }
+      else
+      {
+        strDestination.Clear();
+        size_t pos = pos0;
+        while(1)
+        {
+          pos0 = strSource.Find(szTranslateBegin, pos0);
+          if(pos0 == typename _TStr::npos) {
+            break;
+          }
+          else {
+            strDestination.Append(&strSource[pos], pos0 - pos);
+          }
+
+          pos1 = strSource.Find(szTranslateEnd, pos0 + nBegin);
+          if(pos1 == typename _TStr::npos) {
+            break;
+          }
+
+          if(pos0 + nBegin < pos1) {
+            strEnv.Clear();
+            strEnv.Append(&strSource[pos0 + nBegin], pos1 - (pos0 + nBegin));
+            auto it = dict.find(strEnv);
+            if(it != dict.end()) {
+              strDestination.Append((typename _TStr::LPCSTR)it->second);
+            }
+            else {
+              strDestination.Append(&strSource[pos0], pos1 + nEnd - pos0);
+            }
+          }
+
+          pos = pos0 = pos1 + nEnd;
+        }
+
+        strDestination.Append(&strSource[pos]); // pos到结尾'\0'
+      }
+
+      return strDestination;
+    }
   } // namespace StringCommon
 } // namespace clstd
 

@@ -503,10 +503,18 @@ namespace clstd
 {
   namespace StringUtility
   {
+    // ConvertToUtf8，ConvertFromUtf8 转换不清除目标中的原始内容
     clStringA& ConvertToUtf8(clStringA& strUtf8, const clStringW& strUnicode);
     clStringA& ConvertToUtf8(clStringA& strUtf8, const wch* szUnicode, size_t nUnicode);
     clStringW& ConvertFromUtf8(clStringW& strUnicode, const clStringA& strUtf8);
     clStringW& ConvertFromUtf8(clStringW& strUnicode, const ch* szUtf8, size_t nUtf8);
+
+    // strDestination 与 strSource 可以是相同对象
+    clStringW& ExpandEnvironmentStringsFromSet(clStringW& strDestination, const clStringW& strSource, const clmap<clStringW, clStringW>& dict, clStringW::LPCSTR szTranslateBegin, clStringW::LPCSTR szTranslateEnd);
+    clStringA& ExpandEnvironmentStringsFromSet(clStringA& strDestination, const clStringA& strSource, const clmap<clStringA, clStringA>& dict, clStringA::LPCSTR szTranslateBegin, clStringA::LPCSTR szTranslateEnd);
+    clStringW& ExpandEnvironmentStringsFromSet(clStringW& strDestination, const clStringW& strSource, const clhash_map<clStringW, clStringW>& dict, clStringW::LPCSTR szTranslateBegin, clStringW::LPCSTR szTranslateEnd);
+    clStringA& ExpandEnvironmentStringsFromSet(clStringA& strDestination, const clStringA& strSource, const clhash_map<clStringA, clStringA>& dict, clStringA::LPCSTR szTranslateBegin, clStringA::LPCSTR szTranslateEnd);
+
   } // namespace StringUtility
 } // namespace clstd
 

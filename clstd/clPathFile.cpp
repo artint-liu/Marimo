@@ -180,9 +180,12 @@ namespace clpathfile
       }
       strPath.Append(szExt);
     }
-    else {
+    else if(szExt) {
       strPath.Replace(p + 1, -1, 
         (typename _TString::LPCSTR)((szExt[0] == '.') ? (szExt + 1) : szExt));
+    }
+    else {
+      strPath.Replace(p, -1, szExt);
     }
     return TRUE;
   }

@@ -204,6 +204,13 @@ namespace clstd
   //  clsize GetLength(); // 返回字符数，GetSize()返回的还是字节数
   //};
 
+  namespace StringUtility
+  {
+    // ConvertToUtf8，ConvertFromUtf8 转换不清除目标中的原始内容
+    MemBuffer& ConvertToUtf8(MemBuffer& strUtf8, const wch* szUnicode, size_t nUnicode);
+    MemBuffer& ConvertFromUtf8(MemBuffer& strUnicode, const ch* szUtf8, size_t nUtf8);
+  } // namespace StringUtility
+
 } // namespace clstd
 //////////////////////////////////////////////////////////////////////////
 //

@@ -1106,8 +1106,15 @@ namespace clstd
       }
       else if((dwBOM & 0xFFFFFF) == BOM_UTF8)
       {
-        CLBREAK; // FIXME: 暂时不支持
-        return FALSE;
+        if(sizeof(TChar) != sizeof(wch)) {
+          CLBREAK; // FIXME: 暂时不支持
+          return FALSE;
+        }
+
+        MemBuffer sNewBuffer;
+        StringUtility::ConvertFromUtf8(sNewBuffer, (const ch*)m_Buffer.GetPtr(), m_Buffer.GetSize());
+        m_Buffer.Replace(0, m_Buffer.GetSize(), sNewBuffer.GetPtr(), sNewBuffer.GetSize());
+        return TRUE;
       }
       else {
         ch chEnd[] = "\0";
