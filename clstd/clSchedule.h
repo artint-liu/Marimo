@@ -47,7 +47,7 @@ namespace clstd
   {
   protected:
     typedef clmap<u32, TIMER*>        IdDict;
-    typedef clhash_map<void*, IdDict> HandleDict;
+    typedef clmap<void*, IdDict> HandleDict;
     //typedef LinkedList<TIMER>         TimerChain2;
 
     class TimerChain

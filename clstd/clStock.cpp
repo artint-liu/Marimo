@@ -1404,6 +1404,22 @@ namespace clstd
   }
 
   _SSP_TEMPL
+    typename _SSP_IMPL::Section&
+    _SSP_IMPL::Section::operator=(const Section& sect)
+  {
+    pStock     = sect.pStock;
+    pParent    = (this == sect.pParent) ? NULL : sect.pParent;
+    nModify    = sect.nModify;
+    nDepth     = sect.nDepth;
+
+    name       = sect.name;
+    iter_begin = sect.iter_begin;
+    iter_end   = sect.iter_end;
+
+    return *this;
+  }
+
+  _SSP_TEMPL
     void _SSP_IMPL::Section::operator++()
   {
     if( ! NextSection(NULL)) {

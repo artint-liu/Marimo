@@ -39,7 +39,7 @@ namespace clstd
     struct KEYDESC
     {
 #ifdef ENABLE_HASH_NAME
-      typedef clhash_map<clStringA, struct KEYDESC> KeyDict;
+      typedef clmap<clStringA, struct KEYDESC> KeyDict;
 #else
       // 今后考虑可能不再支持hash_map的键值记录
       // 使用map的红黑树，键值字符串是有序的，未来在只读模式中可以用二分法查找

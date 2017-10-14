@@ -15,7 +15,7 @@
 #pragma warning(disable : 4996)
 using namespace clstd;
 
-void TestA()
+void Test_UnitA()
 {
   {
     // 测试打开空文件的情况
@@ -41,6 +41,14 @@ void TestA()
   }
 
   {
+    // 测试StockA::Section自我赋值
+    StockA stock;
+    StockA::Section sect = stock.CreateSection("default");
+    sect = sect.Create("win32"); // sect子段赋值给自己
+    sect.SetKey("file", "abc.text"); // 不应该崩溃
+  }
+
+  {
     // 测试遍历某一段下的一段的情况
     StockA stock;
     StockA::Section sect_default = stock.CreateSection("default");
@@ -51,66 +59,10 @@ void TestA()
     sect = sect_default.Open(NULL);
     if(sect)
     {
+      CLOG("sect name:%s", sect.SectionName());
       ASSERT(sect.SectionName() == "win32");
     }
   }
-
-  {
-    // 测试StockA::Section自我赋值
-    // FIXME: 目前不支持
-    //StockA stock;
-    //StockA::Section sect = stock.CreateSection("default");
-    //sect = sect.Create("win32");
-    //sect.SetKey("file", "abc.text");
-  }
-}
-
-int GeneralRead()
-{
-    //SmartStockA sp;
-    //SmartStockA::HANDLE hFind;
-    //sp.Load(_T("Window.GSprite"));
-    //hFind = sp.FindFirstSection(NULL, FALSE, ("Image\\Module"), ("rect"));
-    ////SmartStockA::HANDLE hKey;
-    //do{
-    //	SmartStockA::VALUE value;
-    //	if(sp.FindKey(hFind, "left", value))
-    //	{
-    //		printf("left=%d ", value.ToInt());
-    //	}
-    //	if(sp.FindKey(hFind, "name", value))
-    //	{
-    //		printf("%s\n", value.ToString());
-    //	}
-    //}while(sp.FindNextSection(hFind));
-
-    //sp.FindClose(hFind);
-    //getch();
-    return 0;
-}
-
-int EnumAllSectKey()
-{
-    //SmartStockA sp;
-    //SmartStockA::HANDLE hFind;
-    //sp.Load(_T("Window.GSprite"));
-    //hFind = sp.FindFirstSection(NULL, FALSE, ("Image\\Module"), NULL);
-    ////SmartStockA::HANDLE hKey;
-    //do{
-    //	printf("%s\n", sp.GetSectionName(hFind));
-    //	SmartStockA::VALUE value;
-    //	SmartStockA::HANDLE hEnumKey;
-    //	hEnumKey = sp.FindFirstKey(hFind, value);
-    //	do{
-    //		printf("  %s::%s\n", value.KeyName(), value.ToString());
-    //	} while (sp.FindNextKey(hEnumKey, value));
-    //	sp.FindClose(hEnumKey);
-
-    //}while(sp.FindNextSection(hFind));
-
-    //sp.FindClose(hFind);
-    //getch();
-    return 0;
 }
 
 void StockToText(clStringA& strStockText, const StockA& stock)
@@ -398,7 +350,7 @@ int main(int argc, char* argv[])
   // 这两种忽略写入，但是Stock文件中如果有“key=;”这种模式还应该能正常读取
   CLOG(__FUNCTION__);
 
-  TestA();
+  Test_UnitA();
 
   CreateSectAndSave();
   test_outofdate();

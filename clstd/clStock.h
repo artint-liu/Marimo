@@ -168,6 +168,7 @@ namespace clstd
       b32       DeleteKey           (T_LPCSTR szKey);
       b32       InsertKey           (T_LPCSTR szKey, T_LPCSTR val); // SetKey 替换原来键值，InsertKey 可以插入新的键值
 
+      Section&  operator=(const Section& sect);
       void      operator++();
       ATTRIBUTE operator[](T_LPCSTR name) const;
                 operator unspecified_bool_type() const;
