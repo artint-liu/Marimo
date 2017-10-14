@@ -20,15 +20,10 @@
 //#include <stdarg.h>
 //#include "windef.h"
 #include "clstd.h"
-
+#include "clString.h"
+#include "clCrypt.h"
 /* SHA Context Structure Declaration */
 
-typedef struct {
-   ULONG Unknown[6];
-   ULONG State[5];
-   ULONG Count[2];
-   UCHAR Buffer[64];
-} SHA_CTX, *PSHA_CTX;
 
 /* SHA1 Helper Macros */
 
@@ -109,7 +104,7 @@ static void SHA1Transform(ULONG State[5], UCHAR Buffer[64])
  * RETURNS
  *  Nothing
  */
-CLVOID A_SHAInit(PSHA_CTX Context)
+CLVOID A_SHAInit(SHA_CTX* Context)
 {
    /* SHA1 initialization constants */
    Context->State[0] = 0x67452301;
@@ -134,7 +129,7 @@ CLVOID A_SHAInit(PSHA_CTX Context)
  * RETURNS
  *  Nothing
  */
-CLVOID A_SHAUpdate(PSHA_CTX Context, const unsigned char *Buffer, UINT BufferSize)
+CLVOID A_SHAUpdate(SHA_CTX* Context, const unsigned char *Buffer, UINT BufferSize)
 {
    ULONG BufferContentSize;
 
@@ -176,7 +171,7 @@ CLVOID A_SHAUpdate(PSHA_CTX Context, const unsigned char *Buffer, UINT BufferSiz
  * RETURNS
  *  Nothing
  */
-CLVOID A_SHAFinal(PSHA_CTX Context, CLLPULONG Result)
+CLVOID A_SHAFinal(SHA_CTX* Context, CLLPULONG Result)
 {
    INT Pad, Index;
    UCHAR Buffer[72];

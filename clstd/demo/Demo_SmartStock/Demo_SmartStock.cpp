@@ -14,6 +14,57 @@
 
 #pragma warning(disable : 4996)
 using namespace clstd;
+
+void TestA()
+{
+  {
+    // 测试打开空文件的情况
+    {
+      File file;
+      file.CreateAlways("empty.txt");
+      file.Close();
+    }
+    StockA stock;
+    b32 result = stock.LoadFromFile("empty.txt");
+    ASSERT(result);
+    StockA::Section sect = stock.OpenSection("default");
+    CLOG("sect is %s", sect.empty() ? "empty" : "not empty(异常)");
+    ASSERT(sect.empty());
+  }
+
+  {
+    // 测试构造后直接打开的情况
+    StockA stock;
+    StockA::Section sect = stock.OpenSection("default");
+    CLOG("sect is %s", sect.empty() ? "empty" : "not empty(异常)");
+    ASSERT(sect.empty());
+  }
+
+  {
+    // 测试遍历某一段下的一段的情况
+    StockA stock;
+    StockA::Section sect_default = stock.CreateSection("default");
+    StockA::Section sect = sect_default.Create("win32");
+    sect.SetKey("file", "abc.text");
+
+    sect_default = stock.OpenSection("default");
+    sect = sect_default.Open(NULL);
+    if(sect)
+    {
+      ASSERT(sect.SectionName() == "win32");
+    }
+  }
+
+  {
+    // 测试StockA::Section自我赋值
+    // FIXME: 目前不支持
+    //StockA stock;
+    //StockA::Section sect = stock.CreateSection("default");
+    //sect = sect.Create("win32");
+    //sect.SetKey("file", "abc.text");
+  }
+}
+
 int GeneralRead()
 {
     //SmartStockA sp;
@@ -346,6 +397,8 @@ int main(int argc, char* argv[])
   // 测试SetKey("key", "");
   // 这两种忽略写入，但是Stock文件中如果有“key=;”这种模式还应该能正常读取
   CLOG(__FUNCTION__);
+
+  TestA();
 
   CreateSectAndSave();
   test_outofdate();

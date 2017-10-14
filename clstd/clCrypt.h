@@ -10,7 +10,14 @@ struct MD5_CTX
   unsigned char digest[16];
 };
 
-struct SHA_CTX;
+struct SHA_CTX
+{
+  ULONG Unknown[6];
+  ULONG State[5];
+  ULONG Count[2];
+  UCHAR Buffer[64];
+};
+
 
 unsigned char *CRYPT_DEShash( unsigned char *dst, const unsigned char *key, const unsigned char *src );
 
@@ -33,19 +40,45 @@ namespace clstd
     MD5Calculater();
     void Clear();
     //void End();
-    void Update(const void* pBuffer, clsize cbSize);
-    void Update(const BufferBase* pBuffer);
+    MD5Calculater& Update(const void* pBuffer, clsize cbSize);
+    MD5Calculater& Update(const BufferBase* pBuffer);
 
-    b32       operator=(const MD5Calculater& md5) const;
-    int       Compare(const MD5Calculater& md5) const;  // return 0 if equal
+    b32         operator==(const MD5Calculater& md5) const;
+    int         Compare(const MD5Calculater& md5) const;  // return 0 if equal
 
-    u32*      Get128Bits();
-    clStringA GetAsGUIDA();// "48961C27-CE71-44CC-8F20-73D3D2A460B5"    {0x48961c27, 0xce71, 0x44cc, 0x8f, 0x20, 0x73, 0xd3, 0xd2, 0xa4, 0x60, 0xb5};
-    clStringW GetAsGUIDW();// "48961C27-CE71-44CC-8F20-73D3D2A460B5"    {0x48961c27, 0xce71, 0x44cc, 0x8f, 0x20, 0x73, 0xd3, 0xd2, 0xa4, 0x60, 0xb5};
-    clStringA ToStringA();
-    clStringW ToStringW();
-
+    u32*        Get128Bits();
+    clStringA   GetAsGUIDA();// "48961C27-CE71-44CC-8F20-73D3D2A460B5"    {0x48961c27, 0xce71, 0x44cc, 0x8f, 0x20, 0x73, 0xd3, 0xd2, 0xa4, 0x60, 0xb5};
+    clStringW   GetAsGUIDW();// "48961C27-CE71-44CC-8F20-73D3D2A460B5"    {0x48961c27, 0xce71, 0x44cc, 0x8f, 0x20, 0x73, 0xd3, 0xd2, 0xa4, 0x60, 0xb5};
+    clStringA&  ToStringA(clStringA& str);
+    clStringW&  ToStringW(clStringW& str);
+    clStringA   ToStringA();
+    clStringW   ToStringW();
   };
+
+  class SHACalculater // SHA1
+  {
+    SHA_CTX ctx;
+    u32 m_State[5];
+
+    void CheckFinal();
+    template <class _TStr>
+    _TStr& ToStringT(_TStr& str);
+  public:
+    SHACalculater();
+    void Clear();
+    SHACalculater& Update(const void* pBuffer, clsize cbSize);
+    SHACalculater& Update(const BufferBase* pBuffer);
+
+    b32         operator=(const SHACalculater& _sha) const;
+    int         Compare(const SHACalculater& _sha) const;  // return 0 if equal
+
+    u32*        Get160Bits();
+    clStringA&  ToStringA(clStringA& str);
+    clStringW&  ToStringW(clStringW& str);
+    clStringA   ToStringA();
+    clStringW   ToStringW();
+  };
+
 } // namespace clstd
 
 #endif // _CL_CRYPT_H_

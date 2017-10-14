@@ -126,9 +126,9 @@ namespace clpathfile
 
   // 整理路径名, 消除"."和".."表示的相对路径, vice slash 替换为 slash
   template<typename _TString>
-  _TString  CanonicalizeT (const _TString& strPath);
-  clStringA Canonicalize  (const clStringA& strPath);
-  clStringW Canonicalize  (const clStringW& strPath);
+  _TString&  CanonicalizeT (_TString& strPath);
+  clStringA& Canonicalize  (clStringA& strPath);
+  clStringW& Canonicalize  (clStringW& strPath);
 
   // 判断这个路径只是单纯文件名，是返回1，否则返回0
   template<class _Traits, typename _TCh>
@@ -232,11 +232,17 @@ namespace clpathfile {
           }
 
           // 目录：根据返回值决定是否遍历这个目录及子目录
-          // 文件：忽略返回值
-          if(fn(strDir, wfd) && TEST_FLAG(wfd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY))
-          {
-            _TString strChildDir = strDir + wfd.cFileName;
-            RecursiveSearchDir<_TString>(strChildDir, fn);
+          // 文件：不再进行当前目录的遍历
+          if(fn(strDir, wfd)) {
+            if(TEST_FLAG(wfd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY)) {
+              _TString strChildDir = strDir + wfd.cFileName;
+              RecursiveSearchDir<_TString>(strChildDir, fn);
+            }
+          }
+          else {
+            if(TEST_FLAG_NOT(ff_data.dwAttributes, clstd::FileAttribute_Directory)) {
+              break;
+            }
           }
         } while (FindNextFile(hFind, &wfd));
         FindClose(hFind);
@@ -398,11 +404,17 @@ namespace clpathfile
         }
 
         // 目录：根据返回值决定是否遍历这个目录及子目录
-        // 文件：忽略返回值
-        if(fn(strDir, ff_data) && TEST_FLAG(ff_data.dwAttributes, clstd::FileAttribute_Directory))
-        {
-          _TString strChildDir = strDir + ff_data.cFileName;
-          RecursiveSearchDir<_TString, FINDFILEDATAT>(strChildDir, fn);
+        // 文件：不再进行当前目录的遍历
+        if(fn(strDir, ff_data)) {
+          if(TEST_FLAG(ff_data.dwAttributes, clstd::FileAttribute_Directory)) {
+            _TString strChildDir = strDir + ff_data.cFileName;
+            RecursiveSearchDir<_TString, FINDFILEDATAT>(strChildDir, fn);
+          }
+        }
+        else {
+          if(TEST_FLAG_NOT(ff_data.dwAttributes, clstd::FileAttribute_Directory)) {
+            break;
+          }
         }
       }
     }

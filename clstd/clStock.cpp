@@ -907,10 +907,11 @@ namespace clstd
     if(desc && (desc->empty() || desc->pStock != this)) {
       return Section();
     }
-
-    if((szPath != NULL && szPath[0] == L'\0') || ! m_Buffer.GetSize())
-    {
+    else if(szPath != NULL && szPath[0] == L'\0') {
       return Section((StockT*)this);
+    }
+    else if(m_Buffer.GetSize() == 0) {
+      return Section();
     }
 
     // FIXME: 目前重名Section包含不同子Section，查找只会匹配第一个找到的Section
@@ -1327,13 +1328,16 @@ namespace clstd
 
   //////////////////////////////////////////////////////////////////////////
   _SSP_TEMPL
-    _SSP_IMPL::Section::Section()
+    _SSP_IMPL::Section::Section() // 无效的section
     : pStock(NULL)
+    , pParent (NULL)
+    , nModify (NULL)
+    , nDepth  (0)
   {
   }
 
   _SSP_TEMPL
-  _SSP_IMPL::Section::Section(StockT* pCoStock)
+  _SSP_IMPL::Section::Section(StockT* pCoStock) // stock整个区域
     : pStock  (pCoStock)
     , pParent (NULL)
     , nModify (pCoStock->m_nModify)
@@ -1391,7 +1395,7 @@ namespace clstd
   typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::operator[](T_LPCSTR name) const
   {
     ATTRIBUTE attr;
-    if( ! GetKey(name, attr)) {
+    if(pStock == NULL || GetKey(name, attr) == FALSE) {
       attr.pSection = NULL;
       attr.key.length = 0;
       attr.value.length = 0;

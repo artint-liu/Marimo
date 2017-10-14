@@ -517,46 +517,40 @@ namespace clpathfile
   //////////////////////////////////////////////////////////////////////////
 
   template<typename _TString>
-  _TString CanonicalizeT(const _TString& strPath)
+  _TString& CanonicalizeT(_TString& strPath)
   {
     clsize nPos = 0;
-    //clStringA str = strPath;
-    _TString str = strPath;
-
-    str.Replace((ch)s_VicePathSlash, (ch)s_PathSlash);
 
     while(1)
     {
-      nPos = str.Find('.', nPos);
+      nPos = strPath.Find('.', nPos);
       if(nPos == _TString::npos)
         break;
 
-      if(str[nPos + 1] == (typename _TString::TChar)'.')
+      if(strPath[nPos + 1] == (typename _TString::TChar)'.')
       {
-        clsize nPrevPath = str.ReverseFind((ch)s_PathSlash, 0, (int)nPos - 1);
-        str.Replace(nPrevPath, nPos - nPrevPath + 2, NULL);
+        clsize nPrevPath = strPath.ReverseFind((ch)s_PathSlash, 0, (int)nPos - 1);
+        strPath.Replace(nPrevPath, nPos - nPrevPath + 2, NULL);
         nPos -= nPos - nPrevPath + 2;
       }
-      else if((nPos > 0 && str[nPos - 1] == s_PathSlash) || (str[nPos + 1] == s_PathSlash))
+      else if((nPos > 0 && strPath[nPos - 1] == s_PathSlash) || (strPath[nPos + 1] == s_PathSlash))
       {
-        str.Replace(nPos - 1, 2, NULL);
+        strPath.Replace(nPos - 1, 2, NULL);
         nPos -= 2;
       }
       nPos++;
-      //if(nPos >= str.GetLength())
-      //  break;
     }
 
-    str.Replace((typename _TString::TChar)s_VicePathSlash, (typename _TString::TChar)s_PathSlash);
-    return str;
+    strPath.Replace((typename _TString::TChar)s_VicePathSlash, (typename _TString::TChar)s_PathSlash);
+    return strPath;
   }
   
-  clStringA Canonicalize(const clStringA& strPath)
+  clStringA& Canonicalize(clStringA& strPath)
   {
     return CanonicalizeT(strPath);
   }
 
-  clStringW Canonicalize(const clStringW& strPath)
+  clStringW& Canonicalize(clStringW& strPath)
   {
     return CanonicalizeT(strPath);
   }
