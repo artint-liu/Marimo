@@ -631,6 +631,7 @@ FINAL_RET:
     ~ScopeTimeTrace();
   };
 
+  u32 GetTime();
   u64 GetTime64(); // Milli Seconds
   u32 GetNumberOfProcessors();  // 获得处理器数量
 

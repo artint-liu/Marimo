@@ -45,6 +45,14 @@ namespace clstd
     SocketResult_TimeOut = 100,
   };
 
+  enum SocketOption
+  {
+    SocketOption_SendTimeOut,
+    SocketOption_ReceiveTimeOut,
+    SocketOption_SendBuffer,
+    SocketOption_ReceiveBuffer,
+  };
+
 #define _ChkWSACleanup(_status) _status = WSACleanup(); ASSERT(_status != WSANOTINITIALISED)
 
   namespace net_sockets
@@ -56,6 +64,17 @@ namespace clstd
     int Startup();
     int Cleanup();
     b32 IsStartup();
+
+    class SocketInterface
+    {
+    protected:
+      SOCKET  m_socket;
+
+      SocketInterface(SOCKET socket);
+
+    public:
+      i32 SetOption(SocketOption eOpt, int nValue);
+    };
 
 //#if defined(_CL_SYSTEM_WINDOWS)
     //class TCPSocket
@@ -71,11 +90,8 @@ namespace clstd
     //  //i32 Recv    (CLLPCVOID pData, CLINT nLen);
     //};
 
-    class TCPClient
+    class TCPClient : public SocketInterface
     {
-    protected:
-      SOCKET  m_socket;
-
     public:
       TCPClient();
       TCPClient(SOCKET socket);
@@ -114,14 +130,13 @@ namespace clstd
         TCPClientProc   m_func;
         Signal*         m_pWaiting;
       };
-    }
+    } // namespace Internal
 
-    class TCPListener
+    class TCPListener : public SocketInterface
     {
     protected:
       typedef clist<SOCKET> SocketList;
       typedef clist<Internal::TCPClientThread*> ClientList;
-      SOCKET      m_socket;
       SocketList  m_SocketList;
 
       // �첽ģʽ

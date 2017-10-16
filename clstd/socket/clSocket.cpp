@@ -90,12 +90,12 @@ namespace clstd
     //////////////////////////////////////////////////////////////////////////
 
     TCPClient::TCPClient()
-      : m_socket (INVALID_SOCKET)
+      : SocketInterface(INVALID_SOCKET)
     {
     }
 
     TCPClient::TCPClient(SOCKET socket)
-      : m_socket(socket)
+      : SocketInterface(socket)
     {
     }
 
@@ -367,7 +367,7 @@ namespace clstd
     //////////////////////////////////////////////////////////////////////////
 
     TCPListener::TCPListener()
-      : m_socket(INVALID_SOCKET)
+      : SocketInterface(INVALID_SOCKET)
       , m_tid(0)
       , m_nIdleThread(0)
     {
@@ -726,6 +726,37 @@ namespace clstd
     {
     }
 
-//#endif // _CL_SYSTEM_WINDOWS
+    SocketInterface::SocketInterface(SOCKET socket)
+      : m_socket(socket)
+    {
+    }
+
+    //#endif // _CL_SYSTEM_WINDOWS
+
+    i32 SocketInterface::SetOption(SocketOption eOpt, int nValue)
+    {
+      if(m_socket == INVALID_SOCKET) {
+        return 0;
+      }
+
+      i32 result = 0;
+      switch(eOpt)
+      {
+      case SocketOption_SendTimeOut:
+        result = setsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&nValue, (int)sizeof(nValue));
+        break;
+      case SocketOption_ReceiveTimeOut:
+        result = setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&nValue, (int)sizeof(nValue));
+        break;
+      case SocketOption_SendBuffer:
+        result = setsockopt(m_socket, SOL_SOCKET, SO_SNDBUF, (char*)&nValue, (int)sizeof(nValue));
+        break;
+      case SocketOption_ReceiveBuffer:
+        result = setsockopt(m_socket, SOL_SOCKET, SO_RCVBUF, (char*)&nValue, (int)sizeof(nValue));
+        break;
+      }
+      return result;
+    }
+
   } // namespace net_sockets
 } // namespace clstd

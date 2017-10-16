@@ -193,7 +193,22 @@ namespace clstd
     clStringA& strName = *(clStringA*)&name;
     strName.~clStringA();
   }
-
+  
+  u32 GetTime()
+  {
+#if defined(_CL_SYSTEM_WINDOWS) && (_WIN32_WINNT >= 0x0600)
+    return GetTickCount();
+#elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_LINUX)
+    u32 time_ms;
+    struct timeval current;
+    gettimeofday(&current, NULL);
+    time_ms = (u32)current.tv_sec * 1000 + (u32)current.tv_usec / 1000;
+    return time_ms;
+#else
+# error implement this func.
+#endif // (defined(_WIN32) || defined(_WINDOWS)) && _WIN32_WINNT >= 0x0600)
+  }
+  
   u64 GetTime64()
   {
 #if defined(_CL_SYSTEM_WINDOWS) && (_WIN32_WINNT >= 0x0600)
@@ -202,7 +217,7 @@ namespace clstd
     u64 time_ms;
     struct timeval current;
     gettimeofday(&current, NULL);
-    time_ms = current.tv_sec * 1000 + current.tv_usec / 1000;
+    time_ms = (u64)current.tv_sec * 1000 + (u64)current.tv_usec / 1000;
     return time_ms;
 #else
 # error implement this func.

@@ -27,7 +27,15 @@ void Test_UnitA()
     StockA stock;
     b32 result = stock.LoadFromFile("empty.txt");
     ASSERT(result);
-    StockA::Section sect = stock.OpenSection("default");
+    StockA::Section sect = stock.OpenSection(NULL);
+    CLOG("sect is %s", sect.empty() ? "empty(异常)" : "not empty");
+    ASSERT(_CL_NOT_(sect.empty()));
+
+    sect = stock.OpenSection("");
+    CLOG("sect is %s", sect.empty() ? "empty" : "not empty(异常)");
+    ASSERT(sect.empty());
+
+    sect = stock.OpenSection("default");
     CLOG("sect is %s", sect.empty() ? "empty" : "not empty(异常)");
     ASSERT(sect.empty());
   }

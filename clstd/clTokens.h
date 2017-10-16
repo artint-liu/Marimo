@@ -32,9 +32,9 @@ namespace clstd {
     struct iterator
     {
     public:
-      const TokensT*  pContainer;
       T_LPCSTR        marker;
       clsize          length;
+      const TokensT*  pContainer;
 
       iterator()
         : pContainer(NULL)

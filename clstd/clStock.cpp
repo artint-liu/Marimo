@@ -907,10 +907,9 @@ namespace clstd
     if(desc && (desc->empty() || desc->pStock != this)) {
       return Section();
     }
-    else if(szPath != NULL && szPath[0] == L'\0') {
-      return Section((StockT*)this);
-    }
-    else if(m_Buffer.GetSize() == 0) {
+
+    if(m_Buffer.GetSize() == 0 && szPath != NULL)
+    {
       return Section();
     }
 
