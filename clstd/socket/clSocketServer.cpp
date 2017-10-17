@@ -1,4 +1,4 @@
-#include <functional>
+ï»¿#include <functional>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"
@@ -49,7 +49,7 @@ namespace clstd
     // specify that the address does not matter
     serverSockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   
-    // create a socket  socket(Í¨ĞÅ·¢ÉúµÄÇøÓò,Ì×½Ó×ÖµÄÀàĞÍ,Ì×½Ó×ÖÊ¹ÓÃµÄÌØ¶¨Ğ­Òé)
+    // create a socket  socket(é€šä¿¡å‘ç”Ÿçš„åŒºåŸŸ,å¥—æ¥å­—çš„ç±»å‹,å¥—æ¥å­—ä½¿ç”¨çš„ç‰¹å®šåè®®)
     m_ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (m_ServerSocket == INVALID_SOCKET) {
       //_ChkWSACleanup(status);
@@ -78,7 +78,7 @@ namespace clstd
       status = closesocket(m_ServerSocket);
       SOCKET_ERROR_LOG(status, "Error for closing server socket...\r\n");
 
-      // µÈ´ıÏß³ÌÍË³ö
+      // ç­‰å¾…çº¿ç¨‹é€€å‡º
       if(nMilliSec != 0) {
         Wait(nMilliSec);
       }
@@ -111,7 +111,7 @@ namespace clstd
   {
     int status;
 
-    // allow the socket to take connections listen(ÒÑ½¨Á¢¡¢ÉĞÎ´Á¬½ÓµÄÌ×½Ó×ÖºÅ,Á¬½Ó¶ÓÁĞµÄ×î´ó³¤¶È)
+    // allow the socket to take connections listen(å·²å»ºç«‹ã€å°šæœªè¿æ¥çš„å¥—æ¥å­—å·,è¿æ¥é˜Ÿåˆ—çš„æœ€å¤§é•¿åº¦)
     status = listen(m_ServerSocket, 1);
     if(status == SOCKET_ERROR)
     {
@@ -139,7 +139,7 @@ namespace clstd
       FD_ZERO(&ExceptSet);
       FD_SET(m_ServerSocket, &ExceptSet);
 
-      ASSERT(m_ClientList.size() < FD_SETSIZE - 1); // ServerSocket ÒªÕ¼ÓÃÒ»¸ö
+      ASSERT(m_ClientList.size() < FD_SETSIZE - 1); // ServerSocket è¦å ç”¨ä¸€ä¸ª
       for(SocketList::iterator it = m_ClientList.begin();
         it != m_ClientList.end(); ++it)
       {
@@ -194,10 +194,10 @@ namespace clstd
             u32 dwPeek;
             result = recv(*it, (char*)&dwPeek, sizeof(u32), MSG_PEEK);
 
-            if(result == 0) // ¶Ë¿ÚÒÑ¾­¹Ø±Õ
+            if(result == 0) // ç«¯å£å·²ç»å…³é—­
             {
-              // ÕâÖÖ·½Ê½ÏÂ
-              // Èç¹û¿Í»§¶ËÔÚDebugÏÂ³öÏÖ¶Ïµã²¢¹Ø±Õ£¬ÕâÀï»áÎŞ·¨ÊÕµ½closeÏûÏ¢
+              // è¿™ç§æ–¹å¼ä¸‹
+              // å¦‚æœå®¢æˆ·ç«¯åœ¨Debugä¸‹å‡ºç°æ–­ç‚¹å¹¶å…³é—­ï¼Œè¿™é‡Œä¼šæ— æ³•æ”¶åˆ°closeæ¶ˆæ¯
               OnEvent(*it, SE_CLOSE);
 
               result = ::closesocket(*it);
@@ -215,7 +215,7 @@ namespace clstd
       }
   	}
 
-    // ÍË³öÊ±ÇåÀí¿Í»§¶Ë¶Ë¿Ú
+    // é€€å‡ºæ—¶æ¸…ç†å®¢æˆ·ç«¯ç«¯å£
     for(SocketList::iterator it = m_ClientList.begin();
       it != m_ClientList.end(); ++it)
     {
@@ -298,12 +298,12 @@ namespace clstd
       SOCKET_ERROR_LOG(status, "Error for closing UDP socket...\r\n");
     
 
-      // µÈ´ıÏß³ÌÍË³ö
+      // ç­‰å¾…çº¿ç¨‹é€€å‡º
       if(nMilliSec != 0) {
         Wait(nMilliSec);
       }
 
-      m_Socket = NULL; // ÍË³öÇ°Ïß³Ì¿ÉÄÜ»¹ĞèÒªSocket
+      m_Socket = NULL; // é€€å‡ºå‰çº¿ç¨‹å¯èƒ½è¿˜éœ€è¦Socket
 
       //_ChkWSACleanup(status);
     }

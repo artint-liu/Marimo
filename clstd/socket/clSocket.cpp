@@ -1,4 +1,4 @@
-#include <functional>
+ï»¿#include <functional>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"
@@ -146,7 +146,7 @@ namespace clstd
       // specify that the address does not matter
       SockAddr.sin_addr.s_addr = addr;
 
-      // create a socket  socket(Í¨ĞÅ·¢ÉúµÄÇøÓò,Ì×½Ó×ÖµÄÀàĞÍ,Ì×½Ó×ÖÊ¹ÓÃµÄÌØ¶¨Ğ­Òé)
+      // create a socket  socket(é€šä¿¡å‘ç”Ÿçš„åŒºåŸŸ,å¥—æ¥å­—çš„ç±»å‹,å¥—æ¥å­—ä½¿ç”¨çš„ç‰¹å®šåè®®)
       m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
       if (m_socket == INVALID_SOCKET) {
         //_ChkWSACleanup(status);
@@ -155,7 +155,7 @@ namespace clstd
         return SocketResult_CreateFailed;
       }
 
-      // ×èÈûÄ£Ê½ÏÂ£¬·µ»ØµÄÊÇ³¢ÊÔÁ¬½ÓµÄ½á¹û£¬·şÎñÆ÷Ó¦´ğ²»ÔÚÕâÀïÌåÏÖ
+      // é˜»å¡æ¨¡å¼ä¸‹ï¼Œè¿”å›çš„æ˜¯å°è¯•è¿æ¥çš„ç»“æœï¼ŒæœåŠ¡å™¨åº”ç­”ä¸åœ¨è¿™é‡Œä½“ç°
       status = ::connect(m_socket, (SOCKADDR*)&SockAddr, sizeof(SockAddr));
       if(status == SOCKET_ERROR) {
         //_ChkWSACleanup(status);
@@ -181,13 +181,13 @@ namespace clstd
 
       timeval tv = {timeout_sec, 0};
 
-      // ·µ»Ø½á¹ûÊÇread_setÀïĞèÒª´¦ÀíµÄsocketÊıÁ¿£¬ÕâÀï¿Ï¶¨ÊÇ1
-      // Èç¹ûÊÇ0´ú±í³¬Ê±, SOCKET_ERROR±íÊ¾³ö´í
+      // è¿”å›ç»“æœæ˜¯read_seté‡Œéœ€è¦å¤„ç†çš„socketæ•°é‡ï¼Œè¿™é‡Œè‚¯å®šæ˜¯1
+      // å¦‚æœæ˜¯0ä»£è¡¨è¶…æ—¶, SOCKET_ERRORè¡¨ç¤ºå‡ºé”™
       int result = ::select(0, &read_set, 0, 0, timeout_sec ? &tv : 0);
       
       if(result > 0)
       {
-        ASSERT(result == 1); // read_set Ö»ÌîÁË1¸ö
+        ASSERT(result == 1); // read_set åªå¡«äº†1ä¸ª
       }
       else if(result == 0)
       {
@@ -209,7 +209,7 @@ namespace clstd
       }
       else {
         CLOG_ERROR("Unexpected socket result(%d).", result);
-        CLBREAK; // ÒâÍâµÄ½á¹û
+        CLBREAK; // æ„å¤–çš„ç»“æœ
         return SocketResult_UnknownError;
       }
 
@@ -301,7 +301,7 @@ namespace clstd
         do {
           int result = ::recv(m_socket, (char*)pData, nSpecifySize, 0);
 
-          // ·µ»Ø0±íÊ¾ÎÂºÍµØ¶Ï¿ªÁËÁ´½Ó
+          // è¿”å›0è¡¨ç¤ºæ¸©å’Œåœ°æ–­å¼€äº†é“¾æ¥
           if(result == SOCKET_ERROR || result == 0) {
             return result;
           }
@@ -406,7 +406,7 @@ namespace clstd
       serverSockAddr.sin_family = AF_INET;
       serverSockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-      // Í¨ĞÅ·¢ÉúµÄÇøÓò,Ì×½Ó×ÖµÄÀàĞÍ,Ì×½Ó×ÖÊ¹ÓÃµÄÌØ¶¨Ğ­Òé
+      // é€šä¿¡å‘ç”Ÿçš„åŒºåŸŸ,å¥—æ¥å­—çš„ç±»å‹,å¥—æ¥å­—ä½¿ç”¨çš„ç‰¹å®šåè®®
       m_socket = socket(AF_INET, SOCK_STREAM, 0);
       if (m_socket == INVALID_SOCKET) {
         //_ChkWSACleanup(status);
@@ -440,7 +440,7 @@ namespace clstd
       return SocketResult_Ok;
     }
 
-    int TCPListener::WaitSocket() // TODO: ºÍWaitSocketAsync()ºÏ²¢
+    int TCPListener::WaitSocket() // TODO: å’ŒWaitSocketAsync()åˆå¹¶
     {
       fd_set ReadSet;
       //fd_set ExceptSet;
@@ -452,7 +452,7 @@ namespace clstd
       //FD_ZERO(&ExceptSet);
       //FD_SET(m_socket, &ExceptSet);
 
-      ASSERT(m_SocketList.size() < FD_SETSIZE - 1); // ServerSocket ÒªÕ¼ÓÃÒ»¸ö
+      ASSERT(m_SocketList.size() < FD_SETSIZE - 1); // ServerSocket è¦å ç”¨ä¸€ä¸ª
       for(auto it = m_SocketList.begin(); it != m_SocketList.end(); ++it)
       {
         ASSERT(*it != 0);
@@ -507,10 +507,10 @@ namespace clstd
             u32 dwPeek;
             result = recv(*it, (char*)&dwPeek, sizeof(u32), MSG_PEEK);
 
-            if(result == 0 || result == SOCKET_ERROR) // ¶Ë¿ÚÒÑ¾­¹Ø±Õ
+            if(result == 0 || result == SOCKET_ERROR) // ç«¯å£å·²ç»å…³é—­
             {
-              // ÕâÖÖ·½Ê½ÏÂ
-              // Èç¹û¿Í»§¶ËÔÚDebugÏÂ³öÏÖ¶Ïµã²¢¹Ø±Õ£¬ÕâÀï»áÎŞ·¨ÊÕµ½closeÏûÏ¢
+              // è¿™ç§æ–¹å¼ä¸‹
+              // å¦‚æœå®¢æˆ·ç«¯åœ¨Debugä¸‹å‡ºç°æ–­ç‚¹å¹¶å…³é—­ï¼Œè¿™é‡Œä¼šæ— æ³•æ”¶åˆ°closeæ¶ˆæ¯
               OnDisconnect(*it);
 
               result = ::closesocket(*it);
@@ -529,7 +529,7 @@ namespace clstd
       return result;
     }
 
-    int TCPListener::WaitSocketAsync(long timeout_sec, TCPClientProc proc) // TODO: ºÍWaitSocket()ºÏ²¢
+    int TCPListener::WaitSocketAsync(long timeout_sec, TCPClientProc proc) // TODO: å’ŒWaitSocket()åˆå¹¶
     {
       fd_set ReadSet;
       //fd_set ExceptSet;
@@ -632,7 +632,7 @@ namespace clstd
       int result = 0;
 
       /*
-      // ÍË³öÊ±ÇåÀí¿Í»§¶Ë¶Ë¿Ú
+      // é€€å‡ºæ—¶æ¸…ç†å®¢æˆ·ç«¯ç«¯å£
       for(auto it = m_SocketList.begin(); it != m_SocketList.end(); ++it)
       {
         result = ::closesocket(*it);
@@ -732,6 +732,36 @@ namespace clstd
     }
 
     //#endif // _CL_SYSTEM_WINDOWS
+
+    i32 SocketInterface::GetOption(SocketOption eOpt)
+    {
+      if(m_socket == INVALID_SOCKET) {
+        return 0;
+      }
+
+      i32 result = 0;
+      i32 value = 0;
+      i32 len = sizeof(value);
+      switch(eOpt)
+      {
+      case SocketOption_SendTimeOut:
+        result = getsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&value, (int*)&len);
+        break;
+      case SocketOption_ReceiveTimeOut:
+        result = getsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&value, (int*)&len);
+        break;
+      case SocketOption_SendBuffer:
+        result = getsockopt(m_socket, SOL_SOCKET, SO_SNDBUF, (char*)&value, (int*)&len);
+        break;
+      case SocketOption_ReceiveBuffer:
+        result = getsockopt(m_socket, SOL_SOCKET, SO_RCVBUF, (char*)&value, (int*)&len);
+        break;
+      }
+      if(result == 0) {
+        return value;
+      }
+      return -1;
+    }
 
     i32 SocketInterface::SetOption(SocketOption eOpt, int nValue)
     {

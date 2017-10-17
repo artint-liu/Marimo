@@ -1,4 +1,4 @@
-#ifndef _CLSTD_SOCKET_H_
+ï»¿#ifndef _CLSTD_SOCKET_H_
 #define _CLSTD_SOCKET_H_
 
 #include <functional>
@@ -35,7 +35,7 @@ namespace clstd
     SocketResult_Ok = 0,
     SocketResult_Disconnected = -1,
     SocketResult_Error = -2,
-    SocketResult_UnknownError = -3,   // Ã»ÓĞÔÚ·â×°ÖĞ´¦ÀíµÄ´íÎó
+    SocketResult_UnknownError = -3,   // æ²¡æœ‰åœ¨å°è£…ä¸­å¤„ç†çš„é”™è¯¯
 
     SocketResult_CreateFailed = -4,
     SocketResult_CanotBind = -5,
@@ -47,9 +47,9 @@ namespace clstd
 
   enum SocketOption
   {
-    SocketOption_SendTimeOut,
+    SocketOption_SendTimeOut,     // æ¯«ç§’
     SocketOption_ReceiveTimeOut,
-    SocketOption_SendBuffer,
+    SocketOption_SendBuffer,      // å­—èŠ‚
     SocketOption_ReceiveBuffer,
   };
 
@@ -73,6 +73,7 @@ namespace clstd
       SocketInterface(SOCKET socket);
 
     public:
+      i32 GetOption(SocketOption eOpt);
       i32 SetOption(SocketOption eOpt, int nValue);
     };
 
@@ -106,11 +107,11 @@ namespace clstd
       int CloseSocket ();
 
       i32 Send    (CLLPCVOID pData, CLINT nLen) const;
-      i32 Recv    (CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize) const;  // ·µ»ØÊÕµ½ÁË×Ö½ÚÊı£¬·µ»ØSOCKET_ERROR±íÊ¾¶Ë¿Ú´íÎó£¬0±íÊ¾¶Ï¿ªÁ¬½Ó
+      i32 Recv    (CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize) const;  // è¿”å›æ”¶åˆ°äº†å­—èŠ‚æ•°ï¼Œè¿”å›SOCKET_ERRORè¡¨ç¤ºç«¯å£é”™è¯¯ï¼Œ0è¡¨ç¤ºæ–­å¼€è¿æ¥
       i32 Send    (const BufferBase& buf) const;
       //i32 Send    (const StockA& stock) const;
       //i32 Send    (const StockW& stock) const;
-      i32 Send    (const Repository& repo); // ·¢ËÍÊ§°Ü»áÖ÷¶¯¹Ø±Õsocket
+      i32 Send    (const Repository& repo); // å‘é€å¤±è´¥ä¼šä¸»åŠ¨å…³é—­socket
     };
 
     namespace Internal {
@@ -139,11 +140,11 @@ namespace clstd
       typedef clist<Internal::TCPClientThread*> ClientList;
       SocketList  m_SocketList;
 
-      // Òì²½Ä£Ê½
+      // å¼‚æ­¥æ¨¡å¼
       this_thread::id   m_tid;
       ClientList        m_ClientList;
       ClientList        m_RecyclePool;
-      volatile size_t   m_nIdleThread; // Òì²½Ä£Ê½ÏÂ¿ÕÏĞµÄ¿Í»§¶ËÏß³Ì£¬¿ÉÄÜ²»×¼
+      volatile size_t   m_nIdleThread; // å¼‚æ­¥æ¨¡å¼ä¸‹ç©ºé—²çš„å®¢æˆ·ç«¯çº¿ç¨‹ï¼Œå¯èƒ½ä¸å‡†
       //Signal      m_IdleSig;
 
     public:
@@ -160,10 +161,10 @@ namespace clstd
       i32 Send  (SOCKET sock, CLLPCVOID pData, u32 nLen);
       i32 Recv  (SOCKET sock, CLLPVOID pData, u32 nLen);
 
-      i32 GetClientCount() const; // Ö»ÄÜTCPListenerÏß³Ìµ÷ÓÃ
+      i32 GetClientCount() const; // åªèƒ½TCPListenerçº¿ç¨‹è°ƒç”¨
       void CloseClientSocket(TCPClient* pClient);
 
-      virtual b32  OnAccept(SOCKET socket, const SOCKADDR_IN& addr_in); // ²»´¦ÀíÖ±½Ó·µ»ØTRUE£¬·µ»ØFALSEÔò¶Ï¿ªÁ´½Ó
+      virtual b32  OnAccept(SOCKET socket, const SOCKADDR_IN& addr_in); // ä¸å¤„ç†ç›´æ¥è¿”å›TRUEï¼Œè¿”å›FALSEåˆ™æ–­å¼€é“¾æ¥
       virtual void OnDisconnect(SOCKET socket);
       virtual void OnRecv(SOCKET socket);
     };

@@ -1,4 +1,4 @@
-#ifndef _SOCKET_CLIENT_H_
+﻿#ifndef _SOCKET_CLIENT_H_
 #define _SOCKET_CLIENT_H_
 
 #ifndef _CLSTD_THREAD_H_

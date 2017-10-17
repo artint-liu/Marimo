@@ -57,6 +57,13 @@ void StartAsServer()
   net_sockets::TCPListener listener;
 
   listener.OpenPort(34001);
+  i32 nSendTimeOut = listener.GetOption(SocketOption_SendTimeOut);
+  i32 nRecvTimeOut = listener.GetOption(SocketOption_ReceiveTimeOut);
+  i32 nSendBuffer = listener.GetOption(SocketOption_SendBuffer);
+  i32 nRecvBuffer = listener.GetOption(SocketOption_ReceiveBuffer);
+  CLOG("Send timeout:%d, receive timeout:%d, send buffer:%d, receive buffer:%d",
+    nSendTimeOut, nRecvTimeOut, nSendBuffer, nRecvBuffer);
+
   listener.ListenSocket();
   
   while(1)
@@ -97,6 +104,13 @@ void StartAsClient()
   CLOG("client: connecting");
   client.Connect("127.0.0.1:34001");
   CLOG("client: connected OK");
+
+  i32 nSendTimeOut = client.GetOption(SocketOption_SendTimeOut);
+  i32 nRecvTimeOut = client.GetOption(SocketOption_ReceiveTimeOut);
+  i32 nSendBuffer  = client.GetOption(SocketOption_SendBuffer);
+  i32 nRecvBuffer  = client.GetOption(SocketOption_ReceiveBuffer);
+  CLOG("Send timeout:%d, receive timeout:%d, send buffer:%d, receive buffer:%d",
+    nSendTimeOut, nRecvTimeOut, nSendBuffer, nRecvBuffer);
 
   CLOG("输入字符后按回车发送，ESC退出");
 

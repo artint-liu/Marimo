@@ -1,4 +1,4 @@
-#include <functional>
+ï»¿#include <functional>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"
@@ -66,7 +66,7 @@ namespace clstd
     // specify that the address does not matter
     SockAddr.sin_addr.s_addr = addr;
 
-    // create a socket  socket(Í¨ĞÅ·¢ÉúµÄÇøÓò,Ì×½Ó×ÖµÄÀàĞÍ,Ì×½Ó×ÖÊ¹ÓÃµÄÌØ¶¨Ğ­Òé)
+    // create a socket  socket(é€šä¿¡å‘ç”Ÿçš„åŒºåŸŸ,å¥—æ¥å­—çš„ç±»å‹,å¥—æ¥å­—ä½¿ç”¨çš„ç‰¹å®šåè®®)
     m_clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (m_clientSocket == INVALID_SOCKET) {
       _ChkWSACleanup(status);

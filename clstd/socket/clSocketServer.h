@@ -1,4 +1,4 @@
-#ifndef _SOCKET_SERVER_H_
+ï»¿#ifndef _SOCKET_SERVER_H_
 #define _SOCKET_SERVER_H_
 
 #ifndef _CLSTD_THREAD_H_
@@ -29,11 +29,11 @@ namespace clstd
     
     	SocketResult OpenPort(CLUSHORT port);
 
-      // ¹Ø±ÕÍøÂçÌ×½Ó×Ö
-      // dwMilliSec: µÈ´ıÏß³Ì³¬Ê±
-      // 0: ²»µÈ´ı
-      // -1(0xffffffff): µÈ´ıÖ±µ½ÍË³ö
-      // ÆäËü: µÈ´ı³¬Ê±Ê±¼ä
+      // å…³é—­ç½‘ç»œå¥—æ¥å­—
+      // dwMilliSec: ç­‰å¾…çº¿ç¨‹è¶…æ—¶
+      // 0: ä¸ç­‰å¾…
+      // -1(0xffffffff): ç­‰å¾…ç›´åˆ°é€€å‡º
+      // å…¶å®ƒ: ç­‰å¾…è¶…æ—¶æ—¶é—´
       int Close (u32 nMilliSec);
       i32 Send  (SOCKET sock, CLLPCVOID pData, u32 nLen);
       i32 Recv  (SOCKET sock, CLLPVOID pData, u32 nLen);
@@ -74,11 +74,11 @@ namespace clstd
 
     SocketResult OpenPort(PropertyFlags dwFlags, u32 uRecvPort);
 
-    // ¹Ø±ÕÍøÂçÌ×½Ó×Ö
-    // dwMilliSec: µÈ´ıÏß³Ì³¬Ê±
-    // 0: ²»µÈ´ı
-    // -1(0xffffffff): µÈ´ıÖ±µ½ÍË³ö
-    // ÆäËü: µÈ´ı³¬Ê±Ê±¼ä
+    // å…³é—­ç½‘ç»œå¥—æ¥å­—
+    // dwMilliSec: ç­‰å¾…çº¿ç¨‹è¶…æ—¶
+    // 0: ä¸ç­‰å¾…
+    // -1(0xffffffff): ç­‰å¾…ç›´åˆ°é€€å‡º
+    // å…¶å®ƒ: ç­‰å¾…è¶…æ—¶æ—¶é—´
     int Close (u32 nMilliSec);
     i32 Send(CLLPCSTR szIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen);
     i32 Send(IPAddr uIPAddress, u32 wPort, CLLPCVOID pData, u32 nLen);
