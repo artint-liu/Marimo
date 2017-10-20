@@ -65,6 +65,8 @@ namespace clstd
       _TStr   KeyName     () const;
       int     ToInt       (int nDefault = 0) const;
       u32     ToUInt      (u32 nDefault = 0) const;
+      i64     ToInt64     (i64 nDefault = 0) const;
+      u64     ToUInt64    (u64 nDefault = 0) const;
       _TStr   ToString    (T_LPCSTR szDefault = NULL) const;
       float   ToFloat     (float fDefault = 0.0f) const;
       b32     ToBoolean   (b32 bDefault = false) const; // 如果不存在则返回默认值，如果是“1”,“OK”,“yes”,"true"（不区分大小写）返回TRUE，否则返回false
@@ -173,6 +175,8 @@ namespace clstd
       ATTRIBUTE operator[](T_LPCSTR name) const;
                 operator unspecified_bool_type() const;
 
+      void      ForEachSection      (T_LPCSTR szSectionName, std::function<b32(const Section&)> fn) const;
+      void      ForEachKey          (std::function<b32(const ATTRIBUTE&)> fn) const;
     };
 
   protected:

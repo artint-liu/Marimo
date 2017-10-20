@@ -273,6 +273,7 @@ typedef uintptr_t         CLULONG_PTR;
 #include <queue>
 #include <list>
 #include <set>
+#include <functional>
 
 #define clvector        std::vector
 #define clmap           std::map

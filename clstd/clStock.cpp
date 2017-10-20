@@ -161,6 +161,26 @@ namespace clstd
   }
 
   _SSP_TEMPL
+    i64 _SSP_IMPL::ATTRIBUTE::ToInt64(i64 nDefault) const
+  {
+    if(value.length) {
+      _TStr str;
+      return SmartStreamUtility::TranslateQuotation(value, str).ToInteger64();
+    }
+    return nDefault;
+  }
+
+  _SSP_TEMPL
+    u64 _SSP_IMPL::ATTRIBUTE::ToUInt64(u64 nDefault) const
+  {
+    if(value.length) {
+      _TStr str;
+      return SmartStreamUtility::TranslateQuotation(value, str).ToUInteger64();
+    }
+    return nDefault;
+  }
+
+  _SSP_TEMPL
     _TStr _SSP_IMPL::ATTRIBUTE::ToString(T_LPCSTR szDefault) const
   {
     if(value.length) {
@@ -836,6 +856,31 @@ namespace clstd
     return TRUE;
   }
 
+  _SSP_TEMPL
+  void _SSP_IMPL::Section::ForEachSection(T_LPCSTR szSectionName, std::function<b32(const Section&)> fn) const
+  {
+    Section sect = Open(szSectionName);
+    if(sect) {
+      do {
+        if(_CL_NOT_(fn(sect))) {
+          break;
+        }
+      } while (sect.NextSection(szSectionName));
+    }
+  }
+
+  _SSP_TEMPL
+    void _SSP_IMPL::Section::ForEachKey(std::function<b32(const ATTRIBUTE&)> fn) const
+  {
+    ATTRIBUTE attr;
+    if(FirstKey(attr)) {
+      do {
+        if(_CL_NOT_(fn(attr))) {
+          break;
+        }
+      } while (attr.NextKey());
+    }
+  }
   //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL

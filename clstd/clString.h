@@ -318,6 +318,8 @@ namespace clstd
 
     i32         ToInteger       (int nRadix = 10) const;  // 尝试将字符串转换为有符号整数，参数描述这个字符串的进制
     u32         ToUInteger      (int nRadix = 10) const;  // 尝试将字符串转换为无符号整数，参数描述这个字符串的进制
+    i64         ToInteger64     (int nRadix = 10) const;  // 尝试将字符串转换为64位有符号整数，参数描述这个字符串的进制
+    u64         ToUInteger64    (int nRadix = 10) const;  // 尝试将字符串转换为64位无符号整数，参数描述这个字符串的进制
     double      ToFloat         () const;                 // 尝试转换为浮点数
 
     u32         GetHash         () const; // 计算字符串的hash，这个算法是独立且平台一致的

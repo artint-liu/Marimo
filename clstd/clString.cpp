@@ -1767,6 +1767,18 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
+    i64 _CLSTR_IMPL::ToInteger64(int nRadix) const
+  {
+    return clstd::xtoi(nRadix, m_pBuf);
+  }
+
+  _CLSTR_TEMPL
+    u64 _CLSTR_IMPL::ToUInteger64(int nRadix) const
+  {
+    return clstd::xtou64(nRadix, m_pBuf, CLSTR_LENGTH(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
     double _CLSTR_IMPL::ToFloat() const
   {
     return clstd::_xstrtofT<double>(m_pBuf);
