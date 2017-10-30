@@ -311,6 +311,7 @@ namespace clstd
 
     if( ! file.ReadToBuffer(&m_Buffer)) {
       // 如果Load一个空文件，则自己创建一个缓冲
+      m_Buffer.Reserve(1024);
       m_Buffer.Resize(0, FALSE);
       m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), (u32)m_Buffer.GetSize()/sizeof(TChar));
       return TRUE;
@@ -498,6 +499,9 @@ namespace clstd
       T_LPCSTR szSubSection, T_LPCSTR szMainKey, T_LPCSTR szMatchValue, QueryType eType)
   {
     IS_OUT_OF_DATE;
+    ASSERT((CLINT_PTR)iter_begin.marker >= (CLINT_PTR)pStock->GetBuffer().GetPtr());
+    ASSERT((CLINT_PTR)iter_end.marker <= (CLINT_PTR)pStock->GetBuffer().GetPtr() + pStock->GetBuffer().GetSize());
+
     Section sub_sect = Open(szSubSection);
     if(sub_sect) {
       ATTRIBUTE attr;
@@ -896,11 +900,12 @@ namespace clstd
       return Section();
     }
 
-    // 初始化Smart对象
-    if( ! m_Buffer.GetSize()) {
+    // 初始化Smart对象, 这里改动了m_Buffer指针, 所以需要desc为空, 否则要调整desc内指针
+    if(desc == 0 && m_Buffer.GetSize() == 0) {
       m_Buffer.Reserve(1024);
       m_SmartStream.Attach((TChar*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(TChar));
     }
+    ASSERT(m_Buffer.GetCapacity() != 0);
 
     Section sDesc;
     Section sResult;
@@ -977,9 +982,11 @@ namespace clstd
       }
     }
     else {
-      new(&sDesc) Section((StockT*)this);
+      if(m_Buffer.GetPtr() != NULL) {
+        new(&sDesc) Section((StockT*)this);
+      }
+
       if(szPath == NULL) {
-        //return AddSection(&sDesc); // 根Section
         return sDesc;
       }
     }
@@ -1304,6 +1311,7 @@ namespace clstd
     else {
       auto pStreamPtr = m_SmartStream.GetStreamPtr();
       auto pMarker = it.marker;
+      ASSERT(pMarker >= pStreamPtr);
 
       // 用来向前跳过空白，尽量插入的Section在上一个换行符号之后
       while(--pMarker >= pStreamPtr && (*pMarker == ' ' || *pMarker == '\t')) {}

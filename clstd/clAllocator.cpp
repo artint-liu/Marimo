@@ -504,12 +504,45 @@ namespace clstd
 # define STD_ALLOC_EXTRA_LENGTH 0
 #endif
 
+#define ENABLE_HEAP_ALLOC
+
+#ifdef _CL_SYSTEM_WINDOWS
+  StdAllocator::StdAllocator()
+    : m_heap(INVALID_HANDLE_VALUE)
+    //, m_nAllocCount(0)
+  {
+#if defined(ENABLE_HEAP_ALLOC)
+    m_heap = HeapCreate(0, 1024 * 1024, 0);
+#endif
+  }
+
+  StdAllocator::~StdAllocator()
+  {
+#if defined(ENABLE_HEAP_ALLOC)
+    //if(m_nAllocCount == 0) {
+      HeapDestroy(m_heap);
+      m_heap = INVALID_HANDLE_VALUE;
+    //}
+#endif
+  }
+#endif // #ifdef _CL_SYSTEM_WINDOWS
+
+
 
   void* StdAllocator::Alloc( clsize nBytes, clsize* pCapacity )
   {
     const clsize nCapacity = ALIGN_4(nBytes + sizeof(clsize));
 #ifdef _CL_SYSTEM_WINDOWS
-    void* ptr = HeapAlloc(GetProcessHeap(), 0, sizeof(CLBYTE) * (nCapacity + STD_ALLOC_EXTRA_LENGTH));
+# if defined(ENABLE_HEAP_ALLOC)
+    //if(m_heap == INVALID_HANDLE_VALUE) {
+    //  m_heap = HeapCreate(0, 1024 * 1024, 0);
+    //}
+    ASSERT(m_heap != INVALID_HANDLE_VALUE); // 不支持全局/静态类使用这个分配
+    void* ptr = HeapAlloc(m_heap, 0, sizeof(CLBYTE) * (nCapacity + STD_ALLOC_EXTRA_LENGTH));
+    //m_nAllocCount++;
+# else
+    void* ptr = new CLBYTE[(nCapacity + STD_ALLOC_EXTRA_LENGTH)];
+# endif
 #else
     void* ptr = malloc(sizeof(CLBYTE) * (nCapacity + STD_ALLOC_EXTRA_LENGTH)); // new CLBYTE[nCapacity + STD_ALLOC_EXTRA_LENGTH];
 #endif
@@ -551,7 +584,12 @@ namespace clstd
 #endif // #if defined(_DEBUG) && (STD_ALLOC_EXTRA_LENGTH > 0)
     //delete[] (u8*)ptr;
 #ifdef _CL_SYSTEM_WINDOWS
-    HeapFree(GetProcessHeap(), 0, ptr);
+# if defined(ENABLE_HEAP_ALLOC)
+    HeapFree(m_heap, 0, ptr);
+    //--m_nAllocCount;
+# else
+    delete ptr;
+# endif
 #else
     free(ptr);
 #endif

@@ -276,7 +276,7 @@ namespace clstd
     FILETIME sCreationTime;
     FILETIME sLastAccessTime;
     FILETIME sLastWriteTime;
-    GetFileTime(m_hFile, &sCreationTime, &sLastAccessTime, &sLastWriteTime);
+    ::GetFileTime(m_hFile, &sCreationTime, &sLastAccessTime, &sLastWriteTime);
     if(lpCreationTime)
     {
       lpCreationTime->dwHighDateTime = sCreationTime.dwHighDateTime;
@@ -461,6 +461,24 @@ FALSE_RET:
     pTime->dwHighDateTime = (t & 0xffffffff);
     pTime->dwLowDateTime  = (t >> 32);
 #endif
+  }
+
+  void File::GetFileTime(CLLPCWSTR szFilePath, TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime)
+  {
+    File file;
+    File::TIME sLastWriteTime = { 0, 0 };
+    if(file.OpenExisting(szFilePath)) {
+      file.GetTime(lpCreationTime, lpLastAccessTime, lpLastWriteTime);
+    }
+  }
+
+  void File::GetFileTime(CLLPCSTR szFilePath, TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime)
+  {
+    File file;
+    File::TIME sLastWriteTime = { 0, 0 };
+    if(file.OpenExisting(szFilePath)) {
+      file.GetTime(lpCreationTime, lpLastAccessTime, lpLastWriteTime);
+    }
   }
 
   b32 File::ReadToBuffer(Buffer* pBuffer, int nFileOffset, u32 cbSize)

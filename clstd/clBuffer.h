@@ -166,19 +166,21 @@ namespace clstd
   protected:
     clsize m_nCapacity;  // 容量大小
     clsize m_nPageSize;  // 页大小, 大小不够将按照这个长度增加
+
   public:
     MemBuffer(u32 nPageSize = 512);
     virtual ~MemBuffer();
 
-    size_t      Reserve   (clsize dwSize); // 地址没变化返回0，否则返回一个补码的地址差
-    size_t      Resize    (clsize dwSize, b32 bZeroInit); // 地址没变化返回0，否则返回一个补码的地址差
-    CLLPVOID    GetPtr    () const;
-    clsize      GetSize   () const;
-    //b32       Add       (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
-    MemBuffer&  Append    (CLLPCVOID lpData, clsize dwSize);
-    MemBuffer&  Append    (const BufferBase& buf);
-    b32         Replace   (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
-    b32         Insert    (clsize nPos, CLLPCVOID lpData, clsize cbSize);
+    size_t      Reserve     (clsize dwSize); // 地址没变化返回0，否则返回一个补码的地址差
+    size_t      Resize      (clsize dwSize, b32 bZeroInit); // 地址没变化返回0，否则返回一个补码的地址差
+    CLLPVOID    GetPtr      () const;
+    clsize      GetSize     () const;
+    clsize      GetCapacity () const;
+    //b32       Add         (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！
+    MemBuffer&  Append      (CLLPCVOID lpData, clsize dwSize);
+    MemBuffer&  Append      (const BufferBase& buf);
+    b32         Replace     (clsize nPos, clsize nLen, CLLPCVOID lpData, clsize cbSize);
+    b32         Insert      (clsize nPos, CLLPCVOID lpData, clsize cbSize);
 
     MemBuffer& operator=(const MemBuffer& buf);
 

@@ -134,6 +134,8 @@ namespace clstd
     b32  MapToBuffer  (MemBuffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
 
     static void GetSystemTime(TIME* pTime); // 以文件时间形式获得当前时间(UTC)
+    static void GetFileTime(CLLPCWSTR szFilePath, TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime);
+    static void GetFileTime(CLLPCSTR szFilePath, TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime);
     //TextStream& 
     //    GetTextStream ();  
   };

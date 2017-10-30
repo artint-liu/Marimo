@@ -596,7 +596,7 @@ namespace clstd
     return TRUE;
   }
 
-  b32 Image::ScaleNearest(Image* pDestImage, int nWidth, int nHeight)
+  b32 Image::ScaleNearest(Image* pDestImage, int nWidth, int nHeight) const
   {
     if( ! pDestImage->Set(nWidth, nHeight, (const char*)m_format.name, m_depth, (const void*)-1, 0)) {
       return FALSE;
@@ -665,7 +665,7 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
 
   template<typename _TChannel, int _channel, int _shift>
-  void Image::IntFastLinearScaling(Image* pDestImage, int nWidth, int nHeight)
+  void Image::IntFastLinearScaling(Image* pDestImage, int nWidth, int nHeight) const
   {
     typedef i32 t32;
     const t32 _max = (1 << _shift);
@@ -768,7 +768,7 @@ namespace clstd
     SAFE_DELETE_ARRAY(aLine);
   }
 
-  b32 Image::ScaleFastLinear(Image* pDestImage, int nWidth, int nHeight)
+  b32 Image::ScaleFastLinear(Image* pDestImage, int nWidth, int nHeight) const
   {
     if(m_width == nWidth && m_height == nHeight) {
       *pDestImage = *this;
@@ -869,7 +869,7 @@ namespace clstd
   }
 
   template<typename _Ty>
-  void Image::IntStretchCopy(Image* pDestImage, int nWidth, int nHeight)
+  void Image::IntStretchCopy(Image* pDestImage, int nWidth, int nHeight) const
   {
     int* aLine = new int[nWidth];
     int delta = 0;

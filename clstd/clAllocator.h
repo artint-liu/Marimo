@@ -105,6 +105,15 @@ namespace clstd
   // 使用new/delete的标准分配函数
   class StdAllocator
   {
+#ifdef _CL_SYSTEM_WINDOWS
+    HANDLE m_heap;
+    //size_t m_nAllocCount;
+  
+  public:
+    StdAllocator();
+    ~StdAllocator();
+#endif
+
   public:
     void*   Alloc             (clsize nBytes, clsize* pCapacity);
     void    Free              (void* ptr);

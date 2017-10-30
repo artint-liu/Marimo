@@ -92,8 +92,8 @@ namespace clstd
     b32         RenameChannel       (char* szChannel);
     b32         GetChannelPlane     (Image* pDestImage, char chChannel); // 获得通道平面，pDest将被清空
     b32         ReplaceChannel      (char chReplacedChannel, const Image* pSource, char chSrcChannel); // 从一个图像拷贝通道，如果指定的通道在源图像中不存在，会失败。
-    b32         ScaleNearest        (Image* pDestImage, int nWidth, int nHeight); // 点采样缩放，这个不需要计算像素
-    b32         ScaleFastLinear     (Image* pDestImage, int nWidth, int nHeight); // 快速线性插值，从原始图像的相邻像素进行插值得出新像素
+    b32         ScaleNearest        (Image* pDestImage, int nWidth, int nHeight) const; // 点采样缩放，这个不需要计算像素
+    b32         ScaleFastLinear     (Image* pDestImage, int nWidth, int nHeight) const; // 快速线性插值，从原始图像的相邻像素进行插值得出新像素
     const char* GetFormat           () const;
     b32         SetFormat           (const char* fmt); // 更改通道顺序或者删除通道
     ImageColorSpace GetColorSpace   () const;
@@ -145,10 +145,10 @@ namespace clstd
     static void IntCopyChannel(Image* pDestImage, int nDestIndex, const Image* pSrcImage, int nSrcIndex);
 
     template<typename _Ty>
-    void IntStretchCopy( Image* pDestImage, int nWidth, int nHeight );
+    void IntStretchCopy( Image* pDestImage, int nWidth, int nHeight ) const;
 
     template<typename _TChannel, int _channel, int _shift>
-    void IntFastLinearScaling(Image* pDestImage, int nWidth, int nHeight);
+    void IntFastLinearScaling(Image* pDestImage, int nWidth, int nHeight) const;
 
     //template<typename _Ty>
     //void IntStretchCopyMulti( Image* pDestImage, int nWidth, int nHeight, int nCount );

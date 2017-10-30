@@ -150,6 +150,11 @@ namespace clstd
     return m_uSize;
   }
 
+  clsize MemBuffer::GetCapacity() const
+  {
+    return m_nCapacity;
+  }
+
   CLLPVOID MemBuffer::GetPtr() const
   {
     return m_lpBuffer;  
