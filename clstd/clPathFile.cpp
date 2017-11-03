@@ -607,6 +607,27 @@ namespace clpathfile
 
   //////////////////////////////////////////////////////////////////////////
   template<typename _TCh>
+  const _TCh* SkipRootT(const _TCh* szPath)
+  {
+    if(((szPath[0] >= 'A' && szPath[0] <= 'Z') ||
+      (szPath[0] >= 'a' && szPath[0] <= 'z')) && szPath[1] == ':') {
+      return szPath + 2;
+    }
+    return szPath;
+  }
+
+  const ch* SkipRoot(const ch* szPath)
+  {
+    return SkipRootT(szPath);
+  }
+
+  const wch* SkipRoot(const wch* szPath)
+  {
+    return SkipRootT(szPath);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  template<typename _TCh>
   b32 IsRelativeT(const _TCh* szPath)
   {
 #if defined(_CL_SYSTEM_WINDOWS)

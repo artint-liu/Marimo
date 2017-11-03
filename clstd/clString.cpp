@@ -772,7 +772,11 @@ namespace clstd
     if(pStr == NULL) {
       Clear();
     }
-    else {
+    else if(m_pBuf < pStr && m_pBuf + CLSTR_LENGTH(m_pBuf) >= pStr)
+    {
+      Remove(0, pStr - m_pBuf);
+    }
+    else if(m_pBuf != pStr) {
       const clsize uStrLen = _Traits::StringLength(pStr);
       _ResizeLengthNoCopy(uStrLen);
       if(uStrLen) {

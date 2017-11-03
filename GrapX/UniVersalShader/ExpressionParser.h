@@ -355,9 +355,9 @@ namespace UVShader
     GXBOOL  ParseExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
     //GXBOOL  ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end);
     //GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
-    GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
+    //GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion);
     GXBOOL  TryKeywords(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, RTSCOPE::TYPE* parse_end);
-    GXBOOL  TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end); // 解析一个代码块，用{}限定的一组或者仅有一句表达式的代码
+    //GXBOOL  TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end); // 解析一个代码块，用{}限定的一组或者仅有一句表达式的代码
     RTSCOPE::TYPE  ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, GXBOOL bElseIf);
     RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::DESC* pBlockNode);
     RTSCOPE::TYPE  ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
@@ -387,8 +387,8 @@ namespace UVShader
 
     //GXBOOL   Macro_ExpandMacroInvoke(int nMacro, TOKEN& token);
 
-    template<class _List, class _Iter>
-    void     AppendWithExpandProprocess(_List& tokens, int offset, int nSrcLine, const _Iter& begin, const _Iter& end);
+    //template<class _List, class _Iter>
+    //void     AppendWithExpandProprocess(_List& tokens, int offset, int nSrcLine, const _Iter& begin, const _Iter& end);
 
     //static void StringTokenToString(clStringW& strOut, const TOKEN::Array& aTokens, int nBegin);
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
@@ -398,7 +398,9 @@ namespace UVShader
     void    RelocaleStatements(StatementArray& aStatements);
     void    RelocalePointer();
     void    RelocaleSyntaxPtr(SYNTAXNODE* pNode);
-    GXBOOL  IsIntrinsicType(GXLPCSTR szType);
+    
+    //GXBOOL  IsType(GXLPCSTR szType);
+    //GXBOOL  IsIntrinsicType(GXLPCSTR szType);
 
     GXLPCSTR GetUniqueString(const TOKEN* pSym);
     const TYPE* ParseType(const TOKEN* pSym);

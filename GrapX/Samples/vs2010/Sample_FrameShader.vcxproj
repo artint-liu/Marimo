@@ -14,19 +14,19 @@
     <ClCompile Include="..\..\UniVersalShader\ArithmeticExpression.cpp" />
     <ClCompile Include="..\..\UniVersalShader\ArithmeticExpr_static.cpp" />
     <ClCompile Include="..\..\UniVersalShader\ExpressionParser.cpp" />
-    <ClCompile Include="..\Sample_UVShader\ExpressionSample.cpp" />
-    <ClCompile Include="..\Sample_UVShader\Sample_UVShader.cpp" />
-    <ClCompile Include="..\Sample_UVShader\TestParseArithmeticExpression.cpp" />
-    <ClCompile Include="..\Sample_UVShader\TestParseFromFile.cpp" />
+    <ClCompile Include="..\Sample_FrameShader\Sample_FrameShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\UniVersalShader\ArithmeticExpression.h" />
     <ClInclude Include="..\..\UniVersalShader\ExpressionParser.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\bin\uvsmsg.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E155BF80-C981-4E82-BC2A-EB1AE7D088B6}</ProjectGuid>
+    <ProjectGuid>{C25AC0AF-2AC1-4B4E-A1ED-C6319E75C136}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Sample_UVShader</RootNamespace>
+    <RootNamespace>Sample_FrameShader</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -52,12 +52,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\..\bin\x86\</OutDir>
-    <TargetName>$(ProjectName)_d</TargetName>
+    <OutDir>..\..\..\bin\x86\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\..\bin\x86\</OutDir>
+    <OutDir>..\..\..\bin\x86\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -77,20 +76,17 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>GrapX.lib;clstd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\bin\x86;$(ProjectDir)..\..\..\clstd\bin;$(VLDDIR)\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

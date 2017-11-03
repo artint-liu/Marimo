@@ -229,9 +229,9 @@ namespace Test{
     while(find.GetFile(&find_data))
     {
       ITEM item;
-      item.strName      = find_data.Filename;
-      item.strOutput    = find_data.Filename;
-      item.strReference = find_data.Filename;
+      item.strName      = find_data.cFileName;
+      item.strOutput    = find_data.cFileName;
+      item.strReference = find_data.cFileName;
 
       clpathfile::RenameExtension(item.strName, "");
 
@@ -246,7 +246,7 @@ namespace Test{
       {
         item.strOutput.Insert(pos, "[output]");
         item.strReference.Insert(pos, "[reference]");
-        clpathfile::CombinePath(item.strInput, szDir, find_data.Filename);
+        clpathfile::CombinePath(item.strInput, szDir, find_data.cFileName);
         clpathfile::CombinePath(item.strOutput, szDir, item.strOutput);
         clpathfile::CombinePath(item.strReference, szDir, item.strReference);
         toy_list.push_back(item);

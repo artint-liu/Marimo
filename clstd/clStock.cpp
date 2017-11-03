@@ -500,7 +500,7 @@ namespace clstd
   {
     IS_OUT_OF_DATE;
     ASSERT((CLINT_PTR)iter_begin.marker >= (CLINT_PTR)pStock->GetBuffer().GetPtr());
-    ASSERT((CLINT_PTR)iter_end.marker <= (CLINT_PTR)pStock->GetBuffer().GetPtr() + pStock->GetBuffer().GetSize());
+    ASSERT((CLINT_PTR)iter_end.marker <= (CLINT_PTR)pStock->GetBuffer().GetPtr() + (CLINT_PTR)pStock->GetBuffer().GetSize());
 
     Section sub_sect = Open(szSubSection);
     if(sub_sect) {

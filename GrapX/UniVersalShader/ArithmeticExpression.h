@@ -16,6 +16,7 @@
 //#define ERROR_MSG_C1021_无效的预处理器命令 
 
 #define E1021_无效的预处理器命令_vs     1021
+#define E1050_缺少类型描述              1050
 #define E1189_用户定义错误_vs           1189
 #define E4006_undef应输入标识符         4006
 #define E4067_预处理器指令后有意外标记_应输入换行符 4067

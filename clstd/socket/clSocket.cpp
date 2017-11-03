@@ -233,7 +233,12 @@ namespace clstd
 
     i32 TCPClient::Send(CLLPCVOID pData, CLINT nLen) const
     {
-      return ::send(m_socket, (const char*)pData, nLen, 0);
+      i32 result = ::send(m_socket, (const char*)pData, nLen, 0);
+      if(result == SOCKET_ERROR) {
+        int wsa_error = WSAGetLastError();
+        CLOG_ERROR("WSAGetLastError()=%d", wsa_error);
+      }
+      return result;
     }
 
     i32 TCPClient::Send(const BufferBase& buf) const
@@ -248,28 +253,28 @@ namespace clstd
       int result = 0;
       int r = 0;
       do {
-        r = ::send(m_socket, (const char*)raw.header, (int)raw.cbHeader, 0);
+        r = Send((const char*)raw.header, (int)raw.cbHeader);
         if(r != raw.cbHeader) {
           CLOG_ERROR("can not send repository header(%d).", r);
           break;
         }
         result += r;
 
-        r = ::send(m_socket, (const char*)raw.keys, (int)raw.cbKeys, 0);
+        r = Send((const char*)raw.keys, (int)raw.cbKeys);
         if(r != raw.cbKeys) {
           CLOG_ERROR("can not send repository keys(%d).", r);
           break;
         }
         result += r;
 
-        r = ::send(m_socket, (const char*)raw.names, (int)raw.cbNames, 0);
+        r = Send((const char*)raw.names, (int)raw.cbNames);
         if(r != raw.cbNames) {
           CLOG_ERROR("can not send repository names(%d).", r);
           break;
         }
         result += r;
 
-        r = ::send(m_socket, (const char*)raw.data, (int)raw.cbData, 0);
+        r = Send((const char*)raw.data, (int)raw.cbData);
         if(r != raw.cbData) {
           CLOG_ERROR("can not send repository data(%d).", r);
           break;

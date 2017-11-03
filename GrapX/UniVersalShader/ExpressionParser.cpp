@@ -1045,6 +1045,16 @@ NOT_INC_P:
     }
   }
 
+  //GXBOOL CodeParser::IsType(GXLPCSTR szType)
+  //{
+  //  return IsIntrinsicType(szType);
+  //}
+
+  //GXBOOL CodeParser::IsIntrinsicType(GXLPCSTR szType)
+  //{
+  //  
+  //}
+
   GXBOOL CodeParser::ParseStructMember(STATEMENT* pStat, STRUCT_MEMBER& member, TOKEN**pp, const TOKEN* pMemberEnd)
   {
     TOKEN*& p = *pp;
@@ -1108,6 +1118,11 @@ NOT_INC_P:
 
       const TOKEN* pMemberEnd = &m_aTokens.front() + p->semi_scope;
       member.szType = GetUniqueString(p);
+      if(ParseType(p) == NULL) {
+        clStringW strType = member.szType;
+        OutputErrorW(*p, E1050_缺少类型描述, strType.CStr());
+      }
+
       INC_BUT_NOT_END(p, pMemberEnd); // ERROR: 结构体成员声明不正确
 
       if( ! ParseStructMember(pStat, member, &p, pMemberEnd)) {
@@ -1124,7 +1139,7 @@ NOT_INC_P:
         aMembers.push_back(member);
       }
 
-      ASSERT(*p == ';');
+      ASSERT(*p == ';'); // 上面打印了错误信息,这个可有可无
       p++;
 
       //else if(*p == ',') {

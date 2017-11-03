@@ -142,6 +142,12 @@ namespace clpathfile
   b32 RemoveFileSpec  (clStringA& strPath);
   b32 RemoveFileSpec  (clStringW& strPath);
 
+  // 跳过驱动器符号前缀, 这个不会改变字符串原有内容
+  template<typename _TCh>
+  const _TCh*  SkipRootT (const _TCh* szPath);
+  const ch*    SkipRoot  (const ch* szPath);
+  const wch*   SkipRoot  (const wch* szPath);
+
   // 判断是否为相对路径
   template<typename _TCh>
   b32 IsRelativeT (const _TCh* szPath);
