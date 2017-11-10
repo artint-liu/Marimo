@@ -236,7 +236,7 @@ namespace clstd
       i32 result = ::send(m_socket, (const char*)pData, nLen, 0);
       if(result == SOCKET_ERROR) {
         int wsa_error = WSAGetLastError();
-        CLOG_ERROR("WSAGetLastError()=%d", wsa_error);
+        CLOG_ERROR("Send(), WSAGetLastError()=%d", wsa_error);
       }
       return result;
     }
@@ -298,7 +298,12 @@ namespace clstd
     {
       if(bRecvSpecifySize == FALSE)
       {
-        return ::recv(m_socket, (char*)pData, nLen, 0);
+        i32 result = ::recv(m_socket, (char*)pData, nLen, 0);
+        if(result == SOCKET_ERROR) {
+          int wsa_error = WSAGetLastError();
+          CLOG_ERROR("Recv(), WSAGetLastError()=%d", wsa_error);
+        }
+        return result;
       }
       else
       {
@@ -308,6 +313,8 @@ namespace clstd
 
           // 返回0表示温和地断开了链接
           if(result == SOCKET_ERROR || result == 0) {
+            int wsa_error = WSAGetLastError();
+            CLOG_ERROR("Recv(), WSAGetLastError()=%d", wsa_error);
             return result;
           }
 
