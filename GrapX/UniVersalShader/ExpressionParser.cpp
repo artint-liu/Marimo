@@ -729,9 +729,14 @@ namespace UVShader
   {
     TOKEN* p = &m_aTokens[pScope->begin];
 
-    if((RTSCOPE::TYPE)p->semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)p->semi_scope > pScope->end) {
+    if(p->semi_scope == pScope->begin) { // 独立的分号
+      pScope->begin++;
+      return TRUE;
+    }
+    else if((RTSCOPE::TYPE)p->semi_scope == RTSCOPE::npos || (RTSCOPE::TYPE)p->semi_scope > pScope->end) {
       return FALSE;
     }
+
     const TOKEN* pEnd = &m_aTokens.front() + p->semi_scope;
 
     STATEMENT stat = {StatementType_Definition};
@@ -2308,13 +2313,12 @@ NOT_INC_P:
 
     clpathfile::CombinePath(strPath, strPath, strHeader);
 
-    CodeParser* pRoot = GetRootParser();
+    //CodeParser* pRoot = GetRootParser();
 
     clBuffer* pBuffer = OpenIncludeFile(strPath);
-    //GXHRESULT hr = m_pInclude->Open(Include::IncludeType_Local, strPath, &pBuffer);
-    //if(GXFAILED(hr)) {
-    //  return;
-    //}
+    if(pBuffer == NULL) {
+      OutputErrorW(E9999_未定义错误_vsd, __FILEW__, __LINE__);
+    }
 
     ASSERT(m_pMsg); // 应该从m_pParent设置过临时的m_pMsg
     CodeParser parser(m_pContext, m_pInclude);

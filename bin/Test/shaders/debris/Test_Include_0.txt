@@ -1,0 +1,3 @@
+#include "Test_Include_0.h"
+
+string message="hollo world";

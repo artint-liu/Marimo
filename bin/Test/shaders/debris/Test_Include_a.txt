@@ -1,0 +1,70 @@
+#include "Test_Include_a.h"
+
+float3 g_vSunColor     : ATMOSPHERE_SUNCOLOR;
+float  g_fSunIntensity : ATMOSPHERE_SUNINTENSITY;
+
+struct FRAME_VS_INPUT
+{
+  float4 Position : POSITION;
+};
+
+struct FRAME_VS_OUTPUT
+{
+  float4 Position : POSITION;
+  float4 I        : COLOR14;
+  float4 E        : COLOR15;
+};
+
+FRAME_VS_OUTPUT atmosphere_vs(FRAME_VS_INPUT Input)
+{
+  FRAME_VS_OUTPUT Output;
+
+  float4 Position = mul(g_matWorld, Input.Position);
+  float3 V = Position.xyz / Position.w - g_vViewPos;
+  float d = length( V );  // 我加的,距离放大了n倍
+  float ThetaVU = dot(V, float3(0,1,0));
+  V = V / d;
+
+  // 把天空顶调整为扁球体
+  d = ScaleToEllipse(ThetaVU, d);
+
+  float Theta = dot( V, g_vMainLightDir );
+  float SR = d * 0.005f;
+  float SM = d * 0.05f;
+
+  Output.I.a = 1.0f;
+  Output.E.a = 1.0f;
+
+  Theta = pow(max(0, Theta), 10.0);
+  Output.E.rgb = E(abs(Theta), SR, SM );
+  Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity;
+
+  Output.Position   = mul(g_matWorldViewProj, Input.Position);
+  
+  return Output;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+FRAME_VS_OUTPUT frame_vs_main(FRAME_VS_INPUT input)
+{
+  FRAME_VS_OUTPUT Output;
+
+  Input = vs_main(Input);
+  Output = atmosphere_vs(Input);
+  return Output;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+struct FRAME_PS_OUTPUT
+{
+  // TODO...
+};
+
+FRAME_PS_OUTPUT frame_ps_main(FRAME_VS_OUTPUT input)
+{
+  FRAME_PS_OUTPUT Output;
+  // TODO...
+  return Output;
+}

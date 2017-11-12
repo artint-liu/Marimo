@@ -255,51 +255,18 @@ namespace Test{
   }
 }
 
-void TestShaderToys(GXBOOL bShowList)
+//////////////////////////////////////////////////////////////////////////
+
+void TestFiles(GXLPCSTR szDir, GXBOOL bShowList)
 {
-  Test::ItemList toy_list;
-  Test::Generate(toy_list, "Test\\shaders\\ShaderToy");
-
-  //clstd::FindFile find("Test\\shaders\\ShaderToy\\*.txt");
-  //clstd::FINDFILEDATAA find_data;
-
-
-  //ItemList toy_list;
-
-  //while(find.GetFileA(&find_data))
-  //{
-  //  ITEM item;
-  //  item.strName = find_data.Filename;
-  //  item.strOutput = find_data.Filename;
-
-  //  clpathfile::RenameExtensionA(item.strName, "");
-
-  //  if(item.strOutput.EndsWith("[output].txt")) {
-  //    continue;
-  //  }
-
-  //  clsize pos = clpathfile::FindExtensionA(item.strOutput);
-  //  if(pos != clStringA::npos)
-  //  {
-  //    item.strOutput.Insert(pos, "[output]");
-  //    clpathfile::CombinePathA(item.strInput, "Test\\shaders\\ShaderToy", find_data.Filename);
-  //    clpathfile::CombinePathA(item.strOutput, "Test\\shaders\\ShaderToy", item.strOutput);
-  //    if(bShowList)
-  //    {
-  //      toy_list.push_back(item);
-  //    }
-  //    else
-  //    {
-  //      TestFromFile(item.strInput, item.strOutput);
-  //    }
-  //  }
-  //}
+  Test::ItemList sShaderSource_list;
+  Test::Generate(sShaderSource_list, szDir);
 
   if(bShowList)
   {
-    for(auto it = toy_list.begin(); it != toy_list.end(); ++it)
+    for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it)
     {
-      auto n = it - toy_list.begin();
+      auto n = it - sShaderSource_list.begin();
       printf("%3d.%*s", n, -35, it->strName);
       if(n % 2 == 1) {
         printf("\n");
@@ -310,24 +277,39 @@ void TestShaderToys(GXBOOL bShowList)
     char szBuffer[128];
     gets(szBuffer);
     if(GXSTRCMPI(szBuffer, "all") == 0) {
-      for(auto it = toy_list.begin(); it != toy_list.end(); ++it) {
+      for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it) {
         TestFromFile(it->strInput, it->strOutput, it->strReference);
       }
     }
     else
     {
       int nSelect = atoi(szBuffer);
-      if(nSelect >= 0 && nSelect < (int)toy_list.size()) {
-        auto& item = toy_list[nSelect];
+      if(nSelect >= 0 && nSelect < (int)sShaderSource_list.size()) {
+        auto& item = sShaderSource_list[nSelect];
         TestFromFile(item.strInput, item.strOutput, item.strReference);
       }
     }
   }
+  else // 不显示菜单的话就测试所有项目
+  {
+    for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it) {
+      TestFromFile(it->strInput, it->strOutput, it->strReference);
+    }
+  }
+}
+
+void TestShaderToys(GXBOOL bShowList)
+{
+  TestFiles("Test\\shaders\\ShaderToy", bShowList);
+}
+
+void TestDebris(GXBOOL bShowList)
+{
+  TestFiles("Test\\shaders\\debris", bShowList);
 }
 
 // 测试开关
 //#define TEST_ARITHMETIC_PARSING
-#define TEST_ALL_SHADERTOYS
 #define TEST_STD_SAMPLE
 
 
@@ -342,10 +324,13 @@ int _tmain(int argc, _TCHAR* argv[])
 
   int a = 1, b = 2, c = 3, d = 4;
 
+  // 没啥用
   TestFlowIf();
+
+  // 定位基础目录
   clpathfile::LocalWorkingDirA("..");
 
-
+  // 测试数字解析
   DigitalParsing::Test();
 
   //
@@ -369,21 +354,43 @@ int _tmain(int argc, _TCHAR* argv[])
   MakeGraphicalExpression("Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", "Test\\shaders\\output.png");
 #endif // #ifdef ENABLE_GRAPH
 
+  // 最基础的测试， 包含了一些典型代码
 #ifdef TEST_STD_SAMPLE
   TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt", "Test\\shaders\\std_samples[reference].txt");
 #endif // #ifdef TEST_STD_SAMPLE
 
-#ifdef TEST_ALL_SHADERTOYS
-  TestShaderToys(TRUE);
-#endif // TEST_ALL_SHADERTOYS
-
+  while(1)
   {
-    Test::ItemList toys_list;
-    Test::Generate(toys_list, "Test\\shaders\\debris");
-    std::for_each(toys_list.begin(), toys_list.end(), [](Test::ITEM& item){
-      TestFromFile(item.strInput, item.strOutput, item.strReference);
-    });
+    printf("\n\n---------------------------------\n");
+    printf("1.测试ShaderToy代码\n");
+    printf("2.测试Debris代码\n");
+    printf("\n0. 所有测试\n");
+    printf("[ESC]. quit\n");
+    char c = clstd_cli::getch();
+    switch(c)
+    {
+    case '0':
+      TestShaderToys(FALSE);
+      TestDebris(FALSE);
+      break;
+
+    case '1':
+      TestShaderToys(TRUE);
+      break;
+
+    case '2':
+      TestDebris(TRUE);
+      break;
+
+    case VK_ESCAPE:
+      goto BREAK_LOOP;
+
+    default:
+      break;
+    }
   }
+
+BREAK_LOOP:
 
   //TestFromFile("Test\\shaders\\ShaderToy\\Flame.txt", "Test\\shaders\\Flame[output].txt");
   //TestFromFile("Test\\shaders\\ShaderToy\\Anatomy of an explosion.txt", "Test\\shaders\\Anatomy of an explosion[output].txt");
