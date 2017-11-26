@@ -46,6 +46,11 @@
     return FALSE;     \
   }
 
+#define INC_AND_END(_P, _END) \
+  if(++_P != _END) {  \
+    return FALSE;     \
+  }
+
 #define OUT_OF_SCOPE(s) (s == (clsize)-1)
 
 //static clsize s_nMultiByteOperatorLen = 0; // 最大长度
@@ -71,6 +76,37 @@
 
 namespace UVShader
 {
+  //////////////////////////////////////////////////////////////////////////
+#if 0
+  enum GrammarCategory // 类别
+  {
+    GrammarCategory_DontCare = 0, // 不太关心
+    GrammarCategory_Known,        // 已知类别, 必须在name中指定
+    GrammarCategory_Type,         // 变量类型
+    GrammarCategory_Variable,     // 变量
+    GrammarCategory_Child,
+    GrammarCategory_End,
+  };
+
+  struct GRAMMAR_ELEMENT
+  {
+    GrammarCategory cate;     // 语法类别
+    GXLPCSTR        name;     // 指定已知类别的名字
+    GXBOOL          optional; // 可选类型，不一定存在
+    GRAMMAR_ELEMENT*child;    // 子类别
+  };
+
+  GRAMMAR_ELEMENT stru_var[] = {
+    {GrammarCategory_Variable, NULL, 0, NULL},
+    {GrammarCategory_Known, ",", 0, NULL},
+    {GrammarCategory_End,},
+  };
+
+  GRAMMAR_ELEMENT stru_member[] = {
+    {GrammarCategory_Type, NULL, 0, NULL},
+    {GrammarCategory_End,},
+  };
+#endif
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -1087,7 +1123,7 @@ NOT_INC_P:
 
       // TODO: 检查这个是Signature
 
-      INC_BUT_NOT_END(p, pMemberEnd);
+      INC_AND_END(p, pMemberEnd);
 
       ASSERT(*p == ';' || *p == ','); // 如果发生这个断言错误，检查如何处理这个编译错误
       //if(*p != ";") {
@@ -1163,9 +1199,19 @@ NOT_INC_P:
       //aMembers.push_back(member);
     }
 
-    pStat->stru.pMembers = (STRUCT_MEMBER*)m_aMembersPack.size();
     pStat->stru.nNumOfMembers = aMembers.size();
-    m_aMembersPack.insert(m_aMembersPack.end(), aMembers.begin(), aMembers.end());
+    if(pStat->stru.nNumOfMembers)
+    {
+      pStat->stru.pMembers = (STRUCT_MEMBER*)m_aMembersPack.size();
+      m_aMembersPack.insert(m_aMembersPack.end(), aMembers.begin(), aMembers.end());
+    }
+    else
+    {
+      ASSERT(pStat->type == StatementType_Empty); // 没有成员时这个值没有初始化
+      pStat->stru.pMembers = NULL;
+      pStat->type = StatementType_Struct;
+    }
+
     return TRUE;
   }
 
