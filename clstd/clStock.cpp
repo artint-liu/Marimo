@@ -731,7 +731,7 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::SetKey(T_LPCSTR szKey, u32 val)
   {
-    _TStr str(val);
+    _TStr str((typename _TStr::U32)val);
     return SetKey(szKey, str);
   }
 
@@ -788,7 +788,7 @@ namespace clstd
   _SSP_TEMPL
     b32 _SSP_IMPL::Section::ComparedSetKey(T_LPCSTR szKey, u32 val)
   {
-    _TStr str(val);
+    _TStr str((typename _TStr::U32)val);
     return ComparedSetKey(szKey, str);
   }
 
