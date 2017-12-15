@@ -638,12 +638,12 @@ namespace clstd
         while(1)
         {
           pos0 = strSource.Find(szTranslateBegin, pos0);
-          if(pos0 == typename _TStr::npos) {
+          if(pos0 == _TStr::npos) {
             break;
           }
 
           pos1 = strSource.Find(szTranslateEnd, pos0 + nBegin);
-          if(pos1 == typename _TStr::npos) {
+          if(pos1 == _TStr::npos) {
             break;
           }
 
@@ -666,7 +666,7 @@ namespace clstd
         while(1)
         {
           pos0 = strSource.Find(szTranslateBegin, pos0);
-          if(pos0 == typename _TStr::npos) {
+          if(pos0 == _TStr::npos) {
             break;
           }
           else {
@@ -674,7 +674,7 @@ namespace clstd
           }
 
           pos1 = strSource.Find(szTranslateEnd, pos0 + nBegin);
-          if(pos1 == typename _TStr::npos) {
+          if(pos1 == _TStr::npos) {
             break;
           }
 

@@ -31,7 +31,7 @@ namespace clstd
     typename _TMap::iterator insert(typename _TString::LPCSTR str)
     {
       const _TString sstr(str);
-      STRINGSETDESC sDesc = {0, -1};
+      STRINGSETDESC sDesc = {0, (clsize)-1};
       auto r = _TMap::insert(clmake_pair(sstr, sDesc));
       //calcsize(sstr, r);
 

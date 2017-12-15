@@ -1,7 +1,7 @@
 ﻿#include "clstd.h"
 #include "clString.h"
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 # include <conio.h>
 # include <Windows.h>
 # include <Shlwapi.h>
@@ -23,7 +23,7 @@ namespace clstd
 //enum Output
 }
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 #define SET_TEXT_COLOR(_CR)     CONSOLE_SCREEN_BUFFER_INFO bi;  \
                                 HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE); \
                                 GetConsoleScreenBufferInfo(hStdout, &bi); \

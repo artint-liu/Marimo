@@ -27,9 +27,11 @@
 # error 这是一个意料之外的CPU构架
 #endif
 
+#if !(defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP) || defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_IOS_SIM) || defined(_CL_SYSTEM_ANDROID))
 // 操作系统平台
-#if defined(_WIN32)
-# define _CL_SYSTEM_WINDOWS
+# if defined(_WIN32)
+#   define _CL_SYSTEM_WINDOWS
+# endif
 #endif
 
 #if defined(_CL_SYSTEM_WINDOWS)   // 桌面windows
@@ -44,7 +46,7 @@
 //# define _WINDOWS
 //#endif
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 # include <windows.h>
 //# if !defined(_WIN32) && !defined(_WIN64)
 //# define _WIN32
@@ -204,7 +206,7 @@ namespace clstd
 
 
 #ifdef _DEBUG
-# if defined(_CL_SYSTEM_WINDOWS) || defined(_CONSOLE)
+# if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP) || defined(_CONSOLE)
 #   ifdef __clang__
 #     include <assert.h>
 #     define TRACEW        wprintf
@@ -326,16 +328,15 @@ extern "C" void _cl_traceW(const wch *fmt, ...);
 #define INVALID_HANDLE_VALUE ((HANDLE)(u32_ptr)-1)
 #endif // INVALID_HANDLE_VALUE
 
-#if defined(_CL_SYSTEM_WINDOWS)
-#  ifndef CALLBACK
-#    define CALLBACK __stdcall
-#  endif
-#else
-#define CALLBACK
+#ifndef CALLBACK
+# if defined(_CL_SYSTEM_WINDOWS)
+#   define CALLBACK __stdcall
+# else
+#   define CALLBACK
+# endif
 #endif
 
-#if defined(_CL_SYSTEM_WINDOWS) && !defined(POSIX_THREAD)
-//#include <windows.h>
+#if (defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)) && !defined(POSIX_THREAD)
 #define CL_CALLBACK  __stdcall
 #else
 # include <pthread.h>

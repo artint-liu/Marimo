@@ -18,18 +18,18 @@
 //
 
 #include <clstd.h>
-#include <clString.H>
-//#include <clFile.H>
-//#include <clBuffer.H>
-#include <thread/clThread.H>
-#include <thread/clSignal.H>
+#include <clString.h>
+//#include <clFile.h>
+//#include <clBuffer.h>
+//#include <thread/clThread.h>
+//#include <thread/clSignal.h>
 //#include <thread/clMessageThread.h>
-#include <clutility.h>
-#include <clColorSpace.h>
+#include <clUtility.h>
+//#include <clColorSpace.h>
 //#include <smart/SmartRepository.h>
 //#include <Socket/clSocket.h>
 
-#include "GrapX/GBaseTypes.H"
+#include "GrapX/GBaseTypes.h"
 #include <GrapX/GUnknown.h>
 #include <GrapX/gxError.H>
 

@@ -283,7 +283,9 @@ namespace clstd
           size_t out_len = buf_len;
           char*  out_ptr = buffer;
           size_t in_len = cchX;
-#if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
+#if defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
+          char* in_ptr = (char*)pStrX;
+#elif defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
           const char* in_ptr = (const char*)pStrX;
 #else
           char* in_ptr = (char*)pStrX;
@@ -303,7 +305,9 @@ namespace clstd
         else { // 转换模式
           uLength *= sizeof(_TOutChar); // iconv 长度参数都是基于字节的
           tran = uLength;
-#if defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
+#if defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
+          iconv(m_cd, (char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
+#elif defined(_LIBICONV_VERSION) && _LIBICONV_VERSION >= 0x0109
           iconv(m_cd, (const char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
 #else
           iconv(m_cd, (char**)&pStrX, &cchX, (char**)&pNativeStr, &uLength);
@@ -2015,7 +2019,11 @@ namespace clstd
   {
     class StringXF : public StringCommon::StringFormattedT<StringX> {};
     STATIC_ASSERT(sizeof(StringXF) == sizeof(StringX));
+#if defined(_CL_SYSTEM_IOS)
+    reinterpret_cast<StringXF*>(this)->template StringFormattedT<StringX>::VarFormat(pFmt, arglist);
+#else
     reinterpret_cast<StringXF*>(this)->StringCommon::StringFormattedT<StringX>::VarFormat(pFmt, arglist);
+#endif
     return CLSTR_LENGTH(m_pBuf);
   }
 

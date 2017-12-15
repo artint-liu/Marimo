@@ -2,7 +2,7 @@
 #include "clString.h"
 #include "clUtility.h"
 
-#if ! defined(_CL_SYSTEM_WINDOWS)
+#if ! (defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP))
 # include <sys/time.h>
 #endif
 
@@ -98,7 +98,7 @@ namespace clstd
     return chksum_crc32(pData, nLength);
   }
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
   TimeTrace::TimeTrace()
   {
     QueryPerformanceFrequency(&m_Frequency);
@@ -198,6 +198,8 @@ namespace clstd
   {
 #if defined(_CL_SYSTEM_WINDOWS) && (_WIN32_WINNT >= 0x0600)
     return GetTickCount();
+#elif defined(_CL_SYSTEM_UWP)
+    return (u32)(::GetTickCount64() & 0xffff);
 #elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_LINUX)
     u32 time_ms;
     struct timeval current;
@@ -211,8 +213,8 @@ namespace clstd
   
   u64 GetTime64()
   {
-#if defined(_CL_SYSTEM_WINDOWS) && (_WIN32_WINNT >= 0x0600)
-    return GetTickCount64();
+#if (defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)) && (_WIN32_WINNT >= 0x0600)
+    return ::GetTickCount64();
 #elif defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_LINUX)
     u64 time_ms;
     struct timeval current;

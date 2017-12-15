@@ -1,15 +1,6 @@
-﻿#include <string>
-
-#include "clstd.h"
+﻿#include "clstd.h"
 #include "clString.h"
-//#include "clmemory.h"
-//#include "clFile.h"
-//#include "clBuffer.h"
 #include "clUtility.h"
-
-//#ifdef _WINDOWS
-//#pragma warning(disable:4355)
-//#endif // #ifdef _WINDOWS
 
 namespace clstd
 {
@@ -126,9 +117,7 @@ namespace clstd
 #ifdef _CL_SYSTEM_WINDOWS
     m_hFile = ::CreateFileA(pszFileName, eDesiredAccess, eShareMode, NULL, 
       eCreationDistribution, eFlagAttr, NULL);
-    //if (m_hFile == INVALID_HANDLE_VALUE) {
-    //  _cl_WinVerifyFailure("Win32::CreateFileA()", __FILE__, __LINE__, GetLastError());
-    //}
+    // 这里不验证文件打开是否失败,有可能用这个来判断文件是否存在
     return (m_hFile != INVALID_HANDLE_VALUE);
 #else
     // TODO: 这个没测试过
@@ -447,7 +436,7 @@ FALSE_RET:
   void File::GetSystemTime(TIME* pTime)
   {
     // UTC时间
-#ifdef _CL_SYSTEM_WINDOWS
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
     SYSTEMTIME st;
     FILETIME ft;
 

@@ -54,7 +54,7 @@ typedef size_t              clsize;
 typedef size_t              clsize_t;
 #endif
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 # ifdef __clang__
 #   define _w64
 # endif // #if __clang__
@@ -145,13 +145,13 @@ typedef float             CLFLOAT;
 typedef void              CLVOID;
 typedef u16               CLUSHORT;
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 typedef __int64           CLLONGLONG;
 #else
 typedef int64_t           CLLONGLONG;
 #endif
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 typedef _w64 CLDWORD      CLDWORD_PTR;
 typedef _w64 CLINT        CLINT_PTR;
 typedef _w64 CLLONG       CLLONG_PTR;

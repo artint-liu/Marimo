@@ -1,11 +1,11 @@
 ﻿#include "clstd.h"
 
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 #include <Windows.h>
 #include <Shlwapi.h>
 #include <direct.h>
 #pragma comment(lib, "shlwapi.lib")
-#elif defined(_CL_SYSTEM_LINUX)
+#elif defined(_CL_SYSTEM_LINUX) || defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
 # include <sys/stat.h> 
 # include <unistd.h>
 #endif // #if defined(_CL_SYSTEM_WINDOWS)
@@ -825,7 +825,7 @@ namespace clpathfile
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifdef _WINDOWS
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
   b32 LocalWorkingDirA(CLLPCSTR szDir)
   {
     if(szDir) {
@@ -870,23 +870,43 @@ namespace clpathfile
 
   //////////////////////////////////////////////////////////////////////////
 
-  template<typename _TCh>
-  b32 IsPathExistT(const _TCh* szPath)
-  {
+  //template<typename _TCh>
+  //b32 IsPathExistT(const _TCh* szPath)
+  //{
 
-  }
+  //}
 
+# if defined(_CL_SYSTEM_WINDOWS)
   b32 IsPathExist(const ch* szPath)
   {
-    return PathFileExistsA(szPath);
+    return ::PathFileExistsA(szPath);
   }
 
   b32 IsPathExist(const wch* szPath)
   {
-    return PathFileExistsW(szPath);
+    return ::PathFileExistsW(szPath);
+  }
+# elif defined(_CL_SYSTEM_UWP)
+  b32 IsPathExist(const ch* szPath)
+  {
+    struct stat stat_info;
+
+    if(stat(szPath, &stat_info) != 0)
+      return FALSE;
+
+    return TRUE;
   }
 
-#elif defined(_CL_SYSTEM_LINUX)
+  b32 IsPathExist(const wch* szPath)
+  {
+    clStringA strpathA = szPath;
+    return IsPathExist(strpathA.CStr());
+  }
+# else
+#   error unexpected system
+# endif
+
+#elif defined(_CL_SYSTEM_LINUX) || defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)
 
   clStringA& GetCurrentDirectory(clStringA& strDir)
   {
@@ -933,6 +953,18 @@ namespace clpathfile
     return FALSE;
   }
 
+  b32 IsPathExist(const ch* szPath)
+  {
+    CLBREAK;
+    return FALSE;
+  }
+
+  b32 IsPathExist(const wch* szPath)
+  {
+    CLBREAK;
+    return FALSE;
+  }
+
 #endif // #ifdef _WINDOWS
 
   //////////////////////////////////////////////////////////////////////////
@@ -949,8 +981,10 @@ namespace clpathfile
       if (szDirName[i] == s_PathSlash || szDirName[i] == s_VicePathSlash || szDirName[i] == '\0') {
         szSubDir[i] = '\0';
         if( ! IsPathExist(szSubDir)) {
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
           int result = __mkdir(szSubDir);
+#elif defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
+          int result = __mkdir(szSubDir, S_IRWXU);
 #else
           int result = __mkdir(szSubDir, S_IREAD | S_IWRITE | S_IRGRP | S_IWGRP);
 #endif
@@ -971,7 +1005,7 @@ namespace clpathfile
 
   b32 CreateDirectoryAlways(const wch* szDirName)
   {
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
     return CreateDirectoryAlwaysT(szDirName, _wmkdir);
 #else
     clStringA str(szDirName);
@@ -981,7 +1015,7 @@ namespace clpathfile
 
   b32 CreateDirectoryAlways(const ch* szDirName)
   {
-#if defined(_CL_SYSTEM_WINDOWS)
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
     return CreateDirectoryAlwaysT(szDirName, _mkdir);
 #else
     return CreateDirectoryAlwaysT(szDirName, mkdir);
