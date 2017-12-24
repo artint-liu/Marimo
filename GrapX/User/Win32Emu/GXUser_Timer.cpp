@@ -36,6 +36,7 @@ GXUINT GXDLLAPI gxSetTimer(
   }
 #ifdef REFACTOR_TIMER
   lpStation->m_pShcedule->CreateTimer(hWnd, nIDEvent, uElapse, (clstd::TimerProc)lpTimerFunc);
+  return nIDEvent;
 #else
   GXTIMERCHAIN* pNewTimer = NULL;
   GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;
@@ -78,6 +79,7 @@ GXBOOL GXDLLAPI gxKillTimer(
   }
 #ifdef REFACTOR_TIMER
   lpStation->m_pShcedule->DestroyTimer(hWnd, uIDEvent);
+  return TRUE;
 #else
   GXTIMERCHAIN* pPrev = NULL;
   GXTIMERCHAIN* pTimer = lpStation->m_pTimerChain;

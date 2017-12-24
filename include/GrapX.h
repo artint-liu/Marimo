@@ -21,11 +21,11 @@
 #include <clString.h>
 //#include <clFile.h>
 //#include <clBuffer.h>
-//#include <thread/clThread.h>
-//#include <thread/clSignal.h>
+#include <thread/clThread.h>
+#include <thread/clSignal.h>
 //#include <thread/clMessageThread.h>
 #include <clUtility.h>
-//#include <clColorSpace.h>
+#include <clColorSpace.h>
 //#include <smart/SmartRepository.h>
 //#include <Socket/clSocket.h>
 
