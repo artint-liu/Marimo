@@ -63,6 +63,7 @@ namespace UVShader
     {
       typedef cllist<TOKEN>   List;
       typedef clvector<TOKEN> Array;
+      typedef CTokens::T_LPCSTR T_LPCSTR;
       enum Type
       {
         TokenType_Undefine      = 0,
@@ -439,7 +440,7 @@ namespace UVShader
     static MBO s_Operator3[];
     static PAIRMARK s_PairMark[4];
     static const int s_MaxPrecedence = 14;
-    static const int s_nPairMark = sizeof(s_PairMark) / sizeof(PAIRMARK);
+    //static const int s_nPairMark = sizeof(s_PairMark) / sizeof(PAIRMARK);
 
 
 
@@ -458,13 +459,15 @@ namespace UVShader
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
 
-    void    MarryBracket(PairStack* sStack, TOKEN& token, int& EOE);
+    GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
     GXBOOL  MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
     GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
     GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+
+    GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
     
   public:
     ArithmeticExpression();

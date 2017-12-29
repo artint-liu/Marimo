@@ -755,6 +755,14 @@ namespace UVShader
     return TRUE;
   }
 
+  GXBOOL ArithmeticExpression::CompareToken(int index, TOKEN::T_LPCSTR szName)
+  {
+    if(index < 0 || index >= (int)m_aTokens.size()) {
+      return FALSE;
+    }
+    return m_aTokens[index] == szName;
+  }
+
   GXBOOL ArithmeticExpression::ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 括号肯定是匹配的
@@ -778,14 +786,16 @@ namespace UVShader
     return bret;
   }
 
-  void ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token, int& EOE)
+  GXBOOL ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token)
   {
+    // 返回值表示是否更新表达式结尾(End of Expresion)
+
     if(token.type == TOKEN::TokenType_String) {
-      return;
+      return FALSE;
     }
 
     const int c_size = (int)m_aTokens.size();
-    for(int i = 0; i < s_nPairMark; ++i)
+    for(int i = 0; i < countof(s_PairMark); ++i)
     {
       PAIRMARK& c = s_PairMark[i];
       PairStack&    s = sStack[i];
@@ -818,10 +828,10 @@ namespace UVShader
         token.precedence = TOKEN::ID_BRACE;
       }
 
-      if(c.bNewEOE) {
-        EOE = c_size + 1;
-      }
+      return c.bNewEOE;
+        //EOE = c_size + 1;
     } // for
+    return FALSE;
   }
 
   //////////////////////////////////////////////////////////////////////////

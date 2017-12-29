@@ -325,7 +325,7 @@ namespace UVShader
 
     SetIteratorCallBack(IteratorProc, (u32_ptr)&token);
 
-    PairStack sStack[s_nPairMark];
+    PairStack sStack[countof(s_PairMark)];
 
 
     auto it = begin();
@@ -370,7 +370,12 @@ namespace UVShader
 
 
       // 符号配对处理
-      MarryBracket(sStack, token, EOE);
+      if(MarryBracket(sStack, token) && m_aTokens.back() != "=" &&
+        _CL_NOT_(CompareToken(token.scope - 1, "=")))
+      {
+        EOE = c_size + 1;
+      }
+      // FIXME: {}匹配会更新EOE, 但是a[]={};这种形式不希望更新
       
       if(OnToken(token)) {
         token.ClearMarker();
@@ -394,7 +399,7 @@ namespace UVShader
       }
     }
 
-    for(int i = 0; i < s_nPairMark; ++i)
+    for(int i = 0; i < countof(s_PairMark); ++i)
     {
       PairStack& s = sStack[i];
       if( ! s.empty()) {
