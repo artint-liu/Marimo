@@ -35,6 +35,7 @@
 #define OPP(_PRE) (ArithmeticExpression::TOKEN::FIRST_OPCODE_PRECEDENCE + _PRE)
 
 #define USE_CLSTD_TOKENS
+//#define ENABLE_NODE_INDEX
 
 namespace Marimo
 {
@@ -208,7 +209,9 @@ namespace UVShader
         FLAG_OPERAND_SHIFT      = 8,
         FLAG_OPERAND_UNDEFINED  = 0,
         FLAG_OPERAND_TYPEMASK   = 0x0000000F,
+#ifdef ENABLE_NODE_INDEX
         FLAG_OPERAND_IS_NODEIDX = 0x00000001,
+#endif
         FLAG_OPERAND_IS_NODE    = 0x00000002,
         FLAG_OPERAND_IS_TOKEN   = 0x00000004,
       };
@@ -248,7 +251,9 @@ namespace UVShader
       union UN {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
+#ifdef ENABLE_NODE_INDEX
         size_t        nNodeIndex;
+#endif
         const TOKEN*  pSym;
       };
 
@@ -280,6 +285,7 @@ namespace UVShader
         flags = (flags & (~(FLAG_OPERAND_TYPEMASK << shift))) | (flag << shift);
       }
 
+#ifdef ENABLE_NODE_INDEX
       inline GXBOOL OperandA_IsNodeIndex() const {
         const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK;
         return (flags & dwTypeMask) == FLAG_OPERAND_IS_NODEIDX;
@@ -290,6 +296,7 @@ namespace UVShader
         const GXDWORD dwNode = FLAG_OPERAND_IS_NODEIDX << FLAG_OPERAND_SHIFT;
         return (flags & dwTypeMask) == dwNode;
       }
+#endif
 
       inline void Clear()
       {
@@ -317,10 +324,12 @@ namespace UVShader
             case FLAG_OPERAND_IS_NODE:
               RecursiveNode(pParser, pNode->Operand[i].pNode, func);
               break;
+#ifdef ENABLE_NODE_INDEX
             case FLAG_OPERAND_IS_NODEIDX:
               RecursiveNode(pParser, &pParser->
                 m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], func);
               break;
+#endif
             }
             i++;
           }while(i < 2);
@@ -354,8 +363,19 @@ namespace UVShader
       }
 
     };
+#ifdef ENABLE_NODE_INDEX
     typedef clvector<SYNTAXNODE>  SyntaxNodeArray;
+#endif
     typedef clstack<int>          PairStack;
+    
+    struct SYNTAXNODEPOOL
+    {
+      SYNTAXNODE* pBegin;
+      SYNTAXNODE* pEnd;
+    };
+
+    typedef cllist<SYNTAXNODEPOOL> SyntaxNodePoolList;
+
 
 
     struct VALUE
@@ -447,8 +467,13 @@ namespace UVShader
     ErrorMessage*       m_pMsg;
     TOKEN::Array        m_aTokens;
     //int                 m_nMaxPrecedence;   // 优先级最大值
+#ifdef ENABLE_NODE_INDEX
     SyntaxNodeArray     m_aSyntaxNodePack;  // 表达式语法节点
-
+#else
+    // 语法节点的内存池
+    SyntaxNodePoolList  m_NodePoolList;
+    SYNTAXNODE*         m_pNewNode;           // 记录当前分配节点的指针
+#endif
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     clStringArrayA      m_aDbgExpressionOperStack;
 
@@ -468,6 +493,9 @@ namespace UVShader
     GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
+
+    SYNTAXNODE* AllocSyntaxNode();
+    void ClearSyntaxNodePool();
     
   public:
     ArithmeticExpression();

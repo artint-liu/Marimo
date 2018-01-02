@@ -70,6 +70,10 @@ namespace UVShader
     : m_pMsg(NULL)
     //, m_nMaxPrecedence(0)
     , m_nDbgNumOfExpressionParse(0)
+#ifdef ENABLE_NODE_INDEX
+#else
+    , m_pNewNode(NULL)
+#endif
   {
 #ifdef _DEBUG
     // 检查名字与其设定长度是一致的
@@ -118,6 +122,10 @@ namespace UVShader
 
   ArithmeticExpression::~ArithmeticExpression()
   {
+#ifdef ENABLE_NODE_INDEX
+#else
+    ClearSyntaxNodePool();
+#endif
   }
 
   //inline b32 IS_NUM(char c)
@@ -392,8 +400,10 @@ namespace UVShader
       return NULL;
     case SYNTAXNODE::FLAG_OPERAND_IS_NODE:
       return pDesc->un.pNode;
+#ifdef ENABLE_NODE_INDEX
     case SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
       return &m_aSyntaxNodePack[pDesc->un.nNodeIndex];
+#endif
     }
     CLBREAK; // 不可能到这里
     return NULL;
@@ -407,8 +417,10 @@ namespace UVShader
       return SYNTAXNODE::MODE_Undefined;
     case SYNTAXNODE::FLAG_OPERAND_IS_NODE:
       return pDesc->un.pNode->mode;
+#ifdef ENABLE_NODE_INDEX
     case SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
       return m_aSyntaxNodePack[pDesc->un.nNodeIndex].mode;
+#endif
     case SYNTAXNODE::FLAG_OPERAND_UNDEFINED:
       return SYNTAXNODE::MODE_Undefined;
     default:
@@ -437,19 +449,27 @@ namespace UVShader
         sNode.SetOperandType(i, pOperand[i]->flag);
         sNode.Operand[i].ptr = pOperand[i]->un.ptr;
       }
+#ifdef ENABLE_NODE_INDEX
       else if(pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
         sNode.SetOperandType(i, SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX);
         ASSERT(pOperand[i]->un.nNodeIndex < m_aSyntaxNodePack.size()); // 这时候还是索引，所以肯定小于序列的长度
         sNode.Operand[i].nNodeIndex = pOperand[i]->un.nNodeIndex;
       }
+#endif
       else {
         CLBREAK; // 空的或者不存在的 pOperand[i]->flag 类型        
       }
     }
 
+#ifdef ENABLE_NODE_INDEX
     pDest->flag = SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX;
     pDest->un.nNodeIndex = m_aSyntaxNodePack.size();
     m_aSyntaxNodePack.push_back(sNode);
+#else
+    pDest->flag = SYNTAXNODE::FLAG_OPERAND_IS_NODE;
+    pDest->un.pNode = AllocSyntaxNode();
+    *pDest->un.pNode = sNode;
+#endif
 
     return TRUE;
   }
@@ -762,7 +782,32 @@ namespace UVShader
     }
     return m_aTokens[index] == szName;
   }
+#ifdef ENABLE_NODE_INDEX
+#else
+  ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::AllocSyntaxNode()
+  {
+    const size_t c_ElementCount = 128;
+    if(m_pNewNode == NULL || (++m_pNewNode) == m_NodePoolList.back().pEnd) {
+      SYNTAXNODEPOOL pool = {NULL, NULL};
+      m_pNewNode = new SYNTAXNODE[c_ElementCount];
+      pool.pBegin = m_pNewNode;
+      pool.pEnd = pool.pBegin + c_ElementCount;
+      m_NodePoolList.push_back(pool);
+    }
+    return m_pNewNode;
+  }
 
+  void ArithmeticExpression::ClearSyntaxNodePool()
+  {
+    std::for_each(m_NodePoolList.begin(), m_NodePoolList.end(),
+      [](SYNTAXNODEPOOL& pool)
+    {
+      delete[] pool.pBegin;
+    });
+    m_NodePoolList.clear();
+    m_pNewNode = NULL;
+  }
+#endif
   GXBOOL ArithmeticExpression::ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 括号肯定是匹配的

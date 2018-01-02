@@ -108,6 +108,50 @@ namespace UVShader
   };
 #endif
 
+  const CTokens::T_LPCSTR c_StorageClass =
+    "extern\0nointerpolation\0precise\0shared\0groupshared\0static\0uniform\0volatile\0";
+
+  const CTokens::T_LPCSTR c_TypeModifier = "const\0row_major\0column_major\0";
+
+  enum StreamCategory
+  {
+    StreamCategory_DontCare = 0,      // 不关心
+    StreamCategory_Known,             // 已知的Token, 在name中指定
+    StreamCategory_KnownList,         // 已知TokenList, 在name中指定, 用"\0"分割
+    StreamCategory_OneToken,          // 任意一个Token
+    StreamCategory_SomeTokens,        // 任意多个Token
+    StreamCategory_OpenBracket,       // 开括号"(", "[", "{", 具体在name中指定
+    StreamCategory_CloseBracket,      // 闭括号")", "]", "}"
+    StreamCategory_End,               // 结束符号
+  };
+
+  struct EXPSTREAM
+  {
+    StreamCategory  cate;
+    CTokens::T_LPCSTR name;
+  };
+ 
+  // [Storage_Class] [Type_Modifier] Type Name[Index] 
+  const EXPSTREAM s_Steam_LeftDefVariable1[] = {
+    {StreamCategory_KnownList, c_StorageClass},
+    {StreamCategory_KnownList, c_TypeModifier},
+    {StreamCategory_OneToken, NULL},
+    {StreamCategory_OneToken, NULL},
+    {StreamCategory_OpenBracket, "["},
+    {StreamCategory_SomeTokens, NULL},
+    {StreamCategory_CloseBracket, "]"},
+    {StreamCategory_End, NULL},
+  };
+
+  // [Storage_Class] [Type_Modifier] Type Name
+  const EXPSTREAM s_Steam_LeftDefVariable2[] = {
+    {StreamCategory_KnownList, c_StorageClass},
+    {StreamCategory_KnownList, c_TypeModifier},
+    {StreamCategory_OneToken, NULL},
+    {StreamCategory_OneToken, NULL},
+    {StreamCategory_End, NULL},
+  };
+
   //////////////////////////////////////////////////////////////////////////
 
   DefaultInclude s_DefaultInclude;
@@ -150,9 +194,13 @@ namespace UVShader
     //
     // 所有pack类型，都存一个空值，避免记录0索引与NULL指针混淆的问题
     //
+#ifdef ENABLE_NODE_INDEX
     SYNTAXNODE node = {NULL};
     m_aSyntaxNodePack.clear();
     m_aSyntaxNodePack.push_back(node);
+#else
+    ClearSyntaxNodePool();
+#endif
 
     STRUCT_MEMBER member = {NULL};
     m_aMembersPack.clear();
@@ -204,9 +252,6 @@ namespace UVShader
   u32 CALLBACK CodeParser::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
   {
     GXBOOL bENotation = FALSE;
-    if(TEST_FLAG(m_aCharSem[it.marker[0]], M_CALLBACK)) {
-      return MultiByteOperatorProc(it, remain, lParam);
-    }
 
     if(it.marker[0] == '#' && TEST_FLAG_NOT(((CodeParser*)it.pContainer)->m_dwState, AttachFlag_Preprocess))
     {
@@ -291,6 +336,11 @@ namespace UVShader
     {
       ArithmeticExpression::IteratorProc(it, remain, lParam);
     }
+
+    if(TEST_FLAG(m_aCharSem[it.marker[0]], M_CALLBACK)) {
+      return MultiByteOperatorProc(it, remain, lParam);
+    }
+
     ASSERT((int)remain >= 0);
     return 0;
   }
@@ -808,7 +858,11 @@ namespace UVShader
     // 如 float a, b, c; 改为
     // float a; float b; float c;
     //
+#ifdef ENABLE_NODE_INDEX
     SYNTAXNODE* pNode = &m_aSyntaxNodePack[stat.defn.sRoot.un.nNodeIndex];
+#else
+    SYNTAXNODE* pNode = stat.defn.sRoot.un.pNode;
+#endif
     cllist<SYNTAXNODE*> sDefinitionList;
     SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList](SYNTAXNODE* pNode) -> GXBOOL {
       if( ! (pNode->mode == CodeParser::SYNTAXNODE::MODE_Definition || 
@@ -833,13 +887,19 @@ namespace UVShader
       // (nodeN) [var define node 1] [var define node 2]
 
       auto& front = sDefinitionList.front();
+#ifdef ENABLE_NODE_INDEX
       auto* pNodeFrontPtr = &m_aSyntaxNodePack.front();
+#endif
 
       ASSERT(front->mode == SYNTAXNODE::MODE_Definition || front->mode == SYNTAXNODE::MODE_DefinitionConst);
 
       front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
       front->SetOperandType(1, sDefinitionList.back()->GetOperandType(0));
+#ifdef ENABLE_NODE_INDEX
       stat.defn.sRoot.un.nNodeIndex = front - &m_aSyntaxNodePack.front();
+#else
+      stat.defn.sRoot.un.pNode = front;
+#endif
       m_aStatements.push_back(stat);
 
       auto it = sDefinitionList.end();
@@ -855,7 +915,11 @@ namespace UVShader
         SyntaxNode.SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN); // front->GetOperandType(0)
 
         // 加入列表
+#ifdef ENABLE_NODE_INDEX
         stat.defn.sRoot.un.nNodeIndex = *it - pNodeFrontPtr;
+#else
+        stat.defn.sRoot.un.pNode = *it;
+#endif
         m_aStatements.push_back(stat);
       }
     }//*/
@@ -1078,6 +1142,7 @@ NOT_INC_P:
 
   void CodeParser::RelocaleSyntaxPtr(SYNTAXNODE* pNode)
   {
+#ifdef ENABLE_NODE_INDEX
     if(pNode->OperandA_IsNodeIndex() && pNode->Operand[0].pNode) {
       IndexToPtr(pNode->Operand[0].pNode, m_aSyntaxNodePack);
       RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[0].pNode);
@@ -1089,6 +1154,7 @@ NOT_INC_P:
       RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[1].pNode);
       pNode->SetOperandType(1, SYNTAXNODE::FLAG_OPERAND_IS_NODE);
     }
+#endif
   }
 
   //GXBOOL CodeParser::IsType(GXLPCSTR szType)
@@ -1314,9 +1380,11 @@ NOT_INC_P:
         else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
           DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
         }
+#ifdef ENABLE_NODE_INDEX
         else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
           DbgDumpSyntaxTree(pArray, &m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
         }
+#endif
         else {
           CLBREAK;
         }
@@ -2172,16 +2240,20 @@ NOT_INC_P:
         break;
 
       case StatementType_Expression:
+#ifdef ENABLE_NODE_INDEX
         IndexToPtr(it->expr.sRoot.un.pNode, m_aSyntaxNodePack);
         RelocaleSyntaxPtr(it->expr.sRoot.un.pNode);
+#endif
         break;
 
       case StatementType_Definition:
+#ifdef ENABLE_NODE_INDEX
         if(it->defn.sRoot.flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX)
         {
           IndexToPtr(it->defn.sRoot.un.pNode, m_aSyntaxNodePack);
           RelocaleSyntaxPtr(it->defn.sRoot.un.pNode);
         }
+#endif
         break;
       }
     }
@@ -2547,6 +2619,7 @@ NOT_INC_P:
       return ctx.iter_next.marker;
     }
 
+#ifdef ENABLE_NODE_INDEX
     if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
       // TODO: 封装
       pParser->IndexToPtr(sDesc.un.pNode, pParser->m_aSyntaxNodePack);
@@ -2554,6 +2627,7 @@ NOT_INC_P:
       sDesc.flag = SYNTAXNODE::FLAG_OPERAND_IS_NODE;
       // --封装
     }
+#endif
 
     VALUE v;
     if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {

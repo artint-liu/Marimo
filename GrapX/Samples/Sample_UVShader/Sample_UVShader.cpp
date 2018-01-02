@@ -309,7 +309,7 @@ void TestDebris(GXBOOL bShowList)
 }
 
 // ²âÊÔ¿ª¹Ø
-//#define TEST_ARITHMETIC_PARSING
+#define TEST_ARITHMETIC_PARSING
 #define TEST_STD_SAMPLE
 
 
