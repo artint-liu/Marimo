@@ -70,11 +70,17 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
   {
     if(pNode->Operand[i].ptr) {
       //if(pExpp->TryGetNodeType(&pNode->Operand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-      if(pNode->GetOperandType(i) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-        str[i].Append(pNode->Operand[i].pSym->ToString());
+      SYNTAXNODE::FLAGS fg = pNode->GetOperandType(i);
+      if(fg == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN)
+      {
+        str[i].Append(pNode->Operand[i].pTokn->ToString());
+      }
+      else if(fg == SYNTAXNODE::FLAG_OPERAND_IS_NODE)
+      {
+        DumpBlock(pExpp, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, next_depth, &str[i]);
       }
       else {
-        DumpBlock(pExpp, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, next_depth, &str[i]);
+        CLBREAK;
       }
     }
     else {
@@ -319,25 +325,6 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
               clStringA str;
               DumpBlock(&expp, definition.sRoot.un.pNode, 0, 0, &str);
               file.WritefA("%s", str);
-              /*
-              file.WritefA("%s %s", definition.szType, definition.szName);
-              if(definition.sRoot.ptr) {
-              clStringA str;
-              auto type = expp.TryGetNodeType(&definition.sRoot);
-              if(type == UVShader::CodeParser::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-              str = definition.sRoot.pSym->ToString();
-              file.WritefA("=%s", str);
-              }
-              else if(type == UVShader::CodeParser::SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
-              if(definition.sRoot.pNode->mode != UVShader::CodeParser::SYNTAXNODE::MODE_Undefined) {
-              DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
-              file.WritefA("=%s", str);
-              }
-              }
-              else {
-              CLBREAK;
-              }
-              }*/
               file.WritefA(";\n");
             }
             break;
@@ -376,6 +363,10 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
                 //DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, 1, &str);
                 DumpBlock(&expp, func.pExpression->expr.sRoot.un.pNode, 0, 0, &str);
                 file.WritefA(str); // 缩进两个空格
+              }
+              else
+              {
+                file.WritefA("{\n}\n");
               }
               file.WritefA("\n");
               //file.WritefA("}\n\n");
@@ -501,7 +492,8 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 int main(int argc, char* argv[])
 {
   clpathfile::LocalWorkingDirW(_CLTEXT(".."));
-  TestFromFile("Test\\FrameShader\\SimpleShader_ps.hlsl", "Test\\FrameShader\\SimpleShader_ps.out.hlsl", NULL);
+  //TestFromFile("Test\\FrameShader\\SimpleShader_ps.hlsl", "Test\\FrameShader\\SimpleShader_ps.out.hlsl", NULL);
+  TestFromFile("Test\\FrameShader\\AtmoScatt_FrameShader.hlsl", "Test\\FrameShader\\AtmoScatt_FrameShader.out.hlsl", NULL);
 	return 0;
 }
 

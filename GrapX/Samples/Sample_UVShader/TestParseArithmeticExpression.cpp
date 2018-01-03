@@ -26,7 +26,7 @@ public:
       TRACE("±‡“Î¥ÌŒÛ\n");
       m_aDbgExpressionOperStack.clear();
     }
-    else if(stat.expr.sRoot.flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE && stat.expr.sRoot.un.pNode) {
+    else if(stat.expr.sRoot.flag == UVShader::ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODE && stat.expr.sRoot.un.pNode) {
       //IndexToPtr(stat.expr.sRoot.un.pNode, m_aSyntaxNodePack);
       //RelocaleSyntaxPtr(stat.expr.sRoot.un.pNode);
       TRACE("---\n");
@@ -166,7 +166,7 @@ namespace DigitalParsing
   using namespace UVShader;
   typedef ArithmeticExpression::VALUE VALUE;
   typedef ArithmeticExpression::VALUE::State State;
-  typedef ArithmeticExpression::TOKEN TOKEN;
+  //typedef ArithmeticExpression::TOKEN TOKEN;
   struct SAMPLE
   {
     GXLPCSTR  str;
@@ -224,7 +224,7 @@ namespace DigitalParsing
   {
     for(int i = 0; aSampleDigitals[i].str != NULL; i++)
     {
-      TOKEN token;
+      ArithmeticExpression::TOKEN token;
       VALUE value;
       token.marker = aSampleDigitals[i].str;
       token.length = GXSTRLEN(aSampleDigitals[i].str);

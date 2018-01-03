@@ -373,7 +373,7 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "(a)=a+b;", 0},
   {0, _I_, "(a=a+b);", 0},
   {0, _I_, "a=a+b;b=a-c*d;c=a*d;", 20},
-  {0, "(a=a+b);(b=a-c*d);c=a*d;", 24},
+  //{0, _I_, "(a=a+b);(b=a-c*d);c=a*d;", 24},
 
   // ∂®“Â
   {0, _I_, "float2 texcoord : TEXCOORD0, pos : POSITION0", 8, NULL},

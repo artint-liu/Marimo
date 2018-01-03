@@ -280,15 +280,15 @@ namespace UVShader
 
         switch(pNode->mode)
         {
-        case ArithmeticExpression::SYNTAXNODE::MODE_Opcode:
-          s = v.set(*pNode->Operand[i].pSym);
+        case SYNTAXNODE::MODE_Opcode:
+          s = v.set(*pNode->Operand[i].pTokn);
 
-        case ArithmeticExpression::SYNTAXNODE::MODE_FunctionCall:
+        case SYNTAXNODE::MODE_FunctionCall:
           if(i == 0) {
-            pToken = pNode->Operand[i].pSym;
+            pToken = pNode->Operand[i].pTokn;
           }
           else {
-            s = v.set(*pNode->Operand[i].pSym);
+            s = v.set(*pNode->Operand[i].pTokn);
           }
           break;
 

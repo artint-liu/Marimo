@@ -865,8 +865,10 @@ namespace UVShader
 #endif
     cllist<SYNTAXNODE*> sDefinitionList;
     SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList](SYNTAXNODE* pNode) -> GXBOOL {
-      if( ! (pNode->mode == CodeParser::SYNTAXNODE::MODE_Definition || 
-        pNode->mode == CodeParser::SYNTAXNODE::MODE_DefinitionConst || (pNode->pOpcode && (*(pNode->pOpcode)) == ',')))
+      if(_CL_NOT_(
+        pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition || 
+        pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_DefinitionConst ||
+        (pNode->pOpcode && (*(pNode->pOpcode)) == ',')) )
       {
         return FALSE;
       }
@@ -1340,7 +1342,8 @@ NOT_INC_P:
     m_nDbgNumOfExpressionParse = 0;
     m_aDbgExpressionOperStack.clear();
 
-    if(pScope->begin == pScope->end) {
+    ASSERT(pScope->begin < pScope->end); // 似乎不应该有相等的情况, "{}" 区间这种是相差一个的
+    if(pScope->begin + 1 == pScope->end) {
       return TRUE;
     }
 
@@ -1371,11 +1374,11 @@ NOT_INC_P:
     clStringA str[2];
     for(int i = 0; i < 2; i++)
     {
-      if(pNode->Operand[i].pSym) {
+      if(pNode->Operand[i].pTokn) {
         //const auto flag = TryGetNodeType(&pNode->Operand[i]);
         const auto flag = pNode->GetOperandType(i);
         if(flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-          str[i] = pNode->Operand[i].pSym->ToString();
+          str[i] = pNode->Operand[i].pTokn->ToString();
         }
         else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
           DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
@@ -2010,7 +2013,7 @@ NOT_INC_P:
     }
     else {
       T = m_aTokens[index];
-      ASSERT(*T.un.pSym == ';');
+      ASSERT(*T.un.pTokn == ';');
       bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, &T);
     }
 
@@ -2572,7 +2575,7 @@ NOT_INC_P:
       }
     }
     else {
-      sOut.pToken = pDesc->un.pSym;
+      sOut.pToken = pDesc->un.pTokn;
       return TRUE;
     }
 
@@ -2587,16 +2590,16 @@ NOT_INC_P:
     }
     else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
-      if(*(pNode->Operand[0].pSym) == PREPROCESS_defined)
+      if(*(pNode->Operand[0].pTokn) == PREPROCESS_defined)
       {
         ASSERT(pNode->GetOperandType(0) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
 
         if(pNode->GetOperandType(1) != SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-          OutputErrorW(*pNode->Operand[0].pSym, E2004_应输入_defined_id);
+          OutputErrorW(*pNode->Operand[0].pTokn, E2004_应输入_defined_id);
           return FALSE;
         }
 
-        auto it = m_pContext->Macros.find(pNode->Operand[1].pSym->ToString());
+        auto it = m_pContext->Macros.find(pNode->Operand[1].pTokn->ToString());
 
         sOut.v.rank = ArithmeticExpression::VALUE::Rank_Signed64;
         sOut.v.nValue64 = (it != m_pContext->Macros.end());
@@ -2630,9 +2633,9 @@ NOT_INC_P:
 #endif
 
     VALUE v;
-    if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+    if(sDesc.flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
       // TODO: 测试 sDesc.un.pSym 能解析为一个数字，如果定义不为数字需要报错
-      v = *sDesc.un.pSym;
+      v = *sDesc.un.pTokn;
     }
     else
     {      
@@ -2787,14 +2790,14 @@ NOT_INC_P:
       str.Append(m_pMsg->GetFilenameW());
       str.Append("\"");
 
-      token.type = ArithmeticExpression::TOKEN::TokenType_String;
+      token.type = TOKEN::TokenType_String;
       token.Set(m_pContext->Strings, str);
       return TRUE;
     }
     else if(token == MACRO_LINE)
     {
       str.AppendInteger32(m_pMsg->LineFromPtr(line_num.marker));
-      token.type = ArithmeticExpression::TOKEN::TokenType_Numeric;
+      token.type = TOKEN::TokenType_Numeric;
       token.Set(m_pContext->Strings, str);
       return TRUE;
     }

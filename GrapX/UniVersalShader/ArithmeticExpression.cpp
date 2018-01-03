@@ -572,17 +572,17 @@ namespace UVShader
       B = m_aTokens[scope.begin + 1];
       GXBOOL bret = TRUE;
 
-      ASSERT(*B.un.pSym != ';'); // 已经在外部避免了表达式内出现分号
+      ASSERT(*B.un.pTokn != ';'); // 已经在外部避免了表达式内出现分号
 
-      if(A.un.pSym->precedence > 0)
+      if(A.un.pTokn->precedence > 0)
       {
-        bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, A.un.pSym, NULL, &B);
-        DbgDumpScope(A.un.pSym->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
+        bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, A.un.pTokn, NULL, &B);
+        DbgDumpScope(A.un.pTokn->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
       }
-      else if(B.un.pSym->precedence > 0)
+      else if(B.un.pTokn->precedence > 0)
       {
-        bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, B.un.pSym, &A, NULL);
-        DbgDumpScope(B.un.pSym->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
+        bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, B.un.pTokn, &A, NULL);
+        DbgDumpScope(B.un.pTokn->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
       }
       else {
         // 变量声明
@@ -619,7 +619,7 @@ namespace UVShader
       bret = bret && MakeSyntaxNode(pDesc, mode, &A, &B);
       return bret;
     }
-    else if((front == '(' || front == '[') && front.scope == scope.end - 1)  // 括号内表达式
+    else if((front == '(' || front == '[' || front == '{') && front.scope == scope.end - 1)  // 括号内表达式
     {
       // 括号肯定是匹配的
       ASSERT(m_aTokens[scope.end - 1].scope == scope.begin);
@@ -732,12 +732,12 @@ namespace UVShader
     CONTEXT c;
     TOKEN* pBack = &m_aTokens[scope.end - 1];
     A = m_aTokens[scope.begin];
-    ASSERT(A.un.pSym->precedence == 0); // 第一个必须不是运算符号
+    ASSERT(A.un.pTokn->precedence == 0); // 第一个必须不是运算符号
 
 
     while(1) {
       if(pBack->scope == RTSCOPE::npos) {
-        ERROR_MSG__MISSING_SEMICOLON(*A.un.pSym);
+        ERROR_MSG__MISSING_SEMICOLON(*A.un.pTokn);
         return FALSE;
       }
       c.mode = *pBack == ')' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
@@ -782,11 +782,17 @@ namespace UVShader
     }
     return m_aTokens[index] == szName;
   }
+
 #ifdef ENABLE_NODE_INDEX
 #else
   ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::AllocSyntaxNode()
   {
     const size_t c_ElementCount = 128;
+    
+    ASSERT(m_pNewNode == NULL || (
+      m_pNewNode >= m_NodePoolList.back().pBegin &&
+      m_pNewNode < m_NodePoolList.back().pEnd));
+
     if(m_pNewNode == NULL || (++m_pNewNode) == m_NodePoolList.back().pEnd) {
       SYNTAXNODEPOOL pool = {NULL, NULL};
       m_pNewNode = new SYNTAXNODE[c_ElementCount];

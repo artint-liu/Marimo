@@ -40,9 +40,9 @@ GXLPCSTR Get(UVShader::CodeParser::StorageClass e)
 
 const int nTabSize = 2;
 //////////////////////////////////////////////////////////////////////////
-int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNODE* pNode, int precedence, int depth, clStringA* pStr)
+int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::ArithmeticExpression::SYNTAXNODE* pNode, int precedence, int depth, clStringA* pStr)
 {
-  typedef UVShader::CodeParser::SYNTAXNODE SYNTAXNODE;
+  typedef UVShader::ArithmeticExpression::SYNTAXNODE SYNTAXNODE;
 
   clStringA str[2];
   //int chain = 0;
@@ -70,7 +70,7 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
     if(pNode->Operand[i].ptr) {
       //if(pExpp->TryGetNodeType(&pNode->Operand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
       if(pNode->GetOperandType(i) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-        str[i].Append(pNode->Operand[i].pSym->ToString());
+        str[i].Append(pNode->Operand[i].pTokn->ToString());
       }
       else {
         DumpBlock(pExpp, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, next_depth, &str[i]);
@@ -327,7 +327,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
     if(file.MapToBuffer(&pBuffer))
     {
       UVShader::CodeParser expp(NULL, NULL);
-      const UVShader::CodeParser::TOKEN::Array* pTokens;
+      const UVShader::ArithmeticExpression::TOKEN::Array* pTokens;
       clStringW strFullname = szFilename;
       clpathfile::CombineAbsPath(strFullname);
       expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize(), 0, strFullname);

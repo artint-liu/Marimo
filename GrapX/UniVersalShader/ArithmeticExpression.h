@@ -59,22 +59,25 @@ namespace UVShader
   public:
     typedef cllist<iterator> IterList;
 
+    //typedef clvector<TOKEN> TokenArray;
+    //typedef cllist<TOKEN> TokenList;
+
     // 运行时记录符号和操作符等属性
-    struct TOKEN : iterator
+    struct TOKEN : CTokens::iterator
     {
       typedef cllist<TOKEN>   List;
       typedef clvector<TOKEN> Array;
       typedef CTokens::T_LPCSTR T_LPCSTR;
       enum Type
       {
-        TokenType_Undefine      = 0,
-        TokenType_String        = 1,
-        TokenType_FormalParams  = 2,  // 宏的形参
-        TokenType_FirstNumeric  = 5,
-        TokenType_Numeric       = TokenType_FirstNumeric,
+        TokenType_Undefine = 0,
+        TokenType_String = 1,
+        TokenType_FormalParams = 2,  // 宏的形参
+        TokenType_FirstNumeric = 5,
+        TokenType_Numeric = TokenType_FirstNumeric,
         TokenType_LastNumeric,
-        TokenType_Name          = 20,
-        TokenType_Operator      = 30,
+        TokenType_Name = 20,
+        TokenType_Operator = 30,
       };
 
       const static int scope_bits = 22;
@@ -86,17 +89,17 @@ namespace UVShader
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
       //iterator  marker;
       int       scope;                          // 括号匹配索引
-      int       semi_scope   : scope_bits;      // 分号作用域
-      int       precedence   : precedence_bits; // 符号优先级
-      u32       unary        : 1;               // 是否为一元操作符
-      u32       unary_mask   : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
+      int       semi_scope : scope_bits;      // 分号作用域
+      int       precedence : precedence_bits; // 符号优先级
+      u32       unary : 1;               // 是否为一元操作符
+      u32       unary_mask : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
 
-      Type      type         : 8;               // 类型
+      Type      type : 8;               // 类型
       u32       bInStringSet : 1;               // 在String字典而不再流中
-      // [precedence]
-      // 1~14 表示运算符的优先级
-      // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
-      // array[open].scope = closed && array[closed].scope = open
+                                                // [precedence]
+                                                // 1~14 表示运算符的优先级
+                                                // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
+                                                // array[open].scope = closed && array[closed].scope = open
 
       void ClearMarker();
       void Set(const iterator& _iter);
@@ -105,7 +108,7 @@ namespace UVShader
       template<class _Ty>
       void SetArithOperatorInfo(const _Ty& t) // 设置数学符号信息
       {
-        unary      = t.unary;
+        unary = t.unary;
         unary_mask = t.unary_mask;
         precedence = t.precedence;
       }
@@ -131,7 +134,7 @@ namespace UVShader
         for(_Iter it = begin; it != end; ++it)
         {
           tokens.push_back(*it);
-          
+
           auto& back = tokens.back();
 
           fn(addi, back); // 这个可能会改变addi，所以必须在这里做
@@ -172,10 +175,7 @@ namespace UVShader
 
         return TRUE;
       }
-
     }; // struct TOKEN
-    //typedef clvector<TOKEN> TokenArray;
-    //typedef cllist<TOKEN> TokenList;
 
 #ifdef USE_CLSTD_TOKENS
     enum {
@@ -189,7 +189,7 @@ namespace UVShader
       char* szOperator;
       int precedence; // 优先级，越大越高
 
-      u32 unary      : 1; // 参考 TOKEN 机构体说明
+      u32 unary : 1; // 参考 TOKEN 机构体说明
       u32 unary_mask : 2;
     };
 
@@ -197,23 +197,22 @@ namespace UVShader
     {
       GXCHAR    chOpen;         // 开区间
       GXCHAR    chClosed;       // 闭区间
-      GXUINT    bNewEOE   : 1;  // 更新End Of Expression的位置
-      GXUINT    bCloseAE  : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
+      GXUINT    bNewEOE : 1;  // 更新End Of Expression的位置
+      GXUINT    bCloseAE : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
     };
-
 
     struct SYNTAXNODE
     {
       enum FLAGS
       {
-        FLAG_OPERAND_SHIFT      = 8,
-        FLAG_OPERAND_UNDEFINED  = 0,
-        FLAG_OPERAND_TYPEMASK   = 0x0000000F,
+        FLAG_OPERAND_SHIFT = 8,
+        FLAG_OPERAND_UNDEFINED = 0,
+        FLAG_OPERAND_TYPEMASK = 0x0000000F,
 #ifdef ENABLE_NODE_INDEX
-        FLAG_OPERAND_IS_NODEIDX = 0x00000001,
+        FLAG_OPERAND_IS_NODEIDX = 0x00000003,
 #endif
-        FLAG_OPERAND_IS_NODE    = 0x00000002,
-        FLAG_OPERAND_IS_TOKEN   = 0x00000004,
+        FLAG_OPERAND_IS_NODE = 0x00000001,
+        FLAG_OPERAND_IS_TOKEN = 0x00000002,
       };
 
       enum MODE
@@ -245,16 +244,16 @@ namespace UVShader
       const static int s_NumOfOperand = 2;
 
       GXDWORD flags : 16;
-      MODE    mode  : 16;
+      MODE    mode : 16;
       const TOKEN* pOpcode;
 
       union UN {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
+        const TOKEN*  pTokn;
 #ifdef ENABLE_NODE_INDEX
         size_t        nNodeIndex;
 #endif
-        const TOKEN*  pSym;
       };
 
       struct DESC {
@@ -262,7 +261,7 @@ namespace UVShader
         FLAGS flag; // 标记un具体是哪一个类型
         DESC& operator=(const TOKEN& token) {
           flag = FLAG_OPERAND_IS_TOKEN;
-          un.pSym = &token;
+          un.pTokn = &token;
           return *this;
         }
       };
@@ -305,8 +304,8 @@ namespace UVShader
         visual_flag[1] = FLAG_OPERAND_UNDEFINED;
 #endif // ENABLE_VSYNTAX_FLAG
 
-        flags  = 0;
-        mode   = MODE_Undefined;
+        flags = 0;
+        mode = MODE_Undefined;
         pOpcode = NULL;
         Operand[0].ptr = NULL;
         Operand[1].ptr = NULL;
@@ -332,7 +331,7 @@ namespace UVShader
 #endif
             }
             i++;
-          }while(i < 2);
+          } while(i < 2);
         }
       }
 
@@ -347,22 +346,24 @@ namespace UVShader
           if(f == FLAG_OPERAND_IS_NODE) {
             bret = RecursiveNode2(pParser, pNode->Operand[i].pNode, param[i], func);
           }
+#ifdef ENABLE_NODE_INDEX
           else if(f == FLAG_OPERAND_IS_NODEIDX) {
             bret = RecursiveNode2(pParser, &pParser->m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], param[i], func);
           }
-          else if(f == FLAG_OPERAND_IS_TOKEN){
+#endif
+          else if(f == FLAG_OPERAND_IS_TOKEN) {
             bret = param[i].OnToken(pNode, i);
           }
 
-          if( ! bret) {
+          if(_CL_NOT_(bret)) {
             return bret;
           }
         }
 
         return func(rOut, pNode, param);
       }
+    }; // struct SYNTAXNODE
 
-    };
 #ifdef ENABLE_NODE_INDEX
     typedef clvector<SYNTAXNODE>  SyntaxNodeArray;
 #endif
