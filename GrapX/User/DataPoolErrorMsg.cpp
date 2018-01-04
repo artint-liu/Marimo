@@ -84,11 +84,12 @@ namespace Marimo
   _DPEM_TEMPL
   void _DPEM_CLS::WriteMessageW(GXBOOL bError, GXLPCWSTR szMessage)
   {
+    // 这里不能用CLOG_*
     if(bError) {
-      CLOG_ERRORW(szMessage);
+      _cl_traceW(szMessage);
     }
     else if( ! m_bSilent){
-      CLOG_WARNINGW(szMessage);
+      _cl_traceW(szMessage);
     }
   }
 

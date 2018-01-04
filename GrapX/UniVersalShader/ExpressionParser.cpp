@@ -1099,10 +1099,12 @@ namespace UVShader
     // #
     // # 解析成员变量
     // #
-    ParseStructMembers(&stat, &StruScope);
-
-    m_aStatements.push_back(stat);
-    return TRUE;
+    if(ParseStructMembers(&stat, &StruScope))
+    {
+      m_aStatements.push_back(stat);
+      return TRUE;
+    }
+    return FALSE;
   }
 
   GXBOOL CodeParser::ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope)
@@ -1222,14 +1224,16 @@ NOT_INC_P:
     if(p == pMemberEnd || *p == ',') {
       if(pStat->type != StatementType_Empty && pStat->type != StatementType_Struct) {
         // ERROR: 结构体成员作用不一致。纯结构体和Shader标记结构体混合定义
+        OutputErrorW(*p, E9999_未定义错误_vsd, __FILEW__, __LINE__);
         return FALSE;
       }
       pStat->type = StatementType_Struct;
       //++p;
     }
     else if(*p == ':') {
-      if(pStat->type != StatementType_Empty && pStat->type != StatementType_Struct) {
+      if(pStat->type != StatementType_Empty && pStat->type != StatementType_Signatures) {
         // ERROR: 结构体成员作用不一致。纯结构体和Shader标记结构体混合定义
+        OutputErrorW(*p, E9999_未定义错误_vsd, __FILEW__, __LINE__);
         return FALSE;
       }
       pStat->type = StatementType_Signatures;
@@ -1241,11 +1245,6 @@ NOT_INC_P:
       INC_AND_END(p, pMemberEnd);
 
       ASSERT(*p == ';' || *p == ','); // 如果发生这个断言错误，检查如何处理这个编译错误
-      //if(*p != ";") {
-      //  ERROR_MSG__MISSING_SEMICOLON; // ERROR: 缺少“；”
-      //  return FALSE;
-      //}
-      //++p;
     }
     ASSERT(p <= pMemberEnd);
     return TRUE;
