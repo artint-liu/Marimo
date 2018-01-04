@@ -25,7 +25,7 @@ GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
   }
 }
 
-GXLPCSTR Get(UVShader::CodeParser::StorageClass e)
+GXLPCSTR Get(UVShader::CodeParser::FunctionStorageClass e)
 {
   switch(e)
   {

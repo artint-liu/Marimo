@@ -25,7 +25,7 @@ GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
   }
 }
 
-GXLPCSTR Get(UVShader::CodeParser::StorageClass e)
+GXLPCSTR Get(UVShader::CodeParser::FunctionStorageClass e)
 {
   switch(e)
   {
@@ -104,6 +104,11 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
   {
   case SYNTAXNODE::MODE_FunctionCall: // º¯Êýµ÷ÓÃ
     strOut.Format("%s(%s)", str[0], str[1]);
+    break;
+
+  case SYNTAXNODE::MODE_ArrayAlloc:
+    ASSERT(str[1].IsEmpty());
+    strOut.Format("%s[]", str[0]);
     break;
 
   case SYNTAXNODE::MODE_ArrayIndex:
@@ -223,6 +228,10 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::CodeParser::SYNTAXNOD
 
   case SYNTAXNODE::MODE_Flow_Discard:
     strOut = "discard";
+    break;
+
+  case SYNTAXNODE::MODE_ArrayAssignment:
+    strOut.Format("%s={%s}", str[0], str[1]);
     break;
 
   default:

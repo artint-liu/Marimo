@@ -420,12 +420,12 @@ namespace UVShader
 
 
       // 符号配对处理
+      // ...={...}这种情况不更新EOE
       if(MarryBracket(sStack, token) && m_aTokens.back() != "=" &&
         _CL_NOT_(CompareToken(token.scope - 1, "=")))
       {
         EOE = c_size + 1;
       }
-      // FIXME: {}匹配会更新EOE, 但是a[]={};这种形式不希望更新
       
       if(OnToken(token)) {
         token.ClearMarker();
@@ -833,19 +833,61 @@ namespace UVShader
     STATEMENT stat = {StatementType_Definition};
     RTSCOPE::TYPE definition_end = p->semi_scope;
 
+    // 储存限定
+    if(*p == "extern") {
+      stat.defn.storage_class = VariableStorageClass_extern;
+    }
+    else if(*p == "nointerpolation") {
+      stat.defn.storage_class = VariableStorageClass_nointerpolation;
+    }
+    else if(*p == "precise") {
+      stat.defn.storage_class = VariableStorageClass_precise;
+    }
+    else if(*p == "shared") {
+      stat.defn.storage_class = VariableStorageClass_shared;
+    }
+    else if(*p == "groupshared") {
+      stat.defn.storage_class = VariableStorageClass_groupshared;
+    }
+    else if(*p == "static") {
+      stat.defn.storage_class = VariableStorageClass_static;
+    }
+    else if(*p == "uniform") {
+      stat.defn.storage_class = VariableStorageClass_uniform;
+    }
+    else if(*p == "volatile") {
+      stat.defn.storage_class = VariableStorageClass_volatile;
+    }
+    else {
+      stat.defn.storage_class = VariableStorageClass_empty;
+    }
+
+    if(stat.defn.storage_class != VariableStorageClass_empty) {
+      INC_BUT_NOT_END(p, pEnd);
+      pScope->begin++;
+    }
+
     // 修饰
     if(*p == "const") {
       stat.defn.modifier = UniformModifier_const;
-      INC_BUT_NOT_END(p, pEnd);
+    }
+    else if(*p == "row_major") {
+      stat.defn.modifier = UniformModifier_row_major;
+    }
+    else if(*p == "column_major") {
+      stat.defn.modifier = UniformModifier_column_major;
     }
     else {
       stat.defn.modifier = UniformModifier_empty;
     }
 
+    if(stat.defn.modifier != UniformModifier_empty)
+    {
+      INC_BUT_NOT_END(p, pEnd);
+      pScope->begin++;
+    }
+
     stat.defn.szType = GetUniqueString(p);
-    //if(p + 1 < pEnd) {
-    //  stat.defn.szName = GetUniqueString(p + 1);
-    //}
 
     if( ! ParseExpression(RTSCOPE(pScope->begin, definition_end), &stat.defn.sRoot))
     {
@@ -1411,6 +1453,11 @@ NOT_INC_P:
       strOut.Format("%s(%s)", str[0], str[1]);
       break;
 
+    case SYNTAXNODE::MODE_ArrayAlloc:
+      ASSERT(str[1].IsEmpty());
+      strOut.Format("%s[]", str[0]);
+      break;
+
     case SYNTAXNODE::MODE_ArrayIndex:
       strOut.Format("%s[%s]", str[0], str[1]);
       break;
@@ -1473,6 +1520,9 @@ NOT_INC_P:
       else {
         strOut.Format("%s%s%s", str[0], pNode->pOpcode->ToString(), str[1]);
       }
+      break;
+    case SYNTAXNODE::MODE_ArrayAssignment:
+      strOut.Format("%s={%s}", str[0], str[1]);
       break;
 
     default:

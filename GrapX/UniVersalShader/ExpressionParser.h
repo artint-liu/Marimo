@@ -136,7 +136,7 @@ namespace UVShader
       StatementType_Expression,     // 表达式
     };
 
-    enum StorageClass // 函数修饰，可选
+    enum FunctionStorageClass // 函数修饰，可选
     {
       StorageClass_empty,
       StorageClass_inline,
@@ -150,10 +150,25 @@ namespace UVShader
       InputModifier_uniform,
     };
 
+    enum VariableStorageClass
+    {
+      VariableStorageClass_empty,
+      VariableStorageClass_extern,
+      VariableStorageClass_nointerpolation,
+      VariableStorageClass_precise,
+      VariableStorageClass_shared,
+      VariableStorageClass_groupshared,
+      VariableStorageClass_static,
+      VariableStorageClass_uniform,
+      VariableStorageClass_volatile,
+    };
+    
     enum UniformModifier
     {
       UniformModifier_empty,
       UniformModifier_const,
+      UniformModifier_row_major,
+      UniformModifier_column_major,
     };
 
     enum PPCondRank
@@ -199,7 +214,7 @@ namespace UVShader
 
     struct STATEMENT_FUNC // 函数体/函数声明
     {
-      StorageClass eStorageClass; // [opt]
+      FunctionStorageClass eStorageClass; // [opt]
       GXLPCSTR     szReturnType;  // [req]
       GXLPCSTR     szName;        // [req]
       GXLPCSTR     szSemantic;    // [opt]
@@ -222,9 +237,10 @@ namespace UVShader
     
     struct STATEMENT_DEFN
     {
-      UniformModifier modifier;
-      GXLPCSTR        szType;
-      SYNTAXNODE::DESC  sRoot;
+      VariableStorageClass  storage_class;
+      UniformModifier       modifier;
+      GXLPCSTR              szType;
+      SYNTAXNODE::DESC      sRoot;
     };
 
 

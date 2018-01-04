@@ -382,7 +382,9 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "float freqs[8], time[4]", 10},
   {0, _I_, "float freqs[16]", 5},
   {0, _I_, "float freqs[16][8]", 8},
-  //{0, _I_, "float freqs[] = {12, 3, 5}", 12},
+  {0, _I_, "float freqs[] = {12, 3, 5}", 12},
+  {0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21},
+  //{0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21},
   {0, _I_, NULL,  0},};
 
 SAMPLE_EXPRESSION samplesIfExpression[] = {

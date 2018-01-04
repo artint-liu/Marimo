@@ -128,158 +128,6 @@ namespace UVShader
 #endif
   }
 
-  //inline b32 IS_NUM(char c)
-  //{
-  //  return c >= '0' && c <= '9';
-  //}
-  /*
-  clsize ArithmeticExpression::GenerateTokens()
-  {
-    auto stream_end = end();
-    ASSERT(m_aTokens.empty()); // 调用者负责清空
-
-    m_aTokens.reserve(EstimateForTokensCount());
-    typedef clstack<int> PairStack;
-    //PairStack stackBrackets;        // 圆括号
-    //PairStack stackSquareBrackets;  // 方括号
-    //PairStack stackBrace;           // 花括号
-    TOKEN token;
-
-    // 只是清理
-    m_CurSymInfo.ClearMarker();
-    m_CurSymInfo.precedence = 0;
-    m_CurSymInfo.unary      = 0;
-
-    struct PAIR_CONTEXT
-    {
-      GXCHAR    chOpen;         // 开区间
-      GXCHAR    chClosed;       // 闭区间
-      GXUINT    bNewEOE   : 1;  // 更新End Of Expression的位置
-      GXUINT    bCloseAE  : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
-      PairStack sStack;
-    };
-
-    // 这里面有 PairStack 对象，所以不能声明为静态的
-    PAIR_CONTEXT pair_context[] = {
-      {'(', ')', FALSE, FALSE},   // 圆括号
-      {'[', ']', FALSE, FALSE},   // 方括号
-      {'{', '}', TRUE , FALSE},   // 花括号
-      {'?', ':', FALSE, TRUE},    // 冒号不匹配会被解释为语意
-      {NULL, },
-    };
-
-    int EOE = 0; // End Of Expression
-
-    for(auto it = begin(); it != stream_end; ++it)
-    {
-      // 上一个预处理结束后，后面的语句长度设置为0可以回到主循环步进
-      // 这样做是为了避免如果下一条语句也是预处理指令，不会在处理回调中发生递归调用
-      if(it.length == 0) {
-        continue;
-      }
-
-
-      const int c_size = (int)m_aTokens.size();
-      token.Set(it);
-      token.scope = -1;
-      token.semi_scope = -1;
-
-      ASSERT(m_CurSymInfo.marker == NULL ||
-        m_CurSymInfo.marker == it.marker); // 遍历时一定这个要保持一致
-
-      token.SetArithOperatorInfo(m_CurSymInfo);
-
-      // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
-      if((it == '-' || it == '+') && ! m_aTokens.empty())
-      {        
-        const auto& l_back = m_aTokens.back();
-
-        // 一元操作符，+/-就不转换为正负号
-        // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
-        if(l_back.precedence != 0 && l_back != ')' && l_back != ']' && ( ! l_back.unary)) {
-          const auto& p = s_plus_minus[(int)(it.marker[0] - '+')];
-          token.SetArithOperatorInfo(p);
-        }
-      }
-
-
-      // 只是清理
-      m_CurSymInfo.ClearMarker();
-      m_CurSymInfo.ClearArithOperatorInfo();
-
-
-      // 符号配对处理
-      for(int i = 0; pair_context[i].chOpen != NULL; ++i)
-      {
-        PAIR_CONTEXT& c = pair_context[i];
-        if(it == c.chOpen) {
-          c.sStack.push(c_size);
-        }
-        else if(it == c.chClosed) {
-          if(c.sStack.empty()) {
-            if(c.bCloseAE) {
-              ASSERT(token == ':'); // 目前只有这个
-              token.SetArithOperatorInfo(s_semantic);
-              break;
-            }
-            else {
-              // ERROR: 括号不匹配
-              ERROR_MSG__MISSING_OPENBRACKET;
-            }
-          }
-          token.scope = c.sStack.top();
-          m_aTokens[token.scope].scope = c_size;
-          c.sStack.pop();
-        }
-        else {
-          continue;
-        }
-
-        // ?: 操作符precedence不为0，拥有自己的优先级；其他括号我们标记为括号
-        if(token.precedence == 0) {
-          token.precedence = TOKEN::ID_BRACE;
-        }
-
-        if(c.bNewEOE) {
-          EOE = c_size + 1;
-        }
-        break;
-      } // for
-
-      if(token.precedence == 0)
-      {
-        auto iter_token = m_Macros.find(token.ToString());
-        if(iter_token != m_Macros.end())
-        {
-          token.Set(iter_token->second.value.marker);
-        }
-      }
-
-      m_aTokens.push_back(token);
-
-      if(it == ';') {
-        ASSERT(EOE < (int)m_aTokens.size());
-        for(auto it = m_aTokens.begin() + EOE; it != m_aTokens.end(); ++it)
-        {
-          it->semi_scope = c_size;
-        }
-        EOE = c_size + 1;
-      }
-    }
-
-    for(int i = 0; pair_context[i].chOpen != NULL; ++i)
-    {
-      PAIR_CONTEXT& c = pair_context[i];
-      if( ! c.sStack.empty()) {
-        // ERROR: 不匹配
-        ERROR_MSG__MISSING_CLOSEDBRACKET;
-      }
-    }
-
-    return m_aTokens.size();
-  }
-  //*/
-
   const ArithmeticExpression::TOKEN::Array* ArithmeticExpression::GetTokensArray() const
   {
     return &m_aTokens;
@@ -483,8 +331,10 @@ namespace UVShader
     RTSCOPE scopeB(nMiddle + 1, pScope->end);
     SYNTAXNODE::DESC A = {0}, B = {0};
     GXBOOL bresult = TRUE;
+    //SYNTAXNODE::MODE _mode = SYNTAXNODE::MODE_Opcode;
 
-    if(*pOpcode == '?') {
+    if(*pOpcode == '?') // 三元操作符处理
+    {
       const TOKEN& s = m_aTokens[nMiddle];
       //SYNTAXNODE sNodeB;
       //B.pNode = &sNodeB;
@@ -497,14 +347,26 @@ namespace UVShader
       else {
         // ERROR: ?:三元操作符不完整
       }
+      MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Opcode, pOpcode, &A, &B);
     }
-    else {
-      bresult = 
+    else if(*pOpcode == '=' && m_aTokens[nMiddle + 1] == '{')
+    {
+      bresult =
         ParseArithmeticExpression(scopeA, &A, nMinPrecedence) &&
-        ParseArithmeticExpression(scopeB, &B, nMinPrecedence) ;
-    }
+        ParseArithmeticExpression(scopeB, &B, nMinPrecedence);
 
-    MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Opcode, pOpcode, &A, &B);
+      // Opcode 这里设置为空, 因为'='的优先级高于初始化列表中的',', 
+      // 在生成表达式时会给初始化列表加上'('和')'使初始化列表出现语法错误.
+      MakeSyntaxNode(pParent, SYNTAXNODE::MODE_ArrayAssignment, NULL, &A, &B);
+    }
+    else
+    {
+      bresult =
+        ParseArithmeticExpression(scopeA, &A, nMinPrecedence) &&
+        ParseArithmeticExpression(scopeB, &B, nMinPrecedence);
+
+      MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Opcode, pOpcode, &A, &B);
+    }
 
     DbgDumpScope(pOpcode->ToString(), scopeA, scopeB);
 
@@ -542,7 +404,7 @@ namespace UVShader
   {
     RTSCOPE scope = scope_in;
     if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
-      scope.end--;
+      scope.end--; // TODO: 确定这个是否为必须
     }
     return ParseArithmeticExpression(scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
@@ -824,11 +686,21 @@ namespace UVShader
 
     // TODO: 检查m_aTokens[scope.begin]是函数名
 
-    auto& bracket = m_aTokens[scope.begin + 1];
+    const TOKEN& bracket = m_aTokens[scope.begin + 1];
     ASSERT(bracket == '[' || bracket == '(');
     GXBOOL bret = ParseArithmeticExpression(RTSCOPE(scope.begin + 2, scope.end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
 
-    SYNTAXNODE::MODE mode = bracket == '(' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
+    SYNTAXNODE::MODE mode;
+    if(bracket == '(') {
+      mode = SYNTAXNODE::MODE_FunctionCall;
+    }
+    else if(bracket.scope == m_aTokens[bracket.scope].scope + 1) // "[]"
+    {
+      mode = SYNTAXNODE::MODE_ArrayAlloc;
+    }
+    else {
+     mode = SYNTAXNODE::MODE_ArrayIndex;
+    }
 
     MakeSyntaxNode(pDesc, mode, &A, &B);
     DbgDumpScope(bracket == '(' ? "F" : "I", RTSCOPE(scope.begin, scope.begin + 1),

@@ -6,8 +6,8 @@
 #include "ArithmeticExpression.h"
 #include "ExpressionParser.h"
 
-#include "clTextLines.h"
-#include "../User/DataPoolErrorMsg.h"
+//#include "clTextLines.h"
+//#include "../User/DataPoolErrorMsg.h"
 
 namespace UVShader
 {
@@ -21,7 +21,7 @@ namespace UVShader
   };
 
   ArithmeticExpression::MBO ArithmeticExpression::s_semantic =  // ":" 作为语意的优先级
-  {1, ":", OPP(13) };
+    {1, ":", OPP(13) };
 
   ArithmeticExpression::MBO ArithmeticExpression::s_Operator1[] = {
     {1, ".", OPP(13), FALSE},

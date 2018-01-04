@@ -64,6 +64,9 @@ float aa = 0, bb = 1 + 2, cc = 5 + 4 * 5, dd = sin(3.14);
 float4 colors[8];
 float4 many[8][7];
 float4 many3[8][7][16];
+static float static_var;
+const float const_var = 0.0;
+static const float static_const_var = 0.0;
 
 #if 0
 string pp_test_0;

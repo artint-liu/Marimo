@@ -338,8 +338,8 @@ int _tmain(int argc, _TCHAR* argv[])
   //
 #ifdef TEST_ARITHMETIC_PARSING
   // 2015/10/06 改为只测试数学表达式
-  //TestExpressionParser(samplesOpercode);
-  //TestExpressionParser(samplesNumeric);
+  TestExpressionParser(samplesOpercode);
+  TestExpressionParser(samplesNumeric);
   TestExpressionParser(samplesSimpleExpression);
   TestExpressionParser(samplesExpression);
 

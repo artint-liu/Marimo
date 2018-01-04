@@ -218,14 +218,16 @@ namespace UVShader
       enum MODE
       {
         MODE_Undefined,
-        MODE_Opcode,          // 操作符 + 操作数 模式
-        MODE_FunctionCall,    // 函数调用: A(B)
-        MODE_ArrayIndex,      // 函数调用: A[B]
-        MODE_Definition,      // 变量定义: A B
-        MODE_DefinitionConst, // 常量量定义: const A B
-        MODE_StructDef,       // 结构定义:
-        MODE_Flow_While,      // while(A) {B}
-        MODE_Flow_If,         // if(A) {B}
+        MODE_Opcode,              // 操作符 + 操作数 模式: A (操作符) B
+        MODE_ArrayAssignment,     // 数组赋值: A={B}; 其它形式赋值属于MODE_Opcode
+        MODE_FunctionCall,        // 函数调用: A(B)
+        MODE_ArrayIndex,          // 索引调用: A[B], 方括号内有内容的都认为是数组调用
+        MODE_ArrayAlloc,          // 自适应数组分配: A[], 注意"k[5]"这种形式认为是索引调用
+        MODE_Definition,          // 变量定义: A B
+        MODE_DefinitionConst,     // 常量量定义: const A B
+        MODE_StructDef,           // 结构定义:
+        MODE_Flow_While,          // while(A) {B}
+        MODE_Flow_If,             // if(A) {B}
         MODE_Flow_ElseIf,
         MODE_Flow_Else,
         MODE_Flow_For,            // for(A) {B} [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]
