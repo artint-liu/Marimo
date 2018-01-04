@@ -26,21 +26,12 @@ public:
       TRACE("±‡“Î¥ÌŒÛ\n");
       m_aDbgExpressionOperStack.clear();
     }
-    else if(stat.expr.sRoot.flag == UVShader::ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODE && stat.expr.sRoot.un.pNode) {
-      //IndexToPtr(stat.expr.sRoot.un.pNode, m_aSyntaxNodePack);
-      //RelocaleSyntaxPtr(stat.expr.sRoot.un.pNode);
+    else if(stat.expr.sRoot.IsNode() && stat.expr.sRoot.un.pNode) {
       TRACE("---\n");
       DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.un.pNode, 0);
     }
-    //else if(stat.expr.sRoot.flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX && stat.expr.sRoot.un.pNode) {
-    //  IndexToPtr(stat.expr.sRoot.un.pNode, m_aSyntaxNodePack);
-    //  RelocaleSyntaxPtr(stat.expr.sRoot.un.pNode);
-    //  TRACE("---\n");
-    //  DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.un.pNode, 0);
-    //}
     *pStat = stat;
     return bret;
-    //return ParseStatementAs_Expression(pStat, pScope, TRUE);
   }
 #ifdef ENABLE_GRAPH
   GXBOOL TestGraph(SYNTAXNODE::UN* pUnion)

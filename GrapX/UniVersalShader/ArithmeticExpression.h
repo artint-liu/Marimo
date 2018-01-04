@@ -31,11 +31,9 @@
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
 #define ENABLE_STRINGED_SYMBOL
-#define ENABLE_VSYNTAX_FLAG       // syntax flag 可视化
 #define OPP(_PRE) (ArithmeticExpression::TOKEN::FIRST_OPCODE_PRECEDENCE + _PRE)
 
 #define USE_CLSTD_TOKENS
-//#define ENABLE_NODE_INDEX
 
 namespace Marimo
 {
@@ -205,14 +203,10 @@ namespace UVShader
     {
       enum FLAGS
       {
-        FLAG_OPERAND_SHIFT = 8,
+        FLAG_OPERAND_MAGIC = 0xffff,
         FLAG_OPERAND_UNDEFINED = 0,
-        FLAG_OPERAND_TYPEMASK = 0x0000000F,
-#ifdef ENABLE_NODE_INDEX
-        FLAG_OPERAND_IS_NODEIDX = 0x00000003,
-#endif
-        FLAG_OPERAND_IS_NODE = 0x00000001,
-        FLAG_OPERAND_IS_TOKEN = 0x00000002,
+        FLAG_OPERAND_IS_NODE,
+        FLAG_OPERAND_IS_TOKEN,
       };
 
       enum MODE
@@ -245,68 +239,43 @@ namespace UVShader
 
       const static int s_NumOfOperand = 2;
 
-      GXDWORD flags : 16;
-      MODE    mode : 16;
+      GXDWORD magic : 16; // 0xffff
+      MODE    mode  : 16;
       const TOKEN* pOpcode;
 
       union UN {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
         const TOKEN*  pTokn;
-#ifdef ENABLE_NODE_INDEX
-        size_t        nNodeIndex;
-#endif
       };
 
       struct DESC {
         UN    un;
-        FLAGS flag; // 标记un具体是哪一个类型
         DESC& operator=(const TOKEN& token) {
-          flag = FLAG_OPERAND_IS_TOKEN;
           un.pTokn = &token;
           return *this;
+        }
+
+        GXBOOL IsToken() const
+        {
+          return un.pNode && un.pNode->magic != FLAG_OPERAND_MAGIC;
+        }
+
+        GXBOOL IsNode() const
+        {
+          return un.pNode && un.pNode->magic == FLAG_OPERAND_MAGIC;
         }
       };
 
       UN Operand[s_NumOfOperand];
-#ifdef ENABLE_VSYNTAX_FLAG
-      FLAGS visual_flag[2];
-#endif // ENABLE_VSYNTAX_FLAG
 
       inline FLAGS GetOperandType(const int index) const {
-        const int shift = FLAG_OPERAND_SHIFT * index;
-        return (FLAGS)((flags >> shift) & FLAG_OPERAND_TYPEMASK);
+        return Operand[index].pNode->magic == FLAG_OPERAND_MAGIC ? FLAG_OPERAND_IS_NODE : FLAG_OPERAND_IS_TOKEN;
       }
 
-      inline void SetOperandType(const int index, FLAGS flag) {
-#ifdef ENABLE_VSYNTAX_FLAG
-        visual_flag[index] = flag;
-#endif // ENABLE_VSYNTAX_FLAG
-        const int shift = FLAG_OPERAND_SHIFT * index;
-        flags = (flags & (~(FLAG_OPERAND_TYPEMASK << shift))) | (flag << shift);
-      }
-
-#ifdef ENABLE_NODE_INDEX
-      inline GXBOOL OperandA_IsNodeIndex() const {
-        const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK;
-        return (flags & dwTypeMask) == FLAG_OPERAND_IS_NODEIDX;
-      }
-
-      inline GXBOOL OperandB_IsNodeIndex() const {
-        const GXDWORD dwTypeMask = FLAG_OPERAND_TYPEMASK << FLAG_OPERAND_SHIFT;
-        const GXDWORD dwNode = FLAG_OPERAND_IS_NODEIDX << FLAG_OPERAND_SHIFT;
-        return (flags & dwTypeMask) == dwNode;
-      }
-#endif
 
       inline void Clear()
       {
-#ifdef ENABLE_VSYNTAX_FLAG
-        visual_flag[0] = FLAG_OPERAND_UNDEFINED;
-        visual_flag[1] = FLAG_OPERAND_UNDEFINED;
-#endif // ENABLE_VSYNTAX_FLAG
-
-        flags = 0;
         mode = MODE_Undefined;
         pOpcode = NULL;
         Operand[0].ptr = NULL;
@@ -320,17 +289,8 @@ namespace UVShader
           int i = 0;
           do {
             auto type = pNode->GetOperandType(i);
-            switch(type)
-            {
-            case FLAG_OPERAND_IS_NODE:
+            if(type == FLAG_OPERAND_IS_NODE) {
               RecursiveNode(pParser, pNode->Operand[i].pNode, func);
-              break;
-#ifdef ENABLE_NODE_INDEX
-            case FLAG_OPERAND_IS_NODEIDX:
-              RecursiveNode(pParser, &pParser->
-                m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], func);
-              break;
-#endif
             }
             i++;
           } while(i < 2);
@@ -348,11 +308,6 @@ namespace UVShader
           if(f == FLAG_OPERAND_IS_NODE) {
             bret = RecursiveNode2(pParser, pNode->Operand[i].pNode, param[i], func);
           }
-#ifdef ENABLE_NODE_INDEX
-          else if(f == FLAG_OPERAND_IS_NODEIDX) {
-            bret = RecursiveNode2(pParser, &pParser->m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], param[i], func);
-          }
-#endif
           else if(f == FLAG_OPERAND_IS_TOKEN) {
             bret = param[i].OnToken(pNode, i);
           }
@@ -366,9 +321,6 @@ namespace UVShader
       }
     }; // struct SYNTAXNODE
 
-#ifdef ENABLE_NODE_INDEX
-    typedef clvector<SYNTAXNODE>  SyntaxNodeArray;
-#endif
     typedef clstack<int>          PairStack;
     
     struct SYNTAXNODEPOOL
@@ -470,13 +422,11 @@ namespace UVShader
     ErrorMessage*       m_pMsg;
     TOKEN::Array        m_aTokens;
     //int                 m_nMaxPrecedence;   // 优先级最大值
-#ifdef ENABLE_NODE_INDEX
-    SyntaxNodeArray     m_aSyntaxNodePack;  // 表达式语法节点
-#else
+
     // 语法节点的内存池
     SyntaxNodePoolList  m_NodePoolList;
     SYNTAXNODE*         m_pNewNode;           // 记录当前分配节点的指针
-#endif
+
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     clStringArrayA      m_aDbgExpressionOperStack;
 

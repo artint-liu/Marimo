@@ -194,13 +194,7 @@ namespace UVShader
     //
     // 所有pack类型，都存一个空值，避免记录0索引与NULL指针混淆的问题
     //
-#ifdef ENABLE_NODE_INDEX
-    SYNTAXNODE node = {NULL};
-    m_aSyntaxNodePack.clear();
-    m_aSyntaxNodePack.push_back(node);
-#else
     ClearSyntaxNodePool();
-#endif
 
     STRUCT_MEMBER member = {NULL};
     m_aMembersPack.clear();
@@ -900,11 +894,7 @@ namespace UVShader
     // 如 float a, b, c; 改为
     // float a; float b; float c;
     //
-#ifdef ENABLE_NODE_INDEX
-    SYNTAXNODE* pNode = &m_aSyntaxNodePack[stat.defn.sRoot.un.nNodeIndex];
-#else
     SYNTAXNODE* pNode = stat.defn.sRoot.un.pNode;
-#endif
     cllist<SYNTAXNODE*> sDefinitionList;
     SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList](SYNTAXNODE* pNode) -> GXBOOL {
       if(_CL_NOT_(
@@ -931,39 +921,28 @@ namespace UVShader
       // (nodeN) [var define node 1] [var define node 2]
 
       auto& front = sDefinitionList.front();
-#ifdef ENABLE_NODE_INDEX
-      auto* pNodeFrontPtr = &m_aSyntaxNodePack.front();
-#endif
 
       ASSERT(front->mode == SYNTAXNODE::MODE_Definition || front->mode == SYNTAXNODE::MODE_DefinitionConst);
 
       front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
-      front->SetOperandType(1, sDefinitionList.back()->GetOperandType(0));
-#ifdef ENABLE_NODE_INDEX
-      stat.defn.sRoot.un.nNodeIndex = front - &m_aSyntaxNodePack.front();
-#else
+      //front->SetOperandType(1, sDefinitionList.back()->GetOperandType(0));
       stat.defn.sRoot.un.pNode = front;
-#endif
       m_aStatements.push_back(stat);
 
       auto it = sDefinitionList.end();
       ASSERT(front->GetOperandType(0) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
       for(--it; it != sDefinitionList.begin(); --it)
       {
-        auto& SyntaxNode = **it;
+        SYNTAXNODE& SyntaxNode = **it;
 
         // 逗号并列式改为独立类型定义式
         SyntaxNode.mode = front->mode;
         SyntaxNode.pOpcode = NULL;
         SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type
-        SyntaxNode.SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN); // front->GetOperandType(0)
+        //SyntaxNode.SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_TOKEN); // front->GetOperandType(0)
 
         // 加入列表
-#ifdef ENABLE_NODE_INDEX
-        stat.defn.sRoot.un.nNodeIndex = *it - pNodeFrontPtr;
-#else
         stat.defn.sRoot.un.pNode = *it;
-#endif
         m_aStatements.push_back(stat);
       }
     }//*/
@@ -1186,33 +1165,6 @@ NOT_INC_P:
     RelocaleStatements(m_aSubStatements);
   }
 
-  void CodeParser::RelocaleSyntaxPtr(SYNTAXNODE* pNode)
-  {
-#ifdef ENABLE_NODE_INDEX
-    if(pNode->OperandA_IsNodeIndex() && pNode->Operand[0].pNode) {
-      IndexToPtr(pNode->Operand[0].pNode, m_aSyntaxNodePack);
-      RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[0].pNode);
-      pNode->SetOperandType(0, SYNTAXNODE::FLAG_OPERAND_IS_NODE);
-    }
-
-    if(pNode->OperandB_IsNodeIndex() && pNode->Operand[1].pNode) {
-      IndexToPtr(pNode->Operand[1].pNode, m_aSyntaxNodePack);
-      RelocaleSyntaxPtr((SYNTAXNODE*)pNode->Operand[1].pNode);
-      pNode->SetOperandType(1, SYNTAXNODE::FLAG_OPERAND_IS_NODE);
-    }
-#endif
-  }
-
-  //GXBOOL CodeParser::IsType(GXLPCSTR szType)
-  //{
-  //  return IsIntrinsicType(szType);
-  //}
-
-  //GXBOOL CodeParser::IsIntrinsicType(GXLPCSTR szType)
-  //{
-  //  
-  //}
-
   GXBOOL CodeParser::ParseStructMember(STATEMENT* pStat, STRUCT_MEMBER& member, TOKEN**pp, const TOKEN* pMemberEnd)
   {
     TOKEN*& p = *pp;
@@ -1424,11 +1376,6 @@ NOT_INC_P:
         else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
           DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
         }
-#ifdef ENABLE_NODE_INDEX
-        else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
-          DbgDumpSyntaxTree(pArray, &m_aSyntaxNodePack[pNode->Operand[i].nNodeIndex], pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i]);
-        }
-#endif
         else {
           CLBREAK;
         }
@@ -2292,20 +2239,9 @@ NOT_INC_P:
         break;
 
       case StatementType_Expression:
-#ifdef ENABLE_NODE_INDEX
-        IndexToPtr(it->expr.sRoot.un.pNode, m_aSyntaxNodePack);
-        RelocaleSyntaxPtr(it->expr.sRoot.un.pNode);
-#endif
         break;
 
       case StatementType_Definition:
-#ifdef ENABLE_NODE_INDEX
-        if(it->defn.sRoot.flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX)
-        {
-          IndexToPtr(it->defn.sRoot.un.pNode, m_aSyntaxNodePack);
-          RelocaleSyntaxPtr(it->defn.sRoot.un.pNode);
-        }
-#endif
         break;
       }
     }
@@ -2618,7 +2554,7 @@ NOT_INC_P:
         if( ! pNode->Operand[i].ptr) {
           continue;
         }
-        l_desc.flag = pNode->GetOperandType(i);
+        //l_desc.flag = pNode->GetOperandType(i);
         l_desc.un.ptr = pNode->Operand[i].ptr;
         CalculateValue(param[i], &l_desc);
       }
@@ -2671,18 +2607,9 @@ NOT_INC_P:
       return ctx.iter_next.marker;
     }
 
-#ifdef ENABLE_NODE_INDEX
-    if(sDesc.flag == ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
-      // TODO: 封装
-      pParser->IndexToPtr(sDesc.un.pNode, pParser->m_aSyntaxNodePack);
-      pParser->RelocaleSyntaxPtr(sDesc.un.pNode);
-      sDesc.flag = SYNTAXNODE::FLAG_OPERAND_IS_NODE;
-      // --封装
-    }
-#endif
 
     VALUE v;
-    if(sDesc.flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+    if(sDesc.IsToken()) {
       // TODO: 测试 sDesc.un.pSym 能解析为一个数字，如果定义不为数字需要报错
       v = *sDesc.un.pTokn;
     }

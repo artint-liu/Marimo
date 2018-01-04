@@ -70,10 +70,7 @@ namespace UVShader
     : m_pMsg(NULL)
     //, m_nMaxPrecedence(0)
     , m_nDbgNumOfExpressionParse(0)
-#ifdef ENABLE_NODE_INDEX
-#else
     , m_pNewNode(NULL)
-#endif
   {
 #ifdef _DEBUG
     // 检查名字与其设定长度是一致的
@@ -122,10 +119,7 @@ namespace UVShader
 
   ArithmeticExpression::~ArithmeticExpression()
   {
-#ifdef ENABLE_NODE_INDEX
-#else
     ClearSyntaxNodePool();
-#endif
   }
 
   const ArithmeticExpression::TOKEN::Array* ArithmeticExpression::GetTokensArray() const
@@ -214,66 +208,20 @@ namespace UVShader
     return 0;
   }
 
-  //ArithmeticExpression::SYNTAXNODE::FLAGS ArithmeticExpression::TryGetNodeType( const SYNTAXNODE::DESC* pDesc ) const
-  //{
-  //  if(pDesc->un.ptr >= &m_aTokens.front() && pDesc->un.ptr <= &m_aTokens.back()) {
-  //    return SYNTAXNODE::FLAG_OPERAND_IS_TOKEN;
-  //  }
-  //  else if(pDesc->ptr >= &m_aSyntaxNodePack.front() && pDesc->ptr <= &m_aSyntaxNodePack.back()) {
-  //    return SYNTAXNODE::FLAG_OPERAND_IS_NODE;
-  //  }
-  //  else {
-  //    return SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX;
-  //  }
-  //}
-
-  //ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNode( const SYNTAXNODE::DESC* pDesc ) const
-  //{
-  //  if(pDesc->ptr >= &m_aTokens.front() && pDesc->ptr <= &m_aTokens.back()) {
-  //    return SYNTAXNODE::MODE_Undefined;
-  //  }
-  //  else if(pDesc->ptr >= &m_aSyntaxNodePack.front() && pDesc->ptr <= &m_aSyntaxNodePack.back()) {
-  //    return pDesc->pNode->mode;
-  //  }
-  //  else {
-  //    return m_aSyntaxNodePack[pDesc->un.nNodeIndex].mode;
-  //  }
-  //}
-
   const ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::TryGetNode(const SYNTAXNODE::DESC* pDesc) const
   {
-    switch(pDesc->flag)
-    {
-    case SYNTAXNODE::FLAG_OPERAND_IS_TOKEN:
-      return NULL;
-    case SYNTAXNODE::FLAG_OPERAND_IS_NODE:
+    if(pDesc->IsNode()) {
       return pDesc->un.pNode;
-#ifdef ENABLE_NODE_INDEX
-    case SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
-      return &m_aSyntaxNodePack[pDesc->un.nNodeIndex];
-#endif
     }
-    CLBREAK; // 不可能到这里
     return NULL;
   }
 
   ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNodeMode(const SYNTAXNODE::DESC* pDesc) const
   {
-    switch(pDesc->flag)
-    {
-    case SYNTAXNODE::FLAG_OPERAND_IS_TOKEN:
-      return SYNTAXNODE::MODE_Undefined;
-    case SYNTAXNODE::FLAG_OPERAND_IS_NODE:
+    if(pDesc->IsNode()) {
       return pDesc->un.pNode->mode;
-#ifdef ENABLE_NODE_INDEX
-    case SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX:
-      return m_aSyntaxNodePack[pDesc->un.nNodeIndex].mode;
-#endif
-    case SYNTAXNODE::FLAG_OPERAND_UNDEFINED:
-      return SYNTAXNODE::MODE_Undefined;
-    default:
-      CLBREAK;
     }
+    return SYNTAXNODE::MODE_Undefined;
   }
 
   GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB)
@@ -284,40 +232,24 @@ namespace UVShader
   GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB)
   {
     const SYNTAXNODE::DESC* pOperand[] = {pOperandA, pOperandB};
-    SYNTAXNODE sNode = {0, mode, pOpcode};
+    SYNTAXNODE sNode = {SYNTAXNODE::FLAG_OPERAND_MAGIC, mode, pOpcode};
 
     for(int i = 0; i < 2; ++i)
     {
-      const int nFlagShift = SYNTAXNODE::FLAG_OPERAND_SHIFT * i;
       if(pOperand[i] == NULL || pOperand[i]->un.ptr == NULL) {
-        ASSERT(pOperand[i] == NULL || pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_UNDEFINED);
+        ASSERT(pOperand[i] == NULL || pOperand[i]->un.ptr == NULL);
         sNode.Operand[i].ptr = NULL;
       }
-      else if(pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN || pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
-        sNode.SetOperandType(i, pOperand[i]->flag);
+      else if(pOperand[i]->un.ptr != NULL) {
         sNode.Operand[i].ptr = pOperand[i]->un.ptr;
       }
-#ifdef ENABLE_NODE_INDEX
-      else if(pOperand[i]->flag == SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX) {
-        sNode.SetOperandType(i, SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX);
-        ASSERT(pOperand[i]->un.nNodeIndex < m_aSyntaxNodePack.size()); // 这时候还是索引，所以肯定小于序列的长度
-        sNode.Operand[i].nNodeIndex = pOperand[i]->un.nNodeIndex;
-      }
-#endif
       else {
         CLBREAK; // 空的或者不存在的 pOperand[i]->flag 类型        
       }
     }
 
-#ifdef ENABLE_NODE_INDEX
-    pDest->flag = SYNTAXNODE::FLAG_OPERAND_IS_NODEIDX;
-    pDest->un.nNodeIndex = m_aSyntaxNodePack.size();
-    m_aSyntaxNodePack.push_back(sNode);
-#else
-    pDest->flag = SYNTAXNODE::FLAG_OPERAND_IS_NODE;
     pDest->un.pNode = AllocSyntaxNode();
     *pDest->un.pNode = sNode;
-#endif
 
     return TRUE;
   }
@@ -645,8 +577,6 @@ namespace UVShader
     return m_aTokens[index] == szName;
   }
 
-#ifdef ENABLE_NODE_INDEX
-#else
   ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::AllocSyntaxNode()
   {
     const size_t c_ElementCount = 128;
@@ -675,7 +605,7 @@ namespace UVShader
     m_NodePoolList.clear();
     m_pNewNode = NULL;
   }
-#endif
+
   GXBOOL ArithmeticExpression::ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 括号肯定是匹配的
