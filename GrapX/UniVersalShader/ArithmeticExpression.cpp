@@ -389,23 +389,24 @@ namespace UVShader
       ASSERT(count > 2);
       SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_Definition;
       RTSCOPE scope_expr(scope.begin + 1, scope.end);
-      if(front == "const") {
-        if(count == 3) {
-          // ERROR: 缺少常量赋值
-          return FALSE;
-        }
-        else if(m_aTokens[scope.begin + 2].precedence != 0)
-        {
-          // m_aTokens[scope.begin + 1] 是类型 ERROR: 缺少适当的变量名
-          // m_aTokens[scope.begin + 1] 不是类型 ERROR: 缺少类型名
-          return FALSE;
-        }
+      //if(front == "const") {
+      //  if(count == 3) {
+      //    // ERROR: 缺少常量赋值
+      //    return FALSE;
+      //  }
+      //  else if(m_aTokens[scope.begin + 2].precedence != 0)
+      //  {
+      //    // m_aTokens[scope.begin + 1] 是类型 ERROR: 缺少适当的变量名
+      //    // m_aTokens[scope.begin + 1] 不是类型 ERROR: 缺少类型名
+      //    return FALSE;
+      //  }
 
-        mode = SYNTAXNODE::MODE_DefinitionConst;
-        A = m_aTokens[scope.begin + 1];
-        scope_expr.begin++;
-      }
-      else {
+      //  mode = SYNTAXNODE::MODE_DefinitionConst;
+      //  A = m_aTokens[scope.begin + 1];
+      //  scope_expr.begin++;
+      //}
+      //else
+      {
         A = front;
       }
       B.un.ptr = NULL;

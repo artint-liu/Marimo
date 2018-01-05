@@ -899,7 +899,7 @@ namespace UVShader
     SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList](SYNTAXNODE* pNode) -> GXBOOL {
       if(_CL_NOT_(
         pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition || 
-        pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_DefinitionConst ||
+        //pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_DefinitionConst ||
         (pNode->pOpcode && (*(pNode->pOpcode)) == ',')) )
       {
         return FALSE;
@@ -922,7 +922,7 @@ namespace UVShader
 
       auto& front = sDefinitionList.front();
 
-      ASSERT(front->mode == SYNTAXNODE::MODE_Definition || front->mode == SYNTAXNODE::MODE_DefinitionConst);
+      ASSERT(front->mode == SYNTAXNODE::MODE_Definition/* || front->mode == SYNTAXNODE::MODE_DefinitionConst*/);
 
       front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
       //front->SetOperandType(1, sDefinitionList.back()->GetOperandType(0));
@@ -1408,9 +1408,9 @@ NOT_INC_P:
       strOut.Format("%s[%s]", str[0], str[1]);
       break;
 
-    case SYNTAXNODE::MODE_DefinitionConst:
-      strOut.Format("const %s %s", str[0], str[1]);
-      break;
+    //case SYNTAXNODE::MODE_DefinitionConst:
+    //  strOut.Format("const %s %s", str[0], str[1]);
+    //  break;
 
     case SYNTAXNODE::MODE_Definition:
       strOut.Format("%s %s", str[0], str[1]);

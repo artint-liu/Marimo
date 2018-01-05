@@ -218,7 +218,7 @@ namespace UVShader
         MODE_ArrayIndex,          // 索引调用: A[B], 方括号内有内容的都认为是数组调用
         MODE_ArrayAlloc,          // 自适应数组分配: A[], 注意"k[5]"这种形式认为是索引调用
         MODE_Definition,          // 变量定义: A B
-        MODE_DefinitionConst,     // 常量量定义: const A B
+        //MODE_DefinitionConst,     // 常量量定义: const A B
         MODE_StructDef,           // 结构定义:
         MODE_Flow_While,          // while(A) {B}
         MODE_Flow_If,             // if(A) {B}
