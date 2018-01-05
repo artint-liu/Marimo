@@ -232,7 +232,10 @@ namespace UVShader
   GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB)
   {
     const SYNTAXNODE::DESC* pOperand[] = {pOperandA, pOperandB};
-    SYNTAXNODE sNode = {SYNTAXNODE::FLAG_OPERAND_MAGIC, mode, pOpcode};
+    SYNTAXNODE sNode; // = {SYNTAXNODE::FLAG_OPERAND_MAGIC, mode, pOpcode};
+    sNode.magic   = SYNTAXNODE::FLAG_OPERAND_MAGIC;
+    sNode.mode    = mode;
+    sNode.pOpcode = pOpcode;
 
     for(int i = 0; i < 2; ++i)
     {
@@ -250,6 +253,11 @@ namespace UVShader
 
     pDest->un.pNode = AllocSyntaxNode();
     *pDest->un.pNode = sNode;
+
+#ifdef _DEBUG
+    static size_t id = 1;
+    pDest->un.pNode->id = id++;
+#endif
 
     return TRUE;
   }

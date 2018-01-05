@@ -2531,7 +2531,7 @@ namespace clstd
 
      static _TCh nan[] = {'#','N','A','N', 0};
      if(value != value) {
-       ASSERT(*(CLDWORD*)&value == 0xe0000000); // #nan
+       ASSERT(*(CLDWORD*)&value == 0xe0000000 || *(u64*)&value == 0xfff8000000000000); // #nan
        // 没有的再加
        for(int i = 0; i < width; i++)
        {

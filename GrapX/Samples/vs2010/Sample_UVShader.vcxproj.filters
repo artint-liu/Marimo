@@ -33,6 +33,8 @@
     <ClInclude Include="..\..\UniVersalShader\ExpressionParser.h">
       <Filter>sources</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\UniVersalShader\ArithmeticExpression.h" />
+    <ClInclude Include="..\..\UniVersalShader\ArithmeticExpression.h">
+      <Filter>sources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

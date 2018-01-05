@@ -108,6 +108,7 @@ namespace UVShader
   };
 #endif
 
+#if 0
   const CTokens::T_LPCSTR c_StorageClass =
     "extern\0nointerpolation\0precise\0shared\0groupshared\0static\0uniform\0volatile\0";
 
@@ -151,6 +152,7 @@ namespace UVShader
     {StreamCategory_OneToken, NULL},
     {StreamCategory_End, NULL},
   };
+#endif
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -1907,7 +1909,7 @@ NOT_INC_P:
 
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_While, &A, &B);
 
-    DbgDumpScope("while", sConditional, sBlock);
+    DbgDumpScope("while", sConditional, sBlock); // 可能会输出[{...]的情况, 因为end='}'不包含在输出中
     return bret ? sBlock.end : RTSCOPE::npos;
   }
   

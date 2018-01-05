@@ -107,9 +107,9 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::ArithmeticExpression:
     strOut.Format("%s %s", str[0], str[1]);
     break;
 
-  case SYNTAXNODE::MODE_DefinitionConst:
-    strOut.Format("const %s %s", str[0], str[1]);
-    break;
+  //case SYNTAXNODE::MODE_DefinitionConst:
+  //  strOut.Format("const %s %s", str[0], str[1]);
+  //  break;
 
   case SYNTAXNODE::MODE_Flow_If:
     strOut.Format("if(%s) ", str[0]);
@@ -382,6 +382,46 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
                 const auto& definition = s.defn;
                 clStringA str;
                 DumpBlock(&expp, definition.sRoot.un.pNode, 0, 0, &str);
+                switch(s.defn.storage_class)
+                {
+                case UVShader::CodeParser::VariableStorageClass_extern:
+                  file.WritefA("%s ", "extern");
+                  break;
+                case UVShader::CodeParser::VariableStorageClass_nointerpolation:
+                  file.WritefA("%s ", "nointerpolation");
+                  break;
+                case UVShader::CodeParser::VariableStorageClass_precise:
+                  file.WritefA("%s ", "precise");
+                  break;
+                case UVShader::CodeParser::VariableStorageClass_shared:
+                  file.WritefA("%s ", "shared");
+                  break;
+                case UVShader::CodeParser::VariableStorageClass_groupshared:
+                  file.WritefA("%s ", "groupshared");
+                  break;
+                case UVShader::CodeParser::VariableStorageClass_static:
+                  file.WritefA("%s ", "static");
+                  break;
+                case UVShader::CodeParser::VariableStorageClass_uniform:
+                  file.WritefA("%s ", "uniform");
+                  break;
+                case UVShader::CodeParser::VariableStorageClass_volatile:
+                  file.WritefA("%s ", "volatile");
+                  break;
+                }
+
+                switch(s.defn.modifier)
+                {
+                case UVShader::CodeParser::UniformModifier_const:
+                  file.WritefA("%s ", "const");
+                  break;
+                case UVShader::CodeParser::UniformModifier_row_major:
+                  file.WritefA("%s ", "row_major");
+                  break;
+                case UVShader::CodeParser::UniformModifier_column_major:
+                  file.WritefA("%s ", "column_major");
+                  break;
+                }
                 file.WritefA("%s", str);
                 /*
                 file.WritefA("%s %s", definition.szType, definition.szName);

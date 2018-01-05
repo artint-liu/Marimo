@@ -288,8 +288,8 @@ SAMPLE_EXPRESSION samplesOpercode[] = {
   {0, _I_, "n- --i",     4, aOperStack_OC004},// n=10, i=3, 结果7
   {0, _I_, "n--- --i",   5, aOperStack_OC005},// n=9, i=3, 结果7
   {0, _I_, "n--- - --i", 6},// n=9, i=3, 结果13
-  {0, _I_, ";", 1},
-  {0, _I_, ";;", 2},
+  //{0, _I_, ";", 1},
+  //{0, _I_, ";;", 2},
   {NULL},};
 
 SAMPLE_EXPRESSION samplesNumeric[] = {
@@ -370,9 +370,9 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "float3 a=b=c=d", 8},
   {0, _I_, "float a,b,c,d,e", 10},
   {0, _I_, "float a, b = c", 6},
-  {0, _I_, "(a)=a+b;", 0},
-  {0, _I_, "(a=a+b);", 0},
-  {0, _I_, "a=a+b;b=a-c*d;c=a*d;", 20},
+  {0, _I_, "(a)=a+b", 0},
+  {0, _I_, "(a=a+b)", 0},
+  //{0, _I_, "a=a+b;b=a-c*d;c=a*d;", 20}, // 不再支持
   //{0, _I_, "(a=a+b);(b=a-c*d);c=a*d;", 24},
 
   // 定义
@@ -387,31 +387,31 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   //{0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21},
   {0, _I_, NULL,  0},};
 
-SAMPLE_EXPRESSION samplesIfExpression[] = {
-  {0, _I_, "if(a == b && c + d > e)", 12, aOperStack_HasError}, // error
-  {0, _I_, "if(a == b && c + d > e) b=c;", 16, aOperStack_if001},
-  {0, _I_, "if(a == b && c + d > e) b=c; a=4*a;", 22},
-  {0, _I_, "if(a == b && c + d > e) { b=c; a=4*a; }", 24},
-
-  {0, _I_, "if(a > b) c = a; if(a < b) c = b;", 20, aOperStack_if004},
-
-  {0, _I_, "if(a > b) else a = b;", 11, aOperStack_HasError}, // error
-  {0, _I_, "if(a == b && c + d > e) b=c; else a = b;", 21, aOperStack_if006},
-  {0, _I_, "if(a == b && c + d > e) b=c; a=4*a; else a = b;", 27, aOperStack_HasError}, // error
-  {0, _I_, "if(a == b && c < d) { b=c; a=4*a; } else a = b;", 27, aOperStack_if007},
-
-  {0, _I_, "if(a == b) else if(a > b) a = b;", 17, aOperStack_HasError}, // error
-  {0, _I_, "if(a == b) r=c; else if(a > b) r = a; else r = b;", 26, aOperStack_if008},
-  {0, _I_, "if(a == b) b=c; a=4*a; else if(a > b) a = b else a = b;", 31, aOperStack_HasError}, // error
-  {0, _I_, "if(a == b) { b=c; a=4*a; } else if(a > b) a = b; else a = c;", 34, aOperStack_if009},
-  {0, _I_, "while(a - b * c)", 8, aOperStack_HasError},
-  //{0, "switch(a - b * c)", 8},
-  {0, _I_, NULL,  0},
-  {0, _I_, "",    0},
-  {0, _I_, "",    0},
-  {0, _I_, "",    0},
-  {0, _I_, "",    0},
-};
+//SAMPLE_EXPRESSION samplesIfExpression[] = {
+//  {0, _I_, "if(a == b && c + d > e)", 12, aOperStack_HasError}, // error
+//  {0, _I_, "if(a == b && c + d > e) b=c;", 16, aOperStack_if001},
+//  {0, _I_, "if(a == b && c + d > e) b=c; a=4*a;", 22},
+//  {0, _I_, "if(a == b && c + d > e) { b=c; a=4*a; }", 24},
+//
+//  {0, _I_, "if(a > b) c = a; if(a < b) c = b;", 20, aOperStack_if004},
+//
+//  {0, _I_, "if(a > b) else a = b;", 11, aOperStack_HasError}, // error
+//  {0, _I_, "if(a == b && c + d > e) b=c; else a = b;", 21, aOperStack_if006},
+//  {0, _I_, "if(a == b && c + d > e) b=c; a=4*a; else a = b;", 27, aOperStack_HasError}, // error
+//  {0, _I_, "if(a == b && c < d) { b=c; a=4*a; } else a = b;", 27, aOperStack_if007},
+//
+//  {0, _I_, "if(a == b) else if(a > b) a = b;", 17, aOperStack_HasError}, // error
+//  {0, _I_, "if(a == b) r=c; else if(a > b) r = a; else r = b;", 26, aOperStack_if008},
+//  {0, _I_, "if(a == b) b=c; a=4*a; else if(a > b) a = b else a = b;", 31, aOperStack_HasError}, // error
+//  {0, _I_, "if(a == b) { b=c; a=4*a; } else if(a > b) a = b; else a = c;", 34, aOperStack_if009},
+//  {0, _I_, "while(a - b * c)", 8, aOperStack_HasError},
+//  //{0, "switch(a - b * c)", 8},
+//  {0, _I_, NULL,  0},
+//  {0, _I_, "",    0},
+//  {0, _I_, "",    0},
+//  {0, _I_, "",    0},
+//  {0, _I_, "",    0},
+//};
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -467,15 +467,15 @@ GXLPCSTR aOperStack_FOR004[] = {
   NULL};
 
 
-SAMPLE_EXPRESSION samplesForExpression[] = {
-  //{0, ";;;;;",    0},
-  {0, _I_, "for(;;);", 0, aOperStack_FOR000},
-  {0, _I_, "for(int i = 0; i < 10; i++) n = a+b*c;", 0, aOperStack_FOR001},
-  {0, _I_, "for(int i = 0; i < 10; i++) n = a+b*c;", 0, aOperStack_FOR002},
-  {0, _I_, "for(int i = 0; i < 10; i++) {n = a+b*c;}", 0, aOperStack_FOR002},
-  {0, _I_, "for(int i = 0, int n = 10; i < 10, n >= 0; i++, --n) {r = a+b*c + n; if(n < 5) { out(n);} }", 0, aOperStack_FOR004},
-  {0, _I_, NULL,  0},
-};
+//SAMPLE_EXPRESSION samplesForExpression[] = {
+//  //{0, ";;;;;",    0},
+//  {0, _I_, "for(;;);", 0, aOperStack_FOR000},
+//  {0, _I_, "for(int i = 0; i < 10; i++) n = a+b*c;", 0, aOperStack_FOR001},
+//  {0, _I_, "for(int i = 0; i < 10; i++) n = a+b*c;", 0, aOperStack_FOR002},
+//  {0, _I_, "for(int i = 0; i < 10; i++) {n = a+b*c;}", 0, aOperStack_FOR002},
+//  {0, _I_, "for(int i = 0, int n = 10; i < 10, n >= 0; i++, --n) {r = a+b*c + n; if(n < 5) { out(n);} }", 0, aOperStack_FOR004},
+//  {0, _I_, NULL,  0},
+//};
 
 SAMPLE_EXPRESSION samplesExpression[] = {
   {0, _I_, "(Output.LdotN*shadowFactor)+Output.Ambient+Output.Specular*shadowFactor", 17},
@@ -488,7 +488,7 @@ SAMPLE_EXPRESSION samplesExpression[] = {
   {0, _I_, "Output.color.rgb = L * g_vLightDiffuse * g_fSunIntensity", 11, aOperStack_017},
   {0, _I_, "Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", 26, aOperStack_018},
   {0, _I_, "float4 c = Output.Diffuse * ((Output.LdotN * shadowFactor) + Output.Ambient + Output.Specular * shadowFactor)", 26},
-  {0, _I_, "float4 c = Output.Diffuse * (Output.LdotN + Output.Ambient);", 17},
+  {0, _I_, "float4 c = Output.Diffuse * (Output.LdotN + Output.Ambient)", 16},
   {0, _I_, "float4 Diffuse = tex2D(MainSampler, Input.TexUV) * Input.Color", 15},
   {0, _I_, "Output.uvSM.x = (Output.uvSM.x + Output.uvSM.w) * 0.5", 21},
   {0, _I_, "float blend = clamp((d - deformation.blending.x) / deformation.blending.y, 0.0, 1.0)", 25},
@@ -511,8 +511,8 @@ SAMPLE_EXPRESSION samplesExpression[] = {
 
   {0, _I_, "float4 cst = rmu < 0.0 && delta > 0.0 ? float4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : float4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU))", 49, aOperStack_361},
   {0, _I_, "float3 data = viewdir.z > 0.0 ? tex2D(glareSampler, float2(0.5,0.5) + viewdir.xy * 4.0).rgb : float3(0.0,0.0,0.0)", 37, aOperStack_362},
-  {0, _I_, NULL,  0},
-  {0, _I_, "return mix(a.x, a.y, f.z);", 0, aOperStack_Return0100},
+
+  {0, _I_, "return mix(a.x, a.y, f.z)", 0, aOperStack_Return0100},
   {0, _I_, "return sumWeight > 0.0 ? sumWeightedSlopes / sqrt(sumWeight) : texture2DGrad(river.wave.patternTex, p.xy / river.wave.length, gradx, grady).xy", 36, aOperStack_360},
   {0, _I_, "return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG*mieG) * pow(1.0 + (mieG*mieG) - 2.0*mieG*mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG*mieG)", 56},
   {0, _I_, "return float4(  c.xyz * Input.E.xyz  + Input.I.xyz, Output.Diffuse.w)", 25},
@@ -521,6 +521,7 @@ SAMPLE_EXPRESSION samplesExpression[] = {
   {0, _I_, "return (BetaR(Theta) + BetaM(Theta)) / (vBetaRay + vBetaMie)", 18},
   {0, _I_, "return exp( -(vBetaRay * SR + vBetaMie * SM))", 14},
   {0, _I_, "return ((BetaR(Theta) + BetaM(Theta)) * (1.0f - exp(-(vBetaRay * SR + vBetaMie * SM)))) / (vBetaRay + vBetaMie)", 38},
+  {0, _I_, NULL,  0},
   {0, _I_, "",    0},
   {0, _I_, "",    0},
   {0, _I_, "",    0},

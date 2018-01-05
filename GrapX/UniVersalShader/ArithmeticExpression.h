@@ -239,9 +239,12 @@ namespace UVShader
 
       const static int s_NumOfOperand = 2;
 
-      GXDWORD magic : 16; // 0xffff
       MODE    mode  : 16;
+      GXDWORD magic : 16; // 0xffff
       const TOKEN* pOpcode;
+#ifdef _DEBUG
+      size_t  id;
+#endif
 
       union UN {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型

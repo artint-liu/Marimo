@@ -30,8 +30,8 @@ namespace DigitalParsing
 extern SAMPLE_EXPRESSION samplesNumeric[];
 extern SAMPLE_EXPRESSION samplesOpercode[];
 extern SAMPLE_EXPRESSION samplesExpression[];
-extern SAMPLE_EXPRESSION samplesIfExpression[];
-extern SAMPLE_EXPRESSION samplesForExpression[];
+//extern SAMPLE_EXPRESSION samplesIfExpression[];
+//extern SAMPLE_EXPRESSION samplesForExpression[];
 extern SAMPLE_EXPRESSION samplesSimpleExpression[];
 
 // 使用继承类为了暴露ParseStatementAs_Expression接口进行测试
@@ -337,7 +337,9 @@ int _tmain(int argc, _TCHAR* argv[])
   // 数学表达式解析
   //
 #ifdef TEST_ARITHMETIC_PARSING
+
   // 2015/10/06 改为只测试数学表达式
+  // 不再支持分号分隔的多语句测试
   TestExpressionParser(samplesOpercode);
   TestExpressionParser(samplesNumeric);
   TestExpressionParser(samplesSimpleExpression);
