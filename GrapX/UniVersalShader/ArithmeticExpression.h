@@ -250,6 +250,28 @@ namespace UVShader
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
         const TOKEN*  pTokn;
+
+        GXBOOL IsToken() const
+        {
+          return pNode && pNode->magic != FLAG_OPERAND_MAGIC;
+        }
+
+        GXBOOL IsNode() const
+        {
+          return pNode && pNode->magic == FLAG_OPERAND_MAGIC;
+        }
+
+        inline FLAGS GetType() const
+        {
+          if(pNode) {
+            return (pNode->magic == FLAG_OPERAND_MAGIC)
+              ? FLAG_OPERAND_IS_NODE 
+              : FLAG_OPERAND_IS_TOKEN;
+          }
+          else {
+            return FLAG_OPERAND_UNDEFINED;
+          }
+        }
       };
 
       struct DESC {
@@ -258,23 +280,13 @@ namespace UVShader
           un.pTokn = &token;
           return *this;
         }
-
-        GXBOOL IsToken() const
-        {
-          return un.pNode && un.pNode->magic != FLAG_OPERAND_MAGIC;
-        }
-
-        GXBOOL IsNode() const
-        {
-          return un.pNode && un.pNode->magic == FLAG_OPERAND_MAGIC;
-        }
       };
 
       UN Operand[s_NumOfOperand];
 
-      inline FLAGS GetOperandType(const int index) const {
-        return Operand[index].pNode->magic == FLAG_OPERAND_MAGIC ? FLAG_OPERAND_IS_NODE : FLAG_OPERAND_IS_TOKEN;
-      }
+      //inline FLAGS GetOperandType(const int index) const {
+      //  return Operand[index].pNode->magic == FLAG_OPERAND_MAGIC ? FLAG_OPERAND_IS_NODE : FLAG_OPERAND_IS_TOKEN;
+      //}
 
 
       inline void Clear()
@@ -291,7 +303,7 @@ namespace UVShader
         if(func(pNode)) {
           int i = 0;
           do {
-            auto type = pNode->GetOperandType(i);
+            auto type = pNode->Operand[i].GetType();
             if(type == FLAG_OPERAND_IS_NODE) {
               RecursiveNode(pParser, pNode->Operand[i].pNode, func);
             }

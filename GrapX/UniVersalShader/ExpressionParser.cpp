@@ -648,40 +648,36 @@ namespace UVShader
     return TRUE;
   }
 
-//#define AAA(a,b) a b
   GXBOOL CodeParser::TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end)
   {
     if(it_begin->type == TOKEN::TokenType_String || TEST_FLAG(m_dwState, AttachFlag_NotExpandMacro) || ! m_ExpandedStream.empty()) {
       return FALSE;
     }
 
-    if( ! (ctx_out.pMacro = FindMacro(*it_begin))) {
+    // 没有找到同名宏定义
+    if(_CL_NOT_(ctx_out.pMacro = FindMacro(*it_begin))) {
       return FALSE;
     }
 
-    //clStringA strTokenName = it_begin->ToString();
-
-    //auto itMacro = m_Macros.find(strTokenName);
-    //if(itMacro == m_Macros.end()) {
-    //  return FALSE;
-    //}
-
     TOKEN::List::iterator it = it_begin;
-    //ctx_out.pMacro = &itMacro->second;
-    ctx_out.stream.clear();
-    ctx_out.ActualParam.clear();
 
     if(ctx_out.pMacro->aFormalParams.empty())
     {
+      ctx_out.ActualParam.clear();
       ++it;
     }
     else
     {
       ++it;
-      if(*it != '(' || it == it_end) {
+      //if(*it != '(' || it == it_end) {
+      if(it == it_end) {
         OutputErrorW(*it, E2008_宏定义中的意外_vs, clStringW(it->ToString()));
         *it_out = it;
         return TRUE;
+      }
+      else if(*it != '(') {
+        // 宏定义有形参"r(a)", 但是代码中非函数形式"r=x"形式的调用不认为是宏
+        return FALSE;
       }
 
       if(++it == it_end) {
@@ -696,6 +692,7 @@ namespace UVShader
       // 准备宏实参表
       //
       TOKEN::List ll;
+      ctx_out.ActualParam.clear();
       ctx_out.ActualParam.reserve(ctx_out.pMacro->aFormalParams.size() * 2); // 预估
       ctx_out.ActualParam.push_back(ll);
       for(; it != it_end; ++it)
@@ -724,6 +721,7 @@ namespace UVShader
       }
     } // if(ctx.pMacro->aFormalParams.empty())
 
+    ctx_out.stream.clear();
     ExpandMacro(ctx_out);
     *it_out = it;
     return TRUE;
@@ -932,7 +930,7 @@ namespace UVShader
       m_aStatements.push_back(stat);
 
       auto it = sDefinitionList.end();
-      ASSERT(front->GetOperandType(0) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
+      ASSERT(front->Operand[0].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
       for(--it; it != sDefinitionList.begin(); --it)
       {
         SYNTAXNODE& SyntaxNode = **it;
@@ -1371,7 +1369,7 @@ NOT_INC_P:
     {
       if(pNode->Operand[i].pTokn) {
         //const auto flag = TryGetNodeType(&pNode->Operand[i]);
-        const auto flag = pNode->GetOperandType(i);
+        const auto flag = pNode->Operand[i].GetType();
         if(flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
           str[i] = pNode->Operand[i].pTokn->ToString();
         }
@@ -2316,6 +2314,7 @@ NOT_INC_P:
     else if(tokens.front() == PREPROCESS_file) {
       if(tokens.size() != 2) {
         // ERROR: #file 格式不正确
+        OutputErrorW(tokens.front(), 9999, __FILEW__, __LINE__);
       }
 
       clStringW strW = tokens[1].ToString();
@@ -2325,6 +2324,7 @@ NOT_INC_P:
     else if(tokens.front() == PREPROCESS_line) {
       if(tokens.size() != 2) {
         // ERROR: #line 格式不正确
+        OutputErrorW(tokens.front(), 9999, __FILEW__, __LINE__);
       }
 
       GXINT nLine = tokens[1].ToString().ToInteger();
@@ -2579,9 +2579,9 @@ NOT_INC_P:
     {
       if(*(pNode->Operand[0].pTokn) == PREPROCESS_defined)
       {
-        ASSERT(pNode->GetOperandType(0) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
+        ASSERT(pNode->Operand[0].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
 
-        if(pNode->GetOperandType(1) != SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+        if(pNode->Operand[1].GetType() != SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
           OutputErrorW(*pNode->Operand[0].pTokn, E2004_应输入_defined_id);
           return FALSE;
         }
@@ -2611,7 +2611,7 @@ NOT_INC_P:
 
 
     VALUE v;
-    if(sDesc.IsToken()) {
+    if(sDesc.un.IsToken()) {
       // TODO: 测试 sDesc.un.pSym 能解析为一个数字，如果定义不为数字需要报错
       v = *sDesc.un.pTokn;
     }
@@ -2633,10 +2633,8 @@ NOT_INC_P:
   CodeParser::T_LPCSTR CodeParser::PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end)
   {
     // session 调用 Macro_SkipConditionalBlock 所处的状态，这个决定了跳过多少预处理指令
-    //typedef clstack<PPCondRank> RankStack;  // 预处理命令嵌套堆栈
-    //RankStack sRankStack;
+
     UINT depth = 0;
-    //PPCondRank rank = PPCondRank_Empty;
     T_LPCSTR p = begin;
     for(; p < end; ++p)
     {
@@ -2661,9 +2659,7 @@ NOT_INC_P:
       // if 要放在 ifdef, ifndef 后面
       if(CompareString(p, PREPROCESS_ifdef, 5) || CompareString(p, PREPROCESS_ifndef, 6) || CompareString(p, PREPROCESS_if, 2))
       {
-        //pp_stack.push(p);
         depth++;
-        //sRankStack.push(PPCondRank_if);
       }
       else if(CompareString(p, PREPROCESS_elif, str_elif_len))
       {
@@ -2676,6 +2672,7 @@ NOT_INC_P:
 
         if(session > PPCondRank_elif) {
           // ERROR: fatal error C1018: 意外的 #elif
+          OutputErrorW(p, E9999_未定义错误_vsd, __FILEW__, __LINE__);
           CLBREAK;
         }
         session = PPCondRank_elif;
@@ -2736,6 +2733,26 @@ NOT_INC_P:
 
         p += 5; // "endif" 长度
         break;
+      }
+      else if(CompareString(p, PREPROCESS_line, 4) || CompareString(p, PREPROCESS_file, 4))
+      {
+        p += 4; // "line"/"file" 长度
+        continue;
+      }
+      else if(CompareString(p, PREPROCESS_undef, 5) || CompareString(p, PREPROCESS_error, 5))
+      {
+        p += 5; // "error"/"undef"  长度
+        continue;
+      }
+      else if(CompareString(p, PREPROCESS_define, 6) || CompareString(p, PREPROCESS_pragma, 6))
+      {
+        p += 6; // "define"/"pragma" 长度
+        continue;
+      }
+      else if(CompareString(p, PREPROCESS_include, 7) || CompareString(p, PREPROCESS_message, 7))
+      {
+        p += 7; // "message"/"include" 长度
+        continue;
       }
       else {
         // ERROR: 无效的预处理命令

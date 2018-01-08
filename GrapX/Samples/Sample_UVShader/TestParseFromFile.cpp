@@ -69,7 +69,7 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::ArithmeticExpression:
   {
     if(pNode->Operand[i].ptr) {
       //if(pExpp->TryGetNodeType(&pNode->Operand[i]) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-      if(pNode->GetOperandType(i) == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+      if(pNode->Operand[i].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
         str[i].Append(pNode->Operand[i].pTokn->ToString());
       }
       else {

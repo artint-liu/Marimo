@@ -210,7 +210,7 @@ namespace UVShader
 
   const ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::TryGetNode(const SYNTAXNODE::DESC* pDesc) const
   {
-    if(pDesc->IsNode()) {
+    if(pDesc->un.IsNode()) {
       return pDesc->un.pNode;
     }
     return NULL;
@@ -218,7 +218,7 @@ namespace UVShader
 
   ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNodeMode(const SYNTAXNODE::DESC* pDesc) const
   {
-    if(pDesc->IsNode()) {
+    if(pDesc->un.IsNode()) {
       return pDesc->un.pNode->mode;
     }
     return SYNTAXNODE::MODE_Undefined;

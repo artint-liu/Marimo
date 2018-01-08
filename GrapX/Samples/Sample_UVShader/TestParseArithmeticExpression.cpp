@@ -20,14 +20,15 @@ public:
     m_aDbgExpressionOperStack.clear();
     m_aCommand.clear();
     STATEMENT stat = {StatementType_Expression};
+    TRACE("--- 解析树 ---\n"); // 解析时生成的树
     GXBOOL bret = ParseArithmeticExpression(*pScope, &stat.expr.sRoot);
     if( ! bret)
     {
       TRACE("编译错误\n");
       m_aDbgExpressionOperStack.clear();
     }
-    else if(stat.expr.sRoot.IsNode() && stat.expr.sRoot.un.pNode) {
-      TRACE("---\n");
+    else if(stat.expr.sRoot.un.IsNode() && stat.expr.sRoot.un.pNode) {
+      TRACE("--- 内存树 ---\n"); // 重新输出的内存树结构
       DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.un.pNode, 0);
     }
     *pStat = stat;
@@ -107,14 +108,30 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     // 表达式解析
     UVShader::CodeParser::RTSCOPE scope(0, pTokens->size());
     UVShader::CodeParser::STATEMENT stat;
-    expp.TestParseExpression(&stat, &scope);
+    GXBOOL bCompilation = expp.TestParseExpression(&stat, &scope);
+    if(pSamples[i].szResult != NULL)
+    {
+      if(GXSTRCMP(pSamples[i].szResult, "FAILED") == 0)
+      {
+        ASSERT(_CL_NOT_(bCompilation));
+      }
+      else if(GXSTRCMP(pSamples[i].szResult, "OK") == 0)
+      {
+        ASSERT(bCompilation);
+      }
+      else
+      {
+        // 避免结构体初始化串位置, 所以这个在非NULL情况下只能二选一
+        CLBREAK;
+      }
+    }
 
     const clStringArrayA& dbg_stack = expp.DbgGetExpressionStack();
 
     // 检查操作堆栈
     if(pSamples[i].aOperStack)
     {
-
+      TRACE("--- 对比语法列表 ---\n");
       int W0 = MeasureStringsWidth(pSamples[i].aOperStack);
       int W1 = MeasureStringsWidth(dbg_stack);
 
@@ -139,6 +156,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
       ASSERT( ! pSamples[i].aOperStack[n]);
     }
     else {
+      TRACE("--- 输出语法列表(没有参考列表) ---\n");
       for(auto it = expp.m_aCommand.begin(); it != expp.m_aCommand.end(); ++it)
       {
         TRACE("%s\n", *it);
@@ -183,9 +201,11 @@ namespace DigitalParsing
     {"-9223372036854775809", ArithmeticExpression::VALUE::State_Overflow},
     {"18446744073709551616", ArithmeticExpression::VALUE::State_Overflow},
     {"184467440737095516140", ArithmeticExpression::VALUE::State_Overflow},
+    
+    // 浮点
     {"1e18", ArithmeticExpression::VALUE::State_OK},
     {"1e19", ArithmeticExpression::VALUE::State_OK},
-    {"2e19", ArithmeticExpression::VALUE::State_Overflow},
+    {"2e19", ArithmeticExpression::VALUE::State_OK},
 
     // 浮点
     {"123.456", ArithmeticExpression::VALUE::State_OK},
@@ -239,6 +259,8 @@ namespace DigitalParsing
       {
         str.Format("\"%s\" => XXX(failed)\t\t%d|%d", aSampleDigitals[i].str, aSampleDigitals[i].state, state);
       }
+
+      ASSERT(aSampleDigitals[i].state == state);
 
       TRACE(str.AppendFormat("%s\n", aSampleDigitals[i].state == state ? "" : " (X)"));
     }

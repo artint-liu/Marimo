@@ -123,6 +123,51 @@ GXLPCSTR aOperStack_350[] = {
   "[?] [a] [b?d:e:c?f:g]",
   NULL, };
 
+GXLPCSTR aSyntaxList_400[] = {
+  "[+] [b] [c]",
+  "[=] [a] [b+c]",
+  NULL };
+
+GXLPCSTR aSyntaxList_401[] = {
+  "[=] [c] [d]",
+  "[=] [b] [c=d]",
+  "[=] [a] [b=c=d]",
+  NULL };
+
+GXLPCSTR aSyntaxList_403[] = {
+  "[+] [b] [c]",
+  "[=] [a] [b+c]",
+  NULL };
+
+GXLPCSTR aSyntaxList_404[] = {
+  "[=] [c] [d]",
+  "[=] [b] [c=d]",
+  "[=] [a] [b=c=d]",
+  NULL };
+
+GXLPCSTR aSyntaxList_405[] = {
+  "[,] [a] [b]",
+  "[,] [a,b] [c]",
+  "[,] [a,b,c] [d]",
+  "[,] [a,b,c,d] [e]",
+  NULL };
+
+GXLPCSTR aSyntaxList_406[] = {
+  "[=] [b] [c]",
+  "[,] [a] [b=c]",
+  NULL };
+
+GXLPCSTR aSyntaxList_407[] = {
+  "[+] [a] [b]",
+  "[=] [(a)] [a+b]",
+  NULL };
+
+GXLPCSTR aSyntaxList_408[] = {
+  "[+] [a] [b]",
+  "[=] [a] [a+b]",
+  NULL };
+
+
 GXLPCSTR aOperStack_360[] = {
   "[>] [sumWeight] [0.0]",
   "[F] [sqrt] [sumWeight]",
@@ -260,6 +305,11 @@ GXLPCSTR aOperStack_OC001[] = {
   "[,] [i=4] [n=10]",
   NULL, };
 
+GXLPCSTR aOperStack_OC002[] = {
+  "[-] [] [i]",
+  "[-] [n] [-i]",
+  NULL, };
+
 GXLPCSTR aOperStack_OC003[] = {
   "[--] [n] []",
   "[-] [n--] [i]",
@@ -277,12 +327,41 @@ GXLPCSTR aOperStack_OC005[] = {
   "[-] [n--] [--i]",
   NULL, };
 
+GXLPCSTR aOperList_396[] = {
+  "[:] [texcoord] [TEXCOORD0]",
+  "[:] [pos] [POSITION0]",
+  "[,] [texcoord:TEXCOORD0] [pos:POSITION0]",
+  NULL, };
+
+GXLPCSTR aOperList_397[] = {
+  "[:] [texcoord] [TEXCOORD0]",
+  "[,] [0] [0]",
+  "[F] [float2] [0,0]",
+  "[=] [texcoord:TEXCOORD0] [float2(0,0)]",
+  "[:] [pos] [POSITION0]",
+  "[,] [320] [240]",
+  "[F] [float2] [320,240]",
+  "[=] [pos:POSITION0] [float2(320,240)]",
+  "[,] [texcoord:TEXCOORD0=float2(0,0)] [pos:POSITION0=float2(320,240)]",
+  NULL, };
+
+GXLPCSTR aOperStack_403[] = {
+  "[*] [2] [3]",
+  "[I] [freqs] [2*3]",
+  "[,] [12] [8]",
+  "[,] [12,8] [4]",
+  "[,] [12,8,4] [5]",
+  "[,] [12,8,4,5] [3]",
+  "[,] [12,8,4,5,3] [9]",
+  "[=] [freqs[2*3]] [{12,8,4,5,3,9}]",
+  NULL, };
+
 #define _I_ __FILE__,__LINE__
 
 SAMPLE_EXPRESSION samplesOpercode[] = {
   {0, _I_, "i=4, n=10",  7, aOperStack_OC001}, // 下面的例子就是这里的初始值
-  {0, _I_, "n--i",       3},// err
-  {0, _I_, "n- -i",      4},
+  {0, _I_, "n--i",       3, NULL, "FAILED"},// err
+  {0, _I_, "n- -i",      4, aOperStack_OC002},
   {0, _I_, "n---i",      4, aOperStack_OC003},// n=9, i=4, 结果6
   {0, _I_, "n-- -i",     4, aOperStack_OC003},// n=9, i=4, 结果6
   {0, _I_, "n- --i",     4, aOperStack_OC004},// n=10, i=3, 结果7
@@ -363,27 +442,27 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "a?b?d:e:c?f:g", 13, aOperStack_350},
 
   // 赋值
-  {0, _I_, "a=b+c", 5},
-  {0, _I_, "a=b=c=d", 7},
+  {0, _I_, "a=b+c", 5, aSyntaxList_400},
+  {0, _I_, "a=b=c=d", 7, aSyntaxList_401},
   {0, _I_, "float a", 2},
-  {0, _I_, "float a=b+c", 6},
-  {0, _I_, "float3 a=b=c=d", 8},
-  {0, _I_, "float a,b,c,d,e", 10},
-  {0, _I_, "float a, b = c", 6},
-  {0, _I_, "(a)=a+b", 0},
-  {0, _I_, "(a=a+b)", 0},
+  {0, _I_, "float a=b+c", 6, aSyntaxList_403},
+  {0, _I_, "float3 a=b=c=d", 8, aSyntaxList_404},
+  {0, _I_, "float a,b,c,d,e", 10, aSyntaxList_405},
+  {0, _I_, "float a, b = c", 6, aSyntaxList_406},
+  {0, _I_, "(a)=a+b", 7, aSyntaxList_407},
+  {0, _I_, "(a=a+b)", 7, aSyntaxList_408},
   //{0, _I_, "a=a+b;b=a-c*d;c=a*d;", 20}, // 不再支持
   //{0, _I_, "(a=a+b);(b=a-c*d);c=a*d;", 24},
 
   // 定义
-  {0, _I_, "float2 texcoord : TEXCOORD0, pos : POSITION0", 8, NULL},
-  {0, _I_, "float2 texcoord : TEXCOORD0 = float2(0,0), pos : POSITION0 = float2(320, 240)", 0, NULL},
+  {0, _I_, "float2 texcoord : TEXCOORD0, pos : POSITION0", 8, aOperList_396},
+  {0, _I_, "float2 texcoord : TEXCOORD0 = float2(0,0), pos : POSITION0 = float2(320, 240)", 0, aOperList_397},
   {0, _I_, "float freqs, time, frame, fps", 8, NULL},
   {0, _I_, "float freqs[8], time[4]", 10},
   {0, _I_, "float freqs[16]", 5},
   {0, _I_, "float freqs[16][8]", 8},
   {0, _I_, "float freqs[] = {12, 3, 5}", 12},
-  {0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21},
+  {0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21, aOperStack_403},
   //{0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21},
   {0, _I_, NULL,  0},};
 
@@ -477,6 +556,54 @@ GXLPCSTR aOperStack_FOR004[] = {
 //  {0, _I_, NULL,  0},
 //};
 
+GXLPCSTR aSyntaxList_566[] = {
+  //"float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S))"
+  "[F] [float] [RES_MU_S]",
+  "[/] [0.5] [float(RES_MU_S)]",
+  "[-] [] [0.1975]",
+  "[,] [muS] [-0.1975]",
+  "[F] [max] [muS,-0.1975]",
+  "[*] [1.26] [1.1]",
+  "[F] [tan] [1.26*1.1]",
+  "[*] [max(muS,-0.1975)] [tan(1.26*1.1)]",
+  "[F] [atan] [max(muS,-0.1975)*tan(1.26*1.1)]",
+  "[/] [atan(max(muS,-0.1975)*tan(1.26*1.1))] [1.1]",
+  "[-] [1.0] [0.26]",
+  "[+] [atan(max(muS,-0.1975)*tan(1.26*1.1))/1.1] [(1.0-0.26)]",
+  "[*] [(atan(max(muS,-0.1975)*tan(1.26*1.1))/1.1+(1.0-0.26))] [0.5]",
+  "[F] [float] [RES_MU_S]",
+  "[/] [1.0] [float(RES_MU_S)]",
+  "[-] [1.0] [1.0/float(RES_MU_S)]",
+  "[*] [(atan(max(muS,-0.1975)*tan(1.26*1.1))/1.1+(1.0-0.26))*0.5] [(1.0-1.0/float(RES_MU_S))]",
+  "[+] [0.5/float(RES_MU_S)] [(atan(max(muS,-0.1975)*tan(1.26*1.1))/1.1+(1.0-0.26))*0.5*(1.0-1.0/float(RES_MU_S))]",
+  "[=] [uMuS] [0.5/float(RES_MU_S)+(atan(max(muS,-0.1975)*tan(1.26*1.1))/1.1+(1.0-0.26))*0.5*(1.0-1.0/float(RES_MU_S))]",
+  NULL};
+
+GXLPCSTR aSyntaxList_542[] = {
+  // "return tex3D(table, float3((uNu + uMuS) / float(RES_NU), uMu, uR)) * (1.0 - lerp) +  tex3D(table, float3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR)) * lerp"
+  "[+] [uNu] [uMuS]",
+  "[F] [float] [RES_NU]",
+  "[/] [(uNu+uMuS)] [float(RES_NU)]",
+  "[,] [(uNu+uMuS)/float(RES_NU)] [uMu]",
+  "[,] [(uNu+uMuS)/float(RES_NU),uMu] [uR]",
+  "[F] [float3] [(uNu+uMuS)/float(RES_NU),uMu,uR]",
+  "[,] [table] [float3((uNu+uMuS)/float(RES_NU),uMu,uR)]",
+  "[F] [tex3D] [table,float3((uNu+uMuS)/float(RES_NU),uMu,uR)]",
+  "[-] [1.0] [lerp]",
+  "[*] [tex3D(table,float3((uNu+uMuS)/float(RES_NU),uMu,uR))] [(1.0-lerp)]",
+  "[+] [uNu] [uMuS]",
+  "[+] [uNu+uMuS] [1.0]",
+  "[F] [float] [RES_NU]",
+  "[/] [(uNu+uMuS+1.0)] [float(RES_NU)]",
+  "[,] [(uNu+uMuS+1.0)/float(RES_NU)] [uMu]",
+  "[,] [(uNu+uMuS+1.0)/float(RES_NU),uMu] [uR]",
+  "[F] [float3] [(uNu+uMuS+1.0)/float(RES_NU),uMu,uR]",
+  "[,] [table] [float3((uNu+uMuS+1.0)/float(RES_NU),uMu,uR)]",
+  "[F] [tex3D] [table,float3((uNu+uMuS+1.0)/float(RES_NU),uMu,uR)]",
+  "[*] [tex3D(table,float3((uNu+uMuS+1.0)/float(RES_NU),uMu,uR))] [lerp]",
+  "[+] [tex3D(table,float3((uNu+uMuS)/float(RES_NU),uMu,uR))*(1.0-lerp)] [tex3D(table,float3((uNu+uMuS+1.0)/float(RES_NU),uMu,uR))*lerp]",
+  NULL};
+
 SAMPLE_EXPRESSION samplesExpression[] = {
   {0, _I_, "(Output.LdotN*shadowFactor)+Output.Ambient+Output.Specular*shadowFactor", 17},
   {0, _I_, "Input.Normal = (Input.Normal - 0.5) * 2.0", 13},
@@ -504,8 +631,8 @@ SAMPLE_EXPRESSION samplesExpression[] = {
   {0, _I_, "groundColor = treeBrdf(q, d, lcc, v, fn, WSD, vec3(0.0, 0.0, 1.0), reflectance, sunL, skyE)", 31},
   {0, _I_, "data.r += mod(dot(floor(deformation.offset.xy / deformation.offset.z + 0.5), vec2(1.0)), 2.0)", 33},
   {0, _I_, "float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / float(RES_MU))", 42},
-  {0, _I_, "float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S))", 50},
-  {0, _I_, "return tex3D(table, float3((uNu + uMuS      ) / float(RES_NU), uMu, uR)) * (1.0 - lerp) +  tex3D(table, float3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR)) * lerp", 56},
+  {0, _I_, "float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S))", 50, aSyntaxList_566},
+  {0, _I_, "return tex3D(table, float3((uNu + uMuS      ) / float(RES_NU), uMu, uR)) * (1.0 - lerp) +  tex3D(table, float3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR)) * lerp", 56, aSyntaxList_542},
   {0, _I_, "float2 y = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * float2(1.0, exp(-d/H*(d/(2.0*r)+mu)))", 47},
   {0, _I_, "m_fHue = m_fSaturation = m_fValue = 0.0",    7},
 
