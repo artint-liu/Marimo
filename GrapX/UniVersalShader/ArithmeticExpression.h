@@ -15,9 +15,19 @@
 #define ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动 CLBREAK
 //#define ERROR_MSG_C1021_无效的预处理器命令 
 
+#define E1004_意外的文件结束            1004
+#define E1016_ifdef_应输入标识符        1016
+#define E1017_无效的整数常数表达式      1017
+#define E1018_意外的_elif              1018
+#define E1019_意外的_else              1019
+#define E1020_意外的_endif             1020
+
 #define E1021_无效的预处理器命令_vs     1021
+
+
 #define E1050_缺少类型描述              1050
 #define E1189_用户定义错误_vs           1189
+
 #define E4006_undef应输入标识符         4006
 #define E4067_预处理器指令后有意外标记_应输入换行符 4067
 #define E2004_应输入_defined_id        2004
@@ -385,6 +395,8 @@ namespace UVShader
       VALUE(const TOKEN& token) { set(token); }
 
       void clear();
+      void SetZero();
+      void SetOne();
       State set(const TOKEN& token);
       VALUE& set(const VALUE& v);
       State SyncRank(Rank _type);  // 调整为到 type 指定的级别
@@ -455,7 +467,7 @@ namespace UVShader
     GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
-    GXBOOL  MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
     GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
     GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
@@ -478,9 +490,9 @@ namespace UVShader
     //clsize              GenerateTokens          ();
     const TOKEN::Array* GetTokensArray          () const;
 
-    GXBOOL  ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence); // 递归函数
+    GXBOOL  ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseArithmeticExpression(int depth, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseArithmeticExpression(int depth, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence); // 递归函数
 
     void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);

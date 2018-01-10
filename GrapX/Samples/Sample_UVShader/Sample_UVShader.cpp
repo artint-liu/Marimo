@@ -4,6 +4,7 @@
 
 #include <tchar.h>
 #include <conio.h>
+#include <locale.h>
 #include <Marimo.H>
 #include <Smart/SmartStream.h>
 #include <clTokens.h>
@@ -315,12 +316,22 @@ void TestDebris(GXBOOL bShowList)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+  setlocale(LC_ALL,"chs");
+
 #ifdef ENABLE_GRAPH
   using namespace Gdiplus;
   GdiplusStartupInput gdiplusStartupInput;
   ULONG_PTR gdiplusToken;
   GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 #endif // ENABLE_GRAPH
+
+  LPCWSTR szTestCasePath_$ = L"%OneDrive%\\Marimo-TestCase\\shaders";
+  WCHAR szTestCasePath[MAX_PATH] = {};
+
+  HANDLE hToken = INVALID_HANDLE_VALUE;
+  ExpandEnvironmentStrings(szTestCasePath_$, szTestCasePath, MAX_PATH);
+
+  b32 bRunBasicTest = (GetAsyncKeyState(VK_SHIFT) & 0x8000) == 0;
 
   int a = 1, b = 2, c = 3, d = 4;
 
@@ -340,17 +351,18 @@ int _tmain(int argc, _TCHAR* argv[])
 
   // 2015/10/06 改为只测试数学表达式
   // 不再支持分号分隔的多语句测试
-  TestExpressionParser(samplesOpercode);
-  TestExpressionParser(samplesNumeric);
-  TestExpressionParser(samplesSimpleExpression);
-  TestExpressionParser(samplesExpression);
+  if(bRunBasicTest)
+  {
+    TestExpressionParser(samplesOpercode);
+    TestExpressionParser(samplesNumeric);
+    TestExpressionParser(samplesSimpleExpression);
+    TestExpressionParser(samplesExpression);
+  }
 
   // if/for 表达式不在这里测试了！
   //TestExpressionParser(samplesIfExpression);
   //TestExpressionParser(samplesForExpression);
 #endif // TEST_ARITHMETIC_PARSING
-
-
 
 #ifdef ENABLE_GRAPH
   MakeGraphicalExpression("Output.I.rgb = (1.0f - Output.E.rgb) * I( Theta ) * g_vLightDiffuse.xyz * g_fSunIntensity", "Test\\shaders\\output.png");
@@ -358,7 +370,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
   // 最基础的测试， 包含了一些典型代码
 #ifdef TEST_STD_SAMPLE
-  TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt", "Test\\shaders\\std_samples[reference].txt");
+  if(bRunBasicTest)
+  {
+    TestFromFile("Test\\shaders\\std_samples.uvs", "Test\\shaders\\std_samples[output].txt", "Test\\shaders\\std_samples[reference].txt");
+  }
 #endif // #ifdef TEST_STD_SAMPLE
 
   while(1)
@@ -366,6 +381,7 @@ int _tmain(int argc, _TCHAR* argv[])
     printf("\n\n---------------------------------\n");
     printf("1.测试ShaderToy代码\n");
     printf("2.测试Debris代码\n");
+    printf("3.测试Error代码\n");
     printf("\n0. 所有测试\n");
     printf("[ESC]. quit\n");
     char c = clstd_cli::getch();
@@ -383,6 +399,14 @@ int _tmain(int argc, _TCHAR* argv[])
     case '2':
       TestDebris(TRUE);
       break;
+
+    case '3':
+    {
+      clStringW str;
+      clpathfile::CombinePath(str, szTestCasePath, _CLTEXT("errorcase"));
+      TestFiles(clStringA(str), TRUE);
+    }
+    break;
 
     case VK_ESCAPE:
       goto BREAK_LOOP;

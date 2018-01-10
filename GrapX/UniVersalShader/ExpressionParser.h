@@ -265,7 +265,6 @@ namespace UVShader
       T_LPCSTR ppend;       // 当前预处理的结尾
       T_LPCSTR stream_end;  // 字符流的结尾，GetStreamPtr() + GetStreamCount()
       iterator iter_next;   // #标志预处理结束，忽略注释后第一个token
-
     };
 
 

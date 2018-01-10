@@ -262,7 +262,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ArithmeticExpression::MakeInstruction(const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle)
+  GXBOOL ArithmeticExpression::MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle)
   {
     ASSERT((int)pScope->begin <= nMiddle);
     ASSERT(nMiddle <= (int)pScope->end);
@@ -278,11 +278,11 @@ namespace UVShader
       const TOKEN& s = m_aTokens[nMiddle];
       //SYNTAXNODE sNodeB;
       //B.pNode = &sNodeB;
-      bresult = ParseArithmeticExpression(scopeA, &A, nMinPrecedence);
+      bresult = ParseArithmeticExpression(depth + 1, scopeA, &A, nMinPrecedence);
 
       if(s.scope >= (int)pScope->begin && s.scope < (int)pScope->end) {
         ASSERT(m_aTokens[s.scope] == ':');
-        bresult = bresult && MakeInstruction(&m_aTokens[s.scope], nMinPrecedence, &scopeB, &B, s.scope);
+        bresult = bresult && MakeInstruction(depth + 1, &m_aTokens[s.scope], nMinPrecedence, &scopeB, &B, s.scope);
       }
       else {
         // ERROR: ?:三元操作符不完整
@@ -292,8 +292,8 @@ namespace UVShader
     else if(*pOpcode == '=' && m_aTokens[nMiddle + 1] == '{')
     {
       bresult =
-        ParseArithmeticExpression(scopeA, &A, nMinPrecedence) &&
-        ParseArithmeticExpression(scopeB, &B, nMinPrecedence);
+        ParseArithmeticExpression(depth + 1, scopeA, &A, nMinPrecedence) &&
+        ParseArithmeticExpression(depth + 1, scopeB, &B, nMinPrecedence);
 
       // Opcode 这里设置为空, 因为'='的优先级高于初始化列表中的',', 
       // 在生成表达式时会给初始化列表加上'('和')'使初始化列表出现语法错误.
@@ -302,10 +302,14 @@ namespace UVShader
     else
     {
       bresult =
-        ParseArithmeticExpression(scopeA, &A, nMinPrecedence) &&
-        ParseArithmeticExpression(scopeB, &B, nMinPrecedence);
+        ParseArithmeticExpression(depth + 1, scopeA, &A, nMinPrecedence) &&
+        ParseArithmeticExpression(depth + 1, scopeB, &B, nMinPrecedence);
 
       MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Opcode, pOpcode, &A, &B);
+    }
+
+    if(_CL_NOT_(bresult)) {
+      return bresult;
     }
 
     DbgDumpScope(pOpcode->ToString(), scopeA, scopeB);
@@ -334,27 +338,34 @@ namespace UVShader
   }
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(clsize begin, clsize end, SYNTAXNODE::DESC* pDesc)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::DESC* pDesc)
   {
     RTSCOPE scope(begin, end);
-    return ParseArithmeticExpression(scope, pDesc);
+    return ParseArithmeticExpression(depth + 1, scope, pDesc);
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(const RTSCOPE& scope_in, SYNTAXNODE::DESC* pDesc)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const RTSCOPE& scope_in, SYNTAXNODE::DESC* pDesc)
   {
     RTSCOPE scope = scope_in;
     if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
       scope.end--; // TODO: 确定这个是否为必须
     }
-    return ParseArithmeticExpression(scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    return ParseArithmeticExpression(depth + 1, scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence)
   {
     int nCandidate = s_MaxPrecedence;
     GXINT_PTR i = (GXINT_PTR)scope.end - 1;
     GXINT_PTR nCandidatePos = i;
     SYNTAXNODE::DESC A, B;
+
+    if(depth > 1000)
+    {
+      // ERROR: 表达式解析堆栈不足
+      m_pMsg->WriteErrorW(TRUE, m_aTokens[scope.begin].offset(), E9999_未定义错误_vsd, __FILEW__, __LINE__);
+      return FALSE;
+    }
 
     const GXINT_PTR count = scope.end - scope.begin;
 
@@ -418,7 +429,7 @@ namespace UVShader
         A = front;
       }
       B.un.ptr = NULL;
-      GXBOOL bret = ParseArithmeticExpression(scope_expr, &B);
+      GXBOOL bret = ParseArithmeticExpression(depth + 1, scope_expr, &B);
       bret = bret && MakeSyntaxNode(pDesc, mode, &A, &B);
       return bret;
     }
@@ -426,7 +437,7 @@ namespace UVShader
     {
       // 括号肯定是匹配的
       ASSERT(m_aTokens[scope.end - 1].scope == scope.begin);
-      return ParseArithmeticExpression(RTSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+      return ParseArithmeticExpression(depth + 1, RTSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
     }
     else if(m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
     {
@@ -456,7 +467,7 @@ namespace UVShader
           // ?: 操作符标记：precedence 储存优先级，scope 储存?:的关系
 
           if(s.precedence == nMinPrecedence) {
-            return MakeInstruction(&s, nMinPrecedence, &scope, pDesc, i);
+            return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -488,7 +499,7 @@ namespace UVShader
           }
 
           if(s.precedence == nMinPrecedence) {
-            return MakeInstruction(&s, nMinPrecedence, &scope, pDesc, i);
+            return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -546,7 +557,7 @@ namespace UVShader
       c.mode = *pBack == ')' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
       c.B.un.ptr = NULL;
 
-      if( ! ParseArithmeticExpression(RTSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {
+      if( ! ParseArithmeticExpression(0, RTSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {
         return FALSE;
       }
 
@@ -627,7 +638,7 @@ namespace UVShader
 
     const TOKEN& bracket = m_aTokens[scope.begin + 1];
     ASSERT(bracket == '[' || bracket == '(');
-    GXBOOL bret = ParseArithmeticExpression(RTSCOPE(scope.begin + 2, scope.end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    GXBOOL bret = ParseArithmeticExpression(0, RTSCOPE(scope.begin + 2, scope.end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
 
     SYNTAXNODE::MODE mode;
     if(bracket == '(') {
@@ -753,6 +764,18 @@ namespace UVShader
   {
     uValue64 = 0;
     rank = Rank_Undefined;
+  }
+
+  void ArithmeticExpression::VALUE::SetZero()
+  {
+    uValue64 = 0;
+    rank = Rank_Signed;
+  }
+
+  void ArithmeticExpression::VALUE::SetOne()
+  {
+    uValue64 = 1;
+    rank = Rank_Signed;
   }
 
   ArithmeticExpression::VALUE& ArithmeticExpression::VALUE::set(const VALUE& v)

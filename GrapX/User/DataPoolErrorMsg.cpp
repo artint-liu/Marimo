@@ -107,7 +107,14 @@ namespace Marimo
           break;
         }
       }
-      str.Format(bError ? STD_ERROR_HEADW : STD_WARNING_HEADW, m_cSign, nCode);
+      else if(_CL_NOT_(m_Sources.empty())) {
+        // 没有token信息就定位在文件第一行
+        str.Format(bError ? STD_ERROR_HEAD_EXTW : STD_WARNING_HEAD_EXTW,
+          (GXLPCWSTR)m_Sources.back()->strFilename, 1, m_cSign, nCode);
+      }
+      else {
+        str.Format(bError ? STD_ERROR_HEADW : STD_WARNING_HEADW, m_cSign, nCode);
+      }
       break;
     }
 

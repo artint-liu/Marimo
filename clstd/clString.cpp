@@ -2,6 +2,7 @@
 #include "clString.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits>
 #include <locale.h>
 #include <ctype.h>
 #include "clStringCommon.hxx"
@@ -2529,7 +2530,8 @@ namespace clstd
      int    prec;
      _TCh   buf[MAX_DIGITS];
 
-     static _TCh nan[] = {'#','N','A','N', 0};
+     static _TCh nan[] = { '#','N','A','N', 0 };
+     static _TCh inf[] = { '#','I','N','F', 0 };
      if(value != value) {
        ASSERT(*(CLDWORD*)&value == 0xe0000000 || *(u64*)&value == 0xfff8000000000000); // #nan
        // 没有的再加
@@ -2541,6 +2543,16 @@ namespace clstd
          }
        }
      }
+     else if(value == std::numeric_limits<double>::infinity())
+     {
+       for(int i = 0; i < width; i++) {
+         ascii[i] = inf[i];
+         if(ascii[i] == '\0') {
+           return i;
+         }
+       }
+     }
+     
 
      prec = prec1;
      mode = format;

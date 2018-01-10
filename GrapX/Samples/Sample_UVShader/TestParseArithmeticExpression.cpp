@@ -21,7 +21,7 @@ public:
     m_aCommand.clear();
     STATEMENT stat = {StatementType_Expression};
     TRACE("--- 解析树 ---\n"); // 解析时生成的树
-    GXBOOL bret = ParseArithmeticExpression(*pScope, &stat.expr.sRoot);
+    GXBOOL bret = ParseArithmeticExpression(0, *pScope, &stat.expr.sRoot);
     if( ! bret)
     {
       TRACE("编译错误\n");

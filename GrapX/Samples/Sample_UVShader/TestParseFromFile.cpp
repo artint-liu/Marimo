@@ -321,6 +321,7 @@ void DumpMemory(const void* ptr, size_t count)
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 {
   clFile file;
+  TRACE("╡Бйтнд╪Ч╫БнЖ:\n%s\n", szFilename);
   if(file.OpenExisting(szFilename))
   {
     clBuffer* pBuffer = NULL;

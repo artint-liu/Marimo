@@ -180,7 +180,12 @@ namespace UVShader
     }
     m_pContext = NULL;
 
+    // 如果是子解析器，这里借用了父对象的信息定位，退出时要清空，避免析构时删除
+    if(m_pSubParser) {
+      m_pSubParser->m_pMsg = NULL;
+    }
     SAFE_DELETE(m_pSubParser);
+
     ErrorMessage::Destroy(m_pMsg);
 
     // 释放包含文件缓存
@@ -449,8 +454,9 @@ namespace UVShader
     {
       PairStack& s = sStack[i];
       if( ! s.empty()) {
-        // ERROR: 不匹配
-        ERROR_MSG__MISSING_CLOSEDBRACKET;
+        // ERROR: 闭括号不匹配
+        OutputErrorW(m_aTokens[s.top()], E9999_未定义错误_vsd, __FILEW__, __LINE__);
+        //ERROR_MSG__MISSING_CLOSEDBRACKET;
       }
     }
 
@@ -460,10 +466,10 @@ namespace UVShader
 #endif // #ifdef USE_CLSTD_TOKENS
     SetIteratorCallBack(IteratorProc, NULL);
 
-    // 如果是子解析器，这里借用了父对象的信息定位，退出时要清空，避免析构时删除
-    if(pParent) {
-      m_pMsg = NULL;
-    }
+    //// 如果是子解析器，这里借用了父对象的信息定位，退出时要清空，避免析构时删除
+    //if(pParent) {
+    //  m_pMsg = NULL;
+    //}
     m_pParent = pPrevParent;
     return m_aTokens.size();
   }
@@ -797,10 +803,20 @@ namespace UVShader
 
   GXBOOL CodeParser::Parse()
   {
-    RTSCOPE scope(0, m_aTokens.size());
-    while(ParseStatement(&scope));
-    RelocalePointer();
-    return TRUE;
+    __try
+    {
+      RTSCOPE scope(0, m_aTokens.size());
+      while(ParseStatement(&scope));
+      RelocalePointer();
+      return TRUE;
+    }
+    //catch(const std::exception& e)
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+      // ERROR: 致命错误, 无法从错误中恢复
+      OutputErrorW(E9999_未定义错误_vsd, __FILEW__, __LINE__);
+    }
+    return FALSE;
   }
 
   GXBOOL CodeParser::ParseStatement(RTSCOPE* pScope)
@@ -1575,7 +1591,7 @@ NOT_INC_P:
       }
 
       if(eMode == SYNTAXNODE::MODE_Return) {
-        bret = ParseArithmeticExpression(scope.begin + 1, front.semi_scope, &B);
+        bret = ParseArithmeticExpression(0, scope.begin + 1, front.semi_scope, &B);
         MakeSyntaxNode(pDesc, eMode, NULL, &A, &B);
         pend = front.semi_scope;
       }
@@ -1696,7 +1712,7 @@ NOT_INC_P:
       //bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, &A, &B);
     }
 
-    ParseArithmeticExpression(scope, pDesc);
+    ParseArithmeticExpression(0, scope, pDesc);
     return TRUE;
   }
 
@@ -1723,7 +1739,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
 
-    bret = bret && ParseArithmeticExpression(sConditional, &A);
+    bret = bret && ParseArithmeticExpression(0, sConditional, &A);
 
 
 
@@ -1858,7 +1874,7 @@ NOT_INC_P:
       return RTSCOPE::npos;
     }
     
-    bret = bret && ParseArithmeticExpression(sConditional, &A);
+    bret = bret && ParseArithmeticExpression(0, sConditional, &A);
 
 
     sBlock.begin = sConditional.end + 1;
@@ -1943,7 +1959,7 @@ NOT_INC_P:
     // TODO： 验证域的开始是括号和花括号
 
     GXBOOL bret = ParseExpression(sBlock, &B);
-    bret = bret && ParseArithmeticExpression(sConditional, &A);
+    bret = bret && ParseArithmeticExpression(0, sConditional, &A);
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
     RTSCOPE::TYPE while_end = sConditional.end + 1;
@@ -1990,7 +2006,7 @@ NOT_INC_P:
         continue;
       }
 
-      bret = bret && ParseArithmeticExpression(RTSCOPE(index, decl.semi_scope), &T);
+      bret = bret && ParseArithmeticExpression(0, RTSCOPE(index, decl.semi_scope), &T);
       NodeStack.push(T);
       
       index = decl.semi_scope;
@@ -2179,9 +2195,9 @@ NOT_INC_P:
 
     ASSERT(m_aTokens[sBlock.begin] == "for" || m_aTokens[sBlock.end] == ';' || m_aTokens[sBlock.end] == '}');
 
-    ParseArithmeticExpression(sInitializer, &uInit, TOKEN::FIRST_OPCODE_PRECEDENCE);
-    ParseArithmeticExpression(sConditional, &uCond, TOKEN::FIRST_OPCODE_PRECEDENCE);
-    ParseArithmeticExpression(sIterator   , &uIter, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(0, sInitializer, &uInit, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(0, sConditional, &uCond, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    ParseArithmeticExpression(0, sIterator   , &uIter, TOKEN::FIRST_OPCODE_PRECEDENCE);
     //if(sBlock.end == RTSCOPE::npos)
     //{
     //  ASSERT(m_aTokens[sBlock.begin] == "for"); // MakeFlowForScope 函数保证
@@ -2351,13 +2367,16 @@ NOT_INC_P:
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && tokens.front() == PREPROCESS_define);
     const auto count = tokens.size();
-    clStringA strMacroName(tokens[1].marker, tokens[1].length);
     //m_MacrosSet.insert(strMacroName);
 
     if(count == 1) {
       OutputErrorW(tokens.front(), E2007_define缺少定义_vs);
+      return;
     }
-    else if(count == 2) // "#define MACRO" 形
+    
+    clStringA strMacroName(tokens[1].marker, tokens[1].length);
+
+    if(count == 2) // "#define MACRO" 形
     {
       m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
     }
@@ -2430,7 +2449,9 @@ NOT_INC_P:
 
     clBuffer* pBuffer = OpenIncludeFile(strPath);
     if(pBuffer == NULL) {
+      // ERROR: 无法打开文件
       OutputErrorW(E9999_未定义错误_vsd, __FILEW__, __LINE__);
+      return;
     }
 
     ASSERT(m_pMsg); // 应该从m_pParent设置过临时的m_pMsg
@@ -2473,7 +2494,11 @@ NOT_INC_P:
     clStringA strMacroName = aTokens[1].ToString();
     //m_MacrosSet.erase(strMacroName);
     auto it = m_pContext->Macros.find(strMacroName);
-    ASSERT(it != m_pContext->Macros.end()); // 集合里有的话化名表里也应该有
+    //ASSERT(it != m_pContext->Macros.end()); // 集合里有的话化名表里也应该有
+
+    if(it != m_pContext->Macros.end())
+    {
+    }
     
     //strMacroName.Append("@A");
     //do {
@@ -2489,6 +2514,8 @@ NOT_INC_P:
 
     if(tokens.size() == 1) {
       // ERROR: ifdef 缺少定义
+      OutputErrorW(tokens.front(), E1016_ifdef_应输入标识符);
+      return ctx.stream_end;
     }
     else if(tokens.size() == 2) {
       const GXBOOL bFind = (m_pContext->Macros.find(tokens[1].ToString()) == m_pContext->Macros.end());
@@ -2604,16 +2631,28 @@ NOT_INC_P:
   CodeParser::T_LPCSTR CodeParser::PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser)
   {
     SYNTAXNODE::DESC sDesc;
-    if( ! pParser->ParseArithmeticExpression(1, pParser->m_aTokens.size(), &sDesc)) {
+    if( ! pParser->ParseArithmeticExpression(0, 1, pParser->m_aTokens.size(), &sDesc)) {
       // ERROR: 无法解析表达式
+      OutputErrorW(pParser->m_aTokens.front(), E9999_未定义错误_vsd, __FILEW__, __LINE__);
       return ctx.iter_next.marker;
     }
 
 
     VALUE v;
     if(sDesc.un.IsToken()) {
-      // TODO: 测试 sDesc.un.pSym 能解析为一个数字，如果定义不为数字需要报错
-      v = *sDesc.un.pTokn;
+      clStringA strMacro = sDesc.un.pTokn->ToString();
+      v.SetZero();
+
+      if(strMacro.IsAlphanumeric() && (strMacro[0] < '0' || strMacro[1] > '0')) // 封装为:IsIdentifier()
+      {
+        auto it = m_pContext->Macros.find(strMacro);
+        if(it != m_pContext->Macros.end() && it->second.aFormalParams.empty()) {
+          v = it->second.aTokens.front();
+        }
+      }
+      else {
+        v.set(*sDesc.un.pTokn);
+      }
     }
     else
     {      
@@ -2643,7 +2682,7 @@ NOT_INC_P:
       }
 
       if((p = Macro_SkipGaps(p, end)) >= end) {
-        return end;
+        break;
       }
 
       if(*p != '#') {
@@ -2651,7 +2690,7 @@ NOT_INC_P:
       }
 
       if((p = Macro_SkipGaps(p, end)) >= end) {
-        return end;
+        break;
       }
 
       size_t str_elif_len = 4;
@@ -2768,7 +2807,12 @@ NOT_INC_P:
     }
     
     for(; *p != '\n' && p < end; p++);
-    return p != end ? ++p : end;
+    if(p == end)
+    {
+      OutputErrorW(begin, E1004_意外的文件结束);
+      return end;
+    }
+    return (p + 1);    
   }
 
   GXBOOL CodeParser::ExpandInnerMacro(TOKEN& token, const TOKEN& line_num)
@@ -2825,15 +2869,18 @@ NOT_INC_P:
 
   void CodeParser::OutputErrorW(GXUINT code, ...)
   {
+    const char* ptr = NULL;
     for (auto it = m_aTokens.rbegin(); it != m_aTokens.rend(); ++it) {
       if(it->pContainer) {
-        va_list arglist;
-        va_start(arglist, code);
-        m_pMsg->VarWriteErrorW(TRUE, it->marker, code, arglist);
-        va_end(arglist);
-        return;
+        ptr = it->marker;
       }
     }
+
+    va_list arglist;
+    va_start(arglist, code);
+    m_pMsg->VarWriteErrorW(TRUE, ptr, code, arglist);
+    va_end(arglist);
+    return;
   }
 
   void CodeParser::OutputErrorW(const TOKEN& token, GXUINT code, ...)
