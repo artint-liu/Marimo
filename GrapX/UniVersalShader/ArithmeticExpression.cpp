@@ -4,6 +4,7 @@
 #include <clTokens.h>
 #include <clStringSet.h>
 #include "ArithmeticExpression.h"
+#include "UVShaderError.h"
 //#include "ExpressionParser.h"
 
 #include "clTextLines.h"
@@ -1143,6 +1144,32 @@ namespace UVShader
   b32 ArithmeticExpression::TOKEN::operator<(const TOKEN& _token) const
   {
     return (b32)(*static_cast<const iterator*>(this) < _token);
+  }
+
+  b32 ArithmeticExpression::TOKEN::IsIdentifier() const
+  {
+    if(length < 1) {
+      return FALSE;
+    }
+
+    if(_CL_NOT_(marker[0] == '_' ||
+      (marker[0] >= 'A' && marker[0] <= 'Z') ||
+      (marker[0] >= 'a' && marker[0] <= 'z') ))
+    {
+      return FALSE;
+    }
+    
+    for(clsize i = 1; i < length; i++)
+    {
+      if(_CL_NOT_(marker[0] == '_' ||
+        (marker[0] >= 'A' && marker[0] <= 'Z') ||
+        (marker[0] >= 'a' && marker[0] <= 'z') ||
+        (marker[0] >= '0' && marker[0] <= '9') ))
+      {
+        return FALSE;
+      }
+    }
+    return TRUE;
   }
 
 } // namespace UVShader

@@ -2,41 +2,6 @@
 #define _ARITHMETIC_EXPRESSION_H_
 
 #define IDX2ITER(_IDX)                           m_aTokens[_IDX]
-#define ERROR_MSG__MISSING_SEMICOLON(_token)      m_pMsg->WriteErrorW(TRUE, (_token).offset(), 1000)
-#define ERROR_MSG__MISSING_OPENBRACKET    CLBREAK
-#define ERROR_MSG__MISSING_CLOSEDBRACKET  CLBREAK
-
-//
-// 竟然可以使用中文 ಠ౪ಠ
-//
-#define ERROR_MSG_缺少分号(_token)    ERROR_MSG__MISSING_SEMICOLON(_token)
-#define ERROR_MSG_缺少开括号  ERROR_MSG__MISSING_OPENBRACKET  
-#define ERROR_MSG_缺少闭括号  ERROR_MSG__MISSING_CLOSEDBRACKET
-#define ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动 CLBREAK
-//#define ERROR_MSG_C1021_无效的预处理器命令 
-
-#define E1004_意外的文件结束            1004
-#define E1016_ifdef_应输入标识符        1016
-#define E1017_无效的整数常数表达式      1017
-#define E1018_意外的_elif              1018
-#define E1019_意外的_else              1019
-#define E1020_意外的_endif             1020
-
-#define E1021_无效的预处理器命令_vs     1021
-
-
-#define E1050_缺少类型描述              1050
-#define E1189_用户定义错误_vs           1189
-
-#define E4006_undef应输入标识符         4006
-#define E4067_预处理器指令后有意外标记_应输入换行符 4067
-#define E2004_应输入_defined_id        2004
-#define E2007_define缺少定义_vs         2007
-#define E2008_宏定义中的意外_vs         2008
-#define E2010_宏形参表中的意外          2010
-#define E2059_SyntaxError_vs           2059
-#define E2121_无效的井号_可能是宏扩展    2121
-#define E9999_未定义错误_vsd            9999
 
 #define UNARY_LEFT_OPERAND    2 // 10B， 注意是允许操作数在左侧
 #define UNARY_RIGHT_OPERAND   1 // 01B
@@ -124,6 +89,8 @@ namespace UVShader
       void ClearArithOperatorInfo();
       clStringA ToString() const;
       int GetScope() const;
+
+      b32 IsIdentifier() const; // 标识符, 字母大小写, 下划线开头, 本体是字母数字, 下划线的字符串
 
       GXBOOL operator==(const TOKEN& t) const;
       GXBOOL operator==(SmartStreamA::T_LPCSTR str) const;

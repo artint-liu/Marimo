@@ -36,5 +36,8 @@
     <ClInclude Include="..\..\UniVersalShader\ArithmeticExpression.h">
       <Filter>sources</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\UniVersalShader\UVShaderError.h">
+      <Filter>sources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

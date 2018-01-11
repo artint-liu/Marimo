@@ -18,6 +18,7 @@
 #pragma comment(lib, "gdiplus.lib")
 void TestExpressionParser();
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference);
+void ExportTestCase(const clStringA& strPath);
 void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples);
 //#define ENABLE_GRAPH // 毫无意义的开始了语法树转图形化的工作，又舍不得删代码，先注释掉
 
@@ -287,7 +288,12 @@ void TestFiles(GXLPCSTR szDir, GXBOOL bShowList)
       int nSelect = atoi(szBuffer);
       if(nSelect >= 0 && nSelect < (int)sShaderSource_list.size()) {
         auto& item = sShaderSource_list[nSelect];
-        TestFromFile(item.strInput, item.strOutput, item.strReference);
+        if(item.strInput.Find("$CaseList$") != clStringA::npos) {
+          ExportTestCase(item.strInput);
+        }
+        else {
+          TestFromFile(item.strInput, item.strOutput, item.strReference);
+        }
       }
     }
   }

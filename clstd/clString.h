@@ -301,6 +301,7 @@ namespace clstd
     b32         IsFloat         () const; // 以'+'or'-'开头，'0'-'9',只出现一次的'.'，'F'或'f'结尾的形式，暂时不支持"1e2"这种科学计数形式
     b32         IsInteger       () const; // 判断是否是整数形式的字符串，以'+'or'-'开头，后面全是数字
     b32         IsAlphanumeric  () const; // 判断字符串是否只包含['a'-'z', 'A'-'Z', '0'-'9', '_']这些字符
+    b32         IsIdentifier    () const; // 判断字符串是否为标识符: 以['a'-'z', 'A'-'Z', '_'], 包含['a'-'z', 'A'-'Z', '0'-'9', '_']的字符串
     void        Clear           ();       // 清除字符串内容
 
     size_t      Find            (_TCh cFind, size_t uStart = 0) const;

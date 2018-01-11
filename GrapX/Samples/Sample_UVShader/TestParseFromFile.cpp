@@ -8,6 +8,8 @@
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"
 
+#define SRC_ERROR_CASE_SIGN "//{ERROR_CASE}" // 14 chars
+
 GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
 {
   switch(e)
@@ -321,6 +323,12 @@ void DumpMemory(const void* ptr, size_t count)
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 {
   clFile file;
+
+  // 特殊文件不做处理
+  if(clstd::strstrT<ch>((GXLPSTR)szFilename, "$CaseList$") != NULL) {
+    return;
+  }
+
   TRACE("测试文件解析:\n%s\n", szFilename);
   if(file.OpenExisting(szFilename))
   {
@@ -365,7 +373,9 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       // 解析语法
       expp.Parse();
 
-      if(szOutput != NULL)
+      b32 bErrorCase = (clstd::strncmpiT((LPCSTR)pBuffer->GetPtr(), SRC_ERROR_CASE_SIGN, 14) == 0);
+
+      if(_CL_NOT_(bErrorCase) && szOutput != NULL)
       {
         clstd::File file;
         if(file.CreateAlways(szOutput))
@@ -600,4 +610,116 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
     }
   } while(0);
 
+}
+
+//////////////////////////////////////////////////////////////////////////
+b32 GetLine(const clstd::MemBuffer& buf, clStringA& str, size_t& pos)
+{
+  str.Clear();
+  if(pos >= buf.GetSize()) {
+    return FALSE;
+  }
+
+  clStringA::LPCSTR ptr = (clStringA::LPCSTR)buf.GetPtr() + pos;
+  clStringA::LPCSTR pEnd = (clStringA::LPCSTR)buf.GetPtr() + buf.GetSize();
+  while(*ptr != '\n' && ptr < pEnd)
+  {
+    str.Append(*ptr++);
+  }
+
+  if(*ptr == '\n') {
+    str.Append(*ptr++);
+  }
+
+  pos = ptr - (clStringA::LPCSTR)buf.GetPtr();
+  return TRUE;
+}
+
+void ExportTestCase(const clStringA& strPath)
+{
+  clstd::File file;
+  clstd::MemBuffer buf;
+  if(_CL_NOT_(file.OpenExisting(strPath))) {
+    return;
+  }
+
+  if(_CL_NOT_(file.ReadToBuffer(&buf))) {
+    return;
+  }
+  file.Close();
+
+  clStringA str;
+  clStringA strFilename;
+  clStringA strDir = strPath;
+  //clStringA strExportMsg;
+  clmap<int, clStringA> sExportMsgDict;
+  size_t pos_prev = 0;
+  size_t pos = 0;
+  int nLine = 0;
+  b32 bErrorCase = // 标记输出文件是否为错误case
+    (clstd::strncmpiT((GXLPCSTR)buf.GetPtr(), "$ErrorList", 10) == 0);
+
+  clpathfile::RemoveFileSpec(strDir);
+  
+  while(GetLine(buf, str, pos))
+  {
+    nLine++;
+
+    if(str.Compare("$-------", 8) == 0) // 忽略分割行
+    {
+      continue;
+    }
+    else if(str.Compare("$file=", 6) == 0) // 获得输出文件名
+    {
+      strFilename = str.CStr() + 6;
+      strFilename.TrimRight("\r\n");
+      clpathfile::CombinePath(strFilename, strDir, strFilename);
+      if(file.IsGood()) {
+        file.Close();
+      }
+
+      if(file.CreateAlways(strFilename)) {
+        if(bErrorCase) {
+          // 如果标记为错误case, 在文件头加上这个标记
+          // 测试程序会用来断言编译错误
+          file.WritefA(SRC_ERROR_CASE_SIGN "\r\n");
+        }
+      }
+      continue;
+    }
+    else if(str.Compare("$msg=", 5) == 0) // 错误消息
+    {
+      clStringA strMsgLine = str.CStr() + 5;
+      clStringA strValue, strMsg;
+      strMsgLine.TrimLeft("\r\n\t ");
+      strMsgLine.TrimRight("\r\n\t ");
+      strMsgLine.DivideBy('=', strValue, strMsg);
+      if(strValue.IsEmpty() || strMsg.IsEmpty()) {
+        TRACE("%s(%d) : \"$msg\" 格式错误\n", strPath.CStr(), nLine);
+        return;
+      }
+
+      // 添加至字典并检查id是否重复
+      auto r = sExportMsgDict.insert(clmake_pair(strValue.ToInteger(), strMsg));
+      if(r.second == FALSE) {
+        TRACE("%s(%d) : 重复id=%s\n", strPath.CStr(), nLine, strValue);
+      }
+
+      if(file.IsGood()) {
+        file.WritefA("// %s\r\n", strMsg.CStr());
+      }
+      continue;
+    }
+
+    // 如果不是标记数据, 直接写入已经打开的文件
+    if(file.IsGood()) {
+      file.Write(str.CStr(), str.GetLength());
+    }
+  }
+
+  // 输出所有错误消息, 符合stock文件格式
+  for(auto it = sExportMsgDict.begin(); it != sExportMsgDict.end(); ++it)
+  {
+    TRACE("%d=\"%s\";\r\n", it->first, it->second.CStr()); // 这样才能正确显示"%s"字符串
+  }
 }

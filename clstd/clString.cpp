@@ -1595,6 +1595,33 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
+  b32 _CLSTR_IMPL::IsIdentifier() const
+  {
+    const clsize uStrLen = CLSTR_LENGTH(m_pBuf);
+    if(uStrLen == 0) { // null string
+      return FALSE;
+    }
+
+    if(_CL_NOT_(m_pBuf[0] == '_' ||
+      (m_pBuf[0] >= 'a' && m_pBuf[0] <= 'z') ||
+      (m_pBuf[0] >= 'A' && m_pBuf[0] <= 'Z') ))
+    {
+      return FALSE;
+    }
+
+    for(clsize i = 1; i < uStrLen; i++)
+    {
+      const _TCh c = m_pBuf[i];
+      if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+        (c >= '0' && c <= '9') || c == '_') {
+        continue;
+      }
+      return FALSE;
+    }
+    return TRUE;
+  }
+
+  _CLSTR_TEMPL
     void _CLSTR_IMPL::Clear()
   {
     _Reduce(0);

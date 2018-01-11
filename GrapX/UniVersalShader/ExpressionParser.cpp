@@ -5,6 +5,7 @@
 #include <clStringSet.h>
 #include "ArithmeticExpression.h"
 #include "ExpressionParser.h"
+#include "UVShaderError.h"
 
 #include "clPathFile.h"
 #include "clTextLines.h"
@@ -265,7 +266,9 @@ namespace UVShader
       SET_FLAG(pThis->m_dwState, State_InPreprocess);
 
       if( ! TOKENSUTILITY::IsHeadOfLine(it.pContainer, it.marker)) {
-        ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
+        //ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
+        pThis->OutputErrorW(E2014_预处理器命令必须作为第一个非空白空间启动);
+        return 0;
       }
 
       RTPPCONTEXT ctx;
@@ -1243,7 +1246,8 @@ NOT_INC_P:
       member.szType = GetUniqueString(p);
       if(ParseType(p) == NULL) {
         clStringW strType = member.szType;
-        OutputErrorW(*p, E1050_缺少类型描述, strType.CStr());
+        OutputErrorW(*p, E2062_意外的类型_vs, strType.CStr());
+        return FALSE;
       }
 
       INC_BUT_NOT_END(p, pMemberEnd); // ERROR: 结构体成员声明不正确
@@ -2640,11 +2644,11 @@ NOT_INC_P:
 
     VALUE v;
     if(sDesc.un.IsToken()) {
-      clStringA strMacro = sDesc.un.pTokn->ToString();
       v.SetZero();
 
-      if(strMacro.IsAlphanumeric() && (strMacro[0] < '0' || strMacro[1] > '0')) // 封装为:IsIdentifier()
+      if(sDesc.un.pTokn->IsIdentifier())
       {
+        clStringA strMacro = sDesc.un.pTokn->ToString();
         auto it = m_pContext->Macros.find(strMacro);
         if(it != m_pContext->Macros.end() && it->second.aFormalParams.empty()) {
           v = it->second.aTokens.front();
