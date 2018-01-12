@@ -329,7 +329,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
     return;
   }
 
-  TRACE("测试文件解析:\n%s\n", szFilename);
+  TRACE(
+    "------------\n"
+    "测试文件解析:\n"
+    "------------\n"
+    "%s\n", szFilename);
+
   if(file.OpenExisting(szFilename))
   {
     clBuffer* pBuffer = NULL;
@@ -673,6 +678,11 @@ void ExportTestCase(const clStringA& strPath)
     {
       strFilename = str.CStr() + 6;
       strFilename.TrimRight("\r\n");
+      if(strFilename.IsEmpty()) {
+        TRACE("%s(%d) : \"$file\" 文件名为空\n", strPath.CStr(), nLine);
+        return;
+      }
+
       clpathfile::CombinePath(strFilename, strDir, strFilename);
       if(file.IsGood()) {
         file.Close();
@@ -709,6 +719,10 @@ void ExportTestCase(const clStringA& strPath)
         file.WritefA("// %s\r\n", strMsg.CStr());
       }
       continue;
+    }
+    else if(str.Compare("$end", 4) == 0) // 结尾
+    {
+      break;
     }
 
     // 如果不是标记数据, 直接写入已经打开的文件

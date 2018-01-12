@@ -927,7 +927,11 @@ namespace UVShader
       return TRUE;
     });
 
-    if(sDefinitionList.size() == 1) {
+    if(sDefinitionList.empty()) {
+      OutputErrorW(p[1], E2145_语法错误_标识符前面缺少token_vs, ";");
+      return FALSE;
+    }
+    else if(sDefinitionList.size() == 1) {
       m_aStatements.push_back(stat);
     }
     else {

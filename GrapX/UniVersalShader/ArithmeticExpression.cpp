@@ -685,7 +685,8 @@ namespace UVShader
           }
           else {
             // ERROR: 括号不匹配
-            ERROR_MSG__MISSING_OPENBRACKET;
+            //ERROR_MSG__MISSING_OPENBRACKET;
+            m_pMsg->WriteErrorW(TRUE, token.offset(), E2059_SyntaxError_vs, _CLTEXT("("));
             break;
           }
         }
