@@ -1,6 +1,8 @@
 #ifndef _EXPRESSION_PARSER_H_
 #define _EXPRESSION_PARSER_H_
 
+#define REFACTOR_STRUCT_PARSER
+
 namespace UVShader
 {
   //struct GRAMMAR
@@ -90,7 +92,7 @@ namespace UVShader
 
     //  //// ActualParam 实参
     //  //TOKEN::Array aTokens; // 实参列表
-    //  //RTSCOPE::Array aArgs; // 实参
+    //  //TKSCOPE::Array aArgs; // 实参
 
     //  ArithmeticExpression::iterator itSave;
 
@@ -199,6 +201,8 @@ namespace UVShader
     };
     typedef clvector<FUNCTION_ARGUMENT> ArgumentsArray;
     
+#ifdef REFACTOR_STRUCT_PARSER
+#else
     struct STRUCT_MEMBER // 结构体成员/Shader标记
     {
       GXLPCSTR szType;       // [req]
@@ -206,7 +210,7 @@ namespace UVShader
       GXLPCSTR szSignature;  // [req], 结构体成员没有这项
     };
     typedef clvector<STRUCT_MEMBER> MemberArray;
-
+#endif
 
     //////////////////////////////////////////////////////////////////////////
     struct STATEMENT;
@@ -223,12 +227,21 @@ namespace UVShader
       STATEMENT* pExpression;
     };
 
+#ifdef REFACTOR_STRUCT_PARSER
+    struct STATEMENT_STRU // 结构体定义
+    {
+      GXLPCSTR         szName;
+      clsize           nNumOfMembers; // 不是必要的
+      SYNTAXNODE::DESC sRoot;
+    };
+#else
     struct STATEMENT_STRU // 结构体定义
     {
       GXLPCSTR        szName;
       STRUCT_MEMBER*  pMembers;
       clsize          nNumOfMembers;
     };
+#endif
 
     struct STATEMENT_EXPR // 表达式定义
     {
@@ -319,17 +332,17 @@ namespace UVShader
 
     struct MAKESCOPE
     {
-      const RTSCOPE*  pScope;   // 限定区域
-      RTSCOPE::TYPE   begin;    // 开始
+      const TKSCOPE*  pScope;   // 限定区域
+      TKSCOPE::TYPE   begin;    // 开始
       GXBOOL          bBeginMate;// scope begin 取自m_aTokens[begin].scope
-      RTSCOPE::TYPE   end;
+      TKSCOPE::TYPE   end;
       GXBOOL          bEndMate;
       GXWCHAR         chTermin; // 如果begin遇到这个终结符，返回一个begin==end的scope
 
       MAKESCOPE(){}
-      MAKESCOPE(const RTSCOPE*_pScope, RTSCOPE::TYPE _begin, GXBOOL _bIndBegin, RTSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
+      MAKESCOPE(const TKSCOPE*_pScope, TKSCOPE::TYPE _begin, GXBOOL _bIndBegin, TKSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
         : pScope(_pScope), begin(_begin), bBeginMate(_bIndBegin), end(_end), bEndMate(_bIndEnd), chTermin(_chTermin) {}
-      MAKESCOPE(const RTSCOPE& _scope, RTSCOPE::TYPE _begin, GXBOOL _bIndBegin, RTSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
+      MAKESCOPE(const TKSCOPE& _scope, TKSCOPE::TYPE _begin, GXBOOL _bIndBegin, TKSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
         : pScope(&_scope), begin(_begin), bBeginMate(_bIndBegin), end(_end), bEndMate(_bIndEnd), chTermin(_chTermin) {}
     };
     //////////////////////////////////////////////////////////////////////////
@@ -340,31 +353,34 @@ namespace UVShader
     void    InitPacks();
     void    Cleanup();
 
-    GXBOOL  ParseStatementAs_Definition(RTSCOPE* pScope);
-    GXBOOL  ParseStatementAs_Function(RTSCOPE* pScope);
-    GXBOOL  ParseFunctionArguments(STATEMENT* pStat, RTSCOPE* pArgScope);
+    GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
+    GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
+    GXBOOL  ParseFunctionArguments(STATEMENT* pStat, TKSCOPE* pArgScope);
 
-    GXBOOL  ParseStatementAs_Struct(RTSCOPE* pScope);
+    GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);
+#ifdef REFACTOR_STRUCT_PARSER
+#else
     GXBOOL  ParseStructMember(STATEMENT* pStat, STRUCT_MEMBER& member, TOKEN**p, const TOKEN* pEnd);
-    GXBOOL  ParseStructMembers(STATEMENT* pStat, RTSCOPE* pStruScope);
+    GXBOOL  ParseStructMembers(STATEMENT* pStat, TKSCOPE* pStruScope);
+#endif
 
-    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, RTSCOPE* pScope/*, GXBOOL bDbgRelocale*/); // (算数表)达式
+    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, TKSCOPE* pScope/*, GXBOOL bDbgRelocale*/); // (算数表)达式
 
     GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::DESC* pDesc);
 
 
 
-    GXBOOL  ParseRemainStatement(RTSCOPE::TYPE parse_end, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseExpression(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseRemainStatement(TKSCOPE::TYPE parse_end, const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseExpression(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
 
-    GXBOOL  TryKeywords(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, RTSCOPE::TYPE* parse_end);
-    RTSCOPE::TYPE  ParseFlowIf(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, GXBOOL bElseIf);
-    RTSCOPE::TYPE  MakeFlowForScope(const RTSCOPE& scope, RTSCOPE* pInit, RTSCOPE* pCond, RTSCOPE* pIter, RTSCOPE* pBlock, SYNTAXNODE::DESC* pBlockNode);
-    RTSCOPE::TYPE  ParseFlowFor(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    RTSCOPE::TYPE  ParseFlowWhile(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    RTSCOPE::TYPE  ParseFlowDoWhile(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    RTSCOPE::TYPE  ParseStructDefine(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  MakeScope(RTSCOPE* pOut, MAKESCOPE* pParam);
+    GXBOOL  TryKeywords(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc, TKSCOPE::TYPE* parse_end);
+    TKSCOPE::TYPE  ParseFlowIf(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc, GXBOOL bElseIf);
+    TKSCOPE::TYPE  MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, SYNTAXNODE::DESC* pBlockNode);
+    TKSCOPE::TYPE  ParseFlowFor(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    TKSCOPE::TYPE  ParseFlowWhile(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    TKSCOPE::TYPE  ParseFlowDoWhile(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    TKSCOPE::TYPE  ParseStructDefine(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);
     void    GetNext(iterator& it, TOKEN& token);
     void    ExpandMacro(MACRO_EXPAND_CONTEXT& c);
@@ -387,7 +403,7 @@ namespace UVShader
     static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
     GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 
-    GXBOOL  ParseStatement(RTSCOPE* pScope);
+    GXBOOL  ParseStatement(TKSCOPE* pScope);
     void    RelocaleStatements(StatementArray& aStatements);
     void    RelocalePointer();
     
@@ -424,7 +440,10 @@ namespace UVShader
     
     PARSER_CONTEXT*     m_pContext;
 
+#ifdef REFACTOR_STRUCT_PARSER
+#else
     MemberArray         m_aMembersPack;     // 结构体所有成员变量都存在这里
+#endif
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
 
     FileDict            m_sIncludeFiles;    // 包含文件集合, 仅限于Root parser
@@ -445,7 +464,7 @@ namespace UVShader
 //    GXBOOL   IsToken(const SYNTAXNODE::UN* pUnion) const;
     //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const;
 
-    void DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL);
+    void DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL, int depth = 0);
 
 
   };

@@ -27,6 +27,70 @@ namespace UVShader
 # define TOKENSUTILITY SmartStreamUtility
 #endif // USE_CLSTD_TOKENS
 
+  template<class _Ty>
+  class StablePool
+  {
+  public:
+    typedef _Ty T;
+
+    struct POOL
+    {
+      _Ty* pBegin;
+      _Ty* pEnd;
+    };
+
+    typedef cllist<POOL> PoolList;
+
+  protected:
+    PoolList m_PoolList;
+    int      m_nElementCount; // 增长数量，实际分配内存是数量*sizeof(_Ty)
+    _Ty*     m_pNew;
+
+  public:
+    StablePool(int nCount)
+      : m_nElementCount(nCount), m_pNew(NULL) {}
+
+    ~StablePool()
+    {
+      Clear();
+    }
+
+    _Ty* Alloc()
+    {
+      ASSERT(m_pNew == NULL || (
+        m_pNew >= m_PoolList.back().pBegin &&
+        m_pNew < m_PoolList.back().pEnd));
+
+      if(m_pNew == NULL || (++m_pNew) == m_PoolList.back().pEnd) {
+        POOL pool = { NULL, NULL };
+        m_pNew = new _Ty[m_nElementCount];
+        pool.pBegin = m_pNew;
+        pool.pEnd = pool.pBegin + m_nElementCount;
+        m_PoolList.push_back(pool);
+      }
+      return m_pNew;
+    }
+
+    _Ty* PushBack(const _Ty& t) // 把t追加到最后， 并且返回一个稳定地址
+    {
+      _Ty* ptr = Alloc();
+      *ptr = t;
+      return ptr;
+    }
+
+    void Clear()
+    {
+      std::for_each(m_PoolList.begin(), m_PoolList.end(),
+        [](POOL& pool)
+      {
+        delete[] pool.pBegin;
+      });
+      m_PoolList.clear();
+      m_pNew = NULL;
+    }
+
+  };
+
   class ArithmeticExpression : public CTokens
   {
   public:
@@ -178,6 +242,8 @@ namespace UVShader
 
     struct SYNTAXNODE
     {
+      typedef clist<SYNTAXNODE*> PtrList;
+
       enum FLAGS
       {
         FLAG_OPERAND_MAGIC = 0xffff,
@@ -315,13 +381,13 @@ namespace UVShader
 
     typedef clstack<int>          PairStack;
     
-    struct SYNTAXNODEPOOL
-    {
-      SYNTAXNODE* pBegin;
-      SYNTAXNODE* pEnd;
-    };
+    //struct SYNTAXNODEPOOL
+    //{
+    //  SYNTAXNODE* pBegin;
+    //  SYNTAXNODE* pEnd;
+    //};
 
-    typedef cllist<SYNTAXNODEPOOL> SyntaxNodePoolList;
+    //typedef cllist<SYNTAXNODEPOOL> SyntaxNodePoolList;
 
 
 
@@ -374,17 +440,17 @@ namespace UVShader
       typename _Ty CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2);
     };
 
-    struct RTSCOPE // 运行时的范围描述结构体
+    struct TKSCOPE // 运行时的Token范围描述结构体
     {
-      typedef cllist<RTSCOPE> List;
-      typedef clvector<RTSCOPE> Array;
+      typedef cllist<TKSCOPE> List;
+      typedef clvector<TKSCOPE> Array;
       typedef clsize TYPE;
       const static TYPE npos = -1;
       TYPE begin;
       TYPE end;
 
-      RTSCOPE(){}
-      RTSCOPE(clsize _begin, clsize _end) : begin(_begin), end(_end) {}
+      TKSCOPE(){}
+      TKSCOPE(clsize _begin, clsize _end) : begin(_begin), end(_end) {}
 
       inline GXBOOL IsValid() const {
         return (begin != (clsize)-1) && begin < end;
@@ -412,14 +478,15 @@ namespace UVShader
     //static const int s_nPairMark = sizeof(s_PairMark) / sizeof(PAIRMARK);
 
 
-
+    GXBOOL              m_bRefMsg; // 如果为TRUE，析构时不删除m_pMsg
     ErrorMessage*       m_pMsg;
     TOKEN::Array        m_aTokens;
     //int                 m_nMaxPrecedence;   // 优先级最大值
 
     // 语法节点的内存池
-    SyntaxNodePoolList  m_NodePoolList;
-    SYNTAXNODE*         m_pNewNode;           // 记录当前分配节点的指针
+    //SyntaxNodePoolList  m_NodePoolList;
+    //SYNTAXNODE*         m_pNewNode;           // 记录当前分配节点的指针
+    StablePool<SYNTAXNODE> m_NodePool;
 
     int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     clStringArrayA      m_aDbgExpressionOperStack;
@@ -431,19 +498,17 @@ namespace UVShader
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
 
+    void    InitTokenScope(TKSCOPE& scope, const TOKEN& token) const;
     GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
-    GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
-    GXBOOL  ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
 
-    SYNTAXNODE* AllocSyntaxNode();
-    void ClearSyntaxNodePool();
-    
   public:
     ArithmeticExpression();
     virtual ~ArithmeticExpression();
@@ -458,12 +523,12 @@ namespace UVShader
     const TOKEN::Array* GetTokensArray          () const;
 
     GXBOOL  ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseArithmeticExpression(int depth, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseArithmeticExpression(int depth, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence); // 递归函数
+    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence); // 递归函数
 
-    void DbgDumpScope(clStringA& str, const RTSCOPE& scope);
+    void DbgDumpScope(clStringA& str, const TKSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
-    void DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB);
+    void DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB);
     const clStringArrayA& DbgGetExpressionStack() const;
 
   };

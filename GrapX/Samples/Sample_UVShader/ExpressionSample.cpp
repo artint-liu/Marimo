@@ -459,6 +459,7 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "float2 texcoord : TEXCOORD0 = float2(0,0), pos : POSITION0 = float2(320, 240)", 0, aOperList_397},
   {0, _I_, "float freqs, time, frame, fps", 8, NULL},
   {0, _I_, "float freqs[8], time[4]", 10},
+  {0, _I_, "float freqs[8] : FREQUENT, time[4]:TIME", 14},
   {0, _I_, "float freqs[16]", 5},
   {0, _I_, "float freqs[16][8]", 8},
   {0, _I_, "float freqs[] = {12, 3, 5}", 12},

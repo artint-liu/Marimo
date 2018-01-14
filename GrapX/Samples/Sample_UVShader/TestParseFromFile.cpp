@@ -239,6 +239,8 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::ArithmeticExpression:
   return 0;
 }
 
+#ifdef REFACTOR_STRUCT_PARSER
+#else
 void DumpStructMembers(clStringA& str, int depth, UVShader::CodeParser::STRUCT_MEMBER* pMembers, clsize nNumOfMembers)
 {
   for(clsize i = 0; i < nNumOfMembers; i++)
@@ -252,6 +254,7 @@ void DumpStructMembers(clStringA& str, int depth, UVShader::CodeParser::STRUCT_M
     }
   }
 }
+#endif
 
 void DumpMemory(const void* ptr, size_t count)
 {
@@ -505,11 +508,18 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
             case UVShader::CodeParser::StatementType_Signatures:
               {
                 const auto& stru = s.stru;
+#ifdef REFACTOR_STRUCT_PARSER
+                clStringA str;
+                file.WritefA("struct %s\n", stru.szName);
+                DumpBlock(&expp, stru.sRoot.un.pNode, 0, 0, &str);
+                file.WritefA(str);
+#else
                 clStringA str;
                 file.WritefA("struct %s {\n", stru.szName);
                 DumpStructMembers(str, 1, stru.pMembers, stru.nNumOfMembers);
                 file.WritefA(str);
                 file.WritefA("};\n");
+#endif
               }
               break;
             case UVShader::CodeParser::StatementType_Expression:

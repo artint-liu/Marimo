@@ -15,7 +15,7 @@ public:
   {
   }
 
-  GXBOOL TestParseExpression(STATEMENT* pStat, RTSCOPE* pScope)
+  GXBOOL TestParseExpression(STATEMENT* pStat, TKSCOPE* pScope)
   {
     m_aDbgExpressionOperStack.clear();
     m_aCommand.clear();
@@ -38,7 +38,7 @@ public:
   GXBOOL TestGraph(SYNTAXNODE::UN* pUnion)
   {
     //GXBOOL bret = Parse();
-    UVShader::CodeParser::RTSCOPE scope(0, m_aTokens.size());
+    UVShader::CodeParser::TKSCOPE scope(0, m_aTokens.size());
     GXBOOL bret = ParseArithmeticExpression(&scope, pUnion);
 
     if( ! bret) {
@@ -106,7 +106,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     }
 
     // 表达式解析
-    UVShader::CodeParser::RTSCOPE scope(0, pTokens->size());
+    UVShader::CodeParser::TKSCOPE scope(0, pTokens->size());
     UVShader::CodeParser::STATEMENT stat;
     GXBOOL bCompilation = expp.TestParseExpression(&stat, &scope);
     if(pSamples[i].szResult != NULL)

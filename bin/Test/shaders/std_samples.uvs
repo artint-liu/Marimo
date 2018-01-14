@@ -161,9 +161,9 @@ void func5()
 {
   struct CONTEXT {
     float3 pos;	
-	float3 dir;
-	;
-	float2 texcoord;
+    float3 dir;
+    ;
+    float2 texcoord;
   };
   
   CONTEXT c;

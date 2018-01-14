@@ -71,7 +71,8 @@ namespace UVShader
     : m_pMsg(NULL)
     //, m_nMaxPrecedence(0)
     , m_nDbgNumOfExpressionParse(0)
-    , m_pNewNode(NULL)
+    , m_NodePool(128)
+    , m_bRefMsg(FALSE)
   {
 #ifdef _DEBUG
     // 检查名字与其设定长度是一致的
@@ -120,7 +121,7 @@ namespace UVShader
 
   ArithmeticExpression::~ArithmeticExpression()
   {
-    ClearSyntaxNodePool();
+    m_NodePool.Clear();
   }
 
   const ArithmeticExpression::TOKEN::Array* ArithmeticExpression::GetTokensArray() const
@@ -252,8 +253,7 @@ namespace UVShader
       }
     }
 
-    pDest->un.pNode = AllocSyntaxNode();
-    *pDest->un.pNode = sNode;
+    pDest->un.pNode = m_NodePool.PushBack(sNode);
 
 #ifdef _DEBUG
     static size_t id = 1;
@@ -263,13 +263,13 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ArithmeticExpression::MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const RTSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle)
+  GXBOOL ArithmeticExpression::MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle)
   {
     ASSERT((int)pScope->begin <= nMiddle);
     ASSERT(nMiddle <= (int)pScope->end);
 
-    RTSCOPE scopeA(pScope->begin, nMiddle);
-    RTSCOPE scopeB(nMiddle + 1, pScope->end);
+    TKSCOPE scopeA(pScope->begin, nMiddle);
+    TKSCOPE scopeB(nMiddle + 1, pScope->end);
     SYNTAXNODE::DESC A = {0}, B = {0};
     GXBOOL bresult = TRUE;
     //SYNTAXNODE::MODE _mode = SYNTAXNODE::MODE_Opcode;
@@ -341,20 +341,20 @@ namespace UVShader
 
   GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::DESC* pDesc)
   {
-    RTSCOPE scope(begin, end);
+    TKSCOPE scope(begin, end);
     return ParseArithmeticExpression(depth + 1, scope, pDesc);
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const RTSCOPE& scope_in, SYNTAXNODE::DESC* pDesc)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope_in, SYNTAXNODE::DESC* pDesc)
   {
-    RTSCOPE scope = scope_in;
+    TKSCOPE scope = scope_in;
     if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
       scope.end--; // TODO: 确定这个是否为必须
     }
     return ParseArithmeticExpression(depth + 1, scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence)
   {
     int nCandidate = s_MaxPrecedence;
     GXINT_PTR i = (GXINT_PTR)scope.end - 1;
@@ -391,12 +391,12 @@ namespace UVShader
       if(A.un.pTokn->precedence > 0)
       {
         bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, A.un.pTokn, NULL, &B);
-        DbgDumpScope(A.un.pTokn->ToString(), RTSCOPE(0,0), RTSCOPE(scope.begin + 1, scope.end));
+        DbgDumpScope(A.un.pTokn->ToString(), TKSCOPE(0,0), TKSCOPE(scope.begin + 1, scope.end));
       }
       else if(B.un.pTokn->precedence > 0)
       {
         bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, B.un.pTokn, &A, NULL);
-        DbgDumpScope(B.un.pTokn->ToString(), RTSCOPE(scope.begin, scope.begin + 1), RTSCOPE(0,0));
+        DbgDumpScope(B.un.pTokn->ToString(), TKSCOPE(scope.begin, scope.begin + 1), TKSCOPE(0,0));
       }
       else {
         // 变量声明
@@ -408,7 +408,7 @@ namespace UVShader
     {
       ASSERT(count > 2);
       SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_Definition;
-      RTSCOPE scope_expr(scope.begin + 1, scope.end);
+      TKSCOPE scope_expr(scope.begin + 1, scope.end);
       //if(front == "const") {
       //  if(count == 3) {
       //    // ERROR: 缺少常量赋值
@@ -438,7 +438,7 @@ namespace UVShader
     {
       // 括号肯定是匹配的
       ASSERT(m_aTokens[scope.end - 1].scope == scope.begin);
-      return ParseArithmeticExpression(depth + 1, RTSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+      return ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
     }
     else if(m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
     {
@@ -528,7 +528,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ArithmeticExpression::ParseFunctionIndexCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
+  GXBOOL ArithmeticExpression::ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 从右到左解析这两种形式:
     // name(...)(...)(...)
@@ -551,14 +551,14 @@ namespace UVShader
 
 
     while(1) {
-      if(pBack->scope == RTSCOPE::npos) {
+      if(pBack->scope == TKSCOPE::npos) {
         ERROR_MSG__MISSING_SEMICOLON(*A.un.pTokn);
         return FALSE;
       }
       c.mode = *pBack == ')' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
       c.B.un.ptr = NULL;
 
-      if( ! ParseArithmeticExpression(0, RTSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {
+      if( ! ParseArithmeticExpression(0, TKSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {
         return FALSE;
       }
 
@@ -598,36 +598,7 @@ namespace UVShader
     return m_aTokens[index] == szName;
   }
 
-  ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::AllocSyntaxNode()
-  {
-    const size_t c_ElementCount = 128;
-    
-    ASSERT(m_pNewNode == NULL || (
-      m_pNewNode >= m_NodePoolList.back().pBegin &&
-      m_pNewNode < m_NodePoolList.back().pEnd));
-
-    if(m_pNewNode == NULL || (++m_pNewNode) == m_NodePoolList.back().pEnd) {
-      SYNTAXNODEPOOL pool = {NULL, NULL};
-      m_pNewNode = new SYNTAXNODE[c_ElementCount];
-      pool.pBegin = m_pNewNode;
-      pool.pEnd = pool.pBegin + c_ElementCount;
-      m_NodePoolList.push_back(pool);
-    }
-    return m_pNewNode;
-  }
-
-  void ArithmeticExpression::ClearSyntaxNodePool()
-  {
-    std::for_each(m_NodePoolList.begin(), m_NodePoolList.end(),
-      [](SYNTAXNODEPOOL& pool)
-    {
-      delete[] pool.pBegin;
-    });
-    m_NodePoolList.clear();
-    m_pNewNode = NULL;
-  }
-
-  GXBOOL ArithmeticExpression::ParseFunctionCall(const RTSCOPE& scope, SYNTAXNODE::DESC* pDesc)
+  GXBOOL ArithmeticExpression::ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc)
   {
     // 括号肯定是匹配的
     ASSERT(m_aTokens[scope.end - 1].scope == scope.begin + 1);
@@ -639,7 +610,7 @@ namespace UVShader
 
     const TOKEN& bracket = m_aTokens[scope.begin + 1];
     ASSERT(bracket == '[' || bracket == '(');
-    GXBOOL bret = ParseArithmeticExpression(0, RTSCOPE(scope.begin + 2, scope.end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
+    GXBOOL bret = ParseArithmeticExpression(0, TKSCOPE(scope.begin + 2, scope.end - 1), &B, TOKEN::FIRST_OPCODE_PRECEDENCE);
 
     SYNTAXNODE::MODE mode;
     if(bracket == '(') {
@@ -654,10 +625,20 @@ namespace UVShader
     }
 
     MakeSyntaxNode(pDesc, mode, &A, &B);
-    DbgDumpScope(bracket == '(' ? "F" : "I", RTSCOPE(scope.begin, scope.begin + 1),
-      RTSCOPE(scope.begin + 2, scope.end - 1));
+    DbgDumpScope(bracket == '(' ? "F" : "I", TKSCOPE(scope.begin, scope.begin + 1),
+      TKSCOPE(scope.begin + 2, scope.end - 1));
 
     return bret;
+  }
+
+  void ArithmeticExpression::InitTokenScope(TKSCOPE& scope, const TOKEN& token) const
+  {
+    // 使用token的括号作用域初始化一个作用域
+    ASSERT(&token >= &m_aTokens.front() && &token < &m_aTokens.back()); // token必须是本类的序列中的
+    ASSERT(token.scope != -1); // 必须有匹配
+
+    scope.end = token.scope;
+    scope.begin = m_aTokens[token.scope].scope;
   }
 
   GXBOOL ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token)
@@ -736,12 +717,12 @@ namespace UVShader
     }
   }
 
-  void ArithmeticExpression::DbgDumpScope( clStringA& str, const RTSCOPE& scope )
+  void ArithmeticExpression::DbgDumpScope( clStringA& str, const TKSCOPE& scope )
   {
     DbgDumpScope(str, scope.begin, scope.end, FALSE);
   }
 
-  void ArithmeticExpression::DbgDumpScope(GXLPCSTR opcode, const RTSCOPE& scopeA, const RTSCOPE& scopeB )
+  void ArithmeticExpression::DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB )
   {
     clStringA strA, strB;
     DbgDumpScope(strA, scopeA);
