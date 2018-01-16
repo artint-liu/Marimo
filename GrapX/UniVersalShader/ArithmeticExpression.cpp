@@ -1210,4 +1210,61 @@ namespace UVShader
     return pOpcode && *pOpcode == str;
   }
 
+  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAB() const
+  {
+    if(Operand[0].IsToken()) {
+      return *Operand[0].pTokn;
+    }
+    else if(Operand[1].IsToken()) {
+      return *Operand[1].pTokn;
+    }
+    else if(Operand[0].IsNode()) {
+      return Operand[0].pNode->GetAnyTokenAB();
+    }
+    else if(Operand[1].IsNode()) {
+      return Operand[1].pNode->GetAnyTokenAB();
+    }
+    CLBREAK;
+  }
+
+  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAPB() const
+  {
+    if(Operand[0].IsToken()) {
+      return *Operand[0].pTokn;
+    }
+    else if(Operand[0].IsNode()) {
+      return Operand[0].pNode->GetAnyTokenAPB();
+    }
+    else if(pOpcode) {
+      return *pOpcode;
+    }
+    else if(Operand[1].IsToken()) {
+      return *Operand[1].pTokn;
+    }
+    else if(Operand[1].IsNode()) {
+      return Operand[1].pNode->GetAnyTokenAPB();
+    }
+    CLBREAK;
+  }
+
+  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenPAB() const
+  {
+    if(pOpcode) {
+      return *pOpcode;
+    }
+    else if(Operand[0].IsToken()) {
+      return *Operand[0].pTokn;
+    }
+    else if(Operand[1].IsToken()) {
+      return *Operand[1].pTokn;
+    }
+    else if(Operand[0].IsNode()) {
+      return Operand[0].pNode->GetAnyTokenPAB();
+    }
+    else if(Operand[1].IsNode()) {
+      return Operand[1].pNode->GetAnyTokenPAB();
+    }
+    CLBREAK;
+  }
+
 } // namespace UVShader

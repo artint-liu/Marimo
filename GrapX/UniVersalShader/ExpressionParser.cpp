@@ -820,10 +820,84 @@ namespace UVShader
   }
 
   GXBOOL CodeParser::ParseStatement(TKSCOPE* pScope)
-  {    
-    return (pScope->begin < pScope->end) && (
-      ParseStatementAs_Definition(pScope) ||
-      ParseStatementAs_Function(pScope) || ParseStatementAs_Struct(pScope));
+  {
+    return (pScope->begin < pScope->end) &&
+      (
+        ParseStatementAs_Struct(pScope) ||
+        ParseStatementAs_Definition(pScope) ||
+        ParseStatementAs_Function(pScope)
+      );
+  }
+
+  GXBOOL CodeParser::BreakDefinition(STATEMENT& stat, const TKSCOPE& scope)
+  {
+    //
+    // 将类型定义中的逗号表达式展开为独立的类型定义
+    // 如 float a, b, c; 改为
+    // float a; float b; float c;
+    //
+    SYNTAXNODE* pNode = stat.defn.sRoot.pNode;
+    SYNTAXNODE::PtrList sDefinitionList;
+    SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList]
+    (SYNTAXNODE* pNode, int depth) -> GXBOOL
+    {
+      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition ||
+        (pNode->CompareOpcode(',')))
+      {
+        sDefinitionList.push_back(pNode);
+        return TRUE;
+      }
+      return FALSE;
+    });
+
+    if(sDefinitionList.empty()) {
+      OutputErrorW(m_aTokens[scope.begin + 1], E2145_语法错误_标识符前面缺少token_vs, ";");
+      return FALSE;
+    }
+    else if(sDefinitionList.size() == 1) {
+      m_aStatements.push_back(stat);
+    }
+    else {
+      ASSERT(!sDefinitionList.empty());
+      // 这里list应该是如下形式
+      // (define) [type] [node1]
+      // (node1) [node2] [var define node N]
+      // (node2) [node3] [var define node (N-1)]
+      // ...
+      // (nodeN) [var define node 1] [var define node 2]
+
+      auto& front = sDefinitionList.front();
+
+      ASSERT(front->mode == SYNTAXNODE::MODE_Definition);
+
+      front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
+      stat.defn.sRoot.pNode = front;
+      m_aStatements.push_back(stat);
+
+      auto it = sDefinitionList.end();
+      ASSERT(front->Operand[0].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
+      for(--it; it != sDefinitionList.begin(); --it)
+      {
+        SYNTAXNODE& SyntaxNode = **it;
+
+        if(SyntaxNode.CompareOpcode(',') == NULL) {
+          const TOKEN& t = SyntaxNode.GetAnyTokenAB();
+          clStringA str = t.ToString();
+          OutputErrorW(t, E2061, clStringW(str)); // "语法错误: 标识符“%s”";
+          return FALSE;
+        }
+
+        // 逗号并列式改为独立类型定义式
+        SyntaxNode.mode = front->mode;
+        SyntaxNode.pOpcode = NULL;
+        SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type
+
+                                                           // 加入列表
+        stat.defn.sRoot.pNode = *it;
+        m_aStatements.push_back(stat);
+      }
+    }
+    return TRUE;
   }
 
   GXBOOL CodeParser::ParseStatementAs_Definition(TKSCOPE* pScope)
@@ -899,6 +973,7 @@ namespace UVShader
 
     stat.defn.szType = GetUniqueString(p);
 
+#if 0
     if( ! ParseExpression(TKSCOPE(pScope->begin, definition_end), &stat.defn.sRoot))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(definition_end));
@@ -954,8 +1029,7 @@ namespace UVShader
       {
         SYNTAXNODE& SyntaxNode = **it;
 
-        //ASSERT(SyntaxNode.mode == );
-        ASSERT(*SyntaxNode.pOpcode == ',');
+        ASSERT(SyntaxNode.CompareOpcode(','));
 
         // 逗号并列式改为独立类型定义式
         SyntaxNode.mode = front->mode;
@@ -967,6 +1041,16 @@ namespace UVShader
         m_aStatements.push_back(stat);
       }
     }
+#else
+    TKSCOPE scope(pScope->begin, definition_end);
+    if(!ParseExpression(scope, &stat.defn.sRoot))
+    {
+      ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope.end));
+      return FALSE;
+    }
+
+    BreakDefinition(stat, scope);
+#endif
 
     ASSERT(pEnd->semi_scope == definition_end && *pEnd == ';');
     pScope->begin = definition_end + 1;
@@ -1066,12 +1150,12 @@ namespace UVShader
     return TRUE;
   }
 
-  ArithmeticExpression::SYNTAXNODE::GLOB* CodeParser::BreakDefinition(SYNTAXNODE::PtrList& sVarList, const TOKEN& type_token, SYNTAXNODE* pNode)
+  ArithmeticExpression::SYNTAXNODE::GLOB* CodeParser::BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode)
   {
     if(pNode->Operand[0].IsToken() == FALSE && pNode->Operand[0].pNode->CompareOpcode(','))
     {
       sVarList.push_front(pNode);
-      return BreakDefinition(sVarList, type_token, pNode->Operand[0].pNode);
+      return BreakDefinition(sVarList, pNode->Operand[0].pNode);
     }
     sVarList.push_front(pNode);
     return &pNode->Operand[0];
@@ -1089,10 +1173,16 @@ namespace UVShader
     STATEMENT stat = {StatementType_Empty};
     INC_BUT_NOT_END(p, pEnd);
 
+    TOKEN* pStructName = p;
     stat.stru.szName = GetUniqueString(p);
     INC_BUT_NOT_END(p, pEnd);
 
-    if(*p != "{") {
+    if(*p == ";") {
+      // 结构体声明
+      pScope->begin = p - &m_aTokens.front() + 1;
+      return TRUE;
+    }
+    else if(*p != "{") {
       // ERROR: 错误的结构体定义
       CLBREAK;
       return FALSE;
@@ -1112,7 +1202,7 @@ namespace UVShader
       OutputErrorW(E1004); // 遇到意外的文件结束
       return FALSE;
     }
-    else if(m_aTokens[pScope->begin] != ";") {
+    else if(m_aTokens[pScope->begin] != ";" && m_aTokens[pScope->begin].IsIdentifier() == FALSE) {
       OutputErrorW(m_aTokens[pScope->begin], E2145, ";"); // "语法错误：标识符前面缺少“%s”"
       return FALSE;
     }
@@ -1125,7 +1215,10 @@ namespace UVShader
     // 这里面所做的就是将 type a,b,c;这种形式展开为
     // type a; type b; type c;
     SYNTAXNODE* pLastChain = NULL;
-    SYNTAXNODE::RecursiveNode(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pLastChain]
+    int nSignatures = 0; // Signature Member数量
+    int nDefination = 0; // 定义数量
+    b32 result = TRUE;
+    SYNTAXNODE::RecursiveNode(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pLastChain, &nDefination,&nSignatures, &result]
     (SYNTAXNODE* pNode, int depth)->GXBOOL
     {
       if(depth == 0)
@@ -1141,15 +1234,20 @@ namespace UVShader
       {
         if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Definition) {
           // ERROR
-          CLBREAK;
+          const TOKEN& t = pNode->GetAnyTokenAPB();
+          clStringA str = t.ToString();
+          OutputErrorW(t, E2062, clStringW(str));
+          result = FALSE;
           return FALSE;
         }
+
+        nDefination++;
 
         if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsToken() == FALSE
           && pNode->Operand[1].pNode->CompareOpcode(','))
         {
           ArithmeticExpression::SYNTAXNODE::PtrList sVarList;
-          ArithmeticExpression::SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, *pNode->Operand[0].pTokn, pNode->Operand[1].pNode);
+          ArithmeticExpression::SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
           pNode->Operand[1].ptr = pFirstVar->ptr;
 
           for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
@@ -1158,6 +1256,7 @@ namespace UVShader
             n->mode = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
             n->pOpcode = NULL;
             n->Operand[0].ptr = pNode->Operand[0].ptr;
+            //nDefination++;
 
             SYNTAXNODE* pChain = m_NodePool.Alloc();
             pChain->id = 0;
@@ -1172,20 +1271,75 @@ namespace UVShader
           }
         }
       }
+      else if(depth == 2)
+      {
+        if(pNode->CompareOpcode(':')) {
+          nSignatures++;
+        }
+      }
   
       return TRUE;
     });
 
+    if(_CL_NOT_(result)) {
+      return FALSE;
+    }
+
+    if(nSignatures && nSignatures != nDefination) {
+      // ERROR: 不是所有成员都定义为signatures
+      CLBREAK;
+    }
+
     //DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
     //TRACE("---------------------------------------------\n");
 
-    stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[pScope->begin];
+    stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
+    stat.stru.nNumOfMembers = nDefination;
 
-    stat.type = StatementType_Struct; // TODO: 暂时用这个，也可能是StatementType_Signatures
-    m_aStatements.push_back(stat);
-    ++pScope->begin;
+    if(m_aTokens[pScope->begin] == ';')
+    {
+      stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[pScope->begin];
+      m_aStatements.push_back(stat);
+      ++pScope->begin;
+    }
+    else {
+      TKSCOPE scope_var(pScope->begin, m_aTokens[pScope->begin].semi_scope);
+      stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[scope_var.end];
+      m_aStatements.push_back(stat);
+
+      // 结构体定义后定义变量
+      STATEMENT stat_var;
+      stat_var.type = StatementType_Definition;
+      stat_var.defn.modifier = UniformModifier_empty;
+      stat_var.defn.storage_class = VariableStorageClass_empty;
+      stat_var.defn.szType = stat.stru.szName;
+
+      if(_CL_NOT_(ParseExpression(scope_var, &stat_var.defn.sRoot)))
+      {
+        ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
+        return FALSE;
+      }
+
+      // 封装一个定义序列
+      SYNTAXNODE* pNewDef = m_NodePool.Alloc();
+      pNewDef->id = 0;
+      pNewDef->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
+      pNewDef->mode = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
+      pNewDef->pOpcode = NULL;
+      pNewDef->Operand[0].ptr = pStructName;
+      pNewDef->Operand[1].ptr = stat_var.defn.sRoot.ptr;
+
+      stat_var.defn.sRoot.pNode = pNewDef;
+
+      if(BreakDefinition(stat_var, scope_var) == FALSE) {
+        CLBREAK;
+        return FALSE;
+      }
+      
+      pScope->begin = scope_var.end + 1;
+    }
+
     return TRUE;
-    return FALSE;
   }
 
   GXBOOL CodeParser::ParseFunctionArguments(STATEMENT* pStat, TKSCOPE* pArgScope)

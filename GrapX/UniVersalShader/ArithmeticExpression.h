@@ -347,8 +347,11 @@ namespace UVShader
       }
 
       b32 CompareOpcode(TChar ch) const;
-
       b32 CompareOpcode(T_LPCSTR str) const;
+
+      const TOKEN& GetAnyTokenAB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
+      const TOKEN& GetAnyTokenAPB() const;  // 为错误处理找到一个定位的token 顺序:operand[0], opcode, operand[1]
+      const TOKEN& GetAnyTokenPAB() const; // 为错误处理找到一个定位的token 顺序:opcode, operand[0], operand[1]
     }; // struct SYNTAXNODE
 
     typedef clstack<int>          PairStack;

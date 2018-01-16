@@ -341,7 +341,8 @@ namespace UVShader
 
     GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc);
 
-    SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, const TOKEN& type_token, SYNTAXNODE* pNode);
+    SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
+    GXBOOL BreakDefinition(STATEMENT& stat, const TKSCOPE& scope);
 
     GXBOOL  ParseRemainStatement(TKSCOPE::TYPE parse_end, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseExpression(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
