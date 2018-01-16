@@ -244,7 +244,7 @@ namespace Marimo
       GXLPCWSTR szFilename = (szRefFilename == NULL ? L"<memory>" : szRefFilename);
       CLOGW(L"Import data from memory (reference filename: \"%s\").", szFilename);
       IMPORT import;
-      import.ErrorMsg.LoadErrorMessageW(DPC_MESSAGE_FILE);
+      import.ErrorMsg.LoadErrorMessage(DPC_MESSAGE_FILE);
       if(import.ss.Set(pBuffer) && import.PrepareLines(szFilename)) {
         auto sectRoot = import.ss.OpenSection(NULL);
         IntImportSections(import, sectRoot, NULL);
@@ -260,7 +260,7 @@ namespace Marimo
     {
       CLOGW(L"Import data from \"%s\".", szFilename);
       IMPORT import;
-      import.ErrorMsg.LoadErrorMessageW(DPC_MESSAGE_FILE);
+      import.ErrorMsg.LoadErrorMessage(DPC_MESSAGE_FILE);
       if(import.ss.LoadFromFile(szFilename)) {
         if(import.PrepareLines(szFilename)) {
           auto sectRoot = import.ss.OpenSection(NULL);

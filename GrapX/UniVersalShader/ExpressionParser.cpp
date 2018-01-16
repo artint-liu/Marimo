@@ -41,6 +41,8 @@
 //#pragma message(__LOC__"Need to do 3D collision testing")
 //
 
+GXLPCSTR g_ExportErrorMessage1 = __FILE__;
+
 // 步进符号指针，但是不期望遇到结尾指针
 #define INC_BUT_NOT_END(_P, _END) \
   if(++_P >= _END) {  \
@@ -234,7 +236,7 @@ namespace UVShader
     {
       if( ! m_pMsg) {
         m_pMsg = ErrorMessage::Create();
-        m_pMsg->LoadErrorMessageW(L"uvsmsg.txt");
+        m_pMsg->LoadErrorMessage(L"uvsmsg.txt");
         m_pMsg->SetMessageSign('C');
         m_pMsg->PushFile(szFilename);
       }
@@ -2976,7 +2978,8 @@ NOT_INC_P:
     for(; *p != '\n' && p < end; p++);
     if(p == end)
     {
-      OutputErrorW(begin, E1004_意外的文件结束);
+      //OutputErrorW(begin, E1004_意外的文件结束);
+      OutputErrorW(begin, UV_EXPORT_TEXT("%", 1004, "意外的文件结束"));
       return end;
     }
     return (p + 1);    
@@ -3034,6 +3037,7 @@ NOT_INC_P:
   //  va_end(arglist);
   //}
 
+  //////////////////////////////////////////////////////////////////////////
   void CodeParser::OutputErrorW(GXUINT code, ...)
   {
     const char* ptr = NULL;
@@ -3065,6 +3069,8 @@ NOT_INC_P:
     m_pMsg->VarWriteErrorW(TRUE, ptr, code, arglist);
     va_end(arglist);
   }
+
+  //////////////////////////////////////////////////////////////////////////
 
   CodeParser* CodeParser::GetRootParser()
   {

@@ -598,6 +598,12 @@ namespace UVShader
     return m_aTokens[index] == szName;
   }
 
+  GXUINT ArithmeticExpression::MarkCode(GXUINT code, GXLPCSTR szMessage)
+  {
+    m_pMsg->UpdateErrorMessage(code, clStringW(szMessage));
+    return code;
+  }
+
   GXBOOL ArithmeticExpression::ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     // 括号肯定是匹配的

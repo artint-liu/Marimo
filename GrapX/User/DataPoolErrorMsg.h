@@ -33,7 +33,8 @@ namespace Marimo
     virtual ~DataPoolErrorMsg();
 
   public:
-    GXBOOL    LoadErrorMessageW   (GXLPCWSTR szErrorFile);
+    GXBOOL    LoadErrorMessage    (GXLPCWSTR szErrorFile);
+    GXBOOL    UpdateErrorMessage  (GXUINT nCode, GXLPCWSTR szErrorText);
     void      SetMessageSign      (GXWCHAR cSign);
 
     void      PushFile            (GXLPCWSTR szFilename, GXINT nTopLine = 0);

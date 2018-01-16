@@ -10,6 +10,8 @@
 
 #define USE_CLSTD_TOKENS
 
+#define UV_EXPORT_TEXT(_PREFIX, _CODE_ID, _MESSAGE)  MarkCode(_CODE_ID, _MESSAGE)
+
 namespace Marimo
 {
   template<typename _TChar>
@@ -483,6 +485,8 @@ namespace UVShader
     GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
+
+    GXUINT  MarkCode(GXUINT code, GXLPCSTR szMessage);
 
   public:
     ArithmeticExpression();

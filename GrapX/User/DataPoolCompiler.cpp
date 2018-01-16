@@ -521,7 +521,7 @@ namespace Marimo
     }
 
     // 加载编译信息资源
-    m_ErrorMsg.LoadErrorMessageW(L"dpcmsg.txt");
+    m_ErrorMsg.LoadErrorMessage(L"dpcmsg.txt");
     m_ErrorMsg.SetMessageSign('C');
     //clStringA strSourceFilePath = ;
     m_ErrorMsg.PushFile(szSourceFilePath ? szSourceFilePath : L"");

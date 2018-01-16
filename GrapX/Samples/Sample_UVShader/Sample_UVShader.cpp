@@ -22,6 +22,8 @@ void ExportTestCase(const clStringA& strPath);
 void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples);
 //#define ENABLE_GRAPH // 毫无意义的开始了语法树转图形化的工作，又舍不得删代码，先注释掉
 
+extern GXLPCSTR g_ExportErrorMessage1;
+
 namespace DigitalParsing
 {
   void Test();
@@ -315,6 +317,45 @@ void TestDebris(GXBOOL bShowList)
   TestFiles("Test\\shaders\\debris", bShowList);
 }
 
+void ExportErrorMessage(GXLPCSTR szCSourceFile)
+{
+  TRACE("导出：%s\n", szCSourceFile);
+  clstd::File file;
+  if(_CL_NOT_(file.OpenExisting(szCSourceFile)))
+  {
+    return;
+  }
+  clstd::MemBuffer buf;
+  if(_CL_NOT_(file.ReadToBuffer(&buf)))
+  {
+    return;
+  }
+
+  clstd::TokensW srccode;
+  clstd::MemBuffer bufW;
+  //UVShader::CodeParser expp(NULL, NULL);
+  if((*(u32*)buf.GetPtr() & 0xffffff) == BOM_UTF8)
+  {
+    clstd::StringUtility::ConvertFromUtf8(bufW, (const char*)buf.GetPtr(), buf.GetSize());
+  }
+  else
+  {
+    return;
+  }
+  srccode.Attach((CLLPCWSTR)bufW.GetPtr(), bufW.GetSize());
+
+  for(auto it = srccode.begin(); it != srccode.end(); ++it)
+  {
+    if(it == "UV_EXPORT_TEXT")
+    {
+      if((it + 1) == _CLTEXT("(") && (it + 2) == _CLTEXT("\"%\""))
+      {
+        TRACEW(_CLTEXT("%s=%s;\n"), (it + 4).ToString(), (it + 6).ToRawString());
+      }
+    }
+  }
+}
+
 // 测试开关
 #define TEST_ARITHMETIC_PARSING
 #define TEST_STD_SAMPLE
@@ -389,6 +430,7 @@ int _tmain(int argc, _TCHAR* argv[])
     printf("2.测试Debris代码\n");
     printf("3.测试Error代码\n");
     printf("4.测试Standard代码\n");
+    printf("*.导出ErrorMessage\n");
     printf("\n0. 所有测试\n");
     printf("[ESC]. quit\n");
 
@@ -423,6 +465,10 @@ int _tmain(int argc, _TCHAR* argv[])
       TestFiles(clStringA(str), TRUE);
     }
     break;
+
+    case '*':
+      ExportErrorMessage(g_ExportErrorMessage1);
+      break;
 
     case VK_ESCAPE:
       goto BREAK_LOOP;

@@ -60,7 +60,7 @@ namespace Marimo
   }
 
   _DPEM_TEMPL
-    GXBOOL _DPEM_CLS::LoadErrorMessageW(GXLPCWSTR szErrorFile)
+    GXBOOL _DPEM_CLS::LoadErrorMessage(GXLPCWSTR szErrorFile)
   {
     clstd::StockW ss;
     if(ss.LoadFromFile(szErrorFile))
@@ -79,6 +79,12 @@ namespace Marimo
       }
     }
     return FALSE;
+  }
+
+  _DPEM_TEMPL
+  GXBOOL _DPEM_CLS::UpdateErrorMessage(GXUINT nCode, GXLPCWSTR szErrorText)
+  {
+    return m_ErrorMsg.insert(clmake_pair(nCode, szErrorText)).second;
   }
 
   _DPEM_TEMPL
