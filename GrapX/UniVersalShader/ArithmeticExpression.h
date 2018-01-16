@@ -95,6 +95,9 @@ namespace UVShader
   {
   public:
     typedef cllist<iterator> IterList;
+    typedef CTokens::T_LPCSTR T_LPCSTR;
+    typedef CTokens::TChar    TChar;
+
 
     //typedef clvector<TOKEN> TokenArray;
     //typedef cllist<TOKEN> TokenList;
@@ -289,71 +292,36 @@ namespace UVShader
       size_t  id;
 #endif
 
-      union UN {
+      union GLOB {
         void*         ptr;    // 任意类型，在只是判断UN是否有效时用具体类型可能会产生误解，所以定义了通用类型
         SYNTAXNODE*   pNode;
         const TOKEN*  pTokn;
 
-        GXBOOL IsToken() const
-        {
-          return pNode && pNode->magic != FLAG_OPERAND_MAGIC;
-        }
+        GXBOOL IsToken() const;
+        GXBOOL IsNode() const;
+        FLAGS GetType() const;
 
-        GXBOOL IsNode() const
-        {
-          return pNode && pNode->magic == FLAG_OPERAND_MAGIC;
-        }
-
-        inline FLAGS GetType() const
-        {
-          if(pNode) {
-            return (pNode->magic == FLAG_OPERAND_MAGIC)
-              ? FLAG_OPERAND_IS_NODE 
-              : FLAG_OPERAND_IS_TOKEN;
-          }
-          else {
-            return FLAG_OPERAND_UNDEFINED;
-          }
-        }
-      };
-
-      struct DESC {
-        UN    un;
-        DESC& operator=(const TOKEN& token) {
-          un.pTokn = &token;
+        GLOB& operator=(const TOKEN& token) {
+          pTokn = &token;
           return *this;
         }
       };
 
-      UN Operand[s_NumOfOperand];
+      //struct DESC {
+      //  GLOB    un;
+      //  DESC& operator=(const TOKEN& token) {
+      //    un.pTokn = &token;
+      //    return *this;
+      //  }
+      //};
+      //typedef clist<GLOB> UNList;
 
-      //inline FLAGS GetOperandType(const int index) const {
-      //  return Operand[index].pNode->magic == FLAG_OPERAND_MAGIC ? FLAG_OPERAND_IS_NODE : FLAG_OPERAND_IS_TOKEN;
-      //}
+      GLOB Operand[s_NumOfOperand];
 
 
-      inline void Clear()
-      {
-        mode = MODE_Undefined;
-        pOpcode = NULL;
-        Operand[0].ptr = NULL;
-        Operand[1].ptr = NULL;
-      }
+      void Clear();
 
-      template<class _Func>
-      static void RecursiveNode(ArithmeticExpression* pParser, SYNTAXNODE* pNode, _Func func) // 广度优先递归
-      {
-        if(func(pNode)) {
-          int i = 0;
-          do {
-            auto type = pNode->Operand[i].GetType();
-            if(type == FLAG_OPERAND_IS_NODE) {
-              RecursiveNode(pParser, pNode->Operand[i].pNode, func);
-            }
-            i++;
-          } while(i < 2);
-        }
-      }
+      static void RecursiveNode(ArithmeticExpression* pParser, SYNTAXNODE* pNode, std::function<GXBOOL(SYNTAXNODE*, int)> func, int depth = 0); // 广度优先递归
 
       template<class _Func, class _Ty>
       static GXBOOL RecursiveNode2(ArithmeticExpression* pParser, const SYNTAXNODE* pNode, _Ty& rOut, _Func func) // 深度优先递归
@@ -361,7 +329,7 @@ namespace UVShader
         _Ty param[2];
         for(int i = 0; i < 2; i++)
         {
-          const FLAGS f = pNode->GetOperandType(i);
+          const FLAGS f = pNode->GetType(i);
           GXBOOL bret = TRUE;
           if(f == FLAG_OPERAND_IS_NODE) {
             bret = RecursiveNode2(pParser, pNode->Operand[i].pNode, param[i], func);
@@ -377,6 +345,10 @@ namespace UVShader
 
         return func(rOut, pNode, param);
       }
+
+      b32 CompareOpcode(TChar ch) const;
+
+      b32 CompareOpcode(T_LPCSTR str) const;
     }; // struct SYNTAXNODE
 
     typedef clstack<int>          PairStack;
@@ -500,12 +472,12 @@ namespace UVShader
 
     void    InitTokenScope(TKSCOPE& scope, const TOKEN& token) const;
     GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token);
-    GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
-    GXBOOL  MakeSyntaxNode(SYNTAXNODE::DESC* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::DESC* pOperandA, SYNTAXNODE::DESC* pOperandB);
-    GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::DESC* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
+    GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
+    GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::GLOB* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
-    GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
+    GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
 
@@ -515,16 +487,16 @@ namespace UVShader
 
     //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
     //SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
-    const SYNTAXNODE* TryGetNode        (const SYNTAXNODE::DESC* pDesc) const; // TODO: 修改所属类
-    SYNTAXNODE::MODE  TryGetNodeMode    (const SYNTAXNODE::DESC* pDesc) const; // TODO: 修改所属类
+    const SYNTAXNODE* TryGetNode        (const SYNTAXNODE::GLOB* pDesc) const; // TODO: 修改所属类
+    SYNTAXNODE::MODE  TryGetNodeMode    (const SYNTAXNODE::GLOB* pDesc) const; // TODO: 修改所属类
 
     clsize              EstimateForTokensCount  () const;   // 从Stream的字符数估计Token的数量
     //clsize              GenerateTokens          ();
     const TOKEN::Array* GetTokensArray          () const;
 
-    GXBOOL  ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc);
-    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::DESC* pDesc, int nMinPrecedence); // 递归函数
+    GXBOOL  ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, int nMinPrecedence); // 递归函数
 
     void DbgDumpScope(clStringA& str, const TKSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);

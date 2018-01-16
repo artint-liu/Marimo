@@ -239,22 +239,6 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::ArithmeticExpression:
   return 0;
 }
 
-#ifdef REFACTOR_STRUCT_PARSER
-#else
-void DumpStructMembers(clStringA& str, int depth, UVShader::CodeParser::STRUCT_MEMBER* pMembers, clsize nNumOfMembers)
-{
-  for(clsize i = 0; i < nNumOfMembers; i++)
-  {
-    str.AppendFormat("%*s%s %s", depth * nTabSize, " ", pMembers[i].szType, pMembers[i].szName);
-    if(pMembers[i].szSignature) {
-      str.AppendFormat(" : %s;\n", pMembers[i].szSignature);
-    }
-    else {
-      str.Append(";\n");
-    }
-  }
-}
-#endif
 
 void DumpMemory(const void* ptr, size_t count)
 {
@@ -400,7 +384,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
               {
                 const auto& definition = s.defn;
                 clStringA str;
-                DumpBlock(&expp, definition.sRoot.un.pNode, 0, 0, &str);
+                DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
                 switch(s.defn.storage_class)
                 {
                 case UVShader::CodeParser::VariableStorageClass_extern:
@@ -492,12 +476,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
                 }
 
                 //file.WritefA("{\n");
-                if(func.pExpression && func.pExpression->expr.sRoot.un.pNode)
+                if(func.pExpression && func.pExpression->expr.sRoot.pNode)
                 {
                   clStringA str;
                   //str.Format("{\n");
                   //DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, 1, &str);
-                  DumpBlock(&expp, func.pExpression->expr.sRoot.un.pNode, 0, 0, &str);
+                  DumpBlock(&expp, func.pExpression->expr.sRoot.pNode, 0, 0, &str);
                   file.WritefA(str); // 缩进两个空格
                 }
                 file.WritefA("\n");
@@ -508,25 +492,17 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
             case UVShader::CodeParser::StatementType_Signatures:
               {
                 const auto& stru = s.stru;
-#ifdef REFACTOR_STRUCT_PARSER
                 clStringA str;
                 file.WritefA("struct %s\n", stru.szName);
-                DumpBlock(&expp, stru.sRoot.un.pNode, 0, 0, &str);
+                DumpBlock(&expp, stru.sRoot.pNode, 0, 0, &str);
                 file.WritefA(str);
-#else
-                clStringA str;
-                file.WritefA("struct %s {\n", stru.szName);
-                DumpStructMembers(str, 1, stru.pMembers, stru.nNumOfMembers);
-                file.WritefA(str);
-                file.WritefA("};\n");
-#endif
               }
               break;
             case UVShader::CodeParser::StatementType_Expression:
               {
                 clStringA str;
                 CLBREAK;
-                DumpBlock(&expp, s.expr.sRoot.un.pNode, 0, 1, &str);
+                DumpBlock(&expp, s.expr.sRoot.pNode, 0, 1, &str);
                 file.WritefA(str);
               }
               break;

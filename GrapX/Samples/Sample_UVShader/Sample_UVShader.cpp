@@ -149,7 +149,7 @@ void CleanGraphBox(SYNTAXBOX* pParent)
 void MakeGraphicalExpression(GXLPCSTR szExpression, GXLPCSTR szOutputFile)
 {
   TestExpression expp;
-  UVShader::CodeParser::SYNTAXNODE::UN Union;
+  UVShader::CodeParser::SYNTAXNODE::GLOB Union;
   const auto nSize = strlen(szExpression);
   expp.Attach(szExpression, nSize);
   expp.GenerateTokens();
@@ -388,8 +388,10 @@ int _tmain(int argc, _TCHAR* argv[])
     printf("1.≤‚ ‘ShaderToy¥˙¬Î\n");
     printf("2.≤‚ ‘Debris¥˙¬Î\n");
     printf("3.≤‚ ‘Error¥˙¬Î\n");
+    printf("4.≤‚ ‘Standard¥˙¬Î\n");
     printf("\n0. À˘”–≤‚ ‘\n");
     printf("[ESC]. quit\n");
+
     char c = clstd_cli::getch();
     switch(c)
     {
@@ -410,6 +412,14 @@ int _tmain(int argc, _TCHAR* argv[])
     {
       clStringW str;
       clpathfile::CombinePath(str, szTestCasePath, _CLTEXT("errorcase"));
+      TestFiles(clStringA(str), TRUE);
+    }
+    break;
+
+    case '4':
+    {
+      clStringW str;
+      clpathfile::CombinePath(str, szTestCasePath, _CLTEXT("stdcase"));
       TestFiles(clStringA(str), TRUE);
     }
     break;

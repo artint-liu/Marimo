@@ -27,15 +27,15 @@ public:
       TRACE("编译错误\n");
       m_aDbgExpressionOperStack.clear();
     }
-    else if(stat.expr.sRoot.un.IsNode() && stat.expr.sRoot.un.pNode) {
+    else if(stat.expr.sRoot.IsNode() && stat.expr.sRoot.pNode) {
       TRACE("--- 内存树 ---\n"); // 重新输出的内存树结构
-      DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.un.pNode, 0);
+      DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.pNode, 0);
     }
     *pStat = stat;
     return bret;
   }
 #ifdef ENABLE_GRAPH
-  GXBOOL TestGraph(SYNTAXNODE::UN* pUnion)
+  GXBOOL TestGraph(SYNTAXNODE::GLOB* pUnion)
   {
     //GXBOOL bret = Parse();
     UVShader::CodeParser::TKSCOPE scope(0, m_aTokens.size());
