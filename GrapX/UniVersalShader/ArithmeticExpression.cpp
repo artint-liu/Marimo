@@ -529,7 +529,8 @@ namespace UVShader
       GXINT_PTR len = (m_aTokens[scope.end - 1].marker - m_aTokens[scope.begin].marker) + m_aTokens[scope.end - 1].length;
       ASSERT(len >= 0);
       clStringA strMsg(m_aTokens[scope.begin].marker, len);
-      TRACE("ERROR: 无法解析\"%s\"\n", strMsg);
+      clStringW strMsgW = strMsg;
+      m_pMsg->WriteErrorW(TRUE, m_aTokens[scope.begin].offset(), UVS_EXPORT_TEXT(5008, "无法解析表达式: \"%s\"."), strMsgW.CStr());
       return FALSE;
     }
     return TRUE;
@@ -1143,6 +1144,21 @@ namespace UVShader
       return clStringA("\"") + ToRawString() + '\"';
     }
     return ToRawString();
+  }
+
+  clStringA& ArithmeticExpression::TOKEN::ToString(clStringA& str) const
+  {
+    if(type == TokenType_String && !BeginsWith('\"')) {
+      return str.Append("\"").Append(marker, length).Append("\"");
+    }
+    return ToRawString(str);
+  }
+
+  clStringW& ArithmeticExpression::TOKEN::ToString(clStringW& str) const
+  {
+    clStringA strA;
+    str = ToString(strA);
+    return str;
   }
 
   int ArithmeticExpression::TOKEN::GetScope() const

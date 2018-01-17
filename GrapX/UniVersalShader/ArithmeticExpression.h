@@ -162,6 +162,8 @@ namespace UVShader
 
       void ClearArithOperatorInfo();
       clStringA ToString() const;
+      clStringA& ToString(clStringA& str) const;
+      clStringW& ToString(clStringW& str) const;
       int GetScope() const;
 
       b32 IsIdentifier() const; // 标识符, 字母大小写, 下划线开头, 本体是字母数字, 下划线的字符串

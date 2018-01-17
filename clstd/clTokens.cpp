@@ -268,6 +268,17 @@ namespace clstd
   }
 
   _TOEKN_TEMPL
+    _TStr& _TOKEN_IMPL::iterator::ToRawString(_TStr& str) const
+  {
+    if(length == 0) {
+      str.Clear();
+      return str;
+    }
+
+    return str.Append(marker, length);
+  }
+
+  _TOEKN_TEMPL
     _TStr _TOKEN_IMPL::iterator::ToString() const
   {
     _TStr strTemp;
@@ -290,6 +301,31 @@ namespace clstd
     strTemp.ReleaseBuffer();
 
     return strTemp;
+  }
+
+  _TOEKN_TEMPL
+    _TStr& _TOKEN_IMPL::iterator::ToString(_TStr& str) const
+  {
+    if(length == 0) {
+      str.Clear();
+      return str;
+    }
+    u32 i = (marker[0] != '\"' && marker[0] != '\'') ? 0 : 1;
+    u32 n = 0;
+    TChar* pTemp = str.GetBuffer(length + 1);
+
+    for(; i < length - 1; i++) {
+      pTemp[n++] = marker[i];
+    }
+
+    if(marker[length - 1] != '\"' && marker[length - 1] != '\'') {
+      pTemp[n++] = marker[i];
+    }
+
+    pTemp[n] = '\0';
+    str.ReleaseBuffer();
+
+    return str;
   }
 
   _TOEKN_TEMPL

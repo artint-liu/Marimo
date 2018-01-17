@@ -1891,8 +1891,7 @@ NOT_INC_P:
       //bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, &A, &B);
     }
 
-    ParseArithmeticExpression(0, scope, pDesc);
-    return TRUE;
+    return ParseArithmeticExpression(0, scope, pDesc);
   }
 
   //////////////////////////////////////////////////////////////////////////
