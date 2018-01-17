@@ -10,7 +10,12 @@
 
 #define USE_CLSTD_TOKENS
 
-#define UV_EXPORT_TEXT(_PREFIX, _CODE_ID, _MESSAGE)  MarkCode(_CODE_ID, _MESSAGE)
+// 注意UVS_EXPORT_TEXT不能改名, 它在Sample中作为标记符号抽取ErrorMessage
+#if defined(UVS_EXPORT_TEXT_IS_SIGN)
+#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  MarkCode(_CODE_ID, _MESSAGE)
+#else
+#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  _CODE_ID
+#endif
 
 namespace Marimo
 {
@@ -263,6 +268,7 @@ namespace UVShader
         MODE_Opcode,              // 操作符 + 操作数 模式: A (操作符) B
         MODE_ArrayAssignment,     // 数组赋值: A={B}; 其它形式赋值属于MODE_Opcode
         MODE_FunctionCall,        // 函数调用: A(B)
+        MODE_TypeConversion,      // 类型转换: (A)B
         MODE_ArrayIndex,          // 索引调用: A[B], 方括号内有内容的都认为是数组调用
         MODE_ArrayAlloc,          // 自适应数组分配: A[], 注意"k[5]"这种形式认为是索引调用
         MODE_Definition,          // 变量定义: A B
@@ -482,11 +488,14 @@ namespace UVShader
     GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::GLOB* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
     GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseTypeConversion(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
 
+#if defined(UVS_EXPORT_TEXT_IS_SIGN)
     GXUINT  MarkCode(GXUINT code, GXLPCSTR szMessage);
+#endif
 
   public:
     ArithmeticExpression();

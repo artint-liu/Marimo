@@ -364,7 +364,7 @@ namespace UVShader
     if(depth > 1000)
     {
       // ERROR: 表达式解析堆栈不足
-      m_pMsg->WriteErrorW(TRUE, m_aTokens[scope.begin].offset(), E9999_未定义错误_vsd, __FILEW__, __LINE__);
+      m_pMsg->WriteErrorW(TRUE, m_aTokens[scope.begin].offset(), UVS_EXPORT_TEXT(5001, "表达式解析堆栈不足"));
       return FALSE;
     }
 
@@ -436,13 +436,20 @@ namespace UVShader
     }
     else if((front == '(' || front == '[' || front == '{') && front.scope == scope.end - 1)  // 括号内表达式
     {
-      // 括号肯定是匹配的
-      ASSERT(m_aTokens[scope.end - 1].scope == scope.begin);
+      // (...) 形式
+      
+      ASSERT(m_aTokens[scope.end - 1].scope == scope.begin); // 括号肯定是匹配的
       return ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
     }
     else if(m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
     {
+      // X(...) 形式
       return ParseFunctionCall(scope, pDesc);
+    }
+    else if(m_aTokens[scope.begin].scope == scope.end - 2)
+    {
+      // (...)X 形式
+      return ParseTypeConversion(scope, pDesc);
     }
 
     while(nMinPrecedence <= s_MaxPrecedence)
@@ -598,11 +605,14 @@ namespace UVShader
     return m_aTokens[index] == szName;
   }
 
+#if defined(UVS_EXPORT_TEXT_IS_SIGN)
   GXUINT ArithmeticExpression::MarkCode(GXUINT code, GXLPCSTR szMessage)
   {
-    m_pMsg->UpdateErrorMessage(code, clStringW(szMessage));
+    clStringW strMessage = szMessage;
+    m_pMsg->UpdateErrorMessage(code, strMessage);
     return code;
   }
+#endif
 
   GXBOOL ArithmeticExpression::ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
@@ -612,7 +622,13 @@ namespace UVShader
     SYNTAXNODE::GLOB A, B = {0};
     A = m_aTokens[scope.begin];
 
-    // TODO: 检查m_aTokens[scope.begin]是函数名
+    // 检查m_aTokens[scope.begin]是函数名
+    if(A.pTokn->IsIdentifier() == FALSE) // 检查是否为标识符
+    {
+      m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5005, "表达式看起来像函数, 但是\"%s\"不是标识符."), A.pTokn->ToString());
+      return FALSE;
+    }
+    // TODO: 重名/重载检查?
 
     const TOKEN& bracket = m_aTokens[scope.begin + 1];
     ASSERT(bracket == '[' || bracket == '(');
@@ -635,6 +651,40 @@ namespace UVShader
       TKSCOPE(scope.begin + 2, scope.end - 1));
 
     return bret;
+  }
+
+  GXBOOL ArithmeticExpression::ParseTypeConversion(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  {
+    ASSERT(scope.begin < scope.end - 2); // 这个由之前的判断保证
+    ASSERT(m_aTokens[scope.begin].scope == scope.end - 2); // 外部保证是(A)B 形式
+
+    SYNTAXNODE::GLOB A = {0}, B;
+    B = m_aTokens[scope.end - 1];
+
+    if(B.pTokn->IsIdentifier() == FALSE)
+    {
+      m_pMsg->WriteErrorW(TRUE, B.pTokn->offset(), UVS_EXPORT_TEXT(5006, "表达式看起来像类型转换, 但是\"%s\"不是标识符."), B.pTokn->ToString());
+      return FALSE;
+    }
+
+    const TOKEN& bracket = m_aTokens[scope.begin];
+    ASSERT(bracket == '(');
+
+    TKSCOPE first_scope(scope.begin + 1, m_aTokens[scope.begin].scope);
+    //InitTokenScope(first_scope, m_aTokens[scope.begin]);
+
+    if(_CL_NOT_(ParseArithmeticExpression(0, first_scope, &A, TOKEN::FIRST_OPCODE_PRECEDENCE)))
+    {
+      m_pMsg->WriteErrorW(TRUE, m_aTokens[first_scope.begin].offset(), UVS_EXPORT_TEXT(5007, "表达式无法解析."));
+      return FALSE;
+    }
+
+    MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_TypeConversion, &A, &B);
+
+    DbgDumpScope("C", TKSCOPE(scope.begin, scope.end - 3),
+      TKSCOPE(scope.end - 2, scope.end - 1));
+
+    return TRUE;
   }
 
   void ArithmeticExpression::InitTokenScope(TKSCOPE& scope, const TOKEN& token) const
@@ -673,7 +723,8 @@ namespace UVShader
           else {
             // ERROR: 括号不匹配
             //ERROR_MSG__MISSING_OPENBRACKET;
-            m_pMsg->WriteErrorW(TRUE, token.offset(), E2059_SyntaxError_vs, _CLTEXT("("));
+            clStringW str((clStringW::TChar)c.chOpen, 1);
+            m_pMsg->WriteErrorW(TRUE, token.offset(), UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), str.CStr());
             break;
           }
         }

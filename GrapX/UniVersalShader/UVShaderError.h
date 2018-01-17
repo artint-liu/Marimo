@@ -275,7 +275,7 @@ namespace UVShader
     E2504 = 2504, // "“class”: 未定义基类";
     E2513 = 2513, // "“type”: 在“=”前没有声明变量";
 
-    E9999 = 9999, // 未定义错误
+    //E9999 = 9999, // 未定义错误
   };
 } // namespace UVShader
 
@@ -291,7 +291,7 @@ namespace UVShader
 #define E2008_宏定义中的意外_vs         2008
 #define E2010_宏形参表中的意外          2010
 
-#define E9999_未定义错误_vsd            9999
+//#define E9999_未定义错误_vsd            9999
 
 
 

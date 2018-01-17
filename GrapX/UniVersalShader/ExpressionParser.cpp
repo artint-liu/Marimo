@@ -457,7 +457,7 @@ namespace UVShader
       PairStack& s = sStack[i];
       if( ! s.empty()) {
         // ERROR: 闭括号不匹配
-        OutputErrorW(m_aTokens[s.top()], E9999_未定义错误_vsd, __FILEW__, __LINE__);
+        OutputErrorW(m_aTokens[s.top()], UVS_EXPORT_TEXT(5001, "文件异常结尾, 缺少闭括号."));
         //ERROR_MSG__MISSING_CLOSEDBRACKET;
       }
     }
@@ -816,7 +816,7 @@ namespace UVShader
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
       // ERROR: 致命错误, 无法从错误中恢复
-      OutputErrorW(E9999_未定义错误_vsd, __FILEW__, __LINE__);
+      OutputErrorW(UVS_EXPORT_TEXT(5002, "致命错误, 无法从错误中恢复"));
     }
     return FALSE;
   }
@@ -1602,6 +1602,10 @@ NOT_INC_P:
     //case SYNTAXNODE::MODE_DefinitionConst:
     //  strOut.Format("const %s %s", str[0], str[1]);
     //  break;
+
+    case SYNTAXNODE::MODE_TypeConversion:
+      strOut.Format("(%s) %s", str[0], str[1]);
+      break;
 
     case SYNTAXNODE::MODE_Definition:
       strOut.Format("%s %s", str[0], str[1]);
@@ -2619,7 +2623,7 @@ NOT_INC_P:
     clBuffer* pBuffer = OpenIncludeFile(strPath);
     if(pBuffer == NULL) {
       // ERROR: 无法打开文件
-      OutputErrorW(E9999_未定义错误_vsd, __FILEW__, __LINE__);
+      OutputErrorW(UVS_EXPORT_TEXT(5003, "无法打开包含文件: \"%s\""), strPath.CStr());
       return;
     }
 
@@ -2802,7 +2806,7 @@ NOT_INC_P:
     SYNTAXNODE::GLOB sDesc;
     if( ! pParser->ParseArithmeticExpression(0, 1, pParser->m_aTokens.size(), &sDesc)) {
       // ERROR: 无法解析表达式
-      OutputErrorW(pParser->m_aTokens.front(), E9999_未定义错误_vsd, __FILEW__, __LINE__);
+      OutputErrorW(pParser->m_aTokens.front(), UVS_EXPORT_TEXT(5004, "无法解析#if的条件表达式"));
       return ctx.iter_next.marker;
     }
 
@@ -2880,7 +2884,7 @@ NOT_INC_P:
 
         if(session > PPCondRank_elif) {
           // ERROR: fatal error C1018: 意外的 #elif
-          OutputErrorW(p, E9999_未定义错误_vsd, __FILEW__, __LINE__);
+          OutputErrorW(p, UVS_EXPORT_TEXT(1018, "意外的 #elif"));
           CLBREAK;
         }
         session = PPCondRank_elif;
@@ -2979,7 +2983,7 @@ NOT_INC_P:
     if(p == end)
     {
       //OutputErrorW(begin, E1004_意外的文件结束);
-      OutputErrorW(begin, UV_EXPORT_TEXT("%", 1004, "意外的文件结束"));
+      OutputErrorW(begin, UVS_EXPORT_TEXT(1004, "意外的文件结束"));
       return end;
     }
     return (p + 1);    

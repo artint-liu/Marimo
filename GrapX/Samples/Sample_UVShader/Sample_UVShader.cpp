@@ -342,17 +342,25 @@ void ExportErrorMessage(GXLPCSTR szCSourceFile)
   {
     return;
   }
-  srccode.Attach((CLLPCWSTR)bufW.GetPtr(), bufW.GetSize());
+  srccode.Attach((CLLPCWSTR)bufW.GetPtr(), bufW.GetSize() / sizeof(wch));
 
+  clset<clStringW> sStrintSet;
   for(auto it = srccode.begin(); it != srccode.end(); ++it)
   {
-    if(it == "UV_EXPORT_TEXT")
+    if(it == "UVS_EXPORT_TEXT")
     {
-      if((it + 1) == _CLTEXT("(") && (it + 2) == _CLTEXT("\"%\""))
+      if((it + 1) == _CLTEXT("(") && (it + 3) == _CLTEXT(","))
       {
-        TRACEW(_CLTEXT("%s=%s;\n"), (it + 4).ToString(), (it + 6).ToRawString());
+        clStringW str;
+        str.Format(_CLTEXT("%s=%s;\n"), (it + 2).ToString(), (it + 4).ToRawString());
+        sStrintSet.insert(str); // 插入到集合中排序
       }
     }
+  }
+
+  for(auto it = sStrintSet.begin(); it != sStrintSet.end(); ++it)
+  {
+    TRACEW(it->CStr());
   }
 }
 
