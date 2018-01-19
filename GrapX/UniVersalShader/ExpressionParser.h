@@ -348,6 +348,7 @@ namespace UVShader
     GXBOOL  ParseExpression(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseExpression(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope);
     GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope);
+    GXBOOL  TryParseExpressions(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope); // 尝试解析多个表达式，可以是不精确的区间
 
     GXBOOL  TryKeywords(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end);
     TKSCOPE::TYPE  ParseFlowIf(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);

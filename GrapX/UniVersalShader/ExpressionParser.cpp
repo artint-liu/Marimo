@@ -897,7 +897,7 @@ namespace UVShader
         SyntaxNode.pOpcode = NULL;
         SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type
 
-                                                           // 加入列表
+        // 加入列表
         stat.defn.sRoot.pNode = *it;
         m_aStatements.push_back(stat);
       }
@@ -920,7 +920,7 @@ namespace UVShader
     const TOKEN* pEnd = &m_aTokens.front() + p->semi_scope;
 
     STATEMENT stat = {StatementType_Definition};
-    TKSCOPE::TYPE definition_end = p->semi_scope;
+    TKSCOPE::TYPE definition_end = p->semi_scope + 1;
 
     // 储存限定
     if(*p == "extern") {
@@ -1048,7 +1048,7 @@ namespace UVShader
     }
 #else
     TKSCOPE scope(pScope->begin, definition_end);
-    if(!ParseExpression(scope, &stat.defn.sRoot))
+    if(!ParseExpression(&stat.defn.sRoot, scope))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope.end));
       return FALSE;
@@ -1057,8 +1057,8 @@ namespace UVShader
     BreakDefinition(stat, scope);
 #endif
 
-    ASSERT(pEnd->semi_scope == definition_end && *pEnd == ';');
-    pScope->begin = definition_end + 1;
+    ASSERT(pEnd->semi_scope + 1 == definition_end && *pEnd == ';');
+    pScope->begin = definition_end;
     return TRUE;
   }
 
@@ -1198,7 +1198,7 @@ namespace UVShader
     TKSCOPE sMembersScope;
     InitTokenScope(sMembersScope, *p, TRUE);
 
-    if(_CL_NOT_(ParseExpression(sMembersScope, &stat.stru.sRoot)))
+    if(_CL_NOT_(ParseExpression(&stat.stru.sRoot, sMembersScope)))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
       return FALSE;
@@ -1312,8 +1312,9 @@ namespace UVShader
       ++pScope->begin;
     }
     else {
-      TKSCOPE scope_var(pScope->begin, m_aTokens[pScope->begin].semi_scope);
-      stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[scope_var.end];
+      const auto semi_end = m_aTokens[pScope->begin].semi_scope;
+      TKSCOPE scope_var(pScope->begin, semi_end + 1);
+      stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[semi_end];
       m_aStatements.push_back(stat);
 
       // 结构体定义后定义变量
@@ -1323,7 +1324,7 @@ namespace UVShader
       stat_var.defn.storage_class = VariableStorageClass_empty;
       stat_var.defn.szType = stat.stru.szName;
 
-      if(_CL_NOT_(ParseExpression(scope_var, &stat_var.defn.sRoot)))
+      if(_CL_NOT_(ParseExpression(&stat_var.defn.sRoot, scope_var)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
         return FALSE;
@@ -1691,6 +1692,7 @@ NOT_INC_P:
   //  RTSCOPE scope(begin, end);
   //  return ParseExpression(&scope, pUnion);
   //}
+#if 1
  
   GXBOOL CodeParser::ParseRemainStatement(TKSCOPE::TYPE parse_end, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
@@ -1709,6 +1711,7 @@ NOT_INC_P:
     }
     return bret ? parse_end != TKSCOPE::npos : FALSE;
   }
+#endif
 
   //////////////////////////////////////////////////////////////////////////
   GXBOOL CodeParser::TryKeywords(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end)
@@ -1817,7 +1820,7 @@ NOT_INC_P:
 
   //  return bret;
   //}
-
+#if 1
   GXBOOL CodeParser::ParseExpression(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     //ASSERT(scope.end == m_aTokens.size() || // 结尾
@@ -1890,9 +1893,9 @@ NOT_INC_P:
       bret = ParseExpression(inner_scope, pDesc);
       bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Block, pDesc, NULL);
       
-      ASSERT(front.scope <= scope.end);
+      ASSERT(front.scope <= (int)scope.end);
       
-      if(front.scope + 1 < scope.end) {
+      if(front.scope + 1 < (int)scope.end) {
         GXBOOL result = ParseRemainStatement(front.scope + 1, scope, pDesc);
         TRACE("---------------------------------------------\n");
         DbgDumpSyntaxTree(NULL, pDesc->pNode, 0, NULL, 1);
@@ -1939,13 +1942,14 @@ NOT_INC_P:
 
     return ParseArithmeticExpression(0, scope, pDesc);
   }
-
+#endif
   //////////////////////////////////////////////////////////////////////////
 
   GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope)
   {
     // 解析一条表达式语句或者一个语句块
-    ASSERT((m_aTokens[scope.begin].semi_scope == scope.end - 1 && m_aTokens[scope.end - 1] == ';') ||
+    ASSERT(scope.begin == scope.end ||
+      (m_aTokens[scope.begin].semi_scope == scope.end - 1 && m_aTokens[scope.end - 1] == ';') ||
       (m_aTokens[scope.begin].scope == scope.end - 1 && m_aTokens[scope.begin] == '{' && m_aTokens[scope.end - 1] == '}'));
       //||
       //m_aTokens[scope.begin] == "if" || m_aTokens[scope.begin] == "for" || m_aTokens[scope.begin] == "while" ||
@@ -1954,8 +1958,7 @@ NOT_INC_P:
     if(m_aTokens[scope.begin] == '{') {
       return ParseCodeBlock(pDest, scope);
     }
-
-    if(ParseArithmeticExpression(1, TKSCOPE(scope.begin, scope.end - 1), pDest) == FALSE)
+    else if(ParseArithmeticExpression(1, TKSCOPE(scope.begin, scope.end - 1), pDest) == FALSE)
     {
       OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5013, "表达式解析失败"));
       return FALSE;
@@ -2011,7 +2014,7 @@ NOT_INC_P:
         TKSCOPE exp_scope;
         exp_scope.begin = step_scope.begin;
         exp_scope.end   = front.semi_scope;
-        ASSERT(m_aTokens[step_scope.begin].semi_scope <= step_scope.end);
+        ASSERT(m_aTokens[step_scope.begin].semi_scope <= (int)step_scope.end);
 
         step_scope.begin = front.semi_scope + 1;
 

@@ -286,7 +286,7 @@ namespace UVShader
         MODE_Flow_ForInit,        // for 的初始化部分 [MODE_Flow_ForInit] [MODE_Flow_ForRunning]
         MODE_Flow_ForRunning,     // for 的条件和步进部分
         //MODE_Flow_Switch,
-        MODE_Flow_DoWhile,
+        MODE_Flow_DoWhile,        // do{B}while(A)
         MODE_Flow_Break,
         MODE_Flow_Continue,
         MODE_Flow_Discard,
