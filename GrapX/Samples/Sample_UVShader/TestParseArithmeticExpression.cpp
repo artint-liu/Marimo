@@ -85,6 +85,12 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
   TestExpression expp;
   for(int i = 0; pSamples[i].expression != 0; i++)
   {
+    // 如果Caps Lock On就跳过表达式解析自检
+    SHORT key_state = GetKeyState(VK_CAPITAL);
+    if(TEST_FLAG(key_state, 1)) {
+      return;
+    }
+
     auto nSize = strlen(pSamples[i].expression);
     expp.Attach(pSamples[i].expression, nSize, 0, NULL);
     expp.GenerateTokens();

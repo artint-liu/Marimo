@@ -337,7 +337,7 @@ namespace UVShader
 
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);
 
-    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, TKSCOPE* pScope/*, GXBOOL bDbgRelocale*/); // (算数表)达式
+    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, TKSCOPE* pScope); // (算数表)达式
 
     GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc);
 
@@ -346,6 +346,8 @@ namespace UVShader
 
     GXBOOL  ParseRemainStatement(TKSCOPE::TYPE parse_end, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseExpression(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseExpression(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope);
+    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope);
 
     GXBOOL  TryKeywords(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end);
     TKSCOPE::TYPE  ParseFlowIf(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);

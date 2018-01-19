@@ -23,6 +23,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples);
 //#define ENABLE_GRAPH // 毫无意义的开始了语法树转图形化的工作，又舍不得删代码，先注释掉
 
 extern GXLPCSTR g_ExportErrorMessage1;
+extern GXLPCSTR g_ExportErrorMessage2;
 
 namespace DigitalParsing
 {
@@ -476,6 +477,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
     case '*':
       ExportErrorMessage(g_ExportErrorMessage1);
+      ExportErrorMessage(g_ExportErrorMessage2);
       break;
 
     case VK_ESCAPE:

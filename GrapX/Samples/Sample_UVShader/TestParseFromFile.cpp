@@ -544,14 +544,14 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       {
         if(it_ref.ToString() != it_out.ToString())
         {
-          printf("\"%s\" not equals \"%s\"\n", it_out.ToString(), it_ref.ToString());
+          TRACE("\"%s\" not equals \"%s\"\n", it_out.ToString(), it_ref.ToString());
           CLBREAK;
         }
       }
 
       if(it_ref != tokens_ref.end() || it_out != tokens_out.end())
       {
-        printf("Not same end.\n");
+        TRACE("Not same end.\n");
         CLBREAK;
       }
 

@@ -17,6 +17,8 @@
 #define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  _CODE_ID
 #endif
 
+#define ENABLE_SYNTAX_NODE_ID
+
 namespace Marimo
 {
   template<typename _TChar>
@@ -298,7 +300,7 @@ namespace UVShader
       MODE    mode  : 16;
       GXDWORD magic : 16; // 0xffff
       const TOKEN* pOpcode;
-#ifdef _DEBUG
+#ifdef ENABLE_SYNTAX_NODE_ID
       size_t  id;
 #endif
 
@@ -432,13 +434,19 @@ namespace UVShader
       typedef clsize TYPE;
       const static TYPE npos = -1;
       TYPE begin;
-      TYPE end;
+      TYPE end; // 解析数学规则: [begin, end)
 
       TKSCOPE(){}
       TKSCOPE(clsize _begin, clsize _end) : begin(_begin), end(_end) {}
 
       inline GXBOOL IsValid() const {
         return (begin != (clsize)-1) && begin < end;
+      }
+
+      inline TYPE GetSize() const
+      {
+        ASSERT(begin <= end);
+        return (end - begin);
       }
     };
 
@@ -461,7 +469,9 @@ namespace UVShader
     static PAIRMARK s_PairMark[4];
     static const int s_MaxPrecedence = 14;
     //static const int s_nPairMark = sizeof(s_PairMark) / sizeof(PAIRMARK);
-
+#ifdef ENABLE_SYNTAX_NODE_ID
+    clsize              m_nNodeId;
+#endif
 
     GXBOOL              m_bRefMsg; // 如果为TRUE，析构时不删除m_pMsg
     ErrorMessage*       m_pMsg;
@@ -483,7 +493,8 @@ namespace UVShader
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
 
-    void    InitTokenScope(TKSCOPE& scope, const TOKEN& token) const;
+    void    InitTokenScope(TKSCOPE& scope, const TOKEN& token, b32 bHasBracket) const;
+    void    InitTokenScope(TKSCOPE& scope, GXUINT index, b32 bHasBracket) const;
     GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);

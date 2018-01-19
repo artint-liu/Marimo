@@ -61,6 +61,10 @@
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
+#if defined(UVS_EXPORT_TEXT_IS_SIGN)
+GXLPCSTR g_ExportErrorMessage2 = __FILE__;
+#endif
+
 namespace UVShader
 {
 #ifdef USE_CLSTD_TOKENS
@@ -73,6 +77,9 @@ namespace UVShader
     , m_nDbgNumOfExpressionParse(0)
     , m_NodePool(128)
     , m_bRefMsg(FALSE)
+#ifdef ENABLE_SYNTAX_NODE_ID
+    , m_nNodeId(1)
+#endif
   {
 #ifdef _DEBUG
     // 检查名字与其设定长度是一致的
@@ -233,31 +240,18 @@ namespace UVShader
 
   GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB)
   {
-    const SYNTAXNODE::GLOB* pOperand[] = {pOperandA, pOperandB};
+    //const SYNTAXNODE::GLOB* pOperand[] = {pOperandA, pOperandB};
     SYNTAXNODE sNode; // = {SYNTAXNODE::FLAG_OPERAND_MAGIC, mode, pOpcode};
     sNode.magic   = SYNTAXNODE::FLAG_OPERAND_MAGIC;
     sNode.mode    = mode;
     sNode.pOpcode = pOpcode;
-
-    for(int i = 0; i < 2; ++i)
-    {
-      if(pOperand[i] == NULL || pOperand[i]->ptr == NULL) {
-        ASSERT(pOperand[i] == NULL || pOperand[i]->ptr == NULL);
-        sNode.Operand[i].ptr = NULL;
-      }
-      else if(pOperand[i]->ptr != NULL) {
-        sNode.Operand[i].ptr = pOperand[i]->ptr;
-      }
-      else {
-        CLBREAK; // 空的或者不存在的 pOperand[i]->flag 类型        
-      }
-    }
+    sNode.Operand[0].ptr = (pOperandA == NULL) ? NULL : pOperandA->ptr;
+    sNode.Operand[1].ptr = (pOperandB == NULL) ? NULL : pOperandB->ptr;
 
     pDest->pNode = m_NodePool.PushBack(sNode);
 
-#ifdef _DEBUG
-    static size_t id = 1;
-    pDest->pNode->id = id++;
+#ifdef ENABLE_SYNTAX_NODE_ID
+    pDest->pNode->id = m_nNodeId++;
 #endif
 
     return TRUE;
@@ -449,7 +443,7 @@ namespace UVShader
     else if(m_aTokens[scope.begin].scope == scope.end - 2)
     {
       // (...)X 形式
-      return ParseTypeConversion(scope, pDesc);
+      return ParseTypeCast(scope, pDesc); // FIXME: 不应该放在这里, 优先级不正确
     }
 
     while(nMinPrecedence <= s_MaxPrecedence)
@@ -623,8 +617,8 @@ namespace UVShader
     SYNTAXNODE::GLOB A, B = {0};
     A = m_aTokens[scope.begin];
 
-    // 检查m_aTokens[scope.begin]是函数名
-    if(A.pTokn->IsIdentifier() == FALSE) // 检查是否为标识符
+    // 检查m_aTokens[scope.begin]是函数名, 或者正号, 负号
+    if(*A.pTokn != '+' && *A.pTokn != '-' && A.pTokn->IsIdentifier() == FALSE) // 检查是否为标识符
     {
       m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5005, "表达式看起来像函数, 但是\"%s\"不是标识符."), A.pTokn->ToString());
       return FALSE;
@@ -654,7 +648,7 @@ namespace UVShader
     return bret;
   }
 
-  GXBOOL ArithmeticExpression::ParseTypeConversion(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  GXBOOL ArithmeticExpression::ParseTypeCast(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     ASSERT(scope.begin < scope.end - 2); // 这个由之前的判断保证
     ASSERT(m_aTokens[scope.begin].scope == scope.end - 2); // 外部保证是(A)B 形式
@@ -688,14 +682,40 @@ namespace UVShader
     return TRUE;
   }
 
-  void ArithmeticExpression::InitTokenScope(TKSCOPE& scope, const TOKEN& token) const
+  void ArithmeticExpression::InitTokenScope(TKSCOPE& scope, const TOKEN& token, b32 bHasBracket) const
   {
     // 使用token的括号作用域初始化一个作用域
     ASSERT(&token >= &m_aTokens.front() && &token < &m_aTokens.back()); // token必须是本类的序列中的
     ASSERT(token.scope != -1); // 必须有匹配
 
-    scope.end = token.scope;
-    scope.begin = m_aTokens[token.scope].scope;
+    if(bHasBracket)
+    {
+      scope.end = token.scope + 1;
+      scope.begin = m_aTokens[token.scope].scope;
+    }
+    else
+    {
+      scope.end = token.scope;
+      scope.begin = m_aTokens[token.scope].scope + 1;
+    }
+  }
+
+  void ArithmeticExpression::InitTokenScope(TKSCOPE& scope, GXUINT index, b32 bHasBracket) const
+  {
+    // 使用token的括号作用域初始化一个作用域
+    ASSERT(index < (GXUINT)m_aTokens.size()); // token必须是本类的序列中的
+    ASSERT(m_aTokens[index].scope != -1); // 必须有匹配
+
+    if(bHasBracket)
+    {
+      scope.begin = index;
+      scope.end   = m_aTokens[index].scope + 1;
+    }
+    else
+    {
+      scope.begin = index + 1;
+      scope.end = m_aTokens[index].scope;
+    }
   }
 
   GXBOOL ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token)

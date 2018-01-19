@@ -189,37 +189,37 @@ void flow_test2()
   int count = 0;
   
   // 标准循环
-  for(int i = 0; i < 10; i++)
+  for(int i = 0; i < 11; i++)
     count += i;
 
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 12; i++) {
     count += i;
   }
   count = 0;
 
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 13; i++) {
     count += i;
     count *= lerp(0, 1, i * 0.1f);
   }
   count = 0;
   // 嵌套循环
-  for(int y = -10; y <= 10; y++)
-    for(int x = -10; x <= 10; x++)
+  for(int y = -10; y <= 14; y++)
+    for(int x = -10; x <= 15; x++)
       count += y * 21 + x;
 
-  for(int y = -10; y <= 10; y++)
-    for(int x = -10; x <= 10; x++) {
+  for(int y = -10; y <= 16; y++)
+    for(int x = -10; x <= 17; x++) {
       count += y * 23 + x;
     }
 
-  for(int y = -10; y <= 10; y++) {
-    for(int x = -10; x <= 10; x++) {
+  for(int y = -10; y <= 18; y++) {
+    for(int x = -10; x <= 19; x++) {
       count += y * 25 + x;
     }
   }
   count = 0;
-  for(int z = -5; z <= 5; z++)
-    for(int y = -5; y <= 5; y++)
+  for(int z = -5; z <= 3; z++)
+    for(int y = -5; y <= 4; y++)
       for(int x = -5; x <= 5; x++)
         count += z + y + x;
 

@@ -450,7 +450,7 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "float a,b,c,d,e", 10, aSyntaxList_405},
   {0, _I_, "float a, b = c", 6, aSyntaxList_406},
   {0, _I_, "(a)=a+b", 7, aSyntaxList_407},
-  {0, _I_, "((int)a)=5", 0},
+  {0, _I_, "((int)a)=5", 0}, // FIXME: type cast 优先级不正确
   //{0, _I_, "((int*)&a)=5", 0},
   {0, _I_, "((const int)a)=5", 0},
   //{0, _I_, "((const int)&a)=5", 0},
