@@ -501,7 +501,7 @@ namespace UVShader
     GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::GLOB* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
 
     GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    GXBOOL  ParseTypeConversion(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseTypeCast(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
