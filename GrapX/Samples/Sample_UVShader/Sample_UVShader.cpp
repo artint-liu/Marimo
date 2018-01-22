@@ -318,43 +318,56 @@ void TestDebris(GXBOOL bShowList)
   TestFiles("Test\\shaders\\debris", bShowList);
 }
 
-void ExportErrorMessage(GXLPCSTR szCSourceFile)
+void ExportErrorMessage(const cllist<clStringA>& files)
 {
-  TRACE("导出：%s\n", szCSourceFile);
-  clstd::File file;
-  if(_CL_NOT_(file.OpenExisting(szCSourceFile)))
-  {
-    return;
-  }
-  clstd::MemBuffer buf;
-  if(_CL_NOT_(file.ReadToBuffer(&buf)))
-  {
-    return;
-  }
-
-  clstd::TokensW srccode;
-  clstd::MemBuffer bufW;
-  //UVShader::CodeParser expp(NULL, NULL);
-  if((*(u32*)buf.GetPtr() & 0xffffff) == BOM_UTF8)
-  {
-    clstd::StringUtility::ConvertFromUtf8(bufW, (const char*)buf.GetPtr(), buf.GetSize());
-  }
-  else
-  {
-    return;
-  }
-  srccode.Attach((CLLPCWSTR)bufW.GetPtr(), bufW.GetSize() / sizeof(wch));
-
   clset<clStringW> sStrintSet;
-  for(auto it = srccode.begin(); it != srccode.end(); ++it)
+
+  for(auto iter_file = files.begin(); iter_file != files.end(); ++iter_file)
   {
-    if(it == "UVS_EXPORT_TEXT")
+    TRACE("导出：%s\n", iter_file->CStr());
+    clstd::File file;
+    if(_CL_NOT_(file.OpenExisting(*iter_file)))
     {
-      if((it + 1) == _CLTEXT("(") && (it + 3) == _CLTEXT(","))
+      return;
+    }
+    clstd::MemBuffer buf;
+    if(_CL_NOT_(file.ReadToBuffer(&buf)))
+    {
+      return;
+    }
+
+    clstd::TokensW srccode;
+    clstd::MemBuffer bufW;
+    //UVShader::CodeParser expp(NULL, NULL);
+    if((*(u32*)buf.GetPtr() & 0xffffff) == BOM_UTF8)
+    {
+      clstd::StringUtility::ConvertFromUtf8(bufW, (const char*)buf.GetPtr(), buf.GetSize());
+    }
+    else
+    {
+      return;
+    }
+    srccode.Attach((CLLPCWSTR)bufW.GetPtr(), bufW.GetSize() / sizeof(wch));
+
+    for(auto it = srccode.begin(); it != srccode.end(); ++it)
+    {
+      if(it == "UVS_EXPORT_TEXT")
       {
-        clStringW str;
-        str.Format(_CLTEXT("%s=%s;\n"), (it + 2).ToString(), (it + 4).ToRawString());
-        sStrintSet.insert(str); // 插入到集合中排序
+        if((it + 1) == _CLTEXT("(") && (it + 3) == _CLTEXT(","))
+        {
+          clStringW str;
+          str.Format(_CLTEXT("%s=%s;\n"), (it + 2).ToString(), (it + 4).ToRawString());
+          size_t pos = 0;
+          while((pos = str.Find('%', pos)) != clStringW::npos)
+          {
+            str.Insert(pos, '%');
+            pos += 2;
+            if(pos > str.GetLength()) {
+              break;
+            }
+          }
+          sStrintSet.insert(str); // 插入到集合中排序
+        }
       }
     }
   }
@@ -476,9 +489,13 @@ int _tmain(int argc, _TCHAR* argv[])
     break;
 
     case '*':
-      ExportErrorMessage(g_ExportErrorMessage1);
-      ExportErrorMessage(g_ExportErrorMessage2);
+    {
+      cllist<clStringA> files;
+      files.push_back(g_ExportErrorMessage1);
+      files.push_back(g_ExportErrorMessage2);
+      ExportErrorMessage(files);
       break;
+    }
 
     case VK_ESCAPE:
       goto BREAK_LOOP;

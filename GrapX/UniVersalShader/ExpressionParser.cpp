@@ -1219,91 +1219,100 @@ namespace UVShader
     //DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
     //TRACE("---------------------------------------------\n");
 
-    // 这里面所做的就是将 type a,b,c;这种形式展开为
-    // type a; type b; type c;
-    SYNTAXNODE* pLastChain = NULL;
-    int nSignatures = 0; // Signature Member数量
-    int nDefination = 0; // 定义数量
-    b32 result = TRUE;
-    SYNTAXNODE::RecursiveNode(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pLastChain, &nDefination,&nSignatures, &result]
-    (SYNTAXNODE* pNode, int depth)->GXBOOL
+    if(stat.stru.sRoot.pNode->Operand[0].ptr)
     {
-      if(depth == 0)
+      // 这里面所做的就是将 type a,b,c;这种形式展开为
+      // type a; type b; type c;
+      SYNTAXNODE* pLastChain = NULL;
+      int nSignatures = 0; // Signature Member数量
+      int nDefination = 0; // 定义数量
+      b32 result = TRUE;
+      SYNTAXNODE::RecursiveNode(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pLastChain, &nDefination, &nSignatures, &result]
+      (SYNTAXNODE* pNode, int depth)->GXBOOL
       {
-        if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Chain) {
-          // ERROR!
-          CLBREAK;
-          return FALSE;
-        }
-        pLastChain = pNode;
-      }
-      else if(depth == 1)
-      {
-        if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Definition) {
-          // ERROR
-          const TOKEN& t = pNode->GetAnyTokenAPB();
-          clStringA str = t.ToString();
-          OutputErrorW(t, E2062, clStringW(str));
-          result = FALSE;
-          return FALSE;
-        }
-
-        nDefination++;
-
-        if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsToken() == FALSE
-          && pNode->Operand[1].pNode->CompareOpcode(','))
+        if(depth == 0)
         {
-          ArithmeticExpression::SYNTAXNODE::PtrList sVarList;
-          ArithmeticExpression::SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
-          pNode->Operand[1].ptr = pFirstVar->ptr;
+          if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Chain) {
+            // ERROR!
+            CLBREAK;
+            return FALSE;
+          }
+          pLastChain = pNode;
+        }
+        else if(depth == 1)
+        {
+          if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Definition) {
+            // ERROR
+            const TOKEN& t = pNode->GetAnyTokenAPB();
+            clStringA str = t.ToString();
+            OutputErrorW(t, E2062, clStringW(str));
+            result = FALSE;
+            return FALSE;
+          }
 
-          for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
+          nDefination++;
+
+          if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsToken() == FALSE
+            && pNode->Operand[1].pNode->CompareOpcode(','))
           {
-            SYNTAXNODE* n = *it;
-            n->mode = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
-            n->pOpcode = NULL;
-            n->Operand[0].ptr = pNode->Operand[0].ptr;
-            //nDefination++;
+            ArithmeticExpression::SYNTAXNODE::PtrList sVarList;
+            ArithmeticExpression::SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
+            pNode->Operand[1].ptr = pFirstVar->ptr;
 
-            SYNTAXNODE* pChain = m_NodePool.Alloc();
+            for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
+            {
+              SYNTAXNODE* n = *it;
+              n->mode = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
+              n->pOpcode = NULL;
+              n->Operand[0].ptr = pNode->Operand[0].ptr;
+              //nDefination++;
+
+              SYNTAXNODE* pChain = m_NodePool.Alloc();
 #ifdef ENABLE_SYNTAX_NODE_ID
-            pChain->id = m_nNodeId++;
+              pChain->id = m_nNodeId++;
 #endif
-            pChain->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
-            pChain->mode = ArithmeticExpression::SYNTAXNODE::MODE_Chain;
-            pChain->pOpcode = NULL;
-            pChain->Operand[0].ptr = n;
-            pChain->Operand[1].ptr = pLastChain->Operand[1].ptr;
+              pChain->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
+              pChain->mode = ArithmeticExpression::SYNTAXNODE::MODE_Chain;
+              pChain->pOpcode = NULL;
+              pChain->Operand[0].ptr = n;
+              pChain->Operand[1].ptr = pLastChain->Operand[1].ptr;
 
-            pLastChain->Operand[1].pNode = pChain;
-            pLastChain = pChain;
+              pLastChain->Operand[1].pNode = pChain;
+              pLastChain = pChain;
+            }
           }
         }
-      }
-      else if(depth == 2)
-      {
-        if(pNode->CompareOpcode(':')) {
-          nSignatures++;
+        else if(depth == 2)
+        {
+          if(pNode->CompareOpcode(':')) {
+            nSignatures++;
+          }
         }
+
+        return TRUE;
+      });
+
+      if(_CL_NOT_(result)) {
+        return FALSE;
       }
-  
-      return TRUE;
-    });
 
-    if(_CL_NOT_(result)) {
-      return FALSE;
+      if(nSignatures && nSignatures != nDefination) {
+        // ERROR: 不是所有成员都定义为signatures
+        CLBREAK;
+      }
+      stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
+      stat.stru.nNumOfMembers = nDefination;
+    }
+    else // 空结构体
+    {
+      stat.type = StatementType_Struct;
+      stat.stru.nNumOfMembers = 0;
     }
 
-    if(nSignatures && nSignatures != nDefination) {
-      // ERROR: 不是所有成员都定义为signatures
-      CLBREAK;
-    }
 
     //DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
     //TRACE("---------------------------------------------\n");
 
-    stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
-    stat.stru.nNumOfMembers = nDefination;
 
     if(m_aTokens[pScope->begin] == ';')
     {
@@ -1745,7 +1754,7 @@ NOT_INC_P:
       SYNTAXNODE::GLOB A = {0}, B = {0};
 
       A = front;
-      pend = scope.begin + 1;
+      pend = scope.begin + 2;
 
       if(front.semi_scope == TKSCOPE::npos || (TKSCOPE::TYPE)front.semi_scope > scope.end) {
         // ERROR: 缺少;
@@ -1853,7 +1862,7 @@ NOT_INC_P:
 
     if(step_scope.GetSize() == 1) {
       ASSERT(front == ';');
-      return TRUE;
+      return step_scope.end;
     }
     else if(front == '{')
     {
@@ -1866,7 +1875,7 @@ NOT_INC_P:
       }
 
       if(ParseCodeBlock(glob, sub_block) == FALSE) {
-        return FALSE;
+        return TKSCOPE::npos;
       }
       return sub_block.end;
     }
@@ -1880,6 +1889,13 @@ NOT_INC_P:
 
     // 普通表达式
     TKSCOPE exp_scope;
+
+    if(front.semi_scope == TKSCOPE::npos)
+    {
+      OutputErrorW(front, UVS_EXPORT_TEXT(5016, "表达式应该以\';\'结尾."));
+      return TKSCOPE::npos;
+    }
+
     exp_scope.begin = step_scope.begin;
     exp_scope.end   = front.semi_scope;
     ASSERT(m_aTokens[step_scope.begin].semi_scope <= (int)step_scope.end);
@@ -2747,8 +2763,9 @@ NOT_INC_P:
 
   CodeParser::T_LPCSTR CodeParser::PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser)
   {
-    SYNTAXNODE::GLOB sDesc;
-    if( ! pParser->ParseArithmeticExpression(0, 1, pParser->m_aTokens.size(), &sDesc)) {
+    SYNTAXNODE::GLOB sDesc = {0};
+    TKSCOPE scope(1, pParser->m_aTokens.size());
+    if( ! pParser->ParseArithmeticExpression(0, scope, &sDesc)) {
       // ERROR: 无法解析表达式
       OutputErrorW(pParser->m_aTokens.front(), UVS_EXPORT_TEXT(5004, "无法解析#if的条件表达式"));
       return ctx.iter_next.marker;
@@ -2771,13 +2788,18 @@ NOT_INC_P:
         v.set(*sDesc.pTokn);
       }
     }
-    else
+    else if(sDesc.IsNode())
     {      
       OPERAND result;
       CalculateValue(result, &sDesc);
       TRACE("#if %s\n", result.v.ToString());
 
       v = result.v;
+    }
+    else {
+      // 定义了一个带形参的宏, 但实际只用了宏的名字
+      ASSERT(pParser->m_aTokens.size() == 1);
+      v.SetZero();
     }
     
     if(v.nValue64 == 0) {

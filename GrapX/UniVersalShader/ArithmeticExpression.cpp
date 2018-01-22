@@ -618,9 +618,11 @@ namespace UVShader
     A = m_aTokens[scope.begin];
 
     // 检查m_aTokens[scope.begin]是函数名, 或者正号, 负号
-    if(*A.pTokn != '+' && *A.pTokn != '-' && A.pTokn->IsIdentifier() == FALSE) // 检查是否为标识符
+    if(*A.pTokn != '+' && *A.pTokn != '-' && *A.pTokn != '!' &&
+      A.pTokn->IsIdentifier() == FALSE) // 检查是否为标识符
     {
-      m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5005, "表达式看起来像函数, 但是\"%s\"不是标识符."), A.pTokn->ToString());
+      clStringW str;
+      m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5005, "表达式看起来像函数, 但是\"%s\"不是标识符."), A.pTokn->ToString(str).CStr());
       return FALSE;
     }
     // TODO: 重名/重载检查?

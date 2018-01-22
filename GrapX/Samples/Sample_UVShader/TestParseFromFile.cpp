@@ -316,21 +316,22 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
     return;
   }
 
-  TRACE(
-    "------------\n"
-    "测试文件解析:\n"
-    "------------\n"
-    "%s\n", szFilename);
+  clStringW strFullname = szFilename;
+  clpathfile::CombineAbsPath(strFullname);
 
-  if(file.OpenExisting(szFilename))
+  TRACEW(
+    _CLTEXT("------------\n")
+    _CLTEXT("测试文件解析:\n")
+    _CLTEXT("------------\n")
+    _CLTEXT("%s\n"), strFullname.CStr());
+
+  if(file.OpenExisting(strFullname))
   {
     clBuffer* pBuffer = NULL;
     if(file.MapToBuffer(&pBuffer))
     {
       UVShader::CodeParser expp(NULL, NULL);
       const UVShader::ArithmeticExpression::TOKEN::Array* pTokens;
-      clStringW strFullname = szFilename;
-      clpathfile::CombineAbsPath(strFullname);
       expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize(), 0, strFullname);
 
       expp.GenerateTokens();
