@@ -1048,7 +1048,7 @@ namespace UVShader
     }
 #else
     TKSCOPE scope(pScope->begin, definition_end);
-    if(!ParseExpression(&stat.defn.sRoot, scope))
+    if(!ParseExpression(stat.defn.sRoot, scope))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope.end));
       return FALSE;
@@ -1198,7 +1198,7 @@ namespace UVShader
     TKSCOPE sMembersScope;
     InitTokenScope(sMembersScope, *p, TRUE);
 
-    if(_CL_NOT_(ParseExpression(&stat.stru.sRoot, sMembersScope)))
+    if(_CL_NOT_(ParseExpression(stat.stru.sRoot, sMembersScope)))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
       return FALSE;
@@ -1324,7 +1324,7 @@ namespace UVShader
       stat_var.defn.storage_class = VariableStorageClass_empty;
       stat_var.defn.szType = stat.stru.szName;
 
-      if(_CL_NOT_(ParseExpression(&stat_var.defn.sRoot, scope_var)))
+      if(_CL_NOT_(ParseExpression(stat_var.defn.sRoot, scope_var)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
         return FALSE;
@@ -1494,7 +1494,7 @@ NOT_INC_P:
 
     STATEMENT& stat = *pStat;
     
-    GXBOOL bret = ParseCodeBlock(&stat.expr.sRoot, *pScope);
+    GXBOOL bret = ParseCodeBlock(stat.expr.sRoot, *pScope);
     return bret;
   }
 
@@ -1686,34 +1686,6 @@ NOT_INC_P:
   }
 
   //////////////////////////////////////////////////////////////////////////
-
-  //GXBOOL CodeParser::ParseExpression(SYNTAXNODE::UN* pUnion, clsize begin, clsize end)
-  //{
-  //  RTSCOPE scope(begin, end);
-  //  return ParseExpression(&scope, pUnion);
-  //}
-#if 1
- 
-  GXBOOL CodeParser::ParseRemainStatement(TKSCOPE::TYPE parse_end, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
-  {
-    GXBOOL bret = TRUE;
-    if(parse_end == TKSCOPE::npos) {
-      return FALSE;
-    }
-    ASSERT(parse_end <= scope.end);
-    if(parse_end <= scope.end)
-    {
-      SYNTAXNODE::GLOB A, B = {0};
-      A = *pDesc;
-
-      bret = ParseExpression(TKSCOPE(parse_end, scope.end), &B) &&
-        MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, &A, &B);
-    }
-    return bret ? parse_end != TKSCOPE::npos : FALSE;
-  }
-#endif
-
-  //////////////////////////////////////////////////////////////////////////
   GXBOOL CodeParser::TryKeywords(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end)
   {
     // 如果是关键字，返回true，否则返回false
@@ -1797,155 +1769,9 @@ NOT_INC_P:
     return bret;
   }
 
-  //GXBOOL CodeParser::TryBlock(const RTSCOPE& scope, SYNTAXNODE::UN* pUnion, RTSCOPE::TYPE* parse_end)
-  //{
-  //  const auto& first = m_aTokens[scope.begin];
-  //  auto& pend = *parse_end;
-  //  GXBOOL bret = TRUE;
-
-  //  ASSERT(pend == RTSCOPE::npos); // 强调调用者要初始化这个变量
-
-  //  if(first == '{')
-  //  {
-  //    if(first.scope > scope.end) {
-  //      // ERROR: 没有正确的'}'来匹配
-  //    }
-  //    else {
-  //      ParseExpression(pUnion, scope.begin + 1, first.scope);
-  //    }
-  //  }
-  //  else {
-  //    ASSERT(first.semi_scope < scope.end);
-  //  }
-
-  //  return bret;
-  //}
-#if 1
-  GXBOOL CodeParser::ParseExpression(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
-  {
-    //ASSERT(scope.end == m_aTokens.size() || // 结尾
-    //  scope.begin == scope.end ||           // 空
-    //  m_aTokens[scope.end] == ';' ||        // 表达式结束
-    //  m_aTokens[scope.end - 1] == '}' ||    // 代码块结束
-    //  (m_aTokens[scope.end] == '}' && scope.begin < m_aTokens[scope.end].scope)); // 表达式后面带一个代码块
-
-    ASSERT(
-      scope.end == m_aTokens.size() ||      // 结尾
-      scope.begin == scope.end ||           // 空
-      m_aTokens[scope.end] == ';' ||        // 表达式结束
-      m_aTokens[scope.end - 1] == '}' ||    // 代码块
-      m_aTokens[scope.end] == '}');         // 代码块内部
-
-    //ASSERT(m_aTokens[scope.begin].scope == -1 || m_aTokens[scope.begin].scope == scope.end - 1);
-
-
-    const GXINT_PTR count = scope.end - scope.begin;
-    SYNTAXNODE::GLOB A = {0}, B = {0};
-    GXBOOL bret = TRUE;
-    TKSCOPE::TYPE parse_end = TKSCOPE::npos;
-
-    if(count <= 1) {
-      if(count < 0) {
-        CLBREAK;
-        return FALSE;
-      }
-      else if(count == 1) {
-        *pDesc = m_aTokens[scope.begin];
-      }
-      
-      return TRUE;  // count == 0 / count == 1
-    }
-
-    const auto& front = m_aTokens[scope.begin];
-
-    if(front == '{') // 代码块
-    {
-      if((clsize)front.scope > scope.end) {
-        // ERROR: 没有正确的'}'来匹配
-        OutputErrorW(front, UVS_EXPORT_TEXT(5009, "没有正确的'}'匹配."));
-        return FALSE;
-      }
-
-      ASSERT((TKSCOPE::TYPE)front.scope <= scope.end);  // scopeB.begin 最多仅仅比scope.end大1
-
-      //////////////////////////////////////////////////////////////////////////
-      //
-      // ParseRemainStatement 在处理 statement block 剩余部分时有微妙的不同：
-      // parse_end 如果严格限定等于 scope.end，pDesc不做任何修改，这种用法通常在
-      // if/else if/else/for/while关键字的代码块解析中使用
-      //
-      // parse_end 如果小于 scope.end, pDesc会被修改为MODE_Chain，需要注意：
-      // * parse_end 如果仅仅比 scope.end 小 1，则意味着生成的MODE_Chain是chain的结尾。
-      // * 这种用法在 statement block 中用来标记chain的结尾
-      //
-      //////////////////////////////////////////////////////////////////////////
-      if(m_aTokens[front.scope - 1] != ';' && m_aTokens[front.scope - 1] != '}') {
-        OutputErrorW(m_aTokens[front.scope], UVS_EXPORT_TEXT(5010, "语法错误:代码块结尾缺少';'."));
-        return FALSE;
-      }
-
-      TKSCOPE inner_scope;
-      InitTokenScope(inner_scope, front, FALSE);
-
-      // 去掉代码块结尾的';'
-      //TrimRightSemicolon(inner_scope);
-
-      bret = ParseExpression(inner_scope, pDesc);
-      bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Block, pDesc, NULL);
-      
-      ASSERT(front.scope <= (int)scope.end);
-      
-      if(front.scope + 1 < (int)scope.end) {
-        GXBOOL result = ParseRemainStatement(front.scope + 1, scope, pDesc);
-        TRACE("---------------------------------------------\n");
-        DbgDumpSyntaxTree(NULL, pDesc->pNode, 0, NULL, 1);
-        return result;
-      }
-     
-      TRACE("---------------------------------------------\n");
-      DbgDumpSyntaxTree(NULL, pDesc->pNode, 0, NULL, 1);
-      return TRUE;
-    }
-    else if(TryKeywords(scope, pDesc, &parse_end))
-    {
-      if(parse_end == TKSCOPE::npos) {
-        return FALSE; // 解析错误, 直接返回
-      }
-      // 解析剩余部分
-      return ParseRemainStatement(parse_end, scope, pDesc);
-    }
-    else if(front.semi_scope == TKSCOPE::npos) {
-      ERROR_MSG__MISSING_SEMICOLON(front);
-      return FALSE;
-    }
-    else if((clsize)front.semi_scope < scope.end)
-    {
-      ASSERT(m_aTokens[front.semi_scope] == ';'); // 目前进入这个循环的只可能是遇到分号
-
-      TKSCOPE scopeA(scope.begin, front.semi_scope);
-
-      // 跳过只是一个分号的情况
-      if(scopeA.begin == scopeA.end) {
-        return ParseExpression(TKSCOPE(scopeA.end + 1, scope.end), pDesc);
-      }
-      else
-      {
-        //RTSCOPE scopeB(front.semi_scope + 1, scope.end);
-        ASSERT((TKSCOPE::TYPE)front.semi_scope + 1 <= scope.end); // 感觉有可能begin>end，这里如果遇到就改成if(scopeB.begin >= scopeB.end)
-
-        bret = ParseExpression(scopeA, pDesc);
-        return ParseRemainStatement(front.semi_scope + 1, scope, pDesc);
-      }
-      //bret = bret && ParseExpression(scopeB, &B);
-      //bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, &A, &B);
-    }
-
-    return ParseArithmeticExpression(0, scope, pDesc);
-  }
-#endif
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope)
   {
     // 解析一条表达式语句或者一个语句块
     ASSERT(scope.begin == scope.end ||
@@ -1956,9 +1782,9 @@ NOT_INC_P:
       //m_aTokens[scope.begin] == "return" );
 
     if(m_aTokens[scope.begin] == '{') {
-      return ParseCodeBlock(pDest, scope);
+      return ParseCodeBlock(glob, scope);
     }
-    else if(ParseArithmeticExpression(1, TKSCOPE(scope.begin, scope.end - 1), pDest) == FALSE)
+    else if(ParseArithmeticExpression(1, TKSCOPE(scope.begin, scope.end - 1), &glob) == FALSE)
     {
       OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5013, "表达式解析失败"));
       return FALSE;
@@ -1966,75 +1792,111 @@ NOT_INC_P:
     return TRUE;
   }
 
+  //////////////////////////////////////////////////////////////////////////
+  // 解析一个代码块
   // 避免每条语句解析都递归
-  GXBOOL CodeParser::ParseCodeBlock(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseCodeBlock(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope)
   {
     // 保证解析内容在数学区间: [begin, end)
     ASSERT(m_aTokens[scope.begin].scope == scope.end - 1);
     ASSERT(m_aTokens[scope.begin] == '{' && m_aTokens[scope.end - 1] == '}');
 
     TKSCOPE step_scope(scope.begin + 1, scope.end - 1); // begin会步进, end恒定
-    SYNTAXNODE::GLOB A, B;
-    TKSCOPE::TYPE parse_end;
+    //SYNTAXNODE::GLOB A;
+    //TKSCOPE::TYPE parse_end;
 
-    MakeSyntaxNode(pDest, SYNTAXNODE::MODE_Block, NULL, NULL);
-    SYNTAXNODE::GLOB* pCurrNode = &pDest->pNode->Operand[0];
+    MakeSyntaxNode(&glob, SYNTAXNODE::MODE_Block, NULL, NULL);
+    //SYNTAXNODE::GLOB* pCurrNode = &pDest->pNode->Operand[0];
+
+    return ParseToChain(glob.pNode->Operand[0], step_scope);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  // 解析一个范围内的所有表达式, 解析的表达式会连接成为chain
+  GXBOOL CodeParser::ParseToChain(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope)
+  {
+    SYNTAXNODE::GLOB A;
+    SYNTAXNODE::GLOB* pCurrNode = &glob;
+    TKSCOPE step_scope = scope;
 
     while(step_scope.GetSize() > 0)
     {
       A.ptr = NULL;
-      B.ptr = NULL;
-      parse_end = TKSCOPE::npos;
       
-      const auto& front = m_aTokens[step_scope.begin];
-
-      if(step_scope.GetSize() == 1) {
-        ASSERT(front == ';');
-        return TRUE;
-        //*pDesc = m_aTokens[step_scope.begin];
+      const TKSCOPE::TYPE pos = TryParseSingle(A, step_scope);
+      if(pos == TKSCOPE::npos) {
+        return FALSE;
       }
-      else if(front == '{')
-      {
-        TKSCOPE sub_block;
-        InitTokenScope(sub_block, front, TRUE);
-        if(ParseCodeBlock(&A, sub_block) == FALSE) {
-          return FALSE;
-        }
-        step_scope.begin = sub_block.end;
-      }
-      else if(TryKeywords(step_scope, &A, &parse_end))
-      {
-        if(parse_end == TKSCOPE::npos) {
-          return FALSE; // 解析错误, 直接返回
-        }
-        step_scope.begin = parse_end;
-      }
-      else
-      {
-        TKSCOPE exp_scope;
-        exp_scope.begin = step_scope.begin;
-        exp_scope.end   = front.semi_scope;
-        ASSERT(m_aTokens[step_scope.begin].semi_scope <= (int)step_scope.end);
-
-        step_scope.begin = front.semi_scope + 1;
-
-        if(exp_scope.GetSize() == 0) // 跳过独立的分号
-        {
-          continue;
-        }
-
-        if(ParseArithmeticExpression(1, exp_scope, &A) == FALSE)
-        {
-          OutputErrorW(front, UVS_EXPORT_TEXT(5013, "表达式解析失败"));
-          return FALSE;
-        }
+      else if(pos == step_scope.begin + 1) {
+        ASSERT(m_aTokens[step_scope.begin] == ';'); // 步进一次只可能是遇到了单独的分号
+        step_scope.begin = pos;
+        continue;
       }
 
-      MakeSyntaxNode(pCurrNode, SYNTAXNODE::MODE_Chain, &A, &B);
+      step_scope.begin = pos;
+      MakeSyntaxNode(pCurrNode, SYNTAXNODE::MODE_Chain, &A, NULL);
       pCurrNode = &pCurrNode->pNode->Operand[1];
-      //step_scope.begin++; // 跳过前面执行的结束符
     }
     return TRUE;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  // 解析一个代码块, 一条关键字表达式或者一条表达式
+  // 如果解析失败, 返回TKSCOPE::npos
+  // 如果解析成功, 返回接下来解析的起始位置
+
+  CodeParser::TKSCOPE::TYPE CodeParser::TryParseSingle(SYNTAXNODE::GLOB& glob, const TKSCOPE& step_scope)
+  {
+    ASSERT(step_scope.GetSize() > 0); // 外部保证解析时不为空
+    const auto& front = m_aTokens[step_scope.begin];
+    TKSCOPE::TYPE parse_end = TKSCOPE::npos;
+
+    if(step_scope.GetSize() == 1) {
+      ASSERT(front == ';');
+      return TRUE;
+    }
+    else if(front == '{')
+    {
+      TKSCOPE sub_block;
+      InitTokenScope(sub_block, front, TRUE);
+
+      if(sub_block.end > step_scope.end) {
+        OutputErrorW(front, UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), GetPairOfBracket(front.marker[0]));
+        return TKSCOPE::npos;
+      }
+
+      if(ParseCodeBlock(glob, sub_block) == FALSE) {
+        return FALSE;
+      }
+      return sub_block.end;
+    }
+    else if(TryKeywords(step_scope, &glob, &parse_end))
+    {
+      if(parse_end == TKSCOPE::npos) {
+        return TKSCOPE::npos; // 解析错误, 直接返回
+      }
+      return parse_end;
+    }
+
+    // 普通表达式
+    TKSCOPE exp_scope;
+    exp_scope.begin = step_scope.begin;
+    exp_scope.end   = front.semi_scope;
+    ASSERT(m_aTokens[step_scope.begin].semi_scope <= (int)step_scope.end);
+
+    //step_scope.begin = front.semi_scope + 1;
+
+    if(exp_scope.GetSize() == 0) // 跳过独立的分号
+    {
+      return front.semi_scope + 1;
+    }
+
+    if(ParseArithmeticExpression(1, exp_scope, &glob) == FALSE)
+    {
+      OutputErrorW(front, UVS_EXPORT_TEXT(5013, "表达式解析失败"));
+      return TKSCOPE::npos;
+    }
+    return front.semi_scope + 1;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -2047,7 +1909,7 @@ NOT_INC_P:
     ASSERT(m_aTokens[scope.begin] == "if");
 
     TKSCOPE sConditional(scope.begin + 2, m_aTokens[scope.begin + 1].scope);
-    TKSCOPE sBlock;
+    TKSCOPE sStatement;
 
     if(sConditional.begin >= scope.end || sConditional.end == -1 || sConditional.end > scope.end)
     {
@@ -2059,40 +1921,12 @@ NOT_INC_P:
     bret = bret && ParseArithmeticExpression(0, sConditional, &A);
 
 
+    sStatement.begin = sConditional.end + 1;
+    sStatement.end = scope.end;
 
-    sBlock.begin = sConditional.end + 1;
-    sBlock.end = TKSCOPE::npos;
-    if(sBlock.begin >= scope.end) {
-      // ERROR: if 语法错误
-      OutputErrorW(m_aTokens[sBlock.begin], UVS_EXPORT_TEXT(5014, "if 语法错误"));
+    sStatement.begin = TryParseSingle(B, sStatement);
+    if(sStatement.begin == TKSCOPE::npos) {
       return TKSCOPE::npos;
-    }
-
-    auto& block_begin = m_aTokens[sBlock.begin];
-    //SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
-
-    if(TryKeywords(TKSCOPE(sBlock.begin, scope.end), &B, &sBlock.end))
-    {
-      //eMode = SYNTAXNODE::MODE_Flow_If;
-      bret = sBlock.end != TKSCOPE::npos;
-    }
-    else
-    {
-      if(block_begin == '{')
-      {
-        sBlock.end = block_begin.scope + 1;
-        //sBlock.begin ++;
-      }
-      else {
-        sBlock.end = block_begin.semi_scope + 1;
-      }
-
-      if(sBlock.end > scope.end)
-      {
-        // ERROR: if 语法错误
-        return TKSCOPE::npos;
-      }
-      bret = bret && ParseExpression(&B, sBlock);
     }
 
     const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
@@ -2105,47 +1939,35 @@ NOT_INC_P:
 
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_If, &A, &B);
 
-    auto result = sBlock.end;
+    //auto result = sStatement.begin;
 
 
-    if(bret && (scope.end - sBlock.end) > 1 && m_aTokens[sBlock.end] == "else")
+    if(bret && (scope.end - sStatement.begin) > 1 && m_aTokens[sStatement.begin] == "else")
     {
-      auto nNextBegin = sBlock.end;
+      //auto nNextBegin = sStatement.begin;
 
       // 只处理 else if/else 两种情况
       A = *pDesc;
-      ++nNextBegin;
-      if(nNextBegin >= scope.end) {
+      ++sStatement.begin;
+      if(sStatement.begin >= scope.end) {
         // ERROR: else 语法错误
+        CLBREAK;
         return TKSCOPE::npos;
       }
 
       SYNTAXNODE::MODE eNextMode = SYNTAXNODE::MODE_Flow_Else;
 
-      if(m_aTokens[nNextBegin] == "if")
+      if(m_aTokens[sStatement.begin] == "if")
       {
         eNextMode = SYNTAXNODE::MODE_Flow_ElseIf;
-        result = ParseFlowIf(TKSCOPE(nNextBegin, scope.end), &B, TRUE);
+        sStatement.begin = ParseFlowIf(TKSCOPE(sStatement.begin, scope.end), &B, TRUE);
       }
       else
       {
-        //****************//
-        auto& else_begin = m_aTokens[nNextBegin];
-        result = TKSCOPE::npos;
-        if(TryKeywords(TKSCOPE(nNextBegin, scope.end), &B, &result))
+        sStatement.begin = TryParseSingle(B, sStatement);
+        if(sStatement.begin == TKSCOPE::npos)
         {
-          ;
-        }
-        else
-        {
-          result = (else_begin == '{' ? else_begin.scope : else_begin.semi_scope) + 1;
-
-          if(result == TKSCOPE::npos || result > scope.end) {
-            // ERROR: else 语法错误
-            return TKSCOPE::npos;
-          }
-
-          bret = ParseExpression(&B, TKSCOPE(nNextBegin, result));
+          return TKSCOPE::npos;
         }
       }
 
@@ -2165,7 +1987,7 @@ NOT_INC_P:
       bret = bret && MakeSyntaxNode(pDesc, eNextMode, &A, &B);
     }
 
-    return bret ? result : TKSCOPE::npos;
+    return bret ? sStatement.begin : TKSCOPE::npos;
   }
 
   CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
@@ -2195,27 +2017,10 @@ NOT_INC_P:
 
     auto& block_begin = m_aTokens[sBlock.begin];
     //SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
-    if(TryKeywords(TKSCOPE(sBlock.begin, scope.end), &B, &sBlock.end))
-    {
-      bret = sBlock.end != TKSCOPE::npos;
-    }
-    else
-    {
-      if(block_begin == '{')
-      {
-        sBlock.end = block_begin.scope + 1;
-        //sBlock.begin++;
-      }
-      else {
-        sBlock.end = block_begin.semi_scope + 1;
-      }
 
-      if(sBlock.end > scope.end)
-      {
-        // ERROR: while 语法错误
-        return TKSCOPE::npos;
-      }
-      bret = bret && ParseExpression(&B, sBlock);
+    sBlock.end = TryParseSingle(B, TKSCOPE(sBlock.begin, scope.end));
+    if(sBlock.end == TKSCOPE::npos) {
+      return TKSCOPE::npos;
     }
 
     const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
@@ -2250,9 +2055,10 @@ NOT_INC_P:
     SYNTAXNODE::GLOB A = {0}, B = {0};
 
 
-    if( ! MakeScope(&sBlock, &MAKESCOPE(scope, scope.begin + 2, FALSE, scope.begin + 1, TRUE, 0))) {
-      return TKSCOPE::npos;
-    }
+    //if( ! MakeScope(&sBlock, &MAKESCOPE(scope, scope.begin + 2, FALSE, scope.begin + 1, TRUE, 0))) {
+    //  return TKSCOPE::npos;
+    //}
+    InitTokenScope(sBlock, scope.begin + 1, FALSE);
 
     TKSCOPE::TYPE while_token = sBlock.end + 1;
     
@@ -2262,16 +2068,23 @@ NOT_INC_P:
       return TKSCOPE::npos;
     }
 
-    //if( ! MakeScope(&sConditional, &MAKESCOPE(scope, while_token + 2, FALSE, while_token + 1, TRUE, 0))) {
-    //  return TKSCOPE::npos;
-    //}
     InitTokenScope(sConditional, while_token + 1, FALSE);
 
     // TODO： 验证域的开始是括号和花括号
 
     //TrimRightSemicolon(sBlock);
 
-    GXBOOL bret = ParseExpression(sBlock, &B);
+    //GXBOOL bret = ParseExpression(sBlock, &B);
+    //if(sBlock.GetSize() > 0)
+    //{
+    //  TKSCOPE::TYPE block_result = ParseExpressionsToChain(&B, sBlock);
+    //  if(block_result == TKSCOPE::npos) {
+    //    return TKSCOPE::npos;
+    //  }
+    //  ASSERT(block_result == sBlock.end); // 确保sBlock范围计算正确
+    //}
+
+    GXBOOL bret = ParseToChain(B, sBlock);
     bret = bret && ParseArithmeticExpression(0, sConditional, &A);
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
@@ -2514,8 +2327,10 @@ NOT_INC_P:
     //else
 
     if(uBlock.ptr == NULL) {
-      ParseExpression(&uBlock, sBlock);
-      //MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Chain, &uBlock, NULL);
+      //ParseExpression(&uBlock, sBlock);
+      if(TryParseSingle(uBlock, sBlock) == TKSCOPE::npos) {
+        return TKSCOPE::npos;
+      }
     }
 
     GXBOOL bret = TRUE;

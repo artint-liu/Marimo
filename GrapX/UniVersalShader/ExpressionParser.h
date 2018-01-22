@@ -344,11 +344,10 @@ namespace UVShader
     SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
     GXBOOL BreakDefinition(STATEMENT& stat, const TKSCOPE& scope);
 
-    GXBOOL  ParseRemainStatement(TKSCOPE::TYPE parse_end, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    GXBOOL  ParseExpression(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    GXBOOL  ParseExpression(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope);
-    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope);
-    GXBOOL  TryParseExpressions(SYNTAXNODE::GLOB* pDest, const TKSCOPE& scope); // 尝试解析多个表达式，可以是不精确的区间
+    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
+    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
+    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
+    TKSCOPE::TYPE  TryParseSingle(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
 
     GXBOOL  TryKeywords(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end);
     TKSCOPE::TYPE  ParseFlowIf(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);

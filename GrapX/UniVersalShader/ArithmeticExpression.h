@@ -509,6 +509,8 @@ namespace UVShader
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
     GXUINT  MarkCode(GXUINT code, GXLPCSTR szMessage);
 #endif
+  public:
+    static TChar GetPairOfBracket(TChar ch); // 获得与输入配对的括号
 
   public:
     ArithmeticExpression();

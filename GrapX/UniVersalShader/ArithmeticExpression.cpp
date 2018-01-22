@@ -819,6 +819,23 @@ namespace UVShader
     return m_aDbgExpressionOperStack;
   }
 
+  ArithmeticExpression::TChar ArithmeticExpression::GetPairOfBracket(TChar ch)
+  {
+    for(int i = 0; i < countof(s_PairMark); i++)
+    {
+      if(s_PairMark[i].bCloseAE == FALSE) {
+        if(s_PairMark[i].chOpen == ch) {
+          return s_PairMark[i].chClosed;
+        }
+        else if(s_PairMark[i].chClosed == ch) {
+          return s_PairMark[i].chOpen;
+        }
+      }
+    }
+    CLBREAK; // 不是括号!
+    return '?';
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   void ArithmeticExpression::VALUE::clear()
