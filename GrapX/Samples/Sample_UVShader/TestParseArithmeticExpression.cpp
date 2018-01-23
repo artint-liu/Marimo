@@ -110,6 +110,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     if(pSamples[i].bDbgBreak) {
       CLNOP; // 根据调试标记在这里下断点
     }
+    // pSamples[i].id 可以追踪
 
     // 表达式解析
     UVShader::CodeParser::TKSCOPE scope(0, pTokens->size());
@@ -137,7 +138,7 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     // 检查操作堆栈
     if(pSamples[i].aOperStack)
     {
-      TRACE("--- 对比语法列表 ---\n");
+      TRACE("--- 对比语法列表(参考样本:解析结果) ---\n");
       int W0 = MeasureStringsWidth(pSamples[i].aOperStack);
       int W1 = MeasureStringsWidth(dbg_stack);
 

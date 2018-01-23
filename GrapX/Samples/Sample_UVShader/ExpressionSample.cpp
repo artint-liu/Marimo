@@ -26,6 +26,17 @@ GXLPCSTR aOperStack_010[] = {
   "[+] [a+b+c] [d*e/f]",
   NULL, };
 
+GXLPCSTR aOperStack_436[] = {
+  "[++] [n] []",
+  "[++] [] [n++]",
+  NULL, };
+
+GXLPCSTR aOperStack_442[] = {
+  "[~] [] [n]",
+  "[++] [] [~n]",
+  "[!] [] [++~n]",
+  NULL, };
+
 GXLPCSTR aOperStack_Return0100[] = {
   "[.] [a] [x]",
   "[.] [a] [y]",
@@ -433,6 +444,8 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "(a+b)*c", 7, aOperStack_009},
   {0, _I_, "a+b+c+d*e/f", 11, aOperStack_010},
   {0, _I_, "k*((a*b)+c+d*e)", 15},
+  {0, _I_, "++n++", 3, aOperStack_436}, // 可以解析,但是语法是错的, 前置++需要左值
+  {0, _I_, "!++~n", 4, aOperStack_442},
 
   // 三元操作
   {0, _I_, "a?b:c", 5},
@@ -451,6 +464,7 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {0, _I_, "float a, b = c", 6, aSyntaxList_406},
   {0, _I_, "(a)=a+b", 7, aSyntaxList_407},
   {0, _I_, "((int)a)=5", 0}, // FIXME: type cast 优先级不正确
+  //{1, _I_, "k=~(int)++a", 0},
   //{0, _I_, "((int*)&a)=5", 0},
   {0, _I_, "((const int)a)=5", 0},
   //{0, _I_, "((const int)&a)=5", 0},

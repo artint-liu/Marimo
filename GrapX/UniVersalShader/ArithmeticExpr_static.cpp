@@ -48,8 +48,8 @@ namespace UVShader
   };
 
   ArithmeticExpression::MBO ArithmeticExpression::s_Operator2[] = {
-    {2, "--", OPP(13), TRUE, UNARY_RIGHT_OPERAND | UNARY_LEFT_OPERAND},
-    {2, "++", OPP(13), TRUE, UNARY_RIGHT_OPERAND | UNARY_LEFT_OPERAND},
+    {2, "--", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 默认 --n
+    {2, "++", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // ++n
     {2, ">>", OPP( 9)},
     {2, "<<", OPP( 9)},
     {2, "<=", OPP( 8)},
@@ -73,6 +73,16 @@ namespace UVShader
     {2, "->",  OPP(-1)},
     {2, ".*",  OPP(-1)},
     {2, "->*", OPP(-1)}, 
+  };
+
+  // 多重解释的符号
+  ArithmeticExpression::MBO ArithmeticExpression::s_UnaryLeftOperand[] = {
+    {2, "++", OPP(13), TRUE, UNARY_LEFT_OPERAND},  // n++
+    {},                                            // 占位
+    {2, "--", OPP(13), TRUE, UNARY_LEFT_OPERAND},  // n--
+    //{2, "--", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // --n
+    //{2, "++", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // ++n
+    {NULL,},
   };
 
   ArithmeticExpression::MBO ArithmeticExpression::s_Operator3[] = {

@@ -17,28 +17,28 @@
 //  Precedence  Operator          Description                                               Associativity 
 //
 //
-//  2           ++   --           Suffix/postfix increment and decrement                    Left-to-right
+//  2 OPP(13)   ++   --           Suffix/postfix increment and decrement                    Left-to-right
 //              ()                Function call
 //              []                Array subscripting
 //              .                 Element selection by reference
 //
-//  3           ++   --           Prefix increment and decrement                            Right-to-left 
+//  3 OPP(12)   ++   --           Prefix increment and decrement                            Right-to-left 
 //              +   −             Unary plus and minus
 //              !   ~             Logical NOT and bitwise NOT
 //              (type)            Type cast
 //              &                 Address-of
-//  5           *   /   %         Multiplication, division, and remainder                   Left-to-right 
-//  6           +   −             Addition and subtraction                                  Left-to-right 
-//  7           <<   >>           Bitwise left shift and right shift                        Left-to-right 
-//  8           <   <=            For relational operators < and ≤ respectively             Left-to-right 
+//  5  OPP(11)  *   /   %         Multiplication, division, and remainder                   Left-to-right 
+//  6  OPP(10)  +   −             Addition and subtraction                                  Left-to-right 
+//  7  OPP(9)   <<   >>           Bitwise left shift and right shift                        Left-to-right 
+//  8  OPP(8)   <   <=            For relational operators < and ≤ respectively             Left-to-right 
 //              >   >=            For relational operators > and ≥ respectively             Left-to-right 
-//  9           ==   !=           For relational = and ≠ respectively                       Left-to-right 
-//  10          &                 Bitwise AND                                               Left-to-right 
-//  11          ^                 Bitwise XOR (exclusive or)                                Left-to-right 
-//  12          |                 Bitwise OR (inclusive or)                                 Left-to-right 
-//  13          &&                Logical AND                                               Left-to-right 
-//  14          ||                Logical OR                                                Left-to-right 
-//  15          ?:                Ternary conditional                                       Right-to-left 
+//  9  OPP(7)   ==   !=           For relational = and ≠ respectively                       Left-to-right 
+//  10 OPP(6)   &                 Bitwise AND                                               Left-to-right 
+//  11 OPP(5)   ^                 Bitwise XOR (exclusive or)                                Left-to-right 
+//  12 OPP(4)   |                 Bitwise OR (inclusive or)                                 Left-to-right 
+//  13 OPP(3)   &&                Logical AND                                               Left-to-right 
+//  14 OPP(2)   ||                Logical OR                                                Left-to-right 
+//  15 OPP(1)   ?:                Ternary conditional                                       Right-to-left 
 //
 //              =                 Direct assignment (provided by default for C++ classes)
 //              +=   −=           Assignment by sum and difference
@@ -46,7 +46,7 @@
 //              <<=   >>=         Assignment by bitwise left shift and right shift
 //              &=   ^=   |=      Assignment by bitwise AND, XOR, and OR
 //
-//  17          ,                 Comma                                                     Left-to-right 
+//  17 OPP(0)   ,                 Comma                                                     Left-to-right 
 //
 // UVS 中不用的操作符号
 //  1           ::                Scope resolution                                          Left-to-right
@@ -144,7 +144,7 @@ namespace UVShader
 
   const ArithmeticExpression::MBO* MatchOperator(const ArithmeticExpression::MBO* op, u32 op_len, ArithmeticExpression::iterator& it, u32 remain)
   {
-    if(remain <= op_len) {
+    if(remain < op_len) {
       return NULL;
     }
 
@@ -344,6 +344,7 @@ namespace UVShader
     TKSCOPE scope = scope_in;
     if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
       scope.end--; // TODO: 确定这个是否为必须
+      CLBREAK;
     }
     return ParseArithmeticExpression(depth + 1, scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
@@ -448,7 +449,7 @@ namespace UVShader
 
     while(nMinPrecedence <= s_MaxPrecedence)
     {
-      if(nMinPrecedence == OPP(1))
+      if(nMinPrecedence == OPP(1) || nMinPrecedence == OPP(12))
       {
         for(i = (GXINT_PTR)scope.begin; i < (GXINT_PTR)scope.end; ++i)
         {

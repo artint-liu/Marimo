@@ -372,6 +372,22 @@ void TestFormatString1()
   TestFormatStrFunc<clStringAttachA>(str_ath, fmt_flags, countof(fmt_flags), fmt_width, countof(fmt_width), fmt_specifier, countof(fmt_specifier), samp_int, countof(samp_int));
 }
 
+void TestFormatString2() // 字符串格式化异常
+{
+  clStringA str;
+  str.Format("a:%d");
+  CLOG("%s", str.CStr());
+
+  str.Format("b:%c");
+  CLOG("%s", str.CStr());
+  
+  str.Format("c:%s", 0);
+  CLOG("%s", str.CStr());
+
+  str.Format("d:%s");
+  CLOG("%s", str.CStr());
+}
+
 void TestExpandString()
 {
   clmap<clStringA, clStringA> EnvDict;
@@ -440,6 +456,7 @@ int main(int argc, char* argv[])
   TestStringToFloat();
   TestFormatString0();
   TestFormatString1();
+  TestFormatString2();
 
   TestExpandString();
 

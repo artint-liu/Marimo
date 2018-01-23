@@ -373,10 +373,10 @@ namespace UVShader
     token.precedence = 0;
     token.unary      = 0;
 
-#ifdef USE_CLSTD_TOKENS
-#else
-    SetTriggerCallBack(MultiByteOperatorProc, (u32_ptr)&token);
-#endif // USE_CLSTD_TOKENS
+//#ifdef USE_CLSTD_TOKENS
+//#else
+//    SetTriggerCallBack(MultiByteOperatorProc, (u32_ptr)&token);
+//#endif // USE_CLSTD_TOKENS
 
     SetIteratorCallBack(IteratorProc, (u32_ptr)&token);
 
@@ -405,19 +405,33 @@ namespace UVShader
 
       const int c_size = (int)m_aTokens.size();
 
-      // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
-      if((it == '-' || it == '+') && ! m_aTokens.empty())
-      {        
-        const auto& l_back = m_aTokens.back();
+      
+      if(c_size > 0)
+      {
+        if((it.marker[0] == '-' || it.marker[0] == '+') && (it.marker[1] == '-' || it.marker[1] == '+'))
+        {
+          ASSERT(it == '-' || it == '+' || it == "--" || it == "++");
+          const auto& l_back = m_aTokens.back();
 
-        // 一元操作符，+/-就不转换为正负号
-        // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
-        if(l_back.precedence != 0 && l_back != ')' && l_back != ']' && ( ! l_back.unary)) {
-          const auto& p = s_plus_minus[(int)(it.marker[0] - '+')];
-          token.SetArithOperatorInfo(p);
+          // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
+          if(it.length == 1)
+          {
+            // 一元操作符，+/-就不转换为正负号
+            // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
+            if(l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary)) {
+              const auto& p = s_plus_minus[(int)(it.marker[0] - '+')];
+              token.SetArithOperatorInfo(p);
+            }
+          }
+          else if(it.length == 2)
+          {
+            if(l_back.IsIdentifier() || l_back.precedence == TOKEN::ID_BRACE) {
+              const auto& p = s_UnaryLeftOperand[(int)(it.marker[0] - '+')];
+              token.SetArithOperatorInfo(p);
+            }
+          }
         }
       }
-
       
       // 只是清理
       //l_token.ClearMarker();
@@ -464,10 +478,10 @@ namespace UVShader
       }
     }
 
-#ifdef USE_CLSTD_TOKENS
-#else
-    SetTriggerCallBack(MultiByteOperatorProc, NULL);
-#endif // #ifdef USE_CLSTD_TOKENS
+//#ifdef USE_CLSTD_TOKENS
+//#else
+//    SetTriggerCallBack(MultiByteOperatorProc, NULL);
+//#endif // #ifdef USE_CLSTD_TOKENS
     SetIteratorCallBack(IteratorProc, NULL);
 
     //// 如果是子解析器，这里借用了父对象的信息定位，退出时要清空，避免析构时删除

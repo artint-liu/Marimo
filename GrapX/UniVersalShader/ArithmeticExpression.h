@@ -465,6 +465,7 @@ namespace UVShader
     static MBO s_plus_minus[];
     static MBO s_Operator1[];
     static MBO s_Operator2[];
+    static MBO s_UnaryLeftOperand[];
     static MBO s_Operator3[];
     static PAIRMARK s_PairMark[4];
     static const int s_MaxPrecedence = 14;

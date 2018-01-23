@@ -62,8 +62,42 @@ namespace clstd
               }
               break;
             case 's':
-              _TStr::Append((TChar*)va_arg(arglist, TChar*), bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+            {
+              TChar* pStr = (TChar*)va_arg(arglist, TChar*);
+              if(pStr == NULL) {
+                buffer[0] = '('; buffer[1] = 'n'; buffer[2] = 'u';
+                buffer[3] = 'l'; buffer[4] = 'l'; buffer[5] = ')';
+                buffer[6] = '\0';
+                _TStr::Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+              }
+              else
+              {
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
+                __try
+                {
+                  _TStr::Append(pStr, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+                }
+                __except(EXCEPTION_EXECUTE_HANDLER)
+                {
+                  buffer[0] = '<'; buffer[1] = 'e'; buffer[2] = 'r';
+                  buffer[3] = 'r'; buffer[4] = '>'; buffer[5] = '\0';
+                  _TStr::Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+                }
+#else
+                try
+                {
+                  _TStr::Append(pStr, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+                }
+                catch(...)
+                {
+                  buffer[0] = '<'; buffer[1] = 'e'; buffer[2] = 'r';
+                  buffer[3] = 'r'; buffer[4] = '>'; buffer[5] = '\0';
+                  _TStr::Append(buffer, bZeroPrefix && nWidth > 0 ? '0' : ' ', nWidth);
+                }
+#endif
+              }
               break;
+            }
             case 'c':
               _TStr::Append((TChar)va_arg(arglist, int/*TChar*/));
               break;
