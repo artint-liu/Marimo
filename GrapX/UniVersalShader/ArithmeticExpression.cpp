@@ -26,7 +26,6 @@
 //              +   −             Unary plus and minus
 //              !   ~             Logical NOT and bitwise NOT
 //              (type)            Type cast
-//              &                 Address-of
 //  5  OPP(11)  *   /   %         Multiplication, division, and remainder                   Left-to-right 
 //  6  OPP(10)  +   −             Addition and subtraction                                  Left-to-right 
 //  7  OPP(9)   <<   >>           Bitwise left shift and right shift                        Left-to-right 
@@ -50,11 +49,12 @@
 //
 // UVS 中不用的操作符号
 //  1           ::                Scope resolution                                          Left-to-right
-//  2           −>                Element selection through pointer
-//  3           sizeof            Size-of
+//  2           −>                Element selection through pointer                         Left-to-right
+//  3           sizeof            Size-of                                                   Right-to-left
 //  3           *                 Indirection (dereference)
 //              new, new[]        Dynamic memory allocation
 //              delete, delete[]  Dynamic memory deallocation
+//              &                 Address-of
 //
 //  4           .*   ->*          Pointer to member                                         Left-to-right 
 //  16          throw             Throw operator (for exceptions)                           Right-to-left 
@@ -309,20 +309,19 @@ namespace UVShader
 
     DbgDumpScope(pOpcode->ToString(), scopeA, scopeB);
 
-    if(pOpcode->unary) {
+    // 解析中保证一元操作符解析正确
+    if(bresult && pOpcode->unary) {
       if(A.pNode != NULL && B.pNode != NULL)
       {
         // ERROR: 一元操作符不能同时带有左右操作数
         return FALSE;
       }
-
-      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_LEFT_OPERAND) && A.pNode != NULL)
+      else if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_LEFT_OPERAND) && A.pNode != NULL)
       {
         // ERROR: 一元操作符不接受左值
         return FALSE;
       }
-
-      if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_RIGHT_OPERAND) && B.pNode != NULL)
+      else if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_RIGHT_OPERAND) && B.pNode != NULL)
       {
         // ERROR: 一元操作符不接受右值
         return FALSE;
@@ -331,29 +330,122 @@ namespace UVShader
 
     return bresult;
   }
-  //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::GLOB* pDesc)
+  GXBOOL ArithmeticExpression::IsLikeTypeCast(const TKSCOPE& scope, TKSCOPE::TYPE i)
   {
-    TKSCOPE scope(begin, end);
-    return ParseArithmeticExpression(depth + 1, scope, pDesc);
+    const TOKEN& front = m_aTokens[scope.begin];
+    if(front == '(' && (TKSCOPE::TYPE)front.scope + 1 < scope.end) // (...)... 形式
+    {
+      const TOKEN& nt = m_aTokens[front.scope + 1];
+      if(nt == '(' || nt.unary || nt.IsIdentifier()) // type cast
+      {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope_in, SYNTAXNODE::GLOB* pDesc)
+  //////////////////////////////////////////////////////////////////////////
+
+  ArithmeticExpression::TKSCOPE::TYPE ArithmeticExpression::GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence)
   {
-    TKSCOPE scope = scope_in;
-    if(scope.end > scope.begin && m_aTokens[scope.end - 1] == ';') {
-      scope.end--; // TODO: 确定这个是否为必须
-      CLBREAK;
+    // 获得一个区间的操作符最低优先级的索引
+
+    int nCandidate = s_MaxPrecedence;
+    TKSCOPE::TYPE i = scope.end - 1;
+    TKSCOPE::TYPE nCandidatePos = i;
+
+    while(nMinPrecedence <= s_MaxPrecedence)
+    {
+      if(nMinPrecedence == OPP(1) || nMinPrecedence == OPP(12))
+      {
+        for(i = scope.begin; i < scope.end; ++i)
+        {
+          m_nDbgNumOfExpressionParse++;
+
+          const TOKEN& s = m_aTokens[i];
+
+          if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
+          {
+            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
+            if(IsLikeTypeCast(scope, i)) {
+              return s.scope;
+            }
+            i = s.scope;
+            continue;
+          }
+          else if(s.precedence == 0 || s == ':') { // 跳过非运算符, 这里包括三元运算符的次级运算符
+            continue;
+          }
+
+          // ?: 操作符标记：precedence 储存优先级，scope 储存?:的关系
+
+          if(s.precedence == nMinPrecedence) {
+            return i;
+            //return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
+          }
+          else if(s.precedence < nCandidate) {
+            nCandidate = s.precedence;
+            // 这里优先级因为从LTR切换到RTL，所以不记录 nCandidatePos
+          }
+        } // for
+
+        nCandidatePos = scope.end - 1;
+      }
+      else
+      {
+        for(; (GXINT_PTR)i >= (GXINT_PTR)scope.begin; --i)
+        {
+          m_nDbgNumOfExpressionParse++;
+          const TOKEN& s = m_aTokens[i];
+
+          // 优先级（2）是从右向左的，这个循环处理从左向右
+          ASSERT(nMinPrecedence != 2);
+
+          // 跳过非运算符, 也包括括号
+          if(s.precedence == TOKEN::ID_BRACE)
+          {
+            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
+#if 1
+            if(IsLikeTypeCast(scope, i)) {
+              return i;
+            }
+#endif
+            i = s.scope;
+            continue;
+          }
+          else if(s.precedence == 0) { // 跳过非运算符
+            continue;
+          }
+
+          if(s.precedence == nMinPrecedence) {
+            return i;
+            //return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
+          }
+          else if(s.precedence < nCandidate) {
+            nCandidate = s.precedence;
+            nCandidatePos = i;
+          }
+        } // for
+      }
+
+      if(nMinPrecedence >= nCandidate) {
+        break;
+      }
+
+      nMinPrecedence = nCandidate;
+      i = nCandidatePos;
     }
+    return TKSCOPE::npos;
+  }
+
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  {
     return ParseArithmeticExpression(depth + 1, scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
 
   GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, int nMinPrecedence)
   {
-    int nCandidate = s_MaxPrecedence;
-    GXINT_PTR i = (GXINT_PTR)scope.end - 1;
-    GXINT_PTR nCandidatePos = i;
     SYNTAXNODE::GLOB A, B;
 
     if(depth > 1000)
@@ -404,26 +496,7 @@ namespace UVShader
       ASSERT(count > 2);
       SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_Definition;
       TKSCOPE scope_expr(scope.begin + 1, scope.end);
-      //if(front == "const") {
-      //  if(count == 3) {
-      //    // ERROR: 缺少常量赋值
-      //    return FALSE;
-      //  }
-      //  else if(m_aTokens[scope.begin + 2].precedence != 0)
-      //  {
-      //    // m_aTokens[scope.begin + 1] 是类型 ERROR: 缺少适当的变量名
-      //    // m_aTokens[scope.begin + 1] 不是类型 ERROR: 缺少类型名
-      //    return FALSE;
-      //  }
-
-      //  mode = SYNTAXNODE::MODE_DefinitionConst;
-      //  A = m_aTokens[scope.begin + 1];
-      //  scope_expr.begin++;
-      //}
-      //else
-      {
-        A = front;
-      }
+      A = front;
       B.ptr = NULL;
       GXBOOL bret = ParseArithmeticExpression(depth + 1, scope_expr, &B);
       bret = bret && MakeSyntaxNode(pDesc, mode, &A, &B);
@@ -436,87 +509,39 @@ namespace UVShader
       ASSERT(m_aTokens[scope.end - 1].scope == scope.begin); // 括号肯定是匹配的
       return ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
     }
-    else if(m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
+    else if(front.IsIdentifier() && m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
     {
       // X(...) 形式
       return ParseFunctionCall(scope, pDesc);
     }
-    else if(m_aTokens[scope.begin].scope == scope.end - 2)
+#if 0
+    else if(front.scope == scope.begin + 2)
     {
-      // (...)X 形式
+      // (type)X 形式
       return ParseTypeCast(scope, pDesc); // FIXME: 不应该放在这里, 优先级不正确
     }
+#endif
 
-    while(nMinPrecedence <= s_MaxPrecedence)
+    TKSCOPE::TYPE nLowestOpcodeIndex = GetLowestPrecedence(scope, nMinPrecedence);
+    ASSERT(nLowestOpcodeIndex == TKSCOPE::npos ||
+      (scope.begin <= nLowestOpcodeIndex && nLowestOpcodeIndex < scope.end));
+
+    if(nLowestOpcodeIndex != TKSCOPE::npos)
     {
-      if(nMinPrecedence == OPP(1) || nMinPrecedence == OPP(12))
+      const TOKEN& t = m_aTokens[nLowestOpcodeIndex];
+      ASSERT(t == ')' || (OPP(0) <= t.precedence && t.precedence <= s_MaxPrecedence));
+
+#if 1
+      if(t == ')')
       {
-        for(i = (GXINT_PTR)scope.begin; i < (GXINT_PTR)scope.end; ++i)
-        {
-          m_nDbgNumOfExpressionParse++;
-
-          const TOKEN& s = m_aTokens[i];
-
-          if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
-          {
-            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
-            i = s.scope;
-            continue;
-          }
-          else if(s.precedence == 0 || s == ':') { // 跳过非运算符, 这里包括三元运算符的次级运算符
-            continue;
-          }
-
-          // ?: 操作符标记：precedence 储存优先级，scope 储存?:的关系
-
-          if(s.precedence == nMinPrecedence) {
-            return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
-          }
-          else if(s.precedence < nCandidate) {
-            nCandidate = s.precedence;
-            // 这里优先级因为从LTR切换到RTL，所以不记录 nCandidatePos
-          }
-        } // for
-
-        nCandidatePos = (GXINT_PTR)scope.end - 1;
+        //CLNOP;
+        ASSERT(m_aTokens[scope.begin] == '(');
+        return ParseTypeCast(scope, pDesc);
       }
-      else
-      {
-        for(; i >= (GXINT_PTR)scope.begin; --i)
-        {
-          m_nDbgNumOfExpressionParse++;
-          const TOKEN& s = m_aTokens[i];
+#endif
 
-          // 优先级（2）是从右向左的，这个循环处理从左向右
-          ASSERT(nMinPrecedence != 2);
-
-          // 跳过非运算符, 也包括括号
-          if(s.precedence == TOKEN::ID_BRACE)
-          {
-            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
-            i = s.scope;
-            continue;
-          }
-          else if(s.precedence == 0) { // 跳过非运算符
-            continue;
-          }
-
-          if(s.precedence == nMinPrecedence) {
-            return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
-          }
-          else if(s.precedence < nCandidate) {
-            nCandidate = s.precedence;
-            nCandidatePos = i;
-          }
-        } // for
-      }
-
-      if(nMinPrecedence >= nCandidate) {
-        break;
-      }
-
-      nMinPrecedence = nCandidate;
-      i = nCandidatePos;
+      return MakeInstruction(depth + 1, &t,
+        t.precedence, &scope, pDesc, nLowestOpcodeIndex);
     }
 
     if( ! ParseFunctionIndexCall(scope, pDesc))
@@ -618,6 +643,7 @@ namespace UVShader
     SYNTAXNODE::GLOB A, B = {0};
     A = m_aTokens[scope.begin];
 
+#if 0 // 外部保证
     // 检查m_aTokens[scope.begin]是函数名, 或者正号, 负号
     if(*A.pTokn != '+' && *A.pTokn != '-' && *A.pTokn != '!' &&
       A.pTokn->IsIdentifier() == FALSE) // 检查是否为标识符
@@ -626,6 +652,7 @@ namespace UVShader
       m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5005, "表达式看起来像函数, 但是\"%s\"不是标识符."), A.pTokn->ToString(str).CStr());
       return FALSE;
     }
+#endif
     // TODO: 重名/重载检查?
 
     const TOKEN& bracket = m_aTokens[scope.begin + 1];
@@ -653,34 +680,45 @@ namespace UVShader
 
   GXBOOL ArithmeticExpression::ParseTypeCast(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
-    ASSERT(scope.begin < scope.end - 2); // 这个由之前的判断保证
-    ASSERT(m_aTokens[scope.begin].scope == scope.end - 2); // 外部保证是(A)B 形式
+    ASSERT(scope.begin < scope.end - 2); // 这个由之前的判断保证, 目前括号里只可能有一个类型标识符
+    //ASSERT(m_aTokens[scope.begin].scope == scope.end - 2); // 外部保证是(A)B 形式
 
-    SYNTAXNODE::GLOB A = {0}, B;
-    B = m_aTokens[scope.end - 1];
+    SYNTAXNODE::GLOB A = {0}, B = {0};
+    //B = m_aTokens[scope.end - 1];
 
-    if(B.pTokn->IsIdentifier() == FALSE)
-    {
-      m_pMsg->WriteErrorW(TRUE, B.pTokn->offset(), UVS_EXPORT_TEXT(5006, "表达式看起来像类型转换, 但是\"%s\"不是标识符."), B.pTokn->ToString());
-      return FALSE;
-    }
+    //if(B.pTokn->IsIdentifier() == FALSE)
+    //{
+    //  clStringW str;
+    //  m_pMsg->WriteErrorW(TRUE, B.pTokn->offset(), UVS_EXPORT_TEXT(5006, "表达式看起来像类型转换, 但是\"%s\"不是标识符."), B.pTokn->ToString(str).CStr());
+    //  return FALSE;
+    //}
 
     const TOKEN& bracket = m_aTokens[scope.begin];
     ASSERT(bracket == '(');
 
-    TKSCOPE first_scope(scope.begin + 1, m_aTokens[scope.begin].scope);
-    //InitTokenScope(first_scope, m_aTokens[scope.begin]);
+    TKSCOPE type_scope; //(scope.begin + 1, m_aTokens[scope.begin].scope);
+    TKSCOPE cast_scope;
 
-    if(_CL_NOT_(ParseArithmeticExpression(0, first_scope, &A, TOKEN::FIRST_OPCODE_PRECEDENCE)))
+    InitTokenScope(type_scope, scope.begin, FALSE);
+    cast_scope.begin = type_scope.end + 1;
+    cast_scope.end = scope.end;
+    ASSERT(cast_scope.begin < cast_scope.end);
+
+    if(_CL_NOT_(ParseArithmeticExpression(0, type_scope, &A, TOKEN::FIRST_OPCODE_PRECEDENCE)))
     {
-      m_pMsg->WriteErrorW(TRUE, m_aTokens[first_scope.begin].offset(), UVS_EXPORT_TEXT(5007, "表达式无法解析."));
+      m_pMsg->WriteErrorW(TRUE, m_aTokens[type_scope.begin].offset(), UVS_EXPORT_TEXT(5007, "类型转换:类型无法解析."));
       return FALSE;
     }
 
-    MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_TypeConversion, &A, &B);
+    if(_CL_NOT_(ParseArithmeticExpression(0, cast_scope, &B, OPP(12))))
+    {
+      m_pMsg->WriteErrorW(TRUE, m_aTokens[type_scope.begin].offset(), UVS_EXPORT_TEXT(5008, "类型转换:表达式无法解析."));
+      return FALSE;
+    }
 
-    DbgDumpScope("C", TKSCOPE(scope.begin, scope.end - 3),
-      TKSCOPE(scope.end - 2, scope.end - 1));
+    MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_TypeCast, &A, &B);
+
+    DbgDumpScope("C", type_scope, cast_scope);
 
     return TRUE;
   }

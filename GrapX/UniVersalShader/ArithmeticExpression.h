@@ -137,18 +137,19 @@ namespace UVShader
       clStringA symbol;
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
       //iterator  marker;
-      int       scope;                          // 括号匹配索引
+      int       scope;                        // 括号匹配索引
       int       semi_scope : scope_bits;      // 分号作用域
       int       precedence : precedence_bits; // 符号优先级
-      u32       unary : 1;               // 是否为一元操作符
+      u32       unary : 1;                    // 是否为一元操作符
       u32       unary_mask : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
 
-      Type      type : 8;               // 类型
-      u32       bInStringSet : 1;               // 在String字典而不再流中
-                                                // [precedence]
-                                                // 1~14 表示运算符的优先级
-                                                // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
-                                                // array[open].scope = closed && array[closed].scope = open
+      Type      type : 8;                     // 类型
+      u32       bInStringSet : 1;             // 在String字典而不在流中
+
+      // [precedence]
+      // 1~14 表示运算符的优先级
+      // 15 表示"{","}","(",")","[","]"这些之一，此时scope数据是相互对应的，例如
+      // array[open].scope = closed && array[closed].scope = open
 
       void ClearMarker();
       void Set(const iterator& _iter);
@@ -272,7 +273,7 @@ namespace UVShader
         MODE_Opcode,              // 操作符 + 操作数 模式: A (操作符) B
         MODE_ArrayAssignment,     // 数组赋值: A={B}; 其它形式赋值属于MODE_Opcode
         MODE_FunctionCall,        // 函数调用: A(B)
-        MODE_TypeConversion,      // 类型转换: (A)B
+        MODE_TypeCast,            // 类型转换: (A)B
         MODE_ArrayIndex,          // 索引调用: A[B], 方括号内有内容的都认为是数组调用
         MODE_ArrayAlloc,          // 自适应数组分配: A[], 注意"k[5]"这种形式认为是索引调用
         MODE_Definition,          // 变量定义: A B
@@ -468,7 +469,7 @@ namespace UVShader
     static MBO s_UnaryLeftOperand[];
     static MBO s_Operator3[];
     static PAIRMARK s_PairMark[4];
-    static const int s_MaxPrecedence = 14;
+    static const int s_MaxPrecedence = OPP(13);
     //static const int s_nPairMark = sizeof(s_PairMark) / sizeof(PAIRMARK);
 #ifdef ENABLE_SYNTAX_NODE_ID
     clsize              m_nNodeId;
@@ -500,12 +501,14 @@ namespace UVShader
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
     GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::GLOB* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  IsLikeTypeCast(const TKSCOPE& scope, TKSCOPE::TYPE i);
 
     GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseTypeCast(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
+    TKSCOPE::TYPE  GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence);
 
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
     GXUINT  MarkCode(GXUINT code, GXLPCSTR szMessage);
@@ -526,7 +529,6 @@ namespace UVShader
     //clsize              GenerateTokens          ();
     const TOKEN::Array* GetTokensArray          () const;
 
-    GXBOOL  ParseArithmeticExpression(int depth, clsize begin, clsize end, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, int nMinPrecedence); // 递归函数
 

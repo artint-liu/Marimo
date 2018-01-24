@@ -107,9 +107,6 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     }
     TRACE("(%d:%f)\n", nCount, (float)nSize / nCount);
 
-    if(pSamples[i].bDbgBreak) {
-      CLNOP; // 根据调试标记在这里下断点
-    }
     // pSamples[i].id 可以追踪
 
     // 表达式解析

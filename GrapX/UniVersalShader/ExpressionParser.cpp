@@ -387,6 +387,7 @@ namespace UVShader
     token.Set(it);
 
     int EOE = m_aTokens.size(); // End Of Expression
+    cllist<clsize> UnaryPendingList; // "++", "--" 未确定前置还是后缀的列表
 
     //m_Macros[MACRO_FILE]
     //m_Macros[MACRO_LINE]
@@ -408,9 +409,9 @@ namespace UVShader
       
       if(c_size > 0)
       {
-        if((it.marker[0] == '-' || it.marker[0] == '+') && (it.marker[1] == '-' || it.marker[1] == '+'))
+        if(it.marker[0] == '-' || it.marker[0] == '+')
         {
-          ASSERT(it == '-' || it == '+' || it == "--" || it == "++");
+          ASSERT(it == '-' || it == '+' || it == "--" || it == "++" || it == "+=" || it == "-=");
           const auto& l_back = m_aTokens.back();
 
           // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
@@ -423,11 +424,15 @@ namespace UVShader
               token.SetArithOperatorInfo(p);
             }
           }
-          else if(it.length == 2)
+          else if(it.length == 2 && (it.marker[1] == '-' || it.marker[1] == '+'))
           {
-            if(l_back.IsIdentifier() || l_back.precedence == TOKEN::ID_BRACE) {
+            // "++","--" 默认按照前缀操作符处理, 这里检查是否转换为后缀操作符
+            if(l_back.IsIdentifier()) {
               const auto& p = s_UnaryLeftOperand[(int)(it.marker[0] - '+')];
               token.SetArithOperatorInfo(p);
+            }
+            else {
+              UnaryPendingList.push_back(c_size);
             }
           }
         }
@@ -468,6 +473,7 @@ namespace UVShader
       }
     }
 
+    // 检查括号匹配
     for(int i = 0; i < countof(s_PairMark); ++i)
     {
       PairStack& s = sStack[i];
@@ -478,10 +484,19 @@ namespace UVShader
       }
     }
 
-//#ifdef USE_CLSTD_TOKENS
-//#else
-//    SetTriggerCallBack(MultiByteOperatorProc, NULL);
-//#endif // #ifdef USE_CLSTD_TOKENS
+    // 对未确定的"++","--"重新确定
+    for(auto it = UnaryPendingList.begin(); it != UnaryPendingList.end(); ++it)
+    {
+      clsize n = *it;
+      if(n + 1 >= m_aTokens.size()) {
+        // 后缀操作符, 但是语法有错误
+        token.SetArithOperatorInfo(s_UnaryLeftOperand[(int)(m_aTokens[n].marker[0] - '+')]);
+      }
+      //else if(m_aTokens[n + 1].IsIdentifier()) {
+      //  // 前缀操作符, 不做处理
+      //}
+    }
+
     SetIteratorCallBack(IteratorProc, NULL);
 
     //// 如果是子解析器，这里借用了父对象的信息定位，退出时要清空，避免析构时删除
@@ -1623,8 +1638,8 @@ NOT_INC_P:
     //  strOut.Format("const %s %s", str[0], str[1]);
     //  break;
 
-    case SYNTAXNODE::MODE_TypeConversion:
-      strOut.Format("(%s) %s", str[0], str[1]);
+    case SYNTAXNODE::MODE_TypeCast:
+      strOut.Format("(%s)%s", str[0], str[1]);
       break;
 
     case SYNTAXNODE::MODE_Definition:
@@ -1777,7 +1792,8 @@ NOT_INC_P:
       }
 
       if(eMode == SYNTAXNODE::MODE_Return) {
-        bret = ParseArithmeticExpression(0, scope.begin + 1, front.semi_scope, &B);
+        TKSCOPE ret_scope(scope.begin + 1, front.semi_scope);
+        bret = ParseArithmeticExpression(0, ret_scope, &B);
         MakeSyntaxNode(pDesc, eMode, NULL, &A, &B);
         pend = front.semi_scope + 1;
       }

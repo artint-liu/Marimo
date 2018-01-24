@@ -134,6 +134,10 @@ GXLPCSTR aOperStack_350[] = {
   "[?] [a] [b?d:e:c?f:g]",
   NULL, };
 
+GXLPCSTR aSyntaxList_399[] = {
+  "[=] [a] [b]",
+  NULL };
+
 GXLPCSTR aSyntaxList_400[] = {
   "[+] [b] [c]",
   "[=] [a] [b+c]",
@@ -172,6 +176,44 @@ GXLPCSTR aSyntaxList_407[] = {
   "[+] [a] [b]",
   "[=] [(a)] [a+b]",
   NULL };
+
+GXLPCSTR aSyntaxList_474[] = {
+  "[C] [int] [a]",
+  "[=] [((int)a)] [5]",
+  NULL };
+
+GXLPCSTR aSyntaxList_475[] = {
+  "[++] [] [a]",
+  "[C] [int] [++a]",
+  "[~] [] [(int)++a]",
+  "[=] [k] [~(int)++a]",
+  NULL };
+
+GXLPCSTR aSyntaxList_476[] = {
+  "[++] [] [a]",
+  "[C] [int] [(++a)]",
+  "[~] [] [(int)(++a)]",
+  "[=] [k] [~(int)(++a)]",
+  NULL };
+
+GXLPCSTR aSyntaxList_477[] = {
+  "[++] [] [(a)]",
+  "[C] [int] [++(a)]",
+  "[~] [] [(int)++(a)]",
+  "[=] [k] [~(int)++(a)]",
+  NULL };
+
+GXLPCSTR aSyntaxList_478[] = {
+  "[*] [int] []",
+  "[&] [(int*)] [a]",
+  "[=] [((int*)&a)] [5]",
+  NULL };
+
+GXLPCSTR aSyntaxList_479[] = {
+  "[C] [constint] [a]",
+  "[=] [((constint)a)] [5]",
+  NULL };
+
 
 GXLPCSTR aSyntaxList_408[] = {
   "[+] [a] [b]",
@@ -370,14 +412,17 @@ GXLPCSTR aOperStack_403[] = {
 #define _I_ __FILE__,__LINE__
 
 SAMPLE_EXPRESSION samplesOpercode[] = {
-  {0, _I_, "i=4, n=10",  7, aOperStack_OC001}, // 下面的例子就是这里的初始值
+  {0, _I_, "i=4, n=10",  7, aOperStack_OC001, "OK"}, // 下面的例子就是这里的初始值
+  {0, _I_, "n k", 2, NULL, "OK"},   // 会认为是声明, 类型 变量名
+  {0, _I_, "n k m", 3, NULL, "OK"}, // 会认为是声明, 修饰 类型 变量名
   {0, _I_, "n--i",       3, NULL, "FAILED"},// err
-  {0, _I_, "n- -i",      4, aOperStack_OC002},
-  {0, _I_, "n---i",      4, aOperStack_OC003},// n=9, i=4, 结果6
-  {0, _I_, "n-- -i",     4, aOperStack_OC003},// n=9, i=4, 结果6
-  {0, _I_, "n- --i",     4, aOperStack_OC004},// n=10, i=3, 结果7
-  {0, _I_, "n--- --i",   5, aOperStack_OC005},// n=9, i=3, 结果7
-  {0, _I_, "n--- - --i", 6},// n=9, i=3, 结果13
+  {0, _I_, "n- -i",      4, aOperStack_OC002, "OK"},
+  {0, _I_, "n---i",      4, aOperStack_OC003, "OK"},// n=9, i=4, 结果6
+  {0, _I_, "n-- -i",     4, aOperStack_OC003, "OK"},// n=9, i=4, 结果6
+  {0, _I_, "n- --i",     4, aOperStack_OC004, "OK"},// n=10, i=3, 结果7
+  {0, _I_, "n--- --i",   5, aOperStack_OC005, "OK"},// n=9, i=3, 结果7
+  {0, _I_, "n--- - --i", 6, NULL, "OK"},// n=9, i=3, 结果13
+  {0, _I_, "!~!~!~!~n", 9, NULL, "OK"},
   //{0, _I_, ";", 1},
   //{0, _I_, ";;", 2},
   {NULL},};
@@ -437,53 +482,56 @@ SAMPLE_EXPRESSION samplesNumeric[] = {
 
 SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   // 基本表达式
-  {0, _I_, "output.color", 3},
+  {51000, _I_, "output.color", 3},
 
   // 数学表达式
-  {0, _I_, "a+b*c", 5, aOperStack_008},
-  {0, _I_, "(a+b)*c", 7, aOperStack_009},
-  {0, _I_, "a+b+c+d*e/f", 11, aOperStack_010},
-  {0, _I_, "k*((a*b)+c+d*e)", 15},
-  {0, _I_, "++n++", 3, aOperStack_436}, // 可以解析,但是语法是错的, 前置++需要左值
-  {0, _I_, "!++~n", 4, aOperStack_442},
+  {52000, _I_, "a+b*c", 5, aOperStack_008},
+  {52000, _I_, "(a+b)*c", 7, aOperStack_009},
+  {52000, _I_, "a+b+c+d*e/f", 11, aOperStack_010},
+  {52000, _I_, "k*((a*b)+c+d*e)", 15},
+  {52000, _I_, "++n++", 3, aOperStack_436}, // 可以解析,但是语法是错的, 前置++需要左值
+  {52000, _I_, "!++~n", 4, aOperStack_442},
 
   // 三元操作
-  {0, _I_, "a?b:c", 5},
-  {0, _I_, "a>b?b:c", 7},
-  {0, _I_, "a?b:c?f:g", 9, aOperStack_348},
-  {0, _I_, "a?b?d:e:c", 9, aOperStack_349},
-  {0, _I_, "a?b?d:e:c?f:g", 13, aOperStack_350},
+  {53000, _I_, "a?b:c", 5},
+  {53000, _I_, "a>b?b:c", 7},
+  {53000, _I_, "a?b:c?f:g", 9, aOperStack_348},
+  {53000, _I_, "a?b?d:e:c", 9, aOperStack_349},
+  {53000, _I_, "a?b?d:e:c?f:g", 13, aOperStack_350},
 
   // 赋值
-  {0, _I_, "a=b+c", 5, aSyntaxList_400},
-  {0, _I_, "a=b=c=d", 7, aSyntaxList_401},
-  {0, _I_, "float a", 2},
-  {0, _I_, "float a=b+c", 6, aSyntaxList_403},
-  {0, _I_, "float3 a=b=c=d", 8, aSyntaxList_404},
-  {0, _I_, "float a,b,c,d,e", 10, aSyntaxList_405},
-  {0, _I_, "float a, b = c", 6, aSyntaxList_406},
-  {0, _I_, "(a)=a+b", 7, aSyntaxList_407},
-  {0, _I_, "((int)a)=5", 0}, // FIXME: type cast 优先级不正确
-  //{1, _I_, "k=~(int)++a", 0},
-  //{0, _I_, "((int*)&a)=5", 0},
-  {0, _I_, "((const int)a)=5", 0},
-  //{0, _I_, "((const int)&a)=5", 0},
-  {0, _I_, "(a=a+b)", 7, aSyntaxList_408},
-  //{0, _I_, "a=a+b;b=a-c*d;c=a*d;", 20}, // 不再支持
-  //{0, _I_, "(a=a+b);(b=a-c*d);c=a*d;", 24},
+  {54000, _I_, "a=b", 3, aSyntaxList_399},
+  {54000, _I_, "a=b+c", 5, aSyntaxList_400},
+  {54000, _I_, "a=b=c=d", 7, aSyntaxList_401},
+  {54000, _I_, "float a", 2},
+  {54000, _I_, "float a=b+c", 6, aSyntaxList_403},
+  {54000, _I_, "float3 a=b=c=d", 8, aSyntaxList_404},
+  {54000, _I_, "float a,b,c,d,e", 10, aSyntaxList_405},
+  {54000, _I_, "float a, b = c", 6, aSyntaxList_406},
+  {54000, _I_, "(a)=a+b", 7, aSyntaxList_407},
+  {54000, _I_, "((int)a)=5", 8, aSyntaxList_474}, // FIXME: type cast 优先级不正确
+  {54000, _I_, "k=~(int)++a", 8, aSyntaxList_475},
+  {54000, _I_, "k=~(int)(++a)", 10, aSyntaxList_476},
+  {54000, _I_, "k=~(int)++(a)", 10, aSyntaxList_477},
+  {54000, _I_, "((int*)&a)=5", 10, aSyntaxList_478},
+  {54001, _I_, "((const int)a)=5", 9, aSyntaxList_479},
+  //{54000, _I_, "((const int)&a)=5", 0},
+  {54000, _I_, "(a=a+b)", 7, aSyntaxList_408},
+  //{54000, _I_, "a=a+b;b=a-c*d;c=a*d;", 20}, // 不再支持
+  //{54000, _I_, "(a=a+b);(b=a-c*d);c=a*d;", 24},
 
   // 定义
-  {0, _I_, "float2 texcoord : TEXCOORD0, pos : POSITION0", 8, aOperList_396},
-  {0, _I_, "float2 texcoord : TEXCOORD0 = float2(0,0), pos : POSITION0 = float2(320, 240)", 0, aOperList_397},
-  {0, _I_, "float freqs, time, frame, fps", 8, NULL},
-  {0, _I_, "float freqs[8], time[4]", 10},
-  {0, _I_, "float freqs[8] : FREQUENT, time[4]:TIME", 14},
-  {0, _I_, "float freqs[16]", 5},
-  {0, _I_, "float freqs[16][8]", 8},
-  {0, _I_, "float freqs[] = {12, 3, 5}", 12},
-  {0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21, aOperStack_403},
+  {55000, _I_, "float2 texcoord : TEXCOORD0, pos : POSITION0", 8, aOperList_396},
+  {55000, _I_, "float2 texcoord : TEXCOORD0 = float2(0,0), pos : POSITION0 = float2(320, 240)", 0, aOperList_397},
+  {55000, _I_, "float freqs, time, frame, fps", 8, NULL},
+  {55000, _I_, "float freqs[8], time[4]", 10},
+  {55000, _I_, "float freqs[8] : FREQUENT, time[4]:TIME", 14},
+  {55000, _I_, "float freqs[16]", 5},
+  {55000, _I_, "float freqs[16][8]", 8},
+  {55000, _I_, "float freqs[] = {12, 3, 5}", 12},
+  {55000, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21, aOperStack_403},
   //{0, _I_, "float freqs[2*3] = {12, 8, 4, 5, 3, 9}", 21},
-  {0, _I_, NULL,  0},};
+  {55000, _I_, NULL,  0},};
 
 //SAMPLE_EXPRESSION samplesIfExpression[] = {
 //  {0, _I_, "if(a == b && c + d > e)", 12, aOperStack_HasError}, // error

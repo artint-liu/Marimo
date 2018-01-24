@@ -16,7 +16,7 @@ namespace UVShader
   // 这个按照ASCII顺序分布, "+",",","-" 分别是43，44，45
   ArithmeticExpression::MBO ArithmeticExpression::s_plus_minus[] = {
     {1, "+", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 正号
-    {},
+    {}, // 占位
     {1, "-", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号
   };
 
@@ -24,7 +24,7 @@ namespace UVShader
     {1, ":", OPP(13) };
 
   ArithmeticExpression::MBO ArithmeticExpression::s_Operator1[] = {
-    {1, ".", OPP(13), FALSE},
+    {1, ".", OPP(13)},
     //{1, "+", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 正号
     //{1, "−", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号
     {1, "!", OPP(12), TRUE, UNARY_RIGHT_OPERAND},
@@ -80,8 +80,6 @@ namespace UVShader
     {2, "++", OPP(13), TRUE, UNARY_LEFT_OPERAND},  // n++
     {},                                            // 占位
     {2, "--", OPP(13), TRUE, UNARY_LEFT_OPERAND},  // n--
-    //{2, "--", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // --n
-    //{2, "++", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // ++n
     {NULL,},
   };
 
