@@ -6,6 +6,8 @@
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"
 
+extern SAMPLE_EXPRESSION samplesNumeric[];
+
 class TestExpression : public UVShader::CodeParser
 {
 public:
@@ -235,7 +237,7 @@ namespace DigitalParsing
     {NULL, },
   };
 
-  void Test()
+  void Test1()
   {
     for(int i = 0; aSampleDigitals[i].str != NULL; i++)
     {
@@ -267,6 +269,40 @@ namespace DigitalParsing
       ASSERT(aSampleDigitals[i].state == state);
 
       TRACE(str.AppendFormat("%s\n", aSampleDigitals[i].state == state ? "" : " (X)"));
+    }
+  }
+
+  void Test2()
+  {
+    UVShader::CodeParser expp(NULL, NULL);
+
+    SAMPLE_EXPRESSION* samp = samplesNumeric;
+
+    for(int i = 0; samp[i].expression != NULL; i++)
+    {
+      // 去掉符号前缀
+      const ch* pstr = samp[i].expression;
+      if(pstr[0] == '+' || pstr[0] == '-')
+      {
+        pstr++;
+      }
+      clsize len = clstd::strlenT(pstr);
+
+      expp.Attach(pstr, len, 0, 0);
+      expp.GenerateTokens();
+      const UVShader::CodeParser::TOKEN::Array* pArray = expp.GetTokensArray();
+
+      if(pArray->size() != 1) {
+        TRACE("%s(%d)\n", samp[i].szSourceFile, samp[i].nLine);
+        TRACE("ERROR : 样本字符串没有按照数字格式扩展:%s\n", samp[i].expression);
+        CLBREAK;
+      }
+      else if((*pArray)[0].type != UVShader::CodeParser::TOKEN::TokenType_Numeric)
+      {
+        TRACE("%s(%d)\n", samp[i].szSourceFile, samp[i].nLine);
+        TRACE("ERROR : 扩展的没有解析为数字:%s\n", samp[i].expression);
+        CLBREAK;
+      }
     }
   }
 }

@@ -115,6 +115,8 @@ namespace clstd
   float xtof(const wch* str, size_t len);
   double xtod(const ch* str, size_t len);
   double xtod(const wch* str, size_t len);
+
+  int isdigit(i32 c);
 }
 
 

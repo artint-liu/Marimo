@@ -492,6 +492,7 @@ namespace UVShader
     static u32 m_aCharSem[128];
 #endif // USE_CLSTD_TOKENS
   protected:
+    static b32 TryExtendNumeric         (iterator& it, clsize remain);
     static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
     static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
 

@@ -159,6 +159,50 @@ namespace UVShader
     return NULL;
   }
 
+  // 按照C语言的数学格式扩展token iterator
+  // iterator在输入时可能是一个单纯的纯数字或者字符的串, 因为
+  // 这个方法只是试图连接'.'或者E后面续接'+'/'-'而断开的两端字符串
+  // 这个方法不会考虑'+','-'前缀, 带有这两个符号前缀会时扩展提前终止
+  // 返回值: 如果做了扩展返回TRUE, 没有修改串长度返回FALSE, 该方法不会减少串长度
+  b32 ArithmeticExpression::TryExtendNumeric(iterator &it, clsize remain)
+  {
+    b32 bENotation = FALSE;
+    const int ec = *(it.end());
+    if((it.front() == '.' && isdigit(ec)) ||               // '.'+"数字..."
+      (isdigit(it.front()) && (it.back() == 'e' || it.back() == 'E')) || // "数字...E/e"
+      (isdigit(it.front()) && ec == '.'))                   // "数字..."+'.'
+    {
+      it.length++;
+      while(--remain)
+      {
+        if(isdigit(it.marker[it.length])) {
+          it.length++;
+        }
+        else if(_CL_NOT_(bENotation) && // 没有切换到科学计数法时遇到‘e’标记
+          (it.marker[it.length] == 'e' || it.marker[it.length] == 'E'))
+        {
+          bENotation = TRUE;
+          it.length++;
+
+          // 科学计数法，+/- 符号判断
+          if((--remain) != 0 && (*(it.end()) == '-' || *(it.end()) == '+')) {
+            it.length++;
+          }
+        }
+        else {
+          break;
+        }
+      }
+
+      if(it.marker[it.length] == 'f' || it.marker[it.length] == 'F' ||
+        it.marker[it.length] == 'h' || it.marker[it.length] == 'H') {
+        it.length++;
+      }
+      return TRUE;
+    }
+    return FALSE;
+  }
+
   u32 CALLBACK ArithmeticExpression::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
   {
     if(it.BeginsWith('\"') && it.EndsWith('\"')) {
@@ -167,8 +211,11 @@ namespace UVShader
       return 0;
     }
 
-    GXBOOL bIsNumeric = SmartStreamUtility::ExtendToCStyleNumeric(it, remain);
-    if(bIsNumeric) {
+    GXBOOL bIsLikeNumeric = TryExtendNumeric(it, remain) || 
+      (it.length > 0 && isdigit(it.marker[0]));
+
+    if(bIsLikeNumeric) {
+      // 并不十分精确, 具体看应用时的解析
       TOKEN& l_token = *(TOKEN*)lParam;
       l_token.type = TOKEN::TokenType_Numeric;
     }
@@ -337,7 +384,7 @@ namespace UVShader
     if(front == '(' && (TKSCOPE::TYPE)front.scope + 1 < scope.end) // (...)... 形式
     {
       const TOKEN& nt = m_aTokens[front.scope + 1];
-      if(nt == '(' || nt.unary || nt.IsIdentifier()) // type cast
+      if(nt == '(' || nt.unary || nt.IsIdentifier() || nt.type == TOKEN::TokenType_Numeric) // type cast
       {
         return TRUE;
       }

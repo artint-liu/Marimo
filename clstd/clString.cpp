@@ -2864,6 +2864,11 @@ namespace clstd
     return clstd::_xstrtofT<double>(str);
   }
 
+  int isdigit(i32 c)
+  {
+    return ('0' <= c && c <= '9');
+  }
+
   float xtof(const ch* str, size_t len)
   {
     return clstd::_xstrtofT<float>(str, len);

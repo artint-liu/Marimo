@@ -148,7 +148,14 @@ namespace clstd {
   {
     template<class _TStr>
     b32 IsHeadOfLine(const TokensT<_TStr>* pToken, typename _TStr::LPCSTR pChar);
-  }
+
+#if 0
+    // 扫描一个字符串, 返回符合C语言的数字格式的长度
+    // 字符串需要以数字或者'.'开头, 函数不会识别'+','-'
+    template<typename _TCh>
+    clsize ExtendCStyleNumeric(const _TCh* str, clsize max_len);
+#endif // 0
+  } // namespace TokensUtility
 
 } // namespace clstd
 

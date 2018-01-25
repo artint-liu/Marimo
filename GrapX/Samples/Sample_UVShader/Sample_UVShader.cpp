@@ -27,7 +27,8 @@ extern GXLPCSTR g_ExportErrorMessage2;
 
 namespace DigitalParsing
 {
-  void Test();
+  void Test1();
+  void Test2();
 } // namespace DigitalParsing
 
 //////////////////////////////////////////////////////////////////////////
@@ -411,7 +412,8 @@ int _tmain(int argc, _TCHAR* argv[])
   clpathfile::LocalWorkingDirA("..");
 
   // 测试数字解析
-  DigitalParsing::Test();
+  DigitalParsing::Test1();
+  DigitalParsing::Test2();
 
   //
   // 数学表达式解析

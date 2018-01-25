@@ -33,6 +33,10 @@ namespace clstd
   namespace TokensUtility {
     template b32 IsHeadOfLine<clStringA>(const TokensT<clStringA>* pToken, clStringA::LPCSTR pChar);
     template b32 IsHeadOfLine<clStringW>(const TokensT<clStringW>* pToken, clStringW::LPCSTR pChar);
+#if 0
+    template clsize ExtendCStyleNumeric<ch>(const ch* str, clsize max_len);
+    template clsize ExtendCStyleNumeric<wch>(const wch* str, clsize max_len);
+#endif
   } // namespace TokensUtility
 
 #define IS_GAP(_POINTER)            ((*_POINTER) == 0x20 || (*_POINTER) == '\t' || (*_POINTER) == '\r' || (*_POINTER) == '\n')
@@ -560,6 +564,27 @@ namespace clstd
       }
       return TRUE; // 到文档开头了
     }
+
+#if 0
+    template<typename _TCh>
+    clsize ExtendCStyleNumeric(const _TCh* str, clsize max_len)
+    {
+      if(str == NULL || max_len == 0 ||
+        _CL_NOT_(isdigit(str[0])) && str[0] != '.')
+      {
+        return 0;
+      }
+      b32 bDot = str[0] == '.';
+
+      //bENotation;
+
+      for(clsize i = 1; i < max_len; i++)
+      {
+      }
+
+      return bDot ? 0 : 1;
+    }
+#endif // 0
 
   } // namespace TokenUtility
 

@@ -373,6 +373,7 @@ namespace SmartStreamUtility
   }
 
   template<class _Iter>
+  CLDEPRECATED_ATTRIBUTE
   b32 ExtendToCStyleNumeric(_Iter &it, clsize remain)
   {
     b32 bENotation = FALSE;

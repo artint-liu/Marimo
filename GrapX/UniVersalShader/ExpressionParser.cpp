@@ -1007,75 +1007,6 @@ namespace UVShader
 
     stat.defn.szType = GetUniqueString(p);
 
-#if 0
-    if( ! ParseExpression(TKSCOPE(pScope->begin, definition_end), &stat.defn.sRoot))
-    {
-      ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(definition_end));
-      return FALSE;
-    }
-
-    //
-    // 将类型定义中的逗号表达式展开为独立的类型定义
-    // 如 float a, b, c; 改为
-    // float a; float b; float c;
-    //
-    SYNTAXNODE* pNode = stat.defn.sRoot.pNode;
-    SYNTAXNODE::PtrList sDefinitionList;
-    SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList]
-    (SYNTAXNODE* pNode, int depth) -> GXBOOL
-    {
-      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition ||
-        (pNode->CompareOpcode(',')))
-      {
-        sDefinitionList.push_back(pNode);
-        return TRUE;
-      }
-      return FALSE;
-    });
-
-    if(sDefinitionList.empty()) {
-      OutputErrorW(p[1], E2145_语法错误_标识符前面缺少token_vs, ";");
-      return FALSE;
-    }
-    else if(sDefinitionList.size() == 1) {
-      m_aStatements.push_back(stat);
-    }
-    else {
-      ASSERT( ! sDefinitionList.empty());
-      // 这里list应该是如下形式
-      // (define) [type] [node1]
-      // (node1) [node2] [var define node N]
-      // (node2) [node3] [var define node (N-1)]
-      // ...
-      // (nodeN) [var define node 1] [var define node 2]
-
-      auto& front = sDefinitionList.front();
-
-      ASSERT(front->mode == SYNTAXNODE::MODE_Definition);
-
-      front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
-      stat.defn.sRoot.pNode = front;
-      m_aStatements.push_back(stat);
-
-      auto it = sDefinitionList.end();
-      ASSERT(front->Operand[0].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
-      for(--it; it != sDefinitionList.begin(); --it)
-      {
-        SYNTAXNODE& SyntaxNode = **it;
-
-        ASSERT(SyntaxNode.CompareOpcode(','));
-
-        // 逗号并列式改为独立类型定义式
-        SyntaxNode.mode = front->mode;
-        SyntaxNode.pOpcode = NULL;
-        SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type
-
-        // 加入列表
-        stat.defn.sRoot.pNode = *it;
-        m_aStatements.push_back(stat);
-      }
-    }
-#else
     TKSCOPE scope(pScope->begin, definition_end);
     if(!ParseExpression(stat.defn.sRoot, scope))
     {
@@ -1083,8 +1014,11 @@ namespace UVShader
       return FALSE;
     }
 
-    BreakDefinition(stat, scope);
-#endif
+    // abc; 这种会被解析为token
+    if(stat.defn.sRoot.IsNode())
+    {
+      BreakDefinition(stat, scope);
+    }
 
     ASSERT(pEnd->semi_scope + 1 == definition_end && *pEnd == ';');
     pScope->begin = definition_end;
