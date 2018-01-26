@@ -237,7 +237,11 @@ namespace UVShader
     }
     else if(it.marker[0] == '/' && (remain > 0 && it.marker[1] == '*')) // 处理块注释“/*...*/”
     {
-      SmartStreamUtility::ExtendToCStyleBlockComment(it, 2, remain);
+      if(SmartStreamUtility::ExtendToCStyleBlockComment(it, 2, remain) == FALSE)
+      {
+        ArithmeticExpression* pThis = (ArithmeticExpression*)it.pContainer;
+        pThis->m_pMsg->WriteErrorW(TRUE, it.offset(), UVS_EXPORT_TEXT2(1071, "在注释中遇到意外的文件结束", pThis));
+      }
       ++it;
     }
     else
@@ -905,6 +909,12 @@ namespace UVShader
   const clStringArrayA& ArithmeticExpression::DbgGetExpressionStack() const
   {
     return m_aDbgExpressionOperStack;
+  }
+
+  int ArithmeticExpression::SetError(int err)
+  {
+    m_errorlist.insert(err);
+    return err;
   }
 
   ArithmeticExpression::TChar ArithmeticExpression::GetPairOfBracket(TChar ch)

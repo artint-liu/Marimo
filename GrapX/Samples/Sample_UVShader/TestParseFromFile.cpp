@@ -364,9 +364,13 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       //}
 
       // 解析语法
-      expp.Parse();
-
+      GXBOOL bParseResult = expp.Parse();
       b32 bErrorCase = (clstd::strncmpiT((LPCSTR)pBuffer->GetPtr(), SRC_ERROR_CASE_SIGN, 14) == 0);
+
+      // 如果代码标记失败, 则解析也应该失败
+      if(bErrorCase) {
+        ASSERT(bParseResult == FALSE);
+      }
 
       if(_CL_NOT_(bErrorCase) && szOutput != NULL)
       {

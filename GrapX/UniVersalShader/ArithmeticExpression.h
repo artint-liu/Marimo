@@ -12,9 +12,11 @@
 
 // 注意UVS_EXPORT_TEXT不能改名, 它在Sample中作为标记符号抽取ErrorMessage
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
-#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  MarkCode(_CODE_ID, _MESSAGE)
+#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  SetError(MarkCode(_CODE_ID, _MESSAGE))
+#define UVS_EXPORT_TEXT2(_CODE_ID, _MESSAGE, _THIS)  _THIS->SetError(_THIS->MarkCode(_CODE_ID, _MESSAGE))
 #else
-#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  _CODE_ID
+#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  SetError(_CODE_ID)
+#define UVS_EXPORT_TEXT2(_CODE_ID, _MESSAGE, _THIS)  _THIS->SetError(_CODE_ID)
 #endif
 
 #define ENABLE_SYNTAX_NODE_ID
@@ -478,7 +480,8 @@ namespace UVShader
     GXBOOL              m_bRefMsg; // 如果为TRUE，析构时不删除m_pMsg
     ErrorMessage*       m_pMsg;
     TOKEN::Array        m_aTokens;
-    //int                 m_nMaxPrecedence;   // 优先级最大值
+    
+    clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
 
     // 语法节点的内存池
     //SyntaxNodePoolList  m_NodePoolList;
@@ -537,7 +540,7 @@ namespace UVShader
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     void DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB);
     const clStringArrayA& DbgGetExpressionStack() const;
-
+    int SetError(int err);
   };
 
 

@@ -352,7 +352,7 @@ void ExportErrorMessage(const cllist<clStringA>& files)
 
     for(auto it = srccode.begin(); it != srccode.end(); ++it)
     {
-      if(it == "UVS_EXPORT_TEXT")
+      if(it == "UVS_EXPORT_TEXT" || it == "UVS_EXPORT_TEXT2")
       {
         if((it + 1) == _CLTEXT("(") && (it + 3) == _CLTEXT(","))
         {

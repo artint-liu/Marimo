@@ -168,6 +168,7 @@ namespace UVShader
     , m_pSubParser(NULL)
     , m_dwState(0)
     , m_pParent(NULL)
+    , m_nPPRecursion(0)
     , m_pInclude(pInclude ? pInclude : &s_DefaultInclude)
   {
     if(pContext) {
@@ -218,6 +219,7 @@ namespace UVShader
 
   void CodeParser::Cleanup()
   {
+    m_errorlist.clear();
     m_aTokens.clear();
     m_aStatements.clear();
     //m_Macros.clear();
@@ -267,7 +269,7 @@ namespace UVShader
 
       if( ! TOKENSUTILITY::IsHeadOfLine(it.pContainer, it.marker)) {
         //ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
-        pThis->OutputErrorW(E2014_预处理器命令必须作为第一个非空白空间启动);
+        pThis->OutputErrorW(UVS_EXPORT_TEXT2(2014, "预处理器命令必须作为第一个非空白空间启动", pThis));
         return 0;
       }
 
@@ -305,12 +307,18 @@ namespace UVShader
       }
       else if(it == PREPROCESS_endif)
       {
+        if(pThis->m_nPPRecursion <= 0) {
+          pThis->OutputErrorW(it.marker, UVS_EXPORT_TEXT2(1020, "意外的 #endif", pThis));
+          return 0;
+        }
+
+        pThis->m_nPPRecursion--;
         it = ctx.iter_next;
       }
       else if(it == PREPROCESS_error)
       {
         clStringW str(it.marker + it.length, ctx.ppend - (it.marker + it.length));
-        pThis->OutputErrorW(it.marker, E1189_用户定义错误_vs, str);
+        pThis->PP_UserError(it.marker, str);
       }
       else
       {
@@ -401,7 +409,7 @@ namespace UVShader
       }
 
       if( ! m_pParent && token == PREPROCESS_pound) {
-        OutputErrorW(E2121); // 无效的"#"号_可能是宏扩展
+        OutputErrorW(token, UVS_EXPORT_TEXT(2121, "“#”: 无效字符 : 可能是宏展开的结果")); // 无效的"#"号_可能是宏扩展
       }
 
       const int c_size = (int)m_aTokens.size();
@@ -471,6 +479,10 @@ namespace UVShader
         }
         EOE = c_size + 1;
       }
+    }
+
+    if(m_nPPRecursion != 0) {
+      OutputErrorW(UVS_EXPORT_TEXT(1070, "“%s”文件中的 #if/#endif 对不匹配"), m_pMsg->GetFilenameW());
     }
 
     // 检查括号匹配
@@ -711,7 +723,7 @@ namespace UVShader
       ++it;
       //if(*it != '(' || it == it_end) {
       if(it == it_end) {
-        OutputErrorW(*it_prev, E2008_宏定义中的意外_vs, clStringW(it_prev->ToString()));
+        OutputErrorW(*it_prev, UVS_EXPORT_TEXT(2008, "“%s”:宏定义中的意外"), clStringW(it_prev->ToString()));
         *it_out = it;
         return TRUE;
       }
@@ -721,7 +733,7 @@ namespace UVShader
       }
 
       if(++it == it_end) {
-        OutputErrorW(*it, E2008_宏定义中的意外_vs, clStringW(it->ToString()));
+        OutputErrorW(*it, UVS_EXPORT_TEXT(2008, "“%s”:宏定义中的意外"), clStringW(it->ToString()));
         *it_out = it;
         return TRUE;
       }
@@ -842,7 +854,7 @@ namespace UVShader
       TKSCOPE scope(0, m_aTokens.size());
       while(ParseStatement(&scope));
       RelocalePointer();
-      return TRUE;
+      return m_errorlist.empty();
     }
     //catch(const std::exception& e)
     __except(EXCEPTION_EXECUTE_HANDLER)
@@ -885,7 +897,7 @@ namespace UVShader
     });
 
     if(sDefinitionList.empty()) {
-      OutputErrorW(m_aTokens[scope.begin + 1], E2145_语法错误_标识符前面缺少token_vs, ";");
+      OutputErrorW(m_aTokens[scope.begin + 1], UVS_EXPORT_TEXT(2145, "语法错误：标识符前面缺少“%s”."), ";");
       return FALSE;
     }
     else if(sDefinitionList.size() == 1) {
@@ -917,7 +929,7 @@ namespace UVShader
         if(SyntaxNode.CompareOpcode(',') == NULL) {
           const TOKEN& t = SyntaxNode.GetAnyTokenAB();
           clStringA str = t.ToString();
-          OutputErrorW(t, E2061, clStringW(str)); // "语法错误: 标识符“%s”";
+          OutputErrorW(t, UVS_EXPORT_TEXT(2061, "语法错误: 标识符“%s”."), clStringW(str)); // "语法错误: 标识符“%s”";
           return FALSE;
         }
 
@@ -1169,11 +1181,11 @@ namespace UVShader
 
     pScope->begin = sMembersScope.end;
     if(pScope->begin >= pScope->end) {
-      OutputErrorW(E1004); // 遇到意外的文件结束
+      OutputErrorW(m_aTokens[pScope->begin], UVS_EXPORT_TEXT(1004, "遇到意外的文件结束")); // 遇到意外的文件结束
       return FALSE;
     }
     else if(m_aTokens[pScope->begin] != ";" && m_aTokens[pScope->begin].IsIdentifier() == FALSE) {
-      OutputErrorW(m_aTokens[pScope->begin], E2145, ";"); // "语法错误：标识符前面缺少“%s”"
+      OutputErrorW(m_aTokens[pScope->begin], UVS_EXPORT_TEXT(2145, "语法错误：标识符前面缺少“%s”"), ";"); // "语法错误：标识符前面缺少“%s”"
       return FALSE;
     }
 
@@ -1208,7 +1220,7 @@ namespace UVShader
             // ERROR
             const TOKEN& t = pNode->GetAnyTokenAPB();
             clStringA str = t.ToString();
-            OutputErrorW(t, E2062, clStringW(str));
+            OutputErrorW(t, UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), clStringW(str));
             result = FALSE;
             return FALSE;
           }
@@ -2413,12 +2425,15 @@ NOT_INC_P:
       PP_Undefine(ctx, tokens);
     }
     else if(tokens.front() == PREPROCESS_ifdef) {
+      m_nPPRecursion++;
       return PP_IfDefine(ctx, FALSE, tokens);
     }
     else if(tokens.front() == PREPROCESS_ifndef) {
+      m_nPPRecursion++;
       return PP_IfDefine(ctx, TRUE, tokens);
     }
     else if(tokens.front() == PREPROCESS_if) {
+      m_nPPRecursion++;
       return PP_If(ctx, pParse);
     }
     else if(tokens.front() == PREPROCESS_pragma) {
@@ -2435,9 +2450,15 @@ NOT_INC_P:
       m_pMsg->SetCurrentFilenameW(strW);
     }
     else if(tokens.front() == PREPROCESS_line) {
+      clStringW str;
       if(tokens.size() != 2) {
-        // ERROR: #line 格式不正确
-        OutputErrorW(tokens.front(), 9999, __FILEW__, __LINE__);
+        OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(2005, "#line 应输入行号，却找到“%s”"), _CLTEXT("new line"));
+        return end;
+      }
+      else if(tokens[1].type != TOKEN::TokenType_Numeric)
+      {
+        OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(2005, "#line 应输入行号，却找到“%s”"), tokens[1].ToString(str).CStr());
+        return end;
       }
 
       GXINT nLine = tokens[1].ToString().ToInteger();
@@ -2452,7 +2473,7 @@ NOT_INC_P:
       }
     }
     else {
-      OutputErrorW(tokens.front(), E1021_无效的预处理器命令_vs, clStringW(tokens.front().ToString()));
+      OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(1021, "无效的预处理器命令 \"%s\"."), clStringW(tokens.front().ToString()));
     }
     return ctx.iter_next.marker;
   }
@@ -2467,7 +2488,7 @@ NOT_INC_P:
     //m_MacrosSet.insert(strMacroName);
 
     if(count == 1) {
-      OutputErrorW(tokens.front(), E2007_define缺少定义_vs);
+      OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(2007, "#define 缺少定义."));
       return;
     }
     
@@ -2479,6 +2500,12 @@ NOT_INC_P:
     }
     else if(count == 3) // "#define MACRO XXX" 形
     {
+      // "#define MACROxxx" 异形, xxx可能是字符串, 符号等
+      if(tokens[1].end() == tokens[2].begin()) {
+        clStringW str;
+        OutputErrorW(tokens[1], UVS_EXPORT_TEXT(2008, "“%s”: 宏定义中的意外"), tokens[2].ToString(str).CStr());
+      }
+
       auto result = m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
 
       // 如果已经添加过，清除原有数据
@@ -2495,7 +2522,7 @@ NOT_INC_P:
       if(tokens[1].end() == tokens[2].marker)
       {
         if(tokens[2] != '(') {
-          OutputErrorW(tokens[2], E2008_宏定义中的意外_vs, clStringW(tokens[2].ToString()));
+          OutputErrorW(tokens[2], UVS_EXPORT_TEXT(2008, "“%s”:宏定义中的意外"), clStringW(tokens[2].ToString()));
           return;
         }
 
@@ -2505,7 +2532,7 @@ NOT_INC_P:
           for(int i = 3; i < scope_end; i++)
           {
             if((tokens[i] == ',' && (i & 1)) || (tokens[i] != ',' && (i & 1) == 0)) {
-              OutputErrorW(tokens[i], E2010_宏形参表中的意外, clStringW(tokens[i].ToString()));
+              OutputErrorW(tokens[i], UVS_EXPORT_TEXT(2010, "“%s”:宏形参表中的意外"), clStringW(tokens[i].ToString()));
               return;
             }
             if(i & 1) {
@@ -2513,6 +2540,10 @@ NOT_INC_P:
               sFormalList.back().formal_index = sFormalList.size() - 1;
               sFormalList.back().type = TOKEN::TokenType_FormalParams;
             }
+          }
+
+          if(_CL_NOT_(Verify_MacroFormalList(sFormalList))) {
+            return;
           }
         }
         l_define = scope_end + 1;
@@ -2537,17 +2568,44 @@ NOT_INC_P:
   {
     clStringW strPath = m_pMsg->GetFilePathW();
     clpathfile::RemoveFileSpec(strPath);
-    clStringW strHeader = aTokens[1].ToString();
-    strHeader.TrimBoth('\"');
 
-    clpathfile::CombinePath(strPath, strPath, strHeader);
+    if(aTokens[1] == '<')
+    {
+      size_t i = 2;
+      for(; i < aTokens.size(); i++) {
+        if(aTokens[i] == '>') {
+          break;
+        }
+      }
 
-    //CodeParser* pRoot = GetRootParser();
+      if(i == 2) {
+        OutputErrorW(aTokens[1], UVS_EXPORT_TEXT(2012, "在\"<\"之后缺少名称."));
+        return;
+      }
+      else if(i == aTokens.size()) {
+        OutputErrorW(aTokens[1], UVS_EXPORT_TEXT(2013, "缺少\">\"."));
+        return;
+      }
+
+      clStringW strHeader(aTokens[2].marker, (size_t)(aTokens[i - 1].end() - aTokens[2].begin()));
+      clpathfile::CombinePath(strPath, strPath, strHeader);
+    }
+    else if(aTokens[1].type == TOKEN::TokenType_String)
+    {
+      clStringW strHeader = aTokens[1].ToString();
+      strHeader.TrimBoth('\"');
+      clpathfile::CombinePath(strPath, strPath, strHeader);
+    }
+    else {
+      clStringW str;
+      OutputErrorW(aTokens[0], UVS_EXPORT_TEXT(2006, "\"#include\" 应输入文件名, 缺找到\"%s\""), aTokens[1].ToString(str).CStr());
+      return;
+    }
 
     clBuffer* pBuffer = OpenIncludeFile(strPath);
     if(pBuffer == NULL) {
       // ERROR: 无法打开文件
-      OutputErrorW(UVS_EXPORT_TEXT(5003, "无法打开包含文件: \"%s\""), strPath.CStr());
+      OutputErrorW(aTokens[0], UVS_EXPORT_TEXT(5003, "无法打开包含文件: \"%s\""), strPath.CStr());
       return;
     }
 
@@ -2579,11 +2637,11 @@ NOT_INC_P:
   {
     ASSERT(aTokens.front() == "undef");
     if(aTokens.size() == 1) {
-      OutputErrorW(aTokens.front(), E4006_undef应输入标识符);
+      OutputErrorW(aTokens.front(), UVS_EXPORT_TEXT(4006, "#undef 应输入标识符"));
       return;
     }
     else if(aTokens.size() > 2) {
-      OutputErrorW(aTokens.front(), E4067_预处理器指令后有意外标记_应输入换行符);
+      OutputErrorW(aTokens.front(), UVS_EXPORT_TEXT(4067, "预处理器指令后有意外标记 - 应输入换行符"));
       return;
     }
 
@@ -2611,7 +2669,7 @@ NOT_INC_P:
 
     if(tokens.size() == 1) {
       // ERROR: ifdef 缺少定义
-      OutputErrorW(tokens.front(), E1016_ifdef_应输入标识符);
+      OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(1016, "#ifdef 应输入标识符."));
       return ctx.stream_end;
     }
     else if(tokens.size() == 2) {
@@ -2639,12 +2697,12 @@ NOT_INC_P:
     if(aTokens[1] == PREPROCESS_message)
     {
       if(aTokens[2] != '(') {
-        OutputErrorW(aTokens[2], E2059_SyntaxError_vs, clStringW(aTokens[2].ToString()));
+        OutputErrorW(aTokens[2], UVS_EXPORT_TEXT(2059, "语法错误 :“%s”"), clStringW(aTokens[2].ToString()));
         return;
       }
 
       if(aTokens[3].type != TOKEN::TokenType_String) {
-        OutputErrorW(aTokens[2], E2059_SyntaxError_vs, clStringW(aTokens[2].ToString()));
+        OutputErrorW(aTokens[2], UVS_EXPORT_TEXT(2059, "语法错误 :“%s”"), clStringW(aTokens[2].ToString()));
         return;
       }
 
@@ -2656,7 +2714,7 @@ NOT_INC_P:
     }
     else {
       // 不能识别的pragma子指令
-      OutputErrorW(aTokens[1], E1021_无效的预处理器命令_vs, clStringW(aTokens[1].ToString()));
+      OutputErrorW(aTokens[1], UVS_EXPORT_TEXT(1021, "无效的预处理器命令 “%s”"), clStringW(aTokens[1].ToString()));
     }
   }
 
@@ -2706,7 +2764,7 @@ NOT_INC_P:
         ASSERT(pNode->Operand[0].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
 
         if(pNode->Operand[1].GetType() != SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-          OutputErrorW(*pNode->Operand[0].pTokn, E2004_应输入_defined_id);
+          OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2004, "应输入“defined(id)”"));
           return FALSE;
         }
 
@@ -2873,6 +2931,7 @@ NOT_INC_P:
           continue;
         }
 
+        --m_nPPRecursion;
         p += 5; // "endif" 长度
         break;
       }
@@ -2905,18 +2964,22 @@ NOT_INC_P:
           }
         }
         clStringW str(p, (size_t)pend - (size_t)p);
-        OutputErrorW(p, E1021_无效的预处理器命令_vs, str);
+        OutputErrorW(p, UVS_EXPORT_TEXT(1021, "无效的预处理器命令 \"%s\"."), str);
       }
     }
     
     for(; *p != '\n' && p < end; p++);
     if(p == end)
     {
-      //OutputErrorW(begin, E1004_意外的文件结束);
       OutputErrorW(begin, UVS_EXPORT_TEXT(1004, "意外的文件结束"));
       return end;
     }
     return (p + 1);    
+  }
+
+  void CodeParser::PP_UserError(T_LPCSTR position, const clStringW& strText)
+  {
+    OutputErrorW(position, UVS_EXPORT_TEXT(1189, "#error : %s"), strText);
   }
 
   GXBOOL CodeParser::ExpandInnerMacro(TOKEN& token, const TOKEN& line_num)
@@ -3030,6 +3093,37 @@ NOT_INC_P:
     }
 
     return NULL;
+  }
+
+  GXBOOL CodeParser::Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList)
+  {
+    clStringW str;
+    if(sFormalList.size() <= 1)
+    {
+      if(sFormalList.front().IsIdentifier() == FALSE) {
+        OutputErrorW(sFormalList.front(), UVS_EXPORT_TEXT(2010, "“%s”: 宏形参表中的意外"), sFormalList.front().ToString(str).CStr());
+        return FALSE;
+      }
+      return TRUE;
+    }
+
+    for(auto it1 = sFormalList.begin(); it1 != sFormalList.end(); ++it1)
+    {
+      if(it1->IsIdentifier() == FALSE) {
+        OutputErrorW(*it1, UVS_EXPORT_TEXT(2010, "“%s”: 宏形参表中的意外"), it1->ToString(str).CStr());
+        return FALSE;
+      }
+
+      auto it2 = it1;
+      for(++it2; it2 != sFormalList.end(); ++it2)
+      {
+        if(*it1 == *it2) {
+          OutputErrorW(*it2, UVS_EXPORT_TEXT(2009, "宏形式“%s”重复使用"), it2->ToString(str).CStr());
+          return FALSE;
+        }
+      }
+    }
+    return TRUE;
   }
 
   //////////////////////////////////////////////////////////////////////////

@@ -373,6 +373,7 @@ namespace UVShader
     T_LPCSTR PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
     T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
     T_LPCSTR PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
+    void     PP_UserError(T_LPCSTR position, const clStringW& strText);
     GXBOOL   ExpandInnerMacro(TOKEN& token, const TOKEN& line_num); // 主要是替换__FILE__ __LINE__
 
 
@@ -392,6 +393,8 @@ namespace UVShader
 
     CodeParser* GetRootParser();
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
+
+    GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
@@ -413,6 +416,7 @@ namespace UVShader
     TypeSet             m_TypeSet;
     StatementArray      m_aStatements;
     StatementArray      m_aSubStatements;   // m_aStatements的次级储存，没有顺序关系
+    int                 m_nPPRecursion;     // 条件预处理递归次数
     
     PARSER_CONTEXT*     m_pContext;
 

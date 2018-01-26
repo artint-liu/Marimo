@@ -84,7 +84,9 @@ namespace Marimo
   _DPEM_TEMPL
   GXBOOL _DPEM_CLS::UpdateErrorMessage(GXUINT nCode, GXLPCWSTR szErrorText)
   {
-    return m_ErrorMsg.insert(clmake_pair(nCode, szErrorText)).second;
+    auto result = m_ErrorMsg.insert(clmake_pair(nCode, szErrorText));
+    result.first->second = szErrorText;
+    return result.second;
   }
 
   _DPEM_TEMPL
