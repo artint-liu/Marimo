@@ -1418,7 +1418,24 @@ namespace UVShader
     return pOpcode && *pOpcode == str;
   }
 
-  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAB() const
+  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAB() const // 深度优先
+  {
+    if(Operand[0].IsToken()) {
+      return *Operand[0].pTokn;
+    }
+    else if(Operand[0].IsNode()) {
+      return Operand[0].pNode->GetAnyTokenAB();
+    }
+    else if(Operand[1].IsToken()) {
+      return *Operand[1].pTokn;
+    }
+    else if(Operand[1].IsNode()) {
+      return Operand[1].pNode->GetAnyTokenAB();
+    }
+    CLBREAK;
+  }
+
+  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAB2() const // 广度优先
   {
     if(Operand[0].IsToken()) {
       return *Operand[0].pTokn;

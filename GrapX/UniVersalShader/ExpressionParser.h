@@ -39,6 +39,25 @@ namespace UVShader
     GXHRESULT Close(clBuffer* pBuffer) override;
   };
 
+  class NameSet
+  {
+  public:
+    typedef clset<clStringA> StrSet;
+    typedef clStringA::LPCSTR LPCSTR;
+  
+  protected:
+    StrSet  m_TypeSet;
+    StrSet  m_VariableSet;
+
+  public:
+    void   Cleanup();
+    GXBOOL RegisterType(LPCSTR szName);
+    GXBOOL RegisterVariable(LPCSTR szName);
+
+    GXBOOL HasType(LPCSTR szName) const;
+    GXBOOL HasVariable(LPCSTR szName) const;
+  };
+
 
   class CodeParser : public ArithmeticExpression
   {
@@ -395,6 +414,7 @@ namespace UVShader
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
+    GXBOOL Verify_VariableName(const SYNTAXNODE& rNode);
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
@@ -428,6 +448,7 @@ namespace UVShader
     CodeParser*         m_pSubParser;
     //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // ºêÕ¹¿ªÁ÷
+    NameSet             m_RootSet;
   public:
     CodeParser(PARSER_CONTEXT* pContext, Include* pInclude);
     virtual ~CodeParser();

@@ -219,6 +219,7 @@ namespace UVShader
 
   void CodeParser::Cleanup()
   {
+    m_RootSet.Cleanup();
     m_errorlist.clear();
     m_aTokens.clear();
     m_aStatements.clear();
@@ -901,6 +902,9 @@ namespace UVShader
       return FALSE;
     }
     else if(sDefinitionList.size() == 1) {
+      if(Verify_VariableName(*pNode) == FALSE) {
+        return FALSE;
+      }
       m_aStatements.push_back(stat);
     }
     else {
@@ -936,7 +940,11 @@ namespace UVShader
         // 逗号并列式改为独立类型定义式
         SyntaxNode.mode = front->mode;
         SyntaxNode.pOpcode = NULL;
-        SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type
+        SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type        
+
+        if(Verify_VariableName(SyntaxNode) == FALSE) {
+          return FALSE;
+        }
 
         // 加入列表
         stat.defn.sRoot.pNode = *it;
@@ -1157,6 +1165,13 @@ namespace UVShader
 
     TOKEN* pStructName = p;
     stat.stru.szName = GetUniqueString(p);
+    if(m_RootSet.RegisterType(stat.stru.szName) == FALSE &&
+      m_RootSet.HasVariable(stat.stru.szName))
+    {
+      clStringW str;
+      OutputErrorW(*pStructName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), pStructName->ToString(str).CStr());
+      return FALSE;
+    }
     INC_BUT_NOT_END(p, pEnd);
 
     if(*p == ";") {
@@ -2531,12 +2546,14 @@ NOT_INC_P:
         {
           for(int i = 3; i < scope_end; i++)
           {
-            if((tokens[i] == ',' && (i & 1)) || (tokens[i] != ',' && (i & 1) == 0)) {
+            if((_CL_NOT_(tokens[i].IsIdentifier()) && (i & 1)) ||
+              (tokens[i] != ',' && (i & 1) == 0))
+            {
               OutputErrorW(tokens[i], UVS_EXPORT_TEXT(2010, "“%s”:宏形参表中的意外"), clStringW(tokens[i].ToString()));
               return;
             }
             if(i & 1) {
-              sFormalList.push_back(tokens[i++]);
+              sFormalList.push_back(tokens[i]);
               sFormalList.back().formal_index = sFormalList.size() - 1;
               sFormalList.back().type = TOKEN::TokenType_FormalParams;
             }
@@ -3126,6 +3143,31 @@ NOT_INC_P:
     return TRUE;
   }
 
+  GXBOOL CodeParser::Verify_VariableName(const SYNTAXNODE& rNode)
+  {
+    const TOKEN& tkVar = rNode.Operand[1].IsToken()
+      ? *rNode.Operand[1].pTokn
+      : rNode.Operand[1].pNode->GetAnyTokenAB();
+
+    clStringW str;
+    if(tkVar.IsIdentifier())
+    {
+      clStringA strA;
+      if(m_RootSet.RegisterVariable(tkVar.ToString(strA)) == FALSE ||
+        m_RootSet.HasType(strA))
+      {
+        OutputErrorW(tkVar, UVS_EXPORT_TEXT(2371, "“%s”: 重定义"), tkVar.ToString(str).CStr());
+        return FALSE;
+      }
+    }
+    else
+    {
+      OutputErrorW(tkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), tkVar.ToString(str).CStr());
+      return FALSE;
+    }
+    return TRUE;
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   bool CodeParser::TYPE::operator<( const TYPE& t ) const
@@ -3203,6 +3245,36 @@ NOT_INC_P:
   {
     delete pBuffer;
     return GX_OK;
+  }
+
+  void NameSet::Cleanup()
+  {
+    m_TypeSet.clear();
+    m_VariableSet.clear();
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  GXBOOL NameSet::RegisterType(LPCSTR szName)
+  {
+    auto r = m_TypeSet.insert(szName);
+    return r.second;
+  }
+
+  GXBOOL NameSet::RegisterVariable(LPCSTR szName)
+  {
+    auto r = m_VariableSet.insert(szName);
+    return r.second;
+  }
+
+  GXBOOL NameSet::HasType(LPCSTR szName) const
+  {
+    return (m_TypeSet.find(szName) != m_TypeSet.end());
+  }
+
+  GXBOOL NameSet::HasVariable(LPCSTR szName) const
+  {
+    return (m_VariableSet.find(szName) != m_VariableSet.end());
   }
 
 } // namespace UVShader
