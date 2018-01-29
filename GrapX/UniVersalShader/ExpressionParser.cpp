@@ -81,6 +81,7 @@ GXLPCSTR g_ExportErrorMessage1 = __FILE__;
 
 namespace UVShader
 {
+  CodeParser::TOKEN::T_LPCSTR s_szString = "string";
   //////////////////////////////////////////////////////////////////////////
 #if 0
   enum GrammarCategory // 类别
@@ -885,7 +886,7 @@ namespace UVShader
     //
     SYNTAXNODE* pNode = stat.defn.sRoot.pNode;
     SYNTAXNODE::PtrList sDefinitionList;
-    SYNTAXNODE::RecursiveNode(this, pNode, [this, &sDefinitionList]
+    RecursiveNode<SYNTAXNODE>(this, pNode, [this, &sDefinitionList]
     (SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
       if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition ||
@@ -902,7 +903,7 @@ namespace UVShader
       return FALSE;
     }
     else if(sDefinitionList.size() == 1) {
-      if(Verify_VariableName(*pNode) == FALSE) {
+      if(Verify_VariableDefinition(*pNode) == FALSE) {
         return FALSE;
       }
       m_aStatements.push_back(stat);
@@ -917,10 +918,12 @@ namespace UVShader
       // (nodeN) [var define node 1] [var define node 2]
 
       auto& front = sDefinitionList.front();
-
       ASSERT(front->mode == SYNTAXNODE::MODE_Definition);
-
       front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
+
+      if(Verify_VariableDefinition(*front) == FALSE) {
+        return FALSE;
+      }
       stat.defn.sRoot.pNode = front;
       m_aStatements.push_back(stat);
 
@@ -942,7 +945,7 @@ namespace UVShader
         SyntaxNode.pOpcode = NULL;
         SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type        
 
-        if(Verify_VariableName(SyntaxNode) == FALSE) {
+        if(Verify_VariableDefinition(SyntaxNode) == FALSE) {
           return FALSE;
         }
 
@@ -1217,7 +1220,7 @@ namespace UVShader
       int nSignatures = 0; // Signature Member数量
       int nDefination = 0; // 定义数量
       b32 result = TRUE;
-      SYNTAXNODE::RecursiveNode(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pLastChain, &nDefination, &nSignatures, &result]
+      RecursiveNode<SYNTAXNODE>(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pLastChain, &nDefination, &nSignatures, &result]
       (SYNTAXNODE* pNode, int depth)->GXBOOL
       {
         if(depth == 0)
@@ -1437,17 +1440,17 @@ NOT_INC_P:
     return m_pContext->Strings.add(pSym->ToString());
   }
 
-  const CodeParser::TYPE* CodeParser::ParseType(const TOKEN* pSym)
+  const CodeParser::TYPEDESC* CodeParser::ParseType(const TOKEN& token)
   {
-    TYPE sType = {NULL, 1, 1};
+    TYPEDESC sType = {NULL, 1, 1};
 
     // 对于内置类型，要解析出 Type[RxC] 这种格式
     for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i)
     {
       const INTRINSIC_TYPE& t = s_aIntrinsicType[i];
-      if(pSym->BeginsWith(t.name, t.name_len)) {
-        const auto* pElement = pSym->marker + t.name_len;
-        const int   remain   = pSym->length - (int)t.name_len;
+      if(token.BeginsWith(t.name, t.name_len)) {
+        const auto* pElement = token.marker + t.name_len;
+        const int   remain   = token.length - (int)t.name_len;
         sType.name = t.name;
 
         // [(1..4)[x(1..4)]]
@@ -1455,23 +1458,33 @@ NOT_INC_P:
           ;
         }
         else if(remain == 1 && *pElement >= '1' && *pElement <= '4') { // TypeR 格式
-          sType.R = *pElement - '0';
-          ASSERT(sType.R >= 1 && sType.R <= 4);
+          sType.maxR = *pElement - '0';
+          ASSERT(sType.maxR >= 1 && sType.maxR <= 4);
         }
         else if(remain == 3 && *pElement >= '1' && *pElement <= '4' && // TypeRxC 格式
           pElement[1] == 'x' && pElement[2] >= '1' && pElement[2] <= '4')
         {
-          sType.R = pElement[0] - '0';
-          sType.C = pElement[2] - '0';
-          ASSERT(sType.R >= 1 && sType.R <= 4);
-          ASSERT(sType.C >= 1 && sType.C <= 4);
+          sType.maxR = pElement[0] - '0';
+          sType.maxC = pElement[2] - '0';
+          ASSERT(sType.maxR >= 1 && sType.maxR <= 4);
+          ASSERT(sType.maxC >= 1 && sType.maxC <= 4);
         }
         else {
           break;
         }
 
+        sType.cate = TYPEDESC::TypeCate_Numeric;
         return &(*m_TypeSet.insert(sType).first);
       }
+    }
+
+    if(token.IsEqual(s_szString, 6)) // 6是"string"长度
+    {
+      sType.name = s_szString;
+      sType.maxR = 1;
+      sType.maxC = 1;
+      sType.cate = TYPEDESC::TypeCate_String;
+      return &(*m_TypeSet.insert(sType).first);
     }
     
     // TODO: 查找用户定义类型
@@ -3112,6 +3125,12 @@ NOT_INC_P:
     return NULL;
   }
 
+  const CodeParser::TYPEDESC* CodeParser::Verify_Type(const TOKEN& tkType)
+  {
+    const TYPEDESC* pTypeDesc = ParseType(tkType);
+    return pTypeDesc;
+  }
+
   GXBOOL CodeParser::Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList)
   {
     clStringW str;
@@ -3143,11 +3162,24 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXBOOL CodeParser::Verify_VariableName(const SYNTAXNODE& rNode)
+  GXBOOL CodeParser::Verify_VariableDefinition(const SYNTAXNODE& rNode)
   {
     const TOKEN& tkVar = rNode.Operand[1].IsToken()
       ? *rNode.Operand[1].pTokn
       : rNode.Operand[1].pNode->GetAnyTokenAB();
+
+    ASSERT(rNode.Operand[0].IsToken()); // 外面的拆解保证不会出现这个
+    
+    // 检查类型定义
+    const TYPEDESC* pType = NULL;
+    if(_CL_NOT_(rNode.Operand[0].pTokn->IsIdentifier()) || 
+      _CL_NOT_(pType = Verify_Type(*rNode.Operand[0].pTokn)))
+    {
+      clStringW str;
+      OutputErrorW(*rNode.Operand[0].pTokn,
+        UVS_EXPORT_TEXT(5024, "错误的数据类型 : \"%s\""), rNode.Operand[0].pTokn->ToString(str).CStr());
+      return FALSE;
+    }
 
     clStringW str;
     if(tkVar.IsIdentifier())
@@ -3165,12 +3197,62 @@ NOT_INC_P:
       OutputErrorW(tkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), tkVar.ToString(str).CStr());
       return FALSE;
     }
-    return TRUE;
+
+    return rNode.Operand[1].IsToken() ? TRUE
+      : Verify2_VariableExpr(*rNode.Operand[0].pTokn, pType, *rNode.Operand[1].pNode);
+  }
+
+  GXBOOL CodeParser::Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode)
+  {
+    GXBOOL result = TRUE;
+    RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, &pType]
+    (const SYNTAXNODE* pNode, int depth) -> GXBOOL
+    {
+      if(pNode->CompareOpcode('=')) {
+        if(pNode->Operand[1].IsToken())
+        {
+          if((pType->cate == CodeParser::TYPEDESC::TypeCate_Numeric && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_Numeric) ||
+            (pType->cate == CodeParser::TYPEDESC::TypeCate_String && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_String) ||
+            pType->cate == CodeParser::TYPEDESC::TypeCate_Struct)
+          {
+            clStringW str;
+            clStringW str2(pType->name);
+            OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
+              pNode->Operand[1].pTokn->ToString(str).CStr(), str2.CStr());
+            result = FALSE;
+            return FALSE;
+          }
+        }
+        else if(pNode->Operand[1].IsNode())
+        {
+          if(pType->cate == CodeParser::TYPEDESC::TypeCate_Numeric)
+          {
+            CodeParser::VALUE v;
+            CodeParser::VALUE::State s = pNode->Operand[1].pNode->Calcuate(v);
+            if(s < CodeParser::VALUE::State_OK)
+            {
+              OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
+              result = FALSE;
+              return FALSE;
+            }
+            CLNOP
+          }
+        }
+        else {
+          OutputErrorW(*pNode->pOpcode, UVS_EXPORT_TEXT(5022, "赋值错误, \"=\" 后应该有表达式"));
+          result = FALSE;
+          return FALSE;
+        }
+      }
+      return TRUE;
+    });
+
+    return result;
   }
 
   //////////////////////////////////////////////////////////////////////////
 
-  bool CodeParser::TYPE::operator<( const TYPE& t ) const
+  bool CodeParser::TYPEDESC::operator<( const TYPEDESC& t ) const
   {
     const int r = GXSTRCMP(name, t.name);
     if(r < 0) {
@@ -3179,7 +3261,7 @@ NOT_INC_P:
     else if(r > 0) {
       return FALSE;
     }
-    return ((R << 3) | C) < ((t.R << 3) | t.C);
+    return ((maxR << 3) | maxC) < ((t.maxR << 3) | t.maxC);
   }
 
   //////////////////////////////////////////////////////////////////////////

@@ -199,15 +199,23 @@ namespace UVShader
       PPCondRank_endif = 4,
     };
 
-    struct TYPE
+    struct TYPEDESC
     {
-      GXLPCSTR  name;
-      int       R;    // Row, 或者 array size
-      int       C;    // Column
+      enum TypeCate
+      {
+        TypeCate_Numeric,
+        TypeCate_String,
+        TypeCate_Struct,
+      };
 
-      bool operator<(const TYPE& t) const;
+      GXLPCSTR  name;
+      int       maxR : 8;    // Row, 或者 array size
+      int       maxC : 8;    // Column
+      TypeCate  cate : 8;
+
+      bool operator<(const TYPEDESC& t) const;
     };
-    typedef clset<TYPE>   TypeSet;
+    typedef clset<TYPEDESC>   TypeSet;
 
     struct FUNCTION_ARGUMENT // 函数参数
     {
@@ -404,7 +412,7 @@ namespace UVShader
     void    RelocalePointer();
     
     GXLPCSTR GetUniqueString(const TOKEN* pSym);
-    const TYPE* ParseType(const TOKEN* pSym);
+    const TYPEDESC* ParseType(const TOKEN& token);
 
     void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
     void OutputErrorW(const TOKEN& token, GXUINT code, ...);
@@ -413,8 +421,10 @@ namespace UVShader
     CodeParser* GetRootParser();
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
+    const TYPEDESC* Verify_Type(const TOKEN& tkType);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
-    GXBOOL Verify_VariableName(const SYNTAXNODE& rNode);
+    GXBOOL Verify_VariableDefinition(const SYNTAXNODE& rNode);
+    GXBOOL Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)

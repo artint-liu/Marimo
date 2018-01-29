@@ -67,6 +67,9 @@ GXLPCSTR g_ExportErrorMessage2 = __FILE__;
 
 namespace UVShader
 {
+  template void RecursiveNode<ArithmeticExpression::SYNTAXNODE>(ArithmeticExpression* pParser, ArithmeticExpression::SYNTAXNODE* pNode, std::function<GXBOOL(ArithmeticExpression::SYNTAXNODE*, int)> func, int depth);
+  template void RecursiveNode<const ArithmeticExpression::SYNTAXNODE>(ArithmeticExpression* pParser, const ArithmeticExpression::SYNTAXNODE* pNode, std::function<GXBOOL(const ArithmeticExpression::SYNTAXNODE*, int)> func, int depth);
+
 #ifdef USE_CLSTD_TOKENS
   u32 ArithmeticExpression::m_aCharSem[128];
 #endif // USE_CLSTD_TOKENS
@@ -1083,14 +1086,23 @@ namespace UVShader
       ASSERT(digi[2] == 0);
       uValue64 = digi[0];
 
-      if(TEST_FLAG(dwFlags, Rank_Signed)) {
+      if(TEST_FLAG(dwFlags, Rank_Signed))
+      {
         if(nValue64 > 0x8000000000000000) {
           return State_Overflow;
         }
+        else if(nValue64 > 0x80000000) {
+          SET_FLAG(dwFlags, Rank_F_LongLong);
+        }
         nValue64 = -nValue64;
       }
-
-      SET_FLAG(dwFlags, Rank_F_LongLong);
+      else
+      {
+        if(nValue64 > 0xffffffff)
+        {
+          SET_FLAG(dwFlags, Rank_F_LongLong);
+        }
+      }
 
       //if((TEST_FLAG(dwFlags, Rank_Signed) && uValue64 > INT_MAX) ||
       //  (TEST_FLAG_NOT(dwFlags, Rank_Signed) && uValue64 > UINT_MAX)) {
@@ -1161,6 +1173,12 @@ namespace UVShader
     else if(type == Rank_Double) {
       fValue64 = CalculateT(token, fValue64, second.fValue64);
     }
+    else if(type == Rank_Unsigned) {
+      uValue = CalculateT(token, uValue, second.uValue);
+    }
+    else if(type == Rank_Signed) {
+      nValue = CalculateT(token, nValue, second.nValue);
+    }
     else {
       CLBREAK;
       return State_SyntaxError;
@@ -1174,6 +1192,12 @@ namespace UVShader
     clStringA str;
     switch(rank)
     {
+    case Rank_Signed:
+      str.AppendInteger32(nValue);
+      break;
+    case Rank_Unsigned:
+      str.AppendUInt32(uValue);
+      break;
     case Rank_Signed64:
       str.AppendInteger64(nValue64);
       break;
@@ -1394,16 +1418,17 @@ namespace UVShader
     Operand[1].ptr = NULL;
   }
 
-  void ArithmeticExpression::SYNTAXNODE::RecursiveNode(ArithmeticExpression* pParser, SYNTAXNODE* pNode, std::function<GXBOOL(SYNTAXNODE*, int)> func, int depth /*= 0*/) // 广度优先递归
+  template<class SYNTAXNODE_T>
+  void RecursiveNode(ArithmeticExpression* pParser, SYNTAXNODE_T* pNode, std::function<GXBOOL(SYNTAXNODE_T*, int)> func, int depth /*= 0*/) // 广度优先递归
   {
     if(func(pNode, depth)) {
-      if(pNode->Operand[0].GetType() == FLAG_OPERAND_IS_NODE) {
-        RecursiveNode(pParser, pNode->Operand[0].pNode, func, depth + 1);
+      if(pNode->Operand[0].GetType() == SYNTAXNODE_T::FLAG_OPERAND_IS_NODE) {
+        RecursiveNode(pParser, (SYNTAXNODE_T*)pNode->Operand[0].ptr, func, depth + 1);
       }
 
-      if(pNode->Operand[1].GetType() == FLAG_OPERAND_IS_NODE) {
-        RecursiveNode(pParser, pNode->Operand[1].pNode, func,
-          pNode->mode == MODE_Chain ? depth : depth + 1); // next chain 不增加深度
+      if(pNode->Operand[1].GetType() == SYNTAXNODE_T::FLAG_OPERAND_IS_NODE) {
+        RecursiveNode(pParser, (SYNTAXNODE_T*)pNode->Operand[1].ptr, func,
+          pNode->mode == SYNTAXNODE_T::MODE_Chain ? depth : depth + 1); // next chain 不增加深度
       }
     }
   }
@@ -1416,6 +1441,51 @@ namespace UVShader
   b32 ArithmeticExpression::SYNTAXNODE::CompareOpcode(T_LPCSTR str) const
   {
     return pOpcode && *pOpcode == str;
+  }
+
+  ArithmeticExpression::VALUE::State ArithmeticExpression::SYNTAXNODE::Calcuate(VALUE& value_out) const
+  {
+    VALUE p1, p2;
+    VALUE::State s = VALUE::State_OK;
+    if(mode == MODE_FunctionCall)
+    {
+      return VALUE::State_Call;
+    }
+
+    if(Operand[0].IsNode()) {
+      s = Operand[0].pNode->Calcuate(p1);
+    }
+    else if(Operand[0].IsToken()) {
+      s = p1.set(*Operand[0].pTokn);
+    }
+    else {
+      p1.SetZero();
+    }
+
+    if(s != VALUE::State_OK) {
+      return s;
+    }
+
+    if(Operand[1].IsNode()) {
+      s = Operand[1].pNode->Calcuate(p2);
+    }
+    else if(Operand[1].IsToken()) {
+      s = p2.set(*Operand[1].pTokn);
+    }
+    else {
+      p2.SetZero();
+    }
+
+    if(s != VALUE::State_OK) {
+      return s;
+    }
+
+    if(pOpcode == NULL) {
+      return VALUE::State_BadOpcode;
+    }
+
+    s = value_out.Calculate(*pOpcode, p1, p2);
+    return s;
   }
 
   const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAB() const // 深度优先

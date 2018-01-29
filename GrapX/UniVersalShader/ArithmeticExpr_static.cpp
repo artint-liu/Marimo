@@ -89,6 +89,7 @@ namespace UVShader
     {NULL,},
   };
 
+  // 全是数字类型
   ArithmeticExpression::INTRINSIC_TYPE ArithmeticExpression::s_aIntrinsicType[] = {
     {"int",   3, 4, 4},
     {"vec",   3, 4, 0},

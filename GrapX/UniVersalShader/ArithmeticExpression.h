@@ -257,6 +257,63 @@ namespace UVShader
       GXUINT    bCloseAE : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
     };
 
+    //////////////////////////////////////////////////////////////////////////
+
+    struct VALUE
+    {
+      enum State {
+        State_Call = 1, // 函数调用
+        State_OK = 0,
+        State_SyntaxError = -1,
+        State_Overflow = -2,
+        State_IllegalChar = -3,
+        State_BadOpcode = -4, // 错误的操作符
+      };
+      enum Rank {
+        // 这些值由特殊用法不能轻易修改
+        Rank_Unsigned = 0, // 000B
+        Rank_Signed = 1, // 001B
+        Rank_float = 3, // 011B
+        Rank_Unsigned64 = 4, // 100B
+        Rank_Signed64 = 5, // 101B
+        Rank_Double = 7, // 111B
+
+        Rank_F_LongLong = 4, // 100B 标记为64位类型
+        Rank_Undefined = -1, // 未定义
+        Rank_BadValue = -2, // 计算异常
+        Rank_First = Rank_Unsigned, // 第一个
+        Rank_Last = Rank_Double,   // 最后一个
+      };
+      union {
+        GXUINT   uValue;
+        GXINT    nValue;
+        float    fValue;
+        GXUINT64 uValue64;
+        GXINT64  nValue64;
+        double   fValue64;
+      };
+      Rank rank;
+
+      VALUE() {}
+      VALUE(const TOKEN& token) {
+        set(token);
+      }
+
+      void clear();
+      void SetZero();
+      void SetOne();
+      State set(const TOKEN& token);
+      VALUE& set(const VALUE& v);
+      State SyncRank(Rank _type);  // 调整为到 type 指定的级别
+      State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
+      clStringA ToString() const;
+
+      template<typename _Ty>
+      typename _Ty CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2);
+    };
+
+    //////////////////////////////////////////////////////////////////////////
+
     struct SYNTAXNODE
     {
       typedef clist<SYNTAXNODE*> PtrList;
@@ -336,8 +393,6 @@ namespace UVShader
 
       void Clear();
 
-      static void RecursiveNode(ArithmeticExpression* pParser, SYNTAXNODE* pNode, std::function<GXBOOL(SYNTAXNODE*, int)> func, int depth = 0); // 广度优先递归
-
       template<class _Func, class _Ty>
       static GXBOOL RecursiveNode2(ArithmeticExpression* pParser, const SYNTAXNODE* pNode, _Ty& rOut, _Func func) // 深度优先递归
       {
@@ -364,6 +419,8 @@ namespace UVShader
       b32 CompareOpcode(TChar ch) const;
       b32 CompareOpcode(T_LPCSTR str) const;
 
+      VALUE::State Calcuate(VALUE& value_out) const;
+
       const TOKEN& GetAnyTokenAB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
       const TOKEN& GetAnyTokenAB2() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
       const TOKEN& GetAnyTokenAPB() const;  // 为错误处理找到一个定位的token 顺序:operand[0], opcode, operand[1]
@@ -382,54 +439,7 @@ namespace UVShader
 
 
 
-    struct VALUE
-    {
-      enum State {
-        State_OK = 0,
-        State_SyntaxError = -1,
-        State_Overflow = -2,
-        State_IllegalChar = -3,
-      };
-      enum Rank {
-        // 这些值由特殊用法不能轻易修改
-        Rank_Unsigned   = 0, // 000B
-        Rank_Signed     = 1, // 001B
-        Rank_float      = 3, // 011B
-        Rank_Unsigned64 = 4, // 100B
-        Rank_Signed64   = 5, // 101B
-        Rank_Double     = 7, // 111B
 
-        Rank_F_LongLong = 4, // 100B 标记为64位类型
-        Rank_Undefined   = -1, // 未定义
-        Rank_BadValue   = -2, // 计算异常
-        Rank_First = Rank_Unsigned, // 第一个
-        Rank_Last  = Rank_Double,   // 最后一个
-      };
-      union {
-        GXUINT   uValue;
-        GXINT    nValue;
-        float    fValue;
-        GXUINT64 uValue64;
-        GXINT64  nValue64;
-        double   fValue64;
-      };
-      Rank rank;
-
-      VALUE(){}
-      VALUE(const TOKEN& token) { set(token); }
-
-      void clear();
-      void SetZero();
-      void SetOne();
-      State set(const TOKEN& token);
-      VALUE& set(const VALUE& v);
-      State SyncRank(Rank _type);  // 调整为到 type 指定的级别
-      State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
-      clStringA ToString() const;
-
-      template<typename _Ty>
-      typename _Ty CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2);
-    };
 
     struct TKSCOPE // 运行时的Token范围描述结构体
     {
@@ -544,6 +554,8 @@ namespace UVShader
     int SetError(int err);
   };
 
+  template<class SYNTAXNODE_T>
+  void RecursiveNode(ArithmeticExpression* pParser, SYNTAXNODE_T* pNode, std::function<GXBOOL(SYNTAXNODE_T*, int)> func, int depth = 0); // 广度优先递归
 
 } // namespace UVShader
 
