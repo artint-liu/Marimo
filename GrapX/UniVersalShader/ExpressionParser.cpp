@@ -3131,6 +3131,28 @@ NOT_INC_P:
     return pTypeDesc;
   }
 
+  const CodeParser::TYPEDESC* CodeParser::Verify_Struct(const TOKEN& tkType)
+  {
+    clStringA str;
+    tkType.ToString(str);
+    TYPEDESC sType = {0};
+
+    for(auto it = m_aStatements.begin(); it != m_aStatements.end(); ++it)
+    {
+      if(it->type == StatementType_Struct)
+      {
+        if(str == it->stru.szName) {
+          sType.cate = TYPEDESC::TypeCate_Struct;
+          sType.maxC = 1;
+          sType.maxR = 1;
+          sType.name = it->stru.szName;
+          return &(*m_TypeSet.insert(sType).first);
+        }
+      }
+    }
+    return NULL;
+  }
+
   GXBOOL CodeParser::Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList)
   {
     clStringW str;
@@ -3172,12 +3194,15 @@ NOT_INC_P:
     
     // 检查类型定义
     const TYPEDESC* pType = NULL;
-    if(_CL_NOT_(rNode.Operand[0].pTokn->IsIdentifier()) || 
-      _CL_NOT_(pType = Verify_Type(*rNode.Operand[0].pTokn)))
+    if(_CL_NOT_(rNode.Operand[0].pTokn->IsIdentifier()) || (
+      _CL_NOT_(pType = Verify_Type(*rNode.Operand[0].pTokn)) &&
+      _CL_NOT_(pType = Verify_Struct(*rNode.Operand[0].pTokn))) )
     {
       clStringW str;
       OutputErrorW(*rNode.Operand[0].pTokn,
-        UVS_EXPORT_TEXT(5024, "错误的数据类型 : \"%s\""), rNode.Operand[0].pTokn->ToString(str).CStr());
+        UVS_EXPORT_TEXT(5024, "错误的数据类型 : \"%s\""),
+        rNode.Operand[0].pTokn->ToString(str).CStr());
+
       return FALSE;
     }
 
@@ -3211,9 +3236,9 @@ NOT_INC_P:
       if(pNode->CompareOpcode('=')) {
         if(pNode->Operand[1].IsToken())
         {
-          if((pType->cate == CodeParser::TYPEDESC::TypeCate_Numeric && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_Numeric) ||
-            (pType->cate == CodeParser::TYPEDESC::TypeCate_String && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_String) ||
-            pType->cate == CodeParser::TYPEDESC::TypeCate_Struct)
+          if(pType->cate == CodeParser::TYPEDESC::TypeCate_Struct ||
+            (pType->cate == CodeParser::TYPEDESC::TypeCate_Numeric && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_Numeric) ||
+            (pType->cate == CodeParser::TYPEDESC::TypeCate_String && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_String) )
           {
             clStringW str;
             clStringW str2(pType->name);

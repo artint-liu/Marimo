@@ -422,6 +422,7 @@ namespace UVShader
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
     const TYPEDESC* Verify_Type(const TOKEN& tkType);
+    const TYPEDESC* Verify_Struct(const TOKEN& tkType);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
     GXBOOL Verify_VariableDefinition(const SYNTAXNODE& rNode);
     GXBOOL Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
