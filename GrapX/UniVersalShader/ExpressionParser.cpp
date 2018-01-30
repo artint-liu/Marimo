@@ -2889,6 +2889,17 @@ NOT_INC_P:
   CodeParser::T_LPCSTR CodeParser::PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end)
   {
     // session 调用 Macro_SkipConditionalBlock 所处的状态，这个决定了跳过多少预处理指令
+    if(m_nPPRecursion == 0)
+    {
+      if(session == PPCondRank_elif) {
+        OutputErrorW(begin, UVS_EXPORT_TEXT(1018, "意外的 #elif"));
+        return end;
+      }
+      else if(session == PPCondRank_else) {
+        OutputErrorW(begin, UVS_EXPORT_TEXT(1019, "意外的 #else"));
+        return end;
+      }
+    }
 
     UINT depth = 0;
     T_LPCSTR p = begin;
