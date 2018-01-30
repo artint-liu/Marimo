@@ -9,6 +9,8 @@
 #include "ExpressionSample.h"
 
 #define SRC_ERROR_CASE_SIGN "//{ERROR_CASE}" // 14 chars
+#define SRC_ERROR_CODE_A "//{ERR=" // 7 chars
+#define SRC_ERROR_CODE_B "%d}\r\n"
 
 GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
 {
@@ -365,11 +367,29 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 
       // 解析语法
       GXBOOL bParseResult = expp.Parse();
-      b32 bErrorCase = (clstd::strncmpiT((LPCSTR)pBuffer->GetPtr(), SRC_ERROR_CASE_SIGN, 14) == 0);
+      GXLPCSTR lpCodes = (GXLPCSTR)pBuffer->GetPtr();
+      b32 bErrorCase = (clstd::strncmpiT(lpCodes, SRC_ERROR_CASE_SIGN, 14) == 0);
+      int err_code = 0; // 预期错误码
+      lpCodes += 14;
+
+      //  查找预期的错误码
+      for(int i = 0; i < 8; i++, lpCodes++)
+      {
+        if(clstd::strncmpiT(lpCodes, SRC_ERROR_CODE_A, 7) == 0) {
+          lpCodes += 7;
+          err_code = clstd::xtoi(10, lpCodes, 8);
+          break;
+        }
+      }
 
       // 如果代码标记失败, 则解析也应该失败
       if(bErrorCase) {
         ASSERT(bParseResult == FALSE);
+      }
+
+      // 如果设置了预期错误码, 则错误集合中也至少要包含这个错误码
+      if(err_code) {
+        ASSERT(expp.DbgHasError(err_code));
       }
 
       if(_CL_NOT_(bErrorCase) && szOutput != NULL)
@@ -654,6 +674,7 @@ void ExportTestCase(const clStringA& strPath)
   int nLine = 0;
   b32 bErrorCase = // 标记输出文件是否为错误case
     (clstd::strncmpiT((GXLPCSTR)buf.GetPtr(), "$ErrorList", 10) == 0);
+  int err_code = 0;
 
   clpathfile::RemoveFileSpec(strDir);
   
@@ -669,6 +690,7 @@ void ExportTestCase(const clStringA& strPath)
     {
       strFilename = str.CStr() + 6;
       strFilename.TrimRight("\r\n");
+      err_code = 0;
       if(strFilename.IsEmpty()) {
         TRACE("%s(%d) : \"$file\" 文件名为空\n", strPath.CStr(), nLine);
         return;
@@ -685,6 +707,16 @@ void ExportTestCase(const clStringA& strPath)
           // 测试程序会用来断言编译错误
           file.WritefA(SRC_ERROR_CASE_SIGN "\r\n");
         }
+      }
+      continue;
+    }
+    else if(str.Compare("$err=", 5) == 0) // 预期错误代码, 需要放在文件名后面
+    {
+      clStringA strNum(str.CStr() + 5);
+      err_code = strNum.ToInteger();
+      if(bErrorCase && err_code)
+      {
+        file.WritefA(SRC_ERROR_CODE_A SRC_ERROR_CODE_B, err_code);
       }
       continue;
     }

@@ -220,6 +220,7 @@ namespace UVShader
 
   void CodeParser::Cleanup()
   {
+    m_PhonyTokenDict.clear();
     m_RootSet.Cleanup();
     m_errorlist.clear();
     m_aTokens.clear();
@@ -527,7 +528,7 @@ namespace UVShader
       return FALSE;
     }
 
-    auto& last_one = m_aTokens.back();
+    TOKEN& last_one = m_aTokens.back();
 
     if(token.type == TOKEN::TokenType_String && last_one.type == TOKEN::TokenType_String)
     {
@@ -539,9 +540,12 @@ namespace UVShader
         last_one.length = (clsize)token.marker + token.length - (clsize)last_one.marker;
       }
       else {
-        clStringA str;
+        //PHONY_TOKEN pt;
         const iterator* aTonkens[] = {&last_one, &token};
-        
+        //auto& emplace = m_PhonyTokenDict.emplace(m_aTokens.size() - 1);
+        //PHONY_TOKEN& pt = emplace.first->second;
+        clStringA str;
+
         // TODO: 优化处理分号
         for(int i = 0; i < 2; i++)
         {
@@ -556,9 +560,13 @@ namespace UVShader
             str.Remove(str.GetLength() - 1, 1);
           }
         }
-        //str.Append(last_one.marker, last_one.length);
-        //str.Append(token.marker, token.length);
-        last_one.Set(m_pContext->Strings, str);
+
+        //pt.str = str;
+        //if(last_one.bPhony == FALSE) {
+        //  pt.ori_marker = last_one.marker;
+        //}
+
+        last_one.SetPhonyString(InsertStableTokenString(m_aTokens.size() - 1, str));
       }
 #ifdef ENABLE_STRINGED_SYMBOL
       last_one.symbol = last_one.ToString();
@@ -566,6 +574,23 @@ namespace UVShader
       return TRUE;
     }
     return FALSE;
+  }
+
+  const clStringA& CodeParser::InsertStableTokenString(int index, const clStringA& str)
+  {
+    PHONY_TOKEN pt;
+    auto emplace = m_PhonyTokenDict.emplace(clmake_pair(index, pt));
+    if(emplace.second)
+    {
+      ASSERT(_CL_NOT_(m_aTokens[index].bPhony)); // 第一次添加肯定不是替代值
+      emplace.first->second.ori_marker = m_aTokens[index].marker;
+    }
+    else
+    {
+      ASSERT(m_aTokens[index].bPhony); // 添加肯定已经标记为"替代品"
+    }
+    emplace.first->second.str = str;
+    return emplace.first->second.str;
   }
 
   const CodeParser::MACRO* CodeParser::FindMacro(const TOKEN& token) // TODO: 正常的查找都要换做这个
@@ -1126,6 +1151,11 @@ namespace UVShader
         STATEMENT sub_stat = {StatementType_Expression};
         if(ParseStatementAs_Expression(&sub_stat, &func_statement_block))
         {
+          if(Verify_FunctionBlock(sub_stat.expr) == FALSE)
+          {
+            return FALSE;
+          }
+
           stat.func.pExpression = (STATEMENT*)m_aSubStatements.size();
           m_aSubStatements.push_back(sub_stat);
         }
@@ -1815,11 +1845,7 @@ NOT_INC_P:
     ASSERT(m_aTokens[scope.begin] == '{' && m_aTokens[scope.end - 1] == '}');
 
     TKSCOPE step_scope(scope.begin + 1, scope.end - 1); // begin会步进, end恒定
-    //SYNTAXNODE::GLOB A;
-    //TKSCOPE::TYPE parse_end;
-
     MakeSyntaxNode(&glob, SYNTAXNODE::MODE_Block, NULL, NULL);
-    //SYNTAXNODE::GLOB* pCurrNode = &pDest->pNode->Operand[0];
 
     return ParseToChain(glob.pNode->Operand[0], step_scope);
   }
@@ -3085,7 +3111,18 @@ NOT_INC_P:
   {
     va_list  arglist;
     va_start(arglist, code);
-    m_pMsg->VarWriteErrorW(TRUE, token.marker, code, arglist);
+    if(token.bPhony) {
+      auto it = m_PhonyTokenDict.find(&token - &m_aTokens.front());
+      if(it == m_PhonyTokenDict.end()) {
+        m_pMsg->VarWriteErrorW(TRUE, (GXSIZE_T)0, code, arglist);
+      }
+      else {
+        m_pMsg->VarWriteErrorW(TRUE, it->second.ori_marker, code, arglist);
+      }
+    }
+    else {
+      m_pMsg->VarWriteErrorW(TRUE, token.marker, code, arglist);
+    }
     va_end(arglist);
   }
 
@@ -3186,6 +3223,7 @@ NOT_INC_P:
 
   GXBOOL CodeParser::Verify_VariableDefinition(const SYNTAXNODE& rNode)
   {
+    ASSERT(rNode.mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition);
     const TOKEN& tkVar = rNode.Operand[1].IsToken()
       ? *rNode.Operand[1].pTokn
       : rNode.Operand[1].pNode->GetAnyTokenAB();
@@ -3244,8 +3282,18 @@ NOT_INC_P:
             clStringW str2(pType->name);
             OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
               pNode->Operand[1].pTokn->ToString(str).CStr(), str2.CStr());
-            result = FALSE;
-            return FALSE;
+            return (result = FALSE);
+          }
+
+          if(pType->cate == CodeParser::TYPEDESC::TypeCate_Numeric)
+          {
+            CodeParser::VALUE v;
+            CodeParser::VALUE::State s = v.set(*pNode->Operand[1].pTokn);
+            if(s != CodeParser::VALUE::State_OK) {
+              clStringW str;
+              OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是\"%s\""), pNode->Operand[1].pTokn->ToString(str).CStr());
+              return (result = FALSE);
+            }
           }
         }
         else if(pNode->Operand[1].IsNode())
@@ -3257,22 +3305,48 @@ NOT_INC_P:
             if(s < CodeParser::VALUE::State_OK)
             {
               OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
-              result = FALSE;
-              return FALSE;
+              return (result = FALSE);
             }
             CLNOP
+          }
+          else if(pType->cate == CodeParser::TYPEDESC::TypeCate_String)
+          {
+            // token解析会自动连接字符串, 所以不会出现两个token都是字符串的情况
+            OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
+            return (result = FALSE);
+          }
+          else if(pType->cate == CodeParser::TYPEDESC::TypeCate_Struct)
+          {
+            OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
+            return (result = FALSE);
           }
         }
         else {
           OutputErrorW(*pNode->pOpcode, UVS_EXPORT_TEXT(5022, "赋值错误, \"=\" 后应该有表达式"));
-          result = FALSE;
-          return FALSE;
+          return (result = FALSE);
         }
       }
       return TRUE;
     });
 
     return result;
+  }
+
+  GXBOOL CodeParser::Verify_FunctionBlock(const STATEMENT_EXPR& expr)
+  {
+    //func.pExpression
+    GXBOOL result = TRUE;
+    RecursiveNode<SYNTAXNODE>(this, expr.sRoot.pNode, [this, &result](SYNTAXNODE* pNode, int depth) -> GXBOOL
+    {
+      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition)
+      {
+        result = result && Verify_VariableDefinition(*pNode);
+        return FALSE; // 不再递归
+      }
+      return TRUE;
+    });
+    
+    return TRUE;
   }
 
   //////////////////////////////////////////////////////////////////////////

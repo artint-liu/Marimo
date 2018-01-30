@@ -350,6 +350,14 @@ namespace UVShader
       MAKESCOPE(const TKSCOPE& _scope, TKSCOPE::TYPE _begin, GXBOOL _bIndBegin, TKSCOPE::TYPE _end, GXBOOL _bIndEnd, GXWCHAR _chTermin)
         : pScope(&_scope), begin(_begin), bBeginMate(_bIndBegin), end(_end), bEndMate(_bIndEnd), chTermin(_chTermin) {}
     };
+
+    struct PHONY_TOKEN
+    {
+      clStringA         str;          // 替代字符串
+      clStringA::LPCSTR ori_marker;   // 原始字符串地址
+    };
+
+    typedef clmap<int, PHONY_TOKEN> PhonyTokenDict_T;
     //////////////////////////////////////////////////////////////////////////
 
   protected:
@@ -426,6 +434,9 @@ namespace UVShader
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
     GXBOOL Verify_VariableDefinition(const SYNTAXNODE& rNode);
     GXBOOL Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
+    GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
+
+    const clStringA& InsertStableTokenString(int index, const clStringA& str);
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
@@ -450,6 +461,7 @@ namespace UVShader
     int                 m_nPPRecursion;     // 条件预处理递归次数
     
     PARSER_CONTEXT*     m_pContext;
+    PhonyTokenDict_T    m_PhonyTokenDict;   // 用户从替换的token中找到原始token信息
 
     ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
 
@@ -460,6 +472,7 @@ namespace UVShader
     //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // 宏展开流
     NameSet             m_RootSet;
+
   public:
     CodeParser(PARSER_CONTEXT* pContext, Include* pInclude);
     virtual ~CodeParser();

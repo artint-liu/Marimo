@@ -610,6 +610,11 @@ namespace UVShader
     return TRUE;
   }
 
+  GXBOOL ArithmeticExpression::DbgHasError(int errcode) const
+  {
+    return (m_errorlist.find(errcode) != m_errorlist.end());
+  }
+
   GXBOOL ArithmeticExpression::ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     // 从右到左解析这两种形式:
@@ -1257,7 +1262,7 @@ namespace UVShader
     marker = 0;
     length = 0;
     type = TokenType_Undefine;
-    bInStringSet = 0;
+    bPhony = 0;
   }
 
   void ArithmeticExpression::TOKEN::Set(const iterator& _iter)
@@ -1274,7 +1279,7 @@ namespace UVShader
       marker     = _iter.marker;
       length     = _iter.length;
 
-      bInStringSet = 0;
+      bPhony = 0;
     }
   }
 
@@ -1287,7 +1292,19 @@ namespace UVShader
     pContainer = NULL;
     marker     = sStrSet.add(str);
     length     = str.GetLength();
-    bInStringSet      = 1;
+    bPhony     = 1;
+  }
+
+  void ArithmeticExpression::TOKEN::SetPhonyString(const clStringA& str)
+  {
+    ASSERT(str.IsNotEmpty());
+#ifdef ENABLE_STRINGED_SYMBOL
+    symbol = str;
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+    pContainer = NULL;
+    marker     = str;
+    length     = str.GetLength();
+    bPhony     = 1;
   }
 
   void ArithmeticExpression::TOKEN::ClearArithOperatorInfo()

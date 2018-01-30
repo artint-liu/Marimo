@@ -146,7 +146,7 @@ namespace UVShader
       u32       unary_mask : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
 
       Type      type : 8;                     // 类型
-      u32       bInStringSet : 1;             // 在String字典而不在流中
+      u32       bPhony : 1;             // 在String字典而不在流中
 
       // [precedence]
       // 1~14 表示运算符的优先级
@@ -156,6 +156,7 @@ namespace UVShader
       void ClearMarker();
       void Set(const iterator& _iter);
       void Set(clstd::StringSetA& sStrSet, const clStringA& str); // 设置外来字符串
+      void SetPhonyString(const clStringA& str); // 设置外来字符串
 
       template<class _Ty>
       void SetArithOperatorInfo(const _Ty& t) // 设置数学符号信息
@@ -547,6 +548,7 @@ namespace UVShader
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, int nMinPrecedence); // 递归函数
 
+    GXBOOL DbgHasError(int errcode) const;
     void DbgDumpScope(clStringA& str, const TKSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     void DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB);
