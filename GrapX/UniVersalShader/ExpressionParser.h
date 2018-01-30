@@ -53,6 +53,8 @@ namespace UVShader
     void   Cleanup();
     GXBOOL RegisterType(LPCSTR szName);
     GXBOOL RegisterVariable(LPCSTR szName);
+    GXBOOL RegisterType(const clStringA& strName);
+    GXBOOL RegisterVariable(const clStringA& strName);
 
     GXBOOL HasType(LPCSTR szName) const;
     GXBOOL HasVariable(LPCSTR szName) const;
@@ -435,6 +437,7 @@ namespace UVShader
     GXBOOL Verify_VariableDefinition(const SYNTAXNODE& rNode);
     GXBOOL Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
+    GXBOOL Verify_StructMember(const SYNTAXNODE& rNode);
 
     const clStringA& InsertStableTokenString(int index, const clStringA& str);
 

@@ -1323,6 +1323,13 @@ namespace UVShader
         // ERROR: 不是所有成员都定义为signatures
         CLBREAK;
       }
+
+      if(stat.stru.sRoot.IsNode()) {
+        if(Verify_StructMember(*stat.stru.sRoot.pNode) == FALSE) {
+          return FALSE;
+        }
+      }
+
       stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
       stat.stru.nNumOfMembers = nDefination;
     }
@@ -1333,10 +1340,9 @@ namespace UVShader
     }
 
 
-    //DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
-    //TRACE("---------------------------------------------\n");
-
-
+    //
+    // 结构体定义后定义变量
+    //
     if(m_aTokens[pScope->begin] == ';')
     {
       stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[pScope->begin];
@@ -3357,7 +3363,39 @@ NOT_INC_P:
       return TRUE;
     });
     
-    return TRUE;
+    return result;
+  }
+
+  GXBOOL CodeParser::Verify_StructMember(const SYNTAXNODE& rNode)
+  {
+    GXBOOL result = TRUE;
+    NameSet sSet;
+    RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, &sSet](const SYNTAXNODE* pNode, int depth) -> GXBOOL
+    {
+      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition)
+      {
+        const ArithmeticExpression::SYNTAXNODE::GLOB& Op = pNode->Operand[1];
+        if(Op.IsToken()) {
+          clStringA str;
+          if(sSet.RegisterVariable(Op.pTokn->ToString(str)) == FALSE)
+          {
+            clStringW str;
+            OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), Op.pTokn->ToString(str));
+          }
+        }
+        else if(Op.IsNode()) {
+          auto& tk = Op.pNode->GetAnyTokenAB();
+          clStringA str;
+          if(sSet.RegisterVariable(tk.ToString(str)) == FALSE)
+          {
+            clStringW str;
+            OutputErrorW(tk, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), tk.ToString(str));
+          }
+        }
+      }
+      return TRUE;
+    });
+    return result;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -3457,6 +3495,16 @@ NOT_INC_P:
   {
     auto r = m_VariableSet.insert(szName);
     return r.second;
+  }
+
+  GXBOOL NameSet::RegisterType(const clStringA& strName)
+  {
+    return m_TypeSet.insert(strName).second;
+  }
+
+  GXBOOL NameSet::RegisterVariable(const clStringA& strName)
+  {
+    return m_VariableSet.insert(strName).second;
   }
 
   GXBOOL NameSet::HasType(LPCSTR szName) const
