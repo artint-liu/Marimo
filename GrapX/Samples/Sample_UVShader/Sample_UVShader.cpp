@@ -240,6 +240,7 @@ namespace Test{
       item.strReference = find_data.cFileName;
 
       clpathfile::RenameExtension(item.strName, "");
+      item.strName.TrimRight('.');
 
       // 跳过输出文件和屏蔽文件
       if(item.strOutput.EndsWith("[output].txt") || item.strOutput.EndsWith("[reference].txt") ||
@@ -278,18 +279,37 @@ void TestFiles(GXLPCSTR szDir, GXBOOL bShowList)
         printf("\n");
       }
     }
-    printf("type \"all\" for all.\n");
+    printf("type \"?all\" for all.\n");
 
     char szBuffer[128];
     gets(szBuffer);
-    if(GXSTRCMPI(szBuffer, "all") == 0) {
+    if(GXSTRCMPI(szBuffer, "?all") == 0) {
       for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it) {
         TestFromFile(it->strInput, it->strOutput, it->strReference);
       }
     }
     else
     {
-      int nSelect = atoi(szBuffer);
+      int nSelect = -1;
+      if(szBuffer[0] == '?')
+      {
+        nSelect = atoi(szBuffer + 1);
+      }
+      else {
+        for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it)
+        {
+          if(it->strName.CompareNoCase(szBuffer) == 0) {
+            nSelect = it - sShaderSource_list.begin();
+            break;
+          }
+        }
+
+        if(nSelect < 0) {
+          printf("没找到文件\n按任意键继续...\n");
+          clstd_cli::getch();
+        }
+      }
+
       if(nSelect >= 0 && nSelect < (int)sShaderSource_list.size()) {
         auto& item = sShaderSource_list[nSelect];
         if(item.strInput.Find("$CaseList$") != clStringA::npos) {

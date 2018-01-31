@@ -39,25 +39,48 @@ namespace UVShader
     GXHRESULT Close(clBuffer* pBuffer) override;
   };
 
+  struct TYPEDESC
+  {
+    enum TypeCate
+    {
+      TypeCate_Numeric,
+      TypeCate_String,
+      TypeCate_Struct,
+    };
+
+    GXLPCSTR  name;
+    int       maxR : 8;    // Row, 或者 array size
+    int       maxC : 8;    // Column
+    TypeCate  cate : 8;
+
+    bool operator<(const TYPEDESC& t) const;
+  };
+
   class NameSet
   {
   public:
     typedef clset<clStringA> StrSet;
+    typedef clmap<clStringA, TYPEDESC> TypeMap;
     typedef clStringA::LPCSTR LPCSTR;
   
   protected:
-    StrSet  m_TypeSet;
-    StrSet  m_VariableSet;
+    const NameSet* m_pParent;
+    TypeMap  m_TypeMap;
+    StrSet   m_VariableSet;
 
   public:
+    NameSet();
+    NameSet(const NameSet* pParent);
+
     void   Cleanup();
-    GXBOOL RegisterType(LPCSTR szName);
+    GXBOOL RegisterType(LPCSTR szName, TYPEDESC::TypeCate cate);
     GXBOOL RegisterVariable(LPCSTR szName);
-    GXBOOL RegisterType(const clStringA& strName);
+    GXBOOL RegisterType(const clStringA& strName, TYPEDESC::TypeCate cate);
     GXBOOL RegisterVariable(const clStringA& strName);
 
     GXBOOL HasType(LPCSTR szName) const;
     GXBOOL HasVariable(LPCSTR szName) const;
+    const TYPEDESC* GetType(LPCSTR szName) const;
   };
 
 
@@ -201,22 +224,6 @@ namespace UVShader
       PPCondRank_endif = 4,
     };
 
-    struct TYPEDESC
-    {
-      enum TypeCate
-      {
-        TypeCate_Numeric,
-        TypeCate_String,
-        TypeCate_Struct,
-      };
-
-      GXLPCSTR  name;
-      int       maxR : 8;    // Row, 或者 array size
-      int       maxC : 8;    // Column
-      TypeCate  cate : 8;
-
-      bool operator<(const TYPEDESC& t) const;
-    };
     typedef clset<TYPEDESC>   TypeSet;
 
     struct FUNCTION_ARGUMENT // 函数参数
@@ -379,7 +386,7 @@ namespace UVShader
     GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc);
 
     SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
-    GXBOOL BreakDefinition(STATEMENT& stat, const TKSCOPE& scope);
+    GXBOOL BreakDefinition(STATEMENT& stat, NameSet& sNameSet, const TKSCOPE& scope);
 
     GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
     GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
@@ -432,11 +439,12 @@ namespace UVShader
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
     const TYPEDESC* Verify_Type(const TOKEN& tkType);
-    const TYPEDESC* Verify_Struct(const TOKEN& tkType);
+    const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameSet* pNameSet);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
-    GXBOOL Verify_VariableDefinition(const SYNTAXNODE& rNode);
+    GXBOOL Verify_VariableDefinition(NameSet& sNameSet, const SYNTAXNODE& rNode);
     GXBOOL Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
-    GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
+    //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
+    GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameSet* pParentSet);
     GXBOOL Verify_StructMember(const SYNTAXNODE& rNode);
 
     const clStringA& InsertStableTokenString(int index, const clStringA& str);
@@ -474,7 +482,7 @@ namespace UVShader
     CodeParser*         m_pSubParser;
     //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // 宏展开流
-    NameSet             m_RootSet;
+    NameSet             m_GlobalSet;
 
   public:
     CodeParser(PARSER_CONTEXT* pContext, Include* pInclude);

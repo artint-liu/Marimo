@@ -262,22 +262,28 @@ namespace UVShader
 
     struct VALUE
     {
-      enum State {
-        State_Call = 1, // 函数调用
+      enum State // Flags
+      {
         State_OK = 0,
-        State_SyntaxError = -1,
-        State_Overflow = -2,
-        State_IllegalChar = -3,
-        State_BadOpcode = -4, // 错误的操作符
+        State_Identifier  = 0x00000001, // 标识符
+        State_Call        = 0x00000002, // 函数调用
+
+        State_WarningMask = 0x0000ffff, // 警告的掩码
+        State_ErrorMask   = 0xffff0000, // 错误的掩码
+        State_SyntaxError = 0x80000000,
+        State_Overflow    = 0x20000000,
+        State_IllegalChar = 0x40000000,
+        State_BadOpcode   = 0x10000000, // 错误的操作符
       };
+
       enum Rank {
         // 这些值由特殊用法不能轻易修改
-        Rank_Unsigned = 0, // 000B
-        Rank_Signed = 1, // 001B
-        Rank_float = 3, // 011B
+        Rank_Unsigned = 0,   // 000B
+        Rank_Signed = 1,     // 001B
+        Rank_Float = 3,      // 011B
         Rank_Unsigned64 = 4, // 100B
-        Rank_Signed64 = 5, // 101B
-        Rank_Double = 7, // 111B
+        Rank_Signed64 = 5,   // 101B
+        Rank_Double = 7,     // 111B
 
         Rank_F_LongLong = 4, // 100B 标记为64位类型
         Rank_Undefined = -1, // 未定义

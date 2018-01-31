@@ -70,6 +70,18 @@ namespace UVShader
   template void RecursiveNode<ArithmeticExpression::SYNTAXNODE>(ArithmeticExpression* pParser, ArithmeticExpression::SYNTAXNODE* pNode, std::function<GXBOOL(ArithmeticExpression::SYNTAXNODE*, int)> func, int depth);
   template void RecursiveNode<const ArithmeticExpression::SYNTAXNODE>(ArithmeticExpression* pParser, const ArithmeticExpression::SYNTAXNODE* pNode, std::function<GXBOOL(const ArithmeticExpression::SYNTAXNODE*, int)> func, int depth);
 
+  // 操作符号重载
+  ArithmeticExpression::VALUE::State operator|(ArithmeticExpression::VALUE::State a, ArithmeticExpression::VALUE::State b)
+  {
+    return ArithmeticExpression::VALUE::State((u32)a | (u32)b);
+  }
+
+  ArithmeticExpression::VALUE::State operator|=(ArithmeticExpression::VALUE::State a, ArithmeticExpression::VALUE::State b)
+  {
+    a = ArithmeticExpression::VALUE::State((u32)a | (u32)b);
+    return a;
+  }
+
 #ifdef USE_CLSTD_TOKENS
   u32 ArithmeticExpression::m_aCharSem[128];
 #endif // USE_CLSTD_TOKENS
@@ -1012,7 +1024,7 @@ namespace UVShader
     {
       if(ptr[i] == '.')
       {
-        SET_FLAG(dwFlags, Rank_float);
+        SET_FLAG(dwFlags, Rank_Float);
         p++;
         if(p >= 2) { // 不会出现两个‘.’, 这个由TOKEN中的浮点数分析保证
           return State_SyntaxError;
@@ -1022,7 +1034,7 @@ namespace UVShader
       {
         p = 2;
         i++;
-        SET_FLAG(dwFlags, Rank_float);
+        SET_FLAG(dwFlags, Rank_Float);
         if(i >= count) {
           return State_SyntaxError;
         }
@@ -1059,7 +1071,7 @@ namespace UVShader
 //    int test = 0;
 //#endif
 
-    if(dwFlags == Rank_float)
+    if(dwFlags == Rank_Float)
     {
       fValue64 = (double)digi[1];
       while(fValue64 > 1.0) {
@@ -1227,14 +1239,31 @@ namespace UVShader
       return State_SyntaxError;
     }
 
-    if(_type == Rank_Double) {
-      double d;
-      if(rank == Rank_Signed64) {
-        d = (double)nValue64;
+    if(_type == Rank_Float) {
+      float r;
+      ASSERT(rank == Rank_Unsigned || rank == Rank_Signed); // 只可能是这两种情况
+      if(TEST_FLAG(rank, Rank_Signed)) {
+        r = (float)nValue64;
+      } else {
+        r = (float)uValue64;
       }
-      else {
-        ASSERT(Rank_Unsigned64);
+      fValue = r;
+    }
+    else if(_type == Rank_Double) {
+      double d;
+      if(rank == Rank_Float) {
+        d = (double)fValue;
+      } else if(TEST_FLAG(rank, Rank_Signed)) {
+        d = (double)nValue64;
+      } else {
         d = (double)uValue64;
+      }
+      fValue64 = d;
+    }
+    else if(_type == Rank_Signed) {
+      ASSERT(rank == Rank_Unsigned);
+      if(nValue & 0x80000000) {
+        return State_Overflow;
       }
     }
     else {
@@ -1462,46 +1491,41 @@ namespace UVShader
 
   ArithmeticExpression::VALUE::State ArithmeticExpression::SYNTAXNODE::Calcuate(VALUE& value_out) const
   {
-    VALUE p1, p2;
+    VALUE p[2];
     VALUE::State s = VALUE::State_OK;
     if(mode == MODE_FunctionCall)
     {
       return VALUE::State_Call;
     }
 
-    if(Operand[0].IsNode()) {
-      s = Operand[0].pNode->Calcuate(p1);
-    }
-    else if(Operand[0].IsToken()) {
-      s = p1.set(*Operand[0].pTokn);
-    }
-    else {
-      p1.SetZero();
-    }
+    for(int i = 0; i < 2; i++)
+    {
+      if(Operand[i].IsNode()) {
+        s = Operand[i].pNode->Calcuate(p[i]);
+      }
+      else if(Operand[i].IsToken()) {
+        if(Operand[i].pTokn->type == TOKEN::TokenType_Numeric) {
+          s = p[i].set(*Operand[i].pTokn);
+        }
+        else if(Operand[i].pTokn->IsIdentifier()) {
+          p[i].SetOne(); // 标识符用临时值1
+          s = VALUE::State_Identifier;
+        }
+      }
+      else {
+        p[i].SetZero();
+      }
 
-    if(s != VALUE::State_OK) {
-      return s;
-    }
-
-    if(Operand[1].IsNode()) {
-      s = Operand[1].pNode->Calcuate(p2);
-    }
-    else if(Operand[1].IsToken()) {
-      s = p2.set(*Operand[1].pTokn);
-    }
-    else {
-      p2.SetZero();
-    }
-
-    if(s != VALUE::State_OK) {
-      return s;
+      if(s < VALUE::State_OK) {
+        return s;
+      }
     }
 
     if(pOpcode == NULL) {
       return VALUE::State_BadOpcode;
     }
 
-    s = value_out.Calculate(*pOpcode, p1, p2);
+    s |= value_out.Calculate(*pOpcode, p[0], p[1]);
     return s;
   }
 
