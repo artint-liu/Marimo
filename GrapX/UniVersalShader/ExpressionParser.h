@@ -446,6 +446,7 @@ namespace UVShader
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameSet* pParentSet);
     GXBOOL Verify_StructMember(const SYNTAXNODE& rNode);
+    GXBOOL Verify2_LeftValue(const NameSet& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
 
     const clStringA& InsertStableTokenString(int index, const clStringA& str);
 

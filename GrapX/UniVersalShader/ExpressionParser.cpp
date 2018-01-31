@@ -3395,6 +3395,20 @@ NOT_INC_P:
         sNameSet.RegisterType(pNode->Operand[0].pTokn->ToString(str), TYPEDESC::TypeCate_Struct);
         return FALSE;
       }
+      else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Opcode)
+      {
+        if(pNode->pOpcode)
+        {
+          if(*pNode->pOpcode == '=')
+          {
+#if 0
+            if(Verify2_LeftValue(sNameSet, pNode->Operand[0], *pNode->pOpcode) == FALSE) {
+              result = FALSE;
+            }
+#endif // 0
+          }
+        }
+      }
       return TRUE;
     });
 
@@ -3461,6 +3475,30 @@ NOT_INC_P:
       return TRUE;
     });
     return result;
+  }
+
+  GXBOOL CodeParser::Verify2_LeftValue(const NameSet& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode)
+  {
+    clStringA strA;
+    clStringW strW;
+    if(left_glob.IsToken()) {
+      if(sNameSet.HasVariable(left_glob.pTokn->ToString(strA)) == FALSE)
+      {
+        strW = strA;
+        OutputErrorW(*left_glob.pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), strW.CStr());
+        return FALSE;
+      }
+      return TRUE;
+    }
+    
+    if(left_glob.IsNode() == FALSE) {
+      OutputErrorW(opcode, UVS_EXPORT_TEXT(5010, "“=”前缺少左值"));
+      return FALSE;
+    }
+
+
+
+    return TRUE;
   }
 
   //////////////////////////////////////////////////////////////////////////
