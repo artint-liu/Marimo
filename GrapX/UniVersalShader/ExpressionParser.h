@@ -1,6 +1,8 @@
 #ifndef _EXPRESSION_PARSER_H_
 #define _EXPRESSION_PARSER_H_
 
+#define ENABLE_SYNTAX_VERIFY // 语法检查开关, 只用来做语法解析临时调试用, 正式版不要关闭这个
+
 namespace UVShader
 {
   //struct GRAMMAR
@@ -385,8 +387,8 @@ namespace UVShader
 
     GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc);
 
+    SYNTAXNODE* FlatDefinition(SYNTAXNODE* pThisChain);
     SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
-    GXBOOL BreakDefinition(STATEMENT& stat, NameSet& sNameSet, const TKSCOPE& scope);
 
     GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
     GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
@@ -438,6 +440,7 @@ namespace UVShader
     CodeParser* GetRootParser();
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
+#ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* Verify_Type(const TOKEN& tkType);
     const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameSet* pNameSet);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
@@ -447,6 +450,7 @@ namespace UVShader
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameSet* pParentSet);
     GXBOOL Verify_StructMember(const SYNTAXNODE& rNode);
     GXBOOL Verify2_LeftValue(const NameSet& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
+#endif
 
     const clStringA& InsertStableTokenString(int index, const clStringA& str);
 

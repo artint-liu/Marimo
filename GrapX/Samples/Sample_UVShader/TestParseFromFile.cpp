@@ -309,6 +309,53 @@ void DumpMemory(const void* ptr, size_t count)
   }
 }
 
+void DumpVariableStorageClass(UVShader::CodeParser::VariableStorageClass storage_class, clstd::File &file)
+{
+  switch(storage_class)
+  {
+  case UVShader::CodeParser::VariableStorageClass_extern:
+    file.WritefA("%s ", "extern");
+    break;
+  case UVShader::CodeParser::VariableStorageClass_nointerpolation:
+    file.WritefA("%s ", "nointerpolation");
+    break;
+  case UVShader::CodeParser::VariableStorageClass_precise:
+    file.WritefA("%s ", "precise");
+    break;
+  case UVShader::CodeParser::VariableStorageClass_shared:
+    file.WritefA("%s ", "shared");
+    break;
+  case UVShader::CodeParser::VariableStorageClass_groupshared:
+    file.WritefA("%s ", "groupshared");
+    break;
+  case UVShader::CodeParser::VariableStorageClass_static:
+    file.WritefA("%s ", "static");
+    break;
+  case UVShader::CodeParser::VariableStorageClass_uniform:
+    file.WritefA("%s ", "uniform");
+    break;
+  case UVShader::CodeParser::VariableStorageClass_volatile:
+    file.WritefA("%s ", "volatile");
+    break;
+  }
+}
+
+void DumpVariableModifier(UVShader::CodeParser::UniformModifier modifier, clstd::File &file)
+{
+  switch(modifier)
+  {
+  case UVShader::CodeParser::UniformModifier_const:
+    file.WritefA("%s ", "const");
+    break;
+  case UVShader::CodeParser::UniformModifier_row_major:
+    file.WritefA("%s ", "row_major");
+    break;
+  case UVShader::CodeParser::UniformModifier_column_major:
+    file.WritefA("%s ", "column_major");
+    break;
+  }
+}
+
 void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 {
   clFile file;
@@ -409,68 +456,29 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
               {
                 const auto& definition = s.defn;
                 clStringA str;
-                DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
-                switch(s.defn.storage_class)
+                if(definition.sRoot.pNode->mode == UVShader::CodeParser::SYNTAXNODE::MODE_Definition)
                 {
-                case UVShader::CodeParser::VariableStorageClass_extern:
-                  file.WritefA("%s ", "extern");
-                  break;
-                case UVShader::CodeParser::VariableStorageClass_nointerpolation:
-                  file.WritefA("%s ", "nointerpolation");
-                  break;
-                case UVShader::CodeParser::VariableStorageClass_precise:
-                  file.WritefA("%s ", "precise");
-                  break;
-                case UVShader::CodeParser::VariableStorageClass_shared:
-                  file.WritefA("%s ", "shared");
-                  break;
-                case UVShader::CodeParser::VariableStorageClass_groupshared:
-                  file.WritefA("%s ", "groupshared");
-                  break;
-                case UVShader::CodeParser::VariableStorageClass_static:
-                  file.WritefA("%s ", "static");
-                  break;
-                case UVShader::CodeParser::VariableStorageClass_uniform:
-                  file.WritefA("%s ", "uniform");
-                  break;
-                case UVShader::CodeParser::VariableStorageClass_volatile:
-                  file.WritefA("%s ", "volatile");
-                  break;
+                  DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
+                  DumpVariableStorageClass(s.defn.storage_class, file);
+                  DumpVariableModifier(s.defn.modifier, file);
+                  file.WritefA("%s;\n", str);
                 }
-
-                switch(s.defn.modifier)
+                else if(definition.sRoot.pNode->mode == UVShader::CodeParser::SYNTAXNODE::MODE_Chain)
                 {
-                case UVShader::CodeParser::UniformModifier_const:
-                  file.WritefA("%s ", "const");
-                  break;
-                case UVShader::CodeParser::UniformModifier_row_major:
-                  file.WritefA("%s ", "row_major");
-                  break;
-                case UVShader::CodeParser::UniformModifier_column_major:
-                  file.WritefA("%s ", "column_major");
-                  break;
+                  UVShader::CodeParser::SYNTAXNODE* pNode = definition.sRoot.pNode;
+                  while(pNode)
+                  {
+                    DumpBlock(&expp, pNode->Operand[0].pNode, 0, 0, &str);
+                    DumpVariableStorageClass(s.defn.storage_class, file);
+                    DumpVariableModifier(s.defn.modifier, file);
+                    file.WritefA("%s;\n", str);
+                    pNode = pNode->Operand[1].pNode;
+                  }
                 }
-                file.WritefA("%s", str);
-                /*
-                file.WritefA("%s %s", definition.szType, definition.szName);
-                if(definition.sRoot.ptr) {
-                  clStringA str;
-                  auto type = expp.TryGetNodeType(&definition.sRoot);
-                  if(type == UVShader::CodeParser::SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
-                    str = definition.sRoot.pSym->ToString();
-                    file.WritefA("=%s", str);
-                  }
-                  else if(type == UVShader::CodeParser::SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
-                    if(definition.sRoot.pNode->mode != UVShader::CodeParser::SYNTAXNODE::MODE_Undefined) {
-                      DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
-                      file.WritefA("=%s", str);
-                    }
-                  }
-                  else {
-                    CLBREAK;
-                  }
-                }*/
-                file.WritefA(";\n");
+                else
+                {
+                  CLBREAK;
+                }
               }
               break;
             case UVShader::CodeParser::StatementType_Function:

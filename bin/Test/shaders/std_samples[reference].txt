@@ -21,6 +21,8 @@ string pp_test_1;
 string pp_test_3;
 string pp_test_4;
 string paltform_opengles;
+uniform float global_a;
+uniform float global_b;
 float func()
 {
   int a=0;
@@ -46,7 +48,12 @@ void func3(in float a,in float b)
 
 void func4()
 {
-  int a=0,b=1,c=2,d=3,e=4,f=5;
+  int a=0;
+  int b=1;
+  int c=2;
+  int d=3;
+  int e=4;
+  int f=5;
   a=3;
   b=4;
   d=4;
@@ -68,6 +75,11 @@ void func4()
   }
 }
 
+float global_c;
+float global_d;
+float global_e;
+float global_f;
+float global_g;
 void func5()
 {
   struct CONTEXT {
@@ -135,7 +147,12 @@ void flow_test2()
 
 void test_flow_if()
 {
-  int a=0,b=1,c=2,d=3,e=4,f=5;
+  int a=0;
+  int b=1;
+  int c=2;
+  int d=3;
+  int e=4;
+  int f=5;
   if(a>b) {
     a=a;
   }
@@ -206,7 +223,12 @@ void test_flow_if()
 
 void test_flow_while()
 {
-  int a=0,b=1,c=2,d=3,e=4,f=5;
+  int a=0;
+  int b=1;
+  int c=2;
+  int d=3;
+  int e=4;
+  int f=5;
   while(a<10) {
   }
   while(a<100) {
@@ -243,7 +265,12 @@ void test_flow_while()
 
 void test_flow_dowhile()
 {
-  int a=0,b=1,c=2,d=3,e=4,f=5;
+  int a=0;
+  int b=1;
+  int c=2;
+  int d=3;
+  int e=4;
+  int f=5;
   do {
   }while(a<b);
   do {
@@ -259,7 +286,12 @@ void test_flow_dowhile()
 
 void test_flow_mix()
 {
-  int a=0,b=1,c=2,d=3,e=4,f=5;
+  int a=0;
+  int b=1;
+  int c=2;
+  int d=3;
+  int e=4;
+  int f=5;
   for(int i=0;i<10;i++) {
     if(a>b) {
       while(b<10) {
@@ -296,7 +328,12 @@ void test_flow_mix()
 
 void test_arithmetic_expression()
 {
-  int a=0,b=1,c=2,d=3,e=4,f=5;
+  int a=0;
+  int b=1;
+  int c=2;
+  int d=3;
+  int e=4;
+  int f=5;
   a=b+=c++-d+--e/-f;
   a=(b+c)*d+e+f;
 }

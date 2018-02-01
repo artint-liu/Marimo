@@ -107,6 +107,7 @@ string paltform_error; // 没定义平台也没缺省，就报错误
 #pragma message("hello world" "!")
 #pragma message("File name is " __FILE__)
 
+uniform float global_a, global_b;
  
 // 函数测试部分
 float func()
@@ -156,6 +157,7 @@ void func4()
 	b = 1;
   }
 }
+float global_c, global_d,global_e, global_f,global_g;
 
 void func5()
 {

@@ -561,11 +561,6 @@ namespace UVShader
           }
         }
 
-        //pt.str = str;
-        //if(last_one.bPhony == FALSE) {
-        //  pt.ori_marker = last_one.marker;
-        //}
-
         last_one.SetPhonyString(InsertStableTokenString(m_aTokens.size() - 1, str));
       }
 #ifdef ENABLE_STRINGED_SYMBOL
@@ -902,86 +897,6 @@ namespace UVShader
       );
   }
 
-  GXBOOL CodeParser::BreakDefinition(STATEMENT& stat, NameSet& sNameSet, const TKSCOPE& scope)
-  {
-    //
-    // 将类型定义中的逗号表达式展开为独立的类型定义
-    // 如 float a, b, c; 改为
-    // float a; float b; float c;
-    //
-    SYNTAXNODE* pNode = stat.defn.sRoot.pNode;
-    SYNTAXNODE::PtrList sDefinitionList;
-    RecursiveNode<SYNTAXNODE>(this, pNode, [this, &sDefinitionList]
-    (SYNTAXNODE* pNode, int depth) -> GXBOOL
-    {
-      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition ||
-        (pNode->CompareOpcode(',')))
-      {
-        sDefinitionList.push_back(pNode);
-        return TRUE;
-      }
-      return FALSE;
-    });
-
-    if(sDefinitionList.empty()) {
-      OutputErrorW(m_aTokens[scope.begin + 1], UVS_EXPORT_TEXT(2145, "语法错误：标识符前面缺少“%s”."), ";");
-      return FALSE;
-    }
-    else if(sDefinitionList.size() == 1) {
-      if(Verify_VariableDefinition(sNameSet, *pNode) == FALSE) {
-        return FALSE;
-      }
-      m_aStatements.push_back(stat);
-    }
-    else {
-      ASSERT(!sDefinitionList.empty());
-      // 这里list应该是如下形式
-      // (define) [type] [node1]
-      // (node1) [node2] [var define node N]
-      // (node2) [node3] [var define node (N-1)]
-      // ...
-      // (nodeN) [var define node 1] [var define node 2]
-
-      auto& front = sDefinitionList.front();
-      ASSERT(front->mode == SYNTAXNODE::MODE_Definition);
-      front->Operand[1].ptr = sDefinitionList.back()->Operand[0].ptr;
-
-      if(Verify_VariableDefinition(sNameSet, *front) == FALSE) {
-        return FALSE;
-      }
-      stat.defn.sRoot.pNode = front;
-      m_aStatements.push_back(stat);
-
-      auto it = sDefinitionList.end();
-      ASSERT(front->Operand[0].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
-      for(--it; it != sDefinitionList.begin(); --it)
-      {
-        SYNTAXNODE& SyntaxNode = **it;
-
-        if(SyntaxNode.CompareOpcode(',') == NULL) {
-          const TOKEN& t = SyntaxNode.GetAnyTokenAB();
-          clStringA str = t.ToString();
-          OutputErrorW(t, UVS_EXPORT_TEXT(2061, "语法错误: 标识符“%s”."), clStringW(str)); // "语法错误: 标识符“%s”";
-          return FALSE;
-        }
-
-        // 逗号并列式改为独立类型定义式
-        SyntaxNode.mode = front->mode;
-        SyntaxNode.pOpcode = NULL;
-        SyntaxNode.Operand[0].ptr = front->Operand[0].ptr; // type        
-
-        if(Verify_VariableDefinition(sNameSet, SyntaxNode) == FALSE) {
-          return FALSE;
-        }
-
-        // 加入列表
-        stat.defn.sRoot.pNode = *it;
-        m_aStatements.push_back(stat);
-      }
-    }
-    return TRUE;
-  }
-
   GXBOOL CodeParser::ParseStatementAs_Definition(TKSCOPE* pScope)
   {
     if(pScope->begin == pScope->end) {
@@ -1067,9 +982,22 @@ namespace UVShader
     }
 
     // abc; 这种会被解析为token
-    if(stat.defn.sRoot.IsNode())
+    if(stat.defn.sRoot.IsNode() &&
+      stat.defn.sRoot.pNode->Operand[1].IsNode() &&
+      stat.defn.sRoot.pNode->Operand[1].pNode->CompareOpcode(','))
     {
-      BreakDefinition(stat, m_GlobalSet, scope);
+      MakeSyntaxNode(&stat.defn.sRoot, SYNTAXNODE::MODE_Chain, &stat.defn.sRoot, NULL);
+      FlatDefinition(stat.defn.sRoot.pNode);
+      m_aStatements.push_back(stat);
+    }
+    else
+    {
+#ifdef ENABLE_SYNTAX_VERIFY
+      if(Verify_VariableDefinition(m_GlobalSet, *stat.defn.sRoot.pNode) == FALSE) {
+        return FALSE;
+      }
+#endif
+      m_aStatements.push_back(stat);
     }
 
     ASSERT(pEnd->semi_scope + 1 == definition_end && *pEnd == ';');
@@ -1159,11 +1087,12 @@ namespace UVShader
         STATEMENT sub_stat = {StatementType_Expression};
         if(ParseStatementAs_Expression(&sub_stat, &func_statement_block))
         {
+#ifdef ENABLE_SYNTAX_VERIFY
           if(Verify_Block(sub_stat.expr.sRoot.pNode, &m_GlobalSet) == FALSE)
           {
             return FALSE;
           }
-
+#endif
           stat.func.pExpression = (STATEMENT*)m_aSubStatements.size();
           m_aSubStatements.push_back(sub_stat);
         }
@@ -1181,10 +1110,44 @@ namespace UVShader
     return TRUE;
   }
 
+  CodeParser::SYNTAXNODE* CodeParser::FlatDefinition(SYNTAXNODE* pThisChain)
+  {
+    SYNTAXNODE* pNode = pThisChain->Operand[0].pNode;
+
+    // 外部保证满足如下关系
+    ASSERT(pThisChain->mode == ArithmeticExpression::SYNTAXNODE::MODE_Chain);
+    ASSERT(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition);
+
+    ArithmeticExpression::SYNTAXNODE::PtrList sVarList;
+    ArithmeticExpression::SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
+    pNode->Operand[1].ptr = pFirstVar->ptr;
+
+    for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
+    {
+      SYNTAXNODE* n = *it;
+      n->mode = pNode->mode; // ArithmeticExpression::SYNTAXNODE::MODE_Definition;
+      n->pOpcode = NULL;
+      n->Operand[0].ptr = pNode->Operand[0].ptr;
+
+      SYNTAXNODE* pChain = m_NodePool.Alloc();
+#ifdef ENABLE_SYNTAX_NODE_ID
+      pChain->id = m_nNodeId++;
+#endif
+      pChain->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
+      pChain->mode = ArithmeticExpression::SYNTAXNODE::MODE_Chain;
+      pChain->pOpcode = NULL;
+      pChain->Operand[0].ptr = n;
+      pChain->Operand[1].ptr = pThisChain->Operand[1].ptr;
+
+      pThisChain->Operand[1].pNode = pChain;
+      pThisChain = pChain;
+    }
+    return pThisChain;
+  }
+
   ArithmeticExpression::SYNTAXNODE::GLOB* CodeParser::BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode)
   {
-    // TODO: 稍后改成这个: if(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->CompareOpcode(','))
-    if(pNode->Operand[0].IsToken() == FALSE && pNode->Operand[0].pNode->CompareOpcode(','))
+    if(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->CompareOpcode(','))
     {
       sVarList.push_front(pNode);
       return BreakDefinition(sVarList, pNode->Operand[0].pNode);
@@ -1255,11 +1218,11 @@ namespace UVShader
     {
       // 这里面所做的就是将 type a,b,c;这种形式展开为
       // type a; type b; type c;
-      SYNTAXNODE* pLastChain = NULL;
+      SYNTAXNODE* pThisChain = NULL;
       int nSignatures = 0; // Signature Member数量
       int nDefination = 0; // 定义数量
       b32 result = TRUE;
-      RecursiveNode<SYNTAXNODE>(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pLastChain, &nDefination, &nSignatures, &result]
+      RecursiveNode<SYNTAXNODE>(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pThisChain, &nDefination, &nSignatures, &result]
       (SYNTAXNODE* pNode, int depth)->GXBOOL
       {
         if(depth == 0)
@@ -1269,7 +1232,7 @@ namespace UVShader
             CLBREAK;
             return FALSE;
           }
-          pLastChain = pNode;
+          pThisChain = pNode;
         }
         else if(depth == 1)
         {
@@ -1284,34 +1247,10 @@ namespace UVShader
 
           nDefination++;
 
-          if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsToken() == FALSE
+          if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsNode()
             && pNode->Operand[1].pNode->CompareOpcode(','))
           {
-            ArithmeticExpression::SYNTAXNODE::PtrList sVarList;
-            ArithmeticExpression::SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
-            pNode->Operand[1].ptr = pFirstVar->ptr;
-
-            for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
-            {
-              SYNTAXNODE* n = *it;
-              n->mode = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
-              n->pOpcode = NULL;
-              n->Operand[0].ptr = pNode->Operand[0].ptr;
-              //nDefination++;
-
-              SYNTAXNODE* pChain = m_NodePool.Alloc();
-#ifdef ENABLE_SYNTAX_NODE_ID
-              pChain->id = m_nNodeId++;
-#endif
-              pChain->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
-              pChain->mode = ArithmeticExpression::SYNTAXNODE::MODE_Chain;
-              pChain->pOpcode = NULL;
-              pChain->Operand[0].ptr = n;
-              pChain->Operand[1].ptr = pLastChain->Operand[1].ptr;
-
-              pLastChain->Operand[1].pNode = pChain;
-              pLastChain = pChain;
-            }
+            pThisChain = FlatDefinition(pThisChain);
           }
         }
         else if(depth == 2)
@@ -1334,9 +1273,11 @@ namespace UVShader
       }
 
       if(stat.stru.sRoot.IsNode()) {
+#ifdef ENABLE_SYNTAX_VERIFY
         if(Verify_StructMember(*stat.stru.sRoot.pNode) == FALSE) {
           return FALSE;
         }
+#endif
       }
 
       stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
@@ -1391,9 +1332,14 @@ namespace UVShader
       stat_var.defn.sRoot.pNode = pNewDef;
 
       pScope->begin = clMin(pScope->end, scope_var.end + 1);
-      if(BreakDefinition(stat_var, m_GlobalSet, scope_var) == FALSE) {
-        return FALSE;
-      }      
+
+      if(stat_var.defn.sRoot.pNode->Operand[1].IsNode() &&
+        stat_var.defn.sRoot.pNode->Operand[1].pNode->CompareOpcode(','))
+      {
+        MakeSyntaxNode(&stat_var.defn.sRoot, SYNTAXNODE::MODE_Chain, &stat_var.defn.sRoot, NULL);
+        FlatDefinition(stat_var.defn.sRoot.pNode);
+      }
+      m_aStatements.push_back(stat_var);
     }
 
     return TRUE;
@@ -1887,6 +1833,15 @@ NOT_INC_P:
 
       step_scope.begin = pos;
       MakeSyntaxNode(pCurrNode, SYNTAXNODE::MODE_Chain, &A, NULL);
+
+      // 变量声明展开
+      if(A.IsNode() && A.pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition &&
+        A.pNode->Operand[1].IsNode() && A.pNode->Operand[1].pNode->CompareOpcode(','))
+      {
+        pCurrNode = &(FlatDefinition(pCurrNode->pNode)->Operand[1]);
+        continue;
+      }
+
       pCurrNode = &pCurrNode->pNode->Operand[1];
     }
     return TRUE;
@@ -1998,13 +1953,8 @@ NOT_INC_P:
 
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_If, &A, &B);
 
-    //auto result = sStatement.begin;
-
-
     if(bret && (scope.end - sStatement.begin) > 1 && m_aTokens[sStatement.begin] == "else")
     {
-      //auto nNextBegin = sStatement.begin;
-
       // 只处理 else if/else 两种情况
       A = *pDesc;
       ++sStatement.begin;
@@ -2090,10 +2040,6 @@ NOT_INC_P:
       bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
     }
 
-    //if(TryGetNode(&B) != SYNTAXNODE::MODE_Block) {
-    //  bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
-    //}
-
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_While, &A, &B);
 
     DbgDumpScope("while", sConditional, sBlock); // 可能会输出[{...]的情况, 因为end='}'不包含在输出中
@@ -2128,20 +2074,6 @@ NOT_INC_P:
     }
 
     InitTokenScope(sConditional, while_token + 1, FALSE);
-
-    // TODO： 验证域的开始是括号和花括号
-
-    //TrimRightSemicolon(sBlock);
-
-    //GXBOOL bret = ParseExpression(sBlock, &B);
-    //if(sBlock.GetSize() > 0)
-    //{
-    //  TKSCOPE::TYPE block_result = ParseExpressionsToChain(&B, sBlock);
-    //  if(block_result == TKSCOPE::npos) {
-    //    return TKSCOPE::npos;
-    //  }
-    //  ASSERT(block_result == sBlock.end); // 确保sBlock范围计算正确
-    //}
 
     GXBOOL bret = ParseToChain(B, sBlock);
     bret = bret && ParseArithmeticExpression(0, sConditional, &A);
@@ -2611,9 +2543,11 @@ NOT_INC_P:
             }
           }
 
+#ifdef ENABLE_SYNTAX_VERIFY
           if(_CL_NOT_(Verify_MacroFormalList(sFormalList))) {
             return;
           }
+#endif
         }
         l_define = scope_end + 1;
       }
@@ -2723,11 +2657,6 @@ NOT_INC_P:
     if(it != m_pContext->Macros.end())
     {
     }
-    
-    //strMacroName.Append("@A");
-    //do {
-    //  it = m_Macros.erase(it);
-    //} while (it->first.BeginsWith(strMacroName));
   }
 
   CodeParser::T_LPCSTR CodeParser::PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& tokens)
@@ -3186,6 +3115,8 @@ NOT_INC_P:
     return NULL;
   }
 
+#ifdef ENABLE_SYNTAX_VERIFY
+
   const TYPEDESC* CodeParser::Verify_Type(const TOKEN& tkType)
   {
     const TYPEDESC* pTypeDesc = ParseType(tkType);
@@ -3415,36 +3346,6 @@ NOT_INC_P:
     return result;
   }
 
-  //GXBOOL CodeParser::Verify_FunctionBlock(const STATEMENT_EXPR& expr)
-  //{
-  //  return Verify2_Block(expr.sRoot.pNode);
-  //  ////func.pExpression
-  //  //GXBOOL result = TRUE;
-  //  //NameSet sNameSet;
-  //  //RecursiveNode<SYNTAXNODE>(this, expr.sRoot.pNode, [this, &result, &sNameSet]
-  //  //(SYNTAXNODE* pNode, int depth) -> GXBOOL
-  //  //{
-  //  //  if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Flow_For)
-  //  //  {
-  //  //  }
-  //  //  else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition)
-  //  //  {
-  //  //    result = result && Verify_VariableDefinition(sNameSet, *pNode);
-  //  //    return FALSE; // 不再递归
-  //  //  }
-  //  //  else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_StructDef)
-  //  //  {
-  //  //    clStringA str;
-  //  //    // 注册结构体类型
-  //  //    sNameSet.RegisterType(pNode->Operand[0].pTokn->ToString(str), TYPEDESC::TypeCate_Struct);
-  //  //    return FALSE;
-  //  //  }
-  //  //  return TRUE;
-  //  //});
-  //  //
-  //  //return result;
-  //}
-
   GXBOOL CodeParser::Verify_StructMember(const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
@@ -3500,6 +3401,7 @@ NOT_INC_P:
 
     return TRUE;
   }
+#endif // #ifdef ENABLE_SYNTAX_VERIFY
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -3522,9 +3424,6 @@ NOT_INC_P:
     aTokens.clear();
     aFormalParams.clear();
   }
-
-  //CodeParser::MACRO::MACRO() : bTranslate(0), bHasLINE(0), bHasFILE(0), bPoundSign(0)
-  //{}
 
   void CodeParser::MACRO::set(const Dict& dict, const TOKEN::Array& tokens, int begin_at)
   {
