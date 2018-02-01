@@ -3316,7 +3316,9 @@ NOT_INC_P:
       }
       else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition)
       {
-        result = result && Verify_VariableDefinition(sNameSet, *pNode);
+        if(Verify_VariableDefinition(sNameSet, *pNode) == FALSE) {
+          result = FALSE;
+        }
         return FALSE; // 不再递归
       }
       else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_StructDef)
@@ -3332,11 +3334,9 @@ NOT_INC_P:
         {
           if(*pNode->pOpcode == '=')
           {
-#if 0
             if(Verify2_LeftValue(sNameSet, pNode->Operand[0], *pNode->pOpcode) == FALSE) {
               result = FALSE;
             }
-#endif // 0
           }
         }
       }

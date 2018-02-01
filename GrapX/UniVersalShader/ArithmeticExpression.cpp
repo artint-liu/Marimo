@@ -1495,6 +1495,7 @@ namespace UVShader
     VALUE::State s = VALUE::State_OK;
     if(mode == MODE_FunctionCall)
     {
+      value_out.SetOne();
       return VALUE::State_Call;
     }
 
