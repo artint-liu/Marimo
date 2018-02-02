@@ -401,6 +401,7 @@ namespace UVShader
     TKSCOPE::TYPE  ParseFlowFor(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseFlowWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseFlowDoWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseStructDefinition(const TKSCOPE& scope, NameSet& sNameSet, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
     TKSCOPE::TYPE  ParseStructDefine(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);

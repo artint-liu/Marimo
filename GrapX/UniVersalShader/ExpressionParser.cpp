@@ -988,14 +988,19 @@ namespace UVShader
     {
       MakeSyntaxNode(&stat.defn.sRoot, SYNTAXNODE::MODE_Chain, &stat.defn.sRoot, NULL);
       FlatDefinition(stat.defn.sRoot.pNode);
+#ifdef ENABLE_SYNTAX_VERIFY
+      SYNTAXNODE* pChainNode = stat.defn.sRoot.pNode;
+      while(pChainNode) {
+        Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
+        pChainNode = pChainNode->Operand[1].pNode;
+      }
+#endif
       m_aStatements.push_back(stat);
     }
     else
     {
 #ifdef ENABLE_SYNTAX_VERIFY
-      if(Verify_VariableDefinition(m_GlobalSet, *stat.defn.sRoot.pNode) == FALSE) {
-        return FALSE;
-      }
+      Verify_VariableDefinition(m_GlobalSet, *stat.defn.sRoot.pNode);
 #endif
       m_aStatements.push_back(stat);
     }
@@ -1156,6 +1161,246 @@ namespace UVShader
     return &pNode->Operand[0];
   }
 
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(const TKSCOPE& scope, NameSet& sNameSet, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
+  {
+    const TOKEN* pTokensFront = &m_aTokens.front();
+    const TOKEN* p = &m_aTokens[scope.begin];
+    const TOKEN* pEnd = pTokensFront + scope.end;
+
+    ASSERT(*p == "struct");
+
+    // 名字
+    const TOKEN* ptkName = ++p;
+    if(ptkName >= pEnd || _CL_NOT_(ptkName->IsIdentifier()))
+    {
+      clStringW str;
+      OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2332, "“%s”: 缺少标记名"), (p - 1)->ToString(str).CStr());
+      ASSERT(str == _CLTEXT("struct"));
+      return p - pTokensFront;
+    }
+
+    clStringA strName;
+    p->ToString(strName);
+    //stat.stru.szName = GetUniqueString(p);
+    /*
+    if(m_GlobalSet.RegisterType(stat.stru.szName, TYPEDESC::TypeCate_Struct) == FALSE &&
+      m_GlobalSet.HasVariable(stat.stru.szName))
+    {
+      clStringW str;
+      OutputErrorW(*pStructName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), pStructName->ToString(str).CStr());
+      return FALSE;
+    }
+    INC_BUT_NOT_END(p, pEnd);
+    //*/
+
+    ++p;
+    if(p >= pEnd) {
+      OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”"));
+      return scope.end;
+    }
+    else if(*p == ';') {
+      // 结构体声明, 只是声明有这么个东西
+      sNameSet.RegisterType(strName, TYPEDESC::TypeCate_Struct);
+      return (p - pTokensFront + 1);
+    }
+    else if(*p == '{')
+    {
+      // 结构体定义
+
+      TKSCOPE sMembersScope;
+      InitTokenScope(sMembersScope, *p, TRUE);
+      ASSERT(sMembersScope.end < scope.end); // 给出的作用域不对
+
+      if(sNameSet.RegisterType(strName, TYPEDESC::TypeCate_Struct) == FALSE &&
+        m_GlobalSet.HasVariable(strName))
+      {
+        clStringW str;
+        OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), ptkName->ToString(str).CStr());
+        return sMembersScope.end;
+      }
+
+      if(_CL_NOT_(ParseExpression(*pMembers, sMembersScope)))
+      {
+        ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
+        return sMembersScope.end;
+      }
+
+      p = pTokensFront + sMembersScope.end;
+      if(p >= pEnd) {
+        OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(1004, "遇到意外的文件结束")); // 遇到意外的文件结束
+        return scope.end;
+      }
+      else if(m_aTokens[scope.begin] != ";" && m_aTokens[scope.begin].IsIdentifier() == FALSE) {
+        OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(2145, "语法错误：标识符前面缺少“%s”"), ";"); // "语法错误：标识符前面缺少“%s”"
+        return sMembersScope.end;
+      }
+
+      //////////////////////////////////////////////////////////////////////////
+      //TRACE("---------------------------------------------\n");
+      //DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
+      //TRACE("---------------------------------------------\n");
+
+      if(pMembers->pNode->Operand[0].ptr)
+      {
+        // 这里面所做的就是将 type a,b,c;这种形式展开为
+        // type a; type b; type c;
+        if(pMembers->IsNode()) {
+          SYNTAXNODE* pThisChain = NULL;
+          int nSignatures = 0; // Signature Member数量
+          int nDefination = 0; // 定义数量
+          b32 result = TRUE;
+          RecursiveNode<SYNTAXNODE>(this, pMembers->pNode->Operand[0].pNode,
+            [this, &pThisChain, &nDefination, &nSignatures, &result]
+          (SYNTAXNODE* pNode, int depth)->GXBOOL
+          {
+            if(depth == 0)
+            {
+              if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Chain) {
+                // ERROR!
+                CLBREAK;
+                return FALSE;
+              }
+              pThisChain = pNode;
+            }
+            else if(depth == 1)
+            {
+              if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Definition) {
+                // ERROR
+                const TOKEN& t = pNode->GetAnyTokenAPB();
+                clStringA str = t.ToString();
+                OutputErrorW(t, UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), clStringW(str));
+                result = FALSE;
+                return FALSE;
+              }
+
+              nDefination++;
+
+              if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsNode()
+                && pNode->Operand[1].pNode->CompareOpcode(','))
+              {
+                pThisChain = FlatDefinition(pThisChain);
+              }
+            }
+            else if(depth == 2)
+            {
+              if(pNode->CompareOpcode(':')) {
+                nSignatures++;
+              }
+            }
+
+            return TRUE;
+          });
+
+          if(_CL_NOT_(result)) {
+            return scope.end;
+          }
+
+          //if(nSignatures && nSignatures != nDefination) {
+          //  // ERROR: 不是所有成员都定义为signatures
+          //  CLBREAK;
+          //}
+          *pSignatures = nSignatures;
+          *pDefinitionNum = nDefination;
+
+#ifdef ENABLE_SYNTAX_VERIFY
+          if(Verify_StructMember(*pMembers->pNode) == FALSE) {
+            return scope.end;
+          }
+#endif
+        }
+
+        //stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
+        //stat.stru.nNumOfMembers = nDefination;
+      }
+      else // 空结构体
+      {
+        //stat.type = StatementType_Struct;
+        //stat.stru.nNumOfMembers = 0;
+        *pSignatures = 0;
+        *pDefinitionNum = 0;
+      }
+      p = pTokensFront + sMembersScope.end;
+    } // else if(*p == '{')
+
+    //////////////////////////////////////////////////////////////////////////
+
+    if(p >= &m_aTokens.back()) {
+      OutputErrorW(*pTokensFront, UVS_EXPORT_TEXT(1004, "遇到意外的文件结束"));
+      return scope.end;
+    }
+    else if(*p == ';') {
+      return p - pTokensFront + 1;
+    }
+
+    else if(p->IsIdentifier())
+    {
+
+      const auto semi_end = p->semi_scope;
+      TKSCOPE scope_var(scope.begin, semi_end + 1);
+      //stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[semi_end];
+      //m_aStatements.push_back(stat);
+
+      // 结构体定义后定义变量
+      //STATEMENT stat_var;
+      //stat_var.type = StatementType_Definition;
+      //stat_var.defn.modifier = UniformModifier_empty;
+      //stat_var.defn.storage_class = VariableStorageClass_empty;
+      //stat_var.defn.szType = stat.stru.szName;
+      SYNTAXNODE::GLOB glob;
+
+      if(_CL_NOT_(ParseExpression(glob, scope_var)))
+      {
+        ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
+        return FALSE;
+      }
+
+      // 封装一个定义序列
+      SYNTAXNODE* pNewDef = m_NodePool.Alloc();
+#ifdef ENABLE_SYNTAX_NODE_ID
+      pNewDef->id = m_nNodeId++;
+#endif
+      pNewDef->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
+      pNewDef->mode = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
+      pNewDef->pOpcode = NULL;
+      pNewDef->Operand[0].pTokn = ptkName;
+      pNewDef->Operand[1].ptr = glob.ptr;
+
+      glob.pNode = pNewDef;
+
+      p = pTokensFront + clMin(scope.end, scope_var.end + 1);
+
+      if(glob.pNode->Operand[1].IsNode() &&
+        glob.pNode->Operand[1].pNode->CompareOpcode(','))
+      {
+        MakeSyntaxNode(&glob, SYNTAXNODE::MODE_Chain, &glob, NULL);
+        FlatDefinition(glob.pNode);
+
+#ifdef ENABLE_SYNTAX_VERIFY
+        SYNTAXNODE* pChainNode = glob.pNode;
+        while(pChainNode) {
+          Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
+          pChainNode = pChainNode->Operand[1].pNode;
+        }
+#endif
+      }
+      pDefinitions->ptr = glob.ptr;
+    }
+    else if(*p != ';') {
+      clStringW str;
+      OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”(在“%s”的前面)"), p->ToString(str).CStr());
+      return scope.end;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    if(p >= &m_aTokens.back()) {
+      OutputErrorW(*pTokensFront, UVS_EXPORT_TEXT(1004, "遇到意外的文件结束"));
+      return scope.end;
+    }
+    ++p;
+    return p - pTokensFront;
+  }
+
   GXBOOL CodeParser::ParseStatementAs_Struct( TKSCOPE* pScope )
   {
     TOKEN* p = &m_aTokens[pScope->begin];
@@ -1289,6 +1534,7 @@ namespace UVShader
       stat.stru.nNumOfMembers = 0;
     }
 
+    //////////////////////////////////////////////////////////////////////////
 
     //
     // 结构体定义后定义变量
@@ -1338,6 +1584,15 @@ namespace UVShader
       {
         MakeSyntaxNode(&stat_var.defn.sRoot, SYNTAXNODE::MODE_Chain, &stat_var.defn.sRoot, NULL);
         FlatDefinition(stat_var.defn.sRoot.pNode);
+
+#ifdef ENABLE_SYNTAX_VERIFY
+        SYNTAXNODE* pChainNode = stat_var.defn.sRoot.pNode;
+        while(pChainNode) {
+          Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
+          pChainNode = pChainNode->Operand[1].pNode;
+        }
+#endif
+
       }
       m_aStatements.push_back(stat_var);
     }
@@ -3184,7 +3439,8 @@ NOT_INC_P:
 
   GXBOOL CodeParser::Verify_VariableDefinition(NameSet& sNameSet, const SYNTAXNODE& rNode)
   {
-    ASSERT(rNode.mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition);
+    ASSERT(rNode.mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition); // 只检查定义
+
     const TOKEN& tkVar = rNode.Operand[1].IsToken()
       ? *rNode.Operand[1].pTokn
       : rNode.Operand[1].pNode->GetAnyTokenAB();
@@ -3205,6 +3461,7 @@ NOT_INC_P:
       return FALSE;
     }
 
+    // 检查变量名
     clStringW str;
     if(tkVar.IsIdentifier())
     {

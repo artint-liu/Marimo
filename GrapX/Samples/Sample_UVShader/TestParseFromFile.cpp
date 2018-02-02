@@ -677,6 +677,7 @@ void ExportTestCase(const clStringA& strPath)
   clStringA strDir = strPath;
   //clStringA strExportMsg;
   clmap<int, clStringA> sExportMsgDict;
+  clmap<clStringA, int> ExportFilenameSet; // 同一个testcast列表里要保证没有重名文件
   size_t pos_prev = 0;
   size_t pos = 0;
   int nLine = 0;
@@ -703,6 +704,8 @@ void ExportTestCase(const clStringA& strPath)
         TRACE("%s(%d) : \"$file\" 文件名为空\n", strPath.CStr(), nLine);
         return;
       }
+
+      ++ExportFilenameSet.insert(clmake_pair(strFilename, 0)).first->second;
 
       clpathfile::CombinePath(strFilename, strDir, strFilename);
       if(file.IsGood()) {
@@ -766,5 +769,12 @@ void ExportTestCase(const clStringA& strPath)
   for(auto it = sExportMsgDict.begin(); it != sExportMsgDict.end(); ++it)
   {
     TRACE("%d=\"%s\";\r\n", it->first, it->second.CStr()); // 这样才能正确显示"%s"字符串
+  }
+
+  for(auto it = ExportFilenameSet.begin(); it != ExportFilenameSet.end(); ++it)
+  {
+    if(it->second > 1) {
+      CLOG_ERROR("%s 文件重名", it->first.CStr());
+    }
   }
 }
