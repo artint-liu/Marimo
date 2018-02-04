@@ -430,9 +430,11 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       }
 
       // 如果代码标记失败, 则解析也应该失败
-      if(bErrorCase) {
-        ASSERT(bParseResult == FALSE);
-      }
+      ASSERT(bParseResult ||
+        (bErrorCase && bParseResult == FALSE));
+      //if(bErrorCase) {
+      //  ASSERT(bParseResult == FALSE);
+      //}
 
       // 如果设置了预期错误码, 则错误集合中也至少要包含这个错误码
       if(err_code) {

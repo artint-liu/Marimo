@@ -1163,6 +1163,8 @@ namespace UVShader
 
   CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(const TKSCOPE& scope, NameSet& sNameSet, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
   {
+    // pMembers->ptr为空表示解析失败，空定义pMembers->ptr也是一个block
+
     const TOKEN* pTokensFront = &m_aTokens.front();
     const TOKEN* p = &m_aTokens[scope.begin];
     const TOKEN* pEnd = pTokensFront + scope.end;
@@ -1237,7 +1239,7 @@ namespace UVShader
 
       //////////////////////////////////////////////////////////////////////////
       //TRACE("---------------------------------------------\n");
-      //DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
+      //DbgDumpSyntaxTree(NULL, pMembers->pNode, 0, NULL, 1);
       //TRACE("---------------------------------------------\n");
 
       if(pMembers->pNode->Operand[0].ptr)
@@ -1324,19 +1326,20 @@ namespace UVShader
 
     //////////////////////////////////////////////////////////////////////////
 
-    if(p >= &m_aTokens.back()) {
+    if(p > &m_aTokens.back()) {
       OutputErrorW(*pTokensFront, UVS_EXPORT_TEXT(1004, "遇到意外的文件结束"));
       return scope.end;
     }
     else if(*p == ';') {
+      pMembers->pNode->Operand[1].pTokn = p; // Block后面的分号
       return p - pTokensFront + 1;
     }
-
     else if(p->IsIdentifier())
     {
-
       const auto semi_end = p->semi_scope;
-      TKSCOPE scope_var(scope.begin, semi_end + 1);
+      TKSCOPE scope_var(p - pTokensFront, semi_end + 1);
+      pMembers->pNode->Operand[1].pTokn = &m_aTokens[semi_end]; // Block后面的分号
+
       //stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[semi_end];
       //m_aStatements.push_back(stat);
 
@@ -1384,6 +1387,7 @@ namespace UVShader
 #endif
       }
       pDefinitions->ptr = glob.ptr;
+      return p - pTokensFront;
     }
     else if(*p != ';') {
       clStringW str;
@@ -1392,15 +1396,45 @@ namespace UVShader
     }
 
     //////////////////////////////////////////////////////////////////////////
-
-    if(p >= &m_aTokens.back()) {
-      OutputErrorW(*pTokensFront, UVS_EXPORT_TEXT(1004, "遇到意外的文件结束"));
-      return scope.end;
-    }
-    ++p;
+    CLBREAK; // 其实不会到这里
     return p - pTokensFront;
   }
 
+#if 1
+  GXBOOL CodeParser::ParseStatementAs_Struct(TKSCOPE* pScope)
+  {
+    TOKEN* p = &m_aTokens[pScope->begin];
+    if(*p != "struct") {
+      return FALSE;
+    }
+
+    STATEMENT stat = { StatementType_Empty };
+    STATEMENT stat_var = { StatementType_Definition };
+    stat_var.defn.modifier = UniformModifier_empty;
+    stat_var.defn.storage_class = VariableStorageClass_empty;
+    stat_var.defn.szType = stat.stru.szName;
+    int nSignatures = 0;
+    int nDefinition = 0;
+    
+    pScope->begin = ParseStructDefinition(*pScope, m_GlobalSet, &stat.stru.sRoot,
+      &stat_var.defn.sRoot, &nSignatures, &nDefinition);
+
+    if(stat.stru.sRoot.ptr)
+    {
+      stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
+      stat.stru.szName = GetUniqueString(p + 1);
+      stat.stru.nNumOfMembers = nDefinition;
+    }
+
+    m_aStatements.push_back(stat);
+
+    if(stat_var.defn.sRoot.ptr) {
+      m_aStatements.push_back(stat_var);
+    }
+
+    return TRUE;
+  }
+#else
   GXBOOL CodeParser::ParseStatementAs_Struct( TKSCOPE* pScope )
   {
     TOKEN* p = &m_aTokens[pScope->begin];
@@ -1455,9 +1489,9 @@ namespace UVShader
     }
 
     //////////////////////////////////////////////////////////////////////////
-    //TRACE("---------------------------------------------\n");
-    //DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
-    //TRACE("---------------------------------------------\n");
+    TRACE("---------------------------------------------\n");
+    DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
+    TRACE("---------------------------------------------\n");
 
     if(stat.stru.sRoot.pNode->Operand[0].ptr)
     {
@@ -1599,6 +1633,7 @@ namespace UVShader
 
     return TRUE;
   }
+#endif
 
   GXBOOL CodeParser::ParseFunctionArguments(STATEMENT* pStat, TKSCOPE* pArgScope)
   {
@@ -1976,7 +2011,23 @@ NOT_INC_P:
       ASSERT(m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
     }
     else if(front == "struct") {
-      pend = ParseStructDefine(scope, pDesc);
+      //pend = ParseStructDefine(scope, pDesc);
+      // FIXME: m_GlobalSet 是错误的
+      SYNTAXNODE::GLOB sMembers = { 0 };
+      SYNTAXNODE::GLOB sVariable = { 0 };
+      int nSignatures = 0;
+      int nDefinition = 0;
+      pend = ParseStructDefinition(scope, m_GlobalSet, &sMembers, &sVariable, &nSignatures, &nDefinition);
+
+      if(sMembers.ptr)
+      {
+        SYNTAXNODE::GLOB sName;
+        sName = m_aTokens[scope.begin + 1];
+
+        MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_StructDef, &sName, &sMembers);
+      }
+      ASSERT(nSignatures == 0);  // 没处理这个错误
+      ASSERT(sVariable.ptr == NULL); // 没实现这个处理
     }
     else if(front == "break") {
       eMode = SYNTAXNODE::MODE_Flow_Break;
@@ -2343,6 +2394,7 @@ NOT_INC_P:
     return bret ? while_end : TKSCOPE::npos;
   }
 
+#if 0
   CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefine(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     SYNTAXNODE::GLOB T, B = {0};
@@ -2407,6 +2459,7 @@ NOT_INC_P:
     //DbgDumpScope("while", sConditional, sBlock);
     return bret ? sBlock.end + 1 : TKSCOPE::npos;
   }
+#endif // 0
 
   GXBOOL CodeParser::MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam)
   {
