@@ -23,15 +23,15 @@ public:
     m_aCommand.clear();
     STATEMENT stat = {StatementType_Expression};
     TRACE("--- 解析树 ---\n"); // 解析时生成的树
-    GXBOOL bret = ParseArithmeticExpression(0, *pScope, &stat.expr.sRoot);
+    GXBOOL bret = ParseArithmeticExpression(0, *pScope, &stat.sRoot);
     if( ! bret)
     {
       TRACE("编译错误\n");
       m_aDbgExpressionOperStack.clear();
     }
-    else if(stat.expr.sRoot.IsNode() && stat.expr.sRoot.pNode) {
+    else if(stat.sRoot.IsNode() && stat.sRoot.pNode) {
       TRACE("--- 内存树 ---\n"); // 重新输出的内存树结构
-      DbgDumpSyntaxTree(&m_aCommand, stat.expr.sRoot.pNode, 0);
+      DbgDumpSyntaxTree(&m_aCommand, stat.sRoot.pNode, 0);
     }
     *pStat = stat;
     return bret;

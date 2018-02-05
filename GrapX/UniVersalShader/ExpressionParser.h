@@ -177,6 +177,7 @@ namespace UVShader
       StatementType_Definition,     // 变量定义
       StatementType_FunctionDecl,   // 函数声明
       StatementType_Function,       // 函数体
+      StatementType_Typedef,        // Typedef
       StatementType_Struct,         // 结构体
       StatementType_Signatures,     // 用于shader输入输出标记的结构体
       StatementType_Expression,     // 表达式
@@ -256,31 +257,30 @@ namespace UVShader
     {
       GXLPCSTR         szName;
       clsize           nNumOfMembers; // 不是必要的
-      SYNTAXNODE::GLOB sRoot;
     };
 
-    struct STATEMENT_EXPR // 表达式定义
-    {
-      SYNTAXNODE::GLOB sRoot;
-    };
+    //struct STATEMENT_EXPR // 表达式定义
+    //{
+    //  SYNTAXNODE::GLOB sRoot;
+    //};
     
     struct STATEMENT_DEFN
     {
       VariableStorageClass  storage_class;
       UniformModifier       modifier;
       GXLPCSTR              szType;
-      SYNTAXNODE::GLOB      sRoot;
     };
 
 
     struct STATEMENT
     {
       StatementType type;
+      SYNTAXNODE::GLOB sRoot;
       union
       {
         STATEMENT_FUNC func;
         STATEMENT_STRU stru;
-        STATEMENT_EXPR expr;
+        //STATEMENT_EXPR expr;
         STATEMENT_DEFN defn; // 全局变量定义
       };
     };
@@ -381,6 +381,7 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
     GXBOOL  ParseFunctionArguments(STATEMENT* pStat, TKSCOPE* pArgScope);
 
+    GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);
 
     GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, TKSCOPE* pScope); // (算数表)达式
@@ -395,12 +396,13 @@ namespace UVShader
     GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
     TKSCOPE::TYPE  TryParseSingle(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
 
-    GXBOOL  TryKeywords(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end);
+    GXBOOL  TryKeywords(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest, TKSCOPE::TYPE* parse_end);
     TKSCOPE::TYPE  ParseFlowIf(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
     TKSCOPE::TYPE  MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, SYNTAXNODE::GLOB* pBlockNode);
     TKSCOPE::TYPE  ParseFlowFor(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseFlowWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseFlowDoWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseTypedef(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseStructDefinition(const TKSCOPE& scope, NameSet& sNameSet, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
 #if 0
     TKSCOPE::TYPE  ParseStructDefine(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);

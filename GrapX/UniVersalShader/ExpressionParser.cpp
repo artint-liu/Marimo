@@ -892,6 +892,7 @@ namespace UVShader
     return (pScope->begin < pScope->end) &&
       (
         ParseStatementAs_Struct(pScope) ||
+        ParseStatementAs_Typedef(pScope) ||
         ParseStatementAs_Definition(pScope) ||
         ParseStatementAs_Function(pScope)
       );
@@ -975,21 +976,21 @@ namespace UVShader
     stat.defn.szType = GetUniqueString(p);
 
     TKSCOPE scope(pScope->begin, definition_end);
-    if(!ParseExpression(stat.defn.sRoot, scope))
+    if(!ParseExpression(stat.sRoot, scope))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope.end));
       return FALSE;
     }
 
     // abc; 这种会被解析为token
-    if(stat.defn.sRoot.IsNode() &&
-      stat.defn.sRoot.pNode->Operand[1].IsNode() &&
-      stat.defn.sRoot.pNode->Operand[1].pNode->CompareOpcode(','))
+    if(stat.sRoot.IsNode() &&
+      stat.sRoot.pNode->Operand[1].IsNode() &&
+      stat.sRoot.pNode->Operand[1].pNode->CompareOpcode(','))
     {
-      MakeSyntaxNode(&stat.defn.sRoot, SYNTAXNODE::MODE_Chain, &stat.defn.sRoot, NULL);
-      FlatDefinition(stat.defn.sRoot.pNode);
+      MakeSyntaxNode(&stat.sRoot, SYNTAXNODE::MODE_Chain, &stat.sRoot, NULL);
+      FlatDefinition(stat.sRoot.pNode);
 #ifdef ENABLE_SYNTAX_VERIFY
-      SYNTAXNODE* pChainNode = stat.defn.sRoot.pNode;
+      SYNTAXNODE* pChainNode = stat.sRoot.pNode;
       while(pChainNode) {
         Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
         pChainNode = pChainNode->Operand[1].pNode;
@@ -1000,7 +1001,7 @@ namespace UVShader
     else
     {
 #ifdef ENABLE_SYNTAX_VERIFY
-      Verify_VariableDefinition(m_GlobalSet, *stat.defn.sRoot.pNode);
+      Verify_VariableDefinition(m_GlobalSet, *stat.sRoot.pNode);
 #endif
       m_aStatements.push_back(stat);
     }
@@ -1093,7 +1094,7 @@ namespace UVShader
         if(ParseStatementAs_Expression(&sub_stat, &func_statement_block))
         {
 #ifdef ENABLE_SYNTAX_VERIFY
-          if(Verify_Block(sub_stat.expr.sRoot.pNode, &m_GlobalSet) == FALSE)
+          if(Verify_Block(sub_stat.sRoot.pNode, &m_GlobalSet) == FALSE)
           {
             return FALSE;
           }
@@ -1370,7 +1371,7 @@ namespace UVShader
 
       glob.pNode = pNewDef;
 
-      p = pTokensFront + clMin(scope.end, scope_var.end + 1);
+      p = pTokensFront + clMin(scope.end, scope_var.end);
 
       if(glob.pNode->Operand[1].IsNode() &&
         glob.pNode->Operand[1].pNode->CompareOpcode(','))
@@ -1416,10 +1417,10 @@ namespace UVShader
     int nSignatures = 0;
     int nDefinition = 0;
     
-    pScope->begin = ParseStructDefinition(*pScope, m_GlobalSet, &stat.stru.sRoot,
-      &stat_var.defn.sRoot, &nSignatures, &nDefinition);
+    pScope->begin = ParseStructDefinition(*pScope, m_GlobalSet, &stat.sRoot,
+      &stat_var.sRoot, &nSignatures, &nDefinition);
 
-    if(stat.stru.sRoot.ptr)
+    if(stat.sRoot.ptr)
     {
       stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
       stat.stru.szName = GetUniqueString(p + 1);
@@ -1428,7 +1429,7 @@ namespace UVShader
 
     m_aStatements.push_back(stat);
 
-    if(stat_var.defn.sRoot.ptr) {
+    if(stat_var.sRoot.ptr) {
       m_aStatements.push_back(stat_var);
     }
 
@@ -1472,7 +1473,7 @@ namespace UVShader
     TKSCOPE sMembersScope;
     InitTokenScope(sMembersScope, *p, TRUE);
 
-    if(_CL_NOT_(ParseExpression(stat.stru.sRoot, sMembersScope)))
+    if(_CL_NOT_(ParseExpression(stat.sRoot, sMembersScope)))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
       return FALSE;
@@ -1490,10 +1491,10 @@ namespace UVShader
 
     //////////////////////////////////////////////////////////////////////////
     TRACE("---------------------------------------------\n");
-    DbgDumpSyntaxTree(NULL, stat.stru.sRoot.pNode, 0, NULL, 1);
+    DbgDumpSyntaxTree(NULL, stat.sRoot.pNode, 0, NULL, 1);
     TRACE("---------------------------------------------\n");
 
-    if(stat.stru.sRoot.pNode->Operand[0].ptr)
+    if(stat.sRoot.pNode->Operand[0].ptr)
     {
       // 这里面所做的就是将 type a,b,c;这种形式展开为
       // type a; type b; type c;
@@ -1501,7 +1502,7 @@ namespace UVShader
       int nSignatures = 0; // Signature Member数量
       int nDefination = 0; // 定义数量
       b32 result = TRUE;
-      RecursiveNode<SYNTAXNODE>(this, stat.stru.sRoot.pNode->Operand[0].pNode, [this, &pThisChain, &nDefination, &nSignatures, &result]
+      RecursiveNode<SYNTAXNODE>(this, stat.sRoot.pNode->Operand[0].pNode, [this, &pThisChain, &nDefination, &nSignatures, &result]
       (SYNTAXNODE* pNode, int depth)->GXBOOL
       {
         if(depth == 0)
@@ -1551,9 +1552,9 @@ namespace UVShader
         CLBREAK;
       }
 
-      if(stat.stru.sRoot.IsNode()) {
+      if(stat.sRoot.IsNode()) {
 #ifdef ENABLE_SYNTAX_VERIFY
-        if(Verify_StructMember(*stat.stru.sRoot.pNode) == FALSE) {
+        if(Verify_StructMember(*stat.sRoot.pNode) == FALSE) {
           return FALSE;
         }
 #endif
@@ -1575,14 +1576,14 @@ namespace UVShader
     //
     if(m_aTokens[pScope->begin] == ';')
     {
-      stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[pScope->begin];
+      stat.sRoot.pNode->Operand[1].pTokn = &m_aTokens[pScope->begin];
       m_aStatements.push_back(stat);
       ++pScope->begin;
     }
     else {
       const auto semi_end = m_aTokens[pScope->begin].semi_scope;
       TKSCOPE scope_var(pScope->begin, semi_end + 1);
-      stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[semi_end];
+      stat.sRoot.pNode->Operand[1].pTokn = &m_aTokens[semi_end];
       m_aStatements.push_back(stat);
 
       // 结构体定义后定义变量
@@ -1592,7 +1593,7 @@ namespace UVShader
       stat_var.defn.storage_class = VariableStorageClass_empty;
       stat_var.defn.szType = stat.stru.szName;
 
-      if(_CL_NOT_(ParseExpression(stat_var.defn.sRoot, scope_var)))
+      if(_CL_NOT_(ParseExpression(stat_var.sRoot, scope_var)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
         return FALSE;
@@ -1607,20 +1608,20 @@ namespace UVShader
       pNewDef->mode    = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
       pNewDef->pOpcode = NULL;
       pNewDef->Operand[0].ptr = pStructName;
-      pNewDef->Operand[1].ptr = stat_var.defn.sRoot.ptr;
+      pNewDef->Operand[1].ptr = stat_var.sRoot.ptr;
 
-      stat_var.defn.sRoot.pNode = pNewDef;
+      stat_var.sRoot.pNode = pNewDef;
 
       pScope->begin = clMin(pScope->end, scope_var.end + 1);
 
-      if(stat_var.defn.sRoot.pNode->Operand[1].IsNode() &&
-        stat_var.defn.sRoot.pNode->Operand[1].pNode->CompareOpcode(','))
+      if(stat_var.sRoot.pNode->Operand[1].IsNode() &&
+        stat_var.sRoot.pNode->Operand[1].pNode->CompareOpcode(','))
       {
-        MakeSyntaxNode(&stat_var.defn.sRoot, SYNTAXNODE::MODE_Chain, &stat_var.defn.sRoot, NULL);
-        FlatDefinition(stat_var.defn.sRoot.pNode);
+        MakeSyntaxNode(&stat_var.sRoot, SYNTAXNODE::MODE_Chain, &stat_var.sRoot, NULL);
+        FlatDefinition(stat_var.sRoot.pNode);
 
 #ifdef ENABLE_SYNTAX_VERIFY
-        SYNTAXNODE* pChainNode = stat_var.defn.sRoot.pNode;
+        SYNTAXNODE* pChainNode = stat_var.sRoot.pNode;
         while(pChainNode) {
           Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
           pChainNode = pChainNode->Operand[1].pNode;
@@ -1634,6 +1635,27 @@ namespace UVShader
     return TRUE;
   }
 #endif
+
+  GXBOOL CodeParser::ParseStatementAs_Typedef(TKSCOPE* pScope)
+  {
+    if(pScope->begin == pScope->end) {
+      return TRUE;
+    }
+
+    TOKEN* p = &m_aTokens[pScope->begin];
+    if(*p != "typedef") {
+      return FALSE;
+    }
+
+    STATEMENT stat = { StatementType_Typedef };
+
+    TKSCOPE::TYPE end = TKSCOPE::npos;
+    if(TryKeywords(m_GlobalSet, *pScope, &stat.sRoot, &end)) {
+      m_aStatements.push_back(stat);
+    }
+    pScope->begin = end;
+    return TRUE;
+  }
 
   GXBOOL CodeParser::ParseFunctionArguments(STATEMENT* pStat, TKSCOPE* pArgScope)
   {
@@ -1785,7 +1807,7 @@ NOT_INC_P:
 
     STATEMENT& stat = *pStat;
     
-    GXBOOL bret = ParseCodeBlock(stat.expr.sRoot, *pScope);
+    GXBOOL bret = ParseCodeBlock(stat.sRoot, *pScope);
     return bret;
   }
 
@@ -1977,7 +1999,7 @@ NOT_INC_P:
   }
 
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL CodeParser::TryKeywords(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end)
+  GXBOOL CodeParser::TryKeywords(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end)
   {
     // 如果是关键字，返回true，否则返回false
     // 解析成功parse_end返回表达式最后一个token的索引，parse_end是这个关键字表达式之内的！
@@ -2010,6 +2032,10 @@ NOT_INC_P:
       pend = ParseFlowDoWhile(scope, pDesc);
       ASSERT(m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
     }
+    else if(front == "typedef") {
+      pend = ParseTypedef(sNameSet, scope, pDesc);
+      ASSERT(m_aTokens[pend - 1] == ';');
+    }
     else if(front == "struct") {
       //pend = ParseStructDefine(scope, pDesc);
       // FIXME: m_GlobalSet 是错误的
@@ -2026,8 +2052,12 @@ NOT_INC_P:
 
         MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_StructDef, &sName, &sMembers);
       }
+
       ASSERT(nSignatures == 0);  // 没处理这个错误
-      ASSERT(sVariable.ptr == NULL); // 没实现这个处理
+      if(sVariable.ptr != NULL)
+      {
+        MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, pDesc, &sVariable);
+      }
     }
     else if(front == "break") {
       eMode = SYNTAXNODE::MODE_Flow_Break;
@@ -2183,7 +2213,7 @@ NOT_INC_P:
       }
       return sub_block.end;
     }
-    else if(TryKeywords(step_scope, &glob, &parse_end))
+    else if(TryKeywords(m_GlobalSet, step_scope, &glob, &parse_end)) // FIXME: 暂时使用全局NameSet: m_GlobalSet
     {
       if(parse_end == TKSCOPE::npos) {
         return TKSCOPE::npos; // 解析错误, 直接返回
@@ -2394,6 +2424,50 @@ NOT_INC_P:
     return bret ? while_end : TKSCOPE::npos;
   }
 
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseTypedef(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest)
+  {
+    // typedef A B;
+    SYNTAXNODE::GLOB A = {0}, B = {0};
+    const TOKEN& front = m_aTokens[scope.begin];
+    ASSERT(front == "typedef");
+
+    if(front.semi_scope - scope.begin < 3 || scope.GetSize() < 3) {
+      OutputErrorW(front, UVS_EXPORT_TEXT(5019, "“typedef”语法错误"));
+      return TKSCOPE::npos;
+    }
+
+    TKSCOPE type_scope(scope.begin + 1, front.semi_scope - 1);
+    ASSERT(type_scope.GetSize() >= 1); // 上面保证
+
+    if(type_scope.GetSize() == 1) {
+      A = m_aTokens[type_scope.begin];
+    }
+    else {
+      if(ParseArithmeticExpression(0, type_scope, &A) == FALSE) {
+        return TKSCOPE::npos;
+      }
+    }
+    B = m_aTokens[front.semi_scope - 1];
+
+    ASSERT(A.IsToken()); // 目前仅处理这个情况
+    clStringA strTypename;
+
+    const TYPEDESC* pTypeDesc = sNameSet.GetType(A.pTokn->ToString(strTypename));
+    if(pTypeDesc)
+    {
+      sNameSet.RegisterType(B.pTokn->ToString(strTypename), pTypeDesc->cate);
+    }
+    else
+    {
+      clStringA strTypenameW;
+      OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5020, "“typedef”定义中使用的“%s”不是一个类型"), A.pTokn->ToString(strTypenameW).CStr());
+      return TKSCOPE::npos;
+    }
+
+    MakeSyntaxNode(pDest, SYNTAXNODE::MODE_Typedef, NULL, &A, &B);
+    return front.semi_scope + 1;
+  }
+
 #if 0
   CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefine(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
@@ -2577,7 +2651,7 @@ NOT_INC_P:
     {
       pBlock->end = block_begin.scope + 1;
     }
-    else if(TryKeywords(TKSCOPE(pBlock->begin, scope.end), pBlockNode, &pBlock->end))
+    else if(TryKeywords(m_GlobalSet, TKSCOPE(pBlock->begin, scope.end), pBlockNode, &pBlock->end))// FIXME: 暂时使用全局NameSet: m_GlobalSet
     {
       ; // 没想好该干啥，哇哈哈哈!
     }

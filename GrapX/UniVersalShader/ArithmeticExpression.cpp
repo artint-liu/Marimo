@@ -1353,6 +1353,7 @@ namespace UVShader
 
   clStringA& ArithmeticExpression::TOKEN::ToString(clStringA& str) const
   {
+    str.Clear();
     if(type == TokenType_String && !BeginsWith('\"')) {
       return str.Append("\"").Append(marker, length).Append("\"");
     }

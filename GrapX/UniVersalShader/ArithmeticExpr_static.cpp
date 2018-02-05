@@ -102,6 +102,19 @@ namespace UVShader
     {NULL},
   };
 
+/*
+[] [float] [x]
+[] [float] [y]
+[] [float] [z]
+[] [float] [w]
+[] [float w] []
+[] [float z] [float w]
+[] [float y] [float z;float w]
+[] [float x] [float y;float z;float w]
+[] [float x;float y;float z;float w] [;]
+{float x;float y;float z;float w}
+*/
+
   ArithmeticExpression::PAIRMARK ArithmeticExpression::s_PairMark[] = {
     {'(', ')', FALSE, FALSE},   // 圆括号
     {'[', ']', FALSE, FALSE},   // 方括号

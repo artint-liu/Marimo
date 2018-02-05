@@ -222,9 +222,14 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::ArithmeticExpression:
     strOut = "discard";
     break;
 
+  case SYNTAXNODE::MODE_Typedef:
+    strOut.Format("typedef %s %s;\n", str[0], str[1]);
+    break;
+
   default:
     // 没处理的 pNode->mode 类型
     strOut = "[!ERROR!]";
+    CLBREAK;
     break;
   }
 
@@ -456,7 +461,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
               break;
             case UVShader::CodeParser::StatementType_Definition:
               {
-                const auto& definition = s.defn;
+                const auto& definition = s;
                 clStringA str;
                 if(definition.sRoot.pNode->mode == UVShader::CodeParser::SYNTAXNODE::MODE_Definition)
                 {
@@ -511,12 +516,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
                 }
 
                 //file.WritefA("{\n");
-                if(func.pExpression && func.pExpression->expr.sRoot.pNode)
+                if(func.pExpression && func.pExpression->sRoot.pNode)
                 {
                   clStringA str;
                   //str.Format("{\n");
                   //DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, 1, &str);
-                  DumpBlock(&expp, func.pExpression->expr.sRoot.pNode, 0, 0, &str);
+                  DumpBlock(&expp, func.pExpression->sRoot.pNode, 0, 0, &str);
                   file.WritefA(str); // 缩进两个空格
                 }
                 file.WritefA("\n");
@@ -526,9 +531,9 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
             case UVShader::CodeParser::StatementType_Struct:
             case UVShader::CodeParser::StatementType_Signatures:
               {
-                const auto& stru = s.stru;
+                const auto& stru = s;
                 clStringA str;
-                file.WritefA("struct %s\n", stru.szName);
+                file.WritefA("struct %s\n", s.stru.szName);
                 DumpBlock(&expp, stru.sRoot.pNode, 0, 0, &str);
                 file.WritefA(str);
               }
@@ -537,10 +542,17 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
               {
                 clStringA str;
                 CLBREAK;
-                DumpBlock(&expp, s.expr.sRoot.pNode, 0, 1, &str);
+                DumpBlock(&expp, s.sRoot.pNode, 0, 1, &str);
                 file.WritefA(str);
               }
               break;
+            case UVShader::CodeParser::StatementType_Typedef:
+            {
+              clStringA str;
+              DumpBlock(&expp, s.sRoot.pNode, 0, 1, &str);
+              file.WritefA(str);
+            }
+            break;
             default:
               CLBREAK;
               break;

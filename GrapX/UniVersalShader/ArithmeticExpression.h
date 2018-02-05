@@ -340,6 +340,7 @@ namespace UVShader
         MODE_ArrayAssignment,     // 数组赋值: A={B}; 其它形式赋值属于MODE_Opcode
         MODE_FunctionCall,        // 函数调用: A(B)
         MODE_TypeCast,            // 类型转换: (A)B
+        MODE_Typedef,             // typedef A B;
         MODE_ArrayIndex,          // 索引调用: A[B], 方括号内有内容的都认为是数组调用
         MODE_ArrayAlloc,          // 自适应数组分配: A[], 注意"k[5]"这种形式认为是索引调用
         MODE_Definition,          // 变量定义: A B

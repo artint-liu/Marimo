@@ -271,55 +271,91 @@ void TestFiles(GXLPCSTR szDir, GXBOOL bShowList)
 
   if(bShowList)
   {
-    for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it)
+    GXBOOL bLoop = FALSE;
+    do
     {
-      auto n = it - sShaderSource_list.begin();
-      printf("%3d.%*s", n, -35, it->strName);
-      if(n % 2 == 1) {
-        printf("\n");
-      }
-    }
-    printf("type \"?all\" for all.\n");
-
-    char szBuffer[128];
-    gets(szBuffer);
-    if(GXSTRCMPI(szBuffer, "?all") == 0) {
-      for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it) {
-        TestFromFile(it->strInput, it->strOutput, it->strReference);
-      }
-    }
-    else
-    {
-      int nSelect = -1;
-      if(szBuffer[0] == '?')
+      bLoop = FALSE;
+      for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it)
       {
-        nSelect = atoi(szBuffer + 1);
+        auto n = it - sShaderSource_list.begin();
+        printf("%3d.%*s", n, -35, it->strName);
+        if(n % 2 == 1) {
+          printf("\n");
+        }
       }
-      else {
+      printf("type \"?all\" for all.\n");
+
+      char szBuffer[128];
+      gets(szBuffer);
+      if(GXSTRCMPI(szBuffer, "?all") == 0) {
+        for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it) {
+          TestFromFile(it->strInput, it->strOutput, it->strReference);
+        }
+      }
+      else
+      {
+        int nSelect = -1;
+        clStringA strSpec;
+
+        if(szBuffer[0] == '\0')
+        {
+          return; // 回车退出此层菜单
+        }
+        else if(szBuffer[0] == '?')
+        {
+          nSelect = atoi(szBuffer + 1);
+          if(nSelect >= 0 && nSelect < (int)sShaderSource_list.size()) {
+            strSpec = sShaderSource_list[nSelect].strName.CStr();
+            strSpec.MakeUpper();
+          }
+          else {
+            printf("没找到文件\n按任意键继续...\n");
+            clstd_cli::getch();
+            bLoop = TRUE;
+            continue;
+          }
+        }
+        else {
+          strSpec = szBuffer;
+          strSpec.MakeUpper();
+        }
+        
+        // 循环查找匹配文件名的测试文件
+        clStringA strName;
+        GXBOOL bUpdateList = FALSE;
         for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it)
         {
-          if(it->strName.CompareNoCase(szBuffer) == 0) {
-            nSelect = it - sShaderSource_list.begin();
-            break;
+          strName = it->strName;
+          strName.MakeUpper();
+
+          if(clpathfile::MatchSpec(strName, strSpec))
+          {
+            auto& item = *it;
+            if(item.strInput.Find("$CaseList$") != clStringA::npos) {
+              ExportTestCase(item.strInput);
+              bUpdateList = TRUE;
+            }
+            else {
+              TestFromFile(item.strInput, item.strOutput, item.strReference);
+            }
+            bLoop = TRUE; // 单独文件测试时循环此层菜单
           }
         }
 
-        if(nSelect < 0) {
+        if(bUpdateList)
+        {
+          sShaderSource_list.clear();
+          Test::Generate(sShaderSource_list, szDir);
+          bLoop = TRUE;
+        }
+        else if(bLoop == FALSE) {
           printf("没找到文件\n按任意键继续...\n");
           clstd_cli::getch();
+          bLoop = TRUE;
+          continue;
         }
       }
-
-      if(nSelect >= 0 && nSelect < (int)sShaderSource_list.size()) {
-        auto& item = sShaderSource_list[nSelect];
-        if(item.strInput.Find("$CaseList$") != clStringA::npos) {
-          ExportTestCase(item.strInput);
-        }
-        else {
-          TestFromFile(item.strInput, item.strOutput, item.strReference);
-        }
-      }
-    }
+    } while(bLoop);
   }
   else // 不显示菜单的话就测试所有项目
   {
@@ -329,15 +365,15 @@ void TestFiles(GXLPCSTR szDir, GXBOOL bShowList)
   }
 }
 
-void TestShaderToys(GXBOOL bShowList)
-{
-  TestFiles("Test\\shaders\\ShaderToy", bShowList);
-}
+//void TestShaderToys(GXBOOL bShowList)
+//{
+//  TestFiles("Test\\shaders\\ShaderToy", bShowList);
+//}
 
-void TestDebris(GXBOOL bShowList)
-{
-  TestFiles("Test\\shaders\\debris", bShowList);
-}
+//void TestDebris(GXBOOL bShowList)
+//{
+//  TestFiles("Test\\shaders\\debris", bShowList);
+//}
 
 void ExportErrorMessage(const cllist<clStringA>& files)
 {
@@ -482,16 +518,20 @@ int _tmain(int argc, _TCHAR* argv[])
     switch(c)
     {
     case '0':
-      TestShaderToys(FALSE);
-      TestDebris(FALSE);
+      //TestShaderToys(FALSE);
+      //TestDebris(FALSE);
+      TestFiles("Test\\shaders\\ShaderToy", FALSE);
+      TestFiles("Test\\shaders\\debris", FALSE);
       break;
 
     case '1':
-      TestShaderToys(TRUE);
+      //TestShaderToys(TRUE);
+      TestFiles("Test\\shaders\\ShaderToy", TRUE);
       break;
 
     case '2':
-      TestDebris(TRUE);
+      //TestDebris(TRUE);
+      TestFiles("Test\\shaders\\debris", TRUE);
       break;
 
     case '3':
