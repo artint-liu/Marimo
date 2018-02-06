@@ -2,6 +2,7 @@
 #include <Smart/SmartStream.h>
 #include <clTokens.h>
 #include <clStringSet.h>
+#include <clStablePool.h>
 #include "../../../GrapX/UniVersalShader/ArithmeticExpression.h"
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"

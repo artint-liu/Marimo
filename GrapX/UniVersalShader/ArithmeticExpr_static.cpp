@@ -3,6 +3,7 @@
 #include <Smart/SmartStream.h>
 #include <clTokens.h>
 #include <clStringSet.h>
+#include <clStablePool.h>
 #include "ArithmeticExpression.h"
 #include "ExpressionParser.h"
 
@@ -101,6 +102,83 @@ namespace UVShader
     {"double",6, 4, 4},
     {NULL},
   };
+
+  //////////////////////////////////////////////////////////////////////////
+  MEMBERLIST s_aIntXYZW[] = {
+    {"int", "x"},
+    {"int", "y"},
+    {"int", "z"},
+    {"int", "w"},
+  };
+
+  MEMBERLIST s_aVecXYZW[] = {
+    {"float", "x"},
+    {"float", "y"},
+    {"float", "z"},
+    {"float", "w"},
+  };
+
+  MEMBERLIST s_aHalfXYZW[] = {
+    {"half", "x"},
+    {"half", "y"},
+    {"half", "z"},
+    {"half", "w"},
+  };
+
+  MEMBERLIST s_aUintXYZW[] = {
+    {"uint", "x"},
+    {"uint", "y"},
+    {"uint", "z"},
+    {"uint", "w"},
+  };
+
+  MEMBERLIST s_aDoubleXYZW[] = {
+    {"double", "x"},
+    {"double", "y"},
+    {"double", "z"},
+    {"double", "w"},
+  };
+
+  STRUCTDESC s_aIntrinsicStruct[] =
+  {
+    {"int2", s_aIntXYZW, 2},
+    {"int3", s_aIntXYZW, 3},
+    {"int4", s_aIntXYZW, 4},
+    
+    {"vec2", s_aVecXYZW, 2},
+    {"vec3", s_aVecXYZW, 3},
+    {"vec4", s_aVecXYZW, 4},
+    
+    {"half2", s_aHalfXYZW, 2},
+    {"half3", s_aHalfXYZW, 3},
+    {"half4", s_aHalfXYZW, 4},
+
+    {"uint2", s_aUintXYZW, 2},
+    {"uint3", s_aUintXYZW, 3},
+    {"uint4", s_aUintXYZW, 4},
+
+    {"float2", s_aVecXYZW, 2},
+    {"float3", s_aVecXYZW, 3},
+    {"float4", s_aVecXYZW, 4},
+    
+    {"double2", s_aDoubleXYZW, 2},
+    {"double3", s_aDoubleXYZW, 3},
+    {"double4", s_aDoubleXYZW, 4},
+
+    {NULL},
+  };
+
+  STRUCTDESC s_aBaseType[] =
+  {
+    {"float"},
+    {"half"},
+    {"int"},
+    {"bool"},
+    {"uint"},
+    {"double"},
+    {NULL}
+  };
+
 
 /*
 [] [float] [x]

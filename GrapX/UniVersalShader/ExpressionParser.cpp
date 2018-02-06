@@ -3,6 +3,7 @@
 #include <Smart/SmartStream.h>
 #include <clTokens.h>
 #include <clStringSet.h>
+#include <clStablePool.h>
 #include "ArithmeticExpression.h"
 #include "ExpressionParser.h"
 #include "UVShaderError.h"
@@ -81,7 +82,7 @@ GXLPCSTR g_ExportErrorMessage1 = __FILE__;
 
 namespace UVShader
 {
-  CodeParser::TOKEN::T_LPCSTR s_szString = "string";
+  TOKEN::T_LPCSTR s_szString = "string";
   //////////////////////////////////////////////////////////////////////////
 #if 0
   enum GrammarCategory // 类别
@@ -161,6 +162,9 @@ namespace UVShader
 #endif
 
   //////////////////////////////////////////////////////////////////////////
+  extern STRUCTDESC s_aIntrinsicStruct[];
+  extern STRUCTDESC s_aBaseType[];
+
 
   DefaultInclude s_DefaultInclude;
 
@@ -819,7 +823,7 @@ namespace UVShader
         if(bPound) {
           std::for_each(p.begin(), p.end(), [&c](const TOKEN& tt) {
             c.stream.push_back(tt);
-            c.stream.back().type = ArithmeticExpression::TOKEN::TokenType_String;
+            c.stream.back().type = TOKEN::TokenType_String;
             c.stream.back().precedence = 0;
           });
         }
@@ -976,7 +980,7 @@ namespace UVShader
     stat.defn.szType = GetUniqueString(p);
 
     TKSCOPE scope(pScope->begin, definition_end);
-    if(!ParseExpression(stat.sRoot, scope))
+    if(!ParseExpression(stat.sRoot, m_GlobalSet, scope))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope.end));
       return FALSE;
@@ -1019,6 +1023,7 @@ namespace UVShader
     //  [StatementBlock]
     //};
 
+    NameSet sNameSet_Func(m_GlobalSet);
     if(pScope->begin == pScope->end) {
       return TRUE;
     }
@@ -1062,8 +1067,9 @@ namespace UVShader
     // #
     if(p[0].scope != p[1].scope + 1) // 有参数: 两个括号不相邻
     {
-      TKSCOPE ArgScope(m_aTokens[p->scope].scope + 1, p->scope);
-      ParseFunctionArguments(&stat, &ArgScope);
+      TKSCOPE ArgScope; //(m_aTokens[p->scope].scope + 1, p->scope);
+      InitTokenScope(ArgScope, *p, FALSE);
+      ParseFunctionArguments(sNameSet_Func, &stat, &ArgScope);
     }
     p = &m_aTokens[p->scope];
     ASSERT(*p == ')');
@@ -1090,17 +1096,14 @@ namespace UVShader
 
       if(func_statement_block.IsValid())
       {
-        STATEMENT sub_stat = {StatementType_Expression};
-        if(ParseStatementAs_Expression(&sub_stat, &func_statement_block))
+        if(ParseStatementAs_Expression(&stat, sNameSet_Func, &func_statement_block))
         {
 #ifdef ENABLE_SYNTAX_VERIFY
-          if(Verify_Block(sub_stat.sRoot.pNode, &m_GlobalSet) == FALSE)
+          if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
           {
             return FALSE;
           }
 #endif
-          stat.func.pExpression = (STATEMENT*)m_aSubStatements.size();
-          m_aSubStatements.push_back(sub_stat);
         }
       }
     }
@@ -1116,22 +1119,22 @@ namespace UVShader
     return TRUE;
   }
 
-  CodeParser::SYNTAXNODE* CodeParser::FlatDefinition(SYNTAXNODE* pThisChain)
+  SYNTAXNODE* CodeParser::FlatDefinition(SYNTAXNODE* pThisChain)
   {
     SYNTAXNODE* pNode = pThisChain->Operand[0].pNode;
 
     // 外部保证满足如下关系
-    ASSERT(pThisChain->mode == ArithmeticExpression::SYNTAXNODE::MODE_Chain);
-    ASSERT(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition);
+    ASSERT(pThisChain->mode == SYNTAXNODE::MODE_Chain);
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition);
 
-    ArithmeticExpression::SYNTAXNODE::PtrList sVarList;
-    ArithmeticExpression::SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
+    SYNTAXNODE::PtrList sVarList;
+    SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
     pNode->Operand[1].ptr = pFirstVar->ptr;
 
     for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
     {
       SYNTAXNODE* n = *it;
-      n->mode = pNode->mode; // ArithmeticExpression::SYNTAXNODE::MODE_Definition;
+      n->mode = pNode->mode; // SYNTAXNODE::MODE_Definition;
       n->pOpcode = NULL;
       n->Operand[0].ptr = pNode->Operand[0].ptr;
 
@@ -1139,8 +1142,8 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_NODE_ID
       pChain->id = m_nNodeId++;
 #endif
-      pChain->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
-      pChain->mode = ArithmeticExpression::SYNTAXNODE::MODE_Chain;
+      pChain->magic = SYNTAXNODE::FLAG_OPERAND_MAGIC;
+      pChain->mode = SYNTAXNODE::MODE_Chain;
       pChain->pOpcode = NULL;
       pChain->Operand[0].ptr = n;
       pChain->Operand[1].ptr = pThisChain->Operand[1].ptr;
@@ -1151,7 +1154,7 @@ namespace UVShader
     return pThisChain;
   }
 
-  ArithmeticExpression::SYNTAXNODE::GLOB* CodeParser::BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode)
+  SYNTAXNODE::GLOB* CodeParser::BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode)
   {
     if(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->CompareOpcode(','))
     {
@@ -1162,7 +1165,7 @@ namespace UVShader
     return &pNode->Operand[0];
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(const TKSCOPE& scope, NameSet& sNameSet, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
   {
     // pMembers->ptr为空表示解析失败，空定义pMembers->ptr也是一个block
 
@@ -1203,7 +1206,8 @@ namespace UVShader
     }
     else if(*p == ';') {
       // 结构体声明, 只是声明有这么个东西
-      sNameSet.RegisterType(strName, TYPEDESC::TypeCate_Struct);
+      //sNameSet.RegisterType(strName, TYPEDESC::TypeCate_Struct);
+      sNameSet.RegisterStruct(ptkName, NULL);
       return (p - pTokensFront + 1);
     }
     else if(*p == '{')
@@ -1214,6 +1218,7 @@ namespace UVShader
       InitTokenScope(sMembersScope, *p, TRUE);
       ASSERT(sMembersScope.end < scope.end); // 给出的作用域不对
 
+#if 0
       if(sNameSet.RegisterType(strName, TYPEDESC::TypeCate_Struct) == FALSE &&
         m_GlobalSet.HasVariable(strName))
       {
@@ -1221,8 +1226,9 @@ namespace UVShader
         OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), ptkName->ToString(str).CStr());
         return sMembersScope.end;
       }
+#endif
 
-      if(_CL_NOT_(ParseExpression(*pMembers, sMembersScope)))
+      if(_CL_NOT_(ParseExpression(*pMembers, sNameSet, sMembersScope)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
         return sMembersScope.end;
@@ -1258,7 +1264,7 @@ namespace UVShader
           {
             if(depth == 0)
             {
-              if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Chain) {
+              if(pNode->mode != SYNTAXNODE::MODE_Chain) {
                 // ERROR!
                 CLBREAK;
                 return FALSE;
@@ -1267,7 +1273,7 @@ namespace UVShader
             }
             else if(depth == 1)
             {
-              if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Definition) {
+              if(pNode->mode != SYNTAXNODE::MODE_Definition) {
                 // ERROR
                 const TOKEN& t = pNode->GetAnyTokenAPB();
                 clStringA str = t.ToString();
@@ -1322,6 +1328,17 @@ namespace UVShader
         *pSignatures = 0;
         *pDefinitionNum = 0;
       }
+
+      if(sNameSet.RegisterStruct(ptkName, pMembers->pNode) == FALSE &&
+        //m_GlobalSet.GetVariable(strName))
+        m_GlobalSet.GetVariable(ptkName))        
+      {
+        clStringW str;
+        OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), ptkName->ToString(str).CStr());
+        return sMembersScope.end;
+      }
+
+
       p = pTokensFront + sMembersScope.end;
     } // else if(*p == '{')
 
@@ -1352,7 +1369,7 @@ namespace UVShader
       //stat_var.defn.szType = stat.stru.szName;
       SYNTAXNODE::GLOB glob;
 
-      if(_CL_NOT_(ParseExpression(glob, scope_var)))
+      if(_CL_NOT_(ParseExpression(glob, sNameSet, scope_var)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
         return FALSE;
@@ -1363,8 +1380,8 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_NODE_ID
       pNewDef->id = m_nNodeId++;
 #endif
-      pNewDef->magic = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
-      pNewDef->mode = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
+      pNewDef->magic = SYNTAXNODE::FLAG_OPERAND_MAGIC;
+      pNewDef->mode = SYNTAXNODE::MODE_Definition;
       pNewDef->pOpcode = NULL;
       pNewDef->Operand[0].pTokn = ptkName;
       pNewDef->Operand[1].ptr = glob.ptr;
@@ -1382,7 +1399,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
         SYNTAXNODE* pChainNode = glob.pNode;
         while(pChainNode) {
-          Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
+          Verify_VariableDefinition(sNameSet, *pChainNode->Operand[0].pNode);
           pChainNode = pChainNode->Operand[1].pNode;
         }
 #endif
@@ -1401,7 +1418,6 @@ namespace UVShader
     return p - pTokensFront;
   }
 
-#if 1
   GXBOOL CodeParser::ParseStatementAs_Struct(TKSCOPE* pScope)
   {
     TOKEN* p = &m_aTokens[pScope->begin];
@@ -1417,7 +1433,7 @@ namespace UVShader
     int nSignatures = 0;
     int nDefinition = 0;
     
-    pScope->begin = ParseStructDefinition(*pScope, m_GlobalSet, &stat.sRoot,
+    pScope->begin = ParseStructDefinition(m_GlobalSet, *pScope, &stat.sRoot,
       &stat_var.sRoot, &nSignatures, &nDefinition);
 
     if(stat.sRoot.ptr)
@@ -1435,206 +1451,6 @@ namespace UVShader
 
     return TRUE;
   }
-#else
-  GXBOOL CodeParser::ParseStatementAs_Struct( TKSCOPE* pScope )
-  {
-    TOKEN* p = &m_aTokens[pScope->begin];
-    const TOKEN* pEnd = &m_aTokens.front() + pScope->end;
-
-    if(*p != "struct") {
-      return FALSE;
-    }
-
-    STATEMENT stat = {StatementType_Empty};
-    INC_BUT_NOT_END(p, pEnd);
-
-    TOKEN* pStructName = p;
-    stat.stru.szName = GetUniqueString(p);
-    if(m_GlobalSet.RegisterType(stat.stru.szName, TYPEDESC::TypeCate_Struct) == FALSE &&
-      m_GlobalSet.HasVariable(stat.stru.szName))
-    {
-      clStringW str;
-      OutputErrorW(*pStructName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), pStructName->ToString(str).CStr());
-      return FALSE;
-    }
-    INC_BUT_NOT_END(p, pEnd);
-
-    if(*p == ";") {
-      // 结构体声明
-      pScope->begin = p - &m_aTokens.front() + 1;
-      return TRUE;
-    }
-    else if(*p != "{") {
-      // ERROR: 错误的结构体定义
-      CLBREAK;
-      return FALSE;
-    }
-
-    TKSCOPE sMembersScope;
-    InitTokenScope(sMembersScope, *p, TRUE);
-
-    if(_CL_NOT_(ParseExpression(stat.sRoot, sMembersScope)))
-    {
-      ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
-      return FALSE;
-    }
-
-    pScope->begin = sMembersScope.end;
-    if(pScope->begin >= pScope->end) {
-      OutputErrorW(m_aTokens[pScope->begin], UVS_EXPORT_TEXT(1004, "遇到意外的文件结束")); // 遇到意外的文件结束
-      return FALSE;
-    }
-    else if(m_aTokens[pScope->begin] != ";" && m_aTokens[pScope->begin].IsIdentifier() == FALSE) {
-      OutputErrorW(m_aTokens[pScope->begin], UVS_EXPORT_TEXT(2145, "语法错误：标识符前面缺少“%s”"), ";"); // "语法错误：标识符前面缺少“%s”"
-      return FALSE;
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-    TRACE("---------------------------------------------\n");
-    DbgDumpSyntaxTree(NULL, stat.sRoot.pNode, 0, NULL, 1);
-    TRACE("---------------------------------------------\n");
-
-    if(stat.sRoot.pNode->Operand[0].ptr)
-    {
-      // 这里面所做的就是将 type a,b,c;这种形式展开为
-      // type a; type b; type c;
-      SYNTAXNODE* pThisChain = NULL;
-      int nSignatures = 0; // Signature Member数量
-      int nDefination = 0; // 定义数量
-      b32 result = TRUE;
-      RecursiveNode<SYNTAXNODE>(this, stat.sRoot.pNode->Operand[0].pNode, [this, &pThisChain, &nDefination, &nSignatures, &result]
-      (SYNTAXNODE* pNode, int depth)->GXBOOL
-      {
-        if(depth == 0)
-        {
-          if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Chain) {
-            // ERROR!
-            CLBREAK;
-            return FALSE;
-          }
-          pThisChain = pNode;
-        }
-        else if(depth == 1)
-        {
-          if(pNode->mode != ArithmeticExpression::SYNTAXNODE::MODE_Definition) {
-            // ERROR
-            const TOKEN& t = pNode->GetAnyTokenAPB();
-            clStringA str = t.ToString();
-            OutputErrorW(t, UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), clStringW(str));
-            result = FALSE;
-            return FALSE;
-          }
-
-          nDefination++;
-
-          if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsNode()
-            && pNode->Operand[1].pNode->CompareOpcode(','))
-          {
-            pThisChain = FlatDefinition(pThisChain);
-          }
-        }
-        else if(depth == 2)
-        {
-          if(pNode->CompareOpcode(':')) {
-            nSignatures++;
-          }
-        }
-
-        return TRUE;
-      });
-
-      if(_CL_NOT_(result)) {
-        return FALSE;
-      }
-
-      if(nSignatures && nSignatures != nDefination) {
-        // ERROR: 不是所有成员都定义为signatures
-        CLBREAK;
-      }
-
-      if(stat.sRoot.IsNode()) {
-#ifdef ENABLE_SYNTAX_VERIFY
-        if(Verify_StructMember(*stat.sRoot.pNode) == FALSE) {
-          return FALSE;
-        }
-#endif
-      }
-
-      stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
-      stat.stru.nNumOfMembers = nDefination;
-    }
-    else // 空结构体
-    {
-      stat.type = StatementType_Struct;
-      stat.stru.nNumOfMembers = 0;
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-
-    //
-    // 结构体定义后定义变量
-    //
-    if(m_aTokens[pScope->begin] == ';')
-    {
-      stat.sRoot.pNode->Operand[1].pTokn = &m_aTokens[pScope->begin];
-      m_aStatements.push_back(stat);
-      ++pScope->begin;
-    }
-    else {
-      const auto semi_end = m_aTokens[pScope->begin].semi_scope;
-      TKSCOPE scope_var(pScope->begin, semi_end + 1);
-      stat.sRoot.pNode->Operand[1].pTokn = &m_aTokens[semi_end];
-      m_aStatements.push_back(stat);
-
-      // 结构体定义后定义变量
-      STATEMENT stat_var;
-      stat_var.type = StatementType_Definition;
-      stat_var.defn.modifier = UniformModifier_empty;
-      stat_var.defn.storage_class = VariableStorageClass_empty;
-      stat_var.defn.szType = stat.stru.szName;
-
-      if(_CL_NOT_(ParseExpression(stat_var.sRoot, scope_var)))
-      {
-        ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
-        return FALSE;
-      }
-
-      // 封装一个定义序列
-      SYNTAXNODE* pNewDef = m_NodePool.Alloc();
-#ifdef ENABLE_SYNTAX_NODE_ID
-      pNewDef->id      = m_nNodeId++;
-#endif
-      pNewDef->magic   = ArithmeticExpression::SYNTAXNODE::FLAG_OPERAND_MAGIC;
-      pNewDef->mode    = ArithmeticExpression::SYNTAXNODE::MODE_Definition;
-      pNewDef->pOpcode = NULL;
-      pNewDef->Operand[0].ptr = pStructName;
-      pNewDef->Operand[1].ptr = stat_var.sRoot.ptr;
-
-      stat_var.sRoot.pNode = pNewDef;
-
-      pScope->begin = clMin(pScope->end, scope_var.end + 1);
-
-      if(stat_var.sRoot.pNode->Operand[1].IsNode() &&
-        stat_var.sRoot.pNode->Operand[1].pNode->CompareOpcode(','))
-      {
-        MakeSyntaxNode(&stat_var.sRoot, SYNTAXNODE::MODE_Chain, &stat_var.sRoot, NULL);
-        FlatDefinition(stat_var.sRoot.pNode);
-
-#ifdef ENABLE_SYNTAX_VERIFY
-        SYNTAXNODE* pChainNode = stat_var.sRoot.pNode;
-        while(pChainNode) {
-          Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
-          pChainNode = pChainNode->Operand[1].pNode;
-        }
-#endif
-
-      }
-      m_aStatements.push_back(stat_var);
-    }
-
-    return TRUE;
-  }
-#endif
 
   GXBOOL CodeParser::ParseStatementAs_Typedef(TKSCOPE* pScope)
   {
@@ -1657,7 +1473,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL CodeParser::ParseFunctionArguments(STATEMENT* pStat, TKSCOPE* pArgScope)
+  GXBOOL CodeParser::ParseFunctionArguments(NameSet& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope)
   {
     // 函数参数格式
     // [InputModifier] Type Name [: Semantic]
@@ -1697,11 +1513,11 @@ namespace UVShader
       INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
 
 NOT_INC_P:
-      arg.szType = GetUniqueString(p);
+      arg.ptkType = p;
 
       INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
 
-      arg.szName = GetUniqueString(p);
+      arg.ptkName = p;
 
       if(++p >= pEnd) {
         aArgs.push_back(arg);
@@ -1726,7 +1542,15 @@ NOT_INC_P:
     ASSERT( ! aArgs.empty());
     pStat->func.pArguments = (FUNCTION_ARGUMENT*)m_aArgumentsPack.size();
     pStat->func.nNumOfArguments = aArgs.size();
-    m_aArgumentsPack.insert(m_aArgumentsPack.end(), aArgs.begin(), aArgs.end());
+
+    m_aArgumentsPack.reserve(m_aArgumentsPack.size() + aArgs.size());
+    for(auto it = aArgs.begin(); it != aArgs.end(); ++it)
+    {
+      clStringA str;
+      sNameSet.RegisterVariable(it->ptkType->ToString(str), it->ptkName);
+      m_aArgumentsPack.push_back(*it);
+    }
+    //m_aArgumentsPack.insert(m_aArgumentsPack.end(), aArgs.begin(), aArgs.end());
     return TRUE;
   }
 
@@ -1741,6 +1565,7 @@ NOT_INC_P:
     return m_pContext->Strings.add(pSym->ToString());
   }
 
+#if 0
   const TYPEDESC* CodeParser::ParseType(const TOKEN& token)
   {
     TYPEDESC sType = {NULL, 1, 1};
@@ -1794,8 +1619,21 @@ NOT_INC_P:
 
     return NULL;
   }
+#endif
+//#else
+//  const TYPEDESC* CodeParser::ParseType(const TOKEN& token)
+//  {
+//    for(int i = 0; s_aIntrinsicStruct[i].name; i++)
+//    {
+//      if(token == s_aIntrinsicStruct[i].name) {
+//      }
+//    }
+//
+//
+//  }
+//#endif
 
-  GXBOOL CodeParser::ParseStatementAs_Expression(STATEMENT* pStat, TKSCOPE* pScope)
+  GXBOOL CodeParser::ParseStatementAs_Expression(STATEMENT* pStat, NameSet& sNameSet, TKSCOPE* pScope)
   {
     m_nDbgNumOfExpressionParse = 0;
     m_aDbgExpressionOperStack.clear();
@@ -1805,10 +1643,7 @@ NOT_INC_P:
       return TRUE;
     }
 
-    STATEMENT& stat = *pStat;
-    
-    GXBOOL bret = ParseCodeBlock(stat.sRoot, *pScope);
-    return bret;
+    return ParseCodeBlock(pStat->sRoot, sNameSet, *pScope);
   }
 
   void CodeParser::DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr, int depth)
@@ -1825,7 +1660,7 @@ NOT_INC_P:
           if(depth == 0) {
             DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i], 0);
           }
-          else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Chain) {
+          else if(pNode->mode == SYNTAXNODE::MODE_Chain) {
             DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i], depth);
           }
           else {
@@ -1876,10 +1711,10 @@ NOT_INC_P:
       strCommand.AppendFormat("[%s] [%s] [%s]", pNode->pOpcode ? pNode->pOpcode->ToString() : "", str[0], str[1]);
 #endif
 
-      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Chain) {
+      if(pNode->mode == SYNTAXNODE::MODE_Chain) {
         strCommand.Append("(Chain)");
       }
-      else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Block) {
+      else if(pNode->mode == SYNTAXNODE::MODE_Block) {
         strCommand.Append("(Block)");
       }
     }
@@ -2017,19 +1852,19 @@ NOT_INC_P:
       OutputErrorW(front, UVS_EXPORT_TEXT(5012, "\"else\" 不能独立使用."));
     }
     else if(front == "for") {
-      pend = ParseFlowFor(scope, pDesc);
+      pend = ParseFlowFor(sNameSet, scope, pDesc);
       ASSERT(m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
     }
     else if(front == "if") {
-      pend = ParseFlowIf(scope, pDesc, FALSE);
+      pend = ParseFlowIf(sNameSet, scope, pDesc, FALSE);
       ASSERT(m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
     }
     else if(front == "while") {
-      pend = ParseFlowWhile(scope, pDesc);
+      pend = ParseFlowWhile(sNameSet, scope, pDesc);
       ASSERT(m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
     }
     else if(front == "do") {
-      pend = ParseFlowDoWhile(scope, pDesc);
+      pend = ParseFlowDoWhile(sNameSet, scope, pDesc);
       ASSERT(m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
     }
     else if(front == "typedef") {
@@ -2038,12 +1873,11 @@ NOT_INC_P:
     }
     else if(front == "struct") {
       //pend = ParseStructDefine(scope, pDesc);
-      // FIXME: m_GlobalSet 是错误的
       SYNTAXNODE::GLOB sMembers = { 0 };
       SYNTAXNODE::GLOB sVariable = { 0 };
       int nSignatures = 0;
       int nDefinition = 0;
-      pend = ParseStructDefinition(scope, m_GlobalSet, &sMembers, &sVariable, &nSignatures, &nDefinition);
+      pend = ParseStructDefinition(sNameSet, scope, &sMembers, &sVariable, &nSignatures, &nDefinition);
 
       if(sMembers.ptr)
       {
@@ -2058,6 +1892,8 @@ NOT_INC_P:
       {
         MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, pDesc, &sVariable);
       }
+
+      //sNameSet.RegisterStruct()
     }
     else if(front == "break") {
       eMode = SYNTAXNODE::MODE_Flow_Break;
@@ -2109,7 +1945,7 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope)
   {
     // 解析一条表达式语句或者一个语句块
     ASSERT(scope.begin == scope.end ||
@@ -2120,7 +1956,7 @@ NOT_INC_P:
       //m_aTokens[scope.begin] == "return" );
 
     if(m_aTokens[scope.begin] == '{') {
-      return ParseCodeBlock(glob, scope);
+      return ParseCodeBlock(glob, sNameSet, scope);
     }
     else if(ParseArithmeticExpression(1, TKSCOPE(scope.begin, scope.end - 1), &glob) == FALSE)
     {
@@ -2133,7 +1969,7 @@ NOT_INC_P:
   //////////////////////////////////////////////////////////////////////////
   // 解析一个代码块
   // 避免每条语句解析都递归
-  GXBOOL CodeParser::ParseCodeBlock(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope)
   {
     // 保证解析内容在数学区间: [begin, end)
     ASSERT(m_aTokens[scope.begin].scope == scope.end - 1);
@@ -2142,12 +1978,12 @@ NOT_INC_P:
     TKSCOPE step_scope(scope.begin + 1, scope.end - 1); // begin会步进, end恒定
     MakeSyntaxNode(&glob, SYNTAXNODE::MODE_Block, NULL, NULL);
 
-    return ParseToChain(glob.pNode->Operand[0], step_scope);
+    return ParseToChain(glob.pNode->Operand[0], sNameSet, step_scope);
   }
 
   //////////////////////////////////////////////////////////////////////////
   // 解析一个范围内的所有表达式, 解析的表达式会连接成为chain
-  GXBOOL CodeParser::ParseToChain(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseToChain(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope)
   {
     SYNTAXNODE::GLOB A;
     SYNTAXNODE::GLOB* pCurrNode = &glob;
@@ -2157,7 +1993,7 @@ NOT_INC_P:
     {
       A.ptr = NULL;
       
-      const TKSCOPE::TYPE pos = TryParseSingle(A, step_scope);
+      const TKSCOPE::TYPE pos = TryParseSingle(sNameSet, A, step_scope);
       if(pos == TKSCOPE::npos) {
         return FALSE;
       }
@@ -2171,7 +2007,7 @@ NOT_INC_P:
       MakeSyntaxNode(pCurrNode, SYNTAXNODE::MODE_Chain, &A, NULL);
 
       // 变量声明展开
-      if(A.IsNode() && A.pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition &&
+      if(A.IsNode() && A.pNode->mode == SYNTAXNODE::MODE_Definition &&
         A.pNode->Operand[1].IsNode() && A.pNode->Operand[1].pNode->CompareOpcode(','))
       {
         pCurrNode = &(FlatDefinition(pCurrNode->pNode)->Operand[1]);
@@ -2188,7 +2024,7 @@ NOT_INC_P:
   // 如果解析失败, 返回TKSCOPE::npos
   // 如果解析成功, 返回接下来解析的起始位置
 
-  CodeParser::TKSCOPE::TYPE CodeParser::TryParseSingle(SYNTAXNODE::GLOB& glob, const TKSCOPE& step_scope)
+  CodeParser::TKSCOPE::TYPE CodeParser::TryParseSingle(NameSet& sNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& step_scope)
   {
     ASSERT(step_scope.GetSize() > 0); // 外部保证解析时不为空
     const auto& front = m_aTokens[step_scope.begin];
@@ -2208,12 +2044,12 @@ NOT_INC_P:
         return TKSCOPE::npos;
       }
 
-      if(ParseCodeBlock(glob, sub_block) == FALSE) {
+      if(ParseCodeBlock(glob, sNameSet, sub_block) == FALSE) {
         return TKSCOPE::npos;
       }
       return sub_block.end;
     }
-    else if(TryKeywords(m_GlobalSet, step_scope, &glob, &parse_end)) // FIXME: 暂时使用全局NameSet: m_GlobalSet
+    else if(TryKeywords(sNameSet, step_scope, &glob, &parse_end))
     {
       if(parse_end == TKSCOPE::npos) {
         return TKSCOPE::npos; // 解析错误, 直接返回
@@ -2251,9 +2087,10 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowIf(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowIf(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf)
   {
     // 与 ParseFlowWhile 相似
+    NameSet sNameSet_FlowIf(sNameSet);
     SYNTAXNODE::GLOB A = {0}, B = {0};
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "if");
@@ -2274,7 +2111,7 @@ NOT_INC_P:
     sStatement.begin = sConditional.end + 1;
     sStatement.end = scope.end;
 
-    sStatement.begin = TryParseSingle(B, sStatement);
+    sStatement.begin = TryParseSingle(sNameSet_FlowIf, B, sStatement);
     if(sStatement.begin == TKSCOPE::npos) {
       return TKSCOPE::npos;
     }
@@ -2305,11 +2142,11 @@ NOT_INC_P:
       if(m_aTokens[sStatement.begin] == "if")
       {
         eNextMode = SYNTAXNODE::MODE_Flow_ElseIf;
-        sStatement.begin = ParseFlowIf(TKSCOPE(sStatement.begin, scope.end), &B, TRUE);
+        sStatement.begin = ParseFlowIf(sNameSet_FlowIf, TKSCOPE(sStatement.begin, scope.end), &B, TRUE);
       }
       else
       {
-        sStatement.begin = TryParseSingle(B, sStatement);
+        sStatement.begin = TryParseSingle(sNameSet_FlowIf, B, sStatement);
         if(sStatement.begin == TKSCOPE::npos)
         {
           return TKSCOPE::npos;
@@ -2335,10 +2172,11 @@ NOT_INC_P:
     return bret ? sStatement.begin : TKSCOPE::npos;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     // 与 ParseFlowIf 相似
     SYNTAXNODE::GLOB A = {0}, B = {0};
+    NameSet sNameSet_FlowWhile(sNameSet);
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "while");
 
@@ -2352,7 +2190,6 @@ NOT_INC_P:
     
     bret = bret && ParseArithmeticExpression(0, sConditional, &A);
 
-
     sBlock.begin = sConditional.end + 1;
     sBlock.end   = TKSCOPE::npos;
     if(sBlock.begin >= scope.end) {
@@ -2363,7 +2200,7 @@ NOT_INC_P:
     auto& block_begin = m_aTokens[sBlock.begin];
     //SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
 
-    sBlock.end = TryParseSingle(B, TKSCOPE(sBlock.begin, scope.end));
+    sBlock.end = TryParseSingle(sNameSet_FlowWhile, B, TKSCOPE(sBlock.begin, scope.end));
     if(sBlock.end == TKSCOPE::npos) {
       return TKSCOPE::npos;
     }
@@ -2382,9 +2219,12 @@ NOT_INC_P:
     return bret ? sBlock.end : TKSCOPE::npos;
   }
   
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowDoWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowDoWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     ASSERT(m_aTokens[scope.begin] == "do");
+    // do{...}while(...); 中while()不允许使用类型定义
+    NameSet sNameSet_Do(sNameSet);
+
 
     if(scope.begin + 1 >= scope.end) {
       // ERROR: do 语法错误
@@ -2411,9 +2251,11 @@ NOT_INC_P:
 
     InitTokenScope(sConditional, while_token + 1, FALSE);
 
-    GXBOOL bret = ParseToChain(B, sBlock);
+    GXBOOL bret = ParseToChain(B, sNameSet_Do, sBlock);
     bret = bret && ParseArithmeticExpression(0, sConditional, &A);
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
+
+    // TODO: 检查A中没有类型定义
 
     TKSCOPE::TYPE while_end = sConditional.end + 2;
     if(while_end >= scope.end || m_aTokens[while_end] != ';') {
@@ -2452,88 +2294,42 @@ NOT_INC_P:
     ASSERT(A.IsToken()); // 目前仅处理这个情况
     clStringA strTypename;
 
-    const TYPEDESC* pTypeDesc = sNameSet.GetType(A.pTokn->ToString(strTypename));
-    if(pTypeDesc)
-    {
-      sNameSet.RegisterType(B.pTokn->ToString(strTypename), pTypeDesc->cate);
-    }
-    else
-    {
+    auto state = sNameSet.TypeDefine(A.pTokn, B.pTokn);
+
+    if(state == NameSet::State_NotFound) {
       clStringA strTypenameW;
       OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5020, "“typedef”定义中使用的“%s”不是一个类型"), A.pTokn->ToString(strTypenameW).CStr());
       return TKSCOPE::npos;
     }
+    else if(state == NameSet::State_DuplicatedType) {
+      clStringA str;
+      OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5021, "“typedef”定义的类型“%s”已经存在"), B.pTokn->ToString(str).CStr());
+      return TKSCOPE::npos;
+    }
+
+    //const TYPEDESC2* pTypeDesc = sNameSet.GetType(A.pTokn->ToString(strTypename));
+    //if(pTypeDesc)
+    //{
+    //  ASSERT((pTypeDesc->pMemberNode == NULL && pTypeDesc->pDesc) ||
+    //    (pTypeDesc->pMemberNode && pTypeDesc->pDesc == NULL));
+
+    //  if(pTypeDesc->pMemberNode) {
+    //    sNameSet.RegisterStruct(B.pTokn, pTypeDesc->pMemberNode);
+    //  }
+    //  else if(pTypeDesc->pDesc) {
+    //  }
+    //  //sNameSet.RegisterType(B.pTokn->ToString(strTypename), pTypeDesc->cate);
+    //}
+    //else
+    //{
+    //  clStringA strTypenameW;
+    //  OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5020, "“typedef”定义中使用的“%s”不是一个类型"), A.pTokn->ToString(strTypenameW).CStr());
+    //  return TKSCOPE::npos;
+    //}
 
     MakeSyntaxNode(pDest, SYNTAXNODE::MODE_Typedef, NULL, &A, &B);
     return front.semi_scope + 1;
   }
-
-#if 0
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefine(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
-  {
-    SYNTAXNODE::GLOB T, B = {0};
-    GXBOOL bret = TRUE;
-    ASSERT(m_aTokens[scope.begin] == "struct");
-
-
-    //RTSCOPE sName(scope.begin + 2, m_aTokens[scope.begin + 1].scope);
-    TKSCOPE::TYPE index = scope.begin + 2;
-
-    if(index >= scope.end) {
-      // ERROR: struct 定义错误，缺少定义名
-      return TKSCOPE::npos;
-    }
-
-    // 确定定义块的范围
-    TKSCOPE sBlock(index, m_aTokens[index].scope);
-    if(sBlock.end == TKSCOPE::npos || sBlock.end >= scope.end) {
-      ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sBlock.begin));
-      return TKSCOPE::npos;
-    }
-
-    clstack<SYNTAXNODE::GLOB> NodeStack;
-
-    while(++index < sBlock.end && bret)
-    {
-      auto& decl = m_aTokens[index];
-      if(decl.semi_scope == TKSCOPE::npos || (TKSCOPE::TYPE)decl.semi_scope >= sBlock.end) {
-        ERROR_MSG_缺少分号(decl);
-        break;
-      }
-      else if(index == decl.semi_scope) {
-        continue;
-      }
-
-      bret = bret && ParseArithmeticExpression(0, TKSCOPE(index, decl.semi_scope), &T);
-      NodeStack.push(T);
-      
-      index = decl.semi_scope;
-    }
-
-    while( ! NodeStack.empty())
-    {
-      MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &NodeStack.top(), &B);
-      NodeStack.pop();
-    }
-
-
-    index = sBlock.end + 1;
-    if(index >= scope.end || m_aTokens[index] != ';') {
-      ERROR_MSG_缺少分号(IDX2ITER(sBlock.end - 1));
-    }
-    else {
-      T = m_aTokens[index];
-      ASSERT(*T.pTokn == ';');
-      bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, &T);
-    }
-
-    T = m_aTokens[scope.begin + 1];
-    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_StructDef, &T, &B);
-
-    //DbgDumpScope("while", sConditional, sBlock);
-    return bret ? sBlock.end + 1 : TKSCOPE::npos;
-  }
-#endif // 0
 
   GXBOOL CodeParser::MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam)
   {
@@ -2671,8 +2467,9 @@ NOT_INC_P:
     return pBlock->end;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowFor(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowFor(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
+    NameSet sNameSet_FlowFor(sNameSet);
     TKSCOPE sInitializer, sConditional, sIterator;
     TKSCOPE sBlock;
 
@@ -2701,7 +2498,7 @@ NOT_INC_P:
 
     if(uBlock.ptr == NULL) {
       //ParseExpression(&uBlock, sBlock);
-      if(TryParseSingle(uBlock, sBlock) == TKSCOPE::npos) {
+      if(TryParseSingle(sNameSet_FlowFor, uBlock, sBlock) == TKSCOPE::npos) {
         return TKSCOPE::npos;
       }
     }
@@ -2741,14 +2538,14 @@ NOT_INC_P:
       case StatementType_Function:
         //it->func.pArguments = &m_aArgumentsPack[(GXINT_PTR)it->func.pArguments];
         IndexToPtr(it->func.pArguments, m_aArgumentsPack);
-        IndexToPtr(it->func.pExpression, m_aSubStatements);
+        //IndexToPtr(it->func.pExpression, m_aSubStatements);
         break;
 
-      case StatementType_Expression:
-        break;
+      //case StatementType_Expression:
+      //  break;
 
-      case StatementType_Definition:
-        break;
+      //case StatementType_Definition:
+      //  break;
       }
     }
   }
@@ -3150,7 +2947,7 @@ NOT_INC_P:
 
         auto it = m_pContext->Macros.find(pNode->Operand[1].pTokn->ToString());
 
-        sOut.v.rank = ArithmeticExpression::VALUE::Rank_Signed64;
+        sOut.v.rank = VALUE::Rank_Signed64;
         sOut.v.nValue64 = (it != m_pContext->Macros.end());
       }
       else {
@@ -3499,18 +3296,19 @@ NOT_INC_P:
 
 #ifdef ENABLE_SYNTAX_VERIFY
 
-  const TYPEDESC* CodeParser::Verify_Type(const TOKEN& tkType)
+#if 0
+  const TYPEDESC2* CodeParser::Verify_Type(const TOKEN& tkType)
   {
-    const TYPEDESC* pTypeDesc = ParseType(tkType);
+    const TYPEDESC2* pTypeDesc = GetType(tkType);
     return pTypeDesc;
   }
 
-  const TYPEDESC* CodeParser::Verify_Struct(const TOKEN& tkType, const NameSet* pNameSet)
+  const TYPEDESC2* CodeParser::Verify_Struct(const TOKEN& tkType, const NameSet* pNameSet)
   {
     clStringA str;
     tkType.ToString(str);
-    TYPEDESC sType = {0};
-
+    //TYPEDESC sType = {0};
+    /*
     for(auto it = m_aStatements.begin(); it != m_aStatements.end(); ++it)
     {
       if(it->type == StatementType_Struct)
@@ -3524,6 +3322,7 @@ NOT_INC_P:
         }
       }
     }
+    */
 
     if(pNameSet)
     {
@@ -3532,6 +3331,7 @@ NOT_INC_P:
 
     return NULL;
   }
+#endif
 
   GXBOOL CodeParser::Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList)
   {
@@ -3566,14 +3366,20 @@ NOT_INC_P:
 
   GXBOOL CodeParser::Verify_VariableDefinition(NameSet& sNameSet, const SYNTAXNODE& rNode)
   {
-    ASSERT(rNode.mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition); // 只检查定义
+    ASSERT(rNode.mode == SYNTAXNODE::MODE_Definition); // 只检查定义
 
     const TOKEN& tkVar = rNode.Operand[1].IsToken()
       ? *rNode.Operand[1].pTokn
       : rNode.Operand[1].pNode->GetAnyTokenAB();
 
     ASSERT(rNode.Operand[0].IsToken()); // 外面的拆解保证不会出现这个
-    
+
+    clStringA strType, strVar;
+    rNode.Operand[0].pTokn->ToString(strType);
+    tkVar.ToString(strVar);
+
+   
+#if 0
     // 检查类型定义
     const TYPEDESC* pType = NULL;
     if(_CL_NOT_(rNode.Operand[0].pTokn->IsIdentifier()) || (
@@ -3587,17 +3393,32 @@ NOT_INC_P:
 
       return FALSE;
     }
+#endif
 
     // 检查变量名
     clStringW str;
+    const TYPEDESC* pType = NULL;
     if(tkVar.IsIdentifier())
     {
-      clStringA strA;
-      if(sNameSet.RegisterVariable(tkVar.ToString(strA)) == FALSE ||
-        sNameSet.HasType(strA))
+      //clStringA strA;
+      if((pType = sNameSet.RegisterVariable(strType, &tkVar)) == NULL ||
+        sNameSet.GetType(strVar))
       {
-        OutputErrorW(tkVar, UVS_EXPORT_TEXT(2371, "“%s”: 重定义"), tkVar.ToString(str).CStr());
-        return FALSE;
+        NameSet::State state = sNameSet.GetLastState();
+        if(state == NameSet::State_NotFound)
+        {
+          str = strType;
+          OutputErrorW(tkVar, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), str.CStr());
+          return FALSE;
+        }
+        else if(state == NameSet::State_DuplicatedVariable)
+        {
+          OutputErrorW(tkVar, UVS_EXPORT_TEXT(2371, "“%s”: 重定义"), tkVar.ToString(str).CStr());
+          return FALSE;
+        }
+        else {
+          CLBREAK; // 预期之外的状态
+        }
       }
     }
     else
@@ -3607,21 +3428,21 @@ NOT_INC_P:
     }
 
     return rNode.Operand[1].IsToken() ? TRUE
-      : Verify2_VariableExpr(*rNode.Operand[0].pTokn, pType, *rNode.Operand[1].pNode);
+      : Verify2_VariableExpr(sNameSet, *rNode.Operand[0].pTokn, pType, *rNode.Operand[1].pNode);
   }
 
-  GXBOOL CodeParser::Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode)
+  GXBOOL CodeParser::Verify2_VariableExpr(NameSet& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
-    RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, &pType]
+    RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, &pType, &sNameSet]
     (const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
-      if(pNode->CompareOpcode('=') || pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_ArrayAssignment) {
+      if(pNode->CompareOpcode('=') || pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
         if(pNode->Operand[1].IsToken())
         {
-          if(pType->cate == TYPEDESC::TypeCate_Struct ||
-            (pType->cate == TYPEDESC::TypeCate_Numeric && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_Numeric) ||
-            (pType->cate == TYPEDESC::TypeCate_String && pNode->Operand[1].pTokn->type != CodeParser::TOKEN::TokenType_String) )
+          if(//pType->cate == TYPEDESC::TypeCate_Struct ||
+            (pType->cate == TYPEDESC::TypeCate_Numeric && pNode->Operand[1].pTokn->type != TOKEN::TokenType_Numeric) ||
+            (pType->cate == TYPEDESC::TypeCate_String && pNode->Operand[1].pTokn->type != TOKEN::TokenType_String) )
           {
             clStringW str;
             clStringW str2(pType->name);
@@ -3629,12 +3450,23 @@ NOT_INC_P:
               pNode->Operand[1].pTokn->ToString(str).CStr(), str2.CStr());
             return (result = FALSE);
           }
+          else if(pType->cate == TYPEDESC::TypeCate_Struct)
+          {
+            const TYPEDESC* pVarTypeDesc = sNameSet.GetVariable(pNode->Operand[1].pTokn);
+            if(pType->cate != pVarTypeDesc->cate || pType->name != pVarTypeDesc->name)
+            {
+              clStringW str;
+              clStringW str2(pType->name);
+              OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
+                pNode->Operand[1].pTokn->ToString(str).CStr(), str2.CStr());
+            }
+          }
 
           if(pType->cate == TYPEDESC::TypeCate_Numeric)
           {
-            CodeParser::VALUE v;
-            CodeParser::VALUE::State s = v.set(*pNode->Operand[1].pTokn);
-            if(TEST_FLAG(s, CodeParser::VALUE::State_ErrorMask)) {
+            VALUE v;
+            VALUE::State s = v.set(*pNode->Operand[1].pTokn);
+            if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
               clStringW str;
               OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是\"%s\""), pNode->Operand[1].pTokn->ToString(str).CStr());
               return (result = FALSE);
@@ -3645,9 +3477,9 @@ NOT_INC_P:
         {
           if(pType->cate == TYPEDESC::TypeCate_Numeric)
           {
-            CodeParser::VALUE v;
-            CodeParser::VALUE::State s = pNode->Operand[1].pNode->Calcuate(v);
-            if(TEST_FLAG(s, CodeParser::VALUE::State_ErrorMask))
+            VALUE v;
+            VALUE::State s = pNode->Operand[1].pNode->Calcuate(v);
+            if(TEST_FLAG(s, VALUE::State_ErrorMask))
             {
               OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
               return (result = FALSE);
@@ -3662,8 +3494,11 @@ NOT_INC_P:
           }
           else if(pType->cate == TYPEDESC::TypeCate_Struct)
           {
-            OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
-            return (result = FALSE);
+            if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment)
+            {
+              OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
+              return (result = FALSE);
+            }
           }
         }
         else {
@@ -3684,7 +3519,7 @@ NOT_INC_P:
     RecursiveNode<const SYNTAXNODE>(this, pNode, [this, &result, &sNameSet]
     (const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
-      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Flow_For)
+      if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
       {
         NameSet sFlowForSet(&sNameSet);
         if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[0].pNode, &sFlowForSet)))
@@ -3698,21 +3533,21 @@ NOT_INC_P:
         }
         return FALSE;
       }
-      else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition)
+      else if(pNode->mode == SYNTAXNODE::MODE_Definition)
       {
         if(Verify_VariableDefinition(sNameSet, *pNode) == FALSE) {
           result = FALSE;
         }
         return FALSE; // 不再递归
       }
-      else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_StructDef)
+      else if(pNode->mode == SYNTAXNODE::MODE_StructDef)
       {
         clStringA str;
         // 注册结构体类型
-        sNameSet.RegisterType(pNode->Operand[0].pTokn->ToString(str), TYPEDESC::TypeCate_Struct);
+        //sNameSet.RegisterType(pNode->Operand[0].pTokn->ToString(str), TYPEDESC::TypeCate_Struct);
         return FALSE;
       }
-      else if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Opcode)
+      else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
       {
         if(pNode->pOpcode)
         {
@@ -3736,12 +3571,15 @@ NOT_INC_P:
     NameSet sSet;
     RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, &sSet](const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
-      if(pNode->mode == ArithmeticExpression::SYNTAXNODE::MODE_Definition)
+      if(pNode->mode == SYNTAXNODE::MODE_Definition)
       {
-        const ArithmeticExpression::SYNTAXNODE::GLOB& Op = pNode->Operand[1];
+        const SYNTAXNODE::GLOB& Op = pNode->Operand[1];
+        clStringA strType;
+        pNode->Operand[0].pTokn->ToString(strType);
+
         if(Op.IsToken()) {
           clStringA str;
-          if(sSet.RegisterVariable(Op.pTokn->ToString(str)) == FALSE)
+          if(sSet.RegisterVariable(strType, Op.pTokn/*->ToString(str)*/) == NULL)
           {
             clStringW str;
             OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), Op.pTokn->ToString(str));
@@ -3750,7 +3588,7 @@ NOT_INC_P:
         else if(Op.IsNode()) {
           auto& tk = Op.pNode->GetAnyTokenAB();
           clStringA str;
-          if(sSet.RegisterVariable(tk.ToString(str)) == FALSE)
+          if(sSet.RegisterVariable(strType, &tk/*.ToString(str)*/) == NULL)
           {
             clStringW str;
             OutputErrorW(tk, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), tk.ToString(str));
@@ -3764,12 +3602,13 @@ NOT_INC_P:
 
   GXBOOL CodeParser::Verify2_LeftValue(const NameSet& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode)
   {
-    clStringA strA;
+    //clStringA strA;
     clStringW strW;
     if(left_glob.IsToken()) {
-      if(sNameSet.HasVariable(left_glob.pTokn->ToString(strA)) == FALSE)
+      if(sNameSet.GetVariable(left_glob.pTokn/*->ToString(strA)*/) == NULL)
       {
-        strW = strA;
+        //strW = strA;
+        left_glob.pTokn->ToString(strW);
         OutputErrorW(*left_glob.pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), strW.CStr());
         return FALSE;
       }
@@ -3786,20 +3625,6 @@ NOT_INC_P:
     return TRUE;
   }
 #endif // #ifdef ENABLE_SYNTAX_VERIFY
-
-  //////////////////////////////////////////////////////////////////////////
-
-  bool TYPEDESC::operator<( const TYPEDESC& t ) const
-  {
-    const int r = GXSTRCMP(name, t.name);
-    if(r < 0) {
-      return TRUE;
-    }
-    else if(r > 0) {
-      return FALSE;
-    }
-    return ((maxR << 3) | maxC) < ((t.maxR << 3) | t.maxC);
-  }
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -3820,7 +3645,7 @@ NOT_INC_P:
         const auto it = std::find(aFormalParams.begin(), aFormalParams.end(), token);
         if(it != aFormalParams.end()) {
           token.formal_index = it->formal_index; 
-          token.type = ArithmeticExpression::TOKEN::TokenType_FormalParams;
+          token.type = TOKEN::TokenType_FormalParams;
         }
     });
 #ifdef _DEBUG
@@ -3867,69 +3692,141 @@ NOT_INC_P:
 
   NameSet::NameSet()
     : m_pParent(NULL)
+    , m_eLastState(State_Ok)
   {   
   }
 
   NameSet::NameSet(const NameSet* pParent)
     : m_pParent(pParent)
+    , m_eLastState(State_Ok)
   {
   }
 
   void NameSet::Cleanup()
   {
     m_TypeMap.clear();
-    m_VariableSet.clear();
+    m_VariableMap.clear();
   }
   
-  GXBOOL NameSet::RegisterType(LPCSTR szName, TYPEDESC::TypeCate cate)
+  GXBOOL NameSet::TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType)
   {
-    TYPEDESC td;
-    td.cate = cate;
-    td.maxC = 1;
-    td.maxR = 1;
-    td.name = szName;
-    auto r = m_TypeMap.insert(clmake_pair(szName, td));
-    return r.second;
+    ASSERT(pOut->pDesc == NULL && pOut->pMemberNode == NULL); // 强制外部初始化
+    for(int i = 0; s_aIntrinsicStruct[i].name; i++)
+    {
+      if(strType == s_aIntrinsicStruct[i].name) {
+        pOut->cate = TYPEDESC::TypeCate_Struct;
+        pOut->name = strType;
+        pOut->pDesc = &s_aIntrinsicStruct[i];
+        return TRUE;
+        //it = m_TypeMap.insert(clmake_pair(strType, td)).first;
+      }
+    }
+
+    for(int i = 0; s_aBaseType[i].name; i++)
+    {
+      if(strType == s_aBaseType[i].name)
+      {
+        pOut->cate = TYPEDESC::TypeCate_Numeric;
+        pOut->name = strType;
+        pOut->pDesc = &s_aBaseType[i];
+        return TRUE;
+      }
+    }
+
+    if(strType == s_szString) {
+      pOut->cate = TYPEDESC::TypeCate_String;
+      pOut->name = strType;
+      pOut->pDesc = NULL;
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
-  GXBOOL NameSet::RegisterVariable(LPCSTR szName)
+  const TYPEDESC* NameSet::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable)
   {
-    auto r = m_VariableSet.insert(szName);
-    return r.second;
+    const TYPEDESC* pDesc = GetType(strType);
+    if(pDesc == NULL)
+    {
+      TYPEDESC td = {TYPEDESC::TypeCate_Empty};
+      if(TestIntrinsicType(&td, strType) == FALSE) {
+        m_eLastState = State_NotFound;
+        return NULL;
+      }
+      pDesc = &(m_TypeMap.insert(clmake_pair(strType, td)).first->second);
+    }
+    
+    auto result = m_VariableMap.insert(clmake_pair(ptrVariable, pDesc));
+    if(result.second) {
+      // 添加成功, 返回type描述
+      m_eLastState = State_Ok;
+      return result.first->second;
+    }
+
+    m_eLastState = State_DuplicatedVariable;
+    return NULL;
   }
 
-  GXBOOL NameSet::RegisterType(const clStringA& strName, TYPEDESC::TypeCate cate)
+  NameSet::State NameSet::GetLastState() const
   {
-    TYPEDESC td;
-    td.cate = cate;
-    td.maxC = 1;
-    td.maxR = 1;
-    td.name = strName;
-    return m_TypeMap.insert(clmake_pair(strName, td)).second;
+    return m_eLastState;
   }
 
-  GXBOOL NameSet::RegisterVariable(const clStringA& strName)
+  GXBOOL NameSet::RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode)
   {
-    return m_VariableSet.insert(strName).second;
+    ASSERT(pMemberNode == NULL || pMemberNode->mode == SYNTAXNODE::MODE_Block);
+    TYPEDESC td = {TYPEDESC::TypeCate_Empty};
+    clStringA strName;
+    td.cate = TYPEDESC::TypeCate_Struct;
+    td.name = ptkName->ToString(strName);
+    td.pMemberNode = pMemberNode;
+
+    auto result = m_TypeMap.insert(clmake_pair(strName, td));
+
+    // 结构体声明可以重复
+    if(result.first->second.pMemberNode == NULL) {
+      result.first->second.pMemberNode = pMemberNode;
+      return TRUE;
+    }
+    else if(pMemberNode == NULL) { // 定义后也可以声明
+      return TRUE;
+    }
+    return result.second;
   }
 
-  GXBOOL NameSet::HasType(LPCSTR szName) const
+  const TYPEDESC* NameSet::GetVariable(const TOKEN* ptkName) const
   {
-    return (m_TypeMap.find(szName) != m_TypeMap.end());
+    auto it = m_VariableMap.find(TokenPtr(ptkName));
+    return it != m_VariableMap.end()
+      ? it->second
+      : (m_pParent ? m_pParent->GetVariable(ptkName) : NULL);
   }
 
-  GXBOOL NameSet::HasVariable(LPCSTR szName) const
+  const TYPEDESC* NameSet::GetType(const clStringA& strType) const
   {
-    return (m_VariableSet.find(szName) != m_VariableSet.end()) || 
-      (m_pParent && m_pParent->HasVariable(szName));
-  }
-
-  const TYPEDESC* NameSet::GetType(LPCSTR szName) const
-  {
-    auto it = m_TypeMap.find(szName);
+    auto it = m_TypeMap.find(strType);
     return it != m_TypeMap.end()
       ? &it->second
-      : (m_pParent ? m_pParent->GetType(szName) : NULL);
+      : (m_pParent ? m_pParent->GetType(strType) : NULL);
   }
+
+  NameSet::State NameSet::TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName)
+  {
+    clStringA strOriName;
+    TYPEDESC td = { TYPEDESC::TypeCate_Empty };
+    const TYPEDESC* pDesc = GetType(ptkOriName->ToString(strOriName));
+    if(pDesc == NULL) {
+      if(TestIntrinsicType(&td, strOriName) == FALSE) {
+        return State_NotFound;
+      }
+      pDesc = &td;
+    }
+
+    clStringA strNewName;
+    return m_TypeMap.insert(clmake_pair(ptkNewName->ToString(strNewName), *pDesc)).second
+      ? State_Ok : State_DuplicatedType;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
 } // namespace UVShader

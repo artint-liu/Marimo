@@ -10,6 +10,7 @@
 #include <clTokens.h>
 #include <clPathFile.h>
 #include <clStringSet.h>
+#include <clStablePool.h>
 #include "../../../GrapX/UniVersalShader/ArithmeticExpression.h"
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"

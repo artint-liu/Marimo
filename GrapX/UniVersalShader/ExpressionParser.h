@@ -41,48 +41,87 @@ namespace UVShader
     GXHRESULT Close(clBuffer* pBuffer) override;
   };
 
+  //struct TYPEDESC
+  //{
+  //  enum TypeCate
+  //  {
+  //    TypeCate_Numeric,
+  //    TypeCate_String,
+  //    TypeCate_Struct,
+  //  };
+
+  //  GXLPCSTR  name;
+  //  int       maxR : 8;    // Row, 或者 array size
+  //  int       maxC : 8;    // Column
+  //  TypeCate  cate : 8;
+
+  //  bool operator<(const TYPEDESC& t) const;
+  //};
+
   struct TYPEDESC
   {
     enum TypeCate
     {
+      TypeCate_Empty,
       TypeCate_Numeric,
       TypeCate_String,
       TypeCate_Struct,
     };
 
-    GXLPCSTR  name;
-    int       maxR : 8;    // Row, 或者 array size
-    int       maxC : 8;    // Column
-    TypeCate  cate : 8;
-
-    bool operator<(const TYPEDESC& t) const;
+    TypeCate          cate;
+    clStringA         name;
+    STRUCTDESC*       pDesc;
+    const SYNTAXNODE* pMemberNode;
   };
 
   class NameSet
   {
   public:
-    typedef clset<clStringA> StrSet;
-    typedef clmap<clStringA, TYPEDESC> TypeMap;
+    //typedef clset<clStringA> StrSet;
+    //typedef clmap<clStringA, TYPEDESC> TypeMap;
+    typedef clmap<clStringA, TYPEDESC>  TypeMap;
+    typedef clmap<TokenPtr, const TYPEDESC*>  VariableMap;
     typedef clStringA::LPCSTR LPCSTR;
+
+    enum State
+    {
+      State_Ok = 0,
+      State_NotFound = -1,         // 没有找到类型
+      State_DuplicatedType = -2,  // 重复注册类型
+      State_DuplicatedVariable = -3,
+    };
   
   protected:
     const NameSet* m_pParent;
-    TypeMap  m_TypeMap;
-    StrSet   m_VariableSet;
+    //TypeMap  m_TypeMap;
+    //StrSet   m_VariableSet;
+
+    TypeMap    m_TypeMap;
+    VariableMap m_VariableMap;
+    State      m_eLastState;
+
+    GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
 
   public:
     NameSet();
     NameSet(const NameSet* pParent);
 
     void   Cleanup();
-    GXBOOL RegisterType(LPCSTR szName, TYPEDESC::TypeCate cate);
-    GXBOOL RegisterVariable(LPCSTR szName);
-    GXBOOL RegisterType(const clStringA& strName, TYPEDESC::TypeCate cate);
-    GXBOOL RegisterVariable(const clStringA& strName);
+    //GXBOOL RegisterType(LPCSTR szName, TYPEDESC::TypeCate cate);
+    //GXBOOL RegisterVariable(LPCSTR szName);
+    //GXBOOL RegisterType(const clStringA& strName, TYPEDESC::TypeCate cate);
+    //GXBOOL RegisterVariable(const clStringA& strName);
 
-    GXBOOL HasType(LPCSTR szName) const;
-    GXBOOL HasVariable(LPCSTR szName) const;
-    const TYPEDESC* GetType(LPCSTR szName) const;
+    const TYPEDESC* GetType(const clStringA& strType) const;
+    const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
+    State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
+    GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
+    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
+    State  GetLastState() const;
+
+    //GXBOOL HasType(LPCSTR szName) const;
+    //GXBOOL HasVariable(LPCSTR szName) const;
+    //const TYPEDESC* GetType(LPCSTR szName) const;
   };
 
 
@@ -180,7 +219,7 @@ namespace UVShader
       StatementType_Typedef,        // Typedef
       StatementType_Struct,         // 结构体
       StatementType_Signatures,     // 用于shader输入输出标记的结构体
-      StatementType_Expression,     // 表达式
+      //StatementType_Expression,     // 表达式
     };
 
     enum FunctionStorageClass // 函数修饰，可选
@@ -232,16 +271,15 @@ namespace UVShader
     struct FUNCTION_ARGUMENT // 函数参数
     {
       InputModifier eModifier;  // [opt]
-      GXLPCSTR      szType;     // [req]
-      GXLPCSTR      szName;     // [req]
+      //GXLPCSTR      szType;     // [req]
+      //GXLPCSTR      szName;     // [req]
+      const TOKEN*  ptkType;    // [req]
+      const TOKEN*  ptkName;    // [req]
       GXLPCSTR      szSemantic; // [opt]
     };
     typedef clvector<FUNCTION_ARGUMENT> ArgumentsArray;
     
     //////////////////////////////////////////////////////////////////////////
-    struct STATEMENT;
-    struct STATEMENT_EXPR;
-
     struct STATEMENT_FUNC // 函数体/函数声明
     {
       FunctionStorageClass eStorageClass; // [opt]
@@ -250,7 +288,6 @@ namespace UVShader
       GXLPCSTR     szSemantic;    // [opt]
       FUNCTION_ARGUMENT*  pArguments;       // [opt]
       clsize              nNumOfArguments;  // [opt]
-      STATEMENT* pExpression;
     };
 
     struct STATEMENT_STRU // 结构体定义
@@ -259,11 +296,6 @@ namespace UVShader
       clsize           nNumOfMembers; // 不是必要的
     };
 
-    //struct STATEMENT_EXPR // 表达式定义
-    //{
-    //  SYNTAXNODE::GLOB sRoot;
-    //};
-    
     struct STATEMENT_DEFN
     {
       VariableStorageClass  storage_class;
@@ -280,7 +312,6 @@ namespace UVShader
       {
         STATEMENT_FUNC func;
         STATEMENT_STRU stru;
-        //STATEMENT_EXPR expr;
         STATEMENT_DEFN defn; // 全局变量定义
       };
     };
@@ -379,34 +410,32 @@ namespace UVShader
 
     GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
-    GXBOOL  ParseFunctionArguments(STATEMENT* pStat, TKSCOPE* pArgScope);
+    GXBOOL  ParseFunctionArguments(NameSet& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);
 
-    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, TKSCOPE* pScope); // (算数表)达式
+    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, NameSet& sNameSet, TKSCOPE* pScope); // (算数表)达式
 
     GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc);
 
     SYNTAXNODE* FlatDefinition(SYNTAXNODE* pThisChain);
     SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
 
-    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
-    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
-    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope);
-    TKSCOPE::TYPE  TryParseSingle(SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
+    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope);
+    TKSCOPE::TYPE  TryParseSingle(NameSet& sNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
 
     GXBOOL  TryKeywords(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest, TKSCOPE::TYPE* parse_end);
-    TKSCOPE::TYPE  ParseFlowIf(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
+    TKSCOPE::TYPE  ParseFlowIf(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
     TKSCOPE::TYPE  MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, SYNTAXNODE::GLOB* pBlockNode);
-    TKSCOPE::TYPE  ParseFlowFor(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowDoWhile(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowFor(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowDoWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseTypedef(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseStructDefinition(const TKSCOPE& scope, NameSet& sNameSet, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
-#if 0
-    TKSCOPE::TYPE  ParseStructDefine(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-#endif // 0
+    TKSCOPE::TYPE  ParseStructDefinition(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
+
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);
     void    GetNext(iterator& it, TOKEN& token);
@@ -446,11 +475,11 @@ namespace UVShader
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
 #ifdef ENABLE_SYNTAX_VERIFY
-    const TYPEDESC* Verify_Type(const TOKEN& tkType);
+    //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
     const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameSet* pNameSet);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
     GXBOOL Verify_VariableDefinition(NameSet& sNameSet, const SYNTAXNODE& rNode);
-    GXBOOL Verify2_VariableExpr(const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
+    GXBOOL Verify2_VariableExpr(NameSet& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameSet* pParentSet);
     GXBOOL Verify_StructMember(const SYNTAXNODE& rNode);

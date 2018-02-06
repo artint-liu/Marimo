@@ -173,6 +173,7 @@
     <ClInclude Include="..\..\clStringCommon.hxx" />
     <ClInclude Include="..\..\clSchedule.h" />
     <ClInclude Include="..\..\clLinkedList.h" />
+    <ClInclude Include="..\..\clStablePool.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">

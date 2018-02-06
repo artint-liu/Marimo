@@ -3,6 +3,7 @@
 #include <Smart/SmartStream.h>
 #include <clTokens.h>
 #include <clStringSet.h>
+#include <clStablePool.h>
 #include "ArithmeticExpression.h"
 #include "UVShaderError.h"
 //#include "ExpressionParser.h"
@@ -67,18 +68,18 @@ GXLPCSTR g_ExportErrorMessage2 = __FILE__;
 
 namespace UVShader
 {
-  template void RecursiveNode<ArithmeticExpression::SYNTAXNODE>(ArithmeticExpression* pParser, ArithmeticExpression::SYNTAXNODE* pNode, std::function<GXBOOL(ArithmeticExpression::SYNTAXNODE*, int)> func, int depth);
-  template void RecursiveNode<const ArithmeticExpression::SYNTAXNODE>(ArithmeticExpression* pParser, const ArithmeticExpression::SYNTAXNODE* pNode, std::function<GXBOOL(const ArithmeticExpression::SYNTAXNODE*, int)> func, int depth);
+  template void RecursiveNode<SYNTAXNODE>(ArithmeticExpression* pParser, SYNTAXNODE* pNode, std::function<GXBOOL(SYNTAXNODE*, int)> func, int depth);
+  template void RecursiveNode<const SYNTAXNODE>(ArithmeticExpression* pParser, const SYNTAXNODE* pNode, std::function<GXBOOL(const SYNTAXNODE*, int)> func, int depth);
 
   // 操作符号重载
-  ArithmeticExpression::VALUE::State operator|(ArithmeticExpression::VALUE::State a, ArithmeticExpression::VALUE::State b)
+  VALUE::State operator|(VALUE::State a, VALUE::State b)
   {
-    return ArithmeticExpression::VALUE::State((u32)a | (u32)b);
+    return VALUE::State((u32)a | (u32)b);
   }
 
-  ArithmeticExpression::VALUE::State operator|=(ArithmeticExpression::VALUE::State a, ArithmeticExpression::VALUE::State b)
+  VALUE::State operator|=(VALUE::State a, VALUE::State b)
   {
-    a = ArithmeticExpression::VALUE::State((u32)a | (u32)b);
+    a = VALUE::State((u32)a | (u32)b);
     return a;
   }
 
@@ -146,7 +147,7 @@ namespace UVShader
     m_NodePool.Clear();
   }
 
-  const ArithmeticExpression::TOKEN::Array* ArithmeticExpression::GetTokensArray() const
+  const TOKEN::Array* ArithmeticExpression::GetTokensArray() const
   {
     return &m_aTokens;
   }
@@ -283,7 +284,7 @@ namespace UVShader
     return 0;
   }
 
-  const ArithmeticExpression::SYNTAXNODE* ArithmeticExpression::TryGetNode(const SYNTAXNODE::GLOB* pDesc) const
+  const SYNTAXNODE* ArithmeticExpression::TryGetNode(const SYNTAXNODE::GLOB* pDesc) const
   {
     if(pDesc->IsNode()) {
       return pDesc->pNode;
@@ -291,7 +292,7 @@ namespace UVShader
     return NULL;
   }
 
-  ArithmeticExpression::SYNTAXNODE::MODE ArithmeticExpression::TryGetNodeMode(const SYNTAXNODE::GLOB* pDesc) const
+  SYNTAXNODE::MODE ArithmeticExpression::TryGetNodeMode(const SYNTAXNODE::GLOB* pDesc) const
   {
     if(pDesc->IsNode()) {
       return pDesc->pNode->mode;
@@ -956,31 +957,31 @@ namespace UVShader
 
   //////////////////////////////////////////////////////////////////////////
 
-  void ArithmeticExpression::VALUE::clear()
+  void VALUE::clear()
   {
     uValue64 = 0;
     rank = Rank_Undefined;
   }
 
-  void ArithmeticExpression::VALUE::SetZero()
+  void VALUE::SetZero()
   {
     uValue64 = 0;
     rank = Rank_Signed;
   }
 
-  void ArithmeticExpression::VALUE::SetOne()
+  void VALUE::SetOne()
   {
     uValue64 = 1;
     rank = Rank_Signed;
   }
 
-  ArithmeticExpression::VALUE& ArithmeticExpression::VALUE::set(const VALUE& v)
+  VALUE& VALUE::set(const VALUE& v)
   {
     *this = v;
     return *this;
   }
 
-  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::set( const TOKEN& token )
+  VALUE::State VALUE::set( const TOKEN& token )
   {
     // 注意，有关上限的检查写的不严谨
     // X是任意内容，D是指数字
@@ -1132,7 +1133,7 @@ namespace UVShader
   }
 
   template<typename _Ty>
-  typename _Ty ArithmeticExpression::VALUE::CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2)
+  typename _Ty VALUE::CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2)
   {
     if(opcode.length == 1)
     {
@@ -1169,7 +1170,7 @@ namespace UVShader
     return (_Ty)0;
   }
 
-  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1)
+  VALUE::State VALUE::Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1)
   {
     *this = param0;
     VALUE second = param1;
@@ -1204,7 +1205,7 @@ namespace UVShader
     return State_OK;
   }
 
-  clStringA ArithmeticExpression::VALUE::ToString() const
+  clStringA VALUE::ToString() const
   {
     clStringA str;
     switch(rank)
@@ -1230,7 +1231,7 @@ namespace UVShader
     return str;
   }
 
-  ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::SyncRank(Rank _type)
+  VALUE::State VALUE::SyncRank(Rank _type)
   {
     if(rank == _type || rank == Rank_Undefined) { // 同级或者未定义（一元操作情况）
       return State_OK;
@@ -1276,14 +1277,14 @@ namespace UVShader
     return State_OK;
   }
 
-  //ArithmeticExpression::VALUE::State ArithmeticExpression::VALUE::SyncLevel(VALUE& t1, VALUE& t2)
+  //VALUE::State VALUE::SyncLevel(VALUE& t1, VALUE& t2)
   //{
   //  Type type = clMax(t1.type, t2.type);
   //  
   //}
   
   //////////////////////////////////////////////////////////////////////////
-  void ArithmeticExpression::TOKEN::ClearMarker()
+  void TOKEN::ClearMarker()
   {
 #ifdef ENABLE_STRINGED_SYMBOL
     symbol.Clear();
@@ -1294,7 +1295,7 @@ namespace UVShader
     bPhony = 0;
   }
 
-  void ArithmeticExpression::TOKEN::Set(const iterator& _iter)
+  void TOKEN::Set(const iterator& _iter)
   {
     if(_iter.length != 0)
     {
@@ -1312,7 +1313,7 @@ namespace UVShader
     }
   }
 
-  void ArithmeticExpression::TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)
+  void TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)
   {
     ASSERT(str.IsNotEmpty());
 #ifdef ENABLE_STRINGED_SYMBOL
@@ -1324,7 +1325,7 @@ namespace UVShader
     bPhony     = 1;
   }
 
-  void ArithmeticExpression::TOKEN::SetPhonyString(const clStringA& str)
+  void TOKEN::SetPhonyString(const clStringA& str)
   {
     ASSERT(str.IsNotEmpty());
 #ifdef ENABLE_STRINGED_SYMBOL
@@ -1336,14 +1337,14 @@ namespace UVShader
     bPhony     = 1;
   }
 
-  void ArithmeticExpression::TOKEN::ClearArithOperatorInfo()
+  void TOKEN::ClearArithOperatorInfo()
   {
     unary      = 0;
     unary_mask = 0;
     precedence = 0;
   }
 
-  clStringA ArithmeticExpression::TOKEN::ToString() const
+  clStringA TOKEN::ToString() const
   {
     if(type == TokenType_String && ! BeginsWith('\"')) {
       return clStringA("\"") + ToRawString() + '\"';
@@ -1351,7 +1352,7 @@ namespace UVShader
     return ToRawString();
   }
 
-  clStringA& ArithmeticExpression::TOKEN::ToString(clStringA& str) const
+  clStringA& TOKEN::ToString(clStringA& str) const
   {
     str.Clear();
     if(type == TokenType_String && !BeginsWith('\"')) {
@@ -1360,19 +1361,19 @@ namespace UVShader
     return ToRawString(str);
   }
 
-  clStringW& ArithmeticExpression::TOKEN::ToString(clStringW& str) const
+  clStringW& TOKEN::ToString(clStringW& str) const
   {
     clStringA strA;
     str = ToString(strA);
     return str;
   }
 
-  int ArithmeticExpression::TOKEN::GetScope() const
+  int TOKEN::GetScope() const
   {
     return scope >= 0 ? scope : semi_scope;
   }
 
-  GXBOOL ArithmeticExpression::TOKEN::operator==(const TOKEN& t) const
+  GXBOOL TOKEN::operator==(const TOKEN& t) const
   {
     // 不可能出现指向同一地址却长度不同的情况
     ASSERT((marker == t.marker && length == t.length) || 
@@ -1382,32 +1383,32 @@ namespace UVShader
       && GXSTRNCMP(marker, t.marker, length) == 0);
   }
 
-  GXBOOL ArithmeticExpression::TOKEN::operator==(SmartStreamA::T_LPCSTR str) const
+  GXBOOL TOKEN::operator==(SmartStreamA::T_LPCSTR str) const
   {
     return (*static_cast<const iterator*>(this) == str);
   }
 
-  GXBOOL ArithmeticExpression::TOKEN::operator==(SmartStreamA::TChar ch) const
+  GXBOOL TOKEN::operator==(SmartStreamA::TChar ch) const
   {
     return (*static_cast<const iterator*>(this) == ch);
   }
 
-  GXBOOL ArithmeticExpression::TOKEN::operator!=(SmartStreamA::T_LPCSTR str) const
+  GXBOOL TOKEN::operator!=(SmartStreamA::T_LPCSTR str) const
   {
     return (*static_cast<const iterator*>(this) != str);
   }
 
-  GXBOOL ArithmeticExpression::TOKEN::operator!=(SmartStreamA::TChar ch) const
+  GXBOOL TOKEN::operator!=(SmartStreamA::TChar ch) const
   {
     return (*static_cast<const iterator*>(this) != ch);
   }
 
-  b32 ArithmeticExpression::TOKEN::operator<(const TOKEN& _token) const
+  b32 TOKEN::operator<(const TOKEN& _token) const
   {
     return (b32)(*static_cast<const iterator*>(this) < _token);
   }
 
-  b32 ArithmeticExpression::TOKEN::IsIdentifier() const
+  b32 TOKEN::IsIdentifier() const
   {
     if(length < 1) {
       return FALSE;
@@ -1435,17 +1436,17 @@ namespace UVShader
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL ArithmeticExpression::SYNTAXNODE::GLOB::IsToken() const
+  GXBOOL SYNTAXNODE::GLOB::IsToken() const
   {
     return pNode && pNode->magic != FLAG_OPERAND_MAGIC;
   }
 
-  GXBOOL ArithmeticExpression::SYNTAXNODE::GLOB::IsNode() const
+  GXBOOL SYNTAXNODE::GLOB::IsNode() const
   {
     return pNode && pNode->magic == FLAG_OPERAND_MAGIC;
   }
 
-  ArithmeticExpression::SYNTAXNODE::FLAGS ArithmeticExpression::SYNTAXNODE::GLOB::GetType() const
+  SYNTAXNODE::FLAGS SYNTAXNODE::GLOB::GetType() const
   {
     if(pNode) {
       return (pNode->magic == FLAG_OPERAND_MAGIC)
@@ -1457,7 +1458,7 @@ namespace UVShader
     }
   }
 
-  void ArithmeticExpression::SYNTAXNODE::Clear()
+  void SYNTAXNODE::Clear()
   {
     mode = MODE_Undefined;
     pOpcode = NULL;
@@ -1480,17 +1481,17 @@ namespace UVShader
     }
   }
 
-  b32 ArithmeticExpression::SYNTAXNODE::CompareOpcode(TChar ch) const
+  b32 SYNTAXNODE::CompareOpcode(CTokens::TChar ch) const
   {
     return pOpcode && *pOpcode == ch;
   }
 
-  b32 ArithmeticExpression::SYNTAXNODE::CompareOpcode(T_LPCSTR str) const
+  b32 SYNTAXNODE::CompareOpcode(CTokens::T_LPCSTR str) const
   {
     return pOpcode && *pOpcode == str;
   }
 
-  ArithmeticExpression::VALUE::State ArithmeticExpression::SYNTAXNODE::Calcuate(VALUE& value_out) const
+  VALUE::State SYNTAXNODE::Calcuate(VALUE& value_out) const
   {
     VALUE p[2];
     VALUE::State s = VALUE::State_OK;
@@ -1531,7 +1532,7 @@ namespace UVShader
     return s;
   }
 
-  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAB() const // 深度优先
+  const TOKEN& SYNTAXNODE::GetAnyTokenAB() const // 深度优先
   {
     if(Operand[0].IsToken()) {
       return *Operand[0].pTokn;
@@ -1548,7 +1549,7 @@ namespace UVShader
     CLBREAK;
   }
 
-  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAB2() const // 广度优先
+  const TOKEN& SYNTAXNODE::GetAnyTokenAB2() const // 广度优先
   {
     if(Operand[0].IsToken()) {
       return *Operand[0].pTokn;
@@ -1565,7 +1566,7 @@ namespace UVShader
     CLBREAK;
   }
 
-  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenAPB() const
+  const TOKEN& SYNTAXNODE::GetAnyTokenAPB() const
   {
     if(Operand[0].IsToken()) {
       return *Operand[0].pTokn;
@@ -1585,7 +1586,7 @@ namespace UVShader
     CLBREAK;
   }
 
-  const ArithmeticExpression::TOKEN& ArithmeticExpression::SYNTAXNODE::GetAnyTokenPAB() const
+  const TOKEN& SYNTAXNODE::GetAnyTokenPAB() const
   {
     if(pOpcode) {
       return *pOpcode;
@@ -1603,6 +1604,22 @@ namespace UVShader
       return Operand[1].pNode->GetAnyTokenPAB();
     }
     CLBREAK;
+  }
+
+  bool TokenPtr::operator<(const TokenPtr& tp2) const
+  {    
+    if(ptr->length != tp2.ptr->length) {
+      return ptr->length < tp2.ptr->length;
+    }
+    auto s1 = ptr->marker;
+    auto s2 = tp2.ptr->marker;
+    for(clsize i = 0; i < ptr->length; i++, s1++, s2++)
+    {
+      if(*s1 != *s2) {
+        return *s1 < *s2;
+      }
+    }
+    return false;
   }
 
 } // namespace UVShader

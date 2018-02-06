@@ -2,6 +2,7 @@
 #include <Smart/SmartStream.h>
 #include <clTokens.h>
 #include <clStringSet.h>
+#include <clStablePool.h>
 #include "../../../GrapX/UniVersalShader/ArithmeticExpression.h"
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"
@@ -21,7 +22,7 @@ public:
   {
     m_aDbgExpressionOperStack.clear();
     m_aCommand.clear();
-    STATEMENT stat = {StatementType_Expression};
+    STATEMENT stat = {StatementType_Empty};
     TRACE("--- 解析树 ---\n"); // 解析时生成的树
     GXBOOL bret = ParseArithmeticExpression(0, *pScope, &stat.sRoot);
     if( ! bret)
@@ -179,9 +180,9 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
 namespace DigitalParsing
 {
   using namespace UVShader;
-  typedef ArithmeticExpression::VALUE VALUE;
-  typedef ArithmeticExpression::VALUE::State State;
-  //typedef ArithmeticExpression::TOKEN TOKEN;
+  //typedef ArithmeticExpression::VALUE VALUE;
+  typedef VALUE::State State;
+  //typedef TOKEN TOKEN;
   struct SAMPLE
   {
     GXLPCSTR  str;
@@ -190,49 +191,49 @@ namespace DigitalParsing
 
   static SAMPLE aSampleDigitals[] = {
     // 格式测试
-    {"- 666", ArithmeticExpression::VALUE::State_OK},
-    {"+\t666", ArithmeticExpression::VALUE::State_OK},
-    {"- \t\r666", ArithmeticExpression::VALUE::State_OK},
-    {"- \t\r6f66", ArithmeticExpression::VALUE::State_IllegalChar},
-    {"- \t\r", ArithmeticExpression::VALUE::State_SyntaxError},
-    {"- \t\r\\97", ArithmeticExpression::VALUE::State_IllegalChar},
+    {"- 666", VALUE::State_OK},
+    {"+\t666", VALUE::State_OK},
+    {"- \t\r666", VALUE::State_OK},
+    {"- \t\r6f66", VALUE::State_IllegalChar},
+    {"- \t\r", VALUE::State_SyntaxError},
+    {"- \t\r\\97", VALUE::State_IllegalChar},
     // 整数类型
-    {"123456", ArithmeticExpression::VALUE::State_OK},
-    {"-123456", ArithmeticExpression::VALUE::State_OK},
-    {"123e4", ArithmeticExpression::VALUE::State_OK},
-    {"-123e4", ArithmeticExpression::VALUE::State_OK},
-    {"-9223372036854775808", ArithmeticExpression::VALUE::State_OK}, // 这个不要改, 基准参考, 64位有符号最小值
-    { "9223372036854775807", ArithmeticExpression::VALUE::State_OK},  // 这个不要改, 基准参考, 64位有符号最大值
-    {"18446744073709551615", ArithmeticExpression::VALUE::State_OK}, // 这个不要改, 基准参考, 64位无符号最大值
-    {"-9223372036854775809", ArithmeticExpression::VALUE::State_Overflow},
-    {"18446744073709551616", ArithmeticExpression::VALUE::State_Overflow},
-    {"184467440737095516140", ArithmeticExpression::VALUE::State_Overflow},
+    {"123456", VALUE::State_OK},
+    {"-123456", VALUE::State_OK},
+    {"123e4", VALUE::State_OK},
+    {"-123e4", VALUE::State_OK},
+    {"-9223372036854775808", VALUE::State_OK}, // 这个不要改, 基准参考, 64位有符号最小值
+    { "9223372036854775807", VALUE::State_OK},  // 这个不要改, 基准参考, 64位有符号最大值
+    {"18446744073709551615", VALUE::State_OK}, // 这个不要改, 基准参考, 64位无符号最大值
+    {"-9223372036854775809", VALUE::State_Overflow},
+    {"18446744073709551616", VALUE::State_Overflow},
+    {"184467440737095516140", VALUE::State_Overflow},
     
     // 浮点
-    {"1e18", ArithmeticExpression::VALUE::State_OK},
-    {"1e19", ArithmeticExpression::VALUE::State_OK},
-    {"2e19", ArithmeticExpression::VALUE::State_OK},
+    {"1e18", VALUE::State_OK},
+    {"1e19", VALUE::State_OK},
+    {"2e19", VALUE::State_OK},
 
     // 浮点
-    {"123.456", ArithmeticExpression::VALUE::State_OK},
-    {"0.12345", ArithmeticExpression::VALUE::State_OK},
-    {".123456", ArithmeticExpression::VALUE::State_OK},
-    {"123456.", ArithmeticExpression::VALUE::State_OK},
-    {"-123.456", ArithmeticExpression::VALUE::State_OK},
-    {"-0.12345", ArithmeticExpression::VALUE::State_OK},
-    {"-.123456", ArithmeticExpression::VALUE::State_OK},
-    {"-123456.", ArithmeticExpression::VALUE::State_OK},
-    {"12.34.56", ArithmeticExpression::VALUE::State_SyntaxError},
-    {"-12.34.56", ArithmeticExpression::VALUE::State_SyntaxError},
+    {"123.456", VALUE::State_OK},
+    {"0.12345", VALUE::State_OK},
+    {".123456", VALUE::State_OK},
+    {"123456.", VALUE::State_OK},
+    {"-123.456", VALUE::State_OK},
+    {"-0.12345", VALUE::State_OK},
+    {"-.123456", VALUE::State_OK},
+    {"-123456.", VALUE::State_OK},
+    {"12.34.56", VALUE::State_SyntaxError},
+    {"-12.34.56", VALUE::State_SyntaxError},
 
-    {"123e3", ArithmeticExpression::VALUE::State_OK},
-    {"1.23e3", ArithmeticExpression::VALUE::State_OK},
-    {"123e-3", ArithmeticExpression::VALUE::State_OK},
-    {"1.23e-3", ArithmeticExpression::VALUE::State_OK},
-    {"-123e3", ArithmeticExpression::VALUE::State_OK},
-    {"-1.23e3", ArithmeticExpression::VALUE::State_OK},
-    {"-123e-3", ArithmeticExpression::VALUE::State_OK},
-    {"-1.23e-3", ArithmeticExpression::VALUE::State_OK},
+    {"123e3", VALUE::State_OK},
+    {"1.23e3", VALUE::State_OK},
+    {"123e-3", VALUE::State_OK},
+    {"1.23e-3", VALUE::State_OK},
+    {"-123e3", VALUE::State_OK},
+    {"-1.23e3", VALUE::State_OK},
+    {"-123e-3", VALUE::State_OK},
+    {"-1.23e-3", VALUE::State_OK},
 
     {NULL, },
   };
@@ -241,7 +242,7 @@ namespace DigitalParsing
   {
     for(int i = 0; aSampleDigitals[i].str != NULL; i++)
     {
-      ArithmeticExpression::TOKEN token;
+      TOKEN token;
       VALUE value;
       token.marker = aSampleDigitals[i].str;
       token.length = GXSTRLEN(aSampleDigitals[i].str);
@@ -290,14 +291,14 @@ namespace DigitalParsing
 
       expp.Attach(pstr, len, 0, 0);
       expp.GenerateTokens();
-      const UVShader::CodeParser::TOKEN::Array* pArray = expp.GetTokensArray();
+      const UVShader::TOKEN::Array* pArray = expp.GetTokensArray();
 
       if(pArray->size() != 1) {
         TRACE("%s(%d)\n", samp[i].szSourceFile, samp[i].nLine);
         TRACE("ERROR : 样本字符串没有按照数字格式扩展:%s\n", samp[i].expression);
         CLBREAK;
       }
-      else if((*pArray)[0].type != UVShader::CodeParser::TOKEN::TokenType_Numeric)
+      else if((*pArray)[0].type != UVShader::TOKEN::TokenType_Numeric)
       {
         TRACE("%s(%d)\n", samp[i].szSourceFile, samp[i].nLine);
         TRACE("ERROR : 扩展的没有解析为数字:%s\n", samp[i].expression);

@@ -97,6 +97,7 @@
     <ClInclude Include="..\..\clLinkedList.h" />
     <ClInclude Include="..\..\clRepository.h" />
     <ClInclude Include="..\..\clSchedule.h" />
+    <ClInclude Include="..\..\clStablePool.h" />
     <ClInclude Include="..\..\clStaticStringsDict.h" />
     <ClInclude Include="..\..\clCrypt.h" />
     <ClInclude Include="..\..\clfifo.h" />

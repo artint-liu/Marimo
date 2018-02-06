@@ -4,6 +4,7 @@
 #include <clTokens.h>
 #include <clPathFile.h>
 #include <clStringSet.h>
+#include <clStablePool.h>
 #include "../../../GrapX/UniVersalShader/ArithmeticExpression.h"
 #include "../../../GrapX/UniVersalShader/ExpressionParser.h"
 #include "ExpressionSample.h"
@@ -44,9 +45,9 @@ GXLPCSTR Get(UVShader::CodeParser::FunctionStorageClass e)
 
 const int nTabSize = 2;
 //////////////////////////////////////////////////////////////////////////
-int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::ArithmeticExpression::SYNTAXNODE* pNode, int precedence, int depth, clStringA* pStr)
+int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::SYNTAXNODE* pNode, int precedence, int depth, clStringA* pStr)
 {
-  typedef UVShader::ArithmeticExpression::SYNTAXNODE SYNTAXNODE;
+  typedef UVShader::SYNTAXNODE SYNTAXNODE;
 
   clStringA str[2];
   //int chain = 0;
@@ -385,7 +386,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
     if(file.MapToBuffer(&pBuffer))
     {
       UVShader::CodeParser expp(NULL, NULL);
-      const UVShader::ArithmeticExpression::TOKEN::Array* pTokens;
+      const UVShader::TOKEN::Array* pTokens;
       expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize(), 0, strFullname);
 
       expp.GenerateTokens();
@@ -463,16 +464,16 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
               {
                 const auto& definition = s;
                 clStringA str;
-                if(definition.sRoot.pNode->mode == UVShader::CodeParser::SYNTAXNODE::MODE_Definition)
+                if(definition.sRoot.pNode->mode == UVShader::SYNTAXNODE::MODE_Definition)
                 {
                   DumpBlock(&expp, definition.sRoot.pNode, 0, 0, &str);
                   DumpVariableStorageClass(s.defn.storage_class, file);
                   DumpVariableModifier(s.defn.modifier, file);
                   file.WritefA("%s;\n", str);
                 }
-                else if(definition.sRoot.pNode->mode == UVShader::CodeParser::SYNTAXNODE::MODE_Chain)
+                else if(definition.sRoot.pNode->mode == UVShader::SYNTAXNODE::MODE_Chain)
                 {
-                  UVShader::CodeParser::SYNTAXNODE* pNode = definition.sRoot.pNode;
+                  UVShader::SYNTAXNODE* pNode = definition.sRoot.pNode;
                   while(pNode)
                   {
                     DumpBlock(&expp, pNode->Operand[0].pNode, 0, 0, &str);
@@ -493,9 +494,14 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
                 const auto& func = s.func;
 
                 clStringA strArgs;
+                clStringA strType;
+                clStringA strName;
                 for(clsize i = 0; i < func.nNumOfArguments; i++)
                 {
-                  strArgs.AppendFormat("%s%s %s", Get(func.pArguments[i].eModifier), func.pArguments[i].szType, func.pArguments[i].szName);
+                  strArgs.AppendFormat("%s%s %s", Get(func.pArguments[i].eModifier),
+                    func.pArguments[i].ptkType->ToString(strType).CStr(),
+                    func.pArguments[i].ptkName->ToString(strName).CStr());
+
                   if(func.pArguments[i].szSemantic) {
                     strArgs.AppendFormat(" : %s", func.pArguments[i].szSemantic);
                   }
@@ -516,12 +522,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
                 }
 
                 //file.WritefA("{\n");
-                if(func.pExpression && func.pExpression->sRoot.pNode)
+                if(s.sRoot.ptr)
                 {
                   clStringA str;
                   //str.Format("{\n");
                   //DbgDumpSyntaxTree(&expp, func.pExpression->expr.sRoot.pNode, 0, 1, &str);
-                  DumpBlock(&expp, func.pExpression->sRoot.pNode, 0, 0, &str);
+                  DumpBlock(&expp, s.sRoot.pNode, 0, 0, &str);
                   file.WritefA(str); // 缩进两个空格
                 }
                 file.WritefA("\n");
@@ -538,14 +544,14 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
                 file.WritefA(str);
               }
               break;
-            case UVShader::CodeParser::StatementType_Expression:
-              {
-                clStringA str;
-                CLBREAK;
-                DumpBlock(&expp, s.sRoot.pNode, 0, 1, &str);
-                file.WritefA(str);
-              }
-              break;
+            //case UVShader::CodeParser::StatementType_Expression:
+            //  {
+            //    clStringA str;
+            //    CLBREAK;
+            //    DumpBlock(&expp, s.sRoot.pNode, 0, 1, &str);
+            //    file.WritefA(str);
+            //  }
+            //  break;
             case UVShader::CodeParser::StatementType_Typedef:
             {
               clStringA str;
