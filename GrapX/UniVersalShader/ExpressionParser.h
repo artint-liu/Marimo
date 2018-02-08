@@ -21,6 +21,9 @@ namespace UVShader
 
   //  GRAMMAR* pChild;
   //};
+
+  class CodeParser;
+
   class Include
   {
   public:
@@ -89,9 +92,12 @@ namespace UVShader
       State_TypeNotFound = -1,     // 没有找到类型
       State_DuplicatedType = -2,  // 重复注册类型
       State_DuplicatedVariable = -3,
+      State_DefineAsType = -4,    // 变量已经被定义为类型
+      State_DefineAsVariable = -5,// 类型已经被定义为变量
     };
   
   protected:
+    CodeParser* m_pCodeParser;
     const NameSet* m_pParent;
 
     TypeMap     m_TypeMap;
@@ -106,7 +112,8 @@ namespace UVShader
     NameSet(const NameSet* pParent);
     NameSet(const NameSet& sParent);
 
-    void   Cleanup();
+    void SetParser(CodeParser* pCodeParser);
+    void Cleanup();
 
     const TYPEDESC* GetType(const clStringA& strType) const;
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
@@ -114,17 +121,19 @@ namespace UVShader
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
     State  GetLastState() const;
+    const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
   };
 
   struct NODE_CALC : public SYNTAXNODE
   {
-    const TYPEDESC* GetMember(const NameSet& sNameSet) const;
+    //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
     VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out) const;
   };
 
 
   class CodeParser : public ArithmeticExpression
   {
+    friend class NameSet;
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
 
@@ -435,6 +444,9 @@ namespace UVShader
     TKSCOPE::TYPE  ParseFlowDoWhile(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseTypedef(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseStructDefinition(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
+
+    //const TYPEDESC* GetMember(const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
+    //VALUE::State Calcuate(VALUE& value_out, const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
 
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);

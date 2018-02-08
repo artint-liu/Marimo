@@ -176,6 +176,7 @@ namespace UVShader
     , m_nPPRecursion(0)
     , m_pInclude(pInclude ? pInclude : &s_DefaultInclude)
   {
+    m_GlobalSet.SetParser(this);
     if(pContext) {
       pContext->nRefCount++;
     }
@@ -3299,23 +3300,29 @@ NOT_INC_P:
     if(tkVar.IsIdentifier())
     {
       //clStringA strA;
-      if((pType = sNameSet.RegisterVariable(strType, &tkVar)) == NULL ||
-        sNameSet.GetType(strVar))
+      if((pType = sNameSet.RegisterVariable(strType, &tkVar)) == NULL)
       {
-        NameSet::State state = sNameSet.GetLastState();
-        if(state == NameSet::State_TypeNotFound)
+        switch(sNameSet.GetLastState())
+        {
+        case NameSet::State_TypeNotFound:
         {
           str = strType;
           OutputErrorW(tkVar, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), str.CStr());
           return FALSE;
         }
-        else if(state == NameSet::State_DuplicatedVariable)
+        case NameSet::State_DuplicatedVariable:
         {
           OutputErrorW(tkVar, UVS_EXPORT_TEXT(2371, "“%s”: 重定义"), tkVar.ToString(str).CStr());
           return FALSE;
         }
-        else {
+        case NameSet::State_DefineAsType:
+        {
+          OutputErrorW(tkVar, UVS_EXPORT_TEXT(5013, "“%s”: 变量已经被定义为类型"), tkVar.ToString(str).CStr());
+          return FALSE;
+        }
+        default:
           CLBREAK; // 预期之外的状态
+          break;
         }
       }
     }
@@ -3531,7 +3538,8 @@ NOT_INC_P:
   {
     //clStringA strA;
     clStringW strW;
-    if(left_glob.IsToken()) {
+    if(left_glob.IsToken())
+    {
       if(sNameSet.GetVariable(left_glob.pTokn/*->ToString(strA)*/) == NULL)
       {
         //strW = strA;
@@ -3541,8 +3549,16 @@ NOT_INC_P:
       }
       return TRUE;
     }
-    
-    if(left_glob.IsNode() == FALSE) {
+    else if(left_glob.IsNode())
+    {
+      const TYPEDESC* pDesc = sNameSet.GetMember(left_glob.pNode);
+      if(pDesc == NULL)
+      {
+        OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
+        return FALSE;
+      }
+    }    
+    else {
       OutputErrorW(opcode, UVS_EXPORT_TEXT(5010, "“=”前缺少左值"));
       return FALSE;
     }
@@ -3618,19 +3634,22 @@ NOT_INC_P:
   //////////////////////////////////////////////////////////////////////////
 
   NameSet::NameSet()
-    : m_pParent(NULL)
+    : m_pCodeParser(NULL)
+    , m_pParent(NULL)
     , m_eLastState(State_Ok)
   {   
   }
 
   NameSet::NameSet(const NameSet* pParent)
-    : m_pParent(pParent)
+    : m_pCodeParser(pParent->m_pCodeParser)
+    , m_pParent(pParent)
     , m_eLastState(State_Ok)
   {
   }
 
   NameSet::NameSet(const NameSet& sParent)
-    : m_pParent(&sParent)
+    : m_pCodeParser(sParent.m_pCodeParser)
+    , m_pParent(&sParent)
     , m_eLastState(State_Ok)
   {
   }
@@ -3690,6 +3709,11 @@ NOT_INC_P:
     return reinterpret_cast<NameSet*>(reinterpret_cast<size_t>(pSet));
   }
 
+  void NameSet::SetParser(CodeParser* pCodeParser)
+  {
+    m_pCodeParser = pCodeParser;
+  }
+
   const TYPEDESC* NameSet::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable)
   {
     const TYPEDESC* pDesc = GetType(strType);
@@ -3703,6 +3727,13 @@ NOT_INC_P:
 
       // 内置类型由根节点持有
       pDesc = &(GetRoot()->m_TypeMap.insert(clmake_pair(strType, td)).first->second);
+    }
+
+    clStringA strVari;
+    ptrVariable->ToString(strVari);
+    if(GetType(strVari)) {
+      m_eLastState = State_DefineAsType;
+      return NULL;
     }
     
     auto result = m_VariableMap.insert(clmake_pair(ptrVariable, pDesc));
@@ -3719,6 +3750,37 @@ NOT_INC_P:
   NameSet::State NameSet::GetLastState() const
   {
     return m_eLastState;
+  }
+
+  const TYPEDESC* NameSet::GetMember(const SYNTAXNODE* pNode) const
+  {
+    const TYPEDESC* pTypeDesc = NULL;
+    if(pNode->Operand[0].IsToken())
+    {
+      pTypeDesc = GetVariable(pNode->Operand[0].pTokn);
+    }
+    else
+    {
+      ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.'));
+      pTypeDesc = GetMember(pNode->Operand[0].pNode);
+    }
+    ASSERT(pNode->Operand[1].IsToken());
+
+    clStringA strTypename;
+    
+    if(pTypeDesc->GetMemberTypename(strTypename, pNode->Operand[1].pTokn))
+    {
+      pTypeDesc = GetType(strTypename);
+    }
+    else
+    {
+      clStringW str1, str2;
+      pTypeDesc = NULL;
+      m_pCodeParser->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT2(2039, "“%s”: 不是“%s”的成员", m_pCodeParser),
+        pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].pTokn->ToString(str1).CStr());
+    }
+
+    return pTypeDesc;
   }
 
   GXBOOL NameSet::RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode)
@@ -3788,28 +3850,6 @@ NOT_INC_P:
     a = VALUE::State((u32)a | (u32)b);
   }
 
-  const TYPEDESC* NODE_CALC::GetMember(const NameSet& sNameSet) const
-  {
-    const TYPEDESC* pTypeDesc = NULL;
-    if(Operand[0].IsToken())
-    {
-      pTypeDesc = sNameSet.GetVariable(Operand[0].pTokn);
-    }
-    else
-    {
-      ASSERT(mode == SYNTAXNODE::MODE_Opcode && CompareOpcode('.'));
-      pTypeDesc = static_cast<NODE_CALC*>(Operand[0].pNode)->GetMember(sNameSet);
-    }
-    ASSERT(Operand[1].IsToken());
-
-    clStringA strTypename;
-    if(pTypeDesc->GetMemberTypename(strTypename, Operand[1].pTokn))
-    {
-      return sNameSet.GetType(strTypename);
-    }
-    return NULL;
-  }
-
   VALUE::State NODE_CALC::Calcuate(const NameSet& sNameSet, VALUE& value_out) const
   {
     VALUE p[2];
@@ -3834,7 +3874,7 @@ NOT_INC_P:
         //-----------------------------------------
 
         clStringA strTypename;
-        const TYPEDESC* pTypeDesc = GetMember(sNameSet);
+        const TYPEDESC* pTypeDesc = sNameSet.GetMember(this);
 
         if(pTypeDesc->cate == TYPEDESC::TypeCate_Numeric)
         {

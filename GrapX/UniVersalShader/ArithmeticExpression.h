@@ -336,7 +336,7 @@ namespace UVShader
     b32 CompareOpcode(CTokens::TChar ch) const;
     b32 CompareOpcode(CTokens::T_LPCSTR str) const;
 
-    //VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out) const;
+    //VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out, std::function<GXBOOL(const SYNTAXNODE*)> func) const;
 
     const TOKEN& GetAnyTokenAB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
     const TOKEN& GetAnyTokenAB2() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
