@@ -484,6 +484,7 @@ SAMPLE_EXPRESSION samplesNumeric[] = {
 SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   // 基本表达式
   {51000, _I_, "output.color", 3},
+  {51000, _I_, "output.color.x", 5},
 
   // 数学表达式
   {52000, _I_, "a+b*c", 5, aOperStack_008},

@@ -388,11 +388,6 @@ namespace UVShader
     token.precedence = 0;
     token.unary      = 0;
 
-//#ifdef USE_CLSTD_TOKENS
-//#else
-//    SetTriggerCallBack(MultiByteOperatorProc, (u32_ptr)&token);
-//#endif // USE_CLSTD_TOKENS
-
     SetIteratorCallBack(IteratorProc, (u32_ptr)&token);
 
     PairStack sStack[countof(s_PairMark)];
@@ -471,9 +466,22 @@ namespace UVShader
       }
 
       // 可能被宏展开后清除
-      if(token.marker) {
-        if( ! MergeStringToken(token)){
+      if(token.marker)
+      {
+        if(_CL_NOT_(MergeStringToken(token)))
+        {
           m_aTokens.push_back(token);
+
+          if(token == "false")
+          {
+            m_aTokens.back().type = TOKEN::TokenType_Numeric;
+            SetTokenPhonyString(m_aTokens.size() - 1, "0");
+          }
+          else if(token == "true")
+          {
+            m_aTokens.back().type = TOKEN::TokenType_Numeric;
+            SetTokenPhonyString(m_aTokens.size() - 1, "1");
+          }
         }
       }
 
@@ -565,7 +573,7 @@ namespace UVShader
           }
         }
 
-        last_one.SetPhonyString(InsertStableTokenString(m_aTokens.size() - 1, str));
+        SetTokenPhonyString(m_aTokens.size() - 1, str);
       }
 #ifdef ENABLE_STRINGED_SYMBOL
       last_one.symbol = last_one.ToString();
@@ -575,21 +583,24 @@ namespace UVShader
     return FALSE;
   }
 
-  const clStringA& CodeParser::InsertStableTokenString(int index, const clStringA& str)
+  void CodeParser::SetTokenPhonyString(int index, const clStringA& str)
   {
     PHONY_TOKEN pt;
     auto emplace = m_PhonyTokenDict.emplace(clmake_pair(index, pt));
+    TOKEN& token = m_aTokens[index];
     if(emplace.second)
     {
-      ASSERT(_CL_NOT_(m_aTokens[index].bPhony)); // 第一次添加肯定不是替代值
-      emplace.first->second.ori_marker = m_aTokens[index].marker;
+      ASSERT(_CL_NOT_(token.bPhony)); // 第一次添加肯定不是替代值
+      emplace.first->second.ori_marker = token.marker;
     }
     else
     {
-      ASSERT(m_aTokens[index].bPhony); // 添加肯定已经标记为"替代品"
+      ASSERT(token.bPhony); // 添加肯定已经标记为"替代品"
     }
-    emplace.first->second.str = str;
-    return emplace.first->second.str;
+    emplace.first->second.szPhonyText = GetUniqueString(str.CStr());
+    emplace.first->second.nPhonyLength = str.GetLength();
+    token.SetPhonyString(emplace.first->second.szPhonyText, emplace.first->second.nPhonyLength);
+    //return emplace.first->second.str;
   }
 
   const CodeParser::MACRO* CodeParser::FindMacro(const TOKEN& token) // TODO: 正常的查找都要换做这个
@@ -652,12 +663,6 @@ namespace UVShader
       return FALSE;
     }
 
-    //auto itMacro = m_Macros.find(strTokenName);
-    //if(itMacro == m_Macros.end()) {
-    //  return FALSE;
-    //}
-    
-    //MACRO* pMacro = &itMacro->second;
     iterator it = token;
     TOKEN::List stream;
 
@@ -714,14 +719,10 @@ namespace UVShader
     } // if(ctx.pMacro->aFormalParams.empty())
 
     ASSERT(token.pContainer);
-    //ctx.pLineNumRef = &token;
-    //ExpandMacro(ctx);
-    //m_ExpandedStream = ctx.stream;
     TOKEN next_token = token;
     ExpandMacroStream(stream, token);
     m_ExpandedStream = stream;
     m_ExpandedStream.push_back(next_token);
-    //*/
     return TRUE;
   }
 
@@ -1096,7 +1097,15 @@ namespace UVShader
 
       if(func_statement_block.IsValid())
       {
-        if(ParseStatementAs_Expression(&stat, sNameSet_Func, &func_statement_block))
+        m_nDbgNumOfExpressionParse = 0;
+        m_aDbgExpressionOperStack.clear();
+
+        ASSERT(func_statement_block.begin < func_statement_block.end); // 似乎不应该有相等的情况, "{}" 区间这种是相差一个的
+        if(func_statement_block.GetSize() == 1)
+        {
+          stat.sRoot.ptr = NULL;
+        }
+        else if(ParseCodeBlock(stat.sRoot, sNameSet_Func, func_statement_block))
         {
 #ifdef ENABLE_SYNTAX_VERIFY
           if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
@@ -1187,17 +1196,6 @@ namespace UVShader
 
     clStringA strName;
     p->ToString(strName);
-    //stat.stru.szName = GetUniqueString(p);
-    /*
-    if(m_GlobalSet.RegisterType(stat.stru.szName, TYPEDESC::TypeCate_Struct) == FALSE &&
-      m_GlobalSet.HasVariable(stat.stru.szName))
-    {
-      clStringW str;
-      OutputErrorW(*pStructName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), pStructName->ToString(str).CStr());
-      return FALSE;
-    }
-    INC_BUT_NOT_END(p, pEnd);
-    //*/
 
     ++p;
     if(p >= pEnd) {
@@ -1206,7 +1204,6 @@ namespace UVShader
     }
     else if(*p == ';') {
       // 结构体声明, 只是声明有这么个东西
-      //sNameSet.RegisterType(strName, TYPEDESC::TypeCate_Struct);
       sNameSet.RegisterStruct(ptkName, NULL);
       return (p - pTokensFront + 1);
     }
@@ -1218,17 +1215,9 @@ namespace UVShader
       InitTokenScope(sMembersScope, *p, TRUE);
       ASSERT(sMembersScope.end < scope.end); // 给出的作用域不对
 
-#if 0
-      if(sNameSet.RegisterType(strName, TYPEDESC::TypeCate_Struct) == FALSE &&
-        m_GlobalSet.HasVariable(strName))
-      {
-        clStringW str;
-        OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), ptkName->ToString(str).CStr());
-        return sMembersScope.end;
-      }
-#endif
+      NameSet sMemberSet(sNameSet);
 
-      if(_CL_NOT_(ParseExpression(*pMembers, sNameSet, sMembersScope)))
+      if(_CL_NOT_(ParseExpression(*pMembers, sMemberSet, sMembersScope)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
         return sMembersScope.end;
@@ -1312,9 +1301,7 @@ namespace UVShader
           *pDefinitionNum = nDefination;
 
 #ifdef ENABLE_SYNTAX_VERIFY
-          if(Verify_StructMember(*pMembers->pNode) == FALSE) {
-            return scope.end;
-          }
+          Verify_StructMember(sNameSet, *pMembers->pNode); // 检查失败仍然继续解析
 #endif
         }
 
@@ -1330,8 +1317,7 @@ namespace UVShader
       }
 
       if(sNameSet.RegisterStruct(ptkName, pMembers->pNode) == FALSE &&
-        //m_GlobalSet.GetVariable(strName))
-        m_GlobalSet.GetVariable(ptkName))        
+        sNameSet.GetVariable(ptkName))
       {
         clStringW str;
         OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2371, "“%s”: 重定义；不同的基类型"), ptkName->ToString(str).CStr());
@@ -1358,15 +1344,6 @@ namespace UVShader
       TKSCOPE scope_var(p - pTokensFront, semi_end + 1);
       pMembers->pNode->Operand[1].pTokn = &m_aTokens[semi_end]; // Block后面的分号
 
-      //stat.stru.sRoot.pNode->Operand[1].pTokn = &m_aTokens[semi_end];
-      //m_aStatements.push_back(stat);
-
-      // 结构体定义后定义变量
-      //STATEMENT stat_var;
-      //stat_var.type = StatementType_Definition;
-      //stat_var.defn.modifier = UniformModifier_empty;
-      //stat_var.defn.storage_class = VariableStorageClass_empty;
-      //stat_var.defn.szType = stat.stru.szName;
       SYNTAXNODE::GLOB glob;
 
       if(_CL_NOT_(ParseExpression(glob, sNameSet, scope_var)))
@@ -1425,28 +1402,28 @@ namespace UVShader
       return FALSE;
     }
 
-    STATEMENT stat = { StatementType_Empty };
-    STATEMENT stat_var = { StatementType_Definition };
-    stat_var.defn.modifier = UniformModifier_empty;
-    stat_var.defn.storage_class = VariableStorageClass_empty;
-    stat_var.defn.szType = stat.stru.szName;
+    STATEMENT stat_stru = { StatementType_Empty };
+    STATEMENT stat_vari = { StatementType_Definition };
+    stat_vari.defn.modifier = UniformModifier_empty;
+    stat_vari.defn.storage_class = VariableStorageClass_empty;
+    stat_vari.defn.szType = stat_stru.stru.szName;
     int nSignatures = 0;
     int nDefinition = 0;
     
-    pScope->begin = ParseStructDefinition(m_GlobalSet, *pScope, &stat.sRoot,
-      &stat_var.sRoot, &nSignatures, &nDefinition);
+    pScope->begin = ParseStructDefinition(m_GlobalSet, *pScope, &stat_stru.sRoot,
+      &stat_vari.sRoot, &nSignatures, &nDefinition);
 
-    if(stat.sRoot.ptr)
+    if(stat_stru.sRoot.ptr)
     {
-      stat.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
-      stat.stru.szName = GetUniqueString(p + 1);
-      stat.stru.nNumOfMembers = nDefinition;
+      stat_stru.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
+      stat_stru.stru.szName = GetUniqueString(p + 1);
+      stat_stru.stru.nNumOfMembers = nDefinition;
     }
 
-    m_aStatements.push_back(stat);
+    m_aStatements.push_back(stat_stru);
 
-    if(stat_var.sRoot.ptr) {
-      m_aStatements.push_back(stat_var);
+    if(stat_vari.sRoot.ptr) {
+      m_aStatements.push_back(stat_vari);
     }
 
     return TRUE;
@@ -1565,86 +1542,23 @@ NOT_INC_P:
     return m_pContext->Strings.add(pSym->ToString());
   }
 
-#if 0
-  const TYPEDESC* CodeParser::ParseType(const TOKEN& token)
+  GXLPCSTR CodeParser::GetUniqueString(T_LPCSTR szText)
   {
-    TYPEDESC sType = {NULL, 1, 1};
-
-    // 对于内置类型，要解析出 Type[RxC] 这种格式
-    for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i)
-    {
-      const INTRINSIC_TYPE& t = s_aIntrinsicType[i];
-      if(token.BeginsWith(t.name, t.name_len)) {
-        const auto* pElement = token.marker + t.name_len;
-        const int   remain   = token.length - (int)t.name_len;
-        sType.name = t.name;
-
-        // [(1..4)[x(1..4)]]
-        if(remain == 0) {
-          ;
-        }
-        else if(remain == 1 && *pElement >= '1' && *pElement <= '4') { // TypeR 格式
-          sType.maxR = *pElement - '0';
-          ASSERT(sType.maxR >= 1 && sType.maxR <= 4);
-        }
-        else if(remain == 3 && *pElement >= '1' && *pElement <= '4' && // TypeRxC 格式
-          pElement[1] == 'x' && pElement[2] >= '1' && pElement[2] <= '4')
-        {
-          sType.maxR = pElement[0] - '0';
-          sType.maxC = pElement[2] - '0';
-          ASSERT(sType.maxR >= 1 && sType.maxR <= 4);
-          ASSERT(sType.maxC >= 1 && sType.maxC <= 4);
-        }
-        else {
-          break;
-        }
-
-        sType.cate = TYPEDESC::TypeCate_Numeric;
-        return &(*m_TypeSet.insert(sType).first);
-      }
-    }
-
-    if(token.IsEqual(s_szString, 6)) // 6是"string"长度
-    {
-      sType.name = s_szString;
-      sType.maxR = 1;
-      sType.maxC = 1;
-      sType.cate = TYPEDESC::TypeCate_String;
-      return &(*m_TypeSet.insert(sType).first);
-    }
-    
-    // TODO: 查找用户定义类型
-    // 1.typdef 定义
-    // 1.struct 定义
-
-    return NULL;
+    return m_pContext->Strings.add(szText);
   }
-#endif
-//#else
-//  const TYPEDESC* CodeParser::ParseType(const TOKEN& token)
-//  {
-//    for(int i = 0; s_aIntrinsicStruct[i].name; i++)
-//    {
-//      if(token == s_aIntrinsicStruct[i].name) {
-//      }
-//    }
-//
-//
-//  }
-//#endif
 
-  GXBOOL CodeParser::ParseStatementAs_Expression(STATEMENT* pStat, NameSet& sNameSet, TKSCOPE* pScope)
-  {
-    m_nDbgNumOfExpressionParse = 0;
-    m_aDbgExpressionOperStack.clear();
+  //GXBOOL CodeParser::ParseStatementAs_Expression(STATEMENT* pStat, NameSet& sNameSet, TKSCOPE* pScope)
+  //{
+  //  m_nDbgNumOfExpressionParse = 0;
+  //  m_aDbgExpressionOperStack.clear();
 
-    ASSERT(pScope->begin < pScope->end); // 似乎不应该有相等的情况, "{}" 区间这种是相差一个的
-    if(pScope->begin + 1 == pScope->end) {
-      return TRUE;
-    }
+  //  ASSERT(pScope->begin < pScope->end); // 似乎不应该有相等的情况, "{}" 区间这种是相差一个的
+  //  if(pScope->begin + 1 == pScope->end) {
+  //    return TRUE;
+  //  }
 
-    return ParseCodeBlock(pStat->sRoot, sNameSet, *pScope);
-  }
+  //  return ParseCodeBlock(pStat->sRoot, sNameSet, *pScope);
+  //}
 
   void CodeParser::DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr, int depth)
   {
@@ -1951,9 +1865,6 @@ NOT_INC_P:
     ASSERT(scope.begin == scope.end ||
       (m_aTokens[scope.begin].semi_scope == scope.end - 1 && m_aTokens[scope.end - 1] == ';') ||
       (m_aTokens[scope.begin].scope == scope.end - 1 && m_aTokens[scope.begin] == '{' && m_aTokens[scope.end - 1] == '}'));
-      //||
-      //m_aTokens[scope.begin] == "if" || m_aTokens[scope.begin] == "for" || m_aTokens[scope.begin] == "while" ||
-      //m_aTokens[scope.begin] == "return" );
 
     if(m_aTokens[scope.begin] == '{') {
       return ParseCodeBlock(glob, sNameSet, scope);
@@ -2087,10 +1998,10 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowIf(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowIf(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf)
   {
     // 与 ParseFlowWhile 相似
-    NameSet sNameSet_FlowIf(sNameSet);
+    NameSet sNameSet_FlowIf(sParentSet);
     SYNTAXNODE::GLOB A = {0}, B = {0};
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "if");
@@ -2172,11 +2083,11 @@ NOT_INC_P:
     return bret ? sStatement.begin : TKSCOPE::npos;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowWhile(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     // 与 ParseFlowIf 相似
     SYNTAXNODE::GLOB A = {0}, B = {0};
-    NameSet sNameSet_FlowWhile(sNameSet);
+    NameSet sNameSet_FlowWhile(sParentSet);
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "while");
 
@@ -2219,11 +2130,11 @@ NOT_INC_P:
     return bret ? sBlock.end : TKSCOPE::npos;
   }
   
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowDoWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowDoWhile(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     ASSERT(m_aTokens[scope.begin] == "do");
     // do{...}while(...); 中while()不允许使用类型定义
-    NameSet sNameSet_Do(sNameSet);
+    NameSet sNameSet_Do(sParentSet);
 
 
     if(scope.begin + 1 >= scope.end) {
@@ -2294,38 +2205,25 @@ NOT_INC_P:
     ASSERT(A.IsToken()); // 目前仅处理这个情况
     clStringA strTypename;
 
-    auto state = sNameSet.TypeDefine(A.pTokn, B.pTokn);
-
-    if(state == NameSet::State_NotFound) {
+    switch(sNameSet.TypeDefine(A.pTokn, B.pTokn))
+    {
+    case NameSet::State_TypeNotFound:
+    {
       clStringA strTypenameW;
       OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5020, "“typedef”定义中使用的“%s”不是一个类型"), A.pTokn->ToString(strTypenameW).CStr());
       return TKSCOPE::npos;
     }
-    else if(state == NameSet::State_DuplicatedType) {
+    case NameSet::State_DuplicatedType:
+    {
       clStringA str;
       OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5021, "“typedef”定义的类型“%s”已经存在"), B.pTokn->ToString(str).CStr());
       return TKSCOPE::npos;
     }
+    default:
+      CLBREAK; // 没有处理的错误
+      break;
+    }
 
-    //const TYPEDESC2* pTypeDesc = sNameSet.GetType(A.pTokn->ToString(strTypename));
-    //if(pTypeDesc)
-    //{
-    //  ASSERT((pTypeDesc->pMemberNode == NULL && pTypeDesc->pDesc) ||
-    //    (pTypeDesc->pMemberNode && pTypeDesc->pDesc == NULL));
-
-    //  if(pTypeDesc->pMemberNode) {
-    //    sNameSet.RegisterStruct(B.pTokn, pTypeDesc->pMemberNode);
-    //  }
-    //  else if(pTypeDesc->pDesc) {
-    //  }
-    //  //sNameSet.RegisterType(B.pTokn->ToString(strTypename), pTypeDesc->cate);
-    //}
-    //else
-    //{
-    //  clStringA strTypenameW;
-    //  OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5020, "“typedef”定义中使用的“%s”不是一个类型"), A.pTokn->ToString(strTypenameW).CStr());
-    //  return TKSCOPE::npos;
-    //}
 
     MakeSyntaxNode(pDest, SYNTAXNODE::MODE_Typedef, NULL, &A, &B);
     return front.semi_scope + 1;
@@ -2467,9 +2365,9 @@ NOT_INC_P:
     return pBlock->end;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowFor(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowFor(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
-    NameSet sNameSet_FlowFor(sNameSet);
+    NameSet sNameSet_FlowFor(sParentSet);
     TKSCOPE sInitializer, sConditional, sIterator;
     TKSCOPE sBlock;
 
@@ -3405,7 +3303,7 @@ NOT_INC_P:
         sNameSet.GetType(strVar))
       {
         NameSet::State state = sNameSet.GetLastState();
-        if(state == NameSet::State_NotFound)
+        if(state == NameSet::State_TypeNotFound)
         {
           str = strType;
           OutputErrorW(tkVar, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), str.CStr());
@@ -3440,48 +3338,50 @@ NOT_INC_P:
       if(pNode->CompareOpcode('=') || pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
         if(pNode->Operand[1].IsToken())
         {
+          const TOKEN& tkRightValue = *pNode->Operand[1].pTokn;
           if(//pType->cate == TYPEDESC::TypeCate_Struct ||
-            (pType->cate == TYPEDESC::TypeCate_Numeric && pNode->Operand[1].pTokn->type != TOKEN::TokenType_Numeric) ||
-            (pType->cate == TYPEDESC::TypeCate_String && pNode->Operand[1].pTokn->type != TOKEN::TokenType_String) )
+            (pType->cate == TYPEDESC::TypeCate_Numeric && tkRightValue.type != TOKEN::TokenType_Numeric) ||
+            (pType->cate == TYPEDESC::TypeCate_String && tkRightValue.type != TOKEN::TokenType_String) )
           {
             clStringW str;
             clStringW str2(pType->name);
-            OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
-              pNode->Operand[1].pTokn->ToString(str).CStr(), str2.CStr());
+            OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
+              tkRightValue.ToString(str).CStr(), str2.CStr());
             return (result = FALSE);
           }
           else if(pType->cate == TYPEDESC::TypeCate_Struct)
           {
-            const TYPEDESC* pVarTypeDesc = sNameSet.GetVariable(pNode->Operand[1].pTokn);
+            const TYPEDESC* pVarTypeDesc = sNameSet.GetVariable(&tkRightValue);
             if(pType->cate != pVarTypeDesc->cate || pType->name != pVarTypeDesc->name)
             {
               clStringW str;
               clStringW str2(pType->name);
-              OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
-                pNode->Operand[1].pTokn->ToString(str).CStr(), str2.CStr());
+              OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
+                tkRightValue.ToString(str).CStr(), str2.CStr());
             }
           }
 
           if(pType->cate == TYPEDESC::TypeCate_Numeric)
           {
             VALUE v;
-            VALUE::State s = v.set(*pNode->Operand[1].pTokn);
+            VALUE::State s = v.set(tkRightValue);
             if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
               clStringW str;
-              OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是\"%s\""), pNode->Operand[1].pTokn->ToString(str).CStr());
+              OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是\"%s\""), tkRightValue.ToString(str).CStr());
               return (result = FALSE);
             }
           }
         }
         else if(pNode->Operand[1].IsNode())
         {
+          const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(pNode->Operand[1].pNode);
           if(pType->cate == TYPEDESC::TypeCate_Numeric)
           {
             VALUE v;
-            VALUE::State s = pNode->Operand[1].pNode->Calcuate(v);
+            VALUE::State s = pnodeRightValue->Calcuate(sNameSet, v);
             if(TEST_FLAG(s, VALUE::State_ErrorMask))
             {
-              OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
+              OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
               return (result = FALSE);
             }
             CLNOP
@@ -3489,14 +3389,14 @@ NOT_INC_P:
           else if(pType->cate == TYPEDESC::TypeCate_String)
           {
             // token解析会自动连接字符串, 所以不会出现两个token都是字符串的情况
-            OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
+            OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
             return (result = FALSE);
           }
           else if(pType->cate == TYPEDESC::TypeCate_Struct)
           {
             if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment)
             {
-              OutputErrorW(pNode->Operand[1].pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
+              OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
               return (result = FALSE);
             }
           }
@@ -3565,10 +3465,10 @@ NOT_INC_P:
     return result;
   }
 
-  GXBOOL CodeParser::Verify_StructMember(const SYNTAXNODE& rNode)
+  GXBOOL CodeParser::Verify_StructMember(const NameSet& sParentSet, const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
-    NameSet sSet;
+    NameSet sSet(sParentSet);
     RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, &sSet](const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
       if(pNode->mode == SYNTAXNODE::MODE_Definition)
@@ -3582,7 +3482,21 @@ NOT_INC_P:
           if(sSet.RegisterVariable(strType, Op.pTokn/*->ToString(str)*/) == NULL)
           {
             clStringW str;
-            OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), Op.pTokn->ToString(str));
+            switch(sSet.GetLastState())
+            {
+            case NameSet::State_DuplicatedVariable:
+              OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), Op.pTokn->ToString(str));
+              break;
+            case NameSet::State_TypeNotFound:
+              str = strType;
+              OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), str.CStr());
+              break;
+            default:
+              CLBREAK; // 没有处理的错误
+              break;
+            }
+
+            result = FALSE;
           }
         }
         else if(Op.IsNode()) {
@@ -3591,7 +3505,20 @@ NOT_INC_P:
           if(sSet.RegisterVariable(strType, &tk/*.ToString(str)*/) == NULL)
           {
             clStringW str;
-            OutputErrorW(tk, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), tk.ToString(str));
+            switch(sSet.GetLastState())
+            {
+            case NameSet::State_DuplicatedVariable:
+              OutputErrorW(tk, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), tk.ToString(str));
+              break;
+            case NameSet::State_TypeNotFound:
+              str = strType;
+              OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), str.CStr());
+              break;
+            default:
+              CLBREAK; // 没有处理的错误
+              break;
+            }
+            result = FALSE;
           }
         }
       }
@@ -3702,6 +3629,12 @@ NOT_INC_P:
   {
   }
 
+  NameSet::NameSet(const NameSet& sParent)
+    : m_pParent(&sParent)
+    , m_eLastState(State_Ok)
+  {
+  }
+
   void NameSet::Cleanup()
   {
     m_TypeMap.clear();
@@ -3711,6 +3644,8 @@ NOT_INC_P:
   GXBOOL NameSet::TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType)
   {
     ASSERT(pOut->pDesc == NULL && pOut->pMemberNode == NULL); // 强制外部初始化
+
+    // 内置结构体
     for(int i = 0; s_aIntrinsicStruct[i].name; i++)
     {
       if(strType == s_aIntrinsicStruct[i].name) {
@@ -3722,6 +3657,7 @@ NOT_INC_P:
       }
     }
 
+    // 内置基础类型
     for(int i = 0; s_aBaseType[i].name; i++)
     {
       if(strType == s_aBaseType[i].name)
@@ -3733,6 +3669,7 @@ NOT_INC_P:
       }
     }
 
+    // 字符串类型
     if(strType == s_szString) {
       pOut->cate = TYPEDESC::TypeCate_String;
       pOut->name = strType;
@@ -3743,6 +3680,16 @@ NOT_INC_P:
     return FALSE;
   }
 
+  NameSet* NameSet::GetRoot()
+  {
+    const NameSet* pSet = this;
+    while(pSet->m_pParent)
+    {
+      pSet = pSet->m_pParent;
+    }
+    return reinterpret_cast<NameSet*>(reinterpret_cast<size_t>(pSet));
+  }
+
   const TYPEDESC* NameSet::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable)
   {
     const TYPEDESC* pDesc = GetType(strType);
@@ -3750,10 +3697,12 @@ NOT_INC_P:
     {
       TYPEDESC td = {TYPEDESC::TypeCate_Empty};
       if(TestIntrinsicType(&td, strType) == FALSE) {
-        m_eLastState = State_NotFound;
+        m_eLastState = State_TypeNotFound;
         return NULL;
       }
-      pDesc = &(m_TypeMap.insert(clmake_pair(strType, td)).first->second);
+
+      // 内置类型由根节点持有
+      pDesc = &(GetRoot()->m_TypeMap.insert(clmake_pair(strType, td)).first->second);
     }
     
     auto result = m_VariableMap.insert(clmake_pair(ptrVariable, pDesc));
@@ -3817,7 +3766,7 @@ NOT_INC_P:
     const TYPEDESC* pDesc = GetType(ptkOriName->ToString(strOriName));
     if(pDesc == NULL) {
       if(TestIntrinsicType(&td, strOriName) == FALSE) {
-        return State_NotFound;
+        return State_TypeNotFound;
       }
       pDesc = &td;
     }
@@ -3828,5 +3777,169 @@ NOT_INC_P:
   }
 
   //////////////////////////////////////////////////////////////////////////
+  // 操作符号重载
+  VALUE::State operator|(VALUE::State a, VALUE::State b)
+  {
+    return VALUE::State((u32)a | (u32)b);
+  }
+
+  void operator|=(VALUE::State& a, VALUE::State b)
+  {
+    a = VALUE::State((u32)a | (u32)b);
+  }
+
+  const TYPEDESC* NODE_CALC::GetMember(const NameSet& sNameSet) const
+  {
+    const TYPEDESC* pTypeDesc = NULL;
+    if(Operand[0].IsToken())
+    {
+      pTypeDesc = sNameSet.GetVariable(Operand[0].pTokn);
+    }
+    else
+    {
+      ASSERT(mode == SYNTAXNODE::MODE_Opcode && CompareOpcode('.'));
+      pTypeDesc = static_cast<NODE_CALC*>(Operand[0].pNode)->GetMember(sNameSet);
+    }
+    ASSERT(Operand[1].IsToken());
+
+    clStringA strTypename;
+    if(pTypeDesc->GetMemberTypename(strTypename, Operand[1].pTokn))
+    {
+      return sNameSet.GetType(strTypename);
+    }
+    return NULL;
+  }
+
+  VALUE::State NODE_CALC::Calcuate(const NameSet& sNameSet, VALUE& value_out) const
+  {
+    VALUE p[2];
+    VALUE::State s = VALUE::State_OK;
+    if(mode == MODE_FunctionCall)
+    {
+      value_out.SetOne();
+      return VALUE::State_Call;
+    }
+    else if(mode == MODE_Opcode)
+    {
+      
+      ASSERT(pOpcode != NULL);
+      if(*pOpcode == '.')
+      {
+        //-----------------------------------------
+        //<ID_0028>        [.] [surf] [ff3]
+        //<ID_0029>      [.] [surf.ff3]<ID_0028> [fx]
+        //<ID_0030>    [.] [surf.ff3.fx]<ID_0029> [color]
+        //<ID_0031>  [.] [surf.ff3.fx.color]<ID_0030> [x]
+        //surf.ff3.fx.color.x
+        //-----------------------------------------
+
+        clStringA strTypename;
+        const TYPEDESC* pTypeDesc = GetMember(sNameSet);
+
+        if(pTypeDesc->cate == TYPEDESC::TypeCate_Numeric)
+        {
+          value_out.SetOne();
+          return VALUE::State_OK;
+        }
+        else {
+          CLBREAK; // 不是数学类型
+        }
+      }
+    }
+
+    for(int i = 0; i < 2; i++)
+    {
+      if(Operand[i].IsNode()) {
+        s = static_cast<const NODE_CALC*>(Operand[i].pNode)->Calcuate(sNameSet, p[i]);
+      }
+      else if(Operand[i].IsToken()) {
+        if(Operand[i].pTokn->type == TOKEN::TokenType_Numeric) {
+          s = p[i].set(*Operand[i].pTokn);
+        }
+        else if(Operand[i].pTokn->IsIdentifier()) {
+          p[i].SetOne(); // 标识符用临时值1
+          s = VALUE::State_Identifier;
+        }
+      }
+      else {
+        p[i].SetZero();
+      }
+
+      if(s < VALUE::State_OK) {
+        return s;
+      }
+    }
+
+    if(pOpcode == NULL) {
+      return VALUE::State_BadOpcode;
+    }
+
+    s |= value_out.Calculate(*pOpcode, p[0], p[1]);
+    return s;
+
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  GXBOOL TYPEDESC::GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const
+  {
+    strTypename.Clear();
+
+    if(pMemberNode)
+    {
+      ASSERT(pDesc == NULL);
+      const TYPEDESC* pDesc = NULL;
+
+      // 确定符合结构体描述
+      ASSERT(pMemberNode->mode == SYNTAXNODE::MODE_Block &&
+        pMemberNode->Operand[0].IsNode() &&
+        pMemberNode->Operand[1].IsToken() && *pMemberNode->Operand[1].pTokn == ';');
+
+      RecursiveNode<const SYNTAXNODE>(NULL, pMemberNode->Operand[0].pNode, [&pDesc, &strTypename, &ptkMember]
+      (const SYNTAXNODE* pNode, int depth)-> GXBOOL
+      {
+        if(strTypename.IsNotEmpty()) // 找到类型后尽快结束迭代
+        {
+          return FALSE;
+        }
+        else if(pNode->mode == SYNTAXNODE::MODE_Definition)
+        {
+          if(pNode->Operand[1].IsToken()) {
+            if(*pNode->Operand[1].pTokn == *ptkMember) {
+              ASSERT(pNode->Operand[0].IsToken());
+              pNode->Operand[0].pTokn->ToString(strTypename);
+              return FALSE;
+            }
+          }
+          else if(pNode->Operand[1].IsNode()) {
+            if(pNode->Operand[1].pNode->GetAnyTokenAB() == *ptkMember) {
+              ASSERT(pNode->Operand[0].IsToken());
+              pNode->Operand[0].pTokn->ToString(strTypename);
+              return FALSE;
+            }
+          }
+          else {
+            CLBREAK;
+          }
+        }
+        return TRUE;
+      });
+      //return pDesc;
+      return strTypename.IsNotEmpty();
+    }
+    else if(pDesc)
+    {
+      ASSERT(pMemberNode == NULL);
+      for(size_t i = 0; i < pDesc->count; i++)
+      {
+        if(*ptkMember == pDesc->list[i].name) {
+          strTypename = pDesc->list[i].type;
+          return TRUE;
+        }
+      }
+    }
+    CLBREAK;
+    return NULL;
+  }
 
 } // namespace UVShader

@@ -69,16 +69,16 @@ namespace UVShader
     };
 
     TypeCate          cate;
-    clStringA         name;
+    clStringA         name; // 类型名
     STRUCTDESC*       pDesc;
     const SYNTAXNODE* pMemberNode;
+
+    GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
   };
 
   class NameSet
   {
   public:
-    //typedef clset<clStringA> StrSet;
-    //typedef clmap<clStringA, TYPEDESC> TypeMap;
     typedef clmap<clStringA, TYPEDESC>  TypeMap;
     typedef clmap<TokenPtr, const TYPEDESC*>  VariableMap;
     typedef clStringA::LPCSTR LPCSTR;
@@ -86,31 +86,27 @@ namespace UVShader
     enum State
     {
       State_Ok = 0,
-      State_NotFound = -1,         // 没有找到类型
+      State_TypeNotFound = -1,     // 没有找到类型
       State_DuplicatedType = -2,  // 重复注册类型
       State_DuplicatedVariable = -3,
     };
   
   protected:
     const NameSet* m_pParent;
-    //TypeMap  m_TypeMap;
-    //StrSet   m_VariableSet;
 
-    TypeMap    m_TypeMap;
+    TypeMap     m_TypeMap;
     VariableMap m_VariableMap;
-    State      m_eLastState;
+    State       m_eLastState;
 
     GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
+    NameSet* GetRoot();
 
   public:
     NameSet();
     NameSet(const NameSet* pParent);
+    NameSet(const NameSet& sParent);
 
     void   Cleanup();
-    //GXBOOL RegisterType(LPCSTR szName, TYPEDESC::TypeCate cate);
-    //GXBOOL RegisterVariable(LPCSTR szName);
-    //GXBOOL RegisterType(const clStringA& strName, TYPEDESC::TypeCate cate);
-    //GXBOOL RegisterVariable(const clStringA& strName);
 
     const TYPEDESC* GetType(const clStringA& strType) const;
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
@@ -118,10 +114,12 @@ namespace UVShader
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
     State  GetLastState() const;
+  };
 
-    //GXBOOL HasType(LPCSTR szName) const;
-    //GXBOOL HasVariable(LPCSTR szName) const;
-    //const TYPEDESC* GetType(LPCSTR szName) const;
+  struct NODE_CALC : public SYNTAXNODE
+  {
+    const TYPEDESC* GetMember(const NameSet& sNameSet) const;
+    VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out) const;
   };
 
 
@@ -395,7 +393,9 @@ namespace UVShader
 
     struct PHONY_TOKEN
     {
-      clStringA         str;          // 替代字符串
+      //clStringA         str;          // 替代字符串
+      clStringA::LPCSTR szPhonyText;
+      clsize            nPhonyLength;
       clStringA::LPCSTR ori_marker;   // 原始字符串地址
     };
 
@@ -415,7 +415,7 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);
 
-    GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, NameSet& sNameSet, TKSCOPE* pScope); // (算数表)达式
+    //GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, NameSet& sNameSet, TKSCOPE* pScope); // (算数表)达式
 
     GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc);
 
@@ -428,11 +428,11 @@ namespace UVShader
     TKSCOPE::TYPE  TryParseSingle(NameSet& sNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
 
     GXBOOL  TryKeywords(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest, TKSCOPE::TYPE* parse_end);
-    TKSCOPE::TYPE  ParseFlowIf(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
+    TKSCOPE::TYPE  ParseFlowIf(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
     TKSCOPE::TYPE  MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, SYNTAXNODE::GLOB* pBlockNode);
-    TKSCOPE::TYPE  ParseFlowFor(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowDoWhile(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowFor(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowWhile(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowDoWhile(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseTypedef(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     TKSCOPE::TYPE  ParseStructDefinition(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
 
@@ -465,6 +465,7 @@ namespace UVShader
     void    RelocalePointer();
     
     GXLPCSTR GetUniqueString(const TOKEN* pSym);
+    GXLPCSTR GetUniqueString(T_LPCSTR szText);
     const TYPEDESC* ParseType(const TOKEN& token);
 
     void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
@@ -482,11 +483,11 @@ namespace UVShader
     GXBOOL Verify2_VariableExpr(NameSet& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameSet* pParentSet);
-    GXBOOL Verify_StructMember(const SYNTAXNODE& rNode);
+    GXBOOL Verify_StructMember(const NameSet& sParentSet, const SYNTAXNODE& rNode);
     GXBOOL Verify2_LeftValue(const NameSet& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
 #endif
 
-    const clStringA& InsertStableTokenString(int index, const clStringA& str);
+    void SetTokenPhonyString(int index, const clStringA& str);
 
     template<class _Ty>
     _Ty* IndexToPtr(clvector<_Ty>& array, _Ty* ptr_index)
@@ -535,7 +536,7 @@ namespace UVShader
 //    GXBOOL   IsToken(const SYNTAXNODE::UN* pUnion) const;
     //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const;
 
-    void DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL, int depth = 0);
+    static void DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL, int depth = 0);
 
 
   };

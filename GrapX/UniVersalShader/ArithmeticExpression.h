@@ -33,6 +33,7 @@ namespace UVShader
   typedef clstd::TokensT<clStringA> CTokens;
 # define TOKENSUTILITY clstd::TokensUtility
   class ArithmeticExpression;
+  class NameSet;
 
   struct MEMBERLIST
   {
@@ -90,7 +91,7 @@ namespace UVShader
     void ClearMarker();
     void Set(const iterator& _iter);
     void Set(clstd::StringSetA& sStrSet, const clStringA& str); // 设置外来字符串
-    void SetPhonyString(const clStringA& str); // 设置外来字符串
+    void SetPhonyString(T_LPCSTR szText, size_t len); // 设置外来字符串
 
     template<class _Ty>
     void SetArithOperatorInfo(const _Ty& t) // 设置数学符号信息
@@ -183,15 +184,16 @@ namespace UVShader
     enum State // Flags
     {
       State_OK = 0,
-      State_Identifier = 0x00000001, // 标识符
-      State_Call = 0x00000002, // 函数调用
+      State_Identifier    = 0x00000001, // 标识符
+      State_Call          = 0x00000002, // 函数调用
+      State_UnknownOpcode = 0x00000004, // 无法识别的操作符
 
-      State_WarningMask = 0x0000ffff, // 警告的掩码
-      State_ErrorMask = 0xffff0000, // 错误的掩码
-      State_SyntaxError = 0x80000000,
-      State_Overflow = 0x20000000,
-      State_IllegalChar = 0x40000000,
-      State_BadOpcode = 0x10000000, // 错误的操作符
+      State_WarningMask   = 0x0000ffff, // 警告的掩码
+      State_ErrorMask     = 0xffff0000, // 错误的掩码
+      State_SyntaxError   = 0x80000000,
+      State_Overflow      = 0x20000000,
+      State_IllegalChar   = 0x40000000,
+      State_BadOpcode     = 0x10000000, // 错误的操作符
     };
 
     enum Rank {
@@ -234,7 +236,7 @@ namespace UVShader
     clStringA ToString() const;
 
     template<typename _Ty>
-    typename _Ty CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2);
+    State CalculateT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2);
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -334,7 +336,7 @@ namespace UVShader
     b32 CompareOpcode(CTokens::TChar ch) const;
     b32 CompareOpcode(CTokens::T_LPCSTR str) const;
 
-    VALUE::State Calcuate(VALUE& value_out) const;
+    //VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out) const;
 
     const TOKEN& GetAnyTokenAB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
     const TOKEN& GetAnyTokenAB2() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]

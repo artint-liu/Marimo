@@ -70,18 +70,18 @@ namespace UVShader
 {
   template void RecursiveNode<SYNTAXNODE>(ArithmeticExpression* pParser, SYNTAXNODE* pNode, std::function<GXBOOL(SYNTAXNODE*, int)> func, int depth);
   template void RecursiveNode<const SYNTAXNODE>(ArithmeticExpression* pParser, const SYNTAXNODE* pNode, std::function<GXBOOL(const SYNTAXNODE*, int)> func, int depth);
-
+#if 0
   // 操作符号重载
   VALUE::State operator|(VALUE::State a, VALUE::State b)
   {
     return VALUE::State((u32)a | (u32)b);
   }
 
-  VALUE::State operator|=(VALUE::State a, VALUE::State b)
+  void operator|=(VALUE::State& a, VALUE::State b)
   {
     a = VALUE::State((u32)a | (u32)b);
-    return a;
   }
+#endif
 
 #ifdef USE_CLSTD_TOKENS
   u32 ArithmeticExpression::m_aCharSem[128];
@@ -581,13 +581,6 @@ namespace UVShader
       // X(...) 形式
       return ParseFunctionCall(scope, pDesc);
     }
-#if 0
-    else if(front.scope == scope.begin + 2)
-    {
-      // (type)X 形式
-      return ParseTypeCast(scope, pDesc); // FIXME: 不应该放在这里, 优先级不正确
-    }
-#endif
 
     TKSCOPE::TYPE nLowestOpcodeIndex = GetLowestPrecedence(scope, nMinPrecedence);
     ASSERT(nLowestOpcodeIndex == TKSCOPE::npos ||
@@ -598,14 +591,11 @@ namespace UVShader
       const TOKEN& t = m_aTokens[nLowestOpcodeIndex];
       ASSERT(t == ')' || (OPP(0) <= t.precedence && t.precedence <= s_MaxPrecedence));
 
-#if 1
       if(t == ')')
       {
-        //CLNOP;
         ASSERT(m_aTokens[scope.begin] == '(');
         return ParseTypeCast(scope, pDesc);
       }
-#endif
 
       return MakeInstruction(depth + 1, &t,
         t.precedence, &scope, pDesc, nLowestOpcodeIndex);
@@ -1133,41 +1123,44 @@ namespace UVShader
   }
 
   template<typename _Ty>
-  typename _Ty VALUE::CalculateT(const TOKEN& opcode, _Ty& t1, _Ty& t2)
+  VALUE::State VALUE::CalculateT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2)
   {
     if(opcode.length == 1)
     {
       switch(opcode.marker[0])
       {
-      case '+': return t1 + t2;
-      case '-': return t1 - t2;
-      case '*': return t1 * t2;
-      case '/': return t1 / t2;
-      case '<': return _Ty(t1 < t2);
-      case '>': return _Ty(t1 > t2);
-      case '!': return _Ty( ! t2);
+      case '+': output = t1 + t2; break;
+      case '-': output = t1 - t2; break;
+      case '*': output = t1 * t2; break;
+      case '/': output = t1 / t2; break;
+      case '<': output = _Ty(t1 < t2); break;
+      case '>': output = _Ty(t1 > t2); break;
+      case '!': output = _Ty( ! t2); break;
       default:
-        TRACE("Unsupport opcode(%c).\n", opcode);
-        CLBREAK;
+        return State_UnknownOpcode;
+        //TRACE("Unsupport opcode(%c).\n", opcode);
+        //CLBREAK;
       }
     }
     else
     {
       if(opcode == "&&") {
-        return t1 && t2;
+        output = (t1 && t2);
       }
       else if(opcode == "||") {
-        return t1 || t2;
+        output = (t1 || t2);
       }
       else if(opcode == "==") {
-        return t1 == t2;
+        output = (t1 == t2);
       }
       else {
-        TRACE("Unsupport opcode(%c).\n", opcode);
-        CLBREAK;
+        return State_UnknownOpcode;
+        //TRACE("Unsupport opcode(%c).\n", opcode);
+        //CLBREAK;
       }
     }
-    return (_Ty)0;
+
+    return State_OK;
   }
 
   VALUE::State VALUE::Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1)
@@ -1183,26 +1176,26 @@ namespace UVShader
     }
 
     if(type == Rank_Signed64) {
-      nValue64 = CalculateT(token, nValue64, second.nValue64);
+      state = CalculateT(nValue64, token, nValue64, second.nValue64);
     }
     else if(type == Rank_Unsigned64) {
-      uValue64 = CalculateT(token, uValue64, second.uValue64);
+      state = CalculateT(uValue64, token, uValue64, second.uValue64);
     }
     else if(type == Rank_Double) {
-      fValue64 = CalculateT(token, fValue64, second.fValue64);
+      state = CalculateT(fValue64, token, fValue64, second.fValue64);
     }
     else if(type == Rank_Unsigned) {
-      uValue = CalculateT(token, uValue, second.uValue);
+      state = CalculateT(uValue, token, uValue, second.uValue);
     }
     else if(type == Rank_Signed) {
-      nValue = CalculateT(token, nValue, second.nValue);
+      state = CalculateT(nValue, token, nValue, second.nValue);
     }
     else {
       CLBREAK;
       return State_SyntaxError;
     }
     rank = type;
-    return State_OK;
+    return state;
   }
 
   clStringA VALUE::ToString() const
@@ -1325,15 +1318,16 @@ namespace UVShader
     bPhony     = 1;
   }
 
-  void TOKEN::SetPhonyString(const clStringA& str)
+  void TOKEN::SetPhonyString(T_LPCSTR szText, size_t len)
   {
-    ASSERT(str.IsNotEmpty());
+    ASSERT(szText != NULL && length > 0);
 #ifdef ENABLE_STRINGED_SYMBOL
-    symbol = str;
+    symbol.Clear();
+    symbol.Append(szText, length);
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
     pContainer = NULL;
-    marker     = str;
-    length     = str.GetLength();
+    marker     = szText;
+    length     = len;
     bPhony     = 1;
   }
 
@@ -1491,7 +1485,8 @@ namespace UVShader
     return pOpcode && *pOpcode == str;
   }
 
-  VALUE::State SYNTAXNODE::Calcuate(VALUE& value_out) const
+#if 0
+  VALUE::State SYNTAXNODE::Calcuate(const NameSet& sNameSet, VALUE& value_out) const
   {
     VALUE p[2];
     VALUE::State s = VALUE::State_OK;
@@ -1504,7 +1499,7 @@ namespace UVShader
     for(int i = 0; i < 2; i++)
     {
       if(Operand[i].IsNode()) {
-        s = Operand[i].pNode->Calcuate(p[i]);
+        s = Operand[i].pNode->Calcuate(sNameSet, p[i]);
       }
       else if(Operand[i].IsToken()) {
         if(Operand[i].pTokn->type == TOKEN::TokenType_Numeric) {
@@ -1529,8 +1524,18 @@ namespace UVShader
     }
 
     s |= value_out.Calculate(*pOpcode, p[0], p[1]);
+    if(TEST_FLAG(s, VALUE::State_UnknownOpcode))
+    {
+      if(*pOpcode == '.')
+      {
+        ASSERT(Operand[0].IsToken());
+        const TYPEDESC* pTypeDesc = sNameSet.GetVariable(Operand[0].pTokn);
+      }
+      CLNOP;
+    }
     return s;
   }
+#endif
 
   const TOKEN& SYNTAXNODE::GetAnyTokenAB() const // 深度优先
   {
