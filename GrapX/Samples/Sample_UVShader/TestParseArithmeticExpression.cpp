@@ -298,7 +298,7 @@ namespace DigitalParsing
         TRACE("ERROR : 样本字符串没有按照数字格式扩展:%s\n", samp[i].expression);
         CLBREAK;
       }
-      else if((*pArray)[0].type != UVShader::TOKEN::TokenType_Numeric)
+      else if(_CL_NOT_((*pArray)[0].IsNumeric()))
       {
         TRACE("%s(%d)\n", samp[i].szSourceFile, samp[i].nLine);
         TRACE("ERROR : 扩展的没有解析为数字:%s\n", samp[i].expression);

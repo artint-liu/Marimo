@@ -227,14 +227,17 @@ namespace UVShader
       return 0;
     }
 
-    GXBOOL bIsLikeNumeric = TryExtendNumeric(it, remain) || 
-      (it.length > 0 && isdigit(it.marker[0]));
+    //GXBOOL bIsLikeNumeric =  || 
+    //  (it.length > 0 && isdigit(it.marker[0]));
 
-    if(bIsLikeNumeric) {
-      // 并不十分精确, 具体看应用时的解析
-      TOKEN& l_token = *(TOKEN*)lParam;
-      l_token.type = TOKEN::TokenType_Numeric;
+    // 并不十分精确, 具体看应用时的解析
+    if(TryExtendNumeric(it, remain)) {
+      reinterpret_cast<TOKEN*>(lParam)->type = TOKEN::TokenType_Real;
     }
+    else if(it.length > 0 && isdigit(it.marker[0])) {
+      reinterpret_cast<TOKEN*>(lParam)->type = TOKEN::TokenType_Integer;
+    }
+
     ASSERT((int)remain >= 0);
     return 0;
   }
@@ -404,7 +407,7 @@ namespace UVShader
     if(front == '(' && (TKSCOPE::TYPE)front.scope + 1 < scope.end) // (...)... 形式
     {
       const TOKEN& nt = m_aTokens[front.scope + 1];
-      if(nt == '(' || nt.unary || nt.IsIdentifier() || nt.type == TOKEN::TokenType_Numeric) // type cast
+      if(nt == '(' || nt.unary || nt.IsIdentifier() || nt.IsNumeric()) // type cast
       {
         return TRUE;
       }
@@ -1000,55 +1003,77 @@ namespace UVShader
     else if(ptr[i] == '+') {
       i++;
     }
-    
-    while(ptr[i] == 0x20 || ptr[i] == '\t' || ptr[i] == '\r' || ptr[i] == '\n') { 
+
+    while(ptr[i] == 0x20 || ptr[i] == '\t' || ptr[i] == '\r' || ptr[i] == '\n') {
       if(++i >= count) { // 只有一个+/-符号
         return State_SyntaxError;
       }
     }
 
-    //if(i >= count) { // 只有一个+/-符号，这个怎么破？
-    //  return State_SyntaxError;
-    //}
-
-    for(; i < count; i++)
+    if(ptr[i] == '0' && token.type == TOKEN::TokenType_Integer) // 8进制
     {
-      if(ptr[i] == '.')
+      for(i++; i < count; i++)
       {
-        SET_FLAG(dwFlags, Rank_Float);
-        p++;
-        if(p >= 2) { // 不会出现两个‘.’, 这个由TOKEN中的浮点数分析保证
-          return State_SyntaxError;
+        if(ptr[i] == '8' || ptr[i] == '9') {
+          return State_IllegalNumber;
         }
-      }
-      else if(ptr[i] == 'e' || ptr[i] == 'E')
-      {
-        p = 2;
-        i++;
-        SET_FLAG(dwFlags, Rank_Float);
-        if(i >= count) {
-          return State_SyntaxError;
-        }
+        else if(ptr[i] >= '0' && ptr[i] <= '7')
+        {
+          const int n = ptr[i] - '0';
 
-        auto c = ptr[i];
-        if(c == '-') {
-          bNegExp = TRUE;
-        }
-        else if(c != '+') {
-          i--;
-        }        
-      }
-      else if(ptr[i] >= '0' && ptr[i] <= '9') 
-      {
-        int n = ptr[i] - '0';
-        if(digi[p] >= (ULLONG_MAX - (ULLONG_MAX % 10)) ||
-          (digi[p] >= (ULLONG_MAX / 10) && n > (ULLONG_MAX % 10))) {
+          if(ptr[i] > (ULLONG_MAX / 8) ||       // TODO: 感觉比下面的State_Overflow写的更准啊
+            (ptr[i] == (ULLONG_MAX / 8) && n > (ULLONG_MAX % 8)))
+          {
             return State_Overflow;
+          }
+          digi[p] = digi[p] * 8 + n;
         }
-        digi[p] = digi[p] * 10 + n;
+        else {
+          return State_IllegalChar;
+        }
       }
-      else {
-        return State_IllegalChar;
+    }
+    else
+    {
+      for(; i < count; i++)
+      {
+        if(ptr[i] == '.')
+        {
+          SET_FLAG(dwFlags, Rank_Float);
+          p++;
+          if(p >= 2) { // 不会出现两个‘.’, 这个由TOKEN中的浮点数分析保证
+            return State_SyntaxError;
+          }
+        }
+        else if(ptr[i] == 'e' || ptr[i] == 'E')
+        {
+          p = 2;
+          i++;
+          SET_FLAG(dwFlags, Rank_Float);
+          if(i >= count) {
+            return State_SyntaxError;
+          }
+
+          auto c = ptr[i];
+          if(c == '-') {
+            bNegExp = TRUE;
+          }
+          else if(c != '+') {
+            i--;
+          }
+        }
+        else if(ptr[i] >= '0' && ptr[i] <= '9')
+        {
+          int n = ptr[i] - '0';
+          if(digi[p] >= (ULLONG_MAX - (ULLONG_MAX % 10)) || // TODO: 这个可能是digi[p] > (ULLONG_MAX / 10)
+            (digi[p] >= (ULLONG_MAX / 10) && n > (ULLONG_MAX % 10))) {
+            return State_Overflow;
+          }
+          digi[p] = digi[p] * 10 + n;
+        }
+        else {
+          return State_IllegalChar;
+        }
       }
     }
 
@@ -1426,6 +1451,11 @@ namespace UVShader
       }
     }
     return TRUE;
+  }
+
+  b32 TOKEN::IsNumeric() const
+  {
+    return TokenType_FirstNumeric < type && type < TokenType_LastNumeric;
   }
 
   //////////////////////////////////////////////////////////////////////////

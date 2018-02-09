@@ -33,7 +33,7 @@ namespace UVShader
   typedef clstd::TokensT<clStringA> CTokens;
 # define TOKENSUTILITY clstd::TokensUtility
   class ArithmeticExpression;
-  class NameSet;
+  class NameContext;
 
   struct MEMBERLIST
   {
@@ -59,9 +59,12 @@ namespace UVShader
       TokenType_Undefine = 0,
       TokenType_String = 1,
       TokenType_FormalParams = 2,  // 宏的形参
+
       TokenType_FirstNumeric = 5,
-      TokenType_Numeric = TokenType_FirstNumeric,
+      TokenType_Integer, // 整数, 包括正数负数
+      TokenType_Real,    // 浮点数, float, double
       TokenType_LastNumeric,
+
       TokenType_Name = 20,
       TokenType_Operator = 30,
     };
@@ -108,6 +111,7 @@ namespace UVShader
     int GetScope() const;
 
     b32 IsIdentifier() const; // 标识符, 字母大小写, 下划线开头, 本体是字母数字, 下划线的字符串
+    b32 IsNumeric() const;
 
     GXBOOL operator==(const TOKEN& t) const;
     GXBOOL operator==(SmartStreamA::T_LPCSTR str) const;
@@ -194,6 +198,7 @@ namespace UVShader
       State_Overflow      = 0x20000000,
       State_IllegalChar   = 0x40000000,
       State_BadOpcode     = 0x10000000, // 错误的操作符
+      State_IllegalNumber = 0x08000000, // 非法数字, 入8进制下的"05678"
     };
 
     enum Rank {

@@ -61,6 +61,19 @@ namespace UVShader
   //  bool operator<(const TYPEDESC& t) const;
   //};
 
+  enum KeywordFilter
+  {
+    KeywordFilter_break    = 0x0001,
+    KeywordFilter_continue = 0x0002,
+    KeywordFilter_return   = 0x0004,    // 有返回值的函数才开启这个
+    KeywordFilter_typedef  = 0x0008,
+
+    KeywordFilter_All = 0xffffffff,
+    KeywordFilter_InFuntionArgument = 0,
+    KeywordFilter_InFuntion = KeywordFilter_typedef,
+    //KeywordMask_FlowsControl,
+  };
+
   struct TYPEDESC
   {
     enum TypeCate
@@ -79,7 +92,7 @@ namespace UVShader
     GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
   };
 
-  class NameSet
+  class NameContext
   {
   public:
     typedef clmap<clStringA, TYPEDESC>  TypeMap;
@@ -98,19 +111,21 @@ namespace UVShader
   
   protected:
     CodeParser* m_pCodeParser;
-    const NameSet* m_pParent;
+    const NameContext* m_pParent;
 
     TypeMap     m_TypeMap;
     VariableMap m_VariableMap;
     State       m_eLastState;
 
     GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
-    NameSet* GetRoot();
+    NameContext* GetRoot();
 
   public:
-    NameSet();
-    NameSet(const NameSet* pParent);
-    NameSet(const NameSet& sParent);
+    NameContext();
+    NameContext(const NameContext* pParent);
+    NameContext(const NameContext& sParent);
+
+    GXDWORD allow_keywords; // 过滤的关键字
 
     void SetParser(CodeParser* pCodeParser);
     void Cleanup();
@@ -127,13 +142,12 @@ namespace UVShader
   struct NODE_CALC : public SYNTAXNODE
   {
     //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
-    VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out) const;
+    VALUE::State Calcuate(const NameContext& sNameSet, VALUE& value_out) const;
   };
-
 
   class CodeParser : public ArithmeticExpression
   {
-    friend class NameSet;
+    friend class NameContext;
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
 
@@ -419,7 +433,7 @@ namespace UVShader
 
     GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
-    GXBOOL  ParseFunctionArguments(NameSet& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope);
+    GXBOOL  ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);
@@ -431,19 +445,19 @@ namespace UVShader
     SYNTAXNODE* FlatDefinition(SYNTAXNODE* pThisChain);
     SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
 
-    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope);
-    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope);
-    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameSet& sNameSet, const TKSCOPE& scope);
-    TKSCOPE::TYPE  TryParseSingle(NameSet& sNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
+    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope);
+    TKSCOPE::TYPE  TryParseSingle(NameContext& sNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
 
-    GXBOOL  TryKeywords(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest, TKSCOPE::TYPE* parse_end);
-    TKSCOPE::TYPE  ParseFlowIf(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
+    GXBOOL  TryKeywords(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest, TKSCOPE::TYPE* parse_end);
+    TKSCOPE::TYPE  ParseFlowIf(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
     TKSCOPE::TYPE  MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, SYNTAXNODE::GLOB* pBlockNode);
-    TKSCOPE::TYPE  ParseFlowFor(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowWhile(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowDoWhile(const NameSet& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseTypedef(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseStructDefinition(NameSet& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
+    TKSCOPE::TYPE  ParseFlowFor(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowWhile(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowDoWhile(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    TKSCOPE::TYPE  ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
 
     //const TYPEDESC* GetMember(const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
     //VALUE::State Calcuate(VALUE& value_out, const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
@@ -489,14 +503,14 @@ namespace UVShader
 
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
-    const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameSet* pNameSet);
+    const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
-    GXBOOL Verify_VariableDefinition(NameSet& sNameSet, const SYNTAXNODE& rNode);
-    GXBOOL Verify2_VariableExpr(NameSet& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
+    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE& rNode);
+    GXBOOL Verify2_VariableExpr(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
-    GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameSet* pParentSet);
-    GXBOOL Verify_StructMember(const NameSet& sParentSet, const SYNTAXNODE& rNode);
-    GXBOOL Verify2_LeftValue(const NameSet& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
+    GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
+    GXBOOL Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode);
+    GXBOOL Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
 #endif
 
     void SetTokenPhonyString(int index, const clStringA& str);
@@ -534,7 +548,7 @@ namespace UVShader
     CodeParser*         m_pSubParser;
     //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // 宏展开流
-    NameSet             m_GlobalSet;
+    NameContext         m_GlobalSet;
 
   public:
     CodeParser(PARSER_CONTEXT* pContext, Include* pInclude);
@@ -543,7 +557,7 @@ namespace UVShader
     clsize              GenerateTokens          (CodeParser* pParent = NULL);
     GXBOOL              Parse                   ();
 
-    const StatementArray& GetStatments          () const;
+    const StatementArray& GetStatements          () const;
 
 //    GXBOOL   IsToken(const SYNTAXNODE::UN* pUnion) const;
     //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const;

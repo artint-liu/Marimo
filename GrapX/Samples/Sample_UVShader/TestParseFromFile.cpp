@@ -421,7 +421,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       // 解析语法
       GXBOOL bParseResult = expp.Parse();
       GXLPCSTR lpCodes = (GXLPCSTR)pBuffer->GetPtr();
-      b32 bErrorCase = (clstd::strncmpiT(lpCodes, SRC_ERROR_CASE_SIGN, 14) == 0);
+      GXBOOL bExpectResult = (clstd::strncmpiT(lpCodes, SRC_ERROR_CASE_SIGN, 14) != 0);
       int err_code = 0; // 预期错误码
       lpCodes += 14;
 
@@ -436,23 +436,19 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       }
 
       // 如果代码标记失败, 则解析也应该失败
-      ASSERT(bParseResult ||
-        (bErrorCase && bParseResult == FALSE));
-      //if(bErrorCase) {
-      //  ASSERT(bParseResult == FALSE);
-      //}
+      ASSERT(bParseResult == bExpectResult);
 
       // 如果设置了预期错误码, 则错误集合中也至少要包含这个错误码
       if(err_code) {
         ASSERT(expp.DbgHasError(err_code));
       }
 
-      if(_CL_NOT_(bErrorCase) && szOutput != NULL)
+      if(bExpectResult && szOutput != NULL)
       {
         clstd::File file;
         if(file.CreateAlways(szOutput))
         {
-          const UVShader::CodeParser::StatementArray& stats = expp.GetStatments();
+          const UVShader::CodeParser::StatementArray& stats = expp.GetStatements();
           for(auto it = stats.begin(); it != stats.end(); ++it)
           {
             const auto& s = *it;
