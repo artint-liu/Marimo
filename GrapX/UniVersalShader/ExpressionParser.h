@@ -65,8 +65,9 @@ namespace UVShader
   {
     KeywordFilter_break    = 0x0001,
     KeywordFilter_continue = 0x0002,
-    KeywordFilter_return   = 0x0004,    // 有返回值的函数才开启这个
-    KeywordFilter_typedef  = 0x0008,
+    KeywordFilter_case     = 0x0004,
+    KeywordFilter_return   = 0x0008,    // 有返回值的函数才开启这个
+    KeywordFilter_typedef  = 0x0010,
 
     KeywordFilter_All = 0xffffffff,
     KeywordFilter_InFuntionArgument = 0,

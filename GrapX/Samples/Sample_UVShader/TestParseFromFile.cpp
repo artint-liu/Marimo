@@ -227,6 +227,14 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::SYNTAXNODE* pNode, in
     strOut.Format("typedef %s %s;\n", str[0], str[1]);
     break;
 
+  case SYNTAXNODE::MODE_ArrayAlloc:
+    strOut.Format("%s[]", str[0]);
+    break;
+
+  case SYNTAXNODE::MODE_ArrayAssignment:
+    strOut.Format("%s={%s}", str[0], str[1]);
+    break;
+
   default:
     // 没处理的 pNode->mode 类型
     strOut = "[!ERROR!]";

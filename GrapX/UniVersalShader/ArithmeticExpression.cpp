@@ -868,10 +868,26 @@ namespace UVShader
         token.precedence = TOKEN::ID_BRACE;
       }
 
-      return c.bNewEOE;
+      return FALSE;
         //EOE = c_size + 1;
     } // for
     return FALSE;
+  }
+
+  GXBOOL ArithmeticExpression::IsArrayList(const TOKEN& token)
+  {
+    if(token != '}' || m_aTokens.empty()) {
+      return FALSE;
+    }
+
+    // 数组列表
+    // 1. ={}
+    // 2. {没有分号}
+
+    if(m_aTokens.back() == '{') {
+      return CompareToken(token.scope - 1, "=");
+    }
+    return (m_aTokens[token.scope + 1].semi_scope == -1);
   }
 
   //////////////////////////////////////////////////////////////////////////

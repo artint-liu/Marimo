@@ -194,10 +194,10 @@ namespace UVShader
 */
 
   ArithmeticExpression::PAIRMARK ArithmeticExpression::s_PairMark[] = {
-    {'(', ')', FALSE, FALSE},   // 圆括号
-    {'[', ']', FALSE, FALSE},   // 方括号
-    {'{', '}', TRUE , FALSE},   // 花括号
-    {'?', ':', FALSE, TRUE},    // 冒号不匹配会被解释为语意
+    {'(', ')', FALSE},   // 圆括号
+    {'[', ']', FALSE},   // 方括号
+    {'{', '}', FALSE},   // 花括号
+    {'?', ':', TRUE},    // 冒号不匹配会被解释为语意
   };
 
 } // namespace UVShader

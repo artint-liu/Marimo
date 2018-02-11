@@ -457,11 +457,9 @@ namespace UVShader
 
       // 符号配对处理
       // ...={...}这种情况不更新EOE
-      if(MarryBracket(sStack, token) && m_aTokens.back() != "=" &&
-        _CL_NOT_(CompareToken(token.scope - 1, "=")))
-      {
-        EOE = c_size + 1;
-      }
+      //if(MarryBracket(sStack, token) && m_aTokens.back() != "=" &&
+      //  _CL_NOT_(CompareToken(token.scope - 1, "=")))
+      MarryBracket(sStack, token);
       
       if(OnToken(token)) {
         token.ClearMarker();
@@ -489,10 +487,22 @@ namespace UVShader
 
       if(it == ';') {
         ASSERT(EOE < (int)m_aTokens.size());
-        for(auto it = m_aTokens.begin() + EOE; it != m_aTokens.end(); ++it)
+        int brace_depth = 0;
+
+        // 分号作用域不能穿过"{", 但是可以穿过匹配并且内部不含分号的"{","}"
+        for(TOKEN* p = &m_aTokens.back(); p >= &m_aTokens.front() + EOE; p--)
         {
-          ASSERT(it->semi_scope == -1); // 如果非-1，则说明被覆盖
-          it->semi_scope = c_size;
+          ASSERT(p->semi_scope == -1); // 如果非-1，则说明被覆盖
+          if(*p == '}') {
+            brace_depth++;
+          }
+          else if(*p == '{') {
+            brace_depth--;
+            if(brace_depth < 0) {
+              break;
+            }
+          }
+          p->semi_scope = c_size;
         }
         EOE = c_size + 1;
       }
@@ -1022,6 +1032,8 @@ namespace UVShader
 #endif
       m_aStatements.push_back(stat);
     }
+
+    //DbgDumpSyntaxTree(NULL, stat.sRoot.pNode, 0, NULL, 1);
 
     ASSERT(pEnd->semi_scope + 1 == definition_end && *pEnd == ';');
     return TRUE;
@@ -1644,6 +1656,9 @@ NOT_INC_P:
       else if(pNode->mode == SYNTAXNODE::MODE_Block) {
         strCommand.Append("(Block)");
       }
+      else if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
+        strCommand.Append("(Array)");
+      }
     }
     else
     {
@@ -1829,7 +1844,32 @@ NOT_INC_P:
       eMode = SYNTAXNODE::MODE_Flow_Break;
     }
     else if(front == "continue") {
+      if(TEST_FLAG_NOT(sNameSet.allow_keywords, KeywordFilter_continue)) {
+        OutputErrorW(front, UVS_EXPORT_TEXT(2044, "非法 continue"));
+      }
       eMode = SYNTAXNODE::MODE_Flow_Continue;
+    }
+    else if(front == "case") {
+      if(TEST_FLAG_NOT(sNameSet.allow_keywords, KeywordFilter_case)) {
+        OutputErrorW(front, UVS_EXPORT_TEXT(2046, "非法 case"));
+      }
+
+      TKSCOPE::TYPE i = scope.begin + 1;
+      for(; i < scope.end; i++)
+      {
+        if(m_aTokens[i] == ':') {
+          break;
+        }
+      }
+
+      if(i == scope.end) {
+        OutputErrorW(front, UVS_EXPORT_TEXT(5025, "case 结尾缺少“:”"));
+        pend = scope.begin + 1;
+      }
+      else {
+        pend = i + 1;
+      }
+      eMode = SYNTAXNODE::MODE_Flow_Case;
     }
     else if(front == "discard") {
       eMode = SYNTAXNODE::MODE_Flow_Discard;
@@ -2221,8 +2261,10 @@ NOT_INC_P:
     ASSERT(A.IsToken()); // 目前仅处理这个情况
     clStringA strTypename;
 
-    switch(sNameSet.TypeDefine(A.pTokn, B.pTokn))
+    NameContext::State state = sNameSet.TypeDefine(A.pTokn, B.pTokn);
+    switch(state)
     {
+    case NameContext::State_Ok: break;
     case NameContext::State_TypeNotFound:
     {
       clStringA strTypenameW;

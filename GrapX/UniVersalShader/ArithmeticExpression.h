@@ -281,6 +281,7 @@ namespace UVShader
       MODE_Flow_DoWhile,        // do{B}while(A)
       MODE_Flow_Break,
       MODE_Flow_Continue,
+      MODE_Flow_Case,           // 只检查,不支持
       MODE_Flow_Discard,
       MODE_Return,
       MODE_Block,         // {A}B, B只可能是';'
@@ -382,7 +383,7 @@ namespace UVShader
     {
       GXCHAR    chOpen;         // 开区间
       GXCHAR    chClosed;       // 闭区间
-      GXUINT    bNewEOE : 1;  // 更新End Of Expression的位置
+      //GXUINT    bNewEOE : 1;  // 更新End Of Expression的位置
       GXUINT    bCloseAE : 1;  // AE = Another Explanation, 闭区间符号有另外解释，主要是"...?...:..."操作符
     };
 
@@ -479,6 +480,7 @@ namespace UVShader
     void    InitTokenScope(TKSCOPE& scope, const TOKEN& token, b32 bHasBracket) const;
     void    InitTokenScope(TKSCOPE& scope, GXUINT index, b32 bHasBracket) const;
     GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token);
+    GXBOOL  IsArrayList(const TOKEN& token);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
     GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::GLOB* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
