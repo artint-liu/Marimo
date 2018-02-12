@@ -91,79 +91,99 @@ namespace UVShader
   };
 
   // 全是数字类型
-  ArithmeticExpression::INTRINSIC_TYPE ArithmeticExpression::s_aIntrinsicType[] = {
-    {"int",   3, 4, 4},
-    {"vec",   3, 4, 0},
-    {"bool",  4, 4, 0},
-    {"half",  4, 4, 4},
-    {"uint",  4, 4, 4},
-    {"dword", 5, 4, 4},
-    {"float", 5, 4, 4},
-    {"double",6, 4, 4},
-    {NULL},
-  };
+  //ArithmeticExpression::INTRINSIC_TYPE ArithmeticExpression::s_aIntrinsicType[] = {
+  //  {"int",   3, 4, 4},
+  //  {"vec",   3, 4, 0},
+  //  {"bool",  4, 4, 0},
+  //  {"half",  4, 4, 4},
+  //  {"uint",  4, 4, 4},
+  //  {"dword", 5, 4, 4},
+  //  {"float", 5, 4, 4},
+  //  {"double",6, 4, 4},
+  //  {NULL},
+  //};
 
   //////////////////////////////////////////////////////////////////////////
   MEMBERLIST s_aIntXYZW[] = {
     {"int", "x"},
+    {"int", "r"},
     {"int", "y"},
+    {"int", "g"},
     {"int", "z"},
+    {"int", "b"},
     {"int", "w"},
+    {"int", "a"},
   };
 
   MEMBERLIST s_aVecXYZW[] = {
     {"float", "x"},
+    {"float", "r"},
     {"float", "y"},
+    {"float", "g"},
     {"float", "z"},
+    {"float", "b"},
     {"float", "w"},
+    {"float", "a"},
   };
 
   MEMBERLIST s_aHalfXYZW[] = {
     {"half", "x"},
+    {"half", "r"},
     {"half", "y"},
+    {"half", "g"},
     {"half", "z"},
+    {"half", "b"},
     {"half", "w"},
+    {"half", "a"},
   };
 
   MEMBERLIST s_aUintXYZW[] = {
     {"uint", "x"},
+    {"uint", "r"},
     {"uint", "y"},
+    {"uint", "g"},
     {"uint", "z"},
+    {"uint", "b"},
     {"uint", "w"},
+    {"uint", "a"},
   };
 
   MEMBERLIST s_aDoubleXYZW[] = {
     {"double", "x"},
+    {"double", "r"},
     {"double", "y"},
+    {"double", "g"},
     {"double", "z"},
+    {"double", "b"},
     {"double", "w"},
+    {"double", "a"},
   };
 
   STRUCTDESC s_aIntrinsicStruct[] =
   {
-    {"int2", s_aIntXYZW, 2},
-    {"int3", s_aIntXYZW, 3},
-    {"int4", s_aIntXYZW, 4},
+    {"int2", s_aIntXYZW, 4, "int", "xy", "rg"},
+    {"int3", s_aIntXYZW, 6, "int", "xyz", "rgb"},
+    {"int4", s_aIntXYZW, 8, "int", "xyzw", "rgba"},
     
-    {"vec2", s_aVecXYZW, 2},
-    {"vec3", s_aVecXYZW, 3},
-    {"vec4", s_aVecXYZW, 4},
+    {"vec2", s_aVecXYZW, 4, "float", "xy", "rg"},
+    {"vec3", s_aVecXYZW, 6, "float", "xyz", "rgb"},
+    {"vec4", s_aVecXYZW, 8, "float", "xyzw", "rgba"},
     
-    {"half2", s_aHalfXYZW, 2},
-    {"half3", s_aHalfXYZW, 3},
-    {"half4", s_aHalfXYZW, 4},
+    {"half2", s_aHalfXYZW, 4, "half", "xy", "rg"},
+    {"half3", s_aHalfXYZW, 6, "half", "xyz", "rgb"},
+    {"half4", s_aHalfXYZW, 8, "half", "xyzw", "rgba"},
 
-    {"uint2", s_aUintXYZW, 2},
-    {"uint3", s_aUintXYZW, 3},
-    {"uint4", s_aUintXYZW, 4},
+    {"uint2", s_aUintXYZW, 4, "uint", "xy", "rg"},
+    {"uint3", s_aUintXYZW, 6, "uint", "xyz", "rgb"},
+    {"uint4", s_aUintXYZW, 8, "uint", "xyzw", "rgba"},
 
-    {"float2", s_aVecXYZW, 2},
-    {"float3", s_aVecXYZW, 3},
-    {"float4", s_aVecXYZW, 4},
+    {"float2", s_aVecXYZW, 4, "float", "xy", "rg"},
+    {"float3", s_aVecXYZW, 6, "float", "xyz", "rgb"},
+    {"float4", s_aVecXYZW, 8, "float", "xyzw", "rgba"},
     
-    {"double2", s_aDoubleXYZW, 2},
-    {"double3", s_aDoubleXYZW, 3},
-    {"double4", s_aDoubleXYZW, 4},
+    {"double2", s_aDoubleXYZW, 4, "double", "xy", "rg"},
+    {"double3", s_aDoubleXYZW, 6, "double", "xyz", "rgb"},
+    {"double4", s_aDoubleXYZW, 8, "double", "xyzw", "rgba"},
 
     {NULL},
   };

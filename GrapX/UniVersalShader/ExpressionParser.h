@@ -91,6 +91,7 @@ namespace UVShader
     const SYNTAXNODE* pMemberNode;
 
     GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
+    static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set);
   };
 
   class NameContext
@@ -434,7 +435,7 @@ namespace UVShader
 
     GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
-    GXBOOL  ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope);
+    GXBOOL  ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);
@@ -506,7 +507,7 @@ namespace UVShader
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
     const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
-    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE& rNode);
+    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode);
     GXBOOL Verify2_VariableExpr(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);

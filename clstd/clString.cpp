@@ -1130,13 +1130,25 @@ namespace clstd
   //}
 
   _CLSTR_TEMPL
-    _TCh& _CLSTR_IMPL::Front() const
+    _TCh& _CLSTR_IMPL::Front()
   {
     return m_pBuf[0];
   }
 
   _CLSTR_TEMPL
-    _TCh& _CLSTR_IMPL::Back() const
+    _TCh& _CLSTR_IMPL::Back()
+  {
+    return m_pBuf[CLSTR_LENGTH(m_pBuf) - 1];
+  }
+
+  _CLSTR_TEMPL
+  const _TCh& _CLSTR_IMPL::Front() const
+  {
+    return m_pBuf[0];
+  }
+
+  _CLSTR_TEMPL
+  const _TCh& _CLSTR_IMPL::Back() const
   {
     return m_pBuf[CLSTR_LENGTH(m_pBuf) - 1];
   }

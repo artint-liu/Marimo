@@ -99,9 +99,9 @@ namespace UVShader
   {
 #ifdef _DEBUG
     // 检查名字与其设定长度是一致的
-    for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i) {
-      ASSERT(GXSTRLEN(s_aIntrinsicType[i].name) == s_aIntrinsicType[i].name_len);
-    }
+    //for(int i = 0; s_aIntrinsicType[i].name != NULL; ++i) {
+    //  ASSERT(GXSTRLEN(s_aIntrinsicType[i].name) == s_aIntrinsicType[i].name_len);
+    //}
 #endif // #ifdef _DEBUG
 
 #ifdef USE_CLSTD_TOKENS
@@ -648,7 +648,21 @@ namespace UVShader
         ERROR_MSG__MISSING_SEMICOLON(*A.pTokn);
         return FALSE;
       }
-      c.mode = *pBack == ')' ? SYNTAXNODE::MODE_FunctionCall : SYNTAXNODE::MODE_ArrayIndex;
+
+      if(*pBack == ')') {
+        c.mode = SYNTAXNODE::MODE_FunctionCall;
+      }
+      else if(*pBack == ']')
+      {
+        c.mode = SYNTAXNODE::MODE_ArrayIndex;
+      }
+      else {
+        ASSERT(*pBack == '}');
+        clStringW str;
+        m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(2054, "在“%s”之后应输入“%s”"), A.pTokn->ToString(str).CStr(), _CLTEXT("="));
+        c.mode = SYNTAXNODE::MODE_Undefined;
+      }
+
       c.B.ptr = NULL;
 
       if( ! ParseArithmeticExpression(0, TKSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {

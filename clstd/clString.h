@@ -235,8 +235,10 @@ namespace clstd
     _TCh&    operator[]    (int nIdx);
     _TCh&    operator[]    (clsize nIdx);
     //_TCh&    operator[]    (clsize nIdx);
-    _TCh&    Front     () const;
-    _TCh&    Back      () const;
+    _TCh&       Front     ();
+    _TCh&       Back      ();
+    const _TCh& Front     () const;
+    const _TCh& Back      () const;
 
     operator const _TCh*() const;
     const _TCh* CStr() const;

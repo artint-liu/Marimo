@@ -1019,7 +1019,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
       SYNTAXNODE* pChainNode = stat.sRoot.pNode;
       while(pChainNode) {
-        Verify_VariableDefinition(m_GlobalSet, *pChainNode->Operand[0].pNode);
+        Verify_VariableDefinition(m_GlobalSet, pChainNode->Operand[0].pNode);
         pChainNode = pChainNode->Operand[1].pNode;
       }
 #endif
@@ -1028,12 +1028,10 @@ namespace UVShader
     else
     {
 #ifdef ENABLE_SYNTAX_VERIFY
-      Verify_VariableDefinition(m_GlobalSet, *stat.sRoot.pNode);
+      Verify_VariableDefinition(m_GlobalSet, stat.sRoot.pNode);
 #endif
       m_aStatements.push_back(stat);
     }
-
-    //DbgDumpSyntaxTree(NULL, stat.sRoot.pNode, 0, NULL, 1);
 
     ASSERT(pEnd->semi_scope + 1 == definition_end && *pEnd == ';');
     return TRUE;
@@ -1089,12 +1087,13 @@ namespace UVShader
     // #
     // # ( [ArgumentList] )
     // #
+    int nTypeOnlyCount = 0;
     if(p[0].scope != p[1].scope + 1) // 有参数: 两个括号不相邻
     {
       TKSCOPE ArgScope; //(m_aTokens[p->scope].scope + 1, p->scope);
       InitTokenScope(ArgScope, *p, FALSE);
       sNameSet_Func.allow_keywords = KeywordFilter_InFuntionArgument;
-      ParseFunctionArguments(sNameSet_Func, &stat, &ArgScope);
+      ParseFunctionArguments(sNameSet_Func, &stat, &ArgScope, nTypeOnlyCount);
     }
     p = &m_aTokens[p->scope];
     ASSERT(*p == ')');
@@ -1112,6 +1111,10 @@ namespace UVShader
       stat.type = StatementType_FunctionDecl;
     }
     else if(*p == "{") { // 函数体
+      if(nTypeOnlyCount != 0) {
+        OutputErrorW(*p, UVS_EXPORT_TEXT(2055, "应输入形参表，而不是类型表"));
+      }
+
       TKSCOPE func_statement_block; // (m_aTokens[p->scope].scope, p->scope);
       InitTokenScope(func_statement_block, *p, TRUE);
 
@@ -1401,7 +1404,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
         SYNTAXNODE* pChainNode = glob.pNode;
         while(pChainNode) {
-          Verify_VariableDefinition(sNameSet, *pChainNode->Operand[0].pNode);
+          Verify_VariableDefinition(sNameSet, pChainNode->Operand[0].pNode);
           pChainNode = pChainNode->Operand[1].pNode;
         }
 #endif
@@ -1475,12 +1478,13 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL CodeParser::ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope)
+  GXBOOL CodeParser::ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount)
   {
     // 函数参数格式
     // [InputModifier] Type Name [: Semantic]
     // 函数可以包含多个参数，用逗号分隔
 
+    nTypeOnlyCount = 0; // 类型描述的数量
     TOKEN* p = &m_aTokens[pArgScope->begin];
     const TOKEN* pEnd = &m_aTokens.front() + pArgScope->end;
     ASSERT(*pEnd == ")"); // 函数参数列表的结尾必须是闭圆括号
@@ -1516,8 +1520,18 @@ namespace UVShader
 
 NOT_INC_P:
       arg.ptkType = p;
-
-      INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
+      if(++p >= pEnd) {
+        nTypeOnlyCount++;
+        aArgs.push_back(arg);
+        break;
+      }
+      
+      if(*p == ',') {
+        nTypeOnlyCount++;
+        aArgs.push_back(arg);
+        INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
+        continue;
+      }
 
       arg.ptkName = p;
 
@@ -1659,6 +1673,9 @@ NOT_INC_P:
       else if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
         strCommand.Append("(Array)");
       }
+      else if(pNode->mode == SYNTAXNODE::MODE_Definition) {
+        strCommand.Append("(definition)");
+      }
     }
     else
     {
@@ -1673,6 +1690,9 @@ NOT_INC_P:
     clStringA strOut;
     switch(pNode->mode)
     {
+    case SYNTAXNODE::MODE_Undefined: // 解析出错才会有这个
+      break;
+
     case SYNTAXNODE::MODE_FunctionCall: // 函数调用
       strOut.Format("%s(%s)", str[0], str[1]);
       break;
@@ -1791,7 +1811,7 @@ NOT_INC_P:
 
     if(front == "else") {
       // ERROR: "else" 不能独立使用
-      OutputErrorW(front, UVS_EXPORT_TEXT(5012, "\"else\" 不能独立使用."));
+      OutputErrorW(front, UVS_EXPORT_TEXT(2181, "没有匹配 if 的非法 else"));
     }
     else if(front == "for") {
       pend = ParseFlowFor(sNameSet, scope, pDesc);
@@ -3320,32 +3340,40 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXBOOL CodeParser::Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE& rNode)
+  GXBOOL CodeParser::Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
-    ASSERT(rNode.mode == SYNTAXNODE::MODE_Definition); // 只检查定义
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition); // 只检查定义
 
-    const TOKEN& tkVar = rNode.Operand[1].IsToken()
-      ? *rNode.Operand[1].pTokn
-      : rNode.Operand[1].pNode->GetAnyTokenAB();
+    if(pNode->Operand[0].IsToken())
+    {
+      if(*pNode->Operand[0].pTokn == "const") {
+        return Verify_VariableDefinition(sNameSet, pNode->Operand[1].pNode);
+      }
+    }
 
-    ASSERT(rNode.Operand[0].IsToken()); // 外面的拆解保证不会出现这个
+    const TOKEN& tkVar = pNode->Operand[1].IsToken()
+      ? *pNode->Operand[1].pTokn
+      : pNode->Operand[1].pNode->GetAnyTokenAB();
+
+    ASSERT(pNode->Operand[0].IsToken()); // 外面的拆解保证不会出现这个
 
     clStringA strType, strVar;
-    rNode.Operand[0].pTokn->ToString(strType);
+    pNode->Operand[0].pTokn->ToString(strType);
     tkVar.ToString(strVar);
 
+    DbgDumpSyntaxTree(NULL, pNode, 0, NULL, 1);
    
 #if 0
     // 检查类型定义
     const TYPEDESC* pType = NULL;
-    if(_CL_NOT_(rNode.Operand[0].pTokn->IsIdentifier()) || (
-      _CL_NOT_(pType = Verify_Type(*rNode.Operand[0].pTokn)) &&
-      _CL_NOT_(pType = Verify_Struct(*rNode.Operand[0].pTokn, &sNameSet))) )
+    if(_CL_NOT_(pNode->Operand[0].pTokn->IsIdentifier()) || (
+      _CL_NOT_(pType = Verify_Type(*pNode->Operand[0].pTokn)) &&
+      _CL_NOT_(pType = Verify_Struct(*pNode->Operand[0].pTokn, &sNameSet))) )
     {
       clStringW str;
-      OutputErrorW(*rNode.Operand[0].pTokn,
+      OutputErrorW(*pNode->Operand[0].pTokn,
         UVS_EXPORT_TEXT(5024, "错误的数据类型 : \"%s\""),
-        rNode.Operand[0].pTokn->ToString(str).CStr());
+        pNode->Operand[0].pTokn->ToString(str).CStr());
 
       return FALSE;
     }
@@ -3389,8 +3417,8 @@ NOT_INC_P:
       return FALSE;
     }
 
-    return rNode.Operand[1].IsToken() ? TRUE
-      : Verify2_VariableExpr(sNameSet, *rNode.Operand[0].pTokn, pType, *rNode.Operand[1].pNode);
+    return pNode->Operand[1].IsToken() ? TRUE
+      : Verify2_VariableExpr(sNameSet, *pNode->Operand[0].pTokn, pType, *pNode->Operand[1].pNode);
   }
 
   GXBOOL CodeParser::Verify2_VariableExpr(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode)
@@ -3476,6 +3504,25 @@ NOT_INC_P:
           OutputErrorW(*pNode->pOpcode, UVS_EXPORT_TEXT(5022, "赋值错误, \"=\" 后应该有表达式"));
           return (result = FALSE);
         }
+        return FALSE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_ArrayIndex)
+      {
+        //if(pNode->Operand[1].IsToken())
+        //{
+        //}
+        //else if(pNode->Operand[1].IsNode())
+        //{
+        //  CLBREAK;
+        //}
+        //else {
+        //  CLBREAK;
+        //}
+      }
+      else {
+        if(depth <= 1 && pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->pOpcode == NULL) {
+          CLNOP
+        }
       }
       return TRUE;
     });
@@ -3506,7 +3553,7 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Definition)
       {
-        if(Verify_VariableDefinition(sNameSet, *pNode) == FALSE) {
+        if(Verify_VariableDefinition(sNameSet, pNode) == FALSE) {
           result = FALSE;
         }
         return FALSE; // 不再递归
@@ -3794,32 +3841,46 @@ NOT_INC_P:
     const TYPEDESC* pDesc = GetType(strType);
     if(pDesc == NULL)
     {
-      TYPEDESC td = {TYPEDESC::TypeCate_Empty};
-      if(TestIntrinsicType(&td, strType) == FALSE) {
-        m_eLastState = State_TypeNotFound;
+      // 如果注册vec4, 那么vec3和vec2都会被注册
+      clStringA strTypeRec = strType;
+      ch* pc = &strTypeRec.Back();
+     
+      do
+      {
+        TYPEDESC td = { TYPEDESC::TypeCate_Empty };
+
+        // TODO: 如果是vec4类型, 则同时也能返回vec3和vec2
+        if(TestIntrinsicType(&td, strTypeRec) == FALSE) {
+          m_eLastState = State_TypeNotFound;
+          return NULL;
+        }
+
+        // 内置类型由根节点持有
+        pDesc = &(GetRoot()->m_TypeMap.insert(clmake_pair(strTypeRec, td)).first->second);
+        *pc -= 1;
+      } while(*pc == '2' || *pc == '3');
+    }
+
+    if(ptrVariable)
+    {
+      clStringA strVari;
+      ptrVariable->ToString(strVari);
+      if(GetType(strVari)) {
+        m_eLastState = State_DefineAsType;
         return NULL;
       }
 
-      // 内置类型由根节点持有
-      pDesc = &(GetRoot()->m_TypeMap.insert(clmake_pair(strType, td)).first->second);
-    }
+      auto result = m_VariableMap.insert(clmake_pair(ptrVariable, pDesc));
+      if(result.second) {
+        // 添加成功, 返回type描述
+        m_eLastState = State_Ok;
+        return result.first->second;
+      }
 
-    clStringA strVari;
-    ptrVariable->ToString(strVari);
-    if(GetType(strVari)) {
-      m_eLastState = State_DefineAsType;
+      m_eLastState = State_DuplicatedVariable;
       return NULL;
     }
-    
-    auto result = m_VariableMap.insert(clmake_pair(ptrVariable, pDesc));
-    if(result.second) {
-      // 添加成功, 返回type描述
-      m_eLastState = State_Ok;
-      return result.first->second;
-    }
-
-    m_eLastState = State_DuplicatedVariable;
-    return NULL;
+    return pDesc;
   }
 
   NameContext::State NameContext::GetLastState() const
@@ -4052,9 +4113,33 @@ NOT_INC_P:
           return TRUE;
         }
       }
+
+      ASSERT(clstd::strlenT(pDesc->set0) == clstd::strlenT(pDesc->set1)); // 保证这两个长度一致
+
+      if(MatchScaler(ptkMember, pDesc->set0) || MatchScaler(ptkMember, pDesc->set1))
+      {
+        strTypename = pDesc->name;
+        strTypename.Back() = '0' + ptkMember->length;
+        return TRUE;
+      }
     }
-    CLBREAK;
-    return NULL;
+    return FALSE;
+  }
+
+  GXBOOL TYPEDESC::MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set)
+  {
+    size_t match_count = 0;
+    for(size_t i = 0; i < ptkMember->length; i++)
+    {
+      for(size_t n = 0; scaler_set[n]; n++)
+      {
+        if(ptkMember->marker[i] == scaler_set[n]) {
+          match_count++;
+          break;
+        }
+      }
+    }
+    return match_count == ptkMember->length;
   }
 
 } // namespace UVShader

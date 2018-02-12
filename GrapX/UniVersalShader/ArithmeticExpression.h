@@ -46,6 +46,9 @@ namespace UVShader
     GXLPCSTR    name;   // 结构体名
     MEMBERLIST* list;   // 成员列表
     size_t      count;  // 成员数
+    GXLPCSTR    type;
+    GXLPCSTR    set0;
+    GXLPCSTR    set1;
   };
 
   // 运行时记录符号和操作符等属性
@@ -441,7 +444,7 @@ namespace UVShader
 
     typedef Marimo::DataPoolErrorMsg<ch> ErrorMessage;
   protected:
-    static INTRINSIC_TYPE s_aIntrinsicType[];
+    //static INTRINSIC_TYPE s_aIntrinsicType[];
     static MBO s_semantic;
     static MBO s_plus_minus[];
     static MBO s_Operator1[];
