@@ -91,14 +91,20 @@ namespace UVShader
     const SYNTAXNODE* pMemberNode;
 
     GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
-    static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set);
+    static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
+  };
+
+  struct VARIDESC
+  {
+    const TYPEDESC* pDesc;
+    clStringA       strConstValue;  // 常量类型
   };
 
   class NameContext
   {
   public:
     typedef clmap<clStringA, TYPEDESC>  TypeMap;
-    typedef clmap<TokenPtr, const TYPEDESC*>  VariableMap;
+    typedef clmap<TokenPtr, VARIDESC>  VariableMap;
     typedef clStringA::LPCSTR LPCSTR;
 
     enum State
@@ -119,13 +125,15 @@ namespace UVShader
     VariableMap m_VariableMap;
     State       m_eLastState;
 
-    GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
     NameContext* GetRoot();
+
+  private: // 禁止拷贝构造和复制构造
+    NameContext(const NameContext& sNameCtx){}
+    NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
   public:
     NameContext();
     NameContext(const NameContext* pParent);
-    NameContext(const NameContext& sParent);
 
     GXDWORD allow_keywords; // 过滤的关键字
 
@@ -133,12 +141,15 @@ namespace UVShader
     void Cleanup();
 
     const TYPEDESC* GetType(const clStringA& strType) const;
+    const TYPEDESC* GetType(const TOKEN& token) const;
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
     State  GetLastState() const;
     const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
+    
+    static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
   };
 
   struct NODE_CALC : public SYNTAXNODE
@@ -505,10 +516,10 @@ namespace UVShader
 
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
-    const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
+    //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
     GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode);
-    GXBOOL Verify2_VariableExpr(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
+    GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
     GXBOOL Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode);

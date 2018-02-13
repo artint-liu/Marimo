@@ -104,7 +104,7 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::SYNTAXNODE* pNode, in
     strOut.Format("%s(%s)", str[0], str[1]);
     break;
 
-  case SYNTAXNODE::MODE_ArrayIndex:
+  case SYNTAXNODE::MODE_Subscript:
     strOut.Format("%s[%s]", str[0], str[1]);
     break;
 
@@ -227,7 +227,7 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::SYNTAXNODE* pNode, in
     strOut.Format("typedef %s %s;\n", str[0], str[1]);
     break;
 
-  case SYNTAXNODE::MODE_ArrayAlloc:
+  case SYNTAXNODE::MODE_Subscript0:
     strOut.Format("%s[]", str[0]);
     break;
 

@@ -654,7 +654,7 @@ namespace UVShader
       }
       else if(*pBack == ']')
       {
-        c.mode = SYNTAXNODE::MODE_ArrayIndex;
+        c.mode = SYNTAXNODE::MODE_Subscript;
       }
       else {
         ASSERT(*pBack == '}');
@@ -744,10 +744,10 @@ namespace UVShader
     }
     else if(bracket.scope == m_aTokens[bracket.scope].scope + 1) // "[]"
     {
-      mode = SYNTAXNODE::MODE_ArrayAlloc;
+      mode = SYNTAXNODE::MODE_Subscript0;
     }
     else {
-     mode = SYNTAXNODE::MODE_ArrayIndex;
+      mode = SYNTAXNODE::MODE_Subscript;
     }
 
     MakeSyntaxNode(pDesc, mode, &A, &B);

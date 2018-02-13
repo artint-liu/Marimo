@@ -268,8 +268,8 @@ namespace UVShader
       MODE_FunctionCall,        // 函数调用: A(B)
       MODE_TypeCast,            // 类型转换: (A)B
       MODE_Typedef,             // typedef A B;
-      MODE_ArrayIndex,          // 索引调用: A[B], 方括号内有内容的都认为是数组调用
-      MODE_ArrayAlloc,          // 自适应数组分配: A[], 注意"k[5]"这种形式认为是索引调用
+      MODE_Subscript,           // 下标: A[B], 方括号内有内容的都认为是下标
+      MODE_Subscript0,          // 自适应下标: A[], B永远为空
       MODE_Definition,          // 变量定义: A B
 
       MODE_StructDef,           // 结构定义:
@@ -286,9 +286,9 @@ namespace UVShader
       MODE_Flow_Continue,
       MODE_Flow_Case,           // 只检查,不支持
       MODE_Flow_Discard,
-      MODE_Return,
-      MODE_Block,         // {A}B, B只可能是';'
-      MODE_Chain,         // 表达式链表,链表中的应该属于同一个作用域, [A:statement][B:next chain]，在chain结尾应该是[A:statement][B:NULL]这样
+      MODE_Return,              // return
+      MODE_Block,               // {A}B, B只可能是';'
+      MODE_Chain,               // 表达式链表,链表中的应该属于同一个作用域, [A:statement][B:next chain]，在chain结尾应该是[A:statement][B:NULL]这样
     };
 
     const static int s_NumOfOperand = 2;
