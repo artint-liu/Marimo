@@ -270,7 +270,7 @@ namespace clpathfile {
         RecursiveSearchDir<_TString>(szPath, [&rFileList, &fn]
         (const _TString& strDir, const WIN32_FIND_DATA& wfd) -> b32
         {
-          if(TEST_FLAG(wfd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY))
+          if(TEST_FLAG(wfd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY))
           {
             return fn(strDir, wfd);
           }
@@ -428,7 +428,7 @@ namespace clpathfile
 
   // 从一个路径收集文件，
   // 如果这个路径是目录，则遍历子目录，如果是文件，就填入list后返回
-  template<class _TString, class FINDFILEDATAT, typename _TCh, typename _TStringList, class _Fn>
+  template<class _TString, class FINDFILEDATAT, typename _TCh, typename _TStringList, class _Fn> // [](_TString str, FINDFILEDATAT wfd)->b32
   void GenerateFiles(_TStringList& rFileList, const _TCh* szPath, _Fn fn)
   {
     CLDWORD dwAttri = clpathfile::GetFileAttributes(szPath);
@@ -438,10 +438,10 @@ namespace clpathfile
 
     if(dwAttri & clstd::FileAttribute_Directory)
     {
-      RecursiveSearchDir<_TString>(szPath, [&rFileList, &fn]
+      RecursiveSearchDir<_TString, FINDFILEDATAT>(szPath, [&rFileList, &fn]
       (const _TString& strDir, const FINDFILEDATAT& wfd) -> b32
       {
-        if(TEST_FLAG(wfd.dwFileAttributes, clstd::FileAttribute_Directory))
+        if(TEST_FLAG(wfd.dwAttributes, clstd::FileAttribute_Directory))
         {
           return fn(strDir, wfd);
         }

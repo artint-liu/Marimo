@@ -1332,7 +1332,7 @@ namespace clstd
       clmemmove(m_pBuf + idx + count, m_pBuf + idx, (uStrLength - idx + 1) * sizeof(_TCh));
 
       for(size_t i = 0; i < count; i++) {
-        m_pBuf[i] = cCh;
+        m_pBuf[idx + i] = cCh;
       }
     }
     return uStrLength + count;

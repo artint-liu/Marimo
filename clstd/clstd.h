@@ -29,7 +29,7 @@
 
 #if !(defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP) || defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_IOS_SIM) || defined(_CL_SYSTEM_ANDROID))
 // 操作系统平台
-# if defined(_WIN32)
+# if defined(_WIN32) || defined(WIN32)
 #   define _CL_SYSTEM_WINDOWS
 # endif
 #endif
