@@ -1,6 +1,6 @@
 ﻿//#include "stdafx.h"
 //#include <clTypes.h>
-#include "clMemory.h"
+//#include "clMemory.h"
 #include "clstd.h"
 #include "clTree.h"
 
