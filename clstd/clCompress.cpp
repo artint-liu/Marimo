@@ -2,7 +2,11 @@
 //#include "clBuffer.h"
 #include "clCompress.h"
 
-#include "third_party/zlib/include/zlib.h"
+#if defined(_CL_SYSTEM_MACOS)
+# include "zlib.h"
+#else
+# include "third_party/zlib/include/zlib.h"
+#endif
 
 namespace clstd
 {

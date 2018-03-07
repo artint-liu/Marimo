@@ -67,7 +67,7 @@ typedef i64                 i32_ptr;
 typedef s64                 s32_ptr;
 typedef u64                 u32_ptr;
 # endif
-#elif defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_LINUX)
+#elif defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_LINUX) || defined(_CL_SYSTEM_MACOS)
 typedef intptr_t            i32_ptr;
 typedef intptr_t            s32_ptr;
 typedef uintptr_t           u32_ptr;

@@ -60,6 +60,8 @@
 #elif defined(_CL_SYSTEM_LINUX)
 # include <stdint.h>
 # include <stddef.h>
+#elif defined(_CL_SYSTEM_MACOS)
+# include <stdlib.h>
 #else
 # error 未知平台或者新增加的平台
 #endif
