@@ -1223,8 +1223,8 @@ namespace UVShader
     *this = param0;
     VALUE second = param1;
     Rank type = clMax(this->rank, second.rank);
-    State state = SyncRank(type);
-    state = (state == State_OK) ? second.SyncRank(type) : state;
+    State state = UpdateValueByRank(type);
+    state = (state == State_OK) ? second.UpdateValueByRank(type) : state;
     
     if(state != State_OK) {
       return state;
@@ -1279,7 +1279,7 @@ namespace UVShader
     return str;
   }
 
-  VALUE::State VALUE::SyncRank(Rank _type)
+  VALUE::State VALUE::UpdateValueByRank(Rank _type)
   {
     if(rank == _type || rank == Rank_Undefined) { // 同级或者未定义（一元操作情况）
       return State_OK;

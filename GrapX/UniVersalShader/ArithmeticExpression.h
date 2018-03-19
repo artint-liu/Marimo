@@ -41,9 +41,10 @@ namespace UVShader
     GXLPCSTR name;      // 成员名
   };
 
-  struct STRUCTDESC
+  struct COMMINTRTYPEDESC
   {
     GXLPCSTR    name;   // 结构体名
+    int         rank;   // VALUE::Rank
     MEMBERLIST* list;   // 成员列表
     size_t      count;  // 成员数
     GXLPCSTR    type;
@@ -239,7 +240,7 @@ namespace UVShader
     void SetOne();
     State set(const TOKEN& token);
     VALUE& set(const VALUE& v);
-    State SyncRank(Rank _type);  // 调整为到 type 指定的级别
+    State UpdateValueByRank(Rank _type);  // 调整为到 type 指定的级别
     State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
     clStringA ToString() const;
 
@@ -314,6 +315,7 @@ namespace UVShader
         return *this;
       }
     };
+    typedef clist<GLOB> GlobList;
 
     GLOB Operand[s_NumOfOperand];
 

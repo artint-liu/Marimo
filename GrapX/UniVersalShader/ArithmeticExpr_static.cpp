@@ -12,6 +12,18 @@
 
 namespace UVShader
 {
+  GXLPCSTR STR_INT    = "int";
+  GXLPCSTR STR_UINT   = "uint";
+  GXLPCSTR STR_HALF   = "half";
+  GXLPCSTR STR_BOOL   = "bool";
+  GXLPCSTR STR_FLOAT  = "float";
+  GXLPCSTR STR_FLOAT2 = "float2";
+  GXLPCSTR STR_FLOAT3 = "float3";
+  GXLPCSTR STR_FLOAT4 = "float4";
+  GXLPCSTR STR_VEC2   = "vec2";
+  GXLPCSTR STR_VEC3   = "vec3";
+  GXLPCSTR STR_VEC4   = "vec4";
+  GXLPCSTR STR_DOUBLE = "double";
   //static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
 
   // 这个按照ASCII顺序分布, "+",",","-" 分别是43，44，45
@@ -105,98 +117,121 @@ namespace UVShader
 
   //////////////////////////////////////////////////////////////////////////
   MEMBERLIST s_aIntXYZW[] = {
-    {"int", "x"},
-    {"int", "r"},
-    {"int", "y"},
-    {"int", "g"},
-    {"int", "z"},
-    {"int", "b"},
-    {"int", "w"},
-    {"int", "a"},
+    {STR_INT, "x"},
+    {STR_INT, "r"},
+    {STR_INT, "y"},
+    {STR_INT, "g"},
+    {STR_INT, "z"},
+    {STR_INT, "b"},
+    {STR_INT, "w"},
+    {STR_INT, "a"},
   };
 
   MEMBERLIST s_aVecXYZW[] = {
-    {"float", "x"},
-    {"float", "r"},
-    {"float", "y"},
-    {"float", "g"},
-    {"float", "z"},
-    {"float", "b"},
-    {"float", "w"},
-    {"float", "a"},
+    {STR_FLOAT, "x"},
+    {STR_FLOAT, "r"},
+    {STR_FLOAT, "y"},
+    {STR_FLOAT, "g"},
+    {STR_FLOAT, "z"},
+    {STR_FLOAT, "b"},
+    {STR_FLOAT, "w"},
+    {STR_FLOAT, "a"},
   };
 
   MEMBERLIST s_aHalfXYZW[] = {
-    {"half", "x"},
-    {"half", "r"},
-    {"half", "y"},
-    {"half", "g"},
-    {"half", "z"},
-    {"half", "b"},
-    {"half", "w"},
-    {"half", "a"},
+    {STR_HALF, "x"},
+    {STR_HALF, "r"},
+    {STR_HALF, "y"},
+    {STR_HALF, "g"},
+    {STR_HALF, "z"},
+    {STR_HALF, "b"},
+    {STR_HALF, "w"},
+    {STR_HALF, "a"},
   };
 
   MEMBERLIST s_aUintXYZW[] = {
-    {"uint", "x"},
-    {"uint", "r"},
-    {"uint", "y"},
-    {"uint", "g"},
-    {"uint", "z"},
-    {"uint", "b"},
-    {"uint", "w"},
-    {"uint", "a"},
+    {STR_UINT, "x"},
+    {STR_UINT, "r"},
+    {STR_UINT, "y"},
+    {STR_UINT, "g"},
+    {STR_UINT, "z"},
+    {STR_UINT, "b"},
+    {STR_UINT, "w"},
+    {STR_UINT, "a"},
   };
 
   MEMBERLIST s_aDoubleXYZW[] = {
-    {"double", "x"},
-    {"double", "r"},
-    {"double", "y"},
-    {"double", "g"},
-    {"double", "z"},
-    {"double", "b"},
-    {"double", "w"},
-    {"double", "a"},
+    {STR_DOUBLE, "x"},
+    {STR_DOUBLE, "r"},
+    {STR_DOUBLE, "y"},
+    {STR_DOUBLE, "g"},
+    {STR_DOUBLE, "z"},
+    {STR_DOUBLE, "b"},
+    {STR_DOUBLE, "w"},
+    {STR_DOUBLE, "a"},
   };
 
-  STRUCTDESC s_aIntrinsicStruct[] =
+  COMMINTRTYPEDESC s_aIntrinsicStruct[] =
   {
-    {"int2", s_aIntXYZW, 4, "int", "xy", "rg"},
-    {"int3", s_aIntXYZW, 6, "int", "xyz", "rgb"},
-    {"int4", s_aIntXYZW, 8, "int", "xyzw", "rgba"},
+    {"int2", VALUE::Rank_Undefined, s_aIntXYZW, 4, STR_INT, "xy", "rg"},
+    {"int3", VALUE::Rank_Undefined, s_aIntXYZW, 6, STR_INT, "xyz", "rgb"},
+    {"int4", VALUE::Rank_Undefined, s_aIntXYZW, 8, STR_INT, "xyzw", "rgba"},
     
-    {"vec2", s_aVecXYZW, 4, "float", "xy", "rg"},
-    {"vec3", s_aVecXYZW, 6, "float", "xyz", "rgb"},
-    {"vec4", s_aVecXYZW, 8, "float", "xyzw", "rgba"},
+    {"vec2", VALUE::Rank_Undefined, s_aVecXYZW, 4, STR_FLOAT, "xy", "rg"},
+    {"vec3", VALUE::Rank_Undefined, s_aVecXYZW, 6, STR_FLOAT, "xyz", "rgb"},
+    {"vec4", VALUE::Rank_Undefined, s_aVecXYZW, 8, STR_FLOAT, "xyzw", "rgba"},
     
-    {"half2", s_aHalfXYZW, 4, "half", "xy", "rg"},
-    {"half3", s_aHalfXYZW, 6, "half", "xyz", "rgb"},
-    {"half4", s_aHalfXYZW, 8, "half", "xyzw", "rgba"},
+    {"half2", VALUE::Rank_Undefined, s_aHalfXYZW, 4, STR_HALF, "xy", "rg"},
+    {"half3", VALUE::Rank_Undefined, s_aHalfXYZW, 6, STR_HALF, "xyz", "rgb"},
+    {"half4", VALUE::Rank_Undefined, s_aHalfXYZW, 8, STR_HALF, "xyzw", "rgba"},
 
-    {"uint2", s_aUintXYZW, 4, "uint", "xy", "rg"},
-    {"uint3", s_aUintXYZW, 6, "uint", "xyz", "rgb"},
-    {"uint4", s_aUintXYZW, 8, "uint", "xyzw", "rgba"},
+    {"uint2", VALUE::Rank_Undefined, s_aUintXYZW, 4, STR_UINT, "xy", "rg"},
+    {"uint3", VALUE::Rank_Undefined, s_aUintXYZW, 6, STR_UINT, "xyz", "rgb"},
+    {"uint4", VALUE::Rank_Undefined, s_aUintXYZW, 8, STR_UINT, "xyzw", "rgba"},
 
-    {"float2", s_aVecXYZW, 4, "float", "xy", "rg"},
-    {"float3", s_aVecXYZW, 6, "float", "xyz", "rgb"},
-    {"float4", s_aVecXYZW, 8, "float", "xyzw", "rgba"},
+    {"float2", VALUE::Rank_Undefined, s_aVecXYZW, 4, STR_FLOAT, "xy", "rg"},
+    {"float3", VALUE::Rank_Undefined, s_aVecXYZW, 6, STR_FLOAT, "xyz", "rgb"},
+    {"float4", VALUE::Rank_Undefined, s_aVecXYZW, 8, STR_FLOAT, "xyzw", "rgba"},
     
-    {"double2", s_aDoubleXYZW, 4, "double", "xy", "rg"},
-    {"double3", s_aDoubleXYZW, 6, "double", "xyz", "rgb"},
-    {"double4", s_aDoubleXYZW, 8, "double", "xyzw", "rgba"},
+    {"double2", VALUE::Rank_Undefined, s_aDoubleXYZW, 4, STR_DOUBLE, "xy", "rg"},
+    {"double3", VALUE::Rank_Undefined, s_aDoubleXYZW, 6, STR_DOUBLE, "xyz", "rgb"},
+    {"double4", VALUE::Rank_Undefined, s_aDoubleXYZW, 8, STR_DOUBLE, "xyzw", "rgba"},
 
     {NULL},
   };
 
-  STRUCTDESC s_aBaseType[] =
+  COMMINTRTYPEDESC s_aBaseType[] =
   {
-    {"float"},
-    {"half"},
-    {"int"},
-    {"bool"},
-    {"uint"},
-    {"double"},
+    {STR_FLOAT, VALUE::Rank_Float},
+    {STR_HALF, VALUE::Rank_Float},
+    {STR_INT, VALUE::Rank_Signed},
+    {STR_BOOL, VALUE::Rank_Undefined},
+    {STR_UINT, VALUE::Rank_Unsigned},
+    {STR_DOUBLE, VALUE::Rank_Double},
     {NULL}
+  };
+
+  // 不对外使用
+  //static GXLPCSTR s_ParamArray_Floats[] = {STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT};
+  //static GXLPCSTR s_ParamArray_Float2[] = { "float2", "float2", "float2", "float2" };
+  //static GXLPCSTR s_ParamArray_Float3[] = { "float3", "float3", "float3", "float3" };
+  //static GXLPCSTR s_ParamArray_Float4[] = { "float4", "float4", "float4", "float4" };
+  //static GXLPCSTR s_ParamArray_Vec2[] = { "vec2", "vec2", "vec2", "vec2" };
+  //static GXLPCSTR s_ParamArray_Vec3[] = { "vec3", "vec3", "vec3", "vec3" };
+  //static GXLPCSTR s_ParamArray_Vec4[] = { "vec4", "vec4", "vec4", "vec4" };
+
+  INTRINSIC_FUNC s_functions[] =
+  {
+    // 位含义: 00000MVS
+    // M: Matrix
+    // V: Vector
+    // S: Scaler
+    // A: 与第一参数相同
+
+    {"sin", 0, 1, "\x07"},
+    {"floor", 0, 1, "\x07"},
+
+    {NULL},
   };
 
 

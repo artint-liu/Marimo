@@ -83,6 +83,20 @@ GXLPCSTR g_ExportErrorMessage1 = __FILE__;
 namespace UVShader
 {
   TOKEN::T_LPCSTR s_szString = "string";
+
+  extern GXLPCSTR STR_INT;
+  extern GXLPCSTR STR_UINT;
+  extern GXLPCSTR STR_HALF;
+  extern GXLPCSTR STR_BOOL;
+  extern GXLPCSTR STR_FLOAT;
+  extern GXLPCSTR STR_FLOAT2;
+  extern GXLPCSTR STR_FLOAT3;
+  extern GXLPCSTR STR_FLOAT4;
+  extern GXLPCSTR STR_VEC2;
+  extern GXLPCSTR STR_VEC3;
+  extern GXLPCSTR STR_VEC4;
+  extern GXLPCSTR STR_DOUBLE;
+
   //////////////////////////////////////////////////////////////////////////
 #if 0
   enum GrammarCategory // 类别
@@ -162,8 +176,10 @@ namespace UVShader
 #endif
 
   //////////////////////////////////////////////////////////////////////////
-  extern STRUCTDESC s_aIntrinsicStruct[];
-  extern STRUCTDESC s_aBaseType[];
+  extern COMMINTRTYPEDESC s_aIntrinsicStruct[];
+  extern COMMINTRTYPEDESC s_aBaseType[];
+  extern INTRINSIC_FUNC s_functions[];
+
 
 
   DefaultInclude s_DefaultInclude;
@@ -178,6 +194,7 @@ namespace UVShader
   {
     m_GlobalSet.allow_keywords = KeywordFilter_typedef;
     m_GlobalSet.SetParser(this);
+    m_GlobalSet.BuildIntrinsicType();
     if(pContext) {
       pContext->nRefCount++;
     }
@@ -294,7 +311,7 @@ namespace UVShader
 
       if(++it >= ctx.iter_next) { // 只有一个'#', 直接跳过
         RESET_FLAG(pThis->m_dwState, State_InPreprocess);
-        return 0 ;
+        return 0;
       }
 
       // define
@@ -1200,6 +1217,24 @@ namespace UVShader
     }
     sVarList.push_front(pNode);
     return &pNode->Operand[0];
+  }
+
+  SYNTAXNODE::GlobList& CodeParser::BreakComma(SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE::GLOB& sGlob)
+  {
+    if(sGlob.IsNode() && sGlob.pNode->CompareOpcode(',')) {
+      sExprList.push_front(sGlob.pNode->Operand[1]);
+      
+      if(sGlob.pNode->Operand[0].IsNode()) {
+        return BreakComma(sExprList, sGlob.pNode->Operand[0]);
+      }
+      else if(sGlob.pNode->Operand[0].IsToken()) {
+        sExprList.push_front(sGlob.pNode->Operand[0]);
+        return sExprList;
+      }
+    }
+
+    sExprList.push_front(sGlob);
+    return sExprList;
   }
 
   CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
@@ -3512,32 +3547,13 @@ NOT_INC_P:
         }
         else if(pNode->Operand[1].IsNode())
         {
-          const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(pNode->Operand[1].pNode);
-          if(pType->cate == TYPEDESC::TypeCate_Numeric)
-          {
-            VALUE v;
-            VALUE::State s = pnodeRightValue->Calcuate(sNameSet, v);
-            if(TEST_FLAG(s, VALUE::State_ErrorMask))
-            {
-              OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
-              return (result = FALSE);
-            }
-            CLNOP
-          }
-          else if(pType->cate == TYPEDESC::TypeCate_String)
-          {
-            // token解析会自动连接字符串, 所以不会出现两个token都是字符串的情况
-            OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
-            return (result = FALSE);
-          }
-          else if(pType->cate == TYPEDESC::TypeCate_Struct)
-          {
-            if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment)
-            {
-              OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
-              return (result = FALSE);
-            }
-          }
+          // RightValue
+#if 0
+          result = result && Verify2_RightValue(sNameSet, pType, pNode->mode, pNode->Operand[1]);
+#else
+          result = result && InferRightValueType(pType, sNameSet, pNode->Operand[1], pNode->pOpcode);
+#endif
+          return result;
         }
         else {
           OutputErrorW(*pNode->pOpcode, UVS_EXPORT_TEXT(5022, "赋值错误, \"=\" 后应该有表达式"));
@@ -3725,6 +3741,265 @@ NOT_INC_P:
 
     return TRUE;
   }
+
+  const TYPEDESC* CodeParser::InferFunctionReturnedType(NameContext& sNameSet, const SYNTAXNODE* pFuncNode)
+  {
+    ASSERT(pFuncNode->mode == SYNTAXNODE::MODE_FunctionCall);
+    ASSERT(pFuncNode->Operand[0].IsToken()); // 函数名
+
+    const TYPEDESC* pRetType = NULL;
+
+    for(int i = 0; s_functions[i].name != NULL; i++)
+    {
+      if(*pFuncNode->Operand[0].pTokn == s_functions[i].name)
+      {
+        SYNTAXNODE::GlobList sExprList;
+        BreakComma(sExprList, pFuncNode->Operand[1]);
+
+        if(sExprList.size() == s_functions[i].count)
+        {
+          size_t n = 0;
+          auto it = sExprList.begin();
+          for(; n < s_functions[i].count; n++)
+          {
+            const TYPEDESC* pTypeDesc = InferType(sNameSet, *it);
+            if(pTypeDesc)
+            {
+              if(s_functions[i].type == n) {
+                pRetType = pTypeDesc;
+              }
+              // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
+              if(TEST_FLAG(s_functions[i].params[n], 1) && TryTypeCasting(sNameSet, STR_FLOAT, pTypeDesc, pFuncNode->Operand[0].pTokn))
+              {
+                continue;                
+              }
+              else if(TEST_FLAG(s_functions[i].params[n], 2) && (
+                TryTypeCasting(sNameSet, STR_FLOAT2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT4, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_VEC2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_VEC3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_VEC4, pTypeDesc, pFuncNode->Operand[0].pTokn)) )
+              {
+                continue;
+              }
+              else if(TEST_FLAG(s_functions[i].params[n], 4)) {
+                CLBREAK; // 没实现矩阵参数
+                //pFormalDesc = sNameSet.GetType(STR_FLOAT);
+                //if(_CL_NOT_(TryTypeCasting(pFormalDesc, pTypeDesc, pFuncNode->Operand[0].pTokn)))
+                //{
+                //  break;
+                //}
+              }
+              break;
+            }
+            else {
+              CLBREAK;
+            }
+          }
+
+          if(n == s_functions[i].count) {
+            return pRetType; //sNameSet.GetType(s_functions[i].type);
+          }
+        }
+      }
+    }
+
+    TRACE("func name:%s\n", pFuncNode->Operand[0].pTokn->ToString().CStr());
+    CLBREAK; // 一般是找不到函数
+    return NULL;
+  }
+
+  const TYPEDESC* CodeParser::InferType(NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob)
+  {
+    if(sGlob.IsNode()) {
+      return InferType(sNameSet, sGlob.pNode);
+    }
+    else if(sGlob.IsToken()) {
+      return InferType(sNameSet, sGlob.pTokn);
+    }
+    CLBREAK;
+  }
+  
+  const TYPEDESC* CodeParser::InferType(NameContext& sNameSet, const TOKEN* pToken)
+  {
+    if(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric)
+    {
+      VALUE val;
+      val.set(*pToken);
+      return sNameSet.GetType(val.rank);
+    }
+    return sNameSet.GetVariable(pToken);
+  }
+  
+  const TYPEDESC* CodeParser::InferType(NameContext& sNameSet, const SYNTAXNODE* pNode)
+  {
+    if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
+    {
+      return InferFunctionReturnedType(sNameSet, pNode);
+    }
+    else if(pNode->pOpcode)
+    {
+      if(pNode->pOpcode->unary)
+      {
+        ASSERT(
+          *pNode->pOpcode == '-' ||
+          *pNode->pOpcode == '+' ||
+          *pNode->pOpcode == "--" ||
+          *pNode->pOpcode == "++");
+
+        if(pNode->pOpcode->unary_mask == 0x01)
+        {
+          return InferType(sNameSet, pNode->Operand[1]);
+        }
+        else if(pNode->pOpcode->unary_mask == 0x02)
+        {
+          return InferType(sNameSet, pNode->Operand[0]);
+        }
+        else // 11B
+        {
+          CLBREAK
+        }
+      }
+      else if(*pNode->pOpcode == '.')
+      {
+        CLBREAK;
+      }
+    }
+
+    //VALUE v[2];
+    VALUE::Rank rank_ab[2];
+    const TYPEDESC* pTypeDesc = NULL;
+    int n = 0;
+
+    for(int i = 0; i < 2; i++)
+    {
+      pTypeDesc = NULL;
+
+      if(pNode->Operand[i].IsNode())
+      {
+        pTypeDesc = InferType(sNameSet, pNode->Operand[i].pNode);
+      }
+      else if(pNode->Operand[i].IsToken())
+      {
+        pTypeDesc = InferType(sNameSet, pNode->Operand[i].pTokn);
+      }
+      else {
+        CLBREAK; // 没处理
+      }
+
+
+      if(pTypeDesc->cate == TYPEDESC::TypeCate_Numeric)
+      {
+        rank_ab[n++] = (VALUE::Rank)pTypeDesc->pDesc->rank;
+      }
+      else
+      {
+        CLBREAK;
+      }
+    }
+
+    if(n == 2)
+    {
+      VALUE::Rank rank = clMax(rank_ab[0], rank_ab[1]);
+      const TYPEDESC* pTypeDesc = sNameSet.GetType(rank);
+      ASSERT(pTypeDesc->pDesc->rank >= VALUE::Rank_First && pTypeDesc->pDesc->rank <= VALUE::Rank_Last);
+      return pTypeDesc;
+    }
+
+    CLBREAK; // 没处理
+    return NULL;
+  }
+  
+  GXBOOL CodeParser::InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation)
+  {
+    if(right_glob.IsNode())
+    {
+      const TYPEDESC* pRightType = InferType(sNameSet, right_glob.pNode);
+      ASSERT(pRightType);
+      return TryTypeCasting(pLeftType, pRightType, pLocation);
+    }
+    else if(right_glob.IsToken())
+    {
+      CLBREAK;
+      return TRUE;
+    }
+    else {
+      CLBREAK;
+    }
+    return TRUE;
+  }
+  
+  GXBOOL CodeParser::TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
+  {
+    const TYPEDESC* pTypeTo = sNameSet.GetType(szTypeTo);
+    return TryTypeCasting(pTypeTo, pTypeFrom, pLocation);
+  }
+
+  GXBOOL CodeParser::TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
+  {
+    if(pTypeTo->cate == TYPEDESC::TypeCate_Numeric && pTypeFrom->cate == TYPEDESC::TypeCate_Numeric)
+    {
+      if(pTypeTo->pDesc->rank < pTypeFrom->pDesc->rank &&
+        (pTypeTo->pDesc->rank != VALUE::Rank_Double && pTypeTo->pDesc->rank != VALUE::Rank_Float) &&
+        (pTypeFrom->pDesc->rank != VALUE::Rank_Double && pTypeFrom->pDesc->rank != VALUE::Rank_Float)
+        ) {
+        clStringW strFrom = pTypeFrom->name;
+        clStringW strTo = pTypeTo->name;
+        OutputErrorW(*pLocation, UVS_EXPORT_TEXT(4244, "从“%s”转换到“%s”，可能丢失数据"), strFrom.CStr(), strTo.CStr());
+      }
+      return TRUE;
+    }
+    else if(pTypeTo->cate == TYPEDESC::TypeCate_Struct && pTypeFrom->cate == TYPEDESC::TypeCate_Struct)
+    {
+      if(pTypeTo->name == pTypeFrom->name)
+      {
+        ASSERT(pTypeTo->pDesc == pTypeFrom->pDesc); // 应该同一个名的函数只注册过一次
+        return TRUE;
+      }
+    }
+
+    //CLBREAK;
+    return FALSE;
+  }
+  
+  GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
+  {
+    //const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(pNode->Operand[1].pNode);
+    // struct RESULT {
+    //   TYPEDESC::TypeCate cate;
+    //   TYPEDESC* pType;
+    //   clStringA strTypeName;
+    // };
+
+    const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(right_glob.pNode);
+    if(pType->cate == TYPEDESC::TypeCate_Numeric)
+    {
+      VALUE v;
+      VALUE::State s = pnodeRightValue->Calcuate(sNameSet, v);
+      if(TEST_FLAG(s, VALUE::State_ErrorMask))
+      {
+        OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
+        return FALSE;
+      }
+      CLNOP
+    }
+    else if(pType->cate == TYPEDESC::TypeCate_String)
+    {
+      // token解析会自动连接字符串, 所以不会出现两个token都是字符串的情况
+      OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
+      return FALSE;
+    }
+    else if(pType->cate == TYPEDESC::TypeCate_Struct)
+    {
+      if(mode == SYNTAXNODE::MODE_ArrayAssignment)
+      {
+        OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
 #endif // #ifdef ENABLE_SYNTAX_VERIFY
 
   //////////////////////////////////////////////////////////////////////////
@@ -3811,43 +4086,81 @@ NOT_INC_P:
   {
     m_TypeMap.clear();
     m_VariableMap.clear();
+    BuildIntrinsicType();
   }
   
-  GXBOOL NameContext::TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType)
+  void NameContext::BuildIntrinsicType()
   {
-    ASSERT(pOut->pDesc == NULL && pOut->pMemberNode == NULL); // 强制外部初始化
+    // 只有Root才能调用这个
+    ASSERT(m_pParent == NULL);
+
+    TYPEDESC td = { TYPEDESC::TypeCate_Empty };
 
     // 内置结构体
     for(int i = 0; s_aIntrinsicStruct[i].name; i++)
     {
-      if(strType == s_aIntrinsicStruct[i].name) {
-        pOut->cate = TYPEDESC::TypeCate_Struct;
-        pOut->name = strType;
-        pOut->pDesc = &s_aIntrinsicStruct[i];
-        return TRUE;
-        //it = m_TypeMap.insert(clmake_pair(strType, td)).first;
-      }
+      //if(strType == s_aIntrinsicStruct[i].name) {
+      td.cate = TYPEDESC::TypeCate_Struct;
+      td.name = s_aIntrinsicStruct[i].name;
+      td.pDesc = &s_aIntrinsicStruct[i];
+      m_TypeMap.insert(clmake_pair(td.name, td));
+      //}
     }
 
     // 内置基础类型
     for(int i = 0; s_aBaseType[i].name; i++)
     {
-      if(strType == s_aBaseType[i].name)
-      {
-        pOut->cate = TYPEDESC::TypeCate_Numeric;
-        pOut->name = strType;
-        pOut->pDesc = &s_aBaseType[i];
-        return TRUE;
-      }
+      td.cate = TYPEDESC::TypeCate_Numeric;
+      td.name = s_aBaseType[i].name;
+      td.pDesc = &s_aBaseType[i];
+
+      m_TypeMap.insert(clmake_pair(td.name, td));
     }
 
     // 字符串类型
-    if(strType == s_szString) {
-      pOut->cate = TYPEDESC::TypeCate_String;
-      pOut->name = strType;
-      pOut->pDesc = NULL;
-      return TRUE;
-    }
+    //if(strType == s_szString) {
+    td.cate = TYPEDESC::TypeCate_String;
+    td.name = s_szString;
+    td.pDesc = NULL;
+    m_TypeMap.insert(clmake_pair(td.name, td));
+    //}
+  }
+
+  GXBOOL NameContext::TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType)
+  {
+    ASSERT(pOut->pDesc == NULL && pOut->pMemberNode == NULL); // 强制外部初始化
+    CLBREAK;
+    //// 内置结构体
+    //for(int i = 0; s_aIntrinsicStruct[i].name; i++)
+    //{
+    //  if(strType == s_aIntrinsicStruct[i].name) {
+    //    pOut->cate = TYPEDESC::TypeCate_Struct;
+    //    pOut->name = strType;
+    //    pOut->pDesc = &s_aIntrinsicStruct[i];
+    //    return TRUE;
+    //    //it = m_TypeMap.insert(clmake_pair(strType, td)).first;
+    //  }
+    //}
+
+    //// 内置基础类型
+    //for(int i = 0; s_aBaseType[i].name; i++)
+    //{
+    //  if(strType == s_aBaseType[i].name)
+    //  {
+    //    pOut->cate = TYPEDESC::TypeCate_Numeric;
+    //    pOut->name = strType;
+    //    pOut->pDesc = &s_aBaseType[i];
+    //    return TRUE;
+    //  }
+    //}
+
+    //// 字符串类型
+    //if(strType == s_szString) {
+    //  pOut->cate = TYPEDESC::TypeCate_String;
+    //  pOut->name = strType;
+    //  pOut->pDesc = NULL;
+    //  return TRUE;
+    //}
 
     return FALSE;
   }
@@ -3860,6 +4173,16 @@ NOT_INC_P:
       pSet = pSet->m_pParent;
     }
     return reinterpret_cast<NameContext*>(reinterpret_cast<size_t>(pSet));
+  }
+
+  const NameContext* NameContext::GetRoot() const
+  {
+    const NameContext* pSet = this;
+    while(pSet->m_pParent)
+    {
+      pSet = pSet->m_pParent;
+    }
+    return pSet;
   }
 
   void NameContext::SetParser(CodeParser* pCodeParser)
@@ -3982,10 +4305,21 @@ NOT_INC_P:
       : (m_pParent ? m_pParent->GetVariable(ptkName) : NULL);
   }
 
+  //const TYPEDESC* NameContext::TryGetIntrinsicType(const clStringA& strTypeName) const
+  //{
+  //  TYPEDESC td = { TYPEDESC::TypeCate_Empty };
+
+  //  if(TestIntrinsicType(&td, strTypeName) == FALSE) {
+  //    return NULL;
+  //  }
+
+  //  return &GetRoot()->m_TypeMap.insert(clmake_pair(strTypeName, td)).first->second;
+  //}
+
   const TYPEDESC* NameContext::GetType(const clStringA& strType) const
   {
     auto it = m_TypeMap.find(strType);
-    return it != m_TypeMap.end()
+    return (it != m_TypeMap.end())
       ? &it->second
       : (m_pParent ? m_pParent->GetType(strType) : NULL);
   }
@@ -3994,6 +4328,61 @@ NOT_INC_P:
   {
     clStringA str;
     return GetType(token.ToString(str));
+  }
+
+  const TYPEDESC* NameContext::GetType(VALUE::Rank rank) const
+  {
+    const NameContext* pRoot = GetRoot();
+    clStringA strTypeName;
+    //{"float"},
+    //{ "half" },
+    //{ "int" },
+    //{ "bool" },
+    //{ "uint" },
+    //{ "double" },
+    
+    // TODO: 和s_aBaseType中的字符串做统一, 保证一次修改
+    switch(rank)
+    {
+    case UVShader::VALUE::Rank_Unsigned:
+      strTypeName = STR_UINT;
+      break;
+    case UVShader::VALUE::Rank_Signed:
+      strTypeName = STR_INT;
+      break;
+    case UVShader::VALUE::Rank_Float:
+      strTypeName = STR_FLOAT;
+      break;
+    //case UVShader::VALUE::Rank_Unsigned64:
+    //  break;
+    //case UVShader::VALUE::Rank_Signed64:
+    //  break;
+    case UVShader::VALUE::Rank_Double:
+      strTypeName = STR_DOUBLE;
+      break;
+    //case UVShader::VALUE::Rank_F_LongLong:
+    //  break;
+    //case UVShader::VALUE::Rank_Undefined:
+    //  break;
+    //case UVShader::VALUE::Rank_BadValue:
+    //  break;
+    //case UVShader::VALUE::Rank_First:
+    //  break;
+    //case UVShader::VALUE::Rank_Last:
+    //  break;
+    default:
+      CLBREAK;
+      return NULL;
+    }
+
+    //TYPEDESC td = { TYPEDESC::TypeCate_Empty };
+
+    //if(TestIntrinsicType(&td, strTypeName) == FALSE) {
+    //  return NULL;
+    //}
+
+    //return &pRoot->m_TypeMap.insert(clmake_pair(strTypeName, td)).first->second;
+    return pRoot->GetType(strTypeName);
   }
 
   NameContext::State NameContext::TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName)
