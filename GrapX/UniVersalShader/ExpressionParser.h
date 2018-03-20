@@ -98,6 +98,7 @@ namespace UVShader
   {
     GXLPCSTR  name;   // 函数名
     int       type;   // 0 表示与第一个参数相同, 1表示与第二个参数相同, 以此类推
+                      // -1表示第一个参数的标量值, 例如第一个参数是int3, 则返回值是int
     size_t    count;  // 参数数量
     GXLPCSTR  params;
   };

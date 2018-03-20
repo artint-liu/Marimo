@@ -97,6 +97,31 @@ namespace UVShader
   extern GXLPCSTR STR_VEC4;
   extern GXLPCSTR STR_DOUBLE;
 
+  extern GXLPCSTR STR_FLOAT2x2;
+  extern GXLPCSTR STR_FLOAT2x3;
+  extern GXLPCSTR STR_FLOAT2x4;
+  extern GXLPCSTR STR_FLOAT3x2;
+  extern GXLPCSTR STR_FLOAT3x3;
+  extern GXLPCSTR STR_FLOAT3x4;
+  extern GXLPCSTR STR_FLOAT4x2;
+  extern GXLPCSTR STR_FLOAT4x3;
+  extern GXLPCSTR STR_FLOAT4x4;
+  
+  extern GXLPCSTR STR_DOUBLE;
+  extern GXLPCSTR STR_DOUBLE2;
+  extern GXLPCSTR STR_DOUBLE3;
+  extern GXLPCSTR STR_DOUBLE4;
+  
+  extern GXLPCSTR STR_DOUBLE2x2;
+  extern GXLPCSTR STR_DOUBLE2x3;
+  extern GXLPCSTR STR_DOUBLE2x4;
+  extern GXLPCSTR STR_DOUBLE3x2;
+  extern GXLPCSTR STR_DOUBLE3x3;
+  extern GXLPCSTR STR_DOUBLE3x4;
+  extern GXLPCSTR STR_DOUBLE4x2;
+  extern GXLPCSTR STR_DOUBLE4x3;
+  extern GXLPCSTR STR_DOUBLE4x4;
+
   //////////////////////////////////////////////////////////////////////////
 #if 0
   enum GrammarCategory // 类别
@@ -3765,9 +3790,14 @@ NOT_INC_P:
             const TYPEDESC* pTypeDesc = InferType(sNameSet, *it);
             if(pTypeDesc)
             {
-              if(s_functions[i].type == n) {
+              ASSERT(s_functions[i].type >= -1);
+              if(s_functions[i].type == -1 && n == 0) {
                 pRetType = pTypeDesc;
               }
+              else if(s_functions[i].type == n) {
+                pRetType = pTypeDesc;
+              }
+
               // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
               if(TEST_FLAG(s_functions[i].params[n], 1) && TryTypeCasting(sNameSet, STR_FLOAT, pTypeDesc, pFuncNode->Operand[0].pTokn))
               {
@@ -3783,13 +3813,18 @@ NOT_INC_P:
               {
                 continue;
               }
-              else if(TEST_FLAG(s_functions[i].params[n], 4)) {
-                CLBREAK; // 没实现矩阵参数
-                //pFormalDesc = sNameSet.GetType(STR_FLOAT);
-                //if(_CL_NOT_(TryTypeCasting(pFormalDesc, pTypeDesc, pFuncNode->Operand[0].pTokn)))
-                //{
-                //  break;
-                //}
+              else if(TEST_FLAG(s_functions[i].params[n], 4) && (
+                TryTypeCasting(sNameSet, STR_FLOAT2x2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT2x3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT2x4, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT3x2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT3x3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT3x4, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT4x2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT4x3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
+                TryTypeCasting(sNameSet, STR_FLOAT4x4, pTypeDesc, pFuncNode->Operand[0].pTokn)) )
+              {
+                continue;
               }
               break;
             }
@@ -3799,6 +3834,9 @@ NOT_INC_P:
           }
 
           if(n == s_functions[i].count) {
+            if(s_functions[i].type == -1) {
+              return sNameSet.GetType(pRetType->pDesc->list->type);
+            }
             return pRetType; //sNameSet.GetType(s_functions[i].type);
           }
         }
@@ -4534,6 +4572,7 @@ NOT_INC_P:
     else if(pDesc)
     {
       ASSERT(pMemberNode == NULL);
+      // 访问向量/矩阵里面的标量
       for(size_t i = 0; i < pDesc->count; i++)
       {
         if(*ptkMember == pDesc->list[i].name) {
@@ -4543,7 +4582,7 @@ NOT_INC_P:
       }
 
       ASSERT(clstd::strlenT(pDesc->set0) == clstd::strlenT(pDesc->set1)); // 保证这两个长度一致
-
+      // 访问重组向量
       if(MatchScaler(ptkMember, pDesc->set0) || MatchScaler(ptkMember, pDesc->set1))
       {
         strTypename = pDesc->name;

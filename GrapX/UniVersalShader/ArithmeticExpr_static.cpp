@@ -20,10 +20,54 @@ namespace UVShader
   GXLPCSTR STR_FLOAT2 = "float2";
   GXLPCSTR STR_FLOAT3 = "float3";
   GXLPCSTR STR_FLOAT4 = "float4";
+
+  GXLPCSTR STR_FLOAT2x2 = "float2x2";
+  GXLPCSTR STR_FLOAT2x3 = "float2x3";
+  GXLPCSTR STR_FLOAT2x4 = "float2x4";
+  GXLPCSTR STR_FLOAT3x2 = "float3x2";
+  GXLPCSTR STR_FLOAT3x3 = "float3x3";
+  GXLPCSTR STR_FLOAT3x4 = "float3x4";
+  GXLPCSTR STR_FLOAT4x2 = "float4x2";
+  GXLPCSTR STR_FLOAT4x3 = "float4x3";
+  GXLPCSTR STR_FLOAT4x4 = "float4x4";
+
+  GXLPCSTR STR_DOUBLE  = "double";
+  GXLPCSTR STR_DOUBLE2 = "double2";
+  GXLPCSTR STR_DOUBLE3 = "double3";
+  GXLPCSTR STR_DOUBLE4 = "double4";
+
+  GXLPCSTR STR_DOUBLE2x2 = "double2x2";
+  GXLPCSTR STR_DOUBLE2x3 = "double2x3";
+  GXLPCSTR STR_DOUBLE2x4 = "double2x4";
+  GXLPCSTR STR_DOUBLE3x2 = "double3x2";
+  GXLPCSTR STR_DOUBLE3x3 = "double3x3";
+  GXLPCSTR STR_DOUBLE3x4 = "double3x4";
+  GXLPCSTR STR_DOUBLE4x2 = "double4x2";
+  GXLPCSTR STR_DOUBLE4x3 = "double4x3";
+  GXLPCSTR STR_DOUBLE4x4 = "double4x4";
+
   GXLPCSTR STR_VEC2   = "vec2";
   GXLPCSTR STR_VEC3   = "vec3";
   GXLPCSTR STR_VEC4   = "vec4";
-  GXLPCSTR STR_DOUBLE = "double";
+  GXLPCSTR STR_IVEC2  = "ivec2";
+  GXLPCSTR STR_IVEC3  = "ivec3";
+  GXLPCSTR STR_IVEC4  = "ivec4";
+  GXLPCSTR STR_UVEC2  = "uvec2";
+  GXLPCSTR STR_UVEC3  = "uvec3";
+  GXLPCSTR STR_UVEC4  = "uvec4";
+  GXLPCSTR STR_MAT2   = "mat2";  // 两行两列
+  GXLPCSTR STR_MAT2x2 = "mat2x2";
+  GXLPCSTR STR_MAT3   = "mat3"; 	// 三行三列
+  GXLPCSTR STR_MAT3x3 = "mat3x3";
+  GXLPCSTR STR_MAT4   = "mat4"; 	// 四行四列
+  GXLPCSTR STR_MAT4x4 = "mat4x4";
+  GXLPCSTR STR_MAT2x3 = "mat2x3";	// 三行两列
+  GXLPCSTR STR_MAT2x4 = "mat2x4";	// 四行两列
+  GXLPCSTR STR_MAT3x2 = "mat3x2";	// 两行三列
+  GXLPCSTR STR_MAT3x4 = "mat3x4";	// 四行三列
+  GXLPCSTR STR_MAT4x2 = "mat4x2";	// 两行四列
+  GXLPCSTR STR_MAT4x3 = "mat4x3";	// 三行四列
+
   //static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
 
   // 这个按照ASCII顺序分布, "+",",","-" 分别是43，44，45
@@ -230,6 +274,9 @@ namespace UVShader
 
     {"sin", 0, 1, "\x07"},
     {"floor", 0, 1, "\x07"},
+    {"dot", -1, 2, "\x02\x02"},
+    {"vec4", 0, 1, "\x02"},
+    //{"vec4", -2, 1, "\x01"},
 
     {NULL},
   };
