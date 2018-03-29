@@ -272,12 +272,18 @@ namespace UVShader
     // S: Scaler
     // A: 与第一参数相同
 
-    {"sin", 0, 1, "\x07"},
-    {"floor", 0, 1, "\x07"},
-    {"dot", -1, 2, "\x02\x02"},
-    {"vec4", 0, 1, "\x02"},
-    //{"vec4", -2, 1, "\x01"},
-
+    {"sin", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
+    {"cos", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
+    {"asin", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
+    {"acos", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
+    {"floor", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
+    {"dot", INTRINSIC_FUNC::RetType_Scaler0, 2, "\x02\x02"},
+    {"vec3", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
+    {"vec3", INTRINSIC_FUNC::RetType_FromName, 3, "\x01\x01\x01"},
+    {"vec4", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
+    {"vec4", INTRINSIC_FUNC::RetType_FromName, 4, "\x01\x01\x01\x01"},
+    {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
+    {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, "\x03\x03\x01"}, // FIXME: 没有验证第一个参数和第二个参数类型相同
     {NULL},
   };
 

@@ -23,6 +23,7 @@ namespace UVShader
   //};
 
   class CodeParser;
+  typedef clvector<clStringA> StringArray;
 
   class Include
   {
@@ -87,15 +88,31 @@ namespace UVShader
 
     TypeCate          cate;
     clStringA         name; // 类型名
-    COMMINTRTYPEDESC* pDesc;
-    const SYNTAXNODE* pMemberNode;
+    COMMINTRTYPEDESC* pDesc; // 结构体(内置) 的描述
+    const SYNTAXNODE* pMemberNode; // 结构体(用户定义) 的描述
 
     GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
   };
 
+  struct FUNCDESC // 用户定义的函数描述
+  {
+    // FIXME: 因为定义顺序关系, 返回值和形参应改储存TYPEDESC, 而不是名字, 这个要改暂时备忘
+    clStringA         ret_type;     // 返回的类型
+    clStringA         name;         // 类型名
+    StringArray       sFormalTypes; // 函数, 形参类型表
+  };
+
   struct INTRINSIC_FUNC
   {
+    enum RetType
+    {
+      RetType_Scaler0 = -1,
+      RetType_FromName = -2, // 返回类型是函数名
+      RetType_Last = -3,
+      RetType_Argument0 = 0, // 返回类型同第一个参数类型
+    };
+
     GXLPCSTR  name;   // 函数名
     int       type;   // 0 表示与第一个参数相同, 1表示与第二个参数相同, 以此类推
                       // -1表示第一个参数的标量值, 例如第一个参数是int3, 则返回值是int
@@ -113,6 +130,7 @@ namespace UVShader
   {
   public:
     typedef clmap<clStringA, TYPEDESC>  TypeMap;
+    typedef std::multimap<clStringA, FUNCDESC>  FuncMap;
     typedef clmap<TokenPtr, VARIDESC>  VariableMap;
     typedef clStringA::LPCSTR LPCSTR;
 
@@ -131,6 +149,7 @@ namespace UVShader
     const NameContext* m_pParent;
 
     TypeMap     m_TypeMap;
+    FuncMap     m_FuncMap;
     VariableMap m_VariableMap;
     State       m_eLastState;
 
@@ -158,9 +177,11 @@ namespace UVShader
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
+    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames);
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
     State  GetLastState() const;
     const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
+    void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
     
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
   };
@@ -533,6 +554,7 @@ namespace UVShader
     const TYPEDESC* InferType(NameContext& sNameSet, const SYNTAXNODE* pNode);
 
     GXBOOL InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
 

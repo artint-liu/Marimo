@@ -1619,13 +1619,20 @@ NOT_INC_P:
     pStat->func.pArguments = (FUNCTION_ARGUMENT*)m_aArgumentsPack.size();
     pStat->func.nNumOfArguments = aArgs.size();
 
+    StringArray sFormalTypenames;
     m_aArgumentsPack.reserve(m_aArgumentsPack.size() + aArgs.size());
+    sFormalTypenames.reserve(aArgs.size());
+
     for(auto it = aArgs.begin(); it != aArgs.end(); ++it)
     {
       clStringA str;
-      sNameSet.RegisterVariable(it->ptkType->ToString(str), it->ptkName);
+      sNameSet.RegisterVariable(it->ptkType->ToString(str), it->ptkName); // 注册在临时域内, 用啦检查形参重名
+      sFormalTypenames.push_back(str);
       m_aArgumentsPack.push_back(*it);
     }
+
+    m_GlobalSet.RegisterFunction(pStat->func.szReturnType, pStat->func.szName, sFormalTypenames);
+
     //m_aArgumentsPack.insert(m_aArgumentsPack.end(), aArgs.begin(), aArgs.end());
     return TRUE;
   }
@@ -3774,25 +3781,27 @@ NOT_INC_P:
 
     const TYPEDESC* pRetType = NULL;
 
+    SYNTAXNODE::GlobList sExprList;
+    BreakComma(sExprList, pFuncNode->Operand[1]);
+
     for(int i = 0; s_functions[i].name != NULL; i++)
     {
       if(*pFuncNode->Operand[0].pTokn == s_functions[i].name)
       {
-        SYNTAXNODE::GlobList sExprList;
-        BreakComma(sExprList, pFuncNode->Operand[1]);
-
         if(sExprList.size() == s_functions[i].count)
         {
           size_t n = 0;
           auto it = sExprList.begin();
-          for(; n < s_functions[i].count; n++)
+          for(; n < s_functions[i].count; n++, ++it)
           {
             const TYPEDESC* pTypeDesc = InferType(sNameSet, *it);
             if(pTypeDesc)
             {
-              ASSERT(s_functions[i].type >= -1);
-              if(s_functions[i].type == -1 && n == 0) {
+              ASSERT(s_functions[i].type > INTRINSIC_FUNC::RetType_Last);
+              if(s_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
                 pRetType = pTypeDesc;
+              }
+              else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
               }
               else if(s_functions[i].type == n) {
                 pRetType = pTypeDesc;
@@ -3834,8 +3843,11 @@ NOT_INC_P:
           }
 
           if(n == s_functions[i].count) {
-            if(s_functions[i].type == -1) {
+            if(s_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
               return sNameSet.GetType(pRetType->pDesc->list->type);
+            }
+            else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
+              return sNameSet.GetType(s_functions[i].name);
             }
             return pRetType; //sNameSet.GetType(s_functions[i].type);
           }
@@ -3843,8 +3855,38 @@ NOT_INC_P:
       }
     }
 
+    cllist<const FUNCDESC*> aUserFunc;
+    sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sExprList.size(), aUserFunc);
+    for(auto iter_func = aUserFunc.begin(); iter_func  != aUserFunc.end(); ++iter_func)
+    {
+      int i = 0;
+      size_t nConfirm = 0;
+      ASSERT((*iter_func)->sFormalTypes.size() == sExprList.size());
+      for(auto iter_arg = sExprList.begin(); iter_arg != sExprList.end(); ++iter_arg, ++i)
+      {
+        const TYPEDESC* pArgumentTypeDesc = InferType(sNameSet, *iter_arg);
+        const TYPEDESC* pFormalTypeDesc = sNameSet.GetType((*iter_func)->sFormalTypes[i]);
+        ASSERT(pFormalTypeDesc != NULL);
+
+        // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
+        if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
+          nConfirm++;
+        }
+        else {
+          break;
+        }
+      }
+
+      if(nConfirm == sExprList.size()) {
+        return sNameSet.GetType((*iter_func)->ret_type);
+      }
+    }
+
+#ifdef _DEBUG
     TRACE("func name:%s\n", pFuncNode->Operand[0].pTokn->ToString().CStr());
+    OutputErrorW(pFuncNode->Operand[0].pTokn->marker, 0);
     CLBREAK; // 一般是找不到函数
+#endif
     return NULL;
   }
 
@@ -3901,51 +3943,70 @@ NOT_INC_P:
       }
       else if(*pNode->pOpcode == '.')
       {
-        CLBREAK;
+        const TYPEDESC* pTypeDesc = sNameSet.GetMember(pNode);
+        return pTypeDesc;
       }
     }
 
-    //VALUE v[2];
-    VALUE::Rank rank_ab[2];
-    const TYPEDESC* pTypeDesc = NULL;
-    int n = 0;
+    const TYPEDESC* pTypeDesc[2] = {NULL, NULL};
 
     for(int i = 0; i < 2; i++)
     {
-      pTypeDesc = NULL;
-
       if(pNode->Operand[i].IsNode())
       {
-        pTypeDesc = InferType(sNameSet, pNode->Operand[i].pNode);
+        pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i].pNode);
       }
       else if(pNode->Operand[i].IsToken())
       {
-        pTypeDesc = InferType(sNameSet, pNode->Operand[i].pTokn);
+        pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i].pTokn);
       }
       else {
         CLBREAK; // 没处理
       }
-
-
-      if(pTypeDesc->cate == TYPEDESC::TypeCate_Numeric)
-      {
-        rank_ab[n++] = (VALUE::Rank)pTypeDesc->pDesc->rank;
-      }
-      else
-      {
-        CLBREAK;
-      }
     }
 
-    if(n == 2)
+    if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
     {
-      VALUE::Rank rank = clMax(rank_ab[0], rank_ab[1]);
-      const TYPEDESC* pTypeDesc = sNameSet.GetType(rank);
-      ASSERT(pTypeDesc->pDesc->rank >= VALUE::Rank_First && pTypeDesc->pDesc->rank <= VALUE::Rank_Last);
-      return pTypeDesc;
+      if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Numeric && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Numeric)
+      {
+        VALUE::Rank rank = (VALUE::Rank)clMax(pTypeDesc[0]->pDesc->rank, pTypeDesc[1]->pDesc->rank);
+        const TYPEDESC* pTypeDesc = sNameSet.GetType(rank);
+        ASSERT(pTypeDesc->pDesc->rank >= VALUE::Rank_First && pTypeDesc->pDesc->rank <= VALUE::Rank_Last);
+        return pTypeDesc;
+      }
+      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Numeric && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Struct)
+      {
+        // TODO: 是否应考虑符号?
+        if(TryTypeCasting(pTypeDesc[1], pTypeDesc[0], &pNode->GetAnyTokenPAB())) {
+          return pTypeDesc[1];
+        }
+        CLBREAK; // 没处理
+        return NULL;
+      }
+      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Struct && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Numeric)
+      {
+        // TODO: 是否应考虑符号?
+        if(TryTypeCasting(pTypeDesc[0], pTypeDesc[1], &pNode->GetAnyTokenPAB())) {
+          return pTypeDesc[1];
+        }
+        CLBREAK; // 没处理
+        return NULL;
+      }
+      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Struct && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Struct)
+      {
+        if(pTypeDesc[0]->name == pTypeDesc[1]->name)
+        {
+          ASSERT(pTypeDesc[0] == pTypeDesc[1]); // 地址应改一样
+          return pTypeDesc[0];
+        }
+      }
+      else {
+#ifdef _DEBUG
+        OutputErrorW(pNode->GetAnyTokenPAB().marker, 0);
+#endif
+        CLBREAK; // 没处理
+      }
     }
-
-    CLBREAK; // 没处理
     return NULL;
   }
   
@@ -3954,7 +4015,10 @@ NOT_INC_P:
     if(right_glob.IsNode())
     {
       const TYPEDESC* pRightType = InferType(sNameSet, right_glob.pNode);
-      ASSERT(pRightType);
+      if(pRightType == NULL) {
+        OutputErrorW(right_glob.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
+        return FALSE;
+      }
       return TryTypeCasting(pLeftType, pRightType, pLocation);
     }
     else if(right_glob.IsToken())
@@ -3968,6 +4032,13 @@ NOT_INC_P:
     return TRUE;
   }
   
+  GXBOOL CodeParser::CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo)
+  {
+    return (
+      (clstd::strcmpT(szTypeFrom, STR_FLOAT) || clstd::strcmpT(szTypeFrom, STR_HALF) || clstd::strcmpT(szTypeFrom, STR_DOUBLE)) &&
+      (clstd::strcmpT(szTypeTo, STR_FLOAT) || clstd::strcmpT(szTypeTo, STR_HALF) || clstd::strcmpT(szTypeTo, STR_DOUBLE)) );
+  }
+
   GXBOOL CodeParser::TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
   {
     const TYPEDESC* pTypeTo = sNameSet.GetType(szTypeTo);
@@ -3995,6 +4066,11 @@ NOT_INC_P:
         ASSERT(pTypeTo->pDesc == pTypeFrom->pDesc); // 应该同一个名的函数只注册过一次
         return TRUE;
       }
+    }
+    else if(pTypeTo->cate == TYPEDESC::TypeCate_Struct && pTypeFrom->cate == TYPEDESC::TypeCate_Numeric)
+    {
+      return (pTypeTo->pDesc && pTypeTo->pDesc->list &&
+        CompareScaler(pTypeFrom->name, pTypeTo->pDesc->list->type));
     }
 
     //CLBREAK;
@@ -4288,11 +4364,20 @@ NOT_INC_P:
     if(pNode->Operand[0].IsToken())
     {
       pTypeDesc = GetVariable(pNode->Operand[0].pTokn);
+      if(pTypeDesc == NULL) {
+        clStringW strToken;
+        m_pCodeParser->OutputErrorW(*pNode->Operand[0].pTokn,
+          UVS_EXPORT_TEXT2(2065, "“%s”: 未声明的标识符", m_pCodeParser), 
+          pNode->Operand[0].pTokn->ToString(strToken).CStr());
+
+        return NULL;
+      }
     }
     else
     {
       ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.'));
       pTypeDesc = GetMember(pNode->Operand[0].pNode);
+      ASSERT(pTypeDesc);
     }
     ASSERT(pNode->Operand[1].IsToken());
 
@@ -4311,6 +4396,21 @@ NOT_INC_P:
     }
 
     return pTypeDesc;
+  }
+
+  void NameContext::GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const
+  {
+    const NameContext* pRoot = GetRoot(); // 没有局部函数, 所以直接从根查找
+
+    clStringA strFuncName;
+    pFuncName->ToString(strFuncName);
+
+    auto it = pRoot->m_FuncMap.find(strFuncName);
+    while(it != pRoot->m_FuncMap.end() && it->first == strFuncName && it->second.sFormalTypes.size() == nFormalCount)
+    {
+      aMatchedFunc.push_back(&it->second);
+      ++it;
+    }
   }
 
   GXBOOL NameContext::RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode)
@@ -4333,6 +4433,18 @@ NOT_INC_P:
       return TRUE;
     }
     return result.second;
+  }
+
+  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames)
+  {
+    //ASSERT(pMemberNode == NULL || pMemberNode->mode == SYNTAXNODE::MODE_Block);
+    FUNCDESC td;
+    td.ret_type = strRetType;
+    td.name = strName; // ptkName->ToString(strName);
+    td.sFormalTypes = sFormalTypenames;
+
+    auto it = m_FuncMap.insert(clmake_pair(strName, td));
+    return TRUE;
   }
 
   const TYPEDESC* NameContext::GetVariable(const TOKEN* ptkName) const
