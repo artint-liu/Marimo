@@ -12,6 +12,8 @@
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
+#define PARSER_ASSERT(_X, _GLOB) { OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X); }
+
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
@@ -83,6 +85,9 @@ GXLPCSTR g_ExportErrorMessage1 = __FILE__;
 namespace UVShader
 {
   TOKEN::T_LPCSTR s_szString = "string";
+  TOKEN::T_LPCSTR s_szSampler2D = "sampler2D";
+  TOKEN::T_LPCSTR s_szSampler3D = "sampler3D";
+  //TOKEN::T_LPCSTR s_szSamplerCube = "string";
 
   extern GXLPCSTR STR_INT;
   extern GXLPCSTR STR_UINT;
@@ -3757,7 +3762,7 @@ NOT_INC_P:
     }
     else if(left_glob.IsNode())
     {
-      const TYPEDESC* pDesc = sNameSet.GetMember(left_glob.pNode);
+      const TYPEDESC* pDesc = InferMemberType(sNameSet, left_glob.pNode);
       if(pDesc == NULL)
       {
         OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
@@ -3774,7 +3779,7 @@ NOT_INC_P:
     return TRUE;
   }
 
-  const TYPEDESC* CodeParser::InferFunctionReturnedType(NameContext& sNameSet, const SYNTAXNODE* pFuncNode)
+  const TYPEDESC* CodeParser::InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode)
   {
     ASSERT(pFuncNode->mode == SYNTAXNODE::MODE_FunctionCall);
     ASSERT(pFuncNode->Operand[0].IsToken()); // 函数名
@@ -3801,10 +3806,16 @@ NOT_INC_P:
               if(s_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
                 pRetType = pTypeDesc;
               }
-              else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
+              else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName ||
+                s_functions[i].type == INTRINSIC_FUNC::RetType_Vector4 ||
+                s_functions[i].type == INTRINSIC_FUNC::RetType_Float4)
+              {
               }
               else if(s_functions[i].type == n) {
                 pRetType = pTypeDesc;
+              }
+              else if(s_functions[i].type < 0 || n >= s_functions[i].count) {
+                CLBREAK;
               }
 
               // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
@@ -3835,10 +3846,24 @@ NOT_INC_P:
               {
                 continue;
               }
+              else if(TEST_FLAG(s_functions[i].params[n], 8) && pTypeDesc->cate == TYPEDESC::TypeCate_Sampler2D)
+              {
+                continue;
+              }
+              else if(TEST_FLAG(s_functions[i].params[n], 0x10) && pTypeDesc->cate == TYPEDESC::TypeCate_Sampler3D)
+              {
+                continue;
+              }
               break;
             }
             else {
-              CLBREAK;
+              if(it->IsToken())
+              {
+                clStringW strToken;                
+                OutputErrorW(*it->pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), it->pTokn->ToString(strToken).CStr());
+              }
+              return NULL;
+              //CLBREAK;
             }
           }
 
@@ -3849,6 +3874,13 @@ NOT_INC_P:
             else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
               return sNameSet.GetType(s_functions[i].name);
             }
+            else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Vector4) {
+              return sNameSet.GetType(STR_VEC4);
+            }
+            else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Float4) {
+              return sNameSet.GetType(STR_FLOAT4);
+            }
+
             return pRetType; //sNameSet.GetType(s_functions[i].type);
           }
         }
@@ -3890,7 +3922,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferType(NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob)
+  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob)
   {
     if(sGlob.IsNode()) {
       return InferType(sNameSet, sGlob.pNode);
@@ -3901,7 +3933,7 @@ NOT_INC_P:
     CLBREAK;
   }
   
-  const TYPEDESC* CodeParser::InferType(NameContext& sNameSet, const TOKEN* pToken)
+  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const TOKEN* pToken)
   {
     if(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric)
     {
@@ -3912,11 +3944,15 @@ NOT_INC_P:
     return sNameSet.GetVariable(pToken);
   }
   
-  const TYPEDESC* CodeParser::InferType(NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
     if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
       return InferFunctionReturnedType(sNameSet, pNode);
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
+    {
+      CLNOP
     }
     else if(pNode->pOpcode)
     {
@@ -3943,7 +3979,7 @@ NOT_INC_P:
       }
       else if(*pNode->pOpcode == '.')
       {
-        const TYPEDESC* pTypeDesc = sNameSet.GetMember(pNode);
+        const TYPEDESC* pTypeDesc = InferMemberType(sNameSet, pNode);
         return pTypeDesc;
       }
     }
@@ -4010,6 +4046,60 @@ NOT_INC_P:
     return NULL;
   }
   
+  const TYPEDESC* CodeParser::InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  {
+    const TYPEDESC* pTypeDesc = NULL;
+    if(pNode->Operand[0].IsToken())
+    {
+      pTypeDesc = sNameSet.GetVariable(pNode->Operand[0].pTokn);
+      if(pTypeDesc == NULL) {
+        clStringW strToken;
+        OutputErrorW(*pNode->Operand[0].pTokn,
+          UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"),
+          pNode->Operand[0].pTokn->ToString(strToken).CStr());
+
+        return NULL;
+      }
+      ASSERT(pTypeDesc);
+    }
+    else if(pNode->Operand[0].IsNode())
+    {
+      SYNTAXNODE* pChildNode = pNode->Operand[0].pNode;
+      if(pChildNode->mode == SYNTAXNODE::MODE_Opcode && pChildNode->CompareOpcode('.'))
+      {
+        pTypeDesc = InferMemberType(sNameSet, pChildNode);
+        ASSERT(pTypeDesc);
+      }
+      else
+      {
+        ASSERT(pChildNode->CompareOpcode('.') == FALSE); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
+        pTypeDesc = InferType(sNameSet, pChildNode);
+        PARSER_ASSERT(pTypeDesc, pNode->Operand[0]);
+      }
+    }
+    else
+    {
+      CLBREAK;
+    }
+    ASSERT(pNode->Operand[1].IsToken());
+
+    clStringA strTypename;
+
+    if(pTypeDesc->GetMemberTypename(strTypename, pNode->Operand[1].pTokn))
+    {
+      pTypeDesc = sNameSet.GetType(strTypename);
+    }
+    else
+    {
+      clStringW str1, str2;
+      pTypeDesc = NULL;
+      OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2039, "“%s”: 不是“%s”的成员"),
+        pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].pTokn->ToString(str1).CStr());
+    }
+
+    return pTypeDesc;
+  }
+
   GXBOOL CodeParser::InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation)
   {
     if(right_glob.IsNode())
@@ -4019,7 +4109,15 @@ NOT_INC_P:
         OutputErrorW(right_glob.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
         return FALSE;
       }
-      return TryTypeCasting(pLeftType, pRightType, pLocation);
+
+      const GXBOOL bCastResult = TryTypeCasting(pLeftType, pRightType, pLocation);
+      if(bCastResult == FALSE)
+      {
+        clStringW strLeft = pLeftType->name;
+        clStringW strRight = pRightType->name;
+        OutputErrorW(*pLocation, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strRight.CStr(), strLeft.CStr());
+      }
+      return bCastResult;
     }
     else if(right_glob.IsToken())
     {
@@ -4090,7 +4188,7 @@ NOT_INC_P:
     if(pType->cate == TYPEDESC::TypeCate_Numeric)
     {
       VALUE v;
-      VALUE::State s = pnodeRightValue->Calcuate(sNameSet, v);
+      VALUE::State s = pnodeRightValue->Calcuate(this, sNameSet, v);
       if(TEST_FLAG(s, VALUE::State_ErrorMask))
       {
         OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
@@ -4237,6 +4335,16 @@ NOT_INC_P:
     td.name = s_szString;
     td.pDesc = NULL;
     m_TypeMap.insert(clmake_pair(td.name, td));
+
+    td.cate = TYPEDESC::TypeCate_Sampler2D;
+    td.name = s_szSampler2D;
+    td.pDesc = NULL;
+    m_TypeMap.insert(clmake_pair(td.name, td));
+
+    td.cate = TYPEDESC::TypeCate_Sampler3D;
+    td.name = s_szSampler3D;
+    td.pDesc = NULL;
+    m_TypeMap.insert(clmake_pair(td.name, td));
     //}
   }
 
@@ -4358,45 +4466,45 @@ NOT_INC_P:
     return m_eLastState;
   }
 
-  const TYPEDESC* NameContext::GetMember(const SYNTAXNODE* pNode) const
-  {
-    const TYPEDESC* pTypeDesc = NULL;
-    if(pNode->Operand[0].IsToken())
-    {
-      pTypeDesc = GetVariable(pNode->Operand[0].pTokn);
-      if(pTypeDesc == NULL) {
-        clStringW strToken;
-        m_pCodeParser->OutputErrorW(*pNode->Operand[0].pTokn,
-          UVS_EXPORT_TEXT2(2065, "“%s”: 未声明的标识符", m_pCodeParser), 
-          pNode->Operand[0].pTokn->ToString(strToken).CStr());
+  //const TYPEDESC* NameContext::GetMember(const SYNTAXNODE* pNode) const
+  //{
+  //  const TYPEDESC* pTypeDesc = NULL;
+  //  if(pNode->Operand[0].IsToken())
+  //  {
+  //    pTypeDesc = GetVariable(pNode->Operand[0].pTokn);
+  //    if(pTypeDesc == NULL) {
+  //      clStringW strToken;
+  //      m_pCodeParser->OutputErrorW(*pNode->Operand[0].pTokn,
+  //        UVS_EXPORT_TEXT2(2065, "“%s”: 未声明的标识符", m_pCodeParser), 
+  //        pNode->Operand[0].pTokn->ToString(strToken).CStr());
 
-        return NULL;
-      }
-    }
-    else
-    {
-      ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.'));
-      pTypeDesc = GetMember(pNode->Operand[0].pNode);
-      ASSERT(pTypeDesc);
-    }
-    ASSERT(pNode->Operand[1].IsToken());
+  //      return NULL;
+  //    }
+  //  }
+  //  else
+  //  {
+  //    ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.'));
+  //    pTypeDesc = GetMember(pNode->Operand[0].pNode);
+  //    ASSERT(pTypeDesc);
+  //  }
+  //  ASSERT(pNode->Operand[1].IsToken());
 
-    clStringA strTypename;
-    
-    if(pTypeDesc->GetMemberTypename(strTypename, pNode->Operand[1].pTokn))
-    {
-      pTypeDesc = GetType(strTypename);
-    }
-    else
-    {
-      clStringW str1, str2;
-      pTypeDesc = NULL;
-      m_pCodeParser->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT2(2039, "“%s”: 不是“%s”的成员", m_pCodeParser),
-        pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].pTokn->ToString(str1).CStr());
-    }
+  //  clStringA strTypename;
+  //  
+  //  if(pTypeDesc->GetMemberTypename(strTypename, pNode->Operand[1].pTokn))
+  //  {
+  //    pTypeDesc = GetType(strTypename);
+  //  }
+  //  else
+  //  {
+  //    clStringW str1, str2;
+  //    pTypeDesc = NULL;
+  //    m_pCodeParser->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT2(2039, "“%s”: 不是“%s”的成员", m_pCodeParser),
+  //      pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].pTokn->ToString(str1).CStr());
+  //  }
 
-    return pTypeDesc;
-  }
+  //  return pTypeDesc;
+  //}
 
   void NameContext::GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const
   {
@@ -4564,7 +4672,7 @@ NOT_INC_P:
     a = VALUE::State((u32)a | (u32)b);
   }
 
-  VALUE::State NODE_CALC::Calcuate(const NameContext& sNameSet, VALUE& value_out) const
+  VALUE::State NODE_CALC::Calcuate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const
   {
     VALUE p[2];
     VALUE::State s = VALUE::State_OK;
@@ -4588,7 +4696,7 @@ NOT_INC_P:
         //-----------------------------------------
 
         clStringA strTypename;
-        const TYPEDESC* pTypeDesc = sNameSet.GetMember(this);
+        const TYPEDESC* pTypeDesc = pParser->InferMemberType(sNameSet, this);
 
         if(pTypeDesc->cate == TYPEDESC::TypeCate_Numeric)
         {
@@ -4604,7 +4712,7 @@ NOT_INC_P:
     for(int i = 0; i < 2; i++)
     {
       if(Operand[i].IsNode()) {
-        s = static_cast<const NODE_CALC*>(Operand[i].pNode)->Calcuate(sNameSet, p[i]);
+        s = static_cast<const NODE_CALC*>(Operand[i].pNode)->Calcuate(pParser, sNameSet, p[i]);
       }
       else if(Operand[i].IsToken()) {
         if(Operand[i].pTokn->IsNumeric()) {

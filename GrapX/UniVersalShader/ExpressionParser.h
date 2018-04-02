@@ -83,6 +83,9 @@ namespace UVShader
       TypeCate_Empty,
       TypeCate_Numeric,
       TypeCate_String,
+      TypeCate_Sampler2D,
+      TypeCate_Sampler3D,
+      //TypeCate_SamplerCube,
       TypeCate_Struct,
     };
 
@@ -109,7 +112,9 @@ namespace UVShader
     {
       RetType_Scaler0 = -1,
       RetType_FromName = -2, // 返回类型是函数名
-      RetType_Last = -3,
+      RetType_Vector4 = -3,  // 4维向量,一般代表颜色
+      RetType_Float4 = -4,  // 4维向量,一般代表颜色
+      RetType_Last = -5,
       RetType_Argument0 = 0, // 返回类型同第一个参数类型
     };
 
@@ -180,7 +185,7 @@ namespace UVShader
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames);
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
     State  GetLastState() const;
-    const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
+    //const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
     void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
     
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
@@ -189,12 +194,13 @@ namespace UVShader
   struct NODE_CALC : public SYNTAXNODE
   {
     //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
-    VALUE::State Calcuate(const NameContext& sNameSet, VALUE& value_out) const;
+    VALUE::State Calcuate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const;
   };
 
   class CodeParser : public ArithmeticExpression
   {
     friend class NameContext;
+    friend struct NODE_CALC;
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
 
@@ -548,10 +554,11 @@ namespace UVShader
     CodeParser* GetRootParser();
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
-    const TYPEDESC* InferFunctionReturnedType(NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
-    const TYPEDESC* InferType(NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob);
-    const TYPEDESC* InferType(NameContext& sNameSet, const TOKEN* pToken);
-    const TYPEDESC* InferType(NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
+    const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob);
+    const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
+    const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
 
     GXBOOL InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);

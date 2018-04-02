@@ -266,11 +266,13 @@ namespace UVShader
 
   INTRINSIC_FUNC s_functions[] =
   {
-    // 位含义: 00000MVS
+    // 位含义: 00C32MVS
     // M: Matrix
     // V: Vector
     // S: Scaler
-    // A: 与第一参数相同
+    // 2: Sampler2D
+    // 3: Sampler3D
+    // C: SamplerCube
 
     {"sin", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"cos", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
@@ -278,12 +280,22 @@ namespace UVShader
     {"acos", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"floor", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"dot", INTRINSIC_FUNC::RetType_Scaler0, 2, "\x02\x02"},
+    {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
+    {"frac", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
+    {"clamp", INTRINSIC_FUNC::RetType_Argument0, 3, "\x07\x07\x07"},
+    {"length", INTRINSIC_FUNC::RetType_Scaler0, 1, "\x02"},
+    
+    // GLSL
+    {"vec2", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
+    {"vec2", INTRINSIC_FUNC::RetType_FromName, 2, "\x01\x01"},
     {"vec3", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
     {"vec3", INTRINSIC_FUNC::RetType_FromName, 3, "\x01\x01\x01"},
     {"vec4", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
     {"vec4", INTRINSIC_FUNC::RetType_FromName, 4, "\x01\x01\x01\x01"},
-    {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
     {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, "\x03\x03\x01"}, // FIXME: 没有验证第一个参数和第二个参数类型相同
+    {"fract", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
+    {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 2, "\x08\x02"}, // FIXME: 2维向量
+    {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 3, "\x08\x02\x01"}, // FIXME: 2维向量
     {NULL},
   };
 
