@@ -12,8 +12,8 @@
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
-#define PARSER_ASSERT(_X, _GLOB) { OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X); }
-
+#define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
+#define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
@@ -3592,7 +3592,8 @@ NOT_INC_P:
         {
           const TOKEN& tkRightValue = *pNode->Operand[1].pTokn;
           if(//pType->cate == TYPEDESC::TypeCate_Struct ||
-            (pType->cate == TYPEDESC::TypeCate_Numeric && tkRightValue.IsNumeric() == FALSE) ||
+            ((pType->cate == TYPEDESC::TypeCate_FloatNumeric || pType->cate == TYPEDESC::TypeCate_IntegerNumeric) &&
+                tkRightValue.IsNumeric() == FALSE) ||
             (pType->cate == TYPEDESC::TypeCate_String && tkRightValue.type != TOKEN::TokenType_String) )
           {
             clStringW str;
@@ -3613,7 +3614,7 @@ NOT_INC_P:
             }
           }
 
-          if(pType->cate == TYPEDESC::TypeCate_Numeric)
+          if(pType->cate == TYPEDESC::TypeCate_IntegerNumeric || pType->cate == TYPEDESC::TypeCate_FloatNumeric)
           {
             VALUE v;
             VALUE::State s = v.set(tkRightValue);
@@ -4001,8 +4002,34 @@ NOT_INC_P:
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
-      CLBREAK;
-      CLNOP
+      const TYPEDESC* pTypeDesc = NULL;
+      if(pNode->Operand[0].IsNode())
+      {
+        pTypeDesc = InferType(sNameSet, pNode->Operand[0].pNode);
+      }
+      else if(pNode->Operand[0].IsToken())
+      {
+        pTypeDesc = InferType(sNameSet, pNode->Operand[0].pTokn);
+      }
+      else
+      {
+        CLBREAK;
+      }
+
+      if(pTypeDesc->cate != TYPEDESC::TypeCate_MultiDim)
+      {
+        OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组或指针类型"));
+        return NULL;
+      }
+
+      const TYPEDESC* pSubscriptType = InferType(sNameSet, pNode->Operand[1]);
+      if(pSubscriptType->cate != TYPEDESC::TypeCate_IntegerNumeric)
+      {
+        OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
+        return NULL;
+      }
+
+      return pTypeDesc->pNextDim;
     }
     else if(pNode->pOpcode)
     {
@@ -4053,14 +4080,16 @@ NOT_INC_P:
 
     if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
     {
-      if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Numeric && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Numeric)
+      const GXBOOL bFirstNumeric = pTypeDesc[0]->cate == TYPEDESC::TypeCate_FloatNumeric || pTypeDesc[0]->cate == TYPEDESC::TypeCate_IntegerNumeric;
+      const GXBOOL bSecondNumeric = pTypeDesc[1]->cate == TYPEDESC::TypeCate_FloatNumeric || pTypeDesc[1]->cate == TYPEDESC::TypeCate_IntegerNumeric;
+      if(bFirstNumeric && bSecondNumeric)
       {
         VALUE::Rank rank = (VALUE::Rank)clMax(pTypeDesc[0]->pDesc->rank, pTypeDesc[1]->pDesc->rank);
         const TYPEDESC* pTypeDesc = sNameSet.GetType(rank);
         ASSERT(pTypeDesc->pDesc->rank >= VALUE::Rank_First && pTypeDesc->pDesc->rank <= VALUE::Rank_Last);
         return pTypeDesc;
       }
-      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Numeric && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Struct)
+      else if(bFirstNumeric && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Struct)
       {
         // TODO: 是否应考虑符号?
         if(TryTypeCasting(pTypeDesc[1], pTypeDesc[0], &pNode->GetAnyTokenPAB())) {
@@ -4069,7 +4098,7 @@ NOT_INC_P:
         CLBREAK; // 没处理
         return NULL;
       }
-      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Struct && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Numeric)
+      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Struct && bSecondNumeric)
       {
         // TODO: 是否应考虑符号?
         if(TryTypeCasting(pTypeDesc[0], pTypeDesc[1], &pNode->GetAnyTokenPAB())) {
@@ -4199,7 +4228,7 @@ NOT_INC_P:
 
   GXBOOL CodeParser::TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
   {
-    if(pTypeTo->cate == TYPEDESC::TypeCate_Numeric && pTypeFrom->cate == TYPEDESC::TypeCate_Numeric)
+    if(IS_NUMERIC_CATE(pTypeTo->cate) && IS_NUMERIC_CATE(pTypeFrom->cate))
     {
       if(pTypeTo->pDesc->rank < pTypeFrom->pDesc->rank &&
         (pTypeTo->pDesc->rank != VALUE::Rank_Double && pTypeTo->pDesc->rank != VALUE::Rank_Float) &&
@@ -4219,7 +4248,7 @@ NOT_INC_P:
         return TRUE;
       }
     }
-    else if(pTypeTo->cate == TYPEDESC::TypeCate_Struct && pTypeFrom->cate == TYPEDESC::TypeCate_Numeric)
+    else if(pTypeTo->cate == TYPEDESC::TypeCate_Struct && IS_NUMERIC_CATE(pTypeFrom->cate))
     {
       return (pTypeTo->pDesc && pTypeTo->pDesc->list &&
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->list->type));
@@ -4239,7 +4268,7 @@ NOT_INC_P:
     // };
 
     const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(right_glob.pNode);
-    if(pType->cate == TYPEDESC::TypeCate_Numeric)
+    if(IS_NUMERIC_CATE(pType->cate))
     {
       VALUE v;
       VALUE::State s = pnodeRightValue->Calculate(this, sNameSet, v);
@@ -4376,7 +4405,14 @@ NOT_INC_P:
     // 内置基础类型
     for(int i = 0; s_aBaseType[i].name; i++)
     {
-      td.cate = TYPEDESC::TypeCate_Numeric;
+      if(s_aBaseType[i].rank == VALUE::Rank_Float || s_aBaseType[i].rank == VALUE::Rank_Double)
+      {
+        td.cate = TYPEDESC::TypeCate_FloatNumeric;
+      }
+      else
+      {
+        td.cate = TYPEDESC::TypeCate_IntegerNumeric;
+      }
       td.name = s_aBaseType[i].name;
       td.pDesc = &s_aBaseType[i];
 
@@ -4627,19 +4663,21 @@ NOT_INC_P:
         const TOKEN* ptkVariable = first_glob->pTokn;
         ASSERT(sDimensions.empty() == FALSE);
 
-        TYPEDESC td = {TYPEDESC::TypeCate_MultiDim};
-        td.name = strType;
-        for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
-        {
-          td.name.Append('@').AppendInteger32(*it); // int x[2][3][4] 记为"int@4@3@2"
-          td.sDimensions.push_back(*it);
-
-          auto result = m_TypeMap.insert(clmake_pair(td.name, td));
-          td.pNextDim = &result.first->second;
-        }
-
         m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable);
         if(m_eLastState == State_Ok) {
+
+          TYPEDESC td = {TYPEDESC::TypeCate_MultiDim};
+          td.name = strType;
+          td.pNextDim = pTypeDesc;
+          for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
+          {
+            td.name.Append('@').AppendInteger32(*it); // int x[2][3][4] 记为"int@4@3@2"
+            td.sDimensions.push_back(*it);
+
+            auto result = m_TypeMap.insert(clmake_pair(td.name, td));
+            td.pNextDim = &result.first->second;
+          }
+
           pVariDesc->pDesc = td.pNextDim;
           return pTypeDesc;
         }
@@ -4894,7 +4932,7 @@ NOT_INC_P:
         clStringA strTypename;
         const TYPEDESC* pTypeDesc = pParser->InferMemberType(sNameSet, this);
 
-        if(pTypeDesc->cate == TYPEDESC::TypeCate_Numeric)
+        if(IS_NUMERIC_CATE(pTypeDesc->cate))
         {
           value_out.SetOne();
           return VALUE::State_OK;

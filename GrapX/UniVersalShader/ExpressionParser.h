@@ -81,7 +81,8 @@ namespace UVShader
     enum TypeCate
     {
       TypeCate_Empty,
-      TypeCate_Numeric,   // 数字类型
+      TypeCate_FloatNumeric,    // 浮点-数字类型
+      TypeCate_IntegerNumeric,  // 整数-数字类型
       TypeCate_MultiDim,  // 多维类型
       TypeCate_String,
       TypeCate_Sampler2D,
@@ -96,7 +97,7 @@ namespace UVShader
     COMMINTRTYPEDESC* pDesc; // 结构体(内置) 的描述
     const SYNTAXNODE* pMemberNode; // 结构体(用户定义) 的描述
     DimList_T         sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
-    TYPEDESC*         pNextDim;
+    const TYPEDESC*   pNextDim;
 
     GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
