@@ -516,40 +516,39 @@ int _tmain(int argc, _TCHAR* argv[])
     printf("[ESC]. quit\n");
 
     char c = clstd_cli::getch();
+    clStringW strPath;
     switch(c)
     {
     case '0':
       //TestShaderToys(FALSE);
       //TestDebris(FALSE);
-      TestFiles("Test\\shaders\\ShaderToy", FALSE);
-      TestFiles("Test\\shaders\\debris", FALSE);
+
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("ShaderToy"));
+      TestFiles(clStringA(strPath), FALSE);
+
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("debris"));
+      TestFiles(clStringA(strPath), FALSE);
       break;
 
     case '1':
-      //TestShaderToys(TRUE);
-      TestFiles("Test\\shaders\\ShaderToy", TRUE);
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("ShaderToy"));
+      TestFiles(clStringA(strPath), TRUE);
       break;
 
     case '2':
-      //TestDebris(TRUE);
-      TestFiles("Test\\shaders\\debris", TRUE);
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("debris"));
+      TestFiles(clStringA(strPath), TRUE);
       break;
 
     case '3':
-    {
-      clStringW str;
-      clpathfile::CombinePath(str, szTestCasePath, _CLTEXT("errorcase"));
-      TestFiles(clStringA(str), TRUE);
-    }
-    break;
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("errorcase"));
+      TestFiles(clStringA(strPath), TRUE);
+      break;
 
     case '4':
-    {
-      clStringW str;
-      clpathfile::CombinePath(str, szTestCasePath, _CLTEXT("stdcase"));
-      TestFiles(clStringA(str), TRUE);
-    }
-    break;
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("stdcase"));
+      TestFiles(clStringA(strPath), TRUE);
+      break;
 
     case '*':
     {

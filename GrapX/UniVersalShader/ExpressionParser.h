@@ -81,18 +81,22 @@ namespace UVShader
     enum TypeCate
     {
       TypeCate_Empty,
-      TypeCate_Numeric,
+      TypeCate_Numeric,   // 数字类型
+      TypeCate_MultiDim,  // 多维类型
       TypeCate_String,
       TypeCate_Sampler2D,
       TypeCate_Sampler3D,
       //TypeCate_SamplerCube,
       TypeCate_Struct,
     };
+    typedef clvector<size_t> DimList_T;
 
     TypeCate          cate;
     clStringA         name; // 类型名
     COMMINTRTYPEDESC* pDesc; // 结构体(内置) 的描述
     const SYNTAXNODE* pMemberNode; // 结构体(用户定义) 的描述
+    DimList_T         sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
+    TYPEDESC*         pNextDim;
 
     GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
@@ -127,8 +131,11 @@ namespace UVShader
 
   struct VARIDESC
   {
+    //typedef clvector<size_t> DimList_T;
+
     const TYPEDESC* pDesc;
     clStringA       strConstValue;  // 常量类型
+    //DimList_T       sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
   };
 
   class NameContext
@@ -142,11 +149,13 @@ namespace UVShader
     enum State
     {
       State_Ok = 0,
-      State_TypeNotFound = -1,     // 没有找到类型
-      State_DuplicatedType = -2,  // 重复注册类型
-      State_DuplicatedVariable = -3,
-      State_DefineAsType = -4,    // 变量已经被定义为类型
-      State_DefineAsVariable = -5,// 类型已经被定义为变量
+      State_HashError = -1,          // 其它错误，已经在函数内部输出
+      State_TypeNotFound = -2,       // 没有找到类型
+      State_DuplicatedType = -3,     // 重复注册类型
+      State_DuplicatedVariable = -4, // 重复定义变量
+      State_DefineAsType = -5,       // 变量已经被定义为类型
+      State_DefineAsVariable = -6,   // 类型已经被定义为变量
+      State_VariableIsNotIdentifier = -7, // 期望的变量名不是一个标识符      
     };
   
   protected:
@@ -165,6 +174,7 @@ namespace UVShader
     NameContext(const NameContext& sNameCtx){}
     NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
+    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable);
   public:
     NameContext();
     NameContext(const NameContext* pParent);
@@ -184,17 +194,19 @@ namespace UVShader
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames);
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
+    const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
     State  GetLastState() const;
     //const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
     void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
     
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
+    VALUE::State CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE::GLOB* pGlob);
   };
 
   struct NODE_CALC : public SYNTAXNODE
   {
     //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
-    VALUE::State Calcuate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const;
+    VALUE::State Calculate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const;
   };
 
   class CodeParser : public ArithmeticExpression
@@ -514,7 +526,7 @@ namespace UVShader
     TKSCOPE::TYPE  ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
 
     //const TYPEDESC* GetMember(const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
-    //VALUE::State Calcuate(VALUE& value_out, const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
+    //VALUE::State CalcuateConstantValue(VALUE& value_out, const NameContext& sNameSet, const SYNTAXNODE::GLOB* pGlob);
 
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);

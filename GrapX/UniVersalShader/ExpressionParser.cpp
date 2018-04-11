@@ -3462,17 +3462,62 @@ NOT_INC_P:
       }
     }
 
-    const TOKEN& tkVar = pNode->Operand[1].IsToken()
-      ? *pNode->Operand[1].pTokn
-      : pNode->Operand[1].pNode->GetAnyTokenAB();
+    const SYNTAXNODE::GLOB& second_glob = pNode->Operand[1];
+    const TOKEN* ptkVar = NULL;
+    const TYPEDESC* pType = NULL;
+    clStringA strType;
+
+    pNode->Operand[0].pTokn->ToString(strType);
+
+    if(second_glob.IsToken())
+    {
+      ptkVar = second_glob.pTokn;
+      pType = sNameSet.RegisterVariable(strType, ptkVar);
+    }
+    else if(second_glob.IsNode())
+    {
+      if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
+      {
+        //// FIXME: 临时写法
+        //ptkVar = &second_glob.pNode->GetAnyTokenAB();
+        //pType = sNameSet.RegisterVariable(strType, ptkVar);
+        //ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
+        //// /临时写法
+
+        pType = sNameSet.RegisterMultidimVariable(strType, second_glob.pNode);
+      }
+      else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
+      {
+        CLBREAK;
+      }
+      else if(second_glob.pNode->CompareOpcode(':') || // 语义
+        second_glob.pNode->CompareOpcode('=')) // 赋值
+      {
+        ptkVar = &second_glob.pNode->GetAnyTokenAB();
+        pType = sNameSet.RegisterVariable(strType, ptkVar);
+        ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
+      }
+      else
+      {
+        CLBREAK;
+      }
+    }
+    else
+    {
+      CLBREAK;
+      // 定义但是没写名字，报错
+    }
 
     ASSERT(pNode->Operand[0].IsToken()); // 外面的拆解保证不会出现这个
 
-    clStringA strType, strVar;
     pNode->Operand[0].pTokn->ToString(strType);
-    tkVar.ToString(strVar);
+
+#if 0
+    clStringA strVar;
+    ptkVar->ToString(strVar);
 
     DbgDumpSyntaxTree(NULL, pNode, 0, NULL, 1);
+#endif
    
 #if 0
     // 检查类型定义
@@ -3490,30 +3535,34 @@ NOT_INC_P:
     }
 #endif
 
-    // 检查变量名
-    clStringW str;
-    const TYPEDESC* pType = NULL;
-    if(tkVar.IsIdentifier())
-    {
+    //// 检查变量名
+    //if(ptkVar->IsIdentifier())
+    //{
       //clStringA strA;
-      if((pType = sNameSet.RegisterVariable(strType, &tkVar)) == NULL)
+      if(pType == NULL)
       {
+        clStringW strW;
         switch(sNameSet.GetLastState())
         {
         case NameContext::State_TypeNotFound:
         {
-          str = strType;
-          OutputErrorW(tkVar, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), str.CStr());
+          strW = strType;
+          OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), strW.CStr());
           return FALSE;
         }
         case NameContext::State_DuplicatedVariable:
         {
-          OutputErrorW(tkVar, UVS_EXPORT_TEXT(2371, "“%s”: 重定义"), tkVar.ToString(str).CStr());
+          OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(2371, "“%s”: 重定义"), ptkVar->ToString(strW).CStr());
           return FALSE;
         }
         case NameContext::State_DefineAsType:
         {
-          OutputErrorW(tkVar, UVS_EXPORT_TEXT(5013, "“%s”: 变量已经被定义为类型"), tkVar.ToString(str).CStr());
+          OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(5013, "“%s”: 变量已经被定义为类型"), ptkVar->ToString(strW).CStr());
+          return FALSE;
+        }
+        case NameContext::State_VariableIsNotIdentifier:
+        {
+          OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), ptkVar->ToString(strW).CStr());
           return FALSE;
         }
         default:
@@ -3521,12 +3570,12 @@ NOT_INC_P:
           break;
         }
       }
-    }
-    else
-    {
-      OutputErrorW(tkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), tkVar.ToString(str).CStr());
-      return FALSE;
-    }
+    //}
+    //else
+    //{
+    //  OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), ptkVar->ToString(str).CStr());
+    //  return FALSE;
+    //}
 
     return pNode->Operand[1].IsToken() ? TRUE
       : Verify2_VariableInit(sNameSet, *pNode->Operand[0].pTokn, pType, *pNode->Operand[1].pNode);
@@ -3952,6 +4001,7 @@ NOT_INC_P:
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
+      CLBREAK;
       CLNOP
     }
     else if(pNode->pOpcode)
@@ -4075,12 +4125,16 @@ NOT_INC_P:
         ASSERT(pChildNode->CompareOpcode('.') == FALSE); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
         pTypeDesc = InferType(sNameSet, pChildNode);
         PARSER_ASSERT(pTypeDesc, pNode->Operand[0]);
+        if(pTypeDesc == NULL) {
+          return NULL;
+        }
       }
     }
     else
     {
       CLBREAK;
     }
+
     ASSERT(pNode->Operand[1].IsToken());
 
     clStringA strTypename;
@@ -4188,7 +4242,7 @@ NOT_INC_P:
     if(pType->cate == TYPEDESC::TypeCate_Numeric)
     {
       VALUE v;
-      VALUE::State s = pnodeRightValue->Calcuate(this, sNameSet, v);
+      VALUE::State s = pnodeRightValue->Calculate(this, sNameSet, v);
       if(TEST_FLAG(s, VALUE::State_ErrorMask))
       {
         OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
@@ -4387,6 +4441,20 @@ NOT_INC_P:
     return FALSE;
   }
 
+  VALUE::State NameContext::CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE::GLOB* pGlob)
+  {
+    if(pGlob->IsNode())
+    {
+      const NODE_CALC* pCalcNode = static_cast<const NODE_CALC*>(pGlob->pNode);
+      return pCalcNode->Calculate(pParser, this, value_out);
+    }
+    else if(pGlob->IsToken())
+    {
+      return value_out.set(*pGlob->pTokn);
+    }
+    CLBREAK;
+  }
+
   NameContext* NameContext::GetRoot()
   {
     const NameContext* pSet = this;
@@ -4411,9 +4479,57 @@ NOT_INC_P:
   {
     m_pCodeParser = pCodeParser;
   }
+ 
+  
+  NameContext::State NameContext::IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable)
+  {
+    ASSERT(ptkVariable);
+
+    if(ptkVariable->IsIdentifier() == FALSE)
+    {
+      return State_VariableIsNotIdentifier;
+    }
+
+    const TYPEDESC* pDesc = GetType(strType);
+    if(pDesc == NULL)
+    {
+      return State_TypeNotFound;
+    }
+
+    clStringA strVari;
+    ptkVariable->ToString(strVari);
+    if(GetType(strVari)) {
+      return State_DefineAsType;
+    }
+
+    VARIDESC sVariDesc;
+    sVariDesc.pDesc = pDesc;
+    auto result = m_VariableMap.insert(clmake_pair(ptkVariable, sVariDesc));
+    if(result.second) {
+      // 添加成功, 返回type描述
+      m_eLastState = State_Ok;
+      *ppType = result.first->second.pDesc;
+      *ppVariable = &result.first->second;
+      return State_Ok;
+    }
+
+    return State_DuplicatedVariable;
+  }
 
   const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable)
   {
+    // PS: 返回值似乎没什么用
+    const TYPEDESC* pTypeDesc = NULL;
+    VARIDESC* pVariDesc = NULL;
+    m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptrVariable);
+    return pTypeDesc;
+#if 0
+    if(ptrVariable->IsIdentifier() == FALSE)
+    {
+      m_eLastState = State_VariableIsNotIdentifier;
+      return NULL;
+    }
+
     const TYPEDESC* pDesc = GetType(strType);
     if(pDesc == NULL)
     {
@@ -4459,6 +4575,86 @@ NOT_INC_P:
       return NULL;
     }
     return pDesc;
+#endif
+  }
+
+  const TYPEDESC* NameContext::RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode)
+  {
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript); // 外部保证
+    //ASSERT(pNode->Operand[1].IsToken());
+
+    TYPEDESC::DimList_T sDimensions;
+    const TYPEDESC* pTypeDesc = NULL;
+    VARIDESC* pVariDesc = NULL;
+
+
+    while(TRUE)
+    {
+      VALUE value;
+      VALUE::State state = CalculateConstantValue(value, m_pCodeParser, &pNode->Operand[1]);
+
+      const SYNTAXNODE::GLOB* first_glob = &pNode->Operand[0];
+      if(state == VALUE::State_OK)
+      {
+        //int a[-12]; // C2118 负下标
+        //int b[1.3]; // C2058 常量表达式不是整型
+        //int c[0];   // C2466 不能分配常量大小为 0 的数组
+        if(value.rank == VALUE::Rank_Float || value.rank == VALUE::Rank_Double)
+        {
+          m_pCodeParser->OutputErrorW(first_glob->pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT2(2058, "常量表达式不是整型", m_pCodeParser));
+          m_eLastState = State_HashError;
+          return NULL;
+        }
+        else if(value.nValue64 < 0) {
+          m_pCodeParser->OutputErrorW(first_glob->pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT2(2118, "负下标", m_pCodeParser));
+          m_eLastState = State_HashError;
+          return NULL;
+        }
+        else if(value.nValue64 == 0) {
+          m_pCodeParser->OutputErrorW(first_glob->pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT2(2466, "不能分配常量大小为 0 的数组", m_pCodeParser));
+          m_eLastState = State_HashError;
+          return NULL;
+        }
+        sDimensions.push_back((size_t)value.nValue64);
+      }
+      else
+      {
+        CLBREAK; // 没输出VALUE::State错误
+      }
+
+      if(first_glob->IsToken())
+      {
+        const TOKEN* ptkVariable = first_glob->pTokn;
+        ASSERT(sDimensions.empty() == FALSE);
+
+        TYPEDESC td = {TYPEDESC::TypeCate_MultiDim};
+        td.name = strType;
+        for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
+        {
+          td.name.Append('@').AppendInteger32(*it); // int x[2][3][4] 记为"int@4@3@2"
+          td.sDimensions.push_back(*it);
+
+          auto result = m_TypeMap.insert(clmake_pair(td.name, td));
+          td.pNextDim = &result.first->second;
+        }
+
+        m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable);
+        if(m_eLastState == State_Ok) {
+          pVariDesc->pDesc = td.pNextDim;
+          return pTypeDesc;
+        }
+        return NULL;
+      }
+      else if(first_glob->IsNode())
+      {
+        pNode = first_glob->pNode;
+      }
+      else
+      {
+        CLBREAK;
+      }
+    }
+    return NULL;
   }
 
   NameContext::State NameContext::GetLastState() const
@@ -4672,7 +4868,7 @@ NOT_INC_P:
     a = VALUE::State((u32)a | (u32)b);
   }
 
-  VALUE::State NODE_CALC::Calcuate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const
+  VALUE::State NODE_CALC::Calculate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const
   {
     VALUE p[2];
     VALUE::State s = VALUE::State_OK;
@@ -4712,7 +4908,7 @@ NOT_INC_P:
     for(int i = 0; i < 2; i++)
     {
       if(Operand[i].IsNode()) {
-        s = static_cast<const NODE_CALC*>(Operand[i].pNode)->Calcuate(pParser, sNameSet, p[i]);
+        s = static_cast<const NODE_CALC*>(Operand[i].pNode)->Calculate(pParser, sNameSet, p[i]);
       }
       else if(Operand[i].IsToken()) {
         if(Operand[i].pTokn->IsNumeric()) {
@@ -4750,14 +4946,14 @@ NOT_INC_P:
     if(pMemberNode)
     {
       ASSERT(pDesc == NULL);
-      const TYPEDESC* pDesc = NULL;
+      //const TYPEDESC* pDesc = NULL;
 
       // 确定符合结构体描述
       ASSERT(pMemberNode->mode == SYNTAXNODE::MODE_Block &&
         pMemberNode->Operand[0].IsNode() &&
         pMemberNode->Operand[1].IsToken() && *pMemberNode->Operand[1].pTokn == ';');
 
-      RecursiveNode<const SYNTAXNODE>(NULL, pMemberNode->Operand[0].pNode, [&pDesc, &strTypename, &ptkMember]
+      RecursiveNode<const SYNTAXNODE>(NULL, pMemberNode->Operand[0].pNode, [/*&pDesc, */&strTypename, &ptkMember]
       (const SYNTAXNODE* pNode, int depth)-> GXBOOL
       {
         if(strTypename.IsNotEmpty()) // 找到类型后尽快结束迭代
