@@ -255,8 +255,6 @@ namespace UVShader
     {NULL}
   };
 
-  // 不对外使用
-  //static GXLPCSTR s_ParamArray_Floats[] = {STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT};
   //static GXLPCSTR s_ParamArray_Float2[] = { "float2", "float2", "float2", "float2" };
   //static GXLPCSTR s_ParamArray_Float3[] = { "float3", "float3", "float3", "float3" };
   //static GXLPCSTR s_ParamArray_Float4[] = { "float4", "float4", "float4", "float4" };
@@ -273,13 +271,14 @@ namespace UVShader
     // 2: Sampler2D
     // 3: Sampler3D
     // C: SamplerCube
-
+    {"sqrt", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"sin", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"cos", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"asin", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"acos", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"floor", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"dot", INTRINSIC_FUNC::RetType_Scaler0, 2, "\x02\x02"},
+    {"cross", INTRINSIC_FUNC::RetType_Argument0, 2, "\x02\x02"},
     {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
     {"frac", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"clamp", INTRINSIC_FUNC::RetType_Argument0, 3, "\x07\x07\x07"},
@@ -296,6 +295,16 @@ namespace UVShader
     {"fract", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 2, "\x08\x02"}, // FIXME: 2维向量
     {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 3, "\x08\x02\x01"}, // FIXME: 2维向量
+    {NULL},
+  };
+
+  // 不对外使用
+  static GXLPCSTR s_Vec4_ParamArray[] = { STR_VEC3, STR_FLOAT };
+  static GXLPCSTR s_ParamArray_Floats[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
+  INTRINSIC_FUNC2 s_functions2[] =
+  {
+    {"vec4", "vec4", 2, s_Vec4_ParamArray},
+    {"float", "float", 1, s_ParamArray_Floats},
     {NULL},
   };
 

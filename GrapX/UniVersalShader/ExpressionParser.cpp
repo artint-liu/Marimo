@@ -12,6 +12,7 @@
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
+#define PARSER_BREAK(_GLOB) { OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 // TODO:
@@ -209,6 +210,7 @@ namespace UVShader
   extern COMMINTRTYPEDESC s_aIntrinsicStruct[];
   extern COMMINTRTYPEDESC s_aBaseType[];
   extern INTRINSIC_FUNC s_functions[];
+  extern INTRINSIC_FUNC2 s_functions2[];
 
 
 
@@ -3839,6 +3841,7 @@ NOT_INC_P:
     SYNTAXNODE::GlobList sExprList;
     BreakComma(sExprList, pFuncNode->Operand[1]);
 
+    // 通配符形式的内部函数列表
     for(int i = 0; s_functions[i].name != NULL; i++)
     {
       if(*pFuncNode->Operand[0].pTokn == s_functions[i].name)
@@ -3932,6 +3935,43 @@ NOT_INC_P:
             }
 
             return pRetType; //sNameSet.GetType(s_functions[i].type);
+          }
+        }
+      }
+    }
+
+    // 确切参数类型的函数列表
+    for(int i = 0; s_functions2[i].name != NULL; i++)
+    {
+      if(*pFuncNode->Operand[0].pTokn == s_functions2[i].name)
+      {
+        if(sExprList.size() == s_functions2[i].count)
+        {
+          size_t n = 0;
+          auto it = sExprList.begin();
+          for(; n < s_functions2[i].count; n++, ++it)
+          {
+            const TYPEDESC* pTypeDesc = InferType(sNameSet, *it);
+            if(pTypeDesc)
+            {
+              const TYPEDESC* pTypeTo = sNameSet.GetType(s_functions2[i].params[n]);
+              ASSERT(pTypeTo);
+              if(TryTypeCasting(pTypeTo, pTypeDesc, pFuncNode->Operand[0].pTokn)) {
+                continue;
+              }
+              break;
+            }
+            else
+            {
+              PARSER_BREAK(pFuncNode->Operand[0]);
+              CLBREAK;
+            }
+            //if(s_functions2[i].params[n])
+          }
+
+          if(n == s_functions2[i].count)
+          {
+            return sNameSet.GetType(s_functions2[i].ret_type);
           }
         }
       }
@@ -4072,6 +4112,13 @@ NOT_INC_P:
       else if(pNode->Operand[i].IsToken())
       {
         pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i].pTokn);
+        if(pTypeDesc[i] == NULL)
+        {
+          // C2065: “m”: 未声明的标识符
+          clStringW strW;
+          OutputErrorW(*pNode->Operand[i].pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), pNode->Operand[i].pTokn->ToString(strW).CStr());
+          return NULL;
+        }
       }
       else {
         CLBREAK; // 没处理

@@ -130,6 +130,14 @@ namespace UVShader
     GXLPCSTR  params;
   };
 
+  struct INTRINSIC_FUNC2
+  {
+    GXLPSTR   ret_type; // 返回类型
+    GXLPSTR   name;     // 函数名
+    size_t    count;    // 形参数量
+    GXLPCSTR* params;   // 形参列表
+  };
+
   struct VARIDESC
   {
     //typedef clvector<size_t> DimList_T;
