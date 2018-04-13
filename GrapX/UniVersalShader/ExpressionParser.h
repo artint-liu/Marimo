@@ -175,6 +175,7 @@ namespace UVShader
     FuncMap     m_FuncMap;
     VariableMap m_VariableMap;
     State       m_eLastState;
+    const TYPEDESC* m_pReturnType;
 
     NameContext* GetRoot();
     const NameContext* GetRoot() const;
@@ -194,6 +195,9 @@ namespace UVShader
     void Cleanup();
 
     void BuildIntrinsicType();
+
+    GXBOOL SetReturnType(GXLPCSTR szTypeName);
+    const TYPEDESC* GetReturnType() const;
 
     const TYPEDESC* GetType(const clStringA& strType) const;
     const TYPEDESC* GetType(const TOKEN& token) const;
@@ -593,6 +597,7 @@ namespace UVShader
     GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode);
     GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
+    GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext* pNameContext);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
     GXBOOL Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode);
     GXBOOL Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位

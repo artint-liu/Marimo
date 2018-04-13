@@ -1021,10 +1021,12 @@ namespace UVShader
 
     rank = Rank_BadValue;
 
-    //if(ptr[count - 1] == 'f' || ptr[count - 1] == 'F') {
-    //  SETBIT(dwFlags, Rank_float);
-    //  count--;
-    //}
+    // FIXME: 这种写法会认为"10f"为合法的,实际C/C++中不承认这种写法
+    if(ptr[count - 1] == 'f' || ptr[count - 1] == 'F') {
+      SET_FLAG(dwFlags, Rank_Float);
+      count--;
+    }
+
     // 符号解析
     if(ptr[i] == '-') {
       SET_FLAG(dwFlags, Rank_Signed);

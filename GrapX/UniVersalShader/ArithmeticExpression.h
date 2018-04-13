@@ -287,7 +287,7 @@ namespace UVShader
       MODE_Flow_Continue,
       MODE_Flow_Case,           // 只检查,不支持
       MODE_Flow_Discard,
-      MODE_Return,              // return
+      MODE_Return,              // A="return" B
       MODE_Block,               // {A}B, B只可能是';'
       MODE_Chain,               // 表达式链表,链表中的应该属于同一个作用域, [A:statement][B:next chain]，在chain结尾应该是[A:statement][B:NULL]这样
     };

@@ -12,6 +12,8 @@
 
 namespace UVShader
 {
+  GXLPCSTR STR_VOID   = "void";
+
   GXLPCSTR STR_INT    = "int";
   GXLPCSTR STR_UINT   = "uint";
   GXLPCSTR STR_HALF   = "half";
@@ -283,6 +285,9 @@ namespace UVShader
     {"frac", INTRINSIC_FUNC::RetType_Argument0, 1, "\x07"},
     {"clamp", INTRINSIC_FUNC::RetType_Argument0, 3, "\x07\x07\x07"},
     {"length", INTRINSIC_FUNC::RetType_Scaler0, 1, "\x02"},
+    
+    // HLSL
+    {"float3", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
     
     // GLSL
     {"vec2", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},

@@ -15,6 +15,7 @@
 #define PARSER_BREAK(_GLOB) { OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
+#define VOID_TYPEDESC ((const TYPEDESC*)-1)
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
@@ -89,6 +90,8 @@ namespace UVShader
   TOKEN::T_LPCSTR s_szSampler2D = "sampler2D";
   TOKEN::T_LPCSTR s_szSampler3D = "sampler3D";
   //TOKEN::T_LPCSTR s_szSamplerCube = "string";
+
+  extern GXLPCSTR STR_VOID;
 
   extern GXLPCSTR STR_INT;
   extern GXLPCSTR STR_UINT;
@@ -1184,6 +1187,8 @@ namespace UVShader
         }
         else if(ParseCodeBlock(stat.sRoot, sNameSet_Func, func_statement_block))
         {
+          GXBOOL bret = sNameSet_Func.SetReturnType(stat.func.szReturnType);
+          ASSERT(bret);
 #ifdef ENABLE_SYNTAX_VERIFY
           if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
           {
@@ -3674,30 +3679,44 @@ NOT_INC_P:
     return result;
   }
 
-  GXBOOL CodeParser::Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet)
+  GXBOOL CodeParser::Verify_Chain(const SYNTAXNODE* pNode, NameContext* pNameContext)
   {
     GXBOOL result = TRUE;
-    NameContext sNameSet(pParentSet);
-    RecursiveNode<const SYNTAXNODE>(this, pNode, [this, &result, &sNameSet]
+    RecursiveNode<const SYNTAXNODE>(this, pNode, [this, &result, &pNameContext]
     (const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
-      if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
+      // return FALSE 表示不再遍历后面的节点
+
+      if(pNode->mode == SYNTAXNODE::MODE_Block ||
+        pNode->mode == SYNTAXNODE::MODE_Chain)
       {
-        NameContext sFlowForSet(&sNameSet);
-        if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[0].pNode, &sFlowForSet)))
+        return TRUE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
+      {
+        NameContext sFlowForSet(pNameContext);
+        if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[0].pNode, &sFlowForSet))) // FIXME: 这里不能用Verify_Block
         {
           result = FALSE;
         }
-        
+
         if(pNode->Operand[1].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[1].pNode, &sFlowForSet)))
         {
           result = FALSE;
         }
         return FALSE;
       }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_ForInit)
+      {
+        return TRUE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning)
+      {
+        return TRUE;
+      }
       else if(pNode->mode == SYNTAXNODE::MODE_Definition)
       {
-        if(Verify_VariableDefinition(sNameSet, pNode) == FALSE) {
+        if(Verify_VariableDefinition(*pNameContext, pNode) == FALSE) {
           result = FALSE;
         }
         return FALSE; // 不再递归
@@ -3711,20 +3730,61 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
       {
+        // TODO: 写的不完整
         if(pNode->pOpcode)
         {
           if(*pNode->pOpcode == '=')
           {
-            if(Verify2_LeftValue(sNameSet, pNode->Operand[0], *pNode->pOpcode) == FALSE) {
+            if(Verify2_LeftValue(pNameContext, pNode->Operand[0], *pNode->pOpcode) == FALSE) {
               result = FALSE;
             }
           }
         }
+        return TRUE;
       }
+      else if(pNode->mode == SYNTAXNODE::MODE_Return)
+      {
+        // error C2059: 语法错误:“return”
+        const TYPEDESC* pTypeTo = pNameContext->GetReturnType();
+        if(pTypeTo == VOID_TYPEDESC)
+        {
+          // error C2562: <function name>:“void”函数返回值
+          ASSERT(pNode->Operand[0].IsToken());
+          OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2562, "“void”函数返回值"));
+          result = FALSE;
+        }
+
+        const TYPEDESC* pTypeFrom = InferType(*pNameContext, pNode->Operand[1]);
+        //const TYPEDESC* pTypeTo = sNameSet.GetType(szReturnType);
+        ASSERT(pTypeTo);
+
+        if(TryTypeCasting(pTypeTo, pTypeFrom, pNode->Operand[0].pTokn) == FALSE)
+        {
+          // error C2440: “return”: 无法从“TypeFrom”转换为“TypeTo”
+          clStringW strFrom = pTypeFrom->name;
+          clStringW strTo = pTypeTo->name;
+          OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+          result = FALSE;
+        }
+        return FALSE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
+      {
+        InferFunctionReturnedType(*pNameContext, pNode);
+        return FALSE; // 不再遍历后面的节点
+      }
+
+      CLBREAK; // 应该处理 pNode->mode
       return TRUE;
     });
 
     return result;
+  }
+
+  GXBOOL CodeParser::Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet)
+  {
+    NameContext sNameContext(pParentSet);
+    return Verify_Chain(pNode, &sNameContext);
   }
 
   GXBOOL CodeParser::Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode)
@@ -4413,6 +4473,7 @@ NOT_INC_P:
     , m_pParent(NULL)
     , m_eLastState(State_Ok)
     , allow_keywords(KeywordFilter_All)
+    , m_pReturnType(NULL)
   {   
   }
 
@@ -4421,11 +4482,13 @@ NOT_INC_P:
     , m_pParent(pParent)
     , m_eLastState(State_Ok)
     , allow_keywords(KeywordFilter_All)
+    , m_pReturnType(NULL)
   {
   }
 
   void NameContext::Cleanup()
   {
+    m_pReturnType = NULL;
     m_TypeMap.clear();
     m_VariableMap.clear();
     BuildIntrinsicType();
@@ -4483,6 +4546,25 @@ NOT_INC_P:
     td.pDesc = NULL;
     m_TypeMap.insert(clmake_pair(td.name, td));
     //}
+  }
+
+  GXBOOL NameContext::SetReturnType(GXLPCSTR szTypeName)
+  {
+    ASSERT(GetReturnType() == NULL);
+    if(clstd::strcmpT(szTypeName, STR_VOID) == 0)
+    {
+      m_pReturnType = VOID_TYPEDESC;
+      return TRUE;
+    }
+
+    m_pReturnType = GetType(szTypeName);
+    return (m_pReturnType != NULL);
+  }
+
+  const TYPEDESC* NameContext::GetReturnType() const
+  {
+    return m_pReturnType ? m_pReturnType : 
+      (m_pParent ? m_pParent->GetReturnType() : NULL);
   }
 
   GXBOOL NameContext::TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType)
