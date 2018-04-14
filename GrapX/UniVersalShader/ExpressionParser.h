@@ -207,20 +207,26 @@ namespace UVShader
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames);
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
+#ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
+#endif
     State  GetLastState() const;
     //const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
     void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
     
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
+#ifdef ENABLE_SYNTAX_VERIFY
     VALUE::State CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE::GLOB* pGlob);
+#endif
   };
 
+#ifdef ENABLE_SYNTAX_VERIFY
   struct NODE_CALC : public SYNTAXNODE
   {
     //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
     VALUE::State Calculate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const;
   };
+#endif
 
   class CodeParser : public ArithmeticExpression
   {
@@ -579,11 +585,13 @@ namespace UVShader
     CodeParser* GetRootParser();
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
+#ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+#endif
 
     GXBOOL InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
@@ -597,10 +605,10 @@ namespace UVShader
     GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode);
     GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
-    GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext* pNameContext);
+    GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
     GXBOOL Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode);
-    GXBOOL Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
+    const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
     GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob);
 #endif
 

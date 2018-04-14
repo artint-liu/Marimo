@@ -12,7 +12,7 @@
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
-#define PARSER_BREAK(_GLOB) { OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); }
+#define PARSER_BREAK(_GLOB) { OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 #define VOID_TYPEDESC ((const TYPEDESC*)-1)
@@ -3598,9 +3598,8 @@ NOT_INC_P:
         if(pNode->Operand[1].IsToken())
         {
           const TOKEN& tkRightValue = *pNode->Operand[1].pTokn;
-          if(//pType->cate == TYPEDESC::TypeCate_Struct ||
-            ((pType->cate == TYPEDESC::TypeCate_FloatNumeric || pType->cate == TYPEDESC::TypeCate_IntegerNumeric) &&
-                tkRightValue.IsNumeric() == FALSE) ||
+          if(//pType->cate == TYPEDESC::TypeCate_Struct ||            
+            (IS_NUMERIC_CATE(pType->cate) && tkRightValue.IsNumeric() == FALSE) ||
             (pType->cate == TYPEDESC::TypeCate_String && tkRightValue.type != TOKEN::TokenType_String) )
           {
             clStringW str;
@@ -3621,7 +3620,7 @@ NOT_INC_P:
             }
           }
 
-          if(pType->cate == TYPEDESC::TypeCate_IntegerNumeric || pType->cate == TYPEDESC::TypeCate_FloatNumeric)
+          if(IS_NUMERIC_CATE(pType->cate))
           {
             VALUE v;
             VALUE::State s = v.set(tkRightValue);
@@ -3679,22 +3678,30 @@ NOT_INC_P:
     return result;
   }
 
-  GXBOOL CodeParser::Verify_Chain(const SYNTAXNODE* pNode, NameContext* pNameContext)
+  GXBOOL CodeParser::Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext)
   {
     GXBOOL result = TRUE;
-    RecursiveNode<const SYNTAXNODE>(this, pNode, [this, &result, &pNameContext]
+    RecursiveNode<const SYNTAXNODE>(this, pNode, [this, &result, &sNameContext]
     (const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
       // return FALSE 表示不再遍历后面的节点
 
       if(pNode->mode == SYNTAXNODE::MODE_Block ||
-        pNode->mode == SYNTAXNODE::MODE_Chain)
+        pNode->mode == SYNTAXNODE::MODE_Chain ||
+        pNode->mode == SYNTAXNODE::MODE_Flow_ForInit ||
+        pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning ||
+        pNode->mode == SYNTAXNODE::MODE_Flow_If ||
+        pNode->mode == SYNTAXNODE::MODE_Flow_Else ||
+        pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf ||
+        pNode->mode == SYNTAXNODE::MODE_Flow_While ||
+        pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile
+        )
       {
         return TRUE;
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
       {
-        NameContext sFlowForSet(pNameContext);
+        NameContext sFlowForSet(&sNameContext);
         if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[0].pNode, &sFlowForSet))) // FIXME: 这里不能用Verify_Block
         {
           result = FALSE;
@@ -3706,17 +3713,9 @@ NOT_INC_P:
         }
         return FALSE;
       }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_ForInit)
-      {
-        return TRUE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning)
-      {
-        return TRUE;
-      }
       else if(pNode->mode == SYNTAXNODE::MODE_Definition)
       {
-        if(Verify_VariableDefinition(*pNameContext, pNode) == FALSE) {
+        if(Verify_VariableDefinition(sNameContext, pNode) == FALSE) {
           result = FALSE;
         }
         return FALSE; // 不再递归
@@ -3733,19 +3732,58 @@ NOT_INC_P:
         // TODO: 写的不完整
         if(pNode->pOpcode)
         {
-          if(*pNode->pOpcode == '=')
+          if(*pNode->pOpcode == '=' ||
+            *pNode->pOpcode == "-=" || *pNode->pOpcode == "+=" ||
+            *pNode->pOpcode == "*=" || *pNode->pOpcode == "/=" || *pNode->pOpcode == "%=" ||
+            *pNode->pOpcode == "<<=" || *pNode->pOpcode == ">>=" ||
+            *pNode->pOpcode == "&=" || *pNode->pOpcode == "|=" || *pNode->pOpcode == "^=" )
           {
-            if(Verify2_LeftValue(pNameContext, pNode->Operand[0], *pNode->pOpcode) == FALSE) {
+            // TODO: 需要验证左值
+            const TYPEDESC* pTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
+            if(pTypeDesc == NULL) {
+              result = FALSE;
+            }
+
+            if(InferRightValueType(pTypeDesc, sNameContext, pNode->Operand[1], pNode->pOpcode) == FALSE)
+            {
               result = FALSE;
             }
           }
+          else if(pNode->pOpcode->unary)
+          {
+            for(int i = 0; i < 2; i++)
+            {
+              if(pNode->Operand[i].ptr)
+              {
+                if(InferRightValueType(NULL, sNameContext, pNode->Operand[i], pNode->pOpcode) == FALSE)
+                {
+                  result = FALSE;
+                }
+                break;
+              }
+            }
+          }
+          else
+          {
+            if(InferRightValueType(NULL, sNameContext, pNode->Operand[1], pNode->pOpcode) == FALSE)
+            {
+              result = FALSE;
+            }
+
+            //CLBREAK;
+            //PARSER_BREAK(pNode->Operand[1]);
+          }
         }
-        return TRUE;
+        else
+        {
+          CLBREAK; // SYNTAXNODE::MODE_Opcode 模式没有 Opcode
+        }
+        return FALSE;
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Return)
       {
         // error C2059: 语法错误:“return”
-        const TYPEDESC* pTypeTo = pNameContext->GetReturnType();
+        const TYPEDESC* pTypeTo = sNameContext.GetReturnType();
         if(pTypeTo == VOID_TYPEDESC)
         {
           // error C2562: <function name>:“void”函数返回值
@@ -3754,7 +3792,7 @@ NOT_INC_P:
           result = FALSE;
         }
 
-        const TYPEDESC* pTypeFrom = InferType(*pNameContext, pNode->Operand[1]);
+        const TYPEDESC* pTypeFrom = InferType(sNameContext, pNode->Operand[1]);
         //const TYPEDESC* pTypeTo = sNameSet.GetType(szReturnType);
         ASSERT(pTypeTo);
 
@@ -3770,7 +3808,7 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
       {
-        InferFunctionReturnedType(*pNameContext, pNode);
+        InferFunctionReturnedType(sNameContext, pNode);
         return FALSE; // 不再遍历后面的节点
       }
 
@@ -3784,7 +3822,7 @@ NOT_INC_P:
   GXBOOL CodeParser::Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet)
   {
     NameContext sNameContext(pParentSet);
-    return Verify_Chain(pNode, &sNameContext);
+    return Verify_Chain(pNode, sNameContext);
   }
 
   GXBOOL CodeParser::Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode)
@@ -3849,7 +3887,7 @@ NOT_INC_P:
     return result;
   }
 
-  GXBOOL CodeParser::Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode)
+  const TYPEDESC* CodeParser::Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode)
   {
     //Any of the following C expressions can be l-value expressions:
     //  An identifier of integral, floating, pointer, structure, or union type
@@ -3861,34 +3899,31 @@ NOT_INC_P:
 
     //clStringA strA;
     clStringW strW;
+    const TYPEDESC* pTypeDesc = NULL;
     if(left_glob.IsToken())
     {
-      if(sNameSet.GetVariable(left_glob.pTokn/*->ToString(strA)*/) == NULL)
+      pTypeDesc = sNameSet.GetVariable(left_glob.pTokn/*->ToString(strA)*/);
+      if(pTypeDesc == NULL)
       {
         //strW = strA;
         left_glob.pTokn->ToString(strW);
         OutputErrorW(*left_glob.pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), strW.CStr());
-        return FALSE;
+        return NULL;
       }
-      return TRUE;
+      return pTypeDesc;
     }
     else if(left_glob.IsNode())
     {
-      const TYPEDESC* pDesc = InferMemberType(sNameSet, left_glob.pNode);
-      if(pDesc == NULL)
+      pTypeDesc = InferMemberType(sNameSet, left_glob.pNode);
+      if(pTypeDesc == NULL)
       {
         OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
-        return FALSE;
+        return NULL;
       }
+      return pTypeDesc;
     }    
-    else {
-      OutputErrorW(opcode, UVS_EXPORT_TEXT(5010, "“=”前缺少左值"));
-      return FALSE;
-    }
-
-
-
-    return TRUE;
+    OutputErrorW(opcode, UVS_EXPORT_TEXT(5010, "“=”前缺少左值"));
+    return NULL;
   }
 
   const TYPEDESC* CodeParser::InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode)
@@ -4024,7 +4059,7 @@ NOT_INC_P:
             else
             {
               PARSER_BREAK(pFuncNode->Operand[0]);
-              CLBREAK;
+              //CLBREAK;
             }
             //if(s_functions2[i].params[n])
           }
@@ -4085,6 +4120,7 @@ NOT_INC_P:
   
   const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const TOKEN* pToken)
   {
+    // TODO: 直接提示找不到符号？
     if(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric)
     {
       VALUE val;
@@ -4187,8 +4223,8 @@ NOT_INC_P:
 
     if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
     {
-      const GXBOOL bFirstNumeric = pTypeDesc[0]->cate == TYPEDESC::TypeCate_FloatNumeric || pTypeDesc[0]->cate == TYPEDESC::TypeCate_IntegerNumeric;
-      const GXBOOL bSecondNumeric = pTypeDesc[1]->cate == TYPEDESC::TypeCate_FloatNumeric || pTypeDesc[1]->cate == TYPEDESC::TypeCate_IntegerNumeric;
+      const GXBOOL bFirstNumeric = IS_NUMERIC_CATE(pTypeDesc[0]->cate);
+      const GXBOOL bSecondNumeric = IS_NUMERIC_CATE(pTypeDesc[1]->cate);
       if(bFirstNumeric && bSecondNumeric)
       {
         VALUE::Rank rank = (VALUE::Rank)clMax(pTypeDesc[0]->pDesc->rank, pTypeDesc[1]->pDesc->rank);
@@ -4292,14 +4328,18 @@ NOT_INC_P:
 
   GXBOOL CodeParser::InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation)
   {
-    if(right_glob.IsNode())
-    {
-      const TYPEDESC* pRightType = InferType(sNameSet, right_glob.pNode);
-      if(pRightType == NULL) {
-        OutputErrorW(right_glob.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
-        return FALSE;
-      }
+    // 这个函数外部不输出 Error/Warning
+    ASSERT(right_glob.IsNode() || right_glob.IsToken());
+    //if(right_glob.IsNode() || right_glob.IsToken())
+    //{
+    const TYPEDESC* pRightType = InferType(sNameSet, right_glob);
+    if(pRightType == NULL) {
+      OutputErrorW(right_glob.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
+      return FALSE;
+    }
 
+    if(pLeftType)
+    {
       const GXBOOL bCastResult = TryTypeCasting(pLeftType, pRightType, pLocation);
       if(bCastResult == FALSE)
       {
@@ -4309,15 +4349,18 @@ NOT_INC_P:
       }
       return bCastResult;
     }
-    else if(right_glob.IsToken())
-    {
-      CLBREAK;
-      return TRUE;
-    }
-    else {
-      CLBREAK;
-    }
     return TRUE;
+
+    //}
+    //else if()
+    //{
+    //  CLBREAK;
+    //  return TRUE;
+    //}
+    //else {
+    //  CLBREAK;
+    //}
+    //return TRUE;
   }
   
   GXBOOL CodeParser::CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo)
@@ -4367,6 +4410,8 @@ NOT_INC_P:
   
   GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
   {
+    // 这个函数外部不输出 Error/Warning
+    CLBREAK;
     //const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(pNode->Operand[1].pNode);
     // struct RESULT {
     //   TYPEDESC::TypeCate cate;
@@ -4606,6 +4651,7 @@ NOT_INC_P:
     return FALSE;
   }
 
+#ifdef ENABLE_SYNTAX_VERIFY
   VALUE::State NameContext::CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE::GLOB* pGlob)
   {
     if(pGlob->IsNode())
@@ -4619,6 +4665,7 @@ NOT_INC_P:
     }
     CLBREAK;
   }
+#endif
 
   NameContext* NameContext::GetRoot()
   {
@@ -4743,6 +4790,7 @@ NOT_INC_P:
 #endif
   }
 
+#ifdef ENABLE_SYNTAX_VERIFY
   const TYPEDESC* NameContext::RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript); // 外部保证
@@ -4823,6 +4871,7 @@ NOT_INC_P:
     }
     return NULL;
   }
+#endif
 
   NameContext::State NameContext::GetLastState() const
   {
@@ -5035,6 +5084,7 @@ NOT_INC_P:
     a = VALUE::State((u32)a | (u32)b);
   }
 
+#ifdef ENABLE_SYNTAX_VERIFY
   VALUE::State NODE_CALC::Calculate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const
   {
     VALUE p[2];
@@ -5103,7 +5153,7 @@ NOT_INC_P:
     return s;
 
   }
-
+#endif
   //////////////////////////////////////////////////////////////////////////
 
   GXBOOL TYPEDESC::GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const

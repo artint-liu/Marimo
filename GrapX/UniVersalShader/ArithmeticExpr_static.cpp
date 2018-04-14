@@ -288,6 +288,7 @@ namespace UVShader
     
     // HLSL
     {"float3", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
+    {"lerp", INTRINSIC_FUNC::RetType_Argument0, 3, "\x07\x07\x07"}, // FIXME: 没有验证参数的一致性
     
     // GLSL
     {"vec2", INTRINSIC_FUNC::RetType_Argument0, 1, "\x02"},
