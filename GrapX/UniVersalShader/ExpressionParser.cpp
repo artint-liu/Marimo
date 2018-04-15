@@ -12,7 +12,7 @@
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
-#define PARSER_BREAK(_GLOB) { OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); CLBREAK; }
+#define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "断言错误"); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 #define VOID_TYPEDESC ((const TYPEDESC*)-1)
@@ -483,7 +483,8 @@ namespace UVShader
           {
             // 一元操作符，+/-就不转换为正负号
             // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
-            if(l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary)) {
+            if(l_back == "return" ||
+              (l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary))) {
               const auto& p = s_plus_minus[(int)(it.marker[0] - '+')];
               token.SetArithOperatorInfo(p);
             }
@@ -3699,10 +3700,16 @@ NOT_INC_P:
       {
         return TRUE;
       }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Continue)
+      {
+        ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "continue");
+        ASSERT(pNode->Operand[1].ptr == NULL);
+        return FALSE;
+      }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
       {
         NameContext sFlowForSet(&sNameContext);
-        if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[0].pNode, &sFlowForSet))) // FIXME: 这里不能用Verify_Block
+        if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Chain(pNode->Operand[0].pNode, sFlowForSet))) // FIXME: 这里不能用Verify_Block
         {
           result = FALSE;
         }
@@ -3796,7 +3803,10 @@ NOT_INC_P:
         //const TYPEDESC* pTypeTo = sNameSet.GetType(szReturnType);
         ASSERT(pTypeTo);
 
-        if(TryTypeCasting(pTypeTo, pTypeFrom, pNode->Operand[0].pTokn) == FALSE)
+        if(pTypeFrom == NULL) {
+          result = FALSE;
+        }
+        else if(TryTypeCasting(pTypeTo, pTypeFrom, pNode->Operand[0].pTokn) == FALSE)
         {
           // error C2440: “return”: 无法从“TypeFrom”转换为“TypeTo”
           clStringW strFrom = pTypeFrom->name;
@@ -3966,6 +3976,19 @@ NOT_INC_P:
                 CLBREAK;
               }
 
+              if(TEST_FLAG(s_functions[i].params[n], 8)) // out 修饰
+              {
+                // FIXME: 如果没有重载或者有重载并且形参数唯一匹配,才输出这条错误消息
+                if(it->IsNode()) {
+                  //error C2664: “UVShader::sincos”: 不能将参数 2 从“float”转换为“float &”
+                  clStringW strFunc = s_functions[i].name;
+                  OutputErrorW(it->pNode->GetAnyTokenAPB(),
+                    UVS_EXPORT_TEXT(2664, "“%s”: 参数 %d 不能使用“out”修饰"),
+                    strFunc.CStr(), n); // TODO: 没有testcase
+                  return NULL;
+                }
+              }
+
               // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
               if(TEST_FLAG(s_functions[i].params[n], 1) && TryTypeCasting(sNameSet, STR_FLOAT, pTypeDesc, pFuncNode->Operand[0].pTokn))
               {
@@ -4056,12 +4079,7 @@ NOT_INC_P:
               }
               break;
             }
-            else
-            {
-              PARSER_BREAK(pFuncNode->Operand[0]);
-              //CLBREAK;
-            }
-            //if(s_functions2[i].params[n])
+            return NULL; // 推导参数类型失败, 比如含有未定义的标识符
           }
 
           if(n == s_functions2[i].count)
@@ -4086,7 +4104,11 @@ NOT_INC_P:
         ASSERT(pFormalTypeDesc != NULL);
 
         // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
-        if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
+        if(pArgumentTypeDesc == NULL)
+        {
+          return NULL; // 无法推导参数类型
+        }
+        else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
           nConfirm++;
         }
         else {
@@ -4125,9 +4147,19 @@ NOT_INC_P:
     {
       VALUE val;
       val.set(*pToken);
+      //if(val.fValue == 100.0f) {
+      //  CLBREAK;
+      //}
       return sNameSet.GetType(val.rank);
     }
-    return sNameSet.GetVariable(pToken);
+    const TYPEDESC* pTypeDesc = sNameSet.GetVariable(pToken);
+    if(pTypeDesc == NULL)
+    {
+      // C2065: “m”: 未声明的标识符
+      clStringW strW;
+      OutputErrorW(*pToken, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), pToken->ToString(strW).CStr());
+    }
+    return pTypeDesc;
   }
   
   const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
@@ -4201,24 +4233,8 @@ NOT_INC_P:
 
     for(int i = 0; i < 2; i++)
     {
-      if(pNode->Operand[i].IsNode())
-      {
-        pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i].pNode);
-      }
-      else if(pNode->Operand[i].IsToken())
-      {
-        pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i].pTokn);
-        if(pTypeDesc[i] == NULL)
-        {
-          // C2065: “m”: 未声明的标识符
-          clStringW strW;
-          OutputErrorW(*pNode->Operand[i].pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), pNode->Operand[i].pTokn->ToString(strW).CStr());
-          return NULL;
-        }
-      }
-      else {
-        CLBREAK; // 没处理
-      }
+      pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i]);
+      ASSERT(pNode->Operand[i].ptr);
     }
 
     if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
@@ -4245,7 +4261,7 @@ NOT_INC_P:
       {
         // TODO: 是否应考虑符号?
         if(TryTypeCasting(pTypeDesc[0], pTypeDesc[1], &pNode->GetAnyTokenPAB())) {
-          return pTypeDesc[1];
+          return pTypeDesc[0];
         }
         CLBREAK; // 没处理
         return NULL;
@@ -4334,7 +4350,7 @@ NOT_INC_P:
     //{
     const TYPEDESC* pRightType = InferType(sNameSet, right_glob);
     if(pRightType == NULL) {
-      OutputErrorW(right_glob.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
+      OutputErrorW(*right_glob.GetFirstToken(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
       return FALSE;
     }
 
@@ -4378,6 +4394,8 @@ NOT_INC_P:
 
   GXBOOL CodeParser::TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
   {
+    ASSERT(pTypeTo != NULL && pTypeFrom != NULL);
+
     if(IS_NUMERIC_CATE(pTypeTo->cate) && IS_NUMERIC_CATE(pTypeFrom->cate))
     {
       if(pTypeTo->pDesc->rank < pTypeFrom->pDesc->rank &&

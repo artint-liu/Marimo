@@ -314,6 +314,8 @@ namespace UVShader
         pTokn = &token;
         return *this;
       }
+
+      const TOKEN* GetFirstToken() const;
     };
     typedef clist<GLOB> GlobList;
 

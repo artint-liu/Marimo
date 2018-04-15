@@ -1514,6 +1514,17 @@ namespace UVShader
     }
   }
 
+  const TOKEN* SYNTAXNODE::GLOB::GetFirstToken() const
+  {
+    if(IsToken()) {
+      return pTokn;
+    }
+    else if(IsNode()) {
+      return &pNode->GetAnyTokenAPB();
+    }
+    return NULL;
+  }
+
   void SYNTAXNODE::Clear()
   {
     mode = MODE_Undefined;
