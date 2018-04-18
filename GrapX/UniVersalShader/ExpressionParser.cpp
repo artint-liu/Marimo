@@ -104,6 +104,26 @@ namespace UVShader
   extern GXLPCSTR STR_VEC2;
   extern GXLPCSTR STR_VEC3;
   extern GXLPCSTR STR_VEC4;
+
+  extern GXLPCSTR STR_IVEC2;
+  extern GXLPCSTR STR_IVEC3;
+  extern GXLPCSTR STR_IVEC4;
+  extern GXLPCSTR STR_UVEC2;
+  extern GXLPCSTR STR_UVEC3;
+  extern GXLPCSTR STR_UVEC4;
+  extern GXLPCSTR STR_MAT2;  // 两行两列
+  extern GXLPCSTR STR_MAT2x2;
+  extern GXLPCSTR STR_MAT3;   // 三行三列
+  extern GXLPCSTR STR_MAT3x3;
+  extern GXLPCSTR STR_MAT4;   // 四行四列
+  extern GXLPCSTR STR_MAT4x4;
+  extern GXLPCSTR STR_MAT2x3;  // 三行两列
+  extern GXLPCSTR STR_MAT2x4;  // 四行两列
+  extern GXLPCSTR STR_MAT3x2;  // 两行三列
+  extern GXLPCSTR STR_MAT3x4;  // 四行三列
+  extern GXLPCSTR STR_MAT4x2;  // 两行四列
+  extern GXLPCSTR STR_MAT4x3;  // 三行四列
+
   extern GXLPCSTR STR_DOUBLE;
 
   extern GXLPCSTR STR_FLOAT2x2;
@@ -3706,6 +3726,12 @@ NOT_INC_P:
         ASSERT(pNode->Operand[1].ptr == NULL);
         return FALSE;
       }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Break)
+      {
+        ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "break");
+        ASSERT(pNode->Operand[1].ptr == NULL);
+        return FALSE;
+      }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
       {
         NameContext sFlowForSet(&sNameContext);
@@ -4040,7 +4066,8 @@ NOT_INC_P:
 
           if(n == s_functions[i].count) {
             if(s_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
-              return sNameSet.GetType(pRetType->pDesc->list->type);
+              //return sNameSet.GetType(pRetType->pDesc->list->type);
+              return sNameSet.GetType(pRetType->pDesc->component_type);
             }
             else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
               return sNameSet.GetType(s_functions[i].name);
@@ -4270,7 +4297,7 @@ NOT_INC_P:
       {
         if(pTypeDesc[0]->name == pTypeDesc[1]->name)
         {
-          ASSERT(pTypeDesc[0] == pTypeDesc[1]); // 地址应改一样
+          //ASSERT(pTypeDesc[0] == pTypeDesc[1]); // 地址应该一样
           return pTypeDesc[0];
         }
       }
@@ -4418,8 +4445,8 @@ NOT_INC_P:
     }
     else if(pTypeTo->cate == TYPEDESC::TypeCate_Struct && IS_NUMERIC_CATE(pTypeFrom->cate))
     {
-      return (pTypeTo->pDesc && pTypeTo->pDesc->list &&
-        CompareScaler(pTypeFrom->name, pTypeTo->pDesc->list->type));
+      return (pTypeTo->pDesc && pTypeTo->pDesc->component_type &&
+        CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));
     }
 
     //CLBREAK;
@@ -5223,22 +5250,26 @@ NOT_INC_P:
     else if(pDesc)
     {
       ASSERT(pMemberNode == NULL);
-      // 访问向量/矩阵里面的标量
-      for(size_t i = 0; i < pDesc->count; i++)
-      {
-        if(*ptkMember == pDesc->list[i].name) {
-          strTypename = pDesc->list[i].type;
-          return TRUE;
-        }
-      }
+      //// 访问向量/矩阵里面的标量
+      //for(size_t i = 0; i < pDesc->count; i++)
+      //{
+      //  if(*ptkMember == pDesc->list[i].name) {
+      //    strTypename = pDesc->list[i].type;
+      //    return TRUE;
+      //  }
+      //}
 
-      ASSERT(clstd::strlenT(pDesc->set0) == clstd::strlenT(pDesc->set1)); // 保证这两个长度一致
-      // 访问重组向量
-      if(MatchScaler(ptkMember, pDesc->set0) || MatchScaler(ptkMember, pDesc->set1))
+      //ASSERT(clstd::strlenT(pDesc->set0) == clstd::strlenT(pDesc->set1)); // 保证这两个长度一致
+      //// 访问重组向量
+      //if(MatchScaler(ptkMember, pDesc->set0) || MatchScaler(ptkMember, pDesc->set1))
+      //{
+      //  strTypename = pDesc->name;
+      //  strTypename.Back() = '0' + ptkMember->length;
+      //  return TRUE;
+      //}
+      if(pDesc->lpDotOverride)
       {
-        strTypename = pDesc->name;
-        strTypename.Back() = '0' + ptkMember->length;
-        return TRUE;
+        return (pDesc->lpDotOverride(pDesc, strTypename, ptkMember));
       }
     }
     return FALSE;

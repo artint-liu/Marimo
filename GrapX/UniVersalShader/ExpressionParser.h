@@ -171,7 +171,7 @@ namespace UVShader
     CodeParser* m_pCodeParser;
     const NameContext* m_pParent;
 
-    TypeMap     m_TypeMap;
+    TypeMap     m_TypeMap; // typedef 会产生两个一致的 TYPEDESC
     FuncMap     m_FuncMap;
     VariableMap m_VariableMap;
     State       m_eLastState;

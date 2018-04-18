@@ -41,15 +41,24 @@ namespace UVShader
     GXLPCSTR name;      // 成员名
   };
 
+  struct TOKEN;
+  struct TYPEDESC;
+  struct COMMINTRTYPEDESC;
+
+  typedef GXBOOL (GXCALLBACK *OPERATORPROC)(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken);
+
   struct COMMINTRTYPEDESC
   {
     GXLPCSTR    name;   // 结构体名
     int         rank;   // VALUE::Rank
-    MEMBERLIST* list;   // 成员列表
-    size_t      count;  // 成员数
-    GXLPCSTR    type;
-    GXLPCSTR    set0;
-    GXLPCSTR    set1;
+    GXLPCSTR    component_type;
+    OPERATORPROC lpDotOverride;
+    //OPERATORPROC lpSubscript; 
+    //MEMBERLIST* list;   // 成员列表
+    //size_t      count;  // 成员数
+    //GXLPCSTR    type;
+    //GXLPCSTR    set0;
+    //GXLPCSTR    set1;
   };
 
   // 运行时记录符号和操作符等属性

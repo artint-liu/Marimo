@@ -59,16 +59,16 @@ namespace UVShader
   GXLPCSTR STR_UVEC4  = "uvec4";
   GXLPCSTR STR_MAT2   = "mat2";  // 两行两列
   GXLPCSTR STR_MAT2x2 = "mat2x2";
-  GXLPCSTR STR_MAT3   = "mat3"; 	// 三行三列
+  GXLPCSTR STR_MAT3   = "mat3";   // 三行三列
   GXLPCSTR STR_MAT3x3 = "mat3x3";
-  GXLPCSTR STR_MAT4   = "mat4"; 	// 四行四列
+  GXLPCSTR STR_MAT4   = "mat4";   // 四行四列
   GXLPCSTR STR_MAT4x4 = "mat4x4";
-  GXLPCSTR STR_MAT2x3 = "mat2x3";	// 三行两列
-  GXLPCSTR STR_MAT2x4 = "mat2x4";	// 四行两列
-  GXLPCSTR STR_MAT3x2 = "mat3x2";	// 两行三列
-  GXLPCSTR STR_MAT3x4 = "mat3x4";	// 四行三列
-  GXLPCSTR STR_MAT4x2 = "mat4x2";	// 两行四列
-  GXLPCSTR STR_MAT4x3 = "mat4x3";	// 三行四列
+  GXLPCSTR STR_MAT2x3 = "mat2x3";  // 三行两列
+  GXLPCSTR STR_MAT2x4 = "mat2x4";  // 四行两列
+  GXLPCSTR STR_MAT3x2 = "mat3x2";  // 两行三列
+  GXLPCSTR STR_MAT3x4 = "mat3x4";  // 四行三列
+  GXLPCSTR STR_MAT4x2 = "mat4x2";  // 两行四列
+  GXLPCSTR STR_MAT4x3 = "mat4x3";  // 三行四列
 
   //static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
 
@@ -217,31 +217,157 @@ namespace UVShader
     {STR_DOUBLE, "a"},
   };
 
+  GXBOOL GXCALLBACK OnVector2(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken)
+  {
+    TOKEN::T_LPCSTR p = pToken->marker;
+    if(p[0] == 'x' || p[0] == 'y') {
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 'x' || p[i] == 'y')) {
+          return FALSE;
+        }
+      }
+    }
+    else if(p[0] == 'r' || p[0] == 'g') {
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 'r' || p[i] == 'g')) {
+          return FALSE;
+        }
+      }
+    }
+    else {
+      return FALSE;
+    }
+
+    if(pToken->length == 1) {
+      strType = pDesc->component_type;
+      return TRUE;
+    }
+    if(pToken->length > 4) {
+      return FALSE;
+    }
+
+    strType = pDesc->component_type;
+    strType.Append('0' + pToken->length);
+    return TRUE;
+  }
+
+  GXBOOL GXCALLBACK OnVector3(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken)
+  {
+    TOKEN::T_LPCSTR p = pToken->marker;
+    if(p[0] == 'x' || p[0] == 'y' || p[0] == 'z') {
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 'x' || p[i] == 'y' || p[i] == 'z')) {
+          return FALSE;
+        }
+      }
+    }
+    else if(p[0] == 'r' || p[0] == 'g' || p[0] == 'b') {
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 'r' || p[i] == 'g' || p[i] == 'b')) {
+          return FALSE;
+        }
+      }
+    }
+    else {
+      return FALSE;
+    }
+
+    if(pToken->length == 1) {
+      strType = pDesc->component_type;
+      return TRUE;
+    }
+    if(pToken->length > 4) {
+      return FALSE;
+    }
+
+    strType = pDesc->component_type;
+    strType.Append('0' + pToken->length);
+    return TRUE;
+  }
+
+  GXBOOL GXCALLBACK OnVector4(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken)
+  {
+    TOKEN::T_LPCSTR p = pToken->marker;
+    if(p[0] == 'x' || p[0] == 'y' || p[0] == 'z' || p[0] == 'w') {
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 'x' || p[i] == 'y' || p[i] == 'z' || p[i] == 'w')) {
+          return FALSE;
+        }
+      }
+    }
+    else if(p[0] == 'r' || p[0] == 'g' || p[0] == 'b' || p[0] == 'a') {
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 'r' || p[i] == 'g' || p[i] == 'b' || p[i] == 'a')) {
+          return FALSE;
+        }
+      }
+    }
+    else {
+      return FALSE;
+    }
+
+    if(pToken->length == 1) {
+      strType = pDesc->component_type;
+      return TRUE;
+    }
+    if(pToken->length > 4) {
+      return FALSE;
+    }
+
+    strType = pDesc->component_type;
+    strType.Append('0' + pToken->length);
+    return TRUE;
+  }
+
   COMMINTRTYPEDESC s_aIntrinsicStruct[] =
   {
-    {"int2", VALUE::Rank_Undefined, s_aIntXYZW, 4, STR_INT, "xy", "rg"},
-    {"int3", VALUE::Rank_Undefined, s_aIntXYZW, 6, STR_INT, "xyz", "rgb"},
-    {"int4", VALUE::Rank_Undefined, s_aIntXYZW, 8, STR_INT, "xyzw", "rgba"},
-    
-    {"vec2", VALUE::Rank_Undefined, s_aVecXYZW, 4, STR_FLOAT, "xy", "rg"},
-    {"vec3", VALUE::Rank_Undefined, s_aVecXYZW, 6, STR_FLOAT, "xyz", "rgb"},
-    {"vec4", VALUE::Rank_Undefined, s_aVecXYZW, 8, STR_FLOAT, "xyzw", "rgba"},
-    
-    {"half2", VALUE::Rank_Undefined, s_aHalfXYZW, 4, STR_HALF, "xy", "rg"},
-    {"half3", VALUE::Rank_Undefined, s_aHalfXYZW, 6, STR_HALF, "xyz", "rgb"},
-    {"half4", VALUE::Rank_Undefined, s_aHalfXYZW, 8, STR_HALF, "xyzw", "rgba"},
+    //{"int2", VALUE::Rank_Undefined, s_aIntXYZW, 4, STR_INT, "xy", "rg"},
+    //{"int3", VALUE::Rank_Undefined, s_aIntXYZW, 6, STR_INT, "xyz", "rgb"},
+    //{"int4", VALUE::Rank_Undefined, s_aIntXYZW, 8, STR_INT, "xyzw", "rgba"},
+    //
+    ////{"vec2", VALUE::Rank_Undefined, s_aVecXYZW, 4, STR_FLOAT, "xy", "rg"},
+    ////{"vec3", VALUE::Rank_Undefined, s_aVecXYZW, 6, STR_FLOAT, "xyz", "rgb"},
+    ////{"vec4", VALUE::Rank_Undefined, s_aVecXYZW, 8, STR_FLOAT, "xyzw", "rgba"},
+    //
+    //{"half2", VALUE::Rank_Undefined, s_aHalfXYZW, 4, STR_HALF, "xy", "rg"},
+    //{"half3", VALUE::Rank_Undefined, s_aHalfXYZW, 6, STR_HALF, "xyz", "rgb"},
+    //{"half4", VALUE::Rank_Undefined, s_aHalfXYZW, 8, STR_HALF, "xyzw", "rgba"},
 
-    {"uint2", VALUE::Rank_Undefined, s_aUintXYZW, 4, STR_UINT, "xy", "rg"},
-    {"uint3", VALUE::Rank_Undefined, s_aUintXYZW, 6, STR_UINT, "xyz", "rgb"},
-    {"uint4", VALUE::Rank_Undefined, s_aUintXYZW, 8, STR_UINT, "xyzw", "rgba"},
+    //{"uint2", VALUE::Rank_Undefined, s_aUintXYZW, 4, STR_UINT, "xy", "rg"},
+    //{"uint3", VALUE::Rank_Undefined, s_aUintXYZW, 6, STR_UINT, "xyz", "rgb"},
+    //{"uint4", VALUE::Rank_Undefined, s_aUintXYZW, 8, STR_UINT, "xyzw", "rgba"},
 
-    {"float2", VALUE::Rank_Undefined, s_aVecXYZW, 4, STR_FLOAT, "xy", "rg"},
-    {"float3", VALUE::Rank_Undefined, s_aVecXYZW, 6, STR_FLOAT, "xyz", "rgb"},
-    {"float4", VALUE::Rank_Undefined, s_aVecXYZW, 8, STR_FLOAT, "xyzw", "rgba"},
-    
-    {"double2", VALUE::Rank_Undefined, s_aDoubleXYZW, 4, STR_DOUBLE, "xy", "rg"},
-    {"double3", VALUE::Rank_Undefined, s_aDoubleXYZW, 6, STR_DOUBLE, "xyz", "rgb"},
-    {"double4", VALUE::Rank_Undefined, s_aDoubleXYZW, 8, STR_DOUBLE, "xyzw", "rgba"},
+    //{"float2", VALUE::Rank_Undefined, s_aVecXYZW, 4, STR_FLOAT, "xy", "rg"},
+    //{"float3", VALUE::Rank_Undefined, s_aVecXYZW, 6, STR_FLOAT, "xyz", "rgb"},
+    //{"float4", VALUE::Rank_Undefined, s_aVecXYZW, 8, STR_FLOAT, "xyzw", "rgba"},
+    //
+    //{"double2", VALUE::Rank_Undefined, s_aDoubleXYZW, 4, STR_DOUBLE, "xy", "rg"},
+    //{"double3", VALUE::Rank_Undefined, s_aDoubleXYZW, 6, STR_DOUBLE, "xyz", "rgb"},
+    //{"double4", VALUE::Rank_Undefined, s_aDoubleXYZW, 8, STR_DOUBLE, "xyzw", "rgba"},
+
+    {"int2", VALUE::Rank_Undefined, STR_INT, OnVector2},
+    {"int3", VALUE::Rank_Undefined, STR_INT, OnVector3},
+    {"int4", VALUE::Rank_Undefined, STR_INT, OnVector4},
+
+    {"half2", VALUE::Rank_Undefined, STR_HALF, OnVector2},
+    {"half3", VALUE::Rank_Undefined, STR_HALF, OnVector3},
+    {"half4", VALUE::Rank_Undefined, STR_HALF, OnVector4},
+
+    {"uint2", VALUE::Rank_Undefined, STR_UINT, OnVector2},
+    {"uint3", VALUE::Rank_Undefined, STR_UINT, OnVector3},
+    {"uint4", VALUE::Rank_Undefined, STR_UINT, OnVector4},
+
+    {"float2", VALUE::Rank_Undefined, STR_FLOAT, OnVector2},
+    {"float3", VALUE::Rank_Undefined, STR_FLOAT, OnVector3},
+    {"float4", VALUE::Rank_Undefined, STR_FLOAT, OnVector4},
+
+    {"double2", VALUE::Rank_Undefined, STR_DOUBLE, OnVector2},
+    {"double3", VALUE::Rank_Undefined, STR_DOUBLE, OnVector3},
+    {"double4", VALUE::Rank_Undefined, STR_DOUBLE, OnVector4},
+
+    {"float2x2", VALUE::Rank_Undefined, },
+    {"float3x3", VALUE::Rank_Undefined, },
+    {"float4x4", VALUE::Rank_Undefined, },
 
     {NULL},
   };
@@ -290,6 +416,7 @@ namespace UVShader
     {"acos", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"floor", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"frac", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"exp", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"length", INTRINSIC_FUNC::RetType_Scaler0, 1, ARG_Vec},
     {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
 
@@ -324,13 +451,18 @@ namespace UVShader
   };
 
   // 不对外使用
+  static GXLPCSTR s_Vec3_ParamArray0[] = { STR_VEC2, STR_FLOAT };
+  static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_VEC2 };
   static GXLPCSTR s_Vec4_ParamArray[] = { STR_VEC3, STR_FLOAT };
-  static GXLPCSTR s_ParamArray_Floats[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
+  static GXLPCSTR s_ParamArray_Floats_16[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
   INTRINSIC_FUNC2 s_functions2[] =
   {
+    {"vec3", "vec3", 2, s_Vec3_ParamArray0},
+    {"vec3", "vec3", 2, s_Vec3_ParamArray1},
     {"vec4", "vec4", 2, s_Vec4_ParamArray},
-    {"float", "float", 1, s_ParamArray_Floats},
-    {"vec2", "sincos", 1, s_ParamArray_Floats},
+    {"float", "float", 1, s_ParamArray_Floats_16},
+    {"vec2", "sincos", 1, s_ParamArray_Floats_16},
+    {"mat4", "mat4", 16, s_ParamArray_Floats_16},
     {NULL},
   };
 
