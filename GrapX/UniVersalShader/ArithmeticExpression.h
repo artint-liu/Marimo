@@ -46,6 +46,7 @@ namespace UVShader
   struct COMMINTRTYPEDESC;
 
   typedef GXBOOL (GXCALLBACK *OPERATORPROC)(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken);
+  typedef const TYPEDESC* (GXCALLBACK *OPERATORPROC2)(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx);
 
   struct COMMINTRTYPEDESC
   {
@@ -53,7 +54,7 @@ namespace UVShader
     int         rank;   // VALUE::Rank
     GXLPCSTR    component_type;
     OPERATORPROC lpDotOverride;
-    //OPERATORPROC lpSubscript; 
+    OPERATORPROC2 lpSubscript; 
     //MEMBERLIST* list;   // 成员列表
     //size_t      count;  // 成员数
     //GXLPCSTR    type;

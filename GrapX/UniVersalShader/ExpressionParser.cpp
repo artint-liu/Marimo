@@ -14,6 +14,7 @@
 
 #define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "断言错误"); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
+#define PARSER_ASSERT_TK(_X, _TOKEN) { if(!(_X)) {OutputErrorW(*_TOKEN, 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 #define VOID_TYPEDESC ((const TYPEDESC*)-1)
 // TODO:
@@ -1208,10 +1209,9 @@ namespace UVShader
         }
         else if(ParseCodeBlock(stat.sRoot, sNameSet_Func, func_statement_block))
         {
-          GXBOOL bret = sNameSet_Func.SetReturnType(stat.func.szReturnType);
-          ASSERT(bret);
 #ifdef ENABLE_SYNTAX_VERIFY
-          if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
+          GXBOOL bret = sNameSet_Func.SetReturnType(stat.func.szReturnType);
+          if(bret == FALSE || Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
           {
             return FALSE;
           }
@@ -3950,15 +3950,59 @@ NOT_INC_P:
     }
     else if(left_glob.IsNode())
     {
-      pTypeDesc = InferMemberType(sNameSet, left_glob.pNode);
-      if(pTypeDesc == NULL)
+      // TODO: 这个地方的实现以之前的修改并且没提交的为准
+      const SYNTAXNODE* pLeftNode = left_glob.pNode;
+      if(pLeftNode->mode == SYNTAXNODE::MODE_Opcode && pLeftNode->CompareOpcode('.'))
       {
-        OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
-        return NULL;
+        pTypeDesc = InferMemberType(sNameSet, pLeftNode);
+        if(pTypeDesc == NULL)
+        {
+          OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
+          return NULL;
+        }
+      }
+      else if(pLeftNode->mode == SYNTAXNODE::MODE_Subscript)
+      {
+        pTypeDesc = InferSubscript(sNameSet, pLeftNode);
       }
       return pTypeDesc;
     }    
     OutputErrorW(opcode, UVS_EXPORT_TEXT(5010, "“=”前缺少左值"));
+    return NULL;
+  }
+
+  const TYPEDESC* CodeParser::InferUserFunctionType(const NameContext& sNameSet, const SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE* pFuncNode)
+  {
+    cllist<const FUNCDESC*> aUserFunc;
+    sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sExprList.size(), aUserFunc);
+    for(auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
+    {
+      int i = 0;
+      size_t nConfirm = 0;
+      ASSERT((*iter_func)->sFormalTypes.size() == sExprList.size());
+      for(auto iter_arg = sExprList.begin(); iter_arg != sExprList.end(); ++iter_arg, ++i)
+      {
+        const TYPEDESC* pArgumentTypeDesc = InferType(sNameSet, *iter_arg);
+        const TYPEDESC* pFormalTypeDesc = sNameSet.GetType((*iter_func)->sFormalTypes[i]);
+        ASSERT(pFormalTypeDesc != NULL);
+
+        // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
+        if(pArgumentTypeDesc == NULL)
+        {
+          return NULL; // 无法推导参数类型
+        }
+        else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
+          nConfirm++;
+        }
+        else {
+          break;
+        }
+      }
+
+      if(nConfirm == sExprList.size()) {
+        return sNameSet.GetType((*iter_func)->ret_type);
+      }
+    }
     return NULL;
   }
 
@@ -3972,10 +4016,25 @@ NOT_INC_P:
     SYNTAXNODE::GlobList sExprList;
     BreakComma(sExprList, pFuncNode->Operand[1]);
 
+    pRetType = InferUserFunctionType(sNameSet, sExprList, pFuncNode);
+    if(pRetType) {
+      return pRetType;
+    }
+
+    clStringA strFunctionName;
+    const TYPEDESC* pTypeFunc = NULL;
+    if(sNameSet.IsTypedefedType(pFuncNode->Operand[0].pTokn, &pTypeFunc))
+    {
+      strFunctionName = pTypeFunc->name;
+    }
+    else {
+      pFuncNode->Operand[0].pTokn->ToString(strFunctionName);
+    }
+
     // 通配符形式的内部函数列表
     for(int i = 0; s_functions[i].name != NULL; i++)
     {
-      if(*pFuncNode->Operand[0].pTokn == s_functions[i].name)
+      if(strFunctionName == s_functions[i].name)
       {
         if(sExprList.size() == s_functions[i].count)
         {
@@ -4088,7 +4147,7 @@ NOT_INC_P:
     // 确切参数类型的函数列表
     for(int i = 0; s_functions2[i].name != NULL; i++)
     {
-      if(*pFuncNode->Operand[0].pTokn == s_functions2[i].name)
+      if(strFunctionName == s_functions2[i].name)
       {
         if(sExprList.size() == s_functions2[i].count)
         {
@@ -4114,37 +4173,6 @@ NOT_INC_P:
             return sNameSet.GetType(s_functions2[i].ret_type);
           }
         }
-      }
-    }
-
-    cllist<const FUNCDESC*> aUserFunc;
-    sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sExprList.size(), aUserFunc);
-    for(auto iter_func = aUserFunc.begin(); iter_func  != aUserFunc.end(); ++iter_func)
-    {
-      int i = 0;
-      size_t nConfirm = 0;
-      ASSERT((*iter_func)->sFormalTypes.size() == sExprList.size());
-      for(auto iter_arg = sExprList.begin(); iter_arg != sExprList.end(); ++iter_arg, ++i)
-      {
-        const TYPEDESC* pArgumentTypeDesc = InferType(sNameSet, *iter_arg);
-        const TYPEDESC* pFormalTypeDesc = sNameSet.GetType((*iter_func)->sFormalTypes[i]);
-        ASSERT(pFormalTypeDesc != NULL);
-
-        // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
-        if(pArgumentTypeDesc == NULL)
-        {
-          return NULL; // 无法推导参数类型
-        }
-        else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
-          nConfirm++;
-        }
-        else {
-          break;
-        }
-      }
-
-      if(nConfirm == sExprList.size()) {
-        return sNameSet.GetType((*iter_func)->ret_type);
       }
     }
 
@@ -4197,34 +4225,7 @@ NOT_INC_P:
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
-      const TYPEDESC* pTypeDesc = NULL;
-      if(pNode->Operand[0].IsNode())
-      {
-        pTypeDesc = InferType(sNameSet, pNode->Operand[0].pNode);
-      }
-      else if(pNode->Operand[0].IsToken())
-      {
-        pTypeDesc = InferType(sNameSet, pNode->Operand[0].pTokn);
-      }
-      else
-      {
-        CLBREAK;
-      }
-
-      if(pTypeDesc->cate != TYPEDESC::TypeCate_MultiDim)
-      {
-        OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组或指针类型"));
-        return NULL;
-      }
-
-      const TYPEDESC* pSubscriptType = InferType(sNameSet, pNode->Operand[1]);
-      if(pSubscriptType->cate != TYPEDESC::TypeCate_IntegerNumeric)
-      {
-        OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
-        return NULL;
-      }
-
-      return pTypeDesc->pNextDim;
+      return InferSubscript(sNameSet, pNode);
     }
     else if(pNode->pOpcode)
     {
@@ -4313,6 +4314,7 @@ NOT_INC_P:
   
   const TYPEDESC* CodeParser::InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.'));
     const TYPEDESC* pTypeDesc = NULL;
     if(pNode->Operand[0].IsToken())
     {
@@ -4367,6 +4369,46 @@ NOT_INC_P:
     }
 
     return pTypeDesc;
+  }
+
+  const TYPEDESC* CodeParser::InferSubscript(const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  {
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript);
+
+    const TYPEDESC* pTypeDesc = NULL;
+    if(pNode->Operand[0].IsNode())
+    {
+      pTypeDesc = InferType(sNameSet, pNode->Operand[0].pNode);
+    }
+    else if(pNode->Operand[0].IsToken())
+    {
+      pTypeDesc = InferType(sNameSet, pNode->Operand[0].pTokn);
+    }
+    else
+    {
+      CLBREAK;
+    }
+
+    const TYPEDESC* pSubscriptType = InferType(sNameSet, pNode->Operand[1]);
+    if(pSubscriptType->cate != TYPEDESC::TypeCate_IntegerNumeric)
+    {
+      OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
+      return NULL;
+    }
+
+    if(pTypeDesc->cate == TYPEDESC::TypeCate_MultiDim)
+    {
+      return pTypeDesc->pNextDim;
+    }
+    else if(pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
+    {
+      pTypeDesc = pTypeDesc->pDesc->lpSubscript(pTypeDesc->pDesc, sNameSet);
+      ASSERT(pTypeDesc);
+      return pTypeDesc;
+    }
+    
+    OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组或指针类型"));
+    return NULL;
   }
 
   GXBOOL CodeParser::InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation)
@@ -5010,6 +5052,19 @@ NOT_INC_P:
 
     auto it = m_FuncMap.insert(clmake_pair(strName, td));
     return TRUE;
+  }
+
+  GXBOOL NameContext::IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc) const
+  {
+    const TYPEDESC* pTypeDesc = GetType(*ptkTypename);
+    if(pTypeDesc)
+    {
+      if(ppTypeDesc) {
+        *ppTypeDesc = pTypeDesc;
+      }
+      return ((*ptkTypename) != pTypeDesc->name); // 字典名与原始名不一致, 说明是typedef的类型
+    }
+    return FALSE;
   }
 
   const TYPEDESC* NameContext::GetVariable(const TOKEN* ptkName) const

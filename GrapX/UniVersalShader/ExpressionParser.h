@@ -171,7 +171,7 @@ namespace UVShader
     CodeParser* m_pCodeParser;
     const NameContext* m_pParent;
 
-    TypeMap     m_TypeMap; // typedef 会产生两个一致的 TYPEDESC
+    TypeMap     m_TypeMap; // typedef 会产生两个内容相同的TYPEDESC
     FuncMap     m_FuncMap;
     VariableMap m_VariableMap;
     State       m_eLastState;
@@ -206,6 +206,7 @@ namespace UVShader
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames);
+    GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
@@ -586,11 +587,13 @@ namespace UVShader
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
 #ifdef ENABLE_SYNTAX_VERIFY
+    const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferSubscript(const NameContext& sNameSet, const SYNTAXNODE* pNode);
 #endif
 
     GXBOOL InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位

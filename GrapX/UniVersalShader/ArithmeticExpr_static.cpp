@@ -319,6 +319,14 @@ namespace UVShader
     return TRUE;
   }
 
+  const TYPEDESC* GXCALLBACK OnFloatMatrixSubscript(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx)
+  {
+    clStringA str = pDesc->name;
+    ASSERT(str.EndsWith("x2") || str.EndsWith("x3") || str.EndsWith("x4"));
+    str.Remove(str.GetLength() - 2, 2);
+    return sNameCtx.GetType(str);
+  }
+
   COMMINTRTYPEDESC s_aIntrinsicStruct[] =
   {
     //{"int2", VALUE::Rank_Undefined, s_aIntXYZW, 4, STR_INT, "xy", "rg"},
@@ -365,9 +373,9 @@ namespace UVShader
     {"double3", VALUE::Rank_Undefined, STR_DOUBLE, OnVector3},
     {"double4", VALUE::Rank_Undefined, STR_DOUBLE, OnVector4},
 
-    {"float2x2", VALUE::Rank_Undefined, },
-    {"float3x3", VALUE::Rank_Undefined, },
-    {"float4x4", VALUE::Rank_Undefined, },
+    {"float2x2", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
+    {"float3x3", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
+    {"float4x4", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
 
     {NULL},
   };
@@ -433,16 +441,23 @@ namespace UVShader
     {"float3", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
     {"lerp", INTRINSIC_FUNC::RetType_Argument0, 3, ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
     {"modf", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},
+    {"pow", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},
 
     // GLSL
-    {"vec2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
-    {"vec3", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
-    {"vec4", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
+    //{"vec2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
+    //{"vec3", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
+    //{"vec4", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
+    {"float2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
+    {"float3", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
+    {"float4", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
     {"fract", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
 
-    {"vec2", INTRINSIC_FUNC::RetType_FromName, 2, ARG_Scaler ARG_Scaler},
-    {"vec3", INTRINSIC_FUNC::RetType_FromName, 3, ARG_Scaler ARG_Scaler ARG_Scaler},
-    {"vec4", INTRINSIC_FUNC::RetType_FromName, 4, ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
+    //{"vec2", INTRINSIC_FUNC::RetType_FromName, 2, ARG_Scaler ARG_Scaler},
+    //{"vec3", INTRINSIC_FUNC::RetType_FromName, 3, ARG_Scaler ARG_Scaler ARG_Scaler},
+    //{"vec4", INTRINSIC_FUNC::RetType_FromName, 4, ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
+    {"float2", INTRINSIC_FUNC::RetType_FromName, 2, ARG_Scaler ARG_Scaler},
+    {"float3", INTRINSIC_FUNC::RetType_FromName, 3, ARG_Scaler ARG_Scaler ARG_Scaler},
+    {"float4", INTRINSIC_FUNC::RetType_FromName, 4, ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
     {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, ARG_VecScal ARG_VecScal ARG_Scaler}, // FIXME: 没有验证第一个参数和第二个参数类型相同
     {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 2, ARG_Sampler2D ARG_Vec}, // FIXME: 2维向量
     {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 3, ARG_Sampler2D ARG_Vec ARG_Scaler}, // FIXME: 2维向量
@@ -453,16 +468,23 @@ namespace UVShader
   // 不对外使用
   static GXLPCSTR s_Vec3_ParamArray0[] = { STR_VEC2, STR_FLOAT };
   static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_VEC2 };
-  static GXLPCSTR s_Vec4_ParamArray[] = { STR_VEC3, STR_FLOAT };
+  static GXLPCSTR s_Vec4_ParamArray_v3s[] = { STR_VEC3, STR_FLOAT };
+  static GXLPCSTR s_Vec4_ParamArray_sv2s[] = { STR_FLOAT, STR_VEC2, STR_FLOAT };
   static GXLPCSTR s_ParamArray_Floats_16[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
   INTRINSIC_FUNC2 s_functions2[] =
   {
-    {"vec3", "vec3", 2, s_Vec3_ParamArray0},
-    {"vec3", "vec3", 2, s_Vec3_ParamArray1},
-    {"vec4", "vec4", 2, s_Vec4_ParamArray},
+    //{"vec3", "vec3", 2, s_Vec3_ParamArray0},
+    //{"vec3", "vec3", 2, s_Vec3_ParamArray1},
+    //{"vec4", "vec4", 2, s_Vec4_ParamArray},
+    {"float3", "float3", 2, s_Vec3_ParamArray0},
+    {"float3", "float3", 2, s_Vec3_ParamArray1},
+    {"float4", "float4", 2, s_Vec4_ParamArray_v3s},
+    {"float4", "float4", 3, s_Vec4_ParamArray_sv2s}, // 其它排列组合的参数也可以么? 比如 (float, float, float2)
     {"float", "float", 1, s_ParamArray_Floats_16},
     {"vec2", "sincos", 1, s_ParamArray_Floats_16},
-    {"mat4", "mat4", 16, s_ParamArray_Floats_16},
+    {"float2x2", "float2x2", 4, s_ParamArray_Floats_16},
+    {"float3x3", "float3x3", 9, s_ParamArray_Floats_16},
+    {"float4x4", "float4x4", 16, s_ParamArray_Floats_16},
     {NULL},
   };
 
