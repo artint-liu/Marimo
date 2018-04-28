@@ -12,9 +12,8 @@
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
-#define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "断言错误"); CLBREAK; }
+#define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "没实现的功能"); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
-#define PARSER_ASSERT_TK(_X, _TOKEN) { if(!(_X)) {OutputErrorW(*_TOKEN, 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 #define VOID_TYPEDESC ((const TYPEDESC*)-1)
 // TODO:
@@ -1227,6 +1226,8 @@ namespace UVShader
 
 
     m_aStatements.push_back(stat);
+    m_GlobalSet.RegisterFunction(stat.func.szReturnType, stat.func.szName, &m_aArgumentsPack[(size_t)stat.func.pArguments], stat.func.nNumOfArguments);
+
     pScope->begin = p - &m_aTokens.front();
     return TRUE;
   }
@@ -1291,7 +1292,9 @@ namespace UVShader
       }
     }
 
-    sExprList.push_front(sGlob);
+    if(sGlob.ptr) {
+      sExprList.push_front(sGlob);
+    }
     return sExprList;
   }
 
@@ -1664,7 +1667,7 @@ NOT_INC_P:
       m_aArgumentsPack.push_back(*it);
     }
 
-    m_GlobalSet.RegisterFunction(pStat->func.szReturnType, pStat->func.szName, sFormalTypenames);
+    //m_GlobalSet.RegisterFunction(pStat->func.szReturnType, pStat->func.szName, sFormalTypenames);
 
     //m_aArgumentsPack.insert(m_aArgumentsPack.end(), aArgs.begin(), aArgs.end());
     return TRUE;
@@ -3950,22 +3953,35 @@ NOT_INC_P:
     }
     else if(left_glob.IsNode())
     {
-      // TODO: 这个地方的实现以之前的修改并且没提交的为准
       const SYNTAXNODE* pLeftNode = left_glob.pNode;
-      if(pLeftNode->mode == SYNTAXNODE::MODE_Opcode && pLeftNode->CompareOpcode('.'))
+      if(pLeftNode->mode == SYNTAXNODE::MODE_Opcode)
       {
-        pTypeDesc = InferMemberType(sNameSet, pLeftNode);
-        if(pTypeDesc == NULL)
+        if(pLeftNode->CompareOpcode('.'))
         {
-          OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
-          return NULL;
+          pTypeDesc = InferMemberType(sNameSet, left_glob.pNode);
+          if(pTypeDesc == NULL)
+          {
+            OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
+            return NULL;
+          }
+          return pTypeDesc;
+        }
+        else
+        {
+          PARSER_BREAK(left_glob);
         }
       }
       else if(pLeftNode->mode == SYNTAXNODE::MODE_Subscript)
       {
-        pTypeDesc = InferSubscript(sNameSet, pLeftNode);
+        pTypeDesc = InferSubscriptType(sNameSet, pLeftNode);
+        return pTypeDesc;
+        //PARSER_BREAK(left_glob);
       }
-      return pTypeDesc;
+      else {
+        // error C2106: “=”: 左操作数必须为左值
+        OutputErrorW(opcode, UVS_EXPORT_TEXT(2106, "“=”: 左操作数必须为左值"));
+        return NULL;
+      }
     }    
     OutputErrorW(opcode, UVS_EXPORT_TEXT(5010, "“=”前缺少左值"));
     return NULL;
@@ -3975,23 +3991,23 @@ NOT_INC_P:
   {
     cllist<const FUNCDESC*> aUserFunc;
     sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sExprList.size(), aUserFunc);
-    for(auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
+    for (auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
     {
       int i = 0;
       size_t nConfirm = 0;
       ASSERT((*iter_func)->sFormalTypes.size() == sExprList.size());
-      for(auto iter_arg = sExprList.begin(); iter_arg != sExprList.end(); ++iter_arg, ++i)
+      for (auto iter_arg = sExprList.begin(); iter_arg != sExprList.end(); ++iter_arg, ++i)
       {
         const TYPEDESC* pArgumentTypeDesc = InferType(sNameSet, *iter_arg);
         const TYPEDESC* pFormalTypeDesc = sNameSet.GetType((*iter_func)->sFormalTypes[i]);
         ASSERT(pFormalTypeDesc != NULL);
 
         // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
-        if(pArgumentTypeDesc == NULL)
+        if (pArgumentTypeDesc == NULL)
         {
           return NULL; // 无法推导参数类型
         }
-        else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
+        else if (TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
           nConfirm++;
         }
         else {
@@ -3999,7 +4015,7 @@ NOT_INC_P:
         }
       }
 
-      if(nConfirm == sExprList.size()) {
+      if (nConfirm == sExprList.size()) {
         return sNameSet.GetType((*iter_func)->ret_type);
       }
     }
@@ -4013,6 +4029,7 @@ NOT_INC_P:
 
     const TYPEDESC* pRetType = NULL;
 
+    // 拆解参数成列表
     SYNTAXNODE::GlobList sExprList;
     BreakComma(sExprList, pFuncNode->Operand[1]);
 
@@ -4225,7 +4242,31 @@ NOT_INC_P:
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
-      return InferSubscript(sNameSet, pNode);
+      return InferSubscriptType(sNameSet, pNode);
+      //const TYPEDESC* pTypeDesc = NULL;
+      //if(pNode->Operand[0].ptr)
+      //{
+      //  pTypeDesc = InferType(sNameSet, pNode->Operand[0]);
+      //}
+      //else
+      //{
+      //  CLBREAK;
+      //}
+
+      //if(pTypeDesc->cate != TYPEDESC::TypeCate_MultiDim)
+      //{
+      //  OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组或指针类型"));
+      //  return NULL;
+      //}
+
+      //const TYPEDESC* pSubscriptType = InferType(sNameSet, pNode->Operand[1]);
+      //if(pSubscriptType->cate != TYPEDESC::TypeCate_IntegerNumeric)
+      //{
+      //  OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
+      //  return NULL;
+      //}
+
+      //return pTypeDesc->pNextDim;
     }
     else if(pNode->pOpcode)
     {
@@ -4301,12 +4342,17 @@ NOT_INC_P:
           //ASSERT(pTypeDesc[0] == pTypeDesc[1]); // 地址应该一样
           return pTypeDesc[0];
         }
+        else {
+          return InferDifferentTypesOfCalculations(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
+        }
       }
       else {
-#ifdef _DEBUG
-        OutputErrorW(pNode->GetAnyTokenPAB().marker, 0);
-#endif
-        CLBREAK; // 没处理
+        return InferDifferentTypesOfCalculations(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
+
+//#ifdef _DEBUG
+//        OutputErrorW(pNode->GetAnyTokenPAB().marker, 0);
+//#endif
+//        CLBREAK; // 没处理
       }
     }
     return NULL;
@@ -4371,18 +4417,14 @@ NOT_INC_P:
     return pTypeDesc;
   }
 
-  const TYPEDESC* CodeParser::InferSubscript(const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript);
 
     const TYPEDESC* pTypeDesc = NULL;
-    if(pNode->Operand[0].IsNode())
+    if(pNode->Operand[0].ptr)
     {
-      pTypeDesc = InferType(sNameSet, pNode->Operand[0].pNode);
-    }
-    else if(pNode->Operand[0].IsToken())
-    {
-      pTypeDesc = InferType(sNameSet, pNode->Operand[0].pTokn);
+      pTypeDesc = InferType(sNameSet, pNode->Operand[0]);
     }
     else
     {
@@ -4400,14 +4442,39 @@ NOT_INC_P:
     {
       return pTypeDesc->pNextDim;
     }
-    else if(pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
+    else if(pTypeDesc->cate == TYPEDESC::TypeCate_Struct && pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
     {
       pTypeDesc = pTypeDesc->pDesc->lpSubscript(pTypeDesc->pDesc, sNameSet);
       ASSERT(pTypeDesc);
       return pTypeDesc;
     }
-    
+
     OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组或指针类型"));
+    return NULL;
+  }
+
+  const TYPEDESC* CodeParser::InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond)
+  {
+    ASSERT(pToken); // 暂时不支持
+    if(*pToken == '*')
+    {
+      if(
+        (pFirst->name == STR_FLOAT2 && pSecond->name == STR_FLOAT2x2) ||
+        (pFirst->name == STR_FLOAT3 && pSecond->name == STR_FLOAT3x3) ||
+        (pFirst->name == STR_FLOAT4 && pSecond->name == STR_FLOAT4x4) )
+      {
+        return pFirst;
+      }
+      else if(
+        (pFirst->name == STR_FLOAT2x2 && pSecond->name == STR_FLOAT2) ||
+        (pFirst->name == STR_FLOAT3x3 && pSecond->name == STR_FLOAT3) ||
+        (pFirst->name == STR_FLOAT4x4 && pSecond->name == STR_FLOAT4) )
+      {
+        return pSecond;
+      }
+    }
+
+    CLBREAK;
     return NULL;
   }
 
@@ -4495,45 +4562,45 @@ NOT_INC_P:
     return FALSE;
   }
   
-  GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
-  {
-    // 这个函数外部不输出 Error/Warning
-    CLBREAK;
-    //const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(pNode->Operand[1].pNode);
-    // struct RESULT {
-    //   TYPEDESC::TypeCate cate;
-    //   TYPEDESC* pType;
-    //   clStringA strTypeName;
-    // };
+  //GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
+  //{
+  //  // 这个函数外部不输出 Error/Warning
+  //  CLBREAK;
+  //  //const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(pNode->Operand[1].pNode);
+  //  // struct RESULT {
+  //  //   TYPEDESC::TypeCate cate;
+  //  //   TYPEDESC* pType;
+  //  //   clStringA strTypeName;
+  //  // };
 
-    const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(right_glob.pNode);
-    if(IS_NUMERIC_CATE(pType->cate))
-    {
-      VALUE v;
-      VALUE::State s = pnodeRightValue->Calculate(this, sNameSet, v);
-      if(TEST_FLAG(s, VALUE::State_ErrorMask))
-      {
-        OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
-        return FALSE;
-      }
-      CLNOP
-    }
-    else if(pType->cate == TYPEDESC::TypeCate_String)
-    {
-      // token解析会自动连接字符串, 所以不会出现两个token都是字符串的情况
-      OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
-      return FALSE;
-    }
-    else if(pType->cate == TYPEDESC::TypeCate_Struct)
-    {
-      if(mode == SYNTAXNODE::MODE_ArrayAssignment)
-      {
-        OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
-        return FALSE;
-      }
-    }
-    return TRUE;
-  }
+  //  const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(right_glob.pNode);
+  //  if(IS_NUMERIC_CATE(pType->cate))
+  //  {
+  //    VALUE v;
+  //    VALUE::State s = pnodeRightValue->Calculate(this, sNameSet, v);
+  //    if(TEST_FLAG(s, VALUE::State_ErrorMask))
+  //    {
+  //      OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
+  //      return FALSE;
+  //    }
+  //    CLNOP
+  //  }
+  //  else if(pType->cate == TYPEDESC::TypeCate_String)
+  //  {
+  //    // token解析会自动连接字符串, 所以不会出现两个token都是字符串的情况
+  //    OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
+  //    return FALSE;
+  //  }
+  //  else if(pType->cate == TYPEDESC::TypeCate_Struct)
+  //  {
+  //    if(mode == SYNTAXNODE::MODE_ArrayAssignment)
+  //    {
+  //      OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
+  //      return FALSE;
+  //    }
+  //  }
+  //  return TRUE;
+  //}
 #endif // #ifdef ENABLE_SYNTAX_VERIFY
 
   //////////////////////////////////////////////////////////////////////////
@@ -5042,15 +5109,21 @@ NOT_INC_P:
     return result.second;
   }
 
-  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames)
+  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc)
   {
     //ASSERT(pMemberNode == NULL || pMemberNode->mode == SYNTAXNODE::MODE_Block);
     FUNCDESC td;
     td.ret_type = strRetType;
     td.name = strName; // ptkName->ToString(strName);
-    td.sFormalTypes = sFormalTypenames;
+    //td.sFormalTypes = pArguments;
 
     auto it = m_FuncMap.insert(clmake_pair(strName, td));
+    clStringA str;
+    for(int i = 0; i < argc; i++)
+    {
+      str.Clear();
+      it->second.sFormalTypes.push_back(pArguments[i].ptkType->ToString(str));
+    }
     return TRUE;
   }
 

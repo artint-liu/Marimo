@@ -427,7 +427,12 @@ namespace UVShader
     {"exp", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"length", INTRINSIC_FUNC::RetType_Scaler0, 1, ARG_Vec},
     {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
+    {"atan", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"abs", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"log2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"exp2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
 
+    {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_Vec ARG_Vec},
     {"dot", INTRINSIC_FUNC::RetType_Scaler0, 2, ARG_Vec ARG_Vec},
     {"cross", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_Vec ARG_Vec},
     {"min", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},

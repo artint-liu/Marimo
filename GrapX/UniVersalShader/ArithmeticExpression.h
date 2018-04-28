@@ -45,16 +45,16 @@ namespace UVShader
   struct TYPEDESC;
   struct COMMINTRTYPEDESC;
 
-  typedef GXBOOL (GXCALLBACK *OPERATORPROC)(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken);
-  typedef const TYPEDESC* (GXCALLBACK *OPERATORPROC2)(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx);
+  typedef GXBOOL (GXCALLBACK *OPERATORPROC_TOKEN)(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken);
+  typedef const TYPEDESC* (GXCALLBACK *OPERATORPROC_NAMECTX)(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx);
 
   struct COMMINTRTYPEDESC
   {
     GXLPCSTR    name;   // 结构体名
     int         rank;   // VALUE::Rank
     GXLPCSTR    component_type;
-    OPERATORPROC lpDotOverride;
-    OPERATORPROC2 lpSubscript; 
+    OPERATORPROC_TOKEN lpDotOverride;
+    OPERATORPROC_NAMECTX lpSubscript; 
     //MEMBERLIST* list;   // 成员列表
     //size_t      count;  // 成员数
     //GXLPCSTR    type;

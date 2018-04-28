@@ -13,17 +13,17 @@
 #define SRC_ERROR_CODE_A "//{ERR=" // 7 chars
 #define SRC_ERROR_CODE_B "%d}\r\n"
 
-GXLPCSTR Get(UVShader::CodeParser::InputModifier e)
+GXLPCSTR Get(UVShader::InputModifier e)
 {
   switch(e)
   {
-  case UVShader::CodeParser::InputModifier_in:
+  case UVShader::InputModifier_in:
     return "in ";
-  case UVShader::CodeParser::InputModifier_out:
+  case UVShader::InputModifier_out:
     return "out ";
-  case UVShader::CodeParser::InputModifier_inout:
+  case UVShader::InputModifier_inout:
     return "inout ";
-  case UVShader::CodeParser::InputModifier_uniform:
+  case UVShader::InputModifier_uniform:
     return "uniform ";
   default:
     CLBREAK;

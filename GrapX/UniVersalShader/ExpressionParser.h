@@ -147,6 +147,23 @@ namespace UVShader
     //DimList_T       sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
   };
 
+  enum InputModifier // 函数参数修饰
+  {
+    InputModifier_in,
+    InputModifier_out,
+    InputModifier_inout,
+    InputModifier_uniform,
+  };
+
+  struct FUNCTION_ARGUMENT // 函数参数
+  {
+    InputModifier eModifier;  // [opt]
+    const TOKEN*  ptkType;    // [req]
+    const TOKEN*  ptkName;    // [req]
+    GXLPCSTR      szSemantic; // [opt]
+  };
+
+
   class NameContext
   {
   public:
@@ -205,7 +222,7 @@ namespace UVShader
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
-    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const StringArray& sFormalTypenames);
+    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
 #ifdef ENABLE_SYNTAX_VERIFY
@@ -334,14 +351,6 @@ namespace UVShader
       StorageClass_inline,
     };
 
-    enum InputModifier // 函数参数修饰
-    {
-      InputModifier_in,
-      InputModifier_out,
-      InputModifier_inout,
-      InputModifier_uniform,
-    };
-
     enum VariableStorageClass
     {
       VariableStorageClass_empty,
@@ -374,15 +383,6 @@ namespace UVShader
 
     typedef clset<TYPEDESC>   TypeSet;
 
-    struct FUNCTION_ARGUMENT // 函数参数
-    {
-      InputModifier eModifier;  // [opt]
-      //GXLPCSTR      szType;     // [req]
-      //GXLPCSTR      szName;     // [req]
-      const TOKEN*  ptkType;    // [req]
-      const TOKEN*  ptkName;    // [req]
-      GXLPCSTR      szSemantic; // [opt]
-    };
     typedef clvector<FUNCTION_ARGUMENT> ArgumentsArray;
     
     //////////////////////////////////////////////////////////////////////////
@@ -593,7 +593,8 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferSubscript(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
 #endif
 
     GXBOOL InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
@@ -612,7 +613,7 @@ namespace UVShader
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
     GXBOOL Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode);
     const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
-    GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob);
+    //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob);
 #endif
 
     void SetTokenPhonyString(int index, const clStringA& str);
