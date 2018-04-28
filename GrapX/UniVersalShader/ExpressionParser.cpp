@@ -3710,8 +3710,27 @@ NOT_INC_P:
     {
       // return FALSE 表示不再遍历后面的节点
 
-      if(pNode->mode == SYNTAXNODE::MODE_Block ||
-        pNode->mode == SYNTAXNODE::MODE_Chain ||
+      if(pNode->mode == SYNTAXNODE::MODE_Block)
+      {
+        // TODO: 测试 int a; if(a) {a} 能否编译通过(block中没有分号)
+        ASSERT(pNode->Operand[1].ptr == NULL ||
+          (pNode->Operand[1].IsToken() && *pNode->Operand[1].pTokn == ';'));
+
+        if(pNode->Operand[0].IsNode())
+        {
+          NameContext sBlockNameContext(&sNameContext);
+          result = Verify_Chain(pNode->Operand[0].pNode, sBlockNameContext);
+        }
+        else if(pNode->Operand[0].IsToken())
+        {
+          if(InferRightValueType(NULL, sNameContext, pNode->Operand[0], pNode->pOpcode) == FALSE)
+          {
+            result = FALSE;
+          }
+        }
+        return FALSE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Chain ||
         pNode->mode == SYNTAXNODE::MODE_Flow_ForInit ||
         pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning ||
         pNode->mode == SYNTAXNODE::MODE_Flow_If ||
