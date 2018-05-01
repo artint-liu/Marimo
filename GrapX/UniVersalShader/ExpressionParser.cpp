@@ -1124,6 +1124,7 @@ namespace UVShader
     }
 
     TOKEN* p = &m_aTokens[pScope->begin];
+    TOKEN* ptkReturnedType = p;
     const TOKEN* pEnd = &m_aTokens.front() + pScope->end;
 
     STATEMENT stat = {StatementType_Empty};
@@ -1210,7 +1211,13 @@ namespace UVShader
         {
 #ifdef ENABLE_SYNTAX_VERIFY
           GXBOOL bret = sNameSet_Func.SetReturnType(stat.func.szReturnType);
-          if(bret == FALSE || Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
+          if(bret == FALSE)
+          {
+            clStringW strW;
+            OutputErrorW(*ptkReturnedType, UVS_EXPORT_TEXT(5031, "函数返回值“%s”不是一个类型"), ptkReturnedType->ToString(strW).CStr());
+            return FALSE;
+          }
+          else if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
           {
             return FALSE;
           }
