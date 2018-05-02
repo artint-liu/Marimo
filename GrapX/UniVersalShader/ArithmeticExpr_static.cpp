@@ -385,7 +385,7 @@ namespace UVShader
     {STR_FLOAT, VALUE::Rank_Float},
     {STR_HALF, VALUE::Rank_Float},
     {STR_INT, VALUE::Rank_Signed},
-    {STR_BOOL, VALUE::Rank_Undefined},
+    {STR_BOOL, VALUE::Rank_Signed},
     {STR_UINT, VALUE::Rank_Unsigned},
     {STR_DOUBLE, VALUE::Rank_Double},
     {NULL}
@@ -428,11 +428,13 @@ namespace UVShader
     {"length", INTRINSIC_FUNC::RetType_Scaler0, 1, ARG_Vec},
     {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
     {"atan", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"tan", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"abs", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"log2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"exp2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
 
     {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_Vec ARG_Vec},
+    {"atan2", INTRINSIC_FUNC::RetType_Argument1, 2, ARG_MatVecSca ARG_MatVecSca},
     {"dot", INTRINSIC_FUNC::RetType_Scaler0, 2, ARG_Vec ARG_Vec},
     {"cross", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_Vec ARG_Vec},
     {"min", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},
@@ -473,6 +475,7 @@ namespace UVShader
   // 不对外使用
   static GXLPCSTR s_Vec3_ParamArray0[] = { STR_VEC2, STR_FLOAT };
   static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_VEC2 };
+  static GXLPCSTR s_Vec4_ParamArray_v3v3v3[] = { STR_VEC3, STR_VEC3, STR_VEC3 };
   static GXLPCSTR s_Vec4_ParamArray_v3s[] = { STR_VEC3, STR_FLOAT };
   static GXLPCSTR s_Vec4_ParamArray_sv2s[] = { STR_FLOAT, STR_VEC2, STR_FLOAT };
   static GXLPCSTR s_ParamArray_Floats_16[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
@@ -488,6 +491,7 @@ namespace UVShader
     {"float", "float", 1, s_ParamArray_Floats_16},
     {"vec2", "sincos", 1, s_ParamArray_Floats_16},
     {"float2x2", "float2x2", 4, s_ParamArray_Floats_16},
+    {"float3x3", "float3x3", 3, s_Vec4_ParamArray_v3v3v3},
     {"float3x3", "float3x3", 9, s_ParamArray_Floats_16},
     {"float4x4", "float4x4", 16, s_ParamArray_Floats_16},
     {NULL},

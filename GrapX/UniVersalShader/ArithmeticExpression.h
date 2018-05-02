@@ -286,8 +286,8 @@ namespace UVShader
       MODE_StructDef,           // 结构定义:
       MODE_Flow_While,          // while(A) {B}
       MODE_Flow_If,             // if(A) {B}
-      MODE_Flow_ElseIf,
-      MODE_Flow_Else,
+      MODE_Flow_ElseIf,         // A else B, A肯定是MODE_Flow_If
+      MODE_Flow_Else,           // A else {B;}, A肯定是MODE_Flow_If
       MODE_Flow_For,            // for(A) {B} [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]
       MODE_Flow_ForInit,        // for 的初始化部分 [MODE_Flow_ForInit] [MODE_Flow_ForRunning]
       MODE_Flow_ForRunning,     // for 的条件和步进部分

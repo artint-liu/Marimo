@@ -121,6 +121,7 @@ namespace UVShader
       RetType_Float4 = -4,  // 4维向量,一般代表颜色
       RetType_Last = -5,
       RetType_Argument0 = 0, // 返回类型同第一个参数类型
+      RetType_Argument1 = 1, // 返回类型同第二个参数类型
     };
 
     GXLPCSTR  name;   // 函数名
@@ -594,6 +595,7 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
 #endif
 

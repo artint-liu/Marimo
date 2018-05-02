@@ -3628,60 +3628,58 @@ NOT_INC_P:
       if(pNode->CompareOpcode('=') || pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
         if(pNode->Operand[1].IsToken())
         {
-          const TOKEN& tkRightValue = *pNode->Operand[1].pTokn;
-          if(//pType->cate == TYPEDESC::TypeCate_Struct ||            
-            (IS_NUMERIC_CATE(pType->cate) && tkRightValue.IsNumeric() == FALSE) ||
-            (pType->cate == TYPEDESC::TypeCate_String && tkRightValue.type != TOKEN::TokenType_String) )
-          {
-            clStringW str;
-            clStringW str2(pType->name);
-            OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
-              tkRightValue.ToString(str).CStr(), str2.CStr());
-            return (result = FALSE);
-          }
-          else if(pType->cate == TYPEDESC::TypeCate_Struct)
-          {
-            const TYPEDESC* pVarTypeDesc = sNameSet.GetVariable(&tkRightValue);
-            if(pType->cate != pVarTypeDesc->cate || pType->name != pVarTypeDesc->name)
-            {
-              clStringW str;
-              clStringW str2(pType->name);
-              OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
-                tkRightValue.ToString(str).CStr(), str2.CStr());
-            }
-          }
+          //const TOKEN& tkRightValue = *pNode->Operand[1].pTokn;
+          //if(//pType->cate == TYPEDESC::TypeCate_Struct ||            
+          //  (IS_NUMERIC_CATE(pType->cate) && tkRightValue.IsNumeric() == FALSE) ||
+          //  (pType->cate == TYPEDESC::TypeCate_String && tkRightValue.type != TOKEN::TokenType_String) )
+          //{
+          //  clStringW str;
+          //  clStringW str2(pType->name);
+          //  OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
+          //    tkRightValue.ToString(str).CStr(), str2.CStr());
+          //  return (result = FALSE);
+          //}
+          //else if(pType->cate == TYPEDESC::TypeCate_Struct)
+          //{
+          //  const TYPEDESC* pVarTypeDesc = sNameSet.GetVariable(&tkRightValue);
+          //  if(pType->cate != pVarTypeDesc->cate || pType->name != pVarTypeDesc->name)
+          //  {
+          //    clStringW str;
+          //    clStringW str2(pType->name);
+          //    OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(5025, "无法将\"%s\"转换为\"%s\"类型"),
+          //      tkRightValue.ToString(str).CStr(), str2.CStr());
+          //  }
+          //}
 
-          if(IS_NUMERIC_CATE(pType->cate))
-          {
-            VALUE v;
-            VALUE::State s = v.set(tkRightValue);
-            if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
-              clStringW str;
-              if(TEST_FLAG(s, VALUE::State_IllegalNumber))
-              {
-                OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(2041, "非法的数字 : “%s”"), tkRightValue.ToString(str).CStr());
-              }
-              else
-              {
-                OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是“%s”"), tkRightValue.ToString(str).CStr());
-              }
-              return (result = FALSE);
-            }
-          }
+          result = InferRightValueType(pType, sNameSet, pNode->Operand[1], pNode->pOpcode) && result;
+
+          //if(result && IS_NUMERIC_CATE(pType->cate))
+          //{
+          //  VALUE v;
+          //  const TOKEN& tkRightValue = *pNode->Operand[1].pTokn;
+          //  VALUE::State s = v.set(tkRightValue);
+          //  if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
+          //    clStringW str;
+          //    if(TEST_FLAG(s, VALUE::State_IllegalNumber))
+          //    {
+          //      OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(2041, "非法的数字 : “%s”"), tkRightValue.ToString(str).CStr());
+          //    }
+          //    else
+          //    {
+          //      OutputErrorW(tkRightValue, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是“%s”"), tkRightValue.ToString(str).CStr());
+          //    }
+          //    return (result == FALSE);
+          //  }
+          //}
         }
         else if(pNode->Operand[1].IsNode())
         {
-          // RightValue
-#if 0
-          result = result && Verify2_RightValue(sNameSet, pType, pNode->mode, pNode->Operand[1]);
-#else
-          result = result && InferRightValueType(pType, sNameSet, pNode->Operand[1], pNode->pOpcode);
-#endif
-          return result;
+          result = InferRightValueType(pType, sNameSet, pNode->Operand[1], pNode->pOpcode) && result;
+          return (result == FALSE);
         }
         else {
           OutputErrorW(*pNode->pOpcode, UVS_EXPORT_TEXT(5022, "赋值错误, \"=\" 后应该有表达式"));
-          return (result = FALSE);
+          return (result == FALSE);
         }
         return FALSE;
       }
@@ -3740,13 +3738,27 @@ NOT_INC_P:
       else if(pNode->mode == SYNTAXNODE::MODE_Chain ||
         pNode->mode == SYNTAXNODE::MODE_Flow_ForInit ||
         pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning ||
-        pNode->mode == SYNTAXNODE::MODE_Flow_If ||
-        pNode->mode == SYNTAXNODE::MODE_Flow_Else ||
-        pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf ||
         pNode->mode == SYNTAXNODE::MODE_Flow_While ||
         pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile
         )
       {
+        return TRUE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
+      {
+        result = InferRightValueType(NULL, sNameContext, pNode->Operand[0], NULL) && result;
+        ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
+        return TRUE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf)
+      {
+        ASSERT(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Flow_If);
+        return TRUE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Else)
+      {
+        ASSERT(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Flow_If);
+        ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
         return TRUE;
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_Continue)
@@ -3758,6 +3770,12 @@ NOT_INC_P:
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_Break)
       {
         ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "break");
+        ASSERT(pNode->Operand[1].ptr == NULL);
+        return FALSE;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Discard)
+      {
+        ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "discard");
         ASSERT(pNode->Operand[1].ptr == NULL);
         return FALSE;
       }
@@ -4244,7 +4262,19 @@ NOT_INC_P:
     if(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric)
     {
       VALUE val;
-      val.set(*pToken);
+      VALUE::State s = val.set(*pToken);
+
+      if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
+        clStringW str;
+        if(TEST_FLAG(s, VALUE::State_IllegalNumber))
+        {
+          OutputErrorW(*pToken, UVS_EXPORT_TEXT(2041, "非法的数字 : “%s”"), pToken->ToString(str).CStr());
+        }
+        else
+        {
+          OutputErrorW(*pToken, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是“%s”"), pToken->ToString(str).CStr());
+        }
+      }
       //if(val.fValue == 100.0f) {
       //  CLBREAK;
       //}
@@ -4262,6 +4292,9 @@ NOT_INC_P:
   
   const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
+    ASSERT(pNode->mode != SYNTAXNODE::MODE_Block &&
+      pNode->mode != SYNTAXNODE::MODE_Chain);
+
     if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
       return InferFunctionReturnedType(sNameSet, pNode);
@@ -4334,6 +4367,11 @@ NOT_INC_P:
 
     if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
     {
+      const TYPEDESC* pResultTypeDesc = InferTypeByOperator(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
+      if(pResultTypeDesc) {
+        return pResultTypeDesc;
+      }
+
       const GXBOOL bFirstNumeric = IS_NUMERIC_CATE(pTypeDesc[0]->cate);
       const GXBOOL bSecondNumeric = IS_NUMERIC_CATE(pTypeDesc[1]->cate);
       if(bFirstNumeric && bSecondNumeric)
@@ -4479,6 +4517,11 @@ NOT_INC_P:
     return NULL;
   }
 
+  const TYPEDESC* CodeParser::InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond)
+  {
+    return NULL;
+  }
+
   const TYPEDESC* CodeParser::InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond)
   {
     ASSERT(pToken); // 暂时不支持
@@ -4518,6 +4561,7 @@ NOT_INC_P:
 
     if(pLeftType)
     {
+      ASSERT(pLocation);
       const GXBOOL bCastResult = TryTypeCasting(pLeftType, pRightType, pLocation);
       if(bCastResult == FALSE)
       {
