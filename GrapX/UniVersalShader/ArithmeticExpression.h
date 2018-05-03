@@ -66,6 +66,7 @@ namespace UVShader
   struct TOKEN : CTokens::iterator
   {
     typedef cllist<TOKEN>   List;
+    typedef clvector<const TOKEN*>   PtrCArray;
     typedef clvector<TOKEN> Array;
     typedef CTokens::T_LPCSTR T_LPCSTR;
     enum Type

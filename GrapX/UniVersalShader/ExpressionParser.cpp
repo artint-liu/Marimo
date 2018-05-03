@@ -16,6 +16,7 @@
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 #define VOID_TYPEDESC ((const TYPEDESC*)-1)
+#define ERROR_TYPEDESC ((const TYPEDESC*)-2)
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
@@ -984,7 +985,8 @@ namespace UVShader
         ParseStatementAs_Struct(pScope) ||
         ParseStatementAs_Typedef(pScope) ||
         ParseStatementAs_Definition(pScope) ||
-        ParseStatementAs_Function(pScope)
+        ParseStatementAs_Function(pScope) ||
+        ParseStatement_SyntaxError(pScope)
       );
   }
 
@@ -1210,16 +1212,14 @@ namespace UVShader
         else if(ParseCodeBlock(stat.sRoot, sNameSet_Func, func_statement_block))
         {
 #ifdef ENABLE_SYNTAX_VERIFY
-          GXBOOL bret = sNameSet_Func.SetReturnType(stat.func.szReturnType);
-          if(bret == FALSE)
+          if(sNameSet_Func.SetReturnType(stat.func.szReturnType) == FALSE)
           {
             clStringW strW;
             OutputErrorW(*ptkReturnedType, UVS_EXPORT_TEXT(5031, "函数返回值“%s”不是一个类型"), ptkReturnedType->ToString(strW).CStr());
-            return FALSE;
-          }
+          }          
           else if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
           {
-            return FALSE;
+            TRACE("函数内部语法错误\n");
           }
 #endif
         }
@@ -1237,6 +1237,14 @@ namespace UVShader
 
     pScope->begin = p - &m_aTokens.front();
     return TRUE;
+  }
+
+  GXBOOL CodeParser::ParseStatement_SyntaxError(TKSCOPE* pScope)
+  {
+    const TOKEN& token = m_aTokens[pScope->begin];
+    clStringW strW;
+    OutputErrorW(token, UVS_EXPORT_TEXT(5032, "语法错误：不能识别得格式“%s”"), token.ToString(strW).CStr());
+    return FALSE;
   }
 
   SYNTAXNODE* CodeParser::FlatDefinition(SYNTAXNODE* pThisChain)
@@ -3818,13 +3826,13 @@ NOT_INC_P:
             *pNode->pOpcode == "<<=" || *pNode->pOpcode == ">>=" ||
             *pNode->pOpcode == "&=" || *pNode->pOpcode == "|=" || *pNode->pOpcode == "^=" )
           {
+            // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
             // TODO: 需要验证左值
             const TYPEDESC* pTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
             if(pTypeDesc == NULL) {
               result = FALSE;
             }
-
-            if(InferRightValueType(pTypeDesc, sNameContext, pNode->Operand[1], pNode->pOpcode) == FALSE)
+            else if(InferRightValueType(pTypeDesc, sNameContext, pNode->Operand[1], pNode->pOpcode) == FALSE)
             {
               result = FALSE;
             }
@@ -4033,6 +4041,9 @@ NOT_INC_P:
 
   const TYPEDESC* CodeParser::InferUserFunctionType(const NameContext& sNameSet, const SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE* pFuncNode)
   {
+    // 返回ERROR_TYPEDESC表示语法出现错误而失败
+    // 返回NULL表示没找到匹配函数
+
     cllist<const FUNCDESC*> aUserFunc;
     sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sExprList.size(), aUserFunc);
     for (auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
@@ -4043,13 +4054,21 @@ NOT_INC_P:
       for (auto iter_arg = sExprList.begin(); iter_arg != sExprList.end(); ++iter_arg, ++i)
       {
         const TYPEDESC* pArgumentTypeDesc = InferType(sNameSet, *iter_arg);
-        const TYPEDESC* pFormalTypeDesc = sNameSet.GetType((*iter_func)->sFormalTypes[i]);
-        ASSERT(pFormalTypeDesc != NULL);
+        const TOKEN* ptkFormal = (*iter_func)->sFormalTypes[i];
+        const TYPEDESC* pFormalTypeDesc = sNameSet.GetType(*ptkFormal);
+        //ASSERT(pFormalTypeDesc != NULL);
+
+        if(pFormalTypeDesc == NULL)
+        {
+          clStringW strW;
+          OutputErrorW(*ptkFormal, UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), ptkFormal->ToString(strW).CStr());
+          return ERROR_TYPEDESC;
+        }
 
         // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
         if (pArgumentTypeDesc == NULL)
         {
-          return NULL; // 无法推导参数类型
+          return ERROR_TYPEDESC; // 无法推导参数类型
         }
         else if (TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
           nConfirm++;
@@ -4078,7 +4097,10 @@ NOT_INC_P:
     BreakComma(sExprList, pFuncNode->Operand[1]);
 
     pRetType = InferUserFunctionType(sNameSet, sExprList, pFuncNode);
-    if(pRetType) {
+    if(pRetType == ERROR_TYPEDESC) {
+      return NULL;
+    }
+    else if(pRetType) {
       return pRetType;
     }
 
@@ -4174,13 +4196,7 @@ NOT_INC_P:
               break;
             }
             else {
-              if(it->IsToken())
-              {
-                clStringW strToken;                
-                OutputErrorW(*it->pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), it->pTokn->ToString(strToken).CStr());
-              }
               return NULL;
-              //CLBREAK;
             }
           }
 
@@ -4280,6 +4296,7 @@ NOT_INC_P:
       //}
       return sNameSet.GetType(val.rank);
     }
+
     const TYPEDESC* pTypeDesc = sNameSet.GetVariable(pToken);
     if(pTypeDesc == NULL)
     {
@@ -4451,7 +4468,7 @@ NOT_INC_P:
       {
         ASSERT(pChildNode->CompareOpcode('.') == FALSE); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
         pTypeDesc = InferType(sNameSet, pChildNode);
-        PARSER_ASSERT(pTypeDesc, pNode->Operand[0]);
+        //PARSER_ASSERT(pTypeDesc, pNode->Operand[0]);
         if(pTypeDesc == NULL) {
           return NULL;
         }
@@ -4519,6 +4536,13 @@ NOT_INC_P:
 
   const TYPEDESC* CodeParser::InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond)
   {
+    if(pOperator)
+    {
+      if(*pOperator == ',') {
+        // 例: a = 1, b = 2 返回后者类型
+        return pSecond;
+      }
+    }
     return NULL;
   }
 
@@ -5102,46 +5126,6 @@ NOT_INC_P:
     return m_eLastState;
   }
 
-  //const TYPEDESC* NameContext::GetMember(const SYNTAXNODE* pNode) const
-  //{
-  //  const TYPEDESC* pTypeDesc = NULL;
-  //  if(pNode->Operand[0].IsToken())
-  //  {
-  //    pTypeDesc = GetVariable(pNode->Operand[0].pTokn);
-  //    if(pTypeDesc == NULL) {
-  //      clStringW strToken;
-  //      m_pCodeParser->OutputErrorW(*pNode->Operand[0].pTokn,
-  //        UVS_EXPORT_TEXT2(2065, "“%s”: 未声明的标识符", m_pCodeParser), 
-  //        pNode->Operand[0].pTokn->ToString(strToken).CStr());
-
-  //      return NULL;
-  //    }
-  //  }
-  //  else
-  //  {
-  //    ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.'));
-  //    pTypeDesc = GetMember(pNode->Operand[0].pNode);
-  //    ASSERT(pTypeDesc);
-  //  }
-  //  ASSERT(pNode->Operand[1].IsToken());
-
-  //  clStringA strTypename;
-  //  
-  //  if(pTypeDesc->GetMemberTypename(strTypename, pNode->Operand[1].pTokn))
-  //  {
-  //    pTypeDesc = GetType(strTypename);
-  //  }
-  //  else
-  //  {
-  //    clStringW str1, str2;
-  //    pTypeDesc = NULL;
-  //    m_pCodeParser->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT2(2039, "“%s”: 不是“%s”的成员", m_pCodeParser),
-  //      pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].pTokn->ToString(str1).CStr());
-  //  }
-
-  //  return pTypeDesc;
-  //}
-
   void NameContext::GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const
   {
     const NameContext* pRoot = GetRoot(); // 没有局部函数, 所以直接从根查找
@@ -5150,9 +5134,11 @@ NOT_INC_P:
     pFuncName->ToString(strFuncName);
 
     auto it = pRoot->m_FuncMap.find(strFuncName);
-    while(it != pRoot->m_FuncMap.end() && it->first == strFuncName && it->second.sFormalTypes.size() == nFormalCount)
+    while(it != pRoot->m_FuncMap.end() && it->first == strFuncName)
     {
-      aMatchedFunc.push_back(&it->second);
+      if(it->second.sFormalTypes.size() == nFormalCount) {
+        aMatchedFunc.push_back(&it->second);
+      }
       ++it;
     }
   }
@@ -5185,14 +5171,13 @@ NOT_INC_P:
     FUNCDESC td;
     td.ret_type = strRetType;
     td.name = strName; // ptkName->ToString(strName);
-    //td.sFormalTypes = pArguments;
 
     auto it = m_FuncMap.insert(clmake_pair(strName, td));
-    clStringA str;
+    //clStringA str;
     for(int i = 0; i < argc; i++)
     {
-      str.Clear();
-      it->second.sFormalTypes.push_back(pArguments[i].ptkType->ToString(str));
+      //str.Clear();
+      it->second.sFormalTypes.push_back(pArguments[i].ptkType);
     }
     return TRUE;
   }

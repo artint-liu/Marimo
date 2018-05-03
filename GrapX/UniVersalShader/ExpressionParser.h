@@ -108,7 +108,7 @@ namespace UVShader
     // FIXME: 因为定义顺序关系, 返回值和形参应改储存TYPEDESC, 而不是名字, 这个要改暂时备忘
     clStringA         ret_type;     // 返回的类型
     clStringA         name;         // 类型名
-    StringArray       sFormalTypes; // 函数, 形参类型表
+    TOKEN::PtrCArray  sFormalTypes; // 函数, 形参类型表
   };
 
   struct INTRINSIC_FUNC
@@ -519,6 +519,7 @@ namespace UVShader
 
     GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
+    GXBOOL  ParseStatement_SyntaxError(TKSCOPE* pScope);
     GXBOOL  ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
@@ -588,7 +589,7 @@ namespace UVShader
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
 #ifdef ENABLE_SYNTAX_VERIFY
-    const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE* pFuncNode);
+    const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
     const TYPEDESC* InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);

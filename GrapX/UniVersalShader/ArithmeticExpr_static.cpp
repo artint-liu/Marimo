@@ -16,12 +16,16 @@ namespace UVShader
 
   GXLPCSTR STR_INT    = "int";
   GXLPCSTR STR_UINT   = "uint";
-  GXLPCSTR STR_HALF   = "half";
   GXLPCSTR STR_BOOL   = "bool";
   GXLPCSTR STR_FLOAT  = "float";
   GXLPCSTR STR_FLOAT2 = "float2";
   GXLPCSTR STR_FLOAT3 = "float3";
   GXLPCSTR STR_FLOAT4 = "float4";
+
+  GXLPCSTR STR_HALF = "half";
+  GXLPCSTR STR_HALF2 = "half2";
+  GXLPCSTR STR_HALF3 = "half3";
+  GXLPCSTR STR_HALF4 = "half4";
 
   GXLPCSTR STR_FLOAT2x2 = "float2x2";
   GXLPCSTR STR_FLOAT2x3 = "float2x3";
@@ -319,6 +323,22 @@ namespace UVShader
     return TRUE;
   }
 
+  const TYPEDESC* GXCALLBACK OnFloatVectorSubscript(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx)
+  {
+    clStringA str = pDesc->name;
+    if(str == STR_FLOAT2 || str == STR_FLOAT3 || str == STR_FLOAT4) {
+      return sNameCtx.GetType(STR_FLOAT);
+    }
+    else if(str == STR_HALF2 || str == STR_HALF3 || str == STR_HALF4) {
+      return sNameCtx.GetType(STR_HALF);
+    }
+    else if(str == STR_DOUBLE2 || str == STR_DOUBLE3 || str == STR_DOUBLE4) {
+      return sNameCtx.GetType(STR_DOUBLE);
+    }
+    CLBREAK;
+    return NULL;
+  }
+
   const TYPEDESC* GXCALLBACK OnFloatMatrixSubscript(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx)
   {
     clStringA str = pDesc->name;
@@ -357,21 +377,21 @@ namespace UVShader
     {"int3", VALUE::Rank_Undefined, STR_INT, OnVector3},
     {"int4", VALUE::Rank_Undefined, STR_INT, OnVector4},
 
-    {"half2", VALUE::Rank_Undefined, STR_HALF, OnVector2},
-    {"half3", VALUE::Rank_Undefined, STR_HALF, OnVector3},
-    {"half4", VALUE::Rank_Undefined, STR_HALF, OnVector4},
+    {"half2", VALUE::Rank_Undefined, STR_HALF, OnVector2, OnFloatVectorSubscript},
+    {"half3", VALUE::Rank_Undefined, STR_HALF, OnVector3, OnFloatVectorSubscript},
+    {"half4", VALUE::Rank_Undefined, STR_HALF, OnVector4, OnFloatVectorSubscript},
 
     {"uint2", VALUE::Rank_Undefined, STR_UINT, OnVector2},
     {"uint3", VALUE::Rank_Undefined, STR_UINT, OnVector3},
     {"uint4", VALUE::Rank_Undefined, STR_UINT, OnVector4},
 
-    {"float2", VALUE::Rank_Undefined, STR_FLOAT, OnVector2},
-    {"float3", VALUE::Rank_Undefined, STR_FLOAT, OnVector3},
-    {"float4", VALUE::Rank_Undefined, STR_FLOAT, OnVector4},
+    {"float2", VALUE::Rank_Undefined, STR_FLOAT, OnVector2, OnFloatVectorSubscript},
+    {"float3", VALUE::Rank_Undefined, STR_FLOAT, OnVector3, OnFloatVectorSubscript},
+    {"float4", VALUE::Rank_Undefined, STR_FLOAT, OnVector4, OnFloatVectorSubscript},
 
-    {"double2", VALUE::Rank_Undefined, STR_DOUBLE, OnVector2},
-    {"double3", VALUE::Rank_Undefined, STR_DOUBLE, OnVector3},
-    {"double4", VALUE::Rank_Undefined, STR_DOUBLE, OnVector4},
+    {"double2", VALUE::Rank_Undefined, STR_DOUBLE, OnVector2, OnFloatVectorSubscript},
+    {"double3", VALUE::Rank_Undefined, STR_DOUBLE, OnVector3, OnFloatVectorSubscript},
+    {"double4", VALUE::Rank_Undefined, STR_DOUBLE, OnVector4, OnFloatVectorSubscript},
 
     {"float2x2", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
     {"float3x3", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
@@ -426,6 +446,7 @@ namespace UVShader
     {"frac", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"exp", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"length", INTRINSIC_FUNC::RetType_Scaler0, 1, ARG_Vec},
+    {"noise", INTRINSIC_FUNC::RetType_Scaler0, 1, ARG_Vec},
     {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
     {"atan", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"tan", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
@@ -475,7 +496,9 @@ namespace UVShader
   // 不对外使用
   static GXLPCSTR s_Vec3_ParamArray0[] = { STR_VEC2, STR_FLOAT };
   static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_VEC2 };
-  static GXLPCSTR s_Vec4_ParamArray_v3v3v3[] = { STR_VEC3, STR_VEC3, STR_VEC3 };
+  static GXLPCSTR s_ParamArray_v2v2[] = { STR_VEC2, STR_VEC2};
+  static GXLPCSTR s_ParamArray_v3v3v3[] = { STR_VEC3, STR_VEC3, STR_VEC3 };
+  static GXLPCSTR s_ParamArray_v4v4v4v4[] = { STR_VEC4, STR_VEC4, STR_VEC4, STR_VEC4 };
   static GXLPCSTR s_Vec4_ParamArray_v3s[] = { STR_VEC3, STR_FLOAT };
   static GXLPCSTR s_Vec4_ParamArray_sv2s[] = { STR_FLOAT, STR_VEC2, STR_FLOAT };
   static GXLPCSTR s_ParamArray_Floats_16[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
@@ -490,9 +513,13 @@ namespace UVShader
     {"float4", "float4", 3, s_Vec4_ParamArray_sv2s}, // 其它排列组合的参数也可以么? 比如 (float, float, float2)
     {"float", "float", 1, s_ParamArray_Floats_16},
     {"vec2", "sincos", 1, s_ParamArray_Floats_16},
+    {"float2x2", "float2x2", 2, s_ParamArray_v2v2},
     {"float2x2", "float2x2", 4, s_ParamArray_Floats_16},
-    {"float3x3", "float3x3", 3, s_Vec4_ParamArray_v3v3v3},
+    
+    {"float3x3", "float3x3", 3, s_ParamArray_v3v3v3},
     {"float3x3", "float3x3", 9, s_ParamArray_Floats_16},
+
+    {"float4x4", "float4x4", 4, s_ParamArray_v4v4v4v4},
     {"float4x4", "float4x4", 16, s_ParamArray_Floats_16},
     {NULL},
   };
