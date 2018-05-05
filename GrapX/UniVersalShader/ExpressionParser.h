@@ -81,6 +81,7 @@ namespace UVShader
     enum TypeCate
     {
       TypeCate_Empty,
+      TypeCate_Void,
       TypeCate_FloatNumeric,    // 浮点-数字类型
       TypeCate_IntegerNumeric,  // 整数-数字类型
       TypeCate_MultiDim,  // 多维类型
@@ -117,7 +118,8 @@ namespace UVShader
     {
       RetType_Scaler0 = -1,
       RetType_FromName = -2, // 返回类型是函数名
-      RetType_Vector4 = -3,  // 4维向量,一般代表颜色
+      //RetType_Vector4 = -3,  // 4维向量,一般代表颜色
+      RetType_Bool = -3,
       RetType_Float4 = -4,  // 4维向量,一般代表颜色
       RetType_Last = -5,
       RetType_Argument0 = 0, // 返回类型同第一个参数类型

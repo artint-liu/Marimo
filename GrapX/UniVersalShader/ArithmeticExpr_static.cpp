@@ -437,11 +437,14 @@ namespace UVShader
 #define ARG_SamplerCube  "\x20"
 #define ARG_OutMatVecSca "\x87"
 
+    {"abs", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"acos", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"all", INTRINSIC_FUNC::RetType_Bool, 1, ARG_MatVecSca},
+    {"any", INTRINSIC_FUNC::RetType_Bool, 1, ARG_MatVecSca},
     {"sqrt", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"sin", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"cos", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"asin", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
-    {"acos", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"floor", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"frac", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"exp", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
@@ -450,7 +453,7 @@ namespace UVShader
     {"normalize", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
     {"atan", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"tan", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
-    {"abs", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
+    {"log", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"log2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
     {"exp2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_MatVecSca},
 
@@ -460,6 +463,7 @@ namespace UVShader
     {"cross", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_Vec ARG_Vec},
     {"min", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},
     {"max", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},
+    {"step", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},
 
     {"clamp", INTRINSIC_FUNC::RetType_Argument0, 3, ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca},
     {"smoothstep", INTRINSIC_FUNC::RetType_Argument0, 3, ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
@@ -487,40 +491,56 @@ namespace UVShader
     {"float3", INTRINSIC_FUNC::RetType_FromName, 3, ARG_Scaler ARG_Scaler ARG_Scaler},
     {"float4", INTRINSIC_FUNC::RetType_FromName, 4, ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
     {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, ARG_VecScal ARG_VecScal ARG_Scaler}, // FIXME: 没有验证第一个参数和第二个参数类型相同
-    {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 2, ARG_Sampler2D ARG_Vec}, // FIXME: 2维向量
-    {"texture2D", INTRINSIC_FUNC::RetType_Vector4, 3, ARG_Sampler2D ARG_Vec ARG_Scaler}, // FIXME: 2维向量
+    {"texture2D", INTRINSIC_FUNC::RetType_Float4, 2, ARG_Sampler2D ARG_Vec}, // FIXME: 2维向量
+    {"texture2D", INTRINSIC_FUNC::RetType_Float4, 3, ARG_Sampler2D ARG_Vec ARG_Scaler}, // FIXME: 2维向量
     {"mod", INTRINSIC_FUNC::RetType_Argument0, 2, ARG_MatVecSca ARG_MatVecSca},
     {NULL},
   };
 
   // 不对外使用
-  static GXLPCSTR s_Vec3_ParamArray0[] = { STR_VEC2, STR_FLOAT };
-  static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_VEC2 };
-  static GXLPCSTR s_ParamArray_v2v2[] = { STR_VEC2, STR_VEC2};
-  static GXLPCSTR s_ParamArray_v3v3v3[] = { STR_VEC3, STR_VEC3, STR_VEC3 };
-  static GXLPCSTR s_ParamArray_v4v4v4v4[] = { STR_VEC4, STR_VEC4, STR_VEC4, STR_VEC4 };
-  static GXLPCSTR s_Vec4_ParamArray_v3s[] = { STR_VEC3, STR_FLOAT };
-  static GXLPCSTR s_Vec4_ParamArray_sv2s[] = { STR_FLOAT, STR_VEC2, STR_FLOAT };
+  static GXLPCSTR s_Vec3_ParamArray0[] = { STR_FLOAT2, STR_FLOAT };
+  static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_FLOAT2 };
+  static GXLPCSTR s_ParamArray_v2v2[] = { STR_FLOAT2, STR_FLOAT2};
+  static GXLPCSTR s_ParamArray_v3v3v3[] = { STR_FLOAT3, STR_FLOAT3, STR_FLOAT3 };
+  static GXLPCSTR s_ParamArray_v4v4v4v4[] = { STR_FLOAT4, STR_FLOAT4, STR_FLOAT4, STR_FLOAT4 };
+  static GXLPCSTR s_Vec4_ParamArray_v3s[] = { STR_FLOAT3, STR_FLOAT };
+  static GXLPCSTR s_Vec4_ParamArray_v2ss[] = { STR_FLOAT2, STR_FLOAT, STR_FLOAT };
+  static GXLPCSTR s_Vec4_ParamArray_sv2s[] = { STR_FLOAT, STR_FLOAT2, STR_FLOAT };
+  static GXLPCSTR s_Vec4_ParamArray_ssv2[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT2 };
   static GXLPCSTR s_ParamArray_Floats_16[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
+
   INTRINSIC_FUNC2 s_functions2[] =
   {
     //{"vec3", "vec3", 2, s_Vec3_ParamArray0},
     //{"vec3", "vec3", 2, s_Vec3_ParamArray1},
     //{"vec4", "vec4", 2, s_Vec4_ParamArray},
+    {"float2", "float2", 1, s_ParamArray_Floats_16},
+    {"float3", "float3", 1, s_ParamArray_Floats_16},
+    {"float4", "float4", 1, s_ParamArray_Floats_16},
+    {"float2x2", "float2x2", 1, s_ParamArray_Floats_16},
+    {"float3x3", "float3x3", 1, s_ParamArray_Floats_16},
+    {"float4x4", "float4x4", 1, s_ParamArray_Floats_16},
+
+    {"float2", "float2", 2, s_ParamArray_Floats_16},
+    {"float3", "float3", 3, s_ParamArray_Floats_16},
+    {"float4", "float4", 4, s_ParamArray_Floats_16},
+    {"float2x2", "float2x2", 4, s_ParamArray_Floats_16},
+    {"float3x3", "float3x3", 9, s_ParamArray_Floats_16},
+    {"float4x4", "float4x4", 16, s_ParamArray_Floats_16},
+
     {"float3", "float3", 2, s_Vec3_ParamArray0},
     {"float3", "float3", 2, s_Vec3_ParamArray1},
+    
     {"float4", "float4", 2, s_Vec4_ParamArray_v3s},
-    {"float4", "float4", 3, s_Vec4_ParamArray_sv2s}, // 其它排列组合的参数也可以么? 比如 (float, float, float2)
+    {"float4", "float4", 3, s_Vec4_ParamArray_ssv2},
+    {"float4", "float4", 3, s_Vec4_ParamArray_sv2s},
+    {"float4", "float4", 3, s_Vec4_ParamArray_v2ss},
     {"float", "float", 1, s_ParamArray_Floats_16},
     {"vec2", "sincos", 1, s_ParamArray_Floats_16},
-    {"float2x2", "float2x2", 2, s_ParamArray_v2v2},
-    {"float2x2", "float2x2", 4, s_ParamArray_Floats_16},
-    
-    {"float3x3", "float3x3", 3, s_ParamArray_v3v3v3},
-    {"float3x3", "float3x3", 9, s_ParamArray_Floats_16},
 
+    {"float2x2", "float2x2", 2, s_ParamArray_v2v2},    
+    {"float3x3", "float3x3", 3, s_ParamArray_v3v3v3},
     {"float4x4", "float4x4", 4, s_ParamArray_v4v4v4v4},
-    {"float4x4", "float4x4", 16, s_ParamArray_Floats_16},
     {NULL},
   };
 

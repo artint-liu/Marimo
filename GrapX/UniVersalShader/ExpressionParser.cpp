@@ -15,8 +15,8 @@
 #define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "没实现的功能"); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
-#define VOID_TYPEDESC ((const TYPEDESC*)-1)
-#define ERROR_TYPEDESC ((const TYPEDESC*)-2)
+//#define VOID_TYPEDESC ((const TYPEDESC*)-1)
+#define ERROR_TYPEDESC ((const TYPEDESC*)-1)
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
@@ -3872,7 +3872,7 @@ NOT_INC_P:
       {
         // error C2059: 语法错误:“return”
         const TYPEDESC* pTypeTo = sNameContext.GetReturnType();
-        if(pTypeTo == VOID_TYPEDESC)
+        if(pTypeTo->cate == TYPEDESC::TypeCate_Void)
         {
           // error C2562: <function name>:“void”函数返回值
           ASSERT(pNode->Operand[0].IsToken());
@@ -4133,7 +4133,7 @@ NOT_INC_P:
                 pRetType = pTypeDesc;
               }
               else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName ||
-                s_functions[i].type == INTRINSIC_FUNC::RetType_Vector4 ||
+                s_functions[i].type == INTRINSIC_FUNC::RetType_Bool ||
                 s_functions[i].type == INTRINSIC_FUNC::RetType_Float4)
               {
               }
@@ -4208,8 +4208,8 @@ NOT_INC_P:
             else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
               return sNameSet.GetType(s_functions[i].name);
             }
-            else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Vector4) {
-              return sNameSet.GetType(STR_VEC4);
+            else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Bool) {
+              return sNameSet.GetType(STR_BOOL);
             }
             else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Float4) {
               return sNameSet.GetType(STR_FLOAT4);
@@ -4253,11 +4253,16 @@ NOT_INC_P:
       }
     }
 
-#ifdef _DEBUG
-    TRACE("func name:%s\n", pFuncNode->Operand[0].pTokn->ToString().CStr());
-    OutputErrorW(pFuncNode->Operand[0].pTokn->marker, 0);
-    CLBREAK; // 一般是找不到函数
-#endif
+    //  error C3861: “func”: 找不到标识符
+    clStringW strW;
+    OutputErrorW(*pFuncNode->Operand[0].pTokn, UVS_EXPORT_TEXT(3861, "“%s”: 找不到标识符"),
+      pFuncNode->Operand[0].pTokn->ToString(strW).CStr());
+
+//#ifdef _DEBUG
+//    TRACE("func name:%s\n", pFuncNode->Operand[0].pTokn->ToString().CStr());
+//    OutputErrorW(pFuncNode->Operand[0].pTokn->marker, 0);
+//    CLBREAK; // 一般是找不到函数
+//#endif
     return NULL;
   }
 
@@ -4506,6 +4511,9 @@ NOT_INC_P:
     if(pNode->Operand[0].ptr)
     {
       pTypeDesc = InferType(sNameSet, pNode->Operand[0]);
+      if(pTypeDesc == NULL) {
+        return NULL;
+      }
     }
     else
     {
@@ -4653,7 +4661,7 @@ NOT_INC_P:
     }
 
     //CLBREAK;
-    return FALSE;
+    return (pTypeTo->name == pTypeFrom->name);
   }
   
   //GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
@@ -4822,6 +4830,15 @@ NOT_INC_P:
       m_TypeMap.insert(clmake_pair(td.name, td));
     }
 
+    // void
+    td.name = STR_VOID;
+    td.cate = TYPEDESC::TypeCate_Void;
+    td.pDesc = NULL;
+    td.pMemberNode = NULL;
+    td.sDimensions.clear();
+    td.pNextDim = NULL;
+    m_TypeMap.insert(clmake_pair(td.name, td));
+
     // 字符串类型
     //if(strType == s_szString) {
     td.cate = TYPEDESC::TypeCate_String;
@@ -4844,11 +4861,11 @@ NOT_INC_P:
   GXBOOL NameContext::SetReturnType(GXLPCSTR szTypeName)
   {
     ASSERT(GetReturnType() == NULL);
-    if(clstd::strcmpT(szTypeName, STR_VOID) == 0)
-    {
-      m_pReturnType = VOID_TYPEDESC;
-      return TRUE;
-    }
+    //if(clstd::strcmpT(szTypeName, STR_VOID) == 0)
+    //{
+    //  m_pReturnType = VOID_TYPEDESC;
+    //  return TRUE;
+    //}
 
     m_pReturnType = GetType(szTypeName);
     return (m_pReturnType != NULL);
