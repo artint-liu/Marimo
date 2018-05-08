@@ -303,8 +303,8 @@ namespace clstd
     _float3& operator /= (const float f){x /= f; y /= f; z /= f; return *this;}
     _float3& operator /= (const _float3& v){x /= v.x; y /= v.y; z /= v.z; return *this;}
     _float3& operator = (const float v)  {x = y = z = v; return *this;}
-    _float3& operator = (const _float3 v){x = v.x; y = v.y; z = v.z; return *this;}
-    _float3& operator = (const _float4 v);
+    _float3& operator = (const _float3& v){x = v.x; y = v.y; z = v.z; return *this;}
+    //_float3& operator = (const _float4 v);
     _float3& operator = (const unsigned long dwColor)
     { 
       x = (float)((dwColor >> 16) & 0xff) / 255.0f;
@@ -510,7 +510,7 @@ namespace clstd
       rgba.b = (float)( dwColor        & 0xff) / 255.0f;
     }
 
-    operator const unsigned long()
+    u32 ToColor32() const
     {
       _float4 t(*this);
       t.saturate();

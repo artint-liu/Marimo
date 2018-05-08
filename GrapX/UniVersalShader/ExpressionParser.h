@@ -86,9 +86,10 @@ namespace UVShader
       TypeCate_IntegerNumeric,  // 整数-数字类型
       TypeCate_MultiDim,  // 多维类型
       TypeCate_String,
+      TypeCate_Sampler1D,
       TypeCate_Sampler2D,
       TypeCate_Sampler3D,
-      //TypeCate_SamplerCube,
+      TypeCate_SamplerCube,
       TypeCate_Struct,
     };
     typedef clvector<size_t> DimList_T;
@@ -126,11 +127,23 @@ namespace UVShader
       RetType_Argument1 = 1, // 返回类型同第二个参数类型
     };
 
+    enum ArgMask
+    {
+      ArgMask_Scaler      = 0x01,
+      ArgMask_Vector      = 0x02,
+      ArgMask_Matrix      = 0x04,
+      ArgMask_Sampler1D   = 0x08,
+      ArgMask_Sampler2D   = 0x10,
+      ArgMask_Sampler3D   = 0x20,
+      ArgMask_SamplerCube = 0x40,
+      ArgMask_Out         = 0x80,
+    };
+
     GXLPCSTR  name;   // 函数名
     int       type;   // 0 表示与第一个参数相同, 1表示与第二个参数相同, 以此类推
                       // -1表示第一个参数的标量值, 例如第一个参数是int3, 则返回值是int
     size_t    count;  // 参数数量
-    GXLPCSTR  params;
+    u16*      params;
   };
 
   struct INTRINSIC_FUNC2
@@ -606,6 +619,7 @@ namespace UVShader
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    GXBOOL TryTypeCasting(const NameContext& sNameSet, GXDWORD dwArgMask, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
 
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);

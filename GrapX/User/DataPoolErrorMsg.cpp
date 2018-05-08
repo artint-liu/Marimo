@@ -327,7 +327,7 @@ namespace Marimo
   _DPEM_TEMPL
   const typename _DPEM_CLS::FILE_SECTION* _DPEM_CLS::SectionFromPtr(T_LPCSTR ptr) const
   {
-    for(auto it = m_Sources.rbegin(); it != m_Sources.rend(); ++it)
+    for(auto it = m_SourcesTable.rbegin(); it != m_SourcesTable.rend(); ++it)
     {
       const FILE_SECTION* pSect = *it;
       if(pSect->tl.IsPtrIn(ptr)) {

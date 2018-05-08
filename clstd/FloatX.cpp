@@ -42,13 +42,13 @@ namespace clstd
     z = v.z / v.w;
   }
 
-  float3& float3::operator=(const _float4 v)
-  {
-    x = v.x / v.w; 
-    y = v.y / v.w; 
-    z = v.z / v.w;
-    return *this;
-  }
+  //float3& float3::operator=(const _float4 v)
+  //{
+  //  x = v.x / v.w; 
+  //  y = v.y / v.w; 
+  //  z = v.z / v.w;
+  //  return *this;
+  //}
 
   float3 operator*(const float3& v, const _float4x4& m)
   {

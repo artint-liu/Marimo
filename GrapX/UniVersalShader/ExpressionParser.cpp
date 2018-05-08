@@ -17,6 +17,7 @@
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
 //#define VOID_TYPEDESC ((const TYPEDESC*)-1)
 #define ERROR_TYPEDESC ((const TYPEDESC*)-1)
+
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
@@ -4158,39 +4159,7 @@ NOT_INC_P:
               }
 
               // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
-              if(TEST_FLAG(s_functions[i].params[n], 1) && TryTypeCasting(sNameSet, STR_FLOAT, pTypeDesc, pFuncNode->Operand[0].pTokn))
-              {
-                continue;                
-              }
-              else if(TEST_FLAG(s_functions[i].params[n], 2) && (
-                TryTypeCasting(sNameSet, STR_FLOAT2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT4, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_VEC2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_VEC3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_VEC4, pTypeDesc, pFuncNode->Operand[0].pTokn)) )
-              {
-                continue;
-              }
-              else if(TEST_FLAG(s_functions[i].params[n], 4) && (
-                TryTypeCasting(sNameSet, STR_FLOAT2x2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT2x3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT2x4, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT3x2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT3x3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT3x4, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT4x2, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT4x3, pTypeDesc, pFuncNode->Operand[0].pTokn) ||
-                TryTypeCasting(sNameSet, STR_FLOAT4x4, pTypeDesc, pFuncNode->Operand[0].pTokn)) )
-              {
-                continue;
-              }
-              else if(TEST_FLAG(s_functions[i].params[n], 8) && pTypeDesc->cate == TYPEDESC::TypeCate_Sampler2D)
-              {
-                continue;
-              }
-              else if(TEST_FLAG(s_functions[i].params[n], 0x10) && pTypeDesc->cate == TYPEDESC::TypeCate_Sampler3D)
-              {
+              if(TryTypeCasting(sNameSet, (GXDWORD)s_functions[i].params[n], pTypeDesc, pFuncNode->Operand[0].pTokn)) {
                 continue;
               }
               break;
@@ -4660,10 +4629,71 @@ NOT_INC_P:
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));
     }
 
+    // 只是没处理
+    ASSERT(
+      pTypeTo->cate != TYPEDESC::TypeCate_Sampler1D &&
+      pTypeTo->cate != TYPEDESC::TypeCate_Sampler2D &&
+      pTypeTo->cate != TYPEDESC::TypeCate_Sampler3D &&
+      pTypeTo->cate != TYPEDESC::TypeCate_SamplerCube);
+
+    // 只是没处理
+    ASSERT(
+      pTypeFrom->cate != TYPEDESC::TypeCate_Sampler1D &&
+      pTypeFrom->cate != TYPEDESC::TypeCate_Sampler2D &&
+      pTypeFrom->cate != TYPEDESC::TypeCate_Sampler3D &&
+      pTypeFrom->cate != TYPEDESC::TypeCate_SamplerCube);
+
     //CLBREAK;
     return (pTypeTo->name == pTypeFrom->name);
   }
   
+  GXBOOL CodeParser::TryTypeCasting(const NameContext& sNameSet, GXDWORD dwArgMask, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
+  {
+    if(TEST_FLAG(dwArgMask, INTRINSIC_FUNC::ArgMask_Scaler))
+    {
+      if(TryTypeCasting(sNameSet, STR_FLOAT, pTypeFrom, pLocation)) {
+        return TRUE;
+      }
+    }
+    
+    if(TEST_FLAG(dwArgMask, INTRINSIC_FUNC::ArgMask_Vector))
+    {
+      if(TryTypeCasting(sNameSet, STR_FLOAT2, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT3, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT4, pTypeFrom, pLocation))
+      {
+        return TRUE;
+      }
+    }
+    
+    if(TEST_FLAG(dwArgMask, INTRINSIC_FUNC::ArgMask_Matrix))
+    {
+      if(TryTypeCasting(sNameSet, STR_FLOAT2x2, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT2x3, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT2x4, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT3x2, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT3x3, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT3x4, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT4x2, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT4x3, pTypeFrom, pLocation) ||
+        TryTypeCasting(sNameSet, STR_FLOAT4x4, pTypeFrom, pLocation))
+      {
+        return TRUE;
+      }
+    }
+    
+    if(
+      (TEST_FLAG(dwArgMask, INTRINSIC_FUNC::ArgMask_Sampler1D) && pTypeFrom->cate == TYPEDESC::TypeCate_Sampler1D) ||
+      (TEST_FLAG(dwArgMask, INTRINSIC_FUNC::ArgMask_Sampler2D) && pTypeFrom->cate == TYPEDESC::TypeCate_Sampler2D) ||
+      (TEST_FLAG(dwArgMask, INTRINSIC_FUNC::ArgMask_Sampler3D) && pTypeFrom->cate == TYPEDESC::TypeCate_Sampler3D) ||
+      (TEST_FLAG(dwArgMask, INTRINSIC_FUNC::ArgMask_SamplerCube) && pTypeFrom->cate == TYPEDESC::TypeCate_SamplerCube) )
+    {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
   //GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
   //{
   //  // 这个函数外部不输出 Error/Warning
