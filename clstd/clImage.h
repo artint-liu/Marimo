@@ -94,6 +94,8 @@ namespace clstd
     b32         ReplaceChannel      (char chReplacedChannel, const Image* pSource, char chSrcChannel); // 从一个图像拷贝通道，如果指定的通道在源图像中不存在，会失败。
     b32         ScaleNearest        (Image* pDestImage, int nWidth, int nHeight) const; // 点采样缩放，这个不需要计算像素
     b32         ScaleFastLinear     (Image* pDestImage, int nWidth, int nHeight) const; // 快速线性插值，从原始图像的相邻像素进行插值得出新像素
+    b32         SkewX               (Image* pDestImage, float factor) const;
+    b32         SkewY               (Image* pDestImage, float factor) const;
     const char* GetFormat           () const;
     b32         SetFormat           (const char* fmt); // 更改通道顺序或者删除通道
     ImageColorSpace GetColorSpace   () const;
@@ -164,6 +166,13 @@ namespace clstd
 
     template<typename _TDestChannel, typename _TSrcChannel>
     void ChangeDepth(CLLPBYTE pDestPtr, size_t nDestPitch, int right_shift);
+
+    template<typename _TPixel>
+    b32 SkewXT(Image* pDestImage, int add_width, float factor) const;
+    
+    template<typename _TPixel>
+    b32 SkewYT(Image* pDestImage, int add_height, float factor) const;
+
 
     template<typename _TChannel>
     b32 RGBAToYUVA(CLLPBYTE pDestPtr, int nNewPixelSize, int nNewPitch, float mulval, int maxval, int* nChannelTable);

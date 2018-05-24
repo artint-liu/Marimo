@@ -32,6 +32,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\casemap.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\ecvt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.cpp" />
@@ -74,7 +77,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\cltypes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.h" />

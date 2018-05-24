@@ -124,6 +124,56 @@ namespace clstd
     }
   }
 
+  template<typename _TPixel>
+  b32 clstd::Image::SkewXT(Image* pDestImage, int add_width, float factor) const
+  {
+    float start_x = factor > 0 ? 0 : (float)add_width;
+    for(int y = 0; y < m_height; y++)
+    {
+      _TPixel* pd = (_TPixel*)pDestImage->GetPixelPtr((int)(start_x + 0.5f), y);
+      _TPixel* ps = (_TPixel*)GetLine(y);
+      for(int x = 0; x < m_width; x++)
+      {
+        *pd = *ps++;
+        pd++;
+      }
+      start_x += factor;
+    }
+    return TRUE;
+  }
+
+  template<typename _TPixel>
+  b32 clstd::Image::SkewYT(Image* pDestImage, int add_height, float factor) const
+  {
+    float start_y = (factor > 0 ? 0 : (float)add_height);
+    for(int y = 0; y < m_height; y++)
+    {
+      _TPixel* pd = (_TPixel*)pDestImage->GetPixelPtr(0, (int)(start_y + 0.5f));
+      _TPixel* ps = (_TPixel*)GetLine(y);
+      float fr = 0;
+      for(int x = 0; x < m_width; x++)
+      {
+        *pd++ = *ps++;
+
+        fr += factor;
+        if(fr <= -1.0f)
+        {
+          float I = floor(-fr);
+          pd = (_TPixel*)(((size_t)pd - pDestImage->m_pitch * (size_t)I));
+          fr = fr + (float)I;
+        }
+        else if(fr >= 1.0f)
+        {
+          float I = floor(fr);
+          pd = (_TPixel*)(((size_t)pd + pDestImage->m_pitch * (size_t)I));
+          fr = fr - (float)I;
+        }
+      }
+      start_y++;
+    }
+    return TRUE;
+  }
+
   b32 Image::SetChannelDepth(int nDepth)
   {
     if(nDepth == m_depth) {
@@ -821,6 +871,153 @@ namespace clstd
     }
 
     return TRUE;
+  }
+
+  b32 Image::SkewX(Image* pDestImage, float factor) const
+  {
+    if(factor == 0)
+    {
+      *pDestImage = *this;
+      return true;
+    }
+
+    int add_width = abs((int)ceil(factor * m_height));
+    //int add_height = abs((int)ceil(factorY * m_width));
+
+    if(_CL_NOT_(pDestImage->Set(m_width + add_width, m_height, (const char*)m_format.name, m_depth))) {
+      return FALSE;
+    }
+
+    //typedef u32 _TPixel;
+    switch(GETPIXELSIZE)
+    {
+    case 1: // 8 depth 1 channel
+      return SkewXT<u8>(pDestImage, add_width, factor);
+      break;
+
+    case 2: // 16 depth 1 channel
+            //  8 depth 2 channel
+      return SkewXT<u16>(pDestImage, add_width, factor);
+      break;
+
+    case 3: // 8 depth 3 channel
+    {
+      struct u24_t { u8 m[3]; };
+      return SkewXT<u24_t>(pDestImage, add_width, factor);
+    }
+    break;
+
+    case 4: // 32 depth 1 channel
+            // 16 depth 2 channel
+            //  8 depth 4 channel
+      return SkewXT<u32>(pDestImage, add_width, factor);
+      break;
+
+    case 6: // 16 depth 3 channel
+    {
+      struct u48_t { u16 m[3]; };
+      return SkewXT<u48_t>(pDestImage, add_width, factor);
+    }
+    break;
+
+    case 8: // 16 depth 4 channel
+            // 32 depth 2 channel
+      return SkewXT<u64>(pDestImage, add_width, factor);
+      break;
+
+    case 12: // 32 depth 3 channel
+    {
+      struct u96_t { u32 m[3]; };
+      return SkewXT<u96_t>(pDestImage, add_width, factor);
+    }
+    break;
+
+    case 16: // 32 depth 4 channel
+    {
+      struct u128_t { u64 m[2]; };
+      return SkewXT<u128_t>(pDestImage, add_width, factor);
+    }
+    break;
+
+    default:
+      CLBREAK;
+      CLOG_ERROR("%s: Unsupported pixel size.\r\n", __FUNCTION__);
+      break;
+    }
+    return FALSE;
+  }
+  
+  b32 Image::SkewY(Image* pDestImage, float factor) const
+  {
+    if(factor == 0)
+    {
+      *pDestImage = *this;
+      return true;
+    }
+
+    int add_height = abs((int)ceil(factor * m_width));
+
+    if(_CL_NOT_(pDestImage->Set(m_width, m_height + add_height, (const char*)m_format.name, m_depth))) {
+      return FALSE;
+    }
+
+    //typedef u32 _TPixel;
+    switch(GETPIXELSIZE)
+    {
+    case 1: // 8 depth 1 channel
+      return SkewYT<u8>(pDestImage, add_height, factor);
+      break;
+
+    case 2: // 16 depth 1 channel
+            //  8 depth 2 channel
+      return SkewYT<u16>(pDestImage, add_height, factor);
+      break;
+
+    case 3: // 8 depth 3 channel
+    {
+      struct u24_t { u8 m[3]; };
+      return SkewYT<u24_t>(pDestImage, add_height, factor);
+    }
+    break;
+
+    case 4: // 32 depth 1 channel
+            // 16 depth 2 channel
+            //  8 depth 4 channel
+      return SkewYT<u32>(pDestImage, add_height, factor);
+      break;
+
+    case 6: // 16 depth 3 channel
+    {
+      struct u48_t { u16 m[3]; };
+      return SkewYT<u48_t>(pDestImage, add_height, factor);
+    }
+    break;
+
+    case 8: // 16 depth 4 channel
+            // 32 depth 2 channel
+      return SkewYT<u64>(pDestImage, add_height, factor);
+      break;
+
+    case 12: // 32 depth 3 channel
+    {
+      struct u96_t { u32 m[3]; };
+      return SkewYT<u96_t>(pDestImage, add_height, factor);
+    }
+    break;
+
+    case 16: // 32 depth 4 channel
+    {
+      struct u128_t { u64 m[2]; };
+      return SkewYT<u128_t>(pDestImage, add_height, factor);
+    }
+    break;
+
+    default:
+      CLBREAK;
+      CLOG_ERROR("%s: Unsupported pixel size.\r\n", __FUNCTION__);
+      break;
+    }
+    return FALSE;
   }
 
   //////////////////////////////////////////////////////////////////////////

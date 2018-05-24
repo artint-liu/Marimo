@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd", "clstd.vcxproj", "{C0C51A96-8BCF-4952-BC0C-9CADFAE6FCF6}"
 EndProject
@@ -15,10 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstdX.Clang", "clstdX\clst
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{78aa8294-ce44-4f27-81ab-22960bf56f39}*SharedItemsImports = 9
 		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{3e11e44f-6b62-4ca1-aa6f-e6aa9e920f7a}*SharedItemsImports = 4
-		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{4ef5a126-bc56-4a82-ae23-2dea7399621e}*SharedItemsImports = 4
 		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{4cf346c6-c312-4bc0-a7f6-ce944a4f73f4}*SharedItemsImports = 4
+		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{78aa8294-ce44-4f27-81ab-22960bf56f39}*SharedItemsImports = 9
+		clstdX\clstdX.Shared\clstdX.Shared.vcxitems*{c0c51a96-8bcf-4952-bc0c-9cadfae6fcf6}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM

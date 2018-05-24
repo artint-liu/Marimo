@@ -79,6 +79,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)clstdX.h" />
@@ -148,6 +151,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\cltypes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3D">
