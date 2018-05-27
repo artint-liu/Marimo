@@ -232,12 +232,12 @@ namespace clstd
 
   const void* Image::GetPixelPtr(int x, int y) const
   {
-    return (CLLPBYTE)m_ptr + m_pitch * y + x * m_channel;
+    return (CLLPBYTE)m_ptr + m_pitch * y + (x * GETPIXELSIZE);
   }
 
   void* Image::GetPixelPtr(int x, int y)
   {
-    return (CLLPBYTE)m_ptr + m_pitch * y + x * m_channel;
+    return (CLLPBYTE)m_ptr + m_pitch * y + (x * GETPIXELSIZE);
   }
 
   size_t Image::GetDataSize() const
