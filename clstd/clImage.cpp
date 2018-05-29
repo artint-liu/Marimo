@@ -115,8 +115,8 @@ namespace clstd
 
     for(int y = 0; y < nCopyHeight; y++)
     {
-      _TPixel* d = (_TPixel*)((CLLPBYTE)pDest->ptr + pDest->pitch * (yDest + y) + xDest);
-      const _TPixel* s = (const _TPixel*)((CLLPBYTE)pSrc->ptr + pSrc->pitch * (ySrc + y) + xSrc);
+      _TPixel* d = (_TPixel*)((CLLPBYTE)pDest->ptr + pDest->pitch * (yDest + y)) + xDest;
+      const _TPixel* s = (const _TPixel*)((CLLPBYTE)pSrc->ptr + pSrc->pitch * (ySrc + y)) + xSrc;
       for(int x = 0; x < nCopyWidth; x++)
       {
         *d++ = *s++;
