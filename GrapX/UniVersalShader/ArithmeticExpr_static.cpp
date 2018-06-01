@@ -441,7 +441,7 @@ namespace UVShader
     // O: out
 #define ARG_MatVecSca    "\x07\x00"
 #define ARG_VecScal      "\x03\x00"
-#define ARG_Vector          "\x02\x00"
+#define ARG_Vector       "\x02\x00"
 #define ARG_Scaler       "\x01\x00"
 #define ARG_Sampler1D    "\x08\x00"
 #define ARG_Sampler2D    "\x10\x00"
@@ -468,6 +468,7 @@ namespace UVShader
     {"log", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"log2", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"exp2", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"sign", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
 
     {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"atan2", INTRINSIC_FUNC::RetType_Argument1, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},

@@ -78,6 +78,7 @@ namespace UVShader
 
   struct TYPEDESC
   {
+    typedef cllist<const TYPEDESC*> CPtrList;
     enum TypeCate
     {
       TypeCate_Empty,
@@ -137,6 +138,8 @@ namespace UVShader
       ArgMask_Sampler3D   = 0x20,
       ArgMask_SamplerCube = 0x40,
       ArgMask_Out         = 0x80,
+      ArgMask_TemplType   = 0xe000,
+      ArgMask_TemplShift  = 13,
     };
 
     GXLPCSTR  name;   // 函数名
@@ -144,6 +147,8 @@ namespace UVShader
                       // -1表示第一个参数的标量值, 例如第一个参数是int3, 则返回值是int
     size_t    count;  // 参数数量
     u16*      params;
+
+    static int GetTypeTemplateTypeIndex(GXDWORD dwMasks);
   };
 
   struct INTRINSIC_FUNC2
@@ -604,7 +609,7 @@ namespace UVShader
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
 #ifdef ENABLE_SYNTAX_VERIFY
-    const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
+    const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
     const TYPEDESC* InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
@@ -626,7 +631,7 @@ namespace UVShader
     //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
     GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode);
-    GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TOKEN& tkType, const TYPEDESC* pType, const SYNTAXNODE& rNode);
+    GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
