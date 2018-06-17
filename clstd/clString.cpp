@@ -1852,10 +1852,10 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
-    void _CLSTR_IMPL::Replace(size_t idx, size_t uCount, const _TCh* pStr)
+    size_t _CLSTR_IMPL::Replace(size_t idx, size_t uCount, const _TCh* pStr)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    const size_t uInputLength = pStr == NULL ? 0 : _Traits::StringLength(pStr);
+    const size_t uInputLength = (pStr == NULL) ? 0 : _Traits::StringLength(pStr);
     if(idx > uStrLength)
       idx = uStrLength;
 
@@ -1874,6 +1874,10 @@ namespace clstd
       _Reduce(uStrLength - uCount + uInputLength);
     if(pStr && uInputLength) {
       _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
+      return (idx + uStrLength);
+    }
+    else {
+      return idx;
     }
   }
 
@@ -1893,6 +1897,18 @@ namespace clstd
       }
     }
     return nCount;
+  }
+
+  _CLSTR_TEMPL
+    _CLSTR_IMPL& _CLSTR_IMPL::Replace(const _TCh* szFind, const _TCh* szReplace, size_t uStart)
+  {
+    size_t pos;
+    size_t nFindLen = _Traits::StringLength(szFind);
+    while((pos = Find(szFind, uStart)) != npos)
+    {
+      uStart = Replace(pos, nFindLen, szReplace);
+    }
+    return *this;
   }
 
   _CLSTR_TEMPL
