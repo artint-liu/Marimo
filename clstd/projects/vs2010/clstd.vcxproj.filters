@@ -91,6 +91,7 @@
     <ClCompile Include="..\..\clImageDecoder.cpp" />
     <ClCompile Include="..\..\clStringAttach.cpp" />
     <ClCompile Include="..\..\clSchedule.cpp" />
+    <ClCompile Include="..\..\clParallelWork.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\clFile.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="..\..\clSchedule.h" />
     <ClInclude Include="..\..\clLinkedList.h" />
     <ClInclude Include="..\..\clStablePool.h" />
+    <ClInclude Include="..\..\clParallelWork.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Smart">
