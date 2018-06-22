@@ -8,6 +8,12 @@
 
 using namespace clstd;
 
+struct NOR
+{
+  float length;
+  float squarelen;
+};
+
 struct DESC
 {
   float x;
@@ -17,10 +23,8 @@ struct DESC
 };
 
 
-int main()
+void TestForEach1()
 {
-  CLOG("Sample ParallelWork");
-
   ParallelWork pw;
   clvector<DESC> sVec;
   cllist<DESC> sList;
@@ -37,7 +41,7 @@ int main()
   }
   sList.insert(sList.begin(), sVec.begin(), sVec.end());
 
-  for (auto it = sVec.begin(); it != sVec.end(); ++it) {
+  for(auto it = sVec.begin(); it != sVec.end(); ++it) {
     TRACE("%.2f,%.2f,%.2f,%.2f\n", it->x, it->y, it->z, it->nor);
   }
 
@@ -82,6 +86,61 @@ int main()
   for(auto it = sVec.begin(); it != sVec.end(); ++it) {
     TRACE("%.2f,%.2f,%.2f,%.2f\n", it->x, it->y, it->z, it->nor);
   }
+}
+
+void TestForEach2()
+{
+  ParallelWork pw;
+  clvector<DESC> sVec;
+  cllist<DESC> sList;
+  cllist<NOR> sNors;
+  sVec.reserve(1000);
+  clstd::Rand r;
+  for(size_t i = 0; i < sVec.capacity(); i++)
+  {
+    DESC d;
+    d.x = r.randf();
+    d.y = r.randf();
+    d.z = r.randf();
+    d.nor = 0;
+    sVec.push_back(d);
+  }
+  sList.insert(sList.begin(), sVec.begin(), sVec.end());
+
+  NOR n = { 0 };
+  sNors.insert(sNors.begin(), sList.size(), n);
+
+
+  TRACE("原始数据\n");
+  for(auto it = sNors.begin(); it != sNors.end(); ++it) {
+    TRACE("%.2f,%.2f\t", it->squarelen, it->length);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  TRACE("\n=== TestForEach2 ===\n");
+  pw.ForEach(sNors, sList, [](void* pData, const void* pSrc)
+  {
+    const DESC* desc = reinterpret_cast<const DESC*>(pSrc);
+    NOR* pNor = reinterpret_cast<NOR*>(pData);
+
+    // 求平方和与长度
+    pNor->squarelen = (desc->x * desc->x + desc->y * desc->y + desc->z * desc->z);
+    pNor->length = sqrt(pNor->squarelen);
+  });
+
+  TRACE("\n结果\n");
+  for(auto it = sNors.begin(); it != sNors.end(); ++it) {
+    TRACE("%.2f,%.2f\t", it->squarelen, it->length);
+  }
+  TRACE("\n");
+}
+
+int main()
+{
+  CLOG("Sample ParallelWork");
+
+  TestForEach1();
+  TestForEach2();
 
 	return 0;
 }
