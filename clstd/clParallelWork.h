@@ -43,7 +43,7 @@ namespace clstd
     }
 
     template<class _DestT, class _SrcT>
-    void ForEach(cllist<_DestT>& rDestList, cllist<_SrcT>& rSrcList, std::function<void(void*, const void*)> fn)
+    void ForEach(cllist<_DestT>& rDestList, const cllist<_SrcT>& rSrcList, std::function<void(void*, const void*)> fn)
     {
       clvector<_DestT> rDestArray;
       clvector<_SrcT> rSrcArray;
