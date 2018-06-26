@@ -3430,6 +3430,29 @@ NOT_INC_P:
   }
 #endif
 
+  const TOKEN* CodeParser::Verify_VariableWithSeamantic(const SYNTAXNODE::GLOB& glob)
+  {
+    // 递归解析带语意的变量定义
+    // <variable> [: seamantic1] [: seamantic2] ...
+    if(glob.IsToken())
+    {
+      return glob.pTokn;
+    }
+    else if(glob.IsNode())
+    {
+      if(glob.pNode->CompareOpcode(':'))
+      {
+        return Verify_VariableWithSeamantic(glob.pNode->Operand[0]);
+      }
+      else
+      {
+        PARSER_BREAK(glob);
+      }
+    }
+    CLBREAK;
+    return NULL;
+  }
+
   GXBOOL CodeParser::Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList)
   {
     clStringW str;
@@ -3464,6 +3487,7 @@ NOT_INC_P:
   GXBOOL CodeParser::Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition); // 只检查定义
+    const TYPEDESC* pRightTypeDesc = NULL;
 
     if(pNode->Operand[0].IsToken())
     {
@@ -3493,6 +3517,7 @@ NOT_INC_P:
         {
           if(pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Definition)
           {
+            // 递归
             return Verify_VariableDefinition(sNameSet, pNode->Operand[1].pNode);
           }
           else {
@@ -3506,6 +3531,10 @@ NOT_INC_P:
           OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(4430, "缺少类型说明符"));
           return FALSE;
         }
+      }
+      else {
+        // ASSERT is type
+        //PARSER_BREAK(pNode->Operand[0]);
       }
     }
 
@@ -3525,22 +3554,29 @@ NOT_INC_P:
     {
       if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
       {
-        //// FIXME: 临时写法
-        //ptkVar = &second_glob.pNode->GetAnyTokenAB();
-        //pType = sNameSet.RegisterVariable(strType, ptkVar);
-        //ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
-        //// /临时写法
-
         pType = sNameSet.RegisterMultidimVariable(strType, second_glob.pNode);
       }
       else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
       {
         CLBREAK;
       }
-      else if(second_glob.pNode->CompareOpcode(':') || // 语义
-        second_glob.pNode->CompareOpcode('=')) // 赋值
+      else if(second_glob.pNode->CompareOpcode(':')) // 语义
       {
-        ptkVar = &second_glob.pNode->GetAnyTokenAB();
+        //ptkVar = &second_glob.pNode->GetAnyTokenAB();
+        ptkVar = Verify_VariableWithSeamantic(second_glob);
+        if(ptkVar)
+        {
+          pType = sNameSet.RegisterVariable(strType, ptkVar);
+          ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
+          return TRUE;
+        }
+        return FALSE;
+      }
+      else if(second_glob.pNode->CompareOpcode('=')) // 赋值
+      {
+        //ptkVar = &second_glob.pNode->GetAnyTokenAB();
+        pRightTypeDesc = InferRightValueType2(sNameSet, second_glob.pNode->Operand[1], ptkVar);
+        ptkVar = Verify_VariableWithSeamantic(second_glob.pNode->Operand[0]);
         pType = sNameSet.RegisterVariable(strType, ptkVar);
         ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
       }
@@ -3624,10 +3660,29 @@ NOT_INC_P:
     //  return FALSE;
     //}
 
-    return pNode->Operand[1].IsToken() ? TRUE
-      : Verify2_VariableInit(sNameSet, pType, *pNode->Operand[1].pNode);
+    //return pNode->Operand[1].IsToken() ? TRUE
+    //  : Verify2_VariableInit(sNameSet, pType, *pNode->Operand[1].pNode);
+    if(pNode->Operand[1].IsNode())
+    {
+      ASSERT(pRightTypeDesc != NULL ||
+        second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript); // 下标情况下可以没有pRightTypeDesc
+
+      if(pRightTypeDesc)
+      {
+        const TOKEN& token = pNode->GetAnyTokenPAB();
+        if(TryTypeCasting(pType, pRightTypeDesc, &token) == FALSE)
+        {
+          clStringW strFrom = pRightTypeDesc->name;
+          clStringW strTo = pType->name;
+          OutputErrorW(token, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+          return FALSE;
+        }
+      }
+    }
+    return TRUE;
   }
 
+#if 0
   GXBOOL CodeParser::Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
@@ -3659,6 +3714,7 @@ NOT_INC_P:
 
     return result;
   }
+#endif // 0
 
   GXBOOL CodeParser::Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext)
   {
@@ -3681,7 +3737,7 @@ NOT_INC_P:
         }
         else if(pNode->Operand[0].IsToken())
         {
-          if(InferRightValueType(NULL, sNameContext, pNode->Operand[0], pNode->pOpcode) == FALSE)
+          if(InferRightValueType2(sNameContext, pNode->Operand[0], pNode->pOpcode) == NULL)
           {
             result = FALSE;
           }
@@ -3699,7 +3755,8 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
       {
-        result = InferRightValueType(NULL, sNameContext, pNode->Operand[0], NULL) && result;
+        const TYPEDESC* pTypeDesc = InferRightValueType2(sNameContext, pNode->Operand[0], NULL);
+        result = result && (pTypeDesc != NULL);
         ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
         return TRUE;
       }
@@ -3773,14 +3830,22 @@ NOT_INC_P:
           {
             // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
             // TODO: 需要验证左值
-            const TYPEDESC* pTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
-            if(pTypeDesc == NULL) {
-              result = FALSE;
-            }
-            else if(InferRightValueType(pTypeDesc, sNameContext, pNode->Operand[1], pNode->pOpcode) == FALSE)
+            const TYPEDESC* pRightTypeDesc = InferRightValueType2(sNameContext, pNode->Operand[1], pNode->pOpcode);
+            const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
+            if(TryTypeCasting(pLeftTypeDesc, pRightTypeDesc, pNode->pOpcode) == FALSE)
             {
+              clStringW strFrom = pRightTypeDesc->name;
+              clStringW strTo = pLeftTypeDesc->name;
+              OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
               result = FALSE;
             }
+            //if(pTypeDesc == NULL) {
+            //  result = FALSE;
+            //}
+            //else if(InferRightValueType2(pTypeDesc, sNameContext, pNode->Operand[1], pNode->pOpcode) == NULL)
+            //{
+            //  result = FALSE;
+            //}
           }
           else if(pNode->pOpcode->unary)
           {
@@ -3788,7 +3853,7 @@ NOT_INC_P:
             {
               if(pNode->Operand[i].ptr)
               {
-                if(InferRightValueType(NULL, sNameContext, pNode->Operand[i], pNode->pOpcode) == FALSE)
+                if(InferRightValueType2(sNameContext, pNode->Operand[i], pNode->pOpcode) == NULL)
                 {
                   result = FALSE;
                 }
@@ -3798,7 +3863,7 @@ NOT_INC_P:
           }
           else
           {
-            if(InferRightValueType(NULL, sNameContext, pNode->Operand[1], pNode->pOpcode) == FALSE)
+            if(InferRightValueType2(sNameContext, pNode->Operand[1], pNode->pOpcode) == NULL)
             {
               result = FALSE;
             }
@@ -4500,7 +4565,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  GXBOOL CodeParser::InferRightValueType(const TYPEDESC* pLeftType, NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation)
+  const TYPEDESC* CodeParser::InferRightValueType2(NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation)
   {
     // 这个函数外部不输出 Error/Warning
     ASSERT(right_glob.IsNode() || right_glob.IsToken());
@@ -4509,22 +4574,22 @@ NOT_INC_P:
     const TYPEDESC* pRightType = InferType(sNameSet, right_glob);
     if(pRightType == NULL) {
       OutputErrorW(*right_glob.GetFirstToken(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
-      return FALSE;
     }
+    return pRightType;
 
-    if(pLeftType)
-    {
-      ASSERT(pLocation);
-      const GXBOOL bCastResult = TryTypeCasting(pLeftType, pRightType, pLocation);
-      if(bCastResult == FALSE)
-      {
-        clStringW strLeft = pLeftType->name;
-        clStringW strRight = pRightType->name;
-        OutputErrorW(*pLocation, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strRight.CStr(), strLeft.CStr());
-      }
-      return bCastResult;
-    }
-    return TRUE;
+    //if(pLeftType)
+    //{
+    //  ASSERT(pLocation);
+    //  const GXBOOL bCastResult = TryTypeCasting(pLeftType, pRightType, pLocation);
+    //  if(bCastResult == FALSE)
+    //  {
+    //    clStringW strLeft = pLeftType->name;
+    //    clStringW strRight = pRightType->name;
+    //    OutputErrorW(*pLocation, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strRight.CStr(), strLeft.CStr());
+    //  }
+    //  return bCastResult;
+    //}
+    //return TRUE;
   }
   
   GXBOOL CodeParser::CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo)
