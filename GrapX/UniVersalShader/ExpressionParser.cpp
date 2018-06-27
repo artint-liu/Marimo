@@ -3832,20 +3832,20 @@ NOT_INC_P:
             // TODO: 需要验证左值
             const TYPEDESC* pRightTypeDesc = InferRightValueType2(sNameContext, pNode->Operand[1], pNode->pOpcode);
             const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
+            
             if(TryTypeCasting(pLeftTypeDesc, pRightTypeDesc, pNode->pOpcode) == FALSE)
             {
-              clStringW strFrom = pRightTypeDesc->name;
-              clStringW strTo = pLeftTypeDesc->name;
-              OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
-              result = FALSE;
+              if(*pNode->pOpcode == "*=" && IsComponent(NULL, pRightTypeDesc, pLeftTypeDesc))
+              {
+              }
+              else
+              {
+                clStringW strFrom = pRightTypeDesc->name;
+                clStringW strTo = pLeftTypeDesc->name;
+                OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+                result = FALSE;
+              }
             }
-            //if(pTypeDesc == NULL) {
-            //  result = FALSE;
-            //}
-            //else if(InferRightValueType2(pTypeDesc, sNameContext, pNode->Operand[1], pNode->pOpcode) == NULL)
-            //{
-            //  result = FALSE;
-            //}
           }
           else if(pNode->pOpcode->unary)
           {
@@ -4310,40 +4310,16 @@ NOT_INC_P:
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
       return InferSubscriptType(sNameSet, pNode);
-      //const TYPEDESC* pTypeDesc = NULL;
-      //if(pNode->Operand[0].ptr)
-      //{
-      //  pTypeDesc = InferType(sNameSet, pNode->Operand[0]);
-      //}
-      //else
-      //{
-      //  CLBREAK;
-      //}
-
-      //if(pTypeDesc->cate != TYPEDESC::TypeCate_MultiDim)
-      //{
-      //  OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组或指针类型"));
-      //  return NULL;
-      //}
-
-      //const TYPEDESC* pSubscriptType = InferType(sNameSet, pNode->Operand[1]);
-      //if(pSubscriptType->cate != TYPEDESC::TypeCate_IntegerNumeric)
-      //{
-      //  OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
-      //  return NULL;
-      //}
-
-      //return pTypeDesc->pNextDim;
     }
     else if(pNode->pOpcode)
     {
       if(pNode->pOpcode->unary)
       {
-        ASSERT(
+        ASSERT(*pNode->pOpcode == '!' ||
           *pNode->pOpcode == '-' ||
           *pNode->pOpcode == '+' ||
           *pNode->pOpcode == "--" ||
-          *pNode->pOpcode == "++");
+          *pNode->pOpcode == "++" );
 
         if(pNode->pOpcode->unary_mask == 0x01)
         {
@@ -4420,11 +4396,6 @@ NOT_INC_P:
       }
       else {
         return InferDifferentTypesOfCalculations(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
-
-//#ifdef _DEBUG
-//        OutputErrorW(pNode->GetAnyTokenPAB().marker, 0);
-//#endif
-//        CLBREAK; // 没处理
       }
     }
     return NULL;
@@ -4545,6 +4516,7 @@ NOT_INC_P:
     ASSERT(pToken); // 暂时不支持
     if(*pToken == '*')
     {
+      // TODO: 不完整
       if(
         (pFirst->name == STR_FLOAT2 && pSecond->name == STR_FLOAT2x2) ||
         (pFirst->name == STR_FLOAT3 && pSecond->name == STR_FLOAT3x3) ||
@@ -4569,27 +4541,12 @@ NOT_INC_P:
   {
     // 这个函数外部不输出 Error/Warning
     ASSERT(right_glob.IsNode() || right_glob.IsToken());
-    //if(right_glob.IsNode() || right_glob.IsToken())
-    //{
+
     const TYPEDESC* pRightType = InferType(sNameSet, right_glob);
     if(pRightType == NULL) {
       OutputErrorW(*right_glob.GetFirstToken(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
     }
     return pRightType;
-
-    //if(pLeftType)
-    //{
-    //  ASSERT(pLocation);
-    //  const GXBOOL bCastResult = TryTypeCasting(pLeftType, pRightType, pLocation);
-    //  if(bCastResult == FALSE)
-    //  {
-    //    clStringW strLeft = pLeftType->name;
-    //    clStringW strRight = pRightType->name;
-    //    OutputErrorW(*pLocation, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strRight.CStr(), strLeft.CStr());
-    //  }
-    //  return bCastResult;
-    //}
-    //return TRUE;
   }
   
   GXBOOL CodeParser::CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo)
@@ -4698,6 +4655,71 @@ NOT_INC_P:
     }
 
     return FALSE;
+  }
+
+  GXLPCSTR CodeParser::ResolveType(const TYPEDESC* pTypeDesc, int& R, int& C)
+  {
+    // floatN 类型：R=N，C=1
+    // floatNxM 类型：R=N，C=M
+
+    GXLPCSTR szRxC = NULL;
+    GXLPCSTR szScaler = NULL;
+    if(pTypeDesc->name.BeginsWith(STR_HALF))
+    {
+      szScaler = STR_HALF;
+      szRxC = &pTypeDesc->name[clstd::strlenT(szScaler)];
+    }
+    else if(pTypeDesc->name.BeginsWith(STR_FLOAT))
+    {
+      szScaler = STR_FLOAT;
+      szRxC = &pTypeDesc->name[clstd::strlenT(szScaler)];
+    }
+    else if(pTypeDesc->name.BeginsWith(STR_DOUBLE))
+    {
+      szScaler = STR_DOUBLE;
+      szRxC = &pTypeDesc->name[clstd::strlenT(szScaler)];
+    }
+    else
+    {
+      CLBREAK;
+    }
+
+    if(szScaler)
+    {
+      R = szRxC[0] - '0';
+      ASSERT(R >= 1 || R <= 4);
+      if(szRxC[1] != '\0')
+      {
+        ASSERT(szRxC[1] == 'x');
+        C = szRxC[2] - '0';
+        ASSERT(C >= 1 || C <= 4);
+      }
+    }
+    return szScaler;
+  }
+
+  GXBOOL CodeParser::IsComponent(const TYPEDESC* pRowVector, const TYPEDESC* pMatrixDesc, const TYPEDESC* pColumnVector)
+  {
+    ASSERT(pRowVector != NULL || pColumnVector != NULL);
+    ASSERT(pRowVector == NULL || pColumnVector == NULL);
+    GXLPCSTR szScaler = NULL;
+    int R, C;
+    int RV, CV;
+    szScaler = ResolveType(pMatrixDesc, R, C);
+
+    if(pRowVector) {
+      if(_CL_NOT_(pRowVector->name.BeginsWith(szScaler))) {
+        return FALSE;
+      }
+      ResolveType(pRowVector, RV, CV);
+      return RV == R;
+    }
+
+    if(_CL_NOT_(pColumnVector->name.BeginsWith(szScaler))) {
+      return FALSE;
+    }
+    ResolveType(pColumnVector, RV, CV);
+    return RV == C;
   }
 
   //GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
