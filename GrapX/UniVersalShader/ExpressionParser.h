@@ -83,14 +83,17 @@ namespace UVShader
     {
       TypeCate_Empty,
       TypeCate_Void,
-      TypeCate_FloatNumeric,    // 浮点-数字类型
-      TypeCate_IntegerNumeric,  // 整数-数字类型
+      TypeCate_FloatScaler,    // 浮点-数字类型
+      TypeCate_IntegerScaler,  // 整数-数字类型
       TypeCate_MultiDim,  // 多维类型
       TypeCate_String,
       TypeCate_Sampler1D,
       TypeCate_Sampler2D,
       TypeCate_Sampler3D,
       TypeCate_SamplerCube,
+      //TypeCate_Scaler, // TODO: 与TypeCate_FloatNumeric，TypeCate_IntegerNumeric重复
+      TypeCate_Vector,
+      TypeCate_Matrix,
       TypeCate_Struct,
     };
     typedef clvector<size_t> DimList_T;
@@ -104,6 +107,9 @@ namespace UVShader
 
     GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
+    GXLPCSTR Resolve(int& R, int& C) const;
+    GXBOOL IsVector() const;
+    GXBOOL IsMatrix() const;
   };
 
   struct FUNCDESC // 用户定义的函数描述
@@ -626,7 +632,7 @@ namespace UVShader
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXDWORD dwArgMask, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
 
-    static GXLPCSTR ResolveType(const TYPEDESC* pTypeDesc, int& R, int& C);
+    //static GXLPCSTR ResolveType(const TYPEDESC* pTypeDesc, int& R, int& C);
     static GXBOOL IsComponent(const TYPEDESC* pRowVector, const TYPEDESC* pMatrixDesc, const TYPEDESC* pColumnVector);
 
 #ifdef ENABLE_SYNTAX_VERIFY

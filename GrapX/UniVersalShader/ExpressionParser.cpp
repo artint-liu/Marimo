@@ -14,7 +14,8 @@
 
 #define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "没实现的功能"); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
-#define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatNumeric || _CATE == TYPEDESC::TypeCate_IntegerNumeric)
+#define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler)
+#define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
 //#define VOID_TYPEDESC ((const TYPEDESC*)-1)
 #define ERROR_TYPEDESC ((const TYPEDESC*)-1)
 
@@ -103,28 +104,28 @@ namespace UVShader
   extern GXLPCSTR STR_FLOAT2;
   extern GXLPCSTR STR_FLOAT3;
   extern GXLPCSTR STR_FLOAT4;
-  extern GXLPCSTR STR_VEC2;
-  extern GXLPCSTR STR_VEC3;
-  extern GXLPCSTR STR_VEC4;
+  //extern GXLPCSTR STR_VEC2;
+  //extern GXLPCSTR STR_VEC3;
+  //extern GXLPCSTR STR_VEC4;
 
-  extern GXLPCSTR STR_IVEC2;
-  extern GXLPCSTR STR_IVEC3;
-  extern GXLPCSTR STR_IVEC4;
-  extern GXLPCSTR STR_UVEC2;
-  extern GXLPCSTR STR_UVEC3;
-  extern GXLPCSTR STR_UVEC4;
-  extern GXLPCSTR STR_MAT2;  // 两行两列
-  extern GXLPCSTR STR_MAT2x2;
-  extern GXLPCSTR STR_MAT3;   // 三行三列
-  extern GXLPCSTR STR_MAT3x3;
-  extern GXLPCSTR STR_MAT4;   // 四行四列
-  extern GXLPCSTR STR_MAT4x4;
-  extern GXLPCSTR STR_MAT2x3;  // 三行两列
-  extern GXLPCSTR STR_MAT2x4;  // 四行两列
-  extern GXLPCSTR STR_MAT3x2;  // 两行三列
-  extern GXLPCSTR STR_MAT3x4;  // 四行三列
-  extern GXLPCSTR STR_MAT4x2;  // 两行四列
-  extern GXLPCSTR STR_MAT4x3;  // 三行四列
+  //extern GXLPCSTR STR_IVEC2;
+  //extern GXLPCSTR STR_IVEC3;
+  //extern GXLPCSTR STR_IVEC4;
+  //extern GXLPCSTR STR_UVEC2;
+  //extern GXLPCSTR STR_UVEC3;
+  //extern GXLPCSTR STR_UVEC4;
+  //extern GXLPCSTR STR_MAT2;  // 两行两列
+  //extern GXLPCSTR STR_MAT2x2;
+  //extern GXLPCSTR STR_MAT3;   // 三行三列
+  //extern GXLPCSTR STR_MAT3x3;
+  //extern GXLPCSTR STR_MAT4;   // 四行四列
+  //extern GXLPCSTR STR_MAT4x4;
+  //extern GXLPCSTR STR_MAT2x3;  // 三行两列
+  //extern GXLPCSTR STR_MAT2x4;  // 四行两列
+  //extern GXLPCSTR STR_MAT3x2;  // 两行三列
+  //extern GXLPCSTR STR_MAT3x4;  // 四行三列
+  //extern GXLPCSTR STR_MAT4x2;  // 两行四列
+  //extern GXLPCSTR STR_MAT4x3;  // 三行四列
 
   extern GXLPCSTR STR_DOUBLE;
 
@@ -152,6 +153,11 @@ namespace UVShader
   extern GXLPCSTR STR_DOUBLE4x2;
   extern GXLPCSTR STR_DOUBLE4x3;
   extern GXLPCSTR STR_DOUBLE4x4;
+
+  const size_t STR_HALF_LENGTH   = clstd::strlenT(STR_HALF);
+  const size_t STR_FLOAT_LENGTH  = clstd::strlenT(STR_FLOAT);
+  const size_t STR_DOUBLE_LENGTH = clstd::strlenT(STR_DOUBLE);
+
 
   //////////////////////////////////////////////////////////////////////////
 #if 0
@@ -3576,6 +3582,9 @@ NOT_INC_P:
       {
         //ptkVar = &second_glob.pNode->GetAnyTokenAB();
         pRightTypeDesc = InferRightValueType2(sNameSet, second_glob.pNode->Operand[1], ptkVar);
+        if(pRightTypeDesc == NULL) {
+          return FALSE;
+        }
         ptkVar = Verify_VariableWithSeamantic(second_glob.pNode->Operand[0]);
         pType = sNameSet.RegisterVariable(strType, ptkVar);
         ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
@@ -3830,9 +3839,16 @@ NOT_INC_P:
           {
             // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
             // TODO: 需要验证左值
+            const size_t nErrorCount = DbgErrorCount();
             const TYPEDESC* pRightTypeDesc = InferRightValueType2(sNameContext, pNode->Operand[1], pNode->pOpcode);
             const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
             
+            if(pRightTypeDesc == NULL || pLeftTypeDesc == NULL)
+            {
+              ASSERT(DbgErrorCount() > nErrorCount);
+              return FALSE;
+            }
+
             if(TryTypeCasting(pLeftTypeDesc, pRightTypeDesc, pNode->pOpcode) == FALSE)
             {
               if(*pNode->pOpcode == "*=" && IsComponent(NULL, pRightTypeDesc, pLeftTypeDesc))
@@ -4282,9 +4298,6 @@ NOT_INC_P:
           OutputErrorW(*pToken, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是“%s”"), pToken->ToString(str).CStr());
         }
       }
-      //if(val.fValue == 100.0f) {
-      //  CLBREAK;
-      //}
       return sNameSet.GetType(val.rank);
     }
 
@@ -4365,7 +4378,7 @@ NOT_INC_P:
         ASSERT(pTypeDesc->pDesc->rank >= VALUE::Rank_First && pTypeDesc->pDesc->rank <= VALUE::Rank_Last);
         return pTypeDesc;
       }
-      else if(bFirstNumeric && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Struct)
+      else if(bFirstNumeric && IS_STRUCT_CATE(pTypeDesc[1]->cate))
       {
         // TODO: 是否应考虑符号?
         if(TryTypeCasting(pTypeDesc[1], pTypeDesc[0], &pNode->GetAnyTokenPAB())) {
@@ -4374,7 +4387,7 @@ NOT_INC_P:
         CLBREAK; // 没处理
         return NULL;
       }
-      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Struct && bSecondNumeric)
+      else if(IS_STRUCT_CATE(pTypeDesc[0]->cate) && bSecondNumeric)
       {
         // TODO: 是否应考虑符号?
         if(TryTypeCasting(pTypeDesc[0], pTypeDesc[1], &pNode->GetAnyTokenPAB())) {
@@ -4383,7 +4396,7 @@ NOT_INC_P:
         CLBREAK; // 没处理
         return NULL;
       }
-      else if(pTypeDesc[0]->cate == TYPEDESC::TypeCate_Struct && pTypeDesc[1]->cate == TYPEDESC::TypeCate_Struct)
+      else if(IS_STRUCT_CATE(pTypeDesc[0]->cate) && IS_STRUCT_CATE(pTypeDesc[1]->cate))
       {
         if(pTypeDesc[0]->name == pTypeDesc[1]->name)
         {
@@ -4478,7 +4491,7 @@ NOT_INC_P:
     }
 
     const TYPEDESC* pSubscriptType = InferType(sNameSet, pNode->Operand[1]);
-    if(pSubscriptType->cate != TYPEDESC::TypeCate_IntegerNumeric)
+    if(pSubscriptType->cate != TYPEDESC::TypeCate_IntegerScaler)
     {
       OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
       return NULL;
@@ -4488,7 +4501,7 @@ NOT_INC_P:
     {
       return pTypeDesc->pNextDim;
     }
-    else if(pTypeDesc->cate == TYPEDESC::TypeCate_Struct && pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
+    else if(IS_STRUCT_CATE(pTypeDesc->cate) && pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
     {
       pTypeDesc = pTypeDesc->pDesc->lpSubscript(pTypeDesc->pDesc, sNameSet);
       ASSERT(pTypeDesc);
@@ -4517,17 +4530,11 @@ NOT_INC_P:
     if(*pToken == '*')
     {
       // TODO: 不完整
-      if(
-        (pFirst->name == STR_FLOAT2 && pSecond->name == STR_FLOAT2x2) ||
-        (pFirst->name == STR_FLOAT3 && pSecond->name == STR_FLOAT3x3) ||
-        (pFirst->name == STR_FLOAT4 && pSecond->name == STR_FLOAT4x4) )
+      if(pFirst->IsVector() && pSecond->IsMatrix() && IsComponent(pFirst, pSecond, NULL))
       {
         return pFirst;
       }
-      else if(
-        (pFirst->name == STR_FLOAT2x2 && pSecond->name == STR_FLOAT2) ||
-        (pFirst->name == STR_FLOAT3x3 && pSecond->name == STR_FLOAT3) ||
-        (pFirst->name == STR_FLOAT4x4 && pSecond->name == STR_FLOAT4) )
+      else if(pFirst->IsMatrix() && pSecond->IsVector() && IsComponent(NULL, pFirst, pSecond))
       {
         return pSecond;
       }
@@ -4578,7 +4585,7 @@ NOT_INC_P:
       }
       return TRUE;
     }
-    else if(pTypeTo->cate == TYPEDESC::TypeCate_Struct && pTypeFrom->cate == TYPEDESC::TypeCate_Struct)
+    else if(IS_STRUCT_CATE(pTypeTo->cate) && IS_STRUCT_CATE(pTypeFrom->cate))
     {
       if(pTypeTo->name == pTypeFrom->name)
       {
@@ -4586,7 +4593,7 @@ NOT_INC_P:
         return TRUE;
       }
     }
-    else if(pTypeTo->cate == TYPEDESC::TypeCate_Struct && IS_NUMERIC_CATE(pTypeFrom->cate))
+    else if(IS_STRUCT_CATE(pTypeTo->cate) && IS_NUMERIC_CATE(pTypeFrom->cate))
     {
       return (pTypeTo->pDesc && pTypeTo->pDesc->component_type &&
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));
@@ -4657,47 +4664,6 @@ NOT_INC_P:
     return FALSE;
   }
 
-  GXLPCSTR CodeParser::ResolveType(const TYPEDESC* pTypeDesc, int& R, int& C)
-  {
-    // floatN 类型：R=N，C=1
-    // floatNxM 类型：R=N，C=M
-
-    GXLPCSTR szRxC = NULL;
-    GXLPCSTR szScaler = NULL;
-    if(pTypeDesc->name.BeginsWith(STR_HALF))
-    {
-      szScaler = STR_HALF;
-      szRxC = &pTypeDesc->name[clstd::strlenT(szScaler)];
-    }
-    else if(pTypeDesc->name.BeginsWith(STR_FLOAT))
-    {
-      szScaler = STR_FLOAT;
-      szRxC = &pTypeDesc->name[clstd::strlenT(szScaler)];
-    }
-    else if(pTypeDesc->name.BeginsWith(STR_DOUBLE))
-    {
-      szScaler = STR_DOUBLE;
-      szRxC = &pTypeDesc->name[clstd::strlenT(szScaler)];
-    }
-    else
-    {
-      CLBREAK;
-    }
-
-    if(szScaler)
-    {
-      R = szRxC[0] - '0';
-      ASSERT(R >= 1 || R <= 4);
-      if(szRxC[1] != '\0')
-      {
-        ASSERT(szRxC[1] == 'x');
-        C = szRxC[2] - '0';
-        ASSERT(C >= 1 || C <= 4);
-      }
-    }
-    return szScaler;
-  }
-
   GXBOOL CodeParser::IsComponent(const TYPEDESC* pRowVector, const TYPEDESC* pMatrixDesc, const TYPEDESC* pColumnVector)
   {
     ASSERT(pRowVector != NULL || pColumnVector != NULL);
@@ -4705,62 +4671,23 @@ NOT_INC_P:
     GXLPCSTR szScaler = NULL;
     int R, C;
     int RV, CV;
-    szScaler = ResolveType(pMatrixDesc, R, C);
+    szScaler = pMatrixDesc->Resolve(R, C);
 
     if(pRowVector) {
       if(_CL_NOT_(pRowVector->name.BeginsWith(szScaler))) {
         return FALSE;
       }
-      ResolveType(pRowVector, RV, CV);
+      pRowVector->Resolve(RV, CV);
       return RV == R;
     }
 
     if(_CL_NOT_(pColumnVector->name.BeginsWith(szScaler))) {
       return FALSE;
     }
-    ResolveType(pColumnVector, RV, CV);
+    pColumnVector->Resolve(RV, CV);
     return RV == C;
   }
 
-  //GXBOOL CodeParser::Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob)
-  //{
-  //  // 这个函数外部不输出 Error/Warning
-  //  CLBREAK;
-  //  //const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(pNode->Operand[1].pNode);
-  //  // struct RESULT {
-  //  //   TYPEDESC::TypeCate cate;
-  //  //   TYPEDESC* pType;
-  //  //   clStringA strTypeName;
-  //  // };
-
-  //  const NODE_CALC* pnodeRightValue = static_cast<const NODE_CALC*>(right_glob.pNode);
-  //  if(IS_NUMERIC_CATE(pType->cate))
-  //  {
-  //    VALUE v;
-  //    VALUE::State s = pnodeRightValue->Calculate(this, sNameSet, v);
-  //    if(TEST_FLAG(s, VALUE::State_ErrorMask))
-  //    {
-  //      OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5026, "无法计算数学表达式"));
-  //      return FALSE;
-  //    }
-  //    CLNOP
-  //  }
-  //  else if(pType->cate == TYPEDESC::TypeCate_String)
-  //  {
-  //    // token解析会自动连接字符串, 所以不会出现两个token都是字符串的情况
-  //    OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5027, "字符串表达式语法错误"));
-  //    return FALSE;
-  //  }
-  //  else if(pType->cate == TYPEDESC::TypeCate_Struct)
-  //  {
-  //    if(mode == SYNTAXNODE::MODE_ArrayAssignment)
-  //    {
-  //      OutputErrorW(pnodeRightValue->GetAnyTokenAB(), UVS_EXPORT_TEXT(5028, "不支持结构体赋值"));
-  //      return FALSE;
-  //    }
-  //  }
-  //  return TRUE;
-  //}
 #endif // #ifdef ENABLE_SYNTAX_VERIFY
 
   //////////////////////////////////////////////////////////////////////////
@@ -4864,7 +4791,7 @@ NOT_INC_P:
     for(int i = 0; s_aIntrinsicStruct[i].name; i++)
     {
       //if(strType == s_aIntrinsicStruct[i].name) {
-      td.cate = TYPEDESC::TypeCate_Struct;
+      td.cate = static_cast<TYPEDESC::TypeCate>(s_aIntrinsicStruct[i].cate);
       td.name = s_aIntrinsicStruct[i].name;
       td.pDesc = &s_aIntrinsicStruct[i];
       m_TypeMap.insert(clmake_pair(td.name, td));
@@ -4876,11 +4803,11 @@ NOT_INC_P:
     {
       if(s_aBaseType[i].rank == VALUE::Rank_Float || s_aBaseType[i].rank == VALUE::Rank_Double)
       {
-        td.cate = TYPEDESC::TypeCate_FloatNumeric;
+        td.cate = TYPEDESC::TypeCate_FloatScaler;
       }
       else
       {
-        td.cate = TYPEDESC::TypeCate_IntegerNumeric;
+        td.cate = TYPEDESC::TypeCate_IntegerScaler;
       }
       td.name = s_aBaseType[i].name;
       td.pDesc = &s_aBaseType[i];
@@ -5278,17 +5205,6 @@ NOT_INC_P:
       : (m_pParent ? m_pParent->GetVariable(ptkName) : NULL);
   }
 
-  //const TYPEDESC* NameContext::TryGetIntrinsicType(const clStringA& strTypeName) const
-  //{
-  //  TYPEDESC td = { TYPEDESC::TypeCate_Empty };
-
-  //  if(TestIntrinsicType(&td, strTypeName) == FALSE) {
-  //    return NULL;
-  //  }
-
-  //  return &GetRoot()->m_TypeMap.insert(clmake_pair(strTypeName, td)).first->second;
-  //}
-
   const TYPEDESC* NameContext::GetType(const clStringA& strType) const
   {
     auto it = m_TypeMap.find(strType);
@@ -5547,6 +5463,65 @@ NOT_INC_P:
       }
     }
     return match_count == ptkMember->length;
+  }
+
+  GXLPCSTR TYPEDESC::Resolve(int& R, int& C) const
+  {
+    // floatN 类型：R=N，C=0
+    // floatNxM 类型：R=N，C=M
+
+    GXLPCSTR szRxC = NULL;
+    GXLPCSTR szScaler = NULL;
+    if(name.BeginsWith(STR_HALF))
+    {
+      szScaler = STR_HALF;
+      szRxC = &name[STR_HALF_LENGTH];
+    }
+    else if(name.BeginsWith(STR_FLOAT))
+    {
+      szScaler = STR_FLOAT;
+      szRxC = &name[STR_FLOAT_LENGTH];
+    }
+    else if(name.BeginsWith(STR_DOUBLE))
+    {
+      szScaler = STR_DOUBLE;
+      szRxC = &name[STR_DOUBLE_LENGTH];
+    }
+    else
+    {
+      CLBREAK;
+    }
+
+    R = C = 0;
+
+    if(szScaler)
+    {
+      R = szRxC[0] - '0';
+      ASSERT(R >= 1 || R <= 4);
+      if(szRxC[1] != '\0')
+      {
+        ASSERT(szRxC[1] == 'x');
+        C = szRxC[2] - '0';
+        ASSERT(C >= 1 || C <= 4);
+      }
+    }
+    return szScaler;
+  }
+
+  GXBOOL TYPEDESC::IsVector() const
+  {
+    return (cate == TypeCate_Vector);
+    //int R, C;
+    //Resolve(R, C);
+    //return (R > 0 && C == 0);
+  }
+
+  GXBOOL TYPEDESC::IsMatrix() const
+  {
+    return (cate == TypeCate_Matrix);
+    //int R, C;
+    //Resolve(R, C);
+    //return (R > 0 && C > 0);
   }
 
   int INTRINSIC_FUNC::GetTypeTemplateTypeIndex(GXDWORD dwMasks)

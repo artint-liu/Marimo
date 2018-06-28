@@ -52,27 +52,27 @@ namespace UVShader
   GXLPCSTR STR_DOUBLE4x3 = "double4x3";
   GXLPCSTR STR_DOUBLE4x4 = "double4x4";
 
-  GXLPCSTR STR_VEC2   = "vec2";
-  GXLPCSTR STR_VEC3   = "vec3";
-  GXLPCSTR STR_VEC4   = "vec4";
-  GXLPCSTR STR_IVEC2  = "ivec2";
-  GXLPCSTR STR_IVEC3  = "ivec3";
-  GXLPCSTR STR_IVEC4  = "ivec4";
-  GXLPCSTR STR_UVEC2  = "uvec2";
-  GXLPCSTR STR_UVEC3  = "uvec3";
-  GXLPCSTR STR_UVEC4  = "uvec4";
-  GXLPCSTR STR_MAT2   = "mat2";  // 两行两列
-  GXLPCSTR STR_MAT2x2 = "mat2x2";
-  GXLPCSTR STR_MAT3   = "mat3";   // 三行三列
-  GXLPCSTR STR_MAT3x3 = "mat3x3";
-  GXLPCSTR STR_MAT4   = "mat4";   // 四行四列
-  GXLPCSTR STR_MAT4x4 = "mat4x4";
-  GXLPCSTR STR_MAT2x3 = "mat2x3";  // 三行两列
-  GXLPCSTR STR_MAT2x4 = "mat2x4";  // 四行两列
-  GXLPCSTR STR_MAT3x2 = "mat3x2";  // 两行三列
-  GXLPCSTR STR_MAT3x4 = "mat3x4";  // 四行三列
-  GXLPCSTR STR_MAT4x2 = "mat4x2";  // 两行四列
-  GXLPCSTR STR_MAT4x3 = "mat4x3";  // 三行四列
+  //GXLPCSTR STR_VEC2   = "vec2";
+  //GXLPCSTR STR_VEC3   = "vec3";
+  //GXLPCSTR STR_VEC4   = "vec4";
+  //GXLPCSTR STR_IVEC2  = "ivec2";
+  //GXLPCSTR STR_IVEC3  = "ivec3";
+  //GXLPCSTR STR_IVEC4  = "ivec4";
+  //GXLPCSTR STR_UVEC2  = "uvec2";
+  //GXLPCSTR STR_UVEC3  = "uvec3";
+  //GXLPCSTR STR_UVEC4  = "uvec4";
+  //GXLPCSTR STR_MAT2   = "mat2";  // 两行两列
+  //GXLPCSTR STR_MAT2x2 = "mat2x2";
+  //GXLPCSTR STR_MAT3   = "mat3";   // 三行三列
+  //GXLPCSTR STR_MAT3x3 = "mat3x3";
+  //GXLPCSTR STR_MAT4   = "mat4";   // 四行四列
+  //GXLPCSTR STR_MAT4x4 = "mat4x4";
+  //GXLPCSTR STR_MAT2x3 = "mat2x3";  // 三行两列
+  //GXLPCSTR STR_MAT2x4 = "mat2x4";  // 四行两列
+  //GXLPCSTR STR_MAT3x2 = "mat3x2";  // 两行三列
+  //GXLPCSTR STR_MAT3x4 = "mat3x4";  // 四行三列
+  //GXLPCSTR STR_MAT4x2 = "mat4x2";  // 两行四列
+  //GXLPCSTR STR_MAT4x3 = "mat4x3";  // 三行四列
 
   //static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
 
@@ -373,41 +373,41 @@ namespace UVShader
     //{"double3", VALUE::Rank_Undefined, s_aDoubleXYZW, 6, STR_DOUBLE, "xyz", "rgb"},
     //{"double4", VALUE::Rank_Undefined, s_aDoubleXYZW, 8, STR_DOUBLE, "xyzw", "rgba"},
 
-    {"int2", VALUE::Rank_Undefined, STR_INT, OnVector2},
-    {"int3", VALUE::Rank_Undefined, STR_INT, OnVector3},
-    {"int4", VALUE::Rank_Undefined, STR_INT, OnVector4},
+    {"int2", STR_INT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector2},
+    {"int3", STR_INT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector3},
+    {"int4", STR_INT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector4},
 
-    {"half2", VALUE::Rank_Undefined, STR_HALF, OnVector2, OnFloatVectorSubscript},
-    {"half3", VALUE::Rank_Undefined, STR_HALF, OnVector3, OnFloatVectorSubscript},
-    {"half4", VALUE::Rank_Undefined, STR_HALF, OnVector4, OnFloatVectorSubscript},
+    {"half2", STR_HALF, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector2, OnFloatVectorSubscript},
+    {"half3", STR_HALF, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector3, OnFloatVectorSubscript},
+    {"half4", STR_HALF, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector4, OnFloatVectorSubscript},
 
-    {"uint2", VALUE::Rank_Undefined, STR_UINT, OnVector2},
-    {"uint3", VALUE::Rank_Undefined, STR_UINT, OnVector3},
-    {"uint4", VALUE::Rank_Undefined, STR_UINT, OnVector4},
+    {"uint2", STR_UINT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector2},
+    {"uint3", STR_UINT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector3},
+    {"uint4", STR_UINT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector4},
 
-    {"float2", VALUE::Rank_Undefined, STR_FLOAT, OnVector2, OnFloatVectorSubscript},
-    {"float3", VALUE::Rank_Undefined, STR_FLOAT, OnVector3, OnFloatVectorSubscript},
-    {"float4", VALUE::Rank_Undefined, STR_FLOAT, OnVector4, OnFloatVectorSubscript},
+    {"float2", STR_FLOAT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector2, OnFloatVectorSubscript},
+    {"float3", STR_FLOAT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector3, OnFloatVectorSubscript},
+    {"float4", STR_FLOAT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector4, OnFloatVectorSubscript},
 
-    {"double2", VALUE::Rank_Undefined, STR_DOUBLE, OnVector2, OnFloatVectorSubscript},
-    {"double3", VALUE::Rank_Undefined, STR_DOUBLE, OnVector3, OnFloatVectorSubscript},
-    {"double4", VALUE::Rank_Undefined, STR_DOUBLE, OnVector4, OnFloatVectorSubscript},
+    {"double2", STR_DOUBLE, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector2, OnFloatVectorSubscript},
+    {"double3", STR_DOUBLE, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector3, OnFloatVectorSubscript},
+    {"double4", STR_DOUBLE, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Vector, OnVector4, OnFloatVectorSubscript},
 
-    {"float2x2", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
-    {"float3x3", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
-    {"float4x4", VALUE::Rank_Undefined, STR_FLOAT, NULL, OnFloatMatrixSubscript},
+    {"float2x2", STR_FLOAT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Matrix, NULL, OnFloatMatrixSubscript},
+    {"float3x3", STR_FLOAT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Matrix, NULL, OnFloatMatrixSubscript},
+    {"float4x4", STR_FLOAT, VALUE::Rank_Undefined, TYPEDESC::TypeCate_Matrix, NULL, OnFloatMatrixSubscript},
 
     {NULL},
   };
 
   COMMINTRTYPEDESC s_aBaseType[] =
   {
-    {STR_FLOAT, VALUE::Rank_Float},
-    {STR_HALF, VALUE::Rank_Float},
-    {STR_INT, VALUE::Rank_Signed},
-    {STR_BOOL, VALUE::Rank_Signed},
-    {STR_UINT, VALUE::Rank_Unsigned},
-    {STR_DOUBLE, VALUE::Rank_Double},
+    {STR_HALF,   STR_HALF,   VALUE::Rank_Float, TYPEDESC::TypeCate_FloatScaler},
+    {STR_FLOAT,  STR_FLOAT,  VALUE::Rank_Float, TYPEDESC::TypeCate_FloatScaler},
+    {STR_DOUBLE, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_FloatScaler},
+    {STR_INT,    STR_INT,    VALUE::Rank_Signed, TYPEDESC::TypeCate_IntegerScaler},
+    {STR_BOOL,   STR_BOOL,   VALUE::Rank_Signed, TYPEDESC::TypeCate_IntegerScaler},
+    {STR_UINT,   STR_UINT,   VALUE::Rank_Unsigned, TYPEDESC::TypeCate_IntegerScaler},
     {NULL}
   };
 
@@ -469,10 +469,12 @@ namespace UVShader
     {"log2", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"exp2", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"sign", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"degrees", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
 
     {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"atan2", INTRINSIC_FUNC::RetType_Argument1, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"dot", INTRINSIC_FUNC::RetType_Scaler0, 2, (u16*)ARG_Vector ARG_Vector},
+    {"distance", INTRINSIC_FUNC::RetType_Scaler0, 2, (u16*)ARG_VecScal ARG_VecScal},
     {"cross", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"min", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"max", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
@@ -504,8 +506,9 @@ namespace UVShader
     {"float3", INTRINSIC_FUNC::RetType_FromName, 3, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler},
     {"float4", INTRINSIC_FUNC::RetType_FromName, 4, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
     {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_VecScal ARG_VecScal ARG_Scaler}, // FIXME: 没有验证第一个参数和第二个参数类型相同
-    {"texture2D", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 2维向量
-    {"texture2D", INTRINSIC_FUNC::RetType_Float4, 3, (u16*)ARG_Sampler2D ARG_Vector ARG_Scaler}, // FIXME: 2维向量
+    {"tex2D", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 2维向量
+    {"tex2D", INTRINSIC_FUNC::RetType_Float4, 3, (u16*)ARG_Sampler2D ARG_Vector ARG_Scaler}, // FIXME: 2维向量
+    {"tex2DBias", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 4维向量
     {"mod", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {NULL},
   };

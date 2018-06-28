@@ -51,10 +51,11 @@ namespace UVShader
   struct COMMINTRTYPEDESC
   {
     GXLPCSTR    name;   // 结构体名
-    int         rank;   // VALUE::Rank
     GXLPCSTR    component_type;
-    OPERATORPROC_TOKEN lpDotOverride;
-    OPERATORPROC_NAMECTX lpSubscript; 
+    i16         rank;   // VALUE::Rank
+    i16         cate;   // TYPEDESC::TypeCate
+    OPERATORPROC_TOKEN lpDotOverride; // "."重载
+    OPERATORPROC_NAMECTX lpSubscript; // "[]"下标重载
     //MEMBERLIST* list;   // 成员列表
     //size_t      count;  // 成员数
     //GXLPCSTR    type;
@@ -478,6 +479,7 @@ namespace UVShader
     TOKEN::Array        m_aTokens;
     
     clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
+    size_t              m_nErrorCount;
 
     // 语法节点的内存池
     //SyntaxNodePoolList  m_NodePoolList;
@@ -534,6 +536,7 @@ namespace UVShader
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, int nMinPrecedence); // 递归函数
 
     GXBOOL DbgHasError(int errcode) const;
+    size_t DbgErrorCount() const;
     void DbgDumpScope(clStringA& str, const TKSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     void DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB);

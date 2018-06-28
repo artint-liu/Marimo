@@ -90,6 +90,7 @@ namespace UVShader
   ArithmeticExpression::ArithmeticExpression()
     : m_pMsg(NULL)
     //, m_nMaxPrecedence(0)
+    , m_nErrorCount(0)
     , m_nDbgNumOfExpressionParse(0)
     , m_NodePool(128)
     , m_bRefMsg(FALSE)
@@ -621,6 +622,11 @@ namespace UVShader
     return (m_errorlist.find(errcode) != m_errorlist.end());
   }
 
+  size_t ArithmeticExpression::DbgErrorCount() const
+  {
+    return m_nErrorCount;
+  }
+
   GXBOOL ArithmeticExpression::ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     // 从右到左解析这两种形式:
@@ -957,6 +963,7 @@ namespace UVShader
 
   int ArithmeticExpression::SetError(int err)
   {
+    m_nErrorCount++;
     m_errorlist.insert(err);
     return err;
   }
