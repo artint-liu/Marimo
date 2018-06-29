@@ -393,6 +393,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
     clBuffer* pBuffer = NULL;
     if(file.MapToBuffer(&pBuffer))
     {
+      file.Close();
       UVShader::CodeParser expp(NULL, NULL);
       const UVShader::TOKEN::Array* pTokens;
       expp.Attach((const char*)pBuffer->GetPtr(), pBuffer->GetSize(), 0, strFullname);

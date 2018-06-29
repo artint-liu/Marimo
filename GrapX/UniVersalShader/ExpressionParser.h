@@ -170,7 +170,8 @@ namespace UVShader
     //typedef clvector<size_t> DimList_T;
 
     const TYPEDESC* pDesc;
-    clStringA       strConstValue;  // 常量类型
+    VALUE sConstValue; // 规定 string 类型不能以 const 修饰，所以这里用VALUE
+    //clStringA       strConstValue;  // 常量类型
     //DimList_T       sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
   };
 
@@ -208,7 +209,8 @@ namespace UVShader
       State_DuplicatedVariable = -4, // 重复定义变量
       State_DefineAsType = -5,       // 变量已经被定义为类型
       State_DefineAsVariable = -6,   // 类型已经被定义为变量
-      State_VariableIsNotIdentifier = -7, // 期望的变量名不是一个标识符      
+      State_VariableIsNotIdentifier = -7, // 期望的变量名不是一个标识符
+      State_RequireConstantExpression = -8, // 需要常量表达式
     };
   
   protected:
@@ -228,7 +230,7 @@ namespace UVShader
     NameContext(const NameContext& sNameCtx){}
     NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
-    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable);
+    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue);
   public:
     NameContext();
     NameContext(const NameContext* pParent);
@@ -247,11 +249,12 @@ namespace UVShader
     const TYPEDESC* GetType(const TOKEN& token) const;
     const TYPEDESC* GetType(VALUE::Rank rank) const;
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
+    const VALUE* GetVariableValue(const TOKEN* ptkName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
-    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable);
+    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue = NULL);
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
 #endif
@@ -262,16 +265,17 @@ namespace UVShader
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
 #ifdef ENABLE_SYNTAX_VERIFY
     VALUE::State CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE::GLOB* pGlob);
+    VALUE::State Calculate(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE* pNode) const;
 #endif
   };
 
-#ifdef ENABLE_SYNTAX_VERIFY
-  struct NODE_CALC : public SYNTAXNODE
-  {
-    //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
-    VALUE::State Calculate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const;
-  };
-#endif
+//#ifdef ENABLE_SYNTAX_VERIFY
+//  struct NODE_CALC : public SYNTAXNODE
+//  {
+//    //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
+//    VALUE::State Calculate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const;
+//  };
+//#endif
 
   class CodeParser : public ArithmeticExpression
   {
@@ -628,8 +632,8 @@ namespace UVShader
 
     const TYPEDESC* InferRightValueType2(NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
-    GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXDWORD dwArgMask, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
 
     //static GXLPCSTR ResolveType(const TYPEDESC* pTypeDesc, int& R, int& C);
@@ -640,7 +644,7 @@ namespace UVShader
     //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
     const TOKEN* Verify_VariableWithSeamantic(const SYNTAXNODE::GLOB& glob);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
-    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode);
+    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable = FALSE);
     GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
