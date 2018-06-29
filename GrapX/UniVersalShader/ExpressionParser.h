@@ -125,7 +125,7 @@ namespace UVShader
     enum RetType
     {
       RetType_Scaler0 = -1,
-      RetType_FromName = -2, // 返回类型是函数名
+      //RetType_FromName = -2, // 返回类型是函数名
       //RetType_Vector4 = -3,  // 4维向量,一般代表颜色
       RetType_Bool = -3,
       RetType_Float4 = -4,  // 4维向量,一般代表颜色
@@ -157,12 +157,22 @@ namespace UVShader
     static int GetTypeTemplateTypeIndex(GXDWORD dwMasks);
   };
 
-  struct INTRINSIC_FUNC2
+  //struct INTRINSIC_FUNC2
+  //{
+  //  GXLPSTR   ret_type; // 返回类型
+  //  GXLPSTR   name;     // 函数名
+  //  size_t    count;    // 形参数量
+  //  GXLPCSTR* params;   // 形参列表
+  //};
+
+  // 用来实现向量和矩阵的组合初始化
+  // 如: float3(pos.xy, 1)
+  //     float4(pos.xy, 1, 1)
+  //     float4(0, pos.xy, 1)
+  struct PERCOMPONENTMATH // Per-Component Math Operations
   {
-    GXLPSTR   ret_type; // 返回类型
-    GXLPSTR   name;     // 函数名
-    size_t    count;    // 形参数量
-    GXLPCSTR* params;   // 形参列表
+    GXLPCSTR name;
+    int scaler_count;
   };
 
   struct VARIDESC

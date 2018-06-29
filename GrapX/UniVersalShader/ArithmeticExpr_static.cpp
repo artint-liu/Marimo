@@ -485,7 +485,7 @@ namespace UVShader
     {"sincos", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_OutMatVecSca ARG_OutMatVecSca},
 
     // HLSL
-    {"float3", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Vector},
+    //{"float3", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Vector},
     {"lerp", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
     {"modf", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"pow", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
@@ -494,17 +494,18 @@ namespace UVShader
     //{"vec2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
     //{"vec3", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
     //{"vec4", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
-    {"float2", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Vector},
-    {"float3", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Vector},
-    {"float4", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Vector},
+    {STR_FLOAT, INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Scaler},
+    //{STR_FLOAT2, INTRINSIC_FUNC::RetType_FromName, 1, (u16*)ARG_Vector},
+    //{STR_FLOAT3, INTRINSIC_FUNC::RetType_FromName, 1, (u16*)ARG_Vector},
+    //{STR_FLOAT4, INTRINSIC_FUNC::RetType_FromName, 1, (u16*)ARG_Vector},
     {"fract", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
 
     //{"vec2", INTRINSIC_FUNC::RetType_FromName, 2, ARG_Scaler ARG_Scaler},
     //{"vec3", INTRINSIC_FUNC::RetType_FromName, 3, ARG_Scaler ARG_Scaler ARG_Scaler},
     //{"vec4", INTRINSIC_FUNC::RetType_FromName, 4, ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
-    {"float2", INTRINSIC_FUNC::RetType_FromName, 2, (u16*)ARG_Scaler ARG_Scaler},
-    {"float3", INTRINSIC_FUNC::RetType_FromName, 3, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler},
-    {"float4", INTRINSIC_FUNC::RetType_FromName, 4, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
+    //{"float2", INTRINSIC_FUNC::RetType_FromName, 2, (u16*)ARG_Scaler ARG_Scaler},
+    //{"float3", INTRINSIC_FUNC::RetType_FromName, 3, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler},
+    //{"float4", INTRINSIC_FUNC::RetType_FromName, 4, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
     {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_VecScal ARG_VecScal ARG_Scaler}, // FIXME: 没有验证第一个参数和第二个参数类型相同
     {"tex2D", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 2维向量
     {"tex2D", INTRINSIC_FUNC::RetType_Float4, 3, (u16*)ARG_Sampler2D ARG_Vector ARG_Scaler}, // FIXME: 2维向量
@@ -514,52 +515,66 @@ namespace UVShader
   };
 
   // 不对外使用
-  static GXLPCSTR s_Vec3_ParamArray0[] = { STR_FLOAT2, STR_FLOAT };
-  static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_FLOAT2 };
-  static GXLPCSTR s_ParamArray_v2v2[] = { STR_FLOAT2, STR_FLOAT2};
-  static GXLPCSTR s_ParamArray_v3v3v3[] = { STR_FLOAT3, STR_FLOAT3, STR_FLOAT3 };
-  static GXLPCSTR s_ParamArray_v4v4v4v4[] = { STR_FLOAT4, STR_FLOAT4, STR_FLOAT4, STR_FLOAT4 };
-  static GXLPCSTR s_Vec4_ParamArray_v3s[] = { STR_FLOAT3, STR_FLOAT };
-  static GXLPCSTR s_Vec4_ParamArray_v2ss[] = { STR_FLOAT2, STR_FLOAT, STR_FLOAT };
-  static GXLPCSTR s_Vec4_ParamArray_sv2s[] = { STR_FLOAT, STR_FLOAT2, STR_FLOAT };
-  static GXLPCSTR s_Vec4_ParamArray_ssv2[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT2 };
-  static GXLPCSTR s_ParamArray_Floats_16[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
+  //static GXLPCSTR s_Vec3_ParamArray0[] = { STR_FLOAT2, STR_FLOAT };
+  //static GXLPCSTR s_Vec3_ParamArray1[] = { STR_FLOAT, STR_FLOAT2 };
+  //static GXLPCSTR s_ParamArray_v2v2[] = { STR_FLOAT2, STR_FLOAT2};
+  //static GXLPCSTR s_ParamArray_v3v3v3[] = { STR_FLOAT3, STR_FLOAT3, STR_FLOAT3 };
+  //static GXLPCSTR s_ParamArray_v4v4v4v4[] = { STR_FLOAT4, STR_FLOAT4, STR_FLOAT4, STR_FLOAT4 };
+  //static GXLPCSTR s_Vec4_ParamArray_v3s[] = { STR_FLOAT3, STR_FLOAT };
+  //static GXLPCSTR s_Vec4_ParamArray_v2ss[] = { STR_FLOAT2, STR_FLOAT, STR_FLOAT };
+  //static GXLPCSTR s_Vec4_ParamArray_sv2s[] = { STR_FLOAT, STR_FLOAT2, STR_FLOAT };
+  //static GXLPCSTR s_Vec4_ParamArray_ssv2[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT2 };
+  //static GXLPCSTR s_ParamArray_Floats_16[] = { STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT, STR_FLOAT };
 
-  INTRINSIC_FUNC2 s_functions2[] =
-  {
-    //{"vec3", "vec3", 2, s_Vec3_ParamArray0},
-    //{"vec3", "vec3", 2, s_Vec3_ParamArray1},
-    //{"vec4", "vec4", 2, s_Vec4_ParamArray},
-    {"float2", "float2", 1, s_ParamArray_Floats_16},
-    {"float3", "float3", 1, s_ParamArray_Floats_16},
-    {"float4", "float4", 1, s_ParamArray_Floats_16},
-    {"float2x2", "float2x2", 1, s_ParamArray_Floats_16},
-    {"float3x3", "float3x3", 1, s_ParamArray_Floats_16},
-    {"float4x4", "float4x4", 1, s_ParamArray_Floats_16},
+  //INTRINSIC_FUNC2 s_functions2[] =
+  //{
+  //  //{"vec3", "vec3", 2, s_Vec3_ParamArray0},
+  //  //{"vec3", "vec3", 2, s_Vec3_ParamArray1},
+  //  //{"vec4", "vec4", 2, s_Vec4_ParamArray},
+  //  {"float2", "float2", 1, s_ParamArray_Floats_16},
+  //  {"float3", "float3", 1, s_ParamArray_Floats_16},
+  //  {"float4", "float4", 1, s_ParamArray_Floats_16},
+  //  {"float2x2", "float2x2", 1, s_ParamArray_Floats_16},
+  //  {"float3x3", "float3x3", 1, s_ParamArray_Floats_16},
+  //  {"float4x4", "float4x4", 1, s_ParamArray_Floats_16},
 
-    {"float2", "float2", 2, s_ParamArray_Floats_16},
-    {"float3", "float3", 3, s_ParamArray_Floats_16},
-    {"float4", "float4", 4, s_ParamArray_Floats_16},
-    {"float2x2", "float2x2", 4, s_ParamArray_Floats_16},
-    {"float3x3", "float3x3", 9, s_ParamArray_Floats_16},
-    {"float4x4", "float4x4", 16, s_ParamArray_Floats_16},
+  //  {"float2", "float2", 2, s_ParamArray_Floats_16},
+  //  {"float3", "float3", 3, s_ParamArray_Floats_16},
+  //  {"float4", "float4", 4, s_ParamArray_Floats_16},
+  //  {"float2x2", "float2x2", 4, s_ParamArray_Floats_16},
+  //  {"float3x3", "float3x3", 9, s_ParamArray_Floats_16},
+  //  {"float4x4", "float4x4", 16, s_ParamArray_Floats_16},
 
-    {"float3", "float3", 2, s_Vec3_ParamArray0},
-    {"float3", "float3", 2, s_Vec3_ParamArray1},
-    
-    {"float4", "float4", 2, s_Vec4_ParamArray_v3s},
-    {"float4", "float4", 3, s_Vec4_ParamArray_ssv2},
-    {"float4", "float4", 3, s_Vec4_ParamArray_sv2s},
-    {"float4", "float4", 3, s_Vec4_ParamArray_v2ss},
-    {"float", "float", 1, s_ParamArray_Floats_16},
-    {"vec2", "sincos", 1, s_ParamArray_Floats_16},
+  //  {"float3", "float3", 2, s_Vec3_ParamArray0},
+  //  {"float3", "float3", 2, s_Vec3_ParamArray1},
+  //  
+  //  {"float4", "float4", 2, s_Vec4_ParamArray_v3s},
+  //  {"float4", "float4", 3, s_Vec4_ParamArray_ssv2},
+  //  {"float4", "float4", 3, s_Vec4_ParamArray_sv2s},
+  //  {"float4", "float4", 3, s_Vec4_ParamArray_v2ss},
+  //  {"float", "float", 1, s_ParamArray_Floats_16},
+  //  {"vec2", "sincos", 1, s_ParamArray_Floats_16},
 
-    {"float2x2", "float2x2", 2, s_ParamArray_v2v2},    
-    {"float3x3", "float3x3", 3, s_ParamArray_v3v3v3},
-    {"float4x4", "float4x4", 4, s_ParamArray_v4v4v4v4},
+  //  {"float2x2", "float2x2", 2, s_ParamArray_v2v2},    
+  //  {"float3x3", "float3x3", 3, s_ParamArray_v3v3v3},
+  //  {"float4x4", "float4x4", 4, s_ParamArray_v4v4v4v4},
+  //  {NULL},
+  //};
+  PERCOMPONENTMATH s_PreComponentMath[] = {
+    {STR_FLOAT2, 2},
+    {STR_FLOAT3, 3},
+    {STR_FLOAT4, 4},
+    {STR_FLOAT2x2, 2 * 2},
+    {STR_FLOAT2x3, 2 * 3},
+    {STR_FLOAT2x4, 2 * 4},
+    {STR_FLOAT3x2, 3 * 2},
+    {STR_FLOAT3x3, 3 * 3},
+    {STR_FLOAT3x4, 3 * 4},
+    {STR_FLOAT4x2, 4 * 2},
+    {STR_FLOAT4x3, 4 * 3},
+    {STR_FLOAT4x4, 4 * 4},
     {NULL},
   };
-
 
 /*
 [] [float] [x]

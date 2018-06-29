@@ -18,6 +18,7 @@
 #define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
 //#define VOID_TYPEDESC ((const TYPEDESC*)-1)
 #define ERROR_TYPEDESC ((const TYPEDESC*)-1)
+#define PARSER_NOTIMPLEMENT TRACE("%s(%d):没咋处理的地方\n", __FILE__, __LINE__)
 
 // TODO:
 // 1.float3(0) => float3(0,0,0)
@@ -241,7 +242,7 @@ namespace UVShader
   extern COMMINTRTYPEDESC s_aIntrinsicStruct[];
   extern COMMINTRTYPEDESC s_aBaseType[];
   extern INTRINSIC_FUNC s_functions[];
-  extern INTRINSIC_FUNC2 s_functions2[];
+  extern PERCOMPONENTMATH s_PreComponentMath[];
 
 
 
@@ -4179,6 +4180,9 @@ NOT_INC_P:
     for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
     {
       const TYPEDESC* pTypeDesc = InferType(sNameSet, *it);
+      if(pTypeDesc == NULL) {
+        return NULL;
+      }
       sArgumentsTypeList.push_back(pTypeDesc);
     }
 
@@ -4219,7 +4223,7 @@ NOT_INC_P:
               if(s_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
                 pRetType = pTypeDesc;
               }
-              else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName ||
+              else if(//s_functions[i].type == INTRINSIC_FUNC::RetType_FromName ||
                 s_functions[i].type == INTRINSIC_FUNC::RetType_Bool ||
                 s_functions[i].type == INTRINSIC_FUNC::RetType_Float4)
               {
@@ -4260,9 +4264,9 @@ NOT_INC_P:
               //return sNameSet.GetType(pRetType->pDesc->list->type);
               return sNameSet.GetType(pRetType->pDesc->component_type);
             }
-            else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
-              return sNameSet.GetType(s_functions[i].name);
-            }
+            //else if(s_functions[i].type == INTRINSIC_FUNC::RetType_FromName) {
+            //  return sNameSet.GetType(s_functions[i].name);
+            //}
             else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Bool) {
               return sNameSet.GetType(STR_BOOL);
             }
@@ -4277,34 +4281,44 @@ NOT_INC_P:
     }
 
     // 确切参数类型的函数列表
-    for(int i = 0; s_functions2[i].name != NULL; i++)
+    for(int i = 0; s_PreComponentMath[i].name != NULL; i++)
     {
-      if(strFunctionName == s_functions2[i].name)
+      if(strFunctionName == s_PreComponentMath[i].name)
       {
-        if(sArgumentsTypeList.size() == s_functions2[i].count)
+        int nScalerCount = 0;
+        for(auto it = sArgumentsTypeList.begin(); it != sArgumentsTypeList.end(); ++it)
         {
-          size_t n = 0;
-          auto it = sArgumentsTypeList.begin();
-          for(; n < s_functions2[i].count; n++, ++it)
-          {
-            const TYPEDESC* pTypeDesc = *it; // InferType(sNameSet, *it);
-            if(pTypeDesc)
-            {
-              const TYPEDESC* pTypeTo = sNameSet.GetType(s_functions2[i].params[n]);
-              ASSERT(pTypeTo);
-              if(TryTypeCasting(pTypeTo, pTypeDesc, pFuncNode->Operand[0].pTokn)) {
-                continue;
-              }
-              break;
-            }
-            return NULL; // 推导参数类型失败, 比如含有未定义的标识符
-          }
+          const TYPEDESC* pTypeDesc = *it; // InferType(sNameSet, *it);
+          int R, C;
 
-          if(n == s_functions2[i].count)
+          pTypeDesc->Resolve(R, C);
+          if(C == 0) // pTypeDesc必须是标量或者向量
           {
-            return sNameSet.GetType(s_functions2[i].ret_type);
+            if(R == 0) {
+              nScalerCount++;
+            }
+            else {
+              nScalerCount += R;
+            }
+          }
+          else {
+            break;
           }
         }
+
+        if(s_PreComponentMath[i].scaler_count == nScalerCount || nScalerCount == 1)
+        {
+          return sNameSet.GetType(s_PreComponentMath[i].name);
+        }
+        else
+        {
+          clStringW str(s_PreComponentMath[i].name);
+          OutputErrorW(*pFuncNode->Operand[0].pTokn,
+            UVS_EXPORT_TEXT(5039, "“%s”: 参数数量不匹配，参数只提供了%d个标量"), str.CStr(), nScalerCount);
+          return NULL;
+        }
+       
+        break;
       }
     }
 
@@ -4654,14 +4668,14 @@ NOT_INC_P:
     }
 
     // 只是没处理
-    ASSERT(pTypeTo->cate == pTypeFrom->cate || (
+    ASSERT(pTypeTo->name == pTypeFrom->name || (
       pTypeTo->cate != TYPEDESC::TypeCate_Sampler1D &&
       pTypeTo->cate != TYPEDESC::TypeCate_Sampler2D &&
       pTypeTo->cate != TYPEDESC::TypeCate_Sampler3D &&
       pTypeTo->cate != TYPEDESC::TypeCate_SamplerCube));
 
     // 只是没处理
-    ASSERT(pTypeTo->cate == pTypeFrom->cate || (
+    ASSERT(pTypeTo->name == pTypeFrom->name  || (
       pTypeFrom->cate != TYPEDESC::TypeCate_Sampler1D &&
       pTypeFrom->cate != TYPEDESC::TypeCate_Sampler2D &&
       pTypeFrom->cate != TYPEDESC::TypeCate_Sampler3D &&
@@ -5602,20 +5616,20 @@ NOT_INC_P:
     }
     else
     {
-      CLBREAK;
+      PARSER_NOTIMPLEMENT;
     }
 
     R = C = 0;
 
-    if(szScaler)
+    if(szScaler && szRxC[0] != '\0')
     {
       R = szRxC[0] - '0';
-      ASSERT(R >= 1 || R <= 4);
+      ASSERT(R >= 1 && R <= 4);
       if(szRxC[1] != '\0')
       {
         ASSERT(szRxC[1] == 'x');
         C = szRxC[2] - '0';
-        ASSERT(C >= 1 || C <= 4);
+        ASSERT(C >= 1 && C <= 4);
       }
     }
     return szScaler;
