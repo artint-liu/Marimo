@@ -1628,7 +1628,7 @@ namespace UVShader
       else if(*p == "inout") {
         arg.eModifier = InputModifier_inout;
       }
-      else if(*p == "uniform") {
+      else if(*p == "uniform" || *p == "const") {
         arg.eModifier = InputModifier_uniform;
       }
       else {
@@ -4392,6 +4392,17 @@ NOT_INC_P:
     {
       return InferSubscriptType(sNameSet, pNode);
     }
+    else if(pNode->mode == SYNTAXNODE::MODE_TypeCast)
+    {
+      ASSERT(pNode->Operand[0].IsToken());
+      const TYPEDESC* pCastTypeDesc = sNameSet.GetType(*pNode->Operand[0].pTokn);
+      const TYPEDESC* pSource = InferType(sNameSet, pNode->Operand[1]);
+      if(TryReinterpretCasting(pCastTypeDesc, pSource, pNode->Operand[0].pTokn))
+      {
+        return pCastTypeDesc;
+      }
+      return NULL;
+    }
     else if(pNode->pOpcode)
     {
       if(pNode->pOpcode->unary)
@@ -4729,6 +4740,16 @@ NOT_INC_P:
       return TRUE;
     }
 
+    return FALSE;
+  }
+
+  GXBOOL CodeParser::TryReinterpretCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
+  {
+    if(TryTypeCasting(pTypeTo, pTypeFrom, pLocation)) {
+      return TRUE;
+    }
+
+    PARSER_NOTIMPLEMENT;
     return FALSE;
   }
 
@@ -5617,6 +5638,7 @@ NOT_INC_P:
     else
     {
       PARSER_NOTIMPLEMENT;
+      TRACE("%s\n", name.CStr());
     }
 
     R = C = 0;

@@ -112,6 +112,10 @@ int DumpBlock(UVShader::CodeParser* pExpp, const UVShader::SYNTAXNODE* pNode, in
     strOut.Format("%s %s", str[0], str[1]);
     break;
 
+  case SYNTAXNODE::MODE_TypeCast:
+    strOut.Format("(%s)(%s)", str[0], str[1]);
+    break;
+
   //case SYNTAXNODE::MODE_DefinitionConst:
   //  strOut.Format("const %s %s", str[0], str[1]);
   //  break;

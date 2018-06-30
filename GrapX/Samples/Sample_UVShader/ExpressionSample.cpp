@@ -517,6 +517,9 @@ SAMPLE_EXPRESSION samplesSimpleExpression[] = {
   {54000, _I_, "k=~(int)++(a)", 10, aSyntaxList_477},
   {54000, _I_, "((int*)&a)=5", 10, aSyntaxList_478},
   {54001, _I_, "((const int)a)=5", 9, aSyntaxList_479},
+  {54002, _I_, "((const int)(a + b))", 11, },
+  {54003, _I_, "(float)(a.x == b.x)", 12, },
+  {54004, _I_, "float4((float)(a.x == b.x), (float)(a.y == b.y), (float)(a.z == b.z), (float)(a.w == b.w))",},
   //{54000, _I_, "((const int)&a)=5", 0},
   {54000, _I_, "(a=a+b)", 7, aSyntaxList_408},
   //{54000, _I_, "a=a+b;b=a-c*d;c=a*d;", 20}, // 不再支持

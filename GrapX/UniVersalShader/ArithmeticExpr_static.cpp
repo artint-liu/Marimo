@@ -22,6 +22,14 @@ namespace UVShader
   GXLPCSTR STR_FLOAT3 = "float3";
   GXLPCSTR STR_FLOAT4 = "float4";
 
+  GXLPCSTR STR_INT2 = "int2";
+  GXLPCSTR STR_INT3 = "int3";
+  GXLPCSTR STR_INT4 = "int4";
+
+  GXLPCSTR STR_UINT2 = "uint2";
+  GXLPCSTR STR_UINT3 = "uint3";
+  GXLPCSTR STR_UINT4 = "uint4";
+
   GXLPCSTR STR_HALF = "half";
   GXLPCSTR STR_HALF2 = "half2";
   GXLPCSTR STR_HALF3 = "half3";
@@ -470,6 +478,7 @@ namespace UVShader
     {"exp2", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"sign", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"degrees", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"ceil", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
 
     {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"atan2", INTRINSIC_FUNC::RetType_Argument1, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
@@ -564,6 +573,12 @@ namespace UVShader
     {STR_FLOAT2, 2},
     {STR_FLOAT3, 3},
     {STR_FLOAT4, 4},
+    {STR_INT2, 2},
+    {STR_INT3, 3},
+    {STR_INT4, 4},
+    {STR_UINT2, 2},
+    {STR_UINT3, 3},
+    {STR_UINT4, 4},
     {STR_FLOAT2x2, 2 * 2},
     {STR_FLOAT2x3, 2 * 3},
     {STR_FLOAT2x4, 2 * 4},

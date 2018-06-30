@@ -408,7 +408,8 @@ namespace UVShader
     if(front == '(' && (TKSCOPE::TYPE)front.scope + 1 < scope.end) // (...)... 形式
     {
       const TOKEN& nt = m_aTokens[front.scope + 1];
-      if(nt == '(' || nt.unary || nt.IsIdentifier() || nt.IsNumeric()) // type cast
+      if((nt == '(' && nt.scope == scope.end - 1) ||
+        nt.unary || nt.IsIdentifier() || nt.IsNumeric()) // type cast
       {
         return TRUE;
       }

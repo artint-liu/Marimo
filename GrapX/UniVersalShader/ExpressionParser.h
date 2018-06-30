@@ -190,7 +190,7 @@ namespace UVShader
     InputModifier_in,
     InputModifier_out,
     InputModifier_inout,
-    InputModifier_uniform,
+    InputModifier_uniform, // Input only constant data
   };
 
   struct FUNCTION_ARGUMENT // 函数参数
@@ -645,6 +645,7 @@ namespace UVShader
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXDWORD dwArgMask, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    GXBOOL TryReinterpretCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
 
     //static GXLPCSTR ResolveType(const TYPEDESC* pTypeDesc, int& R, int& C);
     static GXBOOL IsComponent(const TYPEDESC* pRowVector, const TYPEDESC* pMatrixDesc, const TYPEDESC* pColumnVector);
