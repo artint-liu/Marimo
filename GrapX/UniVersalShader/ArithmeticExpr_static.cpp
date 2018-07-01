@@ -517,8 +517,10 @@ namespace UVShader
     //{"float4", INTRINSIC_FUNC::RetType_FromName, 4, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
     {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_VecScal ARG_VecScal ARG_Scaler}, // FIXME: 没有验证第一个参数和第二个参数类型相同
     {"tex2D", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 2维向量
+    {"tex3D", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler3D ARG_Vector}, // FIXME: 3维向量
     {"tex2D", INTRINSIC_FUNC::RetType_Float4, 3, (u16*)ARG_Sampler2D ARG_Vector ARG_Scaler}, // FIXME: 2维向量
     {"tex2DBias", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 4维向量
+    {"texCUBE", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_SamplerCube ARG_Vector},
     {"mod", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {NULL},
   };

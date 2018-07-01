@@ -16,6 +16,12 @@
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler)
 #define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
+#define IS_SAMPLER_CATE(_CATE) (\
+  _CATE == TYPEDESC::TypeCate_Sampler1D || \
+  _CATE == TYPEDESC::TypeCate_Sampler2D || \
+  _CATE == TYPEDESC::TypeCate_Sampler3D || \
+  _CATE == TYPEDESC::TypeCate_SamplerCube ) 
+
 //#define VOID_TYPEDESC ((const TYPEDESC*)-1)
 #define ERROR_TYPEDESC ((const TYPEDESC*)-1)
 #define PARSER_NOTIMPLEMENT TRACE("%s(%d):没咋处理的地方\n", __FILE__, __LINE__)
@@ -91,9 +97,10 @@ GXLPCSTR g_ExportErrorMessage1 = __FILE__;
 namespace UVShader
 {
   TOKEN::T_LPCSTR s_szString = "string";
+  TOKEN::T_LPCSTR s_szSampler1D = "sampler1D";
   TOKEN::T_LPCSTR s_szSampler2D = "sampler2D";
   TOKEN::T_LPCSTR s_szSampler3D = "sampler3D";
-  //TOKEN::T_LPCSTR s_szSamplerCube = "string";
+  TOKEN::T_LPCSTR s_szSamplerCube = "samplerCUBE";
 
   extern GXLPCSTR STR_VOID;
 
@@ -3642,12 +3649,13 @@ NOT_INC_P:
       }
       else
       {
-        CLBREAK;
+        // 意料之外的变量定义语法
+        PARSER_BREAK(second_glob);
       }
     }
     else
     {
-      CLBREAK;
+      PARSER_BREAK(second_glob);
       // 定义但是没写名字，报错
     }
 
@@ -3690,7 +3698,7 @@ NOT_INC_P:
         case NameContext::State_TypeNotFound:
         {
           strW = strType;
-          OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), strW.CStr());
+          OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), strW.CStr());
           return FALSE;
         }
         case NameContext::State_DuplicatedVariable:
@@ -4678,19 +4686,19 @@ NOT_INC_P:
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));
     }
 
-    // 只是没处理
-    ASSERT(pTypeTo->name == pTypeFrom->name || (
-      pTypeTo->cate != TYPEDESC::TypeCate_Sampler1D &&
-      pTypeTo->cate != TYPEDESC::TypeCate_Sampler2D &&
-      pTypeTo->cate != TYPEDESC::TypeCate_Sampler3D &&
-      pTypeTo->cate != TYPEDESC::TypeCate_SamplerCube));
+    //// 只是没处理
+    //ASSERT(pTypeTo->name == pTypeFrom->name || (
+    //  pTypeTo->cate != TYPEDESC::TypeCate_Sampler1D &&
+    //  pTypeTo->cate != TYPEDESC::TypeCate_Sampler2D &&
+    //  pTypeTo->cate != TYPEDESC::TypeCate_Sampler3D &&
+    //  pTypeTo->cate != TYPEDESC::TypeCate_SamplerCube));
 
-    // 只是没处理
-    ASSERT(pTypeTo->name == pTypeFrom->name  || (
-      pTypeFrom->cate != TYPEDESC::TypeCate_Sampler1D &&
-      pTypeFrom->cate != TYPEDESC::TypeCate_Sampler2D &&
-      pTypeFrom->cate != TYPEDESC::TypeCate_Sampler3D &&
-      pTypeFrom->cate != TYPEDESC::TypeCate_SamplerCube));
+    //// 只是没处理
+    //ASSERT(pTypeTo->name == pTypeFrom->name  || (
+    //  pTypeFrom->cate != TYPEDESC::TypeCate_Sampler1D &&
+    //  pTypeFrom->cate != TYPEDESC::TypeCate_Sampler2D &&
+    //  pTypeFrom->cate != TYPEDESC::TypeCate_Sampler3D &&
+    //  pTypeFrom->cate != TYPEDESC::TypeCate_SamplerCube));
 
     //CLBREAK;
     return (pTypeTo->name == pTypeFrom->name);
@@ -4920,6 +4928,11 @@ NOT_INC_P:
     td.pDesc = NULL;
     m_TypeMap.insert(clmake_pair(td.name, td));
 
+    td.cate = TYPEDESC::TypeCate_Sampler1D;
+    td.name = s_szSampler1D;
+    td.pDesc = NULL;
+    m_TypeMap.insert(clmake_pair(td.name, td));
+
     td.cate = TYPEDESC::TypeCate_Sampler2D;
     td.name = s_szSampler2D;
     td.pDesc = NULL;
@@ -4927,6 +4940,11 @@ NOT_INC_P:
 
     td.cate = TYPEDESC::TypeCate_Sampler3D;
     td.name = s_szSampler3D;
+    td.pDesc = NULL;
+    m_TypeMap.insert(clmake_pair(td.name, td));
+
+    td.cate = TYPEDESC::TypeCate_SamplerCube;
+    td.name = s_szSamplerCube;
     td.pDesc = NULL;
     m_TypeMap.insert(clmake_pair(td.name, td));
     //}
