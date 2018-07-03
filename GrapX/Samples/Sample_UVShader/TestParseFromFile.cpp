@@ -374,7 +374,7 @@ void DumpVariableModifier(UVShader::CodeParser::UniformModifier modifier, clstd:
   }
 }
 
-void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
+void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference, cllist<clStringA>* pFailList)
 {
   clFile file;
 
@@ -449,6 +449,12 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
       }
 
       // 如果代码标记失败, 则解析也应该失败
+      if(bParseResult != bExpectResult) {
+        TRACE("文件解析结果与预期结果不一致:\n%s\n", szFilename);
+        if(pFailList) {
+          pFailList->push_back(szFilename);
+        }
+      }
       ASSERT(bParseResult == bExpectResult);
 
       // 如果设置了预期错误码, 则错误集合中也至少要包含这个错误码
@@ -581,7 +587,7 @@ void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference)
 
   // TODO: 对比输出文件与参考文件
   do {
-    if(file.OpenExisting(szReference)) {
+    if(szReference != NULL && file.OpenExisting(szReference)) {
       clBuffer* pRefBuffer = NULL;
       clBuffer* pOutBuffer = NULL;
       clFile sOutFile;

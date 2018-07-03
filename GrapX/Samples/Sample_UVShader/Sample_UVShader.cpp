@@ -18,9 +18,10 @@
 
 #pragma comment(lib, "gdiplus.lib")
 void TestExpressionParser();
-void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference);
+void TestFromFile(GXLPCSTR szFilename, GXLPCSTR szOutput, GXLPCSTR szReference, cllist<clStringA>* pFailList = NULL);
 void ExportTestCase(const clStringA& strPath);
 void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples);
+b32 ReadFileList(cllist<clStringA>& rFileList, GXLPCSTR szDir, GXLPCSTR szListFile);
 //#define ENABLE_GRAPH // 毫无意义的开始了语法树转图形化的工作，又舍不得删代码，先注释掉
 
 extern GXLPCSTR g_ExportErrorMessage1;
@@ -265,10 +266,11 @@ namespace Test{
 
 //////////////////////////////////////////////////////////////////////////
 
-void TestFiles(GXLPCSTR szDir, GXBOOL bShowList)
+void TestFiles(GXLPCSTR szDir, GXBOOL bShowList, GXBOOL bIgnoreListFile = FALSE)
 {
   Test::ItemList sShaderSource_list;
   Test::Generate(sShaderSource_list, szDir);
+  cllist<clStringA> sFailList;
 
   if(bShowList)
   {
@@ -360,12 +362,78 @@ void TestFiles(GXLPCSTR szDir, GXBOOL bShowList)
   }
   else // 不显示菜单的话就测试所有项目
   {
-    for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it) {
-      TestFromFile(it->strInput, it->strOutput, it->strReference);
+    int n = 0;
+    clset<clStringA> sIgnoreSet;
+    
+    if(bIgnoreListFile) {
+      cllist<clStringA> sFileList;
+      clStringA strFileListDir;
+      clpathfile::CombinePath(strFileListDir, szDir, "..");
+
+      // 独取排除列表
+      ReadFileList(sFileList, strFileListDir, "filelist.txt");
+      sIgnoreSet.insert(sFileList.begin(), sFileList.end());
+    }
+
+    for(auto it = sShaderSource_list.begin(); it != sShaderSource_list.end(); ++it, n++)
+    {
+      // 启用排除列表
+      if(sIgnoreSet.find(it->strInput) != sIgnoreSet.end()) {
+        continue;
+      }
+      TestFromFile(it->strInput, it->strOutput, it->strReference, &sFailList);
     }
   }
+
+  std::for_each(sFailList.begin(), sFailList.end(), [](const clStringA& str) {
+    TRACE("%s\n", str.CStr());
+  });
 }
 
+b32 ReadFileList(cllist<clStringA>& rFileList, GXLPCSTR szDir, GXLPCSTR szListFile)
+{
+  clstd::File file;
+  clStringA strFileListPath;
+  clpathfile::CombinePath(strFileListPath, szDir, szListFile);
+  if(!file.OpenExisting(strFileListPath))
+  {
+    return FALSE;
+  }
+
+  // 读入文件列表，并将列表数据按照换行切割为字符串列表
+  clstd::MemBuffer buf;
+  file.ReadToBuffer(&buf);
+  clStringA strFiles((clStringA::LPCSTR)buf.GetPtr(), buf.GetSize());
+  clstd::ResolveString(strFiles, '\n', rFileList);
+
+  for(auto it = rFileList.begin(); it != rFileList.end();)
+  {
+    it->TrimBoth('\r');
+    // 剔除空行和注释的文件
+    if(it->IsEmpty() || it->BeginsWith("//")) {
+      it = rFileList.erase(it);
+    }
+    else {
+      clpathfile::CombinePath(*it, szDir, *it);
+      ++it;
+    }
+  }
+  return TRUE;
+}
+
+void TestFileList(GXLPCSTR szDir, GXLPCSTR szListFile)
+{
+  clStringA strShaderFile;
+  cllist<clStringA> sShaderSource;
+
+  ReadFileList(sShaderSource, szDir, szListFile);
+
+  for(auto it = sShaderSource.begin(); it != sShaderSource.end(); ++it)
+  {
+    //clpathfile::CombinePath(strShaderFile, szDir, *it);
+    TestFromFile(*it, NULL, NULL);
+  }
+}
 //void TestShaderToys(GXBOOL bShowList)
 //{
 //  TestFiles("Test\\shaders\\ShaderToy", bShowList);
@@ -511,6 +579,9 @@ int _tmain(int argc, _TCHAR* argv[])
     printf("2.测试Debris代码\n");
     printf("3.测试Error代码\n");
     printf("4.测试Standard代码\n");
+    printf("5.测试ShaderToy To HLSL代码\n");
+    printf("6.测试ShaderToy 原始代码(排除filelist)\n");
+    printf("7.测试filelist.txt列举\n\n");
     printf("*.导出ErrorMessage\n");
     printf("\n0. 所有测试\n");
     printf("[ESC]. quit\n");
@@ -548,6 +619,21 @@ int _tmain(int argc, _TCHAR* argv[])
     case '4':
       clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("stdcase"));
       TestFiles(clStringA(strPath), TRUE);
+      break;
+
+    case '5':
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("ShaderToy-ToHLSL"));
+      TestFiles(clStringA(strPath), FALSE);
+      break;
+
+    case '6':
+      clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("ShaderToy-RAW"));
+      TestFiles(clStringA(strPath), FALSE, TRUE);
+      break;
+
+    case '7':
+      //clpathfile::CombinePath(strPath, szTestCasePath, _CLTEXT("filelist.txt"));
+      TestFileList(clStringA(szTestCasePath), "filelist.txt");
       break;
 
     case '*':

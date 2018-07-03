@@ -60,6 +60,17 @@
 //  4           .*   ->*          Pointer to member                                         Left-to-right 
 //  16          throw             Throw operator (for exceptions)                           Right-to-left 
 
+
+//
+// [GLSL 与 HLSL 语法差别]
+// 1.GLSL支持“*”符号计算向量与矩阵，这个在uvs中也支持。
+// 2.GLSL支持结构体简单构造：
+//   struct Ray { vec3 pos, dir; };
+//   Ray(vec3(0,0,0), vec3(1,1,1));
+// uvs不支持这个。
+// 3.GLSL支持“^^”符号，代表布尔异或，uvs不支持，查了一下，HLSL也没有这个符号。
+//
+
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
@@ -605,7 +616,9 @@ namespace UVShader
       return MakeInstruction(depth + 1, &t,
         t.precedence, &scope, pDesc, nLowestOpcodeIndex);
     }
-
+#if 1
+    return ParseFunctionIndexCall(scope, pDesc);
+#else
     if( ! ParseFunctionIndexCall(scope, pDesc))
     {
       GXINT_PTR len = (m_aTokens[scope.end - 1].marker - m_aTokens[scope.begin].marker) + m_aTokens[scope.end - 1].length;
@@ -616,6 +629,7 @@ namespace UVShader
       return FALSE;
     }
     return TRUE;
+#endif
   }
 
   GXBOOL ArithmeticExpression::DbgHasError(int errcode) const
@@ -647,7 +661,13 @@ namespace UVShader
     CONTEXT c;
     TOKEN* pBack = &m_aTokens[scope.end - 1];
     A = m_aTokens[scope.begin];
-    ASSERT(A.pTokn->precedence == 0); // 第一个必须不是运算符号
+    //ASSERT(A.pTokn->precedence == 0); // 第一个必须不是运算符号
+    if(A.pTokn->precedence != 0)
+    {
+      clStringW strW;
+      m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5040, "语法错误: “%s”"), A.pTokn->ToString(strW).CStr());
+      return FALSE;
+    }
 
 
     while(1) {
@@ -798,7 +818,7 @@ namespace UVShader
 
     if(_CL_NOT_(ParseArithmeticExpression(0, cast_scope, &B, OPP(12))))
     {
-      m_pMsg->WriteErrorW(TRUE, m_aTokens[type_scope.begin].offset(), UVS_EXPORT_TEXT(5008, "类型转换:表达式无法解析."));
+      //m_pMsg->WriteErrorW(TRUE, m_aTokens[type_scope.begin].offset(), UVS_EXPORT_TEXT(5008, "类型转换:表达式无法解析."));
       return FALSE;
     }
 
@@ -1105,9 +1125,11 @@ namespace UVShader
         else if(ptr[i] >= '0' && ptr[i] <= '9')
         {
           int n = ptr[i] - '0';
-          if(digi[p] >= (ULLONG_MAX - (ULLONG_MAX % 10)) || // TODO: 这个可能是digi[p] > (ULLONG_MAX / 10)
-            (digi[p] >= (ULLONG_MAX / 10) && n > (ULLONG_MAX % 10))) {
-            return State_Overflow;
+          if(dwFlags != Rank_Float) {
+            ASSERT(p == 0);
+            if(digi[p] > (ULLONG_MAX / 10) || (digi[p] == (ULLONG_MAX / 10) && n > (ULLONG_MAX % 10))) {
+              return State_Overflow;
+            }
           }
           digi[p] = digi[p] * 10 + n;
         }

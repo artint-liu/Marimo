@@ -13,7 +13,7 @@
 #include "../User/DataPoolErrorMsg.h"
 
 #define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "没实现的功能"); CLBREAK; }
-#define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), 0, "断言错误"); ASSERT(_X);} }
+#define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5678, "断言错误")); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler)
 #define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
 #define IS_SAMPLER_CATE(_CATE) (\
@@ -691,7 +691,8 @@ namespace UVShader
     TOKEN& token = m_aTokens[index];
     if(emplace.second)
     {
-      ASSERT(_CL_NOT_(token.bPhony)); // 第一次添加肯定不是替代值
+      // 宏多次展开时可能遇到替代值
+      //ASSERT(_CL_NOT_(token.bPhony)); // 第一次添加肯定不是替代值
       emplace.first->second.ori_marker = token.marker;
     }
     else
@@ -957,10 +958,11 @@ namespace UVShader
       }
       else if(TryMatchMacro(ctx, &itMacroEnd, it, it_end)) {
         it = sTokenList.erase(it, itMacroEnd);
+        ASSERT(it == itMacroEnd); // 理论上应该是一个
         TOKEN::List::iterator it_next = it;
-        if (it_next != it_end) {        
-          ++it_next;
-        }
+        //if (it_next != it_end) {        
+        //  ++it_next;
+        //}
         sTokenList.insert(it, ctx.stream.begin(), ctx.stream.end());
         it = it_next;
       }
@@ -1010,6 +1012,7 @@ namespace UVShader
     if(pScope->begin == pScope->end) {
       return TRUE;
     }
+    TKSCOPE saved_scope = *pScope;
 
     TOKEN* p = &m_aTokens[pScope->begin];
 
@@ -1086,6 +1089,13 @@ namespace UVShader
     if(!ParseExpression(stat.sRoot, m_GlobalSet, scope))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope.end));
+      return FALSE;
+    }
+
+    // 函数声明
+    if(stat.sRoot.pNode->Operand[1].IsNode() && stat.sRoot.pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_FunctionCall)
+    {
+      *pScope = saved_scope;
       return FALSE;
     }
 
@@ -2053,7 +2063,7 @@ NOT_INC_P:
         TKSCOPE ret_scope(scope.begin + 1, front.semi_scope);
         bret = ParseArithmeticExpression(0, ret_scope, &B);
         MakeSyntaxNode(pDesc, eMode, NULL, &A, &B);
-        pend = front.semi_scope + 1;
+        pend = bret ? front.semi_scope + 1 : TKSCOPE::npos;
       }
       else {
         MakeSyntaxNode(pDesc, eMode, NULL, &A, NULL);
@@ -4032,7 +4042,7 @@ NOT_INC_P:
               OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), str.CStr());
               break;
             default:
-              CLBREAK; // 没有处理的错误
+              PARSER_BREAK(Op); // 没有处理的错误
               break;
             }
 
@@ -4052,7 +4062,7 @@ NOT_INC_P:
               break;
             case NameContext::State_TypeNotFound:
               str = strType;
-              OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), str.CStr());
+              OutputErrorW(tk, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), str.CStr());
               break;
             default:
               CLBREAK; // 没有处理的错误
@@ -4177,7 +4187,7 @@ NOT_INC_P:
   const TYPEDESC* CodeParser::InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode)
   {
     ASSERT(pFuncNode->mode == SYNTAXNODE::MODE_FunctionCall);
-    ASSERT(pFuncNode->Operand[0].IsToken()); // 函数名
+    PARSER_ASSERT(pFuncNode->Operand[0].IsToken(), pFuncNode->Operand[0]); // 函数名
 
     const TYPEDESC* pRetType = NULL;
 
@@ -5158,9 +5168,10 @@ NOT_INC_P:
       return State_TypeNotFound;
     }
 
-    clStringA strVari;
-    ptkVariable->ToString(strVari);
-    if(GetType(strVari)) {
+    // 变量名可以同类型名，但是必须是结构体
+    // （就是不能为关键字，没试过typedef的名字行不行）
+    const TYPEDESC* pTestVarName = GetType(*ptkVariable);
+    if(pTestVarName && pTestVarName->cate != TYPEDESC::TypeCate_Struct) {
       return State_DefineAsType;
     }
 
@@ -5328,6 +5339,7 @@ NOT_INC_P:
 
   GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc)
   {
+    ASSERT(m_pParent == NULL);
     //ASSERT(pMemberNode == NULL || pMemberNode->mode == SYNTAXNODE::MODE_Block);
     FUNCDESC td;
     td.ret_type = strRetType;
@@ -5359,9 +5371,12 @@ NOT_INC_P:
   const TYPEDESC* NameContext::GetVariable(const TOKEN* ptkName) const
   {
     auto it = m_VariableMap.find(TokenPtr(ptkName));
-    return it != m_VariableMap.end()
+    
+    return (it != m_VariableMap.end())
       ? it->second.pDesc
-      : (m_pParent ? m_pParent->GetVariable(ptkName) : NULL);
+      : (m_pParent
+        ? m_pParent->GetVariable(ptkName)
+        : ((ptkName->type == TOKEN::TokenType_String) ? GetType("string") : NULL));
   }
 
   const VALUE* NameContext::GetVariableValue(const TOKEN* ptkName) const
