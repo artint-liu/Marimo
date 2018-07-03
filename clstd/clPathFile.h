@@ -26,10 +26,10 @@ void ResetWorkingDir();
 
 // TODO: 这个将来废弃
 template<typename _TString>
-b32 IsFullPathT(const _TString& strFilename);
+CLDEPRECATED_ATTRIBUTE b32 IsFullPathT(const _TString& strFilename);
 
-b32 IsFullPath(const clStringA& strFilename);
-b32 IsFullPath(const clStringW& strFilename);
+CLDEPRECATED_ATTRIBUTE b32 IsFullPath(const clStringA& strFilename);
+CLDEPRECATED_ATTRIBUTE b32 IsFullPath(const clStringW& strFilename);
 
 namespace clpathfile
 {
@@ -58,7 +58,8 @@ namespace clpathfile
     return s_VicePathSlash;
   }
 
-  // 修改路径中的扩展名, 参数中的扩展名接受".exe"或者"exe"两种形式的写法
+  // 修改路径中的扩展名, szExt指向还有“.”与新扩展名的字符串地址
+  // 如".exe"或者"(1).exe"都是可以接受的新扩展名
   template<typename _TString>
   b32 RenameExtensionT (_TString& strPath, typename _TString::LPCSTR szExt);
   b32 RenameExtension  (clStringA& strPath, clStringA::LPCSTR szExt);
@@ -426,38 +427,46 @@ namespace clpathfile
     }
   }
 
-  // 从一个路径收集文件，
-  // 如果这个路径是目录，则遍历子目录，如果是文件，就填入list后返回
-  template<class _TString, class FINDFILEDATAT, typename _TCh, typename _TStringList, class _Fn> // [](_TString str, FINDFILEDATAT wfd)->b32
-  void GenerateFiles(_TStringList& rFileList, const _TCh* szPath, _Fn fn)
-  {
-    CLDWORD dwAttri = clpathfile::GetFileAttributes(szPath);
-    if(dwAttri == 0xffffffff) {
-      return;
-    }
+  // 从一个路径收集文件
+  // 1.如果是文件，就直接填入list后返回
+  // 2.如果这个路径是目录，则遍历子目录并在遍历过程中调用fn决定处理逻辑
+  // fn的返回值会决定文件和目录的处理细节
+  // A.如果是文件，fn的返回值决定了文件是否加入列表
+  // B.如果是目录，fn的返回值决定是否遍历此目录
+  cllist<clStringA>& GenerateFiles(cllist<clStringA>& rFileList, const ch* szPath, clfunction<b32(const clStringA&, const clstd::FINDFILEDATAA&)> fn);
+  cllist<clStringW>& GenerateFiles(cllist<clStringW>& rFileList, const wch* szPath, clfunction<b32(const clStringW&, const clstd::FINDFILEDATAW&)> fn);
+  clvector<clStringA>& GenerateFiles(clvector<clStringA>& rFileList, const ch* szPath, clfunction<b32(const clStringA&, const clstd::FINDFILEDATAA&)> fn);
+  clvector<clStringW>& GenerateFiles(clvector<clStringW>& rFileList, const wch* szPath, clfunction<b32(const clStringW&, const clstd::FINDFILEDATAW&)> fn);
+  //template<class _TString, class FINDFILEDATAT, typename _TCh, typename _TStringList, class _Fn> // [](_TString str, FINDFILEDATAT wfd)->b32
+  //void GenerateFiles(_TStringList& rFileList, const _TCh* szPath, _Fn fn)
+  //{
+  //  CLDWORD dwAttri = clpathfile::GetFileAttributes(szPath);
+  //  if(dwAttri == 0xffffffff) {
+  //    return;
+  //  }
 
-    if(dwAttri & clstd::FileAttribute_Directory)
-    {
-      RecursiveSearchDir<_TString, FINDFILEDATAT>(szPath, [&rFileList, &fn]
-      (const _TString& strDir, const FINDFILEDATAT& wfd) -> b32
-      {
-        if(TEST_FLAG(wfd.dwAttributes, clstd::FileAttribute_Directory))
-        {
-          return fn(strDir, wfd);
-        }
-        else if(fn(strDir, wfd))
-        {
-          _TString str;
-          str = strDir + wfd.cFileName;
-          rFileList.push_back(str);
-        }
-        return TRUE;
-      });
-    }
-    else {
-      rFileList.push_back(szPath);
-    }
-  }
+  //  if(dwAttri & clstd::FileAttribute_Directory)
+  //  {
+  //    RecursiveSearchDir<_TString, FINDFILEDATAT>(szPath, [&rFileList, &fn]
+  //    (const _TString& strDir, const FINDFILEDATAT& wfd) -> b32
+  //    {
+  //      if(TEST_FLAG(wfd.dwAttributes, clstd::FileAttribute_Directory))
+  //      {
+  //        return fn(strDir, wfd);
+  //      }
+  //      else if(fn(strDir, wfd))
+  //      {
+  //        _TString str;
+  //        str = strDir + wfd.cFileName;
+  //        rFileList.push_back(str);
+  //      }
+  //      return TRUE;
+  //    });
+  //  }
+  //  else {
+  //    rFileList.push_back(szPath);
+  //  }
+  //}
 
   template<class _TString, class FINDFILEDATAT, typename _TCh, class _Fn>
   void GenerateFiles(const _TCh* szPath, _Fn fn)

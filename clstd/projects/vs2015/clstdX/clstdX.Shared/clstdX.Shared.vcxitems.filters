@@ -82,6 +82,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clParallelWork.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)clstdX.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clParallelWork.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3D">

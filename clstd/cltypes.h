@@ -284,6 +284,7 @@ typedef uintptr_t         CLULONG_PTR;
 #define clist           std::list
 #define clpair          std::pair
 #define clmake_pair     std::make_pair
+#define clfunction      std::function
 
 //#else
 //#if defined(_CL_SYSTEM_WINDOWS)

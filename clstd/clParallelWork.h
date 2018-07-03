@@ -11,24 +11,24 @@ namespace clstd
     ParallelWork(int nNumOfProcessors = 0);
     virtual ~ParallelWork();
 
-    void ForEach(void* pArray, size_t cbElement, size_t count, std::function<void(void*)> fn);
-    void ForEach(void* pDestArray, size_t cbDestElement, void* pSrcArray, size_t cbSrcElement, size_t count, std::function<void(void*, const void*)> fn);
+    void ForEach(void* pArray, size_t cbElement, size_t count, clfunction<void(void*)> fn);
+    void ForEach(void* pDestArray, size_t cbDestElement, void* pSrcArray, size_t cbSrcElement, size_t count, clfunction<void(void*, const void*)> fn);
 
     template<class _ElementT>
-    void ForEach(clvector<_ElementT>& rArray, std::function<void(void*)> fn)
+    void ForEach(clvector<_ElementT>& rArray, clfunction<void(void*)> fn)
     {
       ForEach(&rArray.front(), sizeof(_ElementT), rArray.size(), fn);
     }
 
     template<class _DestT, class _SrcT>
-    void ForEach(clvector<_DestT>& rDestArray, const clvector<_SrcT>& rSrcArray, std::function<void(void*, const void*)> fn)
+    void ForEach(clvector<_DestT>& rDestArray, const clvector<_SrcT>& rSrcArray, clfunction<void(void*, const void*)> fn)
     {
       ForEach(&rDestArray.front(), sizeof(_DestT), &rDestArray.front(), sizeof(_SrcT),
         rDestArray.size() < rSrcArray.size() ? rDestArray.size() : rSrcArray.size(), fn);
     }
 
     template<class _ElementT>
-    void ForEach(cllist<_ElementT>& rList, std::function<void(void*)> fn)
+    void ForEach(cllist<_ElementT>& rList, clfunction<void(void*)> fn)
     {
       clvector<_ElementT> rArray;
       rArray.insert(rArray.begin(), rList.begin(), rList.end());
@@ -43,7 +43,7 @@ namespace clstd
     }
 
     template<class _DestT, class _SrcT>
-    void ForEach(cllist<_DestT>& rDestList, const cllist<_SrcT>& rSrcList, std::function<void(void*, const void*)> fn)
+    void ForEach(cllist<_DestT>& rDestList, const cllist<_SrcT>& rSrcList, clfunction<void(void*, const void*)> fn)
     {
       clvector<_DestT> rDestArray;
       clvector<_SrcT> rSrcArray;

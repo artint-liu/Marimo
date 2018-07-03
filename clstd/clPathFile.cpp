@@ -175,14 +175,14 @@ namespace clpathfile
   {
     size_t p = FindExtensionT<typename _TString::TChar>(strPath);
     if(p == _TString::npos) {
-      if(szExt[0] != '.') {
-        strPath.Append('.');
-      }
+      //if(szExt[0] != '.') {
+      //  strPath.Append('.');
+      //}
       strPath.Append(szExt);
     }
     else if(szExt) {
-      strPath.Replace(p + 1, -1, 
-        (typename _TString::LPCSTR)((szExt[0] == '.') ? (szExt + 1) : szExt));
+      strPath.Replace(p, -1, szExt);
+        //(typename _TString::LPCSTR)((szExt[0] == '.') ? (szExt + 1) : szExt));
     }
     else {
       strPath.Replace(p, -1, szExt);
@@ -1351,3 +1351,59 @@ namespace clstd
   }
 #endif // #if defined(_CL_SYSTEM_WINDOWS)
 } // namespace clstd
+
+namespace clpathfile
+{
+  template<class _TString, class FINDFILEDATAT, typename _TCh, typename _TStringList, class _Fn> // [](_TString str, FINDFILEDATAT wfd)->b32
+  _TStringList& GenerateFiles(_TStringList& rFileList, const _TCh* szPath, _Fn fn)
+  {
+    CLDWORD dwAttri = clpathfile::GetFileAttributes(szPath);
+    if(dwAttri == 0xffffffff) {
+      return rFileList;
+    }
+
+    if(dwAttri & clstd::FileAttribute_Directory)
+    {
+      RecursiveSearchDir<_TString, FINDFILEDATAT>(szPath, [&rFileList, &fn]
+      (const _TString& strDir, const FINDFILEDATAT& wfd) -> b32
+      {
+        if(TEST_FLAG(wfd.dwAttributes, clstd::FileAttribute_Directory))
+        {
+          return fn(strDir, wfd);
+        }
+        else if(fn(strDir, wfd))
+        {
+          _TString str;
+          str = strDir + wfd.cFileName;
+          rFileList.push_back(str);
+        }
+        return TRUE;
+      });
+    }
+    else {
+      rFileList.push_back(szPath);
+    }
+    return rFileList;
+  }
+
+  cllist<clStringA>& GenerateFiles(cllist<clStringA>& rFileList, const ch* szPath, clfunction<b32(const clStringA&, const clstd::FINDFILEDATAA&)> fn)
+  {
+    return GenerateFiles<clStringA, FINDFILEDATAA, ch>(rFileList, szPath, fn);
+  }
+
+  cllist<clStringW>& GenerateFiles(cllist<clStringW>& rFileList, const wch* szPath, clfunction<b32(const clStringW&, const clstd::FINDFILEDATAW&)> fn)
+  {
+    return GenerateFiles<clStringW, FINDFILEDATAW, wch>(rFileList, szPath, fn);
+  }
+
+  clvector<clStringA>& GenerateFiles(clvector<clStringA>& rFileList, const ch* szPath, clfunction<b32(const clStringA&, const clstd::FINDFILEDATAA&)> fn)
+  {
+    return GenerateFiles<clStringA, FINDFILEDATAA, ch>(rFileList, szPath, fn);
+  }
+
+  clvector<clStringW>& GenerateFiles(clvector<clStringW>& rFileList, const wch* szPath, clfunction<b32(const clStringW&, const clstd::FINDFILEDATAW&)> fn)
+  {
+    return GenerateFiles<clStringW, FINDFILEDATAW, wch>(rFileList, szPath, fn);
+  }
+
+} // namespace clpathfile

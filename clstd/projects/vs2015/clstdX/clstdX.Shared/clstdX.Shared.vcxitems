@@ -29,6 +29,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clImage.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clParallelWork.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.CPP" />
@@ -74,6 +75,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clmemory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clParallelWork.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
