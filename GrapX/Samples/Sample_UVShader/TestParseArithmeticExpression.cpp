@@ -197,11 +197,11 @@ namespace DigitalParsing
     {"- \t\r6f66", VALUE::State_IllegalChar},
     {"- \t\r", VALUE::State_SyntaxError},
     {"- \t\r\\97", VALUE::State_IllegalChar},
+
     // 整数类型
+    {"123u", VALUE::State_OK},
     {"123456", VALUE::State_OK},
     {"-123456", VALUE::State_OK},
-    {"123e4", VALUE::State_OK},
-    {"-123e4", VALUE::State_OK},
     {"-9223372036854775808", VALUE::State_OK}, // 这个不要改, 基准参考, 64位有符号最小值
     { "9223372036854775807", VALUE::State_OK}, // 这个不要改, 基准参考, 64位有符号最大值
     {"18446744073709551615", VALUE::State_OK}, // 这个不要改, 基准参考, 64位无符号最大值
@@ -233,6 +233,8 @@ namespace DigitalParsing
     {"1e18", VALUE::State_OK},
     {"1e19", VALUE::State_OK},
     {"2e19", VALUE::State_OK},
+    {"123e4", VALUE::State_OK},
+    {"-123e4", VALUE::State_OK},
 
     // 浮点
     {"123.456", VALUE::State_OK},

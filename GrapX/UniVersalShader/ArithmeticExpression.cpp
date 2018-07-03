@@ -1133,6 +1133,11 @@ namespace UVShader
           }
           digi[p] = digi[p] * 10 + n;
         }
+        else if(p == 0 && (ptr[i] == 'u' || ptr[i] == 'U') && i == count - 1)
+        {
+          dwFlags = Rank_Unsigned;
+          break;
+        }
         else {
           return State_IllegalChar;
         }

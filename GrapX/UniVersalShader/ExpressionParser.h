@@ -313,8 +313,9 @@ namespace UVShader
       typedef clmap<clStringA, MACRO> Dict; // macro 支持重载，所以 key 的名字用 clStringA 来储存, Dict 要求具有排序性
       typedef clvector<int>           IntArray;
       //typedef clhash_set<clStringA>   Set;
-      MACRO_TOKEN::Array aFormalParams;  // 形参
+      MACRO_TOKEN::Array aFormalParams; // 形参
       MACRO_TOKEN::List aTokens;        // 替换内容
+      size_t            nNumTokens;     // 宏名占用的token数量，最少为1
       //GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
       //GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
       //GXDWORD bHasFILE       : 1; // 有__FILE__宏

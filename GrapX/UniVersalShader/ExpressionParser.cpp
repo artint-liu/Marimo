@@ -765,10 +765,12 @@ namespace UVShader
       return FALSE;
     }
 
+    ASSERT(pMacro->nNumTokens > 0);
+
     iterator it = token;
     TOKEN::List stream;
 
-    if(pMacro->aFormalParams.empty())
+    if(pMacro->aFormalParams.empty() && pMacro->nNumTokens == 1)
     {
       stream.insert(stream.end(), pMacro->aTokens.begin(), pMacro->aTokens.end());
       token.ClearMarker();
@@ -841,7 +843,7 @@ namespace UVShader
 
     TOKEN::List::iterator it = it_begin;
 
-    if(ctx_out.pMacro->aFormalParams.empty())
+    if(ctx_out.pMacro->aFormalParams.empty() && ctx_out.pMacro->nNumTokens == 1)
     {
       ctx_out.ActualParam.clear();
       ++it;
@@ -2784,6 +2786,7 @@ NOT_INC_P:
     //const auto& tokens = *m_pSubParser->GetTokensArray();
     ASSERT( ! tokens.empty() && tokens.front() == PREPROCESS_define);
     const auto count = tokens.size();
+    l_m.nNumTokens = 0;
     //m_MacrosSet.insert(strMacroName);
 
     if(count == 1) {
@@ -2795,6 +2798,7 @@ NOT_INC_P:
 
     if(count == 2) // "#define MACRO" 形
     {
+      l_m.nNumTokens = 1;
       m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
     }
     else if(count == 3) // "#define MACRO XXX" 形
@@ -2805,6 +2809,7 @@ NOT_INC_P:
         OutputErrorW(tokens[1], UVS_EXPORT_TEXT(2008, "“%s”: 宏定义中的意外"), tokens[2].ToString(str).CStr());
       }
 
+      l_m.nNumTokens = 1;
       auto result = m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
 
       // 如果已经添加过，清除原有数据
@@ -2826,9 +2831,11 @@ NOT_INC_P:
         }
 
         const int scope_end = tokens[2].scope;
+        l_m.nNumTokens = 3;
         if(scope_end > 3) // #define MACRO(...) ... 形解析
         {
-          for(int i = 3; i < scope_end; i++)
+          int i = 3;
+          for(; i < scope_end; i++)
           {
             if((_CL_NOT_(tokens[i].IsIdentifier()) && (i & 1)) ||
               (tokens[i] != ',' && (i & 1) == 0))
@@ -2842,6 +2849,8 @@ NOT_INC_P:
               sFormalList.back().type = TOKEN::TokenType_FormalParams;
             }
           }
+          l_m.nNumTokens = (size_t)i;
+
 
 #ifdef ENABLE_SYNTAX_VERIFY
           if(_CL_NOT_(Verify_MacroFormalList(sFormalList))) {
@@ -2851,7 +2860,9 @@ NOT_INC_P:
         }
         l_define = scope_end + 1;
       }
-      else {} // #define MACRO ... 形解析
+      else { // #define MACRO ... 形解析
+        l_m.nNumTokens = 1;
+      }
 
       auto result = m_pContext->Macros.insert(clmake_pair(strMacroName, l_m));
       if( ! result.second) {
