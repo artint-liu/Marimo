@@ -677,6 +677,7 @@ GXLPCSTR aSyntaxList_542[] = {
   NULL};
 
 SAMPLE_EXPRESSION samplesExpression[] = {
+  {0, _I_, "SPRITE(0xFFFE,0xEAA9,0xE569,0xE6B9,0xE6B9,0xEBF9,0xEAA9,0x9555)", 18},
   {0, _I_, "(Output.LdotN*shadowFactor)+Output.Ambient+Output.Specular*shadowFactor", 17},
   {0, _I_, "Input.Normal = (Input.Normal - 0.5) * 2.0", 13},
   {0, _I_, "Input.Position.xyz += SwingGrass(Input.Position.xyz, Input.Texcoord.y - 0.1875)", 22},

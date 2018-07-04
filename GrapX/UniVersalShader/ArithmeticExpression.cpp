@@ -69,7 +69,10 @@
 //   Ray(vec3(0,0,0), vec3(1,1,1));
 // uvs不支持这个。
 // 3.GLSL支持“^^”符号，代表布尔异或，uvs不支持，查了一下，HLSL也没有这个符号。
-//
+// 4.GLSL支持数组的length()方法，uvs目前还在考虑是否支持
+// 5.GLSL支持数组初始化：
+//  vec4 Scene[] = vec4[](vec4(0, 0, 0, 1), vec4(1, 1, 1, 1), vec4(2, 2, 2, 1));
+// uvs不打算支持这种形式。
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -195,13 +198,24 @@ namespace UVShader
   b32 ArithmeticExpression::TryExtendNumeric(iterator &it, clsize remain)
   {
     b32 bENotation = FALSE;
+    if((remain -= it.length) == 0) {
+      return FALSE;
+    }
+
+    VALUE value;
+
     const int ec = *(it.end());
-    if((it.front() == '.' && isdigit(ec)) ||               // '.'+"数字..."
-      (isdigit(it.front()) && (it.back() == 'e' || it.back() == 'E')) || // "数字...E/e"
-      (isdigit(it.front()) && ec == '.'))                   // "数字..."+'.'
+    const int front_is_digit = clstd::isdigit(it.front());
+    const b32 exp_postfix = (it.back() == 'e' || it.back() == 'E');
+    if((it.front() == '.' && clstd::isdigit(ec)) ||               // '.'+"数字..."
+      (front_is_digit && exp_postfix) || // "数字...E/e"
+      (front_is_digit && ec == '.'))                   // "数字..."+'.'
     {
-      it.length++;
-      while(--remain)
+      if(_CL_NOT_(front_is_digit && exp_postfix) || ec == '-' || ec == '+') {
+        it.length++;
+      }
+
+      while(remain--)
       {
         if(isdigit(it.marker[it.length])) {
           it.length++;
@@ -246,7 +260,7 @@ namespace UVShader
     if(TryExtendNumeric(it, remain)) {
       reinterpret_cast<TOKEN*>(lParam)->type = TOKEN::TokenType_Real;
     }
-    else if(it.length > 0 && isdigit(it.marker[0])) {
+    else if(it.length > 0 && clstd::isdigit(it.marker[0])) {
       reinterpret_cast<TOKEN*>(lParam)->type = TOKEN::TokenType_Integer;
     }
 
@@ -1032,14 +1046,19 @@ namespace UVShader
     return *this;
   }
 
-  VALUE::State VALUE::set( const TOKEN& token )
+  VALUE::State VALUE::set(const TOKEN& token)
   {
-    // 注意，有关上限的检查写的不严谨
+    return set(token.marker, token.length, token.type == TOKEN::TokenType_Integer);
+  }
+
+  VALUE::State VALUE::set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger)
+  {
+    // 注意，有关上限的检查写的不严谨(貌似已经严谨了)
     // X是任意内容，D是指数字
     // "-X" "+X" ".X" "Xf"
     // "De-D" "DeD"
-    auto ptr     = token.marker;
-    size_t count = token.length;
+    //auto ptr     = token.marker;
+    //size_t count = token.length;
     GXDWORD dwFlags = 0;
     GXQWORD digi[3] = {0}; // [0]是整数部分，[1]是小数部分, [2]是指数
     size_t p = 0; // part
@@ -1070,7 +1089,7 @@ namespace UVShader
       }
     }
 
-    if(ptr[i] == '0' && token.type == TOKEN::TokenType_Integer) // 8进制
+    if(ptr[i] == '0' && bInteger) // 8进制
     {
       for(i++; i < count; i++)
       {
@@ -1081,8 +1100,7 @@ namespace UVShader
         {
           const int n = ptr[i] - '0';
 
-          if(ptr[i] > (ULLONG_MAX / 8) ||       // TODO: 感觉比下面的State_Overflow写的更准啊
-            (ptr[i] == (ULLONG_MAX / 8) && n > (ULLONG_MAX % 8)))
+          if(ptr[i] > (ULLONG_MAX / 8) || (ptr[i] == (ULLONG_MAX / 8) && n > (ULLONG_MAX % 8)))
           {
             return State_Overflow;
           }
@@ -1547,6 +1565,16 @@ namespace UVShader
     else {
       return FLAG_OPERAND_UNDEFINED;
     }
+  }
+
+  GXBOOL SYNTAXNODE::GLOB::CompareAsToken(TOKEN::T_LPCSTR str) const
+  {
+    return IsToken() ? (*pTokn == str) : NULL;
+  }
+
+  GXBOOL SYNTAXNODE::GLOB::CompareAsToken(TOKEN::TChar c) const
+  {
+    return IsToken() ? (*pTokn == c) : NULL;
   }
 
   const TOKEN* SYNTAXNODE::GLOB::GetFirstToken() const

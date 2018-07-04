@@ -70,6 +70,8 @@ namespace UVShader
     typedef clvector<const TOKEN*>   PtrCArray;
     typedef clvector<TOKEN> Array;
     typedef CTokens::T_LPCSTR T_LPCSTR;
+    typedef CTokens::TChar TChar;
+
     enum Type
     {
       TokenType_Undefine = 0,
@@ -250,6 +252,7 @@ namespace UVShader
     void clear();
     void SetZero();
     void SetOne();
+    State set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger);
     State set(const TOKEN& token);
     VALUE& set(const VALUE& v);
     State UpdateValueByRank(Rank _type);  // 调整为到 type 指定的级别
@@ -321,6 +324,9 @@ namespace UVShader
       GXBOOL IsToken() const;
       GXBOOL IsNode() const;
       FLAGS GetType() const;
+
+      GXBOOL CompareAsToken(TOKEN::T_LPCSTR str) const; // 以token方式比较，如果不是token，则返回FALSE
+      GXBOOL CompareAsToken(TOKEN::TChar c) const;
 
       GLOB& operator=(const TOKEN& token) {
         pTokn = &token;

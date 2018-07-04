@@ -102,6 +102,8 @@ namespace UVShader
   TOKEN::T_LPCSTR s_szSampler3D = "sampler3D";
   TOKEN::T_LPCSTR s_szSamplerCube = "samplerCUBE";
 
+  TOKEN::T_LPCSTR s_szLengthFunc = "length";
+
   extern GXLPCSTR STR_VOID;
 
   extern GXLPCSTR STR_INT;
@@ -3902,7 +3904,7 @@ NOT_INC_P:
       else if(pNode->mode == SYNTAXNODE::MODE_StructDef)
       {
         clStringA str;
-        // 注册结构体类型
+        // TODO: 注册结构体类型
         //sNameSet.RegisterType(pNode->Operand[0].pTokn->ToString(str), TYPEDESC::TypeCate_Struct);
         return FALSE;
       }
@@ -4524,7 +4526,10 @@ NOT_INC_P:
   
   const TYPEDESC* CodeParser::InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
-    ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.'));
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.')); // 外部保证
+    // ab.cd.ef 解析为
+    // [.] [[.] [ab] [cd]] [ef]
+
     const TYPEDESC* pTypeDesc = NULL;
     if(pNode->Operand[0].IsToken())
     {
@@ -4548,7 +4553,8 @@ NOT_INC_P:
       }
       else
       {
-        ASSERT(pChildNode->CompareOpcode('.') == FALSE); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
+        // 结构体起始类型，相当于上面的[ab]
+        PARSER_ASSERT(pChildNode->CompareOpcode('.') == FALSE, pNode->Operand[0]); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
         pTypeDesc = InferType(sNameSet, pChildNode);
         //PARSER_ASSERT(pTypeDesc, pNode->Operand[0]);
       }
@@ -4562,10 +4568,29 @@ NOT_INC_P:
       CLBREAK;
     }
 
-    ASSERT(pNode->Operand[1].IsToken());
+    if(pNode->Operand[1].IsNode())
+    {
+#if 0
+      // 暂时不支持“length()”方法
+      // “.length()”求数组长度
+      const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
+      if(pMemberNode->mode == SYNTAXNODE::MODE_FunctionCall)
+      {
+        if(pMemberNode->Operand[0].CompareAsToken(s_szLengthFunc) && pMemberNode->Operand[1].ptr == NULL)
+        {
+          return m_GlobalSet.GetType(STR_INT);
+        }
+      }
+#endif
+
+      clStringW strW;
+      const TOKEN* pToken = pNode->Operand[1].GetFirstToken();
+      OutputErrorW(*pToken, UVS_EXPORT_TEXT(5041, "结构体不支持的操作: “%s”"), pToken->ToString(strW).CStr());
+      return NULL;
+    }
+
 
     clStringA strTypename;
-
     if(pTypeDesc->GetMemberTypename(strTypename, pNode->Operand[1].pTokn))
     {
       pTypeDesc = sNameSet.GetType(strTypename);

@@ -93,6 +93,10 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     if(TEST_FLAG(key_state, 1)) {
       return;
     }
+    
+    // 可以追踪的两个变量:
+    // pSamples[i].nLine
+    // pSamples[i].id
 
     auto nSize = strlen(pSamples[i].expression);
     expp.Attach(pSamples[i].expression, nSize, 0, NULL);
@@ -110,7 +114,6 @@ void TestExpressionParser(const SAMPLE_EXPRESSION* pSamples)
     }
     TRACE("(%d:%f)\n", nCount, (float)nSize / nCount);
 
-    // pSamples[i].id 可以追踪
 
     // 表达式解析
     UVShader::CodeParser::TKSCOPE scope(0, pTokens->size());
