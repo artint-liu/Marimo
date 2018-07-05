@@ -333,7 +333,8 @@ namespace UVShader
         return *this;
       }
 
-      const TOKEN* GetFirstToken() const;
+      const TOKEN* GetFrontToken() const;
+      const TOKEN* GetBackToken() const;
     };
     typedef clist<GLOB> GlobList;
 
@@ -372,6 +373,7 @@ namespace UVShader
     const TOKEN& GetAnyTokenAB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
     const TOKEN& GetAnyTokenAB2() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
     const TOKEN& GetAnyTokenAPB() const;  // 为错误处理找到一个定位的token 顺序:operand[0], opcode, operand[1]
+    const TOKEN& GetAnyTokenBPA() const;
     const TOKEN& GetAnyTokenPAB() const; // 为错误处理找到一个定位的token 顺序:opcode, operand[0], operand[1]
   }; // struct SYNTAXNODE
 

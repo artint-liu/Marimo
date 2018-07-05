@@ -95,6 +95,10 @@ namespace UVShader
       TypeCate_Vector,
       TypeCate_Matrix,
       TypeCate_Struct,
+      TypeCate_Flag_Scaler   = 0x10000,
+      TypeCate_Flag_MultiDim = 0x20000,
+      TypeCate_Flag_Sampler  = 0x40000,
+      TypeCate_Flag_Struct   = 0x80000,
     };
     typedef clvector<size_t> DimList_T;
 
@@ -105,7 +109,7 @@ namespace UVShader
     DimList_T         sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
     const TYPEDESC*   pNextDim;
 
-    GXBOOL GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const;
+    //GXBOOL GetMemberTypename(clStringA& strTypename, TYPEDESC* pMemberTypeDesc, const NameContext& sNameSet, CodeParser* pParser, const TOKEN* ptkMember) const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
     GXLPCSTR Resolve(int& R, int& C) const;
     GXBOOL IsVector() const;
@@ -209,6 +213,7 @@ namespace UVShader
     typedef std::multimap<clStringA, FUNCDESC>  FuncMap;
     typedef clmap<TokenPtr, VARIDESC>  VariableMap;
     typedef clStringA::LPCSTR LPCSTR;
+    typedef clmap<clStringA, const NameContext*> StructContextMap;
 
     enum State
     {
@@ -225,13 +230,15 @@ namespace UVShader
   
   protected:
     CodeParser* m_pCodeParser;
+    clStringA m_strName;    // 域名
     const NameContext* m_pParent;
 
-    TypeMap     m_TypeMap; // typedef 会产生两个内容相同的TYPEDESC
+    TypeMap     m_TypeMap;  // typedef 会产生两个内容相同的TYPEDESC
     FuncMap     m_FuncMap;
     VariableMap m_VariableMap;
     State       m_eLastState;
-    const TYPEDESC* m_pReturnType;
+    StructContextMap  m_StructContextMap; // 结构体成员的NameContext
+    const TYPEDESC*   m_pReturnType;
 
     NameContext* GetRoot();
     const NameContext* GetRoot() const;
@@ -242,8 +249,9 @@ namespace UVShader
 
     State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue);
   public:
-    NameContext();
-    NameContext(const NameContext* pParent);
+    NameContext(GXLPCSTR szName);
+    NameContext(GXLPCSTR szName, const NameContext* pParent);
+    ~NameContext();
 
     GXDWORD allow_keywords; // 过滤的关键字
 
@@ -260,8 +268,10 @@ namespace UVShader
     const TYPEDESC* GetType(VALUE::Rank rank) const;
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
     const VALUE* GetVariableValue(const TOKEN* ptkName) const;
+    const NameContext* GetStructContext(const clStringA& strName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
+    GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue = NULL);
@@ -290,6 +300,7 @@ namespace UVShader
   class CodeParser : public ArithmeticExpression
   {
     friend class NameContext;
+    friend struct TYPEDESC;
     friend struct NODE_CALC;
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
@@ -574,10 +585,10 @@ namespace UVShader
     static SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
     static SYNTAXNODE::GlobList& BreakComma(SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE::GLOB& sGlob); // 列出逗号并列式
 
-    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope);
-    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope);
-    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope);
-    TKSCOPE::TYPE  TryParseSingle(NameContext& sNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
+    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
+    TKSCOPE::TYPE  TryParseSingle(NameContext* pNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
 
     GXBOOL  TryKeywords(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest, TKSCOPE::TYPE* parse_end);
     TKSCOPE::TYPE  ParseFlowIf(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
@@ -654,14 +665,15 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
     //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
-    const TOKEN* Verify_VariableWithSeamantic(const SYNTAXNODE::GLOB& glob);
+    const TOKEN* GetVariableWithoutSeamantic(const SYNTAXNODE::GLOB& glob);
+    const SYNTAXNODE* GetVariableArrayWithoutSeamantic(const SYNTAXNODE::GLOB& glob);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
-    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable = FALSE);
+    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
     GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
-    GXBOOL Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode);
+    GXBOOL Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode);
     const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob);
 #endif

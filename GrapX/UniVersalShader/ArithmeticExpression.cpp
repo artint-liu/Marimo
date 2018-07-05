@@ -69,7 +69,7 @@
 //   Ray(vec3(0,0,0), vec3(1,1,1));
 // uvs不支持这个。
 // 3.GLSL支持“^^”符号，代表布尔异或，uvs不支持，查了一下，HLSL也没有这个符号。
-// 4.GLSL支持数组的length()方法，uvs目前还在考虑是否支持
+// 4.GLSL支持数组的length()方法，uvs支持这个方法
 // 5.GLSL支持数组初始化：
 //  vec4 Scene[] = vec4[](vec4(0, 0, 0, 1), vec4(1, 1, 1, 1), vec4(2, 2, 2, 1));
 // uvs不打算支持这种形式。
@@ -1577,13 +1577,24 @@ namespace UVShader
     return IsToken() ? (*pTokn == c) : NULL;
   }
 
-  const TOKEN* SYNTAXNODE::GLOB::GetFirstToken() const
+  const TOKEN* SYNTAXNODE::GLOB::GetFrontToken() const
   {
     if(IsToken()) {
       return pTokn;
     }
     else if(IsNode()) {
       return &pNode->GetAnyTokenAPB();
+    }
+    return NULL;
+  }
+
+  const TOKEN* SYNTAXNODE::GLOB::GetBackToken() const
+  {
+    if(IsToken()) {
+      return pTokn;
+    }
+    else if(IsNode()) {
+      return &pNode->GetAnyTokenBPA();
     }
     return NULL;
   }
@@ -1723,6 +1734,26 @@ namespace UVShader
     }
     else if(Operand[1].IsNode()) {
       return Operand[1].pNode->GetAnyTokenAPB();
+    }
+    CLBREAK;
+  }
+
+  const TOKEN& SYNTAXNODE::GetAnyTokenBPA() const
+  {
+    if(Operand[1].IsToken()) {
+      return *Operand[1].pTokn;
+    }
+    else if(Operand[1].IsNode()) {
+      return Operand[1].pNode->GetAnyTokenAPB();
+    }
+    else if(pOpcode) {
+      return *pOpcode;
+    }
+    else if(Operand[0].IsToken()) {
+      return *Operand[0].pTokn;
+    }
+    else if(Operand[0].IsNode()) {
+      return Operand[0].pNode->GetAnyTokenAPB();
     }
     CLBREAK;
   }

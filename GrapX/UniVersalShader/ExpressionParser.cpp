@@ -12,7 +12,7 @@
 #include "clTextLines.h"
 #include "../User/DataPoolErrorMsg.h"
 
-#define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFirstToken(), 0, "没实现的功能"); CLBREAK; }
+#define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFrontToken(), UVS_EXPORT_TEXT(5678, "没实现的功能")); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5678, "断言错误")); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler)
 #define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
@@ -103,6 +103,7 @@ namespace UVShader
   TOKEN::T_LPCSTR s_szSamplerCube = "samplerCUBE";
 
   TOKEN::T_LPCSTR s_szLengthFunc = "length";
+  static GXLPCSTR s_szNCName_Block = "{";  // Name Context 代码块名
 
   extern GXLPCSTR STR_VOID;
 
@@ -264,6 +265,7 @@ namespace UVShader
     , m_pParent(NULL)
     , m_nPPRecursion(0)
     , m_pInclude(pInclude ? pInclude : &s_DefaultInclude)
+    , m_GlobalSet("$")
   {
     m_GlobalSet.allow_keywords = KeywordFilter_typedef;
     m_GlobalSet.SetParser(this);
@@ -1090,7 +1092,7 @@ namespace UVShader
     stat.defn.szType = GetUniqueString(p);
 
     TKSCOPE scope(pScope->begin, definition_end);
-    if(!ParseExpression(stat.sRoot, m_GlobalSet, scope))
+    if(!ParseExpression(stat.sRoot, &m_GlobalSet, scope))
     {
       ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope.end));
       return FALSE;
@@ -1149,7 +1151,6 @@ namespace UVShader
     //  [StatementBlock]
     //};
 
-    NameContext sNameSet_Func(&m_GlobalSet);
     if(pScope->begin == pScope->end) {
       return TRUE;
     }
@@ -1185,6 +1186,10 @@ namespace UVShader
     // #
     stat.func.szName = GetUniqueString(p);
     INC_BUT_NOT_END(p, pEnd); // ERROR: 缺少“；”
+
+    clStringA strFunctionName;
+    strFunctionName.Format("%s()", stat.func.szName);
+    NameContext sNameSet_Func(strFunctionName, &m_GlobalSet);
 
     ASSERT(*p == '('); // 由前面的特征检查保证
     ASSERT(p->scope >= 0);  // 由 GenerateTokens 函数保证
@@ -1238,7 +1243,7 @@ namespace UVShader
         {
           stat.sRoot.ptr = NULL;
         }
-        else if(ParseCodeBlock(stat.sRoot, sNameSet_Func, func_statement_block))
+        else if(ParseCodeBlock(stat.sRoot, &sNameSet_Func, func_statement_block))
         {
 #ifdef ENABLE_SYNTAX_VERIFY
           if(sNameSet_Func.SetReturnType(stat.func.szReturnType) == FALSE)
@@ -1383,9 +1388,9 @@ namespace UVShader
       InitTokenScope(sMembersScope, *p, TRUE);
       ASSERT(sMembersScope.end < scope.end); // 给出的作用域不对
 
-      NameContext sMemberSet(&sNameSet);
+      //NameContext sMemberSet(strName, &sNameSet);
 
-      if(_CL_NOT_(ParseExpression(*pMembers, sMemberSet, sMembersScope)))
+      if(_CL_NOT_(ParseExpression(*pMembers, NULL, sMembersScope)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(sMembersScope.end));
         return sMembersScope.end;
@@ -1469,7 +1474,7 @@ namespace UVShader
           *pDefinitionNum = nDefination;
 
 #ifdef ENABLE_SYNTAX_VERIFY
-          Verify_StructMember(sNameSet, *pMembers->pNode); // 检查失败仍然继续解析
+          Verify_StructMember(sNameSet, strName, *pMembers->pNode); // 检查失败仍然继续解析
 #endif
         }
 
@@ -1514,7 +1519,7 @@ namespace UVShader
 
       SYNTAXNODE::GLOB glob;
 
-      if(_CL_NOT_(ParseExpression(glob, sNameSet, scope_var)))
+      if(_CL_NOT_(ParseExpression(glob, &sNameSet, scope_var)))
       {
         ERROR_MSG__MISSING_SEMICOLON(IDX2ITER(scope_var.end));
         return FALSE;
@@ -2082,7 +2087,7 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
   {
     // 解析一条表达式语句或者一个语句块
     ASSERT(scope.begin == scope.end ||
@@ -2090,7 +2095,7 @@ NOT_INC_P:
       (m_aTokens[scope.begin].scope == scope.end - 1 && m_aTokens[scope.begin] == '{' && m_aTokens[scope.end - 1] == '}'));
 
     if(m_aTokens[scope.begin] == '{') {
-      return ParseCodeBlock(glob, sNameSet, scope);
+      return ParseCodeBlock(glob, pNameSet, scope);
     }
     else if(ParseArithmeticExpression(1, TKSCOPE(scope.begin, scope.end - 1), &glob) == FALSE)
     {
@@ -2103,7 +2108,7 @@ NOT_INC_P:
   //////////////////////////////////////////////////////////////////////////
   // 解析一个代码块
   // 避免每条语句解析都递归
-  GXBOOL CodeParser::ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
   {
     // 保证解析内容在数学区间: [begin, end)
     ASSERT(m_aTokens[scope.begin].scope == scope.end - 1);
@@ -2112,12 +2117,12 @@ NOT_INC_P:
     TKSCOPE step_scope(scope.begin + 1, scope.end - 1); // begin会步进, end恒定
     MakeSyntaxNode(&glob, SYNTAXNODE::MODE_Block, NULL, NULL);
 
-    return ParseToChain(glob.pNode->Operand[0], sNameSet, step_scope);
+    return ParseToChain(glob.pNode->Operand[0], pNameSet, step_scope);
   }
 
   //////////////////////////////////////////////////////////////////////////
   // 解析一个范围内的所有表达式, 解析的表达式会连接成为chain
-  GXBOOL CodeParser::ParseToChain(SYNTAXNODE::GLOB& glob, NameContext& sNameSet, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseToChain(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
   {
     SYNTAXNODE::GLOB A;
     SYNTAXNODE::GLOB* pCurrNode = &glob;
@@ -2127,7 +2132,7 @@ NOT_INC_P:
     {
       A.ptr = NULL;
       
-      const TKSCOPE::TYPE pos = TryParseSingle(sNameSet, A, step_scope);
+      const TKSCOPE::TYPE pos = TryParseSingle(pNameSet, A, step_scope);
       if(pos == TKSCOPE::npos) {
         return FALSE;
       }
@@ -2158,7 +2163,7 @@ NOT_INC_P:
   // 如果解析失败, 返回TKSCOPE::npos
   // 如果解析成功, 返回接下来解析的起始位置
 
-  CodeParser::TKSCOPE::TYPE CodeParser::TryParseSingle(NameContext& sNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& step_scope)
+  CodeParser::TKSCOPE::TYPE CodeParser::TryParseSingle(NameContext* pNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& step_scope)
   {
     ASSERT(step_scope.GetSize() > 0); // 外部保证解析时不为空
     const auto& front = m_aTokens[step_scope.begin];
@@ -2180,12 +2185,12 @@ NOT_INC_P:
         return TKSCOPE::npos;
       }
 
-      if(ParseCodeBlock(glob, sNameSet, sub_block) == FALSE) {
+      if(ParseCodeBlock(glob, pNameSet, sub_block) == FALSE) {
         return TKSCOPE::npos;
       }
       return sub_block.end;
     }
-    else if(TryKeywords(sNameSet, step_scope, &glob, &parse_end)) // FIXME: 这里不能用KeywordMask_All, 要从外部继承进来
+    else if(pNameSet && TryKeywords(*pNameSet, step_scope, &glob, &parse_end)) // FIXME: 这里不能用KeywordMask_All, 要从外部继承进来
     {
       if(parse_end == TKSCOPE::npos) {
         return TKSCOPE::npos; // 解析错误, 直接返回
@@ -2226,7 +2231,7 @@ NOT_INC_P:
   CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowIf(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf)
   {
     // 与 ParseFlowWhile 相似
-    NameContext sNameSet_FlowIf(&sParentSet);
+    NameContext sNameSet_FlowIf("if", &sParentSet);
     SYNTAXNODE::GLOB A = {0}, B = {0};
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "if");
@@ -2247,7 +2252,7 @@ NOT_INC_P:
     sStatement.begin = sConditional.end + 1;
     sStatement.end = scope.end;
 
-    sStatement.begin = TryParseSingle(sNameSet_FlowIf, B, sStatement);
+    sStatement.begin = TryParseSingle(&sNameSet_FlowIf, B, sStatement);
     if(sStatement.begin == TKSCOPE::npos) {
       return TKSCOPE::npos;
     }
@@ -2282,7 +2287,7 @@ NOT_INC_P:
       }
       else
       {
-        sStatement.begin = TryParseSingle(sNameSet_FlowIf, B, sStatement);
+        sStatement.begin = TryParseSingle(&sNameSet_FlowIf, B, sStatement);
         if(sStatement.begin == TKSCOPE::npos)
         {
           return TKSCOPE::npos;
@@ -2312,7 +2317,7 @@ NOT_INC_P:
   {
     // 与 ParseFlowIf 相似
     SYNTAXNODE::GLOB A = {0}, B = {0};
-    NameContext sNameSet_FlowWhile(&sParentSet);
+    NameContext sNameSet_FlowWhile("while", &sParentSet);
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "while");
 
@@ -2336,7 +2341,7 @@ NOT_INC_P:
     auto& block_begin = m_aTokens[sBlock.begin];
     //SYNTAXNODE::MODE eMode = SYNTAXNODE::MODE_Undefined;
 
-    sBlock.end = TryParseSingle(sNameSet_FlowWhile, B, TKSCOPE(sBlock.begin, scope.end));
+    sBlock.end = TryParseSingle(&sNameSet_FlowWhile, B, TKSCOPE(sBlock.begin, scope.end));
     if(sBlock.end == TKSCOPE::npos) {
       return TKSCOPE::npos;
     }
@@ -2359,7 +2364,7 @@ NOT_INC_P:
   {
     ASSERT(m_aTokens[scope.begin] == "do");
     // do{...}while(...); 中while()不允许使用类型定义
-    NameContext sNameSet_Do(&sParentSet);
+    NameContext sNameSet_Do("do", &sParentSet);
 
 
     if(scope.begin + 1 >= scope.end) {
@@ -2387,7 +2392,7 @@ NOT_INC_P:
 
     InitTokenScope(sConditional, while_token + 1, FALSE);
 
-    GXBOOL bret = ParseToChain(B, sNameSet_Do, sBlock);
+    GXBOOL bret = ParseToChain(B, &sNameSet_Do, sBlock);
     bret = bret && ParseArithmeticExpression(0, sConditional, &A);
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
@@ -2594,7 +2599,7 @@ NOT_INC_P:
 
   CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowFor(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
-    NameContext sNameSet_FlowFor(&sParentSet);
+    NameContext sNameSet_FlowFor("for", &sParentSet);
     TKSCOPE sInitializer, sConditional, sIterator;
     TKSCOPE sBlock;
 
@@ -2623,7 +2628,7 @@ NOT_INC_P:
 
     if(uBlock.ptr == NULL) {
       //ParseExpression(&uBlock, sBlock);
-      if(TryParseSingle(sNameSet_FlowFor, uBlock, sBlock) == TKSCOPE::npos) {
+      if(TryParseSingle(&sNameSet_FlowFor, uBlock, sBlock) == TKSCOPE::npos) {
         return TKSCOPE::npos;
       }
     }
@@ -3467,7 +3472,7 @@ NOT_INC_P:
   }
 #endif
 
-  const TOKEN* CodeParser::Verify_VariableWithSeamantic(const SYNTAXNODE::GLOB& glob)
+  const TOKEN* CodeParser::GetVariableWithoutSeamantic(const SYNTAXNODE::GLOB& glob)
   {
     // 递归解析带语意的变量定义
     // <variable> [: seamantic1] [: seamantic2] ...
@@ -3479,7 +3484,36 @@ NOT_INC_P:
     {
       if(glob.pNode->CompareOpcode(':'))
       {
-        return Verify_VariableWithSeamantic(glob.pNode->Operand[0]);
+        return GetVariableWithoutSeamantic(glob.pNode->Operand[0]);
+      }
+      else
+      {
+        PARSER_BREAK(glob);
+      }
+    }
+    CLBREAK;
+    return NULL;
+  }
+
+  // 获得去除语意的数组变量
+  const SYNTAXNODE* CodeParser::GetVariableArrayWithoutSeamantic(const SYNTAXNODE::GLOB& glob)
+  {
+    // 递归解析带语意的变量定义
+    // <variable>["[m]"]["[n]"] [: seamantic1] [: seamantic2] ...
+    if(glob.IsToken())
+    {
+      PARSER_BREAK(glob);
+    }
+    else if(glob.IsNode())
+    {
+      if(glob.pNode->mode == SYNTAXNODE::MODE_Subscript0 ||
+        glob.pNode->mode == SYNTAXNODE::MODE_Subscript)
+      {
+        return glob.pNode;
+      }
+      else if(glob.pNode->CompareOpcode(':'))
+      {
+        return GetVariableArrayWithoutSeamantic(glob.pNode->Operand[0]);
       }
       else
       {
@@ -3521,7 +3555,7 @@ NOT_INC_P:
     return TRUE;
   }
 
-  GXBOOL CodeParser::Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable)
+  GXBOOL CodeParser::Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable, GXBOOL bMember)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition); // 只检查定义
     const TYPEDESC* pRightTypeDesc = NULL;
@@ -3600,7 +3634,7 @@ NOT_INC_P:
       else if(second_glob.pNode->CompareOpcode(':')) // 语义
       {
         //ptkVar = &second_glob.pNode->GetAnyTokenAB();
-        ptkVar = Verify_VariableWithSeamantic(second_glob);
+        ptkVar = GetVariableWithoutSeamantic(second_glob);
         if(ptkVar)
         {
           pType = sNameSet.RegisterVariable(strType, ptkVar);
@@ -3609,9 +3643,22 @@ NOT_INC_P:
         }
         return FALSE;
       }
+      else if(second_glob.pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) // 数组赋值
+      {
+        pRightTypeDesc = InferRightValueType2(sNameSet, second_glob.pNode->Operand[1], ptkVar);
+        const SYNTAXNODE* pVarableArray = GetVariableArrayWithoutSeamantic(second_glob.pNode->Operand[0]);
+        pType = sNameSet.RegisterMultidimVariable(strType, pVarableArray);
+
+        if(pRightTypeDesc == NULL) {
+          // 右侧类型推导失败，注册变量名（RegisterVariable）后再退出，
+          // 这样后面就不会报找不到变量的错误
+          return FALSE;
+        }
+
+        ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
+      }
       else if(second_glob.pNode->CompareOpcode('=')) // 赋值
       {
-        //ptkVar = &second_glob.pNode->GetAnyTokenAB();
         VALUE value;
 
         if(bConstVariable)
@@ -3620,7 +3667,7 @@ NOT_INC_P:
           VALUE::State state = sNameSet.CalculateConstantValue(value, this, &second_glob.pNode->Operand[1]);
           if(state != VALUE::State_OK)
           {
-            const TOKEN* pToken = second_glob.pNode->Operand[1].GetFirstToken();
+            const TOKEN* pToken = second_glob.pNode->Operand[1].GetFrontToken();
             switch(state)
             {
             case UVShader::VALUE::State_UnknownOpcode:
@@ -3649,9 +3696,9 @@ NOT_INC_P:
             }
           }
         }
-        pRightTypeDesc = InferRightValueType2(sNameSet, second_glob.pNode->Operand[1], ptkVar);
 
-        ptkVar = Verify_VariableWithSeamantic(second_glob.pNode->Operand[0]);
+        pRightTypeDesc = InferRightValueType2(sNameSet, second_glob.pNode->Operand[1], ptkVar);
+        ptkVar = GetVariableWithoutSeamantic(second_glob.pNode->Operand[0]);
         if(bConstVariable)
         {
           // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
@@ -3823,7 +3870,7 @@ NOT_INC_P:
 
         if(pNode->Operand[0].IsNode())
         {
-          NameContext sBlockNameContext(&sNameContext);
+          NameContext sBlockNameContext(s_szNCName_Block, &sNameContext);
           result = Verify_Chain(pNode->Operand[0].pNode, sBlockNameContext);
         }
         else if(pNode->Operand[0].IsToken())
@@ -3882,7 +3929,7 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
       {
-        NameContext sFlowForSet(&sNameContext);
+        NameContext sFlowForSet("for", &sNameContext);
         if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Chain(pNode->Operand[0].pNode, sFlowForSet))) // FIXME: 这里不能用Verify_Block
         {
           result = FALSE;
@@ -4024,69 +4071,129 @@ NOT_INC_P:
 
   GXBOOL CodeParser::Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet)
   {
-    NameContext sNameContext(pParentSet);
+    NameContext sNameContext(s_szNCName_Block, pParentSet);
     return Verify_Chain(pNode, sNameContext);
   }
 
-  GXBOOL CodeParser::Verify_StructMember(const NameContext& sParentSet, const SYNTAXNODE& rNode)
+  GXBOOL CodeParser::Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
-    NameContext sSet(&sParentSet);
-    RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, &sSet](const SYNTAXNODE* pNode, int depth) -> GXBOOL
+    NameContext* pStructMemberSet = new NameContext(s_szNCName_Block, &sParentSet);
+    RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, pStructMemberSet](const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
       if(pNode->mode == SYNTAXNODE::MODE_Definition)
       {
+#if 1
+        const SYNTAXNODE::GLOB& second_glob = pNode->Operand[1];
+        const TOKEN* ptkVar = NULL;
+        const TYPEDESC* pType = NULL;
+        clStringA strType;
+
+        pNode->Operand[0].pTokn->ToString(strType);
+
+        if(second_glob.IsToken())
+        {
+          ptkVar = second_glob.pTokn;
+          pType = pStructMemberSet->RegisterVariable(strType, ptkVar);
+        }
+        else if(second_glob.IsNode())
+        {
+          if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
+          {
+            pType = pStructMemberSet->RegisterMultidimVariable(strType, second_glob.pNode);
+          }
+          else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
+          {
+            CLBREAK;
+          }
+          else if(second_glob.pNode->CompareOpcode(':')) // 语义
+          {
+            //ptkVar = &second_glob.pNode->GetAnyTokenAB();
+            ptkVar = GetVariableWithoutSeamantic(second_glob);
+            if(ptkVar)
+            {
+              pType = pStructMemberSet->RegisterVariable(strType, ptkVar);
+              ASSERT(pType || pStructMemberSet->GetLastState() != NameContext::State_Ok);
+              return TRUE;
+            }
+            return FALSE;
+          }
+        }
+
+        if(pType == NULL)
+        {
+          clStringW strW;
+          switch(pStructMemberSet->GetLastState())
+          {
+          case NameContext::State_DuplicatedVariable:
+            OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), ptkVar->ToString(strW));
+            break;
+          case NameContext::State_TypeNotFound:
+            strW = strType;
+            OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), strW.CStr());
+            break;
+          default:
+            PARSER_BREAK(second_glob); // 没有处理的错误
+            break;
+          }
+          result = FALSE;
+        }
+
+        // TODO: 检查sMemberName是否有错误状态
+
+        //pType = pStructMemberSet->GetVariable(ptkMember);
+        //if(pType != NULL)
+        //{
+        //  if(pMemberTypeDesc) {
+        //    *pMemberTypeDesc = *pType;
+        //  }
+        //  strTypename = pType->name;
+        //  return FALSE;
+        //}
+
+#else
         const SYNTAXNODE::GLOB& Op = pNode->Operand[1];
         clStringA strType;
         pNode->Operand[0].pTokn->ToString(strType);
+        const TOKEN* pMemberToken = NULL;
 
-        if(Op.IsToken()) {
-          clStringA str;
-          if(sSet.RegisterVariable(strType, Op.pTokn/*->ToString(str)*/) == NULL)
-          {
-            clStringW str;
-            switch(sSet.GetLastState())
-            {
-            case NameContext::State_DuplicatedVariable:
-              OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), Op.pTokn->ToString(str));
-              break;
-            case NameContext::State_TypeNotFound:
-              str = strType;
-              OutputErrorW(*Op.pTokn, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), str.CStr());
-              break;
-            default:
-              PARSER_BREAK(Op); // 没有处理的错误
-              break;
-            }
+        if(Op.IsToken())
+        {
+          pMemberToken = Op.pTokn;
+        }
+        else if(Op.IsNode())
+        {
+          pMemberToken = &Op.pNode->GetAnyTokenAB();
+        }
+        else
+        {
+          PARSER_BREAK(Op);
+        }
 
-            result = FALSE;
-          }
-        }
-        else if(Op.IsNode()) {
-          auto& tk = Op.pNode->GetAnyTokenAB();
-          clStringA str;
-          if(sSet.RegisterVariable(strType, &tk/*.ToString(str)*/) == NULL)
+        if(pStructMemberSet->RegisterVariable(strType, pMemberToken) == NULL)
+        {
+          clStringW strW;
+          switch(pStructMemberSet->GetLastState())
           {
-            clStringW str;
-            switch(sSet.GetLastState())
-            {
-            case NameContext::State_DuplicatedVariable:
-              OutputErrorW(tk, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), tk.ToString(str));
-              break;
-            case NameContext::State_TypeNotFound:
-              str = strType;
-              OutputErrorW(tk, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), str.CStr());
-              break;
-            default:
-              CLBREAK; // 没有处理的错误
-              break;
-            }
-            result = FALSE;
+          case NameContext::State_DuplicatedVariable:
+            OutputErrorW(*pMemberToken, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), pMemberToken->ToString(strW));
+            break;
+          case NameContext::State_TypeNotFound:
+            strW = strType;
+            OutputErrorW(*pMemberToken, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), strW.CStr());
+            break;
+          default:
+            PARSER_BREAK(Op); // 没有处理的错误
+            break;
           }
+          result = FALSE;
         }
-      }
+#endif
+      } // SYNTAXNODE::MODE_Definition
       return TRUE;
     });
+
+    sParentSet.RegisterStructContext(strStructName, pStructMemberSet);
     return result;
   }
 
@@ -4570,38 +4677,83 @@ NOT_INC_P:
 
     if(pNode->Operand[1].IsNode())
     {
-#if 0
+      const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
+      if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript)
+      {
+        const NameContext* pMemberContext = sNameSet.GetStructContext(pTypeDesc->name);
+        if(pMemberContext)
+        {
+          pTypeDesc = InferSubscriptType(*pMemberContext, pMemberNode);
+          return pTypeDesc;
+        }
+      }
+#if 1
       // 暂时不支持“length()”方法
       // “.length()”求数组长度
-      const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
-      if(pMemberNode->mode == SYNTAXNODE::MODE_FunctionCall)
+      else if(pMemberNode->mode == SYNTAXNODE::MODE_FunctionCall)
       {
         if(pMemberNode->Operand[0].CompareAsToken(s_szLengthFunc) && pMemberNode->Operand[1].ptr == NULL)
         {
+          //const NameContext* pMemberContext = sNameSet.GetStructContext(pTypeDesc->name);
+          //if(pMemberContext)
+          //{
+          //  pTypeDesc = InferSubscriptType(*pMemberContext, pMemberNode);
+          //  CLNOP;
+          //}
+#ifdef _DEBUG
+          const TOKEN* pMemberToken = pNode->Operand[0].GetBackToken();
+          TRACE("length of(%s) = %d\n", pMemberToken->ToString().CStr(), pTypeDesc->sDimensions.back());
+#endif
           return m_GlobalSet.GetType(STR_INT);
         }
       }
 #endif
+      else {
+      }
 
       clStringW strW;
-      const TOKEN* pToken = pNode->Operand[1].GetFirstToken();
+      const TOKEN* pToken = pNode->Operand[1].GetFrontToken();
       OutputErrorW(*pToken, UVS_EXPORT_TEXT(5041, "结构体不支持的操作: “%s”"), pToken->ToString(strW).CStr());
       return NULL;
     }
-
-
-    clStringA strTypename;
-    if(pTypeDesc->GetMemberTypename(strTypename, pNode->Operand[1].pTokn))
+    else if(pNode->Operand[1].IsToken())
     {
-      pTypeDesc = sNameSet.GetType(strTypename);
+      //const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
+      //if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript)
+      //{
+        
+        {
+        }
+        const NameContext* pMemberContext = sNameSet.GetStructContext(pTypeDesc->name);
+        if(pMemberContext)
+        {
+          pTypeDesc = InferType(*pMemberContext, pNode->Operand[1].pTokn);
+          return pTypeDesc;
+        }
+        else if(pTypeDesc->pDesc && pTypeDesc->pDesc->lpDotOverride)
+        {
+          clStringA strBasicType;
+          if(pTypeDesc->pDesc->lpDotOverride(pTypeDesc->pDesc, strBasicType, pNode->Operand[1].pTokn))
+          {
+            return m_GlobalSet.GetType(strBasicType);
+          }
+        }
+      //}
     }
-    else
-    {
+
+    //clStringA strTypename;
+    //TYPEDESC sMemberTypeDesc;
+    //if(pTypeDesc->GetMemberTypename(strTypename, &sMemberTypeDesc, sNameSet, this, pNode->Operand[1].pTokn))
+    //{
+    //  pTypeDesc = sNameSet.GetType(strTypename);
+    //}
+    //else
+    //{
       clStringW str1, str2;
       pTypeDesc = NULL;
       OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2039, "“%s”: 不是“%s”的成员"),
-        pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].pTokn->ToString(str1).CStr());
-    }
+        pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].GetFrontToken()->ToString(str1).CStr());
+    //}
 
     return pTypeDesc;
   }
@@ -4684,7 +4836,7 @@ NOT_INC_P:
 
     const TYPEDESC* pRightType = InferType(sNameSet, right_glob);
     if(pRightType == NULL) {
-      OutputErrorW(*right_glob.GetFirstToken(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
+      OutputErrorW(*right_glob.GetFrontToken(), UVS_EXPORT_TEXT(5030, "无法计算表达式类型"));
     }
     return pRightType;
   }
@@ -4897,8 +5049,9 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  NameContext::NameContext()
+  NameContext::NameContext(GXLPCSTR szName)
     : m_pCodeParser(NULL)
+    , m_strName(szName)
     , m_pParent(NULL)
     , m_eLastState(State_Ok)
     , allow_keywords(KeywordFilter_All)
@@ -4906,13 +5059,22 @@ NOT_INC_P:
   {   
   }
 
-  NameContext::NameContext(const NameContext* pParent)
+  NameContext::NameContext(GXLPCSTR szName, const NameContext* pParent)
     : m_pCodeParser(pParent->m_pCodeParser)
+    , m_strName(szName)
     , m_pParent(pParent)
     , m_eLastState(State_Ok)
     , allow_keywords(KeywordFilter_All)
     , m_pReturnType(NULL)
   {
+  }
+
+  NameContext::~NameContext()
+  {
+    for(auto it = m_StructContextMap.begin(); it != m_StructContextMap.end(); ++it)
+    {
+      SAFE_DELETE(it->second);
+    }
   }
 
   void NameContext::Cleanup()
@@ -5108,7 +5270,7 @@ NOT_INC_P:
         //-----------------------------------------
 
         clStringA strTypename;
-        const TYPEDESC* pTypeDesc = pParser->InferMemberType(this, pNode);
+        const TYPEDESC* pTypeDesc = pParser->InferMemberType(*this, pNode);
 
         if(IS_NUMERIC_CATE(pTypeDesc->cate))
         {
@@ -5234,6 +5396,7 @@ NOT_INC_P:
 
   const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue)
   {
+    ASSERT(strType.IsIdentifier());
     // PS: 返回值似乎没什么用
     const TYPEDESC* pTypeDesc = NULL;
     VARIDESC* pVariDesc = NULL;
@@ -5244,7 +5407,7 @@ NOT_INC_P:
 #ifdef ENABLE_SYNTAX_VERIFY
   const TYPEDESC* NameContext::RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode)
   {
-    ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript); // 外部保证
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript || pNode->mode == SYNTAXNODE::MODE_Subscript0); // 外部保证
     //ASSERT(pNode->Operand[1].IsToken());
 
     TYPEDESC::DimList_T sDimensions;
@@ -5255,7 +5418,15 @@ NOT_INC_P:
     while(TRUE)
     {
       VALUE value;
-      VALUE::State state = CalculateConstantValue(value, m_pCodeParser, &pNode->Operand[1]);
+      VALUE::State state = VALUE::State_OK;
+      const b32 bSelfAdaptionLength = (pNode->Operand[1].ptr == NULL);
+      
+      if(bSelfAdaptionLength) {
+        value.SetZero();
+      }
+      else {
+        state = CalculateConstantValue(value, m_pCodeParser, &pNode->Operand[1]);
+      }
 
       const SYNTAXNODE::GLOB* first_glob = &pNode->Operand[0];
       if(state == VALUE::State_OK)
@@ -5265,17 +5436,17 @@ NOT_INC_P:
         //int c[0];   // C2466 不能分配常量大小为 0 的数组
         if(value.rank == VALUE::Rank_Float || value.rank == VALUE::Rank_Double)
         {
-          m_pCodeParser->OutputErrorW(first_glob->pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT2(2058, "常量表达式不是整型", m_pCodeParser));
+          m_pCodeParser->OutputErrorW(*first_glob->GetFrontToken(), UVS_EXPORT_TEXT2(2058, "常量表达式不是整型", m_pCodeParser));
           m_eLastState = State_HashError;
           return NULL;
         }
         else if(value.nValue64 < 0) {
-          m_pCodeParser->OutputErrorW(first_glob->pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT2(2118, "负下标", m_pCodeParser));
+          m_pCodeParser->OutputErrorW(*first_glob->GetFrontToken(), UVS_EXPORT_TEXT2(2118, "负下标", m_pCodeParser));
           m_eLastState = State_HashError;
           return NULL;
         }
-        else if(value.nValue64 == 0) {
-          m_pCodeParser->OutputErrorW(first_glob->pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT2(2466, "不能分配常量大小为 0 的数组", m_pCodeParser));
+        else if(_CL_NOT_(bSelfAdaptionLength) && value.nValue64 == 0) {
+          m_pCodeParser->OutputErrorW(*first_glob->GetFrontToken(), UVS_EXPORT_TEXT2(2466, "不能分配常量大小为 0 的数组", m_pCodeParser));
           m_eLastState = State_HashError;
           return NULL;
         }
@@ -5373,6 +5544,13 @@ NOT_INC_P:
     return result.second;
   }
 
+  GXBOOL NameContext::RegisterStructContext(const clStringA& strName, const NameContext* pContext)
+  {
+    auto result = m_StructContextMap.insert(clmake_pair(strName, pContext));
+    ASSERT(result.second); // RegisterStruct保证不会重复添加结构体定义
+    return result.second;
+  }
+
   GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc)
   {
     ASSERT(m_pParent == NULL);
@@ -5420,6 +5598,16 @@ NOT_INC_P:
     auto it = m_VariableMap.find(TokenPtr(ptkName));
     return (it != m_VariableMap.end() && it->second.sConstValue.rank != VALUE::Rank_Undefined)
       ? &it->second.sConstValue : NULL;
+  }
+
+  const NameContext* NameContext::GetStructContext(const clStringA& strName) const
+  {
+    auto it = m_StructContextMap.find(strName);
+    return (it != m_StructContextMap.end())
+      ? it->second
+      : (m_pParent
+        ? m_pParent->GetStructContext(strName)
+        : NULL);
   }
 
   const TYPEDESC* NameContext::GetType(const clStringA& strType) const
@@ -5592,80 +5780,132 @@ NOT_INC_P:
 //#endif
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL TYPEDESC::GetMemberTypename(clStringA& strTypename, const TOKEN* ptkMember) const
-  {
-    strTypename.Clear();
-
-    if(pMemberNode)
-    {
-      ASSERT(pDesc == NULL);
-      //const TYPEDESC* pDesc = NULL;
-
-      // 确定符合结构体描述
-      ASSERT(pMemberNode->mode == SYNTAXNODE::MODE_Block &&
-        pMemberNode->Operand[0].IsNode() &&
-        pMemberNode->Operand[1].IsToken() && *pMemberNode->Operand[1].pTokn == ';');
-
-      RecursiveNode<const SYNTAXNODE>(NULL, pMemberNode->Operand[0].pNode, [/*&pDesc, */&strTypename, &ptkMember]
-      (const SYNTAXNODE* pNode, int depth)-> GXBOOL
-      {
-        if(strTypename.IsNotEmpty()) // 找到类型后尽快结束迭代
-        {
-          return FALSE;
-        }
-        else if(pNode->mode == SYNTAXNODE::MODE_Definition)
-        {
-          if(pNode->Operand[1].IsToken()) {
-            if(*pNode->Operand[1].pTokn == *ptkMember) {
-              ASSERT(pNode->Operand[0].IsToken());
-              pNode->Operand[0].pTokn->ToString(strTypename);
-              return FALSE;
-            }
-          }
-          else if(pNode->Operand[1].IsNode()) {
-            if(pNode->Operand[1].pNode->GetAnyTokenAB() == *ptkMember) {
-              ASSERT(pNode->Operand[0].IsToken());
-              pNode->Operand[0].pTokn->ToString(strTypename);
-              return FALSE;
-            }
-          }
-          else {
-            CLBREAK;
-          }
-        }
-        return TRUE;
-      });
-      //return pDesc;
-      return strTypename.IsNotEmpty();
-    }
-    else if(pDesc)
-    {
-      ASSERT(pMemberNode == NULL);
-      //// 访问向量/矩阵里面的标量
-      //for(size_t i = 0; i < pDesc->count; i++)
-      //{
-      //  if(*ptkMember == pDesc->list[i].name) {
-      //    strTypename = pDesc->list[i].type;
-      //    return TRUE;
-      //  }
-      //}
-
-      //ASSERT(clstd::strlenT(pDesc->set0) == clstd::strlenT(pDesc->set1)); // 保证这两个长度一致
-      //// 访问重组向量
-      //if(MatchScaler(ptkMember, pDesc->set0) || MatchScaler(ptkMember, pDesc->set1))
-      //{
-      //  strTypename = pDesc->name;
-      //  strTypename.Back() = '0' + ptkMember->length;
-      //  return TRUE;
-      //}
-      if(pDesc->lpDotOverride)
-      {
-        return (pDesc->lpDotOverride(pDesc, strTypename, ptkMember));
-      }
-    }
-    return FALSE;
-  }
-
+//  GXBOOL TYPEDESC::GetMemberTypename(clStringA& strTypename, TYPEDESC* pMemberTypeDesc, const NameContext& sNameSet, CodeParser* pParser, const TOKEN* ptkMember) const
+//  {
+//    strTypename.Clear();    
+//
+//    if(pMemberNode)
+//    {
+//      ASSERT(pDesc == NULL);
+//      //const TYPEDESC* pDesc = NULL;
+//
+//      // 确定符合结构体描述
+//      ASSERT(pMemberNode->mode == SYNTAXNODE::MODE_Block &&
+//        pMemberNode->Operand[0].IsNode() &&
+//        pMemberNode->Operand[1].IsToken() && *pMemberNode->Operand[1].pTokn == ';');
+//      NameContext sMemberName(s_szNCName_Block, &sNameSet);
+//
+//      RecursiveNode<const SYNTAXNODE>(NULL, pMemberNode->Operand[0].pNode,
+//        [/*&pDesc, */&strTypename, &ptkMember, &sMemberName, pMemberTypeDesc, pParser]
+//      (const SYNTAXNODE* pNode, int depth)->GXBOOL
+//      {
+//        if(strTypename.IsNotEmpty()) // 找到类型后尽快结束迭代
+//        {
+//          return FALSE;
+//        }
+//        else if(pNode->mode == SYNTAXNODE::MODE_Definition)
+//        {
+//#if 1
+//          const SYNTAXNODE::GLOB& second_glob = pNode->Operand[1];
+//          const TOKEN* ptkVar = NULL;
+//          const TYPEDESC* pType = NULL;
+//          clStringA strType;
+//
+//          pNode->Operand[0].pTokn->ToString(strType);
+//
+//          if(second_glob.IsToken())
+//          {
+//            ptkVar = second_glob.pTokn;
+//            pType = sMemberName.RegisterVariable(strType, ptkVar);
+//          }
+//          else if(second_glob.IsNode())
+//          {
+//            if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
+//            {
+//              pType = sMemberName.RegisterMultidimVariable(strType, second_glob.pNode);
+//            }
+//            else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
+//            {
+//              CLBREAK;
+//            }
+//            else if(second_glob.pNode->CompareOpcode(':')) // 语义
+//            {
+//              //ptkVar = &second_glob.pNode->GetAnyTokenAB();
+//              ptkVar = pParser->GetVariableWithoutSeamantic(second_glob);
+//              if(ptkVar)
+//              {
+//                pType = sMemberName.RegisterVariable(strType, ptkVar);
+//                ASSERT(pType || sMemberName.GetLastState() != NameContext::State_Ok);
+//                return TRUE;
+//              }
+//              return FALSE;
+//            }
+//          }
+//
+//          // TODO: 检查sMemberName是否有错误状态
+//
+//          pType = sMemberName.GetVariable(ptkMember);
+//          if(pType != NULL)
+//          {
+//            if(pMemberTypeDesc) {
+//              *pMemberTypeDesc = *pType;
+//            }
+//            strTypename = pType->name;
+//            return FALSE;
+//          }
+//#else
+//          if(pNode->Operand[1].IsToken()) {
+//            if(*pNode->Operand[1].pTokn == *ptkMember) {
+//              ASSERT(pNode->Operand[0].IsToken());
+//              pNode->Operand[0].pTokn->ToString(strTypename);
+//              return FALSE;
+//            }
+//          }
+//          else if(pNode->Operand[1].IsNode()) {
+//            if(pNode->Operand[1].pNode->GetAnyTokenAB() == *ptkMember) {
+//              ASSERT(pNode->Operand[0].IsToken());
+//              pNode->Operand[0].pTokn->ToString(strTypename);
+//              return FALSE;
+//            }
+//          }
+//          else {
+//            CLBREAK;
+//          }
+//#endif
+//        }
+//        return TRUE;
+//      });
+//      //return pDesc;
+//      return strTypename.IsNotEmpty();
+//    }
+//    else if(pDesc)
+//    {
+//      ASSERT(pMemberNode == NULL);
+//      //// 访问向量/矩阵里面的标量
+//      //for(size_t i = 0; i < pDesc->count; i++)
+//      //{
+//      //  if(*ptkMember == pDesc->list[i].name) {
+//      //    strTypename = pDesc->list[i].type;
+//      //    return TRUE;
+//      //  }
+//      //}
+//
+//      //ASSERT(clstd::strlenT(pDesc->set0) == clstd::strlenT(pDesc->set1)); // 保证这两个长度一致
+//      //// 访问重组向量
+//      //if(MatchScaler(ptkMember, pDesc->set0) || MatchScaler(ptkMember, pDesc->set1))
+//      //{
+//      //  strTypename = pDesc->name;
+//      //  strTypename.Back() = '0' + ptkMember->length;
+//      //  return TRUE;
+//      //}
+//      if(pDesc->lpDotOverride)
+//      {
+//        return (pDesc->lpDotOverride(pDesc, strTypename, ptkMember));
+//      }
+//    }
+//    return FALSE;
+//  }
+//
   GXBOOL TYPEDESC::MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set)
   {
     size_t match_count = 0;
