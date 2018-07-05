@@ -13,6 +13,7 @@
 #include "../User/DataPoolErrorMsg.h"
 
 #define PARSER_BREAK(_GLOB) { OutputErrorW(*_GLOB.GetFrontToken(), UVS_EXPORT_TEXT(5678, "没实现的功能")); CLBREAK; }
+#define PARSER_BREAK2(PARSER, _GLOB) { PARSER->OutputErrorW(*_GLOB.GetFrontToken(), UVS_EXPORT_TEXT2(5678, "没实现的功能", PARSER)); CLBREAK; }
 #define PARSER_ASSERT(_X, _GLOB) { if(!(_X)) {OutputErrorW(_GLOB.IsToken() ? *_GLOB.pTokn : _GLOB.pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(5678, "断言错误")); ASSERT(_X);} }
 #define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler)
 #define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
@@ -3721,12 +3722,14 @@ NOT_INC_P:
       {
         // 意料之外的变量定义语法
         PARSER_BREAK(second_glob);
+        return FALSE;
       }
     }
     else
     {
       PARSER_BREAK(second_glob);
       // 定义但是没写名字，报错
+      return FALSE;
     }
 
     ASSERT(pNode->Operand[0].IsToken()); // 外面的拆解保证不会出现这个
@@ -4118,6 +4121,16 @@ NOT_INC_P:
             }
             return FALSE;
           }
+          else {
+            PARSER_BREAK(second_glob); // 没有处理的错误
+            result = FALSE;
+            return FALSE;
+          }
+        }
+        else {
+          PARSER_BREAK(second_glob); // 没有处理的错误
+          result = FALSE;
+          return FALSE;
         }
 
         if(pType == NULL)
@@ -5301,7 +5314,7 @@ NOT_INC_P:
           }
           else
           {
-            CLBREAK;
+            PARSER_BREAK2(m_pCodeParser, pNode->Operand[i]);
             p[i].SetOne(); // 标识符用临时值1
           }
           s = VALUE::State_Identifier;
