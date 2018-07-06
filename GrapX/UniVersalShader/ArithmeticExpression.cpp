@@ -84,6 +84,7 @@ namespace UVShader
 {
   template void RecursiveNode<SYNTAXNODE>(ArithmeticExpression* pParser, SYNTAXNODE* pNode, std::function<GXBOOL(SYNTAXNODE*, int)> func, int depth);
   template void RecursiveNode<const SYNTAXNODE>(ArithmeticExpression* pParser, const SYNTAXNODE* pNode, std::function<GXBOOL(const SYNTAXNODE*, int)> func, int depth);
+  static b32 s_bDumpScope = TRUE;
 #if 0
   // 操作符号重载
   VALUE::State operator|(VALUE::State a, VALUE::State b)
@@ -949,6 +950,10 @@ namespace UVShader
 
   void ArithmeticExpression::DbgDumpScope( clStringA& str, clsize begin, clsize end, GXBOOL bRaw )
   {
+    if(_CL_NOT_(s_bDumpScope)) {
+      return;
+    }
+
     if(end - begin > 1 && m_aTokens[end - 1] == ';') {
       --end;
     }
@@ -979,6 +984,10 @@ namespace UVShader
 
   void ArithmeticExpression::DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB )
   {
+    if(_CL_NOT_(s_bDumpScope)) {
+      return;
+    }
+
     clStringA strA, strB;
     DbgDumpScope(strA, scopeA);
     DbgDumpScope(strB, scopeB);
@@ -989,6 +998,14 @@ namespace UVShader
     TRACE("%s\n", strIntruction);
     m_aDbgExpressionOperStack.push_back(strIntruction);
     // </Make OperString>
+  }
+
+  void ArithmeticExpression::Invoke(GXLPCSTR szFunc, GXLPCSTR szArguments)
+  {
+    if(clstd::strcmpT(szFunc, "EnableDumpScope"))
+    {
+      s_bDumpScope = clStringA(szArguments).ToBoolean();
+    }
   }
 
   const clStringArrayA& ArithmeticExpression::DbgGetExpressionStack() const
@@ -1630,6 +1647,16 @@ namespace UVShader
   b32 SYNTAXNODE::CompareOpcode(CTokens::T_LPCSTR str) const
   {
     return pOpcode && *pOpcode == str;
+  }
+
+  clStringA& SYNTAXNODE::ToString(clStringA& str) const
+  {
+    return GetAnyTokenAPB().ToString(str);
+  }
+
+  clStringW& SYNTAXNODE::ToString(clStringW& str) const
+  {
+    return GetAnyTokenAPB().ToString(str);
   }
 
 #if 0

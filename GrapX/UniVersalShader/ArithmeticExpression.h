@@ -367,9 +367,11 @@ namespace UVShader
 
     b32 CompareOpcode(CTokens::TChar ch) const;
     b32 CompareOpcode(CTokens::T_LPCSTR str) const;
+    clStringA& ToString(clStringA& str) const;
+    clStringW& ToString(clStringW& str) const;
 
     //VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out, std::function<GXBOOL(const SYNTAXNODE*)> func) const;
-
+    //void GetSourceScope(TKSCOPE& scope) const; // 获得源代码的区间，如果SYNTAXNODE中的节点被替换过
     const TOKEN& GetAnyTokenAB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
     const TOKEN& GetAnyTokenAB2() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
     const TOKEN& GetAnyTokenAPB() const;  // 为错误处理找到一个定位的token 顺序:operand[0], opcode, operand[1]
@@ -548,6 +550,7 @@ namespace UVShader
     void DbgDumpScope(clStringA& str, const TKSCOPE& scope);
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     void DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB);
+    void Invoke(GXLPCSTR szFunc, GXLPCSTR szArguments);
     const clStringArrayA& DbgGetExpressionStack() const;
     int SetError(int err);
   };

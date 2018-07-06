@@ -326,6 +326,7 @@ namespace UVShader
       //typedef clhash_set<clStringA>   Set;
       MACRO_TOKEN::Array aFormalParams; // 形参
       MACRO_TOKEN::List aTokens;        // 替换内容
+      int               nOrder;         // 定义顺序，防止无限展开
       size_t            nNumTokens;     // 宏名占用的token数量，最少为1
       //GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
       //GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
@@ -605,9 +606,9 @@ namespace UVShader
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);
     void    GetNext(iterator& it, TOKEN& token);
-    void    ExpandMacro(MACRO_EXPAND_CONTEXT& c);
-    void    ExpandMacroStream(TOKEN::List& sTokenList, const TOKEN& line_num);
-    GXBOOL  TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
+    void    ExpandMacro(MACRO_EXPAND_CONTEXT& c, int order);
+    void    ExpandMacroStream(TOKEN::List& sTokenList, const TOKEN& line_num, int order);
+    GXBOOL  TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end, int order);
     GXBOOL  MergeStringToken(const TOKEN& token);
     const MACRO* FindMacro(const TOKEN& token);
 
@@ -633,8 +634,12 @@ namespace UVShader
     GXLPCSTR GetUniqueString(const TOKEN* pSym);
     GXLPCSTR GetUniqueString(T_LPCSTR szText);
 
+    void VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const;
     void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
-    void OutputErrorW(const TOKEN& token, GXUINT code, ...);
+    void OutputErrorW(const SYNTAXNODE::GLOB& glob, GXUINT code, ...) const;
+    void OutputErrorW(const SYNTAXNODE* pNode, GXUINT code, ...) const;
+    void OutputErrorW(const TOKEN& token, GXUINT code, ...) const;
+    void OutputErrorW(const TOKEN* pToken, GXUINT code, ...) const;
     void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
 
     CodeParser* GetRootParser();
@@ -678,6 +683,11 @@ namespace UVShader
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob);
 #endif
 
+    void DbgBreak(const SYNTAXNODE::GLOB& glob);
+    void DbgBreak(const SYNTAXNODE* pNode);
+    void DbgBreak(const TOKEN* pToken);
+    void DbgAssert(b32 bConditional, const SYNTAXNODE::GLOB& glob);
+
     void SetTokenPhonyString(int index, const clStringA& str);
 
     template<class _Ty>
@@ -716,13 +726,15 @@ namespace UVShader
     NameContext         m_GlobalSet;
 
   public:
+    CodeParser();
     CodeParser(PARSER_CONTEXT* pContext, Include* pInclude);
     virtual ~CodeParser();
     b32                 Attach                  (const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename);
     clsize              GenerateTokens          (CodeParser* pParent = NULL);
     GXBOOL              Parse                   ();
 
-    const StatementArray& GetStatements          () const;
+    const StatementArray& GetStatements         () const;
+    void                Invoke                  (GXLPCSTR szFunc, GXLPCSTR szArguments);
 
 //    GXBOOL   IsToken(const SYNTAXNODE::UN* pUnion) const;
     //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const;
