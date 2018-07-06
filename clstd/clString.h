@@ -322,6 +322,7 @@ namespace clstd
     size_t      DivideBy        (_TCh cCh, StringX& strFront, StringX& strBack) const; // 查找特定字符并切为前后两段
     size_t      ReverseDivideBy (_TCh cCh, StringX& strFront, StringX& strBack) const; // 从结尾开始搜索特定字符并切为前后两段
 
+    b32         ToBoolean       () const;
     i32         ToInteger       (int nRadix = 10) const;  // 尝试将字符串转换为有符号整数，参数描述这个字符串的进制
     u32         ToUInteger      (int nRadix = 10) const;  // 尝试将字符串转换为无符号整数，参数描述这个字符串的进制
     i64         ToInteger64     (int nRadix = 10) const;  // 尝试将字符串转换为64位有符号整数，参数描述这个字符串的进制

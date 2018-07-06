@@ -99,6 +99,9 @@ namespace clstd
   // 无符号数字 => 字符串(带数学分组)
   template<typename _TCh, typename _TNum>
   void _ultogxstrT(_TNum value, _TCh* pDest, size_t uSize, i32 radix, i32 group, i32 upper);
+
+  template <typename _TCh>
+  b32 _StringToBooleanT(const _TCh* pStr, size_t len);
   
   //////////////////////////////////////////////////////////////////////////
 
@@ -157,6 +160,10 @@ namespace clstd
 
   template u32    HashStringT(const wch* str);
   template u32    HashStringT(const  ch* str);
+
+  template b32    _StringToBooleanT(const wch* pStr, size_t len);
+  template b32    _StringToBooleanT(const ach* pStr, size_t len);
+
 
   namespace StringUtility
   {
@@ -1803,6 +1810,12 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
+  b32 _CLSTR_IMPL::ToBoolean() const
+  {
+    return _StringToBooleanT(m_pBuf, CLSTR_LENGTH(m_pBuf));
+  }
+
+  _CLSTR_TEMPL
     i32 _CLSTR_IMPL::ToInteger(int nRadix) const
   {
     return clstd::xtoi(nRadix, m_pBuf);
@@ -2915,6 +2928,25 @@ namespace clstd
   double xtod(const wch* str, size_t len)
   {
     return clstd::_xstrtofT<double>(str, len);
+  }
+
+  template <typename _TCh>
+  b32 _StringToBooleanT(const _TCh* pStr, size_t len)
+  {
+    switch(len)
+    {
+    case 1:
+      return pStr[0] == '1';
+    case 2:
+      return (pStr[0] == 'O' || pStr[0] == 'o') && (pStr[1] == 'K' || pStr[1] == 'k');
+    case 3:
+      return (pStr[0] == 'Y' || pStr[0] == 'y') && (pStr[1] == 'E' || pStr[1] == 'e') &&
+        (pStr[2] == 'S' || pStr[2] == 's');
+    case 4:
+      return (pStr[0] == 'T' || pStr[0] == 't') && (pStr[1] == 'R' || pStr[1] == 'r') &&
+        (pStr[2] == 'U' || pStr[2] == 'u') && (pStr[3] == 'E' || pStr[3] == 'e');
+    }
+    return FALSE;
   }
 
   //////////////////////////////////////////////////////////////////////////
