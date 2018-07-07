@@ -326,7 +326,7 @@ namespace UVShader
       //typedef clhash_set<clStringA>   Set;
       MACRO_TOKEN::Array aFormalParams; // 形参
       MACRO_TOKEN::List aTokens;        // 替换内容
-      int               nOrder;         // 定义顺序，防止无限展开
+      int               nOrder;         // 定义顺序，相当于id，防止无限展开
       size_t            nNumTokens;     // 宏名占用的token数量，最少为1
       //GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
       //GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
@@ -370,11 +370,13 @@ namespace UVShader
 
     struct MACRO_EXPAND_CONTEXT
     {
+      typedef clset<int> OrderSet_T;
       const TOKEN* pLineNumRef;
       TOKEN::List stream;
       const MACRO* pMacro;
 
       clvector<TOKEN::List> ActualParam;
+      OrderSet_T OrderSet; // 展开宏的集合，防止无限展开递归
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -606,9 +608,9 @@ namespace UVShader
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);
     void    GetNext(iterator& it, TOKEN& token);
-    void    ExpandMacro(MACRO_EXPAND_CONTEXT& c, int order);
-    void    ExpandMacroStream(TOKEN::List& sTokenList, const TOKEN& line_num, int order);
-    GXBOOL  TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end, int order);
+    void    ExpandMacro(MACRO_EXPAND_CONTEXT& c);
+    void    ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet);
+    GXBOOL  TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
     GXBOOL  MergeStringToken(const TOKEN& token);
     const MACRO* FindMacro(const TOKEN& token);
 
@@ -624,7 +626,8 @@ namespace UVShader
     GXBOOL   ExpandInnerMacro(TOKEN& token, const TOKEN& line_num); // 主要是替换__FILE__ __LINE__
 
 
-    static T_LPCSTR Macro_SkipGaps( T_LPCSTR begin, T_LPCSTR end );  // 返回跳过制表符和空格后的字符串地址
+    static T_LPCSTR Macro_SkipGapsAndNewLine(T_LPCSTR begin, T_LPCSTR end);  // 返回跳过制表符和空格后的字符串地址
+    static T_LPCSTR Macro_SkipGaps(T_LPCSTR begin, T_LPCSTR end);  // 返回跳过制表符和空格后的字符串地址
     GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 
     GXBOOL  ParseStatement(TKSCOPE* pScope);
@@ -655,6 +658,7 @@ namespace UVShader
     const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
+    const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);
 #endif
 
     const TYPEDESC* InferRightValueType2(NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位

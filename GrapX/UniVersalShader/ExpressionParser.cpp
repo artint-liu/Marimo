@@ -104,6 +104,7 @@ namespace UVShader
   TOKEN::T_LPCSTR s_szSamplerCube = "samplerCUBE";
 
   TOKEN::T_LPCSTR s_szLengthFunc = "length";
+  TOKEN::T_LPCSTR s_szMultiplicationFunc = "mul";
   static GXLPCSTR s_szNCName_Block = "{";  // Name Context 代码块名
 
   extern GXLPCSTR STR_VOID;
@@ -166,7 +167,9 @@ namespace UVShader
   extern GXLPCSTR STR_DOUBLE4x3;
   extern GXLPCSTR STR_DOUBLE4x4;
 
-  const size_t STR_HALF_LENGTH   = clstd::strlenT(STR_HALF);
+  const size_t STR_INT_LENGTH = clstd::strlenT(STR_INT);
+  const size_t STR_UINT_LENGTH = clstd::strlenT(STR_UINT);
+  const size_t STR_HALF_LENGTH = clstd::strlenT(STR_HALF);
   const size_t STR_FLOAT_LENGTH  = clstd::strlenT(STR_FLOAT);
   const size_t STR_DOUBLE_LENGTH = clstd::strlenT(STR_DOUBLE);
 
@@ -294,6 +297,16 @@ namespace UVShader
     m_GlobalSet.BuildIntrinsicType();
     if(pContext) {
       pContext->nRefCount++;
+    }
+
+    if(pContext && ! pContext->Macros.empty())
+    {
+      int n = 0;
+      for(auto it = pContext->Macros.begin(); it != pContext->Macros.end(); ++it, n++)
+      {
+        ASSERT(it->second.nOrder == n); // 必须指定宏的order
+        ASSERT(it->second.nNumTokens > 0); // 肯定大于0啊
+      }
     }
 
     SetIteratorCallBack(CodeParser::IteratorProc, 0);
@@ -835,7 +848,10 @@ namespace UVShader
 
     if(pMacro->aFormalParams.empty() && pMacro->nNumTokens == 1)
     {
-      stream.insert(stream.end(), pMacro->aTokens.begin(), pMacro->aTokens.end());
+      // 这里不展开不含形参的宏，保证和带形参宏处理级别一致
+      // 对于“#define Time Time+5”这种写法，如果这里展开，
+      // 在次级再做展开就会产生“Time+5+5”这样错误的表达式
+      stream.push_back(token);
       token.ClearMarker();
       ++it;
       token.Set(it);
@@ -887,24 +903,27 @@ namespace UVShader
 
     ASSERT(token.pContainer);
     TOKEN next_token = token;
-    ExpandMacroStream(stream, token, 0);
+    ExpandMacroContent(stream, token, NULL); // 次级展开
     m_ExpandedStream = stream;
     m_ExpandedStream.push_back(next_token);
     return TRUE;
   }
 
-  GXBOOL CodeParser::TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end, int order)
+  GXBOOL CodeParser::TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end)
   {
     if(it_begin->type == TOKEN::TokenType_String || TEST_FLAG(m_dwState, AttachFlag_NotExpandMacro) || ! m_ExpandedStream.empty()) {
       return FALSE;
     }
 
-    // 没有找到同名宏定义
-    if(_CL_NOT_(ctx_out.pMacro = FindMacro(*it_begin)) || ctx_out.pMacro->nOrder < order) {
+    // 没有找到同名宏定义 || 不展开集合中存在的宏（防止无限展开）
+    if(_CL_NOT_(ctx_out.pMacro = FindMacro(*it_begin)) || 
+      ctx_out.OrderSet.find(ctx_out.pMacro->nOrder) != ctx_out.OrderSet.end())
+    {
       return FALSE;
     }
-
+    
     TOKEN::List::iterator it = it_begin;
+    ctx_out.OrderSet.insert(ctx_out.pMacro->nOrder);
 
     if(ctx_out.pMacro->aFormalParams.empty() && ctx_out.pMacro->nNumTokens == 1)
     {
@@ -968,12 +987,16 @@ namespace UVShader
     } // if(ctx.pMacro->aFormalParams.empty())
 
     ctx_out.stream.clear();
-    ExpandMacro(ctx_out, order + 1);
+
+    ExpandMacro(ctx_out); // 展开含有形参的宏
+
+    // 重新对流中的token进行一次检查，展开不含形参的宏
+    ExpandMacroContent(ctx_out.stream, *ctx_out.pLineNumRef, &ctx_out.OrderSet);
     *it_out = it;
     return TRUE;
   }
 
-  void CodeParser::ExpandMacro(MACRO_EXPAND_CONTEXT& c, int order)
+  void CodeParser::ExpandMacro(MACRO_EXPAND_CONTEXT& c) // 展开宏参数的内容
   {
     GXBOOL bPound = FALSE;
     MACRO_EXPAND_CONTEXT ctx;
@@ -996,7 +1019,7 @@ namespace UVShader
           });
         }
         else {
-          ExpandMacroStream(p, *c.pLineNumRef, order);
+          ExpandMacroContent(p, *c.pLineNumRef, NULL);
           c.stream.insert(c.stream.end(), p.begin(), p.end());
         }
       }
@@ -1005,29 +1028,28 @@ namespace UVShader
         bPound = FALSE;
       }
     }
-
-    ExpandMacroStream(c.stream, *c.pLineNumRef, order); // 这个展开非形参部分的宏
   }
 
-  void CodeParser::ExpandMacroStream(TOKEN::List& sTokenList, const TOKEN& line_num, int order)
+  void CodeParser::ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet) // 展开宏内容里的宏
   {
     TOKEN::List::iterator itMacroEnd; // 如果有展开的宏，则将宏的结尾放置在这个里面
     TOKEN::List::iterator it_end = sTokenList.end();
     MACRO_EXPAND_CONTEXT ctx;
     ctx.pLineNumRef = &line_num;
 
+    if(pOrderSet) {
+      ctx.OrderSet = *pOrderSet;
+    }
+
     for(auto it = sTokenList.begin(); it != it_end;)
     {
       if(ExpandInnerMacro(*it, line_num)) {
-
+        ++it; // 似乎应该加上这个
       }
-      else if(TryMatchMacro(ctx, &itMacroEnd, it, it_end, order)) {
+      else if(TryMatchMacro(ctx, &itMacroEnd, it, it_end)) {
         it = sTokenList.erase(it, itMacroEnd);
         ASSERT(it == itMacroEnd); // 理论上应该是一个
         TOKEN::List::iterator it_next = it;
-        //if (it_next != it_end) {        
-        //  ++it_next;
-        //}
         sTokenList.insert(it, ctx.stream.begin(), ctx.stream.end());
         it = it_next;
       }
@@ -1035,8 +1057,10 @@ namespace UVShader
         ++it;
       }
     } // for
+    return;
   }
 
+  //////////////////////////////////////////////////////////////////////////
   
 
   
@@ -3277,7 +3301,7 @@ NOT_INC_P:
         continue;
       }
 
-      if((p = Macro_SkipGaps(p, end)) >= end) {
+      if((p = Macro_SkipGapsAndNewLine(p, end)) >= end) {
         break;
       }
 
@@ -3349,6 +3373,7 @@ NOT_INC_P:
 
         if(session >= PPCondRank_else) {
           // ERROR: fatal error C1019: 意外的 #else
+          OutputErrorW(p, UVS_EXPORT_TEXT(9999, "没实现的功能"));
           CLBREAK;
         }
         session = PPCondRank_else;
@@ -3445,7 +3470,16 @@ NOT_INC_P:
     return FALSE;
   }
 
-  CodeParser::T_LPCSTR CodeParser::Macro_SkipGaps( T_LPCSTR p, T_LPCSTR end )
+  CodeParser::T_LPCSTR CodeParser::Macro_SkipGapsAndNewLine(T_LPCSTR p, T_LPCSTR end)
+  {
+    do {
+      p++;
+    } while((*p == '\t' || *p == 0x20 || *p == '\r' || *p == '\n') && p < end);
+    return p;
+
+  }
+
+  CodeParser::T_LPCSTR CodeParser::Macro_SkipGaps(T_LPCSTR p, T_LPCSTR end)
   {
     do {
       p++;
@@ -4518,6 +4552,15 @@ NOT_INC_P:
       pFuncNode->Operand[0].pTokn->ToString(strFunctionName);
     }
 
+    // mul()比较特殊
+    if(strFunctionName == s_szMultiplicationFunc && sArgumentsTypeList.size() == 2)
+    {
+      pTypeFunc = InferDifferentTypesOfMultiplication(sArgumentsTypeList.front(), sArgumentsTypeList.back());
+      if(pTypeFunc) {
+        return pTypeFunc;
+      }
+    }
+
     // 通配符形式的内部函数列表
     for(int i = 0; s_functions[i].name != NULL; i++)
     {
@@ -4996,18 +5039,26 @@ NOT_INC_P:
     ASSERT(pToken); // 暂时不支持
     if(*pToken == '*')
     {
-      // TODO: 不完整
-      if(pFirst->IsVector() && pSecond->IsMatrix() && IsComponent(pFirst, pSecond, NULL))
-      {
-        return pFirst;
-      }
-      else if(pFirst->IsMatrix() && pSecond->IsVector() && IsComponent(NULL, pFirst, pSecond))
-      {
-        return pSecond;
-      }
+      return InferDifferentTypesOfMultiplication(pFirst, pSecond);
     }
 
     CLBREAK;
+    return NULL;
+  }
+
+  const TYPEDESC* CodeParser::InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond)
+  {
+    // 推导乘法类型，支持矩阵与向量乘法
+    if(pFirst->name == pSecond->name) {
+      return pFirst;
+    }
+    else if(pFirst->IsVector() && pSecond->IsMatrix() && IsComponent(pFirst, pSecond, NULL)) {
+      return pFirst;
+    }
+    else if(pFirst->IsMatrix() && pSecond->IsVector() && IsComponent(NULL, pFirst, pSecond)) {
+      return pSecond;
+    }
+    else {}
     return NULL;
   }
 
@@ -6127,6 +6178,16 @@ NOT_INC_P:
     {
       szScaler = STR_DOUBLE;
       szRxC = &name[STR_DOUBLE_LENGTH];
+    }
+    else if(name.BeginsWith(STR_INT))
+    {
+      szScaler = STR_INT;
+      szRxC = &name[STR_INT_LENGTH];
+    }
+    else if(name.BeginsWith(STR_UINT))
+    {
+      szScaler = STR_UINT;
+      szRxC = &name[STR_UINT_LENGTH];
     }
     else
     {
