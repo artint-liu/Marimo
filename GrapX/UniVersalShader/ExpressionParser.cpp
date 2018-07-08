@@ -1819,22 +1819,22 @@ NOT_INC_P:
       pStat->func.pArguments = (FUNCTION_ARGUMENT*)m_aArgumentsPack.size();
       pStat->func.nNumOfArguments = aArgs.size();
 
-      StringArray sFormalTypenames;
+      //StringArray sFormalTypenames;
       m_aArgumentsPack.reserve(m_aArgumentsPack.size() + aArgs.size());
-      sFormalTypenames.reserve(aArgs.size());
+      //sFormalTypenames.reserve(aArgs.size());
 
       for(auto it = aArgs.begin(); it != aArgs.end(); ++it)
       {
         clStringA str;
-        sNameSet.RegisterVariable(it->ptkType->ToString(str), it->ptkName); // 注册在临时域内, 用来检查形参重名
-        sFormalTypenames.push_back(str);
+        if(it->ptkName)
+        {
+          sNameSet.RegisterVariable(it->ptkType->ToString(str), it->ptkName); // 注册在临时域内, 用来检查形参重名
+          //sFormalTypenames.push_back(str);
+        }
         m_aArgumentsPack.push_back(*it);
       }
     }
 
-    //m_GlobalSet.RegisterFunction(pStat->func.szReturnType, pStat->func.szName, sFormalTypenames);
-
-    //m_aArgumentsPack.insert(m_aArgumentsPack.end(), aArgs.begin(), aArgs.end());
     return TRUE;
   }
 
