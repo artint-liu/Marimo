@@ -1,7 +1,7 @@
 ﻿#ifndef _UNIVERSAL_SHADER_ERROR_H_
 #define _UNIVERSAL_SHADER_ERROR_H_
 
-#define ERROR_MSG__MISSING_SEMICOLON(_token)      m_pMsg->WriteErrorW(TRUE, (_token).offset(), 1000)
+#define ERROR_MSG__MISSING_SEMICOLON(_token)      m_pMsg->WriteErrorW(TRUE, (_token).offset(), UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”"))
 #define ERROR_MSG__MISSING_OPENBRACKET    CLBREAK
 #define ERROR_MSG__MISSING_CLOSEDBRACKET  CLBREAK
 

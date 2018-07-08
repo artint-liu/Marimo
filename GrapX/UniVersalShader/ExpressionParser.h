@@ -274,7 +274,7 @@ namespace UVShader
     GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
-    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue = NULL);
+    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
 #endif

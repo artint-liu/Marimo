@@ -102,7 +102,7 @@ namespace UVShader
     u32       unary_mask : 2;               // 一元操作符允许位：11B表示操作数可以在左边和右边，01B表示操作数只能在右边，10B表示操作数只能在左边
 
     Type      type : 8;                     // 类型
-    u32       bPhony : 1;             // 在String字典而不在流中
+    u32       bPhony : 1;                   // 在String字典而不在流中
 
     // [precedence]
     // 1~14 表示运算符的优先级
@@ -137,6 +137,7 @@ namespace UVShader
     GXBOOL operator!=(SmartStreamA::T_LPCSTR str) const;
     GXBOOL operator!=(SmartStreamA::TChar ch) const;
     b32    operator<(const TOKEN& _token) const;
+    clsize offset() const;
 
   public:
 
@@ -217,6 +218,7 @@ namespace UVShader
       State_IllegalChar   = 0x40000000,
       State_BadOpcode     = 0x10000000, // 错误的操作符
       State_IllegalNumber = 0x08000000, // 非法数字, 入8进制下的"05678"
+      State_BadIdentifier = 0x04000000, // 找不到标识符
     };
 
     enum Rank {
@@ -483,7 +485,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_NODE_ID
     clsize              m_nNodeId;
 #endif
-
+    GXBOOL              m_bHigherDefiniton; // “Identifier Identifier” 形式的定义转为更高优先级，默认比较低
     GXBOOL              m_bRefMsg; // 如果为TRUE，析构时不删除m_pMsg
     ErrorMessage*       m_pMsg;
     TOKEN::Array        m_aTokens;
@@ -522,6 +524,7 @@ namespace UVShader
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
     TKSCOPE::TYPE  GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence);
+    void    EnableHigherDefinition(GXBOOL bHigher);
 
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
     GXUINT  MarkCode(GXUINT code, GXLPCSTR szMessage);

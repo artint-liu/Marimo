@@ -108,6 +108,7 @@ namespace UVShader
     , m_nErrorCount(0)
     , m_nDbgNumOfExpressionParse(0)
     , m_NodePool(128)
+    , m_bHigherDefiniton(FALSE)
     , m_bRefMsg(FALSE)
 #ifdef ENABLE_SYNTAX_NODE_ID
     , m_nNodeId(1)
@@ -503,7 +504,10 @@ namespace UVShader
           // 跳过非运算符, 也包括括号
           if(s.precedence == TOKEN::ID_BRACE)
           {
-            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
+            if(s.scope >= (int)scope.end) // 闭括号肯定在表达式区间内
+            {              
+              return TKSCOPE::npos;
+            }
 #if 1
             if(IsLikeTypeCast(scope, i)) {
               return i;
@@ -535,6 +539,11 @@ namespace UVShader
       i = nCandidatePos;
     }
     return TKSCOPE::npos;
+  }
+
+  void ArithmeticExpression::EnableHigherDefinition(GXBOOL bHigher)
+  {
+    m_bHigherDefiniton = bHigher;
   }
 
   GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
@@ -589,7 +598,7 @@ namespace UVShader
       }
       return bret;
     }
-    else if(front.precedence == 0 && m_aTokens[scope.begin + 1].precedence == 0) // 变量声明
+    else if(front.precedence == 0 && m_aTokens[scope.begin + 1].precedence == 0 && m_bHigherDefiniton == FALSE) // 变量声明
     {
       ASSERT(count > 2);
       SYNTAXNODE::MODE mode = SYNTAXNODE::MODE_Definition;
@@ -1387,6 +1396,15 @@ namespace UVShader
         return State_Overflow;
       }
     }
+    else if(_type == Rank_Signed64 && rank == Rank_Signed) {
+      // 高位肯定初始化了
+      ASSERT((nValue >= 0 && (nValue64 & 0xffffffff00000000) == 0) ||
+        (nValue < 0 && (nValue64 & 0xffffffff00000000) == 0xffffffff00000000)
+      );
+    }
+    else if(_type == Rank_Signed64 && rank == Rank_Unsigned) {
+      ASSERT((uValue64 & 0xffffffff00000000) == 0); // 高位肯定初始化为0了
+    }
     else {
       ASSERT(_type == Rank_Signed64 && rank == Rank_Unsigned64);
       if(uValue64 & 0x8000000000000000) {
@@ -1558,6 +1576,15 @@ namespace UVShader
   b32 TOKEN::IsNumeric() const
   {
     return TokenType_FirstNumeric < type && type < TokenType_LastNumeric;
+  }
+
+  clsize TOKEN::offset() const
+  {
+    if((size_t)pContainer & 0x1) {
+      // 代换的token使用pContainer储存偏移
+      return ((size_t)pContainer & (~(size_t)1));
+    }
+    return CTokens::iterator::offset();
   }
 
   //////////////////////////////////////////////////////////////////////////
