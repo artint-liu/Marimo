@@ -622,6 +622,7 @@ namespace UVShader
     T_LPCSTR PP_IfDefine(const RTPPCONTEXT& ctx, GXBOOL bNot, const TOKEN::Array& aTokens); // bNot 表示 if not define
     T_LPCSTR PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser);
     T_LPCSTR PP_SkipConditionalBlock(PPCondRank session, T_LPCSTR begin, T_LPCSTR end); // 从这条预处理的行尾开始，跳过这块预处理，begin应该是当前预处理的结尾
+    T_LPCSTR PP_FindPreProcessIdentifier(T_LPCSTR begin, T_LPCSTR end);
     void     PP_UserError(T_LPCSTR position, const clStringW& strText);
     GXBOOL   ExpandInnerMacro(TOKEN& token, const TOKEN& line_num); // 主要是替换__FILE__ __LINE__
 

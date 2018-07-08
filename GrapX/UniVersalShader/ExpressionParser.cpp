@@ -3339,21 +3339,7 @@ NOT_INC_P:
     T_LPCSTR p = begin;
     for(; p < end; ++p)
     {
-      if(*p != '\n') {
-        continue;
-      }
-
-      ++p;
-
-      if((p = Macro_SkipGapsAndNewLine(p, end)) >= end) {
-        break;
-      }
-
-      if(*p != '#') {
-        continue;
-      }
-
-      if((p = Macro_SkipGaps(p, end)) >= end) {
+      if((p = PP_FindPreProcessIdentifier(p, end)) == end) {
         break;
       }
 
@@ -3484,6 +3470,41 @@ NOT_INC_P:
       return end;
     }
     return p;
+  }
+
+  CodeParser::T_LPCSTR CodeParser::PP_FindPreProcessIdentifier(T_LPCSTR begin, T_LPCSTR end)
+  {
+    T_LPCSTR p = begin;
+
+    if(*p == '#') {
+      if((p = Macro_SkipGaps(p, end)) >= end) {
+        return end;
+      }
+      return p;
+    }
+
+    for(; p < end; p++)
+    {
+      if(*p != '\n') {
+        continue;
+      }
+
+      ++p;
+
+      if((p = Macro_SkipGapsAndNewLine(p, end)) >= end) {
+        break;
+      }
+
+      if(*p != '#') {
+        continue;
+      }
+
+      if((p = Macro_SkipGaps(p, end)) >= end) {
+        break;
+      }
+      return p;
+    }
+    return end;
   }
 
   void CodeParser::PP_UserError(T_LPCSTR position, const clStringW& strText)
