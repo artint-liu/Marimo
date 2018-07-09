@@ -511,7 +511,7 @@ namespace UVShader
 
     void    InitTokenScope(TKSCOPE& scope, const TOKEN& token, b32 bHasBracket) const;
     void    InitTokenScope(TKSCOPE& scope, GXUINT index, b32 bHasBracket) const;
-    GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token);
+    GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token, GXBOOL bSilent);
     GXBOOL  IsArrayList(const TOKEN& token);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
     GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);

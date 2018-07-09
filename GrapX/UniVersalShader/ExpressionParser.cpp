@@ -594,7 +594,7 @@ namespace UVShader
       // ...={...}这种情况不更新EOE
       //if(MarryBracket(sStack, token) && m_aTokens.back() != "=" &&
       //  _CL_NOT_(CompareToken(token.scope - 1, "=")))
-      MarryBracket(sStack, token);
+      MarryBracket(sStack, token, TEST_FLAG(m_dwState, AttachFlag_Preprocess));
       
       if(OnToken(token)) {
         token.ClearMarker();
@@ -648,13 +648,16 @@ namespace UVShader
     }
 
     // 检查括号匹配
-    for(int i = 0; i < countof(s_PairMark); ++i)
+    if(TEST_FLAG_NOT(m_dwState, AttachFlag_Preprocess))
     {
-      PairStack& s = sStack[i];
-      if( ! s.empty()) {
-        // ERROR: 闭括号不匹配
-        OutputErrorW(m_aTokens[s.top()], UVS_EXPORT_TEXT(5001, "文件异常结尾, 缺少闭括号."));
-        //ERROR_MSG__MISSING_CLOSEDBRACKET;
+      for(int i = 0; i < countof(s_PairMark); ++i)
+      {
+        PairStack& s = sStack[i];
+        if(!s.empty()) {
+          // ERROR: 闭括号不匹配
+          OutputErrorW(m_aTokens[s.top()], UVS_EXPORT_TEXT(5001, "文件异常结尾, 缺少闭括号."));
+          //ERROR_MSG__MISSING_CLOSEDBRACKET;
+        }
       }
     }
 
@@ -830,6 +833,45 @@ namespace UVShader
     }
   }
 
+  CodeParser::iterator CodeParser::MakeupMacroFunc(TOKEN::List& stream, TOKEN& token, const iterator& end)
+  {
+    int depth = 0;
+    
+    for(auto it = stream.begin(); it != stream.end(); ++it)
+    {
+      if(*it == '(') {
+        depth++;
+      }
+      else if(*it == ')') {
+        depth--;
+      }
+    }
+
+    iterator it = token;
+    for(; it != end; ++it)
+    {
+      token.Set(it);
+      stream.push_back(token);
+      token.ClearMarker();
+      token.ClearArithOperatorInfo();
+
+      if(it == '(') {
+        depth++;
+      }
+      else if(it == ')') {
+        depth--;
+        if(depth <= 0) {
+          ++it;
+          break;
+        }
+      }
+    }
+
+    token.Set(it);
+    //ASSERT(it == end || it == ')');
+    return it;
+  }
+
   GXBOOL CodeParser::OnToken(TOKEN& token)
   {
     if(token.type == TOKEN::TokenType_String || TEST_FLAG(m_dwState, AttachFlag_NotExpandMacro) || ! m_ExpandedStream.empty()) {
@@ -868,28 +910,31 @@ namespace UVShader
     else
     {
       int depth = 0;
-      iterator it_end = end();
+      //iterator it_end = end();
       TOKEN save_token = token;
 
-      for(; it != it_end; ++it)
-      {
-        token.Set(it);
-        stream.push_back(token);
-        token.ClearMarker();
-        token.ClearArithOperatorInfo();
+      //for(; it != it_end; ++it)
+      //{
+      //  token.Set(it);
+      //  stream.push_back(token);
+      //  token.ClearMarker();
+      //  token.ClearArithOperatorInfo();
 
-        if(it == '(') {
-          depth++;
-        }
-        else if(it == ')') {
-          depth--;
-          if(depth <= 0) {
-            break;
-          }
-        }
-      }
+      //  if(it == '(') {
+      //    depth++;
+      //  }
+      //  else if(it == ')') {
+      //    depth--;
+      //    if(depth <= 0) {
+      //      break;
+      //    }
+      //  }
+      //}
 
-      ASSERT(it == it_end || it == ')');
+      //ASSERT(it == it_end || it == ')');
+      it = MakeupMacroFunc(stream, token, end());
+      //token.ClearMarker();
+      //token.ClearArithOperatorInfo();
 
       if(depth < 0)
       {
@@ -904,32 +949,47 @@ namespace UVShader
         }
       }
 
-      if(it == ')') {
-        ++it;
-      }
-      token.Set(it);
+      //if(it == ')') { // 省掉
+      //  ++it;
+      //}
+      //token.Set(it);
     } // if(ctx.pMacro->aFormalParams.empty())
 
     ASSERT(token.pContainer);
     TOKEN next_token = token;
-    ExpandMacroContent(stream, token, NULL); // 次级展开
+    if(ExpandMacroContent(stream, token, NULL) == MacroExpand_Rematch)
+    {
+      it = MakeupMacroFunc(stream, token, end());
+      //if(it == ')') { // 省掉
+      //  ++it;
+      //}
+      //token.Set(it);
+      next_token = token;
+      MacroExpand result = ExpandMacroContent(stream, token, NULL);
+      ASSERT(result == MacroExpand_Ok); // 对于不完整的宏调用，只能重新展开一次
+    }
     m_ExpandedStream = stream;
     m_ExpandedStream.push_back(next_token);
     m_ExpandedStream.front().pContainer = reinterpret_cast<CodeParser*>(macro_offset | 1);
     return TRUE;
   }
 
-  GXBOOL CodeParser::TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end)
+  CodeParser::MacroExpand CodeParser::TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end)
   {
+    // 返回0表示没展开宏
+    // 返回1表示展开宏，it_out是结尾
+    // 返回-1表示当前宏调用不完整，需要上一级补充完整
+    // [Doc\宏\宏展开顺序]宏展开顺序: \
+    // 宏调用参数替换形参展开为表达式，表达式再次扫描，宏代换直接替换，宏调用再次用参数替换形参展开为表达式
     if(it_begin->type == TOKEN::TokenType_String || TEST_FLAG(m_dwState, AttachFlag_NotExpandMacro) || ! m_ExpandedStream.empty()) {
-      return FALSE;
+      return MacroExpand_Skip;
     }
 
     // 没有找到同名宏定义 || 不展开集合中存在的宏（防止无限展开）
     if(_CL_NOT_(ctx_out.pMacro = FindMacro(*it_begin)) || 
       ctx_out.OrderSet.find(ctx_out.pMacro->nOrder) != ctx_out.OrderSet.end())
     {
-      return FALSE;
+      return MacroExpand_Skip;
     }
 
     TOKEN::List::iterator it = it_begin;
@@ -939,6 +999,9 @@ namespace UVShader
     {
       ctx_out.ActualParam.clear();
       ++it;
+
+      ctx_out.stream.clear();
+      ctx_out.stream.insert(ctx_out.stream.end(), ctx_out.pMacro->aTokens.begin(), ctx_out.pMacro->aTokens.end());
     }
     else
     {
@@ -948,17 +1011,17 @@ namespace UVShader
       if(it == it_end) {
         OutputErrorW(*it_prev, UVS_EXPORT_TEXT(2008, "“%s”:宏定义中的意外"), clStringW(it_prev->ToString()));
         *it_out = it;
-        return TRUE;
+        return MacroExpand_Ok;
       }
       else if(*it != '(') {
         // 宏定义有形参"r(a)", 但是代码中非函数形式"r=x"形式的调用不认为是宏
-        return FALSE;
+        return MacroExpand_Skip;
       }
 
       if(++it == it_end) {
         OutputErrorW(*it, UVS_EXPORT_TEXT(2008, "“%s”:宏定义中的意外"), clStringW(it->ToString()));
         *it_out = it;
-        return TRUE;
+        return MacroExpand_Ok;
       }
 
       int depth = 1;
@@ -991,28 +1054,44 @@ namespace UVShader
       }
 
       ASSERT(it == it_end || *it == ')');
-      if(*it == ')') {
+      //if(depth != 0) {
+      //  ASSERT(it == it_end);
+      //  *it_out = it;
+      //  return TRUE;
+      //}
+      //else if(*it == ')') {
+      //  ++it;
+      //}
+
+      if(depth == 0)
+      {
+        ASSERT(*it == ')');
         ++it;
+        if(ctx_out.ActualParam.size() < ctx_out.pMacro->aFormalParams.size()) {
+          clStringW strW;
+          it_begin->ToString(strW);
+          OutputErrorW(it_begin->marker, UVS_EXPORT_TEXT(4003, "“%s”宏的实参不足"), strW.CStr());
+          return MacroExpand_Skip;
+        }
+        
+        ctx_out.stream.clear();
+        ExpandMacroFunc(ctx_out); // 展开含有形参的宏“M(a,b)”或者不完整的“M(a,”形式
+      }
+      else {
+        ASSERT(it == it_end);
+        *it_out = it;
+        return MacroExpand_Incomplete;
       }
     } // if(ctx.pMacro->aFormalParams.empty())
 
-    if(ctx_out.ActualParam.size() < ctx_out.pMacro->aFormalParams.size()) {
-      clStringW strW;
-      it_begin->ToString(strW);
-      OutputErrorW(it_begin->marker, UVS_EXPORT_TEXT(4003, "“%s”宏的实参不足"), strW.CStr());
-      return FALSE;
-    }
-    //ctx_out.stream.clear();
 
-    ExpandMacro(ctx_out); // 展开含有形参的宏
+    *it_out = it;
 
     // 重新对流中的token进行一次检查，展开不含形参的宏
-    ExpandMacroContent(ctx_out.stream, *ctx_out.pLineNumRef, &ctx_out.OrderSet);
-    *it_out = it;
-    return TRUE;
+    return ExpandMacroContent(ctx_out.stream, *ctx_out.pLineNumRef, &ctx_out.OrderSet);
   }
 
-  void CodeParser::ExpandMacro(MACRO_EXPAND_CONTEXT& c) // 展开宏参数的内容
+  void CodeParser::ExpandMacroFunc(MACRO_EXPAND_CONTEXT& c) // 展开宏调用的内容
   {
     GXBOOL bPound = FALSE;
     MACRO_EXPAND_CONTEXT ctx;
@@ -1046,11 +1125,12 @@ namespace UVShader
     }
   }
 
-  void CodeParser::ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet) // 展开宏内容里的宏
+  CodeParser::MacroExpand CodeParser::ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet) // 展开宏内容里的宏
   {
     TOKEN::List::iterator itMacroEnd; // 如果有展开的宏，则将宏的结尾放置在这个里面
     TOKEN::List::iterator it_end = sTokenList.end();
     MACRO_EXPAND_CONTEXT ctx;
+    MacroExpand result = MacroExpand_Ok;
     ctx.pLineNumRef = &line_num;
 
     if(pOrderSet) {
@@ -1060,15 +1140,38 @@ namespace UVShader
     for(auto it = sTokenList.begin(); it != it_end;)
     {
       if(ExpandInnerMacro(*it, line_num)) {
-        ++it; // 似乎应该加上这个
+        ++it;
       }
-      else if(TryMatchMacro(ctx, &itMacroEnd, it, it_end)) {
-        it = sTokenList.erase(it, itMacroEnd);
-        ASSERT(it == itMacroEnd); // 理论上应该是一个
-        TOKEN::List::iterator it_next = it;
-        sTokenList.insert(it, ctx.stream.begin(), ctx.stream.end());
-        ctx.stream.clear();
-        it = it_next;
+      else if((result = TryMatchMacro(ctx, &itMacroEnd, it, it_end)) != MacroExpand_Skip) {
+        if(result == MacroExpand_Incomplete) {
+          ASSERT(itMacroEnd == it_end); // TryMatchMacro约定
+          return MacroExpand_Rematch;
+        }
+        else if(result == MacroExpand_Ok)
+        {
+          // TODO: 精简一下这个代码
+          it = sTokenList.erase(it, itMacroEnd);
+          ASSERT(it == itMacroEnd); // 理论上应该是一个
+          sTokenList.insert(it, ctx.stream.begin(), ctx.stream.end());
+        }
+        else if(result == MacroExpand_Rematch)
+        {
+          it = sTokenList.erase(it, itMacroEnd);
+
+          if(it == sTokenList.begin()) {
+            sTokenList.insert(it, ctx.stream.begin(), ctx.stream.end());
+            it = sTokenList.begin();
+          }
+          else {
+            auto it_prev = it;
+            --it_prev;
+            sTokenList.insert(it, ctx.stream.begin(), ctx.stream.end());
+            it = ++it_prev;
+          }
+        }
+        else {
+          CLBREAK;
+        }
 
         // 恢复当前层级的集合
         if(pOrderSet) {
@@ -1082,7 +1185,7 @@ namespace UVShader
         ++it;
       }
     } // for
-    return;
+    return MacroExpand_Ok;
   }
 
   //////////////////////////////////////////////////////////////////////////

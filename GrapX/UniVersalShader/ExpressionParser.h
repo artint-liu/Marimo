@@ -389,6 +389,14 @@ namespace UVShader
       AttachFlag_NotExpandCond  = 0x00040000, // 不展开defined()里面的宏
     };
 
+    enum MacroExpand
+    {
+      MacroExpand_Skip = 0,     // 不是宏，或者已经展开了一次，跳过
+      MacroExpand_Ok,           // 执行了展开
+      MacroExpand_Incomplete,   // 不完整，需要后续
+      MacroExpand_Rematch,      // 之前的不完整，在这里重新匹配
+    };
+
     enum StatementType
     {
       StatementType_Empty,
@@ -608,9 +616,10 @@ namespace UVShader
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);
     void    GetNext(iterator& it, TOKEN& token);
-    void    ExpandMacro(MACRO_EXPAND_CONTEXT& c);
-    void    ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet);
-    GXBOOL  TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
+    iterator  MakeupMacroFunc(TOKEN::List& stream, TOKEN& token, const iterator& end);
+    void    ExpandMacroFunc(MACRO_EXPAND_CONTEXT& c);
+    MacroExpand ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet);
+    MacroExpand TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
     GXBOOL  MergeStringToken(const TOKEN& token);
     const MACRO* FindMacro(const TOKEN& token);
 

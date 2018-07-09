@@ -889,7 +889,7 @@ namespace UVShader
     }
   }
 
-  GXBOOL ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token)
+  GXBOOL ArithmeticExpression::MarryBracket(PairStack* sStack, TOKEN& token, GXBOOL bSilent)
   {
     // 返回值表示是否更新表达式结尾(End of Expresion)
 
@@ -910,15 +910,13 @@ namespace UVShader
           if(c.bCloseAE) {
             ASSERT(token == ':'); // 目前只有这个
             token.SetArithOperatorInfo(s_semantic);
-            break;
           }
-          else {
+          else if(_CL_NOT_(bSilent)){
             // ERROR: 括号不匹配
-            //ERROR_MSG__MISSING_OPENBRACKET;
             clStringW str((clStringW::TChar)c.chOpen, 1);
             m_pMsg->WriteErrorW(TRUE, token.offset(), UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), str.CStr());
-            break;
           }
+          break;
         }
         token.scope = s.top();
         m_aTokens[token.scope].scope = c_size;
