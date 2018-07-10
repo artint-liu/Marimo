@@ -106,6 +106,7 @@ namespace UVShader
     : m_pMsg(NULL)
     //, m_nMaxPrecedence(0)
     , m_nErrorCount(0)
+    , m_nSessionError(0)
     , m_nDbgNumOfExpressionParse(0)
     , m_NodePool(128)
     , m_bHigherDefiniton(FALSE)
@@ -276,6 +277,8 @@ namespace UVShader
     }
     else if(it.marker[0] == '/' && (remain > 0 && it.marker[1] == '/')) // 处理单行注释“//...”
     {
+      auto marker = it.marker;
+      auto lenght = it.length;
       SmartStreamUtility::ExtendToNewLine(it, 2, remain);
       ++it;
     }
@@ -1020,8 +1023,18 @@ namespace UVShader
   int ArithmeticExpression::SetError(int err)
   {
     m_nErrorCount++;
+    m_nSessionError++;
     m_errorlist.insert(err);
+
+    if(m_nErrorCount == c_nMaxErrorCount) {
+      m_pMsg->WriteErrorW(FALSE, 0, UVS_EXPORT_TEXT(9997, "错误数量超过%d条，将停止输出错误消息"), c_nMaxErrorCount);
+    }
     return err;
+  }
+
+  void ArithmeticExpression::ResetSessionError()
+  {
+    m_nSessionError = 0;
   }
 
   ArithmeticExpression::TChar ArithmeticExpression::GetPairOfBracket(TChar ch)
@@ -1439,11 +1452,11 @@ namespace UVShader
       semi_scope = -1;
       //marker = _iter;
       pContainer = _iter.pContainer;
-      length     = _iter.length;
 
       bPhony = 0;
     }
     marker = _iter.marker;
+    length = _iter.length;
   }
 
   void TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)

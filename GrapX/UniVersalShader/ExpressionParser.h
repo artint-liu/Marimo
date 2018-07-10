@@ -725,6 +725,7 @@ namespace UVShader
     StatementArray      m_aStatements;
     StatementArray      m_aSubStatements;   // m_aStatements的次级储存，没有顺序关系
     int                 m_nPPRecursion;     // 条件预处理递归次数
+
     
     PARSER_CONTEXT*     m_pContext;
     PhonyTokenDict_T    m_PhonyTokenDict;   // 用户从替换的token中找到原始token信息

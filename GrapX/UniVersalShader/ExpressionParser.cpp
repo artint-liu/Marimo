@@ -360,6 +360,9 @@ namespace UVShader
     m_errorlist.clear();
     m_aTokens.clear();
     m_aStatements.clear();
+    m_errorlist.clear();
+    m_nErrorCount = 0;
+    m_nSessionError = 0;
     //m_Macros.clear();
     SAFE_DELETE(m_pSubParser);
     InitPacks();
@@ -467,6 +470,7 @@ namespace UVShader
 
           // 防止进入MultiByteOperatorProc，因为这个函数要求it是无效的
           if(TEST_FLAG(m_aCharSem[it.marker[0]], M_CALLBACK)) {
+            RESET_FLAG(pThis->m_dwState, State_InPreprocess);
             return 0;
           }
         }
@@ -1418,6 +1422,7 @@ namespace UVShader
         m_nDbgNumOfExpressionParse = 0;
         m_aDbgExpressionOperStack.clear();
 
+        ResetSessionError();
         ASSERT(func_statement_block.begin < func_statement_block.end); // 似乎不应该有相等的情况, "{}" 区间这种是相差一个的
         sNameSet_Func.allow_keywords = KeywordFilter_InFuntion;
         if(func_statement_block.GetSize() == 1)
@@ -3214,8 +3219,8 @@ NOT_INC_P:
       return ctx.stream_end;
     }
     else if(tokens.size() == 2) {
-      const GXBOOL bFind = (m_pContext->Macros.find(tokens[1].ToString()) == m_pContext->Macros.end());
-      if(( ! bNot && bFind) || (bNot && ! bFind))
+      const GXBOOL bNotDefined = (m_pContext->Macros.find(tokens[1].ToString()) == m_pContext->Macros.end());
+      if(( ! bNot && bNotDefined) || (bNot && ! bNotDefined))
       {
         const T_LPCSTR pBlockEnd = 
           PP_SkipConditionalBlock(PPCondRank_if, ctx.ppend, ctx.stream_end);
@@ -3668,6 +3673,10 @@ NOT_INC_P:
 
   void CodeParser::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
   {
+    if(m_nErrorCount >= c_nMaxErrorCount || m_nSessionError > 8) {
+      return;
+    }
+
     if(pLocation)
     {
       if(pLocation->bPhony) {

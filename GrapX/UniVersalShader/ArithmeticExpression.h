@@ -389,6 +389,7 @@ namespace UVShader
     typedef cllist<iterator> IterList;
     typedef CTokens::T_LPCSTR T_LPCSTR;
     typedef CTokens::TChar    TChar;
+    static const int c_nMaxErrorCount = 100;
 
 
     //typedef clvector<TOKEN> TokenArray;
@@ -492,6 +493,7 @@ namespace UVShader
     
     clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
     size_t              m_nErrorCount;
+    int                 m_nSessionError;    // 区间错误数量，如果在区间内大于一定值则不会再输出错误
 
     // 语法节点的内存池
     //SyntaxNodePoolList  m_NodePoolList;
@@ -556,6 +558,7 @@ namespace UVShader
     void Invoke(GXLPCSTR szFunc, GXLPCSTR szArguments);
     const clStringArrayA& DbgGetExpressionStack() const;
     int SetError(int err);
+    void ResetSessionError(); // 重置区间错误计数
   };
 
   template<class SYNTAXNODE_T>
