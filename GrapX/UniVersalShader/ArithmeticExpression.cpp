@@ -154,9 +154,6 @@ namespace UVShader
 #else
     SetCharSemantic(aCharSem, 0, 128);
 #endif // USE_CLSTD_TOKENS
-
-    //SetIteratorCallBack(IteratorProc, 0);
-    //SetTriggerCallBack(MultiByteOperatorProc, 0);
   }
 
   ArithmeticExpression::~ArithmeticExpression()
@@ -1442,11 +1439,11 @@ namespace UVShader
       semi_scope = -1;
       //marker = _iter;
       pContainer = _iter.pContainer;
-      marker     = _iter.marker;
       length     = _iter.length;
 
       bPhony = 0;
     }
+    marker = _iter.marker;
   }
 
   void TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)

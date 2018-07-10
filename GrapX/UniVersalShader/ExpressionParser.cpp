@@ -910,31 +910,9 @@ namespace UVShader
     else
     {
       int depth = 0;
-      //iterator it_end = end();
       TOKEN save_token = token;
 
-      //for(; it != it_end; ++it)
-      //{
-      //  token.Set(it);
-      //  stream.push_back(token);
-      //  token.ClearMarker();
-      //  token.ClearArithOperatorInfo();
-
-      //  if(it == '(') {
-      //    depth++;
-      //  }
-      //  else if(it == ')') {
-      //    depth--;
-      //    if(depth <= 0) {
-      //      break;
-      //    }
-      //  }
-      //}
-
-      //ASSERT(it == it_end || it == ')');
       it = MakeupMacroFunc(stream, token, end());
-      //token.ClearMarker();
-      //token.ClearArithOperatorInfo();
 
       if(depth < 0)
       {
@@ -948,11 +926,6 @@ namespace UVShader
           PARSER_BREAK(&token);
         }
       }
-
-      //if(it == ')') { // 省掉
-      //  ++it;
-      //}
-      //token.Set(it);
     } // if(ctx.pMacro->aFormalParams.empty())
 
     ASSERT(token.pContainer);
@@ -960,17 +933,16 @@ namespace UVShader
     if(ExpandMacroContent(stream, token, NULL) == MacroExpand_Rematch)
     {
       it = MakeupMacroFunc(stream, token, end());
-      //if(it == ')') { // 省掉
-      //  ++it;
-      //}
-      //token.Set(it);
       next_token = token;
       MacroExpand result = ExpandMacroContent(stream, token, NULL);
       ASSERT(result == MacroExpand_Ok); // 对于不完整的宏调用，只能重新展开一次
     }
     m_ExpandedStream = stream;
     m_ExpandedStream.push_back(next_token);
-    m_ExpandedStream.front().pContainer = reinterpret_cast<CodeParser*>(macro_offset | 1);
+    if(m_ExpandedStream.front().pContainer == NULL) {
+      m_ExpandedStream.front().pContainer = reinterpret_cast<CodeParser*>(macro_offset | 1);
+    }
+    ASSERT(((size_t)m_ExpandedStream.back().pContainer & 1) == 0);
     return TRUE;
   }
 
@@ -4160,6 +4132,8 @@ NOT_INC_P:
           OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), ptkVar->ToString(strW).CStr());
           return FALSE;
         }
+        case NameContext::State_RequireConstantExpression:
+          break;  // 内部已处理
         default:
           CLBREAK; // 预期之外的状态
           break;
@@ -5161,19 +5135,10 @@ NOT_INC_P:
       //}
     }
 
-    //clStringA strTypename;
-    //TYPEDESC sMemberTypeDesc;
-    //if(pTypeDesc->GetMemberTypename(strTypename, &sMemberTypeDesc, sNameSet, this, pNode->Operand[1].pTokn))
-    //{
-    //  pTypeDesc = sNameSet.GetType(strTypename);
-    //}
-    //else
-    //{
-      clStringW str1, str2;
-      pTypeDesc = NULL;
-      OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2039, "“%s”: 不是“%s”的成员"),
-        pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].GetFrontToken()->ToString(str1).CStr());
-    //}
+    clStringW str1, str2;
+    pTypeDesc = NULL;
+    OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2039, "“%s”: 不是“%s”的成员"),
+      pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].GetFrontToken()->ToString(str1).CStr());
 
     return pTypeDesc;
   }
@@ -5853,16 +5818,17 @@ NOT_INC_P:
     {
       VALUE value;
       VALUE::State state = VALUE::State_OK;
+      const SYNTAXNODE::GLOB& subscript_glob = pNode->Operand[1];
       const b32 bSelfAdaptionLength = (pNode->Operand[1].ptr == NULL);
       
       if(bSelfAdaptionLength) {
         value.SetZero();
       }
       else {
-        state = CalculateConstantValue(value, m_pCodeParser, &pNode->Operand[1]);
+        state = CalculateConstantValue(value, m_pCodeParser, &subscript_glob);
       }
 
-      const SYNTAXNODE::GLOB* first_glob = &pNode->Operand[0];
+      const SYNTAXNODE::GLOB* pFirstGlob = &pNode->Operand[0];
       if(state == VALUE::State_OK)
       {
         //int a[-12]; // C2118 负下标
@@ -5870,17 +5836,17 @@ NOT_INC_P:
         //int c[0];   // C2466 不能分配常量大小为 0 的数组
         if(value.rank == VALUE::Rank_Float || value.rank == VALUE::Rank_Double)
         {
-          m_pCodeParser->OutputErrorW(*first_glob->GetFrontToken(), UVS_EXPORT_TEXT2(2058, "常量表达式不是整型", m_pCodeParser));
+          m_pCodeParser->OutputErrorW(*pFirstGlob->GetFrontToken(), UVS_EXPORT_TEXT2(2058, "常量表达式不是整型", m_pCodeParser));
           m_eLastState = State_HashError;
           return NULL;
         }
         else if(value.nValue64 < 0) {
-          m_pCodeParser->OutputErrorW(*first_glob->GetFrontToken(), UVS_EXPORT_TEXT2(2118, "负下标", m_pCodeParser));
+          m_pCodeParser->OutputErrorW(*pFirstGlob->GetFrontToken(), UVS_EXPORT_TEXT2(2118, "负下标", m_pCodeParser));
           m_eLastState = State_HashError;
           return NULL;
         }
         else if(_CL_NOT_(bSelfAdaptionLength) && value.nValue64 == 0) {
-          m_pCodeParser->OutputErrorW(*first_glob->GetFrontToken(), UVS_EXPORT_TEXT2(2466, "不能分配常量大小为 0 的数组", m_pCodeParser));
+          m_pCodeParser->OutputErrorW(*pFirstGlob->GetFrontToken(), UVS_EXPORT_TEXT2(2466, "不能分配常量大小为 0 的数组", m_pCodeParser));
           m_eLastState = State_HashError;
           return NULL;
         }
@@ -5888,7 +5854,16 @@ NOT_INC_P:
       }
       else if(state == VALUE::State_SyntaxError)
       {
-        ASSERT(m_eLastState == State_RequireConstantExpression);
+        if(m_eLastState == State_RequireConstantExpression)
+        {
+          clStringW strW;
+          m_pCodeParser->OutputErrorW(subscript_glob,
+            UVS_EXPORT_TEXT2(2057, "应输入常量表达式：“%s”", m_pCodeParser),
+            subscript_glob.GetFrontToken()->ToString(strW).CStr());
+        }
+        else {
+          PARSER_BREAK2(m_pCodeParser, subscript_glob);
+        }
         return NULL;
       }
       else
@@ -5896,9 +5871,9 @@ NOT_INC_P:
         CLBREAK; // 没输出VALUE::State错误
       }
 
-      if(first_glob->IsToken())
+      if(pFirstGlob->IsToken())
       {
-        const TOKEN* ptkVariable = first_glob->pTokn;
+        const TOKEN* ptkVariable = pFirstGlob->pTokn;
         ASSERT(sDimensions.empty() == FALSE);
 
         m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable, NULL);
@@ -5921,9 +5896,9 @@ NOT_INC_P:
         }
         return NULL;
       }
-      else if(first_glob->IsNode())
+      else if(pFirstGlob->IsNode())
       {
-        pNode = first_glob->pNode;
+        pNode = pFirstGlob->pNode;
       }
       else
       {

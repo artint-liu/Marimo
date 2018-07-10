@@ -645,6 +645,10 @@ FINAL_RET:
   size_t ViewMemory16(ch* szBuffer, size_t cBuffer, const void* ptr, size_t count, const void* ptrBase = NULL);
   void DumpMemory(const void* ptr, size_t count);
   extern int s_aPrimeNum[];
+
+  class StockA& ReadUserDefault(StockA& stock);
+  class StockW& ReadUserDefault(StockW& stock);
+
 } // namespace clstd
 
 #endif // _CL_UTILITY_

@@ -211,6 +211,9 @@ namespace clpathfile
 
   b32 GetFileDescription(const wch* szPath, FILEATTRIBUTE* pFileAttr);
   b32 GetFileDescription(const ch* szPath, FILEATTRIBUTE* pFileAttr);
+
+  clStringA& GetApplicationFilename(clStringA& strFilename);
+  clStringW& GetApplicationFilename(clStringW& strFilename);
 } // namespace clpathfile
 
 //////////////////////////////////////////////////////////////////////////

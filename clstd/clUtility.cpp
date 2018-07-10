@@ -1,6 +1,9 @@
 ﻿#include "clstd.h"
 #include "clString.h"
 #include "clUtility.h"
+#include "clPathFile.h"
+#include "clTokens.h"
+#include "clStock.h"
 
 #if ! (defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP))
 # include <sys/time.h>
@@ -491,6 +494,27 @@ namespace clstd
 
       TRACE("%s", buffer);
     }
+  }
+
+  template<class _StockT, class _StringT>
+  typename _StockT& ReadUserDefaultT(typename _StockT& stock)
+  {
+    static _StringT::TChar s_szExtension[] = {'.','s','t','o','c','k','\0'};
+    _StringT strUserDefault;
+    clpathfile::GetApplicationFilename(strUserDefault);
+    clpathfile::RenameExtension(strUserDefault, s_szExtension);
+    stock.LoadFromFile(strUserDefault);
+    return stock;
+  }
+
+  class StockA& ReadUserDefault(StockA& stock)
+  {
+    return ReadUserDefaultT<StockA, clStringA>(stock);
+  }
+
+  class StockW& ReadUserDefault(StockW& stock)
+  {
+    return ReadUserDefaultT<StockW, clStringW>(stock);
   }
 
 } // namespace clstd

@@ -1069,6 +1069,20 @@ namespace clpathfile
     return GetFileDescription(strPath, pFileAttr);
   }
 
+  clStringA& GetApplicationFilename(clStringA& strFilename)
+  {    
+    GetModuleFileNameA(NULL, strFilename.GetBuffer(MAX_PATH), MAX_PATH);
+    strFilename.ReleaseBuffer();
+    return strFilename;
+  }
+
+  clStringW& GetApplicationFilename(clStringW& strFilename)
+  {
+    GetModuleFileNameW(NULL, strFilename.GetBuffer(MAX_PATH), MAX_PATH);
+    strFilename.ReleaseBuffer();
+    return strFilename;
+  }
+
 #else
   CLDWORD GetFileAttributes(const wch* szPath)
   {
