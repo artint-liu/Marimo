@@ -701,6 +701,7 @@ namespace UVShader
     void DbgBreak(const SYNTAXNODE* pNode);
     void DbgBreak(const TOKEN* pToken);
     void DbgAssert(b32 bConditional, const SYNTAXNODE::GLOB& glob);
+    void DbgAssert(b32 bConditional, const TOKEN& token);
 
     void SetTokenPhonyString(int index, const clStringA& str);
 

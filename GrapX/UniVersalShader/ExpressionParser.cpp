@@ -739,23 +739,33 @@ namespace UVShader
 
   void CodeParser::DbgBreak(const SYNTAXNODE::GLOB& glob)
   {
-    OutputErrorW(*glob.GetFrontToken(), UVS_EXPORT_TEXT(9999, "没实现的功能"));
-    if(s_bParserBreak) {
-      CLBREAK;
-    }
+    DbgBreak(glob.GetFrontToken());
+
+    //OutputErrorW(*glob.GetFrontToken(), UVS_EXPORT_TEXT(9999, "没实现的功能"));
+    //if(s_bParserBreak) {
+    //  CLBREAK;
+    //}
   }
 
   void CodeParser::DbgBreak(const SYNTAXNODE* pNode)
   {
-    OutputErrorW(pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(9999, "没实现的功能"));
-    if(s_bParserBreak) {
-      CLBREAK;
-    }
+    DbgBreak(&pNode->GetAnyTokenAPB());
+    //OutputErrorW(pNode->GetAnyTokenAPB(), UVS_EXPORT_TEXT(9999, "没实现的功能"));
+    //if(s_bParserBreak) {
+    //  CLBREAK;
+    //}
   }
 
   void CodeParser::DbgBreak(const TOKEN* pToken)
   {
+    const auto nSaveErrorCount = m_nErrorCount;
+    const auto nSaveSessionCount = m_nSessionError;
+    m_nErrorCount = m_nSessionError = 0;
+
     OutputErrorW(pToken, UVS_EXPORT_TEXT(9999, "没实现的功能"));
+    m_nSessionError += nSaveSessionCount;
+    m_nErrorCount += nSaveErrorCount;
+
     if(s_bParserBreak) {
       CLBREAK;
     }
@@ -763,9 +773,26 @@ namespace UVShader
 
   void CodeParser::DbgAssert(b32 bConditional, const SYNTAXNODE::GLOB& glob)
   {
+    DbgAssert(bConditional, *glob.GetFrontToken());
+    //if(_CL_NOT_(bConditional))
+    //{
+    //  OutputErrorW(*glob.GetFrontToken(), UVS_EXPORT_TEXT(9998, "断言异常"));
+    //  if(s_bParserAssert) {
+    //    CLBREAK;
+    //  }
+    //}
+  }
+
+  void CodeParser::DbgAssert(b32 bConditional, const TOKEN& token)
+  {
     if(_CL_NOT_(bConditional))
     {
-      OutputErrorW(*glob.GetFrontToken(), UVS_EXPORT_TEXT(9998, "断言异常"));
+      const auto nSaveErrorCount = m_nErrorCount;
+      const auto nSaveSessionCount = m_nSessionError;
+      m_nErrorCount = m_nSessionError = 0;
+      OutputErrorW(token, UVS_EXPORT_TEXT(9998, "断言异常"));
+      m_nSessionError += nSaveSessionCount;
+      m_nErrorCount += nSaveErrorCount;
       if(s_bParserAssert) {
         CLBREAK;
       }
@@ -840,6 +867,7 @@ namespace UVShader
   CodeParser::iterator CodeParser::MakeupMacroFunc(TOKEN::List& stream, TOKEN& token, const iterator& end)
   {
     int depth = 0;
+    TOKEN::T_LPCSTR begin_ptr = token.marker;
     
     for(auto it = stream.begin(); it != stream.end(); ++it)
     {
@@ -868,6 +896,10 @@ namespace UVShader
           ++it;
           break;
         }
+      }
+      else if(depth == 0 && it.marker > begin_ptr) {
+        // “MARCRO_FUNC”后面不是“(”
+        break;
       }
     }
 
@@ -955,8 +987,6 @@ namespace UVShader
     // 返回0表示没展开宏
     // 返回1表示展开宏，it_out是结尾
     // 返回-1表示当前宏调用不完整，需要上一级补充完整
-    // [Doc\宏\宏展开顺序]宏展开顺序: \
-    // 宏调用参数替换形参展开为表达式，表达式再次扫描，宏代换直接替换，宏调用再次用参数替换形参展开为表达式
     if(it_begin->type == TOKEN::TokenType_String || TEST_FLAG(m_dwState, AttachFlag_NotExpandMacro) || ! m_ExpandedStream.empty()) {
       return MacroExpand_Skip;
     }
@@ -984,12 +1014,12 @@ namespace UVShader
       auto it_prev = it;
       ++it;
       //if(*it != '(' || it == it_end) {
-      if(it == it_end) {
+      /*if(it == it_end) {
         OutputErrorW(*it_prev, UVS_EXPORT_TEXT(2008, "“%s”:宏定义中的意外"), clStringW(it_prev->ToString()));
         *it_out = it;
         return MacroExpand_Ok;
       }
-      else if(*it != '(') {
+      else */if(it == it_end || *it != '(') {
         // 宏定义有形参"r(a)", 但是代码中非函数形式"r=x"形式的调用不认为是宏
         return MacroExpand_Skip;
       }
@@ -1090,6 +1120,7 @@ namespace UVShader
           });
         }
         else {
+          // 参数在单独的列表中预先展开，再存入父列表
           ExpandMacroContent(p, *c.pLineNumRef, NULL);
           c.stream.insert(c.stream.end(), p.begin(), p.end());
         }
@@ -1432,6 +1463,7 @@ namespace UVShader
         else if(ParseCodeBlock(stat.sRoot, &sNameSet_Func, func_statement_block))
         {
 #ifdef ENABLE_SYNTAX_VERIFY
+          const size_t nErrorCount = DbgErrorCount();
           if(sNameSet_Func.SetReturnType(stat.func.szReturnType) == FALSE)
           {
             clStringW strW;
@@ -1439,7 +1471,8 @@ namespace UVShader
           }          
           else if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
           {
-            TRACE("函数内部语法错误\n");
+            ASSERT(DbgErrorCount() > nErrorCount); // 内部输出错误，这里校验
+            //TRACE("函数内部语法错误\n");
           }
 #endif
         }
@@ -4133,6 +4166,7 @@ NOT_INC_P:
         }
         case NameContext::State_DefineAsType:
         {
+          ptkVar = ptkVar != NULL ? ptkVar : second_glob.GetFrontToken();
           OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(5013, "“%s”: 变量已经被定义为类型"), ptkVar->ToString(strW).CStr());
           return FALSE;
         }
@@ -4948,7 +4982,9 @@ NOT_INC_P:
     {
       if(pNode->pOpcode->unary)
       {
-        ASSERT(*pNode->pOpcode == '!' ||
+        ASSERT(
+          *pNode->pOpcode == '~' ||
+          *pNode->pOpcode == '!' ||
           *pNode->pOpcode == '-' ||
           *pNode->pOpcode == '+' ||
           *pNode->pOpcode == "--" ||
@@ -4979,7 +5015,7 @@ NOT_INC_P:
     for(int i = 0; i < 2; i++)
     {
       pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i]);
-      ASSERT(pNode->Operand[i].ptr);
+      PARSER_ASSERT(pNode->Operand[i].ptr != NULL, pNode->GetAnyTokenAPB());
     }
 
     if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
@@ -5486,7 +5522,7 @@ NOT_INC_P:
     m_pReturnType = NULL;
     m_TypeMap.clear();
     m_VariableMap.clear();
-    BuildIntrinsicType();
+    BuildIntrinsicType(); // TODO: CodeParser::Attach每次都调用这个，优化一下
   }
   
   void NameContext::BuildIntrinsicType()
@@ -5713,6 +5749,14 @@ NOT_INC_P:
             //p[i].SetOne(); // 标识符用临时值1
           }
           //s = VALUE::State_Identifier;
+        }
+        else {
+          // error C2059: 语法错误:“%s”
+          clStringW strW;
+          pParser->OutputErrorW(pNode->Operand[i].pTokn,
+            UVS_EXPORT_TEXT2(2059, "语法错误:“%s”", pParser),
+            pNode->Operand[i].pTokn->ToString(strW).CStr());
+          return VALUE::State_SyntaxError;
         }
       }
       else {
