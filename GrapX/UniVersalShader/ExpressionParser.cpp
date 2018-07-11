@@ -3674,9 +3674,12 @@ NOT_INC_P:
   GXBOOL CodeParser::CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count)
   {
     GXBOOL bSame = GXSTRNCMP(str1, str2, count) == 0;
-    const TChar& c = str1[count];
+    const TChar* c = str1 + count;
     ASSERT(c != '\0');
-    return bSame && (&c == m_pEnd || c == '\t' || c == 0x20 || c == '\r' || c == '\n');
+    return bSame && (c == m_pEnd || _CL_NOT_(
+      (*c >= 'a' && *c <= 'z') ||
+      (*c >= 'A' && *c <= 'Z') ||
+      *c == '_' ));
   }
 
   //void CodeParser::OutputErrorW( GXSIZE_T offset, GXUINT code, ... )
