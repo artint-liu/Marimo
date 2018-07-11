@@ -3265,9 +3265,9 @@ NOT_INC_P:
       }
     }
     else {
-      CLBREAK; // 没完成
+      OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(4067, "预处理器指令后有意外标记 - 应输入换行符")); // FIXME: 应该是警告
     }
-    return ctx.stream_end;
+    return ctx.iter_next.marker;
   }
 
   void CodeParser::PP_Pragma(const TOKEN::Array& aTokens)
@@ -3417,7 +3417,7 @@ NOT_INC_P:
     {      
       OPERAND result;
       CalculateValue(result, &sDesc);
-      TRACE("#if %s\n", result.v.ToString());
+      //TRACE("#if %s\n", result.v.ToString());
 
       v = result.v;
     }
@@ -5037,11 +5037,14 @@ NOT_INC_P:
       else if(bFirstNumeric && IS_STRUCT_CATE(pTypeDesc[1]->cate))
       {
         // TODO: 是否应考虑符号?
-        if(TryTypeCasting(pTypeDesc[1], pTypeDesc[0], &pNode->GetAnyTokenPAB())) {
-          return pTypeDesc[1];
+        if(_CL_NOT_(TryTypeCasting(pTypeDesc[1], pTypeDesc[0], &pNode->GetAnyTokenPAB())))
+        {
+          clStringW strFromW(pTypeDesc[0]->name);
+          clStringW strToW(pTypeDesc[1]->name);
+          OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFromW.CStr(), strToW.CStr());
+          return NULL;
         }
-        CLBREAK; // 没处理
-        return NULL;
+        return pTypeDesc[1];
       }
       else if(IS_STRUCT_CATE(pTypeDesc[0]->cate) && bSecondNumeric)
       {
