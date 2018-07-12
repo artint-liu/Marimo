@@ -1312,8 +1312,8 @@ namespace UVShader
     *this = param0;
     VALUE second = param1;
     Rank type = clMax(this->rank, second.rank);
-    State state = UpdateValueByRank(type);
-    state = (state == State_OK) ? second.UpdateValueByRank(type) : state;
+    State state = UpgradeValueByRank(type);
+    state = (state == State_OK) ? second.UpgradeValueByRank(type) : state;
     
     if(state != State_OK) {
       return state;
@@ -1368,7 +1368,7 @@ namespace UVShader
     return str;
   }
 
-  VALUE::State VALUE::UpdateValueByRank(Rank _type)
+  VALUE::State VALUE::UpgradeValueByRank(Rank _type)
   {
     if(rank == _type || rank == Rank_Undefined) { // 同级或者未定义（一元操作情况）
       return State_OK;
@@ -1420,6 +1420,243 @@ namespace UVShader
       }
     }
     rank = _type;
+    return State_OK;
+  }
+
+  VALUE::State VALUE::CastValueByRank(Rank new_rank)
+  {
+    if(rank == new_rank) {
+      return State_OK;
+    }
+    const Rank old_rank = rank;
+    rank = new_rank;
+
+    const u64 u32_max = 0xffffffff;
+
+    switch(new_rank)
+    {
+    case UVShader::VALUE::Rank_Unsigned:
+    {
+      switch(old_rank)
+      {
+      case UVShader::VALUE::Rank_Signed:
+      {
+        // const u32 v = -1; // 4294967295U
+        ASSERT((uValue64 & 0xffffffff00000000) == 0);
+        return State_OK;
+      }
+
+      case UVShader::VALUE::Rank_Float:
+      {
+        //const u32 v = 1.23f; // 可能丢失数据
+        ASSERT((uValue64 & 0xffffffff00000000) == 0);
+        uValue = static_cast<u32>(fValue);
+        return State_LoseOfData;
+      }
+      case UVShader::VALUE::Rank_Unsigned64:
+      case UVShader::VALUE::Rank_Signed64:
+      {
+        //const u32 v = 0x100000000;
+        //const u32 v = -1Ui64;
+        uValue64 = static_cast<u64>(uValue);
+        return State_Truncation;
+      }
+      case UVShader::VALUE::Rank_Double:
+      {
+        //const u32 v = (double)5000000000.0;
+        uValue64 = static_cast<u64>(fValue64) & u32_max;
+        return State_LoseOfData;
+      }
+      default:
+        CLBREAK;
+        break;
+      }
+      break;
+    }
+    case UVShader::VALUE::Rank_Signed:
+    {
+      switch(old_rank)
+      {
+      case UVShader::VALUE::Rank_Unsigned:
+      {
+        //const s32 v = 4294967295U;
+        ASSERT((uValue64 & 0xffffffff00000000) == 0);
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Float:
+      {
+        ASSERT((uValue64 & 0xffffffff00000000) == 0);
+        nValue = static_cast<s32>(fValue);
+        return State_LoseOfData;
+        break;
+      }
+      case UVShader::VALUE::Rank_Unsigned64:
+      case UVShader::VALUE::Rank_Signed64:
+      {
+        uValue64 = static_cast<u64>(uValue);
+        return State_Truncation;
+      }
+      case UVShader::VALUE::Rank_Double:
+      {
+        nValue64 = static_cast<u64>(fValue64) & u32_max;
+        return State_LoseOfData;
+      }
+      default:
+        CLBREAK;
+        break;
+      }
+      break;
+    }
+    case UVShader::VALUE::Rank_Float:
+    {
+      switch(old_rank)
+      {
+      case UVShader::VALUE::Rank_Unsigned:
+      {
+        fValue = static_cast<float>(uValue);
+        uValue64 &= u32_max;
+        return State_LoseOfData;
+      }
+      case UVShader::VALUE::Rank_Signed:
+      {
+        fValue = static_cast<float>(nValue);
+        uValue64 &= u32_max;
+        return State_LoseOfData;
+      }
+      case UVShader::VALUE::Rank_Unsigned64:
+      {
+        fValue = static_cast<float>(uValue64);
+        uValue64 &= u32_max;
+        return State_LoseOfData;
+      }
+      case UVShader::VALUE::Rank_Signed64:
+      {
+        fValue = static_cast<float>(nValue64);
+        uValue64 &= u32_max;
+        return State_LoseOfData;
+      }
+      case UVShader::VALUE::Rank_Double:
+      {
+        fValue = static_cast<float>(fValue64);
+        uValue64 &= u32_max;
+        return State_LoseOfData;
+      }
+      default:
+        CLBREAK;
+        break;
+      }
+      break;
+    }
+    case UVShader::VALUE::Rank_Unsigned64:
+    {
+      switch(old_rank)
+      {
+      case UVShader::VALUE::Rank_Unsigned:
+      case UVShader::VALUE::Rank_Signed:
+      {
+        ASSERT((uValue64 & 0xffffffff00000000) == 0);
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Float:
+      {
+        //const float vfrom = 1.2f;
+        //const u64 v = vfrom;
+        uValue64 = static_cast<u64>(fValue);
+        return State_LoseOfData;
+      }
+      case UVShader::VALUE::Rank_Signed64:
+      {
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Double:
+      {
+        //const double vfrom = 1.2;
+        //const u64 v = vfrom;
+        uValue64 = static_cast<u64>(fValue64);
+        return State_LoseOfData;
+      }
+      default:
+        CLBREAK;
+        break;
+      }
+      break;
+    }
+    case UVShader::VALUE::Rank_Signed64:
+    {
+      switch(old_rank)
+      {
+      case UVShader::VALUE::Rank_Unsigned:
+      {
+        ASSERT((uValue64 & 0xffffffff00000000) == 0);
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Signed:
+      {
+        //const s32 vfrom = -1;
+        //const s64 v = vfrom;
+        ASSERT((uValue64 & 0xffffffff00000000) == 0);
+        nValue64 = static_cast<i64>(nValue); // 补码
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Float:
+      {
+        nValue64 = static_cast<s64>(fValue);
+        return State_LoseOfData;
+      }
+      case UVShader::VALUE::Rank_Unsigned64:
+      {
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Double:
+      {
+        nValue64 = static_cast<s64>(fValue64);
+        return State_LoseOfData;
+      }
+      default:
+        CLBREAK;
+        break;
+      }
+      break;
+    }
+    case UVShader::VALUE::Rank_Double:
+    {
+      switch(old_rank)
+      {
+      case UVShader::VALUE::Rank_Unsigned:
+      {
+        fValue64 = static_cast<double>(uValue);
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Signed:
+      {
+        fValue64 = static_cast<double>(nValue);
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Float:
+      {
+        fValue64 = static_cast<double>(fValue);
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Unsigned64:
+      {
+        fValue64 = static_cast<double>(uValue64);
+        return State_OK;
+      }
+      case UVShader::VALUE::Rank_Signed64:
+      {
+        fValue64 = static_cast<double>(nValue64);
+        return State_OK;
+      }
+      default:
+        CLBREAK;
+        break;
+      }
+      break;
+    }
+    default:
+      CLBREAK;
+      break;
+    }
     return State_OK;
   }
 

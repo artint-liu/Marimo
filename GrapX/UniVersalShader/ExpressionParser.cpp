@@ -2614,6 +2614,7 @@ NOT_INC_P:
 
     if(scope.begin + 1 >= scope.end) {
       // ERROR: do 语法错误
+      OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5044, "do ... while 意外的结束"));
       return TKSCOPE::npos;
     }
 
@@ -2625,13 +2626,28 @@ NOT_INC_P:
     //if( ! MakeScope(&sBlock, &MAKESCOPE(scope, scope.begin + 2, FALSE, scope.begin + 1, TRUE, 0))) {
     //  return TKSCOPE::npos;
     //}
-    InitTokenScope(sBlock, scope.begin + 1, FALSE);
+    const TOKEN& tkScope = m_aTokens[scope.begin + 1];
+    TKSCOPE::TYPE while_token;
+    if(tkScope.scope != TKSCOPE::npos)
+    {
+      InitTokenScope(sBlock, tkScope, FALSE);
+      while_token = sBlock.end + 1;
+    }
+    else if(tkScope.semi_scope != TKSCOPE::npos)
+    {
+      sBlock.begin = scope.begin + 1;
+      sBlock.end = tkScope.semi_scope + 1;
+      while_token = sBlock.end;
+    }
+    else {
+      OutputErrorW(tkScope, UVS_EXPORT_TEXT(5045, "do ... while 语法错误"));
+      return TKSCOPE::npos;
+    }
 
-    TKSCOPE::TYPE while_token = sBlock.end + 1;
     
     if(while_token >= scope.end && m_aTokens[while_token] != "while") {
       // ERROR: while 语法错误
-      OutputErrorW(while_token, UVS_EXPORT_TEXT(5011, "do...while语法错误, 没有出现预期的\"while\"关键字."));
+      OutputErrorW(while_token, UVS_EXPORT_TEXT(5011, "do...while 语法错误, 没有出现预期的\"while\"关键字."));
       return TKSCOPE::npos;
     }
 
@@ -3589,34 +3605,27 @@ NOT_INC_P:
   {
     T_LPCSTR p = begin;
 
-    if(*p == '#') {
-      if((p = Macro_SkipGaps(p, end)) >= end) {
+    for(; p < end;)
+    {
+      // 跳过空白找"#"
+      if((p = Macro_SkipGapsAndNewLine(p, end)) >= end) {
         return end;
       }
-      return p;
-    }
-
-    for(; p < end; p++)
-    {
-      if(*p != '\n') {
-        continue;
+      if(*p == '#') {
+        if((p = Macro_SkipGaps(p, end)) >= end) {
+          return end;
+        }
+        return p;
       }
 
+      while(*p != '\n') {
+        if(++p >= end) {
+          return end;
+        }
+      }
       ++p;
-
-      if((p = Macro_SkipGapsAndNewLine(p, end)) >= end) {
-        break;
-      }
-
-      if(*p != '#') {
-        continue;
-      }
-
-      if((p = Macro_SkipGaps(p, end)) >= end) {
-        break;
-      }
-      return p;
     }
+
     return end;
   }
 
@@ -3709,7 +3718,7 @@ NOT_INC_P:
 
   void CodeParser::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
   {
-    if(m_nErrorCount >= c_nMaxErrorCount || m_nSessionError > 8) {
+    if(m_nErrorCount >= c_nMaxErrorCount || m_nSessionError > c_nMaxSessionError) {
       return;
     }
 
@@ -5692,13 +5701,50 @@ NOT_INC_P:
     CLBREAK;
   }
 
-  VALUE::State NameContext::Calculate(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE* pNode) const
+  VALUE::State NameContext::Calculate(VALUE& value_out, CodeParser* pParser/*没用啊*/, const SYNTAXNODE* pNode) const
   {
     VALUE p[2];
     VALUE::State s = VALUE::State_OK;
     if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
-      value_out.SetOne();
+      if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsNode())
+      {
+        const TOKEN& func_name = *pNode->Operand[0].pTokn;
+        if(func_name == STR_HALF &&
+          (s = Calculate(value_out, pParser, pNode->Operand[1].pNode)) == VALUE::State_OK)
+        {
+          value_out.CastValueByRank(VALUE::Rank_Float);
+        }
+        else if(func_name == STR_FLOAT &&
+          (s = Calculate(value_out, pParser, pNode->Operand[1].pNode)) == VALUE::State_OK)
+        {
+          value_out.CastValueByRank(VALUE::Rank_Float);
+        }
+        else if(func_name == STR_INT &&
+          (s = Calculate(value_out, pParser, pNode->Operand[1].pNode)) == VALUE::State_OK)
+        {
+          value_out.CastValueByRank(VALUE::Rank_Signed);
+        }
+        else if(func_name == STR_UINT &&
+          (s = Calculate(value_out, pParser, pNode->Operand[1].pNode)) == VALUE::State_OK)
+        {
+          value_out.CastValueByRank(VALUE::Rank_Unsigned);
+        }
+        else if(func_name == STR_DOUBLE &&
+          (s = Calculate(value_out, pParser, pNode->Operand[1].pNode)) == VALUE::State_OK)
+        {
+          value_out.CastValueByRank(VALUE::Rank_Double);
+        }
+        else {
+          value_out.SetZero();
+          return VALUE::State_Call;
+        }
+
+        // 显式类型转换下，数据截断和丢失数据不需要报错
+        return (s == VALUE::State_OK || s == VALUE::State_LoseOfData || s == VALUE::State_Truncation)
+          ? VALUE::State_OK : s;
+      }
+      value_out.SetZero();
       return VALUE::State_Call;
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
@@ -5927,6 +5973,7 @@ NOT_INC_P:
       }
       else
       {
+        PARSER_BREAK2(m_pCodeParser, subscript_glob);
         CLBREAK; // 没输出VALUE::State错误
       }
 

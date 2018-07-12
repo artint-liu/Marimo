@@ -210,6 +210,8 @@ namespace UVShader
       State_Identifier    = 0x00000001, // 标识符
       State_Call          = 0x00000002, // 函数调用
       State_UnknownOpcode = 0x00000004, // 无法识别的操作符
+      State_Truncation    = 0x00000008, // 类型被截断
+      State_LoseOfData    = 0x00000010, // 类型转换可能丢失是数据
 
       State_WarningMask   = 0x0000ffff, // 警告的掩码
       State_ErrorMask     = 0xffff0000, // 错误的掩码
@@ -257,7 +259,8 @@ namespace UVShader
     State set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger);
     State set(const TOKEN& token);
     VALUE& set(const VALUE& v);
-    State UpdateValueByRank(Rank _type);  // 调整为到 type 指定的级别
+    State UpgradeValueByRank(Rank _type);  // 调整为到 type 指定的级别, 对于浮点与整数类型会做类型转换
+    State CastValueByRank(Rank _type); // 按照rank转换值，这个可以指定更低的rank
     State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
     clStringA ToString() const;
 
@@ -390,6 +393,7 @@ namespace UVShader
     typedef CTokens::T_LPCSTR T_LPCSTR;
     typedef CTokens::TChar    TChar;
     static const int c_nMaxErrorCount = 100;
+    static const int c_nMaxSessionError = 4;
 
 
     //typedef clvector<TOKEN> TokenArray;
