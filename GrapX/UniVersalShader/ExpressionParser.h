@@ -304,6 +304,7 @@ namespace UVShader
     friend struct NODE_CALC;
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
+    typedef ArithmeticExpression::iterator iterator;
 
     struct MACRO_TOKEN : public TOKEN
     {
@@ -575,7 +576,7 @@ namespace UVShader
     //////////////////////////////////////////////////////////////////////////
 
   protected:
-    static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
+    u32     StepIterator     (iterator& it) override;
 
     void    InitPacks();
     void    Cleanup();
@@ -615,8 +616,8 @@ namespace UVShader
 
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);
-    void    GetNext(iterator& it, TOKEN& token);
-    iterator  MakeupMacroFunc(TOKEN::List& stream, TOKEN& token, const iterator& end);
+    void    GetNext(iterator& it);
+    iterator  MakeupMacroFunc(TOKEN::List& stream, iterator& it, const iterator& end);
     void    ExpandMacroFunc(MACRO_EXPAND_CONTEXT& c);
     MacroExpand ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet);
     MacroExpand TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);

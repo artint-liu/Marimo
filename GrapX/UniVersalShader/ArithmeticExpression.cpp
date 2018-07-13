@@ -183,7 +183,7 @@ namespace UVShader
       ASSERT(op_len == op[i].nLen);
       if(clstd::strncmpT(op[i].szOperator, it.marker, op[i].nLen) == 0)
       {
-        it.length = op[i].nLen;
+        it->length = it.length = op[i].nLen;
         return &op[i];
       }
     }
@@ -245,11 +245,12 @@ namespace UVShader
     return FALSE;
   }
 
-  u32 CALLBACK ArithmeticExpression::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
+  u32 ArithmeticExpression::StepIterator(ArithmeticExpression::iterator& it)
   {
+    size_t remain = m_pEnd - it.marker;
     if(it.BeginsWith('\"') && it.EndsWith('\"')) {
-      TOKEN& l_token = *(TOKEN*)lParam;
-      l_token.type = TOKEN::TokenType_String;
+      //TOKEN& l_token = *(TOKEN*)lParam;
+      it->type = TOKEN::TokenType_String;
       return 0;
     }
 
@@ -258,19 +259,19 @@ namespace UVShader
 
     // 并不十分精确, 具体看应用时的解析
     if(TryExtendNumeric(it, remain)) {
-      reinterpret_cast<TOKEN*>(lParam)->type = TOKEN::TokenType_Real;
+      it->type = TOKEN::TokenType_Real;
     }
     else if(it.length > 0 && clstd::isdigit(it.marker[0])) {
-      reinterpret_cast<TOKEN*>(lParam)->type = TOKEN::TokenType_Integer;
+      it->type = TOKEN::TokenType_Integer;
     }
 
     ASSERT((int)remain >= 0);
     return 0;
   }
 
-  u32 CALLBACK ArithmeticExpression::MultiByteOperatorProc( iterator& it, u32 remain, u32_ptr lParam )
+  u32 ArithmeticExpression::MultiByteOperatorProc(iterator& it, u32 remain)
   {
-    ASSERT(lParam != NULL); // 需要 lParam 指向一个 TOKEN 结构体作为临时储存对象
+    //ASSERT(lParam != NULL); // 需要 lParam 指向一个 TOKEN 结构体作为临时储存对象
 
     if(it.front() == '.' && it.length > 1) { // 跳过".5"这种格式的浮点数
       return 0;
@@ -293,9 +294,11 @@ namespace UVShader
     }
     else
     {
-      TOKEN& l_token = *(TOKEN*)lParam;
+      //TOKEN& l_token = *(TOKEN*)lParam;
       //CodeParser* pParser = (CodeParser*)it.pContainer;
-      ASSERT(l_token.marker == NULL); // 每次用完外面都要清理这个
+      //ASSERT(it.marker == NULL); // 每次用完外面都要清理这个
+      //ASSERT(it.marker == it.marker);
+      //ASSERT(it.length == it.length);
 
       const MBO* pProp = NULL;
       // 从多字节到单字节符号匹配,其中有一个返回TRUE就不执行后面的匹配了
@@ -304,15 +307,56 @@ namespace UVShader
         (pProp = MatchOperator(s_Operator2, 2, it, remain)) ||
         (pProp = MatchOperator(s_Operator1, 1, it, remain)) )
       {
-        l_token.Set(it);
-        l_token.precedence = pProp->precedence;
-        l_token.scope = -1;
-        l_token.unary = pProp->unary;
-        l_token.unary_mask = pProp->unary_mask;
-        l_token.type = TOKEN::TokenType_Operator;
+        //it->Set(it);
+        it->precedence = pProp->precedence;
+        it->scope = -1;
+        it->unary = pProp->unary;
+        it->unary_mask = pProp->unary_mask;
+        it->type = TOKEN::TokenType_Operator;
       }
     }
     return 0;
+  }
+
+  ArithmeticExpression::iterator ArithmeticExpression::begin()
+  {
+    ArithmeticExpression::iterator it;
+
+    it.marker = m_pBegin;
+    it.length = 0;
+    it.pContainer = this;
+    it.operator++();
+
+//    CTokens::iterator it_base = CTokens::begin();
+//    it.marker     = it_base.marker;
+//    it.length     = it_base.length;
+//    it.pContainer = it_base.pContainer;
+//    //it->Set(it_base);
+//
+//#ifdef ENABLE_STRINGED_SYMBOL
+//    it_base.ToString(it.tk.symbol);
+//#endif // #ifdef ENABLE_STRINGED_SYMBOL
+//    it.tk.scope = -1;
+//    it.tk.semi_scope = -1;
+//    it.tk.pContainer = it_base.pContainer;
+//    
+//    it.tk.bPhony = 0;
+//    it.tk.marker = it_base.marker;
+//    it.tk.length = it_base.length;
+//
+//    StepIterator(it);
+    return it;
+  }
+
+  ArithmeticExpression::iterator ArithmeticExpression::end()
+  {
+    CTokens::iterator it_base = CTokens::end();
+    ArithmeticExpression::iterator it;
+    it.marker = it_base.marker;
+    it.length = it_base.length;
+    it.pContainer = it_base.pContainer;
+    //it->Set(it_base);
+    return it;
   }
 
   const SYNTAXNODE* ArithmeticExpression::TryGetNode(const SYNTAXNODE::GLOB* pDesc) const
@@ -622,9 +666,14 @@ namespace UVShader
       return ParseFunctionCall(scope, pDesc);
     }
 
+    //
+    // 获得结合律最低的符号位置
+    //
     TKSCOPE::TYPE nLowestOpcodeIndex = GetLowestPrecedence(scope, nMinPrecedence);
     ASSERT(nLowestOpcodeIndex == TKSCOPE::npos ||
       (scope.begin <= nLowestOpcodeIndex && nLowestOpcodeIndex < scope.end));
+    //
+    //
 
     if(nLowestOpcodeIndex != TKSCOPE::npos)
     {
@@ -1678,23 +1727,23 @@ namespace UVShader
     bPhony = 0;
   }
 
-  void TOKEN::Set(const iterator& _iter)
-  {
-    if(_iter.length != 0)
-    {
-#ifdef ENABLE_STRINGED_SYMBOL
-      symbol = _iter.ToString();
-#endif // #ifdef ENABLE_STRINGED_SYMBOL
-      scope = -1;
-      semi_scope = -1;
-      //marker = _iter;
-      pContainer = _iter.pContainer;
-
-      bPhony = 0;
-    }
-    marker = _iter.marker;
-    length = _iter.length;
-  }
+//  void TOKEN::Set(const iterator& _iter)
+//  {
+//    //ASSERT((size_t)this != (size_t)&_iter + offsetof(ArithmeticExpression::iterator, tk));
+//    if(_iter.length != 0)
+//    {
+//#ifdef ENABLE_STRINGED_SYMBOL
+//      symbol = _iter.ToString();
+//#endif // #ifdef ENABLE_STRINGED_SYMBOL
+//      scope = -1;
+//      semi_scope = -1;
+//      pContainer = _iter.pContainer;
+//
+//      bPhony = 0;
+//    }
+//    marker = _iter.marker;
+//    length = _iter.length;
+//  }
 
   void TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)
   {
@@ -1831,6 +1880,18 @@ namespace UVShader
     }
     return CTokens::iterator::offset();
   }
+
+  //TOKEN& TOKEN::operator++()
+  //{
+  //  //CTokens::iterator::GetNext()
+  //  pContainer->next(*this);
+
+  //  //(reinterpret_cast<const ArithmeticExpression*>(pContainer))
+  //  //reinterpret_cast<ArithmeticExpression*>()->StepIterator(*this);
+  //  ((ArithmeticExpression*)pContainer)->StepIterator(*this);
+  //  //*static_cast<CTokens::iterator*>(&tk) = *static_cast<CTokens::iterator*>(this);
+  //  return *this;
+  //}
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -2092,5 +2153,147 @@ namespace UVShader
     }
     return false;
   }
+
+  ArithmeticExpression::iterator& ArithmeticExpression::iterator::operator++()
+  {
+    pContainer->next(*this);
+
+    tk.ClearMarker();
+    tk.ClearArithOperatorInfo();
+
+    ((ArithmeticExpression*)pContainer)->StepIterator(*this);
+
+    //tk.Set(*this);
+#ifdef ENABLE_STRINGED_SYMBOL
+    ToString(tk.symbol);
+#endif // #ifdef ENABLE_STRINGED_SYMBOL
+    tk.scope = -1;
+    tk.semi_scope = -1;
+    tk.pContainer = pContainer;
+
+    tk.marker = marker;
+    tk.length = length;
+    return *this;
+  }
+
+ TOKEN* ArithmeticExpression::iterator::operator->()
+  {
+    return &tk;
+  }
+
+  TOKEN& ArithmeticExpression::iterator::operator*()
+  {
+    return tk;
+  }
+  //ArithmeticExpression::iterator& ArithmeticExpression::iterator::operator=(const TOKEN& t)
+  //{
+  //  *static_cast<TOKEN*>(this) = t;
+  //  return *this;
+  //}
+
+  //  const TOKEN* ArithmeticExpression::iterator::operator->() const
+//  {
+//    return &tk;
+//  }
+//
+//  const TOKEN& ArithmeticExpression::iterator::operator*() const
+//  {
+//    return tk;
+//  }
+//
+//#if 0
+//  b32 ArithmeticExpression::iterator::operator==(const _TStr& str) const
+//  {
+//    return (str.GetLength() == tk.length && !clstd::strncmpT(tk.marker, (T_LPCSTR)str, (int)tk.length));
+//  }
+//  
+//  b32 ArithmeticExpression::iterator::operator==(T_LPCSTR pStr) const
+//  {
+//    const size_t nStrLength = clstd::strlenT(pStr);
+//    return (nStrLength == tk.length && !clstd::strncmpT(tk.marker, pStr, (int)tk.length));
+//  }
+//
+//  b32 ArithmeticExpression::iterator::operator==(TChar ch) const
+//  {
+//    return (tk.length == 1 && tk.marker[0] == ch);
+//  }
+//
+//  b32 ArithmeticExpression::iterator::operator!=(const _TStr& str) const
+//  {
+//    return (str.GetLength() != tk.length || clstd::strncmpT(tk.marker, (T_LPCSTR)str, (int)tk.length));
+//  }
+//
+//  b32 ArithmeticExpression::iterator::operator!=(T_LPCSTR pStr) const
+//  {
+//    return (_TStr(pStr).GetLength() != tk.length || clstd::strncmpT(tk.marker, pStr, (int)tk.length));
+//  }
+//
+//  b32 ArithmeticExpression::iterator::operator!=(TChar ch) const
+//  {
+//    return (tk.length != 1 || tk.marker[0] != ch);
+//  }
+//
+//
+//  b32 ArithmeticExpression::iterator::operator==(const iterator& it) const
+//  {
+//    ASSERT(tk.pContainer == it.tk.pContainer);
+//    return (tk.marker == it.tk.marker && tk.length == it.tk.length);
+//  }
+//  
+//  b32 ArithmeticExpression::iterator::operator!=(const iterator& it) const
+//  {
+//    return (!operator==(it));
+//  }
+//  
+//  b32 ArithmeticExpression::iterator::operator>=(const iterator& it) const
+//  {
+//    ASSERT(tk.pContainer == it.tk.pContainer);
+//    return (tk.marker > it.tk.marker) ||
+//      (tk.marker == it.tk.marker && tk.length == it.tk.length);
+//  }
+//
+//  b32 ArithmeticExpression::iterator::operator<=(const iterator& it) const
+//  {
+//    ASSERT(tk.pContainer == it.tk.pContainer);
+//    return (tk.marker < it.tk.marker) ||
+//      (tk.marker == it.tk.marker && tk.length == it.tk.length);
+//  }
+//
+//  TOKEN::T_LPCSTR ArithmeticExpression::iterator::begin() const
+//  {
+//    return tk.marker;
+//  }
+//
+//  TOKEN::T_LPCSTR ArithmeticExpression::iterator::end() const
+//  {
+//    return tk.marker + tk.length;
+//  }
+//
+//#endif
+//
+  ArithmeticExpression::iterator& ArithmeticExpression::iterator::operator=(const TOKEN& token)
+  {
+    //ASSERT(&token != &tk);
+    tk = token;
+    *static_cast<CTokens::iterator*>(this) = *static_cast<const CTokens::iterator*>(&token);
+    return *this;
+  }
+
+  ArithmeticExpression::iterator::iterator()
+  {
+    tk.ClearMarker();
+    tk.ClearArithOperatorInfo();
+  }
+
+  ArithmeticExpression::iterator::iterator(const TOKEN& token)
+  {
+    this->operator=(token);
+  }
+//
+
+//b32 ArithmeticExpression::iterator::operator!=(const ArithmeticExpression::iterator& it) const
+//{
+//  return CTokens::iterator::operator!=(it);
+//}
 
 } // namespace UVShader

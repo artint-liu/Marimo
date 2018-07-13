@@ -71,6 +71,7 @@ namespace UVShader
     typedef clvector<TOKEN> Array;
     typedef CTokens::T_LPCSTR T_LPCSTR;
     typedef CTokens::TChar TChar;
+    typedef clStringA _TStr;
 
     enum Type
     {
@@ -95,6 +96,8 @@ namespace UVShader
     clStringA symbol;
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
     //iterator  marker;
+    //T_LPCSTR  str_head;
+    //size_t    length;
     int       scope;                        // 括号匹配索引
     int       semi_scope : scope_bits;      // 分号作用域
     int       precedence : precedence_bits; // 符号优先级
@@ -110,7 +113,7 @@ namespace UVShader
     // array[open].scope = closed && array[closed].scope = open
 
     void ClearMarker();
-    void Set(const iterator& _iter);
+    //void Set(const iterator& _iter);
     void Set(clstd::StringSetA& sStrSet, const clStringA& str); // 设置外来字符串
     void SetPhonyString(T_LPCSTR szText, size_t len); // 设置外来字符串
 
@@ -130,6 +133,9 @@ namespace UVShader
 
     b32 IsIdentifier() const; // 标识符, 字母大小写, 下划线开头, 本体是字母数字, 下划线的字符串
     b32 IsNumeric() const;
+
+    //TOKEN& operator++();
+    //b32  operator!=(const iterator& it) const;
 
     GXBOOL operator==(const TOKEN& t) const;
     GXBOOL operator==(SmartStreamA::T_LPCSTR str) const;
@@ -388,6 +394,7 @@ namespace UVShader
 
   class ArithmeticExpression : public CTokens
   {
+    //friend struct TOKEN;
   public:
     typedef cllist<iterator> IterList;
     typedef CTokens::T_LPCSTR T_LPCSTR;
@@ -404,6 +411,38 @@ namespace UVShader
       M_CALLBACK = 1,
     };
 #endif // USE_CLSTD_TOKENS
+
+    struct iterator : public CTokens::iterator
+    {
+      // CTokens::iterator用于在文本流中步进，tk用于处理信息，比如宏替换或者合并字符串
+      // 所以CTokens::iterator.marker与tk.marker不一定完全相等
+      //typedef clStringA _TStr;
+      TOKEN tk;
+
+      iterator();
+      iterator(const TOKEN& token);
+
+      iterator& operator++();
+      TOKEN* operator->();
+      TOKEN& operator*();
+
+      iterator& operator=(const TOKEN& token);
+      //b32  operator==(const _TStr& str) const;
+      //b32  operator==(T_LPCSTR pStr) const;
+      //b32  operator==(TChar ch) const;            // 如果iterator是多字节将返回FALSE
+      //b32  operator!=(const _TStr& str) const;
+      //b32  operator!=(T_LPCSTR pStr) const;
+      //b32  operator!=(TChar ch) const;
+      //b32  operator==(const iterator& it) const;
+      //b32  operator!=(const iterator& it) const;
+      //b32  operator>=(const iterator& it) const;
+      //b32  operator<=(const iterator& it) const;
+
+
+    //  //TOKEN::T_LPCSTR begin() const;
+    //  //TOKEN::T_LPCSTR end() const;
+    };
+
 
     struct MBO // 静态定义符号属性用的结构体
     {
@@ -512,8 +551,11 @@ namespace UVShader
 #endif // USE_CLSTD_TOKENS
   protected:
     static b32 TryExtendNumeric         (iterator& it, clsize remain);
-    static u32 CALLBACK IteratorProc         (iterator& it, u32 nRemain, u32_ptr lParam);
-    static u32 CALLBACK MultiByteOperatorProc(iterator& it, u32 nRemain, u32_ptr lParam);
+    virtual u32     StepIterator         (ArithmeticExpression::iterator& it);
+    u32     MultiByteOperatorProc(ArithmeticExpression::iterator& it, u32 nRemain);
+
+    ArithmeticExpression::iterator begin();
+    ArithmeticExpression::iterator end();
 
     void    InitTokenScope(TKSCOPE& scope, const TOKEN& token, b32 bHasBracket) const;
     void    InitTokenScope(TKSCOPE& scope, GXUINT index, b32 bHasBracket) const;

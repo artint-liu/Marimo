@@ -279,7 +279,7 @@ namespace UVShader
     m_GlobalSet.SetParser(this);
     m_GlobalSet.BuildIntrinsicType();
 
-    SetIteratorCallBack(CodeParser::IteratorProc, 0);
+    //SetIteratorCallBack(CodeParser::IteratorProc, 0);
     InitPacks();
   }
 
@@ -309,7 +309,7 @@ namespace UVShader
       }
     }
 
-    SetIteratorCallBack(CodeParser::IteratorProc, 0);
+    //SetIteratorCallBack(CodeParser::IteratorProc, 0);
     InitPacks();
   }
 
@@ -394,9 +394,10 @@ namespace UVShader
 
   //////////////////////////////////////////////////////////////////////////
 
-  u32 CALLBACK CodeParser::IteratorProc( iterator& it, u32 remain, u32_ptr lParam )
+  u32 CodeParser::StepIterator( ArithmeticExpression::iterator& it)
   {
     GXBOOL bENotation = FALSE;
+    size_t remain = m_pEnd - it.marker;
 
     if(it.marker[0] == '#' && TEST_FLAG_NOT(((CodeParser*)it.pContainer)->m_dwState, AttachFlag_Preprocess))
     {
@@ -493,11 +494,11 @@ namespace UVShader
     }
     else
     {
-      ArithmeticExpression::IteratorProc(it, remain, lParam);
+      ArithmeticExpression::StepIterator(it);
     }
 
     if(TEST_FLAG(m_aCharSem[it.marker[0]], M_CALLBACK)) {
-      return MultiByteOperatorProc(it, remain, lParam);
+      return MultiByteOperatorProc(it, remain);
     }
 
     ASSERT((int)remain >= 0);
@@ -508,7 +509,7 @@ namespace UVShader
   {
     CodeParser* pPrevParent = m_pParent;
     m_pParent = pParent;
-    auto stream_end = end();
+    ArithmeticExpression::iterator stream_end = end();
     ASSERT(m_aTokens.empty()); // 调用者负责清空
 
     if( ! m_pMsg && pParent) {
@@ -518,23 +519,23 @@ namespace UVShader
 
 
     m_aTokens.reserve(EstimateForTokensCount());
-    TOKEN token;
+    //TOKEN token;
     //TOKEN l_token; // 用来在迭代器中储存符号优先级的信息
     //clstack<int> sMacroStack;
     //clStringA strMacro;
     
     // 只是清理
-    token.ClearMarker();
-    token.precedence = 0;
-    token.unary      = 0;
+    //token.ClearMarker();
+    //token.precedence = 0;
+    //token.unary      = 0;
 
-    SetIteratorCallBack(IteratorProc, (u32_ptr)&token);
+    //SetIteratorCallBack(StepIterator, (u32_ptr)&token);
 
     PairStack sStack[countof(s_PairMark)];
 
 
-    auto it = begin();
-    token.Set(it);
+    ArithmeticExpression::iterator it = begin();
+    //token.Set(it);
 
     int EOE = m_aTokens.size(); // End Of Expression
     cllist<clsize> UnaryPendingList; // "++", "--" 未确定前置还是后缀的列表
@@ -542,7 +543,7 @@ namespace UVShader
     //m_Macros[MACRO_FILE]
     //m_Macros[MACRO_LINE]
 
-    for(; /*it.pContainer == NULL || */((size_t)it.pContainer & 1) || it != stream_end; GetNext(it, token))
+    for(; /*it.pContainer == NULL || */((size_t)it.pContainer & 1) || it != stream_end; GetNext(it))
     {
       // 上一个预处理结束后，后面的语句长度设置为0可以回到主循环步进
       // 这样做是为了避免如果下一条语句也是预处理指令，不会在处理回调中发生递归调用
@@ -550,8 +551,8 @@ namespace UVShader
         continue;
       }
 
-      if( ! m_pParent && token == PREPROCESS_pound) {
-        OutputErrorW(token, UVS_EXPORT_TEXT(2121, "“#”: 无效字符 : 可能是宏展开的结果")); // 无效的"#"号_可能是宏扩展
+      if( ! m_pParent && *it == PREPROCESS_pound) {
+        OutputErrorW(*it, UVS_EXPORT_TEXT(2121, "“#”: 无效字符 : 可能是宏展开的结果")); // 无效的"#"号_可能是宏扩展
       }
 
       const int c_size = (int)m_aTokens.size();
@@ -572,7 +573,7 @@ namespace UVShader
             if(l_back == "return" ||
               (l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary))) {
               const auto& p = s_plus_minus[(int)(it.marker[0] - '+')];
-              token.SetArithOperatorInfo(p);
+              it->SetArithOperatorInfo(p);
             }
           }
           else if(it.length == 2 && (it.marker[1] == '-' || it.marker[1] == '+'))
@@ -580,7 +581,7 @@ namespace UVShader
             // "++","--" 默认按照前缀操作符处理, 这里检查是否转换为后缀操作符
             if(l_back.IsIdentifier()) {
               const auto& p = s_UnaryLeftOperand[(int)(it.marker[0] - '+')];
-              token.SetArithOperatorInfo(p);
+              it->SetArithOperatorInfo(p);
             }
             else {
               UnaryPendingList.push_back(c_size);
@@ -598,25 +599,25 @@ namespace UVShader
       // ...={...}这种情况不更新EOE
       //if(MarryBracket(sStack, token) && m_aTokens.back() != "=" &&
       //  _CL_NOT_(CompareToken(token.scope - 1, "=")))
-      MarryBracket(sStack, token, TEST_FLAG(m_dwState, AttachFlag_Preprocess));
+      MarryBracket(sStack, *it, TEST_FLAG(m_dwState, AttachFlag_Preprocess));
       
-      if(OnToken(token)) {
-        token.ClearMarker();
+      if(OnToken(*it)) {
+        it->ClearMarker();
       }
 
       // 可能被宏展开后清除
-      if(token.marker)
+      if(it->marker)
       {
-        if(_CL_NOT_(MergeStringToken(token)))
+        if(_CL_NOT_(MergeStringToken(*it)))
         {
-          m_aTokens.push_back(token);
+          m_aTokens.push_back(*it);
 
-          if(token == "false")
+          if(*it == "false")
           {
             m_aTokens.back().type = TOKEN::TokenType_Integer;
             SetTokenPhonyString(m_aTokens.size() - 1, "0");
           }
-          else if(token == "true")
+          else if(*it == "true")
           {
             m_aTokens.back().type = TOKEN::TokenType_Integer;
             SetTokenPhonyString(m_aTokens.size() - 1, "1");
@@ -671,14 +672,16 @@ namespace UVShader
       clsize n = *it;
       if(n + 1 >= m_aTokens.size()) {
         // 后缀操作符, 但是语法有错误
-        token.SetArithOperatorInfo(s_UnaryLeftOperand[(int)(m_aTokens[n].marker[0] - '+')]);
+        // 忘了这个是干啥用的了 先中断吧
+        CLBREAK;
+        // token.SetArithOperatorInfo(s_UnaryLeftOperand[(int)(m_aTokens[n].marker[0] - '+')]);
       }
       //else if(m_aTokens[n + 1].IsIdentifier()) {
       //  // 前缀操作符, 不做处理
       //}
     }
 
-    SetIteratorCallBack(IteratorProc, NULL);
+    //SetIteratorCallBack(StepIterator, NULL);
 
     //// 如果是子解析器，这里借用了父对象的信息定位，退出时要清空，避免析构时删除
     //if(pParent) {
@@ -707,7 +710,7 @@ namespace UVShader
       }
       else {
         //PHONY_TOKEN pt;
-        const iterator* aTonkens[] = {&last_one, &token};
+        const TOKEN* aTonkens[] = {&last_one, &token};
         //auto& emplace = m_PhonyTokenDict.emplace(m_aTokens.size() - 1);
         //PHONY_TOKEN& pt = emplace.first->second;
         clStringA str;
@@ -837,55 +840,51 @@ namespace UVShader
     return NULL;
   }
 
-  void CodeParser::GetNext(iterator& it, TOKEN& token) // TODO: it 与 token 合并为 token
+  void CodeParser::GetNext(ArithmeticExpression::iterator& it)
   {
     if(m_ExpandedStream.empty()) {
-      token.ClearMarker();
-      token.ClearArithOperatorInfo();
+      //it->ClearMarker();
+      //it->ClearArithOperatorInfo();
       ++it; // next(it);
-      token.Set(it);
+      //it->Set(it);
     }
     else {
-      token = m_ExpandedStream.front();
+      *it = m_ExpandedStream.front();
 
-      if(token.marker == NULL) {
+      if(it->marker == NULL) {
         // m_ExpandedStream 最后一个token可能记录的是结尾
         ASSERT(m_ExpandedStream.size() == 1);
         it = end();
       } else {
-        it = token;
+        it = *it;
       }
-      token.semi_scope = -1;
-      token.scope = -1;
+      it->semi_scope = -1;
+      it->scope = -1;
       m_ExpandedStream.pop_front();
       if( ! m_ExpandedStream.empty() && m_ExpandedStream.front().pContainer == NULL) {
-        m_ExpandedStream.front().pContainer = token.pContainer;
+        m_ExpandedStream.front().pContainer = it.pContainer;
       }
     }
   }
 
-  CodeParser::iterator CodeParser::MakeupMacroFunc(TOKEN::List& stream, TOKEN& token, const iterator& end)
+  CodeParser::iterator CodeParser::MakeupMacroFunc(TOKEN::List& stream, iterator& it, const iterator& end)
   {
     int depth = 0;
-    TOKEN::T_LPCSTR begin_ptr = token.marker;
+    TOKEN::T_LPCSTR begin_ptr = it.marker;
     
-    for(auto it = stream.begin(); it != stream.end(); ++it)
+    for(auto iter_stream = stream.begin(); iter_stream != stream.end(); ++iter_stream)
     {
-      if(*it == '(') {
+      if(*iter_stream == '(') {
         depth++;
       }
-      else if(*it == ')') {
+      else if(*iter_stream == ')') {
         depth--;
       }
     }
 
-    iterator it = token;
     for(; it != end; ++it)
     {
-      token.Set(it);
-      stream.push_back(token);
-      token.ClearMarker();
-      token.ClearArithOperatorInfo();
+      stream.push_back(*it);
 
       if(it == '(') {
         depth++;
@@ -899,11 +898,12 @@ namespace UVShader
       }
       else if(depth == 0 && it.marker > begin_ptr) {
         // “MARCRO_FUNC”后面不是“(”
+        stream.pop_back();
         break;
       }
     }
 
-    token.Set(it);
+    //token.Set(it);
     //ASSERT(it == end || it == ')');
     return it;
   }
@@ -938,23 +938,24 @@ namespace UVShader
       // 这里不展开不含形参的宏，保证和带形参宏处理级别一致
       // 对于“#define Time Time+5”这种写法，如果这里展开，
       // 在次级再做展开就会产生“Time+5+5”这样错误的表达式
-      stream.push_back(token);
-      token.ClearMarker();
+      stream.push_back(*it);
+      //it->ClearMarker();
       ++it;
-      token.Set(it);
+      //token.Set(it);
     }
     else
     {
       int depth = 0;
-      TOKEN save_token = token;
+      TOKEN save_token = *it;
 
-      it = MakeupMacroFunc(stream, token, end());
+      it = MakeupMacroFunc(stream, it, end());
 
       if(depth < 0)
       {
         if(TEST_FLAG(m_dwState, AttachFlag_NotExpandCond)) {
           // FIXME: 这里没有处理 #if defined(ADD(1,2)) 这种符合ADD(a,b)形参的形式, 可能会导致后面表达式计算出错！
           token = save_token;
+          //it->Set(save_token);
           return FALSE;
         }
         else {
@@ -965,11 +966,11 @@ namespace UVShader
     } // if(ctx.pMacro->aFormalParams.empty())
 
     ASSERT(token.pContainer);
-    TOKEN next_token = token;
+    TOKEN next_token = *it;
     if(ExpandMacroContent(stream, token, NULL) == MacroExpand_Rematch)
     {
-      it = MakeupMacroFunc(stream, token, end());
-      next_token = token;
+      it = MakeupMacroFunc(stream, it, end());
+      next_token = *it;
       MacroExpand result = ExpandMacroContent(stream, token, NULL);
       ASSERT(result == MacroExpand_Ok); // 对于不完整的宏调用，只能重新展开一次
     }
