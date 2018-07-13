@@ -278,8 +278,6 @@ namespace UVShader
     }
     else if(it.marker[0] == '/' && (remain > 0 && it.marker[1] == '/')) // 处理单行注释“//...”
     {
-      auto marker = it.marker;
-      auto lenght = it.length;
       SmartStreamUtility::ExtendToNewLine(it, 2, remain);
       ++it;
     }

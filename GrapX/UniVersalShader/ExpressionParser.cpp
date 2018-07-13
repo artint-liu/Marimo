@@ -492,6 +492,11 @@ namespace UVShader
 
       RESET_FLAG(pThis->m_dwState, State_InPreprocess);
     }
+    else if((it.marker[0] == '\\' && remain > 0 && it.marker[1] == '\n') ||
+      (it.marker[0] == '\\' && remain > 1 && it.marker[1] == '\r' && it.marker[2] == '\n'))
+    {
+      ++it;
+    }
     else
     {
       ArithmeticExpression::StepIterator(it);
@@ -2377,6 +2382,7 @@ NOT_INC_P:
       }
       else if(pos == step_scope.begin + 1) {
         ASSERT(m_aTokens[step_scope.begin] == ';'); // 步进一次只可能是遇到了单独的分号
+        PARSER_ASSERT(m_aTokens[step_scope.begin] == ';', m_aTokens[step_scope.begin]);
         step_scope.begin = pos;
         continue;
       }
