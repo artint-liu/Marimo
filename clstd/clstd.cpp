@@ -157,7 +157,7 @@ void _cl_vtraceT(const _TCh *fmt, va_list val)
   str_attach.VarFormat(fmt, val);
 
   if(str_attach.IsNotEmpty()) {
-    clstd::OutputString(buffer);
+    clstd::OutputString(str_attach.CStr());
   }
 }
 
