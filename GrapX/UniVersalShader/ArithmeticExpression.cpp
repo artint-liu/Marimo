@@ -1998,58 +1998,6 @@ namespace UVShader
     return GetAnyTokenAPB().ToString(str);
   }
 
-#if 0
-  VALUE::State SYNTAXNODE::Calcuate(const NameSet& sNameSet, VALUE& value_out) const
-  {
-    VALUE p[2];
-    VALUE::State s = VALUE::State_OK;
-    if(mode == MODE_FunctionCall)
-    {
-      value_out.SetOne();
-      return VALUE::State_Call;
-    }
-
-    for(int i = 0; i < 2; i++)
-    {
-      if(Operand[i].IsNode()) {
-        s = Operand[i].pNode->Calcuate(sNameSet, p[i]);
-      }
-      else if(Operand[i].IsToken()) {
-        if(Operand[i].pTokn->type == TOKEN::TokenType_Numeric) {
-          s = p[i].set(*Operand[i].pTokn);
-        }
-        else if(Operand[i].pTokn->IsIdentifier()) {
-          p[i].SetOne(); // 标识符用临时值1
-          s = VALUE::State_Identifier;
-        }
-      }
-      else {
-        p[i].SetZero();
-      }
-
-      if(s < VALUE::State_OK) {
-        return s;
-      }
-    }
-
-    if(pOpcode == NULL) {
-      return VALUE::State_BadOpcode;
-    }
-
-    s |= value_out.Calculate(*pOpcode, p[0], p[1]);
-    if(TEST_FLAG(s, VALUE::State_UnknownOpcode))
-    {
-      if(*pOpcode == '.')
-      {
-        ASSERT(Operand[0].IsToken());
-        const TYPEDESC* pTypeDesc = sNameSet.GetVariable(Operand[0].pTokn);
-      }
-      CLNOP;
-    }
-    return s;
-  }
-#endif
-
   const TOKEN& SYNTAXNODE::GetAnyTokenAB() const // 深度优先
   {
     if(Operand[0].IsToken()) {
