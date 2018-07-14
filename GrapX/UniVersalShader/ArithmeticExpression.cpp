@@ -417,7 +417,7 @@ namespace UVShader
 
       if(s.scope >= (int)pScope->begin && s.scope < (int)pScope->end) {
         ASSERT(m_aTokens[s.scope] == ':');
-        bresult = bresult && MakeInstruction(depth + 1, &m_aTokens[s.scope], nMinPrecedence, &scopeB, &B, s.scope);
+        bresult = bresult && MakeInstruction(depth + 1, &m_aTokens[s.scope], TOKEN::FIRST_OPCODE_PRECEDENCE, &scopeB, &B, s.scope);
       }
       else {
         // ERROR: ?:三元操作符不完整
@@ -558,6 +558,14 @@ namespace UVShader
             i = s.scope;
             continue;
           }
+          else if(s.precedence == OPP(1) && s.scope != -1)
+          {
+            ASSERT(s == ':');
+            i = s.scope;
+            nCandidate = s.precedence;
+            nCandidatePos = i;
+            continue;
+          }
           else if(s.precedence == 0) { // 跳过非运算符
             continue;
           }
@@ -688,9 +696,9 @@ namespace UVShader
         t.precedence, &scope, pDesc, nLowestOpcodeIndex);
     }
 #if 1
-    return ParseFunctionIndexCall(scope, pDesc);
+    return ParseFunctionSubscriptCall(scope, pDesc);
 #else
-    if( ! ParseFunctionIndexCall(scope, pDesc))
+    if( ! ParseFunctionSubscriptCall(scope, pDesc))
     {
       GXINT_PTR len = (m_aTokens[scope.end - 1].marker - m_aTokens[scope.begin].marker) + m_aTokens[scope.end - 1].length;
       ASSERT(len >= 0);
@@ -713,7 +721,7 @@ namespace UVShader
     return m_nErrorCount;
   }
 
-  GXBOOL ArithmeticExpression::ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  GXBOOL ArithmeticExpression::ParseFunctionSubscriptCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
   {
     // 从右到左解析这两种形式:
     // name(...)(...)(...)

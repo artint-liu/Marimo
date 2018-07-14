@@ -568,7 +568,7 @@ namespace UVShader
 
     GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
     GXBOOL  ParseTypeCast(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    GXBOOL  ParseFunctionIndexCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseFunctionSubscriptCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
     TKSCOPE::TYPE  GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence);
