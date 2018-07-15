@@ -618,6 +618,8 @@ namespace UVShader
     const TOKEN* GetVariableWithoutSeamantic(const SYNTAXNODE::GLOB& glob);
     const SYNTAXNODE* GetVariableArrayWithoutSeamantic(const SYNTAXNODE::GLOB& glob);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
+
+    GXBOOL Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const SYNTAXNODE::GLOB& second_glob, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
     GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
     GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);

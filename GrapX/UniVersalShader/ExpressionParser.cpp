@@ -3595,9 +3595,11 @@ NOT_INC_P:
 
   void CodeParser::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
   {
+#if REDUCE_ERROR_MESSAGE
     if(m_nErrorCount >= c_nMaxErrorCount || m_nSessionError > c_nMaxSessionError) {
       return;
     }
+#endif // REDUCE_ERROR_MESSAGE
 
     if(pLocation)
     {
@@ -3704,7 +3706,6 @@ NOT_INC_P:
       }
       else
       {
-        //PARSER_BREAK(glob);
         return NULL;
       }
     }
@@ -3775,7 +3776,6 @@ NOT_INC_P:
   GXBOOL CodeParser::Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable, GXBOOL bMember)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition); // 只检查定义
-    const TYPEDESC* pRightTypeDesc = NULL;
 
     if(pNode->Operand[0].IsToken())
     {
@@ -3829,20 +3829,25 @@ NOT_INC_P:
           return FALSE;
         }
         // ASSERT is type
-        //PARSER_BREAK(pNode->Operand[0]);
       }
     }
     else {
-      // pNode->Operand[0].IsNode() || pNode->Operand[0].ptr == NULL;
       CLBREAK;
     }
 
-    const SYNTAXNODE::GLOB& second_glob = pNode->Operand[1];
+    return Verify_VariableTypedDefinition(sNameSet, *pNode->Operand[0].pTokn, pNode->Operand[1], bConstVariable, bMember);
+  }
+
+  GXBOOL CodeParser::Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const SYNTAXNODE::GLOB& second_glob, GXBOOL bConstVariable, GXBOOL bMember)
+  {
+    const TYPEDESC* pRightTypeDesc = NULL;
+
+    //const SYNTAXNODE::GLOB& second_glob = pNode->Operand[1];
     const TOKEN* ptkVar = NULL;
     const TYPEDESC* pType = NULL;
     clStringA strType;
 
-    pNode->Operand[0].pTokn->ToString(strType);
+    tkType.ToString(strType);
 
     if(second_glob.IsToken())
     {
@@ -3956,10 +3961,23 @@ NOT_INC_P:
 
         ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
       }
+      else if(second_glob.pNode->CompareOpcode(','))
+      {
+        const size_t nErrorCount = DbgErrorCount();
+        ASSERT(bMember == FALSE); // 成员变量定义在结构体解析时已经展开了，不应该存在“,”并列式
+        if(Verify_VariableTypedDefinition(sNameSet, tkType, second_glob.pNode->Operand[0], bConstVariable, FALSE) == FALSE ||
+          Verify_VariableTypedDefinition(sNameSet, tkType, second_glob.pNode->Operand[1], bConstVariable, FALSE) == FALSE)
+        {
+          ASSERT(DbgErrorCount() > nErrorCount);
+          return FALSE;
+        }
+        return TRUE;
+      }
       else
       {
         // 意料之外的变量定义语法
         PARSER_BREAK(second_glob);
+        CLBREAK;
         return FALSE;
       }
     }
@@ -3970,9 +3988,9 @@ NOT_INC_P:
       return FALSE;
     }
 
-    ASSERT(pNode->Operand[0].IsToken()); // 外面的拆解保证不会出现这个
+    //ASSERT(pNode->Operand[0].IsToken()); // 外面的拆解保证不会出现这个
 
-    pNode->Operand[0].pTokn->ToString(strType);
+    //pNode->Operand[0].pTokn->ToString(strType);
 
     //// 检查变量名
     if(pType == NULL)
@@ -3983,7 +4001,7 @@ NOT_INC_P:
       case NameContext::State_TypeNotFound:
       {
         strW = strType;
-        OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), strW.CStr());
+        OutputErrorW(tkType, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), strW.CStr());
         return FALSE;
       }
       case NameContext::State_DuplicatedVariable:
@@ -4011,14 +4029,14 @@ NOT_INC_P:
       }
     }
 
-    if(pNode->Operand[1].IsNode())
+    if(second_glob.IsNode())
     {
       ASSERT(pRightTypeDesc != NULL ||
         second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript); // 下标情况下可以没有pRightTypeDesc
 
       if(pRightTypeDesc)
       {
-        const TOKEN& token = pNode->GetAnyTokenPAB();
+        const TOKEN& token = *second_glob.GetFrontToken();
         if(TryTypeCasting(pType, pRightTypeDesc, &token) == FALSE)
         {
           clStringW strFrom = pRightTypeDesc->name;
@@ -4189,9 +4207,6 @@ NOT_INC_P:
             {
               result = FALSE;
             }
-
-            //CLBREAK;
-            //PARSER_BREAK(pNode->Operand[1]);
           }
         }
         else
@@ -4392,7 +4407,6 @@ NOT_INC_P:
       {
         pTypeDesc = InferSubscriptType(sNameSet, pLeftNode);
         return pTypeDesc;
-        //PARSER_BREAK(left_glob);
       }
       else {
         // error C2106: “=”: 左操作数必须为左值
@@ -4453,7 +4467,6 @@ NOT_INC_P:
   const TYPEDESC* CodeParser::InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode)
   {
     ASSERT(pFuncNode->mode == SYNTAXNODE::MODE_FunctionCall);
-    //PARSER_ASSERT(pFuncNode->Operand[0].IsToken(), pFuncNode->Operand[0]); // 函数名
     if(pFuncNode->Operand[0].IsNode())
     {
       // “float[2](0, 1)” 这种形式
@@ -4832,7 +4845,6 @@ NOT_INC_P:
         // 结构体起始类型，相当于上面的[ab]
         PARSER_ASSERT(pChildNode->CompareOpcode('.') == FALSE, pNode->Operand[0]); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
         pTypeDesc = InferType(sNameSet, pChildNode);
-        //PARSER_ASSERT(pTypeDesc, pNode->Operand[0]);
       }
 
       if(pTypeDesc == NULL) {
