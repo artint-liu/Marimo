@@ -543,7 +543,6 @@ namespace UVShader
     //SYNTAXNODE*         m_pNewNode;           // 记录当前分配节点的指针
     clstd::StablePool<SYNTAXNODE> m_NodePool;
 
-    int                 m_nDbgNumOfExpressionParse; // 调试模式用于记录解析表达式迭代次数的变量
     clStringArrayA      m_aDbgExpressionOperStack;
 
 #ifdef USE_CLSTD_TOKENS

@@ -5,23 +5,6 @@
 
 namespace UVShader
 {
-  //struct GRAMMAR
-  //{
-  //  enum Modified
-  //  {
-  //    Modified_optional,
-  //    Modified_required,
-  //  };
-
-  //  Modified eModified;
-  //  GXLPCSTR szMarker;
-
-  //  GXLPVOID pDest;
-  //  GXSIZE_T offset;
-
-  //  GRAMMAR* pChild;
-  //};
-
   class CodeParser;
   typedef clvector<clStringA> StringArray;
 
@@ -44,23 +27,6 @@ namespace UVShader
     GXHRESULT Open(IncludeType eIncludeType, GXLPCWSTR szFileName, clBuffer** ppBuffer) override;
     GXHRESULT Close(clBuffer* pBuffer) override;
   };
-
-  //struct TYPEDESC
-  //{
-  //  enum TypeCate
-  //  {
-  //    TypeCate_Numeric,
-  //    TypeCate_String,
-  //    TypeCate_Struct,
-  //  };
-
-  //  GXLPCSTR  name;
-  //  int       maxR : 8;    // Row, 或者 array size
-  //  int       maxC : 8;    // Column
-  //  TypeCate  cate : 8;
-
-  //  bool operator<(const TYPEDESC& t) const;
-  //};
 
   enum KeywordFilter
   {
@@ -109,7 +75,6 @@ namespace UVShader
     DimList_T         sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
     const TYPEDESC*   pNextDim;
 
-    //GXBOOL GetMemberTypename(clStringA& strTypename, TYPEDESC* pMemberTypeDesc, const NameContext& sNameSet, CodeParser* pParser, const TOKEN* ptkMember) const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
     GXLPCSTR Resolve(int& R, int& C) const;
     GXBOOL IsVector() const;
@@ -160,14 +125,6 @@ namespace UVShader
 
     static int GetTypeTemplateTypeIndex(GXDWORD dwMasks);
   };
-
-  //struct INTRINSIC_FUNC2
-  //{
-  //  GXLPSTR   ret_type; // 返回类型
-  //  GXLPSTR   name;     // 函数名
-  //  size_t    count;    // 形参数量
-  //  GXLPCSTR* params;   // 形参列表
-  //};
 
   // 用来实现向量和矩阵的组合初始化
   // 如: float3(pos.xy, 1)
@@ -289,14 +246,6 @@ namespace UVShader
 #endif
   };
 
-//#ifdef ENABLE_SYNTAX_VERIFY
-//  struct NODE_CALC : public SYNTAXNODE
-//  {
-//    //const TYPEDESC* GetMember(const NameSet& sNameSet) const;
-//    VALUE::State Calculate(CodeParser* pParser, const NameContext& sNameSet, VALUE& value_out) const;
-//  };
-//#endif
-
   class CodeParser : public ArithmeticExpression
   {
     friend class NameContext;
@@ -342,25 +291,6 @@ namespace UVShader
       void ClearContainer (); // 这个用来清除iterator里的container，指向subparse容易出错
       //int  ExpandMacro    (const Dict& dict); // 展开宏
     };
-
-    //struct MACRO_EXPAND_CONTEXT
-    //{
-    //  typedef clstack<MACRO_EXPAND_CONTEXT> Stack;
-    //  typedef cllist<MACRO_EXPAND_CONTEXT>  List;
-    //  CodeParser* pParser;
-    //  MACRO*      pMacro;
-    //  TOKEN::List current;
-
-    //  //// ActualParam 实参
-    //  //TOKEN::Array aTokens; // 实参列表
-    //  //TKSCOPE::Array aArgs; // 实参
-
-    //  ArithmeticExpression::iterator itSave;
-
-    //  template<class _TIter>
-    //  void Append(const _TIter& _begin, const _TIter& _end);
-    //};
-    //
 
     struct PARSER_CONTEXT
     {
@@ -752,9 +682,6 @@ namespace UVShader
 
     const StatementArray& GetStatements         () const;
     void                Invoke                  (GXLPCSTR szFunc, GXLPCSTR szArguments);
-
-//    GXBOOL   IsToken(const SYNTAXNODE::UN* pUnion) const;
-    //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const;
 
     static void DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL, int depth = 0);
 

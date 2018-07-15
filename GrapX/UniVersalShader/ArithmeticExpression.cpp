@@ -107,7 +107,6 @@ namespace UVShader
     //, m_nMaxPrecedence(0)
     , m_nErrorCount(0)
     , m_nSessionError(0)
-    , m_nDbgNumOfExpressionParse(0)
     , m_NodePool(128)
     , m_bHigherDefiniton(FALSE)
     , m_bRefMsg(FALSE)
@@ -324,25 +323,6 @@ namespace UVShader
     it.length = 0;
     it.pContainer = this;
     it.operator++();
-
-//    CTokens::iterator it_base = CTokens::begin();
-//    it.marker     = it_base.marker;
-//    it.length     = it_base.length;
-//    it.pContainer = it_base.pContainer;
-//    //it->Set(it_base);
-//
-//#ifdef ENABLE_STRINGED_SYMBOL
-//    it_base.ToString(it.tk.symbol);
-//#endif // #ifdef ENABLE_STRINGED_SYMBOL
-//    it.tk.scope = -1;
-//    it.tk.semi_scope = -1;
-//    it.tk.pContainer = it_base.pContainer;
-//    
-//    it.tk.bPhony = 0;
-//    it.tk.marker = it_base.marker;
-//    it.tk.length = it_base.length;
-//
-//    StepIterator(it);
     return it;
   }
 
@@ -353,7 +333,6 @@ namespace UVShader
     it.marker = it_base.marker;
     it.length = it_base.length;
     it.pContainer = it_base.pContainer;
-    //it->Set(it_base);
     return it;
   }
 
@@ -380,8 +359,7 @@ namespace UVShader
 
   GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB)
   {
-    //const SYNTAXNODE::GLOB* pOperand[] = {pOperandA, pOperandB};
-    SYNTAXNODE sNode; // = {SYNTAXNODE::FLAG_OPERAND_MAGIC, mode, pOpcode};
+    SYNTAXNODE sNode;
     sNode.magic   = SYNTAXNODE::FLAG_OPERAND_MAGIC;
     sNode.mode    = mode;
     sNode.pOpcode = pOpcode;
@@ -502,8 +480,6 @@ namespace UVShader
       {
         for(i = scope.begin; i < scope.end; ++i)
         {
-          m_nDbgNumOfExpressionParse++;
-
           const TOKEN& s = m_aTokens[i];
 
           if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
@@ -523,7 +499,6 @@ namespace UVShader
 
           if(s.precedence == nMinPrecedence) {
             return i;
-            //return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -537,7 +512,6 @@ namespace UVShader
       {
         for(; (GXINT_PTR)i >= (GXINT_PTR)scope.begin; --i)
         {
-          m_nDbgNumOfExpressionParse++;
           const TOKEN& s = m_aTokens[i];
 
           // 优先级（2）是从右向左的，这个循环处理从左向右
@@ -550,11 +524,9 @@ namespace UVShader
             {              
               return TKSCOPE::npos;
             }
-#if 1
             if(IsLikeTypeCast(scope, i)) {
               return i;
             }
-#endif
             i = s.scope;
             continue;
           }
@@ -572,7 +544,6 @@ namespace UVShader
 
           if(s.precedence == nMinPrecedence) {
             return i;
-            //return MakeInstruction(depth + 1, &s, nMinPrecedence, &scope, pDesc, i);
           }
           else if(s.precedence < nCandidate) {
             nCandidate = s.precedence;
@@ -695,20 +666,7 @@ namespace UVShader
       return MakeInstruction(depth + 1, &t,
         t.precedence, &scope, pDesc, nLowestOpcodeIndex);
     }
-#if 1
     return ParseFunctionSubscriptCall(scope, pDesc);
-#else
-    if( ! ParseFunctionSubscriptCall(scope, pDesc))
-    {
-      GXINT_PTR len = (m_aTokens[scope.end - 1].marker - m_aTokens[scope.begin].marker) + m_aTokens[scope.end - 1].length;
-      ASSERT(len >= 0);
-      clStringA strMsg(m_aTokens[scope.begin].marker, len);
-      clStringW strMsgW = strMsg;
-      m_pMsg->WriteErrorW(TRUE, m_aTokens[scope.begin].offset(), UVS_EXPORT_TEXT(5008, "无法解析表达式: \"%s\"."), strMsgW.CStr());
-      return FALSE;
-    }
-    return TRUE;
-#endif
   }
 
   GXBOOL ArithmeticExpression::DbgHasError(int errcode) const
@@ -1733,24 +1691,6 @@ namespace UVShader
     bPhony = 0;
   }
 
-//  void TOKEN::Set(const iterator& _iter)
-//  {
-//    //ASSERT((size_t)this != (size_t)&_iter + offsetof(ArithmeticExpression::iterator, tk));
-//    if(_iter.length != 0)
-//    {
-//#ifdef ENABLE_STRINGED_SYMBOL
-//      symbol = _iter.ToString();
-//#endif // #ifdef ENABLE_STRINGED_SYMBOL
-//      scope = -1;
-//      semi_scope = -1;
-//      pContainer = _iter.pContainer;
-//
-//      bPhony = 0;
-//    }
-//    marker = _iter.marker;
-//    length = _iter.length;
-//  }
-
   void TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)
   {
     ASSERT(str.IsNotEmpty());
@@ -1886,18 +1826,6 @@ namespace UVShader
     }
     return CTokens::iterator::offset();
   }
-
-  //TOKEN& TOKEN::operator++()
-  //{
-  //  //CTokens::iterator::GetNext()
-  //  pContainer->next(*this);
-
-  //  //(reinterpret_cast<const ArithmeticExpression*>(pContainer))
-  //  //reinterpret_cast<ArithmeticExpression*>()->StepIterator(*this);
-  //  ((ArithmeticExpression*)pContainer)->StepIterator(*this);
-  //  //*static_cast<CTokens::iterator*>(&tk) = *static_cast<CTokens::iterator*>(this);
-  //  return *this;
-  //}
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -2139,92 +2067,7 @@ namespace UVShader
   {
     return tk;
   }
-  //ArithmeticExpression::iterator& ArithmeticExpression::iterator::operator=(const TOKEN& t)
-  //{
-  //  *static_cast<TOKEN*>(this) = t;
-  //  return *this;
-  //}
 
-  //  const TOKEN* ArithmeticExpression::iterator::operator->() const
-//  {
-//    return &tk;
-//  }
-//
-//  const TOKEN& ArithmeticExpression::iterator::operator*() const
-//  {
-//    return tk;
-//  }
-//
-//#if 0
-//  b32 ArithmeticExpression::iterator::operator==(const _TStr& str) const
-//  {
-//    return (str.GetLength() == tk.length && !clstd::strncmpT(tk.marker, (T_LPCSTR)str, (int)tk.length));
-//  }
-//  
-//  b32 ArithmeticExpression::iterator::operator==(T_LPCSTR pStr) const
-//  {
-//    const size_t nStrLength = clstd::strlenT(pStr);
-//    return (nStrLength == tk.length && !clstd::strncmpT(tk.marker, pStr, (int)tk.length));
-//  }
-//
-//  b32 ArithmeticExpression::iterator::operator==(TChar ch) const
-//  {
-//    return (tk.length == 1 && tk.marker[0] == ch);
-//  }
-//
-//  b32 ArithmeticExpression::iterator::operator!=(const _TStr& str) const
-//  {
-//    return (str.GetLength() != tk.length || clstd::strncmpT(tk.marker, (T_LPCSTR)str, (int)tk.length));
-//  }
-//
-//  b32 ArithmeticExpression::iterator::operator!=(T_LPCSTR pStr) const
-//  {
-//    return (_TStr(pStr).GetLength() != tk.length || clstd::strncmpT(tk.marker, pStr, (int)tk.length));
-//  }
-//
-//  b32 ArithmeticExpression::iterator::operator!=(TChar ch) const
-//  {
-//    return (tk.length != 1 || tk.marker[0] != ch);
-//  }
-//
-//
-//  b32 ArithmeticExpression::iterator::operator==(const iterator& it) const
-//  {
-//    ASSERT(tk.pContainer == it.tk.pContainer);
-//    return (tk.marker == it.tk.marker && tk.length == it.tk.length);
-//  }
-//  
-//  b32 ArithmeticExpression::iterator::operator!=(const iterator& it) const
-//  {
-//    return (!operator==(it));
-//  }
-//  
-//  b32 ArithmeticExpression::iterator::operator>=(const iterator& it) const
-//  {
-//    ASSERT(tk.pContainer == it.tk.pContainer);
-//    return (tk.marker > it.tk.marker) ||
-//      (tk.marker == it.tk.marker && tk.length == it.tk.length);
-//  }
-//
-//  b32 ArithmeticExpression::iterator::operator<=(const iterator& it) const
-//  {
-//    ASSERT(tk.pContainer == it.tk.pContainer);
-//    return (tk.marker < it.tk.marker) ||
-//      (tk.marker == it.tk.marker && tk.length == it.tk.length);
-//  }
-//
-//  TOKEN::T_LPCSTR ArithmeticExpression::iterator::begin() const
-//  {
-//    return tk.marker;
-//  }
-//
-//  TOKEN::T_LPCSTR ArithmeticExpression::iterator::end() const
-//  {
-//    return tk.marker + tk.length;
-//  }
-//
-//#endif
-//
   ArithmeticExpression::iterator& ArithmeticExpression::iterator::operator=(const TOKEN& token)
   {
     //ASSERT(&token != &tk);
@@ -2243,11 +2086,5 @@ namespace UVShader
   {
     this->operator=(token);
   }
-//
-
-//b32 ArithmeticExpression::iterator::operator!=(const ArithmeticExpression::iterator& it) const
-//{
-//  return CTokens::iterator::operator!=(it);
-//}
 
 } // namespace UVShader
