@@ -1289,10 +1289,14 @@ namespace UVShader
       case '+': output = t1 + t2; break;
       case '-': output = t1 - t2; break;
       case '*': output = t1 * t2; break;
-      case '/': output = t1 / t2; break;
       case '<': output = _Ty(t1 < t2); break;
       case '>': output = _Ty(t1 > t2); break;
       case '!': output = _Ty( ! t2); break;
+      case '/':
+        if(t2 == 0) {
+          return State_DivideByZero;
+        }
+        output = t1 / t2; break;
       default:
         return State_UnknownOpcode;
         //TRACE("Unsupport opcode(%c).\n", opcode);

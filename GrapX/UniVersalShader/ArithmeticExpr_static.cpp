@@ -119,7 +119,7 @@ namespace UVShader
     {1, "<", OPP( 8)},
     {1, ">", OPP( 8)},
     {1, "&", OPP( 6)},
-    {1, "^", OPP( 5), TRUE, UNARY_RIGHT_OPERAND},
+    {1, "^", OPP( 5)}, // 不是一元操作符啊！！ TRUE, UNARY_RIGHT_OPERAND},
     {1, "|", OPP( 4)},
     {1, "=", OPP( 1)},
     {1, "?", OPP( 1)}, // ?: 操作符

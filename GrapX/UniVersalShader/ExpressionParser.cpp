@@ -23,6 +23,8 @@
   _CATE == TYPEDESC::TypeCate_Sampler3D || \
   _CATE == TYPEDESC::TypeCate_SamplerCube ) 
 
+#define REDUCE_ERROR_MESSAGE
+
 //#define VOID_TYPEDESC ((const TYPEDESC*)-1)
 #define ERROR_TYPEDESC ((const TYPEDESC*)-1)
 #define PARSER_NOTIMPLEMENT TRACE("%s(%d):没咋处理的地方\n", __FILE__, __LINE__)
@@ -1867,8 +1869,7 @@ NOT_INC_P:
         clStringA str;
         if(it->ptkName)
         {
-          sNameSet.RegisterVariable(it->ptkType->ToString(str), it->ptkName); // 注册在临时域内, 用来检查形参重名
-          //sFormalTypenames.push_back(str);
+          const TYPEDESC* pTypeDesc = sNameSet.RegisterVariable(it->ptkType->ToString(str), it->ptkName); // 注册在临时域内, 用来检查形参重名
         }
         m_aArgumentsPack.push_back(*it);
       }
@@ -3595,7 +3596,7 @@ NOT_INC_P:
 
   void CodeParser::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
   {
-#if REDUCE_ERROR_MESSAGE
+#ifdef REDUCE_ERROR_MESSAGE
     if(m_nErrorCount >= c_nMaxErrorCount || m_nSessionError > c_nMaxSessionError) {
       return;
     }
@@ -3921,6 +3922,10 @@ NOT_INC_P:
               return FALSE;
             case VALUE::State_IllegalNumber:
               OutputErrorW(*pToken, UVS_EXPORT_TEXT(5038, "非法的数字"));
+              return FALSE;
+            case VALUE::State_DivideByZero:
+              // error C2124 : 被零除或对零求模
+              OutputErrorW(*pToken, UVS_EXPORT_TEXT(2124, "被零除或对零求模"));
               return FALSE;
             case VALUE::State_BadIdentifier: // 内部输出
             case VALUE::State_Call: // 向量/矩阵等常量的初始化
@@ -4337,8 +4342,6 @@ NOT_INC_P:
             OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(2030, "“%s”: 结构成员重定义"), ptkVar->ToString(strW));
             break;
           case NameContext::State_TypeNotFound:
-            //strW = strType;
-            //OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(2062, "“%s”: 意外的类型"), strW.CStr());
             CLBREAK; // 上面判断了，这里不应该有
             break;
           default:
@@ -4747,6 +4750,16 @@ NOT_INC_P:
       {
         const TYPEDESC* pTypeDesc = InferMemberType(sNameSet, pNode);
         return pTypeDesc;
+      }
+      else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
+      {
+        ASSERT(pNode->pOpcode); // 上面分支判断了，这里防止以后重构遗失这个条件
+        if(pNode->Operand[0].ptr == NULL || pNode->Operand[1].ptr == NULL) {
+          clStringW strW;
+          pNode->pOpcode->ToString(strW);
+          OutputErrorW(pNode->pOpcode, UVS_EXPORT_TEXT(5046, "“%s”缺少必要的操作数"), strW.CStr());
+          return NULL;
+        }
       }
     }
 
@@ -5526,6 +5539,8 @@ NOT_INC_P:
     const TYPEDESC* pDesc = GetType(strType);
     if(pDesc == NULL)
     {
+      clStringW strW = strType;
+      m_pCodeParser->OutputErrorW(ptkVariable, UVS_EXPORT_TEXT2(5012, "“%s”: 类型未定义", m_pCodeParser), strW.CStr());
       return State_TypeNotFound;
     }
 
