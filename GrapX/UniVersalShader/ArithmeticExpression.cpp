@@ -67,12 +67,16 @@
 // 2.GLSL支持结构体简单构造：
 //   struct Ray { vec3 pos, dir; };
 //   Ray(vec3(0,0,0), vec3(1,1,1));
-// uvs不支持这个。
+// HLSL不支持这个，uvs不支持这个。
 // 3.GLSL支持“^^”符号，代表布尔异或，uvs不支持，查了一下，HLSL也没有这个符号。
 // 4.GLSL支持数组的length()方法，uvs支持这个方法
 // 5.GLSL支持数组初始化：
 //  vec4 Scene[] = vec4[](vec4(0, 0, 0, 1), vec4(1, 1, 1, 1), vec4(2, 2, 2, 1));
-// uvs不打算支持这种形式。
+// HLSL不支持，uvs不打算支持这种形式。
+// 6.GLSL支持复杂表达式声明数组长度，如：
+//  const vec2 t= vec2(2,3);
+//  const float c[int(t.x) * int(t.y)];
+// HLSL不支持这种声明，uvs也暂时不打算支持这种声明
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -336,7 +340,7 @@ namespace UVShader
     return it;
   }
 
-  const SYNTAXNODE* ArithmeticExpression::TryGetNode(const SYNTAXNODE::GLOB* pDesc) const
+  const SYNTAXNODE* ArithmeticExpression::TryGetNode(const GLOB* pDesc) const
   {
     if(pDesc->IsNode()) {
       return pDesc->pNode;
@@ -344,7 +348,7 @@ namespace UVShader
     return NULL;
   }
 
-  SYNTAXNODE::MODE ArithmeticExpression::TryGetNodeMode(const SYNTAXNODE::GLOB* pDesc) const
+  SYNTAXNODE::MODE ArithmeticExpression::TryGetNodeMode(const GLOB* pDesc) const
   {
     if(pDesc->IsNode()) {
       return pDesc->pNode->mode;
@@ -352,12 +356,12 @@ namespace UVShader
     return SYNTAXNODE::MODE_Undefined;
   }
 
-  GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB)
+  GXBOOL ArithmeticExpression::MakeSyntaxNode(GLOB* pDest, SYNTAXNODE::MODE mode, GLOB* pOperandA, GLOB* pOperandB)
   {
     return MakeSyntaxNode(pDest, mode, NULL, pOperandA, pOperandB);
   }
 
-  GXBOOL ArithmeticExpression::MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB)
+  GXBOOL ArithmeticExpression::MakeSyntaxNode(GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, GLOB* pOperandA, GLOB* pOperandB)
   {
     SYNTAXNODE sNode;
     sNode.magic   = SYNTAXNODE::FLAG_OPERAND_MAGIC;
@@ -375,14 +379,14 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL ArithmeticExpression::MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::GLOB* pParent, int nMiddle)
+  GXBOOL ArithmeticExpression::MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, GLOB* pParent, int nMiddle)
   {
     ASSERT((int)pScope->begin <= nMiddle);
     ASSERT(nMiddle <= (int)pScope->end);
 
     TKSCOPE scopeA(pScope->begin, nMiddle);
     TKSCOPE scopeB(nMiddle + 1, pScope->end);
-    SYNTAXNODE::GLOB A = {0}, B = {0};
+    GLOB A = {0}, B = {0};
     GXBOOL bresult = TRUE;
     //SYNTAXNODE::MODE _mode = SYNTAXNODE::MODE_Opcode;
 
@@ -567,14 +571,14 @@ namespace UVShader
     m_bHigherDefiniton = bHigher;
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc)
   {
     return ParseArithmeticExpression(depth + 1, scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
   }
 
-  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, int nMinPrecedence)
+  GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence)
   {
-    SYNTAXNODE::GLOB A, B;
+    GLOB A, B;
 
     if(depth > 1000)
     {
@@ -679,7 +683,7 @@ namespace UVShader
     return m_nErrorCount;
   }
 
-  GXBOOL ArithmeticExpression::ParseFunctionSubscriptCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  GXBOOL ArithmeticExpression::ParseFunctionSubscriptCall(const TKSCOPE& scope, GLOB* pDesc)
   {
     // 从右到左解析这两种形式:
     // name(...)(...)(...)
@@ -689,12 +693,12 @@ namespace UVShader
     struct CONTEXT
     {
       SYNTAXNODE::MODE mode;
-      SYNTAXNODE::GLOB B;
+      GLOB B;
     };
 
     typedef clstack<CONTEXT> SyntaxStack;
     SyntaxStack node_stack;
-    SYNTAXNODE::GLOB A;
+    GLOB A;
     CONTEXT c;
     TOKEN* pBack = &m_aTokens[scope.end - 1];
     A = m_aTokens[scope.begin];
@@ -778,12 +782,12 @@ namespace UVShader
   }
 #endif
 
-  GXBOOL ArithmeticExpression::ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  GXBOOL ArithmeticExpression::ParseFunctionCall(const TKSCOPE& scope, GLOB* pDesc)
   {
     // 括号肯定是匹配的
     ASSERT(m_aTokens[scope.end - 1].scope == scope.begin + 1);
 
-    SYNTAXNODE::GLOB A, B = {0};
+    GLOB A, B = {0};
     A = m_aTokens[scope.begin];
 
 #if 0 // 外部保证
@@ -821,12 +825,12 @@ namespace UVShader
     return bret;
   }
 
-  GXBOOL ArithmeticExpression::ParseTypeCast(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  GXBOOL ArithmeticExpression::ParseTypeCast(const TKSCOPE& scope, GLOB* pDesc)
   {
     ASSERT(scope.begin < scope.end - 2); // 这个由之前的判断保证, 目前括号里只可能有一个类型标识符
     //ASSERT(m_aTokens[scope.begin].scope == scope.end - 2); // 外部保证是(A)B 形式
 
-    SYNTAXNODE::GLOB A = {0}, B = {0};
+    GLOB A = {0}, B = {0};
     //B = m_aTokens[scope.end - 1];
 
     //if(B.pTokn->IsIdentifier() == FALSE)

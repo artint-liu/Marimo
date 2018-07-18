@@ -709,7 +709,55 @@ namespace UVShader
     return FALSE;
   }
 
-  void CodeParser::DbgBreak(const SYNTAXNODE::GLOB& glob)
+  // 计算常量定义中的值
+  // 返回值：State_OK, State_Call, State_Identifier 不会输出消息，
+  // 其它结果会在内部输出错误消息
+  VALUE::State CodeParser::CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob)
+  {
+    value_out.clear();
+    VALUE::State state = sNameCtx.CalculateConstantValue(value_out, this, &const_expr_glob);
+    if(state != VALUE::State_OK)
+    {
+      //const TOKEN* pToken = const_expr_glob.pNode->Operand[1].GetFrontToken();
+      const TOKEN* pToken = const_expr_glob.GetFrontToken();
+      switch(state)
+      {
+      case VALUE::State_UnknownOpcode:
+        OutputErrorW(*pToken, UVS_EXPORT_TEXT(5033, "无效的操作符"));
+        break;
+      case VALUE::State_SyntaxError:
+        OutputErrorW(*pToken, UVS_EXPORT_TEXT(5034, "语法错误"));
+        break;
+      case VALUE::State_Overflow:
+        OutputErrorW(*pToken, UVS_EXPORT_TEXT(5035, "溢出"));
+        break;
+      case VALUE::State_IllegalChar:
+        OutputErrorW(*pToken, UVS_EXPORT_TEXT(5036, "非法字符"));
+        break;
+      case VALUE::State_BadOpcode:
+        OutputErrorW(*pToken, UVS_EXPORT_TEXT(5037, "错误的操作符"));
+        break;
+      case VALUE::State_IllegalNumber:
+        OutputErrorW(*pToken, UVS_EXPORT_TEXT(5038, "非法的数字"));
+        break;
+      case VALUE::State_DivideByZero:
+        // error C2124 : 被零除或对零求模
+        OutputErrorW(*pToken, UVS_EXPORT_TEXT(2124, "被零除或对零求模"));
+        break;
+      case VALUE::State_BadIdentifier: // 内部输出
+        break;
+      case VALUE::State_Call: // 向量/矩阵等常量的初始化
+      case VALUE::State_Identifier: // 右值中含有变量，不是一个在编译时就能计算出数值的表达式
+        break;
+      default:
+        PARSER_BREAK(const_expr_glob.pNode->Operand[1]);
+        break;
+      }
+    }
+    return state;
+  }
+
+  void CodeParser::DbgBreak(const GLOB& glob)
   {
     DbgBreak(glob.GetFrontToken());
   }
@@ -734,7 +782,7 @@ namespace UVShader
     }
   }
 
-  void CodeParser::DbgAssert(b32 bConditional, const SYNTAXNODE::GLOB& glob)
+  void CodeParser::DbgAssert(b32 bConditional, const GLOB& glob)
   {
     DbgAssert(bConditional, *glob.GetFrontToken());
   }
@@ -1440,7 +1488,7 @@ namespace UVShader
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition);
 
     SYNTAXNODE::PtrList sVarList;
-    SYNTAXNODE::GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
+    GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
     pNode->Operand[1].ptr = pFirstVar->ptr;
 
     for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
@@ -1477,7 +1525,7 @@ namespace UVShader
     return &pNode->Operand[0];
   }
 
-  SYNTAXNODE::GlobList& CodeParser::BreakComma(SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE::GLOB& sGlob)
+  SYNTAXNODE::GlobList& CodeParser::BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob)
   {
     if(sGlob.IsNode() && sGlob.pNode->CompareOpcode(',')) {
       sExprList.push_front(sGlob.pNode->Operand[1]);
@@ -1497,7 +1545,7 @@ namespace UVShader
     return sExprList;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
   {
     // pMembers->ptr为空表示解析失败，空定义pMembers->ptr也是一个block
 
@@ -1664,7 +1712,7 @@ namespace UVShader
       TKSCOPE scope_var(p - pTokensFront, semi_end + 1);
       pMembers->pNode->Operand[1].pTokn = &m_aTokens[semi_end]; // Block后面的分号
 
-      SYNTAXNODE::GLOB glob;
+      GLOB glob;
 
       if(_CL_NOT_(ParseExpression(glob, &sNameSet, scope_var)))
       {
@@ -2091,7 +2139,7 @@ NOT_INC_P:
   }
 
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL CodeParser::TryKeywords(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, TKSCOPE::TYPE* parse_end)
+  GXBOOL CodeParser::TryKeywords(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDesc, TKSCOPE::TYPE* parse_end)
   {
     // 如果是关键字，返回true，否则返回false
     // 解析成功parse_end返回表达式最后一个token的索引，parse_end是这个关键字表达式之内的！
@@ -2130,15 +2178,15 @@ NOT_INC_P:
     }
     else if(front == "struct") {
       //pend = ParseStructDefine(scope, pDesc);
-      SYNTAXNODE::GLOB sMembers = { 0 };
-      SYNTAXNODE::GLOB sVariable = { 0 };
+      GLOB sMembers = { 0 };
+      GLOB sVariable = { 0 };
       int nSignatures = 0;
       int nDefinition = 0;
       pend = ParseStructDefinition(sNameSet, scope, &sMembers, &sVariable, &nSignatures, &nDefinition);
 
       if(sMembers.ptr)
       {
-        SYNTAXNODE::GLOB sName;
+        GLOB sName;
         sName = m_aTokens[scope.begin + 1];
 
         MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_StructDef, &sName, &sMembers);
@@ -2205,7 +2253,7 @@ NOT_INC_P:
       eMode == SYNTAXNODE::MODE_Flow_Break || eMode == SYNTAXNODE::MODE_Flow_Continue ||
       eMode == SYNTAXNODE::MODE_Flow_Discard || eMode == SYNTAXNODE::MODE_Return))
     {
-      SYNTAXNODE::GLOB A = {0}, B = {0};
+      GLOB A = {0}, B = {0};
 
       A = front;
       pend = scope.begin + 2;
@@ -2235,7 +2283,7 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::ParseExpression(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseExpression(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
   {
     // 解析一条表达式语句或者一个语句块
     ASSERT(scope.begin == scope.end ||
@@ -2256,7 +2304,7 @@ NOT_INC_P:
   //////////////////////////////////////////////////////////////////////////
   // 解析一个代码块
   // 避免每条语句解析都递归
-  GXBOOL CodeParser::ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseCodeBlock(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
   {
     // 保证解析内容在数学区间: [begin, end)
     ASSERT(m_aTokens[scope.begin].scope == scope.end - 1);
@@ -2270,10 +2318,10 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
   // 解析一个范围内的所有表达式, 解析的表达式会连接成为chain
-  GXBOOL CodeParser::ParseToChain(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
+  GXBOOL CodeParser::ParseToChain(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope)
   {
-    SYNTAXNODE::GLOB A;
-    SYNTAXNODE::GLOB* pCurrNode = &glob;
+    GLOB A;
+    GLOB* pCurrNode = &glob;
     TKSCOPE step_scope = scope;
 
     while(step_scope.GetSize() > 0)
@@ -2313,7 +2361,7 @@ NOT_INC_P:
   // 如果解析失败, 返回TKSCOPE::npos
   // 如果解析成功, 返回接下来解析的起始位置
 
-  CodeParser::TKSCOPE::TYPE CodeParser::TryParseSingle(NameContext* pNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& step_scope)
+  CodeParser::TKSCOPE::TYPE CodeParser::TryParseSingle(NameContext* pNameSet, GLOB& glob, const TKSCOPE& step_scope)
   {
     ASSERT(step_scope.GetSize() > 0); // 外部保证解析时不为空
     const auto& front = m_aTokens[step_scope.begin];
@@ -2378,11 +2426,11 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowIf(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowIf(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc, GXBOOL bElseIf)
   {
     // 与 ParseFlowWhile 相似
     NameContext sNameSet_FlowIf("if", &sParentSet);
-    SYNTAXNODE::GLOB A = {0}, B = {0};
+    GLOB A = {0}, B = {0};
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "if");
 
@@ -2470,10 +2518,10 @@ NOT_INC_P:
     return bret ? sStatement.begin : TKSCOPE::npos;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowWhile(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowWhile(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc)
   {
     // 与 ParseFlowIf 相似
-    SYNTAXNODE::GLOB A = {0}, B = {0};
+    GLOB A = {0}, B = {0};
     NameContext sNameSet_FlowWhile("while", &sParentSet);
     GXBOOL bret = TRUE;
     ASSERT(m_aTokens[scope.begin] == "while");
@@ -2517,7 +2565,7 @@ NOT_INC_P:
     return bret ? sBlock.end : TKSCOPE::npos;
   }
   
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowDoWhile(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowDoWhile(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc)
   {
     ASSERT(m_aTokens[scope.begin] == "do");
     // do{...}while(...); 中while()不允许使用类型定义
@@ -2532,7 +2580,7 @@ NOT_INC_P:
 
     TKSCOPE sConditional;
     TKSCOPE sBlock;
-    SYNTAXNODE::GLOB A = {0}, B = {0};
+    GLOB A = {0}, B = {0};
 
     const TOKEN& tkScope = m_aTokens[scope.begin + 1];
     TKSCOPE::TYPE while_token;
@@ -2576,10 +2624,10 @@ NOT_INC_P:
     return bret ? while_end : TKSCOPE::npos;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDest)
   {
     // typedef A B;
-    SYNTAXNODE::GLOB A = {0}, B = {0};
+    GLOB A = {0}, B = {0};
     const TOKEN& front = m_aTokens[scope.begin];
     ASSERT(front == "typedef");
 
@@ -2683,7 +2731,7 @@ NOT_INC_P:
     return TRUE;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, SYNTAXNODE::GLOB* pBlockNode)
+  CodeParser::TKSCOPE::TYPE CodeParser::MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, GLOB* pBlockNode)
   {
     ASSERT(m_aTokens[scope.begin] == "for"); // 外部保证调用这个函数的正确性
 
@@ -2766,13 +2814,13 @@ NOT_INC_P:
     return pBlock->end;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowFor(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowFor(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc)
   {
     NameContext sNameSet_FlowFor("for", &sParentSet);
     TKSCOPE sInitializer, sConditional, sIterator;
     TKSCOPE sBlock;
 
-    SYNTAXNODE::GLOB uInit = {0}, uCond = {0}, uIter = {0}, uBlock = {0}, D;
+    GLOB uInit = {0}, uCond = {0}, uIter = {0}, uBlock = {0}, D;
     
     auto result = MakeFlowForScope(scope, &sInitializer, &sConditional, &sIterator, &sBlock, &uBlock);
     if(result == TKSCOPE::npos)
@@ -3202,7 +3250,7 @@ NOT_INC_P:
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL CodeParser::CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc)
+  GXBOOL CodeParser::CalculateValue(OPERAND& sOut, const GLOB* pDesc)
   {
     if(pDesc->IsToken())
     {
@@ -3215,7 +3263,7 @@ NOT_INC_P:
       OPERAND param[2];
       param[0].clear();
       param[1].clear();
-      SYNTAXNODE::GLOB l_desc;
+      GLOB l_desc;
       for(int i = 0; i < 2; i++)
       {
         if(!pNode->Operand[i].ptr) {
@@ -3287,7 +3335,7 @@ NOT_INC_P:
 
   CodeParser::T_LPCSTR CodeParser::PP_If(const RTPPCONTEXT& ctx, CodeParser* pParser)
   {
-    SYNTAXNODE::GLOB sDesc = {0};
+    GLOB sDesc = {0};
     TKSCOPE scope(1, pParser->m_aTokens.size());
     pParser->EnableHigherDefinition(TRUE);
     if( ! pParser->ParseArithmeticExpression(0, scope, &sDesc)) {
@@ -3621,7 +3669,7 @@ NOT_INC_P:
     m_pMsg->VarWriteErrorW(TRUE, (GXSIZE_T)0, code, arglist);
   }
 
-  void CodeParser::OutputErrorW(const SYNTAXNODE::GLOB& glob, GXUINT code, ...) const
+  void CodeParser::OutputErrorW(const GLOB& glob, GXUINT code, ...) const
   {
     va_list  arglist;
     va_start(arglist, code);
@@ -3691,7 +3739,7 @@ NOT_INC_P:
 
 #ifdef ENABLE_SYNTAX_VERIFY
 
-  const TOKEN* CodeParser::GetVariableWithoutSeamantic(const SYNTAXNODE::GLOB& glob)
+  const TOKEN* CodeParser::GetVariableWithoutSeamantic(const GLOB& glob)
   {
     // 递归解析带语意的变量定义
     // <variable> [: seamantic1] [: seamantic2] ...
@@ -3715,7 +3763,7 @@ NOT_INC_P:
   }
 
   // 获得去除语意的数组变量
-  const SYNTAXNODE* CodeParser::GetVariableArrayWithoutSeamantic(const SYNTAXNODE::GLOB& glob)
+  const SYNTAXNODE* CodeParser::GetVariableArrayWithoutSeamantic(const GLOB& glob)
   {
     // 递归解析带语意的变量定义
     // <variable>["[m]"]["[n]"] [: seamantic1] [: seamantic2] ...
@@ -3839,11 +3887,11 @@ NOT_INC_P:
     return Verify_VariableTypedDefinition(sNameSet, *pNode->Operand[0].pTokn, pNode->Operand[1], bConstVariable, bMember);
   }
 
-  GXBOOL CodeParser::Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const SYNTAXNODE::GLOB& second_glob, GXBOOL bConstVariable, GXBOOL bMember)
+  GXBOOL CodeParser::Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstVariable, GXBOOL bMember)
   {
     const TYPEDESC* pRightTypeDesc = NULL;
 
-    //const SYNTAXNODE::GLOB& second_glob = pNode->Operand[1];
+    //const GLOB& second_glob = pNode->Operand[1];
     const TOKEN* ptkVar = NULL;
     const TYPEDESC* pType = NULL;
     clStringA strType;
@@ -3898,42 +3946,9 @@ NOT_INC_P:
 
         if(bConstVariable)
         {
-          value.clear();
-          state = sNameSet.CalculateConstantValue(value, this, &second_glob.pNode->Operand[1]);
-          if(state != VALUE::State_OK)
-          {
-            const TOKEN* pToken = second_glob.pNode->Operand[1].GetFrontToken();
-            switch(state)
-            {
-            case VALUE::State_UnknownOpcode:
-              OutputErrorW(*pToken, UVS_EXPORT_TEXT(5033, "无效的操作符"));
-              return FALSE;
-            case VALUE::State_SyntaxError:
-              OutputErrorW(*pToken, UVS_EXPORT_TEXT(5034, "语法错误"));
-              return FALSE;
-            case VALUE::State_Overflow:
-              OutputErrorW(*pToken, UVS_EXPORT_TEXT(5035, "溢出"));
-              return FALSE;
-            case VALUE::State_IllegalChar:
-              OutputErrorW(*pToken, UVS_EXPORT_TEXT(5036, "非法字符"));
-              return FALSE;
-            case VALUE::State_BadOpcode:
-              OutputErrorW(*pToken, UVS_EXPORT_TEXT(5037, "错误的操作符"));
-              return FALSE;
-            case VALUE::State_IllegalNumber:
-              OutputErrorW(*pToken, UVS_EXPORT_TEXT(5038, "非法的数字"));
-              return FALSE;
-            case VALUE::State_DivideByZero:
-              // error C2124 : 被零除或对零求模
-              OutputErrorW(*pToken, UVS_EXPORT_TEXT(2124, "被零除或对零求模"));
-              return FALSE;
-            case VALUE::State_BadIdentifier: // 内部输出
-            case VALUE::State_Call: // 向量/矩阵等常量的初始化
-              break;
-            default:
-              PARSER_BREAK(second_glob.pNode->Operand[1]);
-              return FALSE;
-            }
+          state = CalculateValueAsConstantDefinition(value, sNameSet, second_glob.pNode->Operand[1]);
+          if(state != VALUE::State_OK && state != VALUE::State_Call && state != VALUE::State_Identifier) {
+            return FALSE;
           }
         }
 
@@ -3948,10 +3963,15 @@ NOT_INC_P:
           return NULL;
         }
 
-        if(bConstVariable && state == VALUE::State_OK)
+        if(bConstVariable)
         {
           // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
-          pType = sNameSet.RegisterVariable(strType, ptkVar, &value);
+          if(state == VALUE::State_OK) {
+            pType = sNameSet.RegisterVariable(strType, ptkVar, &value, &second_glob.pNode->Operand[1]);
+          }
+          else {
+            pType = sNameSet.RegisterVariable(strType, ptkVar, NULL, &second_glob.pNode->Operand[1]);
+          }
         }
         else
         {
@@ -4280,7 +4300,7 @@ NOT_INC_P:
     {
       if(pNode->mode == SYNTAXNODE::MODE_Definition)
       {
-        const SYNTAXNODE::GLOB& second_glob = pNode->Operand[1];
+        const GLOB& second_glob = pNode->Operand[1];
         const TOKEN* ptkVar = NULL;
         const TYPEDESC* pType = NULL;
         clStringA strType;
@@ -4361,7 +4381,7 @@ NOT_INC_P:
     return result;
   }
 
-  const TYPEDESC* CodeParser::Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode)
+  const TYPEDESC* CodeParser::Verify2_LeftValue(const NameContext& sNameSet, const GLOB& left_glob, const TOKEN& opcode)
   {
     //Any of the following C expressions can be l-value expressions:
     //  An identifier of integral, floating, pointer, structure, or union type
@@ -4648,7 +4668,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob)
+  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const GLOB& sGlob)
   {
     if(sGlob.IsNode()) {
       return InferType(sNameSet, sGlob.pNode);
@@ -5009,7 +5029,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferRightValueType2(NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation)
+  const TYPEDESC* CodeParser::InferRightValueType2(NameContext& sNameSet, const GLOB& right_glob, const TOKEN* pLocation)
   {
     // 这个函数外部不输出 Error/Warning
     ASSERT(right_glob.IsNode() || right_glob.IsToken());
@@ -5345,7 +5365,7 @@ NOT_INC_P:
   }
 
 #ifdef ENABLE_SYNTAX_VERIFY
-  VALUE::State NameContext::CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE::GLOB* pGlob)
+  VALUE::State NameContext::CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const GLOB* pGlob)
   {
     if(pGlob->IsNode())
     {
@@ -5373,17 +5393,17 @@ NOT_INC_P:
     CLBREAK;
   }
 
-  VALUE::State NameContext::Calculate(VALUE& value_out, CodeParser* pParser/*没用啊*/, const SYNTAXNODE* pNode) const
+  VALUE::State NameContext::Calculate(VALUE& value_out, CodeParser* pMsgLogger, const SYNTAXNODE* pNode) const
   {
     VALUE p[2];
     VALUE::State s = VALUE::State_OK;
     if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
-      if(pNode->Operand[0].IsToken() && pNode->Operand[1].IsNode())
+      if(pNode->Operand[0].IsToken())
       {
         const TOKEN& func_name = *pNode->Operand[0].pTokn;
         VALUE::Rank target_rank = VALUE::Rank_Undefined;
-        if(func_name == STR_HALF)          
+        if(func_name == STR_HALF)
         {
           target_rank = VALUE::Rank_Float;
         }
@@ -5408,13 +5428,36 @@ NOT_INC_P:
           return VALUE::State_Call;
         }
 
-        if(target_rank != VALUE::Rank_Undefined)
+        if(pNode->Operand[1].IsNode())
         {
-          if((s = Calculate(value_out, pParser, pNode->Operand[1].pNode)) != VALUE::State_OK) {
+          if((s = Calculate(value_out, pMsgLogger, pNode->Operand[1].pNode)) != VALUE::State_OK) {
             return s;
           }
-          value_out.CastValueByRank(target_rank);
+
+          s = value_out.CastValueByRank(target_rank);
         }
+        else if(pNode->Operand[1].IsToken())
+        {
+          GetVariableValue(value_out, pNode->Operand[1].pTokn);
+
+          if(value_out.rank == VALUE::Rank_Undefined) {
+            return VALUE::State_Identifier;
+          }
+          else if(value_out.rank == VALUE::Rank_BadValue) {
+            return VALUE::State_BadIdentifier;
+          }
+
+          s = value_out.CastValueByRank(target_rank);
+        }
+        else {
+          // int a = int(); 形式
+          value_out.rank = VALUE::Rank_Undefined;
+          return VALUE::State_Identifier;
+        }
+
+        //else {
+        //  PARSER_BREAK2(pParser, pNode); // 不是数学类型
+        //}
 
         // 显式类型转换下，数据截断和丢失数据不需要报错
         return (s == VALUE::State_OK || s == VALUE::State_LoseOfData || s == VALUE::State_Truncation)
@@ -5438,23 +5481,25 @@ NOT_INC_P:
         //-----------------------------------------
 
         clStringA strTypename;
-        const TYPEDESC* pTypeDesc = pParser->InferMemberType(*this, pNode);
+        const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(*this, pNode);
 
         if(pTypeDesc && IS_NUMERIC_CATE(pTypeDesc->cate))
         {
-          value_out.SetOne();
-          return VALUE::State_OK;
+          value_out.rank = VALUE::Rank_Undefined;
+          return VALUE::State_Identifier;
         }
         else {
-          PARSER_BREAK2(pParser, pNode); // 不是数学类型
+          PARSER_BREAK2(pMsgLogger, pNode); // 不是数学类型
         }
+      }
+      else {
       }
     }
 
     for(int i = 0; i < 2; i++)
     {
       if(pNode->Operand[i].IsNode()) {
-        s = Calculate(p[i], pParser, pNode->Operand[i].pNode);
+        s = Calculate(p[i], pMsgLogger, pNode->Operand[i].pNode);
       }
       else if(pNode->Operand[i].IsToken()) {
         if(pNode->Operand[i].pTokn->IsNumeric()) {
@@ -5470,15 +5515,15 @@ NOT_INC_P:
           {
             clStringW strW;
             pNode->Operand[i].pTokn->ToString(strW);
-            pParser->OutputErrorW(pNode->Operand[i].pTokn, UVS_EXPORT_TEXT2(3861, "“%s”: 找不到标识符", pParser), strW.CStr());
+            pMsgLogger->OutputErrorW(pNode->Operand[i].pTokn, UVS_EXPORT_TEXT2(3861, "“%s”: 找不到标识符", pMsgLogger), strW.CStr());
             return VALUE::State_BadIdentifier;
           }
         }
         else {
           // error C2059: 语法错误:“%s”
           clStringW strW;
-          pParser->OutputErrorW(pNode->Operand[i].pTokn,
-            UVS_EXPORT_TEXT2(2059, "语法错误:“%s”", pParser),
+          pMsgLogger->OutputErrorW(pNode->Operand[i].pTokn,
+            UVS_EXPORT_TEXT2(2059, "语法错误:“%s”", pMsgLogger),
             pNode->Operand[i].pTokn->ToString(strW).CStr());
           return VALUE::State_SyntaxError;
         }
@@ -5487,7 +5532,9 @@ NOT_INC_P:
         p[i].SetZero();
       }
 
-      if(s == VALUE::State_Call || (s & VALUE::State_ErrorMask)) {
+      if(s == VALUE::State_Call || s == VALUE::State_Identifier ||
+        (s & VALUE::State_ErrorMask))
+      {
         return s;
       }
     }
@@ -5527,7 +5574,9 @@ NOT_INC_P:
   }
  
   
-  NameContext::State NameContext::IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue)
+  NameContext::State NameContext::IntRegisterVariable(
+    const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType,
+    const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
   {
     ASSERT(ptkVariable);
 
@@ -5553,6 +5602,14 @@ NOT_INC_P:
 
     VARIDESC sVariDesc;
     sVariDesc.pDesc = pDesc;
+
+    if(pValueExprGlob) {
+      sVariDesc.glob = *pValueExprGlob;
+    }
+    else {
+      sVariDesc.glob.ptr = NULL;
+    }
+
     if(pConstValue) {
       sVariDesc.sConstValue = *pConstValue;
     }
@@ -5572,13 +5629,13 @@ NOT_INC_P:
     return State_DuplicatedVariable;
   }
 
-  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue)
+  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
   {
     ASSERT(strType.IsIdentifier());
     // PS: 返回值似乎没什么用
     const TYPEDESC* pTypeDesc = NULL;
     VARIDESC* pVariDesc = NULL;
-    m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptrVariable, pConstValue);
+    m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptrVariable, pConstValue, pValueExprGlob);
     return pTypeDesc;
   }
 
@@ -5596,7 +5653,7 @@ NOT_INC_P:
     {
       VALUE value;
       VALUE::State state = VALUE::State_OK;
-      const SYNTAXNODE::GLOB& subscript_glob = pNode->Operand[1];
+      const GLOB& subscript_glob = pNode->Operand[1];
       const b32 bSelfAdaptionLength = (pNode->Operand[1].ptr == NULL);
       const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
       if(bSelfAdaptionLength) {
@@ -5606,7 +5663,7 @@ NOT_INC_P:
         state = CalculateConstantValue(value, m_pCodeParser, &subscript_glob);
       }
 
-      const SYNTAXNODE::GLOB* pFirstGlob = &pNode->Operand[0];
+      const GLOB* pFirstGlob = &pNode->Operand[0];
       if(state == VALUE::State_OK)
       {
         //int a[-12]; // C2118 负下标
@@ -5650,10 +5707,17 @@ NOT_INC_P:
         m_eLastState = State_VariableIsNotIdentifier;
         return NULL;
       }
+      else if(state == VALUE::State_Identifier)
+      {
+        m_pCodeParser->OutputErrorW(subscript_glob, 
+          UVS_EXPORT_TEXT2(5047, "不支持复杂表达式声明数组长度", m_pCodeParser));
+        m_eLastState = State_RequireConstantExpression;
+        return NULL;
+      }
       else
       {
         PARSER_BREAK2(m_pCodeParser, subscript_glob);
-        CLBREAK; // 没输出VALUE::State错误
+        return NULL;
       }
 
       if(pFirstGlob->IsToken())
@@ -5661,7 +5725,7 @@ NOT_INC_P:
         const TOKEN* ptkVariable = pFirstGlob->pTokn;
         ASSERT(sDimensions.empty() == FALSE);
 
-        m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable, NULL);
+        m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable, NULL, NULL);
         if(m_eLastState == State_Ok) {
 
           TYPEDESC td = {TYPEDESC::TypeCate_MultiDim};
@@ -5791,6 +5855,23 @@ NOT_INC_P:
     auto it = m_VariableMap.find(TokenPtr(ptkName));
     return (it != m_VariableMap.end() && it->second.sConstValue.rank != VALUE::Rank_Undefined)
       ? &it->second.sConstValue : (m_pParent ? m_pParent->GetVariableValue(ptkName) : NULL);
+  }
+
+  VALUE& NameContext::GetVariableValue(VALUE& value, const TOKEN* ptkName) const
+  {
+    // 注意这个变量“未定义”不是Rank_Undefined
+    // 找不到： value.rank = VALUE::Rank_BadValue;
+    // 不是常量：value.rank = VALUE::Rank_Undefined;
+    auto it = m_VariableMap.find(TokenPtr(ptkName));
+    if(it == m_VariableMap.end()) {
+      if(m_pParent) {
+        return GetVariableValue(value, ptkName);
+      }
+      value.rank = VALUE::Rank_BadValue;
+      return value;
+    }
+    value = it->second.sConstValue;
+    return value;
   }
 
   const NameContext* NameContext::GetStructContext(const clStringA& strName) const

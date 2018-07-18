@@ -138,12 +138,9 @@ namespace UVShader
 
   struct VARIDESC
   {
-    //typedef clvector<size_t> DimList_T;
-
     const TYPEDESC* pDesc;
     VALUE sConstValue; // 规定 string 类型不能以 const 修饰，所以这里用VALUE
-    //clStringA       strConstValue;  // 常量类型
-    //DimList_T       sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
+    SYNTAXNODE::GLOB  glob; // 所有常量都应该定义这个值，数字类型常量同时还应该定义sConstValue
   };
 
   enum InputModifier // 函数参数修饰
@@ -171,6 +168,7 @@ namespace UVShader
     typedef clmap<TokenPtr, VARIDESC>  VariableMap;
     typedef clStringA::LPCSTR LPCSTR;
     typedef clmap<clStringA, const NameContext*> StructContextMap;
+    typedef ArithmeticExpression::GLOB GLOB;
 
     enum State
     {
@@ -204,7 +202,7 @@ namespace UVShader
     NameContext(const NameContext& sNameCtx){}
     NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
-    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue);
+    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob);
   public:
     NameContext(GXLPCSTR szName);
     NameContext(GXLPCSTR szName, const NameContext* pParent);
@@ -225,13 +223,14 @@ namespace UVShader
     const TYPEDESC* GetType(VALUE::Rank rank) const;
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
     const VALUE* GetVariableValue(const TOKEN* ptkName) const;
+    VALUE& GetVariableValue(VALUE& value, const TOKEN* ptkName) const;
     const NameContext* GetStructContext(const clStringA& strName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
-    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
 #endif
@@ -241,8 +240,8 @@ namespace UVShader
     
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
 #ifdef ENABLE_SYNTAX_VERIFY
-    VALUE::State CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE::GLOB* pGlob);
-    VALUE::State Calculate(VALUE& value_out, CodeParser* pParser, const SYNTAXNODE* pNode) const;
+    VALUE::State CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const GLOB* pGlob);
+    VALUE::State Calculate(VALUE& value_out, CodeParser* pMsgLogger, const SYNTAXNODE* pNode) const;
 #endif
   };
 
@@ -408,7 +407,7 @@ namespace UVShader
     struct STATEMENT
     {
       StatementType type;
-      SYNTAXNODE::GLOB sRoot;
+      GLOB sRoot;
       union
       {
         STATEMENT_FUNC func;
@@ -521,25 +520,25 @@ namespace UVShader
 
     //GXBOOL  ParseStatementAs_Expression(STATEMENT* pStat, NameSet& sNameSet, TKSCOPE* pScope); // (算数表)达式
 
-    GXBOOL  CalculateValue(OPERAND& sOut, const SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  CalculateValue(OPERAND& sOut, const GLOB* pDesc);
 
     SYNTAXNODE* FlatDefinition(SYNTAXNODE* pThisChain);
-    static SYNTAXNODE::GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
-    static SYNTAXNODE::GlobList& BreakComma(SYNTAXNODE::GlobList& sExprList, const SYNTAXNODE::GLOB& sGlob); // 列出逗号并列式
+    static GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
+    static SYNTAXNODE::GlobList& BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出逗号并列式
 
-    GXBOOL  ParseExpression(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
-    GXBOOL  ParseToChain(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
-    GXBOOL  ParseCodeBlock(SYNTAXNODE::GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
-    TKSCOPE::TYPE  TryParseSingle(NameContext* pNameSet, SYNTAXNODE::GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
+    GXBOOL  ParseExpression(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseToChain(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
+    GXBOOL  ParseCodeBlock(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
+    TKSCOPE::TYPE  TryParseSingle(NameContext* pNameSet, GLOB& glob, const TKSCOPE& scope); // 解析一个代码块, 一条关键字表达式或者一条表达式
 
-    GXBOOL  TryKeywords(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDest, TKSCOPE::TYPE* parse_end);
-    TKSCOPE::TYPE  ParseFlowIf(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, GXBOOL bElseIf);
-    TKSCOPE::TYPE  MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, SYNTAXNODE::GLOB* pBlockNode);
-    TKSCOPE::TYPE  ParseFlowFor(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowWhile(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseFlowDoWhile(const NameContext& sParentSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    TKSCOPE::TYPE  ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, SYNTAXNODE::GLOB* pMembers, SYNTAXNODE::GLOB* pDefinitions, int* pSignatures, int* pDefinition);
+    GXBOOL  TryKeywords(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDest, TKSCOPE::TYPE* parse_end);
+    TKSCOPE::TYPE  ParseFlowIf(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc, GXBOOL bElseIf);
+    TKSCOPE::TYPE  MakeFlowForScope(const TKSCOPE& scope, TKSCOPE* pInit, TKSCOPE* pCond, TKSCOPE* pIter, TKSCOPE* pBlock, GLOB* pBlockNode);
+    TKSCOPE::TYPE  ParseFlowFor(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowWhile(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowDoWhile(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc);
+    TKSCOPE::TYPE  ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDesc);
+    TKSCOPE::TYPE  ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, int* pSignatures, int* pDefinition);
 
     //const TYPEDESC* GetMember(const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
     //VALUE::State CalcuateConstantValue(VALUE& value_out, const NameContext& sNameSet, const SYNTAXNODE::GLOB* pGlob);
@@ -580,7 +579,7 @@ namespace UVShader
 
     void VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const;
     void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
-    void OutputErrorW(const SYNTAXNODE::GLOB& glob, GXUINT code, ...) const;
+    void OutputErrorW(const GLOB& glob, GXUINT code, ...) const;
     void OutputErrorW(const SYNTAXNODE* pNode, GXUINT code, ...) const;
     void OutputErrorW(const TOKEN& token, GXUINT code, ...) const;
     void OutputErrorW(const TOKEN* pToken, GXUINT code, ...) const;
@@ -592,7 +591,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
     const TYPEDESC* InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
-    const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE::GLOB& sGlob);
+    const TYPEDESC* InferType(const NameContext& sNameSet, const GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
@@ -602,7 +601,7 @@ namespace UVShader
     const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);
 #endif
 
-    const TYPEDESC* InferRightValueType2(NameContext& sNameSet, const SYNTAXNODE::GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    const TYPEDESC* InferRightValueType2(NameContext& sNameSet, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
@@ -615,25 +614,27 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
     //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
-    const TOKEN* GetVariableWithoutSeamantic(const SYNTAXNODE::GLOB& glob);
-    const SYNTAXNODE* GetVariableArrayWithoutSeamantic(const SYNTAXNODE::GLOB& glob);
+    const TOKEN* GetVariableWithoutSeamantic(const GLOB& glob);
+    const SYNTAXNODE* GetVariableArrayWithoutSeamantic(const GLOB& glob);
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
 
-    GXBOOL Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const SYNTAXNODE::GLOB& second_glob, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
+    GXBOOL Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
     GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
     GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
     GXBOOL Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode);
-    const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const SYNTAXNODE::GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
-    //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const SYNTAXNODE::GLOB& right_glob);
+    const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
+    //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const GLOB& right_glob);
 #endif
 
-    void DbgBreak(const SYNTAXNODE::GLOB& glob);
+    VALUE::State CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob);
+
+    void DbgBreak(const GLOB& glob);
     void DbgBreak(const SYNTAXNODE* pNode);
     void DbgBreak(const TOKEN* pToken);
-    void DbgAssert(b32 bConditional, const SYNTAXNODE::GLOB& glob);
+    void DbgAssert(b32 bConditional, const GLOB& glob);
     void DbgAssert(b32 bConditional, const TOKEN& token);
 
     void SetTokenPhonyString(int index, const clStringA& str);

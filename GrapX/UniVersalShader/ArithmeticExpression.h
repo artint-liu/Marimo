@@ -215,7 +215,7 @@ namespace UVShader
       State_OK = 0,
       State_Identifier    = 0x00000001, // 标识符
       State_Call          = 0x00000002, // 函数调用
-      State_UnknownOpcode = 0x00000004, // 无法识别的操作符
+      State_UnknownOpcode = 0x00000004, // 无法识别的操作符 FIXME: 这是错误消息？
       State_Truncation    = 0x00000008, // 类型被截断
       State_LoseOfData    = 0x00000010, // 类型转换可能丢失是数据
 
@@ -400,6 +400,7 @@ namespace UVShader
     typedef cllist<iterator> IterList;
     typedef CTokens::T_LPCSTR T_LPCSTR;
     typedef CTokens::TChar    TChar;
+    typedef SYNTAXNODE::GLOB  GLOB;
     static const int c_nMaxErrorCount = 100;
     static const int c_nMaxSessionError = 4;
 
@@ -561,14 +562,14 @@ namespace UVShader
     void    InitTokenScope(TKSCOPE& scope, GXUINT index, b32 bHasBracket) const;
     GXBOOL  MarryBracket(PairStack* sStack, TOKEN& token, GXBOOL bSilent);
     GXBOOL  IsArrayList(const TOKEN& token);
-    GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
-    GXBOOL  MakeSyntaxNode(SYNTAXNODE::GLOB* pDest, SYNTAXNODE::MODE mode, SYNTAXNODE::GLOB* pOperandA, SYNTAXNODE::GLOB* pOperandB);
-    GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, SYNTAXNODE::GLOB* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
+    GXBOOL  MakeSyntaxNode(GLOB* pDest, SYNTAXNODE::MODE mode, const TOKEN* pOpcode, GLOB* pOperandA, GLOB* pOperandB);
+    GXBOOL  MakeSyntaxNode(GLOB* pDest, SYNTAXNODE::MODE mode, GLOB* pOperandA, GLOB* pOperandB);
+    GXBOOL  MakeInstruction(int depth, const TOKEN* pOpcode, int nMinPrecedence, const TKSCOPE* pScope, GLOB* pParent, int nMiddle); // nMiddle是把RTSCOPE分成两个RTSCOPE的那个索引
     GXBOOL  IsLikeTypeCast(const TKSCOPE& scope, TKSCOPE::TYPE i);
 
-    GXBOOL  ParseFunctionCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    GXBOOL  ParseTypeCast(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    GXBOOL  ParseFunctionSubscriptCall(const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
+    GXBOOL  ParseFunctionCall(const TKSCOPE& scope, GLOB* pDesc);
+    GXBOOL  ParseTypeCast(const TKSCOPE& scope, GLOB* pDesc);
+    GXBOOL  ParseFunctionSubscriptCall(const TKSCOPE& scope, GLOB* pDesc);
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
     TKSCOPE::TYPE  GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence);
@@ -586,15 +587,15 @@ namespace UVShader
 
     //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
     //SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
-    const SYNTAXNODE* TryGetNode        (const SYNTAXNODE::GLOB* pDesc) const; // TODO: 修改所属类
-    SYNTAXNODE::MODE  TryGetNodeMode    (const SYNTAXNODE::GLOB* pDesc) const; // TODO: 修改所属类
+    const SYNTAXNODE* TryGetNode        (const GLOB* pDesc) const; // TODO: 修改所属类
+    SYNTAXNODE::MODE  TryGetNodeMode    (const GLOB* pDesc) const; // TODO: 修改所属类
 
     clsize              EstimateForTokensCount  () const;   // 从Stream的字符数估计Token的数量
     //clsize              GenerateTokens          ();
     const TOKEN::Array* GetTokensArray          () const;
 
-    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc);
-    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, SYNTAXNODE::GLOB* pDesc, int nMinPrecedence); // 递归函数
+    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc);
+    GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence); // 递归函数
 
     GXBOOL DbgHasError(int errcode) const;
     size_t DbgErrorCount() const;
