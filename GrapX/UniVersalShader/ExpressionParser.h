@@ -620,7 +620,7 @@ namespace UVShader
 
     GXBOOL Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
     GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
-    GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
+    //GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
@@ -628,6 +628,8 @@ namespace UVShader
     const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const GLOB& right_glob);
 #endif
+
+    void SetRepalcedValue(GLOB& glob, const VALUE& value);
 
     VALUE::State CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob);
 
@@ -654,6 +656,7 @@ namespace UVShader
 
   protected:
     typedef clmap<clStringW, clBuffer*> FileDict;
+    typedef clmap<const void*, VALUE> ValueDict;
     GXDWORD             m_dwState;          // 内部状态, 参考RTState
     CodeParser*         m_pParent;
     TypeSet             m_TypeSet;
@@ -674,6 +677,7 @@ namespace UVShader
     //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // 宏展开流
     NameContext         m_GlobalSet;
+    ValueDict           m_ValueDict;        // 常量表达式可以直接替换成数字的
 
   public:
     CodeParser();
@@ -685,6 +689,7 @@ namespace UVShader
 
     const StatementArray& GetStatements         () const;
     void                Invoke                  (GXLPCSTR szFunc, GXLPCSTR szArguments);
+    void                GetRepalcedValue        (VALUE& value, const GLOB& glob) const;
 
     static void DbgDumpSyntaxTree(clStringArrayA* pArray, const SYNTAXNODE* pNode, int precedence, clStringA* pStr = NULL, int depth = 0);
 

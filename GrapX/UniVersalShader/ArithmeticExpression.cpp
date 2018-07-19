@@ -928,10 +928,13 @@ namespace UVShader
             ASSERT(token == ':'); // 目前只有这个
             token.SetArithOperatorInfo(s_semantic);
           }
-          else if(_CL_NOT_(bSilent)){
-            // ERROR: 括号不匹配
-            clStringW str((clStringW::TChar)c.chOpen, 1);
-            m_pMsg->WriteErrorW(TRUE, token.offset(), UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), str.CStr());
+          else {
+            if(_CL_NOT_(bSilent)) {
+              // ERROR: 括号不匹配
+              clStringW str((clStringW::TChar)c.chOpen, 1);
+              m_pMsg->WriteErrorW(TRUE, token.offset(), UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), str.CStr());
+            }
+            token.type = TOKEN::TokenType_Bracket;
           }
           break;
         }
@@ -945,6 +948,7 @@ namespace UVShader
 
       // ?: 操作符precedence不为0，拥有自己的优先级；其他括号我们标记为括号
       if(token.precedence == 0) {
+        token.type = TOKEN::TokenType_Bracket;
         token.precedence = TOKEN::ID_BRACE;
       }
 
@@ -1349,6 +1353,9 @@ namespace UVShader
     else if(type == Rank_Double) {
       state = CalculateT(fValue64, token, fValue64, second.fValue64);
     }
+    else if(type == Rank_Float) {
+      state = CalculateT(fValue, token, fValue, second.fValue);
+    }
     else if(type == Rank_Unsigned) {
       state = CalculateT(uValue, token, uValue, second.uValue);
     }
@@ -1379,6 +1386,9 @@ namespace UVShader
       break;
     case Rank_Unsigned64:
       str.AppendUInt64(uValue64);
+      break;
+    case Rank_Float:
+      str.AppendFloat(fValue);
       break;
     case Rank_Double:
       str.AppendFloat((float)fValue64);
@@ -1695,13 +1705,15 @@ namespace UVShader
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
     marker = 0;
     length = 0;
-    type = TokenType_Undefine;
+    type   = TokenType_Identifier;
     bPhony = 0;
   }
 
   void TOKEN::Set(clstd::StringSetA& sStrSet, const clStringA& str)
   {
     ASSERT(str.IsNotEmpty());
+    ASSERT(type == TokenType_String || operator==("__LINE__"));
+
 #ifdef ENABLE_STRINGED_SYMBOL
     symbol = str;
 #endif // #ifdef ENABLE_STRINGED_SYMBOL
@@ -1714,6 +1726,8 @@ namespace UVShader
   void TOKEN::SetPhonyString(T_LPCSTR szText, size_t len)
   {
     ASSERT(szText != NULL && length > 0);
+    ASSERT(type == TokenType_String || operator==("true") || operator==("false"));
+
 #ifdef ENABLE_STRINGED_SYMBOL
     symbol.Clear();
     symbol.Append(szText, length);
@@ -1797,7 +1811,10 @@ namespace UVShader
 
   b32 TOKEN::IsIdentifier() const
   {
+    // TODO: 断言验证type与marker内容的一致性
+    // TODO: 以后可能会简化这个判断改为直接返回type
     if(length < 1) {
+      ASSERT(type != TokenType_Identifier);
       return FALSE;
     }
 
@@ -1805,6 +1822,7 @@ namespace UVShader
       (marker[0] >= 'A' && marker[0] <= 'Z') ||
       (marker[0] >= 'a' && marker[0] <= 'z') ))
     {
+      ASSERT(type != TokenType_Identifier);
       return FALSE;
     }
     
@@ -1815,9 +1833,11 @@ namespace UVShader
         (marker[0] >= 'a' && marker[0] <= 'z') ||
         (marker[0] >= '0' && marker[0] <= '9') ))
       {
+        ASSERT(type != TokenType_Identifier);
         return FALSE;
       }
     }
+    ASSERT(type == TokenType_Identifier || type == TokenType_FormalParams);
     return TRUE;
   }
 
@@ -1835,28 +1855,26 @@ namespace UVShader
     return CTokens::iterator::offset();
   }
 
+  b32 TOKEN::HasReplacedValue() const
+  {
+    return (bPhony && type == TokenType_Identifier);
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   GXBOOL SYNTAXNODE::GLOB::IsToken() const
   {
-    return pNode && pNode->magic != FLAG_OPERAND_MAGIC;
+    return (pNode && (pNode->magic & FLAG_OPERAND_MAGIC_REPLACED) != FLAG_OPERAND_MAGIC_REPLACED);
   }
 
   GXBOOL SYNTAXNODE::GLOB::IsNode() const
   {
-    return pNode && pNode->magic == FLAG_OPERAND_MAGIC;
+    return (pNode && (pNode->magic & FLAG_OPERAND_MAGIC_REPLACED) == FLAG_OPERAND_MAGIC_REPLACED);
   }
 
-  SYNTAXNODE::FLAGS SYNTAXNODE::GLOB::GetType() const
+  GXBOOL SYNTAXNODE::GLOB::IsReplacedNode() const
   {
-    if(pNode) {
-      return (pNode->magic == FLAG_OPERAND_MAGIC)
-        ? FLAG_OPERAND_IS_NODE
-        : FLAG_OPERAND_IS_TOKEN;
-    }
-    else {
-      return FLAG_OPERAND_UNDEFINED;
-    }
+    return (pNode && (pNode->magic == FLAG_OPERAND_MAGIC_REPLACED));
   }
 
   GXBOOL SYNTAXNODE::GLOB::CompareAsToken(TOKEN::T_LPCSTR str) const
@@ -1903,11 +1921,11 @@ namespace UVShader
   void RecursiveNode(ArithmeticExpression* pParser, SYNTAXNODE_T* pNode, std::function<GXBOOL(SYNTAXNODE_T*, int)> func, int depth /*= 0*/) // 广度优先递归
   {
     if(func(pNode, depth)) {
-      if(pNode->Operand[0].GetType() == SYNTAXNODE_T::FLAG_OPERAND_IS_NODE) {
+      if(pNode->Operand[0].IsNode()) {
         RecursiveNode(pParser, (SYNTAXNODE_T*)pNode->Operand[0].ptr, func, depth + 1);
       }
 
-      if(pNode->Operand[1].GetType() == SYNTAXNODE_T::FLAG_OPERAND_IS_NODE) {
+      if(pNode->Operand[1].IsNode()) {
         RecursiveNode(pParser, (SYNTAXNODE_T*)pNode->Operand[1].ptr, func,
           pNode->mode == SYNTAXNODE_T::MODE_Chain ? depth : depth + 1); // next chain 不增加深度
       }

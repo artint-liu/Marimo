@@ -75,7 +75,7 @@ namespace UVShader
 
     enum Type
     {
-      TokenType_Undefine = 0,
+      TokenType_Identifier = 0,
       TokenType_String = 1,
       TokenType_FormalParams = 2,  // 宏的形参
 
@@ -84,7 +84,9 @@ namespace UVShader
       TokenType_Real,    // 浮点数, float, double
       TokenType_LastNumeric,
 
-      TokenType_Name = 20,
+      //TokenType_Name = 20,
+      TokenType_Bracket = 20, // 括号
+      TokenType_Semicolon,    // 分号
       TokenType_Operator = 30,
     };
 
@@ -133,6 +135,7 @@ namespace UVShader
 
     b32 IsIdentifier() const; // 标识符, 字母大小写, 下划线开头, 本体是字母数字, 下划线的字符串
     b32 IsNumeric() const;
+    b32 HasReplacedValue() const;
 
     //TOKEN& operator++();
     //b32  operator!=(const iterator& it) const;
@@ -283,9 +286,10 @@ namespace UVShader
     enum FLAGS
     {
       FLAG_OPERAND_MAGIC = 0xffff,
+      FLAG_OPERAND_MAGIC_REPLACED = 0xfffe,
       FLAG_OPERAND_UNDEFINED = 0,
-      FLAG_OPERAND_IS_NODE,
-      FLAG_OPERAND_IS_TOKEN,
+      //FLAG_OPERAND_IS_NODE,
+      //FLAG_OPERAND_IS_TOKEN,
     };
 
     enum MODE
@@ -322,7 +326,7 @@ namespace UVShader
     const static int s_NumOfOperand = 2;
 
     MODE    mode : 16;
-    GXDWORD magic : 16; // 0xffff
+    GXDWORD magic : 16; // 0xffff, 0xfffe
     const TOKEN* pOpcode;
 #ifdef ENABLE_SYNTAX_NODE_ID
     size_t  id;
@@ -335,7 +339,9 @@ namespace UVShader
 
       GXBOOL IsToken() const;
       GXBOOL IsNode() const;
-      FLAGS GetType() const;
+      GXBOOL IsReplacedNode() const;
+
+      //FLAGS GetType() const;
 
       GXBOOL CompareAsToken(TOKEN::T_LPCSTR str) const; // 以token方式比较，如果不是token，则返回FALSE
       GXBOOL CompareAsToken(TOKEN::TChar c) const;

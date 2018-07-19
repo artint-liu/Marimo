@@ -335,6 +335,7 @@ namespace UVShader
 
   void CodeParser::Cleanup()
   {
+    m_ValueDict.clear();
     m_PhonyTokenDict.clear();
     m_GlobalSet.Cleanup();
     m_errorlist.clear();
@@ -592,6 +593,9 @@ namespace UVShader
             m_aTokens.back().type = TOKEN::TokenType_Integer;
             SetTokenPhonyString(m_aTokens.size() - 1, "1");
           }
+          else if(*it == ';') {
+            m_aTokens.back().type = TOKEN::TokenType_Semicolon;
+          }
         }
       }
 
@@ -707,6 +711,45 @@ namespace UVShader
       return TRUE;
     }
     return FALSE;
+  }
+
+  void CodeParser::SetRepalcedValue(GLOB& glob, const VALUE& value)
+  {
+    if(glob.IsToken()) {
+      if(glob.pTokn->type > TOKEN::TokenType_FirstNumeric && glob.pTokn->type < TOKEN::TokenType_LastNumeric) {
+        return;
+      }
+      ASSERT(glob.pTokn->type != TOKEN::TokenType_String);
+      ASSERT(glob.pTokn->bPhony == FALSE);
+      reinterpret_cast<TOKEN*>(reinterpret_cast<size_t>(glob.pTokn))->bPhony = TRUE; // 强制修改
+      m_ValueDict.insert(clmake_pair(glob.pTokn, value));
+    }
+    else if(glob.IsNode()) {
+      ASSERT(glob.pNode->magic == SYNTAXNODE::FLAG_OPERAND_MAGIC);
+      glob.pNode->magic = SYNTAXNODE::FLAG_OPERAND_MAGIC_REPLACED;
+      m_ValueDict.insert(clmake_pair(glob.pNode, value));
+    }
+    else {
+      CLBREAK;
+    }
+  }
+
+  void CodeParser::GetRepalcedValue(VALUE& value, const GLOB& glob) const
+  {
+    if(glob.IsToken()) {
+      ASSERT(glob.pTokn->HasReplacedValue());
+      auto it = m_ValueDict.find(glob.pTokn);
+      ASSERT(it != m_ValueDict.end()); // 标记了不可能查不到
+      value = it->second;
+    }
+    else if(glob.IsNode()) {
+      ASSERT(glob.pNode->magic == SYNTAXNODE::FLAG_OPERAND_MAGIC_REPLACED);
+      auto it = m_ValueDict.find(glob.pNode);
+      ASSERT(it != m_ValueDict.end()); // 标记了不可能查不到
+      value = it->second;
+    }
+    else {
+    }
   }
 
   // 计算常量定义中的值
@@ -1952,11 +1995,11 @@ NOT_INC_P:
     for(int i = 0; i < 2; i++)
     {
       if(pNode->Operand[i].pTokn) {
-        const auto flag = pNode->Operand[i].GetType();
-        if(flag == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+        //const auto flag = pNode->Operand[i].GetType();
+        if(pNode->Operand[i].IsToken()) {
           str[i] = pNode->Operand[i].pTokn->ToString();
         }
-        else if(flag == SYNTAXNODE::FLAG_OPERAND_IS_NODE) {
+        else if(pNode->Operand[i].IsNode()) {
           if(depth == 0) {
             DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i], 0);
           }
@@ -3279,9 +3322,9 @@ NOT_INC_P:
         ASSERT(pNode->mode == SYNTAXNODE::MODE_FunctionCall ||
           pNode->mode == SYNTAXNODE::MODE_Definition);
 
-        ASSERT(pNode->Operand[0].GetType() == SYNTAXNODE::FLAG_OPERAND_IS_TOKEN);
+        ASSERT(pNode->Operand[0].IsToken());
 
-        if(pNode->Operand[1].GetType() != SYNTAXNODE::FLAG_OPERAND_IS_TOKEN) {
+        if( ! pNode->Operand[1].IsToken()) {
           OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2004, "应输入“defined(id)”"));
           return FALSE;
         }
@@ -3295,7 +3338,7 @@ NOT_INC_P:
       {
         for(int i = 0; i < 2; i++) {
           if(param[i].v.rank == VALUE::Rank_Undefined && param[i].pToken) {
-            if(param[i].pToken->type == TOKEN::TokenType_Undefine)
+            if(param[i].pToken->type == TOKEN::TokenType_Identifier)
             {
               const MACRO* pMacro = FindMacro(*param[i].pToken);
               if(pMacro) {
@@ -3968,6 +4011,7 @@ NOT_INC_P:
           // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
           if(state == VALUE::State_OK) {
             pType = sNameSet.RegisterVariable(strType, ptkVar, &value, &second_glob.pNode->Operand[1]);
+            SetRepalcedValue(second_glob.pNode->Operand[1], value);
           }
           else {
             pType = sNameSet.RegisterVariable(strType, ptkVar, NULL, &second_glob.pNode->Operand[1]);
@@ -5865,7 +5909,7 @@ NOT_INC_P:
     auto it = m_VariableMap.find(TokenPtr(ptkName));
     if(it == m_VariableMap.end()) {
       if(m_pParent) {
-        return GetVariableValue(value, ptkName);
+        return m_pParent->GetVariableValue(value, ptkName);
       }
       value.rank = VALUE::Rank_BadValue;
       return value;
