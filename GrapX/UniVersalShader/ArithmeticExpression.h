@@ -297,12 +297,14 @@ namespace UVShader
       MODE_Undefined,
       MODE_Opcode,              // 操作符 + 操作数 模式: A (操作符) B
       MODE_ArrayAssignment,     // 数组赋值: A={B}; 其它形式赋值属于MODE_Opcode
+      MODE_InitList,            // 数据初始化列表, {A}, B永远为空
       MODE_FunctionCall,        // 函数调用: A(B)
       MODE_TypeCast,            // 类型转换: (A)B
       MODE_Typedef,             // typedef A B;
       MODE_Subscript,           // 下标: A[B], 方括号内有内容的都认为是下标
       MODE_Subscript0,          // 自适应下标: A[], B永远为空
       MODE_Definition,          // 变量定义: A B
+      MODE_Bracket,             // 空括号"()", "[]", 如果不是独立出现, 通常会被解释为函数和下标
 
       MODE_StructDef,           // 结构定义:
       MODE_Flow_While,          // while(A) {B}

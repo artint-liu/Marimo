@@ -607,7 +607,15 @@ namespace UVShader
 
       ASSERT(*B.pTokn != ';'); // 已经在外部避免了表达式内出现分号
 
-      if(A.pTokn->precedence > 0)
+      if(A.pTokn->precedence == TOKEN::ID_BRACE && A.pTokn->scope == scope.begin + 1) {
+        if(*A.pTokn == '{') {
+          bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_InitList, NULL, NULL);
+        }
+        else {
+          bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Bracket, &A, &B);
+        }
+      }
+      else if(A.pTokn->precedence > 0)
       {
         bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, A.pTokn, NULL, &B);
         DbgDumpScope(A.pTokn->ToString(), TKSCOPE(0,0), TKSCOPE(scope.begin + 1, scope.end));
@@ -637,9 +645,17 @@ namespace UVShader
     else if((front == '(' || front == '[' || front == '{') && front.scope == scope.end - 1)  // 括号内表达式
     {
       // (...) 形式
-      
       ASSERT(m_aTokens[scope.end - 1].scope == scope.begin); // 括号肯定是匹配的
-      return ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+      if(front == '{') {
+        GXBOOL bRet = ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+        if(bRet) {
+          bRet = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_InitList, pDesc, NULL);
+        }
+        return bRet;
+      }
+      else {
+        return ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+      }
     }
     else if(front.IsIdentifier() && m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
     {

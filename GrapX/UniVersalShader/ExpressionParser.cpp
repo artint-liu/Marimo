@@ -713,7 +713,7 @@ namespace UVShader
     return FALSE;
   }
 
-  void CodeParser::SetRepalcedValue(GLOB& glob, const VALUE& value)
+  void CodeParser::SetRepalcedValue(const GLOB& glob, const VALUE& value)
   {
     if(glob.IsToken()) {
       if(glob.pTokn->type > TOKEN::TokenType_FirstNumeric && glob.pTokn->type < TOKEN::TokenType_LastNumeric) {
@@ -2054,24 +2054,49 @@ NOT_INC_P:
       strCommand.AppendFormat("[%s] [%s] [%s]", pNode->pOpcode ? pNode->pOpcode->ToString() : "", str[0], str[1]);
 #endif
 
-      if(pNode->mode == SYNTAXNODE::MODE_Chain) {
-        strCommand.Append("(Chain)");
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Block) {
-        strCommand.Append("(Block)");
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
-        strCommand.Append("(Array)");
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Definition) {
-        strCommand.Append("(definition)");
-      }
     }
     else
     {
       strCommand.Format("[%s] [%s] [%s]", pNode->pOpcode ? pNode->pOpcode->ToString() : "", str[0], str[1]);
     }
 
+    int dots = 40 - (int)strCommand.GetLength();
+    if(pNode->mode == SYNTAXNODE::MODE_Chain) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(Chain)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Block) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(Block)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(Array)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Definition) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(definition)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Subscript) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(subscript)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Subscript0) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(subscript0)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_InitList) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(init list)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Bracket) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(bracket)");
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Opcode) {
+      if(dots > 0) { strCommand.Append('.', dots); }
+      strCommand.Append("(opcode)");
+    }
     if(pArray) {
       pArray->push_back(strCommand);
     }
@@ -2156,12 +2181,21 @@ NOT_INC_P:
       }
       break;
     case SYNTAXNODE::MODE_ArrayAssignment:
-      strOut.Format("%s={%s}", str[0], str[1]);
+      strOut.Format("%s=%s", str[0], str[1]);
       break;
 
     case SYNTAXNODE::MODE_StructDef:
       strOut.Format("struct %s ", str[0]);
       strOut.Append(str[1]);
+      break;
+
+    case SYNTAXNODE::MODE_InitList:
+      ASSERT(pNode->Operand[1].ptr == NULL);
+      strOut.Format("{%s}", str[0]);
+      break;
+
+    case SYNTAXNODE::MODE_Bracket:
+      strOut.Format("%s%s", str[0], str[1]);
       break;
 
     case SYNTAXNODE::MODE_Flow_DoWhile:
@@ -5729,6 +5763,7 @@ NOT_INC_P:
           m_eLastState = State_HashError;
           return NULL;
         }
+        m_pCodeParser->SetRepalcedValue(subscript_glob, value);
         sDimensions.push_back((size_t)value.nValue64);
       }
       else if(state == VALUE::State_SyntaxError)

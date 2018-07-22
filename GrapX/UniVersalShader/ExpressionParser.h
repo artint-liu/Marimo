@@ -629,7 +629,7 @@ namespace UVShader
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const GLOB& right_glob);
 #endif
 
-    void SetRepalcedValue(GLOB& glob, const VALUE& value);
+    void SetRepalcedValue(const GLOB& glob, const VALUE& value);
 
     VALUE::State CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob);
 
