@@ -296,8 +296,8 @@ namespace UVShader
     {
       MODE_Undefined,
       MODE_Opcode,              // 操作符 + 操作数 模式: A (操作符) B
-      MODE_ArrayAssignment,     // 数组赋值: A={B}; 其它形式赋值属于MODE_Opcode
-      MODE_InitList,            // 数据初始化列表, {A}, B永远为空
+      MODE_Assignment,          // 初始化列表赋值: A=B; B应该是MODE_InitList, 其它形式赋值属于MODE_Opcode
+      MODE_InitList,            // 数据初始化列表, {A}; B永远为空
       MODE_FunctionCall,        // 函数调用: A(B)
       MODE_TypeCast,            // 类型转换: (A)B
       MODE_Typedef,             // typedef A B;

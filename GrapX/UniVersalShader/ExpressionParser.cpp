@@ -15,7 +15,7 @@
 #define PARSER_BREAK(_GLOB) DbgBreak(_GLOB)
 #define PARSER_BREAK2(PARSER, _GLOB) PARSER->DbgBreak(_GLOB)
 #define PARSER_ASSERT(_X, _GLOB) DbgAssert(_X, _GLOB)
-#define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler)
+#define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler) // TODO: 改名IS_SCALER_CATE
 #define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
 #define IS_SAMPLER_CATE(_CATE) (\
   _CATE == TYPEDESC::TypeCate_Sampler1D || \
@@ -2069,9 +2069,9 @@ NOT_INC_P:
       if(dots > 0) { strCommand.Append('.', dots); }
       strCommand.Append("(Block)");
     }
-    else if(pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) {
+    else if(pNode->mode == SYNTAXNODE::MODE_Assignment) {
       if(dots > 0) { strCommand.Append('.', dots); }
-      strCommand.Append("(Array)");
+      strCommand.Append("(Assignment)");
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Definition) {
       if(dots > 0) { strCommand.Append('.', dots); }
@@ -2180,7 +2180,7 @@ NOT_INC_P:
         strOut.Format("%s%s%s", str[0], pNode->pOpcode->ToString(), str[1]);
       }
       break;
-    case SYNTAXNODE::MODE_ArrayAssignment:
+    case SYNTAXNODE::MODE_Assignment:
       strOut.Format("%s=%s", str[0], str[1]);
       break;
 
@@ -3816,7 +3816,7 @@ NOT_INC_P:
 
 #ifdef ENABLE_SYNTAX_VERIFY
 
-  const TOKEN* CodeParser::GetVariableWithoutSeamantic(const GLOB& glob)
+  const TOKEN* CodeParser::GetVariableNameWithoutSeamantic(const GLOB& glob)
   {
     // 递归解析带语意的变量定义
     // <variable> [: seamantic1] [: seamantic2] ...
@@ -3828,7 +3828,7 @@ NOT_INC_P:
     {
       if(glob.pNode->CompareOpcode(':'))
       {
-        return GetVariableWithoutSeamantic(glob.pNode->Operand[0]);
+        return GetVariableNameWithoutSeamantic(glob.pNode->Operand[0]);
       }
       else
       {
@@ -3840,30 +3840,32 @@ NOT_INC_P:
   }
 
   // 获得去除语意的数组变量
-  const SYNTAXNODE* CodeParser::GetVariableArrayWithoutSeamantic(const GLOB& glob)
+  const SYNTAXNODE::GLOB* CodeParser::GetVariableDeclWithoutSeamantic(const GLOB& glob)
   {
     // 递归解析带语意的变量定义
     // <variable>["[m]"]["[n]"] [: seamantic1] [: seamantic2] ...
     if(glob.IsToken())
     {
-      PARSER_BREAK(glob);
+      // 初始化列表不一定赋值给数组: float3 v = {1,1,1};
+      return &glob;
     }
     else if(glob.IsNode())
     {
       if(glob.pNode->mode == SYNTAXNODE::MODE_Subscript0 ||
         glob.pNode->mode == SYNTAXNODE::MODE_Subscript)
       {
-        return glob.pNode;
+        return &glob;
       }
       else if(glob.pNode->CompareOpcode(':'))
       {
-        return GetVariableArrayWithoutSeamantic(glob.pNode->Operand[0]);
+        return GetVariableDeclWithoutSeamantic(glob.pNode->Operand[0]);
       }
       else
       {
         PARSER_BREAK(glob);
       }
     }
+    PARSER_NOTIMPLEMENT;
     CLBREAK;
     return NULL;
   }
@@ -3993,7 +3995,7 @@ NOT_INC_P:
       else if(second_glob.pNode->CompareOpcode(':')) // 语义
       {
         //ptkVar = &second_glob.pNode->GetAnyTokenAB();
-        ptkVar = GetVariableWithoutSeamantic(second_glob);
+        ptkVar = GetVariableNameWithoutSeamantic(second_glob);
         if(ptkVar)
         {
           pType = sNameSet.RegisterVariable(strType, ptkVar);
@@ -4002,11 +4004,40 @@ NOT_INC_P:
         }
         return FALSE;
       }
-      else if(second_glob.pNode->mode == SYNTAXNODE::MODE_ArrayAssignment) // 数组赋值
+      else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Assignment) // 赋值
       {
-        pRightTypeDesc = InferRightValueType2(sNameSet, second_glob.pNode->Operand[1], ptkVar);
-        const SYNTAXNODE* pVarableArray = GetVariableArrayWithoutSeamantic(second_glob.pNode->Operand[0]);
-        pType = sNameSet.RegisterMultidimVariable(strType, pVarableArray);
+        // 初始化列表不一定赋值给数组: float3 v = {1,1,1};
+        // [Doc\变量定义]使用初始化列表赋值的变量，左值先于右值检查
+        // int p = 0;
+        // void func_0() {
+        //   float p = p + 1; // 右值的p是int类型的全局变量
+        // }
+        // void func_1() {
+        //   float p[] = {p + 1}; // 错误，右值的p是float[]
+        // }
+        // [/Doc]
+
+
+        const GLOB& rInitList = second_glob.pNode->Operand[1];
+        if(rInitList.IsNode() == FALSE || rInitList.pNode->mode != SYNTAXNODE::MODE_InitList) {
+          OutputErrorW(tkType, UVS_EXPORT_TEXT(5048, "预期应该是初始化列表"));
+          return FALSE;
+        }
+        else if(rInitList.pNode->Operand[0].ptr == NULL) {
+          OutputErrorW(tkType, UVS_EXPORT_TEXT(5049, "初始化列表不应该为空"));
+          return FALSE;
+        }
+
+        const GLOB* pVarableDecl = GetVariableDeclWithoutSeamantic(second_glob.pNode->Operand[0]);
+
+        if(pVarableDecl)
+        {
+          pType = sNameSet.RegisterVariable(strType, pVarableDecl->pTokn);
+        }
+
+        const GLOB& right_glob = second_glob.pNode->Operand[1];
+        pRightTypeDesc = InferRightValueType(sNameSet, pType, right_glob, ptkVar);
+
 
         if(pRightTypeDesc == NULL) {
           // 右侧类型推导失败，注册变量名（RegisterVariable）后再退出，
@@ -4031,8 +4062,8 @@ NOT_INC_P:
 
         const size_t nErrorCount = DbgErrorCount();
 
-        pRightTypeDesc = InferRightValueType2(sNameSet, second_glob.pNode->Operand[1], ptkVar);
-        ptkVar = GetVariableWithoutSeamantic(second_glob.pNode->Operand[0]);
+        pRightTypeDesc = InferRightValueType(sNameSet, NULL, second_glob.pNode->Operand[1], ptkVar);
+        ptkVar = GetVariableNameWithoutSeamantic(second_glob.pNode->Operand[0]);
 
         if(pRightTypeDesc == NULL || ptkVar == NULL) {
           // InferRightValueType2和GetVariableWithoutSeamantic内部应该输出错误
@@ -4056,11 +4087,11 @@ NOT_INC_P:
           pType = sNameSet.RegisterVariable(strType, ptkVar);
         }
 
-        if(pRightTypeDesc == NULL) {
-          // 右侧类型推导失败，注册变量名（RegisterVariable）后再退出，
-          // 这样后面就不会报找不到变量的错误
-          return FALSE;
-        }
+        //if(pRightTypeDesc == NULL) {
+        //  // 右侧类型推导失败，注册变量名（RegisterVariable）后再退出，
+        //  // 这样后面就不会报找不到变量的错误
+        //  return FALSE;
+        //}
 
         ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
       }
@@ -4173,7 +4204,7 @@ NOT_INC_P:
         }
         else if(pNode->Operand[0].IsToken())
         {
-          if(InferRightValueType2(sNameContext, pNode->Operand[0], pNode->pOpcode) == NULL)
+          if(InferRightValueType(sNameContext, NULL, pNode->Operand[0], pNode->pOpcode) == NULL)
           {
             result = FALSE;
           }
@@ -4191,7 +4222,7 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
       {
-        const TYPEDESC* pTypeDesc = InferRightValueType2(sNameContext, pNode->Operand[0], NULL);
+        const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, NULL, pNode->Operand[0], NULL);
         result = result && (pTypeDesc != NULL);
         ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
         return TRUE;
@@ -4267,7 +4298,7 @@ NOT_INC_P:
             // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
             // TODO: 需要验证左值
             const size_t nErrorCount = DbgErrorCount();
-            const TYPEDESC* pRightTypeDesc = InferRightValueType2(sNameContext, pNode->Operand[1], pNode->pOpcode);
+            const TYPEDESC* pRightTypeDesc = InferRightValueType(sNameContext, NULL, pNode->Operand[1], pNode->pOpcode);
             const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
             
             if(pRightTypeDesc == NULL || pLeftTypeDesc == NULL)
@@ -4296,7 +4327,7 @@ NOT_INC_P:
             {
               if(pNode->Operand[i].ptr)
               {
-                if(InferRightValueType2(sNameContext, pNode->Operand[i], pNode->pOpcode) == NULL)
+                if(InferRightValueType(sNameContext, NULL, pNode->Operand[i], pNode->pOpcode) == NULL)
                 {
                   result = FALSE;
                 }
@@ -4306,7 +4337,7 @@ NOT_INC_P:
           }
           else
           {
-            if(InferRightValueType2(sNameContext, pNode->Operand[1], pNode->pOpcode) == NULL)
+            if(InferRightValueType(sNameContext, NULL, pNode->Operand[1], pNode->pOpcode) == NULL)
             {
               result = FALSE;
             }
@@ -4410,7 +4441,7 @@ NOT_INC_P:
           else if(second_glob.pNode->CompareOpcode(':')) // 语义
           {
             //ptkVar = &second_glob.pNode->GetAnyTokenAB();
-            ptkVar = GetVariableWithoutSeamantic(second_glob);
+            ptkVar = GetVariableNameWithoutSeamantic(second_glob);
             if(ptkVar)
             {
               pType = pStructMemberSet->RegisterVariable(strType, ptkVar);
@@ -4819,6 +4850,10 @@ NOT_INC_P:
       }
       return NULL;
     }
+    else if(pNode->mode == SYNTAXNODE::MODE_InitList)
+    {
+      CLBREAK;
+    }
     else if(pNode->pOpcode)
     {
       if(pNode->pOpcode->unary)
@@ -4924,6 +4959,85 @@ NOT_INC_P:
     return NULL;
   }
   
+  const TYPEDESC* CodeParser::InferInitList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const SYNTAXNODE* pNode)
+  {
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_InitList); // 外部保证
+    // tkBaseType 是基础类型标记，如定义“float2 a[3][2] = {...}”, 基础类型就是“float2”
+
+    SYNTAXNODE::GlobList sExprList;
+    if(BreakComma(sExprList, pNode->Operand[0]).empty()) {
+      return sNameSet.GetType(STR_VOID); // void type
+    }
+
+    const TYPEDESC* pListType = NULL;
+    for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
+    {
+      const TYPEDESC* pElementType = NULL;
+      if(it->IsNode() && it->pNode->mode == SYNTAXNODE::MODE_InitList) {
+        pElementType = InferInitList(sNameSet, pLeftType, it->pNode);
+      }
+      else {
+        pElementType = InferType(sNameSet, *it);
+      }
+
+      if(pElementType == NULL) {
+        return NULL; // 出现错误
+      }
+      else if(pListType == NULL) {
+        pListType = pElementType;
+      }
+      else if(pElementType->name == STR_VOID) {
+        continue; // "{}" 直接跳过
+      }
+      else if(pListType != pElementType) {
+        pListType = TryExtendType(pListType, pElementType);
+      }
+      ASSERT(pListType == pElementType);
+    }
+
+    //if(bElement && sExprList.size() == 1) {
+    //  return pListType;
+    //}
+
+    // pListType & sExprList.size() 与 tkBaseType 尝试匹配
+    if(IS_NUMERIC_CATE(pListType->cate) && (pLeftType->cate == TYPEDESC::TypeCate_Vector))
+    {
+      // "float" "2" -> "float3"
+      // "float" "3" -> "float3"
+      int R, C;
+      pLeftType->Resolve(R, C);
+      //const TYPEDESC* pCompType = sNameSet.GetType(pLeftType->pDesc->component_type);
+      ASSERT(pLeftType->pElementType != NULL);
+      if(pListType->pDesc->rank > pLeftType->pElementType->pDesc->rank)
+      {
+        // TODO: 数据类型收窄警告？
+      }
+
+      if(sExprList.size() <= (size_t)R)
+      {
+        return pLeftType;
+      }
+      CLBREAK;
+    }
+    else if(pListType->cate == TYPEDESC::TypeCate_Vector && pLeftType->cate == TYPEDESC::TypeCate_Vector)
+    {
+      if(pListType == pLeftType || pListType->name == pLeftType->name) {
+        //return sNameSet.RegisterArrayType(pBaseType, sExprList.size());
+      }
+      CLNOP
+    }
+    else
+    {
+      CLBREAK;
+    }
+    return pListType;
+  }
+
+  const TYPEDESC* CodeParser::TryExtendType(const TYPEDESC* pTypeA, const TYPEDESC* pTypeB)
+  {
+    return NULL;
+  }
+
   const TYPEDESC* CodeParser::InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.')); // 外部保证
@@ -5054,7 +5168,7 @@ NOT_INC_P:
 
     if(pTypeDesc->cate == TYPEDESC::TypeCate_MultiDim)
     {
-      return pTypeDesc->pNextDim;
+      return pTypeDesc->pElementType;
     }
     else if(IS_STRUCT_CATE(pTypeDesc->cate) && pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
     {
@@ -5107,10 +5221,40 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferRightValueType2(NameContext& sNameSet, const GLOB& right_glob, const TOKEN* pLocation)
+  const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB& right_glob, const TOKEN* pLocation)
   {
     // 这个函数外部不输出 Error/Warning
     ASSERT(right_glob.IsNode() || right_glob.IsToken());
+
+    //ASSERT( // 这两个参数要一致
+    //  (ptkType == NULL && ppMinorType == NULL) ||
+    //  (ptkType != NULL && ppMinorType != NULL));
+
+    if(right_glob.IsNode() && right_glob.pNode->mode == SYNTAXNODE::MODE_InitList)
+    {
+      if(pLeftTypeDesc == NULL) {
+        OutputErrorW(right_glob.GetFrontToken(), UVS_EXPORT_TEXT(5050, "不能使用初始化列表"));
+        return NULL;
+      }
+      else {
+        //const TYPEDESC* pLeftType = sNameSet.GetType(*ptkType);
+        //if(pLeftType == NULL) {
+        //  PARSER_NOTIMPLEMENT;
+        //  return NULL;
+        //}
+        const TYPEDESC* pInitListType = InferInitList(sNameSet, pLeftTypeDesc, right_glob.pNode);
+        //*ppMinorType = InferInitList(sNameSet, pLeftType, right_glob.pNode, TRUE); // 初始化列表推导的次要类型
+        //if(pMajorType == *ppMinorType) {
+        //  *ppMinorType = NULL;
+        //}
+
+        //// 不能出现主类型为空但是副类型有效的情况
+        //ASSERT(pMajorType != NULL ||
+        //  (pMajorType == NULL && *ppMinorType == NULL))
+
+        return pInitListType;
+      }
+    }
 
     const size_t nErrorCount = DbgErrorCount();
     const TYPEDESC* pRightType = InferType(sNameSet, right_glob);
@@ -5356,17 +5500,6 @@ NOT_INC_P:
 
     TYPEDESC td = { TYPEDESC::TypeCate_Empty };
 
-    // 内置结构体
-    for(int i = 0; s_aIntrinsicStruct[i].name; i++)
-    {
-      //if(strType == s_aIntrinsicStruct[i].name) {
-      td.cate = static_cast<TYPEDESC::TypeCate>(s_aIntrinsicStruct[i].cate);
-      td.name = s_aIntrinsicStruct[i].name;
-      td.pDesc = &s_aIntrinsicStruct[i];
-      m_TypeMap.insert(clmake_pair(td.name, td));
-      //}
-    }
-
     // 内置基础类型
     for(int i = 0; s_aBaseType[i].name; i++)
     {
@@ -5384,13 +5517,27 @@ NOT_INC_P:
       m_TypeMap.insert(clmake_pair(td.name, td));
     }
 
+    // 内置结构体
+    for(int i = 0; s_aIntrinsicStruct[i].name; i++)
+    {
+      //if(strType == s_aIntrinsicStruct[i].name) {
+      td.cate = static_cast<TYPEDESC::TypeCate>(s_aIntrinsicStruct[i].cate);
+      td.name = s_aIntrinsicStruct[i].name;
+      td.pDesc = &s_aIntrinsicStruct[i];
+      auto it = m_TypeMap.find(td.pDesc->component_type);
+      ASSERT(it != m_TypeMap.end()); // 向量矩阵一定有元素类型
+      td.pElementType = &it->second;
+      m_TypeMap.insert(clmake_pair(td.name, td));
+      //}
+    }
+
     // void
     td.name = STR_VOID;
     td.cate = TYPEDESC::TypeCate_Void;
     td.pDesc = NULL;
     td.pMemberNode = NULL;
     td.sDimensions.clear();
-    td.pNextDim = NULL;
+    td.pElementType = NULL;
     m_TypeMap.insert(clmake_pair(td.name, td));
 
     // 字符串类型
@@ -5707,13 +5854,24 @@ NOT_INC_P:
     return State_DuplicatedVariable;
   }
 
-  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue, const GLOB* pValueExprGlob)
+  {
+    if(pVariableDeclGlob->IsToken()) {
+      return RegisterVariable(strType, pVariableDeclGlob->pTokn, pConstValue, pValueExprGlob);
+    }
+    else if(pValueExprGlob->IsNode()) {
+      return RegisterMultidimVariable(strType, pVariableDeclGlob->pNode);
+    }
+    return NULL;
+  }
+
+  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
   {
     ASSERT(strType.IsIdentifier());
     // PS: 返回值似乎没什么用
     const TYPEDESC* pTypeDesc = NULL;
     VARIDESC* pVariDesc = NULL;
-    m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptrVariable, pConstValue, pValueExprGlob);
+    m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable, pConstValue, pValueExprGlob);
     return pTypeDesc;
   }
 
@@ -5809,17 +5967,17 @@ NOT_INC_P:
 
           TYPEDESC td = {TYPEDESC::TypeCate_MultiDim};
           td.name = strType;
-          td.pNextDim = pTypeDesc;
+          td.pElementType = pTypeDesc;
           for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
           {
             td.name.Append('@').AppendInteger32(*it); // int x[2][3][4] 记为"int@4@3@2"
             td.sDimensions.push_back(*it);
 
             auto result = m_TypeMap.insert(clmake_pair(td.name, td));
-            td.pNextDim = &result.first->second;
+            td.pElementType = &result.first->second;
           }
 
-          pVariDesc->pDesc = td.pNextDim;
+          pVariDesc->pDesc = td.pElementType;
           return pTypeDesc;
         }
         return NULL;
@@ -5834,6 +5992,22 @@ NOT_INC_P:
       }
     }
     return NULL;
+  }
+
+  const TYPEDESC* NameContext::RegisterArrayType(const TYPEDESC* pTypeDesc, size_t nDimension)
+  {
+    TYPEDESC td = { TYPEDESC::TypeCate_MultiDim };
+
+    td.name = pTypeDesc->name;
+    td.name.Append('@').AppendInteger32(nDimension); // int x[2][3][4] 记为"int@4@3@2"
+
+    td.sDimensions = pTypeDesc->sDimensions;
+    td.sDimensions.push_back(nDimension);
+
+    td.pElementType = pTypeDesc;
+
+    auto result = m_TypeMap.insert(clmake_pair(td.name, td));
+    return &result.first->second;
   }
 #endif
 

@@ -73,7 +73,7 @@ namespace UVShader
     COMMINTRTYPEDESC* pDesc; // 结构体(内置) 的描述
     const SYNTAXNODE* pMemberNode; // 结构体(用户定义) 的描述
     DimList_T         sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
-    const TYPEDESC*   pNextDim;
+    const TYPEDESC*   pElementType; // float[3][2]的 pElementType=float[2]，float3[2]的pElementType=float3，float3的pElementType=float，只有数学类型才有
 
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
     GXLPCSTR Resolve(int& R, int& C) const;
@@ -226,11 +226,13 @@ namespace UVShader
     VALUE& GetVariableValue(VALUE& value, const TOKEN* ptkName) const;
     const NameContext* GetStructContext(const clStringA& strName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
+    const TYPEDESC* RegisterArrayType(const TYPEDESC* pTypeDesc, size_t nDimension);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
-    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptrVariable, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
 #endif
@@ -594,14 +596,16 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferInitList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const SYNTAXNODE* pNode); // pNode->mode 必须是 MODE_InitList
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);
+    const TYPEDESC* TryExtendType(const TYPEDESC* pTypeA, const TYPEDESC* pTypeB); // 初始化列表：尝试根据两个类型描述扩充为一个更大的类型，如“float2”与“float”扩充为“float2”
 #endif
 
-    const TYPEDESC* InferRightValueType2(NameContext& sNameSet, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    const TYPEDESC* InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
@@ -614,8 +618,8 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
     //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
-    const TOKEN* GetVariableWithoutSeamantic(const GLOB& glob);
-    const SYNTAXNODE* GetVariableArrayWithoutSeamantic(const GLOB& glob);
+    const TOKEN* GetVariableNameWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量名，如“vColor”
+    const SYNTAXNODE::GLOB* GetVariableDeclWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量声明，可能含有下标，如“vColor[2][3]”
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
 
     GXBOOL Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);

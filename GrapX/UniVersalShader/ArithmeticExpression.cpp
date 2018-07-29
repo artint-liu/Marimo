@@ -414,7 +414,7 @@ namespace UVShader
 
       // Opcode 这里设置为空, 因为'='的优先级高于初始化列表中的',', 
       // 在生成表达式时会给初始化列表加上'('和')'使初始化列表出现语法错误.
-      MakeSyntaxNode(pParent, SYNTAXNODE::MODE_ArrayAssignment, NULL, &A, &B);
+      MakeSyntaxNode(pParent, SYNTAXNODE::MODE_Assignment, NULL, &A, &B);
     }
     else
     {
