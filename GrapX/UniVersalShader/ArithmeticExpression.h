@@ -355,6 +355,7 @@ namespace UVShader
 
       const TOKEN* GetFrontToken() const;
       const TOKEN* GetBackToken() const;
+      clStringA& ToString(clStringA& str) const;
     };
     typedef clist<GLOB> GlobList;
 
@@ -388,7 +389,7 @@ namespace UVShader
     b32 CompareOpcode(CTokens::TChar ch) const;
     b32 CompareOpcode(CTokens::T_LPCSTR str) const;
     clStringA& ToString(clStringA& str) const;
-    clStringW& ToString(clStringW& str) const;
+    //clStringW& ToString(clStringW& str) const;
 
     //VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out, std::function<GXBOOL(const SYNTAXNODE*)> func) const;
     //void GetSourceScope(TKSCOPE& scope) const; // 获得源代码的区间，如果SYNTAXNODE中的节点被替换过

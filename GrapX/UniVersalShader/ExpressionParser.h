@@ -70,8 +70,8 @@ namespace UVShader
 
     TypeCate          cate;
     clStringA         name; // 类型名
-    COMMINTRTYPEDESC* pDesc; // 结构体(内置) 的描述
-    const SYNTAXNODE* pMemberNode; // 结构体(用户定义) 的描述
+    COMMINTRTYPEDESC* pDesc; // 结构体(内置) 的描述, 多维数组这个指向它的基础类型
+    const SYNTAXNODE* pMemberNode; // 结构体(用户定义) 的描述, 必须是"SYNTAXNODE::MODE_Block"
     DimList_T         sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
     const TYPEDESC*   pElementType; // float[3][2]的 pElementType=float[2]，float3[2]的pElementType=float3，float3的pElementType=float，只有数学类型才有
 
@@ -79,6 +79,9 @@ namespace UVShader
     GXLPCSTR Resolve(int& R, int& C) const;
     GXBOOL IsVector() const;
     GXBOOL IsMatrix() const;
+    GXBOOL IsSameType(const TYPEDESC* pOtherTypeDesc) const;
+    TYPEDESC::CPtrList& GetMemberTypeList(const NameContext& sNameSet, TYPEDESC::CPtrList& sMemberTypeList) const;
+    size_t CountOf() const; // 获得向量，矩阵和数组包含的基础类型数量
   };
 
   struct FUNCDESC // 用户定义的函数描述
@@ -234,7 +237,7 @@ namespace UVShader
     const TYPEDESC* RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
-    const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode);
+    const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
 #endif
     State  GetLastState() const;
     //const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
@@ -527,6 +530,7 @@ namespace UVShader
     SYNTAXNODE* FlatDefinition(SYNTAXNODE* pThisChain);
     static GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
     static SYNTAXNODE::GlobList& BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出逗号并列式
+    static SYNTAXNODE::GlobList& BreakChain(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出链并列式
 
     GXBOOL  ParseExpression(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
     GXBOOL  ParseToChain(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
@@ -596,13 +600,15 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferInitList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const SYNTAXNODE* pNode); // pNode->mode 必须是 MODE_InitList
+    const TYPEDESC* InferInitList(const NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob); // initlist_glob.pNode->mode 必须是 MODE_InitList
+    const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);
-    const TYPEDESC* TryExtendType(const TYPEDESC* pTypeA, const TYPEDESC* pTypeB); // 初始化列表：尝试根据两个类型描述扩充为一个更大的类型，如“float2”与“float”扩充为“float2”
+    const TYPEDESC* InitList_SyncType(const NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob);
+    const TYPEDESC* InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation);
 #endif
 
     const TYPEDESC* InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位

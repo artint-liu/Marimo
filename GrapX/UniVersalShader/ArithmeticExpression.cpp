@@ -1925,6 +1925,20 @@ namespace UVShader
     return NULL;
   }
 
+  clStringA& SYNTAXNODE::GLOB::ToString(clStringA& str) const
+  {
+    if(IsToken()) {
+      pTokn->ToString(str);
+    }
+    else if(IsNode()) {
+      pNode->ToString(str);
+    }
+    else {
+      str = "(null ptr)";
+    }
+    return str;
+  }
+
   void SYNTAXNODE::Clear()
   {
     mode = MODE_Undefined;
@@ -1960,13 +1974,66 @@ namespace UVShader
 
   clStringA& SYNTAXNODE::ToString(clStringA& str) const
   {
-    return GetAnyTokenAPB().ToString(str);
+    clStringA strOp;
+    clStringA strOper[2];
+    switch(mode)
+    {
+    case UVShader::SYNTAXNODE::MODE_Opcode:
+      if(Operand[0].ptr) {
+        Operand[0].ToString(str).Append(pOpcode->ToString(strOp));
+        if(Operand[1].ptr) {
+          Operand[1].ToString(strOper[1]);
+          str.Append(strOper[1]);
+        }
+      }
+      else if(Operand[1].ptr) {
+        pOpcode->ToString(str).Append(Operand[1].ToString(strOper[1]));
+      }
+      break;
+    case UVShader::SYNTAXNODE::MODE_InitList:
+      ASSERT(Operand[1].ptr == NULL);
+      Operand[0].ToString(strOper[0]);
+      str.Reserve(strOper[0].GetLength() + 2);
+      str = "{";
+      str.Append(strOper[0]).Append("}");
+      break;
+    case UVShader::SYNTAXNODE::MODE_Undefined:
+    case UVShader::SYNTAXNODE::MODE_Assignment:
+    case UVShader::SYNTAXNODE::MODE_FunctionCall:
+    case UVShader::SYNTAXNODE::MODE_TypeCast:
+    case UVShader::SYNTAXNODE::MODE_Typedef:
+    case UVShader::SYNTAXNODE::MODE_Subscript:
+    case UVShader::SYNTAXNODE::MODE_Subscript0:
+    case UVShader::SYNTAXNODE::MODE_Definition:
+    case UVShader::SYNTAXNODE::MODE_Bracket:
+    case UVShader::SYNTAXNODE::MODE_StructDef:
+    case UVShader::SYNTAXNODE::MODE_Flow_While:
+    case UVShader::SYNTAXNODE::MODE_Flow_If:
+    case UVShader::SYNTAXNODE::MODE_Flow_ElseIf:
+    case UVShader::SYNTAXNODE::MODE_Flow_Else:
+    case UVShader::SYNTAXNODE::MODE_Flow_For:
+    case UVShader::SYNTAXNODE::MODE_Flow_ForInit:
+    case UVShader::SYNTAXNODE::MODE_Flow_ForRunning:
+    case UVShader::SYNTAXNODE::MODE_Flow_DoWhile:
+    case UVShader::SYNTAXNODE::MODE_Flow_Break:
+    case UVShader::SYNTAXNODE::MODE_Flow_Continue:
+    case UVShader::SYNTAXNODE::MODE_Flow_Case:
+    case UVShader::SYNTAXNODE::MODE_Flow_Discard:
+    case UVShader::SYNTAXNODE::MODE_Return:
+    case UVShader::SYNTAXNODE::MODE_Block:
+    case UVShader::SYNTAXNODE::MODE_Chain:
+    default:
+      CLBREAK;
+      break;
+    }
+    return str;
+    //return GetAnyTokenAPB().ToString(str);
   }
 
-  clStringW& SYNTAXNODE::ToString(clStringW& str) const
-  {
-    return GetAnyTokenAPB().ToString(str);
-  }
+  //clStringW& SYNTAXNODE::ToString(clStringW& str) const
+  //{
+  //  return GetAnyTokenAPB().ToString(str);
+  //}
 
   const TOKEN& SYNTAXNODE::GetAnyTokenAB() const // 深度优先
   {

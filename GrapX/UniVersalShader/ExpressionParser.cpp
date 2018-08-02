@@ -15,7 +15,7 @@
 #define PARSER_BREAK(_GLOB) DbgBreak(_GLOB)
 #define PARSER_BREAK2(PARSER, _GLOB) PARSER->DbgBreak(_GLOB)
 #define PARSER_ASSERT(_X, _GLOB) DbgAssert(_X, _GLOB)
-#define IS_NUMERIC_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_FloatScaler || _CATE == TYPEDESC::TypeCate_IntegerScaler) // TODO: 改名IS_SCALER_CATE
+#define IS_SCALER_CATE(_CATE) (_CATE->cate == TYPEDESC::TypeCate_FloatScaler || _CATE->cate == TYPEDESC::TypeCate_IntegerScaler)
 #define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
 #define IS_SAMPLER_CATE(_CATE) (\
   _CATE == TYPEDESC::TypeCate_Sampler1D || \
@@ -730,7 +730,11 @@ namespace UVShader
       m_ValueDict.insert(clmake_pair(glob.pNode, value));
     }
     else {
-      CLBREAK;
+      // 对空的glob增加一个替换值
+      SYNTAXNODE node = { SYNTAXNODE::MODE_Undefined };
+      node.magic = SYNTAXNODE::FLAG_OPERAND_MAGIC_REPLACED;
+      reinterpret_cast<GLOB*>(reinterpret_cast<size_t>(&glob))->pNode = m_NodePool.PushBack(node);
+      m_ValueDict.insert(clmake_pair(glob.pNode, value));
     }
   }
 
@@ -1584,6 +1588,22 @@ namespace UVShader
 
     if(sGlob.ptr) {
       sExprList.push_front(sGlob);
+    }
+    return sExprList;
+  }
+
+  SYNTAXNODE::GlobList& CodeParser::BreakChain(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob)
+  {
+    if(sGlob.IsNode() && sGlob.pNode->mode == SYNTAXNODE::MODE_Chain) {
+      sExprList.push_back(sGlob.pNode->Operand[0]);
+
+      if(sGlob.pNode->Operand[1].IsNode()) {
+        return BreakChain(sExprList, sGlob.pNode->Operand[1]);
+      }
+      else if(sGlob.pNode->Operand[1].IsToken()) {
+        sExprList.push_back(sGlob.pNode->Operand[1]);
+        return sExprList;
+      }
     }
     return sExprList;
   }
@@ -3986,7 +4006,7 @@ NOT_INC_P:
     {
       if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
       {
-        pType = sNameSet.RegisterMultidimVariable(strType, second_glob.pNode);
+        pType = sNameSet.RegisterMultidimVariable(strType, second_glob.pNode, NULL);
       }
       else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
       {
@@ -4029,15 +4049,15 @@ NOT_INC_P:
         }
 
         const GLOB* pVarableDecl = GetVariableDeclWithoutSeamantic(second_glob.pNode->Operand[0]);
+        const GLOB& right_glob = second_glob.pNode->Operand[1];
 
         if(pVarableDecl)
         {
-          pType = sNameSet.RegisterVariable(strType, pVarableDecl->pTokn);
+          pType = sNameSet.RegisterVariable(strType, pVarableDecl, NULL, &right_glob);
         }
 
-        const GLOB& right_glob = second_glob.pNode->Operand[1];
+        TRACE("var \"%s\":\n", pVarableDecl->GetFrontToken()->ToString().CStr());
         pRightTypeDesc = InferRightValueType(sNameSet, pType, right_glob, ptkVar);
-
 
         if(pRightTypeDesc == NULL) {
           // 右侧类型推导失败，注册变量名（RegisterVariable）后再退出，
@@ -4432,7 +4452,7 @@ NOT_INC_P:
         {
           if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
           {
-            pType = pStructMemberSet->RegisterMultidimVariable(strType, second_glob.pNode);
+            pType = pStructMemberSet->RegisterMultidimVariable(strType, second_glob.pNode, NULL);
           }
           else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
           {
@@ -4604,7 +4624,7 @@ NOT_INC_P:
       // “float[2](0, 1)” 这种形式
       clStringW strW;
       OutputErrorW(pFuncNode->Operand[0], UVS_EXPORT_TEXT(5042, "语法错误: 无效的函数“%s”"),
-        pFuncNode->ToString(strW).CStr());
+        pFuncNode->GetAnyTokenAPB().ToString(strW).CStr());
       return NULL;
     }
     else if(pFuncNode->Operand[0].ptr == NULL)
@@ -4911,8 +4931,8 @@ NOT_INC_P:
         return pResultTypeDesc;
       }
 
-      const GXBOOL bFirstNumeric = IS_NUMERIC_CATE(pTypeDesc[0]->cate);
-      const GXBOOL bSecondNumeric = IS_NUMERIC_CATE(pTypeDesc[1]->cate);
+      const GXBOOL bFirstNumeric = IS_SCALER_CATE(pTypeDesc[0]);
+      const GXBOOL bSecondNumeric = IS_SCALER_CATE(pTypeDesc[1]);
       if(bFirstNumeric && bSecondNumeric)
       {
         VALUE::Rank rank = (VALUE::Rank)clMax(pTypeDesc[0]->pDesc->rank, pTypeDesc[1]->pDesc->rank);
@@ -4959,48 +4979,212 @@ NOT_INC_P:
     return NULL;
   }
   
-  const TYPEDESC* CodeParser::InferInitList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferInitList(const NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob)
   {
-    ASSERT(pNode->mode == SYNTAXNODE::MODE_InitList); // 外部保证
+    ASSERT(initlist_glob.IsToken() || (initlist_glob.IsNode() && initlist_glob.pNode->mode == SYNTAXNODE::MODE_InitList)); // 外部保证
+    ASSERT(pRefType != NULL);
     // tkBaseType 是基础类型标记，如定义“float2 a[3][2] = {...}”, 基础类型就是“float2”
 
     SYNTAXNODE::GlobList sExprList;
-    if(BreakComma(sExprList, pNode->Operand[0]).empty()) {
-      return sNameSet.GetType(STR_VOID); // void type
+    if(initlist_glob.IsToken()) {
+      sExprList.push_back(initlist_glob);
+    }
+    else if(initlist_glob.IsNode()) {
+      if(BreakComma(sExprList, initlist_glob.pNode->Operand[0]).empty()) {
+        return sNameSet.GetType(STR_VOID); // void type
+      }
+    }
+    else {
+      CLBREAK;
     }
 
-    const TYPEDESC* pListType = NULL;
-    for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
+    
+    if(pRefType->cate == TYPEDESC::TypeCate_Struct)
     {
-      const TYPEDESC* pElementType = NULL;
-      if(it->IsNode() && it->pNode->mode == SYNTAXNODE::MODE_InitList) {
-        pElementType = InferInitList(sNameSet, pLeftType, it->pNode);
-      }
-      else {
-        pElementType = InferType(sNameSet, *it);
+      TYPEDESC::CPtrList sMemberTypeList;
+      pRefType->GetMemberTypeList(sNameSet, sMemberTypeList);
+
+      if(sExprList.size() > sMemberTypeList.size()) {
+        OutputErrorW(initlist_glob, UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+        return NULL;
       }
 
-      if(pElementType == NULL) {
-        return NULL; // 出现错误
+      const TYPEDESC* pListType = NULL;
+      auto iter_member = sMemberTypeList.begin();
+      auto iter_element = sExprList.begin();
+      for(; iter_element != sExprList.end(); ++iter_member, ++iter_element)
+      {
+        const GLOB& element_glob = *iter_element;
+        pListType = InitList_SyncType(sNameSet, *iter_member, NULL, &element_glob);
+        if(pListType == NULL) {
+          return NULL;
+        }
       }
-      else if(pListType == NULL) {
-        pListType = pElementType;
+
+#ifdef _DEBUG
+      clStringA strA;
+      clStringA strList;
+      strA.Append(pRefType ? pRefType->name : "(null)").Append(": ").Append(initlist_glob.ToString(strList)).Append("\n");
+      TRACE(strA);
+#endif
+
+      return pRefType;
+    }
+    else if(IS_SCALER_CATE(pRefType) || pRefType->cate == TYPEDESC::TypeCate_Vector ||
+        pRefType->cate == TYPEDESC::TypeCate_Matrix || pRefType->cate == TYPEDESC::TypeCate_MultiDim)
+    {
+      //pElementType = InferInitList(sNameSet, pRefType, *pElementGlob);
+      const TYPEDESC* pListType = NULL;
+      for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
+      {
+        const GLOB& element_glob = *it;
+        pListType = InitList_SyncType(sNameSet, (pRefType->pElementType ? pRefType->pElementType : pRefType), pListType, &element_glob);
+        if(pListType == NULL) {
+          return NULL;
+        }
       }
-      else if(pElementType->name == STR_VOID) {
-        continue; // "{}" 直接跳过
-      }
-      else if(pListType != pElementType) {
-        pListType = TryExtendType(pListType, pElementType);
-      }
-      ASSERT(pListType == pElementType);
+
+      // pListType & sExprList.size() 与 tkBaseType 尝试匹配
+      const size_t nListCount = sExprList.size();
+      pListType = InitList_CastType(pRefType, pListType, nListCount, &initlist_glob);
+#ifdef _DEBUG
+      clStringA strA;
+      clStringA strList;
+      strA.Append(pListType ? pListType->name : "(null)").Append(": ").Append(initlist_glob.ToString(strList)).Append("\n");
+      TRACE(strA);
+#endif
+      return pListType;
+    }
+    else {
+      CLBREAK;
     }
 
-    //if(bElement && sExprList.size() == 1) {
-    //  return pListType;
-    //}
+    return NULL;
+  }
 
-    // pListType & sExprList.size() 与 tkBaseType 尝试匹配
-    if(IS_NUMERIC_CATE(pListType->cate) && (pLeftType->cate == TYPEDESC::TypeCate_Vector))
+//  const TYPEDESC* CodeParser::InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob)
+//  {
+//    ASSERT(pLeftType->cate == TYPEDESC::TypeCate_Struct);
+//    ASSERT(pInitListGlob->IsToken() || (pInitListGlob->IsNode() && pInitListGlob->pNode->mode == SYNTAXNODE::MODE_InitList));
+//
+//    SYNTAXNODE::GlobList sExprList;
+//    //SYNTAXNODE::GlobList sMemberList;
+//    TYPEDESC::CPtrList sMemberTypeList;
+//
+//    if(pInitListGlob->IsNode()) {
+//      if(BreakComma(sExprList, pInitListGlob->pNode->Operand[0]).empty()) {
+//        return sNameSet.GetType(STR_VOID); // void type
+//      }
+//    }
+//    else if(pInitListGlob->IsToken()) {
+//      sExprList.push_back(*pInitListGlob);
+//    }
+//    else {
+//      CLBREAK;
+//    }
+//
+//    pLeftType->GetMemberTypeList(sNameSet, sMemberTypeList);
+//
+//    if(sExprList.size() > sMemberTypeList.size()) {
+//      OutputErrorW(*pInitListGlob, UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+//      return NULL;
+//    }
+//
+//    const TYPEDESC* pListType = NULL;
+//    auto iter_member = sMemberTypeList.begin();
+//    auto iter_element = sExprList.begin();
+//    for(; iter_element != sExprList.end(); ++iter_member, ++iter_element)
+//    {
+//      const GLOB& element_glob = *iter_element;
+//      pListType = InitList_SyncType(sNameSet, *iter_member, NULL, &element_glob);
+//      if(pListType == NULL) {
+//        return NULL;
+//      }
+//    }
+//
+//    //ASSERT(pLeftType->pMemberNode->mode == SYNTAXNODE::MODE_Block);
+//    //BreakChain(sMemberList, pLeftType->pMemberNode->Operand[0]);
+//    //return InitList_CastType(pLeftType, pListType, sExprList.size(), pNode);
+//#ifdef _DEBUG
+//    clStringA strA;
+//    clStringA strList;
+//    strA.Append(pLeftType ? pLeftType->name : "(null)").Append(": ").Append(pInitListGlob->ToString(strList)).Append("\n");
+//    TRACE(strA);
+//#endif
+//
+//    return pLeftType;
+//  }
+
+  const TYPEDESC* CodeParser::InitList_SyncType(const NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob)
+  {
+    const TYPEDESC* pElementType = NULL;
+
+    //if(pRefType->cate == TYPEDESC::TypeCate_Struct)
+    //{
+    //  //pElementType = InferInitMemberList(sNameSet, pRefType, pElementGlob);
+    //  pElementType = InferInitList(sNameSet, pRefType, *pElementGlob);
+    //}
+    //else 
+    if(pElementGlob->IsNode() && pElementGlob->pNode->mode == SYNTAXNODE::MODE_InitList) {
+      //if(IS_SCALER_CATE(pRefType) || pRefType->cate == TYPEDESC::TypeCate_Vector ||
+      //  pRefType->cate == TYPEDESC::TypeCate_Matrix || pRefType->cate == TYPEDESC::TypeCate_MultiDim)
+      //{
+        pElementType = InferInitList(sNameSet, pRefType, *pElementGlob);
+      //}
+      //else {
+      //  CLBREAK;
+      //}
+    }
+    else {
+      pElementType = InferType(sNameSet, *pElementGlob);
+    }
+
+    if(pElementType == NULL) {
+      return NULL; // 出现错误
+    }
+    else if(pListType == NULL || pElementType == pListType) {
+      return pElementType;
+    }
+    else if(pElementType->name == STR_VOID) {
+      return pListType;
+    }
+    else if(IS_SCALER_CATE(pElementType) && IS_SCALER_CATE(pListType)) {
+      return pElementType->pDesc->rank >= pListType->pDesc->rank ? pElementType : pListType;
+    }
+    else if(IS_SCALER_CATE(pElementType) && (pListType->cate == TYPEDESC::TypeCate_MultiDim ||
+      pListType->cate == TYPEDESC::TypeCate_Vector || pListType->cate == TYPEDESC::TypeCate_Matrix))
+    {
+      return pListType;
+    }
+    else if(IS_SCALER_CATE(pListType) && (pElementType->cate == TYPEDESC::TypeCate_MultiDim ||
+      pElementType->cate == TYPEDESC::TypeCate_Vector || pElementType->cate == TYPEDESC::TypeCate_Matrix))
+    {
+      return pElementType;
+    }
+
+    // error C2440: “初始化”: 无法从“int”转换为“UVShader::TYPEDESC::TypeCate”
+    clStringW strFrom = pElementType->name;
+    clStringW strTo = pRefType->name;
+    OutputErrorW(*pElementGlob, UVS_EXPORT_TEXT(2440, "“初始化”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+    return NULL;
+  }
+
+  const TYPEDESC* CodeParser::InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation)
+  {
+    if(pListType->IsSameType(pLeftType))
+    {
+      return pLeftType;
+    }
+    else if(IS_SCALER_CATE(pListType) && IS_SCALER_CATE(pLeftType))
+    {
+      if(pListType->pDesc->rank > pLeftType->pDesc->rank)
+      {
+        // TODO: 数据类型收窄警告？
+      }
+      return pListType->pDesc->rank >= pLeftType->pDesc->rank
+        ? pListType : pLeftType;
+    }
+    else if(IS_SCALER_CATE(pListType) && (pLeftType->cate == TYPEDESC::TypeCate_Vector))
     {
       // "float" "2" -> "float3"
       // "float" "3" -> "float3"
@@ -5013,28 +5197,64 @@ NOT_INC_P:
         // TODO: 数据类型收窄警告？
       }
 
-      if(sExprList.size() <= (size_t)R)
+      if(nListCount <= (size_t)R)
       {
         return pLeftType;
       }
-      CLBREAK;
+      // Jump to "初始值设定项太多"
+    }
+    else if(IS_SCALER_CATE(pListType) && (pLeftType->cate == TYPEDESC::TypeCate_MultiDim))
+    {
+      // "float" "2" -> "float[3]"
+      // "float" "3" -> "float[3]"
+      ASSERT(pLeftType->pElementType != NULL);
+      if(pListType->pDesc->rank > pLeftType->pElementType->pDesc->rank)
+      {
+        // TODO: 数据类型收窄警告？
+      }
+
+      if(nListCount <= pLeftType->CountOf())
+      {
+        return pLeftType;
+      }
+      // Jump to "初始值设定项太多"
+    }
+    else if(pListType->cate == TYPEDESC::TypeCate_MultiDim && pLeftType->cate == TYPEDESC::TypeCate_MultiDim)
+    {
+      // "float[4]" "2" -> "float[4][3]"
+      // "float[4]" "3" -> "float[4][3]"
+
+      ASSERT(pLeftType->pElementType != NULL);
+      if(pListType->pDesc->rank > pLeftType->pElementType->pDesc->rank)
+      {
+        // TODO: 数据类型收窄警告？
+      }
+
+      if(nListCount <= pLeftType->CountOf())
+      {
+        return pLeftType;
+      }
+
+      // Jump to "初始值设定项太多"
     }
     else if(pListType->cate == TYPEDESC::TypeCate_Vector && pLeftType->cate == TYPEDESC::TypeCate_Vector)
     {
+      CLBREAK; // 没实现
       if(pListType == pLeftType || pListType->name == pLeftType->name) {
         //return sNameSet.RegisterArrayType(pBaseType, sExprList.size());
       }
       CLNOP
     }
+    else if(pLeftType->pElementType->IsSameType(pListType)) // pLeftType是pListType的数组类型
+    {
+      return pLeftType;
+    }
     else
     {
       CLBREAK;
     }
-    return pListType;
-  }
-
-  const TYPEDESC* CodeParser::TryExtendType(const TYPEDESC* pTypeA, const TYPEDESC* pTypeB)
-  {
+    // error C2078: 初始值设定项太多
+    OutputErrorW(*pLocation, UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
     return NULL;
   }
 
@@ -5237,21 +5457,7 @@ NOT_INC_P:
         return NULL;
       }
       else {
-        //const TYPEDESC* pLeftType = sNameSet.GetType(*ptkType);
-        //if(pLeftType == NULL) {
-        //  PARSER_NOTIMPLEMENT;
-        //  return NULL;
-        //}
-        const TYPEDESC* pInitListType = InferInitList(sNameSet, pLeftTypeDesc, right_glob.pNode);
-        //*ppMinorType = InferInitList(sNameSet, pLeftType, right_glob.pNode, TRUE); // 初始化列表推导的次要类型
-        //if(pMajorType == *ppMinorType) {
-        //  *ppMinorType = NULL;
-        //}
-
-        //// 不能出现主类型为空但是副类型有效的情况
-        //ASSERT(pMajorType != NULL ||
-        //  (pMajorType == NULL && *ppMinorType == NULL))
-
+        const TYPEDESC* pInitListType = InferInitList(sNameSet, pLeftTypeDesc, right_glob);
         return pInitListType;
       }
     }
@@ -5281,7 +5487,7 @@ NOT_INC_P:
   {
     ASSERT(pTypeTo != NULL && pTypeFrom != NULL);
 
-    if(IS_NUMERIC_CATE(pTypeTo->cate) && IS_NUMERIC_CATE(pTypeFrom->cate))
+    if(IS_SCALER_CATE(pTypeTo) && IS_SCALER_CATE(pTypeFrom))
     {
       if(pTypeTo->pDesc->rank < pTypeFrom->pDesc->rank &&
         (pTypeTo->pDesc->rank != VALUE::Rank_Double && pTypeTo->pDesc->rank != VALUE::Rank_Float) &&
@@ -5301,7 +5507,7 @@ NOT_INC_P:
         return TRUE;
       }
     }
-    else if(IS_STRUCT_CATE(pTypeTo->cate) && IS_NUMERIC_CATE(pTypeFrom->cate))
+    else if(IS_STRUCT_CATE(pTypeTo->cate) && IS_SCALER_CATE(pTypeFrom))
     {
       return (pTypeTo->pDesc && pTypeTo->pDesc->component_type &&
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));
@@ -5708,7 +5914,7 @@ NOT_INC_P:
         clStringA strTypename;
         const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(*this, pNode);
 
-        if(pTypeDesc && IS_NUMERIC_CATE(pTypeDesc->cate))
+        if(pTypeDesc && IS_SCALER_CATE(pTypeDesc))
         {
           value_out.rank = VALUE::Rank_Undefined;
           return VALUE::State_Identifier;
@@ -5860,7 +6066,7 @@ NOT_INC_P:
       return RegisterVariable(strType, pVariableDeclGlob->pTokn, pConstValue, pValueExprGlob);
     }
     else if(pValueExprGlob->IsNode()) {
-      return RegisterMultidimVariable(strType, pVariableDeclGlob->pNode);
+      return RegisterMultidimVariable(strType, pVariableDeclGlob->pNode, pValueExprGlob); // FIXME: 没传常量表达式
     }
     return NULL;
   }
@@ -5876,7 +6082,7 @@ NOT_INC_P:
   }
 
 #ifdef ENABLE_SYNTAX_VERIFY
-  const TYPEDESC* NameContext::RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode)
+  const TYPEDESC* NameContext::RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript || pNode->mode == SYNTAXNODE::MODE_Subscript0); // 外部保证
 
@@ -5890,10 +6096,25 @@ NOT_INC_P:
       VALUE value;
       VALUE::State state = VALUE::State_OK;
       const GLOB& subscript_glob = pNode->Operand[1];
-      const b32 bSelfAdaptionLength = (pNode->Operand[1].ptr == NULL);
+      const b32 bSelfAdaptionLength = (subscript_glob.ptr == NULL);
       const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
-      if(bSelfAdaptionLength) {
-        value.SetZero();
+      if(bSelfAdaptionLength)
+      {
+        SYNTAXNODE::GlobList sExprList;
+
+        // error C2133: “a”: 未知的大小
+        if(pValueExprGlob == NULL || _CL_NOT_(pValueExprGlob->IsNode()) ||
+          pValueExprGlob->pNode->mode != SYNTAXNODE::MODE_InitList ||
+          CodeParser::BreakComma(sExprList, pValueExprGlob->pNode->Operand[0]).empty())
+        {
+          const TOKEN& tkVariable = pNode->GetAnyTokenAB();
+          clStringW strW;
+          tkVariable.ToString(strW);
+          m_pCodeParser->OutputErrorW(tkVariable, UVS_EXPORT_TEXT2(2133, "“%s”: 未知的大小", m_pCodeParser), strW.CStr());
+          return NULL;
+        }
+        value.rank = VALUE::Rank_Unsigned;
+        value.uValue64 = sExprList.size();
       }
       else {
         state = CalculateConstantValue(value, m_pCodeParser, &subscript_glob);
@@ -5968,6 +6189,7 @@ NOT_INC_P:
           TYPEDESC td = {TYPEDESC::TypeCate_MultiDim};
           td.name = strType;
           td.pElementType = pTypeDesc;
+          td.pDesc = pTypeDesc->pDesc;
           for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
           {
             td.name.Append('@').AppendInteger32(*it); // int x[2][3][4] 记为"int@4@3@2"
@@ -5978,7 +6200,8 @@ NOT_INC_P:
           }
 
           pVariDesc->pDesc = td.pElementType;
-          return pTypeDesc;
+          return td.pElementType; // 数组类型
+          // return pTypeDesc; // 基础类型
         }
         return NULL;
       }
@@ -6004,6 +6227,7 @@ NOT_INC_P:
     td.sDimensions = pTypeDesc->sDimensions;
     td.sDimensions.push_back(nDimension);
 
+    td.pDesc = pTypeDesc->pDesc;
     td.pElementType = pTypeDesc;
 
     auto result = m_TypeMap.insert(clmake_pair(td.name, td));
@@ -6234,6 +6458,14 @@ NOT_INC_P:
   {
     // floatN 类型：R=N，C=0
     // floatNxM 类型：R=N，C=M
+    if(cate != TypeCate_FloatScaler &&
+      cate != TypeCate_IntegerScaler &&
+      cate != TypeCate_Vector &&
+      cate != TypeCate_Matrix)
+    {
+      R = C = 0;
+      return NULL;
+    }
 
     GXLPCSTR szRxC = NULL;
     GXLPCSTR szScaler = NULL;
@@ -6292,6 +6524,51 @@ NOT_INC_P:
   GXBOOL TYPEDESC::IsMatrix() const
   {
     return (cate == TypeCate_Matrix);
+  }
+
+  GXBOOL TYPEDESC::IsSameType(const TYPEDESC* pOtherTypeDesc) const // 不区分typedef出来的类型
+  {
+    return ((this == pOtherTypeDesc) || (name == pOtherTypeDesc->name));
+  }
+
+  TYPEDESC::CPtrList& TYPEDESC::GetMemberTypeList(const NameContext& sNameSet, TYPEDESC::CPtrList& sMemberTypeList) const
+  {
+    ASSERT(cate == TypeCate_Struct); // 外部保证
+    ASSERT(pMemberNode->mode == SYNTAXNODE::MODE_Block); // 防止以后修改
+
+    SYNTAXNODE::GlobList sMemberList;
+
+    CodeParser::BreakChain(sMemberList, pMemberNode->Operand[0]);
+    for(auto it = sMemberList.begin(); it != sMemberList.end(); ++it)
+    {
+      if(it->IsNode() && it->pNode->mode == SYNTAXNODE::MODE_Definition)
+      {
+        if(it->pNode->Operand[0].IsToken()) {
+          const TYPEDESC* pTypeDesc = sNameSet.GetType(*it->pNode->Operand[0].pTokn);
+          ASSERT(pTypeDesc);
+          sMemberTypeList.push_back(pTypeDesc);
+        }
+        else {
+          CLBREAK;
+        }
+      }
+      else {
+        CLBREAK;
+      }
+    }
+    return sMemberTypeList;
+  }
+
+  size_t TYPEDESC::CountOf() const
+  {
+    int R, C;
+    Resolve(R, C); // FIXME: 结构体不正确
+    size_t count = clMax(static_cast<size_t>(R * C), static_cast<size_t>(1));
+    for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
+    {
+      count *= *it;
+    }
+    return count;
   }
 
   int INTRINSIC_FUNC::GetTypeTemplateTypeIndex(GXDWORD dwMasks)
