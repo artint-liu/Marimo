@@ -470,6 +470,20 @@ namespace UVShader
 
   //////////////////////////////////////////////////////////////////////////
 
+  ArithmeticExpression::TKSCOPE::TYPE ArithmeticExpression::FindComma(const TKSCOPE& scope)
+  {
+    for(TKSCOPE::TYPE i = scope.begin; i < scope.end; ++i)
+    {
+      if(m_aTokens[i].scope != -1) {
+        i = m_aTokens[i].scope;
+      }
+      else if(m_aTokens[i] == ',') {
+        return i;
+      }
+    }
+    return TKSCOPE::npos;
+  }
+
   ArithmeticExpression::TKSCOPE::TYPE ArithmeticExpression::GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence)
   {
     // 获得一个区间的操作符最低优先级的索引
@@ -663,6 +677,13 @@ namespace UVShader
       return ParseFunctionCall(scope, pDesc);
     }
 
+#ifdef REFACTOR_COMMA
+    GXBOOL bret = BreakComma(depth, scope, pDesc, nMinPrecedence);
+    if(bret >= 0) {
+      return bret;
+    }
+#endif
+
     //
     // 获得结合律最低的符号位置
     //
@@ -687,6 +708,66 @@ namespace UVShader
         t.precedence, &scope, pDesc, nLowestOpcodeIndex);
     }
     return ParseFunctionSubscriptCall(scope, pDesc);
+  }
+
+  GXBOOL ArithmeticExpression::BreakComma(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence)
+  {
+    GLOB A;
+    GLOB B;
+    // 对“,”操作符进行特殊处理，以便支持大超大数组
+    if(nMinPrecedence == OPP(0))
+    {
+      TKSCOPE scopeB = scope;
+      B.ptr = NULL;
+      struct GLOB_COMMA
+      {
+        GLOB A;
+        TKSCOPE scopeA;
+        TOKEN* pComma;
+      };
+      GLOB_COMMA gc;
+
+      clstack<GLOB_COMMA> sGlobStack;
+      while(true)
+      {
+        TKSCOPE::TYPE nComma = FindComma(scopeB);
+        if(nComma == TKSCOPE::npos)
+        {
+          if(sGlobStack.empty()) {
+            return -1;
+          }
+          if(ParseArithmeticExpression(depth + 1, scopeB, pDesc, nMinPrecedence + 1) == FALSE) {
+            return FALSE;
+          }
+
+          ASSERT(gc.A.ptr == sGlobStack.top().A.ptr);
+
+          do {
+            //A = sGlobStack.top();
+            B = *pDesc;
+            GLOB_COMMA& top_gc = sGlobStack.top();
+            MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, top_gc.pComma, &top_gc.A, &B);
+            DbgDumpScope(top_gc.pComma->ToString(), top_gc.scopeA, scopeB);
+            scopeB.begin = top_gc.scopeA.begin;
+
+            sGlobStack.pop();
+          } while(_CL_NOT_(sGlobStack.empty()));
+          return TRUE;
+        }
+
+        TKSCOPE scopeA(scopeB.begin, nComma);
+        scopeB.begin = nComma + 1;
+        A.ptr = NULL;
+
+        if(ParseArithmeticExpression(depth + 1, scopeA, &gc.A, nMinPrecedence + 1) == FALSE) {
+          return FALSE;
+        }
+        gc.pComma = &m_aTokens[nComma];
+        gc.scopeA = scopeA;
+        sGlobStack.push(gc);
+      }
+    }
+    return -1;
   }
 
   GXBOOL ArithmeticExpression::DbgHasError(int errcode) const

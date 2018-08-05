@@ -20,7 +20,7 @@
 #endif
 
 #define ENABLE_SYNTAX_NODE_ID
-
+#define REFACTOR_COMMA
 namespace Marimo
 {
   template<typename _TChar>
@@ -582,6 +582,7 @@ namespace UVShader
 
     GXBOOL  CompareToken(int index, TOKEN::T_LPCSTR szName); // 带容错的
     TKSCOPE::TYPE  GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence);
+    TKSCOPE::TYPE FindComma(const TKSCOPE& scope);
     void    EnableHigherDefinition(GXBOOL bHigher);
 
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
@@ -605,6 +606,8 @@ namespace UVShader
 
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc);
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence); // 递归函数
+
+    int BreakComma(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence); // 返回值：-1，没处理；0，失败；1，成功
 
     GXBOOL DbgHasError(int errcode) const;
     size_t DbgErrorCount() const;

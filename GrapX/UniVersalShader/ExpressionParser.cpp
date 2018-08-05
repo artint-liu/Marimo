@@ -1526,6 +1526,48 @@ namespace UVShader
     return FALSE;
   }
 
+#ifdef REFACTOR_COMMA
+  SYNTAXNODE* CodeParser::FlatDefinition(SYNTAXNODE* pThisChain)
+  {
+    SYNTAXNODE* pNode = pThisChain->Operand[0].pNode;
+
+    // 外部保证满足如下关系
+    ASSERT(pThisChain->mode == SYNTAXNODE::MODE_Chain);
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition);
+    ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->CompareOpcode(','));
+
+    SYNTAXNODE::PtrList sVarList;
+    GLOB* pFirstVar = BreakDefinition(sVarList, pNode->Operand[1].pNode);
+    pNode->Operand[1].ptr = pFirstVar->ptr;
+
+    for(auto it = sVarList.begin(); it != sVarList.end(); ++it)
+    {
+      SYNTAXNODE* n = *it;
+      n->mode = pNode->mode; // SYNTAXNODE::MODE_Definition;
+      n->pOpcode = NULL;
+
+      if(n->Operand[1].IsNode() && n->Operand[1].pNode->CompareOpcode(',')) {
+        // 把下一级的节点提上来
+        n->Operand[1].ptr = n->Operand[1].pNode->Operand[0].ptr;
+      }
+      n->Operand[0].ptr = pNode->Operand[0].ptr;
+
+      SYNTAXNODE* pChain = m_NodePool.Alloc();
+#ifdef ENABLE_SYNTAX_NODE_ID
+      pChain->id = m_nNodeId++;
+#endif
+      pChain->magic = SYNTAXNODE::FLAG_OPERAND_MAGIC;
+      pChain->mode = SYNTAXNODE::MODE_Chain;
+      pChain->pOpcode = NULL;
+      pChain->Operand[0].ptr = n;
+      pChain->Operand[1].ptr = pThisChain->Operand[1].ptr;
+
+      pThisChain->Operand[1].pNode = pChain;
+      pThisChain = pChain;
+    }
+    return pThisChain;
+  }
+#else
   SYNTAXNODE* CodeParser::FlatDefinition(SYNTAXNODE* pThisChain)
   {
     SYNTAXNODE* pNode = pThisChain->Operand[0].pNode;
@@ -1560,7 +1602,43 @@ namespace UVShader
     }
     return pThisChain;
   }
+#endif
 
+#ifdef REFACTOR_COMMA
+  SYNTAXNODE::GLOB* CodeParser::BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode)
+  {
+    if(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->CompareOpcode(','))
+    {
+      sVarList.push_back(pNode);
+      BreakDefinition(sVarList, pNode->Operand[1].pNode);
+    }
+    else {
+      sVarList.push_back(pNode);
+    }
+    return &pNode->Operand[0];
+  }
+
+  SYNTAXNODE::GlobList& CodeParser::BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob)
+  {
+    // (,) [a] [b,c]
+    if(sGlob.IsNode() && sGlob.pNode->CompareOpcode(',')) {
+      sExprList.push_back(sGlob.pNode->Operand[0]);
+
+      if(sGlob.pNode->Operand[1].IsNode()) {
+        return BreakComma(sExprList, sGlob.pNode->Operand[1]);
+      }
+      else if(sGlob.pNode->Operand[1].IsToken()) {
+        sExprList.push_front(sGlob.pNode->Operand[1]);
+        return sExprList;
+      }
+    }
+
+    if(sGlob.ptr) {
+      sExprList.push_back(sGlob);
+    }
+    return sExprList;
+  }
+#else
   SYNTAXNODE::GLOB* CodeParser::BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode)
   {
     if(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->CompareOpcode(','))
@@ -1574,6 +1652,7 @@ namespace UVShader
 
   SYNTAXNODE::GlobList& CodeParser::BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob)
   {
+    // (,) [a,b] [c]
     if(sGlob.IsNode() && sGlob.pNode->CompareOpcode(',')) {
       sExprList.push_front(sGlob.pNode->Operand[1]);
       
@@ -1591,6 +1670,7 @@ namespace UVShader
     }
     return sExprList;
   }
+#endif
 
   SYNTAXNODE::GlobList& CodeParser::BreakChain(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob)
   {
