@@ -5094,13 +5094,11 @@ NOT_INC_P:
         i++;
         if(rInitList.Step() == NULL)
         {
-          //break;
           if(rInitList.Depth() >= nDepth || rInitList.Depth() == nListDepth) 
           {
             continue;
           }
           break;
-          //else if()
         }
       }
 
@@ -5116,9 +5114,8 @@ NOT_INC_P:
     }
     else if(pRefType->pElementType->cate == TYPEDESC::TypeCate_MultiDim)
     {
-      clStringA strList;
-      strList = pRefType->name;
-      strList.Append(":{");
+      clStringA strList = "<";
+      strList.Append(pRefType->name).Append(">{");
       for(size_t i = 0; i < array_count; i++)
       {
         if(InferInitList(pValuePool, sNameSet, pRefType->pElementType, rInitList, nDepth + 1) == NULL) {
@@ -5146,6 +5143,8 @@ NOT_INC_P:
     ASSERT(pRefType != NULL);
     // tkBaseType 是基础类型标记，如定义“float2 a[3][2] = {...}”, 基础类型就是“float2”
 
+    m_aDbgExpressionOperStack.clear();
+
     CInitList il(&initlist_glob);
     size_t count = pRefType->CountOf();
     VALUE* pValuePool = new VALUE[count];
@@ -5153,6 +5152,8 @@ NOT_INC_P:
 
     const TYPEDESC* pTypeDesc = InferInitList(pValuePool, sNameSet, pRefType, il, 1);
     SAFE_DELETE_ARRAY(pValuePool);
+    
+    m_aDbgExpressionOperStack.push_back(il.DbgString());
     return pTypeDesc;
 
 //    SYNTAXNODE::GlobList sExprList;
@@ -6888,8 +6889,8 @@ NOT_INC_P:
 
   void CInitList::DbgListBegin(const clStringA& strTypeName)
   {
-    m_strDebug = strTypeName;
-    m_strDebug.Append(":{");
+    m_strDebug = "<";
+    m_strDebug.Append(strTypeName).Append(">{");
   }
 
   void CInitList::DbgListAdd(const SYNTAXNODE::GLOB* pGlob)
