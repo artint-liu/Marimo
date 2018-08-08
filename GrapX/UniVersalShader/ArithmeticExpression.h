@@ -347,6 +347,7 @@ namespace UVShader
 
       GXBOOL CompareAsToken(TOKEN::T_LPCSTR str) const; // 以token方式比较，如果不是token，则返回FALSE
       GXBOOL CompareAsToken(TOKEN::TChar c) const;
+      GXBOOL CompareAsNode(MODE _mode) const;
 
       GLOB& operator=(const TOKEN& token) {
         pTokn = &token;

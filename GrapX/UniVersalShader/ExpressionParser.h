@@ -68,19 +68,20 @@ namespace UVShader
     };
     typedef clvector<size_t> DimList_T;
 
-    TypeCate          cate;
-    clStringA         name; // 类型名
-    COMMINTRTYPEDESC* pDesc; // 结构体(内置) 的描述, 多维数组这个指向它的基础类型
-    const SYNTAXNODE* pMemberNode; // 结构体(用户定义) 的描述, 必须是"SYNTAXNODE::MODE_Block"
-    DimList_T         sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
-    const TYPEDESC*   pElementType; // float[3][2]的 pElementType=float[2]，float3[2]的pElementType=float3，float3的pElementType=float，只有数学类型才有
+    TypeCate            cate;
+    const NameContext*  pNameCtx;
+    clStringA           name; // 类型名
+    COMMINTRTYPEDESC*   pDesc; // 结构体(内置) 的描述, 多维数组这个指向它的基础类型
+    const SYNTAXNODE*   pMemberNode; // 结构体(用户定义) 的描述, 必须是"SYNTAXNODE::MODE_Block"
+    DimList_T           sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
+    const TYPEDESC*     pElementType; // float[3][2]的 pElementType=float[2]，float3[2]的pElementType=float3，float3的pElementType=float，只有数学类型才有
 
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
     GXLPCSTR Resolve(int& R, int& C) const;
     GXBOOL IsVector() const;
     GXBOOL IsMatrix() const;
     GXBOOL IsSameType(const TYPEDESC* pOtherTypeDesc) const;
-    TYPEDESC::CPtrList& GetMemberTypeList(const NameContext& sNameSet, TYPEDESC::CPtrList& sMemberTypeList) const;
+    TYPEDESC::CPtrList& GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const;
     size_t CountOf() const; // 获得向量，矩阵和数组包含的基础类型数量
   };
 
@@ -175,6 +176,7 @@ namespace UVShader
 
     enum State
     {
+      State_SelfAdaptionLength = 1,
       State_Ok = 0,
       State_HashError = -1,          // 其它错误，已经在函数内部输出
       State_TypeNotFound = -2,       // 没有找到类型
@@ -250,11 +252,46 @@ namespace UVShader
 #endif
   };
 
+  class CInitList
+  {
+    struct STACKDESC
+    {
+      SYNTAXNODE::GlobList sInitList;
+      SYNTAXNODE::GlobList::iterator iter;
+    };
+    const SYNTAXNODE::GLOB* m_pInitListGlob;
+    cllist<STACKDESC> m_sStack;
+    GXBOOL m_bNeedAlignDepth;
+    clStringA m_strDebug;
+
+    STACKDESC& Top();
+    const STACKDESC& Top() const;
+    GXBOOL Enter(const SYNTAXNODE::GLOB* pInitListGlob);
+
+  public:
+    CInitList(const SYNTAXNODE::GLOB* pInitListGlob);
+    const SYNTAXNODE::GLOB* Get();
+    const SYNTAXNODE::GLOB* Step();
+    GXBOOL IsEnd() const;
+    GXBOOL Empty() const;
+    size_t Depth() const;
+    GXBOOL NeedAlignDepth() const;
+
+    void DbgListBegin(const clStringA& strTypeName);
+    void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);
+    void DbgListEnd();
+    void DbgSetString(const clStringA& str);
+    const clStringA& DbgString() const;
+  };
+
+  //////////////////////////////////////////////////////////////////////////
+
   class CodeParser : public ArithmeticExpression
   {
     friend class NameContext;
     friend struct TYPEDESC;
     friend struct NODE_CALC;
+    friend class CInitList;
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
     typedef ArithmeticExpression::iterator iterator;
@@ -600,8 +637,9 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferInitList(VALUE* pValuePool, const NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(const NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob); // initlist_glob.pNode->mode 必须是 MODE_InitList
-    const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
+    //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);

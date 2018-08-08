@@ -1976,12 +1976,17 @@ namespace UVShader
 
   GXBOOL SYNTAXNODE::GLOB::CompareAsToken(TOKEN::T_LPCSTR str) const
   {
-    return IsToken() ? (*pTokn == str) : NULL;
+    return IsToken() ? (*pTokn == str) : FALSE;
   }
 
   GXBOOL SYNTAXNODE::GLOB::CompareAsToken(TOKEN::TChar c) const
   {
-    return IsToken() ? (*pTokn == c) : NULL;
+    return IsToken() ? (*pTokn == c) : FALSE;
+  }
+
+  GXBOOL SYNTAXNODE::GLOB::CompareAsNode(MODE _mode) const
+  {
+    return (IsNode() && pNode->mode == _mode);
   }
 
   const TOKEN* SYNTAXNODE::GLOB::GetFrontToken() const
