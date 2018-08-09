@@ -5098,13 +5098,15 @@ NOT_INC_P:
           {
             continue;
           }
-          break;
+          break;  // 结束
+        }
+        else if(rInitList.Depth() > nDepth) {
+          break;  // 深度过深并且没有结束：初始值设定项太多
         }
       }
 
       if(rInitList.Depth() >= nDepth && rInitList.IsEnd() == FALSE)
       {
-        CLBREAK; // 测试代码不可能到这里，所以暂时限制下
         OutputErrorW(*rInitList.Get(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
         return NULL;
       }
