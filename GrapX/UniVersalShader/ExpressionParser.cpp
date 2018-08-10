@@ -5070,17 +5070,13 @@ NOT_INC_P:
     {
       clStringA strList;
       rInitList.DbgListBegin(pRefType->name);
-      size_t nListDepth = 0; // rInitList.Depth();
-
+      rInitList.Get(); // 强制进入列表最深层
+      const size_t nListDepth =  rInitList.Depth();
+      const GLOB* pGlob = NULL;
       for(size_t i = 0; i < array_count;)
       {
-        const GLOB* pGlob = rInitList.Get();
-
-        if(pGlob == NULL) {
+        if((pGlob = rInitList.Get()) == NULL) {
           break;
-        }
-        else if(i == 0) {
-          nListDepth = rInitList.Depth();
         }
 
         ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
@@ -5094,18 +5090,18 @@ NOT_INC_P:
         i++;
         if(rInitList.Step() == NULL)
         {
-          if(rInitList.Depth() >= nDepth || rInitList.Depth() == nListDepth) 
+          if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth) 
           {
             continue;
           }
           break;  // 结束
         }
-        else if(rInitList.Depth() > nDepth) {
+        else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
           break;  // 深度过深并且没有结束：初始值设定项太多
         }
       }
 
-      if(rInitList.Depth() >= nDepth && rInitList.IsEnd() == FALSE)
+      if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
       {
         OutputErrorW(*rInitList.Get(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
         return NULL;
