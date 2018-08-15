@@ -279,6 +279,7 @@ namespace UVShader
     GXBOOL Empty() const;
     size_t Depth() const;
     GXBOOL NeedAlignDepth() const;
+    void ClearAlignDepthFlag();
 
     void DbgListBegin(const clStringA& strTypeName);
     void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);

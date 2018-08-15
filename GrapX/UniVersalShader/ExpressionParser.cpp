@@ -5109,10 +5109,15 @@ NOT_INC_P:
         }
       }
 
+      
       if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
       {
         OutputErrorW(*rInitList.Get(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
         return NULL;
+      }
+      else if(rInitList.Depth() == nListDepth)
+      {
+        rInitList.ClearAlignDepthFlag();
       }
 
       rInitList.DbgListEnd();
@@ -5128,6 +5133,9 @@ NOT_INC_P:
     }
     else if(pRefType->pElementType->cate == TYPEDESC::TypeCate_MultiDim)
     {
+      rInitList.Get(); // 强制进入列表最深层
+      const size_t nListDepth = rInitList.Depth();
+
       clStringA strList = "<";
       strList.Append(pRefType->name).Append(">{");
       for(index = 0; index < array_count; index++)
@@ -5136,7 +5144,8 @@ NOT_INC_P:
           return NULL;
         }
         strList.Append(rInitList.DbgString()).Append(',');
-        if(rInitList.NeedAlignDepth() && nDepth > rInitList.Depth()) {
+        if(rInitList.NeedAlignDepth() && nDepth > rInitList.Depth() && rInitList.Depth() != nListDepth) {
+          index++;
           break;
         }
       }
@@ -6787,6 +6796,11 @@ NOT_INC_P:
   GXBOOL CInitList::NeedAlignDepth() const
   {
     return m_bNeedAlignDepth;
+  }
+
+  void CInitList::ClearAlignDepthFlag()
+  {
+    m_bNeedAlignDepth = FALSE;
   }
 
   void CInitList::DbgListBegin(const clStringA& strTypeName)
