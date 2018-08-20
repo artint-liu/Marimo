@@ -261,6 +261,7 @@ namespace UVShader
     {
       SYNTAXNODE::GlobList sInitList;
       SYNTAXNODE::GlobList::iterator iter;
+      const TOKEN* ptkOpcode; // 用于输出定位
     };
     const SYNTAXNODE::GLOB* m_pInitListGlob;
     cllist<STACKDESC> m_sStack;
@@ -272,8 +273,13 @@ namespace UVShader
     GXBOOL Enter(const SYNTAXNODE::GLOB* pInitListGlob);
 
   public:
+    enum
+    {
+      E_FAILED = -1
+    };
     CInitList(const SYNTAXNODE::GLOB* pInitListGlob);
     const SYNTAXNODE::GLOB* Get();
+    const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
     GXBOOL IsEnd() const;
     GXBOOL Empty() const;

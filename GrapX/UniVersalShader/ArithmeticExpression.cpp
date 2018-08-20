@@ -623,27 +623,31 @@ namespace UVShader
 
       if(A.pTokn->precedence == TOKEN::ID_BRACE && A.pTokn->scope == scope.begin + 1) {
         if(*A.pTokn == '{') {
-          bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_InitList, NULL, NULL);
+          bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_InitList, A.pTokn, NULL, NULL);
         }
         else {
-          bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Bracket, &A, &B);
+          bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Bracket, A.pTokn, &A, &B);
         }
       }
-      else if(A.pTokn->precedence > 0)
+      else if(A.pTokn->precedence > OPP(0)) // 不包括“,”
       {
         bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, A.pTokn, NULL, &B);
         DbgDumpScope(A.pTokn->ToString(), TKSCOPE(0,0), TKSCOPE(scope.begin + 1, scope.end));
       }
-      else if(B.pTokn->precedence > 0)
+      else if(B.pTokn->precedence > OPP(0))
       {
         bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, B.pTokn, &A, NULL);
         DbgDumpScope(B.pTokn->ToString(), TKSCOPE(scope.begin, scope.begin + 1), TKSCOPE(0,0));
       }
-      else {
+      else if(front.IsIdentifier()) {
         // 变量声明
         bret = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Definition, &A, &B);
       }
+      else {
+        goto GO_NEXT;
+      }
       return bret;
+GO_NEXT:;
     }
     else if(front.precedence == 0 && m_aTokens[scope.begin + 1].precedence == 0 && m_bHigherDefiniton == FALSE) // 变量声明
     {
@@ -712,7 +716,7 @@ namespace UVShader
 
   GXBOOL ArithmeticExpression::BreakComma(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence)
   {
-    GLOB A;
+    //GLOB A;
     GLOB B;
     // 对“,”操作符进行特殊处理，以便支持大超大数组
     if(nMinPrecedence == OPP(0))
@@ -736,11 +740,21 @@ namespace UVShader
           if(sGlobStack.empty()) {
             return -1;
           }
+
           if(ParseArithmeticExpression(depth + 1, scopeB, pDesc, nMinPrecedence + 1) == FALSE) {
             return FALSE;
           }
-
-          ASSERT(gc.A.ptr == sGlobStack.top().A.ptr);
+          else if(pDesc->ptr == NULL)
+          {
+            pDesc->ptr = sGlobStack.top().A.ptr;
+            sGlobStack.pop();
+            if(sGlobStack.empty()) {
+              return TRUE;
+            }
+          }
+          else {
+            ASSERT(gc.A.ptr == sGlobStack.top().A.ptr);
+          }
 
           do {
             //A = sGlobStack.top();
@@ -757,9 +771,13 @@ namespace UVShader
 
         TKSCOPE scopeA(scopeB.begin, nComma);
         scopeB.begin = nComma + 1;
-        A.ptr = NULL;
+        gc.A.ptr = NULL;
 
         if(ParseArithmeticExpression(depth + 1, scopeA, &gc.A, nMinPrecedence + 1) == FALSE) {
+          return FALSE;
+        }
+        else if(gc.A.ptr == NULL) {
+          ERROR_MSG__MISSING_SEMICOLON(m_aTokens[scopeA.begin]);
           return FALSE;
         }
         gc.pComma = &m_aTokens[nComma];

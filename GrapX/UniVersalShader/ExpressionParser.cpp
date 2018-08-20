@@ -5083,14 +5083,21 @@ NOT_INC_P:
       const GLOB* pGlob = NULL;
       for(index = 0; index < array_count;)
       {
-        if((pGlob = rInitList.Get()) == NULL) {
+        if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
           break;
         }
 
-        ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-        const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
-        if(pTypeDesc == NULL) {
-          return NULL;
+        if(pGlob == NULL)
+        {
+          // 使用了“{}”定义，解释为0
+        }
+        else
+        {
+          ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
+          const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
+          if(pTypeDesc == NULL) {
+            return NULL;
+          }
         }
 
         rInitList.DbgListAdd(pGlob);
@@ -5112,7 +5119,7 @@ NOT_INC_P:
       
       if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
       {
-        OutputErrorW(*rInitList.Get(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+        OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
         return NULL;
       }
       else if(rInitList.Depth() == nListDepth)
@@ -5161,6 +5168,13 @@ NOT_INC_P:
 
       rInitList.DbgSetString(strList);
       TRACE("%s\n", strList.CStr());
+
+      if(nDepth == 1 && rInitList.Empty() == FALSE && rInitList.IsEnd() == FALSE)
+      {
+        OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+        return NULL;
+      }
+
     }
     else
     {
@@ -6696,6 +6710,7 @@ NOT_INC_P:
       return FALSE;
     }
 
+    const TOKEN* ptkOpcode = pInitListGlob->pNode->pOpcode;
     pInitListGlob = &pInitListGlob->pNode->Operand[0];
     while(true)
     {
@@ -6703,10 +6718,12 @@ NOT_INC_P:
       STACKDESC& top = Top();
       CodeParser::BreakComma(top.sInitList, *pInitListGlob);
       top.iter = top.sInitList.begin();
+      top.ptkOpcode = ptkOpcode;
       if(top.sInitList.empty() || _CL_NOT_(top.iter->CompareAsNode(SYNTAXNODE::MODE_InitList))) {
         break;
       }
       else {
+        ptkOpcode = top.iter->pNode->pOpcode;
         pInitListGlob = &top.iter->pNode->Operand[0];
       }
     } // while
@@ -6730,7 +6747,20 @@ NOT_INC_P:
     {
       Enter(&*Top().iter);
     }
+    
+    if(Top().sInitList.empty()) {
+      return NULL;
+    }
     return &*Top().iter;
+  }
+
+  const TOKEN* CInitList::GetLocation() const
+  {
+    ASSERT(!m_sStack.empty());
+    if(Top().sInitList.empty()) {
+      return Top().ptkOpcode;
+    }
+    return (*Top().iter).GetFrontToken();
   }
 
   const SYNTAXNODE::GLOB* CInitList::Step()
@@ -6753,7 +6783,9 @@ NOT_INC_P:
 #else
     // 返回值是步进后的Glob
     STACKDESC& top = Top();
-    ++top.iter;
+    if(!top.sInitList.empty()) {
+      ++top.iter;
+    }
 
     if(IsEnd()) {
       do {
@@ -6812,7 +6844,7 @@ NOT_INC_P:
   void CInitList::DbgListAdd(const SYNTAXNODE::GLOB* pGlob)
   {
     clStringA strA;
-    m_strDebug.Append(pGlob->ToString(strA)).Append(',');
+    m_strDebug.Append(pGlob ? pGlob->ToString(strA) : "0").Append(',');
   }
 
   void CInitList::DbgListEnd()
