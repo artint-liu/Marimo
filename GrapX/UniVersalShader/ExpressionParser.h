@@ -266,7 +266,7 @@ namespace UVShader
     const SYNTAXNODE::GLOB* m_pInitListGlob;
     cllist<STACKDESC> m_sStack;
     GXBOOL m_bNeedAlignDepth;
-    clStringA m_strDebug;
+    cllist<clStringA> m_DebugStrings; // 用来生成解析结构式
 
     STACKDESC& Top();
     const STACKDESC& Top() const;
@@ -289,9 +289,12 @@ namespace UVShader
 
     void DbgListBegin(const clStringA& strTypeName);
     void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);
+    void DbgListAdd(const clStringA& str);
     void DbgListEnd();
+    void DbgPushString();
+    void DbgPopString();
     void DbgSetString(const clStringA& str);
-    const clStringA& DbgString() const;
+    const clStringA& DbgGetString() const;
   };
 
   //////////////////////////////////////////////////////////////////////////

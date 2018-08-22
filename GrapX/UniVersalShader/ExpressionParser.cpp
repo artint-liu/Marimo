@@ -5066,21 +5066,101 @@ NOT_INC_P:
   
   const TYPEDESC* CodeParser::InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
   {
-    ASSERT(pRefType->cate == TYPEDESC::TypeCate_MultiDim);
+    ASSERT(pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
     // 被这个功能折磨了快三周，没找文档，完全使靠vs2010 C++的黑盒测试出来的
-    // 之前比较关注花括号的层级，后来发现“,”才比较重要，一段列表前面的逗号一定是这个列表所在层级的开始
+    // 之前比较关注花括号的层级，后来发现“,”才比较重要，一段列表前面的逗号一定是这个列表所在层级的开始(后来发现也不完全是，靠)
     
-    const b32 bAdaptedLength = (pRefType->sDimensions.back() == 0);
+    const b32 bAdaptedLength = (_CL_NOT_(pRefType->sDimensions.empty()) && pRefType->sDimensions.back() == 0);
     size_t index;
-    size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
 
-    if(IS_SCALER_CATE(pRefType->pElementType))
+    if(pRefType->cate == TYPEDESC::TypeCate_Struct) // 结构体
+    {
+      rInitList.DbgListBegin(pRefType->name);
+      rInitList.Get(); // 强制进入列表最深层
+
+      TYPEDESC::CPtrList sMemberTypeList;
+      pRefType->GetMemberTypeList(sMemberTypeList);
+
+      const size_t nListDepth = rInitList.Depth();
+      const GLOB* pGlob = NULL;
+
+      for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it)
+      {
+        if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
+          break;
+        }
+
+        if(pGlob == NULL)
+        {
+          // 使用了“{}”定义，解释为0
+        }
+        else if((*it)->cate == TYPEDESC::TypeCate_Struct || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
+        {
+          rInitList.DbgPushString();
+          if(InferInitList(pValuePool, sNameSet, *it, rInitList, nDepth + 1) == NULL) {
+            return NULL;
+          }
+          rInitList.DbgPopString();
+
+          if(rInitList.Empty()) {
+            break;
+          }
+          continue;
+        }
+        else
+        {
+          ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
+          const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
+          if(pTypeDesc == NULL) {
+            return NULL;
+          }
+        }
+
+        rInitList.DbgListAdd(pGlob);
+
+        if(rInitList.Step() == NULL)
+        {
+          if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth)
+          {
+            continue;
+          }
+          break;  // 结束
+        }
+        else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
+          break;  // 深度过深并且没有结束：初始值设定项太多
+        }
+      }
+
+
+      if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
+      {
+        OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+        return NULL;
+      }
+      else if(rInitList.Depth() == nListDepth)
+      {
+        rInitList.ClearAlignDepthFlag();
+      }
+
+      rInitList.DbgListEnd();
+
+      if(bAdaptedLength) {
+        clStringA str = rInitList.DbgGetString();
+        const size_t len = pRefType->name.GetLength();
+        pRefType = sNameSet.SetTypeSize(pRefType, index);
+        str.Replace(1, len, pRefType->name);
+        rInitList.DbgSetString(str);
+      }
+      TRACE("%s\n", rInitList.DbgGetString().CStr());
+    }
+    else if(IS_SCALER_CATE(pRefType->pElementType)) // 标量数组
     {
       clStringA strList;
       rInitList.DbgListBegin(pRefType->name);
       rInitList.Get(); // 强制进入列表最深层
       const size_t nListDepth =  rInitList.Depth();
       const GLOB* pGlob = NULL;
+      size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
       for(index = 0; index < array_count;)
       {
         if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
@@ -5130,27 +5210,28 @@ NOT_INC_P:
       rInitList.DbgListEnd();
 
       if(bAdaptedLength) {
-        clStringA str = rInitList.DbgString();
+        clStringA str = rInitList.DbgGetString();
         const size_t len = pRefType->name.GetLength();
         pRefType = sNameSet.SetTypeSize(pRefType, index);
         str.Replace(1, len, pRefType->name);
         rInitList.DbgSetString(str);
       }
-      TRACE("%s\n", rInitList.DbgString().CStr());
+      TRACE("%s\n", rInitList.DbgGetString().CStr());
     }
-    else if(pRefType->pElementType->cate == TYPEDESC::TypeCate_MultiDim)
+    else if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) // 数组
     {
       rInitList.Get(); // 强制进入列表最深层
       const size_t nListDepth = rInitList.Depth();
 
       clStringA strList = "<";
       strList.Append(pRefType->name).Append(">{");
+      size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
       for(index = 0; index < array_count; index++)
       {
         if(InferInitList(pValuePool, sNameSet, pRefType->pElementType, rInitList, nDepth + 1) == NULL) {
           return NULL;
         }
-        strList.Append(rInitList.DbgString()).Append(',');
+        strList.Append(rInitList.DbgGetString()).Append(',');
         if(rInitList.NeedAlignDepth() && nDepth > rInitList.Depth() && rInitList.Depth() != nListDepth) {
           index++;
           break;
@@ -5200,7 +5281,7 @@ NOT_INC_P:
     const TYPEDESC* pTypeDesc = InferInitList(pValuePool, sNameSet, pRefType, il, 1);
     SAFE_DELETE_ARRAY(pValuePool);
     
-    m_aDbgExpressionOperStack.push_back(il.DbgString());
+    m_aDbgExpressionOperStack.push_back(il.DbgGetString());
     return pTypeDesc;
   }
 
@@ -5769,9 +5850,18 @@ NOT_INC_P:
 
   void NameContext::Cleanup()
   {
+    for(auto it = m_StructContextMap.begin(); it != m_StructContextMap.end(); ++it)
+    {
+      SAFE_DELETE(it->second);
+    }
+
     m_pReturnType = NULL;
     m_TypeMap.clear();
+    m_FuncMap.clear();
     m_VariableMap.clear();
+    m_eLastState = State_Ok;
+    m_StructContextMap.clear();
+    m_pReturnType = NULL;
     BuildIntrinsicType(); // TODO: CodeParser::Attach每次都调用这个，优化一下
   }
   
@@ -6736,6 +6826,7 @@ NOT_INC_P:
   {
     ASSERT(pInitListGlob->CompareAsNode(SYNTAXNODE::MODE_InitList));
     Enter(pInitListGlob);
+    m_DebugStrings.push_back("");
   }
 
   const SYNTAXNODE::GLOB* CInitList::Get()
@@ -6837,30 +6928,49 @@ NOT_INC_P:
 
   void CInitList::DbgListBegin(const clStringA& strTypeName)
   {
-    m_strDebug = "<";
-    m_strDebug.Append(strTypeName).Append(">{");
+    m_DebugStrings.back() = "<";
+    m_DebugStrings.back().Append(strTypeName).Append(">{");
   }
 
   void CInitList::DbgListAdd(const SYNTAXNODE::GLOB* pGlob)
   {
     clStringA strA;
-    m_strDebug.Append(pGlob ? pGlob->ToString(strA) : "0").Append(',');
+    DbgListAdd(pGlob ? pGlob->ToString(strA) : "0");
+  }
+
+  void CInitList::DbgListAdd(const clStringA& str)
+  {
+    m_DebugStrings.back().Append(str).Append(',');
   }
 
   void CInitList::DbgListEnd()
   {
-    m_strDebug.TrimRight(',');
-    m_strDebug.Append("}");
+    m_DebugStrings.back().TrimRight(',');
+    m_DebugStrings.back().Append("}");
+  }
+
+  void CInitList::DbgPushString()
+  {
+    ASSERT(!m_DebugStrings.empty());
+    m_DebugStrings.push_back("");
+  }
+
+  void CInitList::DbgPopString()
+  {
+    clStringA str = m_DebugStrings.back();
+    m_DebugStrings.pop_back();
+    ASSERT(!m_DebugStrings.empty());
+    DbgListAdd(str);
   }
 
   void CInitList::DbgSetString(const clStringA& str)
   {
-    m_strDebug = str;
+    m_DebugStrings.back() = str;
   }
 
-  const clStringA& CInitList::DbgString() const
+  const clStringA& CInitList::DbgGetString() const
   {
-    return m_strDebug;
+    return m_DebugStrings.back();
   }
 
 } // namespace UVShader
