@@ -652,6 +652,7 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList_LinearArray(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob); // initlist_glob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
