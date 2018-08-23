@@ -3926,7 +3926,9 @@ NOT_INC_P:
     }
     else if(glob.IsNode())
     {
-      if(glob.pNode->CompareOpcode(':'))
+      if(glob.pNode->CompareOpcode(':') ||
+        glob.pNode->mode == SYNTAXNODE::MODE_Subscript0 ||
+        glob.pNode->mode == SYNTAXNODE::MODE_Subscript)
       {
         return GetVariableNameWithoutSeamantic(glob.pNode->Operand[0]);
       }
@@ -5064,6 +5066,91 @@ NOT_INC_P:
     return NULL;
   }
   
+  const TYPEDESC* CodeParser::InferInitList_Struct(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
+  {
+    rInitList.DbgListBegin(pRefType->name);
+    rInitList.Get(); // 强制进入列表最深层
+
+    TYPEDESC::CPtrList sMemberTypeList;
+    pRefType->GetMemberTypeList(sMemberTypeList);
+
+    const size_t nListDepth = rInitList.Depth();
+    const GLOB* pGlob = NULL;
+
+    for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it)
+    {
+      if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
+        break;
+      }
+
+      if(pGlob == NULL)
+      {
+        // 使用了“{}”定义，解释为0
+      }
+      else if((*it)->cate == TYPEDESC::TypeCate_Struct || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
+      {
+        rInitList.DbgPushString();
+        if(InferInitList(pValuePool, sNameSet, *it, rInitList, nDepth + 1) == NULL) {
+          return NULL;
+        }
+        rInitList.DbgPopString();
+
+        if(rInitList.NeedAlignDepth() && nDepth > rInitList.Depth() && rInitList.Depth() != nListDepth) {
+          break;
+        }
+        else if(rInitList.Empty()) {
+          break;
+        }
+        continue;
+      }
+      else
+      {
+        ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
+        const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
+        if(pTypeDesc == NULL) {
+          return NULL;
+        }
+      }
+
+      rInitList.DbgListAdd(pGlob);
+
+      if(rInitList.Step() == NULL)
+      {
+        if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth)
+        {
+          continue;
+        }
+        break;  // 结束
+      }
+      else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
+        break;  // 深度过深并且没有结束：初始值设定项太多
+      }
+    }
+
+
+    if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
+    {
+      OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+      return NULL;
+    }
+    else if(rInitList.Depth() == nListDepth)
+    {
+      rInitList.ClearAlignDepthFlag();
+    }
+
+    rInitList.DbgListEnd();
+
+    //if(bAdaptedLength) {
+    //  clStringA str = rInitList.DbgGetString();
+    //  const size_t len = pRefType->name.GetLength();
+    //  pRefType = sNameSet.SetTypeSize(pRefType, index);
+    //  str.Replace(1, len, pRefType->name);
+    //  rInitList.DbgSetString(str);
+    //}
+    TRACE("%s\n", rInitList.DbgGetString().CStr());
+    return pRefType;
+  }
+
   const TYPEDESC* CodeParser::InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
   {
     ASSERT(pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
@@ -5075,83 +5162,7 @@ NOT_INC_P:
 
     if(pRefType->cate == TYPEDESC::TypeCate_Struct) // 结构体
     {
-      rInitList.DbgListBegin(pRefType->name);
-      rInitList.Get(); // 强制进入列表最深层
-
-      TYPEDESC::CPtrList sMemberTypeList;
-      pRefType->GetMemberTypeList(sMemberTypeList);
-
-      const size_t nListDepth = rInitList.Depth();
-      const GLOB* pGlob = NULL;
-
-      for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it)
-      {
-        if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
-          break;
-        }
-
-        if(pGlob == NULL)
-        {
-          // 使用了“{}”定义，解释为0
-        }
-        else if((*it)->cate == TYPEDESC::TypeCate_Struct || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
-        {
-          rInitList.DbgPushString();
-          if(InferInitList(pValuePool, sNameSet, *it, rInitList, nDepth + 1) == NULL) {
-            return NULL;
-          }
-          rInitList.DbgPopString();
-
-          if(rInitList.Empty()) {
-            break;
-          }
-          continue;
-        }
-        else
-        {
-          ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-          const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
-          if(pTypeDesc == NULL) {
-            return NULL;
-          }
-        }
-
-        rInitList.DbgListAdd(pGlob);
-
-        if(rInitList.Step() == NULL)
-        {
-          if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth)
-          {
-            continue;
-          }
-          break;  // 结束
-        }
-        else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
-          break;  // 深度过深并且没有结束：初始值设定项太多
-        }
-      }
-
-
-      if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
-      {
-        OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
-        return NULL;
-      }
-      else if(rInitList.Depth() == nListDepth)
-      {
-        rInitList.ClearAlignDepthFlag();
-      }
-
-      rInitList.DbgListEnd();
-
-      if(bAdaptedLength) {
-        clStringA str = rInitList.DbgGetString();
-        const size_t len = pRefType->name.GetLength();
-        pRefType = sNameSet.SetTypeSize(pRefType, index);
-        str.Replace(1, len, pRefType->name);
-        rInitList.DbgSetString(str);
-      }
-      TRACE("%s\n", rInitList.DbgGetString().CStr());
+      return InferInitList_Struct(pValuePool, sNameSet, pRefType, rInitList, nDepth);
     }
     else if(IS_SCALER_CATE(pRefType->pElementType)) // 标量数组
     {
@@ -5223,32 +5234,38 @@ NOT_INC_P:
       rInitList.Get(); // 强制进入列表最深层
       const size_t nListDepth = rInitList.Depth();
 
-      clStringA strList = "<";
-      strList.Append(pRefType->name).Append(">{");
+      //clStringA strList = "<";
+      //strList.Append(pRefType->name).Append(">{");
+      rInitList.DbgListBegin(pRefType->name);
       size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
       for(index = 0; index < array_count; index++)
       {
+        rInitList.DbgPushString();
         if(InferInitList(pValuePool, sNameSet, pRefType->pElementType, rInitList, nDepth + 1) == NULL) {
           return NULL;
         }
-        strList.Append(rInitList.DbgGetString()).Append(',');
+        //strList.Append(rInitList.DbgGetString()).Append(',');
+        rInitList.DbgPopString();
         if(rInitList.NeedAlignDepth() && nDepth > rInitList.Depth() && rInitList.Depth() != nListDepth) {
           index++;
           break;
         }
       }
 
-      strList.TrimRight(',');
-      strList.Append("}");
+      //strList.TrimRight(',');
+      //strList.Append("}");
+      rInitList.DbgListEnd();
+
 
       if(bAdaptedLength) {
         const size_t len = pRefType->name.GetLength();
         pRefType = sNameSet.SetTypeSize(pRefType, index);
-        strList.Replace(1, len, pRefType->name);
+        //strList.Replace(1, len, pRefType->name);
+        rInitList.DbgGetString().Replace(1, len, pRefType->name);
       }
 
-      rInitList.DbgSetString(strList);
-      TRACE("%s\n", strList.CStr());
+      //rInitList.DbgSetString(strList);
+      TRACE("%s\n", rInitList.DbgGetString().CStr());
 
       if(nDepth == 1 && rInitList.Empty() == FALSE && rInitList.IsEnd() == FALSE)
       {
@@ -6724,6 +6741,13 @@ NOT_INC_P:
     ASSERT(cate == TypeCate_Struct); // 外部保证
     ASSERT(pMemberNode->mode == SYNTAXNODE::MODE_Block); // 防止以后修改
 
+    sMemberTypeList.clear();
+
+    const NameContext* pStructCtx = pNameCtx->GetStructContext(name);
+    if(pStructCtx == NULL) {
+      return sMemberTypeList;
+    }
+
     SYNTAXNODE::GlobList sMemberList;
 
     CodeParser::BreakChain(sMemberList, pMemberNode->Operand[0]);
@@ -6731,14 +6755,18 @@ NOT_INC_P:
     {
       if(it->IsNode() && it->pNode->mode == SYNTAXNODE::MODE_Definition)
       {
-        if(it->pNode->Operand[0].IsToken()) {
-          const TYPEDESC* pTypeDesc = pNameCtx->GetType(*it->pNode->Operand[0].pTokn);
-          ASSERT(pTypeDesc);
-          sMemberTypeList.push_back(pTypeDesc);
-        }
-        else {
-          CLBREAK;
-        }
+        //if(it->pNode->Operand[0].IsToken()) {
+        //  const TYPEDESC* pTypeDesc = pNameCtx->GetType(*it->pNode->Operand[0].pTokn);
+        //  ASSERT(pTypeDesc);
+        //  sMemberTypeList.push_back(pTypeDesc);
+        //}
+        //else {
+        //  CLBREAK;
+        //}
+        const TOKEN* ptkVariable = CodeParser::GetVariableNameWithoutSeamantic(it->pNode->Operand[1]);
+        const TYPEDESC* pMemberTypeDesc = pStructCtx->GetVariable(ptkVariable);
+        ASSERT(pMemberTypeDesc);
+        sMemberTypeList.push_back(pMemberTypeDesc);
       }
       else {
         CLBREAK;
@@ -6968,7 +6996,7 @@ NOT_INC_P:
     m_DebugStrings.back() = str;
   }
 
-  const clStringA& CInitList::DbgGetString() const
+  clStringA& CInitList::DbgGetString()
   {
     return m_DebugStrings.back();
   }

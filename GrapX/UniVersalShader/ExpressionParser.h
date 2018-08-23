@@ -294,7 +294,7 @@ namespace UVShader
     void DbgPushString();
     void DbgPopString();
     void DbgSetString(const clStringA& str);
-    const clStringA& DbgGetString() const;
+    clStringA& DbgGetString();
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -651,6 +651,7 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList_Struct(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob); // initlist_glob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
@@ -675,7 +676,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
     //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
-    const TOKEN* GetVariableNameWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量名，如“vColor”
+    static const TOKEN* GetVariableNameWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量名，如“vColor”
     const SYNTAXNODE::GLOB* GetVariableDeclWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量声明，可能含有下标，如“vColor[2][3]”
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
 
