@@ -5151,13 +5151,80 @@ NOT_INC_P:
     return pRefType;
   }
 
+  const TYPEDESC* CodeParser::InferInitList_LinearArray(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
+  {
+    size_t index;
+    const b32 bAdaptedLength = (_CL_NOT_(pRefType->sDimensions.empty()) && pRefType->sDimensions.back() == 0);
+    rInitList.DbgListBegin(pRefType->name);
+    rInitList.Get(); // 强制进入列表最深层
+    const size_t nListDepth = rInitList.Depth();
+    const GLOB* pGlob = NULL;
+    size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
+    for(index = 0; index < array_count;)
+    {
+      if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
+        break;
+      }
+
+      if(pGlob == NULL)
+      {
+        // 使用了“{}”定义，解释为0
+      }
+      else
+      {
+        ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
+        const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
+        if(pTypeDesc == NULL) {
+          return NULL;
+        }
+      }
+
+      rInitList.DbgListAdd(pGlob);
+
+      index++;
+      if(rInitList.Step() == NULL)
+      {
+        if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth)
+        {
+          continue;
+        }
+        break;  // 结束
+      }
+      else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
+        break;  // 深度过深并且没有结束：初始值设定项太多
+      }
+    }
+
+
+    if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
+    {
+      OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+      return NULL;
+    }
+    else if(rInitList.Depth() == nListDepth)
+    {
+      rInitList.ClearAlignDepthFlag();
+    }
+
+    rInitList.DbgListEnd();
+
+    if(bAdaptedLength) {
+      clStringA str = rInitList.DbgGetString();
+      const size_t len = pRefType->name.GetLength();
+      pRefType = sNameSet.SetTypeSize(pRefType, index);
+      str.Replace(1, len, pRefType->name);
+      rInitList.DbgSetString(str);
+    }
+    TRACE("%s\n", rInitList.DbgGetString().CStr());
+    return pRefType;
+  }
+
   const TYPEDESC* CodeParser::InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
   {
     ASSERT(pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
     // 被这个功能折磨了快三周，没找文档，完全使靠vs2010 C++的黑盒测试出来的
     // 之前比较关注花括号的层级，后来发现“,”才比较重要，一段列表前面的逗号一定是这个列表所在层级的开始(后来发现也不完全是，靠)
     
-    const b32 bAdaptedLength = (_CL_NOT_(pRefType->sDimensions.empty()) && pRefType->sDimensions.back() == 0);
     size_t index;
 
     if(pRefType->cate == TYPEDESC::TypeCate_Struct) // 结构体
@@ -5166,71 +5233,11 @@ NOT_INC_P:
     }
     else if(IS_SCALER_CATE(pRefType->pElementType)) // 标量数组
     {
-      clStringA strList;
-      rInitList.DbgListBegin(pRefType->name);
-      rInitList.Get(); // 强制进入列表最深层
-      const size_t nListDepth =  rInitList.Depth();
-      const GLOB* pGlob = NULL;
-      size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
-      for(index = 0; index < array_count;)
-      {
-        if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
-          break;
-        }
-
-        if(pGlob == NULL)
-        {
-          // 使用了“{}”定义，解释为0
-        }
-        else
-        {
-          ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-          const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
-          if(pTypeDesc == NULL) {
-            return NULL;
-          }
-        }
-
-        rInitList.DbgListAdd(pGlob);
-
-        index++;
-        if(rInitList.Step() == NULL)
-        {
-          if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth) 
-          {
-            continue;
-          }
-          break;  // 结束
-        }
-        else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
-          break;  // 深度过深并且没有结束：初始值设定项太多
-        }
-      }
-
-      
-      if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
-      {
-        OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
-        return NULL;
-      }
-      else if(rInitList.Depth() == nListDepth)
-      {
-        rInitList.ClearAlignDepthFlag();
-      }
-
-      rInitList.DbgListEnd();
-
-      if(bAdaptedLength) {
-        clStringA str = rInitList.DbgGetString();
-        const size_t len = pRefType->name.GetLength();
-        pRefType = sNameSet.SetTypeSize(pRefType, index);
-        str.Replace(1, len, pRefType->name);
-        rInitList.DbgSetString(str);
-      }
-      TRACE("%s\n", rInitList.DbgGetString().CStr());
+      return InferInitList_LinearArray(pValuePool, sNameSet, pRefType, rInitList, nDepth);
     }
     else if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) // 数组
     {
+      const b32 bAdaptedLength = (_CL_NOT_(pRefType->sDimensions.empty()) && pRefType->sDimensions.back() == 0);
       rInitList.Get(); // 强制进入列表最深层
       const size_t nListDepth = rInitList.Depth();
 
@@ -6294,7 +6301,7 @@ NOT_INC_P:
       if(bSelfAdaptionLength)
       {
         // 自适应长度的数组
-        // 变量会先被注册为类似“int@2@0”类型，在之后的确定长度后修改为“int@2@3”
+        // 变量会先被注册为类似“int*2*0”类型，在之后的确定长度后修改为“int*2*3”
         m_eLastState = State_SelfAdaptionLength;
         value.SetZero();
       }
@@ -6374,7 +6381,7 @@ NOT_INC_P:
           td.pDesc = pTypeDesc->pDesc;
           for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
           {
-            td.name.Append('@').AppendInteger32(*it); // int x[2][3][4] 记为"int@4@3@2"
+            td.name.Append('*').AppendInteger32(*it); // int x[2][3][4] 记为"int*4*3*2"
             td.sDimensions.push_back(*it);
 
             if(*it == 0 && (&*it != &sDimensions.back()))
@@ -6412,7 +6419,7 @@ NOT_INC_P:
   //  TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, this };
 
   //  td.name = pTypeDesc->name;
-  //  td.name.Append('@').AppendInteger32(nDimension); // int x[2][3][4] 记为"int@4@3@2"
+  //  td.name.Append('*').AppendInteger32(nDimension); // int x[2][3][4] 记为"int*4*3*2"
 
   //  td.sDimensions = pTypeDesc->sDimensions;
   //  td.sDimensions.push_back(nDimension);
@@ -6602,7 +6609,7 @@ NOT_INC_P:
   const TYPEDESC* NameContext::SetTypeSize(const TYPEDESC* pTypeDesc, size_t nCount)
   {
     ASSERT(pTypeDesc->sDimensions.back() == 0); // 外部保证
-    ASSERT(pTypeDesc->name.EndsWith("@0"));
+    ASSERT(pTypeDesc->name.EndsWith("*0"));
     clStringA name = pTypeDesc->name;
     name.TrimRight('0');
     name.AppendUInt32(static_cast<u32>(nCount));
