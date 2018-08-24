@@ -263,10 +263,14 @@ namespace UVShader
       SYNTAXNODE::GlobList::iterator iter;
       const TOKEN* ptkOpcode; // 用于输出定位
     };
+    CodeParser*             m_pCodeParser;
+    NameContext&            m_rNameCtx;
     const SYNTAXNODE::GLOB* m_pInitListGlob;
-    cllist<STACKDESC> m_sStack;
-    GXBOOL m_bNeedAlignDepth;
-    cllist<clStringA> m_DebugStrings; // 用来生成解析结构式
+    cllist<STACKDESC>       m_sStack;
+    GXBOOL                  m_bNeedAlignDepth;
+    VALUE*                  m_pValuePool;
+    size_t                  m_nValueCount;
+    cllist<clStringA>       m_DebugStrings; // 用来生成解析结构式
 
     STACKDESC& Top();
     const STACKDESC& Top() const;
@@ -277,7 +281,8 @@ namespace UVShader
     {
       E_FAILED = -1
     };
-    CInitList(const SYNTAXNODE::GLOB* pInitListGlob);
+    CInitList(CodeParser* pCodeParser, NameContext& rNameCtx, const SYNTAXNODE::GLOB* pInitListGlob);
+    void SetValuePool(VALUE* pValuePool, size_t count);
     const SYNTAXNODE::GLOB* Get();
     const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
@@ -288,7 +293,9 @@ namespace UVShader
     GXBOOL NeedAlignDepth(size_t nDimDepth, size_t nListDepth) const;
     void ClearAlignDepthFlag();
 
+    size_t GetMaxCount() const; // 如果是自适应长度，用这个来获得最大可能的长度
     size_t BeginList();
+    VALUE* ValuePoolEnd() const;
 
     void DbgListBegin(const clStringA& strTypeName);
     void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);
