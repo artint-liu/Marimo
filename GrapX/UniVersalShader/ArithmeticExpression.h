@@ -359,6 +359,7 @@ namespace UVShader
       clStringA& ToString(clStringA& str) const;
     };
     typedef clist<GLOB> GlobList;
+    typedef clist<GLOB*> GlobPtrList;
 
     GLOB Operand[s_NumOfOperand];
 

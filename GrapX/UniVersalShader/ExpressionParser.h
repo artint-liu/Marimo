@@ -281,11 +281,14 @@ namespace UVShader
     const SYNTAXNODE::GLOB* Get();
     const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
+    GXBOOL Step(size_t nDimDepth, size_t nListDepth);
     GXBOOL IsEnd() const;
     GXBOOL Empty() const;
     size_t Depth() const;
-    GXBOOL NeedAlignDepth() const;
+    GXBOOL NeedAlignDepth(size_t nDimDepth, size_t nListDepth) const;
     void ClearAlignDepthFlag();
+
+    size_t BeginList();
 
     void DbgListBegin(const clStringA& strTypeName);
     void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);

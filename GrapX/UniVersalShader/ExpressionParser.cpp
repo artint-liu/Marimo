@@ -5066,15 +5066,14 @@ NOT_INC_P:
     return NULL;
   }
   
-  const TYPEDESC* CodeParser::InferInitList_Struct(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
+  const TYPEDESC* CodeParser::InferInitList_Struct(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
     rInitList.DbgListBegin(pRefType->name);
-    rInitList.Get(); // 强制进入列表最深层
 
     TYPEDESC::CPtrList sMemberTypeList;
     pRefType->GetMemberTypeList(sMemberTypeList);
 
-    const size_t nListDepth = rInitList.Depth();
+    const size_t nListDepth = rInitList.BeginList();
     const GLOB* pGlob = NULL;
 
     for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it)
@@ -5090,12 +5089,12 @@ NOT_INC_P:
       else if((*it)->cate == TYPEDESC::TypeCate_Struct || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
       {
         rInitList.DbgPushString();
-        if(InferInitList(pValuePool, sNameSet, *it, rInitList, nDepth + 1) == NULL) {
+        if(InferInitList(pValuePool, sNameSet, *it, rInitList, nDimDepth + 1) == NULL) {
           return NULL;
         }
         rInitList.DbgPopString();
 
-        if(rInitList.NeedAlignDepth() && nDepth > rInitList.Depth() && rInitList.Depth() != nListDepth) {
+        if(rInitList.NeedAlignDepth(nDimDepth, nListDepth)) {
           break;
         }
         else if(rInitList.Empty()) {
@@ -5113,22 +5112,13 @@ NOT_INC_P:
       }
 
       rInitList.DbgListAdd(pGlob);
-
-      if(rInitList.Step() == NULL)
-      {
-        if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth)
-        {
-          continue;
-        }
-        break;  // 结束
-      }
-      else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
-        break;  // 深度过深并且没有结束：初始值设定项太多
+      if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
+        break;
       }
     }
 
 
-    if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
+    if((rInitList.Depth() > nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
     {
       OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
       return NULL;
@@ -5139,25 +5129,17 @@ NOT_INC_P:
     }
 
     rInitList.DbgListEnd();
-
-    //if(bAdaptedLength) {
-    //  clStringA str = rInitList.DbgGetString();
-    //  const size_t len = pRefType->name.GetLength();
-    //  pRefType = sNameSet.SetTypeSize(pRefType, index);
-    //  str.Replace(1, len, pRefType->name);
-    //  rInitList.DbgSetString(str);
-    //}
     TRACE("%s\n", rInitList.DbgGetString().CStr());
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList_LinearArray(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
+  const TYPEDESC* CodeParser::InferInitList_LinearArray(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
     size_t index;
     const b32 bAdaptedLength = (_CL_NOT_(pRefType->sDimensions.empty()) && pRefType->sDimensions.back() == 0);
     rInitList.DbgListBegin(pRefType->name);
-    rInitList.Get(); // 强制进入列表最深层
-    const size_t nListDepth = rInitList.Depth();
+    const size_t nListDepth = rInitList.BeginList();
+
     const GLOB* pGlob = NULL;
     size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
     for(index = 0; index < array_count;)
@@ -5182,21 +5164,13 @@ NOT_INC_P:
       rInitList.DbgListAdd(pGlob);
 
       index++;
-      if(rInitList.Step() == NULL)
-      {
-        if(rInitList.Depth() == nDepth || rInitList.Depth() == nListDepth)
-        {
-          continue;
-        }
-        break;  // 结束
-      }
-      else if(rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) {
-        break;  // 深度过深并且没有结束：初始值设定项太多
+      if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
+        break;
       }
     }
 
 
-    if((rInitList.Depth() > nDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
+    if((rInitList.Depth() > nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
     {
       OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
       return NULL;
@@ -5219,9 +5193,10 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth)
+  const TYPEDESC* CodeParser::InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
-    ASSERT(pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
+    ASSERT(IS_SCALER_CATE(pRefType) ||
+      pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
     // 被这个功能折磨了快三周，没找文档，完全使靠vs2010 C++的黑盒测试出来的
     // 之前比较关注花括号的层级，后来发现“,”才比较重要，一段列表前面的逗号一定是这个列表所在层级的开始(后来发现也不完全是，靠)
     
@@ -5229,57 +5204,72 @@ NOT_INC_P:
 
     if(pRefType->cate == TYPEDESC::TypeCate_Struct) // 结构体
     {
-      return InferInitList_Struct(pValuePool, sNameSet, pRefType, rInitList, nDepth);
+      return InferInitList_Struct(pValuePool, sNameSet, pRefType, rInitList, nDimDepth);
+    }
+    else if(IS_SCALER_CATE(pRefType))
+    {
+      rInitList.DbgListBegin(pRefType->name);
+      const GLOB* pGlob = rInitList.Get();
+      if(pGlob == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
+        return NULL;
+      }
+      else if(pGlob != NULL) // "pGlob == NULL" 使用了“{}”定义，解释为0
+      {
+        ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
+        const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
+        if(pTypeDesc == NULL) {
+          return NULL;
+        }
+      }
+      rInitList.DbgListAdd(pGlob);
+      rInitList.DbgListEnd();
+      TRACE("%s\n", rInitList.DbgGetString());
+
+      pGlob = rInitList.Step();
+      if(pGlob != NULL || _CL_NOT_(rInitList.Empty())) {
+        OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+        return NULL;
+      }
     }
     else if(IS_SCALER_CATE(pRefType->pElementType)) // 标量数组
     {
-      return InferInitList_LinearArray(pValuePool, sNameSet, pRefType, rInitList, nDepth);
+      return InferInitList_LinearArray(pValuePool, sNameSet, pRefType, rInitList, nDimDepth);
     }
     else if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) // 数组
     {
       const b32 bAdaptedLength = (_CL_NOT_(pRefType->sDimensions.empty()) && pRefType->sDimensions.back() == 0);
-      rInitList.Get(); // 强制进入列表最深层
-      const size_t nListDepth = rInitList.Depth();
+      const size_t nListDepth = rInitList.BeginList();
 
-      //clStringA strList = "<";
-      //strList.Append(pRefType->name).Append(">{");
       rInitList.DbgListBegin(pRefType->name);
       size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
       for(index = 0; index < array_count; index++)
       {
         rInitList.DbgPushString();
-        if(InferInitList(pValuePool, sNameSet, pRefType->pElementType, rInitList, nDepth + 1) == NULL) {
+        if(InferInitList(pValuePool, sNameSet, pRefType->pElementType, rInitList, nDimDepth + 1) == NULL) {
           return NULL;
         }
-        //strList.Append(rInitList.DbgGetString()).Append(',');
         rInitList.DbgPopString();
-        if(rInitList.NeedAlignDepth() && nDepth > rInitList.Depth() && rInitList.Depth() != nListDepth) {
+        if(rInitList.NeedAlignDepth(nDimDepth, nListDepth)) {
           index++;
           break;
         }
       }
-
-      //strList.TrimRight(',');
-      //strList.Append("}");
       rInitList.DbgListEnd();
 
 
       if(bAdaptedLength) {
         const size_t len = pRefType->name.GetLength();
         pRefType = sNameSet.SetTypeSize(pRefType, index);
-        //strList.Replace(1, len, pRefType->name);
         rInitList.DbgGetString().Replace(1, len, pRefType->name);
       }
 
-      //rInitList.DbgSetString(strList);
       TRACE("%s\n", rInitList.DbgGetString().CStr());
 
-      if(nDepth == 1 && rInitList.Empty() == FALSE && rInitList.IsEnd() == FALSE)
+      if(nDimDepth == 1 && rInitList.Empty() == FALSE && rInitList.IsEnd() == FALSE)
       {
         OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
         return NULL;
       }
-
     }
     else
     {
@@ -6934,6 +6924,20 @@ NOT_INC_P:
 #endif
   }
 
+  GXBOOL CInitList::Step(size_t nDimDepth, size_t nListDepth)
+  {
+    if(Step() == NULL) {
+      if(Depth() == nDimDepth || Depth() == nListDepth) {
+        return TRUE;
+      }
+      return FALSE; // 结束
+    }
+    else if(Depth() > nDimDepth || Depth() > nListDepth) {
+      return FALSE; // 深度过深并且没有结束：初始值设定项太多
+    }
+    return TRUE;
+  }
+
   GXBOOL CInitList::IsEnd() const
   {
     const STACKDESC& top = Top();
@@ -6951,14 +6955,21 @@ NOT_INC_P:
     return m_sStack.size();
   }
 
-  GXBOOL CInitList::NeedAlignDepth() const
+  GXBOOL CInitList::NeedAlignDepth(size_t nDimDepth, size_t nListDepth) const
   {
-    return m_bNeedAlignDepth;
+    const size_t depth = Depth();
+    return m_bNeedAlignDepth && depth < nDimDepth && depth != nListDepth;
   }
 
   void CInitList::ClearAlignDepthFlag()
   {
     m_bNeedAlignDepth = FALSE;
+  }
+
+  size_t CInitList::BeginList()
+  {
+    Get(); // 强制进入列表最深层
+    return Depth();
   }
 
   void CInitList::DbgListBegin(const clStringA& strTypeName)
