@@ -284,6 +284,7 @@ namespace UVShader
     CInitList(CodeParser* pCodeParser, NameContext& rNameCtx, const SYNTAXNODE::GLOB* pInitListGlob);
     void SetValuePool(VALUE* pValuePool, size_t count);
     const SYNTAXNODE::GLOB* Get();
+    GXBOOL CastToValuePool(size_t index);
     const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
     GXBOOL Step(size_t nDimDepth, size_t nListDepth);
@@ -296,6 +297,7 @@ namespace UVShader
     size_t GetMaxCount() const; // 如果是自适应长度，用这个来获得最大可能的长度
     size_t BeginList();
     VALUE* ValuePoolEnd() const;
+    size_t ValuePoolCount() const;
 
     void DbgListBegin(const clStringA& strTypeName);
     void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);
@@ -660,9 +662,9 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList_Struct(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList_LinearArray(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList_Struct(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob); // initlist_glob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);

@@ -5066,9 +5066,10 @@ NOT_INC_P:
     return NULL;
   }
   
-  const TYPEDESC* CodeParser::InferInitList_Struct(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
+  const TYPEDESC* CodeParser::InferInitList_Struct(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
-    ASSERT(pValuePool + pRefType->CountOf() <= rInitList.ValuePoolEnd());
+    ASSERT(nTopIndex + pRefType->CountOf() <= rInitList.ValuePoolCount());
+
     rInitList.DbgListBegin(pRefType->name);
 
     TYPEDESC::CPtrList sMemberTypeList;
@@ -5083,7 +5084,7 @@ NOT_INC_P:
       if((*it)->cate == TYPEDESC::TypeCate_Struct || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
       {
         rInitList.DbgPushString();
-        if(InferInitList(pValuePool + index, sNameSet, *it, rInitList, nDimDepth + 1) == NULL) {
+        if(InferInitList(nTopIndex + index, sNameSet, *it, rInitList, nDimDepth + 1) == NULL) {
           return NULL;
         }
         index += (*it)->CountOf();
@@ -5097,7 +5098,12 @@ NOT_INC_P:
         }
         continue;
       }
-
+#if 1
+      if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
+        return NULL;
+      }
+      index++;
+#else
       if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
         break;
       }
@@ -5118,8 +5124,9 @@ NOT_INC_P:
         sNameSet.CalculateConstantValue(pValuePool[index], this, pGlob);
         index++;
       }
-
       rInitList.DbgListAdd(pGlob);
+#endif
+
       if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
         break;
       }
@@ -5141,9 +5148,9 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList_LinearArray(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
+  const TYPEDESC* CodeParser::InferInitList_LinearArray(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
-    ASSERT(pValuePool + pRefType->CountOf() <= rInitList.ValuePoolEnd());
+    ASSERT(nTopIndex + pRefType->CountOf() <= rInitList.ValuePoolCount());
     size_t index;
     const b32 bAdaptedLength = (_CL_NOT_(pRefType->sDimensions.empty()) && pRefType->sDimensions.back() == 0);
     rInitList.DbgListBegin(pRefType->name);
@@ -5153,6 +5160,11 @@ NOT_INC_P:
     size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
     for(index = 0; index < array_count;)
     {
+#if 1
+      if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
+        return NULL;
+      }
+#else
       if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
         break;
       }
@@ -5172,8 +5184,9 @@ NOT_INC_P:
         ASSERT(pValuePool[index].rank == VALUE::Rank_Unsigned && pValuePool[index].nValue64 == 0);
         sNameSet.CalculateConstantValue(pValuePool[index], this, pGlob);
       }
-
       rInitList.DbgListAdd(pGlob);
+#endif
+
 
       index++;
       if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
@@ -5205,7 +5218,7 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList(VALUE* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
+  const TYPEDESC* CodeParser::InferInitList(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
     ASSERT(IS_SCALER_CATE(pRefType) ||
       pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
@@ -5216,15 +5229,21 @@ NOT_INC_P:
 
     if(pRefType->cate == TYPEDESC::TypeCate_Struct) // 结构体
     {
-      return InferInitList_Struct(pValuePool, sNameSet, pRefType, rInitList, nDimDepth);
+      return InferInitList_Struct(nTopIndex, sNameSet, pRefType, rInitList, nDimDepth);
     }
     else if(IS_SCALER_CATE(pRefType))
     {
-      ASSERT(pValuePool + pRefType->CountOf() <= rInitList.ValuePoolEnd());
-
+      //ASSERT(pValuePool + pRefType->CountOf() <= rInitList.ValuePoolEnd());
+      ASSERT(nTopIndex + pRefType->CountOf() <= rInitList.ValuePoolCount());
+      const GLOB* pGlob;
       index = 0;
       rInitList.DbgListBegin(pRefType->name);
-      const GLOB* pGlob = rInitList.Get();
+#if 1
+      if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
+        return NULL;
+      }
+#else
+      pGlob = rInitList.Get();
       if(pGlob == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
         return NULL;
       }
@@ -5239,6 +5258,7 @@ NOT_INC_P:
         sNameSet.CalculateConstantValue(pValuePool[index], this, pGlob);
       }
       rInitList.DbgListAdd(pGlob);
+#endif
       rInitList.DbgListEnd();
       TRACE("%s\n", rInitList.DbgGetString());
 
@@ -5250,7 +5270,7 @@ NOT_INC_P:
     }
     else if(IS_SCALER_CATE(pRefType->pElementType)) // 标量数组
     {
-      return InferInitList_LinearArray(pValuePool, sNameSet, pRefType, rInitList, nDimDepth);
+      return InferInitList_LinearArray(nTopIndex, sNameSet, pRefType, rInitList, nDimDepth);
     }
     else if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) // 数组
     {
@@ -5263,8 +5283,9 @@ NOT_INC_P:
       for(index = 0; index < array_count; index++)
       {
         rInitList.DbgPushString();
-        ASSERT(pValuePool + pRefType->pElementType->CountOf() <= rInitList.ValuePoolEnd());
-        if(InferInitList(pValuePool + index * nCountOfElement, sNameSet, pRefType->pElementType, rInitList, nDimDepth + 1) == NULL) {
+        //ASSERT(pValuePool + pRefType->pElementType->CountOf() <= rInitList.ValuePoolEnd());
+        ASSERT(nTopIndex + pRefType->pElementType->CountOf() <= rInitList.ValuePoolCount());
+        if(InferInitList(nTopIndex + index * nCountOfElement, sNameSet, pRefType->pElementType, rInitList, nDimDepth + 1) == NULL) {
           return NULL;
         }
         rInitList.DbgPopString();
@@ -5323,7 +5344,7 @@ NOT_INC_P:
     il.SetValuePool(pValuePool, count);
 
 
-    const TYPEDESC* pTypeDesc = InferInitList(pValuePool, sNameSet, pRefType, il, 1);
+    const TYPEDESC* pTypeDesc = InferInitList(0, sNameSet, pRefType, il, 1);
     SAFE_DELETE_ARRAY(pValuePool);
     
     m_aDbgExpressionOperStack.push_back(il.DbgGetString());
@@ -6911,6 +6932,32 @@ NOT_INC_P:
     return &*Top().iter;
   }
 
+  GXBOOL CInitList::CastToValuePool(size_t index)
+  {
+    const SYNTAXNODE::GLOB* pGlob = Get();
+    if(pGlob == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
+      return FALSE;
+    }
+
+    if(pGlob == NULL)
+    {
+      // 使用了“{}”定义，解释为0
+      ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
+    }
+    else
+    {
+      ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
+      const TYPEDESC* pTypeDesc = m_pCodeParser->InferType(m_rNameCtx, *pGlob);
+      if(pTypeDesc == NULL) {
+        return FALSE;
+      }
+      ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
+      m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
+    }
+    DbgListAdd(pGlob);
+    return TRUE;
+  }
+
   const TOKEN* CInitList::GetLocation() const
   {
     ASSERT(!m_sStack.empty());
@@ -7021,6 +7068,11 @@ NOT_INC_P:
   VALUE* CInitList::ValuePoolEnd() const
   {
     return m_pValuePool + m_nValueCount;
+  }
+
+  size_t CInitList::ValuePoolCount() const
+  {
+    return m_nValueCount;
   }
 
   void CInitList::DbgListBegin(const clStringA& strTypeName)
