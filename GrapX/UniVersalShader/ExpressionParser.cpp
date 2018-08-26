@@ -4148,6 +4148,16 @@ NOT_INC_P:
         }
         else if(pRightTypeDesc != pType)
         {
+          ASSERT(pVarableDecl->IsNode()); // 数组类型，glob必然为node
+          const GLOB* pAutoLenGlob = pVarableDecl;
+          while(pAutoLenGlob->pNode->Operand[0].IsNode()) {
+            pAutoLenGlob = &pAutoLenGlob->pNode->Operand[0];
+          }
+          ASSERT(pAutoLenGlob->pNode->Operand[1].ptr == NULL); // 自适应长度类型，这个必然为空“[]”
+          VALUE value;
+          value.set(VALUE::Rank_Unsigned, &pRightTypeDesc->sDimensions.back());
+          SetRepalcedValue(pAutoLenGlob->pNode->Operand[1], value);
+
           sNameSet.ChangeVariableType(pRightTypeDesc, pVarableDecl);
           pType = pRightTypeDesc;
         }

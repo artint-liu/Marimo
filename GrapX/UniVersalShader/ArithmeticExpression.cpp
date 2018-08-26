@@ -1402,6 +1402,36 @@ GO_NEXT:;
     return State_OK;
   }
 
+  void VALUE::set(Rank r, const void* pValue)
+  {
+    rank = Rank_Unsigned64;
+    uValue64 = 0; // 清除高32位
+    switch(r)
+    {
+    case UVShader::VALUE::Rank_Unsigned:
+      uValue = *static_cast<const GXUINT*>(pValue);
+      break;
+    case UVShader::VALUE::Rank_Signed:
+      nValue = *static_cast<const GXINT*>(pValue);
+      break;
+    case UVShader::VALUE::Rank_Float:
+      fValue = *static_cast<const float*>(pValue);
+      break;
+    case UVShader::VALUE::Rank_Unsigned64:
+      uValue64 = *static_cast<const GXUINT64*>(pValue);
+      break;
+    case UVShader::VALUE::Rank_Signed64:
+      nValue64 = *static_cast<const GXINT64*>(pValue);
+      break;
+    case UVShader::VALUE::Rank_Double:
+      fValue64 = *static_cast<const double*>(pValue);
+      break;
+    default:
+      CLBREAK;
+      break;
+    }
+  }
+
   template<typename _Ty>
   VALUE::State VALUE::CalculateT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2)
   {

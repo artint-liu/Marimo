@@ -268,6 +268,7 @@ namespace UVShader
     void SetOne();
     State set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger);
     State set(const TOKEN& token);
+    void set(Rank r, const void* pValue);
     VALUE& set(const VALUE& v);
     State UpgradeValueByRank(Rank _type);  // 调整为到 type 指定的级别, 对于浮点与整数类型会做类型转换
     State CastValueByRank(Rank _type); // 按照rank转换值，这个可以指定更低的rank
@@ -302,7 +303,7 @@ namespace UVShader
       MODE_TypeCast,            // 类型转换: (A)B
       MODE_Typedef,             // typedef A B;
       MODE_Subscript,           // 下标: A[B], 方括号内有内容的都认为是下标
-      MODE_Subscript0,          // 自适应下标: A[], B永远为空
+      MODE_Subscript0,          // 自适应下标: A[], B永远为空 // TODO: Dump时希望精简分支，不想处理这个分支，准备去掉这个或者修改机制
       MODE_Definition,          // 变量定义: A B
       MODE_Bracket,             // 空括号"()", "[]", 如果不是独立出现, 通常会被解释为函数和下标
 
