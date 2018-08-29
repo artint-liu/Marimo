@@ -4120,46 +4120,44 @@ NOT_INC_P:
         // [/Doc]
 
 
-        const GLOB& rInitList = second_glob.pNode->Operand[1];
-        if(rInitList.IsNode() == FALSE || rInitList.pNode->mode != SYNTAXNODE::MODE_InitList) {
+        //const GLOB& rInitList = second_glob.pNode->Operand[1];
+        const GLOB& right_glob = second_glob.pNode->Operand[1];
+        if(right_glob.IsNode() == FALSE || right_glob.pNode->mode != SYNTAXNODE::MODE_InitList) {
           OutputErrorW(tkType, UVS_EXPORT_TEXT(5048, "预期应该是初始化列表"));
           return FALSE;
         }
-        else if(rInitList.pNode->Operand[0].ptr == NULL) {
+        else if(right_glob.pNode->Operand[0].ptr == NULL) {
           OutputErrorW(tkType, UVS_EXPORT_TEXT(5049, "初始化列表不应该为空"));
           return FALSE;
         }
 
         const GLOB* pVarableDecl = GetVariableDeclWithoutSeamantic(second_glob.pNode->Operand[0]);
-        const GLOB& right_glob = second_glob.pNode->Operand[1];
 
         if(pVarableDecl)
         {
           pType = sNameSet.RegisterVariable(strType, pVarableDecl, NULL, &right_glob);
         }
 
-        TRACE("var \"%s\":\n", pVarableDecl->GetFrontToken()->ToString().CStr());
-        pRightTypeDesc = InferRightValueType(sNameSet, pType, right_glob, ptkVar);
-
-        if(pRightTypeDesc == NULL) {
-          // 右侧类型推导失败，注册变量名（RegisterVariable）后再退出，
-          // 这样后面就不会报找不到变量的错误
+        if(pVarableDecl == NULL || pType == NULL)
+        {
           return FALSE;
         }
-        else if(pRightTypeDesc != pType)
+
+        pRightTypeDesc = pType;
+
+        // 处理自适应长度数组类型，忽略 "int a = {0};" 这种形式
+        if(pVarableDecl->IsNode())
         {
-          ASSERT(pVarableDecl->IsNode()); // 数组类型，glob必然为node
           const GLOB* pAutoLenGlob = pVarableDecl;
           while(pAutoLenGlob->pNode->Operand[0].IsNode()) {
             pAutoLenGlob = &pAutoLenGlob->pNode->Operand[0];
           }
-          ASSERT(pAutoLenGlob->pNode->Operand[1].ptr == NULL); // 自适应长度类型，这个必然为空“[]”
-          VALUE value;
-          value.set(VALUE::Rank_Unsigned, &pRightTypeDesc->sDimensions.back());
-          SetRepalcedValue(pAutoLenGlob->pNode->Operand[1], value);
-
-          sNameSet.ChangeVariableType(pRightTypeDesc, pVarableDecl);
-          pType = pRightTypeDesc;
+          if(pAutoLenGlob->pNode->Operand[1].ptr == NULL) // 自适应长度类型，这个必然为空“[]”
+          {
+            VALUE value;
+            value.set(VALUE::Rank_Unsigned, &pRightTypeDesc->sDimensions.back());
+            SetRepalcedValue(pAutoLenGlob->pNode->Operand[1], value);
+          }
         }
 
         ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
@@ -4168,10 +4166,11 @@ NOT_INC_P:
       {
         VALUE value;
         VALUE::State state = VALUE::State_OK;
+        const GLOB& right_glob = second_glob.pNode->Operand[1];
 
         if(bConstVariable)
         {
-          state = CalculateValueAsConstantDefinition(value, sNameSet, second_glob.pNode->Operand[1]);
+          state = CalculateValueAsConstantDefinition(value, sNameSet, right_glob/*second_glob.pNode->Operand[1]*/);
           if(state != VALUE::State_OK && state != VALUE::State_Call && state != VALUE::State_Identifier) {
             return FALSE;
           }
@@ -4179,7 +4178,7 @@ NOT_INC_P:
 
         const size_t nErrorCount = DbgErrorCount();
 
-        pRightTypeDesc = InferRightValueType(sNameSet, NULL, second_glob.pNode->Operand[1], ptkVar);
+        pRightTypeDesc = InferRightValueType(sNameSet, NULL, NULL, right_glob/*second_glob.pNode->Operand[1]*/, ptkVar);
         ptkVar = GetVariableNameWithoutSeamantic(second_glob.pNode->Operand[0]);
 
         if(pRightTypeDesc == NULL || ptkVar == NULL) {
@@ -4192,11 +4191,11 @@ NOT_INC_P:
         {
           // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
           if(state == VALUE::State_OK) {
-            pType = sNameSet.RegisterVariable(strType, ptkVar, &value, &second_glob.pNode->Operand[1]);
-            SetRepalcedValue(second_glob.pNode->Operand[1], value);
+            pType = sNameSet.RegisterVariable(strType, ptkVar, &value, &right_glob/*second_glob.pNode->Operand[1]*/);
+            SetRepalcedValue(right_glob/*second_glob.pNode->Operand[1]*/, value);
           }
           else {
-            pType = sNameSet.RegisterVariable(strType, ptkVar, NULL, &second_glob.pNode->Operand[1]);
+            pType = sNameSet.RegisterVariable(strType, ptkVar, NULL, &right_glob/*second_glob.pNode->Operand[1]*/);
           }
         }
         else
@@ -4321,7 +4320,7 @@ NOT_INC_P:
         }
         else if(pNode->Operand[0].IsToken())
         {
-          if(InferRightValueType(sNameContext, NULL, pNode->Operand[0], pNode->pOpcode) == NULL)
+          if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[0], pNode->pOpcode) == NULL)
           {
             result = FALSE;
           }
@@ -4339,7 +4338,7 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
       {
-        const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, NULL, pNode->Operand[0], NULL);
+        const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[0], NULL);
         result = result && (pTypeDesc != NULL);
         ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
         return TRUE;
@@ -4415,7 +4414,7 @@ NOT_INC_P:
             // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
             // TODO: 需要验证左值
             const size_t nErrorCount = DbgErrorCount();
-            const TYPEDESC* pRightTypeDesc = InferRightValueType(sNameContext, NULL, pNode->Operand[1], pNode->pOpcode);
+            const TYPEDESC* pRightTypeDesc = InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[1], pNode->pOpcode);
             const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
             
             if(pRightTypeDesc == NULL || pLeftTypeDesc == NULL)
@@ -4444,7 +4443,7 @@ NOT_INC_P:
             {
               if(pNode->Operand[i].ptr)
               {
-                if(InferRightValueType(sNameContext, NULL, pNode->Operand[i], pNode->pOpcode) == NULL)
+                if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[i], pNode->pOpcode) == NULL)
                 {
                   result = FALSE;
                 }
@@ -4454,7 +4453,7 @@ NOT_INC_P:
           }
           else
           {
-            if(InferRightValueType(sNameContext, NULL, pNode->Operand[1], pNode->pOpcode) == NULL)
+            if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[1], pNode->pOpcode) == NULL)
             {
               result = FALSE;
             }
@@ -5075,8 +5074,10 @@ NOT_INC_P:
     }
     return NULL;
   }
+
+  //////////////////////////////////////////////////////////////////////////
   
-  const TYPEDESC* CodeParser::InferInitList_Struct(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
+  const TYPEDESC* CodeParser::InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
     ASSERT(nTopIndex + pRefType->CountOf() <= rInitList.ValuePoolCount());
 
@@ -5094,7 +5095,7 @@ NOT_INC_P:
       if((*it)->cate == TYPEDESC::TypeCate_Struct || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
       {
         rInitList.DbgPushString();
-        if(InferInitList(nTopIndex + index, sNameSet, *it, rInitList, nDimDepth + 1) == NULL) {
+        if(RearrangeInitList(nTopIndex + index, *it, rInitList, nDimDepth + 1) == NULL) {
           return NULL;
         }
         index += (*it)->CountOf();
@@ -5108,34 +5109,11 @@ NOT_INC_P:
         }
         continue;
       }
-#if 1
       if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
         return NULL;
       }
       index++;
-#else
-      if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
-        break;
-      }
 
-      if(pGlob == NULL)
-      {
-        // 使用了“{}”定义，解释为0
-        ASSERT(pValuePool[index].rank == VALUE::Rank_Unsigned && pValuePool[index].nValue64 == 0);        
-      }
-      else
-      {
-        ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-        const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
-        if(pTypeDesc == NULL) {
-          return NULL;
-        }
-        ASSERT(pValuePool[index].rank == VALUE::Rank_Unsigned && pValuePool[index].nValue64 == 0);
-        sNameSet.CalculateConstantValue(pValuePool[index], this, pGlob);
-        index++;
-      }
-      rInitList.DbgListAdd(pGlob);
-#endif
 
       if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
         break;
@@ -5158,7 +5136,7 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList_LinearArray(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
+  const TYPEDESC* CodeParser::InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
     ASSERT(nTopIndex + pRefType->CountOf() <= rInitList.ValuePoolCount());
     size_t index;
@@ -5170,33 +5148,9 @@ NOT_INC_P:
     size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
     for(index = 0; index < array_count;)
     {
-#if 1
       if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
         return NULL;
       }
-#else
-      if((pGlob = rInitList.Get()) == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
-        break;
-      }
-
-      if(pGlob == NULL)
-      {
-        // 使用了“{}”定义，解释为0
-        ASSERT(pValuePool[index].rank == VALUE::Rank_Unsigned && pValuePool[index].nValue64 == 0);
-      }
-      else
-      {
-        ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-        const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
-        if(pTypeDesc == NULL) {
-          return NULL;
-        }
-        ASSERT(pValuePool[index].rank == VALUE::Rank_Unsigned && pValuePool[index].nValue64 == 0);
-        sNameSet.CalculateConstantValue(pValuePool[index], this, pGlob);
-      }
-      rInitList.DbgListAdd(pGlob);
-#endif
-
 
       index++;
       if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
@@ -5220,7 +5174,7 @@ NOT_INC_P:
     if(bAdaptedLength) {
       clStringA str = rInitList.DbgGetString();
       const size_t len = pRefType->name.GetLength();
-      pRefType = sNameSet.SetTypeSize(pRefType, index);
+      pRefType = pRefType->ConfirmArrayCount(index);
       str.Replace(1, len, pRefType->name);
       rInitList.DbgSetString(str);
     }
@@ -5228,7 +5182,7 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
+  const TYPEDESC* CodeParser::RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
     ASSERT(IS_SCALER_CATE(pRefType) ||
       pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
@@ -5239,7 +5193,7 @@ NOT_INC_P:
 
     if(pRefType->cate == TYPEDESC::TypeCate_Struct) // 结构体
     {
-      return InferInitList_Struct(nTopIndex, sNameSet, pRefType, rInitList, nDimDepth);
+      return InferInitList_Struct(nTopIndex, pRefType, rInitList, nDimDepth);
     }
     else if(IS_SCALER_CATE(pRefType))
     {
@@ -5248,27 +5202,9 @@ NOT_INC_P:
       const GLOB* pGlob;
       index = 0;
       rInitList.DbgListBegin(pRefType->name);
-#if 1
       if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
         return NULL;
       }
-#else
-      pGlob = rInitList.Get();
-      if(pGlob == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
-        return NULL;
-      }
-      else if(pGlob != NULL) // "pGlob == NULL" 使用了“{}”定义，解释为0
-      {
-        ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-        const TYPEDESC* pTypeDesc = InferType(sNameSet, *pGlob);
-        if(pTypeDesc == NULL) {
-          return NULL;
-        }
-        ASSERT(pValuePool[index].rank == VALUE::Rank_Unsigned && pValuePool[index].nValue64 == 0);
-        sNameSet.CalculateConstantValue(pValuePool[index], this, pGlob);
-      }
-      rInitList.DbgListAdd(pGlob);
-#endif
       rInitList.DbgListEnd();
       TRACE("%s\n", rInitList.DbgGetString());
 
@@ -5280,7 +5216,7 @@ NOT_INC_P:
     }
     else if(IS_SCALER_CATE(pRefType->pElementType)) // 标量数组
     {
-      return InferInitList_LinearArray(nTopIndex, sNameSet, pRefType, rInitList, nDimDepth);
+      return InferInitList_LinearArray(nTopIndex, pRefType, rInitList, nDimDepth);
     }
     else if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) // 数组
     {
@@ -5295,7 +5231,7 @@ NOT_INC_P:
         rInitList.DbgPushString();
         //ASSERT(pValuePool + pRefType->pElementType->CountOf() <= rInitList.ValuePoolEnd());
         ASSERT(nTopIndex + pRefType->pElementType->CountOf() <= rInitList.ValuePoolCount());
-        if(InferInitList(nTopIndex + index * nCountOfElement, sNameSet, pRefType->pElementType, rInitList, nDimDepth + 1) == NULL) {
+        if(RearrangeInitList(nTopIndex + index * nCountOfElement, pRefType->pElementType, rInitList, nDimDepth + 1) == NULL) {
           return NULL;
         }
         rInitList.DbgPopString();
@@ -5309,7 +5245,7 @@ NOT_INC_P:
 
       if(bAdaptedLength) {
         const size_t len = pRefType->name.GetLength();
-        pRefType = sNameSet.SetTypeSize(pRefType, index);
+        pRefType = pRefType->ConfirmArrayCount(index);
         rInitList.DbgGetString().Replace(1, len, pRefType->name);
       }
 
@@ -5331,7 +5267,8 @@ NOT_INC_P:
 
   const TYPEDESC* CodeParser::InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob)
   {
-    ASSERT(initlist_glob.IsToken() || (initlist_glob.IsNode() && initlist_glob.pNode->mode == SYNTAXNODE::MODE_InitList)); // 外部保证
+    //ASSERT(initlist_glob.IsToken() || (initlist_glob.IsNode() && initlist_glob.pNode->mode == SYNTAXNODE::MODE_InitList)); // 外部保证
+    ASSERT(/*initlist_glob.IsToken() || */initlist_glob.CompareAsNode(SYNTAXNODE::MODE_InitList)); // 外部保证
     ASSERT(pRefType != NULL);
     // tkBaseType 是基础类型标记，如定义“float2 a[3][2] = {...}”, 基础类型就是“float2”
 
@@ -5339,22 +5276,13 @@ NOT_INC_P:
 
     CInitList il(this, sNameSet, &initlist_glob);
 
-    size_t count = pRefType->CountOf();
-    if(count == 0)
-    {
-      if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) {
-        count = il.GetMaxCount() * pRefType->pElementType->CountOf();
-      }
-      else {
-        CLBREAK;
-      }
-    }
+    const size_t count = il.GetMaxCount(pRefType);
     VALUE* pValuePool = new VALUE[count];
     memset(pValuePool, 0, sizeof(VALUE) * count); // 暂时还不用调用构造函数
     il.SetValuePool(pValuePool, count);
 
 
-    const TYPEDESC* pTypeDesc = InferInitList(0, sNameSet, pRefType, il, 1);
+    const TYPEDESC* pTypeDesc = RearrangeInitList(0, pRefType, il, 1);
     SAFE_DELETE_ARRAY(pValuePool);
     
     m_aDbgExpressionOperStack.push_back(il.DbgGetString());
@@ -5674,7 +5602,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB& right_glob, const TOKEN* pLocation)
+  const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB* pVarGlob, const GLOB& right_glob, const TOKEN* pLocation)
   {
     // 这个函数外部不输出 Error/Warning
     ASSERT(right_glob.IsNode() || right_glob.IsToken());
@@ -6277,6 +6205,11 @@ NOT_INC_P:
     sVariDesc.pDesc = pDesc;
 
     if(pValueExprGlob) {
+      // 右值无法转换为pDesc指向的类型
+      if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList) &&
+        m_pCodeParser->InferInitList(*this, pDesc, *pValueExprGlob) != pDesc) {
+        return State_CastTypeError;
+      }
       sVariDesc.glob = *pValueExprGlob;
     }
     else {
@@ -6302,18 +6235,18 @@ NOT_INC_P:
     return State_DuplicatedVariable;
   }
 
-  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue/*想去掉*/, const GLOB* pValueExprGlob)
   {
     if(pVariableDeclGlob->IsToken()) {
       return RegisterVariable(strType, pVariableDeclGlob->pTokn, pConstValue, pValueExprGlob);
     }
-    else if(pValueExprGlob->IsNode()) {
-      return RegisterMultidimVariable(strType, pVariableDeclGlob->pNode, pValueExprGlob); // FIXME: 没传常量表达式
+    else if(pVariableDeclGlob->IsNode()) {
+      return RegisterMultidimVariable(strType, pVariableDeclGlob->pNode, pValueExprGlob);
     }
     return NULL;
   }
 
-  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue/*想去掉*/, const GLOB* pValueExprGlob)
   {
     ASSERT(strType.IsIdentifier());
     // PS: 返回值似乎没什么用
@@ -6323,10 +6256,10 @@ NOT_INC_P:
     return pTypeDesc;
   }
 
-  void NameContext::ChangeVariableType(const TYPEDESC* pTypeDesc, const GLOB* pVariableDeclGlob)
+  void NameContext::ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode)
   {
-    const TOKEN* pToken = pVariableDeclGlob->GetFrontToken();
-    auto it = m_VariableMap.find(TokenPtr(pToken));
+    const TOKEN& token = pVariableDeclNode->GetAnyTokenAB();
+    auto it = m_VariableMap.find(TokenPtr(&token));
     ASSERT(it->second.pDesc->sDimensions.back() == 0); // 只能改变之前没确定长度数组类型的变量
     ASSERT(pTypeDesc->sDimensions.back() != 0);
 
@@ -6448,11 +6381,13 @@ NOT_INC_P:
             td.pElementType = &result.first->second;
           }
 
-          pVariDesc->pDesc = td.pElementType;
-          return td.pElementType; // 数组类型
-          // return pTypeDesc; // 基础类型
+          pTypeDesc = pVariDesc->pDesc = td.pElementType; // 数组类型
+          break;// 下面进行初始化列表的推导
         }
-        return NULL;
+        else
+        {
+          return NULL;
+        }
       }
       else if(pFirstGlob->IsNode())
       {
@@ -6461,9 +6396,38 @@ NOT_INC_P:
       else
       {
         CLBREAK;
+        return NULL;
       }
     } // while
-    return NULL;
+
+    if(pValueExprGlob == NULL)
+    {
+      return pTypeDesc;
+    }
+    else if(_CL_NOT_(pValueExprGlob->IsNode() && pValueExprGlob->pNode->mode == SYNTAXNODE::MODE_InitList))
+    {
+      // int a[3] = 0; 形式
+      m_pCodeParser->OutputErrorW(*pValueExprGlob, UVS_EXPORT_TEXT2(5051, "应该使用初始化列表来初始化数组", m_pCodeParser));
+      return NULL;
+    }
+
+    // 推导初始化列表
+    // 1.从列表中获得表达式值，然后填入ValuePool
+    // 2.确定自适应长度数组的实际长度
+
+    TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
+    const TYPEDESC* pRealTypeDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, *pValueExprGlob);
+    if(pRealTypeDesc == NULL) {
+      return NULL;
+    }
+    else if(pRealTypeDesc != pTypeDesc)
+    {
+      ASSERT(pTypeDesc->cate == TYPEDESC::TypeCate_MultiDim && pTypeDesc->sDimensions.back() == 0);
+      ChangeVariableType(pRealTypeDesc, pNode);
+      return pRealTypeDesc;
+    }
+
+    return pTypeDesc;
   }
 
   //const TYPEDESC* NameContext::RegisterArrayType(const TYPEDESC* pTypeDesc, size_t nDimension)
@@ -6658,7 +6622,7 @@ NOT_INC_P:
     return pRoot->GetType(strTypeName);
   }
 
-  const TYPEDESC* NameContext::SetTypeSize(const TYPEDESC* pTypeDesc, size_t nCount)
+  const TYPEDESC* NameContext::ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount)
   {
     ASSERT(pTypeDesc->sDimensions.back() == 0); // 外部保证
     ASSERT(pTypeDesc->name.EndsWith("*0"));
@@ -6864,6 +6828,11 @@ NOT_INC_P:
     }
   }
 
+  const TYPEDESC* TYPEDESC::ConfirmArrayCount(size_t nCount) const
+  {
+    return pNameCtx->ConfirmArrayCount(this, nCount);
+  }
+
   int INTRINSIC_FUNC::GetTypeTemplateTypeIndex(GXDWORD dwMasks)
   {
     return (dwMasks & ArgMask_TemplType) >> ArgMask_TemplShift;
@@ -7064,9 +7033,19 @@ NOT_INC_P:
     m_bNeedAlignDepth = FALSE;
   }
 
-  size_t CInitList::GetMaxCount() const
+  size_t CInitList::GetMaxCount(const TYPEDESC* pRefType) const
   {
-    return m_sStack.empty() ? 0 : m_sStack.front().sInitList.size();
+    size_t count = pRefType->CountOf();
+    if(count == 0)
+    {
+      if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) {
+        count = (m_sStack.empty() ? 0 : m_sStack.front().sInitList.size()) * pRefType->pElementType->CountOf();
+      }
+      else {
+        CLBREAK;
+      }
+    }
+    return count;      
   }
 
   size_t CInitList::BeginList()

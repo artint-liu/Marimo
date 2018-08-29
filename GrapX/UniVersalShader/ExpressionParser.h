@@ -69,7 +69,7 @@ namespace UVShader
     typedef clvector<size_t> DimList_T;
 
     TypeCate            cate;
-    const NameContext*  pNameCtx;
+    NameContext* const  pNameCtx;
     clStringA           name; // 类型名
     COMMINTRTYPEDESC*   pDesc; // 结构体(内置) 的描述, 多维数组这个指向它的基础类型
     const SYNTAXNODE*   pMemberNode; // 结构体(用户定义) 的描述, 必须是"SYNTAXNODE::MODE_Block"
@@ -83,6 +83,7 @@ namespace UVShader
     GXBOOL IsSameType(const TYPEDESC* pOtherTypeDesc) const;
     TYPEDESC::CPtrList& GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const;
     size_t CountOf() const; // 获得向量，矩阵和数组包含的基础类型数量
+    const TYPEDESC* ConfirmArrayCount(size_t nCount) const;
   };
 
   struct FUNCDESC // 用户定义的函数描述
@@ -187,6 +188,7 @@ namespace UVShader
       State_VariableIsNotIdentifier = -7, // 期望的变量名不是一个标识符
       State_RequireConstantExpression = -8, // 需要常量表达式
       State_RequireSubscript = -9,   // 缺少下标: int a[2][] = {};
+      State_CastTypeError = -10,     // 类型转换错误，含有的右值不能转换成变量类型
     };
   
   protected:
@@ -227,7 +229,7 @@ namespace UVShader
     const TYPEDESC* GetType(const clStringA& strType) const;
     const TYPEDESC* GetType(const TOKEN& token) const;
     const TYPEDESC* GetType(VALUE::Rank rank) const;
-    const TYPEDESC* SetTypeSize(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
+    const TYPEDESC* ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
     const VALUE* GetVariableValue(const TOKEN* ptkName) const;
     VALUE& GetVariableValue(VALUE& value, const TOKEN* ptkName) const;
@@ -240,7 +242,7 @@ namespace UVShader
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     const TYPEDESC* RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
-    void ChangeVariableType(const TYPEDESC* pTypeDesc, const GLOB* pVariableDeclGlob); // 只能改变之前没确定长度数组类型的变量
+    void ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode); // 只能改变之前没确定长度数组类型的变量
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
 #endif
@@ -294,7 +296,7 @@ namespace UVShader
     GXBOOL NeedAlignDepth(size_t nDimDepth, size_t nListDepth) const;
     void ClearAlignDepthFlag();
 
-    size_t GetMaxCount() const; // 如果是自适应长度，用这个来获得最大可能的长度
+    size_t GetMaxCount(const TYPEDESC* pRefType) const; // 如果是自适应长度，用这个来获得最大可能的长度，否则返回类型的实际长度
     size_t BeginList();
     VALUE* ValuePoolEnd() const;
     size_t ValuePoolCount() const;
@@ -662,9 +664,9 @@ namespace UVShader
     const TYPEDESC* InferType(const NameContext& sNameSet, const GLOB& sGlob);
     const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
     const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferInitList(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList_Struct(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, NameContext& sNameSet, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob); // initlist_glob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
@@ -676,7 +678,7 @@ namespace UVShader
     const TYPEDESC* InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation);
 #endif
 
-    const TYPEDESC* InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    const TYPEDESC* InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB* pVarGlob, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
