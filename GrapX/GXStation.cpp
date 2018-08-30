@@ -612,7 +612,7 @@ GXSTATION::GXSTATION(const GXCREATESTATION* lpCreateStation)
 #endif
   }
 
-  const GXDWORD dwAppStyle = lpCreateStation->lpAppDesc->dwStyle;
+  const GXDWORD dwAppStyle = lpCreateStation->lpAppDesc ? lpCreateStation->lpAppDesc->dwStyle : 0;
   if(TEST_FLAGS_ALL(dwAppStyle, GXADS_REALTIME)) {
     m_eUpdateRate = UpdateRate_RealTime;
   } else if(TEST_FLAGS_ALL(dwAppStyle, GXADS_ACTIVE)) {

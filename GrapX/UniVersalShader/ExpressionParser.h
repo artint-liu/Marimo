@@ -210,6 +210,7 @@ namespace UVShader
     NameContext(const NameContext& sNameCtx){}
     NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
+    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const TYPEDESC* pTypeDesc, const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob);
     State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob);
   public:
     NameContext(GXLPCSTR szName);
@@ -242,8 +243,9 @@ namespace UVShader
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     const TYPEDESC* RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
     const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue = NULL, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
-    void ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode); // 只能改变之前没确定长度数组类型的变量
+    //void ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode); // 只能改变之前没确定长度数组类型的变量
 #ifdef ENABLE_SYNTAX_VERIFY
+    const TYPEDESC* RegisterTypes(const clStringA& strBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
     const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
 #endif
     State  GetLastState() const;

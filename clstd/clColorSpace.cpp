@@ -193,9 +193,12 @@ namespace clstd
 
   void yuv2rgb(float y, float u, float v, float* r, float* g, float* b)
   {
-    *r = y + 1.13983f * v;
-    *g = y - 0.39465f * u - 0.58060f * v;
-    *b = y + 2.03211f * u;
+    //*r = y + 1.13983f * v;
+    //*g = y - 0.39465f * u - 0.58060f * v;
+    //*b = y + 2.03211f * u;
+    *r = y + 1.402f * v;
+    *g = y - 0.344f * u - 0.714f * v;
+    *b = y + 1.772f * u;
   }
 
   float getgray(float r, float g, float b)

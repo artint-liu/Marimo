@@ -15,8 +15,15 @@
 #define PARSER_BREAK(_GLOB) DbgBreak(_GLOB)
 #define PARSER_BREAK2(PARSER, _GLOB) PARSER->DbgBreak(_GLOB)
 #define PARSER_ASSERT(_X, _GLOB) DbgAssert(_X, _GLOB)
-#define IS_SCALER_CATE(_CATE) (_CATE->cate == TYPEDESC::TypeCate_FloatScaler || _CATE->cate == TYPEDESC::TypeCate_IntegerScaler)
-#define IS_STRUCT_CATE(_CATE) (_CATE == TYPEDESC::TypeCate_Vector || _CATE == TYPEDESC::TypeCate_Matrix || _CATE == TYPEDESC::TypeCate_Struct)
+#define IS_SCALER_CATE(_CATE) (\
+  _CATE->cate == TYPEDESC::TypeCate_FloatScaler || \
+  _CATE->cate == TYPEDESC::TypeCate_IntegerScaler)
+
+#define IS_STRUCT_CATE(_CATE) (\
+  _CATE->cate == TYPEDESC::TypeCate_Vector || \
+  _CATE->cate == TYPEDESC::TypeCate_Matrix || \
+  _CATE->cate == TYPEDESC::TypeCate_Struct)
+
 #define IS_SAMPLER_CATE(_CATE) (\
   _CATE == TYPEDESC::TypeCate_Sampler1D || \
   _CATE == TYPEDESC::TypeCate_Sampler2D || \
@@ -5036,7 +5043,7 @@ NOT_INC_P:
         ASSERT(pTypeDesc->pDesc->rank >= VALUE::Rank_First && pTypeDesc->pDesc->rank <= VALUE::Rank_Last);
         return pTypeDesc;
       }
-      else if(bFirstNumeric && IS_STRUCT_CATE(pTypeDesc[1]->cate))
+      else if(bFirstNumeric && IS_STRUCT_CATE(pTypeDesc[1]))
       {
         // TODO: 是否应考虑符号?
         if(_CL_NOT_(TryTypeCasting(pTypeDesc[1], pTypeDesc[0], &pNode->GetAnyTokenPAB())))
@@ -5048,7 +5055,7 @@ NOT_INC_P:
         }
         return pTypeDesc[1];
       }
-      else if(IS_STRUCT_CATE(pTypeDesc[0]->cate) && bSecondNumeric)
+      else if(IS_STRUCT_CATE(pTypeDesc[0]) && bSecondNumeric)
       {
         // TODO: 是否应考虑符号?
         if(TryTypeCasting(pTypeDesc[0], pTypeDesc[1], &pNode->GetAnyTokenPAB())) {
@@ -5057,7 +5064,7 @@ NOT_INC_P:
         CLBREAK; // 没处理
         return NULL;
       }
-      else if(IS_STRUCT_CATE(pTypeDesc[0]->cate) && IS_STRUCT_CATE(pTypeDesc[1]->cate))
+      else if(IS_STRUCT_CATE(pTypeDesc[0]) && IS_STRUCT_CATE(pTypeDesc[1]))
       {
         if(pTypeDesc[0]->name == pTypeDesc[1]->name)
         {
@@ -5184,14 +5191,13 @@ NOT_INC_P:
 
   const TYPEDESC* CodeParser::RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
-    ASSERT(IS_SCALER_CATE(pRefType) ||
-      pRefType->cate == TYPEDESC::TypeCate_MultiDim || pRefType->cate == TYPEDESC::TypeCate_Struct);
+    ASSERT(IS_SCALER_CATE(pRefType) || IS_STRUCT_CATE(pRefType) || pRefType->cate == TYPEDESC::TypeCate_MultiDim);
     // 被这个功能折磨了快三周，没找文档，完全使靠vs2010 C++的黑盒测试出来的
     // 之前比较关注花括号的层级，后来发现“,”才比较重要，一段列表前面的逗号一定是这个列表所在层级的开始(后来发现也不完全是，靠)
     
     size_t index;
 
-    if(pRefType->cate == TYPEDESC::TypeCate_Struct) // 结构体
+    if(IS_STRUCT_CATE(pRefType)) // 结构体
     {
       return InferInitList_Struct(nTopIndex, pRefType, rInitList, nDimDepth);
     }
@@ -5551,7 +5557,7 @@ NOT_INC_P:
     {
       return pTypeDesc->pElementType;
     }
-    else if(IS_STRUCT_CATE(pTypeDesc->cate) && pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
+    else if(IS_STRUCT_CATE(pTypeDesc) && pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
     {
       pTypeDesc = pTypeDesc->pDesc->lpSubscript(pTypeDesc->pDesc, sNameSet);
       ASSERT(pTypeDesc);
@@ -5660,7 +5666,7 @@ NOT_INC_P:
       }
       return TRUE;
     }
-    else if(IS_STRUCT_CATE(pTypeTo->cate) && IS_STRUCT_CATE(pTypeFrom->cate))
+    else if(IS_STRUCT_CATE(pTypeTo) && IS_STRUCT_CATE(pTypeFrom))
     {
       if(pTypeTo->name == pTypeFrom->name)
       {
@@ -5668,7 +5674,7 @@ NOT_INC_P:
         return TRUE;
       }
     }
-    else if(IS_STRUCT_CATE(pTypeTo->cate) && IS_SCALER_CATE(pTypeFrom))
+    else if(IS_STRUCT_CATE(pTypeTo) && IS_SCALER_CATE(pTypeFrom))
     {
       return (pTypeTo->pDesc && pTypeTo->pDesc->component_type &&
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));
@@ -6173,10 +6179,23 @@ NOT_INC_P:
   {
     m_pCodeParser = pCodeParser;
   }
- 
-  
+
   NameContext::State NameContext::IntRegisterVariable(
     const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType,
+    const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
+  {
+    const TYPEDESC* pDesc = GetType(strType);
+    if(pDesc == NULL)
+    {
+      clStringW strW = strType;
+      m_pCodeParser->OutputErrorW(ptkVariable, UVS_EXPORT_TEXT2(5012, "“%s”: 类型未定义", m_pCodeParser), strW.CStr());
+      return State_TypeNotFound;
+    }
+    return IntRegisterVariable(ppType, ppVariable, pDesc, ptkVariable, pConstValue, pValueExprGlob);
+  }
+  
+  NameContext::State NameContext::IntRegisterVariable(
+    const TYPEDESC** ppType, VARIDESC** ppVariable, const TYPEDESC* pTypeDesc,
     const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
   {
     ASSERT(ptkVariable);
@@ -6184,14 +6203,6 @@ NOT_INC_P:
     if(ptkVariable->IsIdentifier() == FALSE)
     {
       return State_VariableIsNotIdentifier;
-    }
-
-    const TYPEDESC* pDesc = GetType(strType);
-    if(pDesc == NULL)
-    {
-      clStringW strW = strType;
-      m_pCodeParser->OutputErrorW(ptkVariable, UVS_EXPORT_TEXT2(5012, "“%s”: 类型未定义", m_pCodeParser), strW.CStr());
-      return State_TypeNotFound;
     }
 
     // 变量名可以同类型名，但是必须是结构体
@@ -6202,13 +6213,17 @@ NOT_INC_P:
     }
 
     VARIDESC sVariDesc;
-    sVariDesc.pDesc = pDesc;
+    sVariDesc.pDesc = pTypeDesc;
 
     if(pValueExprGlob) {
       // 右值无法转换为pDesc指向的类型
-      if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList) &&
-        m_pCodeParser->InferInitList(*this, pDesc, *pValueExprGlob) != pDesc) {
-        return State_CastTypeError;
+      if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
+      {
+        sVariDesc.pDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, *pValueExprGlob);
+        if(sVariDesc.pDesc == NULL) {
+          CLBREAK; // 缺少无法转换的提示信息
+          return State_CastTypeError;
+        }
       }
       sVariDesc.glob = *pValueExprGlob;
     }
@@ -6256,17 +6271,50 @@ NOT_INC_P:
     return pTypeDesc;
   }
 
-  void NameContext::ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode)
-  {
-    const TOKEN& token = pVariableDeclNode->GetAnyTokenAB();
-    auto it = m_VariableMap.find(TokenPtr(&token));
-    ASSERT(it->second.pDesc->sDimensions.back() == 0); // 只能改变之前没确定长度数组类型的变量
-    ASSERT(pTypeDesc->sDimensions.back() != 0);
+  //void NameContext::ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode)
+  //{
+  //  const TOKEN& token = pVariableDeclNode->GetAnyTokenAB();
+  //  auto it = m_VariableMap.find(TokenPtr(&token));
+  //  ASSERT(it->second.pDesc->sDimensions.back() == 0); // 只能改变之前没确定长度数组类型的变量
+  //  ASSERT(pTypeDesc->sDimensions.back() != 0);
 
-    it->second.pDesc = pTypeDesc;
-  }
+  //  it->second.pDesc = pTypeDesc;
+  //}
 
 #ifdef ENABLE_SYNTAX_VERIFY
+
+  const TYPEDESC* NameContext::RegisterTypes(const clStringA& strBaseType, const TYPEDESC::DimList_T& sDimensions)
+  {
+    // int x[2][3][4] 列表储存为 "{4,3,2}"
+    // 函数会依次注册"int*4", "int*4*3", "int*4*3*2"这几个类型，最后返回"int*4*3*2"这个类型描述
+    // 对于自适应长度类型数组"int x[][3][4]", 最后返回的类型为"int*4*3*0"
+
+    const TYPEDESC* pBaseTypeDesc = GetType(strBaseType);
+
+    TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, this };
+    td.name = strBaseType;
+    td.pElementType = pBaseTypeDesc;
+    td.pDesc = pBaseTypeDesc->pDesc;
+    for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
+    {
+      td.name.Append('*').AppendInteger32(*it); // int x[2][3][4] 记为"int*4*3*2"
+      td.sDimensions.push_back(*it);
+
+      ASSERT(*it != 0 || (&*it == &sDimensions.back()));
+      //if(*it == 0 && (&*it != &sDimensions.back()))
+      //{
+      //  // error C2087: “a”: 缺少下标: int a[2][] = {1,2,3,4};
+      //  m_pCodeParser->OutputErrorW(subscript_glob, UVS_EXPORT_TEXT2(2087, "缺少下标", m_pCodeParser));
+      //  m_eLastState = State_RequireSubscript;
+      //  return NULL;
+      //}
+
+      auto result = m_TypeMap.insert(clmake_pair(td.name, td));
+      td.pElementType = &result.first->second;
+    }
+    return td.pElementType;
+  }
+
   const TYPEDESC* NameContext::RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript || pNode->mode == SYNTAXNODE::MODE_Subscript0); // 外部保证
@@ -6283,18 +6331,28 @@ NOT_INC_P:
       const GLOB& subscript_glob = pNode->Operand[1];
       const b32 bSelfAdaptionLength = (subscript_glob.ptr == NULL); // TODO: 最高维度才能用自适应长度
       const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
+      const GLOB* pFirstGlob = &pNode->Operand[0];
       if(bSelfAdaptionLength)
       {
         // 自适应长度的数组
         // 变量会先被注册为类似“int*2*0”类型，在之后的确定长度后修改为“int*2*3”
-        m_eLastState = State_SelfAdaptionLength;
-        value.SetZero();
+        if(pFirstGlob->IsToken())
+        {
+          m_eLastState = State_SelfAdaptionLength;
+          value.SetZero();
+        }
+        else
+        {
+          // error C2087: “a”: 缺少下标: int a[2][] = {1,2,3,4};
+          m_pCodeParser->OutputErrorW(*pFirstGlob, UVS_EXPORT_TEXT2(2087, "缺少下标", m_pCodeParser));
+          m_eLastState = State_RequireSubscript;
+          return NULL;
+        }
       }
       else {
         state = CalculateConstantValue(value, m_pCodeParser, &subscript_glob);
       }
 
-      const GLOB* pFirstGlob = &pNode->Operand[0];
       if(state == VALUE::State_OK)
       {
         //int a[-12]; // C2118 负下标
@@ -6357,31 +6415,14 @@ NOT_INC_P:
         const TOKEN* ptkVariable = pFirstGlob->pTokn;
         ASSERT(sDimensions.empty() == FALSE);
 
-        m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable, NULL, NULL);
+        const TYPEDESC* pSizelessTypeDesc = RegisterTypes(strType, sDimensions); // 可能缺少最高维尺寸的数组类型
+        TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
+        m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, pSizelessTypeDesc, ptkVariable, NULL, pValueExprGlob);
         if(m_eLastState == State_Ok) {
-
-          TYPEDESC td = {TYPEDESC::TypeCate_MultiDim, this};
-          td.name = strType;
-          td.pElementType = pTypeDesc;
-          td.pDesc = pTypeDesc->pDesc;
-          for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
-          {
-            td.name.Append('*').AppendInteger32(*it); // int x[2][3][4] 记为"int*4*3*2"
-            td.sDimensions.push_back(*it);
-
-            if(*it == 0 && (&*it != &sDimensions.back()))
-            {
-              // error C2087: “a”: 缺少下标: int a[2][] = {1,2,3,4};
-              m_pCodeParser->OutputErrorW(subscript_glob, UVS_EXPORT_TEXT2(2087, "缺少下标", m_pCodeParser));
-              m_eLastState = State_RequireSubscript;
-              return NULL;
-            }
-
-            auto result = m_TypeMap.insert(clmake_pair(td.name, td));
-            td.pElementType = &result.first->second;
+          if(pSizelessTypeDesc != pTypeDesc) {
+            CLNOP
           }
-
-          pTypeDesc = pVariDesc->pDesc = td.pElementType; // 数组类型
+          pVariDesc->pDesc = pTypeDesc;
           break;// 下面进行初始化列表的推导
         }
         else
@@ -6411,22 +6452,23 @@ NOT_INC_P:
       return NULL;
     }
 
-    // 推导初始化列表
-    // 1.从列表中获得表达式值，然后填入ValuePool
-    // 2.确定自适应长度数组的实际长度
-
-    TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
-    const TYPEDESC* pRealTypeDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, *pValueExprGlob);
-    if(pRealTypeDesc == NULL) {
-      return NULL;
-    }
-    else if(pRealTypeDesc != pTypeDesc)
-    {
-      ASSERT(pTypeDesc->cate == TYPEDESC::TypeCate_MultiDim && pTypeDesc->sDimensions.back() == 0);
-      ChangeVariableType(pRealTypeDesc, pNode);
-      return pRealTypeDesc;
-    }
-
+//#if 0
+//    // 推导初始化列表
+//    // 1.从列表中获得表达式值，然后填入ValuePool
+//    // 2.确定自适应长度数组的实际长度
+//
+//    TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
+//    const TYPEDESC* pRealTypeDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, *pValueExprGlob);
+//    if(pRealTypeDesc == NULL) {
+//      return NULL;
+//    }
+//    else if(pRealTypeDesc != pTypeDesc)
+//    {
+//      ASSERT(pTypeDesc->cate == TYPEDESC::TypeCate_MultiDim && pTypeDesc->sDimensions.back() == 0);
+//      ChangeVariableType(pRealTypeDesc, pNode);
+//      return pRealTypeDesc;
+//    }
+//#endif
     return pTypeDesc;
   }
 
@@ -6761,10 +6803,21 @@ NOT_INC_P:
 
   TYPEDESC::CPtrList& TYPEDESC::GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const
   {
-    ASSERT(cate == TypeCate_Struct); // 外部保证
-    ASSERT(pMemberNode->mode == SYNTAXNODE::MODE_Block); // 防止以后修改
+    ASSERT(IS_STRUCT_CATE(this)); // 外部保证
+    ASSERT(cate != TypeCate_Struct || pMemberNode->mode == SYNTAXNODE::MODE_Block); // 防止以后修改
 
     sMemberTypeList.clear();
+
+    if(cate == TypeCate_Vector || cate == TypeCate_Matrix)
+    {
+      int R, C;
+      Resolve(R, C);
+      C = (cate == TypeCate_Matrix) ? R * C : R;
+      for(int i = 0; i < C; i++) {
+        sMemberTypeList.push_back(pElementType);
+      }
+      return sMemberTypeList;
+    }
 
     const NameContext* pStructCtx = pNameCtx->GetStructContext(name);
     if(pStructCtx == NULL) {
@@ -6805,7 +6858,9 @@ NOT_INC_P:
     {
       int R, C;
       Resolve(R, C); // FIXME: 结构体不正确
-      return static_cast<size_t>(R * C);
+      return (cate == TypeCate_Vector)
+        ? static_cast<size_t>(R)
+        : static_cast<size_t>(R * C);
     }
     else if(cate == TypeCate_MultiDim)
     {
