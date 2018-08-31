@@ -232,7 +232,8 @@ namespace UVShader
     const TYPEDESC* GetType(VALUE::Rank rank) const;
     const TYPEDESC* ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
-    const VALUE* GetVariableValue(const TOKEN* ptkName) const;
+    const VALUE*    GetVariableValue(const TOKEN* ptkName) const;
+    const VARIDESC* GetVariableDesc(const TOKEN* ptkName) const;
     VALUE& GetVariableValue(VALUE& value, const TOKEN* ptkName) const;
     const NameContext* GetStructContext(const clStringA& strName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
@@ -259,6 +260,17 @@ namespace UVShader
 #endif
   };
 
+  struct COMMALIST
+  {
+    CodeParser* pCodeParser;
+    SYNTAXNODE* pBegin;
+    SYNTAXNODE* pEnd;
+
+    void Init(CodeParser* pParser);
+    SYNTAXNODE* Get();
+    COMMALIST&  PushBack(const SYNTAXNODE::GLOB* pGlob);
+  };
+
   class CInitList
   {
     struct STACKDESC
@@ -267,6 +279,7 @@ namespace UVShader
       SYNTAXNODE::GlobList::iterator iter;
       const TOKEN* ptkOpcode; // 用于输出定位
     };
+
     CodeParser*             m_pCodeParser;
     NameContext&            m_rNameCtx;
     const SYNTAXNODE::GLOB* m_pInitListGlob;
@@ -275,6 +288,7 @@ namespace UVShader
     VALUE*                  m_pValuePool;
     size_t                  m_nValueCount;
     cllist<clStringA>       m_DebugStrings; // 用来生成解析结构式
+    cllist<COMMALIST>       m_RearrangedGlob;
 
     STACKDESC& Top();
     const STACKDESC& Top() const;
@@ -302,6 +316,7 @@ namespace UVShader
     size_t BeginList();
     VALUE* ValuePoolEnd() const;
     size_t ValuePoolCount() const;
+    SYNTAXNODE*  GetRearrangedList();
 
     void DbgListBegin(const clStringA& strTypeName);
     void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);
@@ -321,6 +336,7 @@ namespace UVShader
     friend struct TYPEDESC;
     friend struct NODE_CALC;
     friend class CInitList;
+    friend struct COMMALIST;
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
     typedef ArithmeticExpression::iterator iterator;
@@ -596,6 +612,7 @@ namespace UVShader
     SYNTAXNODE* FlatDefinition(SYNTAXNODE* pThisChain);
     static GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
     static SYNTAXNODE::GlobList& BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出逗号并列式
+    static SYNTAXNODE::GlobPtrList& BreakComma(SYNTAXNODE::GlobPtrList& sExprList, GLOB& sGlob); // 列出逗号并列式
     static SYNTAXNODE::GlobList& BreakChain(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出链并列式
 
     GXBOOL  ParseExpression(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
@@ -669,7 +686,7 @@ namespace UVShader
     const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob); // initlist_glob.pNode->mode 必须是 MODE_InitList
+    const TYPEDESC* InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);

@@ -264,8 +264,8 @@ namespace UVShader
     }
 
     void clear();
-    void SetZero();
-    void SetOne();
+    VALUE& SetZero();
+    VALUE& SetOne();
     State set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger);
     State set(const TOKEN& token);
     void set(Rank r, const void* pValue);
@@ -297,8 +297,9 @@ namespace UVShader
     {
       MODE_Undefined,
       MODE_Opcode,              // 操作符 + 操作数 模式: A (操作符) B
+      MODE_CommaList,           // 逗号列表, 增加这个是因为整理初始化列表时找逗号token做pOpcode比较麻烦
       MODE_Assignment,          // 初始化列表赋值: A=B; B应该是MODE_InitList, 其它形式赋值属于MODE_Opcode
-      MODE_InitList,            // 数据初始化列表, {A}; B永远为空, Opcode 应该为‘{’
+      MODE_InitList,            // 数据初始化列表, {A}; B永远为空, Opcode 应该为‘{’或者为NULL
       MODE_FunctionCall,        // 函数调用: A(B)
       MODE_TypeCast,            // 类型转换: (A)B
       MODE_Typedef,             // typedef A B;
@@ -588,6 +589,8 @@ namespace UVShader
     TKSCOPE::TYPE FindComma(const TKSCOPE& scope);
     void    EnableHigherDefinition(GXBOOL bHigher);
 
+    SYNTAXNODE* AllocNode(SYNTAXNODE::MODE m, void* pOperand0, void* pOperand1);
+
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
     GXUINT  MarkCode(GXUINT code, GXLPCSTR szMessage);
 #endif
@@ -618,7 +621,7 @@ namespace UVShader
     void DbgDumpScope(clStringA& str, clsize begin, clsize end, GXBOOL bRaw);
     void DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB);
     void Invoke(GXLPCSTR szFunc, GXLPCSTR szArguments);
-    const clStringArrayA& DbgGetExpressionStack() const;
+    clStringArrayA& DbgGetExpressionStack();
     int SetError(int err);
     void ResetSessionError(); // 重置区间错误计数
   };

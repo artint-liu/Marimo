@@ -585,6 +585,20 @@ namespace UVShader
     m_bHigherDefiniton = bHigher;
   }
 
+  SYNTAXNODE* ArithmeticExpression::AllocNode(SYNTAXNODE::MODE m, void* pOperand0, void* pOperand1)
+  {
+    SYNTAXNODE* pNewNode = m_NodePool.Alloc();
+#ifdef ENABLE_SYNTAX_NODE_ID
+    pNewNode->id = m_nNodeId++;
+#endif
+    pNewNode->magic   = SYNTAXNODE::FLAG_OPERAND_MAGIC;
+    pNewNode->mode    = m;
+    pNewNode->pOpcode = NULL;
+    pNewNode->Operand[0].ptr = pOperand0;
+    pNewNode->Operand[1].ptr = pOperand1;
+    return pNewNode;
+  }
+
   GXBOOL ArithmeticExpression::ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc)
   {
     return ParseArithmeticExpression(depth + 1, scope, pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
@@ -1151,7 +1165,7 @@ GO_NEXT:;
     }
   }
 
-  const clStringArrayA& ArithmeticExpression::DbgGetExpressionStack() const
+  clStringArrayA& ArithmeticExpression::DbgGetExpressionStack()
   {
     return m_aDbgExpressionOperStack;
   }
@@ -1198,16 +1212,18 @@ GO_NEXT:;
     rank = Rank_Undefined;
   }
 
-  void VALUE::SetZero()
+  VALUE& VALUE::SetZero()
   {
     uValue64 = 0;
     rank = Rank_Signed;
+    return *this;
   }
 
-  void VALUE::SetOne()
+  VALUE& VALUE::SetOne()
   {
     uValue64 = 1;
     rank = Rank_Signed;
+    return *this;
   }
 
   VALUE& VALUE::set(const VALUE& v)

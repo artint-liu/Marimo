@@ -1559,15 +1559,7 @@ namespace UVShader
       }
       n->Operand[0].ptr = pNode->Operand[0].ptr;
 
-      SYNTAXNODE* pChain = m_NodePool.Alloc();
-#ifdef ENABLE_SYNTAX_NODE_ID
-      pChain->id = m_nNodeId++;
-#endif
-      pChain->magic = SYNTAXNODE::FLAG_OPERAND_MAGIC;
-      pChain->mode = SYNTAXNODE::MODE_Chain;
-      pChain->pOpcode = NULL;
-      pChain->Operand[0].ptr = n;
-      pChain->Operand[1].ptr = pThisChain->Operand[1].ptr;
+      SYNTAXNODE* pChain = AllocNode(SYNTAXNODE::MODE_Chain, n, pThisChain->Operand[1].ptr);
 
       pThisChain->Operand[1].pNode = pChain;
       pThisChain = pChain;
@@ -1642,6 +1634,27 @@ namespace UVShader
 
     if(sGlob.ptr) {
       sExprList.push_back(sGlob);
+    }
+    return sExprList;
+  }
+
+  SYNTAXNODE::GlobPtrList& CodeParser::BreakComma(SYNTAXNODE::GlobPtrList& sExprList, GLOB& sGlob)
+  {
+    // (,) [a] [b,c]
+    if(sGlob.IsNode() && sGlob.pNode->CompareOpcode(',')) {
+      sExprList.push_back(&sGlob.pNode->Operand[0]);
+
+      if(sGlob.pNode->Operand[1].IsNode()) {
+        return BreakComma(sExprList, sGlob.pNode->Operand[1]);
+      }
+      else if(sGlob.pNode->Operand[1].IsToken()) {
+        sExprList.push_back(&sGlob.pNode->Operand[1]);
+        return sExprList;
+      }
+    }
+
+    if(sGlob.ptr) {
+      sExprList.push_back(&sGlob);
     }
     return sExprList;
   }
@@ -1871,17 +1884,9 @@ namespace UVShader
       }
 
       // 封装一个定义序列
-      SYNTAXNODE* pNewDef = m_NodePool.Alloc();
-#ifdef ENABLE_SYNTAX_NODE_ID
-      pNewDef->id = m_nNodeId++;
-#endif
-      pNewDef->magic = SYNTAXNODE::FLAG_OPERAND_MAGIC;
-      pNewDef->mode = SYNTAXNODE::MODE_Definition;
-      pNewDef->pOpcode = NULL;
-      pNewDef->Operand[0].pTokn = ptkName;
-      pNewDef->Operand[1].ptr = glob.ptr;
 
-      glob.pNode = pNewDef;
+      glob.pNode = AllocNode(SYNTAXNODE::MODE_Definition, NULL, glob.ptr);
+      glob.pNode->Operand[0].pTokn = ptkName;
 
       p = pTokensFront + clMin(scope.end, scope_var.end);
 
@@ -2101,7 +2106,7 @@ NOT_INC_P:
     clStringA str[2];
     for(int i = 0; i < 2; i++)
     {
-      if(pNode->Operand[i].pTokn) {
+      if(pNode->Operand[i].ptr) {
         //const auto flag = pNode->Operand[i].GetType();
         if(pNode->Operand[i].IsToken()) {
           str[i] = pNode->Operand[i].pTokn->ToString();
@@ -2212,7 +2217,7 @@ NOT_INC_P:
     clStringA strOut;
     switch(pNode->mode)
     {
-    case SYNTAXNODE::MODE_Undefined: // 解析出错才会有这个
+    case SYNTAXNODE::MODE_Undefined: // 设置为替换Node或者解析出错才会有这个
       break;
 
     case SYNTAXNODE::MODE_FunctionCall: // 函数调用
@@ -2306,6 +2311,10 @@ NOT_INC_P:
       break;
 
     case SYNTAXNODE::MODE_Flow_DoWhile:
+      break;
+
+    case SYNTAXNODE::MODE_CommaList:
+      strOut.Format("%s,%s", str[0], str[1]);
       break;
 
     default:
@@ -4128,7 +4137,7 @@ NOT_INC_P:
 
 
         //const GLOB& rInitList = second_glob.pNode->Operand[1];
-        const GLOB& right_glob = second_glob.pNode->Operand[1];
+        GLOB& right_glob = second_glob.pNode->Operand[1];
         if(right_glob.IsNode() == FALSE || right_glob.pNode->mode != SYNTAXNODE::MODE_InitList) {
           OutputErrorW(tkType, UVS_EXPORT_TEXT(5048, "预期应该是初始化列表"));
           return FALSE;
@@ -4151,7 +4160,7 @@ NOT_INC_P:
         }
 
         pRightTypeDesc = pType;
-
+        const TOKEN* ptkVarName = NULL;
         // 处理自适应长度数组类型，忽略 "int a = {0};" 这种形式
         if(pVarableDecl->IsNode())
         {
@@ -4159,6 +4168,8 @@ NOT_INC_P:
           while(pAutoLenGlob->pNode->Operand[0].IsNode()) {
             pAutoLenGlob = &pAutoLenGlob->pNode->Operand[0];
           }
+          
+          ptkVarName = pAutoLenGlob->pNode->Operand[0].pTokn;
           if(pAutoLenGlob->pNode->Operand[1].ptr == NULL) // 自适应长度类型，这个必然为空“[]”
           {
             VALUE value;
@@ -4166,6 +4177,16 @@ NOT_INC_P:
             SetRepalcedValue(pAutoLenGlob->pNode->Operand[1], value);
           }
         }
+        else
+        {
+          ptkVarName = pVarableDecl->pTokn;
+        }
+
+        // 用整理过的初始化列表替换原有的列表
+        const VARIDESC* pVariDesc = sNameSet.GetVariableDesc(ptkVarName);
+        ASSERT(pVariDesc != NULL && pVariDesc->glob.CompareAsNode(SYNTAXNODE::MODE_InitList));
+        ASSERT(right_glob.CompareAsNode(SYNTAXNODE::MODE_InitList));
+        right_glob.pNode = pVariDesc->glob.pNode;
 
         ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
       }
@@ -5271,16 +5292,16 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, const GLOB& initlist_glob)
+  const TYPEDESC* CodeParser::InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob)
   {
-    //ASSERT(initlist_glob.IsToken() || (initlist_glob.IsNode() && initlist_glob.pNode->mode == SYNTAXNODE::MODE_InitList)); // 外部保证
-    ASSERT(/*initlist_glob.IsToken() || */initlist_glob.CompareAsNode(SYNTAXNODE::MODE_InitList)); // 外部保证
+    // pInitListGlob 输入初始化列表，同时返回一初始化列表
+    ASSERT(pInitListGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)); // 外部保证
     ASSERT(pRefType != NULL);
-    // tkBaseType 是基础类型标记，如定义“float2 a[3][2] = {...}”, 基础类型就是“float2”
 
     m_aDbgExpressionOperStack.clear();
+    const size_t nErrorCount = DbgErrorCount();
 
-    CInitList il(this, sNameSet, &initlist_glob);
+    CInitList il(this, sNameSet, pInitListGlob);
 
     const size_t count = il.GetMaxCount(pRefType);
     VALUE* pValuePool = new VALUE[count];
@@ -5290,11 +5311,20 @@ NOT_INC_P:
 
     const TYPEDESC* pTypeDesc = RearrangeInitList(0, pRefType, il, 1);
     SAFE_DELETE_ARRAY(pValuePool);
-    
+
+    clStringA strRearrange;
+    if(nErrorCount == DbgErrorCount()) {
+      pInitListGlob->pNode = il.GetRearrangedList();
+      DbgDumpSyntaxTree(NULL, pInitListGlob->pNode, 0, &strRearrange);
+    }
+    else {
+      strRearrange = "[ERROR]";
+    }
+    m_aDbgExpressionOperStack.push_back(strRearrange);
     m_aDbgExpressionOperStack.push_back(il.DbgGetString());
     return pTypeDesc;
   }
-
+#if 0
   const TYPEDESC* CodeParser::InitList_SyncType(NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob)
   {
     const TYPEDESC* pElementType = NULL;
@@ -5335,7 +5365,7 @@ NOT_INC_P:
     OutputErrorW(*pElementGlob, UVS_EXPORT_TEXT(2440, "“初始化”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
     return NULL;
   }
-
+#endif
   const TYPEDESC* CodeParser::InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation)
   {
     if(pListType->IsSameType(pLeftType))
@@ -5619,14 +5649,7 @@ NOT_INC_P:
 
     if(right_glob.IsNode() && right_glob.pNode->mode == SYNTAXNODE::MODE_InitList)
     {
-      if(pLeftTypeDesc == NULL) {
-        OutputErrorW(right_glob.GetFrontToken(), UVS_EXPORT_TEXT(5050, "不能使用初始化列表"));
-        return NULL;
-      }
-      else {
-        const TYPEDESC* pInitListType = InferInitList(sNameSet, pLeftTypeDesc, right_glob);
-        return pInitListType;
-      }
+      CLBREAK; // 不能使用初始化列表
     }
 
     const size_t nErrorCount = DbgErrorCount();
@@ -6215,17 +6238,20 @@ NOT_INC_P:
     VARIDESC sVariDesc;
     sVariDesc.pDesc = pTypeDesc;
 
-    if(pValueExprGlob) {
-      // 右值无法转换为pDesc指向的类型
+    if(pValueExprGlob)
+    {
+      sVariDesc.glob = *pValueExprGlob;
+      // 如果是初始化列表，就进行推导
+      // 这里会重新输出一个整理过的初始化列表到sVariDesc.glob中
       if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
       {
-        sVariDesc.pDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, *pValueExprGlob);
+        const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
+        sVariDesc.pDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, &sVariDesc.glob);
         if(sVariDesc.pDesc == NULL) {
-          CLBREAK; // 缺少无法转换的提示信息
+          ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
           return State_CastTypeError;
         }
       }
-      sVariDesc.glob = *pValueExprGlob;
     }
     else {
       sVariDesc.glob.ptr = NULL;
@@ -6271,16 +6297,6 @@ NOT_INC_P:
     return pTypeDesc;
   }
 
-  //void NameContext::ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode)
-  //{
-  //  const TOKEN& token = pVariableDeclNode->GetAnyTokenAB();
-  //  auto it = m_VariableMap.find(TokenPtr(&token));
-  //  ASSERT(it->second.pDesc->sDimensions.back() == 0); // 只能改变之前没确定长度数组类型的变量
-  //  ASSERT(pTypeDesc->sDimensions.back() != 0);
-
-  //  it->second.pDesc = pTypeDesc;
-  //}
-
 #ifdef ENABLE_SYNTAX_VERIFY
 
   const TYPEDESC* NameContext::RegisterTypes(const clStringA& strBaseType, const TYPEDESC::DimList_T& sDimensions)
@@ -6301,13 +6317,6 @@ NOT_INC_P:
       td.sDimensions.push_back(*it);
 
       ASSERT(*it != 0 || (&*it == &sDimensions.back()));
-      //if(*it == 0 && (&*it != &sDimensions.back()))
-      //{
-      //  // error C2087: “a”: 缺少下标: int a[2][] = {1,2,3,4};
-      //  m_pCodeParser->OutputErrorW(subscript_glob, UVS_EXPORT_TEXT2(2087, "缺少下标", m_pCodeParser));
-      //  m_eLastState = State_RequireSubscript;
-      //  return NULL;
-      //}
 
       auto result = m_TypeMap.insert(clmake_pair(td.name, td));
       td.pElementType = &result.first->second;
@@ -6452,42 +6461,9 @@ NOT_INC_P:
       return NULL;
     }
 
-//#if 0
-//    // 推导初始化列表
-//    // 1.从列表中获得表达式值，然后填入ValuePool
-//    // 2.确定自适应长度数组的实际长度
-//
-//    TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
-//    const TYPEDESC* pRealTypeDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, *pValueExprGlob);
-//    if(pRealTypeDesc == NULL) {
-//      return NULL;
-//    }
-//    else if(pRealTypeDesc != pTypeDesc)
-//    {
-//      ASSERT(pTypeDesc->cate == TYPEDESC::TypeCate_MultiDim && pTypeDesc->sDimensions.back() == 0);
-//      ChangeVariableType(pRealTypeDesc, pNode);
-//      return pRealTypeDesc;
-//    }
-//#endif
     return pTypeDesc;
   }
 
-  //const TYPEDESC* NameContext::RegisterArrayType(const TYPEDESC* pTypeDesc, size_t nDimension)
-  //{
-  //  TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, this };
-
-  //  td.name = pTypeDesc->name;
-  //  td.name.Append('*').AppendInteger32(nDimension); // int x[2][3][4] 记为"int*4*3*2"
-
-  //  td.sDimensions = pTypeDesc->sDimensions;
-  //  td.sDimensions.push_back(nDimension);
-
-  //  td.pDesc = pTypeDesc->pDesc;
-  //  td.pElementType = pTypeDesc;
-
-  //  auto result = m_TypeMap.insert(clmake_pair(td.name, td));
-  //  return &result.first->second;
-  //}
 #endif
 
   NameContext::State NameContext::GetLastState() const
@@ -6604,6 +6580,18 @@ NOT_INC_P:
     }
     value = it->second.sConstValue;
     return value;
+  }
+
+  const VARIDESC* NameContext::GetVariableDesc(const TOKEN* ptkName) const
+  {
+    auto it = m_VariableMap.find(TokenPtr(ptkName));
+    if(it == m_VariableMap.end()) {
+      if(m_pParent) {
+        return m_pParent->GetVariableDesc(ptkName);
+      }
+      return NULL;
+    }
+    return &it->second;
   }
 
   const NameContext* NameContext::GetStructContext(const clStringA& strName) const
@@ -6942,6 +6930,8 @@ NOT_INC_P:
     ASSERT(pInitListGlob->CompareAsNode(SYNTAXNODE::MODE_InitList));
     Enter(pInitListGlob);
     m_DebugStrings.push_back("");
+
+    COMMALIST cm = { NULL, NULL };
   }
 
   void CInitList::SetValuePool(VALUE* pValuePool, size_t count)
@@ -7119,16 +7109,38 @@ NOT_INC_P:
     return m_nValueCount;
   }
 
+  SYNTAXNODE* CInitList::GetRearrangedList()
+  {
+    ASSERT(m_RearrangedGlob.size() == 1);
+    return m_RearrangedGlob.front().Get();
+  }
+
   void CInitList::DbgListBegin(const clStringA& strTypeName)
   {
     m_DebugStrings.back() = "<";
     m_DebugStrings.back().Append(strTypeName).Append(">{");
+
+    COMMALIST cm;
+    cm.Init(m_pCodeParser);
+    m_RearrangedGlob.push_back(cm);
   }
 
   void CInitList::DbgListAdd(const SYNTAXNODE::GLOB* pGlob)
   {
     clStringA strA;
     DbgListAdd(pGlob ? pGlob->ToString(strA) : "0");
+    COMMALIST& cm = m_RearrangedGlob.back();
+    if(pGlob == NULL)
+    {
+      VALUE v;
+      SYNTAXNODE::GLOB temp_glob = { NULL };
+      m_pCodeParser->SetRepalcedValue(temp_glob, v.SetZero());
+      cm.PushBack(&temp_glob);
+    }
+    else
+    {
+      cm.PushBack(pGlob);
+    }
   }
 
   void CInitList::DbgListAdd(const clStringA& str)
@@ -7140,6 +7152,16 @@ NOT_INC_P:
   {
     m_DebugStrings.back().TrimRight(',');
     m_DebugStrings.back().Append("}");
+
+    if(m_RearrangedGlob.size() > 1)
+    {
+      SYNTAXNODE::GLOB glob;
+      glob.pNode = m_RearrangedGlob.back().Get();
+      m_RearrangedGlob.pop_back();
+      COMMALIST& cm = m_RearrangedGlob.back();
+      
+      cm.PushBack(&glob);
+    }
   }
 
   void CInitList::DbgPushString()
@@ -7164,6 +7186,44 @@ NOT_INC_P:
   clStringA& CInitList::DbgGetString()
   {
     return m_DebugStrings.back();
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  void COMMALIST::Init(CodeParser* pParser)
+  {
+    pCodeParser = pParser;
+    pBegin = pEnd = pCodeParser->AllocNode(SYNTAXNODE::MODE_InitList, NULL, NULL);
+  }
+
+  SYNTAXNODE* COMMALIST::Get()
+  {
+    return pBegin;
+  }
+
+  COMMALIST& COMMALIST::PushBack(const SYNTAXNODE::GLOB* pGlob)
+  {
+    if(pEnd->mode == SYNTAXNODE::MODE_InitList)
+    {
+      if(pEnd->Operand[0].ptr == NULL)
+      {
+        pEnd->Operand[0].ptr = pGlob->ptr;
+      }
+      else
+      {
+        pEnd->Operand[0].pNode = pCodeParser->AllocNode(SYNTAXNODE::MODE_CommaList, pEnd->Operand[0].ptr, pGlob->ptr);
+        pEnd = pEnd->Operand[0].pNode;
+      }
+    }
+    else
+    {
+      ASSERT(pEnd->mode == SYNTAXNODE::MODE_CommaList);
+      ASSERT(pEnd->Operand[0].ptr != NULL && pEnd->Operand[1].ptr != NULL);
+
+      pEnd->Operand[1].pNode = pCodeParser->AllocNode(SYNTAXNODE::MODE_CommaList, pEnd->Operand[1].ptr, pGlob->ptr);
+      pEnd = pEnd->Operand[1].pNode;
+    }
+    return *this;
   }
 
 } // namespace UVShader
