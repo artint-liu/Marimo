@@ -174,6 +174,7 @@ namespace UVShader
     typedef clStringA::LPCSTR LPCSTR;
     typedef clmap<clStringA, const NameContext*> StructContextMap;
     typedef ArithmeticExpression::GLOB GLOB;
+    typedef clmap<TokenPtr, VALUE*> ValuePoolMap;
 
     enum State
     {
@@ -201,6 +202,7 @@ namespace UVShader
     VariableMap m_VariableMap;
     State       m_eLastState;
     StructContextMap  m_StructContextMap; // 结构体成员的NameContext
+    ValuePoolMap      m_ValuePoolMap;
     const TYPEDESC*   m_pReturnType;
 
     NameContext* GetRoot();
@@ -221,6 +223,7 @@ namespace UVShader
 
     void SetParser(CodeParser* pCodeParser);
     void Cleanup();
+    void Reset();
 
     void BuildIntrinsicType();
 
@@ -280,6 +283,8 @@ namespace UVShader
       const TOKEN* ptkOpcode; // 用于输出定位
     };
 
+
+
     CodeParser*             m_pCodeParser;
     NameContext&            m_rNameCtx;
     const SYNTAXNODE::GLOB* m_pInitListGlob;
@@ -299,10 +304,18 @@ namespace UVShader
     {
       E_FAILED = -1
     };
+    enum Result
+    {
+      Result_Failed = -1,
+      Result_Ok = 0,
+      Result_ExpandVecMat = 1,  // 展开函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化
+      Result_NotAligned = 2,    // 函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化与index没对齐
+    };
+
     CInitList(CodeParser* pCodeParser, NameContext& rNameCtx, const SYNTAXNODE::GLOB* pInitListGlob);
     void SetValuePool(VALUE* pValuePool, size_t count);
     const SYNTAXNODE::GLOB* Get();
-    GXBOOL CastToValuePool(size_t index);
+    Result CastToValuePool(const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index);
     const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
     GXBOOL Step(size_t nDimDepth, size_t nListDepth);
@@ -595,7 +608,7 @@ namespace UVShader
     u32     StepIterator     (iterator& it) override;
 
     void    InitPacks();
-    void    Cleanup();
+    void    Reset();
 
     GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
@@ -686,7 +699,7 @@ namespace UVShader
     const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
+    const TYPEDESC* InferInitList(VALUE** ppValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);

@@ -2147,9 +2147,17 @@ GO_NEXT:;
       str = "{";
       str.Append(strOper[0]).Append("}");
       break;
+    case UVShader::SYNTAXNODE::MODE_FunctionCall:
+      Operand[0].ToString(str);
+      if(Operand[1].ptr) {
+        str.Append("(").Append(Operand[1].ToString(strOper[1])).Append("}");
+      }
+      else {
+        str.Append("()");
+      }
+      break;
     case UVShader::SYNTAXNODE::MODE_Undefined:
     case UVShader::SYNTAXNODE::MODE_Assignment:
-    case UVShader::SYNTAXNODE::MODE_FunctionCall:
     case UVShader::SYNTAXNODE::MODE_TypeCast:
     case UVShader::SYNTAXNODE::MODE_Typedef:
     case UVShader::SYNTAXNODE::MODE_Subscript:

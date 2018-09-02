@@ -19,6 +19,10 @@
   _CATE->cate == TYPEDESC::TypeCate_FloatScaler || \
   _CATE->cate == TYPEDESC::TypeCate_IntegerScaler)
 
+#define IS_VECMAT_CATE(_CATE) (\
+  _CATE->cate == TYPEDESC::TypeCate_Vector || \
+  _CATE->cate == TYPEDESC::TypeCate_Matrix)
+
 #define IS_STRUCT_CATE(_CATE) (\
   _CATE->cate == TYPEDESC::TypeCate_Vector || \
   _CATE->cate == TYPEDESC::TypeCate_Matrix || \
@@ -340,11 +344,11 @@ namespace UVShader
     m_aSubStatements.push_back(stat);
   }
 
-  void CodeParser::Cleanup()
+  void CodeParser::Reset()
   {
     m_ValueDict.clear();
     m_PhonyTokenDict.clear();
-    m_GlobalSet.Cleanup();
+    m_GlobalSet.Reset();
     m_errorlist.clear();
     m_aTokens.clear();
     m_aStatements.clear();
@@ -358,7 +362,7 @@ namespace UVShader
 
   b32 CodeParser::Attach(const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename)
   {
-    Cleanup();
+    Reset();
     if( ! m_pContext) {
       m_pContext = new PARSER_CONTEXT;
       m_pContext->nRefCount = 1;
@@ -5114,8 +5118,8 @@ NOT_INC_P:
     TYPEDESC::CPtrList sMemberTypeList;
     pRefType->GetMemberTypeList(sMemberTypeList);
 
-    const size_t nListDepth = rInitList.BeginList();
     const GLOB* pGlob = NULL;
+    size_t nListDepth = rInitList.BeginList();
     size_t index = 0;
 
     for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it)
@@ -5137,11 +5141,26 @@ NOT_INC_P:
         }
         continue;
       }
-      if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
-        return NULL;
-      }
-      index++;
 
+      CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
+      switch(result)
+      {
+      case UVShader::CInitList::Result_Failed:
+        return NULL;
+        break;
+      case UVShader::CInitList::Result_ExpandVecMat:
+        nListDepth++;
+        break;
+      case UVShader::CInitList::Result_Ok:
+      case UVShader::CInitList::Result_NotAligned:
+        // 不处理
+        break;
+      default:
+        CLBREAK; // 意外的返回值
+        break;
+      }
+
+      index++;
 
       if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
         break;
@@ -5176,7 +5195,8 @@ NOT_INC_P:
     size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
     for(index = 0; index < array_count;)
     {
-      if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
+      CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
+      if(result != CInitList::Result_Ok) {
         return NULL;
       }
 
@@ -5229,7 +5249,8 @@ NOT_INC_P:
       const GLOB* pGlob;
       index = 0;
       rInitList.DbgListBegin(pRefType->name);
-      if(rInitList.CastToValuePool(nTopIndex + index) == FALSE) {
+      CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
+      if(result != CInitList::Result_Ok) {
         return NULL;
       }
       rInitList.DbgListEnd();
@@ -5292,7 +5313,7 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList(NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob)
+  const TYPEDESC* CodeParser::InferInitList(VALUE** ppValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob)
   {
     // pInitListGlob 输入初始化列表，同时返回一初始化列表
     ASSERT(pInitListGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)); // 外部保证
@@ -5310,7 +5331,25 @@ NOT_INC_P:
 
 
     const TYPEDESC* pTypeDesc = RearrangeInitList(0, pRefType, il, 1);
-    SAFE_DELETE_ARRAY(pValuePool);
+    if(pTypeDesc)
+    {
+      if(pRefType->cate == TYPEDESC::TypeCate_MultiDim && pRefType->sDimensions.back() == 0)
+      {
+        const size_t type_count = pTypeDesc->CountOf();
+        ASSERT(type_count != 0);
+        *ppValuePool = new VALUE[type_count];
+        memcpy(*ppValuePool, pValuePool, type_count * sizeof(VALUE));
+        SAFE_DELETE_ARRAY(pValuePool);
+      }
+      else
+      {
+        *ppValuePool = pValuePool;
+      }
+    }
+    else
+    {
+      SAFE_DELETE_ARRAY(pValuePool);
+    }
 
     clStringA strRearrange;
     if(nErrorCount == DbgErrorCount()) {
@@ -5875,10 +5914,7 @@ NOT_INC_P:
 
   NameContext::~NameContext()
   {
-    for(auto it = m_StructContextMap.begin(); it != m_StructContextMap.end(); ++it)
-    {
-      SAFE_DELETE(it->second);
-    }
+    Cleanup();
   }
 
   void NameContext::Cleanup()
@@ -5887,13 +5923,24 @@ NOT_INC_P:
     {
       SAFE_DELETE(it->second);
     }
+    for(auto it = m_ValuePoolMap.begin(); it != m_ValuePoolMap.end(); ++it)
+    {
+      SAFE_DELETE_ARRAY(it->second);
+    }
 
+    m_StructContextMap.clear();
+    m_ValuePoolMap.clear();
     m_pReturnType = NULL;
     m_TypeMap.clear();
     m_FuncMap.clear();
     m_VariableMap.clear();
-    m_eLastState = State_Ok;
     m_StructContextMap.clear();
+  }
+
+  void NameContext::Reset()
+  {
+    Cleanup();
+    m_eLastState = State_Ok;
     m_pReturnType = NULL;
     BuildIntrinsicType(); // TODO: CodeParser::Attach每次都调用这个，优化一下
   }
@@ -6246,10 +6293,19 @@ NOT_INC_P:
       if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
       {
         const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
-        sVariDesc.pDesc = m_pCodeParser->InferInitList(*this, pTypeDesc, &sVariDesc.glob);
+        VALUE* pValuePool = NULL;
+        sVariDesc.pDesc = m_pCodeParser->InferInitList(&pValuePool, *this, pTypeDesc, &sVariDesc.glob);
         if(sVariDesc.pDesc == NULL) {
+          ASSERT(pValuePool == NULL);
           ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
           return State_CastTypeError;
+        }
+        auto iter_result = m_ValuePoolMap.find(ptkVariable);
+        if(iter_result == m_ValuePoolMap.end()) {
+          m_ValuePoolMap.insert(clmake_pair(ptkVariable, pValuePool));
+        }
+        else {
+          SAFE_DELETE_ARRAY(pValuePool); // 防止变量重复注册导致内存泄漏
         }
       }
     }
@@ -6383,7 +6439,13 @@ NOT_INC_P:
           m_eLastState = State_HashError;
           return NULL;
         }
-        //m_pCodeParser->SetRepalcedValue(subscript_glob, value);
+
+        // 下标如果不是整形数字，则替换为计算后的常量
+        if(subscript_glob.IsNode() || (subscript_glob.pTokn && subscript_glob.pTokn->type != TOKEN::TokenType_Integer))
+        {
+          m_pCodeParser->SetRepalcedValue(subscript_glob, value);
+        }
+
         sDimensions.push_back((size_t)value.nValue64);
       }
       else if(state == VALUE::State_SyntaxError)
@@ -6956,11 +7018,18 @@ NOT_INC_P:
     return &*Top().iter;
   }
 
-  GXBOOL CInitList::CastToValuePool(size_t index)
+  CInitList::Result CInitList::CastToValuePool(const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index)
   {
+    // pRefTypeDesc 参考类型描述，标量/标量数组中这个是标量类型，结构体/向量/矩阵中这个是结构体/向量/矩阵类型
+    // base_index  是当前列表的基础索引, 也可以理解为 top index
+    // array_index 是当前列表的元素索引
+    const size_t index = base_index + array_index;
     const SYNTAXNODE::GLOB* pGlob = Get();
+    const TYPEDESC* pTypeDesc = NULL;
+    Result func_result = Result_Ok;
     if(pGlob == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
-      return FALSE;
+      CLBREAK;
+      return Result_Failed;
     }
 
     if(pGlob == NULL)
@@ -6971,15 +7040,59 @@ NOT_INC_P:
     else
     {
       ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-      const TYPEDESC* pTypeDesc = m_pCodeParser->InferType(m_rNameCtx, *pGlob);
+      pTypeDesc = m_pCodeParser->InferType(m_rNameCtx, *pGlob);
       if(pTypeDesc == NULL) {
-        return FALSE;
+        return Result_Failed;
       }
+      else if(IS_VECMAT_CATE(pTypeDesc) && pRefTypeDesc->IsSameType(pTypeDesc) &&
+        pGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall) && pGlob->pNode->Operand[1].ptr != NULL) // 要满足 float3(a,b,c) 格式        
+      {
+        int i = 0;
+        const size_t scaler_count = pTypeDesc->CountOf();
+
+        for(; s_PreComponentMath[i].name != NULL; i++)
+        {
+          if(pTypeDesc->name == s_PreComponentMath[i].name) {
+            m_sStack.push_back(STACKDESC());
+            STACKDESC& top = Top();
+            CodeParser::BreakComma(top.sInitList, pGlob->pNode->Operand[1]);
+            top.iter = top.sInitList.begin();
+            top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
+            break;
+          }
+        }
+
+        if(s_PreComponentMath[i].name == NULL)
+        {
+          m_pCodeParser->OutputErrorW(*pGlob, UVS_EXPORT_TEXT2(5052, "初始值设定项不能用于初始化列表", m_pCodeParser));
+          return Result_Failed;
+        }
+        else if(index % scaler_count != 0)
+        {
+          // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
+          return Result_NotAligned;
+        }
+
+        pGlob = Get();
+        func_result = Result_ExpandVecMat;
+      }
+      else if(_CL_NOT_(IS_SCALER_CATE(pTypeDesc)))
+      {
+        m_pCodeParser->OutputErrorW(*pGlob, UVS_EXPORT_TEXT2(5052, "初始值设定项不能用于初始化列表", m_pCodeParser));
+        return Result_Failed;
+      }
+
       ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
-      m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
+      VALUE::State state = m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
+      if(state == VALUE::State_OK) {
+      }
+      else {
+        m_pCodeParser->OutputErrorW(*pGlob, UVS_EXPORT_TEXT2(5053, "无法计算初始化列表常量", m_pCodeParser));
+        return Result_Failed;
+      }
     }
     DbgListAdd(pGlob);
-    return TRUE;
+    return func_result;
   }
 
   const TOKEN* CInitList::GetLocation() const
@@ -6993,22 +7106,6 @@ NOT_INC_P:
 
   const SYNTAXNODE::GLOB* CInitList::Step()
   {
-#if 0
-    // 返回值是步进前的Glob
-    STACKDESC& top = Top();
-    if(top.iter == top.sInitList.end()) {
-      m_sStack.pop_back();
-      return NULL;
-    }
-    else {
-      Enter(&*top.iter);
-      top = Top();
-    }
-
-    const SYNTAXNODE::GLOB* pGlob = &*top.iter;
-    ++top.iter;
-    return pGlob;
-#else
     // 返回值是步进后的Glob
     STACKDESC& top = Top();
     if(!top.sInitList.empty()) {
@@ -7026,14 +7123,9 @@ NOT_INC_P:
       m_bNeedAlignDepth = TRUE;
       return NULL;
     }
-    //else {
-    //  Enter(&*top.iter);
-    //  top = Top();
-    //}
 
     m_bNeedAlignDepth = FALSE;
     return &*top.iter;
-#endif
   }
 
   GXBOOL CInitList::Step(size_t nDimDepth, size_t nListDepth)

@@ -606,6 +606,8 @@ namespace UVShader
   //  {"float4x4", "float4x4", 4, s_ParamArray_v4v4v4v4},
   //  {NULL},
   //};
+
+  // 用来描述向量和矩阵的初始化
   PERCOMPONENTMATH s_PreComponentMath[] = {
     {STR_FLOAT2, 2},
     {STR_FLOAT3, 3},
