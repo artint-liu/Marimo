@@ -250,7 +250,17 @@ namespace UVShader
   extern COMMINTRTYPEDESC s_aIntrinsicStruct[];
   extern COMMINTRTYPEDESC s_aBaseType[];
   extern INTRINSIC_FUNC s_functions[];
-  extern PERCOMPONENTMATH s_PreComponentMath[];
+
+  const PERCOMPONENTMATH* FindPerComponentMathOperations(GXLPCSTR szName)
+  {
+    extern PERCOMPONENTMATH s_PreComponentMath[];
+    for(int i = 0; s_PreComponentMath[i].name != NULL; i++) {
+      if(clstd::strcmpT(szName, s_PreComponentMath[i].name) == 0) {
+        return &s_PreComponentMath[i];
+      }
+    }
+    return NULL;
+  }
 
 
 
@@ -4202,7 +4212,7 @@ NOT_INC_P:
 
         if(bConstVariable)
         {
-          state = CalculateValueAsConstantDefinition(value, sNameSet, right_glob/*second_glob.pNode->Operand[1]*/);
+          state = CalculateValueAsConstantDefinition(value, sNameSet, right_glob);
           if(state != VALUE::State_OK && state != VALUE::State_Call && state != VALUE::State_Identifier) {
             return FALSE;
           }
@@ -4210,7 +4220,7 @@ NOT_INC_P:
 
         const size_t nErrorCount = DbgErrorCount();
 
-        pRightTypeDesc = InferRightValueType(sNameSet, NULL, NULL, right_glob/*second_glob.pNode->Operand[1]*/, ptkVar);
+        pRightTypeDesc = InferRightValueType(sNameSet, NULL, NULL, right_glob, ptkVar);
         ptkVar = GetVariableNameWithoutSeamantic(second_glob.pNode->Operand[0]);
 
         if(pRightTypeDesc == NULL || ptkVar == NULL) {
@@ -4223,11 +4233,11 @@ NOT_INC_P:
         {
           // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
           if(state == VALUE::State_OK) {
-            pType = sNameSet.RegisterVariable(strType, ptkVar, &value, &right_glob/*second_glob.pNode->Operand[1]*/);
+            pType = sNameSet.RegisterVariable(strType, ptkVar, &value, &right_glob);
             SetRepalcedValue(right_glob/*second_glob.pNode->Operand[1]*/, value);
           }
           else {
-            pType = sNameSet.RegisterVariable(strType, ptkVar, NULL, &right_glob/*second_glob.pNode->Operand[1]*/);
+            pType = sNameSet.RegisterVariable(strType, ptkVar, NULL, &right_glob);
           }
         }
         else
@@ -4552,7 +4562,7 @@ NOT_INC_P:
   GXBOOL CodeParser::Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
-    NameContext* pStructMemberSet = new NameContext(s_szNCName_Block, &sParentSet);
+    NameContext* pStructMemberSet = new NameContext(s_szNCName_Block, &sParentSet, NULL);
     RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, pStructMemberSet](const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
       if(pNode->mode == SYNTAXNODE::MODE_Definition)
@@ -4670,7 +4680,7 @@ NOT_INC_P:
       {
         if(pLeftNode->CompareOpcode('.'))
         {
-          pTypeDesc = InferMemberType(sNameSet, left_glob.pNode);
+          pTypeDesc = InferMemberType(NULL, sNameSet, left_glob.pNode);
           if(pTypeDesc == NULL)
           {
             OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
@@ -4685,7 +4695,7 @@ NOT_INC_P:
       }
       else if(pLeftNode->mode == SYNTAXNODE::MODE_Subscript)
       {
-        pTypeDesc = InferSubscriptType(sNameSet, pLeftNode);
+        pTypeDesc = InferSubscriptType(NULL, sNameSet, pLeftNode);
         return pTypeDesc;
       }
       else {
@@ -4875,46 +4885,48 @@ NOT_INC_P:
     }
 
     // 确切参数类型的函数列表
-    for(int i = 0; s_PreComponentMath[i].name != NULL; i++)
-    {
-      if(strFunctionName == s_PreComponentMath[i].name)
-      {
-        int nScalerCount = 0;
-        for(auto it = sArgumentsTypeList.begin(); it != sArgumentsTypeList.end(); ++it)
-        {
-          const TYPEDESC* pTypeDesc = *it; // InferType(sNameSet, *it);
-          int R, C;
+    const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(strFunctionName);
 
-          pTypeDesc->Resolve(R, C);
-          if(C == 0) // pTypeDesc必须是标量或者向量
-          {
-            if(R == 0) {
-              nScalerCount++;
-            }
-            else {
-              nScalerCount += R;
-            }
+    //for(int i = 0; s_PreComponentMath[i].name != NULL; i++)
+    //{
+    if(pPreCompMath)
+    {
+      int nScalerCount = 0;
+      for(auto it = sArgumentsTypeList.begin(); it != sArgumentsTypeList.end(); ++it)
+      {
+        const TYPEDESC* pTypeDesc = *it; // InferType(sNameSet, *it);
+        int R, C;
+
+        pTypeDesc->Resolve(R, C);
+        if(C == 0) // pTypeDesc必须是标量或者向量
+        {
+          if(R == 0) {
+            nScalerCount++;
           }
           else {
-            break;
+            nScalerCount += R;
           }
         }
-
-        if(s_PreComponentMath[i].scaler_count == nScalerCount || nScalerCount == 1)
-        {
-          return sNameSet.GetType(s_PreComponentMath[i].name);
+        else {
+          break;
         }
-        else
-        {
-          clStringW str(s_PreComponentMath[i].name);
-          OutputErrorW(*pFuncNode->Operand[0].pTokn,
-            UVS_EXPORT_TEXT(5039, "“%s”: 参数数量不匹配，参数只提供了%d个标量"), str.CStr(), nScalerCount);
-          return NULL;
-        }
-       
-        break;
       }
+
+      if(pPreCompMath->scaler_count == nScalerCount || nScalerCount == 1)
+      {
+        return sNameSet.GetType(pPreCompMath->name);
+      }
+      else
+      {
+        clStringW str(pPreCompMath->name);
+        OutputErrorW(*pFuncNode->Operand[0].pTokn,
+          UVS_EXPORT_TEXT(5039, "“%s”: 参数数量不匹配，参数只提供了%d个标量"), str.CStr(), nScalerCount);
+        return NULL;
+      }
+
+      //break;
     }
+    //}
 
     // TODO: 没有找到名字的提示找不到标识符, 找到名字但是参数不匹配的提示没有找到重载
     //  error C3861: “func”: 找不到标识符
@@ -4980,7 +4992,7 @@ NOT_INC_P:
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
-      return InferSubscriptType(sNameSet, pNode);
+      return InferSubscriptType(NULL, sNameSet, pNode);
     }
     else if(pNode->mode == SYNTAXNODE::MODE_TypeCast)
     {
@@ -5029,7 +5041,7 @@ NOT_INC_P:
       }
       else if(*pNode->pOpcode == '.')
       {
-        const TYPEDESC* pTypeDesc = InferMemberType(sNameSet, pNode);
+        const TYPEDESC* pTypeDesc = InferMemberType(NULL, sNameSet, pNode);
         return pTypeDesc;
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
@@ -5313,7 +5325,7 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList(VALUE** ppValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob)
+  const TYPEDESC* CodeParser::InferInitList(VALUEDESC* pValueDesc, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob)
   {
     // pInitListGlob 输入初始化列表，同时返回一初始化列表
     ASSERT(pInitListGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)); // 外部保证
@@ -5337,13 +5349,15 @@ NOT_INC_P:
       {
         const size_t type_count = pTypeDesc->CountOf();
         ASSERT(type_count != 0);
-        *ppValuePool = new VALUE[type_count];
-        memcpy(*ppValuePool, pValuePool, type_count * sizeof(VALUE));
+        pValueDesc->pValue = new VALUE[type_count];
+        pValueDesc->count = type_count;
+        memcpy(pValueDesc->pValue, pValuePool, type_count * sizeof(VALUE));
         SAFE_DELETE_ARRAY(pValuePool);
       }
       else
       {
-        *ppValuePool = pValuePool;
+        pValueDesc->pValue = pValuePool;
+        pValueDesc->count = count;
       }
     }
     else
@@ -5494,7 +5508,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferMemberType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.')); // 外部保证
     // ab.cd.ef 解析为
@@ -5506,26 +5520,39 @@ NOT_INC_P:
       pTypeDesc = sNameSet.GetVariable(pNode->Operand[0].pTokn);
       if(pTypeDesc == NULL) {
         clStringW strToken;
-        OutputErrorW(*pNode->Operand[0].pTokn,
-          UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"),
+        OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"),
           pNode->Operand[0].pTokn->ToString(strToken).CStr());
-
         return NULL;
       }
       ASSERT(pTypeDesc);
+
+      if(vd)
+      {
+        const VALUEDESC* pValueDesc = sNameSet.GetValuePool(pNode->Operand[0].pTokn);
+        ASSERT(pValueDesc);
+
+        if(vd->pValue) {
+          CLBREAK;
+        }
+        else {
+          *vd = *pValueDesc;
+        }
+      }
     }
     else if(pNode->Operand[0].IsNode())
     {
       SYNTAXNODE* pChildNode = pNode->Operand[0].pNode;
       if(pChildNode->mode == SYNTAXNODE::MODE_Opcode && pChildNode->CompareOpcode('.'))
       {
-        pTypeDesc = InferMemberType(sNameSet, pChildNode);
+        pTypeDesc = InferMemberType(vd, sNameSet, pChildNode);
+        ASSERT(vd == NULL); // 断在这里就是没实现计算值的功能
       }
       else
       {
         // 结构体起始类型，相当于上面的[ab]
         PARSER_ASSERT(pChildNode->CompareOpcode('.') == FALSE, pNode->Operand[0]); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
         pTypeDesc = InferType(sNameSet, pChildNode);
+        ASSERT(vd == NULL); // 断在这里就是没实现计算值的功能
       }
 
       if(pTypeDesc == NULL) {
@@ -5537,15 +5564,17 @@ NOT_INC_P:
       CLBREAK;
     }
 
+
     if(pNode->Operand[1].IsNode())
     {
       const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
-      if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript)
+      if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
       {
         const NameContext* pMemberContext = sNameSet.GetStructContext(pTypeDesc->name);
         if(pMemberContext)
         {
-          pTypeDesc = InferSubscriptType(*pMemberContext, pMemberNode);
+          ASSERT(vd == NULL); // 断在这里就是没实现计算值的功能
+          pTypeDesc = InferSubscriptType(vd, *pMemberContext, pMemberNode);
           return pTypeDesc;
         }
       }
@@ -5560,6 +5589,7 @@ NOT_INC_P:
           const TOKEN* pMemberToken = pNode->Operand[0].GetBackToken();
           TRACE("length of(%s) = %d\n", pMemberToken->ToString().CStr(), pTypeDesc->sDimensions.back());
 #endif
+          ASSERT(vd == NULL); // 断在这里就是没实现计算值的功能
           return m_GlobalSet.GetType(STR_INT);
         }
       }
@@ -5577,15 +5607,36 @@ NOT_INC_P:
       const NameContext* pMemberContext = sNameSet.GetStructContext(pTypeDesc->name);
       if(pMemberContext)
       {
-        pTypeDesc = InferType(*pMemberContext, pNode->Operand[1].pTokn);
+        if(vd)
+        {
+          const VARIDESC* pVariDesc = pMemberContext->GetVariableDesc(pNode->Operand[1].pTokn);
+          pTypeDesc = pVariDesc->pDesc;
+        }
+        else
+        {
+          pTypeDesc = InferType(*pMemberContext, pNode->Operand[1].pTokn);
+        }
         return pTypeDesc;
       }
       else if(pTypeDesc->pDesc && pTypeDesc->pDesc->lpDotOverride)
       {
-        clStringA strBasicType;
-        if(pTypeDesc->pDesc->lpDotOverride(pTypeDesc->pDesc, strBasicType, pNode->Operand[1].pTokn))
+        DOTOPERATOR_RESULT sDotOperator;
+        if(pTypeDesc->pDesc->lpDotOverride(pTypeDesc->pDesc, &sDotOperator, pNode->Operand[1].pTokn))
         {
-          return m_GlobalSet.GetType(strBasicType);
+          if(vd == NULL)
+          {
+            return m_GlobalSet.GetType(sDotOperator.strType);
+          }
+          else
+          {
+            pTypeDesc = m_GlobalSet.GetType(sDotOperator.strType);
+            if(IS_SCALER_CATE(pTypeDesc))
+            {
+              vd->pValue = vd->pValue + sDotOperator.components[0];
+              vd->count = 1;
+            }
+            return pTypeDesc;
+          }
         }
       }
     }
@@ -5598,7 +5649,7 @@ NOT_INC_P:
     return pTypeDesc;
   }
 
-  const TYPEDESC* CodeParser::InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferSubscriptType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript);
 
@@ -5896,19 +5947,23 @@ NOT_INC_P:
     : m_pCodeParser(NULL)
     , m_strName(szName)
     , m_pParent(NULL)
+    , m_pVariParent(NULL)
     , m_eLastState(State_Ok)
     , allow_keywords(KeywordFilter_All)
     , m_pReturnType(NULL)
+    , m_nCount(0)
   {   
   }
 
-  NameContext::NameContext(GXLPCSTR szName, const NameContext* pParent)
+  NameContext::NameContext(GXLPCSTR szName, const NameContext* pParent, const NameContext* pVariParent)
     : m_pCodeParser(pParent->m_pCodeParser)
     , m_strName(szName)
     , m_pParent(pParent)
+    , m_pVariParent(pVariParent == reinterpret_cast<NameContext*>(-1) ? pParent : pVariParent)
     , m_eLastState(State_Ok)
     , allow_keywords(KeywordFilter_All)
     , m_pReturnType(NULL)
+    , m_nCount(0)
   {
   }
 
@@ -5925,7 +5980,7 @@ NOT_INC_P:
     }
     for(auto it = m_ValuePoolMap.begin(); it != m_ValuePoolMap.end(); ++it)
     {
-      SAFE_DELETE_ARRAY(it->second);
+      SAFE_DELETE_ARRAY(it->second.pValue);
     }
 
     m_StructContextMap.clear();
@@ -6158,10 +6213,16 @@ NOT_INC_P:
         //-----------------------------------------
 
         clStringA strTypename;
-        const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(*this, pNode);
+        VALUEDESC vd = {NULL};
+        const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(&vd, *this, pNode);
 
         if(pTypeDesc && IS_SCALER_CATE(pTypeDesc))
         {
+          if(vd.pValue && vd.count == 1)
+          {
+            value_out = *vd.pValue;
+            return VALUE::State_OK;
+          }
           value_out.rank = VALUE::Rank_Undefined;
           return VALUE::State_Identifier;
         }
@@ -6223,6 +6284,7 @@ NOT_INC_P:
     s = VALUE::State(int(s) | int(value_out.Calculate(*(pNode->pOpcode), p[0], p[1])));
     return s;
   }
+
 #endif
 
   NameContext* NameContext::GetRoot()
@@ -6284,30 +6346,57 @@ NOT_INC_P:
 
     VARIDESC sVariDesc;
     sVariDesc.pDesc = pTypeDesc;
+    sVariDesc.nOffset = m_nCount;
 
     if(pValueExprGlob)
     {
+      VALUEDESC vd = { NULL };
       sVariDesc.glob = *pValueExprGlob;
       // 如果是初始化列表，就进行推导
       // 这里会重新输出一个整理过的初始化列表到sVariDesc.glob中
       if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
       {
         const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
-        VALUE* pValuePool = NULL;
-        sVariDesc.pDesc = m_pCodeParser->InferInitList(&pValuePool, *this, pTypeDesc, &sVariDesc.glob);
+        sVariDesc.pDesc = m_pCodeParser->InferInitList(&vd, *this, pTypeDesc, &sVariDesc.glob);
         if(sVariDesc.pDesc == NULL) {
-          ASSERT(pValuePool == NULL);
+          ASSERT(vd.pValue == NULL);
           ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
           return State_CastTypeError;
         }
-        auto iter_result = m_ValuePoolMap.find(ptkVariable);
-        if(iter_result == m_ValuePoolMap.end()) {
-          m_ValuePoolMap.insert(clmake_pair(ptkVariable, pValuePool));
-        }
-        else {
-          SAFE_DELETE_ARRAY(pValuePool); // 防止变量重复注册导致内存泄漏
+      }
+      else if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall))
+      {
+        clStringA strFuncName;
+        ASSERT(pValueExprGlob->pNode->Operand[0].IsToken());
+        
+        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations
+          (pValueExprGlob->pNode->Operand[0].pTokn->ToString(strFuncName));
+        vd.pValue = new VALUE[pPreCompMath->scaler_count];
+        vd.count = pPreCompMath->scaler_count;
+
+        SYNTAXNODE::GlobList sInitList;
+        int ii = 0;
+        CodeParser::BreakComma(sInitList, pValueExprGlob->pNode->Operand[1]);
+        for(auto it = sInitList.begin(); it != sInitList.end(); ++it, ii++)
+        {
+          VALUE::State state = CalculateConstantValue(vd.pValue[ii], m_pCodeParser, &*it);
+          if(state != VALUE::State_OK) {
+            m_pCodeParser->OutputErrorW(*it, UVS_EXPORT_TEXT2(5054, "无法计算表达式常量", m_pCodeParser));
+            SAFE_DELETE_ARRAY(vd.pValue);
+            return State_RequireConstantExpression;
+          }
         }
       }
+
+      // 注册变量的ValuePool
+      auto iter_result = m_ValuePoolMap.find(ptkVariable);
+      if(iter_result == m_ValuePoolMap.end()) {
+        m_ValuePoolMap.insert(clmake_pair(ptkVariable, vd));
+      }
+      else {
+        SAFE_DELETE_ARRAY(vd.pValue); // 防止变量重复注册导致内存泄漏
+      }
+
     }
     else {
       sVariDesc.glob.ptr = NULL;
@@ -6326,6 +6415,7 @@ NOT_INC_P:
       m_eLastState = State_Ok;
       *ppType = result.first->second.pDesc;
       *ppVariable = &result.first->second;
+      m_nCount += sVariDesc.pDesc->CountOf();
       return State_Ok;
     }
 
@@ -6426,17 +6516,17 @@ NOT_INC_P:
         if(value.rank == VALUE::Rank_Float || value.rank == VALUE::Rank_Double)
         {
           m_pCodeParser->OutputErrorW(*pFirstGlob->GetFrontToken(), UVS_EXPORT_TEXT2(2058, "常量表达式不是整型", m_pCodeParser));
-          m_eLastState = State_HashError;
+          m_eLastState = State_HasError;
           return NULL;
         }
         else if(value.nValue64 < 0) {
           m_pCodeParser->OutputErrorW(*pFirstGlob->GetFrontToken(), UVS_EXPORT_TEXT2(2118, "负下标", m_pCodeParser));
-          m_eLastState = State_HashError;
+          m_eLastState = State_HasError;
           return NULL;
         }
         else if(_CL_NOT_(bSelfAdaptionLength) && value.nValue64 == 0) {
           m_pCodeParser->OutputErrorW(*pFirstGlob->GetFrontToken(), UVS_EXPORT_TEXT2(2466, "不能分配常量大小为 0 的数组", m_pCodeParser));
-          m_eLastState = State_HashError;
+          m_eLastState = State_HasError;
           return NULL;
         }
 
@@ -6615,16 +6705,24 @@ NOT_INC_P:
     
     return (it != m_VariableMap.end())
       ? it->second.pDesc
-      : (m_pParent
-        ? m_pParent->GetVariable(ptkName)
+      : (m_pVariParent
+        ? m_pVariParent->GetVariable(ptkName)
         : ((ptkName->type == TOKEN::TokenType_String) ? GetType("string") : NULL));
+  }
+
+  const NameContext::VALUEDESC* NameContext::GetValuePool(const TOKEN* ptkName) const
+  {
+    auto it = m_ValuePoolMap.find(TokenPtr(ptkName));
+
+    return (it != m_ValuePoolMap.end()) ? &it->second
+      : (m_pParent ? m_pParent->GetValuePool(ptkName) :  NULL);
   }
 
   const VALUE* NameContext::GetVariableValue(const TOKEN* ptkName) const
   {
     auto it = m_VariableMap.find(TokenPtr(ptkName));
     return (it != m_VariableMap.end() && it->second.sConstValue.rank != VALUE::Rank_Undefined)
-      ? &it->second.sConstValue : (m_pParent ? m_pParent->GetVariableValue(ptkName) : NULL);
+      ? &it->second.sConstValue : (m_pVariParent ? m_pVariParent->GetVariableValue(ptkName) : NULL);
   }
 
   VALUE& NameContext::GetVariableValue(VALUE& value, const TOKEN* ptkName) const
@@ -6634,8 +6732,8 @@ NOT_INC_P:
     // 不是常量：value.rank = VALUE::Rank_Undefined;
     auto it = m_VariableMap.find(TokenPtr(ptkName));
     if(it == m_VariableMap.end()) {
-      if(m_pParent) {
-        return m_pParent->GetVariableValue(value, ptkName);
+      if(m_pVariParent) {
+        return m_pVariParent->GetVariableValue(value, ptkName);
       }
       value.rank = VALUE::Rank_BadValue;
       return value;
@@ -6648,8 +6746,8 @@ NOT_INC_P:
   {
     auto it = m_VariableMap.find(TokenPtr(ptkName));
     if(it == m_VariableMap.end()) {
-      if(m_pParent) {
-        return m_pParent->GetVariableDesc(ptkName);
+      if(m_pVariParent) {
+        return m_pVariParent->GetVariableDesc(ptkName);
       }
       return NULL;
     }
@@ -7047,30 +7145,29 @@ NOT_INC_P:
       else if(IS_VECMAT_CATE(pTypeDesc) && pRefTypeDesc->IsSameType(pTypeDesc) &&
         pGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall) && pGlob->pNode->Operand[1].ptr != NULL) // 要满足 float3(a,b,c) 格式        
       {
-        int i = 0;
+        //int i = 0;
         const size_t scaler_count = pTypeDesc->CountOf();
 
-        for(; s_PreComponentMath[i].name != NULL; i++)
+        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(pTypeDesc->name);
+        if(pPreCompMath)
         {
-          if(pTypeDesc->name == s_PreComponentMath[i].name) {
-            m_sStack.push_back(STACKDESC());
-            STACKDESC& top = Top();
-            CodeParser::BreakComma(top.sInitList, pGlob->pNode->Operand[1]);
-            top.iter = top.sInitList.begin();
-            top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
-            break;
+          m_sStack.push_back(STACKDESC());
+          STACKDESC& top = Top();
+          CodeParser::BreakComma(top.sInitList, pGlob->pNode->Operand[1]);
+          top.iter = top.sInitList.begin();
+          top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
+          // TODO: pGlob->pNode->Operand[1] 里面必须是标量，如果有向量就对不上数量了
+
+          if(index % scaler_count != 0)
+          {
+            // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
+            return Result_NotAligned;
           }
         }
-
-        if(s_PreComponentMath[i].name == NULL)
+        else //(s_PreComponentMath[i].name == NULL)
         {
           m_pCodeParser->OutputErrorW(*pGlob, UVS_EXPORT_TEXT2(5052, "初始值设定项不能用于初始化列表", m_pCodeParser));
           return Result_Failed;
-        }
-        else if(index % scaler_count != 0)
-        {
-          // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
-          return Result_NotAligned;
         }
 
         pGlob = Get();

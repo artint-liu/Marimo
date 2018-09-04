@@ -144,6 +144,7 @@ namespace UVShader
   struct VARIDESC
   {
     const TYPEDESC* pDesc;
+    size_t nOffset;
     VALUE sConstValue; // 规定 string 类型不能以 const 修饰，所以这里用VALUE
     SYNTAXNODE::GLOB  glob; // 所有常量都应该定义这个值，数字类型常量同时还应该定义sConstValue
   };
@@ -168,19 +169,25 @@ namespace UVShader
   class NameContext
   {
   public:
+    struct VALUEDESC
+    {
+      VALUE* pValue;
+      size_t count;
+    };
+
     typedef clmap<clStringA, TYPEDESC>  TypeMap;
     typedef std::multimap<clStringA, FUNCDESC>  FuncMap;
     typedef clmap<TokenPtr, VARIDESC>  VariableMap;
     typedef clStringA::LPCSTR LPCSTR;
     typedef clmap<clStringA, const NameContext*> StructContextMap;
     typedef ArithmeticExpression::GLOB GLOB;
-    typedef clmap<TokenPtr, VALUE*> ValuePoolMap;
+    typedef clmap<TokenPtr, VALUEDESC> ValuePoolMap;
 
     enum State
     {
       State_SelfAdaptionLength = 1,
       State_Ok = 0,
-      State_HashError = -1,          // 其它错误，已经在函数内部输出
+      State_HasError = -1,           // 其它错误，已经在函数内部输出
       State_TypeNotFound = -2,       // 没有找到类型
       State_DuplicatedType = -3,     // 重复注册类型
       State_DuplicatedVariable = -4, // 重复定义变量
@@ -191,11 +198,12 @@ namespace UVShader
       State_RequireSubscript = -9,   // 缺少下标: int a[2][] = {};
       State_CastTypeError = -10,     // 类型转换错误，含有的右值不能转换成变量类型
     };
-  
+
   protected:
     CodeParser* m_pCodeParser;
     clStringA m_strName;    // 域名
-    const NameContext* m_pParent;
+    const NameContext* m_pParent;     // 默认记录的祖先
+    const NameContext* m_pVariParent; // 变量记录的祖先，比如结构体成员NameContext.m_pVariParent应该为空
 
     TypeMap     m_TypeMap;  // typedef 会产生两个内容相同的TYPEDESC
     FuncMap     m_FuncMap;
@@ -204,6 +212,7 @@ namespace UVShader
     StructContextMap  m_StructContextMap; // 结构体成员的NameContext
     ValuePoolMap      m_ValuePoolMap;
     const TYPEDESC*   m_pReturnType;
+    size_t      m_nCount;
 
     NameContext* GetRoot();
     const NameContext* GetRoot() const;
@@ -216,7 +225,7 @@ namespace UVShader
     State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob);
   public:
     NameContext(GXLPCSTR szName);
-    NameContext(GXLPCSTR szName, const NameContext* pParent);
+    NameContext(GXLPCSTR szName, const NameContext* pParent, const NameContext* pVariParent = reinterpret_cast<NameContext*>(-1));
     ~NameContext();
 
     GXDWORD allow_keywords; // 过滤的关键字
@@ -235,6 +244,7 @@ namespace UVShader
     const TYPEDESC* GetType(VALUE::Rank rank) const;
     const TYPEDESC* ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
+    const VALUEDESC* GetValuePool(const TOKEN* ptkName) const;
     const VALUE*    GetVariableValue(const TOKEN* ptkName) const;
     const VARIDESC* GetVariableDesc(const TOKEN* ptkName) const;
     VALUE& GetVariableValue(VALUE& value, const TOKEN* ptkName) const;
@@ -353,6 +363,7 @@ namespace UVShader
   public:
     typedef clstack<int> MacroStack;        // 带形参宏所用的处理堆栈
     typedef ArithmeticExpression::iterator iterator;
+    typedef NameContext::VALUEDESC VALUEDESC;
 
     struct MACRO_TOKEN : public TOKEN
     {
@@ -699,10 +710,10 @@ namespace UVShader
     const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList(VALUE** ppValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
+    const TYPEDESC* InferInitList(VALUEDESC* pValueDesc, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
-    const TYPEDESC* InferMemberType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferSubscriptType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferMemberType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferSubscriptType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);

@@ -239,106 +239,129 @@ namespace UVShader
     {STR_DOUBLE, "a"},
   };
 
-  GXBOOL GXCALLBACK OnVector2(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken)
+  int GetVectorComponentIndex(TOKEN::TChar c)
+  {
+    switch(c)
+    {
+    case 'x':
+    case 'r':
+      return 0;
+    case 'y':
+    case 'g':
+      return 1;
+    case 'z':
+    case 'b':
+      return 2;
+    case 'w':
+    case 'a':
+      return 3;
+
+    default:
+      CLBREAK; // 外部保证
+      break;
+    }
+    return -1;
+  }
+
+#define GET_VECTOR_COMPONENT_INDEX(_N)  pResult->components[_N] = GetVectorComponentIndex(p[_N]);
+  GXBOOL EndVectorComponentOperator(const COMMINTRTYPEDESC* pDesc, DOTOPERATOR_RESULT* pResult, const TOKEN* pToken)
+  {
+    if(pToken->length == 1) {
+      pResult->strType = pDesc->component_type;
+      pResult->components[pToken->length] = -1;
+      return TRUE;
+    }
+    else if(pToken->length > 4) {
+      return FALSE;
+    }
+
+    pResult->strType = pDesc->component_type;
+    pResult->strType.Append('0' + pToken->length);
+    pResult->components[pToken->length] = -1;
+    return TRUE;
+  }
+
+  GXBOOL GXCALLBACK OnVector2(const COMMINTRTYPEDESC* pDesc, DOTOPERATOR_RESULT* pResult, const TOKEN* pToken)
   {
     TOKEN::T_LPCSTR p = pToken->marker;
     if(p[0] == 'x' || p[0] == 'y') {
+      GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'x' || p[i] == 'y')) {
           return FALSE;
         }
+        GET_VECTOR_COMPONENT_INDEX(i);
       }
     }
     else if(p[0] == 'r' || p[0] == 'g') {
+      GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'r' || p[i] == 'g')) {
           return FALSE;
         }
+        GET_VECTOR_COMPONENT_INDEX(i);
       }
     }
     else {
       return FALSE;
     }
-
-    if(pToken->length == 1) {
-      strType = pDesc->component_type;
-      return TRUE;
-    }
-    if(pToken->length > 4) {
-      return FALSE;
-    }
-
-    strType = pDesc->component_type;
-    strType.Append('0' + pToken->length);
-    return TRUE;
+    return EndVectorComponentOperator(pDesc, pResult, pToken);
   }
 
-  GXBOOL GXCALLBACK OnVector3(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken)
+  GXBOOL GXCALLBACK OnVector3(const COMMINTRTYPEDESC* pDesc, DOTOPERATOR_RESULT* pResult, const TOKEN* pToken)
   {
     TOKEN::T_LPCSTR p = pToken->marker;
     if(p[0] == 'x' || p[0] == 'y' || p[0] == 'z') {
+      GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'x' || p[i] == 'y' || p[i] == 'z')) {
           return FALSE;
         }
+        GET_VECTOR_COMPONENT_INDEX(i);
       }
     }
     else if(p[0] == 'r' || p[0] == 'g' || p[0] == 'b') {
+      GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'r' || p[i] == 'g' || p[i] == 'b')) {
           return FALSE;
         }
+        GET_VECTOR_COMPONENT_INDEX(i);
       }
     }
     else {
       return FALSE;
     }
 
-    if(pToken->length == 1) {
-      strType = pDesc->component_type;
-      return TRUE;
-    }
-    if(pToken->length > 4) {
-      return FALSE;
-    }
-
-    strType = pDesc->component_type;
-    strType.Append('0' + pToken->length);
-    return TRUE;
+    return EndVectorComponentOperator(pDesc, pResult, pToken);
   }
 
-  GXBOOL GXCALLBACK OnVector4(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken)
+  GXBOOL GXCALLBACK OnVector4(const COMMINTRTYPEDESC* pDesc, DOTOPERATOR_RESULT* pResult, const TOKEN* pToken)
   {
     TOKEN::T_LPCSTR p = pToken->marker;
     if(p[0] == 'x' || p[0] == 'y' || p[0] == 'z' || p[0] == 'w') {
+      GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'x' || p[i] == 'y' || p[i] == 'z' || p[i] == 'w')) {
           return FALSE;
         }
+        GET_VECTOR_COMPONENT_INDEX(i);
       }
     }
     else if(p[0] == 'r' || p[0] == 'g' || p[0] == 'b' || p[0] == 'a') {
+      GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'r' || p[i] == 'g' || p[i] == 'b' || p[i] == 'a')) {
           return FALSE;
         }
+        GET_VECTOR_COMPONENT_INDEX(i);
       }
     }
     else {
       return FALSE;
     }
 
-    if(pToken->length == 1) {
-      strType = pDesc->component_type;
-      return TRUE;
-    }
-    if(pToken->length > 4) {
-      return FALSE;
-    }
-
-    strType = pDesc->component_type;
-    strType.Append('0' + pToken->length);
-    return TRUE;
+    return EndVectorComponentOperator(pDesc, pResult, pToken);
   }
 
   const TYPEDESC* GXCALLBACK OnFloatVectorSubscript(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx)

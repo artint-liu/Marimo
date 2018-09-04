@@ -34,6 +34,7 @@ namespace UVShader
 # define TOKENSUTILITY clstd::TokensUtility
   class ArithmeticExpression;
   class NameContext;
+  const size_t MAX_COMPONENTS = 16; // 4x4矩阵
 
   struct MEMBERLIST
   {
@@ -41,11 +42,25 @@ namespace UVShader
     GXLPCSTR name;      // 成员名
   };
 
+  //struct CONSTANTVALUE
+  //{
+  //  static const int MAX_VALUE = 16; // 最大就是一个4x4矩阵
+  //  const TYPEDESC* pTypeDesc;
+  //  VALUE           values[MAX_VALUE];
+  //  size_t          count;
+  //};
+
+  struct DOTOPERATOR_RESULT
+  {
+    clStringA strType;
+    int       components[MAX_COMPONENTS];
+  };
+
   struct TOKEN;
   struct TYPEDESC;
   struct COMMINTRTYPEDESC;
 
-  typedef GXBOOL (GXCALLBACK *OPERATORPROC_TOKEN)(const COMMINTRTYPEDESC* pDesc, clStringA& strType, const TOKEN* pToken);
+  typedef GXBOOL (GXCALLBACK *OPERATORPROC_TOKEN)(const COMMINTRTYPEDESC* pDesc, DOTOPERATOR_RESULT* pResult, const TOKEN* pToken);
   typedef const TYPEDESC* (GXCALLBACK *OPERATORPROC_NAMECTX)(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx);
 
   struct COMMINTRTYPEDESC
@@ -56,11 +71,6 @@ namespace UVShader
     i16         cate;   // TYPEDESC::TypeCate
     OPERATORPROC_TOKEN lpDotOverride; // "."重载
     OPERATORPROC_NAMECTX lpSubscript; // "[]"下标重载
-    //MEMBERLIST* list;   // 成员列表
-    //size_t      count;  // 成员数
-    //GXLPCSTR    type;
-    //GXLPCSTR    set0;
-    //GXLPCSTR    set1;
   };
 
   // 运行时记录符号和操作符等属性
