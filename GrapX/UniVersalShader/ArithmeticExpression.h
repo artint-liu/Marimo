@@ -289,6 +289,8 @@ namespace UVShader
     State CalculateT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2);
   };
 
+  typedef clvector<VALUE> ValuePool;
+
   //////////////////////////////////////////////////////////////////////////
   struct SYNTAXNODE
   {

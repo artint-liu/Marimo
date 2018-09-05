@@ -3849,6 +3849,11 @@ NOT_INC_P:
     return;
   }
 
+  void CodeParser::OutputMissingSemicolon(const TOKEN* ptkLocation)
+  {
+    OutputErrorW(ptkLocation, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”"));
+  }
+
   void CodeParser::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
   {
 #ifdef REDUCE_ERROR_MESSAGE
@@ -5128,7 +5133,9 @@ NOT_INC_P:
     rInitList.DbgListBegin(pRefType->name);
 
     TYPEDESC::CPtrList sMemberTypeList;
-    pRefType->GetMemberTypeList(sMemberTypeList);
+    if(pRefType->GetMemberTypeList(sMemberTypeList) == FALSE) {
+      return NULL;
+    }
 
     const GLOB* pGlob = NULL;
     size_t nListDepth = rInitList.BeginList();
@@ -5325,7 +5332,7 @@ NOT_INC_P:
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList(VALUEDESC* pValueDesc, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob)
+  const TYPEDESC* CodeParser::InferInitList(ValuePool* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob)
   {
     // pInitListGlob 输入初始化列表，同时返回一初始化列表
     ASSERT(pInitListGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)); // 外部保证
@@ -5337,33 +5344,23 @@ NOT_INC_P:
     CInitList il(this, sNameSet, pInitListGlob);
 
     const size_t count = il.GetMaxCount(pRefType);
-    VALUE* pValuePool = new VALUE[count];
-    memset(pValuePool, 0, sizeof(VALUE) * count); // 暂时还不用调用构造函数
-    il.SetValuePool(pValuePool, count);
+    VALUE* pValues = new VALUE[count];
+    memset(pValues, 0, sizeof(VALUE) * count); // 暂时还不用调用构造函数
+    il.SetValuePool(pValues, count);
 
 
     const TYPEDESC* pTypeDesc = RearrangeInitList(0, pRefType, il, 1);
     if(pTypeDesc)
     {
+      size_t copy_count = count;
       if(pRefType->cate == TYPEDESC::TypeCate_MultiDim && pRefType->sDimensions.back() == 0)
       {
-        const size_t type_count = pTypeDesc->CountOf();
-        ASSERT(type_count != 0);
-        pValueDesc->pValue = new VALUE[type_count];
-        pValueDesc->count = type_count;
-        memcpy(pValueDesc->pValue, pValuePool, type_count * sizeof(VALUE));
-        SAFE_DELETE_ARRAY(pValuePool);
+        copy_count = pTypeDesc->CountOf();
+        ASSERT(copy_count != 0);
       }
-      else
-      {
-        pValueDesc->pValue = pValuePool;
-        pValueDesc->count = count;
-      }
+      pValuePool->assign(pValues, pValues + copy_count);
     }
-    else
-    {
-      SAFE_DELETE_ARRAY(pValuePool);
-    }
+    SAFE_DELETE_ARRAY(pValues);
 
     clStringA strRearrange;
     if(nErrorCount == DbgErrorCount()) {
@@ -5528,14 +5525,15 @@ NOT_INC_P:
 
       if(vd)
       {
-        const VALUEDESC* pValueDesc = sNameSet.GetValuePool(pNode->Operand[0].pTokn);
+        const ValuePool* pValueDesc = sNameSet.GetValuePool(pNode->Operand[0].pTokn);
         ASSERT(pValueDesc);
 
         if(vd->pValue) {
           CLBREAK;
         }
         else {
-          *vd = *pValueDesc;
+          vd->pValue = &pValueDesc->front();
+          vd->count = pValueDesc->size();
         }
       }
     }
@@ -5550,6 +5548,7 @@ NOT_INC_P:
       else
       {
         // 结构体起始类型，相当于上面的[ab]
+        // 例："float2(a, b).x" => [.][float2(a, b)][x]
         PARSER_ASSERT(pChildNode->CompareOpcode('.') == FALSE, pNode->Operand[0]); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
         pTypeDesc = InferType(sNameSet, pChildNode);
         ASSERT(vd == NULL); // 断在这里就是没实现计算值的功能
@@ -5643,7 +5642,7 @@ NOT_INC_P:
 
     clStringW str1, str2;
     pTypeDesc = NULL;
-    OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(2039, "“%s”: 不是“%s”的成员"),
+    OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(ERR_IS_NOT_MEMBER, "“%s”: 不是“%s”的成员"),
       pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].GetFrontToken()->ToString(str1).CStr());
 
     return pTypeDesc;
@@ -5978,10 +5977,6 @@ NOT_INC_P:
     {
       SAFE_DELETE(it->second);
     }
-    for(auto it = m_ValuePoolMap.begin(); it != m_ValuePoolMap.end(); ++it)
-    {
-      SAFE_DELETE_ARRAY(it->second.pValue);
-    }
 
     m_StructContextMap.clear();
     m_ValuePoolMap.clear();
@@ -6074,6 +6069,11 @@ NOT_INC_P:
     td.pDesc = NULL;
     m_TypeMap.insert(clmake_pair(td.name, td));
     //}
+  }
+
+  CodeParser* NameContext::GetLogger() const
+  {
+    return m_pCodeParser;
   }
 
   GXBOOL NameContext::SetReturnType(GXLPCSTR szTypeName)
@@ -6350,53 +6350,60 @@ NOT_INC_P:
 
     if(pValueExprGlob)
     {
-      VALUEDESC vd = { NULL };
-      sVariDesc.glob = *pValueExprGlob;
-      // 如果是初始化列表，就进行推导
-      // 这里会重新输出一个整理过的初始化列表到sVariDesc.glob中
-      if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
-      {
-        const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
-        sVariDesc.pDesc = m_pCodeParser->InferInitList(&vd, *this, pTypeDesc, &sVariDesc.glob);
-        if(sVariDesc.pDesc == NULL) {
-          ASSERT(vd.pValue == NULL);
-          ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
-          return State_CastTypeError;
-        }
-      }
-      else if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall))
-      {
-        clStringA strFuncName;
-        ASSERT(pValueExprGlob->pNode->Operand[0].IsToken());
-        
-        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations
-          (pValueExprGlob->pNode->Operand[0].pTokn->ToString(strFuncName));
-        vd.pValue = new VALUE[pPreCompMath->scaler_count];
-        vd.count = pPreCompMath->scaler_count;
-
-        SYNTAXNODE::GlobList sInitList;
-        int ii = 0;
-        CodeParser::BreakComma(sInitList, pValueExprGlob->pNode->Operand[1]);
-        for(auto it = sInitList.begin(); it != sInitList.end(); ++it, ii++)
-        {
-          VALUE::State state = CalculateConstantValue(vd.pValue[ii], m_pCodeParser, &*it);
-          if(state != VALUE::State_OK) {
-            m_pCodeParser->OutputErrorW(*it, UVS_EXPORT_TEXT2(5054, "无法计算表达式常量", m_pCodeParser));
-            SAFE_DELETE_ARRAY(vd.pValue);
-            return State_RequireConstantExpression;
-          }
-        }
-      }
+      //VALUEDESC vd = { NULL };
 
       // 注册变量的ValuePool
-      auto iter_result = m_ValuePoolMap.find(ptkVariable);
-      if(iter_result == m_ValuePoolMap.end()) {
-        m_ValuePoolMap.insert(clmake_pair(ptkVariable, vd));
-      }
-      else {
-        SAFE_DELETE_ARRAY(vd.pValue); // 防止变量重复注册导致内存泄漏
-      }
+      auto iter_find_result = m_ValuePoolMap.find(ptkVariable);
+      if(iter_find_result == m_ValuePoolMap.end())
+      {
+        auto iter_insert_result = m_ValuePoolMap.insert(clmake_pair(ptkVariable, ValuePool()));
+        if(iter_insert_result.second)
+        {
+          ValuePool& vp = iter_insert_result.first->second;
 
+          sVariDesc.glob = *pValueExprGlob;
+          // 如果是初始化列表，就进行推导
+          // 这里会重新输出一个整理过的初始化列表到sVariDesc.glob中
+          if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
+          {
+            const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
+            sVariDesc.pDesc = m_pCodeParser->InferInitList(&vp, *this, pTypeDesc, &sVariDesc.glob);
+            if(sVariDesc.pDesc == NULL) {
+              ASSERT(vp.empty());
+              ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
+              return State_CastTypeError;
+            }
+          }
+          else if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall))
+          {
+            clStringA strFuncName;
+            ASSERT(pValueExprGlob->pNode->Operand[0].IsToken());
+
+            const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations
+            (pValueExprGlob->pNode->Operand[0].pTokn->ToString(strFuncName));
+
+            if(pPreCompMath)
+            {
+              //vd.pValue = new VALUE[pPreCompMath->scaler_count];
+              //vd.count = pPreCompMath->scaler_count;
+              VALUE value_zero;
+              vp.assign(pPreCompMath->scaler_count, value_zero.SetZero());
+
+              SYNTAXNODE::GlobList sInitList;
+              int ii = 0;
+              CodeParser::BreakComma(sInitList, pValueExprGlob->pNode->Operand[1]);
+              for(auto it = sInitList.begin(); it != sInitList.end(); ++it, ii++)
+              {
+                VALUE::State state = CalculateConstantValue(vp[ii], m_pCodeParser, &*it);
+                if(state != VALUE::State_OK) {
+                  m_pCodeParser->OutputErrorW(*it, UVS_EXPORT_TEXT2(5054, "无法计算表达式常量", m_pCodeParser));
+                  return State_RequireConstantExpression;
+                }
+              }
+            } // if(pPreCompMath)
+          }
+        } // iter_insert_result.second
+      }
     }
     else {
       sVariDesc.glob.ptr = NULL;
@@ -6710,7 +6717,7 @@ NOT_INC_P:
         : ((ptkName->type == TOKEN::TokenType_String) ? GetType("string") : NULL));
   }
 
-  const NameContext::VALUEDESC* NameContext::GetValuePool(const TOKEN* ptkName) const
+  const ValuePool* NameContext::GetValuePool(const TOKEN* ptkName) const
   {
     auto it = m_ValuePoolMap.find(TokenPtr(ptkName));
 
@@ -6856,6 +6863,11 @@ NOT_INC_P:
     a = VALUE::State((u32)a | (u32)b);
   }
 
+  CodeParser* TYPEDESC::GetLogger() const
+  {
+    return pNameCtx->GetLogger();
+  }
+
   GXBOOL TYPEDESC::MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set)
   {
     size_t match_count = 0;
@@ -6949,7 +6961,7 @@ NOT_INC_P:
     return ((this == pOtherTypeDesc) || (name == pOtherTypeDesc->name));
   }
 
-  TYPEDESC::CPtrList& TYPEDESC::GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const
+  GXBOOL TYPEDESC::GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const
   {
     ASSERT(IS_STRUCT_CATE(this)); // 外部保证
     ASSERT(cate != TypeCate_Struct || pMemberNode->mode == SYNTAXNODE::MODE_Block); // 防止以后修改
@@ -6964,12 +6976,12 @@ NOT_INC_P:
       for(int i = 0; i < C; i++) {
         sMemberTypeList.push_back(pElementType);
       }
-      return sMemberTypeList;
+      return TRUE;
     }
 
     const NameContext* pStructCtx = pNameCtx->GetStructContext(name);
     if(pStructCtx == NULL) {
-      return sMemberTypeList;
+      return FALSE;
     }
 
     SYNTAXNODE::GlobList sMemberList;
@@ -6979,24 +6991,30 @@ NOT_INC_P:
     {
       if(it->IsNode() && it->pNode->mode == SYNTAXNODE::MODE_Definition)
       {
-        //if(it->pNode->Operand[0].IsToken()) {
-        //  const TYPEDESC* pTypeDesc = pNameCtx->GetType(*it->pNode->Operand[0].pTokn);
-        //  ASSERT(pTypeDesc);
-        //  sMemberTypeList.push_back(pTypeDesc);
-        //}
-        //else {
-        //  CLBREAK;
-        //}
-        const TOKEN* ptkVariable = CodeParser::GetVariableNameWithoutSeamantic(it->pNode->Operand[1]);
-        const TYPEDESC* pMemberTypeDesc = pStructCtx->GetVariable(ptkVariable);
-        ASSERT(pMemberTypeDesc);
-        sMemberTypeList.push_back(pMemberTypeDesc);
+        const TOKEN* ptkMember = CodeParser::GetVariableNameWithoutSeamantic(it->pNode->Operand[1]);
+        if(ptkMember == NULL) {
+          GetLogger()->OutputMissingSemicolon(it->pNode->Operand[1].GetFrontToken());
+          return FALSE;
+        }
+
+        const TYPEDESC* pMemberTypeDesc = pStructCtx->GetVariable(ptkMember);
+        if(pMemberTypeDesc != NULL)
+        {
+          sMemberTypeList.push_back(pMemberTypeDesc);
+        }
+        else
+        {
+          clStringW strMemberName, strStructName = name;
+          GetLogger()->OutputErrorW(ptkMember, UVS_EXPORT_TEXT2(ERR_IS_NOT_MEMBER, "“%s”: 不是“%s”的成员", GetLogger()),
+            ptkMember->ToString(strMemberName).CStr(), strStructName.CStr());
+          return FALSE;
+        }
       }
       else {
         CLBREAK;
       }
     }
-    return sMemberTypeList;
+    return TRUE;
   }
 
   size_t TYPEDESC::CountOf() const
@@ -7018,10 +7036,17 @@ NOT_INC_P:
     {
       TYPEDESC::CPtrList sMemberTypeList;
       size_t count = 0;
-      auto it = GetMemberTypeList(sMemberTypeList).begin();
-      for(; it != sMemberTypeList.end(); ++it)
+      if(GetMemberTypeList(sMemberTypeList))
       {
-        count += (*it)->CountOf();
+        auto it = sMemberTypeList.begin();
+        for(; it != sMemberTypeList.end(); ++it)
+        {
+          count += (*it)->CountOf();
+        }
+      }
+      else
+      {
+        count = (size_t)-1;
       }
       return count;
     }

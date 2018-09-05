@@ -154,7 +154,7 @@ namespace UVShader
     E2021 = 2021, // "应输入指数值，而非“character”";
     E2022 = 2022, // "“number”: 对字符来说太大";
     E2030 = 2030, // "“identifier”: 结构/联合成员重定义";
-    E2039 = 2039, // "“identifier1”: 不是“identifier2”的成员";
+    ERR_IS_NOT_MEMBER = 2039, // "“identifier1”: 不是“identifier2”的成员";
     E2041 = 2041, // "非法的数字“character”(用于基“number”)";
     E2043 = 2043, // "非法 break";
     E2044 = 2044, // "非法 continue";

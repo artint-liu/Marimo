@@ -76,12 +76,13 @@ namespace UVShader
     DimList_T           sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
     const TYPEDESC*     pElementType; // float[3][2]的 pElementType=float[2]，float3[2]的pElementType=float3，float3的pElementType=float，只有数学类型才有
 
+    CodeParser* GetLogger() const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
     GXLPCSTR Resolve(int& R, int& C) const;
     GXBOOL IsVector() const;
     GXBOOL IsMatrix() const;
     GXBOOL IsSameType(const TYPEDESC* pOtherTypeDesc) const;
-    TYPEDESC::CPtrList& GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const;
+    GXBOOL GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const;
     size_t CountOf() const; // 获得向量，矩阵和数组包含的基础类型数量
     const TYPEDESC* ConfirmArrayCount(size_t nCount) const;
   };
@@ -165,13 +166,12 @@ namespace UVShader
     GXLPCSTR      szSemantic; // [opt]
   };
 
-
   class NameContext
   {
   public:
     struct VALUEDESC
     {
-      VALUE* pValue;
+      const VALUE* pValue;
       size_t count;
     };
 
@@ -181,7 +181,7 @@ namespace UVShader
     typedef clStringA::LPCSTR LPCSTR;
     typedef clmap<clStringA, const NameContext*> StructContextMap;
     typedef ArithmeticExpression::GLOB GLOB;
-    typedef clmap<TokenPtr, VALUEDESC> ValuePoolMap;
+    typedef clmap<TokenPtr, ValuePool> ValuePoolMap;
 
     enum State
     {
@@ -235,6 +235,7 @@ namespace UVShader
     void Reset();
 
     void BuildIntrinsicType();
+    CodeParser* GetLogger() const;
 
     GXBOOL SetReturnType(GXLPCSTR szTypeName);
     const TYPEDESC* GetReturnType() const;
@@ -244,7 +245,7 @@ namespace UVShader
     const TYPEDESC* GetType(VALUE::Rank rank) const;
     const TYPEDESC* ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
     const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
-    const VALUEDESC* GetValuePool(const TOKEN* ptkName) const;
+    const ValuePool* GetValuePool(const TOKEN* ptkName) const;
     const VALUE*    GetVariableValue(const TOKEN* ptkName) const;
     const VARIDESC* GetVariableDesc(const TOKEN* ptkName) const;
     VALUE& GetVariableValue(VALUE& value, const TOKEN* ptkName) const;
@@ -698,6 +699,8 @@ namespace UVShader
     void OutputErrorW(const TOKEN* pToken, GXUINT code, ...) const;
     void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
 
+    void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示
+
     CodeParser* GetRootParser();
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
 
@@ -710,7 +713,7 @@ namespace UVShader
     const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList(VALUEDESC* pValueDesc, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
+    const TYPEDESC* InferInitList(ValuePool* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode);
