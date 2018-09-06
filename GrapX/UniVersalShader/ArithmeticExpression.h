@@ -12,10 +12,10 @@
 
 // 注意UVS_EXPORT_TEXT不能改名, 它在Sample中作为标记符号抽取ErrorMessage
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
-#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  SetError(MarkCode(_CODE_ID, _MESSAGE))
+#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  GetLogger()->SetError(GetLogger()->MarkCode(_CODE_ID, _MESSAGE))
 #define UVS_EXPORT_TEXT2(_CODE_ID, _MESSAGE, _THIS)  _THIS->SetError(_THIS->MarkCode(_CODE_ID, _MESSAGE))
 #else
-#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  SetError(_CODE_ID)
+#define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  GetLogger()->SetError(_CODE_ID)
 #define UVS_EXPORT_TEXT2(_CODE_ID, _MESSAGE, _THIS)  _THIS->SetError(_CODE_ID)
 #endif
 
@@ -418,6 +418,62 @@ namespace UVShader
 
   //////////////////////////////////////////////////////////////////////////
 
+  class CLogger
+  {
+    typedef SYNTAXNODE::GLOB  GLOB;
+    typedef Marimo::DataPoolErrorMsg<ch> ErrorMessage;
+    typedef CTokens::T_LPCSTR T_LPCSTR;
+    static const int c_nMaxErrorCount = 100;
+    static const int c_nMaxSessionError = 4;
+    static const int c_nErrorIdLimit = 9000; // 低于这个id的消息受显示数量限制，大于等于这个id的不受限制
+
+    GXUINT              m_uRefCount;
+    ErrorMessage*       m_pMsg;
+
+    clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
+    size_t              m_nErrorCount;
+    int                 m_nSessionError;    // 区间错误数量，如果在区间内大于一定值则不会再输出错误
+
+  public:
+    CLogger();
+    virtual ~CLogger();
+
+    GXUINT AddRef();
+    GXUINT Release();
+
+    void Initialize(const char* szExpression, clsize nSize, GXLPCWSTR szFilename);
+
+    void Reset();
+    void ResetSessionError(); // 重置区间错误计数
+
+    void      SetCurrentFilenameW(GXLPCWSTR szFilename);
+    GXLPCWSTR GetFilenameW(GXUINT idFile = 0) const; // 获得文件名，这个可以被SetCurrentFilenameW重新设置
+    GXLPCWSTR GetFilePathW(GXUINT idFile = 0) const;  // 获得文件路径，这个是PushFile初始设置的文件路径，应该对应一个有效的物理路径
+    void      SetLine(T_LPCSTR ptr, GXINT nLine);
+    void      PushFile(GXLPCWSTR szFilename, GXINT nTopLine, T_LPCSTR szCodes, size_t length);
+    void      PopFile();
+    GXINT     GetLine(const TOKEN& token);
+
+
+    void VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const;
+    //void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
+    void OutputErrorW(const GLOB& glob, GXUINT code, ...) const;
+    void OutputErrorW(const SYNTAXNODE* pNode, GXUINT code, ...) const;
+    void OutputErrorW(const TOKEN& token, GXUINT code, ...) const;
+    void OutputErrorW(const TOKEN* pToken, GXUINT code, ...) const;
+    void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
+    void WriteMessageW(GXLPCWSTR szMessage);
+
+    void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示
+
+    GXUINT MarkCode(GXUINT code, GXLPCSTR szMessage);
+    int    SetError(int err);
+    GXBOOL HasError(int errcode) const;
+    size_t ErrorCount() const;
+  };
+
+  //////////////////////////////////////////////////////////////////////////
+
   class ArithmeticExpression : public CTokens
   {
     //friend struct TOKEN;
@@ -426,8 +482,7 @@ namespace UVShader
     typedef CTokens::T_LPCSTR T_LPCSTR;
     typedef CTokens::TChar    TChar;
     typedef SYNTAXNODE::GLOB  GLOB;
-    static const int c_nMaxErrorCount = 100;
-    static const int c_nMaxSessionError = 4;
+    //static const int c_nMaxSessionError = 4;
 
 
     //typedef clvector<TOKEN> TokenArray;
@@ -498,16 +553,6 @@ namespace UVShader
 
     typedef clstack<int>          PairStack;
     
-    //struct SYNTAXNODEPOOL
-    //{
-    //  SYNTAXNODE* pBegin;
-    //  SYNTAXNODE* pEnd;
-    //};
-
-    //typedef cllist<SYNTAXNODEPOOL> SyntaxNodePoolList;
-
-
-
 
 
     struct TKSCOPE // 运行时的Token范围描述结构体
@@ -557,13 +602,14 @@ namespace UVShader
     clsize              m_nNodeId;
 #endif
     GXBOOL              m_bHigherDefiniton; // “Identifier Identifier” 形式的定义转为更高优先级，默认比较低
-    GXBOOL              m_bRefMsg; // 如果为TRUE，析构时不删除m_pMsg
-    ErrorMessage*       m_pMsg;
+    //GXBOOL              m_bRefMsg; // 如果为TRUE，析构时不删除m_pMsg
+    //ErrorMessage*       m_pMsg;
     TOKEN::Array        m_aTokens;
     
-    clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
-    size_t              m_nErrorCount;
-    int                 m_nSessionError;    // 区间错误数量，如果在区间内大于一定值则不会再输出错误
+    CLogger*             m_pLogger;   
+    //clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
+    //size_t              m_nErrorCount;
+    //int                 m_nSessionError;    // 区间错误数量，如果在区间内大于一定值则不会再输出错误
 
     // 语法节点的内存池
     //SyntaxNodePoolList  m_NodePoolList;
@@ -600,12 +646,8 @@ namespace UVShader
     TKSCOPE::TYPE  GetLowestPrecedence(const TKSCOPE& scope, int nMinPrecedence);
     TKSCOPE::TYPE FindComma(const TKSCOPE& scope);
     void    EnableHigherDefinition(GXBOOL bHigher);
-
     SYNTAXNODE* AllocNode(SYNTAXNODE::MODE m, void* pOperand0, void* pOperand1);
 
-#if defined(UVS_EXPORT_TEXT_IS_SIGN)
-    GXUINT  MarkCode(GXUINT code, GXLPCSTR szMessage);
-#endif
   public:
     static TChar GetPairOfBracket(TChar ch); // 获得与输入配对的括号
 
@@ -613,8 +655,6 @@ namespace UVShader
     ArithmeticExpression();
     virtual ~ArithmeticExpression();
 
-    //SYNTAXNODE::FLAGS TryGetNodeType(const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
-    //SYNTAXNODE::MODE  TryGetNode    (const SYNTAXNODE::UN* pUnion) const; // TODO: 修改所属类
     const SYNTAXNODE* TryGetNode        (const GLOB* pDesc) const; // TODO: 修改所属类
     SYNTAXNODE::MODE  TryGetNodeMode    (const GLOB* pDesc) const; // TODO: 修改所属类
 
@@ -626,6 +666,8 @@ namespace UVShader
     GXBOOL  ParseArithmeticExpression(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence); // 递归函数
 
     int BreakComma(int depth, const TKSCOPE& scope, GLOB* pDesc, int nMinPrecedence); // 返回值：-1，没处理；0，失败；1，成功
+    CLogger* GetLogger();
+    const CLogger* GetLogger() const;
 
     GXBOOL DbgHasError(int errcode) const;
     size_t DbgErrorCount() const;
@@ -634,8 +676,7 @@ namespace UVShader
     void DbgDumpScope(GXLPCSTR opcode, const TKSCOPE& scopeA, const TKSCOPE& scopeB);
     void Invoke(GXLPCSTR szFunc, GXLPCSTR szArguments);
     clStringArrayA& DbgGetExpressionStack();
-    int SetError(int err);
-    void ResetSessionError(); // 重置区间错误计数
+    virtual T_LPCSTR GetOriginPtr(const TOKEN* pToken) const; // 获得token原始地址指针
   };
 
   template<class SYNTAXNODE_T>

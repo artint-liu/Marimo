@@ -107,13 +107,14 @@ namespace UVShader
 #endif // USE_CLSTD_TOKENS
 
   ArithmeticExpression::ArithmeticExpression()
-    : m_pMsg(NULL)
+    : //m_pMsg(NULL)
     //, m_nMaxPrecedence(0)
-    , m_nErrorCount(0)
-    , m_nSessionError(0)
-    , m_NodePool(128)
+    //, m_nErrorCount(0)
+    //, m_nSessionError(0)
+     m_NodePool(128)
     , m_bHigherDefiniton(FALSE)
-    , m_bRefMsg(FALSE)
+    //, m_bRefMsg(FALSE)
+    , m_pLogger(NULL)
 #ifdef ENABLE_SYNTAX_NODE_ID
     , m_nNodeId(1)
 #endif
@@ -289,7 +290,8 @@ namespace UVShader
       if(SmartStreamUtility::ExtendToCStyleBlockComment(it, 2, remain) == FALSE)
       {
         ArithmeticExpression* pThis = (ArithmeticExpression*)it.pContainer;
-        pThis->m_pMsg->WriteErrorW(TRUE, it.offset(), UVS_EXPORT_TEXT2(1071, "在注释中遇到意外的文件结束", pThis));
+        //pThis->GetLogger()->WriteErrorW(TRUE, it.offset(), UVS_EXPORT_TEXT2(1071, "在注释中遇到意外的文件结束", pThis));
+        pThis->GetLogger()->OutputErrorW(it->marker, UVS_EXPORT_TEXT(1071, "在注释中遇到意外的文件结束"));
       }
       ++it;
     }
@@ -611,7 +613,8 @@ namespace UVShader
     if(depth > 1000)
     {
       // ERROR: 表达式解析堆栈不足
-      m_pMsg->WriteErrorW(TRUE, m_aTokens[scope.begin].offset(), UVS_EXPORT_TEXT(5001, "表达式解析堆栈不足"));
+      //m_pMsg->WriteErrorW(TRUE, m_aTokens[scope.begin].offset(), UVS_EXPORT_TEXT(5001, "表达式解析堆栈不足"));
+      GetLogger()->OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5001, "表达式解析堆栈不足"));
       return FALSE;
     }
 
@@ -802,14 +805,24 @@ GO_NEXT:;
     return -1;
   }
 
+  CLogger* ArithmeticExpression::GetLogger()
+  {
+    return m_pLogger;
+  }
+
+  const CLogger* ArithmeticExpression::GetLogger() const
+  {
+    return m_pLogger;
+  }
+
   GXBOOL ArithmeticExpression::DbgHasError(int errcode) const
   {
-    return (m_errorlist.find(errcode) != m_errorlist.end());
+    return GetLogger()->HasError(errcode);
   }
 
   size_t ArithmeticExpression::DbgErrorCount() const
   {
-    return m_nErrorCount;
+    return GetLogger()->ErrorCount();
   }
 
   GXBOOL ArithmeticExpression::ParseFunctionSubscriptCall(const TKSCOPE& scope, GLOB* pDesc)
@@ -835,7 +848,8 @@ GO_NEXT:;
     if(A.pTokn->precedence != 0)
     {
       clStringW strW;
-      m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5040, "语法错误: “%s”"), A.pTokn->ToString(strW).CStr());
+      //m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5040, "语法错误: “%s”"), A.pTokn->ToString(strW).CStr());
+      GetLogger()->OutputErrorW(A.pTokn, UVS_EXPORT_TEXT(5040, "语法错误: “%s”"), A.pTokn->ToString(strW).CStr());
       return FALSE;
     }
 
@@ -856,7 +870,8 @@ GO_NEXT:;
       else {
         ASSERT(*pBack == '}');
         clStringW str;
-        m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(2054, "在“%s”之后应输入“%s”"), A.pTokn->ToString(str).CStr(), _CLTEXT("="));
+        //m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(2054, "在“%s”之后应输入“%s”"), A.pTokn->ToString(str).CStr(), _CLTEXT("="));
+        GetLogger()->OutputErrorW(A.pTokn, UVS_EXPORT_TEXT(2054, "在“%s”之后应输入“%s”"), A.pTokn->ToString(str).CStr(), _CLTEXT("="));
         c.mode = SYNTAXNODE::MODE_Undefined;
       }
 
@@ -901,15 +916,6 @@ GO_NEXT:;
     }
     return m_aTokens[index] == szName;
   }
-
-#if defined(UVS_EXPORT_TEXT_IS_SIGN)
-  GXUINT ArithmeticExpression::MarkCode(GXUINT code, GXLPCSTR szMessage)
-  {
-    clStringW strMessage = szMessage;
-    m_pMsg->UpdateErrorMessage(code, strMessage);
-    return code;
-  }
-#endif
 
   GXBOOL ArithmeticExpression::ParseFunctionCall(const TKSCOPE& scope, GLOB* pDesc)
   {
@@ -982,7 +988,8 @@ GO_NEXT:;
 
     if(_CL_NOT_(ParseArithmeticExpression(0, type_scope, &A, TOKEN::FIRST_OPCODE_PRECEDENCE)))
     {
-      m_pMsg->WriteErrorW(TRUE, m_aTokens[type_scope.begin].offset(), UVS_EXPORT_TEXT(5007, "类型转换:类型无法解析."));
+      //m_pMsg->WriteErrorW(TRUE, m_aTokens[type_scope.begin].offset(), UVS_EXPORT_TEXT(5007, "类型转换:类型无法解析."));
+      GetLogger()->OutputErrorW(m_aTokens[type_scope.begin], UVS_EXPORT_TEXT(5007, "类型转换:类型无法解析."));
       return FALSE;
     }
 
@@ -1061,7 +1068,8 @@ GO_NEXT:;
             if(_CL_NOT_(bSilent)) {
               // ERROR: 括号不匹配
               clStringW str((clStringW::TChar)c.chOpen, 1);
-              m_pMsg->WriteErrorW(TRUE, token.offset(), UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), str.CStr());
+              //m_pMsg->WriteErrorW(TRUE, token.offset(), UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), str.CStr());
+              GetLogger()->OutputErrorW(token, UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), str.CStr());
             }
             token.type = TOKEN::TokenType_Bracket;
           }
@@ -1170,21 +1178,9 @@ GO_NEXT:;
     return m_aDbgExpressionOperStack;
   }
 
-  int ArithmeticExpression::SetError(int err)
+  ArithmeticExpression::T_LPCSTR ArithmeticExpression::GetOriginPtr(const TOKEN* pToken) const
   {
-    m_nErrorCount++;
-    m_nSessionError++;
-    m_errorlist.insert(err);
-
-    if(m_nErrorCount == c_nMaxErrorCount) {
-      m_pMsg->WriteErrorW(FALSE, 0, UVS_EXPORT_TEXT(9997, "错误数量超过%d条，将停止输出错误消息"), c_nMaxErrorCount);
-    }
-    return err;
-  }
-
-  void ArithmeticExpression::ResetSessionError()
-  {
-    m_nSessionError = 0;
+    return NULL;
   }
 
   ArithmeticExpression::TChar ArithmeticExpression::GetPairOfBracket(TChar ch)
@@ -2352,6 +2348,130 @@ GO_NEXT:;
   ArithmeticExpression::iterator::iterator(const TOKEN& token)
   {
     this->operator=(token);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  CLogger::CLogger()
+    : m_uRefCount(1)
+    , m_pMsg(NULL)
+    , m_nErrorCount(0)
+    , m_nSessionError(0)
+  {
+  }
+
+  CLogger::~CLogger()
+  {
+    ErrorMessage::Destroy(m_pMsg);
+  }
+
+  GXUINT CLogger::AddRef()
+  {
+    return ++m_uRefCount;
+  }
+
+  GXUINT CLogger::Release()
+  {
+    if(--m_uRefCount == 0) {
+      delete this;
+      return 0;
+    }
+    return m_uRefCount;
+  }
+
+  void CLogger::Initialize(const char* szExpression, clsize nSize, GXLPCWSTR szFilename)
+  {
+    if(m_pMsg == NULL) {
+      m_pMsg = ErrorMessage::Create();
+      m_pMsg->LoadErrorMessage(L"uvsmsg.txt");
+      m_pMsg->SetMessageSign('C');
+      m_pMsg->PushFile(szFilename);
+    }
+    m_pMsg->GenerateCurLines(szExpression, nSize);
+  }
+
+  void CLogger::Reset()
+  {
+    m_errorlist.clear();
+    m_nErrorCount = 0;
+    m_nSessionError = 0;
+  }
+
+  int CLogger::SetError(int err)
+  {
+    m_nErrorCount++;
+    m_nSessionError++;
+    m_errorlist.insert(err);
+
+    if(m_nErrorCount == c_nMaxErrorCount) {
+      m_pMsg->WriteErrorW(FALSE, 0, UVS_EXPORT_TEXT2(9997, "错误数量超过%d条，将停止输出错误消息", this), c_nMaxErrorCount);
+    }
+    return err;
+  }
+
+  void CLogger::ResetSessionError()
+  {
+    m_nSessionError = 0;
+  }
+
+  void CLogger::SetCurrentFilenameW(GXLPCWSTR szFilename)
+  {
+    m_pMsg->SetCurrentFilenameW(szFilename);
+  }
+
+  GXLPCWSTR CLogger::GetFilenameW(GXUINT idFile) const
+  {
+    return m_pMsg->GetFilenameW(idFile);
+  }
+
+  GXLPCWSTR CLogger::GetFilePathW(GXUINT idFile /*= 0*/) const
+  {
+    return m_pMsg->GetFilePathW(idFile);
+  }
+
+  void CLogger::SetLine(T_LPCSTR ptr, GXINT nLine)
+  {
+    m_pMsg->SetCurrentTopLine(0);
+    GXINT nCurLine = m_pMsg->LineFromPtr(ptr);
+    m_pMsg->SetCurrentTopLine(nLine - nCurLine - 1);
+  }
+
+  void CLogger::PushFile(GXLPCWSTR szFilename, GXINT nTopLine, T_LPCSTR szCodes, size_t length)
+  {
+    m_pMsg->PushFile(szFilename, nTopLine);
+    m_pMsg->GenerateCurLines((GXLPCSTR)szCodes, length);
+  }
+
+  void CLogger::PopFile()
+  {
+    m_pMsg->PopFile();
+  }
+
+  GXINT CLogger::GetLine(const TOKEN& token)
+  {
+    return m_pMsg->LineFromPtr(token.marker);
+  }
+
+  void CLogger::WriteMessageW(GXLPCWSTR szMessage)
+  {
+    m_pMsg->WriteMessageW(FALSE, szMessage);
+  }
+
+  GXUINT CLogger::MarkCode(GXUINT code, GXLPCSTR szMessage)
+  {
+    clStringW strMessage = szMessage;
+    m_pMsg->UpdateErrorMessage(code, strMessage);
+    return code;
+  }
+
+  GXBOOL CLogger::HasError(int errcode) const
+  {
+    return (m_errorlist.find(errcode) != m_errorlist.end());
+  }
+
+  size_t CLogger::ErrorCount() const
+  {
+    return m_nErrorCount;
   }
 
 } // namespace UVShader

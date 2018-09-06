@@ -76,7 +76,7 @@ namespace UVShader
     DimList_T           sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
     const TYPEDESC*     pElementType; // float[3][2]的 pElementType=float[2]，float3[2]的pElementType=float3，float3的pElementType=float，只有数学类型才有
 
-    CodeParser* GetLogger() const;
+    CLogger* GetLogger() const;
     static GXBOOL MatchScaler(const TOKEN* ptkMember, GXLPCSTR scaler_set); // 保证.xxxx, .xyxy, .yxwz这种也是合理的成员
     GXLPCSTR Resolve(int& R, int& C) const;
     GXBOOL IsVector() const;
@@ -166,6 +166,16 @@ namespace UVShader
     GXLPCSTR      szSemantic; // [opt]
   };
 
+  struct VALUE_CONTEXT
+  {
+    const TYPEDESC* pType;
+    const VALUE*    pValue;
+    size_t          count;
+    ValuePool       pool;
+
+    VALUE_CONTEXT();
+  };
+
   class NameContext
   {
   public:
@@ -235,7 +245,7 @@ namespace UVShader
     void Reset();
 
     void BuildIntrinsicType();
-    CodeParser* GetLogger() const;
+    CLogger* GetLogger() const;
 
     GXBOOL SetReturnType(GXLPCSTR szTypeName);
     const TYPEDESC* GetReturnType() const;
@@ -324,6 +334,7 @@ namespace UVShader
     };
 
     CInitList(CodeParser* pCodeParser, NameContext& rNameCtx, const SYNTAXNODE::GLOB* pInitListGlob);
+    CLogger* GetLogger();
     void SetValuePool(VALUE* pValuePool, size_t count);
     const SYNTAXNODE::GLOB* Get();
     Result CastToValuePool(const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index);
@@ -426,7 +437,7 @@ namespace UVShader
     enum AttachFlag // 注意: 与RTState公用标记位
     {
       AttachFlag_Preprocess     = 0x00000001, // 在预处理中，这个状态不再认为#为预处理开始标记
-      AttachFlag_NotLoadMessage = 0x00010000, // TODO: 这个干掉？！
+      //AttachFlag_NotLoadMessage = 0x00010000, // TODO: 这个干掉？！
       AttachFlag_NotExpandMacro = 0x00020000, // 不展开宏
       AttachFlag_NotExpandCond  = 0x00040000, // 不展开defined()里面的宏
     };
@@ -607,8 +618,7 @@ namespace UVShader
 
     struct PHONY_TOKEN
     {
-      //clStringA         str;          // 替代字符串
-      clStringA::LPCSTR szPhonyText;
+      clStringA::LPCSTR szPhonyText;  // 替代字符串
       clsize            nPhonyLength;
       clStringA::LPCSTR ori_marker;   // 原始字符串地址
     };
@@ -691,18 +701,20 @@ namespace UVShader
     GXLPCSTR GetUniqueString(const TOKEN* pSym);
     GXLPCSTR GetUniqueString(T_LPCSTR szText);
 
-    void VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const;
-    void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
-    void OutputErrorW(const GLOB& glob, GXUINT code, ...) const;
-    void OutputErrorW(const SYNTAXNODE* pNode, GXUINT code, ...) const;
-    void OutputErrorW(const TOKEN& token, GXUINT code, ...) const;
-    void OutputErrorW(const TOKEN* pToken, GXUINT code, ...) const;
-    void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
+    //void VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const;
+    //void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
+    //void OutputErrorW(const GLOB& glob, GXUINT code, ...) const;
+    //void OutputErrorW(const SYNTAXNODE* pNode, GXUINT code, ...) const;
+    //void OutputErrorW(const TOKEN& token, GXUINT code, ...) const;
+    //void OutputErrorW(const TOKEN* pToken, GXUINT code, ...) const;
+    //void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
 
-    void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示
+    //void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示
 
     CodeParser* GetRootParser();
     clBuffer* OpenIncludeFile(const clStringW& strFilename);
+    virtual T_LPCSTR GetOriginPtr(const TOKEN* pToken) const override;
+
 
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
@@ -715,11 +727,11 @@ namespace UVShader
     const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(ValuePool* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
-    const TYPEDESC* InferMemberType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferSubscriptType(VALUEDESC* vd, const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferMemberType(VALUE_CONTEXT* vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferSubscriptType(VALUE_CONTEXT* vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
-    const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
-    const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);
+    static const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
+    static const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InitList_SyncType(NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob);
     const TYPEDESC* InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation);
 #endif
@@ -804,10 +816,10 @@ namespace UVShader
 
   public:
     CodeParser();
-    CodeParser(PARSER_CONTEXT* pContext, Include* pInclude);
+    CodeParser(CodeParser* pParent, PARSER_CONTEXT* pContext, Include* pInclude);
     virtual ~CodeParser();
     b32                 Attach                  (const char* szExpression, clsize nSize, GXDWORD dwFlags, GXLPCWSTR szFilename);
-    clsize              GenerateTokens          (CodeParser* pParent = NULL);
+    clsize              GenerateTokens          ();
     GXBOOL              Parse                   ();
 
     const StatementArray& GetStatements         () const;
