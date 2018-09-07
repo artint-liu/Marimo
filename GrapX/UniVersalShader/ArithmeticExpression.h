@@ -355,7 +355,7 @@ namespace UVShader
 
       GXBOOL IsToken() const;
       GXBOOL IsNode() const;
-      GXBOOL IsReplacedNode() const;
+      GXBOOL IsReplaced() const; // 判断是否含有替换值
 
       //FLAGS GetType() const;
 

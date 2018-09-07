@@ -2029,9 +2029,15 @@ GO_NEXT:;
     return (pNode && (pNode->magic & FLAG_OPERAND_MAGIC_REPLACED) == FLAG_OPERAND_MAGIC_REPLACED);
   }
 
-  GXBOOL SYNTAXNODE::GLOB::IsReplacedNode() const
+  GXBOOL SYNTAXNODE::GLOB::IsReplaced() const
   {
-    return (pNode && (pNode->magic == FLAG_OPERAND_MAGIC_REPLACED));
+    if(IsToken()) {
+      return pTokn->HasReplacedValue();
+    }
+    else if(IsNode()) {
+      return (pNode && (pNode->magic == FLAG_OPERAND_MAGIC_REPLACED));
+    }
+    return FALSE;
   }
 
   GXBOOL SYNTAXNODE::GLOB::CompareAsToken(TOKEN::T_LPCSTR str) const

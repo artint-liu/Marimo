@@ -142,11 +142,19 @@ namespace UVShader
     int scaler_count;
   };
 
+  enum ValueResult
+  {
+    ValueResult_Undefined = -1,
+    ValueResult_OK = 0,
+    ValueResult_NotConst,
+    ValueResult_NotStructMember,
+  };
+
   struct VARIDESC
   {
     const TYPEDESC* pDesc;
     size_t nOffset;
-    VALUE sConstValue; // 规定 string 类型不能以 const 修饰，所以这里用VALUE
+    VALUE sConstValue;      // 规定 string 类型不能以 const 修饰，所以这里用VALUE
     SYNTAXNODE::GLOB  glob; // 所有常量都应该定义这个值，数字类型常量同时还应该定义sConstValue
   };
 
@@ -168,12 +176,23 @@ namespace UVShader
 
   struct VALUE_CONTEXT
   {
+    // [属性]
+    const NameContext&  name_ctx;
+    GXBOOL              bNeedValue;
+    CLogger*            pLogger;
+
+    // [值]
+    ValueResult     result;
     const TYPEDESC* pType;
     const VALUE*    pValue;
     size_t          count;
     ValuePool       pool;
 
-    VALUE_CONTEXT();
+    VALUE_CONTEXT(const VALUE_CONTEXT& vctx);
+    VALUE_CONTEXT(const NameContext& _name_ctx);
+    VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue);
+
+    void SetProperty(const VALUE_CONTEXT& vctx); // 从vctx复制属性
   };
 
   class NameContext
@@ -718,17 +737,18 @@ namespace UVShader
 
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
-    const TYPEDESC* InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode);
-    const TYPEDESC* InferType(const NameContext& sNameSet, const GLOB& sGlob);
-    const TYPEDESC* InferType(const NameContext& sNameSet, const TOKEN* pToken);
-    const TYPEDESC* InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);
+    const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const GLOB& sGlob);
+    const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const TOKEN* pToken) const;
+    const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode);
     const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(ValuePool* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
-    const TYPEDESC* InferMemberType(VALUE_CONTEXT* vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferSubscriptType(VALUE_CONTEXT* vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferMemberType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferSubscriptType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferSubscriptTypeB(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     static const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     static const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);

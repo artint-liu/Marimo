@@ -4552,7 +4552,8 @@ NOT_INC_P:
           return FALSE;
         }
 
-        const TYPEDESC* pTypeFrom = InferType(sNameContext, pNode->Operand[1]);
+        VALUE_CONTEXT vctx(sNameContext);
+        const TYPEDESC* pTypeFrom = InferType(vctx, sNameContext, pNode->Operand[1]);
         //const TYPEDESC* pTypeTo = sNameSet.GetType(szReturnType);
         ASSERT(pTypeTo);
 
@@ -4571,7 +4572,8 @@ NOT_INC_P:
       }
       else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
       {
-        InferFunctionReturnedType(sNameContext, pNode);
+        VALUE_CONTEXT vctx(sNameContext, FALSE);
+        InferFunctionReturnedType(vctx, pNode);
         return FALSE; // 不再遍历后面的节点
       }
 
@@ -4709,7 +4711,8 @@ NOT_INC_P:
       {
         if(pLeftNode->CompareOpcode('.'))
         {
-          pTypeDesc = InferMemberType(NULL, sNameSet, left_glob.pNode);
+          VALUE_CONTEXT vctx(sNameSet, FALSE);
+          pTypeDesc = InferMemberType(vctx, left_glob.pNode);
           if(pTypeDesc == NULL)
           {
             GetLogger()->OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
@@ -4724,7 +4727,8 @@ NOT_INC_P:
       }
       else if(pLeftNode->mode == SYNTAXNODE::MODE_Subscript)
       {
-        pTypeDesc = InferSubscriptType(NULL, sNameSet, pLeftNode);
+        VALUE_CONTEXT vctx(sNameSet, FALSE);
+        pTypeDesc = InferSubscriptType(vctx, pLeftNode);
         return pTypeDesc;
       }
       else {
@@ -4783,7 +4787,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferFunctionReturnedType(const NameContext& sNameSet, const SYNTAXNODE* pFuncNode)
+  const TYPEDESC* CodeParser::InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode)
   {
     ASSERT(pFuncNode->mode == SYNTAXNODE::MODE_FunctionCall);
     if(pFuncNode->Operand[0].IsNode())
@@ -4807,14 +4811,14 @@ NOT_INC_P:
     BreakComma(sExprList, pFuncNode->Operand[1]);
     for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
     {
-      const TYPEDESC* pTypeDesc = InferType(sNameSet, *it);
+      const TYPEDESC* pTypeDesc = InferType(vctx, vctx.name_ctx, *it);
       if(pTypeDesc == NULL) {
         return NULL;
       }
       sArgumentsTypeList.push_back(pTypeDesc);
     }
 
-    pRetType = InferUserFunctionType(sNameSet, sArgumentsTypeList, pFuncNode);
+    pRetType = InferUserFunctionType(vctx.name_ctx, sArgumentsTypeList, pFuncNode);
     if(pRetType == ERROR_TYPEDESC) {
       return NULL;
     }
@@ -4824,7 +4828,7 @@ NOT_INC_P:
 
     clStringA strFunctionName;
     const TYPEDESC* pTypeFunc = NULL;
-    if(sNameSet.IsTypedefedType(pFuncNode->Operand[0].pTokn, &pTypeFunc))
+    if(vctx.name_ctx.IsTypedefedType(pFuncNode->Operand[0].pTokn, &pTypeFunc))
     {
       strFunctionName = pTypeFunc->name;
     }
@@ -4886,7 +4890,7 @@ NOT_INC_P:
               }
 
               // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
-              if(TryTypeCasting(sNameSet, (GXDWORD)s_functions[i].params[n], pTypeDesc, pFuncNode->Operand[0].pTokn)) {
+              if(TryTypeCasting(vctx.name_ctx, (GXDWORD)s_functions[i].params[n], pTypeDesc, pFuncNode->Operand[0].pTokn)) {
                 continue;
               }
               break;
@@ -4898,13 +4902,13 @@ NOT_INC_P:
 
           if(n == s_functions[i].count) {
             if(s_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
-              return sNameSet.GetType(pRetType->pDesc->component_type);
+              return vctx.name_ctx.GetType(pRetType->pDesc->component_type);
             }
             else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Bool) {
-              return sNameSet.GetType(STR_BOOL);
+              return vctx.name_ctx.GetType(STR_BOOL);
             }
             else if(s_functions[i].type == INTRINSIC_FUNC::RetType_Float4) {
-              return sNameSet.GetType(STR_FLOAT4);
+              return vctx.name_ctx.GetType(STR_FLOAT4);
             }
 
             return pRetType; //sNameSet.GetType(s_functions[i].type);
@@ -4943,7 +4947,7 @@ NOT_INC_P:
 
       if(pPreCompMath->scaler_count == nScalerCount || nScalerCount == 1)
       {
-        return sNameSet.GetType(pPreCompMath->name);
+        return vctx.name_ctx.GetType(pPreCompMath->name);
       }
       else
       {
@@ -4966,18 +4970,18 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const GLOB& sGlob)
+  const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const GLOB& sGlob)
   {
     if(sGlob.IsNode()) {
-      return InferType(sNameSet, sGlob.pNode);
+      return InferType(vctx, sNameSet, sGlob.pNode);
     }
     else if(sGlob.IsToken()) {
-      return InferType(sNameSet, sGlob.pTokn);
+      return InferType(vctx, sGlob.pTokn);
     }
     CLBREAK;
   }
   
-  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const TOKEN* pToken)
+  const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const TOKEN* pToken) const
   {
     // TODO: 直接提示找不到符号？
     if(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric)
@@ -4989,46 +4993,81 @@ NOT_INC_P:
         clStringW str;
         if(TEST_FLAG(s, VALUE::State_IllegalNumber))
         {
-          GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(2041, "非法的数字 : “%s”"), pToken->ToString(str).CStr());
+          vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2041, "非法的数字 : “%s”", vctx.pLogger), pToken->ToString(str).CStr());
         }
         else
         {
-          GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(2021, "应输入数值, 而不是“%s”"), pToken->ToString(str).CStr());
+          vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2021, "应输入数值, 而不是“%s”", vctx.pLogger), pToken->ToString(str).CStr());
         }
         return NULL;
       }
-      return sNameSet.GetType(val.rank);
+
+      vctx.result = ValueResult_OK;
+      vctx.pType = vctx.name_ctx.GetType(val.rank);
+      vctx.pool.push_back(val);
+      vctx.pValue = &vctx.pool.front();
+      vctx.count = vctx.pType->CountOf();
+      ASSERT(vctx.count == 1); // vctx.pType->CountOf()应该为1
+
+      return vctx.pType;
     }
 
-    const TYPEDESC* pTypeDesc = sNameSet.GetVariable(pToken);
-    if(pTypeDesc == NULL)
+    const VARIDESC* pVariDesc = vctx.name_ctx.GetVariableDesc(pToken);
+    if(pVariDesc == NULL)
     {
       // C2065: “m”: 未声明的标识符
       clStringW strW;
-      GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"), pToken->ToString(strW).CStr());
+      vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2065, "“%s”: 未声明的标识符", vctx.pLogger), pToken->ToString(strW).CStr());
     }
-    return pTypeDesc;
+    
+    vctx.pType = pVariDesc->pDesc;
+    if(vctx.bNeedValue) {
+      if(vctx.pValue == NULL) // 第一个进入的函数
+      {
+        const ValuePool* pPool = vctx.name_ctx.GetValuePool(pToken);
+        if(pPool)
+        {
+          vctx.result = ValueResult_OK;
+          vctx.pValue = &pPool->front();
+          vctx.count = vctx.pType->CountOf();
+          ASSERT(vctx.count == pPool->size());
+        }
+        else
+        {
+          vctx.result = ValueResult_NotConst;
+        }
+      }
+      else
+      {
+        ASSERT(vctx.count <= pVariDesc->nOffset + vctx.pType->CountOf());
+        vctx.result = ValueResult_OK;
+        vctx.pValue += pVariDesc->nOffset;
+        vctx.count = vctx.pType->CountOf();
+      }
+    }
+
+    return pVariDesc->pDesc;
   }
   
-  const TYPEDESC* CodeParser::InferType(const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode != SYNTAXNODE::MODE_Block &&
       pNode->mode != SYNTAXNODE::MODE_Chain);
 
     if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
-      return InferFunctionReturnedType(sNameSet, pNode);
+      return InferFunctionReturnedType(vctx, pNode);
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
-      return InferSubscriptType(NULL, sNameSet, pNode);
+      return InferSubscriptType(vctx, pNode);
     }
     else if(pNode->mode == SYNTAXNODE::MODE_TypeCast)
     {
       if(pNode->Operand[0].IsToken())
       {
         const TYPEDESC* pCastTypeDesc = sNameSet.GetType(*pNode->Operand[0].pTokn);
-        const TYPEDESC* pSource = InferType(sNameSet, pNode->Operand[1]);
+        const TYPEDESC* pSource = InferType(vctx, sNameSet, pNode->Operand[1]);
         if(TryReinterpretCasting(pCastTypeDesc, pSource, pNode->Operand[0].pTokn))
         {
           return pCastTypeDesc;
@@ -5057,11 +5096,11 @@ NOT_INC_P:
 
         if(pNode->pOpcode->unary_mask == 0x01)
         {
-          return InferType(sNameSet, pNode->Operand[1]);
+          return InferType(vctx, sNameSet, pNode->Operand[1]);
         }
         else if(pNode->pOpcode->unary_mask == 0x02)
         {
-          return InferType(sNameSet, pNode->Operand[0]);
+          return InferType(vctx, sNameSet, pNode->Operand[0]);
         }
         else // 11B
         {
@@ -5070,7 +5109,7 @@ NOT_INC_P:
       }
       else if(*pNode->pOpcode == '.')
       {
-        const TYPEDESC* pTypeDesc = InferMemberType(NULL, sNameSet, pNode);
+        const TYPEDESC* pTypeDesc = InferMemberType(vctx, pNode);
         return pTypeDesc;
       }
       else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
@@ -5086,10 +5125,10 @@ NOT_INC_P:
     }
 
     const TYPEDESC* pTypeDesc[2] = {NULL, NULL};
-
+    VALUE_CONTEXT v[2] = {sNameSet, sNameSet };
     for(int i = 0; i < 2; i++)
     {
-      pTypeDesc[i] = InferType(sNameSet, pNode->Operand[i]);
+      pTypeDesc[i] = InferType(v[i], sNameSet, pNode->Operand[i]);
       PARSER_ASSERT(pNode->Operand[i].ptr != NULL, pNode->GetAnyTokenAPB());
     }
 
@@ -5529,7 +5568,7 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferMemberType(VALUE_CONTEXT* vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferMemberType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.')); // 外部保证
     // ab.cd.ef 解析为
@@ -5538,48 +5577,61 @@ NOT_INC_P:
     const TYPEDESC* pTypeDesc = NULL;
     if(pNode->Operand[0].IsToken())
     {
-      pTypeDesc = sNameSet.GetVariable(pNode->Operand[0].pTokn);
-      if(pTypeDesc == NULL) {
-        clStringW strToken;
-        GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"),
-          pNode->Operand[0].pTokn->ToString(strToken).CStr());
+      //pTypeDesc = vctx.name_ctx.GetVariable(pNode->Operand[0].pTokn);
+      //if(pTypeDesc == NULL) {
+      //  clStringW strToken;
+      //  GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"),
+      //    pNode->Operand[0].pTokn->ToString(strToken).CStr());
+      //  return NULL;
+      //}
+      //ASSERT(pTypeDesc);
+
+      //if(vctx.bNeedValue)
+      //{
+      //  const ValuePool* pValueDesc = vctx.name_ctx.GetValuePool(pNode->Operand[0].pTokn);
+      //  ASSERT(pValueDesc);
+
+      //  if(vctx.pValue) {
+      //    CLBREAK;
+      //  }
+      //  else {
+      //    vctx.pType = pTypeDesc;
+      //    vctx.pValue = &pValueDesc->front();
+      //    vctx.count = pValueDesc->size();
+      //  }
+      //}
+      InferType(vctx, pNode->Operand[0].pTokn);
+      if(vctx.result != ValueResult_OK) {
         return NULL;
       }
-      ASSERT(pTypeDesc);
-
-      if(vctx)
-      {
-        const ValuePool* pValueDesc = sNameSet.GetValuePool(pNode->Operand[0].pTokn);
-        ASSERT(pValueDesc);
-
-        if(vctx->pValue) {
-          CLBREAK;
-        }
-        else {
-          vctx->pType = pTypeDesc;
-          vctx->pValue = &pValueDesc->front();
-          vctx->count = pValueDesc->size();
-        }
-      }
+      pTypeDesc = vctx.pType;
     }
     else if(pNode->Operand[0].IsNode())
     {
       SYNTAXNODE* pChildNode = pNode->Operand[0].pNode;
       if(pChildNode->mode == SYNTAXNODE::MODE_Opcode && pChildNode->CompareOpcode('.'))
       {
-        pTypeDesc = InferMemberType(vctx, sNameSet, pChildNode);
-        ASSERT(vctx == NULL); // 断在这里就是没实现计算值的功能
+        pTypeDesc = InferMemberType(vctx, pChildNode);
+        ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
       }
-      else
+      else if(pChildNode->mode == SYNTAXNODE::MODE_Subscript)
       {
-        // 结构体起始类型，相当于上面的[ab]
-        // 例："float2(a, b).x" => [.][float2(a, b)][x]
-        PARSER_ASSERT(pChildNode->CompareOpcode('.') == FALSE, pNode->Operand[0]); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
-        pTypeDesc = InferType(sNameSet, pChildNode);
-        ASSERT(vctx == NULL); // 断在这里就是没实现计算值的功能
+        //// 结构体起始类型，相当于上面的[ab]
+        //// 例："float2(a, b).x" => [.][float2(a, b)][x]
+        //PARSER_ASSERT(pChildNode->CompareOpcode('.') == FALSE, pNode->Operand[0]); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
+        //pTypeDesc = InferType(vctx, vctx.name_ctx, pChildNode);
+        //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
+        InferSubscriptType(vctx, pChildNode);
+        pTypeDesc = vctx.pType;
+      }
+      else {
+        CLBREAK;
       }
 
-      if(pTypeDesc == NULL) {
+      if(vctx.result != ValueResult_OK) {
+        return NULL;
+      }
+      else if(pTypeDesc == NULL) {
         return NULL;
       }
     }
@@ -5592,13 +5644,30 @@ NOT_INC_P:
     if(pNode->Operand[1].IsNode())
     {
       const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
-      if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
+      if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript) // 带下标的成员
       {
-        const NameContext* pMemberContext = sNameSet.GetStructContext(pTypeDesc->name);
+        const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
         if(pMemberContext)
         {
-          ASSERT(vctx == NULL); // 断在这里就是没实现计算值的功能
-          pTypeDesc = InferSubscriptType(vctx, *pMemberContext, pMemberNode);
+          //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
+          VALUE_CONTEXT vctx_member(*pMemberContext, vctx.bNeedValue);
+          vctx_member.pValue = vctx.pValue;
+          vctx_member.count  = vctx.count;
+          pTypeDesc = InferSubscriptType(vctx_member, pMemberNode);
+          if(vctx_member.result != ValueResult_OK) {
+            vctx.result = vctx_member.result;
+            return NULL;
+          }
+          if(vctx_member.pool.empty()) {
+            vctx.pValue = vctx_member.pValue;
+          }
+          else {
+            ASSERT(vctx_member.pValue == &vctx_member.pool.front());
+            vctx.pool = vctx_member.pool;
+            vctx.pValue = &vctx.pool.front();
+          }
+          vctx.count = vctx_member.count;
+          vctx.pType = vctx_member.pType;
           return pTypeDesc;
         }
       }
@@ -5613,7 +5682,7 @@ NOT_INC_P:
           const TOKEN* pMemberToken = pNode->Operand[0].GetBackToken();
           TRACE("length of(%s) = %d\n", pMemberToken->ToString().CStr(), pTypeDesc->sDimensions.back());
 #endif
-          ASSERT(vctx == NULL); // 断在这里就是没实现计算值的功能
+          ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
           return m_GlobalSet.GetType(STR_INT);
         }
       }
@@ -5628,26 +5697,37 @@ NOT_INC_P:
     }
     else if(pNode->Operand[1].IsToken())
     {
-      const NameContext* pMemberContext = sNameSet.GetStructContext(pTypeDesc->name);
+      const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
       if(pMemberContext)
       {
-        if(vctx)
+        if(vctx.bNeedValue)
         {
+          ASSERT(vctx.result == ValueResult_OK);
+          ASSERT(vctx.pValue && vctx.pType);
           const VARIDESC* pVariDesc = pMemberContext->GetVariableDesc(pNode->Operand[1].pTokn);
-          pTypeDesc = pVariDesc->pDesc;
+          if(pVariDesc)
+          {
+            vctx.pType = pVariDesc->pDesc;
+            vctx.pValue += pVariDesc->nOffset;
+            ASSERT(vctx.count >= vctx.pType->CountOf());
+            vctx.count = vctx.pType->CountOf();
+            return vctx.pType;
+          }
         }
         else
         {
-          pTypeDesc = InferType(*pMemberContext, pNode->Operand[1].pTokn);
+          ASSERT(&vctx.name_ctx == pMemberContext);
+          pTypeDesc = InferType(vctx, pNode->Operand[1].pTokn);
+          return pTypeDesc;
         }
-        return pTypeDesc;
+        // 转到函数尾输出错误信息
       }
       else if(pTypeDesc->pDesc && pTypeDesc->pDesc->lpDotOverride)
       {
         DOTOPERATOR_RESULT sDotOperator;
         if(pTypeDesc->pDesc->lpDotOverride(pTypeDesc->pDesc, &sDotOperator, pNode->Operand[1].pTokn))
         {
-          if(vctx == NULL)
+          if(vctx.bNeedValue == NULL)
           {
             return m_GlobalSet.GetType(sDotOperator.strType);
           }
@@ -5656,9 +5736,9 @@ NOT_INC_P:
             pTypeDesc = m_GlobalSet.GetType(sDotOperator.strType);
             if(IS_SCALER_CATE(pTypeDesc))
             {
-              vctx->pType = pTypeDesc;
-              vctx->pValue = vctx->pValue + sDotOperator.components[0];
-              vctx->count = 1;
+              vctx.pType = pTypeDesc;
+              vctx.pValue = vctx.pValue + sDotOperator.components[0];
+              vctx.count = 1;
             }
             return pTypeDesc;
           }
@@ -5670,19 +5750,20 @@ NOT_INC_P:
     pTypeDesc = NULL;
     GetLogger()->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(ERR_IS_NOT_MEMBER, "“%s”: 不是“%s”的成员"),
       pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].GetFrontToken()->ToString(str1).CStr());
+    vctx.result = ValueResult_NotStructMember;
 
     return pTypeDesc;
   }
 
-  const TYPEDESC* CodeParser::InferSubscriptType(VALUE_CONTEXT* vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferSubscriptType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript);
 
     const TYPEDESC* pTypeDesc = NULL;
     if(pNode->Operand[0].ptr)
     {
-      pTypeDesc = InferType(sNameSet, pNode->Operand[0]);
-      if(pTypeDesc == NULL) {
+      pTypeDesc = InferType(vctx, vctx.name_ctx, pNode->Operand[0]);
+      if(pTypeDesc == NULL || vctx.result != ValueResult_OK) {
         return NULL;
       }
     }
@@ -5691,25 +5772,46 @@ NOT_INC_P:
       CLBREAK;
     }
 
-    const TYPEDESC* pSubscriptType = InferType(sNameSet, pNode->Operand[1]);
-    if(pSubscriptType == NULL || pSubscriptType->cate != TYPEDESC::TypeCate_IntegerScaler)
+    return InferSubscriptTypeB(vctx, pNode);
+  }
+
+  const TYPEDESC* CodeParser::InferSubscriptTypeB(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode) // pNode是变量&下标节点
+  {
+    VALUE_CONTEXT vctx_subscript(vctx);
+    const TYPEDESC* pSubscriptType = InferType(vctx_subscript, vctx_subscript.name_ctx, pNode->Operand[1]);
+    if(vctx_subscript.result != ValueResult_OK || vctx_subscript.pType->cate != TYPEDESC::TypeCate_IntegerScaler)
     {
       GetLogger()->OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
       return NULL;
     }
 
-    if(pTypeDesc->cate == TYPEDESC::TypeCate_MultiDim)
+    if(vctx.pType->cate == TYPEDESC::TypeCate_MultiDim)
     {
-      return pTypeDesc->pElementType;
+      if(vctx.bNeedValue)
+      {
+        ASSERT(vctx_subscript.count == 1);
+        ASSERT(vctx_subscript.pValue->nValue64 >= 0); // TODO: 输出错误提示不能为负值
+        const size_t element_count = vctx.pType->pElementType->CountOf();
+        ASSERT(vctx_subscript.pValue->uValue64 * element_count < vctx.count);
+        vctx.pValue += vctx_subscript.pValue->uValue64 * element_count;
+        vctx.pType = vctx.pType->pElementType;
+        ASSERT(vctx.count >= element_count)
+        vctx.count = element_count;
+      }
+      else
+      {
+        vctx.pType = vctx.pType->pElementType;
+      }
+      return vctx.pType;
     }
-    else if(IS_STRUCT_CATE(pTypeDesc) && pTypeDesc->pDesc && pTypeDesc->pDesc->lpSubscript)
+    else if(IS_STRUCT_CATE(vctx.pType) && vctx.pType->pDesc && vctx.pType->pDesc->lpSubscript)
     {
-      pTypeDesc = pTypeDesc->pDesc->lpSubscript(pTypeDesc->pDesc, sNameSet);
-      ASSERT(pTypeDesc);
-      return pTypeDesc;
+      vctx.pType = vctx.pType->pDesc->lpSubscript(vctx.pType->pDesc, vctx.name_ctx);
+      ASSERT(vctx.pType);
+      return vctx.pType;
     }
 
-    GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组或指针类型"));
+    GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组类型"));
     return NULL;
   }
 
@@ -5768,7 +5870,8 @@ NOT_INC_P:
     }
 
     const size_t nErrorCount = DbgErrorCount();
-    const TYPEDESC* pRightType = InferType(sNameSet, right_glob);
+    VALUE_CONTEXT vctx(sNameSet);
+    const TYPEDESC* pRightType = InferType(vctx, sNameSet, right_glob);
     if(pRightType == NULL) {
       ASSERT(DbgErrorCount() > nErrorCount); // InferType 内部应该输出错误
     }
@@ -6239,8 +6342,8 @@ NOT_INC_P:
         //-----------------------------------------
 
         clStringA strTypename;
-        VALUE_CONTEXT vctx;
-        const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(&vctx, *this, pNode);
+        VALUE_CONTEXT vctx(*this);
+        const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(vctx, pNode);
 
         if(pTypeDesc && IS_SCALER_CATE(pTypeDesc))
         {
@@ -6252,12 +6355,27 @@ NOT_INC_P:
           value_out.rank = VALUE::Rank_Undefined;
           return VALUE::State_Identifier;
         }
-        else {
+        else if(vctx.result == ValueResult_Undefined) {
           PARSER_BREAK2(pMsgLogger, pNode); // 不是数学类型
         }
       }
       else {
       }
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
+    {
+      VALUE_CONTEXT vctx(*this);
+      vctx.pLogger = GetLogger();
+
+      m_pCodeParser->InferSubscriptType(vctx, pNode);
+      if(vctx.result != ValueResult_OK || vctx.pType == NULL) {
+        return VALUE::State_SyntaxError;
+      }
+      else if(vctx.count != 1) {
+        return VALUE::State_BadIdentifier;
+      }
+      value_out = *vctx.pValue;
+      return VALUE::State_OK;
     }
 
     for(int i = 0; i < 2; i++)
@@ -6428,6 +6546,11 @@ NOT_INC_P:
               }
             } // if(pPreCompMath)
           }
+
+          if(vp.size() == 1) {
+            sVariDesc.sConstValue = vp.front();
+          }
+
         } // iter_insert_result.second
       }
     }
@@ -6435,13 +6558,13 @@ NOT_INC_P:
       sVariDesc.glob.ptr = NULL;
     }
 
-    if(pConstValue) {
-      sVariDesc.sConstValue = *pConstValue;
-    }
-    else {
-      sVariDesc.sConstValue.rank = VALUE::Rank_Undefined;
-      sVariDesc.sConstValue.nValue = 0;
-    }
+    //if(pConstValue) {
+    //  sVariDesc.sConstValue = *pConstValue;
+    //}
+    //else {
+    //  sVariDesc.sConstValue.rank = VALUE::Rank_Undefined;
+    //  sVariDesc.sConstValue.nValue = 0;
+    //}
     auto result = m_VariableMap.insert(clmake_pair(ptkVariable, sVariDesc));
     if(result.second) {
       // 添加成功, 返回type描述
@@ -7194,7 +7317,8 @@ NOT_INC_P:
     else
     {
       ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-      pTypeDesc = m_pCodeParser->InferType(m_rNameCtx, *pGlob);
+      VALUE_CONTEXT vctx(m_rNameCtx);
+      pTypeDesc = m_pCodeParser->InferType(vctx, m_rNameCtx, *pGlob);
       if(pTypeDesc == NULL) {
         return Result_Failed;
       }
@@ -7471,11 +7595,43 @@ NOT_INC_P:
     return *this;
   }
 
-  VALUE_CONTEXT::VALUE_CONTEXT()
-    : pType(NULL)
+  VALUE_CONTEXT::VALUE_CONTEXT(const NameContext& _name_ctx)
+    : name_ctx(_name_ctx)
+    , bNeedValue(TRUE)
+    , pLogger(NULL)
+    , result(ValueResult_Undefined)
+    , pType(NULL)
     , pValue(NULL)
     , count(0)
   {
+  }
+
+  VALUE_CONTEXT::VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue)
+    : name_ctx(_name_ctx)
+    , bNeedValue(_bNeedValue)
+    , pLogger(NULL)
+    , result(ValueResult_Undefined)
+    , pType(NULL)
+    , pValue(NULL)
+    , count(0)
+  {
+  }
+
+  VALUE_CONTEXT::VALUE_CONTEXT(const VALUE_CONTEXT& vctx)
+    : name_ctx(vctx.name_ctx)
+    , bNeedValue(vctx.bNeedValue)
+    , pLogger(vctx.pLogger)
+    , result(ValueResult_Undefined)
+    , pType(NULL)
+    , pValue(NULL)
+    , count(0)
+  {
+  }
+
+  void VALUE_CONTEXT::SetProperty(const VALUE_CONTEXT& vctx) // 从vctx复制属性
+  {
+    bNeedValue = vctx.bNeedValue;
+    pLogger = vctx.pLogger;
   }
 
 } // namespace UVShader
