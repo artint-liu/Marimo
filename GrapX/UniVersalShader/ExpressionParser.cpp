@@ -4715,7 +4715,7 @@ NOT_INC_P:
           pTypeDesc = InferMemberType(vctx, left_glob.pNode);
           if(pTypeDesc == NULL)
           {
-            GetLogger()->OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5023, "不明确的成员变量"));
+            GetLogger()->OutputErrorW(left_glob.pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(5022, "不明确的成员变量"));
             return NULL;
           }
           return pTypeDesc;
@@ -4809,13 +4809,24 @@ NOT_INC_P:
     TYPEDESC::CPtrList sArgumentsTypeList;
     SYNTAXNODE::GlobList sExprList;
     BreakComma(sExprList, pFuncNode->Operand[1]);
+    VALUE_CONTEXT vctx_param(vctx);
     for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
     {
-      const TYPEDESC* pTypeDesc = InferType(vctx, vctx.name_ctx, *it);
-      if(pTypeDesc == NULL) {
+      vctx_param.ClearValue();
+      const TYPEDESC* pTypeDesc = InferType(vctx_param, vctx_param.name_ctx, *it);
+      if(vctx_param.result != ValueResult_OK) {
+        vctx.result = vctx_param.result;
         return NULL;
       }
       sArgumentsTypeList.push_back(pTypeDesc);
+      if(vctx.bNeedValue) {
+        vctx.pool.insert(vctx.pool.end(), vctx_param.pValue, vctx_param.pValue + vctx_param.count);
+      }
+    }
+
+    if(vctx.bNeedValue) {
+      vctx.pValue = &vctx.pool.front(); // 必须等pool稳定之后才能确定指针位置
+      vctx.count = vctx.pool.size();
     }
 
     pRetType = InferUserFunctionType(vctx.name_ctx, sArgumentsTypeList, pFuncNode);
@@ -4945,15 +4956,19 @@ NOT_INC_P:
         }
       }
 
+      vctx.result = ValueResult_OK;
       if(pPreCompMath->scaler_count == nScalerCount || nScalerCount == 1)
       {
-        return vctx.name_ctx.GetType(pPreCompMath->name);
+        vctx.pType = vctx.name_ctx.GetType(pPreCompMath->name);
+        ASSERT(vctx.pType); // FindPerComponentMathOperations 列表里放了一个不存在的内置类型
+        return vctx.pType;
       }
       else
       {
         clStringW str(pPreCompMath->name);
         GetLogger()->OutputErrorW(*pFuncNode->Operand[0].pTokn,
           UVS_EXPORT_TEXT(5039, "“%s”: 参数数量不匹配，参数只提供了%d个标量"), str.CStr(), nScalerCount);
+        vctx.result = ValueResult_5039;
         return NULL;
       }
 
@@ -4966,6 +4981,7 @@ NOT_INC_P:
     clStringW strW;
     GetLogger()->OutputErrorW(*pFuncNode->Operand[0].pTokn, UVS_EXPORT_TEXT(3861, "“%s”: 找不到标识符"),
       pFuncNode->Operand[0].pTokn->ToString(strW).CStr());
+    vctx.result = ValueResult_3861;
 
     return NULL;
   }
@@ -5044,6 +5060,10 @@ NOT_INC_P:
         vctx.pValue += pVariDesc->nOffset;
         vctx.count = vctx.pType->CountOf();
       }
+    }
+    else
+    {
+      vctx.result = ValueResult_OK;
     }
 
     return pVariDesc->pDesc;
@@ -5612,7 +5632,8 @@ NOT_INC_P:
       if(pChildNode->mode == SYNTAXNODE::MODE_Opcode && pChildNode->CompareOpcode('.'))
       {
         pTypeDesc = InferMemberType(vctx, pChildNode);
-        ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
+        ASSERT(pTypeDesc == vctx.pType);
+        //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
       }
       else if(pChildNode->mode == SYNTAXNODE::MODE_Subscript)
       {
@@ -5625,13 +5646,15 @@ NOT_INC_P:
         pTypeDesc = vctx.pType;
       }
       else {
-        CLBREAK;
+        InferType(vctx, vctx.name_ctx, pChildNode);
+        pTypeDesc = vctx.pType;
       }
 
       if(vctx.result != ValueResult_OK) {
         return NULL;
       }
       else if(pTypeDesc == NULL) {
+        ASSERT(vctx.pType);
         return NULL;
       }
     }
@@ -5700,26 +5723,27 @@ NOT_INC_P:
       const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
       if(pMemberContext)
       {
-        if(vctx.bNeedValue)
+        ASSERT(vctx.result == ValueResult_OK);
+        const VARIDESC* pVariDesc = pMemberContext->GetVariableDesc(pNode->Operand[1].pTokn);
+
+        if(pVariDesc)
         {
-          ASSERT(vctx.result == ValueResult_OK);
-          ASSERT(vctx.pValue && vctx.pType);
-          const VARIDESC* pVariDesc = pMemberContext->GetVariableDesc(pNode->Operand[1].pTokn);
-          if(pVariDesc)
+          vctx.pType = pVariDesc->pDesc;
+          if(vctx.bNeedValue)
           {
-            vctx.pType = pVariDesc->pDesc;
+            ASSERT(vctx.pValue && vctx.pType);
             vctx.pValue += pVariDesc->nOffset;
             ASSERT(vctx.count >= vctx.pType->CountOf());
             vctx.count = vctx.pType->CountOf();
-            return vctx.pType;
           }
+          return vctx.pType;
         }
-        else
-        {
-          ASSERT(&vctx.name_ctx == pMemberContext);
-          pTypeDesc = InferType(vctx, pNode->Operand[1].pTokn);
-          return pTypeDesc;
-        }
+        //else
+        //{
+        //  ASSERT(&vctx.name_ctx == pMemberContext);
+        //  pTypeDesc = InferType(vctx, pNode->Operand[1].pTokn);
+        //  return pTypeDesc;
+        //}
         // 转到函数尾输出错误信息
       }
       else if(pTypeDesc->pDesc && pTypeDesc->pDesc->lpDotOverride)
@@ -5749,7 +5773,7 @@ NOT_INC_P:
     clStringW str1, str2;
     pTypeDesc = NULL;
     GetLogger()->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(ERR_IS_NOT_MEMBER, "“%s”: 不是“%s”的成员"),
-      pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].GetFrontToken()->ToString(str1).CStr());
+      pNode->Operand[1].pTokn->ToString(str1).CStr(), pNode->Operand[0].GetFrontToken()->ToString(str2).CStr());
     vctx.result = ValueResult_NotStructMember;
 
     return pTypeDesc;
@@ -7632,6 +7656,15 @@ NOT_INC_P:
   {
     bNeedValue = vctx.bNeedValue;
     pLogger = vctx.pLogger;
+  }
+
+  void VALUE_CONTEXT::ClearValue()
+  {
+    result = ValueResult_Undefined;
+    pType  = NULL;
+    pValue = NULL;
+    count  = 0;
+    pool.clear();
   }
 
 } // namespace UVShader

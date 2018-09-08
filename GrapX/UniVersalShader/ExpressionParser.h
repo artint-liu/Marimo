@@ -148,6 +148,8 @@ namespace UVShader
     ValueResult_OK = 0,
     ValueResult_NotConst,
     ValueResult_NotStructMember,
+    ValueResult_3861, // 找不到标识符
+    ValueResult_5039, // 函数参数数量不匹配
   };
 
   struct VARIDESC
@@ -193,6 +195,7 @@ namespace UVShader
     VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue);
 
     void SetProperty(const VALUE_CONTEXT& vctx); // 从vctx复制属性
+    void ClearValue();
   };
 
   class NameContext
