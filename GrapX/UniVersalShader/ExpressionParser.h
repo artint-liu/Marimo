@@ -148,8 +148,11 @@ namespace UVShader
     ValueResult_OK = 0,
     ValueResult_NotConst,
     ValueResult_NotStructMember,
-    ValueResult_3861, // 找不到标识符
-    ValueResult_5039, // 函数参数数量不匹配
+    ValueResult_NotNumeric,
+    ValueResult_BadRank,
+    ValueResult_2065 = 2065, // 未声明标识符
+    ValueResult_3861 = 3861, // 找不到标识符
+    ValueResult_5039 = 5039, // 函数参数数量不匹配
   };
 
   struct VARIDESC
@@ -741,9 +744,10 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
     const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);
-    const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const GLOB& sGlob);
+    ValueResult TokenToValue(VALUE_CONTEXT& vctx, const TOKEN* pToken) const;
+    const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const GLOB& sGlob);
     const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const TOKEN* pToken) const;
-    const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
     const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);

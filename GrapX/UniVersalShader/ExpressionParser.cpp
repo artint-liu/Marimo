@@ -4553,7 +4553,8 @@ NOT_INC_P:
         }
 
         VALUE_CONTEXT vctx(sNameContext);
-        const TYPEDESC* pTypeFrom = InferType(vctx, sNameContext, pNode->Operand[1]);
+        vctx.pLogger = GetLogger();
+        const TYPEDESC* pTypeFrom = InferType(vctx, pNode->Operand[1]);
         //const TYPEDESC* pTypeTo = sNameSet.GetType(szReturnType);
         ASSERT(pTypeTo);
 
@@ -4573,6 +4574,7 @@ NOT_INC_P:
       else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
       {
         VALUE_CONTEXT vctx(sNameContext, FALSE);
+        vctx.pLogger = GetLogger();
         InferFunctionReturnedType(vctx, pNode);
         return FALSE; // 不再遍历后面的节点
       }
@@ -4813,7 +4815,7 @@ NOT_INC_P:
     for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
     {
       vctx_param.ClearValue();
-      const TYPEDESC* pTypeDesc = InferType(vctx_param, vctx_param.name_ctx, *it);
+      const TYPEDESC* pTypeDesc = InferType(vctx_param, *it);
       if(vctx_param.result != ValueResult_OK) {
         vctx.result = vctx_param.result;
         return NULL;
@@ -4986,10 +4988,11 @@ NOT_INC_P:
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const GLOB& sGlob)
+  const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const GLOB& sGlob)
   {
+    ASSERT(vctx.pLogger);
     if(sGlob.IsNode()) {
-      return InferType(vctx, sNameSet, sGlob.pNode);
+      return InferType(vctx, sGlob.pNode);
     }
     else if(sGlob.IsToken()) {
       return InferType(vctx, sGlob.pTokn);
@@ -4997,34 +5000,43 @@ NOT_INC_P:
     CLBREAK;
   }
   
+  ValueResult CodeParser::TokenToValue(VALUE_CONTEXT& vctx, const TOKEN* pToken) const
+  {
+    ASSERT(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric); // 外部保证
+    
+    VALUE val;
+    VALUE::State s = val.set(*pToken);      
+
+    if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
+      clStringW str;
+      if(TEST_FLAG(s, VALUE::State_IllegalNumber))
+      {
+        vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2041, "非法的数字 : “%s”", vctx.pLogger), pToken->ToString(str).CStr());
+      }
+      else
+      {
+        vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2021, "应输入数值, 而不是“%s”", vctx.pLogger), pToken->ToString(str).CStr());
+      }
+      vctx.result = ValueResult_NotNumeric;
+      return vctx.result;
+    }
+
+    vctx.result = ValueResult_OK;
+    vctx.pType = vctx.name_ctx.GetType(val.rank);
+    vctx.pool.push_back(val);
+    vctx.pValue = &vctx.pool.front();
+    vctx.count = vctx.pType->CountOf();
+    ASSERT(vctx.count == 1); // vctx.pType->CountOf()应该为1
+
+    return vctx.result;
+  }
+
   const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const TOKEN* pToken) const
   {
     // TODO: 直接提示找不到符号？
     if(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric)
     {
-      VALUE val;
-      VALUE::State s = val.set(*pToken);
-
-      if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
-        clStringW str;
-        if(TEST_FLAG(s, VALUE::State_IllegalNumber))
-        {
-          vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2041, "非法的数字 : “%s”", vctx.pLogger), pToken->ToString(str).CStr());
-        }
-        else
-        {
-          vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2021, "应输入数值, 而不是“%s”", vctx.pLogger), pToken->ToString(str).CStr());
-        }
-        return NULL;
-      }
-
-      vctx.result = ValueResult_OK;
-      vctx.pType = vctx.name_ctx.GetType(val.rank);
-      vctx.pool.push_back(val);
-      vctx.pValue = &vctx.pool.front();
-      vctx.count = vctx.pType->CountOf();
-      ASSERT(vctx.count == 1); // vctx.pType->CountOf()应该为1
-
+      TokenToValue(vctx, pToken);
       return vctx.pType;
     }
 
@@ -5034,6 +5046,8 @@ NOT_INC_P:
       // C2065: “m”: 未声明的标识符
       clStringW strW;
       vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2065, "“%s”: 未声明的标识符", vctx.pLogger), pToken->ToString(strW).CStr());
+      vctx.result = ValueResult_2065;
+      return NULL;
     }
     
     vctx.pType = pVariDesc->pDesc;
@@ -5069,7 +5083,7 @@ NOT_INC_P:
     return pVariDesc->pDesc;
   }
   
-  const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const NameContext& sNameSet, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode)
   {
     ASSERT(pNode->mode != SYNTAXNODE::MODE_Block &&
       pNode->mode != SYNTAXNODE::MODE_Chain);
@@ -5086,8 +5100,8 @@ NOT_INC_P:
     {
       if(pNode->Operand[0].IsToken())
       {
-        const TYPEDESC* pCastTypeDesc = sNameSet.GetType(*pNode->Operand[0].pTokn);
-        const TYPEDESC* pSource = InferType(vctx, sNameSet, pNode->Operand[1]);
+        const TYPEDESC* pCastTypeDesc = vctx.name_ctx.GetType(*pNode->Operand[0].pTokn);
+        const TYPEDESC* pSource = InferType(vctx, pNode->Operand[1]);
         if(TryReinterpretCasting(pCastTypeDesc, pSource, pNode->Operand[0].pTokn))
         {
           return pCastTypeDesc;
@@ -5116,11 +5130,11 @@ NOT_INC_P:
 
         if(pNode->pOpcode->unary_mask == 0x01)
         {
-          return InferType(vctx, sNameSet, pNode->Operand[1]);
+          return InferType(vctx, pNode->Operand[1]);
         }
         else if(pNode->pOpcode->unary_mask == 0x02)
         {
-          return InferType(vctx, sNameSet, pNode->Operand[0]);
+          return InferType(vctx, pNode->Operand[0]);
         }
         else // 11B
         {
@@ -5145,10 +5159,11 @@ NOT_INC_P:
     }
 
     const TYPEDESC* pTypeDesc[2] = {NULL, NULL};
-    VALUE_CONTEXT v[2] = {sNameSet, sNameSet };
+    VALUE_CONTEXT v[2] = {vctx.name_ctx, vctx.name_ctx};
     for(int i = 0; i < 2; i++)
     {
-      pTypeDesc[i] = InferType(v[i], sNameSet, pNode->Operand[i]);
+      v[i].pLogger = vctx.pLogger;
+      pTypeDesc[i] = InferType(v[i], pNode->Operand[i]);
       PARSER_ASSERT(pNode->Operand[i].ptr != NULL, pNode->GetAnyTokenAPB());
     }
 
@@ -5164,9 +5179,15 @@ NOT_INC_P:
       if(bFirstNumeric && bSecondNumeric)
       {
         VALUE::Rank rank = (VALUE::Rank)clMax(pTypeDesc[0]->pDesc->rank, pTypeDesc[1]->pDesc->rank);
-        const TYPEDESC* pTypeDesc = sNameSet.GetType(rank);
-        ASSERT(pTypeDesc->pDesc->rank >= VALUE::Rank_First && pTypeDesc->pDesc->rank <= VALUE::Rank_Last);
-        return pTypeDesc;
+        vctx.pType = vctx.name_ctx.GetType(rank);
+        if(vctx.pType) {
+          vctx.result = ValueResult_OK;
+        }
+        else {
+          vctx.result = ValueResult_BadRank;
+        }
+        ASSERT(vctx.pType->pDesc->rank >= VALUE::Rank_First && vctx.pType->pDesc->rank <= VALUE::Rank_Last);
+        return vctx.pType;
       }
       else if(bFirstNumeric && IS_STRUCT_CATE(pTypeDesc[1]))
       {
@@ -5646,7 +5667,7 @@ NOT_INC_P:
         pTypeDesc = vctx.pType;
       }
       else {
-        InferType(vctx, vctx.name_ctx, pChildNode);
+        InferType(vctx, pChildNode);
         pTypeDesc = vctx.pType;
       }
 
@@ -5676,6 +5697,7 @@ NOT_INC_P:
           VALUE_CONTEXT vctx_member(*pMemberContext, vctx.bNeedValue);
           vctx_member.pValue = vctx.pValue;
           vctx_member.count  = vctx.count;
+          vctx_member.pLogger = vctx.pLogger;
           pTypeDesc = InferSubscriptType(vctx_member, pMemberNode);
           if(vctx_member.result != ValueResult_OK) {
             vctx.result = vctx_member.result;
@@ -5786,7 +5808,7 @@ NOT_INC_P:
     const TYPEDESC* pTypeDesc = NULL;
     if(pNode->Operand[0].ptr)
     {
-      pTypeDesc = InferType(vctx, vctx.name_ctx, pNode->Operand[0]);
+      pTypeDesc = InferType(vctx, pNode->Operand[0]);
       if(pTypeDesc == NULL || vctx.result != ValueResult_OK) {
         return NULL;
       }
@@ -5802,7 +5824,7 @@ NOT_INC_P:
   const TYPEDESC* CodeParser::InferSubscriptTypeB(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode) // pNode是变量&下标节点
   {
     VALUE_CONTEXT vctx_subscript(vctx);
-    const TYPEDESC* pSubscriptType = InferType(vctx_subscript, vctx_subscript.name_ctx, pNode->Operand[1]);
+    const TYPEDESC* pSubscriptType = InferType(vctx_subscript, pNode->Operand[1]);
     if(vctx_subscript.result != ValueResult_OK || vctx_subscript.pType->cate != TYPEDESC::TypeCate_IntegerScaler)
     {
       GetLogger()->OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
@@ -5895,7 +5917,8 @@ NOT_INC_P:
 
     const size_t nErrorCount = DbgErrorCount();
     VALUE_CONTEXT vctx(sNameSet);
-    const TYPEDESC* pRightType = InferType(vctx, sNameSet, right_glob);
+    vctx.pLogger = GetLogger();
+    const TYPEDESC* pRightType = InferType(vctx, right_glob);
     if(pRightType == NULL) {
       ASSERT(DbgErrorCount() > nErrorCount); // InferType 内部应该输出错误
     }
@@ -6367,6 +6390,7 @@ NOT_INC_P:
 
         clStringA strTypename;
         VALUE_CONTEXT vctx(*this);
+        vctx.pLogger = pMsgLogger->GetLogger();
         const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(vctx, pNode);
 
         if(pTypeDesc && IS_SCALER_CATE(pTypeDesc))
@@ -6525,7 +6549,7 @@ NOT_INC_P:
       if(iter_find_result == m_ValuePoolMap.end())
       {
         auto iter_insert_result = m_ValuePoolMap.insert(clmake_pair(ptkVariable, ValuePool()));
-        if(iter_insert_result.second)
+        if(iter_insert_result.second) // 这个判断多余吧？
         {
           ValuePool& vp = iter_insert_result.first->second;
 
@@ -6544,6 +6568,7 @@ NOT_INC_P:
           }
           else if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall))
           {
+            // TODO: 换成Infer函数
             clStringA strFuncName;
             ASSERT(pValueExprGlob->pNode->Operand[0].IsToken());
 
@@ -6569,6 +6594,17 @@ NOT_INC_P:
                 }
               }
             } // if(pPreCompMath)
+          }
+          else if(pValueExprGlob->IsToken() &&
+            pValueExprGlob->pTokn->type > TOKEN::TokenType_FirstNumeric &&
+            pValueExprGlob->pTokn->type < TOKEN::TokenType_LastNumeric)
+          {
+            VALUE_CONTEXT vctx(*this);
+            vctx.pLogger = GetLogger();
+            if(m_pCodeParser->TokenToValue(vctx, pValueExprGlob->pTokn) != ValueResult_OK) {
+              return State_HasError;
+            }
+            vp = vctx.pool;
           }
 
           if(vp.size() == 1) {
@@ -7342,7 +7378,8 @@ NOT_INC_P:
     {
       ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
       VALUE_CONTEXT vctx(m_rNameCtx);
-      pTypeDesc = m_pCodeParser->InferType(vctx, m_rNameCtx, *pGlob);
+      vctx.pLogger = GetLogger();
+      pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
       if(pTypeDesc == NULL) {
         return Result_Failed;
       }
