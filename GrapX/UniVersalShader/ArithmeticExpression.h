@@ -251,6 +251,7 @@ namespace UVShader
       Rank_Unsigned64 = 4, // 100B
       Rank_Signed64 = 5,   // 101B
       Rank_Double = 7,     // 111B
+      Rank_String = 12,    // 1100B
 
       Rank_F_LongLong = 4, // 100B 标记为64位类型
       Rank_Undefined = -1, // 未定义

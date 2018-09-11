@@ -1420,23 +1420,26 @@ GO_NEXT:;
     uValue64 = 0; // 清除高32位
     switch(r)
     {
-    case UVShader::VALUE::Rank_Unsigned:
+    case VALUE::Rank_Unsigned:
       uValue = *static_cast<const GXUINT*>(pValue);
       break;
-    case UVShader::VALUE::Rank_Signed:
+    case VALUE::Rank_Signed:
       nValue = *static_cast<const GXINT*>(pValue);
       break;
-    case UVShader::VALUE::Rank_Float:
+    case VALUE::Rank_Float:
       fValue = *static_cast<const float*>(pValue);
       break;
-    case UVShader::VALUE::Rank_Unsigned64:
+    case VALUE::Rank_Unsigned64:
       uValue64 = *static_cast<const GXUINT64*>(pValue);
       break;
-    case UVShader::VALUE::Rank_Signed64:
+    case VALUE::Rank_Signed64:
       nValue64 = *static_cast<const GXINT64*>(pValue);
       break;
-    case UVShader::VALUE::Rank_Double:
+    case VALUE::Rank_Double:
       fValue64 = *static_cast<const double*>(pValue);
+      break;
+    case VALUE::Rank_String:
+      uValue64 = reinterpret_cast<const GXUINT64>(pValue);
       break;
     default:
       CLBREAK;

@@ -4812,6 +4812,7 @@ NOT_INC_P:
     SYNTAXNODE::GlobList sExprList;
     BreakComma(sExprList, pFuncNode->Operand[1]);
     VALUE_CONTEXT vctx_param(vctx);
+    GXBOOL bNeedValue = vctx.bNeedValue; // 参数中如果不是常量，则整个参数表都不储存常量
     for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
     {
       vctx_param.ClearValue();
@@ -4821,14 +4822,24 @@ NOT_INC_P:
         return NULL;
       }
       sArgumentsTypeList.push_back(pTypeDesc);
-      if(vctx.bNeedValue) {
+      
+      if(vctx.bNeedValue && bNeedValue)
+      {
+        if(vctx_param.count == 0) {
+          bNeedValue = FALSE;
+        }
         vctx.pool.insert(vctx.pool.end(), vctx_param.pValue, vctx_param.pValue + vctx_param.count);
       }
     }
 
-    if(vctx.bNeedValue) {
+    if(bNeedValue) {
       vctx.pValue = &vctx.pool.front(); // 必须等pool稳定之后才能确定指针位置
-      vctx.count = vctx.pool.size();
+      vctx.count  = vctx.pool.size();
+    }
+    else {
+      vctx.pValue = NULL;
+      vctx.count  = 0;
+      vctx.pool.clear();
     }
 
     pRetType = InferUserFunctionType(vctx.name_ctx, sArgumentsTypeList, pFuncNode);
@@ -4924,6 +4935,8 @@ NOT_INC_P:
               return vctx.name_ctx.GetType(STR_FLOAT4);
             }
 
+            vctx.ClearValue();
+            vctx.result = ValueResult_OK;
             return pRetType; //sNameSet.GetType(s_functions[i].type);
           }
         }
@@ -5040,6 +5053,18 @@ NOT_INC_P:
       return vctx.pType;
     }
 
+    if(pToken->type == TOKEN::TokenType_String)
+    {
+      VALUE value;
+      value.set(VALUE::Rank_String, pToken->marker);
+      vctx.pType = vctx.name_ctx.GetType(s_szString);
+      vctx.pool.assign(1, value);
+      vctx.pValue = &vctx.pool.front();
+      vctx.count = vctx.pool.size();
+      vctx.result = ValueResult_OK;
+      return vctx.pType;
+    }
+
     const VARIDESC* pVariDesc = vctx.name_ctx.GetVariableDesc(pToken);
     if(pVariDesc == NULL)
     {
@@ -5087,6 +5112,7 @@ NOT_INC_P:
   {
     ASSERT(pNode->mode != SYNTAXNODE::MODE_Block &&
       pNode->mode != SYNTAXNODE::MODE_Chain);
+    CHECK_VALUE_CONTEXT;
 
     if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
@@ -5165,6 +5191,7 @@ NOT_INC_P:
       v[i].pLogger = vctx.pLogger;
       pTypeDesc[i] = InferType(v[i], pNode->Operand[i]);
       PARSER_ASSERT(pNode->Operand[i].ptr != NULL, pNode->GetAnyTokenAPB());
+      ASSERT(v[i].pType == pTypeDesc[i]);
     }
 
     if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)

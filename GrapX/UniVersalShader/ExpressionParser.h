@@ -201,6 +201,28 @@ namespace UVShader
     void ClearValue();
   };
 
+  // 检查VALUE_CONTEXT输入与输出值的有效性
+  struct VALUE_CONTEXT_CHECKER
+  {
+    const VALUE_CONTEXT& vctx;
+    VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx)
+      : vctx(_vctx)
+    {
+      ASSERT(vctx.pLogger);
+    }
+
+    ~VALUE_CONTEXT_CHECKER()
+    {
+      ASSERT(vctx.result != ValueResult_Undefined);
+      ASSERT(vctx.pValue == NULL || (vctx.pValue != NULL && vctx.count > 0));
+      if(vctx.pValue && vctx.pool.empty() == FALSE) {
+        ASSERT(vctx.pValue >= &vctx.pool.front() && vctx.pValue <= &vctx.pool.back());
+      }
+    }
+  };
+
+#define CHECK_VALUE_CONTEXT VALUE_CONTEXT_CHECKER vcc(vctx)
+
   class NameContext
   {
   public:
