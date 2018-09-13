@@ -362,7 +362,7 @@ namespace clstd
     u32 dwNumWrite;
     clStringW buffer;
     buffer.VarFormat(format, arglist);
-    Write(buffer, (u32)buffer.GetLength(), &dwNumWrite);
+    Write(buffer, (u32)buffer.GetLength() * sizeof(wch), &dwNumWrite);
 
     va_end(arglist);
     return (int)dwNumWrite;
