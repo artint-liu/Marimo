@@ -4791,6 +4791,7 @@ NOT_INC_P:
 
   const TYPEDESC* CodeParser::InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode)
   {
+    CHECK_VALUE_CONTEXT;
     ASSERT(pFuncNode->mode == SYNTAXNODE::MODE_FunctionCall);
     if(pFuncNode->Operand[0].IsNode())
     {
@@ -4817,7 +4818,7 @@ NOT_INC_P:
     {
       vctx_param.ClearValue();
       const TYPEDESC* pTypeDesc = InferType(vctx_param, *it);
-      if(vctx_param.result != ValueResult_OK) {
+      if(vctx_param.result != ValueResult_OK && vctx_param.result != ValueResult_Variable) {
         vctx.result = vctx_param.result;
         return NULL;
       }
@@ -4833,8 +4834,10 @@ NOT_INC_P:
     }
 
     if(bNeedValue) {
-      vctx.pValue = &vctx.pool.front(); // 必须等pool稳定之后才能确定指针位置
-      vctx.count  = vctx.pool.size();
+      // 必须等pool稳定之后才能确定指针位置
+      vctx.UserPool();
+      //vctx.pValue = &vctx.pool.front();
+      //vctx.count  = vctx.pool.size();
     }
     else {
       vctx.pValue = NULL;
@@ -4937,6 +4940,7 @@ NOT_INC_P:
 
             vctx.ClearValue();
             vctx.result = ValueResult_OK;
+            vctx.pType = pRetType;
             return pRetType; //sNameSet.GetType(s_functions[i].type);
           }
         }
@@ -4976,6 +4980,19 @@ NOT_INC_P:
       {
         vctx.pType = vctx.name_ctx.GetType(pPreCompMath->name);
         ASSERT(vctx.pType); // FindPerComponentMathOperations 列表里放了一个不存在的内置类型
+        const VALUE::Rank rank = static_cast<VALUE::Rank>(vctx.pType->pDesc->rank);
+        ASSERT(VALUE::IsNumericRank(rank));
+
+        if(vctx.bNeedValue &&
+          (pPreCompMath->scaler_count > nScalerCount || vctx.pValue->rank != rank))
+        {
+          ASSERT(vctx.count == 1 || vctx.pValue->rank != rank);
+          VALUE value = *vctx.pValue;
+          value.CastValueByRank(rank);
+          vctx.pool.assign(pPreCompMath->scaler_count, value);
+          vctx.UserPool();
+        }
+
         return vctx.pType;
       }
       else
@@ -5037,8 +5054,9 @@ NOT_INC_P:
     vctx.result = ValueResult_OK;
     vctx.pType = vctx.name_ctx.GetType(val.rank);
     vctx.pool.push_back(val);
-    vctx.pValue = &vctx.pool.front();
-    vctx.count = vctx.pType->CountOf();
+    //vctx.pValue = &vctx.pool.front();
+    //vctx.count = vctx.pType->CountOf();
+    vctx.UserPool();
     ASSERT(vctx.count == 1); // vctx.pType->CountOf()应该为1
 
     return vctx.result;
@@ -5059,8 +5077,9 @@ NOT_INC_P:
       value.set(VALUE::Rank_String, pToken->marker);
       vctx.pType = vctx.name_ctx.GetType(s_szString);
       vctx.pool.assign(1, value);
-      vctx.pValue = &vctx.pool.front();
-      vctx.count = vctx.pool.size();
+      //vctx.pValue = &vctx.pool.front();
+      //vctx.count = vctx.pool.size();
+      vctx.UserPool();
       vctx.result = ValueResult_OK;
       return vctx.pType;
     }
@@ -5089,7 +5108,7 @@ NOT_INC_P:
         }
         else
         {
-          vctx.result = ValueResult_NotConst;
+          vctx.result = ValueResult_Variable;
         }
       }
       else
@@ -5200,10 +5219,10 @@ NOT_INC_P:
       if(pResultTypeDesc) {
         return pResultTypeDesc;
       }
-
-      const GXBOOL bFirstNumeric = IS_SCALER_CATE(pTypeDesc[0]);
-      const GXBOOL bSecondNumeric = IS_SCALER_CATE(pTypeDesc[1]);
-      if(bFirstNumeric && bSecondNumeric)
+#if 0
+      const GXBOOL bFirstScaler  = IS_SCALER_CATE(pTypeDesc[0]);
+      const GXBOOL bSecondScaler = IS_SCALER_CATE(pTypeDesc[1]);
+      if(bFirstScaler && bSecondScaler)
       {
         VALUE::Rank rank = (VALUE::Rank)clMax(pTypeDesc[0]->pDesc->rank, pTypeDesc[1]->pDesc->rank);
         vctx.pType = vctx.name_ctx.GetType(rank);
@@ -5216,7 +5235,7 @@ NOT_INC_P:
         ASSERT(vctx.pType->pDesc->rank >= VALUE::Rank_First && vctx.pType->pDesc->rank <= VALUE::Rank_Last);
         return vctx.pType;
       }
-      else if(bFirstNumeric && IS_STRUCT_CATE(pTypeDesc[1]))
+      else if(bFirstScaler && IS_VECMAT_CATE(pTypeDesc[1]))
       {
         // TODO: 是否应考虑符号?
         if(_CL_NOT_(TryTypeCasting(pTypeDesc[1], pTypeDesc[0], &pNode->GetAnyTokenPAB())))
@@ -5228,7 +5247,7 @@ NOT_INC_P:
         }
         return pTypeDesc[1];
       }
-      else if(IS_STRUCT_CATE(pTypeDesc[0]) && bSecondNumeric)
+      else if(IS_VECMAT_CATE(pTypeDesc[0]) && bSecondScaler)
       {
         // TODO: 是否应考虑符号?
         if(TryTypeCasting(pTypeDesc[0], pTypeDesc[1], &pNode->GetAnyTokenPAB())) {
@@ -5237,7 +5256,7 @@ NOT_INC_P:
         CLBREAK; // 没处理
         return NULL;
       }
-      else if(IS_STRUCT_CATE(pTypeDesc[0]) && IS_STRUCT_CATE(pTypeDesc[1]))
+      else if(IS_VECMAT_CATE(pTypeDesc[0]) && IS_VECMAT_CATE(pTypeDesc[1]))
       {
         if(pTypeDesc[0]->name == pTypeDesc[1]->name)
         {
@@ -5251,6 +5270,11 @@ NOT_INC_P:
       else {
         return InferDifferentTypesOfCalculations(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
       }
+#else
+      MergeValueContext(vctx, pNode->pOpcode, v, &pNode->GetAnyTokenPAB());
+      return vctx.pType;
+#endif
+
     }
     return NULL;
   }
@@ -5638,6 +5662,7 @@ NOT_INC_P:
 
   const TYPEDESC* CodeParser::InferMemberType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode)
   {
+    CHECK_VALUE_CONTEXT;
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Opcode && pNode->CompareOpcode('.')); // 外部保证
     // ab.cd.ef 解析为
     // [.] [[.] [ab] [cd]] [ef]
@@ -5963,6 +5988,194 @@ NOT_INC_P:
   {
     const TYPEDESC* pTypeTo = sNameSet.GetType(szTypeTo);
     return TryTypeCasting(pTypeTo, pTypeFrom, pLocation);
+  }
+
+  GXBOOL CodeParser::MergeValueContext(VALUE_CONTEXT& vctx, const TOKEN* pOperator, VALUE_CONTEXT* pAB, const TOKEN* pLocation)
+  {
+    ASSERT(pAB != NULL);
+    CHECK_VALUE_CONTEXT;
+    // pOperator 为空相当于“=”操作
+    // pAB内容可能会改变
+
+    VALUE value;
+
+    if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
+    {
+      if(pAB[0].pType->pDesc->rank >= pAB[1].pType->pDesc->rank) {
+        vctx.pType = pAB[0].pType;
+      }
+      else {
+        vctx.pType = pAB[1].pType;
+      }
+      ASSERT(pAB[0].pType->CountOf() == pAB[1].pType->CountOf());
+    }
+    else if(IS_SCALER_CATE(pAB[0].pType) && IS_VECMAT_CATE(pAB[1].pType))
+    {
+      if(vctx.bNeedValue && pAB[0].result == ValueResult_OK && pAB[1].result == ValueResult_OK) {
+        pAB[0].Enlarge(pAB[1].pType);
+        ASSERT(pAB[0].pType->CountOf() == pAB[1].pType->CountOf());
+      }
+      else {
+        vctx.MergeType(pAB[0].pType, pAB[1].pType);
+      }
+    }
+    else if(IS_VECMAT_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
+    {
+      if(vctx.bNeedValue && pAB[0].result == ValueResult_OK && pAB[1].result == ValueResult_OK) {
+        pAB[1].Enlarge(pAB[0].pType);
+        ASSERT(pAB[0].pType->CountOf() == pAB[1].pType->CountOf());
+      }
+      else {
+        vctx.MergeType(pAB[1].pType, pAB[0].pType);
+      }
+    }
+    else
+    {
+      CLBREAK;
+    }
+
+
+    if(vctx.bNeedValue)
+    {
+       if(
+         (pAB[0].result == ValueResult_OK && pAB[1].result == ValueResult_Variable) ||
+         (pAB[0].result == ValueResult_Variable && pAB[1].result == ValueResult_OK) ||
+         (pAB[0].result == ValueResult_Variable && pAB[1].result == ValueResult_Variable))
+       {
+         vctx.ClearValueOnly();
+         vctx.result = ValueResult_Variable;
+         return TRUE;
+       }
+
+       vctx.result = ValueResult_OK;
+       vctx.pool.clear();
+       const size_t count = pAB[0].pType->CountOf();
+       for(size_t i = 0; i < count; i++)
+       {
+         if(value.Calculate(*pOperator, pAB[0].pValue[i], pAB[1].pValue[i]) != VALUE::State_OK) {
+           CLBREAK;
+           vctx.result = ValueResult_Failed;
+           return FALSE;
+         }
+         vctx.pool.push_back(value);
+       }
+
+       vctx.UserPool();
+       return TRUE;
+    }
+
+    vctx.ClearValue();
+    vctx.result = ValueResult_Failed;
+    return FALSE;
+
+//
+//    if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
+//    {
+//      if(vctx.bNeedValue)
+//      {
+//        if(value.Calculate(*pOperator, *(pAB[0].pValue), *(pAB[1].pValue))) {
+//          vctx.result = ValueResult_OK;
+//        }
+//        else {
+//          vctx.result = ValueResult_Failed;
+//        }
+//
+//        vctx.pool.assign(1, value);
+//        vctx.SetType(clMax(pAB[0].pValue->rank, pAB[1].pValue->rank));
+//        vctx.UserPool();
+//      }
+//      else if(pAB[0].pType->pDesc->rank < pAB[1].pType->pDesc->rank &&
+//        (pAB[0].pType->pDesc->rank != VALUE::Rank_Double && pAB[0].pType->pDesc->rank != VALUE::Rank_Float) &&
+//        (pAB[1].pType->pDesc->rank != VALUE::Rank_Double && pAB[1].pType->pDesc->rank != VALUE::Rank_Float)
+//        ) {
+//        clStringW strFrom = pAB[1].pType->name;
+//        clStringW strTo = pAB[0].pType->name;
+//        GetLogger()->OutputErrorW(*pLocation, UVS_EXPORT_TEXT(4244, "从“%s”转换到“%s”，可能丢失数据"), strFrom.CStr(), strTo.CStr());
+//      }
+//      return TRUE;
+//    }
+//    else if(IS_SCALER_CATE(pAB[0].pType) && IS_VECMAT_CATE(pAB[1].pType))
+//    {
+//      if(vctx.bNeedValue && _CL_NOT_(pOperator == NULL || *pOperator == '='))
+//      {
+//        const size_t count = pAB[1].pType->CountOf();
+//        vctx.result = ValueResult_OK;
+//        vctx.pool.clear();
+//        for(size_t i = 0; i < count; i++)
+//        {
+//          if(value.Calculate(*pOperator, *(pAB[0].pValue), pAB[1].pValue[i]) == FALSE) {
+//            vctx.result = ValueResult_Failed;
+//            return FALSE;
+//          }
+//          vctx.pool.push_back(value);
+//        }
+//
+//        vctx.pType = pAB[0].pType;
+//        vctx.UserPool();
+//        return TRUE;
+//      }
+//      // TODO: 无法将pAB[1].pType类型转换为pAB[0].pType类型
+//      CLBREAK;
+//    }
+//    else if(IS_VECMAT_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
+//    {
+//      if(vctx.bNeedValue && _CL_NOT_(pOperator == NULL || *pOperator == '='))
+//      {
+//        const size_t count = pAB[0].pType->CountOf();
+//        vctx.result = ValueResult_OK;
+//        vctx.pool.clear();
+//        for(size_t i = 0; i < count; i++)
+//        {
+//          if(value.Calculate(*pOperator, pAB[0].pValue[i], *(pAB[1].pValue)) == FALSE) {
+//            vctx.result = ValueResult_Failed;
+//            return FALSE;
+//          }
+//          vctx.pool.push_back(value);
+//        }
+//
+//        vctx.pType = pAB[0].pType;
+//        vctx.UserPool();
+//        return TRUE;
+//      }
+//      // TODO: 无法将pAB[1].pType类型转换为pAB[0].pType类型
+//      CLBREAK;
+//      //return (pAB[0].pType->pDesc && pAB[0].pType->pDesc->component_type &&
+//      //  CompareScaler(pAB[1].pType->name, pAB[0].pType->pDesc->component_type));
+//    }
+//    else if(IS_VECMAT_CATE(pAB[0].pType) && IS_VECMAT_CATE(pAB[1].pType))
+//    {
+//      CLBREAK;
+//#if 0
+//      if(vctx.bNeedValue && _CL_NOT_(pOperator == NULL || *pOperator == '='))
+//      {
+//        const size_t count = pAB[0].pType->CountOf();
+//        vctx.result = ValueResult_OK;
+//        vctx.pool.clear();
+//        for(int i = 0; i < count; i++)
+//        {
+//          if(value.Calculate(*pOperator, *(pAB[0].pValue), *(pAB[1].pValue)) == FALSE) {
+//            vctx.result = ValueResult_Failed;
+//            return FALSE;
+//          }
+//          vctx.pool.push_back(value);
+//        }
+//
+//        vctx.pType = pAB[0].pType;
+//        vctx.UserPool();
+//        return TRUE;
+//      }
+//#endif
+//      CLBREAK;
+//      //if(pAB[0].pType->name == pAB[1].pType->name)
+//      //{
+//      //  ASSERT(pAB[0].pType->pDesc == pAB[1].pType->pDesc); // 应该同一个名的函数只注册过一次
+//      //  return TRUE;
+//      //}
+//    }
+//
+//    CLBREAK;
+//    return FALSE;
+//    //return (pAB[0].pType->name == pAB[1].pType->name);
   }
 
   GXBOOL CodeParser::TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
@@ -7450,6 +7663,9 @@ NOT_INC_P:
       ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
       VALUE::State state = m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
       if(state == VALUE::State_OK) {
+        if(IS_SCALER_CATE(pTypeDesc)) {
+          m_pValuePool[index].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
+        }
       }
       else {
         GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5053, "无法计算初始化列表常量"));
@@ -7722,6 +7938,13 @@ NOT_INC_P:
     pLogger = vctx.pLogger;
   }
 
+  void VALUE_CONTEXT::UserPool()
+  {
+    ASSERT(pool.empty() == FALSE);
+    pValue = &pool.front();
+    count = pool.size();
+  }
+
   void VALUE_CONTEXT::ClearValue()
   {
     result = ValueResult_Undefined;
@@ -7729,6 +7952,100 @@ NOT_INC_P:
     pValue = NULL;
     count  = 0;
     pool.clear();
+  }
+
+  void VALUE_CONTEXT::ClearValueOnly()
+  {
+    pValue = NULL;
+    count = 0;
+    pool.clear();
+  }
+
+  void VALUE_CONTEXT::SetType(VALUE::Rank rank)
+  {
+    pType = name_ctx.GetType(rank);
+    ASSERT(pType);
+  }
+
+  // 根据参数类型扩充元素个数，如果rank比较低也会提升
+  void VALUE_CONTEXT::Enlarge(const TYPEDESC* pTargetType)
+  {
+    ASSERT(pType->CountOf() < pTargetType->CountOf());
+    if(IS_SCALER_CATE(pType) && IS_VECMAT_CATE(pTargetType))
+    {
+      VALUE value = *pValue;
+      if(value.rank > pTargetType->pElementType->pDesc->rank)
+      {
+        pType = MergeType(pType, pTargetType);
+      }
+      else
+      {
+        value.CastValueByRank(static_cast<VALUE::Rank>(pTargetType->pDesc->rank));
+        pType = pTargetType;
+      }
+      const size_t count = pTargetType->CountOf();
+      pool.assign(count, value);
+      UserPool();
+    }
+    else
+    {
+      CLBREAK;
+    }
+  }
+  
+  // 根据给定类型获得更高阶向量矩阵类型
+  const TYPEDESC* VALUE_CONTEXT::MergeType(const TYPEDESC* pScalerType, const TYPEDESC* pVecMatType)
+  {
+    ASSERT(IS_SCALER_CATE(pScalerType));
+    ASSERT(IS_VECMAT_CATE(pVecMatType));
+    ASSERT(VALUE::IsNumericRank(static_cast<VALUE::Rank>(pScalerType->pDesc->rank)));
+    ASSERT(VALUE::IsNumericRank(static_cast<VALUE::Rank>(pVecMatType->pDesc->rank)));
+    if(pScalerType->pDesc->rank > pVecMatType->pDesc->rank)
+    {
+      clStringA str = pScalerType->pDesc->name;
+      str.Append(pVecMatType->pDesc->name + clstd::strlenT(pVecMatType->pDesc->component_type));
+      pVecMatType = name_ctx.GetType(str);
+      ASSERT(pVecMatType);
+    }    
+    return pVecMatType;
+  }
+
+
+  //////////////////////////////////////////////////////////////////////////
+  VALUE_CONTEXT_CHECKER::VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx)
+    : vctx(_vctx)
+  {
+    ASSERT(vctx.pLogger); // 必须指定Logger
+  }
+
+  VALUE_CONTEXT_CHECKER::~VALUE_CONTEXT_CHECKER()
+  {
+    // 必须返回写入处理结果
+    ASSERT(vctx.result != ValueResult_Undefined);
+
+    // 检查value有效性
+    if(vctx.pValue)
+    {
+      // 指针有效时肯定有值
+      ASSERT(vctx.pValue != NULL && vctx.count > 0);
+
+      // 类型与数量一致
+      ASSERT(vctx.count == vctx.pType->CountOf());
+
+      if(vctx.pool.empty() == FALSE &&
+        (IS_SCALER_CATE(vctx.pType) || IS_VECMAT_CATE(vctx.pType)))
+      {
+        const VALUE::Rank rank = static_cast<VALUE::Rank>(vctx.pType->pDesc->rank);
+        for(size_t i = 0; i < vctx.count; i++)
+        {
+          ASSERT(rank == vctx.pValue[i].rank);
+        }
+      }
+    }
+
+    if(vctx.pValue && vctx.pool.empty() == FALSE) {
+      ASSERT(vctx.pValue >= &vctx.pool.front() && vctx.pValue <= &vctx.pool.back());
+    }
   }
 
 } // namespace UVShader

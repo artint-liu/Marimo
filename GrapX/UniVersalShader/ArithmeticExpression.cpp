@@ -1559,6 +1559,16 @@ GO_NEXT:;
     return str;
   }
 
+  GXBOOL VALUE::IsNumericRank() const
+  {
+    return IsNumericRank(rank);
+  }
+
+  GXBOOL VALUE::IsNumericRank(Rank _rank)
+  {
+    return (_rank >= 0 && _rank <= 7);
+  }
+
   VALUE::State VALUE::UpgradeValueByRank(Rank _type)
   {
     if(rank == _type || rank == Rank_Undefined) { // 同级或者未定义（一元操作情况）
@@ -1845,7 +1855,7 @@ GO_NEXT:;
       break;
     }
     default:
-      CLBREAK;
+      CLBREAK; // bad rank
       break;
     }
     return State_OK;

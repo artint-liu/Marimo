@@ -146,7 +146,8 @@ namespace UVShader
   {
     ValueResult_Undefined = -1,
     ValueResult_OK = 0,
-    ValueResult_NotConst,
+    ValueResult_Variable,    // 出现变量, 无法计算出常量
+    ValueResult_Failed,      // 其它错误
     ValueResult_NotStructMember,
     ValueResult_NotNumeric,
     ValueResult_BadRank,
@@ -198,27 +199,21 @@ namespace UVShader
     VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue);
 
     void SetProperty(const VALUE_CONTEXT& vctx); // 从vctx复制属性
+    void UserPool();
     void ClearValue();
+    void ClearValueOnly();
+    void SetType(VALUE::Rank rank);
+    void Enlarge(const TYPEDESC* pTargetType);
+    const TYPEDESC* MergeType(const TYPEDESC* pScalerType, const TYPEDESC* pVecMatType);
   };
 
   // 检查VALUE_CONTEXT输入与输出值的有效性
   struct VALUE_CONTEXT_CHECKER
   {
     const VALUE_CONTEXT& vctx;
-    VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx)
-      : vctx(_vctx)
-    {
-      ASSERT(vctx.pLogger);
-    }
+    VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx);
 
-    ~VALUE_CONTEXT_CHECKER()
-    {
-      ASSERT(vctx.result != ValueResult_Undefined);
-      ASSERT(vctx.pValue == NULL || (vctx.pValue != NULL && vctx.count > 0));
-      if(vctx.pValue && vctx.pool.empty() == FALSE) {
-        ASSERT(vctx.pValue >= &vctx.pool.front() && vctx.pValue <= &vctx.pool.back());
-      }
-    }
+    ~VALUE_CONTEXT_CHECKER();
   };
 
 #define CHECK_VALUE_CONTEXT VALUE_CONTEXT_CHECKER vcc(vctx)
@@ -788,6 +783,7 @@ namespace UVShader
     const TYPEDESC* InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB* pVarGlob, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    GXBOOL MergeValueContext(VALUE_CONTEXT& vctx, const TOKEN* pOperator, VALUE_CONTEXT* pAB, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXDWORD dwArgMask, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryReinterpretCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
