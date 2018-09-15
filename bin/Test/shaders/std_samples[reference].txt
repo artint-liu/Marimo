@@ -5,6 +5,7 @@ float macro_test_5;
 float macro_test_notdefine1;
 float macro_test_10;
 float3 sun;
+float3 vWorldPos : WORLDPOS = float3(0, 0, 0);
 float3 dir:VIEWDIRECTION;
 float3 diffuse:DIFFUSE;
 float aa=0;

@@ -32,6 +32,7 @@ class GVPhySimulator : public GUnknown
 {
 public:
   //enum Rigid
+  typedef clstd::geometry::Plane Plane;
 public:
   GXSTDINTERFACE(GXHRESULT AddRef   ());
   GXSTDINTERFACE(GXHRESULT Release  ());

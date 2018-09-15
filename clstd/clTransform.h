@@ -24,42 +24,42 @@ namespace clstd
   //_CLTRANSFORM_TEMPL
   struct TRANSFORM
   {
-    float3      scaling;
-    quaternion  rotation;
+    _float3      scaling;
+    _quaternion  rotation;
     float3      translation;
     //float3      rotationEuler;     // 角度值
     //quaternion  rotationQuaternion;
-    float4x4    GlobalMatrix; // Global = Coordinate * Local
+    _float4x4    GlobalMatrix; // Global = Coordinate * Local
     //float3      GlobalScaling;
     
     TRANSFORM();
 
     // 下面这些接口设置分量后会丢失原有TRANSFORM所在空间，重新建立在笛卡尔坐标空间中
-    CFloat4x4&  Set                 (CFloat3& vScaling, CQuaternion& quater, CFloat3& vTranslation);
+    CFloat4x4&  Set                 (CFloat3& vScaling, const _quaternion& quater, CFloat3& vTranslation);
     CFloat4x4&  Set                 (CFloat3& vScaling, CFloat3& vEuler, CFloat3& vTranslation);
     b32         SetTransform        (CFloat4x4& mat);
     void        SetPosition         (CFloat3& vPos);  // As top transform
     void        SetScaling          (CFloat3& vScaling);
     void        SetRotationA        (CFloat3& vEuler);  // Angle
     void        SetRotationR        (CFloat3& vEuler);  // Radian
-    void        SetRotation         (CQuaternion& quater);
+    void        SetRotation         (const _quaternion& quater);
     void        RotateA             (CFloat3& vEuler);
     void        RotateR             (CFloat3& vEuler);
-    void        Rotate              (CQuaternion& quater);
+    void        Rotate              (const _quaternion& quater);
     b32         SetDirection        (CFloat3& vDir, CFloat3& vUp);
     CFloat4x4&  UpdateAbsoluteMatrix();
 
-    CFloat4x4&  Set                 (CFloat4x4& Coordinate, CFloat3& vScaling, CQuaternion& quater, CFloat3& vTranslation);
+    CFloat4x4&  Set                 (CFloat4x4& Coordinate, CFloat3& vScaling, const _quaternion& quater, CFloat3& vTranslation);
     CFloat4x4&  Set                 (CFloat4x4& Coordinate, CFloat3& vScaling, CFloat3& vEuler, CFloat3& vTranslation);
     b32         SetTransform        (CFloat4x4& Coordinate, CFloat4x4& mat, ESpace eSpace);
     void        SetPosition         (CFloat4x4& Coordinate, CFloat3& vPos, ESpace eSpace);
     void        SetScaling          (CFloat4x4& Coordinate, CFloat3& vScaling);
     void        SetRotationA        (CFloat4x4& Coordinate, CFloat3& vEuler);  // Angle
     void        SetRotationR        (CFloat4x4& Coordinate, CFloat3& vEuler);  // Radian
-    void        SetRotation         (CFloat4x4& Coordinate, CQuaternion& quater);
+    void        SetRotation         (CFloat4x4& Coordinate, const _quaternion& quater);
     void        RotateA             (CFloat4x4& Coordinate, CFloat3& vEuler);
     void        RotateR             (CFloat4x4& Coordinate, CFloat3& vEuler);
-    void        Rotate              (CFloat4x4& Coordinate, CQuaternion& quater);
+    void        Rotate              (CFloat4x4& Coordinate, const _quaternion& quater);
     b32         SetDirection        (CFloat4x4& Coordinate, CFloat3& vDir, CFloat3& vUp);
     // void   Forward                   (float fDistance);
     // void   Translate                 (CFloat3& translation, Space relativeTo = Space.Self);  // 相对移动
@@ -69,9 +69,9 @@ namespace clstd
     // float3 InverseTransformDirection (CFloat3& direction); // Transforms a direction from world space to local space.
     // float3 TransformPoint            (CFloat3& position);  // Transforms position from local space to world space.
     // float3 InverseTransformPoint     (CFloat3& position);  // Transforms position from world space to local space.
-    float4x4    ToRelativeMatrix        () const;
+    _float4x4   ToRelativeMatrix        () const;
     CFloat4x4&  UpdateAbsoluteMatrix    (CFloat4x4& Coordinate);
-    euler       GetEuler                (RotationOrder eOrder) const;
+    _euler      GetEuler                (RotationOrder eOrder) const;
 
     inline operator const float4x4& () const;
     //CFloat4x4&  CalcAbsoluteMatrixAsTop ();

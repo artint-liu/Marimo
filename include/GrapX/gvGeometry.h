@@ -145,7 +145,7 @@ public:
 
   static GXHRESULT CreateConvex(
     GXGraphics*   pGraphics,
-    Plane*        pPlanes,
+    GVNode::Plane*pPlanes,
     int           nNumPlanes,
     GXColor32     color, 
     GVGeometry**  ppGeometry, 

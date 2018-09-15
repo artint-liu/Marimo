@@ -101,7 +101,7 @@ void GVAnimationTrack::UpdateBoneLocalMarix(Bone& bone, int nBoneIndex, int nFra
   //Bone& bone = m_aBones[nBoneIndex];
   const BONEINFO& BoneInfo = m_pBoneInfo[nBoneIndex];
   float3      vTranslation;
-  quaternion  vRotation;
+  Quaternion  vRotation;
   float3      vScaling;
 
   ASSERT(BoneInfo.nTranslationIdx < 0 || m_pTS[BoneInfo.nTranslationIdx] == BoneInfo.vTranslation);
@@ -136,7 +136,7 @@ GXHRESULT GVAnimationTrack::SaveFile(SmartRepository* pStorage)
   // 其实下面的 Count 不需要储存,只是为了校验
   ASSERT(m_nFrameCount == m_nTSCount || m_nTSCount == 0);
   pStorage->Write(NULL, ANIMTRACK_TSDATA, m_pTS, m_nFrameCount * sizeof(float3));
-  pStorage->Write(NULL, ANIMTRACK_QUATERDATA, m_pQuaternions, m_nQuaterCount * sizeof(quaternion));
+  pStorage->Write(NULL, ANIMTRACK_QUATERDATA, m_pQuaternions, m_nQuaterCount * sizeof(Quaternion));
   pStorage->Write(NULL, ANIMTRACK_BONEINFODATA, m_pBoneInfo, m_nBoneCount * sizeof(BONEINFO));
   return GX_OK;
 }
@@ -166,8 +166,8 @@ GXHRESULT GVAnimationTrack::LoadFile(SmartRepository* pStorage)
 
   if(m_nQuaterCount != 0)
   {
-    m_pQuaternions = new quaternion[m_nQuaterCount];
-    pStorage->Read(NULL, ANIMTRACK_QUATERDATA, m_pQuaternions, m_nQuaterCount * sizeof(quaternion));
+    m_pQuaternions = new Quaternion[m_nQuaterCount];
+    pStorage->Read(NULL, ANIMTRACK_QUATERDATA, m_pQuaternions, m_nQuaterCount * sizeof(Quaternion));
   }
 
   if(m_nBoneCount != 0)
@@ -196,7 +196,7 @@ GXBOOL GVAnimationTrack::InitializeTrack(
   int                 nFrameRate,
   float3*             pTSData,    // Translation Scaling
   int                 nTSCount,
-  quaternion*         pQuaternions,
+  Quaternion*         pQuaternions,
   int                 nQuateCount,
   BONEINFO*           pBoneInfo,
   int                 nBoneCount)
@@ -214,11 +214,11 @@ GXBOOL GVAnimationTrack::InitializeTrack(
   SAFE_DELETE(m_pBoneInfo);
 
   m_pTS = new float3[nTSCount];
-  m_pQuaternions = new quaternion[nQuateCount];
+  m_pQuaternions = new Quaternion[nQuateCount];
   m_pBoneInfo = new BONEINFO[nBoneCount];
 
   memcpy(m_pTS, pTSData, sizeof(float3) * nTSCount);
-  memcpy(m_pQuaternions, pQuaternions, sizeof(quaternion) * nQuateCount);
+  memcpy(m_pQuaternions, pQuaternions, sizeof(Quaternion) * nQuateCount);
   memcpy(m_pBoneInfo, pBoneInfo, sizeof(BONEINFO) * nBoneCount);
 
   m_fTimeLength = (float)m_nFrameCount / m_nFrameRate * 1000;
@@ -233,7 +233,7 @@ GXHRESULT GVAnimationTrack::CreateAnimationTrack(
   int                 nFrameRate,
   float3*             pTSData,    // Translation Scaling
   int                 nTSCount,
-  quaternion*         pQuaternions,
+  Quaternion*         pQuaternions,
   int                 nQuateCount,
   BONEINFO*           pBoneInfo,
   int                 nBoneCount)

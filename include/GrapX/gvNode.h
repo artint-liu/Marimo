@@ -124,6 +124,12 @@ class GXDLL GVNode : public GUnknown, public clstd::treeT<GVNode>
   friend class clstd::treeT<GVNode>;
 public:
   typedef clstd::TRANSFORM TRANSFORM;
+  typedef clstd::geometry::AABB AABB;
+  typedef clstd::_quaternion Quaternion;
+  typedef clstd::geometry::Ray Ray;
+  typedef clstd::geometry::Plane Plane;
+  typedef clstd::geometry::NormalizedRay NormalizedRay;
+  typedef clstd::geometry::FrustumPlanes FrustumPlanes;
   enum ESpace {
     S_ABSOLUTE = clstd::S_World,
     S_RELATIVE = clstd::S_Self,
@@ -163,17 +169,17 @@ public:
 
   void      SetRotationA              (CFloat3& vEuler);  // Angle
   void      SetRotationR              (CFloat3& vEuler);  // Radian
-  void      SetRotation               (CQuaternion& quater);
+  void      SetRotation               (const Quaternion& quater);
   void      RotateA                   (CFloat3& vEuler);
   void      RotateR                   (CFloat3& vEuler);
-  void      Rotate                    (CQuaternion& quater);
+  void      Rotate                    (const Quaternion& quater);
 
   void      Move                      (CFloat3& vDelta);
   float3    GetPosition               (ESpace eTransform = S_RELATIVE);
   void      SetPosition               (CFloat3& vPos, ESpace eTransform = S_RELATIVE);
 
   void      SetTransform              (const float4x4& matTransform, ESpace eTransform = S_RELATIVE);
-  void      SetTransform              (const float3* pScaling, const quaternion* pRotation, const float3* pTranslation); // 参数为NULL则使用自身的分量
+  void      SetTransform              (const float3* pScaling, const Quaternion* pRotation, const float3* pTranslation); // 参数为NULL则使用自身的分量
   void      SetTransformR             (const float3* pScaling, const float3* pEuler, const float3* pTranslation); // 参数为NULL则使用自身的分量
 
   GXBOOL    SetDirection              (CFloat3& vDir, CFloat3& vUp/*, ESpace eTransform = S_RELATIVE*/);
@@ -241,7 +247,7 @@ GXDWORD GVNode::GetFlags() const
   return m_dwFlags;
 }
 
-const AABB& GVNode::GetLocalAABB() const
+const GVNode::AABB& GVNode::GetLocalAABB() const
 {
   return m_aabbLocal;
 }

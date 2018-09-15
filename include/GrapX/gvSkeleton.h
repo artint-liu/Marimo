@@ -36,10 +36,12 @@ struct Bone
 class GXDLL GVAnimationTrack : public GUnknown
 {
 public:
+  typedef clstd::_quaternion Quaternion;
+public:
   struct BONEINFO   // 每个骨骼的动画数据在列表中的索引
   {
     float3      vTranslation;
-    quaternion  vQuaternion;
+    Quaternion  vQuaternion;
     float3      vScaling;
 
     // 这个 BONE 在 GVAnimationTrack::Array 列表里的开始位置
@@ -52,8 +54,8 @@ public:
       nTranslationIdx(-1), nQuaternionIdx(-1), nScalingIdx(-1){}
   };
   typedef clvector<float3>       Vector3Array;
-  typedef clvector<quaternion>   QuaternionArray;
   typedef clvector<BONEINFO>     BoneInfoArray;
+  typedef clvector<Quaternion>   QuaternionArray;
 
 
 
@@ -61,7 +63,7 @@ protected:
   clStringA       m_Name;
   float3*         m_pTS;
   int             m_nTSCount;
-  quaternion*     m_pQuaternions;
+  Quaternion*     m_pQuaternions;
   int             m_nQuaterCount;
   BONEINFO*       m_pBoneInfo;
   int             m_nBoneCount;
@@ -90,7 +92,7 @@ private:
     int                 nFrameRate,
     float3*             pTSData,    // Translation Scaling
     int                 nTSCount,
-    quaternion*         pQuaternions,
+    Quaternion*         pQuaternions,
     int                 nQuateCount,
     BONEINFO*           pBoneInfo,
     int                 nBoneCount);
@@ -130,7 +132,7 @@ public:
     int                 nFrameRate,
     float3*             pTSData,    // Translation Scaling
     int                 nTSCount,
-    quaternion*         pQuaternions,
+    Quaternion*         pQuaternions,
     int                 nQuateCount,
     BONEINFO*           pBoneInfo,
     int                 nBoneCount);

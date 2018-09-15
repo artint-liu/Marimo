@@ -10,6 +10,9 @@ struct STANDARDMTLUNIFORMTABLE;
 class GXCanvas3D : public GXCanvasCore
 {
 public:
+  typedef clstd::geometry::Ray Ray;
+  typedef clstd::geometry::FrustumPlanes FrustumPlanes;
+public:
   GXCanvas3D(GXUINT nPrioruty, GXDWORD dwType) : GXCanvasCore(nPrioruty, dwType) {}
 
   GXSTDINTERFACE(GXHRESULT      Invoke                (GRESCRIPTDESC* pDesc));

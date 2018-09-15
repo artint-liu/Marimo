@@ -5,7 +5,8 @@
 
 namespace clstd
 {
-
+  namespace geometry
+  {
   bool SplitTriByPlane(SPLITTRIBYPLANE* pSplitTriByPlane)
   {
     float3 vClip[2][4];
@@ -100,7 +101,7 @@ namespace clstd
     if(aabb.IsPointIn(ray.vOrigin)) {
       if(fDist) *fDist = 0;
       if(pNormal) pNormal->set(0,0,0);
-      return GeometryOp::GOT_Inside;
+      return geometry::GOT_Inside;
     }
 
     if(ray.vDirection.y < 0 && ray.vOrigin.y > aabb.vMax.y &&
@@ -117,7 +118,7 @@ namespace clstd
         ASSERT(fLen >= 0.0f);
         if(pNormal) *pNormal = float3::AxisY;
         if(fDist) *fDist = fLen;
-        return GeometryOp::GOT_Intersect;
+        return geometry::GOT_Intersect;
       }
     }
     if(ray.vDirection.y > 0 && ray.vOrigin.y < aabb.vMin.y &&
@@ -134,7 +135,7 @@ namespace clstd
         ASSERT(fLen >= 0.0f);
         if(pNormal) *pNormal = -float3::AxisY;
         if(fDist) *fDist = fLen;
-        return GeometryOp::GOT_Intersect;
+        return geometry::GOT_Intersect;
       }
     }
 
@@ -152,7 +153,7 @@ namespace clstd
         ASSERT(fLen >= 0.0f);
         if(pNormal) *pNormal = float3::AxisX;
         if(fDist) *fDist = fLen;
-        return GeometryOp::GOT_Intersect;
+        return geometry::GOT_Intersect;
       }
     }
     if(ray.vDirection.x > 0 && ray.vOrigin.x < aabb.vMin.x &&
@@ -169,7 +170,7 @@ namespace clstd
         ASSERT(fLen >= 0.0f);
         if(pNormal) *pNormal = -float3::AxisX;
         if(fDist) *fDist = fLen;
-        return GeometryOp::GOT_Intersect;
+        return geometry::GOT_Intersect;
       }
     }
 
@@ -187,7 +188,7 @@ namespace clstd
         ASSERT(fLen >= 0.0f);
         if(pNormal) *pNormal = float3::AxisZ;
         if(fDist) *fDist = fLen;
-        return GeometryOp::GOT_Intersect;
+        return geometry::GOT_Intersect;
       }
     }
     if(ray.vDirection.z > 0 && ray.vOrigin.z < aabb.vMin.z &&
@@ -204,10 +205,10 @@ namespace clstd
         ASSERT(fLen >= 0.0f);
         if(pNormal) *pNormal = -float3::AxisZ;
         if(fDist) *fDist = fLen;
-        return GeometryOp::GOT_Intersect;
+        return geometry::GOT_Intersect;
       }
     }
-    return GeometryOp::GOT_Outside;
+    return geometry::GOT_Outside;
   }
 
   bool RayIntersectAABB_Out(const Ray& ray, const AABB& aabb, float* fDist, float3* pBackNormal)
@@ -690,7 +691,7 @@ RET_HIT_CONTENT:
     return true;
   }
 
-  bool IntersectAABBAABB(CAABB& aabbFirst, CAABB& aabbSecond)
+  bool IntersectAABBAABB(const AABB& aabbFirst, const AABB& aabbSecond)
   {
     float3 vMin = Max(aabbFirst.vMin, aabbSecond.vMin);
     float3 vMax = Min(aabbFirst.vMax, aabbSecond.vMax);
@@ -778,7 +779,7 @@ RET_HIT_CONTENT:
   
   int IntersectAABBFrustum(const AABB &aabb, const FrustumPlanes &f)
   {
-    int result = GeometryOp::GOT_Inside;
+    int result = geometry::GOT_Inside;
 
     for (int i = 0; i < 6; ++i) {
       const float4 &plane = f.planes[i];
@@ -796,10 +797,10 @@ RET_HIT_CONTENT:
         );
 
       const float n = float4::dot(float4(pv, 1.0f), plane);
-      if (n < 0) return GeometryOp::GOT_Outside;
+      if (n < 0) return geometry::GOT_Outside;
 
       const float m = float4::dot(float4(nv, 1.0f), plane);
-      if (m < 0) result = GeometryOp::GOT_Intersect;
+      if (m < 0) result = geometry::GOT_Intersect;
     }
 
     return result;
@@ -1006,5 +1007,5 @@ RET_HIT_CONTENT:
     return 1;
   }
 //*/
-
+  } // namespace geometry
 } // namespace clstd

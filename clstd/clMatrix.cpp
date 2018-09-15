@@ -629,7 +629,7 @@ namespace clstd
   _float4x4& _float4x4::RotationYawPitchRollA(float yaw, float pitch, float roll)
   {
     // TODO: 换用MatrixRotationYawPitchRoll
-    quaternion q;
+    _quaternion q;
     q.YawPitchRollA(yaw, pitch, roll);
     return *MatrixRotationQuaternion(this, &q);
   }
@@ -637,12 +637,12 @@ namespace clstd
   _float4x4& _float4x4::RotationYawPitchRollR(float yaw, float pitch, float roll)
   {
     // TODO: 换用MatrixRotationYawPitchRoll
-    quaternion q;
+    _quaternion q;
     q.YawPitchRollR(yaw, pitch, roll);
     return *MatrixRotationQuaternion(this, &q);
   }
 
-  _float4x4& _float4x4::AffineTransformation(const float3* scaling, const float3* rotationcenter, const quaternion* rotation, const float3* translation)
+  _float4x4& _float4x4::AffineTransformation(const float3* scaling, const float3* rotationcenter, const _quaternion* rotation, const float3* translation)
   {
     return *MatrixAffineTransformation(this, scaling, rotationcenter, rotation, translation);
   }
@@ -977,7 +977,7 @@ namespace clstd
     pout->_11 = pout->_22 = pout->_33 = pout->_44 = 1;
   }
 
-  float4x4* MatrixAffineTransformation(float4x4 *pout, const float3* scaling, const float3* rotationcenter, const quaternion* rotation, const float3* translation)
+  float4x4* MatrixAffineTransformation(float4x4 *pout, const float3* scaling, const float3* rotationcenter, const _quaternion* rotation, const float3* translation)
   {
     _float4x4 m1, m2, m3, m4, m5;
 
@@ -1217,7 +1217,7 @@ namespace clstd
     return pout;
   }
 
-  b32 MatrixDecompose(float3* poutscale, quaternion* poutrotation, float3 *pouttranslation, const float4x4 *pm)
+  b32 MatrixDecompose(float3* poutscale, _quaternion* poutrotation, float3 *pouttranslation, const float4x4 *pm)
   {
     //float4x4 normalized;
     //float3 vec;

@@ -230,9 +230,9 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
   float4x4 matInvAbs = float4x4::inverse(m_Transformation.GlobalMatrix);
 
   // TODO: 专门增加一个构造函数和方法，用矩阵变换 NormalizedRay 和 Ray
-  NormalizedRay RayLocal(ray.vOrigin * matInvAbs, ray.vDirection.MulAsMatrix3x3(matInvAbs));
+  GVNode::NormalizedRay RayLocal(ray.vOrigin * matInvAbs, ray.vDirection.MulAsMatrix3x3(matInvAbs));
 
-  if(clstd::IntersectRayAABB(RayLocal, m_aabbLocal, &fDist, NULL) != 0)
+  if(clstd::geometry::IntersectRayAABB(RayLocal, m_aabbLocal, &fDist, NULL) != 0)
   {
     pRayTrace->eType = NRTT_AABB;
     pRayTrace->vLocalHit = RayLocal.vOrigin + RayLocal.vDirection * fDist;
@@ -266,7 +266,7 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
       const float3& v2 = *(float3*)(pVertBuf + nStride * pIndicesBuf[nFaceIndex * 3 + 2]);
 
       float t, u, v;
-      if(clstd::IntersectRayWithTriangle(RayLocal, v0, v1, v2, t, u, v) && fDist > t)
+      if(clstd::geometry::IntersectRayWithTriangle(RayLocal, v0, v1, v2, t, u, v) && fDist > t)
       {
         fDist = t;
         pRayTrace->nFaceIndex = nFaceIndex;
@@ -701,7 +701,7 @@ void GVMesh::ApplyTransform()
 
   // 重置变换矩阵为单位阵
   float3 vScale(1.0f);
-  quaternion sRotation(0, 0, 0, 1);
+  Quaternion sRotation(0, 0, 0, 1);
   SetTransform(&vScale, &sRotation, &float3::Origin);
 }
 
@@ -1045,7 +1045,7 @@ namespace mesh
     return TRUE;
   }
 
-  GXVOID CalculateAABB(AABB& aabb, const float3* pVertices, int nVertCount, GXUINT nVertexStride)
+  GXVOID CalculateAABB(GVNode::AABB& aabb, const float3* pVertices, int nVertCount, GXUINT nVertexStride)
   {
     aabb.Clear();
     if(nVertexStride == 0) {
@@ -1060,7 +1060,7 @@ namespace mesh
     //aabb.UpdateCenterExtent();
   }
 
-  GXVOID CalculateAABBFromIndices(AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, GXSIZE_T nIndexCount, GXUINT nVertexStride)
+  GXVOID CalculateAABBFromIndices(GVNode::AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, GXSIZE_T nIndexCount, GXUINT nVertexStride)
   {
     if(nVertexStride == 0) {
       nVertexStride = sizeof(float3);

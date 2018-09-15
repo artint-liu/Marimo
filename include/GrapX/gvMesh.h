@@ -121,8 +121,8 @@ namespace mesh
   GXBOOL GXDLL CalculateNormals(clvector<float3>& aNormals, const clvector<float3>& aVertices, const clvector<VIndex32>& aIndices);
   GXBOOL GXDLL CalculateNormals(float3* pNormals, const float3* pVertices, int nVertCount, const VIndex32* pIndices, int nFaceCount, GXUINT nNormalStride = NULL, GXUINT nVertexStride = NULL);
 
-  GXVOID GXDLL CalculateAABB(AABB& aabb, const float3* pVertices, int nVertCount, GXUINT nVertexStride = NULL);
-  GXVOID GXDLL CalculateAABBFromIndices(AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, GXSIZE_T nIndexCount, GXUINT nVertexStride = NULL);
+  GXVOID GXDLL CalculateAABB(GVNode::AABB& aabb, const float3* pVertices, int nVertCount, GXUINT nVertexStride = NULL);
+  GXVOID GXDLL CalculateAABBFromIndices(GVNode::AABB& aabb, GXLPCVOID pVertices, const VIndex* pIndex, GXSIZE_T nIndexCount, GXUINT nVertexStride = NULL);
 
   GXBOOL CalculateTBs(
     float4*       pTangents, 

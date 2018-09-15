@@ -32,7 +32,7 @@ namespace clstd
     GlobalMatrix.identity();
   }
 
-  CFloat4x4& TRANSFORM::Set(CFloat3& vScaling, CQuaternion& quater, CFloat3& vTranslation)
+  CFloat4x4& TRANSFORM::Set(CFloat3& vScaling, const _quaternion& quater, CFloat3& vTranslation)
   {
     scaling       = vScaling;
     rotation      = quater;
@@ -50,7 +50,7 @@ namespace clstd
     return CalcAbsoluteMatrix(this);
   }
 
-  CFloat4x4& TRANSFORM::Set(CFloat4x4& Coordinate, CFloat3& vScaling, CQuaternion& quater, CFloat3& vTranslation)
+  CFloat4x4& TRANSFORM::Set(CFloat4x4& Coordinate, CFloat3& vScaling, const _quaternion& quater, CFloat3& vTranslation)
   {
     scaling     = vScaling;
     rotation    = quater;
@@ -110,7 +110,7 @@ namespace clstd
     CalcAbsoluteMatrix(this);
   }
 
-  void TRANSFORM::SetRotation(CQuaternion& quater)
+  void TRANSFORM::SetRotation(const _quaternion& quater)
   {
     rotation = quater;
     //GlobalScaling = scaling; // 为什么有这个？
@@ -119,7 +119,7 @@ namespace clstd
 
   void TRANSFORM::RotateA(CFloat3& vEuler)
   {
-    quaternion r;
+    _quaternion r;
     r.YawPitchRollA(vEuler);
     rotation = r * rotation;  // 在自身的旋转坐标之上做旋转
     CalcAbsoluteMatrix(this);
@@ -127,7 +127,7 @@ namespace clstd
 
   void TRANSFORM::RotateA( CFloat4x4& Coordinate, CFloat3& vEuler )
   {
-    quaternion r;
+    _quaternion r;
     r.YawPitchRollA(vEuler);
     rotation = r * rotation;  // 在自身的旋转坐标之上做旋转
     CalcAbsoluteMatrix(this, Coordinate);
@@ -135,7 +135,7 @@ namespace clstd
 
   void TRANSFORM::RotateR(CFloat3& vEuler)
   {
-    quaternion r;
+    _quaternion r;
     r.YawPitchRollR(vEuler);
     rotation = r * rotation;  // 在自身的旋转坐标之上做旋转
     CalcAbsoluteMatrix(this);
@@ -143,19 +143,19 @@ namespace clstd
 
   void TRANSFORM::RotateR( CFloat4x4& Coordinate, CFloat3& vEuler )
   {
-    quaternion r;
+    _quaternion r;
     r.YawPitchRollR(vEuler);
     rotation = r * rotation;  // 在自身的旋转坐标之上做旋转
     CalcAbsoluteMatrix(this, Coordinate);
   }
 
-  void TRANSFORM::Rotate(CQuaternion& quater)
+  void TRANSFORM::Rotate(const _quaternion& quater)
   {
     rotation *= quater;
     CalcAbsoluteMatrix(this);
   }
 
-  void TRANSFORM::Rotate( CFloat4x4& Coordinate, CQuaternion& quater )
+  void TRANSFORM::Rotate( CFloat4x4& Coordinate, const _quaternion& quater )
   {
     rotation *= quater;
     CalcAbsoluteMatrix(this, Coordinate);
@@ -217,7 +217,7 @@ namespace clstd
     //GlobalMatrix.DecomposeScaling(&GlobalScaling);
   }
 
-  void TRANSFORM::SetRotation(CFloat4x4& Coordinate, CQuaternion& quater)
+  void TRANSFORM::SetRotation(CFloat4x4& Coordinate, const _quaternion& quater)
   {
     rotation = quater;
     CalcAbsoluteMatrix(this, Coordinate);
@@ -297,10 +297,10 @@ namespace clstd
       clstd::approximate(vScaling.z, scaling.z, 1e-3f);
   }
 
-  euler TRANSFORM::GetEuler( RotationOrder eOrder ) const
+  _euler TRANSFORM::GetEuler( RotationOrder eOrder ) const
   {
     float3x3 r = rotation.ToMatrix3x3();
-    euler e;
+    _euler e;
     switch(eOrder)
     {
     case RotationOrder_EulerXYZ:      r.ToEulerAnglesXYZ(e);      break;

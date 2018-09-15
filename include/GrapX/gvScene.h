@@ -69,7 +69,7 @@ private:
 
 private:
   GXHRESULT RenderRecursive   (GXCanvas3D* pCanvas, GVNode* pParent, GVRenderType eType);
-  GXBOOL    RayTraceRecursive (const NormalizedRay& ray, GVNode* pParent, CAABB* pAABB, GVNode** ppNode, float3* pHit);
+  GXBOOL    RayTraceRecursive (const GVNode::NormalizedRay& ray, GVNode* pParent, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit);
   GXHRESULT UpdateRecursive   (const GVSCENEUPDATE& sContext, GVNode* pParent);
   GXHRESULT SaveFileRecursive (clFile* pFile, GVNode* pParent, GXINOUT u32& nVertBase);
   GXHRESULT IntExecuteCommand ();
@@ -82,8 +82,8 @@ public:
   virtual GXHRESULT Release               ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  virtual GXBOOL    RayTrace              (const Ray& ray, CAABB* pAABB, GVNode** ppModel, float3* pHit, GVNode* pParent = NULL);
-  virtual GXBOOL    RayTraceFromViewport  (GXCanvas3D* pCanvas, const GXPOINT* pPoint, CAABB* pAABB, GVNode** ppNode, float3* pHit = NULL);
+  virtual GXBOOL    RayTrace              (const GVNode::Ray& ray, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit, GVNode* pParent = NULL);
+  virtual GXBOOL    RayTraceFromViewport  (GXCanvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit = NULL);
   virtual GXHRESULT SetPhysicalSimlator   (GVPhySimulator* pPhySimulator);
   virtual GVNode*   FindNodeUnsafe        (GXLPCSTR szName);
 

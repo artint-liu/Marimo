@@ -442,7 +442,7 @@ GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil) const
   return m_pDepthStencil->AddRef();
 }
 
-const FrustumPlanes* GXCanvas3DImpl::GetViewFrustum() const
+const GXCanvas3D::FrustumPlanes* GXCanvas3DImpl::GetViewFrustum() const
 {
   return &m_ViewFrustum;
 }

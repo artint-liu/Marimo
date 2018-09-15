@@ -59,6 +59,7 @@ float macro_test_11;
 
 // 全局变量
 float3 sun;
+float3 vWorldPos : WORLDPOS = float3(0, 0, 0);
 float3 dir : VIEWDIRECTION, diffuse : DIFFUSE;
 float aa = 0, bb = 1 + 2, cc = 5 + 4 * 5, dd = sin(3.14);
 float4 colors[8];

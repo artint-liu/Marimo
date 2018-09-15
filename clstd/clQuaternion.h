@@ -152,10 +152,10 @@ namespace clstd
   void         QuaternionToAxisAngle          (const _quaternion *pq, _float3 *paxis, float *pangle);
 } // namespace clstd
 
-typedef clstd::_quaternion quaternion;
-typedef clstd::_euler euler;
-typedef const quaternion  CQuaternion;
-typedef const euler       CEuler;
+//typedef clstd::_quaternion quaternion;
+//typedef clstd::_euler euler;
+//typedef const quaternion  CQuaternion;
+//typedef const euler       CEuler;
 
 #else
 #pragma message(__FILE__": warning : Duplicate included this file.")

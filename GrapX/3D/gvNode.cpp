@@ -144,7 +144,7 @@ void GVNode::SetTransform(const float4x4& matTransform, ESpace eTransform/* = S_
   }
 }
 
-void GVNode::SetTransform( const float3* pScaling, const quaternion* pRotation, const float3* pTranslation )
+void GVNode::SetTransform( const float3* pScaling, const Quaternion* pRotation, const float3* pTranslation )
 {
   if( ! pScaling && ! pRotation && ! pTranslation) {
     return;
@@ -168,7 +168,7 @@ void GVNode::SetTransform( const float3* pScaling, const quaternion* pRotation, 
 
 void GVNode::SetTransformR( const float3* pScaling, const float3* pEuler, const float3* pTranslation )
 {
-  quaternion q;
+  Quaternion q;
   if( ! pScaling && ! pEuler && ! pTranslation) {
     return;
   }
@@ -418,7 +418,7 @@ GXBOOL GVNode::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace)
   float4x4 matInvAbs = float4x4::inverse(m_Transformation.GlobalMatrix);
   Ray RayLocal(ray.vOrigin * matInvAbs, ray.vDirection.MulAsMatrix3x3(matInvAbs));
 
-  if(clstd::IntersectRayAABB(RayLocal, m_aabbLocal, &fRetLength, NULL) != 0)
+  if(clstd::geometry::IntersectRayAABB(RayLocal, m_aabbLocal, &fRetLength, NULL) != 0)
   {
     pRayTrace->eType = NRTT_AABB;
     pRayTrace->vLocalHit = RayLocal.vOrigin + RayLocal.vDirection * fRetLength;
@@ -480,7 +480,7 @@ void GVNode::SetRotationR( CFloat3& vEuler )
   UpdateChildPos();
 }
 
-void GVNode::SetRotation( CQuaternion& quater )
+void GVNode::SetRotation(const Quaternion& quater)
 {
   if(TEST_FLAG(m_dwFlags, GVNF_STATIC)) {
     return;
@@ -527,7 +527,7 @@ void GVNode::RotateR( CFloat3& vEuler )
   UpdateChildPos();
 }
 
-void GVNode::Rotate( CQuaternion& quater )
+void GVNode::Rotate(const Quaternion& quater)
 {
   if(TEST_FLAG(m_dwFlags, GVNF_STATIC)) {
     return;

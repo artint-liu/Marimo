@@ -213,11 +213,11 @@ GXHRESULT GVScene::Delete(GVNode* pNode)
   return GX_OK;
 }
 
-GXBOOL GVScene::RayTraceRecursive(const NormalizedRay& ray, GVNode* pParent, CAABB* pAABB, GVNode** ppNode, float3* pHit)
+GXBOOL GVScene::RayTraceRecursive(const GVNode::NormalizedRay& ray, GVNode* pParent, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit)
 {
   GVNode* pNode = (GVNode*)pParent->GetFirstChild();
   GVNode* pHitNode = NULL;
-  AABB aabbNode;
+  GVNode::AABB aabbNode;
   GXBOOL result = FALSE;
   NODERAYTRACE nrt;
   NODERAYTRACE nrtTest;
@@ -306,12 +306,12 @@ GXBOOL GVScene::RayTraceRecursive(const NormalizedRay& ray, GVNode* pParent, CAA
   return result;
 }
 
-GXBOOL GVScene::RayTrace(const Ray& ray, CAABB* pAABB, GVNode** ppModel, float3* pHit, GVNode* pParent)
+GXBOOL GVScene::RayTrace(const GVNode::Ray& ray, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit, GVNode* pParent)
 {
   return RayTraceRecursive(ray, pParent ? pParent : m_pRoot , pAABB, ppModel, pHit);
 }
 
-GXBOOL GVScene::RayTraceFromViewport(GXCanvas3D* pCanvas, const GXPOINT* pPoint, CAABB* pAABB, GVNode** ppModel, float3* pHit)
+GXBOOL GVScene::RayTraceFromViewport(GXCanvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit)
 {
   float3 vPos;
   pCanvas->PositionFromScreen(pPoint, 1.0f - 1e-5f, &vPos);
@@ -319,7 +319,7 @@ GXBOOL GVScene::RayTraceFromViewport(GXCanvas3D* pCanvas, const GXPOINT* pPoint,
   const float3 vCameraPos = pCamera->GetPos();
 
   clstd::ScopedSafeLocker lock(&m_Locker);
-  return RayTraceRecursive(Ray(vCameraPos, vPos - vCameraPos), m_pRoot, pAABB, ppModel, pHit);
+  return RayTraceRecursive(GVNode::Ray(vCameraPos, vPos - vCameraPos), m_pRoot, pAABB, ppModel, pHit);
 }
 
 GXHRESULT GVScene::SetPhysicalSimlator(GVPhySimulator* pPhySimulator)
@@ -496,9 +496,9 @@ GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
 
 GXHRESULT GVScene::Generate( GXCanvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired )
 {  
-  AABB                  aabbAbs;
+  GVNode::AABB          aabbAbs;
   GVRENDERDESC          Desc;
-  const FrustumPlanes*  pFrustum;
+  const GVNode::FrustumPlanes*  pFrustum;
   clstack<GVNode*>      NodeStack;
 
   pCanvas->UpdateCommonUniforms();
