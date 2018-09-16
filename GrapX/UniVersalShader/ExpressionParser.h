@@ -199,17 +199,20 @@ namespace UVShader
     VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue);
 
     void SetProperty(const VALUE_CONTEXT& vctx); // 从vctx复制属性
-    void UserPool();
+    void UsePool();
     void ClearValue();
     void ClearValueOnly();
     void SetType(VALUE::Rank rank);
-    void Enlarge(const TYPEDESC* pTargetType);
+    const TYPEDESC* CastUpward(const TYPEDESC* pTargetType);
     const TYPEDESC* MergeType(const TYPEDESC* pScalerType, const TYPEDESC* pVecMatType);
+    GXBOOL IsNeedValue() const;
+    VALUE::Rank TypeRank() const;
   };
 
   // 检查VALUE_CONTEXT输入与输出值的有效性
   struct VALUE_CONTEXT_CHECKER
   {
+    size_t nErrorCount;
     const VALUE_CONTEXT& vctx;
     VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx);
 
