@@ -4835,11 +4835,13 @@ NOT_INC_P:
         if(vctx_param.count == 0) {
           bNeedValue = FALSE;
         }
+
+        // 这个池只用于Pre-component math数学结构, 参数列表的所有常量是首尾相接放在一个池里的
         vctx.pool.insert(vctx.pool.end(), vctx_param.pValue, vctx_param.pValue + vctx_param.count);
       }
     }
 
-    if(_CL_NOT_(vctx.pool.empty())) {
+    if(bNeedValue && _CL_NOT_(sExprList.empty())) {
       // 必须等pool稳定之后才能确定指针位置
       vctx.UsePool();
     }
@@ -4852,29 +4854,24 @@ NOT_INC_P:
       return NULL;
     }
     else if(pRetType) {
+      vctx.ClearValueOnly();
       vctx.result = ValueResult_OK;
       vctx.pType = pRetType;
       return pRetType;
     }
 
     clStringA strFunctionName;
-    const TYPEDESC* pTypeFunc = NULL;
-    if(vctx.name_ctx.IsTypedefedType(pFuncNode->Operand[0].pTokn, &pTypeFunc))
-    {
-      strFunctionName = pTypeFunc->name;
-    }
-    else {
-      pFuncNode->Operand[0].pTokn->ToString(strFunctionName);
-    }
+    vctx.name_ctx.TranslateType(strFunctionName, pFuncNode->Operand[0].pTokn);
 
     // mul()比较特殊
     if(strFunctionName == s_szMultiplicationFunc && sArgumentsTypeList.size() == 2)
     {
-      pTypeFunc = InferDifferentTypesOfMultiplication(sArgumentsTypeList.front(), sArgumentsTypeList.back());
-      if(pTypeFunc) {
+      pRetType = InferDifferentTypesOfMultiplication(sArgumentsTypeList.front(), sArgumentsTypeList.back());
+      if(pRetType) {
+        vctx.ClearValueOnly();
         vctx.result = ValueResult_OK;
-        vctx.pType = pTypeFunc;
-        return pTypeFunc;
+        vctx.pType = pRetType;
+        return pRetType;
       }
     }
 
@@ -5001,14 +4998,19 @@ NOT_INC_P:
         const VALUE::Rank rank = vctx.TypeRank();
         ASSERT(VALUE::IsNumericRank(rank));
 
-        if(vctx.IsNeedValue() &&
-          (pPreCompMath->scaler_count > nScalerCount || vctx.pValue->rank != rank))
+        if(vctx.IsNeedValue() && pPreCompMath->scaler_count > nScalerCount)
         {
-          ASSERT(vctx.count == 1 || vctx.pValue->rank != rank);
+          ASSERT(vctx.count == 1);
           VALUE value = *vctx.pValue;
           value.CastValueByRank(rank);
           vctx.pool.assign(pPreCompMath->scaler_count, value);
           vctx.UsePool();
+        }
+        else {
+          const VALUE::Rank rank = static_cast<VALUE::Rank>(vctx.pType->pDesc->rank);
+          std::for_each(vctx.pool.begin(), vctx.pool.end(), [rank](VALUE& value) {
+            value.CastValueByRank(rank);
+          });
         }
 
         return vctx.pType;
@@ -5241,9 +5243,10 @@ NOT_INC_P:
     }
     else // if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
     {
-      const TYPEDESC* pResultTypeDesc = InferTypeByOperator(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
-      if(pResultTypeDesc) {
-        return pResultTypeDesc;
+      vctx.pType = InferTypeByOperator(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
+      if(vctx.pType) {
+        vctx.result = ValueResult_OK;
+        return vctx.pType;
       }
       MergeValueContext(vctx, pNode->pOpcode, v, &pNode->GetAnyTokenPAB());
       return vctx.pType;
@@ -5993,7 +5996,7 @@ NOT_INC_P:
     }
     else if(IS_SCALER_CATE(pAB[0].pType) && IS_VECMAT_CATE(pAB[1].pType))
     {
-      if(vctx.IsNeedValue() && pAB[0].IsNeedValue() && pAB[1].IsNeedValue()) {
+      if(vctx.bNeedValue && pAB[0].IsNeedValue() && pAB[1].IsNeedValue()) {
         vctx.pType = pAB[0].CastUpward(pAB[1].pType);
         ASSERT(pAB[0].pType->CountOf() == pAB[1].pType->CountOf());
       }
@@ -6003,7 +6006,7 @@ NOT_INC_P:
     }
     else if(IS_VECMAT_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
     {
-      if(vctx.IsNeedValue() && pAB[0].IsNeedValue() && pAB[1].IsNeedValue()) {
+      if(vctx.bNeedValue && pAB[0].IsNeedValue() && pAB[1].IsNeedValue()) {
         vctx.pType = pAB[1].CastUpward(pAB[0].pType);
         ASSERT(pAB[0].pType->CountOf() == pAB[1].pType->CountOf());
       }
@@ -6018,7 +6021,7 @@ NOT_INC_P:
     else if(pAB[0].pType->CountOf() == pAB[1].pType->CountOf() &&
       pAB[0].pType->IsVector() && pAB[1].pType->IsVector())
     {
-      if(vctx.IsNeedValue() && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
+      if(vctx.bNeedValue && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
       {
         if(pAB[0].TypeRank() > pAB[1].TypeRank())
         {
@@ -6047,7 +6050,7 @@ NOT_INC_P:
     }
     else if(pAB[0].pType->IsVector() && pAB[1].pType->IsMatrix() && IsComponent(pAB[0].pType, pAB[1].pType, NULL))
     {
-      if(vctx.IsNeedValue() && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
+      if(vctx.bNeedValue && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
       {
         CLBREAK; // 没实现
       }
@@ -6058,7 +6061,7 @@ NOT_INC_P:
     }
     else if(pAB[0].pType->IsMatrix() && pAB[1].pType->IsVector() && IsComponent(NULL, pAB[0].pType, pAB[1].pType))
     {
-      if(vctx.IsNeedValue() && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
+      if(vctx.bNeedValue && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
       {
         CLBREAK; // 没实现
       }
@@ -6077,12 +6080,18 @@ NOT_INC_P:
 
     if(vctx.bNeedValue)
     {
-       if(
-         (pAB[0].result == ValueResult_OK || pAB[0].result == ValueResult_Variable || pAB[0].pValue == NULL) &&
-         (pAB[1].result == ValueResult_OK || pAB[1].result == ValueResult_Variable || pAB[1].pValue == NULL) )
+       if( // 含有变量而无法计算常量时的处理
+         (pAB[0].result == ValueResult_Variable || pAB[0].pValue == NULL) ||
+         (pAB[1].result == ValueResult_Variable || pAB[1].pValue == NULL) )
        {
          vctx.ClearValueOnly();
          vctx.result = ValueResult_Variable;
+         return TRUE;
+       }
+       else if(*pOperator == ':') // ...?...:...三元操作的冒号
+       {
+         vctx.ClearValueOnly();
+         vctx.result = ValueResult_OK;
          return TRUE;
        }
 
@@ -6092,7 +6101,8 @@ NOT_INC_P:
        const size_t count = pAB[0].pType->CountOf();
        for(size_t i = 0; i < count; i++)
        {
-         if(value.Calculate(*pOperator, pAB[0].pValue[i], pAB[1].pValue[i]) != VALUE::State_OK) {
+         VALUE::State state = value.Calculate(*pOperator, pAB[0].pValue[i], pAB[1].pValue[i]);
+         if(state != VALUE::State_OK) {
            CLBREAK;
            vctx.result = ValueResult_Failed;
            return FALSE;
@@ -6104,9 +6114,10 @@ NOT_INC_P:
        return TRUE;
     }
 
-    vctx.ClearValue();
-    vctx.result = ValueResult_Failed;
-    return FALSE;
+    // 不计算值
+    vctx.ClearValueOnly();
+    vctx.result = ValueResult_OK;
+    return TRUE;
   }
 
   GXBOOL CodeParser::TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
@@ -6207,22 +6218,25 @@ NOT_INC_P:
   {
     ASSERT(pRowVector != NULL || pColumnVector != NULL);
     ASSERT(pRowVector == NULL || pColumnVector == NULL);
+    ASSERT(pRowVector == NULL || pRowVector->IsVector());
+    ASSERT(pMatrixDesc->IsMatrix());
+    ASSERT(pColumnVector == NULL || pColumnVector->IsVector());
     GXLPCSTR szScaler = NULL;
     int R, C;
     int RV, CV;
     szScaler = pMatrixDesc->Resolve(R, C);
 
     if(pRowVector) {
-      if(_CL_NOT_(pRowVector->name.BeginsWith(szScaler))) {
-        return FALSE;
-      }
+      //if(_CL_NOT_(pRowVector->name.BeginsWith(szScaler))) {
+      //  return FALSE;
+      //}
       pRowVector->Resolve(RV, CV);
       return RV == R;
     }
 
-    if(_CL_NOT_(pColumnVector->name.BeginsWith(szScaler))) {
-      return FALSE;
-    }
+    //if(_CL_NOT_(pColumnVector->name.BeginsWith(szScaler))) {
+    //  return FALSE;
+    //}
     pColumnVector->Resolve(RV, CV);
     return RV == C;
   }
@@ -6746,9 +6760,9 @@ NOT_INC_P:
             // TODO: 换成Infer函数
             clStringA strFuncName;
             ASSERT(pValueExprGlob->pNode->Operand[0].IsToken());
+            TranslateType(strFuncName, pValueExprGlob->pNode->Operand[0].pTokn);
 
-            const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations
-            (pValueExprGlob->pNode->Operand[0].pTokn->ToString(strFuncName));
+            const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(strFuncName);
 
             if(pPreCompMath)
             {
@@ -6767,23 +6781,30 @@ NOT_INC_P:
                   GetLogger()->OutputErrorW(*it, UVS_EXPORT_TEXT(5054, "无法计算表达式常量"));
                   return State_RequireConstantExpression;
                 }
+                vp[ii].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
               }
             } // if(pPreCompMath)
           }
-          else if(pValueExprGlob->IsToken() &&
-            pValueExprGlob->pTokn->type > TOKEN::TokenType_FirstNumeric &&
-            pValueExprGlob->pTokn->type < TOKEN::TokenType_LastNumeric)
+          else
           {
             VALUE_CONTEXT vctx(*this);
             vctx.pLogger = GetLogger();
-            if(m_pCodeParser->TokenToValue(vctx, pValueExprGlob->pTokn) != ValueResult_OK) {
-              return State_HasError;
+            const size_t nErrorCount = vctx.pLogger->ErrorCount();
+            m_pCodeParser->InferType(vctx, *pValueExprGlob);
+            if(vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
+              ASSERT(nErrorCount < vctx.pLogger->ErrorCount());
+              return State_HasError; // 计算表达式错误
             }
-            vp = vctx.pool;
+            else if(vctx.pValue) {
+              vp.assign(vctx.pValue, vctx.pValue + vctx.count);
+
+              // 转换为对应级别的值
+              std::for_each(vp.begin(), vp.end(), [pTypeDesc](VALUE& value) {
+                value.CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
+              });
+            }
           }
-          else {
-            CLBREAK;
-          }
+
 
           if(vp.size() == 1) {
             sVariDesc.sConstValue = vp.front();
@@ -6791,6 +6812,7 @@ NOT_INC_P:
 
         } // iter_insert_result.second
         ASSERT(_CL_NOT_(iter_insert_result.first->second.empty()));
+        ASSERT(iter_insert_result.first->second.size() == sVariDesc.pDesc->CountOf());
       }
     }
     else {
@@ -7094,6 +7116,18 @@ NOT_INC_P:
     return FALSE;
   }
 
+  GXBOOL NameContext::TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const
+  {
+    const TYPEDESC* pTypeFunc = NULL;
+    if(IsTypedefedType(ptkTypename, &pTypeFunc))
+    {
+      strTypename = pTypeFunc->name;
+      return TRUE;
+    }
+    ptkTypename->ToString(strTypename);
+    return FALSE;
+  }
+
   const TYPEDESC* NameContext::GetVariable(const TOKEN* ptkName) const
   {
     auto it = m_VariableMap.find(TokenPtr(ptkName));
@@ -7107,10 +7141,15 @@ NOT_INC_P:
 
   const ValuePool* NameContext::GetValuePool(const TOKEN* ptkName) const
   {
-    auto it = m_ValuePoolMap.find(TokenPtr(ptkName));
+    // 当前NameContext有对应变量才取pool，否则当前变量没有pool时会找到上一级同名pool中去
+    auto iter_var = m_VariableMap.find(TokenPtr(ptkName));
+    if(iter_var == m_VariableMap.end()) {
+      return m_pParent ? m_pParent->GetValuePool(ptkName) : NULL;
+    }
 
-    return (it != m_ValuePoolMap.end()) ? &it->second
-      : (m_pParent ? m_pParent->GetValuePool(ptkName) :  NULL);
+    auto iter_pool = m_ValuePoolMap.find(TokenPtr(ptkName));
+    return (iter_pool != m_ValuePoolMap.end())
+      ? &iter_pool->second : NULL;
   }
 
   const VALUE* NameContext::GetVariableValue(const TOKEN* ptkName) const
@@ -7602,8 +7641,8 @@ NOT_INC_P:
       ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
       VALUE::State state = m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
       if(state == VALUE::State_OK) {
-        if(IS_SCALER_CATE(pTypeDesc)) {
-          m_pValuePool[index].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
+        if(pRefTypeDesc->pDesc) {
+          m_pValuePool[index].CastValueByRank(static_cast<VALUE::Rank>(pRefTypeDesc->pDesc->rank));
         }
       }
       else {
