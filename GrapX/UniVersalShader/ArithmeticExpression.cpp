@@ -1416,7 +1416,7 @@ GO_NEXT:;
 
   void VALUE::set(Rank r, const void* pValue)
   {
-    rank = Rank_Unsigned64;
+    rank = r;
     uValue64 = 0; // 清除高32位
     switch(r)
     {
@@ -1442,6 +1442,7 @@ GO_NEXT:;
       uValue64 = reinterpret_cast<const GXUINT64>(pValue);
       break;
     default:
+      rank = Rank_Unsigned64;
       CLBREAK;
       break;
     }

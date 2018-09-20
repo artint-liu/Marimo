@@ -166,15 +166,15 @@ namespace UVShader
 
   enum InputModifier // 函数参数修饰
   {
-    InputModifier_in,
-    InputModifier_out,
-    InputModifier_inout,
-    InputModifier_uniform, // Input only constant data
+    InputModifier_in      = 0x01,
+    InputModifier_out     = 0x02,
+    InputModifier_inout   = 0x03,
+    InputModifier_uniform = 0x04, // Input only constant data
   };
 
   struct FUNCTION_ARGUMENT // 函数参数
   {
-    InputModifier eModifier;  // [opt]
+    u32           eModifier;  // [opt]
     const TOKEN*  ptkType;    // [req]
     const TOKEN*  ptkName;    // [req]
     GXLPCSTR      szSemantic; // [opt]
@@ -682,6 +682,7 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
     GXBOOL  ParseStatement_SyntaxError(TKSCOPE* pScope);
     GXBOOL  ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
+    GXBOOL  ParseFunctionArguments2(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);

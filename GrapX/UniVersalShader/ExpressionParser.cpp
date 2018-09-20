@@ -2019,25 +2019,37 @@ namespace UVShader
     {
       FUNCTION_ARGUMENT arg = {InputModifier_in};
 
-      if(*p == "in") {
-        arg.eModifier = InputModifier_in;
-      }
-      else if(*p == "out") {
-        arg.eModifier = InputModifier_out;
-      }
-      else if(*p == "inout") {
-        arg.eModifier = InputModifier_inout;
-      }
-      else if(*p == "uniform" || *p == "const") {
-        arg.eModifier = InputModifier_uniform;
-      }
-      else {
-        goto NOT_INC_P;
+      arg.eModifier = 0;
+      while(TRUE)
+      {
+        if(*p == "in") {
+          arg.eModifier |= InputModifier_in;
+        }
+        else if(*p == "out") {
+          arg.eModifier |= InputModifier_out;
+        }
+        else if(*p == "inout") {
+          arg.eModifier |= InputModifier_inout;
+        }
+        else if(*p == "uniform" || *p == "const") {
+          arg.eModifier |= InputModifier_uniform;
+        }
+        else {
+          break;
+        }
+        INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
       }
 
-      INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
+      if(arg.eModifier != 0 &&
+        arg.eModifier != InputModifier_in && arg.eModifier != InputModifier_out &&
+        arg.eModifier != InputModifier_inout && arg.eModifier != InputModifier_uniform &&
+        arg.eModifier != (InputModifier_in | InputModifier_uniform))
+      {
+        GetLogger()->OutputErrorW(m_aTokens[pArgScope->begin], UVS_EXPORT_TEXT(5050, "参数类型修饰错误"));
+        return FALSE;
+      }
 
-NOT_INC_P:
+//NOT_INC_P:
       arg.ptkType = p;
       if(++p >= pEnd) {
         nTypeOnlyCount++;
@@ -5645,29 +5657,6 @@ NOT_INC_P:
     const TYPEDESC* pTypeDesc = NULL;
     if(pNode->Operand[0].IsToken())
     {
-      //pTypeDesc = vctx.name_ctx.GetVariable(pNode->Operand[0].pTokn);
-      //if(pTypeDesc == NULL) {
-      //  clStringW strToken;
-      //  GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2065, "“%s”: 未声明的标识符"),
-      //    pNode->Operand[0].pTokn->ToString(strToken).CStr());
-      //  return NULL;
-      //}
-      //ASSERT(pTypeDesc);
-
-      //if(vctx.bNeedValue)
-      //{
-      //  const ValuePool* pValueDesc = vctx.name_ctx.GetValuePool(pNode->Operand[0].pTokn);
-      //  ASSERT(pValueDesc);
-
-      //  if(vctx.pValue) {
-      //    CLBREAK;
-      //  }
-      //  else {
-      //    vctx.pType = pTypeDesc;
-      //    vctx.pValue = &pValueDesc->front();
-      //    vctx.count = pValueDesc->size();
-      //  }
-      //}
       InferType(vctx, pNode->Operand[0].pTokn);
       if(vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
         return NULL;
@@ -5754,8 +5743,12 @@ NOT_INC_P:
           const TOKEN* pMemberToken = pNode->Operand[0].GetBackToken();
           TRACE("length of(%s) = %d\n", pMemberToken->ToString().CStr(), pTypeDesc->sDimensions.back());
 #endif
-          ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
-          return m_GlobalSet.GetType(STR_INT);
+          //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
+          vctx.pType = m_GlobalSet.GetType(STR_INT);
+          vctx.pool.assign(1, VALUE());
+          vctx.pool.front().set(vctx.TypeRank(), &pTypeDesc->sDimensions.back());
+          vctx.UsePool();
+          return vctx.pType;
         }
       }
 #endif
@@ -6380,6 +6373,7 @@ NOT_INC_P:
       }
       td.name = s_aBaseType[i].name;
       td.pDesc = &s_aBaseType[i];
+      ASSERT(td.name.BeginsWith(td.pDesc->component_type)); // 确保分量与类型名一致
 
       m_TypeMap.insert(clmake_pair(td.name, td));
     }
@@ -6391,6 +6385,7 @@ NOT_INC_P:
       td.cate = static_cast<TYPEDESC::TypeCate>(s_aIntrinsicStruct[i].cate);
       td.name = s_aIntrinsicStruct[i].name;
       td.pDesc = &s_aIntrinsicStruct[i];
+      ASSERT(td.name.BeginsWith(td.pDesc->component_type)); // 确保分量与类型名一致
       auto it = m_TypeMap.find(td.pDesc->component_type);
       ASSERT(it != m_TypeMap.end()); // 向量矩阵一定有元素类型
       td.pElementType = &it->second;
@@ -8004,14 +7999,15 @@ NOT_INC_P:
     ASSERT(IS_VECMAT_CATE(pVecMatType));
     ASSERT(VALUE::IsNumericRank(static_cast<VALUE::Rank>(pScalerType->pDesc->rank)));
     ASSERT(VALUE::IsNumericRank(static_cast<VALUE::Rank>(pVecMatType->pDesc->rank)));
+    const TYPEDESC* pTypeDesc = pVecMatType;
     if(pScalerType->pDesc->rank > pVecMatType->pDesc->rank)
     {
       clStringA str = pScalerType->pDesc->name;
       str.Append(pVecMatType->pDesc->name + clstd::strlenT(pVecMatType->pDesc->component_type));
-      pVecMatType = name_ctx.GetType(str);
-      ASSERT(pVecMatType);
+      pTypeDesc = name_ctx.GetType(str);
+      ASSERT(pTypeDesc);
     }    
-    return pVecMatType;
+    return pTypeDesc;
   }
 
   GXBOOL VALUE_CONTEXT::IsNeedValue() const

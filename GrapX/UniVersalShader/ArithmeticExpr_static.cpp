@@ -35,56 +35,56 @@ namespace UVShader
   GXLPCSTR STR_HALF3 = "half3";
   GXLPCSTR STR_HALF4 = "half4";
 
-  GXLPCSTR STR_INT1x1 = "float1x1";
-  GXLPCSTR STR_INT1x2 = "float1x2";
-  GXLPCSTR STR_INT1x3 = "float1x3";
-  GXLPCSTR STR_INT1x4 = "float1x4";
-  GXLPCSTR STR_INT2x1 = "float2x1";
-  GXLPCSTR STR_INT2x2 = "float2x2";
-  GXLPCSTR STR_INT2x3 = "float2x3";
-  GXLPCSTR STR_INT2x4 = "float2x4";
-  GXLPCSTR STR_INT3x1 = "float3x1";
-  GXLPCSTR STR_INT3x2 = "float3x2";
-  GXLPCSTR STR_INT3x3 = "float3x3";
-  GXLPCSTR STR_INT3x4 = "float3x4";
-  GXLPCSTR STR_INT4x1 = "float4x1";
-  GXLPCSTR STR_INT4x2 = "float4x2";
-  GXLPCSTR STR_INT4x3 = "float4x3";
-  GXLPCSTR STR_INT4x4 = "float4x4";
+  GXLPCSTR STR_INT1x1 = "int1x1";
+  GXLPCSTR STR_INT1x2 = "int1x2";
+  GXLPCSTR STR_INT1x3 = "int1x3";
+  GXLPCSTR STR_INT1x4 = "int1x4";
+  GXLPCSTR STR_INT2x1 = "int2x1";
+  GXLPCSTR STR_INT2x2 = "int2x2";
+  GXLPCSTR STR_INT2x3 = "int2x3";
+  GXLPCSTR STR_INT2x4 = "int2x4";
+  GXLPCSTR STR_INT3x1 = "int3x1";
+  GXLPCSTR STR_INT3x2 = "int3x2";
+  GXLPCSTR STR_INT3x3 = "int3x3";
+  GXLPCSTR STR_INT3x4 = "int3x4";
+  GXLPCSTR STR_INT4x1 = "int4x1";
+  GXLPCSTR STR_INT4x2 = "int4x2";
+  GXLPCSTR STR_INT4x3 = "int4x3";
+  GXLPCSTR STR_INT4x4 = "int4x4";
 
-  GXLPCSTR STR_UINT1x1 = "float1x1";
-  GXLPCSTR STR_UINT1x2 = "float1x2";
-  GXLPCSTR STR_UINT1x3 = "float1x3";
-  GXLPCSTR STR_UINT1x4 = "float1x4";
-  GXLPCSTR STR_UINT2x1 = "float2x1";
-  GXLPCSTR STR_UINT2x2 = "float2x2";
-  GXLPCSTR STR_UINT2x3 = "float2x3";
-  GXLPCSTR STR_UINT2x4 = "float2x4";
-  GXLPCSTR STR_UINT3x1 = "float3x1";
-  GXLPCSTR STR_UINT3x2 = "float3x2";
-  GXLPCSTR STR_UINT3x3 = "float3x3";
-  GXLPCSTR STR_UINT3x4 = "float3x4";
-  GXLPCSTR STR_UINT4x1 = "float4x1";
-  GXLPCSTR STR_UINT4x2 = "float4x2";
-  GXLPCSTR STR_UINT4x3 = "float4x3";
-  GXLPCSTR STR_UINT4x4 = "float4x4";
+  GXLPCSTR STR_UINT1x1 = "uint1x1";
+  GXLPCSTR STR_UINT1x2 = "uint1x2";
+  GXLPCSTR STR_UINT1x3 = "uint1x3";
+  GXLPCSTR STR_UINT1x4 = "uint1x4";
+  GXLPCSTR STR_UINT2x1 = "uint2x1";
+  GXLPCSTR STR_UINT2x2 = "uint2x2";
+  GXLPCSTR STR_UINT2x3 = "uint2x3";
+  GXLPCSTR STR_UINT2x4 = "uint2x4";
+  GXLPCSTR STR_UINT3x1 = "uint3x1";
+  GXLPCSTR STR_UINT3x2 = "uint3x2";
+  GXLPCSTR STR_UINT3x3 = "uint3x3";
+  GXLPCSTR STR_UINT3x4 = "uint3x4";
+  GXLPCSTR STR_UINT4x1 = "uint4x1";
+  GXLPCSTR STR_UINT4x2 = "uint4x2";
+  GXLPCSTR STR_UINT4x3 = "uint4x3";
+  GXLPCSTR STR_UINT4x4 = "uint4x4";
 
-  GXLPCSTR STR_HALF1x1 = "float1x1";
-  GXLPCSTR STR_HALF1x2 = "float1x2";
-  GXLPCSTR STR_HALF1x3 = "float1x3";
-  GXLPCSTR STR_HALF1x4 = "float1x4";
-  GXLPCSTR STR_HALF2x1 = "float2x1";
-  GXLPCSTR STR_HALF2x2 = "float2x2";
-  GXLPCSTR STR_HALF2x3 = "float2x3";
-  GXLPCSTR STR_HALF2x4 = "float2x4";
-  GXLPCSTR STR_HALF3x1 = "float3x1";
-  GXLPCSTR STR_HALF3x2 = "float3x2";
-  GXLPCSTR STR_HALF3x3 = "float3x3";
-  GXLPCSTR STR_HALF3x4 = "float3x4";
-  GXLPCSTR STR_HALF4x1 = "float4x1";
-  GXLPCSTR STR_HALF4x2 = "float4x2";
-  GXLPCSTR STR_HALF4x3 = "float4x3";
-  GXLPCSTR STR_HALF4x4 = "float4x4";
+  GXLPCSTR STR_HALF1x1 = "half1x1";
+  GXLPCSTR STR_HALF1x2 = "half1x2";
+  GXLPCSTR STR_HALF1x3 = "half1x3";
+  GXLPCSTR STR_HALF1x4 = "half1x4";
+  GXLPCSTR STR_HALF2x1 = "half2x1";
+  GXLPCSTR STR_HALF2x2 = "half2x2";
+  GXLPCSTR STR_HALF2x3 = "half2x3";
+  GXLPCSTR STR_HALF2x4 = "half2x4";
+  GXLPCSTR STR_HALF3x1 = "half3x1";
+  GXLPCSTR STR_HALF3x2 = "half3x2";
+  GXLPCSTR STR_HALF3x3 = "half3x3";
+  GXLPCSTR STR_HALF3x4 = "half3x4";
+  GXLPCSTR STR_HALF4x1 = "half4x1";
+  GXLPCSTR STR_HALF4x2 = "half4x2";
+  GXLPCSTR STR_HALF4x3 = "half4x3";
+  GXLPCSTR STR_HALF4x4 = "half4x4";
 
   GXLPCSTR STR_FLOAT1x1 = "float1x1";
   GXLPCSTR STR_FLOAT1x2 = "float1x2";
@@ -500,22 +500,22 @@ namespace UVShader
     {STR_UINT4x3, STR_UINT, VALUE::Rank_Unsigned, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_UINT4x4, STR_UINT, VALUE::Rank_Unsigned, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
 
-    {STR_HALF1x1, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF1x2, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF1x3, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF1x4, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF2x1, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF2x2, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF2x3, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF2x4, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF3x1, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF3x2, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF3x3, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF3x4, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF4x1, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF4x2, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF4x3, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_HALF4x4, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF1x1, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF1x2, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF1x3, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF1x4, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF2x1, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF2x2, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF2x3, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF2x4, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF3x1, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF3x2, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF3x3, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF3x4, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF4x1, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF4x2, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF4x3, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_HALF4x4, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
 
     {STR_FLOAT1x1, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_FLOAT1x2, STR_FLOAT, VALUE::Rank_Float, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
