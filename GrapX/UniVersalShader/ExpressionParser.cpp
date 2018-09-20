@@ -753,6 +753,44 @@ namespace UVShader
     return FALSE;
   }
 
+  void CodeParser::DumpValueState(CLogger* pLogger, VALUE::State state, const TOKEN* pToken)
+  {
+    switch(state)
+    {
+    case VALUE::State_UnknownOpcode:
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5033, "无效的操作符", pLogger));
+      break;
+    case VALUE::State_SyntaxError:
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5034, "语法错误", pLogger));
+      break;
+    case VALUE::State_Overflow:
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5035, "溢出", pLogger));
+      break;
+    case VALUE::State_IllegalChar:
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5036, "非法字符", pLogger));
+      break;
+    case VALUE::State_BadOpcode:
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5037, "错误的操作符", pLogger));
+      break;
+    case VALUE::State_IllegalNumber:
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5038, "非法的数字", pLogger));
+      break;
+    case VALUE::State_DivideByZero:
+      // error C2124 : 被零除或对零求模
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2124, "被零除或对零求模", pLogger));
+      break;
+    case VALUE::State_BadIdentifier: // 内部输出
+      break;
+    case VALUE::State_Call: // 向量/矩阵等常量的初始化
+    case VALUE::State_Identifier: // 右值中含有变量，不是一个在编译时就能计算出数值的表达式
+      break;
+    default:
+      CLBREAK;
+      //PARSER_BREAK(const_expr_glob.pNode->Operand[1]);
+      break;
+    }
+  }
+
   void CodeParser::SetRepalcedValue(const GLOB& glob, const VALUE& value)
   {
     if(glob.IsToken()) {
@@ -807,39 +845,40 @@ namespace UVShader
     {
       //const TOKEN* pToken = const_expr_glob.pNode->Operand[1].GetFrontToken();
       const TOKEN* pToken = const_expr_glob.GetFrontToken();
-      switch(state)
-      {
-      case VALUE::State_UnknownOpcode:
-        GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5033, "无效的操作符"));
-        break;
-      case VALUE::State_SyntaxError:
-        GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5034, "语法错误"));
-        break;
-      case VALUE::State_Overflow:
-        GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5035, "溢出"));
-        break;
-      case VALUE::State_IllegalChar:
-        GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5036, "非法字符"));
-        break;
-      case VALUE::State_BadOpcode:
-        GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5037, "错误的操作符"));
-        break;
-      case VALUE::State_IllegalNumber:
-        GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5038, "非法的数字"));
-        break;
-      case VALUE::State_DivideByZero:
-        // error C2124 : 被零除或对零求模
-        GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(2124, "被零除或对零求模"));
-        break;
-      case VALUE::State_BadIdentifier: // 内部输出
-        break;
-      case VALUE::State_Call: // 向量/矩阵等常量的初始化
-      case VALUE::State_Identifier: // 右值中含有变量，不是一个在编译时就能计算出数值的表达式
-        break;
-      default:
-        PARSER_BREAK(const_expr_glob.pNode->Operand[1]);
-        break;
-      }
+      DumpValueState(GetLogger(), state, pToken);
+      //switch(state)
+      //{
+      //case VALUE::State_UnknownOpcode:
+      //  GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5033, "无效的操作符"));
+      //  break;
+      //case VALUE::State_SyntaxError:
+      //  GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5034, "语法错误"));
+      //  break;
+      //case VALUE::State_Overflow:
+      //  GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5035, "溢出"));
+      //  break;
+      //case VALUE::State_IllegalChar:
+      //  GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5036, "非法字符"));
+      //  break;
+      //case VALUE::State_BadOpcode:
+      //  GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5037, "错误的操作符"));
+      //  break;
+      //case VALUE::State_IllegalNumber:
+      //  GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5038, "非法的数字"));
+      //  break;
+      //case VALUE::State_DivideByZero:
+      //  // error C2124 : 被零除或对零求模
+      //  GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(2124, "被零除或对零求模"));
+      //  break;
+      //case VALUE::State_BadIdentifier: // 内部输出
+      //  break;
+      //case VALUE::State_Call: // 向量/矩阵等常量的初始化
+      //case VALUE::State_Identifier: // 右值中含有变量，不是一个在编译时就能计算出数值的表达式
+      //  break;
+      //default:
+      //  PARSER_BREAK(const_expr_glob.pNode->Operand[1]);
+      //  break;
+      //}
     }
     return state;
   }
@@ -4816,6 +4855,7 @@ namespace UVShader
       clStringW strW;
       GetLogger()->OutputErrorW(pFuncNode->Operand[0], UVS_EXPORT_TEXT(5042, "语法错误: 无效的函数“%s”"),
         pFuncNode->GetAnyTokenAPB().ToString(strW).CStr());
+      vctx.result = ValueResult_Failed;
       return NULL;
     }
     else if(pFuncNode->Operand[0].ptr == NULL)
@@ -4863,6 +4903,7 @@ namespace UVShader
 
     pRetType = InferUserFunctionType(vctx.name_ctx, sArgumentsTypeList, pFuncNode);
     if(pRetType == ERROR_TYPEDESC) {
+      vctx.result = ValueResult_CanNotInferType;
       return NULL;
     }
     else if(pRetType) {
@@ -5230,6 +5271,7 @@ namespace UVShader
           clStringW strW;
           pNode->pOpcode->ToString(strW);
           GetLogger()->OutputErrorW(pNode->pOpcode, UVS_EXPORT_TEXT(5046, "“%s”缺少必要的操作数"), strW.CStr());
+          vctx.result = ValueResult_Failed;
           return NULL;
         }
       }
@@ -6096,7 +6138,7 @@ namespace UVShader
        {
          VALUE::State state = value.Calculate(*pOperator, pAB[0].pValue[i], pAB[1].pValue[i]);
          if(state != VALUE::State_OK) {
-           CLBREAK;
+           DumpValueState(vctx.pLogger, state, pOperator);
            vctx.result = ValueResult_Failed;
            return FALSE;
          }
@@ -6730,7 +6772,7 @@ namespace UVShader
 
       // 注册变量的ValuePool
       auto iter_find_result = m_ValuePoolMap.find(ptkVariable);
-      if(iter_find_result == m_ValuePoolMap.end())
+      while(iter_find_result == m_ValuePoolMap.end())
       {
         auto iter_insert_result = m_ValuePoolMap.insert(clmake_pair(ptkVariable, ValuePool()));
         if(iter_insert_result.second) // 这个判断多余吧？
@@ -6779,6 +6821,11 @@ namespace UVShader
                 vp[ii].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
               }
             } // if(pPreCompMath)
+            else
+            {
+              m_ValuePoolMap.erase(iter_insert_result.first);
+              break;
+            }
           }
           else
           {
@@ -6798,6 +6845,7 @@ namespace UVShader
                 value.CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
               });
             }
+            break;
           }
 
 
@@ -6808,6 +6856,7 @@ namespace UVShader
         } // iter_insert_result.second
         ASSERT(_CL_NOT_(iter_insert_result.first->second.empty()));
         ASSERT(iter_insert_result.first->second.size() == sVariDesc.pDesc->CountOf());
+        break;
       }
     }
     else {

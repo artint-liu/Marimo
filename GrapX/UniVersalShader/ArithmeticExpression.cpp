@@ -1493,6 +1493,51 @@ GO_NEXT:;
     return State_OK;
   }
 
+  template<typename _Ty>
+  VALUE::State VALUE::CalculateIT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2)
+  {
+    if(opcode.length == 1)
+    {
+      switch(opcode.marker[0])
+      {
+      //case '+': output = t1 + t2; break;
+      //case '-': output = t1 - t2; break;
+      //case '*': output = t1 * t2; break;
+      //case '<': output = _Ty(t1 < t2); break;
+      //case '>': output = _Ty(t1 > t2); break;
+      //case '!': output = _Ty(!t2); break;
+      //case '/':
+      //  if(t2 == 0) {
+      //    return State_DivideByZero;
+      //  }
+      //  output = t1 / t2; break;
+      default:
+        return State_UnknownOpcode;
+        //TRACE("Unsupport opcode(%c).\n", opcode);
+        //CLBREAK;
+      }
+    }
+    else
+    {
+      if(opcode == "<<") {
+        output = (t1 << t2);
+      }
+      else if(opcode == ">>") {
+        output = (t1 >> t2);
+      }
+      //else if(opcode == "==") {
+      //  output = (t1 == t2);
+      //}
+      else {
+        return State_UnknownOpcode;
+        //TRACE("Unsupport opcode(%c).\n", opcode);
+        //CLBREAK;
+      }
+    }
+
+    return State_OK;
+  }
+
   VALUE::State VALUE::Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1)
   {
     *this = param0;
@@ -1506,10 +1551,16 @@ GO_NEXT:;
     }
 
     if(type == Rank_Signed64) {
-      state = CalculateT(nValue64, token, nValue64, second.nValue64);
+      state = CalculateT(nValue64, token, nValue64, second.nValue64);      
+      if(state == State_UnknownOpcode) {
+        state = CalculateIT(nValue64, token, nValue64, second.nValue64);      
+      }
     }
     else if(type == Rank_Unsigned64) {
       state = CalculateT(uValue64, token, uValue64, second.uValue64);
+      if(state == State_UnknownOpcode) {
+        state = CalculateIT(uValue64, token, uValue64, second.uValue64);
+      }
     }
     else if(type == Rank_Double) {
       state = CalculateT(fValue64, token, fValue64, second.fValue64);
@@ -1519,9 +1570,15 @@ GO_NEXT:;
     }
     else if(type == Rank_Unsigned) {
       state = CalculateT(uValue, token, uValue, second.uValue);
+      if(state == State_UnknownOpcode) {
+        state = CalculateIT(uValue, token, uValue, second.uValue);
+      }
     }
     else if(type == Rank_Signed) {
       state = CalculateT(nValue, token, nValue, second.nValue);
+      if(state == State_UnknownOpcode) {
+        state = CalculateIT(nValue, token, nValue, second.nValue);
+      }
     }
     else {
       CLBREAK;

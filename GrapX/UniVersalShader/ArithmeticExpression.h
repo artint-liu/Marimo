@@ -289,6 +289,8 @@ namespace UVShader
     static GXBOOL IsNumericRank(Rank rank);
     template<typename _Ty>
     State CalculateT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2);
+    template<typename _Ty>
+    State CalculateIT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2);
   };
 
   typedef clvector<VALUE> ValuePool;

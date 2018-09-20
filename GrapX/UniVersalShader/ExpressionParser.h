@@ -151,6 +151,7 @@ namespace UVShader
     ValueResult_NotStructMember,
     ValueResult_NotNumeric,
     ValueResult_BadRank,
+    ValueResult_CanNotInferType,
     ValueResult_2065 = 2065, // 未声明标识符
     ValueResult_3861 = 3861, // 找不到标识符
     ValueResult_5039 = 5039, // 函数参数数量不匹配
@@ -813,6 +814,8 @@ namespace UVShader
     const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const GLOB& right_glob);
 #endif
+    static void DumpValueState(CLogger* pLogger, VALUE::State state, const TOKEN* pToken);
+
 
     void SetRepalcedValue(const GLOB& glob, const VALUE& value);
 
