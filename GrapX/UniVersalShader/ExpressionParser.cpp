@@ -4248,7 +4248,7 @@ namespace UVShader
 
         if(pVarableDecl)
         {
-          pType = sNameSet.RegisterVariable(strType, pVarableDecl, NULL, &right_glob);
+          pType = sNameSet.RegisterVariable(strType, pVarableDecl, &right_glob);
         }
 
         if(pVarableDecl == NULL || pType == NULL)
@@ -4289,17 +4289,17 @@ namespace UVShader
       }
       else if(second_glob.pNode->CompareOpcode('=')) // 赋值
       {
-        VALUE value;
-        VALUE::State state = VALUE::State_OK;
+        //VALUE value;
+        //VALUE::State state = VALUE::State_OK;
         const GLOB& right_glob = second_glob.pNode->Operand[1];
 
-        if(bConstVariable)
-        {
-          state = CalculateValueAsConstantDefinition(value, sNameSet, right_glob);
-          if(state != VALUE::State_OK && state != VALUE::State_Call && state != VALUE::State_Identifier) {
-            return FALSE;
-          }
-        }
+        //if(bConstVariable)
+        //{
+        //  state = CalculateValueAsConstantDefinition(value, sNameSet, right_glob);
+        //  if(state != VALUE::State_OK && state != VALUE::State_Call && state != VALUE::State_Identifier) {
+        //    return FALSE;
+        //  }
+        //}
 
         const size_t nErrorCount = DbgErrorCount();
 
@@ -4315,13 +4315,20 @@ namespace UVShader
         if(bConstVariable)
         {
           // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
-          if(state == VALUE::State_OK) {
-            pType = sNameSet.RegisterVariable(strType, ptkVar, &value, &right_glob);
-            SetRepalcedValue(right_glob/*second_glob.pNode->Operand[1]*/, value);
+          pType = sNameSet.RegisterVariable(strType, ptkVar, &right_glob);
+          if(pType) {
+            const ValuePool* pPool = sNameSet.GetValuePool(ptkVar);
+            if(pPool && pPool->size() == 1) {
+              SetRepalcedValue(right_glob, pPool->front());
+            }
           }
-          else {
-            pType = sNameSet.RegisterVariable(strType, ptkVar, NULL, &right_glob);
-          }
+          //if(state == VALUE::State_OK) {
+          //  pType = sNameSet.RegisterVariable(strType, ptkVar, &right_glob);
+          //  SetRepalcedValue(right_glob/*second_glob.pNode->Operand[1]*/, value);
+          //}
+          //else {
+          //  pType = sNameSet.RegisterVariable(strType, ptkVar, &right_glob);
+          //}
         }
         else
         {
@@ -4396,6 +4403,8 @@ namespace UVShader
         GetLogger()->OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), ptkVar->ToString(strW).CStr());
         return FALSE;
       }
+      case NameContext::State_HasError:
+        return FALSE;
       case NameContext::State_RequireConstantExpression:
         break;  // 内部已处理
       default:
@@ -4550,7 +4559,8 @@ namespace UVShader
 
             if(TryTypeCasting(pLeftTypeDesc, pRightTypeDesc, pNode->pOpcode) == FALSE)
             {
-              if(*pNode->pOpcode == "*=" && IsComponent(NULL, pRightTypeDesc, pLeftTypeDesc))
+              if(*pNode->pOpcode == "*=" && pRightTypeDesc->IsMatrix() && pLeftTypeDesc->IsVector() &&
+                IsComponent(NULL, pRightTypeDesc, pLeftTypeDesc))
               {
               }
               else
@@ -5733,7 +5743,7 @@ namespace UVShader
         return NULL;
       }
       else if(pTypeDesc == NULL) {
-        ASSERT(vctx.pType);
+        ASSERT(vctx.pType == NULL);
         return NULL;
       }
     }
@@ -5757,9 +5767,10 @@ namespace UVShader
           vctx_member.count  = vctx.count;
           vctx_member.pLogger = vctx.pLogger;
           pTypeDesc = InferSubscriptType(vctx_member, pMemberNode);
-          if(vctx_member.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
+          if(vctx_member.result != ValueResult_OK && vctx_member.result != ValueResult_Variable) {
             vctx.result = vctx_member.result;
-            return NULL;
+            vctx.pType  = NULL;
+            return vctx.pType;
           }
           if(vctx_member.pool.empty()) {
             vctx.pValue = vctx_member.pValue;
@@ -5771,7 +5782,7 @@ namespace UVShader
           }
           vctx.count = vctx_member.count;
           vctx.pType = vctx_member.pType;
-          return pTypeDesc;
+          return vctx.pType;
         }
       }
 #if 1
@@ -5901,7 +5912,9 @@ namespace UVShader
       vctx_subscript.pType->cate != TYPEDESC::TypeCate_IntegerScaler)
     {
       GetLogger()->OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
-      return NULL;
+      vctx.result = ValueResult_Failed;
+      vctx.pType = NULL;
+      return vctx.pType;
     }
 
     if(vctx.pType->cate == TYPEDESC::TypeCate_MultiDim)
@@ -6633,8 +6646,12 @@ namespace UVShader
           PARSER_BREAK2(pMsgLogger, pNode); // 不是数学类型
         }
       }
-      else {
-      }
+      //else {
+      //  //VALUE_CONTEXT vctx(*this);
+      //  //vctx.pLogger = pMsgLogger->GetLogger();
+      //  //m_pCodeParser->InferType(vctx, pNode);
+      //  CLBREAK
+      //}
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
@@ -6732,7 +6749,7 @@ namespace UVShader
 
   NameContext::State NameContext::IntRegisterVariable(
     const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType,
-    const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
+    const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
   {
     const TYPEDESC* pDesc = GetType(strType);
     if(pDesc == NULL)
@@ -6741,12 +6758,12 @@ namespace UVShader
       GetLogger()->OutputErrorW(ptkVariable, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), strW.CStr());
       return State_TypeNotFound;
     }
-    return IntRegisterVariable(ppType, ppVariable, pDesc, ptkVariable, pConstValue, pValueExprGlob);
+    return IntRegisterVariable(ppType, ppVariable, pDesc, ptkVariable, pValueExprGlob);
   }
   
   NameContext::State NameContext::IntRegisterVariable(
     const TYPEDESC** ppType, VARIDESC** ppVariable, const TYPEDESC* pTypeDesc,
-    const TOKEN* ptkVariable, const VALUE* pConstValue, const GLOB* pValueExprGlob)
+    const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
   {
     ASSERT(ptkVariable);
 
@@ -6821,11 +6838,11 @@ namespace UVShader
                 vp[ii].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
               }
             } // if(pPreCompMath)
-            else
-            {
-              m_ValuePoolMap.erase(iter_insert_result.first);
-              break;
-            }
+            //else
+            //{
+            //  m_ValuePoolMap.erase(iter_insert_result.first);
+            //  break;
+            //}
           }
           else
           {
@@ -6845,12 +6862,22 @@ namespace UVShader
                 value.CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
               });
             }
-            break;
+            else
+            {
+              //m_ValuePoolMap.erase(iter_insert_result.first);
+              //break;
+              ASSERT(vctx.pValue == NULL && vctx.count == 0);
+              ASSERT(vctx.result == ValueResult_Variable);
+            }
+            //break;
           }
-
 
           if(vp.size() == 1) {
             sVariDesc.sConstValue = vp.front();
+          }
+          else if(vp.empty()) {
+            m_ValuePoolMap.erase(iter_insert_result.first);
+            break;
           }
 
         } // iter_insert_result.second
@@ -6883,10 +6910,10 @@ namespace UVShader
     return State_DuplicatedVariable;
   }
 
-  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const VALUE* pConstValue/*想去掉*/, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const GLOB* pValueExprGlob)
   {
     if(pVariableDeclGlob->IsToken()) {
-      return RegisterVariable(strType, pVariableDeclGlob->pTokn, pConstValue, pValueExprGlob);
+      return RegisterVariable(strType, pVariableDeclGlob->pTokn, pValueExprGlob);
     }
     else if(pVariableDeclGlob->IsNode()) {
       return RegisterMultidimVariable(strType, pVariableDeclGlob->pNode, pValueExprGlob);
@@ -6894,13 +6921,13 @@ namespace UVShader
     return NULL;
   }
 
-  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const VALUE* pConstValue/*想去掉*/, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
   {
     ASSERT(strType.IsIdentifier());
     // PS: 返回值似乎没什么用
     const TYPEDESC* pTypeDesc = NULL;
     VARIDESC* pVariDesc = NULL;
-    m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable, pConstValue, pValueExprGlob);
+    m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, strType, ptkVariable, pValueExprGlob);
     return pTypeDesc;
   }
 
@@ -7039,7 +7066,7 @@ namespace UVShader
 
         const TYPEDESC* pSizelessTypeDesc = RegisterTypes(strType, sDimensions); // 可能缺少最高维尺寸的数组类型
         TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
-        m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, pSizelessTypeDesc, ptkVariable, NULL, pValueExprGlob);
+        m_eLastState = IntRegisterVariable(&pTypeDesc, &pVariDesc, pSizelessTypeDesc, ptkVariable, pValueExprGlob);
         if(m_eLastState == State_Ok) {
           if(pSizelessTypeDesc != pTypeDesc) {
             CLNOP
