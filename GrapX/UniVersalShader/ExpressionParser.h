@@ -203,6 +203,7 @@ namespace UVShader
     void UsePool();
     void ClearValue();
     void ClearValueOnly();
+    void CopyValue(const VALUE_CONTEXT& vc);
     void SetType(VALUE::Rank rank);
     const TYPEDESC* CastUpward(const TYPEDESC* pTargetType);
     const TYPEDESC* MergeType(const TYPEDESC* pScalerType, const TYPEDESC* pVecMatType);

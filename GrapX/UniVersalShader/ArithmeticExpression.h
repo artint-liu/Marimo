@@ -277,6 +277,7 @@ namespace UVShader
     void clear();
     VALUE& SetZero();
     VALUE& SetOne();
+    GXBOOL IsZero() const;
     State set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger);
     State set(const TOKEN& token);
     void set(Rank r, const void* pValue);
@@ -366,6 +367,8 @@ namespace UVShader
       GXBOOL CompareAsToken(TOKEN::T_LPCSTR str) const; // 以token方式比较，如果不是token，则返回FALSE
       GXBOOL CompareAsToken(TOKEN::TChar c) const;
       GXBOOL CompareAsNode(MODE _mode) const;
+      GXBOOL CompareAsNode(CTokens::TChar ch) const;
+      GXBOOL CompareAsNode(CTokens::T_LPCSTR str) const;      
 
       GLOB& operator=(const TOKEN& token) {
         pTokn = &token;
@@ -434,9 +437,10 @@ namespace UVShader
     GXUINT              m_uRefCount;
     ErrorMessage*       m_pMsg;
 
-    clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
-    size_t              m_nErrorCount;
+    clset<int>          m_errorlist;        // 错误列表, 如果不为空表示解析失败
+    size_t              m_nErrorCount;      // 错误计数
     int                 m_nSessionError;    // 区间错误数量，如果在区间内大于一定值则不会再输出错误
+    int                 m_nDisplayedError;  // 输出的错误数
 
   public:
     CLogger();
@@ -469,6 +473,7 @@ namespace UVShader
     void WriteMessageW(GXLPCWSTR szMessage);
 
     void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示
+    void OutputTypeCastFailed(const TOKEN* ptkLocation, const TOKEN* pOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom);
 
     GXUINT MarkCode(GXUINT code, GXLPCSTR szMessage);
     int    SetError(int err);
@@ -606,14 +611,9 @@ namespace UVShader
     clsize              m_nNodeId;
 #endif
     GXBOOL              m_bHigherDefiniton; // “Identifier Identifier” 形式的定义转为更高优先级，默认比较低
-    //GXBOOL              m_bRefMsg; // 如果为TRUE，析构时不删除m_pMsg
-    //ErrorMessage*       m_pMsg;
     TOKEN::Array        m_aTokens;
     
     CLogger*             m_pLogger;   
-    //clset<int>          m_errorlist; // 错误列表, 如果不为空表示解析失败
-    //size_t              m_nErrorCount;
-    //int                 m_nSessionError;    // 区间错误数量，如果在区间内大于一定值则不会再输出错误
 
     // 语法节点的内存池
     //SyntaxNodePoolList  m_NodePoolList;

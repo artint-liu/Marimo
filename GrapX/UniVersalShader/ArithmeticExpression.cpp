@@ -107,13 +107,8 @@ namespace UVShader
 #endif // USE_CLSTD_TOKENS
 
   ArithmeticExpression::ArithmeticExpression()
-    : //m_pMsg(NULL)
-    //, m_nMaxPrecedence(0)
-    //, m_nErrorCount(0)
-    //, m_nSessionError(0)
-     m_NodePool(128)
+    : m_NodePool(128)
     , m_bHigherDefiniton(FALSE)
-    //, m_bRefMsg(FALSE)
     , m_pLogger(NULL)
 #ifdef ENABLE_SYNTAX_NODE_ID
     , m_nNodeId(1)
@@ -1222,6 +1217,32 @@ GO_NEXT:;
     return *this;
   }
 
+  GXBOOL VALUE::IsZero() const
+  {
+    switch(rank)
+    {
+    case UVShader::VALUE::Rank_Unsigned:
+      return (uValue == 0);
+    case UVShader::VALUE::Rank_Signed:
+      return (nValue == 0);
+    case UVShader::VALUE::Rank_Float:
+      return (fValue == 0);
+    case UVShader::VALUE::Rank_Unsigned64:
+      return (uValue64 == 0);
+    case UVShader::VALUE::Rank_Signed64:
+      return (nValue64 == 0);
+    case UVShader::VALUE::Rank_Double:
+      return (fValue64 == 0);
+    case UVShader::VALUE::Rank_String:
+      CLBREAK;
+      break;
+    default:
+      CLBREAK;
+      break;
+    }
+    return FALSE;
+  }
+
   VALUE& VALUE::set(const VALUE& v)
   {
     *this = v;
@@ -2126,6 +2147,16 @@ GO_NEXT:;
     return (IsNode() && pNode->mode == _mode);
   }
 
+  GXBOOL SYNTAXNODE::GLOB::CompareAsNode(CTokens::TChar ch) const
+  {
+    return (IsNode() && pNode->CompareOpcode(ch));
+  }
+
+  GXBOOL SYNTAXNODE::GLOB::CompareAsNode(CTokens::T_LPCSTR str) const
+  {
+    return (IsNode() && pNode->CompareOpcode(str));
+  }
+
   const TOKEN* SYNTAXNODE::GLOB::GetFrontToken() const
   {
     if(IsToken()) {
@@ -2434,6 +2465,7 @@ GO_NEXT:;
     , m_pMsg(NULL)
     , m_nErrorCount(0)
     , m_nSessionError(0)
+    , m_nDisplayedError(0)
   {
   }
 
@@ -2472,15 +2504,19 @@ GO_NEXT:;
     m_errorlist.clear();
     m_nErrorCount = 0;
     m_nSessionError = 0;
+    m_nDisplayedError = 0;
   }
 
   int CLogger::SetError(int err)
   {
     m_nErrorCount++;
     m_nSessionError++;
+    if(m_nSessionError <= c_nMaxSessionError) {
+      m_nDisplayedError++;
+    }
     m_errorlist.insert(err);
 
-    if(m_nErrorCount == c_nMaxErrorCount) {
+    if(m_nDisplayedError == c_nMaxErrorCount) {
       m_pMsg->WriteErrorW(FALSE, 0, UVS_EXPORT_TEXT2(9997, "错误数量超过%d条，将停止输出错误消息", this), c_nMaxErrorCount);
     }
     return err;

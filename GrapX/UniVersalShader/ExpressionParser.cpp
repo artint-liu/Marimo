@@ -3917,11 +3917,19 @@ namespace UVShader
     OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2143, "语法错误 : 缺少“;”", this));
   }
 
+  void CLogger::OutputTypeCastFailed(const TOKEN* ptkLocation, const TOKEN* pOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom)
+  {
+    clStringW strOpcode, strTo = pTypeTo->name, strFrom = pTypeFrom->name;
+    pOpcode->ToString(strOpcode);
+    OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2440, "“%s”: 无法从“%s”转换为“%s”", this),
+      strOpcode.CStr(), strFrom.CStr(), strTo.CStr());
+  }
+
   void CLogger::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
   {
 #ifdef REDUCE_ERROR_MESSAGE
     if(code < c_nErrorIdLimit &&
-      (m_nErrorCount >= c_nMaxErrorCount || m_nSessionError > c_nMaxSessionError))
+      (m_nDisplayedError >= c_nMaxErrorCount || m_nSessionError > c_nMaxSessionError))
     {
       return;
     }
@@ -4303,25 +4311,20 @@ namespace UVShader
 
         const size_t nErrorCount = DbgErrorCount();
 
-        pRightTypeDesc = InferRightValueType(sNameSet, NULL, NULL, right_glob, ptkVar);
         ptkVar = GetVariableNameWithoutSeamantic(second_glob.pNode->Operand[0]);
 
-        if(pRightTypeDesc == NULL || ptkVar == NULL) {
-          // InferRightValueType2和GetVariableWithoutSeamantic内部应该输出错误
-          ASSERT(DbgErrorCount() > nErrorCount);
-          return NULL;
-        }
 
         if(bConstVariable)
         {
           // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
-          pType = sNameSet.RegisterVariable(strType, ptkVar, &right_glob);
+          pRightTypeDesc = pType = sNameSet.RegisterVariable(strType, ptkVar, &right_glob);
           if(pType) {
             const ValuePool* pPool = sNameSet.GetValuePool(ptkVar);
             if(pPool && pPool->size() == 1) {
               SetRepalcedValue(right_glob, pPool->front());
             }
           }
+
           //if(state == VALUE::State_OK) {
           //  pType = sNameSet.RegisterVariable(strType, ptkVar, &right_glob);
           //  SetRepalcedValue(right_glob/*second_glob.pNode->Operand[1]*/, value);
@@ -4332,7 +4335,15 @@ namespace UVShader
         }
         else
         {
+          pRightTypeDesc = InferRightValueType(sNameSet, NULL, NULL, right_glob, ptkVar);
+          if(pRightTypeDesc == NULL || ptkVar == NULL) {
+            // InferRightValueType2和GetVariableWithoutSeamantic内部应该输出错误
+            ASSERT(DbgErrorCount() > nErrorCount);
+            return NULL;
+          }
+
           pType = sNameSet.RegisterVariable(strType, ptkVar);
+          // 后面比较pRightTypeDesc是否能转换为pType
         }
 
         //if(pRightTypeDesc == NULL) {
@@ -4406,7 +4417,7 @@ namespace UVShader
       case NameContext::State_HasError:
         return FALSE;
       case NameContext::State_RequireConstantExpression:
-        break;  // 内部已处理
+        return FALSE;  // 内部已处理
       default:
         CLBREAK; // 预期之外的状态
         break;
@@ -4565,9 +4576,10 @@ namespace UVShader
               }
               else
               {
-                clStringW strFrom = pRightTypeDesc->name;
-                clStringW strTo = pLeftTypeDesc->name;
-                GetLogger()->OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+                //clStringW strFrom = pRightTypeDesc->name;
+                //clStringW strTo = pLeftTypeDesc->name;
+                //GetLogger()->OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+                GetLogger()->OutputTypeCastFailed(&pNode->GetAnyTokenPAB(), pNode->pOpcode, pLeftTypeDesc, pRightTypeDesc);
                 result = FALSE;
               }
             }
@@ -4588,10 +4600,17 @@ namespace UVShader
           }
           else
           {
-            if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[1], pNode->pOpcode) == NULL)
-            {
+            VALUE_CONTEXT vctx(sNameContext);
+            vctx.bNeedValue = FALSE;
+            vctx.pLogger = GetLogger();
+            InferType(vctx, pNode);
+            if(vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
               result = FALSE;
             }
+            //if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[1], pNode->pOpcode) == NULL)
+            //{
+            //  result = FALSE;
+            //}
           }
         }
         else
@@ -5289,12 +5308,42 @@ namespace UVShader
 
     const TYPEDESC* pTypeDesc[2] = {NULL, NULL};
     VALUE_CONTEXT v[2] = {vctx.name_ctx, vctx.name_ctx};
-    for(int i = 0; i < 2; i++)
+    v[0].pLogger = v[1].pLogger = vctx.pLogger;
+
+    if(pNode->CompareOpcode('?'))
     {
-      v[i].pLogger = vctx.pLogger;
-      pTypeDesc[i] = InferType(v[i], pNode->Operand[i]);
-      PARSER_ASSERT(pNode->Operand[i].ptr != NULL, pNode->GetAnyTokenAPB());
-      ASSERT(v[i].pType == pTypeDesc[i]);
+      ASSERT(pNode->Operand[1].CompareAsNode(':')); // 这个似乎外部保证过了，这里不再检查
+      pTypeDesc[0] = InferType(v[0], pNode->Operand[0]);
+      if(v[0].result != ValueResult_OK && v[0].result != ValueResult_Variable) {
+        vctx.result = v[0].result;
+        return NULL;
+      }
+      else if(v[0].pValue == NULL) { // 只推导类型而不计算值
+        v[1].bNeedValue = FALSE;
+        pTypeDesc[1] = InferType(v[1], pNode->Operand[1]);
+        vctx.CopyValue(v[1]);
+        return vctx.pType;
+      }
+      else if(v[0].count == 1) { // 标量bool
+        pTypeDesc[1] = InferType(v[1], _CL_NOT_(v[0].pValue->IsZero())
+          ? pNode->Operand[1].pNode->Operand[0]
+          : pNode->Operand[1].pNode->Operand[1]);
+        vctx.CopyValue(v[1]);
+        return vctx.pType;
+      }
+      else { // 向量，矩阵
+        vctx.CopyValue(v[0]); // “?”的计算结果放入vctx，使用后面MergeValueContext来组合计算结果
+        return InferType(vctx, pNode->Operand[1].pNode);
+      }
+    }
+    else
+    {
+      for(int i = 0; i < 2; i++)
+      {
+        pTypeDesc[i] = InferType(v[i], pNode->Operand[i]);
+        PARSER_ASSERT(pNode->Operand[i].ptr != NULL, pNode->GetAnyTokenAPB());
+        ASSERT(v[i].pType == pTypeDesc[i]);
+      }
     }
 
     if(pTypeDesc[0] == NULL) {
@@ -6122,7 +6171,10 @@ namespace UVShader
     {
       // int3 vs float3, cast type
       // float3 vs float4, error!
-      CLBREAK;
+      vctx.pLogger->OutputTypeCastFailed(pLocation, pOperator, pAB[0].pType, pAB[1].pType);
+      vctx.result = ValueResult_Failed;
+      vctx.ClearValueOnly();
+      return FALSE;
     }
 
 
@@ -6138,8 +6190,28 @@ namespace UVShader
        }
        else if(*pOperator == ':') // ...?...:...三元操作的冒号
        {
-         vctx.ClearValueOnly();
+         // 这里不可能是类型推导
+         ASSERT(vctx.bNeedValue);
+
+         // 这里vctx也有输出值
+         ASSERT(vctx.pValue != NULL && vctx.count > 0);
+
+         // 这里用的肯定是池
+         ASSERT(_CL_NOT_(vctx.pool.empty()) && vctx.pool.size() >= vctx.count);
+         ValuePool p00l; // 故意这么写的，好玩
+         p00l.reserve(vctx.count);
+         for(size_t i = 0; i < vctx.count; i++)
+         {
+           if(_CL_NOT_(vctx.pValue[i].IsZero())) {
+             p00l.push_back(pAB[0].pValue[i]);
+           }
+           else {
+             p00l.push_back(pAB[1].pValue[i]);
+           }
+         }
          vctx.result = ValueResult_OK;
+         vctx.pool.assign(p00l.begin(), p00l.end());
+         vctx.UsePool();
          return TRUE;
        }
 
@@ -6813,7 +6885,10 @@ namespace UVShader
           {
             // TODO: 换成Infer函数
             clStringA strFuncName;
-            ASSERT(pValueExprGlob->pNode->Operand[0].IsToken());
+            if(pValueExprGlob->pNode->Operand[0].IsToken() == FALSE) {
+              GetLogger()->OutputMissingSemicolon(pValueExprGlob->pNode->Operand[0].GetFrontToken());
+              return State_HasError;
+            }
             TranslateType(strFuncName, pValueExprGlob->pNode->Operand[0].pTokn);
 
             const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(strFuncName);
@@ -6867,7 +6942,7 @@ namespace UVShader
               //m_ValuePoolMap.erase(iter_insert_result.first);
               //break;
               ASSERT(vctx.pValue == NULL && vctx.count == 0);
-              ASSERT(vctx.result == ValueResult_Variable);
+              ASSERT(vctx.result == ValueResult_OK || vctx.result == ValueResult_Variable);
             }
             //break;
           }
@@ -8008,6 +8083,19 @@ namespace UVShader
     pValue = NULL;
     count = 0;
     pool.clear();
+  }
+
+  void VALUE_CONTEXT::CopyValue(const VALUE_CONTEXT& vc)
+  {
+    result = vc.result;
+    pType  = vc.pType;
+    pValue = vc.pValue;
+    count  = vc.count;
+    if(_CL_NOT_(vc.pool.empty()))
+    {
+      pool = vc.pool;
+      UsePool();
+    }
   }
 
   void VALUE_CONTEXT::SetType(VALUE::Rank rank)
