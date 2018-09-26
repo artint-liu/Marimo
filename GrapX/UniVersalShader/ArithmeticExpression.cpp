@@ -1243,6 +1243,59 @@ GO_NEXT:;
     return FALSE;
   }
 
+  GXBOOL VALUE::IsNegative() const
+  {
+    switch(rank)
+    {
+    case UVShader::VALUE::Rank_Unsigned:
+    case UVShader::VALUE::Rank_Unsigned64:
+      return FALSE;
+    case UVShader::VALUE::Rank_Signed:
+      return (nValue < 0);
+    case UVShader::VALUE::Rank_Float:
+      return (fValue < 0);
+    case UVShader::VALUE::Rank_Signed64:
+      return (nValue64 < 0);
+    case UVShader::VALUE::Rank_Double:
+      return (fValue64 < 0);
+    case UVShader::VALUE::Rank_String:
+      CLBREAK;
+      break;
+    default:
+      CLBREAK;
+      break;
+    }
+    return FALSE;
+  }
+
+  template<typename _Ty>
+  _Ty MakeFloatValueWithExp(const GXQWORD* digi, GXBOOL bNegative, GXBOOL bNegExp)
+  {
+    _Ty fValue = (_Ty)digi[1];
+    while(fValue > 1.0) {
+      fValue *= 0.1;
+    }
+    fValue += digi[0];
+
+    if(digi[2]) {
+      if(bNegExp) {
+        for(size_t i = 0; i < digi[2]; i++) {
+          fValue *= 0.1;
+        }
+      }
+      else {
+        for(size_t i = 0; i < digi[2]; i++) {
+          fValue *= 10.0;
+        }
+      }
+    }
+
+    if(bNegative) {
+      fValue = -fValue;
+    }
+    return fValue;
+  }
+
   VALUE& VALUE::set(const VALUE& v)
   {
     *this = v;
@@ -1377,29 +1430,13 @@ GO_NEXT:;
 
     if(dwFlags == Rank_Float)
     {
-      fValue64 = (double)digi[1];
-      while(fValue64 > 1.0) {
-        fValue64 *= 0.1;
-      }
-      fValue64 += digi[0];
-
-      if(digi[2]) {
-        if(bNegExp) {
-          for(size_t i = 0; i < digi[2]; i++) {
-            fValue64 *= 0.1;
-          }
-        }
-        else {
-          for(size_t i = 0; i < digi[2]; i++) {
-            fValue64 *= 10.0;
-          }
-        }
-      }
-
-      if(ptr[0] == '-') {
-        fValue64 = -fValue64;
-      }
+#ifdef ENABLE_HIGH_PRECISION_FLOAT
+      fValue64 = MakeFloatValueWithExp<double>(digi, ptr[0] == '-', bNegExp);
       SET_FLAG(dwFlags, Rank_F_LongLong);
+#else
+      uValue64 = 0; // 清除高32位
+      fValue = MakeFloatValueWithExp<float>(digi, ptr[0] == '-', bNegExp);
+#endif
     }
     else
     {

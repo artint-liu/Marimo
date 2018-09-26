@@ -59,9 +59,11 @@ namespace UVShader
   struct TOKEN;
   struct TYPEDESC;
   struct COMMINTRTYPEDESC;
+  struct VALUE_CONTEXT;
+  struct VALUE;
 
   typedef GXBOOL (GXCALLBACK *OPERATORPROC_TOKEN)(const COMMINTRTYPEDESC* pDesc, DOTOPERATOR_RESULT* pResult, const TOKEN* pToken);
-  typedef const TYPEDESC* (GXCALLBACK *OPERATORPROC_NAMECTX)(const COMMINTRTYPEDESC* pDesc, const NameContext& sNameCtx);
+  typedef const TYPEDESC* (GXCALLBACK *OPERATORPROC_NAMECTX)(VALUE_CONTEXT& vctx, const VALUE* pValue);
 
   struct COMMINTRTYPEDESC
   {
@@ -278,6 +280,7 @@ namespace UVShader
     VALUE& SetZero();
     VALUE& SetOne();
     GXBOOL IsZero() const;
+    GXBOOL IsNegative() const;
     State set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger);
     State set(const TOKEN& token);
     void set(Rank r, const void* pValue);

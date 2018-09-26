@@ -5876,6 +5876,7 @@ namespace UVShader
               for(int i = 0; sDotOperator.components[i] != -1; i++)
               {
                 temp_pool.push_back(vctx.pValue[sDotOperator.components[i]]);
+                temp_pool.back().CastValueByRank(vctx.TypeRank());
               }
               vctx.pool.assign(temp_pool.begin(), temp_pool.end());
               vctx.UsePool();
@@ -5926,8 +5927,10 @@ namespace UVShader
     CHECK_VALUE_CONTEXT;
     VALUE_CONTEXT vctx_subscript(vctx);
     const TYPEDESC* pSubscriptType = InferType(vctx_subscript, pNode->Operand[1]);
+
     if((vctx_subscript.result != ValueResult_OK && vctx_subscript.result != ValueResult_Variable) ||
-      vctx_subscript.pType->cate != TYPEDESC::TypeCate_IntegerScaler)
+      vctx_subscript.pType->cate != TYPEDESC::TypeCate_IntegerScaler ||
+      vctx_subscript.count != 1)
     {
       GetLogger()->OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
       vctx.result = ValueResult_Failed;
@@ -5954,14 +5957,14 @@ namespace UVShader
       }
       return vctx.pType;
     }
-    else if(IS_STRUCT_CATE(vctx.pType) && vctx.pType->pDesc && vctx.pType->pDesc->lpSubscript)
+    else if(IS_VECMAT_CATE(vctx.pType) && vctx.pType->pDesc && vctx.pType->pDesc->lpSubscript)
     {
-      vctx.pType = vctx.pType->pDesc->lpSubscript(vctx.pType->pDesc, vctx.name_ctx);
+      vctx.pType = vctx.pType->pDesc->lpSubscript(vctx, vctx_subscript.pValue);
       ASSERT(vctx.pType);
       return vctx.pType;
     }
 
-    GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2109, "下标要求数组类型"));
+    GetLogger()->OutputErrorW(*pNode->Operand[0].GetFrontToken(), UVS_EXPORT_TEXT(2109, "下标要求数组类型"));
     vctx.result = ValueResult_Failed;
     vctx.pType = NULL;
     vctx.ClearValueOnly();
@@ -8026,7 +8029,7 @@ namespace UVShader
     const size_t type_count = pType->CountOf();
     const size_t targ_count = pTargetType->CountOf();
     ASSERT(type_count < targ_count ||
-      (type_count < targ_count && TypeRank() < pTargetType->pDesc->rank));
+      (type_count <= targ_count && TypeRank() < pTargetType->pDesc->rank));
 
     if(IS_SCALER_CATE(pType) && IS_VECMAT_CATE(pTargetType))
     {
@@ -8144,6 +8147,9 @@ namespace UVShader
     if(vctx.pValue && vctx.pool.empty() == FALSE) {
       ASSERT(vctx.pValue >= &vctx.pool.front() && vctx.pValue <= &vctx.pool.back());
     }
+
+    ASSERT((vctx.pValue != NULL && vctx.count > 0) ||
+      (vctx.pValue == NULL && vctx.count == 0));
   }
 
 } // namespace UVShader

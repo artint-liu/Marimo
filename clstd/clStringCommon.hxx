@@ -202,11 +202,9 @@ namespace clstd
             case 'u':
             {
               if(nLong == 2) {
-                //MyTraits::Unsigned64ToString(buffer, MAX_DIGITS, va_arg(arglist, u64), 0);
                 clstd::ul64tox(va_arg(arglist, u64), buffer, MAX_DIGITS, 10);
               }
               else {
-                //MyTraits::Unsigned32ToString(buffer, MAX_DIGITS, va_arg(arglist, unsigned long), 0);
                 clstd::ultox(va_arg(arglist, unsigned long), buffer, MAX_DIGITS, 10);
               }
 
@@ -232,40 +230,20 @@ namespace clstd
 
                 if(bForceSign && *(i64*)&va_value >= 0) {
                   buffer[0] = '+';
-                  //avail = 1 + MyTraits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
-                  avail = 1 + clstd::ftox((float)va_value, buffer + 1, MAX_DIGITS - 1, nPrecision, 'F');
+                  avail = 1 + clstd::ftox(va_value, buffer + 1, MAX_DIGITS - 1, nPrecision, 'F');
                 }
                 else if(bSpace && *(i64*)&va_value >= 0) {
                   buffer[0] = 0x20;
-                  //avail = 1 + MyTraits::FloatToString(buffer + 1, MAX_DIGITS - 1, nPrecision, (float)va_value, 'F');
-                  avail = 1 + clstd::ftox((float)va_value, buffer + 1, MAX_DIGITS - 1, nPrecision, 'F');
+                  avail = 1 + clstd::ftox(va_value, buffer + 1, MAX_DIGITS - 1, nPrecision, 'F');
                 }
                 else {
-                  //avail = MyTraits::FloatToString(buffer, MAX_DIGITS, nPrecision, (float)va_value, 'F');
-                  avail = clstd::ftox((float)va_value, buffer, MAX_DIGITS, nPrecision, 'F');
+                  avail = clstd::ftox(va_value, buffer, MAX_DIGITS, nPrecision, 'F');
                 }
-
-                //const _TCh* pDot = MyTraits::StringSearchChar(buffer, '.');
-                //if(pDot != NULL) {
-                //  int nn = nPrecision + 1; // 包含'.'的个数
-                //  while(nn-- && *++pDot != '\0'); // 没错，就是分号！
-                //  *(_TCh*)pDot = '\0';
-                //}
               }
 
               if(!bPound && buffer[avail - 1] == '.') {
                 buffer[avail - 1] = '\0';
               }
-              //else
-              //{
-              //  if(bForceSign && va_value >= 0) {
-              //    buffer[0] = '+';
-              //    MyTraits::FloatToString(buffer + 1, MAX_DIGITS - 1, 0, (float)va_value, 'F');
-              //  }
-              //  else {
-              //    MyTraits::FloatToString(buffer, MAX_DIGITS, 0, (float)va_value, 'F');
-              //  }
-              //}
               _TStr::Append(buffer);
               break;
             }
