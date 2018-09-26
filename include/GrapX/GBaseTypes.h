@@ -156,6 +156,15 @@ public:
   GXColor32() CLTRIVIAL_DEFAULT;
   GXColor32(int _r, int _g, int _b) : b(_b), g(_g), r(_r), a(255) {}
   GXColor32(int _a, int _r, int _g, int _b) : b(_b), g(_g), r(_r), a(_a) {}
+  GXColor32(float _r, float _g, float _b)
+    : b(static_cast<int>(_b * 255.0f))
+    , g(static_cast<int>(_g * 255.0f))
+    , r(static_cast<int>(_r * 255.0f)), a(255) {}
+  GXColor32(float _a, float _r, float _g, float _b)
+    : b(static_cast<int>(_b * 255.0f))
+    , g(static_cast<int>(_g * 255.0f))
+    , r(static_cast<int>(_r * 255.0f))
+    , a(static_cast<int>(_a * 255.0f)) {}
   GXColor32(const GXColor32& clr) : color(clr.color){}
   GXColor32(GXDWORD clr) : color(clr){}
 

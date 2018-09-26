@@ -1272,20 +1272,20 @@ GO_NEXT:;
   _Ty MakeFloatValueWithExp(const GXQWORD* digi, GXBOOL bNegative, GXBOOL bNegExp)
   {
     _Ty fValue = (_Ty)digi[1];
-    while(fValue > 1.0) {
-      fValue *= 0.1;
+    while(fValue > _Ty(1.0)) {
+      fValue *= _Ty(0.1);
     }
     fValue += digi[0];
 
     if(digi[2]) {
       if(bNegExp) {
         for(size_t i = 0; i < digi[2]; i++) {
-          fValue *= 0.1;
+          fValue *= _Ty(0.1);
         }
       }
       else {
         for(size_t i = 0; i < digi[2]; i++) {
-          fValue *= 10.0;
+          fValue *= _Ty(10.0);
         }
       }
     }

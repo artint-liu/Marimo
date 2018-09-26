@@ -305,18 +305,18 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   {
     for(int x = 0; x < 32; x++)
     {
-      pCanvas->SetPixel(x * 2 + 100, y * 2 + 30, float4(1.0f, (float)x / 32.0f, (float)y / 32.0f, 1.0f));
+      pCanvas->SetPixel(x * 2 + 100, y * 2 + 30, GXColor32(1.0f, (float)x / 32.0f, (float)y / 32.0f, 1.0f).color);
     }
   }
 
   pCanvas->DrawRectangle(40, 150, 40, 40, 0xff0000ff);
-  pCanvas->DrawRectangle(80, 150, 40, 40, float4(0.5f,0.5f,0.5f,1.0f));
+  pCanvas->DrawRectangle(80, 150, 40, 40, GXColor32(0.5f,0.5f,0.5f,1.0f).color);
 
   for(int y = 0; y < 32; y++)
   {
     for(int x = 0; x < 32; x++)
     {
-      pCanvas->SetPixel(x * 2 + 20, y * 2 + 30, float4((float)x / 32.0f, (float)y / 32.0f, 1.0f, 1.0f));
+      pCanvas->SetPixel(x * 2 + 20, y * 2 + 30, GXColor32((float)x / 32.0f, (float)y / 32.0f, 1.0f, 1.0f).color);
     }
   }
 
@@ -325,7 +325,7 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
 
   for(int y = 0; y < 80; y++)
   {
-    pCanvas->DrawLine(200, y * 2 + 30, 400, y * 2 + 30, float4((float)y / 80, 0, 0, 1));
+    pCanvas->DrawLine(200, y * 2 + 30, 400, y * 2 + 30, GXColor32((float)y / 80, 0.f, 0.f, 1.f).color);
   }
 
   pCanvas->TextOutA(m_pFontS, 10, 200, "DrawTexture(Dest):", -1, 0xff000000);
@@ -471,7 +471,7 @@ void MyGraphicsTest::TestTextAndClip(GXRECT& rect)
   for(int i = 1; i < 50; i++)
   {
     float fFactor = (float)i / (float)c_max;
-    pCanvas->DrawLine(i * 10, 0, 0, (50 - i) * 10, float4(fFactor, 1.0f, 1.0f - fFactor, 1.0f));
+    pCanvas->DrawLine(i * 10, 0, 0, (50 - i) * 10, GXColor32(fFactor, 1.0f, 1.0f - fFactor, 1.0f).color);
   }
 
   GXRECT rcText;
