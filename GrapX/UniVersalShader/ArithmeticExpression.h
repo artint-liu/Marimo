@@ -226,7 +226,7 @@ namespace UVShader
     enum State // Flags
     {
       State_OK = 0,
-      State_Identifier    = 0x00000001, // 标识符
+      State_Variable      = 0x00000001, // 标识符是变量
       State_Call          = 0x00000002, // 函数调用
       State_UnknownOpcode = 0x00000004, // 无法识别的操作符 FIXME: 这是错误消息？
       State_Truncation    = 0x00000008, // 类型被截断

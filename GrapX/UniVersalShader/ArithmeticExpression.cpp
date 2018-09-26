@@ -1519,24 +1519,7 @@ GO_NEXT:;
   {
     if(opcode.length == 1)
     {
-      switch(opcode.marker[0])
-      {
-      //case '+': output = t1 + t2; break;
-      //case '-': output = t1 - t2; break;
-      //case '*': output = t1 * t2; break;
-      //case '<': output = _Ty(t1 < t2); break;
-      //case '>': output = _Ty(t1 > t2); break;
-      //case '!': output = _Ty(!t2); break;
-      //case '/':
-      //  if(t2 == 0) {
-      //    return State_DivideByZero;
-      //  }
-      //  output = t1 / t2; break;
-      default:
-        return State_UnknownOpcode;
-        //TRACE("Unsupport opcode(%c).\n", opcode);
-        //CLBREAK;
-      }
+      return State_UnknownOpcode;
     }
     else
     {
@@ -2513,12 +2496,12 @@ GO_NEXT:;
     m_nSessionError++;
     if(m_nSessionError <= c_nMaxSessionError) {
       m_nDisplayedError++;
+      if(m_nDisplayedError == c_nMaxErrorCount) {
+        m_pMsg->WriteErrorW(FALSE, 0, UVS_EXPORT_TEXT2(9997, "错误数量超过%d条，将停止输出错误消息", this), c_nMaxErrorCount);
+      }
     }
     m_errorlist.insert(err);
 
-    if(m_nDisplayedError == c_nMaxErrorCount) {
-      m_pMsg->WriteErrorW(FALSE, 0, UVS_EXPORT_TEXT2(9997, "错误数量超过%d条，将停止输出错误消息", this), c_nMaxErrorCount);
-    }
     return err;
   }
 

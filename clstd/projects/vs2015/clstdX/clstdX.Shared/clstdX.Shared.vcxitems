@@ -38,6 +38,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\casemap.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\ecvt.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\FloatX.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\cltypes.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\floatx.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\SmartRepository.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\Smart\smartstream.h" />

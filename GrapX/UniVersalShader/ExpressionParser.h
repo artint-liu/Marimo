@@ -157,12 +157,13 @@ namespace UVShader
     ValueResult_5039 = 5039, // 函数参数数量不匹配
   };
 
-  struct VARIDESC
+  struct IDNFDESC
   {
-    const TYPEDESC* pDesc;
-    size_t nOffset;
-    VALUE sConstValue;      // 规定 string 类型不能以 const 修饰，所以这里用VALUE
+    const TYPEDESC*   pDesc;
+    size_t            nOffset;
+    //VALUE sConstValue;      // 规定 string 类型不能以 const 修饰，所以这里用VALUE
     SYNTAXNODE::GLOB  glob; // 所有常量都应该定义这个值，数字类型常量同时还应该定义sConstValue
+    ValuePool         pool;
   };
 
   enum InputModifier // 函数参数修饰
@@ -234,26 +235,26 @@ namespace UVShader
 
     typedef clmap<clStringA, TYPEDESC>  TypeMap;
     typedef std::multimap<clStringA, FUNCDESC>  FuncMap;
-    typedef clmap<TokenPtr, VARIDESC>  VariableMap;
+    typedef clmap<TokenPtr, IDNFDESC>  IdentifierMap;
     typedef clStringA::LPCSTR LPCSTR;
     typedef clmap<clStringA, const NameContext*> StructContextMap;
     typedef ArithmeticExpression::GLOB GLOB;
-    typedef clmap<TokenPtr, ValuePool> ValuePoolMap;
+    //typedef clmap<TokenPtr, ValuePool> ValuePoolMap;
 
     enum State
     {
       State_SelfAdaptionLength = 1,
       State_Ok = 0,
-      State_HasError = -1,           // 其它错误，已经在函数内部输出
-      State_TypeNotFound = -2,       // 没有找到类型
-      State_DuplicatedType = -3,     // 重复注册类型
-      State_DuplicatedVariable = -4, // 重复定义变量
-      State_DefineAsType = -5,       // 变量已经被定义为类型
-      State_DefineAsVariable = -6,   // 类型已经被定义为变量
-      State_VariableIsNotIdentifier = -7, // 期望的变量名不是一个标识符
+      State_HasError = -1,                  // 其它错误，已经在函数内部输出
+      State_TypeNotFound = -2,              // 没有找到类型
+      State_DuplicatedType = -3,            // 重复注册类型
+      State_DuplicatedIdentifier = -4,      // 重复定义变量
+      State_DefineAsType = -5,              // 变量已经被定义为类型
+      State_DefineAsIdentifier = -6,        // 类型已经被定义为变量
+      State_VariableIsNotIdentifier = -7,   // 期望的变量名不是一个标识符
       State_RequireConstantExpression = -8, // 需要常量表达式
-      State_RequireSubscript = -9,   // 缺少下标: int a[2][] = {};
-      State_CastTypeError = -10,     // 类型转换错误，含有的右值不能转换成变量类型
+      State_RequireSubscript = -9,          // 缺少下标: int a[2][] = {};
+      State_CastTypeError = -10,            // 类型转换错误，含有的右值不能转换成变量类型
     };
 
   protected:
@@ -262,12 +263,12 @@ namespace UVShader
     const NameContext* m_pParent;     // 默认记录的祖先
     const NameContext* m_pVariParent; // 变量记录的祖先，比如结构体成员NameContext.m_pVariParent应该为空
 
-    TypeMap     m_TypeMap;  // typedef 会产生两个内容相同的TYPEDESC
-    FuncMap     m_FuncMap;
-    VariableMap m_VariableMap;
-    State       m_eLastState;
+    TypeMap       m_TypeMap;  // typedef 会产生两个内容相同的TYPEDESC
+    FuncMap       m_FuncMap;
+    IdentifierMap m_IdentifierMap;
+    State         m_eLastState;
     StructContextMap  m_StructContextMap; // 结构体成员的NameContext
-    ValuePoolMap      m_ValuePoolMap;
+    //ValuePoolMap      m_ValuePoolMap;
     const TYPEDESC*   m_pReturnType;
     size_t      m_nCount;
 
@@ -278,8 +279,8 @@ namespace UVShader
     NameContext(const NameContext& sNameCtx){}
     NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
-    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const TYPEDESC* pTypeDesc, const TOKEN* ptkVariable, const GLOB* pValueExprGlob);
-    State IntRegisterVariable(const TYPEDESC** ppType, VARIDESC** ppVariable, const clStringA& strType, const TOKEN* ptkVariable, const GLOB* pValueExprGlob);
+    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const TYPEDESC* pTypeDesc, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob);
+    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const clStringA& strType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob);
   public:
     NameContext(GXLPCSTR szName);
     NameContext(GXLPCSTR szName, const NameContext* pParent, const NameContext* pVariParent = reinterpret_cast<NameContext*>(-1));
@@ -301,28 +302,22 @@ namespace UVShader
     const TYPEDESC* GetType(const TOKEN& token) const;
     const TYPEDESC* GetType(VALUE::Rank rank) const;
     const TYPEDESC* ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
-    const TYPEDESC* GetVariable(const TOKEN* ptkName) const;
-    const ValuePool* GetValuePool(const TOKEN* ptkName) const;
-    const VALUE*    GetVariableValue(const TOKEN* ptkName) const;
-    const VARIDESC* GetVariableDesc(const TOKEN* ptkName) const;
-    VALUE& GetVariableValue(VALUE& value, const TOKEN* ptkName) const;
+    const TYPEDESC* GetIdentifier(const TOKEN* ptkName) const;
+    const IDNFDESC* GetIdentifierDesc(const TOKEN* ptkName) const;
     const NameContext* GetStructContext(const clStringA& strName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
-    //const TYPEDESC* RegisterArrayType(const TYPEDESC* pTypeDesc, size_t nDimension);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     GXBOOL TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
-    const TYPEDESC* RegisterVariable(const clStringA& strType, const GLOB* pVariableDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
-    const TYPEDESC* RegisterVariable(const clStringA& strType, const TOKEN* ptkVariable, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
-    //void ChangeVariableType(const TYPEDESC* pTypeDesc, const SYNTAXNODE* pVariableDeclNode); // 只能改变之前没确定长度数组类型的变量
+    const TYPEDESC* RegisterIdentifier(const clStringA& strType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterIdentifier(const clStringA& strType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterTypes(const clStringA& strBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
-    const TYPEDESC* RegisterMultidimVariable(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
+    const TYPEDESC* RegisterMultidimIdentifier(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
 #endif
     State  GetLastState() const;
-    //const TYPEDESC* GetMember(const SYNTAXNODE* pNode) const;
     void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
     
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
@@ -351,8 +346,6 @@ namespace UVShader
       SYNTAXNODE::GlobList::iterator iter;
       const TOKEN* ptkOpcode; // 用于输出定位
     };
-
-
 
     CodeParser*             m_pCodeParser;
     NameContext&            m_rNameCtx;
@@ -801,12 +794,12 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     //const TYPEDESC2* Verify_Type(const TOKEN& tkType);
     //const TYPEDESC* Verify_Struct(const TOKEN& tkType, const NameContext* pNameSet);
-    static const TOKEN* GetVariableNameWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量名，如“vColor”
-    const SYNTAXNODE::GLOB* GetVariableDeclWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量声明，可能含有下标，如“vColor[2][3]”
+    static const TOKEN* GetIdentifierNameWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量名，如“vColor”
+    const SYNTAXNODE::GLOB* GetIdentifierDeclWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量声明，可能含有下标，如“vColor[2][3]”
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
 
-    GXBOOL Verify_VariableTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
-    GXBOOL Verify_VariableDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstVariable = FALSE, GXBOOL bMember = FALSE);
+    GXBOOL Verify_IdentifierTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstIdentifier = FALSE, GXBOOL bMember = FALSE);
+    GXBOOL Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstIdentifier = FALSE, GXBOOL bMember = FALSE);
     //GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);

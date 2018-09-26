@@ -34,7 +34,7 @@ float func()
   return a;
 }
 
-float func2(in float a)
+float func2(float a)
 {
   float x=3.1415926*2;
   float y=23+345+23*65;
@@ -42,7 +42,7 @@ float func2(in float a)
   return a+1.0f*3.1415926;
 }
 
-void func3(in float a,in float b)
+void func3(float a,float b)
 {
   float c=a+b;
 }
@@ -339,12 +339,12 @@ void test_arithmetic_expression()
   a=(b+c)*d+e+f;
 }
 
-float CalcC_1(in float t,in float p,in float q)
+float CalcC_1(float t,float p,float q)
 {
   return t<1.0/4.0?p+(q-p)*4.0*t:t<0.5?q:t<3.0/4.0?p+(q-p)*8.0*(3.0/4.0-t):p;
 }
 
-float CalcC_2(in float t,in float p,in float q)
+float CalcC_2(float t,float p,float q)
 {
   if(t<1.0/4.0) {
     return p+(q-p)*4.0*t;
