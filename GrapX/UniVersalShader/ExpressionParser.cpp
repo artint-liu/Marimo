@@ -837,17 +837,17 @@ namespace UVShader
   // 计算常量定义中的值
   // 返回值：State_OK, State_Call, State_Variable 不会输出消息，
   // 其它结果会在内部输出错误消息
-  VALUE::State CodeParser::CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob)
-  {
-    value_out.clear();
-    VALUE::State state = sNameCtx.CalculateConstantValue(value_out, this, &const_expr_glob);
-    if(state != VALUE::State_OK)
-    {
-      const TOKEN* pToken = const_expr_glob.GetFrontToken();
-      DumpValueState(GetLogger(), state, pToken);      
-    }
-    return state;
-  }
+  //VALUE::State CodeParser::CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob)
+  //{
+  //  value_out.clear();
+  //  VALUE::State state = sNameCtx.CalculateConstantValue(value_out, this, &const_expr_glob);
+  //  if(state != VALUE::State_OK)
+  //  {
+  //    const TOKEN* pToken = const_expr_glob.GetFrontToken();
+  //    DumpValueState(GetLogger(), state, pToken);      
+  //  }
+  //  return state;
+  //}
 
   void CodeParser::DbgBreak(const GLOB& glob)
   {
@@ -5803,10 +5803,7 @@ namespace UVShader
         {
           if(pTypeDesc->sDimensions.empty()) {
             vctx.pLogger->OutputErrorW(pNode->Operand[0], UVS_EXPORT_TEXT(2109, "下标要求数组类型"));
-            vctx.pType = NULL;
-            vctx.result = ValueResult_Failed;
-            vctx.ClearValueOnly();
-            return NULL;
+            return vctx.ClearValue(ValueResult_Failed).pType;
           }
 #ifdef _DEBUG
           const TOKEN* pMemberToken = pNode->Operand[0].GetBackToken();
@@ -5827,7 +5824,7 @@ namespace UVShader
       clStringW strW;
       const TOKEN* pToken = pNode->Operand[1].GetFrontToken();
       GetLogger()->OutputErrorW(*pToken, UVS_EXPORT_TEXT(5041, "结构体不支持的操作: “%s”"), pToken->ToString(strW).CStr());
-      return NULL;
+      return vctx.ClearValue(ValueResult_Failed).pType;
     }
     else if(pNode->Operand[1].IsToken())
     {
@@ -5933,9 +5930,7 @@ namespace UVShader
       vctx_subscript.count != 1)
     {
       GetLogger()->OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
-      vctx.result = ValueResult_Failed;
-      vctx.pType = NULL;
-      return vctx.pType;
+      return vctx.ClearValue(ValueResult_Failed).pType;
     }
 
     if(vctx.pType->cate == TYPEDESC::TypeCate_MultiDim)
@@ -5965,10 +5960,7 @@ namespace UVShader
     }
 
     GetLogger()->OutputErrorW(*pNode->Operand[0].GetFrontToken(), UVS_EXPORT_TEXT(2109, "下标要求数组类型"));
-    vctx.result = ValueResult_Failed;
-    vctx.pType = NULL;
-    vctx.ClearValueOnly();
-    return NULL;
+    return vctx.ClearValue(ValueResult_Failed).pType;
   }
 
   const TYPEDESC* CodeParser::InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond)
@@ -6147,8 +6139,7 @@ namespace UVShader
       // int3 vs float3, cast type
       // float3 vs float4, error!
       vctx.pLogger->OutputTypeCastFailed(pLocation, pOperator, pAB[0].pType, pAB[1].pType);
-      vctx.result = ValueResult_Failed;
-      vctx.ClearValueOnly();
+      vctx.ClearValue(ValueResult_Failed);
       return FALSE;
     }
 
@@ -6888,21 +6879,56 @@ namespace UVShader
 
         if(pPreCompMath)
         {
-          VALUE value_zero;
-          rIdnfDesc.pool.assign(pPreCompMath->scaler_count, value_zero.SetZero());
+          //VALUE value_zero;
+          //rIdnfDesc.pool.assign(pPreCompMath->scaler_count, value_zero.SetZero());
+          rIdnfDesc.pool.reserve(pPreCompMath->scaler_count);
 
           SYNTAXNODE::GlobList sInitList;
-          int ii = 0;
+          VALUE_CONTEXT vctx_param(*this);
+          vctx_param.pLogger = GetLogger();
           CodeParser::BreakComma(sInitList, pValueExprGlob->pNode->Operand[1]);
-          for(auto it = sInitList.begin(); it != sInitList.end(); ++it, ii++)
+          //int ii = 0;
+          for(auto it = sInitList.begin(); it != sInitList.end(); ++it/*, ii++*/)
           {
-            VALUE::State state = CalculateConstantValue(rIdnfDesc.pool[ii], m_pCodeParser, &*it);
-            if(state != VALUE::State_OK) {
+            vctx_param.ClearValue();
+            m_pCodeParser->InferType(vctx_param, *it);
+            //VALUE::State state = CalculateConstantValue(rIdnfDesc.pool[ii], m_pCodeParser, &*it);
+            if(vctx_param.pValue && vctx_param.count > 0)
+            {
+              //ASSERT(vctx_param.result == ValueResult_OK || vctx_param.result == ValueResult_Variable);
+              for(size_t ip = 0; ip < vctx_param.count; ip++)
+              {
+                rIdnfDesc.pool.push_back(vctx_param.pValue[ip]);
+                rIdnfDesc.pool.back().CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
+              }
+            }
+            else if(vctx_param.result == ValueResult_OK || vctx_param.result == ValueResult_Variable)
+            {
+              rIdnfDesc.pool.clear();
+              break;
+            }
+            //if(vctx_param.result != ValueResult_OK && vctx_param.result != ValueResult_Variable)
+            else
+            {
               GetLogger()->OutputErrorW(*it, UVS_EXPORT_TEXT(5054, "无法计算表达式常量"));
               return State_RequireConstantExpression;
             }
-            rIdnfDesc.pool[ii].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
+            //rIdnfDesc.pool[ii].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
           }
+
+          if(_CL_NOT_(rIdnfDesc.pool.empty()))
+          {
+            ASSERT(rIdnfDesc.pool.size() == 1 || rIdnfDesc.pool.size() == rIdnfDesc.pDesc->CountOf());
+
+            if(rIdnfDesc.pool.size() < rIdnfDesc.pDesc->CountOf())
+            {
+              VALUE temp_value = rIdnfDesc.pool.front();
+              rIdnfDesc.pool.assign(rIdnfDesc.pDesc->CountOf(), temp_value);
+            }
+          }
+        }
+        else {
+          // 不处理
         }
       }
       else
@@ -6930,13 +6956,16 @@ namespace UVShader
         }
       }
 
-      if(rIdnfDesc.pool.empty()) {
-        rIdnfDesc.pool.clear();
-      }
+      //if(rIdnfDesc.pool.empty()) {
+      //  rIdnfDesc.pool.clear();
+      //}
     }
     else {
       rIdnfDesc.glob.ptr = NULL;
     }
+
+    // 尺寸一定与类型相符
+    ASSERT(rIdnfDesc.pool.empty() || rIdnfDesc.pool.size() == rIdnfDesc.pDesc->CountOf());
 
     return State_Ok;
   }
@@ -7057,18 +7086,13 @@ namespace UVShader
 
         sDimensions.push_back((size_t)value.nValue64);
       }
-      else if(state == VALUE::State_SyntaxError)
+      else if(state == VALUE::State_SyntaxError || state == VALUE::State_Call)
       {
-        if(m_eLastState == State_RequireConstantExpression)
-        {
-          clStringW strW;
-          GetLogger()->OutputErrorW(subscript_glob,
-            UVS_EXPORT_TEXT(2057, "应输入常量表达式：“%s”"),
-            subscript_glob.GetFrontToken()->ToString(strW).CStr());
-        }
-        else {
-          PARSER_BREAK2(m_pCodeParser, subscript_glob);
-        }
+        clStringW strW;
+        GetLogger()->OutputErrorW(subscript_glob,
+          UVS_EXPORT_TEXT(2057, "应输入常量表达式：“%s”"),
+          subscript_glob.GetFrontToken()->ToString(strW).CStr());
+        m_eLastState = State_RequireConstantExpression;
         return NULL;
       }
       else if(state == VALUE::State_BadIdentifier)
@@ -7995,6 +8019,16 @@ namespace UVShader
     pValue = NULL;
     count  = 0;
     pool.clear();
+  }
+
+  const VALUE_CONTEXT& VALUE_CONTEXT::ClearValue(ValueResult r)
+  {
+    result = r;
+    pType = NULL;
+    pValue = NULL;
+    count = 0;
+    pool.clear();
+    return *this;
   }
 
   void VALUE_CONTEXT::ClearValueOnly()

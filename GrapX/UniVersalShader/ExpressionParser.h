@@ -203,6 +203,7 @@ namespace UVShader
     void SetProperty(const VALUE_CONTEXT& vctx); // ¥”vctx∏¥÷∆ Ù–‘
     void UsePool();
     void ClearValue();
+    const VALUE_CONTEXT& ClearValue(ValueResult r);
     void ClearValueOnly();
     void CopyValue(const VALUE_CONTEXT& vc);
     void SetType(VALUE::Rank rank);
