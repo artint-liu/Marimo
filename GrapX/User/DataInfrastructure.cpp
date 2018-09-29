@@ -1,9 +1,9 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
-#include "GrapX.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/DataInfrastructure.H"
-#include "GrapX/GXUser.H"
+#include "GrapX.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/DataInfrastructure.h"
+#include "GrapX/GXUser.h"
 
 namespace GXUI
 {

@@ -1,7 +1,7 @@
-#include "GrapX.H"
+#include "GrapX.h"
 #include "User/GrapX.Hxx"
-#include "GrapX/GResource.H"
-#include "GrapX/GXUser.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GXUser.h"
 #include "GXResourceMgr.h"
 
 //////////////////////////////////////////////////////////////////////////

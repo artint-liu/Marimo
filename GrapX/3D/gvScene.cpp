@@ -1,23 +1,23 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
 #include "GrapX/GShader.h"
-#include "GrapX/GXCanvas.H"
+#include "GrapX/GXCanvas.h"
 #include "GrapX/GPrimitive.h"
-#include "GrapX/GTexture.H"
+#include "GrapX/GTexture.h"
 #include "GrapX/GVPhySimulator.h"
 #include "GrapX/GCamera.h"
-#include "GrapX/GXKernel.H"
+#include "GrapX/GXKernel.h"
 
 // 私有头文件
-#include "clTree.H"
+#include "clTree.h"
 #include "clTransform.h"
 
 #include "GrapX/GXCanvas3D.h"
-#include "GrapX/VertexDecl.H"
+#include "GrapX/VertexDecl.h"
 
 #include <GrapX/gvNode.h>
 #include <GrapX/gvMesh.h>

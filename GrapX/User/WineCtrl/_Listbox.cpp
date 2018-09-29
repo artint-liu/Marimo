@@ -32,9 +32,9 @@
  *    - LB_GETLISTBOXINFO
  *    - LBS_NODATA
  */
-#include <GrapX.H>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
+#include <GrapX.h>
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
 #include "GrapX/gxKernel.h"
 
 #include <string.h>
@@ -42,7 +42,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <GrapX/WineComm.H>
+#include <GrapX/WineComm.h>
 //#include "windef.h"
 //#include "winbase.h"
 //#include "wingdi.h"
@@ -51,7 +51,7 @@
 //#include "user_private.h"
 //#include "controls.h"
 //#include "wine/debug.h"
-#include "GrapX/gxError.H"
+#include "GrapX/gxError.h"
 //WINE_DEFAULT_DEBUG_CHANNEL(listbox);
 
 #pragma warning( disable : 4244 )  // _w64型数与普通类型的相互转换

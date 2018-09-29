@@ -1,14 +1,14 @@
 #if defined(_WINDOWS) && ! defined(__clang__)
 #include <windows.h>
 
-#include "GrapX.H"
-#include "GXApp.H"
+#include "GrapX.h"
+#include "GXApp.h"
 #include "res/resource.h"
 
 #include <Smart/smartstream.h>
 #include <clTokens.h>
 #include <clStock.h>
-#include <clPathFile.H>
+#include <clPathFile.h>
 
 //#pragma comment(lib, "user32.lib")
 

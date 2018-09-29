@@ -1,20 +1,20 @@
 ﻿// 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 
 // 平台相关
-#include "GrapX/GResource.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
-//#include "Include/DataInfrastructure.H"
-//#include "clstd/clPathFile.H"
+#include "GrapX/GResource.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+//#include "Include/DataInfrastructure.h"
+//#include "clstd/clPathFile.h"
 
 // 私有头文件
 #include "User/GXWindow.h"
-#include "GrapX/GXUser.H"
-//#include "Include/GXGDI.H"
-//#include "Include/GXKernel.H"
+#include "GrapX/GXUser.h"
+//#include "Include/GXGDI.h"
+//#include "Include/GXKernel.h"
 //#include "Controls/GXUICtrlBase.h"
 //#include "Controls/GXUIStatic.h"
 //#include "Controls/GXUIButton.h"
@@ -24,7 +24,7 @@
 //#include "Controls/PropertySheet.h"
 //#include "Controls/PropertyList.h"
 #include "User/UILayoutMgr.h"
-//#include "gxDevice.H"
+//#include "gxDevice.h"
 
 GXLRESULT GXCALLBACK CommDialogWndProcEx(GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam)
 {

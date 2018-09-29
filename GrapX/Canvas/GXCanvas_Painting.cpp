@@ -1,5 +1,5 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
 

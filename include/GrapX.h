@@ -31,7 +31,7 @@
 
 #include "GrapX/GBaseTypes.h"
 #include <GrapX/GUnknown.h>
-#include <GrapX/gxError.H>
+#include <GrapX/gxError.h>
 
 #ifndef offsetof
 #define offsetof(s,m)     (size_t)&reinterpret_cast<const volatile char&>((((s *)0)->m))
@@ -5361,11 +5361,11 @@ extern "C"
 #include <GrapX/GXUser.h>
 #include <GrapX/GXGDI.h>
 
-#include "GrapX/WineTreeViewDef.H"
-#include "GrapX/WineToolTipsDef.H"
-#include "GrapX/WineDragListDef.H"
-#include "GrapX/WinePagerDef.H"
-#include "GrapX/WineToolbarDef.H"
-#include "GrapX/VertexDecl.H"
+#include "GrapX/WineTreeViewDef.h"
+#include "GrapX/WineToolTipsDef.h"
+#include "GrapX/WineDragListDef.h"
+#include "GrapX/WinePagerDef.h"
+#include "GrapX/WineToolbarDef.h"
+#include "GrapX/VertexDecl.h"
 
 #endif // _GRAPX_DEF_HEADER_

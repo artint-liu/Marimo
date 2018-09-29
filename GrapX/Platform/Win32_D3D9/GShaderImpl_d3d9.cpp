@@ -3,34 +3,34 @@
 #define _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D9_
 
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/GShader.H"
-#include "GrapX/GTexture.H"
-#include "GrapX/GXKernel.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/GShader.h"
+#include "GrapX/GTexture.h"
+#include "GrapX/GXKernel.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
 #include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.h"
 
 // 私有头文件
-#include <GrapX/VertexDecl.H>
+#include <GrapX/VertexDecl.h>
 #include "Canvas/GXResourceMgr.h"
 #include "GrapX/GXCanvas3D.h"
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
-#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.H"
-#include "clPathFile.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
+#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.h"
+#include "clPathFile.h"
 #include "Smart/smartstream.h"
 #include "GDI/GXShaderMgr.h"
 //#define PS_REG_IDX_SHIFT 16

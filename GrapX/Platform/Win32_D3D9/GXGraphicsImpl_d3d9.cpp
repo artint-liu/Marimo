@@ -7,39 +7,39 @@
 #define _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D9_
 
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GRegion.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GRegion.h"
 #include "GrapX/GPrimitive.h"
-#include "GrapX/GShader.H"
-#include "GrapX/GStateBlock.H"
-#include "GrapX/GTexture.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/GXImage.H"
-#include "GrapX/GXFont.H"
+#include "GrapX/GShader.h"
+#include "GrapX/GStateBlock.h"
+#include "GrapX/GTexture.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/GXImage.h"
+#include "GrapX/GXFont.h"
 #include "GrapX/GXCanvas3D.h"
 #include "GrapX/MOLogger.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GPrimitiveImpl_d3d9.h"
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
 #include "Platform/Win32_D3D9/GShaderStubImpl_d3d9.h"
-#include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.H"
+#include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.h"
 
 // 私有头文件
-#include <clPathFile.H>
-#include "Platform/Win32_D3D9/GStateBlock_d3d9.H"
-#include <GrapX/VertexDecl.H>
+#include <clPathFile.h>
+#include "Platform/Win32_D3D9/GStateBlock_d3d9.h"
+#include <GrapX/VertexDecl.h>
 #include "Canvas/GXResourceMgr.h"
 #include "Canvas/GXEffectImpl.h"
 //#include "Console.h"
@@ -47,28 +47,28 @@
 #include <clTokens.h>
 #include <clStock.h>
 
-#include "GrapX/GXKernel.H"
-#include "GrapX/GXUser.H"
-#include <GDI/RegionFunc.H>
-#include <GDI/GRegionImpl.H>
-#include "Platform/Win32_D3D9/GTextureImpl_d3d9.H"
-#include "Platform/Win32_D3D9/GTexture3DImpl_d3d9.H"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXUser.h"
+#include <GDI/RegionFunc.h>
+#include <GDI/GRegionImpl.h>
+#include "Platform/Win32_D3D9/GTextureImpl_d3d9.h"
+#include "Platform/Win32_D3D9/GTexture3DImpl_d3d9.h"
 
-#include "Canvas/GXImageImpl.H"
-#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.H"
+#include "Canvas/GXImageImpl.h"
+#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.h"
 
 #include <ft2build.h>
 #include <freetype/freetype.h>
 #include <freetype/ftglyph.h>
-#include <Canvas/GFTFontImpl.H>
+#include <Canvas/GFTFontImpl.h>
 #include <GDI/GXShaderMgr.h>
 
-#include "GrapX/gxError.H"
+#include "GrapX/gxError.h"
 
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
 // Canvas3D用的
 #include "GrapX/GCamera.h"
-#include "GrapX/GrapVR.H"  // Canvas3D 用的
+#include "GrapX/GrapVR.h"  // Canvas3D 用的
 #include "Canvas/GXMaterialImpl.h"
 // </Canvas3D用的>
 

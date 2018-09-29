@@ -211,11 +211,11 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#include <GrapX.H>
-#include <User/GrapXDef.H>
+#include <GrapX.h>
+#include <User/GrapXDef.h>
 #include "GrapX/gUxtheme.h"
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
 #include "GrapX/GXImm.h"
 
 #include <stdarg.h>
@@ -223,9 +223,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <GrapX/WineComm.H>
-#include <User/Win32Emu/GXCommCtrl.H>
-#include <User/Win32Emu/_dpa.H>
+#include <GrapX/WineComm.h>
+#include <User/Win32Emu/GXCommCtrl.h>
+#include <User/Win32Emu/_dpa.h>
 
 #pragma warning( disable : 4244 )  // _w64型数与普通类型的相互转换
 #pragma warning( disable : 4018 )  // 无符号与有符号数比较

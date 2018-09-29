@@ -1,10 +1,10 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
-#include "GrapX/GXUser.H"
-#include <GXStation.H>
+#include "GrapX/GXUser.h"
+#include <GXStation.h>
 #include <User/GXWindow.h>
-#include "_dpa.H"
+#include "_dpa.h"
 
 extern GXLPSTATION g_pCurStation;
 #ifdef __cplusplus

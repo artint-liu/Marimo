@@ -4,7 +4,7 @@
 //
 // Vertex Shader
 //
-#include "FXCommRegister.H"
+#include "FXCommRegister.h"
 
 struct VS_INPUT
 {

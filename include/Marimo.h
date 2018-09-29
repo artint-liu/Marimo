@@ -15,7 +15,7 @@
 //
 #include <cltree.h>
 //#include "socket/clSocket.h"
-//#include "3D/GrapVR.H"
+//#include "3D/GrapVR.h"
 
 // fbx 文件解析库, 来自 Autodesk
 //#include "GameEngine\third_party\FBX SDK\2013.2\include\fbxsdk.h"
@@ -28,19 +28,19 @@
 // GrapX Headers
 //
 
-#include <GrapX.H>
-#include <GXApp.H>
-//#include <GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GShader.H>
-#include <GrapX/GPrimitive.H>
-#include <GrapX/GTexture.H>
-#include <GrapX/GRegion.H>
-#include <GrapX/GXFont.H>
-#include <GrapX/GXImage.H>
-#include <GrapX/GXSprite.H>
-#include <GrapX/MOSprite.H>
-#include <GrapX/GXCanvas.H>
+#include <GrapX.h>
+#include <GXApp.h>
+//#include <GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GShader.h>
+#include <GrapX/GPrimitive.h>
+#include <GrapX/GTexture.h>
+#include <GrapX/GRegion.h>
+#include <GrapX/GXFont.h>
+#include <GrapX/GXImage.h>
+#include <GrapX/GXSprite.h>
+#include <GrapX/MOSprite.h>
+#include <GrapX/GXCanvas.h>
 #include <GrapX/GXCanvas3D.h>
 #include <GrapX/GXGraphics.h>
 #include <GrapX/GCamera.h>
@@ -50,22 +50,22 @@
 #include <clTransform.h>
 
 #include <GrapX/StdMtl.h>
-#include <GrapX/GVNode.H>
-#include <GrapX/GVMesh.H>
-#include <GrapX/GVGeometry.H>
+#include <GrapX/GVNode.h>
+#include <GrapX/GVMesh.h>
+#include <GrapX/GVGeometry.h>
 #include <GrapX/gvSkinnedMesh.h>
 #include <GrapX/gvScene.h>
 #include <GrapX/gvSkeleton.h>
 #include <GrapX/gvSequence.h>
 
-#include <GrapX/GXUser.H>
-#include <GrapX/gxDevice.H>
-#include <GrapX/gxKernel.H>
+#include <GrapX/GXUser.h>
+#include <GrapX/gxDevice.h>
+#include <GrapX/gxKernel.h>
 #include <GrapX/Platform.h>
-#include <GrapX/DataPool.H>
-#include <GrapX/DataPoolVariable.H>
-#include <GrapX/DataPoolIterator.H>
-#include <GrapX/DataInfrastructure.H>
+#include <GrapX/DataPool.h>
+#include <GrapX/DataPoolVariable.h>
+#include <GrapX/DataPoolIterator.h>
+#include <GrapX/DataInfrastructure.h>
 //#include "third_party\FBX SDK\2013.2\include\fbxsdk.h"
 
 
@@ -81,7 +81,7 @@
 #include <Engine/TranslationAxis.h>
 #include <Engine/Drag.h>
 
-#include <Engine/GXFC.H>
+#include <Engine/GXFC.h>
 #include <Engine/SkyQuad.h>
 #include <Engine/BrunetonSkyQuad.h>
 //#include <Engine/VideoCapture.h>

@@ -46,19 +46,19 @@
 
 //WINE_DEFAULT_DEBUG_CHANNEL(dpa);
 
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXKernel.H"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXGDI.h"
 #include "GrapX/GXImm.h"
 #include "GXCommCtrl.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include <GrapX/WineComm.H>
-#include <User/Win32Emu/_dpa.H>
+#include <GrapX/WineComm.h>
+#include <User/Win32Emu/_dpa.h>
 
 #ifdef TRACE
 #undef TRACE

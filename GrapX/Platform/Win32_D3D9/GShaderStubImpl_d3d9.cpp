@@ -1,21 +1,21 @@
 #ifdef ENABLE_GRAPHICS_API_DX9
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GShader.H"
-#include "GrapX/GTexture.H"
-#include "GrapX/GXKernel.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GShader.h"
+#include "GrapX/GTexture.h"
+#include "GrapX/GXKernel.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
@@ -24,12 +24,12 @@
 
 
 // 私有头文件
-//#include <Driver/Shader/VertexDecl.H>
+//#include <Driver/Shader/VertexDecl.h>
 #include "Canvas/GXResourceMgr.h"
 //#include "include/GXCanvas3D.h"
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
-//#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.H"
-//#include "clstd/clPathFile.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
+//#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.h"
+//#include "clstd/clPathFile.h"
 //#include "Smart/smartstream.h"
 //#define PS_REG_IDX_SHIFT 16
 //#define PS_REG_IDX_PART  (1 << PS_REG_IDX_SHIFT)

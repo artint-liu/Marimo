@@ -44,22 +44,22 @@
 
 // Artint: 这个修改自1.3.30版Wine项目的Edit控件代码
 
-#include <GrapX.H>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
-#include "GrapX/GXKernel.H"
+#include <GrapX.h>
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
+#include "GrapX/GXKernel.h"
 #include "GrapX/GXImm.h"
-#include "GrapX/GResource.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/GXCanvas.H"
+#include "GrapX/GResource.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/GXCanvas.h"
 #include "GXUICtrlBase.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <GrapX/WineComm.H>
+#include <GrapX/WineComm.h>
 
 #undef TRACE
 #undef TRACE_

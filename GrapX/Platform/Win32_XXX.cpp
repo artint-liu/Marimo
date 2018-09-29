@@ -1,20 +1,20 @@
 // 全局头文件
-#include "GrapX.H"
-#include "GXApp.H"
+#include "GrapX.h"
+#include "GXApp.h"
 #include "User/GrapX.Hxx"
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GXUser.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GXUser.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
 #include "GrapX/MOLogger.h"
 
 // 私有头文件
-#include <User32Ex.H>
+#include <User32Ex.h>
 //#include "Console.h"
 #include "GXStation.h"
-#include "GrapX/gxDevice.H"
+#include "GrapX/gxDevice.h"
 #include "GrapX/Platform.h"
 #include "Win32_XXX.h"
 

@@ -38,10 +38,10 @@
 *    - Thread-safe locking
 */
 
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
 #include "GrapX/GXImm.h"
 
 #include <stdarg.h>
@@ -69,7 +69,7 @@
 //WINE_DEFAULT_DEBUG_CHANNEL(imagelist);
 
 #include "GXCommCtrl.h"
-#include <GrapX/WineComm.H>
+#include <GrapX/WineComm.h>
 #include "_imagelist.h"
 
 #pragma warning( disable : 4244 )  // _w64型数与普通类型的相互转换

@@ -1,22 +1,22 @@
 ﻿// 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-#include "GrapX/GResource.H"
-#include "GrapX/GXImage.H"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/MOSprite.H"
-#include "GrapX/GXGraphics.H"
-//#include "GrapX/GXKernel.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GXImage.h"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/MOSprite.h"
+#include "GrapX/GXGraphics.h"
+//#include "GrapX/GXKernel.h"
 
 // 私有头文件
 #include <clPathFile.h>
-#include <clUtility.H>
+#include <clUtility.h>
 #include <clStringSet.h>
 #include <Smart/SmartStream.h>
 #include <clTokens.h>
 #include <clStock.h>
-#include "MOSpriteImpl.H"
+#include "MOSpriteImpl.h"
 
 #define _测试后删除这行_ CLBREAK
 

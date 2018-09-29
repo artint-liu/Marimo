@@ -2,14 +2,14 @@
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GStateBlock.H"
-#include "GrapX/GXKernel.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GStateBlock.h"
+#include "GrapX/GXKernel.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
@@ -19,10 +19,10 @@
 // 私有头文件
 #define _GXGRAPHICS_INLINE_RENDERSTATE_
 #include "Canvas/GXResourceMgr.h"
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
-#include "Platform/Win32_D3D9/GStateBlock_d3d9.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
+#include "Platform/Win32_D3D9/GStateBlock_d3d9.h"
 #include "User/GrapX.Hxx"
-#include "GrapX/gxError.H"
+#include "GrapX/gxError.h"
 
 namespace D3D9
 {

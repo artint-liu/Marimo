@@ -3,7 +3,7 @@
 #include "User/GrapX.Hxx"
 
 #include <clPathFile.h>
-//#include <clString.H>
+//#include <clString.h>
 
 #include "GrapX/GResource.h"
 #include "GrapX/GXGraphics.h"

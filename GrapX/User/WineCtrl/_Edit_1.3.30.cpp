@@ -42,17 +42,17 @@
  *
  */
 
-#include <GrapX.H>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
-#include "GrapX/GXKernel.H"
+#include <GrapX.h>
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
+#include "GrapX/GXKernel.h"
 #include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <GrapX/WineComm.H>
+#include <GrapX/WineComm.h>
 
 #undef TRACE_
 #define TRACE_(_TYPE)  TRACEW

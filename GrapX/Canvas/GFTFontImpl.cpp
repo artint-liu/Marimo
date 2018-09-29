@@ -1,13 +1,13 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include "User/GrapX.Hxx"
 
 // 标准接口
-#include "GrapX/GResource.H"
-#include "GrapX/GTexture.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXFont.H"
-#include "GrapX/GXKernel.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GTexture.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXFont.h"
+#include "GrapX/GXKernel.h"
 
 // 平台相关
 // 私有头文件
@@ -19,9 +19,9 @@
 #include <freetype/ftglyph.h>
 #include <freetype/ftwinfnt.h>
 
-#include "GrapX/GXUser.H"
+#include "GrapX/GXUser.h"
 
-#include "GFTFontImpl.H"
+#include "GFTFontImpl.h"
 
 #ifdef _DEBUG
 #  pragma comment(lib, "freetype2411ST_D.lib")

@@ -1,19 +1,19 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXKernel.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXKernel.h"
 
 // 私有头文件
 //#include <vector>
-//#include <clstd/clTree.H>
+//#include <clstd/clTree.h>
 
 //#include <3D/GVNode.h>
 //#include <3D/gvMesh.h>
 #include "GrapX/gvSceneMgr.h"
-#include "GrapX/GrapVR.H"
+#include "GrapX/GrapVR.h"
 
 GVSceneMgr::GVSceneMgr(GXGraphics* pGraphics)
   : m_pGraphics(pGraphics)

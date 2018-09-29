@@ -1,15 +1,15 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GRegion.H>
-#include "GrapX/GXUser.H"
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GRegion.h>
+#include "GrapX/GXUser.h"
 
 // 私有头文件
-#include "RegionFunc.H"
-#include "GRegionImpl.H"
+#include "RegionFunc.h"
+#include "GRegionImpl.h"
 
 
 typedef clvector<GXBYTE> ByteArray;

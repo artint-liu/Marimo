@@ -1,17 +1,17 @@
-#include "GrapX.H"
+#include "GrapX.h"
 
 #include "Smart/smartstream.h"
 #include "smart/SmartRepository.h"
-#include "clUtility.H"
+#include "clUtility.h"
 
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
 #include "GrapX/GPrimitive.h"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GShader.H"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GShader.h"
 #include "GrapX/gxUtility.h"
 
-#include "GrapX/GrapVR.H"
+#include "GrapX/GrapVR.h"
 
 #define MESHFMT_VERTEXDECL   "%s@VertexDeclaration"
 #define MESHFMT_ASMVERTICES  "%s@AssembledVertices"
@@ -561,7 +561,7 @@ GXBOOL GXDLL PrimitiveUtility::SetUnifiedDiffuse( GPrimitive* pPrimitive, GXColo
 }
 
 #include "clImage.h"
-#include "GrapX/GTexture.H"
+#include "GrapX/GTexture.h"
 
 GXDLL clstd::Image* TextureUtility::CreateImage( GTexture* pTexture )
 {

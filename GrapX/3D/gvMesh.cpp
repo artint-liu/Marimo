@@ -1,20 +1,20 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <GrapX/GResource.H>
+#include <GrapX/GResource.h>
 #include <GrapX/GPrimitive.h>
-#include <GrapX/GXGraphics.H>
-#include <GrapX/GShader.H>
+#include <GrapX/GXGraphics.h>
+#include <GrapX/GShader.h>
 
 // 私有头文件
-#include "clTree.H"
-#include "clTransform.H"
+#include "clTree.h"
+#include "clTransform.h"
 #include "smart/SmartRepository.h"
 #include <Smart/smartstream.h>
-#include <GrapX/VertexDecl.H>
-#include "GrapX/gxError.H"
+#include <GrapX/VertexDecl.h>
+#include "GrapX/gxError.h"
 
 #include <GrapX/gvNode.h>
 #include <GrapX/gvMesh.h>

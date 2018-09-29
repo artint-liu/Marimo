@@ -1,26 +1,26 @@
 ﻿// 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-#include <GrapX/GResource.H>
+#include <GrapX/GResource.h>
 #include <GrapX/GPrimitive.h>
-#include <GrapX/GXGraphics.H>
-#include <GrapX/GShader.H>
+#include <GrapX/GXGraphics.h>
+#include <GrapX/GShader.h>
 
 // 私有头文件
-//#include <clstd/clTree.H>
+//#include <clstd/clTree.h>
 //#include <clstd/Smart/smartstream.h>
-#include <GrapX/VertexDecl.H>
+#include <GrapX/VertexDecl.h>
 #include "GrapX/gxUtility.h"
 
-#include "GrapX/gxError.H"
+#include "GrapX/gxError.h"
 
 //#include <3D/gvNode.h>
 //#include <3D/gvMesh.h>
 //#include <3D/gvGeometry.h>
 //#include <3D/gvScene.h>
-#include "GrapX/GrapVR.H"
+#include "GrapX/GrapVR.h"
 namespace PrimitiveIndicesUtility
 {
   template<typename _VIndexTy>

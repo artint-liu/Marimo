@@ -1,16 +1,16 @@
 #ifndef _DEV_DISABLE_UI_CODE
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GXSprite.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GXSprite.h>
 
 // 私有头文件
 #include <User/Win32Emu/GUXTheme.hxx>
-#include <User/Win32Emu/guxtheme/Button_ID_BP.H>
+#include <User/Win32Emu/guxtheme/Button_ID_BP.h>
 
 static unsigned long s_SpriteIdxMap_PBS[] =
 {

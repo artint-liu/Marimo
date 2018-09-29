@@ -1,12 +1,12 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GShader.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GShader.h>
 
-#include "GrapX/VertexDecl.H"
+#include "GrapX/VertexDecl.h"
 
 //D3DVERTEXELEMENT9 POS_TEXCOORD_COLOR_ELEMENT[] =
 //{

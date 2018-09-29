@@ -1,5 +1,5 @@
 ﻿#if 0
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 #include "RichFXMgr.h"
 

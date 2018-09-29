@@ -1,11 +1,11 @@
-﻿#include "GrapX.H"
+﻿#include "GrapX.h"
 #include "GrapX.Hxx"
 
 #include "clStringSet.h"
 #include "clStaticStringsDict.h"
 
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 
 #include "DataPoolImpl.h"
 #include "DataPoolBuildTime.h"

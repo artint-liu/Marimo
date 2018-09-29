@@ -1,17 +1,17 @@
 //// 全局头文件
-//#include <GrapX.H>
+//#include <GrapX.h>
 //#include <User/GrapX.Hxx>// 标准接口
 //
 //// 标准接口
-//#include <Include/GResource.H>
+//#include <Include/GResource.h>
 //#include <Include/GXCanvas.h>
 //#include <Include/GXFont.h>
 //
 //// 私有头文件
-//#include <clstd/Utility.H>
+//#include <clstd/Utility.h>
 //#include <clstd/floatx.h>
-//#include <Driver/Shader/VertexDecl.H>
-//#include <Canvas\GXCanvasImpl.H>
+//#include <Driver/Shader/VertexDecl.h>
+//#include <Canvas\GXCanvasImpl.h>
 
 // 参考亚洲语言断行规则
 // http://msdn.microsoft.com/zh-cn/goglobal/bb688158.aspx

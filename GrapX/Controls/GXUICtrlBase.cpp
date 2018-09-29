@@ -1,5 +1,5 @@
 #ifndef _DEV_DISABLE_UI_CODE
-#include "GrapX.H"
+#include "GrapX.h"
 
 #include <Smart/smartstream.h>
 #include <clTokens.h>
@@ -9,19 +9,19 @@
 #include "User/GXWindow.h"
 #include "User/UILayoutMgr.h"
 
-#include "GrapX/GResource.H"
-#include "GrapX/GXFont.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXUser.H"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GXFont.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 
 #include "GXUICtrlBase.h"
 #include "GXUIStatic.h"
 #include "GXUIButton.h"
 //#include "GXUISlider.h"
-#include "GrapX/gxDevice.H"
+#include "GrapX/gxDevice.h"
 
 using namespace clstd;
 

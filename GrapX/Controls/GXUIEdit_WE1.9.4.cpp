@@ -68,15 +68,15 @@
 //WINE_DECLARE_DEBUG_CHANNEL(combo);
 //WINE_DECLARE_DEBUG_CHANNEL(relay);
 
-#include <GrapX.H>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
-#include "GrapX/GXKernel.H"
+#include <GrapX.h>
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
+#include "GrapX/GXKernel.h"
 #include "GrapX/GXImm.h"
-#include "GrapX/GResource.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/GXCanvas.H"
+#include "GrapX/GResource.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/GXCanvas.h"
 #include "GXUICtrlBase.h"
 #include "User/gxusp10.h"
 
@@ -84,7 +84,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <GrapX/WineComm.H>
+#include <GrapX/WineComm.h>
 
 #define BUFLIMIT_INITIAL    30000   /* initial buffer size */
 #define GROWLENGTH    32  /* buffers granularity in bytes: must be power of 2 */

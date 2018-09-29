@@ -8,7 +8,7 @@
 #include <fbxsdk.h>
 #endif // #ifdef FBX_SDK
 
-#include "clTree.H"
+#include "clTree.h"
 #include "clTransform.h"
 
 #include "StdMtl.h"

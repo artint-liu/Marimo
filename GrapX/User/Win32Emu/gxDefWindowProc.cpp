@@ -1,15 +1,15 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GTexture.H>
-#include <GrapX/GXGraphics.H>
-#include <GrapX/GXCanvas.H>
-#include <GrapX/GXImage.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GTexture.h>
+#include <GrapX/GXGraphics.h>
+#include <GrapX/GXCanvas.h>
+#include <GrapX/GXImage.h>
 
 // 私有头文件
 #include <clutility.h>
@@ -17,11 +17,11 @@
 #include "GXStation.h"
 #include "User/WindowsSurface.h"
 #include <User/GXWindow.h>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
 #include "GrapX/gUxtheme.h"
-#include <User/ScrollBar.H>
-#include <Utility/HLSL/FXCommRegister.H>
+#include <User/ScrollBar.h>
+#include <Utility/HLSL/FXCommRegister.h>
 
 #define DRAW_CAPTION
 

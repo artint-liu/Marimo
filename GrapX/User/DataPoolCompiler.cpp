@@ -1,4 +1,4 @@
-﻿#include "GrapX.H"
+﻿#include "GrapX.h"
 #include "GrapX.Hxx"
 
 #include "clPathFile.h"
@@ -6,9 +6,9 @@
 #include "clMathExpressionParser.h"
 #include "Smart/smartstream.h"
 
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/GXKernel.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/GXKernel.h"
 
 //#include <exception>
 

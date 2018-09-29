@@ -43,6 +43,9 @@
     <Filter Include="Lib\Utility\HLSL">
       <UniqueIdentifier>{4bf2d8e8-fefd-4051-905a-cef8dcb1c73e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform\Win32_D3X11">
+      <UniqueIdentifier>{364a4930-1eee-43a4-8559-0232467d6033}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Platform\Win32_D3D9.h">
@@ -407,6 +410,33 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\GrapX\GRect.h">
       <Filter>Include\GrapX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GShaderStubImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GStateBlock_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GTextureImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GPrimitiveImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11\GShaderImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\Win32_D3D11.h">
+      <Filter>Platform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -793,6 +823,33 @@
     </ClCompile>
     <ClCompile Include="..\..\Platform\Win32_D3D9\BasicShader_d3d9.cpp">
       <Filter>Platform\Win32_D3D9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GStateBlock_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GTextureImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GPrimitiveImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GShaderImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\GShaderStubImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11.cpp">
+      <Filter>Platform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

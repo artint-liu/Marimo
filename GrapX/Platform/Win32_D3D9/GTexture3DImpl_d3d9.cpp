@@ -1,15 +1,15 @@
 #ifdef ENABLE_GRAPHICS_API_DX9
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GTexture.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXKernel.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GTexture.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXKernel.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
@@ -17,11 +17,11 @@
 #include "Platform/Win32_D3D9.h"
 
 // 私有头文件
-#include "Platform/Win32_D3D9/GTextureImpl_d3d9.H"
-#include "Platform/Win32_D3D9/GTexture3DImpl_d3d9.H"
+#include "Platform/Win32_D3D9/GTextureImpl_d3d9.h"
+#include "Platform/Win32_D3D9/GTexture3DImpl_d3d9.h"
 #define _GXGRAPHICS_INLINE_TEXTURE_D3D9_
 #include "Canvas/GXResourceMgr.h"
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
 
 namespace D3D9
 {

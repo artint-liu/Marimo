@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "LogMgr.H"
+#include "LogMgr.h"
 
 static HANDLE ahLog[LogMgr::LC_Max];
 static char* aLogName[] = {

@@ -1,8 +1,8 @@
-﻿#include "GrapX.H"
+﻿#include "GrapX.h"
 #include "GrapX.Hxx"
 
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "GrapX/DataPoolIterator.h"
 #include "DataPoolImpl.h"
 

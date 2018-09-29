@@ -1,10 +1,10 @@
 #ifndef _DEV_DISABLE_UI_CODE
-#include "GrapX.H"
-#include "GrapX/GResource.H"
+#include "GrapX.h"
+#include "GrapX/GResource.h"
 
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/DataInfrastructure.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/DataInfrastructure.h"
 
 #include "ListDataAdapter.h"
 

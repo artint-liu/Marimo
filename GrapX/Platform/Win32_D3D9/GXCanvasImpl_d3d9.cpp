@@ -10,47 +10,47 @@
 #define _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
 
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GPrimitive.H"
-#include "GrapX/GStateBlock.H"
-#include "GrapX/GRegion.H"
-#include "GrapX/GTexture.H"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXFont.H"
-#include "GrapX/GXImage.H"
-#include "GrapX/GShader.H"
-#include "GrapX/GXKernel.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GStateBlock.h"
+#include "GrapX/GRegion.h"
+#include "GrapX/GTexture.h"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXFont.h"
+#include "GrapX/GXImage.h"
+#include "GrapX/GShader.h"
+#include "GrapX/GXKernel.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
 #include "Canvas/GXResourceMgr.h"
 #include "GrapX/GXCanvas3D.h"
 #include "Canvas/GXEffectImpl.h"
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
-#include "Platform/Win32_D3D9/GTextureImpl_d3d9.H"
-#include "Platform/Win32_D3D9/GStateBlock_d3d9.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
+#include "Platform/Win32_D3D9/GTextureImpl_d3d9.h"
+#include "Platform/Win32_D3D9/GStateBlock_d3d9.h"
 
 // 私有头文件
 #include <clUtility.h>
-#include <GrapX/VertexDecl.H>
-#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.H"
-#include "GrapX/GXUser.H"
+#include <GrapX/VertexDecl.h>
+#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.h"
+#include "GrapX/GXUser.h"
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
-#include <GrapX/gxDevice.H>
+#include <GrapX/gxDevice.h>
 //#include <User/GXWindow.h>
-#include <Utility/hlsl/FXCommRegister.H>
+#include <Utility/hlsl/FXCommRegister.h>
 #include <GrapX/GCamera.h>
 
 

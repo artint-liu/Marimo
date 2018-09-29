@@ -1,15 +1,15 @@
 ﻿// 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-#include "GrapX/GResource.H"
-#include "GrapX/GXKernel.H"
-#include "GrapX/GShader.H"
+#include "GrapX/GResource.h"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GShader.h"
 #include "GrapX/GPrimitive.h"
-#include "GrapX/GXGraphics.H"
+#include "GrapX/GXGraphics.h"
 
 // 私有头文件
-#include <clTree.H>
+#include <clTree.h>
 #include <clTransform.h>
 #include <thread/clSignal.h>
 #include <thread/clMessageThread.h>

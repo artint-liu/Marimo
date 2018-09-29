@@ -2,31 +2,31 @@
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include "User/GrapX.Hxx"
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GPrimitive.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GShader.H"
-#include "GrapX/GXKernel.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GPrimitive.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GShader.h"
+#include "GrapX/GXKernel.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D9.h"
 #include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
-#include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.H"
+#include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.h"
 
 // 私有头文件
 #include "GPrimitiveImpl_d3d9.h"
 //#define _GXGRAPHICS_INLINE_PRIMITIVE_D3D9_
 #include "Canvas/GXResourceMgr.h"
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
 
 namespace D3D9
 {

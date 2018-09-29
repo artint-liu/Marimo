@@ -1,13 +1,13 @@
-#include "GrapX.H"
+#include "GrapX.h"
 
-#include "clTree.H"
+#include "clTree.h"
 #include "clTransform.h"
 
-#include "GrapX/GResource.H"
+#include "GrapX/GResource.h"
 #include "GrapX/GPrimitive.h"
-#include "GrapX/GShader.H"
-#include "GrapX/GXKernel.H"
-#include "GrapX/gxError.H"
+#include "GrapX/GShader.h"
+#include "GrapX/GXKernel.h"
+#include "GrapX/gxError.h"
 #include "GrapX/gvNode.h"
 #include "GrapX/GVSequence.h"
 

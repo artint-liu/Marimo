@@ -1,7 +1,7 @@
 #ifndef _GREGION_IMPL_H_
 #define _GREGION_IMPL_H_
 
-//#include <Include/GRegion.H>
+//#include <Include/GRegion.h>
 //#include <vector>
 //using namespace std;
 //#include "FixedArray.h"

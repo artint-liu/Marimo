@@ -1,8 +1,8 @@
-#include "GrapX.H"
-//#include "GrapX/GUnknown.H"
-#include "GXApp.H"
+#include "GrapX.h"
+//#include "GrapX/GUnknown.h"
+#include "GXApp.h"
 #include "GrapX/Platform.h"
-#include "GrapX/gxDevice.H"
+#include "GrapX/gxDevice.h"
 
 class IGXPlatform_Win32OpenGL;
 class IGXPlatform_Win32D3D9;

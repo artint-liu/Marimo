@@ -1,7 +1,7 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
-#include "GrapX.H"
+#include "GrapX.h"
 #include "User/UILayoutMgr.h"
-#include "GrapX/GXUser.H"
+#include "GrapX/GXUser.h"
 
 namespace GXUI
 {

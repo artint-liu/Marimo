@@ -1,9 +1,9 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
-#include <GrapX.H>
-#include "GXCommCtrl.H"
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
-#include "GrapX/GXKernel.H"
+#include <GrapX.h>
+#include "GXCommCtrl.h"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
+#include "GrapX/GXKernel.h"
 
 GXCOMCTL32_SysColor  comctl32_color;
 #define COMCTL32_wSubclass  L"CCSubCtrl"

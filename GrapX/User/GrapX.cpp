@@ -1,17 +1,17 @@
 ﻿// 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GRegion.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GRegion.h>
 
 // 私有头文件
-#include "clPathFile.H"
-#include "GrapX/GXGDI.H"
-#include "GrapX/GXUser.H"
-#include "GrapX/gxError.H"
+#include "clPathFile.h"
+#include "GrapX/GXGDI.h"
+#include "GrapX/GXUser.h"
+#include "GrapX/gxError.h"
 #if defined(_DEBUG) && (defined(_WIN32) || defined(_WIN64))
 #include <vld.h>
 #endif // #if defined(_DEBUG) && (defined(_WIN32) || defined(_WIN64))

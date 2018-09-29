@@ -84,6 +84,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clParallelWork.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\FloatX.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clImageDecoder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clTokens.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clStock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)clstdX.h" />
@@ -158,6 +161,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clParallelWork.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\floatx.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clImageDecoder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clTokens.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clStock.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="3D">

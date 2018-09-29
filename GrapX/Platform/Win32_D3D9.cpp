@@ -2,15 +2,15 @@
 #if (defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)) && ! defined(__clang__)
 
 // 全局头文件
-#include "GrapX.H"
-#include "GXApp.H"
+#include "GrapX.h"
+#include "GXApp.h"
 #include "User/GrapX.Hxx"
 
 // 标准接口
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/MOLogger.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/MOLogger.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
@@ -18,17 +18,17 @@
 #include "Platform/Win32_D3D9.h"
 
 // 私有头文件
-#include <User32Ex.H>
+#include <User32Ex.h>
 #include "Console.h"
 //#ifdef _ENABLE_STMT
 //#include <clstdcode\stmt\stmt.h>
 //#else
 //#include <clMessageThread.h>
 //#endif // #ifdef _ENABLE_STMT
-#include <GrapX/gxDevice.H>
+#include <GrapX/gxDevice.h>
 #include "Canvas/GXResourceMgr.h"
-#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.H"
-#include "GrapX/GXUser.H"
+#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
+#include "GrapX/GXUser.h"
 //////////////////////////////////////////////////////////////////////////
 
 IGXPlatform_Win32D3D9::IGXPlatform_Win32D3D9()

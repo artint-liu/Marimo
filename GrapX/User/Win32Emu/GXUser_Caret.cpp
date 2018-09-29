@@ -1,17 +1,17 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GXCanvas.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GXCanvas.h>
 
 // 私有头文件
 #include "GXStation.h"
 #include <User/GXWindow.h>
-#include "GrapX/GXUser.H"
+#include "GrapX/GXUser.h"
 
 extern GXLPSTATION g_pCurStation;
 extern "C"

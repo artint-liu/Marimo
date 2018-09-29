@@ -7,7 +7,7 @@
 /* Automatically generated; DO NOT EDIT!! */
 
 //#include "wine/unicode.h"
-#include <GrapX.H>
+#include <GrapX.h>
 
 GXWCHAR wine_casemap_lower[3318] =
 {

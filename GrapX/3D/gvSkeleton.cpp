@@ -1,16 +1,16 @@
-#include "GrapX.H"
+#include "GrapX.h"
 
-//#include <clstd/clTree.H>
+//#include <clstd/clTree.h>
 #include <smart/SmartRepository.h>
 
-#include "GrapX/GResource.H"
+#include "GrapX/GResource.h"
 #include "GrapX/GShader.h"
 #include "GrapX/GPrimitive.h"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXKernel.H"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXKernel.h"
 #include "GrapX/GXError.h"
 
-#include "GrapX/GrapVR.H"
+#include "GrapX/GrapVR.h"
 
 #define ANIMTRACK_FRAMECOUNT     "AnimTrack@FrameCount"
 #define ANIMTRACK_FRAMERATE      "AnimTrack@FrameRate"

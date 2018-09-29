@@ -1,18 +1,18 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GXCanvas.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GXCanvas.h>
 
 // 平台相关
 // 私有头文件
-#include "ScrollBar.H"
-#include "Utility/AeroCommon.H"
-#include "GrapX/GXUser.H"
+#include "ScrollBar.h"
+#include "Utility/AeroCommon.h"
+#include "GrapX/GXUser.h"
 #include "GrapX/guxtheme.h"
 
 extern GXHTHEME hTheme_ScrollBar;

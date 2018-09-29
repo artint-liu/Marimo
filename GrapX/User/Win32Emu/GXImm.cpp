@@ -1,7 +1,7 @@
-﻿#include <GrapX.H>
+﻿#include <GrapX.h>
 #include <User/GrapX.Hxx>
 #include "GrapX/GXImm.h"
-//#include "GXStation.H"
+//#include "GXStation.h"
 //#include <User/GXWindow.h>
 
 

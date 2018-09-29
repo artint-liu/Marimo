@@ -499,8 +499,8 @@ namespace clstd
       T_LPCSTR szSubSection, T_LPCSTR szMainKey, T_LPCSTR szMatchValue, QueryType eType)
   {
     IS_OUT_OF_DATE;
-    ASSERT((CLINT_PTR)iter_begin.marker >= (CLINT_PTR)pStock->GetBuffer().GetPtr());
-    ASSERT((CLINT_PTR)iter_end.marker <= (CLINT_PTR)pStock->GetBuffer().GetPtr() + (CLINT_PTR)pStock->GetBuffer().GetSize());
+    ASSERT((size_t)iter_begin.marker >= (size_t)pStock->GetBuffer().GetPtr());
+    ASSERT((size_t)iter_end.marker <= (size_t)pStock->GetBuffer().GetPtr() + (size_t)pStock->GetBuffer().GetSize());
 
     Section sub_sect = Open(szSubSection);
     if(sub_sect) {

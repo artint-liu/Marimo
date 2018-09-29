@@ -1,7 +1,7 @@
 #include "GrapX.h"
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GXKernel.H"
-#include "GrapX/GXUser.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXUser.h"
 #include "GrapX/MOConsoleStaff.h"
 
 struct KEYCONTEXT

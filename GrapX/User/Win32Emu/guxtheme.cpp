@@ -1,14 +1,14 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GXGraphics.H>
-#include <GrapX/GXSprite.H>
-#include "GrapX/GXCanvas.H"
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GXGraphics.h>
+#include <GrapX/GXSprite.h>
+#include "GrapX/GXCanvas.h"
 
 // 私有头文件
 #include <User/GXWindow.h>

@@ -1,20 +1,20 @@
 #ifndef _DEV_DISABLE_UI_CODE
-#include "GrapX.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXFont.H"
-#include "GrapX/GXSprite.H"
-#include "GrapX/GXGraphics.H"
+#include "GrapX.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXFont.h"
+#include "GrapX/GXSprite.h"
+#include "GrapX/GXGraphics.h"
 
 #include "GrapX/guxtheme.h"
 
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "GXUICtrlBase.h"
 #include "GXUIToolbar.h"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/gxDevice.H"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/gxDevice.h"
 STATIC_ASSERT(sizeof(GXColor32) == 4);
 namespace GXUI
 {

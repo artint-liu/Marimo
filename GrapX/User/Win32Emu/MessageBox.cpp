@@ -1,6 +1,6 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 #include <Smart/smartstream.h>
@@ -8,19 +8,19 @@
 #include <clStock.h>
 
 // 平台相关
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/DataInfrastructure.H"
-#include "clPathFile.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/DataInfrastructure.h"
+#include "clPathFile.h"
 
 // 私有头文件
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
-#include "GrapX/GXKernel.H"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
+#include "GrapX/GXKernel.h"
 #include "User/UILayoutMgr.h"
-#include "GrapX/gxDevice.H"
+#include "GrapX/gxDevice.h"
 
 extern GXWNDCLASSEX WndClassEx_Menu;
 extern GXWNDCLASSEX WndClassEx_MyButton;

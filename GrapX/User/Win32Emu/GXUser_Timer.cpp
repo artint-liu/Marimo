@@ -1,9 +1,9 @@
 ﻿#ifndef _DEV_DISABLE_UI_CODE
-#include <GrapX.H>
+#include <GrapX.h>
 #include <clSchedule.h>
 #include <User/GrapX.Hxx>
-#include <GXStation.H>
-#include "GrapX/GXUser.H"
+#include <GXStation.h>
+#include "GrapX/GXUser.h"
 #include <User/GXWindow.h>
 
 struct GXTIMERCHAIN

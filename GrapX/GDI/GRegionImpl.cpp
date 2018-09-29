@@ -1,18 +1,18 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GRegion.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GRegion.h>
 
 // 私有头文件
-#include <clUtility.H>
-#include "GrapX/GXUser.H"
-#include "GrapX/GXKernel.H"
+#include <clUtility.h>
+#include "GrapX/GXUser.h"
+#include "GrapX/GXKernel.h"
 
-#include "RegionFunc.H"
-#include "GRegionImpl.H"
+#include "RegionFunc.h"
+#include "GRegionImpl.h"
 
 // 关掉这个警告不但会影响编译输出信息,还会影响编译器行为
 // 使用这条预编译指令时, GRegionImpl::delete能够正确调用,并且也能正确调用GRegionImpl的析构函数

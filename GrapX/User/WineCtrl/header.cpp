@@ -45,23 +45,23 @@
 ////#include "wine/debug.h"
 ////
 ////WINE_DEFAULT_DEBUG_CHANNEL(header);
-//#include "PreDefine.H"
-//#include <user\gxWinDef.H>
-//#include <user\GrapXDef.H>
-//#include "Graphics.H"
-//#include <Canvas\GXCanvas.H>
+//#include "PreDefine.h"
+//#include <user\gxWinDef.h>
+//#include <user\GrapXDef.h>
+//#include "Graphics.h"
+//#include <Canvas\GXCanvas.h>
 //#include <User\Win32Emu\guxtheme.h>
-////#include <User\FrameUIBasic.H>
-//#include <User\Win32Emu\GXUser.H>
+////#include <User\FrameUIBasic.h>
+//#include <User\Win32Emu\GXUser.h>
 //#include <User\Win32Emu\gxgdi.h>
-//#include <User\Win32Emu\GXImm.H>
+//#include <User\Win32Emu\GXImm.h>
 //
 //#include <stdarg.h>
 //#include <string.h>
 //#include <stdlib.h>
 //
-//#include "WECommon.H"
-//#include "GXCommCtrl/GXCommCtrl.H"
+//#include "WECommon.h"
+//#include "GXCommCtrl/GXCommCtrl.h"
 //
 //#pragma warning( disable : 4244 )	// _w64型数与普通类型的相互转换
 //#pragma warning( disable : 4018 )	// 无符号与有符号数比较

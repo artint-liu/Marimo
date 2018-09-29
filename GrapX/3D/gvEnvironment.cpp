@@ -1,4 +1,4 @@
 // 全局头文件
-#include "GrapX.H"
+#include "GrapX.h"
 #include "User/GrapX.Hxx"
 #include "gvEnvironment.h"

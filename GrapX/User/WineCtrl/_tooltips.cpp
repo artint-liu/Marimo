@@ -111,18 +111,18 @@
 //
 //WINE_DEFAULT_DEBUG_CHANNEL(tooltips);
 
-#include <GrapX.H>
+#include <GrapX.h>
 #include "GrapX/gUxtheme.h"
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
 #include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <GrapX/WineComm.H>
-#include <User/Win32Emu/GXCommCtrl.H>
+#include <GrapX/WineComm.h>
+#include <User/Win32Emu/GXCommCtrl.h>
 
 #ifdef TRACE
 #undef TRACE

@@ -1,11 +1,11 @@
 // 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 
 // 标准接口
-#include "GrapX/GCamera.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/GXKernel.H"
+#include "GrapX/GCamera.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/GXKernel.h"
 
 // 私有头文件
 //#include "GCamera.h"

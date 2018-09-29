@@ -1,5 +1,5 @@
-﻿#include <GrapX.H>
-#include <User/ResDataMgr.H>
+﻿#include <GrapX.h>
+#include <User/ResDataMgr.h>
 
 //
 // 为毛还写过一个这么复杂且没有测试的东东？

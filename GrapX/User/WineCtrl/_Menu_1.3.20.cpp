@@ -60,19 +60,19 @@
 //#include "user_private.h"
 //#include "wine/debug.h"
 
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
-//#include <GXStation.H>
+//#include <GXStation.h>
 #include <User/GXWindow.h>
-#include "GrapX/GXUser.H"
+#include "GrapX/GXUser.h"
 #include "GrapX/GXKernel.h"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXGDI.h"
 
 #include <stdarg.h>
 #include <string.h>
 
-#include <GrapX/WineComm.H>
-#include "GrapX/gxError.H"
+#include <GrapX/WineComm.h>
+#include "GrapX/gxError.h"
 
 #ifdef _WINE_MENU_1_3_20_
 

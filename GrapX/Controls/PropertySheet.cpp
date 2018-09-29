@@ -6,17 +6,17 @@
 //#include <vsstyle.h>
 
 // 全局头文件
-#include "GrapX.H"
-#include "GrapX/GResource.H"
-#include "GrapX/GXGraphics.H"
-#include "GrapX/GXCanvas.H"
-#include "GrapX/GXImage.H"
-#include "GrapX/GXFont.H"
+#include "GrapX.h"
+#include "GrapX/GResource.h"
+#include "GrapX/GXGraphics.h"
+#include "GrapX/GXCanvas.h"
+#include "GrapX/GXImage.h"
+#include "GrapX/GXFont.h"
 #include "GrapX/DataPool.h"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/GXKernel.H"
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
 #include "GXUICtrlBase.h"
 #include "PropertySheet.h"
 //#include <CommCtrl.h>

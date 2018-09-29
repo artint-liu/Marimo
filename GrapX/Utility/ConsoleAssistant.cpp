@@ -1,11 +1,11 @@
 // 全局头文件
-#include "GrapX.H"
+#include "GrapX.h"
 #include "User/GrapX.Hxx"
 
-//#include "GrapX/GUnknown.H"
+//#include "GrapX/GUnknown.h"
 #include "GXStation.h"
-#include "GrapX/GXKernel.H"
-#include "GrapX/GXUser.H"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXUser.h"
 #include "GrapX/MOLogger.h"
 #include "GrapX/MOConsoleStaff.h"
 

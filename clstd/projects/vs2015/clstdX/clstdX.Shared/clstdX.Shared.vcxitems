@@ -27,14 +27,17 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clFile.CPP" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clGeometry2D.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clImage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clImageDecoder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clMesh.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clParallelWork.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.CPP" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clStock.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clTokens.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\casemap.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\Else\ecvt.cpp" />
@@ -71,6 +74,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clFile.H" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clGeometry2D.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clImage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clImageDecoder.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMathExpressionParser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMathVector.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clMatrix.h" />
@@ -80,8 +84,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clPathFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clstd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clStock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clString.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clStringAttach.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clTokens.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\cltypes.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\clUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\floatx.h" />

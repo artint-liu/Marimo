@@ -1,11 +1,11 @@
-﻿#include <GrapX.H>
-//#include "GrapX/GUnknown.H"
+﻿#include <GrapX.h>
+//#include "GrapX/GUnknown.h"
 #include "clPathFile.h"
 #include "smart/smartstream.h"
 #include <clTokens.h>
 #include "clStock.h"
 #include "GrapX/MOLogger.h"
-#include "GrapX/GXUser.H"
+#include "GrapX/GXUser.h"
 #include "GrapX/DataPool.h"
 #include "GrapX/DataPoolVariable.h"
 #include "GrapX/DataInfrastructure.h"

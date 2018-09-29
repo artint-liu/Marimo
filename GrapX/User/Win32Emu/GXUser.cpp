@@ -1,24 +1,24 @@
 ﻿// 全局头文件
-#include <GrapX.H>
+#include <GrapX.h>
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include <GrapX/GUnknown.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GRegion.H>
-#include <GrapX/GXGraphics.H>
-#include <GrapX/GXCanvas.H>
-#include <GrapX/GXSprite.H>
-#include <GrapX/GXFont.H>
-#include <GrapX/GXImage.H>
+//#include <GrapX/GUnknown.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GRegion.h>
+#include <GrapX/GXGraphics.h>
+#include <GrapX/GXCanvas.h>
+#include <GrapX/GXSprite.h>
+#include <GrapX/GXFont.h>
+#include <GrapX/GXImage.h>
 
 // 私有头文件
 #include "GXStation.h"
-#include "GrapX/GXKernel.H"
-#include "GrapX/GXUser.H"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXUser.h"
+#include "GrapX/GXGDI.h"
 #include <User/GXWindow.h>
-#include "Utility/AeroCommon.H"
+#include "Utility/AeroCommon.h"
 #include "User/DesktopWindowsMgr.h"
 #include "User/WindowsSurface.h"
 #include "thread/clLocker.h"

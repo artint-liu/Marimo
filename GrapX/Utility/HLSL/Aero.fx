@@ -1,7 +1,7 @@
 
 #define PI          (3.1415926535897932384626433832795)
 
-#include "FXCommRegister.H"
+#include "FXCommRegister.h"
 //
 // Vertex Shader
 //

@@ -1,17 +1,17 @@
-﻿#include "GrapX.H"
+﻿#include "GrapX.h"
 #include "User/GrapX.Hxx"
 #include "Smart/smartstream.h"
 #include <clTokens.h>
 #include "clStock.h"
 
-//#include "GrapX/GUnknown.H"
-#include "GrapX/GResource.H"
-//#include "Include/GXFont.H"
-//#include "Include/GXGraphics.H"
-//#include "Include/GXUser.H"
-//#include "Include/GXCanvas.H"
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolVariable.H"
+//#include "GrapX/GUnknown.h"
+#include "GrapX/GResource.h"
+//#include "Include/GXFont.h"
+//#include "GrapX/GXGraphics.h"
+//#include "Include/GXUser.h"
+//#include "Include/GXCanvas.h"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "Controls/GXUICtrlBase.h"
 
 typedef clhash_map<clStringA, GXDWORD> TIdentifyDefination;

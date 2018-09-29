@@ -88,20 +88,20 @@
 //
 //WINE_DEFAULT_DEBUG_CHANNEL(toolbar);
 
-#include <GrapX.H>
-#include <User/GrapXDef.H>
+#include <GrapX.h>
+#include <User/GrapXDef.h>
 #include "GrapX/gUxtheme.h"
-#include "GrapX/GXUser.H"
+#include "GrapX/GXUser.h"
 #include "GrapX/GXKernel.h"
-#include "GrapX/GXGDI.H"
+#include "GrapX/GXGDI.h"
 #include "GrapX/GXImm.h"
 
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include <GrapX/WineComm.H>
-#include <User/Win32Emu/GXCommCtrl.H>
+#include <GrapX/WineComm.h>
+#include <User/Win32Emu/GXCommCtrl.h>
 #include "res/resource.h"
 
 #pragma warning( disable : 4244 )  // _w64型数与普通类型的相互转换

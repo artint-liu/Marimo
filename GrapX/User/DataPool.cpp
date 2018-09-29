@@ -1,4 +1,4 @@
-﻿#include "GrapX.H"
+﻿#include "GrapX.h"
 #include "GrapX.Hxx"
 
 #include "clPathFile.h"
@@ -7,11 +7,11 @@
 #include <clTokens.h>
 #include "clStock.h"
 
-#include "GrapX/DataPool.H"
-#include "GrapX/DataPoolIterator.H"
-#include "GrapX/DataPoolVariable.H"
-#include "GrapX/GXKernel.H"
-#include "GrapX/GXUser.H"
+#include "GrapX/DataPool.h"
+#include "GrapX/DataPoolIterator.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/GXKernel.h"
+#include "GrapX/GXUser.h"
 
 #include "DataPoolErrorMsg.h"
 #include "DataPoolImpl.h"
