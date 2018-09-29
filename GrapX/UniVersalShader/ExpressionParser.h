@@ -155,6 +155,7 @@ namespace UVShader
     ValueResult_2065 = 2065, // 未声明标识符
     ValueResult_3861 = 3861, // 找不到标识符
     ValueResult_5039 = 5039, // 函数参数数量不匹配
+    ValueResult_SubscriptOutOfRange, // 下标超出范围
   };
 
   struct IDNFDESC
@@ -216,14 +217,15 @@ namespace UVShader
   // 检查VALUE_CONTEXT输入与输出值的有效性
   struct VALUE_CONTEXT_CHECKER
   {
-    size_t nErrorCount;
+    int nErrorCount;
     const VALUE_CONTEXT& vctx;
     VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx);
-
     ~VALUE_CONTEXT_CHECKER();
+    void ClearErrorCount(); // 跳过错误输出检查
   };
 
 #define CHECK_VALUE_CONTEXT VALUE_CONTEXT_CHECKER vcc(vctx)
+#define CHECK_VALUE_CONTEXT_CLEARERRORCOUNT vcc.ClearErrorCount()
 
   class NameContext
   {

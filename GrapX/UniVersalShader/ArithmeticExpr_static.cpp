@@ -454,7 +454,10 @@ namespace UVShader
     ASSERT(pValue->IsNegative() == FALSE);
     const size_t element_size = vctx.pType->pElementType->CountOf();
     const size_t element_count = vctx.pType->CountOf() / element_size;
-    ASSERT(pValue->uValue64 < element_count);
+    if(pValue->IsNegative() || pValue->uValue64 >= element_count) {
+      CHECK_VALUE_CONTEXT_CLEARERRORCOUNT;
+      return vctx.ClearValue(ValueResult_SubscriptOutOfRange).pType;
+    }
 
     vctx.pType = vctx.pType->pElementType;
     if(vctx.pValue)

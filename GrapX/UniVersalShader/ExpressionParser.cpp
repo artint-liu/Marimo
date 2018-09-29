@@ -3101,15 +3101,15 @@ namespace UVShader
 
   void CodeParser::Invoke(GXLPCSTR szFunc, GXLPCSTR szArguments)
   {
-    if(clstd::strcmpT(szFunc, "EnableParserBreak"))
+    if(clstd::strcmpT(szFunc, "EnableParserBreak") == 0)
     {
       s_bParserBreak = clStringA(szArguments).ToBoolean();
     }
-    else if(clstd::strcmpT(szFunc, "EnableParserAssert"))
+    else if(clstd::strcmpT(szFunc, "EnableParserAssert") == 0)
     {
       s_bParserAssert = clStringA(szArguments).ToBoolean();
     }
-    else if(clstd::strcmpT(szFunc, "EnableDumpSyntaxTree"))
+    else if(clstd::strcmpT(szFunc, "EnableDumpSyntaxTree") == 0)
     {
       s_bDumpSyntaxTree = clStringA(szArguments).ToBoolean();
     }
@@ -4278,7 +4278,12 @@ namespace UVShader
         const size_t nErrorCount = DbgErrorCount();
 
         ptkVar = GetIdentifierNameWithoutSeamantic(second_glob.pNode->Operand[0]);
-
+        
+        if(ptkVar == NULL)
+        {
+          GetLogger()->OutputErrorW(second_glob.pNode->Operand[0], UVS_EXPORT_TEXT(5057, "定义标识符语法错误"));
+          return NULL;
+        }
 
         if(bConstIdentifier)
         {
@@ -4348,6 +4353,8 @@ namespace UVShader
     if(pType == NULL)
     {
       clStringW strW;
+      ptkVar = ptkVar != NULL ? ptkVar : second_glob.GetFrontToken();
+
       switch(sNameSet.GetLastState())
       {
       case NameContext::State_TypeNotFound:
@@ -4363,13 +4370,11 @@ namespace UVShader
       }
       case NameContext::State_DefineAsType:
       {
-        ptkVar = ptkVar != NULL ? ptkVar : second_glob.GetFrontToken();
         GetLogger()->OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(5013, "“%s”: 变量已经被定义为类型"), ptkVar->ToString(strW).CStr());
         return FALSE;
       }
       case NameContext::State_VariableIsNotIdentifier:
       {
-        ptkVar = ptkVar != NULL ? ptkVar : second_glob.GetFrontToken();
         GetLogger()->OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), ptkVar->ToString(strW).CStr());
         return FALSE;
       }
@@ -5125,6 +5130,7 @@ namespace UVShader
 
   const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const TOKEN* pToken) const
   {
+    CHECK_VALUE_CONTEXT;
     // TODO: 直接提示找不到符号？
     if(pToken->type > TOKEN::TokenType_FirstNumeric && pToken->type < TOKEN::TokenType_LastNumeric)
     {
@@ -5221,7 +5227,9 @@ namespace UVShader
     }
     else if(pNode->mode == SYNTAXNODE::MODE_InitList)
     {
-      CLBREAK;
+      GetLogger()->OutputErrorW(pNode->Operand[0], UVS_EXPORT_TEXT(5058, "不能使用初始化列表"));
+      vctx.result = ValueResult_Failed;
+      return NULL;
     }
     else if(pNode->pOpcode)
     {
@@ -5801,6 +5809,7 @@ namespace UVShader
       {
         if(pMemberNode->Operand[0].CompareAsToken(s_szLengthFunc) && pMemberNode->Operand[1].ptr == NULL)
         {
+          ASSERT(pTypeDesc);
           if(pTypeDesc->sDimensions.empty()) {
             vctx.pLogger->OutputErrorW(pNode->Operand[0], UVS_EXPORT_TEXT(2109, "下标要求数组类型"));
             return vctx.ClearValue(ValueResult_Failed).pType;
@@ -5955,7 +5964,12 @@ namespace UVShader
     else if(IS_VECMAT_CATE(vctx.pType) && vctx.pType->pDesc && vctx.pType->pDesc->lpSubscript)
     {
       vctx.pType = vctx.pType->pDesc->lpSubscript(vctx, vctx_subscript.pValue);
-      ASSERT(vctx.pType);
+      if(vctx.result == ValueResult_SubscriptOutOfRange) {
+        GetLogger()->OutputErrorW(pNode->Operand[1], UVS_EXPORT_TEXT(5056, "下标超出定义范围"));
+      }
+      else {
+        ASSERT(vctx.pType);
+      }
       return vctx.pType;
     }
 
@@ -6842,7 +6856,7 @@ namespace UVShader
       // 添加成功, 返回type描述
       m_eLastState = State_Ok;
       //*ppType = result.first->second.pDesc;
-      *ppVariable = &insert_result.first->second;
+      //*ppVariable = &insert_result.first->second;
       m_nCount += rIdnfDesc.pDesc->CountOf();
       //return State_Ok;
     }
@@ -6862,6 +6876,7 @@ namespace UVShader
         if(rIdnfDesc.pDesc == NULL) {
           ASSERT(rIdnfDesc.pool.empty());
           ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
+          m_IdentifierMap.erase(insert_result.first);
           return State_CastTypeError;
         }
       }
@@ -6871,6 +6886,7 @@ namespace UVShader
         clStringA strFuncName;
         if(pValueExprGlob->pNode->Operand[0].IsToken() == FALSE) {
           GetLogger()->OutputMissingSemicolon(pValueExprGlob->pNode->Operand[0].GetFrontToken());
+          m_IdentifierMap.erase(insert_result.first);
           return State_HasError;
         }
         TranslateType(strFuncName, pValueExprGlob->pNode->Operand[0].pTokn);
@@ -6911,6 +6927,7 @@ namespace UVShader
             else
             {
               GetLogger()->OutputErrorW(*it, UVS_EXPORT_TEXT(5054, "无法计算表达式常量"));
+              m_IdentifierMap.erase(insert_result.first);
               return State_RequireConstantExpression;
             }
             //rIdnfDesc.pool[ii].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
@@ -6939,6 +6956,7 @@ namespace UVShader
         m_pCodeParser->InferType(vctx, *pValueExprGlob);
         if(vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
           ASSERT(nErrorCount < vctx.pLogger->ErrorCount());
+          m_IdentifierMap.erase(insert_result.first);
           return State_HasError; // 计算表达式错误
         }
         else if(vctx.pValue) {
@@ -6967,6 +6985,9 @@ namespace UVShader
     // 尺寸一定与类型相符
     ASSERT(rIdnfDesc.pool.empty() || rIdnfDesc.pool.size() == rIdnfDesc.pDesc->CountOf());
 
+    ASSERT(rIdnfDesc.pDesc);
+
+    *ppVariable = &insert_result.first->second;
     return State_Ok;
   }
 
@@ -6988,6 +7009,7 @@ namespace UVShader
     //const TYPEDESC* pTypeDesc = NULL;
     IDNFDESC* pVariDesc = NULL;
     m_eLastState = IntRegisterIdentifier(&pVariDesc, strType, ptkVariable, pValueExprGlob);
+    ASSERT(m_eLastState != State_Ok || pVariDesc->pDesc != NULL);
     return pVariDesc ? pVariDesc->pDesc : NULL;
   }
 
@@ -7123,6 +7145,7 @@ namespace UVShader
         TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
         m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, pValueExprGlob);
         if(m_eLastState == State_Ok) {
+          ASSERT(pVariDesc->pDesc);
           if(pSizelessTypeDesc != pVariDesc->pDesc) {
             CLNOP
           }
@@ -7522,7 +7545,7 @@ namespace UVShader
         {
           clStringW strMemberName, strStructName = name;
           GetLogger()->OutputErrorW(ptkMember, UVS_EXPORT_TEXT(ERR_IS_NOT_MEMBER, "“%s”: 不是“%s”的成员"),
-            ptkMember->ToString(strMemberName).CStr(), strStructName.CStr());
+            ptkMember->ToString(strMemberName).CStr(), strStructName.CStr()); 
           return FALSE;
         }
       }
@@ -8142,7 +8165,7 @@ namespace UVShader
 
   VALUE_CONTEXT_CHECKER::VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx)
     : vctx(_vctx)
-    , nErrorCount(_vctx.pLogger->ErrorCount())
+    , nErrorCount(static_cast<int>(_vctx.pLogger->ErrorCount()))
   {
     ASSERT(vctx.pLogger); // 必须指定Logger
   }
@@ -8155,7 +8178,7 @@ namespace UVShader
     // 没有算出返回值时一定要输出错误信息
     if(vctx.pType == NULL || (vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable))
     {
-      ASSERT(vctx.pLogger->ErrorCount() > nErrorCount);
+      ASSERT(static_cast<int>(vctx.pLogger->ErrorCount()) > nErrorCount);
     }
 
     // 检查value有效性
@@ -8184,6 +8207,11 @@ namespace UVShader
 
     ASSERT((vctx.pValue != NULL && vctx.count > 0) ||
       (vctx.pValue == NULL && vctx.count == 0));
+  }
+
+  void VALUE_CONTEXT_CHECKER::ClearErrorCount()
+  {
+    --nErrorCount;
   }
 
 } // namespace UVShader
