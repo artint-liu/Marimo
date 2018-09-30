@@ -85,6 +85,7 @@ namespace UVShader
     GXBOOL GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const;
     size_t CountOf() const; // 获得向量，矩阵和数组包含的基础类型数量
     const TYPEDESC* ConfirmArrayCount(size_t nCount) const;
+    VALUE::Rank GetRank() const;
   };
 
   struct FUNCDESC // 用户定义的函数描述
@@ -163,7 +164,7 @@ namespace UVShader
     const TYPEDESC*   pDesc;
     size_t            nOffset;
     //VALUE sConstValue;      // 规定 string 类型不能以 const 修饰，所以这里用VALUE
-    SYNTAXNODE::GLOB  glob; // 所有常量都应该定义这个值，数字类型常量同时还应该定义sConstValue
+    SYNTAXNODE::GLOB  glob; // 所有常量都应该定义这个值
     ValuePool         pool;
   };
 
@@ -343,10 +344,19 @@ namespace UVShader
 
   class CInitList
   {
+    union ELEMENT
+    {
+      typedef cllist<ELEMENT> List;
+
+      SYNTAXNODE::GLOB   glob;
+      VALUE*             pValue; // 一定在pool里面
+    };
+    STATIC_ASSERT(sizeof(ELEMENT) == sizeof(SYNTAXNODE::GLOB)); // BreakComma要使用这个特性
+
     struct STACKDESC
     {
-      SYNTAXNODE::GlobList sInitList;
-      SYNTAXNODE::GlobList::iterator iter;
+      ELEMENT::List sInitList;
+      ELEMENT::List::iterator iter;
       const TOKEN* ptkOpcode; // 用于输出定位
     };
 
@@ -355,6 +365,7 @@ namespace UVShader
     const SYNTAXNODE::GLOB* m_pInitListGlob;
     cllist<STACKDESC>       m_sStack;
     GXBOOL                  m_bNeedAlignDepth;
+    GXBOOL                  m_bConstantValues; // 所有值全是常量
     VALUE*                  m_pValuePool;
     size_t                  m_nValueCount;
     cllist<clStringA>       m_DebugStrings; // 用来生成解析结构式
@@ -380,7 +391,7 @@ namespace UVShader
     CInitList(CodeParser* pCodeParser, NameContext& rNameCtx, const SYNTAXNODE::GLOB* pInitListGlob);
     CLogger* GetLogger();
     void SetValuePool(VALUE* pValuePool, size_t count);
-    const SYNTAXNODE::GLOB* Get();
+    const ELEMENT* Get();
     Result CastToValuePool(const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index);
     const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
@@ -388,8 +399,10 @@ namespace UVShader
     GXBOOL IsEnd() const;
     GXBOOL Empty() const;
     size_t Depth() const;
+    GXBOOL IsConstantValues() const;
     GXBOOL NeedAlignDepth(size_t nDimDepth, size_t nListDepth) const;
     void ClearAlignDepthFlag();
+    GXBOOL IsValue(const ELEMENT* pElement) const;
 
     size_t GetMaxCount(const TYPEDESC* pRefType) const; // 如果是自适应长度，用这个来获得最大可能的长度，否则返回类型的实际长度
     size_t BeginList();
@@ -398,7 +411,7 @@ namespace UVShader
     SYNTAXNODE*  GetRearrangedList();
 
     void DbgListBegin(const clStringA& strTypeName);
-    void DbgListAdd(const SYNTAXNODE::GLOB* pGlob);
+    void DbgListAdd(const ELEMENT* pElement);
     void DbgListAdd(const clStringA& str);
     void DbgListEnd();
     void DbgPushString();

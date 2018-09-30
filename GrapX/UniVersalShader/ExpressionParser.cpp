@@ -2149,7 +2149,10 @@ namespace UVShader
     {
       if(pNode->Operand[i].ptr) {
         //const auto flag = pNode->Operand[i].GetType();
-        if(pNode->Operand[i].IsToken()) {
+        if(pNode->Operand[i].IsReplaced()) {
+          str[i] = "$R"; // replaced value
+        }
+        else if(pNode->Operand[i].IsToken()) {
           str[i] = pNode->Operand[i].pTokn->ToString();
         }
         else if(pNode->Operand[i].IsNode()) {
@@ -5053,7 +5056,7 @@ namespace UVShader
           vctx.UsePool();
         }
         else {
-          const VALUE::Rank rank = static_cast<VALUE::Rank>(vctx.pType->pDesc->rank);
+          const VALUE::Rank rank = vctx.TypeRank();
           std::for_each(vctx.pool.begin(), vctx.pool.end(), [rank](VALUE& value) {
             value.CastValueByRank(rank);
           });
@@ -5569,13 +5572,18 @@ namespace UVShader
         copy_count = pTypeDesc->CountOf();
         ASSERT(copy_count != 0);
       }
-      pValuePool->assign(pValues, pValues + copy_count);
+      if(il.IsConstantValues()) {
+        pValuePool->assign(pValues, pValues + copy_count);
+      }
+      else {
+        ASSERT(pValuePool->empty());
+      }
     }
     SAFE_DELETE_ARRAY(pValues);
 
     clStringA strRearrange;
     if(nErrorCount == DbgErrorCount()) {
-      pInitListGlob->pNode = il.GetRearrangedList();
+      pInitListGlob->pNode = il.GetRearrangedList(); // 用整理的初始化列表代替原来的列表
       DbgDumpSyntaxTree(NULL, pInitListGlob->pNode, 0, &strRearrange);
     }
     else {
@@ -7600,6 +7608,12 @@ namespace UVShader
     return pNameCtx->ConfirmArrayCount(this, nCount);
   }
 
+  VALUE::Rank TYPEDESC::GetRank() const
+  {
+    ASSERT(pDesc);
+    return static_cast<VALUE::Rank>(pDesc->rank);
+  }
+
   int INTRINSIC_FUNC::GetTypeTemplateTypeIndex(GXDWORD dwMasks)
   {
     return (dwMasks & ArgMask_TemplType) >> ArgMask_TemplShift;
@@ -7629,15 +7643,15 @@ namespace UVShader
     {
       m_sStack.push_back(STACKDESC());
       STACKDESC& top = Top();
-      CodeParser::BreakComma(top.sInitList, *pInitListGlob);
+      CodeParser::BreakComma(reinterpret_cast<SYNTAXNODE::GlobList&>(top.sInitList), *pInitListGlob);
       top.iter = top.sInitList.begin();
       top.ptkOpcode = ptkOpcode;
-      if(top.sInitList.empty() || _CL_NOT_(top.iter->CompareAsNode(SYNTAXNODE::MODE_InitList))) {
+      if(top.sInitList.empty() || _CL_NOT_(top.iter->glob.CompareAsNode(SYNTAXNODE::MODE_InitList))) {
         break;
       }
       else {
-        ptkOpcode = top.iter->pNode->pOpcode;
-        pInitListGlob = &top.iter->pNode->Operand[0];
+        ptkOpcode = top.iter->glob.pNode->pOpcode;
+        pInitListGlob = &top.iter->glob.pNode->Operand[0];
       }
     } // while
     return TRUE;
@@ -7648,6 +7662,7 @@ namespace UVShader
     , m_rNameCtx(rNameCtx)
     , m_pInitListGlob(pInitListGlob)
     , m_bNeedAlignDepth(FALSE)
+    , m_bConstantValues(TRUE)
     , m_pValuePool(NULL)
     , m_nValueCount(0)
   {
@@ -7669,20 +7684,20 @@ namespace UVShader
     m_nValueCount = count;
   }
 
-  const SYNTAXNODE::GLOB* CInitList::Get()
+  const CInitList::ELEMENT* CInitList::Get()
   {
     if(m_sStack.empty()) {
       return NULL;
     }
     else if(IsEnd() == FALSE)
     {
-      Enter(&*Top().iter);
+      Enter(&(Top().iter->glob));
     }
     
     if(Top().sInitList.empty()) {
       return NULL;
     }
-    return &*Top().iter;
+    return &(*Top().iter);
   }
 
   CInitList::Result CInitList::CastToValuePool(const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index)
@@ -7691,28 +7706,107 @@ namespace UVShader
     // base_index  是当前列表的基础索引, 也可以理解为 top index
     // array_index 是当前列表的元素索引
     const size_t index = base_index + array_index;
-    const SYNTAXNODE::GLOB* pGlob = Get();
+    const ELEMENT* pElement = Get();
+    const SYNTAXNODE::GLOB* pGlob = pElement ? &pElement->glob : NULL;
+
     const TYPEDESC* pTypeDesc = NULL;
     Result func_result = Result_Ok;
-    if(pGlob == reinterpret_cast<const SYNTAXNODE::GLOB*>(CInitList::E_FAILED)) {
-      CLBREAK;
-      return Result_Failed;
-    }
+    //if(pElement == reinterpret_cast<const ELEMENT*>(CInitList::E_FAILED)) {
+    //  CLBREAK;
+    //  return Result_Failed;
+    //}
 
-    if(pGlob == NULL)
+    if(pElement == NULL)
     {
       // 使用了“{}”定义，解释为0
       ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
+    }
+    else if(IsValue(pElement)) {
+      CLNOP
     }
     else
     {
       ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
       VALUE_CONTEXT vctx(m_rNameCtx);
       vctx.pLogger = GetLogger();
+      //vctx.bNeedValue = FALSE;
       pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
       if(pTypeDesc == NULL) {
         return Result_Failed;
       }
+#if 1
+      else if(IS_VECMAT_CATE(pTypeDesc))
+      {
+        const size_t scaler_count = pRefTypeDesc->CountOf();
+
+#if 0
+        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(pTypeDesc->name);
+        if(pPreCompMath)
+        {
+          m_sStack.push_back(STACKDESC());
+          STACKDESC& top = Top();
+          CodeParser::BreakComma(reinterpret_cast<SYNTAXNODE::GlobList&>(top.sInitList), pGlob->pNode->Operand[1]);
+          top.iter = top.sInitList.begin();
+          top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
+          // TODO: pGlob->pNode->Operand[1] 里面必须是标量，如果有向量就对不上数量了
+
+          if(index % scaler_count != 0)
+          {
+            // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
+            return Result_NotAligned;
+          }
+        }
+        else //(s_PreComponentMath[i].name == NULL)
+        {
+          GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5052, "初始值设定项不能用于初始化列表"));
+          return Result_Failed;
+        }
+#else
+        if(vctx.pValue)
+        {
+          m_sStack.push_back(STACKDESC());
+          STACKDESC& top = Top();
+          const size_t value_count = clMin(scaler_count, pTypeDesc->CountOf());
+          ELEMENT el;
+          for(size_t i = 0; i < value_count; i++)
+          {
+            ASSERT(m_pValuePool[i + index].rank == VALUE::Rank_Unsigned && m_pValuePool[i + index].nValue64 == 0); // 测试没被写过
+            m_pValuePool[i + index] = vctx.pValue[i];
+            el.pValue = &m_pValuePool[i + index];
+            if(pRefTypeDesc->pDesc) {
+              el.pValue->CastValueByRank(pRefTypeDesc->GetRank());
+            }
+            top.sInitList.push_back(el);
+          }
+
+          top.iter = top.sInitList.begin();
+          top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
+        }
+        else {
+          CLNOP
+        }
+
+        if(index % scaler_count != 0)
+        {
+          // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
+          return Result_NotAligned;
+        }
+#endif
+
+        pElement = Get();
+        pGlob = NULL; // &(pElement->glob);
+        func_result = Result_ExpandVecMat;
+
+        //ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0); // 测试没被写过
+
+        vctx.bNeedValue = TRUE;
+        //pTypeDesc = pRefTypeDesc;
+        //pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
+        //if(pTypeDesc == NULL) {
+        //  return Result_Failed;
+        //}
+      }
+#else
       else if(IS_VECMAT_CATE(pTypeDesc) && pRefTypeDesc->IsSameType(pTypeDesc) &&
         pGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall) && pGlob->pNode->Operand[1].ptr != NULL) // 要满足 float3(a,b,c) 格式        
       {
@@ -7724,7 +7818,7 @@ namespace UVShader
         {
           m_sStack.push_back(STACKDESC());
           STACKDESC& top = Top();
-          CodeParser::BreakComma(top.sInitList, pGlob->pNode->Operand[1]);
+          CodeParser::BreakComma(reinterpret_cast<SYNTAXNODE::GlobList&>(top.sInitList), pGlob->pNode->Operand[1]);
           top.iter = top.sInitList.begin();
           top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
           // TODO: pGlob->pNode->Operand[1] 里面必须是标量，如果有向量就对不上数量了
@@ -7741,38 +7835,65 @@ namespace UVShader
           return Result_Failed;
         }
 
-        pGlob = Get();
+        pGlob = &(Get()->glob);
         func_result = Result_ExpandVecMat;
+
+        ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0); // 测试没被写过
+
+        vctx.bNeedValue = TRUE;
+        pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
+        if(pTypeDesc == NULL) {
+          return Result_Failed;
+        }
+        
+        //VALUE::State state = m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
+        //if(state == VALUE::State_OK) {
+        //  if(pRefTypeDesc->pDesc) {
+        //    m_pValuePool[index].CastValueByRank(static_cast<VALUE::Rank>(pRefTypeDesc->pDesc->rank));
+        //  }
+        //}
+        //else {
+        //  GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5053, "无法计算初始化列表常量"));
+        //  return Result_Failed;
+        //}
       }
-      else if(_CL_NOT_(IS_SCALER_CATE(pTypeDesc)))
+#endif
+      else if(IS_SCALER_CATE(pTypeDesc))
+      {
+        if(vctx.count == 0) {
+          m_bConstantValues = FALSE;
+        }
+        else if(vctx.count == 1) {
+          ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0); // 测试没被写过
+          m_pValuePool[index] = *vctx.pValue;
+          if(pRefTypeDesc->pDesc) {
+            m_pValuePool[index].CastValueByRank(pRefTypeDesc->GetRank());
+          }
+        }
+        else {
+          CLBREAK;
+        }
+      }
+      else
       {
         GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5052, "初始值设定项不能用于初始化列表"));
         return Result_Failed;
       }
-
-      ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
-      VALUE::State state = m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
-      if(state == VALUE::State_OK) {
-        if(pRefTypeDesc->pDesc) {
-          m_pValuePool[index].CastValueByRank(static_cast<VALUE::Rank>(pRefTypeDesc->pDesc->rank));
-        }
-      }
-      else {
-        GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5053, "无法计算初始化列表常量"));
-        return Result_Failed;
-      }
     }
-    DbgListAdd(pGlob);
+    //DbgListAdd(&pElement->glob);
+    DbgListAdd(pElement);
     return func_result;
   }
 
   const TOKEN* CInitList::GetLocation() const
   {
     ASSERT(!m_sStack.empty());
-    if(Top().sInitList.empty()) {
+    const STACKDESC& top = Top();
+
+    if(top.sInitList.empty() || IsValue(&*(top.iter))) {
       return Top().ptkOpcode;
     }
-    return (*Top().iter).GetFrontToken();
+    return Top().iter->glob.GetFrontToken();
   }
 
   const SYNTAXNODE::GLOB* CInitList::Step()
@@ -7796,7 +7917,7 @@ namespace UVShader
     }
 
     m_bNeedAlignDepth = FALSE;
-    return &*top.iter;
+    return &(top.iter->glob);
   }
 
   GXBOOL CInitList::Step(size_t nDimDepth, size_t nListDepth)
@@ -7830,6 +7951,11 @@ namespace UVShader
     return m_sStack.size();
   }
 
+  GXBOOL CInitList::IsConstantValues() const
+  {
+    return m_bConstantValues;
+  }
+
   GXBOOL CInitList::NeedAlignDepth(size_t nDimDepth, size_t nListDepth) const
   {
     const size_t depth = Depth();
@@ -7839,6 +7965,11 @@ namespace UVShader
   void CInitList::ClearAlignDepthFlag()
   {
     m_bNeedAlignDepth = FALSE;
+  }
+
+  GXBOOL CInitList::IsValue(const ELEMENT* pElement) const
+  {
+    return (pElement->pValue >= m_pValuePool && pElement->pValue < (m_pValuePool + m_nValueCount));
   }
 
   size_t CInitList::GetMaxCount(const TYPEDESC* pRefType) const
@@ -7888,21 +8019,30 @@ namespace UVShader
     m_RearrangedGlob.push_back(cm);
   }
 
-  void CInitList::DbgListAdd(const SYNTAXNODE::GLOB* pGlob)
+  void CInitList::DbgListAdd(const ELEMENT* pElement)
   {
     clStringA strA;
-    DbgListAdd(pGlob ? pGlob->ToString(strA) : "0");
+    DbgListAdd(pElement ? (IsValue(pElement) 
+      ? pElement->pValue->ToString(strA)
+      : pElement->glob.ToString(strA)) : "0");
+
     COMMALIST& cm = m_RearrangedGlob.back();
-    if(pGlob == NULL)
+    if(pElement == NULL)
     {
       VALUE v;
       SYNTAXNODE::GLOB temp_glob = { NULL };
       m_pCodeParser->SetRepalcedValue(temp_glob, v.SetZero());
       cm.PushBack(&temp_glob);
     }
+    else if(IsValue(pElement))
+    {
+      SYNTAXNODE::GLOB temp_glob = { NULL };
+      m_pCodeParser->SetRepalcedValue(temp_glob, *pElement->pValue);
+      cm.PushBack(&temp_glob);
+    }
     else
     {
-      cm.PushBack(pGlob);
+      cm.PushBack(&pElement->glob);
     }
   }
 
@@ -8121,7 +8261,7 @@ namespace UVShader
       // rank 映射
       for(auto it = pool.begin(); it != pool.end(); ++it)
       {
-        (*it).CastValueByRank(static_cast<VALUE::Rank>(pTargetType->pDesc->rank));
+        (*it).CastValueByRank(pTargetType->GetRank());
       }
       UsePool();
     }
@@ -8137,8 +8277,8 @@ namespace UVShader
   {
     ASSERT(IS_SCALER_CATE(pScalerType));
     ASSERT(IS_VECMAT_CATE(pVecMatType));
-    ASSERT(VALUE::IsNumericRank(static_cast<VALUE::Rank>(pScalerType->pDesc->rank)));
-    ASSERT(VALUE::IsNumericRank(static_cast<VALUE::Rank>(pVecMatType->pDesc->rank)));
+    ASSERT(VALUE::IsNumericRank(pScalerType->GetRank()));
+    ASSERT(VALUE::IsNumericRank(pVecMatType->GetRank()));
     const TYPEDESC* pTypeDesc = pVecMatType;
     if(pScalerType->pDesc->rank > pVecMatType->pDesc->rank)
     {

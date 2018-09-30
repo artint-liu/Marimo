@@ -289,6 +289,7 @@ namespace UVShader
     State CastValueByRank(Rank _type); // 按照rank转换值，这个可以指定更低的rank
     State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
     clStringA ToString() const;
+    clStringA& ToString(clStringA& str) const;
     GXBOOL IsNumericRank() const;
     static GXBOOL IsNumericRank(Rank rank);
     template<typename _Ty>

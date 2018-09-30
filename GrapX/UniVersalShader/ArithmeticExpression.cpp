@@ -1629,9 +1629,8 @@ GO_NEXT:;
     return state;
   }
 
-  clStringA VALUE::ToString() const
+  clStringA& VALUE::ToString(clStringA& str) const
   {
-    clStringA str;
     switch(rank)
     {
     case Rank_Signed:
@@ -1647,7 +1646,7 @@ GO_NEXT:;
       str.AppendUInt64(uValue64);
       break;
     case Rank_Float:
-      str.AppendFloat(fValue);
+      str.AppendFormat("%.3f", fValue);
       break;
     case Rank_Double:
       str.AppendFloat((float)fValue64);
@@ -1656,6 +1655,12 @@ GO_NEXT:;
       CLBREAK;
     }
     return str;
+  }
+
+  clStringA VALUE::ToString() const
+  {
+    clStringA str;    
+    return ToString(str);
   }
 
   GXBOOL VALUE::IsNumericRank() const
@@ -2274,7 +2279,7 @@ GO_NEXT:;
     case UVShader::SYNTAXNODE::MODE_FunctionCall:
       Operand[0].ToString(str);
       if(Operand[1].ptr) {
-        str.Append("(").Append(Operand[1].ToString(strOper[1])).Append("}");
+        str.Append("(").Append(Operand[1].ToString(strOper[1])).Append(")");
       }
       else {
         str.Append("()");
