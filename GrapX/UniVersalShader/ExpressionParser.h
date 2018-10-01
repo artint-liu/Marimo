@@ -188,6 +188,7 @@ namespace UVShader
   {
     // [ Ù–‘]
     const NameContext&  name_ctx;
+    const NameContext*  pMemberCtx;
     GXBOOL              bNeedValue;
     CLogger*            pLogger;
 

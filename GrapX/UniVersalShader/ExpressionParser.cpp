@@ -5040,7 +5040,7 @@ namespace UVShader
       }
 
       vctx.result = ValueResult_OK;
-      if(pPreCompMath->scaler_count == nScalerCount || nScalerCount == 1)
+      if(pPreCompMath->scaler_count <= nScalerCount || nScalerCount == 1)
       {
         vctx.pType = vctx.name_ctx.GetType(pPreCompMath->name);
         ASSERT(vctx.pType); // FindPerComponentMathOperations 列表里放了一个不存在的内置类型
@@ -5055,8 +5055,17 @@ namespace UVShader
           vctx.pool.assign(pPreCompMath->scaler_count, value);
           vctx.UsePool();
         }
-        else {
+        else if(vctx.pool.empty() == FALSE)
+        {
           const VALUE::Rank rank = vctx.TypeRank();
+
+          // 截断
+          if(pPreCompMath->scaler_count < nScalerCount) {
+            vctx.pool.erase(vctx.pool.begin() + pPreCompMath->scaler_count, vctx.pool.end());
+            vctx.count = vctx.pool.size();
+          }
+
+          ASSERT(vctx.pool.size() == pPreCompMath->scaler_count);
           std::for_each(vctx.pool.begin(), vctx.pool.end(), [rank](VALUE& value) {
             value.CastValueByRank(rank);
           });
@@ -5154,7 +5163,11 @@ namespace UVShader
       return vctx.pType;
     }
 
-    const IDNFDESC* pVariDesc = vctx.name_ctx.GetIdentifierDesc(pToken);
+    // 针对 stru.member[n] 这种情况的特殊用法，member使用pMemberCtx域，n使用name_ctx域
+    const IDNFDESC* pVariDesc = vctx.pMemberCtx
+      ? vctx.pMemberCtx->GetIdentifierDesc(pToken)
+      : vctx.name_ctx.GetIdentifierDesc(pToken);
+
     if(pVariDesc == NULL)
     {
       // C2065: “m”: 未声明的标识符
@@ -5790,26 +5803,27 @@ namespace UVShader
         if(pMemberContext)
         {
           //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
-          VALUE_CONTEXT vctx_member(*pMemberContext, vctx.bNeedValue);
-          vctx_member.pValue = vctx.pValue;
-          vctx_member.count  = vctx.count;
-          vctx_member.pLogger = vctx.pLogger;
-          pTypeDesc = InferSubscriptType(vctx_member, pMemberNode);
-          if(vctx_member.result != ValueResult_OK && vctx_member.result != ValueResult_Variable) {
-            vctx.result = vctx_member.result;
-            vctx.pType  = NULL;
+          VALUE_CONTEXT vctx_subscript(vctx);
+          vctx_subscript.pValue = vctx.pValue;
+          vctx_subscript.count = vctx.count;
+          vctx_subscript.pMemberCtx = pMemberContext;
+          pTypeDesc = InferSubscriptType(vctx_subscript, pMemberNode);
+          if(vctx_subscript.result != ValueResult_OK && vctx_subscript.result != ValueResult_Variable) {
+            vctx.result = vctx_subscript.result;
+            vctx.pType = NULL;
             return vctx.pType;
           }
-          if(vctx_member.pool.empty()) {
-            vctx.pValue = vctx_member.pValue;
+
+          if(vctx_subscript.pool.empty()) {
+            vctx.pValue = vctx_subscript.pValue;
           }
           else {
-            ASSERT(vctx_member.pValue == &vctx_member.pool.front());
-            vctx.pool = vctx_member.pool;
+            ASSERT(vctx_subscript.pValue == &vctx_subscript.pool.front());
+            vctx.pool = vctx_subscript.pool;
             vctx.pValue = &vctx.pool.front();
           }
-          vctx.count = vctx_member.count;
-          vctx.pType = vctx_member.pType;
+          vctx.count = vctx_subscript.count;
+          vctx.pType = vctx_subscript.pType;
           return vctx.pType;
         }
       }
@@ -5946,8 +5960,7 @@ namespace UVShader
     const TYPEDESC* pSubscriptType = InferType(vctx_subscript, pNode->Operand[1]);
 
     if((vctx_subscript.result != ValueResult_OK && vctx_subscript.result != ValueResult_Variable) ||
-      vctx_subscript.pType->cate != TYPEDESC::TypeCate_IntegerScaler ||
-      vctx_subscript.count != 1)
+      vctx_subscript.pType->cate != TYPEDESC::TypeCate_IntegerScaler)
     {
       GetLogger()->OutputErrorW(pNode->GetAnyTokenAB(), UVS_EXPORT_TEXT(2058, "常量表达式不是整型")); // TODO: 定位不准
       return vctx.ClearValue(ValueResult_Failed).pType;
@@ -5955,7 +5968,7 @@ namespace UVShader
 
     if(vctx.pType->cate == TYPEDESC::TypeCate_MultiDim)
     {
-      if(vctx.IsNeedValue())
+      if(vctx.IsNeedValue() && vctx_subscript.pValue)
       {
         ASSERT(vctx_subscript.count == 1);
         ASSERT(vctx_subscript.pValue->nValue64 >= 0); // TODO: 输出错误提示不能为负值
@@ -5968,7 +5981,9 @@ namespace UVShader
       }
       else
       {
+        vctx.ClearValueOnly();
         vctx.pType = vctx.pType->pElementType;
+        vctx.result = ValueResult_Variable;
       }
       return vctx.pType;
     }
@@ -8046,6 +8061,7 @@ namespace UVShader
 
   VALUE_CONTEXT::VALUE_CONTEXT(const NameContext& _name_ctx)
     : name_ctx(_name_ctx)
+    , pMemberCtx(NULL)
     , bNeedValue(TRUE)
     , pLogger(NULL)
     , result(ValueResult_Undefined)
@@ -8057,6 +8073,7 @@ namespace UVShader
 
   VALUE_CONTEXT::VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue)
     : name_ctx(_name_ctx)
+    , pMemberCtx(NULL)
     , bNeedValue(_bNeedValue)
     , pLogger(NULL)
     , result(ValueResult_Undefined)
@@ -8068,6 +8085,7 @@ namespace UVShader
 
   VALUE_CONTEXT::VALUE_CONTEXT(const VALUE_CONTEXT& vctx)
     : name_ctx(vctx.name_ctx)
+    , pMemberCtx(NULL)
     , bNeedValue(vctx.bNeedValue)
     , pLogger(vctx.pLogger)
     , result(ValueResult_Undefined)

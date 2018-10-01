@@ -35,6 +35,10 @@ namespace UVShader
   GXLPCSTR STR_HALF3 = "half3";
   GXLPCSTR STR_HALF4 = "half4";
 
+  GXLPCSTR STR_BOOL2 = "bool2";
+  GXLPCSTR STR_BOOL3 = "bool3";
+  GXLPCSTR STR_BOOL4 = "bool4";
+
   GXLPCSTR STR_INT1x1 = "int1x1";
   GXLPCSTR STR_INT1x2 = "int1x2";
   GXLPCSTR STR_INT1x3 = "int1x3";
@@ -300,15 +304,19 @@ namespace UVShader
     {
     case 'x':
     case 'r':
+    case 's':
       return 0;
     case 'y':
     case 'g':
+    case 't':
       return 1;
     case 'z':
     case 'b':
+    case 'p':
       return 2;
     case 'w':
     case 'a':
+    case 'q':
       return 3;
 
     default:
@@ -357,6 +365,15 @@ namespace UVShader
         GET_VECTOR_COMPONENT_INDEX(i);
       }
     }
+    else if(p[0] == 's' || p[0] == 't') {
+      GET_VECTOR_COMPONENT_INDEX(0);
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 's' || p[i] == 't')) {
+          return FALSE;
+        }
+        GET_VECTOR_COMPONENT_INDEX(i);
+      }
+    }
     else {
       return FALSE;
     }
@@ -379,6 +396,15 @@ namespace UVShader
       GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'r' || p[i] == 'g' || p[i] == 'b')) {
+          return FALSE;
+        }
+        GET_VECTOR_COMPONENT_INDEX(i);
+      }
+    }
+    else if(p[0] == 's' || p[0] == 't' || p[0] == 'p') {
+      GET_VECTOR_COMPONENT_INDEX(0);
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 's' || p[i] == 't' || p[i] == 'p')) {
           return FALSE;
         }
         GET_VECTOR_COMPONENT_INDEX(i);
@@ -407,6 +433,15 @@ namespace UVShader
       GET_VECTOR_COMPONENT_INDEX(0);
       for(size_t i = 1; i < pToken->length; i++) {
         if(_CL_NOT_(p[i] == 'r' || p[i] == 'g' || p[i] == 'b' || p[i] == 'a')) {
+          return FALSE;
+        }
+        GET_VECTOR_COMPONENT_INDEX(i);
+      }
+    }
+    else if(p[0] == 's' || p[0] == 't' || p[0] == 'p' || p[0] == 'q') {
+      GET_VECTOR_COMPONENT_INDEX(0);
+      for(size_t i = 1; i < pToken->length; i++) {
+        if(_CL_NOT_(p[i] == 's' || p[i] == 't' || p[i] == 'p' || p[i] == 'q')) {
           return FALSE;
         }
         GET_VECTOR_COMPONENT_INDEX(i);
@@ -482,6 +517,10 @@ namespace UVShader
     {STR_INT2, STR_INT, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector2},
     {STR_INT3, STR_INT, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector3},
     {STR_INT4, STR_INT, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector4},
+
+    {STR_BOOL2, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector2, OnMathSubscript},
+    {STR_BOOL3, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector3, OnMathSubscript},
+    {STR_BOOL4, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector4, OnMathSubscript},
 
     {STR_HALF2, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Vector, OnVector2, OnMathSubscript},
     {STR_HALF3, STR_HALF, VALUE::Rank_Float, TYPEDESC::TypeCate_Vector, OnVector3, OnMathSubscript},
@@ -778,6 +817,11 @@ namespace UVShader
     {STR_HALF3, 3},
     {STR_HALF4, 4},
     {STR_DOUBLE, 1},
+    {STR_BOOL, 1},
+    {STR_BOOL2, 2},
+    {STR_BOOL3, 3},
+    {STR_BOOL4, 4},
+
     {STR_DOUBLE2, 2},
     {STR_DOUBLE3, 3},
     {STR_DOUBLE4, 4},
