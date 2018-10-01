@@ -386,6 +386,7 @@ namespace UVShader
       Result_Ok = 0,
       Result_ExpandVecMat = 1,  // 展开函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化
       Result_NotAligned = 2,    // 函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化与index没对齐
+      Result_VecMatConstruct = 3,
     };
 
     CInitList(CodeParser* pCodeParser, NameContext& rNameCtx, const SYNTAXNODE::GLOB* pInitListGlob);

@@ -5378,30 +5378,33 @@ namespace UVShader
       CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
       switch(result)
       {
-      case UVShader::CInitList::Result_Failed:
+      case CInitList::Result_Failed:
         return NULL;
-        break;
-      case UVShader::CInitList::Result_ExpandVecMat:
+      case CInitList::Result_ExpandVecMat:
         nListDepth++;
+        index++;
         break;
-      case UVShader::CInitList::Result_Ok:
-      case UVShader::CInitList::Result_NotAligned:
+      case CInitList::Result_Ok:
+      case CInitList::Result_NotAligned:
         // 不处理
+        index++;
+        break;
+      case CInitList::Result_VecMatConstruct:
+        index += pRefType->CountOf();
         break;
       default:
         CLBREAK; // 意外的返回值
         break;
       }
 
-      index++;
 
-      if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
+      if(rInitList.Step(nDimDepth, nListDepth) == FALSE || result == CInitList::Result_VecMatConstruct) {
         break;
       }
     }
 
 
-    if((rInitList.Depth() > nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
+    if((rInitList.Depth() > nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE || index > pRefType->CountOf())
     {
       GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
       return NULL;
@@ -7711,10 +7714,6 @@ namespace UVShader
 
     const TYPEDESC* pTypeDesc = NULL;
     Result func_result = Result_Ok;
-    //if(pElement == reinterpret_cast<const ELEMENT*>(CInitList::E_FAILED)) {
-    //  CLBREAK;
-    //  return Result_Failed;
-    //}
 
     if(pElement == NULL)
     {
@@ -7731,37 +7730,14 @@ namespace UVShader
       vctx.pLogger = GetLogger();
       //vctx.bNeedValue = FALSE;
       pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
+
       if(pTypeDesc == NULL) {
         return Result_Failed;
       }
-#if 1
       else if(IS_VECMAT_CATE(pTypeDesc))
       {
         const size_t scaler_count = pRefTypeDesc->CountOf();
 
-#if 0
-        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(pTypeDesc->name);
-        if(pPreCompMath)
-        {
-          m_sStack.push_back(STACKDESC());
-          STACKDESC& top = Top();
-          CodeParser::BreakComma(reinterpret_cast<SYNTAXNODE::GlobList&>(top.sInitList), pGlob->pNode->Operand[1]);
-          top.iter = top.sInitList.begin();
-          top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
-          // TODO: pGlob->pNode->Operand[1] 里面必须是标量，如果有向量就对不上数量了
-
-          if(index % scaler_count != 0)
-          {
-            // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
-            return Result_NotAligned;
-          }
-        }
-        else //(s_PreComponentMath[i].name == NULL)
-        {
-          GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5052, "初始值设定项不能用于初始化列表"));
-          return Result_Failed;
-        }
-#else
         if(vctx.pValue)
         {
           m_sStack.push_back(STACKDESC());
@@ -7781,83 +7757,22 @@ namespace UVShader
 
           top.iter = top.sInitList.begin();
           top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
-        }
-        else {
-          CLNOP
-        }
-
-        if(index % scaler_count != 0)
-        {
-          // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
-          return Result_NotAligned;
-        }
-#endif
-
-        pElement = Get();
-        pGlob = NULL; // &(pElement->glob);
-        func_result = Result_ExpandVecMat;
-
-        //ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0); // 测试没被写过
-
-        vctx.bNeedValue = TRUE;
-        //pTypeDesc = pRefTypeDesc;
-        //pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
-        //if(pTypeDesc == NULL) {
-        //  return Result_Failed;
-        //}
-      }
-#else
-      else if(IS_VECMAT_CATE(pTypeDesc) && pRefTypeDesc->IsSameType(pTypeDesc) &&
-        pGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall) && pGlob->pNode->Operand[1].ptr != NULL) // 要满足 float3(a,b,c) 格式        
-      {
-        //int i = 0;
-        const size_t scaler_count = pTypeDesc->CountOf();
-
-        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(pTypeDesc->name);
-        if(pPreCompMath)
-        {
-          m_sStack.push_back(STACKDESC());
-          STACKDESC& top = Top();
-          CodeParser::BreakComma(reinterpret_cast<SYNTAXNODE::GlobList&>(top.sInitList), pGlob->pNode->Operand[1]);
-          top.iter = top.sInitList.begin();
-          top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
-          // TODO: pGlob->pNode->Operand[1] 里面必须是标量，如果有向量就对不上数量了
 
           if(index % scaler_count != 0)
           {
             // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
             return Result_NotAligned;
           }
+
+          pElement = Get();
+          pGlob = NULL; // &(pElement->glob);
+          func_result = Result_ExpandVecMat;
         }
-        else //(s_PreComponentMath[i].name == NULL)
-        {
-          GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5052, "初始值设定项不能用于初始化列表"));
-          return Result_Failed;
+        else {
+          func_result = Result_VecMatConstruct;
         }
 
-        pGlob = &(Get()->glob);
-        func_result = Result_ExpandVecMat;
-
-        ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0); // 测试没被写过
-
-        vctx.bNeedValue = TRUE;
-        pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
-        if(pTypeDesc == NULL) {
-          return Result_Failed;
-        }
-        
-        //VALUE::State state = m_rNameCtx.CalculateConstantValue(m_pValuePool[index], m_pCodeParser, pGlob);
-        //if(state == VALUE::State_OK) {
-        //  if(pRefTypeDesc->pDesc) {
-        //    m_pValuePool[index].CastValueByRank(static_cast<VALUE::Rank>(pRefTypeDesc->pDesc->rank));
-        //  }
-        //}
-        //else {
-        //  GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5053, "无法计算初始化列表常量"));
-        //  return Result_Failed;
-        //}
       }
-#endif
       else if(IS_SCALER_CATE(pTypeDesc))
       {
         if(vctx.count == 0) {
