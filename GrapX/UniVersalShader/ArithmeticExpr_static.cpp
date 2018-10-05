@@ -737,6 +737,10 @@ namespace UVShader
     {"sign", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"degrees", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"ceil", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"round", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"trunc", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"isinf", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"isnan", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
 
     {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"atan2", INTRINSIC_FUNC::RetType_Argument1, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},

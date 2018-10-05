@@ -1345,7 +1345,37 @@ GO_NEXT:;
       }
     }
 
-    if(ptr[i] == '0' && bInteger) // 8进制
+    if(ptr[i] == '0' && i + 1 < count && (ptr[i + 1] == 'X' || ptr[i + 1] == 'x'))
+    {
+      i += 2;
+      if(i >= count) {
+        return State_IllegalChar;
+      }
+
+      int n;
+      for(; i < count; i++)
+      {
+        if(ptr[i] >= '0' && ptr[i] <= '9') {
+          n = ptr[i] - '0';
+        }
+        else if(ptr[i] >= 'A' && ptr[i] <= 'F') {
+          n = ptr[i] - ('A' - 10);
+        }
+        else if(ptr[i] >= 'a' && ptr[i] <= 'f') {
+          n = ptr[i] - ('a' - 10);
+        }
+        else if((ptr[i] == 'U' || ptr[i] == 'u') && i == count - 1) {
+          ASSERT(dwFlags == Rank_Unsigned || dwFlags == Rank_Unsigned64);
+          break;
+        }
+        else {
+          return State_IllegalChar;
+        }
+        // FIXME: 没有判断溢出情况
+        digi[p] = digi[p] * 16 + n;
+      }
+    }
+    else if(ptr[i] == '0' && bInteger) // 8进制
     {
       for(i++; i < count; i++)
       {
@@ -1365,32 +1395,6 @@ GO_NEXT:;
         else {
           return State_IllegalChar;
         }
-      }
-    }
-    else if(ptr[i] == '0' && i + 1 < count && (ptr[i + 1] == 'X' || ptr[i + 1] == 'x'))
-    {
-      i += 2;
-      if(i >= count) {
-        return State_IllegalChar;
-      }
-
-      int n;
-      for(; i < count; i++)
-      {
-        if (ptr[i] >= '0' && ptr[i] <= '9') {
-          n = ptr[i] - '0';
-        }
-        else if(ptr[i] >= 'A' && ptr[i] <= 'F') {
-          n = ptr[i] - ('A' - 10);
-        }
-        else if(ptr[i] >= 'a' && ptr[i] <= 'f') {
-          n = ptr[i] - ('a' - 10);
-        }
-        else {
-          return State_IllegalChar;
-        }
-        // FIXME: 没有判断溢出情况
-        digi[p] = digi[p] * 16 + n;
       }
     }
     else

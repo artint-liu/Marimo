@@ -6234,6 +6234,7 @@ namespace UVShader
            return FALSE;
          }
          vctx.pool.push_back(value);
+         vctx.pool.back().CastValueByRank(vctx.TypeRank());
        }
 
        vctx.UsePool();
