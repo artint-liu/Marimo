@@ -401,7 +401,7 @@ namespace GrapXToDX11
     {
       pDesc->BindFlags = 0;
       pDesc->CPUAccessFlags = D3D11_CPU_ACCESS_READ|D3D11_CPU_ACCESS_WRITE;
-      pDesc->Usage = D3D11_USAGE_STAGING;
+      //pDesc->Usage = D3D11_USAGE_STAGING;
       return;
     }
     
@@ -413,7 +413,7 @@ namespace GrapXToDX11
     if(TEST_FLAG(ResUsage, GXRU_TEST_READ)) {
       ASSERT( ! TEST_FLAG(ResUsage, GXRU_TEST_WRITE));
       pDesc->CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
-      pDesc->Usage = D3D11_USAGE_STAGING;
+      //pDesc->Usage = D3D11_USAGE_STAGING;
     }
 
     if(TEST_FLAG(ResUsage, GXRU_TEST_WRITE)) {

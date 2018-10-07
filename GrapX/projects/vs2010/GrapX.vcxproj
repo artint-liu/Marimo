@@ -604,6 +604,7 @@
     <ClCompile Include="..\..\Platform\GXApp.cpp" />
     <ClCompile Include="..\..\Platform\MOLauncher.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D11.cpp" />
+    <ClCompile Include="..\..\Platform\Win32_D3D11\BasicShader_d3d11.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D11\GPrimitiveImpl_d3d11.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D11\GShaderImpl_d3d11.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D11\GShaderStubImpl_d3d11.cpp" />

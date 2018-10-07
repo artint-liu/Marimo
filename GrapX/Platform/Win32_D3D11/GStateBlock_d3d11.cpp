@@ -986,7 +986,7 @@ namespace D3D11
 
   GXHRESULT GSamplerStateImpl::ResetToDefault()
   {
-    CLBREAK;
+    //CLBREAK;
     return GX_FAIL;
   }
 

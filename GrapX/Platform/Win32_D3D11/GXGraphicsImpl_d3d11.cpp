@@ -73,6 +73,7 @@
 
 namespace D3D11
 {
+  extern const char* g_szBaseShader;
   typedef LPD3DINCLUDE LPD3DXINCLUDE;
 
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
@@ -106,8 +107,8 @@ namespace D3D11
     , m_pDepthStencilView   (NULL)
     , m_dwFlags             (NULL)
     , m_pIdentity           (GXPLATFORM_UNKNOWN)
-    , m_pSimpleShader       (NULL)
-    , m_pBaseEffect       (NULL)
+    , m_pBaseShader         (NULL)
+    , m_pBaseEffect         (NULL)
     , m_pCurRenderTargetView  (NULL)
     , m_pCurDepthStencilView  (NULL)
     , m_pVertexLayout       (NULL)
@@ -286,18 +287,37 @@ namespace D3D11
     //m_pGraphicsLocker = new clstd::Locker;
     InitCommon();
 
-    if(GXSUCCEEDED(CreateShaderFromFileA(&m_pSimpleShader, "Shader\\Simple.shader.txt")))
+
+    if(GXFAILED(CreateShaderFromSource(&m_pBaseShader, g_szBaseShader, 0, NULL)))
     {
-      CreateEffect(&m_pBaseEffect, m_pSimpleShader);
+      CLOG_ERROR("Create base shader failed");
     }
     else
     {
-      TRACE("初始化SimpleShader失败!\n");
+      CreateEffect(&m_pBaseEffect, m_pBaseShader);
     }
+    //if(GXSUCCEEDED(CreateShaderFromFileA(&m_pSimpleShader, "Shader\\Simple.shader.txt")))
+    //{
+    //  CreateEffect(&m_pBaseEffect, m_pSimpleShader);
+    //}
+    //else
+    //{
+    //  TRACE("初始化SimpleShader失败!\n");
+    //}
 
     return TRUE;
   }
 
+  void GXGraphicsImpl::IntGetDimension(GXUINT& nWidth, GXUINT& nHeight)
+  {
+    if(m_pCurRenderTarget) {
+      m_pCurRenderTarget->GetDimension(&nWidth, &nHeight);
+    }
+    else {
+      nWidth = m_SwapChainDesc.BufferDesc.Width;
+      nHeight = m_SwapChainDesc.BufferDesc.Height;
+    }
+  }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   GXHRESULT GXGraphicsImpl::AddRef()
@@ -315,7 +335,7 @@ namespace D3D11
     }
 
     SAFE_RELEASE(m_pBaseEffect);
-    SAFE_RELEASE(m_pSimpleShader);
+    SAFE_RELEASE(m_pBaseShader);
 
     ReleaseCommon();
 
@@ -665,12 +685,23 @@ namespace D3D11
   GXBOOL GXGraphicsImpl::SetViewport(const GXVIEWPORT* pViewport)
   {
     D3D11_VIEWPORT Viewport;
-    Viewport.TopLeftX = (FLOAT)pViewport->regn.left;
-    Viewport.TopLeftY = (FLOAT)pViewport->regn.top;
-    Viewport.Width    = (FLOAT)pViewport->regn.width;
-    Viewport.Height   = (FLOAT)pViewport->regn.height;
-    Viewport.MinDepth = pViewport->fNear;
-    Viewport.MaxDepth = pViewport->fFar;
+    if(pViewport == NULL)
+    {
+      Viewport.TopLeftX = 0;
+      Viewport.TopLeftY = 0;
+      IntGetDimension((GXUINT&)Viewport.Width, (GXUINT&)Viewport.Height);
+      Viewport.MinDepth = 0.f;
+      Viewport.MaxDepth = 1.f;
+    }
+    else
+    {
+      Viewport.TopLeftX = (FLOAT)pViewport->regn.left;
+      Viewport.TopLeftY = (FLOAT)pViewport->regn.top;
+      Viewport.Width    = (FLOAT)pViewport->regn.width;
+      Viewport.Height   = (FLOAT)pViewport->regn.height;
+      Viewport.MinDepth = pViewport->fNear;
+      Viewport.MaxDepth = pViewport->fFar;
+    }
 
     HRESULT hval = GX_OK;
     m_pImmediateContext->RSSetViewports(1, &Viewport);
@@ -913,8 +944,8 @@ namespace D3D11
 
       if(GXFAILED(pGTex->Create(pSrcInfo)))
       {
+        pGTex->m_emType = GTextureImpl::CreationFailed;
         SAFE_RELEASE(pGTex);
-        ASSERT(FALSE);
         m_pLogger->OutputFormatW(L"...Failed.\n");
         return GX_FAIL;
       }

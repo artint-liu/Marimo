@@ -58,7 +58,9 @@ namespace D3D11
     {
       //OnDeviceEvent(DE_LostDevice);
       INVOKE_LOST_DEVICE;
-      m_pGraphics->UnregisterResource(this);
+      if(m_emType != CreationFailed) {
+        m_pGraphics->UnregisterResource(this);
+      }
       delete this;
       return GX_OK;
     }

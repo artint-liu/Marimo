@@ -851,6 +851,9 @@
     <ClCompile Include="..\..\Platform\Win32_D3D11.cpp">
       <Filter>Platform</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Platform\Win32_D3D11\BasicShader_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Platform\Readme.txt">

@@ -712,8 +712,11 @@ GXBOOL GShader::ComposeSource(MOSHADER_ELEMENT_SOURCE* pSrcComponent, GXDWORD dw
   // 如果文件名一致则跳过磁盘IO直接复制一份
   if(GXSTRCMPI<ch>(pSrcComponent->strVS, pSrcComponent->strPS) == 0) 
   {
-    pPixelBuffer = new clBuffer;
-    pPixelBuffer->Append(pVertexBuffer->GetPtr(), pVertexBuffer->GetSize());
+    if(result)
+    {
+      pPixelBuffer = new clBuffer;
+      pPixelBuffer->Append(pVertexBuffer->GetPtr(), pVertexBuffer->GetSize());
+    }
   }
   else if( ! IntLoadShaderComponent(pSrcComponent->strPS, File, bCompiledPS, &pPixelBuffer, "Can't load PixelShader(%s).\n")) {
     result = FALSE;

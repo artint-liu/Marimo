@@ -79,6 +79,7 @@ namespace D3D11
 
   public:
     GXEffect*                   IntGetEffect        ();
+    void                        IntGetDimension     (GXUINT& nWidth, GXUINT& nHeight);  // 
     inline ID3D11Device*        D3DGetDevice        ();
     inline ID3D11DeviceContext* D3DGetDeviceContext ();
     GXBOOL                      D3DGetSwapChainDesc  (DXGI_SWAP_CHAIN_DESC* pSwapChainDesc);
@@ -106,7 +107,8 @@ namespace D3D11
 
     GTexture*               m_pBackBufferTex;    // 内部使用的纹理缓冲
     GXImage*                m_pBackBufferImg;    // 引用 m_pBackBufferTex
-    GShader*                m_pSimpleShader;
+    //GShader*                m_pSimpleShader;
+    GShader*                m_pBaseShader;
     GXEffect*               m_pBaseEffect;
 
     // State define - 状态定义

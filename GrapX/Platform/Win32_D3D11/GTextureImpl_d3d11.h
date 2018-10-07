@@ -45,6 +45,7 @@ namespace D3D11
   public:
     enum CREATETYPE
     {
+      CreationFailed    = -1, // ´´½¨Ê§°ÜµÄ
       Invalid           = 0,
       User              = 1,
       File              = 2,
