@@ -1325,10 +1325,10 @@ GO_NEXT:;
     rank = Rank_BadValue;
 
     // FIXME: 这种写法会认为"10f"为合法的,实际C/C++中不承认这种写法
-    if(ptr[count - 1] == 'f' || ptr[count - 1] == 'F') {
-      SET_FLAG(dwFlags, Rank_Float);
-      count--;
-    }
+    //if(ptr[count - 1] == 'f' || ptr[count - 1] == 'F') {
+    //  SET_FLAG(dwFlags, Rank_Float);
+    //  count--;
+    //}
 
     // 符号解析
     if(ptr[i] == '-') {
@@ -1441,9 +1441,14 @@ GO_NEXT:;
           }
           digi[p] = digi[p] * 10 + n;
         }
-        else if(p == 0 && (ptr[i] == 'u' || ptr[i] == 'U') && i == count - 1)
+        else if(i == count - 1 && p == 0 && (ptr[i] == 'u' || ptr[i] == 'U'))
         {
           dwFlags = Rank_Unsigned;
+          break;
+        }
+        else if(i == count - 1 && p > 0 && (ptr[i] == 'f' || ptr[i] == 'F'))
+        {
+          dwFlags = Rank_Float;
           break;
         }
         else {
