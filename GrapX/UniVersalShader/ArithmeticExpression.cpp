@@ -1392,6 +1392,10 @@ GO_NEXT:;
           }
           digi[p] = digi[p] * 8 + n;
         }
+        else if((ptr[i] == 'U' || ptr[i] == 'u') && i == count - 1) {
+          ASSERT(dwFlags == Rank_Unsigned || dwFlags == Rank_Unsigned64);
+          break;
+        }
         else {
           return State_IllegalChar;
         }
@@ -2315,11 +2319,13 @@ GO_NEXT:;
         str.Append("()");
       }
       break;
+    case UVShader::SYNTAXNODE::MODE_Subscript:
+      Operand[0].ToString(str).Append('[').Append(Operand[1].ToString(strOper[1])).Append(']');
+      break;
     case UVShader::SYNTAXNODE::MODE_Undefined:
     case UVShader::SYNTAXNODE::MODE_Assignment:
     case UVShader::SYNTAXNODE::MODE_TypeCast:
     case UVShader::SYNTAXNODE::MODE_Typedef:
-    case UVShader::SYNTAXNODE::MODE_Subscript:
     case UVShader::SYNTAXNODE::MODE_Subscript0:
     case UVShader::SYNTAXNODE::MODE_Definition:
     case UVShader::SYNTAXNODE::MODE_Bracket:

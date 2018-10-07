@@ -122,6 +122,7 @@ namespace UVShader
   TOKEN::T_LPCSTR s_szLengthFunc = "length";
   TOKEN::T_LPCSTR s_szMultiplicationFunc = "mul";
   static GXLPCSTR s_szNCName_Block = "{";  // Name Context 代码块名
+  static GXLPCSTR s_szStructMember = "struct member";  // Name Context 结构体成员
 
   extern GXLPCSTR STR_VOID;
 
@@ -163,6 +164,7 @@ namespace UVShader
 
   const size_t STR_INT_LENGTH = clstd::strlenT(STR_INT);
   const size_t STR_UINT_LENGTH = clstd::strlenT(STR_UINT);
+  const size_t STR_BOOL_LENGTH = clstd::strlenT(STR_BOOL);
   const size_t STR_HALF_LENGTH = clstd::strlenT(STR_HALF);
   const size_t STR_FLOAT_LENGTH  = clstd::strlenT(STR_FLOAT);
   const size_t STR_DOUBLE_LENGTH = clstd::strlenT(STR_DOUBLE);
@@ -1403,7 +1405,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
       SYNTAXNODE* pChainNode = stat.sRoot.pNode;
       while(pChainNode) {
-        Verify_IdentifierDefinition(m_GlobalSet, pChainNode->Operand[0].pNode);
+        Verify_IdentifierDefinition(m_GlobalSet, pChainNode->Operand[0].pNode, stat.defn.modifier == UniformModifier_const);
         pChainNode = pChainNode->Operand[1].pNode;
       }
 #endif
@@ -1412,8 +1414,7 @@ namespace UVShader
     else
     {
 #ifdef ENABLE_SYNTAX_VERIFY
-      Verify_IdentifierDefinition(m_GlobalSet, stat.sRoot.pNode,
-        stat.defn.modifier == UniformModifier_const);
+      Verify_IdentifierDefinition(m_GlobalSet, stat.sRoot.pNode, stat.defn.modifier == UniformModifier_const);
 #endif
       m_aStatements.push_back(stat);
     }
@@ -4645,7 +4646,7 @@ namespace UVShader
   GXBOOL CodeParser::Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
-    NameContext* pStructMemberSet = new NameContext(s_szNCName_Block, &sParentSet, NULL);
+    NameContext* pStructMemberSet = new NameContext(s_szStructMember, &sParentSet, NULL);
     RecursiveNode<const SYNTAXNODE>(this, &rNode, [this, &result, pStructMemberSet](const SYNTAXNODE* pNode, int depth) -> GXBOOL
     {
       if(pNode->mode == SYNTAXNODE::MODE_Definition)
@@ -6590,11 +6591,11 @@ namespace UVShader
   }
 
 #ifdef ENABLE_SYNTAX_VERIFY
-  VALUE::State NameContext::CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const GLOB* pGlob)
+  VALUE::State NameContext::CalculateConstantValue(State& eLastState, VALUE& value_out, const GLOB* pGlob) const
   {
     if(pGlob->IsNode())
     {
-      return Calculate(value_out, pParser, pGlob->pNode);
+      return Calculate(value_out, pGlob->pNode);
     }
     else if(pGlob->IsToken())
     {
@@ -6616,13 +6617,13 @@ namespace UVShader
       }
 
       // C2057: 应输入常量表达式
-      m_eLastState = State_RequireConstantExpression;
+      eLastState = State_RequireConstantExpression;
       return VALUE::State_SyntaxError;
     }
     CLBREAK;
   }
 
-  VALUE::State NameContext::Calculate(VALUE& value_out, CodeParser* pMsgLogger, const SYNTAXNODE* pNode) const
+  VALUE::State NameContext::Calculate(VALUE& value_out, const SYNTAXNODE* pNode) const
   {
     VALUE p[2];
     VALUE::State s = VALUE::State_OK;
@@ -6659,7 +6660,7 @@ namespace UVShader
 
         if(pNode->Operand[1].IsNode())
         {
-          if((s = Calculate(value_out, pMsgLogger, pNode->Operand[1].pNode)) != VALUE::State_OK) {
+          if((s = Calculate(value_out, pNode->Operand[1].pNode)) != VALUE::State_OK) {
             return s;
           }
 
@@ -6716,8 +6717,8 @@ namespace UVShader
 
         clStringA strTypename;
         VALUE_CONTEXT vctx(*this);
-        vctx.pLogger = pMsgLogger->GetLogger();
-        const TYPEDESC* pTypeDesc = pMsgLogger->InferMemberType(vctx, pNode);
+        vctx.pLogger = GetLogger();
+        const TYPEDESC* pTypeDesc = m_pCodeParser->InferMemberType(vctx, pNode);
 
         if(pTypeDesc && IS_SCALER_CATE(pTypeDesc))
         {
@@ -6730,7 +6731,7 @@ namespace UVShader
           return VALUE::State_Variable;
         }
         else if(vctx.result == ValueResult_Undefined) {
-          PARSER_BREAK2(pMsgLogger, pNode); // 不是数学类型
+          PARSER_BREAK2(m_pCodeParser, pNode); // 不是数学类型
         }
       }
       //else {
@@ -6759,7 +6760,7 @@ namespace UVShader
     for(int i = 0; i < 2; i++)
     {
       if(pNode->Operand[i].IsNode()) {
-        s = Calculate(p[i], pMsgLogger, pNode->Operand[i].pNode);
+        s = Calculate(p[i], pNode->Operand[i].pNode);
       }
       else if(pNode->Operand[i].IsToken()) {
         if(pNode->Operand[i].pTokn->IsNumeric()) {
@@ -7102,7 +7103,12 @@ namespace UVShader
         }
       }
       else {
-        state = CalculateConstantValue(value, m_pCodeParser, &subscript_glob);
+        if(m_strName == s_szStructMember) {
+          state = m_pParent->CalculateConstantValue(m_eLastState, value, &subscript_glob);
+        }
+        else {
+          state = CalculateConstantValue(m_eLastState, value, &subscript_glob);
+        }
       }
 
       if(state == VALUE::State_OK)
@@ -7489,6 +7495,11 @@ namespace UVShader
     {
       szScaler = STR_UINT;
       szRxC = &name[STR_UINT_LENGTH];
+    }
+    else if(name.BeginsWith(STR_BOOL))
+    {
+      szScaler = STR_BOOL;
+      szRxC = &name[STR_BOOL_LENGTH];
     }
     else
     {

@@ -327,8 +327,8 @@ namespace UVShader
     
     static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
 #ifdef ENABLE_SYNTAX_VERIFY
-    VALUE::State CalculateConstantValue(VALUE& value_out, CodeParser* pParser, const GLOB* pGlob);
-    VALUE::State Calculate(VALUE& value_out, CodeParser* pMsgLogger, const SYNTAXNODE* pNode) const;
+    VALUE::State CalculateConstantValue(State& eLastState, VALUE& value_out, const GLOB* pGlob) const;
+    VALUE::State Calculate(VALUE& value_out, const SYNTAXNODE* pNode) const;
 #endif
   };
 

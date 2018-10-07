@@ -495,7 +495,7 @@ namespace UVShader
     }
 
     vctx.pType = vctx.pType->pElementType;
-    if(vctx.pValue)
+    if(vctx.pValue && pValue)
     {
       if(vctx.pool.empty())
       {
@@ -508,7 +508,10 @@ namespace UVShader
         vctx.pool.assign(temp.begin(), temp.end());
         vctx.UsePool();
       }
-    }    
+    }
+    else if(pValue == NULL) { // 写的稍微严谨一点排除了vctx.pValue为NULL的情况
+      vctx.ClearValueOnly();
+    }
     return vctx.pType;
   }
 
@@ -535,7 +538,7 @@ namespace UVShader
     }
 
     vctx.pType = pElementType;
-    if(vctx.pValue)
+    if(vctx.pValue && pValue)
     {
       if(vctx.pool.empty())
       {
@@ -548,6 +551,9 @@ namespace UVShader
         vctx.pool.assign(temp.begin(), temp.end());
         vctx.UsePool();
       }
+    }
+    else if(pValue == NULL) { // 写的稍微严谨一点排除了vctx.pValue为NULL的情况
+      vctx.ClearValueOnly();
     }
     return vctx.pType;
   }
@@ -741,6 +747,12 @@ namespace UVShader
     {"trunc", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"isinf", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"isnan", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"radians", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"fwidth", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"atan", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"tanh", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"cosh", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"sinh", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
 
     {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"atan2", INTRINSIC_FUNC::RetType_Argument1, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
@@ -750,37 +762,19 @@ namespace UVShader
     {"min", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"max", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"step", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
+    {"modf", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
+    {"pow", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
 
     {"clamp", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca},
     {"smoothstep", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
     {"sincos", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_OutMatVecSca ARG_OutMatVecSca},
+    {"refract", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_Vector ARG_Vector ARG_Scaler},
 
     // HLSL
-    //{"float3", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Vector},
     {"lerp", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
-    {"modf", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
-    {"pow", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
 
-    // GLSL
-    //{"vec2", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
-    //{"vec3", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
-    //{"vec4", INTRINSIC_FUNC::RetType_Argument0, 1, ARG_Vec},
-    //{STR_INT, INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Scaler},
-    //{STR_HALF, INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Scaler},
-    //{STR_UINT, INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Scaler},
-    //{STR_FLOAT, INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Scaler},
-    //{STR_DOUBLE, INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_Scaler},
-    //{STR_FLOAT2, INTRINSIC_FUNC::RetType_FromName, 1, (u16*)ARG_Vector},
-    //{STR_FLOAT3, INTRINSIC_FUNC::RetType_FromName, 1, (u16*)ARG_Vector},
-    //{STR_FLOAT4, INTRINSIC_FUNC::RetType_FromName, 1, (u16*)ARG_Vector},
+    // GLSL 将来去掉
     {"fract", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
-
-    //{"vec2", INTRINSIC_FUNC::RetType_FromName, 2, ARG_Scaler ARG_Scaler},
-    //{"vec3", INTRINSIC_FUNC::RetType_FromName, 3, ARG_Scaler ARG_Scaler ARG_Scaler},
-    //{"vec4", INTRINSIC_FUNC::RetType_FromName, 4, ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
-    //{"float2", INTRINSIC_FUNC::RetType_FromName, 2, (u16*)ARG_Scaler ARG_Scaler},
-    //{"float3", INTRINSIC_FUNC::RetType_FromName, 3, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler},
-    //{"float4", INTRINSIC_FUNC::RetType_FromName, 4, (u16*)ARG_Scaler ARG_Scaler ARG_Scaler ARG_Scaler},
     {"mix", INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_VecScal ARG_VecScal ARG_Scaler}, // FIXME: 没有验证第一个参数和第二个参数类型相同
     {"tex2D", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 2维向量
     {"tex3D", INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler3D ARG_Vector}, // FIXME: 3维向量
