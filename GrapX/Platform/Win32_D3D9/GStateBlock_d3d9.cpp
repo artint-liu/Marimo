@@ -639,6 +639,11 @@ namespace D3D9
     //pd3dDevice->SetSamplerState(Stage, D3DSAMP_DMAPOFFSET,    ThisSampDesc.DMapOffset);
   }
 
+  GXBOOL GSamplerStateImpl::Initialize(GSamplerStateImpl* pDefault)
+  {
+    return TRUE;
+  }
+
   GXBOOL GSamplerStateImpl::Activate(GSamplerStateImpl* pPrevSamplerState)
   {
     ASSERT(m_pGraphicsImpl->InlIsActiveSamplerState(this)); // 确定已经放置到Graphics上

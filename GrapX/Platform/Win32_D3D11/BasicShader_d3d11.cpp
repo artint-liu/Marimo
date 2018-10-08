@@ -14,7 +14,7 @@ struct VS_INPUT                                                         \n\
                                                                         \n\
 struct PS_INPUT                                                         \n\
 {                                                                       \n\
-  float4  Pos : POSITION;                                               \n\
+  float4  Pos : SV_POSITION;                                            \n\
   float4  Color : COLOR0;                                               \n\
   float2  TexUV : TEXCOORD0;                                            \n\
 };                                                                      \n\

@@ -185,6 +185,7 @@ namespace D3D9
     virtual ~GSamplerStateImpl();
 
     static GXBOOL     InitializeStatic  ();
+    GXBOOL            Initialize        (GSamplerStateImpl* pDefault);
     GXBOOL            Activate          (GSamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
     void              SetStageToDevice  (GXUINT Stage, const GXSAMPLERDESC* pPrevSampDesc);
     void              IntUpdateStates   (GXUINT Sampler, const GXSAMPLERDESC* pSamplerDesc, const GXSAMPLERDESC* pDefault);

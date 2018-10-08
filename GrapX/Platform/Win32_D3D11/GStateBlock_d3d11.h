@@ -159,6 +159,7 @@ namespace D3D11
     GSamplerStateImpl(GXGraphics* pGraphics);
     virtual ~GSamplerStateImpl();
     static GXBOOL     InitializeStatic  ();
+    GXBOOL            Initialize        (GSamplerStateImpl* pDefault);
     GXBOOL            Activate          (GSamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
     //void              SetStageToDevice  (DWORD dwStage);
     //void              SetStateToDevice  (DWORD dwStage, GXSamplerStateType eType);

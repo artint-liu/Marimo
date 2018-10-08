@@ -90,7 +90,7 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
   clStringW strProfile;
   GetModuleFileNameW(hInstance, buffer, MAX_PATH);
   strProfile = buffer;
-  clpathfile::RenameExtension(strProfile, L".smartfile");
+  clpathfile::RenameExtension(strProfile, L".user.stock");
   pDesc->idPlatform = GXPLATFORM_WIN32_DIRECT3D9;
   if(sp.LoadFromFile(strProfile)) {
     Section handle = sp.OpenSection("Startup/Info");
@@ -111,9 +111,12 @@ GXBOOL GXDLLAPI MOUICreatePlatformSelectedDlg(HINSTANCE hInstance, GXAPP_DESC* p
     g_hDLLModule, MAKEINTRESOURCE(IDD_PLATFORM), 
     NULL, PlatformSelDlgProc, (LPARAM)pDesc);
 
-  if(val == 0)
+  if(val == 0) // IDOK
   {
-    Section handle = sp.CreateSection("Startup/Info");
+    Section handle = sp.OpenSection("Startup/Info");
+    if(handle.empty()) {
+      handle = sp.CreateSection("Startup/Info");
+    }
     MOPlatformEnumToStringW(pDesc->idPlatform, buffer, MAX_PATH);
     clStringA strPlatform = buffer;
     handle.SetKey("Platform", strPlatform);

@@ -45,7 +45,7 @@ GXBOOL GXCanvasCoreImpl::Initialize(GTexture* pTexture)
     }
 
     if(m_pSamplerState == NULL) {
-      m_pGraphics->IntCreateSamplerState(&m_pSamplerState);
+      m_pGraphics->CreateSamplerState(reinterpret_cast<GSamplerState**>(&m_pSamplerState));
     }
     else {
       m_pSamplerState->ResetToDefault();

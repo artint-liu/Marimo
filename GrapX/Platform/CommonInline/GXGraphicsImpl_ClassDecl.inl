@@ -68,7 +68,7 @@
   GXHRESULT   IntCreateRasterizerState    (GRasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc);
   GXHRESULT   IntCreateBlendState         (GBlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum);
   GXHRESULT   IntCreateDepthStencilState  (GDepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState);
-  GXHRESULT   IntCreateSamplerState       (GSamplerStateImpl** pSamplerState);
+  GXHRESULT   IntCreateSamplerState       (GSamplerStateImpl** pSamplerState, GSamplerStateImpl* pDefault);
 
   // GPrimitive
   virtual GXHRESULT   CreatePrimitiveV  (GPrimitiveV** ppPrimitive, GXLPCSTR szName, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage, GXUINT uVertexCount, GXUINT uVertexStride, GXLPVOID pVertInitData) override;

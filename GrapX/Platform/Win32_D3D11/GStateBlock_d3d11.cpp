@@ -834,6 +834,46 @@ namespace D3D11
     return TRUE;
   }
 
+  GXBOOL GSamplerStateImpl::Initialize(GSamplerStateImpl* pDefault)
+  {
+    ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+    //ID3D11DeviceContext* const pd3dDeviceContext = m_pGraphicsImpl->D3DGetDeviceContext();
+    if(pDefault == NULL)
+    {
+      D3D11_SAMPLER_DESC sampler_desc = { D3D11_FILTER_MIN_MAG_MIP_POINT };
+      sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+      sampler_desc.AddressU       = D3D11_TEXTURE_ADDRESS_WRAP;
+      sampler_desc.AddressV       = D3D11_TEXTURE_ADDRESS_WRAP;
+      sampler_desc.AddressW       = D3D11_TEXTURE_ADDRESS_WRAP;
+      sampler_desc.MipLODBias     = 0.0f;
+      sampler_desc.MaxAnisotropy  = 0;
+      sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS;
+      sampler_desc.BorderColor[0] = 0.0f;
+      sampler_desc.BorderColor[1] = 0.0f;
+      sampler_desc.BorderColor[2] = 0.0f;
+      sampler_desc.BorderColor[3] = 0.0f;
+      sampler_desc.MinLOD         = 0.0f;
+      sampler_desc.MaxLOD         = D3D11_FLOAT32_MAX;
+      ID3D11SamplerState* pd3d11SamplerState = NULL;
+      V(pd3dDevice->CreateSamplerState(&sampler_desc, &pd3d11SamplerState));
+      for(UINT i = 0; i < SAMPLERCOUNT; i++)
+      {
+        m_pSampler[i] = pd3d11SamplerState;
+        m_pSampler[i]->AddRef();
+      }
+      SAFE_RELEASE(pd3d11SamplerState);
+    }
+    else
+    {
+      for(UINT i = 0; i < SAMPLERCOUNT; i++)
+      {
+        m_pSampler[i] = pDefault->m_pSampler[i];
+        m_pSampler[i]->AddRef();
+      }
+    }
+    return TRUE;
+  }
+
   //GXBOOL GSamplerStateImpl::ResetToDefault()
   //{
   //  //TODO: 这个应该根据当前的状态来设置mask, DX11实现比较特殊

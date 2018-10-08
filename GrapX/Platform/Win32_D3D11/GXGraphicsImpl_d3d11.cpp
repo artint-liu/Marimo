@@ -687,9 +687,12 @@ namespace D3D11
     D3D11_VIEWPORT Viewport;
     if(pViewport == NULL)
     {
+      GXUINT width, height;
+      IntGetDimension((GXUINT&)width, (GXUINT&)height);
       Viewport.TopLeftX = 0;
       Viewport.TopLeftY = 0;
-      IntGetDimension((GXUINT&)Viewport.Width, (GXUINT&)Viewport.Height);
+      Viewport.Width    = width;
+      Viewport.Height   = height;
       Viewport.MinDepth = 0.f;
       Viewport.MaxDepth = 1.f;
     }

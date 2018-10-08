@@ -47,8 +47,8 @@
   m_pCurDepthStencilState = m_pDefaultDepthStencilState;
   m_pCurDepthStencilState->AddRef();
 
-  IntCreateSamplerState(&m_pCurSamplerState);
-  IntCreateSamplerState(&m_pDefaultSamplerState);
+  IntCreateSamplerState(&m_pDefaultSamplerState, NULL);
+  IntCreateSamplerState(&m_pCurSamplerState, m_pDefaultSamplerState);
 
 
   CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME,
@@ -253,7 +253,7 @@ GXHRESULT GXGraphicsImpl::CreateDepthStencilState(GDepthStencilState** ppDepthSt
 
 GXHRESULT GXGraphicsImpl::CreateSamplerState(GSamplerState** ppSamplerState)
 {
-  return IntCreateSamplerState((GSamplerStateImpl**)ppSamplerState);
+  return IntCreateSamplerState((GSamplerStateImpl**)ppSamplerState, m_pDefaultSamplerState);
 }
 
 GXHRESULT GXGraphicsImpl::CreatePrimitiveV(
@@ -613,14 +613,14 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szS
   return hval;
 }
 
-GXHRESULT GXGraphicsImpl::IntCreateSamplerState(GSamplerStateImpl** ppSamplerState)
+GXHRESULT GXGraphicsImpl::IntCreateSamplerState(GSamplerStateImpl** ppSamplerState, GSamplerStateImpl* pDefault)
 {
   (*ppSamplerState) = NULL;
   (*ppSamplerState) = new GSamplerStateImpl(this);
-  if((*ppSamplerState) != NULL)
-  {
-    (*ppSamplerState)->AddRef();
-    return GX_OK;
+  if(InlCheckNewAndIncReference(*ppSamplerState)) {
+    if((*ppSamplerState)->Initialize(pDefault)) {
+      return GX_OK;
+    }
   }
   return GX_FAIL;
 }
