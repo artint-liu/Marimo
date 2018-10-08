@@ -67,41 +67,6 @@ inline GXBOOL GXGraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
 #endif // #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D11_
 
 #ifdef _GXGRAPHICS_INLINE_RENDERTARGET_D3D11_
-GXBOOL GXGraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTargetIndex)
-{
-  if(pTexture != NULL)
-  {
-    GTextureImpl* pTextureImpl = static_cast<GTextureImpl*>(pTexture);
-    if(TEST_FLAG(pTextureImpl->m_dwResUsage, GXRU_TEX_RENDERTARGET))
-    {
-      GTextureFromUserRT* pTexRT = static_cast<GTextureFromUserRT*>(pTextureImpl);
-
-      SAFE_RELEASE(m_pCurRenderTarget);
-      SAFE_RELEASE(m_pCurRenderTargetView);
-      m_pCurRenderTarget = pTextureImpl;
-      m_pCurRenderTargetView = pTexRT->m_pRenderTargetView;
-      m_pCurRenderTarget->AddRef();
-      m_pCurRenderTargetView->AddRef();
-
-      m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
-    }
-    else {
-      return FALSE;
-    }
-  }
-  else
-  {
-    SAFE_RELEASE(m_pCurRenderTarget);
-    SAFE_RELEASE(m_pCurRenderTargetView);
-    SAFE_RELEASE(m_pCurDepthStencilView);
-    m_pCurRenderTargetView = m_pRenderTargetView;
-    m_pCurDepthStencilView = m_pDepthStencilView;
-    m_pRenderTargetView->AddRef();
-    m_pDepthStencilView->AddRef();
-    m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
-  }
-  return TRUE;
-}
 #endif // #ifdef _GXGRAPHICS_INLINE_RENDERTARGET_D3D11_
 
 #if defined(_GXGRAPHICS_INLINE_CANVAS_D3D9_) || defined(_GXGRAPHICS_INLINE_CANVAS_D3D11_) || defined(_GXGRAPHICS_INLINE_CANVAS_GLES2_)

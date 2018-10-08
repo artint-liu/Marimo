@@ -781,7 +781,9 @@ namespace D3D11
   //////////////////////////////////////////////////////////////////////////
   GXBOOL GTextureFromUserRT::Initialize(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
   {
-    ASSERT(m_pRenderTargetView == 0);
+    ASSERT(m_pRenderTargetView == NULL);
+    ASSERT(m_pDepthStencil == NULL);
+    ASSERT(m_pDepthStencilView == NULL);
     GXBOOL bval = FALSE;
     if(GTextureFromUser::Initialize(WidthRatio, HeightRatio, MipLevels, Format, ResUsage)) {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
@@ -793,6 +795,35 @@ namespace D3D11
 
       HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pTexture, &TarDesc, &m_pRenderTargetView);
       bval = GXSUCCEEDED(hval);
+
+
+
+      // Create depth stencil texture
+      D3D11_TEXTURE2D_DESC descDepth;
+      InlSetZeroT(descDepth);
+      descDepth.Width               = m_nWidth;
+      descDepth.Height              = m_nHeight;
+      descDepth.MipLevels           = 1;
+      descDepth.ArraySize           = 1;
+      descDepth.Format              = DXGI_FORMAT_D24_UNORM_S8_UINT;
+      descDepth.SampleDesc.Count    = 1;
+      descDepth.SampleDesc.Quality  = 0;
+      descDepth.Usage               = D3D11_USAGE_DEFAULT;
+      descDepth.BindFlags           = D3D11_BIND_DEPTH_STENCIL;
+      descDepth.CPUAccessFlags      = 0;
+      descDepth.MiscFlags           = 0;
+      hval = pd3dDevice->CreateTexture2D(&descDepth, NULL, &m_pDepthStencil);
+      if(FAILED(hval)) {
+        return hval;
+      }
+
+      // Create the depth stencil view
+      D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+      InlSetZeroT(descDSV);
+      descDSV.Format              = descDepth.Format;
+      descDSV.ViewDimension       = D3D11_DSV_DIMENSION_TEXTURE2D;
+      descDSV.Texture2D.MipSlice  = 0;
+      hval = pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
     }
     return bval;
   }
@@ -820,9 +851,18 @@ namespace D3D11
   GTextureFromUserRT::GTextureFromUserRT(GXGraphicsImpl* pGraphicsImpl) 
     : GTextureFromUser(pGraphicsImpl)
     , m_pRenderTargetView(NULL)
+    , m_pDepthStencil(NULL)
+    , m_pDepthStencilView(NULL)
   {
   }
 
+
+  GTextureFromUserRT::~GTextureFromUserRT()
+  {
+    SAFE_RELEASE(m_pRenderTargetView);
+    SAFE_RELEASE(m_pDepthStencil);
+    SAFE_RELEASE(m_pDepthStencilView);
+  }
 
   //////////////////////////////////////////////////////////////////////////
 

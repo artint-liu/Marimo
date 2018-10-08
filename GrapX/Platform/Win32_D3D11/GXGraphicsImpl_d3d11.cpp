@@ -1073,6 +1073,44 @@ namespace D3D11
     }
   }
 
+  GXBOOL GXGraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTargetIndex)
+  {
+    if(pTexture != NULL)
+    {
+      GTextureImpl* pTextureImpl = static_cast<GTextureImpl*>(pTexture);
+      if(TEST_FLAG(pTextureImpl->m_dwResUsage, GXRU_TEX_RENDERTARGET))
+      {
+        GTextureFromUserRT* pTexRT = static_cast<GTextureFromUserRT*>(pTextureImpl);
+
+        SAFE_RELEASE(m_pCurRenderTarget);
+        SAFE_RELEASE(m_pCurRenderTargetView);
+        SAFE_RELEASE(m_pCurDepthStencilView);
+        m_pCurRenderTarget = pTextureImpl;
+        m_pCurRenderTargetView = pTexRT->m_pRenderTargetView;
+        m_pCurDepthStencilView = pTexRT->m_pDepthStencilView;
+        m_pCurRenderTarget->AddRef();
+        m_pCurRenderTargetView->AddRef();
+        m_pCurDepthStencilView->AddRef();
+
+        m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
+      }
+      else {
+        return FALSE;
+      }
+    }
+    else
+    {
+      SAFE_RELEASE(m_pCurRenderTarget);
+      SAFE_RELEASE(m_pCurRenderTargetView);
+      SAFE_RELEASE(m_pCurDepthStencilView);
+      m_pCurRenderTargetView = m_pRenderTargetView;
+      m_pCurDepthStencilView = m_pDepthStencilView;
+      m_pRenderTargetView->AddRef();
+      m_pDepthStencilView->AddRef();
+      m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
+    }
+    return TRUE;
+  }
 } // namespace D3D11
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)

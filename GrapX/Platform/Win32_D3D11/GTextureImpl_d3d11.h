@@ -149,9 +149,12 @@ namespace D3D11
   protected:
     ID3D11RenderTargetView*   m_pRenderTargetView;
 
+    ID3D11Texture2D*          m_pDepthStencil;
+    ID3D11DepthStencilView*   m_pDepthStencilView;
+
   public:
     GTextureFromUserRT(GXGraphicsImpl* pGraphicsImpl);
-    //virtual ~GTextureFromUserRT();
+    virtual ~GTextureFromUserRT();
 
     virtual GXBOOL Initialize(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
   };
