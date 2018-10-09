@@ -1,0 +1,334 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{16e6b6fb-d0ef-4bf0-b731-24d37d6d1d6e}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\DataInfrastructure.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\DataPool.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\DataPoolIterator.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\DataPoolVariable.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GBaseTypes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GCamera.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GPrimitive.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GrapVR.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GRect.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GRegion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GResource.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GStateBlock.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GTexture.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GUnknown.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\guxtheme.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvGeometry.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvNode.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvScene.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvSceneMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvSequence.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvSkeleton.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gvSkinnedMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXCanvas.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXCanvas3D.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gxDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gxError.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXFont.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXGDI.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXGraphics.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXImage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXImm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXKernel.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXSprite.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXUser.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOBehavior.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOComponent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOConsoleStaff.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOLogger.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOSprite.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\Platform.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\StdMtl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\VertexDecl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\WineComm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\WineDragListDef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\WinePagerDef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\WineToolbarDef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\WineToolTipsDef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\WineTreeViewDef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\Marimo.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\3D\gvEnvironment.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GFTFontImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvas3DImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvasCoreImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXEffectImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXImageImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXMaterialImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXResourceMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXSpriteImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Canvas\MOSpriteImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Console.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIButton.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUICtrlBase.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIList_Simple.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIRichList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUISlider.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIStatic.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIToolbar.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\ListDataAdapter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\PropertyList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\PropertySheet.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Controls\RichListAdapter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GDI\GRegionImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GDI\GXShaderMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GDI\RegionFunc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GXStation.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GPrimitiveImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GShaderImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GShaderStubImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GStateBlock_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GTextureImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GStateBlock_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_XXX.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolBuildTime.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolErrorMsg.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\DesktopWindowsMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\GrapX.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\GrapXDef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\gxAdvancedUI.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\gxMessage.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\gxusp10.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\gxWinDef.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\GXWindow.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\ResDataMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\RichFXMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\ScrollBar.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\UILayoutMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GUXTheme.hxx" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\guxtheme\Button_ID_BP.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\guxtheme\ScrollBar_ID_SBP.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXCommCtrl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\OpenFileName.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\_dpa.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\_imagelist.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\WindowsSurface.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\AeroCommon.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\ConsoleAssistant.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\HLSL\FXCommRegister.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\LogMgr.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\AeroShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\BlurShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\SimpleShader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvEnvironment.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvGeometry.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvNode.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvScene.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvSceneMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvSequence.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvSkeleton.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvSkinnedMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GCamera.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GFTFontImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvas_Painting.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXEffectImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXImageImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXMaterialImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXResourceMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXSpriteImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXSpriteMan.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXWndCanvas.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\MOSpriteImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Canvas\MOSpriteManf.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIButton.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUICtrlBase.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIEdit_WE1.3.30.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIEdit_WE1.9.4.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIList_Simple.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIRichList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUISlider.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIStatic.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\GXUIToolbar.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\ListDataAdapter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\PropertyList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Controls\PropertySheet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\GDI\GRegionImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\GDI\GXShaderMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\GDI\RegionFunc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\gxDevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\GXStation.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\gxUtility.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GShaderImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GTextureImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\GXApp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\MOLauncher.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\BasicShader_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GPrimitiveImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GShaderImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GShaderStubImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GStateBlock_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GTextureImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\BasicShader_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GShaderStubImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GStateBlock_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GTexture3DImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GTextureImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GVertexDeclImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_XXX.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataInfrastructure.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPool.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolBuildTime.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolCompiler.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolErrorMsg.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolIterator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolVariable.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DesktopWindowsMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\GrapX.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\GrapXDef.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\gxAdvancedUI.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\gxWinConstant.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\GXWindow.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\ResDataMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\RichFXMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\ScrollBar.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\UILayoutMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\casemap.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\CommonDialogWndProc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\guxtheme.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\guxtheme\guxtheme_Button.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\guxtheme\guxtheme_ScrollBar.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\guxtheme\guxtheme_Window.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXCommCtrl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\gxCreateDialog.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\gxDefWindowProc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXGDI.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXImm.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXKernel.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Caret.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Class.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_ClipBoard.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_ExDC.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Menu.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Message.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Property.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_rect.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Region.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Scroll.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Timer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GXUser_Wnd.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\MessageBox.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\OpenFileName.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\_dpa.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\_imagelist.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WindowsSurface.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\header.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Button.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_combo.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_draglist.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Edit.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Edit_1.3.30.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Edit_1.5.30.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_header.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Listbox.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Listview.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Menu.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Menu_1.3.20.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_Static.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_toolbar.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_tooltips.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\WineCtrl\_treeview.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\ConsoleAssistant.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\GResourceImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\LogMgr.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\MOKeyboardStaff.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\MOLogger.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\AeroShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\BlurShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\SimpleShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\VertexDecl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvas3DImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvasCoreImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvasImpl_ClassDecl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvas_Text.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\D3D_ShaderImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\D3D_ShaderStubImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GStateBlock.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXCanvasImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXCanvasImpl_DrawTexture.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXGraphicsImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXGraphicsImpl_ClassDecl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXGraphicsImpl_Inline.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\OGL_GraphicsImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\OGL_Primitive.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\OGL_StateBlock.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\OGL_TextureImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\X_ShaderImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GUXTheme.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="$(MSBuildThisFileDirectory)..\..\Utility\HLSL\Aero.fx">
+      <FileType>Document</FileType>
+      <Command>fxc /Od /Zi /Tfx_4_0 /Fo$(ProjectDir)../../../bin/shaders/%(FileName).fxo /nologo %(FullPath)
+fxc /Od /Zi /Tvs_3_0 /EAeroVS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).vsu /nologo %(FullPath)
+fxc /Od /Zi /Tps_3_0 /EAeroPS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).psu /nologo %(FullPath)
+</Command>
+      <Outputs>$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="$(MSBuildThisFileDirectory)..\..\Utility\HLSL\Simple.fx">
+      <FileType>Document</FileType>
+      <Command>fxc /Od /Zi /Tfx_2_0 /Fo$(ProjectDir)../../../bin/shaders/%(FileName).fxo /nologo %(FullPath)
+fxc /Od /Zi /Tvs_2_0 /ESimpleVS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).vsu /nologo %(FullPath)
+fxc /Od /Zi /Tps_2_0 /ESimplePS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).psu /nologo %(FullPath)
+</Command>
+      <Outputs>$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\Readme.txt" />
+  </ItemGroup>
+</Project>

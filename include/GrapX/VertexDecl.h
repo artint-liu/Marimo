@@ -13,6 +13,8 @@ struct GXVERTEX_P3F_C1D
       GXBYTE  b, g, r, a;   // 颜色
     };
   };
+
+  GXVERTEX_P3F_C1D() CLTRIVIAL_DEFAULT;
 };
 
 struct GXVERTEX_P3T2C4F
@@ -29,6 +31,8 @@ struct GXVERTEX_P3T2C4F
       float   r, g, b, a;   // 颜色
     };
   };
+
+  GXVERTEX_P3T2C4F() CLTRIVIAL_DEFAULT;
 };
 
 struct GXVERTEX_P4T2C4F
@@ -77,6 +81,15 @@ struct GXVERTEX_P4T2F_C1D
       GXBYTE  b, g, r, a;   // 颜色
     };
   };
+  GXVERTEX_P4T2F_C1D() CLTRIVIAL_DEFAULT;
+
+  GXVERTEX_P4T2F_C1D& operator=(const GXVERTEX_P4T2F_C1D& v)
+  {
+    pos = v.pos;
+    texcoord = v.texcoord;
+    color = v.color;
+    return *this;
+  }
 };
 
 struct GXVERTEX_P3T2N3F_C1D

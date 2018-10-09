@@ -1,3 +1,4 @@
+#if defined(ENABLE_GRAPHICS_API_DX9)
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 #ifndef _GX_GRAPHICS_H_
 #define _GX_GRAPHICS_H_
@@ -134,3 +135,4 @@ namespace D3D9
 
 #endif // _GX_GRAPHICS_H_
 #endif // defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#endif // #if defined(ENABLE_GRAPHICS_API_DX9)

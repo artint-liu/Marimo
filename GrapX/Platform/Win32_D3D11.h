@@ -3,10 +3,11 @@
 
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 #include <windows.h>
-#include <D3DX11.h>
-#include <D3D11Shader.h>
-#include <D3Dcompiler.h>
-#include <D3Dcommon.h>
+#include <d3d11.h>
+#include <d3d11shader.h>
+#include <d3dcompiler.h>
+#include <d3dcommon.h>
+#include <DirectXTex.h>
 
 //#define WM_GX_RESETDEVICE (WM_USER + 100)
 

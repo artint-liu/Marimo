@@ -4,7 +4,7 @@
 
 namespace D3D9
 {
-const char* g_szBaseShader = "#line "__LINE_STR__" \"" __FILE__ "\"\n\
+const char* g_szBaseShader = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\
 struct VS_INPUT                                                         \n\
 {                                                                       \n\
   float4  Pos : POSITION;                                               \n\
@@ -53,7 +53,7 @@ float4 ps_main(PS_INPUT Input) : COLOR0                                 \n\
   return crPixel * Input.Color * Color;                                 \n\
 }";
 
-const char* g_szFastGaussianBlur = "#line "__LINE_STR__" \"" __FILE__ "\"\n\
+const char* g_szFastGaussianBlur = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\
 struct VS_INPUT                                                         \n\
 {                                                                       \n\
   float4  Pos : POSITION;                                               \n\

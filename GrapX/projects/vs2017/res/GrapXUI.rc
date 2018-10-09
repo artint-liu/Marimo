@@ -1,0 +1,193 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(简体，中国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+GXEDITMENU MENU
+BEGIN
+    POPUP "Edit"
+    BEGIN
+        MENUITEM "撤销(&U)",                      199
+        MENUITEM SEPARATOR
+        MENUITEM "剪切(&T)",                      768
+        MENUITEM "复制(&C)",                      769
+        MENUITEM "粘贴(&P)",                      770
+        MENUITEM "删除(&D)",                      771
+        MENUITEM SEPARATOR
+        MENUITEM "全选(&A)",                      177
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,0,2,0
+ PRODUCTVERSION 0,0,2,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "CompanyName", "Artint"
+            VALUE "FileDescription", "GrapXUI"
+            VALUE "FileVersion", "0, 0, 2, 0"
+            VALUE "InternalName", "GrapXUI"
+            VALUE "LegalCopyright", "Copyright (C) 2009"
+            VALUE "OriginalFilename", "GrapXUI.DLL"
+            VALUE "ProductName", "GrapX UI DLL"
+            VALUE "ProductVersion", "0, 0, 2, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TBCUSTOMIZE DIALOG 10, 20, 357, 125
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Customize Toolbar"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON   "&Close",IDCANCEL,308,6,44,14
+    PUSHBUTTON      "R&eset",IDC_RESET_BTN,308,23,44,14
+    PUSHBUTTON      "&Help",IDC_HELP_BTN,308,40,44,14
+    PUSHBUTTON      "Move &Up",IDC_MOVEUP_BTN,308,74,44,14
+    PUSHBUTTON      "Move &Down",IDC_MOVEDN_BTN,308,91,44,14
+    LTEXT           "A&vailable buttons:",-1,4,5,84,10
+    LISTBOX         IDC_AVAILBTN_LBOX,4,17,120,100,LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Add ->",IDOK,131,42,44,14
+    PUSHBUTTON      "<- &Remove",IDC_REMOVE_BTN,131,62,44,14
+    LTEXT           "&Toolbar buttons:",-1,182,5,78,10
+    LISTBOX         IDC_TOOLBARBTN_LBOX,182,17,120,100,LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+END
+
+IDD_PLATFORM DIALOGEX 0, 0, 214, 57
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Marimo Launcher"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,90,36,50,14
+    PUSHBUTTON      "取消",IDCANCEL,143,36,50,14
+    COMBOBOX        IDC_PLATFORMLIST,58,12,134,60,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Platform:",IDC_STATIC,22,12,30,12,SS_CENTERIMAGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_COPY                CURSOR                  "idc_copy.cur"
+GXIDC_DIVIDER           CURSOR                  "idc_divider.cur"
+GXIDC_DIVIDEROPEN       CURSOR                  "idc_divideropen.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_DRAGARROW           ICON                    "idi_dragarrow.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_TBCUSTOMIZE, DIALOG
+    BEGIN
+    END
+
+    IDD_PLATFORM, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // 中文(简体，中国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

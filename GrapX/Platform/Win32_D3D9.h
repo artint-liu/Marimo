@@ -1,7 +1,7 @@
 #ifndef _WIN32_DIRECT3D_9_H_
 #define _WIN32_DIRECT3D_9_H_
 
-#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#if defined(ENABLE_GRAPHICS_API_DX9) && (defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS))
 #include <windows.h>
 #include <d3dx9.h>
 

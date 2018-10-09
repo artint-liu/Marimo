@@ -691,8 +691,8 @@ namespace D3D11
       IntGetDimension((GXUINT&)width, (GXUINT&)height);
       Viewport.TopLeftX = 0;
       Viewport.TopLeftY = 0;
-      Viewport.Width    = width;
-      Viewport.Height   = height;
+      Viewport.Width    = static_cast<FLOAT>(width);
+      Viewport.Height   = static_cast<FLOAT>(height);
       Viewport.MinDepth = 0.f;
       Viewport.MaxDepth = 1.f;
     }

@@ -1,3 +1,4 @@
+#if defined(ENABLE_GRAPHICS_API_DX9)
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
 #ifndef _VERTEX_DECLARATION_D3D9_IMPLEMENT_HEADER_FILE_
@@ -37,3 +38,4 @@ namespace D3D9
 
 #endif // #ifndef _VERTEX_DECLARATION_D3D9_IMPLEMENT_HEADER_FILE_
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#endif // #if defined(ENABLE_GRAPHICS_API_DX9)

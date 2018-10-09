@@ -1,3 +1,4 @@
+#if defined(ENABLE_GRAPHICS_API_DX9)
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
 #define _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D9_
@@ -35,7 +36,6 @@
 #include "GDI/GXShaderMgr.h"
 //#define PS_REG_IDX_SHIFT 16
 //#define PS_REG_IDX_PART  (1 << PS_REG_IDX_SHIFT)
-#ifdef ENABLE_GRAPHICS_API_DX9
 
 #define PS_HANDLE_SHIFT 16
 
@@ -499,7 +499,6 @@ namespace D3D9
   }
 #endif // #ifdef REFACTOR_SHADER
 } // namespace D3D9
-#endif // #ifdef ENABLE_GRAPHICS_API_DX9
 
 #include <Smart/smartstream.h>
 #include <clTokens.h>
@@ -895,3 +894,4 @@ GXBOOL GShader::LoadStateSet(clStockA* pSmart, GXLPCSTR szSection, ParamArray* a
 
 //SetVertexShaderConstantB
 #endif // defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+#endif // #if defined(ENABLE_GRAPHICS_API_DX9)

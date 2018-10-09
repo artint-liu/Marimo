@@ -55,7 +55,7 @@ namespace D3D11
     GXBOOL        SetTextureByHandle      (GTextureBase** pTextureArray, GXUINT uHandle, GTextureBase* pTexture);
     GXBOOL        SetTextureByIndex       (GTextureBase** pTextureArray, GXUINT nIndex, GTextureBase* pTexture);
 #ifdef REFACTOR_SHADER
-    GXBOOL        CommitToDevice          (GXLPVOID lpUniform, GXUINT cbSize);
+    GXBOOL        CommitToDevice          (GXLPVOID lpUniform, GXSIZE_T cbSize);
     GXBOOL        UpdateCanvasUniform     (GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize);
     GXBOOL        UpdateUniform           (int nDefIdx, GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize);
 #endif // #ifdef REFACTOR_SHADER

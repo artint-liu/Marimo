@@ -20,6 +20,7 @@
 #define _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 #include "Canvas/GXResourceMgr.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
+#include <clPathFile.h>
 
 #ifdef ENABLE_GRAPHICS_API_DX11
 namespace D3D11
@@ -903,8 +904,33 @@ namespace D3D11
     ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
     //CalcTextureActualDimension();
 
-    HRESULT hval = D3DX11CreateTextureFromFileW(pd3dDevice, 
-      m_strSrcFile, NULL, NULL, (ID3D11Resource**)&m_pTexture, NULL);
+    //DirectX::Load
+
+    //HRESULT hval = D3DX11CreateTextureFromFileW(pd3dDevice, 
+    //  m_strSrcFile, NULL, NULL, (ID3D11Resource**)&m_pTexture, NULL);
+    DirectX::ScratchImage image;
+    DirectX::TexMetadata metadata;
+    HRESULT hval = S_OK;
+    if(clpathfile::CompareExtension(m_strSrcFile, _CLTEXT("dds")))
+    {
+      hval = DirectX::LoadFromDDSFile(m_strSrcFile, DirectX::DDS_FLAGS_NONE, &metadata, image);
+    }
+    else if(clpathfile::CompareExtension(m_strSrcFile, _CLTEXT("tga")))
+    {
+      hval = DirectX::LoadFromTGAFile(m_strSrcFile, &metadata, image);
+    }
+    else
+    {
+      CLOG_ERRORW(_CLTEXT("Can not load texture file:%s"), m_strSrcFile.CStr());
+    }
+
+    if(GXFAILED(hval)) {
+      return hval;
+    }
+
+    hval = DirectX::CreateTexture(pd3dDevice, image.GetImage(0, 0, 0), 1, metadata, (ID3D11Resource**)&m_pTexture);
+
+
     if(SUCCEEDED(hval)) {
       hval = pd3dDevice->CreateShaderResourceView(m_pTexture, NULL, &m_pTexRV);
       if(SUCCEEDED(hval)) {
@@ -915,7 +941,7 @@ namespace D3D11
         m_nWidthRatio = m_nWidth;
         m_nHeightRatio = m_nHeight;
         // FIXME: ²¹È«
-        return 0;
+        return GX_OK;
       }
     }
     return hval;

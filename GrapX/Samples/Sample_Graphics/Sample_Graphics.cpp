@@ -399,9 +399,9 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
 
   pCanvas->SetCompositingMode(CM_SourceOver);
   pCanvas->TextOutA(m_pFontS, 10, 600, "Clip Drawing:", -1, 0xff000000);
-  GXRECT rect;
-  m_pRegion2->GetBounding(&rect);
-  gxRectToRegn(&regnDst, &rect);
+  GXRECT rect2;
+  m_pRegion2->GetBounding(&rect2);
+  gxRectToRegn(&regnDst, &rect2);
   pCanvas->SetRegion(m_pRegion2, TRUE);
   pCanvas->DrawTexture(m_pTexture, &regnDst);
 

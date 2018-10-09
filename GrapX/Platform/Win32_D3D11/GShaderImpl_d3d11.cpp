@@ -254,9 +254,10 @@ namespace D3D11
     default:
       return GX_FAIL;
     }
-    
-    HRESULT hval = D3DX11CompileFromMemory((LPCSTR)pBuffer->GetPtr(), pBuffer->GetSize(), 
-      szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, NULL, &pShader, &pErrorBlob, NULL);
+
+    // D3DCompile
+    HRESULT hval = D3DCompile((LPCSTR)pBuffer->GetPtr(), pBuffer->GetSize(), 
+      szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, &pShader, &pErrorBlob);
 
     if( FAILED(hval) )
     {
@@ -312,8 +313,8 @@ namespace D3D11
       return GX_FAIL;
     }
 
-    HRESULT hval = D3DX11CompileFromMemory(szSourceCode, nSourceLen,
-      szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, NULL, &pShader, &pErrorBlob, NULL);
+    HRESULT hval = D3DCompile(szSourceCode, nSourceLen,
+      szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, &pShader, &pErrorBlob);
 
     if(FAILED(hval))
     {
