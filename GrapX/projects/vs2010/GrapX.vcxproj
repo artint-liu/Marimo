@@ -229,7 +229,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -296,7 +296,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <PreprocessorDefinitions>_X86;_NDEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_X86;_NDEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -346,7 +346,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -405,7 +405,7 @@
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(DXSDK_DIR)include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_X64;_WIN64;NDEBUG;_WINDOWS;_NDEBUG;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_X64;_WIN64;NDEBUG;_WINDOWS;_NDEBUG;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX9;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -601,6 +601,8 @@
     <ClCompile Include="..\..\gxDevice.cpp" />
     <ClCompile Include="..\..\GXStation.cpp" />
     <ClCompile Include="..\..\gxUtility.cpp" />
+    <ClCompile Include="..\..\Platform\CommonInline\GShaderImpl.cpp" />
+    <ClCompile Include="..\..\Platform\CommonInline\GTextureImpl.cpp" />
     <ClCompile Include="..\..\Platform\GXApp.cpp" />
     <ClCompile Include="..\..\Platform\MOLauncher.cpp" />
     <ClCompile Include="..\..\Platform\Win32_D3D11.cpp" />
@@ -732,6 +734,7 @@ fxc /Od /Zi /Tps_3_0 /EAeroPS /Fo$(ProjectDir)../../../bin/shaders/%(FileName).p
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\Utility\HLSL\Simple.fx">
       <FileType>Document</FileType>
@@ -746,6 +749,7 @@ fxc /Od /Zi /Tps_2_0 /ESimplePS /Fo$(ProjectDir)../../../bin/shaders/%(FileName)
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\..\bin/shaders\%(Filename).fxo;$(ProjectDir)..\..\..\bin/shaders\%(Filename).vsu;$(ProjectDir)..\..\..\bin/shaders\%(Filename).psu;%(Outputs)</Outputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <None Include="res\idc_copy.cur" />
     <None Include="res\idc_divider.cur" />

@@ -871,9 +871,6 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GUXTheme.inl">
       <Filter>Lib\User</Filter>
     </None>
-    <None Include="C:\Users\liuchenglong\Documents\MyCodes\Marimo_trunk2\GrapX\projects\vs2017\..\..\Platform\Readme.txt">
-      <Filter>Platform</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\D3D_ShaderImpl.inl">
       <Filter>Platform\CommInline</Filter>
     </None>
@@ -913,13 +910,10 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\X_ShaderImpl.inl">
       <Filter>Platform\CommInline</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\Readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\liuchenglong\Documents\MyCodes\Marimo_trunk2\GrapX\projects\vs2017\..\..\Utility\HLSL\Aero.fx">
-      <Filter>Lib\Utility\HLSL</Filter>
-    </CustomBuild>
-    <CustomBuild Include="C:\Users\liuchenglong\Documents\MyCodes\Marimo_trunk2\GrapX\projects\vs2017\..\..\Utility\HLSL\Simple.fx">
-      <Filter>Lib\Utility\HLSL</Filter>
-    </CustomBuild>
+    <CustomBuild Include="$(MSBuildThisFileDirectory)..\..\Utility\HLSL\Aero.fx" />
+    <CustomBuild Include="$(MSBuildThisFileDirectory)..\..\Utility\HLSL\Simple.fx" />
   </ItemGroup>
 </Project>

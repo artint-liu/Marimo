@@ -1,3 +1,5 @@
+#ifdef ENABLE_GRAPHICS_API_DX11
+
 #ifndef _WIN32_DIRECT3D_11_H_
 #define _WIN32_DIRECT3D_11_H_
 
@@ -61,3 +63,4 @@ namespace GrapXToDX11
 #endif // _WIN32_XXOO
 
 #endif // #ifndef _WIN32_DIRECT3D_11_H_
+#endif // #ifdef ENABLE_GRAPHICS_API_DX11

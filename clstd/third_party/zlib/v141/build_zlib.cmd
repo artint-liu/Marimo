@@ -1,10 +1,11 @@
 @echo off
 set ZLIB_LIB=zlib-1.2.11
 
-echo 需要在 vs 2017 命令行提示中执行
+echo 1.需要在 vs 2017 命令行提示中执行
+echo 2.需要7z.exe
 pause
 
-curl "https://www.zlib.net/zlib-1.2.11.tar.gz" --output zlib-1.2.11.tar.gz
+if not exist %ZLIB_LIB%.tar.gz curl "https://www.zlib.net/zlib-1.2.11.tar.gz" --output %ZLIB_LIB%.tar.gz
 7z x %ZLIB_LIB%.tar.gz
 7z x %ZLIB_LIB%.tar
 
