@@ -4,8 +4,11 @@
 
 #if defined(_CL_SYSTEM_MACOS)
 # include "zlib.h"
-#else
+#elif _MSC_VER <= 1600
 # include "third_party/zlib/include/zlib.h"
+#else
+//# define Z_PREFIX
+# include <zlib.h>
 #endif
 
 namespace clstd

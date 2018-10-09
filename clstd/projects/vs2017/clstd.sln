@@ -13,6 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd_ios", "clstd_ios.vcxp
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		clstd.vcxitems*{0a932c05-f32c-466a-8192-a6212fa693bd}*SharedItemsImports = 4
 		clstd.vcxitems*{488033d1-aaff-437f-a770-1dd650aee70c}*SharedItemsImports = 9
 		clstd.vcxitems*{db01fd99-30b3-414a-b712-ea16ffc4da6c}*SharedItemsImports = 4
 	EndGlobalSection
@@ -72,5 +73,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7DF1917D-9A65-4221-98D6-13C531D5CAAF}
 	EndGlobalSection
 EndGlobal

@@ -58,6 +58,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\thread\clThread.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\thread\clThreadQueue.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\thread\clTracingLocker.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStringAttach.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\SmartRepository.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clSchedule.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clAllocator.cpp" />
@@ -98,6 +103,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\thread\clThread.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\thread\clThreadQueue.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\thread\clTracingLocker.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clStringAttach.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\SmartRepository.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clSchedule.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\clstd_x64.asm" />

@@ -23,7 +23,7 @@
     <ProjectGuid>{0A932C05-F32C-466A-8192-A6212FA693BD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>clstd_win32</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -72,20 +72,24 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(Platform).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(Platform).$(Configuration).$(PlatformToolset)\</OutDir>
+    <IntDir>build~\$(ProjectName).$(PlatformTarget).$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(Platform).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(Platform).$(Configuration).$(PlatformToolset)\</OutDir>
+    <IntDir>$(PlatformTarget).$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>$(Platform).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(Platform).$(Configuration).$(PlatformToolset)\</OutDir>
+    <IntDir>$(PlatformTarget).$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(Platform).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(Platform).$(Configuration).$(PlatformToolset)\</OutDir>
+    <IntDir>$(PlatformTarget).$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -94,11 +98,20 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <AdditionalDependencies>zlibstat_d.lib</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -107,11 +120,18 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlibstat_d.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -122,13 +142,20 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <AdditionalDependencies>zlibstat.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -139,15 +166,21 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..;$(ProjectDir)..\..\third_party\iconv\include;$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\include;$(ProjectDir)..\..\third_party\pthread\include;$(VLDDIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <Lib>
+      <AdditionalDependencies>zlibstat.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\third_party\zlib\$(DefaultPlatformToolset)\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

@@ -35,10 +35,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clPathFile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clQuaternion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clRepository.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clSchedule.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStaticStringsDict.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clstd.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clString.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStringAttach.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStringSet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clTextLines.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clTokens.h" />
@@ -47,6 +49,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\cltypes.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\floatx.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\SmartRepository.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\socket\clSocket.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\socket\clSocketClient.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\socket\clSocketServer.h" />
@@ -76,9 +81,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clPathFile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clQuaternion.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clRepository.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clSchedule.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clstd.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clStock.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clString.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clStringAttach.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clTokens.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clTransform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clTree.cpp" />
@@ -87,6 +94,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\else\ecvt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\FloatX.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\PrimeNum.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\SmartRepository.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\socket\clSocket.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\socket\clSocketClient.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\socket\clSocketServer.cpp" />
