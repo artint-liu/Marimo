@@ -1138,6 +1138,7 @@ GXBOOL GXCanvasImpl::Clear(GXCOLORREF crClear)
     m_uVertCount  = 0;
     m_uIndexCount = 0;
   }
+
 FLUSH_CMD:
   if(!((m_uBatchCount + 1) < m_uBatchSize))
     Flush();

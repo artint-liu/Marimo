@@ -101,38 +101,79 @@ namespace D3D11
 
   GXHRESULT GPrimitiveVImpl::Invoke(GRESCRIPTDESC* pDesc)
   {
-    //DWORD dwUsage;
-    ////D3DPOOL ePool;
-    ////ConvertPrimResUsageToNative(m_dwResUsage, &dwUsage, &ePool);
+    INVOKE_DESC_CHECK(pDesc);
+    switch(pDesc->dwCmdCode)
+    {
+    case RC_LostDevice:
+    {
+      //SAFE_RELEASE(m_pIndexBuffer);
+      SAFE_RELEASE(m_pVertexBuffer);
+      return GX_OK;
+    }
+    break;
+    case RC_ResetDevice:
+    {
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      HRESULT hr = E_FAIL;
 
-    //switch(eEvent)
-    //{
-    //case DE_LostDevice:
-    //  {
-    //    SAFE_RELEASE(m_pVertexBuffer);
-    //    return GX_OK;
-    //  }
-    //  break;
-    //case DE_ResetDevice:
-    //  {
-    //    LPDIRECT3DDEVICE9 lpd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      D3D11_BUFFER_DESC bd;
+      D3D11_SUBRESOURCE_DATA InitData;
 
-    //    if(GXSUCCEEDED(lpd3dDevice->CreateVertexBuffer(
-    //      m_uElementCount * m_uElementSize, dwUsage, NULL, ePool, &m_pVertexBuffer, NULL)))
-    //    {
-    //      RestoreVertices();
-    //      return GX_OK;
-    //    }
-    //  }
-    //  break;
-    //case DE_ResizeDevice:
-    //  break;
-    //}
+      InlSetZeroT(bd);
+      GrapXToDX11::PrimitiveDescFromResUsage(m_dwResUsage, &bd);
+
+      bd.ByteWidth = m_uElementCount * m_uElementSize;
+      bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+      InlSetZeroT(InitData);
+      InitData.pSysMem = (const void *)pDesc->lParam;
+
+      hr = pd3dDevice->CreateBuffer(&bd, m_pVertices == NULL ? NULL : &InitData, &m_pVertexBuffer);
+      if(FAILED(hr))
+        return hr;
+
+      //bd.ByteWidth = m_uIndexCount * sizeof(GXWORD);
+      //bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+      //InlSetZeroT(InitData);
+      //InitData.pSysMem = m_pIndices;
+
+      //hr = pd3dDevice->CreateBuffer(&bd, m_pIndices == NULL ? NULL : &InitData, &m_pIndexBuffer);
+      if(FAILED(hr))
+        return hr;
+
+      return S_OK;
+      //    DWORD dwUsage;
+      //    D3DPOOL ePool;
+      //    ConvertPrimResUsageToNative(m_dwResUsage, &dwUsage, &ePool);
+
+      //    if(GXSUCCEEDED(lpd3dDevice->CreateVertexBuffer(
+      //      m_uElementCount * m_uElementSize, dwUsage, NULL, ePool, &m_pVertexBuffer, NULL)) &&
+      //      GXSUCCEEDED(lpd3dDevice->CreateIndexBuffer(
+      //      m_uIndexCount * sizeof(GXWORD), dwUsage, D3DFMT_INDEX16, ePool, &m_pIndexBuffer, NULL)) ) {
+
+      //        RestoreVertices();
+
+      //        if(m_pIndices != NULL) {
+      //          GXLPVOID lpLocked = NULL;
+      //          m_pIndexBuffer->Lock(0, 0, &lpLocked, D3DLOCK_DISCARD|D3DLOCK_DONOTWAIT);
+      //          memcpy(lpLocked, m_pIndices, m_uIndexCount * sizeof(GXWORD));
+      //          m_pIndexBuffer->Unlock();
+      //        }
+
+      //        return GX_OK;
+      //    }
+    }
+    break;
+    case RC_ResizeDevice:
+      break;
+    }
     return GX_FAIL;
   }
+
   GXBOOL GPrimitiveVImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCount, GXUINT uElementSize, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
   {
-    ASSERT(pVertInitData == NULL); // TODO: 稍后支持初始化数据
+    //ASSERT(pVertInitData == NULL); // TODO: 稍后支持初始化数据
     m_uElementCount = uElementCount;
     m_uElementSize  = uElementSize;
     m_dwResUsage    = ResUsage;
@@ -144,6 +185,7 @@ namespace D3D11
     GRESCRIPTDESC Desc;
     InlSetZeroT(Desc);
     Desc.dwCmdCode = RC_ResetDevice;
+    Desc.lParam = (GXLPARAM)pVertInitData;
 
     if(Invoke(&Desc) == GX_OK)
     {

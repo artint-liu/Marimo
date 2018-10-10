@@ -21,6 +21,7 @@
 #include "Canvas/GXResourceMgr.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
 #include <clPathFile.h>
+#include <FreeImage.h>
 
 #ifdef ENABLE_GRAPHICS_API_DX11
 namespace D3D11
@@ -905,6 +906,9 @@ namespace D3D11
     //CalcTextureActualDimension();
 
     //DirectX::Load
+    D3D11_SHADER_RESOURCE_VIEW_DESC resview_desc;
+    InlSetZeroT(resview_desc);
+
 
     //HRESULT hval = D3DX11CreateTextureFromFileW(pd3dDevice, 
     //  m_strSrcFile, NULL, NULL, (ID3D11Resource**)&m_pTexture, NULL);
@@ -914,25 +918,84 @@ namespace D3D11
     if(clpathfile::CompareExtension(m_strSrcFile, _CLTEXT("dds")))
     {
       hval = DirectX::LoadFromDDSFile(m_strSrcFile, DirectX::DDS_FLAGS_NONE, &metadata, image);
+
+      if(GXFAILED(hval)) {
+        return hval;
+      }
+
+      const DirectX::Image* pImage = image.GetImage(0, 0, 0);
+      hval = DirectX::CreateTexture(pd3dDevice, pImage, 1, metadata, (ID3D11Resource**)&m_pTexture);
+      resview_desc.Format = pImage->format;
     }
-    else if(clpathfile::CompareExtension(m_strSrcFile, _CLTEXT("tga")))
-    {
-      hval = DirectX::LoadFromTGAFile(m_strSrcFile, &metadata, image);
-    }
+    //else if(clpathfile::CompareExtension(m_strSrcFile, _CLTEXT("tga")))
+    //{
+    //  hval = DirectX::LoadFromTGAFile(m_strSrcFile, &metadata, image);
+    //}
     else
     {
-      CLOG_ERRORW(_CLTEXT("Can not load texture file:%s"), m_strSrcFile.CStr());
+      clstd::File file;
+      if(file.OpenExisting(m_strSrcFile))
+      {
+        clstd::MemBuffer buffer;
+        if(file.ReadToBuffer(&buffer) == FALSE) {
+          return GX_ERROR_OUROFMEMORY;
+        }
+
+        FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)buffer.GetPtr(), buffer.GetSize());
+        FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
+        if(fi_fmt == FIF_UNKNOWN) {
+          return E_FAIL;
+        }
+
+        FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
+
+        D3D11_TEXTURE2D_DESC tex2d_desc;
+        D3D11_SUBRESOURCE_DATA subres_data;
+        InlSetZeroT(tex2d_desc);
+        InlSetZeroT(subres_data);
+
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
+        m_Format = GXFMT_A8B8G8R8;
+#else
+        m_Format = GXFMT_A8R8G8B8;
+#endif
+
+        tex2d_desc.Width          = FreeImage_GetWidth(fibmp);    // UINT 
+        tex2d_desc.Height         = FreeImage_GetHeight(fibmp);   // UINT 
+        tex2d_desc.MipLevels      = 1;// UINT 
+        tex2d_desc.ArraySize      = 1;// UINT 
+        tex2d_desc.Format         = GrapXToDX11::FormatFrom(m_Format); // DXGI_FORMAT
+        tex2d_desc.SampleDesc.Count = 1; // DXGI_SAMPLE_DESC
+        tex2d_desc.SampleDesc.Quality = 0; // DXGI_SAMPLE_DESC
+        tex2d_desc.Usage          = D3D11_USAGE_DEFAULT; // D3D11_USAGE
+        tex2d_desc.BindFlags      = D3D11_BIND_SHADER_RESOURCE;      // UINT
+        tex2d_desc.CPUAccessFlags = 0; // UINT
+        tex2d_desc.MiscFlags      = 0;      // UINT
+
+        subres_data.pSysMem     = FreeImage_GetBits(fibmp);
+        subres_data.SysMemPitch = FreeImage_GetPitch(fibmp);
+
+        hval = pd3dDevice->CreateTexture2D(&tex2d_desc, &subres_data,&m_pTexture);
+
+        FreeImage_Unload(fibmp);
+        FreeImage_CloseMemory(fi_mem);
+
+        resview_desc.Format = tex2d_desc.Format;
+      }
+      else
+      {
+        CLOG_ERRORW(_CLTEXT("Can not load texture file:%s"), m_strSrcFile.CStr());
+      }
     }
 
-    if(GXFAILED(hval)) {
-      return hval;
-    }
-
-    hval = DirectX::CreateTexture(pd3dDevice, image.GetImage(0, 0, 0), 1, metadata, (ID3D11Resource**)&m_pTexture);
 
 
     if(SUCCEEDED(hval)) {
-      hval = pd3dDevice->CreateShaderResourceView(m_pTexture, NULL, &m_pTexRV);
+      resview_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+      resview_desc.Texture2D.MipLevels = 1;
+      resview_desc.Texture2D.MostDetailedMip = 0;
+
+      hval = pd3dDevice->CreateShaderResourceView(m_pTexture, &resview_desc, &m_pTexRV);
       if(SUCCEEDED(hval)) {
         D3D11_TEXTURE2D_DESC Tex2Desc;
         m_pTexture->GetDesc(&Tex2Desc);

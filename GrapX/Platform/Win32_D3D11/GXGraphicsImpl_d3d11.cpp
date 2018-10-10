@@ -511,6 +511,7 @@ namespace D3D11
     }
     return m_nGraphicsCount;
   }
+
   GXHRESULT GXGraphicsImpl::End()
   {
     GXINT nCount = --m_nGraphicsCount;
@@ -757,22 +758,109 @@ namespace D3D11
     return FALSE;    
   }
 
-  GXHRESULT GXGraphicsImpl::Clear(const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, float z, GXDWORD dwStencil)
+  GXHRESULT GXGraphicsImpl::Clear(const GXRECT* lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, float z, GXDWORD dwStencil)
   {
-    if(TEST_FLAG(dwFlags, GXCLEAR_TARGET)) {
-      GXColor color = crClear;
-      m_pImmediateContext->ClearRenderTargetView(m_pCurRenderTargetView, (const FLOAT*)&color);
-    }
+    if(lpRects == NULL || nCount == 0)
+    {
+      if(TEST_FLAG(dwFlags, GXCLEAR_TARGET)) {
+        GXColor color = crClear;
+        m_pImmediateContext->ClearRenderTargetView(m_pCurRenderTargetView, (const FLOAT*)&color);
+      }
 
-    // TODO: 测试的代码
-    m_pImmediateContext->ClearDepthStencilView( m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0 );
-    // /测试的代码
+#if 0
+      // TODO: 测试的代码
+      m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+      // /测试的代码
+#endif
 
     // 这个计算对 "GXCLEAR_*" 和 "D3D11_CLEAR_*" 的定义数值有要求, 不能随便改变
-    UINT uClearFlags = (dwFlags & (GXCLEAR_DEPTH|GXCLEAR_STENCIL)) >> 1;
+      UINT uClearFlags = (dwFlags & (GXCLEAR_DEPTH | GXCLEAR_STENCIL)) >> 1;
 
-    if(uClearFlags != 0) {
-      m_pImmediateContext->ClearDepthStencilView(m_pCurDepthStencilView, uClearFlags, z, (UINT8)dwStencil);
+      if(uClearFlags != 0) {
+        m_pImmediateContext->ClearDepthStencilView(m_pCurDepthStencilView, uClearFlags, z, (UINT8)dwStencil);
+      }
+    }
+    else
+    {
+      GDepthStencilState* pDepthStencil = NULL;
+      GXDEPTHSTENCILDESC desc(TRUE, TRUE);
+      desc.DepthFunc = GXCMP_ALWAYS;
+      CreateDepthStencilState(&pDepthStencil, &desc);
+
+      pDepthStencil->SetStencilRef(dwStencil);
+      InlSetDepthStencilState(static_cast<GDepthStencilStateImpl*>(pDepthStencil));
+      InlSetShader(m_pBaseShader);
+
+      GPrimitiveV* pPrimitive = NULL;
+      clstd::LocalBuffer<sizeof(CANVAS_PRMI_VERT) * 6 * 64> buf;
+      buf.Resize(sizeof(CANVAS_PRMI_VERT) * 6 * nCount, FALSE);
+      CANVAS_PRMI_VERT* pVert = reinterpret_cast<CANVAS_PRMI_VERT*>(buf.GetPtr());
+      for(GXUINT i = 0; i < nCount; i++)
+      {
+        pVert[0].pos.set((float)lpRects[i].left, (float)lpRects[i].top, z, 1);
+        pVert[0].texcoord.set(0, 0);
+        pVert[0].color = crClear;
+
+        pVert[1].pos.set((float)lpRects[i].right, (float)lpRects[i].top, z, 1);
+        pVert[1].texcoord.set(0, 0);
+        pVert[1].color = crClear;
+
+        pVert[2].pos.set((float)lpRects[i].left, (float)lpRects[i].bottom, z, 1);
+        pVert[2].texcoord.set(0, 0);
+        pVert[2].color = crClear;
+
+        pVert[3].pos.set((float)lpRects[i].left, (float)lpRects[i].bottom, z, 1);
+        pVert[3].texcoord.set(0, 0);
+        pVert[3].color = crClear;
+
+        pVert[4].pos.set((float)lpRects[i].right, (float)lpRects[i].top, z, 1);
+        pVert[4].texcoord.set(0, 0);
+        pVert[4].color = crClear;
+
+        pVert[5].pos.set((float)lpRects[i].right, (float)lpRects[i].bottom, z, 1);
+        pVert[5].texcoord.set(0, 0);
+        pVert[5].color = crClear;
+
+        pVert += 6;
+      }
+
+      
+      CreatePrimitiveV(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXRU_DEFAULT, 6 * nCount, sizeof(CANVAS_PRMI_VERT), buf.GetPtr());
+      GPrimitive* pSavedPrimitive = m_pCurPrimitive;
+      if(pSavedPrimitive) {
+        pSavedPrimitive->AddRef();
+      }
+
+      SetPrimitiveV(pPrimitive);
+      GXDWORD dwFlags = m_dwFlags;
+      m_dwFlags = F_ACTIVATE;
+      DrawPrimitive(GXPT_TRIANGLELIST, 0, nCount * 2);
+      m_dwFlags = dwFlags;
+
+      if(pSavedPrimitive)
+      {
+        // TODO: 接口合并
+        if(pSavedPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE) {
+          SetPrimitiveVI(static_cast<GPrimitiveVI*>(pSavedPrimitive));
+        }
+        else {
+          SetPrimitiveV(static_cast<GPrimitiveV*>(pSavedPrimitive));
+        }
+      }
+      else
+      {
+        SetPrimitiveV(NULL);
+      }
+
+      //SAFE_RELEASE(m_pCurPrimitive);
+      //m_pCurPrimitive = pSavedPrimitive;
+      //SAFE_RELEASE(pSavedPrimitive);
+      
+      //GXCanvas* pCanvas = LockCanvas(NULL, NULL, NULL);
+      //pCanvas->Release(); 
+
+      SAFE_RELEASE(pPrimitive);
+      SAFE_RELEASE(pDepthStencil);
     }
     return 0;
 

@@ -4207,8 +4207,40 @@ enum GXRenderStateType {
 //    GXSAMP_FORCE_DWORD   = 0x7fffffff, /* force 32-bit size enum */
 //};
 
+// TODO: 整理格式顺序，对于R，G，B，A，L这些通道，枚举名中的顺序应当为内存数据的顺序，
+// 如B8G8R8A8格式，第一个字节（BYTE）应该是蓝色通道，最后一个应该是Alpha通道
+// 如B16G16R16A16格式，第一个字（WORD）应该是蓝色通道
+// 对于压缩格式（如DXT1，ASTC，ETC）和深度缓冲（如D24S8）依据图形平台格式而定
 enum GXGraphicsFormat
 {
+  Format_Unknown              = 0,
+  Format_B8G8R8A8             = 200,
+  Format_B8G8R8X8             = 201,
+  Format_B8G8R8               = 202,
+  Format_R8G8B8A8             = 203,
+  Format_R8G8B8X8             = 204,
+  Format_R8G8                 = 205,
+  Format_R16G16               = 206,
+  Format_R8                   = 207,
+  Format_R16                  = 208,
+  Format_R32                  = 209,
+  Format_A8                   = 210,
+
+  Format_R32G32B32A32_Float   = 230,
+  Format_R32G32B32_Float      = 231,
+
+  // 深度/模板格式
+  Format_D32                  = 240,
+  Format_D16                  = 241,
+  Format_D24S8                = 242,
+  Format_D24X8                = 243,
+
+  // 顶点索引
+  Format_Index16              = 300,
+  Format_Index32              = 301,
+
+
+  // 旧的
   GXFMT_UNKNOWN              =  0,
 
   GXFMT_R8G8B8               = 20,
@@ -4780,7 +4812,7 @@ typedef GXVERTEXELEMENT*        LPGXVERTEXELEMENT;
 typedef const GXVERTEXELEMENT*  LPCGXVERTEXELEMENT;
 typedef GXVERTEXELEMENT*        GXLPVERTEXELEMENT;
 typedef const GXVERTEXELEMENT*  GXLPCVERTEXELEMENT;
-#define GXDECL_END() {0,GXDECLTYPE_UNUSED,(GXDeclMethod)0,(GXDeclUsage)0,-1}
+#define GXDECL_END() {0,GXDECLTYPE_UNUSED,(GXDeclMethod)0,(GXDeclUsage)0,(GXUINT)-1}
 
 struct GXVIEWPORT
 {

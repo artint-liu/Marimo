@@ -416,6 +416,7 @@ namespace D3D11
     }
     return TRUE;
   }
+
   const GShaderImpl::ConstantDescArray& GShaderImpl::GetConstantDescTable() const
   {
     return m_aConstDesc;
