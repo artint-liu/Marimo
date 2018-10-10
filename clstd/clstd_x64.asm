@@ -1,3 +1,7 @@
+; Visual Studio 支持masm编译方法：
+; 右键项目属性-生成依赖项-生成自定义-勾选“Masm”
+; asm文件，右键属性，项类型选“Microsoft Macro Assembler”
+
 ifndef _CL_ARCH_X64
 .686p
 .XMM

@@ -18,6 +18,12 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\..\clstd_x64.asm">
+      <FileType>Document</FileType>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CL_ARCH_X64</PreprocessorDefinitions>
+    </MASM>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{0A932C05-F32C-466A-8192-A6212FA693BD}</ProjectGuid>
@@ -54,6 +60,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
     <Import Project="clstd.vcxitems" Label="Shared" />
@@ -73,22 +80,22 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>build~\$(ProjectName).$(PlatformTarget).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\bin\$(PlatformToolset)\</OutDir>
     <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(PlatformTarget).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <IntDir>build~\$(ProjectName).$(PlatformTarget).$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\$(PlatformToolset)\</OutDir>
     <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IntDir>$(PlatformTarget).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <IntDir>build~\$(ProjectName).$(PlatformTarget).$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\$(PlatformToolset)\</OutDir>
     <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(PlatformTarget).$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)..\..\bin\$(PlatformToolset)\</OutDir>
+    <IntDir>build~\$(ProjectName).$(PlatformTarget).$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\$(PlatformToolset)\</OutDir>
     <TargetName>$(ProjectName).$(PlatformTarget).$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -182,5 +189,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
 </Project>

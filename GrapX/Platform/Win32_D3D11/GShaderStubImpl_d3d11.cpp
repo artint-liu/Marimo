@@ -342,12 +342,12 @@ namespace D3D11
   }
 
 #ifdef REFACTOR_SHADER
-  GXBOOL GShaderStubImpl::UpdateCanvasUniform(GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize)
+  GXBOOL GShaderStubImpl::UpdateCanvasUniform(GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize)
   {
     CLBREAK;
     return FALSE;
   }
-  GXBOOL GShaderStubImpl::UpdateUniform(int nDefIdx, GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXUINT cbSize)
+  GXBOOL GShaderStubImpl::UpdateUniform(int nDefIdx, GXLPCBYTE lpCanvasUniform, GXLPVOID lpUniform, GXSIZE_T cbSize)
   {
     CLBREAK;
     return FALSE;

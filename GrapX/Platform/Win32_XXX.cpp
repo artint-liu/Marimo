@@ -64,7 +64,7 @@ GXHRESULT IMOPlatform_Win32Base::Finalize(GXINOUT GXGraphics** ppGraphics)
 
 LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  GXApp* pApp = (GXApp*)GetWindowLong(hWnd, 0);
+  GXApp* pApp = (GXApp*)GetWindowLongPtr(hWnd, 0);
   GXLPSTATION lpStation = NULL;
   GXGraphics* pGraphics = NULL;
   //if(bTrack && message != WM_USER + 57 && message != WM_USER + 58) {
@@ -489,7 +489,7 @@ GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndPro
       pDesc->nWidth, pDesc->nHeight, NULL);
   }
 
-  SetWindowLong(m_hWnd, 0, (GXLONG)pApp);
+  SetWindowLongPtr(m_hWnd, 0, (LONG_PTR)pApp);
 
   if (m_hWnd == NULL)
   {

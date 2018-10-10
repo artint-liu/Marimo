@@ -212,7 +212,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -236,13 +236,13 @@
       <TargetMachine>MachineX86</TargetMachine>
       <Profile>true</Profile>
       <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -259,14 +259,14 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>clstd_win32.$(PlatformTarget).$(Configuration).lib;winmm.lib;ole32.lib;dxguid.lib;FreeImaged.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>clstd_win32.$(PlatformTarget).$(Configuration).lib;winmm.lib;ole32.lib;dxguid.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <Profile>true</Profile>
       <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32;$(ProjectDir)../../third_party/FreeImage</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_CLI|Win32'">
@@ -274,7 +274,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -295,7 +295,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -303,7 +303,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -324,7 +324,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_CLI|x64'">
@@ -333,7 +333,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -352,7 +352,7 @@
       <ProgramDatabaseFile>$(OutDir)Frame UI.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -363,7 +363,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;_DEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -376,12 +376,12 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>clstd_win32.$(PlatformTarget).$(Configuration).lib;winmm.lib;ole32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>clstd_win32.$(PlatformTarget).$(Configuration).lib;winmm.lib;ole32.lib;dxguid.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)Frame UI.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_CLI|x64'">
@@ -392,7 +392,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;NDEBUG;_WINDOWS;_NDEBUG;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -411,7 +411,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -424,7 +424,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\..\Include;$(ProjectDir)..\..\..\clstd;$(ProjectDir)..\..\..\GrapX;$(ProjectDir)../../../GrapX/third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)../../../GrapX/third_party/FreeType/include;$(ProjectDir)../../../GrapX/third_party/OpenGL/include;$(ProjectDir)../../../clstd/third_party/pthread/include;$(VLDDIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X64;_WIN64;NDEBUG;_WINDOWS;_NDEBUG;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -443,7 +443,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>

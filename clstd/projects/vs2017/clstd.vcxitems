@@ -108,7 +108,4 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\thread\clTracingLocker.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User32Ex.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\clstd_x64.asm" />
-  </ItemGroup>
 </Project>
