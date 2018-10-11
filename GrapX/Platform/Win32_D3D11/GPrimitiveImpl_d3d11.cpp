@@ -126,9 +126,21 @@ namespace D3D11
       bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
       InlSetZeroT(InitData);
-      InitData.pSysMem = (const void *)pDesc->lParam;
+      if(m_pVertices)
+      {
+        InitData.pSysMem = m_pVertices;
+        hr = pd3dDevice->CreateBuffer(&bd, &InitData, &m_pVertexBuffer);
+      }
+      else if(pDesc->lParam)
+      {
+        InitData.pSysMem = (const void *)pDesc->lParam;
+        hr = pd3dDevice->CreateBuffer(&bd, &InitData, &m_pVertexBuffer);
+      }
+      else
+      {
+        hr = pd3dDevice->CreateBuffer(&bd, NULL, &m_pVertexBuffer);
+      }
 
-      hr = pd3dDevice->CreateBuffer(&bd, m_pVertices == NULL ? NULL : &InitData, &m_pVertexBuffer);
       if(FAILED(hr))
         return hr;
 

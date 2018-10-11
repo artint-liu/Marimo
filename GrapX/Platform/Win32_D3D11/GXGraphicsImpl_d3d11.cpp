@@ -785,11 +785,27 @@ namespace D3D11
       GDepthStencilState* pDepthStencil = NULL;
       GXDEPTHSTENCILDESC desc(TRUE, TRUE);
       desc.DepthFunc = GXCMP_ALWAYS;
+      desc.FrontFace.StencilDepthFailOp = GXSTENCILOP_KEEP;
+      desc.FrontFace.StencilFailOp      = GXSTENCILOP_KEEP;
+      desc.FrontFace.StencilFunc        = GXCMP_ALWAYS;
+      desc.FrontFace.StencilPassOp      = GXSTENCILOP_REPLACE;
+
+      desc.BackFace.StencilDepthFailOp  = GXSTENCILOP_KEEP;
+      desc.BackFace.StencilFailOp       = GXSTENCILOP_KEEP;
+      desc.BackFace.StencilFunc         = GXCMP_ALWAYS;
+      desc.BackFace.StencilPassOp       = GXSTENCILOP_REPLACE;
       CreateDepthStencilState(&pDepthStencil, &desc);
 
-      pDepthStencil->SetStencilRef(dwStencil);
+
+      GDepthStencilStateImpl* pSavedDepthStencilState = m_pCurDepthStencilState;
+      pSavedDepthStencilState->AddRef();
+
       InlSetDepthStencilState(static_cast<GDepthStencilStateImpl*>(pDepthStencil));
       InlSetShader(m_pBaseShader);
+      pDepthStencil->SetStencilRef(dwStencil);
+
+      //GXRASTERIZERDESC ras_desc;
+      //CreateRasterizerState()
 
       GPrimitiveV* pPrimitive = NULL;
       clstd::LocalBuffer<sizeof(CANVAS_PRMI_VERT) * 6 * 64> buf;
@@ -852,12 +868,13 @@ namespace D3D11
         SetPrimitiveV(NULL);
       }
 
+      InlSetDepthStencilState(pSavedDepthStencilState);
+      SAFE_RELEASE(pSavedDepthStencilState);
+
       //SAFE_RELEASE(m_pCurPrimitive);
       //m_pCurPrimitive = pSavedPrimitive;
       //SAFE_RELEASE(pSavedPrimitive);
-      
-      //GXCanvas* pCanvas = LockCanvas(NULL, NULL, NULL);
-      //pCanvas->Release(); 
+
 
       SAFE_RELEASE(pPrimitive);
       SAFE_RELEASE(pDepthStencil);
