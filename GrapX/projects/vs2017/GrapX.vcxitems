@@ -93,6 +93,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GDI\GXShaderMgr.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GDI\RegionFunc.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GXStation.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\GXGraphicsBaseImpl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXRegionFactory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GPrimitiveImpl_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GShaderImpl_d3d11.h" />
@@ -186,6 +188,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\gxDevice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\GXStation.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\gxUtility.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\GXGraphicsBaseImpl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GShaderImpl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GTextureImpl.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\GXApp.cpp" />

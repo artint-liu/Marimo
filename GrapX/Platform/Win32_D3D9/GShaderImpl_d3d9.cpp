@@ -29,6 +29,7 @@
 #include <GrapX/VertexDecl.h>
 #include "Canvas/GXResourceMgr.h"
 #include "GrapX/GXCanvas3D.h"
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
 #include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.h"
 #include "clPathFile.h"

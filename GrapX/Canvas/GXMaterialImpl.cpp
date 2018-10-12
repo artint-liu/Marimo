@@ -13,7 +13,6 @@
 #include "smart/SmartRepository.h"
 #include "GrapX/DataPool.h"
 #include "GrapX/DataPoolVariable.h"
-//#include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
 
 using namespace clstd;
 

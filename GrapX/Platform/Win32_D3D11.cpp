@@ -25,6 +25,7 @@
 //#endif // #ifdef _ENABLE_STMT
 #include <GrapX/gxDevice.h>
 #include "Canvas/GXResourceMgr.h"
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_d3d11.h"
 #include "GrapX/GXUser.h"
 

@@ -19,11 +19,12 @@
 #include "Platform/Win32_D3D11/GTextureImpl_D3D11.h"
 #define _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 #include "Canvas/GXResourceMgr.h"
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
 #include <clPathFile.h>
+#ifdef ENABLE_GRAPHICS_API_DX11
 #include <FreeImage.h>
 
-#ifdef ENABLE_GRAPHICS_API_DX11
 namespace D3D11
 {
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"

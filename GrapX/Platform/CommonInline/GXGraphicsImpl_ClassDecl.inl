@@ -81,9 +81,9 @@
   virtual GXHRESULT   CreateShaderStub        (GShaderStub** ppShaderStub) override;
 
   // GRegion
-  virtual GXHRESULT   CreateRectRgn           (GRegion** ppRegion, const GXINT left, const GXINT top, const GXINT right, const GXINT bottom) override;
-  virtual GXHRESULT   CreateRectRgnIndirect   (GRegion** ppRegion, const GXRECT* lpRects, const GXUINT nCount) override;
-  virtual GXHRESULT   CreateRoundRectRgn      (GRegion** ppRegion, const GXRECT& rect, const GXUINT nWidthEllipse, const GXUINT nHeightEllipse) override;
+  //virtual GXHRESULT   CreateRectRgn           (GRegion** ppRegion, const GXINT left, const GXINT top, const GXINT right, const GXINT bottom) override;
+  //virtual GXHRESULT   CreateRectRgnIndirect   (GRegion** ppRegion, const GXRECT* lpRects, const GXUINT nCount) override;
+  //virtual GXHRESULT   CreateRoundRectRgn      (GRegion** ppRegion, const GXRECT& rect, const GXUINT nWidthEllipse, const GXUINT nHeightEllipse) override;
 
   virtual GXHRESULT   CreateVertexDeclaration (GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement) override;
   //////////////////////////////////////////////////////////////////////////
@@ -183,7 +183,7 @@ private: // 用于管理的对象
   GXCanvasImpl**          m_aCanvasPtrCache;
   //GResourceArray          m_aResource;
   GXResourceMgr           m_ResMgr;
-  GAllocator*             m_pRgnAllocator;
+  //GAllocator*             m_pRgnAllocator;
 
 private:  // 状态对象
   GRasterizerStateImpl*   m_pDefaultRasterizerState;

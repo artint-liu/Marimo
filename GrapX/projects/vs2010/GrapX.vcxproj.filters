@@ -46,6 +46,9 @@
     <Filter Include="Platform\Win32_D3X11">
       <UniqueIdentifier>{364a4930-1eee-43a4-8559-0232467d6033}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform\CommonBase">
+      <UniqueIdentifier>{c6a35e67-4424-4926-b4c0-61fefefc59e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Platform\Win32_D3D9.h">
@@ -437,6 +440,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Platform\Win32_D3D11.h">
       <Filter>Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Platform\CommonBase\GXGraphicsBaseImpl.h">
+      <Filter>Platform\CommonBase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -859,6 +865,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Platform\CommonInline\GShaderImpl.cpp">
       <Filter>Platform\CommInline</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Platform\CommonBase\GXGraphicsBaseImpl.cpp">
+      <Filter>Platform\CommonBase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

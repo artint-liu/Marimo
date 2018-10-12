@@ -26,6 +26,7 @@
 #include "GPrimitiveImpl_d3d9.h"
 //#define _GXGRAPHICS_INLINE_PRIMITIVE_D3D9_
 #include "Canvas/GXResourceMgr.h"
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
 
 namespace D3D9

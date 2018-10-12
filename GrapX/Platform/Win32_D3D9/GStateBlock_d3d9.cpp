@@ -19,6 +19,7 @@
 // 私有头文件
 #define _GXGRAPHICS_INLINE_RENDERSTATE_
 #include "Canvas/GXResourceMgr.h"
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
 #include "Platform/Win32_D3D9/GStateBlock_d3d9.h"
 #include "User/GrapX.Hxx"

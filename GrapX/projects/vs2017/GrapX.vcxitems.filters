@@ -43,6 +43,9 @@
     <Filter Include="Platform\Win32_D3X11">
       <UniqueIdentifier>{c80041aa-b7f3-4ed5-8673-2e66f6f601bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform\CommonBase">
+      <UniqueIdentifier>{afb287eb-c2be-4b4d-ac04-f4577920da34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX.h">
@@ -431,6 +434,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.h">
       <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\liuchenglong\Documents\MyCodes\Marimo_trunk2\GrapX\projects\vs2017\..\..\Platform\CommonInline\GXRegionFactory.h">
+      <Filter>Platform\CommInline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\GXGraphicsBaseImpl.h">
+      <Filter>Platform\CommonBase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -853,6 +862,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GTextureImpl.cpp">
       <Filter>Platform\CommInline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\GXGraphicsBaseImpl.cpp">
+      <Filter>Platform\CommonBase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

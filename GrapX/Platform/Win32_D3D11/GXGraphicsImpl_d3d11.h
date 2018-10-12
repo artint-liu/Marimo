@@ -48,7 +48,7 @@ namespace D3D11
     ILogger*      pLogger;
   };
 
-  class GXGraphicsImpl : public GXGraphics
+  class GXGraphicsImpl : public GrapX::GraphicsBaseImpl
   {
     friend class GPrimImpl;
     friend class GPrimitiveVImpl;

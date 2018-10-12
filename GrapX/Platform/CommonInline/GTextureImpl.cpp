@@ -24,16 +24,6 @@
 //#include "GrapX/GXCanvas3D.h"
 //#include "GrapX/MOLogger.h"
 
-// 平台相关
-//#include "GrapX/Platform.h"
-//#include "GrapX/DataPool.h"
-//#include "GrapX/DataPoolVariable.h"
-//#include "Platform/Win32_XXX.h"
-//#include "Platform/Win32_D3D9.h"
-//#include "Platform/Win32_D3D9/GPrimitiveImpl_d3d9.h"
-//#include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
-//#include "Platform/Win32_D3D9/GShaderStubImpl_d3d9.h"
-//#include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.h"
 
 // 私有头文件
 #include <clPathFile.h>
@@ -64,12 +54,6 @@
 
 #include "GrapX/gxError.h"
 
-//#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
-// Canvas3D用的
-//#include "GrapX/GCamera.h"
-//#include "GrapX/GrapVR.h"  // Canvas3D 用的
-//#include "Canvas/GXMaterialImpl.h"
-// </Canvas3D用的>
 
 
 //////////////////////////////////////////////////////////////////////////

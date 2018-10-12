@@ -65,6 +65,7 @@
 
 #include "GrapX/gxError.h"
 
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
 // Canvas3DÓÃµÄ
 #include "GrapX/GCamera.h"
@@ -133,12 +134,10 @@ namespace D3D9
     , m_dwThreadId          (0)
     //, m_pConsole            (NULL)
     , m_pLogger             (NULL)
-    , m_pRgnAllocator       (NULL)
     , m_pShaderConstName    (NULL)
   {
     InlSetZeroT(m_d3dpp);
     memset(m_pCurTexture, 0, sizeof(GTexture*) * MAX_TEXTURE_STAGE);
-    m_pRgnAllocator = new GAllocator(NULL);
   }
 
   GXBOOL GXGraphicsImpl::Initialize(const GRAPHICS_CREATION_DESC* pDesc)
@@ -295,7 +294,6 @@ namespace D3D9
       memset(&m_d3dpp, 0, sizeof(D3DPRESENT_PARAMETERS));
       m_hWnd = NULL;
     }
-    SAFE_DELETE(m_pRgnAllocator);
 
 //#ifdef _DEBUG
 //    if(m_aResource.size() > 0)

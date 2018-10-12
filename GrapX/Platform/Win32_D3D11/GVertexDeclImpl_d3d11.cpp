@@ -21,6 +21,7 @@
 #define _GXGRAPHICS_INLINE_RENDERSTATE_
 #include "Canvas/GXResourceMgr.h"
 #include "GVertexDeclImpl_d3d11.h"
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
 //#include "User/GrapX.Hxx"
 #include "GrapX/gxError.h"

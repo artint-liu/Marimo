@@ -507,6 +507,7 @@
     <ClInclude Include="..\..\GDI\GXShaderMgr.h" />
     <ClInclude Include="..\..\GDI\RegionFunc.h" />
     <ClInclude Include="..\..\GXStation.h" />
+    <ClInclude Include="..\..\Platform\CommonBase\GXGraphicsBaseImpl.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D11.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D11\GPrimitiveImpl_d3d11.h" />
     <ClInclude Include="..\..\Platform\Win32_D3D11\GShaderImpl_d3d11.h" />
@@ -601,6 +602,7 @@
     <ClCompile Include="..\..\gxDevice.cpp" />
     <ClCompile Include="..\..\GXStation.cpp" />
     <ClCompile Include="..\..\gxUtility.cpp" />
+    <ClCompile Include="..\..\Platform\CommonBase\GXGraphicsBaseImpl.cpp" />
     <ClCompile Include="..\..\Platform\CommonInline\GShaderImpl.cpp" />
     <ClCompile Include="..\..\Platform\CommonInline\GTextureImpl.cpp" />
     <ClCompile Include="..\..\Platform\GXApp.cpp" />

@@ -22,6 +22,7 @@
 // 私有头文件
 #include "GPrimitiveImpl_d3d11.h"
 #include "Canvas/GXResourceMgr.h"
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
 
 #ifdef ENABLE_GRAPHICS_API_DX11

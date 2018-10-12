@@ -20,16 +20,9 @@
 //#include "GrapX/DataPool.h"
 //#include "GrapX/DataPoolVariable.h"
 #include "Platform/Win32_XXX.h"
-//#include "Platform/Win32_D3D9.h"
-//#include "Platform/Win32_D3D9/GShaderImpl_d3d9.h"
-//#include "Platform/Win32_D3D9/GVertexDeclImpl_d3d9.h"
 
 // 私有头文件
 #include <GrapX/VertexDecl.h>
-//#include "Canvas/GXResourceMgr.h"
-//#include "GrapX/GXCanvas3D.h"
-//#include "Platform/Win32_D3D9/GXGraphicsImpl_d3d9.h"
-//#include "Platform/Win32_D3D9/GXCanvasImpl_d3d9.h"
 #include "clPathFile.h"
 #include "Smart/smartstream.h"
 #include "GDI/GXShaderMgr.h"
@@ -84,9 +77,9 @@ GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCST
     return FALSE;
   }
 
-  if(!IsFullPath(strFilename)) {
-    clpathfile::CombinePath(strFilename, szResourceDir, strFilename);
-  }
+  //if(clpathfile::IsRelative(strFilename)) {
+  clpathfile::CombinePath(strFilename, szResourceDir, strFilename);
+  //}
 
   if(!sp.LoadFromFile(strFilename)) {
     CLOG_WARNINGW(L"GShader : Can not open file(%s).\n", strFilename);
@@ -98,22 +91,19 @@ GXHRESULT GShader::Load(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCST
   GShader::LoadElementSource(&sp, strSect, pElement, pMtlParam == NULL ? NULL : &pMtlParam->aBindPool);
   ses.strMacros = strMacros;
 
-  if(pElement->strPreVS.IsNotEmpty() && !IsFullPath(ses.strPreVS))
+  if(pElement->strPreVS.IsNotEmpty())
     clpathfile::CombinePath(ses.strPreVS, strResourceDirA, ses.strPreVS);
 
-  if(ses.strVS.IsNotEmpty() && !IsFullPath(ses.strVS))
+  if(ses.strVS.IsNotEmpty())
     clpathfile::CombinePath(ses.strVS, strResourceDirA, ses.strVS);
 
-  //if(ses.strVSExtra.IsNotEmpty() && ! IsFullPath(ses.strVSExtra))
-  //  clpathfile::CombinePathA(ses.strVSExtra, strResourceDirA, ses.strVSExtra);
-
-  if(ses.strPS.IsNotEmpty() && !IsFullPath(ses.strPS))
+  if(ses.strPS.IsNotEmpty())
     clpathfile::CombinePath(ses.strPS, strResourceDirA, ses.strPS);
 
-  if(ses.strVSComposer.IsNotEmpty() && !IsFullPath(ses.strVSComposer))
+  if(ses.strVSComposer.IsNotEmpty())
     clpathfile::CombinePath(ses.strVSComposer, strResourceDirA, ses.strVSComposer);
 
-  if(ses.strPSComposer.IsNotEmpty() && !IsFullPath(ses.strPSComposer))
+  if(ses.strPSComposer.IsNotEmpty())
     clpathfile::CombinePath(ses.strPSComposer, strResourceDirA, ses.strPSComposer);
 
   //for(clStringArrayA::iterator it = ses.aPSComponent.begin();

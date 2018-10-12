@@ -50,7 +50,7 @@ namespace D3D9
     GXDEFINITION* pParameter;
   };
 
-  class GXGraphicsImpl : public GXGraphics
+  class GXGraphicsImpl : public GrapX::GraphicsBaseImpl
   {
     friend class GPrimitiveVImpl;
     friend class GPrimitiveVIImpl;

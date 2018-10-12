@@ -105,9 +105,9 @@ GXLPCWSTR GXGraphicsImpl::IntToAbsPathW(clStringW& strOutput, GXLPCWSTR szPath)
 GXBOOL GXGraphicsImpl::ConvertToAbsolutePathW(clStringW& strFilename)
 {
   ASSERT(m_strResourceDir.IsNotEmpty());
-  if(strFilename.IsEmpty() || IsFullPath(strFilename) == TRUE) {
-    return FALSE;
-  }
+  //if(strFilename.IsEmpty() || IsFullPath(strFilename) == TRUE) {
+  //  return FALSE;
+  //}
   clpathfile::CombinePath(strFilename, m_strResourceDir, strFilename);
   return TRUE;
 }
@@ -133,9 +133,9 @@ GXBOOL GXGraphicsImpl::ConvertToRelativePathW(clStringW& strFilename)
   CLBREAK; 
 
   ASSERT(m_strResourceDir.IsNotEmpty());
-  if(strFilename.IsEmpty() || IsFullPath(strFilename) == TRUE) {
-    return FALSE;
-  }
+  //if(strFilename.IsEmpty() || IsFullPath(strFilename) == TRUE) {
+  //  return FALSE;
+  //}
   clpathfile::CombinePath(strFilename, m_strResourceDir, strFilename);
   return TRUE;
 }
@@ -776,41 +776,6 @@ GXHRESULT GXGraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexD
   *ppVertexDecl = pVertexDeclImpl;
   RegisterResource(pVertexDeclImpl, &ResFeatDesc);
   return hval;
-}
-
-GXHRESULT GXGraphicsImpl::CreateRectRgn(GRegion** ppRegion, const GXINT left, const GXINT top, const GXINT right, const GXINT bottom)
-{
-  GXRECT rect;
-  rect.left   = left;
-  rect.top    = top;
-  rect.right  = right;
-  rect.bottom = bottom;
-
-  if(gxIsRectEmpty(&rect)) {
-    *ppRegion = (GRegion*)GRegionImpl::CreateEmptyRgn(m_pRgnAllocator);
-  }
-  else {
-    *ppRegion = (GRegion*)GRegionImpl::CreateRectRgn(m_pRgnAllocator, rect);
-  }
-  if(*ppRegion != NULL)
-    return GX_OK;
-  return GX_FAIL;
-}
-
-GXHRESULT GXGraphicsImpl::CreateRectRgnIndirect(GRegion** ppRegion, const GXRECT* lpRects, const GXUINT nCount)
-{
-  *ppRegion =(GRegion*)GRegionImpl::CreateRectRgnIndirect(m_pRgnAllocator, lpRects, nCount);
-  if(*ppRegion != NULL)
-    return GX_OK;
-  return GX_FAIL;
-}
-
-GXHRESULT GXGraphicsImpl::CreateRoundRectRgn(GRegion** ppRegion, const GXRECT& rect, const GXUINT nWidthEllipse, const GXUINT nHeightEllipse)
-{
-  *ppRegion =(GRegion*)GRegionImpl::CreateRoundRectRgn(m_pRgnAllocator, rect, nWidthEllipse, nHeightEllipse);
-  if(*ppRegion != NULL)
-    return GX_OK;
-  return GX_FAIL;
 }
 
 GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn, float fNear, float fFar)

@@ -59,6 +59,7 @@
 #include <Canvas/GFTFontImpl.h>
 #include <GDI/GXShaderMgr.h>
 
+#include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_d3d11.h"
 
 // Canvas3DÓÃµÄ
@@ -140,7 +141,7 @@ namespace D3D11
     , m_pShaderConstName    (NULL)
   {
     memset(m_pCurTexture, 0, sizeof(GTexture*) * MAX_TEXTURE_STAGE);
-    m_pRgnAllocator = new GAllocator(NULL);
+    //m_pRgnAllocator = new GAllocator(NULL);
   }
 
   HRESULT GXGraphicsImpl::Initialize(const GRAPHICS_CREATION_DESC* pDesc)
@@ -368,7 +369,7 @@ namespace D3D11
     SAFE_RELEASE(m_pImmediateContext);
     SAFE_RELEASE(m_pSwapChain);
     SAFE_RELEASE(m_pRenderTargetView);
-    SAFE_DELETE(m_pRgnAllocator);
+    //SAFE_DELETE(m_pRgnAllocator);
 
 //#ifdef _DEBUG
 //    if(m_aResource.size() > 0)
@@ -683,6 +684,7 @@ namespace D3D11
     return TRUE;
 #endif
   }
+
   GXBOOL GXGraphicsImpl::SetViewport(const GXVIEWPORT* pViewport)
   {
     D3D11_VIEWPORT Viewport;
