@@ -92,7 +92,7 @@ namespace Marimo
     GXBOOL  CheckVarList      (LPCVARDECL pVarDecl);
 
     void    PutTypeToDict     (GXLPCSTR szTypeName);
-    GXINT   CalculateVarSize  (LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc);
+    GXINT   ComputeVariableSize  (LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc, GXUINT nAlignSize);
 
     static
     void    TryHash           (HASH_ALGORITHM& hash_info, const BTVarDescArray& aDescs);
@@ -111,7 +111,7 @@ namespace Marimo
     GXUINT              m_bPtr64 : 1;       // 64位指针兼容模式
     GXUINT              m_bFixedPool : 1;
 
-    DataPoolBuildTime(DataPoolLoad dwFlags);
+    DataPoolBuildTime(DataPoolCreation dwFlags);
   };
 
 

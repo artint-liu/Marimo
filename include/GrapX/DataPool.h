@@ -59,13 +59,16 @@ namespace Marimo
   };
 
   // [Flags]
-  enum DataPoolLoad
+  enum DataPoolCreation
   {
-    DataPoolLoad_Default     = 0,
-    DataPoolLoad_ReadOnly    = 0x00000001,
-    DataPoolLoad_NoHashTable = 0x00000002,
-    DataPoolLoad_VarLog      = 0x00000004,  // variable访问异常打印log
-    DataPoolLoad_VarException= 0x00000008,  // variable访问异常会抛异常
+    DataPoolCreation_Default      = 0,
+    DataPoolCreation_ReadOnly     = 0x00000001,
+    DataPoolCreation_NoHashTable  = 0x00000002,
+    DataPoolCreation_VarLog       = 0x00000004,  // variable访问异常打印log
+    DataPoolCreation_VarException = 0x00000008,  // variable访问异常会抛异常
+    DataPoolCreation_Align4       = 0x00000010,  // 4字节对齐，只在创建时有效，加载时忽略
+    DataPoolCreation_Align8       = 0x00000030,  // 8字节对齐，只在创建时有效，加载时忽略
+    DataPoolCreation_Align16      = 0x00000070,  // 16字节对齐，只在创建时有效，加载时忽略
   };
 
   // 还没用上
@@ -157,8 +160,9 @@ namespace Marimo
     GXLPCSTR              Name;
     union {
       VARIABLE_DECLARATION* Struct; // 结构体 成员
-      ENUM_DECLARATION*     Enum;
+      ENUM_DECLARATION*     Enumer;
     }as;
+    GXUINT                StructAlign;    // 结构体成员对齐尺寸，2，4，8，16，其他值以1字节对齐
   };
   typedef const TYPE_DECLARATION* LPCTYPEDECL;
 
@@ -381,7 +385,7 @@ namespace Marimo
 
     GXSTDINTERFACE(GXBOOL      SaveW               (GXLPCWSTR szFilename));
     GXSTDINTERFACE(GXBOOL      Save                (clFile& file));
-    GXSTDINTERFACE(GXBOOL      Load                (clFile& file, DataPoolLoad dwFlags));
+    GXSTDINTERFACE(GXBOOL      Load                (clFile& file, DataPoolCreation dwFlags));
 
     GXSTDINTERFACE(GXLPCSTR    GetVariableName     (GXUINT nIndex) const); // 获得变量的名字
 
@@ -469,11 +473,11 @@ namespace Marimo
   public:
     static  GXHRESULT   FindDataPool        (DataPool** ppDataPool, GXLPCSTR szName);
     static  GXHRESULT   FindVariable        (DataPool** ppDataPool, DataPoolVariable* pVar, GXLPCSTR szGlobalExpession);
-    static  GXHRESULT   CreateDataPool      (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl, DataPoolLoad dwFlags = DataPoolLoad_Default);
-    static  GXHRESULT   CreateFromResolver  (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, DataPoolCompiler* pResolver, DataPoolLoad dwFlags);
-    static  GXHRESULT   CreateFromFileW     (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolLoad dwFlags);
-    static  GXHRESULT   CompileFromMemory   (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength = 0, DataPoolLoad dwFlags = DataPoolLoad_Default);
-    static  GXHRESULT   CompileFromFileW    (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude = NULL, DataPoolLoad dwFlags = DataPoolLoad_Default);
+    static  GXHRESULT   CreateDataPool      (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl, DataPoolCreation dwFlags = DataPoolCreation_Default);
+    static  GXHRESULT   CreateFromResolver  (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, DataPoolCompiler* pResolver, DataPoolCreation dwFlags);
+    static  GXHRESULT   CreateFromFileW     (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolCreation dwFlags);
+    static  GXHRESULT   CompileFromMemory   (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength = 0, DataPoolCreation dwFlags = DataPoolCreation_Default);
+    static  GXHRESULT   CompileFromFileW    (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude = NULL, DataPoolCreation dwFlags = DataPoolCreation_Default);
     static  GXBOOL      IsIllegalName       (GXLPCSTR szName); // 检查类型/变量命名是否符合要求
 
     // 注意不支持 struct 的自包含, 支持动态数组的自包含功能:

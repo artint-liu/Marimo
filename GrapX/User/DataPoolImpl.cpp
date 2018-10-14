@@ -139,6 +139,7 @@ namespace Marimo
     , m_pNamesTabBegin (NULL)
     , m_pNamesTabEnd   (NULL)
   {
+    TRACE("sizeof(DataPoolImpl):%u\n", sizeof(DataPoolImpl));
   }
 
   DataPoolImpl::~DataPoolImpl()
@@ -189,7 +190,7 @@ namespace Marimo
     //SAFE_DELETE(m_pBuffer);
   }
   //////////////////////////////////////////////////////////////////////////
-    GXBOOL DataPoolImpl::Initialize(LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolLoad dwFlags)
+    GXBOOL DataPoolImpl::Initialize(LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolCreation dwFlags)
   {
     if(pVarDecl == NULL) {
       return FALSE;
@@ -217,13 +218,25 @@ namespace Marimo
       return FALSE;
     }
 
-    GXINT nBufferSize = sBuildTime.CalculateVarSize(pVarDecl, sBuildTime.m_aVar);
+    GXUINT nAlignSize = 1;
+    if((dwFlags & DataPoolCreation_Align16) == DataPoolCreation_Align16) {
+      nAlignSize = 16;
+    }
+    else if((dwFlags & DataPoolCreation_Align8) == DataPoolCreation_Align8) {
+      nAlignSize = 8;
+    }
+    else if((dwFlags & DataPoolCreation_Align4) == DataPoolCreation_Align4) {
+      nAlignSize = 4;
+    }
+
+
+    GXINT nBufferSize = sBuildTime.ComputeVariableSize(pVarDecl, sBuildTime.m_aVar, nAlignSize);
     if(nBufferSize == 0) {
       CLOG_ERROR("%s: Empty data pool.\n", __FUNCTION__);
       return FALSE;
     }
 
-    if(TEST_FLAG(sBuildTime.m_dwBuildFlags, DataPoolLoad_NoHashTable)) {
+    if(TEST_FLAG(sBuildTime.m_dwBuildFlags, DataPoolCreation_NoHashTable)) {
       // nothing...
     } else {
       DataPoolBuildTime::TryHash(sBuildTime.m_VarHashInfo, sBuildTime.m_aVar);
@@ -867,7 +880,7 @@ namespace Marimo
       (m_nNumOfStructs == 0 && (m_nNumOfMember == 0 && m_nNumOfEnums == 0)) ||
       (m_nNumOfStructs != 0 && (m_nNumOfMember != 0 || m_nNumOfEnums != 0)) );
     ASSERT(m_pNamesTabEnd && m_pNamesTabBegin < m_pNamesTabEnd);  // m_pNamesTabBegin 在构建时暂时为0
-    ASSERT(m_cbHashBuckets != 0 || TEST_FLAG(m_dwRuntimeFlags, DataPoolLoad_NoHashTable));
+    ASSERT(m_cbHashBuckets != 0 || TEST_FLAG(m_dwRuntimeFlags, DataPoolCreation_NoHashTable));
 
     pSizeList->cbTypes     = m_nNumOfTypes * sizeof(TYPE_DESC);
     pSizeList->cbStructs   = m_nNumOfStructs * sizeof(STRUCT_DESC);
@@ -1875,7 +1888,7 @@ namespace Marimo
     // #.Array Buffer[1] 的重定位表 + data
     // ...
     FILE_HEADER header;
-    const GXDWORD dwFlagsMask = DataPoolLoad_NoHashTable;
+    const GXDWORD dwFlagsMask = DataPoolCreation_NoHashTable;
     header.dwFlags          = m_dwRuntimeFlags & dwFlagsMask; // 只接受储存部分标志，因为有些标志是运行态的，文件态没有意义
     header.dwHashMagic      = clstd::HashStringT("DataPool", 8);
     header.nNumOfTypes      = m_nNumOfTypes;
@@ -2167,7 +2180,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL DataPoolImpl::Load( clFile& file, DataPoolLoad dwFlags )
+  GXBOOL DataPoolImpl::Load( clFile& file, DataPoolCreation dwFlags )
   {
     //
     // TODO: 改为SmartRepository加载
@@ -2244,7 +2257,7 @@ namespace Marimo
 
 
     //*
-    if(TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
+    if(TEST_FLAG(dwFlags, DataPoolCreation_ReadOnly))
     {
       //m_bReadOnly = 1;
       SET_FLAG(m_dwRuntimeFlags, RuntimeFlag_Readonly);
@@ -2297,7 +2310,7 @@ namespace Marimo
       if(file.GetPointer() != header.nStringVarOffset) {
         file.SetPointer(header.nStringVarOffset, 0);
       }
-      if(TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
+      if(TEST_FLAG(dwFlags, DataPoolCreation_ReadOnly))
       {
         pStringBegin = (GXLPBYTE)m_Buffer.GetPtr() + nMainBufferSize_0;
       }
@@ -2313,7 +2326,7 @@ namespace Marimo
 
     // 非只读模式下，在这里初始化缓冲区
     ASSERT(m_aTypes != NULL);
-    if(TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
+    if(TEST_FLAG(dwFlags, DataPoolCreation_ReadOnly))
     {
       GXLPBYTE lpBufferPtr = (GXLPBYTE)m_Buffer.GetPtr() + nMainBufferSize_0 + header.cbStringSpace;
 
@@ -2412,7 +2425,7 @@ namespace Marimo
         case BUFFER_SAVELOAD_DESC::RelocalizeType_String:
         {
           GXLPCWSTR str = (GXLPCWSTR)((GXINT_PTR)pStringBegin + *(GXUINT*)pSrc - header.nStringVarOffset);
-          if (TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
+          if (TEST_FLAG(dwFlags, DataPoolCreation_ReadOnly))
           {
             *(GXLPCWSTR*)pDest = str;
             //INC_DBGNUMOFSTRING;
@@ -2430,7 +2443,7 @@ namespace Marimo
         case BUFFER_SAVELOAD_DESC::RelocalizeType_StringA:
         {
           GXLPCSTR str = (GXLPCSTR)((GXINT_PTR)pStringBegin + *(GXUINT*)pSrc - header.nStringVarOffset);
-          if (TEST_FLAG(dwFlags, DataPoolLoad_ReadOnly))
+          if (TEST_FLAG(dwFlags, DataPoolCreation_ReadOnly))
           {
             *(GXLPCSTR*)pDest = str;
           }

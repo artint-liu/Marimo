@@ -435,12 +435,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.h">
       <Filter>Platform\Win32_D3X11</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\liuchenglong\Documents\MyCodes\Marimo_trunk2\GrapX\projects\vs2017\..\..\Platform\CommonInline\GXRegionFactory.h">
-      <Filter>Platform\CommInline</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\GXGraphicsBaseImpl.h">
       <Filter>Platform\CommonBase</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXRegionFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp">

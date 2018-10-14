@@ -76,10 +76,10 @@ void TestCompileFromFile()
     pDataPool->SaveW(szFilename);
 
     DataPool* pDataPoolReadOnly = NULL;
-    DataPool::CreateFromFileW(&pDataPoolReadOnly, NULL, szFilename, DataPoolLoad_ReadOnly);
+    DataPool::CreateFromFileW(&pDataPoolReadOnly, NULL, szFilename, DataPoolCreation_ReadOnly);
 
     DataPool* pDataPoolFromFile = NULL;
-    DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolLoad_Default);
+    DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolCreation_Default);
 
     //pDataPool->begin()
 

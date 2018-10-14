@@ -13,7 +13,7 @@ using namespace clstd;
 
 namespace Marimo
 {
-  DataPoolBuildTime::DataPoolBuildTime(DataPoolLoad dwFlags)
+  DataPoolBuildTime::DataPoolBuildTime(DataPoolCreation dwFlags)
     : m_dwBuildFlags(dwFlags)
     , m_bPtr64(0)
     , m_bFixedPool(1)
@@ -106,12 +106,12 @@ namespace Marimo
       {
         BTVarDescArray aMemberDesc;
         aMemberDesc.reserve(20);
-        t.cbSize = CalculateVarSize(type.as.Struct, aMemberDesc);
+        t.cbSize = ComputeVariableSize(type.as.Struct, aMemberDesc, type.StructAlign);
         t.nMemberCount = (GXUINT)aMemberDesc.size();
         t.nMemberIndex = (GXUINT)m_aStructMember.size();
         m_aStructMember.insert(m_aStructMember.end(), aMemberDesc.begin(), aMemberDesc.end());
 
-        if(TEST_FLAG(m_dwBuildFlags, DataPoolLoad_NoHashTable))
+        if(TEST_FLAG(m_dwBuildFlags, DataPoolCreation_NoHashTable))
         {
           // do nothing...
         } else {
@@ -130,10 +130,10 @@ namespace Marimo
         //t.nMemberIndex = m_aEnumPck.size();
         t.nMemberIndex = (GXUINT)m_aEnumPck.size();
         DATAPOOL_ENUM_DESC sEnum;
-        for(t.nMemberCount = 0; type.as.Enum[t.nMemberCount].Name != NULL; t.nMemberCount++)
+        for(t.nMemberCount = 0; type.as.Enumer[t.nMemberCount].Name != NULL; t.nMemberCount++)
         {
-          sEnum.nName = (GXUINT)NameSet.index(type.as.Enum[t.nMemberCount].Name);
-          sEnum.Value = type.as.Enum[t.nMemberCount].Value;
+          sEnum.nName = (GXUINT)NameSet.index(type.as.Enumer[t.nMemberCount].Name);
+          sEnum.Value = type.as.Enumer[t.nMemberCount].Value;
           m_aEnumPck.push_back(sEnum);
         }
         m_nNumOfStructs++;
@@ -145,10 +145,11 @@ namespace Marimo
     }
   }
 
-  GXINT DataPoolBuildTime::CalculateVarSize(LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc)
+  GXINT DataPoolBuildTime::ComputeVariableSize(LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc, GXUINT nAlignSize)
   {
     GXINT cbSize = 0;
     int nVarIndex = 0;
+    const GXUINT nAlignMask = (nAlignSize <= 16 && clstd::IsPowerOfTwo(nAlignSize)) ? (nAlignSize - 1) : 0;
     for(;; nVarIndex++)
     {
       BT_VARIABLE_DESC VarDesc;
@@ -196,6 +197,13 @@ namespace Marimo
       {
         VarDesc.bDynamic = 0;
         cbSize += VarDesc.GetSize();
+        
+        // 结构体/全局变量 对齐
+        ASSERT(nAlignMask == 0 && nAlignMask == 1 || nAlignMask == 3 || nAlignMask == 7 || nAlignMask == 15);
+        if(nAlignMask != 0)
+        {
+          cbSize = (cbSize + nAlignMask) & (~nAlignMask);
+        }
       }
       aVariableDesc.push_back(VarDesc);
     }

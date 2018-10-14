@@ -37,7 +37,7 @@ void TestHashBuckets()
     }
 
     // ²»´øhashµÄDataPool
-    result = DataPool::CompileFromFileW(&pPoolWithoutHash, NULL, szFilename, NULL, DataPoolLoad_NoHashTable);
+    result = DataPool::CompileFromFileW(&pPoolWithoutHash, NULL, szFilename, NULL, DataPoolCreation_NoHashTable);
     if(GXFAILED(result)) {
       SAFE_RELEASE(pPoolWithHash);
       SAFE_RELEASE(pPoolWithoutHash);
@@ -64,7 +64,7 @@ void TestHashBuckets()
     DataPool* pPoolWithoutHash = NULL;
     GXHRESULT result = NULL;
     clStringW str;
-    DataPoolLoad eLoad = DataPoolLoad_ReadOnly;
+    DataPoolCreation eLoad = DataPoolCreation_ReadOnly;
 
     str.Format(szFilenameFmt, L"_Hash");
     result = DataPool::CreateFromFileW(&pPoolWithHash, NULL, str, eLoad);

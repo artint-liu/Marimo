@@ -314,7 +314,7 @@ namespace Marimo
 
     virtual GXBOOL SaveW(GXLPCWSTR szFilename) override;
     virtual GXBOOL Save(clFile& file) override;
-    virtual GXBOOL Load(clFile& file, DataPoolLoad dwFlags) override;
+    virtual GXBOOL Load(clFile& file, DataPoolCreation dwFlags) override;
 
     virtual LPCSTR    GetVariableName     (GXUINT nIndex) const override; // 获得变量的名字
 
@@ -356,7 +356,7 @@ namespace Marimo
   protected:
     //void    IntImportSections (IMPORT& import, Section sectParent, MOVariable* varParent);
     //void    IntImportKeys     (IMPORT& import, Section sect, MOVariable* var);
-    GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolLoad dwFlags);
+    GXBOOL  Initialize        (LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolCreation dwFlags);
     GXBOOL  Cleanup           (GXLPVOID lpBuffer, const DATAPOOL_VARIABLE_DESC* pVarDesc, int nVarDescCount);
     GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXUINT nElementCount);
     GXVOID  InitializeValue   (GXUINT nBaseOffset, LPCVARDECL pVarDecl);
@@ -470,7 +470,7 @@ namespace Marimo
           void    IntCleanupWatchObj      (WatchFixedDict& sWatchDict);
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-      GXDWORD           m_dwRuntimeFlags; // RuntimeFlag 与 DataPoolLoad 供用，注意不要冲突
+      GXDWORD           m_dwRuntimeFlags; // RuntimeFlag 与 DataPoolCreation 供用，注意不要冲突
   }; // class DataPoolImpl
 
   // 如果是数字类型，则转换返回TRUE，否则返回FALSE

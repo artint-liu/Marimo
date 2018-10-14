@@ -11,7 +11,7 @@
 void TestHugeArray()
 {
   static char* s_szCode =
-    "#FILE "__FILE__"                \n"
+    "#FILE " __FILE__ "                \n"
     "#LINE 16                        \n"
     "/* 基础结构体                  */\n"
     "struct RECT                     \n"
@@ -194,7 +194,7 @@ void TestHugeArray()
   ASSERT(bRet);
 
   DataPool* pDataPoolFromFile = NULL;
-  DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolLoad_ReadOnly);
+  DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolCreation_ReadOnly);
 
   ENUM_DATAPOOL(pDataPoolFromFile);
 

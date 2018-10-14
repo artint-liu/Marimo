@@ -205,7 +205,7 @@ void TestDataPoolAgent_Primary_StaticArray(DataPool* pDataPool)
   VAR VarFloatArrayEle[20];
   //InlSetZeroT(pVarFloatArrayEle);
 
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
   hval = pDataPool->QueryByName("testArray", &VarFloatArray);
   GXUINT_PTR lpBasePtr = (GXUINT_PTR)VarFloatArray.GetPtr();
 
@@ -240,7 +240,7 @@ void TestDataPoolAgent_String_StaticArray(DataPool* pDataPool)
   VAR Var;
   VAR VarString[nArray];
   //InlSetZeroT(pVarString);
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("TestStringArray", &Var);
   GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
@@ -282,7 +282,7 @@ void TestDataPoolAgent_Struct_StaticArray(DataPool* pDataPool)
   VAR VarVector3Member[nArray][3];
   //InlSetZeroT(pVarVector3);
   //InlSetZeroT(pVarVector3Member);
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("TestVector3", &Var);
   GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
@@ -343,7 +343,7 @@ void TestDataPoolAgent_String_DynArray(DataPool* pDataPool)
   VAR Var;
   VAR VarString[nArray];
   //InlSetZeroT(pVarString);
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("TestStringVarArray", &Var);
   //clBuffer** lplpBuffer = (clBuffer**)Var.GetPtr();
@@ -385,7 +385,7 @@ void TestDataPoolAgent_String_DynArray_NewBack(DataPool* pDataPool)
   VAR Var;
   VAR VarString[nArray];
   //InlSetZeroT(pVarString);
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("TestStringVarArray", &Var);
   GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)(*(clBufferBase**)Var.GetPtr())->GetPtr();
@@ -433,7 +433,7 @@ void TestDataPoolAgent_Struct_DynArray(DataPool* pDataPool)
   //InlSetZeroT(pVarFloat3);
   //InlSetZeroT(pVarFloat3Member);
 
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("testArray2", &Var);
   GXUINT_PTR lpBasePtr = (GXUINT_PTR)Var.GetPtr();
@@ -495,7 +495,7 @@ void TestDataPoolAgent_Struct_DynArray_NewBack(DataPool* pDataPool)
   //InlSetZeroT(pVarFloat3);
   //InlSetZeroT(pVarFloat3Member);
 
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("testArray2", &Var);
   GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)(*(clBufferBase**)Var.GetPtr())->GetPtr();
@@ -570,7 +570,7 @@ void TestDataPoolAgent_Primary_DynArray(DataPool* pDataPool)
   InlSetZeroT(VarElement);
   //InlSetZeroT(pVarFloat3Member);
 
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("testDynArray", &Var);
   GXUINT_PTR lpBasePtr = GetFirstElementPtr(Var);//(GXUINT_PTR)Var.GetPtr();
@@ -609,7 +609,7 @@ void TestDataPoolAgent_Primary_DynArray_NewBack(DataPool* pDataPool)
   VAR VarElement[nArray];
   float aNativeStore[nArray];
 
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   hval = pDataPool->QueryByName("testDynArray", &Var);
   //clBuffer** lplpBuffer = (clBuffer**)Var.GetPtr();
@@ -994,7 +994,7 @@ void test()
 //};
 void TestDataPool_CompileFromCode()
 {
-  TRACE("=== "__FUNCTION__" ===\n");
+  TRACE("=== %s ===\n", __FUNCTION__);
 
   static char* s_szCode = 
     "int nFirst = 123456;"
@@ -1187,6 +1187,65 @@ void TestHeaderSize()
   }
 }
 
+void TestShaderConstantBuffer()
+{
+  static VARIABLE_DECLARATION s_aShaderConstantBuffer[] =
+  {
+    {"float4x4", "WorldViewProjection", 0,},
+    {"float4",   "DiffuseColor", 0,},
+    {"float3",   "LightPosition", 0, 4},
+    {"float3",   "EyePosition"},
+    {"float3",   "EyeDirection"},
+    {NULL, NULL}
+  };
+
+  DataPool* pDataPool = NULL;
+  GXHRESULT hr = DataPool::CreateDataPool(&pDataPool, NULL, NULL, s_aShaderConstantBuffer, DataPoolCreation_Align16);
+  if(GXSUCCEEDED(hr)) {
+    pDataPool->SaveW(L"Test\\TestShaderConstantBuffer.dpl");
+  }
+
+  MOVarMatrix4 matWVProj;
+  MOVarFloat4  vDiffuseColor;
+  DataPoolVariable vLightPositionArray;
+  DataPoolVariable  vLightPosition[4];
+  MOVarFloat3  vEyePosition;
+  MOVarFloat3  vEyeDirection;
+
+  GXBOOL bRetult;
+  bRetult = pDataPool->QueryByName("WorldViewProjection", &matWVProj);
+  ASSERT(bRetult);
+  ASSERT(matWVProj.GetOffset() == 0);
+
+  bRetult = pDataPool->QueryByName("DiffuseColor", &vDiffuseColor);
+  ASSERT(bRetult);
+  ASSERT(vDiffuseColor.GetOffset() == sizeof(float4x4));
+
+  bRetult = pDataPool->QueryByName("LightPosition", &vLightPositionArray);
+  ASSERT(bRetult);
+  ASSERT(TEST_FLAG(vLightPositionArray.GetCaps(), DataPoolVariable::CAPS_ARRAY));
+  ASSERT(vLightPositionArray.GetOffset() == sizeof(float4x4) + sizeof(float4));
+  ASSERT(vLightPositionArray.GetSize() == sizeof(float3) * 4);
+  vLightPosition[0] = vLightPositionArray[0];
+  vLightPosition[1] = vLightPositionArray[1];
+  vLightPosition[2] = vLightPositionArray[2];
+  vLightPosition[3] = vLightPositionArray[3];
+  ASSERT(vLightPosition[0].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 0);
+  ASSERT(vLightPosition[1].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 1);
+  ASSERT(vLightPosition[2].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 2);
+  ASSERT(vLightPosition[3].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 3);
+
+  bRetult = pDataPool->QueryByName("EyePosition", &vEyePosition);
+  ASSERT(bRetult);
+  ASSERT(vEyePosition.GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 4);
+
+  bRetult = pDataPool->QueryByName("EyeDirection", &vEyeDirection);
+  ASSERT(bRetult);
+  ASSERT(vEyeDirection.GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 4 + sizeof(float4));
+
+  SAFE_RELEASE(pDataPool);
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
   clpathfile::LocalWorkingDirW(L"..");
@@ -1196,6 +1255,7 @@ int _tmain(int argc, _TCHAR* argv[])
   TestStringCutter();
 
   // Data pool test
+  TestShaderConstantBuffer();
   TestHashBuckets();
   TestHeaderSize();
   TestHugeArray();

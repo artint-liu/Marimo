@@ -436,15 +436,15 @@ namespace Marimo
       {Marimo::T_SDWORD, "int"},
       {Marimo::T_SQWORD, "longlong"},
 
-      {Marimo::T_STRING, "string"},
+      {Marimo::T_STRING,  "string"},
       {Marimo::T_STRINGA, "stringA"},
-      {Marimo::T_OBJECT, "object"},
+      {Marimo::T_OBJECT,  "object"},
 
-      {Marimo::T_STRUCT, "float2"  , c_float2},
-      {Marimo::T_STRUCT, "float3"  , c_float3},
-      {Marimo::T_STRUCT, "float4"  , c_float4},
-      {Marimo::T_STRUCT, "float3x3", c_float3x3},
-      {Marimo::T_STRUCT, "float4x4", c_float4x4},
+      {Marimo::T_STRUCT, "float2"  , c_float2, 4},
+      {Marimo::T_STRUCT, "float3"  , c_float3, 4},
+      {Marimo::T_STRUCT, "float4"  , c_float4, 4},
+      {Marimo::T_STRUCT, "float3x3", c_float3x3, 4},
+      {Marimo::T_STRUCT, "float4x4", c_float4x4, 4},
       {T_UNDEFINE, NULL},
     };
   } // namespace Implement

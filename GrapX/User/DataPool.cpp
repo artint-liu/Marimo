@@ -620,7 +620,7 @@ namespace Marimo
     return GX_FAIL;
   }
 
-  GXHRESULT DataPool::CreateFromResolver(DataPool** ppDataPool, GXLPCSTR szName, DataPoolCompiler* pResolver, DataPoolLoad dwFlags)
+  GXHRESULT DataPool::CreateFromResolver(DataPool** ppDataPool, GXLPCSTR szName, DataPoolCompiler* pResolver, DataPoolCreation dwFlags)
   {    
     if(pResolver) {
       DataPoolCompiler::MANIFEST sManifest;
@@ -645,7 +645,7 @@ namespace Marimo
     return GX_FAIL;
   }
 
-  GXHRESULT DataPool::CompileFromMemory(DataPool** ppDataPool, GXLPCSTR szName, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength, DataPoolLoad dwFlags)
+  GXHRESULT DataPool::CompileFromMemory(DataPool** ppDataPool, GXLPCSTR szName, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength, DataPoolCreation dwFlags)
   {
     DataPoolCompiler* pResolver = NULL;
     GXHRESULT hval = szDefinitionCodes == NULL ? GX_OK :
@@ -658,7 +658,7 @@ namespace Marimo
     return hval;
   }
 
-  GXHRESULT DataPool::CompileFromFileW(DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude, DataPoolLoad dwFlags)
+  GXHRESULT DataPool::CompileFromFileW(DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude, DataPoolCreation dwFlags)
   {
     clstd::File file;
     GXHRESULT hval = GX_FAIL;
@@ -698,7 +698,7 @@ namespace Marimo
     return hval;
   }
 
-  GXHRESULT DataPool::CreateFromFileW(DataPool** ppDataPool, GXLPCSTR szName, GXLPCWSTR szFilename, DataPoolLoad dwFlags)
+  GXHRESULT DataPool::CreateFromFileW(DataPool** ppDataPool, GXLPCSTR szName, GXLPCWSTR szFilename, DataPoolCreation dwFlags)
   {
     ASSERT(szName == NULL);  // 暂时这个不支持命名方式
     GXHRESULT hval = GX_OK;
@@ -725,7 +725,7 @@ namespace Marimo
     return hval;
   }
 
-  GXHRESULT DataPool::CreateDataPool(DataPool** ppDataPool, GXLPCSTR szName, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl, DataPoolLoad dwFlags)
+  GXHRESULT DataPool::CreateDataPool(DataPool** ppDataPool, GXLPCSTR szName, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl, DataPoolCreation dwFlags)
   {
     GXLPSTATION lpStation = NULL;
     GXHRESULT hval = GX_OK;

@@ -1145,7 +1145,7 @@ namespace Marimo
     pEnum->push_back(sEnumEnd);
 
     // 结尾 it 应该为 ";"
-    TypeDecl.as.Enum = &(pEnum->front()); // 这个填入后 TypeStorage.aVariable 就不能再追加数据了    
+    TypeDecl.as.Enumer = &(pEnum->front()); // 这个填入后 TypeStorage.aVariable 就不能再追加数据了    
     m_aTypes.push_back(TypeDecl);
     return result;
   }
@@ -1167,7 +1167,7 @@ namespace Marimo
 
   GXHRESULT DataPoolResolverImpl::GetCompileResult()
   {
-    static GXHRESULT aResultTab[] = {GX_FAIL, 1, GX_OK};
+    static GXHRESULT aResultTab[] = {GX_FAIL, GXHRESULT(1), GX_OK};
     return aResultTab[m_ErrorMsg.GetErrorLevel()];
   }
 

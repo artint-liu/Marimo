@@ -292,7 +292,7 @@ void TestComplexArray()
   pDataPool->SaveW(szFilename);
 
   DataPool* pDataPoolFromFile = NULL;
-  DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolLoad_ReadOnly);
+  DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolCreation_ReadOnly);
 
   pDataPool->ExportDataToFile(L"Test\\TestComplexArray_export.txt");
 
@@ -307,7 +307,7 @@ void TestComplexArray()
   if(PathFileExists(szFilename2))
   {
     DataPool* pAlternative = NULL;
-    result = DataPool::CreateFromFileW(&pAlternative, NULL, szFilename2, DataPoolLoad_ReadOnly);
+    result = DataPool::CreateFromFileW(&pAlternative, NULL, szFilename2, DataPoolCreation_ReadOnly);
     if(GXSUCCEEDED(result)) {
       TestGetNameId(pAlternative);
       ENUM_DATAPOOL(pAlternative);
