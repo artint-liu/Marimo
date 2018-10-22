@@ -798,7 +798,7 @@ namespace UVShader
     const TYPEDESC* InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation);
 #endif
 
-    const TYPEDESC* InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB* pVarGlob, const GLOB& right_glob, const TOKEN* pLocation); // pLocation 用于错误输出定位
+    const TYPEDESC* InferRightValueType(NameContext& sNameSet, const GLOB& right_glob);
     GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL MergeValueContext(VALUE_CONTEXT& vctx, const TOKEN* pOperator, VALUE_CONTEXT* pAB, const TOKEN* pLocation); // pLocation 用于错误输出定位
@@ -820,8 +820,9 @@ namespace UVShader
     GXBOOL Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstIdentifier = FALSE, GXBOOL bMember = FALSE);
     //GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
-    GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
+    GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
+    GXBOOL Verify_Node(const SYNTAXNODE* pNode, NameContext& sNameContext, GXBOOL& result);
     GXBOOL Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode);
     const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const GLOB& right_glob);

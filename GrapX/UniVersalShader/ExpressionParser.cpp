@@ -1256,6 +1256,9 @@ namespace UVShader
   
   GXBOOL CodeParser::Parse()
   {
+    if(GetLogger()->ErrorCount() > 0) {
+      return FALSE;
+    }
 #if 1
     TKSCOPE scope(0, m_aTokens.size());
     while(ParseStatement(&scope));
@@ -4303,7 +4306,7 @@ namespace UVShader
         }
         else
         {
-          pRightTypeDesc = InferRightValueType(sNameSet, NULL, NULL, right_glob, ptkVar);
+          pRightTypeDesc = InferRightValueType(sNameSet, right_glob);
           if(pRightTypeDesc == NULL || ptkVar == NULL) {
             // InferRightValueType2和GetIdentifierWithoutSeamantic内部应该输出错误
             ASSERT(DbgErrorCount() > nErrorCount);
@@ -4415,230 +4418,269 @@ namespace UVShader
   GXBOOL CodeParser::Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext)
   {
     GXBOOL result = TRUE;
-    RecursiveNode<const SYNTAXNODE>(this, pNode, [this, &result, &sNameContext]
-    (const SYNTAXNODE* pNode, int depth) -> GXBOOL
+
+    if(pNode->mode == SYNTAXNODE::MODE_Chain)
     {
-      // return FALSE 表示不再遍历后面的节点
-
-      if(pNode->mode == SYNTAXNODE::MODE_Block)
-      {
-        // TODO: 测试 int a; if(a) {a} 能否编译通过(block中没有分号)
-        ASSERT(pNode->Operand[1].ptr == NULL ||
-          (pNode->Operand[1].IsToken() && *pNode->Operand[1].pTokn == ';'));
-
+      do {
+        // 验证第一个节点
         if(pNode->Operand[0].IsNode())
         {
-          NameContext sBlockNameContext(s_szNCName_Block, &sNameContext);
-          result = Verify_Chain(pNode->Operand[0].pNode, sBlockNameContext);
-        }
-        else if(pNode->Operand[0].IsToken())
-        {
-          if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[0], pNode->pOpcode) == NULL)
-          {
-            result = FALSE;
+          Verify_Node(pNode->Operand[0].pNode, sNameContext, result);
+          if(result == FALSE) {
+            return result;
           }
         }
-        return FALSE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Chain ||
-        pNode->mode == SYNTAXNODE::MODE_Flow_ForInit ||
-        pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning ||
-        pNode->mode == SYNTAXNODE::MODE_Flow_While ||
-        pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile
-        )
-      {
-        return TRUE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
-      {
-        const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[0], NULL);
-        result = result && (pTypeDesc != NULL);
-        ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
-        return TRUE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf)
-      {
-        ASSERT(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Flow_If);
-        return TRUE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Else)
-      {
-        ASSERT(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Flow_If);
-        ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
-        return TRUE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Continue)
-      {
-        ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "continue");
-        ASSERT(pNode->Operand[1].ptr == NULL);
-        return FALSE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Break)
-      {
-        ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "break");
-        ASSERT(pNode->Operand[1].ptr == NULL);
-        return FALSE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_Discard)
-      {
-        ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "discard");
-        ASSERT(pNode->Operand[1].ptr == NULL);
-        return FALSE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
-      {
-        NameContext sFlowForSet("for", &sNameContext);
-        if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Chain(pNode->Operand[0].pNode, sFlowForSet))) // FIXME: 这里不能用Verify_Block
-        {
-          result = FALSE;
+        else if(pNode->Operand[0].ptr && InferRightValueType(sNameContext, pNode->Operand[0]) == NULL) {
+          return FALSE;
         }
 
-        if(pNode->Operand[1].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[1].pNode, &sFlowForSet)))
+        // 转移第二个节点到当前pNode
+        if(pNode->Operand[1].ptr && pNode->Operand[1].IsNode())
         {
-          result = FALSE;
+          pNode = pNode->Operand[1].pNode;
         }
-        return FALSE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Definition)
-      {
-        if(Verify_IdentifierDefinition(sNameContext, pNode) == FALSE) {
-          result = FALSE;
+        else {
+          ASSERT(pNode->Operand[1].ptr == NULL); // 好像没有其它情况了，这里限制一下看看
+          break;
         }
-        return FALSE; // 不再递归
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_StructDef)
+      } while(pNode->mode == SYNTAXNODE::MODE_Chain);
+    }
+    else
+    {
+      RecursiveNode<const SYNTAXNODE>(this, pNode, [this, &result, &sNameContext]
+      (const SYNTAXNODE* pNode, int depth) -> GXBOOL
       {
-        clStringA str;
-        // TODO: 注册结构体类型
-        //sNameSet.RegisterType(pNode->Operand[0].pTokn->ToString(str), TYPEDESC::TypeCate_Struct);
-        return FALSE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
-      {
-        // TODO: 写的不完整
-        if(pNode->pOpcode)
-        {
-          if(*pNode->pOpcode == '=' ||
-            *pNode->pOpcode == "-=" || *pNode->pOpcode == "+=" ||
-            *pNode->pOpcode == "*=" || *pNode->pOpcode == "/=" || *pNode->pOpcode == "%=" ||
-            *pNode->pOpcode == "<<=" || *pNode->pOpcode == ">>=" ||
-            *pNode->pOpcode == "&=" || *pNode->pOpcode == "|=" || *pNode->pOpcode == "^=" )
-          {
-            // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
-            // TODO: 需要验证左值
-            const size_t nErrorCount = DbgErrorCount();
-            const TYPEDESC* pRightTypeDesc = InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[1], pNode->pOpcode);
-            const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
-            
-            if(pRightTypeDesc == NULL || pLeftTypeDesc == NULL)
-            {
-              ASSERT(DbgErrorCount() > nErrorCount);
-              return FALSE;
-            }
+        return Verify_Node(pNode, sNameContext, result);
+      });
+    }
+    return result;
+  }
 
-            if(TryTypeCasting(pLeftTypeDesc, pRightTypeDesc, pNode->pOpcode) == FALSE)
-            {
-              if(*pNode->pOpcode == "*=" && pRightTypeDesc->IsMatrix() && pLeftTypeDesc->IsVector() &&
-                IsComponent(NULL, pRightTypeDesc, pLeftTypeDesc))
-              {
-              }
-              else
-              {
-                //clStringW strFrom = pRightTypeDesc->name;
-                //clStringW strTo = pLeftTypeDesc->name;
-                //GetLogger()->OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
-                GetLogger()->OutputTypeCastFailed(&pNode->GetAnyTokenPAB(), pNode->pOpcode, pLeftTypeDesc, pRightTypeDesc);
-                result = FALSE;
-              }
-            }
-          }
-          else if(pNode->pOpcode->unary)
+  GXBOOL CodeParser::Verify_Node(const SYNTAXNODE* pNode, NameContext& sNameContext, GXBOOL& result)
+  {
+    // return FALSE 表示不再遍历后面的节点
+
+    if(pNode->mode == SYNTAXNODE::MODE_Block)
+    {
+      // TODO: 测试 int a; if(a) {a} 能否编译通过(block中没有分号)
+      ASSERT(pNode->Operand[1].ptr == NULL ||
+        (pNode->Operand[1].IsToken() && *pNode->Operand[1].pTokn == ';'));
+
+      if(pNode->Operand[0].IsNode())
+      {
+        NameContext sBlockNameContext(s_szNCName_Block, &sNameContext);
+        result = Verify_Chain(pNode->Operand[0].pNode, sBlockNameContext);
+      }
+      else if(pNode->Operand[0].IsToken())
+      {
+        if(InferRightValueType(sNameContext, pNode->Operand[0]) == NULL)
+        {
+          result = FALSE;
+        }
+      }
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Chain)
+    {
+      CLBREAK; // 前面过滤掉，不可能到这里
+    }
+    else if(
+      pNode->mode == SYNTAXNODE::MODE_Flow_ForInit ||
+      pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning ||
+      pNode->mode == SYNTAXNODE::MODE_Flow_While ||
+      pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile
+      )
+    {
+      return TRUE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
+    {
+      const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, pNode->Operand[0]);
+      result = result && (pTypeDesc != NULL);
+      ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
+      return TRUE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf)
+    {
+      ASSERT(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Flow_If);
+      return TRUE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_Else)
+    {
+      ASSERT(pNode->Operand[0].IsNode() && pNode->Operand[0].pNode->mode == SYNTAXNODE::MODE_Flow_If);
+      ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
+      return TRUE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_Continue)
+    {
+      ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "continue");
+      ASSERT(pNode->Operand[1].ptr == NULL);
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_Break)
+    {
+      ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "break");
+      ASSERT(pNode->Operand[1].ptr == NULL);
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_Discard)
+    {
+      ASSERT(pNode->Operand[0].IsToken() && *pNode->Operand[0].pTokn == "discard");
+      ASSERT(pNode->Operand[1].ptr == NULL);
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_For)
+    {
+      NameContext sFlowForSet("for", &sNameContext);
+      if(pNode->Operand[0].IsNode() && _CL_NOT_(Verify_Chain(pNode->Operand[0].pNode, sFlowForSet))) // FIXME: 这里不能用Verify_Block
+      {
+        result = FALSE;
+      }
+
+      if(pNode->Operand[1].IsNode() && _CL_NOT_(Verify_Block(pNode->Operand[1].pNode, &sFlowForSet)))
+      {
+        result = FALSE;
+      }
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Definition)
+    {
+      if(Verify_IdentifierDefinition(sNameContext, pNode) == FALSE) {
+        result = FALSE;
+      }
+      return FALSE; // 不再递归
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_StructDef)
+    {
+      clStringA str;
+      // TODO: 注册结构体类型
+      //sNameSet.RegisterType(pNode->Operand[0].pTokn->ToString(str), TYPEDESC::TypeCate_Struct);
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
+    {
+      // TODO: 写的不完整
+      if(pNode->pOpcode)
+      {
+        if(*pNode->pOpcode == '=' ||
+          *pNode->pOpcode == "-=" || *pNode->pOpcode == "+=" ||
+          *pNode->pOpcode == "*=" || *pNode->pOpcode == "/=" || *pNode->pOpcode == "%=" ||
+          *pNode->pOpcode == "<<=" || *pNode->pOpcode == ">>=" ||
+          *pNode->pOpcode == "&=" || *pNode->pOpcode == "|=" || *pNode->pOpcode == "^=")
+        {
+          // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
+          // TODO: 需要验证左值
+          const size_t nErrorCount = DbgErrorCount();
+          const TYPEDESC* pRightTypeDesc = InferRightValueType(sNameContext, pNode->Operand[1]);
+          const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
+
+          if(pRightTypeDesc == NULL || pLeftTypeDesc == NULL)
           {
-            for(int i = 0; i < 2; i++)
-            {
-              if(pNode->Operand[i].ptr)
-              {
-                if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[i], pNode->pOpcode) == NULL)
-                {
-                  result = FALSE;
-                }
-                break;
-              }
-            }
+            ASSERT(DbgErrorCount() > nErrorCount);
+            return FALSE;
           }
-          else
+
+          if(TryTypeCasting(pLeftTypeDesc, pRightTypeDesc, pNode->pOpcode) == FALSE)
           {
-            VALUE_CONTEXT vctx(sNameContext);
-            vctx.bNeedValue = FALSE;
-            vctx.pLogger = GetLogger();
-            InferType(vctx, pNode);
-            if(vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
+            if(*pNode->pOpcode == "*=" && pRightTypeDesc->IsMatrix() && pLeftTypeDesc->IsVector() &&
+              IsComponent(NULL, pRightTypeDesc, pLeftTypeDesc))
+            {
+            }
+            else
+            {
+              //clStringW strFrom = pRightTypeDesc->name;
+              //clStringW strTo = pLeftTypeDesc->name;
+              //GetLogger()->OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+              GetLogger()->OutputTypeCastFailed(&pNode->GetAnyTokenPAB(), pNode->pOpcode, pLeftTypeDesc, pRightTypeDesc);
               result = FALSE;
             }
-            //if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[1], pNode->pOpcode) == NULL)
-            //{
-            //  result = FALSE;
-            //}
+          }
+        }
+        else if(pNode->pOpcode->unary)
+        {
+          for(int i = 0; i < 2; i++)
+          {
+            if(pNode->Operand[i].ptr)
+            {
+              if(InferRightValueType(sNameContext, pNode->Operand[i]) == NULL)
+              {
+                result = FALSE;
+              }
+              break;
+            }
           }
         }
         else
         {
-          CLBREAK; // SYNTAXNODE::MODE_Opcode 模式没有 Opcode
-        }
-        return FALSE;
-      }
-      else if(pNode->mode == SYNTAXNODE::MODE_Return)
-      {
-        // error C2059: 语法错误:“return”
-        const TYPEDESC* pTypeTo = sNameContext.GetReturnType();
-        if(pTypeTo->cate == TYPEDESC::TypeCate_Void)
-        {
-          // error C2562: <function name>:“void”函数返回值
-          ASSERT(pNode->Operand[0].IsToken());
-          if(pNode->Operand[1].ptr)
-          {
-            GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2562, "“void”函数返回值"));
+          VALUE_CONTEXT vctx(sNameContext);
+          vctx.bNeedValue = FALSE;
+          vctx.pLogger = GetLogger();
+          InferType(vctx, pNode);
+          if(vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
             result = FALSE;
           }
-          return FALSE;
+          //if(InferRightValueType(sNameContext, NULL, NULL, pNode->Operand[1], pNode->pOpcode) == NULL)
+          //{
+          //  result = FALSE;
+          //}
         }
-
-        VALUE_CONTEXT vctx(sNameContext);
-        vctx.pLogger = GetLogger();
-        const TYPEDESC* pTypeFrom = InferType(vctx, pNode->Operand[1]);
-        //const TYPEDESC* pTypeTo = sNameSet.GetType(szReturnType);
-        ASSERT(pTypeTo);
-
-        if(pTypeFrom == NULL) {
-          result = FALSE;
-        }
-        else if(TryTypeCasting(pTypeTo, pTypeFrom, pNode->Operand[0].pTokn) == FALSE)
+      }
+      else
+      {
+        CLBREAK; // SYNTAXNODE::MODE_Opcode 模式没有 Opcode
+      }
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Return)
+    {
+      // error C2059: 语法错误:“return”
+      const TYPEDESC* pTypeTo = sNameContext.GetReturnType();
+      if(pTypeTo->cate == TYPEDESC::TypeCate_Void)
+      {
+        // error C2562: <function name>:“void”函数返回值
+        ASSERT(pNode->Operand[0].IsToken());
+        if(pNode->Operand[1].ptr)
         {
-          // error C2440: “return”: 无法从“TypeFrom”转换为“TypeTo”
-          clStringW strFrom = pTypeFrom->name;
-          clStringW strTo = pTypeTo->name;
-          GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+          GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2562, "“void”函数返回值"));
           result = FALSE;
         }
         return FALSE;
       }
-      else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
-      {
-        VALUE_CONTEXT vctx(sNameContext, FALSE);
-        vctx.pLogger = GetLogger();
-        InferFunctionReturnedType(vctx, pNode);
-        return FALSE; // 不再遍历后面的节点
+
+      VALUE_CONTEXT vctx(sNameContext);
+      vctx.pLogger = GetLogger();
+      const TYPEDESC* pTypeFrom = InferType(vctx, pNode->Operand[1]);
+      //const TYPEDESC* pTypeTo = sNameSet.GetType(szReturnType);
+      ASSERT(pTypeTo);
+
+      if(pTypeFrom == NULL) {
+        result = FALSE;
       }
+      else if(TryTypeCasting(pTypeTo, pTypeFrom, pNode->Operand[0].pTokn) == FALSE)
+      {
+        // error C2440: “return”: 无法从“TypeFrom”转换为“TypeTo”
+        clStringW strFrom = pTypeFrom->name;
+        clStringW strTo = pTypeTo->name;
+        GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+        result = FALSE;
+      }
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_FunctionCall)
+    {
+      VALUE_CONTEXT vctx(sNameContext, FALSE);
+      vctx.pLogger = GetLogger();
+      InferFunctionReturnedType(vctx, pNode);
+      return FALSE; // 不再遍历后面的节点
+    }
 
-      PARSER_BREAK(pNode); // 应该处理 pNode->mode
-      return TRUE;
-    });
-
-    return result;
+    PARSER_BREAK(pNode); // 应该处理 pNode->mode
+    return TRUE;
   }
 
   GXBOOL CodeParser::Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet)
   {
+    ASSERT(pNode->mode == SYNTAXNODE::MODE_Block);
     NameContext sNameContext(s_szNCName_Block, pParentSet);
     return Verify_Chain(pNode, sNameContext);
   }
@@ -6044,7 +6086,7 @@ namespace UVShader
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const TYPEDESC* pLeftTypeDesc, const GLOB* pVarGlob, const GLOB& right_glob, const TOKEN* pLocation)
+  const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const GLOB& right_glob)
   {
     // 这个函数外部不输出 Error/Warning
     ASSERT(right_glob.IsNode() || right_glob.IsToken());
