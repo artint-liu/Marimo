@@ -26,7 +26,7 @@ protected:
 
 protected:
   static LRESULT  CALLBACK  WndProc     (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-  GXLRESULT                 CreateWnd   (GXLPWSTR lpClassName, WNDPROC pWndProc, GXAPP_DESC* pDesc, GXApp* pApp);
+  GXLRESULT                 CreateWnd   (LPWSTR lpClassName, WNDPROC pWndProc, GXAPP_DESC* pDesc, GXApp* pApp);
 public:
   GXLRESULT                 AppHandle   (GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
 };

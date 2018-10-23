@@ -354,7 +354,7 @@ static GXINT EDIT_CallWordBreakProc(EDITSTATE *es, GXINT start, GXINT index, GXI
     {
       GXEDITWORDBREAKPROCW wbpW = (GXEDITWORDBREAKPROCW)es->word_break_proc;
 
-      TRACE_(relay)(L"(UNICODE wordbrk=%p,str=%s,idx=%d,cnt=%d,act=%d)\n",
+      TRACE_(relay)(_CLTEXT("(UNICODE wordbrk=%p,str=%s,idx=%d,cnt=%d,act=%d)\n"),
         es->word_break_proc, debugstr_wn(es->text + start, count), index, count, action);
       ret = wbpW(es->text + start, index, count, action);
     }
@@ -367,7 +367,7 @@ static GXINT EDIT_CallWordBreakProc(EDITSTATE *es, GXINT start, GXINT index, GXI
       countA = gxWideCharToMultiByte(CP_ACP, 0, es->text + start, count, NULL, 0, NULL, NULL);
       textA = (GXCHAR*)gxHeapAlloc(gxGetProcessHeap(), 0, countA);
       gxWideCharToMultiByte(CP_ACP, 0, es->text + start, count, textA, countA, NULL, NULL);
-      TRACE_(relay)(L"(ANSI wordbrk=%p,str=%s,idx=%d,cnt=%d,act=%d)\n",
+      TRACE_(relay)(_CLTEXT("(ANSI wordbrk=%p,str=%s,idx=%d,cnt=%d,act=%d)\n"),
         es->word_break_proc, debugstr_an(textA, countA), index, countA, action);
       ret = wbpA(textA, index, countA, action);
       gxHeapFree(gxGetProcessHeap(), 0, textA);
@@ -2397,7 +2397,7 @@ static void EDIT_EM_ReplaceSel(EDITSTATE *es, GXBOOL can_undo, GXLPCWSTR lpsz_re
   GXLPWSTR buf = NULL;
   GXUINT bufl = 0;
 
-  TRACEW(L"%s, can_undo %d, send_update %d\n", debugstr_w(lpsz_replace), can_undo, send_update);
+  TRACEW(_CLTEXT("%s, can_undo %d, send_update %d\n"), debugstr_w(lpsz_replace), can_undo, send_update);
 
   s = es->selection_start;
   e = es->selection_end;
@@ -2434,22 +2434,22 @@ static void EDIT_EM_ReplaceSel(EDITSTATE *es, GXBOOL can_undo, GXLPCWSTR lpsz_re
     memcpy(buf, es->text + s, bufl * sizeof(GXWCHAR));
     buf[bufl] = 0; /* ensure 0 termination */
     /* now delete */
-    strcpyW(es->text + s, es->text + e);
+    clstd::strcpyT(es->text + s, es->text + e);
     text_buffer_changed(es);
   }
 
   if (strl) {
     /* there is an insertion */
     tl = get_text_length(es);
-    TRACEW(L"inserting stuff (tl %d, strl %d, selstart %d (%s), text %s)\n", tl, strl, s, debugstr_w(es->text + s), debugstr_w(es->text));
+    TRACEW(_CLTEXT("inserting stuff (tl %d, strl %d, selstart %d (%s), text %s)\n"), tl, strl, s, debugstr_w(es->text + s), debugstr_w(es->text));
     for (p = es->text + tl; p >= es->text + s; p--)
       p[strl] = p[0];
     for (i = 0, p = es->text + s; i < strl; i++)
       p[i] = lpsz_replace[i];
     if (es->style & ES_UPPERCASE)
-      CharUpperBuffW(p, strl);
+      CharUpperBuffW(reinterpret_cast<LPWSTR>(p), strl);
     else if (es->style & ES_LOWERCASE)
-      CharLowerBuffW(p, strl);
+      CharLowerBuffW(reinterpret_cast<LPWSTR>(p), strl);
     text_buffer_changed(es);
   }
 
@@ -2464,7 +2464,7 @@ static void EDIT_EM_ReplaceSel(EDITSTATE *es, GXBOOL can_undo, GXLPCWSTR lpsz_re
     /* if text is too long undo all changes */
     if (honor_limit && !(es->style & ES_AUTOVSCROLL) && (es->line_count > vlc)) {
       if (strl)
-        strcpyW(es->text + e, es->text + e + strl);
+        clstd::strcpyT(es->text + e, es->text + e + strl);
       if (e != s)
         for (i = 0, p = es->text; i < e - s; i++)
           p[i + s] = buf[i];
@@ -2483,7 +2483,7 @@ static void EDIT_EM_ReplaceSel(EDITSTATE *es, GXBOOL can_undo, GXLPCWSTR lpsz_re
     /* remove chars that don't fit */
     if (honor_limit && !(es->style & ES_AUTOHSCROLL) && (es->text_width > fw)) {
       while ((es->text_width > fw) && s + strl >= s) {
-        strcpyW(es->text + s + strl - 1, es->text + s + strl);
+        clstd::strcpyT(es->text + s + strl - 1, es->text + s + strl);
         strl--;
         EDIT_CalcLineWidth_SL(es);
       }
@@ -2845,9 +2845,9 @@ static GXBOOL EDIT_EM_Undo(EDITSTATE *es)
 
   utext = (GXLPWSTR)gxHeapAlloc(gxGetProcessHeap(), 0, (ulength + 1) * sizeof(GXWCHAR));
 
-  strcpyW(utext, es->undo_text);
+  clstd::strcpyT(utext, es->undo_text);
 
-  TRACEW(L"before UNDO:insertion length = %d, deletion buffer = %s\n", es->undo_insert_count, debugstr_w(utext));
+  TRACEW(_CLTEXT("before UNDO:insertion length = %d, deletion buffer = %s\n"), es->undo_insert_count, debugstr_w(utext));
 
   EDIT_EM_SetSel(es, es->undo_position, es->undo_position + es->undo_insert_count, FALSE);
   EDIT_EM_EmptyUndoBuffer(es);
@@ -2858,7 +2858,7 @@ static GXBOOL EDIT_EM_Undo(EDITSTATE *es)
   EDIT_EM_ScrollCaret(es);
   gxHeapFree(gxGetProcessHeap(), 0, utext);
 
-  TRACEW(L"after UNDO:insertion length = %d, deletion buffer = %s\n", es->undo_insert_count, debugstr_w(es->undo_text));
+  TRACEW(_CLTEXT("after UNDO:insertion length = %d, deletion buffer = %s\n"), es->undo_insert_count, debugstr_w(es->undo_text));
   return TRUE;
 }
 
@@ -2924,7 +2924,7 @@ static void EDIT_WM_Copy(EDITSTATE *es)
   dst = (GXLPWSTR)gxGlobalLock(hdst);
   memcpy(dst, es->text + s, len * sizeof(GXWCHAR));
   dst[len] = 0; /* ensure 0 termination */
-  TRACEW(L"%s\n", debugstr_w(dst));
+  TRACEW(_CLTEXT("%s\n"), debugstr_w(dst));
   gxGlobalUnlock(hdst);
   gxOpenClipboard(es->hwndSelf);
   gxEmptyClipboard();
@@ -3101,7 +3101,7 @@ static void EDIT_WM_Command(EDITSTATE *es, GXINT code, GXINT id, GXHWND control)
  */
 static void EDIT_WM_ContextMenu(EDITSTATE *es, GXINT x, GXINT y)
 {
-  GXHMENU menu = gxLoadMenuW(user32_module, L"EDITMENU");
+  GXHMENU menu = gxLoadMenuW(user32_module, _CLTEXT("EDITMENU"));
   GXHMENU popup = gxGetSubMenu(menu, 0);
   GXUINT start = es->selection_start;
   GXUINT end = es->selection_end;
@@ -3150,7 +3150,7 @@ static GXINT EDIT_WM_GetText(const EDITSTATE *es, GXINT count, GXLPWSTR dst, GXB
 
   if(unicode)
   {
-    lstrcpynW(dst, es->text, count);
+    clstd::strcpynT(dst, es->text, count);
     return (GXINT)GXSTRLEN(dst);
   }
   else
@@ -3181,7 +3181,7 @@ static GXBOOL EDIT_CheckCombo(EDITSTATE *es, GXUINT msg, GXINT key)
    bDropped = TRUE;
    nEUI     = 0;
 
-   TRACE_(combo)(L"[%p]: handling msg %x (%x)\n", es->hwndSelf, msg, key);
+   TRACE_(combo)(_CLTEXT("[%p]: handling msg %x (%x)\n"), es->hwndSelf, msg, key);
 
    if (key == VK_UP || key == VK_DOWN)
    {
@@ -3688,14 +3688,14 @@ static void EDIT_WM_SetText(EDITSTATE *es, GXLPCWSTR text, GXBOOL unicode)
     EDIT_EM_SetSel(es, 0, (GXUINT)-1, FALSE);
     if (text) 
     {
-  TRACEW(L"%s\n", debugstr_w(text));
+  TRACEW(_CLTEXT("%s\n"), debugstr_w(text));
   EDIT_EM_ReplaceSel(es, FALSE, text, FALSE, FALSE);
   if(!unicode)
       gxHeapFree(gxGetProcessHeap(), 0, textW);
     } 
     else 
     {
-  TRACEW(L"<NULL>\n");
+  TRACEW(_CLTEXT("<NULL>\n"));
   EDIT_EM_ReplaceSel(es, FALSE, empty_stringW, FALSE, FALSE);
     }
     es->x_offset = 0;
@@ -4238,7 +4238,7 @@ static GXLRESULT EDIT_WM_NCCreate(GXHWND hwnd, GXLPCREATESTRUCTW lpcs, GXBOOL un
   EDITSTATE *es;
   GXUINT alloc_size;
 
-  TRACEW(L"Creating %s edit control, style = %08x\n", unicode ? "Unicode" : "ANSI", lpcs->style);
+  TRACEW(_CLTEXT("Creating %s edit control, style = %08x\n"), unicode ? "Unicode" : "ANSI", lpcs->style);
 
   if (!(es = (EDITSTATE*)gxHeapAlloc(gxGetProcessHeap(), GXHEAP_ZERO_MEMORY, sizeof(*es))))
     return FALSE;
@@ -4349,7 +4349,7 @@ static GXLRESULT EDIT_WM_Create(EDITSTATE *es, GXLPCWSTR name)
 {
   GXRECT clientRect;
 
-  TRACEW(L"%s\n", debugstr_w(name));
+  TRACEW(_CLTEXT("%s\n"), debugstr_w(name));
   /*
   *  To initialize some final structure members, we call some helper
   *  functions.  However, since the EDITSTATE is not consistent (i.e.
@@ -4441,7 +4441,7 @@ GXLRESULT EditWndProc_common( GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM
   EDITSTATE *es = (EDITSTATE *)gxGetWindowLongPtrW( hwnd, 0 );
   GXLRESULT result = 0;
 
-  TRACEW(L"hwnd=%p msg=%x (%s) wparam=%lx lparam=%lx\n", hwnd, msg, SPY_GetMsgName(msg, hwnd), wParam, lParam);
+  TRACEW(_CLTEXT("hwnd=%p msg=%x (%s) wparam=%lx lparam=%lx\n"), hwnd, msg, SPY_GetMsgName(msg, hwnd), wParam, lParam);
 
   if (!es && msg != GXWM_NCCREATE)
     return DefWindowProcT(hwnd, msg, wParam, lParam, unicode);

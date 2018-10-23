@@ -55,22 +55,22 @@ GXBOOL IntEnumMenuKeys(
   {
     do {
       clStringW strKeyName = val.KeyName();
-      if(strKeyName == L"Text")
+      if(strKeyName == _CLTEXT("Text"))
       {
         //TRACEW(L"%s\n", val.ToString());
         GXSTRCPYN<wch>(MenuItem.szText, val.ToString(), 1024);
         nTextLength = (GXINT)GXSTRLEN(MenuItem.szText);
       }
-      else if(strKeyName == L"Name")
+      else if(strKeyName == _CLTEXT("Name"))
       {
         //TRACEW(L"%s\n", val.ToString());
         TIdentifyDefination::const_iterator it = DefTable.find(clStringA(val.ToString()));
         MenuItem.head.menuId = it != DefTable.end() ? it->second : 0;
       }
-      else if(strKeyName == L"State")
+      else if(strKeyName == _CLTEXT("State"))
       {
         //TRACEW(L"%s\n", val.ToString());
-        MenuItem.head.dwState = DlgXM::ParseCombinedFlags(val.ToString(), L"GXMFS_", DlgXM::CMC_MenuState);
+        MenuItem.head.dwState = DlgXM::ParseCombinedFlags(val.ToString(), _CLTEXT("GXMFS_"), DlgXM::CMC_MenuState);
       }
     } while(val.NextKey());
   }
@@ -92,7 +92,7 @@ GXBOOL LoadMenuTemplateFromStockSectionW(
   {
     clStringW strSectName = hItems.SectionName();
     
-    if(strSectName == L"MenuItem")
+    if(strSectName == _CLTEXT("MenuItem"))
     {
       IntEnumMenuKeys(pSmart, hItems, DefTable, MenuItem);
 
@@ -101,7 +101,7 @@ GXBOOL LoadMenuTemplateFromStockSectionW(
         pBuffer->Append(&MenuItem, MenuItem.GetSize());
       }
     }
-    else if(strSectName == L"Popup")
+    else if(strSectName == _CLTEXT("Popup"))
     {
       IntEnumMenuKeys(pSmart, hItems, DefTable, MenuItem);
 
@@ -167,7 +167,7 @@ GXBOOL LoadMenuTemplateFromStockW(clStockW* pSmart, GXLPCWSTR szName, clBuffer* 
     clStockW::ATTRIBUTE val;
     TIdentifyDefination DefTable;
     GXBOOL bval = TRUE;
-    if(hSect.GetKey(L"Defination", val))
+    if(hSect.GetKey(_CLTEXT("Defination"), val))
     {
       clStringW strDesc = val.ToString();
       clStringW strFilename;

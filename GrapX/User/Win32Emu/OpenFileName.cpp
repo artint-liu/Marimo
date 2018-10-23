@@ -13,12 +13,12 @@
 
 void GetPathFromItem(const GXHWND hTree, const GXHTREEITEM hItem, clStringW& strDir)
 {
-  GXWCHAR buffer[MAX_PATH + 1] = _T("\\");
+  GXWCHAR buffer[MAX_PATH + 1] = _CLTEXT("\\");
   GXTVITEM tvi;
   GXHTREEITEM hCurItem = hItem, hParent;
   memset(&tvi, 0, sizeof(tvi));
   strDir.Clear();
-  GXWCHAR szDriverName[] = _T("*:");
+  GXWCHAR szDriverName[] = _CLTEXT("*:");
 
   while(1)
   {
@@ -40,7 +40,7 @@ void GetPathFromItem(const GXHWND hTree, const GXHTREEITEM hItem, clStringW& str
       tvi.hItem = hCurItem;
       tvi.mask = GXTVIF_PARAM;
       gxSendMessage(hTree, GXTVM_GETITEM, 0, (LPARAM)&tvi);
-      szDriverName[0] = _T('A') + (int)tvi.lParam;
+      szDriverName[0] = _CLTEXT('A') + (int)tvi.lParam;
       strDir.Insert(0, szDriverName);
       break;
     }
@@ -55,16 +55,16 @@ void PreFillItem(GXHWND hTree, GXHTREEITEM hParent)
   memset(&tis, 0, sizeof(tis));
 
   GetPathFromItem(hTree, hParent, strPath);
-  strPath += _T("\\*.*");
+  strPath += _CLTEXT("\\*.*");
 
-  HANDLE hFind = FindFirstFileW(strPath, &ffd);
+  HANDLE hFind = FindFirstFileW(reinterpret_cast<LPCWSTR>(strPath.CStr()), &ffd);
   if(hFind == INVALID_HANDLE_VALUE) {
     return;
   }
 
   do
   {
-    if((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 && ffd.cFileName[0] != _T('.'))
+    if((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 && ffd.cFileName[0] != _CLTEXT('.'))
     {
       //LRESULT hr = SendMessage(hTree, TVM_GETISEARCHSTRING, 0, (LPARAM)&ffd.cFileName);
       //if(hr == 0)
@@ -72,7 +72,7 @@ void PreFillItem(GXHWND hTree, GXHTREEITEM hParent)
         tis.hParent      = hParent;
         tis.hInsertAfter = GXTVI_SORT;
         tis.u.item.mask    = GXTVIF_TEXT;
-        tis.u.item.pszText = ffd.cFileName;
+        tis.u.item.pszText = reinterpret_cast<GXLPWSTR>(ffd.cFileName);
         gxSendMessage(hTree, GXTVM_INSERTITEM, 0, (LPARAM)&tis);
       }
     }
@@ -120,12 +120,12 @@ void DeleteItem(GXHWND hTree, GXHTREEITEM hParent)
 
 void InitTree(GXHWND hWnd)
 {
-  GXHWND hTree = GXGetDlgItemByName(hWnd, L"Directory");
+  GXHWND hTree = GXGetDlgItemByName(hWnd, _CLTEXT("Directory"));
   DWORD dwDriverMask = GetLogicalDrives();
   GXWCHAR szVolume[64];
   GXWCHAR szBuffer[512];
 
-  GXWCHAR szPathName[] = _T("A:\\");
+  GXWCHAR szPathName[] = _CLTEXT("A:\\");
   GXTVINSERTSTRUCT tis;
   memset(&tis, 0, sizeof(tis));
 
@@ -133,26 +133,26 @@ void InitTree(GXHWND hWnd)
   {
     if(((1 << i) & dwDriverMask) != 0)
     {
-      szPathName[0] = i + _T('A');
-      UINT nType = GetDriveTypeW(szPathName);
+      szPathName[0] = i + _CLTEXT('A');
+      UINT nType = GetDriveTypeW(reinterpret_cast<LPCWSTR>(szPathName));
 
-      szVolume[0] = _T('\0');
+      szVolume[0] = _CLTEXT('\0');
       DWORD dwFileSystemFlag;
       GXWCHAR szFilesystem[32];
       szFilesystem[0] = '\0';
-      GetVolumeInformationW(szPathName, szVolume, 64, NULL, NULL, &dwFileSystemFlag, szFilesystem, sizeof(szFilesystem) / sizeof(szFilesystem[0]));
+      GetVolumeInformationW(reinterpret_cast<LPCWSTR>(szPathName), reinterpret_cast<LPWSTR>(szVolume), 64, NULL, NULL, &dwFileSystemFlag, reinterpret_cast<LPWSTR>(szFilesystem), sizeof(szFilesystem) / sizeof(szFilesystem[0]));
 
       static GXWCHAR *aType[] = {
-        _T("Unknown"), _T("NoRootDir"), _T("Removable"), _T("Fixed"), _T("Remote"), _T("CD-ROM"), _T("RamDisk")};
+        _CLTEXT("Unknown"), _CLTEXT("NoRootDir"), _CLTEXT("Removable"), _CLTEXT("Fixed"), _CLTEXT("Remote"), _CLTEXT("CD-ROM"), _CLTEXT("RamDisk")};
 
-        if(szVolume[0] != _T('\0'))
+        if(szVolume[0] != _CLTEXT('\0'))
         {
-          wsprintfW(szBuffer, _T("%s(%c:)"), szVolume, _T('A') + i);
+          wsprintfW(reinterpret_cast<LPWSTR>(szBuffer), _T("%s(%c:)"), szVolume, _T('A') + i);
         }
         else
         {
           //FILE_NAMED_STREAMS
-          wsprintfW(szBuffer, _T("%s(%c:)"), aType[nType], _T('A') + i);
+          wsprintfW(reinterpret_cast<LPWSTR>(szBuffer), _T("%s(%c:)"), aType[nType], _T('A') + i);
         }
 
         tis.hParent       = NULL;
@@ -169,12 +169,12 @@ void InitTree(GXHWND hWnd)
 }
 void InitListView(GXHWND hWnd)
 {
-  GXHWND hListView = GXGetDlgItemByName(hWnd, L"FileList");
+  GXHWND hListView = GXGetDlgItemByName(hWnd, _CLTEXT("FileList"));
   GXLVCOLUMN lvc;
   memset(&lvc, 0, sizeof(lvc));
   lvc.mask = LVCF_TEXT;
   lvc.fmt = LVCFMT_LEFT;
-  lvc.pszText = _T("文件名");
+  lvc.pszText = _CLTEXT("文件名");
 
   gxSendMessage(hListView, GXLVM_INSERTCOLUMN, 0, (GXLPARAM)&lvc);
 }
@@ -182,15 +182,15 @@ void InitListView(GXHWND hWnd)
 void FillFile(GXHWND hWnd, GXHTREEITEM hTreeItem)
 {
   clStringW strPath;
-  GXHWND hListView = GXGetDlgItemByName(hWnd, L"FileList");
-  GXHWND hTree = GXGetDlgItemByName(hWnd, L"Directory");
+  GXHWND hListView = GXGetDlgItemByName(hWnd, _CLTEXT("FileList"));
+  GXHWND hTree = GXGetDlgItemByName(hWnd, _CLTEXT("Directory"));
   GetPathFromItem(hTree, hTreeItem, strPath);
-  strPath += _T("\\*.*");
+  strPath += _CLTEXT("\\*.*");
 
   gxSendMessage(hListView, GXLVM_DELETEALLITEMS, 0, 0);
 
   WIN32_FIND_DATAW ffd;
-  HANDLE hFind = FindFirstFileW(strPath, &ffd);
+  HANDLE hFind = FindFirstFileW(reinterpret_cast<LPCWSTR>(strPath.CStr()), &ffd);
   if(hFind != INVALID_HANDLE_VALUE)
   {
     do{
@@ -199,7 +199,7 @@ void FillFile(GXHWND hWnd, GXHTREEITEM hTreeItem)
         GXLVITEM lvi;
         memset(&lvi, 0, sizeof(lvi));
         lvi.mask = GXLVIF_TEXT;
-        lvi.pszText = ffd.cFileName;
+        lvi.pszText = reinterpret_cast<GXLPWSTR>(ffd.cFileName);
         gxSendMessage(hListView, GXLVM_INSERTITEM, 0, (LPARAM)&lvi);
       }
     }while(FindNextFileW(hFind, &ffd));
@@ -229,7 +229,7 @@ GXINT_PTR GXCALLBACK IntBrowseFile(GXHWND hDlg, GXUINT message, GXWPARAM wParam,
       {
         GXNMTREEVIEW* pnmtv = (GXNMTREEVIEW*)pnmh;
         //GXHWND hListView = GXGetDlgItemByName(hWnd, L"FileList");
-        GXHWND hTree = GXGetDlgItemByName(hDlg, L"Directory");
+        GXHWND hTree = GXGetDlgItemByName(hDlg, _CLTEXT("Directory"));
 
         if(pnmtv->action == TVE_EXPAND) {
           FillItem(hTree, pnmtv->itemNew.hItem);
@@ -281,7 +281,7 @@ public:
     GXWCHAR szVolume[64];
     GXWCHAR szBuffer[512];
 
-    GXWCHAR szPathName[] = _T("A:\\");
+    GXWCHAR szPathName[] = _CLTEXT("A:\\");
     GXTVINSERTSTRUCT tis;
     memset(&tis, 0, sizeof(tis));
 
@@ -289,23 +289,28 @@ public:
     {
       if(((1 << i) & dwDriverMask) != 0)
       {
-        szPathName[0] = i + _T('A');
-        UINT nType = GetDriveTypeW(szPathName);
+        szPathName[0] = i + _CLTEXT('A');
+        UINT nType = GetDriveTypeW(reinterpret_cast<LPCWSTR>(szPathName));
 
-        szVolume[0] = _T('\0');
+        szVolume[0] = _CLTEXT('\0');
         DWORD dwFileSystemFlag;
         GXWCHAR szFilesystem[32];
         szFilesystem[0] = '\0';
-        GetVolumeInformationW(szPathName, szVolume, 64, NULL, NULL, &dwFileSystemFlag, szFilesystem, sizeof(szFilesystem) / sizeof(szFilesystem[0]));
+        GetVolumeInformationW(
+          reinterpret_cast<LPCWSTR>(szPathName),
+          reinterpret_cast<LPWSTR>(szVolume),
+          64, NULL, NULL, &dwFileSystemFlag,
+          reinterpret_cast<LPWSTR>(szFilesystem),
+          sizeof(szFilesystem) / sizeof(szFilesystem[0]));
 
         static GXWCHAR *aType[] = {
-          _T("Unknown"), _T("NoRootDir"), _T("Removable"), _T("Fixed"), _T("Remote"), _T("CD-ROM"), _T("RamDisk")};
+          _CLTEXT("Unknown"), _CLTEXT("NoRootDir"), _CLTEXT("Removable"), _CLTEXT("Fixed"), _CLTEXT("Remote"), _CLTEXT("CD-ROM"), _CLTEXT("RamDisk")};
 
-          if(szVolume[0] != _T('\0')) {
-            wsprintfW(szBuffer, _T("%s (%c:)"), szVolume, _T('A') + i);
+          if(szVolume[0] != _CLTEXT('\0')) {
+            wsprintfW(reinterpret_cast<LPWSTR>(szBuffer), _T("%s (%c:)"), szVolume, _T('A') + i);
           }
           else {
-            wsprintfW(szBuffer, _T("%s (%c:)"), aType[nType], _T('A') + i);
+            wsprintfW(reinterpret_cast<LPWSTR>(szBuffer), _T("%s (%c:)"), aType[nType], _T('A') + i);
           }
 
           int index = (int)gxSendMessage(hListView, GXLB_ADDSTRINGW, 0, (GXLPARAM)szBuffer);
@@ -316,13 +321,13 @@ public:
 
   void FillList(GXHWND hDlg)
   {
-    GXHWND hListView = GXGetDlgItemByName(hDlg, L"FileList");
+    GXHWND hListView = GXGetDlgItemByName(hDlg, _CLTEXT("FileList"));
     gxSendMessage(hListView, GXLB_RESETCONTENT, 0, 0);
 
-    GXHWND hPath = GXGetDlgItemByName(hDlg, L"Path");
+    GXHWND hPath = GXGetDlgItemByName(hDlg, _CLTEXT("Path"));
     gxSetWindowTextW(hPath, m_strPath);
 
-    if(m_strPath.EndsWith(L":\\")) {
+    if(m_strPath.EndsWith(_CLTEXT(":\\"))) {
       FillDirvers(hListView);
     }
     else if(m_strPath.IsEmpty()) {
@@ -330,7 +335,7 @@ public:
       return;
     }
 
-    clstd::FindFile find(m_strPath + L"\\*");
+    clstd::FindFile find(m_strPath + _CLTEXT("\\*"));
     clstd::FINDFILEDATAW ffd;
     clStringArrayW aFilter;
 
@@ -408,7 +413,7 @@ public:
       {
         if(GXHIWORD(wParam) == GXLBN_DBLCLK)
         {
-          GXHWND hListView = GXGetDlgItemByName(hDlg, L"FileList");
+          GXHWND hListView = GXGetDlgItemByName(hDlg, _CLTEXT("FileList"));
           int nSel = (int)gxSendMessage(hListView, GXLB_GETCURSEL, 0, 0);
 
           if(nSel >= 0)
@@ -423,7 +428,7 @@ public:
             {
               size_t len = GXSTRLEN(szFile);
               psbf->m_strPath.Clear();
-              psbf->m_strPath.Format(L"%c:\\", szFile[len - 3]);
+              psbf->m_strPath.Format(_CLTEXT("%c:\\"), szFile[len - 3]);
               psbf->FillList(hDlg);
             }
             else if(TEST_FLAG(dwAttr, FILE_ATTRIBUTE_DIRECTORY))
@@ -448,12 +453,12 @@ public:
           {
             GXLPCWSTR szName = (GXLPCWSTR)id;
 
-            if(GXSTRCMP(szName, L"Open") == 0) {
+            if(GXSTRCMP(szName, _CLTEXT("Open")) == 0) {
               CSimpleBrowseFile* psbf = (CSimpleBrowseFile*)gxGetWindowLong(hDlg, GXGWL_USERDATA);
               psbf->TrueClose();
               gxEndDialog(hDlg, TRUE);
             }
-            else if(GXSTRCMP(szName, L"Cancel") == 0) {
+            else if(GXSTRCMP(szName, _CLTEXT("Cancel")) == 0) {
               gxEndDialog(hDlg, FALSE);
             }
           }
@@ -491,7 +496,7 @@ extern "C"
     if( ! lpOFN->lpstrInitialDir) {
       if(bConfig) {
         clstd::StockW::Section sect = stock.OpenSection(NULL);
-        strInitDir = sect.GetKeyAsString(L"GetOpenFileName", L"");
+        strInitDir = sect.GetKeyAsString(_CLTEXT("GetOpenFileName"), _CLTEXT(""));
       }
       
       // 缺省
@@ -505,18 +510,18 @@ extern "C"
 
     if(TEST_FLAG(lpOFN->Flags, GXOFN_SIMPLEBROWSER)) {
       CSimpleBrowseFile sbf(lpOFN);
-      result = gxDialogBoxParamW(NULL, L"@UI\\simplebrowser.dlg.txt", lpOFN->hwndOwner,
+      result = gxDialogBoxParamW(NULL, _CLTEXT("@UI\\simplebrowser.dlg.txt"), lpOFN->hwndOwner,
         CSimpleBrowseFile::IntSimpleBrowseFile, (GXLPARAM)&sbf);
       strInitDir = lpOFN->lpstrInitialDir;
     }
     else {
-      result = gxDialogBoxParamW(NULL, L"@UI\\browserfiles.dlg.txt", lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
+      result = gxDialogBoxParamW(NULL, _CLTEXT("@UI\\browserfiles.dlg.txt"), lpOFN->hwndOwner, IntBrowseFile, (GXLPARAM)lpOFN);
     }
 
     // 保存起始路径
     if(result) {
       clstd::StockW::Section sect = stock.CreateSection(NULL);
-      sect.SetKey(L"GetOpenFileName", strInitDir);
+      sect.SetKey(_CLTEXT("GetOpenFileName"), strInitDir);
       stock.SaveToFile(szConfig);
     }
 

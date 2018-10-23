@@ -1,18 +1,6 @@
 ﻿#ifndef _GRAPHX_PRIMITIVE_H_
 #define _GRAPHX_PRIMITIVE_H_
 
-// <过时注释>
-// 1.使用了 Primitive 这个名字 是为了避免和以后的Stream重名
-//    因为 Stream 可能会从 Graphics3D 创建出来
-
-//////////////////////////////////////////////////////////////////////////
-// TODO: 追加数据将来单独分离一个Collector类
-// 如果追加数据会溢出缓冲,则返回 FALSE
-//GXBOOL  Append  (GXLPVOID lpPrimitiveData, GXUINT uElementCount);
-//GXBOOL  Append  (GXLPVOID lpPrimitiveData, GXUINT uElementCount, WORD* pIndices, GXUINT uIndexCount);
-//GXBOOL  Reset  ();
-// </过时注释>
-
 class GVertexDeclaration;
 
 class GPrimitive : public GResource
@@ -26,18 +14,13 @@ public:
   };
 
 public:
-  //enum Type
-  //{
-  //  VertexOnly = 0,
-  //  Indexed = 1,
-  //};
   GPrimitive(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType){}
   GXSTDINTERFACE(GXHRESULT  AddRef  ());
-  //GXSTDINTERFACE(Type       GetType ());
 
   GXSTDINTERFACE(GXLPVOID   GetVerticesBuffer ());
   GXSTDINTERFACE(GXUINT     GetVerticesCount  ());
   GXSTDINTERFACE(GXUINT     GetVertexStride   ());
+  GXSTDINTERFACE(GXUINT     GetIndicesCount   ()); // 如果返回0，表示这个不含Index Buffer
   GXSTDINTERFACE(GXBOOL     UpdateResouce     (ResEnum eRes));  // 将内存数据更新到设备上
   GXSTDINTERFACE(GXHRESULT  GetVertexDeclaration(GVertexDeclaration** ppDeclaration));
   GXSTDINTERFACE(GXGraphics*GetGraphicsUnsafe ());
@@ -80,8 +63,7 @@ public:
     GXLPVOID* ppVertexData, GXWORD** ppIndexData,
     GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE)));
   GXSTDINTERFACE(GXBOOL    Unlock        ());
-  GXSTDINTERFACE(GXUINT    GetIndexCount ());
-
+  GXSTDINTERFACE(GXUINT    GetIndicesCount ());
   GXSTDINTERFACE(GXLPVOID  GetIndicesBuffer());
 };
 //

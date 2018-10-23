@@ -46,25 +46,25 @@ namespace GXUI
     for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
       it != aDefinitions.end(); ++it)
     {
-      if(it->Name == L"DataPool") {
+      if(it->Name == _CLTEXT("DataPool")) {
         SetDataPoolVariableW(it->Value);
       }
-      else if(it->Name == L"ItemHeight") {
+      else if(it->Name == _CLTEXT("ItemHeight")) {
         SetItemHeight(it->Value.ToInteger());
       }
-      else if(it->Name == L"BackColor") {
+      else if(it->Name == _CLTEXT("BackColor")) {
         SetColor(GXLBSC_BACKGROUND, DlgXM::GetColorFromMarkW(it->Value));
       }
-      else if(it->Name == L"TextColor") {
+      else if(it->Name == _CLTEXT("TextColor")) {
         SetColor(GXLBSC_TEXT, DlgXM::GetColorFromMarkW(it->Value));
       }
-      else if(it->Name == L"HightlightColor") {
+      else if(it->Name == _CLTEXT("HightlightColor")) {
         SetColor(GXLBSC_HIGHTLIGHT, DlgXM::GetColorFromMarkW(it->Value));
       }
-      else if(it->Name == L"HightlightTextColor") {
+      else if(it->Name == _CLTEXT("HightlightTextColor")) {
         SetColor(GXLBSC_HIGHTLIGHTTEXT, DlgXM::GetColorFromMarkW(it->Value));
       }
-      else if(it->Name == L"Columns") {
+      else if(it->Name == _CLTEXT("Columns")) {
         SetColumnsWidth(it->Value);
       }
     }

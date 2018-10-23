@@ -716,7 +716,6 @@ namespace D3D11
     }
     else if(pDesc->dwCmdCode == RC_LostDevice)
     {
-      CLBREAK;
       return GTextureImpl::Invoke(pDesc);
     }
     return GX_OK;
@@ -918,7 +917,7 @@ namespace D3D11
     HRESULT hval = S_OK;
     if(clpathfile::CompareExtension(m_strSrcFile, _CLTEXT("dds")))
     {
-      hval = DirectX::LoadFromDDSFile(m_strSrcFile, DirectX::DDS_FLAGS_NONE, &metadata, image);
+      hval = DirectX::LoadFromDDSFile(reinterpret_cast<const wchar_t*>(m_strSrcFile.CStr()), DirectX::DDS_FLAGS_NONE, &metadata, image);
 
       if(GXFAILED(hval)) {
         return hval;

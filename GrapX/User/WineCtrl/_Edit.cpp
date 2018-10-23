@@ -4116,7 +4116,7 @@ static void EDIT_WM_Command(EDITSTATE *es, GXINT code, GXINT id, GXHWND control)
 */
 static void EDIT_WM_ContextMenu(EDITSTATE *es, GXINT x, GXINT y)
 {
-  GXHMENU menu = gxLoadMenuW(user32_module, L"GXEDITMENU");
+  GXHMENU menu = gxLoadMenuW(user32_module, _CLTEXT("GXEDITMENU"));
   GXHMENU popup = gxGetSubMenu(menu, 0);
   GXUINT start = es->selection_start;
   GXUINT end = es->selection_end;

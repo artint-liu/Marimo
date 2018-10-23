@@ -241,6 +241,11 @@ namespace D3D9
     return m_uElementSize;
   }
 
+  GXUINT GPrimitiveVImpl::GetIndicesCount()
+  {
+    return 0;
+  }
+
   GXHRESULT GPrimitiveVImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
   {
     return InlGetSafeObjectT<GVertexDeclaration>(ppDeclaration, m_pVertexDecl);
@@ -466,7 +471,7 @@ namespace D3D9
   //  return Indexed;
   //}
 
-  GXUINT GPrimitiveVIImpl::GetIndexCount()
+  GXUINT GPrimitiveVIImpl::GetIndicesCount()
   {
     return m_uIndexCount;
   }

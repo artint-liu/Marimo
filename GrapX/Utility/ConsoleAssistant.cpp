@@ -13,10 +13,10 @@
 
 STAFFCAPSDESC ConsoleAssistant::s_aStaffDesc[] =
 {
-  {L"ver", L"show version"},
-  {L"help", L"show help"},
-  {L"exit", L"Exit process"},
-  {L"quit", L"Exit process"},
+  {_CLTEXT("ver"),  _CLTEXT("show version")},
+  {_CLTEXT("help"), _CLTEXT("show help")},
+  {_CLTEXT("exit"), _CLTEXT("Exit process")},
+  {_CLTEXT("quit"), _CLTEXT("Exit process")},
   {NULL},
 };
 
@@ -73,7 +73,7 @@ GXHRESULT ConsoleAssistant::Execute(int nCmdIndex, const clStringW* argv, int ar
       for(CmdDict::iterator it = lpStation->m_CommandDict.begin();
         it != lpStation->m_CommandDict.end(); ++it) {
           LPCSTAFFCAPSDESC pCapsDesc = it->second.pStaff->GetCapacity();
-          lpStation->m_pLogger->OutputFormatW(L"%*s %s\r\n", -nWidth, (GXLPCWSTR)clStringW(it->first), pCapsDesc[it->second.nIndex].szDesc);
+          lpStation->m_pLogger->OutputFormatW(_CLTEXT("%*s %s\r\n"), -nWidth, (GXLPCWSTR)clStringW(it->first), pCapsDesc[it->second.nIndex].szDesc);
       }
     }
     break;

@@ -11,48 +11,48 @@ struct KEYCONTEXT
 };
 
 static KEYCONTEXT s_aKeyMap[] = {
-  {L"VK_OEM_3",   GXVK_OEM_3},
-  {L"VK_ESCAPE",  GXVK_ESCAPE},
-  {L"VK_TAB",     GXVK_TAB},
-  {L"VK_F1",      GXVK_F1},
-  {L"VK_F2",      GXVK_F2},
-  {L"VK_F3",      GXVK_F3},
-  {L"VK_F4",      GXVK_F4},
-  {L"VK_F5",      GXVK_F5},
-  {L"VK_F6",      GXVK_F6},
-  {L"VK_F7",      GXVK_F7},
-  {L"VK_F8",      GXVK_F8},
-  {L"VK_F9",      GXVK_F9},
-  {L"VK_F10",     GXVK_F10},
-  {L"VK_F11",     GXVK_F11},
-  {L"VK_F12",     GXVK_F12},
-  {L"VK_F13",     GXVK_F13},
-  {L"VK_F14",     GXVK_F14},
-  {L"VK_F15",     GXVK_F15},
-  {L"VK_F16",     GXVK_F16},
-  {L"VK_F17",     GXVK_F17},
-  {L"VK_F18",     GXVK_F18},
-  {L"VK_F19",     GXVK_F19},
-  {L"VK_F20",     GXVK_F20},
-  {L"VK_F21",     GXVK_F21},
-  {L"VK_F22",     GXVK_F22},
-  {L"VK_F23",     GXVK_F23},
-  {L"VK_F24",     GXVK_F24},
-  {L"VK_LEFT",    GXVK_LEFT},
-  {L"VK_UP",      GXVK_UP},
-  {L"VK_RIGHT",   GXVK_RIGHT},
-  {L"VK_DOWN",    GXVK_DOWN},
-  {L"VK_DELETE",  GXVK_DELETE},
-  {L"VK_NUMPAD0", GXVK_NUMPAD0},
-  {L"VK_NUMPAD1", GXVK_NUMPAD1},
-  {L"VK_NUMPAD2", GXVK_NUMPAD2},
-  {L"VK_NUMPAD3", GXVK_NUMPAD3},
-  {L"VK_NUMPAD4", GXVK_NUMPAD4},
-  {L"VK_NUMPAD5", GXVK_NUMPAD5},
-  {L"VK_NUMPAD6", GXVK_NUMPAD6},
-  {L"VK_NUMPAD7", GXVK_NUMPAD7},
-  {L"VK_NUMPAD8", GXVK_NUMPAD8},
-  {L"VK_NUMPAD9", GXVK_NUMPAD9},
+  {_CLTEXT("VK_OEM_3"),   GXVK_OEM_3},
+  {_CLTEXT("VK_ESCAPE"),  GXVK_ESCAPE},
+  {_CLTEXT("VK_TAB"),     GXVK_TAB},
+  {_CLTEXT("VK_F1"),      GXVK_F1},
+  {_CLTEXT("VK_F2"),      GXVK_F2},
+  {_CLTEXT("VK_F3"),      GXVK_F3},
+  {_CLTEXT("VK_F4"),      GXVK_F4},
+  {_CLTEXT("VK_F5"),      GXVK_F5},
+  {_CLTEXT("VK_F6"),      GXVK_F6},
+  {_CLTEXT("VK_F7"),      GXVK_F7},
+  {_CLTEXT("VK_F8"),      GXVK_F8},
+  {_CLTEXT("VK_F9"),      GXVK_F9},
+  {_CLTEXT("VK_F10"),     GXVK_F10},
+  {_CLTEXT("VK_F11"),     GXVK_F11},
+  {_CLTEXT("VK_F12"),     GXVK_F12},
+  {_CLTEXT("VK_F13"),     GXVK_F13},
+  {_CLTEXT("VK_F14"),     GXVK_F14},
+  {_CLTEXT("VK_F15"),     GXVK_F15},
+  {_CLTEXT("VK_F16"),     GXVK_F16},
+  {_CLTEXT("VK_F17"),     GXVK_F17},
+  {_CLTEXT("VK_F18"),     GXVK_F18},
+  {_CLTEXT("VK_F19"),     GXVK_F19},
+  {_CLTEXT("VK_F20"),     GXVK_F20},
+  {_CLTEXT("VK_F21"),     GXVK_F21},
+  {_CLTEXT("VK_F22"),     GXVK_F22},
+  {_CLTEXT("VK_F23"),     GXVK_F23},
+  {_CLTEXT("VK_F24"),     GXVK_F24},
+  {_CLTEXT("VK_LEFT"),    GXVK_LEFT},
+  {_CLTEXT("VK_UP"),      GXVK_UP},
+  {_CLTEXT("VK_RIGHT"),   GXVK_RIGHT},
+  {_CLTEXT("VK_DOWN"),    GXVK_DOWN},
+  {_CLTEXT("VK_DELETE"),  GXVK_DELETE},
+  {_CLTEXT("VK_NUMPAD0"), GXVK_NUMPAD0},
+  {_CLTEXT("VK_NUMPAD1"), GXVK_NUMPAD1},
+  {_CLTEXT("VK_NUMPAD2"), GXVK_NUMPAD2},
+  {_CLTEXT("VK_NUMPAD3"), GXVK_NUMPAD3},
+  {_CLTEXT("VK_NUMPAD4"), GXVK_NUMPAD4},
+  {_CLTEXT("VK_NUMPAD5"), GXVK_NUMPAD5},
+  {_CLTEXT("VK_NUMPAD6"), GXVK_NUMPAD6},
+  {_CLTEXT("VK_NUMPAD7"), GXVK_NUMPAD7},
+  {_CLTEXT("VK_NUMPAD8"), GXVK_NUMPAD8},
+  {_CLTEXT("VK_NUMPAD9"), GXVK_NUMPAD9},
 
   {NULL, 0},
 };
@@ -108,7 +108,7 @@ public:
     {
     case 0:
       {
-        ASSERT(argv[0] == L"bind");
+        ASSERT(argv[0] == _CLTEXT("bind"));
         if(argc == 1)
         {
           clStringW strCommandLine;
@@ -136,9 +136,9 @@ public:
 
     case 1:
       {
-        ASSERT(argv[0] == L"unbind");
+        ASSERT(argv[0] == _CLTEXT("unbind"));
         if(argc != 2) {
-          MOLogW(L"unbind <virtual-key>\n");
+          MOLogW(_CLTEXT("unbind <virtual-key>\n"));
           break;
         }
         int nVirKey = 0;
@@ -153,13 +153,13 @@ public:
 
         KeyResponseDict::iterator it = m_KeyDict.find(nVirKey);
         if(it == m_KeyDict.end()) {
-          MOLogW(L"\"%s\" doesn't bind anything.\n", (GXLPCWSTR)argv[1]);
+          MOLogW(_CLTEXT("\"%s\" doesn't bind anything.\n"), (GXLPCWSTR)argv[1]);
           break;
         }
 
         SAFE_RELEASE(it->second.pStaff);
         m_KeyDict.erase(it);
-        MOLogW(L"Unbind \"%s\".\n", (GXLPCWSTR)argv[1]);
+        MOLogW(_CLTEXT("Unbind \"%s\".\n"), (GXLPCWSTR)argv[1]);
       }
     }
     return GX_OK;
@@ -253,10 +253,10 @@ public:
 
       // FIXME: 应该能把 VirtualKey 还原为 VK_XXX
       if(it == m_KeyDict.end()) {
-        MOLogW(L"\"%c\" doesn't bind anything.\r\n", nVirKey);
+        MOLogW(_CLTEXT("\"%c\" doesn't bind anything.\r\n"), nVirKey);
       }
       else {
-        MOLogW(L"\"%c\" bind with \"%s\"\r\n", nVirKey, (GXLPCWSTR)it->second.strCmdLine);
+        MOLogW(_CLTEXT("\"%c\" bind with \"%s\"\r\n"), nVirKey, (GXLPCWSTR)it->second.strCmdLine);
       }
     }
     else
@@ -318,10 +318,10 @@ public:
     }
 
     if(sKey.bParams) {
-      strCommandLine.Format(L"bind %s \"%s\"\r\n", (GXLPCWSTR)strKey, (GXLPCWSTR)it->second.strCmdLine);
+      strCommandLine.Format(_CLTEXT("bind %s \"%s\"\r\n"), (GXLPCWSTR)strKey, (GXLPCWSTR)it->second.strCmdLine);
     }
     else {
-      strCommandLine.Format(L"bind %s %s\r\n", (GXLPCWSTR)strKey, (GXLPCWSTR)it->second.strCmdLine);
+      strCommandLine.Format(_CLTEXT("bind %s %s\r\n"), (GXLPCWSTR)strKey, (GXLPCWSTR)it->second.strCmdLine);
     }
     return TRUE;
   }
@@ -347,8 +347,8 @@ public:
 }; // class MOFPSKeyboardStaffImpl : public MOKeyboardStaff
 
 STAFFCAPSDESC MOFPSKeyboardStaffImpl::s_aCapDesc[] = {
-  {L"bind",   L"Bind a key"},
-  {L"unbind", L"Unbind a key"},
+  {_CLTEXT("bind"),   _CLTEXT("Bind a key")},
+  {_CLTEXT("unbind"), _CLTEXT("Unbind a key")},
   {NULL},
 };
 

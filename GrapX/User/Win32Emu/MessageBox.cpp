@@ -101,11 +101,11 @@ GXINT_PTR GXCALLBACK IntMessageBoxDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM 
     {
       MESSAGE_TEXT* lpText = (MESSAGE_TEXT*)lParam;
       gxSetWindowTextW(hWnd, lpText->szCaption);
-      GXHWND hMsgWnd = GXGetDlgItemByName(hWnd, L"Message");
+      GXHWND hMsgWnd = GXGetDlgItemByName(hWnd, _CLTEXT("Message"));
       gxSetWindowTextW(hMsgWnd, lpText->szText);
 
       GXHWND hBtnWnd;
-      GXWCHAR s_BtnName[] = L"Btn0";
+      GXWCHAR s_BtnName[] = _CLTEXT("Btn0");
       for(int i = 0; i < 3; i++)
       {
         if(lpText->szBtnText[i]) {
@@ -134,28 +134,28 @@ int GXDLLAPI gxMessageBoxW(
 
   if(uBtnType == GXMB_OK)
   {
-    sText.szBtnText[0] = L"OK";
+    sText.szBtnText[0] = _CLTEXT("OK");
     sText.szBtnID[0] = IDOK;
     return gxDialogBoxParamW(NULL, _CLTEXT("file://elements/MessageBox_Btn_1.txt"), hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
   }
   else if(uBtnType == GXMB_OKCANCEL || uBtnType == GXMB_YESNO || uBtnType == GXMB_RETRYCANCEL)
   {
     if(uBtnType == GXMB_OKCANCEL) {
-      sText.szBtnText[0] = L"OK";
+      sText.szBtnText[0] = _CLTEXT("OK");
       sText.szBtnID[0] = IDOK;
-      sText.szBtnText[1] = L"Cancel";
+      sText.szBtnText[1] = _CLTEXT("Cancel");
       sText.szBtnID[1] = IDCANCEL;
     }
     else if(uBtnType == GXMB_YESNO) {
-      sText.szBtnText[0] = L"Yes";
+      sText.szBtnText[0] = _CLTEXT("Yes");
       sText.szBtnID[0] = IDYES;
-      sText.szBtnText[1] = L"No";
+      sText.szBtnText[1] = _CLTEXT("No");
       sText.szBtnID[1] = IDNO;
     }
     else if(uBtnType == GXMB_RETRYCANCEL) {
-      sText.szBtnText[0] = L"Retry";
+      sText.szBtnText[0] = _CLTEXT("Retry");
       sText.szBtnID[0] = IDRETRY;
-      sText.szBtnText[1] = L"Cancel";
+      sText.szBtnText[1] = _CLTEXT("Cancel");
       sText.szBtnID[1] = IDCANCEL;
     }
     return gxDialogBoxParamW(NULL, _CLTEXT("file://elements/MessageBox_Btn_2.txt"), hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);
@@ -163,19 +163,19 @@ int GXDLLAPI gxMessageBoxW(
   else if(uBtnType == GXMB_ABORTRETRYIGNORE || uBtnType == GXMB_YESNOCANCEL)
   {
     if(uBtnType == GXMB_ABORTRETRYIGNORE) {
-      sText.szBtnText[0] = L"Abort";
+      sText.szBtnText[0] = _CLTEXT("Abort");
       sText.szBtnID[0] = IDABORT;
-      sText.szBtnText[1] = L"Retry";
+      sText.szBtnText[1] = _CLTEXT("Retry");
       sText.szBtnID[1] = IDRETRY;
-      sText.szBtnText[2] = L"Ignore";
+      sText.szBtnText[2] = _CLTEXT("Ignore");
       sText.szBtnID[2] = IDIGNORE;
     }
     else if(uBtnType == GXMB_YESNOCANCEL) {
-      sText.szBtnText[0] = L"Yes";
+      sText.szBtnText[0] = _CLTEXT("Yes");
       sText.szBtnID[0] = IDYES;
-      sText.szBtnText[1] = L"No";
+      sText.szBtnText[1] = _CLTEXT("No");
       sText.szBtnID[1] = IDNO;
-      sText.szBtnText[2] = L"Cancel";
+      sText.szBtnText[2] = _CLTEXT("Cancel");
       sText.szBtnID[2] = IDCANCEL;
     }
     return gxDialogBoxParamW(NULL, _CLTEXT("file://elements/MessageBox_Btn_3.txt"), hWnd, IntMessageBoxDlgProc, (GXLPARAM)&sText);

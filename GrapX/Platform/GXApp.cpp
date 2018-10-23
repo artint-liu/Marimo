@@ -142,16 +142,16 @@ extern "C"
     switch (ePlatform)
     {
     case GXPLATFORM_WIN32_DIRECT3D9:
-      clstd::strcpynT(szName, L"D3D9", nSize);
+      clstd::strcpynT(szName, _CLTEXT("D3D9"), nSize);
       return TRUE;
     case GXPLATFORM_WIN32_DIRECT3D11:
-      clstd::strcpynT(szName, L"D3D11", nSize);
+      clstd::strcpynT(szName, _CLTEXT("D3D11"), nSize);
       return TRUE;
     case GXPLATFORM_WIN32_OPENGL:
-      clstd::strcpynT(szName, L"WGL2", nSize);
+      clstd::strcpynT(szName, _CLTEXT("WGL2"), nSize);
       return TRUE;
     case GXPLATFORM_X_OPENGLES2:
-      clstd::strcpynT(szName, L"GLES2", nSize);
+      clstd::strcpynT(szName, _CLTEXT("GLES2"), nSize);
       return TRUE;
     }
     return FALSE;
@@ -160,13 +160,13 @@ extern "C"
   GXPlaformIdentity GXDLLAPI MOPlatformStringToEnumW (GXLPCWSTR szName)
   {
     // TODO: 使用注册链表方式记录
-    if(clstd::strncmpT(szName, L"D3D9", 8) == 0)
+    if(clstd::strncmpT(szName, _CLTEXT("D3D9"), 8) == 0)
       return GXPLATFORM_WIN32_DIRECT3D9;
-    else if(clstd::strncmpT(szName, L"D3D11", 8) == 0)
+    else if(clstd::strncmpT(szName, _CLTEXT("D3D11"), 8) == 0)
       return GXPLATFORM_WIN32_DIRECT3D11;
-    else if(clstd::strncmpT(szName, L"WGL2", 8) == 0)
+    else if(clstd::strncmpT(szName, _CLTEXT("WGL2"), 8) == 0)
       return GXPLATFORM_WIN32_OPENGL;
-    else if(clstd::strncmpT(szName, L"GLES2", 8) == 0)
+    else if(clstd::strncmpT(szName, _CLTEXT("GLES2"), 8) == 0)
       return GXPLATFORM_X_OPENGLES2;
     else
       return GXPLATFORM_UNKNOWN;

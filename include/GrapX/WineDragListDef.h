@@ -18,7 +18,7 @@ typedef struct tagGXDRAGLISTINFO {
 #define GXDL_COPYCURSOR           2
 #define GXDL_MOVECURSOR           3
 
-#define GXDRAGLISTMSGSTRING       L"commctrl_DragListMsg"
+#define GXDRAGLISTMSGSTRING       _CLTEXT("commctrl_DragListMsg")
 
 GXBOOL GXDLLAPI gxMakeDragList(GXHWND hLB);
 void GXDLLAPI gxDrawInsert(GXHWND handParent, GXHWND hLB, int nItem);

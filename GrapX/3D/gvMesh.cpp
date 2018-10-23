@@ -250,7 +250,7 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray ¸Ä
       return TRUE;
     }
 
-    GXUINT nFaceCount = m_pPrimitive->GetIndexCount() / 3;
+    GXUINT nFaceCount = m_pPrimitive->GetIndicesCount() / 3;
     GXUINT nStride = m_pPrimitive->GetVertexStride();
     GXINT uOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
     if(uOffset < 0 || nFaceCount == 0) {

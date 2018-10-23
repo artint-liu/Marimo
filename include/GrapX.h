@@ -1899,13 +1899,13 @@ typedef struct _GXHD_HITTESTINFO
 #define LVITEMW_V1_SIZE CCSIZEOF_STRUCT(LVITEMW, lParam)
 
 //-----------------------------------------------------------
-#define WC_LISTVIEWA            "SysListView32"
-#define WC_LISTVIEWW            L"SysListView32"
-#define WC_LISTVIEW             WC_LISTVIEWW
+#define GXWC_LISTVIEWA            "SysListView32"
+#define GXWC_LISTVIEWW            _CLTEXT("SysListView32")
+#define GXWC_LISTVIEW             GXWC_LISTVIEWW
 
-#define WC_HEADERA              "SysHeader32"
-#define WC_HEADERW              L"SysHeader32"
-#define WC_HEADER               WC_HEADERW
+#define GXWC_HEADERA              "SysHeader32"
+#define GXWC_HEADERW              _CLTEXT("SysHeader32")
+#define GXWC_HEADER               GXWC_HEADERW
 
 //#define TOOLTIPS_CLASSW         L"tooltips_class32"
 //#define TOOLTIPS_CLASSA         "tooltips_class32"
@@ -4628,6 +4628,15 @@ typedef const GXRENDERSTATE* GXLPCRENDERSTATE;
 #define GXRU_FREQUENTLYREAD     0x0004   // 频繁读, 高性能, 高内存占用
 #define GXRU_FREQUENTLYWRITE    0x0008   // 频繁写, 性能内存同上
 #define GXRU_SYSTEMMEM          0x0010   // 创建在系统内存中,不能用于渲染
+
+CLENUM_CLASS(GXUINT, GXUsage)
+{
+  GXUsage_Default   = 0,  // 默认，数据在创建时指定
+  GXUsage_Read      = 1,  // 数据可读
+  GXUsage_Write     = 2,  // 数据可以在创建后再写入
+  GXUsage_ReadWrite = 3,  // 数据在创建后可以读取，并且也可以写入
+  GXUsage_SystemMem = 4,  // 数据放在系统内存，不能用于渲染
+};
 
 // 这几个不能同时用
 #define GXRU_TEX_MASK           0x0f00

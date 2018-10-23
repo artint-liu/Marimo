@@ -2538,7 +2538,7 @@ void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL se
     memcpy(buf, m_pText + s, bufl * sizeof(GXWCHAR));
     buf[bufl] = 0; /* ensure 0 termination */
     /* now delete */
-    strcpyW(m_pText + s, m_pText + e);
+    clstd::strcpyT(m_pText + s, m_pText + e);
     text_buffer_changed();
   }
   if (strl) {
@@ -2550,9 +2550,9 @@ void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL se
     for (i = 0 , p = m_pText + s ; i < strl ; i++)
       p[i] = lpsz_replace[i];
     if(m_dwStyle & ES_UPPERCASE)
-      CharUpperBuffW(p, strl);
+      CharUpperBuffW(reinterpret_cast<LPWSTR>(p), strl);
     else if(m_dwStyle & ES_LOWERCASE)
-      CharLowerBuffW(p, strl);
+      CharLowerBuffW(reinterpret_cast<LPWSTR>(p), strl);
     text_buffer_changed();
   }
   if (m_dwStyle & GXES_MULTILINE)
@@ -2565,7 +2565,7 @@ void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL se
     /* if text is too long undo all changes */
     if (honor_limit && !(m_dwStyle & ES_AUTOVSCROLL) && (line_count > vlc)) {
       if (strl)
-        strcpyW(m_pText + e, m_pText + e + strl);
+        clstd::strcpyT(m_pText + e, m_pText + e + strl);
       if (e != s)
         for (i = 0 , p = m_pText ; i < e - s ; i++)
           p[i + s] = buf[i];
@@ -2583,7 +2583,7 @@ void EDITSTATE::EM_ReplaceSel(GXBOOL can_undo, GXLPCWSTR lpsz_replace, GXBOOL se
     /* remove chars that don't fit */
     if (honor_limit && !(m_dwStyle & ES_AUTOHSCROLL) && (text_width > fw)) {
       while ((text_width > fw) && s + strl >= s) {
-        strcpyW(m_pText + s + strl - 1, m_pText + s + strl);
+        clstd::strcpyT(m_pText + s + strl - 1, m_pText + s + strl);
         strl--;
         CalcLineWidth_SL();
       }
@@ -2950,7 +2950,7 @@ GXBOOL EDITSTATE::EM_Undo()
 
   utext = (GXLPWSTR)gxHeapAlloc(gxGetProcessHeap(), 0, (ulength + 1) * sizeof(GXWCHAR));
 
-  strcpyW(utext, undo_text);
+  clstd::strcpyT(utext, undo_text);
 
   TRACE("before UNDO:insertion length = %d, deletion buffer = %s\n",
     undo_insert_count, debugstr_w(utext));
@@ -3208,7 +3208,7 @@ void EDITSTATE::WM_Command(GXINT code, GXINT id, GXHWND control)
 */
 void EDITSTATE::WM_ContextMenu(GXINT x, GXINT y)
 {
-  GXHMENU menu = gxLoadMenuW(user32_module, L"EDITMENU");
+  GXHMENU menu = gxLoadMenuW(user32_module, _CLTEXT("EDITMENU"));
   GXHMENU popup = gxGetSubMenu(menu, 0);
   GXUINT start = selection_start;
   GXUINT end = selection_end;
@@ -3257,7 +3257,7 @@ GXINT EDITSTATE::WM_GetText(GXINT count, GXLPWSTR dst, GXBOOL unicode) const
 
   if(unicode)
   {
-    lstrcpynW(dst, m_pText, count);
+    clstd::strcpynT(dst, m_pText, count);
     return (GXUINT)GXSTRLEN(dst);
   }
   else
@@ -4595,10 +4595,10 @@ GXBOOL EDITSTATE::SolveDefinition( const GXDefinitionArrayW& aDefinitions )
   for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
     it != aDefinitions.end(); ++it)
   {
-    if(it->Name == L"BackColor") {
+    if(it->Name == _CLTEXT("BackColor")) {
       m_crBack = DlgXM::GetColorFromMarkW(it->Value);
     }
-    else if(it->Name == L"TextColor") {
+    else if(it->Name == _CLTEXT("TextColor")) {
       m_crText = DlgXM::GetColorFromMarkW(it->Value);
     }
   }

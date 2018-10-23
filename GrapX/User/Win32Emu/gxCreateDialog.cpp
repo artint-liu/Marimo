@@ -185,31 +185,31 @@ namespace DlgXM
       do 
       {
         clStringW strKeyName = val.KeyName();
-        if(strKeyName == L"Left") {
+        if(strKeyName == _CLTEXT("Left")) {
           pwbp->regn.left = GetPixelSizeFromMarkW(val.ToString());
         }
-        else if(strKeyName == L"Top") {
+        else if(strKeyName == _CLTEXT("Top")) {
           pwbp->regn.top = GetPixelSizeFromMarkW(val.ToString());
         }
-        else if(strKeyName == L"Width") {
+        else if(strKeyName == _CLTEXT("Width")) {
           pwbp->regn.width = GetPixelSizeFromMarkW(val.ToString());
         }
-        else if(strKeyName == L"Height") {
+        else if(strKeyName == _CLTEXT("Height")) {
           pwbp->regn.height = GetPixelSizeFromMarkW(val.ToString());
         }
-        else if(strKeyName == L"Caption" || strKeyName == L"Text") {
+        else if(strKeyName == _CLTEXT("Caption") || strKeyName == _CLTEXT("Text")) {
           pwbp->strCaption = val.ToString();
         }
-        else if(strKeyName == L"Menu") {
+        else if(strKeyName == _CLTEXT("Menu")) {
           pwbp->strMenu = val.ToString();
         }
-        else if(strKeyName == L"Name") {
+        else if(strKeyName == _CLTEXT("Name")) {
           pwbp->strName = val.ToString();
         }
-        else if(strKeyName == L"Style") {
+        else if(strKeyName == _CLTEXT("Style")) {
           strStyle = val.ToString();
         }
-        else if(strKeyName == L"ExStyle") {
+        else if(strKeyName == _CLTEXT("ExStyle")) {
           strExStyle = val.ToString();
         }
         else if(pDefinitions != NULL)
@@ -230,26 +230,26 @@ namespace DlgXM
     //pwbp->regn.top    = GetPixelSizeFromMarkW(FindKeyAsString(hHandle, L"Top", L"0"));
     //pwbp->regn.width  = GetPixelSizeFromMarkW(FindKeyAsString(hHandle, L"Width", L"128"));
     //pwbp->regn.height = GetPixelSizeFromMarkW(FindKeyAsString(hHandle, L"Height", L"128"));
-    //pwbp->strCaption  = FindKeyAsString(hHandle, L"Caption", L"");
-    //pwbp->strName     = FindKeyAsString(hHandle, L"Name", L"");
+    //pwbp->strCaption  = FindKeyAsString(hHandle, L"Caption", _CLTEXT(""));
+    //pwbp->strName     = FindKeyAsString(hHandle, L"Name", _CLTEXT(""));
 
-    //strStyle    = FindKeyAsString(hHandle, L"Style", L"");
-    //strExStyle  = FindKeyAsString(hHandle, L"ExStyle", L"");
+    //strStyle    = FindKeyAsString(hHandle, L"Style", _CLTEXT(""));
+    //strExStyle  = FindKeyAsString(hHandle, L"ExStyle", _CLTEXT(""));
 
     if(strStyle.GetLength())  {
-      pwbp->dwStyle = DlgXM::ParseCombinedFlags(strStyle, L"GXWS_", DlgXM::CMC_WndStyle);
+      pwbp->dwStyle = DlgXM::ParseCombinedFlags(strStyle, _CLTEXT("GXWS_"), DlgXM::CMC_WndStyle);
     }
 
     if(strExStyle.GetLength())  {
-      pwbp->dwExStyle = DlgXM::ParseCombinedFlags(strExStyle, L"GXWS_EX_", DlgXM::CMC_WndExStyle);
+      pwbp->dwExStyle = DlgXM::ParseCombinedFlags(strExStyle, _CLTEXT("GXWS_EX_"), DlgXM::CMC_WndExStyle);
     }
     return 0;
   }
 
   GXHRESULT DlgSmartFile::GetFontParam(StockW::Section hHandle, DLGFONTPARAMW* pwfp)
   {
-    pwfp->strFontName = hHandle.GetKeyAsString(L"FontName", L"");
-    pwfp->nFontSize   = hHandle.GetKeyAsInteger(L"FontSize", 0);
+    pwfp->strFontName = hHandle.GetKeyAsString(_CLTEXT("FontName"), _CLTEXT(""));
+    pwfp->nFontSize   = hHandle.GetKeyAsInteger(_CLTEXT("FontSize"), 0);
 
     return 0;
   }
@@ -259,12 +259,12 @@ namespace DlgXM
     StockW::Section hSprite = hHandle.Open(szSect);
     if(hSprite)
     {
-      pBtnSprite->strResource = hSprite.GetKeyAsString(L"Resource", L"");
-      pBtnSprite->strNormal   = hSprite.GetKeyAsString(L"Normal", L"");
-      pBtnSprite->strHover    = hSprite.GetKeyAsString(L"Hover", L"");
-      pBtnSprite->strPressed  = hSprite.GetKeyAsString(L"Pressed", L"");
-      pBtnSprite->strDisable  = hSprite.GetKeyAsString(L"Disable", L"");
-      pBtnSprite->strDefault  = hSprite.GetKeyAsString(L"Default", L"");
+      pBtnSprite->strResource = hSprite.GetKeyAsString(_CLTEXT("Resource"), _CLTEXT(""));
+      pBtnSprite->strNormal   = hSprite.GetKeyAsString(_CLTEXT("Normal"), _CLTEXT(""));
+      pBtnSprite->strHover    = hSprite.GetKeyAsString(_CLTEXT("Hover"), _CLTEXT(""));
+      pBtnSprite->strPressed  = hSprite.GetKeyAsString(_CLTEXT("Pressed"), _CLTEXT(""));
+      pBtnSprite->strDisable  = hSprite.GetKeyAsString(_CLTEXT("Disable"), _CLTEXT(""));
+      pBtnSprite->strDefault  = hSprite.GetKeyAsString(_CLTEXT("Default"), _CLTEXT(""));
 
       //FindClose(hSprite);
       return GX_OK;
@@ -277,14 +277,14 @@ namespace DlgXM
     StockW::Section hSprite = hHandle.Open(szSect);
     if(hSprite)
     {
-      pBtnSprite->strResource   = hSprite.GetKeyAsString(L"Resource", L"");
-      pBtnSprite->strHandle     = hSprite.GetKeyAsString(L"Handle", L"");
-      pBtnSprite->strEmpty      = hSprite.GetKeyAsString(L"EmptyBar", L"");
-      pBtnSprite->strFull       = hSprite.GetKeyAsString(L"FullBar", L"");
-      pBtnSprite->strDial       = hSprite.GetKeyAsString(L"Dial", L"");
-      pBtnSprite->strVertEmpty  = hSprite.GetKeyAsString(L"VertEmptyBar", L"");
-      pBtnSprite->strVertFull   = hSprite.GetKeyAsString(L"VertFullBar", L"");
-      pBtnSprite->strVertDial   = hSprite.GetKeyAsString(L"VertDial", L"");
+      pBtnSprite->strResource   = hSprite.GetKeyAsString(_CLTEXT("Resource"), _CLTEXT(""));
+      pBtnSprite->strHandle     = hSprite.GetKeyAsString(_CLTEXT("Handle"), _CLTEXT(""));
+      pBtnSprite->strEmpty      = hSprite.GetKeyAsString(_CLTEXT("EmptyBar"), _CLTEXT(""));
+      pBtnSprite->strFull       = hSprite.GetKeyAsString(_CLTEXT("FullBar"), _CLTEXT(""));
+      pBtnSprite->strDial       = hSprite.GetKeyAsString(_CLTEXT("Dial"), _CLTEXT(""));
+      pBtnSprite->strVertEmpty  = hSprite.GetKeyAsString(_CLTEXT("VertEmptyBar"), _CLTEXT(""));
+      pBtnSprite->strVertFull   = hSprite.GetKeyAsString(_CLTEXT("VertFullBar"), _CLTEXT(""));
+      pBtnSprite->strVertDial   = hSprite.GetKeyAsString(_CLTEXT("VertDial"), _CLTEXT(""));
 
       //FindClose(hSprite);
       return GX_OK;
@@ -303,25 +303,25 @@ namespace DlgXM
       do 
       {
         const clStringW& strKey = Value.KeyName();
-        if(strKey == L"Name") {
+        if(strKey == _CLTEXT("Name")) {
           pPanel->strName = Value.ToString();
           //pPanel->dwStyle |= LPS_WNDITEM;
         }
-        else if(strKey == L"Style")
+        else if(strKey == _CLTEXT("Style"))
         {
           pPanel->dwStyle = DlgXM::ParseCombinedFlags(Value.ToString(), 
-            L"LPS_", DlgXM::CMC_LayoutPanel);
+            _CLTEXT("LPS_"), DlgXM::CMC_LayoutPanel);
         }
-        else if(strKey == L"Scale" && nScaleIdx < nScaleMaxIdx)
+        else if(strKey == _CLTEXT("Scale") && nScaleIdx < nScaleMaxIdx)
         {
           const clStringW& strValue = Value.ToString();
-          if(strValue.Back() == L'%') {
+          if(strValue.Back() == _CLTEXT('%')) {
             pPanel->fScale[nScaleIdx] = (float)clstd::xtof((const wch*)strValue) * 0.01f;
             clClamp(0.0f, 1.0f, &pPanel->fScale[nScaleIdx]);
             nScaleIdx++;
           }
         }
-        else if(strKey == L"List")
+        else if(strKey == _CLTEXT("List"))
         {
           clStringArrayW aWndNames;
           clstd::ResolveString(Value.ToString(), ';', aWndNames);
@@ -332,7 +332,7 @@ namespace DlgXM
             if(it->IsEmpty()) {
               continue;
             }
-            else if((*it == L"\n" || *it == L"\\n") && ! pPanel->aPanels.empty()) {
+            else if((*it == _CLTEXT("\n") || *it == _CLTEXT("\\n")) && ! pPanel->aPanels.empty()) {
               pPanel->aPanels.back().dwStyle |= LPS_INT_RETURN;
               continue;
             }
@@ -378,7 +378,7 @@ namespace DlgXM
             Panel.fScale[i] = 0.5f;
           }
           Panel.dwStyle = 0;
-          if(strName == L"Item" || strName == L"Panel")
+          if(strName == _CLTEXT("Item") || strName == _CLTEXT("Panel"))
           {
             if(GXSUCCEEDED(LoadLayoutPanel(hItemSect, &Panel))) {
               pPanel->aPanels.push_back(Panel);
@@ -407,7 +407,7 @@ namespace DlgXM
       do 
       {
         clStringW strName = hSect.SectionName();
-        if(strName == L"Panel")
+        if(strName == _CLTEXT("Panel"))
         {
           if(GXSUCCEEDED(LoadLayoutPanel(hSect, pPanel))) {
             hval = GX_OK;
@@ -427,28 +427,28 @@ namespace DlgXM
       do 
       {
         const clStringW& strKey = Value.KeyName();
-        if(strKey == L"Bitmap") {
+        if(strKey == _CLTEXT("Bitmap")) {
           sTBButton.iBitmap = Value.ToInt();
         }
-        else if(strKey == L"Command")
+        else if(strKey == _CLTEXT("Command"))
         {
           clStringW* pStr = new(&sTBButton.idCommand) clStringW();
           *pStr = Value.ToString();
         }
-        else if(strKey == L"Text")
+        else if(strKey == _CLTEXT("Text"))
         {
           clStringW* pStr = new(&sTBButton.iString) clStringW();
           *pStr = Value.ToString();
         }
-        else if(strKey == L"Style")
+        else if(strKey == _CLTEXT("Style"))
         {
           clStringW strStyle = Value.ToString();
-          sTBButton.fsStyle = (GXBYTE)DlgXM::ParseCombinedFlags(strStyle, L"BTNS_", DlgXM::CMC_ToolbarBtnStyle);
+          sTBButton.fsStyle = (GXBYTE)DlgXM::ParseCombinedFlags(strStyle, _CLTEXT("BTNS_"), DlgXM::CMC_ToolbarBtnStyle);
         }
-        else if(strKey == L"State")
+        else if(strKey == _CLTEXT("State"))
         {
           clStringW strState = Value.ToString();
-          sTBButton.fsState = (GXBYTE)DlgXM::ParseCombinedFlags(strState, L"TBSTATE_", DlgXM::CMC_ToolbarState);
+          sTBButton.fsState = (GXBYTE)DlgXM::ParseCombinedFlags(strState, _CLTEXT("TBSTATE_"), DlgXM::CMC_ToolbarState);
         }
       } while(Value.NextKey());
       //FindClose(hKey);
@@ -458,7 +458,7 @@ namespace DlgXM
 
   GXHRESULT DlgSmartFile::LoadTBButton(StockW::Section hHandle, TBButtonArray& aTBButton)
   {
-    StockW::Section hButtons = hHandle.Open(L"Button");
+    StockW::Section hButtons = hHandle.Open(_CLTEXT("Button"));
     if(hButtons)
     {
       do {
@@ -473,17 +473,17 @@ namespace DlgXM
 
   void DlgSmartFile::LoadTemplate(GXLPSTATION lpStation , const Section& sTemplateSect)
   {
-    Section hButton = sTemplateSect.Open(L"Button");
+    Section hButton = sTemplateSect.Open(_CLTEXT("Button"));
     if(hButton)
     {
-      LoadBtnSpriteCfg(hButton, L"Sprite", &m_sDlgTemplateBtnSprite);
+      LoadBtnSpriteCfg(hButton, _CLTEXT("Sprite"), &m_sDlgTemplateBtnSprite);
       m_sDlgTemplateBtnSprite.strResource = lpStation->ConvertAbsPathW(m_sDlgTemplateBtnSprite.strResource);
     }
 
-    Section hSlider = sTemplateSect.Open(L"Slide");
+    Section hSlider = sTemplateSect.Open(_CLTEXT("Slide"));
     if(hSlider)
     {
-      LoadSliderSpriteCfg(hSlider, L"Sprite", &m_sDlgTemplateSldSprite);
+      LoadSliderSpriteCfg(hSlider, _CLTEXT("Sprite"), &m_sDlgTemplateSldSprite);
       m_sDlgTemplateSldSprite.strResource = lpStation->ConvertAbsPathW(m_sDlgTemplateSldSprite.strResource);
     }
   }
@@ -523,7 +523,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
   ASSERT(lpTemplate[0] != '@'); // 重构前是用@作为文件前缀的，这里放断言是为了督促修改
 
   if(hInstance == NULL || (IS_PTR(lpTemplate) && GXSTRNCMP(lpTemplate, szFileProtocol, countof(szFileProtocol) - 1) == 0))  {
-    return gxIntCreateDialogFromFileW(NULL, lpTemplate, _T("Dialog"), hParent, lpDialogFunc, lParam);
+    return gxIntCreateDialogFromFileW(NULL, lpTemplate, _CLTEXT("Dialog"), hParent, lpDialogFunc, lParam);
   }
 
   GXHRSRC   hRsc;
@@ -591,7 +591,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
     (GXLPARAM)lpDialogFunc    // 对话框处理函数
   };
   hDialogFrame = gxCreateWindowExW( lpDlgTemplate->exStyle, WndClassEx_Dialog.lpszClassName,
-    (GXLPCWSTR)L"", lpDlgTemplate->style, 
+    (GXLPCWSTR)_CLTEXT(""), lpDlgTemplate->style, 
     ptPos.x, ptPos.y, ptSize.cx + (FRAME_NC_EDGE_LEFT + FRAME_NC_EDGE_RIGHT), ptSize.cy + (FRAME_NC_EDGE_CAPTION + FRAME_NC_EDGE_BOTTOM), 
     hParent, (GXHMENU)idMenu, hInstance, (GXLPVOID)&aParam);
 
@@ -612,7 +612,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
   lpBytes += nVariableLen * sizeof(GXSHORT);
   if(GetVariableData(lpBytes, &nVariableLen) != FALSE)
   {
-    TRACEW(L"caption is: %s, length:%d\n", (GXLPWCHAR)lpBytes,nVariableLen);
+    TRACEW(_CLTEXT("caption is: %s, length:%d\n"), (GXLPWCHAR)lpBytes,nVariableLen);
     gxSetWindowText(hDialogFrame, (GXLPWCHAR)lpBytes);
   }
 
@@ -624,7 +624,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
 
   if(GetVariableData(lpBytes, &nVariableLen) != FALSE)
   {
-    TRACEW(L"font face name:%s, length: %d\n", (GXLPWCHAR)lpBytes,nVariableLen);
+    TRACEW(_CLTEXT("font face name:%s, length: %d\n"), (GXLPWCHAR)lpBytes,nVariableLen);
   }
 
   lpBytes = (GXLPBYTE)BYTE_ALIGN_4((GXLONG_PTR)lpBytes + nVariableLen * sizeof(GXSHORT));    // 可能会有Bug,因为Lock的内存有可能不是4字节对齐
@@ -664,7 +664,7 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
       {
         //if(pControl != NULL)
         //  pControl->gxSetWindowText((GXLPCWSTR)pShort);
-        TRACEW(L"control title:%s\n",pTitle);
+        TRACEW(_CLTEXT("control title:%s\n"),pTitle);
         //pTitle += (GXSTRLEN((GXLPCWSTR)pTitle) + 1);
       }
 
@@ -721,8 +721,8 @@ GXHWND GXDLLAPI gxCreateDialogParamW(
     else
     {
       pShort += nVariableLen;
-      TRACEW(L"ComCtrl Class:%d\n", lpBytes);
-      hControl = gxCreateWindowExW(NULL, (GXLPCWSTR)lpBytes, (GXLPCWSTR)L"", lpDlgItem->style, ptPos.x, ptPos.y, ptSize.cx, ptSize.cy, hDialogFrame, (GXHMENU)lpDlgItem->id, NULL, 0);
+      TRACEW(_CLTEXT("ComCtrl Class:%d\n"), lpBytes);
+      hControl = gxCreateWindowExW(NULL, (GXLPCWSTR)lpBytes, (GXLPCWSTR)_CLTEXT(""), lpDlgItem->style, ptPos.x, ptPos.y, ptSize.cx, ptSize.cy, hDialogFrame, (GXHMENU)lpDlgItem->id, NULL, 0);
       //ASSERT(FALSE);
     }
     // 定位到控件标题
@@ -792,10 +792,10 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  clStringW strLayout = hDlgItem.GetKeyAsString(L"Layout", L"");
+  clStringW strLayout = hDlgItem.GetKeyAsString(_CLTEXT("Layout"), _CLTEXT(""));
   if(strLayout.GetLength() > 0)
   {
-    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUISS_", DlgXM::CMC_StaticLabel);
+    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, _CLTEXT("GXUISS_"), DlgXM::CMC_StaticLabel);
   }
 
   clstd::TranslateEscapeCharacter(dbpItem.strCaption);
@@ -805,7 +805,7 @@ GXHWND CreateDialogItem_Label( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
   //gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
   // 设置颜色
-  clStringW strColor = hDlgItem.GetKeyAsString(L"Color", L"");
+  clStringW strColor = hDlgItem.GetKeyAsString(_CLTEXT("Color"), _CLTEXT(""));
   if(strColor.GetLength() > 0)
   {
     pLabel->SetColor(DlgXM::GetColorFromMarkW(strColor));
@@ -834,7 +834,7 @@ GXHWND CreateDialogItem_Rectangle( DlgXM::DlgSmartFile &file, Section hDlgItem, 
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
   // 设置颜色
-  clStringW strColor = hDlgItem.GetKeyAsString(L"Color", L"");
+  clStringW strColor = hDlgItem.GetKeyAsString(_CLTEXT("Color"), _CLTEXT(""));
   if(strColor.GetLength() > 0)
   {
     pRectangle->SetColor(DlgXM::GetColorFromMarkW(strColor));
@@ -857,14 +857,14 @@ GXHWND CreateDialogItem_Sprite( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
   if( ! dbpItem.strStyle.IsEmpty()) {
-    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"GXUISS_", DlgXM::CMC_StaticLabel);
+    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, _CLTEXT("GXUISS_"), DlgXM::CMC_StaticLabel);
   }
 
   GXUI::StaticSprite* pSprite = (GXUI::StaticSprite*)GXUI::Static::Create(file.GetInstance(), hDlgWnd, GXUI::Static::Type_Sprite, dbpItem.strName, &dbpItem, &aDefinitions);
   hItemWnd = pSprite->Get();
   gxSetWindowText(hItemWnd, dbpItem.strCaption);
 
-  clStringW strSpriteInfo = hDlgItem.GetKeyAsString(L"Sprite", L"");
+  clStringW strSpriteInfo = hDlgItem.GetKeyAsString(_CLTEXT("Sprite"), _CLTEXT(""));
   if(strSpriteInfo.GetLength() > 0)
   {
     clStringW strSpriteFile;
@@ -888,9 +888,9 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  clStringW strLayout = hDlgItem.GetKeyAsString(L"Layout", L"");
+  clStringW strLayout = hDlgItem.GetKeyAsString(_CLTEXT("Layout"), _CLTEXT(""));
   if(strLayout.GetLength() > 0) {
-    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUIBS_", DlgXM::CMC_ButtonStyle);
+    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, _CLTEXT("GXUIBS_"), DlgXM::CMC_ButtonStyle);
   }
 
   GXUI::Button* pButton = GXUI::Button::Create(file.GetInstance(), hDlgWnd, dbpItem.strCaption, dbpItem.dwStyle, dbpItem.strName, &dbpItem.regn, &aDefinitions);
@@ -899,7 +899,7 @@ GXHWND CreateDialogItem_Button( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
   // 载入Sprite配置
   DlgXM::DLGBTNSPRITE sDlgBtnSprite = sDlgTemplateBtnSprite;
 
-  file.LoadBtnSpriteCfg(hDlgItem, L"Sprite", &sDlgBtnSprite);
+  file.LoadBtnSpriteCfg(hDlgItem, _CLTEXT("Sprite"), &sDlgBtnSprite);
   pButton->SetSprite(sDlgBtnSprite);
 
 
@@ -944,7 +944,7 @@ GXHWND CreateDialogItem_WEEdit( DlgXM::DlgSmartFile &file, Section hDlgItem, Dlg
   DlgXM::DLGFONTPARAMW  dfpItem;
   file.GetBasicParam(hDlgItem, &dbpItem);
 
-  //clStringW strLayout = file.FindKeyAsString(hDlgItem, L"Layout", L"");
+  //clStringW strLayout = file.FindKeyAsString(hDlgItem, L"Layout", _CLTEXT(""));
   //if(strLayout.GetLength() > 0) {
   //  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strLayout, L"GXUIBS_", DlgXM::CMC_ButtonStyle);
   //}
@@ -1010,7 +1010,7 @@ GXHWND CreateDialogItem_Toolbar( DlgXM::DlgSmartFile &file, Section hDlgItem, Dl
   TBButtonArray aTBButtons;
   file.LoadTBButton(hDlgItem, aTBButtons);
 
-  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"TBSTYLE_", DlgXM::CMC_ToolbarStyle);
+  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, _CLTEXT("TBSTYLE_"), DlgXM::CMC_ToolbarStyle);
 
   GXUI::Toolbar* pToolbar = GXUI::Toolbar::Create(file.GetInstance(), hDlgWnd, &dbpItem, &aDefinitions);
   if(pToolbar) {
@@ -1048,14 +1048,14 @@ GXHWND CreateDialogItem_Slide( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgX
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"GXUISLDS_", DlgXM::CMC_SliderStyle);
+  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, _CLTEXT("GXUISLDS_"), DlgXM::CMC_SliderStyle);
   GXUI::Slider* pSlider = GXUI::Slider::Create(file.GetInstance(), hDlgWnd, &dbpItem, &aDefinitions);
   hItemWnd = pSlider->Get();
 
   // 载入Sprite配置
   DlgXM::DLGSLIDERSPRITE sDlgSldSprite = sDlgTemplateSldSprite;
 
-  file.LoadSliderSpriteCfg(hDlgItem, L"Sprite", &sDlgSldSprite);
+  file.LoadSliderSpriteCfg(hDlgItem, _CLTEXT("Sprite"), &sDlgSldSprite);
   pSlider->SetSprite(sDlgSldSprite);
   return hItemWnd;
 }
@@ -1068,9 +1068,9 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
   //file.GetBasicParam(hDlgItem, &dbpItem);
 
-  clStringW strEditStyle = hDlgItem.GetKeyAsString(L"EditStyle", L"");
+  clStringW strEditStyle = hDlgItem.GetKeyAsString(_CLTEXT("EditStyle"), _CLTEXT(""));
   if(strEditStyle.IsNotEmpty()) {
-    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strEditStyle, L"GXES_", DlgXM::CMC_EditStyle);
+    dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(strEditStyle, _CLTEXT("GXES_"), DlgXM::CMC_EditStyle);
   }
 
   hItemWnd = gxCreateWindowEx(dbpItem.dwExStyle, GXUICLASSNAME_EDIT, dbpItem.strCaption, 
@@ -1080,7 +1080,7 @@ GXHWND CreateDialogItem_Edit( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM
   for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
     it != aDefinitions.end(); ++it)
   {
-    if(it->Name == L"DataPool") {
+    if(it->Name == _CLTEXT("DataPool")) {
       MOVariable Var;
       clStringA strExpression = (GXLPCWSTR)it->Value;
       MODataPool::FindVariable(NULL, &Var, strExpression);
@@ -1113,7 +1113,7 @@ GXHWND CreateDialogItem_List( DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM
   GXDefinitionArrayW aDefinitions;
   file.GetBasicParam(hDlgItem, &dbpItem, &aDefinitions);
 
-  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, L"GXLBS_", DlgXM::CMC_StdListBox);
+  dbpItem.dwStyle |= DlgXM::ParseCombinedFlags(dbpItem.strStyle, _CLTEXT("GXLBS_"), DlgXM::CMC_StdListBox);
 
   GXUI::List* pList = strItemTemplate.IsEmpty()
      ? GXUI::List::Create(file.GetInstance(), hDlgWnd, &dbpItem, &aDefinitions)
@@ -1139,9 +1139,9 @@ typedef cllist<RICHLIST_PARAM> RichListParams;
 GXHWND CreateDialogItem_RichList(DlgXM::DlgSmartFile &file, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp)
 {
   RICHLIST_PARAM sParam;
-  sParam.strItemTemplate = hDlgItem.GetKeyAsString(L"ItemTemplate", L"");
+  sParam.strItemTemplate = hDlgItem.GetKeyAsString(_CLTEXT("ItemTemplate"), _CLTEXT(""));
   if(sParam.strItemTemplate.IsNotEmpty() && clpathfile::IsFileSpec(sParam.strItemTemplate)) {
-    sParam.strItemTemplate = clStringW(file.GetFilename()) + L":" + sParam.strItemTemplate;
+    sParam.strItemTemplate = clStringW(file.GetFilename()) + _CLTEXT(":") + sParam.strItemTemplate;
   }
 
   GXHWND hItemWnd = CreateDialogItem_List(file, hDlgItem, dbpItem, sParam.strItemTemplate, hDlgWnd, dfp);
@@ -1159,55 +1159,55 @@ namespace DlgXM
   GXHWND DlgSmartFile::CreateCtrl(const clStringW& strClassName, Section hDlgItem, DlgXM::DLGBASICPARAMW &dbpItem, GXHWND hDlgWnd, DlgXM::DLGFONTPARAMW &dfp)
   {
     GXHWND hItemWnd;
-    if(strClassName == L"Label") // GXUI Label
+    if(strClassName == _CLTEXT("Label")) // GXUI Label
     {
       hItemWnd = CreateDialogItem_Label(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
     }
-    else if(strClassName == L"Rectangle") // GXUI Rectangle
+    else if(strClassName == _CLTEXT("Rectangle")) // GXUI Rectangle
     {
       hItemWnd = CreateDialogItem_Rectangle(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
     }
-    else if(strClassName == L"Sprite") // GXUI Sprite
+    else if(strClassName == _CLTEXT("Sprite")) // GXUI Sprite
     {
       hItemWnd = CreateDialogItem_Sprite(*this, hDlgItem, dbpItem, hDlgWnd);
     }
-    else if(strClassName == L"Button") // GXUI Button
+    else if(strClassName == _CLTEXT("Button")) // GXUI Button
     {
       hItemWnd = CreateDialogItem_Button(*this, hDlgItem, dbpItem, hDlgWnd, GetButtonTemplate(), dfp);
     }
-    else if(strClassName == L"WETree") // Wine Tree
+    else if(strClassName == _CLTEXT("WETree")) // Wine Tree
     {
       hItemWnd = CreateDialogItem_WETree(*this, hDlgItem, dbpItem, hDlgWnd);
     }
-    else if(strClassName == L"WEListView")
+    else if(strClassName == _CLTEXT("WEListView"))
     {
       hItemWnd = CreateDialogItem_WEListView(*this, hDlgItem, dbpItem, hDlgWnd);
     }
-    else if(strClassName == L"WEEdit") // Wine Edit
+    else if(strClassName == _CLTEXT("WEEdit")) // Wine Edit
     {
       hItemWnd = CreateDialogItem_WEEdit(*this, hDlgItem, dbpItem, hDlgWnd);
     }
-    else if(strClassName == L"Edit") // GXUI Edit
+    else if(strClassName == _CLTEXT("Edit")) // GXUI Edit
     {
       hItemWnd = CreateDialogItem_Edit(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
     }
-    else if(strClassName == L"PropSheet") // Property Sheet
+    else if(strClassName == _CLTEXT("PropSheet")) // Property Sheet
     {
       hItemWnd = CreateDialogItem_PropSheet(*this, hDlgItem, dbpItem, hDlgWnd);
     }
-    else if(strClassName == L"PropList") // PropList
+    else if(strClassName == _CLTEXT("PropList")) // PropList
     {
       hItemWnd = CreateDialogItem_PropList(*this, hDlgItem, dbpItem, hDlgWnd);
     }
-    else if(strClassName == L"Toolbar")
+    else if(strClassName == _CLTEXT("Toolbar"))
     {
       hItemWnd = CreateDialogItem_Toolbar(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
     }
-    else if(strClassName == L"List") // GXUI List Box
+    else if(strClassName == _CLTEXT("List")) // GXUI List Box
     {
       hItemWnd = CreateDialogItem_RichList(*this, hDlgItem, dbpItem, hDlgWnd, dfp);
     }
-    else if(strClassName == L"Slide")
+    else if(strClassName == _CLTEXT("Slide"))
     {
       hItemWnd = CreateDialogItem_Slide(*this, hDlgItem, dbpItem, hDlgWnd, GetSliderTemplate());
     }
@@ -1240,14 +1240,14 @@ GXHWND gxIntCreateDialogFromFileW(
   DlgXM::DlgSmartFile file(hInstance, lpFilename);
   Section hDlgSect;
   Section hDlgItem;
-  clStringW strDialogSection = clStringW(L"Dialogs/") + lpDlgName;
+  clStringW strDialogSection = clStringW(_CLTEXT("Dialogs/")) + lpDlgName;
   clStringW strDialogFile = lpStation->ConvertAbsPathW(szDlgFilename);
 
   //RichListParams sRichListParams; // 参数队列，用来在InitDialog消息之后初始化Rich List Box控件
 
   if( ! file.LoadFromFile(strDialogFile))
   {
-    TRACEW(L"Error gxIntCreateDialogFromFileW, 无法加载文件(%s).\n", lpFilename);
+    TRACEW(_CLTEXT("Error gxIntCreateDialogFromFileW, 无法加载文件(%s).\n"), lpFilename);
     return NULL;
   }
 
@@ -1287,7 +1287,7 @@ GXHWND gxIntCreateDialogFromFileW(
 
   {
     // 获得对话框扩展样式
-    GXDWORD dwDlgStyle = DlgXM::ParseCombinedFlags(wbp.strStyle, L"GXDS_", DlgXM::CMC_DlgStyle);
+    GXDWORD dwDlgStyle = DlgXM::ParseCombinedFlags(wbp.strStyle, _CLTEXT("GXDS_"), DlgXM::CMC_DlgStyle);
 
     // 处理"居中"样式, 此时忽略原来参数中的 left 和 top 参数
     if (TEST_FLAG(dwDlgStyle, GXDS_CENTER))
@@ -1323,7 +1323,7 @@ GXHWND gxIntCreateDialogFromFileW(
   }
 
   // 加载对话框模板资源
-  hTemplate = file.OpenSection(L"Template");
+  hTemplate = file.OpenSection(_CLTEXT("Template"));
   if(hTemplate)
   {
     file.LoadTemplate(lpStation, hTemplate);
@@ -1342,14 +1342,14 @@ GXHWND gxIntCreateDialogFromFileW(
       clStringW strItemName = hDlgItem.SectionName();
 
       //////////////////////////////////////////////////////////////////////////
-      if(strItemName == "Item")
+      if(strItemName == _CLTEXT("Item"))
       {
-        clStringW strClassName = hDlgItem[L"Class"].ToString();
+        clStringW strClassName = hDlgItem[_CLTEXT("Class")].ToString();
         hItemWnd = file.CreateCtrl(strClassName, hDlgItem, dbpItem, hDlgWnd, dfp);
       }
       //////////////////////////////////////////////////////////////////////////
       // Layout
-      else if(strItemName == L"Layout")
+      else if(strItemName == _CLTEXT("Layout"))
       {
         GXHWND hItemWnd = NULL;
         DlgXM::DLGFONTPARAMW  dfpItem;

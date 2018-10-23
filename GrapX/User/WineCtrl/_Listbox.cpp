@@ -991,20 +991,20 @@ static GXINT LISTBOX_FindString( GXLB_DESCR *descr, GXINT start, GXLPCWSTR str, 
 #define CHECK_DRIVE(item) \
     if ((item)->str[0] == '[') \
     { \
-        if (!strncmpiW( str, (item)->str+1, len )) return i; \
-        if (((item)->str[1] == '-') && !strncmpiW(str, (item)->str+2, len)) \
+        if (!clstd::strncmpiT( str, (item)->str+1, len )) return i; \
+        if (((item)->str[1] == '-') && !clstd::strncmpiT(str, (item)->str+2, len)) \
         return i; \
     }
 
             GXINT len = (GXINT)GXSTRLEN(str);
             for (i = start + 1; i < descr->nb_items; i++, item++)
             {
-               if (!strncmpiW( str, item->str, len )) return i;
+               if (!clstd::strncmpiT( str, item->str, len )) return i;
                CHECK_DRIVE(item);
             }
             for (i = 0, item = descr->items; i <= start; i++, item++)
             {
-               if (!strncmpiW( str, item->str, len )) return i;
+               if (!clstd::strncmpiT( str, item->str, len )) return i;
                CHECK_DRIVE(item);
             }
 #undef CHECK_DRIVE
@@ -1350,7 +1350,7 @@ static GXINT LISTBOX_SetFont( GXLB_DESCR *descr, GXHFONT font )
 {
     GXHDC hdc;
     GXHFONT oldFont = 0;
-    const GXWCHAR *alphabet = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const GXWCHAR *alphabet = _CLTEXT("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
     GXSIZE sz;
 
     descr->font = font;
@@ -1841,80 +1841,96 @@ static GXLRESULT LISTBOX_SetCount( GXLB_DESCR *descr, GXINT count )
 static GXLRESULT LISTBOX_Directory( GXLB_DESCR *descr, GXUINT attrib,
                                   GXLPCWSTR filespec, GXBOOL long_names )
 {
-    GXHANDLE handle;
-    GXLRESULT ret = GXLB_OKAY;
-    GXWIN32_FIND_DATAW entry;
-    GXINT pos;
-    GXLRESULT maxinsert = GXLB_ERR;
+  GXHANDLE handle;
+  GXLRESULT ret = GXLB_OKAY;
+  GXWIN32_FIND_DATAW entry;
+  GXINT pos;
+  GXLRESULT maxinsert = GXLB_ERR;
 
-    /* don't scan directory if we just want drives exclusively */
-    if (attrib != (DDL_DRIVES | DDL_EXCLUSIVE)) {
-        /* scan directory */
-        if ((handle = gxFindFirstFileW(filespec, &entry)) == INVALID_HANDLE_VALUE)
+  /* don't scan directory if we just want drives exclusively */
+  if(attrib != (DDL_DRIVES | DDL_EXCLUSIVE)) {
+    /* scan directory */
+    if((handle = gxFindFirstFileW(filespec, &entry)) == INVALID_HANDLE_VALUE)
+    {
+      int le = GetLastError();
+      if((le != ERROR_NO_MORE_FILES) && (le != ERROR_FILE_NOT_FOUND)) return GXLB_ERR;
+    }
+    else
+    {
+      do
+      {
+        //GXWCHAR buffer[270];
+        clStringW strBuffer;
+        strBuffer.Reserve(270);
+
+        if(entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-       int le = GetLastError();
-            if ((le != ERROR_NO_MORE_FILES) && (le != ERROR_FILE_NOT_FOUND)) return GXLB_ERR;
+          static const GXWCHAR bracketW[] = { ']',0 };
+          static const GXWCHAR dotW[] = { '.',0 };
+          if(!(attrib & DDL_DIRECTORY) ||
+            !GXSTRCMP(entry.cFileName, dotW)) continue;
+          //buffer[0] = '[';
+          strBuffer.Append('[');
+          if(!long_names && entry.cAlternateFileName[0]) {
+            //GXSTRCPY(buffer + 1, entry.cAlternateFileName);
+            strBuffer.Append(entry.cAlternateFileName);
+          }
+          else {
+            //GXSTRCPY(buffer + 1, entry.cFileName);
+            strBuffer.Append(entry.cFileName);
+          }
+          strBuffer.Append(bracketW);
+          //clstd::strcatT(buffer, bracketW);
         }
-        else
+        else  /* not a directory */
         {
-            do
-            {
-                GXWCHAR buffer[270];
-                if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-                {
-                    static const GXWCHAR bracketW[]  = { ']',0 };
-                    static const GXWCHAR dotW[] = { '.',0 };
-                    if (!(attrib & DDL_DIRECTORY) ||
-                        !GXSTRCMP( entry.cFileName, dotW )) continue;
-                    buffer[0] = '[';
-                    if (!long_names && entry.cAlternateFileName[0])
-                        GXSTRCPY( buffer + 1, entry.cAlternateFileName );
-                    else
-                        GXSTRCPY( buffer + 1, entry.cFileName );
-                    strcatW(buffer, bracketW);
-                }
-                else  /* not a directory */
-                {
 #define ATTRIBS (FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | \
                  FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE)
 
-                    if ((attrib & DDL_EXCLUSIVE) &&
-                        ((attrib & ATTRIBS) != (entry.dwFileAttributes & ATTRIBS)))
-                        continue;
+          if((attrib & DDL_EXCLUSIVE) &&
+            ((attrib & ATTRIBS) != (entry.dwFileAttributes & ATTRIBS)))
+            continue;
 #undef ATTRIBS
-                    if (!long_names && entry.cAlternateFileName[0])
-                        GXSTRCPY( buffer, entry.cAlternateFileName );
-                    else
-                        GXSTRCPY( buffer, entry.cFileName );
-                }
-                if (!long_names) CharLowerW( buffer );
-                pos = LISTBOX_FindFileStrPos( descr, buffer );
-                if ((ret = LISTBOX_InsertString( descr, pos, buffer )) < 0)
-                    break;
-                if (ret <= maxinsert) maxinsert++; else maxinsert = ret;
-            } while (gxFindNextFileW( handle, &entry ));
-            gxFindClose( handle );
+          if(!long_names && entry.cAlternateFileName[0]) {
+            //GXSTRCPY(buffer, entry.cAlternateFileName);
+            strBuffer = entry.cAlternateFileName;
+          }
+          else {
+            //GXSTRCPY(buffer, entry.cFileName);
+            strBuffer = entry.cFileName;
+          }
         }
+        if(!long_names) {
+          //CharLowerW(reinterpret_cast<LPWSTR>(buffer));
+          strBuffer.MakeLower();
+        }
+        pos = LISTBOX_FindFileStrPos(descr, strBuffer);
+        if((ret = LISTBOX_InsertString(descr, pos, strBuffer)) < 0)
+          break;
+        if(ret <= maxinsert) maxinsert++; else maxinsert = ret;
+      } while(gxFindNextFileW(handle, &entry));
+      gxFindClose(handle);
     }
-    if (ret >= 0)
-    {
-        ret = maxinsert;
+  }
+  if(ret >= 0)
+  {
+    ret = maxinsert;
 
-        /* scan drives */
-        if (attrib & DDL_DRIVES)
-        {
-            GXWCHAR buffer[] = {'[','-','a','-',']',0};
-            GXWCHAR root[] = {'A',':','\\',0};
-            int drive;
-            for (drive = 0; drive < 26; drive++, buffer[2]++, root[0]++)
-            {
-                if (GetDriveTypeW(root) <= DRIVE_NO_ROOT_DIR) continue;
-                if ((ret = LISTBOX_InsertString( descr, -1, buffer )) < 0)
-                    break;
-            }
-        }
+    /* scan drives */
+    if(attrib & DDL_DRIVES)
+    {
+      GXWCHAR buffer[] = { '[','-','a','-',']',0 };
+      GXWCHAR root[] = { 'A',':','\\',0 };
+      int drive;
+      for(drive = 0; drive < 26; drive++, buffer[2]++, root[0]++)
+      {
+        if(GetDriveTypeW(reinterpret_cast<LPCWSTR>(root)) <= DRIVE_NO_ROOT_DIR) continue;
+        if((ret = LISTBOX_InsertString(descr, -1, buffer)) < 0)
+          break;
+      }
     }
-    return ret;
+  }
+  return ret;
 }
 #endif // defined(_WIN32) || defined(_WINDOWS)
 

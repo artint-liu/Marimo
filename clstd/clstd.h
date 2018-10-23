@@ -89,8 +89,7 @@ inline void InlSetZeroT(_Ty& t) {
   memset(&t, 0, sizeof(t));
 }
 
-#define WIDEN2(x) L##x
-#define WIDEN(x) WIDEN2(x)
+#define WIDEN(x) _CLTEXT(x)
 #define __WFILE__ WIDEN(__FILE__)
 
 #ifndef SAFE_DELETE
@@ -109,16 +108,20 @@ inline void InlSetZeroT(_Ty& t) {
 # define SAFE_ADDREF(pobj)    if((pobj) != NULL)  { (pobj)->AddRef(); }
 #endif // SAFE_ADDREF
 
+// Visual Studio 附加参数：/Zc:__cplusplus，则 __cplusplus == _MSVC_LANG
+#if __cplusplus >= 201402L
+# define CLENUM_CLASS(_TYPE, _ENUM)  enum class _ENUM : _TYPE
+# define CLTRIVIAL_DEFAULT = default
+#else
+# define CLENUM_CLASS(_TYPE, _ENUM)  enum _ENUM
+# define CLTRIVIAL_DEFAULT {}
+#endif
+
+
 #ifndef countof
 template<typename _Ty, size_t _count>
 char (&_cl_CountOfHelper(_Ty(&_array)[_count]))[_count];
 # define countof(_arr) (sizeof(_cl_CountOfHelper(_arr)))
-#endif
-
-#if __cplusplus < 201103L
-# define CLTRIVIAL_DEFAULT {}
-#else
-# define CLTRIVIAL_DEFAULT = default
 #endif
 
 // 弃用标记
@@ -244,7 +247,7 @@ extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine)
 #       define CLUNIQUEBREAK {__asm int 3}      // 只中断一次的断点
 #       define CLNOP         {__asm nop}
 #       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
-#       define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); CLBREAK; } // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
+#       define ASSERT(x)      if(!(x)) {_cl_assertW(_CLTEXT(#x), __WFILE__, __LINE__); CLBREAK; } // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
 #       define STATIC_ASSERT(x)    static_assert(x, #x);
 #       define V(x)              if(FAILED(x)) { CLBREAK; }
 #       define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }

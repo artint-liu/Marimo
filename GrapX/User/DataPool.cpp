@@ -76,7 +76,7 @@ using namespace clstd;
 # define ASSERT_X64(x)
 #endif // #ifdef _X86
 
-#define DPC_MESSAGE_FILE L"dpcmsg.txt"
+#define DPC_MESSAGE_FILE _CLTEXT("dpcmsg.txt")
 
 namespace Marimo
 {
@@ -241,8 +241,8 @@ namespace Marimo
 
     virtual GXHRESULT ImportDataFromMemory(clstd::Buffer* pBuffer, GXLPCWSTR szRefFilename) override
     {
-      GXLPCWSTR szFilename = (szRefFilename == NULL ? L"<memory>" : szRefFilename);
-      CLOGW(L"Import data from memory (reference filename: \"%s\").", szFilename);
+      GXLPCWSTR szFilename = (szRefFilename == NULL ? _CLTEXT("<memory>") : szRefFilename);
+      CLOGW(_CLTEXT("Import data from memory (reference filename: \"%s\")."), szFilename);
       IMPORT import;
       import.ErrorMsg.LoadErrorMessage(DPC_MESSAGE_FILE);
       if(import.ss.Set(pBuffer) && import.PrepareLines(szFilename)) {
@@ -258,7 +258,7 @@ namespace Marimo
 
     virtual GXHRESULT ImportDataFromFile(GXLPCWSTR szFilename) override
     {
-      CLOGW(L"Import data from \"%s\".", szFilename);
+      CLOGW(_CLTEXT("Import data from \"%s\"."), szFilename);
       IMPORT import;
       import.ErrorMsg.LoadErrorMessage(DPC_MESSAGE_FILE);
       if(import.ss.LoadFromFile(szFilename)) {
@@ -305,7 +305,7 @@ namespace Marimo
       if(GXSUCCEEDED(ExportDataToMemory(&buffer, szCodec))) {
         clstd::File file;
         if( ! file.CreateAlways(szFilename)) {
-          CLOG_ERRORW(L"Can not create file (\"%s\").", szFilename);
+          CLOG_ERRORW(_CLTEXT("Can not create file (\"%s\")."), szFilename);
           return GX_FAIL;
         }
         
@@ -313,7 +313,7 @@ namespace Marimo
         if(file.Write(buffer.GetPtr(), (u32)buffer.GetSize(), &uNumOfWrites) && buffer.GetSize() == uNumOfWrites) {
           return TRUE;
         }
-        CLOG_ERRORW(L"%s : Not write properly (\"%s\").", __FUNCTIONW__, szFilename);
+        CLOG_ERRORW(_CLTEXT("%s : Not write properly (\"%s\")."), __FUNCTIONW__, szFilename);
       }
       return GX_FAIL;
     }

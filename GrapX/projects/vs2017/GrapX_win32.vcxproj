@@ -225,7 +225,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ExceptionHandling>Async</ExceptionHandling>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -255,7 +255,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <ExceptionHandling>Async</ExceptionHandling>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -284,7 +284,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>_X86;_NDEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -313,7 +313,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PreprocessorDefinitions>_X86;_NDEBUG;_WINDOWS;_UNICODE;UNICODE;GXDLL_API_EXPORTS;ENABLE_GRAPHICS_API_DX11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -343,7 +343,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -372,7 +372,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -401,7 +401,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -433,7 +433,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>

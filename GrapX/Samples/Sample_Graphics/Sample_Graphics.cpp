@@ -131,14 +131,14 @@ public:
   {
     m_nPage = 0;
     m_nSubPage = 0;
-    m_pGraphics->CreateTextureFromFileW(&m_pTexture, L"textures/AOX.png");
-    m_pGraphics->CreateTextureFromFileW(&m_pTestIcon, L"textures/AOX.png");
+    m_pGraphics->CreateTextureFromFileW(&m_pTexture, _CLTEXT("textures/AOX.png"));
+    m_pGraphics->CreateTextureFromFileW(&m_pTestIcon, _CLTEXT("textures/AOX.png"));
     //m_pGraphics->CreateTextureFromFile(&g_pTexture, L"RGB.bmp");
     m_pFont = m_pGraphics->CreateFontA(NULL, 48, "fonts/wqy-microhei.ttc");
     m_pFontS = m_pGraphics->CreateFontA(NULL, 16, "fonts/wqy-microhei.ttc");
     m_pTarget = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
     m_pTarget2 = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
-    m_pImageNonPow2 = m_pGraphics->CreateImageFromFile(L"nonpow2.png");
+    m_pImageNonPow2 = m_pGraphics->CreateImageFromFile(_CLTEXT("nonpow2.png"));
     m_pGraphics->CreateTexture(&m_pEmptyTex, NULL, TEXSIZE_HALF, TEXSIZE_HALF, 1, GXFMT_A8R8G8B8, GXRU_DEFAULT);
     m_pEmptyTex->Clear(NULL, 0xff000000);
 //    m_pTarget->GetTextureUnsafe()->Clear(NULL, -1);
@@ -254,14 +254,15 @@ void MyGraphicsTest::DrawGrid(GXCanvas* pCanvas, GXRECT& rect)
 void MyGraphicsTest::TestDrawHelpText(GXRECT& rect)
 {
 #ifdef _WIN32
-  static GXWCHAR* pszHelp = L"1.测试基本绘图\n"
-    L"2.测试基本裁剪和文字\n"
-    L"3.测试Region限制下的绘制\n"
-    L"4.测试绘制到纹理\n"
-    L"5.用Region限制绘制到纹理\n"
-    L"6.测试分别绘制到两个纹理\n"
-    L"7.测试CopyRect和StretchRect\n"
-    L"8.测试纹理滚动\n";
+  static GXWCHAR* pszHelp =
+    _CLTEXT("1.测试基本绘图\n")
+    _CLTEXT("2.测试基本裁剪和文字\n")
+    _CLTEXT("3.测试Region限制下的绘制\n")
+    _CLTEXT("4.测试绘制到纹理\n")
+    _CLTEXT("5.用Region限制绘制到纹理\n")
+    _CLTEXT("6.测试分别绘制到两个纹理\n")
+    _CLTEXT("7.测试CopyRect和StretchRect\n")
+    _CLTEXT("8.测试纹理滚动\n");
 #else
   static clString pszHelp = L"1.Basic Drawing\n"
   L"2.Basic clip and text\n"
@@ -477,7 +478,7 @@ void MyGraphicsTest::TestTextAndClip(GXRECT& rect)
   GXRECT rcText;
   gxSetRect(&rcText, 210, 20, 310, 100);
   pCanvas->FillRectangle(&rcText, 0x80808080);
-  pCanvas->DrawTextW(m_pFont, L"Hello World!", -1, &rcText, GXDT_SINGLELINE, 0xff00ff00);
+  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World!"), -1, &rcText, GXDT_SINGLELINE, 0xff00ff00);
 
 
   SAFE_RELEASE(pCanvas);
@@ -515,7 +516,7 @@ void MyGraphicsTest::TestDrawToRTInRegion(GXRECT& rect)
 
   GXRECT rcText((gxGetTickCount() / 10) % 768, -20, 250, 100);
   rcText.right += rcText.left;
-  pCanvas->TextOutW(m_pFont, rcText.left - 20, rcText.top, L"TextOutString!~", 15, 0xff000000);
+  pCanvas->TextOutW(m_pFont, rcText.left - 20, rcText.top, _CLTEXT("TextOutString!~"), 15, 0xff000000);
   pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xffffffff);
 
   rcText.top = 100;
@@ -730,13 +731,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 int main(int argc, char *argv[])
 #endif // #if defined(_WIN32) || defined(_WINDOWS)
 {
-  clpathfile::LocalWorkingDirW(L"..");
+  clpathfile::LocalWorkingDirW(_CLTEXT(".."));
 
   GXBYTE AppStruct[BYTE_ALIGN_4(sizeof(MyGraphicsTest))];
   MyGraphicsTest* appTest = new(AppStruct) MyGraphicsTest;
   GXAPP_DESC sAppDesc = {0};
   sAppDesc.cbSize     = sizeof(GXAPP_DESC);
-  sAppDesc.lpName     = L"Test Graphics";
+  sAppDesc.lpName     = _CLTEXT("Test Graphics");
   sAppDesc.nWidth     = 768;
   sAppDesc.nHeight    = 1024;
   sAppDesc.dwStyle    = GXADS_SIZABLE;

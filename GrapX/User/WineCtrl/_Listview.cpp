@@ -545,7 +545,7 @@ static inline GXLPWSTR textdupTtoW(GXLPCWSTR text, GXBOOL isW)
     wstr = (GXLPWSTR)Alloc(len * sizeof(GXWCHAR));
     if (wstr) gxMultiByteToWideChar(GXCP_ACP, 0, (GXLPCSTR)text, -1, wstr, len);
   }
-  TRACEW(L"   wstr=%s\n", text == GXLPSTR_TEXTCALLBACKW ?  L"(callback)" : debugstr_w(wstr));
+  TRACEW(_CLTEXT("   wstr=%s\n"), text == GXLPSTR_TEXTCALLBACKW ?  _CLTEXT("(callback)") : debugstr_w(wstr));
   return wstr;
 }
 
@@ -2614,7 +2614,7 @@ static void LISTVIEW_SaveTextMetrics(LISTVIEW_INFO *infoPtr)
     infoPtr->ntmMaxCharWidth = tm.tmMaxCharWidth;
   }
 
-  if (gxGetTextExtentPoint32W(hdc, L"...", 3, &sz))
+  if (gxGetTextExtentPoint32W(hdc, _CLTEXT("..."), 3, &sz))
     infoPtr->nEllipsisWidth = sz.cx;
 
   gxSelectObject(hdc, hOldFont);
@@ -5186,7 +5186,7 @@ again:
     {
       if (lpFindInfo->flags & LVFI_PARTIAL)
       {
-        if (strstrW(lvItem.pszText, lpFindInfo->psz) == NULL) continue;
+        if (clstd::strstrT(lvItem.pszText, lpFindInfo->psz) == NULL) continue;
       }
       else
       {
@@ -8107,7 +8107,7 @@ static GXLRESULT LISTVIEW_Create(GXHWND hwnd, const GXCREATESTRUCTW *lpcs)
   dFlags |= (LVS_NOCOLUMNHEADER & lpcs->style) ? HDS_HIDDEN : 0;
 
   /* create header */
-  infoPtr->hwndHeader = gxCreateWindowW(WC_HEADERW, NULL, dFlags,
+  infoPtr->hwndHeader = gxCreateWindowW(GXWC_HEADERW, NULL, dFlags,
     0, 0, 0, 0, hwnd, NULL,
     lpcs->hInstance, NULL);
   if (!infoPtr->hwndHeader) return -1;
@@ -10170,7 +10170,7 @@ void LISTVIEW_Register()
   wndClass.cbWndExtra = sizeof(LISTVIEW_INFO *);
   wndClass.hCursor = gxLoadCursorW(0, (GXLPWSTR)GXIDC_ARROW);
   wndClass.hbrBackground = (GXHBRUSH)(GXCOLOR_WINDOW + 1);
-  wndClass.lpszClassName = WC_LISTVIEWW;
+  wndClass.lpszClassName = GXWC_LISTVIEWW;
   gxRegisterClassExW(&wndClass);
 }
 
@@ -10186,7 +10186,7 @@ void LISTVIEW_Register()
 */
 void LISTVIEW_Unregister()
 {
-  gxUnregisterClassW(WC_LISTVIEWW, NULL);
+  gxUnregisterClassW(GXWC_LISTVIEWW, NULL);
 }
 
 /***

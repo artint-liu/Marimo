@@ -823,7 +823,7 @@ TREEVIEW_UpdateDispInfo(const GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *wineIte
         (int)TEXT_CALLBACK_SIZE);
       GXLPWSTR newText = (GXLPWSTR)ReAlloc(wineItem->pszText, len);
 
-      TRACEW(L"returned wstr %s, len=%d\n", debugstr_w(callback.item.pszText), len);
+      TRACEW(_CLTEXT("returned wstr %s, len=%d\n"), debugstr_w(callback.item.pszText), len);
 
       if (newText)
       {
@@ -1188,7 +1188,7 @@ TREEVIEW_DoSetItemT(const GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *wineItem,
         gxMultiByteToWideChar(GXCP_ACP, 0, (GXLPSTR)tvItem->pszText, -1,
         wineItem->pszText, len);
 
-      TRACEW(L"setting text %s, item %p\n", debugstr_w(wineItem->pszText), wineItem);
+      TRACEW(_CLTEXT("setting text %s, item %p\n"), debugstr_w(wineItem->pszText), wineItem);
     }
     else
     {
@@ -1197,7 +1197,7 @@ TREEVIEW_DoSetItemT(const GXTREEVIEW_INFO *infoPtr, GXTREEVIEW_ITEM *wineItem,
       wineItem->pszText = (GXLPWSTR)ReAlloc(wineItem->pszText,
         TEXT_CALLBACK_SIZE * sizeof(GXWCHAR));
       wineItem->cchTextMax = TEXT_CALLBACK_SIZE;
-      TRACEW(L"setting callback, item %p\n", wineItem);
+      TRACEW(_CLTEXT("setting callback, item %p\n"), wineItem);
     }
   }
 
@@ -1784,7 +1784,7 @@ TREEVIEW_SetImageList(GXTREEVIEW_INFO *infoPtr, GXWPARAM wParam, GXHIMAGELIST hi
   int oldHeight = infoPtr->normalImageHeight;
 
 
-  TRACEW(L"%lx,%p\n", wParam, himlNew);
+  TRACEW(_CLTEXT("%lx,%p\n"), wParam, himlNew);
 
   switch (wParam)
   {
@@ -2626,7 +2626,7 @@ TREEVIEW_DrawItem(const GXTREEVIEW_INFO *infoPtr, GXHDC hdc, GXTREEVIEW_ITEM *wi
       rcText.left = wineItem->textOffset;
       rcText.right = rcText.left + wineItem->textWidth + 4;
 
-      TRACEW(L"drawing text %s at (%ld,%ld)-(%ld,%ld)\n", debugstr_w(wineItem->pszText),
+      TRACEW(_CLTEXT("drawing text %s at (%ld,%ld)-(%ld,%ld)\n"), debugstr_w(wineItem->pszText),
         rcText.left, rcText.top, rcText.right, rcText.bottom);
 
       /* Draw it */
@@ -3546,7 +3546,7 @@ TREEVIEW_HitTest(const GXTREEVIEW_INFO *infoPtr, GXLPTVHITTESTINFO lpht)
   }
 
   lpht->hItem = wineItem;
-  TRACEW(L"(%d,%d):result %x\n", lpht->pt.x, lpht->pt.y, lpht->flags);
+  TRACEW(_CLTEXT("(%d,%d):result %x\n"), lpht->pt.x, lpht->pt.y, lpht->flags);
 
   return (GXLRESULT)wineItem;
 }
@@ -4522,12 +4522,12 @@ static GXINT TREEVIEW_ProcessLetterKeys(
     TREEVIEW_GetItemT( infoPtr, &item, TRUE );
 
     /* check for a match */
-    if (strncmpiW(item.pszText,infoPtr->szSearchParam,infoPtr->nSearchParamLength) == 0) {
+    if (clstd::strncmpiT(item.pszText,infoPtr->szSearchParam,infoPtr->nSearchParamLength) == 0) {
       nItem=idx;
       break;
     } else if ( (charCode != 0) && (nItem == NULL) &&
       (nItem != infoPtr->selectedItem) &&
-      (strncmpiW(item.pszText,infoPtr->szSearchParam,1) == 0) ) {
+      (clstd::strncmpiT(item.pszText,infoPtr->szSearchParam,1) == 0) ) {
         /* This would work but we must keep looking for a longer match */
         nItem=idx;
     }

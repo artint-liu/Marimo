@@ -107,7 +107,7 @@ GXBOOL GXCanvas3DImpl::Initialize(GXImage* pImage, GTexture* pDepthStencil, GXLP
 
     GRESKETCH sSketch;
     sSketch.dwCategoryId = RCC_Canvas3D;
-    sSketch.strResourceName.Format(L"%x", this);
+    sSketch.strResourceName.Format(_CLTEXT("%x"), this);
     m_pGraphicsImpl->RegisterResource(this, &sSketch);
     return TRUE;
   }

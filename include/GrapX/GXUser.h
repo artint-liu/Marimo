@@ -2,32 +2,32 @@
 #ifndef _GX_USER_H_
 #define _GX_USER_H_
 
-#define POPUPMENU_CLASS_ATOM L"#32768"    // PopupMenu
-#define DESKTOP_CLASS_ATOM   L"#32769"    // Desktop
-#define DIALOG_CLASS_ATOM    L"#32770"    // Dialog
-#define DIALOG_CLASS_ATOM_EX L"#32780"    // Dialog Ex 从文件创建的对话框类
-#define WINSWITCH_CLASS_ATOM L"#32771"    // WinSwitch
-#define ICONTITLE_CLASS_ATOM L"#32772"    // IconTitle
+#define POPUPMENU_CLASS_ATOM _CLTEXT("#32768")    // PopupMenu
+#define DESKTOP_CLASS_ATOM   _CLTEXT("#32769")    // Desktop
+#define DIALOG_CLASS_ATOM    _CLTEXT("#32770")    // Dialog
+#define DIALOG_CLASS_ATOM_EX _CLTEXT("#32780")    // Dialog Ex 从文件创建的对话框类
+#define WINSWITCH_CLASS_ATOM _CLTEXT("#32771")    // WinSwitch
+#define ICONTITLE_CLASS_ATOM _CLTEXT("#32772")    // IconTitle
 
 #define GXWE_MENUW                POPUPMENU_CLASS_ATOM
-#define GXWE_BUTTONW              _T("Button")
-#define GXWE_EDITW                _T("Edit")
-#define GXWE_EDITW_1_3_30         _T("Edit_1_3_30")
-#define GXWE_LISTBOXW             _T("ListBox")
-#define GXWE_SCROLLBARW           _T("ScrollBar")
-#define GXWE_STATICW              _T("Static")
-#define GXWE_LISTVIEWW            _T("SysListView32")
-#define GXWE_TREEVIEWW            _T("SysTreeView32")
-#define GXUICLASSNAME_EDIT        _T("GXUIEdit")       // 这个是从Wine的Edit控件修改来的
-#define GXUICLASSNAME_EDIT_1_9_4  _T("GXUIEdit_1.9.4")       // 这个是从Wine的Edit控件修改来的
-#define GXUICLASSNAME_STATIC      _T("GXUIStatic")
-#define GXUICLASSNAME_SLIDER      _T("GXUISlider")
-#define GXUICLASSNAME_BUTTON      _T("GXUIButton")
-#define GXUICLASSNAME_LIST        _T("GXUIList")
-#define GXUICLASSNAME_RICHLIST    _T("GXUIRichList")
-#define GXUICLASSNAME_TOOLBAR     _T("GXUIToolbar")
-#define GXUICLASSNAME_PROPSHEET   _T("UIEXTPROPSHEET")
-#define GXUICLASSNAME_PROPLIST    _T("UIEXTPROPLIST")
+#define GXWE_BUTTONW              _CLTEXT("Button")
+#define GXWE_EDITW                _CLTEXT("Edit")
+#define GXWE_EDITW_1_3_30         _CLTEXT("Edit_1_3_30")
+#define GXWE_LISTBOXW             _CLTEXT("ListBox")
+#define GXWE_SCROLLBARW           _CLTEXT("ScrollBar")
+#define GXWE_STATICW              _CLTEXT("Static")
+#define GXWE_LISTVIEWW            _CLTEXT("SysListView32")
+#define GXWE_TREEVIEWW            _CLTEXT("SysTreeView32")
+#define GXUICLASSNAME_EDIT        _CLTEXT("GXUIEdit")       // 这个是从Wine的Edit控件修改来的
+#define GXUICLASSNAME_EDIT_1_9_4  _CLTEXT("GXUIEdit_1.9.4")       // 这个是从Wine的Edit控件修改来的
+#define GXUICLASSNAME_STATIC      _CLTEXT("GXUIStatic")
+#define GXUICLASSNAME_SLIDER      _CLTEXT("GXUISlider")
+#define GXUICLASSNAME_BUTTON      _CLTEXT("GXUIButton")
+#define GXUICLASSNAME_LIST        _CLTEXT("GXUIList")
+#define GXUICLASSNAME_RICHLIST    _CLTEXT("GXUIRichList")
+#define GXUICLASSNAME_TOOLBAR     _CLTEXT("GXUIToolbar")
+#define GXUICLASSNAME_PROPSHEET   _CLTEXT("UIEXTPROPSHEET")
+#define GXUICLASSNAME_PROPLIST    _CLTEXT("UIEXTPROPLIST")
 #define GXWC_DIALOGW              DIALOG_CLASS_ATOM
 #define GXWC_DIALOGEXW            DIALOG_CLASS_ATOM_EX
 

@@ -463,7 +463,7 @@ namespace clstd
 #elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)
     return (size_t)
       MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED,
-        pStrX, (int)cchX, pNativeStr, (int)uLength);
+        pStrX, (int)cchX, reinterpret_cast<LPWSTR>(pNativeStr), (int)uLength);
 #else
     setlocale(LC_ALL, "C");
     return (size_t)mbstowcs(pNativeStr, pStrX, uLength);
@@ -589,7 +589,7 @@ namespace clstd
 #elif defined(_CL_SYSTEM_WINDOWS) && !defined(_C_STANDARD)
     return (size_t)
       WideCharToMultiByte(CP_ACP, NULL,
-        pStrX, (int)cchX, pNativeStr, (int)uLength, NULL, NULL);
+        reinterpret_cast<LPCWSTR>(pStrX), (int)cchX, pNativeStr, (int)uLength, NULL, NULL);
     //#elif defined(_CL_SYSTEM_IOS)
     //  return (size_t)SimpleUnicodeToASCII(pNativeStr, uLength, pStrX);
 #else

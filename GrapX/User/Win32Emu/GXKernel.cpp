@@ -454,10 +454,10 @@ GXDWORD GXDLLAPI GXUIGetStationDesc(GXStationDesc eDesc, GXWPARAM wParam, GXLPAR
   case GXSD_CONFIGPATH:
     {
       clStringW strCfgPath;
-      GetModuleFileNameW(NULL, strCfgPath.GetBuffer(MAX_PATH), MAX_PATH);
+      GetModuleFileNameW(NULL, reinterpret_cast<LPWSTR>(strCfgPath.GetBuffer(MAX_PATH)), MAX_PATH);
       strCfgPath.ReleaseBuffer();
 
-      clpathfile::RenameExtension(strCfgPath, L".config");
+      clpathfile::RenameExtension(strCfgPath, _CLTEXT(".config"));
       GXSTRCPYN<GXWCHAR>((GXLPWSTR)lParam, (GXLPCWSTR)strCfgPath, wParam);
 
       if(strCfgPath.GetLength() > wParam) {
@@ -552,7 +552,7 @@ GXHANDLE GXDLLAPI gxGetModuleHandle(
   GXLPCWSTR lpModuleName   // address of module name to return handle for  
   )
 {
-  return (GXHANDLE)GetModuleHandleW(lpModuleName);
+  return (GXHANDLE)GetModuleHandleW(reinterpret_cast<LPCWSTR>(lpModuleName));
 }
 
 GXLONG GXDLLAPI gxInterlockedIncrement(GXLONG volatile *Addend)
@@ -580,7 +580,7 @@ GXHANDLE GXDLLAPI gxFindFirstFileW(
   )
 {
   ASSERT(sizeof(WIN32_FIND_DATAW) == sizeof(GXWIN32_FIND_DATAW));
-  return (GXHANDLE)FindFirstFileW(lpFileName, (WIN32_FIND_DATAW*)lpFindFileData);
+  return (GXHANDLE)FindFirstFileW(reinterpret_cast<LPCWSTR>(lpFileName), (WIN32_FIND_DATAW*)lpFindFileData);
 }
 GXBOOL GXDLLAPI gxFindNextFileW(
   GXHANDLE hFindFile,  // handle to search  

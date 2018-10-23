@@ -47,9 +47,9 @@ namespace clstd
   void OutputString(const wch* szString)
   {
     if(IsDebuggerPresent()) {
-      OutputDebugStringW(szString);
+      OutputDebugStringW(reinterpret_cast<LPCWSTR>(szString));
     }
-    fputws(szString, stdout); // TODO: 根据消息类型区分stdout/stderr
+    fputws(reinterpret_cast<LPCWSTR>(szString), stdout); // TODO: 根据消息类型区分stdout/stderr
   }
 }
 

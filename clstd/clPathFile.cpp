@@ -110,10 +110,10 @@ void ResetWorkingDir()
   wch szModulePath[MAX_PATH];
   clStringW strDir;
   clStringW strFile;
-  GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
+  GetModuleFileNameW(NULL, reinterpret_cast<LPWSTR>(szModulePath), MAX_PATH);
   SplitPath(clStringW(szModulePath), &strDir, &strFile);
   s_strRootDir = clpathfile::CanonicalizeT(strDir);
-  SetCurrentDirectoryW(strDir);
+  SetCurrentDirectoryW(reinterpret_cast<LPCWSTR>(strDir.CStr()));
 #endif // _WINDOWS
 }
 
@@ -838,18 +838,18 @@ namespace clpathfile
   b32 LocalWorkingDirW(CLLPCWSTR szDir)
   {
     if( ! IsRelative(szDir)) {
-      return SetCurrentDirectoryW(szDir);
+      return SetCurrentDirectoryW(reinterpret_cast<LPCWSTR>(szDir));
     }
     wch szModulePath[MAX_PATH];
     clStringW strDir;
     clStringW strFile;
-    GetModuleFileNameW(NULL, szModulePath, MAX_PATH);
+    GetModuleFileNameW(NULL, reinterpret_cast<LPWSTR>(szModulePath), MAX_PATH);
     SplitPath(clStringW(szModulePath), &strDir, &strFile);
     if(szDir) {
       CombinePath(strDir, strDir, szDir);
     }
     s_strRootDir = clpathfile::CanonicalizeT(strDir);
-    return SetCurrentDirectoryW(strDir);
+    return SetCurrentDirectoryW(reinterpret_cast<LPCWSTR>(strDir.CStr()));
   }
 
   clStringA& GetCurrentDirectory(clStringA& strDir)
@@ -863,7 +863,7 @@ namespace clpathfile
   clStringW& GetCurrentDirectory(clStringW& strDir)
   {
     auto str = strDir.GetBuffer(MAX_PATH);
-    ::GetCurrentDirectoryW(MAX_PATH, str);
+    ::GetCurrentDirectoryW(MAX_PATH, reinterpret_cast<LPWSTR>(str));
     strDir.ReleaseBuffer();
     return strDir;
   }
@@ -884,7 +884,7 @@ namespace clpathfile
 
   b32 IsPathExist(const wch* szPath)
   {
-    return ::PathFileExistsW(szPath);
+    return ::PathFileExistsW(reinterpret_cast<LPCWSTR>(szPath));
   }
 # elif defined(_CL_SYSTEM_UWP)
   b32 IsPathExist(const ch* szPath)
@@ -968,7 +968,7 @@ namespace clpathfile
 #endif // #ifdef _WINDOWS
 
   //////////////////////////////////////////////////////////////////////////
-  template<typename _TCh, class _Tmkdir>
+  template<typename _Tmkdir_str, typename _TCh, class _Tmkdir>
   b32 CreateDirectoryAlwaysT(const _TCh* szDirName, _Tmkdir __mkdir)
   {
     size_t len = clstd::strlenT(szDirName);
@@ -982,7 +982,7 @@ namespace clpathfile
         szSubDir[i] = '\0';
         if( ! IsPathExist(szSubDir)) {
 #if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
-          int result = __mkdir(szSubDir);
+          int result = __mkdir(reinterpret_cast<_Tmkdir_str>(szSubDir));
 #elif defined(_CL_SYSTEM_ANDROID) || defined(_CL_SYSTEM_IOS)
           int result = __mkdir(szSubDir, S_IRWXU);
 #else
@@ -1006,7 +1006,7 @@ namespace clpathfile
   b32 CreateDirectoryAlways(const wch* szDirName)
   {
 #if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
-    return CreateDirectoryAlwaysT(szDirName, _wmkdir);
+    return CreateDirectoryAlwaysT<wchar_t const*>(szDirName, _wmkdir);
 #else
     clStringA str(szDirName);
     return CreateDirectoryAlwaysT((const ch*)str, mkdir);
@@ -1016,7 +1016,7 @@ namespace clpathfile
   b32 CreateDirectoryAlways(const ch* szDirName)
   {
 #if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
-    return CreateDirectoryAlwaysT(szDirName, _mkdir);
+    return CreateDirectoryAlwaysT<char const*>(szDirName, _mkdir);
 #else
     return CreateDirectoryAlwaysT(szDirName, mkdir);
 #endif
@@ -1026,7 +1026,7 @@ namespace clpathfile
 #ifdef _CL_SYSTEM_WINDOWS
   CLDWORD GetFileAttributes(const wch* szPath)
   {
-    const DWORD attr = ::GetFileAttributesW(szPath);
+    const DWORD attr = ::GetFileAttributesW(reinterpret_cast<LPCWSTR>(szPath));
     // Win32 文档: 函数如果失败，返回0xffffffff
     if(attr == 0xffffffff) {
       return attr;
@@ -1047,7 +1047,7 @@ namespace clpathfile
   b32 GetFileDescription(const wch* szPath, FILEATTRIBUTE* pFileAttr)
   {
     WIN32_FILE_ATTRIBUTE_DATA wfad;
-    BOOL bresult = ::GetFileAttributesExW(szPath, GetFileExInfoStandard, &wfad);
+    BOOL bresult = ::GetFileAttributesExW(reinterpret_cast<LPCWSTR>(szPath), GetFileExInfoStandard, &wfad);
     if(_CL_NOT_(bresult))
     {
       CLOG_ERRORW(_CLTEXT("GetFileDescription(\"%s\") failed."), szPath);
@@ -1078,7 +1078,7 @@ namespace clpathfile
 
   clStringW& GetApplicationFilename(clStringW& strFilename)
   {
-    GetModuleFileNameW(NULL, strFilename.GetBuffer(MAX_PATH), MAX_PATH);
+    GetModuleFileNameW(NULL, reinterpret_cast<LPWSTR>(strFilename.GetBuffer(MAX_PATH)), MAX_PATH);
     strFilename.ReleaseBuffer();
     return strFilename;
   }
@@ -1158,7 +1158,7 @@ namespace clstd
     if(hFind != INVALID_HANDLE_VALUE) {
       FindClose(hFind);
     }
-    hFind = FindFirstFileW(szFilename, &wfd);
+    hFind = FindFirstFileW(reinterpret_cast<LPCWSTR>(szFilename), &wfd);
     return (hFind != INVALID_HANDLE_VALUE);
   }
 
@@ -1173,7 +1173,7 @@ namespace clstd
     if(hFind == INVALID_HANDLE_VALUE) {
       return FALSE;
     }
-    clstd::strcpynT(FindFileData->cFileName, wfd.cFileName, MAX_PATH);
+    clstd::strcpynT(FindFileData->cFileName, reinterpret_cast<CLLPWSTR>(wfd.cFileName), MAX_PATH);
     FindFileData->dwAttributes = IntTranslateAttr(wfd.dwFileAttributes);
     FindFileData->nFileSize       = CLMAKE64FROM32(wfd.nFileSizeLow, wfd.nFileSizeHigh);
     FindFileData->nCreationTime   = CLMAKE64FROM32(wfd.ftCreationTime.dwLowDateTime, wfd.ftCreationTime.dwHighDateTime);
@@ -1191,7 +1191,7 @@ namespace clstd
   {
     FINDFILEDATAW ffdW;
     const b32 bval = GetFile(&ffdW);
-    WideCharToMultiByte(CP_ACP, NULL, ffdW.cFileName, -1, FindFileData->cFileName, MAX_PATH, NULL, NULL);
+    WideCharToMultiByte(CP_ACP, NULL, reinterpret_cast<LPCWSTR>(ffdW.cFileName), -1, FindFileData->cFileName, MAX_PATH, NULL, NULL);
     FindFileData->dwAttributes = IntTranslateAttr(ffdW.dwAttributes);
     FindFileData->nFileSize       = ffdW.nFileSize;
     FindFileData->nCreationTime   = ffdW.nCreationTime;

@@ -2294,7 +2294,7 @@ static GXLPCSTR MENUEX_ParseResource( GXLPCSTR res, GXHMENU hMenu)
     /* Align the following fields on a dword boundary.  */
     res += (~((GXUINT_PTR)res - 1)) & 3;
 
-    TRACEW(L"Menu item: [%08x,%08x,%04x,%04x,%s]\n",
+    TRACEW(_CLTEXT("Menu item: [%08x,%08x,%04x,%04x,%s]\n"),
       mii.fType, mii.fState, mii.wID, resinfo, debugstr_w(mii.dwTypeData));
 
     if (resinfo & 1) {  /* Pop-up? */
@@ -3780,7 +3780,7 @@ GXINT GXDLLAPI GetMenuStringA(
     }
     if (!item->text) return 0;
     if (!str || !nMaxSiz) return (GXINT)GXSTRLEN(item->text);
-    if (!WideCharToMultiByte( CP_ACP, 0, item->text, -1, str, nMaxSiz, NULL, NULL ))
+    if (!WideCharToMultiByte( CP_ACP, 0, reinterpret_cast<LPCWCH>(item->text), -1, str, nMaxSiz, NULL, NULL ))
       str[nMaxSiz-1] = 0;
     TRACE("returning %s\n", debugstr_a(str));
     return (GXINT)strlen(str);
@@ -3806,7 +3806,7 @@ GXINT GXDLLAPI GetMenuStringW( GXHMENU hMenu, GXUINT wItemID,
     str[0] = 0;
     return 0;
   }
-  lstrcpynW( str, item->text, nMaxSiz );
+  clstd::strcpynT( str, item->text, nMaxSiz );
   TRACE("returning %s\n", debugstr_w(str));
   return (GXINT)GXSTRLEN(str);
 }
@@ -3965,7 +3965,7 @@ GXBOOL GXDLLAPI gxInsertMenuA( GXHMENU hMenu, GXUINT pos, GXUINT flags,
     GXLPWSTR newstr = (GXLPWSTR)gxHeapAlloc( gxGetProcessHeap(), 0, len * sizeof(GXWCHAR) );
     if (newstr)
     {
-      MultiByteToWideChar( CP_ACP, 0, str, -1, newstr, len );
+      MultiByteToWideChar( CP_ACP, 0, str, -1, reinterpret_cast<LPWSTR>(newstr), len );
       ret = gxInsertMenuW( hMenu, pos, flags, id, newstr );
       gxHeapFree( gxGetProcessHeap(), 0, newstr );
     }
@@ -4584,14 +4584,14 @@ static GXBOOL GetMenuItemInfo_common ( GXHMENU hmenu, GXUINT item, GXBOOL bypos,
       {
         len = (GXINT)GXSTRLEN(menu->text);
         if(lpmii->dwTypeData && lpmii->cch)
-          lstrcpynW(lpmii->dwTypeData, menu->text, lpmii->cch);
+          clstd::strcpynT(lpmii->dwTypeData, menu->text, lpmii->cch);
       }
       else
       {
-        len = WideCharToMultiByte( CP_ACP, 0, menu->text, -1, NULL,
+        len = WideCharToMultiByte( CP_ACP, 0, reinterpret_cast<LPCWCH>(menu->text), -1, NULL,
           0, NULL, NULL ) - 1;
         if(lpmii->dwTypeData && lpmii->cch)
-          if (!WideCharToMultiByte( CP_ACP, 0, menu->text, -1,
+          if (!WideCharToMultiByte( CP_ACP, 0, reinterpret_cast<LPCWCH>(menu->text), -1,
             (GXLPSTR)lpmii->dwTypeData, lpmii->cch, NULL, NULL ))
             ((GXLPSTR)lpmii->dwTypeData)[lpmii->cch - 1] = 0;
       }
@@ -4691,14 +4691,14 @@ static inline void set_menu_item_text( MENUITEM *menu, GXLPCWSTR text, GXBOOL un
   else if (unicode)
   {
     if ((menu->text = (GXLPWSTR)gxHeapAlloc( gxGetProcessHeap(), 0, (GXSTRLEN(text)+1) * sizeof(GXWCHAR) )))
-      strcpyW( menu->text, text );
+      clstd::strcpyT( menu->text, text );
   }
   else
   {
     GXLPCSTR str = (GXLPCSTR)text;
     int len = MultiByteToWideChar( CP_ACP, 0, str, -1, NULL, 0 );
     if ((menu->text = (GXLPWSTR)gxHeapAlloc( gxGetProcessHeap(), 0, len * sizeof(GXWCHAR) )))
-      MultiByteToWideChar( CP_ACP, 0, str, -1, menu->text, len );
+      MultiByteToWideChar( CP_ACP, 0, str, -1, reinterpret_cast<LPWSTR>(menu->text), len );
   }
 }
 

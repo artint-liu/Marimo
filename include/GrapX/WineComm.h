@@ -38,11 +38,11 @@ typedef GXINT16   (CALLBACK *EDITWORDBREAKPROC16)(GXLPSTR,GXINT16,GXINT16,GXINT1
 #define debugstr_an(___TEXT, ___N)    (___TEXT)
 
 // TODO: 去掉!
-#define strcpyW    lstrcpyW
-#define strcmpW    lstrcmpW
-#define strcatW    lstrcatW
-#define strncmpiW  lstrncmpiW
-#define strstrW    wcsstr
+//#define strcpyW    lstrcpyW
+//#define strcmpW    lstrcmpW
+//#define strcatW    lstrcatW
+//#define strncmpiW  lstrncmpiW
+//#define strstrW    wcsstr
 
 #define _gxTrackMouseEvent gxTrackMouseEvent
 //#define strncmpiW ASSERT(FALSE)
@@ -352,7 +352,7 @@ GXLRESULT DEFWNDPROC_NcHitTest(GXHWND hWnd, GXINT xPos, GXINT yPos);
 
 #define HACCEL_16(x)  x
 #define HBITMAP_32(x)  ((GXHBITMAP)x)
-#define GXMAKERESOURCEW(x) L###x
+#define GXMAKERESOURCEW(x) _CLTEXT(#x)
 
 #if defined(_WINDOWS) || defined(_WIN32)
 extern HINSTANCE  g_hDLLModule;

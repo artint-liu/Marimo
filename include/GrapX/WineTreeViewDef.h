@@ -31,7 +31,7 @@ enum{
 
 
 #define WC_TREEVIEWA            "SysTreeView32"
-#define WC_TREEVIEWW            L"SysTreeView32"
+#define WC_TREEVIEWW            _CLTEXT("SysTreeView32")
 
 #ifdef _UNICODE
 #define  WC_TREEVIEW            WC_TREEVIEWW

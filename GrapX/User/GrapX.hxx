@@ -504,7 +504,7 @@ extern GXGDIPEN g_WhitePen;
 extern GXGDIPEN g_NullPen;
 
 #define DEFAULT_FONT_NAME "fonts\\wqy-microhei.ttc"
-#define DEFAULT_FONT_NAMEW L"fonts\\wqy-microhei.ttc"
+#define DEFAULT_FONT_NAMEW _CLTEXT("fonts\\wqy-microhei.ttc")
 
 //
 // menu ex template

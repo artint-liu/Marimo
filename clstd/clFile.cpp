@@ -172,7 +172,7 @@ namespace clstd
   {
     Close();
 #ifdef _CL_SYSTEM_WINDOWS
-    m_hFile = ::CreateFileW(pszFileName, eDesiredAccess, eShareMode, NULL, 
+    m_hFile = ::CreateFileW(reinterpret_cast<LPCWSTR>(pszFileName), eDesiredAccess, eShareMode, NULL, 
       eCreationDistribution, eFlagAttr, NULL);
     return (m_hFile != INVALID_HANDLE_VALUE);
 #else

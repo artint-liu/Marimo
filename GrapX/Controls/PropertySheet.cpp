@@ -54,7 +54,7 @@ namespace GXUIEXT
   // 可读化浮点字符串
   static void ReadlizeFloatString(clStringW& str, int nSignificance = 5)
   {
-    TRACEW(L"%s => ", (GXLPCWSTR)str);
+    TRACEW(_CLTEXT("%s => "), (GXLPCWSTR)str);
     size_t p = str.Find('.');
     if(p == clStringW::npos) {
       return;
@@ -99,7 +99,7 @@ namespace GXUIEXT
     }
 
     str.ReleaseBuffer();
-    TRACEW(L"%s\n", (GXLPCWSTR)str);
+    TRACEW(_CLTEXT("%s\n"), (GXLPCWSTR)str);
     CLNOP;
   }
 
@@ -664,18 +664,18 @@ PROCESS_IT:
 
               if(item.eType == PST_FLOAT)
               {
-                str.Format(L"%f", item.fVal);
+                str.Format(_CLTEXT("%f"), item.fVal);
                 ReadlizeFloatString(str);
                 lWndProc = (LONG)(LONG _w64)EditFloatWndProc;
               }
               else if(item.eType == PST_INTEGER)
               {
-                str.Format(L"%d", item.nVal);
+                str.Format(_CLTEXT("%d"), item.nVal);
                 lWndProc = (LONG)(LONG _w64)EditIntegerWndProc;
               }
               else if(item.eType == PST_UINTEGER)
               {
-                str.Format(L"%u", item.nVal);
+                str.Format(_CLTEXT("%u"), item.nVal);
                 lWndProc = (LONG)(LONG _w64)EditIntegerWndProc;
               }
 
@@ -721,7 +721,7 @@ PROCESS_IT:
             {
               m_nEditing = nItem;
               ASSERT(m_hEdit == NULL);
-              m_hEdit = gxCreateWindowEx(NULL, L"EDIT", item.strVal, WS_CHILD | WS_VISIBLE | GXWS_BORDER | ES_AUTOHSCROLL,
+              m_hEdit = gxCreateWindowEx(NULL, _CLTEXT("EDIT"), item.strVal, WS_CHILD | WS_VISIBLE | GXWS_BORDER | ES_AUTOHSCROLL,
                 m_pCurPage->GetSplit(), rcItem.top, rcItem.right - m_pCurPage->GetSplit(), rcItem.bottom - rcItem.top,
                 m_hWnd, NULL, (GXHINSTANCE)(GXLONG _w64)gxGetWindowLong(m_hWnd, GXGWL_HINSTANCE), NULL);
               gxSetWindowLong(m_hEdit, GXGWL_USERDATA, (GXLONG_PTR)this);
@@ -737,7 +737,7 @@ PROCESS_IT:
               LBItemList& LBItem = *item.pListBoxItem;
               m_nEditing = nItem;
 
-              m_hListBox = gxCreateWindowEx(NULL, L"LISTBOX", NULL, 
+              m_hListBox = gxCreateWindowEx(NULL, _CLTEXT("LISTBOX"), NULL, 
                 WS_OVERLAPPED | WS_CHILD | WS_VISIBLE | GXWS_VSCROLL | CBS_DROPDOWNLIST | GXWS_BORDER | /*LBS_SORT | */LBS_NOINTEGRALHEIGHT | LBS_NOTIFY,
                 m_pCurPage->GetSplit(), rcItem.bottom, rcItem.right - m_pCurPage->GetSplit(), (int)(item.nHeight * (LBItem.size() + 1)),
                 m_hWnd, NULL, (GXHINSTANCE)(GXLONG_PTR)gxGetWindowLong(m_hWnd, GXGWL_HINSTANCE), NULL);
@@ -794,7 +794,7 @@ PROCESS_IT:
               ofn.lStructSize = sizeof(ofn);
               ofn.hInstance = GetModuleHandle(NULL);
               ofn.lpstrFilter = L"所有支持的图像格式\0*.jpg;*.png;*.dds;*.tga;*.bmp;*.tif\0all files(*.*)\0*.*\0";
-              ofn.lpstrFile = szFilename;
+              ofn.lpstrFile = reinterpret_cast<LPWSTR>(szFilename);
               ofn.nMaxFile = MAX_PATH;
               ofn.lpstrTitle = L"Open Image File";
               ofn.Flags = OFN_FILEMUSTEXIST|OFN_EXPLORER;
@@ -1955,15 +1955,15 @@ DRAW_SCROLLBAR:
       GXRECT rect = *pRect;
       if(eType == PST_INTEGER)
       {
-        str.Format(_T("%d"), nVal);
+        str.Format(_CLTEXT("%d"), nVal);
       }
       else if(eType == PST_UINTEGER)
       {
-        str.Format(_T("%u"), bVal);
+        str.Format(_CLTEXT("%u"), bVal);
       }
       else 
       {
-        str.Format(_T("%f"), fVal);
+        str.Format(_CLTEXT("%f"), fVal);
         ReadlizeFloatString(str);
       }
 

@@ -3969,7 +3969,7 @@ TOOLBAR_MapAccelerator (GXHWND hwnd, GXWPARAM wParam, GXLPARAM lParam)
           lpszStr += 2;
           continue;
         }
-        if (!strncmpiW(lpszStr, wszAccel, iLen))
+        if (!clstd::strncmpiT(lpszStr, wszAccel, iLen))
         {
           *pIDButton = btnPtr->idCommand;
           return TRUE;

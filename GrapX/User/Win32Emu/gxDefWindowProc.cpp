@@ -1064,7 +1064,7 @@ GXLRESULT GXDLLAPI gxDefWindowProcW(GXHWND hWnd, GXUINT message, GXWPARAM wParam
     //UNPACKPARAM(xPos, yPos, lParam);
     return DEFWNDPROC_SysCommand(hWnd, (GXUINT)wParam, GXGET_X_LPARAM(lParam), GXGET_Y_LPARAM(lParam));
   case GXWM_NCCREATE:
-    gxOpenThemeData(hWnd, L"WINDOW");
+    gxOpenThemeData(hWnd, _CLTEXT("WINDOW"));
     return TRUE;
   case GXWM_CREATE:
   case GXWM_SIZE:

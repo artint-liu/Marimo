@@ -96,7 +96,7 @@ namespace GXUI
       Desc.strHover, Desc.strPressed, Desc.strDisable, Desc.strDefault);
   }
 
-  GXBOOL Button::SetSprite(LPCWSTR szSpriteFile, LPCWSTR szNormal, LPCWSTR szHover, LPCWSTR szPressed, LPCWSTR szDisabled, LPCWSTR szDefault)
+  GXBOOL Button::SetSprite(GXLPCWSTR szSpriteFile, GXLPCWSTR szNormal, GXLPCWSTR szHover, GXLPCWSTR szPressed, GXLPCWSTR szDisabled, GXLPCWSTR szDefault)
   {
     GXBOOL bval = TRUE;
     SAFE_RELEASE(m_pSprite);
@@ -135,7 +135,7 @@ namespace GXUI
       }
     }
     else {
-      CLOG_ERRORW(L"Can not load sprite(%s).\r\n", szSpriteFile);
+      CLOG_ERRORW(_CLTEXT("Can not load sprite(%s).\r\n"), szSpriteFile);
     }
     return TRUE;
   }

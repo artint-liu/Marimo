@@ -858,7 +858,7 @@ namespace Marimo
   clStringW MOSpriteImpl::GetImageFileW(GXUINT index) const
   {
     if(index >= m_loader.aFiles.size()) {
-      return L"";
+      return _CLTEXT("");
     }
     return clStringW(m_loader.aFiles[index]);
   }
@@ -866,7 +866,7 @@ namespace Marimo
   clStringA MOSpriteImpl::GetImageFileA(GXUINT index) const
   {
     if(index >= m_loader.aFiles.size()) {
-      return L"";
+      return _CLTEXT("");
     }
     return m_loader.aFiles[index];
   }

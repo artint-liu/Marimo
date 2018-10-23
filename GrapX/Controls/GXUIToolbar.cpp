@@ -111,7 +111,7 @@ namespace GXUI
     return 0;
   }
 
-  GXBOOL Toolbar::SetSpriteFile(LPCWSTR szSpriteFile)
+  GXBOOL Toolbar::SetSpriteFile(GXLPCWSTR szSpriteFile)
   {
     SAFE_RELEASE(m_pSprite);
     GXGraphics* pGraphics = GXGetGraphics(m_hWnd);
@@ -184,7 +184,7 @@ namespace GXUI
     tbb.fsState   = pTBButton->fsState;
     tbb.fsStyle   = pTBButton->fsStyle;
     tbb.dwData    = pTBButton->dwData;
-    tbb.strText   = pTBButton->iString == 0 ? L"" : (GXLPCWSTR)pTBButton->iString;
+    tbb.strText   = pTBButton->iString == 0 ? _CLTEXT("") : (GXLPCWSTR)pTBButton->iString;
     tbb.wLeft     = 0;
     tbb.wWidth    = 0;
 
@@ -742,7 +742,7 @@ namespace GXUI
     for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
       it != aDefinitions.end(); ++it)
     {
-      if(it->Name == L"SpritePath") {
+      if(it->Name == _CLTEXT("SpritePath")) {
         LPGXGRAPHICS pGraphics = GXGetGraphics(m_hWnd);
         clStringW strFilename = it->Value;
         pGraphics->ConvertToAbsolutePathW(strFilename);
@@ -877,7 +877,7 @@ namespace GXUI
 
   void Toolbar::InitToolTips(GXHWND hWnd)
   {
-    m_hToolTip = gxCreateWindowEx(NULL, TOOLTIPS_CLASSW, L"", GXWS_POPUP|TTS_ALWAYSTIP|TTS_NOPREFIX,
+    m_hToolTip = gxCreateWindowEx(NULL, TOOLTIPS_CLASSW, _CLTEXT(""), GXWS_POPUP|TTS_ALWAYSTIP|TTS_NOPREFIX,
       GXCW_USEDEFAULT, GXCW_USEDEFAULT, GXCW_USEDEFAULT, GXCW_USEDEFAULT, NULL, NULL, NULL, NULL);
 
     //GXTOOLINFOW ti = {sizeof(GXTOOLINFOW)};

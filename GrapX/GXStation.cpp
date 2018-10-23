@@ -82,7 +82,7 @@ GXHRESULT GXSTATION::Initialize()
 
   if( ! lpPlatform || GXFAILED(lpPlatform->QueryFeature(GXMAKEFOURCC('L','O','G','R'), (GXVOID**)&m_pLogger))) {
     ASSERT(m_pLogger == NULL);
-    MOCreateFileLoggerW(&m_pLogger, L"station.log", FALSE);
+    MOCreateFileLoggerW(&m_pLogger, _CLTEXT("station.log"), FALSE);
   }
 
   GXBOOL bresult;
@@ -107,7 +107,7 @@ GXHRESULT GXSTATION::Initialize()
   lpDesktopWnd->m_lpClsAtom->hCursor       = NULL;
   lpDesktopWnd->m_lpClsAtom->hbrBackground = NULL;
   lpDesktopWnd->m_lpClsAtom->szMenuName[0] = '\0'; 
-  GXSTRCPYN(lpDesktopWnd->m_lpClsAtom->szClassName, L"GrapX Desktop Class", 
+  GXSTRCPYN(lpDesktopWnd->m_lpClsAtom->szClassName, _CLTEXT("GrapX Desktop Class"), 
     sizeof(lpDesktopWnd->m_lpClsAtom->szClassName) / sizeof(lpDesktopWnd->m_lpClsAtom->szClassName[0]));
 
   if(pGraphics) {
@@ -677,7 +677,7 @@ GXBOOL GXDLLAPI MOExecuteFileW(GXLPCWSTR szFilename)
 {
   clstd::File file;
   if( ! file.OpenExisting(szFilename)) {
-    CLOG_ERRORW(L"MOExecuteFileW: Can not open specify file(%s).\n", szFilename);
+    CLOG_ERRORW(_CLTEXT("MOExecuteFileW: Can not open specify file(%s).\n"), szFilename);
     return FALSE;
   }
 
@@ -750,7 +750,7 @@ GXBOOL GXDLLAPI MOExecuteConsoleCmdW(GXLPCWSTR szCommand)
     return TRUE;
   }
   else {
-    MOLogW(L"\"%s\" is not a command.\r\n", (GXLPCWSTR)aArgs[0]);
+    MOLogW(_CLTEXT("\"%s\" is not a command.\r\n"), (GXLPCWSTR)aArgs[0]);
     return FALSE;
   }
 }

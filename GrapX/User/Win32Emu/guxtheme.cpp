@@ -47,7 +47,7 @@ extern "C"
                    GXLPCWSTR pszClassList
                    )
   {
-    if(GXSTRCMPI(pszClassList, L"WINDOW") == 0)
+    if(GXSTRCMPI(pszClassList, _CLTEXT("WINDOW")) == 0)
     {
       GXWND_PTR(hwnd)->m_hTheme = hTheme_Window;
     }
@@ -148,10 +148,10 @@ extern "C"
   GXBOOL GXUXTHEME_Initialize(GXGraphics* pGraphics)
   {
     // TODO: 抽取资源
-    GXCreateSpriteFromFileW(pGraphics, L"elements/common.stock",       &GXWnd::s_pCommonSpr);
-    GXCreateSpriteFromFileW(pGraphics, L"elements/window_frame.stock", &s_pUxThemeSprite_Window);
-    GXCreateSpriteFromFileW(pGraphics, L"elements/scroll_bar.stock",   &s_pUxThemeSprite_ScrollBar);
-    GXCreateSpriteFromFileW(pGraphics, L"elements/button.stock",       &s_pUxThemeSprite_Button);
+    GXCreateSpriteFromFileW(pGraphics, _CLTEXT("elements/common.stock"),       &GXWnd::s_pCommonSpr);
+    GXCreateSpriteFromFileW(pGraphics, _CLTEXT("elements/window_frame.stock"), &s_pUxThemeSprite_Window);
+    GXCreateSpriteFromFileW(pGraphics, _CLTEXT("elements/scroll_bar.stock"),   &s_pUxThemeSprite_ScrollBar);
+    GXCreateSpriteFromFileW(pGraphics, _CLTEXT("elements/button.stock"),       &s_pUxThemeSprite_Button);
     return TRUE;
   }
 

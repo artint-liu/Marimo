@@ -156,7 +156,7 @@ namespace D3D11
     }
     else {
       clStringW strFilePath;
-      clpathfile::CombinePath(strFilePath, pDesc->szRootDir, L"grapx.log");
+      clpathfile::CombinePath(strFilePath, pDesc->szRootDir, _CLTEXT("grapx.log"));
       MOCreateFileLoggerW(&m_pLogger, strFilePath, FALSE);
     }
 
@@ -587,7 +587,7 @@ namespace D3D11
 
     GPrimitiveVImpl* pPrimitiveImpl = (GPrimitiveVImpl*) pPrimitive;
     UINT offset = 0;
-    m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pVertexBuffer, &pPrimitiveImpl->m_uElementSize, &offset );
+    m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, &pPrimitiveImpl->m_uElementSize, &offset );
     //m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
     //  0, pPrimitiveImpl->m_uElementSize);
 
@@ -616,10 +616,10 @@ namespace D3D11
 
     GPrimitiveVIImpl* pPrimitiveImpl = (GPrimitiveVIImpl*)pPrimitive;
     UINT offset = 0;
-    m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pVertexBuffer, 
+    m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, 
       &pPrimitiveImpl->m_uElementSize, &offset );
 
-    m_pImmediateContext->IASetIndexBuffer(pPrimitiveImpl->m_pIndexBuffer, DXGI_FORMAT_R16_UINT, offset);
+    m_pImmediateContext->IASetIndexBuffer(pPrimitiveImpl->m_pD3D11IndexBuffer, DXGI_FORMAT_R16_UINT, offset);
     //m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
     //  0, pPrimitiveImpl->m_uElementSize);
 
@@ -1047,7 +1047,7 @@ namespace D3D11
     clstd::ScopedLocker sl(m_pGraphicsLocker);
     GTextureFromFile *pGTex;
     pGTex = new GTextureFromFile(pSrcFile, Width, Height, MipLevels, Format, ResUsage, Filter, MipFilter, ColorKey, this);
-    m_pLogger->OutputFormatW(L"Load texture from file: %s", pSrcFile);
+    m_pLogger->OutputFormatW(_CLTEXT("Load texture from file: %s"), pSrcFile);
     if(pGTex != NULL)
     {
       pGTex->AddRef();
@@ -1056,16 +1056,16 @@ namespace D3D11
       {
         pGTex->m_emType = GTextureImpl::CreationFailed;
         SAFE_RELEASE(pGTex);
-        m_pLogger->OutputFormatW(L"...Failed.\n");
+        m_pLogger->OutputFormatW(_CLTEXT("...Failed.\n"));
         return GX_FAIL;
       }
 
       RegisterResource(pGTex, NULL);
-      m_pLogger->OutputFormatW(L"...Succeeded.\n");
+      m_pLogger->OutputFormatW(_CLTEXT("...Succeeded.\n"));
       *ppTexture = pGTex;
       return GX_OK;
     }  
-    m_pLogger->OutputFormatW(L"...Failed.\n");
+    m_pLogger->OutputFormatW(_CLTEXT("...Failed.\n"));
     ASSERT(FALSE);
     return GX_FAIL;
   }

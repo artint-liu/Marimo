@@ -500,7 +500,7 @@ GXFont* GXGraphicsImpl::CreateFontIndirectA(const GXLPLOGFONTA lpLogFont)
   {
     SAFE_RELEASE(pFont);
     CLOG_ERROR("GXGraphics::CreateFontIndirectA : Failed to create font(\"%s\").\n", lpLogFont->lfFaceName);
-    m_pLogger->OutputFormatW(L"...Failed.\n");
+    m_pLogger->OutputFormatW(_CLTEXT("...Failed.\n"));
     return NULL;
   }
 
@@ -668,7 +668,7 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
   if(GXFAILED(hval))
   {
     SAFE_RELEASE(pShader);
-    m_pLogger->OutputFormatW(L"...Failed.\n");
+    m_pLogger->OutputFormatW(_CLTEXT("...Failed.\n"));
     return hval;
   }
 

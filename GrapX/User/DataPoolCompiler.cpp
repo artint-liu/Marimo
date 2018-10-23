@@ -266,7 +266,7 @@ namespace Marimo
 
         // 去掉设定标记，换行，空格
         str.TrimLeft(0x20);
-        str.TrimRight(L" \n");
+        str.TrimRight(_CLTEXT(" \n"));
         pThis->m_ErrorMsg.SetCurrentFilenameW(str);
       }
       else if(it.BeginsWith(szLineDefine)) { // # LINE
@@ -521,10 +521,10 @@ namespace Marimo
     }
 
     // 加载编译信息资源
-    m_ErrorMsg.LoadErrorMessage(L"dpcmsg.txt");
+    m_ErrorMsg.LoadErrorMessage(_CLTEXT("dpcmsg.txt"));
     m_ErrorMsg.SetMessageSign('C');
     //clStringA strSourceFilePath = ;
-    m_ErrorMsg.PushFile(szSourceFilePath ? szSourceFilePath : L"");
+    m_ErrorMsg.PushFile(szSourceFilePath ? szSourceFilePath : _CLTEXT(""));
 
     GXBOOL bval = IntCompile(pInclude, szDefinitionCodes, nCodeLength);
     if(bval)

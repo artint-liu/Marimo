@@ -128,16 +128,16 @@ namespace Marimo
 
     auto it = m_ErrorMsg.find(nCode);
     if(it == m_ErrorMsg.end()) {
-      str.AppendFormat(L"Missing Compiler error message.\r\n");
+      str.AppendFormat(_CLTEXT("Missing Compiler error message.\r\n"));
     }
     else {
       try {
         str.VarFormat(it->second, arglist);
-        str.Append(L"\r\n");
+        str.Append(_CLTEXT("\r\n"));
       }
       catch(...)
       {
-        str.Append(L"\r\n");
+        str.Append(_CLTEXT("\r\n"));
       }
     }
 
@@ -256,7 +256,7 @@ namespace Marimo
     else if(idFile < m_SourcesTable.size()) {
       return m_SourcesTable[idFile]->strFilename;
     }
-    return L"";
+    return _CLTEXT("");
   }
 
   _DPEM_TEMPL
@@ -268,7 +268,7 @@ namespace Marimo
     else if(idFile < m_SourcesTable.size()) {
       return m_SourcesTable[idFile]->strPath;
     }
-    return L"";
+    return _CLTEXT("");
   }
 
   _DPEM_TEMPL

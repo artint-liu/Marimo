@@ -103,7 +103,7 @@ namespace GXUI
     for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
       it != aDefinitions.end(); ++it)
     {
-      if(it->Name == L"SliderBegin") {
+      if(it->Name == _CLTEXT("SliderBegin")) {
         if(TEST_FLAG(dwStyle, GXUISLDS_FLOAT)) {
           SetRangeBegin(dwStyle, (float)it->Value.ToFloat());
         }
@@ -111,7 +111,7 @@ namespace GXUI
           SetRangeBegin(dwStyle, it->Value.ToInteger());
         }
       }
-      else if(it->Name == L"SliderEnd") {
+      else if(it->Name == _CLTEXT("SliderEnd")) {
         if(TEST_FLAG(dwStyle, GXUISLDS_FLOAT)) {
           SetRangeEnd(dwStyle, (float)it->Value.ToFloat());
         }
@@ -119,7 +119,7 @@ namespace GXUI
           SetRangeEnd(dwStyle, it->Value.ToInteger());
         }
       }
-      else if(it->Name == L"DataPool")
+      else if(it->Name == _CLTEXT("DataPool"))
       {
         SetDataPoolVariableW(it->Value);
       }

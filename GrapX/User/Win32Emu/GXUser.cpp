@@ -1124,7 +1124,7 @@ GXHCURSOR GXDLLAPI gxLoadCursorW(
            GXLPCWSTR lpCursorName   // name string or cursor resource identifier  
            )
 {
-  return (GXHCURSOR)LoadCursorW((HINSTANCE)hInstance, (GXLPCWSTR)lpCursorName);
+  return (GXHCURSOR)LoadCursorW((HINSTANCE)hInstance, (LPCWSTR)lpCursorName);
 }
 
 GXHCURSOR GXDLLAPI gxLoadCursorA(

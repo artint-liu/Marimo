@@ -32,7 +32,7 @@ namespace GXUI
     , m_hWnd            (NULL)
     , m_hNotifyWnd      (NULL)
     , m_pFont           (NULL)
-    , m_strIdentityName (szIdName ? szIdName : L"")
+    , m_strIdentityName (szIdName ? szIdName : _CLTEXT(""))
   {
   }
 
@@ -81,14 +81,14 @@ namespace GXUI
     for(GXDefinitionArrayW::const_iterator it = aDefinitions.begin();
       it != aDefinitions.end(); ++it)
     {
-      if(it->Name == L"DataPool") {
+      if(it->Name == _CLTEXT("DataPool")) {
         SetDataPoolVariableW(it->Value);
       }
     }
     return TRUE;
   }
 
-  GXHRESULT CtrlBase::SetFont(LPCWSTR szFontName, int nFontSize)
+  GXHRESULT CtrlBase::SetFont(GXLPCWSTR szFontName, int nFontSize)
   {
     SAFE_RELEASE(m_pFont);
     GXGraphics* pGraphics = GXGetGraphics(m_hWnd);
@@ -547,11 +547,11 @@ namespace DlgXM
     s_ColorMarkDict.clear();
   }
 
-  GXDWORD ParseCombinedFlags(const clStringW& str, LPCWSTR szPrefix, CmbMarkCls eClass)
+  GXDWORD ParseCombinedFlags(const clStringW& str, GXLPCWSTR szPrefix, CmbMarkCls eClass)
   {
     clStringArrayW aString;
     GXDWORD dwFlags = NULL;
-    ResolveString(str, L"|", aString);
+    ResolveString(str, _CLTEXT("|"), aString);
 
     if(s_CombMarkDict.size() == 0) {
       InitializeDefinationTable();

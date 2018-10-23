@@ -799,7 +799,7 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
   m_pImage = pGraphics->CreateImageFromFile(m_strImageFile);
 
   if( ! m_pImage) {
-    CLOG_ERRORW(L"GXSprite : Can not create sprite image(\"%s\").\r\n", m_strImageFile);
+    CLOG_ERRORW(_CLTEXT("GXSprite : Can not create sprite image(\"%s\").\r\n"), m_strImageFile);
     return FALSE;
   }
 

@@ -26,7 +26,7 @@ private:
 
   virtual ~FileLoggerImpl()
   {
-    OutputW(L"[End of log file]\r\n");
+    OutputW(_CLTEXT("[End of log file]\r\n"));
     m_file.Close();
   }
 

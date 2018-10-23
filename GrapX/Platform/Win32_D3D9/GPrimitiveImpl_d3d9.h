@@ -58,13 +58,15 @@ namespace D3D9
     GXLPVOID      Lock      (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE)) override;
     GXBOOL        Unlock    () override;
 
-    virtual GXLPVOID    GetVerticesBuffer     () override;
-    virtual GXUINT      GetVerticesCount      () override;
-    virtual GXUINT      GetVertexStride       () override;
-    virtual GXBOOL      UpdateResouce         (ResEnum eRes) override;
-    virtual GXHRESULT   GetVertexDeclaration  (GVertexDeclaration** ppDeclaration) override;
-    virtual GXGraphics* GetGraphicsUnsafe     () override;
-    virtual GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
+    GXLPVOID    GetVerticesBuffer     () override;
+    GXUINT      GetVerticesCount      () override;
+    GXUINT      GetVertexStride       () override;
+    GXUINT      GetIndicesCount       () override;
+
+    GXBOOL      UpdateResouce         (ResEnum eRes) override;
+    GXHRESULT   GetVertexDeclaration  (GVertexDeclaration** ppDeclaration) override;
+    GXGraphics* GetGraphicsUnsafe     () override;
+    GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
   };
 
   //
@@ -94,17 +96,17 @@ namespace D3D9
       GXUINT uIndexOffsetToLock, GXUINT uIndexLengthToLock,
       GXLPVOID* ppVertexData, GXWORD** ppIndexData,
       GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE));
-    GXBOOL        Unlock  ();
-    virtual GXUINT    GetIndexCount  ();
+    GXBOOL      Unlock                ();
+    GXUINT      GetIndicesCount       () override;
 
-    virtual GXLPVOID    GetVerticesBuffer     ();
-    virtual GXUINT      GetVerticesCount      ();
-    virtual GXUINT      GetVertexStride       ();
-    virtual GXLPVOID    GetIndicesBuffer      ();
-    virtual GXBOOL      UpdateResouce         (ResEnum eRes);
-    virtual GXHRESULT   GetVertexDeclaration  (GVertexDeclaration** ppDeclaration);
-    virtual GXGraphics* GetGraphicsUnsafe     ();
-    virtual GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
+    GXLPVOID    GetVerticesBuffer     () override;
+    GXUINT      GetVerticesCount      () override;
+    GXUINT      GetVertexStride       () override;
+    GXLPVOID    GetIndicesBuffer      () override;
+    GXBOOL      UpdateResouce         (ResEnum eRes) override;
+    GXHRESULT   GetVertexDeclaration  (GVertexDeclaration** ppDeclaration) override;
+    GXGraphics* GetGraphicsUnsafe     () override;
+    GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
   protected:
     GXBOOL    RestoreIndices   ();
   private:

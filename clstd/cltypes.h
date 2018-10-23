@@ -84,10 +84,10 @@ typedef char16_t            wch;
 #else
 # if defined(_MSC_VER)
 typedef wchar_t             wch;
-# define _CLTEXT(_str_)     L##_str_
+#   define _CLTEXT(_str_)     L##_str_
 # elif defined(__GNUC__) || defined(__clang__)
 typedef wchar_t             wch; // 32 Bits
-# define _CLTEXT(_str_)     L##_str_
+#   define _CLTEXT(_str_)     L##_str_
 # endif
 #endif
 

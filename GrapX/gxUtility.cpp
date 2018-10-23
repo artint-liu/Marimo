@@ -48,7 +48,7 @@ namespace RepoUtility
       pPrimitive->GetVertexStride() * pPrimitive->GetVerticesCount());
 
     pStorage->Write(NULL, strMeshIndices, pPrimitive->GetIndicesBuffer(), 
-      pPrimitive->GetIndexCount() * sizeof(VIndex));
+      pPrimitive->GetIndicesCount() * sizeof(VIndex));
 
     pStorage->Write64(NULL, strMeshPrimCount, nNumPrimi, 0);
     pStorage->Write64(NULL, strMeshStartIndex, nStartIndex, 0);
@@ -425,7 +425,7 @@ namespace ObjMeshUtility
 
       int nStride = pPrimitive->GetVertexStride();
       int nNumVerts = pPrimitive->GetVerticesCount();
-      int nNumFaces = pPrimitive->GetIndexCount() / 3;
+      int nNumFaces = pPrimitive->GetIndicesCount() / 3;
       clStringA line;
       if(szName) {
         line.Format("g %x\n", pPrimitive);

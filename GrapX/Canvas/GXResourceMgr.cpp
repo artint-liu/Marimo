@@ -199,7 +199,7 @@ namespace GrapXInternal
       GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey)
     {
       pDesc->dwCategoryId = RCC_Texture;
-      pDesc->strResourceName.Format(L"%s,%d,%d,%d,%u,%d,%u,%u,%u,%08x", 
+      pDesc->strResourceName.Format(_CLTEXT("%s,%d,%d,%d,%u,%d,%u,%u,%u,%08x"), 
         pSrcFile, Width, Height, Depth, MipLevels, Format, ResUsage, Filter, MipFilter, ColorKey);
 
       return 0;
@@ -327,7 +327,7 @@ namespace GrapXInternal
 
       int i = 0;
       while((GXINT)lpVertexElement[i].UsageIndex >= 0) {
-        pDesc->strResourceName.AppendFormat(L"%08x-", 
+        pDesc->strResourceName.AppendFormat(_CLTEXT("%08x-"), 
           chksum_crc32((unsigned char*)&lpVertexElement[i], sizeof(GXVERTEXELEMENT)));
         i++;
       }
@@ -366,7 +366,7 @@ namespace GrapXInternal
       
       pDesc->dwCategoryId = RCC_RasterizerState;
       pDesc->strResourceName.Format(
-        L"%02x|%08x|%08x|%08x", 
+        _CLTEXT("%02x|%08x|%08x|%08x"), 
         ctx.dwCode, 
         pStateDesc->DepthBias, 
         pStateDesc->DepthBiasClamp, 
@@ -425,7 +425,7 @@ namespace GrapXInternal
 
       pDesc->dwCategoryId = RCC_BlendState;
       pDesc->strResourceName.Format(
-        L"%02x%08x", 
+        _CLTEXT("%02x%08x"), 
         ctx.dwCode[1], ctx.dwCode[0]);
 
       return GX_OK;
@@ -489,7 +489,7 @@ namespace GrapXInternal
 
       pDesc->dwCategoryId = RCC_DepthStencilState;
       pDesc->strResourceName.Format(
-        L"%08x|%08x|%08x", 
+        _CLTEXT("%08x|%08x|%08x"), 
         ctx.dwCode[0], ctx.dwCode[1], ctx.dwCode[2]);
 
       return GX_OK;

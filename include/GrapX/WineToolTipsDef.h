@@ -15,7 +15,7 @@
 
 //#ifdef _WIN32
 
-#define TOOLTIPS_CLASSW         L"tooltips_class32"
+#define TOOLTIPS_CLASSW         _CLTEXT("tooltips_class32")
 #define TOOLTIPS_CLASSA         "tooltips_class32"
 
 #ifdef _UNICODE

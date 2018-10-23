@@ -99,7 +99,7 @@ typedef GXHANDLE GXHKEY;
 //====== TOOLBAR CONTROL ======================================================
 #ifndef NOTOOLBAR
 
-#define TOOLBARCLASSNAMEW       L"ToolbarWindow32"
+#define TOOLBARCLASSNAMEW       _CLTEXT("ToolbarWindow32")
 #define TOOLBARCLASSNAMEA       "ToolbarWindow32"
 
 #ifdef  _UNICODE

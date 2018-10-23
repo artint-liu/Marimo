@@ -1861,7 +1861,7 @@ namespace Marimo
     if(file.CreateAlways(szFilename)) {
       return Save(file);
     }
-    CLOG_ERRORW(L"can not open file \"%s\".", szFilename);
+    CLOG_ERRORW(_CLTEXT("can not open file \"%s\"."), szFilename);
     return FALSE;
   }
 

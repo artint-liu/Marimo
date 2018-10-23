@@ -1463,7 +1463,7 @@ static LRESULT COMBO_GetTextW( GXLPHEADCOMBO lphc, GXINT count, GXLPWSTR buf )
       /* truncate if buffer is too short */
       if (length != LB_ERR)
       {
-        lstrcpynW( buf, lpBuffer, count );
+        clstd::strcpynT( buf, lpBuffer, count );
         length = count;
       }
       gxHeapFree( gxGetProcessHeap(), 0, lpBuffer );
@@ -2081,9 +2081,9 @@ LRESULT ComboWndProc_common( GXHWND hwnd, GXUINT message, WPARAM wParam, LPARAM 
       if( unicode )
       {
         if( lphc->dwStyle & CBS_LOWERCASE )
-          CharLowerW((GXLPWSTR)lParam);
+          CharLowerW((LPWSTR)lParam);
         else if( lphc->dwStyle & CBS_UPPERCASE )
-          CharUpperW((GXLPWSTR)lParam);
+          CharUpperW((LPWSTR)lParam);
         return gxSendMessageW(lphc->hWndLBox, LB_ADDSTRING, 0, lParam);
       }
       else /* unlike the unicode version, the ansi version does not overwrite
@@ -2111,9 +2111,9 @@ LRESULT ComboWndProc_common( GXHWND hwnd, GXUINT message, WPARAM wParam, LPARAM 
       if( unicode )
       {
         if( lphc->dwStyle & CBS_LOWERCASE )
-          CharLowerW((GXLPWSTR)lParam);
+          CharLowerW((LPWSTR)lParam);
         else if( lphc->dwStyle & CBS_UPPERCASE )
-          CharUpperW((GXLPWSTR)lParam);
+          CharUpperW((LPWSTR)lParam);
         return gxSendMessageW(lphc->hWndLBox, LB_INSERTSTRING, wParam, lParam);
       }
       else

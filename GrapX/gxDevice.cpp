@@ -400,11 +400,11 @@ GXBOOL DestroyStockObject(GXLPSTATION lpStation)
     //memset(buffer, 0, sizeof(GXWCHAR [1024]));
 
     //nCount = sprintf(buffer,L"Cursor Pos:%6d,%6d", lpStation->m_ptCursor.x, lpStation->m_ptCursor.y);
-    nCount = strInfo.Format(L"Cursor pos:%6d,%6d", lpStation->m_ptCursor.x, lpStation->m_ptCursor.y);
+    nCount = strInfo.Format(_CLTEXT("Cursor pos:%6d,%6d"), lpStation->m_ptCursor.x, lpStation->m_ptCursor.y);
     pCanvas->TextOutW(pFont, 6, 6, strInfo, (GXINT)nCount, 0xff000000);
     pCanvas->TextOutW(pFont, 5, 5, strInfo, (GXINT)nCount, 0xffffffff);
     //nCount = wsprintfW(buffer,L"Mouse Over Frame: %08XH ", lpStation->m_pMouseFocus);
-    nCount = strInfo.Format(L"Mouse over wnd: %08XH ", lpStation->m_pMouseFocus);
+    nCount = strInfo.Format(_CLTEXT("Mouse over wnd: %08XH "), lpStation->m_pMouseFocus);
     if(lpStation->m_pMouseFocus != NULL && lpStation->m_pMouseFocus->m_pText > (GXWCHAR*)0xffff)
     {
       //lstrcatW(buffer, lpStation->m_pMouseFocus->m_pText);

@@ -6,7 +6,7 @@
 #include "GrapX/GXKernel.h"
 
 GXCOMCTL32_SysColor  comctl32_color;
-#define COMCTL32_wSubclass  L"CCSubCtrl"
+#define COMCTL32_wSubclass _CLTEXT("CCSubCtrl")
 GXHBRUSH  gxCOMCTL32_hPattern55AABrush = NULL;
 #define ERR TRACE
 

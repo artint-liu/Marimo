@@ -42,7 +42,7 @@ IGXPlatform_Win32D3D11::IGXPlatform_Win32D3D11()
 
 GXHRESULT IGXPlatform_Win32D3D11::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
 {
-  const static GXLPWSTR lpClassName = L"GrapX_Win32_D3D11_Class";
+  const static LPWSTR lpClassName = _T("GrapX_Win32_D3D11_Class");
   //WNDCLASSEX wcex;
 
   m_pApp = pApp;

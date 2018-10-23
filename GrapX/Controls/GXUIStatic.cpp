@@ -516,7 +516,7 @@ namespace GXUI
     return FALSE;
   }
 
-  GXBOOL StaticSprite::SetByNameW(LPCWSTR szName)
+  GXBOOL StaticSprite::SetByNameW(GXLPCWSTR szName)
   {
     GXSprite::Type type;
     m_nSpriteIdx = m_pSprite->Find(szName, &type);

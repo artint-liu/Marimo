@@ -15,7 +15,7 @@ namespace D3D11
   {
   protected:
     GXGraphicsImpl*         m_pGraphicsImpl;
-    ID3D11Buffer*           m_pVertexBuffer;
+    ID3D11Buffer*           m_pD3D11VertexBuffer;
     GXUINT                  m_uElementSize;
     GXBYTE*                 m_pVertices;  // 内存中的保存 GXRU_FREQXXX 没有这个值
 
@@ -28,7 +28,8 @@ namespace D3D11
     D3D11_MAPPED_SUBRESOURCE* m_pVertMappedRes;
   protected:
     GPrimImpl(GXGraphics* pGraphics);
-    GXBOOL CreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl);
+    GXBOOL IntCreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl);
+    HRESULT IntCreateBuffer(ID3D11Buffer** ppD3D11Buffer, GXUINT nSize, GXUINT nBindFlags, GXLPCVOID pInitData);
 
     virtual LPCGXVERTEXELEMENT GetVertexDeclUnsafe();
     //virtual GXUINT    GetVerticesCount  ();
@@ -66,13 +67,15 @@ namespace D3D11
     GXBOOL        Unlock    ();
     //virtual Type  GetType   ();
 
-    virtual GXLPVOID  GetVerticesBuffer ();
-    virtual GXUINT    GetVerticesCount  ();
-    virtual GXUINT    GetVertexStride   ();
-    virtual GXBOOL    UpdateResouce     (ResEnum eRes);
-    virtual GXHRESULT GetVertexDeclaration(GVertexDeclaration** ppDeclaration);
-    virtual GXGraphics* GetGraphicsUnsafe ();
-    virtual GXINT       GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
+    GXLPVOID  GetVerticesBuffer () override;
+    GXUINT    GetVerticesCount  () override;
+    GXUINT    GetVertexStride   () override;
+    GXUINT    GetIndicesCount   () override;
+
+    GXBOOL    UpdateResouce     (ResEnum eRes) override;
+    GXHRESULT GetVertexDeclaration(GVertexDeclaration** ppDeclaration) override;
+    GXGraphics* GetGraphicsUnsafe () override;
+    GXINT       GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
 
     //private:
   };
@@ -107,19 +110,20 @@ namespace D3D11
       GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE));
     GXBOOL        Unlock  ();
     //virtual Type  GetType ();
-    virtual GXUINT    GetIndexCount  ();
 
-    virtual GXLPVOID  GetVerticesBuffer ();
-    virtual GXUINT    GetVerticesCount  ();
-    virtual GXUINT    GetVertexStride   ();
-    virtual GXLPVOID  GetIndicesBuffer  ();
-    virtual GXBOOL    UpdateResouce     (ResEnum eRes);
-    virtual GXHRESULT GetVertexDeclaration(GVertexDeclaration** ppDeclaration);
-    virtual GXGraphics* GetGraphicsUnsafe ();
-    virtual GXINT       GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
+    GXLPVOID    GetVerticesBuffer () override;
+    GXUINT      GetVerticesCount  () override;
+    GXUINT      GetVertexStride   () override;
+    GXLPVOID    GetIndicesBuffer  () override;
+    GXUINT      GetIndicesCount   () override;
+
+    GXBOOL      UpdateResouce     (ResEnum eRes) override;
+    GXHRESULT   GetVertexDeclaration(GVertexDeclaration** ppDeclaration) override;
+    GXGraphics* GetGraphicsUnsafe () override;
+    GXINT       GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
 
   private:
-    ID3D11Buffer*             m_pIndexBuffer;
+    ID3D11Buffer*             m_pD3D11IndexBuffer;
 
     // GXRU_FREQXXX 才有
     GXBYTE*                   m_pIndices;   // 内存中保存的索引缓冲

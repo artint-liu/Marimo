@@ -45,7 +45,7 @@ IMOPlatform_Win32Base::IMOPlatform_Win32Base()
 {
   // 获得当前路径
   GXWCHAR szWorkingPath[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, szWorkingPath);
+  GetCurrentDirectoryW(MAX_PATH, reinterpret_cast<LPWSTR>(szWorkingPath));
   m_strRootDir = szWorkingPath;
 }
 
@@ -217,7 +217,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
       Strings.clear();
       for(int nFileIdx = 0; nFileIdx < nFileCount; nFileIdx++)
       {        
-        DragQueryFileW((HDROP)wParam, nFileIdx, szFilename, MAX_PATH);
+        DragQueryFileW((HDROP)wParam, nFileIdx, reinterpret_cast<LPWSTR>(szFilename), MAX_PATH);
         Strings.push_back(szFilename);
       }
       DragFinish((HDROP)wParam);
@@ -430,7 +430,7 @@ GXHRESULT IMOPlatform_Win32Base::QueryFeature(GXDWORD dwFeatureCode, GXVOID** pp
   return GX_FAIL;
 }
 
-GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndProc, GXAPP_DESC* pDesc, GXApp* pApp)
+GXLRESULT IMOPlatform_Win32Base::CreateWnd(LPWSTR lpClassName, WNDPROC pWndProc, GXAPP_DESC* pDesc, GXApp* pApp)
 {
   WNDCLASSEXW wcex;
 
@@ -472,14 +472,14 @@ GXLRESULT IMOPlatform_Win32Base::CreateWnd(GXLPWSTR lpClassName, WNDPROC pWndPro
     //    rcWorkArea.top + (rcWorkArea.bottom - rcWorkArea.top - pDesc->nHeight) / 2, pDesc->nWidth, pDesc->nHeight);
     //}
     m_hWnd = CreateWindowExW(
-      NULL, lpClassName, pDesc->lpName, WS_OVERLAPPEDWINDOW,
+      NULL, lpClassName, reinterpret_cast<LPCWSTR>(pDesc->lpName), WS_OVERLAPPEDWINDOW,
       regnNewWin.left, regnNewWin.top, regnNewWin.width, regnNewWin.height, NULL, NULL, 
       m_hInstance, NULL);
   }
   else
   {
     m_hWnd = CreateWindowExW(
-      NULL, lpClassName, pDesc->lpName, bSizeable ? WS_OVERLAPPEDWINDOW : (WS_CAPTION | WS_SYSMENU),
+      NULL, lpClassName, reinterpret_cast<LPCWSTR>(pDesc->lpName), bSizeable ? WS_OVERLAPPEDWINDOW : (WS_CAPTION | WS_SYSMENU),
       0, 0, 100, 100, NULL, NULL, m_hInstance, NULL);
     RECT rectWorkarea;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &rectWorkarea, 0);

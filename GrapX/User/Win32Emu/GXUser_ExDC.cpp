@@ -331,17 +331,17 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
 
     if(IS_IDENTIFY(lpBitmapName))
     {
-      GXLPCWSTR szBaseDir = L"Resource\\OBM\\";
+      GXLPCWSTR szBaseDir = _CLTEXT("Resource\\OBM\\");
       GXLPCWSTR szOBMFile = NULL;
       switch((GXDWORD)lpBitmapName)
       {
       case GXOBM_CLOSE:
         break;
       case GXOBM_UPARROW:
-        szOBMFile = L"obm_uparrow.png";
+        szOBMFile = _CLTEXT("obm_uparrow.png");
         break;
       case GXOBM_DNARROW:
-        szOBMFile = L"obm_dnarrow.png";
+        szOBMFile = _CLTEXT("obm_dnarrow.png");
         break;
       case GXOBM_RGARROW:
         break;
@@ -368,15 +368,15 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
       case GXOBM_LFARROWD:
         break;
       case GXOBM_MNARROW:
-        szOBMFile = L"obm_mnarrow.png";
+        szOBMFile = _CLTEXT("obm_mnarrow.png");
         break;
       case GXOBM_COMBO:
         break;
       case GXOBM_UPARROWI:
-        szOBMFile = L"obm_uparrowi.png";
+        szOBMFile = _CLTEXT("obm_uparrowi.png");
         break;
       case GXOBM_DNARROWI:
-        szOBMFile = L"obm_dnarrowi.png";
+        szOBMFile = _CLTEXT("obm_dnarrowi.png");
       case GXOBM_RGARROWI:
         break;
       case GXOBM_LFARROWI:
@@ -398,7 +398,7 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
       case GXOBM_CHECK:
         break;
       case GXOBM_CHECKBOXES:
-        szOBMFile = L"obm_checkboxes.png";
+        szOBMFile = _CLTEXT("obm_checkboxes.png");
         break;
       case GXOBM_BTNCORNERS:
         break;

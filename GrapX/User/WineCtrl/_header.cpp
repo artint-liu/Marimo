@@ -2011,7 +2011,7 @@ static GXLRESULT HEADER_ThemeChanged(GXHWND hwnd)
 
 static GXLRESULT GXCALLBACK HEADER_WindowProc (GXHWND hwnd, GXUINT msg, GXWPARAM wParam, GXLPARAM lParam)
 {
-  TRACEW(L"hwnd=%p msg=%x wparam=%lx lParam=%lx\n", hwnd, msg, wParam, lParam);
+  TRACEW(_CLTEXT("hwnd=%p msg=%x wparam=%lx lParam=%lx\n"), hwnd, msg, wParam, lParam);
   if (!HEADER_GetInfoPtr (hwnd) && (msg != GXWM_CREATE))
     return gxDefWindowProcW (hwnd, msg, wParam, lParam);
   switch (msg) {
@@ -2159,7 +2159,7 @@ HEADER_Register ()
   wndClass.cbClsExtra    = 0;
   wndClass.cbWndExtra    = sizeof(HEADER_INFO *);
   wndClass.hCursor       = gxLoadCursorW (0, (GXLPWSTR)GXIDC_ARROW);
-  wndClass.lpszClassName = WC_HEADERW;
+  wndClass.lpszClassName = GXWC_HEADERW;
 
   gxRegisterClassExW (&wndClass);
 }
@@ -2168,6 +2168,6 @@ HEADER_Register ()
 GXVOID
 HEADER_Unregister ()
 {
-  gxUnregisterClassW (WC_HEADERW, NULL);
+  gxUnregisterClassW (GXWC_HEADERW, NULL);
 }
 #endif // _DEV_DISABLE_UI_CODE
