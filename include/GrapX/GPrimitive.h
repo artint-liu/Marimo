@@ -5,30 +5,22 @@ class GVertexDeclaration;
 
 class GPrimitive : public GResource
 {
-//public:
-//  enum ResEnum // TODO: 去掉
-//  {
-//    ResourceIndices,
-//    ResourceVertices,
-//    ResourceAll,
-//  };
-
 public:
   GPrimitive(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType){}
   GXSTDINTERFACE(GXHRESULT  AddRef  ());
 
-  GXSTDINTERFACE(GXGraphics*GetGraphicsUnsafe ());
+  GXSTDINTERFACE(GXGraphics*GetGraphicsUnsafe   ());
 
-  GXSTDINTERFACE(GXUINT     GetVertexCount    ());
-  GXSTDINTERFACE(GXUINT     GetVertexStride   ());
-  GXSTDINTERFACE(GXLPVOID   MapVertexBuffer   (GXResMap eMap));
-  GXSTDINTERFACE(GXBOOL     UnmapVertexBuffer (GXLPVOID lpMappedBuffer));
+  GXSTDINTERFACE(GXUINT     GetVertexCount      ());
+  GXSTDINTERFACE(GXUINT     GetVertexStride     ());
+  GXSTDINTERFACE(GXLPVOID   MapVertexBuffer     (GXResMap eMap));
+  GXSTDINTERFACE(GXBOOL     UnmapVertexBuffer   (GXLPVOID lpMappedBuffer));
 
   // 如果不包含Index buffer, 则下列索引相关函数返回0或者Null
-  GXSTDINTERFACE(GXUINT     GetIndexCount     ());
-  GXSTDINTERFACE(GXUINT     GetIndexStride    ());
-  GXSTDINTERFACE(GXLPVOID   MapIndexBuffer    (GXResMap eMap));
-  GXSTDINTERFACE(GXBOOL     UnmapIndexBuffer  (GXLPVOID lpMappedBuffer));
+  GXSTDINTERFACE(GXUINT     GetIndexCount       ());
+  GXSTDINTERFACE(GXUINT     GetIndexStride      ());
+  GXSTDINTERFACE(GXLPVOID   MapIndexBuffer      (GXResMap eMap));
+  GXSTDINTERFACE(GXBOOL     UnmapIndexBuffer    (GXLPVOID lpMappedBuffer));
 
   //GXSTDINTERFACE(GXBOOL     UpdateResouce     (ResEnum eRes));  // 将内存数据更新到设备上
   GXSTDINTERFACE(GXHRESULT  GetVertexDeclaration(GVertexDeclaration** ppDeclaration));
@@ -69,47 +61,4 @@ namespace GrapX
   } // namespace PrimitiveUtility
 } // namespace GrapX
 
-//
-// Primitive - Vertex 
-//
-//class GPrimitiveV : public GPrimitive
-//{
-//public:
-//  GPrimitiveV() : GPrimitive(0, RESTYPE_PRIMITIVE){}
-//
-//  GXSTDINTERFACE(GXHRESULT AddRef        ());
-//  GXSTDINTERFACE(GXHRESULT Release       ());
-//
-//  //GXSTDINTERFACE(GXBOOL    EnableDiscard (GXBOOL bDiscard));
-//  //GXSTDINTERFACE(GXBOOL    IsDiscardable ());
-//  //GXSTDINTERFACE(GXLPVOID  Lock          (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, 
-//  //  GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE)));
-//  //GXSTDINTERFACE(GXBOOL    Unlock        ());
-//};
-
-//
-// Primitive - Vertex & Index
-//
-//class GPrimitiveVI : public GPrimitive
-//{
-//public:
-//  GPrimitiveVI() : GPrimitive(0, RESTYPE_INDEXED_PRIMITIVE){}
-//
-//  GXSTDINTERFACE(GXHRESULT AddRef        ());
-//  GXSTDINTERFACE(GXHRESULT Release       ());
-//
-//  //GXSTDINTERFACE(GXBOOL    EnableDiscard (GXBOOL bDiscard));
-//  //GXSTDINTERFACE(GXBOOL    IsDiscardable ());
-//  //GXSTDINTERFACE(GXBOOL    Lock          (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, 
-//  //  GXUINT uIndexOffsetToLock, GXUINT uIndexLengthToLock,
-//  //  GXLPVOID* ppVertexData, GXWORD** ppIndexData,
-//  //  GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE)));
-//  //GXSTDINTERFACE(GXBOOL    Unlock        ());
-//  //GXSTDINTERFACE(GXUINT    GetIndicesCount ());
-//  //GXSTDINTERFACE(GXLPVOID  GetIndicesBuffer());
-//};
-//
-// EnableDiscard()
-// 确定是否可以在LostDevice时丢弃, 默认为TRUE
-//
 #endif // _GRAPHX_PRIMITIVE_H_

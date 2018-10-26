@@ -12,8 +12,6 @@
 #include "GrapX/GXGraphics.h"
 #include "GrapX/GShader.h"
 #include "GrapX/GXKernel.h"
-#include "GrapX/DataPool.h"
-#include "GrapX/DataPoolVariable.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
@@ -31,20 +29,6 @@
 
 namespace D3D9
 {
-#include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
-  
-  //GPrimImpl::GPrimImpl(GXGraphics* pGraphics)
-  //  : m_pGraphicsImpl   ((GXGraphicsImpl*)pGraphics)
-  //  , m_pVertexBuffer   (NULL)
-  //  , m_uVertexSize    (0)
-  //  , m_uVertexCount   (0)
-  //  , m_pLockedVertex   (NULL)
-  //  , m_dwResUsage      (NULL)
-  //  , m_pVertexDecl     (NULL)
-  //  , m_pVertices       (NULL)
-  //{
-  //}
-
   GXBOOL GPrimitiveVertexOnlyImpl::CreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl)
   {
     GXBOOL bval = FALSE;
@@ -111,14 +95,9 @@ namespace D3D9
     GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
     if(nRefCount == 0)
     {
-      //OnDeviceEvent(DE_LostDevice);
       delete this;
       return GX_OK;
     }
-    //else if(m_uRefCount == 1)
-    //{
-    //  return m_pGraphicsImpl->OldUnregisterResource(this);
-    //}
     return nRefCount;
   }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -128,7 +107,6 @@ namespace D3D9
     INVOKE_DESC_CHECK(pDesc);
     DWORD dwUsage;
     D3DPOOL ePool;
-    //ConvertPrimResUsageToNative(m_dwResUsage, &dwUsage, &ePool);
     ConvertPrimResUsageToNative(&dwUsage, &ePool, m_eResUsage);
 
     switch(pDesc->dwCmdCode)
@@ -163,18 +141,17 @@ namespace D3D9
 
   GXBOOL GPrimitiveVertexOnlyImpl::InitPrimitive(LPCGXVERTEXELEMENT pVertexDecl, GXLPCVOID pVertInitData)
   {
-    //m_uVertexCount = uElementCount;
-    //m_uElementSize  = uElementSize;
-    //m_dwResUsage    = ResUsage;
-
     // 创建顶点声明
     CreateVertexDeclaration(pVertexDecl);
-    //ASSERT(TEST_FLAG(ResUsage, GXRU_SYSTEMMEM) == 0);
     GRESCRIPTDESC Desc;
     InlSetZeroT(Desc);
     Desc.dwCmdCode = RC_ResetDevice;
 
-    //if(OnDeviceEvent(DE_ResetDevice) == GX_OK)
+    if(m_uVertexSize == 0) {
+      m_uVertexSize = m_pVertexDecl->GetStride();
+    }
+
+
     if(Invoke(&Desc) == GX_OK)
     {
       // 这个应该在 Invoke ResetDevice 之后创建, 否则会有冗余的内存复制
@@ -192,27 +169,12 @@ namespace D3D9
     return FALSE;
   }
 
-  //GXBOOL GPrimitiveVertexOnlyImpl::EnableDiscard(GXBOOL bDiscard)
-  //{
-  //  return FALSE;
-  //}
-
-  //GXBOOL GPrimitiveVertexOnlyImpl::IsDiscardable()
-  //{
-  //  return TRUE;
-  //}
-
   GXLPVOID GPrimitiveVertexOnlyImpl::MapVertexBuffer(GXResMap eMap)
   {
     if(m_pLockedVertex != NULL) {
       return NULL;
     }
 
-    //if(IsDiscardable() != FALSE)
-    //{
-    //  m_pVertexBuffer->Lock(0, m_uVertexCount * m_uVertexSize, &m_pLockedVertex, D3DLOCK_DISCARD);
-    //  return m_pLockedVertex;
-    //}
     HRESULT hr = S_OK;
 
     switch(m_eResUsage)
@@ -236,15 +198,6 @@ namespace D3D9
 
   GXBOOL GPrimitiveVertexOnlyImpl::UnmapVertexBuffer(GXLPVOID lpMappedBuffer)
   {
-    //if(IsDiscardable() != FALSE)
-    //{
-    //  if(m_pVertices != NULL) {
-    //    memcpy(m_pVertices, m_pLockedVertex, m_uVertexCount * m_uVertexSize);
-    //  }
-
-    //  m_pVertexBuffer->Unlock();
-    //  m_pLockedVertex = NULL;
-    //}
     if(lpMappedBuffer != m_pVertexBuffer) {
       return FALSE;
     }
@@ -265,15 +218,6 @@ namespace D3D9
   {
     return FALSE;
   }
-  //GPrimitive::Type GPrimitiveVImpl::GetType()
-  //{
-  //  return VertexOnly;
-  //}
-  
-  //GXLPVOID GPrimitiveVertexOnlyImpl::GetVerticesBuffer()
-  //{
-  //  return m_pVertices;
-  //}
 
   GXUINT GPrimitiveVertexOnlyImpl::GetVertexCount()
   {
@@ -310,14 +254,6 @@ namespace D3D9
     return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
   }
 
-  //GXBOOL GPrimitiveVertexOnlyImpl::UpdateResouce( ResEnum eRes )
-  //{
-  //  if(eRes == GPrimitive::ResourceAll || eRes == GPrimitive::ResourceVertices) {
-  //    return RestoreVertices();
-  //  }
-  //  return FALSE;
-  //}
-  
   //////////////////////////////////////////////////////////////////////////
   GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride)
     : GPrimitiveVertexOnlyImpl(pGraphics, eUsage, nVertexCount, nVertexStride)
@@ -397,17 +333,6 @@ namespace D3D9
   }
   GXBOOL GPrimitiveVertexIndexImpl::InitPrimitive(LPCGXVERTEXELEMENT pVertexDecl, GXLPCVOID pVertInitData, GXLPCVOID pIndexInitData)
   {
-    //if(uVertexCount == 0 || uVertexSize == 0 || uIndexCount == 0)
-    //  return FALSE;
-
-    //m_uVertexCount = uVertexCount;
-    //m_uVertexSize  = uVertexSize;
-    //m_uIndexCount   = uIndexCount;
-    //m_dwResUsage    = ResUsage;
-
-    // 创建顶点声明
-    //CreateVertexDeclaration(pVertexDecl);
-    //ASSERT(TEST_FLAG(ResUsage, GXRU_SYSTEMMEM) == 0);
     GPrimitiveVertexOnlyImpl::InitPrimitive(pVertexDecl, pVertInitData);
 
     GRESCRIPTDESC Desc;
@@ -415,7 +340,6 @@ namespace D3D9
     Desc.dwCmdCode = RC_ResetDevice;
 
 
-    //if(OnDeviceEvent(DE_ResetDevice) == GX_OK)
     if(Invoke(&Desc) == GX_OK)
     {
       // 这个应该在 Invok ResetDevice 之后创建, 否则会有冗余的内存复制
@@ -426,20 +350,6 @@ namespace D3D9
       {
         memcpy(m_pIndexBuffer, pIndexInitData, m_uIndexCount * m_uIndexSize);
         RestoreIndices();
-
-        //VIndex* pLockedIdx = (VIndex*)MapIndexBuffer(GXResMap_Write);
-
-        ////memcpy(m_pVertices, pVertInitData, m_uVertexCount * m_uVertexSize);
-        ////memcpy(m_pIndices, pIndexInitData, m_uIndexCount * sizeof(GXWORD));
-        //if(pLockedIdx)
-        //{
-        //  //memcpy(pLockedVert, pVertInitData, uVertexCount * uVertexSize);
-        //  memcpy(pLockedIdx, pIndexInitData, m_uIndexCount * m_uIndexSize);
-        //  UnmapIndexBuffer(pLockedIdx);
-        //}
-        //else{
-        //  ASSERT(0);
-        //}
       }
 
       return TRUE;
@@ -450,16 +360,6 @@ namespace D3D9
     SAFE_RELEASE(m_pD3D9VertexBuffer);
     return FALSE;
   }
-
-  //GXBOOL GPrimitiveVertexIndexImpl::EnableDiscard(GXBOOL bDiscard)
-  //{
-  //  return FALSE;
-  //}
-
-  //GXBOOL GPrimitiveVertexIndexImpl::IsDiscardable()
-  //{
-  //  return TRUE;
-  //}
 
   GXLPVOID GPrimitiveVertexIndexImpl::MapIndexBuffer(GXResMap eMap)
   {
@@ -501,10 +401,6 @@ namespace D3D9
 
     return TRUE;
   }
-  //GPrimitive::Type GPrimitiveVIImpl::GetType()
-  //{
-  //  return Indexed;
-  //}
 
   GXUINT GPrimitiveVertexIndexImpl::GetIndexCount()
   {
@@ -525,23 +421,6 @@ namespace D3D9
   {
     return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
   }
-
-  //GXBOOL GPrimitiveVertexIndexImpl::UpdateResouce( ResEnum eRes )
-  //{
-  //  switch(eRes)
-  //  {
-  //  case GPrimitive::ResourceIndices:
-  //    return RestoreIndices();
-  //  case GPrimitive::ResourceVertices:
-  //    return RestoreVertices();
-  //  case GPrimitive::ResourceAll:
-  //    {
-  //      const GXBOOL bval = RestoreIndices();
-  //      return (RestoreVertices() && bval);
-  //    }
-  //  }
-  //  return FALSE;
-  //}
 
   GXBOOL GPrimitiveVertexIndexImpl::RestoreIndices()
   {

@@ -22,7 +22,7 @@ namespace D3D11
     GXGraphicsImpl*           m_pGraphicsImpl;
     ID3D11Buffer*             m_pD3D11VertexBuffer;
     const GXUINT              m_uVertexCount;
-    const GXUINT              m_uVertexStride;
+    GXUINT                    m_uVertexStride;
     D3D11_MAPPED_SUBRESOURCE  m_sVertexMapped;
     GXLPBYTE                  m_pVertexBuffer;
 

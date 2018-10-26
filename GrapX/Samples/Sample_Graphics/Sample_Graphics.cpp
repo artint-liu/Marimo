@@ -53,6 +53,7 @@ GTexture* g_pImage0;
 GTexture* g_pImage1;
 //HWND g_hWnd;
 
+void TestPrimitive(GXGraphics* pGraphics);
 
 //void Test1(RECT& rect);
 //void Test2(RECT& rect);
@@ -131,6 +132,8 @@ public:
   {
     m_nPage = 0;
     m_nSubPage = 0;
+    TestPrimitive(m_pGraphics);
+
     m_pGraphics->CreateTextureFromFileW(&m_pTexture, _CLTEXT("textures/AOX.png"));
     m_pGraphics->CreateTextureFromFileW(&m_pTestIcon, _CLTEXT("textures/AOX.png"));
     //m_pGraphics->CreateTextureFromFile(&g_pTexture, L"RGB.bmp");

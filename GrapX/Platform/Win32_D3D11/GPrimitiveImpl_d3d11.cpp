@@ -5,7 +5,6 @@
 #include "User/GrapX.Hxx"
 
 // 标准接口
-//#include "Include/GUnknown.h"
 #include "GrapX/GResource.h"
 #include "GrapX/GPrimitive.h"
 #include "GrapX/GXGraphics.h"
@@ -16,7 +15,6 @@
 #include "GrapX/Platform.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D11.h"
-#include "Platform/Win32_D3D11/GShaderImpl_D3D11.h"
 #include "Platform/Win32_D3D11/GVertexDeclImpl_d3d11.h"
 
 // 私有头文件
@@ -28,20 +26,6 @@
 #ifdef ENABLE_GRAPHICS_API_DX11
 namespace D3D11
 {
-#include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
-
-  //GPrimImpl::GPrimImpl(GXGraphics* pGraphics)
-  //  : m_pGraphicsImpl   ((GXGraphicsImpl*)pGraphics)
-  //  , m_pD3D11VertexBuffer   (NULL)
-  //  , m_uElementSize    (0)
-  //  , m_uElementCount   (0)
-  //  , m_pVertMappedRes  (NULL)
-  //  , m_dwResUsage      (NULL)
-  //  , m_pVertexDecl     (NULL)
-  //  , m_pVertices       (NULL)
-  //{
-  //}
-
   GXBOOL GPrimitiveVertexOnlyImpl::IntCreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl)
   {
     GXBOOL bval = FALSE;
@@ -59,7 +43,6 @@ namespace D3D11
 
   GXBOOL GPrimitiveVertexOnlyImpl::IntCreateBuffer(ID3D11Buffer** ppD3D11Buffer, GXUINT nSize, GXUINT nBindFlags, GXLPCVOID pInitData)
   {
-    //ASSERT(m_uElementCount > 0 && m_uElementSize > 0);
     ASSERT(*ppD3D11Buffer == NULL);
 
     D3D11_BUFFER_DESC bd;
@@ -165,6 +148,9 @@ namespace D3D11
     IntCreateVertexDeclaration(pVertexDecl);
 
     GXBOOL result = TRUE;
+    if(m_uVertexStride == 0) {
+      m_uVertexStride = m_pVertexDecl->GetStride();
+    }
 
     if(m_eUsage != GXResUsage::GXResUsage_SystemMem)
     {
@@ -269,11 +255,6 @@ namespace D3D11
     return IntUnmapBuffer(lpMappedBuffer, m_pD3D11VertexBuffer, m_sVertexMapped, m_pVertexBuffer);
   }
 
-  //GXLPVOID GPrimitiveVImpl::GetVerticesBuffer()
-  //{
-  //  return m_pVertices;
-  //}
-
   GXUINT GPrimitiveVertexOnlyImpl::GetVertexCount()
   {
     return m_uVertexCount;
@@ -323,12 +304,8 @@ namespace D3D11
     return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
   }
 
-  //GXBOOL GPrimitiveVImpl::UpdateResouce( ResEnum eRes )
-  //{
-  //  CLBREAK;
-  //  return TRUE;
-  //}
   //////////////////////////////////////////////////////////////////////////
+
   GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride)
     : GPrimitiveVertexOnlyImpl(pGraphics, eUsage, nVertexCount, nVertexStride)
     , m_pD3D11IndexBuffer (NULL)
@@ -448,11 +425,6 @@ namespace D3D11
     return IntUnmapBuffer(lpMappedBuffer, m_pD3D11IndexBuffer, m_sIndexMapped, m_pIndexBuffer);
   }
 
-  //GXLPVOID GPrimitiveVIImpl::GetIndicesBuffer()
-  //{
-  //  return m_pIndices;
-  //}
-
   GXUINT GPrimitiveVertexIndexImpl::GetIndexCount()
   {
     return m_uIndexCount;
@@ -463,7 +435,6 @@ namespace D3D11
     return m_uIndexStride;
   }
 
-
   GXHRESULT GPrimitiveVertexIndexImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
   {
     if(m_pVertexDecl == NULL)
@@ -472,6 +443,7 @@ namespace D3D11
     *ppDeclaration = m_pVertexDecl;
     return GX_OK;
   }
+
   GXGraphics* GPrimitiveVertexIndexImpl::GetGraphicsUnsafe()
   {
     return static_cast<GXGraphics*>(m_pGraphicsImpl);
@@ -482,11 +454,6 @@ namespace D3D11
     return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
   }
 
-  //GXBOOL GPrimitiveVIImpl::UpdateResouce( ResEnum eRes )
-  //{
-  //  CLBREAK;
-  //  return TRUE;
-  //}
 } // namespace D3D11
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11
 #endif // defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
