@@ -2163,6 +2163,9 @@ namespace UVShader
           if(depth == 0) {
             DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i], 0);
           }
+          else if(i == 1 && depth > 128) {
+            str[i] = "...";
+          }
           else if(pNode->mode == SYNTAXNODE::MODE_Chain) {
             DbgDumpSyntaxTree(pArray, pNode->Operand[i].pNode, pNode->pOpcode ? pNode->pOpcode->precedence : 0, &str[i], depth);
           }
@@ -5643,7 +5646,7 @@ namespace UVShader
     clStringA strRearrange;
     if(nErrorCount == DbgErrorCount()) {
       pInitListGlob->pNode = il.GetRearrangedList(); // 用整理的初始化列表代替原来的列表
-      DbgDumpSyntaxTree(NULL, pInitListGlob->pNode, 0, &strRearrange);
+      DbgDumpSyntaxTree(NULL, pInitListGlob->pNode, 0, &strRearrange, 1);
     }
     else {
       strRearrange = "[ERROR]";

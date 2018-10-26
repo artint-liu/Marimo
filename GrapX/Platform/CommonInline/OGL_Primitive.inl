@@ -11,13 +11,13 @@
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-GXHRESULT GPrimitiveVImpl::AddRef()
+GXHRESULT GPrimitiveVertexOnlyImpl::AddRef()
 {
   return gxInterlockedIncrement(&m_nRefCount);
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GPrimitiveVImpl::GPrimitiveVImpl(GXGraphics* pGraphics)
+GPrimitiveVertexOnlyImpl::GPrimitiveVertexOnlyImpl(GXGraphics* pGraphics)
   : GPrimitiveV         ()
   , GPrimImpl         (pGraphics)
   //, m_uElementSize      (0)
@@ -29,13 +29,13 @@ GPrimitiveVImpl::GPrimitiveVImpl(GXGraphics* pGraphics)
 {
 }
 
-GPrimitiveVImpl::~GPrimitiveVImpl()
+GPrimitiveVertexOnlyImpl::~GPrimitiveVertexOnlyImpl()
 {
   m_pGraphicsImpl->UnregisterResource(this);
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-GXLRESULT GPrimitiveVImpl::Release()
+GXLRESULT GPrimitiveVertexOnlyImpl::Release()
 {
   GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
   if(nRefCount == 0)
@@ -76,7 +76,7 @@ GXLRESULT GPrimitiveVImpl::Release()
 //  return GX_FAIL;
 //}
 
-GXBOOL GPrimitiveVImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCount, GXUINT uElementSize, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
+GXBOOL GPrimitiveVertexOnlyImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCount, GXUINT uElementSize, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
 {
   ASSERT(pVertInitData == NULL); // TODO: 稍后支持初始化数据
   //ASSERT(pVertexDecl == NULL);
@@ -102,18 +102,18 @@ GXBOOL GPrimitiveVImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCo
   return FALSE;
 }
 
-GXBOOL GPrimitiveVImpl::EnableDiscard(GXBOOL bDiscard)
+GXBOOL GPrimitiveVertexOnlyImpl::EnableDiscard(GXBOOL bDiscard)
 {
   return FALSE;
 }
 
-GXBOOL GPrimitiveVImpl::IsDiscardable()
+GXBOOL GPrimitiveVertexOnlyImpl::IsDiscardable()
 {
   return TRUE;
   //return (m_hVertex == NULL);
 }
 
-GXLPVOID GPrimitiveVImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXDWORD dwFlags/* = (D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE)*/)
+GXLPVOID GPrimitiveVertexOnlyImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXDWORD dwFlags/* = (D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE)*/)
 {
   if(m_pLockedVertex != NULL)
     return m_pLockedVertex;
@@ -128,7 +128,7 @@ GXLPVOID GPrimitiveVImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCount
   return NULL;
 }
 
-GXBOOL GPrimitiveVImpl::Unlock()
+GXBOOL GPrimitiveVertexOnlyImpl::Unlock()
 {
   if(m_uLockedSize == 0)
   {
@@ -157,39 +157,39 @@ GXBOOL GPrimitiveVImpl::Unlock()
   return GX_OK;
 }
 
-GPrimitive::Type GPrimitiveVImpl::GetType()
+GPrimitive::Type GPrimitiveVertexOnlyImpl::GetType()
 {
   return VertexOnly;
 }
 
-GXLPVOID GPrimitiveVImpl::GetVerticesBuffer()
+GXLPVOID GPrimitiveVertexOnlyImpl::GetVerticesBuffer()
 {
   ASSERT(0);
   return NULL;
 }
 
-GXUINT GPrimitiveVImpl::GetVerticesCount()
+GXUINT GPrimitiveVertexOnlyImpl::GetVerticesCount()
 {
   return m_uElementCount;
 }
 
-GXUINT GPrimitiveVImpl::GetVertexStride()
+GXUINT GPrimitiveVertexOnlyImpl::GetVertexStride()
 {
   return m_uElementSize;
 }
 
-  GXHRESULT GPrimitiveVImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
+  GXHRESULT GPrimitiveVertexOnlyImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
   {
     return InlGetSafeObjectT<GVertexDeclaration>(ppDeclaration, m_pVertexDecl);
   }
 
-GXINT GPrimitiveVImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
+GXINT GPrimitiveVertexOnlyImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
 {
   return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
 }
 
 //////////////////////////////////////////////////////////////////////////
-GPrimitiveVIImpl::GPrimitiveVIImpl(GXGraphics* pGraphics)
+GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(GXGraphics* pGraphics)
   : GPrimitiveVI            (pOwner)
   , m_pGraphicsImpl         ((GXGraphicsImpl*)pGraphics)
   , m_uElementSize          (0)
@@ -209,13 +209,13 @@ GPrimitiveVIImpl::GPrimitiveVIImpl(GXGraphics* pGraphics)
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-GXLRESULT GPrimitiveVIImpl::AddRef()
+GXLRESULT GPrimitiveVertexIndexImpl::AddRef()
 {
   return gxInterlockedIncrement(&m_nRefCount);
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXLRESULT GPrimitiveVIImpl::Release()
+GXLRESULT GPrimitiveVertexIndexImpl::Release()
 {
   GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
   ASSERT((m_uRefCount & 0x80000000) == 0);
@@ -231,7 +231,7 @@ GXLRESULT GPrimitiveVIImpl::Release()
   return nRefCount;
 }
 
-GXLRESULT GPrimitiveVIImpl::OnDeviceEvent(DeviceEvent eEvent)
+GXLRESULT GPrimitiveVertexIndexImpl::OnDeviceEvent(DeviceEvent eEvent)
 {
   switch(eEvent)
   {
@@ -266,7 +266,7 @@ GXLRESULT GPrimitiveVIImpl::OnDeviceEvent(DeviceEvent eEvent)
   return GX_FAIL;
 }
 
-GXBOOL GPrimitiveVIImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uVertexCount, GXUINT uVertexSize, GXLPVOID pIndexInitData, GXUINT uIndexCount, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
+GXBOOL GPrimitiveVertexIndexImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uVertexCount, GXUINT uVertexSize, GXLPVOID pIndexInitData, GXUINT uIndexCount, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
 {
   ASSERT(pIndexInitData == NULL && pVertInitData == NULL); // TODO: 稍后支持初始化数据
   //ASSERT(pVertexDecl == NULL);
@@ -298,18 +298,18 @@ GXBOOL GPrimitiveVIImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uVertexCo
   return FALSE;
 }
 
-GXBOOL GPrimitiveVIImpl::EnableDiscard(GXBOOL bDiscard)
+GXBOOL GPrimitiveVertexIndexImpl::EnableDiscard(GXBOOL bDiscard)
 {
   return FALSE;
 }
 
-GXBOOL GPrimitiveVIImpl::IsDiscardable()
+GXBOOL GPrimitiveVertexIndexImpl::IsDiscardable()
 {
   return TRUE;
   //return (m_hVertex == NULL);
 }
 
-GXBOOL GPrimitiveVIImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXUINT uIndexOffsetToLock, GXUINT uIndexLengthToLock,
+GXBOOL GPrimitiveVertexIndexImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXUINT uIndexOffsetToLock, GXUINT uIndexLengthToLock,
   GXLPVOID* ppVertexData, GXWORD** ppIndexData, GXDWORD dwFlags/* = (D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE)*/)
 {
   if(ppVertexData == NULL || ppIndexData == NULL)
@@ -348,7 +348,7 @@ GXBOOL GPrimitiveVIImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCountT
 }
 
 
-GXBOOL GPrimitiveVIImpl::Unlock()
+GXBOOL GPrimitiveVertexIndexImpl::Unlock()
 {
   if(m_uLockedVerticesSize == 0)
   {
@@ -410,40 +410,40 @@ GXBOOL GPrimitiveVIImpl::Unlock()
   return GX_OK;
 }
 
-GPrimitive::Type GPrimitiveVIImpl::GetType()
+GPrimitive::Type GPrimitiveVertexIndexImpl::GetType()
 {
   return Indexed;
 }
 
-GXLPVOID GPrimitiveVIImpl::GetVerticesBuffer()
+GXLPVOID GPrimitiveVertexIndexImpl::GetVerticesBuffer()
 {
   ASSERT(0);
   return NULL;
 }
 
-GXLPVOID GPrimitiveVIImpl::GetIndicesBuffer()
+GXLPVOID GPrimitiveVertexIndexImpl::GetIndicesBuffer()
 {
   ASSERT(0);
   return NULL;
 }
 
-  GXHRESULT GPrimitiveVIImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
+  GXHRESULT GPrimitiveVertexIndexImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
   {
     return InlGetSafeObjectT<GVertexDeclaration>(ppDeclaration, m_pVertexDecl);
   }
 
 
-GXUINT GPrimitiveVIImpl::GetVerticesCount()
+GXUINT GPrimitiveVertexIndexImpl::GetVerticesCount()
 {
   return m_uVertexCount;
 }
 
-GXUINT GPrimitiveVIImpl::GetVertexStride()
+GXUINT GPrimitiveVertexIndexImpl::GetVertexStride()
 {
   return m_uElementSize;
 }
 
-GXINT GPrimitiveVIImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
+GXINT GPrimitiveVertexIndexImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
 {
   return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
 }

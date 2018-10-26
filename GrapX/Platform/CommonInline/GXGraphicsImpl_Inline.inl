@@ -5,8 +5,8 @@
 #define _GXGRAPHICS_INLINE_
 //namespace D3D9
 //{
-class GPrimitiveVImpl;
-class GPrimitiveVIImpl;
+class GPrimitiveVertexOnlyImpl;
+class GPrimitiveVertexIndexImpl;
 #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D9_
 inline GXBOOL GXGraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
 {
@@ -296,8 +296,8 @@ GXHRESULT GXGraphicsImpl::InlSetVertexDecl(GVertexDeclImpl* pVertexDecl)
 
 //namespace GLES2
 //{
-class GPrimitiveVImpl;
-class GPrimitiveVIImpl;
+class GPrimitiveVertexOnlyImpl;
+class GPrimitiveVertexIndexImpl;
 
 
 

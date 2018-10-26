@@ -111,6 +111,7 @@ enum RESOURCE_CATEGORY_CODE // TODO: 这个要改为外部声明
   RCC_BlendState        = GXMAKEFOURCC('B','L','D','T'),
   RCC_DepthStencilState = GXMAKEFOURCC('D','P','S','T'),
   RCC_Canvas3D          = GXMAKEFOURCC('C','N','V','3'),
+  RCC_NamedPrimitive    = GXMAKEFOURCC('N','P','R','I'),
 };
 
 

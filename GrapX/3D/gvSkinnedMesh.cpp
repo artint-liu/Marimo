@@ -34,6 +34,7 @@
 #define SKINNEDMESH_WEIGHT        "SkMesh@Weight"
 #define SKINNEDMESH_CLUSTERCOUNT  "SkMesh@ClusterCount"
 
+using namespace GrapX;
 
 GXBOOL GVSkinnedMeshSoft::Initialize(
   GXGraphics*         pGraphics,
@@ -88,7 +89,9 @@ GXBOOL GVSkinnedMeshSoft::Initialize(GXGraphics* pGraphics, const GVMESHDATA* pM
     m_nNormalOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_NORMAL, 0);
     m_pVertices = new GXBYTE[m_nVertStride * nVertCount];
     m_nClusterCount = nClusterCount;
-    memcpy(m_pVertices, m_pPrimitive->GetVerticesBuffer(), m_nVertStride * nVertCount);
+
+    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Write);
+    memcpy(m_pVertices, locker_v.GetPtr(), m_nVertStride * nVertCount);
 
     return TRUE;
   }
@@ -185,16 +188,21 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
   if(m_pSkeleton == NULL)
     return TRUE;
 
-  GXLPVOID pNewVertices = NULL;
-  GXWORD* pIndices = NULL;
+  //GXLPVOID pNewVertices = NULL;
+  //GXWORD* pIndices = NULL;
 
   float3* pSrcPos = NULL;
   float3* pDestPos = NULL;
   float3* pSrcNormal = NULL;
   float3* pDestNormal = NULL;
   m_aabbLocal.Clear();
-  if(m_pPrimitive->Lock(0, 0, 0, 0, &pNewVertices, &pIndices))
+
+  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_ReadWrite);
+
+  //if(m_pPrimitive->Lock(0, 0, 0, 0, &pNewVertices, &pIndices))
+  if(locker_v.GetPtr())
   {
+    GXLPVOID pNewVertices = locker_v.GetPtr();
     pSrcPos = (float3*)((GXBYTE*)m_pVertices + m_nPosOffset);
     pDestPos = (float3*)((GXBYTE*)pNewVertices + m_nPosOffset);
 
@@ -230,7 +238,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
       pSrcNormal = (float3*)((GXBYTE*)pSrcNormal + m_nVertStride);
       pDestNormal = (float3*)((GXBYTE*)pDestNormal + m_nVertStride);
     }
-    m_pPrimitive->Unlock();
+    //m_pPrimitive->Unlock();
   }
   return TRUE;
 }

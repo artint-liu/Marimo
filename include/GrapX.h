@@ -4629,13 +4629,20 @@ typedef const GXRENDERSTATE* GXLPCRENDERSTATE;
 #define GXRU_FREQUENTLYWRITE    0x0008   // 频繁写, 性能内存同上
 #define GXRU_SYSTEMMEM          0x0010   // 创建在系统内存中,不能用于渲染
 
-CLENUM_CLASS(GXUINT, GXUsage)
+CLENUM_CLASS(GXUINT, GXResUsage)
 {
-  GXUsage_Default   = 0,  // 默认，数据在创建时指定
-  GXUsage_Read      = 1,  // 数据可读
-  GXUsage_Write     = 2,  // 数据可以在创建后再写入
-  GXUsage_ReadWrite = 3,  // 数据在创建后可以读取，并且也可以写入
-  GXUsage_SystemMem = 4,  // 数据放在系统内存，不能用于渲染
+  GXResUsage_Default   = 0,  // 默认，数据在创建时指定
+  GXResUsage_Write     = 1,  // 数据可以在创建后再写入
+  GXResUsage_Read      = 2,  // 数据可读
+  GXResUsage_ReadWrite = 3,  // 数据在创建后可以读取，并且也可以写入
+  GXResUsage_SystemMem = 4,  // 数据放在系统内存，不能用于渲染
+};
+
+CLENUM_CLASS(GXUINT, GXResMap)
+{
+  GXResMap_Write     = 0,
+  GXResMap_Read      = 1,
+  GXResMap_ReadWrite = 2,
 };
 
 // 这几个不能同时用

@@ -271,7 +271,7 @@ namespace D3D11
     GBlendStateImpl*        m_pOpaqueState[2];  // 不透明方式的状态
     GDepthStencilStateImpl* m_pCanvasStencil[2];  // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
 
-    GPrimitiveVI* m_pPrimitive;
+    GPrimitive*   m_pPrimitive;
     PRIMITIVE*    m_lpLockedVertex;
     GXUINT        m_uVertCount;
     GXUINT        m_uIndexCount;

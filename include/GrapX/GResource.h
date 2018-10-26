@@ -32,7 +32,7 @@ enum {
   RESTYPE_TEXTURE3D,          //    0
   RESTYPE_TEXTURE_CUBE,       //    0
   RESTYPE_PRIMITIVE,          //    0
-  RESTYPE_INDEXED_PRIMITIVE,  //    0
+  //RESTYPE_INDEXED_PRIMITIVE,  //    0
   RESTYPE_REGION,             //    -
 
   RESTYPE_FONT,               //    1

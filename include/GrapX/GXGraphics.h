@@ -7,8 +7,8 @@ class GTexture;
 class GTexture3D;
 class GTextureCube;
 class GPrimitive;
-class GPrimitiveV;
-class GPrimitiveVI;
+//class GPrimitiveV;
+//class GPrimitiveVI;
 class GXGraphics;
 class GXFont;
 class GRegion;
@@ -95,8 +95,8 @@ public:
 
 
     GXSTDINTERFACE(GXHRESULT SetPrimitive       (GPrimitive* pPrimitive, GXUINT uStreamSource = 0));
-    GXSTDINTERFACE(GXHRESULT SetPrimitiveV      (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0));
-    GXSTDINTERFACE(GXHRESULT SetPrimitiveVI     (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0));
+    //GXSTDINTERFACE(GXHRESULT SetPrimitiveV      (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0));
+    //GXSTDINTERFACE(GXHRESULT SetPrimitiveVI     (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0));
 
     // 理论上GXGraphics没有 Set** 类函数, SetTexture 例外, 因为 SetTexture 同时肩负这清空指定设备纹理的任务
     GXSTDINTERFACE(GXHRESULT SetTexture           (GTextureBase* pTexture, GXUINT uStage = 0));
@@ -198,27 +198,40 @@ public:
       GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
 
     // GPrimitive
-    GXSTDINTERFACE(GXHRESULT CreatePrimitiveV(
-      GPrimitiveV**       pPrimitive,           // 返回对象
-      GXLPCSTR            szName,               // 资源名, NULL为匿名对象, 具名对象仅在第一次创建时使用下面的参数
-      LPCGXVERTEXELEMENT  pVertexDecl,          // 顶点声明
-      GXDWORD             ResUsage,             // 资源类型/属性
-      GXUINT              uVertexCount,         // 顶点数
-      GXUINT              uVertexStride = 0,    // 每个顶点的字节数
-      GXLPVOID            pVertInitData = NULL  // 初始化数据
-      ));
+    GXSTDINTERFACE(GXHRESULT CreatePrimitive(
+      GPrimitive**        pPrimitive,             // 返回对象
+      GXLPCSTR            szName,                 // 资源名, NULL为匿名对象, 具名对象仅在第一次创建时使用下面的参数
+      GXLPCVERTEXELEMENT  pVertexDecl,            // 顶点声明
+      GXResUsage          eResUsage,              // 资源类型/属性
+      GXUINT              uVertexCount,           // 顶点数
+      GXUINT              uVertexStride = 0,      // 每个顶点的字节数
+      GXLPCVOID           pVertInitData = NULL,   // 初始化数据
+      GXUINT              uIndexCount = 0,        // 索引数量
+      GXUINT              uIndexSize = 2,         // 每个索引的字节数, 2或者4
+      GXLPCVOID           pIndexInitData = NULL   // 索引初始化数据
+    ));
 
-    GXSTDINTERFACE(GXHRESULT CreatePrimitiveVI(
-      GPrimitiveVI**      pPrimitive, 
-      GXLPCSTR            szName, 
-      LPCGXVERTEXELEMENT  pVertexDecl,
-      GXDWORD             ResUsage, 
-      GXUINT              uIndexCount,          // 索引数量
-      GXUINT              uVertexCount,
-      GXUINT              uVertexStride = 0,
-      GXLPCVOID           pIdxInitData = NULL,  // 索引初始化数据
-      GXLPCVOID           pVertInitData = NULL  // 顶点和索引初始化数据必须同时有效或者同时为NULL.
-      ));
+    //GXSTDINTERFACE(GXHRESULT CreatePrimitiveV(
+    //  GPrimitiveV**       pPrimitive,           // 返回对象
+    //  GXLPCSTR            szName,               // 资源名, NULL为匿名对象, 具名对象仅在第一次创建时使用下面的参数
+    //  LPCGXVERTEXELEMENT  pVertexDecl,          // 顶点声明
+    //  GXDWORD             ResUsage,             // 资源类型/属性
+    //  GXUINT              uVertexCount,         // 顶点数
+    //  GXUINT              uVertexStride = 0,    // 每个顶点的字节数
+    //  GXLPVOID            pVertInitData = NULL  // 初始化数据
+    //  ));
+
+    //GXSTDINTERFACE(GXHRESULT CreatePrimitiveVI(
+    //  GPrimitiveVI**      pPrimitive, 
+    //  GXLPCSTR            szName, 
+    //  LPCGXVERTEXELEMENT  pVertexDecl,
+    //  GXDWORD             ResUsage, 
+    //  GXUINT              uIndexCount,          // 索引数量
+    //  GXUINT              uVertexCount,
+    //  GXUINT              uVertexStride = 0,
+    //  GXLPCVOID           pIdxInitData = NULL,  // 索引初始化数据
+    //  GXLPCVOID           pVertInitData = NULL  // 顶点和索引初始化数据必须同时有效或者同时为NULL.
+    //  ));
 
     // GSahder
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromSource      (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)); // nSourceLen是字符长度，如果是0，szShaderSource必须以'\0'结尾

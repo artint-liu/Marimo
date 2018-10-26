@@ -3,7 +3,8 @@
 #define _GRAPVR_SCENE_NODE_MESH_H_
 
 class GVScene;
-class GPrimitiveVI;
+class GPrimitive;
+//class GPrimitiveVI;
 
 struct GVMESHDATA
 {
@@ -32,7 +33,7 @@ class GXDLL GVMesh : public GVNode
 {
 protected:
   GXMaterialInst*   m_pMtlInst;
-  GPrimitiveVI*     m_pPrimitive;
+  GPrimitive*       m_pPrimitive;
   GXUINT            m_nPrimiCount;
   GXUINT            m_nVertCount;
   GXUINT            m_nStartIndex;
@@ -41,7 +42,7 @@ protected:
   GXBOOL InitializeAsObjFromFile(GXGraphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform);
   GXBOOL InitializeAsObjFromMemory(GXGraphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform);
   GXBOOL IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount);
-  GXBOOL IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive);
+  GXBOOL IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive);
   GXBOOL IntCreateMesh(GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent);
   GXBOOL IntInitializeAsContainer(GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount);
   //GXBOOL CloneMesh(GVMesh* pSource);
@@ -78,7 +79,7 @@ public:
   void ApplyTransform(); // 将变换应用到顶点
 
   static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh);
-  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive, GVMesh** ppMesh);
+  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive, GVMesh** ppMesh);
   static GXHRESULT CreateMesh             (GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh);
   static GXHRESULT CreateContainer        (GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh); // 不增加pNodesArray中Node的引用计数
   //static GXHRESULT Clone                  (GVMesh** pNewMesh, GVMesh* pSourceMesh);

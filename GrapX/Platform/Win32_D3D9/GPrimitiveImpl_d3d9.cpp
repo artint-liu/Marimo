@@ -33,19 +33,19 @@ namespace D3D9
 {
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
   
-  GPrimImpl::GPrimImpl(GXGraphics* pGraphics)
-    : m_pGraphicsImpl   ((GXGraphicsImpl*)pGraphics)
-    , m_pVertexBuffer   (NULL)
-    , m_uElementSize    (0)
-    , m_uElementCount   (0)
-    , m_pLockedVertex   (NULL)
-    , m_dwResUsage      (NULL)
-    , m_pVertexDecl     (NULL)
-    , m_pVertices       (NULL)
-  {
-  }
+  //GPrimImpl::GPrimImpl(GXGraphics* pGraphics)
+  //  : m_pGraphicsImpl   ((GXGraphicsImpl*)pGraphics)
+  //  , m_pVertexBuffer   (NULL)
+  //  , m_uVertexSize    (0)
+  //  , m_uVertexCount   (0)
+  //  , m_pLockedVertex   (NULL)
+  //  , m_dwResUsage      (NULL)
+  //  , m_pVertexDecl     (NULL)
+  //  , m_pVertices       (NULL)
+  //{
+  //}
 
-  GXBOOL GPrimImpl::CreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl)
+  GXBOOL GPrimitiveVertexOnlyImpl::CreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl)
   {
     GXBOOL bval = FALSE;
     SAFE_RELEASE(m_pVertexDecl);
@@ -60,39 +60,53 @@ namespace D3D9
     return bval;
   }
 
-  GXBOOL GPrimImpl::RestoreVertices()
+  GXBOOL GPrimitiveVertexOnlyImpl::RestoreVertices()
   {
-    if(m_pVertices != NULL) {
-      GXLPVOID lpLocked = NULL;\
-      m_pVertexBuffer->Lock(0, 0, &lpLocked, D3DLOCK_DISCARD|D3DLOCK_DONOTWAIT);
-      memcpy(lpLocked, m_pVertices, m_uElementCount * m_uElementSize);
-      m_pVertexBuffer->Unlock();
+    if(m_pVertexBuffer != NULL) {
+      GXLPVOID lpLocked = NULL;
+      m_pD3D9VertexBuffer->Lock(0, 0, &lpLocked, D3DLOCK_DISCARD | D3DLOCK_DONOTWAIT);
+      memcpy(lpLocked, m_pVertexBuffer, m_uVertexCount * m_uVertexSize);
+      m_pD3D9VertexBuffer->Unlock();
       return TRUE;
     }
     return FALSE;
   }
 
-  GPrimitiveVImpl::GPrimitiveVImpl(GXGraphics* pGraphics)
-    : GPrimitiveV  ()
-    , GPrimImpl    (pGraphics)
+  GPrimitiveVertexOnlyImpl::GPrimitiveVertexOnlyImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride)
+    : GPrimitive      (0, RESTYPE_PRIMITIVE)
+    , m_pGraphicsImpl (static_cast<GXGraphicsImpl*>(pGraphics))
+    , m_pD3D9VertexBuffer (NULL)
+    , m_eResUsage     (eUsage)
+    , m_uVertexCount  (nVertexCount)
+    , m_uVertexSize   (nVertexStride)
+    , m_pLockedVertex (NULL)
+    , m_pVertexBuffer (NULL)
+    , m_pVertexDecl   (NULL)
   {
   }
 
-  GPrimitiveVImpl::~GPrimitiveVImpl()
+  GPrimitiveVertexOnlyImpl::~GPrimitiveVertexOnlyImpl()
   {
+    if(m_pLockedVertex) {
+      UnmapVertexBuffer(m_pLockedVertex);
+    }
+
+    if(m_pD3D9VertexBuffer) {
+      m_pGraphicsImpl->UnregisterResource(this);
+    }
+
     INVOKE_LOST_DEVICE;
     SAFE_RELEASE(m_pVertexDecl);
-    SAFE_DELETE_ARRAY(m_pVertices);
-    m_pGraphicsImpl->UnregisterResource(this);
+    SAFE_DELETE_ARRAY(m_pVertexBuffer);
   }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT GPrimitiveVImpl::AddRef()
+  GXHRESULT GPrimitiveVertexOnlyImpl::AddRef()
   {
     return gxInterlockedIncrement(&m_nRefCount);
   }
 
-  GXHRESULT GPrimitiveVImpl::Release()
+  GXHRESULT GPrimitiveVertexOnlyImpl::Release()
   {
     GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
     if(nRefCount == 0)
@@ -109,48 +123,53 @@ namespace D3D9
   }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  GXHRESULT GPrimitiveVImpl::Invoke(GRESCRIPTDESC* pDesc)
+  GXHRESULT GPrimitiveVertexOnlyImpl::Invoke(GRESCRIPTDESC* pDesc)
   {
     INVOKE_DESC_CHECK(pDesc);
     DWORD dwUsage;
     D3DPOOL ePool;
-    ConvertPrimResUsageToNative(m_dwResUsage, &dwUsage, &ePool);
+    //ConvertPrimResUsageToNative(m_dwResUsage, &dwUsage, &ePool);
+    ConvertPrimResUsageToNative(&dwUsage, &ePool, m_eResUsage);
 
     switch(pDesc->dwCmdCode)
     {
     case RC_LostDevice:
-      {
-        SAFE_RELEASE(m_pVertexBuffer);
-        return GX_OK;
-      }
-      break;
+    {
+      SAFE_RELEASE(m_pD3D9VertexBuffer);
+      return GX_OK;
+    }
+    break;
     case RC_ResetDevice:
+    {
+      if(m_eResUsage != GXResUsage_SystemMem)
       {
         LPDIRECT3DDEVICE9 lpd3dDevice = m_pGraphicsImpl->D3DGetDevice();
 
-        if(GXSUCCEEDED(lpd3dDevice->CreateVertexBuffer(
-          m_uElementCount * m_uElementSize, dwUsage, NULL, ePool, &m_pVertexBuffer, NULL)))
+        if(SUCCEEDED(lpd3dDevice->CreateVertexBuffer(
+          m_uVertexCount * m_uVertexSize, dwUsage, NULL, ePool, &m_pD3D9VertexBuffer, NULL)))
         {
           RestoreVertices();
           return GX_OK;
         }
       }
-      break;
+    }
+    break;
+
     case RC_ResizeDevice:
       break;
     }
     return GX_FAIL;
   }
 
-  GXBOOL GPrimitiveVImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCount, GXUINT uElementSize, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
+  GXBOOL GPrimitiveVertexOnlyImpl::InitPrimitive(LPCGXVERTEXELEMENT pVertexDecl, GXLPCVOID pVertInitData)
   {
-    m_uElementCount = uElementCount;
-    m_uElementSize  = uElementSize;
-    m_dwResUsage    = ResUsage;
+    //m_uVertexCount = uElementCount;
+    //m_uElementSize  = uElementSize;
+    //m_dwResUsage    = ResUsage;
 
     // 创建顶点声明
     CreateVertexDeclaration(pVertexDecl);
-    ASSERT(TEST_FLAG(ResUsage, GXRU_SYSTEMMEM) == 0);
+    //ASSERT(TEST_FLAG(ResUsage, GXRU_SYSTEMMEM) == 0);
     GRESCRIPTDESC Desc;
     InlSetZeroT(Desc);
     Desc.dwCmdCode = RC_ResetDevice;
@@ -159,24 +178,13 @@ namespace D3D9
     if(Invoke(&Desc) == GX_OK)
     {
       // 这个应该在 Invoke ResetDevice 之后创建, 否则会有冗余的内存复制
-      if( ! (TEST_FLAG(ResUsage, GXRU_FREQUENTLYREAD) || 
-        TEST_FLAG(ResUsage, GXRU_FREQUENTLYWRITE)))
-      {
-        m_pVertices = new GXBYTE[m_uElementCount * m_uElementSize];
-      }
+      m_pVertexBuffer = new GXBYTE[m_uVertexCount * m_uVertexSize];
 
       // Update Init Data
       if(pVertInitData != NULL)
       {
-        GXLPVOID pLockedVert = Lock(0, 0);
-        if(pLockedVert != NULL)
-        {
-          memcpy(pLockedVert, pVertInitData, uElementCount * uElementSize);
-          Unlock();
-        }
-        else{
-          ASSERT(0);
-        }
+        memcpy(m_pVertexBuffer, pVertInitData, m_uVertexCount * m_uVertexSize);
+        RestoreVertices();
       }
       return TRUE;
     }
@@ -184,118 +192,160 @@ namespace D3D9
     return FALSE;
   }
 
-  GXBOOL GPrimitiveVImpl::EnableDiscard(GXBOOL bDiscard)
-  {
-    return FALSE;
-  }
+  //GXBOOL GPrimitiveVertexOnlyImpl::EnableDiscard(GXBOOL bDiscard)
+  //{
+  //  return FALSE;
+  //}
 
-  GXBOOL GPrimitiveVImpl::IsDiscardable()
-  {
-    return TRUE;
-  }
+  //GXBOOL GPrimitiveVertexOnlyImpl::IsDiscardable()
+  //{
+  //  return TRUE;
+  //}
 
-  GXLPVOID GPrimitiveVImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXDWORD dwFlags/* = (D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE)*/)
+  GXLPVOID GPrimitiveVertexOnlyImpl::MapVertexBuffer(GXResMap eMap)
   {
-    if(m_pLockedVertex != NULL)
-      return m_pLockedVertex;
-    if(IsDiscardable() != FALSE)
-    {
-      m_pVertexBuffer->Lock(uElementOffsetToLock * m_uElementSize, 
-        uElementOffsetToLock * m_uElementSize, &m_pLockedVertex, dwFlags);
-      return m_pLockedVertex;
+    if(m_pLockedVertex != NULL) {
+      return NULL;
     }
+
+    //if(IsDiscardable() != FALSE)
+    //{
+    //  m_pVertexBuffer->Lock(0, m_uVertexCount * m_uVertexSize, &m_pLockedVertex, D3DLOCK_DISCARD);
+    //  return m_pLockedVertex;
+    //}
+    HRESULT hr = S_OK;
+
+    switch(m_eResUsage)
+    {
+    case GXResUsage_Default:
+      break;
+    case GXResUsage_Write:
+    case GXResUsage_Read:
+    case GXResUsage_ReadWrite:
+      hr = m_pD3D9VertexBuffer->Lock(0, m_uVertexCount * m_uVertexSize, &m_pLockedVertex, D3DLOCK_DISCARD);
+      if(SUCCEEDED(hr)) {
+        return m_pVertexBuffer;
+      }
+      break;
+    case GXResUsage_SystemMem:
+      return m_pVertexBuffer;
+    }
+
     return NULL;
   }
 
-  GXBOOL GPrimitiveVImpl::Unlock()
+  GXBOOL GPrimitiveVertexOnlyImpl::UnmapVertexBuffer(GXLPVOID lpMappedBuffer)
   {
-    if(IsDiscardable() != FALSE)
-    {
-      if(m_pVertices != NULL) {
-        // TODO: 按照锁定的区域复制
-        memcpy(m_pVertices, m_pLockedVertex, m_uElementCount * m_uElementSize);
-      }
+    //if(IsDiscardable() != FALSE)
+    //{
+    //  if(m_pVertices != NULL) {
+    //    memcpy(m_pVertices, m_pLockedVertex, m_uVertexCount * m_uVertexSize);
+    //  }
 
-      m_pVertexBuffer->Unlock();
-      m_pLockedVertex = NULL;
+    //  m_pVertexBuffer->Unlock();
+    //  m_pLockedVertex = NULL;
+    //}
+    if(lpMappedBuffer != m_pVertexBuffer) {
+      return FALSE;
     }
-    return GX_OK;
+
+    memcpy(m_pLockedVertex, m_pVertexBuffer, m_uVertexCount * m_uVertexSize);
+    m_pD3D9VertexBuffer->Unlock();
+    m_pLockedVertex = NULL;;
+
+    return TRUE;
+  }
+
+  GXLPVOID GPrimitiveVertexOnlyImpl::MapIndexBuffer(GXResMap eMap)
+  {
+    return NULL;
+  }
+
+  GXBOOL GPrimitiveVertexOnlyImpl::UnmapIndexBuffer(GXLPVOID lpMappedBuffer)
+  {
+    return FALSE;
   }
   //GPrimitive::Type GPrimitiveVImpl::GetType()
   //{
   //  return VertexOnly;
   //}
   
-  GXLPVOID GPrimitiveVImpl::GetVerticesBuffer()
+  //GXLPVOID GPrimitiveVertexOnlyImpl::GetVerticesBuffer()
+  //{
+  //  return m_pVertices;
+  //}
+
+  GXUINT GPrimitiveVertexOnlyImpl::GetVertexCount()
   {
-    return m_pVertices;
+    return m_uVertexCount;
   }
 
-  GXUINT GPrimitiveVImpl::GetVerticesCount()
+  GXUINT GPrimitiveVertexOnlyImpl::GetVertexStride()
   {
-    return m_uElementCount;
+    return m_uVertexSize;
   }
 
-  GXUINT GPrimitiveVImpl::GetVertexStride()
-  {
-    return m_uElementSize;
-  }
-
-  GXUINT GPrimitiveVImpl::GetIndicesCount()
+  GXUINT GPrimitiveVertexOnlyImpl::GetIndexCount()
   {
     return 0;
   }
 
-  GXHRESULT GPrimitiveVImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
+  GXUINT GPrimitiveVertexOnlyImpl::GetIndexStride()
+  {
+    return 0;
+  }
+
+  GXHRESULT GPrimitiveVertexOnlyImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
   {
     return InlGetSafeObjectT<GVertexDeclaration>(ppDeclaration, m_pVertexDecl);
   }
 
-  GXGraphics* GPrimitiveVImpl::GetGraphicsUnsafe()
+  GXGraphics* GPrimitiveVertexOnlyImpl::GetGraphicsUnsafe()
   {
     return static_cast<GXGraphics*>(m_pGraphicsImpl);
   }
 
-  GXINT GPrimitiveVImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
+  GXINT GPrimitiveVertexOnlyImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
   {
     return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
   }
 
-  GXBOOL GPrimitiveVImpl::UpdateResouce( ResEnum eRes )
-  {
-    if(eRes == GPrimitive::ResourceAll || eRes == GPrimitive::ResourceVertices) {
-      return RestoreVertices();
-    }
-    return FALSE;
-  }
+  //GXBOOL GPrimitiveVertexOnlyImpl::UpdateResouce( ResEnum eRes )
+  //{
+  //  if(eRes == GPrimitive::ResourceAll || eRes == GPrimitive::ResourceVertices) {
+  //    return RestoreVertices();
+  //  }
+  //  return FALSE;
+  //}
   
   //////////////////////////////////////////////////////////////////////////
-  GPrimitiveVIImpl::GPrimitiveVIImpl(GXGraphics* pGraphics)
-    : GPrimitiveVI    ()
-    , GPrimImpl       (pGraphics)
-    , m_pIndexBuffer   (NULL)
-    , m_uIndexCount    (0)
+  GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride)
+    : GPrimitiveVertexOnlyImpl(pGraphics, eUsage, nVertexCount, nVertexStride)
+    , m_pD3D9IndexBuffer   (NULL)
+    , m_uIndexCount    (nIndexCount)
+    , m_uIndexSize     (nIndexStride)
     , m_pLockedIndex   (NULL)
-    , m_pIndices       (NULL)
+    , m_pIndexBuffer   (NULL)
   {
   }
 
-  GPrimitiveVIImpl::~GPrimitiveVIImpl()
+  GPrimitiveVertexIndexImpl::~GPrimitiveVertexIndexImpl()
   {
+    if(m_pLockedIndex) {
+      UnmapVertexBuffer(m_pLockedIndex);
+    }
+
     INVOKE_LOST_DEVICE;
-    SAFE_RELEASE(m_pVertexDecl);
-    SAFE_DELETE_ARRAY(m_pIndices);
-    SAFE_DELETE_ARRAY(m_pVertices);
-    m_pGraphicsImpl->UnregisterResource(this);
+    SAFE_DELETE_ARRAY(m_pIndexBuffer);
   }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT GPrimitiveVIImpl::AddRef()
+  GXHRESULT GPrimitiveVertexIndexImpl::AddRef()
   {
     return gxInterlockedIncrement(&m_nRefCount);
   }
 
-  GXHRESULT GPrimitiveVIImpl::Release()
+  GXHRESULT GPrimitiveVertexIndexImpl::Release()
   {
     GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
     //ASSERT((m_uRefCount & 0x80000000) == 0);
@@ -308,7 +358,7 @@ namespace D3D9
   }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  GXHRESULT GPrimitiveVIImpl::Invoke(GRESCRIPTDESC* pDesc)
+  GXHRESULT GPrimitiveVertexIndexImpl::Invoke(GRESCRIPTDESC* pDesc)
   {
     INVOKE_DESC_CHECK(pDesc);
 
@@ -316,8 +366,8 @@ namespace D3D9
     {
     case RC_LostDevice:
       {
-        SAFE_RELEASE(m_pIndexBuffer);
-        SAFE_RELEASE(m_pVertexBuffer);
+        SAFE_RELEASE(m_pD3D9IndexBuffer);
+        SAFE_RELEASE(m_pD3D9VertexBuffer);
         return GX_OK;
       }
       break;
@@ -327,17 +377,16 @@ namespace D3D9
 
         DWORD dwUsage;
         D3DPOOL ePool;
-        ConvertPrimResUsageToNative(m_dwResUsage, &dwUsage, &ePool);
+        ConvertPrimResUsageToNative(&dwUsage, &ePool, m_eResUsage);
 
-        if(GXSUCCEEDED(lpd3dDevice->CreateVertexBuffer(
-          m_uElementCount * m_uElementSize, dwUsage, NULL, ePool, &m_pVertexBuffer, NULL)) &&
-          GXSUCCEEDED(lpd3dDevice->CreateIndexBuffer(
-          m_uIndexCount * sizeof(GXWORD), dwUsage, D3DFMT_INDEX16, ePool, &m_pIndexBuffer, NULL)) ) {
-
-            RestoreVertices();
+        if(SUCCEEDED(lpd3dDevice->CreateVertexBuffer(m_uVertexCount * m_uVertexSize, dwUsage, NULL, ePool, &m_pD3D9VertexBuffer, NULL)))
+        {
+          RestoreVertices();
+          if(SUCCEEDED(lpd3dDevice->CreateIndexBuffer(m_uIndexCount * m_uIndexSize, dwUsage, m_uIndexSize == 2 ? D3DFMT_INDEX16 : D3DFMT_INDEX32, ePool, &m_pD3D9IndexBuffer, NULL)))
+          {
             RestoreIndices();
-
             return GX_OK;
+          }
         }
       }
       break;
@@ -346,21 +395,20 @@ namespace D3D9
     }
     return GX_FAIL;
   }
-  GXBOOL GPrimitiveVIImpl::InitPrimitive(GXLPCVOID pVertInitData, 
-    GXUINT uVertexCount, GXUINT uVertexSize, GXLPCVOID pIndexInitData, GXUINT uIndexCount, 
-    LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage)
+  GXBOOL GPrimitiveVertexIndexImpl::InitPrimitive(LPCGXVERTEXELEMENT pVertexDecl, GXLPCVOID pVertInitData, GXLPCVOID pIndexInitData)
   {
-    if(uVertexCount == 0 || uVertexSize == 0 || uIndexCount == 0)
-      return FALSE;
+    //if(uVertexCount == 0 || uVertexSize == 0 || uIndexCount == 0)
+    //  return FALSE;
 
-    m_uElementCount = uVertexCount;
-    m_uElementSize  = uVertexSize;
-    m_uIndexCount   = uIndexCount;
-    m_dwResUsage    = ResUsage;
+    //m_uVertexCount = uVertexCount;
+    //m_uVertexSize  = uVertexSize;
+    //m_uIndexCount   = uIndexCount;
+    //m_dwResUsage    = ResUsage;
 
     // 创建顶点声明
-    CreateVertexDeclaration(pVertexDecl);
-    ASSERT(TEST_FLAG(ResUsage, GXRU_SYSTEMMEM) == 0);
+    //CreateVertexDeclaration(pVertexDecl);
+    //ASSERT(TEST_FLAG(ResUsage, GXRU_SYSTEMMEM) == 0);
+    GPrimitiveVertexOnlyImpl::InitPrimitive(pVertexDecl, pVertInitData);
 
     GRESCRIPTDESC Desc;
     InlSetZeroT(Desc);
@@ -371,175 +419,137 @@ namespace D3D9
     if(Invoke(&Desc) == GX_OK)
     {
       // 这个应该在 Invok ResetDevice 之后创建, 否则会有冗余的内存复制
-      if( ! (TEST_FLAG(ResUsage, GXRU_FREQUENTLYREAD) || 
-        TEST_FLAG(ResUsage, GXRU_FREQUENTLYWRITE)))
-      {
-        m_pIndices = new GXBYTE[m_uIndexCount * sizeof(GXWORD)];
-        m_pVertices = new GXBYTE[m_uElementCount * m_uElementSize];
-      }
+      m_pIndexBuffer = new GXBYTE[m_uIndexCount * m_uIndexSize];
       
       // Update Init Data
-      if(pVertInitData != NULL && pIndexInitData != NULL)
+      if(pIndexInitData != NULL)
       {
-        GXLPVOID pLockedVert = NULL;
-        GXWORD* pLockedIdx = NULL;
+        memcpy(m_pIndexBuffer, pIndexInitData, m_uIndexCount * m_uIndexSize);
+        RestoreIndices();
 
-        memcpy(m_pVertices, pVertInitData, m_uElementCount * m_uElementSize);
-        memcpy(m_pIndices, pIndexInitData, m_uIndexCount * sizeof(GXWORD));
+        //VIndex* pLockedIdx = (VIndex*)MapIndexBuffer(GXResMap_Write);
 
-        if(Lock(0, 0, 0, 0, &pLockedVert, &pLockedIdx))
-        {
-          memcpy(pLockedVert, pVertInitData, uVertexCount * uVertexSize);
-          memcpy(pLockedIdx, pIndexInitData, uIndexCount * sizeof(GXWORD));
-          Unlock();
-        }
-        else{
-          ASSERT(0);
-        }
+        ////memcpy(m_pVertices, pVertInitData, m_uVertexCount * m_uVertexSize);
+        ////memcpy(m_pIndices, pIndexInitData, m_uIndexCount * sizeof(GXWORD));
+        //if(pLockedIdx)
+        //{
+        //  //memcpy(pLockedVert, pVertInitData, uVertexCount * uVertexSize);
+        //  memcpy(pLockedIdx, pIndexInitData, m_uIndexCount * m_uIndexSize);
+        //  UnmapIndexBuffer(pLockedIdx);
+        //}
+        //else{
+        //  ASSERT(0);
+        //}
       }
 
       return TRUE;
     }
 
     // 有可能其中一个创建成功了.
-    SAFE_RELEASE(m_pIndexBuffer);
-    SAFE_RELEASE(m_pVertexBuffer);
+    SAFE_RELEASE(m_pD3D9IndexBuffer);
+    SAFE_RELEASE(m_pD3D9VertexBuffer);
     return FALSE;
   }
 
-  GXBOOL GPrimitiveVIImpl::EnableDiscard(GXBOOL bDiscard)
+  //GXBOOL GPrimitiveVertexIndexImpl::EnableDiscard(GXBOOL bDiscard)
+  //{
+  //  return FALSE;
+  //}
+
+  //GXBOOL GPrimitiveVertexIndexImpl::IsDiscardable()
+  //{
+  //  return TRUE;
+  //}
+
+  GXLPVOID GPrimitiveVertexIndexImpl::MapIndexBuffer(GXResMap eMap)
   {
-    return FALSE;
+    if(m_pLockedIndex != NULL) {
+      return NULL;
+    }
+
+    HRESULT hr = S_OK;
+
+    switch(m_eResUsage)
+    {
+    case GXResUsage_Default:
+      break;
+    case GXResUsage_Write:
+    case GXResUsage_Read:
+    case GXResUsage_ReadWrite:
+      hr = m_pD3D9IndexBuffer->Lock(0, m_uIndexCount * m_uIndexSize, &m_pLockedIndex, D3DLOCK_DISCARD);
+      if(SUCCEEDED(hr)) {
+        return m_pIndexBuffer;
+      }
+      break;
+    case GXResUsage_SystemMem:
+      return m_pIndexBuffer;
+    }
+
+    return NULL;
   }
 
-  GXBOOL GPrimitiveVIImpl::IsDiscardable()
-  {
-    return TRUE;
-  }
 
-  GXBOOL GPrimitiveVIImpl::Lock(GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXUINT uIndexOffsetToLock, GXUINT uIndexLengthToLock,
-    GXLPVOID* ppVertexData, GXWORD** ppIndexData, GXDWORD dwFlags/* = (D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE)*/)
+  GXBOOL GPrimitiveVertexIndexImpl::UnmapIndexBuffer(GXLPVOID lpMappedBuffer)
   {
-    if(ppVertexData == NULL || ppIndexData == NULL || m_pIndexBuffer == NULL)
+    if(lpMappedBuffer != m_pIndexBuffer) {
       return FALSE;
-
-    if(IsDiscardable() != FALSE)
-    {
-      if(m_pLockedVertex == NULL)
-        m_pVertexBuffer->Lock(uElementOffsetToLock * m_uElementSize,
-        uElementCountToLock * m_uElementSize, &m_pLockedVertex, dwFlags);
-
-      if(m_pLockedIndex == NULL)
-        m_pIndexBuffer->Lock(uIndexOffsetToLock * sizeof(GXWORD), 
-        uIndexLengthToLock * sizeof(GXWORD), (void**)&m_pLockedIndex, dwFlags);
-      *ppVertexData = m_pLockedVertex;
-      *ppIndexData  = m_pLockedIndex;
-
-      return ((*ppIndexData) != NULL && (*ppVertexData) != NULL);
     }
-    return FALSE;
-  }
 
+    memcpy(m_pLockedIndex, m_pIndexBuffer, m_uIndexCount * m_uIndexSize);
+    m_pD3D9IndexBuffer->Unlock();
+    m_pLockedIndex = NULL;
 
-  GXBOOL GPrimitiveVIImpl::Unlock()
-  {
-    if(IsDiscardable() != FALSE)
-    {
-      if(m_pLockedVertex != NULL)
-      {
-        if(m_pVertices != NULL) {
-          // TODO: 按照锁定的区域复制
-          memcpy(m_pVertices, m_pLockedVertex, m_uElementCount * m_uElementSize);
-        }
-        m_pVertexBuffer->Unlock();
-        m_pLockedVertex = NULL;
-      }
-      if(m_pLockedIndex != NULL)
-      {
-        if(m_pIndices != NULL) {
-          // TODO: 按照锁定的区域复制
-          memcpy(m_pIndices, m_pLockedIndex, m_uIndexCount * sizeof(GXWORD));
-        }
-        m_pIndexBuffer->Unlock();
-        m_pLockedIndex  = NULL;
-      }
-    }
-    return GX_OK;
+    return TRUE;
   }
   //GPrimitive::Type GPrimitiveVIImpl::GetType()
   //{
   //  return Indexed;
   //}
 
-  GXUINT GPrimitiveVIImpl::GetIndicesCount()
+  GXUINT GPrimitiveVertexIndexImpl::GetIndexCount()
   {
     return m_uIndexCount;
   }
   
-  GXLPVOID GPrimitiveVIImpl::GetVerticesBuffer()
+  GXUINT GPrimitiveVertexIndexImpl::GetIndexStride()
   {
-    return m_pVertices;
+    return m_uIndexSize;
   }
 
-  GXUINT GPrimitiveVIImpl::GetVerticesCount()
-  {
-    return m_uElementCount;
-  }
-
-  GXUINT GPrimitiveVIImpl::GetVertexStride()
-  {
-    return m_uElementSize;
-  }
-
-  GXLPVOID GPrimitiveVIImpl::GetIndicesBuffer()
-  {
-    return m_pIndices;
-  }
-
-  GXHRESULT GPrimitiveVIImpl::GetVertexDeclaration(GVertexDeclaration** ppDeclaration)
-  {
-    //if(m_pVertexDecl == NULL)
-    //  return GX_FAIL;
-    //m_pVertexDecl->AddRef();
-    //*ppDeclaration = m_pVertexDecl;
-    //return GX_OK;
-    return InlGetSafeObjectT<GVertexDeclaration>(ppDeclaration, m_pVertexDecl);
-  }
-
-  GXGraphics* GPrimitiveVIImpl::GetGraphicsUnsafe()
+  GXGraphics* GPrimitiveVertexIndexImpl::GetGraphicsUnsafe()
   {
     return static_cast<GXGraphics*>(m_pGraphicsImpl);
   }
 
-  GXINT GPrimitiveVIImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
+  GXINT GPrimitiveVertexIndexImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
   {
     return m_pVertexDecl->GetElementOffset(Usage, UsageIndex, lpDesc);
   }
 
-  GXBOOL GPrimitiveVIImpl::UpdateResouce( ResEnum eRes )
-  {
-    switch(eRes)
-    {
-    case GPrimitive::ResourceIndices:
-      return RestoreIndices();
-    case GPrimitive::ResourceVertices:
-      return RestoreVertices();
-    case GPrimitive::ResourceAll:
-      {
-        const GXBOOL bval = RestoreIndices();
-        return (RestoreVertices() && bval);
-      }
-    }
-    return FALSE;
-  }
+  //GXBOOL GPrimitiveVertexIndexImpl::UpdateResouce( ResEnum eRes )
+  //{
+  //  switch(eRes)
+  //  {
+  //  case GPrimitive::ResourceIndices:
+  //    return RestoreIndices();
+  //  case GPrimitive::ResourceVertices:
+  //    return RestoreVertices();
+  //  case GPrimitive::ResourceAll:
+  //    {
+  //      const GXBOOL bval = RestoreIndices();
+  //      return (RestoreVertices() && bval);
+  //    }
+  //  }
+  //  return FALSE;
+  //}
 
-  GXBOOL GPrimitiveVIImpl::RestoreIndices()
+  GXBOOL GPrimitiveVertexIndexImpl::RestoreIndices()
   {
-    if(m_pIndices != NULL) {
+    if(m_pIndexBuffer != NULL) {
       GXLPVOID lpLocked = NULL;
-      m_pIndexBuffer->Lock(0, 0, &lpLocked, D3DLOCK_DISCARD|D3DLOCK_DONOTWAIT);
-      memcpy(lpLocked, m_pIndices, m_uIndexCount * sizeof(GXWORD));
-      m_pIndexBuffer->Unlock();
+      m_pD3D9IndexBuffer->Lock(0, 0, &lpLocked, D3DLOCK_DISCARD | D3DLOCK_DONOTWAIT);
+      memcpy(lpLocked, m_pIndexBuffer, m_uIndexCount * m_uIndexSize);
+      m_pD3D9IndexBuffer->Unlock();
       return TRUE;
     }
     return FALSE;

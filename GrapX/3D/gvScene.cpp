@@ -26,6 +26,7 @@
 #include <GrapX/gvSequence.h>
 #include "GrapX/gxUtility.h"
 
+using namespace GrapX;
 //#define DEFAULT_MTL_FILENAME "shaders\\Diffuse_shader.txt"
 
 typedef clstack<GVNode*> GVNodeStack;
@@ -383,7 +384,8 @@ GXHRESULT GVScene::RenderRecursive( GXCanvas3D* pCanvas, GVNode* pParent, GVRend
 
       ASSERT(Desc.pPrimitive != NULL);
       pGraphics->SetPrimitive(Desc.pPrimitive);
-      if(Desc.pPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE)
+      //if(Desc.pPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE)
+      if(Desc.pPrimitive->GetIndexCount() > 0)
       {
         pGraphics->DrawPrimitive(Desc.ePrimType, 
           Desc.BaseVertexIndex, Desc.MinIndex, Desc.NumVertices, 

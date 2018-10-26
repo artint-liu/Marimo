@@ -26,6 +26,7 @@
 #define SKELETON_FMT_BONEPT      "Skeleton@BonePT_%d"  // Parent & Transform
 
 using namespace clstd;
+using namespace GrapX;
 
 //////////////////////////////////////////////////////////////////////////
 struct BONE_PARENT_TRANSFORM
@@ -413,9 +414,13 @@ GXBOOL GVSkeleton::BuildRenderData(GXGraphics* pGraphics)
     }
     m_nVertCount = m_nPrimiCount * 2;
 
-    pGraphics->CreatePrimitiveVI(&m_pPrimitive,
-      NULL, MOGetSysVertexDecl(GXVD_P3T2C4F), GXRU_DEFAULT, m_nPrimiCount * 2, nBoneCount, 
-      0, pIndices, pVertex);
+    //pGraphics->CreatePrimitiveVI(&m_pPrimitive,
+    //  NULL, MOGetSysVertexDecl(GXVD_P3T2C4F), GXRU_DEFAULT, m_nPrimiCount * 2, nBoneCount, 
+    //  0, pIndices, pVertex);
+
+    pGraphics->CreatePrimitive(&m_pPrimitive,
+      NULL, MOGetSysVertexDecl(GXVD_P3T2C4F), GXResUsage::GXResUsage_Default,
+      nBoneCount, 0, pVertex, m_nPrimiCount * 2, 2, pIndices);
 
     SAFE_DELETE_ARRAY(pVertex);
     SAFE_DELETE_ARRAY(pIndices);
@@ -431,18 +436,23 @@ GXBOOL GVSkeleton::BuildRenderData(GXGraphics* pGraphics)
 
 GXBOOL GVSkeleton::UpdateRenderData()
 {
-  GXVERTEX_P3T2C4F* pVertices;
-  GXWORD* pIndices;
+  //GXWORD* pIndices;
   const GXUINT nBoneCount = (GXUINT)m_aBones.size();
-  if(m_pPrimitive->Lock(0, 0, 0, 0, (GXLPVOID*)&pVertices, &pIndices))
+
+  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Write);
+  //PrimitiveUtility::LockIndices locker_i(m_pPrimitive);
+
+  //if(m_pPrimitive->Lock(0, 0, 0, 0, (GXLPVOID*)&pVertices, &pIndices))
+  if(locker_v.GetPtr())
   {
+    GXVERTEX_P3T2C4F* pVertices = reinterpret_cast<GXVERTEX_P3T2C4F*>(locker_v.GetPtr());
     for(GXUINT i = 0; i < nBoneCount; i++)
     {
       pVertices->pos = m_aBones[i].matAbs.GetRow(3);
       pVertices++;
     }
 
-    m_pPrimitive->Unlock();
+    //m_pPrimitive->Unlock();
   }
   return TRUE;
 }

@@ -49,6 +49,7 @@ namespace GrapXToDX11
 
   DXGI_FORMAT   FormatFrom                  (GXFormat eFormat);
   void          PrimitiveDescFromResUsage   (IN GXDWORD ResUsage, D3D11_BUFFER_DESC* pDesc);  // 只填充Usage和CPUAccessFlags
+  void          PrimitiveDescFromResUsage   (D3D11_BUFFER_DESC* pDesc, GXResUsage eResUsage);
   void          TextureDescFromResUsage     (IN GXDWORD ResUsage, D3D11_TEXTURE2D_DESC* pDesc);  // 只填充BindFlags,Usage和CPUAccessFlags
   D3D11_MAP     PrimitiveMapFromResUsage    (IN GXDWORD ResUsage);
   void          VertexLayoutFromVertexDecl  (LPCGXVERTEXELEMENT pVerticesDecl, GXD3D11InputElementDescArray* pArray);

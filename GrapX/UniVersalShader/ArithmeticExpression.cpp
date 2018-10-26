@@ -773,7 +773,7 @@ GO_NEXT:;
             B = *pDesc;
             GLOB_COMMA& top_gc = sGlobStack.top();
             MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, top_gc.pComma, &top_gc.A, &B);
-            DbgDumpScope(top_gc.pComma->ToString(), top_gc.scopeA, scopeB);
+            //DbgDumpScope(top_gc.pComma->ToString(), top_gc.scopeA, scopeB);
             scopeB.begin = top_gc.scopeA.begin;
 
             sGlobStack.pop();

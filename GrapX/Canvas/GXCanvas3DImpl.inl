@@ -243,7 +243,8 @@ GXHRESULT GXCanvas3DImpl::Draw(GVSequence* pSequence)
 
       ASSERT(Desc.pPrimitive != NULL);
       m_pGraphicsImpl->SetPrimitive(Desc.pPrimitive);
-      if(Desc.pPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE)
+      //if(Desc.pPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE)
+      if(Desc.pPrimitive->GetIndexCount() > 0)
       {
         m_pGraphicsImpl->DrawPrimitive(Desc.ePrimType, 
           Desc.BaseVertexIndex, Desc.MinIndex, Desc.NumVertices, 

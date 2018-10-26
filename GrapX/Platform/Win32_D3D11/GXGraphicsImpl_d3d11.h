@@ -50,9 +50,9 @@ namespace D3D11
 
   class GXGraphicsImpl : public GrapX::GraphicsBaseImpl
   {
-    friend class GPrimImpl;
-    friend class GPrimitiveVImpl;
-    friend class GPrimitiveVIImpl;
+    //friend class GPrimImpl;
+    friend class GPrimitiveVertexOnlyImpl;
+    friend class GPrimitiveVertexIndexImpl;
     friend class GVertexDeclImpl;
     //friend class GRenderState;
     friend class GSamplerState;

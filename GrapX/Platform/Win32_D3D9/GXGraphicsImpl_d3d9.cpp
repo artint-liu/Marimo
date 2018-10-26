@@ -320,7 +320,7 @@ namespace D3D9
         InlSetCanvas(NULL);
         InlSetShader(NULL);
         InlSetVertexDecl(NULL);
-        SetPrimitiveVI(NULL, 0);
+        SetPrimitive(NULL, 0);
         for(int i = 0; i < MAX_TEXTURE_STAGE; i++) {
           InlSetTexture(NULL, i);
         }
@@ -546,34 +546,34 @@ namespace D3D9
       InlGetPlatformStringA(), &m_ShaderExtElement, NULL);
   }
 
-  GXHRESULT GXGraphicsImpl::SetPrimitiveV(GPrimitiveV* pPrimitive, GXUINT uStreamSource)
-  {
-    if(m_pCurPrimitive == pPrimitive)
-      return S_OK;
+  //GXHRESULT GXGraphicsImpl::SetPrimitiveV(GPrimitiveV* pPrimitive, GXUINT uStreamSource)
+  //{
+  //  if(m_pCurPrimitive == pPrimitive)
+  //    return S_OK;
 
-    if(m_pCurPrimitive != NULL)
-      m_pCurPrimitive->Release();
+  //  if(m_pCurPrimitive != NULL)
+  //    m_pCurPrimitive->Release();
 
-    m_pCurPrimitive = pPrimitive;
-    if(m_pCurPrimitive == NULL)
-      return S_OK;
+  //  m_pCurPrimitive = pPrimitive;
+  //  if(m_pCurPrimitive == NULL)
+  //    return S_OK;
 
-    m_pCurPrimitive->AddRef();
+  //  m_pCurPrimitive->AddRef();
 
-    // 应用顶点声明
-    GPrimitiveVImpl* pPrimImpl = static_cast<GPrimitiveVImpl*>(pPrimitive);
-    if(pPrimImpl->m_pVertexDecl != NULL) {
-      InlSetVertexDecl(pPrimImpl->m_pVertexDecl);
-    }
+  //  // 应用顶点声明
+  //  GPrimitiveVertexOnlyImpl* pPrimImpl = static_cast<GPrimitiveVertexOnlyImpl*>(pPrimitive);
+  //  if(pPrimImpl->m_pVertexDecl != NULL) {
+  //    InlSetVertexDecl(pPrimImpl->m_pVertexDecl);
+  //  }
 
-    GPrimitiveVImpl* pPrimitiveImpl = (GPrimitiveVImpl*) pPrimitive;
-    m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
-      0, pPrimitiveImpl->m_uElementSize);
+  //  GPrimitiveVertexOnlyImpl* pPrimitiveImpl = (GPrimitiveVertexOnlyImpl*) pPrimitive;
+  //  m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
+  //    0, pPrimitiveImpl->m_uElementSize);
 
-    return S_OK;
-  }
+  //  return S_OK;
+  //}
   
-  GXHRESULT GXGraphicsImpl::SetPrimitiveVI(GPrimitiveVI* pPrimitive, GXUINT uStreamSource)
+  GXHRESULT GXGraphicsImpl::SetPrimitive(GPrimitive* pPrimitive, GXUINT uStreamSource)
   {
     if(m_pCurPrimitive == pPrimitive)
       return S_OK;
@@ -587,17 +587,20 @@ namespace D3D9
     m_pCurPrimitive->AddRef();
 
     // 应用顶点声明
-    GPrimitiveVIImpl* pPrimImpl = static_cast<GPrimitiveVIImpl*>(pPrimitive);
+    GPrimitiveVertexIndexImpl* pPrimImpl = static_cast<GPrimitiveVertexIndexImpl*>(pPrimitive);
     if(pPrimImpl->m_pVertexDecl != NULL) {
       InlSetVertexDecl(pPrimImpl->m_pVertexDecl);
     }
 
 
-    GPrimitiveVIImpl* pPrimitiveImpl = (GPrimitiveVIImpl*)pPrimitive;
-    m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
-      0, pPrimitiveImpl->m_uElementSize);
+    GPrimitiveVertexIndexImpl* pPrimitiveImpl = (GPrimitiveVertexIndexImpl*)pPrimitive;
+    m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pD3D9VertexBuffer, 
+      0, pPrimitiveImpl->m_uVertexSize);
 
-    m_pd3dDevice->SetIndices(pPrimitiveImpl->m_pIndexBuffer);
+    if(pPrimitiveImpl->GetIndexCount())
+    {
+      m_pd3dDevice->SetIndices(pPrimitiveImpl->m_pD3D9IndexBuffer);
+    }
 
     return S_OK;
   }
@@ -1214,6 +1217,35 @@ namespace D3D9
     if((ResUsage & (GXRU_FREQUENTLYREAD | GXRU_MIGHTBEREAD)) == 0)
     {
       *Usage |= D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
+    }
+  }
+
+  void ConvertPrimResUsageToNative(OUT DWORD* dwUsage, OUT D3DPOOL* Pool, GXResUsage eUsage)
+  {
+    switch(eUsage)
+    {
+    case GXResUsage_Default:
+      *dwUsage = D3DUSAGE_DYNAMIC;
+      *Pool = D3DPOOL_DEFAULT;
+      break;
+    case GXResUsage_Write:
+      *dwUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+      *Pool = D3DPOOL_DEFAULT;
+      break;
+    case GXResUsage_Read:
+      *dwUsage = D3DUSAGE_DYNAMIC;
+      *Pool = D3DPOOL_DEFAULT;
+      break;
+    case GXResUsage_ReadWrite:
+      *dwUsage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+      *Pool = D3DPOOL_DEFAULT;
+      break;
+    case GXResUsage_SystemMem:
+      *dwUsage = 0;
+      *Pool = D3DPOOL_SYSTEMMEM;
+      break;
+    default:
+      CLBREAK;
     }
   }
 

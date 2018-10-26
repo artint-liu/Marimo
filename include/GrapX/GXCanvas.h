@@ -3,7 +3,8 @@
 
 class GTexture;
 class GRegion;
-class GPrimitiveVI;
+class GPrimitive;
+//class GPrimitiveVI;
 class GXFont;
 class GXImage;
 class GXGraphics;

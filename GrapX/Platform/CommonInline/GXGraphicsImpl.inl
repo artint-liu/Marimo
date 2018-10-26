@@ -256,79 +256,153 @@ GXHRESULT GXGraphicsImpl::CreateSamplerState(GSamplerState** ppSamplerState)
   return IntCreateSamplerState((GSamplerStateImpl**)ppSamplerState, m_pDefaultSamplerState);
 }
 
-GXHRESULT GXGraphicsImpl::CreatePrimitiveV(
-  GPrimitiveV**       ppPrimitive, 
-  GXLPCSTR            szName, 
-  LPCGXVERTEXELEMENT  pVertexDecl, 
-  GXDWORD             ResUsage, 
-  GXUINT              uVertexCount, 
-  GXUINT              uVertexStride, 
-  GXLPVOID            pVertInitData)
+GXHRESULT GXGraphicsImpl::CreatePrimitive(
+  GPrimitive** ppPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
+  GXUINT uVertexCount, GXUINT uVertexStride, GXLPCVOID pVertInitData,
+  GXUINT uIndexCount, GXUINT uIndexSize, GXLPCVOID pIndexInitData)
 {
-  GPrimitiveVImpl* pPrimitiveImpl = NULL;
+  // uIndexCount = 0 时，没有设置索引数量，与索引有关的参数将被忽略
+  // uVertexStride = 0, 按照pVertexDecl设置顶点结构的大小
 
-  pPrimitiveImpl = new GPrimitiveVImpl(this);
-  if(pPrimitiveImpl != NULL)
+  GRESKETCH rs = {0};
+
+  // 按命名查找资源
+  if(szName != NULL && szName[0] != '\0')
   {
-    pPrimitiveImpl->AddRef();
-    RegisterResource(pPrimitiveImpl, NULL);
-    if(pPrimitiveImpl->InitPrimitive(pVertInitData, uVertexCount, 
-      uVertexStride != 0 ? uVertexStride : MOGetDeclVertexSize(pVertexDecl), 
-      pVertexDecl, ResUsage) != FALSE)
-    {
-      *ppPrimitive = pPrimitiveImpl;
-      return GX_OK;
+    rs.dwCategoryId = RCC_NamedPrimitive;
+    rs.strResourceName.Append(_CLTEXT("<Primitive>")).Append(szName);
+    GPrimitive* pPrimitive = static_cast<GPrimitive*>(m_ResMgr.Find(&rs));
+    if(pPrimitive) {
+      *ppPrimitive = pPrimitive;
+      return pPrimitive->AddRef();
     }
-    SAFE_RELEASE(pPrimitiveImpl);
   }
 
-  // new 失败
-  CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
-  *ppPrimitive = pPrimitiveImpl;
-  return GX_FAIL;
-}
+  // 参数检查
+  if(eResUsage == GXResUsage::GXResUsage_Default &&
+    (pVertInitData == NULL || (uIndexCount > 0 && pIndexInitData == NULL))) {
+    CLOG_ERROR("CreatePrimitive: GXResUsage_Default创建的Primitive必须指定初始化数据，因为在之后不能再改变");
+    return GX_FAIL;
+  }
+  else if(uIndexCount > 0 && uIndexSize != 2 && uIndexSize != 4) {
+    CLOG_ERROR("CreatePrimitive: 如果需要创建索引，uIndexSize只能是2或者4");
+    return GX_FAIL;
+  }
+  else if(uVertexStride > 0 && uVertexStride < MOGetDeclVertexSize(pVertexDecl)) {
+    CLOG_ERROR("CreatePrimitive: uVertexStridez设置的步长要小于顶点声明的实际步长");
+    return GX_FAIL;
+  }
 
-GXHRESULT GXGraphicsImpl::CreatePrimitiveVI(
-  GPrimitiveVI**      ppPrimitive, 
-  GXLPCSTR            szName, 
-  LPCGXVERTEXELEMENT  pVertexDecl, 
-  GXDWORD             ResUsage, 
-  GXUINT              uIndexCount, 
-  GXUINT              uVertexCount, 
-  GXUINT              uVertexStride, 
-  GXLPCVOID           pIdxInitData, 
-  GXLPCVOID           pVertInitData)
-{
-  GPrimitiveVIImpl* pPrimitiveImpl = NULL;
+  // 创建
+  if(uIndexCount == 0)
+  {
+    GPrimitiveVertexOnlyImpl* pPrimitiveVertex =
+      new GPrimitiveVertexOnlyImpl(this, eResUsage, uVertexCount, uVertexStride);
 
-  if((pIdxInitData == NULL && pVertInitData != NULL) ||
-    (pIdxInitData != NULL && pVertInitData == NULL)) {
-      CLOG_ERROR("CreatePrimitiveVI: 顶点与数组初始化数据必须同时提供,或全同时为空.\n");
+    if(InlIsFailedToNewObject(pPrimitiveVertex)) {
       return GX_FAIL;
-  }
-
-  pPrimitiveImpl = new GPrimitiveVIImpl(this);
-
-  if(pPrimitiveImpl != NULL)
-  {
-    pPrimitiveImpl->AddRef();
-    RegisterResource(pPrimitiveImpl, NULL);
-
-    if(pPrimitiveImpl->InitPrimitive(pVertInitData, uVertexCount, 
-      uVertexStride != 0 ? uVertexStride : MOGetDeclVertexSize(pVertexDecl),
-      pIdxInitData, uIndexCount, pVertexDecl, ResUsage) != FALSE)
-    {
-      *ppPrimitive = pPrimitiveImpl;
-      return GX_OK;
     }
-    SAFE_RELEASE(pPrimitiveImpl);
+
+    if(_CL_NOT_(pPrimitiveVertex->InitPrimitive(pVertexDecl, pVertInitData)))
+    {
+      SAFE_RELEASE(pPrimitiveVertex);
+      return GX_FAIL;
+    }
+    *ppPrimitive = pPrimitiveVertex;
+  }
+  else
+  {
+    GPrimitiveVertexIndexImpl* pPrimitiveVertexIndex =
+      new GPrimitiveVertexIndexImpl(this, eResUsage, uVertexCount, uVertexStride, uIndexCount, uIndexSize);
+
+    if(InlIsFailedToNewObject(pPrimitiveVertexIndex)) {
+      return GX_FAIL;
+    }
+
+    if(_CL_NOT_(pPrimitiveVertexIndex->InitPrimitive(pVertexDecl, pVertInitData, pIndexInitData)))
+    {
+      SAFE_RELEASE(pPrimitiveVertexIndex);
+      return GX_FAIL;         
+    }
+    *ppPrimitive = pPrimitiveVertexIndex;
   }
 
-  // new 失败
-  CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
-  *ppPrimitive = pPrimitiveImpl;
-  return GX_FAIL;
+  return RegisterResource(*ppPrimitive, rs.dwCategoryId ? &rs : NULL);
 }
+
+//GXHRESULT GXGraphicsImpl::CreatePrimitiveV(
+//  GPrimitiveV**       ppPrimitive, 
+//  GXLPCSTR            szName, 
+//  LPCGXVERTEXELEMENT  pVertexDecl, 
+//  GXDWORD             ResUsage, 
+//  GXUINT              uVertexCount, 
+//  GXUINT              uVertexStride, 
+//  GXLPVOID            pVertInitData)
+//{
+//  GPrimitiveVertexOnlyImpl* pPrimitiveImpl = NULL;
+//
+//  pPrimitiveImpl = new GPrimitiveVertexOnlyImpl(this);
+//  if(pPrimitiveImpl != NULL)
+//  {
+//    pPrimitiveImpl->AddRef();
+//    RegisterResource(pPrimitiveImpl, NULL);
+//    if(pPrimitiveImpl->InitPrimitive(pVertInitData, uVertexCount, 
+//      uVertexStride != 0 ? uVertexStride : MOGetDeclVertexSize(pVertexDecl), 
+//      pVertexDecl, ResUsage) != FALSE)
+//    {
+//      *ppPrimitive = pPrimitiveImpl;
+//      return GX_OK;
+//    }
+//    SAFE_RELEASE(pPrimitiveImpl);
+//  }
+//
+//  // new 失败
+//  CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
+//  *ppPrimitive = pPrimitiveImpl;
+//  return GX_FAIL;
+//}
+//
+//GXHRESULT GXGraphicsImpl::CreatePrimitiveVI(
+//  GPrimitiveVI**      ppPrimitive, 
+//  GXLPCSTR            szName, 
+//  LPCGXVERTEXELEMENT  pVertexDecl, 
+//  GXDWORD             ResUsage, 
+//  GXUINT              uIndexCount, 
+//  GXUINT              uVertexCount, 
+//  GXUINT              uVertexStride, 
+//  GXLPCVOID           pIdxInitData, 
+//  GXLPCVOID           pVertInitData)
+//{
+//  GPrimitiveVertexIndexImpl* pPrimitiveImpl = NULL;
+//
+//  if((pIdxInitData == NULL && pVertInitData != NULL) ||
+//    (pIdxInitData != NULL && pVertInitData == NULL)) {
+//      CLOG_ERROR("CreatePrimitiveVI: 顶点与数组初始化数据必须同时提供,或全同时为空.\n");
+//      return GX_FAIL;
+//  }
+//
+//  pPrimitiveImpl = new GPrimitiveVertexIndexImpl(this);
+//
+//  if(pPrimitiveImpl != NULL)
+//  {
+//    pPrimitiveImpl->AddRef();
+//    RegisterResource(pPrimitiveImpl, NULL);
+//
+//    if(pPrimitiveImpl->InitPrimitive(pVertInitData, uVertexCount, 
+//      uVertexStride != 0 ? uVertexStride : MOGetDeclVertexSize(pVertexDecl),
+//      pIdxInitData, uIndexCount, pVertexDecl, ResUsage) != FALSE)
+//    {
+//      *ppPrimitive = pPrimitiveImpl;
+//      return GX_OK;
+//    }
+//    SAFE_RELEASE(pPrimitiveImpl);
+//  }
+//
+//  // new 失败
+//  CLOG_ERROR(MOERROR_FMT_OUTOFMEMORY);
+//  *ppPrimitive = pPrimitiveImpl;
+//  return GX_FAIL;
+//}
 //////////////////////////////////////////////////////////////////////////
 GXImage* GXGraphicsImpl::CreateImage(
   GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, 
@@ -849,13 +923,13 @@ GXCanvas* GXGraphicsImpl::LockCanvas(GXImage* pImage, const LPREGN lpRegn, GXDWO
   return pCanvas;
 }
 
-GXHRESULT GXGraphicsImpl::SetPrimitive(GPrimitive* pPrimitive, GXUINT uStreamSource/* = 0*/)
-{
-  if(pPrimitive->GetType() == RESTYPE_PRIMITIVE)
-    return SetPrimitiveV((GPrimitiveV*)pPrimitive);
-  else
-    return SetPrimitiveVI((GPrimitiveVI*)pPrimitive);
-}
+//GXHRESULT GXGraphicsImpl::SetPrimitive(GPrimitive* pPrimitive, GXUINT uStreamSource/* = 0*/)
+//{
+//  if(pPrimitive->GetType() == RESTYPE_PRIMITIVE)
+//    return SetPrimitiveV((GPrimitiveV*)pPrimitive);
+//  else
+//    return SetPrimitiveVI((GPrimitiveVI*)pPrimitive);
+//}
 
 GXHRESULT GXGraphicsImpl::SetRasterizerState(GRasterizerState* pRasterizerState)
 {

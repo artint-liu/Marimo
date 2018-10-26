@@ -33,6 +33,7 @@
 #define MESH_TRANSFORM    "Mesh@Transform"
 
 using namespace clstd;
+using namespace GrapX;
 
 GVMesh::GVMesh(GXGraphics* pGraphics)
   : GVNode       (NULL, GXMAKEFOURCC('M','E','S','H'))
@@ -160,8 +161,8 @@ GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GX
   m_nVertCount  = (GXUINT)nVertCount;
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
-  if(GXSUCCEEDED(pGraphics->CreatePrimitiveVI(&m_pPrimitive, NULL,
-    lpVertDecl, GXRU_DEFAULT, (GXUINT)nIdxCount, (GXUINT)nVertCount, (GXUINT)nStride, pIndices, lpVertics)))
+  if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL,
+    lpVertDecl, GXResUsage::GXResUsage_Default, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, 2, pIndices)))
   {
     GXVERTEXELEMENT Desc;
     int nOffset = MOGetDeclOffset(lpVertDecl, GXDECLUSAGE_POSITION, 0, &Desc);
@@ -177,7 +178,7 @@ GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GX
   return bval;
 }
 
-GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive)
+GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive)
 {
   m_pPrimitive = pPrimitive;
   if(m_pPrimitive) {
@@ -187,7 +188,7 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimi
   //m_eType = eType;
   m_nPrimiCount = (GXUINT)nPrimCount;
   m_nStartIndex = (GXUINT)nStartIndex;
-  m_nVertCount = m_pPrimitive->GetVerticesCount();
+  m_nVertCount = m_pPrimitive->GetVertexCount();
 
   //GVertexDeclaration* pDeclaration = NULL;
   //pPrimitive->GetVertexDeclaration(&pDeclaration);
@@ -198,8 +199,10 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimi
   if(Desc.Type == GXDECLTYPE_FLOAT3)
   {
     AABB aabbPrim;
-    mesh::CalculateAABBFromIndices(aabbPrim, (GXLPCBYTE)pPrimitive->GetVerticesBuffer() + nOffset, 
-      (const VIndex*)pPrimitive->GetIndicesBuffer() + nStartIndex, nPrimCount * 3, pPrimitive->GetVertexStride());
+    PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::GXResMap_Read);
+    PrimitiveUtility::MapIndices  locker_i(pPrimitive, GXResMap::GXResMap_Read);
+    mesh::CalculateAABBFromIndices(aabbPrim, (GXLPCBYTE)locker_v.GetPtr() + nOffset, 
+      (const VIndex*)locker_i.GetPtr() + nStartIndex, nPrimCount * 3, pPrimitive->GetVertexStride());
     m_aabbLocal.Merge(aabbPrim);
   }
 
@@ -244,13 +247,16 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
     }
 
     // --- 模型相交检测
-    GXBYTE* pVertBuf = static_cast<GXBYTE*>(m_pPrimitive->GetVerticesBuffer());
-    VIndex* pIndicesBuf = static_cast<VIndex*>(m_pPrimitive->GetIndicesBuffer());
+    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Read);
+    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::GXResMap_Read);
+
+    GXBYTE* pVertBuf = static_cast<GXBYTE*>(locker_v.GetPtr());
+    VIndex* pIndicesBuf = static_cast<VIndex*>(locker_i.GetPtr());
     if( ! (pVertBuf && pIndicesBuf)) {
       return TRUE;
     }
 
-    GXUINT nFaceCount = m_pPrimitive->GetIndicesCount() / 3;
+    GXUINT nFaceCount = m_pPrimitive->GetIndexCount() / 3;
     GXUINT nStride = m_pPrimitive->GetVertexStride();
     GXINT uOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
     if(uOffset < 0 || nFaceCount == 0) {
@@ -333,7 +339,7 @@ GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount
   return GX_FAIL;
 }
 
-GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitiveVI* pPrimitive, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
@@ -662,8 +668,10 @@ GXVOID GVMesh::CalculateAABB()
   if(m_pPrimitive) {
     int nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
     AABB aabb;
-    mesh::CalculateAABB(aabb, reinterpret_cast<float3*>((GXLPBYTE)m_pPrimitive->GetVerticesBuffer() + nOffset), 
-      m_pPrimitive->GetVerticesCount(), m_pPrimitive->GetVertexStride());
+    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Read);
+    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::GXResMap_Read);
+    mesh::CalculateAABB(aabb, reinterpret_cast<float3*>((GXLPBYTE)locker_v.GetPtr() + nOffset), 
+      m_pPrimitive->GetVertexCount(), m_pPrimitive->GetVertexStride());
 
     m_aabbLocal.Merge(aabb);
   }
@@ -671,10 +679,12 @@ GXVOID GVMesh::CalculateAABB()
 
 void GVMesh::ApplyTransform()
 {
-  const int nCount = m_pPrimitive->GetVerticesCount();
+  const int nCount = m_pPrimitive->GetVertexCount();
   const int nStride = m_pPrimitive->GetVertexStride();
   const float4x4 mat = m_Transformation.ToRelativeMatrix();
-  const GXLPBYTE lpBuffer = (GXLPBYTE)m_pPrimitive->GetVerticesBuffer();
+  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_ReadWrite);
+  const GXLPBYTE lpBuffer = static_cast<GXLPBYTE>(locker_v.GetPtr());
+
   int nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
   mesh::TransformPosition(mat, (float3*)(lpBuffer + nOffset), nCount, nStride);
 
@@ -697,7 +707,7 @@ void GVMesh::ApplyTransform()
   }
 
   // 更新顶点
-  m_pPrimitive->UpdateResouce(GPrimitive::ResourceVertices);
+  //m_pPrimitive->UpdateResouce(GPrimitive::ResourceVertices);
 
   // 重置变换矩阵为单位阵
   float3 vScale(1.0f);

@@ -3,7 +3,7 @@
 #define _GRAPVR_SCENE_MODULE_GEOMETRY_H_
 
 class GVScene;
-class GPrimitiveVI;
+//class GPrimitiveVI;
 
 class GXDLL GVGeometry : public GVMesh
 {
@@ -29,7 +29,7 @@ protected:
   GXBOOL InitializeAsAxis(GXGraphics* pGraphics, const float3& vPos, float fExtent, int nLevel);
   GXBOOL InitializeAsQuadPlane(GXGraphics* pGraphics, const float3& vPos, const float3& vDirection, const float3& vUp, const float2& vExtent, GXUINT xSeg, GXUINT ySeg, GXDWORD dwVertexFlags);
   GXBOOL CreatePrimitive(GXGraphics* pGraphics, GXPrimitiveType eType, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount);
-  GXBOOL SetPrimitive(GXPrimitiveType eType, int nPrimCount, int nStartIndex, GPrimitiveVI* pPrimitive);
+  GXBOOL SetPrimitive(GXPrimitiveType eType, int nPrimCount, int nStartIndex, GPrimitive* pPrimitive);
 public:
   GVGeometry();
   GVGeometry(GXGraphics* pGraphics, GEOTYPE eType);

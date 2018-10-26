@@ -397,6 +397,50 @@ namespace GrapXToDX11
     }
   }
 
+  // D3D11_USAGE_DEFAULT	  A resource that requires read and write access by the GPU.This is likely to be the most common usage choice.
+  // D3D11_USAGE_IMMUTABLE	A resource that can only be read by the GPU.It cannot be written by the GPU, and cannot be accessed at all by the CPU.This type of resource must be initialized when it is created, since it cannot be changed after creation.
+  // D3D11_USAGE_DYNAMIC	  A resource that is accessible by both the GPU (read only) and the CPU (write only).A dynamic resource is a good choice for a resource that will be updated by the CPU at least once per frame.To update a dynamic resource, use a Map method.
+  //                        For info about how to use dynamic resources, see How to : Use dynamic resources.
+  // D3D11_USAGE_STAGING	  A resource that supports data transfer (copy) from the GPU to the CPU.
+
+  void PrimitiveDescFromResUsage(D3D11_BUFFER_DESC* pDesc, GXResUsage eResUsage)
+  {
+    switch(eResUsage)
+    {
+    case GXResUsage::GXResUsage_Default:
+      // 不再修改数据，创建时必须指定
+      pDesc->Usage = D3D11_USAGE_IMMUTABLE;
+      pDesc->CPUAccessFlags = 0;
+      break;
+
+    case GXResUsage::GXResUsage_Read:
+      // 可读，实现中保存数据副本
+      pDesc->Usage = D3D11_USAGE_DEFAULT;
+      pDesc->CPUAccessFlags = 0;
+      break;
+
+    case GXResUsage::GXResUsage_Write:
+      pDesc->Usage = D3D11_USAGE_DYNAMIC;
+      pDesc->CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+      break;
+
+    case GXResUsage::GXResUsage_ReadWrite:
+      pDesc->Usage = D3D11_USAGE_DYNAMIC;
+      pDesc->CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+      break;
+
+    case GXResUsage::GXResUsage_SystemMem:
+      // 始终在CPU内存中，不用于渲染
+      pDesc->Usage = D3D11_USAGE_DEFAULT;
+      pDesc->CPUAccessFlags = 0;
+      break;
+
+    default:
+      CLBREAK;
+      break;
+    }
+  }
+
   void TextureDescFromResUsage(IN GXDWORD ResUsage, D3D11_TEXTURE2D_DESC* pDesc)
   {
     if(TEST_FLAG(ResUsage, GXRU_SYSTEMMEM))

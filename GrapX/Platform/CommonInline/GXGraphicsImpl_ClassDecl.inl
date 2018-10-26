@@ -25,8 +25,8 @@
   virtual GXHRESULT UnregisterResource  (GResource* pResource) override;
 
   virtual GXHRESULT SetPrimitive        (GPrimitive* pPrimitive, GXUINT uStreamSource = 0) override;
-  virtual GXHRESULT SetPrimitiveV       (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0) override;
-  virtual GXHRESULT SetPrimitiveVI      (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0) override;
+  //virtual GXHRESULT SetPrimitiveV       (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0) override;
+  //virtual GXHRESULT SetPrimitiveVI      (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0) override;
 
   // 理论上GXGraphics没有 Set** 类函数, SetTexture 例外, 因为 SetTexture 同时肩负这清空指定设备纹理的任务
   virtual GXHRESULT SetTexture            (GTextureBase* pTexture, GXUINT uStage = 0) override;
@@ -71,8 +71,12 @@
   GXHRESULT   IntCreateSamplerState       (GSamplerStateImpl** pSamplerState, GSamplerStateImpl* pDefault);
 
   // GPrimitive
-  virtual GXHRESULT   CreatePrimitiveV  (GPrimitiveV** ppPrimitive, GXLPCSTR szName, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage, GXUINT uVertexCount, GXUINT uVertexStride, GXLPVOID pVertInitData) override;
-  virtual GXHRESULT   CreatePrimitiveVI (GPrimitiveVI** ppPrimitive, GXLPCSTR szName, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage, GXUINT uIndexCount, GXUINT uVertexCount, GXUINT uVertexStride, GXLPCVOID pIdxInitData, GXLPCVOID pVertInitData) override;
+  GXHRESULT CreatePrimitive               (GPrimitive** pPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
+                                          GXUINT uVertexCount, GXUINT uVertexStride, GXLPCVOID pVertInitData,
+                                          GXUINT uIndexCount, GXUINT uIndexSize, GXLPCVOID pIndexInitData) override;
+
+  //virtual GXHRESULT   CreatePrimitiveV  (GPrimitiveV** ppPrimitive, GXLPCSTR szName, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage, GXUINT uVertexCount, GXUINT uVertexStride, GXLPVOID pVertInitData) override;
+  //virtual GXHRESULT   CreatePrimitiveVI (GPrimitiveVI** ppPrimitive, GXLPCSTR szName, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage, GXUINT uIndexCount, GXUINT uVertexCount, GXUINT uVertexStride, GXLPCVOID pIdxInitData, GXLPCVOID pVertInitData) override;
 
   // GShader
   virtual GXHRESULT   CreateShaderFromSource  (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition) override;

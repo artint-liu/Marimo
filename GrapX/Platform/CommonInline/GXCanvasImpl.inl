@@ -94,9 +94,8 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
     m_uBatchSize     = s_uDefBatchSize;
 
     if(m_pPrimitive == NULL) {
-      m_pGraphics->CreatePrimitiveVI(&m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), 
-        GXRU_FREQUENTLYWRITE, m_uVertIndexSize, m_uVertIndexSize, sizeof(CANVAS_PRMI_VERT), 
-        NULL, NULL);
+      m_pGraphics->CreatePrimitive(&m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::GXResUsage_Write,
+        m_uVertIndexSize, sizeof(CANVAS_PRMI_VERT), NULL, m_uVertIndexSize, 2, NULL);
     }
 
     if(m_aBatch == NULL)
@@ -572,9 +571,16 @@ GXBOOL GXCanvasImpl::Flush()
 
   if(m_lpLockedVertex != NULL)
   {
-    m_pPrimitive->Unlock();
+    m_pPrimitive->UnmapVertexBuffer(m_lpLockedVertex);
     m_lpLockedVertex = NULL;
   }
+
+  if(m_lpLockedIndex != NULL)
+  {
+    m_pPrimitive->UnmapIndexBuffer(m_lpLockedIndex);
+    m_lpLockedIndex = NULL;
+  }
+
   m_pGraphics->Enter();
   CommitState();  // TODO: 如果 bEmptyRect 为 TRUE, 则不提交状态
 
@@ -1295,8 +1301,10 @@ GXBOOL GXCanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprc
   return TRUE;
 }
 
-#define CHECK_LOCK if(m_lpLockedVertex == NULL)  \
-  m_pPrimitive->Lock(0, 0, 0, 0, (void**)&m_lpLockedVertex, &m_lpLockedIndex, GXLOCK_DISCARD);
+#define CHECK_LOCK \
+  if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::GXResMap_Write)); } \
+  if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::GXResMap_Write)); }
+
 #define SET_BATCH_INDEX(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
 
 GXBOOL GXCanvasImpl::SetPixel(GXINT xPos, GXINT yPos, GXCOLORREF crPixel)

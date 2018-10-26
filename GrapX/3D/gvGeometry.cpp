@@ -21,14 +21,23 @@
 //#include <3D/gvGeometry.h>
 //#include <3D/gvScene.h>
 #include "GrapX/GrapVR.h"
-namespace PrimitiveIndicesUtility
-{
-  template<typename _VIndexTy>
-  void FillIndicesAsQuadVertexArrayCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices);
 
-  template<typename _VIndexTy>
-  void FillIndicesAsQuadVertexArrayCCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices);
-} // namespace PrimitiveIndicesUtility
+namespace GrapX
+{
+  namespace PrimitiveUtility
+  {
+    template<typename _VIndexTy>
+    void FillIndicesAsQuadVertexArrayCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices);
+
+    template<typename _VIndexTy>
+    void FillIndicesAsQuadVertexArrayCCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices);
+
+    void FillIndicesAsCycleVertexArray(int nHeightSeg, int nSides, int nBaseIndex, clvector<GXWORD>& aIndices);
+  } // namespace PrimitiveUtility
+} // namespace GrapX
+
+using namespace GrapX;
+
 
 GVGeometry::GVGeometry(GXGraphics* pGraphics, GEOTYPE eType, const float3& vMin, const float3& vMax)
   : GVMesh        (pGraphics, GXMAKEFOURCC('G','E','O','Y'))
@@ -125,9 +134,9 @@ GXBOOL GVGeometry::InitializeAsAABB(GXGraphics* pGraphics, GXCOLOR clr)
 
   //m_pPrimitive->Unlock();
 
-  pGraphics->CreatePrimitiveVI(
-    &m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P3F_C1D), 
-    GXRU_DEFAULT, 24, 8, sizeof(GXVERTEX_P3F_C1D), pIndices, pVertices);
+  pGraphics->CreatePrimitive(
+    &m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P3F_C1D), GXResUsage::GXResUsage_Default,
+    8, sizeof(GXVERTEX_P3F_C1D), pVertices, 24, 2, pIndices);
 
   return TRUE;
 }
@@ -259,7 +268,7 @@ GXBOOL GVGeometry::InitializeAsQuadPlane(GXGraphics* pGraphics, const float3& vP
     vStartPos = vStartPos + yaxis * vGridSize.y;
   }
 
-  PrimitiveIndicesUtility::FillIndicesAsQuadVertexArrayCW(xSeg, ySeg, xSeg + 1, 0, aIndices);
+  PrimitiveUtility::FillIndicesAsQuadVertexArrayCW(xSeg, ySeg, xSeg + 1, 0, aIndices);
 
    //= (|GXVF_COLOR|)
   MeshData.nVertexCount = aVertices.size();
@@ -295,8 +304,8 @@ GXBOOL GVGeometry::CreatePrimitive(GXGraphics* pGraphics, GXPrimitiveType eType,
   m_nVertCount  = nVertCount;
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
-  if(GXSUCCEEDED(pGraphics->CreatePrimitiveVI(&m_pPrimitive, NULL,
-    lpVertDecl, GXRU_DEFAULT, nIdxCount, nVertCount, nStride, pIndices, lpVertics)))
+  if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL, lpVertDecl, GXResUsage::GXResUsage_Default,
+    nVertCount, nStride, lpVertics, nIdxCount, 2, pIndices)))
   {
     GXVERTEXELEMENT Desc;
     int nOffset = MOGetDeclOffset(lpVertDecl, GXDECLUSAGE_POSITION, 0, &Desc);
@@ -651,7 +660,7 @@ void GenerateCircleSlice(
   if(nCapSeg > 1)
   {
     const int nFillBase = 1 + nBaseIdx;
-    PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(nCapSeg - 1, nSides, nFillBase, aIndices);
+    PrimitiveUtility::FillIndicesAsCycleVertexArray(nCapSeg - 1, nSides, nFillBase, aIndices);
   }
 }
 
@@ -751,7 +760,7 @@ void GenerateTaperSides(
       }
     }
   }
-  PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(nHeightSeg - 2, nSides, nStart, aIndices);
+  PrimitiveUtility::FillIndicesAsCycleVertexArray(nHeightSeg - 2, nSides, nStart, aIndices);
 }
 
 void GenerateSphereSides(
@@ -864,7 +873,7 @@ void GenerateSphereSides(
   }
 
   if(n - 2 > 0) {
-    PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(n - 2, nSides, nBaseIdx + 1, aIndices);
+    PrimitiveUtility::FillIndicesAsCycleVertexArray(n - 2, nSides, nBaseIdx + 1, aIndices);
   }
   // 顶点分布是： 自上而下开始，一个顶点-在（经度-纬度）排列的顶点阵列-一个顶点，半球没有最后的一个顶点
   // 面分布是：最上面的圆锥面-最下面的圆锥面-（经度-纬度）排列的球侧面
@@ -921,7 +930,7 @@ void GenerateConeSides(
       aTexcoord.push_back(texcoord);
     }
   }
-  PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(nHeightSeg, nSides, nBaseIdx, aIndices);
+  PrimitiveUtility::FillIndicesAsCycleVertexArray(nHeightSeg, nSides, nBaseIdx, aIndices);
 }
 
 // 创建圆柱面, 这个是基于方向的
@@ -987,7 +996,7 @@ void GenerateCylinderSides(
   }
 
   SAFE_DELETE_ARRAY(pCircles);
-  PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(nHeightSeg, nSides, nBaseIdx, aIndices);
+  PrimitiveUtility::FillIndicesAsCycleVertexArray(nHeightSeg, nSides, nBaseIdx, aIndices);
 
   if(pTransformation) {
     *pTransformation = matT;
@@ -1049,7 +1058,7 @@ void GenerateTorusSides(
   const GXSIZE_T nTotalVertCount = aVertices.size();
   ASSERT(nTotalVertCount < 0xffff);
   const int nLastLine = (nSides - 1) * nSegment * 6;
-  PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(nSides, nSegment, nBaseIdx, aIndices);
+  PrimitiveUtility::FillIndicesAsCycleVertexArray(nSides, nSegment, nBaseIdx, aIndices);
   for(IndicesArray::iterator it = aIndices.begin() + nLastLine;
     it != aIndices.end(); ++it) {
     if(*it >= nTotalVertCount) {
@@ -1521,7 +1530,7 @@ GXHRESULT GVGeometry::CreateCapsule(
     if(nHeightSeg == 1)
     {
       // 高度只分为1段的直接组织索引
-      PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(1, nSides, nTopIndex, aIndices);
+      PrimitiveUtility::FillIndicesAsCycleVertexArray(1, nSides, nTopIndex, aIndices);
     }
     else if(nHeightSeg > 1)
     {
@@ -1537,7 +1546,7 @@ GXHRESULT GVGeometry::CreateCapsule(
           aTexcoord.push_back(aTexcoord[nTopIndex + i]);
         }
       }
-      PrimitiveIndicesUtility::FillIndicesAsCycleVertexArray(nHeightSeg, nSides, nTopIndex, aIndices);
+      PrimitiveUtility::FillIndicesAsCycleVertexArray(nHeightSeg, nSides, nTopIndex, aIndices);
     }
 
     nBaseIndex = (int)aVertices.size();
@@ -1629,100 +1638,103 @@ GXHRESULT GVGeometry::CreateConvex(
   return GX_FAIL;
 }
 
-namespace PrimitiveIndicesUtility
+namespace GrapX
 {
-  template<typename _VIndexTy>
-  void FillIndicesAsQuadVertexArrayCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices)
+  namespace PrimitiveUtility
   {
-    ASSERT(xSeg + 1 <= nPitch);
-    for(int y = 0; y < ySeg; y++)
+    template<typename _VIndexTy>
+    void FillIndicesAsQuadVertexArrayCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices)
     {
-      const GXUINT nStart = y * nPitch + nBaseIndex;
-      for(int x = 0; x < xSeg; x++)
+      ASSERT(xSeg + 1 <= nPitch);
+      for(int y = 0; y < ySeg; y++)
       {
-        const _VIndexTy a = nStart + x;
-        const _VIndexTy b = a + 1;
-        const _VIndexTy c = a + nPitch;
-        const _VIndexTy d = c + 1;
-        aIndices.push_back(a);
-        aIndices.push_back(b);
-        aIndices.push_back(c);
+        const GXUINT nStart = y * nPitch + nBaseIndex;
+        for(int x = 0; x < xSeg; x++)
+        {
+          const _VIndexTy a = nStart + x;
+          const _VIndexTy b = a + 1;
+          const _VIndexTy c = a + nPitch;
+          const _VIndexTy d = c + 1;
+          aIndices.push_back(a);
+          aIndices.push_back(b);
+          aIndices.push_back(c);
 
-        aIndices.push_back(c);
-        aIndices.push_back(b);
-        aIndices.push_back(d);
-      }
-    }
-  }
-
-  template<typename _VIndexTy>
-  void FillIndicesAsQuadVertexArrayCCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices)
-  {
-    ASSERT(xSeg + 1 <= nPitch);
-    for(int y = 0; y < ySeg; y++)
-    {
-      const GXUINT nStart = y * nPitch + nBaseIndex;
-      for(int x = 0; x < xSeg; x++)
-      {
-        const _VIndexTy a = nStart + x;
-        const _VIndexTy b = a + 1;
-        const _VIndexTy c = a + nPitch;
-        const _VIndexTy d = c + 1;
-        aIndices.push_back(c);
-        aIndices.push_back(b);
-        aIndices.push_back(a);
-
-        aIndices.push_back(d);
-        aIndices.push_back(b);
-        aIndices.push_back(c);
-      }
-    }
-  }
-
-  void FillIndicesAsQuadVertexArrayCW16(int xSeg, int ySeg, int nBaseIndex, clvector<u16>& aIndices, int nPitch)
-  {
-    FillIndicesAsQuadVertexArrayCW<u16>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
-  }
-
-  void FillIndicesAsQuadVertexArrayCW32(int xSeg, int ySeg, int nBaseIndex, clvector<u32>& aIndices, int nPitch)
-  {
-    FillIndicesAsQuadVertexArrayCW<u32>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
-  }
-
-  void FillIndicesAsQuadVertexArrayCCW16(int xSeg, int ySeg, int nBaseIndex, clvector<u16>& aIndices, int nPitch)
-  {
-    FillIndicesAsQuadVertexArrayCCW<u16>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
-  }
-
-  void FillIndicesAsQuadVertexArrayCCW32(int xSeg, int ySeg, int nBaseIndex, clvector<u32>& aIndices, int nPitch)
-  {
-    FillIndicesAsQuadVertexArrayCCW<u32>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
-  }
-
-  void FillIndicesAsCycleVertexArray(int nHeightSeg, int nSides, int nBaseIndex, clvector<GXWORD>& aIndices)
-  {
-    for(int y = 0; y < nHeightSeg; y++)
-    {
-      const GXUINT nStart = y * nSides + nBaseIndex;
-      for(int x = 0; x < nSides; x++)
-      {
-        const GXWORD a = nStart + x;
-        const GXWORD c = a + nSides;
-
-        GXWORD b = a + 1;
-        GXWORD d = c + 1;
-        if(x + 1 == nSides) {
-          b -= nSides;
-          d -= nSides;
+          aIndices.push_back(c);
+          aIndices.push_back(b);
+          aIndices.push_back(d);
         }
-        aIndices.push_back(a);
-        aIndices.push_back(b);
-        aIndices.push_back(c);
-
-        aIndices.push_back(c);
-        aIndices.push_back(b);
-        aIndices.push_back(d);
       }
     }
-  }
-} // namespace PrimitiveIndicesUtility
+
+    template<typename _VIndexTy>
+    void FillIndicesAsQuadVertexArrayCCW(int xSeg, int ySeg, int nPitch, int nBaseIndex, clvector<_VIndexTy>& aIndices)
+    {
+      ASSERT(xSeg + 1 <= nPitch);
+      for(int y = 0; y < ySeg; y++)
+      {
+        const GXUINT nStart = y * nPitch + nBaseIndex;
+        for(int x = 0; x < xSeg; x++)
+        {
+          const _VIndexTy a = nStart + x;
+          const _VIndexTy b = a + 1;
+          const _VIndexTy c = a + nPitch;
+          const _VIndexTy d = c + 1;
+          aIndices.push_back(c);
+          aIndices.push_back(b);
+          aIndices.push_back(a);
+
+          aIndices.push_back(d);
+          aIndices.push_back(b);
+          aIndices.push_back(c);
+        }
+      }
+    }
+
+    void FillIndicesAsQuadVertexArrayCW16(int xSeg, int ySeg, int nBaseIndex, clvector<u16>& aIndices, int nPitch)
+    {
+      FillIndicesAsQuadVertexArrayCW<u16>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
+    }
+
+    void FillIndicesAsQuadVertexArrayCW32(int xSeg, int ySeg, int nBaseIndex, clvector<u32>& aIndices, int nPitch)
+    {
+      FillIndicesAsQuadVertexArrayCW<u32>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
+    }
+
+    void FillIndicesAsQuadVertexArrayCCW16(int xSeg, int ySeg, int nBaseIndex, clvector<u16>& aIndices, int nPitch)
+    {
+      FillIndicesAsQuadVertexArrayCCW<u16>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
+    }
+
+    void FillIndicesAsQuadVertexArrayCCW32(int xSeg, int ySeg, int nBaseIndex, clvector<u32>& aIndices, int nPitch)
+    {
+      FillIndicesAsQuadVertexArrayCCW<u32>(xSeg, ySeg, (nPitch == 0) ? (xSeg + 1) : nPitch, nBaseIndex, aIndices);
+    }
+
+    void FillIndicesAsCycleVertexArray(int nHeightSeg, int nSides, int nBaseIndex, clvector<GXWORD>& aIndices)
+    {
+      for(int y = 0; y < nHeightSeg; y++)
+      {
+        const GXUINT nStart = y * nSides + nBaseIndex;
+        for(int x = 0; x < nSides; x++)
+        {
+          const GXWORD a = nStart + x;
+          const GXWORD c = a + nSides;
+
+          GXWORD b = a + 1;
+          GXWORD d = c + 1;
+          if(x + 1 == nSides) {
+            b -= nSides;
+            d -= nSides;
+          }
+          aIndices.push_back(a);
+          aIndices.push_back(b);
+          aIndices.push_back(c);
+
+          aIndices.push_back(c);
+          aIndices.push_back(b);
+          aIndices.push_back(d);
+        }
+      }
+    }
+  } // namespace PrimitiveUtility
+} // namespace GrapX

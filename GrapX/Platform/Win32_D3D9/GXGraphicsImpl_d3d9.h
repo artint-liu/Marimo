@@ -52,8 +52,8 @@ namespace D3D9
 
   class GXGraphicsImpl : public GrapX::GraphicsBaseImpl
   {
-    friend class GPrimitiveVImpl;
-    friend class GPrimitiveVIImpl;
+    friend class GPrimitiveVertexOnlyImpl;
+    friend class GPrimitiveVertexIndexImpl;
     friend class GSamplerStateImpl;
     friend class GXCanvasImpl;
     friend class GXCanvas3DImpl;
@@ -116,6 +116,7 @@ namespace D3D9
   void ConvertVertexDeclToNative    (LPCGXVERTEXELEMENT pVerticesDecl, clBuffer** ppBuffer);
   void ConvertTexResUsageToNative   (IN GXDWORD ResUsage, OUT DWORD& D3DUsage, OUT D3DPOOL& Pool);
   void ConvertPrimResUsageToNative  (IN GXDWORD ResUsage, OUT DWORD* D3DUsage, OUT D3DPOOL* Pool);
+  void ConvertPrimResUsageToNative  (OUT DWORD* D3DUsage, OUT D3DPOOL* Pool, GXResUsage eUsage);
   void ConvertNativeToTexResUsage   (IN DWORD Usage, IN D3DPOOL Pool, OUT GXDWORD& ResUsage);
   void ConvertTextureFileSaveFormat (IN GXLPCSTR szFormat, OUT D3DXIMAGE_FILEFORMAT* d3dxiff);
   

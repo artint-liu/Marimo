@@ -11,70 +11,70 @@ namespace D3D11
   class GXGraphicsImpl;
   class GVertexDeclImpl;
 
-  class GPrimImpl
-  {
-  protected:
-    GXGraphicsImpl*         m_pGraphicsImpl;
-    ID3D11Buffer*           m_pD3D11VertexBuffer;
-    GXUINT                  m_uElementSize;
-    GXBYTE*                 m_pVertices;  // 内存中的保存 GXRU_FREQXXX 没有这个值
-
-    GVertexDeclImpl*        m_pVertexDecl;
-    GXDWORD                 m_dwResUsage;
-
-    // 当前的,追加数据则增加这个计数
-    GXUINT                  m_uElementCount;
-    //GXLPVOID                m_pLockedVertex;
-    D3D11_MAPPED_SUBRESOURCE* m_pVertMappedRes;
-  protected:
-    GPrimImpl(GXGraphics* pGraphics);
-    GXBOOL IntCreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl);
-    HRESULT IntCreateBuffer(ID3D11Buffer** ppD3D11Buffer, GXUINT nSize, GXUINT nBindFlags, GXLPCVOID pInitData);
-
-    virtual LPCGXVERTEXELEMENT GetVertexDeclUnsafe();
-    //virtual GXUINT    GetVerticesCount  ();
-    //virtual GXUINT    GetVertexStride   ();
-
-    //GXBOOL RestoreVertices();
-  };
 
   //
   // Primitive - Vertex 
   //
-  class GPrimitiveVImpl : public GPrimitiveV, GPrimImpl
+  class GPrimitiveVertexOnlyImpl : public GPrimitive
   {
     friend class GXGraphicsImpl;
   protected:
-    GPrimitiveVImpl(GXGraphics* pGraphics);
-    virtual ~GPrimitiveVImpl();
+    GXGraphicsImpl*           m_pGraphicsImpl;
+    ID3D11Buffer*             m_pD3D11VertexBuffer;
+    const GXUINT              m_uVertexCount;
+    const GXUINT              m_uVertexStride;
+    D3D11_MAPPED_SUBRESOURCE  m_sVertexMapped;
+    GXLPBYTE                  m_pVertexBuffer;
+
+    GVertexDeclImpl*          m_pVertexDecl;
+    GXResUsage                m_eUsage;
+
+  protected:
+    GPrimitiveVertexOnlyImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVerteCount, GXUINT nVertextStride);
+    virtual ~GPrimitiveVertexOnlyImpl();
+
+    GXLPVOID      IntMapBuffer      (GXResMap eMap, ID3D11Buffer* pD3D11Buffer, D3D11_MAPPED_SUBRESOURCE& rMappedDesc, GXLPBYTE pMemBuffer);
+    GXBOOL        IntUnmapBuffer    (GXLPVOID lpMappedBuffer, ID3D11Buffer* pD3D11Buffer, D3D11_MAPPED_SUBRESOURCE& rMappedDesc, GXLPBYTE pMemBuffer);
+
   public:
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     virtual GXHRESULT   AddRef();
     virtual GXHRESULT   Release();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXGraphics* GetGraphicsUnsafe () override;
 
-    virtual GXHRESULT   Invoke          (GRESCRIPTDESC* pDesc);
+    GXHRESULT   Invoke          (GRESCRIPTDESC* pDesc) override;
+
+    GXBOOL IntCreateVertexDeclaration(LPCGXVERTEXELEMENT pVertexDecl);
+    GXBOOL IntCreateBuffer(ID3D11Buffer** ppD3D11Buffer, GXUINT nSize, GXUINT nBindFlags, GXLPCVOID pInitData);
+
+    LPCGXVERTEXELEMENT GetVertexDeclUnsafe();
 
 
-    GXBOOL  InitPrimitive(GXLPCVOID pVertInitData, GXUINT uElementCount, GXUINT uElementSize, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage);
+    GXBOOL  InitPrimitive(LPCGXVERTEXELEMENT pVertexDecl, GXLPCVOID pVertInitData);
 
     // 确定是否可以在LostDevice时丢弃, 默认为TRUE
     GXBOOL  EnableDiscard(GXBOOL bDiscard);
     GXBOOL  IsDiscardable();
 
-    GXLPVOID      Lock      (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE));
-    GXBOOL        Unlock    ();
+    GXLPVOID      MapVertexBuffer      (GXResMap eMap) override;
+    GXBOOL        UnmapVertexBuffer    (GXLPVOID lpMappedBuffer) override;
     //virtual Type  GetType   ();
 
-    GXLPVOID  GetVerticesBuffer () override;
-    GXUINT    GetVerticesCount  () override;
-    GXUINT    GetVertexStride   () override;
-    GXUINT    GetIndicesCount   () override;
+    //GXLPVOID  GetVerticesBuffer () override;
+    GXUINT    GetVertexCount  () override;
+    GXUINT    GetVertexStride () override;
 
-    GXBOOL    UpdateResouce     (ResEnum eRes) override;
+
+    GXUINT    GetIndexCount     () override;
+    GXUINT    GetIndexStride    () override;
+    GXLPVOID  MapIndexBuffer   (GXResMap eMap) override;
+    GXBOOL    UnmapIndexBuffer (GXLPVOID lpMappedBuffer) override;
+
+
+    //GXBOOL    UpdateResouce     (ResEnum eRes) override;
     GXHRESULT GetVertexDeclaration(GVertexDeclaration** ppDeclaration) override;
-    GXGraphics* GetGraphicsUnsafe () override;
     GXINT       GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
 
     //private:
@@ -83,12 +83,12 @@ namespace D3D11
   //
   // Primitive - Vertex & Index
   //
-  class GPrimitiveVIImpl : public GPrimitiveVI, GPrimImpl
+  class GPrimitiveVertexIndexImpl : public GPrimitiveVertexOnlyImpl
   {
     friend class GXGraphicsImpl;
   protected:
-    GPrimitiveVIImpl(GXGraphics* pGraphics);
-    virtual ~GPrimitiveVIImpl();
+    GPrimitiveVertexIndexImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride);
+    virtual ~GPrimitiveVertexIndexImpl();
 
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -98,26 +98,34 @@ namespace D3D11
     virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc);
 
 
-    GXBOOL  InitPrimitive(GXLPCVOID pVertInitData, GXUINT uVertexCount, GXUINT uVertexSize, GXLPCVOID pIndexInitData, GXUINT uIndexCount, LPCGXVERTEXELEMENT pVertexDecl, GXDWORD ResUsage);
+    GXBOOL  InitPrimitive(LPCGXVERTEXELEMENT pVertexDecl, GXLPCVOID pVertInitData, GXLPCVOID pIndexInitData);
 
     // 确定是否可以在LostDevice时丢弃, 默认为TRUE
     GXBOOL  EnableDiscard(GXBOOL bDiscard);
     GXBOOL  IsDiscardable();
 
-    GXBOOL        Lock  (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, 
-      GXUINT uIndexOffsetToLock, GXUINT uIndexLengthToLock,
-      GXLPVOID* ppVertexData, GXWORD** ppIndexData,
-      GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE));
-    GXBOOL        Unlock  ();
+    //GXBOOL        Lock  (GXUINT uElementOffsetToLock, GXUINT uElementCountToLock, 
+    //  GXUINT uIndexOffsetToLock, GXUINT uIndexLengthToLock,
+    //  GXLPVOID* ppVertexData, GXWORD** ppIndexData,
+    //  GXDWORD dwFlags = (GXLOCK_DISCARD | GXLOCK_NOOVERWRITE));
+    //GXBOOL        Unlock  ();
     //virtual Type  GetType ();
 
-    GXLPVOID    GetVerticesBuffer () override;
-    GXUINT      GetVerticesCount  () override;
-    GXUINT      GetVertexStride   () override;
-    GXLPVOID    GetIndicesBuffer  () override;
-    GXUINT      GetIndicesCount   () override;
 
-    GXBOOL      UpdateResouce     (ResEnum eRes) override;
+    //GXLPVOID    GetVerticesBuffer () override;
+    GXUINT    GetVertexCount    () override;
+    GXUINT    GetVertexStride   () override;
+    //GXLPVOID  MapVertexBuffer      (GXResMap eMap) override;
+    //GXBOOL    UnmapVertexBuffer    (GXLPVOID lpMappedBuffer) override;
+    //GXLPVOID    GetIndexBuffer    () override;
+
+    GXUINT    GetIndexCount     () override;
+    GXUINT    GetIndexStride    () override;
+    GXLPVOID  MapIndexBuffer   (GXResMap eMap) override;
+    GXBOOL    UnmapIndexBuffer (GXLPVOID lpMappedBuffer) override;
+
+
+    //GXBOOL      UpdateResouce     (ResEnum eRes) override;
     GXHRESULT   GetVertexDeclaration(GVertexDeclaration** ppDeclaration) override;
     GXGraphics* GetGraphicsUnsafe () override;
     GXINT       GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
@@ -126,12 +134,14 @@ namespace D3D11
     ID3D11Buffer*             m_pD3D11IndexBuffer;
 
     // GXRU_FREQXXX 才有
-    GXBYTE*                   m_pIndices;   // 内存中保存的索引缓冲
+    //GXBYTE*                   m_pIndices;   // 内存中保存的索引缓冲
 
-    GXUINT                    m_uIndexCount;
+    const GXUINT              m_uIndexCount;
+    const GXUINT              m_uIndexStride;
+    D3D11_MAPPED_SUBRESOURCE  m_sIndexMapped;
+    GXLPBYTE                  m_pIndexBuffer;
 
     //GXWORD*                   m_pLockedIndex;
-    D3D11_MAPPED_SUBRESOURCE* m_pIndexMappedRes;
   };
 } // namespace D3D11
 

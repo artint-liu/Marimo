@@ -394,7 +394,7 @@ namespace D3D11
         InlSetCanvas(NULL);
         InlSetShader(NULL);
         InlSetVertexDecl(NULL);
-        SetPrimitiveVI(NULL, 0);
+        SetPrimitive(NULL, 0);
         for(int i = 0; i < MAX_TEXTURE_STAGE; i++) {
           InlSetTexture(NULL, i);
         }
@@ -565,36 +565,36 @@ namespace D3D11
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::SetPrimitiveV(GPrimitiveV* pPrimitive, GXUINT uStreamSource)
-  {
-    if(m_pCurPrimitive == pPrimitive)
-      return S_OK;
+  //GXHRESULT GXGraphicsImpl::SetPrimitiveV(GPrimitiveV* pPrimitive, GXUINT uStreamSource)
+  //{
+  //  if(m_pCurPrimitive == pPrimitive)
+  //    return S_OK;
 
-    if(m_pCurPrimitive != NULL)
-      m_pCurPrimitive->Release();
+  //  if(m_pCurPrimitive != NULL)
+  //    m_pCurPrimitive->Release();
 
-    m_pCurPrimitive = pPrimitive;
-    if(m_pCurPrimitive == NULL)
-      return S_OK;
+  //  m_pCurPrimitive = pPrimitive;
+  //  if(m_pCurPrimitive == NULL)
+  //    return S_OK;
 
-    m_pCurPrimitive->AddRef();
+  //  m_pCurPrimitive->AddRef();
 
-    // 应用顶点声明
-    GPrimitiveVImpl* pPrimImpl = static_cast<GPrimitiveVImpl*>(pPrimitive);
-    if(pPrimImpl->m_pVertexDecl != NULL) {
-      InlSetVertexDecl(pPrimImpl->m_pVertexDecl);
-    }
+  //  // 应用顶点声明
+  //  GPrimitiveVertexOnlyImpl* pPrimImpl = static_cast<GPrimitiveVertexOnlyImpl*>(pPrimitive);
+  //  if(pPrimImpl->m_pVertexDecl != NULL) {
+  //    InlSetVertexDecl(pPrimImpl->m_pVertexDecl);
+  //  }
 
-    GPrimitiveVImpl* pPrimitiveImpl = (GPrimitiveVImpl*) pPrimitive;
-    UINT offset = 0;
-    m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, &pPrimitiveImpl->m_uElementSize, &offset );
-    //m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
-    //  0, pPrimitiveImpl->m_uElementSize);
+  //  GPrimitiveVertexOnlyImpl* pPrimitiveImpl = (GPrimitiveVertexOnlyImpl*) pPrimitive;
+  //  UINT offset = 0;
+  //  m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, &pPrimitiveImpl->m_uElementSize, &offset );
+  //  //m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
+  //  //  0, pPrimitiveImpl->m_uElementSize);
 
-    return S_OK;
-  }
+  //  return S_OK;
+  //}
   
-  GXHRESULT GXGraphicsImpl::SetPrimitiveVI(GPrimitiveVI* pPrimitive, GXUINT uStreamSource)
+  GXHRESULT GXGraphicsImpl::SetPrimitive(GPrimitive* pPrimitive, GXUINT uStreamSource)
   {
     if(m_pCurPrimitive == pPrimitive)
       return S_OK;
@@ -608,22 +608,20 @@ namespace D3D11
     m_pCurPrimitive->AddRef();
 
     // 应用顶点声明
-    GPrimitiveVIImpl* pPrimImpl = static_cast<GPrimitiveVIImpl*>(pPrimitive);
+    GPrimitiveVertexIndexImpl* pPrimImpl = static_cast<GPrimitiveVertexIndexImpl*>(pPrimitive);
     if(pPrimImpl->m_pVertexDecl != NULL) {
       InlSetVertexDecl(pPrimImpl->m_pVertexDecl);
     }
 
 
-    GPrimitiveVIImpl* pPrimitiveImpl = (GPrimitiveVIImpl*)pPrimitive;
+    GPrimitiveVertexIndexImpl* pPrimitiveImpl = (GPrimitiveVertexIndexImpl*)pPrimitive;
     UINT offset = 0;
-    m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, 
-      &pPrimitiveImpl->m_uElementSize, &offset );
+    m_pImmediateContext->IASetVertexBuffers(0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, 
+      &pPrimitiveImpl->m_uVertexStride, &offset);
 
-    m_pImmediateContext->IASetIndexBuffer(pPrimitiveImpl->m_pD3D11IndexBuffer, DXGI_FORMAT_R16_UINT, offset);
-    //m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
-    //  0, pPrimitiveImpl->m_uElementSize);
-
-    //m_pd3dDevice->SetIndices(pPrimitiveImpl->m_pIndexBuffer);
+    if(pPrimitiveImpl->GetIndexCount()) {
+      m_pImmediateContext->IASetIndexBuffer(pPrimitiveImpl->m_pD3D11IndexBuffer, DXGI_FORMAT_R16_UINT, offset);
+    }
 
     return S_OK;
   }
@@ -809,7 +807,7 @@ namespace D3D11
       //GXRASTERIZERDESC ras_desc;
       //CreateRasterizerState()
 
-      GPrimitiveV* pPrimitive = NULL;
+      GPrimitive* pPrimitive = NULL;
       clstd::LocalBuffer<sizeof(CANVAS_PRMI_VERT) * 6 * 64> buf;
       buf.Resize(sizeof(CANVAS_PRMI_VERT) * 6 * nCount, FALSE);
       CANVAS_PRMI_VERT* pVert = reinterpret_cast<CANVAS_PRMI_VERT*>(buf.GetPtr());
@@ -843,13 +841,14 @@ namespace D3D11
       }
 
       
-      CreatePrimitiveV(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXRU_DEFAULT, 6 * nCount, sizeof(CANVAS_PRMI_VERT), buf.GetPtr());
+      //CreatePrimitiveV(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXRU_DEFAULT, 6 * nCount, sizeof(CANVAS_PRMI_VERT), buf.GetPtr());
+      CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::GXResUsage_Default, 6 * nCount, sizeof(CANVAS_PRMI_VERT), buf.GetPtr(), 0, 0, NULL);
       GPrimitive* pSavedPrimitive = m_pCurPrimitive;
       if(pSavedPrimitive) {
         pSavedPrimitive->AddRef();
       }
 
-      SetPrimitiveV(pPrimitive);
+      SetPrimitive(pPrimitive);
       GXDWORD dwFlags = m_dwFlags;
       m_dwFlags = F_ACTIVATE;
       DrawPrimitive(GXPT_TRIANGLELIST, 0, nCount * 2);
@@ -857,17 +856,18 @@ namespace D3D11
 
       if(pSavedPrimitive)
       {
+        SetPrimitive(static_cast<GPrimitive*>(pSavedPrimitive));
         // TODO: 接口合并
-        if(pSavedPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE) {
-          SetPrimitiveVI(static_cast<GPrimitiveVI*>(pSavedPrimitive));
-        }
-        else {
-          SetPrimitiveV(static_cast<GPrimitiveV*>(pSavedPrimitive));
-        }
+        //if(pSavedPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE) {
+        //  SetPrimitiveVI(static_cast<GPrimitiveVI*>(pSavedPrimitive));
+        //}
+        //else {
+        //  SetPrimitiveV(static_cast<GPrimitiveV*>(pSavedPrimitive));
+        //}
       }
       else
       {
-        SetPrimitiveV(NULL);
+        SetPrimitive(NULL);
       }
 
       InlSetDepthStencilState(pSavedDepthStencilState);
