@@ -43,6 +43,13 @@
 #define ERROR_TYPEDESC ((const TYPEDESC*)-1)
 #define PARSER_NOTIMPLEMENT TRACE("%s(%d):没咋处理的地方\n", __FILE__, __LINE__)
 
+#define DUMP_STATE_IF_FAILED \
+if(state != VALUE::State_OK) { \
+  DumpValueState(vctx.pLogger, state, pOperator); \
+  vctx.result = ValueResult_Failed; \
+  return FALSE; }
+
+
 // TODO:
 // 1.float3(0) => float3(0,0,0)
 // 2.返回值未完全初始化
@@ -4961,7 +4968,7 @@ namespace UVShader
     // mul()比较特殊
     if(strFunctionName == s_szMultiplicationFunc && sArgumentsTypeList.size() == 2)
     {
-      pRetType = InferDifferentTypesOfMultiplication(sArgumentsTypeList.front(), sArgumentsTypeList.back());
+      pRetType = InferTypesOfMultiplication(sArgumentsTypeList.front(), sArgumentsTypeList.back());
       if(pRetType) {
         vctx.ClearValueOnly();
         vctx.result = ValueResult_OK;
@@ -6061,31 +6068,143 @@ namespace UVShader
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond)
+  const TYPEDESC* CodeParser::InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond) const
   {
     ASSERT(pToken); // 暂时不支持
     if(*pToken == '*')
     {
-      return InferDifferentTypesOfMultiplication(pFirst, pSecond);
+      return InferTypesOfMultiplication(pFirst, pSecond);
     }
 
     CLBREAK;
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond)
+  const TYPEDESC* CodeParser::InferTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond) const
   {
     // 推导乘法类型，支持矩阵与向量乘法
-    if(pFirst->name == pSecond->name) {
-      return pFirst;
+    // 注意，mul双标量乘法与dot等效，与“*”乘法不一致
+
+    //Version   |Name   |Purpose  |Template Type  |Component Type   |Size
+    //1
+    //          |x      |in       |scalar         |float, int       |1
+    //          |y      |in       |scalar         |same as input x  |1
+    //          |ret    |out      |scalar         |same as input x  |1
+    //2
+    //          |x      |in       |scalar         |float, int       |1
+    //          |y      |in       |vector         |float, int       |any
+    //          |ret    |out      |vector         |float, int       |same dimension(s) as input y
+    //3
+    //          |x      |in       |scalar         |float, int       |1
+    //          |y      |in       |matrix         |float, int       |any
+    //          |ret    |out      |matrix         |same as input y  |same dimension(s) as input y
+    //4
+    //          |x      |in       |vector         |float, int       |any
+    //          |y      |in       |scalar         |float, int       |1
+    //          |ret    |out      |vector         |float, int       |same dimension(s) as input x
+    //5
+    //          |x      |in       |vector         |float, int       |any
+    //          |y      |in       |vector         |float, int       |same dimension(s) as input x
+    //          |ret    |out      |scalar         |float, int       |1
+    //6
+    //          |x      |in       |vector         |float, int       |any
+    //          |y      |in       |matrix         |float, int       |rows = same dimension(s) as input x, columns = any
+    //          |ret    |out      |vector         |float, int       |same dimension(s) as input y columns
+    //7
+    //          |x      |in       |matrix         |float, int       |any
+    //          |y      |in       |scalar         |float, int       |1
+    //          |ret    |out      |matrix         |float, int       |same dimension(s) as input x
+    //8
+    //          |x      |in       |matrix         |float, int       |any
+    //          |y      |in       |vector         |float, int       |number of columns in input x
+    //          |ret    |out      |vector         |float, int       |number of rows in input x
+    //9
+    //          |x      |in       |matrix         |float, int       |any
+    //          |y      |in       |matrix         |float, int       |rows = number of columns in input x
+    //          |ret    |out      |matrix         |float, int       |rows = number of rows in input x, columns = number of columns in input y
+    //
+
+    clStringA strTypeName;
+    int R1, C1;
+    int R2, C2;
+
+    if(IS_SCALER_CATE(pFirst))
+    {
+      if(IS_SCALER_CATE(pSecond))
+      {
+        if(pFirst->name == pSecond->name) {
+          return pFirst;
+        }
+      }
+      else if(pSecond->IsVector() || pSecond->IsMatrix())
+      {
+        if(pFirst->name == pSecond->pElementType->name) {
+          return pSecond;
+        }
+      }
     }
-    else if(pFirst->IsVector() && pSecond->IsMatrix() && IsComponent(pFirst, pSecond, NULL)) {
-      return pFirst;
+    else if(pFirst->IsVector())
+    {
+      if(IS_SCALER_CATE(pSecond))
+      {
+        if(pFirst->pElementType->name == pSecond->name) {
+          return pFirst;
+        }
+      }
+      else if(pSecond->IsVector())
+      {
+        if(pFirst->name == pSecond->name) {
+          return pFirst;
+        }
+      }
+      else if(pSecond->IsMatrix())
+      {
+        if(IsComponent(pFirst, pSecond, NULL)) {
+          pSecond->Resolve(R2, C2);
+          strTypeName.Format("%s%d", pFirst->pElementType->name, C2);
+          return m_GlobalSet.GetType(strTypeName);
+        }
+      }
     }
-    else if(pFirst->IsMatrix() && pSecond->IsVector() && IsComponent(NULL, pFirst, pSecond)) {
-      return pSecond;
+    else if(pFirst->IsMatrix())
+    {
+      if(IS_SCALER_CATE(pSecond))
+      {
+        if(pFirst->pElementType->name == pSecond->name) {
+          return pFirst;
+        }
+      }
+      else if(pSecond->IsVector())
+      {
+        if(IsComponent(NULL, pFirst, pSecond))
+        {
+          pFirst->Resolve(R1, C1);
+          strTypeName.Format("%s%d", pFirst->pElementType->name, R1);
+          return m_GlobalSet.GetType(strTypeName);
+        }
+      }
+      else if(pSecond->IsMatrix() && (pFirst->pElementType == pSecond->pElementType))
+      {
+        pFirst->Resolve(R1, C1);
+        pSecond->Resolve(R2, C2);
+        if(R2 == C1) {
+          // R1 x C2
+          strTypeName.Format("%s%dx%s", pFirst->pElementType->name, R1, C2);
+          return m_GlobalSet.GetType(strTypeName);
+        }
+      }
     }
-    else {}
+
+    //if(pFirst->name == pSecond->name) {
+    //  return pFirst;
+    //}
+    //else if(pFirst->IsVector() && pSecond->IsMatrix() && IsComponent(pFirst, pSecond, NULL)) {
+    //  return pFirst;
+    //}
+    //else if(pFirst->IsMatrix() && pSecond->IsVector() && IsComponent(NULL, pFirst, pSecond)) {
+    //  return pSecond;
+    //}
+    //else {}
     return NULL;
   }
 
@@ -6200,24 +6319,56 @@ namespace UVShader
     }
     else if(pAB[0].pType->IsVector() && pAB[1].pType->IsMatrix() && IsComponent(pAB[0].pType, pAB[1].pType, NULL))
     {
+      vctx.pType = InferTypesOfMultiplication(pAB[0].pType, pAB[1].pType);
       if(vctx.bNeedValue && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
       {
-        CLBREAK; // 没实现
-      }
-      else
-      {
-        vctx.pType = pAB[0].pType;
+        VALUE value[4];
+        int R2, C2;
+        VALUE::State state;
+        pAB[1].pType->Resolve(R2, C2);
+        vctx.pool.reserve(4);          
+        for(int c = 0; c < C2; c++)
+        {
+          for(int r = 0; r < R2; r++) {
+            state = value[r].Calculate("*", 1, pAB[0].pValue[r], pAB[1].pValue[C2 * c + r]);
+            DUMP_STATE_IF_FAILED;
+          }
+          for(int r = 0; r < R2 - 1; r++) {
+            state = value[0].Calculate("+", 1, value[r], value[r + 1]);
+            DUMP_STATE_IF_FAILED;
+          }
+          vctx.result = ValueResult_OK;
+          vctx.pool.push_back(value[0]);
+          vctx.pool.back().CastValueByRank(vctx.TypeRank());
+        }
+        return TRUE;
       }
     }
     else if(pAB[0].pType->IsMatrix() && pAB[1].pType->IsVector() && IsComponent(NULL, pAB[0].pType, pAB[1].pType))
     {
+      vctx.pType = InferTypesOfMultiplication(pAB[0].pType, pAB[1].pType);
       if(vctx.bNeedValue && pAB[0].IsNeedValue() && pAB[1].IsNeedValue())
       {
-        CLBREAK; // 没实现
-      }
-      else
-      {
-        vctx.pType = pAB[1].pType;
+        VALUE value[4];
+        int R1, C1;
+        VALUE::State state;
+        pAB[0].pType->Resolve(R1, C1);
+        vctx.pool.reserve(4);
+        for(int r = 0; r < R1; r++)
+        {
+          for(int c = 0; c < C1; c++) {
+            state = value[c].Calculate("*", 1, pAB[0].pValue[r * R1 + c], pAB[1].pValue[r]);
+            DUMP_STATE_IF_FAILED;
+          }
+          for(int c = 0; c < C1 - 1; c++) {
+            state = value[0].Calculate("+", 1, value[c], value[c + 1]);
+            DUMP_STATE_IF_FAILED;
+          }
+          vctx.result = ValueResult_OK;
+          vctx.pool.push_back(value[0]);
+          vctx.pool.back().CastValueByRank(vctx.TypeRank());
+          return TRUE;
+        }
       }
     }
     else
@@ -6274,11 +6425,12 @@ namespace UVShader
        for(size_t i = 0; i < count; i++)
        {
          VALUE::State state = value.Calculate(*pOperator, pAB[0].pValue[i], pAB[1].pValue[i]);
-         if(state != VALUE::State_OK) {
-           DumpValueState(vctx.pLogger, state, pOperator);
-           vctx.result = ValueResult_Failed;
-           return FALSE;
-         }
+         //if(state != VALUE::State_OK) {
+         //  DumpValueState(vctx.pLogger, state, pOperator);
+         //  vctx.result = ValueResult_Failed;
+         //  return FALSE;
+         //}
+         DUMP_STATE_IF_FAILED;
          vctx.pool.push_back(value);
          vctx.pool.back().CastValueByRank(vctx.TypeRank());
        }
@@ -6404,14 +6556,14 @@ namespace UVShader
       //  return FALSE;
       //}
       pRowVector->Resolve(RV, CV);
-      return RV == R;
+      return RV == R && (pRowVector->pElementType == pMatrixDesc->pElementType);
     }
 
     //if(_CL_NOT_(pColumnVector->name.BeginsWith(szScaler))) {
     //  return FALSE;
     //}
     pColumnVector->Resolve(RV, CV);
-    return RV == C;
+    return RV == C && (pMatrixDesc->pElementType == pColumnVector->pElementType);
   }
 
 #endif // #ifdef ENABLE_SYNTAX_VERIFY

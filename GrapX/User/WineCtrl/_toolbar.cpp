@@ -7090,7 +7090,7 @@ TOOLBAR_Register ()
   wndClass.cbWndExtra    = sizeof(TOOLBAR_INFO *);
   wndClass.hCursor       = gxLoadCursorW (0, (GXLPWSTR)GXIDC_ARROW);
   wndClass.hbrBackground = (GXHBRUSH)(GXCOLOR_BTNFACE + 1);
-  wndClass.lpszClassName = TOOLBARCLASSNAMEW;
+  wndClass.lpszClassName = GXTOOLBARCLASSNAMEW;
 
   gxRegisterClassExW (&wndClass);
 }
@@ -7099,7 +7099,7 @@ TOOLBAR_Register ()
 GXVOID
 TOOLBAR_Unregister ()
 {
-  gxUnregisterClassW (TOOLBARCLASSNAMEW, NULL);
+  gxUnregisterClassW (GXTOOLBARCLASSNAMEW, NULL);
 }
 
 static GXHIMAGELIST TOOLBAR_InsertImageList(PIMLENTRY **pies, GXINT *cies, GXHIMAGELIST himl, GXINT id)

@@ -530,9 +530,9 @@ namespace UVShader
     str.TrimRight('1');
     const TYPEDESC* pElementType = vctx.name_ctx.GetType(str);
 
-    const size_t element_size = pElementType->CountOf();
-    const size_t element_count = vctx.pType->CountOf() / element_size;
-    if(pValue && (pValue->IsNegative() || pValue->uValue64 >= element_count)) {
+    const size_t column_size = pElementType->CountOf();
+    const size_t row_size = vctx.pType->CountOf() / column_size;
+    if(pValue && (pValue->IsNegative() || pValue->uValue64 >= row_size)) {
       CHECK_VALUE_CONTEXT_CLEARERRORCOUNT;
       return vctx.ClearValue(ValueResult_SubscriptOutOfRange).pType;
     }
@@ -542,12 +542,12 @@ namespace UVShader
     {
       if(vctx.pool.empty())
       {
-        vctx.pValue += element_size * pValue->uValue64;
-        vctx.count = element_size;
+        vctx.pValue += column_size * pValue->uValue64;
+        vctx.count = column_size;
       }
       else
       {
-        ValuePool temp(vctx.pValue + element_size * pValue->uValue64, vctx.pValue + element_size * (pValue->uValue64 + 1));
+        ValuePool temp(vctx.pValue + column_size * pValue->uValue64, vctx.pValue + column_size * (pValue->uValue64 + 1));
         vctx.pool.assign(temp.begin(), temp.end());
         vctx.UsePool();
       }

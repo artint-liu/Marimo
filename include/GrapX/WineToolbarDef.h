@@ -99,13 +99,13 @@ typedef GXHANDLE GXHKEY;
 //====== TOOLBAR CONTROL ======================================================
 #ifndef NOTOOLBAR
 
-#define TOOLBARCLASSNAMEW       _CLTEXT("ToolbarWindow32")
-#define TOOLBARCLASSNAMEA       "ToolbarWindow32"
+#define GXTOOLBARCLASSNAMEW       _CLTEXT("ToolbarWindow32")
+#define GXTOOLBARCLASSNAMEA       "ToolbarWindow32"
 
 #ifdef  _UNICODE
-#define TOOLBARCLASSNAME        TOOLBARCLASSNAMEW
+#define GXTOOLBARCLASSNAME        GXTOOLBARCLASSNAMEW
 #else
-#define TOOLBARCLASSNAME        TOOLBARCLASSNAMEA
+#define GXTOOLBARCLASSNAME        GXTOOLBARCLASSNAMEA
 #endif
 
 struct GXTBBUTTON {

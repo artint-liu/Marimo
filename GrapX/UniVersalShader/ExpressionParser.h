@@ -792,8 +792,8 @@ namespace UVShader
     const TYPEDESC* InferSubscriptType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptTypeB(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
-    static const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
-    static const TYPEDESC* InferDifferentTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond);
+    const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond) const;
+    const TYPEDESC* InferTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond) const;
     const TYPEDESC* InitList_SyncType(NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob);
     const TYPEDESC* InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation);
 #endif
@@ -832,7 +832,7 @@ namespace UVShader
 
     void SetRepalcedValue(const GLOB& glob, const VALUE& value);
 
-    VALUE::State CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob);
+    //VALUE::State CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob);
 
     void DbgBreak(const GLOB& glob);
     void DbgBreak(const SYNTAXNODE* pNode);

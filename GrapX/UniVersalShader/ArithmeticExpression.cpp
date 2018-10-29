@@ -773,7 +773,10 @@ GO_NEXT:;
             B = *pDesc;
             GLOB_COMMA& top_gc = sGlobStack.top();
             MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Opcode, top_gc.pComma, &top_gc.A, &B);
-            //DbgDumpScope(top_gc.pComma->ToString(), top_gc.scopeA, scopeB);
+            if(sGlobStack.size() < 128)
+            {
+              DbgDumpScope(top_gc.pComma->ToString(), top_gc.scopeA, scopeB);
+            }
             scopeB.begin = top_gc.scopeA.begin;
 
             sGlobStack.pop();
@@ -1546,11 +1549,11 @@ GO_NEXT:;
   }
 
   template<typename _Ty>
-  VALUE::State VALUE::CalculateT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2)
+  VALUE::State VALUE::CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2)
   {
-    if(opcode.length == 1)
+    if(nOpcodeLen == 1)
     {
-      switch(opcode.marker[0])
+      switch(szOpcode[0])
       {
       case '+': output = t1 + t2; break;
       case '-': output = t1 - t2; break;
@@ -1569,15 +1572,15 @@ GO_NEXT:;
         //CLBREAK;
       }
     }
-    else
+    else if(nOpcodeLen == 2)
     {
-      if(opcode == "&&") {
+      if(szOpcode[0] == '&' && szOpcode[1] == '&') {
         output = (t1 && t2);
       }
-      else if(opcode == "||") {
+      else if(szOpcode[0] == '|' && szOpcode[1] == '|') {
         output = (t1 || t2);
       }
-      else if(opcode == "==") {
+      else if(szOpcode[0] == '=' && szOpcode[1] == '=') {
         output = (t1 == t2);
       }
       else {
@@ -1591,27 +1594,22 @@ GO_NEXT:;
   }
 
   template<typename _Ty>
-  VALUE::State VALUE::CalculateIT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2)
+  VALUE::State VALUE::CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2)
   {
-    if(opcode.length == 1)
+    if(nOpcodeLen == 1)
     {
       return State_UnknownOpcode;
     }
-    else
+    else if(nOpcodeLen == 2)
     {
-      if(opcode == "<<") {
+      if(szOpcode[0] == '<' && szOpcode[1] == '<') {
         output = (t1 << t2);
       }
-      else if(opcode == ">>") {
+      else if(szOpcode[0] == '>' && szOpcode[1] == '>') {
         output = (t1 >> t2);
       }
-      //else if(opcode == "==") {
-      //  output = (t1 == t2);
-      //}
       else {
         return State_UnknownOpcode;
-        //TRACE("Unsupport opcode(%c).\n", opcode);
-        //CLBREAK;
       }
     }
 
@@ -1619,6 +1617,11 @@ GO_NEXT:;
   }
 
   VALUE::State VALUE::Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1)
+  {
+    return Calculate(token.marker, token.length, param0, param1);
+  }
+
+  VALUE::State VALUE::Calculate(const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const VALUE& param0, const VALUE& param1)
   {
     *this = param0;
     VALUE second = param1;
@@ -1631,33 +1634,33 @@ GO_NEXT:;
     }
 
     if(type == Rank_Signed64) {
-      state = CalculateT(nValue64, token, nValue64, second.nValue64);      
+      state = CalculateT(nValue64, szOpcode, nOpcodeLen, nValue64, second.nValue64);      
       if(state == State_UnknownOpcode) {
-        state = CalculateIT(nValue64, token, nValue64, second.nValue64);      
+        state = CalculateIT(nValue64, szOpcode, nOpcodeLen, nValue64, second.nValue64);      
       }
     }
     else if(type == Rank_Unsigned64) {
-      state = CalculateT(uValue64, token, uValue64, second.uValue64);
+      state = CalculateT(uValue64, szOpcode, nOpcodeLen, uValue64, second.uValue64);
       if(state == State_UnknownOpcode) {
-        state = CalculateIT(uValue64, token, uValue64, second.uValue64);
+        state = CalculateIT(uValue64, szOpcode, nOpcodeLen, uValue64, second.uValue64);
       }
     }
     else if(type == Rank_Double) {
-      state = CalculateT(fValue64, token, fValue64, second.fValue64);
+      state = CalculateT(fValue64, szOpcode, nOpcodeLen, fValue64, second.fValue64);
     }
     else if(type == Rank_Float) {
-      state = CalculateT(fValue, token, fValue, second.fValue);
+      state = CalculateT(fValue, szOpcode, nOpcodeLen, fValue, second.fValue);
     }
     else if(type == Rank_Unsigned) {
-      state = CalculateT(uValue, token, uValue, second.uValue);
+      state = CalculateT(uValue, szOpcode, nOpcodeLen, uValue, second.uValue);
       if(state == State_UnknownOpcode) {
-        state = CalculateIT(uValue, token, uValue, second.uValue);
+        state = CalculateIT(uValue, szOpcode, nOpcodeLen, uValue, second.uValue);
       }
     }
     else if(type == Rank_Signed) {
-      state = CalculateT(nValue, token, nValue, second.nValue);
+      state = CalculateT(nValue, szOpcode, nOpcodeLen, nValue, second.nValue);
       if(state == State_UnknownOpcode) {
-        state = CalculateIT(nValue, token, nValue, second.nValue);
+        state = CalculateIT(nValue, szOpcode, nOpcodeLen, nValue, second.nValue);
       }
     }
     else {

@@ -288,14 +288,15 @@ namespace UVShader
     State UpgradeValueByRank(Rank _type);  // 调整为到 type 指定的级别, 对于浮点与整数类型会做类型转换
     State CastValueByRank(Rank _type); // 按照rank转换值，这个可以指定更低的rank
     State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
+    State Calculate(const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const VALUE& param0, const VALUE& param1);
     clStringA ToString() const;
     clStringA& ToString(clStringA& str) const;
     GXBOOL IsNumericRank() const;
     static GXBOOL IsNumericRank(Rank rank);
     template<typename _Ty>
-    State CalculateT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2);
+    State CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
     template<typename _Ty>
-    State CalculateIT(_Ty& output, const TOKEN& opcode, const _Ty& t1, const _Ty& t2);
+    State CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
   };
 
   typedef clvector<VALUE> ValuePool;
