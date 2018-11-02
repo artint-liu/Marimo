@@ -95,6 +95,9 @@ namespace D3D11
 
   GXBOOL GTextureImpl::InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
   {
+    const GXUINT nMinPitch = GetMinPitchSize();
+    nPitch = clMax(nPitch, nMinPitch);
+
     if(m_eResUsage != GXResUsage::SystemMem)
     {
       if(_CL_NOT_(IntD3D11CreateResource(bRenderTarget, pInitData, nPitch))) {
@@ -104,14 +107,12 @@ namespace D3D11
 
     if(m_eResUsage == GXResUsage::Read || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
     {
-      const GXUINT nMinPitch = GetMinPitchSize();
       const GXUINT nSize = nMinPitch * m_nHeight;
       m_pTextureData = new GXBYTE[nSize];
       GXLPBYTE pDest = m_pTextureData;
 
       if(pInitData)
       {
-        nPitch = clMax(nPitch, nMinPitch);
         for(GXUINT y = 0; y < m_nHeight; y++, pDest += nMinPitch) {
           memcpy(pDest, reinterpret_cast<GXLPVOID>((size_t)pInitData + nPitch * y), nMinPitch);
         }
@@ -171,6 +172,7 @@ namespace D3D11
 
     ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
     HRESULT hval = pd3dDevice->CreateTexture2D(&TexDesc, pInitData ? &TexInitData : NULL, &m_pD3D11Texture);
+    ASSERT(SUCCEEDED(hval)); // ÁÙÊ±
     if(SUCCEEDED(hval) && TEST_FLAG(TexDesc.BindFlags, D3D11_BIND_SHADER_RESOURCE)) {
       hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, NULL, &m_pD3D11ShaderView);
       if(FAILED(hval))
@@ -465,17 +467,17 @@ namespace D3D11
       {
         return FALSE;
       }
-      pLockRect->pBits = m_pTextureData;
-      pLockRect->Pitch = GetMinPitchSize();
+      pLockRect->pBits = m_sMappedResource.pData;
+      pLockRect->Pitch = m_sMappedResource.RowPitch;
     }
     else if(m_eResUsage == GXResUsage::ReadWrite)
     {
-      if(eResMap == GXResMap::Read)
+      if(eResMap == GXResMap::Write)
       {
         pLockRect->pBits = m_sMappedResource.pData;
         pLockRect->Pitch = m_sMappedResource.RowPitch;
       }
-      else if(eResMap == GXResMap::Write || eResMap == GXResMap::ReadWrite)
+      else if(eResMap == GXResMap::Read || eResMap == GXResMap::ReadWrite)
       {
         if(FAILED(pContext->Map(m_pD3D11Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_sMappedResource)))
         {

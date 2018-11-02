@@ -470,6 +470,7 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
     return 4;
   
   case GXFMT_R8G8B8:
+  case Format_B8G8R8:
     return 3;
   
   case GXFMT_R5G6B5:
@@ -500,6 +501,7 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   case GXFMT_A4L4:
   case GXFMT_S8_LOCKABLE:
     return 1;
+
   default:
     ASSERT(0);
   }

@@ -390,6 +390,9 @@ namespace GrapXToDX11
     case Format_D24X8:
       return DXGI_FORMAT_D24_UNORM_S8_UINT;
       
+    case Format_B8G8R8:
+      return DXGI_FORMAT_B8G8R8A8_UNORM;
+
     default:
       ASSERT(0);
     }

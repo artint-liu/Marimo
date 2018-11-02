@@ -26,10 +26,10 @@ GXCanvasCoreImpl::~GXCanvasCoreImpl()
 
 GXBOOL GXCanvasCoreImpl::Initialize(GXRenderTarget* pTarget)
 {
-  if(pTarget == NULL)
-  {
-    return FALSE;
-  }
+  //if(pTarget == NULL)
+  //{
+  //  return FALSE;
+  //}
 
   m_pTargetTex = static_cast<GXRenderTargetImpl*>(pTarget);
   if(m_pTargetTex != NULL)

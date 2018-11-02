@@ -1075,15 +1075,30 @@ namespace D3D11
     // FIXME:
     // 没有处理64位图像的地方
     // 没有检查图片格式
-    GXFormat
+    GXFormat format;
+
+    //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
+    //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
+    const GXUINT bpp = FreeImage_GetBPP(fibmp);
+    if(bpp == 24)
+    {
+      format = Format_B8G8R8;
+    }
+    else if(bpp == 32)
+    {
 #if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
-    format = GXFMT_A8B8G8R8;
+      format = GXFMT_A8B8G8R8;
 #else
-    format = GXFMT_A8R8G8B8;
+      format = GXFMT_A8R8G8B8;
 #endif
+    }
+    else {
+      CLBREAK;
+    }
+    
 
     hr = CreateTexture(ppTexture, NULL, FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp),
-      format, eUsage, 0, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+      format, eUsage, 1, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
 
     // 有名字的要注册一下
     if(GXSUCCEEDED(hr) && szName)
