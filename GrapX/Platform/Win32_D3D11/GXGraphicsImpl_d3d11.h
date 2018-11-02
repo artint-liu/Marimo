@@ -38,8 +38,8 @@ namespace D3D11
   class GDepthStencilStateImpl;
   class GSamplerStateImpl;
 
-  template<class InterfaceT> class GTexureBaseImplT;
-  typedef GTexureBaseImplT<GTextureBase> GTexBaseImpl;
+  template<class InterfaceT> class GTextureBaseImplT;
+  typedef GTextureBaseImplT<GTextureBase> GTexBaseImpl;
 
   struct GRAPHICS_CREATION_DESC
   {

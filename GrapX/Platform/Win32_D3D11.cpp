@@ -379,6 +379,17 @@ namespace GrapXToDX11
     //case :return DXGI_FORMAT_BC7_UNORM;
     //case :return DXGI_FORMAT_BC7_UNORM_SRGB;
     //case :return DXGI_FORMAT_FORCE_UINT;
+
+    case Format_B8G8R8A8:
+      return DXGI_FORMAT_B8G8R8A8_UNORM;
+    case Format_D32:
+      return DXGI_FORMAT_D32_FLOAT;
+    case Format_D16:
+      return DXGI_FORMAT_D16_UNORM;
+    case Format_D24S8:
+    case Format_D24X8:
+      return DXGI_FORMAT_D24_UNORM_S8_UINT;
+      
     default:
       ASSERT(0);
     }

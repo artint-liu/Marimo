@@ -10,7 +10,7 @@ namespace D3D11
 
   // 用来统一内部TextureImpl对象
   template<class _Interface>
-  class GTexureBaseImplT : public _Interface
+  class GTextureBaseImplT : public _Interface
   {
   protected:
     GXGraphicsImpl*           m_pGraphics;
@@ -18,7 +18,7 @@ namespace D3D11
     ID3D11ShaderResourceView* m_pD3D11ShaderView;
 
   public:
-    GTexureBaseImplT(GXGraphicsImpl*pGraphics)
+    GTextureBaseImplT(GXGraphicsImpl*pGraphics)
       : m_pGraphics(pGraphics)
       , m_pD3D11Texture(NULL)
       , m_pD3D11ShaderView(NULL)
@@ -33,7 +33,7 @@ namespace D3D11
     }
   };
 
-  class GTextureImpl : public GTexureBaseImplT<GTexture>
+  class GTextureImpl : public GTextureBaseImplT<GTexture>
   {
     friend class GXGraphicsImpl;
     friend class GXCanvasCoreImpl;
@@ -76,11 +76,11 @@ namespace D3D11
     GTextureImpl(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage);
     virtual ~GTextureImpl();
 
-    GXBOOL InitTexture(GXLPCVOID pInitData, GXUINT nPitch);
+    GXBOOL InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
     //void   CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
     //GXBOOL           IntGetHelpTexture();
     //ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);
-    GXBOOL IntD3D11CreateResource(GXLPCVOID pInitData, GXUINT nPitch);
+    GXBOOL IntD3D11CreateResource(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
     GXUINT GetMinPitchSize() const;
 
   protected:
@@ -106,6 +106,30 @@ namespace D3D11
 
 
   //////////////////////////////////////////////////////////////////////////
+
+  class GTextureImpl_RenderTarget : public GTextureImpl
+  {
+    friend class GXGraphicsImpl;
+  protected:
+    ID3D11RenderTargetView* m_pD3D11RenderTargetView;
+
+  public:
+    GTextureImpl_RenderTarget(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+    GXBOOL InitRenderTexture();
+  };
+
+  //////////////////////////////////////////////////////////////////////////
+
+  class GTextureImpl_DepthStencil : public GTextureImpl
+  {
+    friend class GXGraphicsImpl;
+  protected:
+    ID3D11DepthStencilView* m_pD3D11DepthStencilView;
+
+  public:
+    GTextureImpl_DepthStencil(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+    GXBOOL InitDepthStencil();
+  };
 #if 0
   class GTextureFromUser : public GTextureImpl
   {
@@ -200,7 +224,7 @@ namespace D3D11
     GTextureImpl_FromD3DSurface(GXGraphics* pGraphics, LPDIRECT3DSURFACE9 lpd3dSurface);
     ~GTextureImpl_FromD3DSurface();
   };*/
-}
+} // namespace D3D11
 
 #endif // _GTEXTURE_D3D11_IMPLEMENT_H_
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)

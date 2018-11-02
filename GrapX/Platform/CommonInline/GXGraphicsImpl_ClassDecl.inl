@@ -117,12 +117,7 @@
   //virtual GXImage*    CreateImageFromFile     (GXLPCWSTR lpwszFilename) override;
   //virtual GXImage*    CreateImageFromTexture  (GTexture* pTexture) override;
 
-  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
-  {
-    GXRenderTargetImpl* pTarget = NULL;
-    CLBREAK;
-    return GX_OK;
-  }
+  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override;
 
   GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
   {

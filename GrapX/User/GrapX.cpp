@@ -462,6 +462,11 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   case GXFMT_D32_LOCKABLE:
   case GXFMT_INDEX32:
   case GXFMT_G16R16F:
+  case Format_B8G8R8A8:
+  case Format_D32:
+  case Format_D24S8:
+  case Format_D24X8:
+  case Format_Index32:
     return 4;
   
   case GXFMT_R8G8B8:
@@ -483,6 +488,8 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   case GXFMT_L16:
   case GXFMT_INDEX16:
   case GXFMT_R16F:
+  case Format_D16:
+  case Format_Index16:
     return 2;
   
   case GXFMT_A8:
@@ -701,7 +708,7 @@ GXFormatCategory GetGraphicsFormatCategory(GXFormat eFmt)
   }
 }
 
-GXUINT TextureRatioToDimension(GXINT nTexRatio, GXUINT nModel, GXDWORD dwFlags)
+GXUINT SizeRatioToDimension(GXINT nTexRatio, GXUINT nModel, GXDWORD dwFlags)
 {
   if(((GXINT)nTexRatio) < 0) 
   {

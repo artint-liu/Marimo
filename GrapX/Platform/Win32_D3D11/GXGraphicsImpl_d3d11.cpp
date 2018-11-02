@@ -982,6 +982,32 @@ namespace D3D11
     return 0;
   }
 
+  GXHRESULT GXGraphicsImpl::CreateRenderTarget(
+    GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight,
+    GXFormat eColorFormat, GXFormat eDepthStencilFormat)
+  {
+    GRESKETCH rs = { RESTYPE_RENDERTARGET };
+
+    GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppRenderTarget), &rs);
+    if(GXSUCCEEDED(hr)) {
+      return hr;
+    }
+
+    GXRenderTargetImpl* pTarget = new GXRenderTargetImpl(this, nWidth, nHeight);
+    if(InlIsFailedToNewObject(pTarget)) {
+      return GX_ERROR_OUROFMEMORY;
+    }
+
+    if(_CL_NOT_(pTarget->Initialize(eColorFormat, eDepthStencilFormat)))
+    {
+      SAFE_RELEASE(pTarget);
+      return GX_FAIL;
+    }
+
+    RegisterResource(pTarget, &rs);
+    *ppRenderTarget = pTarget;
+    return GX_OK;
+  }
 
   GXHRESULT GXGraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, 
     GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
@@ -1006,7 +1032,7 @@ namespace D3D11
       return GX_FAIL;
     }
 
-    if( ! pTexture->InitTexture(pInitData, nPitch))
+    if(_CL_NOT_(pTexture->InitTexture(FALSE, pInitData, nPitch)))
     {
       pTexture->Release();
       pTexture = NULL;

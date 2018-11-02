@@ -30,10 +30,12 @@
 namespace D3D11
 {
 
-  GXRenderTargetImpl::GXRenderTargetImpl(GXGraphics* pGraphics)
+  GXRenderTargetImpl::GXRenderTargetImpl(GXGraphics* pGraphics, GXINT nWidth, GXINT nHeight)
     : m_pGraphics(static_cast<GXGraphicsImpl*>(pGraphics))
     , m_pColorTexture(NULL)
     , m_pDepthStencilTexture(NULL)
+    , m_nWidth(nWidth)
+    , m_nHeight(nHeight)
   {
   }
 
@@ -63,38 +65,47 @@ namespace D3D11
     return nRefCount;
   }
 
+  GXHRESULT GXRenderTargetImpl::Invoke(GRESCRIPTDESC* pDesc)
+  {
+    return GX_OK;
+  }
+
   GXBOOL GXRenderTargetImpl::GetRatio(GXSizeRatio* pWidth, GXSizeRatio* pHeight)
   {
-    // TODO: ...
-    CLBREAK;
-    return FALSE;
+    *pWidth  = m_nWidth < 0 ? static_cast<GXSizeRatio>(m_nWidth) : GXSizeRatio::Undefined;
+    *pHeight = m_nHeight < 0 ? static_cast<GXSizeRatio>(m_nHeight) : GXSizeRatio::Undefined;
+    return TRUE;
   }
 
   GXSIZE* GXRenderTargetImpl::GetDimension(GXSIZE* pDimension)
   {
-    // TODO: ...
-    CLBREAK;
-    return pDimension;
+    return m_pColorTexture->GetDimension(pDimension);
   }
 
   GXHRESULT GXRenderTargetImpl::GetColorTexture(GTexture** ppColorTexture, GXResUsage eUsage)
   {
-    // TODO: ...
-    CLBREAK;
+    if(eUsage == GXResUsage::Default)
+    {
+      *ppColorTexture = m_pColorTexture;
+      return m_pColorTexture->AddRef();
+    }
+    // TODO: else if(eUsage == GXResUsage::Read)
     return GX_FAIL;
   }
 
   GTexture* GXRenderTargetImpl::GetColorTextureUnsafe(GXResUsage eUsage)
   {
-    // TODO: ...
-    CLBREAK;
-    return NULL;
+    return m_pColorTexture;
   }
 
   GXHRESULT GXRenderTargetImpl::GetDepthStencilTexture(GTexture** ppDepthStencilTexture)
   {
-    // TODO: ...
-    CLBREAK;
+    if(m_pDepthStencilTexture)
+    {
+      *ppDepthStencilTexture = m_pDepthStencilTexture;
+      return m_pDepthStencilTexture->AddRef();
+    }
+    *ppDepthStencilTexture = NULL;
     return GX_FAIL;
   }
 
@@ -117,6 +128,45 @@ namespace D3D11
     // TODO: ...
     CLBREAK;
     return FALSE;
+  }
+
+  GXBOOL GXRenderTargetImpl::Initialize(GXFormat eColorFormat, GXFormat eDepthStencilFormat)
+  {
+    GXUINT nWidth  = m_nWidth;
+    GXUINT nHeight = m_nHeight;
+    if(m_nWidth < 0 || m_nHeight < 0)
+    {
+      GXGRAPHICSDEVICE_DESC sDesc;
+      m_pGraphics->GetDesc(&sDesc);
+      nWidth  = SizeRatioToDimension(m_nWidth, sDesc.BackBufferWidth, 0);
+      nHeight = SizeRatioToDimension(m_nHeight, sDesc.BackBufferHeight, 0);
+    }
+
+    m_pColorTexture = new GTextureImpl_RenderTarget(m_pGraphics, eColorFormat, nWidth, nHeight);
+    if(InlIsFailedToNewObject(m_pColorTexture)) {
+      return FALSE;
+    }
+
+    if(_CL_NOT_(m_pColorTexture->InitRenderTexture())) {
+      SAFE_RELEASE(m_pColorTexture);
+      return FALSE;
+    }
+
+    if(eDepthStencilFormat != Format_Unknown) {
+      m_pDepthStencilTexture = new GTextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
+
+      if(InlIsFailedToNewObject(m_pDepthStencilTexture)) {
+        return FALSE;
+      }
+
+      if(_CL_NOT_(m_pDepthStencilTexture->InitDepthStencil())) {
+        SAFE_RELEASE(m_pColorTexture);
+        SAFE_RELEASE(m_pDepthStencilTexture);
+        return FALSE;
+      }
+    }
+
+    return TRUE;
   }
 
   GTextureImpl_RenderTarget* GXRenderTargetImpl::IntGetColorTextureUnsafe()

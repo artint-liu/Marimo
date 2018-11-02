@@ -5331,7 +5331,7 @@ GXDLL GXINT         GetAdaptedSize        (GXINT nSize);
 GXDLL GXUINT        GetBytesOfGraphicsFormat  (GXFormat eFmt);
 GXDLL GXFormatCategory  GetGraphicsFormatCategory  (GXFormat eFmt);
 GXDLL GXBOOL        IsPow2            (GXINT nNum);
-GXDLL GXUINT        TextureRatioToDimension    (GXINT nTexRatio, GXUINT nModel, GXDWORD dwFlags);
+GXDLL GXUINT        SizeRatioToDimension    (GXINT nTexRatio, GXUINT nModel, GXDWORD dwFlags);
 
 // 内置的顶点格式定义
 enum GXSysVertexDecl

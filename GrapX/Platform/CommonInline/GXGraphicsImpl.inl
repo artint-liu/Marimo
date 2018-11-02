@@ -52,7 +52,7 @@
 
 
   //CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME, 1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
-  CreateRenderTarget(&m_pDefaultBackBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, GXFMT_D24S8);
+  CreateRenderTarget(&m_pDefaultBackBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, Format_D24S8);
 
   //m_pBackBufferImg = CreateImageFromTexture(m_pBackBufferTex);
 

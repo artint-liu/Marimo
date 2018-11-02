@@ -75,7 +75,7 @@ namespace D3D11
   }
 
   GTextureImpl::GTextureImpl(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage)
-    : GTexureBaseImplT<GTexture>(static_cast<GXGraphicsImpl*>(pGraphics))
+    : GTextureBaseImplT<GTexture>(static_cast<GXGraphicsImpl*>(pGraphics))
     , m_pTextureData    (NULL)
     , m_nMipLevels      (nMipLevels)
     , m_Format          (eFormat)
@@ -93,11 +93,11 @@ namespace D3D11
     SAFE_DELETE_ARRAY(m_pTextureData);
   }
 
-  GXBOOL GTextureImpl::InitTexture(GXLPCVOID pInitData, GXUINT nPitch)
+  GXBOOL GTextureImpl::InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
   {
     if(m_eResUsage != GXResUsage::SystemMem)
     {
-      if(_CL_NOT_(IntD3D11CreateResource(pInitData, nPitch))) {
+      if(_CL_NOT_(IntD3D11CreateResource(bRenderTarget, pInitData, nPitch))) {
         return FALSE;
       }
     }
@@ -109,8 +109,12 @@ namespace D3D11
       m_pTextureData = new GXBYTE[nSize];
       GXLPBYTE pDest = m_pTextureData;
 
-      for(GXUINT y = 0; y < m_nHeight; y++, pDest += nMinPitch) {
-        memcpy(pDest, reinterpret_cast<GXLPVOID>((size_t)pInitData + nPitch * y), nMinPitch);
+      if(pInitData)
+      {
+        nPitch = clMax(nPitch, nMinPitch);
+        for(GXUINT y = 0; y < m_nHeight; y++, pDest += nMinPitch) {
+          memcpy(pDest, reinterpret_cast<GXLPVOID>((size_t)pInitData + nPitch * y), nMinPitch);
+        }
       }
     }
 
@@ -129,7 +133,7 @@ namespace D3D11
   //  m_nHeight = TextureRatioToDimension((GXINT)m_eHeightRatio, GrapDeviceDesc.BackBufferHeight, dwFlags);
   //}
 
-  GXBOOL GTextureImpl::IntD3D11CreateResource(GXLPCVOID pInitData, GXUINT nPitch)
+  GXBOOL GTextureImpl::IntD3D11CreateResource(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
   {
     ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
@@ -145,7 +149,18 @@ namespace D3D11
     TexDesc.Format              = GrapXToDX11::FormatFrom(m_Format);
     TexDesc.SampleDesc.Count    = 1;
     TexDesc.SampleDesc.Quality  = 0;
-    TexDesc.BindFlags           = D3D11_BIND_SHADER_RESOURCE;
+
+    if(m_Format == Format_D32 || m_Format == Format_D16 ||
+      m_Format == Format_D24S8 || m_Format == Format_D24X8)
+    {
+      TexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    }
+    else if(bRenderTarget) {
+      TexDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+    }
+    else {
+      TexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    }
 
     GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage);
 
@@ -1041,6 +1056,58 @@ namespace D3D11
   //{
 
   //}
+
+
+
+  //////////////////////////////////////////////////////////////////////////
+
+  GTextureImpl_RenderTarget::GTextureImpl_RenderTarget(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+    : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+  {
+  }
+
+  GXBOOL GTextureImpl_RenderTarget::InitRenderTexture()
+  {
+    if(_CL_NOT_(GTextureImpl::InitTexture(TRUE, NULL, 0))) {
+      return FALSE;
+    }
+
+    ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+
+    D3D11_RENDER_TARGET_VIEW_DESC TarDesc;
+    InlSetZeroT(TarDesc);
+
+    TarDesc.Format = GrapXToDX11::FormatFrom(m_Format);
+    TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+    HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
+    return SUCCEEDED(hval);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  GTextureImpl_DepthStencil::GTextureImpl_DepthStencil(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+    : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+  {
+  }
+
+  GXBOOL GTextureImpl_DepthStencil::InitDepthStencil()
+  {
+    if(_CL_NOT_(GTextureImpl::InitTexture(FALSE, NULL, 0))) {
+      return FALSE;
+    }
+
+    ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+
+    // Create the depth stencil view
+    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+    InlSetZeroT(descDSV);
+    descDSV.Format = GrapXToDX11::FormatFrom(m_Format);
+    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    //descDSV.Texture2D.MipSlice = 0;
+    HRESULT hval = pd3dDevice->CreateDepthStencilView(m_pD3D11Texture, &descDSV, &m_pD3D11DepthStencilView);
+    return SUCCEEDED(hval);
+  }
 
 } // namespace D3D11
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11

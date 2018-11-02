@@ -19,42 +19,32 @@ namespace D3D11
     GXGraphics* m_pGraphics;
     GTextureImpl_RenderTarget* m_pColorTexture;
     GTextureImpl_DepthStencil* m_pDepthStencilTexture;
+    const GXINT m_nWidth;
+    const GXINT m_nHeight;
 
   public:
-    GXRenderTargetImpl(GXGraphics* pGraphics);
+    GXRenderTargetImpl(GXGraphics* pGraphics, GXINT nWidth, GXINT nHeight);
     virtual ~GXRenderTargetImpl();
 
   public:
-    GXHRESULT  AddRef            () override;
-    GXHRESULT  Release           () override;
+    GXHRESULT  AddRef                 () override;
+    GXHRESULT  Release                () override;
+    GXHRESULT  Invoke                 (GRESCRIPTDESC* pDesc) override;
 
-    GXBOOL     GetRatio              (GXSizeRatio* pWidth, GXSizeRatio* pHeight) override;
-    GXSIZE*    GetDimension          (GXSIZE* pDimension) override;
-    GXHRESULT  GetColorTexture       (GTexture** ppColorTexture, GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
-    GTexture*  GetColorTextureUnsafe (GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
-    GXHRESULT  GetDepthStencilTexture(GTexture** ppDepthStencilTexture) override;
-    GXBOOL     StretchRect           (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter) override;
-    GXBOOL     SaveToFile            (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat) override;
-    GXBOOL     SaveToMemory          (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat) override;
+    GXBOOL     GetRatio               (GXSizeRatio* pWidth, GXSizeRatio* pHeight) override;
+    GXSIZE*    GetDimension           (GXSIZE* pDimension) override;
+    GXHRESULT  GetColorTexture        (GTexture** ppColorTexture, GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
+    GTexture*  GetColorTextureUnsafe  (GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
+    GXHRESULT  GetDepthStencilTexture (GTexture** ppDepthStencilTexture) override;
+    GXBOOL     StretchRect            (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter) override;
+    GXBOOL     SaveToFile             (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat) override;
+    GXBOOL     SaveToMemory           (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat) override;
 
 
   public:
+    GXBOOL Initialize(GXFormat eColorFormat, GXFormat eDepthStencilFormat);
     GTextureImpl_RenderTarget* IntGetColorTextureUnsafe();
     GTextureImpl_DepthStencil* IntGetDepthStencilTextureUnsafe();
-  };
-
-  class GTextureImpl_RenderTarget : public GTexureBaseImplT<GTexture>
-  {
-    friend class GXGraphicsImpl;
-  protected:
-    ID3D11RenderTargetView* m_pD3D11RenderTargetView;
-  };
-
-  class GTextureImpl_DepthStencil : public GTexureBaseImplT<GTexture>
-  {
-    friend class GXGraphicsImpl;
-  protected:
-    ID3D11DepthStencilView* m_pD3D11DepthStencilView;
   };
 
 } // namespace D3D11

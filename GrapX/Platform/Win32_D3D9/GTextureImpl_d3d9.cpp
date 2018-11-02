@@ -547,11 +547,11 @@ namespace D3D9
       ? NULL : TEXTURERATIO_POW2;
 
     m_nWidth = (m_nWidthRatio < 0)
-      ? TextureRatioToDimension((GXINT)m_nWidthRatio, GrapDeviceDesc.BackBufferWidth, dwFlags)
+      ? SizeRatioToDimension((GXINT)m_nWidthRatio, GrapDeviceDesc.BackBufferWidth, dwFlags)
       : ((GXUINT)(GXINT)m_nWidthRatio);
 
     m_nHeight = (m_nHeightRatio < 0)
-      ? TextureRatioToDimension((GXINT)m_nHeightRatio, GrapDeviceDesc.BackBufferHeight, dwFlags)
+      ? SizeRatioToDimension((GXINT)m_nHeightRatio, GrapDeviceDesc.BackBufferHeight, dwFlags)
       : ((GXUINT)(GXINT)m_nHeightRatio);
 
     if(Pool == D3DPOOL_SYSTEMMEM)
