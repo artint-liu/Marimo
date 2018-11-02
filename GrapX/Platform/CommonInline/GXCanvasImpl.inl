@@ -94,7 +94,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
     m_uBatchSize     = s_uDefBatchSize;
 
     if(m_pPrimitive == NULL) {
-      m_pGraphics->CreatePrimitive(&m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::GXResUsage_Write,
+      m_pGraphics->CreatePrimitive(&m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Write,
         m_uVertIndexSize, sizeof(CANVAS_PRMI_VERT), NULL, m_uVertIndexSize, 2, NULL);
     }
 
@@ -1302,8 +1302,8 @@ GXBOOL GXCanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprc
 }
 
 #define CHECK_LOCK \
-  if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::GXResMap_Write)); } \
-  if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::GXResMap_Write)); }
+  if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::Write)); } \
+  if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::Write)); }
 
 #define SET_BATCH_INDEX(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
 
@@ -1691,43 +1691,43 @@ GXBOOL GXCanvasImpl::DrawTexture(GTexture*pTexture, const GXREGN *rcDest, const 
   return TRUE;
 }
 
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest)
-{
-  GXREGN rcSrc(0);
-  pImage->GetDimension((GXINT*)&rcSrc.width, (GXINT*)&rcSrc.height);
-  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, &rcSrc);
-}
-
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc)
-{
-  GXREGN regn;
-  if(rgSrc == NULL)
-  {
-    regn.left = 0;
-    regn.top = 0;
-    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
-    rgSrc = &regn;
-  }
-  return DrawTexture(pImage->GetTextureUnsafe(), xPos, yPos, rgSrc);
-}
-
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest, const GXREGN *rgSrc)
-{
-  GXREGN regn;
-  if(rgSrc == NULL)
-  {
-    regn.left = 0;
-    regn.top = 0;
-    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
-    rgSrc = &regn;
-  }
-  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc);
-}
-
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation)
-{
-  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc, eRotation);
-}
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest)
+//{
+//  GXREGN rcSrc(0);
+//  pImage->GetDimension((GXINT*)&rcSrc.width, (GXINT*)&rcSrc.height);
+//  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, &rcSrc);
+//}
+//
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc)
+//{
+//  GXREGN regn;
+//  if(rgSrc == NULL)
+//  {
+//    regn.left = 0;
+//    regn.top = 0;
+//    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
+//    rgSrc = &regn;
+//  }
+//  return DrawTexture(pImage->GetTextureUnsafe(), xPos, yPos, rgSrc);
+//}
+//
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest, const GXREGN *rgSrc)
+//{
+//  GXREGN regn;
+//  if(rgSrc == NULL)
+//  {
+//    regn.left = 0;
+//    regn.top = 0;
+//    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
+//    rgSrc = &regn;
+//  }
+//  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc);
+//}
+//
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation)
+//{
+//  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc, eRotation);
+//}
 //
 //const GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst()
 //{

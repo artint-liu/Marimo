@@ -11,11 +11,12 @@ for(int i = 0; i < 4; i++)
   m_lpLockedVertex[m_uVertCount + i].w = 1;
   m_lpLockedVertex[m_uVertCount + i].color = (GXDWORD)m_dwTexVertColor;
 }
-GXUINT nTexWidth;
-GXUINT nTexHeight;
-pTexture->GetDimension(&nTexWidth, &nTexHeight);
-const GXFLOAT fInvTexWidth  = 1.0f / (GXFLOAT)nTexWidth;
-const GXFLOAT fInvTexHeight = 1.0f / (GXFLOAT)nTexHeight;
+//GXUINT nTexWidth;
+//GXUINT nTexHeight;
+GXSIZE sDimension;
+pTexture->GetDimension(&sDimension);
+const GXFLOAT fInvTexWidth  = 1.0f / (GXFLOAT)sDimension.cx;
+const GXFLOAT fInvTexHeight = 1.0f / (GXFLOAT)sDimension.cy;
 
 #ifdef GLES2_CANVAS_IMPL
 const GXFLOAT fLeft   = fInvTexWidth  * rcSrc->left;

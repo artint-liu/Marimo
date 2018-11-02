@@ -2,6 +2,7 @@
 #define _GRAPX_STATION_
 
 class GTexture;
+class GXRenderTarget;
 class GXGraphics;
 class CAeroShader;
 class CBlurShader;
@@ -99,8 +100,8 @@ struct GXSTATION
 #endif
 
 #ifdef ENABLE_AERO
-  GTexture*        pBackDownSampTexA;    // 玻璃效果的缓冲纹理 - A
-  GTexture*        pBackDownSampTexB;    // 玻璃效果的缓冲纹理 - B
+  GXRenderTarget*     pBackDownSampTexA;    // 玻璃效果的缓冲纹理 - A
+  GXRenderTarget*     pBackDownSampTexB;    // 玻璃效果的缓冲纹理 - B
 #endif // ENABLE_AERO
                                          //#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
                                          //  GXSTATION(HWND hWnd, IGXPlatform* lpPlatform);

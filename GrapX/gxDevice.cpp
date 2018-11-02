@@ -7,6 +7,7 @@
 //#include "GrapX/GUnknown.h"
 #include "GrapX/GResource.h"
 #include "GrapX/GTexture.h"
+#include "GrapX/GXRenderTarget.h"
 #include "GrapX/GRegion.h"
 #include "GrapX/GXGraphics.h"
 #include "GrapX/GShader.h"
@@ -141,11 +142,8 @@ GXINT_PTR GXCALLBACK ConsoleDlgProc(GXHWND hWnd, GXUINT message, GXWPARAM wParam
 
 #ifdef ENABLE_AERO
 
-      g_pCurStation->pGraphics->CreateTexture(&g_pCurStation->pBackDownSampTexA, NULL, TEXSIZE_HALF, TEXSIZE_HALF,
-        1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
-
-      g_pCurStation->pGraphics->CreateTexture(&g_pCurStation->pBackDownSampTexB, NULL, TEXSIZE_HALF, TEXSIZE_HALF,
-        1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
+      g_pCurStation->pGraphics->CreateRenderTarget(&g_pCurStation->pBackDownSampTexA, NULL, GXSizeRatio::Half, GXSizeRatio::Half, Format_B8G8R8A8, Format_Unknown);
+      g_pCurStation->pGraphics->CreateRenderTarget(&g_pCurStation->pBackDownSampTexB, NULL, GXSizeRatio::Half, GXSizeRatio::Half, Format_B8G8R8A8, Format_Unknown);
 
       ASSERT(g_pCurStation->pBackDownSampTexA && g_pCurStation->pBackDownSampTexB);
 #endif // ENABLE_AERO
@@ -335,9 +333,9 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
   GXGraphics* pGraphics = lpStation->pGraphics;
 
   // TODO: ³éÈ¡×ÊÔ´
-  pGraphics->CreateShaderFromFileA(&lpStockObject->pAeroShader,   "shaders/Aero.shader.txt");
-  pGraphics->CreateShaderFromFileA(&lpStockObject->pBlurShader,   "shaders/Blur.shader.txt");
-  pGraphics->CreateShaderFromFileA(&lpStockObject->pSimpleShader, "shaders/Simple.shader.txt");
+  pGraphics->CreateShaderFromFile(&lpStockObject->pAeroShader,   "shaders/Aero.shader.txt");
+  pGraphics->CreateShaderFromFile(&lpStockObject->pBlurShader,   "shaders/Blur.shader.txt");
+  pGraphics->CreateShaderFromFile(&lpStockObject->pSimpleShader, "shaders/Simple.shader.txt");
 
   lpStation->pGraphics->CreateEffect(&lpStockObject->pAeroEffect  , lpStockObject->pAeroShader);
   lpStation->pGraphics->CreateEffect(&lpStockObject->pBlurEffect  , lpStockObject->pBlurShader);
@@ -401,8 +399,8 @@ GXBOOL DestroyStockObject(GXLPSTATION lpStation)
 
     //nCount = sprintf(buffer,L"Cursor Pos:%6d,%6d", lpStation->m_ptCursor.x, lpStation->m_ptCursor.y);
     nCount = strInfo.Format(_CLTEXT("Cursor pos:%6d,%6d"), lpStation->m_ptCursor.x, lpStation->m_ptCursor.y);
-    pCanvas->TextOutW(pFont, 6, 6, strInfo, (GXINT)nCount, 0xff000000);
-    pCanvas->TextOutW(pFont, 5, 5, strInfo, (GXINT)nCount, 0xffffffff);
+    pCanvas->TextOut(pFont, 6, 6, strInfo, (GXINT)nCount, 0xff000000);
+    pCanvas->TextOut(pFont, 5, 5, strInfo, (GXINT)nCount, 0xffffffff);
     //nCount = wsprintfW(buffer,L"Mouse Over Frame: %08XH ", lpStation->m_pMouseFocus);
     nCount = strInfo.Format(_CLTEXT("Mouse over wnd: %08XH "), lpStation->m_pMouseFocus);
     if(lpStation->m_pMouseFocus != NULL && lpStation->m_pMouseFocus->m_pText > (GXWCHAR*)0xffff)
@@ -411,8 +409,8 @@ GXBOOL DestroyStockObject(GXLPSTATION lpStation)
       //nCount += lstrlenW(lpStation->m_pMouseFocus->m_pText);
       strInfo += lpStation->m_pMouseFocus->m_pText;
     }
-    pCanvas->TextOutW(pFont, 6, 26, strInfo, (GXINT)strInfo.GetLength(), 0xff000000);
-    pCanvas->TextOutW(pFont, 5, 25, strInfo, (GXINT)strInfo.GetLength(), 0xffffffff);
+    pCanvas->TextOut(pFont, 6, 26, strInfo, (GXINT)strInfo.GetLength(), 0xff000000);
+    pCanvas->TextOut(pFont, 5, 25, strInfo, (GXINT)strInfo.GetLength(), 0xffffffff);
 #endif // _DEV_DISABLE_UI_CODE
   }
 /*

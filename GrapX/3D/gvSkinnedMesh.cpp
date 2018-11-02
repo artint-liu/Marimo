@@ -90,7 +90,7 @@ GXBOOL GVSkinnedMeshSoft::Initialize(GXGraphics* pGraphics, const GVMESHDATA* pM
     m_pVertices = new GXBYTE[m_nVertStride * nVertCount];
     m_nClusterCount = nClusterCount;
 
-    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Write);
+    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Write);
     memcpy(m_pVertices, locker_v.GetPtr(), m_nVertStride * nVertCount);
 
     return TRUE;
@@ -197,7 +197,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
   float3* pDestNormal = NULL;
   m_aabbLocal.Clear();
 
-  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_ReadWrite);
+  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::ReadWrite);
 
   //if(m_pPrimitive->Lock(0, 0, 0, 0, &pNewVertices, &pIndices))
   if(locker_v.GetPtr())

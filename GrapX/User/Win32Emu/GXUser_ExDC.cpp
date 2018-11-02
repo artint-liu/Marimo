@@ -9,7 +9,7 @@
 #include <GrapX/GRegion.h>
 #include <GrapX/GXGraphics.h>
 #include <GrapX/GXCanvas.h>
-#include <GrapX/GXImage.h>
+#include <GrapX/GTexture.h>
 #include <GrapX/GXSprite.h>
 
 // 私有头文件
@@ -157,7 +157,7 @@ GXLONG GXDLLAPI gxTabbedTextOutW(
 
       if(pFont)
       {
-        GXLONG ret2 = pCanvas->TabbedTextOutW(pFont, X, Y, lpString, nCount, 
+        GXLONG ret2 = pCanvas->TabbedTextOut(pFont, X, Y, lpString, nCount, 
           nTabPositions, lpnTabStopPositions, pDC->crText);
         //ASSERT(ret == ret2);
       }
@@ -202,7 +202,7 @@ GXDWORD GXDLLAPI gxGetTabbedTextExtentW(
     if(pCanvas && pDC->hFont)
     {
       GXFont* pFont = GXGDI_FONT_PTR(pDC->hFont)->lpFont;
-      return pCanvas->TabbedTextOutW(pFont, 0, 0, lpString, nCount, nTabPositions, lpnTabStopPositions, 0);
+      return pCanvas->TabbedTextOut(pFont, 0, 0, lpString, nCount, nTabPositions, lpnTabStopPositions, 0);
     }
   }
   return 0;
@@ -417,10 +417,12 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
       if(szOBMFile != NULL)
         strFilename = clStringW(szBaseDir) + szOBMFile;
     }
-    if(strFilename.GetLength() != 0)
-      pBitmap->pImage = lpStation->pGraphics->CreateImageFromFile(strFilename);
-    else
-      pBitmap->pImage = lpStation->pGraphics->CreateImage(16, 16, GXFMT_A8, FALSE, NULL);
+    if(strFilename.GetLength() != 0) {
+      lpStation->pGraphics->CreateTextureFromFile(&pBitmap->pDrawingTexture, strFilename, GXResUsage::Default);
+    }
+    else {
+      lpStation->pGraphics->CreateTexture(&pBitmap->pDrawingTexture, NULL, 16, 16, GXFMT_A8, GXResUsage::Default, 1);
+    }
     GXWin32APIEmu::MapGXGdiObj(GXGDIOBJ_BITMAP, (GXLPVOID)lpBitmapName, pBitmap);
   }
   return GXGDI_BITMAP_HANDLE(pBitmap);
@@ -482,15 +484,17 @@ GXHANDLE GXDLLAPI gxCopyImage(
     LPGXGDIBITMAP lpOrgBitmap = GXGDI_BITMAP_PTR(hImage);
     LPGXGDIBITMAP lpNewBitmap;
     lpNewBitmap = new GXGDIBITMAP;
-    lpNewBitmap->emObjType    = lpOrgBitmap->emObjType;
-    lpNewBitmap->bmWidth    = lpOrgBitmap->bmWidth; 
-    lpNewBitmap->bmHeight    = lpOrgBitmap->bmHeight; 
-    lpNewBitmap->bmWidthBytes  = lpOrgBitmap->bmWidthBytes; 
-    lpNewBitmap->bmPlanes    = lpOrgBitmap->bmPlanes; 
-    lpNewBitmap->bmBitsPixel  = lpOrgBitmap->bmBitsPixel; 
-    lpNewBitmap->bmBits      = lpOrgBitmap->bmBits; 
+    lpNewBitmap->emObjType        = lpOrgBitmap->emObjType;
+    lpNewBitmap->bmWidth          = lpOrgBitmap->bmWidth; 
+    lpNewBitmap->bmHeight         = lpOrgBitmap->bmHeight; 
+    lpNewBitmap->bmWidthBytes     = lpOrgBitmap->bmWidthBytes; 
+    lpNewBitmap->bmPlanes         = lpOrgBitmap->bmPlanes; 
+    lpNewBitmap->bmBitsPixel      = lpOrgBitmap->bmBitsPixel; 
+    lpNewBitmap->bmBits           = lpOrgBitmap->bmBits; 
     ASSERT(lpOrgBitmap->bmBits == NULL);
-    lpNewBitmap->pImage      = lpOrgBitmap->pImage->Clone();
+    //lpNewBitmap->pDrawingTexture  = lpOrgBitmap->pDrawingTexture->Clone();
+    lpOrgBitmap->pDrawingTexture->GetGraphicsUnsafe()->CreateTexture(
+      &lpNewBitmap->pDrawingTexture, NULL, lpOrgBitmap->pDrawingTexture->GetUsage(), lpOrgBitmap->pDrawingTexture);
     return (GXHANDLE)lpNewBitmap;
   }
   else
@@ -677,8 +681,7 @@ GXHICON GXDLLAPI GXCursorToIcon(GXHCURSOR hCursor)
     {
       lpMask[i] = (((~lpMask[i]) << 8) & 0xff000000) | (lpMask[uDelta + i]);
     }
-    pIconRet->pImgIcon = pGraphics
-      ->CreateImage(BitmapMask.bmWidth, BitmapMask.bmHeight >> 1, GXFMT_A8R8G8B8, FALSE, lpMask);
+    pGraphics->CreateTexture(&pIconRet->pImgIcon, NULL, BitmapMask.bmWidth, BitmapMask.bmHeight >> 1, GXFMT_A8R8G8B8, GXResUsage::Default, 1, lpMask);
 
     //GXCreateImage(BitmapMask.bmWidth, 
     //  BitmapMask.bmHeight >> 1, lpMask, FALSE, &pIconRet->pImgIcon);
@@ -690,8 +693,7 @@ GXHICON GXDLLAPI GXCursorToIcon(GXHCURSOR hCursor)
   }
   else if(IconInfo.hbmMask != NULL && IconInfo.hbmColor != NULL)
   {
-    pIconRet->pImgIcon = pGraphics
-      ->CreateImage(BitmapMask.bmWidth, BitmapMask.bmHeight, GXFMT_A8R8G8B8, FALSE, lpColor);
+    pGraphics->CreateTexture(&pIconRet->pImgIcon, NULL, BitmapMask.bmWidth, BitmapMask.bmHeight, GXFMT_A8R8G8B8, GXResUsage::Default, 1, lpColor);
     //GXCreateImage(BitmapMask.bmWidth, 
     //  BitmapMask.bmHeight, lpColor, FALSE, &pIconRet->pImgIcon);
     if(pIconRet->pImgIcon == NULL)

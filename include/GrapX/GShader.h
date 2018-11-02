@@ -8,6 +8,11 @@
 // 并为一个记录, 这称为 Uniform
 // Canvas3D 可以将指定名字的Uniform赋予全局属性，使其在Canvas3D中具有一致的值，
 // 这称为 Canvas-Uniform
+
+// GShader
+// GXEffect = GShader + buffer
+// GXMaterial = GXEffect + render state
+
 namespace Marimo {
   class DataPool;
 }

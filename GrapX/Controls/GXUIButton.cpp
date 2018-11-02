@@ -209,14 +209,14 @@ namespace GXUI
 
       if(TEST_FLAG(dwStyle, GXWS_DISABLED))
       {
-        canvas.DrawTextW(m_pFont, lpText, -1, &rcText, dwDrawTextFlag, m_crDisabledText.color);
+        canvas.DrawText(m_pFont, lpText, -1, &rcText, dwDrawTextFlag, m_crDisabledText.color);
       }
       else
       {
         if(TEST_FLAG(m_dwState, GXUIBUTTON_STATE_PRESSED)) {
           gxOffsetRect(&rcText, 1, 1);
         }
-        canvas.DrawTextW(m_pFont, lpText, -1, &rcText, dwDrawTextFlag, m_crText.color);
+        canvas.DrawText(m_pFont, lpText, -1, &rcText, dwDrawTextFlag, m_crText.color);
       }
     }
     return 0;

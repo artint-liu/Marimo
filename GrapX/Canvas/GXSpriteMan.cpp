@@ -7,7 +7,7 @@
 
 // 标准接口
 #include "GrapX/GResource.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GTexture.h"
 #include "GrapX/GXCanvas.h"
 #include "GrapX/GXSprite.h"
 #include "GrapX/GXGraphics.h"
@@ -64,26 +64,28 @@ extern "C" GXHRESULT GXDLLAPI GXCreateSpriteEx(GXGraphics* pGraphics, const GXSP
 
 GXHRESULT GXDLLAPI GXCreateSpriteArray(GXGraphics* pGraphics, GXLPCWSTR szTextureFile, int xStart, int yStart, int nTileWidth, int nTileHeight, int xGap, int yGap, GXSprite** ppSprite)
 {
-  GXImage* pImage = pGraphics->CreateImageFromFile(szTextureFile);
-  if( ! pImage) {
+  GTexture* pTexture = NULL;
+  if(GXFAILED(pGraphics->CreateTextureFromFile(&pTexture, szTextureFile, GXResUsage::Default))) {
     return GX_E_OPEN_FAILED;
   }
-  int nWidth = pImage->GetWidth();
-  int nHeight = pImage->GetHeight();
+  //int nWidth  = pTexture->GetWidth();
+  //int nHeight = pTexture->GetHeight();
+  GXSIZE sDimension;
+  pTexture->GetDimension(&sDimension);
 
   clvector<GXREGN> aRegn;
   GXREGN regn;
 
-  for(int y = yStart; y <= nHeight - nTileHeight; y += nTileHeight + yGap)
+  for(int y = yStart; y <= sDimension.cy - nTileHeight; y += nTileHeight + yGap)
   {
-    for(int x = xStart; x <= nWidth - nTileWidth; x += nTileWidth + xGap)
+    for(int x = xStart; x <= sDimension.cx - nTileWidth; x += nTileWidth + xGap)
     {
       gxSetRegn(&regn, x, y, nTileWidth, nTileHeight);
       aRegn.push_back(regn);
     }
   }
   GXHRESULT hval = GXCreateSprite(pGraphics, szTextureFile, &aRegn.front(), aRegn.size(), ppSprite);
-  SAFE_RELEASE(pImage);
+  SAFE_RELEASE(pTexture);
   return hval;
 }
 

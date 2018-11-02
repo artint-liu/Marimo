@@ -4,9 +4,8 @@
 class GTexture;
 class GRegion;
 class GPrimitive;
-//class GPrimitiveVI;
 class GXFont;
-class GXImage;
+class GXRenderTarget;
 class GXGraphics;
 class GCamera;
 class GXEffect;
@@ -21,10 +20,10 @@ public:
   GXCanvasCore(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType){}
   //virtual ~GXCanvasCore() = NULL;
 
-  GXSTDINTERFACE(GXHRESULT    AddRef              ());
-  GXSTDINTERFACE(GXVOID       GetTargetDimension  (GXSIZE* pSize) const);
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe   () const);
-  GXSTDINTERFACE(GTexture*    GetTargetUnsafe     () const);
+  GXSTDINTERFACE(GXHRESULT        AddRef              ());
+  GXSTDINTERFACE(GXSIZE*          GetTargetDimension  (GXSIZE* pSize) const);
+  GXSTDINTERFACE(GXGraphics*      GetGraphicsUnsafe   () const);
+  GXSTDINTERFACE(GXRenderTarget*  GetTargetUnsafe     () const);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -164,17 +163,17 @@ public:
   GXSTDINTERFACE(GXBOOL      DrawTexture          (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc));
   GXSTDINTERFACE(GXBOOL      DrawTexture          (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation));
 
-  GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest));
-  GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN* rgSrc));
-  GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc));
-  GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation));
+  //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest));
+  //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN* rgSrc));
+  //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc));
+  //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation));
 
-  GXSTDINTERFACE(GXINT       DrawTextA            (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText));
-  GXSTDINTERFACE(GXINT       DrawTextW            (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText));
-  GXSTDINTERFACE(GXBOOL      TextOutA             (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCSTR lpString, GXINT cbString, GXCOLORREF crText));
-  GXSTDINTERFACE(GXBOOL      TextOutW             (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCWSTR lpString, GXINT cbString, GXCOLORREF crText));
-  GXSTDINTERFACE(GXLONG      TabbedTextOutA       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText));
-  GXSTDINTERFACE(GXLONG      TabbedTextOutW       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)); // 如果颜色的Alpha是0则表示测量字符串尺寸
+  GXSTDINTERFACE(GXINT       DrawText            (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText));
+  GXSTDINTERFACE(GXINT       DrawText            (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText));
+  GXSTDINTERFACE(GXBOOL      TextOut             (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCSTR lpString, GXINT cbString, GXCOLORREF crText));
+  GXSTDINTERFACE(GXBOOL      TextOut             (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCWSTR lpString, GXINT cbString, GXCOLORREF crText));
+  GXSTDINTERFACE(GXLONG      TabbedTextOut       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText));
+  GXSTDINTERFACE(GXLONG      TabbedTextOut       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)); // 如果颜色的Alpha是0则表示测量字符串尺寸
 
   GXSTDINTERFACE(GXINT       SetCompositingMode   (CompositingMode eMode));
   GXSTDINTERFACE(GXBOOL      SetRegion            (GRegion* pRegion, GXBOOL bAbsOrigin));
@@ -199,7 +198,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 #ifndef _DEV_DISABLE_UI_CODE
-class GXDLL GXWndCanvas
+class GXDLL GXWndCanvas // TODO: 是否能改成从GXCanvas继承？
 {
 private:
   GXCanvas*  m_pNative;
@@ -219,13 +218,13 @@ public:
   virtual ~GXWndCanvas();
 
   GXBOOL    DrawFrameControl(GXLPRECT lprc,GXUINT uType,GXUINT uState);  
-  GXHRESULT DrawImage       (GXImage*pImage, const GXREGN *rcDest);
-  GXHRESULT DrawImage       (GXImage*pImage, const GXREGN *rcDest, const GXREGN *rcSrc);
-  GXHRESULT DrawImage       (GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rcSrc);
+  GXHRESULT DrawTexture     (GTexture* pTexture, const GXREGN *rcDest);
+  GXHRESULT DrawTexture     (GTexture* pTexture, const GXREGN *rcDest, const GXREGN *rcSrc);
+  GXHRESULT DrawTexture     (GTexture* pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc);
 
-  GXINT     DrawTextW       (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText);
-  GXINT     DrawGlowTextW   (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius);
-  GXBOOL    TextOutW        (GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText);
+  GXINT     DrawText        (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText);
+  GXINT     DrawGlowText    (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius);
+  GXBOOL    TextOut         (GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText);
 
   GXVOID    DrawRect        (GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight, GXCOLORREF Color);
   GXVOID    FillRect        (GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight, GXCOLORREF Color);

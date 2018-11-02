@@ -1,7 +1,8 @@
 ﻿#ifndef _GRAPH_X_GRAPHICS_H_
 #define _GRAPH_X_GRAPHICS_H_
 
-class GXImage;
+//class GXImage;
+class GRegion;
 class GTextureBase;
 class GTexture;
 class GTexture3D;
@@ -10,8 +11,8 @@ class GPrimitive;
 //class GPrimitiveV;
 //class GPrimitiveVI;
 class GXGraphics;
+class GXRenderTarget;
 class GXFont;
-class GRegion;
 class GAllocator;
 class GXShaderMgr;
 class GShaderStub;
@@ -121,27 +122,32 @@ public:
       GTexture**  ppTexture,      // 返回的纹理指针
       GXLPCSTR    szName,         // 资源名字, 如果为NULL, 则默认私有名字, 否则按照用户指定命名, 
                                   // 如果已存在该名字,则直接返回对象,引用加一, 后面的参数将被忽略
-      GXUINT      Width,          // 宽度和高度, 支持 TEXSIZE_* 的定义
+      GXUINT      Width,          // 宽度和高度
       GXUINT      Height,
-      GXUINT      MipLevels, 
-      GXFormat    Format, 
-      GXDWORD     ResUsage
-      ));
+      GXFormat    Format,
+      GXResUsage  eResUsage,
+      GXUINT      MipLevels = 0, 
+      GXLPCVOID   pInitData = NULL,
+      GXUINT      nPitch = 0));   // 0表示使用默认pitch（nWidth*像素字节数）
 
-    GXSTDINTERFACE(GXHRESULT CreateTextureFromFileW  (GTexture** ppTexture, GXLPCWSTR pSrcFile));
+    GXSTDINTERFACE(GXHRESULT CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, GTexture* pSourceTexture));
 
-    GXSTDINTERFACE(GXHRESULT CreateTextureFromFileExW(
-      GTexture**  ppTexture, 
-      GXLPCWSTR   pSrcFile, 
-      GXUINT      Width, 
-      GXUINT      Height, 
-      GXUINT      MipLevels, 
-      GXFormat    Format, 
-      GXDWORD     ResUsage, 
-      GXDWORD     Filter = GXFILTER_NONE,
-      GXDWORD     MipFilter = GXFILTER_NONE, 
-      GXCOLORREF  ColorKey = 0,
-      GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
+    // eUsage参数只有在首次创建时限定纹理的使用行为，对于重复创建的纹理文件，eUsage作用会被忽略
+    GXSTDINTERFACE(GXHRESULT CreateTextureFromMemory(GTexture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage));
+    GXSTDINTERFACE(GXHRESULT CreateTextureFromFile  (GTexture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage));
+
+    //GXSTDINTERFACE(GXHRESULT CreateTextureFromFileEx(
+    //  GTexture**  ppTexture, 
+    //  GXLPCWSTR   pSrcFile, 
+    //  GXUINT      Width, 
+    //  GXUINT      Height, 
+    //  GXUINT      MipLevels, 
+    //  GXFormat    Format, 
+    //  GXResUsage  ResUsage, 
+    //  GXDWORD     Filter = GXFILTER_NONE,
+    //  GXDWORD     MipFilter = GXFILTER_NONE, 
+    //  GXCOLORREF  ColorKey = 0,
+    //  GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
 
     // Volume Texture
     GXSTDINTERFACE(GXHRESULT CreateTexture3D(
@@ -154,23 +160,23 @@ public:
       GXFormat      Format, 
       GXDWORD       ResUsage));
 
-    GXSTDINTERFACE(GXHRESULT CreateTexture3DFromFileW(
+    GXSTDINTERFACE(GXHRESULT CreateTexture3DFromFile(
       GTexture3D**  ppTexture,
       GXLPCWSTR     pSrcFile));
 
-    GXSTDINTERFACE(GXHRESULT CreateTexture3DFromFileExW(
-      GTexture3D**  ppTexture,
-      GXLPCWSTR     pSrcFile,
-      GXUINT        Width,
-      GXUINT        Height,
-      GXUINT        Depth,
-      GXUINT        MipLevels, 
-      GXFormat      Format, 
-      GXDWORD       ResUsage, 
-      GXDWORD       Filter = GXFILTER_NONE,
-      GXDWORD       MipFilter = GXFILTER_NONE, 
-      GXCOLORREF    ColorKey = 0,
-      GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
+    //GXSTDINTERFACE(GXHRESULT CreateTexture3DFromFileEx(
+    //  GTexture3D**  ppTexture,
+    //  GXLPCWSTR     pSrcFile,
+    //  GXUINT        Width,
+    //  GXUINT        Height,
+    //  GXUINT        Depth,
+    //  GXUINT        MipLevels, 
+    //  GXFormat      Format, 
+    //  GXDWORD       ResUsage, 
+    //  GXDWORD       Filter = GXFILTER_NONE,
+    //  GXDWORD       MipFilter = GXFILTER_NONE, 
+    //  GXCOLORREF    ColorKey = 0,
+    //  GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
 
     // Cube Texture
     GXSTDINTERFACE(GXHRESULT CreateTextureCube(
@@ -181,21 +187,21 @@ public:
       GXFormat      Format, 
       GXDWORD       ResUsage));
 
-    GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFileW(
+    GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFile(
       GTextureCube**ppTexture,
       GXLPCWSTR     pSrcFile));
 
-    GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFileExW(
-      GTextureCube**ppTexture,
-      GXLPCWSTR     pSrcFile,
-      GXUINT        Size,
-      GXUINT        MipLevels, 
-      GXFormat      Format, 
-      GXDWORD       ResUsage, 
-      GXDWORD       Filter = GXFILTER_NONE,
-      GXDWORD       MipFilter = GXFILTER_NONE, 
-      GXCOLORREF    ColorKey = 0,
-      GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
+    //GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFileEx(
+    //  GTextureCube**ppTexture,
+    //  GXLPCWSTR     pSrcFile,
+    //  GXUINT        Size,
+    //  GXUINT        MipLevels, 
+    //  GXFormat      Format, 
+    //  GXDWORD       ResUsage, 
+    //  GXDWORD       Filter = GXFILTER_NONE,
+    //  GXDWORD       MipFilter = GXFILTER_NONE, 
+    //  GXCOLORREF    ColorKey = 0,
+    //  GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
 
     // GPrimitive
     GXSTDINTERFACE(GXHRESULT CreatePrimitive(
@@ -235,8 +241,8 @@ public:
 
     // GSahder
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromSource      (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)); // nSourceLen是字符长度，如果是0，szShaderSource必须以'\0'结尾
-    GXSTDINTERFACE(GXHRESULT    CreateShaderFromFileW       (GShader** ppShader, GXLPCWSTR szShaderDesc));
-    GXSTDINTERFACE(GXHRESULT    CreateShaderFromFileA       (GShader** ppShader, GXLPCSTR szShaderDesc));
+    GXSTDINTERFACE(GXHRESULT    CreateShaderFromFile        (GShader** ppShader, GXLPCWSTR szShaderDesc));
+    GXSTDINTERFACE(GXHRESULT    CreateShaderFromFile        (GShader** ppShader, GXLPCSTR szShaderDesc));
     //GXSTDINTERFACE(GXHRESULT    CreateShader                (GShader** ppShader, MOSHADER_ELEMENT_SOURCE* pSdrElementSrc));
     GXSTDINTERFACE(GXHRESULT    CreateShaderStub            (GShaderStub** ppShaderStub));
 
@@ -251,16 +257,16 @@ public:
     // 高级函数
 
     // GXCanvas
-    GXSTDINTERFACE(GXCanvas*    LockCanvas                 (GXImage* pImage, const LPREGN lpRegn, GXDWORD dwFlags));
+    GXSTDINTERFACE(GXCanvas*    LockCanvas                 (GXRenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags));
 
     // 如果 pImage 为 NULL, 则忽略 DepthStencil 参数
-    GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
-    GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXImage* pImage, GTexture* pDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
+    GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
+    //GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, GTexture* pDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
 
     GXSTDINTERFACE(GXHRESULT    CreateEffect               (GXEffect** ppEffect, GShader* pShader));
     GXSTDINTERFACE(GXHRESULT    CreateMaterial             (GXMaterialInst** ppMtlInst, GShader* pShader));
-    GXSTDINTERFACE(GXHRESULT    CreateMaterialFromFileW    (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType));
-    GXSTDINTERFACE(GXHRESULT    CreateMaterialFromFileA    (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType));
+    GXSTDINTERFACE(GXHRESULT    CreateMaterialFromFile     (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType));
+    //GXSTDINTERFACE(GXHRESULT    CreateMaterialFromFile     (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType));
 
     GXSTDINTERFACE(GXHRESULT    CreateRasterizerState      (GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc));
     GXSTDINTERFACE(GXHRESULT    CreateBlendState           (GBlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum));
@@ -270,18 +276,23 @@ public:
     // GXImage
     // TODO: 即使创建失败,也会返回一个默认图片
     // CreateImage 支持 TEXSIZE_* 族的参数指定Image的宽或者高
-    GXSTDINTERFACE(GXImage*    CreateImage                 (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits));
-    GXSTDINTERFACE(GXImage*    CreateImageFromFile         (GXLPCWSTR lpwszFilename));
-    GXSTDINTERFACE(GXImage*    CreateImageFromTexture      (GTexture* pTexture));
+    //GXSTDINTERFACE(GXImage*    CreateImage                 (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits));
+    //GXSTDINTERFACE(GXImage*    CreateImageFromFile         (GXLPCWSTR lpwszFilename));
+    //GXSTDINTERFACE(GXImage*    CreateImageFromTexture      (GTexture* pTexture));
+    GXSTDINTERFACE(GXHRESULT  CreateRenderTarget           (GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat));
+    GXSTDINTERFACE(GXHRESULT  CreateRenderTarget           (GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat));
+    GXSTDINTERFACE(GXHRESULT  CreateRenderTarget           (GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat));
+    GXSTDINTERFACE(GXHRESULT  CreateRenderTarget           (GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat));
 
     // GXFTFont
-    GXSTDINTERFACE(GXFont*    CreateFontIndirectW          (const GXLPLOGFONTW lpLogFont));
-    GXSTDINTERFACE(GXFont*    CreateFontIndirectA          (const GXLPLOGFONTA lpLogFont));
-    GXSTDINTERFACE(GXFont*    CreateFontW                  (const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName));
-    GXSTDINTERFACE(GXFont*    CreateFontA                  (const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName));
+    GXSTDINTERFACE(GXFont*    CreateFontIndirect          (const GXLPLOGFONTW lpLogFont));
+    GXSTDINTERFACE(GXFont*    CreateFontIndirect          (const GXLPLOGFONTA lpLogFont));
+    GXSTDINTERFACE(GXFont*    CreateFont                  (const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName));
+    GXSTDINTERFACE(GXFont*    CreateFont                  (const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName));
 
-    GXSTDINTERFACE(GXImage*   GetBackBufferImg             ());
-    GXSTDINTERFACE(GTexture*  GetBackBufferTex             ());
+    //GXSTDINTERFACE(GXImage*   GetBackBufferImg             ());
+    //GXSTDINTERFACE(GTexture*  GetBackBufferTex             ());
+    GXSTDINTERFACE(GXHRESULT  GetBackBuffer                (GXRenderTarget** ppTarget));
     GXSTDINTERFACE(GTexture*  GetDeviceOriginTex           ());
     GXSTDINTERFACE(GXBOOL     ScrollTexture                (const SCROLLTEXTUREDESC* lpScrollTexDesc));
 

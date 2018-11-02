@@ -9,7 +9,7 @@
 #include <GrapX/GTexture.h>
 #include <GrapX/GXGraphics.h>
 #include <GrapX/GXCanvas.h>
-#include <GrapX/GXImage.h>
+//#include <GrapX/GXRenderTarget.h>
 
 // 私有头文件
 #include <clutility.h>

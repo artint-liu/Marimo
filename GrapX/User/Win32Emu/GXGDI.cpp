@@ -8,7 +8,8 @@
 #include <GrapX/GResource.h>
 #include <GrapX/GXGraphics.h>
 #include <GrapX/GXCanvas.h>
-#include <GrapX/GXImage.h>
+#include <GrapX/GTexture.h>
+#include <GrapX/GXRenderTarget.h>
 #include <GrapX/GXFont.h>
 #include <GrapX/GRegion.h>
 
@@ -215,7 +216,7 @@ GXBOOL GXDLLAPI gxExtTextOutW(
   lpDC->pCanvas->FillRectangle(lprc->left, lprc->top, lprc->right-lprc->left, lprc->bottom-lprc->top, lpDC->crTextBack);
 
   if(lpString != NULL)
-    lpDC->pCanvas->TextOutW(GXGDI_FONT_PTR(g_hSystemFont)->lpFont, X, Y, lpString, cbCount, lpDC->crText);
+    lpDC->pCanvas->TextOut(GXGDI_FONT_PTR(g_hSystemFont)->lpFont, X, Y, lpString, cbCount, lpDC->crText);
   //  hdc->pGraphics->gxTextOutW(X + hdc->wndOrgX, Y + hdc->wndOrgY, (GXLPCWSTR)lpString, cbCount);
   //  //gxTextOutW(hdc, X + hdc->wndOrgX, Y + hdc->wndOrgY, lpString, cbCount);
   return TRUE;
@@ -325,8 +326,8 @@ GXBOOL GXDLLAPI gxBitBlt(
   GXREGN rgSrc(nXSrc,nYSrc,nWidth,nHeight);
   if(GXGDI_DC_PTR(hdcDest)->emObjType == GXGDIOBJ_DC && GXGDI_DC_PTR(hdcSrc)->emObjType == GXGDIOBJ_MEMDC)
   {
-    GXGDI_DC_PTR(hdcDest)->pCanvas->DrawImage(
-      ((LPGXGDIBITMAP)(GXGDI_DC_PTR(hdcSrc))->lpBitmap)->pImage,
+    GXGDI_DC_PTR(hdcDest)->pCanvas->DrawTexture(
+      ((LPGXGDIBITMAP)(GXGDI_DC_PTR(hdcSrc))->lpBitmap)->pDrawingTexture,
       &rgSrc, &rgDest);
   }
   else if (GXGDI_DC_PTR(hdcDest)->emObjType == GXGDIOBJ_MEMDC && GXGDI_DC_PTR(hdcSrc)->emObjType == GXGDIOBJ_MEMDC)
@@ -337,7 +338,7 @@ GXBOOL GXDLLAPI gxBitBlt(
     //rgSrc.top  = nYSrc;
     //rgSrc.width = nWidth;
     //rgSrc.height = nHeight;
-    lpDC->pCanvas->DrawImage((GXImage*)GXGDI_BITMAP_PTR(GXGDI_DC_PTR(hdcSrc)->lpBitmap)->pImage, nXDest, nYDest, &rgSrc);
+    lpDC->pCanvas->DrawTexture(GXGDI_BITMAP_PTR(GXGDI_DC_PTR(hdcSrc)->lpBitmap)->pDrawingTexture, nXDest, nYDest, &rgSrc);
     //ASSERT(FALSE);
   }
   else
@@ -375,7 +376,8 @@ GXBOOL GXDLLAPI _gxDeleteObject(
     case GXGDIOBJ_BITMAP:
       //if(GXGDI_BITMAP_PTR(hObject)->pImage->GetSource() == GXImage::IS_Resource)
       //  return TRUE;
-      SAFE_RELEASE(GXGDI_BITMAP_PTR(hObject)->pImage);
+      SAFE_RELEASE(GXGDI_BITMAP_PTR(hObject)->pDrawingTexture);
+      SAFE_RELEASE(GXGDI_BITMAP_PTR(hObject)->pTargetTexture);
       SAFE_DELETE(GXGDI_BITMAP_PTR(hObject)->bmBits);
       SAFE_DELETE(hObject);
       return TRUE;
@@ -455,8 +457,8 @@ GXBOOL GXDLLAPI gxStretchBlt(
 
   Marimo::REGNT<GXLONG> rgDest = {nXOriginDest,nYOriginDest,nWidthDest,nHeightDest};
   Marimo::REGNT<GXLONG> rgSrc = {nXOriginSrc,nYOriginSrc,nWidthSrc,nHeightSrc};
-  GXGDI_DC_PTR(hdcDest)->pCanvas->DrawImage(
-    ((LPGXGDIBITMAP)(GXGDI_DC_PTR(hdcSrc))->lpBitmap)->pImage,
+  GXGDI_DC_PTR(hdcDest)->pCanvas->DrawTexture(
+    ((LPGXGDIBITMAP)(GXGDI_DC_PTR(hdcSrc))->lpBitmap)->pDrawingTexture,
     rgSrc, rgDest);
   //ASSERT(FALSE);
   return TRUE;
@@ -649,7 +651,7 @@ GXBOOL GXDLLAPI gxTextOutW(
     pCanvas->FillRectangle(nXStart, nYStart, size.cx, size.cy, ((LPGXGDIDC)hdc)->crTextBack);
   }
   LPGXGDIFONT lpFont = GXGDI_FONT_PTR(lpDC->hFont);
-  pCanvas->TextOutW(lpFont->lpFont, nXStart, nYStart, lpString, cbString, ((LPGXGDIDC)hdc)->crText);
+  pCanvas->TextOut(lpFont->lpFont, nXStart, nYStart, lpString, cbString, ((LPGXGDIDC)hdc)->crText);
   return FALSE;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -672,7 +674,7 @@ GXBOOL GXDLLAPI gxPatBlt(
   regn.height = nHeight;
   if(lpBrush->uStyle == GXBS_DIBPATTERN)
   {
-    lpDC->pCanvas->DrawImage(GXGDI_BITMAP_PTR(lpBrush->hHatch)->pImage, &regn);
+    lpDC->pCanvas->DrawTexture(GXGDI_BITMAP_PTR(lpBrush->hHatch)->pDrawingTexture, &regn);
   }
   else if(lpBrush->uStyle == GXBS_SOLID)
   {
@@ -748,7 +750,7 @@ int GXDLLAPI gxGetObjectW(
   {
   case GXGDIOBJ_BITMAP:
     ASSERT(cbBuffer == sizeof(GXBITMAP));
-    GXGDI_BITMAP_PTR(hgdiobj)->pImage->GetDesc((GXBITMAP*)lpvObject);
+    GXGDI_BITMAP_PTR(hgdiobj)->pDrawingTexture->GetDesc((GXBITMAP*)lpvObject);
     return sizeof(GXBITMAP);
   case GXGDIOBJ_BRUSH:
     ASSERT(cbBuffer == sizeof(GXLOGBRUSH));
@@ -978,7 +980,7 @@ GXBOOL GXDLLAPI gxGetTextExtentPoint32W(
   LPGXGDIDC  lpDC  = GXGDI_DC_PTR(hdc);
   LPGXGDIFONT lpFont  = GXGDI_FONT_PTR(lpDC->hFont);
 
-  lpDC->pCanvas->DrawTextW(lpFont->lpFont, lpString, cbString, &rect, GXDT_SINGLELINE | GXDT_CALCRECT, 0);
+  lpDC->pCanvas->DrawText(lpFont->lpFont, lpString, cbString, &rect, GXDT_SINGLELINE | GXDT_CALCRECT, 0);
   lpSize->cx = rect.right;
   lpSize->cy = rect.bottom;
   ASSERT(cbString == 0 || (rect.right != 0 && rect.bottom != 0));
@@ -1091,7 +1093,8 @@ GXHBITMAP GXDLLAPI gxCreateCompatibleBitmap(
   pNewBitmap->bmBitsPixel   = 32;
   pNewBitmap->bmBits     = NULL;
 
-  pNewBitmap->pImage = GXGDI_DC_PTR(hdc)->pCanvas->GetGraphicsUnsafe()->CreateImage(nWidth, nHeight, GXFMT_A8R8G8B8, TRUE, NULL);
+  //pNewBitmap->pImage = GXGDI_DC_PTR(hdc)->pCanvas->GetGraphicsUnsafe()->CreateImage(nWidth, nHeight, GXFMT_A8R8G8B8, TRUE, NULL);
+  GXGDI_DC_PTR(hdc)->pCanvas->GetGraphicsUnsafe()->CreateTexture(&pNewBitmap->pDrawingTexture, NULL, nWidth, nHeight, GXFMT_A8R8G8B8, GXResUsage::ReadWrite, 1);
   //GXCreateImage(nWidth, nHeight, NULL, TRUE, &pNewBitmap->pImage);
   //pNewBitmap->pImage = CreateTexture
   return GXGDI_BITMAP_HANDLE(pNewBitmap);
@@ -1144,7 +1147,9 @@ GXHBITMAP GXDLLAPI gxCreateBitmap(
   //  else ASSERT(false);
   //}
 
-  pNewBitmap->pImage = GrapX::Internal::GetStationPtr()->pGraphics->CreateImage(nWidth, nHeight, GXFMT_A8R8G8B8, TRUE, lpTBits);
+  // pNewBitmap->pImage = GrapX::Internal::GetStationPtr()->pGraphics->CreateImage(nWidth, nHeight, GXFMT_A8R8G8B8, TRUE, lpTBits);
+  GrapX::Internal::GetStationPtr()->pGraphics
+    ->CreateTexture(&pNewBitmap->pDrawingTexture, NULL, nWidth, nHeight, GXFMT_A8R8G8B8, GXResUsage::Default, 1, lpTBits);
   //GXCreateImage(nWidth, nHeight, lpTBits, TRUE, &pNewBitmap->pImage);
   //if(cBitsPerPel != 32 && lpTBits != lpvBits)
   //  SAFE_DELETE(lpTBits);
@@ -1205,8 +1210,12 @@ GXHBITMAP GXDLLAPI gxCreateDIBSection(
   pNewBitmap->bmBitsPixel   = 32;
   pNewBitmap->bmBits     = new GXCHAR[pNewBitmap->bmWidthBytes * pNewBitmap->bmHeight];
   //GXCreateImage(pNewBitmap->bmWidth, pNewBitmap->bmHeight, NULL, TRUE, &pNewBitmap->pImage);
-  pNewBitmap->pImage = GXGDI_DC_PTR(hdc)->pCanvas->GetGraphicsUnsafe()
-    ->CreateImage(pNewBitmap->bmWidth, pNewBitmap->bmHeight, GXFMT_A8R8G8B8, TRUE, NULL);
+
+  //pNewBitmap->pImage = GXGDI_DC_PTR(hdc)->pCanvas->GetGraphicsUnsafe()
+  //  ->CreateImage(pNewBitmap->bmWidth, pNewBitmap->bmHeight, GXFMT_A8R8G8B8, TRUE, NULL);
+
+  GXGDI_DC_PTR(hdc)->pCanvas->GetGraphicsUnsafe()
+    ->CreateTexture(&pNewBitmap->pDrawingTexture, NULL, pNewBitmap->bmWidth, pNewBitmap->bmHeight, GXFMT_A8R8G8B8, GXResUsage::Default, 1);
 
   if(ppvBits != NULL)
     *(GXLPVOID*)ppvBits = pNewBitmap->bmBits;

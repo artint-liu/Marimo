@@ -8,7 +8,8 @@
 #include <GrapX/GResource.h>
 #include <GrapX/GRegion.h>
 #include <GrapX/GXGraphics.h>
-#include <GrapX/GXImage.h>
+#include <GrapX/GXRenderTarget.h>
+#include <GrapX/GTexture.h>
 
 // 私有头文件
 #include <User/GXWindow.h>
@@ -914,7 +915,9 @@ GXINT GXWnd::Scroll(GXINT dx, GXINT dy, const GXRECT *prcScroll, const GXRECT * 
   }
   // </减掉脏区域>
 
-  stdesc.pOperationTex = pSurface->m_pRenderTar->GetTextureUnsafe();
+  //stdesc.pOperationTex = pSurface->m_pRenderTar->GetTextureUnsafe();
+  pSurface->m_pRenderTar->GetColorTexture(&stdesc.pOperationTex, GXResUsage::Default);
+
   stdesc.pTempTex      = NULL;
   stdesc.dx            = dx; 
   stdesc.dy            = dy;
@@ -945,6 +948,7 @@ GXINT GXWnd::Scroll(GXINT dx, GXINT dy, const GXRECT *prcScroll, const GXRECT * 
     }
   }
 
+  SAFE_RELEASE(stdesc.pOperationTex);
   SAFE_RELEASE(prgnClip);
   return (int)rc;
 }

@@ -1,7 +1,7 @@
 ﻿#ifndef _MARIMO_SPRITE_HEADER_FILE_
 #define _MARIMO_SPRITE_HEADER_FILE_
 
-class GXImage;
+//class GXImage;
 
 namespace Marimo
 {
@@ -123,10 +123,10 @@ namespace Marimo
     GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
     GXSTDINTERFACE(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
-    GXSTDINTERFACE(GXSIZE_T  GetImageCount        () const);  // 含有的图片数量
-    GXSTDINTERFACE(GXBOOL    GetImage             (GXImage** pImage, GXUINT index) const);
-    GXSTDINTERFACE(clStringW GetImageFileW        (GXUINT index) const);
-    GXSTDINTERFACE(clStringA GetImageFileA        (GXUINT index) const);
+    GXSTDINTERFACE(GXSIZE_T  GetTextureCount      () const);  // 含有的图片数量
+    GXSTDINTERFACE(GXBOOL    GetTexture           (GTexture** pImage, GXUINT index) const);
+    GXSTDINTERFACE(clStringW GetTextureFileW      (GXUINT index) const);
+    GXSTDINTERFACE(clStringA GetTextureFileA      (GXUINT index) const);
 
     static GXBOOL GXDLLAPI CreateFromStockA       (Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szImageDir, GXLPCSTR szSection = "sprite");
     //static GXBOOL GXDLLAPI CreateFromStockW       (Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szSection = "sprite");

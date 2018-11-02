@@ -1,3 +1,4 @@
+#if 0
 // 全局头文件
 #include <GrapX.h>
 #include <User/GrapX.Hxx>
@@ -313,3 +314,4 @@ GXBOOL GXImageImpl::BitBltRegion(GXImage* pSource, int xDest, int yDest, GRegion
   //_GlbUnlockStaticRects(lpRects);
   return TRUE;
 }
+#endif // 0

@@ -12,7 +12,7 @@
 //
 // 类声明
 //
-class GXImage;
+class GXRenderTarget;
 class GTexture;
 class GRegion;
 enum RGNCOMPLEX;
@@ -50,8 +50,8 @@ public:
   GXBOOL          SaveToFileW         (GXLPCWSTR lpFilename, GXLPCSTR lpFormat);
 
   GXLPSTATION     m_lpStation;
-  GXImage*        m_pRenderTar;       // 原点对应 Windows 的原点
-  GTexture*       m_pDepthStencil;    // D3DFMT_D24S8
+  GXRenderTarget* m_pRenderTar;       // 原点对应 Windows 的原点
+  //GTexture*       m_pDepthStencil;    // D3DFMT_D24S8
   GXRECT          rcScrUpdate;        // GX屏幕空间的坐标，原点对应 Station 屏幕原点
 
   GXHWND          m_hExclusiveWnd;    // 只有独占Surface的窗口才有这个值

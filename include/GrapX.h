@@ -12,6 +12,10 @@
 
 #define REFACTOR_SHADER   // shader 重构宏
 
+#if __cplusplus < 201103L
+# error 需要C++11或以上级别的编译器支持
+#endif
+
 //////////////////////////////////////////////////////////////////////////
 //
 // 基础类型声明
@@ -4338,18 +4342,18 @@ enum GXGraphicsFormat
 };
 typedef GXGraphicsFormat GXFormat;
 
-struct GXIMAGEINFOX
-{
-  GXUINT              Width;
-  GXUINT              Height;
-  GXUINT              Depth;
-  GXUINT              MipLevels;
-  GXGraphicsFormat    Format;
-  //D3DRESOURCETYPE      ResourceType;
-  //D3DXIMAGE_FILEFORMAT ImageFileFormat;
-};
-typedef GXIMAGEINFOX *LPGXIMAGEINFOX;
-typedef GXIMAGEINFOX *GXLPIMAGEINFOX;
+//struct GXIMAGEINFOX
+//{
+//  GXUINT              Width;
+//  GXUINT              Height;
+//  GXUINT              Depth;
+//  GXUINT              MipLevels;
+//  GXGraphicsFormat    Format;
+//  //D3DRESOURCETYPE      ResourceType;
+//  //D3DXIMAGE_FILEFORMAT ImageFileFormat;
+//};
+//typedef GXIMAGEINFOX *LPGXIMAGEINFOX;
+//typedef GXIMAGEINFOX *GXLPIMAGEINFOX;
 
 //
 // 格式类别
@@ -4521,19 +4525,30 @@ enum GXTextureFilterType
 #define GX_MAX_TEXTURE_STAGE    8
 
 // 纹理尺寸比率,与屏幕相比
-enum GXTextureRatio
+CLENUM_CLASS(GXINT, GXSizeRatio)
 {
+  Undefined = 0,
+  FixedPoint = 2048,
+  Eighth     = -(FixedPoint >> 3),    // 1/8 屏幕, 长(宽)
+  Quarter    = -(FixedPoint >> 2),    // 1/4 屏幕, 长(宽)
+  Half       = -(FixedPoint >> 1),    // 1/2 屏幕, 长(宽)
+  Same       = - FixedPoint,          // 一倍 屏幕, 长(宽)
+  Double     = -(FixedPoint << 1),    // 两 屏幕, 长(宽)
+  Quad       = -(FixedPoint << 2),    // 四倍 屏幕, 长(宽)
+  Octuple    = -(FixedPoint << 3),    // 八倍 屏幕, 长(宽)
+
   TEXSIZE_FIXEDPOINT  = 2048,
   TEXSIZE_OKTA        = -(TEXSIZE_FIXEDPOINT >> 3),    // 1/8 屏幕, 长(宽)
   TEXSIZE_QUARTER     = -(TEXSIZE_FIXEDPOINT >> 2),    // 1/4 屏幕, 长(宽)
   TEXSIZE_HALF        = -(TEXSIZE_FIXEDPOINT >> 1),    // 1/2 屏幕, 长(宽)
-  TEXSIZE_SAME        = -TEXSIZE_FIXEDPOINT,        // 一倍 屏幕, 长(宽)
+  TEXSIZE_SAME        = -TEXSIZE_FIXEDPOINT,           // 一倍 屏幕, 长(宽)
   TEXSIZE_DOUBLE      = -(TEXSIZE_FIXEDPOINT << 1),    // 两 屏幕, 长(宽)
   TEXSIZE_QUAD        = -(TEXSIZE_FIXEDPOINT << 2),    // 四倍 屏幕, 长(宽)
   TEXSIZE_OCTUPLE     = -(TEXSIZE_FIXEDPOINT << 3),    // 八倍 屏幕, 长(宽)
 
   FORCE_DWORD = 0x7fffffff,
 };
+
 
 // TextureRatioToDimension() 参数
 #define TEXTURERATIO_POW2 0x00000001
@@ -4631,19 +4646,21 @@ typedef const GXRENDERSTATE* GXLPCRENDERSTATE;
 
 CLENUM_CLASS(GXUINT, GXResUsage)
 {
-  GXResUsage_Default   = 0,  // 默认，数据在创建时指定
-  GXResUsage_Write     = 1,  // 数据可以在创建后再写入
-  GXResUsage_Read      = 2,  // 数据可读
-  GXResUsage_ReadWrite = 3,  // 数据在创建后可以读取，并且也可以写入
-  GXResUsage_SystemMem = 4,  // 数据放在系统内存，不能用于渲染
+  Default   = 0,  // 默认，数据在创建时指定
+  Write     = 1,  // 数据可以在创建后再写入
+  Read      = 2,  // 数据可读
+  ReadWrite = 3,  // 数据在创建后可以读取，并且也可以写入
+  SystemMem = 4,  // 数据放在系统内存，不能用于渲染
 };
+
 
 CLENUM_CLASS(GXUINT, GXResMap)
 {
-  GXResMap_Write     = 0,
-  GXResMap_Read      = 1,
-  GXResMap_ReadWrite = 2,
+  Write     = 1,
+  Read      = 2,
+  ReadWrite = 3,
 };
+
 
 // 这几个不能同时用
 #define GXRU_TEX_MASK           0x0f00

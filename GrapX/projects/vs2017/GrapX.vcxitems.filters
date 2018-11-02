@@ -439,6 +439,10 @@
       <Filter>Platform\CommonBase</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXRegionFactory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXRenderTarget.h" />
+    <ClInclude Include="C:\Users\liuchenglong\Documents\MyCodes\Marimo_trunk\GrapX\projects\vs2017\..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp">
@@ -863,6 +867,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\GXGraphicsBaseImpl.cpp">
       <Filter>Platform\CommonBase</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\liuchenglong\Documents\MyCodes\Marimo_trunk\GrapX\projects\vs2017\..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

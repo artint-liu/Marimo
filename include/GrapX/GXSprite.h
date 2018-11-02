@@ -3,7 +3,7 @@
 
 class GXCanvas;
 class GXGraphics;
-class GXImage;
+//class GXImage;
 
 class GXSprite : public GUnknown
 {
@@ -125,7 +125,7 @@ public:
   //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXRECT* lprc) const); // 对于Module，返回值的left和top都应该是0
   //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXREGN* lprg) const);
 
-  GXSTDINTERFACE(GXHRESULT GetImage             (GXImage** pImage));
+  GXSTDINTERFACE(GXHRESULT GetTexture           (GTexture** ppTexture));
   GXSTDINTERFACE(clStringW GetImageFileW        () const);
   GXSTDINTERFACE(clStringA GetImageFileA        () const);
                                           

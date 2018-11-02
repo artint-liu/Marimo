@@ -48,8 +48,8 @@ namespace GrapX
         SAFE_RELEASE(pVertexDecl);
       }
 
-      PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::GXResMap_Read);
-      PrimitiveUtility::MapIndices  locker_i(pPrimitive, GXResMap::GXResMap_Read);
+      PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::Read);
+      PrimitiveUtility::MapIndices  locker_i(pPrimitive, GXResMap::Read);
 
 
       pStorage->Write(NULL, strMeshAsmVertices, locker_v.GetPtr(),
@@ -429,7 +429,7 @@ namespace GrapX
         GPrimitive* pPrimitive = pDesc->pPrimitive;
         GXINT nVertOffset = pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
         //GXLPVOID pVertices = pPrimitive->GetVerticesBuffer();
-        PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::GXResMap_Read);
+        PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::Read);
         
         //VIndex* pIndices = (VIndex*)pPrimitive->GetIndicesBuffer();
 
@@ -460,7 +460,7 @@ namespace GrapX
           nVertBase = 1;
         }
 
-        PrimitiveUtility::MapIndices locker_i(pPrimitive, GXResMap::GXResMap_Read);
+        PrimitiveUtility::MapIndices locker_i(pPrimitive, GXResMap::Read);
         VIndex* pIndices = static_cast<VIndex*>(locker_i.GetPtr());
 
         for(int i = 0; i < nNumFaces; i++)
@@ -545,7 +545,7 @@ namespace GrapX
 
     ASSERT(element.Type == GXDECLTYPE_D3DCOLOR);
 
-    PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::GXResMap_Write);
+    PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::Write);
     GXLPBYTE lpColors = (GXLPBYTE)locker_v.GetPtr();
 
     int nNumVertices = pPrimitive->GetVertexCount();
@@ -577,10 +577,11 @@ namespace GrapX
     return TRUE;
   }
 
+#if 0
   GXDLL clstd::Image* TextureUtility::CreateImage(GTexture* pTexture)
   {
-    GTexture::LOCKEDRECT lr;
-    if(!pTexture->LockRect(&lr, NULL, 0)) {
+    GTexture::MAPPEDRECT mapped;
+    if(!pTexture->MapRect(&mapped, NULL, 0)) {
       CLOG_ERROR("%s : Can't lock texture.\r\n", __FUNCTION__);
       return NULL;
     }
@@ -593,7 +594,7 @@ namespace GrapX
 
     auto pImage = new clstd::Image();
 
-    if(!pImage->Set(pTexture->GetWidth(), pTexture->GetHeight(), fmt, nDepth, lr.pBits, lr.Pitch))
+    if(!pImage->Set(pTexture->GetWidth(), pTexture->GetHeight(), fmt, nDepth, mapped.pBits, mapped.Pitch))
     {
       CLOG_ERROR("%s : Failed to set image.\r\n", __FUNCTION__);
       SAFE_DELETE(pImage);
@@ -601,6 +602,7 @@ namespace GrapX
 
     return pImage;
   }
+#endif
 
   GXBOOL GXDLL TextureUtility::TextureFormatToClstdImageFormat(char* fmt, int* nDepth, GXFormat eFmt)
   {

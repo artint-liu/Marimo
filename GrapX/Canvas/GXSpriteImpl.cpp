@@ -3,7 +3,7 @@
 
 // 标准接口
 #include "GrapX/GResource.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GTexture.h"
 #include "GrapX/GXCanvas.h"
 #include "GrapX/GXSprite.h"
 #include "GrapX/GXGraphics.h"
@@ -26,14 +26,14 @@ extern "C" GXBOOL GXDLLAPI gxSetRegn(GXLPREGN lprg, GXINT xLeft, GXINT yTop, GXI
 
 //////////////////////////////////////////////////////////////////////////
 GXSpriteImpl::GXSpriteImpl()
-  : m_pImage(NULL)
+  : m_pTexture(NULL)
 {
   //AddRef();
 }
 
 GXSpriteImpl::~GXSpriteImpl()
 {
-  SAFE_RELEASE(m_pImage);
+  SAFE_RELEASE(m_pTexture);
   //SAFE_DELETE_ARRAY(m_pRect);
   m_aModules.clear();
   m_NameDict.clear();
@@ -71,14 +71,14 @@ GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT
 {
   //const GXREGN& regn = ;
   if(nIndex < (GXINT)m_aModules.size()) {
-    pCanvas->DrawImage(m_pImage, x, y, &m_aModules[nIndex].regn);
+    pCanvas->DrawTexture(m_pTexture, x, y, &m_aModules[nIndex].regn);
   }
 }
 
 GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
 {
   if(nIndex < (GXINT)m_aModules.size()) {
-    pCanvas->DrawImage(m_pImage, lpRegn, &m_aModules[nIndex].regn);
+    pCanvas->DrawTexture(m_pTexture, lpRegn, &m_aModules[nIndex].regn);
   }
 }
 
@@ -92,7 +92,7 @@ GXVOID GXSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT
   //ASSERT(rcDest.width >= 0 && rcDest.height >= 0);
 
   if( ! rcDest.IsEmpty() && (nIndex < (GXINT)m_aModules.size()) ) {
-    pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nIndex].regn);
+    pCanvas->DrawTexture(m_pTexture, &rcDest, &m_aModules[nIndex].regn);
   }
 }
 
@@ -162,7 +162,7 @@ void GXSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GX
 
     //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx    ], &rgTip0);
     //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx + 2], &rgTip1);
-    pCanvas->DrawImage(m_pImage, &rgDest, &m_aModules[nStartIdx + 1].regn);
+    pCanvas->DrawTexture(m_pTexture, &rgDest, &m_aModules[nStartIdx + 1].regn);
   }
   else
   {
@@ -180,8 +180,8 @@ void GXSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GX
 
     rgDest.width = 0;
   }
-  pCanvas->DrawImage(m_pImage, &rgTip0, &m_aModules[nStartIdx    ].regn);
-  pCanvas->DrawImage(m_pImage, &rgTip1, &m_aModules[nStartIdx + 2].regn);
+  pCanvas->DrawTexture(m_pTexture, &rgTip0, &m_aModules[nStartIdx    ].regn);
+  pCanvas->DrawTexture(m_pTexture, &rgTip1, &m_aModules[nStartIdx + 2].regn);
   //return rgDest.width;  // 返回值是中间可缩放Sprite的宽度
 }
 
@@ -225,7 +225,7 @@ void GXSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GX
 
     //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx    ], &rgTip0);
     //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx + 2], &rgTip1);
-    pCanvas->DrawImage(m_pImage, &rgDest, &m_aModules[nStartIdx + 1].regn);
+    pCanvas->DrawTexture(m_pTexture, &rgDest, &m_aModules[nStartIdx + 1].regn);
   }
   else
   {
@@ -243,8 +243,8 @@ void GXSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GX
 
     rgDest.height = 0;
   }
-  pCanvas->DrawImage(m_pImage, &rgTip0, &m_aModules[nStartIdx    ].regn);
-  pCanvas->DrawImage(m_pImage, &rgTip1, &m_aModules[nStartIdx + 2].regn);
+  pCanvas->DrawTexture(m_pTexture, &rgTip0, &m_aModules[nStartIdx    ].regn);
+  pCanvas->DrawTexture(m_pTexture, &rgTip1, &m_aModules[nStartIdx + 2].regn);
   //return rgDest.height;  // 返回值是中间可缩放Sprite的宽度
 }
 
@@ -263,37 +263,37 @@ GXVOID GXSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL b
   const GXINT top = rect->top;
   //const GXINT bottom = rect->bottom;
 
-  /*左上角*/pCanvas->DrawImage(m_pImage, rect->left, rect->top, &m_aModules[nStartIdx].regn);
-  /*右上角*/pCanvas->DrawImage(m_pImage, rect->right - m_aModules[nStartIdx + 2].regn.width, rect->top, &m_aModules[nStartIdx + 2].regn);
-  /*左下角*/pCanvas->DrawImage(m_pImage, rect->left, rect->bottom - m_aModules[nStartIdx + 6].regn.height, &m_aModules[nStartIdx + 6].regn);
-  /*右下角*/pCanvas->DrawImage(m_pImage, rect->right - m_aModules[nStartIdx + 8].regn.width, rect->bottom - m_aModules[nStartIdx + 8].regn.height, &m_aModules[nStartIdx + 8].regn);
+  /*左上角*/pCanvas->DrawTexture(m_pTexture, rect->left, rect->top, &m_aModules[nStartIdx].regn);
+  /*右上角*/pCanvas->DrawTexture(m_pTexture, rect->right - m_aModules[nStartIdx + 2].regn.width, rect->top, &m_aModules[nStartIdx + 2].regn);
+  /*左下角*/pCanvas->DrawTexture(m_pTexture, rect->left, rect->bottom - m_aModules[nStartIdx + 6].regn.height, &m_aModules[nStartIdx + 6].regn);
+  /*右下角*/pCanvas->DrawTexture(m_pTexture, rect->right - m_aModules[nStartIdx + 8].regn.width, rect->bottom - m_aModules[nStartIdx + 8].regn.height, &m_aModules[nStartIdx + 8].regn);
 
 //*
   rcDest.left   = rect->left + m_aModules[nStartIdx].regn.width;
   rcDest.top    = top;
   rcDest.width  = width - m_aModules[nStartIdx].regn.width - m_aModules[nStartIdx + 2].regn.width;
   rcDest.height = m_aModules[nStartIdx + 1].regn.height;
-  pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nStartIdx + 1].regn);
+  pCanvas->DrawTexture(m_pTexture, &rcDest, &m_aModules[nStartIdx + 1].regn);
 
   rcDest.left   = rect->left + m_aModules[nStartIdx + 6].regn.width;
   rcDest.top    = rect->top + height - m_aModules[nStartIdx + 7].regn.height;
   rcDest.width  = width  - m_aModules[nStartIdx + 6].regn.width - m_aModules[nStartIdx + 8].regn.width;
   rcDest.height = m_aModules[nStartIdx + 7].regn.height;
-  pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nStartIdx + 7].regn);
+  pCanvas->DrawTexture(m_pTexture, &rcDest, &m_aModules[nStartIdx + 7].regn);
 
   // 左边
   rcDest.left   = rect->left;
   rcDest.top    = rect->top + m_aModules[nStartIdx   ].regn.height;
   rcDest.width  = m_aModules[nStartIdx + 3].regn.width;
   rcDest.height = height - m_aModules[nStartIdx].regn.height - m_aModules[nStartIdx + 6].regn.height;
-  pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nStartIdx + 3].regn);
+  pCanvas->DrawTexture(m_pTexture, &rcDest, &m_aModules[nStartIdx + 3].regn);
 
   // 右边
   rcDest.left   = rect->right - m_aModules[nStartIdx + 5].regn.width;
   rcDest.top    = rect->top + m_aModules[nStartIdx + 2].regn.height;
   rcDest.width  = m_aModules[nStartIdx + 5].regn.width;
   rcDest.height = height - m_aModules[nStartIdx + 2].regn.height - m_aModules[nStartIdx + 8].regn.height;
-  pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nStartIdx + 5].regn);
+  pCanvas->DrawTexture(m_pTexture, &rcDest, &m_aModules[nStartIdx + 5].regn);
 //*/
   if(bDrawEdge == FALSE)
   {
@@ -301,7 +301,7 @@ GXVOID GXSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL b
     rcDest.top    = m_aModules[nStartIdx].regn.height;
     rcDest.width  = width  - m_aModules[nStartIdx + 3].regn.width  - m_aModules[nStartIdx + 5].regn.width;
     rcDest.height = height - m_aModules[nStartIdx].regn.height - m_aModules[nStartIdx + 8].regn.height;
-    pCanvas->DrawImage(m_pImage, &rcDest, &m_aModules[nStartIdx + 4].regn);
+    pCanvas->DrawTexture(m_pTexture, &rcDest, &m_aModules[nStartIdx + 4].regn);
   }
 }
 
@@ -351,14 +351,14 @@ GXBOOL GXSpriteImpl::GetModuleRegion(GXUINT nIndex, REGN *rgSprite) const
   return TRUE;
 }
 
-GXHRESULT GXSpriteImpl::GetImage(GXImage** ppImage)
+GXHRESULT GXSpriteImpl::GetTexture(GTexture** ppTexture)
 {
-  if(m_pImage == NULL) {
+  if(m_pTexture == NULL) {
     return GX_FAIL;
   }
 
-  *ppImage = m_pImage;
-  return m_pImage->AddRef();
+  *ppTexture = m_pTexture;
+  return m_pTexture->AddRef();
 }
 
 //int GXSpriteImpl::FindByNameA(GXLPCSTR szName) const
@@ -796,9 +796,8 @@ void GXSpriteImpl::Add(_TArray& aArray, GXSprite::Type type, _TDesc& desc)
 GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDesc)
 {
   m_strImageFile = pDesc->szImageFile;
-  m_pImage = pGraphics->CreateImageFromFile(m_strImageFile);
 
-  if( ! m_pImage) {
+  if(GXFAILED(pGraphics->CreateTextureFromFile(&m_pTexture, m_strImageFile, GXResUsage::Default))) {
     CLOG_ERRORW(_CLTEXT("GXSprite : Can not create sprite image(\"%s\").\r\n"), m_strImageFile);
     return FALSE;
   }
@@ -878,7 +877,12 @@ GXBOOL GXSpriteImpl::Initialize(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDe
 
 GXBOOL GXSpriteImpl::Initialize( GXGraphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount )
 {
-  m_pImage = pGraphics->CreateImageFromFile(szTextureFile);
+  if(GXFAILED(pGraphics->CreateTextureFromFile(&m_pTexture, szTextureFile, GXResUsage::Default)))
+  {
+    CLOG_ERRORW(_CLTEXT("GXSprite : Can not create sprite image(\"%s\").\r\n"), m_strImageFile);
+    return FALSE;
+  }
+
   m_strImageFile = szTextureFile;
 
   GXSpriteImpl::MODULE sSprite;

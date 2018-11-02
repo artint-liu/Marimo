@@ -268,10 +268,10 @@ namespace GXUI
       const GXUINT uDrawStyle = GetDrawTextFlag();
       if(TEST_FLAG(dwStyle, GXUISS_CONTRAST)) {
         GXRECT rcContrast(rect.left + 1, rect.top + 1, rect.right + 1, rect.bottom + 1);
-        canvas.DrawTextW(m_pFont, lpText, nLen, &rcContrast, uDrawStyle, 
+        canvas.DrawText(m_pFont, lpText, nLen, &rcContrast, uDrawStyle, 
           m_crText ^ 0xffffff);
       }
-      canvas.DrawTextW(m_pFont, lpText, nLen, &rect, uDrawStyle, m_crText);
+      canvas.DrawText(m_pFont, lpText, nLen, &rect, uDrawStyle, m_crText);
     }
 
     //SAFE_DELETE(lpText);
@@ -360,7 +360,7 @@ namespace GXUI
 
     //GXCanvas* pCanvas = 0;
     GXRECT rect;
-    ((GXCanvas*)NULL)->DrawTextW(m_pFont, lpText, - 1, &rect, GetDrawTextFlag()|GXDT_CALCRECT, 0);
+    ((GXCanvas*)NULL)->DrawText(m_pFont, lpText, - 1, &rect, GetDrawTextFlag()|GXDT_CALCRECT, 0);
     *pRegn = rect;
 
     //SAFE_DELETE(lpText);

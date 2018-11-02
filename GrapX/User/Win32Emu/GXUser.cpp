@@ -10,7 +10,7 @@
 #include <GrapX/GXCanvas.h>
 #include <GrapX/GXSprite.h>
 #include <GrapX/GXFont.h>
-#include <GrapX/GXImage.h>
+#include <GrapX/GTexture.h>
 
 // 私有头文件
 #include "GXStation.h"
@@ -182,7 +182,7 @@ int GXDLLAPI gxDrawTextW(
   //  gxGetTextExtentPointW(hDC, lpString, nCount, &size);
   //  pCanvas->FillRectangle(lpRect->left, lpRect->top, size.cx, size.cy, ((LPGXGDIDC)hDC)->crTextBack);
   //}
-  return lpDC->pCanvas->DrawTextW(
+  return lpDC->pCanvas->DrawText(
     pFont->lpFont, lpString, nCount, lpRect, uFmt & (~GXDT_TABSTOP), ((LPGXGDIDC)hDC)->crText);
   return 0;
 }
@@ -1024,6 +1024,7 @@ GXHWND GXDLLAPI gxGetDesktopWindow()
   LPGXWND lpDesktop = GrapX::Internal::GetStationPtr()->lpDesktopWnd;
   return GXWND_HANDLE(lpDesktop);
 }
+
 GXBOOL GXDLLAPI gxDestroyIcon(
                GXHICON hIcon   // handle to icon to destroy
                )
@@ -1035,6 +1036,7 @@ GXBOOL GXDLLAPI gxDestroyIcon(
   SAFE_DELETE(lpIcon);
   return TRUE;
 }
+
 GXHICON GXDLLAPI gxCreateIconIndirect(
              GXPICONINFO piconinfo   // pointer to icon information structure
              )

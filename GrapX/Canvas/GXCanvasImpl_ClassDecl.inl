@@ -62,17 +62,17 @@ public:
   virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc) override;
   virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation) override;
 
-  virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest) override;
-  virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc) override;
-  virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest, const GXREGN *rgSrc) override;
-  virtual GXBOOL      DrawImage           (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation) override;
+  //virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest) override;
+  //virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc) override;
+  //virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest, const GXREGN *rgSrc) override;
+  //virtual GXBOOL      DrawImage           (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation) override;
 
-  virtual GXINT       DrawTextA           (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText) override;
-  virtual GXINT       DrawTextW           (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText) override;
-  virtual GXBOOL      TextOutA            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText) override;
-  virtual GXBOOL      TextOutW            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText) override;
-  virtual GXLONG      TabbedTextOutA      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
-  virtual GXLONG      TabbedTextOutW      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
+  virtual GXINT       DrawText           (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText) override;
+  virtual GXINT       DrawText           (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText) override;
+  virtual GXBOOL      TextOut            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText) override;
+  virtual GXBOOL      TextOut            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText) override;
+  virtual GXLONG      TabbedTextOut      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
+  virtual GXLONG      TabbedTextOut      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
 
 
   virtual GXINT       SetCompositingMode  (CompositingMode eMode) override;

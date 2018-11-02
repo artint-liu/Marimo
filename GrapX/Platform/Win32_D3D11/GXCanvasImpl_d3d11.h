@@ -28,8 +28,7 @@ namespace D3D11
   public:
     GXCanvasImpl(GXGraphicsImpl* pGraphics, GXBOOL bStatic);
     virtual ~GXCanvasImpl();
-    GXBOOL  Initialize(GTexture* pTexture, const REGN* pRegn);
-    GXBOOL  Initialize(GXImage* pImage, const REGN* pRegn);
+    GXBOOL  Initialize(GXRenderTarget* pTarget, const REGN* pRegn);
 
     GXINT   UpdateStencil    (GRegion* pClipRegion);
 
@@ -86,17 +85,17 @@ namespace D3D11
     virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc) override;
     virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation) override;
 
-    virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest) override;
-    virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc) override;
-    virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest, const GXREGN *rgSrc) override;
-    virtual GXBOOL      DrawImage           (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation) override;
+    //virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest) override;
+    //virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc) override;
+    //virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest, const GXREGN *rgSrc) override;
+    //virtual GXBOOL      DrawImage           (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation) override;
 
-    virtual GXINT       DrawTextA           (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText) override;
-    virtual GXINT       DrawTextW           (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText) override;
-    virtual GXBOOL      TextOutA            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCSTR lpString, GXINT cbString, GXCOLORREF crText) override;
-    virtual GXBOOL      TextOutW            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCWSTR lpString, GXINT cbString, GXCOLORREF crText) override;
-    virtual GXLONG      TabbedTextOutA      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
-    virtual GXLONG      TabbedTextOutW      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
+    virtual GXINT       DrawText           (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText) override;
+    virtual GXINT       DrawText           (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText) override;
+    virtual GXBOOL      TextOut            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCSTR lpString, GXINT cbString, GXCOLORREF crText) override;
+    virtual GXBOOL      TextOut            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCWSTR lpString, GXINT cbString, GXCOLORREF crText) override;
+    virtual GXLONG      TabbedTextOut      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
+    virtual GXLONG      TabbedTextOut      (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText) override;
 
 
     virtual GXINT       SetCompositingMode  (CompositingMode eMode) override;
@@ -255,16 +254,16 @@ namespace D3D11
     GXINT         m_yOrigin;        // [貌似这些值可以省略]
     GXRECT        m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在flush阶段，m_rcClip只能写入/写入后读取，不能只读取，因为m_rcClip不是上一条命令的结果
 
-    GXDWORD       m_dwStencil;
-    GXImage*      m_pTargetImage;
-    GXDWORD       m_dwTexVertColor; // 输出纹理图元时的顶点颜色
-    GXDWORD       m_dwColorAdditive;
-    PenStyle      m_eStyle;
+    GXDWORD         m_dwStencil;
+    GXRenderTarget* m_pTargetImage;
+    GXDWORD         m_dwTexVertColor; // 输出纹理图元时的顶点颜色
+    GXDWORD         m_dwColorAdditive;
+    PenStyle        m_eStyle;
 
-    GRegion*      m_pClipRegion;
+    GRegion*        m_pClipRegion;
 
-    const GXUINT  s_uDefVertIndexSize;
-    const GXUINT  s_uDefBatchSize;
+    const GXUINT    s_uDefVertIndexSize;
+    const GXUINT    s_uDefBatchSize;
 
     GRasterizerStateImpl*   m_pRasterizerState;
     GBlendStateImpl*        m_pBlendingState[2];// Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理

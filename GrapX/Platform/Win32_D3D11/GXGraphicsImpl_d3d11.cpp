@@ -17,7 +17,7 @@
 #include "GrapX/GTexture.h"
 #include "GrapX/GXGraphics.h"
 #include "GrapX/GXCanvas.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GXRenderTarget.h"
 #include "GrapX/GXFont.h"
 #include "GrapX/GXCanvas3D.h"
 #include "GrapX/GStateBlock.h"
@@ -61,6 +61,8 @@
 
 #include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_d3d11.h"
+#include "Platform/Win32_D3D11/GXRenderTargetImpl_d3d11.h"
+#include <FreeImage.h>
 
 // Canvas3D用的
 #include "GrapX/GCamera.h"
@@ -117,7 +119,7 @@ namespace D3D11
     , m_pDeviceOriginTex    (NULL)
     , m_pCurPrimitive       (NULL)
     , m_pCurRenderTarget    (NULL)
-    , m_pCurDepthStencil    (NULL)
+    //, m_pCurDepthStencil    (NULL)
     , m_aCanvasPtrCache     (NULL)
     , m_pCurVertexDecl      (NULL)
     , m_pCurCanvasCore      (NULL)
@@ -130,8 +132,10 @@ namespace D3D11
     , m_pCurDepthStencilState(NULL)
     , m_pCurSamplerState    (NULL)
     , m_pCurShader          (NULL)
-    , m_pBackBufferTex      (NULL)
-    , m_pBackBufferImg      (NULL)
+    , m_pDefaultBackBuffer  (NULL)
+    , m_pTempBuffer         (NULL)
+    //, m_pBackBufferTex      (NULL)
+    //, m_pBackBufferImg      (NULL)
     , m_dwBackBufferStencil (1)
     , m_pGraphicsLocker     (NULL)
     , m_nGraphicsCount      (0)
@@ -312,7 +316,10 @@ namespace D3D11
   void GXGraphicsImpl::IntGetDimension(GXUINT& nWidth, GXUINT& nHeight)
   {
     if(m_pCurRenderTarget) {
-      m_pCurRenderTarget->GetDimension(&nWidth, &nHeight);
+      GXSIZE sDimension;
+      m_pCurRenderTarget->GetDimension(&sDimension);
+      nWidth = sDimension.cx;
+      nHeight = sDimension.cy;
     }
     else {
       nWidth = m_SwapChainDesc.BufferDesc.Width;
@@ -340,8 +347,8 @@ namespace D3D11
 
     ReleaseCommon();
 
-    SAFE_RELEASE(m_pBackBufferTex);
-    SAFE_RELEASE(m_pBackBufferImg);
+    SAFE_RELEASE(m_pDefaultBackBuffer);
+    SAFE_RELEASE(m_pTempBuffer);
 
     SAFE_RELEASE(m_pCurShader);
     //SAFE_RELEASE(m_pCurRenderState);
@@ -349,7 +356,7 @@ namespace D3D11
     for(int i = 0; i < MAX_TEXTURE_STAGE; i++) {
       SAFE_RELEASE(m_pCurTexture[i]);
     }
-    SAFE_RELEASE(m_pCurDepthStencil);
+    //SAFE_RELEASE(m_pCurDepthStencil);
     SAFE_RELEASE(m_pCurRenderTarget);
     SAFE_RELEASE(m_pCurCanvasCore);
 
@@ -431,9 +438,10 @@ namespace D3D11
       RESET_FLAG(m_dwFlags, F_ACTIVATE);
 
       // TODO: 忘了这里为什么必须要恢复原来的BackBuffer
-      if(m_pCurRenderTarget != m_pDeviceOriginTex) {
-        InlSetCanvas(NULL);
-      }
+      //if(m_pCurRenderTarget != m_pDeviceOriginTex) {
+      //  InlSetCanvas(NULL);
+      //}
+      // 忘了就先注释了
 
 #if defined(_DEBUG) && 0
       LPDIRECT3DSURFACE9 lpRenderTar;
@@ -721,6 +729,8 @@ namespace D3D11
   //{
   //  return GXSUCCEEDED(m_pd3dDevice->Clear(nCount, (const D3DRECT*)lpRects, D3DCLEAR_TARGET, crClear, 1.0f, NULL));
   //}
+
+#if 0
   GXBOOL GXGraphicsImpl::IntCheckSizeOfTargetAndDepth()
   {
     if(m_pCurDepthStencil == 0 && m_pCurRenderTarget == 0) {
@@ -757,6 +767,7 @@ namespace D3D11
     TRACE(" ! Depth and stencil buffer size is less than back buffer\n");
     return FALSE;    
   }
+#endif
 
   GXHRESULT GXGraphicsImpl::Clear(const GXRECT* lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, float z, GXDWORD dwStencil)
   {
@@ -842,7 +853,7 @@ namespace D3D11
 
       
       //CreatePrimitiveV(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXRU_DEFAULT, 6 * nCount, sizeof(CANVAS_PRMI_VERT), buf.GetPtr());
-      CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::GXResUsage_Default, 6 * nCount, sizeof(CANVAS_PRMI_VERT), buf.GetPtr(), 0, 0, NULL);
+      CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Default, 6 * nCount, sizeof(CANVAS_PRMI_VERT), buf.GetPtr(), 0, 0, NULL);
       GPrimitive* pSavedPrimitive = m_pCurPrimitive;
       if(pSavedPrimitive) {
         pSavedPrimitive->AddRef();
@@ -902,9 +913,9 @@ namespace D3D11
     const GXUINT PrimitiveCount)
   {
     ASSERT(TEST_FLAG(m_dwFlags, F_ACTIVATE));
-#ifdef _DEBUG
-    IntCheckSizeOfTargetAndDepth();
-#endif // IntCheckSizeOfTargetAndDepth
+//#ifdef _DEBUG
+//    IntCheckSizeOfTargetAndDepth();
+//#endif // IntCheckSizeOfTargetAndDepth
 
     GXUINT nVertCount = 0;
     InlUpdateTopology(eType, PrimitiveCount, &nVertCount);
@@ -944,9 +955,9 @@ namespace D3D11
     SAFE_RELEASE(pIndexBuf);
 
 #endif // D3D11_LOW_DEBUG
-#ifdef _DEBUG
-    IntCheckSizeOfTargetAndDepth();
-#endif // IntCheckSizeOfTargetAndDepth
+//#ifdef _DEBUG
+//    IntCheckSizeOfTargetAndDepth();
+//#endif // IntCheckSizeOfTargetAndDepth
 
     UINT nIndexCount = 0;
     InlUpdateTopology(eType, PrimitiveCount, &nIndexCount);
@@ -972,67 +983,124 @@ namespace D3D11
   }
 
 
-  GXHRESULT GXGraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT MipLevels, 
-    GXFormat Format, GXDWORD ResUsage)
+  GXHRESULT GXGraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, 
+    GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
   {
-    GTextureFromUser *pGTex = NULL;
-    *ppTexture = NULL;
+    GRESKETCH rs = { RCC_Texture };
+    GXHRESULT hr = GX_FAIL;
 
-    if(TEST_FLAG(ResUsage, GXRU_TEX_RENDERTARGET)) {
-      pGTex = new GTextureFromUserRT(this);
+    // 按命名查找资源
+    if(szName) {
+      rs.strResourceName = szName;
+      hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
+      if(GXSUCCEEDED(hr)) {
+        return hr;
+      }
     }
-    else {
-      pGTex = new GTextureFromUser(this);
+
+
+    *ppTexture = NULL;
+    GTextureImpl* pTexture = new GTextureImpl(this, Format, Width, Height, MipLevels, eResUsage);
+
+    if(InlIsFailedToNewObject(pTexture)) {
+      return GX_FAIL;
+    }
+
+    if( ! pTexture->InitTexture(pInitData, nPitch))
+    {
+      pTexture->Release();
+      pTexture = NULL;
+      return GX_FAIL;
+    }
+
+    RegisterResource(pTexture, szName ? &rs : NULL);
+    *ppTexture = pTexture;
+    return GX_OK;
+  }
+
+  GXHRESULT GXGraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, GTexture* pSourceTexture)
+  {
+    CLBREAK;
+  }
+
+
+  GXHRESULT GXGraphicsImpl::CreateTextureFromMemory(GTexture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage)
+  {
+    GRESKETCH rs = { RCC_Texture };
+    GXHRESULT hr = GX_FAIL;
+
+    // 按命名查找资源
+    if(szName) {
+      rs.strResourceName = szName;
+      hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
+      if(GXSUCCEEDED(hr)) {
+        return hr;
+      }
+    }
+
+    FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), pBuffer->GetSize());
+    FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
+    if(fi_fmt == FIF_UNKNOWN) {
+      return GX_ERROR_HANDLE;
+    }
+
+    FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
+
+    // FIXME:
+    // 没有处理64位图像的地方
+    // 没有检查图片格式
+    GXFormat
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
+    format = GXFMT_A8B8G8R8;
+#else
+    format = GXFMT_A8R8G8B8;
+#endif
+
+    hr = CreateTexture(ppTexture, NULL, FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp),
+      format, eUsage, 0, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+
+    // 有名字的要注册一下
+    if(GXSUCCEEDED(hr) && szName)
+    {
+      m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
+      m_ResMgr.Register(&rs, *ppTexture);
     }
     
-    if( ! InlCheckNewAndIncReference(pGTex)) {
-      return GX_FAIL;
-    }
-
-    if( ! pGTex->Initialize(Width, Height, MipLevels, Format, ResUsage))
-    {
-      pGTex->Release();
-      pGTex = NULL;
-      return GX_FAIL;
-    }
-
-    //if(pGTex != NULL)
-    //{
-    //  pGTex->m_emType       = GTextureImpl::User;
-    //  pGTex->m_nWidth       = 0;
-    //  pGTex->m_nHeight      = 0;
-    //  pGTex->m_nMipLevels   = MipLevels;
-    //  pGTex->m_Format       = Format;
-    //  pGTex->m_dwResUsage   = ResUsage;
-    //  pGTex->m_nWidthRatio  = (GXWORD)Width;
-    //  pGTex->m_nHeightRatio = (GXWORD)Height;
-
-    //  GXHRESULT hval = pGTex->AddRef();
-    //  if(GXFAILED(hval))
-    //  {
-    //    SAFE_RELEASE(pGTex);
-    //    return GX_FAIL;
-    //  }
-    RegisterResource(pGTex, NULL);
-    *ppTexture = pGTex;
-    return GX_OK;
-    //}
-    //return GX_FAIL;
+    FreeImage_Unload(fibmp);
+    FreeImage_CloseMemory(fi_mem);
+    return hr;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureFromFileW(GTexture** ppTexture, GXLPCWSTR pSrcFile)
+  GXHRESULT GXGraphicsImpl::CreateTextureFromFile(GTexture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage)
   {
-    GXHRESULT lr = CreateTextureFromFileExW(ppTexture, pSrcFile, 
-      GX_DEFAULT, GX_DEFAULT, GX_FROM_FILE, GXFMT_UNKNOWN, 
-      GXRU_DEFAULT, GX_DEFAULT, GX_DEFAULT, 0, NULL);
-    if(GXSUCCEEDED(lr))
-    {
-      ((GTextureFromFile*)*ppTexture)->m_emType = GTextureImpl::File;
+    GRESKETCH rs = { RCC_Texture };
+    clpathfile::CombinePath(rs.strResourceName, m_strResourceDir, szFilePath);
+
+    // 按命名查找资源
+    GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
+    if(GXSUCCEEDED(hr)) {
+      return hr;
     }
-    return lr;
+
+    clstd::File file;
+    if(file.OpenExisting(rs.strResourceName))
+    {
+      clstd::MemBuffer buffer;
+      if(file.ReadToBuffer(&buffer))
+      {
+        hr = CreateTextureFromMemory(ppTexture, NULL, &buffer, eUsage);
+        if(GXSUCCEEDED(hr)) {
+          m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
+          m_ResMgr.Register(&rs, *ppTexture);
+        }
+        return hr;
+      }
+    }
+    return GX_E_OPEN_FAILED;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureFromFileExW(
+#if 0
+  GXHRESULT GXGraphicsImpl::CreateTextureFromFileEx(
     GTexture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, 
     GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter /* = D3DX_FILTER_NONE */, 
     GXDWORD MipFilter /* = D3DX_FILTER_NONE */, GXCOLORREF ColorKey /* = 0 */, 
@@ -1069,6 +1137,7 @@ namespace D3D11
     ASSERT(FALSE);
     return GX_FAIL;
   }
+#endif
 
   GXHRESULT GXGraphicsImpl::CreateTexture3D(
     GTexture3D** ppTexture, GXLPCSTR szName, 
@@ -1079,22 +1148,24 @@ namespace D3D11
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTexture3DFromFileW(
+  GXHRESULT GXGraphicsImpl::CreateTexture3DFromFile(
     GTexture3D** ppTexture, GXLPCWSTR pSrcFile)
   {
-    return CreateTexture3DFromFileExW(ppTexture, pSrcFile, GX_DEFAULT, GX_DEFAULT, GX_DEFAULT,
-      GX_FROM_FILE,  GXFMT_UNKNOWN, GXRU_DEFAULT, GX_DEFAULT, GX_DEFAULT, 0, NULL);
-  }
-
-  GXHRESULT GXGraphicsImpl::CreateTexture3DFromFileExW(
-    GTexture3D** ppTexture, GXLPCWSTR pSrcFile, 
-    GXUINT Width, GXUINT Height, GXUINT Depth, 
-    GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
-    GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
-  {
+    //return CreateTexture3DFromFileExW(ppTexture, pSrcFile, GX_DEFAULT, GX_DEFAULT, GX_DEFAULT,
+    //  GX_FROM_FILE,  GXFMT_UNKNOWN, GXRU_DEFAULT, GX_DEFAULT, GX_DEFAULT, 0, NULL);
     CLBREAK;
     return GX_OK;
   }
+
+  //GXHRESULT GXGraphicsImpl::CreateTexture3DFromFileExW(
+  //  GTexture3D** ppTexture, GXLPCWSTR pSrcFile, 
+  //  GXUINT Width, GXUINT Height, GXUINT Depth, 
+  //  GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
+  //  GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
+  //{
+  //  CLBREAK;
+  //  return GX_OK;
+  //}
 
   GXHRESULT GXGraphicsImpl::CreateTextureCube(GTextureCube** ppTexture, 
     GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
@@ -1103,19 +1174,19 @@ namespace D3D11
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileW(GTextureCube** ppTexture, GXLPCWSTR pSrcFile)
+  GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFile(GTextureCube** ppTexture, GXLPCWSTR pSrcFile)
   {
     CLBREAK;
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileExW(GTextureCube** ppTexture, 
-    GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
-    GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
-  {
-    CLBREAK;
-    return GX_OK;
-  }
+  //GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileEx(GTextureCube** ppTexture, 
+  //  GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
+  //  GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
+  //{
+  //  CLBREAK;
+  //  return GX_OK;
+  //}
 
 
   //GXLRESULT GXGraphicsImpl::CreateOffscreenPlainSurface(
@@ -1180,30 +1251,33 @@ namespace D3D11
     }
   }
 
-  GXBOOL GXGraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTargetIndex)
+  GXBOOL GXGraphicsImpl::InlSetRenderTarget(GXRenderTarget* pTarget, GXUINT uRenderTargetIndex)
   {
-    if(pTexture != NULL)
+    if(pTarget != NULL)
     {
-      GTextureImpl* pTextureImpl = static_cast<GTextureImpl*>(pTexture);
-      if(TEST_FLAG(pTextureImpl->m_dwResUsage, GXRU_TEX_RENDERTARGET))
+      //GTextureImpl* pTextureImpl = static_cast<GTextureImpl*>(pTexture);
+      //if(TEST_FLAG(pTextureImpl->m_dwResUsage, GXRU_TEX_RENDERTARGET))
+      GXRenderTargetImpl* pTargetImpl = static_cast<GXRenderTargetImpl*>(pTarget);
+
+      if(m_pCurRenderTarget != pTargetImpl)
       {
-        GTextureFromUserRT* pTexRT = static_cast<GTextureFromUserRT*>(pTextureImpl);
+        //GTextureFromUserRT* pTexRT = static_cast<GTextureFromUserRT*>(pTextureImpl);
 
         SAFE_RELEASE(m_pCurRenderTarget);
         SAFE_RELEASE(m_pCurRenderTargetView);
         SAFE_RELEASE(m_pCurDepthStencilView);
-        m_pCurRenderTarget = pTextureImpl;
-        m_pCurRenderTargetView = pTexRT->m_pRenderTargetView;
-        m_pCurDepthStencilView = pTexRT->m_pDepthStencilView;
+        m_pCurRenderTarget = pTargetImpl;
+        m_pCurRenderTargetView = pTargetImpl->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
+        m_pCurDepthStencilView = pTargetImpl->IntGetDepthStencilTextureUnsafe()->m_pD3D11DepthStencilView;
         m_pCurRenderTarget->AddRef();
         m_pCurRenderTargetView->AddRef();
         m_pCurDepthStencilView->AddRef();
 
         m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
       }
-      else {
-        return FALSE;
-      }
+      //else {
+      //  return FALSE;
+      //}
     }
     else
     {

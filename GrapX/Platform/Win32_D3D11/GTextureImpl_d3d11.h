@@ -5,28 +5,23 @@
 
 namespace D3D11
 {
-  //#include <Include/GTexture.h>
-  //struct TEXLOCKED
-  //{
-  //  GXLPVOID lpSystemMem;
-
-  //  TEXLOCKED() : lpSystemMem(NULL) {}
-  //};
   class GResource;
   class GXGraphicsImpl;
+
+  // 用来统一内部TextureImpl对象
   template<class _Interface>
-  class GTexBaseImplT : public _Interface
+  class GTexureBaseImplT : public _Interface
   {
   protected:
     GXGraphicsImpl*           m_pGraphics;
-    ID3D11Texture2D*          m_pTexture;
-    ID3D11ShaderResourceView* m_pTexRV;
+    ID3D11Texture2D*          m_pD3D11Texture;
+    ID3D11ShaderResourceView* m_pD3D11ShaderView;
 
   public:
-    GTexBaseImplT(GXGraphicsImpl*pGraphics)
+    GTexureBaseImplT(GXGraphicsImpl*pGraphics)
       : m_pGraphics(pGraphics)
-      , m_pTexture(NULL)
-      , m_pTexRV(NULL)
+      , m_pD3D11Texture(NULL)
+      , m_pD3D11ShaderView(NULL)
     {};
 
     virtual GXHRESULT AddRef () = NULL;
@@ -34,80 +29,70 @@ namespace D3D11
 
     inline ID3D11ShaderResourceView*& D3DResourceView()
     {
-      return m_pTexRV;
+      return m_pD3D11ShaderView;
     }
   };
 
-  class GTextureImpl : public GTexBaseImplT<GTexture>
+  class GTextureImpl : public GTexureBaseImplT<GTexture>
   {
     friend class GXGraphicsImpl;
     friend class GXCanvasCoreImpl;
+
   public:
-    enum CREATETYPE
-    {
-      CreationFailed    = -1, // 创建失败的
-      Invalid           = 0,
-      User              = 1,
-      File              = 2,
-      FileEx            = 3,
-      Resource          = 4,
-      ResourceEx        = 5,
-      OffscreenPlainSur = 6,
-      D3DSurfaceRef     = 7,
-      LastType
-    };
+    //enum CREATETYPE
+    //{
+    //  CreationFailed    = -1, // 创建失败的
+    //  Invalid           = 0,
+    //  User              = 1,
+    //  File              = 2,
+    //  FileEx            = 3,
+    //  Resource          = 4,
+    //  ResourceEx        = 5,
+    //  OffscreenPlainSur = 6,
+    //  D3DSurfaceRef     = 7,
+    //  LastType
+    //};
   protected:
     virtual GXHRESULT   Invoke        (GRESCRIPTDESC* pDesc);
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT   AddRef        ();
+    GXHRESULT   AddRef        () override;
+    GXHRESULT   Release       () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    friend GXBOOL      GXDLLAPI GXSaveTextureToFileW      (GXLPCWSTR pszFileName, GXLPCWSTR pszDestFormat, GTexture* pTexture);
+    GXBOOL      Clear             (const GXLPRECT lpRect, GXCOLOR dwColor) override;
+    //GXBOOL      GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio) override;
+    GXSIZE*     GetDimension      (GXSIZE* pDimension) override;
+    GXResUsage  GetUsage          () override;
+    GXFormat    GetFormat         () override;
+    GXVOID      GenerateMipMaps   () override;
+    GXBOOL      GetDesc           (GXBITMAP*lpBitmap) override;
+    GXBOOL      CopyRect          (GTexture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
+    GXBOOL      MapRect           (MAPPEDRECT* pLockRect, GXLPCRECT pRect, GXResMap eResMap) override;
+    GXBOOL      UnmapRect         () override;
+    GXGraphics* GetGraphicsUnsafe () override;
 
-    virtual GXBOOL      Clear         (const GXLPRECT lpRect, GXCOLOR dwColor);
-    virtual GXBOOL      GetRatio      (GXINT* pWidthRatio, GXINT* pHeightRatio);
-    virtual GXUINT      GetWidth      ();
-    virtual GXUINT      GetHeight     ();
-    virtual GXBOOL      GetDimension  (GXUINT* pWidth, GXUINT* pHeight);
-    virtual GXDWORD     GetUsage      ();
-    virtual GXFormat    GetFormat     ();
-    virtual GXVOID      GenerateMipMaps();
-    virtual GXBOOL      GetDesc       (GXBITMAP*lpBitmap);
-    virtual GXBOOL      CopyRect      (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination);
-    virtual GXBOOL      StretchRect   (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter);
-    virtual GXBOOL      LockRect      (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags);
-    virtual GXBOOL      UnlockRect        ();
-    virtual GXGraphics* GetGraphicsUnsafe ();
-
-    //virtual LPDIRECT3DTEXTURE9  D3DTexture();    // 过渡函数
-    //virtual LPDIRECT3DSURFACE9  D3DSurface();    // 过渡函数
-
-    virtual GXHRESULT   Release       ();
-    virtual GXBOOL      SaveToFileW   (GXLPCWSTR szFileName, GXLPCSTR szDestFormat);
-
-    CREATETYPE          GetCreateType ();
   protected:
-    void CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
-    GXBOOL           IntGetHelpTexture();
-    ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);
+    GTextureImpl(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage);
+    virtual ~GTextureImpl();
+
+    GXBOOL InitTexture(GXLPCVOID pInitData, GXUINT nPitch);
+    //void   CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
+    //GXBOOL           IntGetHelpTexture();
+    //ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);
+    GXBOOL IntD3D11CreateResource(GXLPCVOID pInitData, GXUINT nPitch);
+    GXUINT GetMinPitchSize() const;
+
   protected:
-    GTextureImpl(GXGraphics* pGraphics);
+    D3D11_MAPPED_SUBRESOURCE  m_sMappedResource;
+    GXLPBYTE                  m_pTextureData;
 
-    CREATETYPE                m_emType;
+    const GXUINT              m_nMipLevels;
+    const GXFormat            m_Format;
+    const GXResUsage          m_eResUsage;
+    const GXUINT              m_nWidth;
+    const GXUINT              m_nHeight;
 
-    GXSHORT                   m_nWidthRatio;
-    GXSHORT                   m_nHeightRatio;
-
-    GXUINT                    m_nWidth;
-    GXUINT                    m_nHeight;
-    GXUINT                    m_nMipLevels;
-    GXFormat                  m_Format;
-    GXDWORD                   m_dwResUsage;
-    ID3D11Texture2D*          m_pHelpTexture; // TODO: 放到Graphics里面,做hash表
-    //TEXLOCKED                 m_Locked;
-    //GXLPVOID                  m_lpSystemMem;    // GXRU_FREQUENTLYREAD / GXRU_FREQUENTLYWRITE 用的
-    //GXPool        m_Pool;
   };
 
   //LPDIRECT3DTEXTURE9 GTextureImpl::D3DTexture()
@@ -121,6 +106,7 @@ namespace D3D11
 
 
   //////////////////////////////////////////////////////////////////////////
+#if 0
   class GTextureFromUser : public GTextureImpl
   {
     friend class GXGraphicsImpl;
@@ -133,9 +119,11 @@ namespace D3D11
     GTextureFromUser(GXGraphicsImpl* pGraphicsImpl);
     //virtual ~GTextureFromUser();
 
-    virtual GXBOOL Initialize(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
+    virtual GXBOOL InitTexture(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
   };
+#endif
   //////////////////////////////////////////////////////////////////////////
+#if 0
   class GTextureFromUserRT : public GTextureFromUser
   {
     friend class GXGraphicsImpl;
@@ -156,16 +144,18 @@ namespace D3D11
     GTextureFromUserRT(GXGraphicsImpl* pGraphicsImpl);
     virtual ~GTextureFromUserRT();
 
-    virtual GXBOOL Initialize(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
+    virtual GXBOOL InitTexture(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
   };
+#endif
   //////////////////////////////////////////////////////////////////////////
+#if 0
   class GTextureFromFile : public GTextureImpl
   {
     friend class GXGraphicsImpl;
     friend class GTextureImpl;
 
   private:
-    clStringW    m_strSrcFile;
+    clStringW      m_strSrcFile;
     GXDWORD        m_Filter;
     GXDWORD        m_MipFilter;
     GXCOLORREF      m_ColorKey;
@@ -181,6 +171,7 @@ namespace D3D11
       GXDWORD MipFilter, GXCOLORREF ColorKey, GXGraphics* pGraphics);
     virtual ~GTextureFromFile();
   };
+#endif
   //////////////////////////////////////////////////////////////////////////
 
   //class GTextureOffscreenPlainSur : public GTextureImpl

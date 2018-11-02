@@ -361,7 +361,7 @@ GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFi
     }
   }
 
-  pGraphics->CreateMaterialFromFileW(&pMtlInst, strFilename, eLoadType);
+  pGraphics->CreateMaterialFromFile(&pMtlInst, strFilename, eLoadType);
   GXHRESULT hval = SetMaterialInstDirect(pMtlInst);
   SAFE_RELEASE(pMtlInst);
 

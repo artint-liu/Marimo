@@ -119,7 +119,7 @@ namespace D3D9
     break;
     case RC_ResetDevice:
     {
-      if(m_eResUsage != GXResUsage_SystemMem)
+      if(m_eResUsage != GXResUsage::SystemMem)
       {
         LPDIRECT3DDEVICE9 lpd3dDevice = m_pGraphicsImpl->D3DGetDevice();
 

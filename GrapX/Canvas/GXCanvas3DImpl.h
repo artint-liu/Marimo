@@ -9,11 +9,12 @@ class GXCanvas3DImpl : public GXCanvas3D
   friend class GXGraphicsImpl;
 protected:
   GXGraphicsImpl*           m_pGraphicsImpl;
-  GXINT                     m_xExt;          // 物理尺寸，不受原点位置影响
-  GXINT                     m_yExt;
-  GTexture*                 m_pDepthStencil;
-  GTexture*                 m_pTargetTex;
-  GXImage*                  m_pImage;
+  //GXINT                     m_xExt;          // 物理尺寸，不受原点位置影响
+  //GXINT                     m_yExt;
+  GXSIZE                    m_sExtent;
+  //GTexture*                 m_pDepthStencil;
+  GXRenderTargetImpl*       m_pTarget;
+  //GXImage*                  m_pImage;
   GXVIEWPORT                m_Viewport;
   GCamera*                  m_pCamera;
 
@@ -38,14 +39,14 @@ protected:
 public:
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT   AddRef                () override;
-  GXHRESULT   Release               () override;
+  GXHRESULT       AddRef                () override;
+  GXHRESULT       Release               () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT   Invoke                (GRESCRIPTDESC* pDesc) override;
-  GXVOID      GetTargetDimension    (GXSIZE* pSize) const override;
-  GXGraphics* GetGraphicsUnsafe     () const override;
-  GTexture*   GetTargetUnsafe       () const override;
-  GXBOOL      Initialize            (GXImage* pImage, GTexture* pDepthStencil, GXLPCVIEWPORT pViewport);
+  GXHRESULT       Invoke                (GRESCRIPTDESC* pDesc) override;
+  GXSIZE*         GetTargetDimension    (GXSIZE* pSize) const override;
+  GXGraphics*     GetGraphicsUnsafe     () const override;
+  GXRenderTarget* GetTargetUnsafe       () const override;
+  GXBOOL          Initialize            (GXRenderTarget* pTarget, GXLPCVIEWPORT pViewport);
 
   GXHRESULT   Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil) override;
   GXHRESULT   TransformPosition     (const float3* pPos, GXOUT float4* pView) override; // Transform world position to screen
@@ -80,9 +81,9 @@ public:
   GXHRESULT   UpdateCommonUniforms  () override;
   GXHRESULT   Draw                  (GVSequence* pSequence) override;
 
-  GXHRESULT   GetDepthStencil       (GTexture** ppDepthStencil) const override;
+  GXHRESULT   GetDepthStencil       (GTexture** ppDepthStencil) override;
 
-  const FrustumPlanes*      GetViewFrustum        () const;
+  const FrustumPlanes*      GetViewFrustum        ();
 #ifdef REFACTOR_SHADER
 #else
   STANDARDMTLUNIFORMTABLE*  GetStandardUniform    ();

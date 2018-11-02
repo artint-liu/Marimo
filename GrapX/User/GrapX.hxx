@@ -22,9 +22,10 @@ namespace clstd
 } // namespace clstd
 
 class GXWnd;
-class GXImage;
+//class GXImage;
 class GUnknown;
 class GTexture;
+class GXRenderTarget;
 class GXFont;
 class GXCanvas;
 class GXGraphics;
@@ -192,7 +193,9 @@ typedef struct __tagGXGDIBITMAP : GXGDIOBJ
   GXWORD      bmPlanes; 
   GXWORD      bmBitsPixel; 
   GXLPVOID    bmBits; 
-  GXImage*    pImage;    
+  //GXImage*    pImage;    
+  GTexture*       pDrawingTexture; // 用于绘制
+  GXRenderTarget* pTargetTexture;  // 如果位图作为绘制目标，则创建它
 }GXGDIBITMAP;
 
 typedef GXGDIPEN  *LPGXGDIPEN, *GXLPGDIPEN;
@@ -229,9 +232,9 @@ typedef struct __tagGXGDIDC : GXGDIOBJ
 typedef struct __tagGXICON
 {
   GXBOOL      fIcon;
-  GXDWORD      xHotspot;
-  GXDWORD      yHotspot;
-  GXImage  *    pImgIcon;
+  GXDWORD     xHotspot;
+  GXDWORD     yHotspot;
+  GTexture*   pImgIcon;
 //  HBITMAP hbmMask; 
 //  HBITMAP hbmColor; 
 }GXICON, *LPGXICON, *GXLPICON;

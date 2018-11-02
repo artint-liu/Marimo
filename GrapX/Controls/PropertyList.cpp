@@ -11,7 +11,7 @@
 #include "GrapX/GResource.h"
 #include "GrapX/GXGraphics.h"
 #include "GrapX/GXCanvas.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GTexture.h"
 #include "GrapX/GXFont.h"
 #include "GrapX/DataPool.h"
 #include "GrapX/DataPoolVariable.h"
@@ -726,9 +726,9 @@ PROCESS_IT:
               }
 #endif // #ifdef _WINDOWS
               if(bChangeTex) {
-                SAFE_RELEASE(item.pImage);
+                SAFE_RELEASE(item.pTexture);
                 LPGXGRAPHICS pGraphics = GXGetGraphics(m_hWnd);
-                item.pImage = pGraphics->CreateImageFromFile(item.strVal);
+                pGraphics->CreateTextureFromFile(&item.pTexture, item.strVal, GXResUsage::Default);
                 NotifyParent(GXNM_RETURN, item);
                 Invalidate(FALSE);
               }
@@ -1190,13 +1190,13 @@ SUM_HEIGHT:
         }
         else if(item.eType == PST_IMAGEPATHA || item.eType == PST_IMAGEPATHW)
         {
-          if(item.pImage)
+          if(item.pTexture)
           {
             pCanvas = GXGetWndCanvas(hdc);
             if(pCanvas)
             {
               GXREGN rgDest(rcItem.left, rcItem.top, rect.right, item.nHeight);
-              pCanvas->DrawImage(item.pImage, &rgDest, NULL);
+              pCanvas->DrawTexture(item.pTexture, &rgDest, NULL);
             }
           }
         }
@@ -1561,8 +1561,8 @@ DRAW_SCROLLBAR:
             {
               GXHWND hWnd = m_pPropSheet->Get();
               LPGXGRAPHICS pGraphics = GXGetGraphics(hWnd);
-              ASSERT(item.pImage == NULL);
-              item.pImage = pGraphics->CreateImageFromFile(item.strVal);
+              ASSERT(item.pTexture == NULL);
+              pGraphics->CreateTextureFromFile(&item.pTexture, item.strVal, GXResUsage::Default);
             }
           }
           break;
@@ -1588,7 +1588,7 @@ DRAW_SCROLLBAR:
         }
         else if(item.eType == PST_IMAGEPATHA || item.eType == PST_IMAGEPATHW)
         {
-          SAFE_RELEASE(item.pImage);
+          SAFE_RELEASE(item.pTexture);
         }
 
         else if(item.eType == PST_LIST)

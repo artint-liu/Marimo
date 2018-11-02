@@ -3,7 +3,7 @@
 
 // 标准接口
 #include "GrapX/GResource.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GTexture.h"
 #include "GrapX/GXCanvas.h"
 #include "GrapX/MOSprite.h"
 #include "GrapX/GXGraphics.h"
@@ -35,8 +35,8 @@ namespace Marimo
 
   MOSpriteImpl::~MOSpriteImpl()
   {
-    std::for_each(m_ImageArray.begin(), m_ImageArray.end(), [](GXImage*& pImage) {
-      SAFE_RELEASE(pImage);
+    std::for_each(m_ImageArray.begin(), m_ImageArray.end(), [](GTexture*& pTexture) {
+      SAFE_RELEASE(pTexture);
     });
   }
 
@@ -71,7 +71,7 @@ namespace Marimo
     //const GXREGN& regn = ;
     if (nIndex < (GXINT)m_loader.aModules.size()) {
       const MODULE& m = m_loader.aModules[nIndex];
-      pCanvas->DrawImage(m_ImageArray[GXHIWORD(m.id)], x, y, &m.regn);
+      pCanvas->DrawTexture(m_ImageArray[GXHIWORD(m.id)], x, y, &m.regn);
     }
   }
 
@@ -84,7 +84,7 @@ namespace Marimo
     rcDest.height = nHeight;
     if (nIndex < (GXINT)m_loader.aModules.size()) {
       const MODULE& m = m_loader.aModules[nIndex];
-      pCanvas->DrawImage(m_ImageArray[GXHIWORD(m.id)], &rcDest, &m.regn);
+      pCanvas->DrawTexture(m_ImageArray[GXHIWORD(m.id)], &rcDest, &m.regn);
     }
   }
 
@@ -92,7 +92,7 @@ namespace Marimo
   {
     if(nIndex < (GXINT)m_loader.aModules.size()) {
       const MODULE& m = m_loader.aModules[nIndex];
-      pCanvas->DrawImage(m_ImageArray[GXHIWORD(m.id)], lpRegn, &m.regn);
+      pCanvas->DrawTexture(m_ImageArray[GXHIWORD(m.id)], lpRegn, &m.regn);
     }
   }
 
@@ -105,7 +105,7 @@ namespace Marimo
   //  rcDest.height = m_loader.aModules[nIndex].regn.height;
   //
   //  if(nIndex < (GXINT)m_loader.aModules.size()) {
-  //    pCanvas->DrawImage(m_pImage, &rcDest, m_loader.aModules[nIndex].regn);
+  //    pCanvas->DrawTexture(m_pImage, &rcDest, m_loader.aModules[nIndex].regn);
   //  }
   //}
   //
@@ -118,7 +118,7 @@ namespace Marimo
   //  rcDest.height = nHeight;
   //
   //  if(nIndex < (GXINT)m_loader.aModules.size()) {
-  //    pCanvas->DrawImage(m_pImage, &rcDest, m_loader.aModules[nIndex].regn);
+  //    pCanvas->DrawTexture(m_pImage, &rcDest, m_loader.aModules[nIndex].regn);
   //  }
   //}
 
@@ -160,9 +160,9 @@ namespace Marimo
   //    rgDest.width  = nWidth - rgTip0.width - rgTip1.width;
   //    rgDest.height = nHeight;
   //
-  //    //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx    ], &rgTip0);
-  //    //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx + 2], &rgTip1);
-  //    pCanvas->DrawImage(m_pImage, &rgDest, &m_loader.aModules[nStartIdx + 1].regn);
+  //    //pCanvas->DrawTexture(m_pImage, &m_pRect[nStartIdx    ], &rgTip0);
+  //    //pCanvas->DrawTexture(m_pImage, &m_pRect[nStartIdx + 2], &rgTip1);
+  //    pCanvas->DrawTexture(m_pImage, &rgDest, &m_loader.aModules[nStartIdx + 1].regn);
   //  }
   //  else
   //  {
@@ -180,8 +180,8 @@ namespace Marimo
   //
   //    rgDest.width = 0;
   //  }
-  //  pCanvas->DrawImage(m_pImage, &rgTip0, &m_loader.aModules[nStartIdx    ].regn);
-  //  pCanvas->DrawImage(m_pImage, &rgTip1, &m_loader.aModules[nStartIdx + 2].regn);
+  //  pCanvas->DrawTexture(m_pImage, &rgTip0, &m_loader.aModules[nStartIdx    ].regn);
+  //  pCanvas->DrawTexture(m_pImage, &rgTip1, &m_loader.aModules[nStartIdx + 2].regn);
   //  return rgDest.width;  // 返回值是中间可缩放Sprite的宽度
   //}
   //
@@ -223,9 +223,9 @@ namespace Marimo
   //    rgDest.height  = nHeight - rgTip0.height - rgTip1.height;
   //    rgDest.width = nWidth;
   //
-  //    //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx    ], &rgTip0);
-  //    //pCanvas->DrawImage(m_pImage, &m_pRect[nStartIdx + 2], &rgTip1);
-  //    pCanvas->DrawImage(m_pImage, &rgDest, &m_loader.aModules[nStartIdx + 1].regn);
+  //    //pCanvas->DrawTexture(m_pImage, &m_pRect[nStartIdx    ], &rgTip0);
+  //    //pCanvas->DrawTexture(m_pImage, &m_pRect[nStartIdx + 2], &rgTip1);
+  //    pCanvas->DrawTexture(m_pImage, &rgDest, &m_loader.aModules[nStartIdx + 1].regn);
   //  }
   //  else
   //  {
@@ -350,7 +350,8 @@ namespace Marimo
   {
     int image_index = 0;
     while(image_index < (int)m_ImageArray.size()) {
-      const GXINT height = m_ImageArray[image_index]->GetHeight();
+      GXSIZE sDimension;
+      const GXINT height = m_ImageArray[image_index]->GetDimension(&sDimension)->cy;
       if(regn.top < height) {
         return image_index;
       }
@@ -375,7 +376,7 @@ namespace Marimo
       rgSrc = m_loader.aModules[fu.nModuleIdx].regn;
       int nIndex = AdjustDrawingRegn(rgSrc);
       if(nIndex >= 0) {
-        pCanvas->DrawImage(m_ImageArray[nIndex], &rgDest, &rgSrc, (RotateType)fu.rotate);
+        pCanvas->DrawTexture(m_ImageArray[nIndex], &rgDest, &rgSrc, (RotateType)fu.rotate);
       }
     }
     //pCanvas->DrawImage();
@@ -840,12 +841,12 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXSIZE_T MOSpriteImpl::GetImageCount() const
+  GXSIZE_T MOSpriteImpl::GetTextureCount() const
   {    
     return m_ImageArray.size();
   }
 
-  GXBOOL MOSpriteImpl::GetImage(GXImage** pImage, GXUINT index) const
+  GXBOOL MOSpriteImpl::GetTexture(GTexture** pImage, GXUINT index) const
   {
     if (index >= m_ImageArray.size()) {
       return FALSE;
@@ -855,7 +856,7 @@ namespace Marimo
     return TRUE;
   }
 
-  clStringW MOSpriteImpl::GetImageFileW(GXUINT index) const
+  clStringW MOSpriteImpl::GetTextureFileW(GXUINT index) const
   {
     if(index >= m_loader.aFiles.size()) {
       return _CLTEXT("");
@@ -863,7 +864,7 @@ namespace Marimo
     return clStringW(m_loader.aFiles[index]);
   }
 
-  clStringA MOSpriteImpl::GetImageFileA(GXUINT index) const
+  clStringA MOSpriteImpl::GetTextureFileA(GXUINT index) const
   {
     if(index >= m_loader.aFiles.size()) {
       return _CLTEXT("");
@@ -880,18 +881,18 @@ namespace Marimo
     // 加载纹理
     std::for_each(pDesc->aFiles.begin(), pDesc->aFiles.end(), [&](const clStringA& str)
     {
-      GXImage* pImage = NULL;
+      GTexture* pTexture = NULL;
 
       if(clpathfile::IsRelative(str)) {
         clStringA strFullPath;
         clpathfile::CombinePath(strFullPath, pDesc->strImageDir, str);
         m_loader.aFiles[i] = strFullPath;
-        pImage = pGraphics->CreateImageFromFile(clStringW(strFullPath));
+        pGraphics->CreateTextureFromFile(&pTexture, clStringW(strFullPath), GXResUsage::Default);
       }
       else {
-        pImage = pGraphics->CreateImageFromFile(clStringW(str));
+        pGraphics->CreateTextureFromFile(&pTexture, clStringW(str), GXResUsage::Default);
       }
-      m_ImageArray.push_back(pImage);
+      m_ImageArray.push_back(pTexture);
       i++;
     });
 

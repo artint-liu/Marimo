@@ -22,7 +22,7 @@
 #include "GrapX/GXCanvas.h"
 #include "GrapX/GXGraphics.h"
 #include "GrapX/GXFont.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GXRenderTarget.h"
 #include "GrapX/GShader.h"
 #include "GrapX/GXKernel.h"
 
@@ -38,6 +38,7 @@
 #include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
 #include "Platform/Win32_D3D11/GTextureImpl_D3D11.h"
+#include "Platform/Win32_D3D11/GXRenderTargetImpl_D3D11.h"
 
 // 私有头文件
 #include <clUtility.h>
@@ -108,11 +109,11 @@ GXCanvasImpl::~GXCanvasImpl()
 {
 }
 
-GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
+GXBOOL GXCanvasImpl::Initialize(GXRenderTarget* pTarget, const REGN* pRegn)
 {
   ASSERT(m_uBatchCount == 0);
 
-  if(GXCanvasCoreImpl::Initialize(pTexture) == TRUE)
+  if(GXCanvasCoreImpl::Initialize(pTarget) == TRUE)
   {
     if(pRegn != NULL)
     {
@@ -133,7 +134,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
       m_rcClip.right  = pRegn->left + pRegn->width;
       m_rcClip.bottom = pRegn->top  + pRegn->height;
 
-      gxSetRect(&rcTexture, 0, 0, m_xExt, m_yExt);
+      gxSetRect(&rcTexture, 0, 0, m_sExtent.cx, m_sExtent.cy);
       gxIntersectRect(&m_rcClip, &rcTexture, &m_rcClip);
     }
     else
@@ -149,8 +150,8 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
         = m_yOrigin 
         = m_rcClip.top
         = 0;
-      m_rcClip.right  = m_xExt;
-      m_rcClip.bottom = m_yExt;
+      m_rcClip.right  = m_sExtent.cx;
+      m_rcClip.bottom = m_sExtent.cy;
     }
 
     m_rcAbsClip = m_rcClip;
@@ -162,7 +163,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
 
     if(m_pPrimitive == NULL) {
       m_pGraphics->CreatePrimitive(&m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), 
-        GXResUsage::GXResUsage_Write, 
+        GXResUsage::Write, 
         m_uVertIndexSize, sizeof(CANVAS_PRMI_VERT), NULL,
         m_uVertIndexSize, 2, NULL);
     }
@@ -186,7 +187,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
 
     // 初始化空纹理时的替换纹理
     if(m_pWhiteTex == NULL) {
-      GXHRESULT hval = m_pGraphics->CreateTexture(&m_pWhiteTex, "CanvasWhiteTex8x8", 8, 8, 0, GXFMT_A8R8G8B8, GXRU_DEFAULT);
+      GXHRESULT hval = m_pGraphics->CreateTexture(&m_pWhiteTex, "CanvasWhiteTex8x8", 8, 8, GXFMT_A8R8G8B8, GXResUsage::Default, 1, NULL, 0);
       if(hval == 0) { // 只有在首次创建时才清除颜色
         m_pWhiteTex->Clear(NULL, 0xffffffff);
       }
@@ -254,6 +255,7 @@ GXBOOL GXCanvasImpl::Initialize(GTexture* pTexture, const REGN* pRegn)
   }
   return FALSE;
 }
+
 GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
 {
   if(pClipRegion != m_pClipRegion)
@@ -339,18 +341,18 @@ GXINT GXCanvasImpl::UpdateStencil(GRegion* pClipRegion)
   return (GXINT)eCompx;
 }
 
-GXBOOL GXCanvasImpl::Initialize(GXImage* pImage, const REGN* pRegn)
-{
-  // TODO: 如果不支持Renderable则将内部纹理重新创建为RenderTarget
-  ASSERT(m_pTargetImage == NULL);
-  m_pTargetImage = pImage;
-  if(pImage != NULL)
-  {
-    m_pTargetImage->AddRef();
-    return Initialize(pImage->GetTextureUnsafe(), pRegn);
-  }
-  return Initialize((GTexture*)NULL, pRegn);
-}
+//GXBOOL GXCanvasImpl::Initialize(GXImage* pImage, const REGN* pRegn)
+//{
+//  // TODO: 如果不支持Renderable则将内部纹理重新创建为RenderTarget
+//  ASSERT(m_pTargetImage == NULL);
+//  m_pTargetImage = pImage;
+//  if(pImage != NULL)
+//  {
+//    m_pTargetImage->AddRef();
+//    return Initialize(pImage->GetTextureUnsafe(), pRegn);
+//  }
+//  return Initialize((GTexture*)NULL, pRegn);
+//}
 
 //#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 GXHRESULT GXCanvasImpl::Release()
@@ -1263,7 +1265,7 @@ GXBOOL GXCanvasImpl::SetRegion(GRegion* pRegion, GXBOOL bAbsOrigin)
   if(pRegion != NULL)
   {
     // TODO: 测试如果区域小于屏幕区,就不用这个屏幕区的Region裁剪
-    m_pGraphics->CreateRectRgn(&pSurfaceRegion, 0, 0, m_xExt, m_yExt);
+    m_pGraphics->CreateRectRgn(&pSurfaceRegion, 0, 0, m_sExtent.cx, m_sExtent.cy);
 
     if(bAbsOrigin == TRUE) {
       pSurfaceRegion->Intersect(pRegion);
@@ -1357,7 +1359,7 @@ GXBOOL GXCanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprc
   GRegion* prgnClip;
   m_pGraphics->CreateRectRgn(&prgnClip, lprcClip->left, lprcClip->top, lprcClip->right, lprcClip->bottom);
 
-  ScrollTexDesc.pOperationTex = m_pTargetTex;
+  ScrollTexDesc.pOperationTex = m_pTargetTex->GetColorTextureUnsafe(GXResUsage::Default);
   ScrollTexDesc.pTempTex    = NULL;
   ScrollTexDesc.dx      = dx;
   ScrollTexDesc.dy      = dy;
@@ -1373,8 +1375,8 @@ GXBOOL GXCanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprc
 //#define CHECK_LOCK if(m_lpLockedVertex == NULL)  \
 //  m_pPrimitive->Lock(0, 0, 0, 0, (void**)&m_lpLockedVertex, &m_lpLockedIndex, GXLOCK_DISCARD);
 #define CHECK_LOCK \
-  if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::GXResMap_Write)); } \
-  if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::GXResMap_Write)); }
+  if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::Write)); } \
+  if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::Write)); }
   //PrimitiveUtility::LockVertices locker_v(m_pPrimitive); \
   //PrimitiveUtility::LockIndices locker_i(m_pPrimitive); \
 
@@ -1721,9 +1723,9 @@ GXBOOL GXCanvasImpl::DrawTexture(GTexture*pTexture, const GXREGN *rcDest, const 
   const GXUINT uDestBottom = (rcDest->top  + rcDest->height);
   const GXPOINT aPos[] = {
     {rcDest->left, rcDest->top},
-    {uDestRight,   rcDest->top},
-    {uDestRight,   uDestBottom},
-    {rcDest->left, uDestBottom},};
+    {static_cast<GXLONG>(uDestRight),   rcDest->top},
+    {static_cast<GXLONG>(uDestRight),   static_cast<GXLONG>(uDestBottom)},
+    {rcDest->left, static_cast<GXLONG>(uDestBottom)},};
 
   if(eRotation > Rotate_CCW90_Flip) {
     eRotation = Rotate_None;
@@ -1764,43 +1766,43 @@ GXBOOL GXCanvasImpl::DrawTexture(GTexture*pTexture, const GXREGN *rcDest, const 
   return TRUE;
 }
 
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest)
-{
-  GXREGN rcSrc(0);
-  pImage->GetDimension((GXINT*)&rcSrc.width, (GXINT*)&rcSrc.height);
-  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, &rcSrc);
-}
-
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc)
-{
-  GXREGN regn;
-  if(rgSrc == NULL)
-  {
-    regn.left = 0;
-    regn.top = 0;
-    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
-    rgSrc = &regn;
-  }
-  return DrawTexture(pImage->GetTextureUnsafe(), xPos, yPos, rgSrc);
-}
-
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest, const GXREGN *rgSrc)
-{
-  GXREGN regn;
-  if(rgSrc == NULL)
-  {
-    regn.left = 0;
-    regn.top = 0;
-    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
-    rgSrc = &regn;
-  }
-  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc);
-}
-
-GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation)
-{
-  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc, eRotation);
-}
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest)
+//{
+//  GXREGN rcSrc(0);
+//  pImage->GetDimension((GXINT*)&rcSrc.width, (GXINT*)&rcSrc.height);
+//  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, &rcSrc);
+//}
+//
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc)
+//{
+//  GXREGN regn;
+//  if(rgSrc == NULL)
+//  {
+//    regn.left = 0;
+//    regn.top = 0;
+//    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
+//    rgSrc = &regn;
+//  }
+//  return DrawTexture(pImage->GetTextureUnsafe(), xPos, yPos, rgSrc);
+//}
+//
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest, const GXREGN *rgSrc)
+//{
+//  GXREGN regn;
+//  if(rgSrc == NULL)
+//  {
+//    regn.left = 0;
+//    regn.top = 0;
+//    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
+//    rgSrc = &regn;
+//  }
+//  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc);
+//}
+//
+//GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation)
+//{
+//  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc, eRotation);
+//}
 //
 //const GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst()
 //{

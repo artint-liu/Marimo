@@ -557,7 +557,7 @@ namespace GXUI
       rect.top    = y;
       rect.right  = x + btn.wWidth;
       rect.bottom = y + m_ButtonSize.cy;
-      canvas.DrawTextW(m_pFont, btn.strText, -1, &rect, GXDT_SINGLELINE|GXDT_VCENTER, m_crText.ARGB);
+      canvas.DrawText(m_pFont, btn.strText, -1, &rect, GXDT_SINGLELINE|GXDT_VCENTER, m_crText.ARGB);
     }
 
     x += btn.wWidth;
@@ -591,7 +591,7 @@ namespace GXUI
     if(TEST_FLAG(pTBBtn->fsStyle, BTNS_SHOWTEXT)) {
       ASSERT(pCanvas != NULL);
       GXRECT rect(0);
-      pCanvas->DrawTextW(m_pFont, pTBBtn->strText, -1, &rect, 
+      pCanvas->DrawText(m_pFont, pTBBtn->strText, -1, &rect, 
         GXDT_SINGLELINE | GXDT_CALCRECT, 0);
       return clMin(m_nMaxBtnWidth, nBtnSize + rect.right + (m_ButtonSize.cx - m_BitmapSize.cx) / 2);
     }

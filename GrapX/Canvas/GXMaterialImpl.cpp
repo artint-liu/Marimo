@@ -581,14 +581,14 @@ int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, GXSIZE_T nCount)
         {
           clStringA strTextureName = &pParameters[i].szValue[1];
           strTextureName.TrimRight('>');
-          hval = m_pGraphics->CreateTexture(&pTexture, strTextureName, 0, 0, 0, GXFMT_UNKNOWN, GXRU_DEFAULT);
+          hval = m_pGraphics->CreateTexture(&pTexture, strTextureName, 0, 0, GXFMT_UNKNOWN, GXResUsage::Default);
           if(GXFAILED(hval)) {
             CLOG_WARNING("Warning: Named texture must be created first when load this material.\n");
           }
         }
         else
         {
-          hval = m_pGraphics->CreateTextureFromFileW(&pTexture, clStringW(pParameters[i].szValue));
+          hval = m_pGraphics->CreateTextureFromFile(&pTexture, clStringW(pParameters[i].szValue), GXResUsage::Default);
         }
 
         if(GXSUCCEEDED(hval)) {
@@ -610,7 +610,7 @@ int GXMaterialInstImpl::SetSampler(GXDEFINITION* pParameters, GXSIZE_T nCount)
         }
         else
         {
-          hval = m_pGraphics->CreateTexture3DFromFileW(&pTexture3D, clStringW(pParameters[i].szValue));
+          hval = m_pGraphics->CreateTexture3DFromFile(&pTexture3D, clStringW(pParameters[i].szValue));
         }
 
         if(GXSUCCEEDED(hval)) {
@@ -939,7 +939,7 @@ GXHRESULT GXMaterialInstImpl::SetTextureByIndex(GXUINT nIndex, GTextureBase* pTe
 GXHRESULT GXMaterialInstImpl::SetTextureByNameFromFileW(GXLPCSTR szName, GXLPCWSTR szFilename)
 {
   GTextureBase* pTexture = NULL;
-  GXHRESULT hval = m_pGraphics->CreateTextureFromFileW((GTexture**)&pTexture, szFilename);
+  GXHRESULT hval = m_pGraphics->CreateTextureFromFile((GTexture**)&pTexture, szFilename, GXResUsage::Default);
   if(GXSUCCEEDED(hval)) {
     hval = SetTextureByName(szName, pTexture);
   }
@@ -950,7 +950,9 @@ GXHRESULT GXMaterialInstImpl::SetTextureByNameFromFileW(GXLPCSTR szName, GXLPCWS
 GXHRESULT GXMaterialInstImpl::SetTextureByIndexFromFileW(GXUINT nIndex, GXLPCWSTR szFilename)
 {
   GTextureBase* pTexture = NULL;
-  GXHRESULT hval = m_pGraphics->CreateTextureFromFileExW((GTexture**)&pTexture, szFilename, 0, 0, 0, GXFMT_UNKNOWN, GXRU_DEFAULT, GXFILTER_LINEAR, GXFILTER_LINEAR);
+  //GXHRESULT hval = m_pGraphics->CreateTextureFromFileEx((GTexture**)&pTexture, szFilename, 0, 0, 0, GXFMT_UNKNOWN, GXRU_DEFAULT, GXFILTER_LINEAR, GXFILTER_LINEAR);
+  GXHRESULT hval = m_pGraphics->CreateTextureFromFile((GTexture**)&pTexture, szFilename, GXResUsage::Default);
+
   if(GXSUCCEEDED(hval)) {
     hval = SetTextureByIndex(nIndex, pTexture);
   }

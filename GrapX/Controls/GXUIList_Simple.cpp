@@ -193,9 +193,9 @@ namespace GXUI
         if(m_aColumns.empty()) {
           if(bContrast) {
             GXRECT rcContrast(rcItem.left + 1, rcItem.top + 1, rcItem.right + 1, rcItem.bottom + 1);
-            canvas.DrawTextW(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcContrast, DT_SINGLELINE|DT_VCENTER, crText.color ^ 0xFFFFFF);
+            canvas.DrawText(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcContrast, DT_SINGLELINE|DT_VCENTER, crText.color ^ 0xFFFFFF);
           }
-          canvas.DrawTextW(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcItem, DT_SINGLELINE|DT_VCENTER, crText.color);
+          canvas.DrawText(m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcItem, DT_SINGLELINE|DT_VCENTER, crText.color);
         }
         else {
           DrawTextWithColumnsW(canvas, m_pFont, ItemStrDesc.sString, (GXINT)nStrLen, &rcItem, 
@@ -254,9 +254,9 @@ namespace GXUI
             rcContrast.top    = rect.top + 1;
             rcContrast.right  = rect.right + 1;
             rcContrast.bottom = rect.bottom + 1;
-            canvas.DrawTextW(pFTFont, &lpString[n], i - n, &rcContrast, uFormat, crContrast);
+            canvas.DrawText(pFTFont, &lpString[n], i - n, &rcContrast, uFormat, crContrast);
           }
-          canvas.DrawTextW(pFTFont, &lpString[n], i - n, &rect, uFormat, crText);
+          canvas.DrawText(pFTFont, &lpString[n], i - n, &rect, uFormat, crText);
           n = i + 1;
           rect.left = rect.right;
           rect.right += *it;
@@ -266,7 +266,7 @@ namespace GXUI
         }
         else {
           GXRECT rcSize = rect;
-          canvas.DrawTextW(pFTFont, &lpString[n], i - n - 1, &rcSize, uFormat | GXDT_CALCRECT, crText);
+          canvas.DrawText(pFTFont, &lpString[n], i - n - 1, &rcSize, uFormat | GXDT_CALCRECT, crText);
 
           if(crContrast)
           {
@@ -274,9 +274,9 @@ namespace GXUI
             rcContrast.top    = rect.top + 1;
             rcContrast.right  = rect.right + 1;
             rcContrast.bottom = rect.bottom + 1;
-            canvas.DrawTextW(pFTFont, &lpString[n], i - n - 1, &rcContrast, uFormat, crContrast);
+            canvas.DrawText(pFTFont, &lpString[n], i - n - 1, &rcContrast, uFormat, crContrast);
           }
-          canvas.DrawTextW(pFTFont, &lpString[n], i - n - 1, &rect, uFormat, crText);
+          canvas.DrawText(pFTFont, &lpString[n], i - n - 1, &rect, uFormat, crText);
           rect.left += (rcSize.right - rcSize.left);
           n = i;
           bEscapeChar = FALSE;
@@ -296,10 +296,10 @@ LAST_STR:
       rcContrast.top    = rect.top + 1;
       rcContrast.right  = rect.right + 1;
       rcContrast.bottom = rect.bottom + 1;
-      canvas.DrawTextW(pFTFont, &lpString[n], nCount - n, &rcContrast, uFormat, crContrast);
+      canvas.DrawText(pFTFont, &lpString[n], nCount - n, &rcContrast, uFormat, crContrast);
     }
 
-    canvas.DrawTextW(pFTFont, &lpString[n], nCount - n, &rect, uFormat, crText);
+    canvas.DrawText(pFTFont, &lpString[n], nCount - n, &rect, uFormat, crText);
     return 0;
   }
 

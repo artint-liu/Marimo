@@ -1,7 +1,7 @@
 #ifndef _IMPLEMENT_GRAPH_X_SPRITE_HEADER_FILE_
 #define _IMPLEMENT_GRAPH_X_SPRITE_HEADER_FILE_
 
-class GXImage;
+//class GXImage;
 class GXCanvas;
 class GXGraphics;
 
@@ -66,7 +66,8 @@ public:
   typedef clstd::StringSetA                 clStringSetA;
 private:
   clStringW         m_strImageFile;
-  GXImage*          m_pImage;
+  //GXImage*          m_pImage;
+  GTexture*         m_pTexture;
 
   clStringSetA      m_NameSet; // TODO: 这个将来可以取消，使用压实的一大块内存储存字符串序列
 
@@ -163,9 +164,9 @@ public:
   GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
   GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
-  virtual GXHRESULT GetImage          (GXImage** ppImage);
-  virtual clStringW GetImageFileW     () const;
-  virtual clStringA GetImageFileA     () const;
+  GXHRESULT GetTexture        (GTexture** ppTexture) override;
+  clStringW GetImageFileW     () const override;
+  clStringA GetImageFileA     () const override;
 
   //virtual int FindByNameA             (GXLPCSTR szName) const;
   //virtual int FindByNameW             (GXLPCWSTR szName) const;

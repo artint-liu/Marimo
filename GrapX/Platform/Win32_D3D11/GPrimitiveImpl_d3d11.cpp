@@ -1,4 +1,4 @@
-#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+ #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 
 // 全局头文件
 #include <GrapX.h>
@@ -152,14 +152,14 @@ namespace D3D11
       m_uVertexStride = m_pVertexDecl->GetStride();
     }
 
-    if(m_eUsage != GXResUsage::GXResUsage_SystemMem)
+    if(m_eUsage != GXResUsage::SystemMem)
     {
       result = IntCreateBuffer(&m_pD3D11VertexBuffer, m_uVertexCount * m_uVertexStride, D3D11_BIND_VERTEX_BUFFER, pVertInitData);
     }
 
     if(result)
     {
-      if(m_eUsage == GXResUsage::GXResUsage_Read || m_eUsage == GXResUsage::GXResUsage_ReadWrite || m_eUsage == GXResUsage::GXResUsage_SystemMem)
+      if(m_eUsage == GXResUsage::Read || m_eUsage == GXResUsage::ReadWrite || m_eUsage == GXResUsage::SystemMem)
       {
         m_pVertexBuffer = new GXBYTE[m_uVertexCount * m_uVertexStride];
         if(pVertInitData) {
@@ -189,40 +189,35 @@ namespace D3D11
       return NULL;
     }
 
-    if(m_eUsage == GXResUsage::GXResUsage_Default)
+    if(m_eUsage == GXResUsage::Default)
     {
     }
-    else if(m_eUsage == GXResUsage::GXResUsage_Write)
+    else if(m_eUsage == GXResUsage::Write)
     {
-      if(eMap == GXResMap::GXResMap_Write) {
+      if(eMap == GXResMap::Write) {
         if(SUCCEEDED(m_pGraphicsImpl->m_pImmediateContext->Map(pD3D11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &rMappedDesc))) {
           return rMappedDesc.pData;
         }
       }
     }
-    else if(m_eUsage == GXResUsage::GXResUsage_Read)
+    else if(m_eUsage == GXResUsage::Read)
     {
-      if(eMap == GXResMap::GXResMap_Read) {
+      if(eMap == GXResMap::Read) {
         return pMemBuffer;
       }
     }
-    else if(m_eUsage == GXResUsage::GXResUsage_ReadWrite)
+    else if(m_eUsage == GXResUsage::ReadWrite)
     {
-      if(eMap == GXResMap::GXResMap_Read) {
+      if(eMap == GXResMap::Read) {
         return pMemBuffer;
       }
-      else if(eMap == GXResMap::GXResMap_Write) {
-        if(SUCCEEDED(m_pGraphicsImpl->m_pImmediateContext->Map(pD3D11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &rMappedDesc))) {
-          return rMappedDesc.pData;
-        }
-      }
-      else if(eMap == GXResMap::GXResMap_ReadWrite) {
+      else if(eMap == GXResMap::Write || eMap == GXResMap::ReadWrite) {
         if(SUCCEEDED(m_pGraphicsImpl->m_pImmediateContext->Map(pD3D11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &rMappedDesc))) {
           return pMemBuffer;
         }
       }
     }
-    else if(m_eUsage == GXResUsage::GXResUsage_SystemMem)
+    else if(m_eUsage == GXResUsage::SystemMem)
     {
       return pMemBuffer;
     }
@@ -375,14 +370,14 @@ namespace D3D11
       return result;
     }
 
-    if(m_eUsage != GXResUsage::GXResUsage_SystemMem)
+    if(m_eUsage != GXResUsage::SystemMem)
     {
       result = IntCreateBuffer(&m_pD3D11IndexBuffer, m_uIndexCount * m_uIndexStride, D3D11_BIND_INDEX_BUFFER, pIndexInitData);
     }
 
     if(result)
     {
-      if(m_eUsage == GXResUsage::GXResUsage_Read || m_eUsage == GXResUsage::GXResUsage_ReadWrite || m_eUsage == GXResUsage::GXResUsage_SystemMem)
+      if(m_eUsage == GXResUsage::Read || m_eUsage == GXResUsage::ReadWrite || m_eUsage == GXResUsage::SystemMem)
       {
         m_pIndexBuffer = new GXBYTE[m_uIndexCount * m_uIndexStride];
         if(pIndexInitData)

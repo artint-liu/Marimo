@@ -162,7 +162,7 @@ GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GX
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
   if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL,
-    lpVertDecl, GXResUsage::GXResUsage_Default, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, 2, pIndices)))
+    lpVertDecl, GXResUsage::Default, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, 2, pIndices)))
   {
     GXVERTEXELEMENT Desc;
     int nOffset = MOGetDeclOffset(lpVertDecl, GXDECLUSAGE_POSITION, 0, &Desc);
@@ -199,8 +199,8 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimi
   if(Desc.Type == GXDECLTYPE_FLOAT3)
   {
     AABB aabbPrim;
-    PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::GXResMap_Read);
-    PrimitiveUtility::MapIndices  locker_i(pPrimitive, GXResMap::GXResMap_Read);
+    PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::Read);
+    PrimitiveUtility::MapIndices  locker_i(pPrimitive, GXResMap::Read);
     mesh::CalculateAABBFromIndices(aabbPrim, (GXLPCBYTE)locker_v.GetPtr() + nOffset, 
       (const VIndex*)locker_i.GetPtr() + nStartIndex, nPrimCount * 3, pPrimitive->GetVertexStride());
     m_aabbLocal.Merge(aabbPrim);
@@ -247,8 +247,8 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
     }
 
     // --- 模型相交检测
-    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Read);
-    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::GXResMap_Read);
+    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Read);
+    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::Read);
 
     GXBYTE* pVertBuf = static_cast<GXBYTE*>(locker_v.GetPtr());
     VIndex* pIndicesBuf = static_cast<VIndex*>(locker_i.GetPtr());
@@ -668,8 +668,8 @@ GXVOID GVMesh::CalculateAABB()
   if(m_pPrimitive) {
     int nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
     AABB aabb;
-    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Read);
-    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::GXResMap_Read);
+    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Read);
+    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::Read);
     mesh::CalculateAABB(aabb, reinterpret_cast<float3*>((GXLPBYTE)locker_v.GetPtr() + nOffset), 
       m_pPrimitive->GetVertexCount(), m_pPrimitive->GetVertexStride());
 
@@ -682,7 +682,7 @@ void GVMesh::ApplyTransform()
   const int nCount = m_pPrimitive->GetVertexCount();
   const int nStride = m_pPrimitive->GetVertexStride();
   const float4x4 mat = m_Transformation.ToRelativeMatrix();
-  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_ReadWrite);
+  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::ReadWrite);
   const GXLPBYTE lpBuffer = static_cast<GXLPBYTE>(locker_v.GetPtr());
 
   int nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);

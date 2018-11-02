@@ -52,16 +52,6 @@ GXBOOL GXGraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTar
 #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D11_
 inline GXBOOL GXGraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
 {
-  //SAFE_RELEASE(m_pCurDepthStencil);
-  //m_pCurDepthStencil = static_cast<GTextureImpl*>(pTexture);
-  //if(m_pCurDepthStencil != NULL)
-  //{
-  //  m_pCurDepthStencil->AddRef();
-  //  return GXSUCCEEDED(m_pd3dDevice->SetDepthStencilSurface(m_pCurDepthStencil->D3DSurface()));
-  //}
-  //else {
-  //  return GXSUCCEEDED(m_pd3dDevice->SetDepthStencilSurface(m_pD3DDepthStencilSur));
-  //}
   return TRUE;
 }
 #endif // #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D11_
@@ -86,7 +76,7 @@ GXHRESULT GXGraphicsImpl::InlSetCanvas(GXCanvasCore *pCanvasCore)
   {
     ASSERT(TEST_FLAG(m_dwFlags, F_ACTIVATE) != 0);
     hr = m_pCurCanvasCore->AddRef();
-    GTexture* pTarget = pCanvasCore->GetTargetUnsafe();
+    GXRenderTarget* pTarget = pCanvasCore->GetTargetUnsafe();
     if(m_pCurRenderTarget != pTarget) {
       InlSetRenderTarget(pTarget, 0);
     }

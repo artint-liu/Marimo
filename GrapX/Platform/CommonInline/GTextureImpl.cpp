@@ -19,7 +19,7 @@
 #include "GrapX/GTexture.h"
 //#include "GrapX/GXGraphics.h"
 //#include "GrapX/GXCanvas.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GXRenderTarget.h"
 //#include "GrapX/GXFont.h"
 //#include "GrapX/GXCanvas3D.h"
 //#include "GrapX/MOLogger.h"

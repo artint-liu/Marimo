@@ -46,19 +46,24 @@
   // CreateTexture 支持 TEXSIZE_* 族的参数作为纹理的宽或高.
 
   // 2D Texture
-  virtual GXHRESULT CreateTexture            (GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
-  virtual GXHRESULT CreateTextureFromFileW   (GTexture** ppTexture, GXLPCWSTR pSrcFile) override;
-  virtual GXHRESULT CreateTextureFromFileExW (GTexture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter = GXFILTER_NONE, GXDWORD MipFilter = GXFILTER_NONE, GXCOLORREF ColorKey = 0, GXOUT LPGXIMAGEINFOX pSrcInfo = NULL) override;
+  GXHRESULT CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch) override;
+  
+  GXHRESULT CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, GTexture* pSourceTexture) override;
+
+
+  GXHRESULT CreateTextureFromMemory  (GTexture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage) override;
+  GXHRESULT CreateTextureFromFile    (GTexture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage) override;
+  //virtual GXHRESULT CreateTextureFromFileEx  (GTexture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter = GXFILTER_NONE, GXDWORD MipFilter = GXFILTER_NONE, GXCOLORREF ColorKey = 0, GXOUT LPGXIMAGEINFOX pSrcInfo = NULL) override;
 
   // Volume Texture
   virtual GXHRESULT CreateTexture3D           (GTexture3D** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
-  virtual GXHRESULT CreateTexture3DFromFileW  (GTexture3D** ppTexture, GXLPCWSTR pSrcFile) override;
-  virtual GXHRESULT CreateTexture3DFromFileExW(GTexture3D** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
+  virtual GXHRESULT CreateTexture3DFromFile   (GTexture3D** ppTexture, GXLPCWSTR pSrcFile) override;
+  //virtual GXHRESULT CreateTexture3DFromFileEx (GTexture3D** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
 
   // Cube Texture
   virtual GXHRESULT CreateTextureCube           (GTextureCube** ppTexture, GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
-  virtual GXHRESULT CreateTextureCubeFromFileW  (GTextureCube** ppTexture, GXLPCWSTR pSrcFile) override;
-  virtual GXHRESULT CreateTextureCubeFromFileExW(GTextureCube** ppTexture, GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
+  virtual GXHRESULT CreateTextureCubeFromFile   (GTextureCube** ppTexture, GXLPCWSTR pSrcFile) override;
+  //virtual GXHRESULT CreateTextureCubeFromFileEx (GTextureCube** ppTexture, GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
 
 
   // GStateBlock_Old
@@ -77,8 +82,8 @@
 
   // GShader
   virtual GXHRESULT   CreateShaderFromSource  (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition) override;
-  virtual GXHRESULT   CreateShaderFromFileW   (GShader** ppShader, GXLPCWSTR szShaderDesc) override;
-  virtual GXHRESULT   CreateShaderFromFileA   (GShader** ppShader, GXLPCSTR szShaderDesc) override;
+  virtual GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCWSTR szShaderDesc) override;
+  virtual GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCSTR szShaderDesc) override;
   virtual GXHRESULT   CreateShaderStub        (GShaderStub** ppShaderStub) override;
 
   // GRegion
@@ -91,14 +96,14 @@
   // 高级函数
 
   // GXCanvas
-  virtual GXCanvas*   LockCanvas              (GXImage* pImage, const LPREGN lpRegn, GXDWORD dwFlags) override;
+  virtual GXCanvas*   LockCanvas              (GXRenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags) override;
 
-  virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn, float fNear, float fFar) override;
-  virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, GXImage* pImage, GTexture* pDepthStencil, LPCREGN lpRegn, float fNear, float fFar) override;
+  virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
+  //virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
   virtual GXHRESULT   CreateEffect            (GXEffect** ppEffect, GShader* pShader) override;
   virtual GXHRESULT   CreateMaterial          (GXMaterialInst** ppMtlInst, GShader* pShader) override;
-  virtual GXHRESULT   CreateMaterialFromFileW (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
-  virtual GXHRESULT   CreateMaterialFromFileA (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
+  virtual GXHRESULT   CreateMaterialFromFile  (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
+  //virtual GXHRESULT   CreateMaterialFromFile  (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
 
   virtual GXHRESULT   CreateRasterizerState   (GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc) override;
   virtual GXHRESULT   CreateBlendState        (GBlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum) override;
@@ -108,31 +113,55 @@
   // GXImage
   // TODO: 即使创建失败,也会返回一个默认图片
   // CreateImage 支持 TEXSIZE_* 族的参数指定Image的宽或者高
-  virtual GXImage*    CreateImage             (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits) override;
-  virtual GXImage*    CreateImageFromFile     (GXLPCWSTR lpwszFilename) override;
-  virtual GXImage*    CreateImageFromTexture  (GTexture* pTexture) override;
+  //virtual GXImage*    CreateImage             (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits) override;
+  //virtual GXImage*    CreateImageFromFile     (GXLPCWSTR lpwszFilename) override;
+  //virtual GXImage*    CreateImageFromTexture  (GTexture* pTexture) override;
+
+  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
+  {
+    GXRenderTargetImpl* pTarget = NULL;
+    CLBREAK;
+    return GX_OK;
+  }
+
+  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
+  {
+    return CreateRenderTarget(ppRenderTarget, szName, static_cast<GXINT>(nWidth), nHeight, eColorFormat, eDepthStencilFormat);
+  }
+
+  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
+  {
+    return CreateRenderTarget(ppRenderTarget, szName, nWidth, static_cast<GXINT>(nHeight), eColorFormat, eDepthStencilFormat);
+  }
+  
+  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
+  {
+    return CreateRenderTarget(ppRenderTarget, szName, static_cast<GXINT>(nWidth), static_cast<GXINT>(nHeight), eColorFormat, eDepthStencilFormat);
+  }
+
 
   // GXFTFont
-  virtual GXFont*     CreateFontIndirectW     (const GXLPLOGFONTW lpLogFont) override;
-  virtual GXFont*     CreateFontIndirectA     (const GXLPLOGFONTA lpLogFont) override;
-  virtual GXFont*     CreateFontW             (const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName) override;
-  virtual GXFont*     CreateFontA             (const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName) override;
+  virtual GXFont*     CreateFontIndirect      (const GXLPLOGFONTW lpLogFont) override;
+  virtual GXFont*     CreateFontIndirect      (const GXLPLOGFONTA lpLogFont) override;
+  virtual GXFont*     CreateFont              (const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName) override;
+  virtual GXFont*     CreateFont              (const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName) override;
 
-  virtual GXImage*    GetBackBufferImg        () override;
-  virtual GTexture*   GetBackBufferTex        () override;
-  virtual GTexture*   GetDeviceOriginTex      () override;
-  virtual GXBOOL      ScrollTexture           (const SCROLLTEXTUREDESC* lpScrollTexDesc) override;
+  //virtual GXImage*    GetBackBufferImg        () override;
+  //virtual GTexture*   GetBackBufferTex        () override;
+  GXHRESULT   GetBackBuffer           (GXRenderTarget** ppTarget) override;
+  GTexture*   GetDeviceOriginTex      () override;
+  GXBOOL      ScrollTexture           (const SCROLLTEXTUREDESC* lpScrollTexDesc) override;
 
-  virtual GXBOOL      GetDesc                 (GXGRAPHICSDEVICE_DESC* pDesc) override;
-  virtual GXBOOL      GetRenderStatistics     (RENDER_STATISTICS* pStat) override;
-  virtual GXBOOL      ConvertToAbsolutePathW  (clStringW& strFilename) override;
-  virtual GXBOOL      ConvertToAbsolutePathA  (clStringA& strFilename) override;
-  virtual GXBOOL      ConvertToRelativePathW  (clStringW& strFilename) override;
-  virtual GXBOOL      ConvertToRelativePathA  (clStringA& strFilename) override;
-  virtual GXDWORD     GetCaps                 (GXGrapCapsCategory eCate) override;
-  virtual void        Enter                   () override;
-  virtual void        Leave                   () override;
-  virtual GXBOOL      SwitchConsole           () override;
+  GXBOOL      GetDesc                 (GXGRAPHICSDEVICE_DESC* pDesc) override;
+  GXBOOL      GetRenderStatistics     (RENDER_STATISTICS* pStat) override;
+  GXBOOL      ConvertToAbsolutePathW  (clStringW& strFilename) override;
+  GXBOOL      ConvertToAbsolutePathA  (clStringA& strFilename) override;
+  GXBOOL      ConvertToRelativePathW  (clStringW& strFilename) override;
+  GXBOOL      ConvertToRelativePathA  (clStringA& strFilename) override;
+  GXDWORD     GetCaps                 (GXGrapCapsCategory eCate) override;
+  void        Enter                   () override;
+  void        Leave                   () override;
+  GXBOOL      SwitchConsole           () override;
 
 private:
   //typedef clvector<GResource*>          GResourceArray;
@@ -155,7 +184,7 @@ private:
 
   inline GXLPCSTR   InlGetPlatformStringA () const;
   inline GXBOOL     InlSetTexture         (GTexBaseImpl* pTexture, GXUINT uStage);
-  inline GXBOOL     InlSetRenderTarget    (GTexture* pTexture, GXDWORD uRenderTargetIndex);
+  inline GXBOOL     InlSetRenderTarget    (GXRenderTarget* pTarget, GXUINT uRenderTargetIndex);
   inline GXBOOL     InlSetDepthStencil    (GTexture* pTexture);
 
   inline GXHRESULT  InlSetCanvas            (GXCanvasCore* pCanvasCore);
@@ -194,8 +223,8 @@ private:  // 状态对象
 
   GPrimitive*             m_pCurPrimitive;
   GTexBaseImpl*           m_pCurTexture[MAX_TEXTURE_STAGE];
-  GTextureImpl*           m_pCurRenderTarget;
-  GTextureImpl*           m_pCurDepthStencil;
+  GXRenderTargetImpl*     m_pCurRenderTarget;
+  //GTextureImpl*           m_pCurDepthStencil;
   GShader*                m_pCurShader;
   GXCanvasCore*           m_pCurCanvasCore;
   //GRenderStateImpl*       m_pCurRenderState;

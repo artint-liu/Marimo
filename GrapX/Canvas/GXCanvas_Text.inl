@@ -609,7 +609,7 @@ RET_IMMT:
     return ptPos.y;
   }
   //////////////////////////////////////////////////////////////////////////
-  GXINT GXCanvasImpl::DrawTextA(GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
+  GXINT GXCanvasImpl::DrawText(GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
   {
     clStringW str;
     if(nCount == -1)
@@ -619,10 +619,10 @@ RET_IMMT:
     else
       return FALSE;
 
-    return DrawTextW(pFTFont, str, (int)str.GetLength(), lpRect, uFormat, crText);
+    return DrawText(pFTFont, str, (int)str.GetLength(), lpRect, uFormat, crText);
   }
 
-  GXINT GXCanvasImpl::DrawTextW(GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
+  GXINT GXCanvasImpl::DrawText(GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
   {
     GXINT nRet;
     GXINT eLastMode = 0;
@@ -668,7 +668,7 @@ RET_IMMT:
 
 
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL GXCanvasImpl::TextOutA(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText)
+  GXBOOL GXCanvasImpl::TextOut(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText)
   {
     clStringW str;
     if(cbString == -1) {
@@ -681,10 +681,10 @@ RET_IMMT:
       return FALSE;
     }
 
-    return TextOutW(pFTFont, nXStart, nYStart, str, (int)str.GetLength(), crText);
+    return TextOut(pFTFont, nXStart, nYStart, str, (int)str.GetLength(), crText);
   }
 
-  GXBOOL GXCanvasImpl::TextOutW(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText)
+  GXBOOL GXCanvasImpl::TextOut(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText)
   {
     GXPOINT ptPos = {nXStart, nYStart};
     SetParametersInfo(CPI_SETTEXTURECOLOR, crText, NULL);
@@ -703,7 +703,7 @@ RET_IMMT:
     return (GXBOOL)pFTFont->GetMetricsHeight();
   }
 
-  GXLONG GXCanvasImpl::TabbedTextOutA(GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
+  GXLONG GXCanvasImpl::TabbedTextOut(GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
   {
     clStringW str;
     if(nCount == -1) {
@@ -716,10 +716,10 @@ RET_IMMT:
       return FALSE;
     }
 
-    return TabbedTextOutW(pFTFont, x, y, str, (int)str.GetLength(), nTabPositions, lpTabStopPositions, crText);
+    return TabbedTextOut(pFTFont, x, y, str, (int)str.GetLength(), nTabPositions, lpTabStopPositions, crText);
   }
 
-  GXLONG GXCanvasImpl::TabbedTextOutW(GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
+  GXLONG GXCanvasImpl::TabbedTextOut(GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
   {
     GXRECT rect(x, y, 0, 0);
     //GXPOINT ptPos = {x, y};

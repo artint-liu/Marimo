@@ -2,7 +2,7 @@
 #define _UXEXT_PropSheet_H_
 
 #define GXWM_DESTROYEDITCTL  GXWM_USER + 100
-class GXImage;
+//class GXImage;
 
 namespace GXUIEXT
 {
@@ -62,7 +62,7 @@ namespace GXUIEXT
       {
         Page*         pChildPage;
         LBItemList*   pListBoxItem;
-        GXImage*      pImage;
+        GTexture*     pTexture;
         GXLPVOID      pGeneral;    // 通用的,只用于指针判断
         float         fIncrease;
       };

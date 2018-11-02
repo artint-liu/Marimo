@@ -10,7 +10,7 @@
 #include <GrapX/GTexture.h>
 #include <GrapX/GXGraphics.h>
 #include <GrapX/GXCanvas.h>
-#include <GrapX/GXImage.h>
+#include <GrapX/GXRenderTarget.h>
 
 // 私有头文件
 #include "GXStation.h"
@@ -344,7 +344,10 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
   }
   // TODO: 根据窗口区域绘制纹理
   GXREGN regn(0);
-  m_pDesktopWindows->m_pRenderTar->GetTextureUnsafe()->GetDimension((GXUINT*)&regn.width, (GXUINT*)&regn.height);
+  GXSIZE sDimension;
+  m_pDesktopWindows->m_pRenderTar->GetDimension(&sDimension);
+  regn.width  = sDimension.cx;
+  regn.height = sDimension.cy;
 
   if(TEST_FLAG(m_dwFlags, GXDWM_AERO) && m_lpStation->m_pStockObject->pAeroEffect)
   {
@@ -368,7 +371,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
     if(m_pDesktopWindows->m_prgnWindows->IsEmpty() == FALSE)
     {
       pCanvas->SetRegion(m_pDesktopWindows->m_prgnWindows, TRUE);
-      pCanvas->DrawTexture(m_pDesktopWindows->m_pRenderTar->GetTextureUnsafe(), 0, 0, &regn);
+      pCanvas->DrawTexture(m_pDesktopWindows->m_pRenderTar->GetColorTextureUnsafe(GXResUsage::Default), 0, 0, &regn);
 
       if(m_pDesktopWindows == pCaretSurface)
       {
@@ -385,7 +388,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
   else if(m_pDesktopWindows->m_prgnWindows->IsEmpty() == FALSE)
   {
     pCanvas->SetRegion(m_pDesktopWindows->m_prgnWindows, TRUE);
-    pCanvas->DrawTexture(m_pDesktopWindows->m_pRenderTar->GetTextureUnsafe(), 0, 0, &regn);
+    pCanvas->DrawTexture(m_pDesktopWindows->m_pRenderTar->GetColorTextureUnsafe(GXResUsage::Default), 0, 0, &regn);
     //pCanvas->SetCompositingMode(TEST_FLAG(m_dwFlags, GXDWM_ALPHA) ? CM_SourceOver : CM_SourceCopy);
 
     if(m_pDesktopWindows == pCaretSurface)
@@ -421,7 +424,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
       }
 
       pCanvas->SetRegion(pSurface->m_prgnWindows, TRUE);
-      pCanvas->DrawTexture(pSurface->m_pRenderTar->GetTextureUnsafe(), 0, 0, &regn);
+      pCanvas->DrawTexture(pSurface->m_pRenderTar->GetColorTextureUnsafe(GXResUsage::Default), 0, 0, &regn);
       if(pSurface == pCaretSurface)
       {
         pCanvas->SetRegion(pSurface->m_prgnWindows, TRUE);

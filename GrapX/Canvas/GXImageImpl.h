@@ -1,6 +1,8 @@
 #ifndef _IMPLEMENT_GRAPH_X_IMAGE_H_
 #define _IMPLEMENT_GRAPH_X_IMAGE_H_
 
+#if 0
+
 #define GXIMAGEFLAG_NOTSAMEWITHTEXTURE  0x00000001  // 与纹理不同尺寸, 纹理不支持NonPow2的情况下存在
 
 class GXGraphics;
@@ -32,10 +34,10 @@ public:
   virtual GXHRESULT Invoke            (GRESCRIPTDESC* pDesc) override;
   virtual GXImage*  Clone             () const override;
   virtual GXBOOL    GetDesc           (GXBITMAP*lpBitmap) const override;
-  virtual GXINT     GetWidth          () const override;
-  virtual GXINT     GetHeight         () const override;
-  virtual void      GetDimension      (GXINT* pWidth, GXINT* pHeight) const override;
-  virtual GXHRESULT SetHelperState    (HelperState eState, GXLPARAM lParam);
+  //virtual GXINT     GetWidth          () const override;
+  //virtual GXINT     GetHeight         () const override;
+  virtual GXSIZE    GetDimension      (GXSIZE* pDimension) const override;
+  //virtual GXHRESULT SetHelperState    (HelperState eState, GXLPARAM lParam);
   virtual GXBOOL    BitBltRegion      (GXImage* pSource, int xDest, int yDest, GRegion* lprgnSource) override;
   virtual GXBOOL    Scroll            (int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate) override;
   virtual GXHRESULT GetTexture        (GTexture** ppTexture) const override;
@@ -49,4 +51,5 @@ public:
 
 };
 
+#endif // 0
 #endif // _IMPLEMENT_GRAPH_X_IMAGE_H_

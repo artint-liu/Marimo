@@ -9,7 +9,7 @@
 #include "GrapX/GRegion.h"
 #include "GrapX/GTexture.h"
 #include "GrapX/GXGraphics.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GXRenderTarget.h"
 #include "GrapX/GXKernel.h"
 
 // 私有头文件
@@ -41,23 +41,25 @@ GXHRESULT GXWindowsSurface::Release()
 
 GXWindowsSurface::GXWindowsSurface(GXLPSTATION lpStation, GXHWND hWnd)
   : m_pRenderTar      (NULL)
-  , m_pDepthStencil    (NULL)
+  //, m_pDepthStencil    (NULL)
   , m_prgnUpdate      (NULL)
   , m_lpStation      (lpStation)
   , m_prgnWindows      (NULL)
   , m_bGenerateWindowsRgn  (FALSE)
   , m_hExclusiveWnd    (hWnd)
 {
-  GXUINT nWidth, nHeight;
+  //GXUINT nWidth, nHeight;
   GXGraphics* pGraphics = m_lpStation->pGraphics;
   pGraphics->CreateRectRgn(&m_prgnUpdate, 0, 0, 0, 0);
   pGraphics->CreateRectRgn(&m_prgnWindows, 0, 0, 0, 0);
   //pGraphics->CreateTexture(&m_pDepthStencil, TEXSIZE_SAME, TEXSIZE_SAME, 1, NULL, GXFMT_D24S8, GXPOOL_DEFAULT);
-  m_pRenderTar = pGraphics->CreateImage(TEXSIZE_SAME, TEXSIZE_SAME, GXFMT_A8R8G8B8, TRUE, NULL);
+  pGraphics->CreateRenderTarget(&m_pRenderTar, NULL, GXSizeRatio::Same, GXSizeRatio::Same,
+    GXGraphicsFormat::Format_B8G8R8A8, GXGraphicsFormat::Format_D24S8);
 
   // 复位设备后整个页面要重绘，这里要设置范围
-  m_pRenderTar->GetTextureUnsafe()->GetDimension(&nWidth, &nHeight);
-  gxSetRect(&rcScrUpdate, 0, 0, nWidth, nHeight);
+  GXSIZE sDimension;
+  m_pRenderTar->GetDimension(&sDimension);
+  gxSetRect(&rcScrUpdate, 0, 0, sDimension.cx, sDimension.cy);
 
   m_bLayered = gxGetWindowLong(hWnd, GXGWL_EXSTYLE) & GXWS_EX_LAYERED;
 #ifdef ENABLE_DYNMAIC_EFFECT
@@ -70,7 +72,7 @@ GXWindowsSurface::~GXWindowsSurface()
   m_hExclusiveWnd = NULL;
   m_lpStation = NULL;
   SAFE_RELEASE(m_prgnUpdate);
-  SAFE_RELEASE(m_pDepthStencil);
+  //SAFE_RELEASE(m_pDepthStencil);
   SAFE_RELEASE(m_pRenderTar);
   SAFE_RELEASE(m_prgnWindows);
 #ifdef ENABLE_DYNMAIC_EFFECT
@@ -93,7 +95,12 @@ RGNCOMPLEX GXWindowsSurface::InvalidateRect(GXRECT* lpRect)
   GXRECT rcUpdate(0);
 
   if(lpRect == NULL)
-    m_pRenderTar->GetTextureUnsafe()->GetDimension((GXUINT*)&rcUpdate.right, (GXUINT*)&rcUpdate.bottom);
+  {
+    GXSIZE sDimension;
+    m_pRenderTar->GetDimension(&sDimension);
+    rcUpdate.right = sDimension.cx;
+    rcUpdate.bottom = sDimension.cy;
+  }
   else
     rcUpdate = *lpRect;
 
@@ -106,13 +113,14 @@ RGNCOMPLEX GXWindowsSurface::InvalidateRect(GXRECT* lpRect)
 
 GXBOOL GXWindowsSurface::SaveToFileW(GXLPCWSTR lpFilename, GXLPCSTR lpFormat)
 {
-  return m_pRenderTar->SaveToFileW(lpFilename, lpFormat);
+  return m_pRenderTar->SaveToFile(lpFilename, lpFormat);
 }
 
 GXBOOL GXWindowsSurface::Scroll(int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate)
 {
   GRegion* prgnUpdate = NULL;
-  m_pRenderTar->Scroll(dx, dy, lprcScroll, lprgnClip, &prgnUpdate);
+  //m_pRenderTar->Scroll(dx, dy, lprcScroll, lprgnClip, &prgnUpdate);
+  CLBREAK; // 上面这条没改
 
   // 将更新区添加到Surface中
   if(prgnUpdate != NULL)
@@ -135,13 +143,15 @@ GXBOOL GXWindowsSurface::BitBltRect(GXWindowsSurface* pSrcSurface, int xDest, in
   rcDest.right  = lprcSource->right + xDest;
   rcDest.bottom = lprcSource->bottom + yDest;
 
-  m_pRenderTar->GetTextureUnsafe()->StretchRect(pSrcSurface->m_pRenderTar->GetTextureUnsafe(), &rcDest, lprcSource, GXTEXFILTER_POINT);
+  m_pRenderTar->StretchRect(pSrcSurface->m_pRenderTar->GetColorTextureUnsafe(GXResUsage::Default), &rcDest, lprcSource, GXTEXFILTER_POINT);
   return TRUE;
 }
 
 GXBOOL GXWindowsSurface::BitBltRegion(GXWindowsSurface* pSrcSurface, int xDest, int yDest, GRegion* lprgnSource)
 {
-  return m_pRenderTar->BitBltRegion(pSrcSurface->m_pRenderTar, xDest, yDest, lprgnSource);
+  //return m_pRenderTar->BitBltRegion(pSrcSurface->m_pRenderTar, xDest, yDest, lprgnSource);
+  CLBREAK; // 上面这条没改
+  return FALSE;
 }
 
 int GXWindowsSurface::GenerateWindowsRgn(GXBOOL bDelay)
@@ -289,10 +299,11 @@ GXHWND GXWindowsSurface::SetExclusiveWnd(GXHWND hWnd, GXDWORD dwFlags)
       }
       else
       {
-        GXImage* pBackBufferImage = m_lpStation->pGraphics->GetBackBufferImg();
-        pBackBufferImage->BitBltRegion(pNewWndOldSur->m_pRenderTar, 0, 0, prgnNewWnd);
-        pDesktopSurface->BitBltRegion(pOldWndOldSur, 0, 0, prgnOldWnd);
-        m_pRenderTar->BitBltRegion(pBackBufferImage, 0, 0, prgnNewWnd);
+        //GXImage* pBackBufferImage = m_lpStation->pGraphics->GetBackBufferImg();
+        //pBackBufferImage->BitBltRegion(pNewWndOldSur->m_pRenderTar, 0, 0, prgnNewWnd);
+        //pDesktopSurface->BitBltRegion(pOldWndOldSur, 0, 0, prgnOldWnd);
+        //m_pRenderTar->BitBltRegion(pBackBufferImage, 0, 0, prgnNewWnd);
+        CLBREAK; // 上面这条没改
       }
 
       // 移动

@@ -135,7 +135,7 @@ GXBOOL GVGeometry::InitializeAsAABB(GXGraphics* pGraphics, GXCOLOR clr)
   //m_pPrimitive->Unlock();
 
   pGraphics->CreatePrimitive(
-    &m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P3F_C1D), GXResUsage::GXResUsage_Default,
+    &m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P3F_C1D), GXResUsage::Default,
     8, sizeof(GXVERTEX_P3F_C1D), pVertices, 24, 2, pIndices);
 
   return TRUE;
@@ -304,7 +304,7 @@ GXBOOL GVGeometry::CreatePrimitive(GXGraphics* pGraphics, GXPrimitiveType eType,
   m_nVertCount  = nVertCount;
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
-  if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL, lpVertDecl, GXResUsage::GXResUsage_Default,
+  if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL, lpVertDecl, GXResUsage::Default,
     nVertCount, nStride, lpVertics, nIdxCount, 2, pIndices)))
   {
     GXVERTEXELEMENT Desc;

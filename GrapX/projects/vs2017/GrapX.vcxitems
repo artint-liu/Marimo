@@ -25,6 +25,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GrapVR.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GRect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GRegion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXRenderTarget.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GResource.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GShader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GStateBlock.h" />
@@ -104,6 +105,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GShaderImpl_d3d9.h" />
@@ -203,6 +205,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\BasicShader_d3d9.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GPrimitiveImpl_d3d9.cpp" />

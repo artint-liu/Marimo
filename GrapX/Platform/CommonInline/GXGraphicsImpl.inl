@@ -51,10 +51,10 @@
   IntCreateSamplerState(&m_pCurSamplerState, m_pDefaultSamplerState);
 
 
-  CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME,
-    1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
+  //CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME, 1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
+  CreateRenderTarget(&m_pDefaultBackBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, GXFMT_D24S8);
 
-  m_pBackBufferImg = CreateImageFromTexture(m_pBackBufferTex);
+  //m_pBackBufferImg = CreateImageFromTexture(m_pBackBufferTex);
 
   //m_pShaderMgr = new GXShaderMgr(this);
   //m_pShaderMgr->Initialize();
@@ -264,22 +264,20 @@ GXHRESULT GXGraphicsImpl::CreatePrimitive(
   // uIndexCount = 0 时，没有设置索引数量，与索引有关的参数将被忽略
   // uVertexStride = 0, 按照pVertexDecl设置顶点结构的大小
 
-  GRESKETCH rs = {0};
+  GRESKETCH rs = { RCC_NamedPrimitive };
 
   // 按命名查找资源
   if(szName != NULL && szName[0] != '\0')
   {
-    rs.dwCategoryId = RCC_NamedPrimitive;
     rs.strResourceName.Append(_CLTEXT("<Primitive>")).Append(szName);
-    GPrimitive* pPrimitive = static_cast<GPrimitive*>(m_ResMgr.Find(&rs));
-    if(pPrimitive) {
-      *ppPrimitive = pPrimitive;
-      return pPrimitive->AddRef();
+    GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppPrimitive), &rs);
+    if(GXSUCCEEDED(hr)) {
+      return hr;
     }
   }
 
   // 参数检查
-  if(eResUsage == GXResUsage::GXResUsage_Default &&
+  if(eResUsage == GXResUsage::Default &&
     (pVertInitData == NULL || (uIndexCount > 0 && pIndexInitData == NULL))) {
     CLOG_ERROR("CreatePrimitive: GXResUsage_Default创建的Primitive必须指定初始化数据，因为在之后不能再改变");
     return GX_FAIL;
@@ -404,21 +402,21 @@ GXHRESULT GXGraphicsImpl::CreatePrimitive(
 //  return GX_FAIL;
 //}
 //////////////////////////////////////////////////////////////////////////
-GXImage* GXGraphicsImpl::CreateImage(
-  GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, 
-  GXBOOL bRenderable, const GXLPVOID lpBits)
-{
-  GXImageImpl* pImage = NULL;
-  pImage = new GXImageImpl(this, nWidth, nHeight, eFormat);
-  pImage->AddRef();
-  RegisterResource(pImage, NULL);
-  if(pImage->Initialize(bRenderable, NULL, lpBits) == FALSE)
-  {
-    SAFE_RELEASE(pImage);
-    return NULL;
-  }
-  return pImage;
-}
+//GXImage* GXGraphicsImpl::CreateImage(
+//  GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, 
+//  GXBOOL bRenderable, const GXLPVOID lpBits)
+//{
+//  GXImageImpl* pImage = NULL;
+//  pImage = new GXImageImpl(this, nWidth, nHeight, eFormat);
+//  pImage->AddRef();
+//  RegisterResource(pImage, NULL);
+//  if(pImage->Initialize(bRenderable, NULL, lpBits) == FALSE)
+//  {
+//    SAFE_RELEASE(pImage);
+//    return NULL;
+//  }
+//  return pImage;
+//}
 
 //////////////////////////////////////////////////////////////////////////
 GXHRESULT GXGraphicsImpl::CreateEffect(GXEffect** ppEffect, GShader* pShader)
@@ -450,7 +448,7 @@ GXHRESULT GXGraphicsImpl::CreateMaterial(GXMaterialInst** ppMtlInst, GShader* pS
   return hval;
 }
 
-GXHRESULT GXGraphicsImpl::CreateMaterialFromFileW(GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType)
+GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType)
 {
   GShader* pShader = NULL;
   GRESKETCH ResFeatDesc;
@@ -526,15 +524,15 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFileW(GXMaterialInst** ppMtlInst, GX
   return hval;
 }
 
-GXHRESULT GXGraphicsImpl::CreateMaterialFromFileA(GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType)
-{
-  clStringW str = szShaderDesc;
-  return CreateMaterialFromFileW(ppMtlInst, str, eLoadType);
-}
+//GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType)
+//{
+//  clStringW str = szShaderDesc;
+//  return CreateMaterialFromFile(ppMtlInst, str, eLoadType);
+//}
 
 
 //////////////////////////////////////////////////////////////////////////
-GXFont* GXGraphicsImpl::CreateFontIndirectW(const GXLPLOGFONTW lpLogFont)
+GXFont* GXGraphicsImpl::CreateFontIndirect(const GXLPLOGFONTW lpLogFont)
 {
   GXLOGFONTA LogFontA;
   LogFontA.lfHeight         = lpLogFont->lfHeight;
@@ -551,10 +549,10 @@ GXFont* GXGraphicsImpl::CreateFontIndirectW(const GXLPLOGFONTW lpLogFont)
   LogFontA.lfQuality        = lpLogFont->lfQuality;
   LogFontA.lfPitchAndFamily = lpLogFont->lfPitchAndFamily;
   gxWideCharToMultiByte(GXCP_ACP, 0, lpLogFont->lfFaceName, -1, LogFontA.lfFaceName, GXLF_FACESIZE, 0, 0);
-  return CreateFontIndirectA(&LogFontA);
+  return CreateFontIndirect(&LogFontA);
 }
 
-GXFont* GXGraphicsImpl::CreateFontIndirectA(const GXLPLOGFONTA lpLogFont)
+GXFont* GXGraphicsImpl::CreateFontIndirect(const GXLPLOGFONTA lpLogFont)
 {
   GRESKETCH ResFeatDesc;
   GrapXInternal::ResourceSketch::GenerateFontA(&ResFeatDesc, lpLogFont);
@@ -583,67 +581,67 @@ GXFont* GXGraphicsImpl::CreateFontIndirectA(const GXLPLOGFONTA lpLogFont)
   return pFont;
 }
 
-GXFont* GXGraphicsImpl::CreateFontW(const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName)
+GXFont* GXGraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName)
 {
   GXLOGFONTW LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTW));
   LogFont.lfWidth = nWidth;
   LogFont.lfHeight = nHeight;
   GXSTRCPYN(LogFont.lfFaceName, pFileName, GXLF_FACESIZE);
-  return CreateFontIndirectW(&LogFont);
+  return CreateFontIndirect(&LogFont);
 }
 
-GXFont* GXGraphicsImpl::CreateFontA(const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName)
+GXFont* GXGraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName)
 {
   GXLOGFONTA LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTA));
   LogFont.lfWidth = nWidth;
   LogFont.lfHeight = nHeight;
   GXSTRCPYN(LogFont.lfFaceName, pFileName, GXLF_FACESIZE);
-  return CreateFontIndirectA(&LogFont);
+  return CreateFontIndirect(&LogFont);
 }
 //////////////////////////////////////////////////////////////////////////
 
 #include "Canvas/GXCanvas3DImpl.h"
 #include "Canvas/GXCanvas3DImpl.inl"
-GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXImage* pImage, GTexture* pDepthStencil, LPCREGN lpRegn, float fNear, float fFar)
+GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
 {
-  GXREGN    regn;
+  GXREGN    regn = 0;
   GXHRESULT hval = GX_OK;
   GXLPCSTR  c_szError_NoSameSize = __FUNCTION__": Image and DepthStencil-texture must be in same size.\n";
 
   // 获得 Image 的尺寸, 如果是 NULL 则取后台缓冲的尺寸
-  if(pImage != NULL && pDepthStencil != NULL) {
-    regn.width = pImage->GetWidth();
-    regn.height = pImage->GetHeight();
+  if(pTarget) {
+    GXSIZE sDimension;
+    pTarget->GetDimension(&sDimension);
+    regn.width  = sDimension.cx;
+    regn.height = sDimension.cy;
 
-    GXUINT nDepthWidth, nDepthHeight;
-    pDepthStencil->GetDimension(&nDepthWidth, &nDepthHeight);
+    //GXUINT nDepthWidth, nDepthHeight;
+    //pDepthStencil->GetDimension(&nDepthWidth, &nDepthHeight);
 
-    if(regn.width != nDepthWidth || regn.height != nDepthHeight) {
-      CLOG_ERROR(c_szError_NoSameSize);
-      return GX_FAIL;
-    }
+    //if(regn.width != nDepthWidth || regn.height != nDepthHeight) {
+    //  CLOG_ERROR(c_szError_NoSameSize);
+    //  return GX_FAIL;
+    //}
   }
-  else if(pImage == NULL && pDepthStencil == NULL) {
+  else// if(pImage == NULL && pDepthStencil == NULL) 
+  {
     GXGRAPHICSDEVICE_DESC Desc;
     GetDesc(&Desc);
     regn.width  = Desc.BackBufferWidth;
     regn.height = Desc.BackBufferHeight;
+    pTarget = m_pDefaultBackBuffer;
   }
-  else
-  {
-    //(pImage == NULL && pDepthStencil != NULL) ||
-    //(pImage != NULL && pDepthStencil == NULL)
-    CLOG_ERROR(MOERROR_FMT_INVALIDPARAM, __FUNCTION__);
-    return GX_FAIL;
-  }
+  //else
+  //{
+  //  //(pImage == NULL && pDepthStencil != NULL) ||
+  //  //(pImage != NULL && pDepthStencil == NULL)
+  //  CLOG_ERROR(MOERROR_FMT_INVALIDPARAM, __FUNCTION__);
+  //  return GX_FAIL;
+  //}
 
-  if(lpRegn == NULL) {
-    regn.left = 0;
-    regn.top = 0;
-  }
-  else {
+  if(lpRegn != NULL) {
     regn = *lpRegn;
   }
 
@@ -653,7 +651,7 @@ GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXImage* pImag
   }
 
   GXVIEWPORT Viewport(&regn, fNear, fFar);
-  if( ! pCanvas3D->Initialize(pImage, pDepthStencil, &Viewport))
+  if( ! pCanvas3D->Initialize(pTarget, &Viewport))
   {
     pCanvas3D->Release();
     pCanvas3D = NULL;
@@ -797,12 +795,12 @@ GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GShader** ppShader, GXLPCSTR sz
   return hr;
 }
 
-GXHRESULT GXGraphicsImpl::CreateShaderFromFileW(GShader** ppShader, GXLPCWSTR szShaderDesc)
+GXHRESULT GXGraphicsImpl::CreateShaderFromFile(GShader** ppShader, GXLPCWSTR szShaderDesc)
 {
   return IntCreateSdrPltDescW(ppShader, szShaderDesc, InlGetPlatformStringA(), NULL);
 }
 
-GXHRESULT GXGraphicsImpl::CreateShaderFromFileA(GShader** ppShader, GXLPCSTR szShaderDesc)
+GXHRESULT GXGraphicsImpl::CreateShaderFromFile(GShader** ppShader, GXLPCSTR szShaderDesc)
 {
   clStringW strDesc = szShaderDesc;
   return IntCreateSdrPltDescW(ppShader, strDesc, InlGetPlatformStringA(), NULL);
@@ -852,29 +850,29 @@ GXHRESULT GXGraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexD
   return hval;
 }
 
-GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn, float fNear, float fFar)
-{
-  // 如果 pImage 为 NULL, 则忽略 eDepthStencil 参数
-  GXINT nWidth = 0, nHeight = 0;
-  if(pImage != NULL) {
-    pImage->GetDimension(&nWidth, &nHeight);
-  }
-  else {
-    //GXGRAPHICSDEVICE_DESC Desc;
-    //GetDesc(&Desc);
-    //nWidth = Desc.BackBufferWidth;
-    //nHeight = Desc.BackBufferHeight;
-  }
-
-  GTexture* pDepthStencil = NULL;
-  if(pImage == NULL || GXSUCCEEDED(CreateTexture(&pDepthStencil, NULL, nWidth, nHeight, 1, eDepthStencil, GXRU_DEFAULT)))
-  {
-    GXHRESULT hval = CreateCanvas3D(ppCanvas3D, pImage, pDepthStencil, lpRegn, fNear, fFar);
-    SAFE_RELEASE(pDepthStencil);
-    return hval;
-  }
-  return GX_FAIL;
-}
+//GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXImage* pImage, GXFormat eDepthStencil, LPCREGN lpRegn, float fNear, float fFar)
+//{
+//  // 如果 pImage 为 NULL, 则忽略 eDepthStencil 参数
+//  GXINT nWidth = 0, nHeight = 0;
+//  if(pImage != NULL) {
+//    pImage->GetDimension(&nWidth, &nHeight);
+//  }
+//  else {
+//    //GXGRAPHICSDEVICE_DESC Desc;
+//    //GetDesc(&Desc);
+//    //nWidth = Desc.BackBufferWidth;
+//    //nHeight = Desc.BackBufferHeight;
+//  }
+//
+//  GTexture* pDepthStencil = NULL;
+//  if(pImage == NULL || GXSUCCEEDED(CreateTexture(&pDepthStencil, NULL, nWidth, nHeight, 1, eDepthStencil, GXRU_DEFAULT)))
+//  {
+//    GXHRESULT hval = CreateCanvas3D(ppCanvas3D, pImage, pDepthStencil, lpRegn, fNear, fFar);
+//    SAFE_RELEASE(pDepthStencil);
+//    return hval;
+//  }
+//  return GX_FAIL;
+//}
 //////////////////////////////////////////////////////////////////////////
 GXDWORD GXGraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
 {
@@ -898,7 +896,7 @@ GXDWORD GXGraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
   return NULL;
 }
 
-GXCanvas* GXGraphicsImpl::LockCanvas(GXImage* pImage, const LPREGN lpRegn, GXDWORD dwFlags)
+GXCanvas* GXGraphicsImpl::LockCanvas(GXRenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags)
 {
   // 允许 lpRegn 是空的, 比如Edit控件会因为调整大小而创建DC.此时需要设备的Font信息.
   if( ! TEST_FLAG(m_dwFlags, F_ACTIVATE))
@@ -912,7 +910,7 @@ GXCanvas* GXGraphicsImpl::LockCanvas(GXImage* pImage, const LPREGN lpRegn, GXDWO
 #endif // #ifdef D3D9_GRAPHICS_IMPL
 
   GXCanvasImpl* pCanvas = (GXCanvasImpl*)AllocCanvas();
-  if(pCanvas->Initialize(pImage, lpRegn) == FALSE)
+  if(pCanvas->Initialize(pTarget, lpRegn) == FALSE)
   {
     SAFE_RELEASE(pCanvas);
     return NULL;
@@ -1088,45 +1086,51 @@ void GXGraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
   *pdwStencil = ((*pdwStencil) & 0xff) + ((*pdwStencil) >> 8);
 }
 
-GXImage* GXGraphicsImpl::CreateImageFromFile(GXLPCWSTR lpwszFilename)
-{
-  GTexture* pTexture;
-  if(GXSUCCEEDED(CreateTextureFromFileExW(
-    &pTexture, lpwszFilename, GX_DEFAULT_NONPOW2, GX_DEFAULT_NONPOW2, 1, GXFMT_UNKNOWN, 
-    GXRU_DEFAULT, GXFILTER_POINT, GX_DEFAULT, 0, NULL)) )
-  {
-    GXImage* pImage = CreateImageFromTexture(pTexture);
-    SAFE_RELEASE(pTexture);
-    return pImage;
-  }
-  return NULL;
-}
-
-GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
-{
-  GXImageImpl* pImage = NULL;
-  pImage = new GXImageImpl(this);
-  pImage->AddRef();
-  // TODO: 这里是不是该加锁?
-  RegisterResource(pImage, NULL);
-  if(pImage->Initialize(pTexture) == FALSE)
-  {
-    SAFE_RELEASE(pImage);
-    return NULL;
-  }
-  return pImage;
-}
+//GXImage* GXGraphicsImpl::CreateImageFromFile(GXLPCWSTR lpwszFilename)
+//{
+//  GTexture* pTexture;
+//  if(GXSUCCEEDED(CreateTextureFromFileExW(
+//    &pTexture, lpwszFilename, GX_DEFAULT_NONPOW2, GX_DEFAULT_NONPOW2, 1, GXFMT_UNKNOWN, 
+//    GXRU_DEFAULT, GXFILTER_POINT, GX_DEFAULT, 0, NULL)) )
+//  {
+//    GXImage* pImage = CreateImageFromTexture(pTexture);
+//    SAFE_RELEASE(pTexture);
+//    return pImage;
+//  }
+//  return NULL;
+//}
+//
+//GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
+//{
+//  GXImageImpl* pImage = NULL;
+//  pImage = new GXImageImpl(this);
+//  pImage->AddRef();
+//  // TODO: 这里是不是该加锁?
+//  RegisterResource(pImage, NULL);
+//  if(pImage->Initialize(pTexture) == FALSE)
+//  {
+//    SAFE_RELEASE(pImage);
+//    return NULL;
+//  }
+//  return pImage;
+//}
 
 //////////////////////////////////////////////////////////////////////////
 
-  GXImage* GXGraphicsImpl::GetBackBufferImg()
-  {
-    return m_pBackBufferImg;
-  }
+  //GXImage* GXGraphicsImpl::GetBackBufferImg()
+  //{
+  //  return m_pBackBufferImg;
+  //}
 
-  GTexture* GXGraphicsImpl::GetBackBufferTex()
+  //GTexture* GXGraphicsImpl::GetBackBufferTex()
+  //{
+  //  return m_pBackBufferTex;
+  //}
+
+  GXHRESULT GXGraphicsImpl::GetBackBuffer(GXRenderTarget** ppTarget)
   {
-    return m_pBackBufferTex;
+    *ppTarget = m_pDefaultBackBuffer;
+    return m_pDefaultBackBuffer->AddRef();
   }
 
   GTexture* GXGraphicsImpl::GetDeviceOriginTex()
@@ -1148,23 +1152,28 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
       ? m_pDeviceOriginTex
       : lpstd->pOperationTex;
     GTexture* const pTempTex = lpstd->pTempTex == NULL 
-      ? m_pBackBufferTex 
+      ? m_pTempBuffer->GetColorTextureUnsafe(GXResUsage::Default)
       : lpstd->pTempTex;
 
     GXRECT rcTarget(0);
-    GXUINT nBackWidth, nBackHeight;
+    //GXUINT nBackWidth, nBackHeight;
+    GXSIZE sTargetDimension;
+    GXSIZE sTempDimension;
 
-    pTarget->GetDimension((GXUINT*)&rcTarget.right, (GXUINT*)&rcTarget.bottom);
-    pTempTex->GetDimension(&nBackWidth, &nBackHeight);
+
+    pTarget->GetDimension(&sTargetDimension);
+    rcTarget.right = sTargetDimension.cx;
+    rcTarget.bottom = sTargetDimension.cy;
+    pTempTex->GetDimension(&sTempDimension);
 
     GRegion* prgnSrc      = NULL;
     GRegion* prgnClip      = NULL;
     GRegion* prgnInvMoveClip  = NULL;
 
-#ifdef _DEBUG
-    // 检测后台临时缓冲要大于操作用的缓冲纹理
-    ASSERT((GXUINT)rcTarget.right <= nBackWidth && (GXUINT)rcTarget.bottom <= nBackHeight);  
-#endif
+//#ifdef _DEBUG
+//    // 检测后台临时缓冲要大于操作用的缓冲纹理
+//    ASSERT((GXUINT)rcTarget.right <= nBackWidth && (GXUINT)rcTarget.bottom <= nBackHeight);  
+//#endif
 
     // 裁剪区是一个Simple Rect
     if(lpstd->lprgnClip != NULL && lpstd->lprgnClip->GetRectCount() == 1)
@@ -1196,8 +1205,9 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
       rcDst = rcSrc;
       gxOffsetRect(&rcDst, lpstd->dx, lpstd->dy);
 
-      pTempTex->StretchRect(pTarget, &rcDst, &rcSrc, GXTEXFILTER_POINT);
-      pTarget->StretchRect(pTempTex, &rcDst, &rcDst, GXTEXFILTER_POINT);
+      //pTempTex->StretchRect(pTarget, &rcDst, &rcSrc, GXTEXFILTER_POINT);
+      //pTarget->StretchRect(pTempTex, &rcDst, &rcDst, GXTEXFILTER_POINT);
+      CLBREAK; // 上面两条没实现
       if(lpstd->lpprgnUpdate != NULL || lpstd->lprcUpdate != NULL)
       {
         CreateRectRgn(&prgnSrc, rcSrc.left, rcSrc.top, rcSrc.right, rcSrc.bottom);
@@ -1260,7 +1270,8 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
       for(GXUINT i = 0; i < nRectCount; i++)
       {
         GXRECT& rect = lpRects[i];
-        pTempTex->StretchRect(pTarget, &rect, &rect, GXTEXFILTER_POINT);
+        //pTempTex->StretchRect(pTarget, &rect, &rect, GXTEXFILTER_POINT);
+        CLBREAK; // 上面1条没实现
       }
       //for(vector<GXRECT>::iterator it = aRects.begin(); it != aRects.end(); ++it)
       for(GXUINT i = 0; i < nRectCount; i++)
@@ -1271,7 +1282,8 @@ GXImage* GXGraphicsImpl::CreateImageFromTexture(GTexture* pTexture)
         rcDest.top    = rect.top + lpstd->dy;
         rcDest.right  = rect.right + lpstd->dx;
         rcDest.bottom = rect.bottom + lpstd->dy;
-        pTarget->StretchRect(pTempTex, &rcDest, &rect, GXTEXFILTER_POINT);
+        //pTarget->StretchRect(pTempTex, &rcDest, &rect, GXTEXFILTER_POINT);
+        CLBREAK; // 上面1条没实现
       }
       //*/
       //_GlbUnlockStaticRects(lpRects);

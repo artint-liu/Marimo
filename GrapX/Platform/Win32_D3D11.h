@@ -48,9 +48,10 @@ namespace GrapXToDX11
   D3D_PRIMITIVE_TOPOLOGY      PrimitiveTopology  (GXPrimitiveType eType, GXUINT nPrimCount, GXUINT* pVertCount);
 
   DXGI_FORMAT   FormatFrom                  (GXFormat eFormat);
-  void          PrimitiveDescFromResUsage   (IN GXDWORD ResUsage, D3D11_BUFFER_DESC* pDesc);  // 只填充Usage和CPUAccessFlags
+  //void          PrimitiveDescFromResUsage   (IN GXDWORD ResUsage, D3D11_BUFFER_DESC* pDesc);  // 只填充Usage和CPUAccessFlags
   void          PrimitiveDescFromResUsage   (D3D11_BUFFER_DESC* pDesc, GXResUsage eResUsage);
-  void          TextureDescFromResUsage     (IN GXDWORD ResUsage, D3D11_TEXTURE2D_DESC* pDesc);  // 只填充BindFlags,Usage和CPUAccessFlags
+  //void          TextureDescFromResUsage     (IN GXDWORD ResUsage, D3D11_TEXTURE2D_DESC* pDesc);  // 只填充BindFlags,Usage和CPUAccessFlags
+  void          TextureDescFromResUsage     (D3D11_TEXTURE2D_DESC* pDesc, GXResUsage eResUsage);  // 只填充BindFlags,Usage和CPUAccessFlags
   D3D11_MAP     PrimitiveMapFromResUsage    (IN GXDWORD ResUsage);
   void          VertexLayoutFromVertexDecl  (LPCGXVERTEXELEMENT pVerticesDecl, GXD3D11InputElementDescArray* pArray);
   D3D11_FILTER  FilterFrom                  (GXTextureFilterType eMag, GXTextureFilterType eMin, GXTextureFilterType eMip);

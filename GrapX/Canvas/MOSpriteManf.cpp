@@ -7,7 +7,7 @@
 
 // 标准接口
 #include "GrapX/GResource.h"
-#include "GrapX/GXImage.h"
+#include "GrapX/GTexture.h"
 #include "GrapX/GXCanvas.h"
 #include "GrapX/MOSprite.h"
 #include "GrapX/GXGraphics.h"

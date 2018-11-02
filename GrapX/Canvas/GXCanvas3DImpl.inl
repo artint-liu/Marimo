@@ -3,16 +3,17 @@
 GXCanvas3DImpl::GXCanvas3DImpl(GXGraphicsImpl* pGraphics)
   : GXCanvas3D      (2, RESTYPE_CANVAS3D)
   , m_pGraphicsImpl (pGraphics)
-  , m_xExt          (0)
-  , m_yExt          (0)
-  , m_pTargetTex    (NULL)
-  , m_pImage        (NULL)
+  //, m_xExt          (0)
+  //, m_yExt          (0)
+  , m_pTarget       (NULL)
+  //, m_pImage        (NULL)
   , m_pCamera       (NULL)
   , m_pBlendState   (NULL)
-  , m_pDepthStencil (NULL)
+  //, m_pDepthStencil (NULL)
   , m_pSamplerState (NULL)
   , m_pCurDepthStencilState (NULL)
 {
+  InlSetZeroT(m_sExtent);
 #ifdef REFACTOR_SHADER
 #else
   memset(&m_StdUniforms, 0, sizeof(m_StdUniforms));
@@ -23,10 +24,10 @@ GXCanvas3DImpl::~GXCanvas3DImpl()
 {
   m_pGraphicsImpl->UnregisterResource(this);
   SAFE_RELEASE(m_pCurDepthStencilState);
-  SAFE_RELEASE(m_pImage);
-  SAFE_RELEASE(m_pTargetTex);
+  //SAFE_RELEASE(m_pImage);
+  SAFE_RELEASE(m_pTarget);
   SAFE_RELEASE(m_pBlendState);
-  SAFE_RELEASE(m_pDepthStencil);
+  //SAFE_RELEASE(m_pDepthStencil);
   SAFE_RELEASE(m_pSamplerState);
 }
 
@@ -49,50 +50,47 @@ GXHRESULT GXCanvas3DImpl::Release()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXVOID GXCanvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
+GXSIZE* GXCanvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
 {
-  pSize->cx = m_xExt;
-  pSize->cy = m_yExt;
+  *pSize = m_sExtent;
+  return pSize;
 }
 
-GTexture* GXCanvas3DImpl::GetTargetUnsafe() const
+GXRenderTarget* GXCanvas3DImpl::GetTargetUnsafe() const
 {
-  return m_pTargetTex;
+  return m_pTarget;
 }
 
-GXBOOL GXCanvas3DImpl::Initialize(GXImage* pImage, GTexture* pDepthStencil, GXLPCVIEWPORT pViewport)
+GXBOOL GXCanvas3DImpl::Initialize(GXRenderTarget* pTarget, GXLPCVIEWPORT pViewport)
 {
   GTexture* pTexture = NULL;
-  if(pImage != NULL)
+  if(pTarget == NULL)
   {
-    pImage->GetTexture(&pTexture);  // 引用+1
-    m_pImage = pImage;
-    InlSetNewObjectT(m_pDepthStencil, pDepthStencil); // 只有 pImage != NULL 时才会设置 DepthStencil 对象
+    m_pGraphicsImpl->GetBackBuffer(&pTarget);
   }
-  else
-  {
-    m_pImage = m_pGraphicsImpl->GetBackBufferImg();
-  }
-  m_pImage->AddRef();
 
-  if((pTexture != NULL && (pTexture->GetUsage() & GXRU_TEX_RENDERTARGET)) ||
-    pTexture == NULL)
-  {
-    ASSERT(m_pTargetTex == NULL);
+  
+  InlSetNewObjectT(m_pTarget, static_cast<GXRenderTargetImpl*>(pTarget));
 
-    m_pTargetTex = (GTextureImpl*)pTexture;
-    if(m_pTargetTex != NULL)
-    {
-      m_pTargetTex->AddRef();
-      m_pTargetTex->GetDimension((GXUINT*)&m_xExt, (GXUINT*)&m_yExt);
-    }
-    else
-    {
-      GXGRAPHICSDEVICE_DESC GraphDeviceDesc;
-      m_pGraphicsImpl->GetDesc(&GraphDeviceDesc);
-      m_xExt = GraphDeviceDesc.BackBufferWidth;
-      m_yExt = GraphDeviceDesc.BackBufferHeight;
-    }
+  //if((pTexture != NULL && (pTexture->GetUsage() & GXRU_TEX_RENDERTARGET)) ||
+  //  pTexture == NULL)
+  {
+    ASSERT(m_pTarget == NULL);
+
+    //m_pTargetTex = (GTextureImpl*)pTexture;
+    //if(m_pTargetTex != NULL)
+    //{
+    //  m_pTargetTex->AddRef();
+    //  m_pTargetTex->GetDimension((GXUINT*)&m_xExt, (GXUINT*)&m_yExt);
+    //}
+    //else
+    //{
+    //  GXGRAPHICSDEVICE_DESC GraphDeviceDesc;
+    //  m_pGraphicsImpl->GetDesc(&GraphDeviceDesc);
+    //  m_xExt = GraphDeviceDesc.BackBufferWidth;
+    //  m_yExt = GraphDeviceDesc.BackBufferHeight;
+    //}
+    m_pTarget->GetDimension(&m_sExtent);
 
     if(m_pCurDepthStencilState == NULL)
     {
@@ -347,7 +345,7 @@ GXHRESULT GXCanvas3DImpl::Activate()
   {
     m_pGraphicsImpl->SetViewport(&m_Viewport);
     m_pGraphicsImpl->SetSafeClip(NULL);
-    m_pGraphicsImpl->InlSetDepthStencil(m_pDepthStencil);
+    m_pGraphicsImpl->InlSetDepthStencil(m_pTarget->IntGetDepthStencilTextureUnsafe());
     m_pGraphicsImpl->InlSetDepthStencilState(m_pCurDepthStencilState);
   }
   return GX_OK;
@@ -433,17 +431,18 @@ GXHRESULT GXCanvas3DImpl::RayFromScreen(const GXPOINT* pScreen, GXOUT Ray* pRay)
 }
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil) const
+GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil)
 {
-  if(m_pDepthStencil == NULL) {
-    return GX_FAIL;
-  }
+  //if(m_pDepthStencil == NULL) {
+  //  return GX_FAIL;
+  //}
 
-  *ppDepthStencil = m_pDepthStencil;
-  return m_pDepthStencil->AddRef();
+  //*ppDepthStencil = m_pDepthStencil;
+  //return m_pDepthStencil->AddRef();
+  return m_pTarget->GetDepthStencilTexture(ppDepthStencil);
 }
 
-const GXCanvas3D::FrustumPlanes* GXCanvas3DImpl::GetViewFrustum() const
+const GXCanvas3D::FrustumPlanes* GXCanvas3DImpl::GetViewFrustum()
 {
   return &m_ViewFrustum;
 }

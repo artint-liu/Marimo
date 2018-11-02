@@ -1,7 +1,7 @@
 ﻿#ifndef _IMPLEMENT_MARIMO_SPRITE_HEADER_FILE_
 #define _IMPLEMENT_MARIMO_SPRITE_HEADER_FILE_
 
-class GXImage;
+class GTexture;
 class GXCanvas;
 class GXGraphics;
 
@@ -84,10 +84,10 @@ namespace Marimo
     typedef clvector<MOSprite::ANIMATION>    AnimationArray;
     typedef clvector<MOSprite::ANIM_UNIT>    AnimFrameArray;
     typedef clstd::StringSetA                clStringSetA;
-    typedef clvector<GXImage*>               ImageArray;
+    typedef clvector<GTexture*>              TextureArray;
   private:
     //clStringW           m_strImageFile;
-    ImageArray          m_ImageArray;
+    TextureArray        m_ImageArray;
     SPRITE_DESC_LOADER  m_loader;
     //GXImage*          m_pImage;
 
@@ -186,10 +186,10 @@ namespace Marimo
     GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
     GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
-    GXSIZE_T  GetImageCount() const override;  // 含有的图片数量
-    GXBOOL    GetImage(GXImage** pImage, GXUINT index) const override;
-    clStringW GetImageFileW(GXUINT index) const override;
-    clStringA GetImageFileA(GXUINT index) const override;
+    GXSIZE_T  GetTextureCount() const override;  // 含有的图片数量
+    GXBOOL    GetTexture(GTexture** pImage, GXUINT index) const override;
+    clStringW GetTextureFileW(GXUINT index) const override;
+    clStringA GetTextureFileA(GXUINT index) const override;
 
     protected:
       template <class _UnitT>

@@ -705,8 +705,9 @@ GXUINT TextureRatioToDimension(GXINT nTexRatio, GXUINT nModel, GXDWORD dwFlags)
 {
   if(((GXINT)nTexRatio) < 0) 
   {
-    nTexRatio = (GXUINT)((GXFLOAT)(-nTexRatio) / (GXFLOAT)TEXSIZE_FIXEDPOINT * nModel);
+    nTexRatio = (GXUINT)((GXFLOAT)(-nTexRatio) / (GXFLOAT)GXSizeRatio::FixedPoint * nModel);
   }
+
   if(TEST_FLAG(dwFlags, TEXTURERATIO_POW2))
   {
     nTexRatio = GetAdaptedSize(nTexRatio);

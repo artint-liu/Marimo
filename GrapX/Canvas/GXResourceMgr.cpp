@@ -166,6 +166,16 @@ namespace GrapXInternal
     return NULL;
   }
 
+  GXHRESULT GXResourceMgr::Find(GResource** ppResource, LPCRESKETCH pDesc) const
+  {
+    GResource* pResource = Find(pDesc);
+    if(pResource) {
+      *ppResource = pResource;
+      return pResource->AddRef();
+    }
+    return GX_FAIL;
+  }
+
   LPCRESKETCH GXResourceMgr::Find(GResource* pResource) const
   {
     ResDict::const_iterator it = m_ResourceDict.find(pResource);

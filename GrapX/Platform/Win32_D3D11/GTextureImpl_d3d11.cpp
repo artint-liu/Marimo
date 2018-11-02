@@ -36,9 +36,8 @@ namespace D3D11
     switch(pDesc->dwCmdCode)
     {
     case RC_LostDevice:
-      SAFE_RELEASE(m_pTexRV);
-      SAFE_RELEASE(m_pTexture);
-      SAFE_RELEASE(m_pHelpTexture);
+      SAFE_RELEASE(m_pD3D11ShaderView);
+      SAFE_RELEASE(m_pD3D11Texture);
       break;
     case RC_ResetDevice:
       break;
@@ -61,7 +60,7 @@ namespace D3D11
     {
       //OnDeviceEvent(DE_LostDevice);
       INVOKE_LOST_DEVICE;
-      if(m_emType != CreationFailed) {
+      if(m_pD3D11Texture && m_pD3D11ShaderView) {
         m_pGraphics->UnregisterResource(this);
       }
       delete this;
@@ -75,115 +74,108 @@ namespace D3D11
     return nRefCount;
   }
 
-  GXBOOL GTextureImpl::SaveToFileW(GXLPCWSTR szFileName, GXLPCSTR szDestFormat)
+  GTextureImpl::GTextureImpl(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage)
+    : GTexureBaseImplT<GTexture>(static_cast<GXGraphicsImpl*>(pGraphics))
+    , m_pTextureData    (NULL)
+    , m_nMipLevels      (nMipLevels)
+    , m_Format          (eFormat)
+    , m_eResUsage       (eResUsage)
+    , m_nWidth          (nWidth)
+    , m_nHeight         (nHeight)
   {
-    if(szFileName == NULL)
-      return FALSE;
-    return FALSE;
-    //D3DXIMAGE_FILEFORMAT d3diff = D3DXIFF_DDS;
-    //if(IS_PTR(pszDestFormat))
-    //{
-    //  if(GXSTRCMPI(pszDestFormat, L"BMP") == 0)
-    //    d3diff = D3DXIFF_BMP;
-    //  else if(GXSTRCMPI(pszDestFormat, L"JPG") == 0)
-    //    d3diff = D3DXIFF_JPG;
-    //  else if(GXSTRCMPI(pszDestFormat, L"TGA") == 0)
-    //    d3diff = D3DXIFF_TGA;
-    //  else if(GXSTRCMPI(pszDestFormat, L"PNG") == 0)
-    //    d3diff = D3DXIFF_PNG;
-    //  else if(GXSTRCMPI(pszDestFormat, L"DDS") == 0)
-    //    d3diff = D3DXIFF_DDS;
-    //  else if(GXSTRCMPI(pszDestFormat, L"PPM") == 0)
-    //    d3diff = D3DXIFF_PPM;
-    //  else if(GXSTRCMPI(pszDestFormat, L"DIB") == 0)
-    //    d3diff = D3DXIFF_DIB;
-    //  else if(GXSTRCMPI(pszDestFormat, L"HDR") == 0)
-    //    d3diff = D3DXIFF_HDR;
-    //  else if(GXSTRCMPI(pszDestFormat, L"PFM") == 0)
-    //    d3diff = D3DXIFF_PFM;
-
-    //}
-    //else if((GXUINT_PTR)pszDestFormat <= 8)
-    //  d3diff = (D3DXIMAGE_FILEFORMAT)(GXUINT_PTR)pszDestFormat;
-    //return GXSUCCEEDED(D3DXSaveTextureToFileW(pszFileName, d3diff, m_pTexture, NULL));
+    InlSetZeroT(m_sMappedResource);
   }
 
-  GTextureImpl::GTextureImpl(GXGraphics* pGraphics)
-    : GTexBaseImplT   ((GXGraphicsImpl*)pGraphics)
-    //, m_pGraphics     ((GXGraphicsImpl*)pGraphics)
-    //, m_pTexture      (NULL)
-    //, m_pTexRV        (NULL)
-    //, m_pSurface      (NULL)
-    , m_nWidthRatio   (0)
-    , m_nHeightRatio  (0)
-    , m_Format        (GXFMT_UNKNOWN)
-    , m_nMipLevels    (0)
-    , m_dwResUsage    (0)
-    , m_emType        (Invalid)
-    , m_pHelpTexture  (NULL)
+  GTextureImpl::~GTextureImpl()
   {
-
+    SAFE_RELEASE(m_pD3D11Texture);
+    SAFE_RELEASE(m_pD3D11ShaderView);
+    SAFE_DELETE_ARRAY(m_pTextureData);
   }
 
-  void GTextureImpl::CalcTextureActualDimension()
+  GXBOOL GTextureImpl::InitTexture(GXLPCVOID pInitData, GXUINT nPitch)
   {
-    GXGRAPHICSDEVICE_DESC GrapDeviceDesc;
-    m_pGraphics->GetDesc(&GrapDeviceDesc);
+    if(m_eResUsage != GXResUsage::SystemMem)
+    {
+      if(_CL_NOT_(IntD3D11CreateResource(pInitData, nPitch))) {
+        return FALSE;
+      }
+    }
 
-    GXDWORD dwFlags = TEST_FLAG(m_pGraphics->GetCaps(GXGRAPCAPS_TEXTURE), GXTEXTURECAPS_NONPOW2)
-      ? NULL : TEXTURERATIO_POW2;
+    if(m_eResUsage == GXResUsage::Read || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
+    {
+      const GXUINT nMinPitch = GetMinPitchSize();
+      const GXUINT nSize = nMinPitch * m_nHeight;
+      m_pTextureData = new GXBYTE[nSize];
+      GXLPBYTE pDest = m_pTextureData;
 
-    //m_nWidth = (m_nWidthRatio < 0)
-    //  ? TextureRatioToDimension((GXINT)m_nWidthRatio, GrapDeviceDesc.BackBufferWidth, dwFlags)
-    //  : ((GXUINT)(GXINT)m_nWidthRatio);
+      for(GXUINT y = 0; y < m_nHeight; y++, pDest += nMinPitch) {
+        memcpy(pDest, reinterpret_cast<GXLPVOID>((size_t)pInitData + nPitch * y), nMinPitch);
+      }
+    }
 
-    //m_nHeight = (m_nHeightRatio < 0)
-    //  ? TextureRatioToDimension((GXINT)m_nHeightRatio, GrapDeviceDesc.BackBufferHeight, dwFlags)
-    //  : ((GXUINT)(GXINT)m_nHeightRatio);
-
-    m_nWidth  = TextureRatioToDimension((GXINT)m_nWidthRatio, GrapDeviceDesc.BackBufferWidth, dwFlags);
-    m_nHeight = TextureRatioToDimension((GXINT)m_nHeightRatio, GrapDeviceDesc.BackBufferHeight, dwFlags);
-  }
-
-
-  GXBOOL GXDLLAPI GXSaveTextureToFileW(GXLPCWSTR pszFileName, GXLPCWSTR pszDestFormat, GTexture* pTexture)
-  {
-    if(pszFileName == NULL || pTexture == NULL)
-      return FALSE;
-    
-    //D3DXIMAGE_FILEFORMAT d3diff = D3DXIFF_DDS;
-    //if(IS_PTR(pszDestFormat))
-    //{
-    //  if(GXSTRCMPI(pszDestFormat, L"BMP") == 0)
-    //    d3diff = D3DXIFF_BMP;
-    //  else if(GXSTRCMPI(pszDestFormat, L"JPG") == 0)
-    //    d3diff = D3DXIFF_JPG;
-    //  else if(GXSTRCMPI(pszDestFormat, L"TGA") == 0)
-    //    d3diff = D3DXIFF_TGA;
-    //  else if(GXSTRCMPI(pszDestFormat, L"PNG") == 0)
-    //    d3diff = D3DXIFF_PNG;
-    //  else if(GXSTRCMPI(pszDestFormat, L"DDS") == 0)
-    //    d3diff = D3DXIFF_DDS;
-    //  else if(GXSTRCMPI(pszDestFormat, L"PPM") == 0)
-    //    d3diff = D3DXIFF_PPM;
-    //  else if(GXSTRCMPI(pszDestFormat, L"DIB") == 0)
-    //    d3diff = D3DXIFF_DIB;
-    //  else if(GXSTRCMPI(pszDestFormat, L"HDR") == 0)
-    //    d3diff = D3DXIFF_HDR;
-    //  else if(GXSTRCMPI(pszDestFormat, L"PFM") == 0)
-    //    d3diff = D3DXIFF_PFM;
-
-    //}
-    //else if((GXUINT_PTR)pszDestFormat <= 8)
-    //  d3diff = (D3DXIMAGE_FILEFORMAT)(GXUINT_PTR)pszDestFormat;
-    //return GXSUCCEEDED(D3DXSaveTextureToFileW(pszFileName, d3diff, ((GTextureImpl*)pTexture)->D3DTexture(), NULL));
     return TRUE;
   }
+
+  //void GTextureImpl::CalcTextureActualDimension()
+  //{
+  //  GXGRAPHICSDEVICE_DESC GrapDeviceDesc;
+  //  m_pGraphics->GetDesc(&GrapDeviceDesc);
+
+  //  GXDWORD dwFlags = TEST_FLAG(m_pGraphics->GetCaps(GXGRAPCAPS_TEXTURE), GXTEXTURECAPS_NONPOW2)
+  //    ? NULL : TEXTURERATIO_POW2;
+
+  //  m_nWidth  = TextureRatioToDimension((GXINT)m_eWidthRatio, GrapDeviceDesc.BackBufferWidth, dwFlags);
+  //  m_nHeight = TextureRatioToDimension((GXINT)m_eHeightRatio, GrapDeviceDesc.BackBufferHeight, dwFlags);
+  //}
+
+  GXBOOL GTextureImpl::IntD3D11CreateResource(GXLPCVOID pInitData, GXUINT nPitch)
+  {
+    ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+
+    D3D11_TEXTURE2D_DESC TexDesc;
+    D3D11_SUBRESOURCE_DATA TexInitData;
+    InlSetZeroT(TexDesc);
+    InlSetZeroT(TexInitData);
+
+    TexDesc.Width               = m_nWidth;
+    TexDesc.Height              = m_nHeight;
+    TexDesc.MipLevels           = m_nMipLevels;
+    TexDesc.ArraySize           = 1;
+    TexDesc.Format              = GrapXToDX11::FormatFrom(m_Format);
+    TexDesc.SampleDesc.Count    = 1;
+    TexDesc.SampleDesc.Quality  = 0;
+    TexDesc.BindFlags           = D3D11_BIND_SHADER_RESOURCE;
+
+    GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage);
+
+    if(pInitData) {
+      TexInitData.pSysMem       = pInitData;
+      TexInitData.SysMemPitch   = nPitch;
+    }
+
+    ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
+    HRESULT hval = pd3dDevice->CreateTexture2D(&TexDesc, pInitData ? &TexInitData : NULL, &m_pD3D11Texture);
+    if(SUCCEEDED(hval) && TEST_FLAG(TexDesc.BindFlags, D3D11_BIND_SHADER_RESOURCE)) {
+      hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, NULL, &m_pD3D11ShaderView);
+      if(FAILED(hval))
+      {
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+
+  GXUINT GTextureImpl::GetMinPitchSize() const
+  {
+    return GetBytesOfGraphicsFormat(m_Format) * m_nWidth;
+  }
+
   //////////////////////////////////////////////////////////////////////////
   GXBOOL GTextureImpl::Clear(const GXLPRECT lpRect, GXCOLOR dwColor)
   {
     ID3D11DeviceContext* pContext = m_pGraphics->D3DGetDeviceContext();
-    if(TEST_FLAG(m_dwResUsage, GXRU_TEST_MIGHTBE) || m_dwResUsage == GXRU_DEFAULT)
+    if(m_eResUsage == GXResUsage::Write || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
     {
       int nWidth;
       int nHeight;
@@ -212,7 +204,7 @@ namespace D3D11
          
       //ID3D11Texture2D* pTempTexture = IntCreateHelpTexture(nWidth, nHeight, pData);
       if(lpRect == NULL) {
-        pContext->UpdateSubresource(m_pTexture, 0, NULL, pData, nWidth * cbFormat, NULL);
+        pContext->UpdateSubresource(m_pD3D11Texture, 0, NULL, pData, nWidth * cbFormat, NULL);
       }
       else {
         ASSERT(0); // FIXME: 不支持区域
@@ -325,11 +317,11 @@ namespace D3D11
     //return TRUE;
   }
   //////////////////////////////////////////////////////////////////////////
-  GTextureImpl::CREATETYPE  GTextureImpl::GetCreateType()
-  {
-    ASSERT(m_emType > Invalid && m_emType < LastType);
-    return m_emType;
-  }
+  //GTextureImpl::CREATETYPE  GTextureImpl::GetCreateType()
+  //{
+  //  ASSERT(m_emType > Invalid && m_emType < LastType);
+  //  return m_emType;
+  //}
   //GXBOOL GTextureImpl::CreateHelperSur()
   //{
   //  return FALSE;
@@ -343,7 +335,7 @@ namespace D3D11
   //  return FALSE;
   //}
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL GTextureImpl::CopyRect(GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination)
+  GXBOOL GTextureImpl::CopyRect(GTexture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
   {
     //RECT rect = {0,0};
     //if(lpRect == NULL)
@@ -366,45 +358,7 @@ namespace D3D11
     return TRUE;
   }
 
-  GXBOOL GTextureImpl::StretchRect(GTexture* pSrc, const GXLPCRECT lpDestRect, const GXLPCRECT lpSrcRect, GXTextureFilterType eFilter)
-  {
-    HRESULT hval = GX_OK;
-//    m_pGraphics->Enter();
-//    GTextureImpl* pSrcImp = (GTextureImpl*)pSrc;
-//#ifdef _DEBUG
-//    GXUINT cxSrc, cySrc;
-//    GXUINT cxDst, cyDst;
-//    if(lpSrcRect != NULL)
-//    {
-//      pSrc->GetDimension(&cxSrc, &cySrc);
-//      ASSERT(lpSrcRect->left >= 0 && lpSrcRect->top >= 0 &&
-//        lpSrcRect->right <= (GXINT)cxSrc && lpSrcRect->bottom <= (GXINT)cySrc);
-//    }
-//    if(lpDestRect)
-//    {
-//      GetDimension(&cxDst, &cyDst);
-//      ASSERT(lpDestRect->left >= 0 && lpDestRect->top >= 0 &&
-//        lpDestRect->right <= (GXINT)cxDst && lpDestRect->bottom <= (GXINT)cyDst);
-//    }
-//#endif // _DEBUG
-//    // StretchRect 不支持 Texture 到 Texture 对拷.
-//    if( TEST_FLAG(m_dwResUsage, GXRU_TEX_RENDERTARGET) == 0 && 
-//      TEST_FLAG(pSrcImp->m_dwResUsage, GXRU_TEX_RENDERTARGET) == 0 )
-//    {
-//      hval = D3DXLoadSurfaceFromSurface(m_pSurface, NULL, 
-//        (RECT*)lpDestRect, pSrcImp->m_pSurface, NULL, (RECT*)lpSrcRect, eFilter, 0);
-//      ASSERT(GXSUCCEEDED(hval));
-//    }
-//    else
-//    {
-//      hval = m_pGraphics->D3DGetDevice()->StretchRect(
-//        ((GTextureImpl*)pSrc)->m_pSurface, (const RECT *)lpSrcRect, 
-//        m_pSurface, (const RECT *)lpDestRect, (D3DTEXTUREFILTERTYPE)eFilter);
-//      ASSERT(GXSUCCEEDED(hval));
-//    }
-//    m_pGraphics->Leave();
-    return GXSUCCEEDED(hval);
-  }
+#if 0
   ID3D11Texture2D* GTextureImpl::IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData)
   {
     ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
@@ -443,7 +397,7 @@ namespace D3D11
     }
 
     // 下载资源
-    pContext->CopyResource(pHelpTexture, m_pTexture);
+    pContext->CopyResource(pHelpTexture, m_pD3D11Texture);
     return pHelpTexture;
   }
 
@@ -457,158 +411,143 @@ namespace D3D11
     }
     return TRUE;
   }
+#endif
 
-  GXBOOL GTextureImpl::LockRect(LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)// TODO: Flags 统一化, 现在没有GX方面的定义,这个值目前都和平台相关
+  GXBOOL GTextureImpl::MapRect(MAPPEDRECT* pLockRect, GXLPCRECT pRect, GXResMap eResMap)
   {
-#ifdef _DEBUG
-    if( ! (Flags == 0)) {
-      CLOG_WARNING("Flags == 0 Failed.\n");
+    // 不能嵌套Map/Unmap
+    if(m_sMappedResource.pData) {
+      return FALSE;
     }
-#endif // #ifdef _DEBUG
+    else if(pRect && (
+      pRect->left   < 0 ||
+      pRect->top    < 0 ||
+      pRect->right  >= (GXLONG)m_nWidth ||
+      pRect->bottom >= (GXLONG)m_nHeight))
+    {
+      return FALSE;
+    }
+
 
     ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
     ID3D11DeviceContext* pContext = m_pGraphics->D3DGetDeviceContext();
     D3D11_MAPPED_SUBRESOURCE SubResource;
     HRESULT hval = S_OK;
-
     InlSetZeroT(SubResource);
 
-    if(TEST_FLAG(m_dwResUsage, GXRU_TEST_FREQUENTLY))
-    {     
-      IntGetHelpTexture();
-      hval = pContext->Map(m_pHelpTexture, 0, D3D11_MAP_WRITE, 0, &SubResource);
-
-      //if(SUCCEEDED(hval)) {
-      //  lpLockRect->pBits = SubResource.pData;
-      //  lpLockRect->Pitch = SubResource.RowPitch;
-      //  if(lpRect != NULL) {
-      //    const GXUINT cbPixel = GetBytesOfGraphicsFormat(m_Format);
-      //    const GXUINT nOffset = lpRect->top * SubResource.RowPitch + lpRect->left * cbPixel;
-
-      //    lpLockRect->pBits = (GXBYTE*)lpLockRect->pBits + nOffset;
-      //  }
-      //  return TRUE;
-      //}
-    }
-    else if(TEST_FLAG(m_dwResUsage, GXRU_SYSTEMMEM))
+    if(m_eResUsage == GXResUsage::Default)
     {
-      hval = pContext->Map(m_pTexture, 0, D3D11_MAP_WRITE, 0, &SubResource);
+      return FALSE;
     }
-    else {
-      ASSERT(0); // FIXME: 没实现!
-    }
-
-    if(SUCCEEDED(hval)) {
-      lpLockRect->pBits = SubResource.pData;
-      lpLockRect->Pitch = SubResource.RowPitch;
-      if(lpRect != NULL) {
-        const GXUINT cbPixel = GetBytesOfGraphicsFormat(m_Format);
-        const GXUINT nOffset = lpRect->top * SubResource.RowPitch + lpRect->left * cbPixel;
-
-        lpLockRect->pBits = (GXBYTE*)lpLockRect->pBits + nOffset;
-      }
-      return TRUE;
-    }
-    return FALSE;
-   
-  }
-
-  GXBOOL GTextureImpl::UnlockRect()
-  {
-    ID3D11DeviceContext* pContext = m_pGraphics->D3DGetDeviceContext();
-    if(TEST_FLAG(m_dwResUsage, GXRU_TEST_FREQUENTLY))
+    else if(m_eResUsage == GXResUsage::Read && eResMap == GXResMap::Read)
     {
-      if(m_pHelpTexture == NULL)
+      pLockRect->pBits = m_pTextureData;
+      pLockRect->Pitch = GetMinPitchSize();
+    }
+    else if(m_eResUsage == GXResUsage::Write && eResMap == GXResMap::Write)
+    {
+      if(FAILED(pContext->Map(m_pD3D11Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_sMappedResource)))
       {
-        CLOG_ERROR(__FUNCTION__" failed to unlock texture.\n");
         return FALSE;
       }
-      pContext->Unmap(m_pHelpTexture, 0);
-      pContext->CopyResource(m_pTexture, m_pHelpTexture);
-      return TRUE;
+      pLockRect->pBits = m_pTextureData;
+      pLockRect->Pitch = GetMinPitchSize();
     }
-    else if(TEST_FLAG(m_dwResUsage, GXRU_SYSTEMMEM))
+    else if(m_eResUsage == GXResUsage::ReadWrite)
     {
-      pContext->Unmap(m_pTexture, 0);
-      return TRUE;
+      if(eResMap == GXResMap::Read)
+      {
+        pLockRect->pBits = m_sMappedResource.pData;
+        pLockRect->Pitch = m_sMappedResource.RowPitch;
+      }
+      else if(eResMap == GXResMap::Write || eResMap == GXResMap::ReadWrite)
+      {
+        if(FAILED(pContext->Map(m_pD3D11Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_sMappedResource)))
+        {
+          return FALSE;
+        }
+        pLockRect->pBits = m_pTextureData;
+        pLockRect->Pitch = GetMinPitchSize();
+      }
+      else {
+        return FALSE;
+      }
+    }
+    else if(m_eResUsage == GXResUsage::SystemMem)
+    {
+      pLockRect->pBits = m_pTextureData;
+      pLockRect->Pitch = GetMinPitchSize();
+    }
+    else {
+      return FALSE;
     }
 
-    //pContext->Unmap(m_pTexture, 0);
-    //return GXSUCCEEDED(m_pSurface->UnlockRect());
-    ASSERT(0); // FIXME: 没实现!
-    return FALSE;
+    if(pRect)
+    {
+      pLockRect->pBits = reinterpret_cast<GXLPVOID>(
+        reinterpret_cast<size_t>(pLockRect->pBits) + pLockRect->Pitch * pRect->top + GetBytesOfGraphicsFormat(m_Format) * pRect->left);
+    }
+
+    return TRUE;
+  }
+
+  GXBOOL GTextureImpl::UnmapRect()
+  {
+    if(m_sMappedResource.pData)
+    {
+      ID3D11DeviceContext* pContext = m_pGraphics->D3DGetDeviceContext();
+      if(m_pTextureData)
+      {
+        const GXUINT nMinPitch = GetMinPitchSize();
+        for(GXUINT y = 0; y < m_nHeight; y++)
+        {
+          memcpy(static_cast<GXLPBYTE>(m_sMappedResource.pData) + y * m_sMappedResource.RowPitch,
+            m_pTextureData + y * nMinPitch, m_sMappedResource.RowPitch);
+        }
+        pContext->Unmap(m_pD3D11Texture, 0);
+        InlSetZeroT(m_sMappedResource);
+      }
+    }
+    return TRUE;
   }
 
   GXGraphics*  GTextureImpl::GetGraphicsUnsafe()
   {
     return m_pGraphics;
   }
-  GXBOOL GTextureImpl::GetRatio(GXINT* pWidthRatio, GXINT* pHeightRatio)
-  {
-    if(pWidthRatio != NULL)
-      *pWidthRatio = (GXINT)m_nWidthRatio;
-    if(pHeightRatio != NULL)
-      *pHeightRatio = (GXINT)m_nHeightRatio;
-    return TRUE;
-  }
-  GXUINT GTextureImpl::GetWidth()
-  {
-    return m_nWidth;
-  }
-  GXUINT GTextureImpl::GetHeight()
-  {
-    return m_nHeight;
-  }
-  GXBOOL GTextureImpl::GetDimension(GXUINT* pWidth, GXUINT* pHeight)
-  {
-    if(pWidth != NULL || pHeight != NULL)
-    {
-      //GXGRAPHICSDEVICE_DESC GrapDeviceDesc;
-      //m_pGraphics->GetDesc(&GrapDeviceDesc);
 
-      if(pWidth != NULL)
-        *pWidth = m_nWidth;
-      if(pHeight != NULL)
-        *pHeight = m_nHeight;
+  //GXBOOL GTextureImpl::GetRatio(GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio)
+  //{
+  //  if(pWidthRatio != NULL)
+  //    *pWidthRatio = m_eWidthRatio;
+  //  if(pHeightRatio != NULL)
+  //    *pHeightRatio = m_eHeightRatio;
+  //  return TRUE;
+  //}
 
-      return TRUE;
+  //GXUINT GTextureImpl::GetWidth()
+  //{
+  //  return m_nWidth;
+  //}
+  //GXUINT GTextureImpl::GetHeight()
+  //{
+  //  return m_nHeight;
+  //}
+
+  GXSIZE* GTextureImpl::GetDimension(GXSIZE* pDimension)
+  {
+    if(pDimension != NULL) {
+      pDimension->cx = m_nWidth;
+      pDimension->cy = m_nHeight;
     }
-    return FALSE;
-    //if( (pWidth != NULL && ((GXINT)m_nWidth) < 0) ||
-    //  (pHeight != NULL && ((GXINT)m_nHeight) < 0) )
-    //{
-    //  D3DPRESENT_PARAMETERS d3dpp;
-    //  m_pGraphics->D3DGetPresentParam(&d3dpp);
-
-    //  if(pWidth != NULL)
-    //  {
-    //    *pWidth = m_nWidth;
-    //    if(((GXINT)m_nWidth) < 0)
-    //      *pWidth = (GXUINT)((float)(-(GXINT)m_nWidth) / (float)TEXSIZE_FIXEDPOINT * d3dpp.BackBufferWidth);
-    //  }
-
-    //  if(pHeight != NULL)
-    //  {
-    //    *pHeight = m_nHeight;
-    //    if(((GXINT)m_nHeight) < 0)
-    //      *pHeight = (GXUINT)((float)(-(GXINT)m_nHeight) / (float)TEXSIZE_FIXEDPOINT * d3dpp.BackBufferHeight);
-    //  }
-    //}
-    //else
-    //{
-    //  ASSERT(m_nWidth > 0);
-    //  ASSERT(m_nHeight > 0);
-    //  if(pWidth != NULL)
-    //    *pWidth = m_nWidth;
-    //  if(pHeight != NULL)
-    //    *pHeight = m_nHeight;
-    //}
-    //return TRUE;
+    return pDimension;
   }
-  GXDWORD GTextureImpl::GetUsage()
+
+  GXResUsage GTextureImpl::GetUsage()
   {
-    return m_dwResUsage;
+    return m_eResUsage;
   }
+
   GXFormat GTextureImpl::GetFormat()
   {
     return m_Format;
@@ -675,7 +614,7 @@ namespace D3D11
   //  }
   //  return m_uRefCount;
   //}
-  
+#if 0  
   GXHRESULT GTextureFromUser::Invoke(GRESCRIPTDESC* pDesc)
   {
     INVOKE_DESC_CHECK(pDesc);
@@ -725,15 +664,15 @@ namespace D3D11
     return TRUE;
   }
 
-  GTextureFromUser::GTextureFromUser(GXGraphicsImpl* pGraphicsImpl) 
-    : GTextureImpl(pGraphicsImpl)
-  {
-  }
+  //GTextureFromUser::GTextureFromUser(GXGraphicsImpl* pGraphicsImpl) 
+  //  : GTextureImpl(pGraphicsImpl)
+  //{
+  //}
   //GTextureFromUser::~GTextureFromUser()
   //{
   //}
 
-  GXBOOL GTextureFromUser::Initialize(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
+  GXBOOL GTextureFromUser::InitTexture(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
   {
     m_emType       = GTextureImpl::User;
     m_nWidth       = 0;
@@ -741,8 +680,8 @@ namespace D3D11
     m_nMipLevels   = MipLevels;
     m_Format       = Format;
     m_dwResUsage   = ResUsage;
-    m_nWidthRatio  = (GXWORD)WidthRatio;
-    m_nHeightRatio = (GXWORD)HeightRatio;
+    m_eWidthRatio  = (GXWORD)WidthRatio;
+    m_eHeightRatio = (GXWORD)HeightRatio;
 
     CalcTextureActualDimension();
 
@@ -779,15 +718,17 @@ namespace D3D11
     }
     return TRUE;
   }
+#endif
 
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL GTextureFromUserRT::Initialize(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
+#if 0
+  GXBOOL GTextureFromUserRT::InitTexture(GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
   {
     ASSERT(m_pRenderTargetView == NULL);
     ASSERT(m_pDepthStencil == NULL);
     ASSERT(m_pDepthStencilView == NULL);
     GXBOOL bval = FALSE;
-    if(GTextureFromUser::Initialize(WidthRatio, HeightRatio, MipLevels, Format, ResUsage)) {
+    if(GTextureFromUser::InitTexture(WidthRatio, HeightRatio, MipLevels, Format, ResUsage)) {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
       D3D11_RENDER_TARGET_VIEW_DESC TarDesc;
       InlSetZeroT(TarDesc);
@@ -888,6 +829,7 @@ namespace D3D11
   {
 
   }
+#endif
 
   //UINT GTextureFromFile::ConvertParamSizeToD3D(GXUINT nSize)
   //{
@@ -899,7 +841,7 @@ namespace D3D11
   //  }
   //  else return nSize;
   //}
-
+#if 0
   HRESULT GTextureFromFile::Create(LPGXIMAGEINFOX pSrcInfo)
   {
     ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
@@ -1001,8 +943,8 @@ namespace D3D11
         m_pTexture->GetDesc(&Tex2Desc);
         m_nWidth = Tex2Desc.Width;
         m_nHeight = Tex2Desc.Height;
-        m_nWidthRatio = m_nWidth;
-        m_nHeightRatio = m_nHeight;
+        m_eWidthRatio = m_nWidth;
+        m_eHeightRatio = m_nHeight;
         // FIXME: 补全
         return GX_OK;
       }
@@ -1052,6 +994,7 @@ namespace D3D11
     //return hval;
     //return FALSE;
   }
+#endif
   //////////////////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////////////////

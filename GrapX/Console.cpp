@@ -261,7 +261,7 @@ void GXConsole::DrawLines(GXCanvas* pCanvas, int y, int yInc, const TextRoundBuf
 GXLRESULT GXConsole::Show(GXBOOL bShow)
 {
   if(m_pFont == NULL) {
-    m_pFont = m_pGraphics->CreateFontA(0, s_nFontHeight, "fonts/wqy-microhei.ttc");
+    m_pFont = m_pGraphics->CreateFont(0, s_nFontHeight, "fonts/wqy-microhei.ttc");
   }
   return GX_OK;
 }

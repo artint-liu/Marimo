@@ -6326,11 +6326,17 @@ namespace UVShader
         int R2, C2;
         VALUE::State state;
         pAB[1].pType->Resolve(R2, C2);
-        vctx.pool.reserve(4);          
+        vctx.pool.reserve(4);
+
+        //                      C2
+        // | x y z w | * | m00 m01 m02 |
+        //               | m10 m11 m12 | R2
+        //               | m20 m21 m22 |
+        //               | m30 m31 m32 |
         for(int c = 0; c < C2; c++)
         {
           for(int r = 0; r < R2; r++) {
-            state = value[r].Calculate("*", 1, pAB[0].pValue[r], pAB[1].pValue[C2 * c + r]);
+            state = value[r].Calculate("*", 1, pAB[0].pValue[r], pAB[1].pValue[r * C2 + c]);
             DUMP_STATE_IF_FAILED;
           }
           for(int r = 0; r < R2 - 1; r++) {
@@ -6354,10 +6360,16 @@ namespace UVShader
         VALUE::State state;
         pAB[0].pType->Resolve(R1, C1);
         vctx.pool.reserve(4);
+
+        //           C1
+        //    | m00 m01 m02 |   | x |
+        // R1 | m10 m11 m12 | * | y |
+        //    | m20 m21 m22 |   | z |
+        //    | m30 m31 m32 |   | w |
         for(int r = 0; r < R1; r++)
         {
           for(int c = 0; c < C1; c++) {
-            state = value[c].Calculate("*", 1, pAB[0].pValue[r * R1 + c], pAB[1].pValue[r]);
+            state = value[c].Calculate("*", 1, pAB[0].pValue[r * C1 + c], pAB[1].pValue[r]);
             DUMP_STATE_IF_FAILED;
           }
           for(int c = 0; c < C1 - 1; c++) {

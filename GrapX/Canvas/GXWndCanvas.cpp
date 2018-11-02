@@ -13,7 +13,7 @@
 #include <GrapX/GXCanvas.h>
 #include <GrapX/GXGraphics.h>
 #include <GrapX/GXFont.h>
-#include <GrapX/GXImage.h>
+#include <GrapX/GXRenderTarget.h>
 #include <GrapX/GShader.h>
 
 // 平台相关
@@ -124,34 +124,34 @@ GXWndCanvas::~GXWndCanvas()
   m_lpStation = NULL;
 }
 
-GXHRESULT GXWndCanvas::DrawImage(GXImage*pImage, const GXREGN *rcDest)
+GXHRESULT GXWndCanvas::DrawTexture(GTexture* pTexture, const GXREGN *rcDest)
 {
-  return m_pNative->DrawImage(pImage, rcDest);
+  return m_pNative->DrawTexture(pTexture, rcDest);
 }
 
-GXHRESULT GXWndCanvas::DrawImage(GXImage*pImage, const GXREGN *rcDest, const GXREGN *rcSrc)
+GXHRESULT GXWndCanvas::DrawTexture(GTexture* pTexture, const GXREGN *rcDest, const GXREGN *rcSrc)
 {
-  return m_pNative->DrawImage(pImage, rcDest, rcSrc);
+  return m_pNative->DrawTexture(pTexture, rcDest, rcSrc);
 }
 
-GXHRESULT GXWndCanvas::DrawImage(GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rcSrc)
+GXHRESULT GXWndCanvas::DrawTexture(GTexture* pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc)
 {
-  return m_pNative->DrawImage(pImage, xPos, yPos, rcSrc);
+  return m_pNative->DrawTexture(pTexture, xPos, yPos, rcSrc);
 }
 
-GXINT GXWndCanvas::DrawTextW(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
+GXINT GXWndCanvas::DrawText(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
 {
-  return m_pNative->DrawTextW(pFTFont, lpString, nCount, lpRect, uFormat, crText);
+  return m_pNative->DrawText(pFTFont, lpString, nCount, lpRect, uFormat, crText);
 }
 
-GXINT GXWndCanvas::DrawGlowTextW(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius)
+GXINT GXWndCanvas::DrawGlowText(GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius)
 {
-  return m_pNative->DrawTextW(pFTFont, lpString, nCount, lpRect, uFormat, Color);
+  return m_pNative->DrawText(pFTFont, lpString, nCount, lpRect, uFormat, Color);
 }
 
-GXBOOL GXWndCanvas::TextOutW(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText)
+GXBOOL GXWndCanvas::TextOut(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText)
 {
-  return m_pNative->TextOutW(pFTFont, nXStart, nYStart, lpString, cbString, crText);
+  return m_pNative->TextOut(pFTFont, nXStart, nYStart, lpString, cbString, crText);
 }
 
 GXVOID GXWndCanvas::DrawRect(GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight, GXCOLORREF Color)

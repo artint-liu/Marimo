@@ -1,39 +1,18 @@
 // TestGXGraphics.cpp : 定义应用程序的入口点。
 //
 
-//#include "stdafx.h"
-//#include <Include/Marimo.H>
-// 如果必须将位于下面指定平台之前的平台作为目标，请修改下列定义。
-// 有关不同平台对应值的最新信息，请参考 MSDN。
-//#ifndef WINVER        // 允许使用特定于 Windows XP 或更高版本的功能。
-//#define WINVER 0x0501    // 将此值更改为相应的值，以适用于 Windows 的其他版本。
-//#endif
-//
-//#ifndef _WIN32_WINNT    // 允许使用特定于 Windows XP 或更高版本的功能。
-//#define _WIN32_WINNT 0x0501  // 将此值更改为相应的值，以适用于 Windows 的其他版本。
-//#endif            
-//
-//#ifndef _WIN32_WINDOWS    // 允许使用特定于 Windows 98 或更高版本的功能。
-//#define _WIN32_WINDOWS 0x0410 // 将此值更改为适当的值，以指定将 Windows Me 或更高版本作为目标。
-//#endif
-//
-//#ifndef _WIN32_IE      // 允许使用特定于 IE 6.0 或更高版本的功能。
-//#define _WIN32_IE 0x0600  // 将此值更改为相应的值，以适用于 IE 的其他版本。
-//#endif
-//
-
 #include <tchar.h>
 
-#include <GrapX.H>
-#include <GXApp.H>
-#include <GrapX/GResource.H>
-#include <GrapX/GXGraphics.H>
-#include <GrapX/GTexture.H>
-#include <GrapX/GRegion.H>
-#include <GrapX/GXImage.H>
-#include <GrapX/GXFont.H>
-#include <GrapX/GXCanvas.H>
-#include <GrapX/gxDevice.H>
+#include <GrapX.h>
+#include <GXApp.h>
+#include <GrapX/GResource.h>
+#include <GrapX/GXGraphics.h>
+#include <GrapX/GXRenderTarget.h>
+#include <GrapX/GRegion.h>
+#include <GrapX/GTexture.h>
+#include <GrapX/GXFont.h>
+#include <GrapX/GXCanvas.h>
+#include <GrapX/gxDevice.h>
 #include "Sample_Graphics.h"
 #define MAX_LOADSTRING 100
 //#include "Resource.h"
@@ -95,9 +74,9 @@ class MyGraphicsTest : public GXApp
 {
   GXFont*     m_pFont;
   GXFont*     m_pFontS;
-  GXImage*    m_pTarget;
-  GXImage*    m_pTarget2;
-  GXImage*    m_pImageNonPow2;
+  GXRenderTarget*    m_pTarget;
+  GXRenderTarget*    m_pTarget2;
+  //GXImage*    m_pImageNonPow2;
   GTexture*   m_pTestIcon;
   GTexture*   m_pEmptyTex;
   GTexture*   m_pTexture;
@@ -116,7 +95,7 @@ public:
   , m_pTarget       (NULL)
   , m_pTarget2      (NULL)
   , m_pEmptyTex     (NULL)
-  , m_pImageNonPow2 (NULL)
+  //, m_pImageNonPow2 (NULL)
   , m_pTexture      (NULL)
   , m_pRegion       (NULL)
   , m_pRegion2      (NULL)
@@ -134,15 +113,16 @@ public:
     m_nSubPage = 0;
     TestPrimitive(m_pGraphics);
 
-    m_pGraphics->CreateTextureFromFileW(&m_pTexture, _CLTEXT("textures/AOX.png"));
-    m_pGraphics->CreateTextureFromFileW(&m_pTestIcon, _CLTEXT("textures/AOX.png"));
+    m_pGraphics->CreateTextureFromFile(&m_pTexture, _CLTEXT("textures/AOX.png"), GXResUsage::Default);
+    m_pGraphics->CreateTextureFromFile(&m_pTestIcon, _CLTEXT("textures/AOX.png"), GXResUsage::Default);
     //m_pGraphics->CreateTextureFromFile(&g_pTexture, L"RGB.bmp");
-    m_pFont = m_pGraphics->CreateFontA(NULL, 48, "fonts/wqy-microhei.ttc");
-    m_pFontS = m_pGraphics->CreateFontA(NULL, 16, "fonts/wqy-microhei.ttc");
-    m_pTarget = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
-    m_pTarget2 = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
-    m_pImageNonPow2 = m_pGraphics->CreateImageFromFile(_CLTEXT("nonpow2.png"));
-    m_pGraphics->CreateTexture(&m_pEmptyTex, NULL, TEXSIZE_HALF, TEXSIZE_HALF, 1, GXFMT_A8R8G8B8, GXRU_DEFAULT);
+    m_pFont = m_pGraphics->CreateFont(NULL, 48, "fonts/wqy-microhei.ttc");
+    m_pFontS = m_pGraphics->CreateFont(NULL, 16, "fonts/wqy-microhei.ttc");
+    //m_pTarget = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
+    //m_pTarget2 = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
+    //m_pImageNonPow2 = m_pGraphics->CreateImageFromFile(_CLTEXT("nonpow2.png"));
+    //m_pGraphics->CreateTexture(&m_pEmptyTex, NULL, TEXSIZE_HALF, TEXSIZE_HALF, 1, GXFMT_A8R8G8B8, GXRU_DEFAULT);
+    m_pGraphics->CreateTexture(&m_pEmptyTex, NULL, 200, 200, GXFMT_A8R8G8B8, GXResUsage::Default, 1);
     m_pEmptyTex->Clear(NULL, 0xff000000);
 //    m_pTarget->GetTextureUnsafe()->Clear(NULL, -1);
 
@@ -174,7 +154,7 @@ public:
   virtual GXHRESULT OnDestroy()
   {
     SAFE_RELEASE(m_pTestIcon);
-    SAFE_RELEASE(m_pImageNonPow2);
+    //SAFE_RELEASE(m_pImageNonPow2);
     SAFE_RELEASE(m_pEmptyTex);
     SAFE_RELEASE(m_pRegion2);
     SAFE_RELEASE(m_pRegion);
@@ -287,7 +267,7 @@ void MyGraphicsTest::TestDrawHelpText(GXRECT& rect)
   }
   
   //pszHelp.SubString(10, 20);
-  pCanvas->DrawTextW(m_pFont, pszHelp, -1, (GXLPRECT)&rect, GXDT_VCENTER | GXDT_CENTER, 0xff000000);
+  pCanvas->DrawText(m_pFont, pszHelp, -1, (GXLPRECT)&rect, GXDT_VCENTER | GXDT_CENTER, 0xff000000);
   SAFE_RELEASE(pCanvas);
 }
 
@@ -300,11 +280,11 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   pCanvas->Clear(0xffe0e0e0);
   DrawGrid(pCanvas, rect);
 
-  pCanvas->TextOutA(m_pFontS, 10, 10, "SetPixel:", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 10, 100, "DrawRectangle:", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 200, 10, "DrawLine:", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 400, 10, "AlphaBlend:", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 600, 10, "Opaque:", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 10, 10, "SetPixel:", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 10, 100, "DrawRectangle:", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 200, 10, "DrawLine:", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 400, 10, "AlphaBlend:", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 600, 10, "Opaque:", -1, 0xff000000);
   for(int y = 0; y < 32; y++)
   {
     for(int x = 0; x < 32; x++)
@@ -332,10 +312,10 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
     pCanvas->DrawLine(200, y * 2 + 30, 400, y * 2 + 30, GXColor32((float)y / 80, 0.f, 0.f, 1.f).color);
   }
 
-  pCanvas->TextOutA(m_pFontS, 10, 200, "DrawTexture(Dest):", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 210, 200, "DrawTexture(Dest,Src):", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 410, 200, "DrawTexture(Pos,Src):", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 610, 200, "FillRectangle:", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 10, 200, "DrawTexture(Dest):", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 210, 200, "DrawTexture(Dest,Src):", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 410, 200, "DrawTexture(Pos,Src):", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 610, 200, "FillRectangle:", -1, 0xff000000);
 
   pCanvas->FillRectangle(610, 230, 150, 160, 0xff0000ff);
 
@@ -364,17 +344,18 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   pCanvas->DrawTexture(m_pTexture, 410, 230, &regnSrc);
 
   
-  pCanvas->TextOutA(m_pFontS, 10, 400, "Image NonePow2(Dest):", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 210, 400, "Image NonePow2(Dest, Src):", -1, 0xff000000);
-  pCanvas->TextOutA(m_pFontS, 510, 400, "Image NonePow2(Pos, Src):", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 10, 400, "Image NonePow2(Dest):", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 210, 400, "Image NonePow2(Dest, Src):", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 510, 400, "Image NonePow2(Pos, Src):", -1, 0xff000000);
 
+#if 0
   if(m_pImageNonPow2 != NULL)
   {
     regnDst.left   = 30;
     regnDst.top    = 430;
     regnDst.width  = 160;
     regnDst.height = 160;
-    pCanvas->DrawImage(m_pImageNonPow2, &regnDst);
+    pCanvas->DrawTexture(m_pImageNonPow2, &regnDst);
 
     regnDst.left   = 230;
     regnDst.top    = 430;
@@ -385,14 +366,15 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
     regnSrc.top    = 0;
     regnSrc.width  = 128;
     regnSrc.height = 128;
-    pCanvas->DrawImage(m_pImageNonPow2, &regnDst, &regnSrc);
+    pCanvas->DrawTexture(m_pImageNonPow2, &regnDst, &regnSrc);
 
     regnSrc.left   = 0;
     regnSrc.top    = 0;
     regnSrc.width  = 210;
     regnSrc.height = 160;
-    pCanvas->DrawImage(m_pImageNonPow2, 530, 430, &regnSrc);
+    pCanvas->DrawTexture(m_pImageNonPow2, 530, 430, &regnSrc);
   }
+#endif
 
   pCanvas->FillRectangle(400 + 10, 50 - 10, 100, 100, 0x8000ff00);
   pCanvas->FillRectangle(450 + 10, 100 - 10, 100, 100, 0x80ff0000);
@@ -402,7 +384,7 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   pCanvas->FillRectangle(650 + 10, 100 - 10, 100, 100, 0x80ff0000);
 
   pCanvas->SetCompositingMode(CM_SourceOver);
-  pCanvas->TextOutA(m_pFontS, 10, 600, "Clip Drawing:", -1, 0xff000000);
+  pCanvas->TextOut(m_pFontS, 10, 600, "Clip Drawing:", -1, 0xff000000);
   GXRECT rect2;
   m_pRegion2->GetBounding(&rect2);
   gxRectToRegn(&regnDst, &rect2);
@@ -414,46 +396,49 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   {
     GXREGN rgSrc(0);
     GXREGN rgDest(0, 0, 128, 128);
-    m_pTestIcon->GetDimension((GXUINT*)&rgSrc.width, (GXUINT*)&rgSrc.height);
+    GXSIZE sDimension;
+    m_pTestIcon->GetDimension(&sDimension);
+    rgSrc.width = sDimension.cx;
+    rgSrc.height = sDimension.cy;
 
     rgDest.left = 210;
     rgDest.top = 625;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_None", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_None", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_None);
 
     rgDest.left = 360;
     rgDest.top = 625;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CW90", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CW90", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CW90);
 
     rgDest.left = 510;
     rgDest.top = 625;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CCW90", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CCW90", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CCW90);
 
     rgDest.left = 10;
     rgDest.top = 825;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_180", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_180", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_180);
 
     rgDest.left = 160;
     rgDest.top = 825;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CW90_Flip", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CW90_Flip", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CW90_Flip);
 
     rgDest.left = 310;
     rgDest.top = 825;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_180_Flip", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_180_Flip", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_180_Flip);
 
     rgDest.left = 460;
     rgDest.top = 825;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CCW90_Flip", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CCW90_Flip", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CCW90_Flip);
 
     rgDest.left = 610;
     rgDest.top = 825;
-    pCanvas->TextOutA(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_FlipHorizontal", -1, 0xff000000);
+    pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_FlipHorizontal", -1, 0xff000000);
     pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_FlipHorizontal);
   }
 
@@ -481,7 +466,7 @@ void MyGraphicsTest::TestTextAndClip(GXRECT& rect)
   GXRECT rcText;
   gxSetRect(&rcText, 210, 20, 310, 100);
   pCanvas->FillRectangle(&rcText, 0x80808080);
-  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World!"), -1, &rcText, GXDT_SINGLELINE, 0xff00ff00);
+  pCanvas->DrawText(m_pFont, _CLTEXT("Hello World!"), -1, &rcText, GXDT_SINGLELINE, 0xff00ff00);
 
 
   SAFE_RELEASE(pCanvas);
@@ -519,17 +504,17 @@ void MyGraphicsTest::TestDrawToRTInRegion(GXRECT& rect)
 
   GXRECT rcText((gxGetTickCount() / 10) % 768, -20, 250, 100);
   rcText.right += rcText.left;
-  pCanvas->TextOutW(m_pFont, rcText.left - 20, rcText.top, _CLTEXT("TextOutString!~"), 15, 0xff000000);
-  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xffffffff);
+  pCanvas->TextOut(m_pFont, rcText.left - 20, rcText.top, _CLTEXT("TextOutString!~"), 15, 0xff000000);
+  pCanvas->DrawText(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xffffffff);
 
   rcText.top = 100;
   rcText.bottom = 200;
-  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xff00ffff);
+  pCanvas->DrawText(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xff00ffff);
 
   rcText.left -= 20;
   rcText.top = 480;
   rcText.bottom = rcText.top + 200;
-  pCanvas->DrawTextW(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xffff00ff);
+  pCanvas->DrawText(m_pFont, _CLTEXT("Hello World"), -1, &rcText, DT_LEFT, 0xffff00ff);
 
 
   //regnDst.left   = (GetTickCount() / 7) % 768;
@@ -543,7 +528,7 @@ void MyGraphicsTest::TestDrawToRTInRegion(GXRECT& rect)
     pCanvas = m_pGraphics->LockCanvas(NULL, NULL, NULL);
     gxSetRegn(&regnSrc, 0, 0, rect.right, rect.bottom);
     //pCanvas->DrawImage(m_pTarget, cos(m_fTime) * 40.0f + 40.0f, sin(m_fTime) * 40.0f + 40.0f, &regnSrc);
-    pCanvas->DrawImage(m_pTarget, 0, 0, &regnSrc);
+    pCanvas->DrawTexture(m_pTarget->GetColorTextureUnsafe(GXResUsage::Default), 0, 0, &regnSrc);
     SAFE_RELEASE(pCanvas);
   }
 }
@@ -574,12 +559,12 @@ void MyGraphicsTest::TestDrawToTwoRT(GXRECT& rect)
   pCanvas = m_pGraphics->LockCanvas(NULL, NULL, NULL);
   pCanvas->Clear(crClear0);
 
-  pCanvas->DrawImage(m_pTarget, &regnDst);
+  pCanvas->DrawTexture(m_pTarget->GetColorTextureUnsafe(GXResUsage::Default), &regnDst);
 
   regnDst.left = (rect.right >> 1);
   regnDst.top = 150;
 
-  pCanvas->DrawImage(m_pTarget2, &regnDst);
+  pCanvas->DrawTexture(m_pTarget2->GetColorTextureUnsafe(GXResUsage::Default), &regnDst);
 
   SAFE_RELEASE(pCanvas);
 }
@@ -592,9 +577,12 @@ void MyGraphicsTest::TestCopyAndStretchRect(GXRECT& rect)
   GXRECT rcDest;
   GXREGN regnSrc;
   GXREGN regnDest;
+  GXSIZE sDimension;
   pCanvas = m_pGraphics->LockCanvas(NULL, NULL, NULL);
 
-  m_pEmptyTex->GetDimension((GXUINT*)&regn.width, (GXUINT*)&regn.height);
+  m_pEmptyTex->GetDimension(&sDimension);
+  regn.width = sDimension.cx;
+  regn.height = sDimension.cy;
   regn.left = regn.width >> 1;
   regn.top = regn.height >> 1;
 
@@ -605,7 +593,7 @@ void MyGraphicsTest::TestCopyAndStretchRect(GXRECT& rect)
 
   if(m_nSubPage == 0)
   {
-    m_pEmptyTex->CopyRect(m_pTexture, &rcSrc, NULL);
+    m_pEmptyTex->CopyRect(m_pTexture, NULL, &rcSrc);
     pCanvas->DrawTexture(m_pTexture, rcSrc.left, rcSrc.top, &regnSrc);
   }
   else
@@ -613,7 +601,8 @@ void MyGraphicsTest::TestCopyAndStretchRect(GXRECT& rect)
     rcDest = rcSrc;
     gxInflateRect(&rcDest, 32, 32);
     gxOffsetRect(&rcDest, -rcDest.left, -rcDest.top);
-    m_pEmptyTex->StretchRect(m_pTexture, &rcDest, &rcSrc, GXTEXFILTER_LINEAR);
+    //m_pEmptyTex->StretchRect(m_pTexture, &rcDest, &rcSrc, GXTEXFILTER_LINEAR);
+    CLBREAK; // 上面1条没实现
     gxRectToRegn(&regnDest, &rcDest);
     pCanvas->DrawTexture(m_pTexture, &regnDest, &regnSrc);
   }

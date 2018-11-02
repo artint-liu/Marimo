@@ -228,15 +228,15 @@ GXBOOL _GFTFont::_CreateTexture()
   //pTexture = GXCreateTexture(DEFAULT_FONT_TEX_SIZE_X, DEFAULT_FONT_TEX_SIZE_Y, 
   //  1, D3DUSAGE_DYNAMIC, D3DFMT_A8, D3DPOOL_DEFAULT);
   if(GXFAILED(m_pGraphics->CreateTexture(&pTexture, NULL, DEFAULT_FONT_TEX_SIZE_X, DEFAULT_FONT_TEX_SIZE_Y, 
-    1, GXFMT_A8, GXRU_FREQUENTLYWRITE)))
+    GXFMT_A8, GXResUsage::Write, 1)))
   {
     CLBREAK;
     return FALSE;
   }
-  GTexture::LOCKEDRECT locked;
-  pTexture->LockRect(&locked, NULL, NULL);
-  memset(locked.pBits, 0x80, DEFAULT_FONT_TEX_SIZE_X * DEFAULT_FONT_TEX_SIZE_Y);
-  pTexture->UnlockRect();
+  GTexture::MAPPEDRECT mapped;
+  pTexture->MapRect(&mapped, NULL, GXResMap::Write);
+  memset(mapped.pBits, 0x80, DEFAULT_FONT_TEX_SIZE_X * DEFAULT_FONT_TEX_SIZE_Y);
+  pTexture->UnmapRect();
 
   m_aFontTex.push_back(pTexture);
   //pTexture->AddRef();
@@ -245,20 +245,20 @@ GXBOOL _GFTFont::_CreateTexture()
 //////////////////////////////////////////////////////////////////////////
 GXVOID _GFTFont::UpdateTexBuffer(GXUINT idxTex, LPGXREGN prgDest, unsigned char* pBuffer)
 {
-  GTexture::LOCKEDRECT locked;
+  GTexture::MAPPEDRECT mapped;
   GXRECT rect;
   ASSERT(prgDest->width > 0 && prgDest->height > 0);
   gxRegnToRect((GXRECT*)&rect, prgDest);
   GTexture* pTexture = m_aFontTex[idxTex];
-  pTexture->LockRect(&locked, &rect, NULL);
+  pTexture->MapRect(&mapped, &rect, GXResMap::Write);
 
-  unsigned char* pBits = (unsigned char*)locked.pBits;
+  unsigned char* pBits = (unsigned char*)mapped.pBits;
   for(GXLONG i = 0; i < prgDest->height; i++)
   {
     memcpy(pBits, (const void*)&pBuffer[i * prgDest->width], prgDest->width);
-    pBits += locked.Pitch;
+    pBits += mapped.Pitch;
   }
-  pTexture->UnlockRect();
+  pTexture->UnmapRect();
 }
 
 GXBOOL _GFTFont::QueryCharDescFromCache(GXWCHAR ch, LPCHARDESC pCharDesc)

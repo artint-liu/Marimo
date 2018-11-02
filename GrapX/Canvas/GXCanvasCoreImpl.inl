@@ -2,14 +2,15 @@ GXCanvasCoreImpl::GXCanvasCoreImpl(GXGraphicsImpl* pGraphics, GXUINT nPriority, 
   : GXCanvas            (nPriority, dwType)
   , m_pGraphics         (pGraphics)
   , m_pTargetTex        (NULL)
-  , m_xExt              (0)
-  , m_yExt              (0)
+  //, m_xExt              (0)
+  //, m_yExt              (0)
   , m_pBlendState       (NULL)
   , m_pSamplerState     (NULL)
   , m_pDepthStencilState(NULL)
   , m_pEffectImpl       (NULL)
   , m_pCamera           (NULL)
 {
+  InlSetZeroT(m_sExtent);
   AddRef();
 }
 
@@ -23,40 +24,39 @@ GXCanvasCoreImpl::~GXCanvasCoreImpl()
   SAFE_RELEASE(m_pCamera);
 }
 
-GXBOOL GXCanvasCoreImpl::Initialize(GTexture* pTexture)
+GXBOOL GXCanvasCoreImpl::Initialize(GXRenderTarget* pTarget)
 {
-  if((pTexture != NULL && (pTexture->GetUsage() & GXRU_TEX_RENDERTARGET)) ||
-    pTexture == NULL)
+  if(pTarget == NULL)
   {
-    ASSERT(m_pTargetTex == NULL);
-
-    m_pTargetTex = (GTextureImpl*)pTexture;
-    if(m_pTargetTex != NULL)
-    {
-      m_pTargetTex->AddRef();
-      m_pTargetTex->GetDimension((GXUINT*)&m_xExt, (GXUINT*)&m_yExt);
-    }
-    else
-    {
-      GXGRAPHICSDEVICE_DESC GraphDeviceDesc;
-      m_pGraphics->GetDesc(&GraphDeviceDesc);
-      m_xExt = GraphDeviceDesc.BackBufferWidth;
-      m_yExt = GraphDeviceDesc.BackBufferHeight;
-    }
-
-    if(m_pSamplerState == NULL) {
-      m_pGraphics->CreateSamplerState(reinterpret_cast<GSamplerState**>(&m_pSamplerState));
-    }
-    else {
-      m_pSamplerState->ResetToDefault();
-    }
-
-    m_pEffectImpl = (GXEffectImpl*)m_pGraphics->IntGetEffect();
-    m_pEffectImpl->AddRef();
-
-    return TRUE;
+    return FALSE;
   }
-  return FALSE;
+
+  m_pTargetTex = static_cast<GXRenderTargetImpl*>(pTarget);
+  if(m_pTargetTex != NULL)
+  {
+    m_pTargetTex->AddRef();
+    m_pTargetTex->GetDimension(&m_sExtent);
+  }
+  else
+  {
+    GXGRAPHICSDEVICE_DESC GraphDeviceDesc;
+    m_pGraphics->GetDesc(&GraphDeviceDesc);
+    
+    m_sExtent.cx = GraphDeviceDesc.BackBufferWidth;
+    m_sExtent.cy = GraphDeviceDesc.BackBufferHeight;
+  }
+
+  if(m_pSamplerState == NULL) {
+    m_pGraphics->CreateSamplerState(reinterpret_cast<GSamplerState**>(&m_pSamplerState));
+  }
+  else {
+    m_pSamplerState->ResetToDefault();
+  }
+
+  m_pEffectImpl = (GXEffectImpl*)m_pGraphics->IntGetEffect();
+  m_pEffectImpl->AddRef();
+
+  return TRUE;
 }
 
 GXHRESULT GXCanvasCoreImpl::Invoke(GRESCRIPTDESC* pDesc)
@@ -64,13 +64,13 @@ GXHRESULT GXCanvasCoreImpl::Invoke(GRESCRIPTDESC* pDesc)
   return GX_OK;
 }
 
-GXVOID GXCanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const
+GXSIZE* GXCanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const
 {
-  pSize->cx = m_xExt;
-  pSize->cy = m_yExt;
+  *pSize = m_sExtent;
+  return pSize;
 }
 
-GTexture* GXCanvasCoreImpl::GetTargetUnsafe() const
+GXRenderTarget* GXCanvasCoreImpl::GetTargetUnsafe() const
 {
   return m_pTargetTex;
 }

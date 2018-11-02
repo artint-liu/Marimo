@@ -30,6 +30,7 @@ namespace GrapXInternal
     GXHRESULT       BroadcastScriptCommand    (GRESCRIPTDESC* pDesc);
     GXHRESULT       BroadcastCategoryMessage  (GXDWORD dwCategoryId, GRESCRIPTDESC* pDesc);
     GResource*      Find                      (LPCRESKETCH pDesc) const;
+    GXHRESULT       Find                      (GResource** ppResource, LPCRESKETCH pDesc) const;
     LPCRESKETCH     Find                      (GResource* pResource) const;
     GXHRESULT       RegisterUnfeatured        (GResource* pResource);
     GXHRESULT       Register                  (LPCRESKETCH pDesc, GResource* pResource);

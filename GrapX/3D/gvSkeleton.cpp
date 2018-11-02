@@ -419,7 +419,7 @@ GXBOOL GVSkeleton::BuildRenderData(GXGraphics* pGraphics)
     //  0, pIndices, pVertex);
 
     pGraphics->CreatePrimitive(&m_pPrimitive,
-      NULL, MOGetSysVertexDecl(GXVD_P3T2C4F), GXResUsage::GXResUsage_Default,
+      NULL, MOGetSysVertexDecl(GXVD_P3T2C4F), GXResUsage::Default,
       nBoneCount, 0, pVertex, m_nPrimiCount * 2, 2, pIndices);
 
     SAFE_DELETE_ARRAY(pVertex);
@@ -439,7 +439,7 @@ GXBOOL GVSkeleton::UpdateRenderData()
   //GXWORD* pIndices;
   const GXUINT nBoneCount = (GXUINT)m_aBones.size();
 
-  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::GXResMap_Write);
+  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Write);
   //PrimitiveUtility::LockIndices locker_i(m_pPrimitive);
 
   //if(m_pPrimitive->Lock(0, 0, 0, 0, (GXLPVOID*)&pVertices, &pIndices))

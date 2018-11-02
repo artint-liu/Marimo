@@ -4,15 +4,17 @@
 class GXGraphicsImpl;
 class GTextureImpl;
 class GSamplerStateImpl;
+class GXRenderTargetImpl;
 
 class GXCanvasCoreImpl : public GXCanvas
 {
   friend class GXGraphicsImpl;
 protected:
   GXGraphicsImpl*     m_pGraphics;
-  GXINT               m_xExt;          // 物理尺寸，不受原点位置影响
-  GXINT               m_yExt;
-  GTextureImpl*       m_pTargetTex;
+  GXSIZE              m_sExtent;
+  //GXINT               m_xExt;          // 物理尺寸，不受原点位置影响
+  //GXINT               m_yExt;
+  GXRenderTargetImpl* m_pTargetTex;
   GXEffectImpl*       m_pEffectImpl;
   GBlendState*        m_pBlendState;
   GDepthStencilState* m_pDepthStencilState;
@@ -25,10 +27,10 @@ public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef              ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXVOID    GetTargetDimension  (GXSIZE* pSize) const override;
-  virtual GTexture* GetTargetUnsafe     () const override;
-  virtual GXBOOL    Initialize          (GTexture* pTexture);
-  virtual GXHRESULT Invoke              (GRESCRIPTDESC* pDesc) override;
+  virtual GXSIZE*         GetTargetDimension  (GXSIZE* pSize) const override;
+  virtual GXRenderTarget* GetTargetUnsafe     () const override;
+  virtual GXBOOL          Initialize          (GXRenderTarget* pTarget);
+  virtual GXHRESULT       Invoke              (GRESCRIPTDESC* pDesc) override;
 };
 
 #endif // _IMPLEMENT_GRAP_X_CANVAS_CORE_H_

@@ -37,7 +37,7 @@
 #include <GrapX/GTexture.h>
 #include <GrapX/GRegion.h>
 #include <GrapX/GXFont.h>
-#include <GrapX/GXImage.h>
+#include <GrapX/GXRenderTarget.h>
 #include <GrapX/GXSprite.h>
 #include <GrapX/MOSprite.h>
 #include <GrapX/GXCanvas.h>

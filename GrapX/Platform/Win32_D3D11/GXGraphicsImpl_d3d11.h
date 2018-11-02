@@ -21,6 +21,7 @@ class GXEffectImpl;
 class GTexture;
 class GXConsole;
 class ILogger;
+class GXRenderTargetImpl;
 
 namespace Marimo {
   class ShaderConstName;
@@ -37,8 +38,8 @@ namespace D3D11
   class GDepthStencilStateImpl;
   class GSamplerStateImpl;
 
-  template<class InterfaceT> class GTexBaseImplT;
-  typedef GTexBaseImplT<GTextureBase> GTexBaseImpl;
+  template<class InterfaceT> class GTexureBaseImplT;
+  typedef GTexureBaseImplT<GTextureBase> GTexBaseImpl;
 
   struct GRAPHICS_CREATION_DESC
   {
@@ -89,7 +90,7 @@ namespace D3D11
 
     inline void       InlUpdateTopology     (GXPrimitiveType eType, GXUINT nPrimCount, GXUINT* pVertCount);
 
-    GXBOOL      IntCheckSizeOfTargetAndDepth();
+    //GXBOOL      IntCheckSizeOfTargetAndDepth();
     GXVOID      BuildInputLayout();
 
   private:
@@ -105,8 +106,10 @@ namespace D3D11
     ID3D11DepthStencilView* m_pDepthStencilView;
     DXGI_SWAP_CHAIN_DESC    m_SwapChainDesc;
 
-    GTexture*               m_pBackBufferTex;    // 内部使用的纹理缓冲
-    GXImage*                m_pBackBufferImg;    // 引用 m_pBackBufferTex
+    GXRenderTarget*         m_pTempBuffer;
+    GXRenderTarget*         m_pDefaultBackBuffer;
+    //GTexture*               m_pBackBufferTex;    // 内部使用的纹理缓冲
+    //GXImage*                m_pBackBufferImg;    // 引用 m_pBackBufferTex
     //GShader*                m_pSimpleShader;
     GShader*                m_pBaseShader;
     GXEffect*               m_pBaseEffect;
