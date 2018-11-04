@@ -73,8 +73,8 @@ namespace D3D11
     GXVOID      GenerateMipMaps   () override;
     GXBOOL      GetDesc           (GXBITMAP*lpBitmap) override;
     GXBOOL      CopyRect          (GTexture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
-    GXBOOL      MapRect           (MAPPED* pMappedRect, GXResMap eResMap) override;
-    GXBOOL      UnmapRect         () override;
+    GXBOOL      Map               (MAPPED* pMappedRect, GXResMap eResMap) override;
+    GXBOOL      Unmap             () override;
     GXBOOL      UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch) override;
     GXGraphics* GetGraphicsUnsafe () override;
 
@@ -146,8 +146,8 @@ namespace D3D11
     GtextureImpl_GPUReadBack(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
     GXBOOL InitReadBackTexture();
 
-    GXBOOL MapRect    (MAPPED* pMappedRect, GXResMap eResMap) override;
-    GXBOOL UnmapRect  () override;
+    GXBOOL Map    (MAPPED* pMappedRect, GXResMap eResMap) override;
+    GXBOOL Unmap  () override;
   };
 
 #if 0

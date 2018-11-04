@@ -137,7 +137,7 @@ namespace D3D11
     pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
 
     GTexture::MAPPED mapped;
-    if(pReadBackTexture->MapRect(&mapped, GXResMap::Read))
+    if(pReadBackTexture->Map(&mapped, GXResMap::Read))
     {
       const GXUINT bpp = GetBytesOfGraphicsFormat(format);
       FIBITMAP* fibmp = FreeImage_Allocate(sDimension.cx, sDimension.cy, bpp * 8);//(static_cast<BYTE*>(mapped.pBits), mapped.Pitch * sDimension.cx);
@@ -151,7 +151,7 @@ namespace D3D11
         mapped.pBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(mapped.pBits) + mapped.Pitch);
       }
 
-      pReadBackTexture->UnmapRect();
+      pReadBackTexture->Unmap();
 
       FREE_IMAGE_FORMAT fi_format = FIF_UNKNOWN;
       clStringA strFormat = pImageFormat;

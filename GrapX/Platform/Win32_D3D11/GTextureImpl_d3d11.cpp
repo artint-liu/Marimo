@@ -442,7 +442,7 @@ namespace D3D11
   }
 #endif
 
-  GXBOOL GTextureImpl::MapRect(MAPPED* pMappedRect, GXResMap eResMap)
+  GXBOOL GTextureImpl::Map(MAPPED* pMappedRect, GXResMap eResMap)
   {
     // 不能嵌套Map/Unmap
     if(m_sMappedResource.pData) {
@@ -520,7 +520,7 @@ namespace D3D11
     return TRUE;
   }
 
-  GXBOOL GTextureImpl::UnmapRect()
+  GXBOOL GTextureImpl::Unmap()
   {
     if(m_sMappedResource.pData)
     {
@@ -1171,7 +1171,7 @@ namespace D3D11
   }
 
 
-  GXBOOL GtextureImpl_GPUReadBack::MapRect(MAPPED* pMappedRect, GXResMap eResMap)
+  GXBOOL GtextureImpl_GPUReadBack::Map(MAPPED* pMappedRect, GXResMap eResMap)
   {
     ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
     if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_READ, 0, &m_sMappedResource)))
@@ -1184,7 +1184,7 @@ namespace D3D11
     return TRUE;
   }
 
-  GXBOOL GtextureImpl_GPUReadBack::UnmapRect()
+  GXBOOL GtextureImpl_GPUReadBack::Unmap()
   {
     if(m_sMappedResource.pData)
     {
