@@ -79,6 +79,23 @@ public:
   static GXDLL GXBOOL     LoadStateSet        (clStockA* pSmart, GXLPCSTR szSection, ParamArray* aStates);
 };
 
+namespace GrapX
+{
+  class Shader : public GResource
+  {
+  public:
+    Shader() : GResource(0, RESTYPE_SHADER) {}
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+    GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe () const);
+
+
+  };
+} // namespace GrapX
+
 class GShaderStub : public GResource
 {
 public:

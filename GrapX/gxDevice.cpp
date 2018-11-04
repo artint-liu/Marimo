@@ -24,9 +24,9 @@
 #include <User/Win32Emu/_dpa.h>
 #include <User/DesktopWindowsMgr.h>
 #include <Utility/LogMgr.h>
-#include <Utility/Shader/AeroShader.h>
-#include <Utility/Shader/BlurShader.h>
-#include <Utility/Shader/SimpleShader.h>
+//#include <Utility/Shader/AeroShader.h>
+//#include <Utility/Shader/BlurShader.h>
+//#include <Utility/Shader/SimpleShader.h>
 //#include <clMessageThread.h>
 #include "GrapX/gxDevice.h"
 //#include "thread/clMessageThread.h"

@@ -266,7 +266,7 @@ extern "C" void _cl_NoOperation();
 #       define CLUNIQUEBREAK CLBREAK
 #       define CLNOP         { _cl_NoOperation(); }
 #       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
-#       define ASSERT(x)      if(!(x)) {_cl_assertW(L###x, __WFILE__, __LINE__); _cl_Break();} // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
+#       define ASSERT(x)      if(!(x)) {_cl_assertW(_CLTEXT(#x), __WFILE__, __LINE__); _cl_Break();} // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
 #       define STATIC_ASSERT(x)    static_assert(x, #x);
 #       define V(x)              if(FAILED(x)) { _cl_Break(); }
 #       define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}

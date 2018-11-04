@@ -1,21 +1,21 @@
-#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
-// È«¾ÖÍ·ÎÄ¼ş
+ï»¿#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
+// å…¨å±€å¤´æ–‡ä»¶
 #include <GrapX.h>
 #include <User/GrapX.Hxx>
 
-// ±ê×¼½Ó¿Ú
+// æ ‡å‡†æ¥å£
 //#include "Include/GUnknown.h"
 #include "GrapX/GResource.h"
 #include "GrapX/GTexture.h"
 #include "GrapX/GXGraphics.h"
 #include "GrapX/GXKernel.h"
 
-// Æ½Ì¨Ïà¹Ø
+// å¹³å°ç›¸å…³
 #include "GrapX/Platform.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D11.h"
 
-// Ë½ÓĞÍ·ÎÄ¼ş
+// ç§æœ‰å¤´æ–‡ä»¶
 #include "Platform/Win32_D3D11/GTextureImpl_D3D11.h"
 #define _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 #include "Canvas/GXResourceMgr.h"
@@ -24,6 +24,18 @@
 #include <clPathFile.h>
 #ifdef ENABLE_GRAPHICS_API_DX11
 #include <FreeImage.h>
+
+// Resource Usage |Default |Dynamic |Immutable |Staging
+// GPU - Read     |yes     |yes     |yes       |yesÂ¹
+// GPU - Write    |yes     |        |          |yesÂ¹
+// CPU - Read     |        |        |          |yesÂ¹
+// CPU - Write    |        |yes     |          |yesÂ¹
+//
+// 1 - GPU read or write of a resource with the D3D11_USAGE_STAGING usage is restricted to copy operations.
+// You use ID3D11DeviceContext::CopySubresourceRegion and ID3D11DeviceContext::CopyResource for these copy
+// operations. Also, because depth-stencil formats and multisample layouts are implementation details of a
+// particular GPU design, the operating system canâ€™t expose these formats and layouts to the CPU in general.
+// Therefore, staging resources can't be a depth-stencil buffer or a multisampled render target.
 
 namespace D3D11
 {
@@ -163,7 +175,7 @@ namespace D3D11
       TexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     }
 
-    GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage);
+    GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage, (pInitData != NULL));
 
     if(pInitData) {
       TexInitData.pSysMem       = pInitData;
@@ -172,7 +184,7 @@ namespace D3D11
 
     ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
     HRESULT hval = pd3dDevice->CreateTexture2D(&TexDesc, pInitData ? &TexInitData : NULL, &m_pD3D11Texture);
-    ASSERT(SUCCEEDED(hval)); // ÁÙÊ±
+    ASSERT(SUCCEEDED(hval)); // ä¸´æ—¶
     if(SUCCEEDED(hval) && TEST_FLAG(TexDesc.BindFlags, D3D11_BIND_SHADER_RESOURCE)) {
       hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, NULL, &m_pD3D11ShaderView);
       if(FAILED(hval))
@@ -189,23 +201,23 @@ namespace D3D11
   }
 
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL GTextureImpl::Clear(const GXLPRECT lpRect, GXCOLOR dwColor)
+  GXBOOL GTextureImpl::Clear(GXCOLOR dwColor)
   {
-    ID3D11DeviceContext* pContext = m_pGraphics->D3DGetDeviceContext();
+    ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
     if(m_eResUsage == GXResUsage::Write || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
     {
       int nWidth;
       int nHeight;
-      if(lpRect == NULL) {
+      //if(lpRect == NULL) {
         nWidth = m_nWidth;
         nHeight = m_nHeight;
-      }
-      else {
-        nWidth = lpRect->right - lpRect->left;
-        nHeight = lpRect->bottom - lpRect->top;
-      }
+      //}
+      //else {
+      //  nWidth = lpRect->right - lpRect->left;
+      //  nHeight = lpRect->bottom - lpRect->top;
+      //}
       GXUINT cbFormat = GetBytesOfGraphicsFormat(m_Format);
-      GXLPVOID pData = new GXBYTE[cbFormat * nWidth * nHeight];
+      GXLPVOID pData = new GXBYTE[cbFormat * m_nWidth * m_nHeight];
       if(cbFormat == 4) 
       {
         GXDWORD* pColor = (GXDWORD*)pData;
@@ -216,16 +228,16 @@ namespace D3D11
       }
       else {
         ASSERT(0);
-        // Ä¿Ç°²»Ö§³Ö
+        // ç›®å‰ä¸æ”¯æŒ
       }
          
       //ID3D11Texture2D* pTempTexture = IntCreateHelpTexture(nWidth, nHeight, pData);
-      if(lpRect == NULL) {
-        pContext->UpdateSubresource(m_pD3D11Texture, 0, NULL, pData, nWidth * cbFormat, NULL);
-      }
-      else {
-        ASSERT(0); // FIXME: ²»Ö§³ÖÇøÓò
-      }
+      //if(lpRect == NULL) {
+      pD3D11Context->UpdateSubresource(m_pD3D11Texture, 0, NULL, pData, nWidth * cbFormat, NULL);
+      //}
+      //else {
+      //  ASSERT(0); // FIXME: ä¸æ”¯æŒåŒºåŸŸ
+      //}
 
       
       //SAFE_RELEASE(pTempTexture);
@@ -276,14 +288,14 @@ namespace D3D11
     //        }
     //      }
     //      break;
-    //    default:  // ²»Ö§³ÖµÄ¸ñÊ½
+    //    default:  // ä¸æ”¯æŒçš„æ ¼å¼
     //      ASSERT(0);
     //    }
 
     //    m_pSurface->UnlockRect();
     //    return TRUE;
     //  }
-    //  ASSERT(0);  // ²»Ö§³ÖËø¶¨
+    //  ASSERT(0);  // ä¸æ”¯æŒé”å®š
     //  return FALSE;
     //}
     //else 
@@ -316,7 +328,7 @@ namespace D3D11
     //}
     //HBRUSH hBrush;
     //GXRECT rect;
-    //hBrush = CreateSolidBrush((GXCOLORREF)dwColor);  // TODO: Õâ¸öÑÕÉ«ÊÇ²»ÊÇ·´µÄ£¿
+    //hBrush = CreateSolidBrush((GXCOLORREF)dwColor);  // TODO: è¿™ä¸ªé¢œè‰²æ˜¯ä¸æ˜¯åçš„ï¼Ÿ
     //
     //if(lpRect == NULL)
     //{
@@ -413,7 +425,7 @@ namespace D3D11
       return NULL;
     }
 
-    // ÏÂÔØ×ÊÔ´
+    // ä¸‹è½½èµ„æº
     pContext->CopyResource(pHelpTexture, m_pD3D11Texture);
     return pHelpTexture;
   }
@@ -430,24 +442,24 @@ namespace D3D11
   }
 #endif
 
-  GXBOOL GTextureImpl::MapRect(MAPPEDRECT* pLockRect, GXLPCRECT pRect, GXResMap eResMap)
+  GXBOOL GTextureImpl::MapRect(MAPPED* pMappedRect, GXResMap eResMap)
   {
-    // ²»ÄÜÇ¶Ì×Map/Unmap
+    // ä¸èƒ½åµŒå¥—Map/Unmap
     if(m_sMappedResource.pData) {
       return FALSE;
     }
-    else if(pRect && (
-      pRect->left   < 0 ||
-      pRect->top    < 0 ||
-      pRect->right  >= (GXLONG)m_nWidth ||
-      pRect->bottom >= (GXLONG)m_nHeight))
-    {
-      return FALSE;
-    }
+    //else if(pRect && (
+    //  pRect->left   < 0 ||
+    //  pRect->top    < 0 ||
+    //  pRect->right  >= (GXLONG)m_nWidth ||
+    //  pRect->bottom >= (GXLONG)m_nHeight))
+    //{
+    //  return FALSE;
+    //}
 
 
-    ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
-    ID3D11DeviceContext* pContext = m_pGraphics->D3DGetDeviceContext();
+    //ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+    ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
     D3D11_MAPPED_SUBRESOURCE SubResource;
     HRESULT hval = S_OK;
     InlSetZeroT(SubResource);
@@ -458,33 +470,33 @@ namespace D3D11
     }
     else if(m_eResUsage == GXResUsage::Read && eResMap == GXResMap::Read)
     {
-      pLockRect->pBits = m_pTextureData;
-      pLockRect->Pitch = GetMinPitchSize();
+      pMappedRect->pBits = m_pTextureData;
+      pMappedRect->Pitch = GetMinPitchSize();
     }
     else if(m_eResUsage == GXResUsage::Write && eResMap == GXResMap::Write)
     {
-      if(FAILED(pContext->Map(m_pD3D11Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_sMappedResource)))
+      if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_sMappedResource)))
       {
         return FALSE;
       }
-      pLockRect->pBits = m_sMappedResource.pData;
-      pLockRect->Pitch = m_sMappedResource.RowPitch;
+      pMappedRect->pBits = m_sMappedResource.pData;
+      pMappedRect->Pitch = m_sMappedResource.RowPitch;
     }
     else if(m_eResUsage == GXResUsage::ReadWrite)
     {
       if(eResMap == GXResMap::Write)
       {
-        pLockRect->pBits = m_sMappedResource.pData;
-        pLockRect->Pitch = m_sMappedResource.RowPitch;
+        pMappedRect->pBits = m_sMappedResource.pData;
+        pMappedRect->Pitch = m_sMappedResource.RowPitch;
       }
       else if(eResMap == GXResMap::Read || eResMap == GXResMap::ReadWrite)
       {
-        if(FAILED(pContext->Map(m_pD3D11Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_sMappedResource)))
+        if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_sMappedResource)))
         {
           return FALSE;
         }
-        pLockRect->pBits = m_pTextureData;
-        pLockRect->Pitch = GetMinPitchSize();
+        pMappedRect->pBits = m_pTextureData;
+        pMappedRect->Pitch = GetMinPitchSize();
       }
       else {
         return FALSE;
@@ -492,18 +504,18 @@ namespace D3D11
     }
     else if(m_eResUsage == GXResUsage::SystemMem)
     {
-      pLockRect->pBits = m_pTextureData;
-      pLockRect->Pitch = GetMinPitchSize();
+      pMappedRect->pBits = m_pTextureData;
+      pMappedRect->Pitch = GetMinPitchSize();
     }
     else {
       return FALSE;
     }
 
-    if(pRect)
-    {
-      pLockRect->pBits = reinterpret_cast<GXLPVOID>(
-        reinterpret_cast<size_t>(pLockRect->pBits) + pLockRect->Pitch * pRect->top + GetBytesOfGraphicsFormat(m_Format) * pRect->left);
-    }
+    //if(pRect)
+    //{
+    //  pMappedRect->pBits = reinterpret_cast<GXLPVOID>(
+    //    reinterpret_cast<size_t>(pMappedRect->pBits) + pMappedRect->Pitch * pRect->top + GetBytesOfGraphicsFormat(m_Format) * pRect->left);
+    //}
 
     return TRUE;
   }
@@ -512,7 +524,7 @@ namespace D3D11
   {
     if(m_sMappedResource.pData)
     {
-      ID3D11DeviceContext* pContext = m_pGraphics->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
       if(m_pTextureData)
       {
         const GXUINT nMinPitch = GetMinPitchSize();
@@ -521,10 +533,24 @@ namespace D3D11
           memcpy(static_cast<GXLPBYTE>(m_sMappedResource.pData) + y * m_sMappedResource.RowPitch,
             m_pTextureData + y * nMinPitch, m_sMappedResource.RowPitch);
         }
-        pContext->Unmap(m_pD3D11Texture, 0);
-        InlSetZeroT(m_sMappedResource);
       }
+      pD3D11Context->Unmap(m_pD3D11Texture, 0);
+      InlSetZeroT(m_sMappedResource);
     }
+    return TRUE;
+  }
+
+  GXBOOL GTextureImpl::UpdateRect(GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch)
+  {
+    ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+    D3D11_BOX box;
+    InlSetZeroT(box);
+    box.left   = prcDest->left;
+    box.top    = prcDest->top;
+    box.right  = prcDest->right;
+    box.bottom = prcDest->bottom;
+    box.back   = 1;
+    pD3D11Context->UpdateSubresource(m_pD3D11Texture, 0, &box, pData, nPitch, 0);
     return TRUE;
   }
 
@@ -962,7 +988,7 @@ namespace D3D11
         m_nHeight = Tex2Desc.Height;
         m_eWidthRatio = m_nWidth;
         m_eHeightRatio = m_nHeight;
-        // FIXME: ²¹È«
+        // FIXME: è¡¥å…¨
         return GX_OK;
       }
     }
@@ -1109,6 +1135,64 @@ namespace D3D11
     //descDSV.Texture2D.MipSlice = 0;
     HRESULT hval = pd3dDevice->CreateDepthStencilView(m_pD3D11Texture, &descDSV, &m_pD3D11DepthStencilView);
     return SUCCEEDED(hval);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  GtextureImpl_GPUReadBack::GtextureImpl_GPUReadBack(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+    : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+  {
+  }
+
+  GXBOOL GtextureImpl_GPUReadBack::InitReadBackTexture()
+  {
+    ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+
+    D3D11_TEXTURE2D_DESC TexDesc;
+    D3D11_SUBRESOURCE_DATA TexInitData;
+    InlSetZeroT(TexDesc);
+    InlSetZeroT(TexInitData);
+
+    TexDesc.Width               = m_nWidth;
+    TexDesc.Height              = m_nHeight;
+    TexDesc.MipLevels           = m_nMipLevels;
+    TexDesc.ArraySize           = 1;
+    TexDesc.Format              = GrapXToDX11::FormatFrom(m_Format);
+    TexDesc.SampleDesc.Count    = 1;
+    TexDesc.SampleDesc.Quality  = 0;
+    TexDesc.BindFlags           = 0;
+    TexDesc.Usage               = D3D11_USAGE_STAGING;
+    TexDesc.CPUAccessFlags      = D3D11_CPU_ACCESS_READ;
+
+
+    HRESULT hval = pd3dDevice->CreateTexture2D(&TexDesc, NULL, &m_pD3D11Texture);
+
+    return SUCCEEDED(hval);
+  }
+
+
+  GXBOOL GtextureImpl_GPUReadBack::MapRect(MAPPED* pMappedRect, GXResMap eResMap)
+  {
+    ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+    if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_READ, 0, &m_sMappedResource)))
+    {
+      return FALSE;
+    }
+
+    pMappedRect->pBits = m_sMappedResource.pData;
+    pMappedRect->Pitch = m_sMappedResource.RowPitch;
+    return TRUE;
+  }
+
+  GXBOOL GtextureImpl_GPUReadBack::UnmapRect()
+  {
+    if(m_sMappedResource.pData)
+    {
+      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      pD3D11Context->Unmap(m_pD3D11Texture, 0);
+      return TRUE;
+    }
+    return FALSE;
   }
 
 } // namespace D3D11

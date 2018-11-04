@@ -187,10 +187,7 @@ GXBOOL GXCanvasImpl::Initialize(GXRenderTarget* pTarget, const REGN* pRegn)
 
     // 初始化空纹理时的替换纹理
     if(m_pWhiteTex == NULL) {
-      GXHRESULT hval = m_pGraphics->CreateTexture(&m_pWhiteTex, "CanvasWhiteTex8x8", 8, 8, GXFMT_A8R8G8B8, GXResUsage::Default, 1, NULL, 0);
-      if(hval == 0) { // 只有在首次创建时才清除颜色
-        m_pWhiteTex->Clear(NULL, 0xffffffff);
-      }
+      m_pGraphics->CreateTexture(&m_pWhiteTex, "White8x8", 0, 0, Format_Unknown, GXResUsage::Default, 0, NULL, 0); // 查询
     }
 
     // 创建BlendState

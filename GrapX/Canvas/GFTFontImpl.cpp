@@ -96,7 +96,7 @@ GXBOOL _GFTFont::CreateFont(const GXULONG nWidth, const GXULONG nHeight, const G
   //FT_Set_Transform( m_Face, &matrix, &pen );
   //m_aFontTex = new GTextureArray;
 
-  _CreateTexture();
+  IntCreateTexture();
 
   return TRUE;
 }
@@ -221,22 +221,26 @@ _GFTFont::~_GFTFont()
 }
 
 
-GXBOOL _GFTFont::_CreateTexture()
+GXBOOL _GFTFont::IntCreateTexture()
 {
   GTexture* pTexture = NULL;
 
   //pTexture = GXCreateTexture(DEFAULT_FONT_TEX_SIZE_X, DEFAULT_FONT_TEX_SIZE_Y, 
   //  1, D3DUSAGE_DYNAMIC, D3DFMT_A8, D3DPOOL_DEFAULT);
   if(GXFAILED(m_pGraphics->CreateTexture(&pTexture, NULL, DEFAULT_FONT_TEX_SIZE_X, DEFAULT_FONT_TEX_SIZE_Y, 
-    GXFMT_A8, GXResUsage::Write, 1)))
+    GXFMT_A8, GXResUsage::Default, 1)))
   {
     CLBREAK;
     return FALSE;
   }
+#if 0
   GTexture::MAPPEDRECT mapped;
   pTexture->MapRect(&mapped, NULL, GXResMap::Write);
   memset(mapped.pBits, 0x80, DEFAULT_FONT_TEX_SIZE_X * DEFAULT_FONT_TEX_SIZE_Y);
   pTexture->UnmapRect();
+#else
+  //pTexture->Clear(0x80808080);
+#endif
 
   m_aFontTex.push_back(pTexture);
   //pTexture->AddRef();
@@ -245,11 +249,13 @@ GXBOOL _GFTFont::_CreateTexture()
 //////////////////////////////////////////////////////////////////////////
 GXVOID _GFTFont::UpdateTexBuffer(GXUINT idxTex, LPGXREGN prgDest, unsigned char* pBuffer)
 {
-  GTexture::MAPPEDRECT mapped;
+  //GTexture::MAPPEDRECT mapped;
   GXRECT rect;
   ASSERT(prgDest->width > 0 && prgDest->height > 0);
   gxRegnToRect((GXRECT*)&rect, prgDest);
   GTexture* pTexture = m_aFontTex[idxTex];
+
+#if 0
   pTexture->MapRect(&mapped, &rect, GXResMap::Write);
 
   unsigned char* pBits = (unsigned char*)mapped.pBits;
@@ -259,6 +265,9 @@ GXVOID _GFTFont::UpdateTexBuffer(GXUINT idxTex, LPGXREGN prgDest, unsigned char*
     pBits += mapped.Pitch;
   }
   pTexture->UnmapRect();
+#else
+  pTexture->UpdateRect(&rect, pBuffer, prgDest->width);
+#endif
 }
 
 GXBOOL _GFTFont::QueryCharDescFromCache(GXWCHAR ch, LPCHARDESC pCharDesc)
@@ -304,7 +313,7 @@ GXINT _GFTFont::QueryCharDesc(GXWCHAR ch, LPCHARDESC pCharDesc)
     }
     if(m_ptPen.y + m_nHeight >= DEFAULT_FONT_TEX_SIZE_Y)
     {
-      if(_CreateTexture() == FALSE)
+      if(IntCreateTexture() == FALSE)
         return FALSE;
       m_ptPen.y = 0;
     }

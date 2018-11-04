@@ -54,6 +54,9 @@
   //CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME, 1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
   CreateRenderTarget(&m_pDefaultBackBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, Format_D24S8);
 
+  GXDWORD white[8 * 8];
+  memset(white, 0xff, sizeof(white));
+  CreateTexture(&m_pWhiteTexture8x8, "White8x8", 8, 8, Format_B8G8R8A8, GXResUsage::Default, 1, white, 0);
   //m_pBackBufferImg = CreateImageFromTexture(m_pBackBufferTex);
 
   //m_pShaderMgr = new GXShaderMgr(this);
@@ -79,6 +82,7 @@ GXBOOL GXGraphicsImpl::ReleaseCommon()
   SAFE_RELEASE(m_pCurSamplerState);
 
   SAFE_DELETE(m_pShaderConstName);
+  SAFE_RELEASE(m_pWhiteTexture8x8);
 
   // 释放 Canvas 缓冲
   if(m_aCanvasPtrCache != NULL)

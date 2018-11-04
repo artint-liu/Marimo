@@ -143,6 +143,7 @@ namespace D3D11
     //, m_pConsole            (NULL)
     , m_pLogger             (NULL)
     , m_pShaderConstName    (NULL)
+    , m_pWhiteTexture8x8  (NULL)
   {
     memset(m_pCurTexture, 0, sizeof(GTexture*) * MAX_TEXTURE_STAGE);
     //m_pRgnAllocator = new GAllocator(NULL);
@@ -859,6 +860,9 @@ namespace D3D11
         pSavedPrimitive->AddRef();
       }
 
+      SetTexture(m_pWhiteTexture8x8, 0);
+      
+
       SetPrimitive(pPrimitive);
       GXDWORD dwFlags = m_dwFlags;
       m_dwFlags = F_ACTIVATE;
@@ -868,13 +872,6 @@ namespace D3D11
       if(pSavedPrimitive)
       {
         SetPrimitive(static_cast<GPrimitive*>(pSavedPrimitive));
-        // TODO: 接口合并
-        //if(pSavedPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE) {
-        //  SetPrimitiveVI(static_cast<GPrimitiveVI*>(pSavedPrimitive));
-        //}
-        //else {
-        //  SetPrimitiveV(static_cast<GPrimitiveV*>(pSavedPrimitive));
-        //}
       }
       else
       {
@@ -887,7 +884,6 @@ namespace D3D11
       //SAFE_RELEASE(m_pCurPrimitive);
       //m_pCurPrimitive = pSavedPrimitive;
       //SAFE_RELEASE(pSavedPrimitive);
-
 
       SAFE_RELEASE(pPrimitive);
       SAFE_RELEASE(pDepthStencil);
@@ -1047,6 +1043,7 @@ namespace D3D11
   GXHRESULT GXGraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, GTexture* pSourceTexture)
   {
     CLBREAK;
+    return GX_FAIL;
   }
 
 

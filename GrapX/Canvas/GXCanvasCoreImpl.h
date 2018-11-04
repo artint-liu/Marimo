@@ -9,6 +9,7 @@ class GXRenderTargetImpl;
 class GXCanvasCoreImpl : public GXCanvas
 {
   friend class GXGraphicsImpl;
+  typedef GrapX::RenderTarget GXRenderTarget;
 protected:
   GXGraphicsImpl*     m_pGraphics;
   GXSIZE              m_sExtent;

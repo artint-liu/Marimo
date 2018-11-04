@@ -5,17 +5,23 @@ class GTexture;
 class GRegion;
 class GPrimitive;
 class GXFont;
-class GXRenderTarget;
+//class GXRenderTarget;
 class GXGraphics;
 class GCamera;
 class GXEffect;
 struct GXSTATION;
+
+namespace GrapX
+{
+  class RenderTarget;
+} // namespace GrapX
 
 //////////////////////////////////////////////////////////////////////////
 // GXCanvasCore 从GUnknown继承改为从GResource继承
 // 这是为了便于在Graphics中进行管理，通过消息分发得到诸如设备尺寸改变等系统信息。
 class GXCanvasCore : public GResource
 {
+  typedef GrapX::RenderTarget GXRenderTarget;
 public:
   GXCanvasCore(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType){}
   //virtual ~GXCanvasCore() = NULL;
@@ -120,8 +126,7 @@ enum RotateType
 
 class GXCanvas : public GXCanvasCore
 {
-public:
-
+  typedef GrapX::RenderTarget GXRenderTarget;
 public:
   //virtual ~GXCanvas() = NULL;
   GXCanvas(GXUINT nPriority, GXDWORD dwType) : GXCanvasCore(nPriority, dwType){}

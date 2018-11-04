@@ -489,14 +489,22 @@ namespace GrapXToDX11
   }
 #endif
 
-  void TextureDescFromResUsage(D3D11_TEXTURE2D_DESC* pDesc, GXResUsage eResUsage)
+  void TextureDescFromResUsage(D3D11_TEXTURE2D_DESC* pDesc, GXResUsage eResUsage, GXBOOL bHasInitData)
   {
     switch(eResUsage)
     {
     case GXResUsage::Default:
-      // 不再修改数据，创建时必须指定
-      pDesc->Usage = D3D11_USAGE_IMMUTABLE;
-      pDesc->CPUAccessFlags = 0;
+      if(bHasInitData)
+      {
+        // 不再修改数据，创建时必须指定
+        pDesc->Usage = D3D11_USAGE_IMMUTABLE;
+        pDesc->CPUAccessFlags = 0;
+      }
+      else
+      {
+        pDesc->Usage = D3D11_USAGE_DEFAULT;
+        pDesc->CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+      }
       break;
 
     case GXResUsage::Read:
@@ -519,6 +527,9 @@ namespace GrapXToDX11
       // 始终在CPU内存中，不用于渲染
       pDesc->Usage = D3D11_USAGE_DEFAULT;
       pDesc->CPUAccessFlags = 0;
+      break;
+
+    case 10:
       break;
 
     default:

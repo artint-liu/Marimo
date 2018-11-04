@@ -33,6 +33,7 @@ GTexture* g_pImage1;
 //HWND g_hWnd;
 
 void TestPrimitive(GXGraphics* pGraphics);
+void TestRenderTarget(GXGraphics* pGraphics);
 
 //void Test1(RECT& rect);
 //void Test2(RECT& rect);
@@ -112,18 +113,21 @@ public:
     m_nPage = 0;
     m_nSubPage = 0;
     TestPrimitive(m_pGraphics);
+    TestRenderTarget(m_pGraphics);
 
     m_pGraphics->CreateTextureFromFile(&m_pTexture, _CLTEXT("textures/AOX.png"), GXResUsage::Default);
     m_pGraphics->CreateTextureFromFile(&m_pTestIcon, _CLTEXT("textures/AOX.png"), GXResUsage::Default);
     //m_pGraphics->CreateTextureFromFile(&g_pTexture, L"RGB.bmp");
     m_pFont = m_pGraphics->CreateFont(NULL, 48, "fonts/wqy-microhei.ttc");
     m_pFontS = m_pGraphics->CreateFont(NULL, 16, "fonts/wqy-microhei.ttc");
+
+    m_pGraphics->CreateRenderTarget(&m_pTarget, NULL, GXSizeRatio::Half, GXSizeRatio::Half, GXFMT_A8R8G8B8, Format_Unknown);
     //m_pTarget = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
     //m_pTarget2 = m_pGraphics->CreateImage(TEXSIZE_HALF, TEXSIZE_HALF, GXFMT_A8R8G8B8, TRUE, NULL);
     //m_pImageNonPow2 = m_pGraphics->CreateImageFromFile(_CLTEXT("nonpow2.png"));
     //m_pGraphics->CreateTexture(&m_pEmptyTex, NULL, TEXSIZE_HALF, TEXSIZE_HALF, 1, GXFMT_A8R8G8B8, GXRU_DEFAULT);
     m_pGraphics->CreateTexture(&m_pEmptyTex, NULL, 200, 200, GXFMT_A8R8G8B8, GXResUsage::Default, 1);
-    m_pEmptyTex->Clear(NULL, 0xff000000);
+    m_pEmptyTex->Clear(0xff000000);
 //    m_pTarget->GetTextureUnsafe()->Clear(NULL, -1);
 
     GXRECT rect1(40, 40, 404, 265);

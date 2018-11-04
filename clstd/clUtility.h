@@ -526,7 +526,7 @@ FINAL_RET:
       return 0;
     }
     _Ty i = 1;
-    while((_Ty)(1 << i) < num) i++;
+    while(((_Ty)1 << i) < num) i++;
     return ((_Ty)1 << i);
   }
 

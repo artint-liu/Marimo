@@ -11,7 +11,7 @@ class GPrimitive;
 //class GPrimitiveV;
 //class GPrimitiveVI;
 class GXGraphics;
-class GXRenderTarget;
+//class GXRenderTarget;
 class GXFont;
 class GAllocator;
 class GXShaderMgr;
@@ -29,6 +29,13 @@ struct MOSHADER_ELEMENT_SOURCE;
 struct MTLFILEPARAMDESC;
 enum GXPlaformIdentity;
 //enum GXPRIMITIVETYPE;
+
+namespace GrapX
+{
+  class RenderTarget;
+}
+
+typedef GrapX::RenderTarget GXRenderTarget;
 
 // GXGRAPHICSPARAM 的标志位
 //enum GXGRAPHICSPARAMFLAG

@@ -7,6 +7,7 @@
 class GXCanvas3DImpl : public GXCanvas3D
 {
   friend class GXGraphicsImpl;
+  typedef GrapX::RenderTarget GXRenderTarget;
 protected:
   GXGraphicsImpl*           m_pGraphicsImpl;
   //GXINT                     m_xExt;          // 物理尺寸，不受原点位置影响

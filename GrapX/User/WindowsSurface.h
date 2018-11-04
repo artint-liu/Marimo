@@ -12,10 +12,14 @@
 //
 // 类声明
 //
-class GXRenderTarget;
+//class GXRenderTarget;
 class GTexture;
 class GRegion;
 enum RGNCOMPLEX;
+namespace GrapX
+{
+  class RenderTarget;
+} // namespace GrapX
 
 // GXWindowsSurface::SetExclusiveWnd 标志
 #define SEW_DONOTBLT    0x00000001
@@ -26,6 +30,7 @@ enum RGNCOMPLEX;
 //
 class GXWindowsSurface : public GUnknown
 {
+  typedef GrapX::RenderTarget GXRenderTarget;
   friend class DesktopWindowsMgr;
 public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE

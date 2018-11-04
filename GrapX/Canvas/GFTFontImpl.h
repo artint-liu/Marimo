@@ -56,7 +56,7 @@ private:
   virtual ~_GFTFont();
 
   inline GXVOID FontDescToCharDesc    (const FTFONTDESC &fm, LPCHARDESC lpCD);
-  GXBOOL    _CreateTexture            ();
+  GXBOOL    IntCreateTexture            ();
   GXVOID    UpdateTexBuffer           (GXUINT idxTex, LPGXREGN prgDest, unsigned char* pBuffer);
 public:
   virtual GXBOOL    CreateFont        (const GXULONG nWidth, const GXULONG nHeight, const GXCHAR *pFileName);

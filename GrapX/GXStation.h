@@ -2,7 +2,7 @@
 #define _GRAPX_STATION_
 
 class GTexture;
-class GXRenderTarget;
+//class GXRenderTarget;
 class GXGraphics;
 class CAeroShader;
 class CBlurShader;

@@ -10,13 +10,13 @@ namespace D3D11
   class GTextureImpl_RenderTarget;
   class GTextureImpl_DepthStencil;
 
-  class GXRenderTargetImpl : public GXRenderTarget
+  class GXRenderTargetImpl : public GrapX::RenderTarget
   {
     friend class GXGraphicsImpl;
     friend class GXCanvasCoreImpl;
 
   protected:
-    GXGraphics* m_pGraphics;
+    GXGraphicsImpl* m_pGraphics;
     GTextureImpl_RenderTarget* m_pColorTexture;
     GTextureImpl_DepthStencil* m_pDepthStencilTexture;
     const GXINT m_nWidth;

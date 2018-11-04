@@ -25,6 +25,7 @@ namespace D3D11
   class GXCanvasImpl : public GXCanvasCoreImpl
   {
     friend class GXGraphicsImpl;
+    typedef GrapX::RenderTarget GXRenderTarget;
   public:
     GXCanvasImpl(GXGraphicsImpl* pGraphics, GXBOOL bStatic);
     virtual ~GXCanvasImpl();

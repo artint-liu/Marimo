@@ -144,9 +144,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\ConsoleAssistant.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\HLSL\FXCommRegister.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\LogMgr.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\AeroShader.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\BlurShader.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\SimpleShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\3D\gvEnvironment.cpp" />
@@ -287,9 +284,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\LogMgr.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\MOKeyboardStaff.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\MOLogger.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\AeroShader.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\BlurShader.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\SimpleShader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\VertexDecl.cpp" />
   </ItemGroup>
   <ItemGroup>

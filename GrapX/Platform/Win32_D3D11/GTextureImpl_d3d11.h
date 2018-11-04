@@ -31,6 +31,11 @@ namespace D3D11
     {
       return m_pD3D11ShaderView;
     }
+
+    inline ID3D11Texture2D* D3DTexture() const
+    {
+      return m_pD3D11Texture;
+    }
   };
 
   class GTextureImpl : public GTextureBaseImplT<GTexture>
@@ -60,7 +65,7 @@ namespace D3D11
     GXHRESULT   Release       () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXBOOL      Clear             (const GXLPRECT lpRect, GXCOLOR dwColor) override;
+    GXBOOL      Clear             (GXCOLOR dwColor) override;
     //GXBOOL      GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio) override;
     GXSIZE*     GetDimension      (GXSIZE* pDimension) override;
     GXResUsage  GetUsage          () override;
@@ -68,8 +73,9 @@ namespace D3D11
     GXVOID      GenerateMipMaps   () override;
     GXBOOL      GetDesc           (GXBITMAP*lpBitmap) override;
     GXBOOL      CopyRect          (GTexture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
-    GXBOOL      MapRect           (MAPPEDRECT* pLockRect, GXLPCRECT pRect, GXResMap eResMap) override;
+    GXBOOL      MapRect           (MAPPED* pMappedRect, GXResMap eResMap) override;
     GXBOOL      UnmapRect         () override;
+    GXBOOL      UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch) override;
     GXGraphics* GetGraphicsUnsafe () override;
 
   protected:
@@ -130,6 +136,20 @@ namespace D3D11
     GTextureImpl_DepthStencil(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
     GXBOOL InitDepthStencil();
   };
+
+  //////////////////////////////////////////////////////////////////////////
+
+  class GtextureImpl_GPUReadBack : public GTextureImpl
+  {
+  protected:
+  public:
+    GtextureImpl_GPUReadBack(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+    GXBOOL InitReadBackTexture();
+
+    GXBOOL MapRect    (MAPPED* pMappedRect, GXResMap eResMap) override;
+    GXBOOL UnmapRect  () override;
+  };
+
 #if 0
   class GTextureFromUser : public GTextureImpl
   {

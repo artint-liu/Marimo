@@ -229,6 +229,8 @@ private:  // 状态对象
   GSamplerStateImpl*      m_pCurSamplerState;
   GVertexDeclImpl*        m_pCurVertexDecl;
 
+  GTexture*               m_pWhiteTexture8x8;
+
 private:  // 对象的(几个平台共用的)存储
   GXDWORD                 m_dwFlags;
   GXPlaformIdentity       m_pIdentity;

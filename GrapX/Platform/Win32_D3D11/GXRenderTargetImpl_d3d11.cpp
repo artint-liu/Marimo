@@ -25,7 +25,7 @@
 #include "Platform/Win32_D3D11/GXRenderTargetImpl_d3d11.h"
 //#include <clPathFile.h>
 #ifdef ENABLE_GRAPHICS_API_DX11
-//#include <FreeImage.h>
+#include <FreeImage.h>
 
 namespace D3D11
 {
@@ -116,17 +116,109 @@ namespace D3D11
     return FALSE;
   }
 
-  GXBOOL GXRenderTargetImpl::SaveToFile(GXLPCWSTR szFilePath, GXLPCSTR pImageFormat)
-  {
-    // TODO: ...
-    CLBREAK;
-    return FALSE;
-  }
-
   GXBOOL GXRenderTargetImpl::SaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat)
   {
-    // TODO: ...
-    CLBREAK;
+    GXSIZE sDimension;
+    GXBOOL bval = TRUE;
+    GXFormat format = m_pColorTexture->GetFormat();
+    m_pColorTexture->GetDimension(&sDimension);
+    GtextureImpl_GPUReadBack* pReadBackTexture = new GtextureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
+    if(InlIsFailedToNewObject(pReadBackTexture)) {
+      return FALSE;
+    }
+
+    if(_CL_NOT_(pReadBackTexture->InitReadBackTexture()))
+    {
+      SAFE_RELEASE(pReadBackTexture);
+      return FALSE;
+    }
+
+    ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+    pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+
+    GTexture::MAPPED mapped;
+    if(pReadBackTexture->MapRect(&mapped, GXResMap::Read))
+    {
+      const GXUINT bpp = GetBytesOfGraphicsFormat(format);
+      FIBITMAP* fibmp = FreeImage_Allocate(sDimension.cx, sDimension.cy, bpp * 8);//(static_cast<BYTE*>(mapped.pBits), mapped.Pitch * sDimension.cx);
+      BYTE* pDest = FreeImage_GetBits(fibmp);
+      GXINT nDestPitch = FreeImage_GetPitch(fibmp);
+      for(int y = 0; y < sDimension.cy; y++)
+      {
+        memcpy(pDest, mapped.pBits, clMin(nDestPitch, mapped.Pitch));
+
+        pDest += nDestPitch;
+        mapped.pBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(mapped.pBits) + mapped.Pitch);
+      }
+
+      pReadBackTexture->UnmapRect();
+
+      FREE_IMAGE_FORMAT fi_format = FIF_UNKNOWN;
+      clStringA strFormat = pImageFormat;
+      strFormat.MakeUpper();
+
+      if(strFormat == "PNG") {
+        fi_format = FIF_PNG;
+      }
+      else if(strFormat == "JPEG" || strFormat == "JPG") {
+        fi_format = FIF_JPEG;
+      }
+      else if(strFormat == "TIF" || strFormat == "TIFF") {
+        fi_format = FIF_TIFF;
+      }
+      else if(strFormat == "TGA") {
+        fi_format = FIF_TARGA;
+      }
+      else if(strFormat == "BMP") {
+        fi_format = FIF_BMP;
+      }
+
+      if(fi_format != FIF_UNKNOWN)
+      {
+        FIMEMORY* fimemory = FreeImage_OpenMemory();
+        if(FreeImage_SaveToMemory(fi_format, fibmp, fimemory))
+        {
+          BYTE *pData;
+          DWORD size_in_bytes;
+          if(FreeImage_AcquireMemory(fimemory, &pData, &size_in_bytes))
+          {
+            pBuffer->Resize(0, FALSE);
+            pBuffer->Append(pData, size_in_bytes);
+          }
+          else
+          {
+            bval = FALSE;
+          }
+        }
+        else
+        {
+          bval = FALSE;
+        }
+        FreeImage_CloseMemory(fimemory);
+      }
+      else
+      {
+        bval = FALSE;
+      }
+
+      FreeImage_Unload(fibmp);
+    }
+
+    SAFE_RELEASE(pReadBackTexture);
+    return bval;
+  }
+
+  GXBOOL GXRenderTargetImpl::SaveToFile(GXLPCWSTR szFilePath, GXLPCSTR pImageFormat)
+  {
+    clstd::MemBuffer buffer;
+    if(SaveToMemory(&buffer, pImageFormat))
+    {
+      clstd::File file;
+      if(file.CreateAlways(szFilePath))
+      {
+        file.Write(buffer);
+      }
+    }
     return FALSE;
   }
 

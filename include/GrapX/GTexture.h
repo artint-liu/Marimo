@@ -20,7 +20,7 @@ public:
 class GTexture : public GTextureBase
 {
 public:
-  struct MAPPEDRECT
+  struct MAPPED
   {
     GXINT     Pitch;
     GXLPVOID  pBits;
@@ -37,13 +37,15 @@ public:
   GXSTDINTERFACE(GXHRESULT    AddRef            ());
   GXSTDINTERFACE(GXHRESULT    Release           ());
 
-  GXSTDINTERFACE(GXBOOL       Clear             (const GXLPRECT lpRect, GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
+  GXSTDINTERFACE(GXBOOL       Clear             (GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
   //GXSTDINTERFACE(GXBOOL       GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio));   // 去屏幕比例,如果是屏幕对齐纹理,返回负值的比率,否则返回纹理尺寸,如果从文件读取的纹理是原始文件的大小
   GXSTDINTERFACE(GXSIZE*      GetDimension      (GXSIZE* pDimension));  // 取纹理的尺寸, 这个值可能会跟屏幕尺寸变化
   GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));
   GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSourceTexture, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource));
-  GXSTDINTERFACE(GXBOOL       MapRect           (MAPPEDRECT* pLockRect, GXLPCRECT pRect, GXResMap eResMap)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
-  GXSTDINTERFACE(GXBOOL       UnmapRect         ());
+  GXSTDINTERFACE(GXBOOL       Map               (MAPPED* pLockRect, GXResMap eResMap)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
+  GXSTDINTERFACE(GXBOOL       Unmap             ());
+  GXSTDINTERFACE(GXBOOL       UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch));
+
 };
 
 class GTexture3D : public GTextureBase

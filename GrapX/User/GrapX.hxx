@@ -25,7 +25,7 @@ class GXWnd;
 //class GXImage;
 class GUnknown;
 class GTexture;
-class GXRenderTarget;
+//class GXRenderTarget;
 class GXFont;
 class GXCanvas;
 class GXGraphics;
@@ -51,7 +51,10 @@ namespace GrapX
   {
     class SystemMessage;
   }
+  class RenderTarget;
 }
+
+typedef GrapX::RenderTarget GXRenderTarget;
 
 struct STOCKOBJECT;
 

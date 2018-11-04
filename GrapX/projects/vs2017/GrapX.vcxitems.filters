@@ -366,15 +366,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\LogMgr.h">
       <Filter>Lib\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\AeroShader.h">
-      <Filter>Lib\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\BlurShader.h">
-      <Filter>Lib\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\SimpleShader.h">
-      <Filter>Lib\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11.h">
       <Filter>Platform</Filter>
     </ClInclude>
@@ -771,15 +762,6 @@
       <Filter>Lib\Utility</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\MOLogger.cpp">
-      <Filter>Lib\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\AeroShader.cpp">
-      <Filter>Lib\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\BlurShader.cpp">
-      <Filter>Lib\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\Shader\SimpleShader.cpp">
       <Filter>Lib\Utility</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Utility\VertexDecl.cpp">
