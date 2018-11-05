@@ -413,7 +413,7 @@ namespace Marimo
       top    = clMax(top,  regn.top);
       width  = clMin(right1, right2) - left;
       height = clMin(bottom1, bottom2) - top;
-      return ((width > 0) && (bottom > 0));
+      return ((width > 0) && (height > 0));
     }
 
     GXBOOL Intersect(const RegnT& regn1, const RegnT& regn2)
@@ -427,7 +427,7 @@ namespace Marimo
       top    = clMax(regn1.top,  regn2.top);
       width  = clMin(right1, right2) - left;
       height = clMin(bottom1, bottom2) - top;
-      return ((width > 0) && (bottom > 0));
+      return ((width > 0) && (height > 0));
     }
 
     GXBOOL IsEqual(const RegnT& regn) const

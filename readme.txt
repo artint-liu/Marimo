@@ -20,8 +20,11 @@ C/C++ 附加包含目录：$(MARIMO_DIR)clstd\
 C/C++ 附加选项    ：/Zc:__cplusplus
 
 使用GrapX库的工程配置
+C/C++ 附加包含目录：$(MARIMO_DIR)Include\
 链接器附加库目录  ：$(MARIMO_DIR)bin\$(PlatformTarget)
 链接器附加依赖项  ：GrapX_win32.$(PlatformTarget).$(Configuration).lib
 C/C++ 附加选项    ：/Zc:__cplusplus
 
 VLD 目录：$(VLDDIR)\lib\Win$(PlatformArchitecture)
+
+中间目录建议修改为：build~\$(ProjectName).$(PlatformTarget).$(Configuration)\

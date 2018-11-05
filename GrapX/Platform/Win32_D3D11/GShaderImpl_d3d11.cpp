@@ -513,6 +513,7 @@ namespace GrapX
             InterCode.pCode->GetBufferPointer(),
             InterCode.pCode->GetBufferSize(),
             NULL, &m_pD3D11VertexShader);
+          TRACE("[Vertex Shader]\n");
         }
         else if(InterCode.type == TargetType::Pixel)
         {
@@ -520,6 +521,7 @@ namespace GrapX
             InterCode.pCode->GetBufferPointer(),
             InterCode.pCode->GetBufferSize(),
             NULL, &m_pD3D11PixelShader);
+          TRACE("[Pixel Shader]\n");
         }
 
         if(FAILED(hr)) {
@@ -538,24 +540,52 @@ namespace GrapX
 
         for(UINT nn = 0; nn < sShaderDesc.ConstantBuffers; nn++)
         {
-          ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer
-            = InterCode.pReflection->GetConstantBufferByIndex(nn);
+          ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer = InterCode.pReflection->GetConstantBufferByIndex(nn);
 
-          D3D11_SHADER_BUFFER_DESC sBufferDesc;
-          pReflectionConstantBuffer->GetDesc(&sBufferDesc);
-          for(UINT kkk = 0; kkk < sBufferDesc.Variables; kkk++)
+          D3D11_SHADER_BUFFER_DESC buffer_desc;
+          pReflectionConstantBuffer->GetDesc(&buffer_desc);
+          TRACE("Constant Buffer:%s\n", buffer_desc.Name);
+
+          for(UINT kkk = 0; kkk < buffer_desc.Variables; kkk++)
           {
             ID3D11ShaderReflectionVariable* pReflectionVariable = pReflectionConstantBuffer->GetVariableByIndex(kkk);
-
-            D3D11_SHADER_VARIABLE_DESC sVariableDesc;
-            pReflectionVariable->GetDesc(&sVariableDesc);
-
             ID3D11ShaderReflectionType* pReflectionType = pReflectionVariable->GetType();
 
+            D3D11_SHADER_TYPE_DESC type_desc;
+            D3D11_SHADER_VARIABLE_DESC variable_desc;
+            pReflectionType->GetDesc(&type_desc);
+            pReflectionVariable->GetDesc(&variable_desc);
 
-            D3D11_SHADER_TYPE_DESC sTypeDesc;
-            pReflectionType->GetDesc(&sTypeDesc);
+            clStringA strTypeName;
+            switch(type_desc.Type)
+            {
+            case D3D_SVT_FLOAT:
+              strTypeName = "float";
+              break;
 
+            default:
+              CLBREAK;
+              break;
+            }
+            switch(type_desc.Class)
+            {
+            case D3D_SVC_SCALAR:
+              break;
+
+            case D3D_SVC_VECTOR:
+              strTypeName.AppendInteger32(type_desc.Columns);
+              break;
+
+            case D3D_SVC_MATRIX_COLUMNS:
+              strTypeName.AppendFormat("%dx%d", type_desc.Columns, type_desc.Rows); // TODO: 不一定对，可能要反过来
+              break;
+
+            default:
+              CLBREAK;
+              break;
+            }
+
+            TRACE("Variable: (%s)%s\n", strTypeName.CStr(), variable_desc.Name);
             CLNOP;
           }
           CLNOP;

@@ -250,7 +250,7 @@ namespace clpathfile {
             }
           }
           else {
-            if(TEST_FLAG_NOT(ff_data.dwAttributes, clstd::FileAttribute_Directory)) {
+            if(TEST_FLAG_NOT(wfd.dwFileAttributes, clstd::FileAttribute_Directory)) {
               break;
             }
           }
