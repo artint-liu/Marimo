@@ -187,7 +187,7 @@ void TestHugeArray()
   }
   //////////////////////////////////////////////////////////////////////////
 
-  GXLPCWSTR szFilename = L"test\\TestHugeArray.DTP";
+  GXLPCWSTR szFilename = _CLTEXT("test\\TestHugeArray.DTP");
 
   ENUM_DATAPOOL(pDataPool);
   GXBOOL bRet = pDataPool->SaveW(szFilename);

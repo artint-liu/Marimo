@@ -112,6 +112,7 @@ namespace D3D11
     , m_pIdentity           (GXPLATFORM_UNKNOWN)
     , m_pBaseShader         (NULL)
     , m_pBaseEffect         (NULL)
+    , m_pBasicShader        (NULL)
     , m_pCurRenderTargetView  (NULL)
     , m_pCurDepthStencilView  (NULL)
     , m_pVertexLayout       (NULL)
@@ -292,6 +293,21 @@ namespace D3D11
     m_pIdentity = GXPLATFORM_WIN32_DIRECT3D11;
     //m_pGraphicsLocker = new clstd::Locker;
     InitCommon();
+
+
+    GXSHADER_SOURCE_DESC aDesc[2];
+    InlSetZeroT(aDesc);
+
+    aDesc[0].szSourceData = g_szBaseShader;
+    aDesc[0].nSourceLen   = 0;
+    aDesc[0].szEntry      = "vs_main";
+    aDesc[0].szTarget     = "vs_4_0";
+    aDesc[1].szSourceData = g_szBaseShader;
+    aDesc[1].nSourceLen   = 0;
+    aDesc[1].szEntry      = "ps_main";
+    aDesc[1].szTarget     = "ps_4_0";
+
+    CreateShaderFromSource(&m_pBasicShader, aDesc, 2);
 
 
     if(GXFAILED(CreateShaderFromSource(&m_pBaseShader, g_szBaseShader, 0, NULL)))

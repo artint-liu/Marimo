@@ -81,15 +81,11 @@
                                           GXUINT uIndexCount, GXUINT uIndexSize, GXLPCVOID pIndexInitData) override;
 
   // GShader
-  virtual GXHRESULT   CreateShaderFromSource  (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition) override;
-  virtual GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCWSTR szShaderDesc) override;
-  virtual GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCSTR szShaderDesc) override;
-  virtual GXHRESULT   CreateShaderStub        (GShaderStub** ppShaderStub) override;
-
-  // GRegion
-  //virtual GXHRESULT   CreateRectRgn           (GRegion** ppRegion, const GXINT left, const GXINT top, const GXINT right, const GXINT bottom) override;
-  //virtual GXHRESULT   CreateRectRgnIndirect   (GRegion** ppRegion, const GXRECT* lpRects, const GXUINT nCount) override;
-  //virtual GXHRESULT   CreateRoundRectRgn      (GRegion** ppRegion, const GXRECT& rect, const GXUINT nWidthEllipse, const GXUINT nHeightEllipse) override;
+  GXHRESULT   CreateShaderFromSource  (GrapX::Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount) override;
+  GXHRESULT   CreateShaderFromSource  (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition) override;
+  GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCWSTR szShaderDesc) override;
+  GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCSTR szShaderDesc) override;
+  GXHRESULT   CreateShaderStub        (GShaderStub** ppShaderStub) override;
 
   virtual GXHRESULT   CreateVertexDeclaration (GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement) override;
   //////////////////////////////////////////////////////////////////////////

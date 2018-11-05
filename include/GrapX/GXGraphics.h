@@ -33,6 +33,7 @@ enum GXPlaformIdentity;
 namespace GrapX
 {
   class RenderTarget;
+  class Shader;
 }
 
 typedef GrapX::RenderTarget GXRenderTarget;
@@ -247,6 +248,7 @@ public:
     //  ));
 
     // GSahder
+    GXSTDINTERFACE(GXHRESULT    CreateShaderFromSource      (GrapX::Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount));
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromSource      (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)); // nSourceLen是字符长度，如果是0，szShaderSource必须以'\0'结尾
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromFile        (GShader** ppShader, GXLPCWSTR szShaderDesc));
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromFile        (GShader** ppShader, GXLPCSTR szShaderDesc));

@@ -449,6 +449,187 @@ namespace D3D11
   //////////////////////////////////////////////////////////////////////////
 } // namespace D3D11
 
+namespace GrapX
+{
+  namespace D3D11
+  {
+    GXHRESULT ShaderImpl::AddRef()
+    {
+      return gxInterlockedIncrement(&m_nRefCount);
+    }
+
+    GXHRESULT ShaderImpl::Release()
+    {
+      GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
+
+      if(nRefCount == 0)
+      {
+        m_pGraphicsImpl->UnregisterResource(this);
+        delete this;
+        return GX_OK;
+      }
+      return nRefCount;
+    }
+
+    GXHRESULT ShaderImpl::Invoke(GRESCRIPTDESC* pDesc)
+    {
+      return GX_OK;
+    }
+
+    ShaderImpl::ShaderImpl(GXGraphicsImpl* pGraphicsImpl)
+      : m_pGraphicsImpl(pGraphicsImpl)
+      , m_pD3D11VertexShader(NULL)
+      , m_pD3D11PixelShader(NULL)
+    {
+    }
+
+    ShaderImpl::~ShaderImpl()
+    {
+    }
+
+    GXBOOL ShaderImpl::InitShader(GXLPCWSTR szResourceDir, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount)
+    {
+      INTERMEDIATE_CODE::Array aCodes;
+      GXBOOL bval = TRUE;
+      aCodes.reserve(nCount);
+
+      ::D3D11::IHLSLInclude* pInclude = new ::D3D11::IHLSLInclude(NULL, clStringA(szResourceDir));
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+
+      for(GXUINT i = 0; i < nCount; i++)
+      {
+        INTERMEDIATE_CODE InterCode;
+        GXHRESULT hr = CompileShader(&InterCode, pShaderDescs + i, pInclude);
+
+        if(GXFAILED(hr) || InterCode.type == TargetType::Undefine) {
+          bval = FALSE;
+          break;
+        }
+
+        aCodes.push_back(InterCode);
+        if(InterCode.type == TargetType::Vertex)
+        {
+          hr = pd3dDevice->CreateVertexShader(
+            InterCode.pCode->GetBufferPointer(),
+            InterCode.pCode->GetBufferSize(),
+            NULL, &m_pD3D11VertexShader);
+        }
+        else if(InterCode.type == TargetType::Pixel)
+        {
+          hr = pd3dDevice->CreatePixelShader(
+            InterCode.pCode->GetBufferPointer(),
+            InterCode.pCode->GetBufferSize(),
+            NULL, &m_pD3D11PixelShader);
+        }
+
+        if(FAILED(hr)) {
+          bval = FALSE;
+          break;
+        }
+
+        D3D11_SHADER_DESC sShaderDesc;
+        InterCode.pReflection->GetDesc(&sShaderDesc);
+        for(UINT nn = 0; nn < sShaderDesc.BoundResources; nn++)
+        {
+          D3D11_SHADER_INPUT_BIND_DESC bind_desc;
+          InterCode.pReflection->GetResourceBindingDesc(nn, &bind_desc);
+          CLNOP;
+        }
+
+        for(UINT nn = 0; nn < sShaderDesc.ConstantBuffers; nn++)
+        {
+          ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer
+            = InterCode.pReflection->GetConstantBufferByIndex(nn);
+
+          D3D11_SHADER_BUFFER_DESC sBufferDesc;
+          pReflectionConstantBuffer->GetDesc(&sBufferDesc);
+          for(UINT kkk = 0; kkk < sBufferDesc.Variables; kkk++)
+          {
+            ID3D11ShaderReflectionVariable* pReflectionVariable = pReflectionConstantBuffer->GetVariableByIndex(kkk);
+
+            D3D11_SHADER_VARIABLE_DESC sVariableDesc;
+            pReflectionVariable->GetDesc(&sVariableDesc);
+
+            ID3D11ShaderReflectionType* pReflectionType = pReflectionVariable->GetType();
+
+
+            D3D11_SHADER_TYPE_DESC sTypeDesc;
+            pReflectionType->GetDesc(&sTypeDesc);
+
+            CLNOP;
+          }
+          CLNOP;
+        }
+
+        SAFE_RELEASE(InterCode.pCode);
+        SAFE_RELEASE(InterCode.pReflection);
+      }
+
+      return bval;
+    }
+
+    GXGraphics* ShaderImpl::GetGraphicsUnsafe() const
+    {
+      return m_pGraphicsImpl;
+    }
+
+    GrapX::D3D11::ShaderImpl::TargetType ShaderImpl::TargetNameToType(GXLPCSTR szTargetName)
+    {
+      if(szTargetName[0] == 'p' && szTargetName[1] == 's' && szTargetName[2] == '_') {
+        return TargetType::Pixel;
+      }
+      else if(szTargetName[0] == 'v' && szTargetName[1] == 's' && szTargetName[2] == '_') {
+        return TargetType::Vertex;
+      }
+      CLBREAK; // 不支持的shader类型
+    }
+
+    GXHRESULT ShaderImpl::CompileShader(INTERMEDIATE_CODE* pInterCode, const GXSHADER_SOURCE_DESC* pShaderDesc, ID3DInclude* pInclude)
+    {
+      DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+      dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+      ID3DBlob* pErrorBlob = NULL;
+      pInterCode->type = TargetType::Undefine;
+
+      const SIZE_T nSourceLength = pShaderDesc->nSourceLen == 0
+        ?clstd::strlenT(pShaderDesc->szSourceData)
+        : pShaderDesc->nSourceLen;
+
+      // 源代码编译为中间代码
+      HRESULT hval = D3DCompile(pShaderDesc->szSourceData, nSourceLength,
+        __FUNCTION__, (D3D10_SHADER_MACRO*)pShaderDesc->pDefines,
+        pInclude, pShaderDesc->szEntry, pShaderDesc->szTarget, dwShaderFlags, 0, &pInterCode->pCode, &pErrorBlob);
+
+      if(FAILED(hval))
+      {
+        if(pErrorBlob != NULL) {
+          TRACE("Shader compiled error:\n>%s\n", (char*)pErrorBlob->GetBufferPointer());
+        }
+        SAFE_RELEASE(pErrorBlob);
+        return hval;
+      }
+
+      // shader 输入参数信息
+      hval = D3DReflect(pInterCode->pCode->GetBufferPointer(), pInterCode->pCode->GetBufferSize(),
+        IID_ID3D11ShaderReflection, (void**)&pInterCode->pReflection);
+
+      if(FAILED(hval))
+      {
+        SAFE_RELEASE(pInterCode->pCode);
+        return hval;
+      }
+
+      // profile 转换为枚举
+      pInterCode->type = TargetNameToType(pShaderDesc->szTarget);
+      SAFE_RELEASE(pErrorBlob);
+      return S_OK;
+    }
+
+  } // namespace D3D11
+} // namespace GrapX
+
 GXHRESULT GXDLLAPI MOCompileHLSL(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADERBUFFERS* pBuffers)
 {
   MOSHADER_ELEMENT_SOURCE SrcComponent;

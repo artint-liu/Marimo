@@ -13,7 +13,7 @@ void TestCompileFromFile()
 {
   DataPool* pDataPool = NULL;
   
-  clStringW strMainFile = L"Test\\DataPool\\main.txt";
+  clStringW strMainFile = _CLTEXT("Test\\DataPool\\main.txt");
   clpathfile::CombineAbsPathT(strMainFile);
   clstd::TimeTrace tt;
   tt.Begin();
@@ -68,10 +68,10 @@ void TestCompileFromFile()
     varEquipMask.Set(0xf);
     TRACE("equipment_essence_raw.equip_mask = %s\n", varEquipMask.ToStringA());
 
-#ifdef _X86
-    GXLPCWSTR szFilename = L"Test\\TestCompileFromFile.DPL";
+#ifdef _CL_ARCH_X86
+    GXLPCWSTR szFilename = _CLTEXT("Test\\TestCompileFromFile.DPL");
 #else
-    GXLPCWSTR szFilename = L"Test\\TestCompileFromFile_x64.DPL";
+    GXLPCWSTR szFilename = _CLTEXT("Test\\TestCompileFromFile_x64.DPL");
 #endif // #ifdef _X86
     pDataPool->SaveW(szFilename);
 

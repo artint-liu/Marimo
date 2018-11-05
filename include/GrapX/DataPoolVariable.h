@@ -87,7 +87,7 @@ namespace Marimo
     //GXBOOL            IsEmpty         () const;  // 返回这个 Variable 是否无效
     GXLPVOID          GetPtr          () const;  // 指针, 要注意动态数据指针会因为 NewBack 操作改变
     GXUINT            GetSize         () const;  // 字节大小, 数组是数组大小, 动态数据大小可变, 结构是结构体大小
-    GXUINT            GetOffset       () const;  // 偏移,全局变量是全局偏移, 结构体变量是结构体内偏移
+    GXUINT            GetOffset       () const;  // 偏移, 全局变量是全局偏移, 动态数组是在buffer上的偏移 /废弃：全局变量是全局偏移, 结构体变量是结构体内偏移/
     DataPool::LPCSTR  GetName         () const;  // 获得定义名, 变量名, 数组变量名或者结构体变量名
     DataPool::LPCSTR  GetTypeName     () const;  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
     TypeCategory      GetTypeCategory () const;  // 变量的分类

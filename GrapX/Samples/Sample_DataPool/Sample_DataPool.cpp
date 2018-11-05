@@ -16,19 +16,19 @@
 #include "TestDataPool.h"
 
 GXLPCWSTR s_szExampleString[] = {
-  L"Introduction",
-  L"Devices",
-  L"Resources",
-  L"Graphics Pipeline",
-  L"Rendering",
-  L"Migrating to Direct3D 11",
-  L"Writing HLSL Shaders in Direct3D 9",
-  L"Using Shaders in Direct3D 9",
-  L"Using Shaders in Direct3D 10",
-  L"Optimizing HLSL Shaders",
-  L"Debugging Shaders in Visual Studio (Direct3D 9)",
-  L"Compiling Shaders",
-  L"Unpacking and Packing DXGI_FORMAT for In-Place Image Editing",
+  _CLTEXT("Introduction"),
+  _CLTEXT("Devices"),
+  _CLTEXT("Resources"),
+  _CLTEXT("Graphics Pipeline"),
+  _CLTEXT("Rendering"),
+  _CLTEXT("Migrating to Direct3D 11"),
+  _CLTEXT("Writing HLSL Shaders in Direct3D 9"),
+  _CLTEXT("Using Shaders in Direct3D 9"),
+  _CLTEXT("Using Shaders in Direct3D 10"),
+  _CLTEXT("Optimizing HLSL Shaders"),
+  _CLTEXT("Debugging Shaders in Visual Studio (Direct3D 9)"),
+  _CLTEXT("Compiling Shaders"),
+  _CLTEXT("Unpacking and Packing DXGI_FORMAT for In-Place Image Editing"),
   NULL,
 };
 
@@ -69,8 +69,8 @@ void TestDynamicStringArray(DataPool* pDataPool)
   bval = pDataPool->QueryByExpression("TestStringVarArray[0]", &varTestStringVarArray0);
   ASSERT(bval && varTestStringVarArray0.ToStringA() == "Hello world");
 
-  varTestStringVarArray0.Set(L"TestVarString");
-  ASSERT(varTestStringVarArray0.ToStringW() == L"TestVarString");
+  varTestStringVarArray0.Set(_CLTEXT("TestVarString"));
+  ASSERT(varTestStringVarArray0.ToStringW() == _CLTEXT("TestVarString"));
   //hval = pDataPool->SetVariable("TestStringVarArray[0]", &clStringW());
   //hval = pDataPool->GetVariable("TestStringVarArray[0]", &strTest);
 
@@ -78,11 +78,11 @@ void TestDynamicStringArray(DataPool* pDataPool)
   //hval = pDataPool->SetVariable("TestStringVarArray[3]", &clStringW(L"AppendStr[3]"));
   bval = pDataPool->QueryByExpression("TestStringVarArray[1]", &varTestStringVarArray1);
   ASSERT(bval);
-  varTestStringVarArray1.Set(L"AppendString");
+  varTestStringVarArray1.Set(_CLTEXT("AppendString"));
 
   bval = pDataPool->QueryByExpression("TestStringVarArray[3]", &varTestStringVarArray3);
   ASSERT(bval);
-  varTestStringVarArray3.Set(L"AppendStr[3]");
+  varTestStringVarArray3.Set(_CLTEXT("AppendStr[3]"));
 
   varTestStringVarArray0.Free();
   varTestStringVarArray1.Free();
@@ -91,13 +91,13 @@ void TestDynamicStringArray(DataPool* pDataPool)
 
 
   bval = pDataPool->QueryByExpression("TestStringVarArray[1]", &varTestStringVarArray1);
-  ASSERT(bval && varTestStringVarArray1.ToStringW() == L"AppendString");
+  ASSERT(bval && varTestStringVarArray1.ToStringW() == _CLTEXT("AppendString"));
 
   bval = pDataPool->QueryByExpression("TestStringVarArray[2]", &varTestStringVarArray2);
-  ASSERT(bval && varTestStringVarArray2.ToStringW() == L"");
+  ASSERT(bval && varTestStringVarArray2.ToStringW() == _CLTEXT(""));
 
   bval = pDataPool->QueryByExpression("TestStringVarArray[3]", &varTestStringVarArray3);
-  ASSERT(bval && varTestStringVarArray3.ToStringW() == L"AppendStr[3]");
+  ASSERT(bval && varTestStringVarArray3.ToStringW() == _CLTEXT("AppendStr[3]"));
 
   ASSERT(varTestStringVarArray.GetSize() == 4 * sizeof(clStringW));
   ASSERT(varTestStringVarArray0.GetSize() == sizeof(clStringW));
@@ -183,7 +183,7 @@ void TestDataPoolAgent(DataPool* pDataPool)
 
   //pDataPool->GetVariable("TestString", &str);
   pDataPool->QueryByName("TestString", &sString);
-  ASSERT(sString.ToStringW() == L"SetFromAgent");
+  ASSERT(sString.ToStringW() == _CLTEXT("SetFromAgent"));
 
   MOVariable dpfloat;
   clStringW str;
@@ -676,7 +676,7 @@ void TestDataPoolAgent2(DataPool* pDataPool)
   ASSERT(GXSUCCEEDED(hval));
 
   clStringW strTest = Var.ToStringW();
-  Var.Set(L"SetFromAgent");
+  Var.Set(_CLTEXT("SetFromAgent"));
 
   // ²âÊÔ¸¡µãÊý×é
   TestDataPoolAgent_Primary_StaticArray(pDataPool);
@@ -1182,73 +1182,16 @@ void TestHeaderSize()
   DataPool* pDataPool = NULL;
   GXHRESULT hr = DataPool::CreateDataPool(&pDataPool, NULL, NULL, s_aVariable);
   if(GXSUCCEEDED(hr)) {
-    pDataPool->SaveW(L"Test\\HeaderSize.dpl");
+    pDataPool->SaveW(_CLTEXT("Test\\HeaderSize.dpl"));
     SAFE_RELEASE(pDataPool);
   }
 }
 
-void TestShaderConstantBuffer()
-{
-  static VARIABLE_DECLARATION s_aShaderConstantBuffer[] =
-  {
-    {"float4x4", "WorldViewProjection", 0,},
-    {"float4",   "DiffuseColor", 0,},
-    {"float3",   "LightPosition", 0, 4},
-    {"float3",   "EyePosition"},
-    {"float3",   "EyeDirection"},
-    {NULL, NULL}
-  };
-
-  DataPool* pDataPool = NULL;
-  GXHRESULT hr = DataPool::CreateDataPool(&pDataPool, NULL, NULL, s_aShaderConstantBuffer, DataPoolCreation_Align16);
-  if(GXSUCCEEDED(hr)) {
-    pDataPool->SaveW(L"Test\\TestShaderConstantBuffer.dpl");
-  }
-
-  MOVarMatrix4 matWVProj;
-  MOVarFloat4  vDiffuseColor;
-  DataPoolVariable vLightPositionArray;
-  DataPoolVariable  vLightPosition[4];
-  MOVarFloat3  vEyePosition;
-  MOVarFloat3  vEyeDirection;
-
-  GXBOOL bRetult;
-  bRetult = pDataPool->QueryByName("WorldViewProjection", &matWVProj);
-  ASSERT(bRetult);
-  ASSERT(matWVProj.GetOffset() == 0);
-
-  bRetult = pDataPool->QueryByName("DiffuseColor", &vDiffuseColor);
-  ASSERT(bRetult);
-  ASSERT(vDiffuseColor.GetOffset() == sizeof(float4x4));
-
-  bRetult = pDataPool->QueryByName("LightPosition", &vLightPositionArray);
-  ASSERT(bRetult);
-  ASSERT(TEST_FLAG(vLightPositionArray.GetCaps(), DataPoolVariable::CAPS_ARRAY));
-  ASSERT(vLightPositionArray.GetOffset() == sizeof(float4x4) + sizeof(float4));
-  ASSERT(vLightPositionArray.GetSize() == sizeof(float3) * 4);
-  vLightPosition[0] = vLightPositionArray[0];
-  vLightPosition[1] = vLightPositionArray[1];
-  vLightPosition[2] = vLightPositionArray[2];
-  vLightPosition[3] = vLightPositionArray[3];
-  ASSERT(vLightPosition[0].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 0);
-  ASSERT(vLightPosition[1].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 1);
-  ASSERT(vLightPosition[2].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 2);
-  ASSERT(vLightPosition[3].GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 3);
-
-  bRetult = pDataPool->QueryByName("EyePosition", &vEyePosition);
-  ASSERT(bRetult);
-  ASSERT(vEyePosition.GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 4);
-
-  bRetult = pDataPool->QueryByName("EyeDirection", &vEyeDirection);
-  ASSERT(bRetult);
-  ASSERT(vEyeDirection.GetOffset() == sizeof(float4x4) + sizeof(float4) + sizeof(float3) * 4 + sizeof(float4));
-
-  SAFE_RELEASE(pDataPool);
-}
+void TestShaderConstantBuffer();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-  clpathfile::LocalWorkingDirW(L"..");
+  clpathfile::LocalWorkingDirW(_CLTEXT(".."));
 
   // TestLines class test
   TestTextGetLines();

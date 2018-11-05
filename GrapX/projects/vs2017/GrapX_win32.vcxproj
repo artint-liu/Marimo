@@ -452,7 +452,6 @@
     <ClInclude Include="res\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="res\idc_copy.cur" />
     <None Include="res\idc_divider.cur" />
     <None Include="res\idc_divideropen.cur" />

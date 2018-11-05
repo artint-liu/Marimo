@@ -105,6 +105,7 @@ namespace Marimo
     //typedef clset<clStringA>                  TypeDeclArray;
 
   private:
+    GXDWORD               m_dwFlags;
     //clStringA             m_strFilename;
     //int                   m_nBaseLine;
     //StringDict            m_StringsDict;
@@ -151,7 +152,7 @@ namespace Marimo
     void      AllocInitPtr    (VARIABLE_DECLARATION* pVarDecl, GXINT aInitArrayCount);
     template<typename _Ty>
     GXBOOL    ParseInitList   (_Ty* aArray, const clStringArrayA& aInit);
-    DataPoolResolverImpl();
+    DataPoolResolverImpl(GXDWORD dwFlags);
     virtual   ~DataPoolResolverImpl();
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -164,8 +165,9 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  DataPoolResolverImpl::DataPoolResolverImpl()
-    : m_pInclude(NULL)
+  DataPoolResolverImpl::DataPoolResolverImpl(GXDWORD dwFlags)
+    : m_dwFlags(dwFlags)
+    , m_pInclude(NULL)
     , m_bParsingExpression(FALSE)
   {
   }
@@ -1025,6 +1027,7 @@ namespace Marimo
     ++it;
     TypeDecl.Cate = bAlways ? T_STRUCTALWAYS : T_STRUCT;
     TypeDecl.Name = AddString(ST_StructType, NULL, it.ToString(), it.offset(), &result);
+    TypeDecl.StructAlign = DataPoolInternal::CreationFlagsToAlignSize(m_dwFlags);
     
     if( ! DataPool::IsIllegalName(TypeDecl.Name)) {
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1101_CANT_USE_AS_STRUCT_NAME, TypeDecl.Name);      // "%s" 不能作为结构体名使用
@@ -1200,9 +1203,9 @@ namespace Marimo
     return bval;
   }
 
-  GXHRESULT DataPoolCompiler::CreateFromMemory(DataPoolCompiler** ppResolver, GXLPCWSTR szSourceFilePath, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength)
+  GXHRESULT DataPoolCompiler::CreateFromMemory(DataPoolCompiler** ppResolver, GXLPCWSTR szSourceFilePath, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength, GXDWORD dwFlags)
   {
-    DataPoolResolverImpl* pResolver = new DataPoolResolverImpl;
+    DataPoolResolverImpl* pResolver = new DataPoolResolverImpl(dwFlags);
     if( ! InlCheckNewAndIncReference(pResolver)) {
       return GX_FAIL;
     }

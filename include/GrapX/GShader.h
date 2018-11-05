@@ -91,8 +91,6 @@ namespace GrapX
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
     GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe () const);
-
-
   };
 } // namespace GrapX
 

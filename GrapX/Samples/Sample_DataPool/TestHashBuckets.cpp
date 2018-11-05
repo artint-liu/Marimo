@@ -15,8 +15,8 @@
 
 void TestHashBuckets()
 {
-  GXLPCWSTR szFilename = L"Test\\DataPool\\ComplexArray_main.txt";
-  GXLPCWSTR szFilenameFmt = L"Test\\ComplexArray_main%s.txt";
+  GXLPCWSTR szFilename = _CLTEXT("Test\\DataPool\\ComplexArray_main.txt");
+  GXLPCWSTR szFilenameFmt = _CLTEXT("Test\\ComplexArray_main%s.txt");
   
   CLOG("[begin test hash buckets]");
 
@@ -32,7 +32,7 @@ void TestHashBuckets()
     if(GXFAILED(result)) {
       SAFE_RELEASE(pPoolWithHash);
       SAFE_RELEASE(pPoolWithoutHash);
-      CLOG_ERRORW(L"can not compiler file\"%s\".", szFilename);
+      CLOG_ERRORW(_CLTEXT("can not compiler file\"%s\"."), szFilename);
       return;
     }
 
@@ -41,7 +41,7 @@ void TestHashBuckets()
     if(GXFAILED(result)) {
       SAFE_RELEASE(pPoolWithHash);
       SAFE_RELEASE(pPoolWithoutHash);
-      CLOG_ERRORW(L"can not compiler file\"%s\".", szFilename);
+      CLOG_ERRORW(_CLTEXT("can not compiler file\"%s\"."), szFilename);
       return;
     }
 
@@ -71,7 +71,7 @@ void TestHashBuckets()
     if(GXFAILED(result)) {
       SAFE_RELEASE(pPoolWithHash);
       SAFE_RELEASE(pPoolWithoutHash);
-      CLOG_ERRORW(L"can not load file\"%s\".", str);
+      CLOG_ERRORW(_CLTEXT("can not load file\"%s\"."), str);
       return;
     }
 
@@ -80,7 +80,7 @@ void TestHashBuckets()
     if(GXFAILED(result)) {
       SAFE_RELEASE(pPoolWithHash);
       SAFE_RELEASE(pPoolWithoutHash);
-      CLOG_ERRORW(L"can not load file\"%s\".", str);
+      CLOG_ERRORW(_CLTEXT("can not load file\"%s\"."), str);
       return;
     }
 

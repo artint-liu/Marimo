@@ -218,17 +218,7 @@ namespace Marimo
       return FALSE;
     }
 
-    GXUINT nAlignSize = 1;
-    if((dwFlags & DataPoolCreation_Align16) == DataPoolCreation_Align16) {
-      nAlignSize = 16;
-    }
-    else if((dwFlags & DataPoolCreation_Align8) == DataPoolCreation_Align8) {
-      nAlignSize = 8;
-    }
-    else if((dwFlags & DataPoolCreation_Align4) == DataPoolCreation_Align4) {
-      nAlignSize = 4;
-    }
-
+    const GXUINT nAlignSize = DataPoolInternal::CreationFlagsToAlignSize(dwFlags);
 
     GXINT nBufferSize = sBuildTime.ComputeVariableSize(pVarDecl, sBuildTime.m_aVar, nAlignSize);
     if(nBufferSize == 0) {
@@ -2633,6 +2623,25 @@ namespace Marimo
       : clstd::HashStringT(str);
   }
 
+  namespace DataPoolInternal
+  {
+    GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags)
+    {
+      if((dwFlags & DataPoolCreation_NotCross16BytesBoundary) == DataPoolCreation_NotCross16BytesBoundary) {
+        return NOT_CROSS_16_BYTES_BOUNDARY;
+      }
+      else if((dwFlags & DataPoolCreation_Align16) == DataPoolCreation_Align16) {
+        return 16;
+      }
+      else if((dwFlags & DataPoolCreation_Align8) == DataPoolCreation_Align8) {
+        return 8;
+      }
+      else if((dwFlags & DataPoolCreation_Align4) == DataPoolCreation_Align4) {
+        return 4;
+      }
+      return 1;
+    }
+  } // namespace DataPoolInternal
 
 } // namespace Marimo
 

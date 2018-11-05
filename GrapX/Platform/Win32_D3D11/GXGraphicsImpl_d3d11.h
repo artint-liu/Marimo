@@ -111,6 +111,7 @@ namespace D3D11
     //GTexture*               m_pBackBufferTex;    // 内部使用的纹理缓冲
     //GXImage*                m_pBackBufferImg;    // 引用 m_pBackBufferTex
     //GShader*                m_pSimpleShader;
+    GrapX::Shader*          m_pBasicShader;
     GShader*                m_pBaseShader;
     GXEffect*               m_pBaseEffect;
 

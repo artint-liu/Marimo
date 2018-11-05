@@ -649,7 +649,7 @@ namespace Marimo
   {
     DataPoolCompiler* pResolver = NULL;
     GXHRESULT hval = szDefinitionCodes == NULL ? GX_OK :
-      DataPoolCompiler::CreateFromMemory(&pResolver, NULL, pInclude, szDefinitionCodes, nCodeLength);
+      DataPoolCompiler::CreateFromMemory(&pResolver, NULL, pInclude, szDefinitionCodes, nCodeLength, dwFlags);
     if(GXSUCCEEDED(hval))
     {
       hval = CreateFromResolver(ppDataPool, szName, pResolver, dwFlags);
@@ -681,7 +681,7 @@ namespace Marimo
           hval = GX_OK;
         }
         else {
-          hval = DataPoolCompiler::CreateFromMemory(&pResolver, strFilenameW, pInclude ? pInclude : &IncludeImpl, szDefinitionCodes, pBuffer->GetSize());
+          hval = DataPoolCompiler::CreateFromMemory(&pResolver, strFilenameW, pInclude ? pInclude : &IncludeImpl, szDefinitionCodes, pBuffer->GetSize(), dwFlags);
           if(GXSUCCEEDED(hval)) {
             hval = CreateFromResolver(ppDataPool, szName, pResolver, dwFlags);
           }

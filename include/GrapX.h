@@ -4786,6 +4786,15 @@ struct GXVERTEXELEMENT
   GXUINT        UsageIndex; // Semantic index
 };
 
+struct GXSHADER_SOURCE_DESC
+{
+  GXLPCSTR            szSourceData; // 代码
+  GXSIZE_T            nSourceLen;   // 代码长度，如果为0，代码需要以'\0'结尾
+  GXLPCSTR            szEntry;      // 入口函数
+  GXLPCSTR            szTarget;     // 编译目标
+  const GXDEFINITION* pDefines;     // 宏，预处理定义
+};
+
 // TODO: 各种type应该能合并成统一的定义
 enum GXUniformType{
   GXUB_UNDEFINED,

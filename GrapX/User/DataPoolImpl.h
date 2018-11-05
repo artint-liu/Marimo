@@ -2,11 +2,16 @@
 #define _MARIMO_DATAPOOL_IMPLEMENT_H_
 
 //class StockW;
-
+#define NOT_CROSS_16_BYTES_BOUNDARY static_cast<GXUINT>(-16)
 namespace Marimo
 {
   struct DataPoolBuildTime;
   class DataPoolVariableImpl;
+
+  namespace DataPoolInternal
+  {
+    GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags);
+  }
 
   // 内部实现的函数表
   struct DataPoolVariable::VTBL

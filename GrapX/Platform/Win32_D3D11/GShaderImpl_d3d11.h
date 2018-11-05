@@ -210,6 +210,54 @@ namespace D3D11
 
 } // namespace D3D11
 
+namespace GrapX
+{
+  namespace D3D11
+  {
+    class ShaderImpl : public Shader
+    {
+      typedef ::D3D11::GXGraphicsImpl GXGraphicsImpl;
+    protected:
+      enum class TargetType : GXUINT
+      {
+        Undefine = 0,
+        Vertex,
+        Pixel,
+      };
+
+      struct INTERMEDIATE_CODE
+      {
+        typedef clvector<INTERMEDIATE_CODE> Array;
+        TargetType type;
+        ID3DBlob*  pCode;
+        ID3D11ShaderReflection* pReflection;
+      };
+
+    protected:
+      GXGraphicsImpl* m_pGraphicsImpl;
+      ID3D11VertexShader*         m_pD3D11VertexShader;
+      ID3D11PixelShader*          m_pD3D11PixelShader;
+
+    public:
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+      GXHRESULT    AddRef            () override;
+      GXHRESULT    Release           () override;
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+      GXHRESULT   Invoke             (GRESCRIPTDESC* pDesc) override;
+
+
+      ShaderImpl(GXGraphicsImpl* pGraphicsImpl);
+      virtual ~ShaderImpl();
+
+      GXBOOL InitShader(GXLPCWSTR szResourceDir, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount);
+      GXGraphics*  GetGraphicsUnsafe () const override;
+
+      static TargetType TargetNameToType  (GXLPCSTR szTargetName);
+      static GXHRESULT  CompileShader     (INTERMEDIATE_CODE* pInterCode, const GXSHADER_SOURCE_DESC* pShaderDesc, ID3DInclude* pInclude);
+    };
+  } // namespace D3D11
+} // namespace GrapX
+
 #endif // _SHADER_CLASS_D3D11_IMPLEMENT_HEADER_DEFINE_FILE_
 #endif // defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11

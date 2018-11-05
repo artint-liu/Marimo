@@ -116,7 +116,7 @@ public:
 //
 inline LPCWSTR CMODialog::GetTemplate()
 {
-  return m_idDlgTemplate;
+  return (LPCWSTR)m_idDlgTemplate;
 }
 
 typedef CMODialog *LPGXDIALOG, *PGXDIALOG;

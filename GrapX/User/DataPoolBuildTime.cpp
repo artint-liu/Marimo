@@ -147,9 +147,14 @@ namespace Marimo
 
   GXINT DataPoolBuildTime::ComputeVariableSize(LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc, GXUINT nAlignSize)
   {
-    GXINT cbSize = 0;
+    GXINT cbVariableSize = 0;
+    GXINT cbSubSize = 0;
     int nVarIndex = 0;
-    const GXUINT nAlignMask = (nAlignSize <= 16 && clstd::IsPowerOfTwo(nAlignSize)) ? (nAlignSize - 1) : 0;
+    const GXUINT nAlignMask = ((nAlignSize - 1) <= 15 && clstd::IsPowerOfTwo(nAlignSize)) ? (nAlignSize - 1) : 0;
+    ASSERT(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY || nAlignSize == 0 || nAlignSize == 1 ||
+      nAlignSize == 4 || nAlignSize == 8 || nAlignSize == 16);
+    ASSERT(nAlignMask == 0 || nAlignMask == 3 || nAlignMask == 7 || nAlignMask == 15);
+
     for(;; nVarIndex++)
     {
       BT_VARIABLE_DESC VarDesc;
@@ -174,40 +179,55 @@ namespace Marimo
         ASSERT(itType != m_TypeDict.end());
       }
 
-      VarDesc.szName     = var.Name;
-      VarDesc.nNameIndex = (GXUINT)NameSet.index(var.Name);
-      VarDesc.pTypeDesc = &itType->second;
-      //VarDesc.TypeDesc  = 0;
-      ASSERT(((GXLONG_PTR)VarDesc.pTypeDesc & 3) == 0); // 一定是4字节对齐的
-
-      //VarDesc.bDynamic = var.Count < 0 ? 1 : 0;
-      VarDesc.bConst = 0;
-
-      VarDesc.nCount  = nDim;
-      VarDesc.nOffset = cbSize;
+      VarDesc.szName      = var.Name;
+      VarDesc.nNameIndex  = (GXUINT)NameSet.index(var.Name);
+      VarDesc.pTypeDesc   = &itType->second;
+      VarDesc.bConst      = 0;
+      VarDesc.nCount      = nDim;
 
       // 动态数组声明为clBuffer*
       if(var.Count < 0) {
         ASSERT(VarDesc.nCount == 0);
         VarDesc.bDynamic = 1;
-        m_bFixedPool = 0;
-        cbSize += (m_bPtr64 ? sizeof(u64) : sizeof(clBuffer*));
+        m_bFixedPool     = 0;
+        cbSubSize = (m_bPtr64 ? sizeof(u64) : sizeof(clBuffer*));
       }
       else
       {
         VarDesc.bDynamic = 0;
-        cbSize += VarDesc.GetSize();
-        
-        // 结构体/全局变量 对齐
-        ASSERT(nAlignMask == 0 && nAlignMask == 1 || nAlignMask == 3 || nAlignMask == 7 || nAlignMask == 15);
+        cbSubSize = VarDesc.GetSize();
+      }
+
+      if(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY)
+      {
+        GXUINT cbNextBoundary = (cbVariableSize + 16) & (~15);
+
+        // 如果跨越16字节边界，则把开始偏移移到下一个边界
+        if((cbVariableSize & 15) != 0 && cbVariableSize + cbSubSize > cbNextBoundary)
+        {
+          cbVariableSize = cbNextBoundary;
+        }
+        VarDesc.nOffset = cbVariableSize;
+        cbVariableSize += cbSubSize;
+      }
+      else {
+        VarDesc.nOffset = cbVariableSize;
+        cbVariableSize += cbSubSize;
         if(nAlignMask != 0)
         {
-          cbSize = (cbSize + nAlignMask) & (~nAlignMask);
+          // 结构体/全局变量 对齐
+          cbVariableSize = (cbVariableSize + nAlignMask) & (~nAlignMask);
         }
       }
+
+      ASSERT(((GXLONG_PTR)VarDesc.pTypeDesc & 3) == 0); // 一定是4字节对齐的
       aVariableDesc.push_back(VarDesc);
     }
-    return cbSize;
+    
+    if(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY) {
+      cbVariableSize = ALIGN_16(cbVariableSize);
+    }
+    return cbVariableSize;
   }
 
   GXBOOL DataPoolBuildTime::CheckVarList(LPCVARDECL pVarDecl)

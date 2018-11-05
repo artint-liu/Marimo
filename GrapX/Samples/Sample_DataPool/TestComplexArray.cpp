@@ -6,6 +6,7 @@
 #include "TestObject.h"
 #include "TestDataPool.h"
 #include <Shlwapi.h>
+#include "clPathFile.h"
 
 void TryGet(DataPool* pDataPool, GXLPCSTR szExpression)
 {
@@ -226,7 +227,7 @@ void TestComplexArray()
   DataPool* pDataPool = NULL;
   HRESULT result;
 
-  result = DataPool::CompileFromFileW(&pDataPool, NULL, L"Test\\DataPool\\ComplexArray_main.txt");
+  result = DataPool::CompileFromFileW(&pDataPool, NULL, _CLTEXT("Test\\DataPool\\ComplexArray_main.txt"));
   ASSERT(GXSUCCEEDED(result));
 
   //TryGet(pDataPool, "DynTest");
@@ -282,19 +283,19 @@ void TestComplexArray()
 
   ENUM_DATAPOOL(pDataPool);
 
-#ifdef _X86
-  GXLPCWSTR szFilename = L"Test\\TestComplexArray.DPL";
-  GXLPCWSTR szFilename2 = L"Test\\TestComplexArray_x64.DPL";  // 跨平台的文件名
+#ifdef _CL_ARCH_X86
+  GXLPCWSTR szFilename = _CLTEXT("Test\\TestComplexArray.DPL");
+  GXLPCWSTR szFilename2 = _CLTEXT("Test\\TestComplexArray_x64.DPL");  // 跨平台的文件名
 #else
-  GXLPCWSTR szFilename = L"Test\\TestComplexArray_x64.DPL";
-  GXLPCWSTR szFilename2 = L"Test\\TestComplexArray.DPL";      // 跨平台的文件名
-#endif // #ifdef _X86
+  GXLPCWSTR szFilename  = _CLTEXT("Test\\TestComplexArray_x64.DPL");
+  GXLPCWSTR szFilename2 = _CLTEXT("Test\\TestComplexArray.DPL");      // 跨平台的文件名
+#endif // #ifdef _CL_ARCH_X86
   pDataPool->SaveW(szFilename);
 
   DataPool* pDataPoolFromFile = NULL;
   DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolCreation_ReadOnly);
 
-  pDataPool->ExportDataToFile(L"Test\\TestComplexArray_export.txt");
+  pDataPool->ExportDataToFile(_CLTEXT("Test\\TestComplexArray_export.txt"));
 
   TestGetNameId(pDataPoolFromFile);
   TestGetNameId(pDataPool);
@@ -304,7 +305,7 @@ void TestComplexArray()
   SAFE_RELEASE(pDataPoolFromFile);
 
   // 异构架文件加载测试
-  if(PathFileExists(szFilename2))
+  if(clpathfile::IsPathExist(szFilename2))
   {
     DataPool* pAlternative = NULL;
     result = DataPool::CreateFromFileW(&pAlternative, NULL, szFilename2, DataPoolCreation_ReadOnly);

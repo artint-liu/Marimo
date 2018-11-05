@@ -69,6 +69,7 @@ namespace Marimo
     DataPoolCreation_Align4       = 0x00000010,  // 4字节对齐，只在创建时有效，加载时忽略
     DataPoolCreation_Align8       = 0x00000030,  // 8字节对齐，只在创建时有效，加载时忽略
     DataPoolCreation_Align16      = 0x00000070,  // 16字节对齐，只在创建时有效，加载时忽略
+    DataPoolCreation_NotCross16BytesBoundary = 0x000000f0,  // 不跨越16字节边界，用于shader constant buffer 打包
   };
 
   // 还没用上
@@ -162,7 +163,8 @@ namespace Marimo
       VARIABLE_DECLARATION* Struct; // 结构体 成员
       ENUM_DECLARATION*     Enumer;
     }as;
-    GXUINT                StructAlign;    // 结构体成员对齐尺寸，2，4，8，16，其他值以1字节对齐
+    GXUINT                StructAlign;    // 结构体成员对齐尺寸-16，2，4，8，16，其他值以1字节对齐
+                                          // -16表示新变量不能跨越16字节边界，参看HLSL “Packing Rules for Constant Variables”规则
   };
   typedef const TYPE_DECLARATION* LPCTYPEDECL;
 
@@ -529,7 +531,7 @@ namespace Marimo
     GXSTDINTERFACE(GXHRESULT GetManifest(MANIFEST* pManifest) const);
 
   public:
-    static GXHRESULT CreateFromMemory(DataPoolCompiler** ppResolver, GXLPCWSTR szSourceFilePath, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength);
+    static GXHRESULT CreateFromMemory(DataPoolCompiler** ppResolver, GXLPCWSTR szSourceFilePath, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength, GXDWORD dwFlags);
   };
 
   //////////////////////////////////////////////////////////////////////////

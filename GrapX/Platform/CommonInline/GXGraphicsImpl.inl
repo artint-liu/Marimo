@@ -756,6 +756,23 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
   return GX_OK;
 }
 
+GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GrapX::Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount)
+{
+  GrapX::D3D11::ShaderImpl* pShader = new GrapX::D3D11::ShaderImpl(this);
+  if(InlIsFailedToNewObject(pShader))
+  {
+    return GX_ERROR_OUROFMEMORY;
+  }
+
+  if(_CL_NOT_(pShader->InitShader(m_strResourceDir, pShaderDescs, nCount))) {
+    SAFE_RELEASE(pShader);
+    return GX_FAIL;
+  }
+
+  *ppShader = pShader;
+  return GX_OK;
+}
+
 GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)
 {
   GShaderImpl* pShader = new GShaderImpl(this);
