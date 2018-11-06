@@ -217,6 +217,7 @@ namespace D3D11
       if(file.CreateAlways(szFilePath))
       {
         file.Write(buffer);
+        return TRUE;
       }
     }
     return FALSE;

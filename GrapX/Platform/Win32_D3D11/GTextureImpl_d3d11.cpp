@@ -543,12 +543,17 @@ namespace D3D11
     ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
     D3D11_BOX box;
     InlSetZeroT(box);
-    box.left   = prcDest->left;
-    box.top    = prcDest->top;
-    box.right  = prcDest->right;
-    box.bottom = prcDest->bottom;
-    box.back   = 1;
-    pD3D11Context->UpdateSubresource(m_pD3D11Texture, 0, &box, pData, nPitch, 0);
+
+    if(prcDest)
+    {
+      box.left    = prcDest->left;
+      box.top     = prcDest->top;
+      box.right   = prcDest->right;
+      box.bottom  = prcDest->bottom;
+      box.back    = 1;
+    }
+
+    pD3D11Context->UpdateSubresource(m_pD3D11Texture, 0, prcDest ? &box : NULL, pData, nPitch, 0);
     return TRUE;
   }
 
