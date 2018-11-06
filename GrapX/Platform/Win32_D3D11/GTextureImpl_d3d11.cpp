@@ -48,8 +48,6 @@ namespace D3D11
     switch(pDesc->dwCmdCode)
     {
     case RC_LostDevice:
-      SAFE_RELEASE(m_pD3D11ShaderView);
-      SAFE_RELEASE(m_pD3D11Texture);
       break;
     case RC_ResetDevice:
       break;
@@ -1094,6 +1092,11 @@ namespace D3D11
   {
   }
 
+  GTextureImpl_RenderTarget::~GTextureImpl_RenderTarget()
+  {
+    SAFE_RELEASE(m_pD3D11RenderTargetView);
+  }
+
   GXBOOL GTextureImpl_RenderTarget::InitRenderTexture()
   {
     if(_CL_NOT_(GTextureImpl::InitTexture(TRUE, NULL, 0))) {
@@ -1117,6 +1120,11 @@ namespace D3D11
   GTextureImpl_DepthStencil::GTextureImpl_DepthStencil(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
     : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
   {
+  }
+
+  GTextureImpl_DepthStencil::~GTextureImpl_DepthStencil()
+  {
+    SAFE_RELEASE(m_pD3D11DepthStencilView);
   }
 
   GXBOOL GTextureImpl_DepthStencil::InitDepthStencil()

@@ -34,7 +34,6 @@ namespace D3D11
     , m_NumDescs(0)
     , m_nStride(NULL)
   {
-    AddRef();
   }
 
   GVertexDeclImpl::~GVertexDeclImpl()

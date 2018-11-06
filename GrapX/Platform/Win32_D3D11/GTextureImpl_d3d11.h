@@ -121,6 +121,7 @@ namespace D3D11
 
   public:
     GTextureImpl_RenderTarget(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+    virtual ~GTextureImpl_RenderTarget();
     GXBOOL InitRenderTexture();
   };
 
@@ -134,6 +135,7 @@ namespace D3D11
 
   public:
     GTextureImpl_DepthStencil(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+    virtual ~GTextureImpl_DepthStencil();
     GXBOOL InitDepthStencil();
   };
 

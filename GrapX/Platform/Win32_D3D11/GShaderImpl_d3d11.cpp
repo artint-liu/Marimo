@@ -63,7 +63,6 @@ namespace D3D11
   {
     memset(&m_VertexShaderConstTabDesc, 0, sizeof(m_VertexShaderConstTabDesc));
     memset(&m_PixelShaderConstTabDesc, 0, sizeof(m_PixelShaderConstTabDesc));
-    AddRef();
   }
 
   GShaderImpl::~GShaderImpl()
@@ -361,7 +360,10 @@ namespace D3D11
     {
       //OnDeviceEvent(DE_LostDevice);
 
-      m_pGraphicsImpl->UnregisterResource(this);
+      if(m_pVertexShader && m_pPixelShader)
+      {
+        m_pGraphicsImpl->UnregisterResource(this);
+      }
       delete this;
       return GX_OK;
     }
@@ -464,7 +466,10 @@ namespace GrapX
 
       if(nRefCount == 0)
       {
-        m_pGraphicsImpl->UnregisterResource(this);
+        if(m_pD3D11VertexShader && m_pD3D11PixelShader)
+        {
+          m_pGraphicsImpl->UnregisterResource(this);
+        }
         delete this;
         return GX_OK;
       }
@@ -485,6 +490,8 @@ namespace GrapX
 
     ShaderImpl::~ShaderImpl()
     {
+      SAFE_RELEASE(m_pD3D11VertexShader);
+      SAFE_RELEASE(m_pD3D11PixelShader);
     }
 
     GXBOOL ShaderImpl::InitShader(GXLPCWSTR szResourceDir, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount)
@@ -595,6 +602,7 @@ namespace GrapX
         SAFE_RELEASE(InterCode.pReflection);
       }
 
+      SAFE_DELETE(pInclude);
       return bval;
     }
 

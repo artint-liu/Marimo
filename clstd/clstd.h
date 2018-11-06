@@ -14,6 +14,10 @@
 
 // 避免使用"PLATFORM"做为库定义宏，这个单词可能指构架平台，操作系统平台或者支付平台，容易引起歧异
 
+#if __cplusplus < 201103L
+# error 需要C++11或以上级别的编译器支持
+#endif
+
 // 处理器平台
 #if defined(_M_IX86) || defined(__i386__)
 # define _CL_ARCH_X86

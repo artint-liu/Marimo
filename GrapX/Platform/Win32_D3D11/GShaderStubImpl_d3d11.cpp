@@ -316,7 +316,7 @@ namespace D3D11
     {
       //OnDeviceEvent(DE_LostDevice);
       SAFE_RELEASE(m_pShaderImpl);
-      m_pGraphicsImpl->UnregisterResource(this);
+      //m_pGraphicsImpl->UnregisterResource(this);
       delete this;
       return GX_OK;
     }

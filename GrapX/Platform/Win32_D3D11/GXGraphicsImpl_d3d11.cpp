@@ -888,6 +888,7 @@ namespace D3D11
       if(pSavedPrimitive)
       {
         SetPrimitive(static_cast<GPrimitive*>(pSavedPrimitive));
+        SAFE_RELEASE(pSavedPrimitive);
       }
       else
       {

@@ -84,6 +84,8 @@ GXBOOL GXGraphicsImpl::ReleaseCommon()
   SAFE_DELETE(m_pShaderConstName);
   SAFE_RELEASE(m_pWhiteTexture8x8);
 
+  SAFE_RELEASE(m_pBasicShader);
+
   // 释放 Canvas 缓冲
   if(m_aCanvasPtrCache != NULL)
   {
@@ -769,6 +771,7 @@ GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GrapX::Shader** ppShader, const
     return GX_FAIL;
   }
 
+  RegisterResource(pShader, NULL);
   *ppShader = pShader;
   return GX_OK;
 }
@@ -806,6 +809,7 @@ GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GShader** ppShader, GXLPCSTR sz
 
   if(GXSUCCEEDED(hr))
   {
+    RegisterResource(pShader, NULL);
     *ppShader = pShader; // 构造时已经加一
   }
   else
@@ -854,7 +858,7 @@ GXHRESULT GXGraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexD
   }
 
   GVertexDeclImpl* pVertexDeclImpl = new GVertexDeclImpl(this);
-  if( ! InlCheckNewAndIncReference(pVertexDeclImpl)) {
+  if(InlIsFailedToNewObject(pVertexDeclImpl)) {
     return GX_FAIL;
   }
 
