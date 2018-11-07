@@ -28,7 +28,7 @@ namespace GXUI
   GXBOOL CDefListDataAdapter::Initialize()
   {
     static
-      Marimo::VARIABLE_DECLARATION s_DefaultListItem[] = {
+      Marimo::DATAPOOL_VARIABLE_DECLARATION s_DefaultListItem[] = {
         {"string", "name", 0, -1, 0},
         {NULL, NULL},
     };

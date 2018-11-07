@@ -190,7 +190,7 @@ void TestHugeArray()
   GXLPCWSTR szFilename = _CLTEXT("test\\TestHugeArray.DTP");
 
   ENUM_DATAPOOL(pDataPool);
-  GXBOOL bRet = pDataPool->SaveW(szFilename);
+  GXBOOL bRet = pDataPool->Save(szFilename);
   ASSERT(bRet);
 
   DataPool* pDataPoolFromFile = NULL;

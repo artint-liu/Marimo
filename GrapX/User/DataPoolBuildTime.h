@@ -20,7 +20,7 @@ namespace Marimo
       IntArray indices;
     };
 
-    struct BUILDTIME_TYPE_DECLARATION : public TYPE_DECLARATION
+    struct BUILDTIME_TYPE_DECLARATION : public DATAPOOL_TYPE_DECLARATION
     {
       GXDWORD dwFlags; // BuildtimeTypeDeclarationFlags
     };

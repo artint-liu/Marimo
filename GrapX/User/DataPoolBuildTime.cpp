@@ -27,15 +27,15 @@ namespace Marimo
 
   GXBOOL DataPoolBuildTime::IntCheckTypeDecl(LPCTYPEDECL pTypeDecl, GXBOOL bCheck)
   {
-    STATIC_ASSERT(sizeof(BUILDTIME_TYPE_DECLARATION) >= sizeof(TYPE_DECLARATION)); // 这个断言不能完全保证数据正确，但至少不会大出错
+    STATIC_ASSERT(sizeof(BUILDTIME_TYPE_DECLARATION) >= sizeof(DATAPOOL_TYPE_DECLARATION)); // 这个断言不能完全保证数据正确，但至少不会大出错
 
     for(int i = 0;; i++) {
       BUILDTIME_TYPE_DECLARATION type;
-      (*(TYPE_DECLARATION*)&type)= pTypeDecl[i];
+      (*(DATAPOOL_TYPE_DECLARATION*)&type)= pTypeDecl[i];
       type.dwFlags = 0;
 
       if(type.Name == NULL) { break; }
-      if(bCheck && (type.Cate <= T_UNDEFINE || type.Cate >= T_MAX || ! DataPool::IsIllegalName(type.Name)) ) {
+      if(bCheck && (type.Cate <= T_UNDEFINE || type.Cate >= T_MAX || _CL_NOT_(DataPool::IsIdentifier(type.Name))) ) {
         CLOG_ERROR("%s: Bad type category.\n", __FUNCTION__);
         return FALSE;
       }
@@ -102,7 +102,7 @@ namespace Marimo
       m_bFixedPool = 0;
       break;
     case T_STRUCT:
-    case T_STRUCTALWAYS:
+    //case T_STRUCTALWAYS:
       {
         BTVarDescArray aMemberDesc;
         aMemberDesc.reserve(20);
@@ -158,7 +158,7 @@ namespace Marimo
     for(;; nVarIndex++)
     {
       BT_VARIABLE_DESC VarDesc;
-      const VARIABLE_DECLARATION& var = pVarDecl[nVarIndex];
+      const DATAPOOL_VARIABLE_DECLARATION& var = pVarDecl[nVarIndex];
       if(var.Type == NULL || var.Name == NULL) {
         break;
       }
@@ -200,7 +200,7 @@ namespace Marimo
 
       if(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY)
       {
-        GXUINT cbNextBoundary = (cbVariableSize + 16) & (~15);
+        GXINT cbNextBoundary = (cbVariableSize + 16) & (~15);
 
         // 如果跨越16字节边界，则把开始偏移移到下一个边界
         if((cbVariableSize & 15) != 0 && cbVariableSize + cbSubSize > cbNextBoundary)
@@ -270,7 +270,7 @@ namespace Marimo
         }
       }
 
-      if( ! DataPool::IsIllegalName(pVarDecl[i].Name)) {
+      if(_CL_NOT_(DataPool::IsIdentifier(pVarDecl[i].Name))) {
         CLOG_ERROR("%s: Bad variable name.\n", __FUNCTION__);
         result = FALSE;
       }

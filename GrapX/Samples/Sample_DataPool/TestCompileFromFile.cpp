@@ -73,7 +73,7 @@ void TestCompileFromFile()
 #else
     GXLPCWSTR szFilename = _CLTEXT("Test\\TestCompileFromFile_x64.DPL");
 #endif // #ifdef _X86
-    pDataPool->SaveW(szFilename);
+    pDataPool->Save(szFilename);
 
     DataPool* pDataPoolReadOnly = NULL;
     DataPool::CreateFromFileW(&pDataPoolReadOnly, NULL, szFilename, DataPoolCreation_ReadOnly);

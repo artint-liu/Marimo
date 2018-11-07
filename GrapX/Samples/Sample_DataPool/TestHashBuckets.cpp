@@ -48,10 +48,10 @@ void TestHashBuckets()
     // 保存结果
     clStringW str;
     str.Format(szFilenameFmt, L"_Hash");
-    pPoolWithHash->SaveW(str);
+    pPoolWithHash->Save(str);
 
     str.Format(szFilenameFmt, L"_NoHash");
-    pPoolWithoutHash->SaveW(str);
+    pPoolWithoutHash->Save(str);
 
     // 释放
     SAFE_RELEASE(pPoolWithoutHash);

@@ -80,7 +80,7 @@ void TestBaseProperty()
     pObject->AddRef();
   }
 
-  static VARIABLE_DECLARATION g_StdMtl[] = 
+  static DATAPOOL_VARIABLE_DECLARATION g_StdMtl[] = 
   {
     {"float",     "fFactor",          0,   },
     {"float",     "aFactor",          0,   3},
@@ -103,14 +103,14 @@ void TestBaseProperty()
     {NULL, NULL}
   };
 
-  static VARIABLE_DECLARATION c_vertex[] = {
+  static DATAPOOL_VARIABLE_DECLARATION c_vertex[] = {
     {"string", "name"},
     {"float3", "pos"},
     {"float3", "vertices", 0, -1},
     {NULL, NULL},
   };
 
-  static TYPE_DECLARATION c_InternalTypeDefine[] = {
+  static DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[] = {
     {Marimo::T_STRUCT, "vertex", c_vertex},
     {T_UNDEFINE, NULL},
   };

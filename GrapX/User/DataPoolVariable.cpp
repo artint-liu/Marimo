@@ -387,20 +387,20 @@ namespace Marimo
   } // namespace Implement
 
   // 预置类型
-  VARIABLE_DECLARATION c_float2[] = {
+  DATAPOOL_VARIABLE_DECLARATION c_float2[] = {
     {"float", "x"},
     {"float", "y"},
     {NULL, NULL},
   };
 
-  VARIABLE_DECLARATION c_float3[] = {
+  DATAPOOL_VARIABLE_DECLARATION c_float3[] = {
     {"float", "x"},
     {"float", "y"},
     {"float", "z"},
     {NULL, NULL},
   };
 
-  VARIABLE_DECLARATION c_float4[] = {
+  DATAPOOL_VARIABLE_DECLARATION c_float4[] = {
     {"float", "x"},
     {"float", "y"},
     {"float", "z"},
@@ -408,19 +408,19 @@ namespace Marimo
     {NULL, NULL},
   };
 
-  VARIABLE_DECLARATION c_float3x3[] = {
+  DATAPOOL_VARIABLE_DECLARATION c_float3x3[] = {
     {"float", "m", 0, 9},
     {NULL, NULL},
   };
 
-  VARIABLE_DECLARATION c_float4x4[] = {
+  DATAPOOL_VARIABLE_DECLARATION c_float4x4[] = {
     {"float", "m", 0, 16},
     {NULL, NULL},
   };
 
   namespace Implement
   {
-    TYPE_DECLARATION c_InternalTypeDefine[] = {
+    DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[] = {
       {Marimo::T_FLOAT,  "float"},
       {Marimo::T_BYTE,   "BYTE"},
       {Marimo::T_WORD,   "WORD"},

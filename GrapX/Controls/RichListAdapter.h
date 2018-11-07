@@ -82,10 +82,10 @@ namespace GXUI
     GXBOOL Initialize(const ItemElementArray& aItemElements, MOVariable* pVariable)
     {
       ELEMENT sElement;
-      typedef clvector<Marimo::VARIABLE_DECLARATION> VarDeclArray;
+      typedef clvector<Marimo::DATAPOOL_VARIABLE_DECLARATION> VarDeclArray;
 
       VarDeclArray                  aStructMember;
-      Marimo::VARIABLE_DECLARATION  sVarDecl;
+      Marimo::DATAPOOL_VARIABLE_DECLARATION  sVarDecl;
 
       static GXLPCSTR szStringTypeName  = "string";
       static GXLPCSTR szFloatTypeName   = "float";
@@ -99,7 +99,7 @@ namespace GXUI
 
       for(ItemElementArray::const_iterator it = aItemElements.begin(); it != aItemElements.end(); ++it) 
       {
-        if(it->strClass != GXUICLASSNAME_STATIC && ! Marimo::DataPool::IsIllegalName(sElement.strName)) {
+        if(it->strClass != GXUICLASSNAME_STATIC && ! Marimo::DataPool::IsIdentifier(sElement.strName)) {
           continue;
         }
 
@@ -190,7 +190,7 @@ namespace GXUI
           {
           case GXUISS_TYPE_LABEL:
           case GXUISS_TYPE_RECT:
-            if( ! Marimo::DataPool::IsIllegalName(sElement.strName)) {
+            if( ! Marimo::DataPool::IsIdentifier(sElement.strName)) {
               continue;
             }
 
@@ -218,8 +218,8 @@ namespace GXUI
 
               sElement.strName.DivideBy('@', strUniformIndex, strSprite);
 
-              if(Marimo::DataPool::IsIllegalName(strSprite) && 
-                Marimo::DataPool::IsIllegalName(strUniformIndex))
+              if(Marimo::DataPool::IsIdentifier(strSprite) && 
+                Marimo::DataPool::IsIdentifier(strUniformIndex))
               {
                 //NameList.push_back(strSprite);
                 sVarDecl.Type = szObjectTypeName;
@@ -291,8 +291,8 @@ namespace GXUI
         aStructMember.push_back(sVarDecl);
 
         static GXLPCSTR szItemType = "ITEM";
-        Marimo::TYPE_DECLARATION sStructType[2];
-        Marimo::VARIABLE_DECLARATION aGlobalVar[2];
+        Marimo::DATAPOOL_TYPE_DECLARATION sStructType[2];
+        Marimo::DATAPOOL_VARIABLE_DECLARATION aGlobalVar[2];
 
         sStructType[0].Cate       = Marimo::T_STRUCT;
         sStructType[0].Name       = szItemType;

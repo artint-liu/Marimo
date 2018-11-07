@@ -737,13 +737,13 @@ void test()
   //  {NULL, NULL},
   //};
 
-  VARIABLE_DECLARATION c_vertex[] = {
+  DATAPOOL_VARIABLE_DECLARATION c_vertex[] = {
     {"string", "name"},
     {"float3", "vertex", 0, -1},
     {NULL, NULL},
   };
 
-  TYPE_DECLARATION c_InternalTypeDefine[] = {
+  DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[] = {
     //{ScriptedDataPool::T_DWORD,  "float"},
     //{ScriptedDataPool::T_STRING, "string"},
     //{ScriptedDataPool::T_STRUCT, "float2"  , c_float2},
@@ -757,7 +757,7 @@ void test()
 
   float4x4 matIdentity[4] = {float4x4::Identity, float4x4::Identity, float4x4::Identity, float4x4::Identity};
 
-  VARIABLE_DECLARATION g_StdMtl[] = 
+  DATAPOOL_VARIABLE_DECLARATION g_StdMtl[] = 
   {
     {"float",    "fFactor",           0,   },
     {"float4x4", "g_matViewProj",     0,   0, &matIdentity},
@@ -1173,7 +1173,7 @@ void TestStringCutter()
 
 void TestHeaderSize()
 {
-  static VARIABLE_DECLARATION s_aVariable[] = 
+  static DATAPOOL_VARIABLE_DECLARATION s_aVariable[] = 
   {
     {"float", "fFactor", 0,},
     {NULL, NULL}
@@ -1182,7 +1182,7 @@ void TestHeaderSize()
   DataPool* pDataPool = NULL;
   GXHRESULT hr = DataPool::CreateDataPool(&pDataPool, NULL, NULL, s_aVariable);
   if(GXSUCCEEDED(hr)) {
-    pDataPool->SaveW(_CLTEXT("Test\\HeaderSize.dpl"));
+    pDataPool->Save(_CLTEXT("Test\\HeaderSize.dpl"));
     SAFE_RELEASE(pDataPool);
   }
 }

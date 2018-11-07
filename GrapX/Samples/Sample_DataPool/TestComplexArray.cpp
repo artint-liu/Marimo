@@ -290,7 +290,7 @@ void TestComplexArray()
   GXLPCWSTR szFilename  = _CLTEXT("Test\\TestComplexArray_x64.DPL");
   GXLPCWSTR szFilename2 = _CLTEXT("Test\\TestComplexArray.DPL");      // 跨平台的文件名
 #endif // #ifdef _CL_ARCH_X86
-  pDataPool->SaveW(szFilename);
+  pDataPool->Save(szFilename);
 
   DataPool* pDataPoolFromFile = NULL;
   DataPool::CreateFromFileW(&pDataPoolFromFile, NULL, szFilename, DataPoolCreation_ReadOnly);

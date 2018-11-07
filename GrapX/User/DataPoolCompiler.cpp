@@ -61,7 +61,7 @@ namespace Marimo
 {
   namespace Implement
   {
-    extern TYPE_DECLARATION c_InternalTypeDefine[];
+    extern DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[];
   } // namespace Implement
 
   typedef SmartStreamA::iterator StreamIter;
@@ -89,11 +89,11 @@ namespace Marimo
       GXSIZE_T   SourceOffset;
     };
 
-    typedef clvector<VARIABLE_DECLARATION>        VarDeclArray;
-    typedef clvector<ENUM_DECLARATION>            EnumPairArray;
+    typedef clvector<DATAPOOL_VARIABLE_DECLARATION>        VarDeclArray;
+    typedef clvector<DATAPOOL_ENUM_DECLARATION>            EnumPairArray;
     typedef clvector<VarDeclArray*>               MembersArray;
     typedef clvector<EnumPairArray*>              EnumDeclArray;
-    typedef clvector<TYPE_DECLARATION>            TypeDeclArray;
+    typedef clvector<DATAPOOL_TYPE_DECLARATION>            TypeDeclArray;
     typedef clhash_map<clStringA, StringType>     StringDict;
     typedef clhash_map<clStringA, DEFINE>         NameDict;
     typedef clhash_map<clStringA, DataPool::Enum> EnumDict;
@@ -133,11 +133,11 @@ namespace Marimo
     TypeCategory  GetVarCateByName  (GXLPCSTR szTypeName);
     GXLPCSTR      AddString         (StringType eType, clStringHashSetA* pVarNameSet, GXLPCSTR szString, GXSIZE_T nSourceOffset, GXBOOL* result);
     GXLPCSTR      CheckType         (GXLPCSTR szTypeName, GXSIZE_T nSourceOffset, GXBOOL* result);
-    GXBOOL        ParseStruct       (SmartStreamA& ss, StreamIter& it, GXBOOL bAlways);
+    GXBOOL        ParseStruct       (SmartStreamA& ss, StreamIter& it);
     GXBOOL        ParseEnum         (SmartStreamA& ss, StreamIter& it, GXBOOL bFlag);
-    GXBOOL        ParseEnumItem     (SmartStreamA& ss, StreamIter& it, const StreamIter&, ENUM_DECLARATION& sEnum);
-    GXBOOL        ParseVariable     (SmartStreamA& ss, StreamIter& it, clStringHashSetA& sNameSet, VARIABLE_DECLARATION* pVarDecl);
-    GXBOOL        ParseAssignment   (SmartStreamA& ss, StreamIter& it, VARIABLE_DECLARATION* pVarDecl);
+    GXBOOL        ParseEnumItem     (SmartStreamA& ss, StreamIter& it, const StreamIter&, DATAPOOL_ENUM_DECLARATION& sEnum);
+    GXBOOL        ParseVariable     (SmartStreamA& ss, StreamIter& it, clStringHashSetA& sNameSet, DATAPOOL_VARIABLE_DECLARATION* pVarDecl);
+    GXBOOL        ParseAssignment   (SmartStreamA& ss, StreamIter& it, DATAPOOL_VARIABLE_DECLARATION* pVarDecl);
     u64           ParseInitValue    (const clStringA& strValue) const;
     GXBOOL        FindValueFromEnum (const StreamIter& it, GXINT* nValue);
     GXBOOL        MainCompile       (DataPoolInclude* pInclude, GXLPCWSTR szSourceFilePath, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength);
@@ -149,7 +149,7 @@ namespace Marimo
     GXINT         MathExpressionParser(const cllist<StreamIter>& expression, GXINT* nValue);
 
     template<typename _Ty>
-    void      AllocInitPtr    (VARIABLE_DECLARATION* pVarDecl, GXINT aInitArrayCount);
+    void      AllocInitPtr    (DATAPOOL_VARIABLE_DECLARATION* pVarDecl, GXINT aInitArrayCount);
     template<typename _Ty>
     GXBOOL    ParseInitList   (_Ty* aArray, const clStringArrayA& aInit);
     DataPoolResolverImpl(GXDWORD dwFlags);
@@ -160,7 +160,7 @@ namespace Marimo
     GXHRESULT Release ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXHRESULT GetManifest(MANIFEST* pManifest) const;
+    GXHRESULT GetManifest(DATAPOOL_MANIFEST* pManifest) const;
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ namespace Marimo
   {
   }
 
-  GXHRESULT DataPoolResolverImpl::GetManifest(MANIFEST* pManifest) const
+  GXHRESULT DataPoolResolverImpl::GetManifest(DATAPOOL_MANIFEST* pManifest) const
   {
     if(m_aTypes.empty() || m_aVariables.empty()) {
       return GX_FAIL;
@@ -531,8 +531,8 @@ namespace Marimo
     GXBOOL bval = IntCompile(pInclude, szDefinitionCodes, nCodeLength);
     if(bval)
     {
-      TYPE_DECLARATION TypeDecl;
-      VARIABLE_DECLARATION VarDeclEnd;
+      DATAPOOL_TYPE_DECLARATION TypeDecl;
+      DATAPOOL_VARIABLE_DECLARATION VarDeclEnd;
       InlSetZeroT(TypeDecl);
       InlSetZeroT(VarDeclEnd);
       m_aTypes.push_back(TypeDecl);
@@ -570,6 +570,7 @@ namespace Marimo
       if(it == ";") {
         continue;
       }
+#if 0
       else if(it == "always")
       {
         nPrevOffset = it.offset();
@@ -585,9 +586,10 @@ namespace Marimo
           break;
         }
       }
+#endif
       else if(it == "struct")
       {
-        if( ! ParseStruct(ss, it, FALSE)) {
+        if( ! ParseStruct(ss, it)) {
           result = FALSE;
           break;
         }
@@ -601,7 +603,7 @@ namespace Marimo
         ParseEnum(ss, it, true);
       }
       else {
-        VARIABLE_DECLARATION VarDecl;
+        DATAPOOL_VARIABLE_DECLARATION VarDecl;
 
         if(it == "const") {
           nPrevOffset = it.offset();
@@ -637,7 +639,7 @@ namespace Marimo
   }
 
   template<typename _Ty>
-  void DataPoolResolverImpl::AllocInitPtr(VARIABLE_DECLARATION* pVarDecl, GXINT aInitArrayCount)
+  void DataPoolResolverImpl::AllocInitPtr(DATAPOOL_VARIABLE_DECLARATION* pVarDecl, GXINT aInitArrayCount)
   {
     pVarDecl->Init = malloc(sizeof(_Ty) * abs(pVarDecl->Count));
     if(pVarDecl->Count > 0 && pVarDecl->Count > aInitArrayCount) {
@@ -645,7 +647,7 @@ namespace Marimo
     }
   }
 
-  GXBOOL DataPoolResolverImpl::ParseAssignment(SmartStreamA& ss, StreamIter& it, VARIABLE_DECLARATION* pVarDecl)
+  GXBOOL DataPoolResolverImpl::ParseAssignment(SmartStreamA& ss, StreamIter& it, DATAPOOL_VARIABLE_DECLARATION* pVarDecl)
   {
     clStringArrayA aInit;
     if(it == '{') {
@@ -699,7 +701,7 @@ namespace Marimo
       return FALSE;
 
     case T_STRUCT:
-    case T_STRUCTALWAYS:
+    //case T_STRUCTALWAYS:
       m_ErrorMsg.WriteErrorA(TRUE, it.marker, "\"object\"类型(%s)不支持赋值", pVarDecl->Name);
       return FALSE;
 
@@ -765,7 +767,7 @@ namespace Marimo
     return TRUE;
   }
 
-  GXBOOL DataPoolResolverImpl::ParseVariable(SmartStreamA& ss, StreamIter& it, clStringHashSetA& sNameSet, VARIABLE_DECLARATION* pVarDecl)
+  GXBOOL DataPoolResolverImpl::ParseVariable(SmartStreamA& ss, StreamIter& it, clStringHashSetA& sNameSet, DATAPOOL_VARIABLE_DECLARATION* pVarDecl)
   {
     GXBOOL bSigned = TRUE;
     GXBOOL result = TRUE;
@@ -846,7 +848,7 @@ namespace Marimo
 
       case STEP_Name:
         pVarDecl->Name = AddString(ST_VarName, &sNameSet, it.ToString(), it.offset(), &result);
-        if( ! DataPool::IsIllegalName(pVarDecl->Name)) {
+        if(_CL_NOT_(DataPool::IsIdentifier(pVarDecl->Name))) {
           clStringW strVarName = pVarDecl->Name;
           m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1200_CANT_USE_AS_VAR_NAME, (GXLPCWSTR)strVarName);
           result = FALSE;
@@ -919,7 +921,7 @@ namespace Marimo
     return result;
   }
 
-  GXBOOL DataPoolResolverImpl::ParseEnumItem(SmartStreamA& ss, StreamIter& it, const StreamIter& itEnd, ENUM_DECLARATION& sEnum)
+  GXBOOL DataPoolResolverImpl::ParseEnumItem(SmartStreamA& ss, StreamIter& it, const StreamIter& itEnd, DATAPOOL_ENUM_DECLARATION& sEnum)
   {
     enum
     {
@@ -939,7 +941,7 @@ namespace Marimo
       case STEP_Name: // 枚举值
         sEnum.Name = AddString(ST_EnumName, NULL, it.ToString(), it.offset(), &result);
 
-        if( ! DataPool::IsIllegalName(sEnum.Name)) {
+        if(_CL_NOT_(DataPool::IsIdentifier(sEnum.Name))) {
           // \"%s\" 不能作为枚举名字使用
           m_ErrorMsg.WriteErrorW(TRUE, nPrevOffset, E_1401_CANT_USE_AS_ENUM_NAME, sEnum.Name);
           result = FALSE;
@@ -1016,20 +1018,20 @@ namespace Marimo
     return result;
   }
 
-  GXBOOL DataPoolResolverImpl::ParseStruct(SmartStreamA& ss, StreamIter& it, GXBOOL bAlways)
+  GXBOOL DataPoolResolverImpl::ParseStruct(SmartStreamA& ss, StreamIter& it)
   {
     VarDeclArray* pStruct = new VarDeclArray;
-    TYPE_DECLARATION TypeDecl;
+    DATAPOOL_TYPE_DECLARATION TypeDecl;
     StreamIter itBegin;
     StreamIter itEnd;
     GXBOOL result = TRUE;
     ASSERT(it == "struct");
     ++it;
-    TypeDecl.Cate = bAlways ? T_STRUCTALWAYS : T_STRUCT;
+    TypeDecl.Cate = T_STRUCT;
     TypeDecl.Name = AddString(ST_StructType, NULL, it.ToString(), it.offset(), &result);
     TypeDecl.StructAlign = DataPoolInternal::CreationFlagsToAlignSize(m_dwFlags);
     
-    if( ! DataPool::IsIllegalName(TypeDecl.Name)) {
+    if(_CL_NOT_(DataPool::IsIdentifier(TypeDecl.Name))) {
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1101_CANT_USE_AS_STRUCT_NAME, TypeDecl.Name);      // "%s" 不能作为结构体名使用
       result = FALSE;
     }
@@ -1049,7 +1051,7 @@ namespace Marimo
       return FALSE;
     }
 
-    VARIABLE_DECLARATION VarMember;
+    DATAPOOL_VARIABLE_DECLARATION VarMember;
     clStringHashSetA sVarNameSet;
     while(++it != itEnd && it != ss.end())
     {
@@ -1067,7 +1069,7 @@ namespace Marimo
     }
 
     // 增加结尾
-    VARIABLE_DECLARATION VarDeclEnd;
+    DATAPOOL_VARIABLE_DECLARATION VarDeclEnd;
     InlSetZeroT(VarDeclEnd);
     pStruct->push_back(VarDeclEnd);
 
@@ -1081,7 +1083,7 @@ namespace Marimo
   GXBOOL DataPoolResolverImpl::ParseEnum(SmartStreamA& ss, StreamIter& it, GXBOOL bFlag)
   {
     EnumPairArray* pEnum = new EnumPairArray;
-    TYPE_DECLARATION TypeDecl;
+    DATAPOOL_TYPE_DECLARATION TypeDecl;
     StreamIter itBegin;
     StreamIter itEnd;
     GXBOOL result = TRUE;
@@ -1094,7 +1096,7 @@ namespace Marimo
     TypeDecl.Cate = bFlag ? T_FLAG : T_ENUM;
     TypeDecl.Name = AddString(ST_EnumType, NULL, it.ToString(), it.offset(), &result);
 
-    if( ! DataPool::IsIllegalName(TypeDecl.Name)) {
+    if(_CL_NOT_(DataPool::IsIdentifier(TypeDecl.Name))) {
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1400_CANT_DECL_AS_ENUM_TYPE, TypeDecl.Name);
       result = FALSE;
     }
@@ -1112,7 +1114,7 @@ namespace Marimo
       return FALSE;
     }
 
-    ENUM_DECLARATION sEnum = {0}; // 如果没有设置初始值，枚举从0开始
+    DATAPOOL_ENUM_DECLARATION sEnum = {0}; // 如果没有设置初始值，枚举从0开始
 
     while(++it != itEnd && it != ss.end())
     {
@@ -1143,7 +1145,7 @@ namespace Marimo
     }
 
     // 增加结尾
-    ENUM_DECLARATION sEnumEnd;
+    DATAPOOL_ENUM_DECLARATION sEnumEnd;
     InlSetZeroT(sEnumEnd);
     pEnum->push_back(sEnumEnd);
 
@@ -1170,7 +1172,7 @@ namespace Marimo
 
   GXHRESULT DataPoolResolverImpl::GetCompileResult()
   {
-    static GXHRESULT aResultTab[] = {GX_FAIL, GXHRESULT(1), GX_OK};
+    static GXHRESULT aResultTab[] = {static_cast<GXHRESULT>(GX_FAIL), static_cast<GXHRESULT>(1), GX_OK};
     return aResultTab[m_ErrorMsg.GetErrorLevel()];
   }
 

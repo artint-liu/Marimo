@@ -475,7 +475,7 @@ namespace Marimo
       switch(var.GetTypeCategory())
       {
       case T_STRUCT:
-      case T_STRUCTALWAYS:
+      //case T_STRUCTALWAYS:
         {
           str.Clear();
           str.Append(0x20, nDepth * 2);
@@ -528,7 +528,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL DataPool::IsIllegalName(GXLPCSTR szName)
+  GXBOOL DataPool::IsIdentifier(GXLPCSTR szName)
   {
     int i = 0;
     while(szName[i] != '\0')
@@ -623,7 +623,7 @@ namespace Marimo
   GXHRESULT DataPool::CreateFromResolver(DataPool** ppDataPool, GXLPCSTR szName, DataPoolCompiler* pResolver, DataPoolCreation dwFlags)
   {    
     if(pResolver) {
-      DataPoolCompiler::MANIFEST sManifest;
+      DATAPOOL_MANIFEST sManifest;
       if(GXSUCCEEDED(pResolver->GetManifest(&sManifest)) &&
          GXSUCCEEDED(CreateDataPool(ppDataPool, szName, sManifest.pTypes, sManifest.pVariables, dwFlags)))
       {
@@ -725,7 +725,7 @@ namespace Marimo
     return hval;
   }
 
-  GXHRESULT DataPool::CreateDataPool(DataPool** ppDataPool, GXLPCSTR szName, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl, DataPoolCreation dwFlags)
+  GXHRESULT DataPool::CreateDataPool(DataPool** ppDataPool, GXLPCSTR szName, const DATAPOOL_TYPE_DECLARATION* pTypeDecl, const DATAPOOL_VARIABLE_DECLARATION* pVarDecl, DataPoolCreation dwFlags)
   {
     GXLPSTATION lpStation = NULL;
     GXHRESULT hval = GX_OK;

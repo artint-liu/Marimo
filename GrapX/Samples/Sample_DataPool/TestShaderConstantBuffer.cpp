@@ -149,7 +149,7 @@ IE12 ie12;                                      \n\
 
 void TestShaderConstantBuffer_Common()
 {
-  static Marimo::VARIABLE_DECLARATION s_aShaderConstantBuffer[] =
+  static Marimo::DATAPOOL_VARIABLE_DECLARATION s_aShaderConstantBuffer[] =
   {
     {"float4x4", "WorldViewProjection", 0,},
     {"float4",   "DiffuseColor", 0,},
@@ -162,7 +162,7 @@ void TestShaderConstantBuffer_Common()
   Marimo::DataPool* pDataPool = NULL;
   GXHRESULT hr = Marimo::DataPool::CreateDataPool(&pDataPool, NULL, NULL, s_aShaderConstantBuffer, Marimo::DataPoolCreation_NotCross16BytesBoundary);
   if(GXSUCCEEDED(hr)) {
-    pDataPool->SaveW(_CLTEXT("Test\\TestShaderConstantBuffer.dpl"));
+    pDataPool->Save(_CLTEXT("Test\\TestShaderConstantBuffer.dpl"));
   }
 
   MOVarMatrix4 matWVProj;

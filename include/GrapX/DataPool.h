@@ -22,7 +22,6 @@ namespace Marimo
   class DataPoolVariable;
   class DataPoolCompiler;
   class DataPoolInclude;
-  //struct DataPoolBuildTime;
 
   namespace DataPoolUtility
   {
@@ -53,7 +52,7 @@ namespace Marimo
     T_ENUM,         // 枚举
     T_FLAG,         // 标志型枚举
     T_STRUCT,
-    T_STRUCTALWAYS, // 即使定义后没有使用, 也会保留它的格式
+    //T_STRUCTALWAYS, // 即使定义后没有使用, 也会保留它的格式
     T_MAX,
     T_CATE_MASK = 0x1f, // 64位调整指针时会标记 TYPE_CHANGED_FLAG，这里用安全掩码去除 TYPE_CHANGED_FLAG 标记
   };
@@ -72,6 +71,7 @@ namespace Marimo
     DataPoolCreation_NotCross16BytesBoundary = 0x000000f0,  // 不跨越16字节边界，用于shader constant buffer 打包
   };
 
+#if 0
   // 还没用上
   enum TypeCategoryFlag
   {
@@ -92,6 +92,7 @@ namespace Marimo
     TypeCategoryFlag_Struct       = 1 << T_STRUCT,
     TypeCategoryFlag_StructAlways = 1 << T_STRUCTALWAYS,
   };
+#endif
 
   enum DataAction
   {
@@ -101,19 +102,6 @@ namespace Marimo
     DATACT_Deleting,  // 正在改变，成员还没删
     DATACT_Deleted,   // 删除后的通知
   };
-
-//#define ENABLE_OLD_DATA_ACTION
-//#ifdef ENABLE_OLD_DATA_ACTION
-//  struct KNOCKACTION
-//  {
-//    const DataPoolVariable* pSponsor; // 发起者
-//    DataPool*   pDataPool;
-//    DataAction  Action;
-//    clStringW   Name;
-//    GXLPCVOID   ptr;
-//    GXINT       Index;  // 只有动态数组才有效
-//  };
-//#endif // #ifdef ENABLE_OLD_DATA_ACTION
 
   struct DATAPOOL_IMPULSE
   {
@@ -130,7 +118,7 @@ namespace Marimo
   //////////////////////////////////////////////////////////////////////////
 
   // DataPool 变量声明结构体
-  struct VARIABLE_DECLARATION
+  struct DATAPOOL_VARIABLE_DECLARATION
   {
     GXLPCSTR  Type;       // 类型名字
     GXLPCSTR  Name;       // 变量名
@@ -144,29 +132,29 @@ namespace Marimo
     GXLPVOID  Init;       // 初始值,如果不为 NULL, count 的绝对值就是元素个数,
                           // 必须有足够长度的数据, 尤其对于string数据
   };
-  typedef const VARIABLE_DECLARATION* LPCVARDECL;
+  typedef const DATAPOOL_VARIABLE_DECLARATION* LPCVARDECL;
 
   // DataPool 枚举声明结构体
-  struct ENUM_DECLARATION // 枚举，标志型枚举都是这个
+  struct DATAPOOL_ENUM_DECLARATION // 枚举，标志型枚举都是这个
   {
     GXLPCSTR  Name;       // 变量名
     GXINT     Value;      // 值，都是int型
   };
-  typedef const ENUM_DECLARATION* LPCENUMDECL;
+  typedef const DATAPOOL_ENUM_DECLARATION* LPCENUMDECL;
 
   // 类型声明结构体
-  struct TYPE_DECLARATION
+  struct DATAPOOL_TYPE_DECLARATION
   {
     TypeCategory          Cate;
     GXLPCSTR              Name;
     union {
-      VARIABLE_DECLARATION* Struct; // 结构体 成员
-      ENUM_DECLARATION*     Enumer;
+      DATAPOOL_VARIABLE_DECLARATION* Struct; // 结构体 成员
+      DATAPOOL_ENUM_DECLARATION*     Enumer;
     }as;
     GXUINT                StructAlign;    // 结构体成员对齐尺寸-16，2，4，8，16，其他值以1字节对齐
                                           // -16表示新变量不能跨越16字节边界，参看HLSL “Packing Rules for Constant Variables”规则
   };
-  typedef const TYPE_DECLARATION* LPCTYPEDECL;
+  typedef const DATAPOOL_TYPE_DECLARATION* LPCTYPEDECL;
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -181,8 +169,11 @@ namespace Marimo
 
 #ifdef DEBUG_DECL_NAME
 # define DATAPOOL_DECL_STRING_NAME GXLPCSTR Name
+// 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
+# define DATAPOOL_CHECK_NAME_ADDR  ASSERT((GXLPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL)
 #else
 # define DATAPOOL_DECL_STRING_NAME
+# define DATAPOOL_CHECK_NAME_ADDR
 #endif // #ifdef DEBUG_DECL_NAME
 
   struct DATAPOOL_TYPE_DESC
@@ -194,10 +185,7 @@ namespace Marimo
 
     inline GXINT_PTR GetName() const // 返回值依赖于DataPool的Variable类型
     {
-#ifdef DEBUG_DECL_NAME
-      // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
-      ASSERT((GXLPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
-#endif // #ifdef DEBUG_DECL_NAME
+      DATAPOOL_CHECK_NAME_ADDR;
       return ((GXINT_PTR)&nName + nName);
     }
   };
@@ -219,22 +207,6 @@ namespace Marimo
     }
   };
 
-  struct DATAPOOL_HASHALGO
-  {
-    u16  eType   : 2; // clstd::StaticStringsDict::HashType
-    u16  nBucket : 14;
-    s16  nPos;
-    u16  nOffset;     // 自定位
-
-    GXSIZE_T HashString(GXLPCSTR str) const;
-
-    inline u8* HashToIndex(GXSIZE_T _hash) const
-    {
-      return (u8*)((GXINT_PTR)&nOffset + nOffset) + (_hash % nBucket) * 2;
-    }
-    //IntArray indices;
-  };
-
   struct DATAPOOL_VARIABLE_DESC
   {
     GXUINT      TypeDesc;           // 减法自定位，指向(TYPE_DESC*)类型
@@ -247,10 +219,7 @@ namespace Marimo
 
     inline GXINT_PTR VariableName() const
     {
-#ifdef DEBUG_DECL_NAME
-      // 自定位方法和这个成员变量地址相关，必须使用引用或者指针类型来传递这个结构体
-      ASSERT((GXLPCSTR)((GXINT_PTR)&nName + nName) == Name || Name == NULL);
-#endif // #ifdef DEBUG_DECL_NAME
+      DATAPOOL_CHECK_NAME_ADDR;
       return ((GXINT_PTR)&nName + nName);
     }
 
@@ -301,8 +270,6 @@ namespace Marimo
     {
       return bDynamic;
     }
-
-
   };
 
   struct DATAPOOL_ENUM_DESC
@@ -313,10 +280,16 @@ namespace Marimo
   };
 #pragma pack(pop)
 
+  struct DATAPOOL_MANIFEST
+  {
+    const DATAPOOL_TYPE_DECLARATION*     pTypes;
+    const DATAPOOL_VARIABLE_DECLARATION* pVariables;
+    const clStringListW*        pImportFiles;
+  };
+
   STATIC_ASSERT(sizeof(TypeCategory) == 4);
 #ifdef DEBUG_DECL_NAME
 #else
-  STATIC_ASSERT(sizeof(DATAPOOL_HASHALGO) == 6);
   STATIC_ASSERT(sizeof(DATAPOOL_ENUM_DESC) == 8);
   STATIC_ASSERT(sizeof(DATAPOOL_TYPE_DESC) == 12);
   STATIC_ASSERT(sizeof(DATAPOOL_STRUCT_DESC) == 20);
@@ -344,16 +317,9 @@ namespace Marimo
 
   class GXDLL DataPool : public GUnknown
   {
-    //friend class DataPoolVariable;
-    //friend struct iterator;
-    //friend struct element_iterator;
     friend struct DataPoolElementReserveIterator;
 
   public:
-    //struct VARIABLE_DESC;
-    //struct TYPE_DESC;
-    //struct ENUM_DESC;
-
     typedef GXLPCSTR              LPCSTR;
     typedef const DATAPOOL_VARIABLE_DESC*  LPCVD;
     typedef DataPoolUtility::iterator                 iterator;
@@ -385,7 +351,7 @@ namespace Marimo
     virtual GXHRESULT   Release             ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXSTDINTERFACE(GXBOOL      SaveW               (GXLPCWSTR szFilename));
+    GXSTDINTERFACE(GXBOOL      Save                (GXLPCWSTR szFilename));
     GXSTDINTERFACE(GXBOOL      Save                (clFile& file));
     GXSTDINTERFACE(GXBOOL      Load                (clFile& file, DataPoolCreation dwFlags));
 
@@ -475,12 +441,12 @@ namespace Marimo
   public:
     static  GXHRESULT   FindDataPool        (DataPool** ppDataPool, GXLPCSTR szName);
     static  GXHRESULT   FindVariable        (DataPool** ppDataPool, DataPoolVariable* pVar, GXLPCSTR szGlobalExpession);
-    static  GXHRESULT   CreateDataPool      (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, const TYPE_DECLARATION* pTypeDecl, const VARIABLE_DECLARATION* pVarDecl, DataPoolCreation dwFlags = DataPoolCreation_Default);
+    static  GXHRESULT   CreateDataPool      (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, const DATAPOOL_TYPE_DECLARATION* pTypeDecl, const DATAPOOL_VARIABLE_DECLARATION* pVarDecl, DataPoolCreation dwFlags = DataPoolCreation_Default);
     static  GXHRESULT   CreateFromResolver  (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, DataPoolCompiler* pResolver, DataPoolCreation dwFlags);
     static  GXHRESULT   CreateFromFileW     (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolCreation dwFlags);
     static  GXHRESULT   CompileFromMemory   (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength = 0, DataPoolCreation dwFlags = DataPoolCreation_Default);
     static  GXHRESULT   CompileFromFileW    (DataPool** ppDataPool, GXLPCSTR szName/*= NULL*/, GXLPCWSTR szFilename, DataPoolInclude* pInclude = NULL, DataPoolCreation dwFlags = DataPoolCreation_Default);
-    static  GXBOOL      IsIllegalName       (GXLPCSTR szName); // 检查类型/变量命名是否符合要求
+    static  GXBOOL      IsIdentifier        (GXLPCSTR szName); // 检查类型/变量命名是否符合要求
 
     // 注意不支持 struct 的自包含, 支持动态数组的自包含功能:
     // struct A
@@ -518,28 +484,16 @@ namespace Marimo
   class DataPoolCompiler : public GUnknown
   {
   public:
-    struct MANIFEST
-    {
-      const TYPE_DECLARATION*     pTypes;
-      const VARIABLE_DECLARATION* pVariables;
-      const clStringListW*        pImportFiles;
-    };
-  public:
     GXSTDINTERFACE(GXHRESULT AddRef  ());
     GXSTDINTERFACE(GXHRESULT Release ());
 
-    GXSTDINTERFACE(GXHRESULT GetManifest(MANIFEST* pManifest) const);
+    GXSTDINTERFACE(GXHRESULT GetManifest(DATAPOOL_MANIFEST* pManifest) const);
 
   public:
     static GXHRESULT CreateFromMemory(DataPoolCompiler** ppResolver, GXLPCWSTR szSourceFilePath, DataPoolInclude* pInclude, GXLPCSTR szDefinitionCodes, GXSIZE_T nCodeLength, GXDWORD dwFlags);
   };
 
   //////////////////////////////////////////////////////////////////////////
-  namespace DataPoolUtility
-  {
-
-  } // namespace DataPoolUtility
-
 } // namespace Marimo
 
 #endif // #ifndef _MARIMO_DATA_POOL_H_

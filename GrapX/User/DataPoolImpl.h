@@ -13,6 +13,28 @@ namespace Marimo
     GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags);
   }
 
+  struct DATAPOOL_HASHALGO
+  {
+    u16  eType : 2; // clstd::StaticStringsDict::HashType
+    u16  nBucket : 14;
+    s16  nPos;
+    u16  nOffset;     // 自定位
+
+    GXSIZE_T HashString(GXLPCSTR str) const;
+
+    inline u8* HashToIndex(GXSIZE_T _hash) const
+    {
+      return (u8*)((GXINT_PTR)&nOffset + nOffset) + (_hash % nBucket) * 2;
+    }
+    //IntArray indices;
+  };
+
+#ifdef DEBUG_DECL_NAME
+#else
+  STATIC_ASSERT(sizeof(DATAPOOL_HASHALGO) == 6);
+#endif // DEBUG_DECL_NAME
+
+
   // 内部实现的函数表
   struct DataPoolVariable::VTBL
   {
@@ -317,7 +339,7 @@ namespace Marimo
     DataPoolImpl(GXLPCSTR szName);
     virtual ~DataPoolImpl();
 
-    virtual GXBOOL SaveW(GXLPCWSTR szFilename) override;
+    virtual GXBOOL Save(GXLPCWSTR szFilename) override;
     virtual GXBOOL Save(clFile& file) override;
     virtual GXBOOL Load(clFile& file, DataPoolCreation dwFlags) override;
 

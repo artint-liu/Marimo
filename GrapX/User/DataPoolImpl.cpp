@@ -52,7 +52,7 @@ namespace Marimo
 
   namespace Implement
   {
-    extern TYPE_DECLARATION c_InternalTypeDefine[];
+    extern DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[];
     extern DataPoolVariable::VTBL* s_pPrimaryVtbl;
     extern DataPoolVariable::VTBL* s_pEnumVtbl;
     extern DataPoolVariable::VTBL* s_pFlagVtbl;
@@ -511,7 +511,7 @@ namespace Marimo
     for(;; nVarIndex++)
     {
       // 下面两个开头故意写成不一样的, 否则不太容易区分, 太像了!
-      const VARIABLE_DECLARATION& varDecl = pVarDecl[nVarIndex];
+      const DATAPOOL_VARIABLE_DECLARATION& varDecl = pVarDecl[nVarIndex];
       if(varDecl.Type == NULL || varDecl.Name == NULL) {
         break;
       }
@@ -1845,7 +1845,7 @@ namespace Marimo
   };
   typedef clvector<BUFFER_SAVELOAD_DESC> BufDescArray;
 
-  GXBOOL DataPoolImpl::SaveW( GXLPCWSTR szFilename )
+  GXBOOL DataPoolImpl::Save( GXLPCWSTR szFilename )
   {
     clFile file;
     if(file.CreateAlways(szFilename)) {
