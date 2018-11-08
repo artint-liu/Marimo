@@ -89,7 +89,30 @@ namespace D3D11
       *ppColorTexture = m_pColorTexture;
       return m_pColorTexture->AddRef();
     }
-    // TODO: else if(eUsage == GXResUsage::Read)
+    else if(eUsage == GXResUsage::Read)
+    {
+      GXSIZE sDimension;
+      //GXBOOL bval = TRUE;
+      GXFormat format = m_pColorTexture->GetFormat();
+      m_pColorTexture->GetDimension(&sDimension);
+
+      GtextureImpl_GPUReadBack* pReadBackTexture = new GtextureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
+      if(InlIsFailedToNewObject(pReadBackTexture)) {
+        return GX_ERROR_OUROFMEMORY;
+      }
+
+      if(_CL_NOT_(pReadBackTexture->InitReadBackTexture()))
+      {
+        SAFE_RELEASE(pReadBackTexture);
+        return GX_FAIL;
+      }
+
+      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+      *ppColorTexture = pReadBackTexture;
+      pReadBackTexture = NULL;
+      return GX_OK;
+    }
     return GX_FAIL;
   }
 
@@ -122,25 +145,15 @@ namespace D3D11
     GXBOOL bval = TRUE;
     GXFormat format = m_pColorTexture->GetFormat();
     m_pColorTexture->GetDimension(&sDimension);
-    GtextureImpl_GPUReadBack* pReadBackTexture = new GtextureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
-    if(InlIsFailedToNewObject(pReadBackTexture)) {
-      return FALSE;
-    }
+    GTexture* pReadBackTexture = NULL;
 
-    if(_CL_NOT_(pReadBackTexture->InitReadBackTexture()))
-    {
-      SAFE_RELEASE(pReadBackTexture);
-      return FALSE;
-    }
-
-    ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
-    pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+    GetColorTexture(&pReadBackTexture, GXResUsage::Read);
 
     GTexture::MAPPED mapped;
     if(pReadBackTexture->Map(&mapped, GXResMap::Read))
     {
       const GXUINT bpp = GetBytesOfGraphicsFormat(format);
-      FIBITMAP* fibmp = FreeImage_Allocate(sDimension.cx, sDimension.cy, bpp * 8);//(static_cast<BYTE*>(mapped.pBits), mapped.Pitch * sDimension.cx);
+      FIBITMAP* fibmp = FreeImage_Allocate(sDimension.cx, sDimension.cy, bpp * 8);
       BYTE* pDest = FreeImage_GetBits(fibmp);
       GXINT nDestPitch = FreeImage_GetPitch(fibmp);
       for(int y = 0; y < sDimension.cy; y++)

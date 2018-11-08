@@ -182,13 +182,14 @@ namespace D3D11
 
     ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
     HRESULT hval = pd3dDevice->CreateTexture2D(&TexDesc, pInitData ? &TexInitData : NULL, &m_pD3D11Texture);
-    ASSERT(SUCCEEDED(hval)); // 临时
-    if(SUCCEEDED(hval) && TEST_FLAG(TexDesc.BindFlags, D3D11_BIND_SHADER_RESOURCE)) {
+    //ASSERT(SUCCEEDED(hval)); // 临时
+    if(FAILED(hval)) {
+      return FALSE;
+    }
+    
+    if(TEST_FLAG(TexDesc.BindFlags, D3D11_BIND_SHADER_RESOURCE)) {
       hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, NULL, &m_pD3D11ShaderView);
-      if(FAILED(hval))
-      {
-        return FALSE;
-      }
+      return SUCCEEDED(hval);
     }
     return TRUE;
   }
@@ -1094,6 +1095,7 @@ namespace D3D11
 
   GTextureImpl_RenderTarget::GTextureImpl_RenderTarget(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
     : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+    , m_pD3D11RenderTargetView(NULL)
   {
   }
 
@@ -1124,6 +1126,7 @@ namespace D3D11
 
   GTextureImpl_DepthStencil::GTextureImpl_DepthStencil(GXGraphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
     : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+    , m_pD3D11DepthStencilView(NULL)
   {
   }
 

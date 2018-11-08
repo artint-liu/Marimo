@@ -4222,7 +4222,7 @@ enum GXGraphicsFormat
   Format_B8G8R8X8             = 201,
   Format_B8G8R8               = 202,
   Format_R8G8B8A8             = 203,
-  Format_R8G8B8X8             = 204,
+  //Format_R8G8B8X8             = 204,
   Format_R8G8                 = 205,
   Format_R16G16               = 206,
   Format_R8                   = 207,

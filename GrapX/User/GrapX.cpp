@@ -428,7 +428,11 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   switch(eFmt)
   {
   case GXFMT_A32B32G32R32F:
+  case Format_R32G32B32A32_Float:
     return 16;
+
+  case Format_R32G32B32_Float:
+    return 12;
 
   case GXFMT_A16B16G16R16:
   //case GXFMT_Q16W16V16U16:
@@ -463,6 +467,11 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   case GXFMT_INDEX32:
   case GXFMT_G16R16F:
   case Format_B8G8R8A8:
+  case Format_B8G8R8X8:
+  case Format_R8G8B8A8:
+  case Format_R16G16:
+  case Format_R32:
+  //case Format_R8G8B8X8:
   case Format_D32:
   case Format_D24S8:
   case Format_D24X8:
@@ -491,6 +500,8 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   case GXFMT_R16F:
   case Format_D16:
   case Format_Index16:
+  case Format_R8G8:
+  case Format_R16:
     return 2;
   
   case GXFMT_A8:
@@ -500,6 +511,8 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   case GXFMT_L8:
   case GXFMT_A4L4:
   case GXFMT_S8_LOCKABLE:
+  case Format_R8:
+  case Format_A8:
     return 1;
 
   default:
