@@ -34,27 +34,38 @@ namespace Marimo
   } // namespace DataPoolUtility
 
 
-  enum TypeCategory
+  enum class DataPoolTypeClass : GXUINT
   {
-    T_UNDEFINE = 0, // 结尾用的
-    T_BYTE,         // 1 byte
-    T_WORD,         // 2 bytes
-    T_DWORD,        // 4 bytes
-    T_QWORD,        // 8 bytes
-    T_SBYTE,        // signed 1 byte
-    T_SWORD,        // signed 2 bytes
-    T_SDWORD,       // signed 4 bytes
-    T_SQWORD,       // signed 8 bytes
-    T_FLOAT,        // float 32
-    T_STRING,
-    T_STRINGA,      // ANSI string
-    T_OBJECT,       // GUnknown*
-    T_ENUM,         // 枚举
-    T_FLAG,         // 标志型枚举
-    T_STRUCT,
+    Undefine = 0, // 结尾用的
+    Byte,         // 1 byte
+    Word,         // 2 bytes
+    DWord,        // 4 bytes
+    QWord,        // 8 bytes
+    SByte,        // signed 1 byte
+    SWord,        // signed 2 bytes
+    SDWord,       // signed 4 bytes
+    SQWord,       // signed 8 bytes
+    Float,        // float 32
+    String,
+    StringA,      // ANSI string
+    Object,       // GUnknown*
+    Enumeration,  // 枚举
+    Flag,         // 标志型枚举
+    Structure,
     //T_STRUCTALWAYS, // 即使定义后没有使用, 也会保留它的格式
-    T_MAX,
-    T_CATE_MASK = 0x1f, // 64位调整指针时会标记 TYPE_CHANGED_FLAG，这里用安全掩码去除 TYPE_CHANGED_FLAG 标记
+    Enum_Count,
+    Enum_ClassMask = 0x1f, // 64位调整指针时会标记 TYPE_CHANGED_FLAG，这里用安全掩码去除 TYPE_CHANGED_FLAG 标记
+  };
+
+  enum class DataPoolPack : GXUINT
+  {
+    Compact = 0,              // 紧凑的，按照1字节对齐
+    Align2,                   // 2字节对齐，结尾按照2字节补齐
+    Align4,
+    Align8,
+    Align16,
+    NotCross16Boundary,       // 成员不跨越16字节边界，结尾处按照16字节补齐
+    NotCross16BoundaryShort,  // 成员不跨越16字节边界，结尾就是最后一个成员的结尾
   };
 
   // [Flags]
@@ -123,7 +134,7 @@ namespace Marimo
     GXLPCSTR  Type;       // 类型名字
     GXLPCSTR  Name;       // 变量名
     GXDWORD   Flags;      // 标志,"VarDeclFlag_*"
-    GXINT     Count;      // 长度度,0,1表示1个元素
+    GXINT     Count;      // 长度,0,1表示1个元素
                           // 大于1表示n个长度
                           // 小于0表示变长数组,变长数组的内容不在统一地址中
                           // 动态数组初始化时, 
@@ -145,14 +156,14 @@ namespace Marimo
   // 类型声明结构体
   struct DATAPOOL_TYPE_DECLARATION
   {
-    TypeCategory          Cate;
+    DataPoolTypeClass     Cate;
     GXLPCSTR              Name;
     union {
       DATAPOOL_VARIABLE_DECLARATION* Struct; // 结构体 成员
       DATAPOOL_ENUM_DECLARATION*     Enumer;
     }as;
-    GXUINT                StructAlign;    // 结构体成员对齐尺寸-16，2，4，8，16，其他值以1字节对齐
-                                          // -16表示新变量不能跨越16字节边界，参看HLSL “Packing Rules for Constant Variables”规则
+    DataPoolPack              MemberPack;    // 结构体成员对齐尺寸-16，2，4，8，16，其他值以1字节对齐
+                                             // -16表示新变量不能跨越16字节边界，参看HLSL “Packing Rules for Constant Variables”规则
   };
   typedef const DATAPOOL_TYPE_DECLARATION* LPCTYPEDECL;
 
@@ -180,7 +191,7 @@ namespace Marimo
   {
     DATAPOOL_DECL_STRING_NAME;
     GXUINT       nName;   // 自定位
-    TypeCategory Cate;
+    DataPoolTypeClass Cate;
     GXUINT       cbSize;
 
     inline GXINT_PTR GetName() const // 返回值依赖于DataPool的Variable类型
@@ -234,22 +245,14 @@ namespace Marimo
       return pRetTypeDesc;
     }
 
-    inline const DATAPOOL_STRUCT_DESC* GetStructDesc() const
-    {
-      const DATAPOOL_TYPE_DESC* pTypeDesc = GetTypeDesc();
-      ASSERT(
-        (pTypeDesc->Cate & T_CATE_MASK) == T_STRUCT ||
-        (pTypeDesc->Cate & T_CATE_MASK) == T_ENUM ||
-        (pTypeDesc->Cate & T_CATE_MASK) == T_FLAG );
-      return static_cast<const DATAPOOL_STRUCT_DESC*>(pTypeDesc);
-    }
+    const DATAPOOL_STRUCT_DESC* GetStructDesc() const;
 
     inline GXUINT TypeSize() const
     {
       return GetTypeDesc()->cbSize;
     }
 
-    inline TypeCategory GetTypeCategory() const
+    inline DataPoolTypeClass GetTypeCategory() const
     {
       return GetTypeDesc()->Cate;
     }
@@ -287,7 +290,7 @@ namespace Marimo
     const clStringListW*        pImportFiles;
   };
 
-  STATIC_ASSERT(sizeof(TypeCategory) == 4);
+  STATIC_ASSERT(sizeof(DataPoolTypeClass) == 4);
 #ifdef DEBUG_DECL_NAME
 #else
   STATIC_ASSERT(sizeof(DATAPOOL_ENUM_DESC) == 8);

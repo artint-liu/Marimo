@@ -16,6 +16,14 @@ void TestCompileFromFile()
   clStringW strMainFile = _CLTEXT("Test\\DataPool\\main.txt");
   clpathfile::CombineAbsPathT(strMainFile);
   clstd::TimeTrace tt;
+
+  if(clpathfile::IsPathExist(strMainFile) == FALSE)
+  {
+    TRACE("由于版权问题，这个文件没有提供样本\n按任意键退出...\n");
+    clstd_cli::getch();
+    return;
+  }
+
   tt.Begin();
   GXHRESULT hval = DataPool::CompileFromFileW(&pDataPool, NULL, strMainFile, NULL);
   ASSERT(GXSUCCEEDED(hval));

@@ -2,7 +2,14 @@
 #define _MARIMO_DATAPOOL_IMPLEMENT_H_
 
 //class StockW;
+
+// 不跨越16字节边界相关的宏
 #define NOT_CROSS_16_BYTES_BOUNDARY static_cast<GXUINT>(-16)
+#define IS_MARK_NX16B(_FLAGS) ((_FLAGS & DataPoolCreation_NotCross16BytesBoundary) == DataPoolCreation_NotCross16BytesBoundary)
+#define IS_MEMBER_NX16B(_ENUM) (_ENUM == DataPoolPack::NotCross16Boundary || _ENUM == DataPoolPack::NotCross16BoundaryShort)
+#define SELECT_INTERNAL_TYPE_TABLE(_FLAGS) IS_MARK_NX16B(_FLAGS)\
+  ? DataPoolInternal::c_TypeDefine_NX16B : DataPoolInternal::c_TypeDefine
+
 namespace Marimo
 {
   struct DataPoolBuildTime;
@@ -10,7 +17,10 @@ namespace Marimo
 
   namespace DataPoolInternal
   {
-    GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags);
+    //GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags);
+    DataPoolPack CreationFlagsToMemberPack(GXDWORD dwFlags);
+    GXUINT NotCross16BytesBoundaryArraySize(GXUINT nTypeSize, GXUINT nElementCount);
+    GXUINT GetMemberAlignMask(DataPoolPack eMemberPack);
   }
 
   struct DATAPOOL_HASHALGO
@@ -236,19 +246,19 @@ namespace Marimo
 
       GUnknown** GetAsObject(GXBYTE* pBaseData) const
       {
-        ASSERT(GetTypeCategory() == T_OBJECT); // object
+        ASSERT(GetTypeCategory() == DataPoolTypeClass::Object); // object
         return (GUnknown**)(pBaseData + nOffset);
       }
 
       clStringW* GetAsStringW(GXBYTE* pBaseData) const
       {
-        ASSERT(GetTypeCategory() == T_STRING); // Unicode 字符串
+        ASSERT(GetTypeCategory() == DataPoolTypeClass::String); // Unicode 字符串
         return (clStringW*)(pBaseData + nOffset);
       }
 
       clStringA* GetAsStringA(GXBYTE* pBaseData) const
       {
-        ASSERT(GetTypeCategory() == T_STRINGA); // ANSI 字符串
+        ASSERT(GetTypeCategory() == DataPoolTypeClass::StringA); // ANSI 字符串
         return (clStringA*)(pBaseData + nOffset);
       }
 

@@ -29,7 +29,7 @@ namespace Marimo
     {
       GXLPCSTR     szName;       // 需要一个稳定的地址
       GXUINT       nNameIndex;   // NameSet 加入的索引
-      TypeCategory Cate;
+      DataPoolTypeClass Cate;
       GXUINT       cbSize;
 
       GXUINT       nMemberIndex; // m_aStructMember 索引
@@ -68,11 +68,11 @@ namespace Marimo
         return bDynamic;
       }
 
-      GXUINT GetSize() const
-      {
-        ASSERT( ! IsDynamicArray()); // 不应该是动态数组
-        return nCount * TypeSize();
-      }
+      //GXUINT GetFixedArraySize() const
+      //{
+      //  ASSERT( ! IsDynamicArray()); // 不应该是动态数组
+      //  return nCount * TypeSize();
+      //}
     };
 
     typedef clhash_map<clStringA, BUILDTIME_TYPE_DECLARATION> BuildTimeTypeDeclarationDict;
@@ -92,7 +92,7 @@ namespace Marimo
     GXBOOL  CheckVarList      (LPCVARDECL pVarDecl);
 
     void    PutTypeToDict     (GXLPCSTR szTypeName);
-    GXINT   ComputeVariableSize  (LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc, GXUINT nAlignSize);
+    GXINT   ComputeVariableSize  (LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc, DataPoolPack eMemberPack);
 
     static
     void    TryHash           (HASH_ALGORITHM& hash_info, const BTVarDescArray& aDescs);

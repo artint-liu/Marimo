@@ -294,10 +294,10 @@ namespace GXUI
         Marimo::DATAPOOL_TYPE_DECLARATION sStructType[2];
         Marimo::DATAPOOL_VARIABLE_DECLARATION aGlobalVar[2];
 
-        sStructType[0].Cate       = Marimo::T_STRUCT;
+        sStructType[0].Cate       = Marimo::DataPoolTypeClass::Structure;
         sStructType[0].Name       = szItemType;
         sStructType[0].as.Struct  = &aStructMember.front();
-        sStructType[1].Cate       = Marimo::T_UNDEFINE;
+        sStructType[1].Cate       = Marimo::DataPoolTypeClass::Undefine;
         sStructType[1].Name       = NULL;
         sStructType[1].as.Struct  = NULL;
 
@@ -450,9 +450,10 @@ namespace GXUI
         {
           using namespace Marimo;
           MOVariable varPos = var.MemberOf(element.strName);
-          TypeCategory eCate = varPos.GetTypeCategory();
-          if(eCate == T_SDWORD || eCate == T_DWORD || eCate == T_WORD || 
-            eCate == T_SWORD || eCate == T_BYTE || eCate == T_SBYTE) {
+          DataPoolTypeClass eCate = varPos.GetTypeCategory();
+          if(eCate == DataPoolTypeClass::SDWord || eCate == DataPoolTypeClass::DWord ||
+            eCate == DataPoolTypeClass::Word || eCate == DataPoolTypeClass::SWord ||
+            eCate == DataPoolTypeClass::Byte || eCate == DataPoolTypeClass::SByte) {
               gxSendMessage(pItemStrDesc->hItemWnd, GXSBM_SETPOS, varPos.ToInteger(), FALSE);
           }
         }

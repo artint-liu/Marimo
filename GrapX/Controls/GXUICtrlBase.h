@@ -9,10 +9,10 @@
 
 class GXFont;
 class GXWndCanvas;
-namespace Marimo
-{
-  struct KNOCKACTION;
-}
+//namespace Marimo
+//{
+//  struct KNOCKACTION;
+//}
 
 namespace GXUI
 {

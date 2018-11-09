@@ -59,9 +59,10 @@ using namespace clstd;
 #define LOG_SYNTAX_ERROR(_IT, _SYM)   m_ErrorMsg.WriteErrorW(TRUE, _IT, E_1001_SYNTAX_ERROR, _SYM)
 namespace Marimo
 {
-  namespace Implement
+  namespace DataPoolInternal
   {
-    extern DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[];
+    extern DATAPOOL_TYPE_DECLARATION c_TypeDefine[];       // 通用内置类型
+    extern DATAPOOL_TYPE_DECLARATION c_TypeDefine_NX16B[]; // 不跨越16字节边界的内置类型
   } // namespace Implement
 
   typedef SmartStreamA::iterator StreamIter;
@@ -120,6 +121,9 @@ namespace Marimo
     GXBOOL                m_bParsingExpression; // TriggerProc部分功能在表达式解析时要跳过
     clStringHashSetA      m_VarNameSet;         // 全局变量集合，用来检查重名
     DataPoolErrorMsgA     m_ErrorMsg;
+
+    const DATAPOOL_TYPE_DECLARATION* const m_pInternalTypeDecl; // 内置变量表
+
     // 自动设置表达式解析状态的类
     class EPSection
     {
@@ -130,7 +134,7 @@ namespace Marimo
     };
 
   protected:
-    TypeCategory  GetVarCateByName  (GXLPCSTR szTypeName);
+    DataPoolTypeClass  GetVarCateByName  (GXLPCSTR szTypeName);
     GXLPCSTR      AddString         (StringType eType, clStringHashSetA* pVarNameSet, GXLPCSTR szString, GXSIZE_T nSourceOffset, GXBOOL* result);
     GXLPCSTR      CheckType         (GXLPCSTR szTypeName, GXSIZE_T nSourceOffset, GXBOOL* result);
     GXBOOL        ParseStruct       (SmartStreamA& ss, StreamIter& it);
@@ -169,6 +173,7 @@ namespace Marimo
     : m_dwFlags(dwFlags)
     , m_pInclude(NULL)
     , m_bParsingExpression(FALSE)
+    , m_pInternalTypeDecl(SELECT_INTERNAL_TYPE_TABLE(dwFlags))
   {
   }
 
@@ -403,12 +408,12 @@ namespace Marimo
     m_aEnums.clear();
   }
 
-  TypeCategory DataPoolResolverImpl::GetVarCateByName(GXLPCSTR szTypeName)
+  DataPoolTypeClass DataPoolResolverImpl::GetVarCateByName(GXLPCSTR szTypeName)
   {
-    for(int i = 0; Implement::c_InternalTypeDefine[i].Cate != T_UNDEFINE; i++)
+    for(int i = 0; m_pInternalTypeDecl[i].Cate != DataPoolTypeClass::Undefine; i++)
     {
-      if(GXSTRCMP(Implement::c_InternalTypeDefine[i].Name, szTypeName) == 0) {
-        return Implement::c_InternalTypeDefine[i].Cate;
+      if(GXSTRCMP(m_pInternalTypeDecl[i].Name, szTypeName) == 0) {
+        return m_pInternalTypeDecl[i].Cate;
       }
     }
 
@@ -418,7 +423,7 @@ namespace Marimo
           return it->Cate;
         }
     }
-    return T_UNDEFINE;
+    return DataPoolTypeClass::Undefine;
   }
 
   GXLPCSTR DataPoolResolverImpl::AddString(StringType eType, clStringHashSetA* pVarNameSet, GXLPCSTR szString, GXSIZE_T nSourceOffset, GXBOOL* result)
@@ -516,10 +521,10 @@ namespace Marimo
     DEFINE def;
     def.SourceFileId = 0;
     def.SourceOffset = 0;
-    for(int i = 0; Implement::c_InternalTypeDefine[i].Name != NULL; ++i)
+    for(int i = 0; m_pInternalTypeDecl[i].Name != NULL; ++i)
     {
       def.type = ST_VarType;
-      m_NameDict[Implement::c_InternalTypeDefine[i].Name] = def;
+      m_NameDict[m_pInternalTypeDecl[i].Name] = def;
     }
 
     // 加载编译信息资源
@@ -689,47 +694,47 @@ namespace Marimo
       pVarDecl->Count = -(GXINT)aInit.size();
     }
 
-    TypeCategory eCate = GetVarCateByName(pVarDecl->Type);
+    DataPoolTypeClass eCate = GetVarCateByName(pVarDecl->Type);
     switch(eCate)
     {
-    case T_UNDEFINE:
+    case DataPoolTypeClass::Undefine:
       m_ErrorMsg.WriteErrorA(TRUE, it.marker, "错误的类型名(%s)", pVarDecl->Type);
       return FALSE;
     
-    case T_OBJECT:
+    case DataPoolTypeClass::Object:
       CLOG_ERROR("error: unsupport type.\n");
       return FALSE;
 
-    case T_STRUCT:
+    case DataPoolTypeClass::Structure:
     //case T_STRUCTALWAYS:
       m_ErrorMsg.WriteErrorA(TRUE, it.marker, "\"object\"类型(%s)不支持赋值", pVarDecl->Name);
       return FALSE;
 
-    case T_BYTE:
-    case T_SBYTE:
+    case DataPoolTypeClass::Byte:
+    case DataPoolTypeClass::SByte:
       AllocInitPtr<u8>(pVarDecl, (GXINT)aInit.size());
       ParseInitList((u8*)pVarDecl->Init, aInit);
       break;
 
-    case T_WORD:
-    case T_SWORD:
+    case DataPoolTypeClass::Word:
+    case DataPoolTypeClass::SWord:
       AllocInitPtr<u16>(pVarDecl, (GXINT)aInit.size());
       ParseInitList((u16*)pVarDecl->Init, aInit);
       break;
 
-    case T_DWORD:
-    case T_SDWORD:
+    case DataPoolTypeClass::DWord:
+    case DataPoolTypeClass::SDWord:
       AllocInitPtr<u32>(pVarDecl, (GXINT)aInit.size());
       ParseInitList((u32*)pVarDecl->Init, aInit);
       break;
 
-    case T_SQWORD:
-    case T_QWORD:
+    case DataPoolTypeClass::SQWord:
+    case DataPoolTypeClass::QWord:
       AllocInitPtr<u64>(pVarDecl, (GXINT)aInit.size());
       ParseInitList((u64*)pVarDecl->Init, aInit);
       break;
 
-    case T_FLOAT:
+    case DataPoolTypeClass::Float:
       {
         int i = 0;
         AllocInitPtr<float>(pVarDecl, (GXINT)aInit.size());
@@ -742,7 +747,7 @@ namespace Marimo
       }
       break;
 
-    case T_STRING:
+    case DataPoolTypeClass::String:
       {
         // 字符串列表格式:"str1\0str2\0str3" 维度由pVarDecl->Count指定
         GXSIZE_T nSize = 0; // WCHAR
@@ -1027,9 +1032,9 @@ namespace Marimo
     GXBOOL result = TRUE;
     ASSERT(it == "struct");
     ++it;
-    TypeDecl.Cate = T_STRUCT;
+    TypeDecl.Cate = DataPoolTypeClass::Structure;
     TypeDecl.Name = AddString(ST_StructType, NULL, it.ToString(), it.offset(), &result);
-    TypeDecl.StructAlign = DataPoolInternal::CreationFlagsToAlignSize(m_dwFlags);
+    TypeDecl.MemberPack = DataPoolInternal::CreationFlagsToMemberPack(m_dwFlags);
     
     if(_CL_NOT_(DataPool::IsIdentifier(TypeDecl.Name))) {
       m_ErrorMsg.WriteErrorW(TRUE, it.offset(), E_1101_CANT_USE_AS_STRUCT_NAME, TypeDecl.Name);      // "%s" 不能作为结构体名使用
@@ -1093,7 +1098,7 @@ namespace Marimo
     m_aEnums.push_back(pEnum);
 
     ++it;
-    TypeDecl.Cate = bFlag ? T_FLAG : T_ENUM;
+    TypeDecl.Cate = bFlag ? DataPoolTypeClass::Flag : DataPoolTypeClass::Enumeration;
     TypeDecl.Name = AddString(ST_EnumType, NULL, it.ToString(), it.offset(), &result);
 
     if(_CL_NOT_(DataPool::IsIdentifier(TypeDecl.Name))) {

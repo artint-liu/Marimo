@@ -90,7 +90,7 @@ namespace Marimo
     GXUINT            GetOffset       () const;  // 偏移, 全局变量是全局偏移, 动态数组是在buffer上的偏移 /废弃：全局变量是全局偏移, 结构体变量是结构体内偏移/
     DataPool::LPCSTR  GetName         () const;  // 获得定义名, 变量名, 数组变量名或者结构体变量名
     DataPool::LPCSTR  GetTypeName     () const;  // 类型, 变量为变量名, 数组为"Type[n]"形式, 动态数组为"Type[]"形式, 结构体为"struct Name"形式
-    TypeCategory      GetTypeCategory () const;  // 变量的分类
+    DataPoolTypeClass GetTypeCategory () const;  // 变量的分类
     GXDWORD           GetCaps         () const;  // 参考CAPS枚举
     clStringA         GetFullName     () const;  // （没实现）获得变量的全称,如果在结构体中，包括结构体名，如果在数组中会包含数组索引,如同DataPool::QueryByExpression()参数那样.
     clBufferBase*     GetBuffer       () const;
@@ -132,9 +132,9 @@ namespace Marimo
     GXBOOL            SetData         (GXLPCVOID lpData, GXUINT cbSize);
     GXBOOL            GetData         (GXLPVOID lpData, GXUINT cbSize) const;
 
-    iterator          begin           () const;
+    iterator          begin           () const;  // 结构体成员迭代器
     iterator          end             () const;
-    element_iterator  array_begin     () const;
+    element_iterator  array_begin     () const;  // 数组成员迭代器
     element_iterator  array_end       () const;
   };
 

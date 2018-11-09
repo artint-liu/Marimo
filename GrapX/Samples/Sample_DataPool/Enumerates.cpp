@@ -291,7 +291,7 @@ b32 EnumeratePtrControl(ENUMERATE_CONTEXT& ctx, int nDepth, DataPoolIterator* pP
 
     switch(itMember.pVarDesc->GetTypeCategory())
     {
-    case T_STRING:
+    case DataPoolTypeClass::String:
       if(itMember.IsArray())
       {
         if(pParent && pParent->IsArray())
@@ -342,7 +342,7 @@ b32 EnumeratePtrControl(ENUMERATE_CONTEXT& ctx, int nDepth, DataPoolIterator* pP
       }
       break;
 
-    case T_STRUCT:
+    case DataPoolTypeClass::Structure:
       if(itMember.IsArray())
       {
         //*
@@ -472,7 +472,7 @@ void EnumeratePtrControl2(DataPool* pDataPool)
       }
     }
 
-    if(it.pVarDesc->GetTypeCategory() == T_STRING)
+    if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::String)
     {
       ctx.nNumString++;
       //TRACE("*%s\n", it.FullNameA());

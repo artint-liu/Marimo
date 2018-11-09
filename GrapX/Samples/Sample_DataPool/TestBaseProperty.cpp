@@ -111,8 +111,8 @@ void TestBaseProperty()
   };
 
   static DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[] = {
-    {Marimo::T_STRUCT, "vertex", c_vertex},
-    {T_UNDEFINE, NULL},
+    {DataPoolTypeClass::Structure, "vertex", c_vertex},
+    {DataPoolTypeClass::Undefine, NULL},
   };
 
 

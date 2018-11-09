@@ -474,7 +474,7 @@ namespace Marimo
       _TString str;
       switch(var.GetTypeCategory())
       {
-      case T_STRUCT:
+      case DataPoolTypeClass::Structure:
       //case T_STRUCTALWAYS:
         {
           str.Clear();
@@ -489,7 +489,7 @@ namespace Marimo
           str.Append(s_szSectionEndFmt);
           pBuffer->Append(str, str.GetLength() * nBytesOfChar);
         }
-        break;;
+        break;
       default:
         str.Clear();
         str.Append(0x20, nDepth * 2);
@@ -794,18 +794,4 @@ namespace Marimo
   }
 
   //////////////////////////////////////////////////////////////////////////
-
-
-
-  //////////////////////////////////////////////////////////////////////////
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////
-
-
-
-
 } // namespace Marimo

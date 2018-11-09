@@ -751,8 +751,8 @@ void test()
     //{ScriptedDataPool::T_STRUCT, "float4"  , c_float4},
     //{ScriptedDataPool::T_STRUCT, "float3x3", c_float3x3},
     //{ScriptedDataPool::T_STRUCT, "float4x4", c_float4x4},
-    {Marimo::T_STRUCT, "vertex", c_vertex},
-    {T_UNDEFINE, NULL},
+    {DataPoolTypeClass::Structure, "vertex", c_vertex},
+    {DataPoolTypeClass::Undefine, NULL},
   };
 
   float4x4 matIdentity[4] = {float4x4::Identity, float4x4::Identity, float4x4::Identity, float4x4::Identity};

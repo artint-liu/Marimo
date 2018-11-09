@@ -271,7 +271,7 @@ struct EDITSTATE
   void      SL_InvalidateText(GXINT start, GXINT end);
 
   GXLRESULT SetVariable (MOVariable* pVariable);
-  GXHRESULT OnKnock     (KNOCKACTION* pKnock);
+  //GXHRESULT OnKnock     (KNOCKACTION* pKnock);
   GXVOID    OnImpulse   (LPCDATAIMPULSE pImpulse);
 
 };

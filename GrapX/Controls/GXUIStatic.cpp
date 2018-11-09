@@ -585,7 +585,7 @@ namespace GXUI
   GXLRESULT StaticSprite::SetVariable( MOVariable* pVariable )
   {
     auto eCate = pVariable->GetTypeCategory();
-    if(eCate == Marimo::T_STRING)
+    if(eCate == Marimo::DataPoolTypeClass::String)
     {
       clStringW str = pVariable->ToStringW();
       clStringW strFilename, strName;
@@ -593,7 +593,7 @@ namespace GXUI
       SetSpriteByFilenameW(strFilename);
       SetByNameW(strName);
     }
-    else if(eCate == Marimo::T_STRUCT)
+    else if(eCate == Marimo::DataPoolTypeClass::Structure)
     {
       auto it = pVariable->begin();
       auto itEnd = pVariable->end();
@@ -605,12 +605,12 @@ namespace GXUI
       for(; it != itEnd; ++it)
       {
         auto eMemberCate = it.pVarDesc->GetTypeCategory();
-        if(eMemberCate == Marimo::T_OBJECT) {
+        if(eMemberCate == Marimo::DataPoolTypeClass::Object) {
           GUnknown* pObject = NULL;
           it.ToVariable().Query(&pObject);
           pSprite = dynamic_cast<GXSprite*>(pObject);
         }
-        else if(eMemberCate == Marimo::T_STRING) {
+        else if(eMemberCate == Marimo::DataPoolTypeClass::String) {
           strName = it.ToVariable().ToStringW();
         }
 

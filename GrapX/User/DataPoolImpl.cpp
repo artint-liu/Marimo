@@ -48,11 +48,168 @@ using namespace clstd;
 
 namespace Marimo
 {
-  typedef DataPoolVariable              Variable;
+  typedef DataPoolVariable Variable;
+
+  namespace DataPoolInternal
+  {
+    // 预置类型
+#define DATAPOOL_VECTOR2_MEMBERLIST(_N) DATAPOOL_VARIABLE_DECLARATION c_##_N##2[] = { {#_N, "x"}, {#_N, "y"}, {NULL, NULL}, }
+#define DATAPOOL_VECTOR3_MEMBERLIST(_N) DATAPOOL_VARIABLE_DECLARATION c_##_N##3[] = { {#_N, "x"}, {#_N, "y"}, {#_N, "z"}, {NULL, NULL}, }
+#define DATAPOOL_VECTOR4_MEMBERLIST(_N) DATAPOOL_VARIABLE_DECLARATION c_##_N##4[] = { {#_N, "x"}, {#_N, "y"}, {#_N, "z"}, {#_N, "w"}, {NULL, NULL}, }
+
+    DATAPOOL_VECTOR2_MEMBERLIST(int);
+    DATAPOOL_VECTOR3_MEMBERLIST(int);
+    DATAPOOL_VECTOR4_MEMBERLIST(int);
+    DATAPOOL_VECTOR2_MEMBERLIST(bool);
+    DATAPOOL_VECTOR3_MEMBERLIST(bool);
+    DATAPOOL_VECTOR4_MEMBERLIST(bool);
+    DATAPOOL_VECTOR2_MEMBERLIST(uint);
+    DATAPOOL_VECTOR3_MEMBERLIST(uint);
+    DATAPOOL_VECTOR4_MEMBERLIST(uint);
+    DATAPOOL_VECTOR2_MEMBERLIST(float);
+    DATAPOOL_VECTOR3_MEMBERLIST(float);
+    DATAPOOL_VECTOR4_MEMBERLIST(float);
+
+#undef DATAPOOL_VECTOR2_MEMBERLIST
+#undef DATAPOOL_VECTOR3_MEMBERLIST
+#undef DATAPOOL_VECTOR4_MEMBERLIST
+
+
+    DATAPOOL_VARIABLE_DECLARATION c_float2x2[] = { {"float", "m", 0, 4}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float3x3[] = { {"float", "m", 0, 9}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float4x4[] = { {"float", "m", 0, 16}, {NULL, NULL}, };
+
+    DATAPOOL_TYPE_DECLARATION c_TypeDefine[] =
+    {
+      {DataPoolTypeClass::Float,  "float"},
+      {DataPoolTypeClass::Byte,   "BYTE"},
+      {DataPoolTypeClass::Word,   "WORD"},
+      {DataPoolTypeClass::DWord,  "DWORD"},
+      {DataPoolTypeClass::QWord,  "QWORD"},
+      {DataPoolTypeClass::Byte,   "unsigned_char"},
+      {DataPoolTypeClass::Word,   "unsigned_short"},
+      {DataPoolTypeClass::DWord,  "unsigned_int"},
+      {DataPoolTypeClass::QWord,  "unsigned_longlong"},
+
+      {DataPoolTypeClass::SByte,  "char"},
+      {DataPoolTypeClass::SWord,  "short"},
+      {DataPoolTypeClass::SDWord, "int"},
+      {DataPoolTypeClass::SQWord, "longlong"},
+
+      {DataPoolTypeClass::String,  "string"},
+      {DataPoolTypeClass::StringA, "stringA"},
+      {DataPoolTypeClass::Object,  "object"},
+
+      {DataPoolTypeClass::Structure, "float2"  , c_float2},
+      {DataPoolTypeClass::Structure, "float3"  , c_float3},
+      {DataPoolTypeClass::Structure, "float4"  , c_float4},
+      {DataPoolTypeClass::Structure, "float2x2", c_float2x2},
+      {DataPoolTypeClass::Structure, "float3x3", c_float3x3},
+      {DataPoolTypeClass::Structure, "float4x4", c_float4x4},
+      {DataPoolTypeClass::Undefine, NULL},
+    };
+
+    DATAPOOL_VARIABLE_DECLARATION c_float2x2_NX16B[] = { {"float2", "v", 0, 2}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float2x3_NX16B[] = { {"float2", "v", 0, 3}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float2x4_NX16B[] = { {"float2", "v", 0, 4}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float3x2_NX16B[] = { {"float3", "v", 0, 2}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float3x3_NX16B[] = { {"float3", "v", 0, 3}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float3x4_NX16B[] = { {"float3", "v", 0, 4}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float4x2_NX16B[] = { {"float4", "v", 0, 2}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float4x3_NX16B[] = { {"float4", "v", 0, 3}, {NULL, NULL}, };
+    DATAPOOL_VARIABLE_DECLARATION c_float4x4_NX16B[] = { {"float4", "v", 0, 4}, {NULL, NULL}, };    
+
+    DATAPOOL_TYPE_DECLARATION c_TypeDefine_NX16B[] =
+    {
+      {DataPoolTypeClass::SDWord, "bool"},
+      {DataPoolTypeClass::Float,  "float"},
+      {DataPoolTypeClass::SDWord, "int"},
+      {DataPoolTypeClass::DWord,  "uint"},
+
+      {DataPoolTypeClass::String,  "string"},
+      {DataPoolTypeClass::StringA, "stringA"},
+      {DataPoolTypeClass::Object,  "object"},
+
+      {DataPoolTypeClass::Structure, "float2"  , c_float2},
+      {DataPoolTypeClass::Structure, "float3"  , c_float3},
+      {DataPoolTypeClass::Structure, "float4"  , c_float4},
+      {DataPoolTypeClass::Structure, "float2x2", c_float2x2_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float2x3", c_float2x3_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float2x4", c_float2x4_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float3x2", c_float3x2_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float3x3", c_float3x3_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float3x4", c_float3x4_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float4x2", c_float4x2_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float4x3", c_float4x3_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "float4x4", c_float4x4_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Undefine, NULL},
+    };
+
+    //GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags)
+    //{
+    //  // 这个判断顺序与定义掩码有关，不能随便修改
+    //  if(IS_MARK_NX16B(dwFlags)) {
+    //    return NOT_CROSS_16_BYTES_BOUNDARY;
+    //  }
+    //  else if((dwFlags & DataPoolCreation_Align16) == DataPoolCreation_Align16) {
+    //    return 16;
+    //  }
+    //  else if((dwFlags & DataPoolCreation_Align8) == DataPoolCreation_Align8) {
+    //    return 8;
+    //  }
+    //  else if((dwFlags & DataPoolCreation_Align4) == DataPoolCreation_Align4) {
+    //    return 4;
+    //  }
+    //  return 1;
+    //}
+
+    DataPoolPack CreationFlagsToMemberPack(GXDWORD dwFlags)
+    {
+      // 这个判断顺序与定义掩码有关，不能随便修改
+      if(IS_MARK_NX16B(dwFlags)) {
+        return DataPoolPack::NotCross16Boundary;
+      }
+      else if((dwFlags & DataPoolCreation_Align16) == DataPoolCreation_Align16) {
+        return DataPoolPack::Align16;
+      }
+      else if((dwFlags & DataPoolCreation_Align8) == DataPoolCreation_Align8) {
+        return DataPoolPack::Align8;
+      }
+      else if((dwFlags & DataPoolCreation_Align4) == DataPoolCreation_Align4) {
+        return DataPoolPack::Align4;
+      }
+      return DataPoolPack::Compact;
+    }
+
+    GXUINT NotCross16BytesBoundaryArraySize(GXUINT nTypeSize, GXUINT nElementCount)
+    {
+      // a[n]数组定义中，a[0]~a[n-1]其实都要16字节对齐，a[n-1]只占用实际长度
+      ASSERT(nElementCount > 0);
+      return (ALIGN_16(nTypeSize) * (nElementCount - 1) + nTypeSize);
+    }
+
+    GXUINT GetMemberAlignMask(DataPoolPack eMemberPack)
+    {
+      switch(eMemberPack)
+      {
+      case DataPoolPack::Align2:
+        return 1;
+      case DataPoolPack::Align4:
+        return 3;           
+      case DataPoolPack::Align8:
+        return 7;
+      case DataPoolPack::Align16:
+        return 15;
+      default:
+        return 0;
+      }
+    }
+  } // namespace DataPoolInternal
+
 
   namespace Implement
   {
-    extern DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[];
+    //extern DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[];
     extern DataPoolVariable::VTBL* s_pPrimaryVtbl;
     extern DataPoolVariable::VTBL* s_pEnumVtbl;
     extern DataPoolVariable::VTBL* s_pFlagVtbl;
@@ -62,6 +219,8 @@ namespace Marimo
     extern DataPoolVariable::VTBL* s_pStructVtbl;
     extern DataPoolVariable::VTBL* s_pStaticArrayVtbl;
     extern DataPoolVariable::VTBL* s_pDynamicArrayVtbl;
+    extern DataPoolVariable::VTBL* s_pStaticArrayNX16BVtbl;
+    extern DataPoolVariable::VTBL* s_pDynamicArrayNX16BVtbl;
 
     //inline GXUINT ConvertToNewOffsetFromOldIndex(const STRINGSETDESC* pTable, int nOldIndex)
     //{
@@ -115,7 +274,30 @@ namespace Marimo
     }
 
   } // namespace Implement
-  
+
+  //////////////////////////////////////////////////////////////////////////
+
+  DataPoolTypeClass operator&(DataPoolTypeClass a, DataPoolTypeClass b)
+  {
+    return static_cast<DataPoolTypeClass>(static_cast<GXUINT>(a) & static_cast<GXUINT>(b));
+  }
+
+  b32 operator==(DataPoolTypeClass a, GXUINT b)
+  {
+    return (static_cast<GXUINT>(a) == b);
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  const DATAPOOL_STRUCT_DESC* DATAPOOL_VARIABLE_DESC::GetStructDesc() const
+  {
+    const DATAPOOL_TYPE_DESC* pTypeDesc = GetTypeDesc();
+    ASSERT(
+      (pTypeDesc->Cate & DataPoolTypeClass::Enum_ClassMask) == DataPoolTypeClass::Structure ||
+      (pTypeDesc->Cate & DataPoolTypeClass::Enum_ClassMask) == DataPoolTypeClass::Enumeration ||
+      (pTypeDesc->Cate & DataPoolTypeClass::Enum_ClassMask) == DataPoolTypeClass::Flag);
+    return static_cast<const DATAPOOL_STRUCT_DESC*>(pTypeDesc);
+  }
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -200,14 +382,18 @@ namespace Marimo
     DataPoolBuildTime sBuildTime(dwFlags);   // 构建时使用的结构
 
     // 创建浮动类型表
-    // -- 内置类型表示是被信任的,不进行合法性检查,Debug版还是要稍微检查下的
 #ifdef _DEBUG
-    if( ! sBuildTime.IntCheckTypeDecl(Implement::c_InternalTypeDefine, TRUE))
-      return FALSE;
+    // -- 内置类型表示是被信任的,不进行合法性检查,Debug版还是要稍微检查下的
+# define CHECK_INTERNAL_TYPE TRUE
 #else
-    if( ! sBuildTime.IntCheckTypeDecl(Implement::c_InternalTypeDefine, FALSE))
-      return FALSE;
+# define CHECK_INTERNAL_TYPE FALSE
 #endif // #ifdef _DEBUG9
+
+    if(_CL_NOT_(sBuildTime.IntCheckTypeDecl(SELECT_INTERNAL_TYPE_TABLE(dwFlags), CHECK_INTERNAL_TYPE)))
+    {
+      return FALSE;
+    }
+
     if(pTypeDecl != NULL) {
       if( ! sBuildTime.IntCheckTypeDecl(pTypeDecl, TRUE))
         return FALSE;
@@ -218,9 +404,10 @@ namespace Marimo
       return FALSE;
     }
 
-    const GXUINT nAlignSize = DataPoolInternal::CreationFlagsToAlignSize(dwFlags);
+    //const GXUINT nAlignSize = DataPoolInternal::CreationFlagsToAlignSize(dwFlags);
+    const DataPoolPack eMemberPack = DataPoolInternal::CreationFlagsToMemberPack(dwFlags);
 
-    GXINT nBufferSize = sBuildTime.ComputeVariableSize(pVarDecl, sBuildTime.m_aVar, nAlignSize);
+    GXINT nBufferSize = sBuildTime.ComputeVariableSize(pVarDecl, sBuildTime.m_aVar, eMemberPack);
     if(nBufferSize == 0) {
       CLOG_ERROR("%s: Empty data pool.\n", __FUNCTION__);
       return FALSE;
@@ -247,7 +434,7 @@ namespace Marimo
   {
     switch(pVarDesc->GetTypeCategory())
     {
-    case T_STRING:
+    case DataPoolTypeClass::String:
       {
         clStringW* pString = reinterpret_cast<clStringW*>(lpFirstElement);
 
@@ -264,7 +451,7 @@ namespace Marimo
       }
       break;
 
-    case T_STRINGA:
+    case DataPoolTypeClass::StringA:
       {
         clStringA* pString = reinterpret_cast<clStringA*>(lpFirstElement);
 
@@ -281,7 +468,7 @@ namespace Marimo
       }
       break;
 
-    case T_OBJECT:
+    case DataPoolTypeClass::Object:
       {
         GUnknown** pObjArray = reinterpret_cast<GUnknown**>(lpFirstElement);
 
@@ -292,7 +479,7 @@ namespace Marimo
       }
       break;
 
-    case T_STRUCT:
+    case DataPoolTypeClass::Structure:
       {
         for(GXUINT nStructIndex = 0; nStructIndex < nElementCount; nStructIndex++)
         {
@@ -384,7 +571,7 @@ namespace Marimo
     if(pVdd != NULL) {
 
       // 只有结构体才有成员, 其他情况直接返回
-      if(pVdd->GetTypeCategory() != T_STRUCT) {
+      if(pVdd->GetTypeCategory() != DataPoolTypeClass::Structure) {
         return NULL;
       }
       end   = pVdd->MemberCount();
@@ -403,7 +590,9 @@ namespace Marimo
     }
 
     ASSERT(pVdd == NULL ||
-      pVdd->GetTypeCategory() == T_STRUCT || pVdd->GetTypeCategory() == T_ENUM || pVdd->GetTypeCategory() == T_FLAG);
+      pVdd->GetTypeCategory() == DataPoolTypeClass::Structure ||
+      pVdd->GetTypeCategory() == DataPoolTypeClass::Enumeration ||
+      pVdd->GetTypeCategory() == DataPoolTypeClass::Flag);
 
     const GXUINT count = (GXUINT)end;
 #ifdef _DEBUG
@@ -521,7 +710,7 @@ namespace Marimo
       ASSERT(GXSTRCMPI((DataPool::LPCSTR)VARDesc.VariableName(), varDecl.Name) == 0);
       switch(VARDesc.GetTypeCategory())
       {
-      case T_STRUCT:
+      case DataPoolTypeClass::Structure:
         {
           int nMemberIndex;
           //int nStart = VARDesc.MemberBegin();
@@ -531,24 +720,24 @@ namespace Marimo
           // 对于含有动态数组和字符串的结构体是不能直接赋值的
           for(nMemberIndex = 0; nMemberIndex < nEnd; nMemberIndex++)
           {
-            if(pMembers[nMemberIndex].GetTypeCategory() == T_STRING || 
-              pMembers[nMemberIndex].GetTypeCategory() == T_STRINGA || 
+            if(pMembers[nMemberIndex].GetTypeCategory() == DataPoolTypeClass::String || 
+              pMembers[nMemberIndex].GetTypeCategory() == DataPoolTypeClass::StringA || 
               pMembers[nMemberIndex].IsDynamicArray())
               break;
           }
           if(nMemberIndex != nEnd)
             break;
         } // 这里没有 break, 如果 Struct 中没有动态数组和字符串声明, 支持初始数据.
-      case T_BYTE:
-      case T_WORD:
-      case T_DWORD:
-      case T_OBJECT:
-      case T_QWORD:
-      case T_SBYTE:
-      case T_SWORD:
-      case T_SDWORD:
-      case T_SQWORD:
-      case T_FLOAT:
+      case DataPoolTypeClass::Byte:
+      case DataPoolTypeClass::Word:
+      case DataPoolTypeClass::DWord:
+      case DataPoolTypeClass::Object:
+      case DataPoolTypeClass::QWord:
+      case DataPoolTypeClass::SByte:
+      case DataPoolTypeClass::SWord:
+      case DataPoolTypeClass::SDWord:
+      case DataPoolTypeClass::SQWord:
+      case DataPoolTypeClass::Float:
         if(varDecl.Init != NULL)
         {
           if(bDynamicArray)
@@ -566,7 +755,7 @@ namespace Marimo
         //case T_Struct:
         //  //if(varDecl.Init != NULL)
         //  break;
-      case T_STRING:
+      case DataPoolTypeClass::String:
         {
           GXLPCWSTR  pStrInit = (GXLPCWSTR)varDecl.Init;
           clStringW* pStrPool = NULL;
@@ -685,7 +874,7 @@ namespace Marimo
         }
         else {
           TRACE("[%s]:[%s]\n", (DataPool::LPCSTR)pVar->VariableName(), (DataPool::LPCSTR)pVarDesc->VariableName());
-          ASSERT(pVar->GetTypeCategory() == T_STRUCT);
+          ASSERT(pVar->GetTypeCategory() == DataPoolTypeClass::Structure);
           pVarDescTable = (LPCVD)pVar->MemberBeginPtr();
           count = pVar->MemberCount();
 
@@ -909,20 +1098,20 @@ namespace Marimo
       // 检查已经调整的标记
       // 如果没有调整过，则重新计算这个类型的大小
       // 否则步进这个类型的大小就可以
-      if(TEST_FLAG_NOT(eCate, TYPE_CHANGED_FLAG))
+      if(TEST_FLAG_NOT(eCate, static_cast<DataPoolTypeClass>(TYPE_CHANGED_FLAG)))
       {
         TYPE_DESC* pTypeDesc = (TYPE_DESC*)d.GetTypeDesc();
         GXUINT& uCate = *(GXUINT*)&pTypeDesc->Cate;
         SET_FLAG(uCate, TYPE_CHANGED_FLAG);
         switch(eCate)
         {
-        case T_STRUCT:
+        case DataPoolTypeClass::Structure:
           pTypeDesc->cbSize = IntChangePtrSize(nSizeofPtr, (VARIABLE_DESC*)d.MemberBeginPtr(), d.MemberCount());
           break;
 
-        case T_STRING:
-        case T_STRINGA:
-        case T_OBJECT:
+        case DataPoolTypeClass::String:
+        case DataPoolTypeClass::StringA:
+        case DataPoolTypeClass::Object:
           ASSERT((pTypeDesc->cbSize == 4 && nSizeofPtr == 8) ||
             (pTypeDesc->cbSize == 8 && nSizeofPtr == 4));
 
@@ -1062,7 +1251,12 @@ namespace Marimo
     else if(pVarDesc->nCount > 1) { // 静态数组
       if(nIndex == (GXUINT)-1)
       {
-        pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
+        if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
+          pVar->Set((VARIABLE::VTBL*)s_pStaticArrayNX16BVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
+        }
+        else {
+          pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
+        }
         return TRUE;
       }
       else if(nIndex < pVarDesc->nCount)
@@ -1276,14 +1470,14 @@ namespace Marimo
     for(auto it = bt.m_TypeDict.begin(); it != bt.m_TypeDict.end(); ++it) {
       BUILDTIME::BT_TYPE_DESC& sBtType = it->second;
 
-      if(sBtType.Cate == T_STRUCT) {
+      if(sBtType.Cate == DataPoolTypeClass::Structure) {
         STRUCT_DESC* pStruct = &m_aStructs[nStructIndex++];
         pType = pStruct;
         pStruct->nMemberCount = sBtType.nMemberCount;
         pStruct->Member = (GXUINT)((GXUINT_PTR)&m_aMembers[sBtType.nMemberIndex] - (GXUINT_PTR)&pStruct->Member);
         cbBuckets = Implement::CopyHashAlgo(&m_aHashAlgos[nStructIndex], &sBtType.HashInfo, m_aHashBuckets, cbBuckets);
       }
-      else if(sBtType.Cate == T_ENUM || sBtType.Cate == T_FLAG) {
+      else if(sBtType.Cate == DataPoolTypeClass::Enumeration || sBtType.Cate == DataPoolTypeClass::Flag) {
         STRUCT_DESC* pStruct = &m_aStructs[nStructIndex++];
         pType = pStruct;
         pStruct->nMemberCount = sBtType.nMemberCount;
@@ -1355,19 +1549,23 @@ namespace Marimo
 
     for(GXUINT i = 0; i < m_nNumOfStructs; ++i) {
       const STRUCT_DESC& t = m_aStructs[i];
-      ASSERT(t.Cate == T_STRUCT || t.Cate == T_FLAG || t.Cate == T_ENUM);
+      
+      ASSERT(
+        t.Cate == DataPoolTypeClass::Structure ||
+        t.Cate == DataPoolTypeClass::Flag ||
+        t.Cate == DataPoolTypeClass::Enumeration);
 
       if(t.nMemberCount >= 1)
       {
         switch(t.Cate)
         {
-        case T_STRUCT:
+        case DataPoolTypeClass::Structure:
           //SortNames<VARIABLE_DESC>(m_aMembers, GSIT_Members + t.nMemberIndex, t.nMemberIndex, t.nMemberCount);
           //TRACE("var index:%d\n", t.GetMemberIndex(m_aMembers));
           SortNames<DATAPOOL_VARIABLE_DESC>(t.GetMembers(), GSIT_Members + t.GetMemberIndex(m_aMembers), 0, t.nMemberCount);
           break;
-        case T_FLAG:
-        case T_ENUM:
+        case DataPoolTypeClass::Flag:
+        case DataPoolTypeClass::Enumeration:
           //SortNames<ENUM_DESC>(m_aEnums, GSIT_Enums + t.nMemberIndex, t.nMemberIndex, t.nMemberCount);
           //TRACE("enum index:%d\n", t.GetEnumIndex(m_aEnums));
           SortNames<DATAPOOL_ENUM_DESC>(t.GetEnumMembers(), GSIT_Enums + t.GetEnumIndex(m_aEnums), 0, t.nMemberCount);
@@ -1777,15 +1975,15 @@ namespace Marimo
       GXUINT nBase = 0; // 基础偏移
       switch(pTypeDesc->Cate)
       {
-      case T_STRUCT:
+      case DataPoolTypeClass::Structure:
         for(GXUINT i = 0; i < nCount; ++i) {
           DataPoolImpl::LPCSD pStructDesc = reinterpret_cast<DataPoolImpl::LPCSD>(pTypeDesc);
           nBase = GenerateRelocalizeTable(nBase, reinterpret_cast<DataPoolImpl::LPCVD>(pStructDesc->GetMembers()), pStructDesc->nMemberCount);
         }
         break;
-      case T_STRING:  GenerateRelocalizeTable(nBase, RelocalizeType_String, nCount);   break;
-      case T_STRINGA: GenerateRelocalizeTable(nBase, RelocalizeType_StringA, nCount);  break;
-      case T_OBJECT:  GenerateRelocalizeTable(nBase, RelocalizeType_Object, nCount);   break;
+      case DataPoolTypeClass::String:  GenerateRelocalizeTable(nBase, RelocalizeType_String, nCount);   break;
+      case DataPoolTypeClass::StringA: GenerateRelocalizeTable(nBase, RelocalizeType_StringA, nCount);  break;
+      case DataPoolTypeClass::Object:  GenerateRelocalizeTable(nBase, RelocalizeType_Object, nCount);   break;
       }
     }
 
@@ -1816,15 +2014,15 @@ namespace Marimo
 
           switch(vd.GetTypeCategory())
           {
-          case T_STRUCT:
+          case DataPoolTypeClass::Structure:
             for(GXUINT n = 0; n < vd.nCount; ++n) {
               nBase = GenerateRelocalizeTable(nBase, vd.MemberBeginPtr(), vd.MemberCount());
             }
             break;
 
-          case T_STRING:  nBase = GenerateRelocalizeTable(nBase, RelocalizeType_String, vd.nCount);   break;
-          case T_STRINGA: nBase = GenerateRelocalizeTable(nBase, RelocalizeType_StringA, vd.nCount);  break;
-          case T_OBJECT:  nBase = GenerateRelocalizeTable(nBase, RelocalizeType_Object, vd.nCount);   break;
+          case DataPoolTypeClass::String:  nBase = GenerateRelocalizeTable(nBase, RelocalizeType_String, vd.nCount);   break;
+          case DataPoolTypeClass::StringA: nBase = GenerateRelocalizeTable(nBase, RelocalizeType_StringA, vd.nCount);  break;
+          case DataPoolTypeClass::Object:  nBase = GenerateRelocalizeTable(nBase, RelocalizeType_Object, vd.nCount);   break;
           default:        nBase += reinterpret_cast<const DataPoolImpl::VARIABLE_DESC&>(vd).GetSize();  break;
           } // switch
         }
@@ -1948,7 +2146,7 @@ namespace Marimo
         nRelOffset = 0;
       }
 
-      ASSERT(bArray || it.pVarDesc->GetTypeCategory() != T_STRUCT);
+      ASSERT(bArray || it.pVarDesc->GetTypeCategory() != DataPoolTypeClass::Structure);
 
 
 
@@ -1979,7 +2177,7 @@ namespace Marimo
         //TRACE("*%d\n", nRelOffset);
         nRelOffset += SIZEOF_PTR32;
       }
-      else if(it.pVarDesc->GetTypeCategory() == T_STRING)
+      else if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::String)
       {
         ASSERT( ! bArray);
         sStringVar.insert(var.ToStringW());
@@ -1988,7 +2186,7 @@ namespace Marimo
         ASSERT_X86(var.GetSize() == 4);
         ++header.nNumOfStrings;
       }
-      else if(it.pVarDesc->GetTypeCategory() == T_STRINGA)
+      else if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::StringA)
       {
         ASSERT( ! bArray);
         sStringVarA.insert(var.ToStringA());
@@ -1997,7 +2195,7 @@ namespace Marimo
         ASSERT_X86(var.GetSize() == 4);
         ++header.nNumOfStrings;
       }
-      else if(it.pVarDesc->GetTypeCategory() == T_OBJECT)
+      else if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::Object)
       {
         ASSERT( ! bArray);
         pCurrBufDesc->RelTable.push_back(nRelOffset | BUFFER_SAVELOAD_DESC::RelocalizeType_Object);
@@ -2537,12 +2735,12 @@ namespace Marimo
   {
     switch(GetTypeCategory())
     {
-    case T_STRING:  return (VTBL*)Implement::s_pStringVtbl;
-    case T_STRINGA: return (VTBL*)Implement::s_pStringAVtbl;
-    case T_STRUCT:  return (VTBL*)Implement::s_pStructVtbl;
-    case T_OBJECT:  return (VTBL*)Implement::s_pObjectVtbl;
-    case T_ENUM:    return (VTBL*)Implement::s_pEnumVtbl;
-    case T_FLAG:    return (VTBL*)Implement::s_pFlagVtbl;
+    case DataPoolTypeClass::String:  return (VTBL*)Implement::s_pStringVtbl;
+    case DataPoolTypeClass::StringA: return (VTBL*)Implement::s_pStringAVtbl;
+    case DataPoolTypeClass::Structure:  return (VTBL*)Implement::s_pStructVtbl;
+    case DataPoolTypeClass::Object:  return (VTBL*)Implement::s_pObjectVtbl;
+    case DataPoolTypeClass::Enumeration:    return (VTBL*)Implement::s_pEnumVtbl;
+    case DataPoolTypeClass::Flag:    return (VTBL*)Implement::s_pFlagVtbl;
     default:        return (VTBL*)Implement::s_pPrimaryVtbl;
     }
   }
@@ -2622,27 +2820,6 @@ namespace Marimo
       ? StaticStringsDict::HashChar(str, GXSTRLEN(str), nPos)
       : clstd::HashStringT(str);
   }
-
-  namespace DataPoolInternal
-  {
-    GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags)
-    {
-      if((dwFlags & DataPoolCreation_NotCross16BytesBoundary) == DataPoolCreation_NotCross16BytesBoundary) {
-        return NOT_CROSS_16_BYTES_BOUNDARY;
-      }
-      else if((dwFlags & DataPoolCreation_Align16) == DataPoolCreation_Align16) {
-        return 16;
-      }
-      else if((dwFlags & DataPoolCreation_Align8) == DataPoolCreation_Align8) {
-        return 8;
-      }
-      else if((dwFlags & DataPoolCreation_Align4) == DataPoolCreation_Align4) {
-        return 4;
-      }
-      return 1;
-    }
-  } // namespace DataPoolInternal
-
 } // namespace Marimo
 
 //#include "DataPoolImpl.cpp"

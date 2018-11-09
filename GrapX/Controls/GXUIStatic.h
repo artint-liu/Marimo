@@ -10,7 +10,7 @@ namespace GXUI
   //GXLRESULT GXCALLBACK StaticWndProc        (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
   class Static : public CtrlBase
   {
-    typedef Marimo::KNOCKACTION KNOCKACTION;
+    //typedef Marimo::KNOCKACTION KNOCKACTION;
   public:
     enum Type
     {
@@ -58,7 +58,7 @@ namespace GXUI
   class StaticLabel : public Static
   {
     friend class Static;
-    typedef Marimo::KNOCKACTION KNOCKACTION;
+    //typedef Marimo::KNOCKACTION KNOCKACTION;
   protected:
     GXCOLORREF  m_crText;
     MOVariable  m_VarText;

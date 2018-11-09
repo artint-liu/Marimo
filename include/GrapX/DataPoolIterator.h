@@ -344,7 +344,7 @@ NEW_LOOP:
 
           switch(itMember.pVarDesc->GetTypeCategory())
           {
-          case T_STRUCT:
+          case DataPoolTypeClass::Structure:
             // 分解结构体
             if(itMember.pVarDesc->nCount > 1) {
               // 这里是倒序迭代入栈,正序出栈
@@ -393,7 +393,7 @@ NEW_LOOP:
           {
             L_ACONTEXT& ac = sDynArray.front();
 
-            if(ac.itElement.pVarDesc->GetTypeCategory() == T_STRUCT) {
+            if(ac.itElement.pVarDesc->GetTypeCategory() == DataPoolTypeClass::Structure) {
               if(ac.itElement != ac.itEnd) {
                 auto _it_begin = ac.itElement.begin();
                 auto _it_end = ac.itElement.end();

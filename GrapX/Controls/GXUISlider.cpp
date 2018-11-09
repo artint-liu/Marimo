@@ -503,17 +503,17 @@ namespace GXUI
     GXDWORD dwStyle = (GXDWORD)gxGetWindowLong(m_hWnd, GXGWL_STYLE);
     switch(eCate)
     {
-    case Marimo::T_FLOAT:
+    case Marimo::DataPoolTypeClass::Float:
       SetPos(dwStyle, m_VarPos.ToFloat());
       break;
-    case Marimo::T_BYTE:
-    case Marimo::T_WORD:
-    case Marimo::T_DWORD:
-    case Marimo::T_QWORD:
-    case Marimo::T_SBYTE:
-    case Marimo::T_SWORD:
-    case Marimo::T_SDWORD:
-    case Marimo::T_SQWORD:
+    case Marimo::DataPoolTypeClass::Byte:
+    case Marimo::DataPoolTypeClass::Word:
+    case Marimo::DataPoolTypeClass::DWord:
+    case Marimo::DataPoolTypeClass::QWord:
+    case Marimo::DataPoolTypeClass::SByte:
+    case Marimo::DataPoolTypeClass::SWord:
+    case Marimo::DataPoolTypeClass::SDWord:
+    case Marimo::DataPoolTypeClass::SQWord:
       SetPos(dwStyle, (GXINT)m_VarPos.ToInteger());
       break;
     default:

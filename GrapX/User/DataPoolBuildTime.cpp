@@ -35,7 +35,7 @@ namespace Marimo
       type.dwFlags = 0;
 
       if(type.Name == NULL) { break; }
-      if(bCheck && (type.Cate <= T_UNDEFINE || type.Cate >= T_MAX || _CL_NOT_(DataPool::IsIdentifier(type.Name))) ) {
+      if(bCheck && (type.Cate <= DataPoolTypeClass::Undefine || type.Cate >= DataPoolTypeClass::Enum_Count || _CL_NOT_(DataPool::IsIdentifier(type.Name))) ) {
         CLOG_ERROR("%s: Bad type category.\n", __FUNCTION__);
         return FALSE;
       }
@@ -71,42 +71,42 @@ namespace Marimo
     //VarDesc.Name = var.Name;
     switch(type.Cate)
     {
-    case T_BYTE:
-    case T_SBYTE:
+    case DataPoolTypeClass::Byte:
+    case DataPoolTypeClass::SByte:
       t.cbSize = sizeof(u8);
       break;
-    case T_WORD:
-    case T_SWORD:
+    case DataPoolTypeClass::Word:
+    case DataPoolTypeClass::SWord:
       t.cbSize = sizeof(u16);
       break;
-    case T_DWORD:
-    case T_SDWORD:
-    case T_FLOAT:
+    case DataPoolTypeClass::DWord:
+    case DataPoolTypeClass::SDWord:
+    case DataPoolTypeClass::Float:
       t.cbSize = sizeof(u32);
       break;
-    case T_QWORD:
-    case T_SQWORD:
+    case DataPoolTypeClass::QWord:
+    case DataPoolTypeClass::SQWord:
       t.cbSize = sizeof(u64);
       break;
 
-    case T_OBJECT:
+    case DataPoolTypeClass::Object:
       t.cbSize = m_bPtr64 ? sizeof(u64) : sizeof(GUnknown*);
       m_bFixedPool = 0;
       break;
 
-    case T_STRING:
-    case T_STRINGA:
+    case DataPoolTypeClass::String:
+    case DataPoolTypeClass::StringA:
       // 字符串类相当于指针，所以printf format系才能使用
       STATIC_ASSERT(sizeof(clStringW) == sizeof(void*) && sizeof(clStringA) == sizeof(void*));
       t.cbSize = m_bPtr64 ? sizeof(u64) : sizeof(void*);
       m_bFixedPool = 0;
       break;
-    case T_STRUCT:
+    case DataPoolTypeClass::Structure:
     //case T_STRUCTALWAYS:
       {
         BTVarDescArray aMemberDesc;
         aMemberDesc.reserve(20);
-        t.cbSize = ComputeVariableSize(type.as.Struct, aMemberDesc, type.StructAlign);
+        t.cbSize = ComputeVariableSize(type.as.Struct, aMemberDesc, type.MemberPack);
         t.nMemberCount = (GXUINT)aMemberDesc.size();
         t.nMemberIndex = (GXUINT)m_aStructMember.size();
         m_aStructMember.insert(m_aStructMember.end(), aMemberDesc.begin(), aMemberDesc.end());
@@ -123,8 +123,8 @@ namespace Marimo
       }
       break;
 
-    case T_ENUM:
-    case T_FLAG:
+    case DataPoolTypeClass::Enumeration:
+    case DataPoolTypeClass::Flag:
       {
         t.cbSize = sizeof(DataPool::Enum);
         //t.nMemberIndex = m_aEnumPck.size();
@@ -145,15 +145,16 @@ namespace Marimo
     }
   }
 
-  GXINT DataPoolBuildTime::ComputeVariableSize(LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc, GXUINT nAlignSize)
+  GXINT DataPoolBuildTime::ComputeVariableSize(LPCVARDECL pVarDecl, BTVarDescArray& aVariableDesc, DataPoolPack eMemberPack)
   {
     GXINT cbVariableSize = 0;
     GXINT cbSubSize = 0;
     int nVarIndex = 0;
-    const GXUINT nAlignMask = ((nAlignSize - 1) <= 15 && clstd::IsPowerOfTwo(nAlignSize)) ? (nAlignSize - 1) : 0;
-    ASSERT(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY || nAlignSize == 0 || nAlignSize == 1 ||
-      nAlignSize == 4 || nAlignSize == 8 || nAlignSize == 16);
-    ASSERT(nAlignMask == 0 || nAlignMask == 3 || nAlignMask == 7 || nAlignMask == 15);
+    const GXUINT nAlignMask = DataPoolInternal::GetMemberAlignMask(eMemberPack);
+      //((nAlignSize - 1) <= 15 && clstd::IsPowerOfTwo(nAlignSize)) ? (nAlignSize - 1) : 0;
+    //ASSERT(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY || nAlignSize == 0 || nAlignSize == 1 ||
+    //  nAlignSize == 4 || nAlignSize == 8 || nAlignSize == 16);
+    ASSERT(nAlignMask == 0 || nAlignMask == 1 || nAlignMask == 3 || nAlignMask == 7 || nAlignMask == 15);
 
     for(;; nVarIndex++)
     {
@@ -195,10 +196,19 @@ namespace Marimo
       else
       {
         VarDesc.bDynamic = 0;
-        cbSubSize = VarDesc.GetSize();
+        if(IS_MEMBER_NX16B(eMemberPack) && VarDesc.nCount > 1)
+        {
+          // a[n]数组定义中，a[0]~a[n-1]其实都要16字节对齐，a[n-1]只占用实际长度
+          cbSubSize = DataPoolInternal::NotCross16BytesBoundaryArraySize(
+            VarDesc.TypeSize(), VarDesc.nCount);
+        }
+        else
+        {
+          cbSubSize = VarDesc.TypeSize() * VarDesc.nCount;
+        }
       }
 
-      if(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY)
+      if(IS_MEMBER_NX16B(eMemberPack))
       {
         GXINT cbNextBoundary = (cbVariableSize + 16) & (~15);
 
@@ -224,7 +234,7 @@ namespace Marimo
       aVariableDesc.push_back(VarDesc);
     }
     
-    if(nAlignSize == NOT_CROSS_16_BYTES_BOUNDARY) {
+    if(eMemberPack == DataPoolPack::NotCross16Boundary) {
       cbVariableSize = ALIGN_16(cbVariableSize);
     }
     return cbVariableSize;
@@ -263,7 +273,7 @@ namespace Marimo
         SET_FLAG(it->second.dwFlags, BuildtimeTypeDeclaration_Used);
 
         // 结构类型 递归检查
-        if(it->second.Cate == T_STRUCT) {
+        if(it->second.Cate == DataPoolTypeClass::Structure) {
           if( ! CheckVarList(it->second.as.Struct)) {
             result = FALSE;
           }
