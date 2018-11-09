@@ -186,7 +186,12 @@ namespace Marimo
       else {
         vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(
           reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc)->GetUnaryMethod());
-        nElementOffset = index * pVarDesc->TypeSize();
+        if(IS_MARK_NX16B(pDataPool->GetFlags())) {
+          nElementOffset = index * ALIGN_16(pVarDesc->TypeSize());
+        }
+        else {
+          nElementOffset = index * pVarDesc->TypeSize();
+        }
       }
 
       // 动态数组使用单独的buffer， 同时偏移也重新计算

@@ -795,6 +795,11 @@ namespace Marimo
     }
   }
 
+  GXDWORD DataPoolImpl::GetFlags() const
+  {
+    return m_dwRuntimeFlags;
+  }
+
   GXBOOL DataPoolImpl::IsFixedPool() const
   {
     return (GXBOOL)TEST_FLAG(m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Fixed);
@@ -2076,7 +2081,10 @@ namespace Marimo
     // #.Array Buffer[1] 的重定位表 + data
     // ...
     FILE_HEADER header;
-    const GXDWORD dwFlagsMask = DataPoolCreation_NoHashTable;
+    const GXDWORD dwFlagsMask = DataPoolCreation_NoHashTable |
+      DataPoolCreation_Align4 | DataPoolCreation_Align8 |
+      DataPoolCreation_Align16 | DataPoolCreation_NotCross16BytesBoundary;
+
     header.dwFlags          = m_dwRuntimeFlags & dwFlagsMask; // 只接受储存部分标志，因为有些标志是运行态的，文件态没有意义
     header.dwHashMagic      = clstd::HashStringT("DataPool", 8);
     header.nNumOfTypes      = m_nNumOfTypes;

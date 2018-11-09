@@ -33,11 +33,9 @@ namespace Marimo
     struct GXDLL iterator
     {
       typedef const DATAPOOL_VARIABLE_DESC*  LPCVD;
-      //typedef DataPoolUtility::element_iterator  element_iterator;
       typedef DataPoolUtility::element_reverse_iterator relement_iterator;
 
       DataPool*         pDataPool;
-      //clStringA         ParentName;
       LPCVD             pVarDesc;
       clBufferBase*     pBuffer;
       GXUINT            nOffset;  // Parent在buffer里的偏移，全局变量一定是0，成员变量是成员所属struct在buffer的偏移

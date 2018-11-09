@@ -355,6 +355,7 @@ namespace Marimo
 
     virtual LPCSTR    GetVariableName     (GXUINT nIndex) const override; // 获得变量的名字
 
+    virtual GXDWORD   GetFlags            () const override;
     virtual GXBOOL    IsFixedPool         () const override; // 池中不含有字符串和动态数组
 #ifndef DISABLE_DATAPOOL_WATCHER
     virtual GXBOOL    IsAutoKnock         () override;

@@ -368,6 +368,8 @@ namespace Marimo
     GXSTDINTERFACE(GXHRESULT   ExportDataToFile    (GXLPCSTR szFilename, GXLPCSTR szCodec = NULL));
     GXSTDINTERFACE(GXHRESULT   ExportDataToMemory  (clstd::Buffer* pBuffer, GXLPCSTR szCodec = NULL));
 
+    GXSTDINTERFACE(GXDWORD     GetFlags            () const);
+
     GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组
     GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ());                 // 必须是RawPool才返回指针
     GXSTDINTERFACE(GXUINT      GetNameId           (LPCSTR szName));    // 返回Type, Variable, Enum等内部稳定字符串的id

@@ -206,7 +206,7 @@ void TestShaderConstantBuffer_Common()
   SAFE_RELEASE(pDataPool);
 }
 
-#define CHECK_OFFSET(_VAR, _EXPR, _VAL) ASSERT((_VAR = _EXPR) == _VAL)
+#define CHECK_VALUE(_VAR, _EXPR, _VAL) ASSERT((_VAR = _EXPR) == _VAL)
 void TestShaderConstantBuffer_HLSLPackingRulesSample()
 {
   Marimo::DataPool* pDataPool = NULL;
@@ -228,57 +228,57 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample()
 
   GXUINT n; // 用于失败时查看值
 
-  CHECK_OFFSET(n, ie1.MemberOf("Val1").GetOffset(), 0);
-  CHECK_OFFSET(n, ie1.MemberOf("Val2").GetOffset(), 16);
-  CHECK_OFFSET(n, ie1.MemberOf("Val3").GetOffset(), 24);
+  CHECK_VALUE(n, ie1.MemberOf("Val1").GetOffset(), 0);
+  CHECK_VALUE(n, ie1.MemberOf("Val2").GetOffset(), 16);
+  CHECK_VALUE(n, ie1.MemberOf("Val3").GetOffset(), 24);
 
-  CHECK_OFFSET(n, ie2.MemberOf("Val1").GetOffset() - ie2.GetOffset(), 0);
-  CHECK_OFFSET(n, ie2.MemberOf("Val2").GetOffset() - ie2.GetOffset(), 16);
-  CHECK_OFFSET(n, ie2.MemberOf("Val3").GetOffset() - ie2.GetOffset(), 32);
+  CHECK_VALUE(n, ie2.MemberOf("Val1").GetOffset() - ie2.GetOffset(), 0);
+  CHECK_VALUE(n, ie2.MemberOf("Val2").GetOffset() - ie2.GetOffset(), 16);
+  CHECK_VALUE(n, ie2.MemberOf("Val3").GetOffset() - ie2.GetOffset(), 32);
 
-  CHECK_OFFSET(n, ie3.MemberOf("Val1").GetOffset() - ie3.GetOffset(), 0);
-  CHECK_OFFSET(n, ie3.MemberOf("Val2").GetOffset() - ie3.GetOffset(), 4);
-  CHECK_OFFSET(n, ie3.MemberOf("Val3").GetOffset() - ie3.GetOffset(), 8);
+  CHECK_VALUE(n, ie3.MemberOf("Val1").GetOffset() - ie3.GetOffset(), 0);
+  CHECK_VALUE(n, ie3.MemberOf("Val2").GetOffset() - ie3.GetOffset(), 4);
+  CHECK_VALUE(n, ie3.MemberOf("Val3").GetOffset() - ie3.GetOffset(), 8);
 
-  CHECK_OFFSET(n, ie4.MemberOf("Val1").GetOffset() - ie4.GetOffset(), 0);
-  CHECK_OFFSET(n, ie4.MemberOf("Val2").GetOffset() - ie4.GetOffset(), 4);
-  CHECK_OFFSET(n, ie4.MemberOf("Val3").GetOffset() - ie4.GetOffset(), 12);
+  CHECK_VALUE(n, ie4.MemberOf("Val1").GetOffset() - ie4.GetOffset(), 0);
+  CHECK_VALUE(n, ie4.MemberOf("Val2").GetOffset() - ie4.GetOffset(), 4);
+  CHECK_VALUE(n, ie4.MemberOf("Val3").GetOffset() - ie4.GetOffset(), 12);
 
-  CHECK_OFFSET(n, ie5.MemberOf("Val1").GetOffset() - ie5.GetOffset(), 0);
-  CHECK_OFFSET(n, ie5.MemberOf("Val1_1").GetOffset() - ie5.GetOffset(), 4);
-  CHECK_OFFSET(n, ie5.MemberOf("Val1_2").GetOffset() - ie5.GetOffset(), 8);
-  CHECK_OFFSET(n, ie5.MemberOf("Val2").GetOffset() - ie5.GetOffset(), 16);
+  CHECK_VALUE(n, ie5.MemberOf("Val1").GetOffset() - ie5.GetOffset(), 0);
+  CHECK_VALUE(n, ie5.MemberOf("Val1_1").GetOffset() - ie5.GetOffset(), 4);
+  CHECK_VALUE(n, ie5.MemberOf("Val1_2").GetOffset() - ie5.GetOffset(), 8);
+  CHECK_VALUE(n, ie5.MemberOf("Val2").GetOffset() - ie5.GetOffset(), 16);
 
-  CHECK_OFFSET(n, ie6.MemberOf("Val1").GetOffset() - ie6.GetOffset(), 0);
-  CHECK_OFFSET(n, ie6.MemberOf("Val2").GetOffset() - ie6.GetOffset(), 12);
+  CHECK_VALUE(n, ie6.MemberOf("Val1").GetOffset() - ie6.GetOffset(), 0);
+  CHECK_VALUE(n, ie6.MemberOf("Val2").GetOffset() - ie6.GetOffset(), 12);
 
-  CHECK_OFFSET(n, ie7.MemberOf("Val1").GetOffset() - ie7.GetOffset(), 0);
-  CHECK_OFFSET(n, ie7.MemberOf("Val2").GetOffset() - ie7.GetOffset(), 4);
+  CHECK_VALUE(n, ie7.MemberOf("Val1").GetOffset() - ie7.GetOffset(), 0);
+  CHECK_VALUE(n, ie7.MemberOf("Val2").GetOffset() - ie7.GetOffset(), 4);
 
-  CHECK_OFFSET(n, ie8.MemberOf("Val1").GetOffset() - ie8.GetOffset(), 0);
-  CHECK_OFFSET(n, ie8.MemberOf("Val1_1").GetOffset() - ie8.GetOffset(), 4);
-  CHECK_OFFSET(n, ie8.MemberOf("Val2").GetOffset() - ie8.GetOffset(), 16);
+  CHECK_VALUE(n, ie8.MemberOf("Val1").GetOffset() - ie8.GetOffset(), 0);
+  CHECK_VALUE(n, ie8.MemberOf("Val1_1").GetOffset() - ie8.GetOffset(), 4);
+  CHECK_VALUE(n, ie8.MemberOf("Val2").GetOffset() - ie8.GetOffset(), 16);
 
-  CHECK_OFFSET(n, ie9.MemberOf("Val1").GetOffset() - ie9.GetOffset(), 0);
-  CHECK_OFFSET(n, ie9.MemberOf("Val2").MemberOf("SVal1").GetOffset() - ie9.GetOffset(), 16);
-  CHECK_OFFSET(n, ie9.MemberOf("Val2").MemberOf("SVal2").GetOffset() - ie9.GetOffset(), 32);
+  CHECK_VALUE(n, ie9.MemberOf("Val1").GetOffset() - ie9.GetOffset(), 0);
+  CHECK_VALUE(n, ie9.MemberOf("Val2").MemberOf("SVal1").GetOffset() - ie9.GetOffset(), 16);
+  CHECK_VALUE(n, ie9.MemberOf("Val2").MemberOf("SVal2").GetOffset() - ie9.GetOffset(), 32);
 
-  CHECK_OFFSET(n, ie10.MemberOf("Val1").GetOffset() - ie10.GetOffset(), 0);
-  CHECK_OFFSET(n, ie10.MemberOf("Val2").MemberOf("SVal1").GetOffset() - ie10.GetOffset(), 16);
-  CHECK_OFFSET(n, ie10.MemberOf("Val2").MemberOf("SVal2").GetOffset() - ie10.GetOffset(), 32);
+  CHECK_VALUE(n, ie10.MemberOf("Val1").GetOffset() - ie10.GetOffset(), 0);
+  CHECK_VALUE(n, ie10.MemberOf("Val2").MemberOf("SVal1").GetOffset() - ie10.GetOffset(), 16);
+  CHECK_VALUE(n, ie10.MemberOf("Val2").MemberOf("SVal2").GetOffset() - ie10.GetOffset(), 32);
 
-  CHECK_OFFSET(n, ie11.MemberOf("Val1").MemberOf("SVal1").GetOffset() - ie11.GetOffset(), 0);
-  CHECK_OFFSET(n, ie11.MemberOf("Val1").MemberOf("SVal2").GetOffset() - ie11.GetOffset(), 16);
-  CHECK_OFFSET(n, ie11.MemberOf("Val2").GetOffset() - ie11.GetOffset(), 32);
+  CHECK_VALUE(n, ie11.MemberOf("Val1").MemberOf("SVal1").GetOffset() - ie11.GetOffset(), 0);
+  CHECK_VALUE(n, ie11.MemberOf("Val1").MemberOf("SVal2").GetOffset() - ie11.GetOffset(), 16);
+  CHECK_VALUE(n, ie11.MemberOf("Val2").GetOffset() - ie11.GetOffset(), 32);
 
-  CHECK_OFFSET(n, ie12.MemberOf("Val1").MemberOf("SVal1").GetOffset() - ie12.GetOffset(), 0);
-  CHECK_OFFSET(n, ie12.MemberOf("Val1").MemberOf("SVal2").GetOffset() - ie12.GetOffset(), 16);
-  CHECK_OFFSET(n, ie12.MemberOf("Val1").MemberOf("SVal3").GetOffset() - ie12.GetOffset(), 24);
-  CHECK_OFFSET(n, ie12.MemberOf("Val1").MemberOf("SVal4").GetOffset() - ie12.GetOffset(), 32);
-  CHECK_OFFSET(n, ie12.MemberOf("Val2").GetOffset() - ie12.GetOffset(), 48);
-  CHECK_OFFSET(n, ie12.MemberOf("Val3").GetOffset() - ie12.GetOffset(), 64);
-  CHECK_OFFSET(n, ie12.MemberOf("Val4").GetOffset() - ie12.GetOffset(), 80);
-  CHECK_OFFSET(n, ie12.MemberOf("Val5").GetOffset() - ie12.GetOffset(), 96);
+  CHECK_VALUE(n, ie12.MemberOf("Val1").MemberOf("SVal1").GetOffset() - ie12.GetOffset(), 0);
+  CHECK_VALUE(n, ie12.MemberOf("Val1").MemberOf("SVal2").GetOffset() - ie12.GetOffset(), 16);
+  CHECK_VALUE(n, ie12.MemberOf("Val1").MemberOf("SVal3").GetOffset() - ie12.GetOffset(), 24);
+  CHECK_VALUE(n, ie12.MemberOf("Val1").MemberOf("SVal4").GetOffset() - ie12.GetOffset(), 32);
+  CHECK_VALUE(n, ie12.MemberOf("Val2").GetOffset() - ie12.GetOffset(), 48);
+  CHECK_VALUE(n, ie12.MemberOf("Val3").GetOffset() - ie12.GetOffset(), 64);
+  CHECK_VALUE(n, ie12.MemberOf("Val4").GetOffset() - ie12.GetOffset(), 80);
+  CHECK_VALUE(n, ie12.MemberOf("Val5").GetOffset() - ie12.GetOffset(), 96);
 
   SAFE_RELEASE(pDataPool);
 }
@@ -305,37 +305,89 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample2()
 
   GXUINT n; // 用于失败时查看值
 
-  CHECK_OFFSET(n, a1.GetOffset(), 0);
-  CHECK_OFFSET(n, a2.GetOffset(), 16 * 7);
-  CHECK_OFFSET(n, mat4x3.GetOffset(), 224);
-  CHECK_OFFSET(n, mat3x4.GetOffset(), 272);
-  
-  CHECK_OFFSET(n, a1.GetSize(), 100);
-  CHECK_OFFSET(n, a2.GetSize(), 104);
-  CHECK_OFFSET(n, mat4x3.GetSize(), 48);
-  CHECK_OFFSET(n, mat3x4.GetSize(), 60);
+  CHECK_VALUE(n, a1.GetOffset(), 0);
+  CHECK_VALUE(n, a2.GetOffset(), 16 * 7);
+  CHECK_VALUE(n, mat4x3.GetOffset(), 224);
+  CHECK_VALUE(n, mat3x4.GetOffset(), 272);
 
-  CHECK_OFFSET(n, a1.IndexOf(0).GetOffset(), 0);
-  CHECK_OFFSET(n, a1.IndexOf(1).GetOffset(), 16 * 1);
-  CHECK_OFFSET(n, a1.IndexOf(2).GetOffset(), 16 * 2);
-  CHECK_OFFSET(n, a1.IndexOf(3).GetOffset(), 16 * 3);
-  CHECK_OFFSET(n, a1.IndexOf(4).GetOffset(), 16 * 4);
-  CHECK_OFFSET(n, a1.IndexOf(5).GetOffset(), 16 * 5);
-  CHECK_OFFSET(n, a1.IndexOf(6).GetOffset(), 16 * 6);
+  CHECK_VALUE(n, a1.GetSize(), 100);
+  CHECK_VALUE(n, a1.IndexOf(0).GetOffset(), 0);
+  CHECK_VALUE(n, a1.IndexOf(1).GetOffset(), 16 * 1);
+  CHECK_VALUE(n, a1.IndexOf(2).GetOffset(), 16 * 2);
+  CHECK_VALUE(n, a1.IndexOf(3).GetOffset(), 16 * 3);
+  CHECK_VALUE(n, a1.IndexOf(4).GetOffset(), 16 * 4);
+  CHECK_VALUE(n, a1.IndexOf(5).GetOffset(), 16 * 5);
+  CHECK_VALUE(n, a1.IndexOf(6).GetOffset(), 16 * 6);
 
-  CHECK_OFFSET(n, a2.IndexOf(0).GetOffset() - a2.GetOffset(), 0);
-  CHECK_OFFSET(n, a2.IndexOf(1).GetOffset() - a2.GetOffset(), 16 * 1);
-  CHECK_OFFSET(n, a2.IndexOf(2).GetOffset() - a2.GetOffset(), 16 * 2);
-  CHECK_OFFSET(n, a2.IndexOf(3).GetOffset() - a2.GetOffset(), 16 * 3);
-  CHECK_OFFSET(n, a2.IndexOf(4).GetOffset() - a2.GetOffset(), 16 * 4);
-  CHECK_OFFSET(n, a2.IndexOf(5).GetOffset() - a2.GetOffset(), 16 * 5);
-  CHECK_OFFSET(n, a2.IndexOf(6).GetOffset() - a2.GetOffset(), 16 * 6);
+  CHECK_VALUE(n, a2.GetSize(), 104);
+  CHECK_VALUE(n, a2.IndexOf(0).GetOffset() - a2.GetOffset(), 0);
+  CHECK_VALUE(n, a2.IndexOf(1).GetOffset() - a2.GetOffset(), 16 * 1);
+  CHECK_VALUE(n, a2.IndexOf(2).GetOffset() - a2.GetOffset(), 16 * 2);
+  CHECK_VALUE(n, a2.IndexOf(3).GetOffset() - a2.GetOffset(), 16 * 3);
+  CHECK_VALUE(n, a2.IndexOf(4).GetOffset() - a2.GetOffset(), 16 * 4);
+  CHECK_VALUE(n, a2.IndexOf(5).GetOffset() - a2.GetOffset(), 16 * 5);
+  CHECK_VALUE(n, a2.IndexOf(6).GetOffset() - a2.GetOffset(), 16 * 6);
 
-  CHECK_OFFSET(n, mat4x3.MemberOf("v").GetOffset() - mat4x3.GetOffset(), 0);
-  CHECK_OFFSET(n, mat4x3.MemberOf("v").IndexOf(0).GetOffset() - mat4x3.GetOffset(), 0);
-  CHECK_OFFSET(n, mat4x3.MemberOf("v").IndexOf(1).GetOffset() - mat4x3.GetOffset(), 16);
-  CHECK_OFFSET(n, mat4x3.MemberOf("v").IndexOf(2).GetOffset() - mat4x3.GetOffset(), 32);
+  CHECK_VALUE(n, mat4x3.GetSize(), 48);
+  CHECK_VALUE(n, mat4x3.GetLength(), 1);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").GetSize(), 48);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").GetLength(), 3);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").GetOffset() - mat4x3.GetOffset(), 0);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").IndexOf(0).GetOffset() - mat4x3.GetOffset(), 0);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").IndexOf(1).GetOffset() - mat4x3.GetOffset(), 16);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").IndexOf(2).GetOffset() - mat4x3.GetOffset(), 32);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").IndexOf(0).GetSize(), 16);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").IndexOf(1).GetSize(), 16);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").IndexOf(2).GetSize(), 16);
+  CHECK_VALUE(n, mat4x3.MemberOf("v").IndexOf(3).IsValid(), 0);
 
+  CHECK_VALUE(n, mat3x4.GetSize(), 60);
+  CHECK_VALUE(n, mat3x4.GetLength(), 1);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").GetSize(), 60);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").GetLength(), 4);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").GetOffset() - mat3x4.GetOffset(), 0);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").IndexOf(0).GetOffset() - mat3x4.GetOffset(), 0);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").IndexOf(1).GetOffset() - mat3x4.GetOffset(), 16);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").IndexOf(2).GetOffset() - mat3x4.GetOffset(), 32);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").IndexOf(0).GetSize(), 12);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").IndexOf(1).GetSize(), 12);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").IndexOf(2).GetSize(), 12);
+  CHECK_VALUE(n, mat3x4.MemberOf("v").IndexOf(3).GetSize(), 12);
+
+  Marimo::DataPoolVariable var;
+  auto iter_var = pDataPool->begin();
+  // a1
+  CHECK_VALUE(n, iter_var.offset(), 0);
+  auto iter_ele = iter_var.array_begin();
+#if 1
+  for(int i = 0; i < 7; i++)
+  {
+    var = iter_ele.ToVariable();
+    CHECK_VALUE(n, var.GetOffset(), i * 16);
+    ++iter_ele;
+  }
+#endif
+
+  ++iter_var;
+  // a2
+  CHECK_VALUE(n, iter_var.offset(), 16 * 7);
+  iter_ele = iter_var.array_begin();
+#if 1
+  for(int i = 0; i < 7; i++)
+  {
+    var = iter_ele.ToVariable();
+    CHECK_VALUE(n, var.GetOffset() - iter_var.offset(), i * 16);
+    ++iter_ele;
+  }
+#endif
+
+  ++iter_var;
+  // mat4x3
+  CHECK_VALUE(n, iter_var.offset(), 224);
+
+  ++iter_var;
+  // mat3x4
+  CHECK_VALUE(n, iter_var.offset(), 272);
 
   SAFE_RELEASE(pDataPool);
 }
@@ -344,7 +396,6 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample2()
 
 void TestShaderConstantBuffer()
 {
-
   TestShaderConstantBuffer_Common();
   TestShaderConstantBuffer_HLSLPackingRulesSample();
   TestShaderConstantBuffer_HLSLPackingRulesSample2();
