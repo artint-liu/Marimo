@@ -463,6 +463,17 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample2()
   CHECK_VALUE(val, mat3x4.GetOffset(), 272);
   CHECK_VALUE(val, mats.GetOffset(), 336);
 
+  // 测试 QueryByExpression()
+  {
+    Marimo::DataPoolVariable a1_2, a2_2, mats_2;
+    pDataPool->QueryByExpression("a1[2]", &a1_2);
+    pDataPool->QueryByExpression("a2[2]", &a2_2);
+    pDataPool->QueryByExpression("mats[2]", &mats_2);
+    CHECK_VALUE(val, a1_2.GetOffset() - a1.GetOffset(), 16 * 2);
+    CHECK_VALUE(val, a2_2.GetOffset() - a2.GetOffset(), 16 * 2);
+    CHECK_VALUE(val, mats_2.GetOffset() - mats.GetOffset(), 64 * 2);
+  }
+
   CheckCommon1(a1, a2, mat4x3, mat3x4, mats, pDataPool->begin());
 
   SAFE_RELEASE(pDataPool);
@@ -488,7 +499,6 @@ float  val_array[];   \n\
   GXHRESULT hr = Marimo::DataPool::CompileFromMemory(&pDataPool, NULL, NULL, szCodeSample3, 0, Marimo::DataPoolCreation_NotCross16BytesBoundary);
   ASSERT(GXSUCCEEDED(hr));
 
-  //Marimo::DataPoolVariable a1, a2, mat4x3, mat3x4, mats;
   Marimo::DataPoolVariable stu_array, mat_array, vc2_array, val_array;
   Marimo::DataPoolVariable new_ele;
   GXUINT val;
@@ -503,10 +513,10 @@ float  val_array[];   \n\
   CHECK_VALUE(val, vc2_array.GetOffset(), sizeof(void*) * 2);
   CHECK_VALUE(val, val_array.GetOffset(), sizeof(void*) * 3);
 
-  //CHECK_VALUE(val, stu_array.GetSize(), 0); // FIXME: 没通过
-  //CHECK_VALUE(val, mat_array.GetSize(), 0); // FIXME: 没通过
-  //CHECK_VALUE(val, vc2_array.GetSize(), 0); // FIXME: 没通过
-  //CHECK_VALUE(val, val_array.GetSize(), 0); // FIXME: 没通过
+  CHECK_VALUE(val, stu_array.GetSize(), 0);
+  CHECK_VALUE(val, mat_array.GetSize(), 0);
+  CHECK_VALUE(val, vc2_array.GetSize(), 0);
+  CHECK_VALUE(val, val_array.GetSize(), 0);
 
   CHECK_VALUE(val, stu_array.GetLength(), 0);
   CHECK_VALUE(val, mat_array.GetLength(), 0);
@@ -517,42 +527,94 @@ float  val_array[];   \n\
   for(int i = 0; i < 7; i++)
   {
     new_ele = mat_array.NewBack();
-    //CHECK_VALUE(val, mat_array.GetSize(), i + 1); // FIXME: 没通过
+    CHECK_VALUE(val, mat_array.GetSize(), i * 64 + 60);
     CHECK_VALUE(val, mat_array.GetLength(), i + 1);
 
     CHECK_VALUE(val, new_ele.GetSize(), 60);
-    // CHECK_VALUE(val, new_ele.GetOffset(), 64 * i); // FIXME: 没通过
+     CHECK_VALUE(val, new_ele.GetOffset(), 64 * i);
   }
 
   for(int i = 0; i < 5; i++)
   {
     new_ele = vc2_array.NewBack();
-    //CHECK_VALUE(val, vc2_array.GetSize(), i + 1); // FIXME: 没通过
+    CHECK_VALUE(val, vc2_array.GetSize(), i * 16 + sizeof(float2));
     CHECK_VALUE(val, vc2_array.GetLength(), i + 1);
 
     CHECK_VALUE(val, new_ele.GetSize(), 8);
-    //CHECK_VALUE(val, new_ele.GetOffset(), 16 * i); // FIXME: 没通过
+    CHECK_VALUE(val, new_ele.GetOffset(), 16 * i);
   }
 
   for(int i = 0; i < 9; i++)
   {
     new_ele = val_array.NewBack();
-    //CHECK_VALUE(val, val_array.GetSize(), i + 1); // FIXME: 没通过
+    CHECK_VALUE(val, val_array.GetSize(), i * 16 + sizeof(float));
     CHECK_VALUE(val, val_array.GetLength(), i + 1);
 
     CHECK_VALUE(val, new_ele.GetSize(), 4);
-    //CHECK_VALUE(val, new_ele.GetOffset(), 16 * i);// FIXME: 没通过
+    CHECK_VALUE(val, new_ele.GetOffset(), 16 * i);
   }
 
   for(int i = 0; i < 5; i++)
   {
     new_ele = stu_array.NewBack();
-    //CHECK_VALUE(val, stu_array.GetSize(), i + 1); // FIXME: 没通过
+    // 结构体长度是按照16字节对齐的
+    CHECK_VALUE(val, stu_array.GetSize(), (i + 1) * 784);
     CHECK_VALUE(val, stu_array.GetLength(), i + 1);
 
     CHECK_VALUE(val, new_ele.GetSize(), 784);
+    CHECK_VALUE(val, new_ele.GetOffset(), 784 * i);
     CheckCommon1(new_ele["a1"], new_ele["a2"], new_ele["mat4x3"], new_ele["mat3x4"], new_ele["mats"], new_ele.begin());
   }
+
+
+  for(auto iter_ele = stu_array.array_begin(); iter_ele != stu_array.array_end(); ++iter_ele)
+  {
+    Marimo::DataPoolVariable var_stu = iter_ele.ToVariable();
+    CHECK_VALUE(val, var_stu.GetSize(), 784);
+    CHECK_VALUE(val, var_stu.GetOffset() % 784, 0);
+    int i = var_stu.GetOffset() / 784;
+
+    auto iter_member = iter_ele.begin();
+    Marimo::DataPoolVariable var_a1 = iter_member.ToVariable();
+    Marimo::DataPoolVariable var_a2 = (++iter_member).ToVariable();
+    Marimo::DataPoolVariable var_mat4x3 = (++iter_member).ToVariable();
+    Marimo::DataPoolVariable var_mat3x4 = (++iter_member).ToVariable();
+    Marimo::DataPoolVariable var_mats = (++iter_member).ToVariable();
+    CheckCommon1(var_a1, var_a2, var_mat4x3, var_mat3x4, var_mats, iter_ele.begin());
+  }
+
+  // 测试QueryByExpression()
+  {
+    Marimo::DataPoolVariable stu_array_2, vc2_array_2, val_array_2;
+    pDataPool->QueryByExpression("stu_array[2]", &stu_array_2);
+    pDataPool->QueryByExpression("vc2_array[2]", &vc2_array_2);
+    pDataPool->QueryByExpression("val_array[2]", &val_array_2);
+    CHECK_VALUE(val, stu_array_2.GetOffset() - stu_array[0].GetOffset(), 784 * 2);
+    CHECK_VALUE(val, vc2_array_2.GetOffset() - vc2_array[0].GetOffset(), 16 * 2);
+    CHECK_VALUE(val, val_array_2.GetOffset() - val_array[0].GetOffset(), 16 * 2);
+  }
+
+  // 测试删除
+
+  {
+    GXUINT len;
+    len = stu_array.GetLength() - 1;
+    stu_array.Remove(len);
+    CHECK_VALUE(val, stu_array.GetSize(), 784 * len);
+
+    len = mat_array.GetLength() - 1;
+    mat_array.Remove(len);
+    CHECK_VALUE(val, mat_array.GetSize(), len * 64 - 4);
+
+    len = vc2_array.GetLength() - 1;
+    vc2_array.Remove(len);
+    CHECK_VALUE(val, vc2_array.GetSize(), len * 16 - 8);
+
+    len = val_array.GetLength() - 1;
+    val_array.Remove(len);
+    CHECK_VALUE(val, val_array.GetSize(), len * 16 - 12);
+  }
+
 
   SAFE_RELEASE(pDataPool);
 }

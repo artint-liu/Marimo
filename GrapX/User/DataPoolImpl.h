@@ -277,7 +277,7 @@ namespace Marimo
       }
 
       VTBL* GetUnaryMethod() const;
-      VTBL* GetMethod() const;
+      VTBL* GetMethod(GXDWORD dwFlags) const;
     };
 
     // 枚举成员

@@ -145,24 +145,6 @@ namespace Marimo
       {DataPoolTypeClass::Undefine, NULL},
     };
 
-    //GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags)
-    //{
-    //  // 这个判断顺序与定义掩码有关，不能随便修改
-    //  if(IS_MARK_NX16B(dwFlags)) {
-    //    return NOT_CROSS_16_BYTES_BOUNDARY;
-    //  }
-    //  else if((dwFlags & DataPoolCreation_Align16) == DataPoolCreation_Align16) {
-    //    return 16;
-    //  }
-    //  else if((dwFlags & DataPoolCreation_Align8) == DataPoolCreation_Align8) {
-    //    return 8;
-    //  }
-    //  else if((dwFlags & DataPoolCreation_Align4) == DataPoolCreation_Align4) {
-    //    return 4;
-    //  }
-    //  return 1;
-    //}
-
     DataPoolPack CreationFlagsToMemberPack(GXDWORD dwFlags)
     {
       // 这个判断顺序与定义掩码有关，不能随便修改
@@ -221,11 +203,6 @@ namespace Marimo
     extern DataPoolVariable::VTBL* s_pDynamicArrayVtbl;
     extern DataPoolVariable::VTBL* s_pStaticArrayNX16BVtbl;
     extern DataPoolVariable::VTBL* s_pDynamicArrayNX16BVtbl;
-
-    //inline GXUINT ConvertToNewOffsetFromOldIndex(const STRINGSETDESC* pTable, int nOldIndex)
-    //{
-    //  return (GXUINT)pTable[nOldIndex].offset;
-    //}
 
     void CopyVariables(DataPoolImpl::VARIABLE_DESC* pDestVarDesc, const DataPoolBuildTime::BTVarDescArray* pSrcVector, const STRINGSETDESC* pTable, GXINT_PTR lpBase)
     {
@@ -1251,7 +1228,9 @@ namespace Marimo
       }
       else if(nIndex < (pArrayBuffer->GetSize() / pVarDesc->TypeSize()))
       {
-        pVar->AbsOffset = nIndex * pVarDesc->TypeSize(); // NX16B?
+        pVar->AbsOffset = IS_MARK_NX16B(m_dwRuntimeFlags)
+          ? nIndex * ALIGN_16(pVarDesc->TypeSize())
+          : nIndex * pVarDesc->TypeSize();
         return IntCreateUnary(pArrayBuffer, pVarDesc, pVar);
       }
     }
@@ -1265,7 +1244,9 @@ namespace Marimo
       }
       else if(nIndex < pVarDesc->nCount)
       {
-        pVar->AbsOffset += (pVarDesc->nOffset + nIndex * pVarDesc->TypeSize()); // NX16B?
+        pVar->AbsOffset += IS_MARK_NX16B(m_dwRuntimeFlags)
+          ? (pVarDesc->nOffset + nIndex * ALIGN_16(pVarDesc->TypeSize()))
+          : (pVarDesc->nOffset + nIndex * pVarDesc->TypeSize());
         return IntCreateUnary(pVar->pBuffer, pVarDesc, pVar);
       }
     }
@@ -2742,23 +2723,27 @@ namespace Marimo
   {
     switch(GetTypeCategory())
     {
-    case DataPoolTypeClass::String:  return (VTBL*)Implement::s_pStringVtbl;
-    case DataPoolTypeClass::StringA: return (VTBL*)Implement::s_pStringAVtbl;
-    case DataPoolTypeClass::Structure:  return (VTBL*)Implement::s_pStructVtbl;
-    case DataPoolTypeClass::Object:  return (VTBL*)Implement::s_pObjectVtbl;
-    case DataPoolTypeClass::Enumeration:    return (VTBL*)Implement::s_pEnumVtbl;
-    case DataPoolTypeClass::Flag:    return (VTBL*)Implement::s_pFlagVtbl;
-    default:        return (VTBL*)Implement::s_pPrimaryVtbl;
+    case DataPoolTypeClass::String:       return (VTBL*)Implement::s_pStringVtbl;
+    case DataPoolTypeClass::StringA:      return (VTBL*)Implement::s_pStringAVtbl;
+    case DataPoolTypeClass::Structure:    return (VTBL*)Implement::s_pStructVtbl;
+    case DataPoolTypeClass::Object:       return (VTBL*)Implement::s_pObjectVtbl;
+    case DataPoolTypeClass::Enumeration:  return (VTBL*)Implement::s_pEnumVtbl;
+    case DataPoolTypeClass::Flag:         return (VTBL*)Implement::s_pFlagVtbl;
+    default:                              return (VTBL*)Implement::s_pPrimaryVtbl;
     }
   }
 
-  DataPoolImpl::VARIABLE_DESC::VTBL* DataPoolImpl::VARIABLE_DESC::GetMethod() const
+  DataPoolImpl::VARIABLE_DESC::VTBL* DataPoolImpl::VARIABLE_DESC::GetMethod(GXDWORD dwFlags) const
   {
     if(IsDynamicArray()) {
-      return (VTBL*)Implement::s_pDynamicArrayVtbl;
+      return IS_MARK_NX16B(dwFlags)
+        ? reinterpret_cast<VTBL*>(Implement::s_pDynamicArrayNX16BVtbl)
+        : reinterpret_cast<VTBL*>(Implement::s_pDynamicArrayVtbl);
     }
     else if(nCount > 1) {
-      return (VTBL*)Implement::s_pStaticArrayVtbl;
+      return IS_MARK_NX16B(dwFlags)
+        ? reinterpret_cast<VTBL*>(Implement::s_pStaticArrayNX16BVtbl)
+        : reinterpret_cast<VTBL*>(Implement::s_pStaticArrayVtbl);
     }
     return GetUnaryMethod();
   }

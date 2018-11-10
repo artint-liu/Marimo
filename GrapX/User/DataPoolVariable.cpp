@@ -257,12 +257,12 @@ namespace Marimo
       return GX_FAIL;
     }
 
-    inline GXHRESULT InlDynSetupUnary(clBufferBase* pBuffer, GXSIZE_T nIndex, DataPoolVariable* pBase) const
+    inline GXHRESULT InlDynSetupUnary(DataPoolVariable* pBase, clBufferBase* pBuffer, GXSIZE_T nIndex, GXUINT nAlignMask = 0) const
     {
       ASSERT(m_pBuffer != NULL);
       DataPoolImpl::VARIABLE var = {0};
 
-      var.AbsOffset = (GXUINT)(nIndex * m_pVdd->TypeSize());
+      var.AbsOffset = (GXUINT)(nIndex * ((m_pVdd->TypeSize() + nAlignMask) & (~nAlignMask)));
       if(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->IntCreateUnary(pBuffer, reinterpret_cast<DataPoolImpl::LPCVD>(m_pVdd), &var))
       {
         new(pBase) DataPoolVariable((VTBL*)var.vtbl, m_pDataPool, var.pVdd, var.pBuffer, var.AbsOffset);
@@ -823,9 +823,8 @@ namespace Marimo
 
   GXUINT DynamicArrayNX16B_GetSize(const VarImpl* pThis)
   {
-    CLBREAK;
-    //DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
-    //return (GXUINT)pBuffer->GetSize();
+    DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
+    return (GXUINT)pBuffer->GetSize();
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -841,8 +840,7 @@ namespace Marimo
   {
     ASSERT(( ! pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
     Variable val;
-    if((GXUINT)nIndex < pThis->GetLength())
-    {
+    if((GXUINT)nIndex < pThis->GetLength()) {
       pThis->InlSetupUnary(&val, nIndex, pThis->InlGetVDD()->TypeSize());
     }
     return val;
@@ -851,13 +849,10 @@ namespace Marimo
   Variable DynamicArray_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex)
   {
     ASSERT(pThis->InlGetVDD()->IsDynamicArray());
-    //ASSERT(( ! pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
     Variable val;
     DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
-    //pThis->InlGetVDD()->GetAsBuffer()
-    if((GXUINT)nIndex < pThis->GetLength())
-    {
-      pThis->InlDynSetupUnary(pBuffer, nIndex, &val);
+    if((GXUINT)nIndex < pThis->GetLength()) {
+      pThis->InlDynSetupUnary(&val, pBuffer, nIndex);
     }
     return val;
   }
@@ -866,8 +861,7 @@ namespace Marimo
   {
     ASSERT((!pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
     Variable val;
-    if((GXUINT)nIndex < pThis->GetLength())
-    {
+    if((GXUINT)nIndex < pThis->GetLength()) {
       pThis->InlSetupUnary(&val, nIndex, ALIGN_16(pThis->InlGetVDD()->TypeSize()));
     }
     return val;
@@ -876,20 +870,16 @@ namespace Marimo
 
   Variable DynamicArrayNX16B_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex)
   {
-    CLBREAK;
-#if 0
     ASSERT(pThis->InlGetVDD()->IsDynamicArray());
-    //ASSERT(( ! pThis->InlGetVDD()->IsDynamicArray()) || pThis->GetOffset() == 0);
     Variable val;
     DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
-    //pThis->InlGetVDD()->GetAsBuffer()
-    if((GXUINT)nIndex < pThis->GetLength())
-    {
-      pThis->InlDynSetupUnary(pBuffer, nIndex, &val);
+    if((GXUINT)nIndex < pThis->GetLength()) {
+      pThis->InlDynSetupUnary(&val, pBuffer, nIndex, 15);
     }
     return val;
-#endif
   }
+
+  //////////////////////////////////////////////////////////////////////////
 
   Variable Struct_GetMember(const VarImpl* pThis, GXLPCSTR szName)
   {
@@ -1355,19 +1345,16 @@ namespace Marimo
   GXSIZE_T DynamicArray_GetLength(const VarImpl* pThis)
   {
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
-    //clBufferBase* pBuffer = pThis->InlGetBufferObj();
     DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
-    return pBuffer == NULL ? 0 : ((GXUINT)pBuffer->GetSize() / pVdd->TypeSize());
+    return (pBuffer == NULL) ? 0 : ((GXUINT)pBuffer->GetSize() / pVdd->TypeSize());
   }
 
 
   GXSIZE_T DynamicArrayNX16B_GetLength(const VarImpl* pThis)
   {
-    return DynamicArray_GetLength(pThis);
-    //DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
-    ////clBufferBase* pBuffer = pThis->InlGetBufferObj();
-    //DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
-    //return pBuffer == NULL ? 0 : ((GXUINT)pBuffer->GetSize() / pVdd->TypeSize());
+    DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
+    DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
+    return (pBuffer == NULL) ? 0 : (ALIGN_16((GXUINT)pBuffer->GetSize()) / ALIGN_16(pVdd->TypeSize()));
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -1379,13 +1366,13 @@ namespace Marimo
     Variable val;
     if(nIncrease == 0) {
       // 不新增元素，只返回最后一个对象
-      pThis->InlDynSetupUnary(pArrayBuffer, (GXUINT)(nIndex - 1), &val);
+      pThis->InlDynSetupUnary(&val, pArrayBuffer, (GXUINT)(nIndex - 1));
     }
     else {
       DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
       const GXUINT nPrevSize = (GXUINT)pArrayBuffer->GetSize();
       pArrayBuffer->Resize(nPrevSize + pVdd->TypeSize() * nIncrease, TRUE);
-      pThis->InlDynSetupUnary(pArrayBuffer, (GXUINT)nIndex, &val);
+      pThis->InlDynSetupUnary(&val, pArrayBuffer, (GXUINT)nIndex);
 
       ASSERT(nIndex == nPrevSize / pVdd->TypeSize());
       THIS_IMPULSE_DATA(DATACT_Insert, (GXUINT)nIndex, nIncrease);
@@ -1395,26 +1382,24 @@ namespace Marimo
 
   Variable DynamicArrayNX16B_NewBack(VarImpl* pThis, GXUINT nIncrease)
   {
-    return DynamicArray_NewBack(pThis, nIncrease);
+    const GXSIZE_T nIndex = pThis->GetLength();
+    DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
+    Variable val;
+    if(nIncrease == 0) {
+      // 不新增元素，只返回最后一个对象
+      pThis->InlDynSetupUnary(&val, pArrayBuffer, (GXUINT)(nIndex - 1), 15);
+    }
+    else {
+      DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
+      const GXUINT nAlignedPrevSize = ALIGN_16((GXUINT)pArrayBuffer->GetSize());
+      
+      pArrayBuffer->Resize(nAlignedPrevSize + DataPoolInternal::NotCross16BytesBoundaryArraySize(pVdd->TypeSize(), nIncrease), TRUE);
+      pThis->InlDynSetupUnary(&val, pArrayBuffer, (GXUINT)nIndex, 15);
 
-    //CLBREAK;
-    //const GXSIZE_T nIndex = pThis->GetLength();
-    //DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
-    //Variable val;
-    //if(nIncrease == 0) {
-    //  // 不新增元素，只返回最后一个对象
-    //  pThis->InlDynSetupUnary(pArrayBuffer, (GXUINT)(nIndex - 1), &val);
-    //}
-    //else {
-    //  DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
-    //  const GXUINT nPrevSize = (GXUINT)pArrayBuffer->GetSize();
-    //  pArrayBuffer->Resize(nPrevSize + pVdd->TypeSize() * nIncrease, TRUE);
-    //  pThis->InlDynSetupUnary(pArrayBuffer, (GXUINT)nIndex, &val);
-
-    //  ASSERT(nIndex == nPrevSize / pVdd->TypeSize());
-    //  THIS_IMPULSE_DATA(DATACT_Insert, (GXUINT)nIndex, nIncrease);
-    //}
-    //return val;
+      ASSERT(nIndex == nAlignedPrevSize / ALIGN_16(pVdd->TypeSize()));
+      THIS_IMPULSE_DATA(DATACT_Insert, (GXUINT)nIndex, nIncrease);
+    }
+    return val;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -1457,8 +1442,6 @@ namespace Marimo
 
   GXBOOL DynamicArrayNX16B_Remove(VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount)
   {
-    CLBREAK;
-#if 0
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     const GXSIZE_T nLength = pThis->GetLength();
 
@@ -1485,12 +1468,12 @@ namespace Marimo
     }
     else    // 从指定位置删除
     {
-      pThis->InlCleanupArray(pVdd, (GXLPBYTE)pArrayBuffer->GetPtr() + pVdd->TypeSize() * nIndex, nCount);
-      pArrayBuffer->Replace(pVdd->TypeSize() * nIndex, pVdd->TypeSize() * nCount, NULL, 0);
+      const GXUINT nAlignedTypeSize = ALIGN_16(pVdd->TypeSize());
+      pThis->InlCleanupArray(pVdd, (GXLPBYTE)pArrayBuffer->GetPtr() + nAlignedTypeSize * nIndex, nCount);
+      pArrayBuffer->Replace(nAlignedTypeSize * (nIndex - 1) + pVdd->TypeSize(), nAlignedTypeSize * nCount, NULL, 0);
     }
 
     THIS_IMPULSE_DATA(DATACT_Deleted, nIndex, nCount);
-#endif
     return TRUE;
   }
 
