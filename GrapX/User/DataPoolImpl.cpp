@@ -1244,29 +1244,28 @@ namespace Marimo
       clBuffer* pArrayBuffer = IntCreateArrayBuffer(pVar->pBuffer, pVarDesc, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
       if(nIndex == (GXUINT)-1)
       {
-        pVar->Set((VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
+        pVar->Set(IS_MARK_NX16B(m_dwRuntimeFlags)
+          ? (VARIABLE::VTBL*)s_pDynamicArrayNX16BVtbl
+          : (VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
         return TRUE;
       }
       else if(nIndex < (pArrayBuffer->GetSize() / pVarDesc->TypeSize()))
       {
-        pVar->AbsOffset = nIndex * pVarDesc->TypeSize();
+        pVar->AbsOffset = nIndex * pVarDesc->TypeSize(); // NX16B?
         return IntCreateUnary(pArrayBuffer, pVarDesc, pVar);
       }
     }
     else if(pVarDesc->nCount > 1) { // 静态数组
       if(nIndex == (GXUINT)-1)
       {
-        if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
-          pVar->Set((VARIABLE::VTBL*)s_pStaticArrayNX16BVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
-        }
-        else {
-          pVar->Set((VARIABLE::VTBL*)s_pStaticArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
-        }
+        pVar->Set(IS_MARK_NX16B(m_dwRuntimeFlags)
+          ? (VARIABLE::VTBL*)s_pStaticArrayNX16BVtbl
+          : (VARIABLE::VTBL*)s_pStaticArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
         return TRUE;
       }
       else if(nIndex < pVarDesc->nCount)
       {
-        pVar->AbsOffset += (pVarDesc->nOffset + nIndex * pVarDesc->TypeSize());
+        pVar->AbsOffset += (pVarDesc->nOffset + nIndex * pVarDesc->TypeSize()); // NX16B?
         return IntCreateUnary(pVar->pBuffer, pVarDesc, pVar);
       }
     }

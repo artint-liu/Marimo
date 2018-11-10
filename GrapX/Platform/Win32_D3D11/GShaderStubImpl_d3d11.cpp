@@ -15,6 +15,7 @@
 #include "GrapX/GShader.h"
 #include "GrapX/GTexture.h"
 #include "GrapX/GXKernel.h"
+#include "GrapX/DataPool.h"
 
 // 平台相关
 #include "GrapX/Platform.h"

@@ -22,6 +22,7 @@
 #include "GrapX/GXCanvas3D.h"
 #include "GrapX/GStateBlock.h"
 #include "GrapX/MOLogger.h"
+#include "GrapX/DataPool.h"
 
 // 平台相关
 #include "GrapX/Platform.h"

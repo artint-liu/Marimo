@@ -20,18 +20,19 @@
 #include "GrapX/Platform.h"
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D11.h"
-#include "Platform/Win32_D3D11/GShaderImpl_D3D11.h"
 #include "Platform/Win32_D3D11/GVertexDeclImpl_D3D11.h"
 
 
 // 私有头文件
 #include <GrapX/VertexDecl.h>
+#include "GrapX/DataPool.h"
 #include "Canvas/GXResourceMgr.h"
 #include "GrapX/GXCanvas3D.h"
 #include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
 #include "Platform/Win32_D3D11/GXCanvasImpl_D3D11.h"
 #include "clPathFile.h"
+#include "Platform/Win32_D3D11/GShaderImpl_D3D11.h"
 
 //#define PS_REG_IDX_SHIFT 16
 //#define PS_REG_IDX_PART  (1 << PS_REG_IDX_SHIFT)
@@ -536,67 +537,7 @@ namespace GrapX
           break;
         }
 
-        D3D11_SHADER_DESC sShaderDesc;
-        InterCode.pReflection->GetDesc(&sShaderDesc);
-        for(UINT nn = 0; nn < sShaderDesc.BoundResources; nn++)
-        {
-          D3D11_SHADER_INPUT_BIND_DESC bind_desc;
-          InterCode.pReflection->GetResourceBindingDesc(nn, &bind_desc);
-          CLNOP;
-        }
-
-        for(UINT nn = 0; nn < sShaderDesc.ConstantBuffers; nn++)
-        {
-          ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer = InterCode.pReflection->GetConstantBufferByIndex(nn);
-
-          D3D11_SHADER_BUFFER_DESC buffer_desc;
-          pReflectionConstantBuffer->GetDesc(&buffer_desc);
-          TRACE("Constant Buffer:%s\n", buffer_desc.Name);
-
-          for(UINT kkk = 0; kkk < buffer_desc.Variables; kkk++)
-          {
-            ID3D11ShaderReflectionVariable* pReflectionVariable = pReflectionConstantBuffer->GetVariableByIndex(kkk);
-            ID3D11ShaderReflectionType* pReflectionType = pReflectionVariable->GetType();
-
-            D3D11_SHADER_TYPE_DESC type_desc;
-            D3D11_SHADER_VARIABLE_DESC variable_desc;
-            pReflectionType->GetDesc(&type_desc);
-            pReflectionVariable->GetDesc(&variable_desc);
-
-            clStringA strTypeName;
-            switch(type_desc.Type)
-            {
-            case D3D_SVT_FLOAT:
-              strTypeName = "float";
-              break;
-
-            default:
-              CLBREAK;
-              break;
-            }
-            switch(type_desc.Class)
-            {
-            case D3D_SVC_SCALAR:
-              break;
-
-            case D3D_SVC_VECTOR:
-              strTypeName.AppendInteger32(type_desc.Columns);
-              break;
-
-            case D3D_SVC_MATRIX_COLUMNS:
-              strTypeName.AppendFormat("%dx%d", type_desc.Columns, type_desc.Rows); // TODO: 不一定对，可能要反过来
-              break;
-
-            default:
-              CLBREAK;
-              break;
-            }
-
-            TRACE("Variable: (%s)%s\n", strTypeName.CStr(), variable_desc.Name);
-            CLNOP;
-          }
-          CLNOP;
-        }
+        Reflect(InterCode.pReflection);
 
         SAFE_RELEASE(InterCode.pCode);
         SAFE_RELEASE(InterCode.pReflection);
@@ -604,6 +545,164 @@ namespace GrapX
 
       SAFE_DELETE(pInclude);
       return bval;
+    }
+
+    GXBOOL ShaderImpl::Reflect(ID3D11ShaderReflection* pReflection)
+    {
+      DataPoolVariableDeclaration_T aGlobals;
+      DataPoolVariableDeclaration_T aMembers;
+
+      D3D11_SHADER_DESC sShaderDesc;
+      pReflection->GetDesc(&sShaderDesc);
+      for(UINT nn = 0; nn < sShaderDesc.BoundResources; nn++)
+      {
+        D3D11_SHADER_INPUT_BIND_DESC bind_desc;
+        pReflection->GetResourceBindingDesc(nn, &bind_desc);
+        switch(bind_desc.Type)
+        {
+        case D3D_SHADER_INPUT_TYPE::D3D10_SIT_CBUFFER:
+          TRACE("cbuffer %s\n", bind_desc.Name);
+          break;
+
+        case D3D_SHADER_INPUT_TYPE::D3D10_SIT_SAMPLER:
+          TRACE("sampler %s\n", bind_desc.Name);
+          break;
+
+        case D3D_SHADER_INPUT_TYPE::D3D10_SIT_TEXTURE:
+          TRACE("texture %s\n", bind_desc.Name);
+          break;
+
+        default:
+          CLBREAK;
+          break;
+        }
+        CLNOP;
+      }
+
+      for(UINT nn = 0; nn < sShaderDesc.ConstantBuffers; nn++)
+      {
+        ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer = pReflection->GetConstantBufferByIndex(nn);
+
+        D3D11_SHADER_BUFFER_DESC buffer_desc;
+        pReflectionConstantBuffer->GetDesc(&buffer_desc);
+        TRACE("Constant Buffer:%s\n", buffer_desc.Name);
+
+        if(clstd::strcmpT(buffer_desc.Name, "$Globals") == 0) {
+          Reflect_ConstantBuffer(aGlobals, pReflectionConstantBuffer, buffer_desc);
+        }
+        else {
+          Reflect_ConstantBuffer(aMembers, pReflectionConstantBuffer, buffer_desc);
+        }
+
+        CLNOP;
+      }
+      return TRUE;
+    }
+
+    GXBOOL ShaderImpl::Reflect_ConstantBuffer(DataPoolVariableDeclaration_T& aArray, ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer, const D3D11_SHADER_BUFFER_DESC& buffer_desc)
+    {
+      Marimo::DATAPOOL_VARIABLE_DECLARATION vari_decl;
+      for(UINT kkk = 0; kkk < buffer_desc.Variables; kkk++)
+      {
+        ID3D11ShaderReflectionVariable* pReflectionVariable = pReflectionConstantBuffer->GetVariableByIndex(kkk);
+        ID3D11ShaderReflectionType* pReflectionType = pReflectionVariable->GetType();
+
+        D3D11_SHADER_TYPE_DESC type_desc;
+        D3D11_SHADER_VARIABLE_DESC variable_desc;
+        pReflectionType->GetDesc(&type_desc);
+        pReflectionVariable->GetDesc(&variable_desc);
+
+        clStringA strTypeName;
+        switch(type_desc.Type)
+        {
+        case D3D_SVT_FLOAT:
+          strTypeName = "float";
+          break;
+
+        case D3D_SVT_INT:
+          strTypeName = "int";
+          break;
+
+        case D3D_SVT_BOOL:
+          strTypeName = "bool";
+          break;
+
+        case D3D_SVT_UINT:
+          strTypeName = "uint";
+          break;
+
+        case D3D_SVT_VOID:
+          strTypeName = "void";
+          break;
+
+        default:
+          CLBREAK;
+          break;
+        }
+
+        switch(type_desc.Class)
+        {
+        case D3D_SVC_SCALAR:
+          break;
+
+        case D3D_SVC_VECTOR:
+          strTypeName.AppendInteger32(type_desc.Columns);
+          break;
+
+        case D3D_SVC_MATRIX_COLUMNS:
+        case D3D_SVC_MATRIX_ROWS:
+          strTypeName.AppendFormat("%dx%d", type_desc.Rows, type_desc.Columns);
+          break;
+
+        case D3D_SVC_STRUCT:
+        {
+          for(UINT member = 0; member < type_desc.Members; member++)
+          {
+            ID3D11ShaderReflectionType* pMemberType = pReflectionType->GetMemberTypeByIndex(member);
+            D3D11_SHADER_TYPE_DESC member_type_desc;
+            pMemberType->GetDesc(&member_type_desc);
+
+            TRACE("%s.%s(%d)\n", variable_desc.Name, pReflectionType->GetMemberTypeName(member),
+              member_type_desc.Offset);
+
+            ID3D11ShaderReflectionType* pSubType = pReflectionType->GetSubType();
+            if(pSubType)
+            {
+              D3D11_SHADER_TYPE_DESC sub_type_desc;
+              pSubType->GetDesc(&sub_type_desc);
+            }
+
+            ID3D11ShaderReflectionType* pInterfaceType = pReflectionType->GetSubType();
+            if(pInterfaceType)
+            {
+              D3D11_SHADER_TYPE_DESC interface_type_desc;
+              pInterfaceType->GetDesc(&interface_type_desc);
+            }
+
+            CLNOP;
+          }
+          strTypeName.AppendFormat("<struct>");
+        }
+          break;
+
+        default:
+          CLBREAK;
+          break;
+        }
+
+        vari_decl.Name = variable_desc.Name;
+        if(type_desc.Elements > 0) {
+          TRACE("Variable: (%s)%s[%d] (start:%d, end:%d)[%d]\n", strTypeName.CStr(), variable_desc.Name, type_desc.Elements,
+            variable_desc.StartOffset, variable_desc.StartOffset + variable_desc.Size, variable_desc.Size);
+        }
+        else {
+          TRACE("Variable: (%s)%s (start:%d, end:%d)[%d]\n", strTypeName.CStr(), variable_desc.Name,
+            variable_desc.StartOffset, variable_desc.StartOffset + variable_desc.Size, variable_desc.Size);
+        }
+        CLNOP;
+        aArray.push_back(vari_decl);
+      }
+      return TRUE;
     }
 
     GXGraphics* ShaderImpl::GetGraphicsUnsafe() const
@@ -650,6 +749,8 @@ namespace GrapX
       }
 
       // shader 输入参数信息
+      //LPVOID pInterCodePtr = pInterCode->pCode->GetBufferPointer();
+      //SIZE_T InterCodeLen = pInterCode->pCode->GetBufferSize();
       hval = D3DReflect(pInterCode->pCode->GetBufferPointer(), pInterCode->pCode->GetBufferSize(),
         IID_ID3D11ShaderReflection, (void**)&pInterCode->pReflection);
 

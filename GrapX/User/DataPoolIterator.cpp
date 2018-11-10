@@ -42,7 +42,12 @@ namespace Marimo
 
       // 数组元素
       if(index != (GXUINT)-1) {
-        it.nOffset += index * pVarDesc->TypeSize();
+        if(IS_MARK_NX16B(pDataPool->GetFlags())) {
+          it.nOffset += index * ALIGN_16(pVarDesc->TypeSize());
+        }
+        else {
+          it.nOffset += index * pVarDesc->TypeSize();
+        }
       }
     }
 
@@ -193,18 +198,6 @@ namespace Marimo
           nElementOffset = index * pVarDesc->TypeSize();
         }
       }
-
-      // 动态数组使用单独的buffer， 同时偏移也重新计算
-      //if(pVarDesc->IsDynamicArray()) {
-      //  if(pBuffer) {
-      //    new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-      //      child_buffer_unsafe(), nElementOffset);
-      //  }
-      //}
-      //else {
-      //  new(&var) DataPoolVariable(vtbl, pDataPool, pVarDesc, 
-      //    pBuffer, offset() + nElementOffset);
-      //}
 
       if(pVarDesc->IsDynamicArray()) {
         if(index == -1)

@@ -217,6 +217,8 @@ namespace GrapX
     class ShaderImpl : public Shader
     {
       typedef ::D3D11::GXGraphicsImpl GXGraphicsImpl;
+      typedef clvector<Marimo::DATAPOOL_VARIABLE_DECLARATION> DataPoolVariableDeclaration_T;
+
     protected:
       enum class TargetType : GXUINT
       {
@@ -244,13 +246,14 @@ namespace GrapX
       GXHRESULT    Release           () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
       GXHRESULT   Invoke             (GRESCRIPTDESC* pDesc) override;
-
+      GXGraphics*  GetGraphicsUnsafe () const override;
 
       ShaderImpl(GXGraphicsImpl* pGraphicsImpl);
       virtual ~ShaderImpl();
 
       GXBOOL InitShader(GXLPCWSTR szResourceDir, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount);
-      GXGraphics*  GetGraphicsUnsafe () const override;
+      GXBOOL Reflect(ID3D11ShaderReflection* pReflection);
+      GXBOOL Reflect_ConstantBuffer(DataPoolVariableDeclaration_T& aArray, ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer, const D3D11_SHADER_BUFFER_DESC& buffer_desc);
 
       static TargetType TargetNameToType  (GXLPCSTR szTargetName);
       static GXHRESULT  CompileShader     (INTERMEDIATE_CODE* pInterCode, const GXSHADER_SOURCE_DESC* pShaderDesc, ID3DInclude* pInclude);

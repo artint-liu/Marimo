@@ -1363,7 +1363,7 @@ namespace Marimo
 
   GXSIZE_T DynamicArrayNX16B_GetLength(const VarImpl* pThis)
   {
-    CLBREAK;
+    return DynamicArray_GetLength(pThis);
     //DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     ////clBufferBase* pBuffer = pThis->InlGetBufferObj();
     //DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
@@ -1395,7 +1395,9 @@ namespace Marimo
 
   Variable DynamicArrayNX16B_NewBack(VarImpl* pThis, GXUINT nIncrease)
   {
-    CLBREAK;
+    return DynamicArray_NewBack(pThis, nIncrease);
+
+    //CLBREAK;
     //const GXSIZE_T nIndex = pThis->GetLength();
     //DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
     //Variable val;

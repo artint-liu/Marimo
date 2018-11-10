@@ -64,9 +64,9 @@ namespace Marimo
       }
 
 
-      iterator  begin           () const;
-      iterator  end             () const;
-      GXUINT            offset          () const; // 在Buffer中的绝对偏移, 数组的话是第一个元素开始的位置
+      iterator          begin           () const;
+      iterator          end             () const;
+      GXUINT            offset          () const; // 这个不是迭代器偏移，是在Buffer中的绝对偏移, 数组的话是第一个元素开始的位置
       element_iterator  array_begin     () const; // 如果是数组的话，这是数组元素的迭代方法，一元变量这个不会报错
       element_iterator  array_end       () const;
       relement_iterator rarray_begin    () const; // 数组的反向迭代，从最后一个元素开始
