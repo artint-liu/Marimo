@@ -66,8 +66,12 @@ namespace Marimo
         (GXUINT_PTR)it.pVarDesc < (GXUINT_PTR)pVarDesc->MemberBeginPtr() + pVarDesc->MemberCount());
       ASSERT(IsArray() && index != (GXUINT)-1); // 必须是数组
       index++;
-      //FullNameA(it.ParentName);
-      it.nOffset += pVarDesc->TypeSize(); // NX16B?
+      if(IS_MARK_NX16B(pDataPool->GetFlags())) {
+        it.nOffset += ALIGN_16(pVarDesc->TypeSize());
+      }
+      else {
+        it.nOffset += pVarDesc->TypeSize();
+      }
     }
 
     clBufferBase* iterator::child_buffer_unsafe() const
@@ -232,8 +236,12 @@ namespace Marimo
     {
       if(pVarDesc->IsDynamicArray()) {
         clBufferBase* pChildBuffer = child_buffer();
-        return pChildBuffer == NULL ? 0
-          : (GXUINT)pChildBuffer->GetSize() / pVarDesc->TypeSize(); // NX16B?
+        if(pChildBuffer == NULL) {
+          return 0;
+        }
+        return IS_MARK_NX16B(pDataPool->GetFlags())
+          ? ALIGN_16((GXUINT)pChildBuffer->GetSize()) / ALIGN_16(pVarDesc->TypeSize())
+          : (GXUINT)pChildBuffer->GetSize() / pVarDesc->TypeSize();
       }
       else {
         return pVarDesc->nCount;

@@ -594,8 +594,16 @@ float  val_array[];   \n\
     CHECK_VALUE(val, val_array_2.GetOffset() - val_array[0].GetOffset(), 16 * 2);
   }
 
-  // ²âÊÔÉ¾³ı
+  {
+    static GXUINT aSampleLen[] = { 5,7,5,9 };
+    int i = 0;
+    for(auto iter_vars = pDataPool->begin(); iter_vars != pDataPool->end(); ++iter_vars, i++)
+    {
+      CHECK_VALUE(val, iter_vars.array_length(), aSampleLen[i]);
+    }
+  }
 
+  // ²âÊÔÉ¾³ı
   {
     GXUINT len;
     len = stu_array.GetLength() - 1;
