@@ -15,6 +15,8 @@
 #include "GXStation.h"
 using namespace clstd;
 
+// NX16B = not cross 16-byte boundary
+
 #define GSIT_Variables (m_aGSIT)
 #define GSIT_Members   (m_aGSIT + m_nNumOfVar)
 #define GSIT_Enums     (m_aGSIT + m_nNumOfVar + m_nNumOfMember)
@@ -163,11 +165,34 @@ namespace Marimo
       return DataPoolPack::Compact;
     }
 
-    GXUINT NotCross16BytesBoundaryArraySize(GXUINT nTypeSize, GXUINT nElementCount)
+    GXUINT NX16BArrayOffset(GXUINT nTypeSize, GXUINT nElementIndex)
+    {
+      return ALIGN_16(nTypeSize) * nElementIndex;
+    }
+
+    GXUINT NX16BArrayOffset(GXDWORD dwFlags, GXUINT nTypeSize, GXUINT nElementIndex)
+    {
+      return IS_MARK_NX16B(dwFlags)
+        ? NX16BArrayOffset(nTypeSize, nElementIndex)
+        : nTypeSize * nElementIndex;
+    }
+
+    GXUINT NX16BArraySize(GXUINT nTypeSize, GXUINT nElementCount)
     {
       // a[n]数组定义中，a[0]~a[n-1]其实都要16字节对齐，a[n-1]只占用实际长度
       ASSERT(nElementCount > 0);
       return (ALIGN_16(nTypeSize) * (nElementCount - 1) + nTypeSize);
+    }
+
+    GXUINT NX16BArrayLength(const DataPoolArray* pArray, const DATAPOOL_VARIABLE_DESC* pVariDesc)
+    {
+      return ALIGN_16(static_cast<GXUINT>(pArray->GetSize())) / ALIGN_16(pVariDesc->TypeSize());
+    }
+
+    GXUINT NX16BTypeSize(GXDWORD dwFlags, const DATAPOOL_VARIABLE_DESC* pVariDesc)
+    {
+      return IS_MARK_NX16B(dwFlags)
+        ? ALIGN_16(pVariDesc->TypeSize()) : pVariDesc->TypeSize();
     }
 
     GXUINT GetMemberAlignMask(DataPoolPack eMemberPack)
@@ -669,11 +694,6 @@ namespace Marimo
 
   GXVOID DataPoolImpl::InitializeValue(GXUINT nBaseOffset, LPCVARDECL pVarDecl)
   {
-    if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
-      CLOG_ERROR("设置NX16B标志时不支持初始化变量设置");
-      return;
-    }
-
     int nVarIndex = 0;
     GXBYTE* pData = (GXBYTE*)m_VarBuffer.GetPtr();
     for(;; nVarIndex++)
@@ -722,12 +742,22 @@ namespace Marimo
           if(bDynamicArray)
           {
             ASSERT(varDecl.Count < 0);
-            clBuffer* pBuffer = IntCreateArrayBuffer(&m_VarBuffer, &VARDesc, pData, varDecl.Init == NULL ? 0 : -varDecl.Count);
-            memcpy(pBuffer->GetPtr(), varDecl.Init, pBuffer->GetSize());
+            clBuffer* pBuffer = IntCreateArrayBuffer(&m_VarBuffer, &VARDesc, pData, -varDecl.Count);
+            if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
+              // TODO: 不支持NX16B初始化
+            }
+            else {
+              memcpy(pBuffer->GetPtr(), varDecl.Init, pBuffer->GetSize());
+            }
           }
           else
           {
-            memcpy(VARDesc.GetAsPtr(pData), varDecl.Init, VARDesc.GetCompactSize());
+            if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
+              // TODO: 不支持NX16B初始化
+            }
+            else {
+              memcpy(VARDesc.GetAsPtr(pData), varDecl.Init, VARDesc.GetCompactSize());
+            }
           }
         }
         break;
@@ -869,8 +899,9 @@ namespace Marimo
           nOffset -= pVar->nOffset;
 
           if(pVar->nCount > 1) {
-            const GXUINT size = IS_MARK_NX16B(m_dwRuntimeFlags)
-              ? ALIGN_16(pVar->TypeSize()) : pVar->TypeSize();
+            //const GXUINT size = IS_MARK_NX16B(m_dwRuntimeFlags)
+            //  ? ALIGN_16(pVar->TypeSize()) : pVar->TypeSize();
+            const GXUINT size = DataPoolInternal::NX16BTypeSize(m_dwRuntimeFlags, pVar);
             const GXUINT index = nOffset / size;
             str->AppendFormat("[%d]", index);
             nOffset -= index * size;
@@ -1224,8 +1255,7 @@ namespace Marimo
     const GXUINT nMemberOffset = pVar->AbsOffset + pVarDesc->nOffset; // 后面多出用到，这里算一下
 
     if(pVarDesc->IsDynamicArray()) { // 动态数组
-      //clBuffer* pArrayBuffer = pVarDesc->CreateAsBuffer(this, pVar->pBuffer, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
-      clBuffer* pArrayBuffer = IntCreateArrayBuffer(pVar->pBuffer, pVarDesc, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
+      DataPoolArray* pArrayBuffer = IntCreateArrayBuffer(pVar->pBuffer, pVarDesc, (GXBYTE*)pVar->pBuffer->GetPtr() + pVar->AbsOffset, 0);
       if(nIndex == (GXUINT)-1)
       {
         pVar->Set(IS_MARK_NX16B(m_dwRuntimeFlags)
@@ -1233,11 +1263,18 @@ namespace Marimo
           : (VARIABLE::VTBL*)s_pDynamicArrayVtbl, pVarDesc, pVar->pBuffer, nMemberOffset);
         return TRUE;
       }
+      else if(IS_MARK_NX16B(m_dwRuntimeFlags))
+      {
+        if(nIndex < DataPoolInternal::NX16BArrayLength(pArrayBuffer, pVarDesc))
+        {
+          pVar->AbsOffset = //nIndex * ALIGN_16(pVarDesc->TypeSize());
+            DataPoolInternal::NX16BArrayOffset(pVarDesc->TypeSize(), nIndex);
+          return IntCreateUnary(pArrayBuffer, pVarDesc, pVar);
+        }
+      }
       else if(nIndex < (pArrayBuffer->GetSize() / pVarDesc->TypeSize()))
       {
-        pVar->AbsOffset = IS_MARK_NX16B(m_dwRuntimeFlags)
-          ? nIndex * ALIGN_16(pVarDesc->TypeSize())
-          : nIndex * pVarDesc->TypeSize();
+        pVar->AbsOffset = nIndex * pVarDesc->TypeSize();
         return IntCreateUnary(pArrayBuffer, pVarDesc, pVar);
       }
     }
@@ -1251,9 +1288,10 @@ namespace Marimo
       }
       else if(nIndex < pVarDesc->nCount)
       {
-        pVar->AbsOffset += IS_MARK_NX16B(m_dwRuntimeFlags)
-          ? (pVarDesc->nOffset + nIndex * ALIGN_16(pVarDesc->TypeSize()))
-          : (pVarDesc->nOffset + nIndex * pVarDesc->TypeSize());
+        //pVar->AbsOffset += IS_MARK_NX16B(m_dwRuntimeFlags)
+        //  ? (pVarDesc->nOffset + nIndex * ALIGN_16(pVarDesc->TypeSize()))
+        //  : (pVarDesc->nOffset + nIndex * pVarDesc->TypeSize());
+        pVar->AbsOffset += pVarDesc->nOffset + DataPoolInternal::NX16BArrayOffset(m_dwRuntimeFlags, pVarDesc->TypeSize(), nIndex);
         return IntCreateUnary(pVar->pBuffer, pVarDesc, pVar);
       }
     }
@@ -2713,7 +2751,7 @@ namespace Marimo
   }
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
-  DataPoolArray* DataPoolImpl::IntCreateArrayBuffer( clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount )
+  DataPoolArray* DataPoolImpl::IntCreateArrayBuffer(clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount)
   {
     ASSERT(pVarDesc->IsDynamicArray()); // 一定是动态数组
     ASSERT(nInitCount >= 0);
@@ -2722,8 +2760,9 @@ namespace Marimo
     if(*ppBuffer == NULL && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly))
     {
       // 这里ArrayBuffer只能使用指针形式
-      GXUINT nTypeSize = IS_MARK_NX16B(m_dwRuntimeFlags)
-        ? ALIGN_16(pVarDesc->TypeSize()) : pVarDesc->TypeSize();
+      //GXUINT nTypeSize = IS_MARK_NX16B(m_dwRuntimeFlags)
+      //  ? ALIGN_16(pVarDesc->TypeSize()) : pVarDesc->TypeSize();
+      const GXUINT nTypeSize = DataPoolInternal::NX16BTypeSize(m_dwRuntimeFlags, pVarDesc);
 
       *ppBuffer = new DataPoolArray(pParent, nTypeSize * 10);  // 十倍类型大小
       (*ppBuffer)->Resize(nInitCount * nTypeSize, TRUE);

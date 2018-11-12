@@ -42,12 +42,13 @@ namespace Marimo
 
       // 数组元素
       if(index != (GXUINT)-1) {
-        if(IS_MARK_NX16B(pDataPool->GetFlags())) {
-          it.nOffset += index * ALIGN_16(pVarDesc->TypeSize());
-        }
-        else {
-          it.nOffset += index * pVarDesc->TypeSize();
-        }
+        //if(IS_MARK_NX16B(pDataPool->GetFlags())) {
+        //  it.nOffset += index * ALIGN_16(pVarDesc->TypeSize());
+        //}
+        //else {
+        //  it.nOffset += index * pVarDesc->TypeSize();
+        //}
+        it.nOffset += DataPoolInternal::NX16BArrayOffset(pDataPool->GetFlags(), pVarDesc->TypeSize(), index);
       }
     }
 
@@ -66,12 +67,13 @@ namespace Marimo
         (GXUINT_PTR)it.pVarDesc < (GXUINT_PTR)pVarDesc->MemberBeginPtr() + pVarDesc->MemberCount());
       ASSERT(IsArray() && index != (GXUINT)-1); // 必须是数组
       index++;
-      if(IS_MARK_NX16B(pDataPool->GetFlags())) {
-        it.nOffset += ALIGN_16(pVarDesc->TypeSize());
-      }
-      else {
-        it.nOffset += pVarDesc->TypeSize();
-      }
+      //if(IS_MARK_NX16B(pDataPool->GetFlags())) {
+      //  it.nOffset += ALIGN_16(pVarDesc->TypeSize());
+      //}
+      //else {
+      //  it.nOffset += pVarDesc->TypeSize();
+      //}
+      it.nOffset += DataPoolInternal::NX16BTypeSize(pDataPool->GetFlags(), pVarDesc);
     }
 
     clBufferBase* iterator::child_buffer_unsafe() const
@@ -195,12 +197,13 @@ namespace Marimo
       else {
         vtbl = reinterpret_cast<DataPoolVariable::VTBL*>(
           reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc)->GetUnaryMethod());
-        if(IS_MARK_NX16B(pDataPool->GetFlags())) {
-          nElementOffset = index * ALIGN_16(pVarDesc->TypeSize());
-        }
-        else {
-          nElementOffset = index * pVarDesc->TypeSize();
-        }
+        //if(IS_MARK_NX16B(pDataPool->GetFlags())) {
+        //  nElementOffset = index * ALIGN_16(pVarDesc->TypeSize());
+        //}
+        //else {
+        //  nElementOffset = index * pVarDesc->TypeSize();
+        //}
+        nElementOffset = DataPoolInternal::NX16BArrayOffset(pDataPool->GetFlags(), pVarDesc->TypeSize(), index);
       }
 
       if(pVarDesc->IsDynamicArray()) {
@@ -235,12 +238,13 @@ namespace Marimo
     GXUINT iterator::array_length() const
     {
       if(pVarDesc->IsDynamicArray()) {
-        clBufferBase* pChildBuffer = child_buffer();
+        DataPoolArray* pChildBuffer = static_cast<DataPoolArray*>(child_buffer());
         if(pChildBuffer == NULL) {
           return 0;
         }
         return IS_MARK_NX16B(pDataPool->GetFlags())
-          ? ALIGN_16((GXUINT)pChildBuffer->GetSize()) / ALIGN_16(pVarDesc->TypeSize())
+          // ALIGN_16((GXUINT)pChildBuffer->GetSize()) / ALIGN_16(pVarDesc->TypeSize())
+          ? DataPoolInternal::NX16BArrayLength(pChildBuffer, pVarDesc)
           : (GXUINT)pChildBuffer->GetSize() / pVarDesc->TypeSize();
       }
       else {

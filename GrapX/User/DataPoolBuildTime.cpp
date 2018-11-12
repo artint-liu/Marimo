@@ -167,10 +167,6 @@ namespace Marimo
       const int nDim = var.Count < 0 ? 0 : 
         (var.Count <= 1 ? 1 : var.Count);
 
-      //clStringA strTypeName = var.Type;
-      //if(var.Count < 0) {  // 变长数组
-      //  strTypeName.Insert(0, '#');
-      //}
       auto itType = m_TypeDict.find(var.Type);
 
       if(itType == m_TypeDict.end())
@@ -199,7 +195,7 @@ namespace Marimo
         if(IS_MEMBER_NX16B(eMemberPack) && VarDesc.nCount > 1)
         {
           // a[n]数组定义中，a[0]~a[n-1]其实都要16字节对齐，a[n-1]只占用实际长度
-          cbSubSize = DataPoolInternal::NotCross16BytesBoundaryArraySize(
+          cbSubSize = DataPoolInternal::NX16BArraySize(
             VarDesc.TypeSize(), VarDesc.nCount);
         }
         else

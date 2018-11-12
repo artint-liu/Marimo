@@ -140,8 +140,9 @@ namespace Marimo
                           // 动态数组初始化时, 
                           //   如果Init不为空, 则初始的动态数组大小为abs(Count);
                           //   如果Init为空, 则初始动态数组大小为0.
-    GXLPVOID  Init;       // 初始值,如果不为 NULL, count 的绝对值就是元素个数,
+    GXLPVOID  Init;       // RAW初始值,如果不为 NULL, count 的绝对值就是元素个数,
                           // 必须有足够长度的数据, 尤其对于string数据
+                          // 数据长度需要与type类型相符
   };
   typedef const DATAPOOL_VARIABLE_DECLARATION* LPCVARDECL;
 

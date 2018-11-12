@@ -14,12 +14,16 @@ namespace Marimo
 {
   struct DataPoolBuildTime;
   class DataPoolVariableImpl;
+  class DataPoolArray;
 
   namespace DataPoolInternal
   {
-    //GXUINT CreationFlagsToAlignSize(GXDWORD dwFlags);
     DataPoolPack CreationFlagsToMemberPack(GXDWORD dwFlags);
-    GXUINT NotCross16BytesBoundaryArraySize(GXUINT nTypeSize, GXUINT nElementCount);
+    GXUINT NX16BArrayOffset(GXUINT nTypeSize, GXUINT nElementIndex);
+    GXUINT NX16BArrayOffset(GXDWORD dwFlags, GXUINT nTypeSize, GXUINT nElementIndex);
+    GXUINT NX16BArraySize(GXUINT nTypeSize, GXUINT nElementCount);
+    GXUINT NX16BArrayLength(const DataPoolArray* pArray, const DATAPOOL_VARIABLE_DESC* pVariDesc);
+    GXUINT NX16BTypeSize(GXDWORD dwFlags, const DATAPOOL_VARIABLE_DESC* pVariDesc);
     GXUINT GetMemberAlignMask(DataPoolPack eMemberPack);
   }
 

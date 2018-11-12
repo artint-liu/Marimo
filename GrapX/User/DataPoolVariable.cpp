@@ -812,7 +812,7 @@ namespace Marimo
   {
     DataPoolImpl::LPCVD pVariableDesc = pThis->InlGetVDD();
     return DataPoolInternal::
-      NotCross16BytesBoundaryArraySize(pVariableDesc->TypeSize(), pVariableDesc->nCount);
+      NX16BArraySize(pVariableDesc->TypeSize(), pVariableDesc->nCount);
   }
 
   GXUINT DynamicArray_GetSize(const VarImpl* pThis)
@@ -1354,7 +1354,8 @@ namespace Marimo
   {
     DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
     DataPoolArray* pBuffer = *(DataPoolArray**)pThis->GetPtr();
-    return (pBuffer == NULL) ? 0 : (ALIGN_16((GXUINT)pBuffer->GetSize()) / ALIGN_16(pVdd->TypeSize()));
+    return (pBuffer == NULL) ? 0 : DataPoolInternal::NX16BArrayLength(pBuffer, pVdd);
+      // (ALIGN_16((GXUINT)pBuffer->GetSize()) / ALIGN_16(pVdd->TypeSize()));
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -1393,7 +1394,7 @@ namespace Marimo
       DataPoolVariable::LPCVD pVdd = pThis->InlGetVDD();
       const GXUINT nAlignedPrevSize = ALIGN_16((GXUINT)pArrayBuffer->GetSize());
       
-      pArrayBuffer->Resize(nAlignedPrevSize + DataPoolInternal::NotCross16BytesBoundaryArraySize(pVdd->TypeSize(), nIncrease), TRUE);
+      pArrayBuffer->Resize(nAlignedPrevSize + DataPoolInternal::NX16BArraySize(pVdd->TypeSize(), nIncrease), TRUE);
       pThis->InlDynSetupUnary(&val, pArrayBuffer, (GXUINT)nIndex, 15);
 
       ASSERT(nIndex == nAlignedPrevSize / ALIGN_16(pVdd->TypeSize()));

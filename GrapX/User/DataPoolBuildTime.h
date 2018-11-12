@@ -67,12 +67,6 @@ namespace Marimo
       {
         return bDynamic;
       }
-
-      //GXUINT GetFixedArraySize() const
-      //{
-      //  ASSERT( ! IsDynamicArray()); // 不应该是动态数组
-      //  return nCount * TypeSize();
-      //}
     };
 
     typedef clhash_map<clStringA, BUILDTIME_TYPE_DECLARATION> BuildTimeTypeDeclarationDict;
