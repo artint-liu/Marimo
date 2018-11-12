@@ -805,7 +805,7 @@ namespace Marimo
 
   GXUINT StaticArray_GetSize(const VarImpl* pThis)
   {
-    return pThis->InlGetVDD()->GetSize();
+    return pThis->InlGetVDD()->GetCompactSize();
   }
 
   GXUINT StaticArrayNX16B_GetSize(const VarImpl* pThis)

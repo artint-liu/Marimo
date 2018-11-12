@@ -3,7 +3,8 @@
 #include "GrapX/DataPool.H"
 #include <clTextLines.h>
 #include "clPathFile.h"
-#include <vld.h>
+//#include <vld.h>
+#include "TestDataPool.h"
 
 // Shader constant buffer打包规则参考：
 // https://docs.microsoft.com/zh-cn/windows/desktop/direct3dhlsl/dx-graphics-hlsl-packing-rules
@@ -476,6 +477,9 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample2()
 
   CheckCommon1(a1, a2, mat4x3, mat3x4, mats, pDataPool->begin());
 
+  EnumerateVariables(pDataPool);
+  EnumeratePtrControl(pDataPool);
+
   SAFE_RELEASE(pDataPool);
 }
 
@@ -566,6 +570,8 @@ float  val_array[];   \n\
     CheckCommon1(new_ele["a1"], new_ele["a2"], new_ele["mat4x3"], new_ele["mat3x4"], new_ele["mats"], new_ele.begin());
   }
 
+  EnumerateVariables(pDataPool);
+  EnumeratePtrControl(pDataPool);
 
   for(auto iter_ele = stu_array.array_begin(); iter_ele != stu_array.array_end(); ++iter_ele)
   {

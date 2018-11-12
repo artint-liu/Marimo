@@ -262,18 +262,25 @@ namespace Marimo
         return (clStringA*)(pBaseData + nOffset);
       }
 
-      GXUINT GetUsageSize() const // 运行时的内存尺寸，动态数组在32/64位下不一致
+      GXUINT GetUsageSize(GXBOOL bNX16B) const // 运行时的内存尺寸，动态数组在32/64位下不一致
       {
         if(IsDynamicArray()) {
           return sizeof(clBuffer*);
         }
-        return GetSize();
+
+        return bNX16B ? GetNX16BSize() : GetCompactSize();
       }
 
-      GXUINT GetSize() const  // 稳定的变量描述尺寸，对照GetMemorySize()
+      GXUINT GetCompactSize() const  // 稳定的紧凑变量描述尺寸
       {
         ASSERT( ! IsDynamicArray()); // 不应该是动态数组
         return nCount * TypeSize();
+      }
+
+      GXUINT GetNX16BSize() const  // 稳定的NX16B变量描述尺寸
+      {
+        ASSERT(!IsDynamicArray()); // 不应该是动态数组
+        return nCount * ALIGN_16(TypeSize());
       }
 
       VTBL* GetUnaryMethod() const;
@@ -432,7 +439,7 @@ namespace Marimo
 
     GXSIZE_T      IntGetRTDescHeader    (SIZELIST* pSizeList);   // 获得运行时描述表大小
     GXSIZE_T      IntGetRTDescNames     ();   // 获得运行时描述表字符串表所占的大小
-    static GXUINT IntChangePtrSize      (GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount);
+    static GXUINT IntChangePtrSize      (GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount, GXBOOL bNX16B);
 
     template<class _Ty>
     static void   IntClearChangePtrFlag (_Ty* pTypeDesc, GXUINT nCount);

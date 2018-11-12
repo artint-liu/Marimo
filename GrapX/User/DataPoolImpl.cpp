@@ -461,11 +461,8 @@ namespace Marimo
         for(GXUINT nStructIndex = 0; nStructIndex < nElementCount; nStructIndex++)
         {
           Cleanup(lpFirstElement, pVarDesc->MemberBeginPtr(), pVarDesc->MemberCount());
-          lpFirstElement = (GXLPBYTE)lpFirstElement + pVarDesc->TypeSize();
+          lpFirstElement = (GXLPBYTE)lpFirstElement + pVarDesc->TypeSize(); // NX16B?
         }
-        //if(bDynamicArray) {
-        //  SAFE_DELETE(*ppBuffer);
-        //}
       }
       break;
     }
@@ -491,7 +488,7 @@ namespace Marimo
           continue;
         }
         ptr = (*ppBuffer)->GetPtr();
-        nCount = (int)((*ppBuffer)->GetSize() / VARDesc.TypeSize());
+        nCount = (int)((*ppBuffer)->GetSize() / VARDesc.TypeSize()); // NX16B?
       }
       else // 字符串数组
       {
@@ -672,6 +669,11 @@ namespace Marimo
 
   GXVOID DataPoolImpl::InitializeValue(GXUINT nBaseOffset, LPCVARDECL pVarDecl)
   {
+    if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
+      CLOG_ERROR("设置NX16B标志时不支持初始化变量设置");
+      return;
+    }
+
     int nVarIndex = 0;
     GXBYTE* pData = (GXBYTE*)m_VarBuffer.GetPtr();
     for(;; nVarIndex++)
@@ -725,7 +727,7 @@ namespace Marimo
           }
           else
           {
-            memcpy(VARDesc.GetAsPtr(pData), varDecl.Init, VARDesc.GetSize());
+            memcpy(VARDesc.GetAsPtr(pData), varDecl.Init, VARDesc.GetCompactSize());
           }
         }
         break;
@@ -867,8 +869,9 @@ namespace Marimo
           nOffset -= pVar->nOffset;
 
           if(pVar->nCount > 1) {
-            GXUINT size = pVar->TypeSize();
-            GXUINT index = nOffset / size;
+            const GXUINT size = IS_MARK_NX16B(m_dwRuntimeFlags)
+              ? ALIGN_16(pVar->TypeSize()) : pVar->TypeSize();
+            const GXUINT index = nOffset / size;
             str->AppendFormat("[%d]", index);
             nOffset -= index * size;
           }
@@ -967,13 +970,14 @@ namespace Marimo
   {
     int begin = 0;
     int end = nCount - 1;
-    auto nEndOffset = pVarDesc[end].nOffset + pVarDesc[end].GetUsageSize();
+    auto nEndOffset = pVarDesc[end].nOffset + pVarDesc[end].GetUsageSize(IS_MARK_NX16B(m_dwRuntimeFlags));
+    ASSERT(nOffset <= nEndOffset);
     while(1)
     {
       const int mid = (begin + end) >> 1;
       if(pVarDesc[begin].nOffset <= nOffset && nOffset < pVarDesc[mid].nOffset) {
         end = mid;
-        nEndOffset = pVarDesc[end].nOffset + pVarDesc[end].GetUsageSize();
+        nEndOffset = pVarDesc[end].nOffset + pVarDesc[end].GetUsageSize(IS_MARK_NX16B(m_dwRuntimeFlags));
       }
       else if(pVarDesc[mid].nOffset <= nOffset && nOffset <= nEndOffset) {
         if(begin == mid) {
@@ -1062,7 +1066,7 @@ namespace Marimo
     return m_Buffer.GetSize() - IntGetRTDescHeader(&sSizeList) - m_VarBuffer.GetSize();
   }
 
-  GXUINT DataPoolImpl::IntChangePtrSize(GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount)
+  GXUINT DataPoolImpl::IntChangePtrSize(GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount, GXBOOL bNX16B)
   {
     // 验证是全局变量开始，或者是成员变量开始
     ASSERT(pVarDesc->nOffset == 0);
@@ -1088,7 +1092,7 @@ namespace Marimo
         switch(eCate)
         {
         case DataPoolTypeClass::Structure:
-          pTypeDesc->cbSize = IntChangePtrSize(nSizeofPtr, (VARIABLE_DESC*)d.MemberBeginPtr(), d.MemberCount());
+          pTypeDesc->cbSize = IntChangePtrSize(nSizeofPtr, (VARIABLE_DESC*)d.MemberBeginPtr(), d.MemberCount(), bNX16B);
           break;
 
         case DataPoolTypeClass::String:
@@ -1106,8 +1110,11 @@ namespace Marimo
         // 动态数组就是一个指针
         nNewOffset += nSizeofPtr; // sizeof(DataPoolArray*)
       }
+      else if(bNX16B) {
+        nNewOffset += d.GetNX16BSize();
+      }
       else {
-        nNewOffset += d.GetSize();
+        nNewOffset += d.GetCompactSize();
       }
     }
     return nNewOffset;
@@ -1346,15 +1353,23 @@ namespace Marimo
       TRACE("%16s %8d\n", (DataPool::LPCSTR)m_aStructs[i].GetName(), m_aStructs[i].cbSize);
     }
 
+    const GXBOOL bNX16B = IS_MARK_NX16B(m_dwRuntimeFlags);
+
     TRACE("========= Variables =========\n");
     for(GXUINT i = 0; i < m_nNumOfVar; ++i)
     {
       const auto& v = m_aVariables[i];
       if(v.nCount > 1) {
-        TRACE("%16s %12s[%4d] %8d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nCount, v.nOffset, v.GetUsageSize());
+        TRACE("%16s %12s[%4d] %8d[%d]\n",
+          (DataPool::LPCSTR)v.TypeName(),
+          (DataPool::LPCSTR)v.VariableName(),
+          v.nCount, v.nOffset, v.GetUsageSize(bNX16B));
       }
       else {
-        TRACE("%16s %16s %10d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nOffset, v.GetUsageSize());
+        TRACE("%16s %16s %10d[%d]\n",
+          (DataPool::LPCSTR)v.TypeName(),
+          (DataPool::LPCSTR)v.VariableName(),
+          v.nOffset, v.GetUsageSize(bNX16B));
       }
     }
 
@@ -1362,10 +1377,16 @@ namespace Marimo
     for(GXUINT i = 0; i < m_nNumOfMember; ++i){
       const auto& v = m_aMembers[i];
       if(v.nCount > 1) {
-        TRACE("%16s %12s[%4d] %8d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nCount, v.nOffset, v.GetUsageSize());
+        TRACE("%16s %12s[%4d] %8d[%d]\n",
+          (DataPool::LPCSTR)v.TypeName(),
+          (DataPool::LPCSTR)v.VariableName(),
+          v.nCount, v.nOffset, v.GetUsageSize(bNX16B));
       }
       else {
-        TRACE("%16s %16s %10d[%d]\n", (DataPool::LPCSTR)v.TypeName(), (DataPool::LPCSTR)v.VariableName(), v.nOffset, v.GetUsageSize());
+        TRACE("%16s %16s %10d[%d]\n",
+          (DataPool::LPCSTR)v.TypeName(),
+          (DataPool::LPCSTR)v.VariableName(),
+          v.nOffset, v.GetUsageSize(bNX16B));
       }
     }
   }
@@ -1981,7 +2002,7 @@ namespace Marimo
       return nBase;
     }
 
-    // 迭代收集重定位表,平台无关，指针按照4字节计算
+    // 递归收集重定位表,平台无关，指针按照4字节计算
     GXUINT GenerateRelocalizeTable(GXUINT nBase, const DATAPOOL_VARIABLE_DESC* pVarDesc, GXSIZE_T nCount)
     {
       for(GXUINT i = 0; i < nCount; ++i)
@@ -2008,7 +2029,7 @@ namespace Marimo
           case DataPoolTypeClass::String:  nBase = GenerateRelocalizeTable(nBase, RelocalizeType_String, vd.nCount);   break;
           case DataPoolTypeClass::StringA: nBase = GenerateRelocalizeTable(nBase, RelocalizeType_StringA, vd.nCount);  break;
           case DataPoolTypeClass::Object:  nBase = GenerateRelocalizeTable(nBase, RelocalizeType_Object, vd.nCount);   break;
-          default:        nBase += reinterpret_cast<const DataPoolImpl::VARIABLE_DESC&>(vd).GetSize();  break;
+          default:        nBase += reinterpret_cast<const DataPoolImpl::VARIABLE_DESC&>(vd).GetCompactSize();  break;
           } // switch
         }
       } // for
@@ -2253,7 +2274,7 @@ namespace Marimo
       // 这段儿地址计算参考[MAIN BUFFER 结构表]
       const GXUINT_PTR nDeltaVarToType = (GXUINT_PTR)m_aVariables - (GXUINT_PTR)m_aTypes;
       //const GXUINT_PTR nDeltaMemberToType = (GXUINT_PTR)m_aMembers - (GXUINT_PTR)m_aTypes;
-      IntChangePtrSize(4, (VARIABLE_DESC*)((GXUINT_PTR)BufferToWrite.GetPtr() + nDeltaVarToType), m_nNumOfVar);
+      IntChangePtrSize(4, (VARIABLE_DESC*)((GXUINT_PTR)BufferToWrite.GetPtr() + nDeltaVarToType), m_nNumOfVar, IS_MARK_NX16B(m_dwRuntimeFlags));
       IntClearChangePtrFlag((TYPE_DESC*)BufferToWrite.GetPtr(), m_nNumOfTypes);
       IntClearChangePtrFlag((STRUCT_DESC*)((GXINT_PTR)BufferToWrite.GetPtr() + (m_nNumOfTypes * sizeof(TYPE_DESC))), m_nNumOfStructs);
 
@@ -2470,7 +2491,7 @@ namespace Marimo
     // 64位下扩展描述表中的指针
     if(SIZEOF_PTR > SIZEOF_PTR32)
     {
-      IntChangePtrSize(8, m_aVariables, m_nNumOfVar);
+      IntChangePtrSize(8, m_aVariables, m_nNumOfVar, IS_MARK_NX16B(header.dwFlags));
       IntClearChangePtrFlag(m_aTypes, m_nNumOfTypes);
       IntClearChangePtrFlag(m_aStructs, m_nNumOfStructs);
     }
@@ -2701,8 +2722,11 @@ namespace Marimo
     if(*ppBuffer == NULL && TEST_FLAG_NOT(m_dwRuntimeFlags, RuntimeFlag_Readonly))
     {
       // 这里ArrayBuffer只能使用指针形式
-      *ppBuffer = new DataPoolArray(pParent, pVarDesc->TypeSize() * 10);  // 十倍类型大小
-      (*ppBuffer)->Resize(nInitCount * pVarDesc->TypeSize(), TRUE);
+      GXUINT nTypeSize = IS_MARK_NX16B(m_dwRuntimeFlags)
+        ? ALIGN_16(pVarDesc->TypeSize()) : pVarDesc->TypeSize();
+
+      *ppBuffer = new DataPoolArray(pParent, nTypeSize * 10);  // 十倍类型大小
+      (*ppBuffer)->Resize(nInitCount * nTypeSize, TRUE);
 
 #ifndef DISABLE_DATAPOOL_WATCHER
       if(pParent == &m_VarBuffer) {

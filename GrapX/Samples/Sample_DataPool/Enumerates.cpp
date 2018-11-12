@@ -3,7 +3,7 @@
 #include "GrapX/DataPoolIterator.h"
 #include "TestDataPool.h"
 #define CHECK_VAR
-#define LOG //TRACE
+#define LOG TRACE
 size_t EnumerateVariables(DataPool* pDataPool, int nDepth, DataPoolIterator& itBegin, DataPoolIterator& itEnd);
 
 size_t EunmerateArray(DataPool* pDataPool, int nDepth, DataPoolElementIterator& itBegin, DataPoolElementIterator& itEnd)
@@ -284,7 +284,7 @@ b32 EnumeratePtrControl(ENUMERATE_CONTEXT& ctx, int nDepth, DataPoolIterator* pP
       {
         CLNOP;
       }
-      TRACE("*%s[x%d %08x]\n", itMember.FullNameA(), 0, itMember.child_buffer());
+      TRACE("*%s[x%d %08x]\n", itMember.FullNameA(), itMember.array_length(), itMember.child_buffer());
       //CheckIter(itMember);
       ctx.nNumArray++;
     }
