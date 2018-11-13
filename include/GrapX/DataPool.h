@@ -253,7 +253,7 @@ namespace Marimo
       return GetTypeDesc()->cbSize;
     }
 
-    inline DataPoolTypeClass GetTypeCategory() const
+    inline DataPoolTypeClass GetTypeClass() const
     {
       return GetTypeDesc()->Cate;
     }

@@ -83,8 +83,9 @@ namespace Marimo
       DataPool::LPCSTR  TypeName        () const;
       GXBOOL            IsArray         () const;
 
+      CLDEPRECATED_ATTRIBUTE
       void              StepArrayMember (iterator& it); // 成员变量步进，it是this结构体数组的一个成员变量，
-      //                                                           这个方法将it调整为数组下一个元素的成员变量
+      //                                                   这个方法将it调整为数组下一个元素的成员变量
 
     protected:
       void first_child    (iterator& it) const;
@@ -340,7 +341,7 @@ NEW_LOOP:
             continue;
           }
 
-          switch(itMember.pVarDesc->GetTypeCategory())
+          switch(itMember.pVarDesc->GetTypeClass())
           {
           case DataPoolTypeClass::Structure:
             // 分解结构体
@@ -391,7 +392,7 @@ NEW_LOOP:
           {
             L_ACONTEXT& ac = sDynArray.front();
 
-            if(ac.itElement.pVarDesc->GetTypeCategory() == DataPoolTypeClass::Structure) {
+            if(ac.itElement.pVarDesc->GetTypeClass() == DataPoolTypeClass::Structure) {
               if(ac.itElement != ac.itEnd) {
                 auto _it_begin = ac.itElement.begin();
                 auto _it_end = ac.itElement.end();
