@@ -289,7 +289,7 @@ b32 EnumeratePtrControl(ENUMERATE_CONTEXT& ctx, int nDepth, DataPoolIterator* pP
       ctx.nNumArray++;
     }
 
-    switch(itMember.pVarDesc->GetTypeCategory())
+    switch(itMember.pVarDesc->GetTypeClass())
     {
     case DataPoolTypeClass::String:
       if(itMember.IsArray())
@@ -472,7 +472,7 @@ void EnumeratePtrControl2(DataPool* pDataPool)
       }
     }
 
-    if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::String)
+    if(it.pVarDesc->GetTypeClass() == DataPoolTypeClass::String)
     {
       ctx.nNumString++;
       //TRACE("*%s\n", it.FullNameA());

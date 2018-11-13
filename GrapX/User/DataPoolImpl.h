@@ -67,8 +67,9 @@ namespace Marimo
     // 数组或动态数组专用 
     Variable  (*GetIndex    )(const VarImpl* pThis, GXSIZE_T nIndex);    // 获得特定索引的变量
     GXSIZE_T  (*GetLength   )(const VarImpl* pThis);                     // 获得数组的成员个数, 注意与GetSize区别
-    Variable  (*NewBack     )(      VarImpl* pThis, GXUINT nIncrease);   // 在动态数组上追加数据, 动态数组专用
-    GXBOOL    (*Remove      )(      VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount);      // 移出动态数组指定索引的数据, 动态数组专用
+    GXBOOL    (*Sliding     )(const VarImpl* pThis, Variable* pElement, GXINT nOffset);     // 滑动数组元素
+    Variable  (*NewBack     )(VarImpl* pThis, GXUINT nIncrease);   // 在动态数组上追加数据, 动态数组专用
+    GXBOOL    (*Remove      )(VarImpl* pThis, GXSIZE_T nIndex, GXSIZE_T nCount);      // 移出动态数组指定索引的数据, 动态数组专用
 
     // 变量专用
     //clStringW (*ToStringW   )(const VarImpl* pThis);                   // 变量按照其含义转值, 数组和结构体等同于GetTypeName()
@@ -250,19 +251,19 @@ namespace Marimo
 
       GUnknown** GetAsObject(GXBYTE* pBaseData) const
       {
-        ASSERT(GetTypeCategory() == DataPoolTypeClass::Object); // object
+        ASSERT(GetTypeClass() == DataPoolTypeClass::Object); // object
         return (GUnknown**)(pBaseData + nOffset);
       }
 
       clStringW* GetAsStringW(GXBYTE* pBaseData) const
       {
-        ASSERT(GetTypeCategory() == DataPoolTypeClass::String); // Unicode 字符串
+        ASSERT(GetTypeClass() == DataPoolTypeClass::String); // Unicode 字符串
         return (clStringW*)(pBaseData + nOffset);
       }
 
       clStringA* GetAsStringA(GXBYTE* pBaseData) const
       {
-        ASSERT(GetTypeCategory() == DataPoolTypeClass::StringA); // ANSI 字符串
+        ASSERT(GetTypeClass() == DataPoolTypeClass::StringA); // ANSI 字符串
         return (clStringA*)(pBaseData + nOffset);
       }
 

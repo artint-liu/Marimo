@@ -7,6 +7,7 @@ extern GXLPCWSTR s_szExampleString[];
 size_t EnumerateVariables(DataPool* pDataPool);
 size_t EnumeratePtrControl(DataPool* pDataPool);
 void EnumeratePtrControl2(DataPool* pDataPool);
+void TestSlidingArray(DataPool* pDataPool, DataPoolVariable& varArray, GXLPCSTR szVarFormat);
 
 void CompareVariable(const DataPoolVariable& var1, const DataPoolVariable& var2);
 size_t CompareDataPool(DataPool* pDataPoolA, DataPool* pDataPoolB);

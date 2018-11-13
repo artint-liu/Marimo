@@ -604,7 +604,7 @@ namespace GXUI
       // 通过迭代器扫描到Object和String类型成员，作为SpriteObject和SpriteName
       for(; it != itEnd; ++it)
       {
-        auto eMemberCate = it.pVarDesc->GetTypeCategory();
+        auto eMemberCate = it.pVarDesc->GetTypeClass();
         if(eMemberCate == Marimo::DataPoolTypeClass::Object) {
           GUnknown* pObject = NULL;
           it.ToVariable().Query(&pObject);

@@ -195,6 +195,49 @@ namespace Marimo
         ? ALIGN_16(pVariDesc->TypeSize()) : pVariDesc->TypeSize();
     }
 
+    template<typename _Ty>
+    void NX16BCopyArrayData(GXLPBYTE pDest, const _Ty* pSrc, GXUINT nCount)
+    {
+      for(GXUINT i = 0; i < nCount; i++)
+      {
+        *reinterpret_cast<_Ty*>(pDest) = *pSrc;
+        pDest += ALIGN_16(sizeof(_Ty));
+        pSrc++;
+      }
+    }
+
+    void NX16BCopyArrayData(DataPoolTypeClass cls, GXLPBYTE pDest, GXLPCVOID pSrc, GXUINT nCount)
+    {
+      switch(cls)
+      {
+      case Marimo::DataPoolTypeClass::Byte:
+      case Marimo::DataPoolTypeClass::SByte:
+        NX16BCopyArrayData(pDest, static_cast<const u8*>(pSrc), nCount);
+        break;
+      case Marimo::DataPoolTypeClass::Word:
+      case Marimo::DataPoolTypeClass::SWord:
+        NX16BCopyArrayData(pDest, static_cast<const u16*>(pSrc), nCount);
+        break;
+      case Marimo::DataPoolTypeClass::DWord:
+      case Marimo::DataPoolTypeClass::SDWord:
+        NX16BCopyArrayData(pDest, static_cast<const u32*>(pSrc), nCount);
+        break;
+      case Marimo::DataPoolTypeClass::QWord:
+      case Marimo::DataPoolTypeClass::SQWord:
+        NX16BCopyArrayData(pDest, static_cast<const u64*>(pSrc), nCount);
+        break;
+      case Marimo::DataPoolTypeClass::Float:
+        NX16BCopyArrayData(pDest, static_cast<const float*>(pSrc), nCount);
+        break;
+      case Marimo::DataPoolTypeClass::Object:
+        NX16BCopyArrayData(pDest, static_cast<const size_t*>(pSrc), nCount);
+        break;
+      default:
+        CLBREAK; // 不应改到这里
+        break;
+      }
+    }
+
     GXUINT GetMemberAlignMask(DataPoolPack eMemberPack)
     {
       switch(eMemberPack)
@@ -434,7 +477,7 @@ namespace Marimo
 
   GXBOOL DataPoolImpl::CleanupArray(const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXUINT nElementCount)
   {
-    switch(pVarDesc->GetTypeCategory())
+    switch(pVarDesc->GetTypeClass())
     {
     case DataPoolTypeClass::String:
       {
@@ -570,7 +613,7 @@ namespace Marimo
     if(pVdd != NULL) {
 
       // 只有结构体才有成员, 其他情况直接返回
-      if(pVdd->GetTypeCategory() != DataPoolTypeClass::Structure) {
+      if(pVdd->GetTypeClass() != DataPoolTypeClass::Structure) {
         return NULL;
       }
       end   = pVdd->MemberCount();
@@ -589,9 +632,9 @@ namespace Marimo
     }
 
     ASSERT(pVdd == NULL ||
-      pVdd->GetTypeCategory() == DataPoolTypeClass::Structure ||
-      pVdd->GetTypeCategory() == DataPoolTypeClass::Enumeration ||
-      pVdd->GetTypeCategory() == DataPoolTypeClass::Flag);
+      pVdd->GetTypeClass() == DataPoolTypeClass::Structure ||
+      pVdd->GetTypeClass() == DataPoolTypeClass::Enumeration ||
+      pVdd->GetTypeClass() == DataPoolTypeClass::Flag);
 
     const GXUINT count = (GXUINT)end;
 #ifdef _DEBUG
@@ -707,7 +750,7 @@ namespace Marimo
 
       GXBOOL bDynamicArray = VARDesc.IsDynamicArray();
       ASSERT(GXSTRCMPI((DataPool::LPCSTR)VARDesc.VariableName(), varDecl.Name) == 0);
-      switch(VARDesc.GetTypeCategory())
+      switch(VARDesc.GetTypeClass())
       {
       case DataPoolTypeClass::Structure:
         {
@@ -719,13 +762,18 @@ namespace Marimo
           // 对于含有动态数组和字符串的结构体是不能直接赋值的
           for(nMemberIndex = 0; nMemberIndex < nEnd; nMemberIndex++)
           {
-            if(pMembers[nMemberIndex].GetTypeCategory() == DataPoolTypeClass::String || 
-              pMembers[nMemberIndex].GetTypeCategory() == DataPoolTypeClass::StringA || 
+            if(pMembers[nMemberIndex].GetTypeClass() == DataPoolTypeClass::String || 
+              pMembers[nMemberIndex].GetTypeClass() == DataPoolTypeClass::StringA || 
               pMembers[nMemberIndex].IsDynamicArray())
               break;
           }
-          if(nMemberIndex != nEnd)
+          if(nMemberIndex != nEnd) {
             break;
+          }
+          else if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
+            CLOG_WARNING("NX16B 模式不支持初始化数组");
+            break;
+          }
         } // 这里没有 break, 如果 Struct 中没有动态数组和字符串声明, 支持初始数据.
       case DataPoolTypeClass::Byte:
       case DataPoolTypeClass::Word:
@@ -745,6 +793,7 @@ namespace Marimo
             clBuffer* pBuffer = IntCreateArrayBuffer(&m_VarBuffer, &VARDesc, pData, -varDecl.Count);
             if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
               // TODO: 不支持NX16B初始化
+              DataPoolInternal::NX16BCopyArrayData(VARDesc.GetTypeClass(), static_cast<GXLPBYTE>(pBuffer->GetPtr()), varDecl.Init, -varDecl.Count);
             }
             else {
               memcpy(pBuffer->GetPtr(), varDecl.Init, pBuffer->GetSize());
@@ -754,6 +803,7 @@ namespace Marimo
           {
             if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
               // TODO: 不支持NX16B初始化
+              DataPoolInternal::NX16BCopyArrayData(VARDesc.GetTypeClass(), static_cast<GXLPBYTE>(VARDesc.GetAsPtr(pData)), varDecl.Init, varDecl.Count);
             }
             else {
               memcpy(VARDesc.GetAsPtr(pData), varDecl.Init, VARDesc.GetCompactSize());
@@ -888,7 +938,7 @@ namespace Marimo
         }
         else {
           TRACE("[%s]:[%s]\n", (DataPool::LPCSTR)pVar->VariableName(), (DataPool::LPCSTR)pVarDesc->VariableName());
-          ASSERT(pVar->GetTypeCategory() == DataPoolTypeClass::Structure);
+          ASSERT(pVar->GetTypeClass() == DataPoolTypeClass::Structure);
           pVarDescTable = (LPCVD)pVar->MemberBeginPtr();
           count = pVar->MemberCount();
 
@@ -1109,7 +1159,7 @@ namespace Marimo
     for(GXUINT i = 0; i < nCount; ++i)
     {
       VARIABLE_DESC& d = pVarDesc[i];
-      const auto eCate = d.GetTypeCategory();
+      const auto eCate = d.GetTypeClass();
       d.nOffset = nNewOffset;
 
       // 检查已经调整的标记
@@ -2056,7 +2106,7 @@ namespace Marimo
         {
           ASSERT(vd.nCount >= 1);
 
-          switch(vd.GetTypeCategory())
+          switch(vd.GetTypeClass())
           {
           case DataPoolTypeClass::Structure:
             for(GXUINT n = 0; n < vd.nCount; ++n) {
@@ -2193,7 +2243,7 @@ namespace Marimo
         nRelOffset = 0;
       }
 
-      ASSERT(bArray || it.pVarDesc->GetTypeCategory() != DataPoolTypeClass::Structure);
+      ASSERT(bArray || it.pVarDesc->GetTypeClass() != DataPoolTypeClass::Structure);
 
 
 
@@ -2224,7 +2274,7 @@ namespace Marimo
         //TRACE("*%d\n", nRelOffset);
         nRelOffset += SIZEOF_PTR32;
       }
-      else if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::String)
+      else if(it.pVarDesc->GetTypeClass() == DataPoolTypeClass::String)
       {
         ASSERT( ! bArray);
         sStringVar.insert(var.ToStringW());
@@ -2233,7 +2283,7 @@ namespace Marimo
         ASSERT_X86(var.GetSize() == 4);
         ++header.nNumOfStrings;
       }
-      else if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::StringA)
+      else if(it.pVarDesc->GetTypeClass() == DataPoolTypeClass::StringA)
       {
         ASSERT( ! bArray);
         sStringVarA.insert(var.ToStringA());
@@ -2242,7 +2292,7 @@ namespace Marimo
         ASSERT_X86(var.GetSize() == 4);
         ++header.nNumOfStrings;
       }
-      else if(it.pVarDesc->GetTypeCategory() == DataPoolTypeClass::Object)
+      else if(it.pVarDesc->GetTypeClass() == DataPoolTypeClass::Object)
       {
         ASSERT( ! bArray);
         pCurrBufDesc->RelTable.push_back(nRelOffset | BUFFER_SAVELOAD_DESC::RelocalizeType_Object);
@@ -2784,7 +2834,7 @@ namespace Marimo
   //////////////////////////////////////////////////////////////////////////
   DataPoolImpl::VARIABLE_DESC::VTBL* DataPoolImpl::VARIABLE_DESC::GetUnaryMethod() const
   {
-    switch(GetTypeCategory())
+    switch(GetTypeClass())
     {
     case DataPoolTypeClass::String:       return (VTBL*)Implement::s_pStringVtbl;
     case DataPoolTypeClass::StringA:      return (VTBL*)Implement::s_pStringAVtbl;

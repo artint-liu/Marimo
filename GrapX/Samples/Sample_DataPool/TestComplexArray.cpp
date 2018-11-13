@@ -277,6 +277,15 @@ void TestComplexArray()
     var.Set(s_szExampleString[i]);
   }
 
+  {
+    MOVariable varSttTestA;
+    MOVariable varDynTestA;
+    pDataPool->QueryByName("SttTestA", &varSttTestA);
+    pDataPool->QueryByName("DynTestA", &varDynTestA);
+    TestSlidingArray(pDataPool, varSttTestA, "SttTestA[%d]");
+    TestSlidingArray(pDataPool, varDynTestA, "DynTestA[%d]");
+  }
+
   TestException(pDataPool);
   TestWatcher(pDataPool);
   TestRemoveItem(pDataPool);

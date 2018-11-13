@@ -12,6 +12,7 @@
 #define __STR__(_V) #_V
 #define __STR2__(_V) __STR__(_V)
 #define __LINE_STR__ __STR2__(__LINE__)
+#define CHECK_VALUE(_VAR, _EXPR, _VAL) ASSERT((_VAR = _EXPR) == _VAL)
 
 static GXLPCSTR g_szCodeSample = "#file" __FILE__ "\n\
 #line " __LINE_STR__ "                          \n\
@@ -147,6 +148,95 @@ IE11 ie11;                                      \n\
 IE12 ie12;                                      \n\
 ";
 
+//////////////////////////////////////////////////////////////////////////
+void TestSlidingArray(DataPool* pDataPool, DataPoolVariable& varArray, GXLPCSTR szVarFormat)
+{
+  TRACE("==== TestSlidingArray ====\n");
+  ASSERT((varArray.GetCaps() & Marimo::DataPoolVariable::CAPS_ARRAY) ||  // 必须是数组
+    (varArray.GetCaps() & Marimo::DataPoolVariable::CAPS_DYNARRAY));
+
+  DataPoolVariable varRefElement, varSlidingElement;
+  clStringA str;
+  size_t val;
+  const GXSIZE_T nCount = varArray.GetLength();
+
+  for(GXSIZE_T i = 0; i < nCount; i++)
+  {
+    str.Format(szVarFormat, i);
+    TRACE("Test sliding \"%s\"\n", str.CStr());
+    pDataPool->QueryByExpression(str, &varRefElement);
+    if(i == 0)
+    {
+      varSlidingElement = varRefElement;
+    }
+
+    CHECK_VALUE(val, varRefElement.GetBuffer() - varSlidingElement.GetBuffer(), 0);
+    CHECK_VALUE(val, varRefElement.GetOffset() - varSlidingElement.GetOffset(), 0);
+    CHECK_VALUE(val, (size_t)varRefElement.GetPtr() - (size_t)varSlidingElement.GetPtr(), 0);
+    CHECK_VALUE(val, varRefElement.GetSize() - varSlidingElement.GetSize(), 0);
+    varArray.Sliding(&varSlidingElement, 1);
+  }
+
+  auto iter_member     = varRefElement.begin();
+  auto iter_member_end = varRefElement.end();
+  for(; iter_member != iter_member_end; ++iter_member)
+  {
+    if(iter_member.IsArray())
+    {
+      auto iter_sub_element = iter_member.array_begin();
+      auto iter_sub_element_end = iter_member.array_end();
+      for(int n = 0; iter_sub_element != iter_sub_element_end; ++iter_sub_element, n++)
+      {
+        str.Format("%s.%s[%d]", szVarFormat, iter_member.VariableName(), n);
+        TestSlidingArray(pDataPool, varArray, str.CStr());
+      }
+    }
+    else
+    {
+      str.Format("%s.%s", szVarFormat, iter_member.VariableName());
+      TestSlidingArray(pDataPool, varArray, str.CStr());
+    }
+  }
+
+}
+
+//void TestSlidingArray(DataPoolVariable& varArray)
+//{
+//  ASSERT(varArray.GetCaps() & Marimo::DataPoolVariable::CAPS_ARRAY); // 必须是数组
+//  clStringA strName = varArray.GetName();
+//  DataPoolVariable varElement = varArray[0];
+//  size_t val;
+//  for(GXSIZE_T i = 0; i < varArray.GetLength(); i++)
+//  {
+//    DataPoolVariable varRefElement = varArray[i];
+//    CHECK_VALUE(val, varRefElement.GetBuffer() - varElement.GetBuffer(), 0);
+//    CHECK_VALUE(val, varRefElement.GetOffset() - varElement.GetOffset(), 0);
+//    CHECK_VALUE(val, (size_t)varRefElement.GetPtr() - (size_t)varElement.GetPtr(), 0);
+//    CHECK_VALUE(val, varRefElement.GetSize() - varElement.GetSize(), 0);
+//    varArray.Sliding(&varElement, 1);
+//  }
+//
+//  varElement = varArray[0];
+//  auto iter_member     = varElement.begin();
+//  auto iter_member_end = varElement.end();
+//  for(; iter_member != iter_member_end; ++iter_member)
+//  {
+//    varElement = varArray[0][iter_member.VariableName()];
+//    for(GXSIZE_T i = 0; i < varArray.GetLength(); i++)
+//    {
+//      DataPoolVariable varRefElementMember = varArray[i][iter_member.VariableName()];
+//
+//      TestSlidingElementMember(varArray, iter_member.ToVariable());
+//    }
+//  }
+//
+//  //for(auto iter_element = VarArray.array_begin(); iter_element != VarArray.array_end(); ++iter_element)
+//  //{
+//  //}
+//}
+
+//////////////////////////////////////////////////////////////////////////
+
 void TestShaderConstantBuffer_Common()
 {
   static Marimo::DATAPOOL_VARIABLE_DECLARATION s_aShaderConstantBuffer[] =
@@ -183,7 +273,7 @@ void TestShaderConstantBuffer_Common()
 
   bRetult = pDataPool->QueryByName("LightPosition", &vLightPositionArray);
   ASSERT(bRetult);
-  // FIXME: 没通过！ ASSERT(TEST_FLAG(vLightPositionArray.GetCaps(), Marimo::DataPoolVariable::CAPS_ARRAY));
+  ASSERT(TEST_FLAG(vLightPositionArray.GetCaps(), Marimo::DataPoolVariable::CAPS_ARRAY));
   ASSERT(vLightPositionArray.GetOffset() == sizeof(float4x4) + sizeof(float4));
   ASSERT(vLightPositionArray.GetSize() == sizeof(float4) * 3 + sizeof(float3));
   vLightPosition[0] = vLightPositionArray[0];
@@ -206,7 +296,6 @@ void TestShaderConstantBuffer_Common()
   SAFE_RELEASE(pDataPool);
 }
 
-#define CHECK_VALUE(_VAR, _EXPR, _VAL) ASSERT((_VAR = _EXPR) == _VAL)
 void TestShaderConstantBuffer_HLSLPackingRulesSample()
 {
   Marimo::DataPool* pDataPool = NULL;
@@ -480,6 +569,10 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample2()
   EnumerateVariables(pDataPool);
   EnumeratePtrControl(pDataPool);
 
+  TestSlidingArray(pDataPool, a1, "a1[%d]");
+  TestSlidingArray(pDataPool, a2, "a2[%d]");
+  TestSlidingArray(pDataPool, mats, "mats[%d]");
+
   SAFE_RELEASE(pDataPool);
 }
 
@@ -572,6 +665,12 @@ float  val_array[];   \n\
 
   EnumerateVariables(pDataPool);
   EnumeratePtrControl(pDataPool);
+
+  TestSlidingArray(pDataPool, stu_array, "stu_array[%d]");
+  TestSlidingArray(pDataPool, mat_array, "mat_array[%d]");
+  TestSlidingArray(pDataPool, vc2_array, "vc2_array[%d]");
+  TestSlidingArray(pDataPool, val_array, "val_array[%d]");
+
 
   for(auto iter_ele = stu_array.array_begin(); iter_ele != stu_array.array_end(); ++iter_ele)
   {

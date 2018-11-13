@@ -61,9 +61,12 @@ namespace Marimo
 
   // 函数声明
   Variable DynamicArray_NewBack(VarImpl* pThis, GXUINT nIncrease);
+  Variable DynamicArrayNX16B_NewBack(VarImpl* pThis, GXUINT nIncrease);
   Variable Struct_GetMember(const VarImpl* pThis, GXLPCSTR szName);
   Variable Array_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex);
-
+  Variable ArrayNX16B_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex);
+  Variable DynamicArray_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex);
+  Variable DynamicArrayNX16B_GetIndex(const VarImpl* pThis, GXSIZE_T nIndex);
   //////////////////////////////////////////////////////////////////////////
 
   template<class _TStoString> // 返回字符串类型和自身储存的字符串类型
@@ -143,6 +146,12 @@ namespace Marimo
       return pDataPoolImpl->CleanupArray(reinterpret_cast<const DataPoolImpl::VARIABLE_DESC*>(pVarDesc), lpBuffer, (GXUINT)nCount);
     }
 
+    inline GXBOOL InlMoveAbsOffset(GXINT nOffset)
+    {
+      m_AbsOffset += nOffset;
+      return TRUE;
+    }
+
     inline GXBOOL IsReadOnly() const
     {
       return TEST_FLAG(reinterpret_cast<DataPoolImpl*>(m_pDataPool)->m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Readonly);
@@ -152,8 +161,8 @@ namespace Marimo
     inline GXBOOL SetAsString(T_LPCSTR szText)
     {
       // 这个函数是String类型专用的
-      ASSERT(m_pVdd->GetTypeCategory() == DataPoolTypeClass::String || 
-        m_pVdd->GetTypeCategory() == DataPoolTypeClass::StringA);
+      ASSERT(m_pVdd->GetTypeClass() == DataPoolTypeClass::String || 
+        m_pVdd->GetTypeClass() == DataPoolTypeClass::StringA);
 
       auto pDataPoolImpl = reinterpret_cast<DataPoolImpl*>(m_pDataPool);
 
@@ -212,7 +221,7 @@ namespace Marimo
     {
       return (m_pVdd == NULL || m_pVdd->GetTypeDesc() == NULL)
         ? DataPoolTypeClass::Undefine
-        : m_pVdd->GetTypeCategory();
+        : m_pVdd->GetTypeClass();
     }
 
     inline GXBOOL InlIsPrimaryType() const
@@ -289,7 +298,7 @@ namespace Marimo
 
     void first_child(iterator& iter) const
     {
-      if(m_pVdd->GetTypeCategory() == DataPoolTypeClass::Structure)
+      if(m_pVdd->GetTypeClass() == DataPoolTypeClass::Structure)
       {
         iter.pDataPool = m_pDataPool;
         iter.pVarDesc  = m_pVdd->MemberBeginPtr();
@@ -583,11 +592,15 @@ namespace Marimo
       SET_FLAG(r, CAPS_FIXED);
     }
 
-    if(m_vtbl->NewBack == DynamicArray_NewBack) {
+    if(m_vtbl->NewBack == DynamicArray_NewBack || m_vtbl->NewBack == DynamicArrayNX16B_NewBack) {
       SET_FLAG(r, CAPS_DYNARRAY);
       ASSERT(m_pVdd->IsDynamicArray());
     }
-    else if(m_vtbl->GetIndex == Array_GetIndex) { // 静态数组都具有 Array_GetIndex 方法
+    else if(m_vtbl->GetIndex == Array_GetIndex ||   // 静态数组都具有 Array_GetIndex 方法
+      m_vtbl->GetIndex == DynamicArray_GetIndex ||
+      m_vtbl->GetIndex == ArrayNX16B_GetIndex ||
+      m_vtbl->GetIndex == DynamicArrayNX16B_GetIndex )
+    {
       SET_FLAG(r, CAPS_ARRAY);
       ASSERT(GetLength() > 1);
     }
@@ -639,6 +652,7 @@ namespace Marimo
   Variable  Variable::MemberOf    (GXLPCSTR szName) const               { return m_vtbl->GetMember   (CAST2VARPTRC(this), szName);            }
   Variable  Variable::IndexOf     (GXSIZE_T nIndex) const               { return m_vtbl->GetIndex    (CAST2VARPTRC(this), nIndex);            }
   GXSIZE_T  Variable::GetLength   () const                              { return m_vtbl->GetLength   (CAST2VARPTRC(this));                    }
+  GXBOOL    Variable::Sliding     (Variable* pElement, GXINT nOffset)   { return m_vtbl->Sliding     (CAST2VARPTR (this), pElement, nOffset); }
   Variable  Variable::NewBack     (GXUINT nIncrease)                    { return m_vtbl->NewBack     (CAST2VARPTR (this), nIncrease);         }
   GXBOOL    Variable::Remove      (GXSIZE_T nIndex, GXSIZE_T nCount)    { return m_vtbl->Remove      (CAST2VARPTR (this), nIndex, nCount);    }
   clStringW Variable::ToStringW   () const                              { return m_vtbl->ToStringW   (CAST2VARPTRC(this));                    }
@@ -775,7 +789,7 @@ namespace Marimo
   GXBOOL Object_Retain(VarImpl* pThis, GUnknown* pUnknown)
   {
     // pUnknown 不能等于 m_pDataPool 否则永远也不会释放
-    ASSERT(pThis->InlGetVDD()->GetTypeCategory() == DataPoolTypeClass::Object);
+    ASSERT(pThis->InlGetVDD()->GetTypeClass() == DataPoolTypeClass::Object);
     if( ! pThis->IsSamePool((DataPool*)pUnknown))
     {
       InlSetNewObjectT(*(GUnknown**)pThis->GetPtr(), pUnknown);
@@ -787,7 +801,7 @@ namespace Marimo
 
   GXBOOL Object_Query(const VarImpl* pThis, GUnknown** ppUnknown)
   {
-    ASSERT(pThis->InlGetVDD()->GetTypeCategory() == DataPoolTypeClass::Object);
+    ASSERT(pThis->InlGetVDD()->GetTypeClass() == DataPoolTypeClass::Object);
 
     *ppUnknown = *((GUnknown**)pThis->GetPtr());
     if(*ppUnknown) {
@@ -1480,6 +1494,84 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
+  GXBOOL Exception_Sliding(const VarImpl* pThis, DataPoolVariable* pElement, GXINT nOffset)
+  {
+    CLOG_ERROR("%s exception\n", __FUNCTION__);
+    return FALSE;
+  }
+
+  // Sliding方法限制Element必须属于Array对象中的元素或者元素成员
+  // 但是Offset参数不限制范围
+  // 例如：
+  // float array[100];
+  // float3 vertices[100];
+  // float b;
+  //
+  // Variable var_array     (= float array[100])
+  // Variable var_element   (= array[0])
+  // Variable var_other     (= b)
+  // var_array.Sliding(var_element, 1);   // 合法
+  // var_array.Sliding(var_element, 10);  // 合法
+  // var_array.Sliding(var_element, -20); // 合法，但是访问越界
+  // var_array.Sliding(var_element, 200); // 合法，但是访问越界
+  // var_array.Sliding(var_other, 200);   // 不合法
+  //
+  // Variable var_vertices  (= vertices)
+  // Variable var_posy      (= var_vertices[10].y)
+  // var_vertices.Sliding(var_posy, 1)    // 合法
+  // var_vertices.Sliding(var_posy, -10)  // 合法，但是访问越界
+  // var_vertices.Sliding(var_other, 1)   // 不合法
+  // var_vertices.Sliding(var_element, 1) // 不合法
+  // var_vertices.Sliding(var_array, 1)   // 不合法
+
+  GXBOOL StaticArray_Sliding(const VarImpl* pThis, Variable* pElement, GXINT nOffset)
+  {
+    const GXSIZE_T nArrayPtr = reinterpret_cast<GXSIZE_T>(pThis->GetPtr());
+    const GXSIZE_T nElementPtr = reinterpret_cast<GXSIZE_T>(pElement->GetPtr());
+    if(nArrayPtr <= nElementPtr && nElementPtr < nArrayPtr + pThis->GetSize())
+    {
+      return static_cast<VarImpl*>(pElement)->InlMoveAbsOffset(pThis->InlGetVDD()->TypeSize() * nOffset);
+    }
+    return FALSE;
+  }
+
+  GXBOOL DynamicArray_Sliding(const VarImpl* pThis, Variable* pElement, GXINT nOffset)
+  {
+    DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
+    const GXSIZE_T nArrayPtr = reinterpret_cast<GXSIZE_T>(pArrayBuffer->GetPtr());
+    const GXSIZE_T nElementPtr = reinterpret_cast<GXSIZE_T>(pElement->GetPtr());
+    if(nArrayPtr <= nElementPtr && nElementPtr < nArrayPtr + pThis->GetSize())
+    {
+      return static_cast<VarImpl*>(pElement)->InlMoveAbsOffset(pThis->InlGetVDD()->TypeSize() * nOffset);
+    }
+    return FALSE;
+  }
+
+  GXBOOL StaticArrayNX16B_Sliding(const VarImpl* pThis, Variable* pElement, GXINT nOffset)
+  {
+    const GXSIZE_T nArrayPtr = reinterpret_cast<GXSIZE_T>(pThis->GetPtr());
+    const GXSIZE_T nElementPtr = reinterpret_cast<GXSIZE_T>(pElement->GetPtr());
+    if(nArrayPtr <= nElementPtr && nElementPtr < nArrayPtr + pThis->GetSize())
+    {
+      return static_cast<VarImpl*>(pElement)->InlMoveAbsOffset(ALIGN_16(pThis->InlGetVDD()->TypeSize()) * nOffset);
+    }
+    return FALSE;
+  }
+
+  GXBOOL DynamicArrayNX16B_Sliding(const VarImpl* pThis, Variable* pElement, GXINT nOffset)
+  {
+    DataPoolArray* pArrayBuffer = *(DataPoolArray**)pThis->GetPtr();
+    const GXSIZE_T nArrayPtr = reinterpret_cast<GXSIZE_T>(pArrayBuffer->GetPtr());
+    const GXSIZE_T nElementPtr = reinterpret_cast<GXSIZE_T>(pElement->GetPtr());
+    if(nArrayPtr <= nElementPtr && nElementPtr < nArrayPtr + pThis->GetSize())
+    {
+      return static_cast<VarImpl*>(pElement)->InlMoveAbsOffset(ALIGN_16(pThis->InlGetVDD()->TypeSize()) * nOffset);
+    }
+    return FALSE;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
   clStringW DynamicArray_ToStringW(const VarImpl* pThis)
   {
     return clStringW(pThis->GetTypeName());
@@ -1539,40 +1631,42 @@ namespace Marimo
   namespace Implement
   {
     Variable::VTBL s_PrimaryVtbl2[] = {{
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Primary_ParseW          , // ParseW
       Primary_ParseA          , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Primary_ToFloat         , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Primary_ToFloat         , // ToFloat
       Primary_ToStringW       , // GetAsStringW
       Primary_ToStringA       , // GetAsStringA
       Primary_SetAsInteger    , // SetAsInteger
       Primary_SetAsInt64      , // SetAsInt64
-      Primary_SetAsFloat      , // SetAsFloat  
+      Primary_SetAsFloat      , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Primary_GetData         , // GetData     
-      Primary_SetData         , // SetData     
+      Primary_GetData         , // GetData
+      Primary_SetData         , // SetData
     },{ // const
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
       Exception_ParseA        , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Primary_ToFloat         , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Primary_ToFloat         , // ToFloat
       Primary_ToStringW       , // GetAsStringW
       Primary_ToStringA       , // GetAsStringA
       Exception_SetAsInteger  , // SetAsInteger
@@ -1587,22 +1681,23 @@ namespace Marimo
     }};
 
     Variable::VTBL s_EnumVtbl2[] = {{
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Enum_ParseT<clStringW>  , // ParseW
       Enum_ParseT<clStringA>  , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Exception_ToFloat       , // ToFloat
       Enum_ToStringW          , // GetAsStringW
       Enum_ToStringA          , // GetAsStringA
       Primary_SetAsInteger    , // SetAsInteger
       Primary_SetAsInt64      , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsFloat    , // SetAsFloat
       Enum_SetAsStringW       , // SetAsStringW
       Enum_SetAsStringA       , // SetAsStringA
       Exception_Retain        ,
@@ -1610,120 +1705,125 @@ namespace Marimo
       Primary_GetData         , // GetData
       Primary_SetData         , // SetData
     },{
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
       Exception_ParseA        , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Exception_ToFloat       , // ToFloat
       Enum_ToStringW          , // GetAsStringW
       Enum_ToStringA          , // GetAsStringA
       Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsFloat    , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Primary_GetData         , // GetData     
-      Exception_SetData       , // SetData     
+      Primary_GetData         , // GetData
+      Exception_SetData       , // SetData
     }};
 
     Variable::VTBL s_FlagVtbl2[] = {{
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Flag_ParseW             , // ParseW
       Flag_ParseA             , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Exception_ToFloat       , // ToFloat
       Flag_ToStringW          , // GetAsStringW
       Flag_ToStringA          , // GetAsStringA
       Primary_SetAsInteger    , // SetAsInteger
       Primary_SetAsInt64      , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsFloat    , // SetAsFloat
       Flag_SetAsStringW       , // SetAsStringW
       Flag_SetAsStringA       , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Primary_GetData         , // GetData     
-      Primary_SetData         , // SetData     
+      Primary_GetData         , // GetData
+      Primary_SetData         , // SetData
     },{
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
       Exception_ParseA        , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Exception_ToFloat       , // ToFloat
       Flag_ToStringW          , // GetAsStringW
       Flag_ToStringA          , // GetAsStringA
       Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsFloat    , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Primary_GetData         , // GetData     
-      Exception_SetData       , // SetData     
+      Primary_GetData         , // GetData
+      Exception_SetData       , // SetData
     }};
 
     Variable::VTBL s_StringVtbl2[] = {{
-      Unary_GetSize           , // GetSize      
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack      
-      Exception_Remove        , // Remove       
-      String_ParseT<clStringW>, // Parse        
-      String_ParseT<clStringA>, // Parse        
-      Exception_ToInteger     , // ToInteger 
-      Exception_ToInt64       , // ToInt64   
-      Exception_ToFloat       , // ToFloat   
-      String_ToStringW        , // ToStringW 
-      String_ToStringA        , // ToStringA 
-      Exception_SetAsInteger  , // SetAsInteger 
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
+      String_ParseT<clStringW>, // Parse
+      String_ParseT<clStringA>, // Parse
+      Exception_ToInteger     , // ToInteger
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
+      String_ToStringW        , // ToStringW
+      String_ToStringA        , // ToStringA
+      Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat   
-      String_SetAsStringW     , // SetAsStringW 
-      String_SetAsStringA     , // SetAsStringA 
+      Exception_SetAsFloat    , // SetAsFloat
+      String_SetAsStringW     , // SetAsStringW
+      String_SetAsStringA     , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Exception_GetData       , // GetData      
-      Exception_SetData       , // SetData      
+      Exception_GetData       , // GetData
+      Exception_SetData       , // SetData
     },{
-      Unary_GetSize           , // GetSize      
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack      
-      Exception_Remove        , // Remove       
-      Exception_ParseW        , // Parse        
-      Exception_ParseA        , // Parse        
-      Exception_ToInteger     , // ToInteger 
-      Exception_ToInt64       , // ToInt64   
-      Exception_ToFloat       , // ToFloat   
-      String_ToStringW        , // ToStringW 
-      String_ToStringA        , // ToStringA 
-      Exception_SetAsInteger  , // SetAsInteger 
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
+      Exception_ParseW        , // Parse
+      Exception_ParseA        , // Parse
+      Exception_ToInteger     , // ToInteger
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
+      String_ToStringW        , // ToStringW
+      String_ToStringA        , // ToStringA
+      Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat   
-      Exception_SetAsStringW  , // SetAsStringW 
-      Exception_SetAsStringA  , // SetAsStringA 
+      Exception_SetAsFloat    , // SetAsFloat
+      Exception_SetAsStringW  , // SetAsStringW
+      Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
       Exception_GetData       , // GetData
@@ -1735,6 +1835,7 @@ namespace Marimo
       Struct_GetMember        , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
+      Exception_Sliding       , // Sliding
       Exception_NewBack       , // NewBack
       Exception_Remove        , // Remove
       Struct_ParseW           , // ParseW
@@ -1746,9 +1847,9 @@ namespace Marimo
       Struct_ToStringA        , // ToStringA
       Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat   
-      Exception_SetAsStringW  , // SetAsStringW 
-      Exception_SetAsStringA  , // SetAsStringA 
+      Exception_SetAsFloat    , // SetAsFloat
+      Exception_SetAsStringW  , // SetAsStringW
+      Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
       Exception_GetData       , // GetData
@@ -1758,6 +1859,7 @@ namespace Marimo
       Struct_GetMember        , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
+      Exception_Sliding       , // Sliding
       Exception_NewBack       , // NewBack
       Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
@@ -1769,9 +1871,9 @@ namespace Marimo
       Struct_ToStringA        , // ToStringA
       Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat   
-      Exception_SetAsStringW  , // SetAsStringW 
-      Exception_SetAsStringA  , // SetAsStringA 
+      Exception_SetAsFloat    , // SetAsFloat
+      Exception_SetAsStringW  , // SetAsStringW
+      Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
       Exception_GetData       , // GetData
@@ -1783,6 +1885,7 @@ namespace Marimo
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
+      Exception_Sliding       , // Sliding
       Exception_NewBack       , // NewBack
       Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
@@ -1806,6 +1909,7 @@ namespace Marimo
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
+      Exception_Sliding       , // Sliding
       Exception_NewBack       , // NewBack
       Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
@@ -1827,22 +1931,23 @@ namespace Marimo
     }};
 
     Variable::VTBL s_StaticArrayVtbl2[] = {{
-      StaticArray_GetSize     , // GetSize     
-      Exception_GetMember     , // GetMember   
-      Array_GetIndex          , // GetIndex    
-      StaticArray_GetLength   , // GetLength   
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      StaticArray_GetSize     , // GetSize
+      Exception_GetMember     , // GetMember
+      Array_GetIndex          , // GetIndex
+      StaticArray_GetLength   , // GetLength
+      StaticArray_Sliding     , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       StaticArray_ParseW      , // ParseW
       StaticArray_ParseA      , // ParseA
       Exception_ToInteger     , // ToInteger
-      Exception_ToInt64       , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
       StaticArray_ToStringW   , // ToStringW
       StaticArray_ToStringA   , // ToStringA
       Exception_SetAsInteger  , // SetAsInteger
-      Exception_SetAsInt64    , // SetAsInt64  
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsInt64    , // SetAsInt64
+      Exception_SetAsFloat    , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
@@ -1850,22 +1955,23 @@ namespace Marimo
       Exception_GetData       , // GetData
       Exception_SetData       , // SetData
     },{
-      StaticArray_GetSize     , // GetSize     
-      Exception_GetMember     , // GetMember   
-      Array_GetIndex          , // GetIndex    
-      StaticArray_GetLength   , // GetLength   
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      StaticArray_GetSize     , // GetSize
+      Exception_GetMember     , // GetMember
+      Array_GetIndex          , // GetIndex
+      StaticArray_GetLength   , // GetLength
+      StaticArray_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
       Exception_ParseA        , // ParseA
       Exception_ToInteger     , // ToInteger
-      Exception_ToInt64       , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
       StaticArray_ToStringW   , // ToStringW
       StaticArray_ToStringA   , // ToStringA
       Exception_SetAsInteger  , // SetAsInteger
-      Exception_SetAsInt64    , // SetAsInt64  
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsInt64    , // SetAsInt64
+      Exception_SetAsFloat    , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
@@ -1877,8 +1983,9 @@ namespace Marimo
     Variable::VTBL s_DynamicArrayVtbl2[] = {{
       DynamicArray_GetSize    , // GetSize
       Exception_GetMember     , // GetMember
-      DynamicArray_GetIndex       , // GetIndex
+      DynamicArray_GetIndex   , // GetIndex
       DynamicArray_GetLength  , // GetLength
+      DynamicArray_Sliding    , // Sliding
       DynamicArray_NewBack    , // NewBack
       DynamicArray_Remove     , // Remove
       DynamicArray_ParseW     , // ParseW
@@ -1900,8 +2007,9 @@ namespace Marimo
     },{
       DynamicArray_GetSize    , // GetSize
       Exception_GetMember     , // GetMember
-      DynamicArray_GetIndex       , // GetIndex
+      DynamicArray_GetIndex   , // GetIndex
       DynamicArray_GetLength  , // GetLength
+      DynamicArray_Sliding    , // Sliding
       Exception_NewBack       , // NewBack
       Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
@@ -1923,160 +2031,167 @@ namespace Marimo
     }};
 //////////////////////////////////////////////////////////////////////////
     Variable::VTBL s_PrimaryVtbl = {
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Primary_ParseW          , // ParseW
       Primary_ParseA          , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Primary_ToFloat         , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Primary_ToFloat         , // ToFloat
       Primary_ToStringW       , // GetAsStringW
       Primary_ToStringA       , // GetAsStringA
       Primary_SetAsInteger    , // SetAsInteger
       Primary_SetAsInt64      , // SetAsInt64
-      Primary_SetAsFloat      , // SetAsFloat  
+      Primary_SetAsFloat      , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Primary_GetData         , // GetData     
-      Primary_SetData         , // SetData     
+      Primary_GetData         , // GetData
+      Primary_SetData         , // SetData
     };
 
     Variable::VTBL s_EnumVtbl = {
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Enum_ParseT<clStringW>  , // ParseW
       Enum_ParseT<clStringA>  , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Exception_ToFloat       , // ToFloat
       Enum_ToStringW          , // GetAsStringW
       Enum_ToStringA          , // GetAsStringA
       Primary_SetAsInteger    , // SetAsInteger
       Primary_SetAsInt64      , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsFloat    , // SetAsFloat
       Enum_SetAsStringW       , // SetAsStringW
       Enum_SetAsStringA       , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Primary_GetData         , // GetData     
-      Primary_SetData         , // SetData     
+      Primary_GetData         , // GetData
+      Primary_SetData         , // SetData
     };
 
     Variable::VTBL s_FlagVtbl = {
-      Unary_GetSize           , // GetSize     
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       Flag_ParseW             , // ParseW
       Flag_ParseA             , // ParseA
       Primary_ToInteger       , // ToInteger
-      Primary_ToInt64         , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Primary_ToInt64         , // ToInt64
+      Exception_ToFloat       , // ToFloat
       Flag_ToStringW          , // GetAsStringW
       Flag_ToStringA          , // GetAsStringA
       Primary_SetAsInteger    , // SetAsInteger
       Primary_SetAsInt64      , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsFloat    , // SetAsFloat
       Flag_SetAsStringW       , // SetAsStringW
       Flag_SetAsStringA       , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Primary_GetData         , // GetData     
-      Primary_SetData         , // SetData     
+      Primary_GetData         , // GetData
+      Primary_SetData         , // SetData
     };
 
     // 这个与 s_PrimaryVtbl 完全一致，所以合并了
     //Variable::VTBL s_DynamicPrimaryVtbl = {
-    //  Unary_GetSize           , // GetSize      
-    //  Exception_GetMember     , // GetMember    
-    //  Exception_GetIndex      , // GetIndex     
-    //  Unary_GetLength         , // GetLength    
-    //  Exception_NewBack       , // NewBack     
-    //  Exception_Remove        , // Remove      
+    //  Unary_GetSize           , // GetSize
+    //  Exception_GetMember     , // GetMember
+    //  Exception_GetIndex      , // GetIndex
+    //  Unary_GetLength         , // GetLength
+    //  Exception_NewBack       , // NewBack
+    //  Exception_Remove        , // Remove
     //  Primary_ParseW          , // ParseW
     //  Primary_ParseA          , // ParseA
     //  Primary_ToStringW       , // ToStringW
-    //  Exception_SetAsStringW  , // SetAsStringW 
-    //  Primary_ToStringA       , // ToStringA 
-    //  Exception_SetAsStringA  , // SetAsStringA 
-    //  Primary_ToFloat         , // ToFloat   
-    //  Primary_SetAsFloat      , // SetAsFloat   
-    //  Primary_ToInteger       , // ToInteger 
-    //  Primary_SetAsInteger    , // SetAsInteger 
-    //  Primary_ToInt64         , // ToInt64   
+    //  Exception_SetAsStringW  , // SetAsStringW
+    //  Primary_ToStringA       , // ToStringA
+    //  Exception_SetAsStringA  , // SetAsStringA
+    //  Primary_ToFloat         , // ToFloat
+    //  Primary_SetAsFloat      , // SetAsFloat
+    //  Primary_ToInteger       , // ToInteger
+    //  Primary_SetAsInteger    , // SetAsInteger
+    //  Primary_ToInt64         , // ToInt64
     //  Primary_SetAsInt64      , // SetAsInt64
     //  Exception_Retain        ,
     //  Exception_Query         ,
-    //  Primary_GetData         , // GetData      
-    //  Primary_SetData         , // SetData      
+    //  Primary_GetData         , // GetData
+    //  Primary_SetData         , // SetData
     //};
 
     Variable::VTBL s_StringVtbl = {
-      Unary_GetSize           , // GetSize      
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack      
-      Exception_Remove        , // Remove       
-      String_ParseT<clStringW>, // Parse        
-      String_ParseT<clStringA>, // Parse        
-      Exception_ToInteger     , // ToInteger 
-      Exception_ToInt64       , // ToInt64   
-      Exception_ToFloat       , // ToFloat   
-      String_ToStringW        , // ToStringW 
-      String_ToStringA        , // ToStringA 
-      Exception_SetAsInteger  , // SetAsInteger 
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
+      String_ParseT<clStringW>, // Parse
+      String_ParseT<clStringA>, // Parse
+      Exception_ToInteger     , // ToInteger
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
+      String_ToStringW        , // ToStringW
+      String_ToStringA        , // ToStringA
+      Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat   
-      String_SetAsStringW     , // SetAsStringW 
-      String_SetAsStringA     , // SetAsStringA 
+      Exception_SetAsFloat    , // SetAsFloat
+      String_SetAsStringW     , // SetAsStringW
+      String_SetAsStringA     , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Exception_GetData       , // GetData      
-      Exception_SetData       , // SetData      
+      Exception_GetData       , // GetData
+      Exception_SetData       , // SetData
     };
 
     Variable::VTBL s_StringAVtbl = {
-      Unary_GetSize           , // GetSize      
+      Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
-      Exception_NewBack       , // NewBack      
-      Exception_Remove        , // Remove       
-      String_ParseT<clStringW>, // Parse        
-      String_ParseT<clStringA>, // Parse        
-      Exception_ToInteger     , // ToInteger 
-      Exception_ToInt64       , // ToInt64   
-      Exception_ToFloat       , // ToFloat   
-      StringA_ToStringW       , // ToStringW 
-      StringA_ToStringA       , // ToStringA 
-      Exception_SetAsInteger  , // SetAsInteger 
+      Exception_Sliding       , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
+      String_ParseT<clStringW>, // Parse
+      String_ParseT<clStringA>, // Parse
+      Exception_ToInteger     , // ToInteger
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
+      StringA_ToStringW       , // ToStringW
+      StringA_ToStringA       , // ToStringA
+      Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat   
-      StringA_SetAsStringW    , // SetAsStringW 
-      StringA_SetAsStringA    , // SetAsStringA 
+      Exception_SetAsFloat    , // SetAsFloat
+      StringA_SetAsStringW    , // SetAsStringW
+      StringA_SetAsStringA    , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Exception_GetData       , // GetData      
-      Exception_SetData       , // SetData      
+      Exception_GetData       , // GetData
+      Exception_SetData       , // SetData
     };
+
     Variable::VTBL s_StructVtbl = {
-      Unary_GetSize           , // GetSize      
-      Struct_GetMember        , // GetMember    
-      Exception_GetIndex      , // GetIndex     
+      Unary_GetSize           , // GetSize
+      Struct_GetMember        , // GetMember
+      Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
+      Exception_Sliding       , // Sliding
       Exception_NewBack       , // NewBack
       Exception_Remove        , // Remove
       Struct_ParseW           , // ParseW
@@ -2088,44 +2203,45 @@ namespace Marimo
       Struct_ToStringA        , // ToStringA
       Exception_SetAsInteger  , // SetAsInteger
       Exception_SetAsInt64    , // SetAsInt64
-      Exception_SetAsFloat    , // SetAsFloat   
-      Exception_SetAsStringW  , // SetAsStringW 
-      Exception_SetAsStringA  , // SetAsStringA 
+      Exception_SetAsFloat    , // SetAsFloat
+      Exception_SetAsStringW  , // SetAsStringW
+      Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Exception_GetData       , // GetData      
-      Exception_SetData       , // SetData      
+      Exception_GetData       , // GetData
+      Exception_SetData       , // SetData
     };
 
     //Variable::VTBL s_DynamicStructVtbl = {
-    //  Unary_GetSize             , // GetSize     
-    //  Struct_GetMember          , // GetMember   
-    //  Exception_GetIndex        , // GetIndex    
-    //  Unary_GetLength           , // GetLength   
-    //  0                         , // NewBack     
-    //  0                         , // Remove      
+    //  Unary_GetSize             , // GetSize
+    //  Struct_GetMember          , // GetMember
+    //  Exception_GetIndex        , // GetIndex
+    //  Unary_GetLength           , // GetLength
+    //  0                         , // NewBack
+    //  0                         , // Remove
     //  Struct_ParseW             , // ParseW
     //  Struct_ParseA             , // ParseA
     //  Struct_ToStringW          , // ToStringW
     //  Exception_SetAsStringW    , // SetAsStringW
     //  Struct_ToStringA          , // ToStringA
     //  Exception_SetAsStringA    , // SetAsStringA
-    //  0                         , // ToFloat  
-    //  0                         , // SetAsFloat  
+    //  0                         , // ToFloat
+    //  0                         , // SetAsFloat
     //  0                         , // ToInteger
     //  0                         , // SetAsInteger
-    //  0                         , // ToInt64  
-    //  0                         , // SetAsInt64  
+    //  0                         , // ToInt64
+    //  0                         , // SetAsInt64
     //  Exception_Retain          ,
     //  Exception_Query           ,
-    //  0                         , // GetData     
-    //  0                         , // SetData     
+    //  0                         , // GetData
+    //  0                         , // SetData
     //};
     Variable::VTBL s_ObjectVtbl = {
       Unary_GetSize           , // GetSize
       Exception_GetMember     , // GetMember
       Exception_GetIndex      , // GetIndex
       Unary_GetLength         , // GetLength
+      Exception_Sliding       , // Sliding
       Exception_NewBack       , // NewBack
       Exception_Remove        , // Remove
       Exception_ParseW        , // ParseW
@@ -2172,103 +2288,107 @@ namespace Marimo
     //};
 
     Variable::VTBL s_StaticArrayVtbl = {
-      StaticArray_GetSize     , // GetSize     
-      Exception_GetMember     , // GetMember   
-      Array_GetIndex          , // GetIndex    
-      StaticArray_GetLength   , // GetLength   
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
+      StaticArray_GetSize     , // GetSize
+      Exception_GetMember     , // GetMember
+      Array_GetIndex          , // GetIndex
+      StaticArray_GetLength   , // GetLength
+      StaticArray_Sliding     , // Sliding
+      Exception_NewBack       , // NewBack
+      Exception_Remove        , // Remove
       StaticArray_ParseW      , // ParseW
       StaticArray_ParseA      , // ParseA
       Exception_ToInteger     , // ToInteger
-      Exception_ToInt64       , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
       StaticArray_ToStringW   , // ToStringW
       StaticArray_ToStringA   , // ToStringA
       Exception_SetAsInteger  , // SetAsInteger
-      Exception_SetAsInt64    , // SetAsInt64  
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsInt64    , // SetAsInt64
+      Exception_SetAsFloat    , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Exception_GetData       , // GetData     
-      Exception_SetData       , // SetData     
+      Exception_GetData       , // GetData
+      Exception_SetData       , // SetData
     };
 
     Variable::VTBL s_DynamicArrayVtbl = {
-      DynamicArray_GetSize    , // GetSize     
-      Exception_GetMember     , // GetMember   
-      DynamicArray_GetIndex       , // GetIndex    
-      DynamicArray_GetLength  , // GetLength   
-      DynamicArray_NewBack    , // NewBack     
-      DynamicArray_Remove     , // Remove      
+      DynamicArray_GetSize    , // GetSize
+      Exception_GetMember     , // GetMember
+      DynamicArray_GetIndex   , // GetIndex
+      DynamicArray_GetLength  , // GetLength
+      DynamicArray_Sliding    , // Sliding
+      DynamicArray_NewBack    , // NewBack
+      DynamicArray_Remove     , // Remove
       DynamicArray_ParseW     , // ParseW
       DynamicArray_ParseA     , // ParseA
       Exception_ToInteger     , // ToInteger
-      Exception_ToInt64       , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
+      Exception_ToInt64       , // ToInt64
+      Exception_ToFloat       , // ToFloat
       DynamicArray_ToStringW  , // ToStringW
       DynamicArray_ToStringA  , // ToStringA
       Exception_SetAsInteger  , // SetAsInteger
-      Exception_SetAsInt64    , // SetAsInt64  
-      Exception_SetAsFloat    , // SetAsFloat  
+      Exception_SetAsInt64    , // SetAsInt64
+      Exception_SetAsFloat    , // SetAsFloat
       Exception_SetAsStringW  , // SetAsStringW
       Exception_SetAsStringA  , // SetAsStringA
       Exception_Retain        ,
       Exception_Query         ,
-      Exception_GetData       , // GetData     
-      Exception_SetData       , // SetData     
+      Exception_GetData       , // GetData
+      Exception_SetData       , // SetData
     };
 
     Variable::VTBL s_StaticArrayNX16BVtbl = {
-      StaticArrayNX16B_GetSize     , // GetSize     
-      Exception_GetMember     , // GetMember   
-      ArrayNX16B_GetIndex          , // GetIndex    
-      StaticArray_GetLength   , // GetLength   
-      Exception_NewBack       , // NewBack     
-      Exception_Remove        , // Remove      
-      StaticArray_ParseW      , // ParseW
-      StaticArray_ParseA      , // ParseA
-      Exception_ToInteger     , // ToInteger
-      Exception_ToInt64       , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
-      StaticArray_ToStringW   , // ToStringW
-      StaticArray_ToStringA   , // ToStringA
-      Exception_SetAsInteger  , // SetAsInteger
-      Exception_SetAsInt64    , // SetAsInt64  
-      Exception_SetAsFloat    , // SetAsFloat  
-      Exception_SetAsStringW  , // SetAsStringW
-      Exception_SetAsStringA  , // SetAsStringA
-      Exception_Retain        ,
-      Exception_Query         ,
-      Exception_GetData       , // GetData     
-      Exception_SetData       , // SetData     
+      StaticArrayNX16B_GetSize  , // GetSize
+      Exception_GetMember       , // GetMember
+      ArrayNX16B_GetIndex       , // GetIndex
+      StaticArray_GetLength     , // GetLength
+      StaticArrayNX16B_Sliding  , // Sliding
+      Exception_NewBack         , // NewBack
+      Exception_Remove          , // Remove
+      StaticArray_ParseW        , // ParseW
+      StaticArray_ParseA        , // ParseA
+      Exception_ToInteger       , // ToInteger
+      Exception_ToInt64         , // ToInt64
+      Exception_ToFloat         , // ToFloat
+      StaticArray_ToStringW     , // ToStringW
+      StaticArray_ToStringA     , // ToStringA
+      Exception_SetAsInteger    , // SetAsInteger
+      Exception_SetAsInt64      , // SetAsInt64
+      Exception_SetAsFloat      , // SetAsFloat
+      Exception_SetAsStringW    , // SetAsStringW
+      Exception_SetAsStringA    , // SetAsStringA
+      Exception_Retain          ,
+      Exception_Query           ,
+      Exception_GetData         , // GetData
+      Exception_SetData         , // SetData
     };
 
     Variable::VTBL s_DynamicArrayNX16BVtbl = {
-      DynamicArrayNX16B_GetSize    , // GetSize     
-      Exception_GetMember          , // GetMember   
-      DynamicArrayNX16B_GetIndex   , // GetIndex    
-      DynamicArrayNX16B_GetLength  , // GetLength   
-      DynamicArrayNX16B_NewBack    , // NewBack     
-      DynamicArrayNX16B_Remove     , // Remove      
-      DynamicArray_ParseW     , // ParseW
-      DynamicArray_ParseA     , // ParseA
-      Exception_ToInteger     , // ToInteger
-      Exception_ToInt64       , // ToInt64  
-      Exception_ToFloat       , // ToFloat  
-      DynamicArray_ToStringW  , // ToStringW
-      DynamicArray_ToStringA  , // ToStringA
-      Exception_SetAsInteger  , // SetAsInteger
-      Exception_SetAsInt64    , // SetAsInt64  
-      Exception_SetAsFloat    , // SetAsFloat  
-      Exception_SetAsStringW  , // SetAsStringW
-      Exception_SetAsStringA  , // SetAsStringA
-      Exception_Retain        ,
-      Exception_Query         ,
-      Exception_GetData       , // GetData     
-      Exception_SetData       , // SetData     
+      DynamicArrayNX16B_GetSize   , // GetSize
+      Exception_GetMember         , // GetMember
+      DynamicArrayNX16B_GetIndex  , // GetIndex
+      DynamicArrayNX16B_GetLength , // GetLength
+      DynamicArrayNX16B_Sliding   , // Sliding
+      DynamicArrayNX16B_NewBack   , // NewBack
+      DynamicArrayNX16B_Remove    , // Remove
+      DynamicArray_ParseW         , // ParseW
+      DynamicArray_ParseA         , // ParseA
+      Exception_ToInteger         , // ToInteger
+      Exception_ToInt64           , // ToInt64
+      Exception_ToFloat           , // ToFloat
+      DynamicArray_ToStringW      , // ToStringW
+      DynamicArray_ToStringA      , // ToStringA
+      Exception_SetAsInteger      , // SetAsInteger
+      Exception_SetAsInt64        , // SetAsInt64
+      Exception_SetAsFloat        , // SetAsFloat
+      Exception_SetAsStringW      , // SetAsStringW
+      Exception_SetAsStringA      , // SetAsStringA
+      Exception_Retain            ,
+      Exception_Query             ,
+      Exception_GetData           , // GetData
+      Exception_SetData           , // SetData
     };
   } // namespace Implement
 } // namespace Marimo
