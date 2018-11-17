@@ -168,6 +168,12 @@ namespace Marimo
   };
   typedef const DATAPOOL_TYPE_DECLARATION* LPCTYPEDECL;
 
+  // 想用的新定义
+  typedef DATAPOOL_VARIABLE_DECLARATION   DATAPOOL_DECLARATION;
+  typedef DATAPOOL_TYPE_DECLARATION       DATAPOOL_TYPE_DEFINITION;
+  typedef DATAPOOL_ENUM_DECLARATION       DATAPOOL_ENUMERATION;
+
+
   //////////////////////////////////////////////////////////////////////////
 
   // 内部储存描述结构体, 同时也是文件储存的结构体声明

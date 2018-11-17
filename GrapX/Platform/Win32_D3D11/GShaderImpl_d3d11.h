@@ -214,10 +214,13 @@ namespace GrapX
 {
   namespace D3D11
   {
+    typedef clvector<Marimo::DATAPOOL_DECLARATION>      DataPoolDeclaration_T;
+    typedef clvector<Marimo::DATAPOOL_TYPE_DEFINITION>  DataPoolTypeDefinition_T;
+    struct DATAPOOL_MAPPER;
+
     class ShaderImpl : public Shader
     {
       typedef ::D3D11::GXGraphicsImpl GXGraphicsImpl;
-      typedef clvector<Marimo::DATAPOOL_VARIABLE_DECLARATION> DataPoolVariableDeclaration_T;
 
     protected:
       enum class TargetType : GXUINT
@@ -252,8 +255,9 @@ namespace GrapX
       virtual ~ShaderImpl();
 
       GXBOOL InitShader(GXLPCWSTR szResourceDir, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount);
-      GXBOOL Reflect(ID3D11ShaderReflection* pReflection);
-      GXBOOL Reflect_ConstantBuffer(DataPoolVariableDeclaration_T& aArray, ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer, const D3D11_SHADER_BUFFER_DESC& buffer_desc);
+      GXBOOL Reflect(DATAPOOL_MAPPER& decl_mapper, ID3D11ShaderReflection* pReflection);
+      GXBOOL Reflect_ConstantBuffer(DataPoolDeclaration_T& aArray, DATAPOOL_MAPPER& aStructDesc, ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer, const D3D11_SHADER_BUFFER_DESC& buffer_desc);
+      GXLPCSTR Reflect_MakeTypename(DATAPOOL_MAPPER& aStructDesc, D3D11_SHADER_TYPE_DESC& type_desc, ID3D11ShaderReflectionType* pReflectionType);
 
       static TargetType TargetNameToType  (GXLPCSTR szTargetName);
       static GXHRESULT  CompileShader     (INTERMEDIATE_CODE* pInterCode, const GXSHADER_SOURCE_DESC* pShaderDesc, ID3DInclude* pInclude);
