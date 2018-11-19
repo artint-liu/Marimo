@@ -26,6 +26,8 @@
 // 私有头文件
 #include <GrapX/VertexDecl.h>
 #include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
+#include "GrapX/DataPoolIterator.h"
 #include "Canvas/GXResourceMgr.h"
 #include "GrapX/GXCanvas3D.h"
 #include "Platform/CommonBase/GXGraphicsBaseImpl.h"
@@ -46,9 +48,13 @@ namespace D3D11
     _NAME"1x1", _NAME"1x2", _NAME"1x3", _NAME"1x4",\
     _NAME"2x1", _NAME"2x2", _NAME"2x3", _NAME"2x4",\
     _NAME"3x1", _NAME"3x2", _NAME"3x3", _NAME"3x4",\
-    _NAME"4x1", _NAME"4x2", _NAME"4x3", _NAME"4x4",
+    _NAME"4x1", _NAME"4x2", _NAME"4x3", _NAME"4x4",\
+    "row_"_NAME"1x1", "row_"_NAME"1x2", "row_"_NAME"1x3", "row_"_NAME"1x4", \
+    "row_"_NAME"2x1", "row_"_NAME"2x2", "row_"_NAME"2x3", "row_"_NAME"2x4", \
+    "row_"_NAME"3x1", "row_"_NAME"3x2", "row_"_NAME"3x3", "row_"_NAME"3x4", \
+    "row_"_NAME"4x1", "row_"_NAME"4x2", "row_"_NAME"4x3", "row_"_NAME"4x4",
 
-  static char* s_szTypeName[][20]{
+  static char* s_szTypeName[][36]{
     {DEFINE_TYPE_LIST("float")}, // 0
     {DEFINE_TYPE_LIST("int")}, // 1
     {DEFINE_TYPE_LIST("bool")}, // 2
@@ -470,6 +476,7 @@ namespace D3D11
 } // namespace D3D11
 
 #define STRUCT_PREFIX_NAME "st_noname_"
+#define CB_PREFIX_NAME "cb_"
 namespace GrapX
 {
   namespace D3D11
@@ -536,16 +543,22 @@ namespace GrapX
         for(size_t i = 0; i < nCount; i++)
         {
           rDest.push_back(pSrc[i]);
-          rDest.back().Name = Strings.add(pSrc[i].Name);
           if(pSrc[i].Type == NULL) {
             continue;
           }
           else if(clstd::strncmpT(pSrc[i].Type, STRUCT_PREFIX_NAME, sizeof(STRUCT_PREFIX_NAME) - 1) != 0)
           {
             // 确保是内置类型
-            ASSERT(clstd::strncmpT(pSrc[i].Type, "int", 3) == 0 || clstd::strncmpT(pSrc[i].Type, "uint", 3) == 0 ||
-              clstd::strncmpT(pSrc[i].Type, "bool", 3) == 0 || clstd::strncmpT(pSrc[i].Type, "float", 3) == 0);
+            ASSERT(clstd::strncmpT(pSrc[i].Type, "int", 3) == 0 || clstd::strncmpT(pSrc[i].Type, "uint", 4) == 0 ||
+              clstd::strncmpT(pSrc[i].Type, "bool", 4) == 0 || clstd::strncmpT(pSrc[i].Type, "float", 5) == 0 ||
+              clstd::strncmpT(pSrc[i].Type, "row_int", 7) == 0 || clstd::strncmpT(pSrc[i].Type, "row_uint", 8) == 0 ||
+              clstd::strncmpT(pSrc[i].Type, "row_bool", 8) == 0 || clstd::strncmpT(pSrc[i].Type, "row_float", 9) == 0);
+            rDest.back().Name = Strings.add(pSrc[i].Name);
             continue;
+          }
+          else
+          {
+            rDest.back().Name = Strings.add(pSrc[i].Name);
           }
           
           size_t nMemberCount;
@@ -620,17 +633,14 @@ namespace GrapX
           return FALSE;
         }
         dest.Copy(dest.aGlobal, &mapper_a.aGlobal.front(), mapper_a.aGlobal.size(), &mapper_a);
-        //dest.aGlobal = mapper_a.aGlobal;
       }
       else if(_CL_NOT_(mapper_a.aGlobal.empty()))
       {
         dest.Copy(dest.aGlobal, &mapper_a.aGlobal.front(), mapper_a.aGlobal.size(), &mapper_a);
-        //dest.aGlobal = mapper_a.aGlobal;
       }
       else if(_CL_NOT_(mapper_b.aGlobal.empty()))
       {
         dest.Copy(dest.aGlobal, &mapper_b.aGlobal.front(), mapper_b.aGlobal.size(), &mapper_b);
-        //dest.aGlobal = mapper_b.aGlobal;
       }
 
       typedef clmap<clStringA, int> CBNameDict;
@@ -658,7 +668,7 @@ namespace GrapX
           const Marimo::DATAPOOL_DECLARATION* pCBListA = mapper_a.GetConstantBufferListByIndex(itFindA->second, &nCBCountA);
           const Marimo::DATAPOOL_DECLARATION* pCBListB = mapper_b.GetConstantBufferListByIndex(itFindB->second, &nCBCountB);
 
-          if(CompareVariableDeclarationArray(pCBListA, nCBCountA, pCBListB, nCBCountB, mapper_a, mapper_b) == FALSE)
+          if(CompareVariableDeclarationArray(pCBListA, nCBCountA - 1, pCBListB, nCBCountB - 1, mapper_a, mapper_b) == FALSE)
           {
             CLOG_WARNING("const buffer(%s) 名字一致但是变量不一致", *iter_name);
             return FALSE;
@@ -713,6 +723,7 @@ namespace GrapX
       : m_pGraphicsImpl(pGraphicsImpl)
       , m_pD3D11VertexShader(NULL)
       , m_pD3D11PixelShader(NULL)
+      , m_buffer(8)
     {
     }
 
@@ -773,10 +784,19 @@ namespace GrapX
       }
 
       DATAPOOL_MAPPER decl_mapper;
-      if((bval = MergeDataPoolMapped(decl_mapper, decl_mapper_ps, decl_mapper_vs)) == FALSE)
+      if((bval = MergeDataPoolMapped(decl_mapper, decl_mapper_ps, decl_mapper_vs)))
+      {
+        bval = BuildDataPoolDecl(decl_mapper);
+      }
+      
+      if(_CL_NOT_(bval))
       {
         SAFE_RELEASE(m_pD3D11PixelShader);
         SAFE_RELEASE(m_pD3D11VertexShader);
+      }
+      else
+      {
+        DbgCheck(aCodes);
       }
 
       //SAFE_RELEASE(InterCode.pReflection);
@@ -835,7 +855,7 @@ namespace GrapX
 
         if(clstd::strcmpT(buffer_desc.Name, "$Globals") == 0) {
           Reflect_ConstantBuffer(decl_mapper.aGlobal, decl_mapper, pReflectionConstantBuffer, buffer_desc);
-          decl_mapper.aGlobal.push_back(sEmpty);
+          //decl_mapper.aGlobal.push_back(sEmpty);
         }
         else {
           clStringA strCBName = "cb_";
@@ -917,9 +937,14 @@ namespace GrapX
         break;
 
       case D3D_SVC_MATRIX_COLUMNS:
-      case D3D_SVC_MATRIX_ROWS:
         strTypeName.AppendFormat("%dx%d", type_desc.Rows, type_desc.Columns);
         type_class = 4 + (type_desc.Rows - 1) * 4 + (type_desc.Columns - 1);
+        break;
+
+      case D3D_SVC_MATRIX_ROWS:
+        strTypeName.Insert(0, "row_");
+        strTypeName.AppendFormat("%dx%d", type_desc.Rows, type_desc.Columns);
+        type_class = 20 + (type_desc.Rows - 1) * 4 + (type_desc.Columns - 1);
         break;
 
       case D3D_SVC_STRUCT:
@@ -1021,6 +1046,185 @@ namespace GrapX
       //  TRACE("Variable: (%s)%s (start:%d, end:%d)[%d]\n", strDbgTypeName.CStr(), variable_desc.Name,
       //    variable_desc.StartOffset, variable_desc.StartOffset + variable_desc.Size, variable_desc.Size);
       //}
+    }
+
+    GXBOOL ShaderImpl::BuildDataPoolDecl(DATAPOOL_MAPPER& mapper)
+    {
+      // mapper 是会被修改的
+      // 缓冲区顺序
+      // *.字符串
+      // *.结构体成员列表
+      // *.CB成员列表（本质也是结构体）
+      // *.全局变量列表（CB作为结构体变量在尾部声明）<- m_pDataPoolDecl
+      // *.结构体类型定义 <- m_pDataPoolTypeDef
+      // *.CB结构体类型
+
+      // 把 constant buffer 作为结构体添加在局部变量后面
+      Marimo::DATAPOOL_DECLARATION desc = { NULL };
+      clStringA str;
+      for(size_t i = 0; i < mapper.aConstantBuffers.size(); i++)
+      {
+        str = mapper.aConstantBuffers[i].Name + sizeof(CB_PREFIX_NAME) - 1;
+        desc.Type = mapper.aConstantBuffers[i].Name;
+        desc.Name = mapper.Strings.add(str);
+        mapper.aGlobal.push_back(desc);
+      }
+
+      // 计算总缓冲区大小
+      const size_t nStringBufSize = mapper.Strings.buffer_size();
+      const size_t nTotalSize = nStringBufSize +
+        sizeof(Marimo::DATAPOOL_DECLARATION) * (mapper.aGlobal.size() + mapper.aMembers.size() + mapper.aCBMembers.size() + 1) +
+        sizeof(Marimo::DATAPOOL_TYPE_DECLARATION) * (mapper.aConstantBuffers.size() + mapper.aTypes.size() + 1);
+      m_buffer.Reserve(nTotalSize);
+      m_buffer.Resize(nStringBufSize, FALSE);
+
+      // 所有字符串写入缓冲区
+      mapper.Strings.gather(reinterpret_cast<GXLPCSTR>(m_buffer.GetPtr()));
+      
+      // 拷贝变量列表
+      TRACE("%s:\n", __FUNCTION__);
+      DataPoolDeclaration_T aDecl[] = {mapper.aMembers, mapper.aCBMembers, mapper.aGlobal};
+      Marimo::DATAPOOL_DECLARATION* pMemberBase = reinterpret_cast<Marimo::DATAPOOL_DECLARATION*>(
+        reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
+
+      for(int n = 0; n < 3; n++)
+      {
+        if(n == 2) {
+          m_pDataPoolDecl = reinterpret_cast<Marimo::DATAPOOL_DECLARATION*>(
+            reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
+        }
+
+        DataPoolDeclaration_T& rDecl = aDecl[n];
+        for(size_t i = 0; i < rDecl.size(); i++)
+        {
+          if(rDecl[i].Name && rDecl[i].Type)
+          {
+            rDecl[i].Name = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(rDecl[i].Name));
+            if(clstd::strncmpT(rDecl[i].Type, STRUCT_PREFIX_NAME, sizeof(STRUCT_PREFIX_NAME) - 1) == 0) {
+              rDecl[i].Type = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(rDecl[i].Type));
+            }
+          }
+
+          ASSERT(rDecl[i].Name == NULL || rDecl[i].Name[0] != '\0');
+
+          TRACE("%s %s[%d]\n", rDecl[i].Type, rDecl[i].Name, rDecl[i].Count);
+          m_buffer.Append(&rDecl[i], sizeof(Marimo::DATAPOOL_DECLARATION));
+          ASSERT(mapper.Strings.buffer_size() == nStringBufSize);
+        }
+      }
+
+      // $Globals结尾
+      Marimo::DATAPOOL_DECLARATION sEmptyVar = { NULL };
+      m_buffer.Append(&sEmptyVar, sizeof(Marimo::DATAPOOL_DECLARATION));
+
+      // 没有结构体或者CB就把类型定义设置为NULL
+      if(mapper.aTypes.empty() && mapper.aConstantBuffers.empty()) {
+        m_pDataPoolTypeDef = NULL;
+      }
+      else {
+        m_pDataPoolTypeDef = reinterpret_cast<Marimo::DATAPOOL_TYPE_DEFINITION*>(
+          reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
+      }
+
+      TRACE("%s type list\n", __FUNCTION__);
+
+      for(int n = 0; n < 2; n++)
+      {
+        DataPoolTypeDefinition_T& rType = (n == 0) ? mapper.aTypes : mapper.aConstantBuffers;
+        for(size_t i = 0; i < rType.size(); i++)
+        {
+          rType[i].Name = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(rType[i].Name));
+          rType[i].as.Struct = pMemberBase + (size_t)rType[i].as.Struct;
+          rType[i].MemberPack = Marimo::DataPoolPack::NotCross16BoundaryShort; // 这里与D3D11文档写的不一样
+          // 文档上写的是结构体是16字节的整数倍，实际测试发现最后一个成员没有按照16字节扩充
+          TRACE("%s\n", rType[i].Name);
+          m_buffer.Append(&rType[i], sizeof(Marimo::DATAPOOL_TYPE_DEFINITION));
+          ASSERT(mapper.Strings.buffer_size() == nStringBufSize);
+#ifdef _DEBUG
+          for(int d = 0; rType[i].as.Struct[d].Name != NULL; d++)
+          {
+            ASSERT(rType[i].as.Struct[d].Name >= m_buffer.GetPtr() &&
+              (size_t)rType[i].as.Struct[d].Name < (size_t)m_buffer.GetPtr() + nStringBufSize);
+          }
+#endif
+        }
+        pMemberBase += mapper.aMembers.size();
+      }
+
+      // 类型列表的结尾
+      Marimo::DATAPOOL_TYPE_DEFINITION sEmptyType = { Marimo::DataPoolTypeClass::Undefine };
+      m_buffer.Append(&sEmptyType, sizeof(Marimo::DATAPOOL_TYPE_DEFINITION));
+
+      ASSERT(m_buffer.GetSize() == nTotalSize); // 校验实际填充大小和计算大小
+      return TRUE;
+    }
+
+    void ShaderImpl::DbgCheck(INTERMEDIATE_CODE::Array& aInterCode)
+    {
+#define CHECK_VALUE(_VAL, _EXPRA, _EXPRB) ASSERT((_VAL = _EXPRA) == _EXPRB)
+      Marimo::DataPool* pDataPool = NULL;
+      GXHRESULT hr = Marimo::DataPool::CreateDataPool(&pDataPool, NULL, m_pDataPoolTypeDef, m_pDataPoolDecl, Marimo::DataPoolCreation_NotCross16BytesBoundary);
+      ASSERT(GXSUCCEEDED(hr));
+
+      MOVariable var;
+      size_t dbg_value;
+      for(auto it = aInterCode.begin(); it != aInterCode.end(); ++it)
+      {
+        ID3D11ShaderReflection* pReflection = it->pReflection;
+        D3D11_SHADER_DESC D3D11ShaderDesc;
+        pReflection->GetDesc(&D3D11ShaderDesc);
+
+        for(UINT cb_index = 0; cb_index < D3D11ShaderDesc.ConstantBuffers; cb_index++)
+        {
+          D3D11_SHADER_BUFFER_DESC D3D11ShaderBufDesc;
+          ID3D11ShaderReflectionConstantBuffer* pD3D11CB = pReflection->GetConstantBufferByIndex(cb_index);
+          pD3D11CB->GetDesc(&D3D11ShaderBufDesc);
+          Marimo::DataPool::iterator iter_var;
+          Marimo::DataPool::iterator iter_var_end;
+          size_t nBaseOffset = 0;
+          if(clstd::strcmpT(D3D11ShaderBufDesc.Name, "$Globals") == 0)
+          {
+            iter_var = pDataPool->begin();
+            iter_var_end = pDataPool->end();
+          }
+          else
+          {
+            MOVariable varCB;
+            GXBOOL bval = pDataPool->QueryByName(D3D11ShaderBufDesc.Name, &varCB);
+            ASSERT(bval);
+            iter_var = varCB.begin();
+            iter_var_end = varCB.end();
+            nBaseOffset = varCB.GetOffset();
+          }
+          
+          for(UINT var_index = 0; iter_var != iter_var_end; ++iter_var, var_index++)
+          {
+            iter_var.ToVariable(var);
+
+            // 遇到结尾的CB定义就结束
+            if(clstd::strncmpT(var.GetTypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
+              break;
+            }
+
+            ID3D11ShaderReflectionVariable* pD3D11Var = pD3D11CB->GetVariableByIndex(var_index);
+            ASSERT(pD3D11Var);
+
+            D3D11_SHADER_VARIABLE_DESC D3D11VarDesc;
+            pD3D11Var->GetDesc(&D3D11VarDesc);
+            ID3D11ShaderReflectionType* pD3DType = pD3D11Var->GetType();
+            D3D11_SHADER_TYPE_DESC D3D11TypeDesc;
+            pD3DType->GetDesc(&D3D11TypeDesc);
+            TRACE("%s %d %d\n", var.GetName(), var.GetOffset(), var.GetSize());
+            ASSERT(clstd::strcmpT(var.GetName(), D3D11VarDesc.Name) == 0);
+            CHECK_VALUE(dbg_value, var.GetOffset() - nBaseOffset, D3D11VarDesc.StartOffset);
+            CHECK_VALUE(dbg_value, var.GetSize(), D3D11VarDesc.Size);
+          }
+        }
+
+
+      }
+#undef CHECK_VALUE
+      SAFE_RELEASE(pDataPool);
     }
 
     GXGraphics* ShaderImpl::GetGraphicsUnsafe() const

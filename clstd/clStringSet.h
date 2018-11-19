@@ -87,7 +87,7 @@ namespace clstd
     // 输出的table是原来字符串插入顺序经过排序后的新顺序和偏移
     // pTable[old_index].index  是排序后的顺序
     // pTable[old_index].offset 是排序后的新偏移
-    clsize sort(STRINGSETDESC* pTable) // 要保证 pTable 有足够的空间储存，空间从count()获得
+    clsize sort(STRINGSETDESC* pTable) // 要保证 pTable 有足够的空间储存，空间从size()获得
     {
       if(pTable == NULL) {
         return size();

@@ -243,6 +243,10 @@ namespace GrapX
       ID3D11VertexShader*         m_pD3D11VertexShader;
       ID3D11PixelShader*          m_pD3D11PixelShader;
 
+      Marimo::DATAPOOL_DECLARATION*     m_pDataPoolDecl;
+      Marimo::DATAPOOL_TYPE_DEFINITION* m_pDataPoolTypeDef;
+      clstd::MemBuffer                  m_buffer;
+
     public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
       GXHRESULT    AddRef            () override;
@@ -258,6 +262,10 @@ namespace GrapX
       GXBOOL Reflect(DATAPOOL_MAPPER& decl_mapper, ID3D11ShaderReflection* pReflection);
       GXBOOL Reflect_ConstantBuffer(DataPoolDeclaration_T& aArray, DATAPOOL_MAPPER& aStructDesc, ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer, const D3D11_SHADER_BUFFER_DESC& buffer_desc);
       GXLPCSTR Reflect_MakeTypename(DATAPOOL_MAPPER& aStructDesc, D3D11_SHADER_TYPE_DESC& type_desc, ID3D11ShaderReflectionType* pReflectionType);
+
+      GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper);
+
+      void DbgCheck(INTERMEDIATE_CODE::Array& aInterCode);
 
       static TargetType TargetNameToType  (GXLPCSTR szTargetName);
       static GXHRESULT  CompileShader     (INTERMEDIATE_CODE* pInterCode, const GXSHADER_SOURCE_DESC* pShaderDesc, ID3DInclude* pInclude);

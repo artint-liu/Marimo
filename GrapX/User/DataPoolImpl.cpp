@@ -144,6 +144,17 @@ namespace Marimo
       {DataPoolTypeClass::Structure, "float4x2", c_float4x2_NX16B, DataPoolPack::NotCross16BoundaryShort},
       {DataPoolTypeClass::Structure, "float4x3", c_float4x3_NX16B, DataPoolPack::NotCross16BoundaryShort},
       {DataPoolTypeClass::Structure, "float4x4", c_float4x4_NX16B, DataPoolPack::NotCross16BoundaryShort},
+
+      {DataPoolTypeClass::Structure, "row_float2x2", c_float2x2_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float2x3", c_float3x2_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float2x4", c_float4x2_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float3x2", c_float2x3_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float3x3", c_float3x3_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float3x4", c_float4x3_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float4x2", c_float2x4_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float4x3", c_float3x4_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      {DataPoolTypeClass::Structure, "row_float4x4", c_float4x4_NX16B, DataPoolPack::NotCross16BoundaryShort},
+      
       {DataPoolTypeClass::Undefine, NULL},
     };
 
@@ -770,7 +781,7 @@ namespace Marimo
           if(nMemberIndex != nEnd) {
             break;
           }
-          else if(IS_MARK_NX16B(m_dwRuntimeFlags)) {
+          else if(IS_MARK_NX16B(m_dwRuntimeFlags) && varDecl.Init) {
             CLOG_WARNING("NX16B 模式不支持初始化数组");
             break;
           }
