@@ -3,7 +3,11 @@
 
 enum   GXPlaformIdentity;
 class  GXApp;
-class  GXGraphics;
+
+namespace GrapX
+{
+  class  Graphics;
+}
 struct GXAPP_DESC;
 
 class IGXPlatform
@@ -11,8 +15,8 @@ class IGXPlatform
 public:
   GXApp* m_pApp;
   virtual ~IGXPlatform() {}
-  GXSTDINTERFACE(GXHRESULT    Initialize      (GXApp* m_pApp, GXAPP_DESC* pDesc, GXOUT GXGraphics** ppGraphics));
-  GXSTDINTERFACE(GXHRESULT    Finalize        (GXINOUT GXGraphics** ppGraphics));
+  GXSTDINTERFACE(GXHRESULT    Initialize      (GXApp* m_pApp, GXAPP_DESC* pDesc, GXOUT GrapX::Graphics** ppGraphics));
+  GXSTDINTERFACE(GXHRESULT    Finalize        (GXINOUT GrapX::Graphics** ppGraphics));
   GXSTDINTERFACE(GXHRESULT    MainLoop        ());
   GXSTDINTERFACE(GXVOID       GetPlatformID   (GXPlaformIdentity* pIdentity));
   GXSTDINTERFACE(GXLPCWSTR    GetRootDir      ());
@@ -22,7 +26,7 @@ public:
 
 // 平台方便创建的模板
 template<class _TIPlatform>
-_TIPlatform* AppCreatePlatformT(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
+_TIPlatform* AppCreatePlatformT(GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics)
 {
   _TIPlatform* pPlatform = new _TIPlatform;
   GXHRESULT hval = pPlatform->Initialize(pApp, pDesc, ppGraphics);

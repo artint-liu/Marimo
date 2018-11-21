@@ -15,7 +15,7 @@ class GXEffectImpl;
 extern "C" GXBOOL GXDLLAPI  gxSetRectEmpty  (GXLPRECT lprc);
 namespace D3D9
 {
-  class GXGraphicsImpl;
+  class GraphicsImpl;
   class GTextureImpl;
   class GRenderState;
 

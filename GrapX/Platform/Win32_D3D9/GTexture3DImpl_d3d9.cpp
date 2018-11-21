@@ -114,7 +114,7 @@ namespace D3D9
     return FALSE;
   }
 
-  GXGraphics* GTexture3DImpl::GetGraphicsUnsafe()
+  Graphics* GTexture3DImpl::GetGraphicsUnsafe()
   {
     return m_pGraphicsImpl;
   }
@@ -129,7 +129,7 @@ namespace D3D9
     return GXSUCCEEDED(D3DXSaveTextureToFileW(szFileName, d3diff, m_pTexture, NULL));
   }
 
-  GTexture3DImpl::GTexture3DImpl( GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXGraphics* pGraphics ) : GTexBaseImplT   ((GXGraphicsImpl*)pGraphics)
+  GTexture3DImpl::GTexture3DImpl( GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, Graphics* pGraphics ) : GTexBaseImplT   ((GraphicsImpl*)pGraphics)
     //: m_pGraphicsImpl ((GXGraphicsImpl*)pGraphics)
     , m_nWidth        (Width)
     , m_nHeight       (Height)
@@ -152,7 +152,7 @@ namespace D3D9
 
   //////////////////////////////////////////////////////////////////////////
   GTexture3DFromFile::GTexture3DFromFile(GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, 
-    GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXGraphics* pGraphics)
+    GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, Graphics* pGraphics)
     : GTexture3DImpl(Width, Height, Depth, MipLevels, Format, ResUsage, pGraphics)
     , m_strSrcFile(pSrcFile)
     , m_Filter    (Filter)

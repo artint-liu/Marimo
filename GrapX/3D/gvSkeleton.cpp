@@ -26,7 +26,7 @@
 #define SKELETON_FMT_BONEPT      "Skeleton@BonePT_%d"  // Parent & Transform
 
 using namespace clstd;
-using namespace GrapX;
+//using namespace GrapX;
 
 //////////////////////////////////////////////////////////////////////////
 struct BONE_PARENT_TRANSFORM
@@ -373,7 +373,7 @@ void GVSkeleton::BuildUpdateOrderTable()
   }
 }
 
-GXBOOL GVSkeleton::BuildRenderData(GXGraphics* pGraphics)
+GXBOOL GVSkeleton::BuildRenderData(GrapX::Graphics* pGraphics)
 {
   CombineFlags(GVNF_VISIBLE);
   SAFE_RELEASE(m_pPrimitive);
@@ -439,7 +439,7 @@ GXBOOL GVSkeleton::UpdateRenderData()
   //GXWORD* pIndices;
   const GXUINT nBoneCount = (GXUINT)m_aBones.size();
 
-  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Write);
+  GrapX::PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Write);
   //PrimitiveUtility::LockIndices locker_i(m_pPrimitive);
 
   //if(m_pPrimitive->Lock(0, 0, 0, 0, (GXLPVOID*)&pVertices, &pIndices))
@@ -684,7 +684,7 @@ GXHRESULT GVSkeleton::SaveFile(SmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVSkeleton::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
+GXHRESULT GVSkeleton::LoadFile(GrapX::Graphics* pGraphics, SmartRepository* pStorage)
 {
   Clear();
   int nBoneCount;

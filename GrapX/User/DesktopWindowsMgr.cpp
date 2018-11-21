@@ -119,7 +119,7 @@ GXHRESULT DesktopWindowsMgr::ManageWindowSurface(GXHWND hWnd, GXUINT message)
   {
     LPGXWND     lpDesktop = pWnd->GetDesktop();
     GXLPSTATION lpStation = GXLPWND_STATION_PTR(pWnd);
-    GXGraphics*  pGraphics = lpStation->pGraphics;
+    GrapX::Graphics*  pGraphics = lpStation->pGraphics;
 
     ASSERT(lpStation->m_pDesktopWindowsMgr == this);
     // TopLevel 窗口
@@ -329,7 +329,7 @@ GXBOOL DesktopWindowsMgr::SendPaintMessage()
   return TRUE;
 }
 
-GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
+GXBOOL DesktopWindowsMgr::Render(GrapX::GXCanvas* pCanvas)
 {
   GXCARET*      lpCaret        = &m_lpStation->SysCaret;
   LPGXWND        lpCaretTopWnd = NULL;
@@ -361,7 +361,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
 
     pCanvas->SetSamplerState(0, &SampDesc);
     pCanvas->SetSamplerState(1, &SampDesc);
-    pCanvas->SetParametersInfo(CPI_SETEXTTEXTURE, 1, m_lpStation->pBackDownSampTexA);
+    pCanvas->SetParametersInfo(GrapX::CPI_SETEXTTEXTURE, 1, m_lpStation->pBackDownSampTexA);
     pCanvas->SetEffect(m_lpStation->m_pStockObject->pAeroEffect);
 
     float2 vTexelKernel((float)(c_flScaleWidth / g_SystemMetrics[GXSM_CXSCREEN]),
@@ -420,7 +420,7 @@ GXBOOL DesktopWindowsMgr::Render(GXCanvas* pCanvas)
           m_lpStation->pGraphics->GetDeviceOriginTex(), NULL, NULL, GXTEXFILTER_LINEAR);
       }
       else {
-        pCanvas->SetCompositingMode(TEST_FLAG(m_dwFlags, GXDWM_ALPHA) ? CM_SourceOver : CM_SourceCopy);
+        pCanvas->SetCompositingMode(TEST_FLAG(m_dwFlags, GXDWM_ALPHA) ? GrapX::CM_SourceOver : GrapX::CM_SourceCopy);
       }
 
       pCanvas->SetRegion(pSurface->m_prgnWindows, TRUE);

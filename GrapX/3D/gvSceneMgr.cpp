@@ -15,7 +15,7 @@
 #include "GrapX/gvSceneMgr.h"
 #include "GrapX/GrapVR.h"
 
-GVSceneMgr::GVSceneMgr(GXGraphics* pGraphics)
+GVSceneMgr::GVSceneMgr(GrapX::Graphics* pGraphics)
   : m_pGraphics(pGraphics)
 {
 }
@@ -48,7 +48,7 @@ GXHRESULT GVSceneMgr::Release()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXHRESULT GVSceneMgr::Create(GXGraphics* pGraphics, GVSceneMgr** ppSceneMgr)
+GXHRESULT GVSceneMgr::Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr)
 {
 
   GVSceneMgr* pSceneMgr = new GVSceneMgr(pGraphics);

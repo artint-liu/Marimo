@@ -32,7 +32,7 @@
 #include "GrapX/GXCanvas3D.h"
 #include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
-#include "Platform/Win32_D3D11/GXCanvasImpl_D3D11.h"
+//#include "Platform/Win32_D3D11/GXCanvasImpl_D3D11.h"
 #include "clPathFile.h"
 #include "Platform/Win32_D3D11/GShaderImpl_D3D11.h"
 #include "clStringSet.h"
@@ -40,9 +40,11 @@
 //#define PS_REG_IDX_SHIFT 16
 //#define PS_REG_IDX_PART  (1 << PS_REG_IDX_SHIFT)
 #define PS_HANDLE_SHIFT 16
-namespace D3D11
+namespace GrapX
 {
-  //////////////////////////////////////////////////////////////////////////
+  namespace D3D11
+  {
+    //////////////////////////////////////////////////////////////////////////
 #define DEFINE_TYPE_LIST(_NAME) \
     _NAME, _NAME"2", _NAME"3", _NAME"4",  \
     _NAME"1x1", _NAME"1x2", _NAME"1x3", _NAME"1x4",\
@@ -54,12 +56,12 @@ namespace D3D11
     "row_"_NAME"3x1", "row_"_NAME"3x2", "row_"_NAME"3x3", "row_"_NAME"3x4", \
     "row_"_NAME"4x1", "row_"_NAME"4x2", "row_"_NAME"4x3", "row_"_NAME"4x4",
 
-  static char* s_szTypeName[][36]{
-    {DEFINE_TYPE_LIST("float")}, // 0
-    {DEFINE_TYPE_LIST("int")}, // 1
-    {DEFINE_TYPE_LIST("bool")}, // 2
-    {DEFINE_TYPE_LIST("uint")}, // 3
-  };
+    static char* s_szTypeName[][36]{
+      {DEFINE_TYPE_LIST("float")}, // 0
+      {DEFINE_TYPE_LIST("int")}, // 1
+      {DEFINE_TYPE_LIST("bool")}, // 2
+      {DEFINE_TYPE_LIST("uint")}, // 3
+    };
 #undef DEFINE_TYPE_LIST
 
   //////////////////////////////////////////////////////////////////////////
@@ -69,411 +71,413 @@ namespace D3D11
 #include "Platform/CommonInline/X_ShaderImpl.inl"
 
   //////////////////////////////////////////////////////////////////////////
-  STATIC_ASSERT(D3D_INCLUDE_LOCAL == c_D3D_INCLUDE_LOCAL);
-  STATIC_ASSERT(D3D_INCLUDE_SYSTEM == c_D3D_INCLUDE_SYSTEM);
-
-  //////////////////////////////////////////////////////////////////////////
-  GShaderImpl::GShaderImpl(GXGraphics* pGraphics)
-    : GShader         ()
-    , m_pGraphicsImpl  ((GXGraphicsImpl*)pGraphics)
-    , m_dwFlag        (NULL)
-    , m_pVertexShader (NULL)
-    , m_pPixelShader  (NULL)
-    , m_pVertexBuf    (NULL)
-    , m_pvct          (NULL)
-    , m_ppct          (NULL)
-    , m_cbCacheSize    (0)
-    , m_cbPixelTopIndex  (0)
-  {
-    memset(&m_VertexShaderConstTabDesc, 0, sizeof(m_VertexShaderConstTabDesc));
-    memset(&m_PixelShaderConstTabDesc, 0, sizeof(m_PixelShaderConstTabDesc));
-  }
-
-  GShaderImpl::~GShaderImpl()
-  {
-    CleanUp();
-  }
-
-  GXHRESULT GShaderImpl::CleanUp()
-  {
-    m_cbCacheSize = 0;
-    m_aConstDesc.clear();
-
-    SAFE_DELETE(m_pVertexBuf);
-    SAFE_RELEASE(m_ppct);
-    SAFE_RELEASE(m_pvct);
-    SAFE_RELEASE(m_pPixelShader);
-    SAFE_RELEASE(m_pVertexShader);
-
-    for(BufPairArray::iterator it = m_aBufPairs.begin();
-      it != m_aBufPairs.end(); ++it)
+    STATIC_ASSERT(D3D_INCLUDE_LOCAL == c_D3D_INCLUDE_LOCAL);
+    STATIC_ASSERT(D3D_INCLUDE_SYSTEM == c_D3D_INCLUDE_SYSTEM);
+#ifdef REFACTOR_GRAPX_SHADER
+    //////////////////////////////////////////////////////////////////////////
+    GShaderImpl::GShaderImpl(Graphics* pGraphics)
+      : GShader         ()
+      , m_pGraphicsImpl  ((GraphicsImpl*)pGraphics)
+      , m_dwFlag        (NULL)
+      , m_pVertexShader (NULL)
+      , m_pPixelShader  (NULL)
+      , m_pVertexBuf    (NULL)
+      , m_pvct          (NULL)
+      , m_ppct          (NULL)
+      , m_cbCacheSize    (0)
+      , m_cbPixelTopIndex  (0)
     {
-      SAFE_RELEASE(it->pD3D11ResBufer);
-      SAFE_DELETE(it->pUserBuffer);
+      memset(&m_VertexShaderConstTabDesc, 0, sizeof(m_VertexShaderConstTabDesc));
+      memset(&m_PixelShaderConstTabDesc, 0, sizeof(m_PixelShaderConstTabDesc));
     }
-    m_dwFlag = NULL;
-    return GX_OK;
-  }
 
-  GXINT GShaderImpl::UpdateConstTabDesc(ID3D11ShaderReflection* pct, D3D11_SHADER_DESC* pctd, GXUINT uHandleShift)
-  {
-    UINT i = 0;
-    GXINT nCacheSize = 0;
-    GXDWORD dwTopIndex = (GXDWORD)m_aConstDesc.size() + 1;
-
-    pct->GetDesc(pctd);
-
-    // Const Buffer 循环
-    for(UINT ncb = 0; ncb < pctd->ConstantBuffers; ncb++)
+    GShaderImpl::~GShaderImpl()
     {
-      D3D11_SHADER_BUFFER_DESC SdrBufDesc;
-      ID3D11ShaderReflectionConstantBuffer* pConstBuf = pct->GetConstantBufferByIndex(ncb);
+      CleanUp();
+    }
 
-      pConstBuf->GetDesc(&SdrBufDesc);
-      ASSERT(SdrBufDesc.Type == D3D_CT_CBUFFER);
-      nCacheSize += SdrBufDesc.Size;
-      int nCBArrayIdx = CreateShaderConstBuffer(SdrBufDesc.Size, ncb, uHandleShift != 0);
+    GXHRESULT GShaderImpl::CleanUp()
+    {
+      m_cbCacheSize = 0;
+      m_aConstDesc.clear();
 
-      for(UINT n = 0; n < SdrBufDesc.Variables; n++, i++)
+      SAFE_DELETE(m_pVertexBuf);
+      SAFE_RELEASE(m_ppct);
+      SAFE_RELEASE(m_pvct);
+      SAFE_RELEASE(m_pPixelShader);
+      SAFE_RELEASE(m_pVertexShader);
+
+      for(BufPairArray::iterator it = m_aBufPairs.begin();
+        it != m_aBufPairs.end(); ++it)
       {
-        D3D11_SHADER_VARIABLE_DESC SdrVarDesc;
-        D3D11_SHADER_TYPE_DESC SdrTypeDesc;
-        ID3D11ShaderReflectionVariable* pSdrVar = pConstBuf->GetVariableByIndex(n);
-        if(pSdrVar != NULL)
-        {
-          GXCONSTDESC cd;
-          ID3D11ShaderReflectionType* pSdrType = pSdrVar->GetType();
-          pSdrVar->GetDesc(&SdrVarDesc);
-          pSdrType->GetDesc(&SdrTypeDesc);
-
-          cd.strName      = SdrVarDesc.Name;
-          cd.dwNameID     = cd.strName.GetHash();
-          cd.nConstBuf    = ncb;
-          cd.nCBArrayIdx  = nCBArrayIdx;
-          cd.dwHandle     = (i + dwTopIndex) << uHandleShift;
-          cd.StartOffset  = SdrVarDesc.StartOffset;    // Offset in constant buffer's backing store
-          cd.Size         = SdrVarDesc.Size;           // Size of variable (in bytes)
-          cd.uFlags       = SdrVarDesc.uFlags;         // Variable flags
-          cd.StartTexture = SdrVarDesc.StartTexture;   // First texture index (or -1 if no textures used)
-          cd.TextureSize  = SdrVarDesc.TextureSize;    // Number of texture slots possibly used.
-          cd.StartSampler = SdrVarDesc.StartSampler;   // First sampler index (or -1 if no textures used)
-          cd.SamplerSize  = SdrVarDesc.SamplerSize;    // Number of sampler slots possibly used.
-          cd.Class        = SdrTypeDesc.Class;          // Variable class (e.g. object, matrix, etc.)
-          cd.Type         = SdrTypeDesc.Type;           // Variable type (e.g. float, sampler, etc.)
-          cd.Rows         = SdrTypeDesc.Rows;           // Number of rows (for matrices, 1 for other numeric, 0 if not applicable)
-          cd.Columns      = SdrTypeDesc.Columns;        // Number of columns (for vectors & matrices, 1 for other numeric, 0 if not applicable)
-          cd.Elements     = SdrTypeDesc.Elements;       // Number of elements (0 if not an array)
-          cd.Members      = SdrTypeDesc.Members;        // Number of members (0 if not a structure)
-          cd.MemberOffset = SdrTypeDesc.Offset;         // Offset from the start of structure (0 if not a structure member)
-          m_aConstDesc.push_back(cd);
-        }
-        //__asm nop
-        //SAFE_RELEASE(pSdrVar);
+        SAFE_RELEASE(it->pD3D11ResBufer);
+        SAFE_DELETE(it->pUserBuffer);
       }
-
-      //SAFE_RELEASE(pConstBuf);
-    }
-    for(UINT nrb = 0; nrb < pctd->BoundResources; nrb++)
-    {
-      D3D11_SHADER_INPUT_BIND_DESC InputBindDesc;
-      HRESULT hval = pct->GetResourceBindingDesc(nrb, &InputBindDesc);
-      //__asm nop
-    }
-
-    return nCacheSize;
-  }
-  
-  GXHRESULT GShaderImpl::LoadFromMemory(const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf)
-  {
-    ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-    GXHRESULT hval = GX_OK;
-
-    // 清理旧的对象
-    CleanUp();
-
-
-    if(pVertexBuf == NULL || pPixelBuf == NULL) {
-      return GX_FAIL;
-    }
-
-    hval = pd3dDevice->CreateVertexShader(pVertexBuf->GetPtr(), pVertexBuf->GetSize(), NULL, &m_pVertexShader);
-    if(SUCCEEDED(hval))
-    {
-      hval = D3DReflect( pVertexBuf->GetPtr(), pVertexBuf->GetSize(), 
-        IID_ID3D11ShaderReflection, (void**)&m_pvct);
-
-      if(SUCCEEDED(hval)) {
-        m_dwFlag |= GXSHADERCAP_VERTEX;
-
-        // 这里复制一份 VertexBuffer, 注意不是 VertexShader
-        ASSERT(m_pVertexBuf == NULL);
-        m_pVertexBuf = new clBuffer;
-        m_pVertexBuf->Append(pVertexBuf->GetPtr(), pVertexBuf->GetSize());
-      }
-    }
-
-    hval = pd3dDevice->CreatePixelShader(pPixelBuf->GetPtr(), pPixelBuf->GetSize(), NULL, &m_pPixelShader);
-    if(SUCCEEDED(hval))
-    {
-      hval = D3DReflect( pPixelBuf->GetPtr(), pPixelBuf->GetSize(), 
-        IID_ID3D11ShaderReflection, (void**)&m_ppct);
-      if(SUCCEEDED(hval))
-        m_dwFlag |= GXSHADERCAP_PIXEL;
-    }
-
-    m_cbPixelTopIndex = UpdateConstTabDesc(m_pvct, &m_VertexShaderConstTabDesc, 0);
-    m_cbCacheSize = UpdateConstTabDesc(m_ppct, &m_PixelShaderConstTabDesc, PS_HANDLE_SHIFT) + m_cbPixelTopIndex;
-    ////BuildMapper();
-    return hval;
-  }
-  
-  GXHRESULT GShaderImpl::CompileShader(clBuffer* pBuffer, LPD3DINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled)
-  {
-    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#ifdef _DEBUG
-    dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-    ID3DBlob* pErrorBlob;
-    ID3DBlob* pShader;
-
-    LPCSTR szShaderFile = NULL;
-    LPCSTR szFunctionName = NULL;
-    LPCSTR szProfile = NULL;
-    switch(eCompiled)
-    {
-    case CompiledComponentPixelShder:
-      szFunctionName = "compose_ps_main";
-      szProfile      = "ps_4_0";
-      break;
-    case CompiledPixelShder:
-      szFunctionName = "ps_main";
-      szProfile      = "ps_4_0";
-      break;
-    case CompiledComponentVertexShder:
-      szFunctionName = "compose_vs_main";
-      szProfile      = "vs_4_0";
-      break;
-    case CompiledVertexShder:
-      szFunctionName = "vs_main";
-      szProfile      = "vs_4_0";
-      break;
-    default:
-      return GX_FAIL;
-    }
-
-    // D3DCompile
-    HRESULT hval = D3DCompile((LPCSTR)pBuffer->GetPtr(), pBuffer->GetSize(), 
-      szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, &pShader, &pErrorBlob);
-
-    if( FAILED(hval) )
-    {
-      if( pErrorBlob != NULL ) {
-        TRACE("Shader compiled error:\n>%s\n", (char*)pErrorBlob->GetBufferPointer() );
-      }
-      SAFE_RELEASE(pErrorBlob);
-      return hval;
-    }
-
-    pBuffer->Resize(0, FALSE);
-    if(pShader) {
-      pBuffer->Append(pShader->GetBufferPointer(), pShader->GetBufferSize());
-    }
-
-    SAFE_RELEASE(pShader);
-    SAFE_RELEASE(pErrorBlob);
-    return S_OK;
-  }
-
-  GXHRESULT GShaderImpl::CompileShader(clBuffer* pIntermediateCode, GXLPCSTR szSourceCode, size_t nSourceLen, LPD3DINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled)
-  {
-    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#ifdef _DEBUG
-    dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-    ID3DBlob* pErrorBlob;
-    ID3DBlob* pShader;
-
-    LPCSTR szShaderFile = NULL;
-    LPCSTR szFunctionName = NULL;
-    LPCSTR szProfile = NULL;
-    switch(eCompiled)
-    {
-    case CompiledComponentPixelShder:
-      szFunctionName = "compose_ps_main";
-      szProfile = "ps_4_0";
-      break;
-    case CompiledPixelShder:
-      szFunctionName = "ps_main";
-      szProfile = "ps_4_0";
-      break;
-    case CompiledComponentVertexShder:
-      szFunctionName = "compose_vs_main";
-      szProfile = "vs_4_0";
-      break;
-    case CompiledVertexShder:
-      szFunctionName = "vs_main";
-      szProfile = "vs_4_0";
-      break;
-    default:
-      return GX_FAIL;
-    }
-
-    HRESULT hval = D3DCompile(szSourceCode, nSourceLen,
-      szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, &pShader, &pErrorBlob);
-
-    if(FAILED(hval))
-    {
-      if(pErrorBlob != NULL) {
-        TRACE("Shader compiled error:\n>%s\n", (char*)pErrorBlob->GetBufferPointer());
-      }
-      SAFE_RELEASE(pErrorBlob);
-      return hval;
-    }
-
-    pIntermediateCode->Resize(0, FALSE);
-    if(pShader) {
-      pIntermediateCode->Append(pShader->GetBufferPointer(), pShader->GetBufferSize());
-    }
-
-    SAFE_RELEASE(pShader);
-    SAFE_RELEASE(pErrorBlob);
-    return S_OK;
-  }
-
-  UINT GShaderImpl::CreateShaderConstBuffer(UINT cbSize, UINT nIdx, GXBOOL bPS)
-  {
-    ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-    GXSDRBUFFERPAIR Pair;
-    D3D11_BUFFER_DESC bd;
-    InlSetZeroT(bd);
-
-    bd.Usage     = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = cbSize;
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags = 0;
-    HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &Pair.pD3D11ResBufer);
-    if(FAILED(hr))
-    {
-      ASSERT(0);
-      return -1;
-    }
-    Pair.nIdx        = nIdx;
-    Pair.pUserBuffer = new GXBYTE[cbSize];
-    Pair.BufferSize  = cbSize;
-    Pair.bNeedUpdate = FALSE;
-    Pair.bPS         = bPS;
-
-    m_aBufPairs.push_back(Pair);
-    return (UINT)m_aBufPairs.size() - 1;
-  }
-
-#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT GShaderImpl::AddRef()
-  {
-    return gxInterlockedIncrement(&m_nRefCount);
-  }
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-
-  GXHRESULT GShaderImpl::Release()
-  {
-    GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
-    
-    if(nRefCount == 0)
-    {
-      //OnDeviceEvent(DE_LostDevice);
-
-      if(m_pVertexShader && m_pPixelShader)
-      {
-        m_pGraphicsImpl->UnregisterResource(this);
-      }
-      delete this;
+      m_dwFlag = NULL;
       return GX_OK;
     }
-    return nRefCount;
-  }
 
-  GXHRESULT GShaderImpl::Activate()
-  {
-    ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
-    pImmediateContext->VSSetShader( m_pVertexShader, NULL, 0 );
-    pImmediateContext->PSSetShader( m_pPixelShader, NULL, 0 );
-    return GX_OK;
-  }
-
-  GXBOOL GShaderImpl::CheckUpdateConstBuf()
-  {
-    ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
-    for(BufPairArray::iterator it = m_aBufPairs.begin();
-      it != m_aBufPairs.end(); ++it)
+    GXINT GShaderImpl::UpdateConstTabDesc(ID3D11ShaderReflection* pct, D3D11_SHADER_DESC* pctd, GXUINT uHandleShift)
     {
-      if(it->bNeedUpdate) {
-        it->bNeedUpdate = FALSE;
-        pImmediateContext->UpdateSubresource(it->pD3D11ResBufer, 0, NULL, it->pUserBuffer, 0, 0 );
-      }
-      if(it->bPS) {
-        pImmediateContext->PSSetConstantBuffers(it->nIdx, 1, &it->pD3D11ResBufer);
-      }
-      else {
-        pImmediateContext->VSSetConstantBuffers(it->nIdx, 1, &it->pD3D11ResBufer);
-      }
-    }
-    return TRUE;
-  }
+      UINT i = 0;
+      GXINT nCacheSize = 0;
+      GXDWORD dwTopIndex = (GXDWORD)m_aConstDesc.size() + 1;
 
-  const GShaderImpl::ConstantDescArray& GShaderImpl::GetConstantDescTable() const
-  {
-    return m_aConstDesc;
-  }
+      pct->GetDesc(pctd);
 
-  GXUINT GShaderImpl::GetHandle(GXLPCSTR pName) const
-  {
-    GXDWORD dwHashId = clStringA(pName).GetHash();
-    GXUINT uHandle = 0;
-    GXINT nFind = 0;
-    for(GShaderImpl::ConstantDescArray::const_iterator it = m_aConstDesc.begin();
-      it != m_aConstDesc.end(); ++it)
-    {
-      if(it->dwNameID == dwHashId)
+      // Const Buffer 循环
+      for(UINT ncb = 0; ncb < pctd->ConstantBuffers; ncb++)
       {
-        ASSERT(it->strName == pName);
+        D3D11_SHADER_BUFFER_DESC SdrBufDesc;
+        ID3D11ShaderReflectionConstantBuffer* pConstBuf = pct->GetConstantBufferByIndex(ncb);
 
-        uHandle |= it->dwHandle;
-        if(++nFind == 2)
-          return uHandle;
+        pConstBuf->GetDesc(&SdrBufDesc);
+        ASSERT(SdrBufDesc.Type == D3D_CT_CBUFFER);
+        nCacheSize += SdrBufDesc.Size;
+        int nCBArrayIdx = CreateShaderConstBuffer(SdrBufDesc.Size, ncb, uHandleShift != 0);
+
+        for(UINT n = 0; n < SdrBufDesc.Variables; n++, i++)
+        {
+          D3D11_SHADER_VARIABLE_DESC SdrVarDesc;
+          D3D11_SHADER_TYPE_DESC SdrTypeDesc;
+          ID3D11ShaderReflectionVariable* pSdrVar = pConstBuf->GetVariableByIndex(n);
+          if(pSdrVar != NULL)
+          {
+            GXCONSTDESC cd;
+            ID3D11ShaderReflectionType* pSdrType = pSdrVar->GetType();
+            pSdrVar->GetDesc(&SdrVarDesc);
+            pSdrType->GetDesc(&SdrTypeDesc);
+
+            cd.strName = SdrVarDesc.Name;
+            cd.dwNameID = cd.strName.GetHash();
+            cd.nConstBuf = ncb;
+            cd.nCBArrayIdx = nCBArrayIdx;
+            cd.dwHandle = (i + dwTopIndex) << uHandleShift;
+            cd.StartOffset = SdrVarDesc.StartOffset;    // Offset in constant buffer's backing store
+            cd.Size = SdrVarDesc.Size;           // Size of variable (in bytes)
+            cd.uFlags = SdrVarDesc.uFlags;         // Variable flags
+            cd.StartTexture = SdrVarDesc.StartTexture;   // First texture index (or -1 if no textures used)
+            cd.TextureSize = SdrVarDesc.TextureSize;    // Number of texture slots possibly used.
+            cd.StartSampler = SdrVarDesc.StartSampler;   // First sampler index (or -1 if no textures used)
+            cd.SamplerSize = SdrVarDesc.SamplerSize;    // Number of sampler slots possibly used.
+            cd.Class = SdrTypeDesc.Class;          // Variable class (e.g. object, matrix, etc.)
+            cd.Type = SdrTypeDesc.Type;           // Variable type (e.g. float, sampler, etc.)
+            cd.Rows = SdrTypeDesc.Rows;           // Number of rows (for matrices, 1 for other numeric, 0 if not applicable)
+            cd.Columns = SdrTypeDesc.Columns;        // Number of columns (for vectors & matrices, 1 for other numeric, 0 if not applicable)
+            cd.Elements = SdrTypeDesc.Elements;       // Number of elements (0 if not an array)
+            cd.Members = SdrTypeDesc.Members;        // Number of members (0 if not a structure)
+            cd.MemberOffset = SdrTypeDesc.Offset;         // Offset from the start of structure (0 if not a structure member)
+            m_aConstDesc.push_back(cd);
+          }
+          //__asm nop
+          //SAFE_RELEASE(pSdrVar);
+        }
+
+        //SAFE_RELEASE(pConstBuf);
       }
+      for(UINT nrb = 0; nrb < pctd->BoundResources; nrb++)
+      {
+        D3D11_SHADER_INPUT_BIND_DESC InputBindDesc;
+        HRESULT hval = pct->GetResourceBindingDesc(nrb, &InputBindDesc);
+        //__asm nop
+      }
+
+      return nCacheSize;
     }
-    return uHandle;
-  }
 
-  GXUniformType GShaderImpl::GetHandleType(GXUINT handle) const
-  {
-    ASSERT(0); // FIXME: 没实现
-    //m_aConstDesc[handle & 0xffff].Class
-    return GXUB_UNDEFINED;
-  }
-  
-  GXUINT GShaderImpl::GetStageByHandle(GXUINT handle) const
-  {
-    CLBREAK; // FIXME: 没实现
-    return 0;
-  }
+    GXHRESULT GShaderImpl::LoadFromMemory(const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf)
+    {
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      GXHRESULT hval = GX_OK;
 
-  void GShaderImpl::PutInResourceMgr()
-  {
-    SET_FLAG(m_dwFlag, ShaderFlag_PutInResourceManager);
-  }
+      // 清理旧的对象
+      CleanUp();
+
+
+      if(pVertexBuf == NULL || pPixelBuf == NULL) {
+        return GX_FAIL;
+      }
+
+      hval = pd3dDevice->CreateVertexShader(pVertexBuf->GetPtr(), pVertexBuf->GetSize(), NULL, &m_pVertexShader);
+      if(SUCCEEDED(hval))
+      {
+        hval = D3DReflect(pVertexBuf->GetPtr(), pVertexBuf->GetSize(),
+          IID_ID3D11ShaderReflection, (void**)&m_pvct);
+
+        if(SUCCEEDED(hval)) {
+          m_dwFlag |= GXSHADERCAP_VERTEX;
+
+          // 这里复制一份 VertexBuffer, 注意不是 VertexShader
+          ASSERT(m_pVertexBuf == NULL);
+          m_pVertexBuf = new clBuffer;
+          m_pVertexBuf->Append(pVertexBuf->GetPtr(), pVertexBuf->GetSize());
+        }
+      }
+
+      hval = pd3dDevice->CreatePixelShader(pPixelBuf->GetPtr(), pPixelBuf->GetSize(), NULL, &m_pPixelShader);
+      if(SUCCEEDED(hval))
+      {
+        hval = D3DReflect(pPixelBuf->GetPtr(), pPixelBuf->GetSize(),
+          IID_ID3D11ShaderReflection, (void**)&m_ppct);
+        if(SUCCEEDED(hval))
+          m_dwFlag |= GXSHADERCAP_PIXEL;
+      }
+
+      m_cbPixelTopIndex = UpdateConstTabDesc(m_pvct, &m_VertexShaderConstTabDesc, 0);
+      m_cbCacheSize = UpdateConstTabDesc(m_ppct, &m_PixelShaderConstTabDesc, PS_HANDLE_SHIFT) + m_cbPixelTopIndex;
+      ////BuildMapper();
+      return hval;
+    }
+
+    GXHRESULT GShaderImpl::CompileShader(clBuffer* pBuffer, LPD3DINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled)
+    {
+      DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+      dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+      ID3DBlob* pErrorBlob;
+      ID3DBlob* pShader;
+
+      LPCSTR szShaderFile = NULL;
+      LPCSTR szFunctionName = NULL;
+      LPCSTR szProfile = NULL;
+      switch(eCompiled)
+      {
+      case CompiledComponentPixelShder:
+        szFunctionName = "compose_ps_main";
+        szProfile = "ps_4_0";
+        break;
+      case CompiledPixelShder:
+        szFunctionName = "ps_main";
+        szProfile = "ps_4_0";
+        break;
+      case CompiledComponentVertexShder:
+        szFunctionName = "compose_vs_main";
+        szProfile = "vs_4_0";
+        break;
+      case CompiledVertexShder:
+        szFunctionName = "vs_main";
+        szProfile = "vs_4_0";
+        break;
+      default:
+        return GX_FAIL;
+      }
+
+      // D3DCompile
+      HRESULT hval = D3DCompile((LPCSTR)pBuffer->GetPtr(), pBuffer->GetSize(),
+        szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, &pShader, &pErrorBlob);
+
+      if(FAILED(hval))
+      {
+        if(pErrorBlob != NULL) {
+          TRACE("Shader compiled error:\n>%s\n", (char*)pErrorBlob->GetBufferPointer());
+        }
+        SAFE_RELEASE(pErrorBlob);
+        return hval;
+      }
+
+      pBuffer->Resize(0, FALSE);
+      if(pShader) {
+        pBuffer->Append(pShader->GetBufferPointer(), pShader->GetBufferSize());
+      }
+
+      SAFE_RELEASE(pShader);
+      SAFE_RELEASE(pErrorBlob);
+      return S_OK;
+    }
+
+    GXHRESULT GShaderImpl::CompileShader(clBuffer* pIntermediateCode, GXLPCSTR szSourceCode, size_t nSourceLen, LPD3DINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled)
+    {
+      DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+      dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+      ID3DBlob* pErrorBlob;
+      ID3DBlob* pShader;
+
+      LPCSTR szShaderFile = NULL;
+      LPCSTR szFunctionName = NULL;
+      LPCSTR szProfile = NULL;
+      switch(eCompiled)
+      {
+      case CompiledComponentPixelShder:
+        szFunctionName = "compose_ps_main";
+        szProfile = "ps_4_0";
+        break;
+      case CompiledPixelShder:
+        szFunctionName = "ps_main";
+        szProfile = "ps_4_0";
+        break;
+      case CompiledComponentVertexShder:
+        szFunctionName = "compose_vs_main";
+        szProfile = "vs_4_0";
+        break;
+      case CompiledVertexShder:
+        szFunctionName = "vs_main";
+        szProfile = "vs_4_0";
+        break;
+      default:
+        return GX_FAIL;
+      }
+
+      HRESULT hval = D3DCompile(szSourceCode, nSourceLen,
+        szShaderFile, (D3D10_SHADER_MACRO*)pMacros, pInclude, szFunctionName, szProfile, dwShaderFlags, 0, &pShader, &pErrorBlob);
+
+      if(FAILED(hval))
+      {
+        if(pErrorBlob != NULL) {
+          TRACE("Shader compiled error:\n>%s\n", (char*)pErrorBlob->GetBufferPointer());
+        }
+        SAFE_RELEASE(pErrorBlob);
+        return hval;
+      }
+
+      pIntermediateCode->Resize(0, FALSE);
+      if(pShader) {
+        pIntermediateCode->Append(pShader->GetBufferPointer(), pShader->GetBufferSize());
+      }
+
+      SAFE_RELEASE(pShader);
+      SAFE_RELEASE(pErrorBlob);
+      return S_OK;
+    }
+
+    UINT GShaderImpl::CreateShaderConstBuffer(UINT cbSize, UINT nIdx, GXBOOL bPS)
+    {
+      ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      GXSDRBUFFERPAIR Pair;
+      D3D11_BUFFER_DESC bd;
+      InlSetZeroT(bd);
+
+      bd.Usage = D3D11_USAGE_DEFAULT;
+      bd.ByteWidth = cbSize;
+      bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+      bd.CPUAccessFlags = 0;
+      HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &Pair.pD3D11ResBufer);
+      if(FAILED(hr))
+      {
+        ASSERT(0);
+        return -1;
+      }
+      Pair.nIdx = nIdx;
+      Pair.pUserBuffer = new GXBYTE[cbSize];
+      Pair.BufferSize = cbSize;
+      Pair.bNeedUpdate = FALSE;
+      Pair.bPS = bPS;
+
+      m_aBufPairs.push_back(Pair);
+      return (UINT)m_aBufPairs.size() - 1;
+    }
+
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXHRESULT GShaderImpl::AddRef()
+    {
+      return gxInterlockedIncrement(&m_nRefCount);
+    }
+
+    GXHRESULT GShaderImpl::Release()
+    {
+      GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
+
+      if(nRefCount == 0)
+      {
+        //OnDeviceEvent(DE_LostDevice);
+
+        if(m_pVertexShader && m_pPixelShader)
+        {
+          m_pGraphicsImpl->UnregisterResource(this);
+        }
+        delete this;
+        return GX_OK;
+      }
+      return nRefCount;
+    }
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+    GXHRESULT GShaderImpl::Activate()
+    {
+      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      pImmediateContext->VSSetShader(m_pVertexShader, NULL, 0);
+      pImmediateContext->PSSetShader(m_pPixelShader, NULL, 0);
+      return GX_OK;
+    }
+
+    GXBOOL GShaderImpl::CheckUpdateConstBuf()
+    {
+      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      for(BufPairArray::iterator it = m_aBufPairs.begin();
+        it != m_aBufPairs.end(); ++it)
+      {
+        if(it->bNeedUpdate) {
+          it->bNeedUpdate = FALSE;
+          pImmediateContext->UpdateSubresource(it->pD3D11ResBufer, 0, NULL, it->pUserBuffer, 0, 0);
+        }
+        if(it->bPS) {
+          pImmediateContext->PSSetConstantBuffers(it->nIdx, 1, &it->pD3D11ResBufer);
+        }
+        else {
+          pImmediateContext->VSSetConstantBuffers(it->nIdx, 1, &it->pD3D11ResBufer);
+        }
+      }
+      return TRUE;
+    }
+
+    const GShaderImpl::ConstantDescArray& GShaderImpl::GetConstantDescTable() const
+    {
+      return m_aConstDesc;
+    }
+
+    GXUINT GShaderImpl::GetHandle(GXLPCSTR pName) const
+    {
+      GXDWORD dwHashId = clStringA(pName).GetHash();
+      GXUINT uHandle = 0;
+      GXINT nFind = 0;
+      for(GShaderImpl::ConstantDescArray::const_iterator it = m_aConstDesc.begin();
+        it != m_aConstDesc.end(); ++it)
+      {
+        if(it->dwNameID == dwHashId)
+        {
+          ASSERT(it->strName == pName);
+
+          uHandle |= it->dwHandle;
+          if(++nFind == 2)
+            return uHandle;
+        }
+      }
+      return uHandle;
+    }
+
+    GXUniformType GShaderImpl::GetHandleType(GXUINT handle) const
+    {
+      ASSERT(0); // FIXME: 没实现
+      //m_aConstDesc[handle & 0xffff].Class
+      return GXUB_UNDEFINED;
+    }
+
+    GXUINT GShaderImpl::GetStageByHandle(GXUINT handle) const
+    {
+      CLBREAK; // FIXME: 没实现
+      return 0;
+    }
+
+    void GShaderImpl::PutInResourceMgr()
+    {
+      SET_FLAG(m_dwFlag, ShaderFlag_PutInResourceManager);
+    }
 
 #ifdef REFACTOR_SHADER
-  GXBOOL GShaderImpl::CommitToDevice( GXLPVOID lpUniform, GXUINT cbSize )
-  {
-    CLBREAK;
-    return FALSE;
-  }
+    GXBOOL GShaderImpl::CommitToDevice(GXLPVOID lpUniform, GXUINT cbSize)
+    {
+      CLBREAK;
+      return FALSE;
+    }
 #endif // #ifdef REFACTOR_SHADER
-  //////////////////////////////////////////////////////////////////////////
-} // namespace D3D11
+#endif // #ifdef REFACTOR_GRAPX_SHADER
+    //////////////////////////////////////////////////////////////////////////
+  } // namespace D3D11
+} // namespace GrapX
 
 #define STRUCT_PREFIX_NAME "st_noname_"
 #define CB_PREFIX_NAME "cb_"
@@ -719,7 +723,7 @@ namespace GrapX
       return GX_OK;
     }
 
-    ShaderImpl::ShaderImpl(GXGraphicsImpl* pGraphicsImpl)
+    ShaderImpl::ShaderImpl(GraphicsImpl* pGraphicsImpl)
       : m_pGraphicsImpl(pGraphicsImpl)
       , m_pD3D11VertexShader(NULL)
       , m_pD3D11PixelShader(NULL)
@@ -739,7 +743,7 @@ namespace GrapX
       GXBOOL bval = TRUE;
       aCodes.reserve(nCount);
 
-      ::D3D11::IHLSLInclude* pInclude = new ::D3D11::IHLSLInclude(NULL, clStringA(szResourceDir));
+      IHLSLInclude* pInclude = new IHLSLInclude(NULL, clStringA(szResourceDir));
       ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       DATAPOOL_MAPPER decl_mapper_vs;
       DATAPOOL_MAPPER decl_mapper_ps;
@@ -763,6 +767,8 @@ namespace GrapX
             NULL, &m_pD3D11VertexShader);
           TRACE("[Vertex Shader]\n");
           Reflect(decl_mapper_vs, InterCode.pReflection);
+
+          m_VertexBuf.Append(InterCode.pCode->GetBufferPointer(), InterCode.pCode->GetBufferSize());
         }
         else if(InterCode.type == TargetType::Pixel)
         {
@@ -1034,8 +1040,8 @@ namespace GrapX
       }
       else
       {
-        ASSERT(strTypeName == ::D3D11::s_szTypeName[type][type_class]);
-        return ::D3D11::s_szTypeName[type][type_class]; 
+        ASSERT(strTypeName == s_szTypeName[type][type_class]);
+        return s_szTypeName[type][type_class]; 
       }
 
       //if(type_desc.Elements > 0) {
@@ -1046,6 +1052,12 @@ namespace GrapX
       //  TRACE("Variable: (%s)%s (start:%d, end:%d)[%d]\n", strDbgTypeName.CStr(), variable_desc.Name,
       //    variable_desc.StartOffset, variable_desc.StartOffset + variable_desc.Size, variable_desc.Size);
       //}
+    }
+
+    GXBOOL ShaderImpl::Activate()
+    {
+      CLBREAK;
+      return FALSE;
     }
 
     GXBOOL ShaderImpl::BuildDataPoolDecl(DATAPOOL_MAPPER& mapper)
@@ -1227,12 +1239,31 @@ namespace GrapX
       SAFE_RELEASE(pDataPool);
     }
 
-    GXGraphics* ShaderImpl::GetGraphicsUnsafe() const
+    GXINT ShaderImpl::GetCacheSize() const
+    {
+      CLBREAK;
+      return 0;
+    }
+
+    Graphics* ShaderImpl::GetGraphicsUnsafe() const
     {
       return m_pGraphicsImpl;
     }
 
-    GrapX::D3D11::ShaderImpl::TargetType ShaderImpl::TargetNameToType(GXLPCSTR szTargetName)
+    void ShaderImpl::GetDataPoolDeclaration(Marimo::DATAPOOL_MANIFEST* pManifest) const
+    {
+      pManifest->pTypes       = m_pDataPoolTypeDef;
+      pManifest->pVariables   = m_pDataPoolDecl;
+      pManifest->pImportFiles = NULL;
+    }
+
+    GXBOOL ShaderImpl::CheckUpdateConstBuf()
+    {
+      CLBREAK;
+      return FALSE;         
+    }
+
+    ShaderImpl::TargetType ShaderImpl::TargetNameToType(GXLPCSTR szTargetName)
     {
       if(szTargetName[0] == 'p' && szTargetName[1] == 's' && szTargetName[2] == '_') {
         return TargetType::Pixel;
@@ -1288,13 +1319,17 @@ namespace GrapX
       return S_OK;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+
+
   } // namespace D3D11
 } // namespace GrapX
 
+#ifdef REFACTOR_GRAPX_SHADER
 GXHRESULT GXDLLAPI MOCompileHLSL(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADERBUFFERS* pBuffers)
 {
   MOSHADER_ELEMENT_SOURCE SrcComponent;
-  GXHRESULT hval = GShader::Load(szShaderDesc, szResourceDir, szPlatformSect, &SrcComponent, NULL);
+  GXHRESULT hval = GrapX::GShader::Load(szShaderDesc, szResourceDir, szPlatformSect, &SrcComponent, NULL);
   if(GXFAILED(hval)) {
     return hval;
   }
@@ -1308,7 +1343,7 @@ GXHRESULT GXDLLAPI MOCompileHLSL(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir
   pPBuf = NULL;
   hval = GX_OK;
 
-  if( ! GShader::ComposeSource(&SrcComponent, GXPLATFORM_WIN32_DIRECT3D11, &ShaderSources, &aMacros)) {
+  if( ! GrapX::GShader::ComposeSource(&SrcComponent, GXPLATFORM_WIN32_DIRECT3D11, &ShaderSources, &aMacros)) {
     // LOG: 组合Shader Source失败
     hval = GX_FAIL;
     goto FUNC_RET;
@@ -1342,15 +1377,15 @@ GXHRESULT GXDLLAPI MOCompileHLSL(GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir
   const GXBOOL bVSComposing = SrcComponent.strVSComposer.IsNotEmpty();
   const GXBOOL bPSComposing = SrcComponent.strPSComposer.IsNotEmpty();
 
-  D3D11::IHLSLInclude* pInclude = new D3D11::IHLSLInclude(NULL, clStringA(szResourceDir));
+  GrapX::D3D11::IHLSLInclude* pInclude = new GrapX::D3D11::IHLSLInclude(NULL, clStringA(szResourceDir));
 
-  if(GXFAILED(hval = D3D11::GShaderImpl::CompileShader(pVBuf, pInclude, pShaderMacro, bVSComposing 
-    ? D3D11::GShaderImpl::CompiledComponentVertexShder : D3D11::GShaderImpl::CompiledVertexShder))) {
+  if(GXFAILED(hval = GrapX::D3D11::GShaderImpl::CompileShader(pVBuf, pInclude, pShaderMacro, bVSComposing 
+    ? GrapX::D3D11::GShaderImpl::CompiledComponentVertexShder : GrapX::D3D11::GShaderImpl::CompiledVertexShder))) {
     goto FUNC_RET;
   }
 
-  if(GXFAILED(hval = D3D11::GShaderImpl::CompileShader(pPBuf, pInclude, pShaderMacro, bPSComposing 
-    ? D3D11::GShaderImpl::CompiledComponentPixelShder : D3D11::GShaderImpl::CompiledPixelShder))) {
+  if(GXFAILED(hval = GrapX::D3D11::GShaderImpl::CompileShader(pPBuf, pInclude, pShaderMacro, bPSComposing 
+    ? GrapX::D3D11::GShaderImpl::CompiledComponentPixelShder : GrapX::D3D11::GShaderImpl::CompiledPixelShder))) {
     goto FUNC_RET;
   }
 
@@ -1395,7 +1430,7 @@ FUNC_RET:
   //SAFE_RELEASE(pShader11);
   return hval;
 }
-
+#endif // #ifdef REFACTOR_GRAPX_SHADER
 
 //SetVertexShaderConstantB
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11

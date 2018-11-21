@@ -16,11 +16,11 @@
 //#include <vector>
 //using namespace std;
 
-class GXGraphics;
+class Graphics;
 
 namespace D3D9
 {
-  class GXGraphicsImpl;
+  class GraphicsImpl;
   //class GRenderStateImpl : public GUnknown
   //{
   //  friend class GXGraphicsImpl;
@@ -60,7 +60,7 @@ namespace D3D9
   class GRasterizerStateImpl : public GRasterizerState
   {
   private:
-    GXGraphicsImpl*   m_pGraphicsImpl;
+    GraphicsImpl*   m_pGraphicsImpl;
     GXRASTERIZERDESC  m_RasterizerDesc;
   public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -70,7 +70,7 @@ namespace D3D9
     virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) override { return GX_OK; }
 
   public:
-    GRasterizerStateImpl(GXGraphicsImpl*        pGraphicsImpl);
+    GRasterizerStateImpl(GraphicsImpl*        pGraphicsImpl);
     virtual ~GRasterizerStateImpl();
     GXBOOL  Initialize  (GXRASTERIZERDESC*      pDesc);
     GXBOOL  Activate    (GRasterizerStateImpl*  pPrevState);
@@ -79,7 +79,7 @@ namespace D3D9
   class GBlendStateImpl : public GBlendState
   {
   private:
-    GXGraphicsImpl* m_pGraphicsImpl;
+    GraphicsImpl* m_pGraphicsImpl;
     GXDWORD         m_BlendFactor;
     GXBLENDDESC     m_BlendDesc;
 
@@ -91,7 +91,7 @@ namespace D3D9
     virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) { return GX_OK; }
 
   public:
-    GBlendStateImpl(GXGraphicsImpl* pGraphicsImpl);
+    GBlendStateImpl(GraphicsImpl* pGraphicsImpl);
     virtual ~GBlendStateImpl();
     GXBOOL  Initialize  (GXBLENDDESC* pDesc, GXUINT nNum);
     GXBOOL  Activate    (GBlendStateImpl* pPrevState);
@@ -108,9 +108,9 @@ namespace D3D9
   //////////////////////////////////////////////////////////////////////////
   class GDepthStencilStateImpl : public GDepthStencilState
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
   private:
-    GXGraphicsImpl*     m_pGraphicsImpl;
+    GraphicsImpl*     m_pGraphicsImpl;
     GXDWORD             m_StencilRef;
     GXDEPTHSTENCILDESC  m_Desc;
 
@@ -123,7 +123,7 @@ namespace D3D9
 
 
   public:
-    GDepthStencilStateImpl(GXGraphicsImpl* pGraphicsImpl);
+    GDepthStencilStateImpl(GraphicsImpl* pGraphicsImpl);
     virtual ~GDepthStencilStateImpl();
     GXBOOL  Initialize      (GXDEPTHSTENCILDESC* pDesc);
     GXBOOL  Activate        (GDepthStencilStateImpl* pPrevState);
@@ -172,16 +172,16 @@ namespace D3D9
 
   class GSamplerStateImpl : public GSamplerState
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
     friend class GXCanvas;
   private:
-    GXGraphicsImpl*       m_pGraphicsImpl;
+    GraphicsImpl*       m_pGraphicsImpl;
     //GXSAMPLERSTAGE        m_SamplerStage[SAMPLERCOUNT];
     GXSAMPLERDESC         m_SamplerDesc[SAMPLERCOUNT];
     GXDWORD               m_dwDefaultMask[SAMPLERCOUNT];  // 如果是默认值,对应位置0
     //static GXSAMPLERSTAGE s_DefaultSamplerState;
   private:
-    GSamplerStateImpl(GXGraphics* pGraphics);
+    GSamplerStateImpl(Graphics* pGraphics);
     virtual ~GSamplerStateImpl();
 
     static GXBOOL     InitializeStatic  ();

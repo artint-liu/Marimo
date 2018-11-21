@@ -1,4 +1,4 @@
-GXCanvasCoreImpl::GXCanvasCoreImpl(GXGraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType)
+GXCanvasCoreImpl::GXCanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType)
   : GXCanvas            (nPriority, dwType)
   , m_pGraphics         (pGraphics)
   , m_pTargetTex        (NULL)
@@ -24,14 +24,14 @@ GXCanvasCoreImpl::~GXCanvasCoreImpl()
   SAFE_RELEASE(m_pCamera);
 }
 
-GXBOOL GXCanvasCoreImpl::Initialize(GXRenderTarget* pTarget)
+GXBOOL GXCanvasCoreImpl::Initialize(RenderTarget* pTarget)
 {
   //if(pTarget == NULL)
   //{
   //  return FALSE;
   //}
 
-  m_pTargetTex = static_cast<GXRenderTargetImpl*>(pTarget);
+  m_pTargetTex = static_cast<RenderTargetImpl*>(pTarget);
   if(m_pTargetTex != NULL)
   {
     m_pTargetTex->AddRef();
@@ -53,7 +53,7 @@ GXBOOL GXCanvasCoreImpl::Initialize(GXRenderTarget* pTarget)
     m_pSamplerState->ResetToDefault();
   }
 
-  m_pEffectImpl = (GXEffectImpl*)m_pGraphics->IntGetEffect();
+  m_pEffectImpl = (EffectImpl*)m_pGraphics->IntGetEffect();
   m_pEffectImpl->AddRef();
 
   return TRUE;
@@ -70,7 +70,7 @@ GXSIZE* GXCanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const
   return pSize;
 }
 
-GXRenderTarget* GXCanvasCoreImpl::GetTargetUnsafe() const
+RenderTarget* GXCanvasCoreImpl::GetTargetUnsafe() const
 {
   return m_pTargetTex;
 }

@@ -1,4 +1,4 @@
-﻿GXBOOL GXGraphicsImpl::InitCommon()
+﻿GXBOOL GraphicsImpl::InitCommon()
 {
   ASSERT(m_pGraphicsLocker == NULL);
 
@@ -13,7 +13,7 @@
 
   //GRenderState::InitializeStatic();
   GSamplerStateImpl::InitializeStatic();
-  GXMaterialInstImpl::InitializeMtlStateDict();
+  MaterialImpl::InitializeMtlStateDict();
   //IntCreateRenderState(&m_pCurRenderState);
 
   ASSERT(m_pCurRasterizerState == NULL);
@@ -68,9 +68,9 @@
   return TRUE;
 }
 
-GXBOOL GXGraphicsImpl::ReleaseCommon()
+GXBOOL GraphicsImpl::ReleaseCommon()
 {
-  GXMaterialInstImpl::FinalizeMtlStateDict(); // 这个不应该在这儿, 如果多个GXGraphics第一个被释放的话会导致第二个材质出错.
+  MaterialImpl::FinalizeMtlStateDict(); // 这个不应该在这儿, 如果多个GXGraphics第一个被释放的话会导致第二个材质出错.
   SAFE_RELEASE(m_pDefaultRasterizerState);
   SAFE_RELEASE(m_pDefaultBlendState);
   SAFE_RELEASE(m_pDefaultDepthStencilState);
@@ -85,6 +85,7 @@ GXBOOL GXGraphicsImpl::ReleaseCommon()
   SAFE_RELEASE(m_pWhiteTexture8x8);
 
   SAFE_RELEASE(m_pBasicShader);
+  SAFE_RELEASE(m_pBasicEffect);
 
   // 释放 Canvas 缓冲
   if(m_aCanvasPtrCache != NULL)
@@ -98,7 +99,7 @@ GXBOOL GXGraphicsImpl::ReleaseCommon()
   return TRUE;
 }
 
-GXLPCWSTR GXGraphicsImpl::IntToAbsPathW(clStringW& strOutput, GXLPCWSTR szPath)
+GXLPCWSTR GraphicsImpl::IntToAbsPathW(clStringW& strOutput, GXLPCWSTR szPath)
 {
   ASSERT(m_strResourceDir.IsNotEmpty());
   if(clpathfile::IsRelative(szPath)) {
@@ -108,7 +109,7 @@ GXLPCWSTR GXGraphicsImpl::IntToAbsPathW(clStringW& strOutput, GXLPCWSTR szPath)
   return szPath;
 }
 
-GXBOOL GXGraphicsImpl::ConvertToAbsolutePathW(clStringW& strFilename)
+GXBOOL GraphicsImpl::ConvertToAbsolutePathW(clStringW& strFilename)
 {
   ASSERT(m_strResourceDir.IsNotEmpty());
   //if(strFilename.IsEmpty() || IsFullPath(strFilename) == TRUE) {
@@ -118,7 +119,7 @@ GXBOOL GXGraphicsImpl::ConvertToAbsolutePathW(clStringW& strFilename)
   return TRUE;
 }
 
-GXBOOL GXGraphicsImpl::ConvertToAbsolutePathA(clStringA& strFilename)
+GXBOOL GraphicsImpl::ConvertToAbsolutePathA(clStringA& strFilename)
 {
   if(strFilename.IsEmpty()) {
     return FALSE;
@@ -129,7 +130,7 @@ GXBOOL GXGraphicsImpl::ConvertToAbsolutePathA(clStringA& strFilename)
   return bval;
 }
 
-GXBOOL GXGraphicsImpl::ConvertToRelativePathW(clStringW& strFilename)
+GXBOOL GraphicsImpl::ConvertToRelativePathW(clStringW& strFilename)
 {
   if(clpathfile::IsRelative(strFilename)) {
     return TRUE;
@@ -146,7 +147,7 @@ GXBOOL GXGraphicsImpl::ConvertToRelativePathW(clStringW& strFilename)
   return TRUE;
 }
 
-GXBOOL GXGraphicsImpl::ConvertToRelativePathA(clStringA& strFilename)
+GXBOOL GraphicsImpl::ConvertToRelativePathA(clStringA& strFilename)
 {
   if(strFilename.IsEmpty()) {
     return FALSE;
@@ -157,7 +158,7 @@ GXBOOL GXGraphicsImpl::ConvertToRelativePathA(clStringA& strFilename)
   return bval;
 }
 
-GXHRESULT GXGraphicsImpl::IntCreateRasterizerState(GRasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
+GXHRESULT GraphicsImpl::IntCreateRasterizerState(GRasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
 {
   GRasterizerStateImpl* pRasterizerState = new GRasterizerStateImpl(this);
   if(! InlCheckNewAndIncReference(pRasterizerState)) {
@@ -173,7 +174,7 @@ GXHRESULT GXGraphicsImpl::IntCreateRasterizerState(GRasterizerStateImpl** ppRast
   return GX_OK;
 }
 
-GXHRESULT GXGraphicsImpl::IntCreateBlendState(GBlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
+GXHRESULT GraphicsImpl::IntCreateBlendState(GBlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
 {
   GBlendStateImpl* pBlendState = new GBlendStateImpl(this);
   if(pBlendState != NULL)
@@ -188,7 +189,7 @@ GXHRESULT GXGraphicsImpl::IntCreateBlendState(GBlendStateImpl** ppBlendState, GX
   return GX_FAIL;
 }
 
-GXHRESULT GXGraphicsImpl::IntCreateDepthStencilState(GDepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
+GXHRESULT GraphicsImpl::IntCreateDepthStencilState(GDepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
 {
   GDepthStencilStateImpl* pDepthStencilState = new GDepthStencilStateImpl(this);
   if(pDepthStencilState != NULL)
@@ -203,10 +204,10 @@ GXHRESULT GXGraphicsImpl::IntCreateDepthStencilState(GDepthStencilStateImpl** pp
   return GX_FAIL;
 }
 
-GXHRESULT GXGraphicsImpl::CreateRasterizerState(GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
+GXHRESULT GraphicsImpl::CreateRasterizerState(GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
 {
   GRESKETCH ResFeatDesc;
-  GrapXInternal::ResourceSketch::GenerateRasterizerState(&ResFeatDesc, pRazDesc);
+  GrapX::Internal::ResourceSketch::GenerateRasterizerState(&ResFeatDesc, pRazDesc);
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
   if(pResource != NULL)
   {
@@ -221,10 +222,10 @@ GXHRESULT GXGraphicsImpl::CreateRasterizerState(GRasterizerState** ppRasterizerS
   return hval;
 }
 
-GXHRESULT GXGraphicsImpl::CreateBlendState(GBlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
+GXHRESULT GraphicsImpl::CreateBlendState(GBlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
 {
   GRESKETCH ResFeatDesc;
-  GrapXInternal::ResourceSketch::GenerateBlendState(&ResFeatDesc, pState);
+  GrapX::Internal::ResourceSketch::GenerateBlendState(&ResFeatDesc, pState);
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
   if(pResource != NULL)
   {
@@ -239,10 +240,10 @@ GXHRESULT GXGraphicsImpl::CreateBlendState(GBlendState** ppBlendState, GXBLENDDE
   return hval;
 }
 
-GXHRESULT GXGraphicsImpl::CreateDepthStencilState(GDepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
+GXHRESULT GraphicsImpl::CreateDepthStencilState(GDepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
 {
   GRESKETCH ResFeatDesc;
-  GrapXInternal::ResourceSketch::GenerateDepthStencilState(&ResFeatDesc, pState);
+  GrapX::Internal::ResourceSketch::GenerateDepthStencilState(&ResFeatDesc, pState);
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
   if(pResource != NULL)
   {
@@ -257,13 +258,13 @@ GXHRESULT GXGraphicsImpl::CreateDepthStencilState(GDepthStencilState** ppDepthSt
   return hval;
 }
 
-GXHRESULT GXGraphicsImpl::CreateSamplerState(GSamplerState** ppSamplerState)
+GXHRESULT GraphicsImpl::CreateSamplerState(GSamplerState** ppSamplerState)
 {
   return IntCreateSamplerState((GSamplerStateImpl**)ppSamplerState, m_pDefaultSamplerState);
 }
 
-GXHRESULT GXGraphicsImpl::CreatePrimitive(
-  GPrimitive** ppPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
+GXHRESULT GraphicsImpl::CreatePrimitive(
+  Primitive** ppPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
   GXUINT uVertexCount, GXUINT uVertexStride, GXLPCVOID pVertInitData,
   GXUINT uIndexCount, GXUINT uIndexSize, GXLPCVOID pIndexInitData)
 {
@@ -425,7 +426,29 @@ GXHRESULT GXGraphicsImpl::CreatePrimitive(
 //}
 
 //////////////////////////////////////////////////////////////////////////
-GXHRESULT GXGraphicsImpl::CreateEffect(GXEffect** ppEffect, GShader* pShader)
+GXHRESULT GraphicsImpl::CreateEffect(Effect** ppEffect, Shader* pShader)
+{
+  if(pShader == NULL) {
+    return GX_FAIL;
+  }
+  
+  EffectImpl* pEffect = new EffectImpl(this, pShader);
+  if(InlIsFailedToNewObject(pEffect)) {
+    return GX_ERROR_OUROFMEMORY;
+  }
+
+  if(_CL_NOT_(pEffect->InitEffect())) {
+    SAFE_RELEASE(pEffect);
+    return GX_FAIL;
+  }
+
+  RegisterResource(pEffect, NULL);
+  *ppEffect = pEffect;
+  return GX_OK;
+}
+
+#if 0
+GXHRESULT GraphicsImpl::CreateEffect(Effect** ppEffect, Shader* pShader)
 {
   if(pShader == NULL)
     return NULL;
@@ -436,27 +459,32 @@ GXHRESULT GXGraphicsImpl::CreateEffect(GXEffect** ppEffect, GShader* pShader)
   *ppEffect = pNewEffect;
   return GX_OK;
 }
+#endif // 0
 
-GXHRESULT GXGraphicsImpl::CreateMaterial(GXMaterialInst** ppMtlInst, GShader* pShader)
+GXHRESULT GraphicsImpl::CreateMaterial(Material** ppMtlInst, Shader* pShader)
 {
   if(pShader == NULL) {
     return GX_FAIL;
   }
-  GXGraphics* pGraphics = pShader->GetGraphicsUnsafe();
-  GXMaterialInstImpl* pNewMaterial = new GXMaterialInstImpl(pGraphics);
-  pNewMaterial->AddRef();
-  GXHRESULT hval = pNewMaterial->SetShaderRef(pShader);
-  if(GXSUCCEEDED(hval)) {
-    *ppMtlInst = pNewMaterial;
-    return hval;
+  Graphics* pGraphics = pShader->GetGraphicsUnsafe();
+  MaterialImpl* pNewMaterial = new MaterialImpl(pGraphics, pShader);
+  if(InlIsFailedToNewObject(pNewMaterial)) {
+    return GX_ERROR_OUROFMEMORY;
   }
-  SAFE_RELEASE(pNewMaterial);
-  return hval;
+
+  if(_CL_NOT_(pNewMaterial->InitMaterial()))
+  {
+    SAFE_RELEASE(pNewMaterial);
+    return GX_FAIL;
+  }
+
+  *ppMtlInst = pNewMaterial;
+  return GX_OK;
 }
 
-GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType)
+GXHRESULT GraphicsImpl::CreateMaterialFromFile(Material** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType)
 {
-  GShader* pShader = NULL;
+  Shader* pShader = NULL;
   GRESKETCH ResFeatDesc;
   
   //
@@ -467,16 +495,17 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXL
   if(eLoadType == MLT_REFERENCE)
   {
     // 只有szShaderDesc完全一致时才能引用, 它不对文件名和宏进行排序(规范化)
-    GrapXInternal::ResourceSketch::GenerateMaterialDescW(&ResFeatDesc, szShaderDesc);
+    GrapX::Internal::ResourceSketch::GenerateMaterialDescW(&ResFeatDesc, szShaderDesc);
     GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
     if(pResource != NULL)
     {
       pResource->AddRef();
-      *ppMtlInst = static_cast<GXMaterialInst*>(pResource);
+      *ppMtlInst = static_cast<Material*>(pResource);
       return GX_OK;
     }
   }
-
+  return GX_FAIL; // 临时
+#if 0
   MTLFILEPARAMDESC MtlParam;
   GXHRESULT hval = IntCreateSdrPltDescW(&pShader, szShaderDesc, InlGetPlatformStringA(), &MtlParam);
   if(GXSUCCEEDED(hval))
@@ -489,11 +518,11 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXL
     else {
       if( ! MtlParam.aUniforms.empty() )
       {
-        (*ppMtlInst)->SetParameters(GXMaterialInst::PT_UNIFORMS, (GXDEFINITION*)&MtlParam.aUniforms.front(), (int)MtlParam.aUniforms.size());
+        (*ppMtlInst)->SetParameters(Material::PT_UNIFORMS, (GXDEFINITION*)&MtlParam.aUniforms.front(), (int)MtlParam.aUniforms.size());
       }
       if( ! MtlParam.aStates.empty() )
       {
-        (*ppMtlInst)->SetParameters(GXMaterialInst::PT_RENDERSTATE, (GXDEFINITION*)&MtlParam.aStates.front(), (int)MtlParam.aStates.size());
+        (*ppMtlInst)->SetParameters(Material::PT_RENDERSTATE, (GXDEFINITION*)&MtlParam.aStates.front(), (int)MtlParam.aStates.size());
       }
       if( ! MtlParam.aBindPool.empty() )
       {
@@ -520,7 +549,6 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXL
       }
 
     }
-    
     SAFE_RELEASE(pShader);
     return hval;
   }
@@ -528,6 +556,7 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXL
     //ASSERT(0);
   }
   return hval;
+#endif
 }
 
 //GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType)
@@ -538,7 +567,7 @@ GXHRESULT GXGraphicsImpl::CreateMaterialFromFile(GXMaterialInst** ppMtlInst, GXL
 
 
 //////////////////////////////////////////////////////////////////////////
-GXFont* GXGraphicsImpl::CreateFontIndirect(const GXLPLOGFONTW lpLogFont)
+GXFont* GraphicsImpl::CreateFontIndirect(const GXLPLOGFONTW lpLogFont)
 {
   GXLOGFONTA LogFontA;
   LogFontA.lfHeight         = lpLogFont->lfHeight;
@@ -558,10 +587,10 @@ GXFont* GXGraphicsImpl::CreateFontIndirect(const GXLPLOGFONTW lpLogFont)
   return CreateFontIndirect(&LogFontA);
 }
 
-GXFont* GXGraphicsImpl::CreateFontIndirect(const GXLPLOGFONTA lpLogFont)
+GXFont* GraphicsImpl::CreateFontIndirect(const GXLPLOGFONTA lpLogFont)
 {
   GRESKETCH ResFeatDesc;
-  GrapXInternal::ResourceSketch::GenerateFontA(&ResFeatDesc, lpLogFont);
+  GrapX::Internal::ResourceSketch::GenerateFontA(&ResFeatDesc, lpLogFont);
   m_pLogger->OutputFormatA("Load font from file: %s", lpLogFont->lfFaceName);
 
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
@@ -587,7 +616,7 @@ GXFont* GXGraphicsImpl::CreateFontIndirect(const GXLPLOGFONTA lpLogFont)
   return pFont;
 }
 
-GXFont* GXGraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName)
+GXFont* GraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GXLPCWSTR pFileName)
 {
   GXLOGFONTW LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTW));
@@ -597,7 +626,7 @@ GXFont* GXGraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, 
   return CreateFontIndirect(&LogFont);
 }
 
-GXFont* GXGraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName)
+GXFont* GraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GXLPCSTR pFileName)
 {
   GXLOGFONTA LogFont;
   memset(&LogFont, 0, sizeof(GXLOGFONTA));
@@ -610,7 +639,7 @@ GXFont* GXGraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, 
 
 #include "Canvas/GXCanvas3DImpl.h"
 #include "Canvas/GXCanvas3DImpl.inl"
-GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
+GXHRESULT GraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
 {
   GXREGN    regn = 0;
   GXHRESULT hval = GX_OK;
@@ -668,7 +697,8 @@ GXHRESULT GXGraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, GXRenderTarget
 }
 
 //////////////////////////////////////////////////////////////////////////
-GXHRESULT GXGraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szShaderDesc, GXLPCSTR szPlatformSect, MTLFILEPARAMDESC* pMtlParam)
+#if 0
+GXHRESULT GraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szShaderDesc, GXLPCSTR szPlatformSect, MTLFILEPARAMDESC* pMtlParam)
 {
   GXHRESULT       hval = GX_FAIL;
 
@@ -690,8 +720,9 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szS
   }
   return hval;
 }
+#endif // 0
 
-GXHRESULT GXGraphicsImpl::IntCreateSamplerState(GSamplerStateImpl** ppSamplerState, GSamplerStateImpl* pDefault)
+GXHRESULT GraphicsImpl::IntCreateSamplerState(GSamplerStateImpl** ppSamplerState, GSamplerStateImpl* pDefault)
 {
   (*ppSamplerState) = NULL;
   (*ppSamplerState) = new GSamplerStateImpl(this);
@@ -703,7 +734,7 @@ GXHRESULT GXGraphicsImpl::IntCreateSamplerState(GSamplerStateImpl** ppSamplerSta
   return GX_FAIL;
 }
 
-void GXGraphicsImpl::IntAttachComposerSdrDesc(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
+void GraphicsImpl::IntAttachComposerSdrDesc(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
 {
   if(pSdrElementSrc->bExtComposer)
   {
@@ -717,12 +748,13 @@ void GXGraphicsImpl::IntAttachComposerSdrDesc(MOSHADER_ELEMENT_SOURCE* pSdrEleme
   }
 }
 
-GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
+#if 0
+GXHRESULT GraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
 {
   GRESKETCH ResFeatDesc;
 
   // 资源特征提取
-  GrapXInternal::ResourceSketch::GenerateShaderElementA(&ResFeatDesc, pSdrElementSrc, NULL);
+  GrapX::Internal::ResourceSketch::GenerateShaderElementA(&ResFeatDesc, pSdrElementSrc, NULL);
 
   m_pLogger->OutputFormatA("Load shader from file: %s(vs), %s(ps)", pSdrElementSrc->strVS, pSdrElementSrc->strPS);
 
@@ -757,10 +789,11 @@ GXHRESULT GXGraphicsImpl::IntCreateSdrFromElement(GShader** ppShader, MOSHADER_E
   m_pLogger->OutputFormatA("...Succeeded.\n");
   return GX_OK;
 }
+#endif // 0
 
-GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GrapX::Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount)
+GXHRESULT GraphicsImpl::CreateShaderFromSource(Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount)
 {
-  GrapX::D3D11::ShaderImpl* pShader = new GrapX::D3D11::ShaderImpl(this);
+  ShaderImpl* pShader = new ShaderImpl(this);
   if(InlIsFailedToNewObject(pShader))
   {
     return GX_ERROR_OUROFMEMORY;
@@ -776,74 +809,76 @@ GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GrapX::Shader** ppShader, const
   return GX_OK;
 }
 
-GXHRESULT GXGraphicsImpl::CreateShaderFromSource(GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)
+//GXHRESULT GraphicsImpl::CreateShaderFromSource(GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition)
+//{
+//  GShaderImpl* pShader = new GShaderImpl(this);
+//  if(InlIsFailedToNewObject(pShader)) {
+//    return GX_ERROR_OUROFMEMORY;
+//  }
+//
+//  clBuffer sVertexBuffer;
+//  clBuffer sPixelBuffer;
+//  LPD3DXINCLUDE pInclude = NULL;
+//  GXHRESULT hr = GX_OK;
+//
+//  if(nSourceLen == 0)
+//  {
+//    nSourceLen = GXSTRLEN(szShaderSource);
+//  }
+//
+//  hr = pShader->CompileShader(&sVertexBuffer, szShaderSource, nSourceLen,
+//    pInclude, pMacroDefinition, GShaderImpl::CompiledVertexShder);
+//
+//  if(GXSUCCEEDED(hr))
+//  {
+//    hr = pShader->CompileShader(&sPixelBuffer, szShaderSource, nSourceLen,
+//      pInclude, pMacroDefinition, GShaderImpl::CompiledPixelShder);
+//  }
+//
+//  if(GXSUCCEEDED(hr))
+//  {
+//    hr = pShader->LoadFromMemory(&sVertexBuffer, &sPixelBuffer);
+//  }
+//
+//  if(GXSUCCEEDED(hr))
+//  {
+//    RegisterResource(pShader, NULL);
+//    *ppShader = pShader; // 构造时已经加一
+//  }
+//  else
+//  {
+//    SAFE_RELEASE(pShader);
+//  }
+//
+//  return hr;
+//}
+
+GXHRESULT GraphicsImpl::CreateShaderFromFile(Shader** ppShader, GXLPCWSTR szShaderDesc)
 {
-  GShaderImpl* pShader = new GShaderImpl(this);
-  if(InlIsFailedToNewObject(pShader)) {
-    return GX_ERROR_OUROFMEMORY;
-  }
-
-  clBuffer sVertexBuffer;
-  clBuffer sPixelBuffer;
-  LPD3DXINCLUDE pInclude = NULL;
-  GXHRESULT hr = GX_OK;
-
-  if(nSourceLen == 0)
-  {
-    nSourceLen = GXSTRLEN(szShaderSource);
-  }
-
-  hr = pShader->CompileShader(&sVertexBuffer, szShaderSource, nSourceLen,
-    pInclude, pMacroDefinition, GShaderImpl::CompiledVertexShder);
-
-  if(GXSUCCEEDED(hr))
-  {
-    hr = pShader->CompileShader(&sPixelBuffer, szShaderSource, nSourceLen,
-      pInclude, pMacroDefinition, GShaderImpl::CompiledPixelShder);
-  }
-
-  if(GXSUCCEEDED(hr))
-  {
-    hr = pShader->LoadFromMemory(&sVertexBuffer, &sPixelBuffer);
-  }
-
-  if(GXSUCCEEDED(hr))
-  {
-    RegisterResource(pShader, NULL);
-    *ppShader = pShader; // 构造时已经加一
-  }
-  else
-  {
-    SAFE_RELEASE(pShader);
-  }
-
-  return hr;
+  CLBREAK;
+  //return IntCreateSdrPltDescW(ppShader, szShaderDesc, InlGetPlatformStringA(), NULL);
 }
 
-GXHRESULT GXGraphicsImpl::CreateShaderFromFile(GShader** ppShader, GXLPCWSTR szShaderDesc)
+GXHRESULT GraphicsImpl::CreateShaderFromFile(Shader** ppShader, GXLPCSTR szShaderDesc)
 {
-  return IntCreateSdrPltDescW(ppShader, szShaderDesc, InlGetPlatformStringA(), NULL);
+  CLBREAK;
+  //clStringW strDesc = szShaderDesc;
+  //return IntCreateSdrPltDescW(ppShader, strDesc, InlGetPlatformStringA(), NULL);
 }
 
-GXHRESULT GXGraphicsImpl::CreateShaderFromFile(GShader** ppShader, GXLPCSTR szShaderDesc)
-{
-  clStringW strDesc = szShaderDesc;
-  return IntCreateSdrPltDescW(ppShader, strDesc, InlGetPlatformStringA(), NULL);
-}
+//GXHRESULT GraphicsImpl::CreateShaderStub(GShaderStub** ppShaderStub)
+//{
+//  GShaderStubImpl* pShaderStub = new GShaderStubImpl(this);
+//  pShaderStub->AddRef();
+//  *ppShaderStub = pShaderStub;
+//  return GX_OK;
+//}
 
-GXHRESULT GXGraphicsImpl::CreateShaderStub(GShaderStub** ppShaderStub)
-{
-  GShaderStubImpl* pShaderStub = new GShaderStubImpl(this);
-  pShaderStub->AddRef();
-  *ppShaderStub = pShaderStub;
-  return GX_OK;
-}
-
-GXHRESULT GXGraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement)
+GXHRESULT GraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement)
 {
   // 资源特征提取
   GRESKETCH ResFeatDesc;
-  GrapXInternal::ResourceSketch::GenerateVertexDecl(&ResFeatDesc, lpVertexElement);
+  GrapX::Internal::ResourceSketch::GenerateVertexDecl(&ResFeatDesc, lpVertexElement);
 
   //
   // locker
@@ -857,7 +892,7 @@ GXHRESULT GXGraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexD
     return hval;
   }
 
-  GVertexDeclImpl* pVertexDeclImpl = new GVertexDeclImpl(this);
+  VertexDeclImpl* pVertexDeclImpl = new VertexDeclImpl(this);
   if(InlIsFailedToNewObject(pVertexDeclImpl)) {
     return GX_FAIL;
   }
@@ -899,7 +934,7 @@ GXHRESULT GXGraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexD
 //  return GX_FAIL;
 //}
 //////////////////////////////////////////////////////////////////////////
-GXDWORD GXGraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
+GXDWORD GraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
 {
   switch(eCate)
   {
@@ -921,7 +956,7 @@ GXDWORD GXGraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
   return NULL;
 }
 
-GXCanvas* GXGraphicsImpl::LockCanvas(GXRenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags)
+GXCanvas* GraphicsImpl::LockCanvas(RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags)
 {
   // 允许 lpRegn 是空的, 比如Edit控件会因为调整大小而创建DC.此时需要设备的Font信息.
   if( ! TEST_FLAG(m_dwFlags, F_ACTIVATE))
@@ -954,7 +989,7 @@ GXCanvas* GXGraphicsImpl::LockCanvas(GXRenderTarget* pTarget, const LPREGN lpReg
 //    return SetPrimitiveVI((GPrimitiveVI*)pPrimitive);
 //}
 
-GXHRESULT GXGraphicsImpl::SetRasterizerState(GRasterizerState* pRasterizerState)
+GXHRESULT GraphicsImpl::SetRasterizerState(GRasterizerState* pRasterizerState)
 {
   if(pRasterizerState == NULL) {
     pRasterizerState = m_pDefaultRasterizerState;
@@ -966,7 +1001,7 @@ GXHRESULT GXGraphicsImpl::SetRasterizerState(GRasterizerState* pRasterizerState)
   return GX_FAIL;
 }
 
-GXHRESULT GXGraphicsImpl::SetBlendState(GBlendState* pBlendState)
+GXHRESULT GraphicsImpl::SetBlendState(GBlendState* pBlendState)
 {
   if(pBlendState == NULL) {
     pBlendState = m_pDefaultBlendState;
@@ -978,7 +1013,7 @@ GXHRESULT GXGraphicsImpl::SetBlendState(GBlendState* pBlendState)
   return GX_FAIL;
 }
 
-GXHRESULT GXGraphicsImpl::SetDepthStencilState(GDepthStencilState* pDepthStencilState)
+GXHRESULT GraphicsImpl::SetDepthStencilState(GDepthStencilState* pDepthStencilState)
 {
   if(pDepthStencilState == NULL) {
     pDepthStencilState = m_pDefaultDepthStencilState;
@@ -991,7 +1026,7 @@ GXHRESULT GXGraphicsImpl::SetDepthStencilState(GDepthStencilState* pDepthStencil
 
 }
 
-GXHRESULT GXGraphicsImpl::SetSamplerState(GSamplerState* pSamplerState)
+GXHRESULT GraphicsImpl::SetSamplerState(GSamplerState* pSamplerState)
 {
   if(pSamplerState == NULL) {
     pSamplerState = m_pDefaultSamplerState;
@@ -1003,7 +1038,7 @@ GXHRESULT GXGraphicsImpl::SetSamplerState(GSamplerState* pSamplerState)
   return GX_FAIL;
 }
 
-GXBOOL GXGraphicsImpl::SwitchConsole()
+GXBOOL GraphicsImpl::SwitchConsole()
 {
   Enter();
   GXBOOL bret = TEST_FLAG(m_dwFlags, F_SHOWCONSOLE);
@@ -1014,7 +1049,7 @@ GXBOOL GXGraphicsImpl::SwitchConsole()
 }
 
 //////////////////////////////////////////////////////////////////////////
-GXHRESULT GXGraphicsImpl::RegisterResource(GResource* pResource, LPCRESKETCH pSketch)
+GXHRESULT GraphicsImpl::RegisterResource(GResource* pResource, LPCRESKETCH pSketch)
 {
   clstd::ScopedSafeLocker locker(m_pGraphicsLocker);
 
@@ -1034,7 +1069,7 @@ GXHRESULT GXGraphicsImpl::RegisterResource(GResource* pResource, LPCRESKETCH pSk
 //  return hval;
 //}
 
-GXHRESULT GXGraphicsImpl::UnregisterResource(GResource* pResource)
+GXHRESULT GraphicsImpl::UnregisterResource(GResource* pResource)
 {
   clstd::ScopedSafeLocker locker(m_pGraphicsLocker);
 
@@ -1064,21 +1099,21 @@ GXHRESULT GXGraphicsImpl::UnregisterResource(GResource* pResource)
 //  return (GXUINT)pResource->Release();
 //}
 
-GXHRESULT GXGraphicsImpl::BroadcastScriptCommand(GRESCRIPTDESC* pDesc)
+GXHRESULT GraphicsImpl::BroadcastScriptCommand(GRESCRIPTDESC* pDesc)
 {
   pDesc->bBroadcast = TRUE;
   pDesc->dwTime = gxGetTickCount();
   return m_ResMgr.BroadcastScriptCommand(pDesc);
 }
 
-GXHRESULT GXGraphicsImpl::BroadcastCategoryCommand(GXDWORD dwCategoryID, GRESCRIPTDESC* pDesc)
+GXHRESULT GraphicsImpl::BroadcastCategoryCommand(GXDWORD dwCategoryID, GRESCRIPTDESC* pDesc)
 {
   pDesc->bBroadcast = TRUE;
   pDesc->dwTime = gxGetTickCount();
   return m_ResMgr.BroadcastCategoryMessage(dwCategoryID, pDesc);
 }
 
-GXCanvas* GXGraphicsImpl::AllocCanvas()
+GXCanvas* GraphicsImpl::AllocCanvas()
 {
   for(GXUINT i = 0; i < s_uCanvasCacheCount; i++)
   {
@@ -1103,7 +1138,7 @@ GXCanvas* GXGraphicsImpl::AllocCanvas()
 //  return m_aResource.end();
 //}
 
-void GXGraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
+void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
 {
   ++(*pdwStencil);
 
@@ -1152,18 +1187,18 @@ void GXGraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
   //  return m_pBackBufferTex;
   //}
 
-  GXHRESULT GXGraphicsImpl::GetBackBuffer(GXRenderTarget** ppTarget)
+  GXHRESULT GraphicsImpl::GetBackBuffer(RenderTarget** ppTarget)
   {
     *ppTarget = m_pDefaultBackBuffer;
     return m_pDefaultBackBuffer->AddRef();
   }
 
-  GTexture* GXGraphicsImpl::GetDeviceOriginTex()
+  GTexture* GraphicsImpl::GetDeviceOriginTex()
   {
     return m_pDeviceOriginTex;
   }
 
-  GXBOOL GXGraphicsImpl::ScrollTexture(const SCROLLTEXTUREDESC* lpstd)
+  GXBOOL GraphicsImpl::ScrollTexture(const SCROLLTEXTUREDESC* lpstd)
   {
     GXBOOL bresult = FALSE;
     // 该函数不对偏移量为(0,0)的情况进行检测
@@ -1354,24 +1389,24 @@ FUNC_RET_0:
     return bresult;
   }
 //////////////////////////////////////////////////////////////////////////
-  GXEffect* GXGraphicsImpl::IntGetEffect()
+  Effect* GraphicsImpl::IntGetEffect()
   {
-    return m_pBaseEffect;
+    return m_pBasicEffect;
   }
 
-  void GXGraphicsImpl::Enter()
+  void GraphicsImpl::Enter()
   {
     //TRACE("\n\n"__FUNCTION__":%d\n", m_pGraphicsLocker->m_nLockCount);
     m_pGraphicsLocker->Lock();
   }
 
-  void GXGraphicsImpl::Leave()
+  void GraphicsImpl::Leave()
   {
     m_pGraphicsLocker->Unlock();
     //TRACE(__FUNCTION__":%d\n", m_pGraphicsLocker->m_nLockCount);
   }
 
-  GXBOOL GXGraphicsImpl::GetRenderStatistics(RENDER_STATISTICS* pStat)
+  GXBOOL GraphicsImpl::GetRenderStatistics(RENDER_STATISTICS* pStat)
   {
     *pStat = m_sStatistics;
     return TRUE;

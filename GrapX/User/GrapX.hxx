@@ -24,11 +24,7 @@ namespace clstd
 class GXWnd;
 //class GXImage;
 class GUnknown;
-class GTexture;
-//class GXRenderTarget;
 class GXFont;
-class GXCanvas;
-class GXGraphics;
 class GRegion;
 class DesktopWindowsMgr;
 class RichFXMgr;
@@ -51,10 +47,12 @@ namespace GrapX
   {
     class SystemMessage;
   }
+  class Graphics;
   class RenderTarget;
+  class Shader;
+  class Effect;
+  class Material;
 }
-
-typedef GrapX::RenderTarget GXRenderTarget;
 
 struct STOCKOBJECT;
 
@@ -197,8 +195,8 @@ typedef struct __tagGXGDIBITMAP : GXGDIOBJ
   GXWORD      bmBitsPixel; 
   GXLPVOID    bmBits; 
   //GXImage*    pImage;    
-  GTexture*       pDrawingTexture; // 用于绘制
-  GXRenderTarget* pTargetTexture;  // 如果位图作为绘制目标，则创建它
+  GrapX::GTexture*     pDrawingTexture; // 用于绘制
+  GrapX::RenderTarget* pTargetTexture;  // 如果位图作为绘制目标，则创建它
 }GXGDIBITMAP;
 
 typedef GXGDIPEN  *LPGXGDIPEN, *GXLPGDIPEN;
@@ -212,7 +210,7 @@ typedef GXGDIBITMAP  *LPGXGDIBITMAP, *GXLPGDIBITMAP;
 typedef struct __tagGXGDIDC : GXGDIOBJ
 {
   GXWndCanvas*    pWndCanvas;    // 
-  GXCanvas*       pCanvas;    
+  GrapX::GXCanvas*pCanvas;    
   LPGXGDIBITMAP   lpBitmap;      // 如果是MemDC，才不为0
   GXHWND          hBindWnd;      // 与这个DC绑定的窗口
   //GXUINT        uRefCount;
@@ -237,7 +235,7 @@ typedef struct __tagGXICON
   GXBOOL      fIcon;
   GXDWORD     xHotspot;
   GXDWORD     yHotspot;
-  GTexture*   pImgIcon;
+  GrapX::GTexture*   pImgIcon;
 //  HBITMAP hbmMask; 
 //  HBITMAP hbmColor; 
 }GXICON, *LPGXICON, *GXLPICON;
@@ -284,7 +282,7 @@ struct GXCARET
   GXDWORD        flag;
   GXBOOL  IsVisible  ();
   GXBOOL  Tick    ();        // 只在可用并且显示时更新就可以了
-  GXHRESULT PaintCaret  (GXCanvas* pCanvas);
+  GXHRESULT PaintCaret  (GrapX::GXCanvas* pCanvas);
 };
 
 struct INTMEASURESTRING // 内部字符串测量结构

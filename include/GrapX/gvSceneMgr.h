@@ -9,14 +9,14 @@ class GVSceneMgr : public GUnknown
 {
   typedef clvector<GVNode*> GVNodeArray;
 private:
-  GXGraphics* m_pGraphics;
-  GVSceneMgr(GXGraphics* pGraphics);
+  GrapX::Graphics* m_pGraphics;
+  GVSceneMgr(GrapX::Graphics* pGraphics);
   virtual ~GVSceneMgr();
 
   GVNodeArray  m_aModel;
 
 public:
-  static GXHRESULT Create(GXGraphics* pGraphics, GVSceneMgr** ppSceneMgr);
+  static GXHRESULT Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr);
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef    ();

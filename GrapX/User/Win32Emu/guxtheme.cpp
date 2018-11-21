@@ -92,7 +92,7 @@ extern "C"
   
   GXHRESULT GXDLLAPI GXDrawThemeBackground(
     GXHTHEME hTheme,
-    GXCanvas* canvas,
+    GrapX::GXCanvas* canvas,
     int iPartId,
     int iStateId,
     const GXRECT *pRect,  // 两个端点的坐标
@@ -145,7 +145,7 @@ extern "C"
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL GXUXTHEME_Initialize(GXGraphics* pGraphics)
+  GXBOOL GXUXTHEME_Initialize(GrapX::Graphics* pGraphics)
   {
     // TODO: 抽取资源
     GXCreateSpriteFromFileW(pGraphics, _CLTEXT("elements/common.stock"),       &GXWnd::s_pCommonSpr);

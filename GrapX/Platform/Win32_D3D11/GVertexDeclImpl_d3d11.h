@@ -4,39 +4,42 @@
 #ifndef _VERTEX_DECLARATION_D3D11_IMPLEMENT_HEADER_FILE_
 #define _VERTEX_DECLARATION_D3D11_IMPLEMENT_HEADER_FILE_
 
-namespace D3D11
+namespace GrapX
 {
-  class GVertexDeclImpl : public GVertexDeclaration
+  namespace D3D11
   {
-    friend class GXGraphicsImpl;
-  private:
-    typedef GrapXToDX11::GXD3D11InputElementDescArray DescArray;
+    class VertexDeclImpl : public GrapX::GVertexDeclaration
+    {
+      friend class GraphicsImpl;
+    private:
+      typedef GrapXToDX11::GXD3D11InputElementDescArray DescArray;
 
-    GXGraphicsImpl*       m_pGraphics;
-    DescArray             m_aDescs;
-    UINT                  m_NumDescs;
-    GXUINT                m_nStride;
-    LPGXVERTEXELEMENT     m_pVertexElement;
+      GraphicsImpl*       m_pGraphics;
+      DescArray             m_aDescs;
+      UINT                  m_NumDescs;
+      GXUINT                m_nStride;
+      LPGXVERTEXELEMENT     m_pVertexElement;
 
-  protected:
-    GVertexDeclImpl(GXGraphicsImpl* pGraphics);
-    virtual ~GVertexDeclImpl();
+    protected:
+      VertexDeclImpl(GraphicsImpl* pGraphics);
+      virtual ~VertexDeclImpl();
 
-  public:
-    GXHRESULT Initialize(LPCGXVERTEXELEMENT lpVertexElement);
-    GXHRESULT Activate();
+    public:
+      GXHRESULT Initialize(LPCGXVERTEXELEMENT lpVertexElement);
+      GXHRESULT Activate();
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT           AddRef            ();
-    virtual GXHRESULT           Release           ();
+      virtual GXHRESULT           AddRef            ();
+      virtual GXHRESULT           Release           ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    virtual GXHRESULT           Invoke            (GRESCRIPTDESC* pDesc) { return GX_OK; }
+      virtual GXHRESULT           Invoke            (GRESCRIPTDESC* pDesc) { return GX_OK; }
 
-    virtual GXUINT              GetStride         ();
-    virtual GXINT               GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
-    virtual GXLPCVERTEXELEMENT  GetVertexElement  ();
-  };
-} // namespace D3D11
+      virtual GXUINT              GetStride         ();
+      virtual GXINT               GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
+      virtual GXLPCVERTEXELEMENT  GetVertexElement  ();
+    };
+  } // namespace D3D11
+}
 
 #endif // #ifndef _VERTEX_DECLARATION_D3D11_IMPLEMENT_HEADER_FILE_
 #endif // #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)

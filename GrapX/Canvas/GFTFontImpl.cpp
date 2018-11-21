@@ -171,7 +171,7 @@ GXBOOL _GFTFont::GetDescA(GXLPLOGFONTA lpLogFont) const
   return TRUE;
 }
 
-_GFTFont::_GFTFont(GXGraphics* pGraphics, const GXLPLOGFONTA lpLogFont)
+_GFTFont::_GFTFont(GrapX::Graphics* pGraphics, const GXLPLOGFONTA lpLogFont)
   : GXFont        ()
   //, m_pFaceName   (NULL)
   , m_pGraphics   (pGraphics)
@@ -223,7 +223,7 @@ _GFTFont::~_GFTFont()
 
 GXBOOL _GFTFont::IntCreateTexture()
 {
-  GTexture* pTexture = NULL;
+  GrapX::GTexture* pTexture = NULL;
 
   //pTexture = GXCreateTexture(DEFAULT_FONT_TEX_SIZE_X, DEFAULT_FONT_TEX_SIZE_Y, 
   //  1, D3DUSAGE_DYNAMIC, D3DFMT_A8, D3DPOOL_DEFAULT);
@@ -253,7 +253,7 @@ GXVOID _GFTFont::UpdateTexBuffer(GXUINT idxTex, LPGXREGN prgDest, unsigned char*
   GXRECT rect;
   ASSERT(prgDest->width > 0 && prgDest->height > 0);
   gxRegnToRect((GXRECT*)&rect, prgDest);
-  GTexture* pTexture = m_aFontTex[idxTex];
+  GrapX::GTexture* pTexture = m_aFontTex[idxTex];
 
 #if 0
   pTexture->MapRect(&mapped, &rect, GXResMap::Write);

@@ -1,9 +1,12 @@
 ﻿#ifndef _IMPLEMENT_MARIMO_SPRITE_HEADER_FILE_
 #define _IMPLEMENT_MARIMO_SPRITE_HEADER_FILE_
 
-class GTexture;
-class GXCanvas;
-class GXGraphics;
+namespace GrapX
+{
+  class Graphics;
+  class GTexture;
+  class GXCanvas;
+}
 
 namespace Marimo
 {
@@ -84,7 +87,7 @@ namespace Marimo
     typedef clvector<MOSprite::ANIMATION>    AnimationArray;
     typedef clvector<MOSprite::ANIM_UNIT>    AnimFrameArray;
     typedef clstd::StringSetA                clStringSetA;
-    typedef clvector<GTexture*>              TextureArray;
+    typedef clvector<GrapX::GTexture*>              TextureArray;
   private:
     //clStringW           m_strImageFile;
     TextureArray        m_ImageArray;
@@ -112,7 +115,7 @@ namespace Marimo
     virtual ~MOSpriteImpl();
   public:
     MOSpriteImpl();
-    GXBOOL Initialize(GXGraphics* pGraphics, const SPRITE_DESC_LOADER* pDesc);
+    GXBOOL Initialize(GrapX::Graphics* pGraphics, const SPRITE_DESC_LOADER* pDesc);
     //GXBOOL Initialize(GXGraphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount);
     
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -120,31 +123,31 @@ namespace Marimo
     virtual GXHRESULT Release();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXVOID    PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const override;
-    GXVOID    PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const override;
-    GXVOID    PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const override;
+    GXVOID    PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const override;
+    GXVOID    PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const override;
+    GXVOID    PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const override;
 
-    GXVOID    PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const override;
-    GXVOID    PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const override;
-    GXVOID    PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const override;
+    GXVOID    PaintModule3H(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const override;
+    GXVOID    PaintModule3V(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const override;
+    GXVOID    PaintModule3x3(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const override;
 
-    GXVOID    PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const override;
-    GXVOID    PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const override;
-    GXVOID    PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const override;
+    GXVOID    PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const override;
+    GXVOID    PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const override;
+    GXVOID    PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const override;
 
-    GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const override;
-    GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const override;
-    GXVOID    PaintAnimationFrame (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) override;
-    GXVOID    PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) override;
+    GXVOID    PaintAnimationFrame (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const override;
+    GXVOID    PaintAnimationFrame (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const override;
+    GXVOID    PaintAnimationFrame (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const override;
+    GXVOID    PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y) override;
+    GXVOID    PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn) override;
+    GXVOID    PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect) override;
 
-    GXVOID    Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const override;
-    GXVOID    Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const override;
-    GXVOID    Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const override;
-    GXVOID    Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const override;
-    GXVOID    Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const override;
-    GXVOID    Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const override;
+    GXVOID    Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const override;
+    GXVOID    Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const override;
+    GXVOID    Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const override;
+    GXVOID    Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const override;
+    GXVOID    Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const override;
+    GXVOID    Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const override;
 
     GXINT     Find                 (ID id, Type* pType) const override;
     GXINT     Find                 (GXLPCSTR szName, Type* pType) const override;
@@ -187,7 +190,7 @@ namespace Marimo
     GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
     GXSIZE_T  GetTextureCount() const override;  // 含有的图片数量
-    GXBOOL    GetTexture(GTexture** pImage, GXUINT index) const override;
+    GXBOOL    GetTexture(GrapX::GTexture** pImage, GXUINT index) const override;
     clStringW GetTextureFileW(GXUINT index) const override;
     clStringA GetTextureFileA(GXUINT index) const override;
 

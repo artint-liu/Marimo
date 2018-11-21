@@ -5,16 +5,16 @@
 namespace D3D9
 {
   //#include <Include/GTexture.h>
-  class GXGraphicsImpl;
+  class GraphicsImpl;
 
   template<class _Interface>
   class GTexBaseImplT : public _Interface
   {
   protected:
-    GXGraphicsImpl*         m_pGraphicsImpl;
+    GraphicsImpl*         m_pGraphicsImpl;
     LPDIRECT3DBASETEXTURE9  m_pTexture;
   public:
-    GTexBaseImplT(GXGraphicsImpl* pGraphicsImpl)
+    GTexBaseImplT(GraphicsImpl* pGraphicsImpl)
       : m_pGraphicsImpl(pGraphicsImpl)
       , m_pTexture     (NULL)
     {
@@ -35,7 +35,7 @@ namespace D3D9
 
   class GTextureImpl : public GTexBaseImplT<GTexture>
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
     friend class GXCanvasCoreImpl;
   public:
     enum CREATIONTYPE
@@ -74,7 +74,7 @@ namespace D3D9
     virtual GXBOOL      StretchRect   (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter) override;
     virtual GXBOOL      LockRect      (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags) override;
     virtual GXBOOL      UnlockRect        () override;
-    virtual GXGraphics* GetGraphicsUnsafe () override;
+    virtual Graphics* GetGraphicsUnsafe () override;
 
     //inline LPDIRECT3DTEXTURE9  D3DTexture();
     inline LPDIRECT3DSURFACE9  D3DSurface();
@@ -88,8 +88,8 @@ namespace D3D9
 
     CREATIONTYPE        GetCreationType ();
   protected:
-    GTextureImpl(GXGraphics* pGraphics);
-    GTextureImpl(GXGraphics* pGraphics, CREATIONTYPE eCreateType, GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
+    GTextureImpl(Graphics* pGraphics);
+    GTextureImpl(Graphics* pGraphics, CREATIONTYPE eCreateType, GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
 
     //GXGraphicsImpl*     m_pGraphics;
     //LPDIRECT3DTEXTURE9  m_pTexture;
@@ -121,12 +121,12 @@ namespace D3D9
   //////////////////////////////////////////////////////////////////////////
   class GTextureFromUser : public GTextureImpl
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
     friend class GTextureImpl;
   protected:
     LPDIRECT3DTEXTURE9  m_pSysMemTexture;
   public:
-    GTextureFromUser(GXGraphics* pGraphics, GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
+    GTextureFromUser(Graphics* pGraphics, GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage);
     virtual ~GTextureFromUser();
   protected:
     GXBOOL  IntCreateShaderTexture(LPDIRECT3DDEVICE9 lpd3dDevice);
@@ -149,7 +149,7 @@ namespace D3D9
   //////////////////////////////////////////////////////////////////////////
   class GTextureFromFile : public GTextureImpl
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
     friend class GTextureImpl;
 
   private:
@@ -169,7 +169,7 @@ namespace D3D9
     HRESULT Create(LPGXIMAGEINFOX pSrcInfo);
     GTextureFromFile(GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, 
       GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, 
-      GXDWORD MipFilter, GXCOLORREF ColorKey, GXGraphics* pGraphics);
+      GXDWORD MipFilter, GXCOLORREF ColorKey, Graphics* pGraphics);
     virtual ~GTextureFromFile();
   };
   //////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ namespace D3D9
 
   class GTextureImpl_FromD3DSurface : public GTextureImpl
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
     friend class GTextureImpl;
   private:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -201,7 +201,7 @@ namespace D3D9
     virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc);
 
   public:
-    GTextureImpl_FromD3DSurface(GXGraphics* pGraphics, LPDIRECT3DSURFACE9 lpd3dSurface);
+    GTextureImpl_FromD3DSurface(Graphics* pGraphics, LPDIRECT3DSURFACE9 lpd3dSurface);
     ~GTextureImpl_FromD3DSurface();
   };
 

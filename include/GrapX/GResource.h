@@ -62,44 +62,47 @@ struct GRESCRIPTDESC
 };
 
 typedef const GRESKETCH* LPCRESKETCH;
-
-class GResource : public GUnknown
+namespace GrapX
 {
-public:
-protected:
-  GResource(GXUINT nPriority, GXDWORD dwType) 
-    : GUnknown()
-    , m_dwPriority(nPriority)
-    , m_dwResType(dwType)
+  class GResource : public GUnknown
   {
-    ASSERT(nPriority < 4);
-    ASSERT(dwType < 256);
-  }
-  virtual ~GResource(){}
+  public:
+  protected:
+    GResource(GXUINT nPriority, GXDWORD dwType)
+      : GUnknown()
+      , m_dwPriority(nPriority)
+      , m_dwResType(dwType)
+    {
+      ASSERT(nPriority < 4);
+      ASSERT(dwType < 256);
+    }
+    virtual ~GResource() {}
 
-public:
-  GXDWORD         m_dwPriority : 2; // 值越小优先级越高, 在广播时越先处理
-  GXDWORD         m_dwResType  : 8;
-  GXSTDINTERFACE(GXHRESULT  Invoke            (GRESCRIPTDESC* pDesc));
+  public:
+    GXDWORD         m_dwPriority : 2; // 值越小优先级越高, 在广播时越先处理
+    GXDWORD         m_dwResType : 8;
+    GXSTDINTERFACE(GXHRESULT  Invoke            (GRESCRIPTDESC* pDesc));
 
-  virtual GXUINT  GetPriority () const
-  {
-    return (GXUINT)m_dwPriority;
-  }
+    virtual GXUINT  GetPriority () const
+    {
+      return (GXUINT)m_dwPriority;
+    }
 
-  virtual GXUINT  SetPriority (GXUINT nNewPriority)
-  {
-    GXUINT nPrevPriority = (GXUINT)m_dwPriority;
-    m_dwPriority = (GXDWORD)nNewPriority;
-    return nPrevPriority;
-  }
+    virtual GXUINT  SetPriority (GXUINT nNewPriority)
+    {
+      GXUINT nPrevPriority = (GXUINT)m_dwPriority;
+      m_dwPriority = (GXDWORD)nNewPriority;
+      return nPrevPriority;
+    }
 
-  virtual GXDWORD GetType     () const
-  {
-    return (GXDWORD)m_dwResType;
-  }
-};
- 
+    virtual GXDWORD GetType     () const
+    {
+      return (GXDWORD)m_dwResType;
+    }
+  };
+
+} // namespace GrapX
+
 #else
 #pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _GRAPX_RESOURCE_H_

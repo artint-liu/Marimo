@@ -256,7 +256,7 @@ GXHRESULT GXImageImpl::SetHelperState(HelperState eState, GXLPARAM lParam)
 GXBOOL GXImageImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate)
 {
   SCROLLTEXTUREDESC ScrollTexDesc;
-  GXGraphics* pGraphics = m_pNativeTex->GetGraphicsUnsafe();
+  Graphics* pGraphics = m_pNativeTex->GetGraphicsUnsafe();
 
   ScrollTexDesc.pOperationTex = m_pNativeTex;
   ScrollTexDesc.pTempTex      = NULL;

@@ -31,7 +31,7 @@ using namespace GrapX;
 
 typedef clstack<GVNode*> GVNodeStack;
 
-GVScene::GVScene(GXGraphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl)
+GVScene::GVScene(GrapX::Graphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl)
   : m_pGraphics     (pGraphics)
   , m_pSceneMgr     (pSceneMgr)
   , m_strDefaultMtl (szDefaultMtl)
@@ -63,7 +63,7 @@ GVScene::~GVScene()
 
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GVScene::Create(GXGraphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl, GVScene** ppScene)
+GXHRESULT GVScene::Create(GrapX::Graphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl, GVScene** ppScene)
 {
   if(pSceneMgr == NULL)
   {
@@ -108,7 +108,7 @@ GXHRESULT GVScene::Release()
 
 //////////////////////////////////////////////////////////////////////////
 
-GXGraphics* GVScene::GetGraphicsUnsafe()
+GrapX::Graphics* GVScene::GetGraphicsUnsafe()
 {
   return m_pGraphics;
 }
@@ -151,8 +151,8 @@ GXHRESULT GVScene::Add(GVNode* pNode, GVNode* pParent)
 
       GXBOOL bHasMesh = sDesc.pPrimitive != NULL;
 
-      if(bHasMesh && GXFAILED(pTraversal->GetMaterialInstFilenameW(NULL))) {
-        pTraversal->SetMaterialInstFromFileW(m_pGraphics, m_strDefaultMtl, NULL);
+      if(bHasMesh && GXFAILED(pTraversal->GetMaterialFilenameW(NULL))) {
+        pTraversal->SetMaterialFromFile(m_pGraphics, m_strDefaultMtl, NULL);
           //FALSE, MLT_REFERENCE);
       }
 
@@ -312,7 +312,7 @@ GXBOOL GVScene::RayTrace(const GVNode::Ray& ray, const GVNode::AABB* pAABB, GVNo
   return RayTraceRecursive(ray, pParent ? pParent : m_pRoot , pAABB, ppModel, pHit);
 }
 
-GXBOOL GVScene::RayTraceFromViewport(GXCanvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit)
+GXBOOL GVScene::RayTraceFromViewport(GrapX::GXCanvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit)
 {
   float3 vPos;
   pCanvas->PositionFromScreen(pPoint, 1.0f - 1e-5f, &vPos);
@@ -351,12 +351,12 @@ GXHRESULT GVScene::UpdateRecursive(const GVSCENEUPDATE& sContext, GVNode* pParen
   return GX_OK;
 }
 
-GXHRESULT GVScene::RenderRecursive( GXCanvas3D* pCanvas, GVNode* pParent, GVRenderType eType )
+GXHRESULT GVScene::RenderRecursive(GrapX::GXCanvas3D* pCanvas, GVNode* pParent, GVRenderType eType)
 {
   GVRENDERDESC Desc;
   GVNode* pModel = pParent->GetFirstChild();
 
-  GXGraphics* pGraphics = pCanvas->GetGraphicsUnsafe();
+  GrapX::Graphics* pGraphics = pCanvas->GetGraphicsUnsafe();
 
   while(pModel != NULL)
   {
@@ -376,7 +376,7 @@ GXHRESULT GVScene::RenderRecursive( GXCanvas3D* pCanvas, GVNode* pParent, GVRend
 
       // Ó¦ÓÃ²ÄÖÊ
       if(Desc.pMaterial != NULL) {
-        pCanvas->SetMaterialInst(Desc.pMaterial);
+        pCanvas->SetMaterial(Desc.pMaterial);
       }
       else {
         ASSERT(0);

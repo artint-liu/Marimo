@@ -1,8 +1,11 @@
 ﻿#ifndef _GRAPH_X_SPRITE_HEADER_FILE_
 #define _GRAPH_X_SPRITE_HEADER_FILE_
 
-class GXCanvas;
-class GXGraphics;
+namespace GrapX
+{
+  class GXCanvas;
+  class Graphics;
+}
 //class GXImage;
 
 class GXSprite : public GUnknown
@@ -61,31 +64,31 @@ public:
 public:
   //GXSTDINTERFACE(GXHRESULT SaveW              (GXLPCWSTR szFilename) const);
                                               
-  GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    PaintModule          (GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
 
-  GXSTDINTERFACE(GXVOID    PaintModule3H        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDINTERFACE(GXVOID    PaintModule3V        (GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDINTERFACE(GXVOID    PaintModule3x3       (GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3H        (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3V        (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3x3       (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
 
-  GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    PaintFrame           (GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const);
 
-  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const);
-  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y));
-  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn));
-  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect));
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y));
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn));
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect));
 
-  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
 
   GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType 可以设置为NULL, 不返回类型
   GXSTDINTERFACE(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType = NULL) const);
@@ -125,7 +128,7 @@ public:
   //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXRECT* lprc) const); // 对于Module，返回值的left和top都应该是0
   //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXREGN* lprg) const);
 
-  GXSTDINTERFACE(GXHRESULT GetTexture           (GTexture** ppTexture));
+  GXSTDINTERFACE(GXHRESULT GetTexture           (GrapX::GTexture** ppTexture));
   GXSTDINTERFACE(clStringW GetImageFileW        () const);
   GXSTDINTERFACE(clStringA GetImageFileA        () const);
                                           
@@ -174,11 +177,11 @@ public:
 extern "C"
 {
   GXBOOL    GXDLLAPI GXSaveSpriteToFileW      (GXLPCWSTR szFilename, const GXSPRITE_DESCW* pDesc);
-  GXHRESULT GXDLLAPI GXCreateSprite           (GXGraphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount, GXSprite** ppSprite);
-  GXHRESULT GXDLLAPI GXCreateSpriteEx         (GXGraphics* pGraphics, const GXSPRITE_DESCW* pDesc, GXSprite** ppSprite);
-  GXHRESULT GXDLLAPI GXCreateSpriteArray      (GXGraphics* pGraphics, GXLPCWSTR szTextureFile, int xStart, int yStart, int nTileWidth, int nTileHeight, int xGap, int yGap, GXSprite** ppSprite);
-  GXHRESULT GXDLLAPI GXCreateSpriteFromFileW  (GXGraphics* pGraphics, GXLPCWSTR szSpriteFile, GXSprite** ppSprite);
-  GXHRESULT GXDLLAPI GXCreateSpriteFromFileA  (GXGraphics* pGraphics, GXLPCSTR szSpriteFile, GXSprite** ppSprite);
+  GXHRESULT GXDLLAPI GXCreateSprite           (GrapX::Graphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount, GXSprite** ppSprite);
+  GXHRESULT GXDLLAPI GXCreateSpriteEx         (GrapX::Graphics* pGraphics, const GXSPRITE_DESCW* pDesc, GXSprite** ppSprite);
+  GXHRESULT GXDLLAPI GXCreateSpriteArray      (GrapX::Graphics* pGraphics, GXLPCWSTR szTextureFile, int xStart, int yStart, int nTileWidth, int nTileHeight, int xGap, int yGap, GXSprite** ppSprite);
+  GXHRESULT GXDLLAPI GXCreateSpriteFromFileW  (GrapX::Graphics* pGraphics, GXLPCWSTR szSpriteFile, GXSprite** ppSprite);
+  GXHRESULT GXDLLAPI GXCreateSpriteFromFileA  (GrapX::Graphics* pGraphics, GXLPCSTR szSpriteFile, GXSprite** ppSprite);
   GXHRESULT GXDLLAPI GXLoadSpriteDescW        (GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
   GXHRESULT GXDLLAPI GXLoadSpriteDescA        (GXLPCSTR szSpriteFile, GXSpriteDesc** ppDesc);
 };

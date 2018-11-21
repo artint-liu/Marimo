@@ -174,7 +174,7 @@ GXHRESULT GXShaderMgr::SetAttribute(SHADERMGRATTR* pShaderMgrAttr)
 #endif // #if 0
 namespace Marimo
 {
-  ShaderConstName::ShaderConstName(GXGraphics* pGraphics)
+  ShaderConstName::ShaderConstName(GrapX::Graphics* pGraphics)
     : m_pGraphics   (pGraphics)
     , m_nTotalCount (0)
     , m_cbCanvasUniform (sizeof(float4x4))  // 这个地方是要避免AllocHandle返回0
@@ -185,7 +185,7 @@ namespace Marimo
   {
   }
 
-  GXINT_PTR ShaderConstName::AddName(GShader* pShader, GXLPCSTR szName, GXLONG cbSize)
+  GXINT_PTR ShaderConstName::AddName(GrapX::Shader* pShader, GXLPCSTR szName, GXLONG cbSize)
   {
     NameDict::iterator it = m_NameDict.find(szName);
     if(it != m_NameDict.end()) {
@@ -218,7 +218,7 @@ namespace Marimo
     return -1;
   }
 
-  int ShaderConstName::RemoveName(GShader* pShader, GXLPCSTR szName)
+  int ShaderConstName::RemoveName(GrapX::Shader* pShader, GXLPCSTR szName)
   {
     int result = 0;
     NameDict::iterator it = m_NameDict.find(szName);

@@ -62,7 +62,7 @@ namespace GXUIEXT
       {
         Page*         pChildPage;
         LBItemList*   pListBoxItem;
-        GTexture*     pTexture;
+        GrapX::GTexture*     pTexture;
         GXLPVOID      pGeneral;    // 通用的,只用于指针判断
         float         fIncrease;
       };

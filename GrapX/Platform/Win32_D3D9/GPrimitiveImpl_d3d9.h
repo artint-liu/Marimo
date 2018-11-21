@@ -3,21 +3,21 @@
 #define _GRAPHICS_X_PRIMITIVE_H_
 
 // ¿‡–Õ…˘√˜
-class GXGraphics;
+class Graphics;
 
 namespace D3D9
 {
-  class GXGraphicsImpl;
+  class GraphicsImpl;
   class GVertexDeclImpl;
 
   //
   // Primitive - Vertex 
   //
-  class GPrimitiveVertexOnlyImpl : public GPrimitive
+  class GPrimitiveVertexOnlyImpl : public Primitive
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
   protected:
-    GXGraphicsImpl*         m_pGraphicsImpl;
+    GraphicsImpl*         m_pGraphicsImpl;
     IDirect3DVertexBuffer9* m_pD3D9VertexBuffer;
     GXResUsage              m_eResUsage;
     
@@ -36,7 +36,7 @@ namespace D3D9
 
 
   protected:
-    GPrimitiveVertexOnlyImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride);
+    GPrimitiveVertexOnlyImpl(Graphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride);
     virtual ~GPrimitiveVertexOnlyImpl();
 
     virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) override;
@@ -72,7 +72,7 @@ namespace D3D9
   //
   class GPrimitiveVertexIndexImpl : public GPrimitiveVertexOnlyImpl
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
 
   protected:
     IDirect3DIndexBuffer9*    m_pD3D9IndexBuffer;
@@ -88,7 +88,7 @@ namespace D3D9
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   protected:
-    GPrimitiveVertexIndexImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride);
+    GPrimitiveVertexIndexImpl(Graphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride);
     virtual ~GPrimitiveVertexIndexImpl();
 
 
@@ -103,7 +103,7 @@ namespace D3D9
     GXBOOL      UnmapIndexBuffer      (GXLPVOID lpMappedBuffer) override;
 
 
-    GXGraphics* GetGraphicsUnsafe     () override;
+    Graphics* GetGraphicsUnsafe     () override;
     GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
   protected:
     GXBOOL      RestoreIndices        ();

@@ -1,14 +1,19 @@
 ﻿#ifndef _GRAPVR_SCENE_H_
 #define _GRAPVR_SCENE_H_
 
-class GXGraphics;
+//class GXGraphics;
 class GVSceneMgr;
 class GVPhySimulator;
 class GVNode;
 class GCamera;
-class GXCanvas3D;
 class GVSequence;
 enum GVRenderType;
+
+namespace GrapX
+{
+  class Graphics;
+  class GXCanvas3D;
+} // namespace GrapX
 //namespace Marimo
 //{
 //  class Component;
@@ -19,7 +24,7 @@ enum GVRenderType;
 
 struct GVSCENEUPDATE // Node update中这个具有const限制,不能改变Canvas和Camera的状态
 {
-  GXCanvas3D* pCanvas3D;
+  GrapX::GXCanvas3D* pCanvas3D;
   GCamera*    pCamera;        // 就是储存在Canvas3D中的对象
   GXUINT      uDrawCallCount;
   GXDWORD     dwDeltaTime;    // 当前Update传入的DeltaTime(单位:ms)
@@ -52,7 +57,7 @@ class GXDLL GVScene : public GUnknown
 
   typedef cllist<CMDBUFFER> CmdBufList;
 private:
-  GXGraphics*       m_pGraphics;
+  GrapX::Graphics*  m_pGraphics;
   GVSceneMgr*       m_pSceneMgr;
   clStringW         m_strDefaultMtl;
   GVPhySimulator*   m_pPhysWorld;
@@ -64,18 +69,18 @@ private:
   CmdBufList        m_CmdBuffer;
   clstd::Locker     m_Locker;
 
-  GVScene(GXGraphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl);
+  GVScene(GrapX::Graphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl);
   virtual ~GVScene();
 
 private:
-  GXHRESULT RenderRecursive   (GXCanvas3D* pCanvas, GVNode* pParent, GVRenderType eType);
+  GXHRESULT RenderRecursive   (GrapX::GXCanvas3D* pCanvas, GVNode* pParent, GVRenderType eType);
   GXBOOL    RayTraceRecursive (const GVNode::NormalizedRay& ray, GVNode* pParent, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit);
   GXHRESULT UpdateRecursive   (const GVSCENEUPDATE& sContext, GVNode* pParent);
   GXHRESULT SaveFileRecursive (clFile* pFile, GVNode* pParent, GXINOUT u32& nVertBase);
   GXHRESULT IntExecuteCommand ();
 
 public:
-  static  GXHRESULT Create(GXGraphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl, GVScene** ppScene);
+  static  GXHRESULT Create(GrapX::Graphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl, GVScene** ppScene);
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef                ();
@@ -83,7 +88,7 @@ public:
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   virtual GXBOOL    RayTrace              (const GVNode::Ray& ray, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit, GVNode* pParent = NULL);
-  virtual GXBOOL    RayTraceFromViewport  (GXCanvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit = NULL);
+  virtual GXBOOL    RayTraceFromViewport  (GrapX::GXCanvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit = NULL);
   virtual GXHRESULT SetPhysicalSimlator   (GVPhySimulator* pPhySimulator);
   virtual GVNode*   FindNodeUnsafe        (GXLPCSTR szName);
 
@@ -91,19 +96,19 @@ public:
   virtual GXHRESULT SetNodeScaling        (GVNode* pNode, CFloat3& vScaling);
   virtual GXHRESULT SetNodeTransform      (GVNode* pNode, CFloat4x4& matTransform, clstd::ESpace eTransform = clstd::S_Self);
 
-  GXGraphics* GetGraphicsUnsafe();
+  GrapX::Graphics* GetGraphicsUnsafe();
 
   GXBOOL    IsChild     (GVNode* pNode);
   GXHRESULT Add         (GVNode* pNode, GVNode* pParent = NULL);
   GXHRESULT Delete      (GVNode* pNode); // Model必须在GVScene中
-  GXHRESULT RenderAll   (GXCanvas3D* pCanvas, GVRenderType eType);  // 不做裁剪,会将整个场景中的所有可渲染物都渲染出来
+  GXHRESULT RenderAll   (GrapX::GXCanvas3D* pCanvas, GVRenderType eType);  // 不做裁剪,会将整个场景中的所有可渲染物都渲染出来
   GXHRESULT SaveToFileW (GXLPCWSTR szFilename);
   GXHRESULT GetRoot     (GVNode** ppRootNode);
   
   // 参考 GVNodeFlags, 如果 dwRequired 不是 GVNode 返回标志的子集, 则不会被加到渲染队列中
   // dwRequired 不必指定 GVNF_VISIBLE 标志, 这个标志是默认的
-  GXHRESULT Generate (GXCanvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired);
-  void      Update      (GXCanvas3D* pCanvas, GXDWORD dwDeltaTime);
+  GXHRESULT Generate    (GrapX::GXCanvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired);
+  void      Update      (GrapX::GXCanvas3D* pCanvas, GXDWORD dwDeltaTime);
 
   inline GXDWORD        GetDeltaTime  ();
   inline float          GetDeltaTimeF ();

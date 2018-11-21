@@ -98,7 +98,7 @@ namespace Marimo
     typedef clhash_map<clStringA, NAMEDESC> NameDict;
 
   private:
-    GXGraphics* m_pGraphics;
+    GrapX::Graphics* m_pGraphics;
     GXLONG      m_nTotalCount;  // 所有的ConstName数量
     NameDict    m_NameDict;
     GXLONG      m_cbCanvasUniform;  // Canvas-Uniform 的大小
@@ -107,13 +107,13 @@ namespace Marimo
     void Cleanup();
 
   public:
-    ShaderConstName(GXGraphics* pGraphics);
+    ShaderConstName(GrapX::Graphics* pGraphics);
     virtual ~ShaderConstName();
 
   public:
     GXINT_PTR AllocHandle       (GXLPCSTR szName, GXUniformType eExpect); // GXUniformType， 如果指定的名字存在，则忽略eExpect。如果不存在则按照期望类型创建，GXUB_UNDEFINED则返回失败
-    GXINT_PTR AddName           (GShader* pShader, GXLPCSTR szName, GXLONG cbSize);
-    int       RemoveName        (GShader* pShader, GXLPCSTR szName);
+    GXINT_PTR AddName           (GrapX::Shader* pShader, GXLPCSTR szName, GXLONG cbSize);
+    int       RemoveName        (GrapX::Shader* pShader, GXLPCSTR szName);
 
     inline GXSIZE_T GetSize() const;
   };

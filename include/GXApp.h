@@ -2,7 +2,10 @@
 #define GRAPX_APPLICATION_H_
 
 class IGXPlatform;
-class GXGraphics;
+namespace GrapX
+{
+  class Graphics;
+}
 class GXImage;
 class ILogger;
 class GXApp;
@@ -50,11 +53,11 @@ struct GXAPPKEYINFO
 class GXDLL GXApp
 {
 protected:
-  GXGraphics*   m_pGraphics;
+  GrapX::Graphics*   m_pGraphics;
   IGXPlatform*  m_pIPlatform;
 public:
   GXHRESULT     Go                 (GXAPP_DESC* pDesc);
-  GXGraphics*   GetGraphicsUnsafe  ();
+  GrapX::Graphics*   GetGraphicsUnsafe  ();
 
   virtual GXHRESULT OnCreate    ();
   virtual GXHRESULT OnDestroy   ();

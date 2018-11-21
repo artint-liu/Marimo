@@ -268,32 +268,32 @@ void GVNode::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
   memset(pRenderDesc, 0, sizeof(GVRENDERDESC));
 }
 
-GXHRESULT GVNode::SetMaterialInstDirect(GXMaterialInst* pMtlInst)
+GXHRESULT GVNode::SetMaterialDirect(GrapX::Material* pMtlInst)
 {
   return GX_OK;
 }
 
-GXHRESULT GVNode::GetMaterialInst(GXMaterialInst** ppMtlInst)
+GXHRESULT GVNode::GetMaterial(GrapX::Material** ppMtlInst)
 {
   *ppMtlInst = NULL;
   CLBREAK;
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::GetMaterialInstFilenameW(clStringW* pstrFilename)
+GXHRESULT GVNode::GetMaterialFilenameW(clStringW* pstrFilename)
 {
   CLBREAK;
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags)
+GXHRESULT GVNode::SetMaterial(GrapX::Material* pMtlInst, GXDWORD dwFlags)
 {
   // 如果要根据顶点属性加载纹理的话, 就使用文件名方式加载
   if(TEST_FLAG_NOT(dwFlags, NODEMTL_IGNOREVERT))
   {
     clStringW strFilename;
-    pMtlInst->GetFilenameW(&strFilename);
-    return SetMaterialInstFromFileW(pMtlInst->GetGraphicsUnsafe(), strFilename, dwFlags);
+    pMtlInst->GetFilename(&strFilename);
+    return SetMaterialFromFile(pMtlInst->GetGraphicsUnsafe(), strFilename, dwFlags);
   }
 
   // 设置子节点
@@ -303,16 +303,16 @@ GXHRESULT GVNode::SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags)
     GVNode* pChild = GetFirstChild();
     while(pChild != NULL)
     {
-      pChild->SetMaterialInst(pMtlInst, dwChildFlags);
+      pChild->SetMaterial(pMtlInst, dwChildFlags);
       pChild = pChild->GetNext();
     }
   }
 
   ASSERT(TEST_FLAG(dwFlags, NODEMTL_IGNOREVERT));
-  return SetMaterialInstDirect(pMtlInst);
+  return SetMaterialDirect(pMtlInst);
 }
 
-GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags)
+GXHRESULT GVNode::SetMaterialFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags)
 {
   // 设置子节点
   if(TEST_FLAG(dwFlags, NODEMTL_SETCHILDREN|NODEMTL_SETSONONLY)) {
@@ -321,13 +321,13 @@ GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFi
     GVNode* pChild = GetFirstChild();
     while(pChild != NULL)
     {
-      pChild->SetMaterialInstFromFileW(pGraphics, szFilename, dwChildFlags);
+      pChild->SetMaterialFromFile(pGraphics, szFilename, dwChildFlags);
       pChild = pChild->GetNext();
     }
   }
 
   clStringW strFilename = szFilename;
-  GXMaterialInst* pMtlInst = NULL;
+  GrapX::Material* pMtlInst = NULL;
   const MtlLoadType eLoadType = TEST_FLAG(dwFlags, NODEMTL_CLONEINST) 
     ? MLT_CLONE : MLT_REFERENCE;
 
@@ -342,7 +342,7 @@ GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFi
       return GX_OK;
     }
 
-    GVertexDeclaration* pVertDecl = NULL;
+    GrapX::GVertexDeclaration* pVertDecl = NULL;
     if(GXSUCCEEDED(renderdesc.pPrimitive->GetVertexDeclaration(&pVertDecl)))
     {
       GXLPCVERTEXELEMENT lpVertElement = pVertDecl->GetVertexElement();
@@ -362,7 +362,7 @@ GXHRESULT GVNode::SetMaterialInstFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFi
   }
 
   pGraphics->CreateMaterialFromFile(&pMtlInst, strFilename, eLoadType);
-  GXHRESULT hval = SetMaterialInstDirect(pMtlInst);
+  GXHRESULT hval = SetMaterialDirect(pMtlInst);
   SAFE_RELEASE(pMtlInst);
 
   return hval;
@@ -389,12 +389,12 @@ GXHRESULT GVNode::SaveFile(clSmartRepository* pStorage)
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::LoadFileA(GXGraphics* pGraphics, GXLPCSTR szFilename)
+GXHRESULT GVNode::LoadFileA(GrapX::Graphics* pGraphics, GXLPCSTR szFilename)
 {
   return LoadFileW(pGraphics, clStringW(szFilename));
 }
 
-GXHRESULT GVNode::LoadFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename)
+GXHRESULT GVNode::LoadFileW(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename)
 {
   clSmartRepository Storage;
   GXBOOL bval = Storage.LoadW(szFilename);
@@ -404,7 +404,7 @@ GXHRESULT GVNode::LoadFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename)
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::LoadFile(GXGraphics* pGraphics, clSmartRepository* pStorage)
+GXHRESULT GVNode::LoadFile(GrapX::Graphics* pGraphics, clSmartRepository* pStorage)
 {
   return GX_FAIL;
 }

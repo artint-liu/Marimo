@@ -100,7 +100,7 @@ namespace GXUI
   {
     GXBOOL bval = TRUE;
     SAFE_RELEASE(m_pSprite);
-    GXGraphics* pGraphics = GXGetGraphics(m_hWnd);
+    GrapX::Graphics* pGraphics = GXGetGraphics(m_hWnd);
 
     if(GXSUCCEEDED(GXCreateSpriteFromFileW(pGraphics, szSpriteFile, &m_pSprite)))
     {

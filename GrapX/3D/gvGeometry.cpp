@@ -39,7 +39,7 @@ namespace GrapX
 using namespace GrapX;
 
 
-GVGeometry::GVGeometry(GXGraphics* pGraphics, GEOTYPE eType, const float3& vMin, const float3& vMax)
+GVGeometry::GVGeometry(Graphics* pGraphics, GEOTYPE eType, const float3& vMin, const float3& vMax)
   : GVMesh        (pGraphics, GXMAKEFOURCC('G','E','O','Y'))
   , m_eType       (GXPT_POINTLIST)
   //, m_nPrimiCount (0)
@@ -64,7 +64,7 @@ GVGeometry::GVGeometry()
   //m_aabbLocal.UpdateCenterExtent();
 }
 
-GVGeometry::GVGeometry(GXGraphics* pGraphics, GEOTYPE eType)
+GVGeometry::GVGeometry(Graphics* pGraphics, GEOTYPE eType)
   : GVMesh        (pGraphics, GXMAKEFOURCC('G','E','O','Y'))
   , m_eType       (GXPT_POINTLIST)
   //, m_nPrimiCount (0)
@@ -90,7 +90,7 @@ GXHRESULT GVGeometry::AddRef()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXBOOL GVGeometry::InitializeAsAABB(GXGraphics* pGraphics, GXCOLOR clr)
+GXBOOL GVGeometry::InitializeAsAABB(Graphics* pGraphics, GXCOLOR clr)
 {
   m_eType = GXPT_LINELIST;
   m_nPrimiCount = 12;
@@ -141,7 +141,7 @@ GXBOOL GVGeometry::InitializeAsAABB(GXGraphics* pGraphics, GXCOLOR clr)
   return TRUE;
 }
 
-GXBOOL GVGeometry::InitializeAsAxis(GXGraphics* pGraphics, const float3& vPos, float fExtent, int nLevel)
+GXBOOL GVGeometry::InitializeAsAxis(Graphics* pGraphics, const float3& vPos, float fExtent, int nLevel)
 {
   GXBOOL bval = TRUE;
   if(nLevel == 0)
@@ -222,7 +222,7 @@ GXBOOL GVGeometry::InitializeAsAxis(GXGraphics* pGraphics, const float3& vPos, f
   return bval;
 }
 
-GXBOOL GVGeometry::InitializeAsQuadPlane(GXGraphics* pGraphics, const float3& vPos, const float3& vDirection, const float3& vUp, const float2& vExtent, GXUINT xSeg, GXUINT ySeg, GXDWORD dwVertexFlags)
+GXBOOL GVGeometry::InitializeAsQuadPlane(Graphics* pGraphics, const float3& vPos, const float3& vDirection, const float3& vUp, const float2& vExtent, GXUINT xSeg, GXUINT ySeg, GXDWORD dwVertexFlags)
 {
   float3 zaxis = float3::normalize(vDirection);
   float3 xaxis = float3::normalize(float3::cross(vUp, zaxis));
@@ -296,7 +296,7 @@ GXBOOL GVGeometry::InitializeAsQuadPlane(GXGraphics* pGraphics, const float3& vP
   //return TRUE;
 }
 
-GXBOOL GVGeometry::CreatePrimitive(GXGraphics* pGraphics, GXPrimitiveType eType, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount)
+GXBOOL GVGeometry::CreatePrimitive(Graphics* pGraphics, GXPrimitiveType eType, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount)
 {
   GXBOOL bval = FALSE;
   m_eType       = eType;
@@ -397,7 +397,7 @@ GXBOOL GVGeometry::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace)
 //  return GX_OK;
 //}
 //////////////////////////////////////////////////////////////////////////
-GXHRESULT GVGeometry::CreateBox(GXGraphics* pGraphics, CFloat3& vCenter, CFloat3& vExtent, GXCOLOR clr, GVGeometry** ppGeometry, GXDWORD dwVertexFlags)
+GXHRESULT GVGeometry::CreateBox(Graphics* pGraphics, CFloat3& vCenter, CFloat3& vExtent, GXCOLOR clr, GVGeometry** ppGeometry, GXDWORD dwVertexFlags)
 {
   const float3 v[2] = {
     vCenter - vExtent,
@@ -510,7 +510,7 @@ GXHRESULT GVGeometry::CreateBox(GXGraphics* pGraphics, CFloat3& vCenter, CFloat3
   }
 }
 
-GXHRESULT GVGeometry::CreateAABB(GXGraphics* pGraphics, const float3& vMin, const float3& vMax, GXCOLOR clr, GVGeometry** ppGeometry)
+GXHRESULT GVGeometry::CreateAABB(Graphics* pGraphics, const float3& vMin, const float3& vMax, GXCOLOR clr, GVGeometry** ppGeometry)
 {
   GVGeometry* pGeometry = new GVGeometry(pGraphics, GT_AABB, vMin, vMax);
   if(pGeometry == NULL) {
@@ -532,7 +532,7 @@ GXHRESULT GVGeometry::CreateAABB(GXGraphics* pGraphics, const float3& vMin, cons
   return hval;
 }
 
-GXHRESULT GVGeometry::CreateAxis(GXGraphics* pGraphics, const float3& vPos, float fExtent, int nLevel, GVGeometry** ppGeometry)
+GXHRESULT GVGeometry::CreateAxis(Graphics* pGraphics, const float3& vPos, float fExtent, int nLevel, GVGeometry** ppGeometry)
 {
   GXHRESULT hval = GX_OK;
   GVGeometry* pGeometry = new GVGeometry(pGraphics, GT_AXIS, vPos, vPos + fExtent);
@@ -554,7 +554,7 @@ GXHRESULT GVGeometry::CreateAxis(GXGraphics* pGraphics, const float3& vPos, floa
 }
 
 GXHRESULT GVGeometry::CreateQuadPlane(
-  GXGraphics*   pGraphics, 
+  Graphics*   pGraphics, 
   const float3& vPos,
   const float3& vDirection, 
   const float3& vUp,
@@ -584,7 +584,7 @@ GXHRESULT GVGeometry::CreateQuadPlane(
 }
 
 GXHRESULT GVGeometry::CreateCylinder(
-  GXGraphics*   pGraphics, 
+  Graphics*   pGraphics, 
   float         fOffset, 
   float         fRadius, 
   float         fHeight, 
@@ -1068,7 +1068,7 @@ void GenerateTorusSides(
 }
 
 GXHRESULT GVGeometry::CreateCylinder(
-  GXGraphics* pGraphics,
+  Graphics* pGraphics,
   float fOffset,
   float fRadius,
   float fHeight,
@@ -1182,7 +1182,7 @@ GXHRESULT GVGeometry::CreateCylinder(
 }
 
 GXHRESULT GVGeometry::CreateCone(
-  GXGraphics*   pGraphics, 
+  Graphics*   pGraphics, 
   float         fOffset, 
   float         fRadius1, 
   float         fRadius2, 
@@ -1312,7 +1312,7 @@ GXHRESULT GVGeometry::CreateCone(
 }
 
 GXHRESULT GVGeometry::CreateTorus(
-  GXGraphics*   pGraphics, 
+  Graphics*   pGraphics, 
   float         fRadius1, 
   float         fRadius2, 
   int           nSegment, 
@@ -1399,7 +1399,7 @@ GXHRESULT GVGeometry::CreateTorus(
 }
 
 GXHRESULT GVGeometry::CreateSphere(
-  GXGraphics*   pGraphics,
+  Graphics*   pGraphics,
   float         fOffset,
   float         fRadius,
   int           nSegments,
@@ -1479,7 +1479,7 @@ GXHRESULT GVGeometry::CreateSphere(
 }
 
 GXHRESULT GVGeometry::CreateCapsule(
-  GXGraphics*   pGraphics,
+  Graphics*   pGraphics,
   float         fOffset,
   float         fRadius,
   float         fHeight,
@@ -1627,7 +1627,7 @@ GXHRESULT GVGeometry::CreateCapsule(
 }
 
 GXHRESULT GVGeometry::CreateConvex(
-  GXGraphics*   pGraphics,
+  Graphics*   pGraphics,
   Plane*        pPlanes,
   int           nNumPlanes,
   GXColor32     color, 

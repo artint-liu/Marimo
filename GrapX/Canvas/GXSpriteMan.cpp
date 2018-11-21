@@ -28,7 +28,7 @@ extern "C" GXBOOL GXDLLAPI gxSetRegn(GXLPREGN lprg, GXINT xLeft, GXINT yTop, GXI
 GXHRESULT IntLoadSpriteDesc(clstd::StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GXDLLAPI GXCreateSprite(GXGraphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount, GXSprite** ppSprite)
+GXHRESULT GXDLLAPI GXCreateSprite(GrapX::Graphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount, GXSprite** ppSprite)
 {
   *ppSprite = NULL;
   GXSpriteImpl* pSpriteImpl = new GXSpriteImpl;
@@ -46,7 +46,7 @@ GXHRESULT GXDLLAPI GXCreateSprite(GXGraphics* pGraphics, GXLPCWSTR szTextureFile
   return GX_OK;
 }
 
-extern "C" GXHRESULT GXDLLAPI GXCreateSpriteEx(GXGraphics* pGraphics, const GXSPRITE_DESCW* pDesc, GXSprite** ppSprite)
+extern "C" GXHRESULT GXDLLAPI GXCreateSpriteEx(GrapX::Graphics* pGraphics, const GXSPRITE_DESCW* pDesc, GXSprite** ppSprite)
 {
   GXSpriteImpl* pSpriteImpl = new GXSpriteImpl;
   if( ! InlCheckNewAndIncReference(pSpriteImpl)) {
@@ -62,9 +62,9 @@ extern "C" GXHRESULT GXDLLAPI GXCreateSpriteEx(GXGraphics* pGraphics, const GXSP
   return GX_OK;
 }
 
-GXHRESULT GXDLLAPI GXCreateSpriteArray(GXGraphics* pGraphics, GXLPCWSTR szTextureFile, int xStart, int yStart, int nTileWidth, int nTileHeight, int xGap, int yGap, GXSprite** ppSprite)
+GXHRESULT GXDLLAPI GXCreateSpriteArray(GrapX::Graphics* pGraphics, GXLPCWSTR szTextureFile, int xStart, int yStart, int nTileWidth, int nTileHeight, int xGap, int yGap, GXSprite** ppSprite)
 {
-  GTexture* pTexture = NULL;
+  GrapX::GTexture* pTexture = NULL;
   if(GXFAILED(pGraphics->CreateTextureFromFile(&pTexture, szTextureFile, GXResUsage::Default))) {
     return GX_E_OPEN_FAILED;
   }
@@ -89,7 +89,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteArray(GXGraphics* pGraphics, GXLPCWSTR szTextur
   return hval;
 }
 
-GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GXGraphics* pGraphics, GXLPCWSTR szSpriteFile, GXSprite** ppSprite)
+GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GrapX::Graphics* pGraphics, GXLPCWSTR szSpriteFile, GXSprite** ppSprite)
 {
   clstd::StockA ss;
   GXHRESULT hval = GX_FAIL;
@@ -409,7 +409,7 @@ GXHRESULT GXDLLAPI GXLoadSpriteDescW(GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDe
   return IntLoadSpriteDesc(ss, szSpriteFile, ppDesc);
 }
 
-GXHRESULT GXDLLAPI GXCreateSpriteFromFileA(GXGraphics* pGraphics, GXLPCSTR szSpriteFile, GXSprite** ppSprite)
+GXHRESULT GXDLLAPI GXCreateSpriteFromFileA(GrapX::Graphics* pGraphics, GXLPCSTR szSpriteFile, GXSprite** ppSprite)
 {
   return GXCreateSpriteFromFileW(pGraphics, AS2WS(szSpriteFile), ppSprite);
 }

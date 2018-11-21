@@ -2,13 +2,17 @@
 #ifndef _GRAPVR_NODE_H_
 #define _GRAPVR_NODE_H_
 
-class GPrimitive;
 class GVScene;
-class GXCanvas3D;
-class GXMaterialInst;
 //class SmartRepository;
 struct GVSCENEUPDATE;
 //enum GXPRIMITIVETYPE;
+
+namespace GrapX
+{
+  class Graphics;
+  class GXCanvas3D;
+  class Primitive;
+} // namespace GrapX
 
 //enum GVModelClass // TODO[9]: 改为GXDWORD 然后是 MAKEFOURCC 生成
 //{
@@ -98,9 +102,9 @@ struct NODENOTIFY
 
 struct GVRENDERDESC
 {
-  GPrimitive*       pPrimitive;
+  GrapX::Primitive* pPrimitive;
   GXPrimitiveType   ePrimType;
-  GXMaterialInst*   pMaterial;
+  GrapX::Material*   pMaterial;
   float4x4          matWorld;   // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
 
   GXDWORD dwFlags;              // 参考 GVModelFlags 定义
@@ -151,9 +155,9 @@ protected:
 private:
   void    UpdateChildPos();
 protected:
-  virtual GXHRESULT LoadFileA(GXGraphics* pGraphics, GXLPCSTR szFilename);
-  virtual GXHRESULT LoadFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename);
-  virtual GXHRESULT LoadFile (GXGraphics* pGraphics, clSmartRepository* pStorage);
+  virtual GXHRESULT LoadFileA(GrapX::Graphics* pGraphics, GXLPCSTR szFilename);
+  virtual GXHRESULT LoadFileW(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename);
+  virtual GXHRESULT LoadFile (GrapX::Graphics* pGraphics, clSmartRepository* pStorage);
 public:
   //GVModel   (GVModelClass eClass);
   GVNode   (GVScene* pScene, GXDWORD dwClassCode);
@@ -185,8 +189,8 @@ public:
   GXBOOL    SetDirection              (CFloat3& vDir, CFloat3& vUp/*, ESpace eTransform = S_RELATIVE*/);
   GVNode*   FindChild                 (GVNode* pStart, GXLPCSTR szName);
   GVNode*   SetParent                 (GVNode* pNewParent, bool bLast = false);
-  GXHRESULT SetMaterialInst           (GXMaterialInst* pMtlInst, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
-  GXHRESULT SetMaterialInstFromFileW  (GXGraphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
+  GXHRESULT SetMaterial               (GrapX::Material* pMtlInst, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
+  GXHRESULT SetMaterialFromFile       (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef    ();
@@ -199,9 +203,9 @@ public:
   virtual GXVOID    CalculateAABB             ();
   virtual void      GetRenderDesc             (GVRenderType eType, GVRENDERDESC* pRenderDesc);
   virtual GXBOOL    RayTrace                  (const Ray& ray, NODERAYTRACE* pRayTrace);
-  virtual GXHRESULT SetMaterialInstDirect     (GXMaterialInst* pMtlInst);
-  virtual GXHRESULT GetMaterialInst           (GXMaterialInst** ppMtlInst);
-  virtual GXHRESULT GetMaterialInstFilenameW  (clStringW* pstrFilename); // 参数可以为NULL, 此时用来探测是否含有材质, 返回值决定了是否含有材质
+  virtual GXHRESULT SetMaterialDirect         (GrapX::Material* pMtlInst);
+  virtual GXHRESULT GetMaterial               (GrapX::Material** ppMtlInst);
+  virtual GXHRESULT GetMaterialFilenameW      (clStringW* pstrFilename); // 参数可以为NULL, 此时用来探测是否含有材质, 返回值决定了是否含有材质
   virtual GXHRESULT Clone                     (GVNode** ppClonedNode/*, GXBOOL bRecursive*/); // 写的不好，要重构，1.继承类应该可以直接使用基类的clone函数，对扩展的成员变量进行处理 2.支持递归
 
   virtual GXHRESULT SaveFileA(GXLPCSTR szFilename);

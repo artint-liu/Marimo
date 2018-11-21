@@ -2,7 +2,7 @@
 #ifndef _GX_THEME_INTERNAL_H_
 #define _GX_THEME_INTERNAL_H_
 
-#define DRAWTHEMEBKG(FUNNAME)  GXHRESULT FUNNAME(GXCanvas* pCanvas, int iStateId, GXLPCRECT pRect, GXLPCRECT pClipRect)
+#define DRAWTHEMEBKG(FUNNAME)  GXHRESULT FUNNAME(GrapX::GXCanvas* pCanvas, int iStateId, GXLPCRECT pRect, GXLPCRECT pClipRect)
 typedef DRAWTHEMEBKG((*DrawThemeBkg));
 
 typedef struct _tagGXTHEME

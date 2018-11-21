@@ -1,7 +1,11 @@
 ﻿#ifndef _G_CAMERA_H_
 #define _G_CAMERA_H_
 
-class GXCanvasCore;
+namespace GrapX
+{
+  class GXCanvasCore;
+} // namespace GrapX
+
 #include <3D/Camera.h>
 //
 // GCAMERACONETXT 的掩码
@@ -63,13 +67,13 @@ public:
 class GXDLL GCamera_ScreenAligned : public GCamera
 {
 protected:
-  GXCanvasCore* m_pCanvasCore;
+  GrapX::GXCanvasCore* m_pCanvasCore;
   static float3  m_vTop;
 public:
-  GCamera_ScreenAligned(GXCanvasCore* pCanvasCore);
+  GCamera_ScreenAligned(GrapX::GXCanvasCore* pCanvasCore);
   ~GCamera_ScreenAligned();
 
-  static GCamera_ScreenAligned* Create(GXCanvasCore* pCanvasCore);
+  static GCamera_ScreenAligned* Create(GrapX::GXCanvasCore* pCanvasCore);
 public:
   virtual CameraType    GetType           () const;
   virtual GXHRESULT     GetContext        (GCAMERACONETXT* pCamContext);

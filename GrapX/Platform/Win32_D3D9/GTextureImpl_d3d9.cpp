@@ -122,8 +122,8 @@ namespace D3D9
     return GXSUCCEEDED(D3DXSaveTextureToFileW(szFileName, d3diff, m_pTexture, NULL));
   }
 
-  GTextureImpl::GTextureImpl(GXGraphics* pGraphics)
-    : GTexBaseImplT  ((GXGraphicsImpl*)pGraphics)
+  GTextureImpl::GTextureImpl(Graphics* pGraphics)
+    : GTexBaseImplT  ((GraphicsImpl*)pGraphics)
     //, m_pGraphics    ((GXGraphicsImpl*)pGraphics)
     //, m_pTexture     (NULL)
     , m_pSurface     (NULL)
@@ -132,9 +132,9 @@ namespace D3D9
   {
   }
 
-  GTextureImpl::GTextureImpl(GXGraphics* pGraphics, CREATIONTYPE eCreateType,
+  GTextureImpl::GTextureImpl(Graphics* pGraphics, CREATIONTYPE eCreateType,
     GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
-    : GTexBaseImplT  ((GXGraphicsImpl*)pGraphics)
+    : GTexBaseImplT  ((GraphicsImpl*)pGraphics)
     //, m_pGraphics    ((GXGraphicsImpl*)pGraphics)
     , m_emType       (eCreateType)
     //, m_pTexture     (NULL)
@@ -402,7 +402,7 @@ namespace D3D9
     return GXSUCCEEDED(m_pSurface->UnlockRect());
   }
 
-  GXGraphics* GTextureImpl::GetGraphicsUnsafe()
+  Graphics* GTextureImpl::GetGraphicsUnsafe()
   {
     return m_pGraphicsImpl;
   }
@@ -827,7 +827,7 @@ namespace D3D9
     return TRUE;
   }
 
-  GTextureFromUser::GTextureFromUser(GXGraphics* pGraphics, GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
+  GTextureFromUser::GTextureFromUser(Graphics* pGraphics, GXUINT WidthRatio, GXUINT HeightRatio, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
     : GTextureImpl(pGraphics, GTextureImpl::User, WidthRatio, HeightRatio, MipLevels, Format, ResUsage)
     , m_pSysMemTexture(NULL)
   {
@@ -911,7 +911,7 @@ namespace D3D9
   GTextureFromFile::GTextureFromFile(
     GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, 
     GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, 
-    GXDWORD MipFilter, GXCOLORREF ColorKey, GXGraphics* pGraphics)
+    GXDWORD MipFilter, GXCOLORREF ColorKey, Graphics* pGraphics)
     : GTextureImpl(pGraphics)
   {
     m_strSrcFile = pSrcFile;
@@ -1100,7 +1100,7 @@ namespace D3D9
     return GX_OK;
   }
 
-  GTextureImpl_FromD3DSurface::GTextureImpl_FromD3DSurface(GXGraphics* pGraphics, LPDIRECT3DSURFACE9 lpd3dSurface)
+  GTextureImpl_FromD3DSurface::GTextureImpl_FromD3DSurface(Graphics* pGraphics, LPDIRECT3DSURFACE9 lpd3dSurface)
     : GTextureImpl(pGraphics)
   {
     D3DSURFACE_DESC d3dsd;

@@ -37,7 +37,7 @@
 using namespace GrapX;
 
 GXBOOL GVSkinnedMeshSoft::Initialize(
-  GXGraphics*         pGraphics,
+  GrapX::Graphics*    pGraphics,
   GXSIZE_T            nPrimCount, 
   GXLPCVERTEXELEMENT  lpVertDecl, 
   GXLPVOID            lpVertics, 
@@ -71,7 +71,7 @@ GXBOOL GVSkinnedMeshSoft::Initialize(
   return FALSE;
 }
 
-GXBOOL GVSkinnedMeshSoft::Initialize(GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, clsize nClusterCount)
+GXBOOL GVSkinnedMeshSoft::Initialize(GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, clsize nClusterCount)
 {
   if(GVMesh::IntCreateMesh(pGraphics, pMeshData))
   {
@@ -99,7 +99,7 @@ GXBOOL GVSkinnedMeshSoft::Initialize(GXGraphics* pGraphics, const GVMESHDATA* pM
 }
 
 GXHRESULT GVSkinnedMeshSoft::CreateMesh(
-  GXGraphics*         pGraphics,
+  GrapX::Graphics*    pGraphics,
   int                 nPrimCount, 
   GXLPCVERTEXELEMENT  lpVertDecl, 
   GXLPVOID            lpVertics, 
@@ -129,7 +129,7 @@ GXHRESULT GVSkinnedMeshSoft::CreateMesh(
   return hval;
 }
 
-GXHRESULT GVSkinnedMeshSoft::CreateFromMeshData(GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh)
+GXHRESULT GVSkinnedMeshSoft::CreateFromMeshData(GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh)
 {
   GVSkinnedMeshSoft* pMesh = new GVSkinnedMeshSoft(pGraphics);
   if(pMesh == NULL) {
@@ -250,7 +250,7 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(clSmartRepository* pStorage)
   if(m_pMtlInst != NULL)
   {
     clStringW strMtlFile;
-    m_pMtlInst->GetFilenameW(&strMtlFile);
+    m_pMtlInst->GetFilename(&strMtlFile);
     if(strMtlFile.IsNotEmpty()) {
       m_pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
       pStorage->WriteStringW(NULL, SKINNEDMESH_MTLINST, strMtlFile);
@@ -290,7 +290,7 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(clSmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVSkinnedMeshSoft::LoadFile(GXGraphics* pGraphics, clSmartRepository* pStorage)
+GXHRESULT GVSkinnedMeshSoft::LoadFile(GrapX::Graphics* pGraphics, clSmartRepository* pStorage)
 {
   Clear();
   clStringA strName;
@@ -359,7 +359,7 @@ GXHRESULT GVSkinnedMeshSoft::LoadFile(GXGraphics* pGraphics, clSmartRepository* 
     //  nPrimiCount * 3, pIndices, nIndexCount);
 
     if(bval) {
-      SetMaterialInstFromFileW(pGraphics, strMtlName, NODEMTL_CLONEINST);
+      SetMaterialFromFile(pGraphics, strMtlName, NODEMTL_CLONEINST);
         //FALSE, MLT_CLONE);
       SetName(strName);
       SetTransform(matLocal);
@@ -379,13 +379,13 @@ GXHRESULT GVSkinnedMeshSoft::LoadFile(GXGraphics* pGraphics, clSmartRepository* 
 }
 
 //////////////////////////////////////////////////////////////////////////
-GXHRESULT GVSkinnedMeshSoft::CreateFromFileA(GXGraphics* pGraphics, GXLPCSTR szFilename, GVSkinnedMeshSoft** ppMesh)
+GXHRESULT GVSkinnedMeshSoft::CreateFromFileA(GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GVSkinnedMeshSoft** ppMesh)
 {
   clStringW strFilename = szFilename;
   return CreateFromFileW(pGraphics, strFilename, ppMesh);
 }
 
-GXHRESULT GVSkinnedMeshSoft::CreateFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename, GVSkinnedMeshSoft** ppMesh)
+GXHRESULT GVSkinnedMeshSoft::CreateFromFileW(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GVSkinnedMeshSoft** ppMesh)
 {
   GVSkinnedMeshSoft* pMesh = new GVSkinnedMeshSoft(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
@@ -401,7 +401,7 @@ GXHRESULT GVSkinnedMeshSoft::CreateFromFileW(GXGraphics* pGraphics, GXLPCWSTR sz
   return hval;
 }
 
-GXHRESULT GVSkinnedMeshSoft::CreateFromRepository(GXGraphics* pGraphics, clSmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh)
+GXHRESULT GVSkinnedMeshSoft::CreateFromRepository(GrapX::Graphics* pGraphics, clSmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh)
 {
   GVSkinnedMeshSoft* pMesh = new GVSkinnedMeshSoft(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
@@ -416,7 +416,7 @@ GXHRESULT GVSkinnedMeshSoft::CreateFromRepository(GXGraphics* pGraphics, clSmart
   return GX_FAIL;
 }
 
-GVSkinnedMeshSoft::GVSkinnedMeshSoft( GXGraphics* pGraphics ) : GVMesh(pGraphics)
+GVSkinnedMeshSoft::GVSkinnedMeshSoft( GrapX::Graphics* pGraphics ) : GVMesh(pGraphics)
   , m_pWeight(NULL)
   , m_pSkeleton(NULL)
   , m_pVertices(NULL)

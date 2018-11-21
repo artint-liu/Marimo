@@ -20,7 +20,7 @@ protected:
   IMOPlatform_Win32Base();
   virtual ~IMOPlatform_Win32Base();
 
-  virtual GXHRESULT Finalize      (GXINOUT GXGraphics** ppGraphics);
+  virtual GXHRESULT Finalize      (GXINOUT GrapX::Graphics** ppGraphics);
   virtual GXHRESULT MainLoop      ();
   virtual GXHRESULT QueryFeature  (GXDWORD dwFeatureCode, GXVOID** ppUnknown);
 

@@ -1,9 +1,11 @@
 #ifndef _GRAPX_STATION_
 #define _GRAPX_STATION_
 
-class GTexture;
-//class GXRenderTarget;
-class GXGraphics;
+namespace GrapX 
+{
+  class Graphics;
+  class GTexture;
+}
 class CAeroShader;
 class CBlurShader;
 class CSimpleShader;
@@ -57,7 +59,7 @@ struct GXSTATION
 #endif // _WIN32
   GXINSTANCE*         pInstDll;
   GXINSTANCE*         pInstApp;
-  GXGraphics*         pGraphics;
+  GrapX::Graphics*    pGraphics;
   GXLPWND             lpDesktopWnd;
   //D3DPRESENT_PARAMETERS  d3dpp;
   GXUINT              nWidth;   // TODO: 和MonitorInfo重复
@@ -100,8 +102,8 @@ struct GXSTATION
 #endif
 
 #ifdef ENABLE_AERO
-  GXRenderTarget*     pBackDownSampTexA;    // 玻璃效果的缓冲纹理 - A
-  GXRenderTarget*     pBackDownSampTexB;    // 玻璃效果的缓冲纹理 - B
+  GrapX::RenderTarget*       pBackDownSampTexA;    // 玻璃效果的缓冲纹理 - A
+  GrapX::RenderTarget*       pBackDownSampTexB;    // 玻璃效果的缓冲纹理 - B
 #endif // ENABLE_AERO
                                          //#if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
                                          //  GXSTATION(HWND hWnd, IGXPlatform* lpPlatform);

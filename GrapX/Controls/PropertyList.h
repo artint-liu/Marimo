@@ -4,7 +4,10 @@
 // 因为PropertySheet和Win32控件重名并且功能不同，所以改名为PropertyList
 
 #define GXWM_DESTROYEDITCTL  GXWM_USER + 100
-class GTexture;
+namespace GrapX
+{
+  class GTexture;
+}
 
 namespace GXUIEXT
 {
@@ -64,7 +67,7 @@ namespace GXUIEXT
       {
         Page*         pChildPage;
         LBItemList*   pListBoxItem;
-        GTexture*     pTexture;
+        GrapX::GTexture*     pTexture;
         GXLPVOID      pGeneral;    // 通用的,只用于指针判断
         float         fIncrease;
       };

@@ -9,10 +9,10 @@ class IGXPlatform_Win32D3D9;
 class IGXPlatform_Win32D3D11;
 class IGXPlatform_XOpenGLES2;
 //////////////////////////////////////////////////////////////////////////
-IGXPlatform_Win32OpenGL*  AppCreateOpenGLPlatform   (GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);
-IGXPlatform_Win32D3D9*    AppCreateD3D9Platform     (GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);
-IGXPlatform_Win32D3D11*   AppCreateD3D11Platform    (GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);
-IGXPlatform_XOpenGLES2*   AppCreateOpenGLES2Platform(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);
+IGXPlatform_Win32OpenGL*  AppCreateOpenGLPlatform   (GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics);
+IGXPlatform_Win32D3D9*    AppCreateD3D9Platform     (GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics);
+IGXPlatform_Win32D3D11*   AppCreateD3D11Platform    (GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics);
+IGXPlatform_XOpenGLES2*   AppCreateOpenGLES2Platform(GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics);
 //////////////////////////////////////////////////////////////////////////
 
 GXHRESULT GXApp::Go(GXAPP_DESC* pDesc)
@@ -91,7 +91,7 @@ GXHRESULT GXApp::Go(GXAPP_DESC* pDesc)
   return GX_OK;
 }
 
-GXGraphics*  GXApp::GetGraphicsUnsafe()
+GrapX::Graphics*  GXApp::GetGraphicsUnsafe()
 {
   return m_pGraphics;
 }

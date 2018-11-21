@@ -63,22 +63,22 @@ class GXConsole
 public:
   GXConsole();
 public:
-  virtual GXLRESULT Render(GXCanvas* pCanvas);
+  virtual GXLRESULT Render(GrapX::GXCanvas* pCanvas);
   virtual GXLRESULT Scroll(int nLine);
   virtual GXLRESULT Show(GXBOOL bShow);
   virtual GXLRESULT WriteW(GXLPCWSTR szFormat, ...);
   virtual GXLRESULT WriteA(GXLPCSTR szFormat, ...);
 public:
-  GXLRESULT Initialize(GXGraphics* pGraphics);
+  GXLRESULT Initialize(GrapX::Graphics* pGraphics);
   GXLRESULT Finalize();
 protected:
 private:
-  GXGraphics*       m_pGraphics;
+  GrapX::Graphics*       m_pGraphics;
   GXFont*           m_pFont;
   const int         s_nFontHeight;
   TextRoundBuffer*  m_pBuffer;
 private:
-  void DrawLines(GXCanvas* pCanvas, int y, int yInc, const TextRoundBuffer::LINEDESC* pLineDesc);
+  void DrawLines(GrapX::GXCanvas* pCanvas, int y, int yInc, const TextRoundBuffer::LINEDESC* pLineDesc);
 };
 
 

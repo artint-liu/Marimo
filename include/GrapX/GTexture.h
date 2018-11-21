@@ -1,124 +1,127 @@
 ﻿#ifndef _GRAPX_TEXTURE_H_
 #define _GRAPX_TEXTURE_H_
 
-class GXGraphics;
-class GTextureBase : public GResource
+//class GXGraphics;
+namespace GrapX
 {
-public:
-  GTextureBase(GXUINT nPriority, GXDWORD dwType) : GResource(0, dwType){}
-public:
-  GXSTDINTERFACE(GXHRESULT    AddRef            ());
-  GXSTDINTERFACE(GXHRESULT    Release           ());
-public:
-  GXSTDINTERFACE(GXResUsage   GetUsage          ());
-  GXSTDINTERFACE(GXFormat     GetFormat         ());
-  GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
-  //GXSTDINTERFACE(GXBOOL       SaveToFile        (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
-};
-
-class GTexture : public GTextureBase
-{
-public:
-  struct MAPPED
+  class GTextureBase : public GResource
   {
-    GXINT     Pitch;
-    GXLPVOID  pBits;
+  public:
+    GTextureBase(GXUINT nPriority, GXDWORD dwType) : GResource(0, dwType) {}
+  public:
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+  public:
+    GXSTDINTERFACE(GXResUsage   GetUsage          ());
+    GXSTDINTERFACE(GXFormat     GetFormat         ());
+    GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
+    GXSTDINTERFACE(GrapX::Graphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
+    //GXSTDINTERFACE(GXBOOL       SaveToFile        (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
   };
 
-public:
-  // TODO: 
-  // 放到Graphics中
-  // GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
-  // 放到GXImage中
-  // GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
-
-  GTexture() : GTextureBase(0, RESTYPE_TEXTURE2D){}
-  GXSTDINTERFACE(GXHRESULT    AddRef            ());
-  GXSTDINTERFACE(GXHRESULT    Release           ());
-
-  GXSTDINTERFACE(GXBOOL       Clear             (GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
-  //GXSTDINTERFACE(GXBOOL       GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio));   // 去屏幕比例,如果是屏幕对齐纹理,返回负值的比率,否则返回纹理尺寸,如果从文件读取的纹理是原始文件的大小
-  GXSTDINTERFACE(GXSIZE*      GetDimension      (GXSIZE* pDimension));  // 取纹理的尺寸, 这个值可能会跟屏幕尺寸变化
-  GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));
-  GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSourceTexture, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource));
-  GXSTDINTERFACE(GXBOOL       Map               (MAPPED* pLockRect, GXResMap eResMap)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
-  GXSTDINTERFACE(GXBOOL       Unmap             ());
-  GXSTDINTERFACE(GXBOOL       UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch));
-
-};
-
-class GTexture3D : public GTextureBase
-{
-public:
-  typedef struct __tagLOCKEDBOX
+  class GTexture : public GTextureBase
   {
-    GXINT     RowPitch;
-    GXINT     SlicePitch;
-    GXLPVOID  pBits;
-  }LOCKEDBOX, *LPLOCKEDBOX;
+  public:
+    struct MAPPED
+    {
+      GXINT     Pitch;
+      GXLPVOID  pBits;
+    };
 
-  typedef struct __tagBOX {
-    GXUINT Left;
-    GXUINT Top;
-    GXUINT Right;
-    GXUINT Bottom;
-    GXUINT Front;
-    GXUINT Back;
-  } BOX, *LPBOX;
+  public:
+    // TODO: 
+    // 放到Graphics中
+    // GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
+    // 放到GXImage中
+    // GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
 
+    GTexture() : GTextureBase(0, RESTYPE_TEXTURE2D) {}
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
 
-public:
-  GTexture3D() : GTextureBase(0, RESTYPE_TEXTURE3D){}
+    GXSTDINTERFACE(GXBOOL       Clear             (GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
+    //GXSTDINTERFACE(GXBOOL       GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio));   // 去屏幕比例,如果是屏幕对齐纹理,返回负值的比率,否则返回纹理尺寸,如果从文件读取的纹理是原始文件的大小
+    GXSTDINTERFACE(GXSIZE*      GetDimension      (GXSIZE* pDimension));  // 取纹理的尺寸, 这个值可能会跟屏幕尺寸变化
+    GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));
+    GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSourceTexture, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource));
+    GXSTDINTERFACE(GXBOOL       Map               (MAPPED* pLockRect, GXResMap eResMap)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
+    GXSTDINTERFACE(GXBOOL       Unmap             ());
+    GXSTDINTERFACE(GXBOOL       UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch));
 
-  GXSTDINTERFACE(GXHRESULT    AddRef            ());
-  GXSTDINTERFACE(GXHRESULT    Release           ());
+  };
 
-  GXSTDINTERFACE(GXBOOL       Clear             (const LPBOX lpRect, GXCOLOR dwColor));
-  GXSTDINTERFACE(GXUINT       GetWidth          ());
-  GXSTDINTERFACE(GXUINT       GetHeight         ());
-  GXSTDINTERFACE(GXUINT       GetDepth          ());
-  GXSTDINTERFACE(GXBOOL       GetDimension      (GXUINT* pWidth, GXUINT* pHeight, GXUINT* pDepth));
-  //GXSTDINTERFACE(GXDWORD      GetUsage          ());
-  //GXSTDINTERFACE(GXFormat     GetFormat         ());
-  //GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
-  GXSTDINTERFACE(GXBOOL       CopyBox           (GTexture3D* pSrc, const LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z));
-  GXSTDINTERFACE(GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, const LPBOX lpBox, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
-  GXSTDINTERFACE(GXBOOL       UnlockBox         ());
-  //GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
-  //GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
-};
-
-class GTextureCube : public GTextureBase
-{
-public:
-  typedef struct __tagLOCKEDRECT
+  class GTexture3D : public GTextureBase
   {
-    GXINT     Pitch;
-    GXLPVOID  pBits;
-  }LOCKEDRECT, *LPLOCKEDRECT;
+  public:
+    typedef struct __tagLOCKEDBOX
+    {
+      GXINT     RowPitch;
+      GXINT     SlicePitch;
+      GXLPVOID  pBits;
+    }LOCKEDBOX, *LPLOCKEDBOX;
 
-public:
-  GTextureCube() : GTextureBase(0, RESTYPE_TEXTURE_CUBE){}
+    typedef struct __tagBOX {
+      GXUINT Left;
+      GXUINT Top;
+      GXUINT Right;
+      GXUINT Bottom;
+      GXUINT Front;
+      GXUINT Back;
+    } BOX, *LPBOX;
 
-  GXSTDINTERFACE(GXHRESULT    AddRef            ());
-  GXSTDINTERFACE(GXHRESULT    Release           ());
 
-  GXSTDINTERFACE(GXBOOL       Clear             (const GXLPRECT lpRect, GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
-  GXSTDINTERFACE(GXUINT       GetSize           ());    // 取m_nWidth成员的值
-  GXSTDINTERFACE(GXResUsage   GetUsage          ());
-  GXSTDINTERFACE(GXFormat     GetFormat         ());
-  GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
-  //GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination));
-  //GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
-  //GXSTDINTERFACE(GXBOOL       LockRect          (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
-  //GXSTDINTERFACE(GXBOOL       UnlockRect        ());
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
+  public:
+    GTexture3D() : GTextureBase(0, RESTYPE_TEXTURE3D) {}
 
-  GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));
-};
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
 
-typedef GTexture* GLPTEXTURE;
+    GXSTDINTERFACE(GXBOOL       Clear             (const LPBOX lpRect, GXCOLOR dwColor));
+    GXSTDINTERFACE(GXUINT       GetWidth          ());
+    GXSTDINTERFACE(GXUINT       GetHeight         ());
+    GXSTDINTERFACE(GXUINT       GetDepth          ());
+    GXSTDINTERFACE(GXBOOL       GetDimension      (GXUINT* pWidth, GXUINT* pHeight, GXUINT* pDepth));
+    //GXSTDINTERFACE(GXDWORD      GetUsage          ());
+    //GXSTDINTERFACE(GXFormat     GetFormat         ());
+    //GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
+    GXSTDINTERFACE(GXBOOL       CopyBox           (GTexture3D* pSrc, const LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z));
+    GXSTDINTERFACE(GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, const LPBOX lpBox, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
+    GXSTDINTERFACE(GXBOOL       UnlockBox         ());
+    //GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
+    //GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
+  };
+
+  class GTextureCube : public GTextureBase
+  {
+  public:
+    typedef struct __tagLOCKEDRECT
+    {
+      GXINT     Pitch;
+      GXLPVOID  pBits;
+    }LOCKEDRECT, *LPLOCKEDRECT;
+
+  public:
+    GTextureCube() : GTextureBase(0, RESTYPE_TEXTURE_CUBE) {}
+
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+
+    GXSTDINTERFACE(GXBOOL       Clear             (const GXLPRECT lpRect, GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
+    GXSTDINTERFACE(GXUINT       GetSize           ());    // 取m_nWidth成员的值
+    GXSTDINTERFACE(GXResUsage   GetUsage          ());
+    GXSTDINTERFACE(GXFormat     GetFormat         ());
+    GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
+    //GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination));
+    //GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
+    //GXSTDINTERFACE(GXBOOL       LockRect          (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
+    //GXSTDINTERFACE(GXBOOL       UnlockRect        ());
+    GXSTDINTERFACE(GrapX::Graphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
+
+    GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));
+  };
+} // namespace GrapX
+
+typedef GrapX::GTexture* GLPTEXTURE;
 
 
 #else

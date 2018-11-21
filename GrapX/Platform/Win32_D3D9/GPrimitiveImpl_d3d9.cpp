@@ -56,9 +56,9 @@ namespace D3D9
     return FALSE;
   }
 
-  GPrimitiveVertexOnlyImpl::GPrimitiveVertexOnlyImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride)
-    : GPrimitive      (0, RESTYPE_PRIMITIVE)
-    , m_pGraphicsImpl (static_cast<GXGraphicsImpl*>(pGraphics))
+  GPrimitiveVertexOnlyImpl::GPrimitiveVertexOnlyImpl(Graphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride)
+    : Primitive      (0, RESTYPE_PRIMITIVE)
+    , m_pGraphicsImpl (static_cast<GraphicsImpl*>(pGraphics))
     , m_pD3D9VertexBuffer (NULL)
     , m_eResUsage     (eUsage)
     , m_uVertexCount  (nVertexCount)
@@ -244,9 +244,9 @@ namespace D3D9
     return InlGetSafeObjectT<GVertexDeclaration>(ppDeclaration, m_pVertexDecl);
   }
 
-  GXGraphics* GPrimitiveVertexOnlyImpl::GetGraphicsUnsafe()
+  Graphics* GPrimitiveVertexOnlyImpl::GetGraphicsUnsafe()
   {
-    return static_cast<GXGraphics*>(m_pGraphicsImpl);
+    return static_cast<Graphics*>(m_pGraphicsImpl);
   }
 
   GXINT GPrimitiveVertexOnlyImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)
@@ -255,7 +255,7 @@ namespace D3D9
   }
 
   //////////////////////////////////////////////////////////////////////////
-  GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(GXGraphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride)
+  GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(Graphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride, GXUINT nIndexCount, GXUINT nIndexStride)
     : GPrimitiveVertexOnlyImpl(pGraphics, eUsage, nVertexCount, nVertexStride)
     , m_pD3D9IndexBuffer   (NULL)
     , m_uIndexCount    (nIndexCount)
@@ -412,9 +412,9 @@ namespace D3D9
     return m_uIndexSize;
   }
 
-  GXGraphics* GPrimitiveVertexIndexImpl::GetGraphicsUnsafe()
+  Graphics* GPrimitiveVertexIndexImpl::GetGraphicsUnsafe()
   {
-    return static_cast<GXGraphics*>(m_pGraphicsImpl);
+    return static_cast<Graphics*>(m_pGraphicsImpl);
   }
 
   GXINT GPrimitiveVertexIndexImpl::GetElementOffset(GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc)

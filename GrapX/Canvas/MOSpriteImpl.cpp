@@ -35,7 +35,7 @@ namespace Marimo
 
   MOSpriteImpl::~MOSpriteImpl()
   {
-    std::for_each(m_ImageArray.begin(), m_ImageArray.end(), [](GTexture*& pTexture) {
+    std::for_each(m_ImageArray.begin(), m_ImageArray.end(), [](GrapX::GTexture*& pTexture) {
       SAFE_RELEASE(pTexture);
     });
   }
@@ -66,7 +66,7 @@ namespace Marimo
   //////////////////////////////////////////////////////////////////////////
 
 
-  GXVOID MOSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
   {
     //const GXREGN& regn = ;
     if (nIndex < (GXINT)m_loader.aModules.size()) {
@@ -75,7 +75,7 @@ namespace Marimo
     }
   }
 
-  GXVOID MOSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+  GXVOID MOSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
   {
     REGN rcDest;
     rcDest.left = x;
@@ -88,7 +88,7 @@ namespace Marimo
     }
   }
 
-  GXVOID MOSpriteImpl::PaintModule(GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
   {
     if(nIndex < (GXINT)m_loader.aModules.size()) {
       const MODULE& m = m_loader.aModules[nIndex];
@@ -96,7 +96,7 @@ namespace Marimo
     }
   }
 
-  //GXVOID MOSpriteImpl::PaintModuleH(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth) const
+  //GXVOID MOSpriteImpl::PaintModuleH(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nWidth) const
   //{
   //  REGN rcDest;
   //  rcDest.left = x;
@@ -109,7 +109,7 @@ namespace Marimo
   //  }
   //}
   //
-  //GXVOID MOSpriteImpl::PaintModuleV(GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nHeight) const
+  //GXVOID MOSpriteImpl::PaintModuleV(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT nHeight) const
   //{
   //  REGN rcDest;
   //  rcDest.left = x;
@@ -122,7 +122,7 @@ namespace Marimo
   //  }
   //}
 
-  //GXLONG MOSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+  //GXLONG MOSpriteImpl::PaintModule3H(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
   //{
   //  if(nStartIdx + 3 > IntGetSpriteCount())
   //  {
@@ -185,7 +185,7 @@ namespace Marimo
   //  return rgDest.width;  // 返回值是中间可缩放Sprite的宽度
   //}
   //
-  //GXLONG MOSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+  //GXLONG MOSpriteImpl::PaintModule3V(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
   //{
   //  if(nStartIdx + 3 > IntGetSpriteCount())
   //  {
@@ -248,7 +248,7 @@ namespace Marimo
   //  return rgDest.height;  // 返回值是中间可缩放Sprite的宽度
   //}
   //
-  //GXVOID MOSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const
+  //GXVOID MOSpriteImpl::PaintModule3x3(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const
   //{
   //  // 0 1 2
   //  // 3 4 5
@@ -341,7 +341,7 @@ namespace Marimo
     return FALSE;
   }
 
-  GXVOID MOSpriteImpl::PaintModule3V(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+  GXVOID MOSpriteImpl::PaintModule3V(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
   {
     CLBREAK;
   }
@@ -361,7 +361,7 @@ namespace Marimo
     return -1;
   }
 
-  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const
   {
     if(nIndex >= m_loader.aFrames.size()) {
       return;
@@ -376,29 +376,29 @@ namespace Marimo
       rgSrc = m_loader.aModules[fu.nModuleIdx].regn;
       int nIndex = AdjustDrawingRegn(rgSrc);
       if(nIndex >= 0) {
-        pCanvas->DrawTexture(m_ImageArray[nIndex], &rgDest, &rgSrc, (RotateType)fu.rotate);
+        pCanvas->DrawTexture(m_ImageArray[nIndex], &rgDest, &rgSrc, (GrapX::RotateType)fu.rotate);
       }
     }
     //pCanvas->DrawImage();
     //__asm nop
   }
 
-  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintFrame(GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const
+  GXVOID MOSpriteImpl::PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::PaintAnimationFrame(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::PaintAnimationFrame(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const
   {
     if(nAnimIndex >= (GXUINT)m_loader.aAnims.size()) {
       return;
@@ -412,17 +412,17 @@ namespace Marimo
     PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex].frame, x, y);
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationFrame(GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
+  GXVOID MOSpriteImpl::PaintAnimationFrame(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y)
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y)
   {
     if(nAnimIndex >= (GXUINT)m_loader.aAnims.size()) {
       return;
@@ -437,47 +437,47 @@ namespace Marimo
     PaintFrame(pCanvas, m_loader.aAnimUnits[a.begin + nFrameIndex].frame, x, y);
   }
 
-  GXVOID MOSpriteImpl::PaintAnimationByTime(GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
+  GXVOID MOSpriteImpl::PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintModule3H(GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+  GXVOID MOSpriteImpl::PaintModule3H(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::PaintModule3x3(GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const
+  GXVOID MOSpriteImpl::PaintModule3x3(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+  GXVOID MOSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const
+  GXVOID MOSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const
+  GXVOID MOSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const
   {
     CLBREAK;
   }
 
-  GXVOID MOSpriteImpl::Paint(GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+  GXVOID MOSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
   {
     CLBREAK;
   }
@@ -846,7 +846,7 @@ namespace Marimo
     return m_ImageArray.size();
   }
 
-  GXBOOL MOSpriteImpl::GetTexture(GTexture** pImage, GXUINT index) const
+  GXBOOL MOSpriteImpl::GetTexture(GrapX::GTexture** pImage, GXUINT index) const
   {
     if (index >= m_ImageArray.size()) {
       return FALSE;
@@ -872,7 +872,7 @@ namespace Marimo
     return m_loader.aFiles[index];
   }
 
-  GXBOOL MOSpriteImpl::Initialize(GXGraphics* pGraphics, const SPRITE_DESC_LOADER* pDesc)
+  GXBOOL MOSpriteImpl::Initialize(GrapX::Graphics* pGraphics, const SPRITE_DESC_LOADER* pDesc)
   {
     m_loader = *pDesc;
     m_ImageArray.reserve(pDesc->aFiles.size());
@@ -881,7 +881,7 @@ namespace Marimo
     // 加载纹理
     std::for_each(pDesc->aFiles.begin(), pDesc->aFiles.end(), [&](const clStringA& str)
     {
-      GTexture* pTexture = NULL;
+      GrapX::GTexture* pTexture = NULL;
 
       if(clpathfile::IsRelative(str)) {
         clStringA strFullPath;

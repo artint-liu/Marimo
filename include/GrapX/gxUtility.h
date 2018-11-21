@@ -12,7 +12,7 @@ namespace GrapX
 
   namespace RepoUtility
   {
-    GXHRESULT GXDLL SavePrimitive(clSmartRepository* pStorage, GXLPCSTR szDomain, GPrimitive* pPrimitive, int nStartIndex, int nNumPrimi);
+    GXHRESULT GXDLL SavePrimitive(clSmartRepository* pStorage, GXLPCSTR szDomain, GrapX::Primitive* pPrimitive, int nStartIndex, int nNumPrimi);
     GXHRESULT GXDLL LoadPrimitive(clSmartRepository* pStorage, GXLPCSTR szDomain, GXVERTEXELEMENT* pVertElement, clBuffer* pVertices, clBuffer* pIndices, GXSIZE_T& nStartIndex, GXSIZE_T& nNumPrimi);
   }; // namespace RepoUtility
 
@@ -73,7 +73,7 @@ namespace GrapX
     // Parameter: GXColor32 crDiffuse
     // Parameter: GXBOOL bManualUpdate 是否手动调用UpdateResource
     //************************************
-    GXBOOL GXDLL SetUnifiedDiffuse(GPrimitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate);
+    GXBOOL GXDLL SetUnifiedDiffuse(GrapX::Primitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate);
   }
 
   namespace PrimitiveIndicesUtility

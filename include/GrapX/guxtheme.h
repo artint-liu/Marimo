@@ -5,7 +5,7 @@ typedef GXHANDLE GXHTHEME;
 
 #include "user/Win32Emu/GUXTheme.inl"
 
-class GXGraphics;
+class Graphics;
 #ifdef __cplusplus
 extern "C"
 {
@@ -40,7 +40,7 @@ extern "C"
   
   GXHRESULT GXDLLAPI GXDrawThemeBackground(
     GXHTHEME hTheme,
-    GXCanvas* canvas,
+    GrapX::GXCanvas* canvas,
     int iPartId,
     int iStateId,
     const GXRECT *pRect,  // 两个端点的坐标
@@ -56,7 +56,7 @@ extern "C"
     int iPartId, int iStateId,  const GXRECT *pBoundingRect, 
     GXRECT *pContentRect);
 
-  GXBOOL GXUXTHEME_Initialize(GXGraphics* pGraphics);
+  GXBOOL GXUXTHEME_Initialize(GrapX::Graphics* pGraphics);
   GXVOID GXUXTHEME_Release();
 #ifdef __cplusplus
 }

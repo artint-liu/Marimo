@@ -37,7 +37,7 @@
 
 namespace D3D9
 {
-  GVertexDeclImpl::GVertexDeclImpl(GXGraphicsImpl* pGraphics)
+  GVertexDeclImpl::GVertexDeclImpl(GraphicsImpl* pGraphics)
     : GVertexDeclaration()
     , m_pGraphics       (pGraphics)
     , m_nStride         (NULL)

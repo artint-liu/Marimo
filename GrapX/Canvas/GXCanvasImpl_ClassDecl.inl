@@ -1,8 +1,8 @@
 class GXCanvasImpl : public GXCanvasCoreImpl
 {
-  friend class GXGraphicsImpl;
+  friend class GraphicsImpl;
 public:
-  GXCanvasImpl(GXGraphicsImpl* pGraphics, GXBOOL bStatic);
+  GXCanvasImpl(GraphicsImpl* pGraphics, GXBOOL bStatic);
   virtual ~GXCanvasImpl();
   GXBOOL  Initialize(GTexture* pTexture, const REGN* pRegn);
   GXBOOL  Initialize(GXImage* pImage, const REGN* pRegn);
@@ -22,7 +22,7 @@ public:
 
 
 public:
-  virtual GXGraphics* GetGraphicsUnsafe   () const override;
+  virtual Graphics* GetGraphicsUnsafe   () const override;
   virtual GXBOOL      SetTransform        (const float4x4* matTransform) override;
   virtual GXBOOL      GetTransform        (float4x4* matTransform) const override;
   virtual GXBOOL      SetViewportOrg      (GXINT x, GXINT y, GXLPPOINT lpPoint) override;
@@ -246,7 +246,7 @@ private:
   GBlendStateImpl*        m_pOpaqueState[2];  // 不透明方式的状态
   GDepthStencilStateImpl* m_pCanvasStencil[2];  // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
 
-  GPrimitive*   m_pPrimitive;
+  Primitive*   m_pPrimitive;
   PRIMITIVE*    m_lpLockedVertex;
   GXUINT        m_uVertCount;
   GXUINT        m_uIndexCount;

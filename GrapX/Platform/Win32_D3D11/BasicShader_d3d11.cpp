@@ -1,10 +1,11 @@
 #define __STR__(_V) #_V
 #define __STR2__(_V) __STR__(_V)
 #define __LINE_STR__ __STR2__(__LINE__)
-
-namespace D3D11
+namespace GrapX
 {
-const char* g_szBaseShader = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\
+  namespace D3D11
+  {
+    const char* g_szBaseShader = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\
 struct VS_INPUT                                                         \n\
 {                                                                       \n\
   float4  Pos : POSITION;                                               \n\
@@ -53,7 +54,7 @@ float4 ps_main(PS_INPUT Input) : SV_Target                              \n\
   return crPixel * Input.Color * Color;                                 \n\
 }";
 
-const char* g_szFastGaussianBlur = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\
+    const char* g_szFastGaussianBlur = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\
 struct VS_INPUT                                                         \n\
 {                                                                       \n\
   float4  Pos : POSITION;                                               \n\
@@ -108,4 +109,5 @@ float4 ps_main(PS_INPUT Input) : COLOR0                                 \n\
   return float4(blurred_image,1.0);                                     \n\
 }                                                                       \n\
 ";
-} // namespace D3D9
+  } // namespace D3D9
+} // namespace GrapX

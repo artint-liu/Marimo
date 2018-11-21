@@ -42,13 +42,13 @@ IGXPlatform_Win32D3D9::~IGXPlatform_Win32D3D9()
 {
 }
 
-GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
+GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, Graphics** ppGraphics)
 {
   const static GXLPWSTR lpClassName = L"GrapX_Win32_D3D9_Class";
   //WNDCLASSEX wcex;
 
   m_pApp = pApp;
-  GXGraphics* pGraphics = NULL;
+  Graphics* pGraphics = NULL;
 
   if( NULL == ( m_pd3d9 = Direct3DCreate9( D3D_SDK_VERSION ) ) )
   {
@@ -69,7 +69,7 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
   sDesc.szRootDir  = m_strRootDir;
   sDesc.pLogger    = pDesc->pLogger;
   sDesc.pParameter = pDesc->pParameter;
-  pGraphics = D3D9::GXGraphicsImpl::Create(&sDesc);
+  pGraphics = D3D9::GraphicsImpl::Create(&sDesc);
 
   if( ! pGraphics) {
     CLOG_ERROR("Can not create D3D9 Graphics.\n");
@@ -101,7 +101,7 @@ GXHRESULT IGXPlatform_Win32D3D9::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGr
   return GX_OK;
 }
 
-GXHRESULT IGXPlatform_Win32D3D9::Finalize(GXINOUT GXGraphics** ppGraphics)
+GXHRESULT IGXPlatform_Win32D3D9::Finalize(GXINOUT Graphics** ppGraphics)
 {
   GXUIDestroyStation();
 
@@ -117,9 +117,9 @@ LRESULT GXCALLBACK IGXPlatform_Win32D3D9::WndProc(HWND hWnd, UINT message, WPARA
   case WM_GX_RESETDEVICED3D9:
     {
       GXApp* pApp = (GXApp*)GetWindowLong(hWnd, 0);
-      GXGraphics* pGraphics = pApp->GetGraphicsUnsafe();
-      D3D9::GXGraphicsImpl* pGraphicsImpl 
-        = static_cast<D3D9::GXGraphicsImpl*>(pGraphics);
+      Graphics* pGraphics = pApp->GetGraphicsUnsafe();
+      D3D9::GraphicsImpl* pGraphicsImpl 
+        = static_cast<D3D9::GraphicsImpl*>(pGraphics);
       return pGraphicsImpl->D3DGetDevice()->Reset((D3DPRESENT_PARAMETERS*)lParam);
     }
     break;
@@ -173,7 +173,7 @@ GXLPCWSTR IGXPlatform_Win32D3D9::GetRootDir()
 
 //////////////////////////////////////////////////////////////////////////
 
-IGXPlatform_Win32D3D9* AppCreateD3D9Platform(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
+IGXPlatform_Win32D3D9* AppCreateD3D9Platform(GXApp* pApp, GXAPP_DESC* pDesc, Graphics** ppGraphics)
 {
   return AppCreatePlatformT<IGXPlatform_Win32D3D9>(pApp, pDesc, ppGraphics);
 }

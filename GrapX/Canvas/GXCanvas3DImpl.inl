@@ -1,6 +1,6 @@
 #define ACCESS_AS(_TYPE, _ID)   (*(_TYPE*)(pConstBuf + m_StdCanvasUniform._ID))
 
-GXCanvas3DImpl::GXCanvas3DImpl(GXGraphicsImpl* pGraphics)
+GXCanvas3DImpl::GXCanvas3DImpl(GraphicsImpl* pGraphics)
   : GXCanvas3D      (2, RESTYPE_CANVAS3D)
   , m_pGraphicsImpl (pGraphics)
   //, m_xExt          (0)
@@ -56,12 +56,12 @@ GXSIZE* GXCanvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
   return pSize;
 }
 
-GXRenderTarget* GXCanvas3DImpl::GetTargetUnsafe() const
+RenderTarget* GXCanvas3DImpl::GetTargetUnsafe() const
 {
   return m_pTarget;
 }
 
-GXBOOL GXCanvas3DImpl::Initialize(GXRenderTarget* pTarget, GXLPCVIEWPORT pViewport)
+GXBOOL GXCanvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
 {
   GTexture* pTexture = NULL;
   if(pTarget == NULL)
@@ -70,7 +70,7 @@ GXBOOL GXCanvas3DImpl::Initialize(GXRenderTarget* pTarget, GXLPCVIEWPORT pViewpo
   }
 
   
-  InlSetNewObjectT(m_pTarget, static_cast<GXRenderTargetImpl*>(pTarget));
+  InlSetNewObjectT(m_pTarget, static_cast<RenderTargetImpl*>(pTarget));
 
   //if((pTexture != NULL && (pTexture->GetUsage() & GXRU_TEX_RENDERTARGET)) ||
   //  pTexture == NULL)
@@ -114,28 +114,30 @@ GXBOOL GXCanvas3DImpl::Initialize(GXRenderTarget* pTarget, GXLPCVIEWPORT pViewpo
   return FALSE;
 }
 
-GXGraphics* GXCanvas3DImpl::GetGraphicsUnsafe() const
+Graphics* GXCanvas3DImpl::GetGraphicsUnsafe() const
 {
   return m_pGraphicsImpl;
 }
 
-GXHRESULT GXCanvas3DImpl::SetMaterialInst(GXMaterialInst* pMtlInst)
+GXHRESULT GXCanvas3DImpl::SetMaterial(Material* pMtlInst)
 {
-  GXMaterialInstImpl* pMtlInstImpl = (GXMaterialInstImpl*)pMtlInst;
-  GShader* pShader = pMtlInstImpl->InlGetShaderUnsafe();
-  GShaderStub* pShaderStub = pMtlInstImpl->InlGetShaderStubUnsafe();
+  MaterialImpl* pMtlInstImpl = (MaterialImpl*)pMtlInst;
+  Shader* pShader = pMtlInstImpl->InlGetShaderUnsafe();
+  //GShaderStub* pShaderStub = pMtlInstImpl->InlGetShaderStubUnsafe();
 
+#if 0
 #ifdef REFACTOR_SHADER
   pMtlInstImpl->IntCommit((GXLPCBYTE)m_CanvasUniformBuf.GetPtr());
 #else
   pMtlInstImpl->IntCommit(&m_StdUniforms);
 #endif // REFACTOR_SHADER
+#endif // 0
 
   m_pGraphicsImpl->InlSetShader(pShader);
   return TRUE;
 }
 
-GXHRESULT GXCanvas3DImpl::SetPrimitive(GPrimitive* pPrimitive)
+GXHRESULT GXCanvas3DImpl::SetPrimitive(Primitive* pPrimitive)
 {
   return m_pGraphicsImpl->SetPrimitive(pPrimitive);
 }
@@ -198,7 +200,7 @@ GXHRESULT GXCanvas3DImpl::UpdateCommonUniforms()
 GXHRESULT GXCanvas3DImpl::Draw(GVSequence* pSequence)
 {
   typedef GVSequence::RenderDescArray RenderDescArray;
-  GXMaterialInst* pMtlInst = NULL;
+  Material* pMtlInst = NULL;
   const int nArrayCount = pSequence->GetArrayCount();
   GXLPCBYTE lpCanvasUniform = (GXLPCBYTE)m_CanvasUniformBuf.GetPtr();
   for(int nArrayIndex = 0; nArrayIndex < nArrayCount; nArrayIndex++)
@@ -221,16 +223,16 @@ GXHRESULT GXCanvas3DImpl::Draw(GVSequence* pSequence)
       if(Desc.pMaterial != NULL) {
         if(pMtlInst != Desc.pMaterial)
         {
-          SetMaterialInst(Desc.pMaterial);
+          SetMaterial(Desc.pMaterial);
           pMtlInst = Desc.pMaterial;
         }
         else {
           // TODO: 这个是否只有在 SetWorldMatrix() 后才需要提交?
           // TODO: 应该改为一个标准接口
 #ifdef REFACTOR_SHADER
-          static_cast<GXMaterialInstImpl*>(pMtlInst)->IntCommit(lpCanvasUniform);
+          static_cast<MaterialImpl*>(pMtlInst)->IntCommit(lpCanvasUniform);
 #else
-          static_cast<GXMaterialInstImpl*>(pMtlInst)->IntCommit(&m_StdUniforms);
+          static_cast<MaterialImpl*>(pMtlInst)->IntCommit(&m_StdUniforms);
 #endif // #ifdef REFACTOR_SHADER
         }
       }

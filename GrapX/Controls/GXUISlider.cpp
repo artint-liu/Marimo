@@ -197,7 +197,7 @@ namespace GXUI
   {
     GXBOOL bval = TRUE;
     SAFE_RELEASE(m_pSprite);
-    GXGraphics* pGraphics = GXGetGraphics(m_hWnd);
+    GrapX::Graphics* pGraphics = GXGetGraphics(m_hWnd);
 
     if(GXSUCCEEDED(GXCreateSpriteFromFileW(pGraphics, Desc.strResource, &m_pSprite)))
     {
@@ -636,7 +636,7 @@ namespace GXUI
     //  UpdatePosFromVar(dwStyle);
     //}
 
-    GXCanvas* pCanvas = canvas.GetCanvasUnsafe();
+    GrapX::GXCanvas* pCanvas = canvas.GetCanvasUnsafe();
 
     if(TEST_FLAG_NOT(dwStyle, GXUISLDS_VERT))
     {
@@ -679,7 +679,7 @@ namespace GXUI
     return 0;
   }
 
-  void Slider::PaintDial(GXCanvas* pCanvas, GXDWORD dwStyle, int x, int y)
+  void Slider::PaintDial(GrapX::GXCanvas* pCanvas, GXDWORD dwStyle, int x, int y)
   {
     // 浮点模式不绘制刻度
     if(TEST_FLAG(dwStyle, GXUISLDS_FLOAT)) {

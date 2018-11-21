@@ -1,5 +1,5 @@
-﻿GPrimImpl::GPrimImpl(GXGraphics* pGraphics)
-  : m_pGraphicsImpl   ((GXGraphicsImpl*)pGraphics)
+﻿GPrimImpl::GPrimImpl(Graphics* pGraphics)
+  : m_pGraphicsImpl   ((GraphicsImpl*)pGraphics)
   , m_uVerticesBuffer   (NULL)
   , m_uElementSize    (0)
   , m_uElementCount   (0)
@@ -17,7 +17,7 @@ GXHRESULT GPrimitiveVertexOnlyImpl::AddRef()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GPrimitiveVertexOnlyImpl::GPrimitiveVertexOnlyImpl(GXGraphics* pGraphics)
+GPrimitiveVertexOnlyImpl::GPrimitiveVertexOnlyImpl(Graphics* pGraphics)
   : GPrimitiveV         ()
   , GPrimImpl         (pGraphics)
   //, m_uElementSize      (0)
@@ -91,7 +91,7 @@ GXBOOL GPrimitiveVertexOnlyImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT u
     GXHRESULT hval = m_pGraphicsImpl->CreateVertexDeclaration(&pInterface, pVertexDecl);
     if(GXSUCCEEDED(hval))
     {
-      m_pVertexDeclImpl = static_cast<GVertexDeclImpl*>(pInterface);
+      m_pVertexDeclImpl = static_cast<VertexDeclImpl*>(pInterface);
       //SET_FLAG(m_dwFlag, GXSHADERCAP_VERTDECL);
     }
   }
@@ -157,7 +157,7 @@ GXBOOL GPrimitiveVertexOnlyImpl::Unlock()
   return GX_OK;
 }
 
-GPrimitive::Type GPrimitiveVertexOnlyImpl::GetType()
+Primitive::Type GPrimitiveVertexOnlyImpl::GetType()
 {
   return VertexOnly;
 }
@@ -189,9 +189,9 @@ GXINT GPrimitiveVertexOnlyImpl::GetElementOffset(GXDeclUsage Usage, GXUINT Usage
 }
 
 //////////////////////////////////////////////////////////////////////////
-GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(GXGraphics* pGraphics)
+GPrimitiveVertexIndexImpl::GPrimitiveVertexIndexImpl(Graphics* pGraphics)
   : GPrimitiveVI            (pOwner)
-  , m_pGraphicsImpl         ((GXGraphicsImpl*)pGraphics)
+  , m_pGraphicsImpl         ((GraphicsImpl*)pGraphics)
   , m_uElementSize          (0)
   , m_uVertexCount          (0)
   , m_uIndexCount           (0)
@@ -286,7 +286,7 @@ GXBOOL GPrimitiveVertexIndexImpl::InitPrimitive(GXLPCVOID pVertInitData, GXUINT 
     GXHRESULT hval = m_pGraphicsImpl->CreateVertexDeclaration(&pInterface, pVertexDecl);
     if(GXSUCCEEDED(hval))
     {
-      m_pVertexDeclImpl = static_cast<GVertexDeclImpl*>(pInterface);
+      m_pVertexDeclImpl = static_cast<VertexDeclImpl*>(pInterface);
       //SET_FLAG(m_dwFlag, GXSHADERCAP_VERTDECL);
     }
   }
@@ -410,7 +410,7 @@ GXBOOL GPrimitiveVertexIndexImpl::Unlock()
   return GX_OK;
 }
 
-GPrimitive::Type GPrimitiveVertexIndexImpl::GetType()
+Primitive::Type GPrimitiveVertexIndexImpl::GetType()
 {
   return Indexed;
 }

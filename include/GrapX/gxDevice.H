@@ -1,6 +1,10 @@
 ﻿#ifndef _GRAPX_DEVICE_H_
 #define _GRAPX_DEVICE_H_
-class GXGraphics;
+
+namespace GrapX
+{
+  class Graphics;
+}
 class GXWnd;
 class IGXPlatform;
 
@@ -59,7 +63,7 @@ extern "C"
   GXBOOL          GXDLLAPI GXUIMakeCurrent        ();
 
   GXHRESULT       GXDLLAPI GXRenderRootFrame      ();
-  GXVOID          GXDLLAPI GXDrawDebugMsg         (GXHSTATION hStation, GXCanvas* pCanvas);
+  GXVOID          GXDLLAPI GXDrawDebugMsg         (GXHSTATION hStation, GrapX::GXCanvas* pCanvas);
 };
 
 #endif // _GRAPX_DEVICE_H_

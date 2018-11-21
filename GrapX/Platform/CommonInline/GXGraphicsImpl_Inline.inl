@@ -8,7 +8,7 @@
 class GPrimitiveVertexOnlyImpl;
 class GPrimitiveVertexIndexImpl;
 #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D9_
-inline GXBOOL GXGraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
+inline GXBOOL GraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
 {
   SAFE_RELEASE(m_pCurDepthStencil);
   m_pCurDepthStencil = static_cast<GTextureImpl*>(pTexture);
@@ -25,7 +25,7 @@ inline GXBOOL GXGraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
 #endif // #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D9_
 
 #ifdef _GXGRAPHICS_INLINE_RENDERTARGET_D3D9_
-GXBOOL GXGraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTargetIndex)
+GXBOOL GraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTargetIndex)
 {
   if(m_pCurRenderTarget != NULL)
   {
@@ -50,7 +50,7 @@ GXBOOL GXGraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTar
 #endif // _GXGRAPHICS_INLINE_RENDERTARGET_
 
 #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D11_
-inline GXBOOL GXGraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
+inline GXBOOL GraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
 {
   return TRUE;
 }
@@ -60,7 +60,7 @@ inline GXBOOL GXGraphicsImpl::InlSetDepthStencil(GTexture* pTexture)
 #endif // #ifdef _GXGRAPHICS_INLINE_RENDERTARGET_D3D11_
 
 #if defined(_GXGRAPHICS_INLINE_CANVAS_D3D9_) || defined(_GXGRAPHICS_INLINE_CANVAS_D3D11_) || defined(_GXGRAPHICS_INLINE_CANVAS_GLES2_)
-GXHRESULT GXGraphicsImpl::InlSetCanvas(GXCanvasCore *pCanvasCore)
+GXHRESULT GraphicsImpl::InlSetCanvas(GXCanvasCore *pCanvasCore)
 {
   //GXCanvasImpl* pCanvas = (GXCanvasImpl*)pICanvas;
   if(m_pCurCanvasCore == (GXCanvasCore*)pCanvasCore)
@@ -76,7 +76,7 @@ GXHRESULT GXGraphicsImpl::InlSetCanvas(GXCanvasCore *pCanvasCore)
   {
     ASSERT(TEST_FLAG(m_dwFlags, F_ACTIVATE) != 0);
     hr = m_pCurCanvasCore->AddRef();
-    GXRenderTarget* pTarget = pCanvasCore->GetTargetUnsafe();
+    GrapX::RenderTarget* pTarget = pCanvasCore->GetTargetUnsafe();
     if(m_pCurRenderTarget != pTarget) {
       InlSetRenderTarget(pTarget, 0);
     }
@@ -90,7 +90,7 @@ GXHRESULT GXGraphicsImpl::InlSetCanvas(GXCanvasCore *pCanvasCore)
 #endif // #if defined(_GXGRAPHICS_INLINE_CANVAS_D3D9_) || defined(_GXGRAPHICS_INLINE_CANVAS_D3D11_) || defined(_GXGRAPHICS_INLINE_CANVAS_GLES2_)
 
 #ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D9_
-GXBOOL GXGraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
+GXBOOL GraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
 {
 #ifdef _DEBUG
   if(uStage >= MAX_TEXTURE_STAGE) {
@@ -117,7 +117,7 @@ GXBOOL GXGraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
 #endif // _GXGRAPHICS_INLINE_TEXTURE_
 
 #ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
-GXBOOL GXGraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
+GXBOOL GraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
 {
 #ifdef _DEBUG
   if(uStage >= MAX_TEXTURE_STAGE) {
@@ -146,7 +146,7 @@ GXBOOL GXGraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
 #endif // #ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 
 #ifdef _GXGRAPHICS_INLINE_SHADER_D3D9_
-GXBOOL GXGraphicsImpl::InlSetShader(GShader* pShader)
+GXBOOL GraphicsImpl::InlSetShader(GShader* pShader)
 {
   if(m_pCurShader == pShader)
   {
@@ -184,14 +184,14 @@ GXBOOL GXGraphicsImpl::InlSetShader(GShader* pShader)
 #endif // _GXGRAPHICS_INLINE_SHADER_D3D9_
 
 #ifdef _GXGRAPHICS_INLINE_EFFECT_D3D9_
-GXBOOL GXGraphicsImpl::InlSetEffect(GXEffectImpl* pEffectImpl)
+GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
 {
   return InlSetShader(pEffectImpl->GetShaderUnsafe());
 }
 #endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
 
 #ifdef _GXGRAPHICS_INLINE_SHADER_D3D11_
-GXBOOL GXGraphicsImpl::InlSetShader(GShader* pShader)
+GXBOOL GraphicsImpl::InlSetShader(Shader* pShader)
 {
   if(m_pCurShader == pShader)
   {
@@ -217,20 +217,20 @@ GXBOOL GXGraphicsImpl::InlSetShader(GShader* pShader)
   if(m_pCurShader != NULL)
   {
     m_pCurShader->AddRef();
-    ((GShaderImpl*)m_pCurShader)->Activate();
+    ((ShaderImpl*)m_pCurShader)->Activate();
   }
   return TRUE;
 }
 #endif // _GXGRAPHICS_INLINE_SHADER_
 #ifdef _GXGRAPHICS_INLINE_EFFECT_D3D11_
-GXBOOL GXGraphicsImpl::InlSetEffect(GXEffectImpl* pEffectImpl)
+GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
 {
-  return InlSetShader(pEffectImpl->GetShaderUnsafe());
+  return InlSetShader(static_cast<EffectImpl*>(pEffectImpl)->GetShaderUnsafe());
 }
 #endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
 
 #ifdef _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D9_
-GXHRESULT GXGraphicsImpl::InlSetVertexDecl(GVertexDeclImpl* pVertexDecl)
+GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 {
   if(m_pCurVertexDecl == pVertexDecl) {
     return GX_OK;
@@ -246,7 +246,7 @@ GXHRESULT GXGraphicsImpl::InlSetVertexDecl(GVertexDeclImpl* pVertexDecl)
 #endif // _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D9_
 
 #ifdef _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D11_
-GXHRESULT GXGraphicsImpl::InlSetVertexDecl(GVertexDeclImpl* pVertexDecl)
+GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 {
   if(m_pCurVertexDecl == pVertexDecl) {
     return GX_OK;
@@ -292,7 +292,7 @@ class GPrimitiveVertexIndexImpl;
 
 
 #ifdef _GXGRAPHICS_INLINE_TEXTURE_GLES2_
-GXBOOL GXGraphicsImpl::InlSetTexture(GTextureImpl* pTexture, GXUINT uStage)
+GXBOOL GraphicsImpl::InlSetTexture(GTextureImpl* pTexture, GXUINT uStage)
 {
   if(pTexture == m_pCurTexture[uStage])
     return TRUE;
@@ -314,7 +314,7 @@ GXBOOL GXGraphicsImpl::InlSetTexture(GTextureImpl* pTexture, GXUINT uStage)
 #endif // _GXGRAPHICS_INLINE_TEXTURE_
 
 #ifdef _GXGRAPHICS_INLINE_SHADER_GLES2_
-GXBOOL GXGraphicsImpl::InlSetShader(GShader* pShader)
+GXBOOL GraphicsImpl::InlSetShader(GShader* pShader)
 {
   if(m_pCurShader == pShader)
     return TRUE;
@@ -336,7 +336,7 @@ GXBOOL GXGraphicsImpl::InlSetShader(GShader* pShader)
 }
 #endif // _GXGRAPHICS_INLINE_SHADER_GLES2_
 #ifdef _GXGRAPHICS_INLINE_EFFECT_GLES2_
-GXBOOL GXGraphicsImpl::InlSetEffect(GXEffectImpl* pEffectImpl)
+GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
 {
   GXBOOL bRet = InlSetShader(pEffectImpl->GetShaderUnsafe());
   if(bRet == false)
@@ -349,7 +349,7 @@ GXBOOL GXGraphicsImpl::InlSetEffect(GXEffectImpl* pEffectImpl)
 #endif // _GXGRAPHICS_INLINE_EFFECT_GLES2_
 
 #ifdef _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_GLES2_
-GXHRESULT GXGraphicsImpl::InlSetVertexDecl(GVertexDeclImpl* pVertexDecl)
+GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 {
   if(m_pCurVertexDecl == pVertexDecl) {
     return GX_OK;
@@ -384,7 +384,7 @@ GXHRESULT GXGraphicsImpl::InlSetVertexDecl(GVertexDeclImpl* pVertexDecl)
 //}
 //#endif // #ifdef _GXGRAPHICS_INLINE_SET_RENDER_STATE_
 template<class _TState>
-inline GXBOOL GXGraphicsImpl::InlSetStateT(_TState*& pCurState, _TState* pState)
+inline GXBOOL GraphicsImpl::InlSetStateT(_TState*& pCurState, _TState* pState)
 {
   ASSERT(pState);
   if(pCurState == pState) {
@@ -405,7 +405,7 @@ inline GXBOOL GXGraphicsImpl::InlSetStateT(_TState*& pCurState, _TState* pState)
 }
 
 #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
-inline GXBOOL GXGraphicsImpl::InlSetRasterizerState(GRasterizerStateImpl* pRasterizerState)
+inline GXBOOL GraphicsImpl::InlSetRasterizerState(GRasterizerStateImpl* pRasterizerState)
 {
   return InlSetStateT<GRasterizerStateImpl>(m_pCurRasterizerState, pRasterizerState);
   //ASSERT(pRasterizerState);
@@ -427,7 +427,7 @@ inline GXBOOL GXGraphicsImpl::InlSetRasterizerState(GRasterizerStateImpl* pRaste
 
 #ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
 // TODO: 这个可以和InlSetDepthStencilState合并为模板
-GXBOOL GXGraphicsImpl::InlSetBlendState(GBlendStateImpl* pBlendState)
+GXBOOL GraphicsImpl::InlSetBlendState(GBlendStateImpl* pBlendState)
 {
   return InlSetStateT(m_pCurBlendState, pBlendState);
   //ASSERT(pBlendState != NULL); // 不能为空
@@ -453,7 +453,7 @@ GXBOOL GXGraphicsImpl::InlSetBlendState(GBlendStateImpl* pBlendState)
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
 
 #ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
-inline GXBOOL GXGraphicsImpl::InlSetDepthStencilState (GDepthStencilStateImpl* pDepthStencilState)
+inline GXBOOL GraphicsImpl::InlSetDepthStencilState (GDepthStencilStateImpl* pDepthStencilState)
 {
   return InlSetStateT(m_pCurDepthStencilState, pDepthStencilState);
   //ASSERT(pDepthStencilState != NULL); // 不能为空
@@ -480,7 +480,7 @@ inline GXBOOL GXGraphicsImpl::InlSetDepthStencilState (GDepthStencilStateImpl* p
 
 
 #ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
-GXBOOL GXGraphicsImpl::InlSetSamplerState(GSamplerStateImpl* pSamplerState)
+GXBOOL GraphicsImpl::InlSetSamplerState(GSamplerStateImpl* pSamplerState)
 {
   return InlSetStateT(m_pCurSamplerState, pSamplerState);
   //ASSERT(pSamplerState != NULL);
@@ -506,32 +506,32 @@ GXBOOL GXGraphicsImpl::InlSetSamplerState(GSamplerStateImpl* pSamplerState)
 }
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
 
-inline GXBOOL GXGraphicsImpl::IsActiveCanvas(GXCanvasCore* pCanvasCore)
+inline GXBOOL GraphicsImpl::IsActiveCanvas(GXCanvasCore* pCanvasCore)
 {
   return m_pCurCanvasCore == pCanvasCore;
 }
 
-inline GXBOOL GXGraphicsImpl::InlIsActiveSamplerState(GSamplerStateImpl* pSamplerState)
+inline GXBOOL GraphicsImpl::InlIsActiveSamplerState(GSamplerStateImpl* pSamplerState)
 {
   return m_pCurSamplerState == pSamplerState;
 }
 
-inline Marimo::ShaderConstName* GXGraphicsImpl::InlGetShaderConstantNameObj()
+inline Marimo::ShaderConstName* GraphicsImpl::InlGetShaderConstantNameObj()
 {
   return m_pShaderConstName;
 }
 
-inline GXBOOL GXGraphicsImpl::InlIsActiveRasterizerState(GRasterizerStateImpl* pRasterizerState)
+inline GXBOOL GraphicsImpl::InlIsActiveRasterizerState(GRasterizerStateImpl* pRasterizerState)
 {
   return m_pCurRasterizerState == pRasterizerState;
 }
 
-inline GXBOOL GXGraphicsImpl::InlIsActiveBlendState(GBlendStateImpl* pBlendState)
+inline GXBOOL GraphicsImpl::InlIsActiveBlendState(GBlendStateImpl* pBlendState)
 {
   return m_pCurBlendState == pBlendState;
 }
 
-inline GXBOOL GXGraphicsImpl::InlIsActiveDepthStencilState(GDepthStencilStateImpl* pDepthStencilState)
+inline GXBOOL GraphicsImpl::InlIsActiveDepthStencilState(GDepthStencilStateImpl* pDepthStencilState)
 {
   return m_pCurDepthStencilState == pDepthStencilState;
 }

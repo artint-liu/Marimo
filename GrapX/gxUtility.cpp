@@ -25,7 +25,7 @@ namespace GrapX
 {
   namespace RepoUtility
   {
-    GXHRESULT SavePrimitive(clSmartRepository* pStorage, GXLPCSTR szDomain, GPrimitive* pPrimitive, int nStartIndex, int nNumPrimi)
+    GXHRESULT SavePrimitive(clSmartRepository* pStorage, GXLPCSTR szDomain, Primitive* pPrimitive, int nStartIndex, int nNumPrimi)
     {
       clStringA strMeshVertexDecl;
       clStringA strMeshAsmVertices;
@@ -426,7 +426,7 @@ namespace GrapX
       //if(pDesc->pPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE)
       if(pDesc->pPrimitive->GetIndexCount() > 0)
       {
-        GPrimitive* pPrimitive = pDesc->pPrimitive;
+        Primitive* pPrimitive = pDesc->pPrimitive;
         GXINT nVertOffset = pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
         //GXLPVOID pVertices = pPrimitive->GetVerticesBuffer();
         PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::Read);
@@ -534,7 +534,7 @@ namespace GrapX
     }
   } // namespace ObjMeshUtility
 
-  GXBOOL GXDLL PrimitiveUtility::SetUnifiedDiffuse(GPrimitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate)
+  GXBOOL GXDLL PrimitiveUtility::SetUnifiedDiffuse(Primitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate)
   {
     GXVERTEXELEMENT element;
     GXINT nOffset = pPrimitive->GetElementOffset(GXDECLUSAGE_COLOR, 0, &element);
@@ -626,7 +626,7 @@ namespace GrapX
 
   namespace PrimitiveUtility
   {
-    MapVertices::MapVertices(GPrimitive* pPrimitive, GXResMap eMap)
+    MapVertices::MapVertices(Primitive* pPrimitive, GXResMap eMap)
       : m_pPrimitive(pPrimitive)
       , m_ptr(NULL)
     {
@@ -650,7 +650,7 @@ namespace GrapX
     }
 
 
-    MapIndices::MapIndices(GPrimitive* pPrimitive, GXResMap eMap)
+    MapIndices::MapIndices(Primitive* pPrimitive, GXResMap eMap)
       : m_pPrimitive(pPrimitive)
       , m_ptr(NULL)
     {

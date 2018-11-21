@@ -1,4 +1,5 @@
 ﻿//////////////////////////////////////////////////////////////////////////
+#ifdef REFACTOR_GRAPX_SHADER
 GShader* GShaderStubImpl::GetShaderUnsafe() const
 {
   return m_pShaderImpl;
@@ -46,3 +47,4 @@ GXBOOL GShaderStubImpl::CommitToDevice(GXLPVOID lpUniform, GXSIZE_T cbSize)
   return m_pShaderImpl->CommitToDevice(lpUniform, cbSize);
 }
 #endif // #ifdef REFACTOR_SHADER
+#endif // #ifdef REFACTOR_GRAPX_SHADER

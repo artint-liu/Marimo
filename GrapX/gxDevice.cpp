@@ -330,7 +330,7 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
   memset(lpStation->m_pStockObject, 0, sizeof(STOCKOBJECT));
 
   LPSTOCKOBJECT const lpStockObject = lpStation->m_pStockObject;
-  GXGraphics* pGraphics = lpStation->pGraphics;
+  GrapX::Graphics* pGraphics = lpStation->pGraphics;
 
   // TODO: ³éÈ¡×ÊÔ´
   pGraphics->CreateShaderFromFile(&lpStockObject->pAeroShader,   "shaders/Aero.shader.txt");
@@ -344,12 +344,21 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
   lpStation->pGraphics->GetPlatformID(&PlatformId);
   if(PlatformId == GXPLATFORM_X_OPENGLES2)
   {
-    lpStockObject->pAeroEffect->SetTextureSlot("s_baseMap", 0);
-    lpStockObject->pAeroEffect->SetTextureSlot("s_blurMap", 1);
+    lpStockObject->pAeroEffect->BindTextureSlot("s_baseMap", 0);
+    lpStockObject->pAeroEffect->BindTextureSlot("s_blurMap", 1);
   }
   else if(PlatformId == GXPLATFORM_WIN32_DIRECT3D9)
   {
-    pGraphics->CreateShaderFromSource(&lpStockObject->pFastGaussianBlurShader, D3D9::g_szFastGaussianBlur, 0, NULL);
+    GXSHADER_SOURCE_DESC desc[2];
+    desc[0].szSourceData  = D3D9::g_szFastGaussianBlur;
+    desc[0].nSourceLen    = 0;
+    desc[0].szEntry       = "vs_main";
+    desc[0].szTarget      = "vs_3_0";
+    desc[1].szSourceData  = D3D9::g_szFastGaussianBlur;
+    desc[1].nSourceLen    = 0;
+    desc[1].szEntry       = "ps_main";
+    desc[1].szTarget      = "ps_3_0";
+    pGraphics->CreateShaderFromSource(&lpStockObject->pFastGaussianBlurShader, desc, 2);
   }
 
   lpStation->pGraphics->CreateEffect(&lpStockObject->pFastGaussianBlurEffect, lpStockObject->pFastGaussianBlurShader);
@@ -385,7 +394,7 @@ GXBOOL DestroyStockObject(GXLPSTATION lpStation)
 
 //extern "C"
 //{
-  extern "C" GXVOID GXDLLAPI GXDrawDebugMsg(GXHSTATION hStation, GXCanvas* pCanvas)
+  extern "C" GXVOID GXDLLAPI GXDrawDebugMsg(GXHSTATION hStation, GrapX::GXCanvas* pCanvas)
   {
 #ifndef _DEV_DISABLE_UI_CODE
     //extern CD3DGraphics *g_pGraphics;

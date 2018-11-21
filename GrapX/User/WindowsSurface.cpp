@@ -49,7 +49,7 @@ GXWindowsSurface::GXWindowsSurface(GXLPSTATION lpStation, GXHWND hWnd)
   , m_hExclusiveWnd    (hWnd)
 {
   //GXUINT nWidth, nHeight;
-  GXGraphics* pGraphics = m_lpStation->pGraphics;
+  GrapX::Graphics* pGraphics = m_lpStation->pGraphics;
   pGraphics->CreateRectRgn(&m_prgnUpdate, 0, 0, 0, 0);
   pGraphics->CreateRectRgn(&m_prgnWindows, 0, 0, 0, 0);
   //pGraphics->CreateTexture(&m_pDepthStencil, TEXSIZE_SAME, TEXSIZE_SAME, 1, NULL, GXFMT_D24S8, GXPOOL_DEFAULT);
@@ -90,7 +90,7 @@ RGNCOMPLEX GXWindowsSurface::InvalidateRegion(const GRegion* pRegion)
 RGNCOMPLEX GXWindowsSurface::InvalidateRect(GXRECT* lpRect)
 {
   GRegion* pRegion;
-  GXGraphics* pGraphics = m_lpStation->pGraphics;
+  GrapX::Graphics* pGraphics = m_lpStation->pGraphics;
 
   GXRECT rcUpdate(0);
 

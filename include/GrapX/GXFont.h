@@ -1,20 +1,24 @@
 ﻿#ifndef _GRAP_X_FONT_H_
 #define _GRAP_X_FONT_H_
 
-class GTexture;
-class GXFont : public GResource
+namespace GrapX
+{
+  class GTexture;
+}
+
+class GXFont : public GrapX::GResource
 {
 public:
   typedef struct __tagCHARDESC  // 字符描述
   {
-    GTexture*   pTex;  // 所在的纹理
+    GrapX::GTexture*   pTex;  // 所在的纹理
     REGN        rgSrc;  // 所在纹理的区域
     GXPOINT     ptDest;
     GXINT       nAdvWidth;
   }CHARDESC, *LPCHARDESC;
 
 public:
-  GXFont() : GResource(1, RESTYPE_FONT){}
+  GXFont() : GrapX::GResource(1, RESTYPE_FONT){}
   GXSTDINTERFACE(GXBOOL   CreateFont             (const GXULONG nWidth, const GXULONG nHeight, const GXCHAR *pFileName));
   GXSTDINTERFACE(GXBOOL   GetDescW               (GXLPLOGFONTW lpLogFont) const);
   GXSTDINTERFACE(GXBOOL   GetDescA               (GXLPLOGFONTA lpLogFont) const);

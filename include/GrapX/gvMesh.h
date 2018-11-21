@@ -3,7 +3,7 @@
 #define _GRAPVR_SCENE_NODE_MESH_H_
 
 class GVScene;
-class GPrimitive;
+//class Primitive;
 //class GPrimitiveVI;
 
 struct GVMESHDATA
@@ -32,27 +32,27 @@ struct GVMESHDATA
 class GXDLL GVMesh : public GVNode
 {
 protected:
-  GXMaterialInst*   m_pMtlInst;
-  GPrimitive*       m_pPrimitive;
+  GrapX::Material*  m_pMtlInst;
+  GrapX::Primitive* m_pPrimitive;
   GXUINT            m_nPrimiCount;
   GXUINT            m_nVertCount;
   GXUINT            m_nStartIndex;
 protected:
   void   Clear();
-  GXBOOL InitializeAsObjFromFile(GXGraphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform);
-  GXBOOL InitializeAsObjFromMemory(GXGraphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform);
-  GXBOOL IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount);
-  GXBOOL IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive);
-  GXBOOL IntCreateMesh(GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent);
-  GXBOOL IntInitializeAsContainer(GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount);
+  GXBOOL InitializeAsObjFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform);
+  GXBOOL InitializeAsObjFromMemory(GrapX::Graphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform);
+  GXBOOL IntCreatePrimitive(GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount);
+  GXBOOL IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GrapX::Primitive* pPrimitive);
+  GXBOOL IntCreateMesh(GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshComponent);
+  GXBOOL IntInitializeAsContainer(GrapX::Graphics* pGraphics, GVNode** pNodesArray, int nNodeCount);
   //GXBOOL CloneMesh(GVMesh* pSource);
 
   //static GXHRESULT SavePrimitive(SmartRepository* pStorage, GPrimitiveVI* pPrimitive, int nStartIndex, int nNumPrimi);
 
-  virtual GXHRESULT LoadFile (GXGraphics* pGraphics, clSmartRepository* pStorage);
+  virtual GXHRESULT LoadFile (GrapX::Graphics* pGraphics, clSmartRepository* pStorage);
 public:
-  GVMesh(GXGraphics* pGraphics);
-  GVMesh(GXGraphics* pGraphics, GXDWORD dwClassCode);
+  GVMesh(GrapX::Graphics* pGraphics);
+  GVMesh(GrapX::Graphics* pGraphics, GXDWORD dwClassCode);
   //GVMesh(GXGraphics* pGraphics, const float3& vMin, const float3& vMax);
   virtual ~GVMesh();
 
@@ -69,25 +69,25 @@ public:
 
   // 文件存取相关的
   virtual GXHRESULT SaveFile (clSmartRepository* pStorage);
-  virtual GXHRESULT SetMaterialInstDirect     (GXMaterialInst* pMtlInst);
+  virtual GXHRESULT SetMaterialDirect    (GrapX::Material* pMtlInst);
 
-  virtual GXHRESULT GetMaterialInst         (GXMaterialInst** ppMtlInst);
+  virtual GXHRESULT GetMaterial          (GrapX::Material** ppMtlInst);
   //virtual GXHRESULT SetMaterialInst         (GXMaterialInst* pMtlInst, GXDWORD dwFlags);
-  virtual GXHRESULT GetMaterialInstFilenameW(clStringW* pstrFilename);
+  virtual GXHRESULT GetMaterialFilename(clStringW* pstrFilename);
   //virtual GXHRESULT SetMaterialInstFromFileW(GXLPCWSTR szFilename, GXDWORD dwFlags);
 
   void ApplyTransform(); // 将变换应用到顶点
 
-  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh);
-  static GXHRESULT CreateUserPrimitive    (GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive, GVMesh** ppMesh);
-  static GXHRESULT CreateMesh             (GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh);
-  static GXHRESULT CreateContainer        (GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh); // 不增加pNodesArray中Node的引用计数
+  static GXHRESULT CreateUserPrimitive    (GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh);
+  static GXHRESULT CreateUserPrimitive    (GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GrapX::Primitive* pPrimitive, GVMesh** ppMesh);
+  static GXHRESULT CreateMesh             (GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh);
+  static GXHRESULT CreateContainer        (GrapX::Graphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh); // 不增加pNodesArray中Node的引用计数
   //static GXHRESULT Clone                  (GVMesh** pNewMesh, GVMesh* pSourceMesh);
-  static GXHRESULT LoadObjFromFileA       (GXGraphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
-  static GXHRESULT LoadObjFromFileW       (GXGraphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
-  static GXHRESULT LoadMeshFromFileA      (GXGraphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh);
-  static GXHRESULT LoadMeshFromFileW      (GXGraphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh);
-  static GXHRESULT LoadMeshFromRepository (GXGraphics* pGraphics, clSmartRepository* pStorage, GVMesh** ppMesh);
+  static GXHRESULT LoadObjFromFileA       (GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
+  static GXHRESULT LoadObjFromFileW       (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
+  static GXHRESULT LoadMeshFromFileA      (GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh);
+  static GXHRESULT LoadMeshFromFileW      (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh);
+  static GXHRESULT LoadMeshFromRepository (GrapX::Graphics* pGraphics, clSmartRepository* pStorage, GVMesh** ppMesh);
 };
 
 namespace mesh

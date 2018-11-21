@@ -233,9 +233,9 @@ GXBOOL GTextureImpl::SaveToFile(GXLPCWSTR pszFileName, GXLPCWSTR pszDestFormat)
   return GX_OK;
 }
 
-GTextureImpl::GTextureImpl(GXGraphics* pGraphics)
+GTextureImpl::GTextureImpl(Graphics* pGraphics)
   : GTexture            ()
-  , m_pGraphics         ((GXGraphicsImpl*)pGraphics)
+  , m_pGraphics         ((GraphicsImpl*)pGraphics)
   , m_pLockedData       (NULL)
   , m_uTexture          (0)
   , m_Format            (GXFMT_UNKNOWN)
@@ -500,7 +500,7 @@ GXBOOL GTextureImpl::UnlockRect()
   return FALSE;
 }
 
-GXGraphics*  GTextureImpl::GetGraphicsUnsafe()
+Graphics*  GTextureImpl::GetGraphicsUnsafe()
 {
   return m_pGraphics;
 }
@@ -634,7 +634,7 @@ GXBOOL GTextureOffscreenPlainSur::CopyRect(GTexture* pSrc)
 {
   return FALSE;
 }
-GTextureOffscreenPlainSur::GTextureOffscreenPlainSur(GXGraphics* pGraphics)
+GTextureOffscreenPlainSur::GTextureOffscreenPlainSur(Graphics* pGraphics)
   : GTextureImpl(pGraphics)
 {
 }
@@ -642,7 +642,7 @@ GTextureOffscreenPlainSur::~GTextureOffscreenPlainSur()
 {
 }
 
-GTexture_OriginFrameBuffer::GTexture_OriginFrameBuffer(GXGraphics* pGraphics)
+GTexture_OriginFrameBuffer::GTexture_OriginFrameBuffer(Graphics* pGraphics)
   : GTextureImpl(pGraphics)
 {
 }

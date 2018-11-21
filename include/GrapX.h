@@ -203,17 +203,21 @@ STATIC_ASSERT(sizeof(GXGUID) == 16);
 //////////////////////////////////////////////////////////////////////////
 
 class GXWnd;  // TODO: 放到内部文件中?
-class GXGraphics;
-class GShader;
-class GXEffect;
-class GTexture;
-class GXCanvas;
 class GRegion;
 class CAeroShader;
 class CSimpleShader;
 class CBlurShader;
 class GXFont;
 //class CGraphics;
+namespace GrapX
+{
+  class Graphics;
+  class Primitive;
+  class Shader;
+  class Effect;
+  class GTexture;
+  class GXCanvas;
+} // namespace GrapX
 
 
 // 常量
@@ -423,7 +427,7 @@ typedef GXDWORD     GXLCID;
 //typedef GXLPVOID    GXHGLOBAL;
 
 class GXWndCanvas;
-typedef GXGraphics* LPGXGRAPHICS;
+typedef GrapX::Graphics* LPGXGRAPHICS;
 typedef GXWndCanvas* LPGXWNDCANVAS;
 
 
@@ -4055,8 +4059,8 @@ typedef struct __tagCANVASSIZEINFO{
   GXSIZE    sizeRenderingSur;//GXINT nWidth, nHeight;
   GXREGN    rgDest;
   GXRECT    rcRenderingSrc;
-  GXCanvas*  pCanvas;
-  GXEffect*  pEffect;
+  GrapX::GXCanvas*  pCanvas;
+  GrapX::Effect*  pEffect;
 }CANVASSIZEINFO, *LPCANVASSIZEINFO;
 
 //
@@ -4566,8 +4570,8 @@ CLENUM_CLASS(GXINT, GXSizeRatio)
 //
 struct SCROLLTEXTUREDESC
 {
-  GTexture* pOperationTex;  // 需要滚动的纹理
-  GTexture* pTempTex;       // 临时纹理
+  GrapX::GTexture* pOperationTex;  // 需要滚动的纹理
+  GrapX::GTexture* pTempTex;       // 临时纹理
   int       dx, dy;         // 偏移量
   LPGXCRECT lprcScroll;     // 滚动区域
   GRegion*  lprgnClip;      // 裁剪区
@@ -5016,15 +5020,15 @@ struct GXSAMPLERDESC {
 
 struct STOCKOBJECT
 {
-  GShader*  pAeroShader;
-  GShader*  pBlurShader;
-  GShader*  pSimpleShader;
-  GShader*  pFastGaussianBlurShader;
+  GrapX::Shader*  pAeroShader;
+  GrapX::Shader*  pBlurShader;
+  GrapX::Shader*  pSimpleShader;
+  GrapX::Shader*  pFastGaussianBlurShader;
 
-  GXEffect* pAeroEffect;
-  GXEffect* pBlurEffect;
-  GXEffect* pSimpleEffect;
-  GXEffect* pFastGaussianBlurEffect;
+  GrapX::Effect* pAeroEffect;
+  GrapX::Effect* pBlurEffect;
+  GrapX::Effect* pSimpleEffect;
+  GrapX::Effect* pFastGaussianBlurEffect;
   GXFont*   pDefaultFont;
 };
 typedef STOCKOBJECT* LPSTOCKOBJECT;

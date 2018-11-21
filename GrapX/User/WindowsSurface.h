@@ -12,13 +12,12 @@
 //
 // 类声明
 //
-//class GXRenderTarget;
-class GTexture;
 class GRegion;
 enum RGNCOMPLEX;
 namespace GrapX
 {
   class RenderTarget;
+  class GTexture;
 } // namespace GrapX
 
 // GXWindowsSurface::SetExclusiveWnd 标志
@@ -30,7 +29,6 @@ namespace GrapX
 //
 class GXWindowsSurface : public GUnknown
 {
-  typedef GrapX::RenderTarget GXRenderTarget;
   friend class DesktopWindowsMgr;
 public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -55,7 +53,8 @@ public:
   GXBOOL          SaveToFileW         (GXLPCWSTR lpFilename, GXLPCSTR lpFormat);
 
   GXLPSTATION     m_lpStation;
-  GXRenderTarget* m_pRenderTar;       // 原点对应 Windows 的原点
+  typedef GrapX::RenderTarget GXRenderTarget;
+  GrapX::RenderTarget*   m_pRenderTar;       // 原点对应 Windows 的原点
   //GTexture*       m_pDepthStencil;    // D3DFMT_D24S8
   GXRECT          rcScrUpdate;        // GX屏幕空间的坐标，原点对应 Station 屏幕原点
 

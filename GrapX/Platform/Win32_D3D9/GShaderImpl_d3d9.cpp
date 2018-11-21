@@ -55,9 +55,9 @@ namespace D3D9
   STATIC_ASSERT(D3DXINC_SYSTEM == c_D3D_INCLUDE_SYSTEM);
   //////////////////////////////////////////////////////////////////////////
 
-  GShaderImpl::GShaderImpl(GXGraphics* pGraphics)
+  GShaderImpl::GShaderImpl(Graphics* pGraphics)
     : GShader           ()
-    , m_pGraphicsImpl   ((GXGraphicsImpl*)pGraphics)
+    , m_pGraphicsImpl   ((GraphicsImpl*)pGraphics)
     , m_dwFlag          (NULL)
     , m_pVertexShader   (NULL)
     , m_pPixelShader    (NULL)

@@ -11,7 +11,7 @@ struct STANDARDMTLUNIFORMTABLE;
 
 namespace D3D9
 {
-  class GXGraphicsImpl;
+  class GraphicsImpl;
   //class IHLSLInclude;
 
   struct GXD3DXCONSTDESC : D3DXCONSTANT_DESC
@@ -27,7 +27,7 @@ namespace D3D9
   class GXCanvasImpl;
   class GShaderImpl : public GShader
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
   public:
     typedef clvector<GXD3DXCONSTDESC>  ConstantDescArray;
     typedef const ConstantDescArray    ConstDescArray;
@@ -49,14 +49,14 @@ namespace D3D9
     STATIC_ASSERT((ShaderFlag_Mask & GXSHADERCAP_MASK) == 0);
 
   protected:
-    GXGraphicsImpl*  m_pGraphicsImpl;
+    GraphicsImpl*  m_pGraphicsImpl;
     GXDWORD          m_dwFlag; // 高16位内部用(ShaderFlag)，低16位外部用(GXShaderCapability)
     GXINT            m_cbPixelTopIndex;
     GXINT            m_cbCacheSize;
     GXHRESULT        CleanUp              ();
     GXINT            UpdateConstTabDesc   (LPD3DXCONSTANTTABLE pct, LPD3DXCONSTANTTABLE_DESC pctd, GXUINT uHandleShift);
 
-    GShaderImpl(GXGraphics* pGraphics);
+    GShaderImpl(Graphics* pGraphics);
     virtual  ~GShaderImpl();
   public:
     LPDIRECT3DVERTEXSHADER9       m_pVertexShader;
@@ -76,7 +76,7 @@ namespace D3D9
     virtual GXHRESULT   Invoke            (GRESCRIPTDESC* pDesc) override;
     virtual GXHRESULT   LoadFromFile      (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc) override;
     virtual GXHRESULT   LoadFromMemory    (const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf) override;
-    virtual GXGraphics* GetGraphicsUnsafe () const override;
+    virtual Graphics* GetGraphicsUnsafe () const override;
     virtual GXLPCWSTR   GetProfileDesc    () const override;
     CLDEPRECATED_ATTRIBUTE static  GXHRESULT   CompileShader     (clBuffer* pBuffer, LPD3DXINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled); // 编译后buffer将被二进制代码替换
     static  GXHRESULT   CompileShader     (clBuffer* pIntermediateCode, GXLPCSTR szSourceCode, size_t nSourceLen, LPD3DXINCLUDE pInclude, GXDEFINITION* pMacros, CompiledType eCompiled);

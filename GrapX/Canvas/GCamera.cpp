@@ -43,7 +43,7 @@ GXHRESULT GCamera::GetContext(GCAMERACONETXT* pCamContext)
 
 //////////////////////////////////////////////////////////////////////////
 float3 GCamera_ScreenAligned::m_vTop = -float3::AxisY;
-GCamera_ScreenAligned::GCamera_ScreenAligned(GXCanvasCore* pCanvasCore)
+GCamera_ScreenAligned::GCamera_ScreenAligned(GrapX::GXCanvasCore* pCanvasCore)
   : m_pCanvasCore(pCanvasCore)
 {
 }
@@ -52,7 +52,7 @@ GCamera_ScreenAligned::~GCamera_ScreenAligned()
 {
 }
 
-GCamera_ScreenAligned* GCamera_ScreenAligned::Create(GXCanvasCore* pCanvasCore)
+GCamera_ScreenAligned* GCamera_ScreenAligned::Create(GrapX::GXCanvasCore* pCanvasCore)
 {
   GCamera_ScreenAligned* pCamScrAligned = new GCamera_ScreenAligned(pCanvasCore);
   pCamScrAligned->AddRef();

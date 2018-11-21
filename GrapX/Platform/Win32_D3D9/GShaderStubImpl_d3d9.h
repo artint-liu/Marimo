@@ -31,7 +31,7 @@ namespace D3D9
     typedef clvector<BINDERSECTDESC>  BinderSectDescArray; // TODO: 以后要储存LPCDATALAYOUT创建出来的对象再做绑定, 直接使用这个不安全
 
   private:
-    GXGraphicsImpl*     m_pGraphicsImpl;
+    GraphicsImpl*     m_pGraphicsImpl;
     GShaderImpl*        m_pShaderImpl;
     CommonUniformArray  m_aCommonUniforms;
     BinderSectDescArray m_aBinderSectDesc;
@@ -49,7 +49,7 @@ namespace D3D9
     GXINT         IntGetDataPool             (MODataPool* pDataPool);
 
   public:
-    GShaderStubImpl(GXGraphics* pGraphics);
+    GShaderStubImpl(Graphics* pGraphics);
     virtual GXHRESULT     SetShaderRef            (GShader* pShader) override;
     virtual GXHRESULT     BindData                (MODataPool* pDataPool, GXLPCSTR szStruct) override;
     virtual GXHRESULT     FindDataPoolByName      (GXLPCSTR szName, MODataPool** ppDataPool) override;

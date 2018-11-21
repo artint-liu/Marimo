@@ -41,9 +41,9 @@ namespace D3D9
 {
 #include "Platform/CommonInline/D3D_ShaderStubImpl.inl"
 
-  GShaderStubImpl::GShaderStubImpl(GXGraphics* pGraphics)
+  GShaderStubImpl::GShaderStubImpl(Graphics* pGraphics)
     : GShaderStub()
-    , m_pGraphicsImpl((GXGraphicsImpl*)pGraphics)
+    , m_pGraphicsImpl((GraphicsImpl*)pGraphics)
     , m_pShaderImpl(NULL)
   {
   }

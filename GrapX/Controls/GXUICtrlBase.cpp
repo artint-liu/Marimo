@@ -91,7 +91,7 @@ namespace GXUI
   GXHRESULT CtrlBase::SetFont(GXLPCWSTR szFontName, int nFontSize)
   {
     SAFE_RELEASE(m_pFont);
-    GXGraphics* pGraphics = GXGetGraphics(m_hWnd);
+    GrapX::Graphics* pGraphics = GXGetGraphics(m_hWnd);
     if(pGraphics != NULL) {
       m_pFont = pGraphics->CreateFontW(0, nFontSize, szFontName);
     }

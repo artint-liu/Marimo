@@ -50,7 +50,7 @@ namespace D3D9
     GXDEFINITION* pParameter;
   };
 
-  class GXGraphicsImpl : public GrapX::GraphicsBaseImpl
+  class GraphicsImpl : public GrapX::GraphicsBaseImpl
   {
     friend class GPrimitiveVertexOnlyImpl;
     friend class GPrimitiveVertexIndexImpl;
@@ -70,7 +70,7 @@ namespace D3D9
     };
     typedef GrapXInternal::GXResourceMgr  GXResourceMgr;
 
-    static GXGraphics* Create(const GRAPHICS_CREATION_DESC* pDesc);
+    static Graphics* Create(const GRAPHICS_CREATION_DESC* pDesc);
 
     // 初始化成员
     virtual GXBOOL Initialize(const GRAPHICS_CREATION_DESC* pDesc);
@@ -120,15 +120,15 @@ namespace D3D9
   void ConvertNativeToTexResUsage   (IN DWORD Usage, IN D3DPOOL Pool, OUT GXDWORD& ResUsage);
   void ConvertTextureFileSaveFormat (IN GXLPCSTR szFormat, OUT D3DXIMAGE_FILEFORMAT* d3dxiff);
   
-  inline LPDIRECT3DDEVICE9 GXGraphicsImpl::D3DGetDevice()
+  inline LPDIRECT3DDEVICE9 GraphicsImpl::D3DGetDevice()
   {
     return m_pd3dDevice; 
   }
-  inline clstd::Locker* GXGraphicsImpl::GetLocker()
+  inline clstd::Locker* GraphicsImpl::GetLocker()
   {
     return m_pGraphicsLocker;
   }
-  inline GXLPCSTR GXGraphicsImpl::InlGetPlatformStringA() const
+  inline GXLPCSTR GraphicsImpl::InlGetPlatformStringA() const
   {
     return "d3d9";
   }

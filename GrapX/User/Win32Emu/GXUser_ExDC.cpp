@@ -147,7 +147,7 @@ GXLONG GXDLLAPI gxTabbedTextOutW(
   GXGDIDC* pDC = GXGDI_DC_PTR(hDC);
   if(pDC)
   {
-    GXCanvas* pCanvas = GXGDI_DC_PTR(hDC)->pCanvas;
+    GrapX::GXCanvas* pCanvas = GXGDI_DC_PTR(hDC)->pCanvas;
     if(pCanvas && pDC->hFont)
     {
       GXFont* pFont = GXGDI_FONT_PTR(pDC->hFont)->lpFont;
@@ -198,7 +198,7 @@ GXDWORD GXDLLAPI gxGetTabbedTextExtentW(
   GXGDIDC* pDC = GXGDI_DC_PTR(hDC);
   if(pDC)
   {
-    GXCanvas* pCanvas = pDC->pCanvas;
+    GrapX::GXCanvas* pCanvas = pDC->pCanvas;
     if(pCanvas && pDC->hFont)
     {
       GXFont* pFont = GXGDI_FONT_PTR(pDC->hFont)->lpFont;
@@ -593,7 +593,7 @@ GXHICON GXDLLAPI GXCursorToIcon(GXHCURSOR hCursor)
   GXDWORD* lpColor = NULL;
   GXDWORD* lpMask = NULL;
   LPGXICON pIconRet = NULL;
-  GXGraphics* pGraphics = GrapX::Internal::GetStationPtr()->pGraphics;
+  GrapX::Graphics* pGraphics = GrapX::Internal::GetStationPtr()->pGraphics;
 
   HDC hdc;
 

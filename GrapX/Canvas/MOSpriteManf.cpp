@@ -288,7 +288,7 @@ namespace Marimo
 
   //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL GXDLLAPI Sprite::CreateFromStockA(Sprite** ppSprite, GXGraphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szImageDir, GXLPCSTR szSection)
+  GXBOOL GXDLLAPI Sprite::CreateFromStockA(Sprite** ppSprite, GrapX::Graphics* pGraphics, clstd::StockA* pStock, GXLPCSTR szImageDir, GXLPCSTR szSection)
   {
     MOSpriteImpl* pSprite = new MOSpriteImpl;
     if(InlIsFailedToNewObject(pSprite)) {
@@ -309,7 +309,7 @@ namespace Marimo
     return FALSE;
   }
 
-  GXBOOL GXDLLAPI Sprite::CreateFromStockFileA(Sprite** ppSprite, GXGraphics* pGraphics, GXLPCSTR szFilename, GXLPCSTR szSection)
+  GXBOOL GXDLLAPI Sprite::CreateFromStockFileA(Sprite** ppSprite, GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GXLPCSTR szSection)
   {
     clstd::StockA stock;
     if( ! stock.LoadFromFile(szFilename)) {

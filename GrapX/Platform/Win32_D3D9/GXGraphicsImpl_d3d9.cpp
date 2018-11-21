@@ -83,23 +83,23 @@ namespace D3D9
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
 #include "Platform/CommonInline/GXGraphicsImpl.inl"
 
-  GXGraphics* GXGraphicsImpl::Create(const GRAPHICS_CREATION_DESC* pDesc)
+  Graphics* GraphicsImpl::Create(const GRAPHICS_CREATION_DESC* pDesc)
   {
-    GXGraphicsImpl* pGraphics = new GXGraphicsImpl;
+    GraphicsImpl* pGraphics = new GraphicsImpl;
 
     if( ! InlCheckNewAndIncReference(pGraphics)) {
       return NULL;
     }
 
     if(pGraphics->Initialize(pDesc) != FALSE) {
-      return (GXGraphics*)pGraphics;
+      return (Graphics*)pGraphics;
     }
 
     pGraphics->Release();
     return NULL;
   }
 
-  GXGraphicsImpl::GXGraphicsImpl()
+  GraphicsImpl::GraphicsImpl()
     : s_uCanvasCacheCount  (4)
     , m_hWnd                (NULL)
     , m_pd3dDevice          (NULL)
@@ -140,7 +140,7 @@ namespace D3D9
     memset(m_pCurTexture, 0, sizeof(GTexture*) * MAX_TEXTURE_STAGE);
   }
 
-  GXBOOL GXGraphicsImpl::Initialize(const GRAPHICS_CREATION_DESC* pDesc)
+  GXBOOL GraphicsImpl::Initialize(const GRAPHICS_CREATION_DESC* pDesc)
   {
     m_strResourceDir = pDesc->szRootDir;
     m_hWnd = pDesc->hWnd;
@@ -242,13 +242,13 @@ namespace D3D9
 
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXHRESULT GXGraphicsImpl::AddRef()
+  GXHRESULT GraphicsImpl::AddRef()
   {
     return gxInterlockedIncrement(&m_nRefCount);
   }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  GXHRESULT GXGraphicsImpl::Release()
+  GXHRESULT GraphicsImpl::Release()
   {
     GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
 
@@ -309,7 +309,7 @@ namespace D3D9
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::Invoke(GRESCRIPTDESC* pDesc)
+  GXHRESULT GraphicsImpl::Invoke(GRESCRIPTDESC* pDesc)
   {
     INVOKE_DESC_CHECK(pDesc);
 
@@ -351,13 +351,13 @@ namespace D3D9
     }
     return FALSE;
   }
-  void GXGraphicsImpl::GetPlatformID(GXPlaformIdentity* pIdentity)
+  void GraphicsImpl::GetPlatformID(GXPlaformIdentity* pIdentity)
   {
     ASSERT(m_pIdentity == GXPLATFORM_WIN32_DIRECT3D9);
     *pIdentity = m_pIdentity;
   }
 
-  GXBOOL GXGraphicsImpl::Activate(GXBOOL bActive)
+  GXBOOL GraphicsImpl::Activate(GXBOOL bActive)
   {
     if(bActive != FALSE) {
       SET_FLAG(m_dwFlags, F_ACTIVATE);
@@ -385,7 +385,7 @@ namespace D3D9
     return TRUE;
   }
 
-  GXHRESULT GXGraphicsImpl::Test()
+  GXHRESULT GraphicsImpl::Test()
   {
     GRESCRIPTDESC Desc;
     const GXHRESULT hr = m_pd3dDevice->TestCooperativeLevel();
@@ -441,7 +441,7 @@ namespace D3D9
     }
     return hr;
   }
-  GXHRESULT GXGraphicsImpl::Begin()
+  GXHRESULT GraphicsImpl::Begin()
   {
     m_pGraphicsLocker->Lock();
 
@@ -466,7 +466,7 @@ namespace D3D9
     return m_nGraphicsCount;
   }
 
-  GXHRESULT GXGraphicsImpl::End()
+  GXHRESULT GraphicsImpl::End()
   {
     GXINT nCount = --m_nGraphicsCount;
     if(nCount == 0)
@@ -489,7 +489,7 @@ namespace D3D9
     return nCount;
   }
 
-  GXHRESULT GXGraphicsImpl::Present()
+  GXHRESULT GraphicsImpl::Present()
   {
     // 这个放到Locker外面，避免Window窗口Resize时偶尔导致很久才响应。
     HRESULT hval =  m_pd3dDevice->Present(0, 0, 0, 0);
@@ -514,7 +514,7 @@ namespace D3D9
     return hval;
   }
 
-  GXHRESULT GXGraphicsImpl::Resize(int nWidth, int nHeight)
+  GXHRESULT GraphicsImpl::Resize(int nWidth, int nHeight)
   {
     GRESCRIPTDESC Desc;
     InlSetZeroT(Desc);
@@ -538,7 +538,7 @@ namespace D3D9
     return GX_OK;
   }
   
-  GXVOID GXGraphicsImpl::SetShaderComposerPathW(GXLPCWSTR szPath)
+  GXVOID GraphicsImpl::SetShaderComposerPathW(GXLPCWSTR szPath)
   {
     m_strShaderComposerPath = szPath;
     
@@ -573,7 +573,7 @@ namespace D3D9
   //  return S_OK;
   //}
   
-  GXHRESULT GXGraphicsImpl::SetPrimitive(GPrimitive* pPrimitive, GXUINT uStreamSource)
+  GXHRESULT GraphicsImpl::SetPrimitive(Primitive* pPrimitive, GXUINT uStreamSource)
   {
     if(m_pCurPrimitive == pPrimitive)
       return S_OK;
@@ -605,13 +605,13 @@ namespace D3D9
     return S_OK;
   }
   
-  GXHRESULT GXGraphicsImpl::SetTexture(GTextureBase* pTexture, GXUINT uStage)
+  GXHRESULT GraphicsImpl::SetTexture(GTextureBase* pTexture, GXUINT uStage)
   {
     return InlSetTexture(reinterpret_cast<GTexBaseImpl*>(pTexture), uStage);
   }
 
   //////////////////////////////////////////////////////////////////////////
-  void GXGraphicsImpl::IntGetDimension(GXUINT& nWidth, GXUINT& nHeight)
+  void GraphicsImpl::IntGetDimension(GXUINT& nWidth, GXUINT& nHeight)
   {
     if(m_pCurRenderTarget) {
       m_pCurRenderTarget->GetDimension(&nWidth, &nHeight);
@@ -622,7 +622,7 @@ namespace D3D9
     }
   }
 
-  GXBOOL GXGraphicsImpl::SetSafeClip(const GXREGN* pRegn)
+  GXBOOL GraphicsImpl::SetSafeClip(const GXREGN* pRegn)
   {
 #ifdef _43A2DE06_6673_4ddd_9C1C_881493B776A0_
     D3DVIEWPORT9 Viewport;
@@ -678,7 +678,7 @@ namespace D3D9
     return GXSUCCEEDED(hval);
 #endif
   }
-  GXBOOL GXGraphicsImpl::SetViewport(const GXVIEWPORT* pViewport)
+  GXBOOL GraphicsImpl::SetViewport(const GXVIEWPORT* pViewport)
   {
     D3DVIEWPORT9 Viewport;
     if(pViewport != NULL)
@@ -709,7 +709,7 @@ namespace D3D9
     return GXSUCCEEDED(hval);
   }
 
-  GXBOOL GXGraphicsImpl::IntCheckSizeOfTargetAndDepth()
+  GXBOOL GraphicsImpl::IntCheckSizeOfTargetAndDepth()
   {
     if(m_pCurDepthStencil == 0 && m_pCurRenderTarget == 0) {
       return TRUE;
@@ -754,12 +754,12 @@ namespace D3D9
     return FALSE;    
   }
 
-  GXHRESULT GXGraphicsImpl::Clear(const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, D3DCOLOR crClear, float z, GXDWORD dwStencil)
+  GXHRESULT GraphicsImpl::Clear(const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, D3DCOLOR crClear, float z, GXDWORD dwStencil)
   {
     return m_pd3dDevice->Clear(nCount, (const D3DRECT*)lpRects, dwFlags, crClear, z, dwStencil);
   }
 
-  GXBOOL GXGraphicsImpl::IntCheckRTTexture(GTextureImpl* pRTTexture)
+  GXBOOL GraphicsImpl::IntCheckRTTexture(GTextureImpl* pRTTexture)
   {
     // 接口设计验证
     ASSERT(pRTTexture != NULL);
@@ -784,7 +784,7 @@ namespace D3D9
     return TRUE;
   }
 
-  GXHRESULT GXGraphicsImpl::DrawPrimitive(const GXPrimitiveType eType, const GXUINT StartVertex, 
+  GXHRESULT GraphicsImpl::DrawPrimitive(const GXPrimitiveType eType, const GXUINT StartVertex, 
     const GXUINT PrimitiveCount)
   {
     ASSERT(TEST_FLAG(m_dwFlags, F_ACTIVATE));
@@ -810,7 +810,7 @@ namespace D3D9
     return hval;
   }
 
-  GXHRESULT GXGraphicsImpl::DrawPrimitive(
+  GXHRESULT GraphicsImpl::DrawPrimitive(
     const GXPrimitiveType eType, const GXINT BaseVertexIndex, 
     const GXUINT MinIndex, const GXUINT NumVertices, 
     const GXUINT StartIndex, const GXUINT PrimitiveCount)
@@ -858,7 +858,7 @@ namespace D3D9
   }
 
 
-  GXHRESULT GXGraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT MipLevels, 
+  GXHRESULT GraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT MipLevels, 
     GXFormat Format, GXDWORD ResUsage)
   {
     GRESKETCH ResFeatDesc;
@@ -868,7 +868,7 @@ namespace D3D9
     // 命名纹理查找
     if(szName != NULL)
     {
-      GrapXInternal::ResourceSketch::GenerateTextureNameA(&ResFeatDesc, szName);
+      GrapX::Internal::ResourceSketch::GenerateTextureNameA(&ResFeatDesc, szName);
       GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
       if(pResource != NULL) {
         GXHRESULT hval = pResource->AddRef();
@@ -918,7 +918,7 @@ namespace D3D9
     return GX_FAIL;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureFromFileW(GTexture** ppTexture, GXLPCWSTR pSrcFile)
+  GXHRESULT GraphicsImpl::CreateTextureFromFileW(GTexture** ppTexture, GXLPCWSTR pSrcFile)
   {
     // 注意 MipLevels 使用 D3DX_FROM_FILE 标志, 根据文件储存来决定
     GXHRESULT lr = CreateTextureFromFileExW(ppTexture, pSrcFile, 
@@ -931,7 +931,7 @@ namespace D3D9
     return lr;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureFromFileExW(
+  GXHRESULT GraphicsImpl::CreateTextureFromFileExW(
     GTexture**    ppTexture, 
     GXLPCWSTR     pSrcFile, 
     GXUINT        Width, 
@@ -961,7 +961,7 @@ namespace D3D9
     pSrcFile = IntToAbsPathW(strSrcFile, pSrcFile);
 
     // 收集资源特征
-    GrapXInternal::ResourceSketch::GenerateTexture(&ResFeatDesc, pSrcFile, 
+    GrapX::Internal::ResourceSketch::GenerateTexture(&ResFeatDesc, pSrcFile, 
       Width, Height, 1, MipLevels, Format, MipFilter, Filter, MipFilter, ColorKey);
 
     // 资源查找
@@ -1003,21 +1003,21 @@ namespace D3D9
     return hval;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTexture3D(
+  GXHRESULT GraphicsImpl::CreateTexture3D(
     GTexture3D** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
   {
     CLBREAK;
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTexture3DFromFileW(GTexture3D** ppTexture, GXLPCWSTR pSrcFile)
+  GXHRESULT GraphicsImpl::CreateTexture3DFromFileW(GTexture3D** ppTexture, GXLPCWSTR pSrcFile)
   {
     // 注意 MipLevels 使用 D3DX_FROM_FILE 标志, 根据文件储存来决定
     return CreateTexture3DFromFileExW(ppTexture, pSrcFile, D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT,
       D3DX_FROM_FILE, GXFMT_UNKNOWN, GXRU_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL);
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTexture3DFromFileExW(GTexture3D** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, 
+  GXHRESULT GraphicsImpl::CreateTexture3DFromFileExW(GTexture3D** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, 
     GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
   {
     GXHRESULT hval = GX_OK;
@@ -1033,7 +1033,7 @@ namespace D3D9
     BEGIN_SCOPED_LOCKER(m_pGraphicsLocker);
 
     // 收集资源特征
-    GrapXInternal::ResourceSketch::GenerateTexture(&ResFeatDesc, pSrcFile, 
+    GrapX::Internal::ResourceSketch::GenerateTexture(&ResFeatDesc, pSrcFile, 
       Width, Height, Depth, MipLevels, Format, MipFilter, Filter, MipFilter, ColorKey);
 
     // 资源查找
@@ -1077,20 +1077,20 @@ namespace D3D9
   //
   // Cube Texture
   //
-  GXHRESULT GXGraphicsImpl::CreateTextureCube(GTextureCube** ppTexture, 
+  GXHRESULT GraphicsImpl::CreateTextureCube(GTextureCube** ppTexture, 
     GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
   {
     CLBREAK;
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileW(GTextureCube** ppTexture, GXLPCWSTR pSrcFile)
+  GXHRESULT GraphicsImpl::CreateTextureCubeFromFileW(GTextureCube** ppTexture, GXLPCWSTR pSrcFile)
   {
     CLBREAK;
     return GX_OK;
   }
 
-  GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileExW(GTextureCube** ppTexture, 
+  GXHRESULT GraphicsImpl::CreateTextureCubeFromFileExW(GTextureCube** ppTexture, 
     GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
     GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
   {
@@ -1131,7 +1131,7 @@ namespace D3D9
   //  return GX_FAIL;
   //}
 
-  GXHRESULT GXGraphicsImpl::CreateTextureFromD3DSurface(
+  GXHRESULT GraphicsImpl::CreateTextureFromD3DSurface(
     GTextureImpl** ppTexture, LPDIRECT3DSURFACE9 lpD3DSurface)
   {
     GTextureImpl_FromD3DSurface* pGTex;
@@ -1152,13 +1152,13 @@ namespace D3D9
 
 //////////////////////////////////////////////////////////////////////////
 
-  GXBOOL GXGraphicsImpl::D3DGetPresentParam(D3DPRESENT_PARAMETERS* pd3dpp)
+  GXBOOL GraphicsImpl::D3DGetPresentParam(D3DPRESENT_PARAMETERS* pd3dpp)
   {
     *pd3dpp = m_d3dpp;
     return TRUE;
   }
 
-  GXBOOL GXGraphicsImpl::GetDesc(GXGRAPHICSDEVICE_DESC* pDesc)
+  GXBOOL GraphicsImpl::GetDesc(GXGRAPHICSDEVICE_DESC* pDesc)
   {
     pDesc->cbSize             = sizeof(GXGRAPHICSDEVICE_DESC);
     pDesc->BackBufferWidth    = m_d3dpp.BackBufferWidth;

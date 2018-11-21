@@ -25,15 +25,15 @@ protected:
   GXPrimitiveType   m_eType;
   GEOTYPE           m_eGeoType;
 protected:
-  GXBOOL InitializeAsAABB(GXGraphics* pGraphics, GXCOLOR clr);
-  GXBOOL InitializeAsAxis(GXGraphics* pGraphics, const float3& vPos, float fExtent, int nLevel);
-  GXBOOL InitializeAsQuadPlane(GXGraphics* pGraphics, const float3& vPos, const float3& vDirection, const float3& vUp, const float2& vExtent, GXUINT xSeg, GXUINT ySeg, GXDWORD dwVertexFlags);
-  GXBOOL CreatePrimitive(GXGraphics* pGraphics, GXPrimitiveType eType, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount);
-  GXBOOL SetPrimitive(GXPrimitiveType eType, int nPrimCount, int nStartIndex, GPrimitive* pPrimitive);
+  GXBOOL InitializeAsAABB(GrapX::Graphics* pGraphics, GXCOLOR clr);
+  GXBOOL InitializeAsAxis(GrapX::Graphics* pGraphics, const float3& vPos, float fExtent, int nLevel);
+  GXBOOL InitializeAsQuadPlane(GrapX::Graphics* pGraphics, const float3& vPos, const float3& vDirection, const float3& vUp, const float2& vExtent, GXUINT xSeg, GXUINT ySeg, GXDWORD dwVertexFlags);
+  GXBOOL CreatePrimitive(GrapX::Graphics* pGraphics, GXPrimitiveType eType, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount);
+  GXBOOL SetPrimitive(GXPrimitiveType eType, int nPrimCount, int nStartIndex, GrapX::Primitive* pPrimitive);
 public:
   GVGeometry();
-  GVGeometry(GXGraphics* pGraphics, GEOTYPE eType);
-  GVGeometry(GXGraphics* pGraphics, GEOTYPE eType, const float3& vMin, const float3& vMax);
+  GVGeometry(GrapX::Graphics* pGraphics, GEOTYPE eType);
+  GVGeometry(GrapX::Graphics* pGraphics, GEOTYPE eType, const float3& vMin, const float3& vMax);
   virtual ~GVGeometry();
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -45,11 +45,11 @@ public:
 
   //GXHRESULT SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags);
 
-  static GXHRESULT CreateBox            (GXGraphics* pGraphics, CFloat3& vCenter, CFloat3& vExtent, GXCOLOR clr, GVGeometry** ppGeometry, GXDWORD dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
-  static GXHRESULT CreateAABB           (GXGraphics* pGraphics, const float3& vMin, const float3& vMax, GXCOLOR clr, GVGeometry** ppGeometry);
-  static GXHRESULT CreateAxis           (GXGraphics* pGraphics, const float3& vPos, float fExtent, int nLevel, GVGeometry** ppGeometry);
+  static GXHRESULT CreateBox            (GrapX::Graphics* pGraphics, CFloat3& vCenter, CFloat3& vExtent, GXCOLOR clr, GVGeometry** ppGeometry, GXDWORD dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
+  static GXHRESULT CreateAABB           (GrapX::Graphics* pGraphics, const float3& vMin, const float3& vMax, GXCOLOR clr, GVGeometry** ppGeometry);
+  static GXHRESULT CreateAxis           (GrapX::Graphics* pGraphics, const float3& vPos, float fExtent, int nLevel, GVGeometry** ppGeometry);
   static GXHRESULT CreateQuadPlane      (
-    GXGraphics*   pGraphics, 
+    GrapX::Graphics*   pGraphics, 
     const float3& vPos, 
     const float3& vDirection, 
     const float3& vUp, 
@@ -60,7 +60,7 @@ public:
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateCylinder(
-    GXGraphics*   pGraphics, 
+    GrapX::Graphics*   pGraphics, 
     float         fOffset, 
     float         fRadius, 
     float         fHeight, 
@@ -75,7 +75,7 @@ public:
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateCylinder(
-    GXGraphics*   pGraphics, 
+    GrapX::Graphics*   pGraphics, 
     float         fOffset, 
     float         fRadius, 
     float         fHeight, 
@@ -90,7 +90,7 @@ public:
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateCone(
-    GXGraphics*   pGraphics, 
+    GrapX::Graphics*   pGraphics, 
     float         fOffset, 
     float         fRadius1, 
     float         fRadius2, 
@@ -106,7 +106,7 @@ public:
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateTorus(
-    GXGraphics*   pGraphics,
+    GrapX::Graphics*   pGraphics,
     float         fRadius1,   // 总体半径, 圆环相当于一个扭弯的圆柱体
     float         fRadius2,   // 环体半径,就是内外径差值的一半
     int           nSegment,   // 沿环体的段数
@@ -117,7 +117,7 @@ public:
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateSphere(
-    GXGraphics*   pGraphics,
+    GrapX::Graphics*   pGraphics,
     float         fOffset,
     float         fRadius,
     int           nSegments,
@@ -129,7 +129,7 @@ public:
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateCapsule(
-    GXGraphics*   pGraphics,
+    GrapX::Graphics*   pGraphics,
     float         fOffset,
     float         fRadius,
     float         fHeight,
@@ -144,7 +144,7 @@ public:
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 
   static GXHRESULT CreateConvex(
-    GXGraphics*   pGraphics,
+    GrapX::Graphics*   pGraphics,
     GVNode::Plane*pPlanes,
     int           nNumPlanes,
     GXColor32     color, 
@@ -157,7 +157,7 @@ class GXDLL GVGeometryBox : public GVGeometry
 {
 protected:
 public:
-  static GXHRESULT Create(GXGraphics* pGraphics, CFloat3& vCenter, CFloat3& vExtent, GXCOLOR clr, GVGeometry** ppGeometry, GXDWORD dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
+  static GXHRESULT Create(GrapX::Graphics* pGraphics, CFloat3& vCenter, CFloat3& vExtent, GXCOLOR clr, GVGeometry** ppGeometry, GXDWORD dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
 };
 
 #endif // _GRAPVR_SCENE_MODULE_GEOMETRY_H_

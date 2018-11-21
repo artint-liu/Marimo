@@ -8,15 +8,15 @@ namespace D3D9
 {
   class GVertexDeclImpl : public GVertexDeclaration
   {
-    friend class GXGraphicsImpl;
+    friend class GraphicsImpl;
   private:
-    GXGraphicsImpl*                 m_pGraphics;
+    GraphicsImpl*                 m_pGraphics;
     IDirect3DVertexDeclaration9*    m_pDecl;
     GXUINT                          m_nStride;
     LPGXVERTEXELEMENT               m_pVertexElement;
 
   protected:
-    GVertexDeclImpl(GXGraphicsImpl* pGraphics);
+    GVertexDeclImpl(GraphicsImpl* pGraphics);
     virtual ~GVertexDeclImpl();
 
   public:

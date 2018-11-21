@@ -114,7 +114,7 @@ namespace GXUI
   GXBOOL Toolbar::SetSpriteFile(GXLPCWSTR szSpriteFile)
   {
     SAFE_RELEASE(m_pSprite);
-    GXGraphics* pGraphics = GXGetGraphics(m_hWnd);
+    GrapX::Graphics* pGraphics = GXGetGraphics(m_hWnd);
     GXBOOL bval = GXSUCCEEDED(GXCreateSpriteFromFileW(pGraphics, szSpriteFile, &m_pSprite));
     if(bval) {
       Invalidate(TRUE);
@@ -507,10 +507,10 @@ namespace GXUI
       GXHTHEME hTheme = gxGetWindowTheme(m_hWnd);
       if(hTheme)
       {
-        GXCanvas* pCanvas = canvas.GetCanvasUnsafe();
-        pCanvas->SetCompositingMode(CM_SourceCopy);
+        GrapX::GXCanvas* pCanvas = canvas.GetCanvasUnsafe();
+        pCanvas->SetCompositingMode(GrapX::CM_SourceCopy);
         GXDrawThemeBackground(hTheme, pCanvas, GXWP_DIALOG, 0, &rect, NULL);
-        pCanvas->SetCompositingMode(CM_SourceOver);
+        pCanvas->SetCompositingMode(GrapX::CM_SourceOver);
       }
     }
     DrawItem(canvas, nItem, clr, ox, oy, (int&)rect.left, (int&)rect.top);

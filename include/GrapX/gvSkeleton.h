@@ -199,7 +199,7 @@ public:
   void        SetParents            (GXLPCSTR* szNames);
   void        UpdateBones           ();
   CFloat4x4&  UpdateBone            (int nBoneIndex, GXBOOL bUpdateParent);
-  GXBOOL      BuildRenderData       (GXGraphics* pGraphics);
+  GXBOOL      BuildRenderData       (GrapX::Graphics* pGraphics);
   void        DbgDump               ();
   int         SetTrackData          (GXLPCSTR szName, GVAnimationTrack* pTrack); // szName 可以为 NULL
   GXBOOL      PlayByName            (GXLPCSTR szName);
@@ -207,7 +207,7 @@ public:
 
 
   virtual GXHRESULT SaveFile(clSmartRepository* pStorage);
-  virtual GXHRESULT LoadFile(GXGraphics* pGraphics, clSmartRepository* pStorage);
+  virtual GXHRESULT LoadFile(GrapX::Graphics* pGraphics, clSmartRepository* pStorage);
 
   virtual GXBOOL    Update                (const GVSCENEUPDATE& sContext);
   static  GXHRESULT CreateFromFileW       (GVSkeleton** ppSkeleton, GVScene* pScene, GXLPCWSTR szFilename);

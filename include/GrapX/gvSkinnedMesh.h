@@ -16,11 +16,11 @@ private:
   GXSIZE_T    m_nClusterCount;
 
 protected:
-  GVSkinnedMeshSoft(GXGraphics* pGraphics);
+  GVSkinnedMeshSoft(GrapX::Graphics* pGraphics);
   virtual ~GVSkinnedMeshSoft();
 
-  GXBOOL Initialize(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, GXWORD* pIndices, GXSIZE_T nIdxCount, GVSkeleton* pSkeleton, float* pWeight, GXSIZE_T nClusterCount);
-  GXBOOL Initialize(GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, GXSIZE_T nClusterCount);
+  GXBOOL Initialize(GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, GXWORD* pIndices, GXSIZE_T nIdxCount, GVSkeleton* pSkeleton, float* pWeight, GXSIZE_T nClusterCount);
+  GXBOOL Initialize(GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, GXSIZE_T nClusterCount);
   GXBOOL CheckSkeleton(GVSkeleton* pSkeleton);
 
 public:
@@ -35,13 +35,13 @@ public:
   virtual GXBOOL      Update    (const GVSCENEUPDATE& sContext);
 
   virtual GXHRESULT   SaveFile  (clSmartRepository* pStorage);
-  virtual GXHRESULT   LoadFile  (GXGraphics* pGraphics, clSmartRepository* pStorage);
+  virtual GXHRESULT   LoadFile  (GrapX::Graphics* pGraphics, clSmartRepository* pStorage);
 
-  static  GXHRESULT   CreateMesh            (GXGraphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh);
-  static  GXHRESULT   CreateFromMeshData    (GXGraphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh);
-  static  GXHRESULT   CreateFromFileA       (GXGraphics* pGraphics, GXLPCSTR szFilename, GVSkinnedMeshSoft** ppMesh);
-  static  GXHRESULT   CreateFromFileW       (GXGraphics* pGraphics, GXLPCWSTR szFilename, GVSkinnedMeshSoft** ppMesh);
-  static  GXHRESULT   CreateFromRepository  (GXGraphics* pGraphics, clSmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh);
+  static  GXHRESULT   CreateMesh            (GrapX::Graphics* pGraphics, int nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, int nVertCount, GXWORD* pIndices, int nIdxCount, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh);
+  static  GXHRESULT   CreateFromMeshData    (GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshData, GVSkeleton* pSkeleton, float* pWeight, int nClusterCount, GVSkinnedMeshSoft** ppSkinnedMesh);
+  static  GXHRESULT   CreateFromFileA       (GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GVSkinnedMeshSoft** ppMesh);
+  static  GXHRESULT   CreateFromFileW       (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GVSkinnedMeshSoft** ppMesh);
+  static  GXHRESULT   CreateFromRepository  (GrapX::Graphics* pGraphics, clSmartRepository* pStorage, GVSkinnedMeshSoft** ppMesh);
 };
 
 

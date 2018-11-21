@@ -23,6 +23,5 @@ namespace GrapX
   };
 } // namespace GrapX
 
-typedef GrapX::RenderTarget GXRenderTarget;
 
 #endif // _GRAPX_RENDERTARGET_H_

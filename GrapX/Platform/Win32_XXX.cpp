@@ -53,7 +53,7 @@ IMOPlatform_Win32Base::~IMOPlatform_Win32Base()
 {
 }
 
-GXHRESULT IMOPlatform_Win32Base::Finalize(GXINOUT GXGraphics** ppGraphics)
+GXHRESULT IMOPlatform_Win32Base::Finalize(GXINOUT GrapX::Graphics** ppGraphics)
 {
   SAFE_RELEASE(m_pLogger);
   m_aDropFiles.~clStringArrayW();
@@ -66,7 +66,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
 {
   GXApp* pApp = (GXApp*)GetWindowLongPtr(hWnd, 0);
   GXLPSTATION lpStation = NULL;
-  GXGraphics* pGraphics = NULL;
+  GrapX::Graphics* pGraphics = NULL;
   //if(bTrack && message != WM_USER + 57 && message != WM_USER + 58) {
   //  TRACE("message=%x\n", message);
   //}
@@ -584,7 +584,7 @@ i32 GXUIMsgThread::StartRoutine()
 {
 #ifndef _DEV_DISABLE_UI_CODE
   GXApp* pApp = (GXApp*)m_pPlatform->m_pApp;
-  GXGraphics* pGraphics = pApp->GetGraphicsUnsafe();
+  GrapX::Graphics* pGraphics = pApp->GetGraphicsUnsafe();
 
   pGraphics->Activate(TRUE);  // 开始捕获Graphics状态
   GXHRESULT hval = pApp->OnCreate();
@@ -616,7 +616,7 @@ i32 GXUIMsgThread::StartRoutine()
 {
 #ifndef _DEV_DISABLE_UI_CODE
   GXApp* pApp = (GXApp*)m_pPlatform->m_pApp;
-  GXGraphics* pGraphics = pApp->GetGraphicsUnsafe();
+  Graphics* pGraphics = pApp->GetGraphicsUnsafe();
 
   pGraphics->Activate(TRUE);  // 开始捕获Graphics状态
   GXHRESULT hval = pApp->OnCreate();

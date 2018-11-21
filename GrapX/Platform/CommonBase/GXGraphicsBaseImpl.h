@@ -1,6 +1,6 @@
 namespace GrapX
 {
-  class GraphicsBaseImpl : public GXGraphics
+  class GraphicsBaseImpl : public Graphics
   {
   private:
     GAllocator*             m_pRgnAllocator;

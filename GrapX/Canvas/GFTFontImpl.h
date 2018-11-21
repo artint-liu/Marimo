@@ -3,30 +3,34 @@
 
 //#include <hash_map>
 
-class GTexture;
-class GXGraphics;
-namespace D3D9{
-  class GXGraphicsImpl;
-};
-namespace D3D11{
-  class GXGraphicsImpl;
-};
-namespace WOGL{
-  class GXGraphicsImpl;
-};
-namespace GLES2{
-  class GXGraphicsImpl;
-};
+namespace GrapX {
+  class Graphics;
+  class GTexture;
+
+  namespace D3D9 {
+    class GraphicsImpl;
+  };
+  namespace D3D11 {
+    class GraphicsImpl;
+  };
+  namespace WOGL {
+    class GraphicsImpl;
+  };
+  namespace GLES2 {
+    class GraphicsImpl;
+  };
+}
+
 
 class _GFTFont : public GXFont
 {
-  friend class D3D9::GXGraphicsImpl;
-  friend class D3D11::GXGraphicsImpl;
-  friend class WOGL::GXGraphicsImpl;
-  friend class GLES2::GXGraphicsImpl;
+  friend class GrapX::D3D9::GraphicsImpl;
+  friend class GrapX::D3D11::GraphicsImpl;
+  friend class GrapX::WOGL::GraphicsImpl;
+  friend class GrapX::GLES2::GraphicsImpl;
 private:
-  typedef clvector<GTexture*>          GTextureArray;
-  GXGraphics*     m_pGraphics;
+  typedef clvector<GrapX::GTexture*>          GTextureArray;
+  GrapX::Graphics*m_pGraphics;
   FT_Library      m_Library;
   FT_Face         m_Face;
   //GXCHAR*         m_pFaceName;
@@ -52,7 +56,7 @@ private:
   typedef clhash_map<short, FTFONTDESC>  CharToFontDesc;
   CharToFontDesc*        m_pmapCode2FMatrix;
 
-  _GFTFont  (GXGraphics* pGraphics, const GXLPLOGFONTA lpLogFont);
+  _GFTFont  (GrapX::Graphics* pGraphics, const GXLPLOGFONTA lpLogFont);
   virtual ~_GFTFont();
 
   inline GXVOID FontDescToCharDesc    (const FTFONTDESC &fm, LPCHARDESC lpCD);

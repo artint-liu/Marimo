@@ -40,13 +40,13 @@ IGXPlatform_Win32D3D11::IGXPlatform_Win32D3D11()
   m_pApp = NULL;
 }
 
-GXHRESULT IGXPlatform_Win32D3D11::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
+GXHRESULT IGXPlatform_Win32D3D11::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics)
 {
   const static LPWSTR lpClassName = _T("GrapX_Win32_D3D11_Class");
   //WNDCLASSEX wcex;
 
   m_pApp = pApp;
-  GXGraphics* pGraphics = NULL;
+  GrapX::Graphics* pGraphics = NULL;
 
   if(CreateWnd(lpClassName, WndProc, pDesc, pApp) != 0) {
     return GX_FAIL;
@@ -111,13 +111,13 @@ GXHRESULT IGXPlatform_Win32D3D11::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXG
   //{
   //  return GX_FAIL;
   //}
-  D3D11::GRAPHICS_CREATION_DESC sDesc;
+  GrapX::D3D11::GRAPHICS_CREATION_DESC sDesc;
   sDesc.hWnd          = m_hWnd;
   sDesc.bWaitForVSync = pDesc->dwStyle & GXADS_WAITFORVSYNC;
   sDesc.szRootDir     = m_strRootDir;
   sDesc.pLogger       = pDesc->pLogger;
   
-  pGraphics = D3D11::GXGraphicsImpl::Create(&sDesc);
+  pGraphics = GrapX::D3D11::GraphicsImpl::Create(&sDesc);
 
   *ppGraphics = pGraphics;
   m_pLogger = pDesc->pLogger;
@@ -156,7 +156,7 @@ GXHRESULT IGXPlatform_Win32D3D11::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, GXG
 
   return GX_OK;
 }
-GXHRESULT IGXPlatform_Win32D3D11::Finalize(GXINOUT GXGraphics** ppGraphics)
+GXHRESULT IGXPlatform_Win32D3D11::Finalize(GXINOUT GrapX::Graphics** ppGraphics)
 {
   GXUIDestroyStation();
 
@@ -575,7 +575,7 @@ namespace GrapXToDX11
 
 } // namespace GrapXToDX11
 
-IGXPlatform_Win32D3D11* AppCreateD3D11Platform(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics)
+IGXPlatform_Win32D3D11* AppCreateD3D11Platform(GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics)
 {
   return AppCreatePlatformT<IGXPlatform_Win32D3D11>(pApp, pDesc, ppGraphics);
 }

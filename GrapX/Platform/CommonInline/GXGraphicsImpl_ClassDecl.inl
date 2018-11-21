@@ -1,6 +1,6 @@
 ﻿public:
   // 构造函数, 设置成员变量的默认值
-  GXGraphicsImpl();
+  GraphicsImpl();
 
   virtual GXHRESULT AddRef() override;
   // 释放所有资源并自删除
@@ -24,7 +24,7 @@
   //virtual GXHRESULT RegisterResourceEx  (LPCRESKETCH pDesc, GResource* pResource);
   virtual GXHRESULT UnregisterResource  (GResource* pResource) override;
 
-  virtual GXHRESULT SetPrimitive        (GPrimitive* pPrimitive, GXUINT uStreamSource = 0) override;
+  virtual GXHRESULT SetPrimitive        (GrapX::Primitive* pPrimitive, GXUINT uStreamSource = 0) override;
   //virtual GXHRESULT SetPrimitiveV       (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0) override;
   //virtual GXHRESULT SetPrimitiveVI      (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0) override;
 
@@ -76,29 +76,29 @@
   GXHRESULT   IntCreateSamplerState       (GSamplerStateImpl** pSamplerState, GSamplerStateImpl* pDefault);
 
   // GPrimitive
-  GXHRESULT CreatePrimitive               (GPrimitive** pPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
+  GXHRESULT CreatePrimitive               (GrapX::Primitive** pPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
                                           GXUINT uVertexCount, GXUINT uVertexStride, GXLPCVOID pVertInitData,
                                           GXUINT uIndexCount, GXUINT uIndexSize, GXLPCVOID pIndexInitData) override;
 
   // GShader
-  GXHRESULT   CreateShaderFromSource  (GrapX::Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount) override;
-  GXHRESULT   CreateShaderFromSource  (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition) override;
-  GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCWSTR szShaderDesc) override;
-  GXHRESULT   CreateShaderFromFile    (GShader** ppShader, GXLPCSTR szShaderDesc) override;
-  GXHRESULT   CreateShaderStub        (GShaderStub** ppShaderStub) override;
+  GXHRESULT   CreateShaderFromSource  (Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount) override;
+  //GXHRESULT   CreateShaderFromSource  (GShader** ppShader, GXLPCSTR szShaderSource, size_t nSourceLen, GXDEFINITION* pMacroDefinition) override;
+  GXHRESULT   CreateShaderFromFile    (Shader** ppShader, GXLPCWSTR szShaderDesc) override;
+  GXHRESULT   CreateShaderFromFile    (Shader** ppShader, GXLPCSTR szShaderDesc) override;
+  //GXHRESULT   CreateShaderStub        (GShaderStub** ppShaderStub) override;
 
   virtual GXHRESULT   CreateVertexDeclaration (GVertexDeclaration** ppVertexDecl, LPCGXVERTEXELEMENT lpVertexElement) override;
   //////////////////////////////////////////////////////////////////////////
   // 高级函数
 
   // GXCanvas
-  virtual GXCanvas*   LockCanvas              (GXRenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags) override;
+  virtual GXCanvas*   LockCanvas              (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags) override;
 
-  virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
-  //virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
-  virtual GXHRESULT   CreateEffect            (GXEffect** ppEffect, GShader* pShader) override;
-  virtual GXHRESULT   CreateMaterial          (GXMaterialInst** ppMtlInst, GShader* pShader) override;
-  virtual GXHRESULT   CreateMaterialFromFile  (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
+  virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
+  //virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
+  virtual GXHRESULT   CreateEffect            (Effect** ppEffect, Shader* pShader) override;
+  virtual GXHRESULT   CreateMaterial          (Material** ppMtlInst, Shader* pShader) override;
+  virtual GXHRESULT   CreateMaterialFromFile  (Material** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
   //virtual GXHRESULT   CreateMaterialFromFile  (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
 
   virtual GXHRESULT   CreateRasterizerState   (GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc) override;
@@ -113,19 +113,19 @@
   //virtual GXImage*    CreateImageFromFile     (GXLPCWSTR lpwszFilename) override;
   //virtual GXImage*    CreateImageFromTexture  (GTexture* pTexture) override;
 
-  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override;
+  GXHRESULT CreateRenderTarget(RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override;
 
-  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
+  GXHRESULT CreateRenderTarget(RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
   {
     return CreateRenderTarget(ppRenderTarget, szName, static_cast<GXINT>(nWidth), nHeight, eColorFormat, eDepthStencilFormat);
   }
 
-  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
+  GXHRESULT CreateRenderTarget(RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
   {
     return CreateRenderTarget(ppRenderTarget, szName, nWidth, static_cast<GXINT>(nHeight), eColorFormat, eDepthStencilFormat);
   }
   
-  GXHRESULT CreateRenderTarget(GXRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
+  GXHRESULT CreateRenderTarget(RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override
   {
     return CreateRenderTarget(ppRenderTarget, szName, static_cast<GXINT>(nWidth), static_cast<GXINT>(nHeight), eColorFormat, eDepthStencilFormat);
   }
@@ -139,7 +139,7 @@
 
   //virtual GXImage*    GetBackBufferImg        () override;
   //virtual GTexture*   GetBackBufferTex        () override;
-  GXHRESULT   GetBackBuffer           (GXRenderTarget** ppTarget) override;
+  GXHRESULT   GetBackBuffer           (RenderTarget** ppTarget) override;
   GTexture*   GetDeviceOriginTex      () override;
   GXBOOL      ScrollTexture           (const SCROLLTEXTUREDESC* lpScrollTexDesc) override;
 
@@ -162,8 +162,8 @@ private:
   GXBOOL    InitCommon                ();
   GXBOOL    ReleaseCommon             ();
   void      IntAttachComposerSdrDesc  (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc);
-  GXHRESULT IntCreateSdrFromElement   (GShader** ppShader, MOSHADER_ELEMENT_SOURCE* pSdrElementSrc);
-  GXHRESULT IntCreateSdrPltDescW      (GShader** ppShader, GXLPCWSTR szShaderDesc, GXLPCSTR szPlatformSect, MTLFILEPARAMDESC* pMtlParam);
+  GXHRESULT IntCreateSdrFromElement   (Shader** ppShader, MOSHADER_ELEMENT_SOURCE* pSdrElementSrc);
+  GXHRESULT IntCreateSdrPltDescW      (Shader** ppShader, GXLPCWSTR szShaderDesc, GXLPCSTR szPlatformSect, MTLFILEPARAMDESC* pMtlParam);
   GXLPCWSTR IntToAbsPathW             (clStringW& strOutput, GXLPCWSTR szPath); // 当 szPath 已经是绝对路径时 strOutput 不会被设置
   GXBOOL    SetSafeClip               (const GXREGN* pRegn);
   GXCanvas* AllocCanvas               ();
@@ -175,7 +175,7 @@ private:
 
   inline GXLPCSTR   InlGetPlatformStringA () const;
   inline GXBOOL     InlSetTexture         (GTexBaseImpl* pTexture, GXUINT uStage);
-  inline GXBOOL     InlSetRenderTarget    (GXRenderTarget* pTarget, GXUINT uRenderTargetIndex);
+  inline GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTargetIndex);
   inline GXBOOL     InlSetDepthStencil    (GTexture* pTexture);
 
   inline GXHRESULT  InlSetCanvas            (GXCanvasCore* pCanvasCore);
@@ -186,9 +186,9 @@ private:
   inline GXBOOL     InlSetBlendState        (GBlendStateImpl* pBlendState);
   inline GXBOOL     InlSetDepthStencilState (GDepthStencilStateImpl* pDepthStencilState);
   inline GXBOOL     InlSetSamplerState      (GSamplerStateImpl* pSamplerState);
-  inline GXBOOL     InlSetShader            (GShader* pShader);
-  inline GXBOOL     InlSetEffect            (GXEffectImpl* pEffect);
-  inline GXHRESULT  InlSetVertexDecl        (GVertexDeclImpl* pVertexDecl);
+  inline GXBOOL     InlSetShader            (Shader* pShader);
+  inline GXBOOL     InlSetEffect            (EffectImpl* pEffect);
+  inline GXHRESULT  InlSetVertexDecl        (VertexDeclImpl* pVertexDecl);
   inline GXBOOL     IsActiveCanvas          (GXCanvasCore* pCanvasCore);
   //inline GXBOOL     IsActiveRenderState     (GRenderStateImpl* pRenderState);
   static GXVOID     IncreaseStencil         (GXDWORD* pdwStencil);
@@ -212,18 +212,18 @@ private:  // 状态对象
   GDepthStencilStateImpl* m_pDefaultDepthStencilState;
   GSamplerStateImpl*      m_pDefaultSamplerState;
 
-  GPrimitive*             m_pCurPrimitive;
+  Primitive*              m_pCurPrimitive;
   GTexBaseImpl*           m_pCurTexture[MAX_TEXTURE_STAGE];
-  GXRenderTargetImpl*     m_pCurRenderTarget;
+  RenderTargetImpl*       m_pCurRenderTarget;
   //GTextureImpl*           m_pCurDepthStencil;
-  GShader*                m_pCurShader;
+  Shader*                 m_pCurShader;
   GXCanvasCore*           m_pCurCanvasCore;
   //GRenderStateImpl*       m_pCurRenderState;
   GRasterizerStateImpl*   m_pCurRasterizerState;
   GBlendStateImpl*        m_pCurBlendState;
   GDepthStencilStateImpl* m_pCurDepthStencilState;
   GSamplerStateImpl*      m_pCurSamplerState;
-  GVertexDeclImpl*        m_pCurVertexDecl;
+  VertexDeclImpl*        m_pCurVertexDecl;
 
   GTexture*               m_pWhiteTexture8x8;
 

@@ -643,7 +643,7 @@ GXBOOL GXDLLAPI gxTextOutW(
 {
   GXSIZE size;
   LPGXGDIDC lpDC = GXGDI_DC_PTR(hdc);
-  GXCanvas* pCanvas = lpDC->pCanvas;
+  GrapX::GXCanvas* pCanvas = lpDC->pCanvas;
 
   if(lpDC->flag & GXDCFLAG_OPAQUEBKMODE)
   {

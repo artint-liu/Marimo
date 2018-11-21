@@ -6,12 +6,12 @@ class IHLSLIncludeT : public _ID3DIncludeT
 {
 private:
   typedef clhash_map<clStringA, clBuffer*> IncDict;
-  GXGraphics* m_pGraphics;
+  Graphics* m_pGraphics;
   clStringA   m_strBaseDir;
   IncDict     m_IncFiles;
 
 public:
-  IHLSLIncludeT(GXGraphics* pGraphics, GXLPCSTR szBaseDir)
+  IHLSLIncludeT(Graphics* pGraphics, GXLPCSTR szBaseDir)
     : m_pGraphics(pGraphics)
     , m_strBaseDir(szBaseDir != NULL ? szBaseDir : "")
   {
@@ -98,6 +98,7 @@ typedef IHLSLIncludeT<ID3DXInclude, D3DXINCLUDE_TYPE> IHLSLInclude;
 typedef IHLSLIncludeT<ID3D10Include, D3D_INCLUDE_TYPE> IHLSLInclude;
 #endif // #ifdef _WIN32_DIRECT3D_9_H_
 
+#ifdef REFACTOR_GRAPX_SHADER
 GXHRESULT GShaderImpl::LoadFromFile(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
 {
   GXDefinitionArray aMacros;
@@ -173,3 +174,4 @@ FUNC_RET:
 
   return hr;
 }
+#endif // #ifdef REFACTOR_GRAPX_SHADER

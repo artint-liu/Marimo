@@ -1,6 +1,6 @@
 ﻿
 //////////////////////////////////////////////////////////////////////////
-GXCanvasImpl::GXCanvasImpl(GXGraphicsImpl* pGraphics, GXBOOL bStatic)
+GXCanvasImpl::GXCanvasImpl(GraphicsImpl* pGraphics, GXBOOL bStatic)
   : GXCanvasCoreImpl    (pGraphics, 2, RESTYPE_CANVAS2D)
   , m_bStatic           (bStatic)
   , m_pTargetImage      (NULL)
@@ -452,7 +452,7 @@ GXBOOL GXCanvasImpl::CommitState()
     m_pGraphics->InlSetSamplerState(m_pSamplerState);
     m_pGraphics->InlSetDepthStencil(NULL);
 
-    m_pGraphics->InlSetEffect((GXEffectImpl*)m_pEffectImpl);
+    m_pGraphics->InlSetEffect((EffectImpl*)m_pEffectImpl);
     UpdateStencil(m_pClipRegion);
 
     gxRectToRegn(&regn, &m_rcClip);
@@ -486,7 +486,7 @@ GXBOOL GXCanvasImpl::CommitState()
 }
 
 
-GXGraphics* GXCanvasImpl::GetGraphicsUnsafe() const
+Graphics* GXCanvasImpl::GetGraphicsUnsafe() const
 {
   return m_pGraphics;
 }
@@ -717,10 +717,10 @@ GXBOOL GXCanvasImpl::Flush()
     case CF_Effect:
       {
         TRACE_BATCH("CF_Effect\n");
-        if(m_pEffectImpl == (GXEffectImpl*)m_aBatch[i].comm.lParam)
+        if(m_pEffectImpl == (EffectImpl*)m_aBatch[i].comm.lParam)
           break;
         SAFE_RELEASE(m_pEffectImpl);
-        m_pEffectImpl = (GXEffectImpl*)m_aBatch[i].comm.lParam;
+        m_pEffectImpl = (EffectImpl*)m_aBatch[i].comm.lParam;
         m_pGraphics->InlSetEffect(m_pEffectImpl);
         m_pEffectImpl->CommitUniform(this, -1);
       }

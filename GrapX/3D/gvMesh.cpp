@@ -35,7 +35,7 @@
 using namespace clstd;
 using namespace GrapX;
 
-GVMesh::GVMesh(GXGraphics* pGraphics)
+GVMesh::GVMesh(Graphics* pGraphics)
   : GVNode       (NULL, GXMAKEFOURCC('M','E','S','H'))
   , m_pMtlInst    (NULL)
   , m_pPrimitive  (NULL)
@@ -45,7 +45,7 @@ GVMesh::GVMesh(GXGraphics* pGraphics)
 {
 }
 
-GVMesh::GVMesh(GXGraphics* pGraphics, GXDWORD dwClassCode)
+GVMesh::GVMesh(Graphics* pGraphics, GXDWORD dwClassCode)
   : GVNode       (NULL, dwClassCode)
   , m_pMtlInst(NULL)
   , m_pPrimitive(NULL)
@@ -77,7 +77,7 @@ GXHRESULT GVMesh::AddRef()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXBOOL GVMesh::InitializeAsObjFromFile(GXGraphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform)
+GXBOOL GVMesh::InitializeAsObjFromFile(Graphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform)
 {
   clFile file;
   GXBOOL bval = FALSE;
@@ -94,7 +94,7 @@ GXBOOL GVMesh::InitializeAsObjFromFile(GXGraphics* pGraphics, GXLPCWSTR szFilena
   return bval;
 }
 
-GXBOOL GVMesh::InitializeAsObjFromMemory(GXGraphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform)
+GXBOOL GVMesh::InitializeAsObjFromMemory(Graphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform)
 {
   using namespace ObjMeshUtility;
 
@@ -153,7 +153,7 @@ GXBOOL GVMesh::InitializeAsObjFromMemory(GXGraphics* pGraphics, clBufferBase* pB
   return bval;
 }
 
-GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount)
+GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount)
 {
   GXBOOL bval = FALSE;
   //m_eType       = eType;
@@ -178,7 +178,7 @@ GXBOOL GVMesh::IntCreatePrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GX
   return bval;
 }
 
-GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive)
+GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primitive* pPrimitive)
 {
   m_pPrimitive = pPrimitive;
   if(m_pPrimitive) {
@@ -294,12 +294,12 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
   return FALSE;
 }
 
-GXHRESULT GVMesh::SetMaterialInstDirect(GXMaterialInst* pMtlInst)
+GXHRESULT GVMesh::SetMaterialDirect(GrapX::Material* pMtlInst)
 {
   return InlSetNewObjectT(m_pMtlInst, pMtlInst);
 }
 
-GXHRESULT GVMesh::GetMaterialInst(GXMaterialInst** ppMtlInst)
+GXHRESULT GVMesh::GetMaterial(GrapX::Material** ppMtlInst)
 {
   if(m_pMtlInst != NULL) {
     *ppMtlInst = m_pMtlInst;
@@ -309,7 +309,7 @@ GXHRESULT GVMesh::GetMaterialInst(GXMaterialInst** ppMtlInst)
   return GX_FAIL;
 }
 
-GXHRESULT GVMesh::GetMaterialInstFilenameW(clStringW* pstrFilename)
+GXHRESULT GVMesh::GetMaterialFilename(clStringW* pstrFilename)
 {
   if(m_pMtlInst == NULL) {
     return GX_FAIL;
@@ -317,12 +317,12 @@ GXHRESULT GVMesh::GetMaterialInstFilenameW(clStringW* pstrFilename)
   else if(pstrFilename == NULL) {
     return GX_OK; // 只是探测 m_pMtlInst 是否有效就直接返回
   }
-  return m_pMtlInst->GetFilenameW(pstrFilename);
+  return m_pMtlInst->GetFilename(pstrFilename);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateUserPrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if(pMesh == NULL) {
@@ -339,7 +339,7 @@ GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount
   return GX_FAIL;
 }
 
-GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GPrimitive* pPrimitive, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateUserPrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primitive* pPrimitive, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
@@ -355,7 +355,7 @@ GXHRESULT GVMesh::CreateUserPrimitive(GXGraphics* pGraphics, GXSIZE_T nPrimCount
   return GX_FAIL;
 }
 
-GXBOOL GVMesh::IntCreateMesh(GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent)
+GXBOOL GVMesh::IntCreateMesh(Graphics* pGraphics, const GVMESHDATA* pMeshComponent)
 {
   GXBOOL bval = TRUE;
   // 检查合法性
@@ -416,7 +416,7 @@ GXBOOL GVMesh::IntCreateMesh(GXGraphics* pGraphics, const GVMESHDATA* pMeshCompo
   return FALSE;
 }
 
-GXBOOL GVMesh::IntInitializeAsContainer(GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount)
+GXBOOL GVMesh::IntInitializeAsContainer(Graphics* pGraphics, GVNode** pNodesArray, int nNodeCount)
 {
   SetFlags(GetFlags() | GVNF_CONTAINER);
   for(int i = 0; i < nNodeCount; i++)
@@ -439,7 +439,7 @@ GXBOOL GVMesh::IntInitializeAsContainer(GXGraphics* pGraphics, GVNode** pNodesAr
 //  m_nStartIndex = pSource->m_nStartIndex;
 //}
 
-GXHRESULT GVMesh::CreateMesh(GXGraphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateMesh(Graphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh)
 {
   GXHRESULT hval = GX_OK;
   GVMesh* pMesh = new GVMesh(NULL);
@@ -458,7 +458,7 @@ GXHRESULT GVMesh::CreateMesh(GXGraphics* pGraphics, const GVMESHDATA* pMeshCompo
   return hval;
 }
 
-GXHRESULT GVMesh::CreateContainer(GXGraphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateContainer(Graphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh)
 {
   GXHRESULT hval = GX_OK;
   GVMesh* pMesh = new GVMesh(NULL);
@@ -517,13 +517,13 @@ GXHRESULT GVMesh::Clone( GVNode** ppClonedNode/*, GXBOOL bRecursive*/ )
   return GX_OK;
 }
 
-GXHRESULT GVMesh::LoadObjFromFileA(GXGraphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform /* = NULL */)
+GXHRESULT GVMesh::LoadObjFromFileA(Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform /* = NULL */)
 {
   clStringW strFile = szFilename;
   return LoadObjFromFileW(pGraphics, strFile, ppMesh, pTransform);
 }
 
-GXHRESULT GVMesh::LoadObjFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform /* = NULL */)
+GXHRESULT GVMesh::LoadObjFromFileW(Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform /* = NULL */)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if(pMesh == NULL) {
@@ -539,13 +539,13 @@ GXHRESULT GVMesh::LoadObjFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename, 
   return GX_FAIL;
 }
 
-GXHRESULT GVMesh::LoadMeshFromFileA(GXGraphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh)
+GXHRESULT GVMesh::LoadMeshFromFileA(Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh)
 {
   clStringW strFilename = szFilename;
   return LoadMeshFromFileW(pGraphics, strFilename, ppMesh);
 }
 
-GXHRESULT GVMesh::LoadMeshFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh)
+GXHRESULT GVMesh::LoadMeshFromFileW(Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
@@ -560,7 +560,7 @@ GXHRESULT GVMesh::LoadMeshFromFileW(GXGraphics* pGraphics, GXLPCWSTR szFilename,
   return GX_FAIL;
 }
 
-GXHRESULT GVMesh::LoadMeshFromRepository(GXGraphics* pGraphics, SmartRepository* pStorage, GVMesh** ppMesh)
+GXHRESULT GVMesh::LoadMeshFromRepository(Graphics* pGraphics, SmartRepository* pStorage, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
@@ -582,7 +582,7 @@ GXHRESULT GVMesh::SaveFile(SmartRepository* pStorage)
   if(m_pMtlInst != NULL)
   {
     clStringW strMtlFile;
-    m_pMtlInst->GetFilenameW(&strMtlFile);
+    m_pMtlInst->GetFilename(&strMtlFile);
     if(strMtlFile.IsNotEmpty()) {
       m_pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
       pStorage->WriteStringW(NULL, MESH_MTLINST, strMtlFile);
@@ -601,7 +601,7 @@ GXHRESULT GVMesh::SaveFile(SmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVMesh::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
+GXHRESULT GVMesh::LoadFile(Graphics* pGraphics, SmartRepository* pStorage)
 {
   Clear();
   clStringA strName;
@@ -646,7 +646,7 @@ GXHRESULT GVMesh::LoadFile(GXGraphics* pGraphics, SmartRepository* pStorage)
 
 
     if(bval) {
-      SetMaterialInstFromFileW(pGraphics, strMtlName, NODEMTL_CLONEINST);
+      SetMaterialFromFile(pGraphics, strMtlName, NODEMTL_CLONEINST);
       SetName(strName);
       SetTransform(matLocal);
     }

@@ -175,7 +175,7 @@ int GXDLLAPI gxDrawTextW(
   //  lpDC->pCanvas->DrawGlowText(
   //    pFont->lpFont, lpString, nCount, lpRect, uFmt & (~GXDT_TABSTOP), /*((LPGXGDIDC)hDC)->crText*/0xffffffff, 7);// TODO: 临时写成白色
   //}
-  GXCanvas* pCanvas = lpDC->pCanvas;
+  GrapX::GXCanvas* pCanvas = lpDC->pCanvas;
   //if(lpDC->flag & GXDCFLAG_OPAQUEBKMODE)
   //{
   //  GXSIZE size;

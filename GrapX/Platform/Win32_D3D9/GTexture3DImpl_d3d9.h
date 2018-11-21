@@ -4,7 +4,7 @@
 
 namespace D3D9
 {
-  class GXGraphicsImpl;
+  class GraphicsImpl;
   //////////////////////////////////////////////////////////////////////////
   class GTexture3DImpl : public GTexBaseImplT<GTexture3D>
   {
@@ -38,12 +38,12 @@ namespace D3D9
     virtual GXBOOL       CopyBox           (GTexture3D* pSrc, const LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z) override;
     virtual GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, const LPBOX lpBox, GXDWORD Flags) override;
     virtual GXBOOL       UnlockBox         () override;
-    virtual GXGraphics*  GetGraphicsUnsafe () override;      // 不会增加引用计数
+    virtual Graphics*  GetGraphicsUnsafe () override;      // 不会增加引用计数
 
     virtual GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat) override;
 
     GTexture3DImpl(GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, 
-      GXDWORD ResUsage, GXGraphics* pGraphics);
+      GXDWORD ResUsage, Graphics* pGraphics);
 
     virtual ~GTexture3DImpl();
 
@@ -59,7 +59,7 @@ namespace D3D9
 
   public:
     GTexture3DFromFile(GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, 
-      GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXGraphics* pGraphics);
+      GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, Graphics* pGraphics);
     virtual ~GTexture3DFromFile();
 
     HRESULT Create(LPGXIMAGEINFOX pSrcInfo);

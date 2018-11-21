@@ -15,11 +15,11 @@
 
 namespace Marimo {
   class DataPool;
-}
+  struct DATAPOOL_MANIFEST;
+} // namespace Marimo
 typedef Marimo::DataPool MODataPool;
 
-class GXGraphics;
-class GTextureBase;
+//class GXGraphics;
 namespace clstd
 {
   class SmartStockA;
@@ -30,57 +30,61 @@ struct MOSHADER_ELEMENT_SOURCE;
 struct MTLFILEPARAMDESC;
 struct STANDARDMTLUNIFORMTABLE;
 
-class GVertexDeclaration : public GResource
-{
-public:
-  GVertexDeclaration() : GResource(0, RESTYPE_VERTEX_DECLARATION) {}
-
-  GXSTDINTERFACE(GXHRESULT          AddRef            ());
-  GXSTDINTERFACE(GXHRESULT          Release           ());
-  GXSTDINTERFACE(GXUINT             GetStride         ());  // 顶点格式所需要的最小长度
-  GXSTDINTERFACE(GXINT              GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc = NULL));
-  GXSTDINTERFACE(GXLPCVERTEXELEMENT GetVertexElement  ());
-  // TODO: 将来实现 GXSTDINTERFACE(GXINT        GetOffset         (GXIN GXDeclUsage Usage, GXIN GXUINT UsageIndex, GXOUT LPGXVERTEXELEMENT lpDesc = NULL));
-  // TODO: 将来实现 GXSTDINTERFACE(GXUINT       GetElementCount   ());
-};
-
-class GUniformBinderDecl : public GResource
-{
-public:
-  GUniformBinderDecl() : GResource(0, RESTYPE_UNKNOWN) {}
-
-  GXSTDINTERFACE(GXHRESULT    AddRef            ());
-  GXSTDINTERFACE(GXHRESULT    Release           ());
-};
-
-class GShader : public GResource
-{
-public:
-  typedef clvector<GXDefinition>      ParamArray;
-public:
-  GShader() : GResource(0, RESTYPE_SHADER) { }
-#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  GXSTDINTERFACE(GXHRESULT    AddRef            ());
-  GXSTDINTERFACE(GXHRESULT    Release           ());
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-
-  GXSTDINTERFACE(GXHRESULT    LoadFromFile      (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc));
-  GXSTDINTERFACE(GXHRESULT    LoadFromMemory    (const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf));
-  //GXSTDINTERFACE(GXDWORD      GetFlags          () const);
-  GXSTDINTERFACE(GXINT        GetCacheSize      () const);
-  GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe () const);
-  GXSTDINTERFACE(GXLPCWSTR    GetProfileDesc    () const);  // 取配置文件(包含各个平台Shader文件)的名字,如果是从内存加载,则为NULL
-public:
-  static GXDLL GXVOID     ResolveProfileDescW (GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros);
-  static GXDLL GXHRESULT  Load                (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam);
-  static GXDLL GXBOOL     LoadElementSource   (clStockA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool);
-  static GXDLL GXBOOL     ComposeSource       (MOSHADER_ELEMENT_SOURCE* pElement, GXDWORD dwPlatfomCode, GXOUT MOSHADERBUFFERS* pSources, GXOUT GXDefinitionArray* aMacros);
-  static GXDLL GXBOOL     LoadUniformSet      (clStockA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms);
-  static GXDLL GXBOOL     LoadStateSet        (clStockA* pSmart, GXLPCSTR szSection, ParamArray* aStates);
-};
-
 namespace GrapX
 {
+  class GTextureBase;
+  class GVertexDeclaration : public GResource
+  {
+  public:
+    GVertexDeclaration() : GResource(0, RESTYPE_VERTEX_DECLARATION) {}
+
+    GXSTDINTERFACE(GXHRESULT          AddRef            ());
+    GXSTDINTERFACE(GXHRESULT          Release           ());
+    GXSTDINTERFACE(GXUINT             GetStride         ());  // 顶点格式所需要的最小长度
+    GXSTDINTERFACE(GXINT              GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc = NULL));
+    GXSTDINTERFACE(GXLPCVERTEXELEMENT GetVertexElement  ());
+    // TODO: 将来实现 GXSTDINTERFACE(GXINT        GetOffset         (GXIN GXDeclUsage Usage, GXIN GXUINT UsageIndex, GXOUT LPGXVERTEXELEMENT lpDesc = NULL));
+    // TODO: 将来实现 GXSTDINTERFACE(GXUINT       GetElementCount   ());
+  };
+
+  class GUniformBinderDecl : public GResource
+  {
+  public:
+    GUniformBinderDecl() : GResource(0, RESTYPE_UNKNOWN) {}
+
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+  };
+
+#ifdef REFACTOR_GRAPX_SHADER
+  class GShader : public GResource
+  {
+  public:
+    typedef clvector<GXDefinition>      ParamArray;
+  public:
+    GShader() : GResource(0, RESTYPE_SHADER) { }
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+    GXSTDINTERFACE(GXHRESULT    LoadFromFile      (MOSHADER_ELEMENT_SOURCE* pSdrElementSrc));
+    GXSTDINTERFACE(GXHRESULT    LoadFromMemory    (const clBufferBase* pVertexBuf, const clBufferBase* pPixelBuf));
+    //GXSTDINTERFACE(GXDWORD      GetFlags          () const);
+    GXSTDINTERFACE(GXINT        GetCacheSize      () const);
+    GXSTDINTERFACE(GrapX::Graphics*  GetGraphicsUnsafe () const);
+    GXSTDINTERFACE(GXLPCWSTR    GetProfileDesc    () const);  // 取配置文件(包含各个平台Shader文件)的名字,如果是从内存加载,则为NULL
+  public:
+    static GXDLL GXVOID     ResolveProfileDescW (GXLPCWSTR szProfileDesc, clStringW* pstrFilename, clStringA* pstrMacros);
+    static GXDLL GXHRESULT  Load                (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADER_ELEMENT_SOURCE* pElement, GXOUT MTLFILEPARAMDESC* pMtlParam);
+    static GXDLL GXBOOL     LoadElementSource   (clStockA* pSmart, GXLPCSTR szSection, MOSHADER_ELEMENT_SOURCE* pElement, clStringArrayA* aDataPool);
+    static GXDLL GXBOOL     ComposeSource       (MOSHADER_ELEMENT_SOURCE* pElement, GXDWORD dwPlatfomCode, GXOUT MOSHADERBUFFERS* pSources, GXOUT GXDefinitionArray* aMacros);
+    static GXDLL GXBOOL     LoadUniformSet      (clStockA* pSmart, GXLPCSTR szSection, ParamArray* aUniforms);
+    static GXDLL GXBOOL     LoadStateSet        (clStockA* pSmart, GXLPCSTR szSection, ParamArray* aStates);
+  };
+
+#endif // #ifdef REFACTOR_GRAPX_SHADER
+
   class Shader : public GResource
   {
   public:
@@ -90,9 +94,55 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT    Release           ());
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe () const);
+    GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe       () const);
+    GXSTDINTERFACE(void         GetDataPoolDeclaration  (Marimo::DATAPOOL_MANIFEST* pManifest) const);
   };
+
+  class Effect : public GResource
+  {
+  public:
+    Effect() : GResource(0, RESTYPE_SHADER_EFFECT) {}
+
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+    GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
+
+    GXSTDINTERFACE(void BindTextureSlot(GXLPCSTR szTextureName, int nSlot));
+  };
+
+  class Material : public GResource
+  {
+  public:
+    enum ParamType // 旧兼容接口
+    {
+      PT_UNIFORMS,
+      PT_RENDERSTATE,
+    };
+
+  public:
+    Material() : GResource(0, RESTYPE_SHADER_MATERIAL) {}
+
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+    GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
+
+    GXSTDINTERFACE(GXHRESULT  GetFilename         (clStringW* pstrFilename));
+    GXSTDINTERFACE(int        GetRenderQueue      () const);
+
+    // 旧兼容接口
+    GXSTDINTERFACE(GXHRESULT  SetParameters       (ParamType eType, GXDEFINITION* pParameters, int nCount = 0));  // 更新列表中的参数值, 如果nCount为0, 则列表的结尾必须以空字符串或者NULL结尾
+    GXSTDINTERFACE(GXHRESULT  BindDataByName              (GXLPCSTR szPoolName, GXLPCSTR szStruct));
+  };
+
 } // namespace GrapX
+
+#ifdef REFACTOR_GRAPX_SHADER
 
 class GShaderStub : public GResource
 {
@@ -173,15 +223,15 @@ public:
 
   GXSTDINTERFACE(GXBOOL     IsSequential                ()); // 废掉
   GXSTDINTERFACE(int        GetRenderQueue              () const);
-  GXSTDINTERFACE(GXGraphics*GetGraphicsUnsafe           ());
+    GXSTDINTERFACE(GrapX::Graphics*GetGraphicsUnsafe           ());
   GXSTDINTERFACE(GXHRESULT  GetFilenameW                (clStringW* pstrFilename));
   GXSTDINTERFACE(GXHRESULT  Clone                       (GXMaterialInst** ppCuplicateMtlInst));
 
   GXSTDINTERFACE(GXHRESULT  SaveFileW                   (GXLPCWSTR szFilename));
   GXSTDINTERFACE(GXHRESULT  SaveRepository              (clSmartRepository* pStorage));
 
-  GXSTDINTERFACE(GXHRESULT  LoadFileW                   (GXGraphics* pGraphics, GXLPCWSTR szFilename));
-  GXSTDINTERFACE(GXHRESULT  LoadRepository              (GXGraphics* pGraphics, clSmartRepository* pStorage));
+    GXSTDINTERFACE(GXHRESULT  LoadFileW                   (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename));
+    GXSTDINTERFACE(GXHRESULT  LoadRepository              (GrapX::Graphics* pGraphics, clSmartRepository* pStorage));
 
   // 初始化接口
   // 这些函数建议都不要频繁调用, 可能会严重影响性能.
@@ -201,9 +251,14 @@ public:
   GXSTDINTERFACE(GXHRESULT  SetTextureByIndexFromFileW  (GXUINT nIndex, GXLPCWSTR szFilename));
   // -- 初始化接口
 };
+#endif // #ifdef REFACTOR_GRAPX_SHADER
 
 //////////////////////////////////////////////////////////////////////////
+#ifdef REFACTOR_GRAPX_SHADER
 typedef GXMaterialInst* GXLPMATERIALINST;
+#endif // #ifdef REFACTOR_GRAPX_SHADER
+
+//typedef GrapX::Material GXMaterialInst;
 
 // 根据绑定声明生成声明源代码
 GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpDataLayout, GXDWORD dwPlatfomCode, clBuffer** ppBuffer);

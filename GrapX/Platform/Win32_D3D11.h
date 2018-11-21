@@ -22,13 +22,13 @@ private:
 public:
   IGXPlatform_Win32D3D11();
 
-  virtual GXHRESULT Initialize    (GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);
-  virtual GXHRESULT Finalize      (GXINOUT GXGraphics** ppGraphics);
+  virtual GXHRESULT Initialize    (GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics);
+  virtual GXHRESULT Finalize      (GXINOUT GrapX::Graphics** ppGraphics);
   virtual GXVOID    GetPlatformID (GXPlaformIdentity* pIdentity);
   virtual GXLPCWSTR GetRootDir    ();
 };
 
-IGXPlatform_Win32D3D11* AppCreateD3D11Platform(GXApp* pApp, GXAPP_DESC* pDesc, GXGraphics** ppGraphics);
+IGXPlatform_Win32D3D11* AppCreateD3D11Platform(GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics);
 
 namespace GrapXToDX11
 {
