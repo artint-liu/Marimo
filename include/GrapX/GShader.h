@@ -15,6 +15,7 @@
 
 namespace Marimo {
   class DataPool;
+  class DataPoolVariable;
   struct DATAPOOL_MANIFEST;
 } // namespace Marimo
 typedef Marimo::DataPool MODataPool;
@@ -109,6 +110,7 @@ namespace GrapX
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
+    GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
 
     GXSTDINTERFACE(void BindTextureSlot(GXLPCSTR szTextureName, int nSlot));
   };

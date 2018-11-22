@@ -583,6 +583,11 @@ namespace GrapX
           rDest.back().Type = sTypeDef.Name; // 换用新名字
         }
       }
+
+      size_t GetBufferCount() const
+      {
+        return (aGlobal.empty() ? 0 : 1) + aConstantBuffers.size();
+      }
     };
 
 
@@ -615,16 +620,19 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL MergeDataPoolMapped(DATAPOOL_MAPPER& dest, const DATAPOOL_MAPPER& mapper_a, const DATAPOOL_MAPPER& mapper_b)
+    GXBOOL MergeDataPoolMapped(DATAPOOL_MAPPER& dest, const DATAPOOL_MAPPER& mapper_a, clvector<size_t>& aIndexTabA, const DATAPOOL_MAPPER& mapper_b, clvector<size_t>& aIndexTabB)
     {
       dest.aGlobal.reserve(clMax(mapper_a.aGlobal.size(), mapper_b.aGlobal.size()));
       dest.aConstantBuffers.reserve(mapper_a.aConstantBuffers.size() + mapper_b.aConstantBuffers.size());
       dest.aCBMembers.reserve(mapper_a.aCBMembers.size() + mapper_b.aCBMembers.size());
       dest.aTypes.reserve(mapper_a.aTypes.size() + mapper_b.aTypes.size());
       dest.aMembers.reserve(mapper_a.aMembers.size() + mapper_b.aMembers.size());
+      aIndexTabA.reserve(mapper_a.GetBufferCount());
+      aIndexTabB.reserve(mapper_b.GetBufferCount());
 
       const DataPoolDeclaration_T& a = mapper_a.aGlobal;
       const DataPoolDeclaration_T& b = mapper_b.aGlobal;
+      size_t nDestIndex = 0;
 
       // $Globals 必须完全一致
       if(_CL_NOT_(mapper_a.aGlobal.empty()) && _CL_NOT_(mapper_b.aGlobal.empty()))
@@ -637,14 +645,21 @@ namespace GrapX
           return FALSE;
         }
         dest.Copy(dest.aGlobal, &mapper_a.aGlobal.front(), mapper_a.aGlobal.size(), &mapper_a);
+        aIndexTabA.push_back(nDestIndex);
+        aIndexTabB.push_back(nDestIndex);
+        nDestIndex++;
       }
       else if(_CL_NOT_(mapper_a.aGlobal.empty()))
       {
         dest.Copy(dest.aGlobal, &mapper_a.aGlobal.front(), mapper_a.aGlobal.size(), &mapper_a);
+        aIndexTabA.push_back(nDestIndex);
+        nDestIndex++;
       }
       else if(_CL_NOT_(mapper_b.aGlobal.empty()))
       {
         dest.Copy(dest.aGlobal, &mapper_b.aGlobal.front(), mapper_b.aGlobal.size(), &mapper_b);
+        aIndexTabB.push_back(nDestIndex);
+        nDestIndex++;
       }
 
       typedef clmap<clStringA, int> CBNameDict;
@@ -679,20 +694,30 @@ namespace GrapX
           }
 
           dest.Copy(dest.aCBMembers, pCBListA, nCBCountA, &mapper_a);
+          aIndexTabA.push_back(nDestIndex);
+          aIndexTabB.push_back(nDestIndex);
+          nDestIndex++;
         }
         else if(itFindA != sNameDictA.end())
         {
           size_t nCBCountA;
           const Marimo::DATAPOOL_DECLARATION* pCBListA = mapper_a.GetConstantBufferListByIndex(itFindA->second, &nCBCountA);
           dest.Copy(dest.aCBMembers, pCBListA, nCBCountA, &mapper_a);
+          aIndexTabA.push_back(nDestIndex);
+          nDestIndex++;
         }
         else if(itFindB != sNameDictB.end())
         {
           size_t nCBCountB;
           const Marimo::DATAPOOL_DECLARATION* pCBListB = mapper_b.GetConstantBufferListByIndex(itFindB->second, &nCBCountB);
           dest.Copy(dest.aCBMembers, pCBListB, nCBCountB, &mapper_b);
+          aIndexTabB.push_back(nDestIndex);
+          nDestIndex++;
         }
       }
+
+      ASSERT(aIndexTabA.size() == mapper_a.GetBufferCount());
+      ASSERT(aIndexTabB.size() == mapper_b.GetBufferCount());
       return TRUE;
     }
     //////////////////////////////////////////////////////////////////////////
@@ -733,8 +758,17 @@ namespace GrapX
 
     ShaderImpl::~ShaderImpl()
     {
+      SAFE_RELEASE(m_pD3DVertexInterCode);
       SAFE_RELEASE(m_pD3D11VertexShader);
       SAFE_RELEASE(m_pD3D11PixelShader);
+
+      if(_CL_NOT_(m_arrayCB.empty())){
+        ID3D11Buffer** ppD3D11Buffer = &m_arrayCB.front();
+        for(; ppD3D11Buffer != m_pVertexCB; ppD3D11Buffer++)
+        {
+          SAFE_RELEASE(*ppD3D11Buffer);
+        }
+      }
     }
 
     GXBOOL ShaderImpl::InitShader(GXLPCWSTR szResourceDir, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount)
@@ -768,7 +802,9 @@ namespace GrapX
           TRACE("[Vertex Shader]\n");
           Reflect(decl_mapper_vs, InterCode.pReflection);
 
-          m_VertexBuf.Append(InterCode.pCode->GetBufferPointer(), InterCode.pCode->GetBufferSize());
+          //m_VertexBuf.Append(InterCode.pCode->GetBufferPointer(), InterCode.pCode->GetBufferSize());
+          m_pD3DVertexInterCode = InterCode.pCode;
+          m_pD3DVertexInterCode->AddRef();
         }
         else if(InterCode.type == TargetType::Pixel)
         {
@@ -790,8 +826,12 @@ namespace GrapX
       }
 
       DATAPOOL_MAPPER decl_mapper;
-      if((bval = MergeDataPoolMapped(decl_mapper, decl_mapper_ps, decl_mapper_vs)))
+      clvector<size_t> aIndexTabA, aIndexTabB;
+      if((bval = MergeDataPoolMapped(decl_mapper, decl_mapper_vs, aIndexTabA, decl_mapper_ps, aIndexTabB)))
       {
+        DATAPOOL_MAPPER arrayMapper[2] = {decl_mapper_vs, decl_mapper_ps};
+        clvector<size_t> arrayIndexTab[2] = {aIndexTabA, aIndexTabB};
+        BuildIndexedCBTable(decl_mapper, arrayMapper, arrayIndexTab);
         bval = BuildDataPoolDecl(decl_mapper);
       }
       
@@ -802,7 +842,9 @@ namespace GrapX
       }
       else
       {
+#ifdef _DEBUG
         DbgCheck(aCodes);
+#endif
       }
 
       //SAFE_RELEASE(InterCode.pReflection);
@@ -1056,7 +1098,93 @@ namespace GrapX
 
     GXBOOL ShaderImpl::Activate()
     {
-      CLBREAK;
+      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      pImmediateContext->VSSetShader(m_pD3D11VertexShader, NULL, 0);
+      pImmediateContext->PSSetShader(m_pD3D11PixelShader, NULL, 0);
+      return TRUE;
+    }
+
+    GXBOOL ShaderImpl::BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab)
+    {
+      const size_t nCombine = combine.GetBufferCount();
+      const size_t nMapper = pMapper[0].GetBufferCount() + pMapper[1].GetBufferCount();
+      m_arrayCB.reserve(nCombine + nMapper);
+      m_arrayCB.assign(nCombine, NULL);
+      for(int i = 0; i < 2; i++)
+      {
+        //m_arrayCB.insert(m_arrayCB.end(), pIndexTab[i].begin(), pIndexTab[i].end());
+        //for(size_t n = 0; n < pIndexTab[i].size(); n++)
+        std::for_each(pIndexTab[i].begin(), pIndexTab[i].end(), [this](size_t n)
+        {
+          m_arrayCB.push_back(reinterpret_cast<ID3D11Buffer*>(n));
+        });
+      }
+      m_pVertexCB = &m_arrayCB[nCombine];
+      m_pPixelCB  = &m_arrayCB[nCombine + pMapper[0].GetBufferCount()];
+      ASSERT(m_arrayCB.size() == nCombine + nMapper);
+      return TRUE;
+    }
+
+    GXBOOL ShaderImpl::BuildCBTable(Marimo::DataPool* pDataPool)
+    {
+      if(m_arrayCB.front()) {
+        return FALSE;
+      }
+
+      Marimo::DataPoolUtility::iterator iter_var = pDataPool->begin();
+      Marimo::DataPoolUtility::iterator iter_var_end = pDataPool->end();
+      Marimo::DataPoolVariable var;
+      size_t nCB = 0;
+
+      // $Global D3D11 CB
+      for(; iter_var != iter_var_end; ++iter_var) {
+        if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
+          iter_var.ToVariable(var);
+          if(var.GetOffset() > 0) {
+            m_arrayCB[nCB++] = D3D11CreateBuffer(var.GetOffset());
+            break;
+          }
+        }
+      }
+
+      if(iter_var == iter_var_end)
+      {
+        m_arrayCB[nCB++] = D3D11CreateBuffer(pDataPool->GetRootSize());
+      }
+      else
+      {
+        // Named D3D11 CB
+        for(; iter_var != iter_var_end; ++iter_var) {
+          if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
+            iter_var.ToVariable(var);
+            m_arrayCB[nCB++] = D3D11CreateBuffer(var.GetSize());
+          }
+          else {
+            break;
+          }
+        }
+      }
+
+      ASSERT((m_pVertexCB - &m_arrayCB.front()) == nCB); // 检查结尾准确性
+      for(size_t i = nCB; i < m_arrayCB.size(); i++)
+      {
+        // 索引转成内容
+        ASSERT(reinterpret_cast<size_t>(m_arrayCB[i]) < nCB);
+        m_arrayCB[i] = m_arrayCB[reinterpret_cast<size_t>(m_arrayCB[i])];
+      }
+
+      return TRUE;
+    }
+
+    GXBOOL ShaderImpl::CommitConstantBuffer(Marimo::DataPool* pDataPool)
+    {
+      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+
+      // FIXME: 假定有$Globals
+      pImmediateContext->UpdateSubresource(m_arrayCB.front(), 0, NULL, pDataPool->GetRootPtr(), 0, 0);
+
+      pImmediateContext->VSSetConstantBuffers(0, m_pPixelCB - m_pVertexCB, m_pVertexCB);
+      pImmediateContext->PSSetConstantBuffers(0, &m_arrayCB.back() - m_pPixelCB + 1, m_pPixelCB);
       return FALSE;
     }
 
@@ -1143,11 +1271,15 @@ namespace GrapX
       for(int n = 0; n < 2; n++)
       {
         DataPoolTypeDefinition_T& rType = (n == 0) ? mapper.aTypes : mapper.aConstantBuffers;
+        static Marimo::DataPoolPack s_aPacks[] = {
+          Marimo::DataPoolPack::NotCross16BoundaryShort,  // 这里与D3D11文档写的不一样
+          Marimo::DataPoolPack::NotCross16Boundary };
+
         for(size_t i = 0; i < rType.size(); i++)
         {
           rType[i].Name = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(rType[i].Name));
           rType[i].as.Struct = pMemberBase + (size_t)rType[i].as.Struct;
-          rType[i].MemberPack = Marimo::DataPoolPack::NotCross16BoundaryShort; // 这里与D3D11文档写的不一样
+          rType[i].MemberPack = s_aPacks[n];
           // 文档上写的是结构体是16字节的整数倍，实际测试发现最后一个成员没有按照16字节扩充
           TRACE("%s\n", rType[i].Name);
           m_buffer.Append(&rType[i], sizeof(Marimo::DATAPOOL_TYPE_DEFINITION));
@@ -1169,6 +1301,26 @@ namespace GrapX
 
       ASSERT(m_buffer.GetSize() == nTotalSize); // 校验实际填充大小和计算大小
       return TRUE;
+    }
+
+    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(size_t cbSize)
+    {
+      ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      D3D11_BUFFER_DESC bd;
+      InlSetZeroT(bd);
+      ASSERT(cbSize > 0);
+
+      bd.Usage          = D3D11_USAGE_DEFAULT;
+      bd.ByteWidth      = cbSize;
+      bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
+      bd.CPUAccessFlags = 0;
+
+      ID3D11Buffer* pD3D11Buffer = NULL;
+      HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &pD3D11Buffer);
+      if(SUCCEEDED(hr)) {
+        return pD3D11Buffer;
+      }
+      return NULL;
     }
 
     void ShaderImpl::DbgCheck(INTERMEDIATE_CODE::Array& aInterCode)
@@ -1259,8 +1411,8 @@ namespace GrapX
 
     GXBOOL ShaderImpl::CheckUpdateConstBuf()
     {
-      CLBREAK;
-      return FALSE;         
+      //CLBREAK;
+      return FALSE;
     }
 
     ShaderImpl::TargetType ShaderImpl::TargetNameToType(GXLPCSTR szTargetName)

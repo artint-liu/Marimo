@@ -63,7 +63,7 @@ namespace D3D9
     GXBOOL      UnmapIndexBuffer      (GXLPVOID lpMappedBuffer) override;
 
     GXHRESULT   GetVertexDeclaration  (GVertexDeclaration** ppDeclaration) override;
-    GXGraphics* GetGraphicsUnsafe     () override;
+    Graphics*   GetGraphicsUnsafe     () override;
     GXINT       GetElementOffset      (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
   };
 

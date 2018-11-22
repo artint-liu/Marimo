@@ -71,12 +71,14 @@ namespace GrapX
 
     Graphics*  GetGraphicsUnsafe () const override;
     Shader*  GetShaderUnsafe() const;
+    Marimo::DataPool* GetDataPoolUnsafe() const;
+    Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
 
     GXBOOL InitEffect();
+    //GXBOOL CommitUniform();
 
 
     // ¾ÉµÄ¼æÈÝ½Ó¿Ú
-    bool CommitUniform(GXCanvas* pCanvas, GXUINT uCommonOffset);
     GXUINT GetHandle(const GXCHAR* pName) const;
   };
 #endif // #ifdef REFACTOR_GRAPX_SHADER

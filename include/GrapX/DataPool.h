@@ -378,7 +378,8 @@ namespace Marimo
     GXSTDINTERFACE(GXDWORD     GetFlags            () const);
 
     GXSTDINTERFACE(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组
-    GXSTDINTERFACE(GXLPVOID    GetFixedDataPtr     ());                 // 必须是RawPool才返回指针
+    GXSTDINTERFACE(GXLPVOID    GetRootPtr          () const);
+    GXSTDINTERFACE(GXSIZE_T    GetRootSize         () const);
     GXSTDINTERFACE(GXUINT      GetNameId           (LPCSTR szName));    // 返回Type, Variable, Enum等内部稳定字符串的id
     GXSTDINTERFACE(GXBOOL      QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar));
     GXSTDINTERFACE(GXBOOL      QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar));

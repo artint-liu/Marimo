@@ -26,6 +26,7 @@
 #include "GrapX/GShader.h"
 #include "GrapX/GXKernel.h"
 #include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
@@ -522,7 +523,7 @@ namespace GrapX
         m_pGraphics->InlSetSamplerState(m_pSamplerState);
         m_pGraphics->InlSetDepthStencil(NULL);
 
-    m_pGraphics->InlSetEffect((EffectImpl*)m_pEffectImpl);
+        m_pGraphics->InlSetEffect((EffectImpl*)m_pEffectImpl);
         UpdateStencil(m_pClipRegion);
 
         gxRectToRegn(&regn, &m_rcClip);
@@ -535,7 +536,7 @@ namespace GrapX
 
         //m_pGraphics->SetVertexShaderConstantF(0, (GXFLOAT*)&m_aVertexShaderRegister, CANVAS_SHARED_SHADER_REGCOUNT);
         //m_pGraphics->SetPixelShaderConstantF(0, (GXFLOAT*)&m_aPixelShaderRegister, CANVAS_SHARED_SHADER_REGCOUNT);
-        m_pEffectImpl->CommitUniform(this, -1);
+        //m_pEffectImpl->CommitUniform(this, -1);
 
         m_pGraphics->InlSetTexture(reinterpret_cast<GTexBaseImpl*>(m_pWhiteTex), 0);
 
@@ -792,7 +793,7 @@ namespace GrapX
           SAFE_RELEASE(m_pEffectImpl);
           m_pEffectImpl = (EffectImpl*)m_aBatch[i].comm.lParam;
           m_pGraphics->InlSetEffect(m_pEffectImpl);
-          m_pEffectImpl->CommitUniform(this, -1);
+          //m_pEffectImpl->CommitUniform(this, -1);
         }
         break;
         case CF_ColorAdditive:
@@ -800,7 +801,16 @@ namespace GrapX
           TRACE_BATCH("CF_ColorAdditive\n");
           m_dwColorAdditive = (GXDWORD)m_aBatch[i].comm.lParam;
           m_CanvasCommConst.colorAdd = m_dwColorAdditive;
-          m_pEffectImpl->CommitUniform(this, MEMBER_OFFSET(GXCANVASCOMMCONST, colorAdd));
+
+          // TODO: 这里全部重新提交了CB，可以改为只提交$Globals          
+          MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
+          MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>(); // 临时写法
+          MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>(); // 临时写法
+          varMVP = m_CanvasCommConst.matWVProj;  // 临时写法
+          colorAdd = m_CanvasCommConst.colorAdd; // 临时写法
+          color = m_CanvasCommConst.colorMul;    // 临时写法
+          static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
+          //m_pEffectImpl->CommitUniform(this, MEMBER_OFFSET(GXCANVASCOMMCONST, colorAdd));
         }
         break;
 #ifdef GLES2_CANVAS_IMPL
@@ -960,7 +970,17 @@ namespace GrapX
           m[4] = m_aBatch[i + 1].PosF.x;   m[5] = m_aBatch[i + 1].PosF.y;   m[6] = m_aBatch[i + 1].PosF.z;   m[7] = m_aBatch[i + 1].PosF.w;
           m[8] = m_aBatch[i + 2].PosF.x;   m[9] = m_aBatch[i + 2].PosF.y;   m[10] = m_aBatch[i + 2].PosF.z;   m[11] = m_aBatch[i + 2].PosF.w;
           m[12] = m_aBatch[i + 3].PosF.x;   m[13] = m_aBatch[i + 3].PosF.y;   m[14] = m_aBatch[i + 3].PosF.z;   m[15] = m_aBatch[i + 3].PosF.w;
-          m_pEffectImpl->CommitUniform(this, -1);
+          //m_pEffectImpl->CommitUniform(this, -1);
+
+          // TODO: 这里全部重新提交了CB，可以改为只提交$Globals
+          MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
+          MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();  // 临时写法
+          MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();        // 临时写法
+          varMVP = m_CanvasCommConst.matWVProj;                                                // 临时写法
+          colorAdd = m_CanvasCommConst.colorAdd;                                               // 临时写法
+          color = m_CanvasCommConst.colorMul;                                                  // 临时写法
+          static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
+
           i += 3;
         }
         break;

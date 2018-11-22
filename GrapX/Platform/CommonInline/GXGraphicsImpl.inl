@@ -442,6 +442,8 @@ GXHRESULT GraphicsImpl::CreateEffect(Effect** ppEffect, Shader* pShader)
     return GX_FAIL;
   }
 
+  static_cast<ShaderImpl*>(pShader)->BuildCBTable(pEffect->GetDataPoolUnsafe());
+
   RegisterResource(pEffect, NULL);
   *ppEffect = pEffect;
   return GX_OK;
@@ -855,13 +857,16 @@ GXHRESULT GraphicsImpl::CreateShaderFromSource(Shader** ppShader, const GXSHADER
 
 GXHRESULT GraphicsImpl::CreateShaderFromFile(Shader** ppShader, GXLPCWSTR szShaderDesc)
 {
-  CLBREAK;
+  //CLBREAK;
   //return IntCreateSdrPltDescW(ppShader, szShaderDesc, InlGetPlatformStringA(), NULL);
+  return GX_FAIL;
 }
 
 GXHRESULT GraphicsImpl::CreateShaderFromFile(Shader** ppShader, GXLPCSTR szShaderDesc)
 {
-  CLBREAK;
+  clStringW str = szShaderDesc;
+  return CreateShaderFromFile(ppShader, str);
+  //CLBREAK;
   //clStringW strDesc = szShaderDesc;
   //return IntCreateSdrPltDescW(ppShader, strDesc, InlGetPlatformStringA(), NULL);
 }

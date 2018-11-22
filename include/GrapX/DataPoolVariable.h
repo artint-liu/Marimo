@@ -58,7 +58,7 @@ namespace Marimo
     template<class _Ty>
     inline _Ty& CastTo() // Reinterpret cast
     {
-      return *(_Ty*)GetPtr();
+      return *(_Ty*)this;
     }
 
   public:

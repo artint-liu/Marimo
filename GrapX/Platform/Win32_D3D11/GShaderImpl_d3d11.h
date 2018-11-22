@@ -241,11 +241,20 @@ namespace GrapX
       GraphicsImpl* m_pGraphicsImpl;
       ID3D11VertexShader*         m_pD3D11VertexShader;
       ID3D11PixelShader*          m_pD3D11PixelShader;
+      ID3DBlob*                   m_pD3DVertexInterCode; // 用来和顶点声明进行绑定
 
-      Marimo::DATAPOOL_DECLARATION*     m_pDataPoolDecl;
+      // DataPool 声明
+      Marimo::DATAPOOL_DECLARATION*     m_pDataPoolDecl; // 变量顺序: $Globals（varA，varB，varC...），各种CB（结构体形式）cb_A a, cb_B b ...
       Marimo::DATAPOOL_TYPE_DEFINITION* m_pDataPoolTypeDef;
       clstd::MemBuffer                  m_buffer;
-      clstd::MemBuffer                  m_VertexBuf;   // 用来和顶点声明进行绑定
+
+      // 常量缓冲
+      // 同时储存VS，PS合集，VS，PS独立连续常量缓冲，
+      // 如(合集:)G,A,B,C,D,|（VS:）G,A,D|（PS:）G,B,C
+      // 只有合集遵守引用计数
+      clvector<ID3D11Buffer*>           m_arrayCB;
+      ID3D11Buffer**                    m_pVertexCB;
+      ID3D11Buffer**                    m_pPixelCB;
 
     public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -265,8 +274,12 @@ namespace GrapX
       GXLPCSTR Reflect_MakeTypename(DATAPOOL_MAPPER& aStructDesc, D3D11_SHADER_TYPE_DESC& type_desc, ID3D11ShaderReflectionType* pReflectionType);
 
       GXBOOL Activate();
+      GXBOOL BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab); // 因为没有大小，只生成vs或者ps CB与合集的索引关系
+      GXBOOL BuildCBTable(Marimo::DataPool* pDataPool); // 第一次创建Effect或者Material时创建D3D CB
+      GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool);
 
-      GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper);
+      GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
+      ID3D11Buffer* D3D11CreateBuffer(size_t cbSize);
 
       void DbgCheck(INTERMEDIATE_CODE::Array& aInterCode);
 

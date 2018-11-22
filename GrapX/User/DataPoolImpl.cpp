@@ -884,9 +884,14 @@ namespace Marimo
     return (DataPool::LPCSTR)m_aVariables[nIndex].VariableName();
   }
 
-  GXLPVOID DataPoolImpl::GetFixedDataPtr()
+  GXLPVOID DataPoolImpl::GetRootPtr() const
   {
-    return TEST_FLAG(m_dwRuntimeFlags, DataPoolImpl::RuntimeFlag_Fixed) ? m_VarBuffer.GetPtr() : NULL;
+    return m_VarBuffer.GetPtr();
+  }
+
+  GXSIZE_T DataPoolImpl::GetRootSize() const
+  {
+    return m_VarBuffer.GetSize();
   }
 
   GXBOOL DataPoolImpl::QueryByName(GXLPCSTR szName, Variable* pVar)

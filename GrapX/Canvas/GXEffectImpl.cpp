@@ -6,6 +6,7 @@
 #include "GrapX/GXGraphics.h"
 #include "GrapX/GXKernel.h"
 #include "GrapX/DataPool.h"
+#include "GrapX/DataPoolVariable.h"
 #include "GXEffectImpl.h"
 
 DATALAYOUT g_CanvasCommon[] =
@@ -194,8 +195,19 @@ namespace GrapX
 
   Shader* EffectImpl::GetShaderUnsafe() const
   {
-    CLBREAK;
-    return NULL;
+    return m_pShader;
+  }
+
+  Marimo::DataPool* EffectImpl::GetDataPoolUnsafe() const
+  {
+    return m_pDataPool;
+  }
+
+  Marimo::DataPoolVariable EffectImpl::GetUniform(GXLPCSTR szName)
+  {
+    Marimo::DataPoolVariable var;
+    m_pDataPool->QueryByName(szName, &var);
+    return var;
   }
 
   GXBOOL EffectImpl::InitEffect()
@@ -206,11 +218,10 @@ namespace GrapX
     return GXSUCCEEDED(hr);
   }
 
-  bool EffectImpl::CommitUniform(GXCanvas* pCanvas, GXUINT uCommonOffset)
-  {
-    CLBREAK;
-    return FALSE;
-  }
+  //GXBOOL EffectImpl::CommitUniform()
+  //{
+  //  return m_pShader->CommitConstantBuffer(m_pDataPool);
+  //}
 
   GXUINT EffectImpl::GetHandle(const GXCHAR* pName) const
   {

@@ -374,7 +374,8 @@ namespace Marimo
     virtual GXBOOL    IsKnocking          (const DataPoolVariable* pVar) override;
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
-    virtual GXLPVOID  GetFixedDataPtr     () override; // 必须是RawPool才返回指针
+            GXLPVOID  GetRootPtr          () const override;
+            GXSIZE_T  GetRootSize         () const override;
     virtual GXUINT    GetNameId           (LPCSTR szName) override;
     virtual GXBOOL    QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar) override;
     virtual GXBOOL    QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar) override;
