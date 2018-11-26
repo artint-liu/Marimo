@@ -246,6 +246,8 @@ namespace GrapX
       // DataPool 声明
       Marimo::DATAPOOL_DECLARATION*     m_pDataPoolDecl; // 变量顺序: $Globals（varA，varB，varC...），各种CB（结构体形式）cb_A a, cb_B b ...
       Marimo::DATAPOOL_TYPE_DEFINITION* m_pDataPoolTypeDef;
+      BINDRESOURCE_DESC*                m_pBindResourceDesc;
+      size_t                            m_nBindResourceDesc;
       clstd::MemBuffer                  m_buffer;
 
       // 常量缓冲
@@ -277,6 +279,7 @@ namespace GrapX
       GXBOOL BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab); // 因为没有大小，只生成vs或者ps CB与合集的索引关系
       GXBOOL BuildCBTable(Marimo::DataPool* pDataPool); // 第一次创建Effect或者Material时创建D3D CB
       GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool);
+      const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 
       GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
       ID3D11Buffer* D3D11CreateBuffer(size_t cbSize);

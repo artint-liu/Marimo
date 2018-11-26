@@ -498,6 +498,9 @@ namespace GrapX
       DataPoolDeclaration_T     aMembers;           // 结构体成员列表
       clstd::StringSetA         Strings;
 
+      clvector<GXLPCSTR>        arraySampler;
+      clvector<GXLPCSTR>        arrayTexture;
+
       const Marimo::DATAPOOL_DECLARATION* FindStructureByName(GXLPCSTR szName, size_t* pCount) const
       {
         for(auto it = aTypes.begin(); it != aTypes.end(); ++it)
@@ -641,7 +644,7 @@ namespace GrapX
           &mapper_a.aGlobal.front(), mapper_a.aGlobal.size() - 1,
           &mapper_b.aGlobal.front(), mapper_b.aGlobal.size() - 1, mapper_a, mapper_b) == FALSE)
         {
-          CLOG_WARNING("$Globals 变量不一致");
+          CLOG_ERROR("$Globals 变量不一致");
           return FALSE;
         }
         dest.Copy(dest.aGlobal, &mapper_a.aGlobal.front(), mapper_a.aGlobal.size(), &mapper_a);
@@ -689,7 +692,7 @@ namespace GrapX
 
           if(CompareVariableDeclarationArray(pCBListA, nCBCountA - 1, pCBListB, nCBCountB - 1, mapper_a, mapper_b) == FALSE)
           {
-            CLOG_WARNING("const buffer(%s) 名字一致但是变量不一致", *iter_name);
+            CLOG_ERROR("const buffer(%s) 名字一致但是变量不一致", *iter_name);
             return FALSE;
           }
 
@@ -714,6 +717,34 @@ namespace GrapX
           aIndexTabB.push_back(nDestIndex);
           nDestIndex++;
         }
+      }
+
+      // sampler
+      if(_CL_NOT_(mapper_a.arraySampler.empty()) && _CL_NOT_(mapper_b.arraySampler.empty())) {
+        if(mapper_a.arraySampler != mapper_b.arraySampler) {
+          CLOG_ERROR("sampler 列表不一致");
+          return FALSE;
+        }
+      }
+      else if(_CL_NOT_(mapper_a.arraySampler.empty())) {
+        dest.arraySampler = mapper_a.arraySampler;
+      }
+      else if(_CL_NOT_(mapper_b.arraySampler.empty())) {
+        dest.arraySampler = mapper_b.arraySampler;
+      }
+
+      // texture
+      if(_CL_NOT_(mapper_a.arrayTexture.empty()) && _CL_NOT_(mapper_b.arrayTexture.empty())) {
+        if(mapper_a.arrayTexture != mapper_b.arrayTexture) {
+          CLOG_ERROR("sampler 列表不一致");
+          return FALSE;
+        }
+      }
+      else if(_CL_NOT_(mapper_a.arrayTexture.empty())) {
+        dest.arrayTexture = mapper_a.arrayTexture;
+      }
+      else if(_CL_NOT_(mapper_b.arrayTexture.empty())) {
+        dest.arrayTexture = mapper_b.arrayTexture;
       }
 
       ASSERT(aIndexTabA.size() == mapper_a.GetBufferCount());
@@ -752,7 +783,13 @@ namespace GrapX
       : m_pGraphicsImpl(pGraphicsImpl)
       , m_pD3D11VertexShader(NULL)
       , m_pD3D11PixelShader(NULL)
+      , m_pDataPoolDecl(NULL)
+      , m_pDataPoolTypeDef(NULL)
+      , m_pBindResourceDesc(NULL)
+      , m_nBindResourceDesc(0)
       , m_buffer(8)
+      , m_pVertexCB(NULL)
+      , m_pPixelCB(NULL)
     {
     }
 
@@ -795,10 +832,9 @@ namespace GrapX
         aCodes.push_back(InterCode);
         if(InterCode.type == TargetType::Vertex)
         {
-          hr = pd3dDevice->CreateVertexShader(
-            InterCode.pCode->GetBufferPointer(),
-            InterCode.pCode->GetBufferSize(),
-            NULL, &m_pD3D11VertexShader);
+          hr = pd3dDevice->CreateVertexShader(InterCode.pCode->GetBufferPointer(),
+            InterCode.pCode->GetBufferSize(), NULL, &m_pD3D11VertexShader);
+
           TRACE("[Vertex Shader]\n");
           Reflect(decl_mapper_vs, InterCode.pReflection);
 
@@ -847,8 +883,6 @@ namespace GrapX
 #endif
       }
 
-      //SAFE_RELEASE(InterCode.pReflection);
-
       // 释放decl_mapper相关的的字符串
       for(auto it = aCodes.begin(); it != aCodes.end(); ++it) {
         SAFE_RELEASE(it->pReflection);
@@ -877,11 +911,15 @@ namespace GrapX
           break;
 
         case D3D_SHADER_INPUT_TYPE::D3D10_SIT_SAMPLER:
-          TRACE("sampler %s\n", bind_desc.Name);
+          TRACE("sampler %s Point:%d, Count:%d \n", bind_desc.Name, bind_desc.BindPoint, bind_desc.BindCount);
+          ASSERT(decl_mapper.arraySampler.size() == bind_desc.BindPoint); // 测试出现顺序与BindPoint一致
+          decl_mapper.arraySampler.push_back(bind_desc.Name);
           break;
 
         case D3D_SHADER_INPUT_TYPE::D3D10_SIT_TEXTURE:
-          TRACE("texture %s\n", bind_desc.Name);
+          TRACE("texture %s Point:%d, Count:%d \n", bind_desc.Name, bind_desc.BindPoint, bind_desc.BindCount);
+          ASSERT(decl_mapper.arrayTexture.size() == bind_desc.BindPoint);
+          decl_mapper.arrayTexture.push_back(bind_desc.Name);
           break;
 
         default:
@@ -1108,6 +1146,9 @@ namespace GrapX
     {
       const size_t nCombine = combine.GetBufferCount();
       const size_t nMapper = pMapper[0].GetBufferCount() + pMapper[1].GetBufferCount();
+      if(nCombine + nMapper == 0) {
+        return TRUE;
+      }
       m_arrayCB.reserve(nCombine + nMapper);
       m_arrayCB.assign(nCombine, NULL);
       for(int i = 0; i < 2; i++)
@@ -1188,6 +1229,20 @@ namespace GrapX
       return FALSE;
     }
 
+    const ShaderImpl::BINDRESOURCE_DESC* ShaderImpl::FindBindResource(GXLPCSTR szName) const
+    {
+      if(m_pBindResourceDesc)
+      {
+        return
+          clstd::BinarySearch(m_pBindResourceDesc, m_pBindResourceDesc + m_nBindResourceDesc, szName,
+            [](BINDRESOURCE_DESC* pDesc, GXLPCSTR szName) -> int
+        {
+          return clstd::strcmpT(pDesc->name, szName);
+        });
+      }
+      return NULL;
+    }
+
     GXBOOL ShaderImpl::BuildDataPoolDecl(DATAPOOL_MAPPER& mapper)
     {
       // mapper 是会被修改的
@@ -1198,6 +1253,13 @@ namespace GrapX
       // *.全局变量列表（CB作为结构体变量在尾部声明）<- m_pDataPoolDecl
       // *.结构体类型定义 <- m_pDataPoolTypeDef
       // *.CB结构体类型
+      // *.Bind resource table <- m_pBindResourceDesc
+
+      m_nBindResourceDesc = mapper.arraySampler.size() + mapper.arrayTexture.size();
+
+      if(mapper.GetBufferCount() == 0 && m_nBindResourceDesc == 0) {
+        return TRUE;
+      }
 
       // 把 constant buffer 作为结构体添加在局部变量后面
       Marimo::DATAPOOL_DECLARATION desc = { NULL };
@@ -1210,11 +1272,21 @@ namespace GrapX
         mapper.aGlobal.push_back(desc);
       }
 
+      for(auto it = mapper.arraySampler.begin(); it != mapper.arraySampler.end(); ++it)
+      {
+        mapper.Strings.add(*it);
+      }
+      for(auto it = mapper.arrayTexture.begin(); it != mapper.arrayTexture.end(); ++it)
+      {
+        mapper.Strings.add(*it);
+      }
+
       // 计算总缓冲区大小
       const size_t nStringBufSize = mapper.Strings.buffer_size();
       const size_t nTotalSize = nStringBufSize +
         sizeof(Marimo::DATAPOOL_DECLARATION) * (mapper.aGlobal.size() + mapper.aMembers.size() + mapper.aCBMembers.size() + 1) +
-        sizeof(Marimo::DATAPOOL_TYPE_DECLARATION) * (mapper.aConstantBuffers.size() + mapper.aTypes.size() + 1);
+        sizeof(Marimo::DATAPOOL_TYPE_DECLARATION) * (mapper.aConstantBuffers.size() + mapper.aTypes.size() + 1) +
+        sizeof(BINDRESOURCE_DESC) * m_nBindResourceDesc;
       m_buffer.Reserve(nTotalSize);
       m_buffer.Resize(nStringBufSize, FALSE);
 
@@ -1229,12 +1301,12 @@ namespace GrapX
 
       for(int n = 0; n < 3; n++)
       {
-        if(n == 2) {
+        DataPoolDeclaration_T& rDecl = aDecl[n];
+        if(n == 2 && _CL_NOT_(rDecl.empty())) {
           m_pDataPoolDecl = reinterpret_cast<Marimo::DATAPOOL_DECLARATION*>(
             reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
         }
 
-        DataPoolDeclaration_T& rDecl = aDecl[n];
         for(size_t i = 0; i < rDecl.size(); i++)
         {
           if(rDecl[i].Name && rDecl[i].Type)
@@ -1299,6 +1371,47 @@ namespace GrapX
       Marimo::DATAPOOL_TYPE_DEFINITION sEmptyType = { Marimo::DataPoolTypeClass::Undefine };
       m_buffer.Append(&sEmptyType, sizeof(Marimo::DATAPOOL_TYPE_DEFINITION));
 
+      if(m_nBindResourceDesc)
+      {
+        m_pBindResourceDesc = reinterpret_cast<BINDRESOURCE_DESC*>(
+          reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
+        BINDRESOURCE_DESC brd;
+
+        for(auto it = mapper.arraySampler.begin(); it != mapper.arraySampler.end(); ++it)
+        {
+          brd.name = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(*it));
+          brd.type = BindType::Sampler;
+          brd.slot = it - mapper.arraySampler.begin();
+          m_buffer.Append(&brd, sizeof(BINDRESOURCE_DESC));
+        }
+
+        for(auto it = mapper.arrayTexture.begin(); it != mapper.arrayTexture.end(); ++it)
+        {
+          brd.name = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(*it));
+          brd.type = BindType::Texture;
+          brd.slot = it - mapper.arrayTexture.begin();
+          m_buffer.Append(&brd, sizeof(BINDRESOURCE_DESC));
+        }
+
+        // 排序, 后面用二分查找
+        struct BIND : BINDRESOURCE_DESC
+        {
+          GXBOOL SortCompare(const BIND& b)
+          {
+            return clstd::strcmpT(name, b.name) > 0;
+          }
+
+          void SortSwap(BIND& b)
+          {
+            BIND t = b;
+            b = *this;
+            *this = t;
+          }
+        };
+
+        clstd::BubbleSort(static_cast<BIND*>(m_pBindResourceDesc), m_nBindResourceDesc);
+      }
+
       ASSERT(m_buffer.GetSize() == nTotalSize); // 校验实际填充大小和计算大小
       return TRUE;
     }
@@ -1325,6 +1438,9 @@ namespace GrapX
 
     void ShaderImpl::DbgCheck(INTERMEDIATE_CODE::Array& aInterCode)
     {
+      if(m_pDataPoolDecl == NULL) {
+        return; // 没有常量
+      }
 #define CHECK_VALUE(_VAL, _EXPRA, _EXPRB) ASSERT((_VAL = _EXPRA) == _EXPRB)
       Marimo::DataPool* pDataPool = NULL;
       GXHRESULT hr = Marimo::DataPool::CreateDataPool(&pDataPool, NULL, m_pDataPoolTypeDef, m_pDataPoolDecl, Marimo::DataPoolCreation_NotCross16BytesBoundary);

@@ -89,6 +89,20 @@ namespace GrapX
   class Shader : public GResource
   {
   public:
+    enum class BindType : GXUINT
+    {
+      Texture = 0,
+      Sampler = 1,
+    };
+
+    struct BINDRESOURCE_DESC
+    {
+      GXLPCSTR  name;
+      BindType  type;
+      int       slot;
+    };
+
+  public:
     Shader() : GResource(0, RESTYPE_SHADER) {}
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
@@ -97,6 +111,7 @@ namespace GrapX
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe       () const);
     GXSTDINTERFACE(void         GetDataPoolDeclaration  (Marimo::DATAPOOL_MANIFEST* pManifest) const);
+    GXSTDINTERFACE(const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const);
   };
 
   class Effect : public GResource
