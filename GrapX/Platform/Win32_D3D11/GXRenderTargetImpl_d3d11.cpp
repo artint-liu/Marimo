@@ -83,7 +83,7 @@ namespace GrapX
       return m_pColorTexture->GetDimension(pDimension);
     }
 
-    GXHRESULT RenderTargetImpl::GetColorTexture(GTexture** ppColorTexture, GXResUsage eUsage)
+    GXHRESULT RenderTargetImpl::GetColorTexture(Texture** ppColorTexture, GXResUsage eUsage)
     {
       if(eUsage == GXResUsage::Default)
       {
@@ -97,7 +97,7 @@ namespace GrapX
         GXFormat format = m_pColorTexture->GetFormat();
         m_pColorTexture->GetDimension(&sDimension);
 
-        GtextureImpl_GPUReadBack* pReadBackTexture = new GtextureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
+        textureImpl_GPUReadBack* pReadBackTexture = new textureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
         if(InlIsFailedToNewObject(pReadBackTexture)) {
           return GX_ERROR_OUROFMEMORY;
         }
@@ -117,12 +117,12 @@ namespace GrapX
       return GX_FAIL;
     }
 
-    GTexture* RenderTargetImpl::GetColorTextureUnsafe(GXResUsage eUsage)
+    Texture* RenderTargetImpl::GetColorTextureUnsafe(GXResUsage eUsage)
     {
       return m_pColorTexture;
     }
 
-    GXHRESULT RenderTargetImpl::GetDepthStencilTexture(GTexture** ppDepthStencilTexture)
+    GXHRESULT RenderTargetImpl::GetDepthStencilTexture(Texture** ppDepthStencilTexture)
     {
       if(m_pDepthStencilTexture)
       {
@@ -133,7 +133,7 @@ namespace GrapX
       return GX_FAIL;
     }
 
-    GXBOOL RenderTargetImpl::StretchRect(GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter)
+    GXBOOL RenderTargetImpl::StretchRect(Texture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter)
     {
       // TODO: ...
       CLBREAK;
@@ -146,11 +146,11 @@ namespace GrapX
       GXBOOL bval = TRUE;
       GXFormat format = m_pColorTexture->GetFormat();
       m_pColorTexture->GetDimension(&sDimension);
-      GTexture* pReadBackTexture = NULL;
+      Texture* pReadBackTexture = NULL;
 
       GetColorTexture(&pReadBackTexture, GXResUsage::Read);
 
-      GTexture::MAPPED mapped;
+      Texture::MAPPED mapped;
       if(pReadBackTexture->Map(&mapped, GXResMap::Read))
       {
         const GXUINT bpp = GetBytesOfGraphicsFormat(format);
@@ -249,7 +249,7 @@ namespace GrapX
         nHeight = SizeRatioToDimension(m_nHeight, sDesc.BackBufferHeight, 0);
       }
 
-      m_pColorTexture = new GTextureImpl_RenderTarget(m_pGraphics, eColorFormat, nWidth, nHeight);
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, eColorFormat, nWidth, nHeight);
       if(InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
@@ -260,7 +260,7 @@ namespace GrapX
       }
 
       if(eDepthStencilFormat != Format_Unknown) {
-        m_pDepthStencilTexture = new GTextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
+        m_pDepthStencilTexture = new TextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
 
         if(InlIsFailedToNewObject(m_pDepthStencilTexture)) {
           return FALSE;
@@ -276,12 +276,12 @@ namespace GrapX
       return TRUE;
     }
 
-    GTextureImpl_RenderTarget* RenderTargetImpl::IntGetColorTextureUnsafe()
+    TextureImpl_RenderTarget* RenderTargetImpl::IntGetColorTextureUnsafe()
     {
       return m_pColorTexture;
     }
 
-    GTextureImpl_DepthStencil* RenderTargetImpl::IntGetDepthStencilTextureUnsafe()
+    TextureImpl_DepthStencil* RenderTargetImpl::IntGetDepthStencilTextureUnsafe()
     {
       return m_pDepthStencilTexture;
     }

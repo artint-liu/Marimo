@@ -360,7 +360,7 @@ namespace GXUI
 
     //GXCanvas* pCanvas = 0;
     GXRECT rect;
-    ((GrapX::GXCanvas*)NULL)->DrawText(m_pFont, lpText, - 1, &rect, GetDrawTextFlag()|GXDT_CALCRECT, 0);
+    ((GrapX::Canvas*)NULL)->DrawText(m_pFont, lpText, - 1, &rect, GetDrawTextFlag()|GXDT_CALCRECT, 0);
     *pRegn = rect;
 
     //SAFE_DELETE(lpText);

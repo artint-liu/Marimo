@@ -1,12 +1,12 @@
 #ifndef _IMPLEMENT_GRAPH_X_MATERIAL_H_
 #define _IMPLEMENT_GRAPH_X_MATERIAL_H_
 struct STANDARDMTLUNIFORMTABLE;
-class GBlendState;
-class GDepthStencilState;
+class BlendState;
+class DepthStencilState;
 //////////////////////////////////////////////////////////////////////////
 namespace GrapX
 {
-  class GSamplerState;
+  class SamplerState;
   class MaterialImpl : public Material
   {
   private:

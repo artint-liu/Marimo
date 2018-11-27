@@ -507,7 +507,7 @@ namespace GXUI
       GXHTHEME hTheme = gxGetWindowTheme(m_hWnd);
       if(hTheme)
       {
-        GrapX::GXCanvas* pCanvas = canvas.GetCanvasUnsafe();
+        GrapX::Canvas* pCanvas = canvas.GetCanvasUnsafe();
         pCanvas->SetCompositingMode(GrapX::CM_SourceCopy);
         GXDrawThemeBackground(hTheme, pCanvas, GXWP_DIALOG, 0, &rect, NULL);
         pCanvas->SetCompositingMode(GrapX::CM_SourceOver);

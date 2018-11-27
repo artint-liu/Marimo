@@ -16,7 +16,7 @@
 //  }
 //  创建 GXCanvas
 //}
-class GXCanvasCore;
+class CanvasCore;
 class GTexture;
 class GXConsole;
 class ILogger;
@@ -27,21 +27,21 @@ namespace Marimo {
 
 namespace GrapX
 {
-  class GSamplerState;
+  class SamplerState;
   class EffectImpl;
 
   namespace D3D11
   {
-    class GTextureImpl;
-    class GXCanvasCoreImpl;
+    class TextureImpl;
+    class CanvasCoreImpl;
     //class GRenderStateImpl;
-    class GRasterizerStateImpl;
-    class GBlendStateImpl;
-    class GDepthStencilStateImpl;
-    class GSamplerStateImpl;
-    class GXCanvas3DImpl;
-    template<class InterfaceT> class GTextureBaseImplT;
-    typedef GTextureBaseImplT<GTextureBase> GTexBaseImpl;
+    class RasterizerStateImpl;
+    class BlendStateImpl;
+    class DepthStencilStateImpl;
+    class SamplerStateImpl;
+    class Canvas3DImpl;
+    template<class InterfaceT> class TextureBaseImplT;
+    typedef TextureBaseImplT<TextureBase> TexBaseImpl;
 
     class VertexDeclImpl;
     class RenderTargetImpl;
@@ -61,9 +61,9 @@ namespace GrapX
       friend class GPrimitiveVertexIndexImpl;
       friend class VertexDeclImpl;
       //friend class GRenderState;
-      friend class GSamplerState;
-      friend class GXCanvasImpl;
-      friend class GXCanvas3DImpl;
+      friend class SamplerState;
+      friend class CanvasImpl;
+      friend class Canvas3DImpl;
       friend class ShaderImpl;
     public:
       enum
@@ -128,7 +128,7 @@ namespace GrapX
       ID3D11RenderTargetView* m_pCurRenderTargetView;
       ID3D11DepthStencilView* m_pCurDepthStencilView;
       ID3D11InputLayout*      m_pVertexLayout;
-      GTextureImpl*           m_pDeviceOriginTex;
+      TextureImpl*            m_pDeviceOriginTex;
       GXDWORD                 m_dwBackBufferStencil;  // m_pDeviceOriginTex 使用的模板 [1, 255]
 
       GXINT                   m_nGraphicsCount;

@@ -3,7 +3,7 @@
 
 namespace GrapX
 {
-  class GTexture;
+  class Texture;
 }
 
 class GXFont : public GrapX::GResource
@@ -11,7 +11,7 @@ class GXFont : public GrapX::GResource
 public:
   typedef struct __tagCHARDESC  // 字符描述
   {
-    GrapX::GTexture*   pTex;  // 所在的纹理
+    GrapX::Texture*   pTex;  // 所在的纹理
     REGN        rgSrc;  // 所在纹理的区域
     GXPOINT     ptDest;
     GXINT       nAdvWidth;

@@ -42,7 +42,7 @@ namespace GrapX
   {
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
 
-    GXHRESULT GTextureImpl::Invoke(GRESCRIPTDESC* pDesc)
+    GXHRESULT TextureImpl::Invoke(GRESCRIPTDESC* pDesc)
     {
       INVOKE_DESC_CHECK(pDesc);
 
@@ -57,13 +57,13 @@ namespace GrapX
     }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    GXHRESULT GTextureImpl::AddRef()
+    GXHRESULT TextureImpl::AddRef()
     {
       return gxInterlockedIncrement(&m_nRefCount);
     }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXHRESULT GTextureImpl::Release()
+    GXHRESULT TextureImpl::Release()
     {
       clstd::ScopedLocker sl(m_pGraphics->GetLocker());
       GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
@@ -85,8 +85,8 @@ namespace GrapX
       return nRefCount;
     }
 
-    GTextureImpl::GTextureImpl(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage)
-      : GTextureBaseImplT<GTexture>(static_cast<GraphicsImpl*>(pGraphics))
+    TextureImpl::TextureImpl(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage)
+      : TextureBaseImplT<Texture>(static_cast<GraphicsImpl*>(pGraphics))
       , m_pTextureData    (NULL)
       , m_nMipLevels      (nMipLevels)
       , m_Format          (eFormat)
@@ -97,14 +97,14 @@ namespace GrapX
       InlSetZeroT(m_sMappedResource);
     }
 
-    GTextureImpl::~GTextureImpl()
+    TextureImpl::~TextureImpl()
     {
       SAFE_RELEASE(m_pD3D11Texture);
       SAFE_RELEASE(m_pD3D11ShaderView);
       SAFE_DELETE_ARRAY(m_pTextureData);
     }
 
-    GXBOOL GTextureImpl::InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
+    GXBOOL TextureImpl::InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
     {
       const GXUINT nMinPitch = GetMinPitchSize();
       nPitch = clMax(nPitch, nMinPitch);
@@ -133,7 +133,7 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL GTextureImpl::IntD3D11CreateResource(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
+    GXBOOL TextureImpl::IntD3D11CreateResource(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
     {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
@@ -183,13 +183,13 @@ namespace GrapX
       return TRUE;
     }
 
-    GXUINT GTextureImpl::GetMinPitchSize() const
+    GXUINT TextureImpl::GetMinPitchSize() const
     {
       return GetBytesOfGraphicsFormat(m_Format) * m_nWidth;
     }
 
     //////////////////////////////////////////////////////////////////////////
-    GXBOOL GTextureImpl::Clear(GXCOLOR dwColor)
+    GXBOOL TextureImpl::Clear(GXCOLOR dwColor)
     {
       ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
       if(m_eResUsage == GXResUsage::Write || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
@@ -230,12 +230,12 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    GXBOOL GTextureImpl::CopyRect(GTexture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
+    GXBOOL TextureImpl::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
     {
       return TRUE;
     }
 
-    GXBOOL GTextureImpl::Map(MAPPED* pMappedRect, GXResMap eResMap)
+    GXBOOL TextureImpl::Map(MAPPED* pMappedRect, GXResMap eResMap)
     {
       // 不能嵌套Map/Unmap
       if(m_sMappedResource.pData) {
@@ -303,7 +303,7 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL GTextureImpl::Unmap()
+    GXBOOL TextureImpl::Unmap()
     {
       if(m_sMappedResource.pData)
       {
@@ -323,7 +323,7 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL GTextureImpl::UpdateRect(GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch)
+    GXBOOL TextureImpl::UpdateRect(GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch)
     {
       ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
       D3D11_BOX box;
@@ -342,12 +342,12 @@ namespace GrapX
       return TRUE;
     }
 
-    Graphics*  GTextureImpl::GetGraphicsUnsafe()
+    Graphics*  TextureImpl::GetGraphicsUnsafe()
     {
       return m_pGraphics;
     }
 
-    GXSIZE* GTextureImpl::GetDimension(GXSIZE* pDimension)
+    GXSIZE* TextureImpl::GetDimension(GXSIZE* pDimension)
     {
       if(pDimension != NULL) {
         pDimension->cx = m_nWidth;
@@ -356,21 +356,21 @@ namespace GrapX
       return pDimension;
     }
 
-    GXResUsage GTextureImpl::GetUsage()
+    GXResUsage TextureImpl::GetUsage()
     {
       return m_eResUsage;
     }
 
-    GXFormat GTextureImpl::GetFormat()
+    GXFormat TextureImpl::GetFormat()
     {
       return m_Format;
     }
 
-    GXVOID GTextureImpl::GenerateMipMaps()
+    GXVOID TextureImpl::GenerateMipMaps()
     {
     }
 
-    GXBOOL GTextureImpl::GetDesc(GXBITMAP*lpBitmap)
+    GXBOOL TextureImpl::GetDesc(GXBITMAP*lpBitmap)
     {
       //D3DSURFACE_DESC sd;
       //if(FAILED(m_pTexture->GetLevelDesc(0, &sd)))
@@ -405,20 +405,20 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    GTextureImpl_RenderTarget::GTextureImpl_RenderTarget(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
-      : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+    TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+      : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
       , m_pD3D11RenderTargetView(NULL)
     {
     }
 
-    GTextureImpl_RenderTarget::~GTextureImpl_RenderTarget()
+    TextureImpl_RenderTarget::~TextureImpl_RenderTarget()
     {
       SAFE_RELEASE(m_pD3D11RenderTargetView);
     }
 
-    GXBOOL GTextureImpl_RenderTarget::InitRenderTexture()
+    GXBOOL TextureImpl_RenderTarget::InitRenderTexture()
     {
-      if(_CL_NOT_(GTextureImpl::InitTexture(TRUE, NULL, 0))) {
+      if(_CL_NOT_(TextureImpl::InitTexture(TRUE, NULL, 0))) {
         return FALSE;
       }
 
@@ -436,20 +436,20 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    GTextureImpl_DepthStencil::GTextureImpl_DepthStencil(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
-      : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+    TextureImpl_DepthStencil::TextureImpl_DepthStencil(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+      : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
       , m_pD3D11DepthStencilView(NULL)
     {
     }
 
-    GTextureImpl_DepthStencil::~GTextureImpl_DepthStencil()
+    TextureImpl_DepthStencil::~TextureImpl_DepthStencil()
     {
       SAFE_RELEASE(m_pD3D11DepthStencilView);
     }
 
-    GXBOOL GTextureImpl_DepthStencil::InitDepthStencil()
+    GXBOOL TextureImpl_DepthStencil::InitDepthStencil()
     {
-      if(_CL_NOT_(GTextureImpl::InitTexture(FALSE, NULL, 0))) {
+      if(_CL_NOT_(TextureImpl::InitTexture(FALSE, NULL, 0))) {
         return FALSE;
       }
 
@@ -467,12 +467,12 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    GtextureImpl_GPUReadBack::GtextureImpl_GPUReadBack(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
-      : GTextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+    textureImpl_GPUReadBack::textureImpl_GPUReadBack(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+      : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
     {
     }
 
-    GXBOOL GtextureImpl_GPUReadBack::InitReadBackTexture()
+    GXBOOL textureImpl_GPUReadBack::InitReadBackTexture()
     {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
@@ -499,7 +499,7 @@ namespace GrapX
     }
 
 
-    GXBOOL GtextureImpl_GPUReadBack::Map(MAPPED* pMappedRect, GXResMap eResMap)
+    GXBOOL textureImpl_GPUReadBack::Map(MAPPED* pMappedRect, GXResMap eResMap)
     {
       ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
       if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_READ, 0, &m_sMappedResource)))
@@ -512,7 +512,7 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL GtextureImpl_GPUReadBack::Unmap()
+    GXBOOL textureImpl_GPUReadBack::Unmap()
     {
       if(m_sMappedResource.pData)
       {

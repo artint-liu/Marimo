@@ -124,17 +124,17 @@ GXWndCanvas::~GXWndCanvas()
   m_lpStation = NULL;
 }
 
-GXHRESULT GXWndCanvas::DrawTexture(GrapX::GTexture* pTexture, const GXREGN *rcDest)
+GXHRESULT GXWndCanvas::DrawTexture(GrapX::Texture* pTexture, const GXREGN *rcDest)
 {
   return m_pNative->DrawTexture(pTexture, rcDest);
 }
 
-GXHRESULT GXWndCanvas::DrawTexture(GrapX::GTexture* pTexture, const GXREGN *rcDest, const GXREGN *rcSrc)
+GXHRESULT GXWndCanvas::DrawTexture(GrapX::Texture* pTexture, const GXREGN *rcDest, const GXREGN *rcSrc)
 {
   return m_pNative->DrawTexture(pTexture, rcDest, rcSrc);
 }
 
-GXHRESULT GXWndCanvas::DrawTexture(GrapX::GTexture* pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc)
+GXHRESULT GXWndCanvas::DrawTexture(GrapX::Texture* pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc)
 {
   return m_pNative->DrawTexture(pTexture, xPos, yPos, rcSrc);
 }
@@ -202,7 +202,7 @@ GXBOOL GXWndCanvas::GetPaintRect(GXLPRECT lpRect)
   return TRUE;
 }
 
-GrapX::GXCanvas* GXWndCanvas::GetCanvasUnsafe()
+GrapX::Canvas* GXWndCanvas::GetCanvasUnsafe()
 {
   return m_pNative;
 }

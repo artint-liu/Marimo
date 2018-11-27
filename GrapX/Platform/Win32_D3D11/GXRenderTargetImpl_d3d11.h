@@ -19,12 +19,12 @@ namespace GrapX
     class RenderTargetImpl : public RenderTarget
     {
       friend class GraphicsImpl;
-      friend class GXCanvasCoreImpl;
+      friend class CanvasCoreImpl;
 
     protected:
       GraphicsImpl* m_pGraphics;
-      GTextureImpl_RenderTarget* m_pColorTexture;
-      GTextureImpl_DepthStencil* m_pDepthStencilTexture;
+      TextureImpl_RenderTarget* m_pColorTexture;
+      TextureImpl_DepthStencil* m_pDepthStencilTexture;
       const GXINT m_nWidth;
       const GXINT m_nHeight;
 
@@ -39,18 +39,18 @@ namespace GrapX
 
       GXBOOL     GetRatio               (GXSizeRatio* pWidth, GXSizeRatio* pHeight) override;
       GXSIZE*    GetDimension           (GXSIZE* pDimension) override;
-      GXHRESULT  GetColorTexture        (GTexture** ppColorTexture, GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
-      GTexture*  GetColorTextureUnsafe  (GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
-      GXHRESULT  GetDepthStencilTexture (GTexture** ppDepthStencilTexture) override;
-      GXBOOL     StretchRect            (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter) override;
+      GXHRESULT  GetColorTexture        (Texture** ppColorTexture, GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
+      Texture*   GetColorTextureUnsafe  (GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
+      GXHRESULT  GetDepthStencilTexture (Texture** ppDepthStencilTexture) override;
+      GXBOOL     StretchRect            (Texture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter) override;
       GXBOOL     SaveToFile             (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat) override;
       GXBOOL     SaveToMemory           (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat) override;
 
 
     public:
       GXBOOL Initialize(GXFormat eColorFormat, GXFormat eDepthStencilFormat);
-      GTextureImpl_RenderTarget* IntGetColorTextureUnsafe();
-      GTextureImpl_DepthStencil* IntGetDepthStencilTextureUnsafe();
+      TextureImpl_RenderTarget* IntGetColorTextureUnsafe();
+      TextureImpl_DepthStencil* IntGetDepthStencilTextureUnsafe();
     };
 
   } // namespace D3D11

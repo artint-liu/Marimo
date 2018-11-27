@@ -1,7 +1,7 @@
 #define ACCESS_AS(_TYPE, _ID)   (*(_TYPE*)(pConstBuf + m_StdCanvasUniform._ID))
 
-GXCanvas3DImpl::GXCanvas3DImpl(GraphicsImpl* pGraphics)
-  : GXCanvas3D      (2, RESTYPE_CANVAS3D)
+Canvas3DImpl::Canvas3DImpl(GraphicsImpl* pGraphics)
+  : Canvas3D      (2, RESTYPE_CANVAS3D)
   , m_pGraphicsImpl (pGraphics)
   //, m_xExt          (0)
   //, m_yExt          (0)
@@ -20,7 +20,7 @@ GXCanvas3DImpl::GXCanvas3DImpl(GraphicsImpl* pGraphics)
 #endif // REFACTOR_SHADER
 }
 
-GXCanvas3DImpl::~GXCanvas3DImpl()
+Canvas3DImpl::~Canvas3DImpl()
 {
   m_pGraphicsImpl->UnregisterResource(this);
   SAFE_RELEASE(m_pCurDepthStencilState);
@@ -32,12 +32,12 @@ GXCanvas3DImpl::~GXCanvas3DImpl()
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-GXHRESULT GXCanvas3DImpl::AddRef()
+GXHRESULT Canvas3DImpl::AddRef()
 {
   return gxInterlockedIncrement(&m_nRefCount);
 }
 
-GXHRESULT GXCanvas3DImpl::Release()
+GXHRESULT Canvas3DImpl::Release()
 {
   GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
   ASSERT(m_nRefCount >= 0);
@@ -50,20 +50,20 @@ GXHRESULT GXCanvas3DImpl::Release()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXSIZE* GXCanvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
+GXSIZE* Canvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
 {
   *pSize = m_sExtent;
   return pSize;
 }
 
-RenderTarget* GXCanvas3DImpl::GetTargetUnsafe() const
+RenderTarget* Canvas3DImpl::GetTargetUnsafe() const
 {
   return m_pTarget;
 }
 
-GXBOOL GXCanvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
+GXBOOL Canvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
 {
-  GTexture* pTexture = NULL;
+  Texture* pTexture = NULL;
   if(pTarget == NULL)
   {
     m_pGraphicsImpl->GetBackBuffer(&pTarget);
@@ -95,7 +95,7 @@ GXBOOL GXCanvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport
     if(m_pCurDepthStencilState == NULL)
     {
       GXDEPTHSTENCILDESC DepthStencil(TRUE, FALSE);
-      m_pGraphicsImpl->CreateDepthStencilState((GDepthStencilState**)&m_pCurDepthStencilState, &DepthStencil);
+      m_pGraphicsImpl->CreateDepthStencilState((DepthStencilState**)&m_pCurDepthStencilState, &DepthStencil);
     }
 
     m_Viewport = *pViewport;
@@ -114,12 +114,12 @@ GXBOOL GXCanvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport
   return FALSE;
 }
 
-Graphics* GXCanvas3DImpl::GetGraphicsUnsafe() const
+Graphics* Canvas3DImpl::GetGraphicsUnsafe() const
 {
   return m_pGraphicsImpl;
 }
 
-GXHRESULT GXCanvas3DImpl::SetMaterial(Material* pMtlInst)
+GXHRESULT Canvas3DImpl::SetMaterial(Material* pMtlInst)
 {
   MaterialImpl* pMtlInstImpl = (MaterialImpl*)pMtlInst;
   Shader* pShader = pMtlInstImpl->InlGetShaderUnsafe();
@@ -137,23 +137,23 @@ GXHRESULT GXCanvas3DImpl::SetMaterial(Material* pMtlInst)
   return TRUE;
 }
 
-GXHRESULT GXCanvas3DImpl::SetPrimitive(Primitive* pPrimitive)
+GXHRESULT Canvas3DImpl::SetPrimitive(Primitive* pPrimitive)
 {
   return m_pGraphicsImpl->SetPrimitive(pPrimitive);
 }
 
-GXHRESULT GXCanvas3DImpl::SetCamera(GCamera* pCamera)
+GXHRESULT Canvas3DImpl::SetCamera(GCamera* pCamera)
 {
   m_pCamera = pCamera;
   return GX_OK;
 }
 
-GCamera* GXCanvas3DImpl::GetCameraUnsafe()
+GCamera* Canvas3DImpl::GetCameraUnsafe()
 {
   return m_pCamera;
 }
 
-GXHRESULT GXCanvas3DImpl::UpdateCommonUniforms()
+GXHRESULT Canvas3DImpl::UpdateCommonUniforms()
 {
   GCAMERACONETXT CameraCtx;
   GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
@@ -197,7 +197,7 @@ GXHRESULT GXCanvas3DImpl::UpdateCommonUniforms()
   return GX_OK;
 }
 
-GXHRESULT GXCanvas3DImpl::Draw(GVSequence* pSequence)
+GXHRESULT Canvas3DImpl::Draw(GVSequence* pSequence)
 {
   typedef GVSequence::RenderDescArray RenderDescArray;
   Material* pMtlInst = NULL;
@@ -263,7 +263,7 @@ GXHRESULT GXCanvas3DImpl::Draw(GVSequence* pSequence)
   return GX_OK;
 }
 
-void GXCanvas3DImpl::SetWorldMatrix(const float4x4& matWorld)
+void Canvas3DImpl::SetWorldMatrix(const float4x4& matWorld)
 {
 #ifdef REFACTOR_SHADER
   GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
@@ -282,7 +282,7 @@ void GXCanvas3DImpl::SetWorldMatrix(const float4x4& matWorld)
 }
 
 #ifdef REFACTOR_SHADER
-GXDWORD GXCanvas3DImpl::GetGlobalHandle(GXLPCSTR szName)
+GXDWORD Canvas3DImpl::GetGlobalHandle(GXLPCSTR szName)
 {
   Marimo::ShaderConstName* pConstNameObj = m_pGraphicsImpl->InlGetShaderConstantNameObj();
   GXINT_PTR handle = pConstNameObj->AllocHandle(szName, GXUB_UNDEFINED);
@@ -295,7 +295,7 @@ GXDWORD GXCanvas3DImpl::GetGlobalHandle(GXLPCSTR szName)
 }
 
 template<typename _Ty>
-GXHRESULT GXCanvas3DImpl::SetCanvasUniformT(GXDWORD dwGlobalHandle, const _Ty& rUniform)
+GXHRESULT Canvas3DImpl::SetCanvasUniformT(GXDWORD dwGlobalHandle, const _Ty& rUniform)
 {
   if(dwGlobalHandle & (sizeof(float) - 1) || dwGlobalHandle > m_CanvasUniformBuf.GetSize()) {
     return GX_FAIL;
@@ -307,41 +307,41 @@ GXHRESULT GXCanvas3DImpl::SetCanvasUniformT(GXDWORD dwGlobalHandle, const _Ty& r
   return GX_OK;
 }
 
-GXHRESULT GXCanvas3DImpl::SetCanvasFloat(GXDWORD dwGlobalHandle, float fValue)
+GXHRESULT Canvas3DImpl::SetCanvasFloat(GXDWORD dwGlobalHandle, float fValue)
 {
   return SetCanvasUniformT(dwGlobalHandle, fValue);
 }
 
-GXHRESULT GXCanvas3DImpl::SetCanvasVector(GXDWORD dwGlobalHandle, const float4& rVector)
+GXHRESULT Canvas3DImpl::SetCanvasVector(GXDWORD dwGlobalHandle, const float4& rVector)
 {
   return SetCanvasUniformT(dwGlobalHandle, rVector);
 }
 
-GXHRESULT GXCanvas3DImpl::SetCanvasMatrix(GXDWORD dwGlobalHandle, const float4x4& rMatrix)
+GXHRESULT Canvas3DImpl::SetCanvasMatrix(GXDWORD dwGlobalHandle, const float4x4& rMatrix)
 {
   return SetCanvasUniformT(dwGlobalHandle, rMatrix);
 }
 
-GXHRESULT GXCanvas3DImpl::SetCanvasFloat(GXLPCSTR szName, float fValue)
+GXHRESULT Canvas3DImpl::SetCanvasFloat(GXLPCSTR szName, float fValue)
 {
   GXDWORD dwHandle = GetGlobalHandle(szName);
   return SetCanvasUniformT(dwHandle, fValue);
 }
 
-GXHRESULT GXCanvas3DImpl::SetCanvasVector(GXLPCSTR szName, const float4& rVector)
+GXHRESULT Canvas3DImpl::SetCanvasVector(GXLPCSTR szName, const float4& rVector)
 {
   GXDWORD dwHandle = GetGlobalHandle(szName);
   return SetCanvasUniformT(dwHandle, rVector);
 }
 
-GXHRESULT GXCanvas3DImpl::SetCanvasMatrix(GXLPCSTR szName, const float4x4& rMatrix)
+GXHRESULT Canvas3DImpl::SetCanvasMatrix(GXLPCSTR szName, const float4x4& rMatrix)
 {
   GXDWORD dwHandle = GetGlobalHandle(szName);
   return SetCanvasUniformT(dwHandle, rMatrix);
 }
 #endif // #ifdef REFACTOR_SHADER
 
-GXHRESULT GXCanvas3DImpl::Activate()
+GXHRESULT Canvas3DImpl::Activate()
 {
   if(m_pGraphicsImpl->InlSetCanvas(this) > 0)
   {
@@ -353,12 +353,12 @@ GXHRESULT GXCanvas3DImpl::Activate()
   return GX_OK;
 }
 
-GXLPCVIEWPORT GXCanvas3DImpl::GetViewport() const
+GXLPCVIEWPORT Canvas3DImpl::GetViewport() const
 {
   return &m_Viewport;
 }
 
-void GXCanvas3DImpl::SetViewport(GXVIEWPORT* pViewport)
+void Canvas3DImpl::SetViewport(GXVIEWPORT* pViewport)
 {
   m_Viewport = *pViewport;
   if(m_pGraphicsImpl->IsActiveCanvas(this))  {
@@ -370,7 +370,7 @@ void GXCanvas3DImpl::SetViewport(GXVIEWPORT* pViewport)
 //
 // 各种坐标系的变换
 //
-GXHRESULT GXCanvas3DImpl::TransformPosition(const float3* pPos, GXOUT float4* pView)
+GXHRESULT Canvas3DImpl::TransformPosition(const float3* pPos, GXOUT float4* pView)
 {
   GCAMERACONETXT ctx;
   ctx.dwMask = GCC_WVP;
@@ -380,7 +380,7 @@ GXHRESULT GXCanvas3DImpl::TransformPosition(const float3* pPos, GXOUT float4* pV
   return GX_OK;
 }
 
-GXHRESULT GXCanvas3DImpl::PositionToView(const float3* pPos, GXOUT float3* pView)
+GXHRESULT Canvas3DImpl::PositionToView(const float3* pPos, GXOUT float3* pView)
 {
   GCAMERACONETXT ctx;
   ctx.dwMask = GCC_WVP;
@@ -391,7 +391,7 @@ GXHRESULT GXCanvas3DImpl::PositionToView(const float3* pPos, GXOUT float3* pView
   return GX_OK;
 }
 
-GXHRESULT GXCanvas3DImpl::PositionToScreen(const float3* pPos, GXOUT GXPOINT* ptScreen)
+GXHRESULT Canvas3DImpl::PositionToScreen(const float3* pPos, GXOUT GXPOINT* ptScreen)
 {
   float3 vView;
   PositionToView(pPos, &vView);
@@ -401,7 +401,7 @@ GXHRESULT GXCanvas3DImpl::PositionToScreen(const float3* pPos, GXOUT GXPOINT* pt
   return GX_OK;
 }
 
-GXHRESULT GXCanvas3DImpl::PositionFromScreen(const GXPOINT* pScreen, float fDepth, GXOUT float3* pWorldPos)
+GXHRESULT Canvas3DImpl::PositionFromScreen(const GXPOINT* pScreen, float fDepth, GXOUT float3* pWorldPos)
 {
   const GXSIZE sizeHalf = {m_Viewport.regn.w / 2, m_Viewport.regn.h / 2};
   const GXPOINT ptCenter = {m_Viewport.regn.x + sizeHalf.cx, 
@@ -412,7 +412,7 @@ GXHRESULT GXCanvas3DImpl::PositionFromScreen(const GXPOINT* pScreen, float fDept
   return PositionFromView(&vPos, pWorldPos);
 }
 
-GXHRESULT GXCanvas3DImpl::PositionFromView(const float3* pView, GXOUT float3* pWorldPos)
+GXHRESULT Canvas3DImpl::PositionFromView(const float3* pView, GXOUT float3* pWorldPos)
 {
   GCAMERACONETXT ctx;
   ctx.dwMask = GCC_WVP;
@@ -423,7 +423,7 @@ GXHRESULT GXCanvas3DImpl::PositionFromView(const float3* pView, GXOUT float3* pW
   return GX_OK;
 }
 
-GXHRESULT GXCanvas3DImpl::RayFromScreen(const GXPOINT* pScreen, GXOUT Ray* pRay)
+GXHRESULT Canvas3DImpl::RayFromScreen(const GXPOINT* pScreen, GXOUT Ray* pRay)
 {
   float3 vWorldPos;
   PositionFromScreen(pScreen, 1.0f - 1e-5f, &vWorldPos);
@@ -433,7 +433,7 @@ GXHRESULT GXCanvas3DImpl::RayFromScreen(const GXPOINT* pScreen, GXOUT Ray* pRay)
 }
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil)
+GXHRESULT Canvas3DImpl::GetDepthStencil(Texture** ppDepthStencil)
 {
   //if(m_pDepthStencil == NULL) {
   //  return GX_FAIL;
@@ -444,20 +444,20 @@ GXHRESULT GXCanvas3DImpl::GetDepthStencil(GTexture** ppDepthStencil)
   return m_pTarget->GetDepthStencilTexture(ppDepthStencil);
 }
 
-const GXCanvas3D::FrustumPlanes* GXCanvas3DImpl::GetViewFrustum()
+const Canvas3D::FrustumPlanes* Canvas3DImpl::GetViewFrustum()
 {
   return &m_ViewFrustum;
 }
 
 #ifdef REFACTOR_SHADER
 #else
-STANDARDMTLUNIFORMTABLE* GXCanvas3DImpl::GetStandardUniform()
+STANDARDMTLUNIFORMTABLE* Canvas3DImpl::GetStandardUniform()
 {
   return &m_StdUniforms;
 }
 #endif // REFACTOR_SHADER
 
-GXHRESULT GXCanvas3DImpl::Clear(GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil)
+GXHRESULT Canvas3DImpl::Clear(GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil)
 {
   if(m_pGraphicsImpl->IsActiveCanvas(this))
   {
@@ -467,7 +467,7 @@ GXHRESULT GXCanvas3DImpl::Clear(GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXD
 }
 
 #define ALLOC_GLOBAL_CONST(_NAME, _TYPE)  m_StdCanvasUniform.id_##_NAME = pConstNameObj->AllocHandle("g_"#_NAME, _TYPE);
-void GXCanvas3DImpl::SetupCanvasUniform()
+void Canvas3DImpl::SetupCanvasUniform()
 {
   Marimo::ShaderConstName* pConstNameObj = m_pGraphicsImpl->InlGetShaderConstantNameObj();
 
@@ -527,7 +527,7 @@ void GXCanvas3DImpl::SetupCanvasUniform()
 #endif // #ifdef REFACTOR_SHADER
 }
 
-GXHRESULT GXCanvas3DImpl::Invoke( GRESCRIPTDESC* pDesc )
+GXHRESULT Canvas3DImpl::Invoke( GRESCRIPTDESC* pDesc )
 {
   if(pDesc->szCmdString == NULL)
   {
@@ -539,7 +539,7 @@ GXHRESULT GXCanvas3DImpl::Invoke( GRESCRIPTDESC* pDesc )
   return GX_OK;
 }
 
-void GXCanvas3DImpl::BroadcastCanvasUniformBufferSize( GXSIZE_T cbSize )
+void Canvas3DImpl::BroadcastCanvasUniformBufferSize( GXSIZE_T cbSize )
 {
   GRESCRIPTDESC sScriptDesc = {NULL};
   sScriptDesc.dwCmdCode = RC_CanvasUniformSize;

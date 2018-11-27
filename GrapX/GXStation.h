@@ -4,7 +4,7 @@
 namespace GrapX 
 {
   class Graphics;
-  class GTexture;
+  class Texture;
 }
 class CAeroShader;
 class CBlurShader;

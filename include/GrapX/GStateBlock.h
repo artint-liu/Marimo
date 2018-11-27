@@ -3,32 +3,32 @@
 
 namespace GrapX
 {
-  class GRasterizerState : public GResource
+  class RasterizerState : public GResource
   {
   public:
-    GRasterizerState() : GResource(0, RESTYPE_RASTERIZER_STATE) {}
+    RasterizerState() : GResource(0, RESTYPE_RASTERIZER_STATE) {}
   };
 
-  class GBlendState : public GResource
+  class BlendState : public GResource
   {
   public:
-    GBlendState() : GResource(0, RESTYPE_BLEND_STATE) {}
+    BlendState() : GResource(0, RESTYPE_BLEND_STATE) {}
     GXSTDINTERFACE(GXDWORD SetBlendFactor  (GXDWORD dwBlendFactor));
   };
 
   //////////////////////////////////////////////////////////////////////////
-  class GDepthStencilState : public GResource
+  class DepthStencilState : public GResource
   {
   public:
-    GDepthStencilState() : GResource(0, RESTYPE_DEPTHSTENCIL_STATE) {}
+    DepthStencilState() : GResource(0, RESTYPE_DEPTHSTENCIL_STATE) {}
     GXSTDINTERFACE(GXDWORD SetStencilRef  (GXDWORD dwStencilRef));
   };
 
   //////////////////////////////////////////////////////////////////////////
-  class GSamplerState : public GResource
+  class SamplerState : public GResource
   {
   public:
-    GSamplerState() : GResource(0, RESTYPE_SAMPLER_STATE) {}
+    SamplerState() : GResource(0, RESTYPE_SAMPLER_STATE) {}
     GXSTDINTERFACE(GXHRESULT  AddRef          ());
     GXSTDINTERFACE(GXHRESULT  Release         ());
 

@@ -1,4 +1,4 @@
-﻿//GXLRESULT GTextureImpl::OnDeviceEvent(DeviceEvent eEvent)
+﻿//GXLRESULT TextureImpl::OnDeviceEvent(DeviceEvent eEvent)
 //{
 //  if(m_Format == GXFMT_UNKNOWN)
 //    return GX_FAIL;
@@ -143,7 +143,7 @@
 //  return GX_OK;
 //}
 
-//GXLRESULT GTextureImpl::AddRef()
+//GXLRESULT TextureImpl::AddRef()
 //{
 //  return gxInterlockedIncrement(&m_nRefCount);
 //  //m_uRefCount++;
@@ -173,7 +173,7 @@ GXLRESULT GTextureImpl::AddRef()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXLRESULT GTextureImpl::Release()
+GXLRESULT TextureImpl::Release()
 {
   clstd::ScopeLocker sl(m_pGraphics->GetLocker());
   m_uRefCount--;
@@ -193,7 +193,7 @@ GXLRESULT GTextureImpl::Release()
   return m_uRefCount;
 }
 
-GXBOOL GTextureImpl::SaveToFile(GXLPCWSTR pszFileName, GXLPCWSTR pszDestFormat)
+GXBOOL TextureImpl::SaveToFile(GXLPCWSTR pszFileName, GXLPCWSTR pszDestFormat)
 {
   //GLVERIFY(GLBindTexture(GL_TEXTURE_2D, m_uTexture));
   //GXUINT nWidth, nHeight;
@@ -233,8 +233,8 @@ GXBOOL GTextureImpl::SaveToFile(GXLPCWSTR pszFileName, GXLPCWSTR pszDestFormat)
   return GX_OK;
 }
 
-GTextureImpl::GTextureImpl(Graphics* pGraphics)
-  : GTexture            ()
+TextureImpl::TextureImpl(Graphics* pGraphics)
+  : Texture             ()
   , m_pGraphics         ((GraphicsImpl*)pGraphics)
   , m_pLockedData       (NULL)
   , m_uTexture          (0)
@@ -252,7 +252,7 @@ GTextureImpl::GTextureImpl(Graphics* pGraphics)
   gxSetRect(&m_rcLocked, 0, 0, 0, 0);
 }
 
-GXBOOL GXDLLAPI GXSaveTextureToFileW(GXLPCWSTR szFileName, GXLPCSTR szDestFormat, GTexture* pTexture)
+GXBOOL GXDLLAPI GXSaveTextureToFileW(GXLPCWSTR szFileName, GXLPCSTR szDestFormat, Texture* pTexture)
 {
   //if(pszFileName == NULL || pTexture == NULL)
   //  return FALSE;
@@ -286,20 +286,20 @@ GXBOOL GXDLLAPI GXSaveTextureToFileW(GXLPCWSTR szFileName, GXLPCSTR szDestFormat
   return FALSE;
 }
 //////////////////////////////////////////////////////////////////////////
-GXBOOL GTextureImpl::Clear(const GXLPRECT lpRect, GXCOLOR dwColor)
+GXBOOL TextureImpl::Clear(const GXLPRECT lpRect, GXCOLOR dwColor)
 {
   return FALSE;
 }
 //////////////////////////////////////////////////////////////////////////
-GXVOID GTextureImpl::GenerateMipMaps()
+GXVOID TextureImpl::GenerateMipMaps()
 {
   ASSERT(0);
 }
 
-GXBOOL GTextureImpl::CopyRect(GTexture* pSrc, const GXLPCRECT lpRect)
+GXBOOL TextureImpl::CopyRect(Texture* pSrc, const GXLPCRECT lpRect)
 {
   GXRECT rect = {0, 0};
-  GTextureImpl* pSrcImpl = (GTextureImpl*)pSrc;
+  TextureImpl* pSrcImpl = (TextureImpl*)pSrc;
   GXUINT uDestHeight = GetHeight();
   GXUINT uSrcWidth, uSrcHeight;
 
@@ -345,11 +345,11 @@ GXBOOL GTextureImpl::CopyRect(GTexture* pSrc, const GXLPCRECT lpRect)
   return TRUE;
 }
 
-GXBOOL GTextureImpl::StretchRect(GTexture* pSrc, const GXLPCRECT lpDestRect, const GXLPCRECT lpSrcRect, GXTextureFilterType eFilter)
+GXBOOL TextureImpl::StretchRect(Texture* pSrc, const GXLPCRECT lpDestRect, const GXLPCRECT lpSrcRect, GXTextureFilterType eFilter)
 {
   GXRECT rcDst = {0, 0};
   GXRECT rcSrc = {0, 0};
-  GTextureImpl* pSrcImpl = (GTextureImpl*)pSrc;
+  TextureImpl* pSrcImpl = (TextureImpl*)pSrc;
 
   GXUINT uSrcHeight  = pSrc->GetHeight();
   GXUINT uDestHeight = GetHeight();
@@ -394,7 +394,7 @@ GXBOOL GTextureImpl::StretchRect(GTexture* pSrc, const GXLPCRECT lpDestRect, con
       m_pGraphics->IntSetTargetTexture(uPrevTexture);
     return TRUE;
   }
-  TRACE(">error: GTextureImpl::StretchRect: 没实现缩放拷贝.\n");
+  TRACE(">error: TextureImpl::StretchRect: 没实现缩放拷贝.\n");
   GLuint uPrevTexture = m_pGraphics->IntSetTargetTexture(pSrcImpl->m_uTexture);
   //GLVERIFY(glBindFramebuffer(GL_FRAMEBUFFER, uFrameBuffer));
   //GLVERIFY(glFramebufferTexture2D(GL_FRAMEBUFFER, 
@@ -425,7 +425,7 @@ GXBOOL GTextureImpl::StretchRect(GTexture* pSrc, const GXLPCRECT lpDestRect, con
   return TRUE;
 }
 
-GXBOOL GTextureImpl::LockRect(LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)
+GXBOOL TextureImpl::LockRect(LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)
 {
   lpLockRect->pBits = NULL;
   lpLockRect->Pitch = NULL;
@@ -457,7 +457,7 @@ GXBOOL GTextureImpl::LockRect(LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD
   return FALSE;
 }
 
-GXBOOL GTextureImpl::UnlockRect()
+GXBOOL TextureImpl::UnlockRect()
 {
   ASSERT(m_pLockedData != NULL);
   if(m_pLockedData != NULL)
@@ -500,12 +500,12 @@ GXBOOL GTextureImpl::UnlockRect()
   return FALSE;
 }
 
-Graphics*  GTextureImpl::GetGraphicsUnsafe()
+Graphics*  TextureImpl::GetGraphicsUnsafe()
 {
   return m_pGraphics;
 }
 
-GXBOOL GTextureImpl::GetRatio(GXINT* pWidthRatio, GXINT* pHeightRatio)
+GXBOOL TextureImpl::GetRatio(GXINT* pWidthRatio, GXINT* pHeightRatio)
 {
   if(pWidthRatio != NULL)
     *pWidthRatio = (GXINT)m_nWidthRatio;
@@ -514,15 +514,15 @@ GXBOOL GTextureImpl::GetRatio(GXINT* pWidthRatio, GXINT* pHeightRatio)
   return TRUE;
 }
 
-GXUINT GTextureImpl::GetWidth()
+GXUINT TextureImpl::GetWidth()
 {
   return m_nWidth;
 }
-GXUINT GTextureImpl::GetHeight()
+GXUINT TextureImpl::GetHeight()
 {
   return m_nHeight;
 }
-GXBOOL GTextureImpl::GetDimension(GXUINT* pWidth, GXUINT* pHeight)
+GXBOOL TextureImpl::GetDimension(GXUINT* pWidth, GXUINT* pHeight)
 {
   if(pWidth != NULL || pHeight != NULL)
   {
@@ -539,20 +539,20 @@ GXBOOL GTextureImpl::GetDimension(GXUINT* pWidth, GXUINT* pHeight)
   }
   return FALSE;
 }
-GXDWORD GTextureImpl::GetUsage()
+GXDWORD TextureImpl::GetUsage()
 {
   return m_dwResUsage;
 }
-GXFormat GTextureImpl::GetFormat()
+GXFormat TextureImpl::GetFormat()
 {
   return m_Format;
 }
-//GXPool GTextureImpl::GetPool()
+//GXPool TextureImpl::GetPool()
 //{
 //  return m_Pool;
 //}
 
-GXBOOL GTextureImpl::GetDesc(GXBITMAP*lpBitmap)
+GXBOOL TextureImpl::GetDesc(GXBITMAP*lpBitmap)
 {
   if(lpBitmap == NULL)
     return FALSE;
@@ -568,7 +568,7 @@ GXBOOL GTextureImpl::GetDesc(GXBITMAP*lpBitmap)
   return TRUE;
 }
 
-GXHRESULT GTextureImpl::Create(
+GXHRESULT TextureImpl::Create(
   const GXSIZE* TexSize, const GXSIZE* ImageSize, 
   GXUINT MipLevels, GXFormat Format, 
   GXDWORD ResUsage, GXDWORD MipFilter, GXLPVOID lpBits)
@@ -606,7 +606,7 @@ GXHRESULT GTextureImpl::Create(
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-//GXLRESULT GTextureOffscreenPlainSur::OnDeviceEvent(DeviceEvent eEvent)
+//GXLRESULT TextureOffscreenPlainSur::OnDeviceEvent(DeviceEvent eEvent)
 //{
 //  switch(eEvent)
 //  {
@@ -614,40 +614,40 @@ GXHRESULT GTextureImpl::Create(
 //    return GX_FAIL;
 //
 //  case DE_LostDevice:
-//    return GTextureImpl::OnDeviceEvent(eEvent);
+//    return TextureImpl::OnDeviceEvent(eEvent);
 //  case DE_ResizeDevice:
 //    break;
 //  }
 //  return GX_OK;
 //}
-GXBOOL GTextureOffscreenPlainSur::LockRect(LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)
+GXBOOL TextureOffscreenPlainSur::LockRect(LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)
 {
   return FALSE;
 }
-GXBOOL GTextureOffscreenPlainSur::UnlockRect()
+GXBOOL TextureOffscreenPlainSur::UnlockRect()
 {
   return FALSE;
 }
 
 
-GXBOOL GTextureOffscreenPlainSur::CopyRect(GTexture* pSrc)
+GXBOOL TextureOffscreenPlainSur::CopyRect(Texture* pSrc)
 {
   return FALSE;
 }
-GTextureOffscreenPlainSur::GTextureOffscreenPlainSur(Graphics* pGraphics)
-  : GTextureImpl(pGraphics)
+TextureOffscreenPlainSur::TextureOffscreenPlainSur(Graphics* pGraphics)
+  : TextureImpl(pGraphics)
 {
 }
-GTextureOffscreenPlainSur::~GTextureOffscreenPlainSur()
-{
-}
-
-GTexture_OriginFrameBuffer::GTexture_OriginFrameBuffer(Graphics* pGraphics)
-  : GTextureImpl(pGraphics)
+TextureOffscreenPlainSur::~TextureOffscreenPlainSur()
 {
 }
 
-//GXLRESULT GTexture_OriginFrameBuffer::OnDeviceEvent(DeviceEvent eEvent)
+Texture_OriginFrameBuffer::Texture_OriginFrameBuffer(Graphics* pGraphics)
+  : TextureImpl(pGraphics)
+{
+}
+
+//GXLRESULT Texture_OriginFrameBuffer::OnDeviceEvent(DeviceEvent eEvent)
 //{
 //  switch(eEvent)
 //  {
@@ -665,17 +665,17 @@ GTexture_OriginFrameBuffer::GTexture_OriginFrameBuffer(Graphics* pGraphics)
 //  return GX_OK;
 //}
 
-GXUINT GTexture_OriginFrameBuffer::GetWidth()
+GXUINT Texture_OriginFrameBuffer::GetWidth()
 {
   return m_nWidth;
 }
 
-GXUINT GTexture_OriginFrameBuffer::GetHeight()
+GXUINT Texture_OriginFrameBuffer::GetHeight()
 {
   return m_nHeight;
 }
 
-GXBOOL GTexture_OriginFrameBuffer::GetDimension(GXUINT* pWidth, GXUINT* pHeight)
+GXBOOL Texture_OriginFrameBuffer::GetDimension(GXUINT* pWidth, GXUINT* pHeight)
 {
   if(pWidth != NULL)
     *pWidth = m_nWidth;

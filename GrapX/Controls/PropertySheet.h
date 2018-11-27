@@ -60,11 +60,11 @@ namespace GXUIEXT
 
       union
       {
-        Page*         pChildPage;
-        LBItemList*   pListBoxItem;
-        GrapX::GTexture*     pTexture;
-        GXLPVOID      pGeneral;    // 通用的,只用于指针判断
-        float         fIncrease;
+        Page*           pChildPage;
+        LBItemList*     pListBoxItem;
+        GrapX::Texture* pTexture;
+        GXLPVOID        pGeneral;    // 通用的,只用于指针判断
+        float           fIncrease;
       };
       ITEM      ();
       //ITEM      (const ITEM& I);

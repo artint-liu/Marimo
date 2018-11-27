@@ -473,7 +473,7 @@ namespace D3D9
     {
       if(TEST_FLAG(m_dwFlags, F_SHOWCONSOLE))
       {
-        GXCanvas* pCanvas = LockCanvas(NULL, NULL, NULL);
+        Canvas* pCanvas = LockCanvas(NULL, NULL, NULL);
         //m_pConsole->Render(pCanvas);
         SAFE_RELEASE(pCanvas);
       }

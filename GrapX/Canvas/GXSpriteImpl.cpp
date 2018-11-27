@@ -67,7 +67,7 @@ int GXSpriteImpl::IntGetSpriteCount() const
 //////////////////////////////////////////////////////////////////////////
 
 
-GXVOID GXSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
+GXVOID GXSpriteImpl::PaintModule(GrapX::Canvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const
 {
   //const GXREGN& regn = ;
   if(nIndex < (GXINT)m_aModules.size()) {
@@ -75,14 +75,14 @@ GXVOID GXSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x
   }
 }
 
-GXVOID GXSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::PaintModule(GrapX::Canvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const
 {
   if(nIndex < (GXINT)m_aModules.size()) {
     pCanvas->DrawTexture(m_pTexture, lpRegn, &m_aModules[nIndex].regn);
   }
 }
 
-GXVOID GXSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const
+GXVOID GXSpriteImpl::PaintModule(GrapX::Canvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const
 {
   REGN rcDest;
   rcDest.left   = x;
@@ -122,7 +122,7 @@ GXVOID GXSpriteImpl::PaintModule(GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x
 //  }
 //}
 
-void GXSpriteImpl::PaintModule3H(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+void GXSpriteImpl::PaintModule3H(GrapX::Canvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
 {
   if(nStartIdx + 3 > IntGetSpriteCount())
   {
@@ -185,7 +185,7 @@ void GXSpriteImpl::PaintModule3H(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXIN
   //return rgDest.width;  // 返回值是中间可缩放Sprite的宽度
 }
 
-void GXSpriteImpl::PaintModule3V(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
+void GXSpriteImpl::PaintModule3V(GrapX::Canvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const
 {
   if(nStartIdx + 3 > IntGetSpriteCount())
   {
@@ -248,7 +248,7 @@ void GXSpriteImpl::PaintModule3V(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXIN
   //return rgDest.height;  // 返回值是中间可缩放Sprite的宽度
 }
 
-GXVOID GXSpriteImpl::PaintModule3x3(GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const
+GXVOID GXSpriteImpl::PaintModule3x3(GrapX::Canvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const
 {
   // 0 1 2
   // 3 4 5
@@ -351,7 +351,7 @@ GXBOOL GXSpriteImpl::GetModuleRegion(GXUINT nIndex, REGN *rgSprite) const
   return TRUE;
 }
 
-GXHRESULT GXSpriteImpl::GetTexture(GrapX::GTexture** ppTexture)
+GXHRESULT GXSpriteImpl::GetTexture(GrapX::Texture** ppTexture)
 {
   if(m_pTexture == NULL) {
     return GX_FAIL;
@@ -497,17 +497,17 @@ GXBOOL GXSpriteImpl::GetAnimBounding( GXUINT nIndex, GXRECT* lprc ) const
   return FALSE;
 }
 
-GXVOID GXSpriteImpl::PaintFrame( GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y ) const
+GXVOID GXSpriteImpl::PaintFrame( GrapX::Canvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y ) const
 {
   CLBREAK;
 }
 
-GXVOID GXSpriteImpl::PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::PaintFrame(GrapX::Canvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const
 {
   CLBREAK;
 }
 
-GXVOID GXSpriteImpl::PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const
+GXVOID GXSpriteImpl::PaintFrame(GrapX::Canvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const
 {
   CLBREAK;
 }
@@ -518,51 +518,51 @@ GXVOID GXSpriteImpl::PaintFrame(GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCRE
 //  CLBREAK;
 //}
 
-GXVOID GXSpriteImpl::PaintAnimationFrame(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const
+GXVOID GXSpriteImpl::PaintAnimationFrame(GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationFrame(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::PaintAnimationFrame(GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationFrame(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
+GXVOID GXSpriteImpl::PaintAnimationFrame(GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y)
+GXVOID GXSpriteImpl::PaintAnimationByTime(GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y)
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)
+GXVOID GXSpriteImpl::PaintAnimationByTime(GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn)
 {
 }
 
-GXVOID GXSpriteImpl::PaintAnimationByTime(GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
+GXVOID GXSpriteImpl::PaintAnimationByTime(GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect)
 {
 }
 
-GXVOID GXSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const
+GXVOID GXSpriteImpl::Paint(GrapX::Canvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const
 {
 }
 
-GXVOID GXSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::Paint(GrapX::Canvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const
 {
 }
 
-GXVOID GXSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+GXVOID GXSpriteImpl::Paint(GrapX::Canvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
 {
 }
 
-GXVOID GXSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const
+GXVOID GXSpriteImpl::Paint(GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const
 {
 }
 
-GXVOID GXSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const
+GXVOID GXSpriteImpl::Paint(GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const
 {
 }
 
-GXVOID GXSpriteImpl::Paint(GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
+GXVOID GXSpriteImpl::Paint(GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const
 {
 }
 

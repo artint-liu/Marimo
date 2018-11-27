@@ -215,8 +215,8 @@ namespace GrapX
   class Primitive;
   class Shader;
   class Effect;
-  class GTexture;
-  class GXCanvas;
+  class Texture;
+  class Canvas;
 } // namespace GrapX
 
 
@@ -4059,7 +4059,7 @@ typedef struct __tagCANVASSIZEINFO{
   GXSIZE    sizeRenderingSur;//GXINT nWidth, nHeight;
   GXREGN    rgDest;
   GXRECT    rcRenderingSrc;
-  GrapX::GXCanvas*  pCanvas;
+  GrapX::Canvas*  pCanvas;
   GrapX::Effect*  pEffect;
 }CANVASSIZEINFO, *LPCANVASSIZEINFO;
 
@@ -4570,8 +4570,8 @@ CLENUM_CLASS(GXINT, GXSizeRatio)
 //
 struct SCROLLTEXTUREDESC
 {
-  GrapX::GTexture* pOperationTex;  // 需要滚动的纹理
-  GrapX::GTexture* pTempTex;       // 临时纹理
+  GrapX::Texture* pOperationTex;  // 需要滚动的纹理
+  GrapX::Texture* pTempTex;       // 临时纹理
   int       dx, dy;         // 偏移量
   LPGXCRECT lprcScroll;     // 滚动区域
   GRegion*  lprgnClip;      // 裁剪区

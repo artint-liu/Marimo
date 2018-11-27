@@ -92,7 +92,7 @@ extern "C"
   
   GXHRESULT GXDLLAPI GXDrawThemeBackground(
     GXHTHEME hTheme,
-    GrapX::GXCanvas* canvas,
+    GrapX::Canvas* canvas,
     int iPartId,
     int iStateId,
     const GXRECT *pRect,  // 两个端点的坐标

@@ -4,22 +4,24 @@
 //class GXGraphics;
 namespace GrapX
 {
-  class GTextureBase : public GResource
+  class TextureBase : public GResource
   {
   public:
-    GTextureBase(GXUINT nPriority, GXDWORD dwType) : GResource(0, dwType) {}
+    TextureBase(GXUINT nPriority, GXDWORD dwType) : GResource(0, dwType) {}
+
   public:
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
+
   public:
     GXSTDINTERFACE(GXResUsage   GetUsage          ());
     GXSTDINTERFACE(GXFormat     GetFormat         ());
     GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
-    GXSTDINTERFACE(GrapX::Graphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
-    //GXSTDINTERFACE(GXBOOL       SaveToFile        (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
+    GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe ());      // 不会增加引用计数
   };
 
-  class GTexture : public GTextureBase
+  // Texture 2D
+  class Texture : public TextureBase
   {
   public:
     struct MAPPED
@@ -35,22 +37,21 @@ namespace GrapX
     // 放到GXImage中
     // GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
 
-    GTexture() : GTextureBase(0, RESTYPE_TEXTURE2D) {}
+    Texture() : TextureBase(0, RESTYPE_TEXTURE2D) {}
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
 
     GXSTDINTERFACE(GXBOOL       Clear             (GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
-    //GXSTDINTERFACE(GXBOOL       GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio));   // 去屏幕比例,如果是屏幕对齐纹理,返回负值的比率,否则返回纹理尺寸,如果从文件读取的纹理是原始文件的大小
     GXSTDINTERFACE(GXSIZE*      GetDimension      (GXSIZE* pDimension));  // 取纹理的尺寸, 这个值可能会跟屏幕尺寸变化
     GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));
-    GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSourceTexture, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource));
+    GXSTDINTERFACE(GXBOOL       CopyRect          (Texture* pSourceTexture, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource));
     GXSTDINTERFACE(GXBOOL       Map               (MAPPED* pLockRect, GXResMap eResMap)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
     GXSTDINTERFACE(GXBOOL       Unmap             ());
     GXSTDINTERFACE(GXBOOL       UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch));
 
   };
 
-  class GTexture3D : public GTextureBase
+  class Texture3D : public TextureBase
   {
   public:
     typedef struct __tagLOCKEDBOX
@@ -71,7 +72,7 @@ namespace GrapX
 
 
   public:
-    GTexture3D() : GTextureBase(0, RESTYPE_TEXTURE3D) {}
+    Texture3D() : TextureBase(0, RESTYPE_TEXTURE3D) {}
 
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
@@ -84,14 +85,14 @@ namespace GrapX
     //GXSTDINTERFACE(GXDWORD      GetUsage          ());
     //GXSTDINTERFACE(GXFormat     GetFormat         ());
     //GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
-    GXSTDINTERFACE(GXBOOL       CopyBox           (GTexture3D* pSrc, const LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z));
+    GXSTDINTERFACE(GXBOOL       CopyBox           (Texture3D* pSrc, const LPBOX lprcSource, GXUINT x, GXUINT y, GXUINT z));
     GXSTDINTERFACE(GXBOOL       LockBox           (LPLOCKEDBOX lpLockRect, const LPBOX lpBox, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
     GXSTDINTERFACE(GXBOOL       UnlockBox         ());
     //GXSTDINTERFACE(GXGraphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
     //GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
   };
 
-  class GTextureCube : public GTextureBase
+  class TextureCube : public TextureBase
   {
   public:
     typedef struct __tagLOCKEDRECT
@@ -101,7 +102,7 @@ namespace GrapX
     }LOCKEDRECT, *LPLOCKEDRECT;
 
   public:
-    GTextureCube() : GTextureBase(0, RESTYPE_TEXTURE_CUBE) {}
+    TextureCube() : TextureBase(0, RESTYPE_TEXTURE_CUBE) {}
 
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
@@ -120,9 +121,6 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));
   };
 } // namespace GrapX
-
-typedef GrapX::GTexture* GLPTEXTURE;
-
 
 #else
 #pragma message(__FILE__": warning : Duplicate included this file.")

@@ -109,7 +109,7 @@ namespace D3D9
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   GRasterizerStateImpl::GRasterizerStateImpl(GraphicsImpl* pGraphicsImpl)
-    : GRasterizerState()
+    : RasterizerState()
     , m_pGraphicsImpl (pGraphicsImpl)
   {
     InlSetZeroT(m_RasterizerDesc);
@@ -212,7 +212,7 @@ namespace D3D9
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   GBlendStateImpl::GBlendStateImpl(GraphicsImpl* pGraphicsImpl)
-    :GBlendState()
+    :BlendState()
     , m_pGraphicsImpl(pGraphicsImpl)
     , m_BlendFactor(-1)
   {
@@ -363,7 +363,7 @@ namespace D3D9
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   GDepthStencilStateImpl::GDepthStencilStateImpl(GraphicsImpl* pGraphicsImpl)
-    : GDepthStencilState()
+    : DepthStencilState()
     , m_pGraphicsImpl   (pGraphicsImpl)
     , m_StencilRef      (0)
   {
@@ -558,7 +558,7 @@ namespace D3D9
 #include "Platform/CommonInline/GStateBlock.inl"
 
   GSamplerStateImpl::GSamplerStateImpl(Graphics* pGraphics)
-    : GSamplerState   ()
+    : SamplerState   ()
     , m_pGraphicsImpl (static_cast<GraphicsImpl*>(pGraphics))
   {
     //ResetToDefault();

@@ -8,13 +8,13 @@ class GVSequence;
 struct STANDARDMTLUNIFORMTABLE;
 namespace GrapX
 {
-  class GXCanvas3D : public GXCanvasCore
+  class Canvas3D : public CanvasCore
   {
   public:
     typedef clstd::geometry::Ray Ray;
     typedef clstd::geometry::FrustumPlanes FrustumPlanes;
   public:
-    GXCanvas3D(GXUINT nPrioruty, GXDWORD dwType) : GXCanvasCore(nPrioruty, dwType) {}
+    Canvas3D(GXUINT nPrioruty, GXDWORD dwType) : CanvasCore(nPrioruty, dwType) {}
 
     GXSTDINTERFACE(GXHRESULT      Invoke                (GRESCRIPTDESC* pDesc));
     GXSTDINTERFACE(GXHRESULT      Activate              ());
@@ -25,7 +25,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT      SetPrimitive          (Primitive* pPrimitive));
     GXSTDINTERFACE(GXHRESULT      SetCamera             (GCamera* pCamera));
     GXSTDINTERFACE(GCamera*       GetCameraUnsafe       ());
-    GXSTDINTERFACE(GXHRESULT      GetDepthStencil       (GTexture** ppDepthStencil));
+    GXSTDINTERFACE(GXHRESULT      GetDepthStencil       (Texture** ppDepthStencil));
     GXSTDINTERFACE(void           SetWorldMatrix        (const float4x4& matWorld));
 
 #ifdef REFACTOR_SHADER

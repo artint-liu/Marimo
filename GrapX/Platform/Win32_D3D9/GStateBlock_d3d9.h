@@ -57,7 +57,7 @@ namespace D3D9
   //  GXBOOL            m_bOnDevice;
   //};
 
-  class GRasterizerStateImpl : public GRasterizerState
+  class GRasterizerStateImpl : public RasterizerState
   {
   private:
     GraphicsImpl*   m_pGraphicsImpl;
@@ -76,7 +76,7 @@ namespace D3D9
     GXBOOL  Activate    (GRasterizerStateImpl*  pPrevState);
   };
 
-  class GBlendStateImpl : public GBlendState
+  class GBlendStateImpl : public BlendState
   {
   private:
     GraphicsImpl* m_pGraphicsImpl;
@@ -106,7 +106,7 @@ namespace D3D9
     return eBlend < 1 || eBlend > 17;
   }
   //////////////////////////////////////////////////////////////////////////
-  class GDepthStencilStateImpl : public GDepthStencilState
+  class GDepthStencilStateImpl : public DepthStencilState
   {
     friend class GraphicsImpl;
   private:
@@ -170,10 +170,10 @@ namespace D3D9
   //typedef const GXSAMPLERSTAGE* GXLPCSAMPLERSTAGE;
   //void IntSetSamplerToDefault(GXLPSAMPLERSTAGE lpSampStage);
 
-  class GSamplerStateImpl : public GSamplerState
+  class GSamplerStateImpl : public SamplerState
   {
     friend class GraphicsImpl;
-    friend class GXCanvas;
+    friend class Canvas;
   private:
     GraphicsImpl*       m_pGraphicsImpl;
     //GXSAMPLERSTAGE        m_SamplerStage[SAMPLERCOUNT];

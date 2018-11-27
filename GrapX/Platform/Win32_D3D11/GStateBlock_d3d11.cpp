@@ -517,13 +517,13 @@ namespace GrapX
     //}
     //////////////////////////////////////////////////////////////////////////
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    GXHRESULT GRasterizerStateImpl::AddRef()
+    GXHRESULT RasterizerStateImpl::AddRef()
     {
       return gxInterlockedIncrement(&m_nRefCount);
     }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXHRESULT GRasterizerStateImpl::Release()
+    GXHRESULT RasterizerStateImpl::Release()
     {
       GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
       if(nRefCount == 0)
@@ -536,15 +536,15 @@ namespace GrapX
       return nRefCount;
     }
 
-    GRasterizerStateImpl::GRasterizerStateImpl(GraphicsImpl* pGraphicsImpl)
-      : GRasterizerState()
+    RasterizerStateImpl::RasterizerStateImpl(GraphicsImpl* pGraphicsImpl)
+      : RasterizerState()
       , m_pGraphicsImpl (pGraphicsImpl)
       , m_pRasterizerState(NULL)
     {
       InlSetZeroT(m_RasterizerDesc);
     }
 
-    GXBOOL GRasterizerStateImpl::Initialize(GXRASTERIZERDESC* pDesc)
+    GXBOOL RasterizerStateImpl::Initialize(GXRASTERIZERDESC* pDesc)
     {
       if(pDesc->cbSize != sizeof(GXRASTERIZERDESC)) {
         return FALSE;
@@ -570,14 +570,14 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL GRasterizerStateImpl::Activate(GRasterizerStateImpl* pPrevState)
+    GXBOOL RasterizerStateImpl::Activate(RasterizerStateImpl* pPrevState)
     {
       ASSERT(m_pGraphicsImpl->InlIsActiveRasterizerState(this));
       InlSetRasterizerState();
       return TRUE;
     }
 
-    inline void GRasterizerStateImpl::InlSetRasterizerState()
+    inline void RasterizerStateImpl::InlSetRasterizerState()
     {
       ID3D11DeviceContext* pd3dContext = m_pGraphicsImpl->D3DGetDeviceContext();
       //GXColor crBlendFactor = m_BlendFactor;
@@ -585,13 +585,13 @@ namespace GrapX
     }
     //////////////////////////////////////////////////////////////////////////
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    GXHRESULT GBlendStateImpl::AddRef()
+    GXHRESULT BlendStateImpl::AddRef()
     {
       return gxInterlockedIncrement(&m_nRefCount);
     }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXHRESULT GBlendStateImpl::Release()
+    GXHRESULT BlendStateImpl::Release()
     {
       GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
       if(nRefCount == 0)
@@ -604,8 +604,8 @@ namespace GrapX
       return nRefCount;
     }
 
-    GBlendStateImpl::GBlendStateImpl(GraphicsImpl* pGraphicsImpl)
-      : GBlendState     ()
+    BlendStateImpl::BlendStateImpl(GraphicsImpl* pGraphicsImpl)
+      : BlendState     ()
       , m_pGraphicsImpl (pGraphicsImpl)
       , m_BlendFactor   (-1)
       , m_pBlendState   (NULL)
@@ -613,7 +613,7 @@ namespace GrapX
       InlSetZeroT(m_BlendDesc);
     }
 
-    GXBOOL GBlendStateImpl::Initialize(GXBLENDDESC* pDesc, GXUINT nNum)
+    GXBOOL BlendStateImpl::Initialize(GXBLENDDESC* pDesc, GXUINT nNum)
     {
       // 状态合法性检查
       if(pDesc == NULL || nNum > 8 || nNum == 0) {
@@ -647,21 +647,21 @@ namespace GrapX
       return TRUE;
     }
 
-    void GBlendStateImpl::InlSetBlendState()
+    void BlendStateImpl::InlSetBlendState()
     {
       ID3D11DeviceContext* pd3dContext = m_pGraphicsImpl->D3DGetDeviceContext();
       GXColor crBlendFactor = m_BlendFactor;
       pd3dContext->OMSetBlendState(m_pBlendState, (float*)&crBlendFactor, 0xffffffff);
     }
 
-    GXBOOL GBlendStateImpl::Activate(GBlendStateImpl* pPrevState)
+    GXBOOL BlendStateImpl::Activate(BlendStateImpl* pPrevState)
     {
       ASSERT(m_pGraphicsImpl->InlIsActiveBlendState(this));
       InlSetBlendState();
       return TRUE;
     }
 
-    GXDWORD GBlendStateImpl::SetBlendFactor(GXDWORD dwBlendFactor)
+    GXDWORD BlendStateImpl::SetBlendFactor(GXDWORD dwBlendFactor)
     {
       const GXDWORD dwPrevFactor = m_BlendFactor;
       m_BlendFactor = dwBlendFactor;
@@ -674,13 +674,13 @@ namespace GrapX
     }
     //////////////////////////////////////////////////////////////////////////
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    GXHRESULT GDepthStencilStateImpl::AddRef()
+    GXHRESULT DepthStencilStateImpl::AddRef()
     {
       return gxInterlockedIncrement(&m_nRefCount);
     }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXHRESULT GDepthStencilStateImpl::Release()
+    GXHRESULT DepthStencilStateImpl::Release()
     {
       GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
       if(nRefCount == 0)
@@ -693,8 +693,8 @@ namespace GrapX
       return nRefCount;
     }
 
-    GDepthStencilStateImpl::GDepthStencilStateImpl(GraphicsImpl* pGraphicsImpl)
-      : GDepthStencilState  ()
+    DepthStencilStateImpl::DepthStencilStateImpl(GraphicsImpl* pGraphicsImpl)
+      : DepthStencilState  ()
       , m_pGraphicsImpl     (pGraphicsImpl)
       , m_StencilRef        (0)
       , m_pDepthStencilState(NULL)
@@ -702,7 +702,7 @@ namespace GrapX
       InlSetZeroT(m_DepthStencilDesc);
     }
 
-    GXBOOL GDepthStencilStateImpl::Initialize(GXDEPTHSTENCILDESC* pDesc)
+    GXBOOL DepthStencilStateImpl::Initialize(GXDEPTHSTENCILDESC* pDesc)
     {
       m_DepthStencilDesc.DepthEnable = pDesc->DepthEnable;
       m_DepthStencilDesc.DepthWriteMask = (D3D11_DEPTH_WRITE_MASK)pDesc->DepthWriteMask;
@@ -726,14 +726,14 @@ namespace GrapX
       return SUCCEEDED(hval);
     }
 
-    GXBOOL GDepthStencilStateImpl::Activate(GDepthStencilStateImpl* pPrevState)
+    GXBOOL DepthStencilStateImpl::Activate(DepthStencilStateImpl* pPrevState)
     {
       ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
       pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
       return TRUE;
     }
 
-    GXDWORD GDepthStencilStateImpl::SetStencilRef(GXDWORD dwStencilRef)
+    GXDWORD DepthStencilStateImpl::SetStencilRef(GXDWORD dwStencilRef)
     {
       const GXDWORD dwPrevStencilReft = m_StencilRef;
       m_StencilRef = dwStencilRef;
@@ -748,7 +748,7 @@ namespace GrapX
     //////////////////////////////////////////////////////////////////////////
 #define DX11_IMPLEMENT
 
-    GSamplerStateImpl::~GSamplerStateImpl()
+    SamplerStateImpl::~SamplerStateImpl()
     {
       for(UINT i = 0; i < SAMPLERCOUNT; i++) {
         SAFE_RELEASE(m_pSampler[i]);
@@ -756,12 +756,12 @@ namespace GrapX
     }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    GXHRESULT GSamplerStateImpl::AddRef()
+    GXHRESULT SamplerStateImpl::AddRef()
     {
       return gxInterlockedIncrement(&m_nRefCount);
     }
 
-    GXHRESULT GSamplerStateImpl::Release()
+    GXHRESULT SamplerStateImpl::Release()
     {
       GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
       if(nRefCount == 0)
@@ -820,8 +820,8 @@ namespace GrapX
     //  //ASSERT(SUCCEEDED(hval));
     //}
 
-    GSamplerStateImpl::GSamplerStateImpl(GrapX::Graphics* pGraphics)
-      : GSamplerState   ()
+    SamplerStateImpl::SamplerStateImpl(GrapX::Graphics* pGraphics)
+      : SamplerState   ()
       , m_pGraphicsImpl (static_cast<GraphicsImpl*>(pGraphics))
       //, m_dwChangeMask  (0xffff)
     {
@@ -831,13 +831,13 @@ namespace GrapX
       InlSetZeroT(m_SamplerDesc);
     }
 
-    GXBOOL GSamplerStateImpl::InitializeStatic()
+    GXBOOL SamplerStateImpl::InitializeStatic()
     {
       //IntSetSamplerToDefault(&s_DefaultSamplerState);
       return TRUE;
     }
 
-    GXBOOL GSamplerStateImpl::Initialize(GSamplerStateImpl* pDefault)
+    GXBOOL SamplerStateImpl::Initialize(SamplerStateImpl* pDefault)
     {
       ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       //ID3D11DeviceContext* const pd3dDeviceContext = m_pGraphicsImpl->D3DGetDeviceContext();
@@ -907,7 +907,7 @@ namespace GrapX
     //  return TRUE;
     //}
 
-    GXBOOL GSamplerStateImpl::Activate(GSamplerStateImpl* pPrevSamplerState)
+    GXBOOL SamplerStateImpl::Activate(SamplerStateImpl* pPrevSamplerState)
     {
       ASSERT(m_pGraphicsImpl->InlIsActiveSamplerState(this)); // 确定已经放置到Graphics上
 
@@ -974,7 +974,7 @@ namespace GrapX
     //  return m_SamplerStage[Sampler].m[eType];
     //}
     //
-    GXHRESULT GSamplerStateImpl::SetState(GXUINT Sampler, GXSAMPLERDESC* pSamplerDesc)
+    GXHRESULT SamplerStateImpl::SetState(GXUINT Sampler, GXSAMPLERDESC* pSamplerDesc)
     {
       ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       GXSAMPLERDESC& SamplerDesc = m_SamplerDesc[Sampler];
@@ -1021,13 +1021,13 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT GSamplerStateImpl::SetStateArray(GXUINT nStartSlot, GXSAMPLERDESC* pSamplerDesc, int nCount)
+    GXHRESULT SamplerStateImpl::SetStateArray(GXUINT nStartSlot, GXSAMPLERDESC* pSamplerDesc, int nCount)
     {
       CLBREAK;
       return GX_FAIL;
     }
 
-    GXHRESULT GSamplerStateImpl::ResetToDefault()
+    GXHRESULT SamplerStateImpl::ResetToDefault()
     {
       //CLBREAK;
       return GX_FAIL;

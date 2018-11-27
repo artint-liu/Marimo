@@ -195,8 +195,8 @@ typedef struct __tagGXGDIBITMAP : GXGDIOBJ
   GXWORD      bmBitsPixel; 
   GXLPVOID    bmBits; 
   //GXImage*    pImage;    
-  GrapX::GTexture*     pDrawingTexture; // 用于绘制
-  GrapX::RenderTarget* pTargetTexture;  // 如果位图作为绘制目标，则创建它
+  GrapX::Texture*       pDrawingTexture; // 用于绘制
+  GrapX::RenderTarget*  pTargetTexture;  // 如果位图作为绘制目标，则创建它
 }GXGDIBITMAP;
 
 typedef GXGDIPEN  *LPGXGDIPEN, *GXLPGDIPEN;
@@ -210,7 +210,7 @@ typedef GXGDIBITMAP  *LPGXGDIBITMAP, *GXLPGDIBITMAP;
 typedef struct __tagGXGDIDC : GXGDIOBJ
 {
   GXWndCanvas*    pWndCanvas;    // 
-  GrapX::GXCanvas*pCanvas;    
+  GrapX::Canvas*pCanvas;    
   LPGXGDIBITMAP   lpBitmap;      // 如果是MemDC，才不为0
   GXHWND          hBindWnd;      // 与这个DC绑定的窗口
   //GXUINT        uRefCount;
@@ -235,7 +235,7 @@ typedef struct __tagGXICON
   GXBOOL      fIcon;
   GXDWORD     xHotspot;
   GXDWORD     yHotspot;
-  GrapX::GTexture*   pImgIcon;
+  GrapX::Texture*   pImgIcon;
 //  HBITMAP hbmMask; 
 //  HBITMAP hbmColor; 
 }GXICON, *LPGXICON, *GXLPICON;
@@ -282,7 +282,7 @@ struct GXCARET
   GXDWORD        flag;
   GXBOOL  IsVisible  ();
   GXBOOL  Tick    ();        // 只在可用并且显示时更新就可以了
-  GXHRESULT PaintCaret  (GrapX::GXCanvas* pCanvas);
+  GXHRESULT PaintCaret  (GrapX::Canvas* pCanvas);
 };
 
 struct INTMEASURESTRING // 内部字符串测量结构

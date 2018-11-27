@@ -108,7 +108,7 @@ GXBOOL CanBreak(GXWCHAR pch, GXWCHAR ch);
 
 //////////////////////////////////////////////////////////////////////////
 
-  GXINT GXCanvasImpl::TextOutDirect(const INTMEASURESTRING* p, GXLPPOINT pptPosition)
+  GXINT CanvasImpl::TextOutDirect(const INTMEASURESTRING* p, GXLPPOINT pptPosition)
   {
     ASSERT(p->pFont != NULL);
     GXFont::CHARDESC CharDesc;
@@ -175,7 +175,7 @@ GXBOOL CanBreak(GXWCHAR pch, GXWCHAR ch);
   }
 
   // 定位Tab位置
-  GXINT GXCanvasImpl::LocalizeTabPos(const INTMEASURESTRING* p, int nCurPos, int nDefaultTabWidth, int* pLastIndex)
+  GXINT CanvasImpl::LocalizeTabPos(const INTMEASURESTRING* p, int nCurPos, int nDefaultTabWidth, int* pLastIndex)
   {
     if(p->nTabPositions != 0 && p->lpnTabStopPositions != NULL) {
       for(int i = *pLastIndex; i < p->nTabPositions; i++) {
@@ -192,7 +192,7 @@ GXBOOL CanBreak(GXWCHAR pch, GXWCHAR ch);
   // 获取单行文本的宽度
   // 输入参数：cbString 必须是一个确切的字符串长度
   // 返回值：字符串的宽度
-  GXINT GXCanvasImpl::MeasureStringWidth_SL(const INTMEASURESTRING* p)
+  GXINT CanvasImpl::MeasureStringWidth_SL(const INTMEASURESTRING* p)
   {
     ASSERT(p->pFont != NULL);
     GXINT  i = 0;
@@ -227,7 +227,7 @@ GXBOOL CanBreak(GXWCHAR pch, GXWCHAR ch);
   // 满足任意条件后都会返回。
   // 输出：pEnd 返回字符串结尾的索引，这个值应该指向'\0''\r''\n'或者等于cbString
   // 返回值：这段长度字符串的宽度
-  GXINT GXCanvasImpl::MeasureStringWidth_RN(const INTMEASURESTRING* p, GXINT* pEnd)
+  GXINT CanvasImpl::MeasureStringWidth_RN(const INTMEASURESTRING* p, GXINT* pEnd)
   {
     ASSERT(p->pFont != NULL);
     GXINT  i = 0;
@@ -266,7 +266,7 @@ GXBOOL CanBreak(GXWCHAR pch, GXWCHAR ch);
     return (ch == CHAR_SPACE || (!IS_CHS(pch) && !IS_ENG(pch)) || (IS_CHS(pch) && ch != 0x0CFF/*chinese ','*/ && ch != 0x0230/*chinese '.'*/));
   }
 
-  GXINT GXCanvasImpl::MeasureStringWidth_WB(const INTMEASURESTRING* p, GXINT nWidthLimit, GXINT* pEnd)
+  GXINT CanvasImpl::MeasureStringWidth_WB(const INTMEASURESTRING* p, GXINT nWidthLimit, GXINT* pEnd)
   {
     ASSERT(p->pFont != NULL);
     struct CONTENT
@@ -378,7 +378,7 @@ RET_IMMT:
   //(暂不支持)GXDT_RTLREADING  Layout in right to left reading order for bi-directional text when the font selected into the hdc is a Hebrew or Arabic font. The default reading order for all text is left to right.
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
-  GXINT GXCanvasImpl::DrawText_SingleLine(const INTMEASURESTRING* p, GXLPRECT lpRect)
+  GXINT CanvasImpl::DrawText_SingleLine(const INTMEASURESTRING* p, GXLPRECT lpRect)
   {
     ASSERT(p->uFormat & GXDT_SINGLELINE);
     ASSERT(lpRect != NULL);
@@ -469,7 +469,7 @@ RET_IMMT:
     return sizeExtent.cy;
   }
   //////////////////////////////////////////////////////////////////////////
-  GXINT GXCanvasImpl::DrawText_Normal(const INTMEASURESTRING* p, GXLPRECT lpRect)
+  GXINT CanvasImpl::DrawText_Normal(const INTMEASURESTRING* p, GXLPRECT lpRect)
   {
     // GXDT_EXPANDTABS
     // GXDT_NOPREFIX
@@ -540,7 +540,7 @@ RET_IMMT:
   // 备注：目前 WordBreak 方式与Win32的不完全一样，已知的差异是在狭长区域
   //     Win32的DrawText仍然不会分割把后继字符与之前的字符断行。而我写的会
   //     把后继字符另起新行
-  GXINT GXCanvasImpl::DrawText_WordBreak(const INTMEASURESTRING* p, GXLPRECT lpRect)
+  GXINT CanvasImpl::DrawText_WordBreak(const INTMEASURESTRING* p, GXLPRECT lpRect)
   {
     // GXDT_EXPANDTABS
     // GXDT_NOPREFIX
@@ -609,7 +609,7 @@ RET_IMMT:
     return ptPos.y;
   }
   //////////////////////////////////////////////////////////////////////////
-  GXINT GXCanvasImpl::DrawText(GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
+  GXINT CanvasImpl::DrawText(GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
   {
     clStringW str;
     if(nCount == -1)
@@ -622,7 +622,7 @@ RET_IMMT:
     return DrawText(pFTFont, str, (int)str.GetLength(), lpRect, uFormat, crText);
   }
 
-  GXINT GXCanvasImpl::DrawText(GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
+  GXINT CanvasImpl::DrawText(GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText)
   {
     GXINT nRet;
     GXINT eLastMode = 0;
@@ -668,7 +668,7 @@ RET_IMMT:
 
 
   //////////////////////////////////////////////////////////////////////////
-  GXBOOL GXCanvasImpl::TextOut(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText)
+  GXBOOL CanvasImpl::TextOut(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCSTR lpString,GXINT cbString, GXCOLORREF crText)
   {
     clStringW str;
     if(cbString == -1) {
@@ -684,7 +684,7 @@ RET_IMMT:
     return TextOut(pFTFont, nXStart, nYStart, str, (int)str.GetLength(), crText);
   }
 
-  GXBOOL GXCanvasImpl::TextOut(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText)
+  GXBOOL CanvasImpl::TextOut(GXFont* pFTFont, GXINT nXStart,GXINT nYStart,GXLPCWSTR lpString,GXINT cbString, GXCOLORREF crText)
   {
     GXPOINT ptPos = {nXStart, nYStart};
     SetParametersInfo(CPI_SETTEXTURECOLOR, crText, NULL);
@@ -703,7 +703,7 @@ RET_IMMT:
     return (GXBOOL)pFTFont->GetMetricsHeight();
   }
 
-  GXLONG GXCanvasImpl::TabbedTextOut(GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
+  GXLONG CanvasImpl::TabbedTextOut(GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
   {
     clStringW str;
     if(nCount == -1) {
@@ -719,7 +719,7 @@ RET_IMMT:
     return TabbedTextOut(pFTFont, x, y, str, (int)str.GetLength(), nTabPositions, lpTabStopPositions, crText);
   }
 
-  GXLONG GXCanvasImpl::TabbedTextOut(GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
+  GXLONG CanvasImpl::TabbedTextOut(GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)
   {
     GXRECT rect(x, y, 0, 0);
     //GXPOINT ptPos = {x, y};

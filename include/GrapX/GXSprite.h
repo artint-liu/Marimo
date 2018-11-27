@@ -3,7 +3,7 @@
 
 namespace GrapX
 {
-  class GXCanvas;
+  class Canvas;
   class Graphics;
 }
 //class GXImage;
@@ -64,31 +64,31 @@ public:
 public:
   //GXSTDINTERFACE(GXHRESULT SaveW              (GXLPCWSTR szFilename) const);
                                               
-  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::Canvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::Canvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintModule          (GrapX::Canvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
 
-  GXSTDINTERFACE(GXVOID    PaintModule3H        (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDINTERFACE(GXVOID    PaintModule3V        (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDINTERFACE(GXVOID    PaintModule3x3       (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3H        (GrapX::Canvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3V        (GrapX::Canvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDINTERFACE(GXVOID    PaintModule3x3       (GrapX::Canvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawCenter, GXLPCRECT rect) const);
 
-  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::Canvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::Canvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintFrame           (GrapX::Canvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const);
 
-  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const);
-  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y));
-  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn));
-  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect));
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationFrame  (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const);
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y));
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn));
+  GXSTDINTERFACE(GXVOID    PaintAnimationByTime (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect));
 
-  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
-  GXSTDINTERFACE(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::Canvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::Canvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::Canvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDINTERFACE(GXVOID    Paint                (GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
 
   GXSTDINTERFACE(GXINT     Find                 (ID id, GXOUT Type* pType = NULL) const); // pType 可以设置为NULL, 不返回类型
   GXSTDINTERFACE(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType = NULL) const);
@@ -128,7 +128,7 @@ public:
   //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXRECT* lprc) const); // 对于Module，返回值的left和top都应该是0
   //GXSTDINTERFACE(GXBOOL    GetSpriteBounding    (GXINT nUnifiedIndex, GXREGN* lprg) const);
 
-  GXSTDINTERFACE(GXHRESULT GetTexture           (GrapX::GTexture** ppTexture));
+  GXSTDINTERFACE(GXHRESULT GetTexture           (GrapX::Texture** ppTexture));
   GXSTDINTERFACE(clStringW GetImageFileW        () const);
   GXSTDINTERFACE(clStringA GetImageFileA        () const);
                                           

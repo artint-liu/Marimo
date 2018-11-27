@@ -1,11 +1,11 @@
 #ifndef _IMPLEMENT_GRAP_X_CANVAS_CORE_H_
 #define _IMPLEMENT_GRAP_X_CANVAS_CORE_H_
 class GraphicsImpl;
-class GTextureImpl;
-class GSamplerStateImpl;
+class TextureImpl;
+class SamplerStateImpl;
 class RenderTargetImpl;
 
-class GXCanvasCoreImpl : public GXCanvas
+class CanvasCoreImpl : public Canvas
 {
   friend class GraphicsImpl;
 protected:
@@ -15,13 +15,13 @@ protected:
   //GXINT               m_yExt;
   RenderTargetImpl*   m_pTargetTex;
   EffectImpl*         m_pEffectImpl;
-  GBlendState*        m_pBlendState;
-  GDepthStencilState* m_pDepthStencilState;
-  GSamplerStateImpl*  m_pSamplerState;
+  BlendState*         m_pBlendState;
+  DepthStencilState*  m_pDepthStencilState;
+  SamplerStateImpl*   m_pSamplerState;
   GCamera*            m_pCamera;
 public:
-  GXCanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType);
-  virtual ~GXCanvasCoreImpl();
+  CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType);
+  virtual ~CanvasCoreImpl();
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef              ();

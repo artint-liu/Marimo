@@ -24,7 +24,7 @@ namespace D3D9
   typedef GXD3DXCONSTDESC*        GXLPD3DXCONSTDESC;
   typedef const GXD3DXCONSTDESC*  GXLPCD3DXCONSTDESC;
 
-  class GXCanvasImpl;
+  class CanvasImpl;
   class GShaderImpl : public GShader
   {
     friend class GraphicsImpl;

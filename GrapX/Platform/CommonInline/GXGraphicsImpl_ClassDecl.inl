@@ -29,11 +29,11 @@
   //virtual GXHRESULT SetPrimitiveVI      (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0) override;
 
   // 理论上GXGraphics没有 Set** 类函数, SetTexture 例外, 因为 SetTexture 同时肩负这清空指定设备纹理的任务
-  virtual GXHRESULT SetTexture            (GTextureBase* pTexture, GXUINT uStage = 0) override;
-  virtual GXHRESULT SetRasterizerState    (GRasterizerState* pRasterizerState) override;
-  virtual GXHRESULT SetBlendState         (GBlendState* pBlendState) override;
-  virtual GXHRESULT SetDepthStencilState  (GDepthStencilState* pDepthStencilState) override;
-  virtual GXHRESULT SetSamplerState       (GSamplerState* pSamplerState) override;
+  virtual GXHRESULT SetTexture            (TextureBase* pTexture, GXUINT uStage = 0) override;
+  virtual GXHRESULT SetRasterizerState    (RasterizerState* pRasterizerState) override;
+  virtual GXHRESULT SetBlendState         (BlendState* pBlendState) override;
+  virtual GXHRESULT SetDepthStencilState  (DepthStencilState* pDepthStencilState) override;
+  virtual GXHRESULT SetSamplerState       (SamplerState* pSamplerState) override;
 
   virtual GXHRESULT Clear               (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil) override;
   virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount) override;
@@ -41,39 +41,38 @@
 
   //////////////////////////////////////////////////////////////////////////
   // 低级函数
-  // GTexture
+  // Texture
 
   // CreateTexture 支持 TEXSIZE_* 族的参数作为纹理的宽或高.
 
   // 2D Texture
-  GXHRESULT CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch) override;
+  GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch) override;
   
-  GXHRESULT CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, GTexture* pSourceTexture) override;
+  GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture) override;
 
 
-  GXHRESULT CreateTextureFromMemory  (GTexture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage) override;
-  GXHRESULT CreateTextureFromFile    (GTexture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage) override;
-  //virtual GXHRESULT CreateTextureFromFileEx  (GTexture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter = GXFILTER_NONE, GXDWORD MipFilter = GXFILTER_NONE, GXCOLORREF ColorKey = 0, GXOUT LPGXIMAGEINFOX pSrcInfo = NULL) override;
+  GXHRESULT CreateTextureFromMemory  (Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage) override;
+  GXHRESULT CreateTextureFromFile    (Texture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage) override;
+  //virtual GXHRESULT CreateTextureFromFileEx  (Texture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter = GXFILTER_NONE, GXDWORD MipFilter = GXFILTER_NONE, GXCOLORREF ColorKey = 0, GXOUT LPGXIMAGEINFOX pSrcInfo = NULL) override;
 
   // Volume Texture
-  virtual GXHRESULT CreateTexture3D           (GTexture3D** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
-  virtual GXHRESULT CreateTexture3DFromFile   (GTexture3D** ppTexture, GXLPCWSTR pSrcFile) override;
-  //virtual GXHRESULT CreateTexture3DFromFileEx (GTexture3D** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
+  virtual GXHRESULT CreateTexture3D           (Texture3D** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
+  virtual GXHRESULT CreateTexture3DFromFile   (Texture3D** ppTexture, GXLPCWSTR pSrcFile) override;
+  //virtual GXHRESULT CreateTexture3DFromFileEx (Texture3D** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
 
   // Cube Texture
-  virtual GXHRESULT CreateTextureCube           (GTextureCube** ppTexture, GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
-  virtual GXHRESULT CreateTextureCubeFromFile   (GTextureCube** ppTexture, GXLPCWSTR pSrcFile) override;
-  //virtual GXHRESULT CreateTextureCubeFromFileEx (GTextureCube** ppTexture, GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
+  virtual GXHRESULT CreateTextureCube           (TextureCube** ppTexture, GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
+  virtual GXHRESULT CreateTextureCubeFromFile   (TextureCube** ppTexture, GXLPCWSTR pSrcFile) override;
+  //virtual GXHRESULT CreateTextureCubeFromFileEx (TextureCube** ppTexture, GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
 
 
   // GStateBlock_Old
   // GRenderState
 
-  //GXHRESULT   IntCreateRenderState        (GRenderStateImpl** pRenderState);
-  GXHRESULT   IntCreateRasterizerState    (GRasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc);
-  GXHRESULT   IntCreateBlendState         (GBlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum);
-  GXHRESULT   IntCreateDepthStencilState  (GDepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState);
-  GXHRESULT   IntCreateSamplerState       (GSamplerStateImpl** pSamplerState, GSamplerStateImpl* pDefault);
+  GXHRESULT   IntCreateRasterizerState    (RasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc);
+  GXHRESULT   IntCreateBlendState         (BlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum);
+  GXHRESULT   IntCreateDepthStencilState  (DepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState);
+  GXHRESULT   IntCreateSamplerState       (SamplerStateImpl** pSamplerState, SamplerStateImpl* pDefault);
 
   // GPrimitive
   GXHRESULT CreatePrimitive               (GrapX::Primitive** pPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
@@ -92,26 +91,26 @@
   // 高级函数
 
   // GXCanvas
-  virtual GXCanvas*   LockCanvas              (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags) override;
+  virtual Canvas*   LockCanvas              (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags) override;
 
-  virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
+  virtual GXHRESULT   CreateCanvas3D          (Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
   //virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
   virtual GXHRESULT   CreateEffect            (Effect** ppEffect, Shader* pShader) override;
   virtual GXHRESULT   CreateMaterial          (Material** ppMtlInst, Shader* pShader) override;
   virtual GXHRESULT   CreateMaterialFromFile  (Material** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
   //virtual GXHRESULT   CreateMaterialFromFile  (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
 
-  virtual GXHRESULT   CreateRasterizerState   (GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc) override;
-  virtual GXHRESULT   CreateBlendState        (GBlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum) override;
-  virtual GXHRESULT   CreateDepthStencilState (GDepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState) override;
-  virtual GXHRESULT   CreateSamplerState      (GSamplerState** ppSamplerState) override;
+  virtual GXHRESULT   CreateRasterizerState   (RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc) override;
+  virtual GXHRESULT   CreateBlendState        (BlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum) override;
+  virtual GXHRESULT   CreateDepthStencilState (DepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState) override;
+  virtual GXHRESULT   CreateSamplerState      (SamplerState** ppSamplerState) override;
 
   // GXImage
   // TODO: 即使创建失败,也会返回一个默认图片
   // CreateImage 支持 TEXSIZE_* 族的参数指定Image的宽或者高
   //virtual GXImage*    CreateImage             (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits) override;
   //virtual GXImage*    CreateImageFromFile     (GXLPCWSTR lpwszFilename) override;
-  //virtual GXImage*    CreateImageFromTexture  (GTexture* pTexture) override;
+  //virtual GXImage*    CreateImageFromTexture  (Texture* pTexture) override;
 
   GXHRESULT CreateRenderTarget(RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override;
 
@@ -140,7 +139,7 @@
   //virtual GXImage*    GetBackBufferImg        () override;
   //virtual GTexture*   GetBackBufferTex        () override;
   GXHRESULT   GetBackBuffer           (RenderTarget** ppTarget) override;
-  GTexture*   GetDeviceOriginTex      () override;
+  Texture*    GetDeviceOriginTex      () override;
   GXBOOL      ScrollTexture           (const SCROLLTEXTUREDESC* lpScrollTexDesc) override;
 
   GXBOOL      GetDesc                 (GXGRAPHICSDEVICE_DESC* pDesc) override;
@@ -166,7 +165,7 @@ private:
   GXHRESULT IntCreateSdrPltDescW      (Shader** ppShader, GXLPCWSTR szShaderDesc, GXLPCSTR szPlatformSect, MTLFILEPARAMDESC* pMtlParam);
   GXLPCWSTR IntToAbsPathW             (clStringW& strOutput, GXLPCWSTR szPath); // 当 szPath 已经是绝对路径时 strOutput 不会被设置
   GXBOOL    SetSafeClip               (const GXREGN* pRegn);
-  GXCanvas* AllocCanvas               ();
+  Canvas* AllocCanvas               ();
   //GResIter  FindResource              (GResource* pResource);
   GXHRESULT BroadcastScriptCommand    (GRESCRIPTDESC* pDesc);
   GXHRESULT BroadcastCategoryCommand  (GXDWORD dwCategoryID, GRESCRIPTDESC* pDesc);
@@ -174,58 +173,58 @@ private:
   GXVOID    SetShaderComposerPathW    (GXLPCWSTR szPath);
 
   inline GXLPCSTR   InlGetPlatformStringA () const;
-  inline GXBOOL     InlSetTexture         (GTexBaseImpl* pTexture, GXUINT uStage);
+  inline GXBOOL     InlSetTexture         (TexBaseImpl* pTexture, GXUINT uStage);
   inline GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTargetIndex);
-  inline GXBOOL     InlSetDepthStencil    (GTexture* pTexture);
+  inline GXBOOL     InlSetDepthStencil    (Texture* pTexture);
 
-  inline GXHRESULT  InlSetCanvas            (GXCanvasCore* pCanvasCore);
+  inline GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
   //inline GXBOOL     InlSetRenderState       (GRenderStateImpl* pRenderState);
   template<class _TState>
   inline GXBOOL     InlSetStateT            (_TState*& pCurState, _TState* pState);
-  inline GXBOOL     InlSetRasterizerState   (GRasterizerStateImpl* pRasterizerState);
-  inline GXBOOL     InlSetBlendState        (GBlendStateImpl* pBlendState);
-  inline GXBOOL     InlSetDepthStencilState (GDepthStencilStateImpl* pDepthStencilState);
-  inline GXBOOL     InlSetSamplerState      (GSamplerStateImpl* pSamplerState);
+  inline GXBOOL     InlSetRasterizerState   (RasterizerStateImpl* pRasterizerState);
+  inline GXBOOL     InlSetBlendState        (BlendStateImpl* pBlendState);
+  inline GXBOOL     InlSetDepthStencilState (DepthStencilStateImpl* pDepthStencilState);
+  inline GXBOOL     InlSetSamplerState      (SamplerStateImpl* pSamplerState);
   inline GXBOOL     InlSetShader            (Shader* pShader);
   inline GXBOOL     InlSetEffect            (EffectImpl* pEffect);
   inline GXHRESULT  InlSetVertexDecl        (VertexDeclImpl* pVertexDecl);
-  inline GXBOOL     IsActiveCanvas          (GXCanvasCore* pCanvasCore);
+  inline GXBOOL     IsActiveCanvas          (CanvasCore* pCanvasCore);
   //inline GXBOOL     IsActiveRenderState     (GRenderStateImpl* pRenderState);
   static GXVOID     IncreaseStencil         (GXDWORD* pdwStencil);
 
 public:
-  inline GXBOOL     InlIsActiveRasterizerState    (GRasterizerStateImpl* pRasterizerState);
-  inline GXBOOL     InlIsActiveBlendState         (GBlendStateImpl* pBlendState);
-  inline GXBOOL     InlIsActiveDepthStencilState  (GDepthStencilStateImpl* pDepthStencilState);
-  inline GXBOOL     InlIsActiveSamplerState       (GSamplerStateImpl* pSamplerState);
+  inline GXBOOL     InlIsActiveRasterizerState    (RasterizerStateImpl* pRasterizerState);
+  inline GXBOOL     InlIsActiveBlendState         (BlendStateImpl* pBlendState);
+  inline GXBOOL     InlIsActiveDepthStencilState  (DepthStencilStateImpl* pDepthStencilState);
+  inline GXBOOL     InlIsActiveSamplerState       (SamplerStateImpl* pSamplerState);
   inline Marimo::ShaderConstName* InlGetShaderConstantNameObj();
 
 private: // 用于管理的对象
-  GXCanvasImpl**          m_aCanvasPtrCache;
+  CanvasImpl**          m_aCanvasPtrCache;
   //GResourceArray          m_aResource;
   GXResourceMgr           m_ResMgr;
   //GAllocator*             m_pRgnAllocator;
 
 private:  // 状态对象
-  GRasterizerStateImpl*   m_pDefaultRasterizerState;
-  GBlendStateImpl*        m_pDefaultBlendState;
-  GDepthStencilStateImpl* m_pDefaultDepthStencilState;
-  GSamplerStateImpl*      m_pDefaultSamplerState;
+  RasterizerStateImpl*    m_pDefaultRasterizerState;
+  BlendStateImpl*         m_pDefaultBlendState;
+  DepthStencilStateImpl*  m_pDefaultDepthStencilState;
+  SamplerStateImpl*       m_pDefaultSamplerState;
 
   Primitive*              m_pCurPrimitive;
-  GTexBaseImpl*           m_pCurTexture[MAX_TEXTURE_STAGE];
+  TexBaseImpl*            m_pCurTexture[MAX_TEXTURE_STAGE];
   RenderTargetImpl*       m_pCurRenderTarget;
   //GTextureImpl*           m_pCurDepthStencil;
   Shader*                 m_pCurShader;
-  GXCanvasCore*           m_pCurCanvasCore;
+  CanvasCore*           m_pCurCanvasCore;
   //GRenderStateImpl*       m_pCurRenderState;
-  GRasterizerStateImpl*   m_pCurRasterizerState;
-  GBlendStateImpl*        m_pCurBlendState;
-  GDepthStencilStateImpl* m_pCurDepthStencilState;
-  GSamplerStateImpl*      m_pCurSamplerState;
-  VertexDeclImpl*        m_pCurVertexDecl;
+  RasterizerStateImpl*    m_pCurRasterizerState;
+  BlendStateImpl*         m_pCurBlendState;
+  DepthStencilStateImpl*  m_pCurDepthStencilState;
+  SamplerStateImpl*       m_pCurSamplerState;
+  VertexDeclImpl*         m_pCurVertexDecl;
 
-  GTexture*               m_pWhiteTexture8x8;
+  Texture*                m_pWhiteTexture8x8;
 
 private:  // 对象的(几个平台共用的)存储
   GXDWORD                 m_dwFlags;

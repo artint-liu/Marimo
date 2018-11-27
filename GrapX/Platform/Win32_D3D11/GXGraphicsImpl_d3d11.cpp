@@ -149,7 +149,7 @@ namespace GrapX
       , m_pShaderConstName    (NULL)
       , m_pWhiteTexture8x8  (NULL)
     {
-      memset(m_pCurTexture, 0, sizeof(GTexture*) * MAX_TEXTURE_STAGE);
+      memset(m_pCurTexture, 0, sizeof(Texture*) * MAX_TEXTURE_STAGE);
       //m_pRgnAllocator = new GAllocator(NULL);
     }
 
@@ -549,7 +549,7 @@ namespace GrapX
       {
         if(TEST_FLAG(m_dwFlags, F_SHOWCONSOLE))
         {
-          GXCanvas* pCanvas = LockCanvas(NULL, NULL, NULL);
+          Canvas* pCanvas = LockCanvas(NULL, NULL, NULL);
           //m_pConsole->Render(pCanvas);
           SAFE_RELEASE(pCanvas);
         }
@@ -655,9 +655,9 @@ namespace GrapX
       return S_OK;
     }
 
-    GXHRESULT GraphicsImpl::SetTexture(GTextureBase* pTexture, GXUINT uStage)
+    GXHRESULT GraphicsImpl::SetTexture(TextureBase* pTexture, GXUINT uStage)
     {
-      return InlSetTexture(reinterpret_cast<GTexBaseImpl*>(pTexture), uStage);
+      return InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTexture), uStage);
     }
 
     GXBOOL GraphicsImpl::SetSafeClip(const GXREGN* pRegn)
@@ -814,7 +814,7 @@ namespace GrapX
       }
       else
       {
-        GDepthStencilState* pDepthStencil = NULL;
+        DepthStencilState* pDepthStencil = NULL;
         GXDEPTHSTENCILDESC desc(TRUE, TRUE);
         desc.DepthFunc = GXCMP_ALWAYS;
         desc.FrontFace.StencilDepthFailOp = GXSTENCILOP_KEEP;
@@ -829,10 +829,10 @@ namespace GrapX
         CreateDepthStencilState(&pDepthStencil, &desc);
 
 
-        GDepthStencilStateImpl* pSavedDepthStencilState = m_pCurDepthStencilState;
+        DepthStencilStateImpl* pSavedDepthStencilState = m_pCurDepthStencilState;
         pSavedDepthStencilState->AddRef();
 
-        InlSetDepthStencilState(static_cast<GDepthStencilStateImpl*>(pDepthStencil));
+        InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(pDepthStencil));
         InlSetShader(m_pBasicShader);
         pDepthStencil->SetStencilRef(dwStencil);
 
@@ -1026,7 +1026,7 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT GraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height,
+    GXHRESULT GraphicsImpl::CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height,
       GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
     {
       GRESKETCH rs = { RCC_Texture };
@@ -1043,7 +1043,7 @@ namespace GrapX
 
 
       *ppTexture = NULL;
-      GTextureImpl* pTexture = new GTextureImpl(this, Format, Width, Height, MipLevels, eResUsage);
+      TextureImpl* pTexture = new TextureImpl(this, Format, Width, Height, MipLevels, eResUsage);
 
       if(InlIsFailedToNewObject(pTexture)) {
         return GX_FAIL;
@@ -1061,14 +1061,14 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT GraphicsImpl::CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, GTexture* pSourceTexture)
+    GXHRESULT GraphicsImpl::CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture)
     {
       CLBREAK;
       return GX_FAIL;
     }
 
 
-    GXHRESULT GraphicsImpl::CreateTextureFromMemory(GTexture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage)
+    GXHRESULT GraphicsImpl::CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage)
     {
       GRESKETCH rs = { RCC_Texture };
       GXHRESULT hr = GX_FAIL;
@@ -1130,7 +1130,7 @@ namespace GrapX
       return hr;
     }
 
-    GXHRESULT GraphicsImpl::CreateTextureFromFile(GTexture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage)
+    GXHRESULT GraphicsImpl::CreateTextureFromFile(Texture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage)
     {
       GRESKETCH rs = { RCC_Texture };
       clpathfile::CombinePath(rs.strResourceName, m_strResourceDir, szFilePath);
@@ -1160,7 +1160,7 @@ namespace GrapX
 
 #if 0
     GXHRESULT GXGraphicsImpl::CreateTextureFromFileEx(
-      GTexture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height,
+      Texture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height,
       GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter /* = D3DX_FILTER_NONE */,
       GXDWORD MipFilter /* = D3DX_FILTER_NONE */, GXCOLORREF ColorKey /* = 0 */,
       OUT LPGXIMAGEINFOX pSrcInfo)
@@ -1172,8 +1172,8 @@ namespace GrapX
       }
 
       clstd::ScopedLocker sl(m_pGraphicsLocker);
-      GTextureFromFile *pGTex;
-      pGTex = new GTextureFromFile(pSrcFile, Width, Height, MipLevels, Format, ResUsage, Filter, MipFilter, ColorKey, this);
+      TextureFromFile *pGTex;
+      pGTex = new TextureFromFile(pSrcFile, Width, Height, MipLevels, Format, ResUsage, Filter, MipFilter, ColorKey, this);
       m_pLogger->OutputFormatW(_CLTEXT("Load texture from file: %s"), pSrcFile);
       if(pGTex != NULL)
       {
@@ -1181,7 +1181,7 @@ namespace GrapX
 
         if(GXFAILED(pGTex->Create(pSrcInfo)))
         {
-          pGTex->m_emType = GTextureImpl::CreationFailed;
+          pGTex->m_emType = TextureImpl::CreationFailed;
           SAFE_RELEASE(pGTex);
           m_pLogger->OutputFormatW(_CLTEXT("...Failed.\n"));
           return GX_FAIL;
@@ -1199,7 +1199,7 @@ namespace GrapX
 #endif
 
     GXHRESULT GraphicsImpl::CreateTexture3D(
-      GTexture3D** ppTexture, GXLPCSTR szName,
+      Texture3D** ppTexture, GXLPCSTR szName,
       GXUINT Width, GXUINT Height, GXUINT Depth,
       GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
     {
@@ -1208,7 +1208,7 @@ namespace GrapX
     }
 
     GXHRESULT GraphicsImpl::CreateTexture3DFromFile(
-      GTexture3D** ppTexture, GXLPCWSTR pSrcFile)
+      Texture3D** ppTexture, GXLPCWSTR pSrcFile)
     {
       //return CreateTexture3DFromFileExW(ppTexture, pSrcFile, GX_DEFAULT, GX_DEFAULT, GX_DEFAULT,
       //  GX_FROM_FILE,  GXFMT_UNKNOWN, GXRU_DEFAULT, GX_DEFAULT, GX_DEFAULT, 0, NULL);
@@ -1217,7 +1217,7 @@ namespace GrapX
     }
 
     //GXHRESULT GXGraphicsImpl::CreateTexture3DFromFileExW(
-    //  GTexture3D** ppTexture, GXLPCWSTR pSrcFile, 
+    //  Texture3D** ppTexture, GXLPCWSTR pSrcFile, 
     //  GXUINT Width, GXUINT Height, GXUINT Depth, 
     //  GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
     //  GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
@@ -1226,20 +1226,20 @@ namespace GrapX
     //  return GX_OK;
     //}
 
-    GXHRESULT GraphicsImpl::CreateTextureCube(GTextureCube** ppTexture,
+    GXHRESULT GraphicsImpl::CreateTextureCube(TextureCube** ppTexture,
       GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
     {
       CLBREAK;
       return GX_OK;
     }
 
-    GXHRESULT GraphicsImpl::CreateTextureCubeFromFile(GTextureCube** ppTexture, GXLPCWSTR pSrcFile)
+    GXHRESULT GraphicsImpl::CreateTextureCubeFromFile(TextureCube** ppTexture, GXLPCWSTR pSrcFile)
     {
       CLBREAK;
       return GX_OK;
     }
 
-    //GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileEx(GTextureCube** ppTexture, 
+    //GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileEx(TextureCube** ppTexture, 
     //  GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
     //  GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
     //{
@@ -1249,16 +1249,16 @@ namespace GrapX
 
 
     //GXLRESULT GXGraphicsImpl::CreateOffscreenPlainSurface(
-    //  GTexture** ppTexture, GXUINT Width, GXUINT Height, GXFormat Format, GXDWORD ResUsage)
+    //  Texture** ppTexture, GXUINT Width, GXUINT Height, GXFormat Format, GXDWORD ResUsage)
     //{
     //  *ppTexture = NULL;
-    //  GTextureOffscreenPlainSur *pGTex;
-    //  pGTex = new GTextureOffscreenPlainSur(this);
+    //  TextureOffscreenPlainSur *pGTex;
+    //  pGTex = new TextureOffscreenPlainSur(this);
     //  if(pGTex)
     //  {
     //    pGTex->AddRef();
     //    RegisterResource(pGTex, NULL);
-    //    pGTex->m_emType     = GTextureImpl::OffscreenPlainSur;
+    //    pGTex->m_emType     = TextureImpl::OffscreenPlainSur;
     //    pGTex->m_nWidth     = Width;
     //    pGTex->m_nHeight    = Height;
     //    pGTex->m_nMipLevels = 1;
@@ -1314,13 +1314,13 @@ namespace GrapX
     {
       if(pTarget != NULL)
       {
-        //GTextureImpl* pTextureImpl = static_cast<GTextureImpl*>(pTexture);
+        //TextureImpl* pTextureImpl = static_cast<TextureImpl*>(pTexture);
         //if(TEST_FLAG(pTextureImpl->m_dwResUsage, GXRU_TEX_RENDERTARGET))
         RenderTargetImpl* pTargetImpl = static_cast<RenderTargetImpl*>(pTarget);
 
         if(m_pCurRenderTarget != pTargetImpl)
         {
-          //GTextureFromUserRT* pTexRT = static_cast<GTextureFromUserRT*>(pTextureImpl);
+          //TextureFromUserRT* pTexRT = static_cast<TextureFromUserRT*>(pTextureImpl);
 
           SAFE_RELEASE(m_pCurRenderTarget);
           SAFE_RELEASE(m_pCurRenderTargetView);

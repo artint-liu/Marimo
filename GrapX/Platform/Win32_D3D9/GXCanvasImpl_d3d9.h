@@ -16,8 +16,7 @@ extern "C" GXBOOL GXDLLAPI  gxSetRectEmpty  (GXLPRECT lprc);
 namespace D3D9
 {
   class GraphicsImpl;
-  class GTextureImpl;
-  class GRenderState;
+  class TextureImpl;
 
 #include "Canvas/GXCanvasCoreImpl.h"
 #include "Canvas/GXCanvasImpl_ClassDecl.inl"

@@ -79,7 +79,7 @@ namespace GXUI
     GXLRESULT                   SetPos        (GXDWORD dwStyle, GXFLOAT fValue);
 
     void                        AlignPos      (GXDWORD dwStyle);
-    void                        PaintDial     (GrapX::GXCanvas* pCanvas, GXDWORD dwStyle, int x, int y);
+    void                        PaintDial     (GrapX::Canvas* pCanvas, GXDWORD dwStyle, int x, int y);
     inline  int                 GetDialLeft   (GXREGN* regn);
     inline  int                 GetDialTop    (GXREGN* regn);
     void                        UpdatePosFromVar(GXDWORD dwStyle);

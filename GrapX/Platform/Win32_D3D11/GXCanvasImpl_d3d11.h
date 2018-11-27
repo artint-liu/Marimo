@@ -19,17 +19,17 @@ namespace GrapX
   namespace D3D11
   {
     class GraphicsImpl;
-    class GTextureImpl;
+    class TextureImpl;
     //class GRenderState;
 
 #include "Canvas/GXCanvasCoreImpl.h"
 
-    class GXCanvasImpl : public GXCanvasCoreImpl
+    class CanvasImpl : public CanvasCoreImpl
     {
       friend class GraphicsImpl;
     public:
-      GXCanvasImpl(GraphicsImpl* pGraphics, GXBOOL bStatic);
-      virtual ~GXCanvasImpl();
+      CanvasImpl(GraphicsImpl* pGraphics, GXBOOL bStatic);
+      virtual ~CanvasImpl();
       GXBOOL  Initialize(RenderTarget* pTarget, const REGN* pRegn);
 
       GXINT   UpdateStencil    (GRegion* pClipRegion);
@@ -81,11 +81,11 @@ namespace GrapX
 
       virtual GXBOOL      ColorFillRegion     (GRegion* pRegion, GXCOLORREF crFill) override;
 
-      virtual GXBOOL      DrawUserPrimitive   (GTexture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount) override;
-      virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest) override;
-      virtual GXBOOL      DrawTexture         (GTexture*pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc) override;
-      virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc) override;
-      virtual GXBOOL      DrawTexture         (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation) override;
+      virtual GXBOOL      DrawUserPrimitive   (Texture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount) override;
+      virtual GXBOOL      DrawTexture         (Texture*pTexture, const GXREGN *rcDest) override;
+      virtual GXBOOL      DrawTexture         (Texture*pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc) override;
+      virtual GXBOOL      DrawTexture         (Texture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc) override;
+      virtual GXBOOL      DrawTexture         (Texture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation) override;
 
       //virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest) override;
       //virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc) override;
@@ -267,18 +267,18 @@ namespace GrapX
       const GXUINT    s_uDefVertIndexSize;
       const GXUINT    s_uDefBatchSize;
 
-      GRasterizerStateImpl*   m_pRasterizerState;
-      GBlendStateImpl*        m_pBlendingState[2];// Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
-      GBlendStateImpl*        m_pOpaqueState[2];  // 不透明方式的状态
-      GDepthStencilStateImpl* m_pCanvasStencil[2];  // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
+      RasterizerStateImpl*   m_pRasterizerState;
+      BlendStateImpl*        m_pBlendingState[2];// Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
+      BlendStateImpl*        m_pOpaqueState[2];  // 不透明方式的状态
+      DepthStencilStateImpl* m_pCanvasStencil[2];  // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
 
-      Primitive*   m_pPrimitive;
+      Primitive*    m_pPrimitive;
       PRIMITIVE*    m_lpLockedVertex;
       GXUINT        m_uVertCount;
       GXUINT        m_uIndexCount;
       GXUINT        m_uVertIndexSize;
       GXWORD*       m_lpLockedIndex;
-      GTexture*     m_pWhiteTex;
+      Texture*      m_pWhiteTex;
 
 
       BATCH*      m_aBatch;
@@ -288,7 +288,7 @@ namespace GrapX
       CALLSTATE    m_CallState;   // User Call State
 
       GXDWORD      m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
-      GTextureImpl*  m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
+      TextureImpl*  m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
 
       GXCANVASCOMMCONST  m_CanvasCommConst;
       clBuffer      m_UniformBuffer;  // 如果这个用了就不用下面两个
@@ -300,15 +300,15 @@ namespace GrapX
     //{
 
     //};
-    const GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst() const
+    const GXCANVASCOMMCONST& CanvasImpl::GetCommonConst() const
     {
       return m_CanvasCommConst;
     }
-    clBuffer& GXCanvasImpl::GetUniformBuffer()
+    clBuffer& CanvasImpl::GetUniformBuffer()
     {
       return m_UniformBuffer;
     }
-    void GXCanvasImpl::GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer)
+    void CanvasImpl::GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer)
     {
       *ppVertexBuffer = &m_VertexConstBuffer;
       *ppPixelBuffer = &m_PixelConstBuffer;

@@ -14,10 +14,10 @@ namespace GrapX
   public:
     GXSTDINTERFACE(GXBOOL     GetRatio              (GXSizeRatio* pWidth, GXSizeRatio* pHeight));
     GXSTDINTERFACE(GXSIZE*    GetDimension          (GXSIZE* pDimension));
-    GXSTDINTERFACE(GXHRESULT  GetColorTexture       (GTexture** ppColorTexture, GXResUsage eUsage)); // 只接受 GXResUsage::Default 或者 GXResUsage::Read
-    GXSTDINTERFACE(GTexture*  GetColorTextureUnsafe (GXResUsage eUsage)); // 只接受 GXResUsage::Default 或者 GXResUsage::Read
-    GXSTDINTERFACE(GXHRESULT  GetDepthStencilTexture(GTexture** ppDepthStencilTexture));
-    GXSTDINTERFACE(GXBOOL     StretchRect           (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
+    GXSTDINTERFACE(GXHRESULT  GetColorTexture       (Texture** ppColorTexture, GXResUsage eUsage)); // 只接受 GXResUsage::Default 或者 GXResUsage::Read
+    GXSTDINTERFACE(Texture*   GetColorTextureUnsafe (GXResUsage eUsage)); // 只接受 GXResUsage::Default 或者 GXResUsage::Read
+    GXSTDINTERFACE(GXHRESULT  GetDepthStencilTexture(Texture** ppDepthStencilTexture));
+    GXSTDINTERFACE(GXBOOL     StretchRect           (Texture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
     GXSTDINTERFACE(GXBOOL     SaveToFile            (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat));
     GXSTDINTERFACE(GXBOOL     SaveToMemory          (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat));
   };

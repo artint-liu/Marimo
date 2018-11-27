@@ -7,18 +7,12 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include "GrapX/GUnknown.h"
 #include "GrapX/GResource.h"
 #include "GrapX/GXGraphics.h"
-//#include "GrapX/GXCanvas.h"
 #include "GrapX/GShader.h"
-//#include "GrapX/GTexture.h"
-//#include "GrapX/GXKernel.h"
 
 // 平台相关
 #include "GrapX/Platform.h"
-//#include "GrapX/DataPool.h"
-//#include "GrapX/DataPoolVariable.h"
 #include "Platform/Win32_XXX.h"
 
 // 私有头文件

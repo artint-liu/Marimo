@@ -6,7 +6,7 @@
 #define GXWM_DESTROYEDITCTL  GXWM_USER + 100
 namespace GrapX
 {
-  class GTexture;
+  class Texture;
 }
 
 namespace GXUIEXT
@@ -67,7 +67,7 @@ namespace GXUIEXT
       {
         Page*         pChildPage;
         LBItemList*   pListBoxItem;
-        GrapX::GTexture*     pTexture;
+        GrapX::Texture*     pTexture;
         GXLPVOID      pGeneral;    // 通用的,只用于指针判断
         float         fIncrease;
       };

@@ -394,7 +394,7 @@ GXBOOL DestroyStockObject(GXLPSTATION lpStation)
 
 //extern "C"
 //{
-  extern "C" GXVOID GXDLLAPI GXDrawDebugMsg(GXHSTATION hStation, GrapX::GXCanvas* pCanvas)
+  extern "C" GXVOID GXDLLAPI GXDrawDebugMsg(GXHSTATION hStation, GrapX::Canvas* pCanvas)
   {
 #ifndef _DEV_DISABLE_UI_CODE
     //extern CD3DGraphics *g_pGraphics;

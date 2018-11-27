@@ -10,7 +10,7 @@ struct GVSCENEUPDATE;
 namespace GrapX
 {
   class Graphics;
-  class GXCanvas3D;
+  class Canvas3D;
   class Primitive;
 } // namespace GrapX
 

@@ -33,7 +33,7 @@ struct STANDARDMTLUNIFORMTABLE;
 
 namespace GrapX
 {
-  class GTextureBase;
+  class TextureBase;
   class GVertexDeclaration : public GResource
   {
   public:

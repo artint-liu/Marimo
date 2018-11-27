@@ -3,7 +3,7 @@
 
 namespace GrapX
 {
-  class GXCanvasCore;
+  class CanvasCore;
 } // namespace GrapX
 
 #include <3D/Camera.h>
@@ -67,13 +67,13 @@ public:
 class GXDLL GCamera_ScreenAligned : public GCamera
 {
 protected:
-  GrapX::GXCanvasCore* m_pCanvasCore;
+  GrapX::CanvasCore* m_pCanvasCore;
   static float3  m_vTop;
 public:
-  GCamera_ScreenAligned(GrapX::GXCanvasCore* pCanvasCore);
+  GCamera_ScreenAligned(GrapX::CanvasCore* pCanvasCore);
   ~GCamera_ScreenAligned();
 
-  static GCamera_ScreenAligned* Create(GrapX::GXCanvasCore* pCanvasCore);
+  static GCamera_ScreenAligned* Create(GrapX::CanvasCore* pCanvasCore);
 public:
   virtual CameraType    GetType           () const;
   virtual GXHRESULT     GetContext        (GCAMERACONETXT* pCamContext);

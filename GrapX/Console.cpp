@@ -244,7 +244,7 @@ GXLRESULT GXConsole::Finalize()
   return 0;
 }
 
-void GXConsole::DrawLines(GrapX::GXCanvas* pCanvas, int y, int yInc, const TextRoundBuffer::LINEDESC* pLineDesc)
+void GXConsole::DrawLines(GrapX::Canvas* pCanvas, int y, int yInc, const TextRoundBuffer::LINEDESC* pLineDesc)
 {
   GXLPCWSTR lpText = (GXLPCWSTR)pLineDesc->pBuffer->GetPtr();
   int nTop = y;
@@ -266,7 +266,7 @@ GXLRESULT GXConsole::Show(GXBOOL bShow)
   return GX_OK;
 }
 
-GXLRESULT GXConsole::Render(GrapX::GXCanvas* pCanvas)
+GXLRESULT GXConsole::Render(GrapX::Canvas* pCanvas)
 {
   GXSIZE size;
  

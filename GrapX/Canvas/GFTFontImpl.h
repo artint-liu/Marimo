@@ -5,7 +5,7 @@
 
 namespace GrapX {
   class Graphics;
-  class GTexture;
+  class Texture;
 
   namespace D3D9 {
     class GraphicsImpl;
@@ -29,7 +29,7 @@ class _GFTFont : public GXFont
   friend class GrapX::WOGL::GraphicsImpl;
   friend class GrapX::GLES2::GraphicsImpl;
 private:
-  typedef clvector<GrapX::GTexture*>          GTextureArray;
+  typedef clvector<GrapX::Texture*>          GTextureArray;
   GrapX::Graphics*m_pGraphics;
   FT_Library      m_Library;
   FT_Face         m_Face;

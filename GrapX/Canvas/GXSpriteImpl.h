@@ -4,7 +4,7 @@
 //class GXImage;
 namespace GrapX
 {
-  class GXCanvas;
+  class Canvas;
   class Graphics;
 }
 
@@ -70,7 +70,7 @@ public:
 private:
   clStringW         m_strImageFile;
   //GXImage*          m_pImage;
-  GrapX::GTexture*  m_pTexture;
+  GrapX::Texture*   m_pTexture;
 
   clStringSetA      m_NameSet; // TODO: 这个将来可以取消，使用压实的一大块内存储存字符串序列
 
@@ -100,31 +100,31 @@ public:
 
   //virtual GXHRESULT SaveW             (GXLPCWSTR szFilename) const;
 
-  GXSTDIMPLEMENT(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
-  GXSTDIMPLEMENT(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
-  GXSTDIMPLEMENT(GXVOID    PaintModule          (GrapX::GXCanvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule          (GrapX::Canvas *pCanvas, GXINT nIndex, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule          (GrapX::Canvas *pCanvas, GXINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule          (GrapX::Canvas *pCanvas, GXINT nIndex, GXINT x, GXINT y, GXINT right, GXINT height) const);
   
-  GXSTDIMPLEMENT(GXVOID    PaintModule3H        (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDIMPLEMENT(GXVOID    PaintModule3V        (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
-  GXSTDIMPLEMENT(GXVOID    PaintModule3x3       (GrapX::GXCanvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule3H        (GrapX::Canvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule3V        (GrapX::Canvas *pCanvas, GXINT nStartIdx, GXINT x, GXINT y, GXINT nWidth, GXINT nHeight) const);
+  GXSTDIMPLEMENT(GXVOID    PaintModule3x3       (GrapX::Canvas *pCanvas, GXINT nStartIdx, GXBOOL bDrawEdge, GXLPCRECT rect) const);
   
-  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
-  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const);
-  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GrapX::GXCanvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const);
+  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GrapX::Canvas *pCanvas, GXUINT nIndex, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GrapX::Canvas *pCanvas, GXUINT nIndex, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    PaintFrame           (GrapX::Canvas *pCanvas, GXUINT nIndex, GXLPCRECT lpRect) const);
   
-  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
-  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const);
-  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const);
-  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y));
-  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn));
-  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GrapX::GXCanvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect));
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationFrame  (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, GXUINT nFrameIndex, GXLPCRECT lpRect) const);
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXINT x, GXINT y));
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCREGN lpRegn));
+  GXSTDIMPLEMENT(GXVOID    PaintAnimationByTime (GrapX::Canvas *pCanvas, GXUINT nAnimIndex, TIME_T time, GXLPCRECT lpRect));
 
-  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
-  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
-  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
-  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
-  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
-  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::GXCanvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::Canvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::Canvas *pCanvas, ID id, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::Canvas *pCanvas, ID id, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXLPCREGN lpRegn) const);
+  GXSTDIMPLEMENT(GXVOID    Paint                (GrapX::Canvas *pCanvas, GXLPCSTR name, TIME_T time, GXINT x, GXINT y, GXINT right, GXINT bottom) const);
 
   GXSTDIMPLEMENT(GXINT     Find                 (ID id, GXOUT Type* pType) const); // pType 可以设置为NULL, 不返回类型
   GXSTDIMPLEMENT(GXINT     Find                 (GXLPCSTR szName, GXOUT Type* pType) const);
@@ -167,7 +167,7 @@ public:
   GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPRECT lprc) const); // 对于Module，返回值的left和top都应该是0
   GXSTDIMPLEMENT(Type      GetBounding          (GXLPCWSTR szName, GXLPREGN lprg) const);
 
-  GXHRESULT GetTexture        (GrapX::GTexture** ppTexture) override;
+  GXHRESULT GetTexture        (GrapX::Texture** ppTexture) override;
   clStringW GetImageFileW     () const override;
   clStringA GetImageFileA     () const override;
 

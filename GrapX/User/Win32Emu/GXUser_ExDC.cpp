@@ -147,7 +147,7 @@ GXLONG GXDLLAPI gxTabbedTextOutW(
   GXGDIDC* pDC = GXGDI_DC_PTR(hDC);
   if(pDC)
   {
-    GrapX::GXCanvas* pCanvas = GXGDI_DC_PTR(hDC)->pCanvas;
+    GrapX::Canvas* pCanvas = GXGDI_DC_PTR(hDC)->pCanvas;
     if(pCanvas && pDC->hFont)
     {
       GXFont* pFont = GXGDI_FONT_PTR(pDC->hFont)->lpFont;
@@ -198,7 +198,7 @@ GXDWORD GXDLLAPI gxGetTabbedTextExtentW(
   GXGDIDC* pDC = GXGDI_DC_PTR(hDC);
   if(pDC)
   {
-    GrapX::GXCanvas* pCanvas = pDC->pCanvas;
+    GrapX::Canvas* pCanvas = pDC->pCanvas;
     if(pCanvas && pDC->hFont)
     {
       GXFont* pFont = GXGDI_FONT_PTR(pDC->hFont)->lpFont;

@@ -187,7 +187,7 @@ extern "C"
     return GX_OK;
   }
 
-  GXHRESULT GXCARET::PaintCaret(GrapX::GXCanvas* pCanvas)
+  GXHRESULT GXCARET::PaintCaret(GrapX::Canvas* pCanvas)
   {
     // TODO: 以后是否能把光标闪烁加入到RichFX中呢?
     if(flag & GXCARET_BLINK)

@@ -329,7 +329,7 @@ GXBOOL DesktopWindowsMgr::SendPaintMessage()
   return TRUE;
 }
 
-GXBOOL DesktopWindowsMgr::Render(GrapX::GXCanvas* pCanvas)
+GXBOOL DesktopWindowsMgr::Render(GrapX::Canvas* pCanvas)
 {
   GXCARET*      lpCaret        = &m_lpStation->SysCaret;
   LPGXWND        lpCaretTopWnd = NULL;

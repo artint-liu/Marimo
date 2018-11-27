@@ -17,7 +17,7 @@ enum RGNCOMPLEX;
 namespace GrapX
 {
   class RenderTarget;
-  class GTexture;
+  class Texture;
 } // namespace GrapX
 
 // GXWindowsSurface::SetExclusiveWnd 标志

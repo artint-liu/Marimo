@@ -7,12 +7,12 @@
   m_pShaderConstName = new Marimo::ShaderConstName(this);
 
   // Canvas 缓冲
-  m_aCanvasPtrCache = new GXCanvasImpl*[s_uCanvasCacheCount];
+  m_aCanvasPtrCache = new CanvasImpl*[s_uCanvasCacheCount];
   for(GXUINT i = 0; i < s_uCanvasCacheCount; i++)
-    m_aCanvasPtrCache[i] = new GXCanvasImpl(this, TRUE);
+    m_aCanvasPtrCache[i] = new CanvasImpl(this, TRUE);
 
   //GRenderState::InitializeStatic();
-  GSamplerStateImpl::InitializeStatic();
+  SamplerStateImpl::InitializeStatic();
   MaterialImpl::InitializeMtlStateDict();
   //IntCreateRenderState(&m_pCurRenderState);
 
@@ -24,7 +24,7 @@
 
   // Rasterizer State
   GXRASTERIZERDESC RasterizerDesc;
-  if(GXFAILED(CreateRasterizerState((GRasterizerState**)&m_pDefaultRasterizerState, &RasterizerDesc))) {
+  if(GXFAILED(CreateRasterizerState((RasterizerState**)&m_pDefaultRasterizerState, &RasterizerDesc))) {
     CLOG_ERROR("%s : Create rasterizer state error.\n", __FUNCTION__);
   }
   m_pCurRasterizerState = m_pDefaultRasterizerState;
@@ -33,7 +33,7 @@
 
   // Blend State
   GXBLENDDESC BlendDesc;  // 自动构造默认参数
-  if(GXFAILED(CreateBlendState((GBlendState**)&m_pDefaultBlendState, &BlendDesc, 1))) {
+  if(GXFAILED(CreateBlendState((BlendState**)&m_pDefaultBlendState, &BlendDesc, 1))) {
     CLOG_ERROR("%s : Create default blend state error.\n", __FUNCTION__);
   }
   m_pCurBlendState = m_pDefaultBlendState;
@@ -41,7 +41,7 @@
   // --Blend State
 
   GXDEPTHSTENCILDESC DepthStencilDesc(TRUE, FALSE);
-  if(GXFAILED(CreateDepthStencilState((GDepthStencilState**)&m_pDefaultDepthStencilState, &DepthStencilDesc))) {
+  if(GXFAILED(CreateDepthStencilState((DepthStencilState**)&m_pDefaultDepthStencilState, &DepthStencilDesc))) {
     CLOG_ERROR("%s : Create depth stencil state error.\n", __FUNCTION__);
   }
   m_pCurDepthStencilState = m_pDefaultDepthStencilState;
@@ -158,9 +158,9 @@ GXBOOL GraphicsImpl::ConvertToRelativePathA(clStringA& strFilename)
   return bval;
 }
 
-GXHRESULT GraphicsImpl::IntCreateRasterizerState(GRasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
+GXHRESULT GraphicsImpl::IntCreateRasterizerState(RasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
 {
-  GRasterizerStateImpl* pRasterizerState = new GRasterizerStateImpl(this);
+  RasterizerStateImpl* pRasterizerState = new RasterizerStateImpl(this);
   if(! InlCheckNewAndIncReference(pRasterizerState)) {
     return GX_FAIL;
   }
@@ -174,9 +174,9 @@ GXHRESULT GraphicsImpl::IntCreateRasterizerState(GRasterizerStateImpl** ppRaster
   return GX_OK;
 }
 
-GXHRESULT GraphicsImpl::IntCreateBlendState(GBlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
+GXHRESULT GraphicsImpl::IntCreateBlendState(BlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
 {
-  GBlendStateImpl* pBlendState = new GBlendStateImpl(this);
+  BlendStateImpl* pBlendState = new BlendStateImpl(this);
   if(pBlendState != NULL)
   {
     pBlendState->AddRef();
@@ -189,9 +189,9 @@ GXHRESULT GraphicsImpl::IntCreateBlendState(GBlendStateImpl** ppBlendState, GXBL
   return GX_FAIL;
 }
 
-GXHRESULT GraphicsImpl::IntCreateDepthStencilState(GDepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
+GXHRESULT GraphicsImpl::IntCreateDepthStencilState(DepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
 {
-  GDepthStencilStateImpl* pDepthStencilState = new GDepthStencilStateImpl(this);
+  DepthStencilStateImpl* pDepthStencilState = new DepthStencilStateImpl(this);
   if(pDepthStencilState != NULL)
   {
     pDepthStencilState->AddRef();
@@ -204,17 +204,17 @@ GXHRESULT GraphicsImpl::IntCreateDepthStencilState(GDepthStencilStateImpl** ppDe
   return GX_FAIL;
 }
 
-GXHRESULT GraphicsImpl::CreateRasterizerState(GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
+GXHRESULT GraphicsImpl::CreateRasterizerState(RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
 {
   GRESKETCH ResFeatDesc;
   GrapX::Internal::ResourceSketch::GenerateRasterizerState(&ResFeatDesc, pRazDesc);
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
   if(pResource != NULL)
   {
-    *ppRasterizerState = static_cast<GRasterizerState*>(pResource);
+    *ppRasterizerState = static_cast<RasterizerState*>(pResource);
     return pResource->AddRef();
   }
-  GXHRESULT hval = IntCreateRasterizerState((GRasterizerStateImpl**)ppRasterizerState, pRazDesc);
+  GXHRESULT hval = IntCreateRasterizerState((RasterizerStateImpl**)ppRasterizerState, pRazDesc);
   if(GXSUCCEEDED(hval))
   {
     RegisterResource(*ppRasterizerState, &ResFeatDesc);
@@ -222,17 +222,17 @@ GXHRESULT GraphicsImpl::CreateRasterizerState(GRasterizerState** ppRasterizerSta
   return hval;
 }
 
-GXHRESULT GraphicsImpl::CreateBlendState(GBlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
+GXHRESULT GraphicsImpl::CreateBlendState(BlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
 {
   GRESKETCH ResFeatDesc;
   GrapX::Internal::ResourceSketch::GenerateBlendState(&ResFeatDesc, pState);
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
   if(pResource != NULL)
   {
-    *ppBlendState = static_cast<GBlendState*>(pResource);
+    *ppBlendState = static_cast<BlendState*>(pResource);
     return pResource->AddRef();
   }
-  GXHRESULT hval = IntCreateBlendState((GBlendStateImpl**)ppBlendState, pState, nNum);
+  GXHRESULT hval = IntCreateBlendState((BlendStateImpl**)ppBlendState, pState, nNum);
   if(GXSUCCEEDED(hval))
   {
     RegisterResource(*ppBlendState, &ResFeatDesc);
@@ -240,17 +240,17 @@ GXHRESULT GraphicsImpl::CreateBlendState(GBlendState** ppBlendState, GXBLENDDESC
   return hval;
 }
 
-GXHRESULT GraphicsImpl::CreateDepthStencilState(GDepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
+GXHRESULT GraphicsImpl::CreateDepthStencilState(DepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
 {
   GRESKETCH ResFeatDesc;
   GrapX::Internal::ResourceSketch::GenerateDepthStencilState(&ResFeatDesc, pState);
   GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
   if(pResource != NULL)
   {
-    *ppDepthStencilState = static_cast<GDepthStencilState*>(pResource);
+    *ppDepthStencilState = static_cast<DepthStencilState*>(pResource);
     return pResource->AddRef();
   }
-  GXHRESULT hval = IntCreateDepthStencilState((GDepthStencilStateImpl**)ppDepthStencilState, pState);
+  GXHRESULT hval = IntCreateDepthStencilState((DepthStencilStateImpl**)ppDepthStencilState, pState);
   if(GXSUCCEEDED(hval))
   {
     m_ResMgr.Register(&ResFeatDesc, *ppDepthStencilState);
@@ -258,9 +258,9 @@ GXHRESULT GraphicsImpl::CreateDepthStencilState(GDepthStencilState** ppDepthSten
   return hval;
 }
 
-GXHRESULT GraphicsImpl::CreateSamplerState(GSamplerState** ppSamplerState)
+GXHRESULT GraphicsImpl::CreateSamplerState(SamplerState** ppSamplerState)
 {
-  return IntCreateSamplerState((GSamplerStateImpl**)ppSamplerState, m_pDefaultSamplerState);
+  return IntCreateSamplerState((SamplerStateImpl**)ppSamplerState, m_pDefaultSamplerState);
 }
 
 GXHRESULT GraphicsImpl::CreatePrimitive(
@@ -641,7 +641,7 @@ GXFont* GraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GX
 
 #include "Canvas/GXCanvas3DImpl.h"
 #include "Canvas/GXCanvas3DImpl.inl"
-GXHRESULT GraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
+GXHRESULT GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
 {
   GXREGN    regn = 0;
   GXHRESULT hval = GX_OK;
@@ -682,7 +682,7 @@ GXHRESULT GraphicsImpl::CreateCanvas3D(GXCanvas3D** ppCanvas3D, RenderTarget* pT
     regn = *lpRegn;
   }
 
-  GXCanvas3DImpl* pCanvas3D = new GXCanvas3DImpl(this);
+  Canvas3DImpl* pCanvas3D = new Canvas3DImpl(this);
   if( ! InlCheckNewAndIncReference(pCanvas3D)) {
     return GX_FAIL;
   }
@@ -724,10 +724,10 @@ GXHRESULT GraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szSha
 }
 #endif // 0
 
-GXHRESULT GraphicsImpl::IntCreateSamplerState(GSamplerStateImpl** ppSamplerState, GSamplerStateImpl* pDefault)
+GXHRESULT GraphicsImpl::IntCreateSamplerState(SamplerStateImpl** ppSamplerState, SamplerStateImpl* pDefault)
 {
   (*ppSamplerState) = NULL;
-  (*ppSamplerState) = new GSamplerStateImpl(this);
+  (*ppSamplerState) = new SamplerStateImpl(this);
   if(InlCheckNewAndIncReference(*ppSamplerState)) {
     if((*ppSamplerState)->Initialize(pDefault)) {
       return GX_OK;
@@ -961,7 +961,7 @@ GXDWORD GraphicsImpl::GetCaps(GXGrapCapsCategory eCate)
   return NULL;
 }
 
-GXCanvas* GraphicsImpl::LockCanvas(RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags)
+Canvas* GraphicsImpl::LockCanvas(RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags)
 {
   // 允许 lpRegn 是空的, 比如Edit控件会因为调整大小而创建DC.此时需要设备的Font信息.
   if( ! TEST_FLAG(m_dwFlags, F_ACTIVATE))
@@ -974,7 +974,7 @@ GXCanvas* GraphicsImpl::LockCanvas(RenderTarget* pTarget, const LPREGN lpRegn, G
   ASSERT(m_dwThreadId == NULL || m_dwThreadId == GetCurrentThreadId());
 #endif // #ifdef D3D9_GRAPHICS_IMPL
 
-  GXCanvasImpl* pCanvas = (GXCanvasImpl*)AllocCanvas();
+  CanvasImpl* pCanvas = (CanvasImpl*)AllocCanvas();
   if(pCanvas->Initialize(pTarget, lpRegn) == FALSE)
   {
     SAFE_RELEASE(pCanvas);
@@ -994,50 +994,50 @@ GXCanvas* GraphicsImpl::LockCanvas(RenderTarget* pTarget, const LPREGN lpRegn, G
 //    return SetPrimitiveVI((GPrimitiveVI*)pPrimitive);
 //}
 
-GXHRESULT GraphicsImpl::SetRasterizerState(GRasterizerState* pRasterizerState)
+GXHRESULT GraphicsImpl::SetRasterizerState(RasterizerState* pRasterizerState)
 {
   if(pRasterizerState == NULL) {
     pRasterizerState = m_pDefaultRasterizerState;
   }
 
-  if(InlSetRasterizerState(static_cast<GRasterizerStateImpl*>(pRasterizerState))) {
+  if(InlSetRasterizerState(static_cast<RasterizerStateImpl*>(pRasterizerState))) {
     return GX_OK;
   }
   return GX_FAIL;
 }
 
-GXHRESULT GraphicsImpl::SetBlendState(GBlendState* pBlendState)
+GXHRESULT GraphicsImpl::SetBlendState(BlendState* pBlendState)
 {
   if(pBlendState == NULL) {
     pBlendState = m_pDefaultBlendState;
   }
 
-  if(InlSetBlendState(static_cast<GBlendStateImpl*>(pBlendState))) {
+  if(InlSetBlendState(static_cast<BlendStateImpl*>(pBlendState))) {
     return GX_OK;
   }
   return GX_FAIL;
 }
 
-GXHRESULT GraphicsImpl::SetDepthStencilState(GDepthStencilState* pDepthStencilState)
+GXHRESULT GraphicsImpl::SetDepthStencilState(DepthStencilState* pDepthStencilState)
 {
   if(pDepthStencilState == NULL) {
     pDepthStencilState = m_pDefaultDepthStencilState;
   }
 
-  if(InlSetDepthStencilState(static_cast<GDepthStencilStateImpl*>(pDepthStencilState))) {
+  if(InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(pDepthStencilState))) {
     return GX_OK;
   }
   return GX_FAIL;
 
 }
 
-GXHRESULT GraphicsImpl::SetSamplerState(GSamplerState* pSamplerState)
+GXHRESULT GraphicsImpl::SetSamplerState(SamplerState* pSamplerState)
 {
   if(pSamplerState == NULL) {
     pSamplerState = m_pDefaultSamplerState;
   }
 
-  if(InlSetSamplerState(static_cast<GSamplerStateImpl*>(pSamplerState))) {
+  if(InlSetSamplerState(static_cast<SamplerStateImpl*>(pSamplerState))) {
     return GX_OK;
   }
   return GX_FAIL;
@@ -1118,7 +1118,7 @@ GXHRESULT GraphicsImpl::BroadcastCategoryCommand(GXDWORD dwCategoryID, GRESCRIPT
   return m_ResMgr.BroadcastCategoryMessage(dwCategoryID, pDesc);
 }
 
-GXCanvas* GraphicsImpl::AllocCanvas()
+Canvas* GraphicsImpl::AllocCanvas()
 {
   for(GXUINT i = 0; i < s_uCanvasCacheCount; i++)
   {
@@ -1128,7 +1128,7 @@ GXCanvas* GraphicsImpl::AllocCanvas()
       return m_aCanvasPtrCache[i];
     }
   }
-  return new GXCanvasImpl(this, FALSE);
+  return new CanvasImpl(this, FALSE);
 }
 
 //GXGraphicsImpl::GResourceArray::iterator
@@ -1198,7 +1198,7 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
     return m_pDefaultBackBuffer->AddRef();
   }
 
-  GTexture* GraphicsImpl::GetDeviceOriginTex()
+  Texture* GraphicsImpl::GetDeviceOriginTex()
   {
     return m_pDeviceOriginTex;
   }
@@ -1213,10 +1213,10 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
     // 确定滚动区是否为一个简单矩形
     GXBOOL bSimpleRect = FALSE;
 
-    GTexture* const pTarget  = lpstd->pOperationTex == NULL 
+    Texture* const pTarget  = lpstd->pOperationTex == NULL 
       ? m_pDeviceOriginTex
       : lpstd->pOperationTex;
-    GTexture* const pTempTex = lpstd->pTempTex == NULL 
+    Texture* const pTempTex = lpstd->pTempTex == NULL 
       ? m_pTempBuffer->GetColorTextureUnsafe(GXResUsage::Default)
       : lpstd->pTempTex;
 
@@ -1386,7 +1386,7 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
     SAFE_RELEASE(prgnClip);
     SAFE_RELEASE(prgnInvMoveClip);
 #ifdef D3D9_GRAPHICS_IMPL
-    IntCheckRTTexture(static_cast<GTextureImpl*>(pTarget));
+    IntCheckRTTexture(static_cast<TextureImpl*>(pTarget));
 #endif // #ifdef D3D9_GRAPHICS_IMPL
     bresult = TRUE;
 FUNC_RET_0:

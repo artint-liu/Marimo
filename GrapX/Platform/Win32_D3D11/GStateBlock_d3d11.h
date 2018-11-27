@@ -23,7 +23,7 @@ namespace GrapX
   namespace D3D11
   {
     class GraphicsImpl;
-    class GSamplerStateImpl;
+    class SamplerStateImpl;
     //class GRenderState : public GUnknown
     //{
     //  friend class GXGraphicsImpl;
@@ -72,7 +72,7 @@ namespace GrapX
     //  //GXBOOL      m_bOnDevice;
     //};
 
-    class GRasterizerStateImpl : public GRasterizerState
+    class RasterizerStateImpl : public RasterizerState
     {
     private:
       GraphicsImpl*           m_pGraphicsImpl;
@@ -87,13 +87,13 @@ namespace GrapX
       virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) { return GX_OK; }
 
     public:
-      GRasterizerStateImpl(GraphicsImpl* pGraphicsImpl);
+      RasterizerStateImpl(GraphicsImpl* pGraphicsImpl);
       GXBOOL  Initialize  (GXRASTERIZERDESC* pDesc);
-      GXBOOL  Activate    (GRasterizerStateImpl* pPrevState);
+      GXBOOL  Activate    (RasterizerStateImpl* pPrevState);
       inline  void    InlSetRasterizerState();
     };
 
-    class GBlendStateImpl : public GBlendState
+    class BlendStateImpl : public BlendState
     {
     private:
       GraphicsImpl*       m_pGraphicsImpl;
@@ -110,16 +110,16 @@ namespace GrapX
       virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) { return GX_OK; }
 
     public:
-      GBlendStateImpl(GraphicsImpl* pGraphicsImpl);
+      BlendStateImpl(GraphicsImpl* pGraphicsImpl);
       GXBOOL  Initialize  (GXBLENDDESC* pDesc, GXUINT nNum);
-      GXBOOL  Activate    (GBlendStateImpl* pPrevState);
+      GXBOOL  Activate    (BlendStateImpl* pPrevState);
 
       virtual GXDWORD SetBlendFactor  (GXDWORD dwBlendFactor);
 
       inline  void    InlSetBlendState();
     };
     //////////////////////////////////////////////////////////////////////////
-    class GDepthStencilStateImpl : public GDepthStencilState
+    class DepthStencilStateImpl : public DepthStencilState
     {
     private:
       GraphicsImpl*       m_pGraphicsImpl;
@@ -138,17 +138,17 @@ namespace GrapX
 
 
     public:
-      GDepthStencilStateImpl(GraphicsImpl* pGraphicsImpl);
+      DepthStencilStateImpl(GraphicsImpl* pGraphicsImpl);
       GXBOOL  Initialize  (GXDEPTHSTENCILDESC* pDesc);
-      GXBOOL  Activate    (GDepthStencilStateImpl* pPrevState);
+      GXBOOL  Activate    (DepthStencilStateImpl* pPrevState);
 
       virtual GXDWORD SetStencilRef  (GXDWORD dwStencilRef);
     };
     //////////////////////////////////////////////////////////////////////////
-    class GSamplerStateImpl : public GSamplerState
+    class SamplerStateImpl : public SamplerState
     {
       friend class GraphicsImpl;
-      friend class GXCanvas;
+      friend class Canvas;
     private:
       GraphicsImpl*       m_pGraphicsImpl;
       //GXSAMPLERSTAGE        m_SamplerStage[SAMPLERCOUNT];
@@ -157,11 +157,11 @@ namespace GrapX
       //DWORD                 m_dwChangeMask;
       //static GXSAMPLERSTAGE s_DefaultSamplerState;
     private:
-      GSamplerStateImpl(Graphics* pGraphics);
-      virtual ~GSamplerStateImpl();
+      SamplerStateImpl(Graphics* pGraphics);
+      virtual ~SamplerStateImpl();
       static GXBOOL     InitializeStatic  ();
-      GXBOOL            Initialize        (GSamplerStateImpl* pDefault);
-      GXBOOL            Activate          (GSamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
+      GXBOOL            Initialize        (SamplerStateImpl* pDefault);
+      GXBOOL            Activate          (SamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
       //void              SetStageToDevice  (DWORD dwStage);
       //void              SetStateToDevice  (DWORD dwStage, GXSamplerStateType eType);
       //void              D3D11BuildSampler (GXUINT Sampler, GXSAMPLERDESC* pSamplerDesc);

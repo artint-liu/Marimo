@@ -26,17 +26,16 @@ namespace GrapX
   class Effect;
   class Material;
 
-  class GTextureBase;
-  class GTexture;
-  class GTexture3D;
-  class GTextureCube;
+  class TextureBase;
+  class Texture;
+  class Texture3D;
+  class TextureCube;
 
-  class GShaderStub;
-  class GXCanvas3D;
-  class GBlendState;
-  class GDepthStencilState;
-  class GSamplerState;
-  class GRasterizerState;
+  class Canvas3D;
+  class BlendState;
+  class DepthStencilState;
+  class SamplerState;
+  class RasterizerState;
 
   class GVertexDeclaration;
 }
@@ -113,11 +112,11 @@ namespace GrapX
     //GXSTDINTERFACE(GXHRESULT SetPrimitiveVI     (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0));
 
     // 理论上GXGraphics没有 Set** 类函数, SetTexture 例外, 因为 SetTexture 同时肩负这清空指定设备纹理的任务
-    GXSTDINTERFACE(GXHRESULT SetTexture           (GTextureBase* pTexture, GXUINT uStage = 0));
-    GXSTDINTERFACE(GXHRESULT SetRasterizerState   (GRasterizerState* pRasterizerState));
-    GXSTDINTERFACE(GXHRESULT SetBlendState        (GBlendState* pBlendState));
-    GXSTDINTERFACE(GXHRESULT SetDepthStencilState (GDepthStencilState* pDepthStencilState));
-    GXSTDINTERFACE(GXHRESULT SetSamplerState      (GSamplerState* pSamplerState));
+    GXSTDINTERFACE(GXHRESULT SetTexture           (TextureBase* pTexture, GXUINT uStage = 0));
+    GXSTDINTERFACE(GXHRESULT SetRasterizerState   (RasterizerState* pRasterizerState));
+    GXSTDINTERFACE(GXHRESULT SetBlendState        (BlendState* pBlendState));
+    GXSTDINTERFACE(GXHRESULT SetDepthStencilState (DepthStencilState* pDepthStencilState));
+    GXSTDINTERFACE(GXHRESULT SetSamplerState      (SamplerState* pSamplerState));
 
     GXSTDINTERFACE(GXHRESULT Clear              (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil));
     GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount));
@@ -132,7 +131,7 @@ namespace GrapX
 
     // 2D Texture
     GXSTDINTERFACE(GXHRESULT CreateTexture(
-      GTexture**  ppTexture,      // 返回的纹理指针
+      Texture**   ppTexture,      // 返回的纹理指针
       GXLPCSTR    szName,         // 资源名字, 如果为NULL, 则默认私有名字, 否则按照用户指定命名, 
                                   // 如果已存在该名字,则直接返回对象,引用加一, 后面的参数将被忽略
       GXUINT      Width,          // 宽度和高度
@@ -143,11 +142,11 @@ namespace GrapX
       GXLPCVOID   pInitData = NULL,
       GXUINT      nPitch = 0));   // 0表示使用默认pitch（nWidth*像素字节数）
 
-    GXSTDINTERFACE(GXHRESULT CreateTexture(GTexture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, GTexture* pSourceTexture));
+    GXSTDINTERFACE(GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture));
 
     // eUsage参数只有在首次创建时限定纹理的使用行为，对于重复创建的纹理文件，eUsage作用会被忽略
-    GXSTDINTERFACE(GXHRESULT CreateTextureFromMemory(GTexture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage));
-    GXSTDINTERFACE(GXHRESULT CreateTextureFromFile  (GTexture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage));
+    GXSTDINTERFACE(GXHRESULT CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage));
+    GXSTDINTERFACE(GXHRESULT CreateTextureFromFile  (Texture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage));
 
     //GXSTDINTERFACE(GXHRESULT CreateTextureFromFileEx(
     //  GTexture**  ppTexture, 
@@ -164,7 +163,7 @@ namespace GrapX
 
     // Volume Texture
     GXSTDINTERFACE(GXHRESULT CreateTexture3D(
-      GTexture3D**  ppTexture,
+      Texture3D**   ppTexture,
       GXLPCSTR      szName,
       GXUINT        Width,          // 宽度,高度和深度
       GXUINT        Height,
@@ -174,7 +173,7 @@ namespace GrapX
       GXDWORD       ResUsage));
 
     GXSTDINTERFACE(GXHRESULT CreateTexture3DFromFile(
-      GTexture3D**  ppTexture,
+      Texture3D**   ppTexture,
       GXLPCWSTR     pSrcFile));
 
     //GXSTDINTERFACE(GXHRESULT CreateTexture3DFromFileEx(
@@ -193,7 +192,7 @@ namespace GrapX
 
     // Cube Texture
     GXSTDINTERFACE(GXHRESULT CreateTextureCube(
-      GTextureCube**ppTexture,
+      TextureCube** ppTexture,
       GXLPCSTR      szName,
       GXUINT        Size,
       GXUINT        MipLevels,
@@ -201,7 +200,7 @@ namespace GrapX
       GXDWORD       ResUsage));
 
     GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFile(
-      GTextureCube**ppTexture,
+      TextureCube** ppTexture,
       GXLPCWSTR     pSrcFile));
 
     //GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFileEx(
@@ -271,10 +270,10 @@ namespace GrapX
     // 高级函数
 
     // GXCanvas
-    GXSTDINTERFACE(GXCanvas*    LockCanvas                 (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags));
+    GXSTDINTERFACE(Canvas*    LockCanvas                 (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags));
 
     // 如果 pImage 为 NULL, 则忽略 DepthStencil 参数
-    GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
+    GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
     //GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, GTexture* pDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
 
     GXSTDINTERFACE(GXHRESULT    CreateEffect               (Effect** ppEffect, Shader* pShader));
@@ -282,10 +281,10 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT    CreateMaterialFromFile     (Material** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType));
     //GXSTDINTERFACE(GXHRESULT    CreateMaterialFromFile     (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType));
 
-    GXSTDINTERFACE(GXHRESULT    CreateRasterizerState      (GRasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc));
-    GXSTDINTERFACE(GXHRESULT    CreateBlendState           (GBlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum));
-    GXSTDINTERFACE(GXHRESULT    CreateDepthStencilState    (GDepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState));
-    GXSTDINTERFACE(GXHRESULT    CreateSamplerState         (GSamplerState** ppSamplerState));
+    GXSTDINTERFACE(GXHRESULT    CreateRasterizerState      (RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc));
+    GXSTDINTERFACE(GXHRESULT    CreateBlendState           (BlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum));
+    GXSTDINTERFACE(GXHRESULT    CreateDepthStencilState    (DepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState));
+    GXSTDINTERFACE(GXHRESULT    CreateSamplerState         (SamplerState** ppSamplerState));
 
     // GXImage
     // TODO: 即使创建失败,也会返回一个默认图片
@@ -307,7 +306,7 @@ namespace GrapX
     //GXSTDINTERFACE(GXImage*   GetBackBufferImg             ());
     //GXSTDINTERFACE(GTexture*  GetBackBufferTex             ());
     GXSTDINTERFACE(GXHRESULT  GetBackBuffer                (RenderTarget** ppTarget));
-    GXSTDINTERFACE(GTexture*  GetDeviceOriginTex           ());
+    GXSTDINTERFACE(Texture*   GetDeviceOriginTex           ());
     GXSTDINTERFACE(GXBOOL     ScrollTexture                (const SCROLLTEXTUREDESC* lpScrollTexDesc));
 
     GXSTDINTERFACE(GXBOOL     GetDesc                      (GXGRAPHICSDEVICE_DESC* pDesc));

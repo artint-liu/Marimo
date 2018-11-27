@@ -3,7 +3,7 @@
 
 #ifndef _IMPLEMENT_GRAP_X_CANVAS_3D_H_
 #define _IMPLEMENT_GRAP_X_CANVAS_3D_H_
-class GXCanvas3DImpl : public GXCanvas3D
+class Canvas3DImpl : public Canvas3D
 {
   friend class GraphicsImpl;
 protected:
@@ -18,9 +18,9 @@ protected:
   GCamera*                  m_pCamera;
 
   FrustumPlanes             m_ViewFrustum;
-  GBlendStateImpl*          m_pBlendState;
-  GDepthStencilStateImpl*   m_pCurDepthStencilState;
-  GSamplerState*            m_pSamplerState;
+  BlendStateImpl*           m_pBlendState;
+  DepthStencilStateImpl*    m_pCurDepthStencilState;
+  SamplerState*             m_pSamplerState;
 #ifdef REFACTOR_SHADER
   clstd::FixedBuffer        m_CanvasUniformBuf;
   STD_CANVAS_UNIFORM        m_StdCanvasUniform;
@@ -29,8 +29,8 @@ protected:
 #endif // REFACTOR_SHADER
 
 protected:
-  GXCanvas3DImpl(GraphicsImpl* pGraphics);
-  virtual ~GXCanvas3DImpl();
+  Canvas3DImpl(GraphicsImpl* pGraphics);
+  virtual ~Canvas3DImpl();
 
   void        SetupCanvasUniform                ();
   void        BroadcastCanvasUniformBufferSize  (GXSIZE_T cbSize);
@@ -80,7 +80,7 @@ public:
   GXHRESULT   UpdateCommonUniforms  () override;
   GXHRESULT   Draw                  (GVSequence* pSequence) override;
 
-  GXHRESULT   GetDepthStencil       (GTexture** ppDepthStencil) override;
+  GXHRESULT   GetDepthStencil       (Texture** ppDepthStencil) override;
 
   const FrustumPlanes*      GetViewFrustum        ();
 #ifdef REFACTOR_SHADER

@@ -93,7 +93,7 @@ namespace GrapX
   namespace TextureUtility
   {
     GXBOOL GXDLL TextureFormatToClstdImageFormat(char* fmt, int* nDepth, GXFormat eFmt); // fmt至少应该4个字节
-    GXDLL clstd::Image* CreateImage(GTexture* pTexture);
+    GXDLL clstd::Image* CreateImage(Texture* pTexture);
   } // namespace TextureUtility
 } // namespace GrapX
 

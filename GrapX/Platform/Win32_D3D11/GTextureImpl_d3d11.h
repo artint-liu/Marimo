@@ -12,7 +12,7 @@ namespace GrapX
 
     // 用来统一内部TextureImpl对象
     template<class _Interface>
-    class GTextureBaseImplT : public _Interface
+    class TextureBaseImplT : public _Interface
     {
     protected:
       GraphicsImpl*             m_pGraphics;
@@ -20,7 +20,7 @@ namespace GrapX
       ID3D11ShaderResourceView* m_pD3D11ShaderView;
 
     public:
-      GTextureBaseImplT(GraphicsImpl*pGraphics)
+      TextureBaseImplT(GraphicsImpl*pGraphics)
         : m_pGraphics(pGraphics)
         , m_pD3D11Texture(NULL)
         , m_pD3D11ShaderView(NULL)
@@ -40,10 +40,10 @@ namespace GrapX
       }
     };
 
-    class GTextureImpl : public GTextureBaseImplT<GTexture>
+    class TextureImpl : public TextureBaseImplT<Texture>
     {
       friend class GraphicsImpl;
-      friend class GXCanvasCoreImpl;
+      friend class CanvasCoreImpl;
 
     public:
       //enum CREATETYPE
@@ -74,15 +74,15 @@ namespace GrapX
       GXFormat    GetFormat         () override;
       GXVOID      GenerateMipMaps   () override;
       GXBOOL      GetDesc           (GXBITMAP*lpBitmap) override;
-      GXBOOL      CopyRect          (GTexture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
+      GXBOOL      CopyRect          (Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
       GXBOOL      Map               (MAPPED* pMappedRect, GXResMap eResMap) override;
       GXBOOL      Unmap             () override;
       GXBOOL      UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch) override;
       GrapX::Graphics* GetGraphicsUnsafe () override;
 
     protected:
-      GTextureImpl(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage);
-      virtual ~GTextureImpl();
+      TextureImpl(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage);
+      virtual ~TextureImpl();
 
       GXBOOL InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
       //void   CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
@@ -115,39 +115,39 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    class GTextureImpl_RenderTarget : public GTextureImpl
+    class TextureImpl_RenderTarget : public TextureImpl
     {
       friend class GraphicsImpl;
     protected:
       ID3D11RenderTargetView* m_pD3D11RenderTargetView;
 
     public:
-      GTextureImpl_RenderTarget(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
-      virtual ~GTextureImpl_RenderTarget();
+      TextureImpl_RenderTarget(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+      virtual ~TextureImpl_RenderTarget();
       GXBOOL InitRenderTexture();
     };
 
     //////////////////////////////////////////////////////////////////////////
 
-    class GTextureImpl_DepthStencil : public GTextureImpl
+    class TextureImpl_DepthStencil : public TextureImpl
     {
       friend class GraphicsImpl;
     protected:
       ID3D11DepthStencilView* m_pD3D11DepthStencilView;
 
     public:
-      GTextureImpl_DepthStencil(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
-      virtual ~GTextureImpl_DepthStencil();
+      TextureImpl_DepthStencil(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+      virtual ~TextureImpl_DepthStencil();
       GXBOOL InitDepthStencil();
     };
 
     //////////////////////////////////////////////////////////////////////////
 
-    class GtextureImpl_GPUReadBack : public GTextureImpl
+    class textureImpl_GPUReadBack : public TextureImpl
     {
     protected:
     public:
-      GtextureImpl_GPUReadBack(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+      textureImpl_GPUReadBack(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
       GXBOOL InitReadBackTexture();
 
       GXBOOL Map    (MAPPED* pMappedRect, GXResMap eResMap) override;

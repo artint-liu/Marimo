@@ -63,7 +63,7 @@ class GXConsole
 public:
   GXConsole();
 public:
-  virtual GXLRESULT Render(GrapX::GXCanvas* pCanvas);
+  virtual GXLRESULT Render(GrapX::Canvas* pCanvas);
   virtual GXLRESULT Scroll(int nLine);
   virtual GXLRESULT Show(GXBOOL bShow);
   virtual GXLRESULT WriteW(GXLPCWSTR szFormat, ...);
@@ -78,7 +78,7 @@ private:
   const int         s_nFontHeight;
   TextRoundBuffer*  m_pBuffer;
 private:
-  void DrawLines(GrapX::GXCanvas* pCanvas, int y, int yInc, const TextRoundBuffer::LINEDESC* pLineDesc);
+  void DrawLines(GrapX::Canvas* pCanvas, int y, int yInc, const TextRoundBuffer::LINEDESC* pLineDesc);
 };
 
 

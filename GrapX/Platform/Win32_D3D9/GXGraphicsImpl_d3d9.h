@@ -16,7 +16,7 @@
 //  }
 //  ´´½¨ GXCanvas
 //}
-class GXCanvasCore;
+class CanvasCore;
 class GXEffectImpl;
 class GTexture;
 class GXConsole;
@@ -56,7 +56,7 @@ namespace D3D9
     friend class GPrimitiveVertexIndexImpl;
     friend class GSamplerStateImpl;
     friend class GXCanvasImpl;
-    friend class GXCanvas3DImpl;
+    friend class Canvas3DImpl;
     friend class GShaderImpl;
     typedef clhash_set<GTextureFromUser*>   RTTexSet;
   public:

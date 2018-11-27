@@ -63,7 +63,7 @@ extern "C"
   GXBOOL          GXDLLAPI GXUIMakeCurrent        ();
 
   GXHRESULT       GXDLLAPI GXRenderRootFrame      ();
-  GXVOID          GXDLLAPI GXDrawDebugMsg         (GXHSTATION hStation, GrapX::GXCanvas* pCanvas);
+  GXVOID          GXDLLAPI GXDrawDebugMsg         (GXHSTATION hStation, GrapX::Canvas* pCanvas);
 };
 
 #endif // _GRAPX_DEVICE_H_

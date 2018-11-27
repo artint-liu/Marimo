@@ -66,7 +66,7 @@ namespace D3D9
 #include "Platform/CommonInline/GXCanvasImpl.inl"
 #include "Canvas/GXCanvasCoreImpl.inl"
 
-  GXBOOL GXCanvasImpl::SetEffectUniformByName1f (const GXCHAR* pName, const float fValue)
+  GXBOOL CanvasImpl::SetEffectUniformByName1f (const GXCHAR* pName, const float fValue)
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
@@ -80,7 +80,7 @@ namespace D3D9
     m_uBatchCount++;
     return TRUE;
   }
-  GXBOOL GXCanvasImpl::SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue)
+  GXBOOL CanvasImpl::SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue)
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
@@ -94,7 +94,7 @@ namespace D3D9
     m_uBatchCount++;
     return TRUE;
   }
-  GXBOOL GXCanvasImpl::SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue)
+  GXBOOL CanvasImpl::SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue)
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
@@ -109,7 +109,7 @@ namespace D3D9
 
     return TRUE;
   }
-  GXBOOL GXCanvasImpl::SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue)
+  GXBOOL CanvasImpl::SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue)
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
@@ -124,7 +124,7 @@ namespace D3D9
     return TRUE;
   }
   
-  GXBOOL GXCanvasImpl::SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue)
+  GXBOOL CanvasImpl::SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue)
   {
     if(!((m_uBatchCount + 1) < m_uBatchSize))
       Flush();
@@ -138,19 +138,19 @@ namespace D3D9
     return TRUE;
   }
 
-  GXBOOL GXCanvasImpl::SetEffectUniform1f(const GXINT nIndex, const float fValue)
+  GXBOOL CanvasImpl::SetEffectUniform1f(const GXINT nIndex, const float fValue)
   {
     return TRUE;
   }
-  GXBOOL GXCanvasImpl::SetEffectUniform2f(const GXINT nIndex, const float2* vValue)
+  GXBOOL CanvasImpl::SetEffectUniform2f(const GXINT nIndex, const float2* vValue)
   {
     return TRUE;
   }
-  GXBOOL GXCanvasImpl::SetEffectUniform3f(const GXINT nIndex, const float3* fValue)
+  GXBOOL CanvasImpl::SetEffectUniform3f(const GXINT nIndex, const float3* fValue)
   {
     return TRUE;
   }
-  GXBOOL GXCanvasImpl::SetEffectUniform4f(const GXINT nIndex, const float4* fValue)
+  GXBOOL CanvasImpl::SetEffectUniform4f(const GXINT nIndex, const float4* fValue)
   {
     return TRUE;
   }

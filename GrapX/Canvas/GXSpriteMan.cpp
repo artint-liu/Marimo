@@ -64,7 +64,7 @@ extern "C" GXHRESULT GXDLLAPI GXCreateSpriteEx(GrapX::Graphics* pGraphics, const
 
 GXHRESULT GXDLLAPI GXCreateSpriteArray(GrapX::Graphics* pGraphics, GXLPCWSTR szTextureFile, int xStart, int yStart, int nTileWidth, int nTileHeight, int xGap, int yGap, GXSprite** ppSprite)
 {
-  GrapX::GTexture* pTexture = NULL;
+  GrapX::Texture* pTexture = NULL;
   if(GXFAILED(pGraphics->CreateTextureFromFile(&pTexture, szTextureFile, GXResUsage::Default))) {
     return GX_E_OPEN_FAILED;
   }

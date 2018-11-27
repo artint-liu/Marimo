@@ -34,7 +34,7 @@ public:
 
   GXBOOL            InvalidateWndRegion (GXHWND hWnd, const GRegion* prgnUpdate, GXBOOL bWndCoord);
   GXBOOL            SendPaintMessage    ();
-  GXBOOL            Render              (GrapX::GXCanvas* pCanvas);
+  GXBOOL            Render              (GrapX::Canvas* pCanvas);
   GXWindowsSurface* GetSurface          (GXINT nSurface);
   void              ActiveWindows       (GXINT uActiveState, DWM_ACTIVEWINDOWS* pActiveWindows);
   GXBOOL            ActiveSurface       (GXWindowsSurface* pWndSurface);

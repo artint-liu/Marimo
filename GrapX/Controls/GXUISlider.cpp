@@ -636,7 +636,7 @@ namespace GXUI
     //  UpdatePosFromVar(dwStyle);
     //}
 
-    GrapX::GXCanvas* pCanvas = canvas.GetCanvasUnsafe();
+    GrapX::Canvas* pCanvas = canvas.GetCanvasUnsafe();
 
     if(TEST_FLAG_NOT(dwStyle, GXUISLDS_VERT))
     {
@@ -679,7 +679,7 @@ namespace GXUI
     return 0;
   }
 
-  void Slider::PaintDial(GrapX::GXCanvas* pCanvas, GXDWORD dwStyle, int x, int y)
+  void Slider::PaintDial(GrapX::Canvas* pCanvas, GXDWORD dwStyle, int x, int y)
   {
     // 浮点模式不绘制刻度
     if(TEST_FLAG(dwStyle, GXUISLDS_FLOAT)) {

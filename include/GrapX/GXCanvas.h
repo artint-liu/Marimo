@@ -9,17 +9,17 @@ struct GXSTATION;
 namespace GrapX
 {
   class Primitive;
-  class GTexture;
+  class Texture;
   class RenderTarget;
   class Effect;
 
   //////////////////////////////////////////////////////////////////////////
   // GXCanvasCore 从GUnknown继承改为从GResource继承
   // 这是为了便于在Graphics中进行管理，通过消息分发得到诸如设备尺寸改变等系统信息。
-  class GXCanvasCore : public GResource
+  class CanvasCore : public GResource
   {
   public:
-    GXCanvasCore(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType) {}
+    CanvasCore(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType) {}
     //virtual ~GXCanvasCore() = NULL;
 
     GXSTDINTERFACE(GXHRESULT        AddRef              ());
@@ -33,12 +33,12 @@ namespace GrapX
   enum CanvasParamInfo
   {
     CPI_SETTEXTURECOLOR = 1,    // uParam 设置纹理颜色
-    CPI_SETCOLORADDITIVE = 2,    // uParam 设置颜色累加值
-    CPI_SETTEXTCLIP = 3,    // 设置文字的裁剪, 只是临时改变设备的矩形裁剪区, pParam指向GXRECT,
-                                 // 如果使用任何裁剪函数设置, 将清除这个函数的效果
-    //CPI_SETPIXELSIZEINV  = 4,  // 像素尺寸的倒数, 相当于纹理坐标上一个像素的跨度, pParam 指向了float2结构
-    CPI_SETEXTTEXTURE = 5,    // 设置额外的纹理, uParam 是纹理的Stage, pParam 指向纹理对象
-                                 // 由于第一个纹理用于绘制图像, 所以0号位置不能设置
+    CPI_SETCOLORADDITIVE = 2,   // uParam 设置颜色累加值
+    CPI_SETTEXTCLIP = 3,        // 设置文字的裁剪, 只是临时改变设备的矩形裁剪区, pParam指向GXRECT,
+                                // 如果使用任何裁剪函数设置, 将清除这个函数的效果
+    //CPI_SETPIXELSIZEINV  = 4, // 像素尺寸的倒数, 相当于纹理坐标上一个像素的跨度, pParam 指向了float2结构
+    CPI_SETEXTTEXTURE = 5,      // 设置额外的纹理, uParam 是纹理的Stage, pParam 指向纹理对象
+                                // 由于第一个纹理用于绘制图像, 所以0号位置不能设置
   };
   enum CompositingMode
   {
@@ -120,11 +120,11 @@ namespace GrapX
   (_ROTATE) = nRotate90 ? ((_ROTATE) ^ (2|4)) : ((_ROTATE) ^ 4);\
   }
 
-  class GXCanvas : public GXCanvasCore
+  class Canvas : public CanvasCore
   {
   public:
     //virtual ~GXCanvas() = NULL;
-    GXCanvas(GXUINT nPriority, GXDWORD dwType) : GXCanvasCore(nPriority, dwType) {}
+    Canvas(GXUINT nPriority, GXDWORD dwType) : CanvasCore(nPriority, dwType) {}
 
     GXSTDINTERFACE(GXHRESULT   Release              ());
     GXSTDINTERFACE(GXHRESULT   Invoke               (GRESCRIPTDESC* pDesc));
@@ -157,16 +157,11 @@ namespace GrapX
 
     GXSTDINTERFACE(GXBOOL      ColorFillRegion      (GRegion* pRegion, GXCOLORREF crFill));
 
-    GXSTDINTERFACE(GXBOOL      DrawUserPrimitive    (GTexture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount));
-    GXSTDINTERFACE(GXBOOL      DrawTexture          (GTexture*pTexture, const GXREGN *rcDest));
-    GXSTDINTERFACE(GXBOOL      DrawTexture          (GTexture*pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc));
-    GXSTDINTERFACE(GXBOOL      DrawTexture          (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc));
-    GXSTDINTERFACE(GXBOOL      DrawTexture          (GTexture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation));
-
-    //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest));
-    //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN* rgSrc));
-    //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc));
-    //GXSTDINTERFACE(GXBOOL      DrawImage            (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation));
+    GXSTDINTERFACE(GXBOOL      DrawUserPrimitive    (Texture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount));
+    GXSTDINTERFACE(GXBOOL      DrawTexture          (Texture*pTexture, const GXREGN *rcDest));
+    GXSTDINTERFACE(GXBOOL      DrawTexture          (Texture*pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc));
+    GXSTDINTERFACE(GXBOOL      DrawTexture          (Texture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc));
+    GXSTDINTERFACE(GXBOOL      DrawTexture          (Texture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation));
 
     GXSTDINTERFACE(GXINT       DrawText            (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText));
     GXSTDINTERFACE(GXINT       DrawText            (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText));
@@ -202,7 +197,7 @@ namespace GrapX
 class GXDLL GXWndCanvas // TODO: 是否能改成从GXCanvas继承？
 {
 private:
-  GrapX::GXCanvas*  m_pNative;
+  GrapX::Canvas*  m_pNative;
   GXHWND    m_hWnd;
   GXSTATION*    m_lpStation;
   GRegion*    m_pSystemRegion;    // Windows Manager 确定的 Region
@@ -219,9 +214,9 @@ public:
   virtual ~GXWndCanvas();
 
   GXBOOL    DrawFrameControl(GXLPRECT lprc,GXUINT uType,GXUINT uState);  
-  GXHRESULT DrawTexture     (GrapX::GTexture* pTexture, const GXREGN *rcDest);
-  GXHRESULT DrawTexture     (GrapX::GTexture* pTexture, const GXREGN *rcDest, const GXREGN *rcSrc);
-  GXHRESULT DrawTexture     (GrapX::GTexture* pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc);
+  GXHRESULT DrawTexture     (GrapX::Texture* pTexture, const GXREGN *rcDest);
+  GXHRESULT DrawTexture     (GrapX::Texture* pTexture, const GXREGN *rcDest, const GXREGN *rcSrc);
+  GXHRESULT DrawTexture     (GrapX::Texture* pTexture, GXINT xPos, GXINT yPos, const GXREGN *rcSrc);
 
   GXINT     DrawText        (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF crText);
   GXINT     DrawGlowText    (GXFont* pFTFont, GXLPCWSTR lpString,GXINT nCount,GXLPRECT lpRect,GXUINT uFormat, GXCOLORREF Color, GXUINT uRadius);
@@ -237,7 +232,7 @@ public:
   GXINT     GetClipBox      (GXLPRECT lpRect);
   GXBOOL    GetPaintRect    (GXLPRECT lpRect);  // 获得可绘图的Rect区域
 
-  GrapX::GXCanvas* GetCanvasUnsafe ();
+  GrapX::Canvas* GetCanvasUnsafe ();
 
   void      EnableAlphaBlend(GXBOOL bEnable);
 

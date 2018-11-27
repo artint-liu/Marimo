@@ -312,7 +312,7 @@ GXBOOL GVScene::RayTrace(const GVNode::Ray& ray, const GVNode::AABB* pAABB, GVNo
   return RayTraceRecursive(ray, pParent ? pParent : m_pRoot , pAABB, ppModel, pHit);
 }
 
-GXBOOL GVScene::RayTraceFromViewport(GrapX::GXCanvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit)
+GXBOOL GVScene::RayTraceFromViewport(GrapX::Canvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit)
 {
   float3 vPos;
   pCanvas->PositionFromScreen(pPoint, 1.0f - 1e-5f, &vPos);
@@ -351,7 +351,7 @@ GXHRESULT GVScene::UpdateRecursive(const GVSCENEUPDATE& sContext, GVNode* pParen
   return GX_OK;
 }
 
-GXHRESULT GVScene::RenderRecursive(GrapX::GXCanvas3D* pCanvas, GVNode* pParent, GVRenderType eType)
+GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, GVRenderType eType)
 {
   GVRENDERDESC Desc;
   GVNode* pModel = pParent->GetFirstChild();
@@ -411,7 +411,7 @@ GXHRESULT GVScene::RenderRecursive(GrapX::GXCanvas3D* pCanvas, GVNode* pParent, 
   return GX_OK;
 }
 
-GXHRESULT GVScene::RenderAll( GXCanvas3D* pCanvas, GVRenderType eType )
+GXHRESULT GVScene::RenderAll( Canvas3D* pCanvas, GVRenderType eType )
 {
   m_uDrawCallCount = 0;
 
@@ -496,7 +496,7 @@ GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
   return GX_FAIL;
 }
 
-GXHRESULT GVScene::Generate( GXCanvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired )
+GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired )
 {  
   GVNode::AABB          aabbAbs;
   GVRENDERDESC          Desc;
@@ -557,7 +557,7 @@ JMP_NEXT:
   return GX_OK;
 }
 
-void GVScene::Update(GXCanvas3D* pCanvas, GXDWORD dwDeltaTime)
+void GVScene::Update(Canvas3D* pCanvas, GXDWORD dwDeltaTime)
 {
   // dwDeltaTime 为 0 也要更新, 因为可能有需要针对摄像机调整方向的Node
   BEGIN_SCOPED_LOCKER(m_Locker);

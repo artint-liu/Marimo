@@ -1,5 +1,5 @@
-GXCanvasCoreImpl::GXCanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType)
-  : GXCanvas            (nPriority, dwType)
+CanvasCoreImpl::CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType)
+  : Canvas            (nPriority, dwType)
   , m_pGraphics         (pGraphics)
   , m_pTargetTex        (NULL)
   //, m_xExt              (0)
@@ -14,7 +14,7 @@ GXCanvasCoreImpl::GXCanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GX
   AddRef();
 }
 
-GXCanvasCoreImpl::~GXCanvasCoreImpl()
+CanvasCoreImpl::~CanvasCoreImpl()
 {
   SAFE_RELEASE(m_pTargetTex);
   SAFE_RELEASE(m_pBlendState);
@@ -24,7 +24,7 @@ GXCanvasCoreImpl::~GXCanvasCoreImpl()
   SAFE_RELEASE(m_pCamera);
 }
 
-GXBOOL GXCanvasCoreImpl::Initialize(RenderTarget* pTarget)
+GXBOOL CanvasCoreImpl::Initialize(RenderTarget* pTarget)
 {
   //if(pTarget == NULL)
   //{
@@ -47,7 +47,7 @@ GXBOOL GXCanvasCoreImpl::Initialize(RenderTarget* pTarget)
   }
 
   if(m_pSamplerState == NULL) {
-    m_pGraphics->CreateSamplerState(reinterpret_cast<GSamplerState**>(&m_pSamplerState));
+    m_pGraphics->CreateSamplerState(reinterpret_cast<SamplerState**>(&m_pSamplerState));
   }
   else {
     m_pSamplerState->ResetToDefault();
@@ -59,24 +59,24 @@ GXBOOL GXCanvasCoreImpl::Initialize(RenderTarget* pTarget)
   return TRUE;
 }
 
-GXHRESULT GXCanvasCoreImpl::Invoke(GRESCRIPTDESC* pDesc)
+GXHRESULT CanvasCoreImpl::Invoke(GRESCRIPTDESC* pDesc)
 {
   return GX_OK;
 }
 
-GXSIZE* GXCanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const
+GXSIZE* CanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const
 {
   *pSize = m_sExtent;
   return pSize;
 }
 
-RenderTarget* GXCanvasCoreImpl::GetTargetUnsafe() const
+RenderTarget* CanvasCoreImpl::GetTargetUnsafe() const
 {
   return m_pTargetTex;
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-GXHRESULT GXCanvasCoreImpl::AddRef()
+GXHRESULT CanvasCoreImpl::AddRef()
 {
   return gxInterlockedIncrement(&m_nRefCount);
 }
