@@ -350,6 +350,23 @@ namespace GrapX
       ASSERT(aIndexTabB.size() == mapper_b.GetBufferCount());
       return TRUE;
     }
+
+    ShaderImpl::D3D11CB_DESC* ShaderImpl::D3D11CB_GetDescBegin() const
+    {
+      return reinterpret_cast<D3D11CB_DESC*>(m_D11ResDescPool.GetPtr());
+    }
+
+    ShaderImpl::D3D11CB_DESC* ShaderImpl::D3D11CB_GetDescEnd() const
+    {
+      ASSERT(m_pVertexCB != NULL);
+      return reinterpret_cast<D3D11CB_DESC*>(m_pVertexCB);
+    }
+
+    ID3D11Buffer** ShaderImpl::D3D11CB_GetPixelCBEnd() const
+    {
+      return reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + m_D11ResDescPool.GetSize());
+    }
+
     //////////////////////////////////////////////////////////////////////////
 
     GXHRESULT ShaderImpl::AddRef()
@@ -398,11 +415,13 @@ namespace GrapX
       SAFE_RELEASE(m_pD3D11VertexShader);
       SAFE_RELEASE(m_pD3D11PixelShader);
 
-      if(_CL_NOT_(m_arrayCB.empty())){
-        ID3D11Buffer** ppD3D11Buffer = &m_arrayCB.front();
-        for(; ppD3D11Buffer != m_pVertexCB; ppD3D11Buffer++)
+      if(m_D11ResDescPool.GetSize() > 0){
+        D3D11CB_DESC* pDesc = D3D11CB_GetDescBegin();
+        D3D11CB_DESC* const pDescEnd = D3D11CB_GetDescEnd();
+        for(; pDesc != pDescEnd; pDesc++)
         {
-          SAFE_RELEASE(*ppD3D11Buffer);
+          SAFE_RELEASE(pDesc->pD3D11ConstantBuffer);
+          pDesc->cbSize = 0;
         }
       }
     }
@@ -748,26 +767,33 @@ namespace GrapX
       if(nCombine + nMapper == 0) {
         return TRUE;
       }
-      m_arrayCB.reserve(nCombine + nMapper);
-      m_arrayCB.assign(nCombine, NULL);
-      for(int i = 0; i < 2; i++)
-      {
-        //m_arrayCB.insert(m_arrayCB.end(), pIndexTab[i].begin(), pIndexTab[i].end());
-        //for(size_t n = 0; n < pIndexTab[i].size(); n++)
-        std::for_each(pIndexTab[i].begin(), pIndexTab[i].end(), [this](size_t n)
-        {
-          m_arrayCB.push_back(reinterpret_cast<ID3D11Buffer*>(n));
-        });
-      }
-      m_pVertexCB = &m_arrayCB[nCombine];
-      m_pPixelCB  = &m_arrayCB[nCombine + pMapper[0].GetBufferCount()];
-      ASSERT(m_arrayCB.size() == nCombine + nMapper);
+      m_D11ResDescPool.Resize(nCombine * sizeof(D3D11CB_DESC) + nMapper * sizeof(ID3D11Buffer*), TRUE);
+      //m_arrayCB.reserve(nCombine + nMapper);
+      //m_arrayCB.assign(nCombine, NULL);
+      m_pVertexCB = reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + nCombine * sizeof(D3D11CB_DESC));
+      m_pPixelCB = m_pVertexCB + pMapper[0].GetBufferCount();
+      
+      int i = 0;
+      std::for_each(pIndexTab[0].begin(), pIndexTab[0].end(), [this, &i](size_t n) {
+        m_pVertexCB[i++] = (reinterpret_cast<ID3D11Buffer*>(n));
+      });
+
+      i = 0;
+      std::for_each(pIndexTab[1].begin(), pIndexTab[1].end(), [this, &i](size_t n) {
+        m_pPixelCB[i++] = (reinterpret_cast<ID3D11Buffer*>(n));
+      });
+
+      //ASSERT(m_arrayCB.size() == nCombine + nMapper);
       return TRUE;
     }
 
     GXBOOL ShaderImpl::BuildCBTable(Marimo::DataPool* pDataPool)
     {
-      if(m_arrayCB.front()) {
+      //if(m_arrayCB.front()) {
+      //  return FALSE;
+      //}
+      D3D11CB_DESC* pDesc = D3D11CB_GetDescBegin();
+      if(pDesc->pD3D11ConstantBuffer) {
         return FALSE;
       }
 
@@ -781,7 +807,7 @@ namespace GrapX
         if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
           iter_var.ToVariable(var);
           if(var.GetOffset() > 0) {
-            m_arrayCB[nCB++] = D3D11CreateBuffer(var.GetOffset());
+            D3D11CreateBuffer(pDesc[nCB++], var.GetOffset());
             break;
           }
         }
@@ -789,7 +815,7 @@ namespace GrapX
 
       if(iter_var == iter_var_end)
       {
-        m_arrayCB[nCB++] = D3D11CreateBuffer(pDataPool->GetRootSize());
+        D3D11CreateBuffer(pDesc[nCB++], pDataPool->GetRootSize());
       }
       else
       {
@@ -797,7 +823,7 @@ namespace GrapX
         for(; iter_var != iter_var_end; ++iter_var) {
           if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
             iter_var.ToVariable(var);
-            m_arrayCB[nCB++] = D3D11CreateBuffer(var.GetSize());
+            D3D11CreateBuffer(pDesc[nCB++], var.GetSize());
           }
           else {
             break;
@@ -805,12 +831,15 @@ namespace GrapX
         }
       }
 
-      ASSERT((m_pVertexCB - &m_arrayCB.front()) == nCB); // 检查结尾准确性
-      for(size_t i = nCB; i < m_arrayCB.size(); i++)
+      ASSERT(((size_t)m_pVertexCB - (size_t)pDesc) == nCB * sizeof(D3D11CB_DESC)); // 检查结尾准确性
+      ID3D11Buffer** pD3D11BufBegin = m_pVertexCB;
+      ID3D11Buffer** const pD3D11BufEnd = D3D11CB_GetPixelCBEnd();
+      ASSERT(((size_t)pD3D11BufEnd - (size_t)pD3D11BufBegin) % sizeof(ID3D11Buffer*) == 0);
+      for(; pD3D11BufBegin != pD3D11BufEnd; pD3D11BufBegin++)
       {
         // 索引转成内容
-        ASSERT(reinterpret_cast<size_t>(m_arrayCB[i]) < nCB);
-        m_arrayCB[i] = m_arrayCB[reinterpret_cast<size_t>(m_arrayCB[i])];
+        ASSERT(reinterpret_cast<size_t>(*pD3D11BufBegin) < nCB);
+        *pD3D11BufBegin = pDesc[reinterpret_cast<size_t>(*pD3D11BufBegin)].pD3D11ConstantBuffer;
       }
 
       return TRUE;
@@ -820,11 +849,17 @@ namespace GrapX
     {
       ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
 
-      // FIXME: 假定有$Globals
-      pImmediateContext->UpdateSubresource(m_arrayCB.front(), 0, NULL, pDataPool->GetRootPtr(), 0, 0);
+      GXLPBYTE pSourceBuffer = reinterpret_cast<GXLPBYTE>(pDataPool->GetRootPtr());
+      
+      D3D11CB_DESC* const pCBDescEnd = D3D11CB_GetDescEnd();
+      for(D3D11CB_DESC* pCBDesc = D3D11CB_GetDescBegin(); pCBDesc != pCBDescEnd; ++pCBDesc)
+      {
+        pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL, pSourceBuffer, 0, 0);
+        pSourceBuffer += pCBDesc->cbSize;
+      }
 
       pImmediateContext->VSSetConstantBuffers(0, m_pPixelCB - m_pVertexCB, m_pVertexCB);
-      pImmediateContext->PSSetConstantBuffers(0, &m_arrayCB.back() - m_pPixelCB + 1, m_pPixelCB);
+      pImmediateContext->PSSetConstantBuffers(0, D3D11CB_GetPixelCBEnd() - m_pPixelCB, m_pPixelCB);
       return FALSE;
     }
 
@@ -1016,7 +1051,7 @@ namespace GrapX
       return TRUE;
     }
 
-    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(size_t cbSize)
+    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(D3D11CB_DESC& desc, size_t cbSize)
     {
       ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       D3D11_BUFFER_DESC bd;
@@ -1028,10 +1063,10 @@ namespace GrapX
       bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
       bd.CPUAccessFlags = 0;
 
-      ID3D11Buffer* pD3D11Buffer = NULL;
-      HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &pD3D11Buffer);
+      desc.cbSize = cbSize;
+      HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &desc.pD3D11ConstantBuffer);
       if(SUCCEEDED(hr)) {
-        return pD3D11Buffer;
+        return desc.pD3D11ConstantBuffer;
       }
       return NULL;
     }

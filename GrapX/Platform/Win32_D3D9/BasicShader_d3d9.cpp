@@ -48,9 +48,9 @@ AddressV = Clamp;                                                       \n\
                                                                         \n\
 float4 ps_main(PS_INPUT Input) : COLOR0                                 \n\
 {                                                                       \n\
-  // 输入的纹理与顶点色相加                                               \n\
-  float4 crPixel = tex2D(Simple_Sampler, Input.TexUV) + ColorAdd;       \n\
-  return crPixel * Input.Color * Color;                                 \n\
+  // 输入的纹理与顶点色相加                                              \n\
+  float4 c = tex2D(Simple_Sampler, Input.TexUV);                        \n\
+  return (c * Color + ColorAdd) * Input.Color;                          \n\
 }";
 
 const char* g_szFastGaussianBlur = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\

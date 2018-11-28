@@ -211,19 +211,25 @@ namespace Marimo
       _Ty& operator=(_Ty& val)
       {
         *(_Ty*)GetPtr() = val;
-//#ifdef ENABLE_DATAPOOL_WATCHER
         Impulse(DATACT_Change);
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
         return *(_Ty*)GetPtr();
       }
 
       const _Ty& operator=(const _Ty& val)
       {
         *(_Ty*)GetPtr() = val;
-//#ifdef ENABLE_DATAPOOL_WATCHER
         Impulse(DATACT_Change);
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
         return *(_Ty*)GetPtr();
+      }
+
+      _Ty* operator->() // 没有数据通知
+      {
+        return reinterpret_cast<_Ty*>(GetPtr());
+      }
+
+      const _Ty* operator->() const // 没有数据通知
+      {
+        return reinterpret_cast<const _Ty*>(GetPtr());
       }
     };
   } // namespace Implement

@@ -587,6 +587,7 @@ namespace clstd
       return *this;
     }
 
+    _float4& set(float f) { x = y = z = w = f; return *this; }
     _float4& set(float x, float y, float z, float w){this->x = x; this->y = y; this->z = z; this->w = w; return *this;}
     float lengthsquare() const { return x * x + y * y + z * z + w * w; }
     float length() const { return sqrt(lengthsquare()); }

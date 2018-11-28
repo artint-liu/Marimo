@@ -106,6 +106,7 @@ namespace GrapX
       gxRtlZeroMemory(&m_pBlendingState, sizeof(m_pBlendingState));
       gxRtlZeroMemory(&m_pOpaqueState, sizeof(m_pOpaqueState));
       gxRtlZeroMemory(&m_pCanvasStencil, sizeof(m_pCanvasStencil));
+      m_CommonEffect.pEffect = NULL;
     }
 
     CanvasImpl::~CanvasImpl()
@@ -159,7 +160,7 @@ namespace GrapX
 
         m_rcAbsClip = m_rcClip;
         m_CallState.rcClip = m_rcClip;
-        m_CallState.pEffectImpl = m_pEffectImpl;
+        m_CallState.RenderState.pEffect = m_pEffectImpl;
 
         m_uVertIndexSize = s_uDefVertIndexSize;
         m_uBatchSize = s_uDefBatchSize;
@@ -246,9 +247,21 @@ namespace GrapX
         gcc.dwMask = GCC_WORLD;
         m_pCamera->GetContext(&gcc);
         m_CallState.matTransform = gcc.matWorld;
-        m_CanvasCommConst.matWVProj = gcc.matWorld;
-        m_CanvasCommConst.colorMul.set(1, 1, 1, 1);
-        m_CanvasCommConst.colorAdd.set(0, 0, 0, 1);
+        //m_CanvasCommConst.matWVProj = gcc.matWorld;
+        //m_CanvasCommConst.colorMul.set(1, 1, 1, 1);
+        //m_CanvasCommConst.colorAdd.set(0, 0, 0, 1);
+
+        ASSERT(m_CommonEffect.pEffect == NULL);
+        m_CommonEffect.pEffect = m_pGraphics->IntGetEffect();
+        m_CommonEffect.pEffect->AddRef();
+
+        m_CommonEffect.transform = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>();
+        m_CommonEffect.color     = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();
+        m_CommonEffect.color_add = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();
+
+        m_CommonEffect.transform = gcc.matWorld;
+        m_CommonEffect.color->set(1.0f);
+        m_CommonEffect.color_add->set(0,0,0,1);
 
         ASSERT(m_dwTexSlot == NULL);
         return TRUE;
@@ -376,6 +389,7 @@ namespace GrapX
         m_dwStencil = 0;
 
         SAFE_RELEASE(m_pClipRegion);
+        SAFE_RELEASE(m_CommonEffect.pEffect);
 
         if(m_dwTexSlot != NULL)
         {
@@ -502,13 +516,13 @@ namespace GrapX
       PosF.w = w;
     }
 
-    void CanvasImpl::BATCH::SetRenderState(GXUINT nCode, GXDWORD dwValue)
-    {
-      eFunc = CF_RenderState;
-      nRenderStateCode = nCode;
-      dwStateValue = dwValue;
-      comm.lParam = NULL;
-    }
+    //void CanvasImpl::BATCH::SetRenderState(GXUINT nCode, GXDWORD dwValue)
+    //{
+    //  eFunc = CF_RenderState;
+    //  nRenderStateCode = nCode;
+    //  dwStateValue = dwValue;
+    //  comm.lParam = NULL;
+    //}
 
     GXBOOL CanvasImpl::CommitState()
     {
@@ -531,12 +545,10 @@ namespace GrapX
         m_pGraphics->SetViewport(NULL);
 
         float4 vColorAdditive = m_dwColorAdditive;
-        m_CanvasCommConst.colorAdd = vColorAdditive;
-        //*(float4*)&FXPCOMMREG(ColorAdd) = vColorAdditive;
+        m_CommonEffect.color_add = vColorAdditive;
 
-        //m_pGraphics->SetVertexShaderConstantF(0, (GXFLOAT*)&m_aVertexShaderRegister, CANVAS_SHARED_SHADER_REGCOUNT);
-        //m_pGraphics->SetPixelShaderConstantF(0, (GXFLOAT*)&m_aPixelShaderRegister, CANVAS_SHARED_SHADER_REGCOUNT);
-        //m_pEffectImpl->CommitUniform(this, -1);
+        static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe()); // TODO: 局部更新
+
 
         m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(m_pWhiteTex), 0);
 
@@ -628,10 +640,9 @@ namespace GrapX
       return TRUE;
     }
 
-    GXVOID CanvasImpl::EnableAlphaBlend(GXBOOL bEnable)
-    {
-
-    }
+    //GXVOID CanvasImpl::EnableAlphaBlend(GXBOOL bEnable)
+    //{
+    //}
 
     GXBOOL CanvasImpl::Flush()
     {
@@ -672,6 +683,7 @@ namespace GrapX
         {
           TRACE_BATCH("CF_LineList\n");
           if(bEmptyRect == FALSE) {
+
             m_pGraphics->DrawPrimitive(GXPT_LINELIST,
               nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 2);
           }
@@ -691,9 +703,19 @@ namespace GrapX
         case CF_Triangle:
         {
           TRACE_BATCH("CF_Trangle\n");
-          if(bEmptyRect == FALSE)
+          if(bEmptyRect == FALSE) {
+
+            //MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
+            //MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>(); // 临时写法
+            //MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>(); // 临时写法
+            //varMVP = m_CanvasCommConst.matWVProj;  // 临时写法
+            //colorAdd = m_CanvasCommConst.colorAdd; // 临时写法
+            //color = m_CanvasCommConst.colorMul;    // 临时写法
+            //static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
+
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
               nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 3);
+          }
           nBaseVertex += m_aBatch[i].uVertexCount;
           nStartIndex += m_aBatch[i].uIndexCount;
         }
@@ -717,14 +739,14 @@ namespace GrapX
           pTexture->Release();
         }
         break;
-        case CF_RenderState:
-        {
-          TRACE_BATCH("CF_RenderState\n");
-          ASSERT(0); // 已经去掉了
-          //m_pRenderState->Set(
-          //  (GXRenderStateType)m_aBatch[i].nRenderStateCode, m_aBatch[i].dwStateValue);
-        }
-        break;
+        //case CF_RenderState:
+        //{
+        //  TRACE_BATCH("CF_RenderState\n");
+        //  ASSERT(0); // 已经去掉了
+        //  //m_pRenderState->Set(
+        //  //  (GXRenderStateType)m_aBatch[i].nRenderStateCode, m_aBatch[i].dwStateValue);
+        //}
+        //break;
         case CF_SetSamplerState:
         {
           GXSAMPLERDESC* pDesc = (GXSAMPLERDESC*)m_aBatch[i].comm.lParam;
@@ -800,15 +822,17 @@ namespace GrapX
         {
           TRACE_BATCH("CF_ColorAdditive\n");
           m_dwColorAdditive = (GXDWORD)m_aBatch[i].comm.lParam;
-          m_CanvasCommConst.colorAdd = m_dwColorAdditive;
+          //m_CanvasCommConst.colorAdd = m_dwColorAdditive;
+          float4 v4 = m_dwColorAdditive;
+          m_CommonEffect.color_add = v4;
 
-          // TODO: 这里全部重新提交了CB，可以改为只提交$Globals          
-          MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
-          MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>(); // 临时写法
-          MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>(); // 临时写法
-          varMVP = m_CanvasCommConst.matWVProj;  // 临时写法
-          colorAdd = m_CanvasCommConst.colorAdd; // 临时写法
-          color = m_CanvasCommConst.colorMul;    // 临时写法
+          //// TODO: 这里全部重新提交了CB，可以改为只提交$Globals          
+          //MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
+          //MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>(); // 临时写法
+          //MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>(); // 临时写法
+          //varMVP = m_CanvasCommConst.matWVProj;  // 临时写法
+          //colorAdd = m_CanvasCommConst.colorAdd; // 临时写法
+          //color = m_CanvasCommConst.colorMul;    // 临时写法
           static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
           //m_pEffectImpl->CommitUniform(this, MEMBER_OFFSET(GXCANVASCOMMCONST, colorAdd));
         }
@@ -965,7 +989,8 @@ namespace GrapX
           ASSERT(m_aBatch[i + 2].eFunc == CF_SetTransform);
           ASSERT(m_aBatch[i + 3].eFunc == CF_SetTransform);
 
-          float* m = m_CanvasCommConst.matWVProj.m;
+          //float* m = m_CanvasCommConst.matWVProj.m;
+          float* m = (float*)m_CommonEffect.transform.GetPtr();
           m[0] = m_aBatch[i].PosF.x;   m[1] = m_aBatch[i].PosF.y;   m[2] = m_aBatch[i].PosF.z;   m[3] = m_aBatch[i].PosF.w;
           m[4] = m_aBatch[i + 1].PosF.x;   m[5] = m_aBatch[i + 1].PosF.y;   m[6] = m_aBatch[i + 1].PosF.z;   m[7] = m_aBatch[i + 1].PosF.w;
           m[8] = m_aBatch[i + 2].PosF.x;   m[9] = m_aBatch[i + 2].PosF.y;   m[10] = m_aBatch[i + 2].PosF.z;   m[11] = m_aBatch[i + 2].PosF.w;
@@ -973,12 +998,12 @@ namespace GrapX
           //m_pEffectImpl->CommitUniform(this, -1);
 
           // TODO: 这里全部重新提交了CB，可以改为只提交$Globals
-          MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
-          MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();  // 临时写法
-          MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();        // 临时写法
-          varMVP = m_CanvasCommConst.matWVProj;                                                // 临时写法
-          colorAdd = m_CanvasCommConst.colorAdd;                                               // 临时写法
-          color = m_CanvasCommConst.colorMul;                                                  // 临时写法
+          //MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
+          //MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();  // 临时写法
+          //MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();        // 临时写法
+          //varMVP = m_CanvasCommConst.matWVProj;                                                // 临时写法
+          //colorAdd = m_CanvasCommConst.colorAdd;                                               // 临时写法
+          //color = m_CanvasCommConst.colorMul;                                                  // 临时写法
           static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
 
           i += 3;
@@ -1016,94 +1041,97 @@ namespace GrapX
       //return GXSUCCEEDED(m_pGraphics->D3DGetDevice()->SetSamplerState(Sampler, Type, Value));
     }
 
-    GXBOOL CanvasImpl::SetRenderState(GXRenderStateType eType, GXDWORD dwValue)
-    {
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      // TODO: 想办法保证, 当GXCanvasImpl不在设备上时只改变GRenderState的变量.
-      m_aBatch[m_uBatchCount++].SetRenderState(eType, dwValue);
-      return TRUE;
-    }
-    GXBOOL CanvasImpl::SetRenderStateBlock(GXLPCRENDERSTATE lpBlock)
-    {
-      ASSERT(0); // 已经去掉了
-      return TRUE;
-      //return m_pRenderState->SetBlock(lpBlock);
-    }
+    //GXBOOL CanvasImpl::SetRenderState(GXRenderStateType eType, GXDWORD dwValue)
+    //{
+    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+    //    Flush();
+    //  // TODO: 想办法保证, 当GXCanvasImpl不在设备上时只改变GRenderState的变量.
+    //  m_aBatch[m_uBatchCount++].SetRenderState(eType, dwValue);
+    //  return TRUE;
+    //}
+    //GXBOOL CanvasImpl::SetRenderStateBlock(GXLPCRENDERSTATE lpBlock)
+    //{
+    //  ASSERT(0); // 已经去掉了
+    //  return TRUE;
+    //  //return m_pRenderState->SetBlock(lpBlock);
+    //}
 
     GXBOOL CanvasImpl::SetEffect(Effect* pEffect)
     {
-      if(m_CallState.pEffectImpl == pEffect)
-      {
+      if(m_CallState.RenderState.pEffect == pEffect) {
         return FALSE;
       }
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      if(pEffect != NULL)
-        pEffect->AddRef();
-      m_aBatch[m_uBatchCount++].Set(CF_Effect, 0, 0, (GXLPARAM)pEffect);
-      m_CallState.pEffectImpl = (EffectImpl*)pEffect;
 
-      const ShaderImpl* pShaderImpl = (ShaderImpl*)m_CallState.pEffectImpl->GetShaderUnsafe();
-      const GXINT nCacheSize = pShaderImpl->GetCacheSize();
-      if((GXINT)m_UniformBuffer.GetSize() < nCacheSize)
-      {
-        m_UniformBuffer.Resize(nCacheSize, TRUE);
+      if(!((m_uBatchCount + 1) < m_uBatchSize)) {
+        Flush();
       }
+      if(pEffect != NULL) {
+        pEffect->AddRef();
+      }
+      m_aBatch[m_uBatchCount++].Set(CF_Effect, 0, 0, (GXLPARAM)pEffect);
+      m_CallState.RenderState.pEffect = (EffectImpl*)pEffect;
+
+      //const ShaderImpl* pShaderImpl = (ShaderImpl*)m_CallState.RenderState.pEffect->GetShaderUnsafe();
+      //const GXINT nCacheSize = pShaderImpl->GetCacheSize();
+      //CLBREAK;
+      //if((GXINT)m_UniformBuffer.GetSize() < nCacheSize)
+      //{
+      //  m_UniformBuffer.Resize(nCacheSize, TRUE);
+      //}
       return TRUE;
     }
-#ifdef GLES2_CANVAS_IMPL
-    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-    {
-      return FALSE;
-    }
-#elif defined(D3D9_CANVAS_IMPL)
-    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-    {
-      //GXEffectImpl* pEffect = (GEffectImpl*)m_CallState.pEffect;
-      //if(pShader == NULL)
-      //{
-      //  ASSERT(0);
-      //  return FALSE;
-      //}
-      //D3DXHANDLE hHandle = pShader->m_ppct->GetConstantByName(NULL, lpName);
-      //if(hHandle == NULL)
-      //{
-      //  TRACE("Don't has constant register named %s\n.", lpName);
-      //  return FALSE;
-      //}
-      //D3DXCONSTANT_DESC d3dcd;
-      //GXUINT uCount;
-      //if(FAILED(pShader->m_ppct->GetConstantDesc(hHandle, &d3dcd, &uCount)))
-      //{
-      //  ASSERT(0);
-      //  return FALSE;
-      //}
-      //if(d3dcd.Type == D3DXPT_FLOAT)
-      //{
-      //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-      //    Flush();
-      //  clBuffer* pBuffer = new clBuffer;
-      //  pBuffer->Append(pData, nPackCount * sizeof(float4));
-      //  m_aBatch[m_uBatchCount].Set(CF_SetPixelShaderConst, 0, 0, (GXLPARAM)pBuffer);
-      //  m_aBatch[m_uBatchCount].comm.wParam = d3dcd.RegisterIndex;
-      //  m_uBatchCount++;
-      //  return TRUE;
-      //}
-      //else
-      //{
-      //  ASSERT(0);
-      return FALSE;
-      //}
-    }
-#elif defined(D3D11_CANVAS_IMPL)
-    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-    {
-      return FALSE;
-    }
-#else
-#error 需要定义inl的环境
-#endif
+//#ifdef GLES2_CANVAS_IMPL
+//    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
+//    {
+//      return FALSE;
+//    }
+//#elif defined(D3D9_CANVAS_IMPL)
+//    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
+//    {
+//      //GXEffectImpl* pEffect = (GEffectImpl*)m_CallState.pEffect;
+//      //if(pShader == NULL)
+//      //{
+//      //  ASSERT(0);
+//      //  return FALSE;
+//      //}
+//      //D3DXHANDLE hHandle = pShader->m_ppct->GetConstantByName(NULL, lpName);
+//      //if(hHandle == NULL)
+//      //{
+//      //  TRACE("Don't has constant register named %s\n.", lpName);
+//      //  return FALSE;
+//      //}
+//      //D3DXCONSTANT_DESC d3dcd;
+//      //GXUINT uCount;
+//      //if(FAILED(pShader->m_ppct->GetConstantDesc(hHandle, &d3dcd, &uCount)))
+//      //{
+//      //  ASSERT(0);
+//      //  return FALSE;
+//      //}
+//      //if(d3dcd.Type == D3DXPT_FLOAT)
+//      //{
+//      //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+//      //    Flush();
+//      //  clBuffer* pBuffer = new clBuffer;
+//      //  pBuffer->Append(pData, nPackCount * sizeof(float4));
+//      //  m_aBatch[m_uBatchCount].Set(CF_SetPixelShaderConst, 0, 0, (GXLPARAM)pBuffer);
+//      //  m_aBatch[m_uBatchCount].comm.wParam = d3dcd.RegisterIndex;
+//      //  m_uBatchCount++;
+//      //  return TRUE;
+//      //}
+//      //else
+//      //{
+//      //  ASSERT(0);
+//      return FALSE;
+//      //}
+//    }
+//#elif defined(D3D11_CANVAS_IMPL)
+//    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
+//    {
+//      return FALSE;
+//    }
+//#else
+//#error 需要定义inl的环境
+//#endif
 
     GXDWORD CanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam)
     {
@@ -1363,12 +1391,12 @@ namespace GrapX
       return m_dwStencil;
     }
 
-    GXBOOL CanvasImpl::GetUniformData(CANVASUNIFORM* pCanvasUniform)
-    {
-      pCanvasUniform->pCommon = GetCommonConst();
-      pCanvasUniform->pUnusualBuf = &GetUniformBuffer();
-      return TRUE;
-    }
+    //GXBOOL CanvasImpl::GetUniformData(CANVASUNIFORM* pCanvasUniform)
+    //{
+    //  pCanvasUniform->pCommon = GetCommonConst();
+    //  pCanvasUniform->pUnusualBuf = &GetUniformBuffer();
+    //  return TRUE;
+    //}
 
     GXBOOL CanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcClip, GRegion** lpprgnUpdate, LPGXRECT lprcUpdate)
     {
@@ -1834,94 +1862,94 @@ namespace GrapX
 
 
 
-    GXBOOL CanvasImpl::SetEffectUniformByName1f (const GXCHAR* pName, const float fValue)
-    {
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-      m_aBatch[m_uBatchCount].eFunc = CF_SetUniform1f;
-      m_aBatch[m_uBatchCount].Handle = uHandle;
-      m_aBatch[m_uBatchCount].PosF.x = fValue;
-      m_aBatch[m_uBatchCount].PosF.y = 0;
-      m_aBatch[m_uBatchCount].PosF.z = 0;
-      m_aBatch[m_uBatchCount].PosF.w = 1;
-      m_uBatchCount++;
-      return TRUE;
-    }
-    GXBOOL CanvasImpl::SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue)
-    {
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-      m_aBatch[m_uBatchCount].eFunc = CF_SetUniform2f;
-      m_aBatch[m_uBatchCount].Handle = uHandle;
-      m_aBatch[m_uBatchCount].PosF.x = vValue->x;
-      m_aBatch[m_uBatchCount].PosF.y = vValue->y;
-      m_aBatch[m_uBatchCount].PosF.z = 0;
-      m_aBatch[m_uBatchCount].PosF.w = 1;
-      m_uBatchCount++;
-      return TRUE;
-    }
-    GXBOOL CanvasImpl::SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue)
-    {
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-      m_aBatch[m_uBatchCount].eFunc = CF_SetUniform3f;
-      m_aBatch[m_uBatchCount].Handle = uHandle;
-      m_aBatch[m_uBatchCount].PosF.x = fValue->x;
-      m_aBatch[m_uBatchCount].PosF.y = fValue->y;
-      m_aBatch[m_uBatchCount].PosF.z = fValue->z;
-      m_aBatch[m_uBatchCount].PosF.w = 1;
-      m_uBatchCount++;
+    //GXBOOL CanvasImpl::SetEffectUniformByName1f (const GXCHAR* pName, const float fValue)
+    //{
+    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+    //    Flush();
+    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
+    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform1f;
+    //  m_aBatch[m_uBatchCount].Handle = uHandle;
+    //  m_aBatch[m_uBatchCount].PosF.x = fValue;
+    //  m_aBatch[m_uBatchCount].PosF.y = 0;
+    //  m_aBatch[m_uBatchCount].PosF.z = 0;
+    //  m_aBatch[m_uBatchCount].PosF.w = 1;
+    //  m_uBatchCount++;
+    //  return TRUE;
+    //}
+    //GXBOOL CanvasImpl::SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue)
+    //{
+    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+    //    Flush();
+    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
+    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform2f;
+    //  m_aBatch[m_uBatchCount].Handle = uHandle;
+    //  m_aBatch[m_uBatchCount].PosF.x = vValue->x;
+    //  m_aBatch[m_uBatchCount].PosF.y = vValue->y;
+    //  m_aBatch[m_uBatchCount].PosF.z = 0;
+    //  m_aBatch[m_uBatchCount].PosF.w = 1;
+    //  m_uBatchCount++;
+    //  return TRUE;
+    //}
+    //GXBOOL CanvasImpl::SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue)
+    //{
+    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+    //    Flush();
+    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
+    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform3f;
+    //  m_aBatch[m_uBatchCount].Handle = uHandle;
+    //  m_aBatch[m_uBatchCount].PosF.x = fValue->x;
+    //  m_aBatch[m_uBatchCount].PosF.y = fValue->y;
+    //  m_aBatch[m_uBatchCount].PosF.z = fValue->z;
+    //  m_aBatch[m_uBatchCount].PosF.w = 1;
+    //  m_uBatchCount++;
 
-      return TRUE;
-    }
-    GXBOOL CanvasImpl::SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue)
-    {
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-      m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4f;
-      m_aBatch[m_uBatchCount].Handle = uHandle;
-      m_aBatch[m_uBatchCount].PosF.x = fValue->x;
-      m_aBatch[m_uBatchCount].PosF.y = fValue->y;
-      m_aBatch[m_uBatchCount].PosF.z = fValue->z;
-      m_aBatch[m_uBatchCount].PosF.w = fValue->w;
-      m_uBatchCount++;
-      return TRUE;
-    }
+    //  return TRUE;
+    //}
+    //GXBOOL CanvasImpl::SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue)
+    //{
+    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+    //    Flush();
+    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
+    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4f;
+    //  m_aBatch[m_uBatchCount].Handle = uHandle;
+    //  m_aBatch[m_uBatchCount].PosF.x = fValue->x;
+    //  m_aBatch[m_uBatchCount].PosF.y = fValue->y;
+    //  m_aBatch[m_uBatchCount].PosF.z = fValue->z;
+    //  m_aBatch[m_uBatchCount].PosF.w = fValue->w;
+    //  m_uBatchCount++;
+    //  return TRUE;
+    //}
 
-    GXBOOL CanvasImpl::SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue)
-    {
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-      float4x4* pMat = new float4x4;
-      m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4x4f;
-      m_aBatch[m_uBatchCount].Handle = uHandle;
-      m_aBatch[m_uBatchCount].comm.lParam = (GXLPARAM)pMat;
-      *pMat = *pValue;
-      m_uBatchCount++;
-      return TRUE;
-    }
+    //GXBOOL CanvasImpl::SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue)
+    //{
+    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+    //    Flush();
+    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
+    //  float4x4* pMat = new float4x4;
+    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4x4f;
+    //  m_aBatch[m_uBatchCount].Handle = uHandle;
+    //  m_aBatch[m_uBatchCount].comm.lParam = (GXLPARAM)pMat;
+    //  *pMat = *pValue;
+    //  m_uBatchCount++;
+    //  return TRUE;
+    //}
 
-    GXBOOL CanvasImpl::SetEffectUniform1f(const GXINT nIndex, const float fValue)
-    {
-      return TRUE;
-    }
-    GXBOOL CanvasImpl::SetEffectUniform2f(const GXINT nIndex, const float2* vValue)
-    {
-      return TRUE;
-    }
-    GXBOOL CanvasImpl::SetEffectUniform3f(const GXINT nIndex, const float3* fValue)
-    {
-      return TRUE;
-    }
-    GXBOOL CanvasImpl::SetEffectUniform4f(const GXINT nIndex, const float4* fValue)
-    {
-      return TRUE;
-    }
+    //GXBOOL CanvasImpl::SetEffectUniform1f(const GXINT nIndex, const float fValue)
+    //{
+    //  return TRUE;
+    //}
+    //GXBOOL CanvasImpl::SetEffectUniform2f(const GXINT nIndex, const float2* vValue)
+    //{
+    //  return TRUE;
+    //}
+    //GXBOOL CanvasImpl::SetEffectUniform3f(const GXINT nIndex, const float3* fValue)
+    //{
+    //  return TRUE;
+    //}
+    //GXBOOL CanvasImpl::SetEffectUniform4f(const GXINT nIndex, const float4* fValue)
+    //{
+    //  return TRUE;
+    //}
     //////////////////////////////////////////////////////////////////////////
   } // namespace D3D11
 } // namespace GrapX

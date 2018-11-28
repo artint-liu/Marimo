@@ -9,13 +9,13 @@
 #include "GrapX/DataPoolVariable.h"
 #include "GXEffectImpl.h"
 
-DATALAYOUT g_CanvasCommon[] =
-{
-  {"Color", MEMBER_OFFSET(GXCANVASCOMMCONST, colorMul), GXUB_FLOAT4, sizeof(float4)},
-  {"ColorAdd", MEMBER_OFFSET(GXCANVASCOMMCONST, colorAdd), GXUB_FLOAT4, sizeof(float4)},
-  {"matWVProj", MEMBER_OFFSET(GXCANVASCOMMCONST, matWVProj), GXUB_MATRIX4, sizeof(float4x4)},
-  {NULL},
-};
+//DATALAYOUT g_CanvasCommon[] =
+//{
+//  {"Color", MEMBER_OFFSET(GXCANVASCOMMCONST, colorMul), GXUB_FLOAT4, sizeof(float4)},
+//  {"ColorAdd", MEMBER_OFFSET(GXCANVASCOMMCONST, colorAdd), GXUB_FLOAT4, sizeof(float4)},
+//  {"matWVProj", MEMBER_OFFSET(GXCANVASCOMMCONST, matWVProj), GXUB_MATRIX4, sizeof(float4x4)},
+//  {NULL},
+//};
 namespace GrapX
 {
   EffectImpl::EffectImpl(Graphics* pGraphics, Shader* pShader)

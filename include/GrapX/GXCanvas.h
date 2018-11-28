@@ -48,10 +48,10 @@ namespace GrapX
 
   enum PenStyle
   {
-    PS_Solid = 0,  // ______
-    PS_Dash = 1,  // - - - -
-    PS_Dot = 2,  // . . . .
-    PS_DashDot = 3,  // - . - . -
+    PS_Solid = 0,       // ______
+    PS_Dash = 1,        // - - - -
+    PS_Dot = 2,         // . . . .
+    PS_DashDot = 3,     // - . - . -
     PS_DashDotDot = 4,  // - .. - .. -
   };
 
@@ -129,17 +129,13 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT   Release              ());
     GXSTDINTERFACE(GXHRESULT   Invoke               (GRESCRIPTDESC* pDesc));
 
+    GXSTDINTERFACE(GXBOOL      SetEffect            (Effect* pEffect));
     GXSTDINTERFACE(GXBOOL      SetTransform         (const float4x4* matTransform));
     GXSTDINTERFACE(GXBOOL      GetTransform         (float4x4* matTransform) const);
     GXSTDINTERFACE(GXBOOL      SetViewportOrg       (GXINT x, GXINT y, GXLPPOINT lpPoint));
     GXSTDINTERFACE(GXBOOL      GetViewportOrg       (GXLPPOINT lpPoint) const);
-    GXSTDINTERFACE(GXVOID      EnableAlphaBlend     (GXBOOL bEnable));
     GXSTDINTERFACE(GXBOOL      Flush                ());
     GXSTDINTERFACE(GXBOOL      SetSamplerState      (GXUINT Sampler, GXSAMPLERDESC* pDesc));
-    GXSTDINTERFACE(GXBOOL      SetRenderState       (GXRenderStateType eType, GXDWORD dwValue));
-    GXSTDINTERFACE(GXBOOL      SetRenderStateBlock  (GXLPCRENDERSTATE lpBlock));
-    GXSTDINTERFACE(GXBOOL      SetEffect            (Effect* pEffect));
-    GXSTDINTERFACE(GXBOOL      SetEffectConst       (GXLPCSTR lpName, void* pData, int nPackCount));  // 临时
     GXSTDINTERFACE(GXDWORD     SetParametersInfo    (CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam));
     GXSTDINTERFACE(PenStyle    SetPenStyle          (PenStyle eStyle));
 
@@ -175,18 +171,18 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL      SetClipBox           (const GXLPRECT lpRect));
     GXSTDINTERFACE(GXINT       GetClipBox           (GXLPRECT lpRect));
     GXSTDINTERFACE(GXDWORD     GetStencilLevel      ());
-    GXSTDINTERFACE(GXBOOL      GetUniformData       (CANVASUNIFORM* pCanvasUniform));
+    //GXSTDINTERFACE(GXBOOL      GetUniformData       (CANVASUNIFORM* pCanvasUniform));
 
-    GXSTDINTERFACE(GXBOOL      SetEffectUniformByName1f (const GXCHAR* pName, const float fValue));
-    GXSTDINTERFACE(GXBOOL      SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue));
-    GXSTDINTERFACE(GXBOOL      SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue));
-    GXSTDINTERFACE(GXBOOL      SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue));
-    GXSTDINTERFACE(GXBOOL      SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniformByName1f (const GXCHAR* pName, const float fValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue));
 
-    GXSTDINTERFACE(GXBOOL      SetEffectUniform1f       (const GXINT nIndex, const float fValue));
-    GXSTDINTERFACE(GXBOOL      SetEffectUniform2f       (const GXINT nIndex, const float2* vValue));
-    GXSTDINTERFACE(GXBOOL      SetEffectUniform3f       (const GXINT nIndex, const float3* fValue));
-    GXSTDINTERFACE(GXBOOL      SetEffectUniform4f       (const GXINT nIndex, const float4* fValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniform1f       (const GXINT nIndex, const float fValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniform2f       (const GXINT nIndex, const float2* vValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniform3f       (const GXINT nIndex, const float3* fValue));
+    //GXSTDINTERFACE(GXBOOL      SetEffectUniform4f       (const GXINT nIndex, const float4* fValue));
 
     GXSTDINTERFACE(GXBOOL      Scroll               (int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcClip, GRegion** lpprgnUpdate, LPGXRECT lprcUpdate));
   };
@@ -234,7 +230,7 @@ public:
 
   GrapX::Canvas* GetCanvasUnsafe ();
 
-  void      EnableAlphaBlend(GXBOOL bEnable);
+  //void      EnableAlphaBlend(GXBOOL bEnable);
 
   static GXVOID GXGetRenderSurfaceExt (GXHWND GXIN hTopLevel, GXINT* GXOUT nWidth, GXINT* GXOUT nHeight);
   static GXVOID GXGetRenderingRect    (GXHWND GXIN hTopLevel, GXHWND GXIN hChild, GXDWORD GXIN flags, GXLPRECT GXOUT lprcOut);  //TODO: 需要整合到Canvas类中

@@ -27,13 +27,13 @@ public:
   virtual GXBOOL      GetTransform        (float4x4* matTransform) const override;
   virtual GXBOOL      SetViewportOrg      (GXINT x, GXINT y, GXLPPOINT lpPoint) override;
   virtual GXBOOL      GetViewportOrg      (GXLPPOINT lpPoint) const override;
-  virtual GXVOID      EnableAlphaBlend    (GXBOOL bEnable) override;
+  //virtual GXVOID      EnableAlphaBlend    (GXBOOL bEnable) override;
   virtual GXBOOL      Flush               () override;
   virtual GXBOOL      SetSamplerState     (GXUINT Sampler, GXSAMPLERDESC* pDesc) override;
   virtual GXBOOL      SetRenderState      (GXRenderStateType eType, GXDWORD dwValue) override;
   virtual GXBOOL      SetRenderStateBlock (GXLPCRENDERSTATE lpBlock) override;
-  virtual GXBOOL      SetEffect           (GXEffect* pEffect) override;
-  virtual GXBOOL      SetEffectConst      (GXLPCSTR lpName, void* pData, int nPackCount) override;
+  virtual GXBOOL      SetEffect           (Effect* pEffect) override;
+  //virtual GXBOOL      SetEffectConst      (GXLPCSTR lpName, void* pData, int nPackCount) override;
   virtual GXDWORD     SetParametersInfo   (CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam) override;
   virtual PenStyle    SetPenStyle         (PenStyle eStyle) override;
 
@@ -111,7 +111,7 @@ private:
     CF_DrawLast,
 
     CF_StateFirst,  // 状态相关的
-    CF_RenderState,
+    //CF_RenderState,
     CF_SetViewportOrg,
     CF_SetRegion,
     CF_SetClipBox,
@@ -121,14 +121,14 @@ private:
     CF_CompositingMode,
     CF_Effect,
     CF_ColorAdditive,
-    CF_SetUniform1f,
-    CF_SetUniform2f,
-    CF_SetUniform3f,
-    CF_SetUniform4f,
-    CF_SetUniform4x4f,
+    //CF_SetUniform1f,
+    //CF_SetUniform2f,
+    //CF_SetUniform3f,
+    //CF_SetUniform4f,
+    //CF_SetUniform4x4f,
     //CF_SetPixelSizeInv,
     CF_SetExtTexture,
-    CF_SetEffectConst,
+    //CF_SetEffectConst,
     CF_SetSamplerState,
     CF_SetTransform,
     CF_StateLast,
@@ -215,9 +215,9 @@ private:
   void    SetStencil        (GXDWORD dwStencil);
   void    IntUpdateClip             (const GXRECT& rcClip);
 public:
-  inline const GXCANVASCOMMCONST& GetCommonConst() const;
-  inline clBuffer&                  GetUniformBuffer();
-  inline void                       GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer);
+  //inline const GXCANVASCOMMCONST& GetCommonConst() const;
+  //inline clBuffer&                  GetUniformBuffer();
+  //inline void                       GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer);
 
 private:
   GXDWORD       m_bStatic : 1;    // 标志是否是 GXGraphics 中的静态成员, 是的话表示在 GXGraphics 创建时已经创建好
@@ -274,16 +274,16 @@ private:
 //{
 
 //};
-const GXCANVASCOMMCONST& CanvasImpl::GetCommonConst() const
-{
-  return m_CanvasCommConst;
-}
-clBuffer& CanvasImpl::GetUniformBuffer()
-{
-  return m_UniformBuffer;
-}
-void CanvasImpl::GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer)
-{
-  *ppVertexBuffer = &m_VertexConstBuffer;
-  *ppPixelBuffer = &m_PixelConstBuffer;
-}
+//const GXCANVASCOMMCONST& CanvasImpl::GetCommonConst() const
+//{
+//  return m_CanvasCommConst;
+//}
+//clBuffer& CanvasImpl::GetUniformBuffer()
+//{
+//  return m_UniformBuffer;
+//}
+//void CanvasImpl::GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer)
+//{
+//  *ppVertexBuffer = &m_VertexConstBuffer;
+//  *ppPixelBuffer = &m_PixelConstBuffer;
+//}

@@ -50,8 +50,8 @@ SamplerState Simple_Sampler : register(s0);// = sampler_state           \n\
 float4 ps_main(PS_INPUT Input) : SV_Target                              \n\
 {                                                                       \n\
   // 输入的纹理与顶点色相加                                              \n\
-  float4 crPixel = texSimple.Sample(Simple_Sampler, Input.TexUV) + ColorAdd;       \n\
-  return crPixel * Input.Color * Color;                                 \n\
+  float4 c = texSimple.Sample(Simple_Sampler, Input.TexUV);             \n\
+  return (c * Color + ColorAdd) * Input.Color;                          \n\
 }";
 
     const char* g_szFastGaussianBlur = "#line " __LINE_STR__ " \"" __FILE__ "\"\n\

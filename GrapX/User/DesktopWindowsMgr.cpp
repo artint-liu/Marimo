@@ -11,6 +11,9 @@
 #include <GrapX/GXGraphics.h>
 #include <GrapX/GXCanvas.h>
 #include <GrapX/GXRenderTarget.h>
+#include <GrapX/DataPool.h>
+#include <GrapX/DataPoolVariable.h>
+#include <GrapX/GShader.h>
 
 // 私有头文件
 #include "GXStation.h"
@@ -366,7 +369,9 @@ GXBOOL DesktopWindowsMgr::Render(GrapX::Canvas* pCanvas)
 
     float2 vTexelKernel((float)(c_flScaleWidth / g_SystemMetrics[GXSM_CXSCREEN]),
       (float)(c_flScaleHeight / g_SystemMetrics[GXSM_CYSCREEN]));
-    pCanvas->SetEffectUniformByName2f("TexelKernel", &vTexelKernel);
+    MOVarFloat2 var = m_lpStation->m_pStockObject->pAeroEffect->GetUniform("TexelKernel").CastTo<MOVarFloat2>();
+    var = vTexelKernel;
+    //pCanvas->SetEffectUniformByName2f("TexelKernel", &vTexelKernel);
 
     if(m_pDesktopWindows->m_prgnWindows->IsEmpty() == FALSE)
     {

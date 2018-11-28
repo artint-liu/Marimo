@@ -53,11 +53,20 @@ namespace GrapX
 
       // 常量缓冲
       // 同时储存VS，PS合集，VS，PS独立连续常量缓冲，
-      // 如(合集:)G,A,B,C,D,|（VS:）G,A,D|（PS:）G,B,C
+      // 如(合集:){G,len},{A,len},{B,len},{C,len},{D,len},|（VS:）G,A,D|（PS:）G,B,C
       // 只有合集遵守引用计数
-      clvector<ID3D11Buffer*>     m_arrayCB;
+      struct D3D11CB_DESC
+      {
+        ID3D11Buffer* pD3D11ConstantBuffer;
+        GXUINT        cbSize;
+      };
+      clstd::MemBuffer            m_D11ResDescPool; // D3D11 描述池
       ID3D11Buffer**              m_pVertexCB;
       ID3D11Buffer**              m_pPixelCB;
+
+      D3D11CB_DESC* D3D11CB_GetDescBegin() const;
+      D3D11CB_DESC* D3D11CB_GetDescEnd() const;
+      ID3D11Buffer** D3D11CB_GetPixelCBEnd() const;
 
     public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -83,7 +92,7 @@ namespace GrapX
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 
       GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
-      ID3D11Buffer* D3D11CreateBuffer(size_t cbSize);
+      ID3D11Buffer* D3D11CreateBuffer(D3D11CB_DESC& desc, size_t cbSize);
 
       void DbgCheck(INTERMEDIATE_CODE::Array& aInterCode);
 

@@ -557,10 +557,9 @@ GXBOOL CanvasImpl::GetViewportOrg(GXLPPOINT lpPoint) const
   return TRUE;
 }
 
-GXVOID CanvasImpl::EnableAlphaBlend(GXBOOL bEnable)
-{
-
-}
+//GXVOID CanvasImpl::EnableAlphaBlend(GXBOOL bEnable)
+//{
+//}
 
 GXBOOL CanvasImpl::Flush()
 {
@@ -962,58 +961,58 @@ GXBOOL CanvasImpl::SetEffect(GXEffect* pEffect)
   }
   return TRUE;
 }
-#ifdef GLES2_CANVAS_IMPL
-GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-{
-  return FALSE;
-}
-#elif defined(D3D9_CANVAS_IMPL)
-GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-{
-  //GXEffectImpl* pEffect = (GEffectImpl*)m_CallState.pEffect;
-  //if(pShader == NULL)
-  //{
-  //  ASSERT(0);
-  //  return FALSE;
-  //}
-  //D3DXHANDLE hHandle = pShader->m_ppct->GetConstantByName(NULL, lpName);
-  //if(hHandle == NULL)
-  //{
-  //  TRACE("Don't has constant register named %s\n.", lpName);
-  //  return FALSE;
-  //}
-  //D3DXCONSTANT_DESC d3dcd;
-  //GXUINT uCount;
-  //if(FAILED(pShader->m_ppct->GetConstantDesc(hHandle, &d3dcd, &uCount)))
-  //{
-  //  ASSERT(0);
-  //  return FALSE;
-  //}
-  //if(d3dcd.Type == D3DXPT_FLOAT)
-  //{
-  //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-  //    Flush();
-  //  clBuffer* pBuffer = new clBuffer;
-  //  pBuffer->Append(pData, nPackCount * sizeof(float4));
-  //  m_aBatch[m_uBatchCount].Set(CF_SetPixelShaderConst, 0, 0, (GXLPARAM)pBuffer);
-  //  m_aBatch[m_uBatchCount].comm.wParam = d3dcd.RegisterIndex;
-  //  m_uBatchCount++;
-  //  return TRUE;
-  //}
-  //else
-  //{
-  //  ASSERT(0);
-    return FALSE;
-  //}
-}
-#elif defined(D3D11_CANVAS_IMPL)
-GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-{
-  return FALSE;
-}
-#else
-#error 需要定义inl的环境
-#endif
+//#ifdef GLES2_CANVAS_IMPL
+//GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
+//{
+//  return FALSE;
+//}
+//#elif defined(D3D9_CANVAS_IMPL)
+//GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
+//{
+//  //GXEffectImpl* pEffect = (GEffectImpl*)m_CallState.pEffect;
+//  //if(pShader == NULL)
+//  //{
+//  //  ASSERT(0);
+//  //  return FALSE;
+//  //}
+//  //D3DXHANDLE hHandle = pShader->m_ppct->GetConstantByName(NULL, lpName);
+//  //if(hHandle == NULL)
+//  //{
+//  //  TRACE("Don't has constant register named %s\n.", lpName);
+//  //  return FALSE;
+//  //}
+//  //D3DXCONSTANT_DESC d3dcd;
+//  //GXUINT uCount;
+//  //if(FAILED(pShader->m_ppct->GetConstantDesc(hHandle, &d3dcd, &uCount)))
+//  //{
+//  //  ASSERT(0);
+//  //  return FALSE;
+//  //}
+//  //if(d3dcd.Type == D3DXPT_FLOAT)
+//  //{
+//  //  if(!((m_uBatchCount + 1) < m_uBatchSize))
+//  //    Flush();
+//  //  clBuffer* pBuffer = new clBuffer;
+//  //  pBuffer->Append(pData, nPackCount * sizeof(float4));
+//  //  m_aBatch[m_uBatchCount].Set(CF_SetPixelShaderConst, 0, 0, (GXLPARAM)pBuffer);
+//  //  m_aBatch[m_uBatchCount].comm.wParam = d3dcd.RegisterIndex;
+//  //  m_uBatchCount++;
+//  //  return TRUE;
+//  //}
+//  //else
+//  //{
+//  //  ASSERT(0);
+//    return FALSE;
+//  //}
+//}
+//#elif defined(D3D11_CANVAS_IMPL)
+//GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
+//{
+//  return FALSE;
+//}
+//#else
+//#error 需要定义inl的环境
+//#endif
 
 GXDWORD CanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam)
 {
@@ -1273,13 +1272,13 @@ GXDWORD CanvasImpl::GetStencilLevel()
   return m_dwStencil;
 }
 
-GXBOOL CanvasImpl::GetUniformData(CANVASUNIFORM* pCanvasUniform)
-{
-  pCanvasUniform->pCommon = GetCommonConst();
-  pCanvasUniform->pUnusualBuf = &GetUniformBuffer();
-  return TRUE;     
-}
-
+//GXBOOL CanvasImpl::GetUniformData(CANVASUNIFORM* pCanvasUniform)
+//{
+//  pCanvasUniform->pCommon = GetCommonConst();
+//  pCanvasUniform->pUnusualBuf = &GetUniformBuffer();
+//  return TRUE;     
+//}
+//
 GXBOOL CanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcClip, GRegion** lpprgnUpdate, LPGXRECT lprcUpdate)
 {
   Flush();

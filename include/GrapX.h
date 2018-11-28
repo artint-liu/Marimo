@@ -4082,139 +4082,6 @@ struct GXPALETTEENTRY {
 typedef GXPALETTEENTRY *GXLPPALETTEENTRY;
 typedef GXPALETTEENTRY *LPGXPALETTEENTRY;
 
-
-enum GXRenderStateType {
-  //GXRS_ZENABLE                 = 7,    /* D3DZBUFFERTYPE (or TRUE/FALSE for legacy) */
-  GXRS_FILLMODE                  = 8,    /* D3DFILLMODE */
-  GXRS_SHADEMODE                 = 9,    /* D3DSHADEMODE */
-  //GXRS_ZWRITEENABLE            = 14,   /* TRUE to enable z writes */
-  GXRS_ALPHATESTENABLE           = 15,   /* TRUE to enable alpha tests */
-  GXRS_LASTPIXEL                 = 16,   /* TRUE for last-pixel on lines */
-  //GXRS_SRCBLEND                = 19,   /* D3DBLEND */
-  //GXRS_DESTBLEND               = 20,   /* D3DBLEND */
-  GXRS_CULLMODE                  = 22,   /* D3DCULL */
-  //GXRS_ZFUNC                   = 23,   /* GXCompareFunc */
-  GXRS_ALPHAREF                  = 24,   /* D3DFIXED */
-  GXRS_ALPHAFUNC                 = 25,   /* GXCompareFunc */
-  GXRS_DITHERENABLE              = 26,   /* TRUE to enable dithering */
-  //GXRS_ALPHABLENDENABLE        = 27,   /* TRUE to enable alpha blending */
-  GXRS_FOGENABLE                 = 28,   /* TRUE to enable fog blending */
-  GXRS_SPECULARENABLE            = 29,   /* TRUE to enable specular */
-  GXRS_FOGCOLOR                  = 34,   /* D3DCOLOR */
-  GXRS_FOGTABLEMODE              = 35,   /* D3DFOGMODE */
-  GXRS_FOGSTART                  = 36,   /* Fog start (for both vertex and pixel fog) */
-  GXRS_FOGEND                    = 37,   /* Fog end      */
-  GXRS_FOGDENSITY                = 38,   /* Fog density  */
-  GXRS_RANGEFOGENABLE            = 48,   /* Enables range-based fog */
-  //GXRS_STENCILENABLE           = 52,   /* GXBOOL enable/disable stenciling */
-  //GXRS_STENCILFAIL             = 53,   /* D3DSTENCILOP to do if stencil test fails */
-  //GXRS_STENCILZFAIL            = 54,   /* D3DSTENCILOP to do if stencil test passes and Z test fails */
-  //GXRS_STENCILPASS             = 55,   /* D3DSTENCILOP to do if both stencil and Z tests pass */
-  //GXRS_STENCILFUNC             = 56,   /* GXCompareFunc fn.  Stencil Test passes if ((ref & mask) stencilfn (stencil & mask)) is true */
-  //GXRS_STENCILREF              = 57,   /* Reference value used in stencil test */
-  //GXRS_STENCILMASK             = 58,   /* Mask value used in stencil test */
-  //GXRS_STENCILWRITEMASK        = 59,   /* Write mask applied to values written to stencil buffer */
-  GXRS_TEXTUREFACTOR             = 60,   /* D3DCOLOR used for multi-texture blend */
-  GXRS_WRAP0                     = 128,  /* wrap for 1st texture coord. set */
-  GXRS_WRAP1                     = 129,  /* wrap for 2nd texture coord. set */
-  GXRS_WRAP2                     = 130,  /* wrap for 3rd texture coord. set */
-  GXRS_WRAP3                     = 131,  /* wrap for 4th texture coord. set */
-  GXRS_WRAP4                     = 132,  /* wrap for 5th texture coord. set */
-  GXRS_WRAP5                     = 133,  /* wrap for 6th texture coord. set */
-  GXRS_WRAP6                     = 134,  /* wrap for 7th texture coord. set */
-  GXRS_WRAP7                     = 135,  /* wrap for 8th texture coord. set */
-  GXRS_CLIPPING                  = 136,
-  GXRS_LIGHTING                  = 137,
-  GXRS_AMBIENT                   = 139,
-  GXRS_FOGVERTEXMODE             = 140,
-  GXRS_COLORVERTEX               = 141,
-  GXRS_LOCALVIEWER               = 142,
-  GXRS_NORMALIZENORMALS          = 143,
-  GXRS_DIFFUSEMATERIALSOURCE     = 145,
-  GXRS_SPECULARMATERIALSOURCE    = 146,
-  GXRS_AMBIENTMATERIALSOURCE     = 147,
-  GXRS_EMISSIVEMATERIALSOURCE    = 148,
-  GXRS_VERTEXBLEND               = 151,
-  GXRS_CLIPPLANEENABLE           = 152,
-  GXRS_POINTSIZE                 = 154,   /* float point size */
-  GXRS_POINTSIZE_MIN             = 155,   /* float point size min threshold */
-  GXRS_POINTSPRITEENABLE         = 156,   /* GXBOOL point texture coord control */
-  GXRS_POINTSCALEENABLE          = 157,   /* GXBOOL point size scale enable */
-  GXRS_POINTSCALE_A              = 158,   /* float point attenuation A value */
-  GXRS_POINTSCALE_B              = 159,   /* float point attenuation B value */
-  GXRS_POINTSCALE_C              = 160,   /* float point attenuation C value */
-  GXRS_MULTISAMPLEANTIALIAS      = 161,  // GXBOOL - set to do FSAA with multisample buffer
-  GXRS_MULTISAMPLEMASK           = 162,  // GXDWORD - per-sample enable/disable
-  GXRS_PATCHEDGESTYLE            = 163,  // Sets whether patch edges will use float style tessellation
-  GXRS_DEBUGMONITORTOKEN         = 165,  // DEBUG ONLY - token to debug monitor
-  GXRS_POINTSIZE_MAX             = 166,   /* float point size max threshold */
-  GXRS_INDEXEDVERTEXBLENDENABLE  = 167,
-  GXRS_COLORWRITEENABLE          = 168,  // per-channel write enable
-  GXRS_TWEENFACTOR               = 170,   // float tween factor
-  //GXRS_BLENDOP                 = 171,   // D3DBLENDOP setting
-  GXRS_POSITIONDEGREE            = 172,   // NPatch position interpolation degree. D3DDEGREE_LINEAR or D3DDEGREE_CUBIC (default)
-  GXRS_NORMALDEGREE              = 173,   // NPatch normal interpolation degree. D3DDEGREE_LINEAR (default) or D3DDEGREE_QUADRATIC
-  GXRS_SCISSORTESTENABLE         = 174,
-  GXRS_SLOPESCALEDEPTHBIAS       = 175,
-  GXRS_ANTIALIASEDLINEENABLE     = 176,
-  GXRS_MINTESSELLATIONLEVEL      = 178,
-  GXRS_MAXTESSELLATIONLEVEL      = 179,
-  GXRS_ADAPTIVETESS_X            = 180,
-  GXRS_ADAPTIVETESS_Y            = 181,
-  GXRS_ADAPTIVETESS_Z            = 182,
-  GXRS_ADAPTIVETESS_W            = 183,
-  GXRS_ENABLEADAPTIVETESSELLATION = 184,
-  GXRS_TWOSIDEDSTENCILMODE       = 185,   /* GXBOOL enable/disable 2 sided stenciling */
-  //GXRS_CCW_STENCILFAIL         = 186,   /* D3DSTENCILOP to do if ccw stencil test fails */
-  //GXRS_CCW_STENCILZFAIL        = 187,   /* D3DSTENCILOP to do if ccw stencil test passes and Z test fails */
-  //GXRS_CCW_STENCILPASS         = 188,   /* D3DSTENCILOP to do if both ccw stencil and Z tests pass */
-  //GXRS_CCW_STENCILFUNC         = 189,   /* GXCompareFunc fn.  ccw Stencil Test passes if ((ref & mask) stencilfn (stencil & mask)) is true */
-  GXRS_COLORWRITEENABLE1         = 190,   /* Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS */
-  GXRS_COLORWRITEENABLE2         = 191,   /* Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS */
-  GXRS_COLORWRITEENABLE3         = 192,   /* Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS */
-  GXRS_BLENDFACTOR               = 193,   /* D3DCOLOR used for a constant blend factor during alpha blending for devices that support D3DPBLENDCAPS_BLENDFACTOR */
-  GXRS_SRGBWRITEENABLE           = 194,   /* Enable rendertarget writes to be DE-linearized to SRGB (for formats that expose D3DUSAGE_QUERY_SRGBWRITE) */
-  GXRS_DEPTHBIAS                 = 195,
-  GXRS_WRAP8                     = 198,   /* Additional wrap states for vs_3_0+ attributes with D3DDECLUSAGE_TEXCOORD */
-  GXRS_WRAP9                     = 199,
-  GXRS_WRAP10                    = 200,
-  GXRS_WRAP11                    = 201,
-  GXRS_WRAP12                    = 202,
-  GXRS_WRAP13                    = 203,
-  GXRS_WRAP14                    = 204,
-  GXRS_WRAP15                    = 205,
-  //GXRS_SEPARATEALPHABLENDENABLE= 206,  /* TRUE to enable a separate blending function for the alpha channel */
-  //GXRS_SRCBLENDALPHA           = 207,  /* SRC blend factor for the alpha channel when GXRS_SEPARATEDESTALPHAENABLE is TRUE */
-  //GXRS_DESTBLENDALPHA          = 208,  /* DST blend factor for the alpha channel when GXRS_SEPARATEDESTALPHAENABLE is TRUE */
-  //GXRS_BLENDOPALPHA            = 209,  /* Blending operation for the alpha channel when GXRS_SEPARATEDESTALPHAENABLE is TRUE */
-
-
-  GXRS_FORCE_DWORD               = 0x7fffffff, /* force 32-bit size enum */
-};
-
-// 已经不再使用这个, 参考 GXSAMPLERDESC
-//enum GXSamplerStateType
-//{
-//    GXSAMP_ADDRESSU       = 1,  /* D3DTEXTUREADDRESS for U coordinate */
-//    GXSAMP_ADDRESSV       = 2,  /* D3DTEXTUREADDRESS for V coordinate */
-//    GXSAMP_ADDRESSW       = 3,  /* D3DTEXTUREADDRESS for W coordinate */
-//    GXSAMP_BORDERCOLOR    = 4,  /* D3DCOLOR */
-//    GXSAMP_MAGFILTER      = 5,  /* D3DTEXTUREFILTER filter to use for magnification */
-//    GXSAMP_MINFILTER      = 6,  /* D3DTEXTUREFILTER filter to use for minification */
-//    GXSAMP_MIPFILTER      = 7,  /* D3DTEXTUREFILTER filter to use between mipmaps during minification */
-//    GXSAMP_MIPMAPLODBIAS  = 8,  /* float Mipmap LOD bias */
-//    GXSAMP_MAXMIPLEVEL    = 9,  /* GXDWORD 0..(n-1) LOD index of largest map to use (0 == largest) */
-//    GXSAMP_MAXANISOTROPY  = 10, /* GXDWORD maximum anisotropy */
-//    GXSAMP_SRGBTEXTURE    = 11, /* Default = 0 (which means Gamma 1.0,
-//                                   no correction required.) else correct for
-//                                   Gamma = 2.2 */
-//    GXSAMP_ELEMENTINDEX   = 12, /* When multi-element texture is assigned to sampler, this
-//                                    indicates which element index to use.  Default = 0.  */
-//    GXSAMP_DMAPOFFSET     = 13, /* Offset in vertices in the pre-sampled displacement map.
-//                                    Only valid for D3DDMAPSAMPLER sampler  */
-//    GXSAMP_FORCE_DWORD   = 0x7fffffff, /* force 32-bit size enum */
-//};
-
 // TODO: 整理格式顺序，对于R，G，B，A，L这些通道，枚举名中的顺序应当为内存数据的顺序，
 // 如B8G8R8A8格式，第一个字节（BYTE）应该是蓝色通道，最后一个应该是Alpha通道
 // 如B16G16R16A16格式，第一个字（WORD）应该是蓝色通道
@@ -4610,32 +4477,32 @@ enum GXGrapCapsCategory
 #define GXTEXTURECAPS_NONPOW2 0x00000001
 
 
-//
-// Render State
-//
-struct GXRENDERSTATE
-{
-  GXRenderStateType   dwType;
-  union{
-    GXDWORD             dwValue;
-    GXFLOAT             fValue;
-  };
-};
+////
+//// Render State
+////
+//struct GXRENDERSTATE
+//{
+//  GXRenderStateType   dwType;
+//  union{
+//    GXDWORD             dwValue;
+//    GXFLOAT             fValue;
+//  };
+//};
 
-typedef GXRENDERSTATE* LPGXRENDERSTATE;
-typedef GXRENDERSTATE* GXLPRENDERSTATE;
-typedef const GXRENDERSTATE* GXLPCRENDERSTATE;
+//typedef GXRENDERSTATE* LPGXRENDERSTATE;
+//typedef GXRENDERSTATE* GXLPRENDERSTATE;
+//typedef const GXRENDERSTATE* GXLPCRENDERSTATE;
 
-#define BEGIN_RENDERSTATE_BLOCK(STATENAME)  GXRENDERSTATE STATENAME[] = {
-#define RENDERSTATE_BLOCK(RENDERSTATE, VAL)  {RENDERSTATE, VAL},
-#define END_RENDERSTATE_BLOCK        {(GXRenderStateType)0,0}};
+//#define BEGIN_RENDERSTATE_BLOCK(STATENAME)  GXRENDERSTATE STATENAME[] = {
+//#define RENDERSTATE_BLOCK(RENDERSTATE, VAL)  {RENDERSTATE, VAL},
+//#define END_RENDERSTATE_BLOCK        {(GXRenderStateType)0,0}};
 
 //
 // Sampler State
 //
-#define BEGIN_SAMPLERSTATE_BLOCK(STATENAME)    GXSAMPSTATE STATENAME[] = {
-#define SAMPLERSTATE_BLOCK(SAMPLERSTATE, VAL)  {SAMPLERSTATE, VAL},
-#define END_SAMPLERSTATE_BLOCK          {(GXSamplerStateType)0,0}};
+//#define BEGIN_SAMPLERSTATE_BLOCK(STATENAME)    GXSAMPSTATE STATENAME[] = {
+//#define SAMPLERSTATE_BLOCK(SAMPLERSTATE, VAL)  {SAMPLERSTATE, VAL},
+//#define END_SAMPLERSTATE_BLOCK          {(GXSamplerStateType)0,0}};
 
 //
 // GXResUsage flags
@@ -5378,7 +5245,7 @@ GXHRESULT GXDLLAPI MOCompileHLSL          (GXLPCWSTR szShaderDesc, GXLPCWSTR szR
 // TODO: 增加一个直接从Primitive转换的接口
 GXBOOL GXDLLAPI MOConvertVertexFormat   (GXLPVOID lpDestVert, GXLPCVERTEXELEMENT lpDestDecl, GXLPVOID lpSrcVert, GXLPCVERTEXELEMENT lpSrcDecl, GXUINT nCount, GXDWORD dwFlags); // dwFlags 还没用上
 
-GXLPCRENDERSTATE    GXDLLAPI MOGetDefaultRenderState(); // 基于D3D9的定义
+//GXLPCRENDERSTATE    GXDLLAPI MOGetDefaultRenderState(); // 基于D3D9的定义
 
 // GetAdaptedSize
 // 获得适配尺寸, 找到一个大于输入数值的2的幂的值
