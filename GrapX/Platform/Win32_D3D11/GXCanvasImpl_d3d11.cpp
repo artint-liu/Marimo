@@ -56,6 +56,8 @@
 
 #ifdef ENABLE_GRAPHICS_API_DX11
 #define TRACE_BATCH
+#define COLORREF_TO_NATIVE(CLR) ((CLR & 0xff00ff00) | ((CLR & 0xff0000) >> 16) | ((CLR & 0xff) << 16))
+#define NATIVE_TO_COLORREF(CLR) COLORREF_TO_NATIVE(CLR)
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -331,14 +333,6 @@ namespace GrapX
           m_pGraphics->Clear(&rcClip, 1, dwFlags, 0xff0000ff, 0, 0);
           m_pGraphics->Clear(lpRects, nRectCount, dwFlags, 0xff00ff00, 0, m_dwStencil);
 
-          //m_pRenderState->Set(GXRS_STENCILENABLE,    TRUE);
-          //m_pRenderState->Set(GXRS_STENCILFAIL,      GXSTENCILOP_KEEP);
-          //m_pRenderState->Set(GXRS_STENCILZFAIL,     GXSTENCILOP_KEEP);
-          //m_pRenderState->Set(GXRS_STENCILPASS,      GXSTENCILOP_KEEP);
-          //m_pRenderState->Set(GXRS_STENCILFUNC,      GXCMP_EQUAL);
-          //m_pRenderState->Set(GXRS_STENCILREF,       m_dwStencil);
-          //m_pRenderState->Set(GXRS_STENCILMASK,      0xffffffff);
-          //m_pRenderState->Set(GXRS_STENCILWRITEMASK, 0xffffffff);
           m_pCanvasStencil[1]->SetStencilRef(m_dwStencil);
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[1]);
 
@@ -353,19 +347,6 @@ namespace GrapX
       IntUpdateClip(rcClip);
       return (GXINT)eCompx;
     }
-
-    //GXBOOL GXCanvasImpl::Initialize(GXImage* pImage, const REGN* pRegn)
-    //{
-    //  // TODO: 如果不支持Renderable则将内部纹理重新创建为RenderTarget
-    //  ASSERT(m_pTargetImage == NULL);
-    //  m_pTargetImage = pImage;
-    //  if(pImage != NULL)
-    //  {
-    //    m_pTargetImage->AddRef();
-    //    return Initialize(pImage->GetTextureUnsafe(), pRegn);
-    //  }
-    //  return Initialize((GTexture*)NULL, pRegn);
-    //}
 
     //#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXHRESULT CanvasImpl::Release()
@@ -515,14 +496,6 @@ namespace GrapX
       PosF.z = z;
       PosF.w = w;
     }
-
-    //void CanvasImpl::BATCH::SetRenderState(GXUINT nCode, GXDWORD dwValue)
-    //{
-    //  eFunc = CF_RenderState;
-    //  nRenderStateCode = nCode;
-    //  dwStateValue = dwValue;
-    //  comm.lParam = NULL;
-    //}
 
     GXBOOL CanvasImpl::CommitState()
     {
@@ -704,15 +677,6 @@ namespace GrapX
         {
           TRACE_BATCH("CF_Trangle\n");
           if(bEmptyRect == FALSE) {
-
-            //MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
-            //MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>(); // 临时写法
-            //MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>(); // 临时写法
-            //varMVP = m_CanvasCommConst.matWVProj;  // 临时写法
-            //colorAdd = m_CanvasCommConst.colorAdd; // 临时写法
-            //color = m_CanvasCommConst.colorMul;    // 临时写法
-            //static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
-
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
               nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 3);
           }
@@ -739,14 +703,7 @@ namespace GrapX
           pTexture->Release();
         }
         break;
-        //case CF_RenderState:
-        //{
-        //  TRACE_BATCH("CF_RenderState\n");
-        //  ASSERT(0); // 已经去掉了
-        //  //m_pRenderState->Set(
-        //  //  (GXRenderStateType)m_aBatch[i].nRenderStateCode, m_aBatch[i].dwStateValue);
-        //}
-        //break;
+
         case CF_SetSamplerState:
         {
           GXSAMPLERDESC* pDesc = (GXSAMPLERDESC*)m_aBatch[i].comm.lParam;
@@ -826,73 +783,10 @@ namespace GrapX
           float4 v4 = m_dwColorAdditive;
           m_CommonEffect.color_add = v4;
 
-          //// TODO: 这里全部重新提交了CB，可以改为只提交$Globals          
-          //MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
-          //MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>(); // 临时写法
-          //MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>(); // 临时写法
-          //varMVP = m_CanvasCommConst.matWVProj;  // 临时写法
-          //colorAdd = m_CanvasCommConst.colorAdd; // 临时写法
-          //color = m_CanvasCommConst.colorMul;    // 临时写法
           static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
-          //m_pEffectImpl->CommitUniform(this, MEMBER_OFFSET(GXCANVASCOMMCONST, colorAdd));
         }
         break;
-#ifdef GLES2_CANVAS_IMPL
-        //case CF_SetPixelEffectConst:
-        //  ASSERT(0);
-        //  break;
-      //case CF_SetSamplerState:
-      //  break;
-#elif defined(D3D9_CANVAS_IMPL)
-        case CF_SetUniform1f:
-        {
-          m_pEffectImpl->SetUniformByHandle(this, m_aBatch[i].Handle, (float*)&m_aBatch[i].PosF, 1);
-        }
-        break;
-        case CF_SetUniform2f:
-        {
-          //float4 fValue(m_aBatch[i].PosF.x, m_aBatch[i].PosF.y, 0, 1);
-          m_pEffectImpl->SetUniformByHandle(this, m_aBatch[i].Handle, (float*)&m_aBatch[i].PosF, 2);
-        }
-        break;
-        case CF_SetUniform3f:
-        {
-          //float4 fValue(m_aBatch[i].PosF.x, m_aBatch[i].PosF.y, 0, 1);
-          m_pEffectImpl->SetUniformByHandle(this, m_aBatch[i].Handle, (float*)&m_aBatch[i].PosF, 3);
-        }
-        break;
-        case CF_SetUniform4f:
-        {
-          //float4 fValue(m_aBatch[i].PosF.x, m_aBatch[i].PosF.y, 0, 1);
-          m_pEffectImpl->SetUniformByHandle(this, m_aBatch[i].Handle, (float*)&m_aBatch[i].PosF, 4);
-        }
-        break;
-        case CF_SetUniform4x4f:
-        {
-          float* pMat = (float*)m_aBatch[i].comm.lParam;
-          m_pEffectImpl->SetUniformByHandle(this, m_aBatch[i].Handle, pMat, 16);
-          delete pMat;
-        }
-        break;
-        //case CF_SetEffectConst:
-        //  {
-        //    const GXUINT uCount = m_aBatch[i].uVertexCount;
-        //    const GXUINT uIndex = m_aBatch[i].comm.wParam;
-        //    clBuffer* pBuffer = (clBuffer*)m_aBatch[i].lParam;
-        //    //memcpy(&m_aPixelShaderRegister[uIndex], pBuffer->GetPtr(), pBuffer->GetSize());
-        //    //for(GXUINT i = 0; i < uCount; i++)
-        //    //{
-        //    //  m_aPixelShaderRegister[uIndex + u].x = 
-        //    //}
-        //    ASSERT((pBuffer->GetSize()%sizeof(float4)) == 0);
-        //    m_pGraphics->SetPixelShaderConstantF(uIndex, (GXFLOAT*)pBuffer->GetPtr(), pBuffer->GetSize()/sizeof(float4));
-        //    delete pBuffer;
-        //  }
-        //  break;
-#elif defined(D3D11_CANVAS_IMPL)
-#else
-#error 需要定义inl的环境
-#endif
+
         case CF_SetViewportOrg:
           TRACE_BATCH("CF_SetViewportOrg\n");
           m_xOrigin = m_aBatch[i].PosI.x;
@@ -911,8 +805,6 @@ namespace GrapX
           rcClip.top = GXLOWORD(m_aBatch[i].comm.lParam);
           rcClip.bottom = GXHIWORD(m_aBatch[i].comm.lParam);
 
-          //m_CallState.rcClip = m_rcClip;
-          //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
 
           gxRectToRegn(&rgClip, &rcClip);
@@ -997,13 +889,6 @@ namespace GrapX
           m[12] = m_aBatch[i + 3].PosF.x;   m[13] = m_aBatch[i + 3].PosF.y;   m[14] = m_aBatch[i + 3].PosF.z;   m[15] = m_aBatch[i + 3].PosF.w;
           //m_pEffectImpl->CommitUniform(this, -1);
 
-          // TODO: 这里全部重新提交了CB，可以改为只提交$Globals
-          //MOVarMatrix4 varMVP = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>(); // 临时写法
-          //MOVarFloat4 colorAdd = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();  // 临时写法
-          //MOVarFloat4 color = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();        // 临时写法
-          //varMVP = m_CanvasCommConst.matWVProj;                                                // 临时写法
-          //colorAdd = m_CanvasCommConst.colorAdd;                                               // 临时写法
-          //color = m_CanvasCommConst.colorMul;                                                  // 临时写法
           static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
 
           i += 3;
@@ -1041,21 +926,6 @@ namespace GrapX
       //return GXSUCCEEDED(m_pGraphics->D3DGetDevice()->SetSamplerState(Sampler, Type, Value));
     }
 
-    //GXBOOL CanvasImpl::SetRenderState(GXRenderStateType eType, GXDWORD dwValue)
-    //{
-    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-    //    Flush();
-    //  // TODO: 想办法保证, 当GXCanvasImpl不在设备上时只改变GRenderState的变量.
-    //  m_aBatch[m_uBatchCount++].SetRenderState(eType, dwValue);
-    //  return TRUE;
-    //}
-    //GXBOOL CanvasImpl::SetRenderStateBlock(GXLPCRENDERSTATE lpBlock)
-    //{
-    //  ASSERT(0); // 已经去掉了
-    //  return TRUE;
-    //  //return m_pRenderState->SetBlock(lpBlock);
-    //}
-
     GXBOOL CanvasImpl::SetEffect(Effect* pEffect)
     {
       if(m_CallState.RenderState.pEffect == pEffect) {
@@ -1071,67 +941,8 @@ namespace GrapX
       m_aBatch[m_uBatchCount++].Set(CF_Effect, 0, 0, (GXLPARAM)pEffect);
       m_CallState.RenderState.pEffect = (EffectImpl*)pEffect;
 
-      //const ShaderImpl* pShaderImpl = (ShaderImpl*)m_CallState.RenderState.pEffect->GetShaderUnsafe();
-      //const GXINT nCacheSize = pShaderImpl->GetCacheSize();
-      //CLBREAK;
-      //if((GXINT)m_UniformBuffer.GetSize() < nCacheSize)
-      //{
-      //  m_UniformBuffer.Resize(nCacheSize, TRUE);
-      //}
       return TRUE;
     }
-//#ifdef GLES2_CANVAS_IMPL
-//    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-//    {
-//      return FALSE;
-//    }
-//#elif defined(D3D9_CANVAS_IMPL)
-//    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-//    {
-//      //GXEffectImpl* pEffect = (GEffectImpl*)m_CallState.pEffect;
-//      //if(pShader == NULL)
-//      //{
-//      //  ASSERT(0);
-//      //  return FALSE;
-//      //}
-//      //D3DXHANDLE hHandle = pShader->m_ppct->GetConstantByName(NULL, lpName);
-//      //if(hHandle == NULL)
-//      //{
-//      //  TRACE("Don't has constant register named %s\n.", lpName);
-//      //  return FALSE;
-//      //}
-//      //D3DXCONSTANT_DESC d3dcd;
-//      //GXUINT uCount;
-//      //if(FAILED(pShader->m_ppct->GetConstantDesc(hHandle, &d3dcd, &uCount)))
-//      //{
-//      //  ASSERT(0);
-//      //  return FALSE;
-//      //}
-//      //if(d3dcd.Type == D3DXPT_FLOAT)
-//      //{
-//      //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-//      //    Flush();
-//      //  clBuffer* pBuffer = new clBuffer;
-//      //  pBuffer->Append(pData, nPackCount * sizeof(float4));
-//      //  m_aBatch[m_uBatchCount].Set(CF_SetPixelShaderConst, 0, 0, (GXLPARAM)pBuffer);
-//      //  m_aBatch[m_uBatchCount].comm.wParam = d3dcd.RegisterIndex;
-//      //  m_uBatchCount++;
-//      //  return TRUE;
-//      //}
-//      //else
-//      //{
-//      //  ASSERT(0);
-//      return FALSE;
-//      //}
-//    }
-//#elif defined(D3D11_CANVAS_IMPL)
-//    GXBOOL CanvasImpl::SetEffectConst(GXLPCSTR lpName, void* pData, int nPackCount)
-//    {
-//      return FALSE;
-//    }
-//#else
-//#error 需要定义inl的环境
-//#endif
 
     GXDWORD CanvasImpl::SetParametersInfo(CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam)
     {
@@ -1144,13 +955,13 @@ namespace GrapX
       case CPI_SETTEXTURECOLOR:
       {
         dwRet = m_dwTexVertColor;
-        m_dwTexVertColor = (GXDWORD)uParam;
+        m_dwTexVertColor = (GXDWORD)COLORREF_TO_NATIVE(uParam);
       }
       break;
       case CPI_SETCOLORADDITIVE:
       {
-        dwRet = m_CallState.dwColorAdditive;
-        m_CallState.dwColorAdditive = (GXDWORD)uParam;
+        dwRet = NATIVE_TO_COLORREF(m_CallState.dwColorAdditive);
+        m_CallState.dwColorAdditive = (GXDWORD)COLORREF_TO_NATIVE(uParam);
 
         // 检测是否是新的叠加颜色
         if(m_CallState.dwColorAdditive != dwRet)
@@ -1158,15 +969,16 @@ namespace GrapX
           // 如果上一个命令也是设置叠加颜色
           if(m_uBatchCount > 0 &&
             m_aBatch[m_uBatchCount - 1].eFunc == CF_ColorAdditive &&
-            m_aBatch[m_uBatchCount - 1].comm.lParam == (GXDWORD)uParam)
+            m_aBatch[m_uBatchCount - 1].comm.lParam == (GXDWORD)COLORREF_TO_NATIVE(uParam))
           {
             m_uBatchCount--;
             dwRet = (GXDWORD)uParam;
           }
           else
           {
-            if(!((m_uBatchCount + 1) < m_uBatchSize))
+            if(!((m_uBatchCount + 1) < m_uBatchSize)) {
               Flush();
+            }
             m_aBatch[m_uBatchCount++].Set(CF_ColorAdditive, 0, dwRet, m_CallState.dwColorAdditive);
           }
         }
@@ -1391,13 +1203,6 @@ namespace GrapX
       return m_dwStencil;
     }
 
-    //GXBOOL CanvasImpl::GetUniformData(CANVASUNIFORM* pCanvasUniform)
-    //{
-    //  pCanvasUniform->pCommon = GetCommonConst();
-    //  pCanvasUniform->pUnusualBuf = &GetUniformBuffer();
-    //  return TRUE;
-    //}
-
     GXBOOL CanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcClip, GRegion** lpprgnUpdate, LPGXRECT lprcUpdate)
     {
       Flush();
@@ -1419,20 +1224,14 @@ namespace GrapX
       return TRUE;
     }
 
-    //#define CHECK_LOCK if(m_lpLockedVertex == NULL)  \
-    //  m_pPrimitive->Lock(0, 0, 0, 0, (void**)&m_lpLockedVertex, &m_lpLockedIndex, GXLOCK_DISCARD);
 #define CHECK_LOCK \
   if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::Write)); } \
   if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::Write)); }
-  //PrimitiveUtility::LockVertices locker_v(m_pPrimitive); \
-  //PrimitiveUtility::LockIndices locker_i(m_pPrimitive); \
 
 #define SET_BATCH_INDEX(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
 
     GXBOOL CanvasImpl::SetPixel(GXINT xPos, GXINT yPos, GXCOLORREF crPixel)
     {
-      //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
-
       GXUINT uBaseIndex = PrepareBatch(CF_Points, 1, 0, NULL);
       CHECK_LOCK;
 
@@ -1440,19 +1239,16 @@ namespace GrapX
       m_lpLockedVertex[m_uVertCount].w = 1;
       m_lpLockedVertex[m_uVertCount].u = 0;
       m_lpLockedVertex[m_uVertCount].v = 0;
-      m_lpLockedVertex[m_uVertCount].color = (GXDWORD)crPixel;
+      m_lpLockedVertex[m_uVertCount].color = (GXDWORD)COLORREF_TO_NATIVE(crPixel);
 
       _SetPrimitivePos(m_uVertCount, xPos, yPos);
 
       m_uVertCount++;
-      //SetParametersInfo(CPI_SETCOLORADDITIVE, dwPrevClrAdd, NULL);
       return TRUE;
     }
 
     GXBOOL CanvasImpl::DrawLine(GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF crLine)
     {
-      //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
-
       GXUINT uBaseIndex = PrepareBatch(CF_LineList, 2, 2, NULL);
       CHECK_LOCK;
 
@@ -1462,7 +1258,7 @@ namespace GrapX
         m_lpLockedVertex[m_uVertCount + i].w = 1;
         m_lpLockedVertex[m_uVertCount + i].u = 0;
         m_lpLockedVertex[m_uVertCount + i].v = 0;
-        m_lpLockedVertex[m_uVertCount + i].color = (GXDWORD)crLine;
+        m_lpLockedVertex[m_uVertCount + i].color = (GXDWORD)COLORREF_TO_NATIVE(crLine);
       }
 
       _SetPrimitivePos(m_uVertCount, left, top);
@@ -1474,7 +1270,6 @@ namespace GrapX
       m_uVertCount += 2;
       m_uIndexCount += 2;
 
-      //SetParametersInfo(CPI_SETCOLORADDITIVE, dwPrevClrAdd, NULL);
       return TRUE;
     }
 
@@ -1519,17 +1314,17 @@ namespace GrapX
 
     GXBOOL CanvasImpl::DrawRectangle(GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crRect)
     {
-      return InlDrawRectangle(x, y, x + w, y + h, crRect);
+      return InlDrawRectangle(x, y, x + w, y + h, COLORREF_TO_NATIVE(crRect));
     }
 
     GXBOOL CanvasImpl::DrawRectangle(GXLPCRECT lprc, GXCOLORREF crRect)
     {
-      return InlDrawRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, crRect);
+      return InlDrawRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, COLORREF_TO_NATIVE(crRect));
     }
 
     GXBOOL CanvasImpl::DrawRectangle(GXLPCREGN lprg, GXCOLORREF crRect)
     {
-      return InlDrawRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, crRect);
+      return InlDrawRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, COLORREF_TO_NATIVE(crRect));
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1570,17 +1365,17 @@ namespace GrapX
 
     GXBOOL CanvasImpl::FillRectangle(GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crFill)
     {
-      return InlFillRectangle(x, y, x + w, y + h, crFill);
+      return InlFillRectangle(x, y, x + w, y + h, COLORREF_TO_NATIVE(crFill));
     }
 
     GXBOOL CanvasImpl::FillRectangle(GXLPCRECT lprc, GXCOLORREF crFill)
     {
-      return InlFillRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, crFill);
+      return InlFillRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, COLORREF_TO_NATIVE(crFill));
     }
 
     GXBOOL CanvasImpl::FillRectangle(GXLPCREGN lprg, GXCOLORREF crFill)
     {
-      return InlFillRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, crFill);
+      return InlFillRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, COLORREF_TO_NATIVE(crFill));
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1812,144 +1607,6 @@ namespace GrapX
 
       return TRUE;
     }
-
-    //GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest)
-    //{
-    //  GXREGN rcSrc(0);
-    //  pImage->GetDimension((GXINT*)&rcSrc.width, (GXINT*)&rcSrc.height);
-    //  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, &rcSrc);
-    //}
-    //
-    //GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc)
-    //{
-    //  GXREGN regn;
-    //  if(rgSrc == NULL)
-    //  {
-    //    regn.left = 0;
-    //    regn.top = 0;
-    //    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
-    //    rgSrc = &regn;
-    //  }
-    //  return DrawTexture(pImage->GetTextureUnsafe(), xPos, yPos, rgSrc);
-    //}
-    //
-    //GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN *rgDest, const GXREGN *rgSrc)
-    //{
-    //  GXREGN regn;
-    //  if(rgSrc == NULL)
-    //  {
-    //    regn.left = 0;
-    //    regn.top = 0;
-    //    pImage->GetDimension((GXINT*)&regn.width, (GXINT*)&regn.height);
-    //    rgSrc = &regn;
-    //  }
-    //  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc);
-    //}
-    //
-    //GXBOOL GXCanvasImpl::DrawImage(GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation)
-    //{
-    //  return DrawTexture(pImage->GetTextureUnsafe(), rgDest, rgSrc, eRotation);
-    //}
-    //
-    //const GXCANVASCOMMCONST& GXCanvasImpl::GetCommonConst()
-    //{
-    //  return m_CanvasCommConst;
-    //}
-    //clBuffer& GXCanvasImpl::GetUniformBuffer()
-    //{
-    //  return m_UniformBuffer;
-    //}
-
-
-
-    //GXBOOL CanvasImpl::SetEffectUniformByName1f (const GXCHAR* pName, const float fValue)
-    //{
-    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-    //    Flush();
-    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform1f;
-    //  m_aBatch[m_uBatchCount].Handle = uHandle;
-    //  m_aBatch[m_uBatchCount].PosF.x = fValue;
-    //  m_aBatch[m_uBatchCount].PosF.y = 0;
-    //  m_aBatch[m_uBatchCount].PosF.z = 0;
-    //  m_aBatch[m_uBatchCount].PosF.w = 1;
-    //  m_uBatchCount++;
-    //  return TRUE;
-    //}
-    //GXBOOL CanvasImpl::SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue)
-    //{
-    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-    //    Flush();
-    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform2f;
-    //  m_aBatch[m_uBatchCount].Handle = uHandle;
-    //  m_aBatch[m_uBatchCount].PosF.x = vValue->x;
-    //  m_aBatch[m_uBatchCount].PosF.y = vValue->y;
-    //  m_aBatch[m_uBatchCount].PosF.z = 0;
-    //  m_aBatch[m_uBatchCount].PosF.w = 1;
-    //  m_uBatchCount++;
-    //  return TRUE;
-    //}
-    //GXBOOL CanvasImpl::SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue)
-    //{
-    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-    //    Flush();
-    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform3f;
-    //  m_aBatch[m_uBatchCount].Handle = uHandle;
-    //  m_aBatch[m_uBatchCount].PosF.x = fValue->x;
-    //  m_aBatch[m_uBatchCount].PosF.y = fValue->y;
-    //  m_aBatch[m_uBatchCount].PosF.z = fValue->z;
-    //  m_aBatch[m_uBatchCount].PosF.w = 1;
-    //  m_uBatchCount++;
-
-    //  return TRUE;
-    //}
-    //GXBOOL CanvasImpl::SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue)
-    //{
-    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-    //    Flush();
-    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4f;
-    //  m_aBatch[m_uBatchCount].Handle = uHandle;
-    //  m_aBatch[m_uBatchCount].PosF.x = fValue->x;
-    //  m_aBatch[m_uBatchCount].PosF.y = fValue->y;
-    //  m_aBatch[m_uBatchCount].PosF.z = fValue->z;
-    //  m_aBatch[m_uBatchCount].PosF.w = fValue->w;
-    //  m_uBatchCount++;
-    //  return TRUE;
-    //}
-
-    //GXBOOL CanvasImpl::SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue)
-    //{
-    //  if(!((m_uBatchCount + 1) < m_uBatchSize))
-    //    Flush();
-    //  GXUINT uHandle = m_CallState.pEffectImpl->GetHandle(pName);
-    //  float4x4* pMat = new float4x4;
-    //  m_aBatch[m_uBatchCount].eFunc = CF_SetUniform4x4f;
-    //  m_aBatch[m_uBatchCount].Handle = uHandle;
-    //  m_aBatch[m_uBatchCount].comm.lParam = (GXLPARAM)pMat;
-    //  *pMat = *pValue;
-    //  m_uBatchCount++;
-    //  return TRUE;
-    //}
-
-    //GXBOOL CanvasImpl::SetEffectUniform1f(const GXINT nIndex, const float fValue)
-    //{
-    //  return TRUE;
-    //}
-    //GXBOOL CanvasImpl::SetEffectUniform2f(const GXINT nIndex, const float2* vValue)
-    //{
-    //  return TRUE;
-    //}
-    //GXBOOL CanvasImpl::SetEffectUniform3f(const GXINT nIndex, const float3* fValue)
-    //{
-    //  return TRUE;
-    //}
-    //GXBOOL CanvasImpl::SetEffectUniform4f(const GXINT nIndex, const float4* fValue)
-    //{
-    //  return TRUE;
-    //}
     //////////////////////////////////////////////////////////////////////////
   } // namespace D3D11
 } // namespace GrapX

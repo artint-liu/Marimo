@@ -65,13 +65,9 @@ namespace GrapX
       GXBOOL      GetTransform        (float4x4* matTransform) const override;
       GXBOOL      SetViewportOrg      (GXINT x, GXINT y, GXLPPOINT lpPoint) override;
       GXBOOL      GetViewportOrg      (GXLPPOINT lpPoint) const override;
-      //GXVOID      EnableAlphaBlend    (GXBOOL bEnable) override;
       GXBOOL      Flush               () override;
       GXBOOL      SetSamplerState     (GXUINT Sampler, GXSAMPLERDESC* pDesc) override;
-      //GXBOOL      SetRenderState      (GXRenderStateType eType, GXDWORD dwValue) override;
-      //GXBOOL      SetRenderStateBlock (GXLPCRENDERSTATE lpBlock) override;
       GXBOOL      SetEffect           (Effect* pEffect) override;
-      //virtual GXBOOL      SetEffectConst      (GXLPCSTR lpName, void* pData, int nPackCount) override;
       GXDWORD     SetParametersInfo   (CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam) override;
       PenStyle    SetPenStyle         (PenStyle eStyle) override;
 
@@ -100,11 +96,6 @@ namespace GrapX
       GXBOOL      DrawTexture         (Texture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc) override;
       GXBOOL      DrawTexture         (Texture*pTexture, const GXREGN *rcDest, const GXREGN *rcSrc, RotateType eRotation) override;
 
-      //virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest) override;
-      //virtual GXBOOL      DrawImage           (GXImage* pImage, GXINT xPos, GXINT yPos, const GXREGN *rgSrc) override;
-      //virtual GXBOOL      DrawImage           (GXImage* pImage, const GXREGN *rgDest, const GXREGN *rgSrc) override;
-      //virtual GXBOOL      DrawImage           (GXImage*pImage, const GXREGN* rgDest, const GXREGN* rgSrc, RotateType eRotation) override;
-
       GXINT       DrawText           (GXFont* pFTFont, GXLPCSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText) override;
       GXINT       DrawText           (GXFont* pFTFont, GXLPCWSTR lpString, GXINT nCount, GXLPRECT lpRect, GXUINT uFormat, GXCOLORREF crText) override;
       GXBOOL      TextOut            (GXFont* pFTFont, GXINT nXStart, GXINT nYStart, GXLPCSTR lpString, GXINT cbString, GXCOLORREF crText) override;
@@ -118,20 +109,8 @@ namespace GrapX
       GXBOOL      SetClipBox          (const GXLPRECT lpRect) override;
       GXINT       GetClipBox          (GXLPRECT lpRect) override;
       GXDWORD     GetStencilLevel     () override;
-      //virtual GXBOOL      GetUniformData      (CANVASUNIFORM* pCanvasUniform) override;
 
       GXBOOL      Scroll              (int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcClip, GRegion** lpprgnUpdate, LPGXRECT lprcUpdate) override;
-
-      //virtual GXBOOL      SetEffectUniformByName1f (const GXCHAR* pName, const float fValue) override;
-      //virtual GXBOOL      SetEffectUniformByName2f (const GXCHAR* pName, const float2* vValue) override;
-      //virtual GXBOOL      SetEffectUniformByName3f (const GXCHAR* pName, const float3* fValue) override;
-      //virtual GXBOOL      SetEffectUniformByName4f (const GXCHAR* pName, const float4* fValue) override;
-      //virtual GXBOOL      SetEffectUniformByName4x4(const GXCHAR* pName, const float4x4* pValue) override;
-
-      //virtual GXBOOL      SetEffectUniform1f       (const GXINT nIndex, const float fValue) override;
-      //virtual GXBOOL      SetEffectUniform2f       (const GXINT nIndex, const float2* vValue) override;
-      //virtual GXBOOL      SetEffectUniform3f       (const GXINT nIndex, const float3* fValue) override;
-      //virtual GXBOOL      SetEffectUniform4f       (const GXINT nIndex, const float4* fValue) override;
 
     private:
       enum CanvasFunc
@@ -311,24 +290,6 @@ namespace GrapX
       //clBuffer      m_VertexConstBuffer;
       //clBuffer      m_PixelConstBuffer;
     };
-
-    //class GXCanvas3DCoreImpl : public GXCanvas3D
-    //{
-
-    //};
-    //const GXCANVASCOMMCONST& CanvasImpl::GetCommonConst() const
-    //{
-    //  return m_CanvasCommConst;
-    //}
-    //clBuffer& CanvasImpl::GetUniformBuffer()
-    //{
-    //  return m_UniformBuffer;
-    //}
-    //void CanvasImpl::GetConstBuffer(clBuffer** ppVertexBuffer, clBuffer** ppPixelBuffer)
-    //{
-    //  *ppVertexBuffer = &m_VertexConstBuffer;
-    //  *ppPixelBuffer = &m_PixelConstBuffer;
-    //}
 
   } // namespace D3D11
 } // namespace GrapX
