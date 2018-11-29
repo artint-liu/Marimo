@@ -13,7 +13,6 @@
 #include <User/GrapX.Hxx>
 
 // 标准接口
-//#include "Include/GUnknown.h"
 #include "GrapX/GResource.h"
 #include "GrapX/GPrimitive.h"
 #include "GrapX/GStateBlock.h"
@@ -49,9 +48,6 @@
 #include "GrapX/GXUser.h"
 #include <User/WindowsSurface.h>
 #include <User/DesktopWindowsMgr.h>
-#include <GrapX/gxDevice.h>
-//#include <User/GXWindow.h>
-#include <Utility/hlsl/FXCommRegister.h>
 #include <GrapX/GCamera.h>
 
 #ifdef ENABLE_GRAPHICS_API_DX11
@@ -68,7 +64,6 @@ namespace GrapX
 #include "Canvas/GXCanvas_Text.inl"
 #define D3D11_CANVAS_IMPL
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
-    //#include "Platform/CommonInline/GXCanvasImpl.inl"
 #include "Canvas/GXCanvasCoreImpl.inl"
 
 
@@ -81,8 +76,6 @@ namespace GrapX
       , m_yAbsOrigin        (0)
       , m_xOrigin           (0)
       , m_yOrigin           (0)
-      //, m_pBlendingState    (NULL)
-      //, m_pOpaqueState      (NULL)
       , m_pPrimitive        (NULL)
       , m_lpLockedVertex    (NULL)
       , m_lpLockedIndex     (NULL)
@@ -125,18 +118,8 @@ namespace GrapX
         {
           GXRECT rcTexture;
 
-          m_xAbsOrigin
-            = m_CallState.xOrigin
-            = m_xOrigin
-            = m_rcClip.left
-            = pRegn->left;
-
-          m_yAbsOrigin
-            = m_CallState.yOrigin
-            = m_yOrigin
-            = m_rcClip.top
-            = pRegn->top;
-
+          m_xAbsOrigin = m_CallState.origin.x = m_xOrigin = m_rcClip.left = pRegn->left;
+          m_yAbsOrigin = m_CallState.origin.y = m_yOrigin = m_rcClip.top = pRegn->top;
           m_rcClip.right = pRegn->left + pRegn->width;
           m_rcClip.bottom = pRegn->top + pRegn->height;
 
@@ -145,17 +128,8 @@ namespace GrapX
         }
         else
         {
-          m_xAbsOrigin
-            = m_CallState.xOrigin
-            = m_xOrigin
-            = m_rcClip.left
-            = 0;
-
-          m_yAbsOrigin
-            = m_CallState.yOrigin
-            = m_yOrigin
-            = m_rcClip.top
-            = 0;
+          m_xAbsOrigin = m_CallState.origin.x = m_xOrigin = m_rcClip.left = 0;
+          m_yAbsOrigin = m_CallState.origin.y = m_yOrigin = m_rcClip.top = 0;
           m_rcClip.right = m_sExtent.cx;
           m_rcClip.bottom = m_sExtent.cy;
         }
@@ -249,9 +223,6 @@ namespace GrapX
         gcc.dwMask = GCC_WORLD;
         m_pCamera->GetContext(&gcc);
         m_CallState.matTransform = gcc.matWorld;
-        //m_CanvasCommConst.matWVProj = gcc.matWorld;
-        //m_CanvasCommConst.colorMul.set(1, 1, 1, 1);
-        //m_CanvasCommConst.colorAdd.set(0, 0, 0, 1);
 
         ASSERT(m_CommonEffect.pEffect == NULL);
         m_CommonEffect.pEffect = m_pGraphics->IntGetEffect();
@@ -286,8 +257,6 @@ namespace GrapX
       if(m_pClipRegion == NULL)
       {
         rcClip = m_rcAbsClip;
-        //m_CallState.rcClip = m_rcAbsClip;
-        //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
         m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
       }
       else
@@ -297,18 +266,13 @@ namespace GrapX
         {
         case RC_ERROR:
           rcClip = m_rcAbsClip;
-          //m_CallState.rcClip = m_rcAbsClip;
-          //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
           break;
         case RC_NULL:
           m_pClipRegion->GetBounding(&rcClip);
-          //m_CallState.rcClip = m_rcClip;
           break;
         case RC_SIMPLE:
           m_pClipRegion->GetBounding(&rcClip);
-          //m_CallState.rcClip = m_rcClip;
-          //m_pRenderState->Set(GXRS_STENCILENABLE, FALSE);
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
           break;
         case RC_COMPLEX:
@@ -320,7 +284,6 @@ namespace GrapX
 
           m_pClipRegion->GetRects(lpRects, nRectCount);
           m_pClipRegion->GetBounding(&rcClip);
-          //m_CallState.rcClip = m_rcClip;
 
           // 如果不先设置Clear在区域之外的会失败
           gxRectToRegn(&rgClip, &rcClip);
@@ -335,8 +298,6 @@ namespace GrapX
 
           m_pCanvasStencil[1]->SetStencilRef(m_dwStencil);
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[1]);
-
-          //_GlbUnlockStaticRects(lpRects);
         }
         IntUpdateClip(rcClip);
         return (GXINT)eCompx;
@@ -418,7 +379,7 @@ namespace GrapX
       return m_uRefCount;
     }
 
-    GXBOOL CanvasImpl::_CanFillBatch(GXUINT uVertCount, GXUINT uIndexCount)
+    GXBOOL CanvasImpl::IntCanFillBatch(GXUINT uVertCount, GXUINT uIndexCount)
     {
       return ((m_uVertCount + uVertCount) < m_uVertIndexSize &&
         (m_uIndexCount + uIndexCount) < m_uVertIndexSize &&
@@ -428,8 +389,9 @@ namespace GrapX
     // 返回值是Index的索引基值
     GXUINT CanvasImpl::PrepareBatch(CanvasFunc eFunc, GXUINT uVertCount, GXUINT uIndexCount, GXLPARAM lParam)
     {
-      if(_CanFillBatch(uVertCount, uIndexCount) == FALSE)
+      if(IntCanFillBatch(uVertCount, uIndexCount) == FALSE) {
         Flush();
+      }
 
       // 队列为空或者与上一个命令不符,则新建一个命令
       if(m_uBatchCount == 0 || m_aBatch[m_uBatchCount - 1].eFunc != eFunc ||
@@ -447,7 +409,6 @@ namespace GrapX
       return uBaseIndex;
     }
 
-
     void CanvasImpl::SetStencil(GXDWORD dwStencil)
     {
       m_dwStencil = dwStencil;
@@ -461,11 +422,9 @@ namespace GrapX
 
     void CanvasImpl::_SetPrimitivePos(GXUINT nIndex, const GXINT _x, const GXINT _y)
     {
-      //m_lpLockedVertex[nIndex].x = (GXFLOAT)_x;
-      //m_lpLockedVertex[nIndex].y = (GXFLOAT)_y;
-      // TODO: 貌似这里应该是m_xOrigin, m_yOrigin, 因为 m_CallState 已经是最后的结果了, m_xOrigin是中间结果
-      m_lpLockedVertex[nIndex].x = (GXFLOAT)m_CallState.xOrigin + _x;
-      m_lpLockedVertex[nIndex].y = (GXFLOAT)m_CallState.yOrigin + _y;
+      PRIMITIVE* pVertex = m_lpLockedVertex + nIndex;
+      pVertex->x = (float)(m_CallState.origin.x + _x);
+      pVertex->y = (float)(m_CallState.origin.y + _y);
     }
 
     void CanvasImpl::BATCH::Set(CanvasFunc _eFunc, GXUINT _uVertexCount, GXUINT _uIndexCount, GXLPARAM _lParam)
@@ -505,7 +464,6 @@ namespace GrapX
       if(m_pGraphics->InlSetCanvas(this) > 0)
       {
         m_pGraphics->SetPrimitive(m_pPrimitive);
-        //m_pGraphics->InlSetRenderState(m_pRenderState);
         m_pGraphics->InlSetRasterizerState(m_pRasterizerState);
         m_pGraphics->InlSetSamplerState(m_pSamplerState);
         m_pGraphics->InlSetDepthStencil(NULL);
@@ -540,7 +498,6 @@ namespace GrapX
       }
       return TRUE;
     }
-
 
     Graphics* CanvasImpl::GetGraphicsUnsafe() const
     {
@@ -583,8 +540,8 @@ namespace GrapX
         lpPoint->x = m_xAbsOrigin - m_xOrigin;
         lpPoint->y = m_yAbsOrigin - m_yOrigin;
 
-        ASSERT(m_xOrigin == m_CallState.xOrigin);
-        ASSERT(m_yOrigin == m_CallState.yOrigin);
+        ASSERT(m_xOrigin == m_CallState.origin.x);
+        ASSERT(m_yOrigin == m_CallState.origin.y);
 
         m_xOrigin = m_xAbsOrigin - x;
         m_yOrigin = m_yAbsOrigin - y;
@@ -597,8 +554,8 @@ namespace GrapX
         }
         m_aBatch[m_uBatchCount++].Set2(CF_SetViewportOrg, m_xAbsOrigin - x, m_yAbsOrigin - y);
       }
-      m_CallState.xOrigin = m_xAbsOrigin - x;
-      m_CallState.yOrigin = m_yAbsOrigin - y;
+      m_CallState.origin.x = m_xAbsOrigin - x;
+      m_CallState.origin.y = m_yAbsOrigin - y;
       return TRUE;
     }
 
@@ -607,15 +564,11 @@ namespace GrapX
       if(lpPoint == NULL)
         return FALSE;
 
-      lpPoint->x = m_xAbsOrigin - m_CallState.xOrigin;
-      lpPoint->y = m_yAbsOrigin - m_CallState.yOrigin;
+      lpPoint->x = m_xAbsOrigin - m_CallState.origin.x;
+      lpPoint->y = m_yAbsOrigin - m_CallState.origin.y;
 
       return TRUE;
     }
-
-    //GXVOID CanvasImpl::EnableAlphaBlend(GXBOOL bEnable)
-    //{
-    //}
 
     GXBOOL CanvasImpl::Flush()
     {
@@ -684,6 +637,7 @@ namespace GrapX
           nStartIndex += m_aBatch[i].uIndexCount;
         }
         break;
+
         case CF_Textured:
         {
           TRACE_BATCH("CF_Textured\n");
@@ -760,7 +714,6 @@ namespace GrapX
             else
               pBlendState = m_pBlendingState[1];
           }
-          //m_pRenderState->SetBlock(lpRenderStateBlock);
           m_pGraphics->InlSetBlendState(pBlendState);
         }
         break;
@@ -772,17 +725,16 @@ namespace GrapX
           SAFE_RELEASE(m_pEffectImpl);
           m_pEffectImpl = (EffectImpl*)m_aBatch[i].comm.lParam;
           m_pGraphics->InlSetEffect(m_pEffectImpl);
-          //m_pEffectImpl->CommitUniform(this, -1);
         }
         break;
         case CF_ColorAdditive:
         {
           TRACE_BATCH("CF_ColorAdditive\n");
           m_dwColorAdditive = (GXDWORD)m_aBatch[i].comm.lParam;
-          //m_CanvasCommConst.colorAdd = m_dwColorAdditive;
           float4 v4 = m_dwColorAdditive;
           m_CommonEffect.color_add = v4;
 
+          // TODO: 这里全部重新提交了CB，可以改为只提交$Globals          
           static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
         }
         break;
@@ -887,7 +839,6 @@ namespace GrapX
           m[4] = m_aBatch[i + 1].PosF.x;   m[5] = m_aBatch[i + 1].PosF.y;   m[6] = m_aBatch[i + 1].PosF.z;   m[7] = m_aBatch[i + 1].PosF.w;
           m[8] = m_aBatch[i + 2].PosF.x;   m[9] = m_aBatch[i + 2].PosF.y;   m[10] = m_aBatch[i + 2].PosF.z;   m[11] = m_aBatch[i + 2].PosF.w;
           m[12] = m_aBatch[i + 3].PosF.x;   m[13] = m_aBatch[i + 3].PosF.y;   m[14] = m_aBatch[i + 3].PosF.z;   m[15] = m_aBatch[i + 3].PosF.w;
-          //m_pEffectImpl->CommitUniform(this, -1);
 
           static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
 
@@ -923,7 +874,6 @@ namespace GrapX
       m_uBatchCount++;
 
       return TRUE;
-      //return GXSUCCEEDED(m_pGraphics->D3DGetDevice()->SetSamplerState(Sampler, Type, Value));
     }
 
     GXBOOL CanvasImpl::SetEffect(Effect* pEffect)
@@ -1004,7 +954,7 @@ namespace GrapX
         {
           // 转换为 RenderTarget 空间的坐标
           GXRECT rcUserClip = *lpRect;
-          gxOffsetRect(&rcUserClip, m_CallState.xOrigin, m_CallState.yOrigin);
+          gxOffsetRect(&rcUserClip, m_CallState.origin.x, m_CallState.origin.y);
 
           // 与系统区域裁剪
           //gxIntersectRect(&rcUserClip, &m_rcAbsClip, &rcUserClip);
@@ -1132,7 +1082,7 @@ namespace GrapX
         else
         {
           GRegion* pAbsRegion = pRegion->Clone();
-          pAbsRegion->Offset(m_CallState.xOrigin, m_CallState.yOrigin);
+          pAbsRegion->Offset(m_CallState.origin.x, m_CallState.origin.y);
           pSurfaceRegion->Intersect(pAbsRegion);
           SAFE_RELEASE(pAbsRegion);
         }
@@ -1172,7 +1122,7 @@ namespace GrapX
       {
         // 转换为 RenderTarget 空间的坐标
         GXRECT rcUserClip = *lpRect;
-        gxOffsetRect(&rcUserClip, m_CallState.xOrigin, m_CallState.yOrigin);
+        gxOffsetRect(&rcUserClip, m_CallState.origin.x, m_CallState.origin.y);
 
         // 与系统区域裁剪
         gxIntersectRect(&m_CallState.rcClip, &m_rcAbsClip, &rcUserClip);
@@ -1224,14 +1174,20 @@ namespace GrapX
       return TRUE;
     }
 
+    //#define CHECK_LOCK if(m_lpLockedVertex == NULL)  \
+    //  m_pPrimitive->Lock(0, 0, 0, 0, (void**)&m_lpLockedVertex, &m_lpLockedIndex, GXLOCK_DISCARD);
 #define CHECK_LOCK \
   if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::Write)); } \
   if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::Write)); }
+  //PrimitiveUtility::LockVertices locker_v(m_pPrimitive); \
+  //PrimitiveUtility::LockIndices locker_i(m_pPrimitive); \
 
 #define SET_BATCH_INDEX(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
 
     GXBOOL CanvasImpl::SetPixel(GXINT xPos, GXINT yPos, GXCOLORREF crPixel)
     {
+      //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
+
       GXUINT uBaseIndex = PrepareBatch(CF_Points, 1, 0, NULL);
       CHECK_LOCK;
 
@@ -1244,11 +1200,14 @@ namespace GrapX
       _SetPrimitivePos(m_uVertCount, xPos, yPos);
 
       m_uVertCount++;
+      //SetParametersInfo(CPI_SETCOLORADDITIVE, dwPrevClrAdd, NULL);
       return TRUE;
     }
 
     GXBOOL CanvasImpl::DrawLine(GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF crLine)
     {
+      //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
+
       GXUINT uBaseIndex = PrepareBatch(CF_LineList, 2, 2, NULL);
       CHECK_LOCK;
 
@@ -1270,6 +1229,7 @@ namespace GrapX
       m_uVertCount += 2;
       m_uIndexCount += 2;
 
+      //SetParametersInfo(CPI_SETCOLORADDITIVE, dwPrevClrAdd, NULL);
       return TRUE;
     }
 
@@ -1282,19 +1242,18 @@ namespace GrapX
       GXUINT uBaseIndex = PrepareBatch(CF_LineList, 4, 8, NULL);
       CHECK_LOCK;
 
-      for(int i = 0; i < 8; i++)
-      {
-        m_lpLockedVertex[m_uVertCount + i].z = 0;
-        m_lpLockedVertex[m_uVertCount + i].w = 1;
-        m_lpLockedVertex[m_uVertCount + i].u = 0;
-        m_lpLockedVertex[m_uVertCount + i].v = 0;
-        m_lpLockedVertex[m_uVertCount + i].color = (GXDWORD)crRect;
-      }
+      GXDWORD dwColor = COLORREF_TO_NATIVE(crRect);
 
-      _SetPrimitivePos(m_uVertCount, left, top);
-      _SetPrimitivePos(m_uVertCount + 1, right - 1, top);
-      _SetPrimitivePos(m_uVertCount + 2, right - 1, bottom - 1);
-      _SetPrimitivePos(m_uVertCount + 3, left, bottom - 1);
+      float x1 = float(left   + m_CallState.origin.x);
+      float y1 = float(top    + m_CallState.origin.y);
+      float x2 = float(right  + m_CallState.origin.x - 1);
+      float y2 = float(bottom + m_CallState.origin.y - 1);
+
+      m_lpLockedVertex[m_uVertCount + 0].Set(x1, y1, dwColor);
+      m_lpLockedVertex[m_uVertCount + 1].Set(x2, y1, dwColor);
+      m_lpLockedVertex[m_uVertCount + 2].Set(x2, y2, dwColor);
+      m_lpLockedVertex[m_uVertCount + 3].Set(x1, y2, dwColor);
+
 
       SET_BATCH_INDEX(0, 0);
       SET_BATCH_INDEX(1, 1);
@@ -1314,17 +1273,17 @@ namespace GrapX
 
     GXBOOL CanvasImpl::DrawRectangle(GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crRect)
     {
-      return InlDrawRectangle(x, y, x + w, y + h, COLORREF_TO_NATIVE(crRect));
+      return InlDrawRectangle(x, y, x + w, y + h, crRect);
     }
 
     GXBOOL CanvasImpl::DrawRectangle(GXLPCRECT lprc, GXCOLORREF crRect)
     {
-      return InlDrawRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, COLORREF_TO_NATIVE(crRect));
+      return InlDrawRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, crRect);
     }
 
     GXBOOL CanvasImpl::DrawRectangle(GXLPCREGN lprg, GXCOLORREF crRect)
     {
-      return InlDrawRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, COLORREF_TO_NATIVE(crRect));
+      return InlDrawRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, crRect);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1335,19 +1294,16 @@ namespace GrapX
       GXUINT uBaseIndex = PrepareBatch(CF_Triangle, 4, 6, NULL);
       CHECK_LOCK;
 
-      for(int i = 0; i < 4; i++)
-      {
-        m_lpLockedVertex[m_uVertCount + i].z = 0;
-        m_lpLockedVertex[m_uVertCount + i].w = 1;
-        m_lpLockedVertex[m_uVertCount + i].u = 0;
-        m_lpLockedVertex[m_uVertCount + i].v = 0;
-        m_lpLockedVertex[m_uVertCount + i].color = (GXDWORD)crFill;
-      }
+      GXDWORD dwColor = COLORREF_TO_NATIVE(crFill);
+      float x1 = float(left   + m_CallState.origin.x);
+      float y1 = float(top    + m_CallState.origin.y);
+      float x2 = float(right  + m_CallState.origin.x);
+      float y2 = float(bottom + m_CallState.origin.y);
 
-      _SetPrimitivePos(m_uVertCount + 0, left, top);
-      _SetPrimitivePos(m_uVertCount + 1, right, top);
-      _SetPrimitivePos(m_uVertCount + 2, right, bottom);
-      _SetPrimitivePos(m_uVertCount + 3, left, bottom);
+      m_lpLockedVertex[m_uVertCount + 0].Set(x1, y1, dwColor);
+      m_lpLockedVertex[m_uVertCount + 1].Set(x2, y1, dwColor);
+      m_lpLockedVertex[m_uVertCount + 2].Set(x2, y2, dwColor);
+      m_lpLockedVertex[m_uVertCount + 3].Set(x1, y2, dwColor);
 
       SET_BATCH_INDEX(0, 0);
       SET_BATCH_INDEX(1, 1);
@@ -1365,17 +1321,17 @@ namespace GrapX
 
     GXBOOL CanvasImpl::FillRectangle(GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crFill)
     {
-      return InlFillRectangle(x, y, x + w, y + h, COLORREF_TO_NATIVE(crFill));
+      return InlFillRectangle(x, y, x + w, y + h, crFill);
     }
 
     GXBOOL CanvasImpl::FillRectangle(GXLPCRECT lprc, GXCOLORREF crFill)
     {
-      return InlFillRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, COLORREF_TO_NATIVE(crFill));
+      return InlFillRectangle(lprc->left, lprc->top, lprc->right, lprc->bottom, crFill);
     }
 
     GXBOOL CanvasImpl::FillRectangle(GXLPCREGN lprg, GXCOLORREF crFill)
     {
-      return InlFillRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, COLORREF_TO_NATIVE(crFill));
+      return InlFillRectangle(lprg->left, lprg->top, lprg->left + lprg->width, lprg->top + lprg->height, crFill);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1418,8 +1374,8 @@ namespace GrapX
       for(GXUINT i = 0; i < uVertCount; i++, pVertex++)
       {
         *pVertex = *((PRIMITIVE*)lpVertices + i);
-        pVertex->x += (GXFLOAT)m_CallState.xOrigin;
-        pVertex->y += (GXFLOAT)m_CallState.yOrigin;
+        pVertex->x += (GXFLOAT)m_CallState.origin.x;
+        pVertex->y += (GXFLOAT)m_CallState.origin.y;
       }
 
       for(GXUINT i = 0; i < uIdxCount; i++) {
@@ -1607,6 +1563,7 @@ namespace GrapX
 
       return TRUE;
     }
+
     //////////////////////////////////////////////////////////////////////////
   } // namespace D3D11
 } // namespace GrapX

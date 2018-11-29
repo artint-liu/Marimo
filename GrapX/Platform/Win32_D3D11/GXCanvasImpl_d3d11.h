@@ -56,6 +56,11 @@ namespace GrapX
       struct PRIMITIVE : public CANVAS_PRMI_VERT
       {
         inline void SetTexcoord(const GXFLOAT _u, const GXFLOAT _v) { u = _u; v = _v; }
+        inline void Set(float _x, float _y, GXCOLORREF col)
+        {
+          x = _x, y = _y, z = 0, w = 1;
+          u = v = 0, color = col;
+        }
       };
 
 
@@ -151,10 +156,26 @@ namespace GrapX
         CF_StateLast,
       };
 
+      struct CMDBASE
+      {
+        CanvasFunc cmd;
+        GXUINT     cbSize;
+      };
+
+      struct DRAWCALLBASE : public CMDBASE
+      {
+        GXUINT  uVertexCount;
+        GXUINT  uIndexCount;
+      };
+
+      struct DRAWCALL_TRIANGLELIST : public DRAWCALLBASE
+      {
+      };
+
       struct BATCH
       {
         CanvasFunc  eFunc;
-        GXUINT      Handle;
+        //GXUINT      Handle;
         union {
           struct // Path, Pixel, Triangle
           {
@@ -197,21 +218,17 @@ namespace GrapX
       // 而对应类中的值是在Flush之后改变的。
       struct CALLSTATE
       {
-        GXINT           xOrigin;
-        GXINT           yOrigin;
+        POINT           origin;
         GXRECT          rcClip;       // m_rcClip
         CompositingMode eCompMode;
         GXDWORD         dwColorAdditive;
         RENDERSTATE     RenderState;  // 不增加引用
-        //EffectImpl*     pEffectImpl;  // 不增加引用
         float4x4        matTransform;
         CALLSTATE()
-          : xOrigin         (0)
-          , yOrigin         (0)
-          , eCompMode       (CM_SourceCopy)
+          : eCompMode       (CM_SourceCopy)
           , dwColorAdditive (NULL)
-          //, pEffectImpl     (NULL)
         {
+          origin.x = origin.y = 0;
           gxSetRectEmpty(&rcClip);
           RenderState.pEffect = NULL;
         }
@@ -219,7 +236,7 @@ namespace GrapX
     private:
       GXBOOL    CommitState        ();
 
-      inline GXBOOL _CanFillBatch       (GXUINT uVertCount, GXUINT uIndexCount);
+      inline GXBOOL IntCanFillBatch       (GXUINT uVertCount, GXUINT uIndexCount);
       inline void _SetPrimitivePos      (GXUINT nIndex, const GXINT _x, const GXINT _y);
       GXUINT    PrepareBatch            (CanvasFunc eFunc, GXUINT uVertCount, GXUINT uIndexCount, GXLPARAM lParam);
 
@@ -274,7 +291,7 @@ namespace GrapX
       GXWORD*       m_lpLockedIndex;
       Texture*      m_pWhiteTex;
 
-
+      clstd::MemBuffer m_Commands;
       BATCH*      m_aBatch;
       GXUINT      m_uBatchCount;  // 计数 这个必须小于m_uBatchSize(不能等于)
       GXUINT      m_uBatchSize;   // 尺寸
@@ -285,10 +302,6 @@ namespace GrapX
       TextureImpl*  m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
 
       DEFAULT_EFFECT m_CommonEffect;
-      //GXCANVASCOMMCONST  m_CanvasCommConst;
-      //clBuffer      m_UniformBuffer;  // 如果这个用了就不用下面两个
-      //clBuffer      m_VertexConstBuffer;
-      //clBuffer      m_PixelConstBuffer;
     };
 
   } // namespace D3D11

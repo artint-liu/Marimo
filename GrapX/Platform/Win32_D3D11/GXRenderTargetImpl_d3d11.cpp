@@ -157,11 +157,13 @@ namespace GrapX
         FIBITMAP* fibmp = FreeImage_Allocate(sDimension.cx, sDimension.cy, bpp * 8);
         BYTE* pDest = FreeImage_GetBits(fibmp);
         GXINT nDestPitch = FreeImage_GetPitch(fibmp);
+
+        pDest += nDestPitch * (sDimension.cy - 1);
         for(int y = 0; y < sDimension.cy; y++)
         {
           memcpy(pDest, mapped.pBits, clMin(nDestPitch, mapped.Pitch));
 
-          pDest += nDestPitch;
+          pDest -= nDestPitch;
           mapped.pBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(mapped.pBits) + mapped.Pitch);
         }
 
