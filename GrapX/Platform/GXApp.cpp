@@ -136,7 +136,7 @@ GXHRESULT GXApp::KeyMessage(GXAPPKEYINFO* pKeyInfo)
 //////////////////////////////////////////////////////////////////////////
 extern "C"
 {
-  GXBOOL GXDLLAPI MOPlatformEnumToStringW (GXPlaformIdentity ePlatform, GXLPWSTR szName, int nSize)
+  GXBOOL GXDLLAPI MOPlatformEnumToStringW (GXPlatformIdentity ePlatform, GXLPWSTR szName, int nSize)
   {
     // TODO: 使用注册链表方式记录
     switch (ePlatform)
@@ -157,7 +157,7 @@ extern "C"
     return FALSE;
   }
 
-  GXPlaformIdentity GXDLLAPI MOPlatformStringToEnumW (GXLPCWSTR szName)
+  GXPlatformIdentity GXDLLAPI MOPlatformStringToEnumW (GXLPCWSTR szName)
   {
     // TODO: 使用注册链表方式记录
     if(clstd::strncmpT(szName, _CLTEXT("D3D9"), 8) == 0)

@@ -351,7 +351,7 @@ namespace D3D9
     }
     return FALSE;
   }
-  void GraphicsImpl::GetPlatformID(GXPlaformIdentity* pIdentity)
+  void GraphicsImpl::GetPlatformID(GXPlatformIdentity* pIdentity)
   {
     ASSERT(m_pIdentity == GXPLATFORM_WIN32_DIRECT3D9);
     *pIdentity = m_pIdentity;

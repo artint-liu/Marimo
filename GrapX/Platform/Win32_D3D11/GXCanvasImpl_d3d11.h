@@ -24,17 +24,28 @@ namespace GrapX
 
 #include "Canvas/GXCanvasCoreImpl.h"
 
-    struct DEFAULT_EFFECT
+    struct CANVAS_EFFECT_DESC
     {
-      Effect*       pEffect;
+      EffectImpl*   pEffectImpl;
       MOVarMatrix4  transform;
       MOVarFloat4   color;
       MOVarFloat4   color_add;
+
+      CANVAS_EFFECT_DESC();
+      ~CANVAS_EFFECT_DESC();
+      void InitEffect(Effect* _pEffect);
+
+    private:
+      void operator=(const CANVAS_EFFECT_DESC&){} // 禁用
     };
 
     struct RENDERSTATE
     {
-      Effect* pEffect;
+      EffectImpl* pEffectImpl;
+
+      RENDERSTATE() : pEffectImpl(NULL){}
+      ~RENDERSTATE()
+      { SAFE_RELEASE(pEffectImpl); }
     };
 
     class CanvasImpl : public CanvasCoreImpl
@@ -246,20 +257,24 @@ namespace GrapX
         POINT           origin;
         GXRECT          rcClip;       // m_rcClip
         CompositingMode eCompMode;
-        GXDWORD         dwColorAdditive;
-        RENDERSTATE     RenderState;  // 不增加引用
+        
         float4x4        matTransform;
+        //GXDWORD         dwTexVertColor;
+        GXDWORD         dwColorAdditive;
+
+        RENDERSTATE     RenderState;  // 不增加引用
         CALLSTATE()
           : eCompMode       (CompositingMode_SourceCopy)
           , dwColorAdditive (NULL)
         {
           origin.x = origin.y = 0;
           gxSetRectEmpty(&rcClip);
-          RenderState.pEffect = NULL;
         }
       };
     private:
       GXBOOL    CommitState        ();
+
+      void      IntCommitEffectCB    ();
 
       inline GXBOOL IntCanFillPrimitive     (GXUINT uVertexCount, GXUINT uIndexCount);
       inline void _SetPrimitivePos      (GXUINT nIndex, const GXINT _x, const GXINT _y);
@@ -318,12 +333,18 @@ namespace GrapX
       clstd::MemBuffer m_Commands;
       CMDBASE*      m_pLastCommand;
 
-      CALLSTATE    m_CallState;   // User Call State
+      CALLSTATE    m_CallState;   // 记录命令队列最后的状态
 
-      GXDWORD      m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
+      GXDWORD       m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
       TextureImpl*  m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
 
-      DEFAULT_EFFECT m_CommonEffect;
+      EffectImpl*   m_pDefaultEffectImpl; // 默认Effect
+
+      // 用于Flush状态续接
+      CANVAS_EFFECT_DESC m_CurrentEffect;
+      float4x4           m_transform;
+      float4             m_color_mul;
+      float4             m_color_add;
     };
 
   } // namespace D3D11

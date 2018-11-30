@@ -19,7 +19,7 @@ public:
 
   GXHRESULT Initialize      (GXIN GXApp* pApp, GXIN GXAPP_DESC* pDesc, GXOUT Graphics** ppGraphics) override;
   GXHRESULT Finalize        (GXINOUT Graphics** ppGraphics) override;
-  GXVOID    GetPlatformID   (GXPlaformIdentity* pIdentity) override;
+  GXVOID    GetPlatformID   (GXPlatformIdentity* pIdentity) override;
   GXLPCWSTR GetRootDir      () override;
   //GXDWORD   GetAppDescStyle () const override;
 };

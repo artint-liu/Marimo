@@ -68,7 +68,7 @@ INT_PTR CALLBACK PlatformSelDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
       int idEnum = (int)SendMessage(hList, CB_GETITEMDATA, nCurSel, 0);
 
       GXAPP_DESC* pDesc = (GXAPP_DESC*)GetWindowLongPtr(hDlg, GWLP_USERDATA);
-      pDesc->idPlatform = (GXPlaformIdentity)idEnum;
+      pDesc->idPlatform = (GXPlatformIdentity)idEnum;
 
       SendMessage(hDlg, WM_CLOSE, 0, 0);
     }

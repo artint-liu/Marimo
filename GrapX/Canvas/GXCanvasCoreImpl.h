@@ -14,7 +14,7 @@ protected:
   //GXINT               m_xExt;          // 物理尺寸，不受原点位置影响
   //GXINT               m_yExt;
   RenderTargetImpl*   m_pTargetTex;
-  EffectImpl*         m_pEffectImpl;
+  //EffectImpl*         m_pEffectImpl;
   BlendState*         m_pBlendState;
   DepthStencilState*  m_pDepthStencilState;
   SamplerStateImpl*   m_pSamplerState;

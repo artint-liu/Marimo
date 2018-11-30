@@ -109,7 +109,7 @@ GXHRESULT GShaderImpl::LoadFromFile(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)
   IHLSLInclude* pInclude = NULL;
   GXHRESULT hr = GX_OK;
 
-  GXPlaformIdentity pltid;
+  GXPlatformIdentity pltid;
   m_pGraphicsImpl->GetPlatformID(&pltid);
   ASSERT(pltid == GXPLATFORM_WIN32_DIRECT3D9 || pltid == GXPLATFORM_WIN32_DIRECT3D11);
 

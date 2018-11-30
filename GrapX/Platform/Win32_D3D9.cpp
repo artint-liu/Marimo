@@ -127,7 +127,7 @@ LRESULT GXCALLBACK IGXPlatform_Win32D3D9::WndProc(HWND hWnd, UINT message, WPARA
   return IMOPlatform_Win32Base::WndProc(hWnd, message, wParam, lParam);
 }
 
-GXVOID IGXPlatform_Win32D3D9::GetPlatformID(GXPlaformIdentity* pIdentity)
+GXVOID IGXPlatform_Win32D3D9::GetPlatformID(GXPlatformIdentity* pIdentity)
 {
   *pIdentity = GXPLATFORM_WIN32_DIRECT3D9;
 }

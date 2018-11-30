@@ -445,7 +445,7 @@ namespace GrapX
       }
       return FALSE;
     }
-    void GraphicsImpl::GetPlatformID(GXPlaformIdentity* pIdentity)
+    void GraphicsImpl::GetPlatformID(GXPlatformIdentity* pIdentity)
     {
       ASSERT(m_pIdentity == GXPLATFORM_WIN32_DIRECT3D11);
       *pIdentity = m_pIdentity;

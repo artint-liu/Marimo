@@ -7,7 +7,7 @@ CanvasCoreImpl::CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWOR
   , m_pBlendState       (NULL)
   , m_pSamplerState     (NULL)
   , m_pDepthStencilState(NULL)
-  , m_pEffectImpl       (NULL)
+  //, m_pEffectImpl       (NULL)
   , m_pCamera           (NULL)
 {
   InlSetZeroT(m_sExtent);
@@ -20,7 +20,7 @@ CanvasCoreImpl::~CanvasCoreImpl()
   SAFE_RELEASE(m_pBlendState);
   SAFE_RELEASE(m_pSamplerState);
   SAFE_RELEASE(m_pDepthStencilState);
-  SAFE_RELEASE(m_pEffectImpl);
+  //SAFE_RELEASE(m_pEffectImpl);
   SAFE_RELEASE(m_pCamera);
 }
 
@@ -53,8 +53,8 @@ GXBOOL CanvasCoreImpl::Initialize(RenderTarget* pTarget)
     m_pSamplerState->ResetToDefault();
   }
 
-  m_pEffectImpl = (EffectImpl*)m_pGraphics->IntGetEffect();
-  m_pEffectImpl->AddRef();
+  //m_pEffectImpl = (EffectImpl*)m_pGraphics->IntGetEffect();
+  //m_pEffectImpl->AddRef();
 
   return TRUE;
 }

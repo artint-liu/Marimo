@@ -340,7 +340,7 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
   lpStation->pGraphics->CreateEffect(&lpStockObject->pAeroEffect  , lpStockObject->pAeroShader);
   lpStation->pGraphics->CreateEffect(&lpStockObject->pBlurEffect  , lpStockObject->pBlurShader);
   lpStation->pGraphics->CreateEffect(&lpStockObject->pSimpleEffect, lpStockObject->pSimpleShader);
-  GXPlaformIdentity PlatformId;
+  GXPlatformIdentity PlatformId;
   lpStation->pGraphics->GetPlatformID(&PlatformId);
   if(PlatformId == GXPLATFORM_X_OPENGLES2)
   {

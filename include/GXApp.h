@@ -29,7 +29,7 @@ struct GXAPP_DESC
   GXUINT              nWidth;     // 显示区域的宽度, 如果为0,表示让系统自己选择窗口尺寸, 此时窗口一定是可以改变大小的.
   GXUINT              nHeight;    // 显示区域的高度
   GXDWORD             dwStyle;    // 样式, 参见 GXAppDescStyle
-  GXPlaformIdentity   idPlatform; // 平台id
+  GXPlatformIdentity  idPlatform; // 平台id
   ILogger*            pLogger;    // 日志输出
   GXDEFINITION*       pParameter; // 参数
 };

@@ -14,7 +14,7 @@ class GXShaderMgr;
 class IGXPlatform;
 struct MOSHADER_ELEMENT_SOURCE;
 struct MTLFILEPARAMDESC;
-enum GXPlaformIdentity;
+enum GXPlatformIdentity;
 //enum GXPRIMITIVETYPE;
 
 namespace GrapX
@@ -91,7 +91,7 @@ namespace GrapX
 
     // 设备事件
     GXSTDINTERFACE(GXHRESULT Invoke             (GRESCRIPTDESC* pDesc));
-    GXSTDINTERFACE(void      GetPlatformID      (GXPlaformIdentity* pIdentity));
+    GXSTDINTERFACE(void      GetPlatformID      (GXPlatformIdentity* pIdentity));
 
 
     // 激活函数,之后的所有D3D操作必须由Graphics接口实现

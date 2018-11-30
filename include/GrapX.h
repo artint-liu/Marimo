@@ -5263,7 +5263,7 @@ GXBOOL GXDLLAPI MOConvertVertexFormat   (GXLPVOID lpDestVert, GXLPCVERTEXELEMENT
 // 纹理比例转换为实际尺寸
 
 //////////////////////////////////////////////////////////////////////////
-enum GXPlaformIdentity // TODO: 以后去掉这个, 使用FOURCC来表示
+enum GXPlatformIdentity // TODO: 以后去掉这个, 使用FOURCC来表示
 {
   GXPLATFORM_UNKNOWN          = 0,
   GXPLATFORM_WIN32_DIRECT3D9  = GXMAKEFOURCC('D','3','D','9'),
@@ -5284,8 +5284,8 @@ enum GXUpdateRate
 // Platform id 与字符串互相转换的函数
 extern "C"
 {
-  GXBOOL            GXDLLAPI MOPlatformEnumToStringW (GXPlaformIdentity ePlatform, GXLPWSTR szName, int nSize);
-  GXPlaformIdentity GXDLLAPI MOPlatformStringToEnumW (GXLPCWSTR szName);
+  GXBOOL            GXDLLAPI MOPlatformEnumToStringW (GXPlatformIdentity ePlatform, GXLPWSTR szName, int nSize);
+  GXPlatformIdentity GXDLLAPI MOPlatformStringToEnumW (GXLPCWSTR szName);
 };
 
 // Static Sprite Message

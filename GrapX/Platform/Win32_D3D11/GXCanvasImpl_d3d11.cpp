@@ -91,6 +91,7 @@ namespace GrapX
       , m_dwColorAdditive   (0)
       , m_dwTexSlot         (NULL)
       , m_pRasterizerState  (NULL)
+      , m_pDefaultEffectImpl(NULL)
     {
       m_Commands.Reserve(1024);
       InlSetZeroT(m_rcClip);
@@ -99,7 +100,7 @@ namespace GrapX
       gxRtlZeroMemory(&m_pBlendingState, sizeof(m_pBlendingState));
       gxRtlZeroMemory(&m_pOpaqueState, sizeof(m_pOpaqueState));
       gxRtlZeroMemory(&m_pCanvasStencil, sizeof(m_pCanvasStencil));
-      m_CommonEffect.pEffect = NULL;
+      //m_DefaultEffect.pEffect = NULL;
     }
 
     CanvasImpl::~CanvasImpl()
@@ -134,7 +135,7 @@ namespace GrapX
 
         m_rcAbsClip = m_rcClip;
         m_CallState.rcClip = m_rcClip;
-        m_CallState.RenderState.pEffect = m_pEffectImpl;
+        //m_CallState.RenderState.sEffect.InitEffect(m_pEffectImpl);
 
         m_uVertIndexSize = s_uDefVertIndexSize;
 
@@ -223,17 +224,20 @@ namespace GrapX
         m_pCamera->GetContext(&gcc);
         m_CallState.matTransform = gcc.matWorld;
 
-        ASSERT(m_CommonEffect.pEffect == NULL);
-        m_CommonEffect.pEffect = m_pGraphics->IntGetEffect();
-        m_CommonEffect.pEffect->AddRef();
+        if(m_pDefaultEffectImpl == NULL)
+        {
+          m_pDefaultEffectImpl = static_cast<EffectImpl*>(m_pGraphics->IntGetEffect());
+          m_pDefaultEffectImpl->AddRef();
+        }
 
-        m_CommonEffect.transform = m_pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>();
-        m_CommonEffect.color     = m_pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();
-        m_CommonEffect.color_add = m_pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();
+        m_transform = gcc.matWorld;
+        m_color_mul.set(1.0f);
+        m_color_add.set(0, 0, 0, 1);
 
-        m_CommonEffect.transform = gcc.matWorld;
-        m_CommonEffect.color->set(1.0f);
-        m_CommonEffect.color_add->set(0,0,0,1);
+        SAFE_RELEASE(m_CallState.RenderState.pEffectImpl);
+        m_CallState.RenderState.pEffectImpl = m_pDefaultEffectImpl;
+        m_CallState.RenderState.pEffectImpl->AddRef();
+        m_CurrentEffect.InitEffect(m_pDefaultEffectImpl);
 
         ASSERT(m_dwTexSlot == NULL);
         return TRUE;
@@ -324,13 +328,13 @@ namespace GrapX
       if((m_bStatic == TRUE && m_uRefCount == 1) ||
         m_uRefCount == 0)
       {
-        SAFE_RELEASE(m_pEffectImpl);
+        //SAFE_RELEASE(m_pEffectImpl);
         SAFE_RELEASE(m_pTargetTex);
         SAFE_RELEASE(m_pTargetImage);
         m_dwStencil = 0;
 
         SAFE_RELEASE(m_pClipRegion);
-        SAFE_RELEASE(m_CommonEffect.pEffect);
+        //SAFE_RELEASE(m_DefaultEffect.pEffect);
 
         if(m_dwTexSlot != NULL)
         {
@@ -354,6 +358,7 @@ namespace GrapX
 
       if(m_uRefCount == 0)
       {
+        SAFE_RELEASE(m_pDefaultEffectImpl);
         SAFE_RELEASE(m_pInvertState);
         SAFE_RELEASE(m_pOpaqueState[0]);
         SAFE_RELEASE(m_pOpaqueState[1]);
@@ -468,18 +473,22 @@ namespace GrapX
         m_pGraphics->InlSetSamplerState(m_pSamplerState);
         m_pGraphics->InlSetDepthStencil(NULL);
 
-        m_pGraphics->InlSetEffect((EffectImpl*)m_pEffectImpl);
+        if(m_CurrentEffect.transform.IsValid()) {
+          m_CurrentEffect.transform = m_transform;
+        }
+        if(m_CurrentEffect.color.IsValid()) {
+          m_CurrentEffect.color = m_color_mul;
+        }
+        if(m_CurrentEffect.color_add.IsValid()) {
+          m_CurrentEffect.color_add = m_color_add;
+        }
+
+        m_pGraphics->InlSetEffect(m_CurrentEffect.pEffectImpl);
         UpdateStencil(m_pClipRegion);
 
         gxRectToRegn(&regn, &m_rcClip);
         m_pGraphics->SetSafeClip(&regn);  // TODO: 是不是应该把这个改为GXRECT
         m_pGraphics->SetViewport(NULL);
-
-        float4 vColorAdditive = m_dwColorAdditive;
-        m_CommonEffect.color_add = vColorAdditive;
-
-        static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe()); // TODO: 局部更新
-
 
         m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(m_pWhiteTex), 0);
 
@@ -497,6 +506,11 @@ namespace GrapX
         }
       }
       return TRUE;
+    }
+
+    void CanvasImpl::IntCommitEffectCB()
+    {
+      static_cast<ShaderImpl*>(m_CurrentEffect.pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_CurrentEffect.pEffectImpl->GetDataPoolUnsafe()); // TODO: 局部更新
     }
 
     Graphics* CanvasImpl::GetGraphicsUnsafe() const
@@ -636,6 +650,7 @@ namespace GrapX
           const DRAWCALL_TEXTURE* pTextureCmd = static_cast<const DRAWCALL_TEXTURE*>(pCmdPtr);
           ASSERT(sizeof(DRAWCALL_TEXTURE) == pCmdPtr->cbSize);
 
+          // TODO: 需要一个Texture对象记录状态
           if(bEmptyRect == FALSE)
           {
             m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTextureCmd->pTexture), 0);
@@ -728,12 +743,28 @@ namespace GrapX
           TRACE_CMD("CF_Effect\n");
           const STATESWITCHING_EFFECT* pEffectCmd = static_cast<const STATESWITCHING_EFFECT*>(pCmdPtr);
           ASSERT(sizeof(STATESWITCHING_EFFECT) == pCmdPtr->cbSize);
-          if(m_pEffectImpl == pEffectCmd->pEffectImpl) {
-            break;
+
+          //if(m_CurrentEffect.pEffectImpl == pEffectCmd->pEffectImpl) {
+          //  break;
+          //}
+          //SAFE_RELEASE(m_pEffectImpl);
+          //float4x4 transform  = m_CurrentEffect.transform;
+          //float4 color        = m_CurrentEffect.color;
+          //float4 color_add    = m_CurrentEffect.color_add;
+          m_CurrentEffect.InitEffect(pEffectCmd->pEffectImpl);
+          if(m_CurrentEffect.transform.IsValid()) {
+            m_CurrentEffect.transform = m_transform;
           }
-          SAFE_RELEASE(m_pEffectImpl);
-          m_pEffectImpl = pEffectCmd->pEffectImpl;
-          m_pGraphics->InlSetEffect(m_pEffectImpl);
+          if(m_CurrentEffect.color.IsValid()) {
+            m_CurrentEffect.color = m_color_mul;
+          }
+          if(m_CurrentEffect.color_add.IsValid()) {
+            m_CurrentEffect.color_add = m_color_add;
+          }
+
+          //m_pEffectImpl = pEffectCmd->pEffectImpl;
+          m_pGraphics->InlSetEffect(pEffectCmd->pEffectImpl);
+          pEffectCmd->pEffectImpl->Release();
         }
         break;
 
@@ -743,11 +774,13 @@ namespace GrapX
           const STATESWITCHING_COLORADD* pColorAddCmd = static_cast<const STATESWITCHING_COLORADD*>(pCmdPtr);
           ASSERT(sizeof(STATESWITCHING_COLORADD) == pCmdPtr->cbSize);
           m_dwColorAdditive = (GXDWORD)pColorAddCmd->color;
-          float4 v4 = m_dwColorAdditive;
-          m_CommonEffect.color_add = v4;
+          m_color_add = m_dwColorAdditive;
 
-          // TODO: 这里全部重新提交了CB，可以改为只提交$Globals          
-          static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
+          if(m_CurrentEffect.color_add.IsValid())
+          {
+            m_CurrentEffect.color_add = m_color_add;
+            IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
+          }
         }
         break;
 
@@ -842,9 +875,13 @@ namespace GrapX
         {
           const STATESWITCHING_TRANSFORM* pTransformCmd = static_cast<const STATESWITCHING_TRANSFORM*>(pCmdPtr);
           ASSERT(sizeof(STATESWITCHING_TRANSFORM) == pCmdPtr->cbSize);
-          m_CommonEffect.transform = pTransformCmd->transform;
-          static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
 
+          m_transform = pTransformCmd->transform;
+         
+          if(m_CurrentEffect.transform.IsValid()) {
+            m_CurrentEffect.transform = pTransformCmd->transform;
+            IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
+          }
         }
         break;
         default:
@@ -874,17 +911,21 @@ namespace GrapX
 
     GXBOOL CanvasImpl::SetEffect(Effect* pEffect)
     {
-      if(m_CallState.RenderState.pEffect == pEffect) {
+      if(m_CallState.RenderState.pEffectImpl == pEffect) {
         return FALSE;
       }
 
       STATESWITCHING_EFFECT* pEffectCmd = IntAppendCommand<STATESWITCHING_EFFECT>(CF_Effect);
 
+      pEffectCmd->pEffectImpl = static_cast<EffectImpl*>(pEffect);
+
+      SAFE_RELEASE(m_CallState.RenderState.pEffectImpl);
+      m_CallState.RenderState.pEffectImpl = static_cast<EffectImpl*>(pEffect);
+
       if(pEffect != NULL) {
         pEffect->AddRef();
+        pEffect->AddRef();
       }
-      pEffectCmd->pEffectImpl = static_cast<EffectImpl*>(pEffect);
-      m_CallState.RenderState.pEffect = (EffectImpl*)pEffect;
 
       return TRUE;
     }
@@ -1477,6 +1518,28 @@ namespace GrapX
     }
 
     //////////////////////////////////////////////////////////////////////////
+
+    CANVAS_EFFECT_DESC::CANVAS_EFFECT_DESC()
+      : pEffectImpl(NULL) {}
+
+    CANVAS_EFFECT_DESC::~CANVAS_EFFECT_DESC()
+    {
+      SAFE_RELEASE(pEffectImpl);
+    }
+
+    void CANVAS_EFFECT_DESC::InitEffect(Effect* _pEffect)
+    {
+      SAFE_RELEASE(pEffectImpl);
+      pEffectImpl = static_cast<EffectImpl*>(_pEffect);
+      if(pEffectImpl)
+      {
+        pEffectImpl->AddRef();
+        transform = pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>();
+        color     = pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();
+        color_add = pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();
+      }
+    }
+
   } // namespace D3D11
 } // namespace GrapX
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11

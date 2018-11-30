@@ -8,7 +8,7 @@
 
   // 设备事件
   virtual GXHRESULT Invoke              (GRESCRIPTDESC* pDesc) override;
-  virtual void      GetPlatformID       (GXPlaformIdentity* pIdentity) override;
+  virtual void      GetPlatformID       (GXPlatformIdentity* pIdentity) override;
 
   // 激活函数,之后的所有D3D操作必须由Graphics接口实现
   virtual GXBOOL    Activate            (GXBOOL bActive) override;
@@ -228,7 +228,7 @@ private:  // 状态对象
 
 private:  // 对象的(几个平台共用的)存储
   GXDWORD                 m_dwFlags;
-  GXPlaformIdentity       m_pIdentity;
+  GXPlatformIdentity       m_pIdentity;
   //GXConsole*              m_pConsole;
   ILogger*                m_pLogger;
   clStringW               m_strResourceDir;
