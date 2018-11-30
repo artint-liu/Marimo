@@ -174,6 +174,7 @@ namespace clstd
     size_t      Reserve     (clsize dwSize); // 地址没变化返回0，否则返回一个补码的地址差
     size_t      Resize      (clsize dwSize, b32 bZeroInit); // 地址没变化返回0，否则返回一个补码的地址差
     CLLPVOID    GetPtr      () const;
+    CLLPVOID    GetEnd      () const; // 获得尾部，一般用于结尾判断，可能指向的地址是无效的，神勇
     clsize      GetSize     () const;
     clsize      GetCapacity () const;
     //b32       Add         (u32 nPos, CLLPCVOID lpData, clsize dwSize); // 这是什么鬼啊！！！

@@ -106,9 +106,9 @@ GXBOOL CanvasImpl::Initialize(Texture* pTexture, const REGN* pRegn)
     }
 
     // 初始化渲染模式
-    m_CallState.eCompMode = CM_SourceOver;
+    m_CallState.eCompMode = CompositingMode_SourceOver;
     m_CallState.dwColorAdditive = 0;
-    m_aBatch[m_uBatchCount++].Set(CF_CompositingMode, 0, 0, CM_SourceOver);
+    m_aBatch[m_uBatchCount++].Set(CF_CompositingMode, 0, 0, CompositingMode_SourceOver);
     m_dwTexVertColor = (GXDWORD)-1;
     m_dwColorAdditive = 0;
     m_eStyle = PS_Solid;
@@ -598,7 +598,7 @@ GXBOOL CanvasImpl::Flush()
     {
     case CF_LineList:
       {
-        TRACE_BATCH("CF_LineList\n");
+        TRACE_CMD("CF_LineList\n");
         if(bEmptyRect == FALSE) {
           m_pGraphics->DrawPrimitive(GXPT_LINELIST, 
           nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 2);
@@ -610,7 +610,7 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_Points:
       {
-        TRACE_BATCH("CF_Points\n");
+        TRACE_CMD("CF_Points\n");
         if(bEmptyRect == FALSE)
           m_pGraphics->DrawPrimitive(GXPT_POINTLIST, nBaseVertex, m_aBatch[i].uVertexCount);
         nBaseVertex += m_aBatch[i].uVertexCount;
@@ -618,7 +618,7 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_Triangle:
       {
-        TRACE_BATCH("CF_Trangle\n");
+        TRACE_CMD("CF_Trangle\n");
         if(bEmptyRect == FALSE)
           m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST, 
           nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 3);
@@ -628,7 +628,7 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_Textured:
       {
-        TRACE_BATCH("CF_Textured\n");
+        TRACE_CMD("CF_Textured\n");
         Texture* pTexture = (Texture*)m_aBatch[i].comm.lParam;
 
         if(bEmptyRect == FALSE)
@@ -647,7 +647,7 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_RenderState:
       {
-        TRACE_BATCH("CF_RenderState\n");
+        TRACE_CMD("CF_RenderState\n");
         ASSERT(0); // 已经去掉了
         //m_pRenderState->Set(
         //  (GXRenderStateType)m_aBatch[i].nRenderStateCode, m_aBatch[i].dwStateValue);
@@ -663,7 +663,7 @@ GXBOOL CanvasImpl::Flush()
 
     case CF_Clear:
       {
-        TRACE_BATCH("CF_Clear\n");
+        TRACE_CMD("CF_Clear\n");
         if(m_pClipRegion == NULL)
         {
           GXRECT rect;
@@ -690,21 +690,21 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_CompositingMode:
       {
-        TRACE_BATCH("CF_CompositingMode\n");
+        TRACE_CMD("CF_CompositingMode\n");
         //LPGXRENDERSTATE lpRenderStateBlock = NULL;
         GBlendStateImpl* pBlendState = NULL;
 
         // 判断是不是最终渲染目标
         if(m_pTargetTex == NULL)
         {
-          if(m_aBatch[i].comm.lParam == CM_SourceCopy)
+          if(m_aBatch[i].comm.lParam == CompositingMode_SourceCopy)
             pBlendState = m_pOpaqueState[0];
           else 
             pBlendState = m_pBlendingState[0];
         }
         else
         {
-          if(m_aBatch[i].comm.lParam == CM_SourceCopy)
+          if(m_aBatch[i].comm.lParam == CompositingMode_SourceCopy)
             pBlendState = m_pOpaqueState[1];
           else 
             pBlendState = m_pBlendingState[1];
@@ -715,7 +715,7 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_Effect:
       {
-        TRACE_BATCH("CF_Effect\n");
+        TRACE_CMD("CF_Effect\n");
         if(m_pEffectImpl == (EffectImpl*)m_aBatch[i].comm.lParam)
           break;
         SAFE_RELEASE(m_pEffectImpl);
@@ -726,7 +726,7 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_ColorAdditive:
       {
-        TRACE_BATCH("CF_ColorAdditive\n");
+        TRACE_CMD("CF_ColorAdditive\n");
         m_dwColorAdditive = (GXDWORD)m_aBatch[i].comm.lParam;
         m_CanvasCommConst.colorAdd = m_dwColorAdditive;
         m_pEffectImpl->CommitUniform(this, MEMBER_OFFSET(GXCANVASCOMMCONST, colorAdd));
@@ -789,13 +789,13 @@ GXBOOL CanvasImpl::Flush()
 #error 需要定义inl的环境
 #endif
     case CF_SetViewportOrg:
-      TRACE_BATCH("CF_SetViewportOrg\n");
+      TRACE_CMD("CF_SetViewportOrg\n");
       m_xOrigin = m_aBatch[i].PosI.x;
       m_yOrigin = m_aBatch[i].PosI.y;
       break;
     case CF_SetClipBox:
       {
-        TRACE_BATCH("CF_SetClipBox\n");
+        TRACE_CMD("CF_SetClipBox\n");
         GXREGN rgClip;
         GXRECT rcClip;
         SAFE_RELEASE(m_pClipRegion);
@@ -820,7 +820,7 @@ GXBOOL CanvasImpl::Flush()
       }
       break;
     case CF_ResetClipBox:
-      TRACE_BATCH("CF_ResetClipBox\n");
+      TRACE_CMD("CF_ResetClipBox\n");
       UpdateStencil(NULL);
       break;
     case CF_ResetTextClip:
@@ -852,7 +852,7 @@ GXBOOL CanvasImpl::Flush()
       break;
     case CF_SetRegion:
       {
-        TRACE_BATCH("CF_SetRegion\n");
+        TRACE_CMD("CF_SetRegion\n");
         if(UpdateStencil((GRegion*)m_aBatch[i].comm.lParam) == RC_NULL)
           bEmptyRect = TRUE;
         else
@@ -860,7 +860,7 @@ GXBOOL CanvasImpl::Flush()
       }
       break;
     case CF_NoOperation:
-      TRACE_BATCH("CF_NoOperation\n");
+      TRACE_CMD("CF_NoOperation\n");
       // 啥也没有!!
       break;
     case CF_SetExtTexture:
@@ -1304,7 +1304,7 @@ GXBOOL CanvasImpl::Scroll(int dx, int dy, LPGXCRECT lprcScroll, LPGXCRECT lprcCl
   if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::Write)); } \
   if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::Write)); }
 
-#define SET_BATCH_INDEX(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
+#define SET_INDEX_BUFFER(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
 
 GXBOOL CanvasImpl::SetPixel(GXINT xPos, GXINT yPos, GXCOLORREF crPixel)
 {
@@ -1345,8 +1345,8 @@ GXBOOL CanvasImpl::DrawLine(GXINT left, GXINT top, GXINT right, GXINT bottom, GX
   _SetPrimitivePos(m_uVertCount,     left, top);
   _SetPrimitivePos(m_uVertCount + 1, right, bottom);
 
-  SET_BATCH_INDEX(0,0);
-  SET_BATCH_INDEX(1,1);
+  SET_INDEX_BUFFER(0,0);
+  SET_INDEX_BUFFER(1,1);
 
   m_uVertCount  += 2;
   m_uIndexCount += 2;
@@ -1378,14 +1378,14 @@ GXBOOL CanvasImpl::InlDrawRectangle(GXINT left, GXINT top, GXINT right, GXINT bo
   _SetPrimitivePos(m_uVertCount + 2, right - 1, bottom - 1);
   _SetPrimitivePos(m_uVertCount + 3, left,      bottom - 1);
 
-  SET_BATCH_INDEX(0, 0);
-  SET_BATCH_INDEX(1, 1);
-  SET_BATCH_INDEX(2, 1);
-  SET_BATCH_INDEX(3, 2);
-  SET_BATCH_INDEX(4, 2);
-  SET_BATCH_INDEX(5, 3);
-  SET_BATCH_INDEX(6, 3);
-  SET_BATCH_INDEX(7, 0);
+  SET_INDEX_BUFFER(0, 0);
+  SET_INDEX_BUFFER(1, 1);
+  SET_INDEX_BUFFER(2, 1);
+  SET_INDEX_BUFFER(3, 2);
+  SET_INDEX_BUFFER(4, 2);
+  SET_INDEX_BUFFER(5, 3);
+  SET_INDEX_BUFFER(6, 3);
+  SET_INDEX_BUFFER(7, 0);
 
   m_uVertCount  += 4;
   m_uIndexCount += 8;
@@ -1431,12 +1431,12 @@ GXBOOL CanvasImpl::InlFillRectangle(GXINT left, GXINT top, GXINT right, GXINT bo
   _SetPrimitivePos(m_uVertCount + 2, right, bottom);
   _SetPrimitivePos(m_uVertCount + 3, left,  bottom);
 
-  SET_BATCH_INDEX(0, 0);
-  SET_BATCH_INDEX(1, 1);
-  SET_BATCH_INDEX(2, 3);
-  SET_BATCH_INDEX(3, 3);
-  SET_BATCH_INDEX(4, 1);
-  SET_BATCH_INDEX(5, 2);
+  SET_INDEX_BUFFER(0, 0);
+  SET_INDEX_BUFFER(1, 1);
+  SET_INDEX_BUFFER(2, 3);
+  SET_INDEX_BUFFER(3, 3);
+  SET_INDEX_BUFFER(4, 1);
+  SET_INDEX_BUFFER(5, 2);
 
   m_uVertCount  += 4;
   m_uIndexCount += 6;
@@ -1558,12 +1558,12 @@ GXBOOL CanvasImpl::DrawTexture(Texture*pTexture, const GXREGN *rcDest)
   _SetPrimitivePos(m_uVertCount + 2, rcDest->left + rcDest->width, rcDest->top + rcDest->height);
   _SetPrimitivePos(m_uVertCount + 3, rcDest->left,                 rcDest->top + rcDest->height);
 
-  SET_BATCH_INDEX(0, 0);
-  SET_BATCH_INDEX(1, 1);
-  SET_BATCH_INDEX(2, 3);
-  SET_BATCH_INDEX(3, 3);
-  SET_BATCH_INDEX(4, 1);
-  SET_BATCH_INDEX(5, 2);
+  SET_INDEX_BUFFER(0, 0);
+  SET_INDEX_BUFFER(1, 1);
+  SET_INDEX_BUFFER(2, 3);
+  SET_INDEX_BUFFER(3, 3);
+  SET_INDEX_BUFFER(4, 1);
+  SET_INDEX_BUFFER(5, 2);
 
   m_uVertCount  += 4;
   m_uIndexCount += 6;
@@ -1582,12 +1582,12 @@ GXBOOL CanvasImpl::DrawTexture(Texture*pTexture, GXINT xPos, GXINT yPos, const G
   _SetPrimitivePos(m_uVertCount + 2, xPos + uWidth, yPos + uHeight);
   _SetPrimitivePos(m_uVertCount + 3, xPos,          yPos + uHeight);
 
-  SET_BATCH_INDEX(0, 0);
-  SET_BATCH_INDEX(1, 1);
-  SET_BATCH_INDEX(2, 3);
-  SET_BATCH_INDEX(3, 3);
-  SET_BATCH_INDEX(4, 1);
-  SET_BATCH_INDEX(5, 2);
+  SET_INDEX_BUFFER(0, 0);
+  SET_INDEX_BUFFER(1, 1);
+  SET_INDEX_BUFFER(2, 3);
+  SET_INDEX_BUFFER(3, 3);
+  SET_INDEX_BUFFER(4, 1);
+  SET_INDEX_BUFFER(5, 2);
 
   m_uVertCount  += 4;
   m_uIndexCount += 6;
@@ -1610,12 +1610,12 @@ GXBOOL CanvasImpl::DrawTexture(Texture*pTexture, const GXREGN *rcDest, const GXR
   _SetPrimitivePos(m_uVertCount + 2, uDestRight,   uDestBottom);
   _SetPrimitivePos(m_uVertCount + 3, rcDest->left, uDestBottom);
 
-  SET_BATCH_INDEX(0, 0);
-  SET_BATCH_INDEX(1, 1);
-  SET_BATCH_INDEX(2, 3);
-  SET_BATCH_INDEX(3, 3);
-  SET_BATCH_INDEX(4, 1);
-  SET_BATCH_INDEX(5, 2);
+  SET_INDEX_BUFFER(0, 0);
+  SET_INDEX_BUFFER(1, 1);
+  SET_INDEX_BUFFER(2, 3);
+  SET_INDEX_BUFFER(3, 3);
+  SET_INDEX_BUFFER(4, 1);
+  SET_INDEX_BUFFER(5, 2);
 
   m_uVertCount  += 4;
   m_uIndexCount += 6;
@@ -1662,12 +1662,12 @@ GXBOOL CanvasImpl::DrawTexture(Texture*pTexture, const GXREGN *rcDest, const GXR
     _SetPrimitivePos(m_uVertCount + 2, aPos[i].x, aPos[i].y);   i = (i + 1) & 3;
     _SetPrimitivePos(m_uVertCount + 3, aPos[i].x, aPos[i].y);
 
-    SET_BATCH_INDEX(0, 0);
-    SET_BATCH_INDEX(1, 1);
-    SET_BATCH_INDEX(2, 3);
-    SET_BATCH_INDEX(3, 3);
-    SET_BATCH_INDEX(4, 1);
-    SET_BATCH_INDEX(5, 2);
+    SET_INDEX_BUFFER(0, 0);
+    SET_INDEX_BUFFER(1, 1);
+    SET_INDEX_BUFFER(2, 3);
+    SET_INDEX_BUFFER(3, 3);
+    SET_INDEX_BUFFER(4, 1);
+    SET_INDEX_BUFFER(5, 2);
   }
   else {
     int i = ((int)eRotation - Rotate_FlipHorizontal + 1) & 3;
@@ -1676,12 +1676,12 @@ GXBOOL CanvasImpl::DrawTexture(Texture*pTexture, const GXREGN *rcDest, const GXR
     _SetPrimitivePos(m_uVertCount + 2, aPos[i].x, aPos[i].y);   i = (i - 1) & 3;
     _SetPrimitivePos(m_uVertCount + 3, aPos[i].x, aPos[i].y);
 
-    SET_BATCH_INDEX(0, 0);
-    SET_BATCH_INDEX(1, 3);
-    SET_BATCH_INDEX(2, 1);
-    SET_BATCH_INDEX(3, 3);
-    SET_BATCH_INDEX(4, 2);
-    SET_BATCH_INDEX(5, 1);
+    SET_INDEX_BUFFER(0, 0);
+    SET_INDEX_BUFFER(1, 3);
+    SET_INDEX_BUFFER(2, 1);
+    SET_INDEX_BUFFER(3, 3);
+    SET_INDEX_BUFFER(4, 2);
+    SET_INDEX_BUFFER(5, 1);
   }
 
   m_uVertCount  += 4;

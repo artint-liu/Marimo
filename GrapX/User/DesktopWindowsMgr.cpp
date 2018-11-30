@@ -425,7 +425,7 @@ GXBOOL DesktopWindowsMgr::Render(GrapX::Canvas* pCanvas)
           m_lpStation->pGraphics->GetDeviceOriginTex(), NULL, NULL, GXTEXFILTER_LINEAR);
       }
       else {
-        pCanvas->SetCompositingMode(TEST_FLAG(m_dwFlags, GXDWM_ALPHA) ? GrapX::CM_SourceOver : GrapX::CM_SourceCopy);
+        pCanvas->SetCompositingMode(TEST_FLAG(m_dwFlags, GXDWM_ALPHA) ? GrapX::CompositingMode_SourceOver : GrapX::CompositingMode_SourceCopy);
       }
 
       pCanvas->SetRegion(pSurface->m_prgnWindows, TRUE);

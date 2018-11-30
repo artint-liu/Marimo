@@ -974,7 +974,8 @@ namespace GrapX
     //  return m_SamplerStage[Sampler].m[eType];
     //}
     //
-    GXHRESULT SamplerStateImpl::SetState(GXUINT Sampler, GXSAMPLERDESC* pSamplerDesc)
+
+    GXHRESULT SamplerStateImpl::SetState(GXUINT Sampler, const GXSAMPLERDESC* pSamplerDesc)
     {
       ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       GXSAMPLERDESC& SamplerDesc = m_SamplerDesc[Sampler];
@@ -1021,7 +1022,7 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT SamplerStateImpl::SetStateArray(GXUINT nStartSlot, GXSAMPLERDESC* pSamplerDesc, int nCount)
+    GXHRESULT SamplerStateImpl::SetStateArray(GXUINT nStartSlot, const GXSAMPLERDESC* pSamplerDesc, int nCount)
     {
       CLBREAK;
       return GX_FAIL;

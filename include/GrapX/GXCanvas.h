@@ -40,10 +40,12 @@ namespace GrapX
     CPI_SETEXTTEXTURE = 5,      // 设置额外的纹理, uParam 是纹理的Stage, pParam 指向纹理对象
                                 // 由于第一个纹理用于绘制图像, 所以0号位置不能设置
   };
+
   enum CompositingMode
   {
-    CM_SourceOver,
-    CM_SourceCopy,
+    CompositingMode_SourceOver,   // Alpha 合成
+    CompositingMode_SourceCopy,   // 颜色直接覆盖
+    CompositingMode_InvertTarget, // 目标反色
   };
 
   enum PenStyle
@@ -149,7 +151,6 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL      FillRectangle        (GXINT x, GXINT y, GXINT w, GXINT h, GXCOLORREF crFill));
     GXSTDINTERFACE(GXBOOL      FillRectangle        (GXLPCRECT lprc, GXCOLORREF crFill));
     GXSTDINTERFACE(GXBOOL      FillRectangle        (GXLPCREGN lprg, GXCOLORREF crFill));
-    GXSTDINTERFACE(GXBOOL      InvertRect           (GXINT x, GXINT y, GXINT w, GXINT h));
 
     GXSTDINTERFACE(GXBOOL      ColorFillRegion      (GRegion* pRegion, GXCOLORREF crFill));
 
@@ -166,7 +167,8 @@ namespace GrapX
     GXSTDINTERFACE(GXLONG      TabbedTextOut       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText));
     GXSTDINTERFACE(GXLONG      TabbedTextOut       (GXFont* pFTFont, GXINT x, GXINT y, GXLPCWSTR lpString, GXINT nCount, GXINT nTabPositions, GXINT* lpTabStopPositions, GXCOLORREF crText)); // 如果颜色的Alpha是0则表示测量字符串尺寸
 
-    GXSTDINTERFACE(GXINT       SetCompositingMode   (CompositingMode eMode));
+    GXSTDINTERFACE(CompositingMode SetCompositingMode   (CompositingMode eMode));
+    GXSTDINTERFACE(CompositingMode GetCompositingMode   ());
     GXSTDINTERFACE(GXBOOL      SetRegion            (GRegion* pRegion, GXBOOL bAbsOrigin));
     GXSTDINTERFACE(GXBOOL      SetClipBox           (const GXLPRECT lpRect));
     GXSTDINTERFACE(GXINT       GetClipBox           (GXLPRECT lpRect));
@@ -221,7 +223,6 @@ public:
   GXVOID    DrawRect        (GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight, GXCOLORREF Color);
   GXVOID    FillRect        (GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight, GXCOLORREF Color);
   GXVOID    FillRect        (GXLPRECT lprect, GXCOLORREF Color);
-  GXVOID    InvertRect      (GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight);
   GXVOID    SetPixel        (GXINT xPos, GXINT yPos, GXCOLORREF Color);
   GXVOID    DrawLine        (GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF Color);
   GXBOOL    SetViewportOrg  (GXINT x, GXINT y, GXLPPOINT lpPoint);

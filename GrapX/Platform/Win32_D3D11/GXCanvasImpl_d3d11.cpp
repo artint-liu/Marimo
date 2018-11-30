@@ -51,7 +51,9 @@
 #include <GrapX/GCamera.h>
 
 #ifdef ENABLE_GRAPHICS_API_DX11
-#define TRACE_BATCH
+#define TRACE_CMD
+
+// 根据RenderTarget格式改成对应转换函数
 #define COLORREF_TO_NATIVE(CLR) ((CLR & 0xff00ff00) | ((CLR & 0xff0000) >> 16) | ((CLR & 0xff) << 16))
 #define NATIVE_TO_COLORREF(CLR) COLORREF_TO_NATIVE(CLR)
 
@@ -74,20 +76,15 @@ namespace GrapX
       , m_pTargetImage      (NULL)
       , m_xAbsOrigin        (0)
       , m_yAbsOrigin        (0)
-      , m_xOrigin           (0)
-      , m_yOrigin           (0)
+      , m_pInvertState      (NULL)
       , m_pPrimitive        (NULL)
       , m_lpLockedVertex    (NULL)
       , m_lpLockedIndex     (NULL)
       , m_pWhiteTex         (NULL)
+      , m_pLastCommand      (NULL)
       , m_uIndexCount       (NULL)
       , m_uVertCount        (0)
       , m_uVertIndexSize    (0)
-      , m_aBatch            (NULL)
-      , m_uBatchCount       (0)
-      , m_uBatchSize        (0)
-      , s_uDefVertIndexSize (128)
-      , s_uDefBatchSize     (32)
       , m_dwStencil         (0)
       , m_pClipRegion       (NULL)
       , m_dwTexVertColor    (-1)
@@ -95,6 +92,7 @@ namespace GrapX
       , m_dwTexSlot         (NULL)
       , m_pRasterizerState  (NULL)
     {
+      m_Commands.Reserve(1024);
       InlSetZeroT(m_rcClip);
       InlSetZeroT(m_rcAbsClip);
       gxRtlZeroMemory(&m_aTextureStage, sizeof(m_aTextureStage));
@@ -110,7 +108,7 @@ namespace GrapX
 
     GXBOOL CanvasImpl::Initialize(RenderTarget* pTarget, const REGN* pRegn)
     {
-      ASSERT(m_uBatchCount == 0);
+      ASSERT(m_Commands.GetSize() == 0);
 
       if(CanvasCoreImpl::Initialize(pTarget) == TRUE)
       {
@@ -118,8 +116,8 @@ namespace GrapX
         {
           GXRECT rcTexture;
 
-          m_xAbsOrigin = m_CallState.origin.x = m_xOrigin = m_rcClip.left = pRegn->left;
-          m_yAbsOrigin = m_CallState.origin.y = m_yOrigin = m_rcClip.top = pRegn->top;
+          m_xAbsOrigin = m_CallState.origin.x = m_rcClip.left = pRegn->left;
+          m_yAbsOrigin = m_CallState.origin.y = m_rcClip.top = pRegn->top;
           m_rcClip.right = pRegn->left + pRegn->width;
           m_rcClip.bottom = pRegn->top + pRegn->height;
 
@@ -128,8 +126,8 @@ namespace GrapX
         }
         else
         {
-          m_xAbsOrigin = m_CallState.origin.x = m_xOrigin = m_rcClip.left = 0;
-          m_yAbsOrigin = m_CallState.origin.y = m_yOrigin = m_rcClip.top = 0;
+          m_xAbsOrigin = m_CallState.origin.x = m_rcClip.left = 0;
+          m_yAbsOrigin = m_CallState.origin.y = m_rcClip.top = 0;
           m_rcClip.right = m_sExtent.cx;
           m_rcClip.bottom = m_sExtent.cy;
         }
@@ -139,7 +137,6 @@ namespace GrapX
         m_CallState.RenderState.pEffect = m_pEffectImpl;
 
         m_uVertIndexSize = s_uDefVertIndexSize;
-        m_uBatchSize = s_uDefBatchSize;
 
         if(m_pPrimitive == NULL) {
           m_pGraphics->CreatePrimitive(&m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D),
@@ -148,22 +145,18 @@ namespace GrapX
             m_uVertIndexSize, 2, NULL);
         }
 
-        if(m_aBatch == NULL)
-          m_aBatch = new BATCH[m_uBatchSize];
-
         if(m_pCamera == NULL) {
           m_pCamera = GCamera_ScreenAligned::Create((CanvasCore*)(Canvas*)this);
         }
 
         // 初始化渲染模式
-        m_CallState.eCompMode = CM_SourceOver;
+        m_CallState.eCompMode = CompositingMode_SourceOver;
         m_CallState.dwColorAdditive = 0;
-        m_aBatch[m_uBatchCount++].Set(CF_CompositingMode, 0, 0, CM_SourceOver);
+        STATESWITCHING_COMPOSITINGMODE* pCompositingModeCmd = IntAppendCommand<STATESWITCHING_COMPOSITINGMODE>(CF_CompositingMode);
+        pCompositingModeCmd->mode = CompositingMode_SourceOver;
         m_dwTexVertColor = (GXDWORD)-1;
         m_dwColorAdditive = 0;
         m_eStyle = PS_Solid;
-
-        //GXUIGetStock()->pSimpleShader->SetColor(0xffffffff);
 
         // 初始化空纹理时的替换纹理
         if(m_pWhiteTex == NULL) {
@@ -203,6 +196,12 @@ namespace GrapX
           // ---
           OpaqueState.BlendEnable = TRUE;
           m_pGraphics->CreateBlendState((BlendState**)&m_pOpaqueState[1], &OpaqueState, 1);
+        }
+
+        if(m_pInvertState == NULL)
+        {
+          GXBLENDDESC sInvertBlend(TRUE, GXBLEND_ONE, GXBLEND_ONE, GXBLENDOP_SUBTRACT);
+          m_pGraphics->CreateBlendState((BlendState**)&m_pInvertState, &sInvertBlend, 1);
         }
 
         if(m_pCanvasStencil[0] == NULL || m_pCanvasStencil[1] == NULL)
@@ -312,7 +311,7 @@ namespace GrapX
     //#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXHRESULT CanvasImpl::Release()
     {
-      if(m_uBatchCount != 0) {
+      if(m_Commands.GetSize() > 0) {
         Flush();
       }
 
@@ -351,11 +350,11 @@ namespace GrapX
 
         m_uVertCount = 0;
         m_uIndexCount = 0;
-        m_uBatchCount = 0;
       }
 
       if(m_uRefCount == 0)
       {
+        SAFE_RELEASE(m_pInvertState);
         SAFE_RELEASE(m_pOpaqueState[0]);
         SAFE_RELEASE(m_pOpaqueState[1]);
         SAFE_RELEASE(m_pRasterizerState);
@@ -365,7 +364,6 @@ namespace GrapX
         SAFE_RELEASE(m_pCanvasStencil[1]);
         SAFE_RELEASE(m_pWhiteTex);
         SAFE_RELEASE(m_pPrimitive);
-        SAFE_DELETE_ARRAY(m_aBatch);
         delete this;
         return GX_OK;
       }
@@ -379,34 +377,65 @@ namespace GrapX
       return m_uRefCount;
     }
 
-    GXBOOL CanvasImpl::IntCanFillBatch(GXUINT uVertCount, GXUINT uIndexCount)
+    template<typename _Ty>
+    _Ty* CanvasImpl::IntAppendCommand(CanvasFunc cmd)
     {
-      return ((m_uVertCount + uVertCount) < m_uVertIndexSize &&
-        (m_uIndexCount + uIndexCount) < m_uVertIndexSize &&
-        (m_uBatchCount + 1) < m_uBatchSize);
-    }
+      if(m_pLastCommand && m_pLastCommand->cmd == cmd) {
+        return static_cast<_Ty*>(m_pLastCommand);
+      }
 
-    // 返回值是Index的索引基值
-    GXUINT CanvasImpl::PrepareBatch(CanvasFunc eFunc, GXUINT uVertCount, GXUINT uIndexCount, GXLPARAM lParam)
-    {
-      if(IntCanFillBatch(uVertCount, uIndexCount) == FALSE) {
+      size_t cbFinalSize = m_Commands.GetSize() + sizeof(_Ty);
+      if(cbFinalSize > m_Commands.GetCapacity()) {
+        cbFinalSize = sizeof(_Ty);
         Flush();
       }
 
-      // 队列为空或者与上一个命令不符,则新建一个命令
-      if(m_uBatchCount == 0 || m_aBatch[m_uBatchCount - 1].eFunc != eFunc ||
-        (eFunc == CF_Textured && m_aBatch[m_uBatchCount - 1].comm.lParam != lParam))    // TODO: 是不是为了通用,以后可以改成仅仅比较lParam参数?
-        //        因为 lParam 不同肯定是不同的队列
-      {
-        m_aBatch[m_uBatchCount++].Set(eFunc, uVertCount, uIndexCount, lParam);
-        return 0;
+      _Ty* pCmdPtr = reinterpret_cast<_Ty*>(m_Commands.GetEnd());
+      m_Commands.Resize(cbFinalSize, FALSE);
+      pCmdPtr->cbSize = sizeof(_Ty);
+      pCmdPtr->cmd = cmd;
+
+      m_pLastCommand = pCmdPtr;
+      return pCmdPtr;
+    }
+
+    template<typename _Ty>
+    GXUINT CanvasImpl::IntAppendDrawCall(_Ty** ppCmdBuffer, CanvasFunc cmd, GXUINT uVertexCount, GXUINT uIndexCount, Texture* pTextureReference)
+    {
+      // TODO: 只处理了增量超出的刷新，没有处理填入的顶点索引数超过缓冲区大小的情况
+      if(_CL_NOT_(IntCanFillPrimitive(uVertexCount, uIndexCount))) {
+        Flush();
       }
-      ASSERT(m_uBatchCount > 0);
-      const GXUINT uBaseIndex = m_aBatch[m_uBatchCount - 1].uVertexCount;
-      m_aBatch[m_uBatchCount - 1].uVertexCount += uVertCount;
-      m_aBatch[m_uBatchCount - 1].uIndexCount += uIndexCount;
-      m_aBatch[m_uBatchCount - 1].comm.lParam = lParam;
-      return uBaseIndex;
+
+      if(m_pLastCommand && m_pLastCommand->cmd == cmd)
+      {
+        if(cmd != CF_Textured || static_cast<DRAWCALL_TEXTURE*>(m_pLastCommand)->pTexture == pTextureReference)
+        {
+          DRAWCALLBASE* pLastDrawCall = static_cast<DRAWCALLBASE*>(m_pLastCommand);
+          const GXUINT uBaseIndex = pLastDrawCall->uVertexCount;
+          pLastDrawCall->uVertexCount += uVertexCount;
+          pLastDrawCall->uIndexCount  += uIndexCount;
+          *ppCmdBuffer = static_cast<_Ty*>(pLastDrawCall);
+          return uBaseIndex;
+        }
+      }
+
+      *ppCmdBuffer = IntAppendCommand<_Ty>(cmd);
+      (*ppCmdBuffer)->uVertexCount = uVertexCount;
+      (*ppCmdBuffer)->uIndexCount = uIndexCount;
+      if(cmd == CF_Textured) {
+        reinterpret_cast<DRAWCALL_TEXTURE*>(*ppCmdBuffer)->pTexture = pTextureReference;
+        if(pTextureReference) {
+          pTextureReference->AddRef();
+        }
+      }
+      return 0;
+    }
+
+    GXBOOL CanvasImpl::IntCanFillPrimitive(GXUINT uVertexCount, GXUINT uIndexCount)
+    {
+      return ((m_uVertCount + uVertexCount) < m_uVertIndexSize &&
+        (m_uIndexCount + uIndexCount) < m_uVertIndexSize);
     }
 
     void CanvasImpl::SetStencil(GXDWORD dwStencil)
@@ -425,35 +454,6 @@ namespace GrapX
       PRIMITIVE* pVertex = m_lpLockedVertex + nIndex;
       pVertex->x = (float)(m_CallState.origin.x + _x);
       pVertex->y = (float)(m_CallState.origin.y + _y);
-    }
-
-    void CanvasImpl::BATCH::Set(CanvasFunc _eFunc, GXUINT _uVertexCount, GXUINT _uIndexCount, GXLPARAM _lParam)
-    {
-      eFunc = _eFunc;
-      uVertexCount = _uVertexCount;
-      uIndexCount = _uIndexCount;
-      comm.lParam = _lParam;
-      if(eFunc == CF_Textured) {
-        ((Texture*)comm.lParam)->AddRef();
-      }
-    }
-
-    void CanvasImpl::BATCH::Set2(CanvasFunc _eFunc, GXINT x, GXINT y)
-    {
-      eFunc = _eFunc;
-      PosI.x = x;
-      PosI.y = y;
-      PosI.z = 0;
-      PosI.w = 0;
-    }
-
-    void CanvasImpl::BATCH::SetFloat4(CanvasFunc _eFunc, float x, float y, float z, float w)
-    {
-      eFunc = _eFunc;
-      PosF.x = x;
-      PosF.y = y;
-      PosF.z = z;
-      PosF.w = w;
     }
 
     GXBOOL CanvasImpl::CommitState()
@@ -510,15 +510,8 @@ namespace GrapX
         return FALSE;
       }
 
-      if(m_uBatchCount + 4 >= m_uBatchSize) {
-        Flush();
-      }
-
-      const float* m = matTransform->m;
-      m_aBatch[m_uBatchCount++].SetFloat4(CF_SetTransform, m[0], m[1], m[2], m[3]);
-      m_aBatch[m_uBatchCount++].SetFloat4(CF_SetTransform, m[4], m[5], m[6], m[7]);
-      m_aBatch[m_uBatchCount++].SetFloat4(CF_SetTransform, m[8], m[9], m[10], m[11]);
-      m_aBatch[m_uBatchCount++].SetFloat4(CF_SetTransform, m[12], m[13], m[14], m[15]);
+      STATESWITCHING_TRANSFORM* pTransformCmd = IntAppendCommand<STATESWITCHING_TRANSFORM>(CF_SetTransform);
+      pTransformCmd->transform = *matTransform;
 
       m_CallState.matTransform = *matTransform;
       return TRUE;
@@ -533,29 +526,17 @@ namespace GrapX
     GXBOOL CanvasImpl::SetViewportOrg(GXINT x, GXINT y, GXLPPOINT lpPoint)
     {
       // !!! 没测试过
+      STATESWITCHING_ORIGIN* pOriginCmd = IntAppendCommand<STATESWITCHING_ORIGIN>(CF_SetViewportOrg);
+
       if(lpPoint)
       {
-        if(m_uBatchCount > 0)
-          Flush();
-        lpPoint->x = m_xAbsOrigin - m_xOrigin;
-        lpPoint->y = m_yAbsOrigin - m_yOrigin;
-
-        ASSERT(m_xOrigin == m_CallState.origin.x);
-        ASSERT(m_yOrigin == m_CallState.origin.y);
-
-        m_xOrigin = m_xAbsOrigin - x;
-        m_yOrigin = m_yAbsOrigin - y;
-        ASSERT(0);  // TODO: 验证 这个不就是 m_CallState(xOrigin/yOrigin) 里的值吗?
+        lpPoint->x = m_xAbsOrigin - m_CallState.origin.x;
+        lpPoint->y = m_yAbsOrigin - m_CallState.origin.y;
       }
-      else
-      {
-        if(!((m_uBatchCount + 1) < m_uBatchSize)) {
-          Flush();
-        }
-        m_aBatch[m_uBatchCount++].Set2(CF_SetViewportOrg, m_xAbsOrigin - x, m_yAbsOrigin - y);
-      }
-      m_CallState.origin.x = m_xAbsOrigin - x;
-      m_CallState.origin.y = m_yAbsOrigin - y;
+
+      pOriginCmd->ptOrigin.x = m_CallState.origin.x = m_xAbsOrigin - x;
+      pOriginCmd->ptOrigin.y = m_CallState.origin.y = m_yAbsOrigin - y;
+
       return TRUE;
     }
 
@@ -572,7 +553,7 @@ namespace GrapX
 
     GXBOOL CanvasImpl::Flush()
     {
-      if(m_uBatchCount == 0)
+      if(m_Commands.GetSize() == 0)
         return FALSE;
 
       GXBOOL bEmptyRect = gxIsRectEmpty(&m_rcClip);
@@ -595,80 +576,94 @@ namespace GrapX
       GXUINT nBaseVertex = 0;
       GXUINT nStartIndex = 0;
 
-      for(GXUINT i = 0; i < m_uBatchCount; i++)
-      {
-        const CanvasFunc eFunc = m_aBatch[i].eFunc;
+      const CMDBASE* pCmdPtr = reinterpret_cast<CMDBASE*>(m_Commands.GetPtr());
+      const CMDBASE* pCmdEnd = reinterpret_cast<CMDBASE*>(m_Commands.GetEnd());
 
-        if(bEmptyRect && (eFunc > CF_DrawFirst && eFunc < CF_DrawLast)) {
+      for(; pCmdPtr != pCmdEnd; pCmdPtr = reinterpret_cast<CMDBASE*>(reinterpret_cast<size_t>(pCmdPtr) + pCmdPtr->cbSize))
+      {
+        const CanvasFunc cmd = pCmdPtr->cmd;
+
+        if(bEmptyRect && (cmd > CF_DrawFirst && cmd < CF_DrawLast)) {
           continue;
         }
 
-        switch(eFunc)
+        switch(cmd)
         {
         case CF_LineList:
         {
-          TRACE_BATCH("CF_LineList\n");
+          TRACE_CMD("CF_LineList\n");
+          const DRAWCALL_LINELIST* pLineListCmd = static_cast<const DRAWCALL_LINELIST*>(pCmdPtr);
+          ASSERT(sizeof(DRAWCALL_LINELIST) == pCmdPtr->cbSize);
           if(bEmptyRect == FALSE) {
 
             m_pGraphics->DrawPrimitive(GXPT_LINELIST,
-              nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 2);
+              nBaseVertex, 0, pLineListCmd->uVertexCount, nStartIndex, pLineListCmd->uIndexCount / 2);
           }
 
-          nBaseVertex += m_aBatch[i].uVertexCount;
-          nStartIndex += m_aBatch[i].uIndexCount;
+          nBaseVertex += pLineListCmd->uVertexCount;
+          nStartIndex += pLineListCmd->uIndexCount;
         }
         break;
+
         case CF_Points:
         {
-          TRACE_BATCH("CF_Points\n");
-          if(bEmptyRect == FALSE)
-            m_pGraphics->DrawPrimitive(GXPT_POINTLIST, nBaseVertex, m_aBatch[i].uVertexCount);
-          nBaseVertex += m_aBatch[i].uVertexCount;
+          TRACE_CMD("CF_Points\n");
+          const DRAWCALL_POINTS* pPointsCmd = static_cast<const DRAWCALL_POINTS*>(pCmdPtr);
+          ASSERT(sizeof(DRAWCALL_POINTS) == pCmdPtr->cbSize);
+          if(bEmptyRect == FALSE) {
+            m_pGraphics->DrawPrimitive(GXPT_POINTLIST, nBaseVertex, pPointsCmd->uVertexCount);
+          }
+          nBaseVertex += pPointsCmd->uVertexCount;
         }
         break;
         case CF_Triangle:
         {
-          TRACE_BATCH("CF_Trangle\n");
+          TRACE_CMD("CF_Trangle\n");
+          const DRAWCALL_TRIANGLELIST* pTriangleListCmd = static_cast<const DRAWCALL_TRIANGLELIST*>(pCmdPtr);
+          ASSERT(sizeof(DRAWCALL_TRIANGLELIST) == pCmdPtr->cbSize);
           if(bEmptyRect == FALSE) {
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
-              nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 3);
+              nBaseVertex, 0, pTriangleListCmd->uVertexCount, nStartIndex, pTriangleListCmd->uIndexCount / 3);
           }
-          nBaseVertex += m_aBatch[i].uVertexCount;
-          nStartIndex += m_aBatch[i].uIndexCount;
+          nBaseVertex += pTriangleListCmd->uVertexCount;
+          nStartIndex += pTriangleListCmd->uIndexCount;
         }
         break;
 
         case CF_Textured:
         {
-          TRACE_BATCH("CF_Textured\n");
-          Texture* pTexture = (Texture*)m_aBatch[i].comm.lParam;
+          TRACE_CMD("CF_Textured\n");
+          const DRAWCALL_TEXTURE* pTextureCmd = static_cast<const DRAWCALL_TEXTURE*>(pCmdPtr);
+          ASSERT(sizeof(DRAWCALL_TEXTURE) == pCmdPtr->cbSize);
 
           if(bEmptyRect == FALSE)
           {
-            m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTexture), 0);
+            m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTextureCmd->pTexture), 0);
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
-              nBaseVertex, 0, m_aBatch[i].uVertexCount, nStartIndex, m_aBatch[i].uIndexCount / 3);
+              nBaseVertex, 0, pTextureCmd->uVertexCount, nStartIndex, pTextureCmd->uIndexCount / 3);
           }
 
-          nBaseVertex += m_aBatch[i].uVertexCount;
-          nStartIndex += m_aBatch[i].uIndexCount;
+          nBaseVertex += pTextureCmd->uVertexCount;
+          nStartIndex += pTextureCmd->uIndexCount;
 
           m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(m_pWhiteTex), 0);
-          pTexture->Release();
+          pTextureCmd->pTexture->Release();
         }
         break;
 
         case CF_SetSamplerState:
         {
-          GXSAMPLERDESC* pDesc = (GXSAMPLERDESC*)m_aBatch[i].comm.lParam;
-          m_pSamplerState->SetState(m_aBatch[i].comm.dwFlag, pDesc);
-          SAFE_DELETE(pDesc);
+          const STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = static_cast<const STATESWITCHING_SAMPLERSTATE*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_SAMPLERSTATE) == pCmdPtr->cbSize);
+          m_pSamplerState->SetState(pSamplerStateCmd->sampler_slot, &pSamplerStateCmd->desc);
         }
         break;
 
         case CF_Clear:
         {
-          TRACE_BATCH("CF_Clear\n");
+          TRACE_CMD("CF_Clear\n");
+          const STATESWITCHING_CLEAR* pClearCmd = static_cast<const STATESWITCHING_CLEAR*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_CLEAR) == pCmdPtr->cbSize);
           if(m_pClipRegion == NULL)
           {
             GXRECT rect;
@@ -677,7 +672,7 @@ namespace GrapX
             rect.right = m_rcClip.right;
             rect.bottom = m_rcClip.bottom;
             const GXHRESULT hRet = // Debug
-              m_pGraphics->Clear(&rect, 1, m_aBatch[i].comm.dwFlag, (GXCOLOR)m_aBatch[i].comm.wParam, 1.0f, m_dwStencil);
+              m_pGraphics->Clear(&rect, 1, pClearCmd->flags, (GXCOLOR)pClearCmd->color, 1.0f, m_dwStencil);
             ASSERT(GXSUCCEEDED(hRet));
           }
           else
@@ -688,49 +683,66 @@ namespace GrapX
 
             GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nRectCount);
             m_pClipRegion->GetRects(lpRects, nRectCount);
-            m_pGraphics->Clear(lpRects, nRectCount, m_aBatch[i].comm.dwFlag, (GXCOLOR)m_aBatch[i].comm.wParam, 1.0f, m_dwStencil);
+            m_pGraphics->Clear(lpRects, nRectCount, pClearCmd->flags, (GXCOLOR)pClearCmd->color, 1.0f, m_dwStencil);
             //_GlbUnlockStaticRects(lpRects);
           }
         }
         break;
         case CF_CompositingMode:
         {
-          TRACE_BATCH("CF_CompositingMode\n");
-          //LPGXRENDERSTATE lpRenderStateBlock = NULL;
+          TRACE_CMD("CF_CompositingMode\n");
+          const STATESWITCHING_COMPOSITINGMODE* pCompositingModeCmd
+            = static_cast<const STATESWITCHING_COMPOSITINGMODE*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_COMPOSITINGMODE) == pCmdPtr->cbSize);
+
           BlendStateImpl* pBlendState = NULL;
 
-          // 判断是不是最终渲染目标
-          if(m_pTargetTex == NULL)
+          if(pCompositingModeCmd->mode == CompositingMode_InvertTarget)
           {
-            if(m_aBatch[i].comm.lParam == CM_SourceCopy)
-              pBlendState = m_pOpaqueState[0];
-            else
-              pBlendState = m_pBlendingState[0];
+            pBlendState = m_pInvertState;
           }
           else
           {
-            if(m_aBatch[i].comm.lParam == CM_SourceCopy)
-              pBlendState = m_pOpaqueState[1];
+            // 判断是不是最终渲染目标
+            if(m_pTargetTex == NULL)
+            {
+              if(pCompositingModeCmd->mode == CompositingMode_SourceCopy)
+                pBlendState = m_pOpaqueState[0];
+              else
+                pBlendState = m_pBlendingState[0];
+            }
             else
-              pBlendState = m_pBlendingState[1];
+            {
+              if(pCompositingModeCmd->mode == CompositingMode_SourceCopy)
+                pBlendState = m_pOpaqueState[1];
+              else
+                pBlendState = m_pBlendingState[1];
+            }
           }
           m_pGraphics->InlSetBlendState(pBlendState);
         }
         break;
+
         case CF_Effect:
         {
-          TRACE_BATCH("CF_Effect\n");
-          if(m_pEffectImpl == (EffectImpl*)m_aBatch[i].comm.lParam)
+          TRACE_CMD("CF_Effect\n");
+          const STATESWITCHING_EFFECT* pEffectCmd = static_cast<const STATESWITCHING_EFFECT*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_EFFECT) == pCmdPtr->cbSize);
+          if(m_pEffectImpl == pEffectCmd->pEffectImpl) {
             break;
+          }
           SAFE_RELEASE(m_pEffectImpl);
-          m_pEffectImpl = (EffectImpl*)m_aBatch[i].comm.lParam;
+          m_pEffectImpl = pEffectCmd->pEffectImpl;
           m_pGraphics->InlSetEffect(m_pEffectImpl);
         }
         break;
+
         case CF_ColorAdditive:
         {
-          TRACE_BATCH("CF_ColorAdditive\n");
-          m_dwColorAdditive = (GXDWORD)m_aBatch[i].comm.lParam;
+          TRACE_CMD("CF_ColorAdditive\n");
+          const STATESWITCHING_COLORADD* pColorAddCmd = static_cast<const STATESWITCHING_COLORADD*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_COLORADD) == pCmdPtr->cbSize);
+          m_dwColorAdditive = (GXDWORD)pColorAddCmd->color;
           float4 v4 = m_dwColorAdditive;
           m_CommonEffect.color_add = v4;
 
@@ -740,22 +752,17 @@ namespace GrapX
         break;
 
         case CF_SetViewportOrg:
-          TRACE_BATCH("CF_SetViewportOrg\n");
-          m_xOrigin = m_aBatch[i].PosI.x;
-          m_yOrigin = m_aBatch[i].PosI.y;
+          TRACE_CMD("CF_SetViewportOrg\n");
           break;
+
         case CF_SetClipBox:
         {
-          TRACE_BATCH("CF_SetClipBox\n");
+          TRACE_CMD("CF_SetClipBox\n");
+          const STATESWITCHING_SETCLIPBOX* pClipBoxCmd = static_cast<const STATESWITCHING_SETCLIPBOX*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_SETCLIPBOX) == pCmdPtr->cbSize);
           GXREGN rgClip;
-          GXRECT rcClip;
+          GXRECT rcClip = pClipBoxCmd->rect;
           SAFE_RELEASE(m_pClipRegion);
-
-          rcClip.left = GXLOWORD(m_aBatch[i].comm.wParam);
-          rcClip.right = GXHIWORD(m_aBatch[i].comm.wParam);
-
-          rcClip.top = GXLOWORD(m_aBatch[i].comm.lParam);
-          rcClip.bottom = GXHIWORD(m_aBatch[i].comm.lParam);
 
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
 
@@ -769,9 +776,10 @@ namespace GrapX
         }
         break;
         case CF_ResetClipBox:
-          TRACE_BATCH("CF_ResetClipBox\n");
+          TRACE_CMD("CF_ResetClipBox\n");
           UpdateStencil(NULL);
           break;
+
         case CF_ResetTextClip:
         {
           GXREGN rgClip;
@@ -788,34 +796,38 @@ namespace GrapX
         break;
         case CF_SetTextClip:
         {
-          GXRECT rcClip;
+          const STATESWITCHING_SETTEXTCLIP* pTextClipCmd = static_cast<const STATESWITCHING_SETTEXTCLIP*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_SETTEXTCLIP) == pCmdPtr->cbSize);
+          GXRECT rcClip = pTextClipCmd->rect;
           GXREGN rgClip;
-          rcClip.left = GXLOWORD(m_aBatch[i].comm.wParam);
-          rcClip.right = GXHIWORD(m_aBatch[i].comm.wParam);
-          rcClip.top = GXLOWORD(m_aBatch[i].comm.lParam);
-          rcClip.bottom = GXHIWORD(m_aBatch[i].comm.lParam);
-          //gxRectToRegn(&rgClip, &m_rcClip); // ???: m_rcClip好像应该是rcClip
           gxRectToRegn(&rgClip, &rcClip);
           m_pGraphics->SetSafeClip(&rgClip);
         }
         break;
         case CF_SetRegion:
         {
-          TRACE_BATCH("CF_SetRegion\n");
-          if(UpdateStencil((GRegion*)m_aBatch[i].comm.lParam) == RC_NULL)
+          TRACE_CMD("CF_SetRegion\n");
+          const STATESWITCHING_REGION* pRegionCmd = static_cast<const STATESWITCHING_REGION*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_REGION) == pCmdPtr->cbSize);
+          if(UpdateStencil(pRegionCmd->pRegion) == RC_NULL) {
             bEmptyRect = TRUE;
-          else
+          }
+          else {
             bEmptyRect = FALSE;
+          }
         }
         break;
         case CF_NoOperation:
-          TRACE_BATCH("CF_NoOperation\n");
+          TRACE_CMD("CF_NoOperation\n");
           // 啥也没有!!
           break;
         case CF_SetExtTexture:
         {
-          const GXUINT uStage = (GXUINT)m_aBatch[i].comm.wParam;
-          Texture* pTexture = (Texture*)m_aBatch[i].comm.lParam;
+          const STATESWITCHING_TEXTUREEXT* pTextureExtCmd = static_cast<const STATESWITCHING_TEXTUREEXT*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_TEXTUREEXT) == pCmdPtr->cbSize);
+
+          const GXUINT uStage = pTextureExtCmd->stage;
+          Texture* pTexture = pTextureExtCmd->pTexture;
           m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTexture), uStage);
           SAFE_RELEASE(m_aTextureStage[uStage]);
           m_aTextureStage[uStage] = (TextureImpl*)pTexture;
@@ -828,30 +840,21 @@ namespace GrapX
         break;
         case CF_SetTransform:
         {
-          ASSERT(m_aBatch[i].eFunc == CF_SetTransform && i + 3 < m_uBatchSize);
-          ASSERT(m_aBatch[i + 1].eFunc == CF_SetTransform);
-          ASSERT(m_aBatch[i + 2].eFunc == CF_SetTransform);
-          ASSERT(m_aBatch[i + 3].eFunc == CF_SetTransform);
-
-          //float* m = m_CanvasCommConst.matWVProj.m;
-          float* m = (float*)m_CommonEffect.transform.GetPtr();
-          m[0] = m_aBatch[i].PosF.x;   m[1] = m_aBatch[i].PosF.y;   m[2] = m_aBatch[i].PosF.z;   m[3] = m_aBatch[i].PosF.w;
-          m[4] = m_aBatch[i + 1].PosF.x;   m[5] = m_aBatch[i + 1].PosF.y;   m[6] = m_aBatch[i + 1].PosF.z;   m[7] = m_aBatch[i + 1].PosF.w;
-          m[8] = m_aBatch[i + 2].PosF.x;   m[9] = m_aBatch[i + 2].PosF.y;   m[10] = m_aBatch[i + 2].PosF.z;   m[11] = m_aBatch[i + 2].PosF.w;
-          m[12] = m_aBatch[i + 3].PosF.x;   m[13] = m_aBatch[i + 3].PosF.y;   m[14] = m_aBatch[i + 3].PosF.z;   m[15] = m_aBatch[i + 3].PosF.w;
-
+          const STATESWITCHING_TRANSFORM* pTransformCmd = static_cast<const STATESWITCHING_TRANSFORM*>(pCmdPtr);
+          ASSERT(sizeof(STATESWITCHING_TRANSFORM) == pCmdPtr->cbSize);
+          m_CommonEffect.transform = pTransformCmd->transform;
           static_cast<ShaderImpl*>(m_pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pEffectImpl->GetDataPoolUnsafe());
 
-          i += 3;
         }
         break;
         default:
-          ASSERT(0);
+          CLBREAK;
         }
       }
       m_uVertCount = 0;
       m_uIndexCount = 0;
-      m_uBatchCount = 0;
+      m_pLastCommand = NULL;
+      m_Commands.Resize(0, FALSE);
 
       // 每次提交后两个clip应该是一致的，如果不一致说明中间的计算算法有差异
       ASSERT(gxEqualRect(&m_CallState.rcClip, &m_rcClip));
@@ -862,16 +865,9 @@ namespace GrapX
 
     GXBOOL CanvasImpl::SetSamplerState(GXUINT Sampler, GXSAMPLERDESC* pDesc)
     {
-      GXSAMPLERDESC* pDescStore = new GXSAMPLERDESC;
-      *pDescStore = *pDesc;
-
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-      m_aBatch[m_uBatchCount].eFunc = CF_SetSamplerState;
-      m_aBatch[m_uBatchCount].comm.dwFlag = Sampler;  // 反正多余, 都写成一样了
-      m_aBatch[m_uBatchCount].comm.wParam = Sampler;
-      m_aBatch[m_uBatchCount].comm.lParam = (GXLPARAM)pDescStore;
-      m_uBatchCount++;
+      STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = IntAppendCommand<STATESWITCHING_SAMPLERSTATE>(CF_SetSamplerState);
+      pSamplerStateCmd->sampler_slot = Sampler;
+      pSamplerStateCmd->desc = *pDesc;
 
       return TRUE;
     }
@@ -882,13 +878,12 @@ namespace GrapX
         return FALSE;
       }
 
-      if(!((m_uBatchCount + 1) < m_uBatchSize)) {
-        Flush();
-      }
+      STATESWITCHING_EFFECT* pEffectCmd = IntAppendCommand<STATESWITCHING_EFFECT>(CF_Effect);
+
       if(pEffect != NULL) {
         pEffect->AddRef();
       }
-      m_aBatch[m_uBatchCount++].Set(CF_Effect, 0, 0, (GXLPARAM)pEffect);
+      pEffectCmd->pEffectImpl = static_cast<EffectImpl*>(pEffect);
       m_CallState.RenderState.pEffect = (EffectImpl*)pEffect;
 
       return TRUE;
@@ -916,42 +911,23 @@ namespace GrapX
         // 检测是否是新的叠加颜色
         if(m_CallState.dwColorAdditive != dwRet)
         {
-          // 如果上一个命令也是设置叠加颜色
-          if(m_uBatchCount > 0 &&
-            m_aBatch[m_uBatchCount - 1].eFunc == CF_ColorAdditive &&
-            m_aBatch[m_uBatchCount - 1].comm.lParam == (GXDWORD)COLORREF_TO_NATIVE(uParam))
-          {
-            m_uBatchCount--;
-            dwRet = (GXDWORD)uParam;
-          }
-          else
-          {
-            if(!((m_uBatchCount + 1) < m_uBatchSize)) {
-              Flush();
-            }
-            m_aBatch[m_uBatchCount++].Set(CF_ColorAdditive, 0, dwRet, m_CallState.dwColorAdditive);
-          }
+          STATESWITCHING_COLORADD* pCommand = IntAppendCommand<STATESWITCHING_COLORADD>(CF_ColorAdditive);
+          pCommand->color = m_CallState.dwColorAdditive;
         }
       }
       break;
       case CPI_SETTEXTCLIP:
       {
-        if(!((m_uBatchCount + 1) < m_uBatchSize))
-          Flush();
-
         GXLPRECT lpRect = (GXLPRECT)pParam;
         // 这个函数里面将 RECT的left 和 right, top 和 bottom 压缩储存
 
         if(lpRect == NULL)  // 复位模式
         {
-          m_aBatch[m_uBatchCount].eFunc = CF_ResetTextClip;
-          m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
-          m_aBatch[m_uBatchCount].comm.wParam = NULL;
-          m_aBatch[m_uBatchCount].comm.lParam = NULL;
-          m_uBatchCount++;
+          CMDBASE* pCommand = IntAppendCommand<CMDBASE>(CF_ResetTextClip);
         }
         else  // 用户设置
         {
+          STATESWITCHING_SETTEXTCLIP* pCommand = IntAppendCommand<STATESWITCHING_SETTEXTCLIP>(CF_SetTextClip);
           // 转换为 RenderTarget 空间的坐标
           GXRECT rcUserClip = *lpRect;
           gxOffsetRect(&rcUserClip, m_CallState.origin.x, m_CallState.origin.y);
@@ -960,35 +936,26 @@ namespace GrapX
           //gxIntersectRect(&rcUserClip, &m_rcAbsClip, &rcUserClip);
           gxIntersectRect(&rcUserClip, &m_CallState.rcClip, &rcUserClip);
 
-          m_aBatch[m_uBatchCount].eFunc = CF_SetTextClip;
-          m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
-          m_aBatch[m_uBatchCount].comm.wParam = GXMAKELONG(rcUserClip.left, rcUserClip.right);
-          m_aBatch[m_uBatchCount].comm.lParam = GXMAKELONG(rcUserClip.top, rcUserClip.bottom);
-
-          m_uBatchCount++;
+          pCommand->rect = rcUserClip;
         }
         return TRUE;
       }
       break;
-      //  case CPI_SETPIXELSIZEINV:
-      break;
+
       case CPI_SETEXTTEXTURE:
       {
         if(uParam > 0 && uParam < GX_MAX_TEXTURE_STAGE)
         {
-          if(!((m_uBatchCount + 1) < m_uBatchSize))
-            Flush();
-
-          m_aBatch[m_uBatchCount].eFunc = CF_SetExtTexture;
-          m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
-          m_aBatch[m_uBatchCount].comm.wParam = uParam;
-          m_aBatch[m_uBatchCount].comm.lParam = (GXLPARAM)pParam;
-          m_uBatchCount++;
-          if(pParam != NULL)
-            ((Texture*)pParam)->AddRef();
+          STATESWITCHING_TEXTUREEXT* pCommand = IntAppendCommand<STATESWITCHING_TEXTUREEXT>(CF_SetExtTexture);
+          pCommand->stage = uParam;
+          pCommand->pTexture = reinterpret_cast<Texture*>(pParam);
+          if(pCommand->pTexture) {
+            pCommand->pTexture->AddRef();
+          }
         }
-        else
+        else {
           dwRet = 0;
+        }
         dwRet = uParam;
       }
       break;
@@ -1009,68 +976,38 @@ namespace GrapX
 
     GXBOOL CanvasImpl::Clear(GXCOLORREF crClear)
     {
-      if(m_uBatchCount > 0)
-      {
-        // 如果调用了Clear, 之前的所有绘图缓冲全部失效了
-        for(GXINT i = m_uBatchCount - 1; i >= 0; i--)
-        {
-          if(m_aBatch[i].eFunc == CF_SetRegion)  // 设置裁剪区之前的绘图命令还是有效的,
-            goto FLUSH_CMD;            // 因为新的裁剪区如果较小,之前的绘图操作会留在旧的裁剪区
-          else if(m_aBatch[i].eFunc > CF_DrawFirst && m_aBatch[i].eFunc < CF_DrawLast)
-            m_aBatch[i].eFunc = CF_NoOperation;
-        }
+      STATESWITCHING_CLEAR* pCommand = IntAppendCommand<STATESWITCHING_CLEAR>(CF_Clear);
 
-        // 清空顶点和索引
-        m_uVertCount = 0;
-        m_uIndexCount = 0;
-      }
+      pCommand->flags |= GXCLEAR_TARGET;
+      pCommand->color = crClear;
 
-    FLUSH_CMD:
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-
-      // 如果上一个命令有清除功能,则直接返回!
-      if(m_aBatch[m_uBatchCount - 1].eFunc == CF_Clear)
-      {
-        if((m_aBatch[m_uBatchCount - 1].comm.dwFlag & GXCLEAR_TARGET) != 0)
-          return TRUE;
-        else
-          m_aBatch[m_uBatchCount - 1].comm.dwFlag |= GXCLEAR_TARGET;
-        return TRUE;
-      }
-
-      m_aBatch[m_uBatchCount].eFunc = CF_Clear;
-      m_aBatch[m_uBatchCount].comm.dwFlag = GXCLEAR_TARGET;
-      m_aBatch[m_uBatchCount].comm.wParam = crClear;
-      m_aBatch[m_uBatchCount].comm.lParam = NULL;
-      m_uBatchCount++;
       return TRUE;
     }
 
-    GXINT CanvasImpl::SetCompositingMode(CompositingMode eMode)
+    CompositingMode CanvasImpl::SetCompositingMode(CompositingMode eMode)
     {
-      if(m_CallState.eCompMode == eMode)
+      if(m_CallState.eCompMode == eMode) {
         return eMode;
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
+      }
 
-      // 如果与上一条命令相同则冲销掉
-      // 如果两个CF_CompositingMode命令间全部是非绘图命令则不能冲销
-      if(m_uBatchCount > 0 && m_aBatch[m_uBatchCount - 1].eFunc == CF_CompositingMode)
-        m_aBatch[m_uBatchCount - 1].Set(CF_CompositingMode, 0, 0, eMode);
-      else
-        m_aBatch[m_uBatchCount++].Set(CF_CompositingMode, 0, 0, eMode);
+      STATESWITCHING_COMPOSITINGMODE* pCommand = IntAppendCommand<STATESWITCHING_COMPOSITINGMODE>(CF_CompositingMode);
+      pCommand->mode = eMode;
+
       CompositingMode ePrevCompMode = m_CallState.eCompMode;
       m_CallState.eCompMode = eMode;
-      return (GXINT)ePrevCompMode;
+      return ePrevCompMode;
+    }
+
+    CompositingMode CanvasImpl::GetCompositingMode()
+    {
+      return m_CallState.eCompMode;
     }
 
     GXBOOL CanvasImpl::SetRegion(GRegion* pRegion, GXBOOL bAbsOrigin)
     {
       GRegion* pSurfaceRegion = NULL;
+      STATESWITCHING_REGION* pRegionCmd = IntAppendCommand<STATESWITCHING_REGION>(CF_SetRegion);
 
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
       if(pRegion != NULL)
       {
         // TODO: 测试如果区域小于屏幕区,就不用这个屏幕区的Region裁剪
@@ -1092,34 +1029,20 @@ namespace GrapX
         m_CallState.rcClip = m_rcAbsClip;
       }
 
-      m_aBatch[m_uBatchCount].eFunc = CF_SetRegion;
-      m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
-      m_aBatch[m_uBatchCount].comm.wParam = NULL;
-      m_aBatch[m_uBatchCount].comm.lParam = (GXLPARAM)pSurfaceRegion;
-      m_uBatchCount++;
-
+      pRegionCmd->pRegion = pSurfaceRegion;
       return TRUE;
     }
 
     GXBOOL CanvasImpl::SetClipBox(const GXLPRECT lpRect)
     {
-      if(!((m_uBatchCount + 1) < m_uBatchSize))
-        Flush();
-
-      // 这个函数里面将 RECT的left 和 right, top 和 bottom 压缩储存
-
       if(lpRect == NULL)  // 复位模式
       {
-        m_aBatch[m_uBatchCount].eFunc = CF_ResetClipBox;
-        m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
-        m_aBatch[m_uBatchCount].comm.wParam = NULL;
-        m_aBatch[m_uBatchCount].comm.lParam = NULL;
-        m_uBatchCount++;
-
+        CMDBASE* pCommand = IntAppendCommand<CMDBASE>(CF_ResetClipBox);
         m_CallState.rcClip = m_rcAbsClip;
       }
       else  // 用户设置
       {
+        STATESWITCHING_SETCLIPBOX* pCommand = IntAppendCommand<STATESWITCHING_SETCLIPBOX>(CF_SetClipBox);
         // 转换为 RenderTarget 空间的坐标
         GXRECT rcUserClip = *lpRect;
         gxOffsetRect(&rcUserClip, m_CallState.origin.x, m_CallState.origin.y);
@@ -1127,13 +1050,7 @@ namespace GrapX
         // 与系统区域裁剪
         gxIntersectRect(&m_CallState.rcClip, &m_rcAbsClip, &rcUserClip);
 
-        m_aBatch[m_uBatchCount].eFunc = CF_SetClipBox;
-        m_aBatch[m_uBatchCount].comm.dwFlag = NULL;
-
-        m_aBatch[m_uBatchCount].comm.wParam = GXMAKELONG(m_CallState.rcClip.left, m_CallState.rcClip.right);
-        m_aBatch[m_uBatchCount].comm.lParam = GXMAKELONG(m_CallState.rcClip.top, m_CallState.rcClip.bottom);
-
-        m_uBatchCount++;
+        pCommand->rect = m_CallState.rcClip;
       }
       return TRUE;
     }
@@ -1179,16 +1096,13 @@ namespace GrapX
 #define CHECK_LOCK \
   if(m_lpLockedVertex == NULL) { m_lpLockedVertex = static_cast<PRIMITIVE*>(m_pPrimitive->MapVertexBuffer(GXResMap::Write)); } \
   if(m_lpLockedIndex == NULL) { m_lpLockedIndex = static_cast<VIndex*>(m_pPrimitive->MapIndexBuffer(GXResMap::Write)); }
-  //PrimitiveUtility::LockVertices locker_v(m_pPrimitive); \
-  //PrimitiveUtility::LockIndices locker_i(m_pPrimitive); \
 
-#define SET_BATCH_INDEX(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
+#define SET_INDEX_BUFFER(_OFFSET, _INDEX)  m_lpLockedIndex[m_uIndexCount + _OFFSET] = uBaseIndex + _INDEX
 
     GXBOOL CanvasImpl::SetPixel(GXINT xPos, GXINT yPos, GXCOLORREF crPixel)
     {
-      //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
-
-      GXUINT uBaseIndex = PrepareBatch(CF_Points, 1, 0, NULL);
+      DRAWCALL_POINTS* pDrawCallCmd = NULL;
+      IntAppendDrawCall<DRAWCALL_POINTS>(&pDrawCallCmd, CF_Points, 1, 0, NULL);
       CHECK_LOCK;
 
       m_lpLockedVertex[m_uVertCount].z = 0;
@@ -1208,7 +1122,8 @@ namespace GrapX
     {
       //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
 
-      GXUINT uBaseIndex = PrepareBatch(CF_LineList, 2, 2, NULL);
+      DRAWCALL_LINELIST* pDrawCallCmd = NULL;
+      GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_LINELIST>(&pDrawCallCmd, CF_LineList, 2, 2, NULL);
       CHECK_LOCK;
 
       for(int i = 0; i < 2; i++)
@@ -1223,8 +1138,8 @@ namespace GrapX
       _SetPrimitivePos(m_uVertCount, left, top);
       _SetPrimitivePos(m_uVertCount + 1, right, bottom);
 
-      SET_BATCH_INDEX(0, 0);
-      SET_BATCH_INDEX(1, 1);
+      SET_INDEX_BUFFER(0, 0);
+      SET_INDEX_BUFFER(1, 1);
 
       m_uVertCount += 2;
       m_uIndexCount += 2;
@@ -1237,9 +1152,8 @@ namespace GrapX
 
     GXBOOL CanvasImpl::InlDrawRectangle(GXINT left, GXINT top, GXINT right, GXINT bottom, GXCOLORREF crRect)
     {
-      //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
-
-      GXUINT uBaseIndex = PrepareBatch(CF_LineList, 4, 8, NULL);
+      DRAWCALL_LINELIST* pDrawCallCmd = NULL;
+      GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_LINELIST>(&pDrawCallCmd, CF_LineList, 4, 8, NULL);
       CHECK_LOCK;
 
       GXDWORD dwColor = COLORREF_TO_NATIVE(crRect);
@@ -1255,14 +1169,14 @@ namespace GrapX
       m_lpLockedVertex[m_uVertCount + 3].Set(x1, y2, dwColor);
 
 
-      SET_BATCH_INDEX(0, 0);
-      SET_BATCH_INDEX(1, 1);
-      SET_BATCH_INDEX(2, 1);
-      SET_BATCH_INDEX(3, 2);
-      SET_BATCH_INDEX(4, 2);
-      SET_BATCH_INDEX(5, 3);
-      SET_BATCH_INDEX(6, 3);
-      SET_BATCH_INDEX(7, 0);
+      SET_INDEX_BUFFER(0, 0);
+      SET_INDEX_BUFFER(1, 1);
+      SET_INDEX_BUFFER(2, 1);
+      SET_INDEX_BUFFER(3, 2);
+      SET_INDEX_BUFFER(4, 2);
+      SET_INDEX_BUFFER(5, 3);
+      SET_INDEX_BUFFER(6, 3);
+      SET_INDEX_BUFFER(7, 0);
 
       m_uVertCount += 4;
       m_uIndexCount += 8;
@@ -1291,7 +1205,8 @@ namespace GrapX
     {
       //GXDWORD dwPrevClrAdd = SetParametersInfo(CPI_SETCOLORADDITIVE, 0xffffff, NULL);
 
-      GXUINT uBaseIndex = PrepareBatch(CF_Triangle, 4, 6, NULL);
+      DRAWCALL_TRIANGLELIST* pDrawCallCmd = NULL;
+      GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_TRIANGLELIST>(&pDrawCallCmd, CF_Triangle, 4, 6, NULL);
       CHECK_LOCK;
 
       GXDWORD dwColor = COLORREF_TO_NATIVE(crFill);
@@ -1305,12 +1220,12 @@ namespace GrapX
       m_lpLockedVertex[m_uVertCount + 2].Set(x2, y2, dwColor);
       m_lpLockedVertex[m_uVertCount + 3].Set(x1, y2, dwColor);
 
-      SET_BATCH_INDEX(0, 0);
-      SET_BATCH_INDEX(1, 1);
-      SET_BATCH_INDEX(2, 3);
-      SET_BATCH_INDEX(3, 3);
-      SET_BATCH_INDEX(4, 1);
-      SET_BATCH_INDEX(5, 2);
+      SET_INDEX_BUFFER(0, 0);
+      SET_INDEX_BUFFER(1, 1);
+      SET_INDEX_BUFFER(2, 3);
+      SET_INDEX_BUFFER(3, 3);
+      SET_INDEX_BUFFER(4, 1);
+      SET_INDEX_BUFFER(5, 2);
 
       m_uVertCount += 4;
       m_uIndexCount += 6;
@@ -1335,11 +1250,6 @@ namespace GrapX
     }
 
     //////////////////////////////////////////////////////////////////////////
-
-    GXBOOL CanvasImpl::InvertRect(GXINT x, GXINT y, GXINT w, GXINT h)
-    {
-      return TRUE;
-    }
 
     GXBOOL CanvasImpl::ColorFillRegion(GRegion* pRegion, GXCOLORREF crFill)
     {
@@ -1366,7 +1276,8 @@ namespace GrapX
       if(m_uVertIndexSize < uVertCount || m_uVertIndexSize < uIdxCount)
         return FALSE;
 
-      GXUINT uBaseIndex = PrepareBatch(CF_Textured, uVertCount, uIdxCount, (GXLPARAM)pTexture);
+      DRAWCALL_TEXTURE* pDrawTextureCmd = NULL;
+      GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_TEXTURE>(&pDrawTextureCmd, CF_Textured, uVertCount, uIdxCount, pTexture);
       CHECK_LOCK;
 
       //memcpy(m_lpLockedVertex + m_uVertCount, lpVertices, uVertCount * sizeof(PRIMITIVE));
@@ -1392,7 +1303,8 @@ namespace GrapX
       if(pTexture == NULL) {
         return FALSE;
       }
-      GXUINT uBaseIndex = PrepareBatch(CF_Textured, 4, 6, (GXLPARAM)pTexture);
+      DRAWCALL_TEXTURE* pDrawCallCmd = NULL;
+      GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_TEXTURE>(&pDrawCallCmd, CF_Textured, 4, 6, pTexture);
       CHECK_LOCK;
 
       for(int i = 0; i < 4; i++)
@@ -1432,12 +1344,12 @@ namespace GrapX
       _SetPrimitivePos(m_uVertCount + 2, rcDest->left + rcDest->width, rcDest->top + rcDest->height);
       _SetPrimitivePos(m_uVertCount + 3, rcDest->left, rcDest->top + rcDest->height);
 
-      SET_BATCH_INDEX(0, 0);
-      SET_BATCH_INDEX(1, 1);
-      SET_BATCH_INDEX(2, 3);
-      SET_BATCH_INDEX(3, 3);
-      SET_BATCH_INDEX(4, 1);
-      SET_BATCH_INDEX(5, 2);
+      SET_INDEX_BUFFER(0, 0);
+      SET_INDEX_BUFFER(1, 1);
+      SET_INDEX_BUFFER(2, 3);
+      SET_INDEX_BUFFER(3, 3);
+      SET_INDEX_BUFFER(4, 1);
+      SET_INDEX_BUFFER(5, 2);
 
       m_uVertCount += 4;
       m_uIndexCount += 6;
@@ -1456,12 +1368,12 @@ namespace GrapX
       _SetPrimitivePos(m_uVertCount + 2, xPos + uWidth, yPos + uHeight);
       _SetPrimitivePos(m_uVertCount + 3, xPos, yPos + uHeight);
 
-      SET_BATCH_INDEX(0, 0);
-      SET_BATCH_INDEX(1, 1);
-      SET_BATCH_INDEX(2, 3);
-      SET_BATCH_INDEX(3, 3);
-      SET_BATCH_INDEX(4, 1);
-      SET_BATCH_INDEX(5, 2);
+      SET_INDEX_BUFFER(0, 0);
+      SET_INDEX_BUFFER(1, 1);
+      SET_INDEX_BUFFER(2, 3);
+      SET_INDEX_BUFFER(3, 3);
+      SET_INDEX_BUFFER(4, 1);
+      SET_INDEX_BUFFER(5, 2);
 
       m_uVertCount += 4;
       m_uIndexCount += 6;
@@ -1484,12 +1396,12 @@ namespace GrapX
       _SetPrimitivePos(m_uVertCount + 2, uDestRight, uDestBottom);
       _SetPrimitivePos(m_uVertCount + 3, rcDest->left, uDestBottom);
 
-      SET_BATCH_INDEX(0, 0);
-      SET_BATCH_INDEX(1, 1);
-      SET_BATCH_INDEX(2, 3);
-      SET_BATCH_INDEX(3, 3);
-      SET_BATCH_INDEX(4, 1);
-      SET_BATCH_INDEX(5, 2);
+      SET_INDEX_BUFFER(0, 0);
+      SET_INDEX_BUFFER(1, 1);
+      SET_INDEX_BUFFER(2, 3);
+      SET_INDEX_BUFFER(3, 3);
+      SET_INDEX_BUFFER(4, 1);
+      SET_INDEX_BUFFER(5, 2);
 
       m_uVertCount += 4;
       m_uIndexCount += 6;
@@ -1536,12 +1448,12 @@ namespace GrapX
         _SetPrimitivePos(m_uVertCount + 2, aPos[i].x, aPos[i].y);   i = (i + 1) & 3;
         _SetPrimitivePos(m_uVertCount + 3, aPos[i].x, aPos[i].y);
 
-        SET_BATCH_INDEX(0, 0);
-        SET_BATCH_INDEX(1, 1);
-        SET_BATCH_INDEX(2, 3);
-        SET_BATCH_INDEX(3, 3);
-        SET_BATCH_INDEX(4, 1);
-        SET_BATCH_INDEX(5, 2);
+        SET_INDEX_BUFFER(0, 0);
+        SET_INDEX_BUFFER(1, 1);
+        SET_INDEX_BUFFER(2, 3);
+        SET_INDEX_BUFFER(3, 3);
+        SET_INDEX_BUFFER(4, 1);
+        SET_INDEX_BUFFER(5, 2);
       }
       else {
         int i = ((int)eRotation - Rotate_FlipHorizontal + 1) & 3;
@@ -1550,12 +1462,12 @@ namespace GrapX
         _SetPrimitivePos(m_uVertCount + 2, aPos[i].x, aPos[i].y);   i = (i - 1) & 3;
         _SetPrimitivePos(m_uVertCount + 3, aPos[i].x, aPos[i].y);
 
-        SET_BATCH_INDEX(0, 0);
-        SET_BATCH_INDEX(1, 3);
-        SET_BATCH_INDEX(2, 1);
-        SET_BATCH_INDEX(3, 3);
-        SET_BATCH_INDEX(4, 2);
-        SET_BATCH_INDEX(5, 1);
+        SET_INDEX_BUFFER(0, 0);
+        SET_INDEX_BUFFER(1, 3);
+        SET_INDEX_BUFFER(2, 1);
+        SET_INDEX_BUFFER(3, 3);
+        SET_INDEX_BUFFER(4, 2);
+        SET_INDEX_BUFFER(5, 1);
       }
 
       m_uVertCount += 4;

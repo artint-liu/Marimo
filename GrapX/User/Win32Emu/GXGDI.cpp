@@ -1318,7 +1318,10 @@ GXBOOL GXDLLAPI gxOffsetWindowOrgEx(
 GXBOOL GXDLLAPI gxInvertRect( GXHDC hdc, const GXRECT* lprc )
 {
   LPGXGDIDC lpDC = GXGDI_DC_PTR(hdc);
-  return lpDC->pCanvas->InvertRect(lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
+  GrapX::CompositingMode ePrevNode = lpDC->pCanvas->SetCompositingMode(GrapX::CompositingMode_InvertTarget);
+  GXBOOL br = lpDC->pCanvas->FillRectangle(lprc, 0xffffffff);
+  lpDC->pCanvas->SetCompositingMode(ePrevNode);
+  return br;
 }
 
 GXDWORD GXDLLAPI gxSetLayout( GXHDC hdc, GXDWORD dwLayout )

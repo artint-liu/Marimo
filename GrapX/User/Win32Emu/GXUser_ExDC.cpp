@@ -121,9 +121,13 @@ GXBOOL GXDLLAPI gxDrawFocusRect(
   //ASSERT(FALSE);
   //TRACE_UNACHIEVE("=== gxDrawFocusRect ===\n");
   LPGXGDIDC lpDC = GXGDI_DC_PTR(hDC);
-  lpDC->pCanvas->InvertRect(lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top);
-  lpDC->pCanvas->InvertRect(lprc->left + 2, lprc->top + 2, lprc->right - lprc->left - 4, lprc->bottom - lprc->top - 4);
-  return FALSE;
+  GrapX::CompositingMode ePrevNode = lpDC->pCanvas->SetCompositingMode(GrapX::CompositingMode_InvertTarget);
+  GXRECT rect = *lprc;
+  lpDC->pCanvas->FillRectangle(&rect, 0xffffffff);
+  rect.Inflate(-2, -2);
+  lpDC->pCanvas->FillRectangle(&rect, 0xffffffff);
+  lpDC->pCanvas->SetCompositingMode(ePrevNode);
+  return TRUE;
 }
 
 GXLONG GXDLLAPI gxTabbedTextOutW(

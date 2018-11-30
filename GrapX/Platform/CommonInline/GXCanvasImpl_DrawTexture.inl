@@ -2,7 +2,9 @@
   return FALSE;
 }
 
-GXUINT uBaseIndex = PrepareBatch(CF_Textured, 4, 6, (GXLPARAM)pTexture);
+DRAWCALL_TEXTURE* pDrawTextureCmd = NULL;
+GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_TEXTURE>(&pDrawTextureCmd, CF_Textured, 4, 6, pTexture);
+
 CHECK_LOCK;
 
 for(int i = 0; i < 4; i++)

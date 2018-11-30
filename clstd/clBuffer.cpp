@@ -160,6 +160,11 @@ namespace clstd
     return m_lpBuffer;  
   }
 
+  CLLPVOID MemBuffer::GetEnd() const
+  {
+    return reinterpret_cast<CLLPVOID>(reinterpret_cast<clsize>(m_lpBuffer) + m_uSize);
+  }
+
   //b32 clBuffer::Add(u32 nPos, CLLPCVOID lpData, clsize dwSize)
   //{
   //  if(nPos > m_uSize)

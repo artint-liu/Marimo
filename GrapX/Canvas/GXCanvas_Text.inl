@@ -135,8 +135,8 @@ GXBOOL CanBreak(GXWCHAR pch, GXWCHAR ch);
         const GXLONG nTabWidth = p->pFont->GetWidth() << 2;
         //ptPen.x = ((ptPen.x - pptPosition->x - m_xOrigin + nTabWidth) / nTabWidth)
         //  * nTabWidth + m_xOrigin + pptPosition->x;
-        ptPen.x = LocalizeTabPos(p, ptPen.x - pptPosition->x - m_xOrigin, nTabWidth, &nTabIdx)
-          + m_xOrigin + pptPosition->x;
+        ptPen.x = LocalizeTabPos(p, ptPen.x - pptPosition->x - m_CallState.origin.x, nTabWidth, &nTabIdx)
+          + m_CallState.origin.x + pptPosition->x;
       }
       else
       {
@@ -634,7 +634,7 @@ RET_IMMT:
 
       SetParametersInfo(CPI_SETTEXTURECOLOR, crText, NULL);
       SetParametersInfo(CPI_SETCOLORADDITIVE, 0x00ffffff, NULL);
-      eLastMode = SetCompositingMode(CM_SourceOver);
+      eLastMode = SetCompositingMode(CompositingMode_SourceOver);
     }
     INTMEASURESTRING m;
     m.pFont    = pFTFont;
@@ -660,8 +660,9 @@ RET_IMMT:
       SetParametersInfo(CPI_SETTEXTURECOLOR, 0xffffffff, NULL);
       SetParametersInfo(CPI_SETCOLORADDITIVE, 0, NULL);
 
-      if(eLastMode != CM_SourceOver)
+      if(eLastMode != CompositingMode_SourceOver) {
         SetCompositingMode((CompositingMode)eLastMode);
+      }
     }
     return nRet;
   }

@@ -364,7 +364,8 @@ namespace GrapX
 
     ID3D11Buffer** ShaderImpl::D3D11CB_GetPixelCBEnd() const
     {
-      return reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + m_D11ResDescPool.GetSize());
+      //return reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + m_D11ResDescPool.GetSize());
+      return reinterpret_cast<ID3D11Buffer**>(m_D11ResDescPool.GetEnd());
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -930,15 +931,13 @@ namespace GrapX
       // 拷贝变量列表
       TRACE("%s:\n", __FUNCTION__);
       DataPoolDeclaration_T aDecl[] = {mapper.aMembers, mapper.aCBMembers, mapper.aGlobal};
-      Marimo::DATAPOOL_DECLARATION* pMemberBase = reinterpret_cast<Marimo::DATAPOOL_DECLARATION*>(
-        reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
+      Marimo::DATAPOOL_DECLARATION* pMemberBase = reinterpret_cast<Marimo::DATAPOOL_DECLARATION*>(m_buffer.GetEnd());
 
       for(int n = 0; n < 3; n++)
       {
         DataPoolDeclaration_T& rDecl = aDecl[n];
         if(n == 2 && _CL_NOT_(rDecl.empty())) {
-          m_pDataPoolDecl = reinterpret_cast<Marimo::DATAPOOL_DECLARATION*>(
-            reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
+          m_pDataPoolDecl = reinterpret_cast<Marimo::DATAPOOL_DECLARATION*>(m_buffer.GetEnd());
         }
 
         for(size_t i = 0; i < rDecl.size(); i++)
@@ -1008,8 +1007,7 @@ namespace GrapX
 
       if(m_nBindResourceDesc)
       {
-        m_pBindResourceDesc = reinterpret_cast<BINDRESOURCE_DESC*>(
-          reinterpret_cast<size_t>(m_buffer.GetPtr()) + m_buffer.GetSize());
+        m_pBindResourceDesc = reinterpret_cast<BINDRESOURCE_DESC*>(m_buffer.GetEnd());
         BINDRESOURCE_DESC brd;
 
         for(auto it = mapper.arraySampler.begin(); it != mapper.arraySampler.end(); ++it)

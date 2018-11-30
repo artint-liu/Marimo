@@ -169,11 +169,6 @@ GXVOID GXWndCanvas::FillRect(GXLPRECT lprect, GXCOLORREF Color)
   m_pNative->FillRectangle(lprect->left, lprect->top, lprect->right - lprect->left, lprect->bottom - lprect->top, Color);
 }
 
-GXVOID GXWndCanvas::InvertRect(GXINT xPos, GXINT yPos, GXINT nWidth, GXINT nHeight)
-{
-  m_pNative->InvertRect(xPos, yPos, nWidth, nHeight);
-}
-
 GXVOID GXWndCanvas::SetPixel(GXINT xPos, GXINT yPos, GXCOLORREF Color)
 {
   m_pNative->SetPixel(xPos, yPos, Color);

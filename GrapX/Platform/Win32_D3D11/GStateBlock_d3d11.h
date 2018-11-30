@@ -180,8 +180,8 @@ namespace GrapX
       //GXBOOL            Set               (GXDWORD Sampler, GXSamplerStateType eType, GXDWORD dwValue);
       //GXDWORD           Get               (GXDWORD Sampler, GXSamplerStateType eType);
 
-      GXHRESULT         SetState          (GXUINT Sampler, GXSAMPLERDESC* pSamplerDesc);
-      GXHRESULT         SetStateArray     (GXUINT nStartSlot, GXSAMPLERDESC* pSamplerDesc, int nCount);
+      GXHRESULT         SetState          (GXUINT Sampler, const GXSAMPLERDESC* pSamplerDesc);
+      GXHRESULT         SetStateArray     (GXUINT nStartSlot, const GXSAMPLERDESC* pSamplerDesc, int nCount);
       GXHRESULT         ResetToDefault    ();
     };
 

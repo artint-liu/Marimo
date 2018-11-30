@@ -251,7 +251,7 @@ extern "C" GXHRESULT GXDLLAPI GXRenderRootFrame()
     _gxDestroyMarkedWindow(GXWND_HANDLE(lpDesktop));
 
   GrapX::Canvas* pCanvas = lpStation->pGraphics->LockCanvas(NULL, NULL, NULL);
-  pCanvas->SetCompositingMode(GrapX::CM_SourceOver);
+  pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceOver);
 
   if(pCanvas != NULL)
   {

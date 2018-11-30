@@ -508,9 +508,9 @@ namespace GXUI
       if(hTheme)
       {
         GrapX::Canvas* pCanvas = canvas.GetCanvasUnsafe();
-        pCanvas->SetCompositingMode(GrapX::CM_SourceCopy);
+        pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceCopy);
         GXDrawThemeBackground(hTheme, pCanvas, GXWP_DIALOG, 0, &rect, NULL);
-        pCanvas->SetCompositingMode(GrapX::CM_SourceOver);
+        pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceOver);
       }
     }
     DrawItem(canvas, nItem, clr, ox, oy, (int&)rect.left, (int&)rect.top);

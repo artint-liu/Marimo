@@ -738,7 +738,7 @@ GXLRESULT DEFWNDPROC_NcPaint(LPGXWND lpWnd, GXHRGN hRgn)
     //lpWnd->m_pMenu != NULL && (lpWnd->m_uStyle & WS_CHILD) == NULL && (lpWnd->m_pParent == NULL || lpWnd->m_pParent == &CGXFrame::s_TheRootFrame))
   {
     GXHDC hdc = gxGetWindowDC(GXWND_HANDLE(lpWnd));
-    GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CM_SourceCopy);
+    GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceCopy);
     gxGetClientRect(GXWND_HANDLE(lpWnd), &rect);
     if(WINSTYLE_HASCAPTION(lpWnd->m_uStyle))
     {
@@ -762,7 +762,7 @@ GXLRESULT DEFWNDPROC_NcPaint_HasCaption(LPGXWND lpWnd, GXHRGN hRgn)
   GXRECT rect;  // 矩形区域是坐标区
   GXHDC hdc = gxGetDCEx(hWnd, hRgn, dwDCXFlags);
   GXREGN rgWin;
-  GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CM_SourceCopy);
+  GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceCopy);
   gxRectToRegn(&rgWin, &lpWnd->rectWindow);
 
   // 标题栏
@@ -802,9 +802,9 @@ GXLRESULT DEFWNDPROC_EraseBkGnd(GXHWND hWnd, GXHDC hdc)
   GXHTHEME hTheme = gxGetWindowTheme(hWnd);
   if(!hTheme)
     return 0;
-  GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CM_SourceCopy);
+  GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceCopy);
   gxDrawThemeBackground(hTheme, hdc, GXWP_DIALOG, 0, &rcClient, NULL);
-  GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CM_SourceOver);
+  GXGDI_DC_PTR(hdc)->pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceOver);
   return -1;  // 返回非0表示已经处理
 }
 GXLRESULT DEFWNDPROC_SetCursor(GXHWND hWnd, GXHWND hCursorWnd, GXLPARAM lParam)

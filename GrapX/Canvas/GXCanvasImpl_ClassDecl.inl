@@ -189,7 +189,7 @@ private:
     CALLSTATE() 
       : xOrigin         (0)
       , yOrigin         (0)
-      , eCompMode       (CM_SourceCopy)
+      , eCompMode       (CompositingMode_SourceCopy)
       , dwColorAdditive (NULL)
       , pEffectImpl     (NULL)
     {
