@@ -134,7 +134,7 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL      SetEffect            (Effect* pEffect));
     GXSTDINTERFACE(GXBOOL      SetTransform         (const float4x4* matTransform));
     GXSTDINTERFACE(GXBOOL      GetTransform         (float4x4* matTransform) const);
-    GXSTDINTERFACE(GXBOOL      SetViewportOrg       (GXINT x, GXINT y, GXLPPOINT lpPoint));
+    GXSTDINTERFACE(GXBOOL      SetViewportOrg       (GXINT x, GXINT y, GXLPPOINT lpPoint)); // 设置当前的原点与新坐标系的映射关系
     GXSTDINTERFACE(GXBOOL      GetViewportOrg       (GXLPPOINT lpPoint) const);
     GXSTDINTERFACE(GXBOOL      Flush                ());
     GXSTDINTERFACE(GXBOOL      SetSamplerState      (GXUINT Sampler, GXSAMPLERDESC* pDesc));
@@ -152,7 +152,7 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL      FillRectangle        (GXLPCRECT lprc, GXCOLORREF crFill));
     GXSTDINTERFACE(GXBOOL      FillRectangle        (GXLPCREGN lprg, GXCOLORREF crFill));
 
-    GXSTDINTERFACE(GXBOOL      ColorFillRegion      (GRegion* pRegion, GXCOLORREF crFill));
+    GXSTDINTERFACE(GXBOOL      FillRegion           (GRegion* pRegion, GXCOLORREF crFill));
 
     GXSTDINTERFACE(GXBOOL      DrawUserPrimitive    (Texture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount));
     GXSTDINTERFACE(GXBOOL      DrawTexture          (Texture*pTexture, const GXREGN *rcDest));

@@ -468,7 +468,6 @@ namespace GrapX
       }
       else
       {
-        return (mode == CompositingMode_SourceCopy) ? m_pOpaqueState[0] : m_pBlendingState[0]; // 临时！
         // 判断是不是最终渲染目标
         if(m_pTargetTex == NULL)
         {
@@ -713,7 +712,7 @@ namespace GrapX
             rect.right = m_rcClip.right;
             rect.bottom = m_rcClip.bottom;
             const GXHRESULT hRet = // Debug
-              m_pGraphics->Clear(&rect, 1, pClearCmd->flags, (GXCOLOR)pClearCmd->color, 1.0f, m_dwStencil);
+              m_pGraphics->Clear(&rect, 1, pClearCmd->flags, (GXCOLOR)COLORREF_TO_NATIVE(pClearCmd->color), 1.0f, m_dwStencil);
             ASSERT(GXSUCCEEDED(hRet));
           }
           else
@@ -724,7 +723,7 @@ namespace GrapX
 
             GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nRectCount);
             m_pClipRegion->GetRects(lpRects, nRectCount);
-            m_pGraphics->Clear(lpRects, nRectCount, pClearCmd->flags, (GXCOLOR)pClearCmd->color, 1.0f, m_dwStencil);
+            m_pGraphics->Clear(lpRects, nRectCount, pClearCmd->flags, (GXCOLOR)COLORREF_TO_NATIVE(pClearCmd->color), 1.0f, m_dwStencil);
             //_GlbUnlockStaticRects(lpRects);
           }
         }
@@ -1291,7 +1290,7 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    GXBOOL CanvasImpl::ColorFillRegion(GRegion* pRegion, GXCOLORREF crFill)
+    GXBOOL CanvasImpl::FillRegion(GRegion* pRegion, GXCOLORREF crFill)
     {
       if(pRegion == NULL)
         return FALSE;

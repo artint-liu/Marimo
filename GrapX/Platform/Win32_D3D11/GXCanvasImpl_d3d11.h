@@ -103,7 +103,7 @@ namespace GrapX
       GXBOOL      FillRectangle       (GXLPCRECT lprc, GXCOLORREF crFill) override;
       GXBOOL      FillRectangle       (GXLPCREGN lprg, GXCOLORREF crFill) override;
 
-      GXBOOL      ColorFillRegion     (GRegion* pRegion, GXCOLORREF crFill) override;
+      GXBOOL      FillRegion          (GRegion* pRegion, GXCOLORREF crFill) override;
 
       GXBOOL      DrawUserPrimitive   (Texture*pTexture, GXLPVOID lpVertices, GXUINT uVertCount, GXWORD* pIndices, GXUINT uIdxCount) override;
       GXBOOL      DrawTexture         (Texture*pTexture, const GXREGN *rcDest) override;
