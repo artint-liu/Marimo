@@ -323,9 +323,7 @@ namespace GrapX
       GXRECT        m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在flush阶段，m_rcClip只能写入/写入后读取，不能只读取，因为m_rcClip不是上一条命令的结果
 
       GXDWORD         m_dwStencil;
-      RenderTarget*   m_pTargetImage;
-      GXDWORD         m_dwTexVertColor; // 输出纹理图元时的顶点颜色
-      //GXDWORD         m_dwColorAdditive;
+      GXDWORD         m_dwTexVertColor; // 输出纹理图元时的顶点颜色，不直接参与渲染状态
       PenStyle        m_eStyle;
 
       GRegion*        m_pClipRegion;

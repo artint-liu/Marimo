@@ -73,7 +73,6 @@ namespace GrapX
     CanvasImpl::CanvasImpl(GraphicsImpl* pGraphics, GXBOOL bStatic)
       : CanvasCoreImpl    (pGraphics, 2, RESTYPE_CANVAS2D)
       , m_bStatic           (bStatic)
-      , m_pTargetImage      (NULL)
       , m_xAbsOrigin        (0)
       , m_yAbsOrigin        (0)
       , m_pInvertState      (NULL)
@@ -88,7 +87,6 @@ namespace GrapX
       , m_dwStencil         (0)
       , m_pClipRegion       (NULL)
       , m_dwTexVertColor    (-1)
-      //, m_dwColorAdditive   (0)
       , m_dwTexSlot         (NULL)
       , m_pRasterizerState  (NULL)
       , m_pDefaultEffectImpl(NULL)
@@ -336,7 +334,7 @@ namespace GrapX
       {
         //SAFE_RELEASE(m_pEffectImpl);
         SAFE_RELEASE(m_pTargetTex);
-        SAFE_RELEASE(m_pTargetImage);
+        //SAFE_RELEASE(m_pTargetImage);
         m_dwStencil = 0;
 
         SAFE_RELEASE(m_pClipRegion);
@@ -1144,13 +1142,7 @@ namespace GrapX
       IntAppendDrawCall<DRAWCALL_POINTS>(&pDrawCallCmd, CF_Points, 1, 0, NULL);
       CHECK_LOCK;
 
-      m_lpLockedVertex[m_uVertCount].z = 0;
-      m_lpLockedVertex[m_uVertCount].w = 1;
-      m_lpLockedVertex[m_uVertCount].u = 0;
-      m_lpLockedVertex[m_uVertCount].v = 0;
-      m_lpLockedVertex[m_uVertCount].color = (GXDWORD)COLORREF_TO_NATIVE(crPixel);
-
-      _SetPrimitivePos(m_uVertCount, xPos, yPos);
+      m_lpLockedVertex[m_uVertCount].Set((float)xPos, (float)yPos, (GXDWORD)COLORREF_TO_NATIVE(crPixel));
 
       m_uVertCount++;
       //SetParametersInfo(CPI_SETCOLORADDITIVE, dwPrevClrAdd, NULL);
@@ -1165,17 +1157,9 @@ namespace GrapX
       GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_LINELIST>(&pDrawCallCmd, CF_LineList, 2, 2, NULL);
       CHECK_LOCK;
 
-      for(int i = 0; i < 2; i++)
-      {
-        m_lpLockedVertex[m_uVertCount + i].z = 0;
-        m_lpLockedVertex[m_uVertCount + i].w = 1;
-        m_lpLockedVertex[m_uVertCount + i].u = 0;
-        m_lpLockedVertex[m_uVertCount + i].v = 0;
-        m_lpLockedVertex[m_uVertCount + i].color = (GXDWORD)COLORREF_TO_NATIVE(crLine);
-      }
-
-      _SetPrimitivePos(m_uVertCount, left, top);
-      _SetPrimitivePos(m_uVertCount + 1, right, bottom);
+      const GXDWORD dwColor = (GXDWORD)COLORREF_TO_NATIVE(crLine);
+      m_lpLockedVertex[m_uVertCount + 0].Set(float(left), float(top), dwColor);
+      m_lpLockedVertex[m_uVertCount + 1].Set(float(right), float(bottom), dwColor);
 
       SET_INDEX_BUFFER(0, 0);
       SET_INDEX_BUFFER(1, 1);
@@ -1195,7 +1179,7 @@ namespace GrapX
       GXUINT uBaseIndex = IntAppendDrawCall<DRAWCALL_LINELIST>(&pDrawCallCmd, CF_LineList, 4, 8, NULL);
       CHECK_LOCK;
 
-      GXDWORD dwColor = COLORREF_TO_NATIVE(crRect);
+      const GXDWORD dwColor = COLORREF_TO_NATIVE(crRect);
 
       float x1 = float(left   + m_CallState.origin.x);
       float y1 = float(top    + m_CallState.origin.y);

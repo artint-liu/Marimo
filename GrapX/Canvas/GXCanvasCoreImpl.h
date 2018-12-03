@@ -4,6 +4,7 @@ class GraphicsImpl;
 class TextureImpl;
 class SamplerStateImpl;
 class RenderTargetImpl;
+class BlendStateImpl;
 
 class CanvasCoreImpl : public Canvas
 {
@@ -11,10 +12,7 @@ class CanvasCoreImpl : public Canvas
 protected:
   GraphicsImpl*     m_pGraphics;
   GXSIZE              m_sExtent;
-  //GXINT               m_xExt;          // 物理尺寸，不受原点位置影响
-  //GXINT               m_yExt;
   RenderTargetImpl*   m_pTargetTex;
-  //EffectImpl*         m_pEffectImpl;
   BlendStateImpl*     m_pBlendStateImpl;
   DepthStencilState*  m_pDepthStencilState;
   SamplerStateImpl*   m_pSamplerState;

@@ -24,53 +24,6 @@ namespace GrapX
   {
     class GraphicsImpl;
     class SamplerStateImpl;
-    //class GRenderState : public GUnknown
-    //{
-    //  friend class GXGraphicsImpl;
-    //  friend class GXCanvasCoreImpl;
-    //  friend class GXCanvas3DImpl;
-    //private:
-    //  struct GROUPMASK  // ·Ö×éÑÚÂë 
-    //  {
-    //    union{
-    //      GXDWORD dw;
-    //      GXWORD  w[2];
-    //      GXBYTE  b[4];
-    //    };
-    //  };
-    //private:
-    //  GRenderState(GXGraphics* pGraphics);
-    //  static GXBOOL     InitializeStatic  ();
-    //  GXBOOL            Update            (GRenderState* pPrevState);
-    //  GXBOOL            ResetToDefault    ();
-    //public:
-    //  virtual GXLRESULT AddRef            ();
-    //  virtual GXLRESULT Release           ();
-
-    //  GXBOOL            Set               (GXRenderStateType eType, GXDWORD dwValue);
-    //  GXDWORD           Get               (GXRenderStateType eType);
-    //  GXBOOL            SetBlock          (GXLPCRENDERSTATE lpBlock);
-
-    //public:
-    //  GXBOOL            IntCheckUpdate    ();
-
-    //private:
-    //  static GXINT                s_aEnumToIdx           [LASTRENDERSTATEENUM];
-    //  static GXDWORD              s_aRenderStateValue    [RENDERSTATECOUNT];
-    //  static GXRenderStateType    s_aRenderStateTypeList [RENDERSTATECOUNT + 1];
-    //  GXGraphicsImpl*           m_pGraphicsImpl;
-
-    //  D3D11_RASTERIZER_DESC     m_RasterizerDesc;
-    //  ID3D11RasterizerState*    m_pRasterizerState;
-
-    //  //GXColor                   m_BlendFactor;
-    //  //D3D11_BLEND_DESC          m_BlendState;
-    //  //ID3D11BlendState*         m_pBlendState;
-
-    //  GROUPMASK                 m_aChanged[(RENDERSTATECOUNT + 31) / 32];
-    //  GXDWORD                   m_aRenderStateValue[RENDERSTATECOUNT];
-    //  //GXBOOL      m_bOnDevice;
-    //};
 
     class RasterizerStateImpl : public RasterizerState
     {

@@ -35,227 +35,9 @@ namespace GrapX
 
 #define GETRSVALUE(TYPE)  m_aRenderStateValue[s_aEnumToIdx[TYPE]]
 
-
   //////////////////////////////////////////////////////////////////////////
-  //GXINT  GRenderState::s_aEnumToIdx[LASTRENDERSTATEENUM];
-  //GXDWORD  GRenderState::s_aRenderStateValue[RENDERSTATECOUNT];
-
-  //// 这个排序影响到分组
-  //GXRenderStateType  GRenderState::s_aRenderStateTypeList[RENDERSTATECOUNT + 1] = {
-  //  //GXRS_ALPHABLENDENABLE,      GXRS_SRCBLEND,          GXRS_DESTBLEND,        GXRS_BLENDOP,
-  //  //GXRS_SEPARATEALPHABLENDENABLE,  GXRS_SRCBLENDALPHA,             GXRS_DESTBLENDALPHA,        GXRS_BLENDOPALPHA,
-
-  //  //GXRS_ZENABLE,          GXRS_ZWRITEENABLE,        GXRS_ZFUNC,          
-  //  GXRS_FILLMODE,        GXRS_CULLMODE,
-
-  //  GXRS_ANTIALIASEDLINEENABLE,     GXRS_SCISSORTESTENABLE,
-
-  //  GXRS_SHADEMODE,        
-  //  GXRS_LASTPIXEL,        
-  //  GXRS_DITHERENABLE,        GXRS_SPECULARENABLE,
-  //  //GXRS_STENCILENABLE,             GXRS_STENCILFAIL,
-  //  //GXRS_STENCILZFAIL,        GXRS_STENCILPASS,        GXRS_STENCILFUNC,        GXRS_STENCILREF,
-  //  //GXRS_STENCILMASK,        GXRS_STENCILWRITEMASK,      
-  //  GXRS_TEXTUREFACTOR,             GXRS_CLIPPING,
-  //  GXRS_LIGHTING,          GXRS_AMBIENT,          GXRS_COLORVERTEX,
-  //  GXRS_LOCALVIEWER,        GXRS_NORMALIZENORMALS,      GXRS_DIFFUSEMATERIALSOURCE,     GXRS_SPECULARMATERIALSOURCE,
-  //  GXRS_AMBIENTMATERIALSOURCE,     GXRS_EMISSIVEMATERIALSOURCE,  GXRS_VERTEXBLEND,        GXRS_CLIPPLANEENABLE,
-  //  GXRS_POINTSIZE,                 GXRS_POINTSIZE_MIN,             GXRS_POINTSPRITEENABLE,         GXRS_POINTSCALEENABLE,
-  //  GXRS_POINTSCALE_A,        GXRS_POINTSCALE_B,        GXRS_POINTSCALE_C,        GXRS_MULTISAMPLEANTIALIAS,
-  //  GXRS_MULTISAMPLEMASK,      GXRS_PATCHEDGESTYLE,      GXRS_DEBUGMONITORTOKEN,         GXRS_POINTSIZE_MAX,
-  //  GXRS_INDEXEDVERTEXBLENDENABLE,  GXRS_COLORWRITEENABLE,      GXRS_TWEENFACTOR,        
-  //  GXRS_POSITIONDEGREE,      GXRS_NORMALDEGREE,        GXRS_SLOPESCALEDEPTHBIAS,
-  //  GXRS_MINTESSELLATIONLEVEL,    GXRS_MAXTESSELLATIONLEVEL,    GXRS_ADAPTIVETESS_X,
-  //  GXRS_ADAPTIVETESS_Y,      GXRS_ADAPTIVETESS_Z,      GXRS_ADAPTIVETESS_W,            GXRS_ENABLEADAPTIVETESSELLATION,
-  //  GXRS_TWOSIDEDSTENCILMODE,    
-  //  //GXRS_CCW_STENCILFAIL,      GXRS_CCW_STENCILZFAIL,          GXRS_CCW_STENCILPASS,    GXRS_CCW_STENCILFUNC,      
-  //  GXRS_COLORWRITEENABLE1,         GXRS_COLORWRITEENABLE2,         GXRS_COLORWRITEENABLE3,
-  //  GXRS_BLENDFACTOR,        GXRS_SRGBWRITEENABLE,      GXRS_DEPTHBIAS,        
-
-  //  // Alpha Test
-  //  GXRS_ALPHATESTENABLE,      GXRS_ALPHAREF,          GXRS_ALPHAFUNC,
-
-  //  // Fog
-  //  GXRS_FOGENABLE,        GXRS_FOGCOLOR,          GXRS_FOGSTART,          GXRS_FOGEND,
-  //  GXRS_FOGTABLEMODE,        GXRS_FOGVERTEXMODE,      GXRS_FOGDENSITY,        GXRS_RANGEFOGENABLE,      
-
-  //  // Wrap
-  //  GXRS_WRAP0,          GXRS_WRAP1,          GXRS_WRAP2,          GXRS_WRAP3,
-  //  GXRS_WRAP4,          GXRS_WRAP5,          GXRS_WRAP6,          GXRS_WRAP7,    
-  //  GXRS_WRAP8,          GXRS_WRAP9,          GXRS_WRAP10,          GXRS_WRAP11,      
-  //  GXRS_WRAP12,          GXRS_WRAP13,          GXRS_WRAP14,          GXRS_WRAP15,
-  //  (GXRenderStateType)0
-  //};
-
-
-
-
-  //GRenderState::GRenderState(GXGraphics* pGraphics)
-  //  : m_pGraphicsImpl       ((GXGraphicsImpl*)pGraphics)
-  //  //, m_bOnDevice           (FALSE)
-  //  //, m_pBlendState         (NULL)
-  //  //, m_pDepthStencilState  (NULL)
-  //  , m_pRasterizerState    (NULL)
-  //  //, m_dwStencilRef        (NULL)
-  //{
-  //  ASSERT(sizeof(GROUPMASK) == 4);
-  //  ASSERT(sizeof(m_aChanged) == 16);
-  //  memset(&m_aChanged, 0, sizeof(m_aChanged));
-  //  ResetToDefault();
-
-  //  m_RasterizerDesc.FillMode = D3D11_FILL_SOLID;
-  //  m_RasterizerDesc.CullMode = D3D11_CULL_BACK;
-  //  m_RasterizerDesc.FrontCounterClockwise = FALSE;
-  //  m_RasterizerDesc.DepthBias = 0;
-  //  m_RasterizerDesc.DepthBiasClamp = 0;
-  //  m_RasterizerDesc.SlopeScaledDepthBias = 0;
-  //  m_RasterizerDesc.DepthClipEnable = FALSE;
-  //  m_RasterizerDesc.ScissorEnable = FALSE;
-  //  m_RasterizerDesc.MultisampleEnable = FALSE;
-  //  m_RasterizerDesc.AntialiasedLineEnable = FALSE;
 
   //  //////////////////////////////////////////////////////////////////////////
-  //  //m_DepthStencilDesc.DepthEnable = FALSE;
-  //  //m_DepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-  //  //m_DepthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-  //  //m_DepthStencilDesc.StencilEnable = FALSE;
-  //  //m_DepthStencilDesc.StencilReadMask = 0xf;
-  //  //m_DepthStencilDesc.StencilWriteMask = 0xf;
-  //  //m_DepthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-  //  //m_DepthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-  //  //m_DepthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-  //  //m_DepthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-  //  //m_DepthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-  //  //m_DepthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-  //  //m_DepthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-  //  //m_DepthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-  //  //////////////////////////////////////////////////////////////////////////
-  //  //m_BlendState.AlphaToCoverageEnable = FALSE;
-  //  //m_BlendState.IndependentBlendEnable = FALSE;
-  //  //for(int i = 0; i < 8; i++)
-  //  //{
-  //  //  m_BlendState.RenderTarget[i].BlendEnable = FALSE;
-  //  //  m_BlendState.RenderTarget[i].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-  //  //  m_BlendState.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-  //  //  m_BlendState.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
-  //  //  m_BlendState.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
-  //  //  m_BlendState.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-  //  //  m_BlendState.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-  //  //  m_BlendState.RenderTarget[i].RenderTargetWriteMask = 0xf;
-  //  //}
-
-  //}
-
-  //GXLRESULT GRenderState::AddRef()
-  //{
-  //  m_uRefCount++;
-  //  return m_uRefCount;
-  //}
-  //GXLRESULT GRenderState::Release()
-  //{
-  //  m_uRefCount--;
-  //  if(m_uRefCount == 0)
-  //  {
-  //    //SAFE_RELEASE(m_pBlendState);
-  //    //SAFE_RELEASE(m_pDepthStencilState);
-  //    SAFE_RELEASE(m_pRasterizerState);
-  //    delete this;
-  //    return GX_OK;
-  //  }  
-  //  //else if(m_uRefCount == 1)
-  //  //{
-  //  //  m_pGraphics->UnregisterResource(this);
-  //  //}
-
-  //  return m_uRefCount;
-  //}
-
-  //GXBOOL GRenderState::InitializeStatic()
-  //{
-  //  memset(s_aRenderStateValue, 0, RENDERSTATECOUNT * sizeof(GXDWORD));
-  //  for(GXINT i = 0;; i++)
-  //  {
-  //    if(s_aRenderStateTypeList[i] == 0)
-  //      break;
-  //    s_aEnumToIdx[s_aRenderStateTypeList[i]] = i;
-  //  }
-
-  //  return TRUE;
-  //}
-
-  //GXBOOL GRenderState::Update(GRenderState* pPrevState)
-  //{
-  //  ASSERT(this != pPrevState);
-  //  ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
-
-  //  if(pPrevState == NULL)
-  //  {
-  //    pImmediateContext->RSSetState(m_pRasterizerState);
-  //    //pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_dwStencilRef);
-  //    //pImmediateContext->OMSetBlendState(m_pBlendState, (FLOAT*)&m_BlendFactor, 0xffffffff);
-  //  }
-  //  else
-  //  {
-
-  //    if(m_pRasterizerState != pPrevState->m_pRasterizerState)
-  //    {
-  //      pImmediateContext->RSSetState(m_pRasterizerState);
-  //    }
-
-  //    //if(m_pDepthStencilState != pPrevState->m_pDepthStencilState || 
-  //    //  m_dwStencilRef != pPrevState->m_dwStencilRef)
-  //    //{
-  //    //  pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_dwStencilRef);
-  //    //}
-
-  //    //if(m_pBlendState != pPrevState->m_pBlendState) {
-  //    //  pImmediateContext->OMSetBlendState(m_pBlendState, (FLOAT*)&m_BlendFactor, 0xffffffff);
-  //    //}
-  //  }
-
-
-  //  return TRUE;
-  //}
-
-  //GXBOOL GRenderState::ResetToDefault()
-  //{
-  //  GXLPCRENDERSTATE lpDefRenderState = MOGetDefaultRenderState();
-  //  return SetBlock(lpDefRenderState);
-  //}
-
-  //GXBOOL GRenderState::Set(GXRenderStateType eType, GXDWORD dwValue)
-  //{
-  //  GXRENDERSTATE StateBlock[2] = {eType, dwValue, (GXRenderStateType)0, 0};
-  //  return SetBlock(StateBlock);
-  //  //const GXINT nStateIndex = s_aEnumToIdx[eType];
-  //  //if(m_aRenderStateValue[nStateIndex] == dwValue)
-  //  //  return FALSE;
-  //  //m_aRenderStateValue[nStateIndex] = dwValue;
-  //  //if(s_aRenderStateValue[nStateIndex] == dwValue)
-  //  //  m_aChanged[nStateIndex >> 5].dw &= ((0xFFFFFFFE) << (nStateIndex & 31));
-  //  //else
-  //  //  m_aChanged[nStateIndex >> 5].dw |= (1 << (nStateIndex & 31));
-
-  //  //if(m_bOnDevice == TRUE)
-  //  //{
-  //  //  m_pGraphics->D3DGetDevice()->SetRenderState(
-  //  //    (D3DRENDERSTATETYPE)eType, dwValue);
-  //  //}
-  //  return TRUE;
-  //}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -319,202 +101,7 @@ namespace GrapX
 
 
 
-    //GXDWORD GRenderState::Get(GXRenderStateType eType)
-    //{
-    //  const GXINT nStateIndex = s_aEnumToIdx[eType];
-    //  return m_aRenderStateValue[nStateIndex];
-    //}
-
-    //GXBOOL GRenderState::SetBlock(GXLPCRENDERSTATE lpBlock)
-    //{
-    //  int i = 0;
-    //  UINT bUpdateBlendState = 0;
-    //  UINT bUpdateDepthStencilState = 0;
-    //  UINT bUpdateRasterizer = 0;
-
-    //  while(lpBlock[i].dwType != (GXRenderStateType)0)
-    //  {
-    //    const GXRenderStateType eType = lpBlock[i].dwType;
-    //    const GXDWORD dwValue = lpBlock[i].dwValue;
-    //  //  const GXRenderStateType  eType    = lpBlock[i].dwType;
-    //  //  const GXDWORD      dwValue    = lpBlock[i].dwValue;
-    //  //  const GXINT        nStateIndex = s_aEnumToIdx[eType];
-    //  //  i++;
-
-    //  //  if(m_aRenderStateValue[nStateIndex] == dwValue)
-    //  //    continue;
-
-    //  //  m_aRenderStateValue[nStateIndex] = dwValue;
-    //  //  if(s_aRenderStateValue[nStateIndex] == dwValue)
-    //  //    m_aChanged[nStateIndex >> 5].dw &= ((0xFFFFFFFE) << (nStateIndex & 31));
-    //  //  else
-    //  //    m_aChanged[nStateIndex >> 5].dw |= (1 << (nStateIndex & 31));
-
-    //  //  if(m_bOnDevice == TRUE)
-    //  //    m_pGraphics->D3DGetDevice()->SetRenderState(
-    //  //    (D3DRENDERSTATETYPE)eType, dwValue);
-    //    //Set(lpBlock[i].dwType, lpBlock[i].dwValue);
-
-    //    switch(eType)
-    //    {
-    //    //case GXRS_BLENDFACTOR:
-    //    //  m_BlendFactor = dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_ALPHABLENDENABLE:
-    //    //  m_BlendState.RenderTarget[0].BlendEnable = dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_DESTBLEND:
-    //    //  m_BlendState.RenderTarget[0].DestBlend = (D3D11_BLEND)dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_SRCBLEND:
-    //    //  m_BlendState.RenderTarget[0].SrcBlend = (D3D11_BLEND)dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_DESTBLENDALPHA:
-    //    //  m_BlendState.RenderTarget[0].DestBlendAlpha = (D3D11_BLEND)dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_SRCBLENDALPHA:
-    //    //  m_BlendState.RenderTarget[0].SrcBlendAlpha = (D3D11_BLEND)dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_BLENDOP:
-    //    //  m_BlendState.RenderTarget[0].BlendOp = (D3D11_BLEND_OP)dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_BLENDOPALPHA:
-    //    //  m_BlendState.RenderTarget[0].BlendOpAlpha = (D3D11_BLEND_OP)dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_COLORWRITEENABLE:
-    //    //  m_BlendState.RenderTarget[0].RenderTargetWriteMask = (UINT8)dwValue;
-    //    //  bUpdateBlendState = TRUE;
-    //    //  break;
-    //    //case GXRS_ZENABLE:
-    //    //  m_DepthStencilDesc.DepthEnable = dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_ZFUNC:
-    //    //  m_DepthStencilDesc.DepthFunc = (D3D11_COMPARISON_FUNC)dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_ZWRITEENABLE:
-    //    //  if(dwValue)
-    //    //    m_DepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    //    //  else
-    //    //    m_DepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILENABLE:
-    //    //  m_DepthStencilDesc.StencilEnable = dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILWRITEMASK:
-    //    //  m_DepthStencilDesc.StencilWriteMask = (UINT8)dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILMASK:
-    //    //  m_DepthStencilDesc.StencilReadMask = (UINT8)dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILFUNC:
-    //    //  m_DepthStencilDesc.FrontFace.StencilFunc = (D3D11_COMPARISON_FUNC)dwValue;
-    //    //  m_DepthStencilDesc.BackFace.StencilFunc = (D3D11_COMPARISON_FUNC)dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILPASS:
-    //    //  m_DepthStencilDesc.FrontFace.StencilPassOp = (D3D11_STENCIL_OP)dwValue;
-    //    //  m_DepthStencilDesc.BackFace.StencilPassOp = (D3D11_STENCIL_OP)dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILFAIL:
-    //    //  m_DepthStencilDesc.FrontFace.StencilFailOp = (D3D11_STENCIL_OP)dwValue;
-    //    //  m_DepthStencilDesc.BackFace.StencilFailOp = (D3D11_STENCIL_OP)dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILZFAIL:
-    //    //  m_DepthStencilDesc.FrontFace.StencilDepthFailOp = (D3D11_STENCIL_OP)dwValue;
-    //    //  m_DepthStencilDesc.BackFace.StencilDepthFailOp = (D3D11_STENCIL_OP)dwValue;
-    //    //  bUpdateDepthStencilState = TRUE;
-    //    //  break;
-    //    //case GXRS_STENCILREF:
-    //    //  m_dwStencilRef = dwValue; // 这个不需要销毁DepthStencil对象
-    //    //  break;
-    //    case GXRS_FILLMODE:
-    //      m_RasterizerDesc.FillMode = (D3D11_FILL_MODE)dwValue;
-    //      bUpdateRasterizer = TRUE;
-    //      break;
-    //    case GXRS_CULLMODE:
-    //      m_RasterizerDesc.CullMode = (D3D11_CULL_MODE)dwValue;
-    //      bUpdateRasterizer = TRUE;
-    //      break;
-    //    case GXRS_DEPTHBIAS:
-    //      //ASSERT(0); // TODO: 没看实现细节,用到了补上
-    //      m_RasterizerDesc.DepthBias = 0;
-    //      //CLOG_WARNING(__FUNCTION__" Warning, 没看实现细节,用到了补上.\n");
-    //      break;
-    //    case GXRS_SLOPESCALEDEPTHBIAS:
-    //      m_RasterizerDesc.SlopeScaledDepthBias = *(float*)&dwValue;
-    //      bUpdateRasterizer = TRUE;
-    //      break;
-    //    case GXRS_SCISSORTESTENABLE:
-    //      m_RasterizerDesc.ScissorEnable = dwValue;
-    //      bUpdateRasterizer = TRUE;
-    //      break;
-    //    case GXRS_ANTIALIASEDLINEENABLE:
-    //      m_RasterizerDesc.AntialiasedLineEnable = dwValue;
-    //      bUpdateRasterizer = TRUE;
-    //      break;
-    //    default:
-    //      __asm nop
-    //      break;
-    //    }
-
-    //    i++;
-    //  }
-    //  //if(bUpdateBlendState) {
-    //  //  SAFE_RELEASE(m_pBlendState);
-    //  //}
-    //  //if(bUpdateDepthStencilState) {
-    //  //  SAFE_RELEASE(m_pDepthStencilState);
-    //  //}
-    //  if(bUpdateRasterizer) {
-    //    SAFE_RELEASE(m_pRasterizerState);
-    //  }
-    //  return TRUE;
-    //}
-
-    //GXBOOL GRenderState::IntCheckUpdate()
-    //{
-    //  ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-    //  ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
-
-    //  if(m_pRasterizerState == NULL)
-    //  {
-    //    pd3dDevice->CreateRasterizerState(&m_RasterizerDesc, &m_pRasterizerState);
-    //    pImmediateContext->RSSetState(m_pRasterizerState);
-    //  }
-
-    //  //if(m_pDepthStencilState == NULL)
-    //  //{
-    //  //  pd3dDevice->CreateDepthStencilState(&m_DepthStencilDesc, &m_pDepthStencilState);
-    //  //  pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_dwStencilRef);
-    //  //}
-
-    //  //if(m_pBlendState == NULL) {
-    //  //  memcpy(&m_BlendState.RenderTarget[1], &m_BlendState.RenderTarget[0], sizeof(D3D11_RENDER_TARGET_BLEND_DESC));
-    //  //  memcpy(&m_BlendState.RenderTarget[2], &m_BlendState.RenderTarget[0], sizeof(D3D11_RENDER_TARGET_BLEND_DESC) * 2);
-    //  //  memcpy(&m_BlendState.RenderTarget[4], &m_BlendState.RenderTarget[0], sizeof(D3D11_RENDER_TARGET_BLEND_DESC) * 4);
-
-    //  //  pd3dDevice->CreateBlendState(&m_BlendState, &m_pBlendState);
-
-    //  //  pImmediateContext->OMSetBlendState(m_pBlendState, (FLOAT*)&m_BlendFactor, 0xffffffff);
-    //  //}
-    //  return TRUE;
-    //}
+    
     //////////////////////////////////////////////////////////////////////////
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXHRESULT RasterizerStateImpl::AddRef()
@@ -616,7 +203,7 @@ namespace GrapX
     GXBOOL BlendStateImpl::Initialize(GXBLENDDESC* pDesc, GXUINT nNum)
     {
       // 状态合法性检查
-      if(pDesc == NULL || nNum > 8 || nNum == 0) {
+      if(pDesc == NULL || nNum > countof(m_BlendDesc.RenderTarget) || nNum == 0) {
         CLOG_ERROR(MOERROR_FMT_INVALIDPARAM, "BlendState");
         return FALSE;
       }
@@ -628,14 +215,14 @@ namespace GrapX
         GXBLENDDESC& Desc = pDesc[i < nNum ? i : nNum - 1];
         D3D11_RENDER_TARGET_BLEND_DESC& RenderTarget = m_BlendDesc.RenderTarget[i];
 
-        RenderTarget.BlendEnable = Desc.BlendEnable;
-        RenderTarget.BlendOp = (D3D11_BLEND_OP)Desc.BlendOp;
-        RenderTarget.BlendOpAlpha = (D3D11_BLEND_OP)Desc.BlendOpAlpha;
-        RenderTarget.DestBlend = (D3D11_BLEND)Desc.DestBlend;
-        RenderTarget.DestBlendAlpha = (D3D11_BLEND)Desc.DestBlendAlpha;
-        RenderTarget.SrcBlend = (D3D11_BLEND)Desc.SrcBlend;
-        RenderTarget.SrcBlendAlpha = (D3D11_BLEND)Desc.SrcBlendAlpha;
-        RenderTarget.RenderTargetWriteMask = (D3D11_BLEND)Desc.WriteMask;
+        RenderTarget.BlendEnable            = Desc.BlendEnable;
+        RenderTarget.BlendOp                = (D3D11_BLEND_OP)Desc.BlendOp;
+        RenderTarget.BlendOpAlpha           = (D3D11_BLEND_OP)Desc.BlendOpAlpha;
+        RenderTarget.DestBlend              = (D3D11_BLEND)Desc.DestBlend;
+        RenderTarget.DestBlendAlpha         = (D3D11_BLEND)Desc.DestBlendAlpha;
+        RenderTarget.SrcBlend               = (D3D11_BLEND)Desc.SrcBlend;
+        RenderTarget.SrcBlendAlpha          = (D3D11_BLEND)Desc.SrcBlendAlpha;
+        RenderTarget.RenderTargetWriteMask  = (D3D11_BLEND)Desc.WriteMask;
       }
 
       ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
@@ -773,53 +360,7 @@ namespace GrapX
     }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    //ID3D11SamplerState** GSamplerStateImpl::GetSamplers()
-    //{
-    //  //if(m_dwChangeMask != NULL)
-    //  //{
-    //  //  for(UINT i = 0; i < SAMPLERCOUNT; i++)
-    //  //  {
-    //  //    if(m_SamplerStage[i].dwMask != 0)
-    //  //    {
-    //  //      D3D11BuildSampler(i);
-    //  //      ASSERT((m_SamplerStage[i].dwMask & 0xffff) == 0);
-    //  //    }
-    //  //  }
-    //  //  ASSERT((m_dwChangeMask & 0xffff) == 0);
-    //  //}
-
-    //  // TODO: 重新实现!
-    //  CLBREAK;
-    //  return m_pSampler;
-    //}
-
-    //void GSamplerState::SetStageToDevice(DWORD dwStage)
-    //{
-    //  //LPDIRECT3DDEVICE9 const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-    //  //GXSAMPLERSTAGE& SamplerStage = m_SamplerStage[dwStage];
-
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_ADDRESSU,      SamplerStage.dwAddressU);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_ADDRESSV,      SamplerStage.dwAddressV);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_ADDRESSW,      SamplerStage.dwAddressW);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_BORDERCOLOR,   SamplerStage.dwBorderColor);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_MAGFILTER,     SamplerStage.dwMagFilter);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_MINFILTER,     SamplerStage.dwMinFilter);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_MIPFILTER,     SamplerStage.dwMipFilter);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_MIPMAPLODBIAS, SamplerStage.dwMipmapLodBias);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_MAXMIPLEVEL,   SamplerStage.dwMaxMipLevel);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_MAXANISOTROPY, SamplerStage.dwMaxAnisotropy);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_SRGBTEXTURE,   SamplerStage.dwSRGBTexture);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_ELEMENTINDEX,  SamplerStage.dwElementIndex);
-    //  //pd3dDevice->SetSamplerState(dwStage, D3DSAMP_DMAPOFFSET,    SamplerStage.dwDMapOffset);
-    //}
-
-    //void GSamplerState::SetStateToDevice(DWORD dwStage, GXSamplerStateType eType)
-    //{
-    //  //LPDIRECT3DDEVICE9 const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-    //  //HRESULT hval = pd3dDevice->SetSamplerState(dwStage, (D3DSAMPLERSTATETYPE)eType, m_SamplerStage[dwStage].m[eType]);
-    //  //ASSERT(SUCCEEDED(hval));
-    //}
-
+  
     SamplerStateImpl::SamplerStateImpl(GrapX::Graphics* pGraphics)
       : SamplerState   ()
       , m_pGraphicsImpl (static_cast<GraphicsImpl*>(pGraphics))
@@ -877,35 +418,6 @@ namespace GrapX
       return TRUE;
     }
 
-    //GXBOOL GSamplerStateImpl::ResetToDefault()
-    //{
-    //  //TODO: 这个应该根据当前的状态来设置mask, DX11实现比较特殊
-
-    //  //if(m_pGraphicsImpl->IsActiveSamplerState(this))
-    //  //{
-    //  //  for(DWORD i = 0; i < SAMPLERCOUNT; i++) {
-    //  //    // 如果已经是默认值就跳过
-    //  //    if((m_SamplerStage[i].dwMask & 0xffff) == 0) {
-    //  //      continue;
-    //  //    }
-
-    //  //    ::IntSetSamplerToDefault(&m_SamplerStage[i]);
-    //  //    SetStageToDevice(i);
-    //  //  }
-    //  //}
-    //  //else {
-    //    for(DWORD i = 0; i < SAMPLERCOUNT; i++) {
-    //  //    // 如果已经是默认值就跳过
-    //  //    if((m_SamplerStage[i].dwMask & 0xffff) == 0) {
-    //  //      continue;
-    //  //    }
-
-    //      IntSetSamplerToDefault(&m_SamplerStage[i]);
-    //      m_SamplerStage[i].dwMask = 0xffff;  // 这个Mask含义和D3D9实现里的不同!
-    //    }
-    //  //}
-    //  return TRUE;
-    //}
 
     GXBOOL SamplerStateImpl::Activate(SamplerStateImpl* pPrevSamplerState)
     {
@@ -913,67 +425,8 @@ namespace GrapX
 
       ID3D11DeviceContext* const pd3dDeviceContext = m_pGraphicsImpl->D3DGetDeviceContext();
       pd3dDeviceContext->PSSetSamplers(0, SAMPLERCOUNT, m_pSampler);
-
-      //if(pPrevSamplerState != NULL)
-      //{
-      //  ASSERT(this != pPrevSamplerState); // 外面保证这个
-
-      //  for(int i = 0; i < SAMPLERCOUNT; i++)
-      //  {
-      //    GXSAMPLERSTAGE& PrevSamp = pPrevSamplerState->m_SamplerStage[i];
-      //    GXSAMPLERSTAGE& ThisSamp = m_SamplerStage[i];
-
-      //    // 如果相等则跳过
-      //    if((PrevSamp.dwMask & 0xffff) != (ThisSamp.dwMask & 0xffff)) {
-      //      SetStageToDevice(i);
-      //    }
-      //  }
-      //}
-      //else {
-      //for(int i = 0; i < SAMPLERCOUNT; i++)
-      //{
-      //  SetStageToDevice(i);
-      //}
-      //}
-
       return TRUE;
     }
-
-    //GXBOOL GSamplerStateImpl::Set(GXDWORD Sampler, GXSamplerStateType eType, GXDWORD dwValue)
-    //{
-    //  ASSERT(Sampler < SAMPLERCOUNT && eType >= 1 && eType <= 13);
-    //  GXSAMPLERSTAGE& Samp = m_SamplerStage[Sampler];
-    //  
-    //  if(Samp.m[eType] != dwValue)
-    //  {
-    //    Samp.m[eType] = dwValue;
-    //    SET_FLAG(Samp.dwMask, 1 << eType);
-    //    SET_FLAG(m_dwChangeMask, 1 << Sampler);
-    //    //if(m_pGraphicsImpl->IsActiveSamplerState(this)) {
-    //    //  SetStateToDevice(Sampler, eType);
-    //    //}
-    //  }
-
-    //  //// 如果是默认值则复位对应位
-    //  //if(s_DefaultSamplerState.m[eType] == dwValue) {
-    //  //  RESET_FLAG(Samp.dwMask, 1 << eType);
-    //  //}
-    //  //else {
-    //  //  SET_FLAG(Samp.dwMask, 1 << eType);
-    //  //}
-
-    //  //if(m_pGraphicsImpl->IsActiveSamplerState(this)) {
-    //  //  SetStateToDevice(Sampler, eType);
-    //  //}
-    //  return TRUE;
-    //}
-
-    //GXDWORD GSamplerStateImpl::Get(GXDWORD Sampler, GXSamplerStateType eType)
-    //{
-    //  ASSERT(Sampler < SAMPLERCOUNT);
-    //  return m_SamplerStage[Sampler].m[eType];
-    //}
-    //
 
     GXHRESULT SamplerStateImpl::SetState(GXUINT Sampler, const GXSAMPLERDESC* pSamplerDesc)
     {
