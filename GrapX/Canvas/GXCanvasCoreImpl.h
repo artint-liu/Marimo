@@ -15,10 +15,12 @@ protected:
   //GXINT               m_yExt;
   RenderTargetImpl*   m_pTargetTex;
   //EffectImpl*         m_pEffectImpl;
-  BlendState*         m_pBlendState;
+  BlendStateImpl*     m_pBlendStateImpl;
   DepthStencilState*  m_pDepthStencilState;
   SamplerStateImpl*   m_pSamplerState;
   GCamera*            m_pCamera;
+
+  void CommitState();
 public:
   CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType);
   virtual ~CanvasCoreImpl();
@@ -31,6 +33,5 @@ public:
   virtual GXBOOL          Initialize          (RenderTarget* pTarget);
   virtual GXHRESULT       Invoke              (GRESCRIPTDESC* pDesc) override;
 };
-
 
 #endif // _IMPLEMENT_GRAP_X_CANVAS_CORE_H_

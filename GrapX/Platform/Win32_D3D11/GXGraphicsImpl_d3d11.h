@@ -62,6 +62,7 @@ namespace GrapX
       friend class VertexDeclImpl;
       //friend class GRenderState;
       friend class SamplerState;
+      friend class CanvasCoreImpl;
       friend class CanvasImpl;
       friend class Canvas3DImpl;
       friend class ShaderImpl;

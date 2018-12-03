@@ -171,6 +171,20 @@ namespace GrapX
       {
         GXUINT     cbSize;
         CanvasFunc cmd;
+
+        template<typename _Ty>
+        _Ty* cast_to()
+        {
+          ASSERT(sizeof(_Ty) == cbSize);
+          return static_cast<_Ty*>(this);
+        }
+
+        template<typename _Ty>
+        const _Ty* cast_to() const
+        {
+          ASSERT(sizeof(_Ty) == cbSize);
+          return static_cast<const _Ty*>(this);
+        }
       };
 
       struct DRAWCALLBASE : public CMDBASE
@@ -296,6 +310,8 @@ namespace GrapX
 
       void    SetStencil                (GXDWORD dwStencil);
       void    IntUpdateClip             (const GXRECT& rcClip);
+
+      BlendStateImpl* IntGetBlendStateUnsafe(CompositingMode mode) const;
     public:
 
     private:
@@ -309,18 +325,22 @@ namespace GrapX
       GXDWORD         m_dwStencil;
       RenderTarget*   m_pTargetImage;
       GXDWORD         m_dwTexVertColor; // 输出纹理图元时的顶点颜色
-      GXDWORD         m_dwColorAdditive;
+      //GXDWORD         m_dwColorAdditive;
       PenStyle        m_eStyle;
 
       GRegion*        m_pClipRegion;
 
       const GXUINT    s_uDefVertIndexSize = 128;
 
+      // 预置的状态
       RasterizerStateImpl*   m_pRasterizerState;
-      BlendStateImpl*        m_pBlendingState[2];// Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
-      BlendStateImpl*        m_pOpaqueState[2];  // 不透明方式的状态
+      DepthStencilStateImpl* m_pCanvasStencil[2]; // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
+      BlendStateImpl*        m_pBlendingState[2]; // Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
+      BlendStateImpl*        m_pOpaqueState[2];   // 不透明方式的状态
       BlendStateImpl*        m_pInvertState;
-      DepthStencilStateImpl* m_pCanvasStencil[2];  // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
+
+      // 预置纹理
+      Texture*      m_pWhiteTex;
 
       Primitive*    m_pPrimitive;
       PRIMITIVE*    m_lpLockedVertex;
@@ -328,12 +348,11 @@ namespace GrapX
       GXUINT        m_uIndexCount;
       GXUINT        m_uVertIndexSize;
       VIndex*       m_lpLockedIndex;
-      Texture*      m_pWhiteTex;
 
       clstd::MemBuffer m_Commands;
       CMDBASE*      m_pLastCommand;
 
-      CALLSTATE    m_CallState;   // 记录命令队列最后的状态
+      CALLSTATE    m_CallState;   // 记录命令队列最后的状态, 精简绘图函数的重复调用
 
       GXDWORD       m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
       TextureImpl*  m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0

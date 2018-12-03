@@ -4,7 +4,7 @@ CanvasCoreImpl::CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWOR
   , m_pTargetTex        (NULL)
   //, m_xExt              (0)
   //, m_yExt              (0)
-  , m_pBlendState       (NULL)
+  , m_pBlendStateImpl       (NULL)
   , m_pSamplerState     (NULL)
   , m_pDepthStencilState(NULL)
   //, m_pEffectImpl       (NULL)
@@ -17,7 +17,7 @@ CanvasCoreImpl::CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWOR
 CanvasCoreImpl::~CanvasCoreImpl()
 {
   SAFE_RELEASE(m_pTargetTex);
-  SAFE_RELEASE(m_pBlendState);
+  SAFE_RELEASE(m_pBlendStateImpl);
   SAFE_RELEASE(m_pSamplerState);
   SAFE_RELEASE(m_pDepthStencilState);
   //SAFE_RELEASE(m_pEffectImpl);
@@ -62,6 +62,11 @@ GXBOOL CanvasCoreImpl::Initialize(RenderTarget* pTarget)
 GXHRESULT CanvasCoreImpl::Invoke(GRESCRIPTDESC* pDesc)
 {
   return GX_OK;
+}
+
+void CanvasCoreImpl::CommitState()
+{
+  m_pGraphics->InlSetBlendState(m_pBlendStateImpl);
 }
 
 GXSIZE* CanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const

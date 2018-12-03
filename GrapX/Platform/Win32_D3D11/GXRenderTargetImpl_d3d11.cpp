@@ -15,6 +15,7 @@
 #include "Platform/Win32_XXX.h"
 #include "Platform/Win32_D3D11.h"
 #include "GrapX/GXRenderTarget.h"
+#include "clImage.h"
 
 // 私有头文件
 #include "Platform/Win32_D3D11/GTextureImpl_D3D11.h"
@@ -153,18 +154,58 @@ namespace GrapX
       Texture::MAPPED mapped;
       if(pReadBackTexture->Map(&mapped, GXResMap::Read))
       {
-        const GXUINT bpp = GetBytesOfGraphicsFormat(format);
-        FIBITMAP* fibmp = FreeImage_Allocate(sDimension.cx, sDimension.cy, bpp * 8);
+        GXUINT bpp = GetBytesOfGraphicsFormat(format);
+
+        GXLPVOID pSourceBits = mapped.pBits;
+        GXINT nSourcePitch = mapped.Pitch;
+        clstd::Image temp_image;
+        FREE_IMAGE_TYPE fit = FIT_BITMAP;
+        switch(format)
+        {
+        case Format_R8G8B8A8:
+          temp_image.Set(sDimension.cx, sDimension.cy, "RGBA", 8, pSourceBits, nSourcePitch);
+          break;
+        case Format_B8G8R8X8:
+          temp_image.Set(sDimension.cx, sDimension.cy, "BGRX", 8, pSourceBits, nSourcePitch);
+          break;
+        case Format_B8G8R8:
+          temp_image.Set(sDimension.cx, sDimension.cy, "BGRX", 8, pSourceBits, nSourcePitch);
+          break;
+        case Format_R8:
+          temp_image.Set(sDimension.cx, sDimension.cy, "R", 8, pSourceBits, nSourcePitch);
+          break;
+        case Format_R8G8:
+          temp_image.Set(sDimension.cx, sDimension.cy, "RG", 8, pSourceBits, nSourcePitch);
+          break;
+        case Format_R32G32B32A32_Float:
+          fit = FIT_RGBAF;
+          break;
+        case Format_R32:
+          fit = FIT_FLOAT;
+          break;
+        }
+
+        if(temp_image.GetDataSize() > 0)
+        {
+          temp_image.SetFormat("BGRA");
+          pSourceBits = temp_image.GetLine(0);
+          nSourcePitch = temp_image.GetPitch();
+          bpp = temp_image.GetChannels();
+        }
+
+        FIBITMAP* fibmp = (fit == FIT_BITMAP)
+          ? FreeImage_Allocate(sDimension.cx, sDimension.cy, bpp * 8)
+          : FreeImage_AllocateT(fit, sDimension.cx, sDimension.cy, bpp * 8);
         BYTE* pDest = FreeImage_GetBits(fibmp);
         GXINT nDestPitch = FreeImage_GetPitch(fibmp);
 
         pDest += nDestPitch * (sDimension.cy - 1);
         for(int y = 0; y < sDimension.cy; y++)
         {
-          memcpy(pDest, mapped.pBits, clMin(nDestPitch, mapped.Pitch));
+          memcpy(pDest, pSourceBits, clMin(nDestPitch, nSourcePitch));
 
           pDest -= nDestPitch;
-          mapped.pBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(mapped.pBits) + mapped.Pitch);
+          pSourceBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(pSourceBits) + nSourcePitch);
         }
 
         pReadBackTexture->Unmap();
@@ -187,6 +228,9 @@ namespace GrapX
         }
         else if(strFormat == "BMP") {
           fi_format = FIF_BMP;
+        }
+        else if(strFormat == "EXR") {
+          fi_format = FIF_EXR;
         }
 
         if(fi_format != FIF_UNKNOWN)

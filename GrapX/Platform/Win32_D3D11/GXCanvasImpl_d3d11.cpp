@@ -88,7 +88,7 @@ namespace GrapX
       , m_dwStencil         (0)
       , m_pClipRegion       (NULL)
       , m_dwTexVertColor    (-1)
-      , m_dwColorAdditive   (0)
+      //, m_dwColorAdditive   (0)
       , m_dwTexSlot         (NULL)
       , m_pRasterizerState  (NULL)
       , m_pDefaultEffectImpl(NULL)
@@ -150,13 +150,10 @@ namespace GrapX
           m_pCamera = GCamera_ScreenAligned::Create((CanvasCore*)(Canvas*)this);
         }
 
-        // 初始化渲染模式
-        m_CallState.eCompMode = CompositingMode_SourceOver;
-        m_CallState.dwColorAdditive = 0;
-        STATESWITCHING_COMPOSITINGMODE* pCompositingModeCmd = IntAppendCommand<STATESWITCHING_COMPOSITINGMODE>(CF_CompositingMode);
-        pCompositingModeCmd->mode = CompositingMode_SourceOver;
+        //STATESWITCHING_COMPOSITINGMODE* pCompositingModeCmd = IntAppendCommand<STATESWITCHING_COMPOSITINGMODE>(CF_CompositingMode);
+        //pCompositingModeCmd->mode = CompositingMode_SourceOver;
         m_dwTexVertColor = (GXDWORD)-1;
-        m_dwColorAdditive = 0;
+        //m_dwColorAdditive = 0;
         m_eStyle = PS_Solid;
 
         // 初始化空纹理时的替换纹理
@@ -205,6 +202,15 @@ namespace GrapX
           m_pGraphics->CreateBlendState((BlendState**)&m_pInvertState, &sInvertBlend, 1);
         }
 
+        // 初始化渲染模式
+        m_CallState.eCompMode = CompositingMode_SourceOver;
+        m_CallState.dwColorAdditive = 0;
+
+        SAFE_RELEASE(m_pBlendStateImpl);
+        m_pBlendStateImpl = IntGetBlendStateUnsafe(m_CallState.eCompMode);
+        m_pBlendStateImpl->AddRef();
+
+
         if(m_pCanvasStencil[0] == NULL || m_pCanvasStencil[1] == NULL)
         {
           ASSERT(m_pCanvasStencil[0] == NULL && m_pCanvasStencil[1] == NULL);
@@ -231,8 +237,8 @@ namespace GrapX
         }
 
         m_transform = gcc.matWorld;
-        m_color_mul.set(1.0f);
-        m_color_add.set(0, 0, 0, 1);
+        m_color_mul = 1.0f;
+        m_color_add = 0.0f;
 
         SAFE_RELEASE(m_CallState.RenderState.pEffectImpl);
         m_CallState.RenderState.pEffectImpl = m_pDefaultEffectImpl;
@@ -386,7 +392,7 @@ namespace GrapX
     _Ty* CanvasImpl::IntAppendCommand(CanvasFunc cmd)
     {
       if(m_pLastCommand && m_pLastCommand->cmd == cmd) {
-        return static_cast<_Ty*>(m_pLastCommand);
+        return m_pLastCommand->cast_to<_Ty>();
       }
 
       size_t cbFinalSize = m_Commands.GetSize() + sizeof(_Ty);
@@ -414,13 +420,13 @@ namespace GrapX
 
       if(m_pLastCommand && m_pLastCommand->cmd == cmd)
       {
-        if(cmd != CF_Textured || static_cast<DRAWCALL_TEXTURE*>(m_pLastCommand)->pTexture == pTextureReference)
+        if(cmd != CF_Textured || m_pLastCommand->cast_to<DRAWCALL_TEXTURE>()->pTexture == pTextureReference)
         {
           DRAWCALLBASE* pLastDrawCall = static_cast<DRAWCALLBASE*>(m_pLastCommand);
           const GXUINT uBaseIndex = pLastDrawCall->uVertexCount;
           pLastDrawCall->uVertexCount += uVertexCount;
           pLastDrawCall->uIndexCount  += uIndexCount;
-          *ppCmdBuffer = static_cast<_Ty*>(pLastDrawCall);
+          *ppCmdBuffer = pLastDrawCall->cast_to<_Ty>();
           return uBaseIndex;
         }
       }
@@ -429,7 +435,7 @@ namespace GrapX
       (*ppCmdBuffer)->uVertexCount = uVertexCount;
       (*ppCmdBuffer)->uIndexCount = uIndexCount;
       if(cmd == CF_Textured) {
-        reinterpret_cast<DRAWCALL_TEXTURE*>(*ppCmdBuffer)->pTexture = pTextureReference;
+        (*ppCmdBuffer)->cast_to<DRAWCALL_TEXTURE>()->pTexture = pTextureReference;
         if(pTextureReference) {
           pTextureReference->AddRef();
         }
@@ -454,6 +460,29 @@ namespace GrapX
       m_rcClip = rcClip;
     }
 
+    GrapX::D3D11::BlendStateImpl* CanvasImpl::IntGetBlendStateUnsafe(CompositingMode mode) const
+    {
+      if(mode == CompositingMode_InvertTarget)
+      {
+        return m_pInvertState;
+      }
+      else
+      {
+        return (mode == CompositingMode_SourceCopy) ? m_pOpaqueState[0] : m_pBlendingState[0]; // 临时！
+        // 判断是不是最终渲染目标
+        if(m_pTargetTex == NULL)
+        {
+          return (mode == CompositingMode_SourceCopy) ? m_pOpaqueState[0] : m_pBlendingState[0];
+        }
+        else
+        {
+          return (mode == CompositingMode_SourceCopy) ? m_pOpaqueState[1] : m_pBlendingState[1];
+        }
+      }
+      CLBREAK;
+      return NULL;
+    }
+
     void CanvasImpl::_SetPrimitivePos(GXUINT nIndex, const GXINT _x, const GXINT _y)
     {
       PRIMITIVE* pVertex = m_lpLockedVertex + nIndex;
@@ -468,6 +497,8 @@ namespace GrapX
       // 如果返回0, 说明Graphics使用的就是当前的 Canvas, 所以不用初始化这些东东
       if(m_pGraphics->InlSetCanvas(this) > 0)
       {
+        CanvasCoreImpl::CommitState();
+
         m_pGraphics->SetPrimitive(m_pPrimitive);
         m_pGraphics->InlSetRasterizerState(m_pRasterizerState);
         m_pGraphics->InlSetSamplerState(m_pSamplerState);
@@ -567,8 +598,9 @@ namespace GrapX
 
     GXBOOL CanvasImpl::Flush()
     {
-      if(m_Commands.GetSize() == 0)
+      if(m_Commands.GetSize() == 0) {
         return FALSE;
+      }
 
       GXBOOL bEmptyRect = gxIsRectEmpty(&m_rcClip);
 
@@ -606,8 +638,7 @@ namespace GrapX
         case CF_LineList:
         {
           TRACE_CMD("CF_LineList\n");
-          const DRAWCALL_LINELIST* pLineListCmd = static_cast<const DRAWCALL_LINELIST*>(pCmdPtr);
-          ASSERT(sizeof(DRAWCALL_LINELIST) == pCmdPtr->cbSize);
+          const DRAWCALL_LINELIST* pLineListCmd = pCmdPtr->cast_to<DRAWCALL_LINELIST>();
           if(bEmptyRect == FALSE) {
 
             m_pGraphics->DrawPrimitive(GXPT_LINELIST,
@@ -622,8 +653,7 @@ namespace GrapX
         case CF_Points:
         {
           TRACE_CMD("CF_Points\n");
-          const DRAWCALL_POINTS* pPointsCmd = static_cast<const DRAWCALL_POINTS*>(pCmdPtr);
-          ASSERT(sizeof(DRAWCALL_POINTS) == pCmdPtr->cbSize);
+          const DRAWCALL_POINTS* pPointsCmd = pCmdPtr->cast_to<DRAWCALL_POINTS>();
           if(bEmptyRect == FALSE) {
             m_pGraphics->DrawPrimitive(GXPT_POINTLIST, nBaseVertex, pPointsCmd->uVertexCount);
           }
@@ -633,8 +663,7 @@ namespace GrapX
         case CF_Triangle:
         {
           TRACE_CMD("CF_Trangle\n");
-          const DRAWCALL_TRIANGLELIST* pTriangleListCmd = static_cast<const DRAWCALL_TRIANGLELIST*>(pCmdPtr);
-          ASSERT(sizeof(DRAWCALL_TRIANGLELIST) == pCmdPtr->cbSize);
+          const DRAWCALL_TRIANGLELIST* pTriangleListCmd = pCmdPtr->cast_to<DRAWCALL_TRIANGLELIST>();
           if(bEmptyRect == FALSE) {
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
               nBaseVertex, 0, pTriangleListCmd->uVertexCount, nStartIndex, pTriangleListCmd->uIndexCount / 3);
@@ -647,8 +676,7 @@ namespace GrapX
         case CF_Textured:
         {
           TRACE_CMD("CF_Textured\n");
-          const DRAWCALL_TEXTURE* pTextureCmd = static_cast<const DRAWCALL_TEXTURE*>(pCmdPtr);
-          ASSERT(sizeof(DRAWCALL_TEXTURE) == pCmdPtr->cbSize);
+          const DRAWCALL_TEXTURE* pTextureCmd = pCmdPtr->cast_to<DRAWCALL_TEXTURE>();
 
           // TODO: 需要一个Texture对象记录状态
           if(bEmptyRect == FALSE)
@@ -668,8 +696,7 @@ namespace GrapX
 
         case CF_SetSamplerState:
         {
-          const STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = static_cast<const STATESWITCHING_SAMPLERSTATE*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_SAMPLERSTATE) == pCmdPtr->cbSize);
+          const STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = pCmdPtr->cast_to<STATESWITCHING_SAMPLERSTATE>();
           m_pSamplerState->SetState(pSamplerStateCmd->sampler_slot, &pSamplerStateCmd->desc);
         }
         break;
@@ -677,8 +704,7 @@ namespace GrapX
         case CF_Clear:
         {
           TRACE_CMD("CF_Clear\n");
-          const STATESWITCHING_CLEAR* pClearCmd = static_cast<const STATESWITCHING_CLEAR*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_CLEAR) == pCmdPtr->cbSize);
+          const STATESWITCHING_CLEAR* pClearCmd = pCmdPtr->cast_to<STATESWITCHING_CLEAR>();
           if(m_pClipRegion == NULL)
           {
             GXRECT rect;
@@ -706,43 +732,21 @@ namespace GrapX
         case CF_CompositingMode:
         {
           TRACE_CMD("CF_CompositingMode\n");
-          const STATESWITCHING_COMPOSITINGMODE* pCompositingModeCmd
-            = static_cast<const STATESWITCHING_COMPOSITINGMODE*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_COMPOSITINGMODE) == pCmdPtr->cbSize);
+          const STATESWITCHING_COMPOSITINGMODE* pCompositingModeCmd = pCmdPtr->cast_to<STATESWITCHING_COMPOSITINGMODE>();
 
-          BlendStateImpl* pBlendState = NULL;
-
-          if(pCompositingModeCmd->mode == CompositingMode_InvertTarget)
-          {
-            pBlendState = m_pInvertState;
-          }
-          else
-          {
-            // 判断是不是最终渲染目标
-            if(m_pTargetTex == NULL)
-            {
-              if(pCompositingModeCmd->mode == CompositingMode_SourceCopy)
-                pBlendState = m_pOpaqueState[0];
-              else
-                pBlendState = m_pBlendingState[0];
-            }
-            else
-            {
-              if(pCompositingModeCmd->mode == CompositingMode_SourceCopy)
-                pBlendState = m_pOpaqueState[1];
-              else
-                pBlendState = m_pBlendingState[1];
-            }
-          }
+          BlendStateImpl* pBlendState = IntGetBlendStateUnsafe(pCompositingModeCmd->mode);
           m_pGraphics->InlSetBlendState(pBlendState);
+
+          SAFE_RELEASE(m_pBlendStateImpl);
+          m_pBlendStateImpl = pBlendState;
+          m_pBlendStateImpl->AddRef();
         }
         break;
 
         case CF_Effect:
         {
           TRACE_CMD("CF_Effect\n");
-          const STATESWITCHING_EFFECT* pEffectCmd = static_cast<const STATESWITCHING_EFFECT*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_EFFECT) == pCmdPtr->cbSize);
+          const STATESWITCHING_EFFECT* pEffectCmd = pCmdPtr->cast_to<STATESWITCHING_EFFECT>();
 
           //if(m_CurrentEffect.pEffectImpl == pEffectCmd->pEffectImpl) {
           //  break;
@@ -771,11 +775,9 @@ namespace GrapX
         case CF_ColorAdditive:
         {
           TRACE_CMD("CF_ColorAdditive\n");
-          const STATESWITCHING_COLORADD* pColorAddCmd = static_cast<const STATESWITCHING_COLORADD*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_COLORADD) == pCmdPtr->cbSize);
-          m_dwColorAdditive = (GXDWORD)pColorAddCmd->color;
-          m_color_add = m_dwColorAdditive;
+          const STATESWITCHING_COLORADD* pColorAddCmd = pCmdPtr->cast_to<STATESWITCHING_COLORADD>();
 
+          m_color_add = (GXDWORD)pColorAddCmd->color;
           if(m_CurrentEffect.color_add.IsValid())
           {
             m_CurrentEffect.color_add = m_color_add;
@@ -791,8 +793,7 @@ namespace GrapX
         case CF_SetClipBox:
         {
           TRACE_CMD("CF_SetClipBox\n");
-          const STATESWITCHING_SETCLIPBOX* pClipBoxCmd = static_cast<const STATESWITCHING_SETCLIPBOX*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_SETCLIPBOX) == pCmdPtr->cbSize);
+          const STATESWITCHING_SETCLIPBOX* pClipBoxCmd = pCmdPtr->cast_to<STATESWITCHING_SETCLIPBOX>();
           GXREGN rgClip;
           GXRECT rcClip = pClipBoxCmd->rect;
           SAFE_RELEASE(m_pClipRegion);
@@ -829,8 +830,7 @@ namespace GrapX
         break;
         case CF_SetTextClip:
         {
-          const STATESWITCHING_SETTEXTCLIP* pTextClipCmd = static_cast<const STATESWITCHING_SETTEXTCLIP*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_SETTEXTCLIP) == pCmdPtr->cbSize);
+          const STATESWITCHING_SETTEXTCLIP* pTextClipCmd = pCmdPtr->cast_to<STATESWITCHING_SETTEXTCLIP>();
           GXRECT rcClip = pTextClipCmd->rect;
           GXREGN rgClip;
           gxRectToRegn(&rgClip, &rcClip);
@@ -840,8 +840,7 @@ namespace GrapX
         case CF_SetRegion:
         {
           TRACE_CMD("CF_SetRegion\n");
-          const STATESWITCHING_REGION* pRegionCmd = static_cast<const STATESWITCHING_REGION*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_REGION) == pCmdPtr->cbSize);
+          const STATESWITCHING_REGION* pRegionCmd = pCmdPtr->cast_to<STATESWITCHING_REGION>();
           if(UpdateStencil(pRegionCmd->pRegion) == RC_NULL) {
             bEmptyRect = TRUE;
           }
@@ -856,8 +855,7 @@ namespace GrapX
           break;
         case CF_SetExtTexture:
         {
-          const STATESWITCHING_TEXTUREEXT* pTextureExtCmd = static_cast<const STATESWITCHING_TEXTUREEXT*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_TEXTUREEXT) == pCmdPtr->cbSize);
+          const STATESWITCHING_TEXTUREEXT* pTextureExtCmd = pCmdPtr->cast_to<STATESWITCHING_TEXTUREEXT>();
 
           const GXUINT uStage = pTextureExtCmd->stage;
           Texture* pTexture = pTextureExtCmd->pTexture;
@@ -873,8 +871,7 @@ namespace GrapX
         break;
         case CF_SetTransform:
         {
-          const STATESWITCHING_TRANSFORM* pTransformCmd = static_cast<const STATESWITCHING_TRANSFORM*>(pCmdPtr);
-          ASSERT(sizeof(STATESWITCHING_TRANSFORM) == pCmdPtr->cbSize);
+          const STATESWITCHING_TRANSFORM* pTransformCmd = pCmdPtr->cast_to<STATESWITCHING_TRANSFORM>();
 
           m_transform = pTransformCmd->transform;
          
@@ -915,16 +912,18 @@ namespace GrapX
         return FALSE;
       }
 
-      STATESWITCHING_EFFECT* pEffectCmd = IntAppendCommand<STATESWITCHING_EFFECT>(CF_Effect);
+      // 这个不增加引用计数
+      EffectImpl* pEffectImpl = pEffect ? static_cast<EffectImpl*>(pEffect) : m_pDefaultEffectImpl;
 
-      pEffectCmd->pEffectImpl = static_cast<EffectImpl*>(pEffect);
+      STATESWITCHING_EFFECT* pEffectCmd = IntAppendCommand<STATESWITCHING_EFFECT>(CF_Effect);
+      pEffectCmd->pEffectImpl = pEffectImpl;
 
       SAFE_RELEASE(m_CallState.RenderState.pEffectImpl);
-      m_CallState.RenderState.pEffectImpl = static_cast<EffectImpl*>(pEffect);
+      m_CallState.RenderState.pEffectImpl = pEffectImpl;
 
-      if(pEffect != NULL) {
-        pEffect->AddRef();
-        pEffect->AddRef();
+      if(pEffectImpl != NULL) {
+        pEffectImpl->AddRef(); // pEffectCmd->pEffectImpl
+        pEffectImpl->AddRef(); // m_CallState.RenderState.pEffectImpl
       }
 
       return TRUE;
