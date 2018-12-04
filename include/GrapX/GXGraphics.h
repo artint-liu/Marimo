@@ -116,7 +116,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT SetRasterizerState   (RasterizerState* pRasterizerState));
     GXSTDINTERFACE(GXHRESULT SetBlendState        (BlendState* pBlendState));
     GXSTDINTERFACE(GXHRESULT SetDepthStencilState (DepthStencilState* pDepthStencilState));
-    GXSTDINTERFACE(GXHRESULT SetSamplerState      (SamplerState* pSamplerState));
+    GXSTDINTERFACE(GXHRESULT SetSamplerState      (GXUINT slot, SamplerState* pSamplerState));
 
     GXSTDINTERFACE(GXHRESULT Clear              (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil));
     GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount));
@@ -284,7 +284,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT    CreateRasterizerState      (RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc));
     GXSTDINTERFACE(GXHRESULT    CreateBlendState           (BlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum));
     GXSTDINTERFACE(GXHRESULT    CreateDepthStencilState    (DepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState));
-    GXSTDINTERFACE(GXHRESULT    CreateSamplerState         (SamplerState** ppSamplerState));
+    GXSTDINTERFACE(GXHRESULT    CreateSamplerState         (SamplerState** ppSamplerState, const GXSAMPLERDESC* pDesc));
 
     // GXImage
     // TODO: 即使创建失败,也会返回一个默认图片

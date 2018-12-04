@@ -33,7 +33,7 @@
   virtual GXHRESULT SetRasterizerState    (RasterizerState* pRasterizerState) override;
   virtual GXHRESULT SetBlendState         (BlendState* pBlendState) override;
   virtual GXHRESULT SetDepthStencilState  (DepthStencilState* pDepthStencilState) override;
-  virtual GXHRESULT SetSamplerState       (SamplerState* pSamplerState) override;
+  virtual GXHRESULT SetSamplerState       (GXUINT slot, SamplerState* pSamplerState) override;
 
   virtual GXHRESULT Clear               (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil) override;
   virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount) override;
@@ -72,7 +72,7 @@
   GXHRESULT   IntCreateRasterizerState    (RasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc);
   GXHRESULT   IntCreateBlendState         (BlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum);
   GXHRESULT   IntCreateDepthStencilState  (DepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState);
-  GXHRESULT   IntCreateSamplerState       (SamplerStateImpl** pSamplerState, SamplerStateImpl* pDefault);
+  GXHRESULT   IntCreateSamplerState       (SamplerStateImpl** pSamplerState, const GXSAMPLERDESC* pDesc);
 
   // GPrimitive
   GXHRESULT CreatePrimitive               (GrapX::Primitive** pPrimitive, GXLPCSTR szName, GXLPCVERTEXELEMENT pVertexDecl, GXResUsage eResUsage,
@@ -103,7 +103,7 @@
   virtual GXHRESULT   CreateRasterizerState   (RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc) override;
   virtual GXHRESULT   CreateBlendState        (BlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum) override;
   virtual GXHRESULT   CreateDepthStencilState (DepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState) override;
-  virtual GXHRESULT   CreateSamplerState      (SamplerState** ppSamplerState) override;
+  virtual GXHRESULT   CreateSamplerState      (SamplerState** ppSamplerState, const GXSAMPLERDESC* pDesc) override;
 
   // GXImage
   // TODO: 即使创建失败,也会返回一个默认图片
@@ -180,11 +180,11 @@ private:
   inline GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
   //inline GXBOOL     InlSetRenderState       (GRenderStateImpl* pRenderState);
   template<class _TState>
-  inline GXBOOL     InlSetStateT            (_TState*& pCurState, _TState* pState);
+  inline GXBOOL     InlSetStateT            (GXUINT slot, _TState*& pCurState, _TState* pState);
   inline GXBOOL     InlSetRasterizerState   (RasterizerStateImpl* pRasterizerState);
   inline GXBOOL     InlSetBlendState        (BlendStateImpl* pBlendState);
   inline GXBOOL     InlSetDepthStencilState (DepthStencilStateImpl* pDepthStencilState);
-  inline GXBOOL     InlSetSamplerState      (SamplerStateImpl* pSamplerState);
+  inline GXBOOL     InlSetSamplerState      (GXUINT slot, SamplerStateImpl* pSamplerState);
   inline GXBOOL     InlSetShader            (Shader* pShader);
   inline GXBOOL     InlSetEffect            (EffectImpl* pEffect);
   inline GXHRESULT  InlSetVertexDecl        (VertexDeclImpl* pVertexDecl);

@@ -434,7 +434,7 @@ namespace GrapX
       case RC_ResetDevice:
       {
         //m_pCurRenderState->Update(NULL);
-        m_pCurSamplerState->Activate(NULL);
+        m_pCurSamplerState->Activate(0, NULL);
       }
       break;
       case RC_ResizeDevice:

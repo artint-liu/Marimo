@@ -4872,16 +4872,29 @@ struct GXSAMPLERDESC {
   GXTextureFilterType   MagFilter;
   GXTextureFilterType   MinFilter;
   GXTextureFilterType   MipFilter;
+};
 
-  GXSAMPLERDESC()
-    : AddressU    (GXTADDRESS_WRAP)
-    , AddressV    (GXTADDRESS_WRAP)
-    , AddressW    (GXTADDRESS_WRAP)
-    , BorderColor (0)
-    , MagFilter   (GXTEXFILTER_POINT)
-    , MinFilter   (GXTEXFILTER_POINT)
-    , MipFilter   (GXTEXFILTER_POINT)
+struct GXSamplerDesc : public GXSAMPLERDESC
+{
+  GXSamplerDesc()
   {
+    AddressU    = GXTADDRESS_WRAP;
+    AddressV    = GXTADDRESS_WRAP;
+    AddressW    = GXTADDRESS_WRAP;
+    BorderColor = 0;
+    MagFilter   = GXTEXFILTER_POINT;
+    MinFilter   = GXTEXFILTER_POINT;
+    MipFilter   = GXTEXFILTER_POINT;
+  }
+
+  operator const GXSAMPLERDESC*() const
+  {
+    return this;
+  }
+
+  operator GXSAMPLERDESC*()
+  {
+    return this;
   }
 };
 

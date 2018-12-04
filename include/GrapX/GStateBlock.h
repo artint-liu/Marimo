@@ -33,9 +33,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT  Release         ());
 
     GXSTDINTERFACE(GXHRESULT  Invoke          (GRESCRIPTDESC* pDesc));
-    GXSTDINTERFACE(GXHRESULT  SetState        (GXUINT nSamplerSlot, const GXSAMPLERDESC* pSamplerDesc));
-    GXSTDINTERFACE(GXHRESULT  SetStateArray   (GXUINT nStartSlot, const GXSAMPLERDESC* pSamplerDesc, int nCount));
-    GXSTDINTERFACE(GXHRESULT  ResetToDefault  ());
+    GXSTDINTERFACE(GXHRESULT  GetDesc         (GXSAMPLERDESC* pSamplerDesc));
   };
 } // namespace GrapX
 

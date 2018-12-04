@@ -64,7 +64,7 @@ namespace GrapX
       GXLRESULT GenerateRasterizerState   (GRESKETCH* pDesc, const GXRASTERIZERDESC* pStateDesc);
       GXLRESULT GenerateBlendState        (GRESKETCH* pDesc, const GXBLENDDESC* pStateDesc);
       GXLRESULT GenerateDepthStencilState (GRESKETCH* pDesc, const GXDEPTHSTENCILDESC* pStateDesc);
-      //GXLRESULT GenerateSamplerState      (GRESFEATUREDESC* pDesc, const GXSAMPLERDESC* pStateDesc);
+      GXLRESULT GenerateSamplerState      (GRESKETCH* pDesc, const GXSAMPLERDESC* pStateDesc);
     }
 
     /*

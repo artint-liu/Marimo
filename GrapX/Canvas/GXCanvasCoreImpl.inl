@@ -46,15 +46,9 @@ GXBOOL CanvasCoreImpl::Initialize(RenderTarget* pTarget)
     m_sExtent.cy = GraphDeviceDesc.BackBufferHeight;
   }
 
-  if(m_pSamplerState == NULL) {
-    m_pGraphics->CreateSamplerState(reinterpret_cast<SamplerState**>(&m_pSamplerState));
-  }
-  else {
-    m_pSamplerState->ResetToDefault();
-  }
-
-  //m_pEffectImpl = (EffectImpl*)m_pGraphics->IntGetEffect();
-  //m_pEffectImpl->AddRef();
+  SAFE_RELEASE(m_pSamplerState);
+  m_pSamplerState = m_pGraphics->m_pDefaultSamplerState;
+  m_pSamplerState->AddRef();
 
   return TRUE;
 }

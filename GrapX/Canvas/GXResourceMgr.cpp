@@ -507,6 +507,53 @@ namespace GrapX
         return GX_OK;
       }
 
+      GXLRESULT GenerateSamplerState(GRESKETCH* pDesc, const GXSAMPLERDESC* pStateDesc)
+      {
+        STATIC_ASSERT(sizeof(GXSAMPLERDESC) == 40);  // 防止DESC结构体修改导致这里收集错误而设置
+        ASSERT(pStateDesc->AddressU < 8);
+        ASSERT(pStateDesc->AddressV < 8);
+        ASSERT(pStateDesc->AddressW < 8);
+        ASSERT(pStateDesc->MinFilter < 8);
+        ASSERT(pStateDesc->MagFilter < 8);
+        ASSERT(pStateDesc->MipFilter < 8);
+
+        struct CONTEXT
+        {
+          union
+          {
+            struct
+            {
+              GXDWORD AddressU : 3;
+              GXDWORD AddressV : 3;
+              GXDWORD AddressW : 3;
+              GXDWORD MinFilter : 3;
+              GXDWORD MagFilter : 3;
+              GXDWORD MipFilter : 3;
+            };
+            GXDWORD dwCode;
+          };
+          CONTEXT()
+          {
+            dwCode = 0;
+          }
+        }ctx;
+        //GXDWORD dwCode = 
+        STATIC_ASSERT(sizeof(CONTEXT) == sizeof(ctx.dwCode));
+
+        ctx.AddressU = pStateDesc->AddressU;
+        ctx.AddressV = pStateDesc->AddressV;
+        ctx.AddressW = pStateDesc->AddressW;
+        ctx.MinFilter = pStateDesc->MinFilter;
+        ctx.MagFilter = pStateDesc->MagFilter;
+        ctx.MipFilter = pStateDesc->MipFilter;
+
+        pDesc->dwCategoryId = RCC_SamplerState;
+        pDesc->strResourceName.Format(_CLTEXT("%x-%x-%x-%x-%x"), ctx.dwCode,
+          pStateDesc->BorderColor.r, pStateDesc->BorderColor.g, pStateDesc->BorderColor.b, pStateDesc->BorderColor.a);
+
+        return GX_OK;
+      }
+
       /*
       GXLRESULT GenerateSamplerState(GRESKETCH* pDesc, const GXSAMPLERDESC* pStateDesc)
       {

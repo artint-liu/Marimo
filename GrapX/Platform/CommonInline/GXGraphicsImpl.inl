@@ -12,7 +12,7 @@
     m_aCanvasPtrCache[i] = new CanvasImpl(this, TRUE);
 
   //GRenderState::InitializeStatic();
-  SamplerStateImpl::InitializeStatic();
+  //SamplerStateImpl::InitializeStatic();
   MaterialImpl::InitializeMtlStateDict();
   //IntCreateRenderState(&m_pCurRenderState);
 
@@ -47,8 +47,10 @@
   m_pCurDepthStencilState = m_pDefaultDepthStencilState;
   m_pCurDepthStencilState->AddRef();
 
-  IntCreateSamplerState(&m_pDefaultSamplerState, NULL);
-  IntCreateSamplerState(&m_pCurSamplerState, m_pDefaultSamplerState);
+  GXSamplerDesc sampler_desc;
+  IntCreateSamplerState(&m_pDefaultSamplerState, sampler_desc);
+  m_pCurSamplerState = m_pDefaultSamplerState;
+  m_pCurSamplerState->AddRef();
 
 
   //CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME, 1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
@@ -258,9 +260,9 @@ GXHRESULT GraphicsImpl::CreateDepthStencilState(DepthStencilState** ppDepthStenc
   return hval;
 }
 
-GXHRESULT GraphicsImpl::CreateSamplerState(SamplerState** ppSamplerState)
+GXHRESULT GraphicsImpl::CreateSamplerState(SamplerState** ppSamplerState, const GXSAMPLERDESC* pDesc)
 {
-  return IntCreateSamplerState((SamplerStateImpl**)ppSamplerState, m_pDefaultSamplerState);
+  return IntCreateSamplerState((SamplerStateImpl**)ppSamplerState, pDesc);
 }
 
 GXHRESULT GraphicsImpl::CreatePrimitive(
@@ -724,15 +726,31 @@ GXHRESULT GraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szSha
 }
 #endif // 0
 
-GXHRESULT GraphicsImpl::IntCreateSamplerState(SamplerStateImpl** ppSamplerState, SamplerStateImpl* pDefault)
+GXHRESULT GraphicsImpl::IntCreateSamplerState(SamplerStateImpl** ppSamplerState, const GXSAMPLERDESC* pDesc)
 {
-  (*ppSamplerState) = NULL;
-  (*ppSamplerState) = new SamplerStateImpl(this);
-  if(InlCheckNewAndIncReference(*ppSamplerState)) {
-    if((*ppSamplerState)->Initialize(pDefault)) {
+  GRESKETCH ResFeatDesc;
+
+  // 资源特征提取
+  GrapX::Internal::ResourceSketch::GenerateSamplerState(&ResFeatDesc, pDesc);
+
+  GResource* pResource = m_ResMgr.Find(&ResFeatDesc);
+  if(pResource != NULL) {
+    GXHRESULT hr = pResource->AddRef();
+    //m_pLogger->OutputFormatA("...Succeeded(%d).\n", hval);
+    *ppSamplerState = static_cast<SamplerStateImpl*>(pResource);
+    return hr;
+  }
+
+  SamplerStateImpl* pSampleStateImpl = new SamplerStateImpl(this);
+  if(InlCheckNewAndIncReference(pSampleStateImpl)) {
+    if(pSampleStateImpl->Initialize(pDesc)) {
+      *ppSamplerState = pSampleStateImpl;
+      RegisterResource(pSampleStateImpl, &ResFeatDesc);
       return GX_OK;
     }
   }
+
+  SAFE_RELEASE(pSampleStateImpl);
   return GX_FAIL;
 }
 
@@ -1031,13 +1049,13 @@ GXHRESULT GraphicsImpl::SetDepthStencilState(DepthStencilState* pDepthStencilSta
 
 }
 
-GXHRESULT GraphicsImpl::SetSamplerState(SamplerState* pSamplerState)
+GXHRESULT GraphicsImpl::SetSamplerState(GXUINT slot, SamplerState* pSamplerState)
 {
   if(pSamplerState == NULL) {
     pSamplerState = m_pDefaultSamplerState;
   }
 
-  if(InlSetSamplerState(static_cast<SamplerStateImpl*>(pSamplerState))) {
+  if(InlSetSamplerState(slot, static_cast<SamplerStateImpl*>(pSamplerState))) {
     return GX_OK;
   }
   return GX_FAIL;

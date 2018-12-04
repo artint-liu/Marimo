@@ -157,8 +157,9 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL RasterizerStateImpl::Activate(RasterizerStateImpl* pPrevState)
+    GXBOOL RasterizerStateImpl::Activate(GXUINT slot, RasterizerStateImpl* pPrevState)
     {
+      ASSERT(slot == 0);
       ASSERT(m_pGraphicsImpl->InlIsActiveRasterizerState(this));
       InlSetRasterizerState();
       return TRUE;
@@ -241,8 +242,9 @@ namespace GrapX
       pd3dContext->OMSetBlendState(m_pBlendState, (float*)&crBlendFactor, 0xffffffff);
     }
 
-    GXBOOL BlendStateImpl::Activate(BlendStateImpl* pPrevState)
+    GXBOOL BlendStateImpl::Activate(GXUINT slot, BlendStateImpl* pPrevState)
     {
+      ASSERT(slot == 0);
       ASSERT(m_pGraphicsImpl->InlIsActiveBlendState(this));
       InlSetBlendState();
       return TRUE;
@@ -313,8 +315,9 @@ namespace GrapX
       return SUCCEEDED(hval);
     }
 
-    GXBOOL DepthStencilStateImpl::Activate(DepthStencilStateImpl* pPrevState)
+    GXBOOL DepthStencilStateImpl::Activate(GXUINT slot, DepthStencilStateImpl* pPrevState)
     {
+      ASSERT(slot == 0);
       ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
       pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
       return TRUE;
@@ -337,9 +340,10 @@ namespace GrapX
 
     SamplerStateImpl::~SamplerStateImpl()
     {
-      for(UINT i = 0; i < SAMPLERCOUNT; i++) {
-        SAFE_RELEASE(m_pSampler[i]);
+      if(m_pD3D11SamplerState) {
+        m_pGraphicsImpl->UnregisterResource(this);
       }
+      SAFE_RELEASE(m_pD3D11SamplerState);
     }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -364,128 +368,87 @@ namespace GrapX
     SamplerStateImpl::SamplerStateImpl(GrapX::Graphics* pGraphics)
       : SamplerState   ()
       , m_pGraphicsImpl (static_cast<GraphicsImpl*>(pGraphics))
-      //, m_dwChangeMask  (0xffff)
+      , m_pD3D11SamplerState(NULL)
     {
-      //ResetToDefault();
-      //memset(m_pSampler, 0, sizeof(ID3D11SamplerState*) * SAMPLERCOUNT);
-      InlSetZeroT(m_pSampler);
       InlSetZeroT(m_SamplerDesc);
     }
 
-    GXBOOL SamplerStateImpl::InitializeStatic()
-    {
-      //IntSetSamplerToDefault(&s_DefaultSamplerState);
-      return TRUE;
-    }
-
-    GXBOOL SamplerStateImpl::Initialize(SamplerStateImpl* pDefault)
+    GXBOOL SamplerStateImpl::Initialize(const GXSAMPLERDESC* pDesc)
     {
       ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-      //ID3D11DeviceContext* const pd3dDeviceContext = m_pGraphicsImpl->D3DGetDeviceContext();
-      if(pDefault == NULL)
-      {
-        D3D11_SAMPLER_DESC sampler_desc = { D3D11_FILTER_MIN_MAG_MIP_POINT };
-        sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-        sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-        sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-        sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-        sampler_desc.MipLODBias = 0.0f;
-        sampler_desc.MaxAnisotropy = 0;
-        sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS;
-        sampler_desc.BorderColor[0] = 0.0f;
-        sampler_desc.BorderColor[1] = 0.0f;
-        sampler_desc.BorderColor[2] = 0.0f;
-        sampler_desc.BorderColor[3] = 0.0f;
-        sampler_desc.MinLOD = 0.0f;
-        sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
-        ID3D11SamplerState* pd3d11SamplerState = NULL;
-        V(pd3dDevice->CreateSamplerState(&sampler_desc, &pd3d11SamplerState));
-        for(UINT i = 0; i < SAMPLERCOUNT; i++)
-        {
-          m_pSampler[i] = pd3d11SamplerState;
-          m_pSampler[i]->AddRef();
-        }
-        SAFE_RELEASE(pd3d11SamplerState);
-      }
-      else
-      {
-        for(UINT i = 0; i < SAMPLERCOUNT; i++)
-        {
-          m_pSampler[i] = pDefault->m_pSampler[i];
-          m_pSampler[i]->AddRef();
-        }
-      }
-      return TRUE;
+      D3D11_SAMPLER_DESC D3D11Desc;
+      InterfaceDescToD3D11Desc(D3D11Desc, *pDesc);
+      m_SamplerDesc = *pDesc;
+      HRESULT hr = pd3dDevice->CreateSamplerState(&D3D11Desc, &m_pD3D11SamplerState);
+      return SUCCEEDED(hr);
     }
 
 
-    GXBOOL SamplerStateImpl::Activate(SamplerStateImpl* pPrevSamplerState)
+    GXBOOL SamplerStateImpl::Activate(GXUINT slot, SamplerStateImpl* pPrevSamplerState)
     {
       ASSERT(m_pGraphicsImpl->InlIsActiveSamplerState(this)); // 确定已经放置到Graphics上
 
       ID3D11DeviceContext* const pd3dDeviceContext = m_pGraphicsImpl->D3DGetDeviceContext();
-      pd3dDeviceContext->PSSetSamplers(0, SAMPLERCOUNT, m_pSampler);
+      pd3dDeviceContext->PSSetSamplers(slot, 1, &m_pD3D11SamplerState);
       return TRUE;
     }
 
-    GXHRESULT SamplerStateImpl::SetState(GXUINT Sampler, const GXSAMPLERDESC* pSamplerDesc)
+    GXHRESULT SamplerStateImpl::GetDesc(GXSAMPLERDESC* pSamplerDesc)
     {
-      ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-      GXSAMPLERDESC& SamplerDesc = m_SamplerDesc[Sampler];
-
-      D3D11_SAMPLER_DESC SampDesc11;
-      InlSetZeroT(SampDesc11);
-
-      SamplerDesc = *pSamplerDesc;
-      GXColor crBorder = SamplerDesc.BorderColor;
-
-      SampDesc11.Filter = GrapXToDX11::FilterFrom((GXTextureFilterType)SamplerDesc.MagFilter,
-        (GXTextureFilterType)SamplerDesc.MinFilter, (GXTextureFilterType)SamplerDesc.MipFilter);
-
-      SampDesc11.AddressU = (D3D11_TEXTURE_ADDRESS_MODE)SamplerDesc.AddressU;
-      SampDesc11.AddressV = (D3D11_TEXTURE_ADDRESS_MODE)SamplerDesc.AddressV;
-      SampDesc11.AddressW = (D3D11_TEXTURE_ADDRESS_MODE)SamplerDesc.AddressW;
-      //sampDesc.MipLODBias     = SamplerStage.dwMipmapLodBias; // FIXME: 类型不对
-      //sampDesc.MaxAnisotropy  = SamplerDesc.MaxAnisotropy;
-      SampDesc11.ComparisonFunc = D3D11_COMPARISON_NEVER;
-      SampDesc11.BorderColor[0] = crBorder.r; // FIXME: 顺序没有验证
-      SampDesc11.BorderColor[1] = crBorder.g;
-      SampDesc11.BorderColor[2] = crBorder.b;
-      SampDesc11.BorderColor[3] = crBorder.a;
-      SampDesc11.MinLOD = 0;
-      SampDesc11.MaxLOD = D3D11_FLOAT32_MAX;
-
-      // TODO: 可以提取一个特征值,从一个池中查询
-      SAFE_RELEASE(m_pSampler[Sampler]);
-      HRESULT hr = pd3dDevice->CreateSamplerState(&SampDesc11, &m_pSampler[Sampler]);
-      if(FAILED(hr)) {
-        TRACE(">%s(%d), create sampler error.\n", __FILE__, __LINE__);
-        CLBREAK;
-      }
-
-      // 如果当前 sampler 在设备上, 则立即提交
-      if(SUCCEEDED(hr) && m_pGraphicsImpl->InlIsActiveSamplerState(this))
-      {
-        ID3D11DeviceContext* const pd3dDeviceContext = m_pGraphicsImpl->D3DGetDeviceContext();
-        pd3dDeviceContext->PSSetSamplers(Sampler, 1, &m_pSampler[Sampler]);
-      }
-      //SamplerStage.dwMask &= (~0xffff);
-      //RESET_FLAG(m_dwChangeMask, 1 << dwStage);
-
+      *pSamplerDesc = m_SamplerDesc;
       return GX_OK;
     }
 
-    GXHRESULT SamplerStateImpl::SetStateArray(GXUINT nStartSlot, const GXSAMPLERDESC* pSamplerDesc, int nCount)
+    void SamplerStateImpl::InterfaceDescToD3D11Desc(D3D11_SAMPLER_DESC& D3D11Desc, const GXSAMPLERDESC& desc)
     {
-      CLBREAK;
-      return GX_FAIL;
+      InlSetZeroT(D3D11Desc);
+
+      D3D11Desc.Filter = GrapXToDX11::FilterFrom(desc.MagFilter, desc.MinFilter, desc.MipFilter);
+
+      D3D11Desc.AddressU = (D3D11_TEXTURE_ADDRESS_MODE)desc.AddressU;
+      D3D11Desc.AddressV = (D3D11_TEXTURE_ADDRESS_MODE)desc.AddressV;
+      D3D11Desc.AddressW = (D3D11_TEXTURE_ADDRESS_MODE)desc.AddressW;
+      //sampDesc.MipLODBias     = SamplerStage.dwMipmapLodBias; // FIXME: 类型不对
+      //sampDesc.MaxAnisotropy  = SamplerDesc.MaxAnisotropy;
+      D3D11Desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+      D3D11Desc.BorderColor[0] = desc.BorderColor.r; // FIXME: 顺序没有验证
+      D3D11Desc.BorderColor[1] = desc.BorderColor.g;
+      D3D11Desc.BorderColor[2] = desc.BorderColor.b;
+      D3D11Desc.BorderColor[3] = desc.BorderColor.a;
+      D3D11Desc.MinLOD = 0;
+      D3D11Desc.MaxLOD = D3D11_FLOAT32_MAX;
     }
 
-    GXHRESULT SamplerStateImpl::ResetToDefault()
+    void SamplerStateImpl::D3D11DescToInterfaceDesc(GXSAMPLERDESC& desc, const D3D11_SAMPLER_DESC& D3D11Desc)
     {
-      //CLBREAK;
-      return GX_FAIL;
+      STATIC_ASSERT(static_cast<int>(D3D11_FILTER_TYPE_POINT) + 1 == static_cast<int>(GXTEXFILTER_POINT));
+      STATIC_ASSERT(static_cast<int>(D3D11_FILTER_TYPE_LINEAR) + 1 == static_cast<int>(GXTEXFILTER_LINEAR));
+
+      STATIC_ASSERT(GXTADDRESS_WRAP       == D3D11_TEXTURE_ADDRESS_WRAP);
+      STATIC_ASSERT(GXTADDRESS_MIRROR     == D3D11_TEXTURE_ADDRESS_MIRROR);
+      STATIC_ASSERT(GXTADDRESS_CLAMP      == D3D11_TEXTURE_ADDRESS_CLAMP);
+      STATIC_ASSERT(GXTADDRESS_BORDER     == D3D11_TEXTURE_ADDRESS_BORDER);
+      STATIC_ASSERT(GXTADDRESS_MIRRORONCE == D3D11_TEXTURE_ADDRESS_MIRROR_ONCE);
+
+      desc.MinFilter = static_cast<GXTextureFilterType>(D3D11_DECODE_MIN_FILTER(D3D11Desc.Filter) + 1);
+      desc.MagFilter = static_cast<GXTextureFilterType>(D3D11_DECODE_MAG_FILTER(D3D11Desc.Filter) + 1);
+      desc.MipFilter = static_cast<GXTextureFilterType>(D3D11_DECODE_MIP_FILTER(D3D11Desc.Filter) + 1);
+
+      desc.AddressU = static_cast<GXTextureAddress>(D3D11Desc.AddressU);
+      desc.AddressV = static_cast<GXTextureAddress>(D3D11Desc.AddressV);
+      desc.AddressW = static_cast<GXTextureAddress>(D3D11Desc.AddressW);
+
+      desc.BorderColor.r = D3D11Desc.BorderColor[0];
+      desc.BorderColor.g = D3D11Desc.BorderColor[1];
+      desc.BorderColor.b = D3D11Desc.BorderColor[2];
+      desc.BorderColor.a = D3D11Desc.BorderColor[3];
     }
+
+    //GXHRESULT SamplerStateImpl::ResetToDefault()
+    //{
+    //  //CLBREAK;
+    //  return GX_FAIL;
+    //}
 
   } // namespace D3D11
 } // namespace GrapX

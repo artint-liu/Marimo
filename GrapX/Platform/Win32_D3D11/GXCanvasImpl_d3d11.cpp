@@ -498,7 +498,7 @@ namespace GrapX
 
         m_pGraphics->SetPrimitive(m_pPrimitive);
         m_pGraphics->InlSetRasterizerState(m_pRasterizerState);
-        m_pGraphics->InlSetSamplerState(m_pSamplerState);
+        m_pGraphics->InlSetSamplerState(0, m_pSamplerState);
         m_pGraphics->InlSetDepthStencil(NULL);
 
         if(m_CurrentEffect.transform.IsValid()) {
@@ -693,8 +693,9 @@ namespace GrapX
 
         case CF_SetSamplerState:
         {
-          const STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = pCmdPtr->cast_to<STATESWITCHING_SAMPLERSTATE>();
-          m_pSamplerState->SetState(pSamplerStateCmd->sampler_slot, &pSamplerStateCmd->desc);
+          STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = const_cast<STATESWITCHING_SAMPLERSTATE*>(pCmdPtr->cast_to<STATESWITCHING_SAMPLERSTATE>());
+          m_pGraphics->InlSetSamplerState(pSamplerStateCmd->sampler_slot, static_cast<SamplerStateImpl*>(pSamplerStateCmd->pSamplerState));
+          SAFE_RELEASE(pSamplerStateCmd->pSamplerState);
         }
         break;
 
@@ -896,11 +897,16 @@ namespace GrapX
 
     GXBOOL CanvasImpl::SetSamplerState(GXUINT Sampler, GXSAMPLERDESC* pDesc)
     {
-      STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = IntAppendCommand<STATESWITCHING_SAMPLERSTATE>(CF_SetSamplerState);
-      pSamplerStateCmd->sampler_slot = Sampler;
-      pSamplerStateCmd->desc = *pDesc;
+      SamplerState* pSamplerState = NULL;
 
-      return TRUE;
+      if(GXSUCCEEDED(m_pGraphics->CreateSamplerState(&pSamplerState, pDesc)))
+      {
+        STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = IntAppendCommand<STATESWITCHING_SAMPLERSTATE>(CF_SetSamplerState);
+        pSamplerStateCmd->sampler_slot = Sampler;
+        pSamplerStateCmd->pSamplerState = pSamplerState;
+        return TRUE;
+      }
+      return FALSE;
     }
 
     GXBOOL CanvasImpl::SetEffect(Effect* pEffect)

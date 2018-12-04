@@ -238,7 +238,7 @@ namespace GrapX
       struct STATESWITCHING_SAMPLERSTATE : public CMDBASE
       {
         GXUINT sampler_slot;
-        GXSAMPLERDESC desc;
+        SamplerState* pSamplerState;
       };
 
       struct STATESWITCHING_CLEAR : public CMDBASE

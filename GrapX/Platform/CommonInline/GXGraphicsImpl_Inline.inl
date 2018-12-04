@@ -390,7 +390,7 @@ GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 //}
 //#endif // #ifdef _GXGRAPHICS_INLINE_SET_RENDER_STATE_
 template<class _TState>
-inline GXBOOL GraphicsImpl::InlSetStateT(_TState*& pCurState, _TState* pState)
+inline GXBOOL GraphicsImpl::InlSetStateT(GXUINT slot, _TState*& pCurState, _TState* pState)
 {
   ASSERT(pState);
   if(pCurState == pState) {
@@ -398,7 +398,7 @@ inline GXBOOL GraphicsImpl::InlSetStateT(_TState*& pCurState, _TState* pState)
   }
   _TState* pPrevState = pCurState;
   pCurState = pState;
-  if(pCurState->Activate(pPrevState))
+  if(pCurState->Activate(slot, pPrevState)) // slot为了模板兼容，并不是所有对象都使用这个
   {
     SAFE_RELEASE(pPrevState);
     pCurState->AddRef();
@@ -413,7 +413,7 @@ inline GXBOOL GraphicsImpl::InlSetStateT(_TState*& pCurState, _TState* pState)
 #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
 inline GXBOOL GraphicsImpl::InlSetRasterizerState(RasterizerStateImpl* pRasterizerState)
 {
-  return InlSetStateT<RasterizerStateImpl>(m_pCurRasterizerState, pRasterizerState);
+  return InlSetStateT<RasterizerStateImpl>(0, m_pCurRasterizerState, pRasterizerState);
   //ASSERT(pRasterizerState);
   //if(m_pCurRasterizerState == pRasterizerState) {
   //  return TRUE;
@@ -435,7 +435,7 @@ inline GXBOOL GraphicsImpl::InlSetRasterizerState(RasterizerStateImpl* pRasteriz
 // TODO: 这个可以和InlSetDepthStencilState合并为模板
 GXBOOL GraphicsImpl::InlSetBlendState(BlendStateImpl* pBlendState)
 {
-  return InlSetStateT(m_pCurBlendState, pBlendState);
+  return InlSetStateT(0, m_pCurBlendState, pBlendState);
   //ASSERT(pBlendState != NULL); // 不能为空
 
   //if(m_pCurBlendState == pBlendState) {
@@ -461,7 +461,7 @@ GXBOOL GraphicsImpl::InlSetBlendState(BlendStateImpl* pBlendState)
 #ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
 inline GXBOOL GraphicsImpl::InlSetDepthStencilState(DepthStencilStateImpl* pDepthStencilState)
 {
-  return InlSetStateT(m_pCurDepthStencilState, pDepthStencilState);
+  return InlSetStateT(0, m_pCurDepthStencilState, pDepthStencilState);
   //ASSERT(pDepthStencilState != NULL); // 不能为空
 
   //if(m_pCurDepthStencilState == pDepthStencilState) {
@@ -486,9 +486,9 @@ inline GXBOOL GraphicsImpl::InlSetDepthStencilState(DepthStencilStateImpl* pDept
 
 
 #ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
-GXBOOL GraphicsImpl::InlSetSamplerState(SamplerStateImpl* pSamplerState)
+GXBOOL GraphicsImpl::InlSetSamplerState(GXUINT slot, SamplerStateImpl* pSamplerState)
 {
-  return InlSetStateT(m_pCurSamplerState, pSamplerState);
+  return InlSetStateT(slot, m_pCurSamplerState, pSamplerState);
   //ASSERT(pSamplerState != NULL);
 
   //if(pSamplerState == m_pCurSamplerState)

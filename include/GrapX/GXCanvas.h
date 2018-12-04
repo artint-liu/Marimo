@@ -137,7 +137,7 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL      SetViewportOrg       (GXINT x, GXINT y, GXLPPOINT lpPoint)); // 设置当前的原点与新坐标系的映射关系
     GXSTDINTERFACE(GXBOOL      GetViewportOrg       (GXLPPOINT lpPoint) const);
     GXSTDINTERFACE(GXBOOL      Flush                ());
-    GXSTDINTERFACE(GXBOOL      SetSamplerState      (GXUINT Sampler, GXSAMPLERDESC* pDesc));
+    GXSTDINTERFACE(GXBOOL      SetSamplerState      (GXUINT slot, GXSAMPLERDESC* pDesc));
     GXSTDINTERFACE(GXDWORD     SetParametersInfo    (CanvasParamInfo eAction, GXUINT uParam, GXLPVOID pParam));
     GXSTDINTERFACE(PenStyle    SetPenStyle          (PenStyle eStyle));
 
