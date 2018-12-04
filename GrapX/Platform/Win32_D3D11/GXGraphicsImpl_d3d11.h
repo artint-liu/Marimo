@@ -3,6 +3,9 @@
 #ifndef _GX_GRAPHICS_H_
 #define _GX_GRAPHICS_H_
 
+#define COLORREF_TO_NATIVE(CLR) ((CLR & 0xff00ff00) | ((CLR & 0xff0000) >> 16) | ((CLR & 0xff) << 16))
+#define NATIVE_TO_COLORREF(CLR) COLORREF_TO_NATIVE(CLR)
+
 #define MAX_TEXTURE_STAGE  16
 //////////////////////////////////////////////////////////////////////////
 //

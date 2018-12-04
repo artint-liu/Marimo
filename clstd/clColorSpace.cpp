@@ -503,6 +503,29 @@ namespace clstd
   }
 
   template<class _TDataDef>
+  _COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator=(const float4& v4)
+  {
+    r = v4.rgba.r;
+    g = v4.rgba.g;
+    b = v4.rgba.b;
+    a = v4.rgba.a;
+    return *this;
+  }
+
+  template<class _TDataDef>
+  float4& _COLOR_RGBTEMPL_F<_TDataDef>::ToFloat4(float4& v4) const
+  {
+    v4.set(r, g, b, a);
+    return v4;
+  }
+
+  template<class _TDataDef>
+  float4& _COLOR_RGBTEMPL_F<_TDataDef>::ToFloat4()
+  {
+    return *reinterpret_cast<float4*>(this);
+  }
+
+  template<class _TDataDef>
   b32 _COLOR_RGBTEMPL_F<_TDataDef>::operator==(const _COLOR_RGBTEMPL_F& rgb) const
   {
     return (this->r == rgb.r && this->g == rgb.g && this->b == rgb.b && this->a == rgb.a);

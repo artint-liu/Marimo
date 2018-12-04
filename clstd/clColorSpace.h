@@ -350,16 +350,17 @@ namespace clstd
     _COLOR_RGBTEMPL_F& operator+=(float v);
 
     _COLOR_RGBTEMPL_F& operator-=(const _COLOR_RGBTEMPL_F& rgb);
-
     _COLOR_RGBTEMPL_F& operator-=(float v);
-
     _COLOR_RGBTEMPL_F& operator*=(float v);
-
     _COLOR_RGBTEMPL_F& operator/=(float v);
 
-    b32 operator==(const _COLOR_RGBTEMPL_F& rgb) const;
+    _COLOR_RGBTEMPL_F& operator=(const float4& v4);
+    float4& ToFloat4(float4& v4) const;  // 复制
+    float4& ToFloat4();       // 返回引用
 
+    b32 operator==(const _COLOR_RGBTEMPL_F& rgb) const;
     b32 operator!=(const _COLOR_RGBTEMPL_F& rgb) const;
+
 
     //operator Internal::COLOR_ARGB () const
     //{

@@ -50,10 +50,10 @@ GXBOOL GraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTarge
 #endif // _GXGRAPHICS_INLINE_RENDERTARGET_
 
 #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D11_
-inline GXBOOL GraphicsImpl::InlSetDepthStencil(Texture* pTexture)
-{
-  return TRUE;
-}
+//inline GXBOOL GraphicsImpl::InlSetDepthStencil(Texture* pTexture)
+//{
+//  return TRUE;
+//}
 #endif // #ifdef _GXGRAPHICS_INLINE_SETDEPTHSTENCIL_D3D11_
 
 #ifdef _GXGRAPHICS_INLINE_RENDERTARGET_D3D11_
@@ -226,9 +226,7 @@ GXBOOL GraphicsImpl::InlSetShader(Shader* pShader)
 GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
 {
   ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
-  GXBOOL br = InlSetShader(pShaderImpl);
-  if(br)
-  {
+  if(InlSetShader(pShaderImpl)) {
     pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
   }
   return br;

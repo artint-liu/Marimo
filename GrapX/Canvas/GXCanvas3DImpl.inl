@@ -347,7 +347,7 @@ GXHRESULT Canvas3DImpl::Activate()
   {
     m_pGraphicsImpl->SetViewport(&m_Viewport);
     m_pGraphicsImpl->SetSafeClip(NULL);
-    m_pGraphicsImpl->InlSetDepthStencil(m_pTarget->IntGetDepthStencilTextureUnsafe());
+    //m_pGraphicsImpl->InlSetDepthStencil(m_pTarget->IntGetDepthStencilTextureUnsafe());
     m_pGraphicsImpl->InlSetDepthStencilState(m_pCurDepthStencilState);
   }
   return GX_OK;

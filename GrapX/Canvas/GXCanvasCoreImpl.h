@@ -10,11 +10,11 @@ class CanvasCoreImpl : public Canvas
 {
   friend class GraphicsImpl;
 protected:
-  GraphicsImpl*     m_pGraphics;
-  GXSIZE              m_sExtent;
+  GraphicsImpl*       m_pGraphics;
+  GXSIZE              m_sExtent;    // m_pTargetTex 的尺寸，如果m_pTargetTex为空则是默认设备缓冲区的尺寸
   RenderTargetImpl*   m_pTargetTex;
   BlendStateImpl*     m_pBlendStateImpl;
-  DepthStencilState*  m_pDepthStencilState;
+  //DepthStencilState*  m_pDepthStencilState;
   SamplerStateImpl*   m_pSamplerState;
   GCamera*            m_pCamera;
 

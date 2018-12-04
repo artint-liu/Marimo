@@ -6,7 +6,7 @@ CanvasCoreImpl::CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWOR
   //, m_yExt              (0)
   , m_pBlendStateImpl       (NULL)
   , m_pSamplerState     (NULL)
-  , m_pDepthStencilState(NULL)
+  //, m_pDepthStencilState(NULL)
   //, m_pEffectImpl       (NULL)
   , m_pCamera           (NULL)
 {
@@ -19,7 +19,7 @@ CanvasCoreImpl::~CanvasCoreImpl()
   SAFE_RELEASE(m_pTargetTex);
   SAFE_RELEASE(m_pBlendStateImpl);
   SAFE_RELEASE(m_pSamplerState);
-  SAFE_RELEASE(m_pDepthStencilState);
+  //SAFE_RELEASE(m_pDepthStencilState);
   //SAFE_RELEASE(m_pEffectImpl);
   SAFE_RELEASE(m_pCamera);
 }

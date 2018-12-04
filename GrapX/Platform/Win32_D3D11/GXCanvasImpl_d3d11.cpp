@@ -53,11 +53,6 @@
 #ifdef ENABLE_GRAPHICS_API_DX11
 #define TRACE_CMD
 
-// 根据RenderTarget格式改成对应转换函数
-#define COLORREF_TO_NATIVE(CLR) ((CLR & 0xff00ff00) | ((CLR & 0xff0000) >> 16) | ((CLR & 0xff) << 16))
-#define NATIVE_TO_COLORREF(CLR) COLORREF_TO_NATIVE(CLR)
-
-
 //////////////////////////////////////////////////////////////////////////
 namespace GrapX
 {
@@ -75,10 +70,13 @@ namespace GrapX
       , m_bStatic           (bStatic)
       , m_xAbsOrigin        (0)
       , m_yAbsOrigin        (0)
-      , m_pInvertState      (NULL)
+      , m_pOMOpaque         (NULL)
+      , m_pOMInvert         (NULL)
       , m_pPrimitive        (NULL)
       , m_lpLockedVertex    (NULL)
       , m_lpLockedIndex     (NULL)
+      , m_pOMNoColor        (NULL)
+      , m_pWriteStencil     (NULL)
       , m_pWhiteTex         (NULL)
       , m_pLastCommand      (NULL)
       , m_uIndexCount       (NULL)
@@ -96,7 +94,6 @@ namespace GrapX
       InlSetZeroT(m_rcAbsClip);
       gxRtlZeroMemory(&m_aTextureStage, sizeof(m_aTextureStage));
       gxRtlZeroMemory(&m_pBlendingState, sizeof(m_pBlendingState));
-      gxRtlZeroMemory(&m_pOpaqueState, sizeof(m_pOpaqueState));
       gxRtlZeroMemory(&m_pCanvasStencil, sizeof(m_pCanvasStencil));
       //m_DefaultEffect.pEffect = NULL;
     }
@@ -160,16 +157,12 @@ namespace GrapX
         }
 
         // 创建BlendState
-        if(m_pBlendingState[0] == NULL || m_pBlendingState[1] == NULL ||
-          m_pOpaqueState[0] == NULL || m_pOpaqueState[1] == NULL)
+        if(m_pBlendingState[0] == NULL || m_pBlendingState[1] == NULL)
         {
           GXBLENDDESC AlphaBlendState(TRUE);
-          GXBLENDDESC OpaqueState;
 
           ASSERT(m_pBlendingState[0] == NULL);
           ASSERT(m_pBlendingState[1] == NULL);
-          ASSERT(m_pOpaqueState[0] == NULL);
-          ASSERT(m_pOpaqueState[1] == NULL);
 
           // ---
           GXRASTERIZERDESC RasterizerDesc;
@@ -185,24 +178,23 @@ namespace GrapX
           AlphaBlendState.SrcBlendAlpha = GXBLEND_INVDESTALPHA;
           AlphaBlendState.DestBlendAlpha = GXBLEND_ONE;
           m_pGraphics->CreateBlendState((BlendState**)&m_pBlendingState[1], &AlphaBlendState, 1);
-
-          // ---
-          m_pGraphics->CreateBlendState((BlendState**)&m_pOpaqueState[0], &OpaqueState, 1);
-
-          // ---
-          OpaqueState.BlendEnable = TRUE;
-          m_pGraphics->CreateBlendState((BlendState**)&m_pOpaqueState[1], &OpaqueState, 1);
         }
 
-        if(m_pInvertState == NULL)
+        if(m_pOMOpaque == NULL)
+        {
+          GXBLENDDESC OpaqueState;
+          m_pGraphics->CreateBlendState((BlendState**)&m_pOMOpaque, &OpaqueState, 1);
+        }
+
+        if(m_pOMInvert == NULL)
         {
           GXBLENDDESC sInvertBlend(TRUE, GXBLEND_ONE, GXBLEND_ONE, GXBLENDOP_SUBTRACT);
-          m_pGraphics->CreateBlendState((BlendState**)&m_pInvertState, &sInvertBlend, 1);
+          m_pGraphics->CreateBlendState((BlendState**)&m_pOMInvert, &sInvertBlend, 1);
         }
 
         // 初始化渲染模式
         m_CallState.eCompMode = CompositingMode_SourceOver;
-        m_CallState.dwColorAdditive = 0;
+        //m_CallState.dwColorAdditive = 0;
 
         SAFE_RELEASE(m_pBlendStateImpl);
         m_pBlendStateImpl = IntGetBlendStateUnsafe(m_CallState.eCompMode);
@@ -222,11 +214,33 @@ namespace GrapX
           m_pGraphics->CreateDepthStencilState((DepthStencilState**)&m_pCanvasStencil[1], &DepthStencil);
         }
 
+        if(m_pWriteStencil == NULL)
+        {
+          GXDEPTHSTENCILDESC desc(TRUE, TRUE);
+          desc.DepthFunc = GXCMP_ALWAYS;
+          desc.FrontFace.StencilDepthFailOp = GXSTENCILOP_KEEP;
+          desc.FrontFace.StencilFailOp      = GXSTENCILOP_KEEP;
+          desc.FrontFace.StencilFunc        = GXCMP_ALWAYS;
+          desc.FrontFace.StencilPassOp      = GXSTENCILOP_REPLACE;
+
+          desc.BackFace.StencilDepthFailOp  = GXSTENCILOP_KEEP;
+          desc.BackFace.StencilFailOp       = GXSTENCILOP_KEEP;
+          desc.BackFace.StencilFunc         = GXCMP_ALWAYS;
+          desc.BackFace.StencilPassOp       = GXSTENCILOP_REPLACE;
+          m_pGraphics->CreateDepthStencilState(&m_pWriteStencil, &desc);
+        }
+
+        if(m_pOMNoColor == NULL)
+        {
+          GXBLENDDESC sBlendDesc;
+          sBlendDesc.WriteMask = 0;
+          m_pGraphics->CreateBlendState((BlendState**)&m_pOMNoColor, &sBlendDesc, 1);
+        }
+
         // 初始化寄存器常量
         GCAMERACONETXT gcc;
         gcc.dwMask = GCC_WORLD;
         m_pCamera->GetContext(&gcc);
-        m_CallState.matTransform = gcc.matWorld;
 
         if(m_pDefaultEffectImpl == NULL)
         {
@@ -234,9 +248,9 @@ namespace GrapX
           m_pDefaultEffectImpl->AddRef();
         }
 
-        m_transform = gcc.matWorld;
-        m_color_mul = 1.0f;
-        m_color_add = 0.0f;
+        m_transform = m_CallState.matTransform = gcc.matWorld;
+        m_CallState.color_mul = m_color_mul = 1.0f;
+        m_CallState.color_add = m_color_add = 0.0f;
 
         SAFE_RELEASE(m_CallState.RenderState.pEffectImpl);
         m_CallState.RenderState.pEffectImpl = m_pDefaultEffectImpl;
@@ -299,9 +313,8 @@ namespace GrapX
           // TODO: 考虑是否在以后用快速Region求补来填充空白区域呢?
           // 如下填充实现了: 在一个矩形区域内,需要绘制图形的部分模板值>1,其他部分模板值为0
           const GXDWORD dwFlags = GXCLEAR_STENCIL;
-          //const GXDWORD dwFlags = GXCLEAR_STENCIL|GXCLEAR_TARGET;
-          m_pGraphics->Clear(&rcClip, 1, dwFlags, 0xff0000ff, 0, 0);
-          m_pGraphics->Clear(lpRects, nRectCount, dwFlags, 0xff00ff00, 0, m_dwStencil);
+          IntClear(&rcClip, 1, dwFlags, 0xff0000ff, 0, 0); // 防止stencil值重复, 先清零
+          IntClear(lpRects, nRectCount, dwFlags, 0xff00ff00, 0, m_dwStencil);
 
           m_pCanvasStencil[1]->SetStencilRef(m_dwStencil);
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[1]);
@@ -363,14 +376,15 @@ namespace GrapX
       if(m_uRefCount == 0)
       {
         SAFE_RELEASE(m_pDefaultEffectImpl);
-        SAFE_RELEASE(m_pInvertState);
-        SAFE_RELEASE(m_pOpaqueState[0]);
-        SAFE_RELEASE(m_pOpaqueState[1]);
+        SAFE_RELEASE(m_pOMInvert);
+        SAFE_RELEASE(m_pOMOpaque);
         SAFE_RELEASE(m_pRasterizerState);
         SAFE_RELEASE(m_pBlendingState[0]);
         SAFE_RELEASE(m_pBlendingState[1]);
         SAFE_RELEASE(m_pCanvasStencil[0]);
         SAFE_RELEASE(m_pCanvasStencil[1]);
+        SAFE_RELEASE(m_pOMNoColor);
+        SAFE_RELEASE(m_pWriteStencil);
         SAFE_RELEASE(m_pWhiteTex);
         SAFE_RELEASE(m_pPrimitive);
         delete this;
@@ -441,6 +455,90 @@ namespace GrapX
       return 0;
     }
 
+    void CanvasImpl::IntClear(const GXRECT* lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil)
+    {
+      ASSERT(m_pGraphics->IsActiveCanvas(this));
+      //m_pGraphics->Clear(lpRects, nCount, dwFlags, crClear, z, dwStencil);
+
+
+      DepthStencilStateImpl* pSavedDepthStencilState = m_pGraphics->m_pCurDepthStencilState;
+      pSavedDepthStencilState->AddRef();
+      BlendStateImpl* pSavedBlendState = m_pGraphics->m_pCurBlendState;
+      pSavedBlendState->AddRef();
+
+      m_pGraphics->InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(m_pWriteStencil));
+      m_pGraphics->InlSetShader(m_pGraphics->m_pBasicShader);
+      m_pWriteStencil->SetStencilRef(dwStencil);
+
+      if(TEST_FLAG(dwFlags, GXCLEAR_TARGET)) {
+        m_pGraphics->InlSetBlendState(m_pOMOpaque);
+      }
+      else {
+        m_pGraphics->InlSetBlendState(m_pOMNoColor);
+      }
+
+
+      //GXRASTERIZERDESC ras_desc;
+      //CreateRasterizerState()
+
+      Primitive* pPrimitive = NULL;
+      clstd::LocalBuffer<sizeof(PRIMITIVE) * 6 * 64> buf;
+      buf.Resize(sizeof(PRIMITIVE) * 6 * nCount, FALSE);
+      PRIMITIVE* pVert = reinterpret_cast<PRIMITIVE*>(buf.GetPtr());
+      
+      GXDWORD dwColor = COLORREF_TO_NATIVE(crClear);
+
+      for(GXUINT i = 0; i < nCount; i++)
+      {
+        pVert[0].Set((float)lpRects[i].left, (float)lpRects[i].top, z, dwColor);
+        pVert[1].Set((float)lpRects[i].right, (float)lpRects[i].top, z, dwColor);
+        pVert[2].Set((float)lpRects[i].left, (float)lpRects[i].bottom, z, dwColor);
+        pVert[3].Set((float)lpRects[i].left, (float)lpRects[i].bottom, z, dwColor);
+        pVert[4].Set((float)lpRects[i].right, (float)lpRects[i].top, z, dwColor);
+        pVert[5].Set((float)lpRects[i].right, (float)lpRects[i].bottom, z, dwColor);
+
+        pVert += 6;
+      }
+
+
+      m_pGraphics->CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Default, 6 * nCount, sizeof(PRIMITIVE), buf.GetPtr(), 0, 0, NULL);
+      Primitive* pSavedPrimitive = m_pGraphics->m_pCurPrimitive;
+      if(pSavedPrimitive) {
+        pSavedPrimitive->AddRef();
+      }
+
+      m_pGraphics->SetTexture(m_pGraphics->m_pWhiteTexture8x8, 0);
+
+
+      m_pGraphics->SetPrimitive(pPrimitive);
+      GXDWORD _dwFlags = m_pGraphics->m_dwFlags;
+      m_pGraphics->m_dwFlags = GraphicsImpl::F_ACTIVATE;
+      m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST, 0, nCount * 2);
+      m_pGraphics->m_dwFlags = _dwFlags;
+
+      if(pSavedPrimitive)
+      {
+        m_pGraphics->SetPrimitive(static_cast<Primitive*>(pSavedPrimitive));
+        SAFE_RELEASE(pSavedPrimitive);
+      }
+      else
+      {
+        m_pGraphics->SetPrimitive(NULL);
+      }
+
+      m_pGraphics->InlSetDepthStencilState(pSavedDepthStencilState);
+      SAFE_RELEASE(pSavedDepthStencilState);
+      
+      m_pGraphics->InlSetBlendState(pSavedBlendState);
+      SAFE_RELEASE(pSavedBlendState);
+
+      //SAFE_RELEASE(m_pCurPrimitive);
+      //m_pCurPrimitive = pSavedPrimitive;
+      //SAFE_RELEASE(pSavedPrimitive);
+
+      SAFE_RELEASE(pPrimitive);
+    }
+
     GXBOOL CanvasImpl::IntCanFillPrimitive(GXUINT uVertexCount, GXUINT uIndexCount)
     {
       return ((m_uVertCount + uVertexCount) < m_uVertIndexSize &&
@@ -460,20 +558,17 @@ namespace GrapX
 
     GrapX::D3D11::BlendStateImpl* CanvasImpl::IntGetBlendStateUnsafe(CompositingMode mode) const
     {
-      if(mode == CompositingMode_InvertTarget)
-      {
-        return m_pInvertState;
+      if(mode == CompositingMode_InvertTarget) {
+        return m_pOMInvert;
       }
       else
       {
         // 判断是不是最终渲染目标
-        if(m_pTargetTex == NULL)
-        {
-          return (mode == CompositingMode_SourceCopy) ? m_pOpaqueState[0] : m_pBlendingState[0];
+        if(mode == CompositingMode_SourceCopy) {
+          return m_pOMOpaque;
         }
-        else
-        {
-          return (mode == CompositingMode_SourceCopy) ? m_pOpaqueState[1] : m_pBlendingState[1];
+        else {
+          return (m_pTargetTex == NULL) ? m_pBlendingState[0] : m_pBlendingState[1];
         }
       }
       CLBREAK;
@@ -499,7 +594,7 @@ namespace GrapX
         m_pGraphics->SetPrimitive(m_pPrimitive);
         m_pGraphics->InlSetRasterizerState(m_pRasterizerState);
         m_pGraphics->InlSetSamplerState(0, m_pSamplerState);
-        m_pGraphics->InlSetDepthStencil(NULL);
+        //m_pGraphics->InlSetDepthStencil(NULL);
 
         if(m_CurrentEffect.transform.IsValid()) {
           m_CurrentEffect.transform = m_transform;
@@ -703,27 +798,30 @@ namespace GrapX
         {
           TRACE_CMD("CF_Clear\n");
           const STATESWITCHING_CLEAR* pClearCmd = pCmdPtr->cast_to<STATESWITCHING_CLEAR>();
-          if(m_pClipRegion == NULL)
+          if(pClearCmd->bEntire)
           {
-            GXRECT rect;
-            rect.left = m_rcClip.left;
-            rect.top = m_rcClip.top;
-            rect.right = m_rcClip.right;
-            rect.bottom = m_rcClip.bottom;
-            const GXHRESULT hRet = // Debug
-              m_pGraphics->Clear(&rect, 1, pClearCmd->flags, (GXCOLOR)COLORREF_TO_NATIVE(pClearCmd->color), 1.0f, m_dwStencil);
+            const GXHRESULT hRet = m_pGraphics->Clear(NULL, 0, pClearCmd->flags, pClearCmd->color, 1.0f, m_dwStencil);
             ASSERT(GXSUCCEEDED(hRet));
           }
           else
           {
-            const GXUINT nRectCount = m_pClipRegion->GetRectCount();
-            clstd::LocalBuffer<sizeof(GXRECT) * 128> _buf;
-            _buf.Resize(sizeof(GXRECT) * nRectCount, FALSE);
+            if(m_pClipRegion == NULL)
+            {
+              GXRECT rect = m_rcClip;
 
-            GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nRectCount);
-            m_pClipRegion->GetRects(lpRects, nRectCount);
-            m_pGraphics->Clear(lpRects, nRectCount, pClearCmd->flags, (GXCOLOR)COLORREF_TO_NATIVE(pClearCmd->color), 1.0f, m_dwStencil);
-            //_GlbUnlockStaticRects(lpRects);
+              IntClear(&rect, 1, pClearCmd->flags, pClearCmd->color, 1.0f, m_dwStencil);
+            }
+            else
+            {
+              const GXUINT nRectCount = m_pClipRegion->GetRectCount();
+              clstd::LocalBuffer<sizeof(GXRECT) * 128> _buf;
+              _buf.Resize(sizeof(GXRECT) * nRectCount, FALSE);
+
+              GXRECT* lpRects = (GXRECT*)_buf.GetPtr(); // _GlbLockStaticRects(nRectCount);
+              m_pClipRegion->GetRects(lpRects, nRectCount);
+              IntClear(lpRects, nRectCount, pClearCmd->flags, pClearCmd->color, 1.0f, m_dwStencil);
+              //_GlbUnlockStaticRects(lpRects);
+            }
           }
         }
         break;
@@ -746,13 +844,6 @@ namespace GrapX
           TRACE_CMD("CF_Effect\n");
           const STATESWITCHING_EFFECT* pEffectCmd = pCmdPtr->cast_to<STATESWITCHING_EFFECT>();
 
-          //if(m_CurrentEffect.pEffectImpl == pEffectCmd->pEffectImpl) {
-          //  break;
-          //}
-          //SAFE_RELEASE(m_pEffectImpl);
-          //float4x4 transform  = m_CurrentEffect.transform;
-          //float4 color        = m_CurrentEffect.color;
-          //float4 color_add    = m_CurrentEffect.color_add;
           m_CurrentEffect.InitEffect(pEffectCmd->pEffectImpl);
           if(m_CurrentEffect.transform.IsValid()) {
             m_CurrentEffect.transform = m_transform;
@@ -775,7 +866,7 @@ namespace GrapX
           TRACE_CMD("CF_ColorAdditive\n");
           const STATESWITCHING_COLORADD* pColorAddCmd = pCmdPtr->cast_to<STATESWITCHING_COLORADD>();
 
-          m_color_add = (GXDWORD)pColorAddCmd->color;
+          pColorAddCmd->color.ToFloat4(m_color_add);
           if(m_CurrentEffect.color_add.IsValid())
           {
             m_CurrentEffect.color_add = m_color_add;
@@ -948,14 +1039,13 @@ namespace GrapX
       break;
       case CPI_SETCOLORADDITIVE:
       {
-        dwRet = NATIVE_TO_COLORREF(m_CallState.dwColorAdditive);
-        m_CallState.dwColorAdditive = (GXDWORD)COLORREF_TO_NATIVE(uParam);
-
-        // 检测是否是新的叠加颜色
-        if(m_CallState.dwColorAdditive != dwRet)
+        dwRet = m_CallState.color_add.ARGB();
+        if(dwRet != uParam)
         {
+          m_CallState.color_add = uParam;
+
           STATESWITCHING_COLORADD* pCommand = IntAppendCommand<STATESWITCHING_COLORADD>(CF_ColorAdditive);
-          pCommand->color = m_CallState.dwColorAdditive;
+          pCommand->color = m_CallState.color_add;
         }
       }
       break;
@@ -1017,12 +1107,23 @@ namespace GrapX
       return ePrevStyle;
     }
 
-    GXBOOL CanvasImpl::Clear(GXCOLORREF crClear)
+    GXBOOL CanvasImpl::Clear(GXCOLORREF crClear) // TODO: 改成浮点
     {
       STATESWITCHING_CLEAR* pCommand = IntAppendCommand<STATESWITCHING_CLEAR>(CF_Clear);
-
-      pCommand->flags |= GXCLEAR_TARGET;
+      pCommand->flags = GXCLEAR_TARGET;
       pCommand->color = crClear;
+
+      if(m_CallState.rcClip.left == 0 &&
+        m_CallState.rcClip.top == 0 &&
+        m_CallState.rcClip.right == m_sExtent.cx &&
+        m_CallState.rcClip.bottom == m_sExtent.cy)
+      {
+        pCommand->bEntire = TRUE;
+      }
+      else
+      {
+        pCommand->bEntire = FALSE;
+      }
 
       return TRUE;
     }
@@ -1148,7 +1249,7 @@ namespace GrapX
       IntAppendDrawCall<DRAWCALL_POINTS>(&pDrawCallCmd, CF_Points, 1, 0, NULL);
       CHECK_LOCK;
 
-      m_lpLockedVertex[m_uVertCount].Set((float)xPos, (float)yPos, (GXDWORD)COLORREF_TO_NATIVE(crPixel));
+      m_lpLockedVertex[m_uVertCount].Set((float)(xPos + m_CallState.origin.x), (float)(yPos + m_CallState.origin.y), (GXDWORD)COLORREF_TO_NATIVE(crPixel));
 
       m_uVertCount++;
       //SetParametersInfo(CPI_SETCOLORADDITIVE, dwPrevClrAdd, NULL);
@@ -1164,8 +1265,8 @@ namespace GrapX
       CHECK_LOCK;
 
       const GXDWORD dwColor = (GXDWORD)COLORREF_TO_NATIVE(crLine);
-      m_lpLockedVertex[m_uVertCount + 0].Set(float(left), float(top), dwColor);
-      m_lpLockedVertex[m_uVertCount + 1].Set(float(right), float(bottom), dwColor);
+      m_lpLockedVertex[m_uVertCount + 0].Set(float(left + m_CallState.origin.x), float(top + m_CallState.origin.y), dwColor);
+      m_lpLockedVertex[m_uVertCount + 1].Set(float(right + m_CallState.origin.x), float(bottom + m_CallState.origin.y), dwColor);
 
       SET_INDEX_BUFFER(0, 0);
       SET_INDEX_BUFFER(1, 1);

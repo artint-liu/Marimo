@@ -450,7 +450,7 @@ GXBOOL CanvasImpl::CommitState()
     //m_pGraphics->InlSetRenderState(m_pRenderState);
     m_pGraphics->InlSetRasterizerState(m_pRasterizerState);
     m_pGraphics->InlSetSamplerState(m_pSamplerState);
-    m_pGraphics->InlSetDepthStencil(NULL);
+    //m_pGraphics->InlSetDepthStencil(NULL);
 
     m_pGraphics->InlSetEffect((EffectImpl*)m_pEffectImpl);
     UpdateStencil(m_pClipRegion);

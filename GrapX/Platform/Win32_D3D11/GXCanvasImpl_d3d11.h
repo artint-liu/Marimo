@@ -72,6 +72,11 @@ namespace GrapX
           x = _x, y = _y, z = 0, w = 1;
           u = v = 0, color = col;
         }
+        inline void Set(float _x, float _y, float _z, GXCOLORREF col)
+        {
+          x = _x, y = _y, z = _z, w = 1;
+          u = v = 0, color = col;
+        }
       };
 
 
@@ -243,13 +248,14 @@ namespace GrapX
 
       struct STATESWITCHING_CLEAR : public CMDBASE
       {
+        GXBOOL      bEntire;
         GXDWORD     flags;
         GXCOLORREF  color;
       };
 
       struct STATESWITCHING_COLORADD : public CMDBASE
       {
-        GXCOLORREF  color;
+        GXColor color;
       };
 
       struct STATESWITCHING_SETCLIPBOX : public CMDBASE
@@ -273,13 +279,14 @@ namespace GrapX
         CompositingMode eCompMode;
         
         float4x4        matTransform;
-        //GXDWORD         dwTexVertColor;
-        GXDWORD         dwColorAdditive;
+        GXColor         color_mul;
+        GXColor         color_add;
+        //GXDWORD         dwColorAdditive;
 
         RENDERSTATE     RenderState;  // 不增加引用
         CALLSTATE()
           : eCompMode       (CompositingMode_SourceCopy)
-          , dwColorAdditive (NULL)
+          //, dwColorAdditive (NULL)
         {
           origin.x = origin.y = 0;
           gxSetRectEmpty(&rcClip);
@@ -298,6 +305,8 @@ namespace GrapX
 
       template<typename _Ty>
       GXUINT   IntAppendDrawCall        (_Ty** ppCmdBuffer, CanvasFunc cmd, GXUINT uVertexCount, GXUINT uIndexCount, Texture* pTextureReference);
+
+      void     IntClear                 (const GXRECT* lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil);
 
       GXINT    TextOutDirect            (const INTMEASURESTRING* p, GXLPPOINT pptPosition);
       GXINT    LocalizeTabPos           (const INTMEASURESTRING* pMeasureStr, int nCurPos, int nDefaultTabWidth, int* pLastIndex);
@@ -320,7 +329,6 @@ namespace GrapX
       GXINT         m_xAbsOrigin;     // 绝对原点位置，不受API影响
       GXINT         m_yAbsOrigin;
       GXRECT        m_rcAbsClip;      // Canvas 初始化的/最大的/系统的 裁剪区域, 其实这个Rect的left和top等于m_xAbsOrigin, m_yAbsOrigin
-      GXRECT        m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在flush阶段，m_rcClip只能写入/写入后读取，不能只读取，因为m_rcClip不是上一条命令的结果
 
       GXDWORD         m_dwStencil;
       GXDWORD         m_dwTexVertColor; // 输出纹理图元时的顶点颜色，不直接参与渲染状态
@@ -334,8 +342,11 @@ namespace GrapX
       RasterizerStateImpl*   m_pRasterizerState;
       DepthStencilStateImpl* m_pCanvasStencil[2]; // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
       BlendStateImpl*        m_pBlendingState[2]; // Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
-      BlendStateImpl*        m_pOpaqueState[2];   // 不透明方式的状态
-      BlendStateImpl*        m_pInvertState;
+      BlendStateImpl*        m_pOMOpaque;      // 不透明方式的状态
+      BlendStateImpl*        m_pOMInvert;
+
+      BlendStateImpl*        m_pOMNoColor;
+      DepthStencilState*     m_pWriteStencil; // 写入模板参考值的模板状态
 
       // 预置纹理
       Texture*      m_pWhiteTex;
@@ -358,6 +369,7 @@ namespace GrapX
       EffectImpl*   m_pDefaultEffectImpl; // 默认Effect
 
       // 用于Flush状态续接
+      GXRECT             m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在Flush阶段, 用来限制绘图区域
       CANVAS_EFFECT_DESC m_CurrentEffect;
       float4x4           m_transform;
       float4             m_color_mul;

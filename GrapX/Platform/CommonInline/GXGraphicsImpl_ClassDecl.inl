@@ -175,7 +175,7 @@ private:
   inline GXLPCSTR   InlGetPlatformStringA () const;
   inline GXBOOL     InlSetTexture         (TexBaseImpl* pTexture, GXUINT uStage);
   inline GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTargetIndex);
-  inline GXBOOL     InlSetDepthStencil    (Texture* pTexture);
+  //inline GXBOOL     InlSetDepthStencil    (Texture* pTexture);
 
   inline GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
   //inline GXBOOL     InlSetRenderState       (GRenderStateImpl* pRenderState);
