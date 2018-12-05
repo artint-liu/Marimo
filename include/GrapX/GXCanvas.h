@@ -24,7 +24,7 @@ namespace GrapX
 
     GXSTDINTERFACE(GXHRESULT        AddRef              ());
     GXSTDINTERFACE(GXSIZE*          GetTargetDimension  (GXSIZE* pSize) const);
-    GXSTDINTERFACE(GrapX::Graphics* GetGraphicsUnsafe   () const);
+    GXSTDINTERFACE(Graphics*        GetGraphicsUnsafe   () const);
     GXSTDINTERFACE(RenderTarget*    GetTargetUnsafe     () const);
   };
 

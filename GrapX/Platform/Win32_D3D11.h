@@ -47,6 +47,7 @@ namespace GrapXToDX11
   // 这些名字都没想好!!
   D3D_PRIMITIVE_TOPOLOGY      PrimitiveTopology  (GXPrimitiveType eType, GXUINT nPrimCount, GXUINT* pVertCount);
 
+  GXLPCSTR      FormatToString              (GXFormat eFormat);
   DXGI_FORMAT   FormatFrom                  (GXFormat eFormat);
   //void          PrimitiveDescFromResUsage   (IN GXDWORD ResUsage, D3D11_BUFFER_DESC* pDesc);  // 只填充Usage和CPUAccessFlags
   void          PrimitiveDescFromResUsage   (D3D11_BUFFER_DESC* pDesc, GXResUsage eResUsage);

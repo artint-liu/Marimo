@@ -27,6 +27,7 @@ namespace GrapX
     Shader*  GetShaderUnsafe() const;
     Marimo::DataPool* GetDataPoolUnsafe() const;
     Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
+    GXHRESULT Clone(Effect** ppNewEffect) override;
 
     GXBOOL InitEffect();
     //GXBOOL CommitUniform();

@@ -228,8 +228,9 @@ GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
   ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
   if(InlSetShader(pShaderImpl)) {
     pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
+    return TRUE;
   }
-  return br;
+  return FALSE;
 }
 #endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
 

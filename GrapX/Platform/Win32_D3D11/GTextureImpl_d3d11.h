@@ -143,15 +143,27 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    class textureImpl_GPUReadBack : public TextureImpl
+    class TextureImpl_GPUReadBack : public TextureImpl
     {
     protected:
     public:
-      textureImpl_GPUReadBack(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+      TextureImpl_GPUReadBack(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
       GXBOOL InitReadBackTexture();
 
       GXBOOL Map    (MAPPED* pMappedRect, GXResMap eResMap) override;
       GXBOOL Unmap  () override;
+    };
+
+    //////////////////////////////////////////////////////////////////////////
+
+    class TextureImpl_SwapBuffer : public TextureImpl
+    {
+      D3D11_TEXTURE2D_DESC m_desc;
+
+    public:
+      TextureImpl_SwapBuffer(Graphics* pGraphics);
+      void SetTexture(ID3D11Texture2D* pD3D11Texture);
+      GXSIZE* GetDimension(GXSIZE* pDimension) override;
     };
 
 #if 0

@@ -170,6 +170,10 @@ namespace GrapX
         MOCreateFileLoggerW(&m_pLogger, strFilePath, FALSE);
       }
 
+      m_pDeviceOriginTex = new TextureImpl_SwapBuffer(this);
+      if(InlIsFailedToNewObject(m_pDeviceOriginTex)) {
+        return E_OUTOFMEMORY;
+      }
 
       //// ´´½¨Êä³ö
       //m_pConsole = new GXConsole;
@@ -209,7 +213,7 @@ namespace GrapX
       sd.BufferCount = 1;
       sd.BufferDesc.Width = rcWndClient.right;
       sd.BufferDesc.Height = rcWndClient.bottom;
-      sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+      sd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
       sd.BufferDesc.RefreshRate.Numerator = 60;
       sd.BufferDesc.RefreshRate.Denominator = 1;
       sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -239,6 +243,7 @@ namespace GrapX
         return hval;
 
       hval = m_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_pRenderTargetView);
+      m_pDeviceOriginTex->SetTexture(pBackBuffer);
       pBackBuffer->Release();
       if(FAILED(hval))
         return hval;

@@ -56,6 +56,8 @@
   //CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME, 1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
   CreateRenderTarget(&m_pDefaultBackBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, Format_D24S8);
 
+  CreateRenderTarget(&m_pTempBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, Format_Unknown);
+
   GXDWORD white[8 * 8];
   memset(white, 0xff, sizeof(white));
   CreateTexture(&m_pWhiteTexture8x8, "White8x8", 8, 8, Format_B8G8R8A8, GXResUsage::Default, 1, white, 0);
@@ -1231,10 +1233,10 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
     // 确定滚动区是否为一个简单矩形
     GXBOOL bSimpleRect = FALSE;
 
-    Texture* const pTarget  = lpstd->pOperationTex == NULL 
+    Texture* const pTarget  = (lpstd->pOperationTex == NULL)
       ? m_pDeviceOriginTex
       : lpstd->pOperationTex;
-    Texture* const pTempTex = lpstd->pTempTex == NULL 
+    Texture* const pTempTex = (lpstd->pTempTex == NULL)
       ? m_pTempBuffer->GetColorTextureUnsafe(GXResUsage::Default)
       : lpstd->pTempTex;
 
@@ -1288,9 +1290,8 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
       rcDst = rcSrc;
       gxOffsetRect(&rcDst, lpstd->dx, lpstd->dy);
 
-      //pTempTex->StretchRect(pTarget, &rcDst, &rcSrc, GXTEXFILTER_POINT);
-      //pTarget->StretchRect(pTempTex, &rcDst, &rcDst, GXTEXFILTER_POINT);
-      CLBREAK; // 上面两条没实现
+      pTempTex->CopyRect(pTarget, reinterpret_cast<GXLPCPOINT>(&rcDst), &rcSrc);
+      pTarget->CopyRect(pTempTex, reinterpret_cast<GXLPCPOINT>(&rcDst), &rcDst);
       if(lpstd->lpprgnUpdate != NULL || lpstd->lprcUpdate != NULL)
       {
         CreateRectRgn(&prgnSrc, rcSrc.left, rcSrc.top, rcSrc.right, rcSrc.bottom);
@@ -1353,8 +1354,7 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
       for(GXUINT i = 0; i < nRectCount; i++)
       {
         GXRECT& rect = lpRects[i];
-        //pTempTex->StretchRect(pTarget, &rect, &rect, GXTEXFILTER_POINT);
-        CLBREAK; // 上面1条没实现
+        pTempTex->CopyRect(pTarget, reinterpret_cast<GXLPCPOINT>(&rect), &rect);
       }
       //for(vector<GXRECT>::iterator it = aRects.begin(); it != aRects.end(); ++it)
       for(GXUINT i = 0; i < nRectCount; i++)
@@ -1365,8 +1365,7 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
         rcDest.top    = rect.top + lpstd->dy;
         rcDest.right  = rect.right + lpstd->dx;
         rcDest.bottom = rect.bottom + lpstd->dy;
-        //pTarget->StretchRect(pTempTex, &rcDest, &rect, GXTEXFILTER_POINT);
-        CLBREAK; // 上面1条没实现
+        pTarget->CopyRect(pTempTex, reinterpret_cast<GXLPCPOINT>(&rcDest), &rect);
       }
       //*/
       //_GlbUnlockStaticRects(lpRects);

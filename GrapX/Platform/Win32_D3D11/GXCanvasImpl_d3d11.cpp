@@ -244,10 +244,22 @@ namespace GrapX
 
         if(m_pDefaultEffectImpl == NULL)
         {
-          m_pDefaultEffectImpl = static_cast<EffectImpl*>(m_pGraphics->IntGetEffect());
-          m_pDefaultEffectImpl->AddRef();
+          m_pGraphics->IntGetEffect()->Clone((Effect**)&m_pDefaultEffectImpl);
+          //m_pDefaultEffectImpl = static_cast<EffectImpl*>(m_pGraphics->IntGetEffect());
+          //m_pDefaultEffectImpl->AddRef();
         }
 
+        if(m_ClearEffect.pEffectImpl == NULL)
+        {
+          EffectImpl* pClearEffect;
+          m_pDefaultEffectImpl->Clone((Effect**)&pClearEffect);
+          m_ClearEffect.InitEffect(pClearEffect);
+          m_ClearEffect.color_mul->set(0.0f);  // 使纹理颜色失效
+          m_ClearEffect.color_add->set(1.0f);
+          SAFE_RELEASE(pClearEffect);
+        }
+
+        m_ClearEffect.transform = gcc.matWorld;
         m_transform = m_CallState.matTransform = gcc.matWorld;
         m_CallState.color_mul = m_color_mul = 1.0f;
         m_CallState.color_add = m_color_add = 0.0f;
@@ -401,25 +413,35 @@ namespace GrapX
     }
 
     template<typename _Ty>
-    _Ty* CanvasImpl::IntAppendCommand(CanvasFunc cmd)
+    _Ty* CanvasImpl::IntAppendCommandAlways(CanvasFunc cmd)
     {
-      if(m_pLastCommand && m_pLastCommand->cmd == cmd) {
-        return m_pLastCommand->cast_to<_Ty>();
-      }
-
       size_t cbFinalSize = m_Commands.GetSize() + sizeof(_Ty);
       if(cbFinalSize > m_Commands.GetCapacity()) {
         cbFinalSize = sizeof(_Ty);
         Flush();
       }
 
-      _Ty* pCmdPtr = reinterpret_cast<_Ty*>(m_Commands.GetEnd());
+      _Ty* pCmdPtr = new(m_Commands.GetEnd()) _Ty(); // 构造vtbl
       m_Commands.Resize(cbFinalSize, FALSE);
       pCmdPtr->cbSize = sizeof(_Ty);
       pCmdPtr->cmd = cmd;
 
       m_pLastCommand = pCmdPtr;
       return pCmdPtr;
+    }
+
+    template<typename _Ty>
+    _Ty* CanvasImpl::IntAppendCommand(CanvasFunc cmd)
+    {
+      if(cmd != CF_SetExtTexture) // 不支持合并的命令
+      {
+        if(m_pLastCommand && m_pLastCommand->cmd == cmd) {
+          m_pLastCommand->OnMerge();
+          return m_pLastCommand->cast_to<_Ty>();
+        }
+      }
+
+      return IntAppendCommandAlways<_Ty>(cmd);
     }
 
     template<typename _Ty>
@@ -443,7 +465,7 @@ namespace GrapX
         }
       }
 
-      *ppCmdBuffer = IntAppendCommand<_Ty>(cmd);
+      *ppCmdBuffer = IntAppendCommandAlways<_Ty>(cmd);
       (*ppCmdBuffer)->uVertexCount = uVertexCount;
       (*ppCmdBuffer)->uIndexCount = uIndexCount;
       if(cmd == CF_Textured) {
@@ -477,6 +499,9 @@ namespace GrapX
         m_pGraphics->InlSetBlendState(m_pOMNoColor);
       }
 
+      ASSERT(m_pGraphics->m_pCurShader == m_CurrentEffect.pEffectImpl->GetShaderUnsafe());
+      ASSERT(m_pGraphics->m_pCurPrimitive == m_pPrimitive);
+      m_pGraphics->InlSetEffect(m_ClearEffect.pEffectImpl);
 
       //GXRASTERIZERDESC ras_desc;
       //CreateRasterizerState()
@@ -502,29 +527,15 @@ namespace GrapX
 
 
       m_pGraphics->CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Default, 6 * nCount, sizeof(PRIMITIVE), buf.GetPtr(), 0, 0, NULL);
-      Primitive* pSavedPrimitive = m_pGraphics->m_pCurPrimitive;
-      if(pSavedPrimitive) {
-        pSavedPrimitive->AddRef();
-      }
-
-      m_pGraphics->SetTexture(m_pGraphics->m_pWhiteTexture8x8, 0);
-
-
       m_pGraphics->SetPrimitive(pPrimitive);
-      GXDWORD _dwFlags = m_pGraphics->m_dwFlags;
-      m_pGraphics->m_dwFlags = GraphicsImpl::F_ACTIVATE;
-      m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST, 0, nCount * 2);
-      m_pGraphics->m_dwFlags = _dwFlags;
 
-      if(pSavedPrimitive)
-      {
-        m_pGraphics->SetPrimitive(static_cast<Primitive*>(pSavedPrimitive));
-        SAFE_RELEASE(pSavedPrimitive);
-      }
-      else
-      {
-        m_pGraphics->SetPrimitive(NULL);
-      }
+      //GXDWORD _dwFlags = m_pGraphics->m_dwFlags;
+      //m_pGraphics->m_dwFlags = GraphicsImpl::F_ACTIVATE;
+      m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST, 0, nCount * 2);
+      //m_pGraphics->m_dwFlags = _dwFlags;
+
+      m_pGraphics->SetPrimitive(static_cast<Primitive*>(m_pPrimitive));
+      m_pGraphics->InlSetEffect(m_CurrentEffect.pEffectImpl);
 
       m_pGraphics->InlSetDepthStencilState(pSavedDepthStencilState);
       SAFE_RELEASE(pSavedDepthStencilState);
@@ -599,8 +610,8 @@ namespace GrapX
         if(m_CurrentEffect.transform.IsValid()) {
           m_CurrentEffect.transform = m_transform;
         }
-        if(m_CurrentEffect.color.IsValid()) {
-          m_CurrentEffect.color = m_color_mul;
+        if(m_CurrentEffect.color_mul.IsValid()) {
+          m_CurrentEffect.color_mul = m_color_mul;
         }
         if(m_CurrentEffect.color_add.IsValid()) {
           m_CurrentEffect.color_add = m_color_add;
@@ -848,8 +859,8 @@ namespace GrapX
           if(m_CurrentEffect.transform.IsValid()) {
             m_CurrentEffect.transform = m_transform;
           }
-          if(m_CurrentEffect.color.IsValid()) {
-            m_CurrentEffect.color = m_color_mul;
+          if(m_CurrentEffect.color_mul.IsValid()) {
+            m_CurrentEffect.color_mul = m_color_mul;
           }
           if(m_CurrentEffect.color_add.IsValid()) {
             m_CurrentEffect.color_add = m_color_add;
@@ -938,10 +949,12 @@ namespace GrapX
           }
         }
         break;
+
         case CF_NoOperation:
           TRACE_CMD("CF_NoOperation\n");
           // 啥也没有!!
           break;
+
         case CF_SetExtTexture:
         {
           const STATESWITCHING_TEXTUREEXT* pTextureExtCmd = pCmdPtr->cast_to<STATESWITCHING_TEXTUREEXT>();
@@ -1220,9 +1233,14 @@ namespace GrapX
 
       SCROLLTEXTUREDESC ScrollTexDesc;
       GRegion* prgnClip;
-      m_pGraphics->CreateRectRgn(&prgnClip, lprcClip->left, lprcClip->top, lprcClip->right, lprcClip->bottom);
+      if(lprcClip == NULL) {
+        m_pGraphics->CreateRectRgn(&prgnClip, m_rcAbsClip.left, m_rcAbsClip.top, m_rcAbsClip.right, m_rcAbsClip.bottom);
+      }
+      else {
+        m_pGraphics->CreateRectRgn(&prgnClip, lprcClip->left, lprcClip->top, lprcClip->right, lprcClip->bottom);
+      }
 
-      ScrollTexDesc.pOperationTex = m_pTargetTex->GetColorTextureUnsafe(GXResUsage::Default);
+      ScrollTexDesc.pOperationTex = m_pTargetTex ? m_pTargetTex->GetColorTextureUnsafe(GXResUsage::Default) : NULL;
       ScrollTexDesc.pTempTex = NULL;
       ScrollTexDesc.dx = dx;
       ScrollTexDesc.dy = dy;
@@ -1624,7 +1642,7 @@ namespace GrapX
       {
         pEffectImpl->AddRef();
         transform = pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>();
-        color     = pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();
+        color_mul = pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();
         color_add = pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();
       }
     }

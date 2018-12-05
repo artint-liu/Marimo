@@ -92,6 +92,11 @@ namespace GrapX
     return var;
   }
 
+  GXHRESULT EffectImpl::Clone(Effect** ppNewEffect)
+  {
+    return m_pGraphics->CreateEffect(ppNewEffect, m_pShader);
+  }
+
   GXBOOL EffectImpl::InitEffect()
   {
     Marimo::DATAPOOL_MANIFEST manifest;

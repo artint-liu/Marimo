@@ -232,6 +232,11 @@ namespace GrapX
 
     GXBOOL TextureImpl::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
     {
+      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      D3D11_BOX box = {UINT(lprcSource->left), UINT(lprcSource->top), 0, UINT(lprcSource->right), UINT(lprcSource->bottom), 1};
+      pD3D11Context->CopySubresourceRegion(
+        m_pD3D11Texture, 0, lpptDestination->x, lpptDestination->y, 0,
+        static_cast<TextureImpl*>(pSrc)->m_pD3D11Texture, 0, &box);
       return TRUE;
     }
 
@@ -467,12 +472,12 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    textureImpl_GPUReadBack::textureImpl_GPUReadBack(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+    TextureImpl_GPUReadBack::TextureImpl_GPUReadBack(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
     {
     }
 
-    GXBOOL textureImpl_GPUReadBack::InitReadBackTexture()
+    GXBOOL TextureImpl_GPUReadBack::InitReadBackTexture()
     {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
@@ -499,7 +504,7 @@ namespace GrapX
     }
 
 
-    GXBOOL textureImpl_GPUReadBack::Map(MAPPED* pMappedRect, GXResMap eResMap)
+    GXBOOL TextureImpl_GPUReadBack::Map(MAPPED* pMappedRect, GXResMap eResMap)
     {
       ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
       if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_READ, 0, &m_sMappedResource)))
@@ -512,7 +517,7 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL textureImpl_GPUReadBack::Unmap()
+    GXBOOL TextureImpl_GPUReadBack::Unmap()
     {
       if(m_sMappedResource.pData)
       {
@@ -521,6 +526,27 @@ namespace GrapX
         return TRUE;
       }
       return FALSE;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    TextureImpl_SwapBuffer::TextureImpl_SwapBuffer(Graphics* pGraphics)
+      : TextureImpl(pGraphics, Format_Unknown, 0, 0, 1, GXResUsage::Default)
+    {}
+
+    void TextureImpl_SwapBuffer::SetTexture(ID3D11Texture2D* pD3D11Texture)
+    {
+      SAFE_RELEASE(m_pD3D11Texture);
+      m_pD3D11Texture = pD3D11Texture;
+      m_pD3D11Texture->AddRef();
+      m_pD3D11Texture->GetDesc(&m_desc);
+    }
+
+    GXSIZE* TextureImpl_SwapBuffer::GetDimension(GXSIZE* pDimension)
+    {
+      pDimension->cx = m_desc.Width;
+      pDimension->cy = m_desc.Height;
+      return pDimension;
     }
 
   } // namespace D3D11

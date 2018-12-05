@@ -99,6 +99,7 @@ namespace GrapX
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
     GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
+    GXSTDINTERFACE(GXHRESULT    Clone(Effect** ppNewEffect));  // 克隆Effect，不会复制常量
 
     GXSTDINTERFACE(void BindTextureSlot(GXLPCSTR szTextureName, int nSlot));
   };

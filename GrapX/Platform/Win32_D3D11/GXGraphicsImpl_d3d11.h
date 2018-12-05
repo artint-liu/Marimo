@@ -45,6 +45,7 @@ namespace GrapX
     class Canvas3DImpl;
     template<class InterfaceT> class TextureBaseImplT;
     typedef TextureBaseImplT<TextureBase> TexBaseImpl;
+    class TextureImpl_SwapBuffer;
 
     class VertexDeclImpl;
     class RenderTargetImpl;
@@ -116,7 +117,7 @@ namespace GrapX
       DXGI_SWAP_CHAIN_DESC    m_SwapChainDesc;
 
       RenderTarget*           m_pTempBuffer;
-      RenderTarget*           m_pDefaultBackBuffer;
+      RenderTarget*           m_pDefaultBackBuffer;  // TODO: 还没使用
       //GTexture*               m_pBackBufferTex;    // 内部使用的纹理缓冲
       //GXImage*                m_pBackBufferImg;    // 引用 m_pBackBufferTex
       //GShader*                m_pSimpleShader;
@@ -132,7 +133,7 @@ namespace GrapX
       ID3D11RenderTargetView* m_pCurRenderTargetView;
       ID3D11DepthStencilView* m_pCurDepthStencilView;
       ID3D11InputLayout*      m_pVertexLayout;
-      TextureImpl*            m_pDeviceOriginTex;
+      TextureImpl_SwapBuffer* m_pDeviceOriginTex;
       GXDWORD                 m_dwBackBufferStencil;  // m_pDeviceOriginTex 使用的模板 [1, 255]
 
       GXINT                   m_nGraphicsCount;

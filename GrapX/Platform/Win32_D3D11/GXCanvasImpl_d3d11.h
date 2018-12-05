@@ -28,7 +28,7 @@ namespace GrapX
     {
       EffectImpl*   pEffectImpl;
       MOVarMatrix4  transform;
-      MOVarFloat4   color;
+      MOVarFloat4   color_mul;
       MOVarFloat4   color_add;
 
       CANVAS_EFFECT_DESC();
@@ -190,6 +190,8 @@ namespace GrapX
           ASSERT(sizeof(_Ty) == cbSize);
           return static_cast<const _Ty*>(this);
         }
+
+        virtual void OnMerge(){} // 合并两条命令时的清理操作
       };
 
       struct DRAWCALLBASE : public CMDBASE
@@ -205,24 +207,28 @@ namespace GrapX
       struct DRAWCALL_TEXTURE : public DRAWCALLBASE
       {
         Texture* pTexture;
+        void OnMerge() override { CLBREAK; } // 纹理绘制不应该发生合并操作
       };
 
       //////////////////////////////////////////////////////////////////////////
-
       struct STATESWITCHING_TEXTUREEXT : public CMDBASE
       {
         GXUINT   stage;
         Texture* pTexture;
+
+        void OnMerge() override { CLBREAK; } // 纹理切换不应该发生合并操作
       };
 
       struct STATESWITCHING_EFFECT : public CMDBASE
       {
         EffectImpl* pEffectImpl;
+        void OnMerge() override { SAFE_RELEASE(pEffectImpl); }
       };
 
       struct STATESWITCHING_REGION : public CMDBASE
       {
         GRegion* pRegion;
+        void OnMerge() override { SAFE_RELEASE(pRegion); }
       };
 
       struct STATESWITCHING_COMPOSITINGMODE : public CMDBASE
@@ -244,6 +250,7 @@ namespace GrapX
       {
         GXUINT sampler_slot;
         SamplerState* pSamplerState;
+        void OnMerge() override { SAFE_RELEASE(pSamplerState); }
       };
 
       struct STATESWITCHING_CLEAR : public CMDBASE
@@ -301,7 +308,10 @@ namespace GrapX
       inline void _SetPrimitivePos      (GXUINT nIndex, const GXINT _x, const GXINT _y);
 
       template<typename _Ty>
-      _Ty*     IntAppendCommand         (CanvasFunc cmd);
+      _Ty*     IntAppendCommandAlways   (CanvasFunc cmd); // 追加命令
+
+      template<typename _Ty>
+      _Ty*     IntAppendCommand         (CanvasFunc cmd); // 带合并的追加命令
 
       template<typename _Ty>
       GXUINT   IntAppendDrawCall        (_Ty** ppCmdBuffer, CanvasFunc cmd, GXUINT uVertexCount, GXUINT uIndexCount, Texture* pTextureReference);
@@ -344,6 +354,8 @@ namespace GrapX
       BlendStateImpl*        m_pBlendingState[2]; // Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
       BlendStateImpl*        m_pOMOpaque;      // 不透明方式的状态
       BlendStateImpl*        m_pOMInvert;
+
+      CANVAS_EFFECT_DESC     m_ClearEffect;     // Clear接口使用的Effect
 
       BlendStateImpl*        m_pOMNoColor;
       DepthStencilState*     m_pWriteStencil; // 写入模板参考值的模板状态

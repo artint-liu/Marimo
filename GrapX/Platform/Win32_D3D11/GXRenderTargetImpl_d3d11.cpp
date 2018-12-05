@@ -98,7 +98,7 @@ namespace GrapX
         GXFormat format = m_pColorTexture->GetFormat();
         m_pColorTexture->GetDimension(&sDimension);
 
-        textureImpl_GPUReadBack* pReadBackTexture = new textureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
+        TextureImpl_GPUReadBack* pReadBackTexture = new TextureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
         if(InlIsFailedToNewObject(pReadBackTexture)) {
           return GX_ERROR_OUROFMEMORY;
         }
@@ -294,6 +294,27 @@ namespace GrapX
         nWidth = SizeRatioToDimension(m_nWidth, sDesc.BackBufferWidth, 0);
         nHeight = SizeRatioToDimension(m_nHeight, sDesc.BackBufferHeight, 0);
       }
+
+      //
+      // 检查
+      //
+      ID3D11Device* pD3D11Device = m_pGraphics->D3DGetDevice();
+      UINT uColorSupport = 0;
+      UINT uDepthStencilSupport = 0;
+      pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eColorFormat), &uColorSupport);
+      if(TEST_FLAG_NOT(uColorSupport, D3D11_FORMAT_SUPPORT_RENDER_TARGET)) {
+        CLOG_ERROR("RenderTarget: %s 格式不能作为渲染纹理", GrapXToDX11::FormatToString(eColorFormat));
+        return FALSE;
+      }
+
+      if(eDepthStencilFormat != Format_Unknown) {
+        pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eDepthStencilFormat), &uDepthStencilSupport);
+        if(TEST_FLAG_NOT(uDepthStencilSupport, D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)) {
+          CLOG_ERROR("RenderTarget: %s 格式不能作为渲染模板深度缓冲", GrapXToDX11::FormatToString(eDepthStencilFormat));
+          return FALSE;
+        }
+      }
+
 
       m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, eColorFormat, nWidth, nHeight);
       if(InlIsFailedToNewObject(m_pColorTexture)) {
