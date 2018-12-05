@@ -42,6 +42,13 @@ namespace GrapXToDX11
     D3D11_INPUT_CLASSIFICATION InputSlotClass;
     UINT        InstanceDataStepRate;
   };
+  STATIC_ASSERT(offsetof(GXD3D11_INPUT_ELEMENT_DESC, SemanticName) == offsetof(D3D11_INPUT_ELEMENT_DESC, SemanticName));
+  STATIC_ASSERT(offsetof(GXD3D11_INPUT_ELEMENT_DESC, SemanticIndex) == offsetof(D3D11_INPUT_ELEMENT_DESC, SemanticIndex));
+  STATIC_ASSERT(offsetof(GXD3D11_INPUT_ELEMENT_DESC, Format) == offsetof(D3D11_INPUT_ELEMENT_DESC, Format));
+  STATIC_ASSERT(offsetof(GXD3D11_INPUT_ELEMENT_DESC, InputSlot) == offsetof(D3D11_INPUT_ELEMENT_DESC, InputSlot));
+  STATIC_ASSERT(offsetof(GXD3D11_INPUT_ELEMENT_DESC, AlignedByteOffset) == offsetof(D3D11_INPUT_ELEMENT_DESC, AlignedByteOffset));
+  STATIC_ASSERT(offsetof(GXD3D11_INPUT_ELEMENT_DESC, InputSlotClass) == offsetof(D3D11_INPUT_ELEMENT_DESC, InputSlotClass));
+  STATIC_ASSERT(offsetof(GXD3D11_INPUT_ELEMENT_DESC, InstanceDataStepRate) == offsetof(D3D11_INPUT_ELEMENT_DESC, InstanceDataStepRate));
   typedef clvector<GXD3D11_INPUT_ELEMENT_DESC>  GXD3D11InputElementDescArray;
 
   // 这些名字都没想好!!

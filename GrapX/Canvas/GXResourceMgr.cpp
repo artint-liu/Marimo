@@ -337,15 +337,36 @@ namespace GrapX
       {
         pDesc->dwCategoryId = RCC_VertexDecl;
 
+        struct CONTEXT
+        {
+          union
+          {
+            struct
+            {
+              GXDWORD  Offset : 8;
+              GXDWORD  Type : 5;
+              GXDWORD  Method : 1;
+              GXDWORD  Usage : 4;
+              GXDWORD  UsageIndex : 4;
+            };
+            GXDWORD dwCode;
+          };
+        }ctx;
+
+        STATIC_ASSERT(sizeof(CONTEXT) == sizeof(ctx.dwCode));
+
         int i = 0;
+        pDesc->strResourceName.Reserve(8 * (8 + 1));
         while((GXINT)lpVertexElement[i].UsageIndex >= 0) {
-          pDesc->strResourceName.AppendFormat(_CLTEXT("%08x-"),
-            chksum_crc32((unsigned char*)&lpVertexElement[i], sizeof(GXVERTEXELEMENT)));
+          ctx.Offset     = lpVertexElement[i].Offset;
+          ctx.Type       = lpVertexElement[i].Type;
+          ctx.Method     = lpVertexElement[i].Method;
+          ctx.Usage      = lpVertexElement[i].Usage;
+          ctx.UsageIndex = lpVertexElement[i].UsageIndex;
+          pDesc->strResourceName.AppendFormat(_CLTEXT("%08x-"), ctx.dwCode);
           i++;
         }
-        //unsigned int uSize = GetVertexDeclLength<unsigned int>(lpVertexElement) * sizeof(GXVERTEXELEMENT);
-        //pDesc->strResourceName = chksum_crc32((unsigned char*)lpVertexElement, uSize);
-
+        pDesc->strResourceName.TrimRight('-');
         return GX_OK;
       }
 
@@ -412,7 +433,6 @@ namespace GrapX
               GXDWORD dwDestBlendAlpha : 5;
               GXDWORD dwBlendOpAlpha : 3;
               GXDWORD dwWriteMask : 8;
-
             };
             GXDWORD dwCode[2];
           };

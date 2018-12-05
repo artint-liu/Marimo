@@ -922,7 +922,7 @@ GXHRESULT GraphicsImpl::CreateVertexDeclaration(GVertexDeclaration** ppVertexDec
     return GX_FAIL;
   }
 
-  GXHRESULT hval = pVertexDeclImpl->Initialize(lpVertexElement);
+  GXHRESULT hval = pVertexDeclImpl->Initialize(lpVertexElement, clStringA(ResFeatDesc.strResourceName));
 
   if(GXFAILED(hval))
   {

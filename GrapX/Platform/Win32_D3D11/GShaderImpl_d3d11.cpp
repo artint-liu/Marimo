@@ -416,6 +416,11 @@ namespace GrapX
       SAFE_RELEASE(m_pD3D11VertexShader);
       SAFE_RELEASE(m_pD3D11PixelShader);
 
+      for(auto it = m_InputLayoutDict.begin(); it != m_InputLayoutDict.end(); ++it)
+      {
+        SAFE_RELEASE(it->second);
+      }
+
       if(m_D11ResDescPool.GetSize() > 0){
         D3D11CB_DESC* pDesc = D3D11CB_GetDescBegin();
         D3D11CB_DESC* const pDescEnd = D3D11CB_GetDescEnd();
@@ -1067,6 +1072,30 @@ namespace GrapX
         return desc.pD3D11ConstantBuffer;
       }
       return NULL;
+    }
+
+    ID3D11InputLayout* ShaderImpl::D3D11GetInputLayout(VertexDeclImpl* pVertexDecl)
+    {
+      auto it = m_InputLayoutDict.find(pVertexDecl->GetSketchName());
+      if(it != m_InputLayoutDict.end())
+      {
+        return it->second;
+      }
+
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      ID3D11InputLayout* pD3D11InputLayout = NULL;
+
+      const GrapXToDX11::GXD3D11InputElementDescArray& sInputLayoutArray =
+        pVertexDecl->GetVertexLayoutDescArray();
+
+      //D3D11_INPUT_ELEMENT_DESC* pDesc = (D3D11_INPUT_ELEMENT_DESC*)&pVertexDecl->m_aDescs.front();
+      pd3dDevice->CreateInputLayout(
+        (D3D11_INPUT_ELEMENT_DESC*)&sInputLayoutArray.front(),
+        sInputLayoutArray.size() - 1, // 最后一个是空的结尾
+        m_pD3DVertexInterCode->GetBufferPointer(),
+        m_pD3DVertexInterCode->GetBufferSize(), &pD3D11InputLayout);
+      m_InputLayoutDict.insert(clmake_pair(pVertexDecl->GetSketchName(), pD3D11InputLayout));
+      return pD3D11InputLayout;
     }
 
     void ShaderImpl::DbgCheck(INTERMEDIATE_CODE::Array& aInterCode)

@@ -923,12 +923,13 @@ namespace GrapX
 
     GXVOID GraphicsImpl::BuildInputLayout()
     {
+      // 更新shader和顶点声明都会清空m_pVertexLayout
       ASSERT(m_pVertexLayout == NULL);
       ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(m_pCurShader);
-      D3D11_INPUT_ELEMENT_DESC* pDesc = (D3D11_INPUT_ELEMENT_DESC*)&m_pCurVertexDecl->m_aDescs.front();
-      m_pd3dDevice->CreateInputLayout(
-        pDesc, m_pCurVertexDecl->m_NumDescs, pShaderImpl->m_pD3DVertexInterCode->GetBufferPointer(),
-        pShaderImpl->m_pD3DVertexInterCode->GetBufferSize(), &m_pVertexLayout);
+
+      ID3D11InputLayout* pInputLayout = pShaderImpl->D3D11GetInputLayout(m_pCurVertexDecl);
+      m_pVertexLayout = pInputLayout;
+      m_pVertexLayout->AddRef();
       m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
     }
 

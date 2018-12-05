@@ -8,13 +8,15 @@ namespace GrapX
 {
   namespace D3D11
   {
+    class GraphicsImpl;
     class VertexDeclImpl : public GrapX::GVertexDeclaration
     {
       friend class GraphicsImpl;
     private:
       typedef GrapXToDX11::GXD3D11InputElementDescArray DescArray;
 
-      GraphicsImpl*       m_pGraphics;
+      GraphicsImpl*         m_pGraphics;
+      clStringA             m_strSketchName;  // ÌØÕ÷Ãû
       DescArray             m_aDescs;
       UINT                  m_NumDescs;
       GXUINT                m_nStride;
@@ -25,18 +27,21 @@ namespace GrapX
       virtual ~VertexDeclImpl();
 
     public:
-      GXHRESULT Initialize(LPCGXVERTEXELEMENT lpVertexElement);
+      GXHRESULT Initialize(LPCGXVERTEXELEMENT lpVertexElement, const clStringA& strSketchName);
       GXHRESULT Activate();
 
-#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-      virtual GXHRESULT           AddRef            ();
-      virtual GXHRESULT           Release           ();
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-      virtual GXHRESULT           Invoke            (GRESCRIPTDESC* pDesc) { return GX_OK; }
+      const clStringA& GetSketchName() const;
+      const GrapXToDX11::GXD3D11InputElementDescArray& GetVertexLayoutDescArray() const;
 
-      virtual GXUINT              GetStride         ();
-      virtual GXINT               GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc);
-      virtual GXLPCVERTEXELEMENT  GetVertexElement  ();
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+      GXHRESULT           AddRef            () override;
+      GXHRESULT           Release           () override;
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+      GXHRESULT           Invoke            (GRESCRIPTDESC* pDesc) override { return GX_OK; }
+
+      GXUINT              GetStride         () override;
+      GXINT               GetElementOffset  (GXDeclUsage Usage, GXUINT UsageIndex, LPGXVERTEXELEMENT lpDesc) override;
+      GXLPCVERTEXELEMENT  GetVertexElement  () override;
     };
   } // namespace D3D11
 }

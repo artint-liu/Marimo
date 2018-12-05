@@ -45,10 +45,8 @@ namespace GrapX
       m_pGraphics->UnregisterResource(this);
     }
 
-    GXHRESULT VertexDeclImpl::Initialize(LPCGXVERTEXELEMENT lpVertexElement)
+    GXHRESULT VertexDeclImpl::Initialize(LPCGXVERTEXELEMENT lpVertexElement, const clStringA& strSketchName)
     {
-      //LPDIRECT3DDEVICE9 lpd3dDevice = m_pGraphics->D3DGetDevice();
-      //ID3D11Device* const pd3dDevice = m_pGraphics->D3DGetDevice();
       // 默认的顶点声明
       //clBuffer* pVertDeclBuf;
       GrapXToDX11::VertexLayoutFromVertexDecl(lpVertexElement, &m_aDescs);
@@ -57,6 +55,7 @@ namespace GrapX
       if(m_aDescs.back().SemanticName.IsEmpty()) {
         m_NumDescs--;
       }
+      m_strSketchName = strSketchName;
 
       // 复制原有的声明
       const GXUINT nCount = MOGetDeclCount(lpVertexElement) + 1;
@@ -84,6 +83,17 @@ namespace GrapX
       //m_pGraphics->m_pImmediateContext->IASetInputLayout(m_pDecl);
       ASSERT(0);
       return GX_OK;
+    }
+
+    const clStringA& VertexDeclImpl::GetSketchName() const
+    {
+      return m_strSketchName;
+    }
+
+    const GrapXToDX11::GXD3D11InputElementDescArray& VertexDeclImpl::GetVertexLayoutDescArray() const
+    {
+      ASSERT(m_aDescs.size() == m_NumDescs + 1);
+      return m_aDescs;
     }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE

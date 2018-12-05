@@ -16,12 +16,14 @@ namespace GrapX
     typedef clvector<Marimo::DATAPOOL_DECLARATION>      DataPoolDeclaration_T;
     typedef clvector<Marimo::DATAPOOL_TYPE_DEFINITION>  DataPoolTypeDefinition_T;
     struct DATAPOOL_MAPPER;
+    class VertexDeclImpl;
 
     class ShaderImpl : public Shader
     {
       friend class GraphicsImpl;
       typedef Marimo::DATAPOOL_DECLARATION      DATAPOOL_DECLARATION;
       typedef Marimo::DATAPOOL_TYPE_DEFINITION  DATAPOOL_TYPE_DEFINITION;
+      typedef clmap<clStringA, ID3D11InputLayout*> InputLayoutDict;
     protected:
       enum class TargetType : GXUINT
       {
@@ -42,7 +44,8 @@ namespace GrapX
       GraphicsImpl* m_pGraphicsImpl;
       ID3D11VertexShader*         m_pD3D11VertexShader;
       ID3D11PixelShader*          m_pD3D11PixelShader;
-      ID3DBlob*                   m_pD3DVertexInterCode; // 用来和顶点声明进行绑定
+      ID3DBlob*                   m_pD3DVertexInterCode;  // 用来和顶点声明进行绑定
+      InputLayoutDict             m_InputLayoutDict;      // 顶点声明与shader映射关系对象表
 
       // DataPool 声明
       DATAPOOL_DECLARATION*       m_pDataPoolDecl; // 变量顺序: $Globals（varA，varB，varC...），各种CB（结构体形式）cb_A a, cb_B b ...
@@ -93,7 +96,7 @@ namespace GrapX
 
       GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
       ID3D11Buffer* D3D11CreateBuffer(D3D11CB_DESC& desc, size_t cbSize);
-
+      ID3D11InputLayout* D3D11GetInputLayout(VertexDeclImpl* pVertexDecl);
       void DbgCheck(INTERMEDIATE_CODE::Array& aInterCode);
 
       GXINT   GetCacheSize() const; // 旧的兼容接口
