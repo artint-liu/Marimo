@@ -321,23 +321,13 @@ namespace GrapX
         return FALSE;
       }
 
-      if(_CL_NOT_(m_pColorTexture->InitRenderTexture())) {
+      if(_CL_NOT_(m_pColorTexture->InitRenderTexture(NULL))) {
         SAFE_RELEASE(m_pColorTexture);
         return FALSE;
       }
 
       if(eDepthStencilFormat != Format_Unknown) {
-        m_pDepthStencilTexture = new TextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
-
-        if(InlIsFailedToNewObject(m_pDepthStencilTexture)) {
-          return FALSE;
-        }
-
-        if(_CL_NOT_(m_pDepthStencilTexture->InitDepthStencil())) {
-          SAFE_RELEASE(m_pColorTexture);
-          SAFE_RELEASE(m_pDepthStencilTexture);
-          return FALSE;
-        }
+        return InitDepthStencil(eDepthStencilFormat, nWidth, nHeight);
       }
 
       return TRUE;
@@ -351,6 +341,105 @@ namespace GrapX
     TextureImpl_DepthStencil* RenderTargetImpl::IntGetDepthStencilTextureUnsafe()
     {
       return m_pDepthStencilTexture;
+    }
+
+    GXBOOL RenderTargetImpl::InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight)
+    {
+      m_pDepthStencilTexture = new TextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
+
+      if(InlIsFailedToNewObject(m_pDepthStencilTexture)) {
+        return FALSE;
+      }
+
+      if(_CL_NOT_(m_pDepthStencilTexture->InitDepthStencil())) {
+        SAFE_RELEASE(m_pColorTexture);
+        SAFE_RELEASE(m_pDepthStencilTexture);
+        return FALSE;
+      }
+      return TRUE;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    GXHRESULT RenderTargetImpl_BackBuffer::Release()
+    {
+      GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
+      if(nRefCount == 0)
+      {
+        delete this;
+        return GX_OK;
+      }
+      return nRefCount;
+    }
+
+    RenderTargetImpl_BackBuffer::RenderTargetImpl_BackBuffer(Graphics* pGraphics)
+      : RenderTargetImpl(pGraphics, GXINT(GXSizeRatio::Same), GXINT(GXSizeRatio::Same))
+    {
+    }
+
+    GXBOOL RenderTargetImpl_BackBuffer::InitializeWithSwapChain(IDXGISwapChain* pD3D11SwapChain)
+    {
+      ID3D11Device* pD3D11Device = m_pGraphics->D3DGetDevice();
+      ID3D11Texture2D* pBackBuffer = NULL;
+
+      HRESULT hval = pD3D11SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+      if(FAILED(hval)) {
+        return FALSE;
+      }
+
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, Format_Unknown, 0, 0);
+      if(InlIsFailedToNewObject(m_pColorTexture)) {
+        return FALSE;
+      }
+
+      if(m_pColorTexture->InitRenderTexture(pBackBuffer) == FALSE) {
+        return FALSE;
+      }
+      pBackBuffer->Release();
+
+      GXSIZE sDimension;
+      m_pColorTexture->GetDimension(&sDimension);
+
+      // ³õÊ¼»¯DepthStencil
+
+      return InitDepthStencil(Format_D24S8, sDimension.cx, sDimension.cy);
+
+      //hval = pD3D11Device->CreateRenderTargetView(pBackBuffer, NULL, &m_pRenderTargetView);
+      //m_pDeviceOriginTex->SetTexture(pBackBuffer);
+      //if(FAILED(hval))
+      //  return hval;
+      //// ==========
+      //m_pCurRenderTargetView = m_pRenderTargetView;
+      //m_pCurRenderTargetView->AddRef();
+
+      //////////////////////////////////////////////////////////////////////////
+      // Create depth stencil texture
+      //D3D11_TEXTURE2D_DESC descDepth;
+      //ZeroMemory(&descDepth, sizeof(descDepth));
+      //descDepth.Width = rcWndClient.right;
+      //descDepth.Height = rcWndClient.bottom;
+      //descDepth.MipLevels = 1;
+      //descDepth.ArraySize = 1;
+      //descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+      //descDepth.SampleDesc.Count = 1;
+      //descDepth.SampleDesc.Quality = 0;
+      //descDepth.Usage = D3D11_USAGE_DEFAULT;
+      //descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+      //descDepth.CPUAccessFlags = 0;
+      //descDepth.MiscFlags = 0;
+      //hval = m_pd3dDevice->CreateTexture2D(&descDepth, NULL, &m_pDepthStencil);
+      //if(FAILED(hval))
+      //  return hval;
+
+      //// Create the depth stencil view
+      //D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+      //ZeroMemory(&descDSV, sizeof(descDSV));
+      //descDSV.Format = descDepth.Format;
+      //descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+      //descDSV.Texture2D.MipSlice = 0;
+      //hval = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
+      //if(FAILED(hval))
+      //  return hval;
     }
 
   } // namespace D3D11

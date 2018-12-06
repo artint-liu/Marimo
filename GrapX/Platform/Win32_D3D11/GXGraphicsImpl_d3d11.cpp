@@ -101,57 +101,46 @@ namespace GrapX
     }
 
     GraphicsImpl::GraphicsImpl()
-      : s_uCanvasCacheCount  (4)
-      , m_hWnd                (NULL)
-      , m_driverType          (D3D_DRIVER_TYPE_NULL)
-      , m_featureLevel        (D3D_FEATURE_LEVEL_11_0)
-      , m_pd3dDevice          (NULL)
-      , m_pImmediateContext   (NULL)
-      , m_pSwapChain          (NULL)
-      , m_pRenderTargetView   (NULL)
-      , m_pDepthStencil       (NULL)
-      , m_pDepthStencilView   (NULL)
-      , m_dwFlags             (NULL)
-      , m_pIdentity           (GXPLATFORM_UNKNOWN)
-      //, m_pBaseShader         (NULL)
-      //, m_pBaseEffect         (NULL)
-      , m_pBasicShader        (NULL)
-      , m_pBasicEffect        (NULL)
+      : s_uCanvasCacheCount     (4)
+      , m_hWnd                  (NULL)
+      , m_driverType            (D3D_DRIVER_TYPE_NULL)
+      , m_featureLevel          (D3D_FEATURE_LEVEL_11_0)
+      , m_pd3dDevice            (NULL)
+      , m_pImmediateContext     (NULL)
+      , m_pSwapChain            (NULL)
+      , m_dwFlags               (NULL)
+      , m_pIdentity             (GXPLATFORM_UNKNOWN)
+      , m_pBasicShader          (NULL)
+      , m_pBasicEffect          (NULL)
       , m_pCurRenderTargetView  (NULL)
       , m_pCurDepthStencilView  (NULL)
-      , m_pVertexLayout       (NULL)
-      , m_eCurTopology        (D3D_PRIMITIVE_TOPOLOGY_UNDEFINED)
-      , m_pDeviceOriginTex    (NULL)
-      , m_pCurPrimitive       (NULL)
-      , m_pCurRenderTarget    (NULL)
-      //, m_pCurDepthStencil    (NULL)
-      , m_aCanvasPtrCache     (NULL)
-      , m_pCurVertexDecl      (NULL)
-      , m_pCurCanvasCore      (NULL)
-      , m_pCurRasterizerState (NULL)
-      , m_pDefaultBlendState  (NULL)
+      , m_pVertexLayout         (NULL)
+      , m_eCurTopology          (D3D_PRIMITIVE_TOPOLOGY_UNDEFINED)
+      , m_pCurPrimitive         (NULL)
+      , m_pCurRenderTarget      (NULL)
+      , m_pDefaultSamplerState  (NULL)
+      , m_aCanvasPtrCache       (NULL)
+      , m_pCurVertexDecl        (NULL)
+      , m_pCurCanvasCore        (NULL)
+      , m_pCurRasterizerState   (NULL)
+      , m_pDefaultBlendState    (NULL)
       , m_pDefaultDepthStencilState(NULL)
       , m_pDefaultRasterizerState(NULL)
-      //, m_pCurRenderState     (NULL)
-      , m_pCurBlendState      (NULL)
-      , m_pCurDepthStencilState(NULL)
-      , m_pCurSamplerState    (NULL)
-      , m_pCurShader          (NULL)
-      , m_pDefaultBackBuffer  (NULL)
-      , m_pTempBuffer         (NULL)
-      //, m_pBackBufferTex      (NULL)
-      //, m_pBackBufferImg      (NULL)
-      , m_dwBackBufferStencil (1)
-      , m_pGraphicsLocker     (NULL)
-      , m_nGraphicsCount      (0)
-      , m_dwThreadId          (0)
-      //, m_pConsole            (NULL)
-      , m_pLogger             (NULL)
-      , m_pShaderConstName    (NULL)
-      , m_pWhiteTexture8x8  (NULL)
+      , m_pCurBlendState        (NULL)
+      , m_pCurDepthStencilState (NULL)
+      , m_pCurSamplerState      (NULL)
+      , m_pCurShader            (NULL)
+      , m_pBackBufferRenderTarget  (NULL)
+      , m_pTempBuffer           (NULL)
+      , m_dwBackBufferStencil   (1)
+      , m_pGraphicsLocker       (NULL)
+      , m_nGraphicsCount        (0)
+      , m_dwThreadId            (0)
+      , m_pLogger               (NULL)
+      , m_pShaderConstName      (NULL)
+      , m_pWhiteTexture8x8      (NULL)
     {
       memset(m_pCurTexture, 0, sizeof(Texture*) * MAX_TEXTURE_STAGE);
-      //m_pRgnAllocator = new GAllocator(NULL);
     }
 
     HRESULT GraphicsImpl::Initialize(const GRAPHICS_CREATION_DESC* pDesc)
@@ -170,17 +159,10 @@ namespace GrapX
         MOCreateFileLoggerW(&m_pLogger, strFilePath, FALSE);
       }
 
-      m_pDeviceOriginTex = new TextureImpl_SwapBuffer(this);
-      if(InlIsFailedToNewObject(m_pDeviceOriginTex)) {
+      m_pBackBufferRenderTarget = new RenderTargetImpl_BackBuffer(this);
+      if(InlIsFailedToNewObject(m_pBackBufferRenderTarget)) {
         return E_OUTOFMEMORY;
       }
-
-      //// 创建输出
-      //m_pConsole = new GXConsole;
-      //if(m_pConsole->Initialize(this) != 0) {
-      //  TRACE("Console 创建失败!\n");
-      //  ASSERT(0);
-      //}
 
       // 创建标志
       UINT createDeviceFlags = 0;
@@ -229,65 +211,16 @@ namespace GrapX
         m_driverType = driverTypes[driverTypeIndex];
         hval = D3D11CreateDeviceAndSwapChain(NULL, m_driverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
           D3D11_SDK_VERSION, &sd, &m_pSwapChain, &m_pd3dDevice, &m_featureLevel, &m_pImmediateContext);
-        if(SUCCEEDED(hval))
-          break;
+        if(SUCCEEDED(hval)) { break; }
       }
-      if(FAILED(hval))
+      if(FAILED(hval)) {
         return hval;
+      }
 
-      //////////////////////////////////////////////////////////////////////////
-      // Create a render target view
-      ID3D11Texture2D* pBackBuffer = NULL;
-      hval = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-      if(FAILED(hval))
-        return hval;
+      m_pBackBufferRenderTarget->InitializeWithSwapChain(m_pSwapChain);
+      InlSetRenderTarget(m_pBackBufferRenderTarget, 0);
 
-      hval = m_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_pRenderTargetView);
-      m_pDeviceOriginTex->SetTexture(pBackBuffer);
-      pBackBuffer->Release();
-      if(FAILED(hval))
-        return hval;
-      // ==========
-      m_pCurRenderTargetView = m_pRenderTargetView;
-      m_pCurRenderTargetView->AddRef();
-
-      //////////////////////////////////////////////////////////////////////////
-      // Create depth stencil texture
-      D3D11_TEXTURE2D_DESC descDepth;
-      ZeroMemory(&descDepth, sizeof(descDepth));
-      descDepth.Width = rcWndClient.right;
-      descDepth.Height = rcWndClient.bottom;
-      descDepth.MipLevels = 1;
-      descDepth.ArraySize = 1;
-      descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-      descDepth.SampleDesc.Count = 1;
-      descDepth.SampleDesc.Quality = 0;
-      descDepth.Usage = D3D11_USAGE_DEFAULT;
-      descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-      descDepth.CPUAccessFlags = 0;
-      descDepth.MiscFlags = 0;
-      hval = m_pd3dDevice->CreateTexture2D(&descDepth, NULL, &m_pDepthStencil);
-      if(FAILED(hval))
-        return hval;
-
-      // Create the depth stencil view
-      D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-      ZeroMemory(&descDSV, sizeof(descDSV));
-      descDSV.Format = descDepth.Format;
-      descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-      descDSV.Texture2D.MipSlice = 0;
-      hval = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
-      if(FAILED(hval))
-        return hval;
-
-      // ==========
-      m_pCurDepthStencilView = m_pDepthStencilView;
-      m_pCurDepthStencilView->AddRef();
-
-
-      //////////////////////////////////////////////////////////////////////////
-      m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
-      m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+      Clear(NULL, 0, GXCLEAR_DEPTH | GXCLEAR_STENCIL, 0, 1.0f, 0);
 
       // Setup the viewport
       D3D11_VIEWPORT vp;
@@ -318,24 +251,6 @@ namespace GrapX
 
       CreateShaderFromSource(&m_pBasicShader, aDesc, 2);
       CreateEffect(&m_pBasicEffect, m_pBasicShader);
-
-
-      //if(GXFAILED(CreateShaderFromSource(&m_pBaseShader, g_szBaseShader, 0, NULL)))
-      //{
-      //  CLOG_ERROR("Create base shader failed");
-      //}
-      //else
-      //{
-      //  CreateEffect(&m_pBaseEffect, m_pBaseShader);
-      //}
-      //if(GXSUCCEEDED(CreateShaderFromFileA(&m_pSimpleShader, "Shader\\Simple.shader.txt")))
-      //{
-      //  CreateEffect(&m_pBaseEffect, m_pSimpleShader);
-      //}
-      //else
-      //{
-      //  TRACE("初始化SimpleShader失败!\n");
-      //}
 
       return TRUE;
     }
@@ -374,43 +289,42 @@ namespace GrapX
 
       ReleaseCommon();
 
-      SAFE_RELEASE(m_pDefaultBackBuffer);
+      SAFE_RELEASE(m_pBackBufferRenderTarget);
       SAFE_RELEASE(m_pTempBuffer);
 
       SAFE_RELEASE(m_pCurShader);
-      //SAFE_RELEASE(m_pCurRenderState);
       SAFE_RELEASE(m_pCurPrimitive);
       for(int i = 0; i < MAX_TEXTURE_STAGE; i++) {
         SAFE_RELEASE(m_pCurTexture[i]);
       }
-      //SAFE_RELEASE(m_pCurDepthStencil);
+
       SAFE_RELEASE(m_pCurRenderTarget);
       SAFE_RELEASE(m_pCurCanvasCore);
 
       SAFE_RELEASE(m_pCurVertexDecl);
-      //OnDeviceEvent(DE_LostDevice);
       INVOKE_LOST_DEVICE;
-      if(m_dwFlags & F_CREATEDEVICE)
-      {
-        SAFE_RELEASE(m_pd3dDevice);
-        m_hWnd = NULL;
-      }
+
       SAFE_RELEASE(m_pVertexLayout);
-      SAFE_RELEASE(m_pDepthStencil);
-      SAFE_RELEASE(m_pDepthStencilView);
       SAFE_RELEASE(m_pCurDepthStencilView);
       SAFE_RELEASE(m_pCurRenderTargetView);
       SAFE_RELEASE(m_pImmediateContext);
       SAFE_RELEASE(m_pSwapChain);
-      SAFE_RELEASE(m_pRenderTargetView);
-      //SAFE_DELETE(m_pRgnAllocator);
 
-  //#ifdef _DEBUG
-  //    if(m_aResource.size() > 0)
-  //      TRACE("GXGraphics 释放后有 %d 个对象没有正常释放.\n", m_aResource.size());
-  //#endif // _DEBUG
-      //m_pConsole->Finalize();
-      //delete m_pConsole;
+      if(m_dwFlags & F_CREATEDEVICE)
+      {
+
+//#if defined(DEBUG) || defined(_DEBUG)
+//        ID3D11Debug *pD3D11Debug;
+//        HRESULT hr = m_pd3dDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&pD3D11Debug));
+//        if(SUCCEEDED(hr)) {
+//          hr = pD3D11Debug->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY);
+//        }
+//        SAFE_RELEASE(pD3D11Debug);
+//#endif
+        SAFE_RELEASE(m_pd3dDevice);
+        m_hWnd = NULL;
+      }
+
       SAFE_RELEASE(m_pLogger);
 
       SAFE_DELETE(m_pGraphicsLocker);
@@ -433,7 +347,7 @@ namespace GrapX
           InlSetTexture(NULL, i);
         }
 
-        SAFE_RELEASE(m_pDeviceOriginTex);
+        //SAFE_RELEASE(m_pDeviceOriginTex);
       }
       break;
       case RC_ResetDevice:
@@ -486,49 +400,9 @@ namespace GrapX
 
     GXHRESULT GraphicsImpl::Test()
     {
-      //const GXHRESULT hr = m_pd3dDevice->TestCooperativeLevel();
-
-      //switch(hr)
-      //{
-      //case D3DERR_DEVICELOST:
-      //  {
-      //    m_pGraphicsLocker->Lock();
-      //    TRACE("D3DERR_DEVICELOST\n");
-      //    OnDeviceEvent(DE_LostDevice);
-      //    CallResourceEvent(DE_LostDevice);
-      //    m_dwFlags |= F_DEVICEHASLOST;
-      //  }
-      //  break;
-      //case D3DERR_DEVICENOTRESET:
-      //  {
-      //    TRACE("D3DERR_DEVICENOTRESET\n");
-      //    if((m_dwFlags & F_DEVICEHASLOST) == 0)
-      //    {
-      //      OnDeviceEvent(DE_LostDevice);
-      //      CallResourceEvent(DE_LostDevice);
-      //    }
-
-      //    // Reset 需要在创建D3D设备的线程来调用
-      //    if(m_dwFlags & F_CREATEDEVICE)
-      //    {
-      //      GXHRESULT hr = SendMessage(m_hWnd, WM_GX_RESETDEVICE, NULL, (LPARAM)&m_d3dpp);
-      //      V(hr);
-      //    }
-      //    OnDeviceEvent(DE_ResetDevice);
-      //    CallResourceEvent(DE_ResetDevice);
-      //    m_dwFlags &= (~F_DEVICEHASLOST);
-      //    m_pGraphicsLocker->Unlock();
-      //  }
-      //  break;
-      //case D3DERR_DRIVERINTERNALERROR:
-      //  {
-      //    TRACE("D3DERR_DRIVERINTERNALERROR\n");
-      //  }
-      //  break;
-      //}
-      //return hr;
       return 0;
     }
+
     GXHRESULT GraphicsImpl::Begin()
     {
       m_pGraphicsLocker->Lock();
@@ -599,35 +473,6 @@ namespace GrapX
       //Activate(FALSE);
       return GX_OK;
     }
-
-    //GXHRESULT GXGraphicsImpl::SetPrimitiveV(GPrimitiveV* pPrimitive, GXUINT uStreamSource)
-    //{
-    //  if(m_pCurPrimitive == pPrimitive)
-    //    return S_OK;
-
-    //  if(m_pCurPrimitive != NULL)
-    //    m_pCurPrimitive->Release();
-
-    //  m_pCurPrimitive = pPrimitive;
-    //  if(m_pCurPrimitive == NULL)
-    //    return S_OK;
-
-    //  m_pCurPrimitive->AddRef();
-
-    //  // 应用顶点声明
-    //  GPrimitiveVertexOnlyImpl* pPrimImpl = static_cast<GPrimitiveVertexOnlyImpl*>(pPrimitive);
-    //  if(pPrimImpl->m_pVertexDecl != NULL) {
-    //    InlSetVertexDecl(pPrimImpl->m_pVertexDecl);
-    //  }
-
-    //  GPrimitiveVertexOnlyImpl* pPrimitiveImpl = (GPrimitiveVertexOnlyImpl*) pPrimitive;
-    //  UINT offset = 0;
-    //  m_pImmediateContext->IASetVertexBuffers( 0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, &pPrimitiveImpl->m_uElementSize, &offset );
-    //  //m_pd3dDevice->SetStreamSource(uStreamSource, pPrimitiveImpl->m_pVertexBuffer, 
-    //  //  0, pPrimitiveImpl->m_uElementSize);
-
-    //  return S_OK;
-    //}
 
     GXHRESULT GraphicsImpl::SetPrimitive(Primitive* pPrimitive, GXUINT uStreamSource)
     {
@@ -1223,16 +1068,6 @@ namespace GrapX
       return GX_OK;
     }
 
-    //GXHRESULT GXGraphicsImpl::CreateTexture3DFromFileExW(
-    //  Texture3D** ppTexture, GXLPCWSTR pSrcFile, 
-    //  GXUINT Width, GXUINT Height, GXUINT Depth, 
-    //  GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, 
-    //  GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo)
-    //{
-    //  CLBREAK;
-    //  return GX_OK;
-    //}
-
     GXHRESULT GraphicsImpl::CreateTextureCube(TextureCube** ppTexture,
       GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
     {
@@ -1288,11 +1123,11 @@ namespace GrapX
 
   //////////////////////////////////////////////////////////////////////////
 
-    GXBOOL GraphicsImpl::D3DGetSwapChainDesc(DXGI_SWAP_CHAIN_DESC* pSwapChainDesc)
-    {
-      *pSwapChainDesc = m_SwapChainDesc;
-      return TRUE;
-    }
+    //GXBOOL GraphicsImpl::D3DGetSwapChainDesc(DXGI_SWAP_CHAIN_DESC* pSwapChainDesc)
+    //{
+    //  *pSwapChainDesc = m_SwapChainDesc;
+    //  return TRUE;
+    //}
 
     GXBOOL GraphicsImpl::GetDesc(GXGRAPHICSDEVICE_DESC* pDesc)
     {
@@ -1319,41 +1154,25 @@ namespace GrapX
 
     GXBOOL GraphicsImpl::InlSetRenderTarget(RenderTarget* pTarget, GXUINT uRenderTargetIndex)
     {
-      if(pTarget != NULL)
+      if(pTarget == NULL)
       {
-        //TextureImpl* pTextureImpl = static_cast<TextureImpl*>(pTexture);
-        //if(TEST_FLAG(pTextureImpl->m_dwResUsage, GXRU_TEX_RENDERTARGET))
-        RenderTargetImpl* pTargetImpl = static_cast<RenderTargetImpl*>(pTarget);
-
-        if(m_pCurRenderTarget != pTargetImpl)
-        {
-          //TextureFromUserRT* pTexRT = static_cast<TextureFromUserRT*>(pTextureImpl);
-
-          SAFE_RELEASE(m_pCurRenderTarget);
-          SAFE_RELEASE(m_pCurRenderTargetView);
-          SAFE_RELEASE(m_pCurDepthStencilView);
-          m_pCurRenderTarget = pTargetImpl;
-          m_pCurRenderTargetView = pTargetImpl->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
-          m_pCurDepthStencilView = pTargetImpl->IntGetDepthStencilTextureUnsafe()->m_pD3D11DepthStencilView;
-          m_pCurRenderTarget->AddRef();
-          m_pCurRenderTargetView->AddRef();
-          m_pCurDepthStencilView->AddRef();
-
-          m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
-        }
-        //else {
-        //  return FALSE;
-        //}
+        pTarget = m_pBackBufferRenderTarget;
       }
-      else
+
+      RenderTargetImpl* pTargetImpl = static_cast<RenderTargetImpl*>(pTarget);
+
+      if(m_pCurRenderTarget != pTargetImpl)
       {
         SAFE_RELEASE(m_pCurRenderTarget);
         SAFE_RELEASE(m_pCurRenderTargetView);
         SAFE_RELEASE(m_pCurDepthStencilView);
-        m_pCurRenderTargetView = m_pRenderTargetView;
-        m_pCurDepthStencilView = m_pDepthStencilView;
-        m_pRenderTargetView->AddRef();
-        m_pDepthStencilView->AddRef();
+        m_pCurRenderTarget = pTargetImpl;
+        m_pCurRenderTargetView = pTargetImpl->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
+        m_pCurDepthStencilView = pTargetImpl->IntGetDepthStencilTextureUnsafe()->m_pD3D11DepthStencilView;
+        m_pCurRenderTarget->AddRef();
+        m_pCurRenderTargetView->AddRef();
+        m_pCurDepthStencilView->AddRef();
+
         m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
       }
       return TRUE;

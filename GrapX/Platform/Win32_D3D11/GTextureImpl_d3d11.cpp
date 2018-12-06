@@ -421,18 +421,30 @@ namespace GrapX
       SAFE_RELEASE(m_pD3D11RenderTargetView);
     }
 
-    GXBOOL TextureImpl_RenderTarget::InitRenderTexture()
+    GXBOOL TextureImpl_RenderTarget::InitRenderTexture(ID3D11Texture2D* pD3D11Texture)
     {
-      if(_CL_NOT_(TextureImpl::InitTexture(TRUE, NULL, 0))) {
-        return FALSE;
+      if(pD3D11Texture)
+      {
+        ASSERT(m_Format == Format_Unknown && m_nWidth == 0 && m_nHeight == 0);
+        m_pD3D11Texture = pD3D11Texture;
+        m_pD3D11Texture->AddRef();
+
+        D3D11_TEXTURE2D_DESC desc;
+        m_pD3D11Texture->GetDesc(&desc);
+        //static_cast<GXFormat>(m_Format) = DX11ToGrapX();
+        static_cast<GXUINT>(m_nWidth) = desc.Width;
+        static_cast<GXUINT>(m_nHeight) = desc.Height;
+      }
+      else
+      {
+        if(_CL_NOT_(TextureImpl::InitTexture(TRUE, NULL, 0))) {
+          return FALSE;
+        }
       }
 
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
-      D3D11_RENDER_TARGET_VIEW_DESC TarDesc;
-      InlSetZeroT(TarDesc);
-
-      TarDesc.Format = GrapXToDX11::FormatFrom(m_Format);
+      D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
       TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
       HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
@@ -529,25 +541,6 @@ namespace GrapX
     }
 
     //////////////////////////////////////////////////////////////////////////
-
-    TextureImpl_SwapBuffer::TextureImpl_SwapBuffer(Graphics* pGraphics)
-      : TextureImpl(pGraphics, Format_Unknown, 0, 0, 1, GXResUsage::Default)
-    {}
-
-    void TextureImpl_SwapBuffer::SetTexture(ID3D11Texture2D* pD3D11Texture)
-    {
-      SAFE_RELEASE(m_pD3D11Texture);
-      m_pD3D11Texture = pD3D11Texture;
-      m_pD3D11Texture->AddRef();
-      m_pD3D11Texture->GetDesc(&m_desc);
-    }
-
-    GXSIZE* TextureImpl_SwapBuffer::GetDimension(GXSIZE* pDimension)
-    {
-      pDimension->cx = m_desc.Width;
-      pDimension->cy = m_desc.Height;
-      return pDimension;
-    }
 
   } // namespace D3D11
 } // namespace GrapX

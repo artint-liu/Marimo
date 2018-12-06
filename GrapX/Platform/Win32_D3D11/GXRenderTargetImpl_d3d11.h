@@ -51,6 +51,21 @@ namespace GrapX
       GXBOOL Initialize(GXFormat eColorFormat, GXFormat eDepthStencilFormat);
       TextureImpl_RenderTarget* IntGetColorTextureUnsafe();
       TextureImpl_DepthStencil* IntGetDepthStencilTextureUnsafe();
+
+    protected:
+      GXBOOL InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight);
+
+    };
+
+    //////////////////////////////////////////////////////////////////////////
+
+    class RenderTargetImpl_BackBuffer : public RenderTargetImpl
+    {
+    public:
+      GXHRESULT  Release                () override;
+
+      RenderTargetImpl_BackBuffer(Graphics* pGraphics);
+      GXBOOL InitializeWithSwapChain(IDXGISwapChain* pSwapChain);
     };
 
   } // namespace D3D11

@@ -54,7 +54,7 @@
 
 
   //CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME, 1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
-  CreateRenderTarget(&m_pDefaultBackBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, Format_D24S8);
+  //CreateRenderTarget(&m_pDefaultBackBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, Format_D24S8);
 
   CreateRenderTarget(&m_pTempBuffer, NULL, GXSizeRatio::Same, GXSizeRatio::Same, GXFMT_A8R8G8B8, Format_Unknown);
 
@@ -672,7 +672,7 @@ GXHRESULT GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget* pTar
     GetDesc(&Desc);
     regn.width  = Desc.BackBufferWidth;
     regn.height = Desc.BackBufferHeight;
-    pTarget = m_pDefaultBackBuffer;
+    pTarget = m_pBackBufferRenderTarget;
   }
   //else
   //{
@@ -1214,13 +1214,13 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
 
   GXHRESULT GraphicsImpl::GetBackBuffer(RenderTarget** ppTarget)
   {
-    *ppTarget = m_pDefaultBackBuffer;
-    return m_pDefaultBackBuffer->AddRef();
+    *ppTarget = m_pBackBufferRenderTarget;
+    return m_pBackBufferRenderTarget->AddRef();
   }
 
   Texture* GraphicsImpl::GetDeviceOriginTex()
   {
-    return m_pDeviceOriginTex;
+    return m_pBackBufferRenderTarget->GetColorTextureUnsafe(GXResUsage::Default);
   }
 
   GXBOOL GraphicsImpl::ScrollTexture(const SCROLLTEXTUREDESC* lpstd)
@@ -1234,7 +1234,7 @@ void GraphicsImpl::IncreaseStencil(GXDWORD* pdwStencil)
     GXBOOL bSimpleRect = FALSE;
 
     Texture* const pTarget  = (lpstd->pOperationTex == NULL)
-      ? m_pDeviceOriginTex
+      ? m_pBackBufferRenderTarget->GetColorTextureUnsafe(GXResUsage::Default)
       : lpstd->pOperationTex;
     Texture* const pTempTex = (lpstd->pTempTex == NULL)
       ? m_pTempBuffer->GetColorTextureUnsafe(GXResUsage::Default)

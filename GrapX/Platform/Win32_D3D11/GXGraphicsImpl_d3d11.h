@@ -49,6 +49,7 @@ namespace GrapX
 
     class VertexDeclImpl;
     class RenderTargetImpl;
+    class RenderTargetImpl_BackBuffer;
 
     struct GRAPHICS_CREATION_DESC
     {
@@ -93,7 +94,7 @@ namespace GrapX
       void                        IntGetDimension     (GXUINT& nWidth, GXUINT& nHeight);  // 
       inline ID3D11Device*        D3DGetDevice        ();
       inline ID3D11DeviceContext* D3DGetDeviceContext ();
-      GXBOOL                      D3DGetSwapChainDesc  (DXGI_SWAP_CHAIN_DESC* pSwapChainDesc);
+      //GXBOOL                      D3DGetSwapChainDesc  (DXGI_SWAP_CHAIN_DESC* pSwapChainDesc);
       inline clstd::Locker*       GetLocker           ();
     private:
       GXHRESULT         Test              ();
@@ -111,20 +112,12 @@ namespace GrapX
       ID3D11Device*           m_pd3dDevice;
       ID3D11DeviceContext*    m_pImmediateContext;
       IDXGISwapChain*         m_pSwapChain;
-      ID3D11RenderTargetView* m_pRenderTargetView;
-      ID3D11Texture2D*        m_pDepthStencil;
-      ID3D11DepthStencilView* m_pDepthStencilView;
       DXGI_SWAP_CHAIN_DESC    m_SwapChainDesc;
 
       RenderTarget*           m_pTempBuffer;
-      RenderTarget*           m_pDefaultBackBuffer;  // TODO: 还没使用
-      //GTexture*               m_pBackBufferTex;    // 内部使用的纹理缓冲
-      //GXImage*                m_pBackBufferImg;    // 引用 m_pBackBufferTex
-      //GShader*                m_pSimpleShader;
+      RenderTargetImpl_BackBuffer* m_pBackBufferRenderTarget;
       Shader*                 m_pBasicShader;
       Effect*                 m_pBasicEffect;
-      //Shader*                 m_pBaseShader;
-      //Effect*                 m_pBaseEffect;
 
       // State define - 状态定义
       D3D_PRIMITIVE_TOPOLOGY  m_eCurTopology;
@@ -133,11 +126,9 @@ namespace GrapX
       ID3D11RenderTargetView* m_pCurRenderTargetView;
       ID3D11DepthStencilView* m_pCurDepthStencilView;
       ID3D11InputLayout*      m_pVertexLayout;
-      TextureImpl_SwapBuffer* m_pDeviceOriginTex;
       GXDWORD                 m_dwBackBufferStencil;  // m_pDeviceOriginTex 使用的模板 [1, 255]
 
       GXINT                   m_nGraphicsCount;
-      //clstd::Locker*          m_pGraphicsLocker;
       DWORD                   m_dwThreadId; // 用来检测Begin()和End()是否调用自同一个线程
     };
 
