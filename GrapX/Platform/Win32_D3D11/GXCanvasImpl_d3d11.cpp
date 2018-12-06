@@ -479,32 +479,21 @@ namespace GrapX
 
     void CanvasImpl::IntClear(const GXRECT* lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil)
     {
+      // 确保全是预知状态
       ASSERT(m_pGraphics->IsActiveCanvas(this));
-      //m_pGraphics->Clear(lpRects, nCount, dwFlags, crClear, z, dwStencil);
-
-
-      DepthStencilStateImpl* pSavedDepthStencilState = m_pGraphics->m_pCurDepthStencilState;
-      pSavedDepthStencilState->AddRef();
-      BlendStateImpl* pSavedBlendState = m_pGraphics->m_pCurBlendState;
-      pSavedBlendState->AddRef();
-
-      m_pGraphics->InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(m_pWriteStencil));
-      m_pGraphics->InlSetShader(m_pGraphics->m_pBasicShader);
-      m_pWriteStencil->SetStencilRef(dwStencil);
-
-      if(TEST_FLAG(dwFlags, GXCLEAR_TARGET)) {
-        m_pGraphics->InlSetBlendState(m_pOMOpaque);
-      }
-      else {
-        m_pGraphics->InlSetBlendState(m_pOMNoColor);
-      }
-
       ASSERT(m_pGraphics->m_pCurShader == m_CurrentEffect.pEffectImpl->GetShaderUnsafe());
       ASSERT(m_pGraphics->m_pCurPrimitive == m_pPrimitive);
+      ASSERT(m_pGraphics->m_pCurBlendState == m_pBlendStateImpl);
+      ASSERT(
+        (m_pClipRegion == NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[0]) ||
+        (m_pClipRegion != NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[1]) ||
+        (m_pClipRegion != NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[0]) ); // UpdateStencil 中间状态
+      
       m_pGraphics->InlSetEffect(m_ClearEffect.pEffectImpl);
+      m_pWriteStencil->SetStencilRef(dwStencil);
+      m_pGraphics->InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(m_pWriteStencil));
+      m_pGraphics->InlSetBlendState(TEST_FLAG(dwFlags, GXCLEAR_TARGET) ? m_pOMOpaque : m_pOMNoColor);
 
-      //GXRASTERIZERDESC ras_desc;
-      //CreateRasterizerState()
 
       Primitive* pPrimitive = NULL;
       clstd::LocalBuffer<sizeof(PRIMITIVE) * 6 * 64> buf;
@@ -529,23 +518,13 @@ namespace GrapX
       m_pGraphics->CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Default, 6 * nCount, sizeof(PRIMITIVE), buf.GetPtr(), 0, 0, NULL);
       m_pGraphics->SetPrimitive(pPrimitive);
 
-      //GXDWORD _dwFlags = m_pGraphics->m_dwFlags;
-      //m_pGraphics->m_dwFlags = GraphicsImpl::F_ACTIVATE;
       m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST, 0, nCount * 2);
-      //m_pGraphics->m_dwFlags = _dwFlags;
 
+      // 状态恢复
       m_pGraphics->SetPrimitive(static_cast<Primitive*>(m_pPrimitive));
       m_pGraphics->InlSetEffect(m_CurrentEffect.pEffectImpl);
-
-      m_pGraphics->InlSetDepthStencilState(pSavedDepthStencilState);
-      SAFE_RELEASE(pSavedDepthStencilState);
-      
-      m_pGraphics->InlSetBlendState(pSavedBlendState);
-      SAFE_RELEASE(pSavedBlendState);
-
-      //SAFE_RELEASE(m_pCurPrimitive);
-      //m_pCurPrimitive = pSavedPrimitive;
-      //SAFE_RELEASE(pSavedPrimitive);
+      m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[m_pClipRegion == NULL ? 0 : 1]);
+      m_pGraphics->InlSetBlendState(m_pBlendStateImpl);
 
       SAFE_RELEASE(pPrimitive);
     }
@@ -607,13 +586,13 @@ namespace GrapX
         m_pGraphics->InlSetSamplerState(0, m_pSamplerState);
         //m_pGraphics->InlSetDepthStencil(NULL);
 
-        if(m_CurrentEffect.transform.IsValid()) {
+        if(m_CurrentEffect.transform.IsValid()) { // TODO: 改为不判断形式
           m_CurrentEffect.transform = m_transform;
         }
-        if(m_CurrentEffect.color_mul.IsValid()) {
+        if(m_CurrentEffect.color_mul.IsValid()) { // TODO: 改为不判断形式
           m_CurrentEffect.color_mul = m_color_mul;
         }
-        if(m_CurrentEffect.color_add.IsValid()) {
+        if(m_CurrentEffect.color_add.IsValid()) { // TODO: 改为不判断形式
           m_CurrentEffect.color_add = m_color_add;
         }
 
@@ -856,13 +835,13 @@ namespace GrapX
           const STATESWITCHING_EFFECT* pEffectCmd = pCmdPtr->cast_to<STATESWITCHING_EFFECT>();
 
           m_CurrentEffect.InitEffect(pEffectCmd->pEffectImpl);
-          if(m_CurrentEffect.transform.IsValid()) {
+          if(m_CurrentEffect.transform.IsValid()) { // TODO: 改为不判断形式
             m_CurrentEffect.transform = m_transform;
           }
-          if(m_CurrentEffect.color_mul.IsValid()) {
+          if(m_CurrentEffect.color_mul.IsValid()) { // TODO: 改为不判断形式
             m_CurrentEffect.color_mul = m_color_mul;
           }
-          if(m_CurrentEffect.color_add.IsValid()) {
+          if(m_CurrentEffect.color_add.IsValid()) { // TODO: 改为不判断形式
             m_CurrentEffect.color_add = m_color_add;
           }
 
@@ -878,7 +857,7 @@ namespace GrapX
           const STATESWITCHING_COLORADD* pColorAddCmd = pCmdPtr->cast_to<STATESWITCHING_COLORADD>();
 
           pColorAddCmd->color.ToFloat4(m_color_add);
-          if(m_CurrentEffect.color_add.IsValid())
+          if(m_CurrentEffect.color_add.IsValid()) // TODO: 改为不判断形式
           {
             m_CurrentEffect.color_add = m_color_add;
             IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
@@ -977,7 +956,7 @@ namespace GrapX
 
           m_transform = pTransformCmd->transform;
          
-          if(m_CurrentEffect.transform.IsValid()) {
+          if(m_CurrentEffect.transform.IsValid()) { // TODO: 改为不判断形式
             m_CurrentEffect.transform = pTransformCmd->transform;
             IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
           }

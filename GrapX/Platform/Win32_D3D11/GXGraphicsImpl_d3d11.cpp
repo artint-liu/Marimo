@@ -547,8 +547,16 @@ namespace GrapX
       return GXSUCCEEDED(m_pd3dDevice->SetViewport(&Viewport));
 #else
       GXRECT rect;
-      gxRegnToRect(&rect, (const GXLPREGN)pRegn);
-      //m_pCurRenderState->Set(GXRS_SCISSORTESTENABLE, TRUE);
+      if(pRegn)
+      {
+        gxRegnToRect(&rect, (const GXLPREGN)pRegn);
+      }
+      else
+      {
+        GXSIZE sDimension;
+        m_pCurRenderTarget->GetDimension(&sDimension);
+        rect.set(0, 0, sDimension.cx, sDimension.cy);
+      }
       m_pImmediateContext->RSSetScissorRects(1, (RECT*)&rect);
 
       //HRESULT hval = m_pd3dDevice->SetScissorRect((RECT*)&rect);

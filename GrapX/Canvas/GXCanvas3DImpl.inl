@@ -75,7 +75,7 @@ GXBOOL Canvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
   //if((pTexture != NULL && (pTexture->GetUsage() & GXRU_TEX_RENDERTARGET)) ||
   //  pTexture == NULL)
   {
-    ASSERT(m_pTarget == NULL);
+    //ASSERT(m_pTarget == NULL);
 
     //m_pTargetTex = (GTextureImpl*)pTexture;
     //if(m_pTargetTex != NULL)

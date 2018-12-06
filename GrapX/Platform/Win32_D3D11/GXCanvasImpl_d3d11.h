@@ -145,11 +145,9 @@ namespace GrapX
         CF_Textured,
         CF_Clear,
         CF_ClearStencil,
-        //CF_Scroll,
         CF_DrawLast,
 
         CF_StateFirst,  // 状态相关的
-        //CF_RenderState,
         CF_SetViewportOrg,
         CF_SetRegion,
         CF_SetClipBox,
@@ -159,14 +157,7 @@ namespace GrapX
         CF_CompositingMode,
         CF_Effect,
         CF_ColorAdditive,
-        //CF_SetUniform1f,
-        //CF_SetUniform2f,
-        //CF_SetUniform3f,
-        //CF_SetUniform4f,
-        //CF_SetUniform4x4f,
-        //CF_SetPixelSizeInv,
         CF_SetExtTexture,
-        //CF_SetEffectConst,
         CF_SetSamplerState,
         CF_SetTransform,
         CF_StateLast,
@@ -288,12 +279,10 @@ namespace GrapX
         float4x4        matTransform;
         GXColor         color_mul;
         GXColor         color_add;
-        //GXDWORD         dwColorAdditive;
 
         RENDERSTATE     RenderState;  // 不增加引用
         CALLSTATE()
           : eCompMode       (CompositingMode_SourceCopy)
-          //, dwColorAdditive (NULL)
         {
           origin.x = origin.y = 0;
           gxSetRectEmpty(&rcClip);
@@ -334,58 +323,57 @@ namespace GrapX
     public:
 
     private:
-      GXDWORD       m_bStatic : 1;    // 标志是否是 GXGraphics 中的静态成员, 是的话表示在 GXGraphics 创建时已经创建好
+      GXDWORD                 m_bStatic : 1;    // 标志是否是 GXGraphics 中的静态成员, 是的话表示在 GXGraphics 创建时已经创建好
 
-      GXINT         m_xAbsOrigin;     // 绝对原点位置，不受API影响
-      GXINT         m_yAbsOrigin;
-      GXRECT        m_rcAbsClip;      // Canvas 初始化的/最大的/系统的 裁剪区域, 其实这个Rect的left和top等于m_xAbsOrigin, m_yAbsOrigin
+      GXINT                   m_xAbsOrigin;     // 绝对原点位置，不受API影响
+      GXINT                   m_yAbsOrigin;
+      GXRECT                  m_rcAbsClip;      // Canvas 初始化的/最大的/系统的 裁剪区域, 其实这个Rect的left和top等于m_xAbsOrigin, m_yAbsOrigin
 
-      GXDWORD         m_dwStencil;
-      GXDWORD         m_dwTexVertColor; // 输出纹理图元时的顶点颜色，不直接参与渲染状态
-      PenStyle        m_eStyle;
+      GXDWORD                 m_dwStencil;
+      GXDWORD                 m_dwTexVertColor; // 输出纹理图元时的顶点颜色，不直接参与渲染状态
+      PenStyle                m_eStyle;
 
-      GRegion*        m_pClipRegion;
+      GRegion*                m_pClipRegion;
 
-      const GXUINT    s_uDefVertIndexSize = 128;
+      const GXUINT            s_uDefVertIndexSize = 128;
 
       // 预置的状态
-      RasterizerStateImpl*   m_pRasterizerState;
-      DepthStencilStateImpl* m_pCanvasStencil[2]; // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
-      BlendStateImpl*        m_pBlendingState[2]; // Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
-      BlendStateImpl*        m_pOMOpaque;      // 不透明方式的状态
-      BlendStateImpl*        m_pOMInvert;
+      RasterizerStateImpl*    m_pRasterizerState;
+      DepthStencilStateImpl*  m_pCanvasStencil[2]; // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
+      BlendStateImpl*         m_pBlendingState[2]; // Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
+      BlendStateImpl*         m_pOMOpaque;      // 不透明方式的状态
+      BlendStateImpl*         m_pOMInvert;
 
-      CANVAS_EFFECT_DESC     m_ClearEffect;     // Clear接口使用的Effect
+      CANVAS_EFFECT_DESC      m_ClearEffect;     // Clear接口使用的Effect
 
-      BlendStateImpl*        m_pOMNoColor;
-      DepthStencilState*     m_pWriteStencil; // 写入模板参考值的模板状态
+      BlendStateImpl*         m_pOMNoColor;
+      DepthStencilState*      m_pWriteStencil; // 写入模板参考值的模板状态
 
       // 预置纹理
-      Texture*      m_pWhiteTex;
+      Texture*                m_pWhiteTex;
 
-      Primitive*    m_pPrimitive;
-      PRIMITIVE*    m_lpLockedVertex;
-      GXUINT        m_uVertCount;
-      GXUINT        m_uIndexCount;
-      GXUINT        m_uVertIndexSize;
-      VIndex*       m_lpLockedIndex;
+      Primitive*              m_pPrimitive;
+      PRIMITIVE*              m_lpLockedVertex;
+      GXUINT                  m_uVertCount;
+      GXUINT                  m_uIndexCount;
+      GXUINT                  m_uVertIndexSize;
+      VIndex*                 m_lpLockedIndex;
 
-      clstd::MemBuffer m_Commands;
-      CMDBASE*      m_pLastCommand;
+      clstd::MemBuffer        m_Commands;
+      CMDBASE*                m_pLastCommand;
 
-      CALLSTATE    m_CallState;   // 记录命令队列最后的状态, 精简绘图函数的重复调用
+      CALLSTATE               m_CallState;   // 记录命令队列最后的状态, 精简绘图函数的重复调用
 
-      GXDWORD       m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
-      TextureImpl*  m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
-
-      EffectImpl*   m_pDefaultEffectImpl; // 默认Effect
+      GXDWORD                 m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
+      TextureImpl*            m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
+      EffectImpl*             m_pDefaultEffectImpl; // 默认Effect
 
       // 用于Flush状态续接
-      GXRECT             m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在Flush阶段, 用来限制绘图区域
-      CANVAS_EFFECT_DESC m_CurrentEffect;
-      float4x4           m_transform;
-      float4             m_color_mul;
-      float4             m_color_add;
+      GXRECT                  m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在Flush阶段, 用来限制绘图区域
+      CANVAS_EFFECT_DESC      m_CurrentEffect;
+      float4x4                m_transform;
+      float4                  m_color_mul;
+      float4                  m_color_add;
     };
 
   } // namespace D3D11
