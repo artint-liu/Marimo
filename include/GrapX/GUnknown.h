@@ -74,6 +74,133 @@ public:
 //  return m_uRefCount;
 //}
 
+namespace GrapX
+{
+  template<class _TUnknown>
+  class ObjectT
+  {
+  protected:
+    _TUnknown* m_pObject;
+
+  public:
+    typedef void (*unspecified_bool_type)(ObjectT***);
+
+    ObjectT() : m_pObject(NULL)
+    {}
+
+    ObjectT(_TUnknown* pObj)
+      : m_pObject(pObj)
+    {
+      SAFE_ADDREF(pObj);
+    }
+
+    ObjectT(const ObjectT& NewObject)
+      : m_pObject(NULL)
+    {
+      operator=(NewObject.operator->());
+    }
+
+    ~ObjectT()
+    {
+      SAFE_RELEASE(m_pObject);
+    }
+
+    _TUnknown** operator&()
+    {
+      return &m_pObject;
+    }
+
+    _TUnknown* operator->()
+    {
+      return m_pObject;
+    }
+
+    _TUnknown* operator->() const
+    {
+      return m_pObject;
+    }
+
+    operator _TUnknown*()
+    {
+      return m_pObject;
+    }
+
+    bool operator!() const
+    {
+      return IsNullPtr();
+    }
+
+    bool operator<(const ObjectT& obj) const
+    {
+      return m_pObject < obj.m_pObject;
+    }
+
+    bool IsNullPtr() const
+    {
+      return m_pObject == NULL;
+    }
+
+    template<class ObjectT2>
+    ObjectT2& CastTo()
+    {
+      return *static_cast<ObjectT2*>(&*this);
+    }
+
+    template<class ObjectT2>
+    const ObjectT2& CastTo() const
+    {
+      return *static_cast<const ObjectT2*>(&*this);
+    }
+
+    ObjectT& operator=(const ObjectT& NewObject)
+    {
+      return operator=(NewObject.operator->());
+    }
+
+    ObjectT& operator=(_TUnknown* pNewObject)
+    {
+      if(m_pObject != pNewObject) {
+        if(m_pObject) {
+          m_pObject->Release();
+        }
+        m_pObject = pNewObject;
+        if(m_pObject) {
+          m_pObject->AddRef();
+        }
+      }
+      return *this;
+    }
+
+    bool operator==(const GUnknown* pCmpObject) const
+    {
+      return m_pObject == pCmpObject;
+    }
+
+    bool operator!=(const GUnknown* pCmpObject) const
+    {
+      return m_pObject != pCmpObject;
+    }
+
+    //template<class _TUnknown2>
+    //bool equals(const ObjectT<_TUnknown2>& Object2) const
+    //{
+    //  return m_pObject == Object2.operator->();
+    //}
+
+    operator unspecified_bool_type() const
+    {
+      return valid() ? __unspecified_bool_type : NULL;
+    }
+
+  protected:
+    static void __unspecified_bool_type(ObjectT***)
+    {
+    }
+  };
+
+  STATIC_ASSERT(sizeof(ObjectT<GUnknown>) == sizeof(GUnknown*));
+} // namespace GrapX
+
 #else
 #pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _GRAPH_UNKNOWN_H_

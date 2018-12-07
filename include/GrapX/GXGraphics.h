@@ -138,7 +138,7 @@ namespace GrapX
       GXUINT      Height,
       GXFormat    Format,
       GXResUsage  eResUsage,
-      GXUINT      MipLevels = 0,
+      GXUINT      MipLevels = 0,  // 为0时，MipMap自动计算，pInitData指向最高层图像数据；大于1时pInitData顺序接逐层数据，nPitch是最高层的步长
       GXLPCVOID   pInitData = NULL,
       GXUINT      nPitch = 0));   // 0表示使用默认pitch（nWidth*像素字节数）
 

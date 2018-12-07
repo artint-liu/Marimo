@@ -64,9 +64,29 @@ namespace GrapX
     return GX_OK;
   }
 
+  GXBOOL EffectImpl::SetTexture(GXUINT nSlot, Texture* pTexture)
+  {
+    if(nSlot >= m_aTextures.size()) {
+      return FALSE;
+    }
+    m_aTextures[nSlot] = pTexture;
+    return TRUE;
+  }
+
+  GXBOOL EffectImpl::SetTexture(GXLPCSTR szSamplerName, Texture* pTexture)
+  {
+    const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->FindBindResource(szSamplerName);
+    if(pDesc && pDesc->type == Shader::BindType::Sampler)
+    {
+      ASSERT(pDesc->slot < (int)m_aTextures.size());
+      m_aTextures[pDesc->slot] = pTexture;
+      return TRUE;
+    }
+    return FALSE;
+  }
+
   void EffectImpl::BindTextureSlot(GXLPCSTR szTextureName, int nSlot)
   {
-
   }
 
   Graphics* EffectImpl::GetGraphicsUnsafe() const
@@ -102,7 +122,34 @@ namespace GrapX
     Marimo::DATAPOOL_MANIFEST manifest;
     m_pShader->GetDataPoolDeclaration(&manifest);
     GXHRESULT hr = Marimo::DataPool::CreateDataPool(&m_pDataPool, NULL, manifest.pTypes, manifest.pVariables, Marimo::DataPoolCreation_NotCross16BytesBoundary);
+
+    GXINT nMaxSlot = 0;
+    for(GXUINT n = 0;; n++)
+    {
+      const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->GetBindResource(n);
+      if(pDesc == NULL) {
+        break;
+      }
+      else if(pDesc->type == Shader::BindType::Sampler) {
+        nMaxSlot = clMax(nMaxSlot, pDesc->slot + 1);
+      }
+    }
+
+    if(nMaxSlot) {
+      m_aTextures.assign(nMaxSlot, NULL);
+    }
+
     return GXSUCCEEDED(hr);
+  }
+
+  GXBOOL EffectImpl::Commit()
+  {
+    GXUINT slot = 0;
+    for(auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
+    {
+      m_pGraphics->SetTexture(*it, slot);
+    }
+    return TRUE;
   }
 
   //GXBOOL EffectImpl::CommitUniform()

@@ -228,6 +228,7 @@ GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
   ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
   if(InlSetShader(pShaderImpl)) {
     pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
+    pEffectImpl->Commit();
     return TRUE;
   }
   return FALSE;

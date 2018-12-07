@@ -400,6 +400,7 @@ namespace GrapX
       : m_pGraphicsImpl(pGraphicsImpl)
       , m_pD3D11VertexShader(NULL)
       , m_pD3D11PixelShader(NULL)
+      , m_pD3DVertexInterCode(NULL)
       , m_pDataPoolDecl(NULL)
       , m_pDataPoolTypeDef(NULL)
       , m_pBindResourceDesc(NULL)
@@ -867,6 +868,14 @@ namespace GrapX
       pImmediateContext->VSSetConstantBuffers(0, m_pPixelCB - m_pVertexCB, m_pVertexCB);
       pImmediateContext->PSSetConstantBuffers(0, D3D11CB_GetPixelCBEnd() - m_pPixelCB, m_pPixelCB);
       return FALSE;
+    }
+
+    const GrapX::Shader::BINDRESOURCE_DESC* ShaderImpl::GetBindResource(GXUINT nIndex) const
+    {
+      if(nIndex >= m_nBindResourceDesc) {
+        return NULL;
+      }
+      return m_pBindResourceDesc + nIndex;
     }
 
     const ShaderImpl::BINDRESOURCE_DESC* ShaderImpl::FindBindResource(GXLPCSTR szName) const

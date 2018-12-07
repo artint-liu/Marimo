@@ -10,6 +10,8 @@ namespace GrapX
     class GResource;
     class GraphicsImpl;
 
+    GXUINT CalculateNumOfMipLevels(GXUINT nWidth, GXUINT nHeight); // 根据长宽计算MipMap数量
+
     // 用来统一内部TextureImpl对象
     template<class _Interface>
     class TextureBaseImplT : public _Interface

@@ -138,9 +138,7 @@ namespace GrapX
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
       D3D11_TEXTURE2D_DESC TexDesc;
-      D3D11_SUBRESOURCE_DATA TexInitData;
       InlSetZeroT(TexDesc);
-      InlSetZeroT(TexInitData);
 
       TexDesc.Width = m_nWidth;
       TexDesc.Height = m_nHeight;
@@ -162,15 +160,45 @@ namespace GrapX
         TexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
       }
 
-      GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage, (pInitData != NULL));
+      GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage, m_nMipLevels, (pInitData != NULL));
+      ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
 
-      if(pInitData) {
+      HRESULT hval;
+      D3D11_SUBRESOURCE_DATA TexInitData;
+
+      if(pInitData == NULL || m_nMipLevels == 0)
+      {
+        hval = pd3dDevice->CreateTexture2D(&TexDesc, NULL, &m_pD3D11Texture);
+      }
+      else  if(m_nMipLevels == 1)
+      {
+        InlSetZeroT(TexInitData);
         TexInitData.pSysMem = pInitData;
         TexInitData.SysMemPitch = nPitch;
+        hval = pd3dDevice->CreateTexture2D(&TexDesc, &TexInitData, &m_pD3D11Texture);
+      }
+      else
+      {
+        clvector<D3D11_SUBRESOURCE_DATA> aInitData;
+        aInitData.reserve(m_nMipLevels);
+        InlSetZeroT(TexInitData);
+        
+        TexInitData.pSysMem = pInitData;
+        TexInitData.SysMemPitch = nPitch;
+        aInitData.push_back(TexInitData);
+        GXUINT nMipmapHeight = m_nHeight;
+
+        for(GXUINT i = 1; i < m_nMipLevels; i++)
+        {
+          TexInitData.pSysMem = reinterpret_cast<void*>(reinterpret_cast<size_t>(TexInitData.pSysMem) + TexInitData.SysMemPitch * nMipmapHeight);
+          nMipmapHeight = clMax((GXUINT)1, nMipmapHeight >> 1);
+          TexInitData.SysMemPitch >>= 1;
+          aInitData.push_back(TexInitData);
+        }
+        hval = pd3dDevice->CreateTexture2D(&TexDesc, &aInitData.front(), &m_pD3D11Texture);
       }
 
-      ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
-      HRESULT hval = pd3dDevice->CreateTexture2D(&TexDesc, pInitData ? &TexInitData : NULL, &m_pD3D11Texture);
+
       //ASSERT(SUCCEEDED(hval)); // 临时
       if(FAILED(hval)) {
         return FALSE;
@@ -178,6 +206,12 @@ namespace GrapX
 
       if(TEST_FLAG(TexDesc.BindFlags, D3D11_BIND_SHADER_RESOURCE)) {
         hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, NULL, &m_pD3D11ShaderView);
+        if(m_nMipLevels == 0 && pInitData) {
+          ASSERT(nPitch);
+          ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+          pD3D11Context->UpdateSubresource(m_pD3D11Texture, 0, NULL, pInitData, nPitch, 0);
+          pD3D11Context->GenerateMips(m_pD3D11ShaderView);
+        }
         return SUCCEEDED(hval);
       }
       return TRUE;
@@ -538,6 +572,18 @@ namespace GrapX
         return TRUE;
       }
       return FALSE;
+    }
+
+    GXUINT CalculateNumOfMipLevels(GXUINT nWidth, GXUINT nHeight)
+    {
+      GXUINT nLevels = 0;
+      while(nWidth > 0 && nHeight > 0)
+      {
+        nWidth >>= 1;
+        nHeight >>= 1;
+        nLevels++;
+      }
+      return nLevels;
     }
 
     //////////////////////////////////////////////////////////////////////////

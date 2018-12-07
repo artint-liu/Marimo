@@ -421,12 +421,12 @@ namespace GrapXToDX11
   }
 #endif
 
-  void TextureDescFromResUsage(D3D11_TEXTURE2D_DESC* pDesc, GXResUsage eResUsage, GXBOOL bHasInitData)
+  void TextureDescFromResUsage(D3D11_TEXTURE2D_DESC* pDesc, GXResUsage eResUsage, GXUINT nMipLevels, GXBOOL bHasInitData)
   {
     switch(eResUsage)
     {
     case GXResUsage::Default:
-      if(bHasInitData)
+      if(bHasInitData && nMipLevels != 0)
       {
         // 不再修改数据，创建时必须指定
         pDesc->Usage = D3D11_USAGE_IMMUTABLE;
@@ -467,6 +467,10 @@ namespace GrapXToDX11
     default:
       CLBREAK;
       break;
+    }
+    if(nMipLevels == 0) {
+      pDesc->MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
+      pDesc->BindFlags |= (D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
     }
   }
 

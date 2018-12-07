@@ -84,6 +84,7 @@ namespace GrapX
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe       () const);
     GXSTDINTERFACE(void         GetDataPoolDeclaration  (Marimo::DATAPOOL_MANIFEST* pManifest) const);
+    GXSTDINTERFACE(const BINDRESOURCE_DESC* GetBindResource(GXUINT nIndex) const);
     GXSTDINTERFACE(const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const);
   };
 
@@ -100,6 +101,8 @@ namespace GrapX
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
     GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
     GXSTDINTERFACE(GXHRESULT    Clone(Effect** ppNewEffect));  // 克隆Effect，不会复制常量
+    GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture));
+    GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture));
 
     GXSTDINTERFACE(void BindTextureSlot(GXLPCSTR szTextureName, int nSlot));
   };

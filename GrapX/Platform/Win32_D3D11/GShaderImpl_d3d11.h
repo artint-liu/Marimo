@@ -92,6 +92,7 @@ namespace GrapX
       GXBOOL BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab); // 因为没有大小，只生成vs或者ps CB与合集的索引关系
       GXBOOL BuildCBTable(Marimo::DataPool* pDataPool); // 第一次创建Effect或者Material时创建D3D CB
       GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool);
+      const BINDRESOURCE_DESC* GetBindResource(GXUINT nIndex) const;
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 
       GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
