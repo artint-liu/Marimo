@@ -51,6 +51,13 @@ namespace GrapX
     class CanvasImpl : public CanvasCoreImpl
     {
       friend class GraphicsImpl;
+      typedef ObjectT<Texture> CTexture;
+      typedef ObjectT<EffectImpl> CEffectImpl;
+      typedef ObjectT<BlendStateImpl> CBlendStateImpl;
+      typedef ObjectT<DepthStencilState> CDepthStencilState;
+      typedef ObjectT<RasterizerStateImpl> CRasterizerStateImpl;
+      typedef ObjectT<DepthStencilStateImpl> CDepthStencilStateImpl;
+
     public:
       CanvasImpl(GraphicsImpl* pGraphics, GXBOOL bStatic);
       virtual ~CanvasImpl();
@@ -157,7 +164,7 @@ namespace GrapX
         CF_CompositingMode,
         CF_Effect,
         CF_ColorAdditive,
-        CF_SetExtTexture,
+        //CF_SetExtTexture,
         CF_SetSamplerState,
         CF_SetTransform,
         CF_StateLast,
@@ -338,19 +345,19 @@ namespace GrapX
       const GXUINT            s_uDefVertIndexSize = 128;
 
       // 预置的状态
-      RasterizerStateImpl*    m_pRasterizerState;
-      DepthStencilStateImpl*  m_pCanvasStencil[2]; // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
-      BlendStateImpl*         m_pBlendingState[2]; // Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
-      BlendStateImpl*         m_pOMOpaque;      // 不透明方式的状态
-      BlendStateImpl*         m_pOMInvert;
+      CRasterizerStateImpl    m_pRasterizerState;
+      CDepthStencilStateImpl  m_pCanvasStencil[2]; // Canvas 用的Stencil开关,[0]关闭模板测试, [1]开启模板测试
+      CBlendStateImpl         m_pBlendingState[2]; // Alpha合成方式的状态, 0: 最终合成, 1: 预先合成到纹理
+      CBlendStateImpl         m_pOMOpaque;      // 不透明方式的状态
+      CBlendStateImpl         m_pOMInvert;
 
       CANVAS_EFFECT_DESC      m_ClearEffect;     // Clear接口使用的Effect
 
-      BlendStateImpl*         m_pOMNoColor;
-      DepthStencilState*      m_pWriteStencil; // 写入模板参考值的模板状态
+      CBlendStateImpl         m_pOMNoColor;
+      CDepthStencilStateImpl  m_pWriteStencil; // 写入模板参考值的模板状态
 
       // 预置纹理
-      Texture*                m_pWhiteTex;
+      CTexture                m_pWhiteTex;
 
       Primitive*              m_pPrimitive;
       PRIMITIVE*              m_lpLockedVertex;
@@ -364,9 +371,9 @@ namespace GrapX
 
       CALLSTATE               m_CallState;   // 记录命令队列最后的状态, 精简绘图函数的重复调用
 
-      GXDWORD                 m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
-      TextureImpl*            m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
-      EffectImpl*             m_pDefaultEffectImpl; // 默认Effect
+      //GXDWORD                 m_dwTexSlot;  // 用来判断是否设置了扩展纹理的标志, 减少循环之用
+      //TextureImpl*            m_aTextureStage[GX_MAX_TEXTURE_STAGE];    // 第一个应该总为0
+      CEffectImpl             m_pDefaultEffectImpl; // 默认Effect
 
       // 用于Flush状态续接
       GXRECT                  m_rcClip;         // 对应 m_LastState.rcClip, 纹理的坐标空间, 在Flush阶段, 用来限制绘图区域

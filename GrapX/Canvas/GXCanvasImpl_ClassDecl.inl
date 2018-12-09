@@ -127,7 +127,7 @@ private:
     //CF_SetUniform4f,
     //CF_SetUniform4x4f,
     //CF_SetPixelSizeInv,
-    CF_SetExtTexture,
+    //CF_SetExtTexture,
     //CF_SetEffectConst,
     CF_SetSamplerState,
     CF_SetTransform,

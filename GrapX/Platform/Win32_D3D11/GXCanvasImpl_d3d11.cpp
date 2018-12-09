@@ -70,14 +70,14 @@ namespace GrapX
       , m_bStatic           (bStatic)
       , m_xAbsOrigin        (0)
       , m_yAbsOrigin        (0)
-      , m_pOMOpaque         (NULL)
-      , m_pOMInvert         (NULL)
+      //, m_pOMOpaque         (NULL)
+      //, m_pOMInvert         (NULL)
       , m_pPrimitive        (NULL)
       , m_lpLockedVertex    (NULL)
       , m_lpLockedIndex     (NULL)
-      , m_pOMNoColor        (NULL)
-      , m_pWriteStencil     (NULL)
-      , m_pWhiteTex         (NULL)
+      //, m_pOMNoColor        (NULL)
+      //, m_pWriteStencil     (NULL)
+      //, m_pWhiteTex         (NULL)
       , m_pLastCommand      (NULL)
       , m_uIndexCount       (NULL)
       , m_uVertCount        (0)
@@ -85,16 +85,16 @@ namespace GrapX
       , m_dwStencil         (0)
       , m_pClipRegion       (NULL)
       , m_dwTexVertColor    (-1)
-      , m_dwTexSlot         (NULL)
-      , m_pRasterizerState  (NULL)
-      , m_pDefaultEffectImpl(NULL)
+      //, m_dwTexSlot         (NULL)
+      //, m_pRasterizerState  (NULL)
+      //, m_pDefaultEffectImpl(NULL)
     {
       m_Commands.Reserve(1024);
       InlSetZeroT(m_rcClip);
       InlSetZeroT(m_rcAbsClip);
-      gxRtlZeroMemory(&m_aTextureStage, sizeof(m_aTextureStage));
-      gxRtlZeroMemory(&m_pBlendingState, sizeof(m_pBlendingState));
-      gxRtlZeroMemory(&m_pCanvasStencil, sizeof(m_pCanvasStencil));
+      //gxRtlZeroMemory(&m_aTextureStage, sizeof(m_aTextureStage));
+      //gxRtlZeroMemory(&m_pBlendingState, sizeof(m_pBlendingState));
+      //gxRtlZeroMemory(&m_pCanvasStencil, sizeof(m_pCanvasStencil));
       //m_DefaultEffect.pEffect = NULL;
     }
 
@@ -227,7 +227,7 @@ namespace GrapX
           desc.BackFace.StencilFailOp       = GXSTENCILOP_KEEP;
           desc.BackFace.StencilFunc         = GXCMP_ALWAYS;
           desc.BackFace.StencilPassOp       = GXSTENCILOP_REPLACE;
-          m_pGraphics->CreateDepthStencilState(&m_pWriteStencil, &desc);
+          m_pGraphics->CreateDepthStencilState((DepthStencilState**)&m_pWriteStencil, &desc);
         }
 
         if(m_pOMNoColor == NULL)
@@ -269,7 +269,7 @@ namespace GrapX
         m_CallState.RenderState.pEffectImpl->AddRef();
         m_CurrentEffect.InitEffect(m_pDefaultEffectImpl);
 
-        ASSERT(m_dwTexSlot == NULL);
+        //ASSERT(m_dwTexSlot == NULL);
         return TRUE;
       }
       return FALSE;
@@ -365,21 +365,21 @@ namespace GrapX
         SAFE_RELEASE(m_pClipRegion);
         //SAFE_RELEASE(m_DefaultEffect.pEffect);
 
-        if(m_dwTexSlot != NULL)
-        {
-          ASSERT(m_aTextureStage[0] == NULL);
-          for(GXUINT i = 1; i < GX_MAX_TEXTURE_STAGE && m_dwTexSlot != 0; i++)
-          {
-            if(m_aTextureStage[i] != NULL)
-            {
-              m_pGraphics->InlSetTexture(NULL, i);
-              m_aTextureStage[i]->Release();
-              m_aTextureStage[i] = NULL;
-              RESETBIT(m_dwTexSlot, i);
-            }
-          }
-        }
-        ASSERT(m_dwTexSlot == NULL);
+        //if(m_dwTexSlot != NULL)
+        //{
+        //  ASSERT(m_aTextureStage[0] == NULL);
+        //  for(GXUINT i = 1; i < GX_MAX_TEXTURE_STAGE && m_dwTexSlot != 0; i++)
+        //  {
+        //    if(m_aTextureStage[i] != NULL)
+        //    {
+        //      m_pGraphics->InlSetTexture(NULL, i);
+        //      m_aTextureStage[i]->Release();
+        //      m_aTextureStage[i] = NULL;
+        //      RESETBIT(m_dwTexSlot, i);
+        //    }
+        //  }
+        //}
+        //ASSERT(m_dwTexSlot == NULL);
 
         m_uVertCount = 0;
         m_uIndexCount = 0;
@@ -387,17 +387,17 @@ namespace GrapX
 
       if(m_uRefCount == 0)
       {
-        SAFE_RELEASE(m_pDefaultEffectImpl);
-        SAFE_RELEASE(m_pOMInvert);
-        SAFE_RELEASE(m_pOMOpaque);
-        SAFE_RELEASE(m_pRasterizerState);
-        SAFE_RELEASE(m_pBlendingState[0]);
-        SAFE_RELEASE(m_pBlendingState[1]);
-        SAFE_RELEASE(m_pCanvasStencil[0]);
-        SAFE_RELEASE(m_pCanvasStencil[1]);
-        SAFE_RELEASE(m_pOMNoColor);
-        SAFE_RELEASE(m_pWriteStencil);
-        SAFE_RELEASE(m_pWhiteTex);
+        //SAFE_RELEASE(m_pDefaultEffectImpl);
+        //SAFE_RELEASE(m_pOMInvert);
+        //SAFE_RELEASE(m_pOMOpaque);
+        //SAFE_RELEASE(m_pRasterizerState);
+        //SAFE_RELEASE(m_pBlendingState[0]);
+        //SAFE_RELEASE(m_pBlendingState[1]);
+        //SAFE_RELEASE(m_pCanvasStencil[0]);
+        //SAFE_RELEASE(m_pCanvasStencil[1]);
+        //SAFE_RELEASE(m_pOMNoColor);
+        //SAFE_RELEASE(m_pWriteStencil);
+        //SAFE_RELEASE(m_pWhiteTex);
         SAFE_RELEASE(m_pPrimitive);
         delete this;
         return GX_OK;
@@ -433,7 +433,7 @@ namespace GrapX
     template<typename _Ty>
     _Ty* CanvasImpl::IntAppendCommand(CanvasFunc cmd)
     {
-      if(cmd != CF_SetExtTexture) // 不支持合并的命令
+      //if(cmd != CF_SetExtTexture) // 不支持合并的命令
       {
         if(m_pLastCommand && m_pLastCommand->cmd == cmd) {
           m_pLastCommand->OnMerge();
@@ -491,7 +491,7 @@ namespace GrapX
       
       m_pGraphics->InlSetEffect(m_ClearEffect.pEffectImpl);
       m_pWriteStencil->SetStencilRef(dwStencil);
-      m_pGraphics->InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(m_pWriteStencil));
+      m_pGraphics->InlSetDepthStencilState(m_pWriteStencil);
       m_pGraphics->InlSetBlendState(TEST_FLAG(dwFlags, GXCLEAR_TARGET) ? m_pOMOpaque : m_pOMNoColor);
 
 
@@ -546,7 +546,7 @@ namespace GrapX
       m_rcClip = rcClip;
     }
 
-    GrapX::D3D11::BlendStateImpl* CanvasImpl::IntGetBlendStateUnsafe(CompositingMode mode) const
+    BlendStateImpl* CanvasImpl::IntGetBlendStateUnsafe(CompositingMode mode) const
     {
       if(mode == CompositingMode_InvertTarget) {
         return m_pOMInvert;
@@ -603,20 +603,20 @@ namespace GrapX
         m_pGraphics->SetSafeClip(&regn);  // TODO: 是不是应该把这个改为GXRECT
         m_pGraphics->SetViewport(NULL);
 
-        m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(m_pWhiteTex), 0);
+        m_pGraphics->InlSetTexture(m_pWhiteTex.ReinterpretCastPtr<TexBaseImpl>(), 0);
 
-        GXDWORD dwTexSlot = m_dwTexSlot;
-        if(dwTexSlot != NULL)
-        {
-          for(GXUINT i = 1; i < GX_MAX_TEXTURE_STAGE && dwTexSlot != 0; i++)
-          {
-            if(m_aTextureStage[i] != NULL)
-            {
-              m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(m_aTextureStage[i]), i);
-              RESETBIT(dwTexSlot, i);
-            }
-          }
-        }
+        //GXDWORD dwTexSlot = m_dwTexSlot;
+        //if(dwTexSlot != NULL)
+        //{
+        //  for(GXUINT i = 1; i < GX_MAX_TEXTURE_STAGE && dwTexSlot != 0; i++)
+        //  {
+        //    if(m_aTextureStage[i] != NULL)
+        //    {
+        //      m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(m_aTextureStage[i]), i);
+        //      RESETBIT(dwTexSlot, i);
+        //    }
+        //  }
+        //}
       }
       return TRUE;
     }
@@ -771,7 +771,7 @@ namespace GrapX
           nBaseVertex += pTextureCmd->uVertexCount;
           nStartIndex += pTextureCmd->uIndexCount;
 
-          m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(m_pWhiteTex), 0);
+          m_pGraphics->InlSetTexture(m_pWhiteTex.ReinterpretCastPtr<TexBaseImpl>(), 0);
           pTextureCmd->pTexture->Release();
         }
         break;
@@ -934,22 +934,22 @@ namespace GrapX
           // 啥也没有!!
           break;
 
-        case CF_SetExtTexture:
-        {
-          const STATESWITCHING_TEXTUREEXT* pTextureExtCmd = pCmdPtr->cast_to<STATESWITCHING_TEXTUREEXT>();
+        //case CF_SetExtTexture:
+        //{
+        //  const STATESWITCHING_TEXTUREEXT* pTextureExtCmd = pCmdPtr->cast_to<STATESWITCHING_TEXTUREEXT>();
 
-          const GXUINT uStage = pTextureExtCmd->stage;
-          Texture* pTexture = pTextureExtCmd->pTexture;
-          m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTexture), uStage);
-          SAFE_RELEASE(m_aTextureStage[uStage]);
-          m_aTextureStage[uStage] = (TextureImpl*)pTexture;
+        //  const GXUINT uStage = pTextureExtCmd->stage;
+        //  Texture* pTexture = pTextureExtCmd->pTexture;
+        //  m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTexture), uStage);
+        //  SAFE_RELEASE(m_aTextureStage[uStage]);
+        //  m_aTextureStage[uStage] = (TextureImpl*)pTexture;
 
-          if(pTexture != NULL)
-            SETBIT(m_dwTexSlot, uStage);
-          else
-            RESETBIT(m_dwTexSlot, uStage);
-        }
-        break;
+        //  if(pTexture != NULL)
+        //    SETBIT(m_dwTexSlot, uStage);
+        //  else
+        //    RESETBIT(m_dwTexSlot, uStage);
+        //}
+        //break;
         case CF_SetTransform:
         {
           const STATESWITCHING_TRANSFORM* pTransformCmd = pCmdPtr->cast_to<STATESWITCHING_TRANSFORM>();
@@ -1067,23 +1067,23 @@ namespace GrapX
       }
       break;
 
-      case CPI_SETEXTTEXTURE:
-      {
-        if(uParam > 0 && uParam < GX_MAX_TEXTURE_STAGE)
-        {
-          STATESWITCHING_TEXTUREEXT* pCommand = IntAppendCommand<STATESWITCHING_TEXTUREEXT>(CF_SetExtTexture);
-          pCommand->stage = uParam;
-          pCommand->pTexture = reinterpret_cast<Texture*>(pParam);
-          if(pCommand->pTexture) {
-            pCommand->pTexture->AddRef();
-          }
-        }
-        else {
-          dwRet = 0;
-        }
-        dwRet = uParam;
-      }
-      break;
+      //case CPI_SETEXTTEXTURE:
+      //{
+      //  if(uParam > 0 && uParam < GX_MAX_TEXTURE_STAGE)
+      //  {
+      //    STATESWITCHING_TEXTUREEXT* pCommand = IntAppendCommand<STATESWITCHING_TEXTUREEXT>(CF_SetExtTexture);
+      //    pCommand->stage = uParam;
+      //    pCommand->pTexture = reinterpret_cast<Texture*>(pParam);
+      //    if(pCommand->pTexture) {
+      //      pCommand->pTexture->AddRef();
+      //    }
+      //  }
+      //  else {
+      //    dwRet = 0;
+      //  }
+      //  dwRet = uParam;
+      //}
+      //break;
       }
       return dwRet;
     }

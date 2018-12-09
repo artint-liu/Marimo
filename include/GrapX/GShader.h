@@ -104,7 +104,7 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture));
     GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture));
 
-    GXSTDINTERFACE(void BindTextureSlot(GXLPCSTR szTextureName, int nSlot));
+    //GXSTDINTERFACE(void BindTextureSlot(GXLPCSTR szTextureName, int nSlot));
   };
 
   class Material : public GResource
@@ -125,6 +125,9 @@ namespace GrapX
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
+    GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
+    GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture));
+    GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture));
 
     GXSTDINTERFACE(GXHRESULT  GetFilename         (clStringW* pstrFilename));
     GXSTDINTERFACE(int        GetRenderQueue      () const);

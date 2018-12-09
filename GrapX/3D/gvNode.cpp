@@ -268,7 +268,7 @@ void GVNode::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
   memset(pRenderDesc, 0, sizeof(GVRENDERDESC));
 }
 
-GXHRESULT GVNode::SetMaterialDirect(GrapX::Material* pMtlInst)
+GXHRESULT GVNode::SetMaterial(GrapX::Material* pMtlInst)
 {
   return GX_OK;
 }
@@ -280,7 +280,7 @@ GXHRESULT GVNode::GetMaterial(GrapX::Material** ppMtlInst)
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::GetMaterialFilenameW(clStringW* pstrFilename)
+GXHRESULT GVNode::GetMaterialFilename(clStringW* pstrFilename)
 {
   CLBREAK;
   return GX_FAIL;
@@ -309,7 +309,7 @@ GXHRESULT GVNode::SetMaterial(GrapX::Material* pMtlInst, GXDWORD dwFlags)
   }
 
   ASSERT(TEST_FLAG(dwFlags, NODEMTL_IGNOREVERT));
-  return SetMaterialDirect(pMtlInst);
+  return SetMaterial(pMtlInst);
 }
 
 GXHRESULT GVNode::SetMaterialFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags)
@@ -362,7 +362,7 @@ GXHRESULT GVNode::SetMaterialFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFi
   }
 
   pGraphics->CreateMaterialFromFile(&pMtlInst, strFilename, eLoadType);
-  GXHRESULT hval = SetMaterialDirect(pMtlInst);
+  GXHRESULT hval = SetMaterial(pMtlInst);
   SAFE_RELEASE(pMtlInst);
 
   return hval;

@@ -151,7 +151,7 @@ GXHRESULT GVScene::Add(GVNode* pNode, GVNode* pParent)
 
       GXBOOL bHasMesh = sDesc.pPrimitive != NULL;
 
-      if(bHasMesh && GXFAILED(pTraversal->GetMaterialFilenameW(NULL))) {
+      if(bHasMesh && GXFAILED(pTraversal->GetMaterialFilename(NULL))) {
         pTraversal->SetMaterialFromFile(m_pGraphics, m_strDefaultMtl, NULL);
           //FALSE, MLT_REFERENCE);
       }
@@ -378,9 +378,9 @@ GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, GV
       if(Desc.pMaterial != NULL) {
         pCanvas->SetMaterial(Desc.pMaterial);
       }
-      else {
-        ASSERT(0);
-      }
+      //else {
+      //  ASSERT(0);
+      //}
 
       ASSERT(Desc.pPrimitive != NULL);
       pGraphics->SetPrimitive(Desc.pPrimitive);

@@ -26,7 +26,7 @@ namespace GrapX
     GXBOOL      SetTexture        (GXUINT nSlot, Texture* pTexture) override;
     GXBOOL      SetTexture        (GXLPCSTR szSamplerName, Texture* pTexture) override;
 
-    void BindTextureSlot(GXLPCSTR szTextureName, int nSlot) override;
+    //void BindTextureSlot(GXLPCSTR szTextureName, int nSlot) override;
 
     Graphics*  GetGraphicsUnsafe () const override;
     Shader*  GetShaderUnsafe() const;

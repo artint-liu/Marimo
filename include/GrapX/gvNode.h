@@ -203,9 +203,9 @@ public:
   virtual GXVOID    CalculateAABB             ();
   virtual void      GetRenderDesc             (GVRenderType eType, GVRENDERDESC* pRenderDesc);
   virtual GXBOOL    RayTrace                  (const Ray& ray, NODERAYTRACE* pRayTrace);
-  virtual GXHRESULT SetMaterialDirect         (GrapX::Material* pMtlInst);
+  virtual GXHRESULT SetMaterial               (GrapX::Material* pMtlInst);
   virtual GXHRESULT GetMaterial               (GrapX::Material** ppMtlInst);
-  virtual GXHRESULT GetMaterialFilenameW      (clStringW* pstrFilename); // 参数可以为NULL, 此时用来探测是否含有材质, 返回值决定了是否含有材质
+  virtual GXHRESULT GetMaterialFilename       (clStringW* pstrFilename); // 参数可以为NULL, 此时用来探测是否含有材质, 返回值决定了是否含有材质
   virtual GXHRESULT Clone                     (GVNode** ppClonedNode/*, GXBOOL bRecursive*/); // 写的不好，要重构，1.继承类应该可以直接使用基类的clone函数，对扩展的成员变量进行处理 2.支持递归
 
   virtual GXHRESULT SaveFileA(GXLPCSTR szFilename);

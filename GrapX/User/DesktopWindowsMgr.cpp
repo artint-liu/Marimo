@@ -358,13 +358,13 @@ GXBOOL DesktopWindowsMgr::Render(GrapX::Canvas* pCanvas)
     m_lpStation->pBackDownSampTexA->StretchRect(
       m_lpStation->pGraphics->GetDeviceOriginTex(), NULL, NULL, GXTEXFILTER_LINEAR);
 
-    static GXSAMPLERDESC SampDesc;
+    static GXSamplerDesc SampDesc;
     SampDesc.MagFilter = GXTEXFILTER_LINEAR;
     SampDesc.MinFilter = GXTEXFILTER_LINEAR;
 
     pCanvas->SetSamplerState(0, &SampDesc);
     pCanvas->SetSamplerState(1, &SampDesc);
-    pCanvas->SetParametersInfo(GrapX::CPI_SETEXTTEXTURE, 1, m_lpStation->pBackDownSampTexA);
+    //pCanvas->SetParametersInfo(GrapX::CPI_SETEXTTEXTURE, 1, m_lpStation->pBackDownSampTexA);
     pCanvas->SetEffect(m_lpStation->m_pStockObject->pAeroEffect);
 
     float2 vTexelKernel((float)(c_flScaleWidth / g_SystemMetrics[GXSM_CXSCREEN]),

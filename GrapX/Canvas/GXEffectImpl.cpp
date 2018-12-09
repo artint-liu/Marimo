@@ -85,9 +85,9 @@ namespace GrapX
     return FALSE;
   }
 
-  void EffectImpl::BindTextureSlot(GXLPCSTR szTextureName, int nSlot)
-  {
-  }
+  //void EffectImpl::BindTextureSlot(GXLPCSTR szTextureName, int nSlot)
+  //{
+  //}
 
   Graphics* EffectImpl::GetGraphicsUnsafe() const
   {

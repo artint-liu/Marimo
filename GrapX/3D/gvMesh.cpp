@@ -294,7 +294,7 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray ¸Ä
   return FALSE;
 }
 
-GXHRESULT GVMesh::SetMaterialDirect(GrapX::Material* pMtlInst)
+GXHRESULT GVMesh::SetMaterial(GrapX::Material* pMtlInst)
 {
   return InlSetNewObjectT(m_pMtlInst, pMtlInst);
 }

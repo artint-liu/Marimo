@@ -368,6 +368,22 @@ namespace GrapX
     return m_pGraphics;
   }
 
+  Marimo::DataPoolVariable MaterialImpl::GetUniform(GXLPCSTR szName)
+  {
+    Marimo::DataPoolVariable var;
+    return var;
+  }
+
+  GXBOOL MaterialImpl::SetTexture(GXUINT nSlot, Texture* pTexture)
+  {
+    return FALSE;
+  }
+
+  GXBOOL MaterialImpl::SetTexture(GXLPCSTR szSamplerName, Texture* pTexture)
+  {
+    return FALSE;
+  }
+
   int MaterialImpl::GetRenderQueue() const
   {
     CLBREAK;

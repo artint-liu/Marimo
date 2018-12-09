@@ -69,7 +69,7 @@ public:
 
   // 文件存取相关的
   virtual GXHRESULT SaveFile (clSmartRepository* pStorage);
-  virtual GXHRESULT SetMaterialDirect    (GrapX::Material* pMtlInst);
+  virtual GXHRESULT SetMaterial    (GrapX::Material* pMtlInst);
 
   virtual GXHRESULT GetMaterial          (GrapX::Material** ppMtlInst);
   //virtual GXHRESULT SetMaterialInst         (GXMaterialInst* pMtlInst, GXDWORD dwFlags);

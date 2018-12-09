@@ -1098,11 +1098,12 @@ namespace GrapX
         pVertexDecl->GetVertexLayoutDescArray();
 
       //D3D11_INPUT_ELEMENT_DESC* pDesc = (D3D11_INPUT_ELEMENT_DESC*)&pVertexDecl->m_aDescs.front();
-      pd3dDevice->CreateInputLayout(
+      HRESULT hr = pd3dDevice->CreateInputLayout(
         (D3D11_INPUT_ELEMENT_DESC*)&sInputLayoutArray.front(),
         sInputLayoutArray.size() - 1, // 最后一个是空的结尾
         m_pD3DVertexInterCode->GetBufferPointer(),
         m_pD3DVertexInterCode->GetBufferSize(), &pD3D11InputLayout);
+      ASSERT(SUCCEEDED(hr));
       m_InputLayoutDict.insert(clmake_pair(pVertexDecl->GetSketchName(), pD3D11InputLayout));
       return pD3D11InputLayout;
     }

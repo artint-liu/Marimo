@@ -486,6 +486,51 @@ GXHRESULT GVGeometry::CreateBox(Graphics* pGraphics, CFloat3& vCenter, CFloat3& 
       }
     }
 
+    if(TEST_FLAG(dwVertexFlags, GXVF_TEXCOORD))
+    {
+      MeshComp.pTexcoord0 = new float2[MeshComp.nVertexCount];
+      static float uv[][2] = {
+        {0, 0}, {0, 1}, {0, 1}, {0, 0}, {1, 0}, {1, 1}, {1, 1}, {1, 0},
+        {1, 0}, {1, 0}, {0, 0}, {0, 0}, {0, 1}, {0, 1}, {1, 1}, {1, 1},
+        {0, 0}, {0, 1}, {1, 1}, {1, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 0},};
+
+      // 没测试过
+      for(GXSIZE_T i = 0; i < MeshComp.nVertexCount; i++)
+      {
+        MeshComp.pTexcoord0[i].set(uv[i][0], uv[i][1]);
+      }
+
+      //MeshComp.pTexcoord0[0].set(0, 0);
+      //MeshComp.pTexcoord0[1].set(0, 1);
+      //MeshComp.pTexcoord0[2].set(0, 1);
+      //MeshComp.pTexcoord0[3].set(0, 0);
+
+      //MeshComp.pTexcoord0[4].set(1, 0);
+      //MeshComp.pTexcoord0[5].set(1, 1);
+      //MeshComp.pTexcoord0[6].set(1, 1);
+      //MeshComp.pTexcoord0[7].set(1, 0);
+
+      //MeshComp.pTexcoord0[8].set(1, 0);
+      //MeshComp.pTexcoord0[9].set(1, 0);
+      //MeshComp.pTexcoord0[10].set(0, 0);
+      //MeshComp.pTexcoord0[11].set(0, 0);
+
+      //MeshComp.pTexcoord0[12].set(0, 1);
+      //MeshComp.pTexcoord0[13].set(0, 1);
+      //MeshComp.pTexcoord0[14].set(1, 1);
+      //MeshComp.pTexcoord0[15].set(1, 1);
+
+      //MeshComp.pTexcoord0[16].set(0, 0);
+      //MeshComp.pTexcoord0[17].set(0, 1);
+      //MeshComp.pTexcoord0[18].set(1, 1);
+      //MeshComp.pTexcoord0[19].set(1, 0);
+
+      //MeshComp.pTexcoord0[20].set(1, 0);
+      //MeshComp.pTexcoord0[21].set(1, 1);
+      //MeshComp.pTexcoord0[22].set(0, 1);
+      //MeshComp.pTexcoord0[23].set(0, 0);
+    }
+
 
     if(pGeometry->IntCreateMesh(pGraphics, &MeshComp))
     {

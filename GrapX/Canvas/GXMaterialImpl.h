@@ -7,6 +7,7 @@ class DepthStencilState;
 namespace GrapX
 {
   class SamplerState;
+
   class MaterialImpl : public Material
   {
   private:
@@ -60,6 +61,11 @@ namespace GrapX
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXHRESULT   Invoke            (GRESCRIPTDESC* pDesc) override;
     Graphics*   GetGraphicsUnsafe () const override;
+
+    Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
+    GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture) override;
+    GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture) override;
+
     //virtual GXHRESULT   SetTextureSlot    (GXLPCSTR szName, GXINT nSlot);
     //virtual GXINT       GetTextureSlot    (GXLPCSTR szName);
     //virtual GXBOOL      IsSequential      () override;

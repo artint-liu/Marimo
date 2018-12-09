@@ -344,8 +344,8 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
   lpStation->pGraphics->GetPlatformID(&PlatformId);
   if(PlatformId == GXPLATFORM_X_OPENGLES2)
   {
-    lpStockObject->pAeroEffect->BindTextureSlot("s_baseMap", 0);
-    lpStockObject->pAeroEffect->BindTextureSlot("s_blurMap", 1);
+    //lpStockObject->pAeroEffect->BindTextureSlot("s_baseMap", 0);
+    //lpStockObject->pAeroEffect->BindTextureSlot("s_blurMap", 1);
   }
   else if(PlatformId == GXPLATFORM_WIN32_DIRECT3D9)
   {

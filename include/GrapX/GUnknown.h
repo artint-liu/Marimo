@@ -120,7 +120,7 @@ namespace GrapX
       return m_pObject;
     }
 
-    operator _TUnknown*()
+    operator _TUnknown*() const
     {
       return m_pObject;
     }
@@ -141,15 +141,27 @@ namespace GrapX
     }
 
     template<class ObjectT2>
-    ObjectT2& CastTo()
+    ObjectT2* CastPtr()
     {
-      return *static_cast<ObjectT2*>(&*this);
+      return static_cast<ObjectT2*>(m_pObject);
     }
 
     template<class ObjectT2>
-    const ObjectT2& CastTo() const
+    ObjectT2* ReinterpretCastPtr()
     {
-      return *static_cast<const ObjectT2*>(&*this);
+      return reinterpret_cast<ObjectT2*>(m_pObject);
+    }
+
+    template<class ObjectT2>
+    ObjectT2& Cast()
+    {
+      return *reinterpret_cast<ObjectT2*>(&*this);
+    }
+
+    template<class ObjectT2>
+    const ObjectT2& Cast() const
+    {
+      return *reinterpret_cast<const ObjectT2*>(&*this);
     }
 
     ObjectT& operator=(const ObjectT& NewObject)
