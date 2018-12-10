@@ -8,24 +8,24 @@
 #include <clUtility.h>
 //#include <clFile.h>
 
-#if defined(_CL_ARCH_X86)
-# ifdef _DEBUG
-#   pragma comment(lib, "clstd.Win32.Debug_MD.lib")
-# else
-#   pragma comment(lib, "clstd.Win32.Release_MD.lib")
-# endif
-#elif defined(_CL_ARCH_X64)
-# ifdef _DEBUG
-#   pragma comment(lib, "clstd.x64.Debug_MD.lib")
-# else
-#   pragma comment(lib, "clstd.x64.Release_MD.lib")
-# endif
-#endif
+//#if defined(_CL_ARCH_X86)
+//# ifdef _DEBUG
+//#   pragma comment(lib, "clstd.Win32.Debug_MD.lib")
+//# else
+//#   pragma comment(lib, "clstd.Win32.Release_MD.lib")
+//# endif
+//#elif defined(_CL_ARCH_X64)
+//# ifdef _DEBUG
+//#   pragma comment(lib, "clstd.x64.Debug_MD.lib")
+//# else
+//#   pragma comment(lib, "clstd.x64.Release_MD.lib")
+//# endif
+//#endif
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-BOOL OpenFile(LPCWSTR szFilepath);
+BOOL OpenFile(CLLPCWSTR szFilepath);
 BOOL ReadBuffer(int nNumOfBlocks);
 
 LPCWSTR szTitle = _T("HexViewer");
@@ -46,7 +46,7 @@ int APIENTRY _tWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstan
     return -1;
   }
 
-  OpenFile(argv[0]);
+  OpenFile(reinterpret_cast<CLLPCWSTR>(argv[0]));
   ReadBuffer(nNumOfBlocks);
 
   SetProcessDPIAware();
@@ -232,7 +232,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   {
     WCHAR szFilepath[MAX_PATH];
     DragQueryFile((HDROP)wParam, 0, szFilepath, MAX_PATH);
-    OpenFile(szFilepath);
+    OpenFile(reinterpret_cast<CLLPCWSTR>(szFilepath));
     ReadBuffer(nNumOfBlocks);
     InvalidateRect(hWnd, NULL, FALSE);
   }
@@ -297,7 +297,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 //////////////////////////////////////////////////////////////////////////
 
-BOOL OpenFile(LPCWSTR szFilepath)
+BOOL OpenFile(CLLPCWSTR szFilepath)
 {
   //const size_t cbFileSizeLimit = 100 * 1024 * 1024;
 

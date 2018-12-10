@@ -63,6 +63,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clSchedule.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clParallelWork.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clAllocator.cpp" />
@@ -108,5 +109,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clSchedule.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clParallelWork.cpp" />
   </ItemGroup>
 </Project>

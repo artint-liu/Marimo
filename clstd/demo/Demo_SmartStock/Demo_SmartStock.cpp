@@ -351,6 +351,42 @@ void test_outofdate()
   ss.SaveToFile("test_04.txt");
 }
 
+
+void RecursiveTraceSectionName(clstd::StockA& ss, clstd::StockA::Section& sect)
+{
+  auto sub_sect = ss.OpenSection(&sect, NULL);
+  if(sub_sect)
+  {
+    do {
+      TRACE("sect name: %s\n", sub_sect.SectionName());
+      RecursiveTraceSectionName(ss, sub_sect);
+    } while(sub_sect.NextSection());
+  }
+}
+
+void Test_UnusalFile() // 测试一些不太规整的文件格式
+{
+  char szFilename[MAX_PATH];
+  printf("输入文件名：");
+  scanf("%s", &szFilename);
+
+  StockA ss;
+  if(_CL_NOT_(ss.LoadFromFile(szFilename)))
+  {
+    printf("无法打开文件(%s)\n", szFilename);
+    clstd_cli::getch();
+    return;
+  }
+
+  auto sect = ss.OpenSection(NULL);
+  if(sect)
+  {
+    RecursiveTraceSectionName(ss, sect);
+  }
+
+  ss.SaveToFile("test.shader");
+}
+
 int main(int argc, char* argv[])
 {
   // 测试SetKey("key", NULL);
@@ -366,6 +402,7 @@ int main(int argc, char* argv[])
   TestRoot();
   test2_write();
   test2_read();
+  Test_UnusalFile();
   printf("Press any key to continue...\n");
   clstd_cli::getch();
   //return GeneralRead();

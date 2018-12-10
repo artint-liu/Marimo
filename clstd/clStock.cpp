@@ -1097,6 +1097,8 @@ namespace clstd
     b32 _SSP_IMPL::ToNativeCodec()
   {
     u32 dwBOM = *(u32*)m_Buffer.GetPtr();
+    wch chStringEnd[] = _CLTEXT("\0");
+
     if(sizeof(TChar) == 1)
     {
       b32 bUnicode = FALSE;
@@ -1116,22 +1118,34 @@ namespace clstd
       }
       else if((dwBOM & 0xFFFFFF) == BOM_UTF8)
       {
-        CLBREAK; // FIXME: 暂时不支持
-        bUnicode = TRUE;
-        return FALSE;
+        bUnicode = FALSE; // 这里处理unicode转换
+
+        MemBuffer sNewBuffer;
+         // 跳过3字节BOM
+        StringUtility::ConvertFromUtf8(sNewBuffer, (const ch*)m_Buffer.GetPtr() + 3, m_Buffer.GetSize() - 3);
+        sNewBuffer.Append(chStringEnd, sizeof(chStringEnd));
+
+        m_Buffer.Resize(sNewBuffer.GetSize(), FALSE);
+
+        clsize req_size = StringA_traits::XStringToNative(
+          (char*)m_Buffer.GetPtr(), m_Buffer.GetSize(), 
+          (const wch*)sNewBuffer.GetPtr(), sNewBuffer.GetSize() / sizeof(wch));
+
+        ASSERT(req_size != (clsize)-1); // TODO: 需要 setlocale(LC_ALL,"");
+        m_Buffer.Resize(req_size, FALSE);
+        return TRUE;
       }
 
       if(bUnicode)
       {
         CLBREAK; // TODO: 测试过这段代码后去掉 CLBREAK
-        wch chEnd[] = _CLTEXT("\0");
         MemBuffer sNewBuffer;
-        m_Buffer.Append(chEnd, sizeof(chEnd));
+        m_Buffer.Append(chStringEnd, sizeof(chStringEnd));
         sNewBuffer.Resize(m_Buffer.GetSize(), FALSE);
 
         clsize size = StringA_traits::XStringToNative(
           (char*)sNewBuffer.GetPtr(), sNewBuffer.GetSize(),
-          (const wch*)m_Buffer.GetPtr(), m_Buffer.GetSize());
+          (const wch*)m_Buffer.GetPtr(), m_Buffer.GetSize() / sizeof(wch));
         //clsize size = wcstombs((char*)sNewBuffer.GetPtr(), (const wch*)m_Buffer.GetPtr(), sNewBuffer.GetSize());
         ASSERT(size != (clsize)-1); // TODO: 需要 setlocale(LC_ALL,"");
 
