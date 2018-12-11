@@ -364,11 +364,84 @@ void RecursiveTraceSectionName(clstd::StockA& ss, clstd::StockA::Section& sect)
   }
 }
 
+void RecursiveTraceSectionNameV2(clStringListA& str_list, clstd::StockA& ss, clstd::StockA::Section& sect)
+{
+  auto sub_sect = ss.OpenSection(&sect, NULL);
+  clStringA str;
+  if(sub_sect)
+  {
+    do {
+      if(sub_sect.name + 1 != sub_sect.iter_begin)
+      {
+        auto iter_name_next = sub_sect.name + 1;
+        clStringA strParam(iter_name_next.marker, sub_sect.iter_begin.marker - iter_name_next.marker);
+        str.Format("<sect>%s:%s", sub_sect.SectionName(), strParam.CStr());
+      }
+      else
+      {
+        str.Format("<sect>%s", sub_sect.SectionName());
+      }
+      TRACE("%s\n", str);
+      str_list.push_back(str);
+
+      auto attr = sub_sect.FirstKey();
+      for(; _CL_NOT_(attr.IsEmpty()); ++attr)
+      {
+        str.Format("< key>%s=%s", attr.KeyName(), attr.value.ToString());
+        TRACE("%s\n", str);
+        str_list.push_back(str);
+      }
+
+      RecursiveTraceSectionNameV2(str_list, ss, sub_sect);
+    } while(sub_sect.NextSection());
+  }
+}
+
+void Test_Version2()
+{
+  const char* szSampleText = "sect(param){ name = green; age(12); sub_sect(k){ empty = yes;} space(20) = middle; } sect(1,2){ name(text)=1342; }"
+    "property[12]{} shader[]{lalala=ok;}";
+  const char* aExpect[] = {
+    "<sect>sect:(param)",
+    "< key>name=green",
+    "< key>age=;",
+    "< key>space=middle",
+    "<sect>sub_sect:(k)",
+    "< key>empty=yes",
+    "<sect>sect:(1,2)",
+    "< key>name=1342",
+    "<sect>property:[12]",
+    "<sect>shader:[]",
+    "< key>lalala=ok",
+    NULL};
+  StockA ss(StockA::StockFlag_Version2);
+
+  ss.Set(szSampleText, clstd::strlenT(szSampleText));
+
+  auto sect = ss.OpenSection(NULL);
+  if(sect)
+  {
+    clStringListA str_list;
+    RecursiveTraceSectionNameV2(str_list, ss, sect);
+    const char** pszExpect = aExpect;
+    for(auto it = str_list.begin(); it != str_list.end(); ++it)
+    {
+      ASSERT(*it == *pszExpect);
+      pszExpect++;
+    }
+    ASSERT(*pszExpect == NULL);
+  }
+}
+
 void Test_UnusalFile() // 测试一些不太规整的文件格式
 {
   char szFilename[MAX_PATH];
   printf("输入文件名：");
   scanf("%s", &szFilename);
+
+  if(clstd::strlenT(szFilename) == 0) {
+    return;
+  }
 
   StockA ss;
   if(_CL_NOT_(ss.LoadFromFile(szFilename)))
@@ -402,7 +475,8 @@ int main(int argc, char* argv[])
   TestRoot();
   test2_write();
   test2_read();
-  Test_UnusalFile();
+  Test_Version2();
+  //Test_UnusalFile();
   printf("Press any key to continue...\n");
   clstd_cli::getch();
   //return GeneralRead();

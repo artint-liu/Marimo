@@ -44,6 +44,10 @@ namespace clstd
       QueryType_FindAlways = 1, // 如果查询失败，会新建一个Section
     };
 
+    enum StockFlag
+    {
+      StockFlag_Version2 = 0x0001, // 读取时支持Section和key后面带括号参数，写入不支持
+    };
 
   public:
     //struct SECTION;
@@ -105,7 +109,7 @@ namespace clstd
       int           nDepth;   // 所在深度，用于文本对齐. 根是0, 如果是<0，说明这个Section已经失效
 
     public:
-      _MyIterator   name;        // Section Name
+      _MyIterator   name;        // Section name
       _MyIterator   iter_begin;  // Section开始的'{'位置
       _MyIterator   iter_end;    // Section结束的'}'位置
 
@@ -133,7 +137,7 @@ namespace clstd
       //  return pStock;
       //}
       b32       empty               () const; // TODO: IsEmpty()
-      void      clear               ();
+      void      clear               ();      
 
       StockT*   GetStock            () const;
       _TStr     SectionName         () const;
@@ -143,8 +147,8 @@ namespace clstd
       void      Delete              ();
       b32       NextSection         (T_LPCSTR szName = NULL); // 如果失败，表示没有后续Section，不会改变当前section内容，这与operator++行为不同
       b32       Rename              (T_LPCSTR szNewName);
-      b32       FirstKey            (ATTRIBUTE& param) const;
-      ATTRIBUTE FirstKey            () const;
+      b32       FirstKey            (ATTRIBUTE& param) const; // 如果section为空，返回值为FALSE，param未定义
+      ATTRIBUTE FirstKey            () const; // 如果section为空，返回的ATTRIBUTE是无效的，这与另一个重载不同
 
       b32       GetKey              (T_LPCSTR szKey, ATTRIBUTE& param) const;
       int       GetKeyAsString      (T_LPCSTR szKey, T_LPCSTR szDefault, TChar* szBuffer, int nCount) const;
@@ -181,7 +185,7 @@ namespace clstd
 
   protected:
     //typedef clvector<SECTION*>  SectionArray;
-
+    u32       m_dwFlags;
     _TTokens  m_SmartStream;
     MemBuffer m_Buffer;
     size_t    m_nModify;
@@ -190,7 +194,7 @@ namespace clstd
     static void ReverseByteOrder16(u16* ptr, clsize nCount);
 
   public:
-    StockT();
+    StockT(u32 dwFlags = 0);
     virtual ~StockT();
 
     b32 LoadFromFile(const ch* lpProfile);
@@ -198,8 +202,8 @@ namespace clstd
     b32 SaveToFile(const ch* lpProfile) const;
     b32 SaveToFile(const wch* lpProfile) const;
 
-    b32 Set(BufferBase* pBuffer);         // 内部会复制一份
-    b32 Set(T_LPCSTR str, clsize nCount); // 内部会复制一份
+    b32   Set(BufferBase* pBuffer);         // 内部会复制一份
+    b32   Set(T_LPCSTR str, clsize nCount); // 内部会复制一份
 
     size_t GetModification() const;       // 获得修改标记，如果两次获得值不一致，说明期间做出了修改。注意这个不能用值含义判断是否修改，而要比较两次获得值。
 
@@ -249,6 +253,7 @@ namespace clstd
   protected:
     //b32      Append            (Section* pSect, T_LPCSTR szText, clsize nCount);
     //b32      Insert            (Section* pSect, clsize nPos, T_LPCSTR szText, clsize nCount);
+    b32      MatchSection      (const _MyIterator& curr, T_LPCSTR szName, _MyIterator& next, const _MyIterator& end) const;
     b32      ToNativeCodec     (); // 根据BOM转为本地编码，StockA为ANSI，StockW为Unicode-16
     b32      Replace           (Section* pSect, clsize nPos, clsize nReplaced, T_LPCSTR szText, clsize nCount);
     b32      FindSingleSection (Section* pFindSect, T_LPCSTR szName, Section& pOutSect) const; // szName为NULL表示查找任何Section;
@@ -263,8 +268,8 @@ namespace clstd
     void     TrimFrontTab      (clsize& uOffset);
   };
 
-  class StockA : public StockT<clStringA> {};
-  class StockW : public StockT<clStringW> {};
+  class StockA : public StockT<clStringA> { public: StockA(u32 dwFlags = 0) : StockT<clStringA>(dwFlags){} };
+  class StockW : public StockT<clStringW> { public: StockW(u32 dwFlags = 0) : StockT<clStringW>(dwFlags){} };
 } // namespace clstd
 
 #else

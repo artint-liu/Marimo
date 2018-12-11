@@ -100,8 +100,9 @@ namespace clstd
     auto itNext = it;
 
     if(itNext == pSection->iter_end) { return FALSE; }
+    ++itNext;
 
-    while(++itNext != pSection->iter_end) {
+    while(itNext < pSection->iter_end) {
       if(itNext.marker[0] == '=') {
         key = it;
         value = ++itNext;
@@ -112,10 +113,36 @@ namespace clstd
         if( ! SmartStreamUtility::FindPair(itNext, itBegin, it, (TChar*)_CLTEXT("{"), (TChar*)_CLTEXT("}"))) {
           return FALSE;
         }
-        itNext = it;
+        itNext = it + 1;
         continue;
       }
+      else if(TEST_FLAG(pSection->pStock->m_dwFlags, StockFlag_Version2))
+      {
+        // "func(param)" 形式
+        if(itNext.marker[0] == '(') {
+          _MyIterator itBegin, itEnd;
+          if( ! SmartStreamUtility::FindPair(itNext, itBegin, itEnd, (TChar)_CLTEXT('('), (TChar)_CLTEXT(')'))) {
+            return FALSE;
+          }
+          itNext = itEnd + 1; // ')' next
+          if(itNext >= pSection->iter_end) {
+            return FALSE;
+          }
+          else if(itNext.marker[0] == ';') { // func(param);
+            key = it;
+            value = itNext; // ';'
+            return TRUE;
+          }
+          else if(itNext.marker[0] == '=') { // func(param) = value;
+            key = it;
+            value = ++itNext;
+            return TRUE;
+          }
+          continue;
+        }
+      }
       it = itNext;
+      ++itNext;
     }
     return FALSE;
   }
@@ -274,8 +301,9 @@ namespace clstd
   //////////////////////////////////////////////////////////////////////////
 
   _SSP_TEMPL 
-    _SSP_IMPL::StockT()
-    : m_nModify(0)
+    _SSP_IMPL::StockT(u32 dwFlags)
+    : m_dwFlags(dwFlags)
+    , m_nModify(0)
   {
   }
 
@@ -556,7 +584,7 @@ namespace clstd
 
 
     while(++itNext != itGlobalEnd) {
-      if((szName == NULL || it == szName) && itNext.marker[0] == '{') {
+      if(pStock->MatchSection(it, szName, itNext, itGlobalEnd)) {
         // itNext应该与输出的ItBegin是同一个值
         if( ! SmartStreamUtility::FindPair(itNext, iter_begin, iter_end, (TChar*)_CLTEXT("{"), (TChar*)_CLTEXT("}")))
         {
@@ -604,7 +632,9 @@ namespace clstd
     typename _SSP_IMPL::ATTRIBUTE _SSP_IMPL::Section::FirstKey() const
   {
     ATTRIBUTE attr;
-    FirstKey(attr);
+    if(_CL_NOT_(FirstKey(attr))) {
+      attr.pSection = NULL; // 使失效
+    }
     return attr;
   }
 
@@ -1262,6 +1292,31 @@ namespace clstd
   //}
 
   _SSP_TEMPL
+    b32 _SSP_IMPL::MatchSection(const _MyIterator& curr, T_LPCSTR szName, _MyIterator& next, const _MyIterator& end) const
+  {
+    if((szName == NULL || curr == szName) && next.marker[0] == '{') {
+      return TRUE;
+    }
+
+    if(TEST_FLAG(m_dwFlags, StockFlag_Version2))
+    {
+      _MyIterator iter_open, iter_close;
+      if((next.marker[0] == '[' && SmartStreamUtility::FindPair(next, iter_open, iter_close, (TChar*)_CLTEXT("["), (TChar*)_CLTEXT("]"))) || 
+        (next.marker[0] == '(' && SmartStreamUtility::FindPair(next, iter_open, iter_close, (TChar*)_CLTEXT("("), (TChar*)_CLTEXT(")"))) )
+      {
+        if(iter_close < end)
+        {
+          next = iter_close + 1;
+          if(next < end) {
+            return (next == '{');
+          }
+        }
+      }
+    }
+    return FALSE;
+  }
+
+  _SSP_TEMPL
     b32 _SSP_IMPL::NewSection(Section* pSection, T_LPCSTR szName, Section& pNewSect )
   {
     ASSERT(pSection != NULL && pSection->DbgCheck());
@@ -1298,7 +1353,7 @@ namespace clstd
     if(itNext == pFindSect->iter_end) { return FALSE; }
 
     while(++itNext != pFindSect->iter_end) {
-      if((szName == NULL || it == szName) && itNext.marker[0] == '{') {
+      if(MatchSection(it, szName, itNext, pFindSect->iter_end)) {
         pOutSect.pStock  = (StockT*)this;
         pOutSect.pParent = pFindSect;
         pOutSect.nModify = m_nModify;
