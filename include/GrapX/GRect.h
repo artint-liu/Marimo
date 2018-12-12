@@ -259,7 +259,7 @@ namespace Marimo
         len = clstd::strlenT(str);
       }
 
-      TRANNUMERIC<typename _T> t;
+      TRANNUMERIC<_T> t;
       clstd::StringUtility::Resolve(str, len, ch, [&t, this](GXSIZE_T i, GXLPCWSTR szText, GXSIZE_T sub_len){
         if(i < 4)
         {
@@ -457,7 +457,7 @@ namespace Marimo
         len = clstd::strlenT(str);
       }
 
-      TRANNUMERIC<typename _T> t;
+      TRANNUMERIC<_T> t;
       clstd::StringUtility::Resolve(str, len, ch, [&t, this](GXSIZE_T i, GXLPCWSTR szText, GXSIZE_T sub_len){
         if(i < 4)
         {

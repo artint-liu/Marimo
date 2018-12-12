@@ -339,7 +339,7 @@ namespace UVShader
     }
 
     pResult->strType = pDesc->component_type;
-    pResult->strType.Append('0' + pToken->length);
+    pResult->strType.Append(static_cast<ch>('0' + pToken->length));
     pResult->components[pToken->length] = -1;
     return TRUE;
   }

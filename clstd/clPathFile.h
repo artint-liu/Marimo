@@ -472,7 +472,7 @@ namespace clpathfile
   //}
 
   template<class _TString, class FINDFILEDATAT, typename _TCh, class _Fn>
-  void GenerateFiles(const _TCh* szPath, _Fn fn)
+  void GenerateFiles(const _TCh* szPath, _Fn fn) // func(const _Tstring& dir, const FINDFILEDATAT& data)
   {
     CLDWORD dwAttri = clpathfile::GetFileAttributes(szPath);
     if(dwAttri == 0xffffffff) {
@@ -500,7 +500,7 @@ namespace clpathfile
       file_data.nLastAccessTime = file_attr.nLastAccessTime;
       file_data.nLastWriteTime  = file_attr.nLastWriteTime;
 
-      clStringW strDir;
+      _TString strDir;
       clsize pos = FindFileName(szPath);
       if(pos != (clsize)-1)
       {

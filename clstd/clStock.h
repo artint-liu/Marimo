@@ -202,7 +202,7 @@ namespace clstd
     b32 SaveToFile(const ch* lpProfile) const;
     b32 SaveToFile(const wch* lpProfile) const;
 
-    b32   Set(BufferBase* pBuffer);         // 内部会复制一份
+    b32   Set(const BufferBase* pBuffer);         // 内部会复制一份
     b32   Set(T_LPCSTR str, clsize nCount); // 内部会复制一份
 
     size_t GetModification() const;       // 获得修改标记，如果两次获得值不一致，说明期间做出了修改。注意这个不能用值含义判断是否修改，而要比较两次获得值。

@@ -2561,7 +2561,7 @@ GO_NEXT:;
   {
     if(m_pMsg == NULL) {
       m_pMsg = ErrorMessage::Create();
-      m_pMsg->LoadErrorMessage(L"uvsmsg.txt");
+      m_pMsg->LoadErrorMessage(_CLTEXT("uvsmsg.txt"));
       m_pMsg->SetMessageSign('C');
       m_pMsg->PushFile(szFilename);
     }

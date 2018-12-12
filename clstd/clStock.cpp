@@ -373,7 +373,7 @@ namespace clstd
   }
 
   _SSP_TEMPL
-  b32 _SSP_IMPL::Set(BufferBase* pBuffer)
+  b32 _SSP_IMPL::Set(const BufferBase* pBuffer)
   {
     m_Buffer.Append(pBuffer->GetPtr(), pBuffer->GetSize());
     m_nModify++;

@@ -50,6 +50,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXImage.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXImm.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXKernel.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXShaderT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXSprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXUser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOBehavior.h" />
@@ -117,6 +118,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_XXX.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ArithmeticExpression.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ExpressionParser.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\UVShaderError.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolBuildTime.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolErrorMsg.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolImpl.h" />
@@ -215,6 +219,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXCanvasImpl_d3d9.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D9\GXGraphicsImpl_d3d9.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_XXX.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ArithmeticExpression.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ArithmeticExpr_static.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ExpressionParser.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\GXShaderT.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataInfrastructure.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPool.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolBuildTime.cpp" />

@@ -99,7 +99,7 @@
 #define CB_HWND( lphc )       ((lphc)->self)
 #define CB_GETTYPE( lphc )    ((lphc)->dwStyle & (CBS_DROPDOWNLIST))
 
-#define ISWIN31 (LOWORD(GetVersion()) == 0x0a03)
+#define ISWIN31 FALSE//(LOWORD(GetVersion()) == 0x0a03)
 
 /*
 * Drawing globals

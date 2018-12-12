@@ -46,6 +46,9 @@
     <Filter Include="Platform\CommonBase">
       <UniqueIdentifier>{afb287eb-c2be-4b4d-ac04-f4577920da34}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lib\ShaderT">
+      <UniqueIdentifier>{3480dbdf-f6dc-45ca-9066-e43798113057}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX.h">
@@ -432,6 +435,18 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXRegionFactory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXRenderTarget.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ArithmeticExpression.h">
+      <Filter>Lib\ShaderT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ExpressionParser.h">
+      <Filter>Lib\ShaderT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\UVShaderError.h">
+      <Filter>Lib\ShaderT</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXShaderT.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp">
@@ -849,6 +864,18 @@
       <Filter>Platform\CommonBase</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ExpressionParser.cpp">
+      <Filter>Lib\ShaderT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ArithmeticExpr_static.cpp">
+      <Filter>Lib\ShaderT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\ArithmeticExpression.cpp">
+      <Filter>Lib\ShaderT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\GXShaderT.cpp">
+      <Filter>Lib\ShaderT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvas3DImpl.inl">

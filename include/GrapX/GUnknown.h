@@ -201,7 +201,7 @@ namespace GrapX
 
     operator unspecified_bool_type() const
     {
-      return valid() ? __unspecified_bool_type : NULL;
+      return IsNullPtr() ? NULL : __unspecified_bool_type;
     }
 
   protected:
