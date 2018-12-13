@@ -1504,7 +1504,8 @@ namespace UVShader
     // # [: Semantic]
     // #
     if(*p == ":") {
-      stat.func.szSemantic = m_pContext->Strings.add((p++)->ToString());
+      stat.func.szSemantic = m_pContext->Strings.add((++p)->ToString());
+      p++;
     }
 
     if(*p == ";") { // 函数声明

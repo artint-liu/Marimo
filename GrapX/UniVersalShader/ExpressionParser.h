@@ -6,6 +6,8 @@
 namespace UVShader
 {
   class CodeParser;
+  class NameContext;
+  struct COMMINTRTYPEDESC;
   typedef clvector<clStringA> StringArray;
 
   class Include
@@ -40,6 +42,27 @@ namespace UVShader
     KeywordFilter_InFuntionArgument = 0,
     KeywordFilter_InFuntion = KeywordFilter_typedef,
     //KeywordMask_FlowsControl,
+  };
+
+  enum VariableStorageClass
+  {
+    VariableStorageClass_empty,
+    VariableStorageClass_extern,
+    VariableStorageClass_nointerpolation,
+    VariableStorageClass_precise,
+    VariableStorageClass_shared,
+    VariableStorageClass_groupshared,
+    VariableStorageClass_static,
+    VariableStorageClass_uniform,
+    VariableStorageClass_volatile,
+  };
+
+  enum UniformModifier
+  {
+    UniformModifier_empty,
+    UniformModifier_const,
+    UniformModifier_row_major,
+    UniformModifier_column_major,
   };
 
   struct TYPEDESC
@@ -527,27 +550,6 @@ namespace UVShader
       StorageClass_inline,
     };
 
-    enum VariableStorageClass
-    {
-      VariableStorageClass_empty,
-      VariableStorageClass_extern,
-      VariableStorageClass_nointerpolation,
-      VariableStorageClass_precise,
-      VariableStorageClass_shared,
-      VariableStorageClass_groupshared,
-      VariableStorageClass_static,
-      VariableStorageClass_uniform,
-      VariableStorageClass_volatile,
-    };
-    
-    enum UniformModifier
-    {
-      UniformModifier_empty,
-      UniformModifier_const,
-      UniformModifier_row_major,
-      UniformModifier_column_major,
-    };
-
     enum PPCondRank
     {
       PPCondRank_Empty = 0,
@@ -695,7 +697,7 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
     GXBOOL  ParseStatement_SyntaxError(TKSCOPE* pScope);
     GXBOOL  ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
-    GXBOOL  ParseFunctionArguments2(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
+    //GXBOOL  ParseFunctionArguments2(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Struct(TKSCOPE* pScope);

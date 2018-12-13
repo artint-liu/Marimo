@@ -20,10 +20,26 @@ namespace clstd
 
     BufferBase& operator=(const BufferBase& buf);
   public:
+    template<class _Ty>
+    inline _Ty*       CastPtr   () const; // 转换为指定类型
+    template<class _Ty>
+    inline clsize     CastSize  () const; // 转换为指定类型的长度
     inline CLLPVOID   GetPtr    () const;
     inline clsize     GetSize   () const;
     inline CLBYTE*    Set       (int val);
   };
+
+  template<class _Ty>
+  _Ty* BufferBase::CastPtr() const
+  {
+    return reinterpret_cast<_Ty*>(GetPtr());
+  }
+
+  template<class _Ty>
+  clsize BufferBase::CastSize() const
+  {
+    return (GetSize() + (sizeof(_Ty) - 1)) / sizeof(_Ty);
+  }
 
   CLLPVOID BufferBase::GetPtr() const
   {
