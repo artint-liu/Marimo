@@ -402,10 +402,10 @@ namespace clstd
   int StringW_traits::FloatToString(wch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
   {
     if(mode == 'F' || mode == 'E') {
-      return _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
+      return _ftoxstrT(fNum, pDestStr, (int)uMaxLength, (int)precision, mode);
     }
     else {
-      _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
+      _ftoxstrT(fNum, pDestStr, (int)uMaxLength, (int)precision, 'F');
       return ReadlizeFloatString(pDestStr);
     }
   }
@@ -550,10 +550,10 @@ namespace clstd
   int StringA_traits::FloatToString(ch* pDestStr, size_t uMaxLength, size_t precision, float fNum, char mode)
   {
     if(mode == 'F' || mode == 'E') {
-      return _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, mode);
+      return _ftoxstrT(fNum, pDestStr, (int)uMaxLength, (int)precision, mode);
     }
     else {
-      _ftoxstrT(fNum, pDestStr, (int)uMaxLength, precision, 'F');
+      _ftoxstrT(fNum, pDestStr, (int)uMaxLength, (int)precision, 'F');
       return ReadlizeFloatString(pDestStr);
     }
   }
@@ -3086,7 +3086,7 @@ int ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相�
 {
   _TCh* c = clstd::strchrT(str, '.');
   if(c == NULL) {
-    return clstd::strlenT(str);
+    return (int)clstd::strlenT(str);
   }
 
   _TCh* l0 = c;
@@ -3108,7 +3108,7 @@ int ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相�
   {
     l0[2] = '\0';
     ASSERT(c >= &l0[2]);
-    return (&l0[2] - str);
+    return (int)(&l0[2] - str);
   }
   else if(*l9 == '.')
   {
@@ -3117,28 +3117,28 @@ int ReadlizeFloatString(_TCh* str, int nSignificance) // nSignificance就是相�
       l9[2] = '\0';
       ASSERT(c >= &l9[2]);
       l9[-1]++;
-      return (&l9[2] - str);
+      return (int)(&l9[2] - str);
     }
     else {
       l9[nSignificance] = '\0';
-      return (&l9[nSignificance] - str);
+      return (int)(&l9[nSignificance] - str);
     }
   }
   else if(*l0 != '.' && l0[1] == '0' && l0 < l9)
   {
     l0[1] = '\0';
-    return (&l0[1] - str);
+    return (int)(&l0[1] - str);
   }
   else if(*l9 != '.' && l9[1] == '9' && l9 < l0)
   {
     l9[1] = '\0';
     ASSERT(*l9 >= '0' && *l9 <= '8');
     (*l9)++;
-    return (&l9[1] - str);
+    return (int)(&l9[1] - str);
   }
 
   ASSERT((c - str) == clstd::strlenT(str)); // c应该就是字符串结尾
-  return (c - str);
+  return (int)(c - str);
 }
 
 int SimpleASCIItoUnicode(wch* pDestStr, int nCount, const ch* pSrcStr)

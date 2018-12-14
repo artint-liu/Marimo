@@ -35,9 +35,9 @@ namespace EditorUtility
     {
     }
     virtual ~RotationAxis();
-    GXBOOL  InitializeRefPlane  (GXGraphics* pGraphics, int nSegments);
-    GVNode* Hit                 (GXCanvas3D* pCanvas, GXLPCPOINT ptHit, NODERAYTRACE* pNRT);
-    float   ProjectLength       (GXCanvas3D* pCanvas, const float3& vPos, const float3& vDir, GXLPCPOINT ptBegin, GXLPCPOINT ptEnd);
+    GXBOOL  InitializeRefPlane  (GrapX::Graphics* pGraphics, int nSegments);
+    GVNode* Hit                 (GrapX::Canvas3D* pCanvas, GXLPCPOINT ptHit, NODERAYTRACE* pNRT);
+    float   ProjectLength       (GrapX::Canvas3D* pCanvas, const float3& vPos, const float3& vDir, GXLPCPOINT ptBegin, GXLPCPOINT ptEnd);
     void    AlignNodeTransform  ();    
     void    SetArcY             (float fStart, float fStop);
     void    SetHighlight        (GXBOOL bHighlight);
@@ -46,15 +46,15 @@ namespace EditorUtility
   public:
     GVNode* BindNode    (GVNode* pNode);
     //GXBOOL  HitTest     (GXCanvas3D* pCanvas, GXLPCPOINT ptHit, NODERAYTRACE* pNRT);
-    GXBOOL  HitTest     (GXCanvas3D* pCanvas, GXBOOL bHighlight, GXLPCPOINT ptHit);
-    GXBOOL  Track       (GXCanvas3D* pCanvas, GXLPCPOINT ptHit);
+    GXBOOL  HitTest     (GrapX::Canvas3D* pCanvas, GXBOOL bHighlight, GXLPCPOINT ptHit);
+    GXBOOL  Track       (GrapX::Canvas3D* pCanvas, GXLPCPOINT ptHit);
     GXVOID  SetFunction (TransformAxisFunction* pFunction);
     //GXBOOL  MoveDist    (GXCanvas3D* pCanvas, GXLPCPOINT ptBegin, GXLPCPOINT ptEnd, float3* vDist);
     inline AxisHitTest  GetHitTest() const;
     inline void         ClearHitTest();
     virtual GXBOOL      Update        (const GVSCENEUPDATE& sContext);
   public:
-    static GXHRESULT CreateAxis(GXGraphics* pGraphics, RotationAxis** ppAxis);
+    static GXHRESULT CreateAxis(GrapX::Graphics* pGraphics, RotationAxis** ppAxis);
   };
 
   inline RotationAxis::AxisHitTest RotationAxis::GetHitTest() const

@@ -800,6 +800,46 @@ namespace UVShader
     }
   }
 
+  void CodeParser::DumpStateError(CLogger* pLogger, NameContext::State state, const TOKEN& tkType, const TOKEN& tkVar)
+  {
+    clStringW strW;
+    switch(state)
+    {
+    case NameContext::State_Ok:
+      CLBREAK;  // 外面保证不会进入这个分支
+      break;
+
+    case NameContext::State_TypeNotFound:
+    {
+      pLogger->OutputErrorW(tkType, UVS_EXPORT_TEXT2(5012, "“%s”: 类型未定义", pLogger), tkType.ToString(strW).CStr());
+      break;
+    }
+    case NameContext::State_DuplicatedIdentifier:
+    {
+      pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(2371, "“%s”: 重定义", pLogger), tkVar.ToString(strW).CStr());
+      break;
+    }
+    case NameContext::State_DefineAsType:
+    {
+      pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(5013, "“%s”: 变量已经被定义为类型", pLogger), tkVar.ToString(strW).CStr());
+      break;
+    }
+    case NameContext::State_VariableIsNotIdentifier:
+    {
+      pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(3000, "预期是一个变量名 : \"%s\"", pLogger), tkVar.ToString(strW).CStr());
+      break;
+    }
+    case NameContext::State_HasError:
+      break;
+    case NameContext::State_CastTypeError:
+    case NameContext::State_RequireConstantExpression:
+      break;  // 内部已处理
+    default:
+      CLBREAK; // 预期之外的状态
+      break;
+    }
+  }
+
   void CodeParser::SetRepalcedValue(const GLOB& glob, const VALUE& value)
   {
     if(glob.IsToken()) {
@@ -1513,7 +1553,8 @@ namespace UVShader
     }
     else if(*p == "{") { // 函数体
       if(nTypeOnlyCount != 0) {
-        GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2055, "应输入形参表，而不是类型表"));
+        // 声明了一个类型，没有变量名，没使用不算错
+        GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2055, "应输入形参表，而不是类型表")); // warning
       }
 
       TKSCOPE func_statement_block; // (m_aTokens[p->scope].scope, p->scope);
@@ -1542,6 +1583,7 @@ namespace UVShader
           {
             clStringW strW;
             GetLogger()->OutputErrorW(*ptkReturnedType, UVS_EXPORT_TEXT(5031, "函数返回值“%s”不是一个类型"), ptkReturnedType->ToString(strW).CStr());
+            return FALSE;
           }          
           else if(Verify_Block(stat.sRoot.pNode, &sNameSet_Func) == FALSE)
           {
@@ -1766,7 +1808,8 @@ namespace UVShader
       clStringW str;
       GetLogger()->OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2332, "“%s”: 缺少标记名"), (p - 1)->ToString(str).CStr());
       ASSERT(str == _CLTEXT("struct"));
-      return p - pTokensFront;
+      //return p - pTokensFront;
+      return scope.end;
     }
 
     clStringA strName;
@@ -1982,14 +2025,12 @@ namespace UVShader
       stat_stru.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
       stat_stru.stru.szName = GetUniqueString(p + 1);
       stat_stru.stru.nNumOfMembers = nDefinition;
+      m_aStatements.push_back(stat_stru);
+
+      if(stat_vari.sRoot.ptr) {
+        m_aStatements.push_back(stat_vari);
+      }
     }
-
-    m_aStatements.push_back(stat_stru);
-
-    if(stat_vari.sRoot.ptr) {
-      m_aStatements.push_back(stat_vari);
-    }
-
     return TRUE;
   }
 
@@ -2122,10 +2163,9 @@ namespace UVShader
 
       for(auto it = aArgs.begin(); it != aArgs.end(); ++it)
       {
-        clStringA str;
         if(it->ptkName)
         {
-          const TYPEDESC* pTypeDesc = sNameSet.RegisterIdentifier(it->ptkType->ToString(str), it->ptkName); // 注册在临时域内, 用来检查形参重名
+          const TYPEDESC* pTypeDesc = sNameSet.RegisterIdentifier(*it->ptkType, it->ptkName); // 注册在临时域内, 用来检查形参重名
         }
         m_aArgumentsPack.push_back(*it);
       }
@@ -4180,20 +4220,19 @@ namespace UVShader
     //const GLOB& second_glob = pNode->Operand[1];
     const TOKEN* ptkVar = NULL;
     const TYPEDESC* pType = NULL;
-    clStringA strType;
-
-    tkType.ToString(strType);
+    //clStringA strType;
+    //tkType.ToString(strType);
 
     if(second_glob.IsToken())
     {
       ptkVar = second_glob.pTokn;
-      pType = sNameSet.RegisterIdentifier(strType, ptkVar);
+      pType = sNameSet.RegisterIdentifier(tkType, ptkVar);
     }
     else if(second_glob.IsNode())
     {
       if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
       {
-        pType = sNameSet.RegisterMultidimIdentifier(strType, second_glob.pNode, NULL);
+        pType = sNameSet.RegisterMultidimIdentifier(tkType, second_glob.pNode, NULL);
       }
       else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
       {
@@ -4205,7 +4244,7 @@ namespace UVShader
         ptkVar = GetIdentifierNameWithoutSeamantic(second_glob);
         if(ptkVar)
         {
-          pType = sNameSet.RegisterIdentifier(strType, ptkVar);
+          pType = sNameSet.RegisterIdentifier(tkType, ptkVar);
           ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
           return TRUE;
         }
@@ -4240,7 +4279,7 @@ namespace UVShader
 
         if(pVarableDecl)
         {
-          pType = sNameSet.RegisterIdentifier(strType, pVarableDecl, &right_glob);
+          pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, &right_glob);
         }
 
         if(pVarableDecl == NULL || pType == NULL)
@@ -4305,8 +4344,8 @@ namespace UVShader
 
         if(bConstIdentifier)
         {
-          // TODO: 检查value与strType类型是否匹配, 比如一个“string s = 23;”是非法的
-          pRightTypeDesc = pType = sNameSet.RegisterIdentifier(strType, ptkVar, &right_glob);
+          // TODO: 检查value与tkType类型是否匹配, 比如一个“string s = 23;”是非法的
+          pRightTypeDesc = pType = sNameSet.RegisterIdentifier(tkType, ptkVar, &right_glob);
           if(pType) {
             //const ValuePool* pPool = sNameSet.GetValuePool(ptkVar);
             const IDNFDESC* pIdnfDesc = sNameSet.GetIdentifierDesc(ptkVar);
@@ -4324,7 +4363,7 @@ namespace UVShader
             return NULL;
           }
 
-          pType = sNameSet.RegisterIdentifier(strType, ptkVar);
+          pType = sNameSet.RegisterIdentifier(tkType, ptkVar);
           // 后面比较pRightTypeDesc是否能转换为pType
         }
 
@@ -4365,7 +4404,7 @@ namespace UVShader
 
     //ASSERT(pNode->Operand[0].IsToken()); // 外面的拆解保证不会出现这个
 
-    //pNode->Operand[0].pTokn->ToString(strType);
+    //pNode->Operand[0].pTokn->ToString(tkType);
 
     //// 检查变量名
     if(pType == NULL)
@@ -4373,37 +4412,8 @@ namespace UVShader
       clStringW strW;
       ptkVar = ptkVar != NULL ? ptkVar : second_glob.GetFrontToken();
 
-      switch(sNameSet.GetLastState())
-      {
-      case NameContext::State_TypeNotFound:
-      {
-        strW = strType;
-        GetLogger()->OutputErrorW(tkType, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), strW.CStr());
-        return FALSE;
-      }
-      case NameContext::State_DuplicatedIdentifier:
-      {
-        GetLogger()->OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(2371, "“%s”: 重定义"), ptkVar->ToString(strW).CStr());
-        return FALSE;
-      }
-      case NameContext::State_DefineAsType:
-      {
-        GetLogger()->OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(5013, "“%s”: 变量已经被定义为类型"), ptkVar->ToString(strW).CStr());
-        return FALSE;
-      }
-      case NameContext::State_VariableIsNotIdentifier:
-      {
-        GetLogger()->OutputErrorW(*ptkVar, UVS_EXPORT_TEXT(3000, "预期是一个变量名 : \"%s\""), ptkVar->ToString(strW).CStr());
-        return FALSE;
-      }
-      case NameContext::State_HasError:
-        return FALSE;
-      case NameContext::State_RequireConstantExpression:
-        return FALSE;  // 内部已处理
-      default:
-        CLBREAK; // 预期之外的状态
-        break;
-      }
+      DumpStateError(GetLogger(), sNameSet.GetLastState(), tkType, *ptkVar);
+      return FALSE;
     }
 
     if(second_glob.IsNode())
@@ -4708,8 +4718,9 @@ namespace UVShader
         const TOKEN* ptkVar = NULL;
         const TYPEDESC* pType = NULL;
         clStringA strType;
-
-        pNode->Operand[0].pTokn->ToString(strType);
+        
+        const TOKEN* ptkType = pNode->Operand[0].pTokn;
+        ptkType->ToString(strType);
         pType = pStructMemberSet->GetType(strType);
         if(pType == NULL)
         {
@@ -4721,13 +4732,13 @@ namespace UVShader
         if(second_glob.IsToken())
         {
           ptkVar = second_glob.pTokn;
-          pType = pStructMemberSet->RegisterIdentifier(strType, ptkVar);
+          pType = pStructMemberSet->RegisterIdentifier(*ptkType, ptkVar);
         }
         else if(second_glob.IsNode())
         {
           if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
           {
-            pType = pStructMemberSet->RegisterMultidimIdentifier(strType, second_glob.pNode, NULL);
+            pType = pStructMemberSet->RegisterMultidimIdentifier(*ptkType, second_glob.pNode, NULL);
           }
           else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
           {
@@ -4739,7 +4750,7 @@ namespace UVShader
             ptkVar = GetIdentifierNameWithoutSeamantic(second_glob);
             if(ptkVar)
             {
-              pType = pStructMemberSet->RegisterIdentifier(strType, ptkVar);
+              pType = pStructMemberSet->RegisterIdentifier(*ptkType, ptkVar);
               ASSERT(pType || pStructMemberSet->GetLastState() != NameContext::State_Ok);
               return TRUE;
             }
@@ -7229,23 +7240,26 @@ namespace UVShader
     return State_Ok;
   }
 
-  const TYPEDESC* NameContext::RegisterIdentifier(const clStringA& strType, const GLOB* pVariableDeclGlob, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterIdentifier(const TOKEN& tkType, const GLOB* pVariableDeclGlob, const GLOB* pValueExprGlob)
   {
     if(pVariableDeclGlob->IsToken()) {
-      return RegisterIdentifier(strType, pVariableDeclGlob->pTokn, pValueExprGlob);
+      return RegisterIdentifier(tkType, pVariableDeclGlob->pTokn, pValueExprGlob);
     }
     else if(pVariableDeclGlob->IsNode()) {
-      return RegisterMultidimIdentifier(strType, pVariableDeclGlob->pNode, pValueExprGlob);
+      return RegisterMultidimIdentifier(tkType, pVariableDeclGlob->pNode, pValueExprGlob);
     }
     return NULL;
   }
 
-  const TYPEDESC* NameContext::RegisterIdentifier(const clStringA& strType, const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
   {
-    ASSERT(strType.IsIdentifier());
     // PS: 返回值似乎没什么用
     //const TYPEDESC* pTypeDesc = NULL;
     IDNFDESC* pVariDesc = NULL;
+    clStringA strType;
+    tkType.ToString(strType);
+    ASSERT(strType.IsIdentifier());
+
     m_eLastState = IntRegisterIdentifier(&pVariDesc, strType, ptkVariable, pValueExprGlob);
     ASSERT(m_eLastState != State_Ok || pVariDesc->pDesc != NULL);
     return pVariDesc ? pVariDesc->pDesc : NULL;
@@ -7278,7 +7292,7 @@ namespace UVShader
     return td.pElementType;
   }
 
-  const TYPEDESC* NameContext::RegisterMultidimIdentifier(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript || pNode->mode == SYNTAXNODE::MODE_Subscript0); // 外部保证
 
@@ -7383,8 +7397,9 @@ namespace UVShader
       {
         const TOKEN* ptkVariable = pFirstGlob->pTokn;
         ASSERT(sDimensions.empty() == FALSE);
+        clStringA strType;
 
-        const TYPEDESC* pSizelessTypeDesc = RegisterTypes(strType, sDimensions); // 可能缺少最高维尺寸的数组类型
+        const TYPEDESC* pSizelessTypeDesc = RegisterTypes(tkType.ToString(strType), sDimensions); // 可能缺少最高维尺寸的数组类型
         TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
         m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, pValueExprGlob);
         if(m_eLastState == State_Ok) {
@@ -7397,6 +7412,7 @@ namespace UVShader
         }
         else
         {
+          CodeParser::DumpStateError(GetLogger(), m_eLastState, tkType, *ptkVariable);
           return NULL;
         }
       }

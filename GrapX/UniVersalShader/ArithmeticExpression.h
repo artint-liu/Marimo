@@ -10,7 +10,10 @@
 
 #define USE_CLSTD_TOKENS
 
-#define UVS_EXPORT_TEXT_IS_SIGN
+#ifndef UVS_EXPORT_TEXT_IS_SIGN
+# define UVS_EXPORT_TEXT_IS_SIGN
+#endif
+
 // 注意UVS_EXPORT_TEXT不能改名, 它在Sample中作为标记符号抽取ErrorMessage
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
 #define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  GetLogger()->SetError(GetLogger()->MarkCode(_CODE_ID, _MESSAGE))

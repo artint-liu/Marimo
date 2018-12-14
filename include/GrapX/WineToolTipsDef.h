@@ -15,13 +15,13 @@
 
 //#ifdef _WIN32
 
-#define TOOLTIPS_CLASSW         _CLTEXT("tooltips_class32")
-#define TOOLTIPS_CLASSA         "tooltips_class32"
+#define GXTOOLTIPS_CLASSW         _CLTEXT("tooltips_class32")
+#define GXTOOLTIPS_CLASSA         "tooltips_class32"
 
 #ifdef _UNICODE
-#define TOOLTIPS_CLASS          TOOLTIPS_CLASSW
+#define GXTOOLTIPS_CLASS          GXTOOLTIPS_CLASSW
 #else
-#define TOOLTIPS_CLASS          TOOLTIPS_CLASSA
+#define GXTOOLTIPS_CLASS          GXTOOLTIPS_CLASSA
 #endif
 
 //#else

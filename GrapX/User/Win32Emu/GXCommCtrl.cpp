@@ -566,7 +566,7 @@ GXHWND gxCOMCTL32_CreateToolTip(GXHWND hwndOwner)
 {
   GXHWND hwndToolTip;
 
-  hwndToolTip = gxCreateWindowExW(0, TOOLTIPS_CLASSW, NULL, GXWS_POPUP,
+  hwndToolTip = gxCreateWindowExW(0, GXTOOLTIPS_CLASSW, NULL, GXWS_POPUP,
     GXCW_USEDEFAULT, GXCW_USEDEFAULT,
     GXCW_USEDEFAULT, GXCW_USEDEFAULT, hwndOwner,
     0, 0, 0);

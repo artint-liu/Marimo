@@ -2786,7 +2786,7 @@ TOOLTIPS_Register ()
   wndClass.cbWndExtra    = sizeof(TOOLTIPS_INFO *);
   wndClass.hCursor       = gxLoadCursorW (0, (GXLPWSTR)GXIDC_ARROW);
   wndClass.hbrBackground = 0;
-  wndClass.lpszClassName = TOOLTIPS_CLASSW;
+  wndClass.lpszClassName = GXTOOLTIPS_CLASSW;
 
   gxRegisterClassExW (&wndClass);
 
@@ -2806,7 +2806,7 @@ TOOLTIPS_Unregister ()
   int i;
   for (i = TTI_INFO; i <= TTI_ERROR; i++)
     gxDestroyIcon(hTooltipIcons[i]);
-  gxUnregisterClassW (TOOLTIPS_CLASSW, NULL);
+  gxUnregisterClassW (GXTOOLTIPS_CLASSW, NULL);
 }
 #endif // TOOLTIP
 #endif // _DEV_DISABLE_UI_CODE

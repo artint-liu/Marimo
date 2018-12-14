@@ -36,22 +36,22 @@ namespace EditorUtility
     {
     }
     virtual ~TranslationAxis();
-    GXBOOL  InitializeRefPlane  (GXGraphics* pGraphics);
-    GVNode* Hit                 (GXCanvas3D* pCanvas, GXLPCPOINT ptHit, NODERAYTRACE* pNRT);
+    GXBOOL  InitializeRefPlane  (GrapX::Graphics* pGraphics);
+    GVNode* Hit                 (GrapX::Canvas3D* pCanvas, GXLPCPOINT ptHit, NODERAYTRACE* pNRT);
     void    SetHighlight        (GXBOOL bHighlight);
     void    AlignBinder         ();
     void    InvokeTranslation   (const float3& vPos);
   public:
     GVNode* BindNode    (GVNode* pNode);
-    GXBOOL  HitTest     (GXCanvas3D* pCanvas, GXBOOL bHighlight, GXLPCPOINT ptHit);
-    GXBOOL  Track       (GXCanvas3D* pCanvas, GXLPCPOINT ptHit);
+    GXBOOL  HitTest     (GrapX::Canvas3D* pCanvas, GXBOOL bHighlight, GXLPCPOINT ptHit);
+    GXBOOL  Track       (GrapX::Canvas3D* pCanvas, GXLPCPOINT ptHit);
     GXVOID  SetFunction (TransformAxisFunction* pFunction);
     void    SetSpace    (ESpace eSpace);
     inline AxisHitTest  GetHitTest() const;
     inline void         ClearHitTest();
     virtual GXBOOL      Update        (const GVSCENEUPDATE& sContext);
   public:
-    static GXHRESULT CreateAxis(GXGraphics* pGraphics, TranslationAxis** ppAxis);
+    static GXHRESULT CreateAxis(GrapX::Graphics* pGraphics, TranslationAxis** ppAxis);
   };
 
   inline TranslationAxis::AxisHitTest TranslationAxis::GetHitTest() const

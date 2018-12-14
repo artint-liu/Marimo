@@ -47,7 +47,7 @@ public:
   inline  GXHWND      Handle        ();
   inline  CMOWnd      GetParent     ();
   inline  GXHINSTANCE GetInstance   ();
-  inline  GXGraphics* GetGraphics   ();
+  inline  GrapX::Graphics* GetGraphics   ();
 
   clStringW   GetClassName        () const;
   GXDWORD     GetClassNameCode    () const;
@@ -154,7 +154,7 @@ inline GXHINSTANCE CMOWnd::GetInstance()
   return (GXHINSTANCE)gxGetWindowLong(m_hWnd, GXGWL_HINSTANCE);
 }
 
-inline GXGraphics* CMOWnd::GetGraphics()
+inline GrapX::Graphics* CMOWnd::GetGraphics()
 {
   return GXGetGraphics(m_hWnd);
 }

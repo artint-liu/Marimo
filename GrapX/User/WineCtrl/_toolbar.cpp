@@ -2047,7 +2047,7 @@ TOOLBAR_TooltipCreateControl(TOOLBAR_INFO *infoPtr)
   GXINT i;
   GXNMTOOLTIPSCREATED nmttc;
 
-  infoPtr->hwndToolTip = gxCreateWindowExW(0, TOOLTIPS_CLASSW, NULL, GXWS_POPUP,
+  infoPtr->hwndToolTip = gxCreateWindowExW(0, GXTOOLTIPS_CLASSW, NULL, GXWS_POPUP,
     GXCW_USEDEFAULT, GXCW_USEDEFAULT, GXCW_USEDEFAULT, GXCW_USEDEFAULT,
     infoPtr->hwndSelf, 0, 0, 0);
 

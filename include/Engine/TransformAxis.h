@@ -9,8 +9,8 @@ namespace EditorUtility
   {
   public:
     virtual GVNode* BindNode    (GVNode* pNode) = 0;
-    virtual GXBOOL  HitTest     (GXCanvas3D* pCanvas, GXBOOL bHighlight, GXLPCPOINT ptHit) = 0;
-    virtual GXBOOL  Track       (GXCanvas3D* pCanvas, GXLPCPOINT ptHit) = 0;
+    virtual GXBOOL  HitTest     (GrapX::Canvas3D* pCanvas, GXBOOL bHighlight, GXLPCPOINT ptHit) = 0;
+    virtual GXBOOL  Track       (GrapX::Canvas3D* pCanvas, GXLPCPOINT ptHit) = 0;
     virtual GXVOID  SetFunction (TransformAxisFunction* pFunction) = 0;
     static  GXColor32 GetAxisColor(char cAxis);
   };

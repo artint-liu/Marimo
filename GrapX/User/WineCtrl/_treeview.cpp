@@ -5020,7 +5020,7 @@ TREEVIEW_Create(GXHWND hwnd, const GXCREATESTRUCTW *lpcs)
   TREEVIEW_NotifyFormat(infoPtr, infoPtr->hwndNotify, GXNF_REQUERY);
 
   if (!(infoPtr->dwStyle & TVS_NOTOOLTIPS))
-    infoPtr->hwndToolTip = gxCreateWindowExW(0, TOOLTIPS_CLASSW, NULL, GXWS_POPUP,
+    infoPtr->hwndToolTip = gxCreateWindowExW(0, GXTOOLTIPS_CLASSW, NULL, GXWS_POPUP,
     GXCW_USEDEFAULT, GXCW_USEDEFAULT, GXCW_USEDEFAULT, GXCW_USEDEFAULT,
     hwnd, 0, 0, 0);
 
@@ -5785,7 +5785,7 @@ TREEVIEW_Register()
 
   wndClass.hCursor = gxLoadCursorW(0, (GXLPWSTR)GXIDC_ARROW);
   wndClass.hbrBackground = 0;
-  wndClass.lpszClassName = WC_TREEVIEWW;
+  wndClass.lpszClassName = GXWC_TREEVIEWW;
 
   gxRegisterClassExW(&wndClass);
 }
@@ -5794,7 +5794,7 @@ TREEVIEW_Register()
 GXVOID
 TREEVIEW_Unregister()
 {
-  gxUnregisterClassW(WC_TREEVIEWW, NULL);
+  gxUnregisterClassW(GXWC_TREEVIEWW, NULL);
 }
 
 //static inline int lstrncmpiW(GXLPCWSTR s1, GXLPCWSTR s2, int n)

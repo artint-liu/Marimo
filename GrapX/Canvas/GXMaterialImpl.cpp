@@ -356,6 +356,7 @@ namespace GrapX
   GXHRESULT MaterialImpl::IntCommit(GXLPCBYTE lpCanvasUniform)
   {
     CLBREAK;
+    return GX_FAIL;
   }
 
   GXHRESULT MaterialImpl::Invoke(GRESCRIPTDESC* pDesc)
@@ -387,11 +388,13 @@ namespace GrapX
   int MaterialImpl::GetRenderQueue() const
   {
     CLBREAK;
+    return -1;
   }
 
   GXHRESULT MaterialImpl::GetFilename(clStringW* pstrFilename)
   {
     CLBREAK;
+    return GX_FAIL;
   }
 
   GXBOOL MaterialImpl::InitMaterial()
@@ -403,11 +406,13 @@ namespace GrapX
   GXHRESULT MaterialImpl::BindDataByName(GXLPCSTR szPoolName, GXLPCSTR szStruct)
   {
     CLBREAK;
+    return GX_FAIL;
   }
 
   GXHRESULT MaterialImpl::SetParameters(ParamType eType, GXDEFINITION* pParameters, int nCount)
   {
     CLBREAK;
+    return GX_FAIL;
   }
 } // namespace GrapX
 

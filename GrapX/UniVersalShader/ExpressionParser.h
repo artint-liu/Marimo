@@ -203,7 +203,7 @@ namespace UVShader
   {
     u32           eModifier;  // [opt]
     const TOKEN*  ptkType;    // [req]
-    const TOKEN*  ptkName;    // [req]
+    const TOKEN*  ptkName;    // [opt]
     GXLPCSTR      szSemantic; // [opt]
   };
 
@@ -339,11 +339,11 @@ namespace UVShader
     GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     GXBOOL TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
-    const TYPEDESC* RegisterIdentifier(const clStringA& strType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
-    const TYPEDESC* RegisterIdentifier(const clStringA& strType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterTypes(const clStringA& strBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
-    const TYPEDESC* RegisterMultidimIdentifier(const clStringA& strType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
+    const TYPEDESC* RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
 #endif
     State  GetLastState() const;
     void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
@@ -830,6 +830,7 @@ namespace UVShader
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const GLOB& right_glob);
 #endif
     static void DumpValueState(CLogger* pLogger, VALUE::State state, const TOKEN* pToken);
+    static void DumpStateError(CLogger* pLogger, NameContext::State state, const TOKEN& tkType, const TOKEN& tkVar);
 
 
     void SetRepalcedValue(const GLOB& glob, const VALUE& value);
