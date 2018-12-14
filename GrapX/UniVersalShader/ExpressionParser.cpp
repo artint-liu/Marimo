@@ -23,13 +23,13 @@
 //#define IS_MATRIX_CATE(_CATE) (_CATE->cate == TYPEDESC::TypeCate_Matrix)
 
 #define IS_VECMAT_CATE(_CATE) (\
-  _CATE->cate == TYPEDESC::TypeCate_Vector || \
-  _CATE->cate == TYPEDESC::TypeCate_Matrix)
+  (_CATE)->cate == TYPEDESC::TypeCate_Vector || \
+  (_CATE)->cate == TYPEDESC::TypeCate_Matrix)
 
 #define IS_STRUCT_CATE(_CATE) (\
-  _CATE->cate == TYPEDESC::TypeCate_Vector || \
-  _CATE->cate == TYPEDESC::TypeCate_Matrix || \
-  _CATE->cate == TYPEDESC::TypeCate_Struct)
+  (_CATE)->cate == TYPEDESC::TypeCate_Vector || \
+  (_CATE)->cate == TYPEDESC::TypeCate_Matrix || \
+  (_CATE)->cate == TYPEDESC::TypeCate_Struct)
 
 #define IS_SAMPLER_CATE(_CATE) (\
   _CATE == TYPEDESC::TypeCate_Sampler1D || \
@@ -5435,7 +5435,7 @@ namespace UVShader
 
     for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it)
     {
-      if((*it)->cate == TYPEDESC::TypeCate_Struct || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
+      if(IS_STRUCT_CATE(*it) || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
       {
         rInitList.DbgPushString();
         if(RearrangeInitList(nTopIndex + index, *it, rInitList, nDimDepth + 1) == NULL) {
