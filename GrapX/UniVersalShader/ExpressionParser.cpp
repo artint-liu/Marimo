@@ -1043,8 +1043,18 @@ namespace UVShader
     const MACRO* pMacro = FindMacro(token);
 
     // 如果没有定义宏的形参和代换，则不处理这个宏
-    if( ! pMacro || (pMacro->aFormalParams.empty() && pMacro->aTokens.empty())) {
+    //if( ! pMacro || (pMacro->aFormalParams.empty() && pMacro->aTokens.empty())) {
+    if(pMacro == NULL) {
       return FALSE;
+    }
+    else if(pMacro->aFormalParams.empty() && pMacro->aTokens.empty())
+    {
+      if(TEST_FLAG(m_dwState, AttachFlag_Preprocess)) {
+        return FALSE; // 不替换宏预处理表达式解析中的宏
+      }
+      // 宏替换成空白
+      m_ExpandedStream.clear();
+      return TRUE;
     }
 
     ASSERT(pMacro->nNumTokens > 0);
@@ -1429,7 +1439,12 @@ namespace UVShader
     }
 
     // 函数声明
-    if(stat.sRoot.pNode->Operand[1].IsNode() && stat.sRoot.pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_FunctionCall)
+    if(stat.sRoot.IsToken()) {
+      clStringW strW;
+      GetLogger()->OutputErrorW(stat.sRoot.pTokn, UVS_EXPORT_TEXT(5059, "“%s” : 孤立的定义."), stat.sRoot.pTokn->ToString(strW).CStr());
+      return FALSE;
+    }
+    else if(stat.sRoot.pNode->Operand[1].IsNode() && stat.sRoot.pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
       *pScope = saved_scope;
       return FALSE;
@@ -1612,7 +1627,7 @@ namespace UVShader
   {
     const TOKEN& token = m_aTokens[pScope->begin];
     clStringW strW;
-    GetLogger()->OutputErrorW(token, UVS_EXPORT_TEXT(5032, "语法错误：不能识别得格式“%s”"), token.ToString(strW).CStr());
+    GetLogger()->OutputErrorW(token, UVS_EXPORT_TEXT(5032, "语法错误：不能识别的格式“%s”"), token.ToString(strW).CStr());
     return FALSE;
   }
 
@@ -3731,7 +3746,7 @@ namespace UVShader
           CLBREAK;
         }
 
-        pParse->Attach(p, (clsize)line_end - (clsize)p, 0, NULL);
+        pParse->Attach(p, (clsize)line_end - (clsize)p, AttachFlag_Preprocess, NULL);
         pParse->GenerateTokens();
         const auto& tokens = *pParse->GetTokensArray();
         if(tokens.empty()) {
