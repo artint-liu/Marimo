@@ -1313,14 +1313,14 @@ namespace UVShader
   
   GXBOOL CodeParser::Parse()
   {
-    if(GetLogger()->ErrorCount() > 0) {
+    if(GetLogger()->ErrorCount(FALSE) > 0) {
       return FALSE;
     }
 #if 1
     TKSCOPE scope(0, m_aTokens.size());
     while(ParseStatement(&scope));
     RelocalePointer();
-    return m_pLogger->ErrorCount() == 0;
+    return m_pLogger->ErrorCount(FALSE) == 0;
 #else
     __try
     {
@@ -1441,8 +1441,9 @@ namespace UVShader
     // 函数声明
     if(stat.sRoot.IsToken()) {
       clStringW strW;
-      GetLogger()->OutputErrorW(stat.sRoot.pTokn, UVS_EXPORT_TEXT(5059, "“%s” : 孤立的定义."), stat.sRoot.pTokn->ToString(strW).CStr());
-      return FALSE;
+      GetLogger()->OutputErrorW(stat.sRoot.pTokn, UVS_EXPORT_TEXT(_WARNING(5059), "“%s” : 孤立的定义."), stat.sRoot.pTokn->ToString(strW).CStr());
+      pScope->begin = definition_end; // 步进到下一个statement
+      return TRUE;
     }
     else if(stat.sRoot.pNode->Operand[1].IsNode() && stat.sRoot.pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_FunctionCall)
     {
@@ -1569,7 +1570,7 @@ namespace UVShader
     else if(*p == "{") { // 函数体
       if(nTypeOnlyCount != 0) {
         // 声明了一个类型，没有变量名，没使用不算错
-        GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2055, "应输入形参表，而不是类型表")); // warning
+        GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(_WARNING(2055), "应输入形参表，而不是类型表")); // warning
       }
 
       TKSCOPE func_statement_block; // (m_aTokens[p->scope].scope, p->scope);
@@ -3967,12 +3968,15 @@ namespace UVShader
   void CLogger::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
   {
 #ifdef REDUCE_ERROR_MESSAGE
+    // waning code 大于 c_nErrorIdLimit，所以不受显示数量限制
     if(code < c_nErrorIdLimit &&
       (m_nDisplayedError >= c_nMaxErrorCount || m_nSessionError > c_nMaxSessionError))
     {
       return;
     }
 #endif // REDUCE_ERROR_MESSAGE
+    const GXUINT error_id = code & (~UVS_WARNING_MASK);
+    const GXBOOL bError = TEST_FLAG_NOT(code, UVS_WARNING_MASK);
 
     if(pLocation)
     {
@@ -3980,7 +3984,7 @@ namespace UVShader
         T_LPCSTR pOriginMarker = static_cast<const ArithmeticExpression*>(pLocation->pContainer)->GetOriginPtr(pLocation);
         if(pOriginMarker)
         {
-          m_pMsg->VarWriteErrorW(TRUE, pOriginMarker, code, arglist);
+          m_pMsg->VarWriteErrorW(bError, pOriginMarker, error_id, arglist);
           return;
         }
         //auto it = m_PhonyTokenDict.find(pLocation - &m_aTokens.front());
@@ -3990,13 +3994,13 @@ namespace UVShader
         //}
       }
       else {
-        m_pMsg->VarWriteErrorW(TRUE, pLocation->marker, code, arglist);
+        m_pMsg->VarWriteErrorW(bError, pLocation->marker, error_id, arglist);
         return;
       }
     }
 
     // pLocation 为空或者 bPhony 下没找到
-    m_pMsg->VarWriteErrorW(TRUE, (GXSIZE_T)0, code, arglist);
+    m_pMsg->VarWriteErrorW(bError, (GXSIZE_T)0, error_id, arglist);
   }
 
   void CLogger::OutputErrorW(const GLOB& glob, GXUINT code, ...) const
@@ -7216,10 +7220,10 @@ namespace UVShader
       {
         VALUE_CONTEXT vctx(*this);
         vctx.pLogger = GetLogger();
-        const size_t nErrorCount = vctx.pLogger->ErrorCount();
+        const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
         m_pCodeParser->InferType(vctx, *pValueExprGlob);
         if(vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable) {
-          ASSERT(nErrorCount < vctx.pLogger->ErrorCount());
+          ASSERT(nErrorCount < m_pCodeParser->DbgErrorCount());
           m_IdentifierMap.erase(insert_result.first);
           return State_HasError; // 计算表达式错误
         }
@@ -8491,7 +8495,7 @@ namespace UVShader
 
   VALUE_CONTEXT_CHECKER::VALUE_CONTEXT_CHECKER(const VALUE_CONTEXT& _vctx)
     : vctx(_vctx)
-    , nErrorCount(static_cast<int>(_vctx.pLogger->ErrorCount()))
+    , nErrorCount(static_cast<int>(_vctx.pLogger->ErrorCount(TRUE)))
   {
     ASSERT(vctx.pLogger); // 必须指定Logger
   }
@@ -8504,7 +8508,7 @@ namespace UVShader
     // 没有算出返回值时一定要输出错误信息
     if(vctx.pType == NULL || (vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable))
     {
-      ASSERT(static_cast<int>(vctx.pLogger->ErrorCount()) > nErrorCount);
+      ASSERT(static_cast<int>(vctx.pLogger->ErrorCount(TRUE)) > nErrorCount);
     }
 
     // 检查value有效性

@@ -14,6 +14,9 @@
 # define UVS_EXPORT_TEXT_IS_SIGN
 #endif
 
+#define UVS_WARNING_MASK 0x8000  // 警告的掩码
+#define _WARNING(_CODE) (_CODE | UVS_WARNING_MASK)
+
 // 注意UVS_EXPORT_TEXT不能改名, 它在Sample中作为标记符号抽取ErrorMessage
 #if defined(UVS_EXPORT_TEXT_IS_SIGN)
 #define UVS_EXPORT_TEXT(_CODE_ID, _MESSAGE)  GetLogger()->SetError(GetLogger()->MarkCode(_CODE_ID, _MESSAGE))
@@ -447,10 +450,12 @@ namespace UVShader
     GXUINT              m_uRefCount;
     ErrorMessage*       m_pMsg;
 
-    clset<int>          m_errorlist;        // 错误列表, 如果不为空表示解析失败
-    size_t              m_nErrorCount;      // 错误计数
+    clset<GXUINT>       m_errorlist;        // 错误列表, 如果不为空表示解析失败
+    size_t              m_nErrorCount;      // 错误计数，包含警告次数
+    size_t              m_nWarningCount;    // 警告次数
     int                 m_nSessionError;    // 区间错误数量，如果在区间内大于一定值则不会再输出错误
     int                 m_nDisplayedError;  // 输出的错误数
+    GXBOOL              m_bWarning;
 
   public:
     CLogger();
@@ -474,7 +479,6 @@ namespace UVShader
 
 
     void VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const;
-    //void OutputErrorW(GXUINT code, ...);  // 从最后一个有效token寻找行号
     void OutputErrorW(const GLOB& glob, GXUINT code, ...) const;
     void OutputErrorW(const SYNTAXNODE* pNode, GXUINT code, ...) const;
     void OutputErrorW(const TOKEN& token, GXUINT code, ...) const;
@@ -486,9 +490,9 @@ namespace UVShader
     void OutputTypeCastFailed(const TOKEN* ptkLocation, const TOKEN* pOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom);
 
     GXUINT MarkCode(GXUINT code, GXLPCSTR szMessage);
-    int    SetError(int err);
+    GXUINT SetError(GXUINT err);
     GXBOOL HasError(int errcode) const;
-    size_t ErrorCount() const;
+    size_t ErrorCount(GXBOOL bWithWarning) const; // bWithWarning==FALSE 不计算警告的数量
   };
 
   //////////////////////////////////////////////////////////////////////////

@@ -820,7 +820,7 @@ GO_NEXT:;
 
   size_t ArithmeticExpression::DbgErrorCount() const
   {
-    return GetLogger()->ErrorCount();
+    return GetLogger()->ErrorCount(TRUE);
   }
 
   GXBOOL ArithmeticExpression::ParseFunctionSubscriptCall(const TKSCOPE& scope, GLOB* pDesc)
@@ -2533,8 +2533,10 @@ GO_NEXT:;
     : m_uRefCount(1)
     , m_pMsg(NULL)
     , m_nErrorCount(0)
+    , m_nWarningCount(0)
     , m_nSessionError(0)
     , m_nDisplayedError(0)
+    , m_bWarning(FALSE)
   {
   }
 
@@ -2576,9 +2578,12 @@ GO_NEXT:;
     m_nDisplayedError = 0;
   }
 
-  int CLogger::SetError(int err)
+  GXUINT CLogger::SetError(GXUINT err)
   {
     m_nErrorCount++;
+    if(TEST_FLAG(err, UVS_WARNING_MASK)) {
+      m_nWarningCount++;
+    }
     m_nSessionError++;
     if(m_nSessionError <= c_nMaxSessionError) {
       m_nDisplayedError++;
@@ -2642,7 +2647,7 @@ GO_NEXT:;
   GXUINT CLogger::MarkCode(GXUINT code, GXLPCSTR szMessage)
   {
     clStringW strMessage = szMessage;
-    m_pMsg->UpdateErrorMessage(code, strMessage);
+    m_pMsg->UpdateErrorMessage(code & (~UVS_WARNING_MASK), strMessage);
     return code;
   }
 
@@ -2651,9 +2656,9 @@ GO_NEXT:;
     return (m_errorlist.find(errcode) != m_errorlist.end());
   }
 
-  size_t CLogger::ErrorCount() const
+  size_t CLogger::ErrorCount(GXBOOL bWithWarning) const
   {
-    return m_nErrorCount;
+    return bWithWarning ? m_nErrorCount : (m_nErrorCount - m_nWarningCount);
   }
 
 } // namespace UVShader
