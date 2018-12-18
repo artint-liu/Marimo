@@ -354,11 +354,6 @@ namespace UVShader
     // 所有pack类型，都存一个空值，避免记录0索引与NULL指针混淆的问题
     //
     m_NodePool.Clear();
-
-    FUNCTION_ARGUMENT argument = {InputModifier_in};
-    m_aArgumentsPack.clear();
-    m_aArgumentsPack.push_back(argument);
-
     STATEMENT stat = {StatementType_Empty};
     m_aSubStatements.push_back(stat);
   }
@@ -1504,6 +1499,7 @@ namespace UVShader
     TOKEN* p = &m_aTokens[pScope->begin];
     TOKEN* ptkReturnedType = p;
     const TOKEN* pEnd = &m_aTokens.front() + pScope->end;
+    TOKEN::PtrCArray types_array;
 
     STATEMENT stat = {StatementType_Empty};
 
@@ -1549,7 +1545,7 @@ namespace UVShader
       TKSCOPE ArgScope; //(m_aTokens[p->scope].scope + 1, p->scope);
       InitTokenScope(ArgScope, *p, FALSE);
       sNameSet_Func.allow_keywords = KeywordFilter_InFuntionArgument;
-      ParseFunctionArguments(sNameSet_Func, &stat, &ArgScope, nTypeOnlyCount);
+      ParseFunctionArguments(sNameSet_Func, &stat, &ArgScope, types_array, nTypeOnlyCount);
     }
     p = &m_aTokens[p->scope];
     ASSERT(*p == ')');
@@ -1618,7 +1614,8 @@ namespace UVShader
 
 
     m_aStatements.push_back(stat);
-    m_GlobalSet.RegisterFunction(stat.func.szReturnType, stat.func.szName, &m_aArgumentsPack[(size_t)stat.func.pArguments], stat.func.nNumOfArguments);
+    m_GlobalSet.RegisterFunction(stat.func.szReturnType, stat.func.szName, types_array);
+      //&m_aArgumentsPack[(size_t)stat.func.pArguments], stat.func.nNumOfArguments);
 
     pScope->begin = p - &m_aTokens.front();
     return TRUE;
@@ -2071,129 +2068,158 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL CodeParser::ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount)
+  GXBOOL CodeParser::VerifyFunctionArgument(NameContext& sNameCtx, const GLOB* pGlob, const GLOB& rBaseGlob, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount)
+  {
+    const TOKEN* ptkType = NULL;
+    const TOKEN* ptkArgName = NULL;
+    clStringW strW;
+
+    if(pGlob->ptr == NULL)
+    {
+      // ERROR: func(float a,,float b); 形式
+      GetLogger()->OutputErrorW(rBaseGlob, UVS_EXPORT_TEXT(5060, "语法错误 : 参数列表出现空项"));
+      return FALSE;
+    }
+    else if(pGlob->IsToken()) {
+      ptkType = pGlob->pTokn;
+      //if(sNameCtx.GetType(*ptkType) == NULL) {
+      //  GetLogger()->OutputErrorW(ptkType, UVS_EXPORT_TEXT(5061, "“%s”不是一个类型"), ptkType->ToString(strW).CStr());
+      //  return FALSE;
+      //}
+    }
+    else // node
+    {
+      // Operand - A
+      if(pGlob->pNode->Operand[0].IsNode())
+      {
+        GetLogger()->OutputErrorW(pGlob->pNode->Operand[0], UVS_EXPORT_TEXT(5062, "“%s”不正确的参数语法"), pGlob->pNode->GetAnyTokenAPB().ToString(strW).CStr());
+        return FALSE;
+      }
+      else
+      {
+        ptkType = pGlob->pNode->Operand[0].pTokn;
+      }
+
+      // Operand - B
+      const GLOB& second_glob = pGlob->pNode->Operand[1];
+      if(second_glob.IsToken())
+      {
+        ptkArgName = second_glob.pTokn;
+      }
+      else
+      {
+        if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript)
+        {
+          const TYPEDESC* pTypeDesc = sNameCtx.RegisterMultidimIdentifier(*ptkType, second_glob.pNode, NULL);
+          if(pTypeDesc == NULL) {
+            DumpStateError(GetLogger(), sNameCtx.GetLastState(), *ptkType, *ptkArgName);
+            return FALSE;
+          }
+          types_array.push_back(ptkType);
+          return TRUE;
+        }
+        else
+        {
+          CLBREAK; // 没实现
+        }
+      }
+    }
+
+    ASSERT(ptkType);
+    if(ptkArgName == NULL)
+    {
+      if(sNameCtx.GetType(*ptkType) == NULL) {
+        GetLogger()->OutputErrorW(ptkType, UVS_EXPORT_TEXT(5061, "“%s”不是一个类型"), ptkType->ToString(strW).CStr());
+        return FALSE;
+      }
+      nTypeOnlyCount++;
+    }
+    else
+    {
+      const TYPEDESC* pTypeDesc = sNameCtx.RegisterIdentifier(*ptkType, ptkArgName);
+      if(pTypeDesc == NULL) {
+        DumpStateError(GetLogger(), sNameCtx.GetLastState(), *ptkType, *ptkArgName);
+        return FALSE;
+      }
+    }
+    
+    types_array.push_back(ptkType);
+    return TRUE;
+  }
+
+  GXBOOL CodeParser::ParseFunctionArguments(NameContext& sNameCtx, STATEMENT* pStat, TKSCOPE* pArgScope, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount)
   {
     // 函数参数格式
     // [InputModifier] Type Name [: Semantic]
     // 函数可以包含多个参数，用逗号分隔
 
-    nTypeOnlyCount = 0; // 类型描述的数量
-    TOKEN* p = &m_aTokens[pArgScope->begin];
-    const TOKEN* pEnd = &m_aTokens.front() + pArgScope->end;
-    ASSERT(*pEnd == ")"); // 函数参数列表的结尾必须是闭圆括号
-
-    if(pArgScope->begin >= pArgScope->end) {
-      // ERROR: 函数参数声明不正确
-      return FALSE;
+    nTypeOnlyCount = 0;
+    SYNTAXNODE::GlobPtrList sArgList;
+    if(pArgScope->IsValid()) {
+      GXBOOL bret = ArithmeticExpression::BreakComma(1, *pArgScope, &pStat->func.arguments_glob, OPP(0));
+      if(bret < 0) {
+        ParseArithmeticExpression(1, *pArgScope, &pStat->func.arguments_glob);
+      }
+    }
+    else {
+      return TRUE;
     }
 
-    ArgumentsArray aArgs;
+    if(pStat->func.arguments_glob.CompareAsToken("void")) {
+      pStat->func.arguments_glob.ptr = NULL;
+      pStat->func.nNumOfArguments = 0;
+      return TRUE;
+    }
 
-    while(1)
+    //clStringW strW;
+    const TOKEN* ptkType = NULL;
+    BreakComma(sArgList, pStat->func.arguments_glob);
+    pStat->func.nNumOfArguments = sArgList.size();
+
+    for(const GLOB* pGlob : sArgList)
     {
-      FUNCTION_ARGUMENT arg = {InputModifier_in};
-
-      arg.eModifier = 0;
-      while(TRUE)
+      u32 eModifier = 0;
+      
+      while(pGlob->IsNode())
       {
-        if(*p == "in") {
-          arg.eModifier |= InputModifier_in;
+        if(*pGlob->pNode->Operand[0].pTokn == "in") {
+          eModifier |= InputModifier_in;
         }
-        else if(*p == "out") {
-          arg.eModifier |= InputModifier_out;
+        else if(*pGlob->pNode->Operand[0].pTokn == "out") {
+          eModifier |= InputModifier_out;
         }
-        else if(*p == "inout") {
-          arg.eModifier |= InputModifier_inout;
+        else if(*pGlob->pNode->Operand[0].pTokn == "inout") {
+          eModifier |= InputModifier_inout;
         }
-        else if(*p == "uniform" || *p == "const") {
-          arg.eModifier |= InputModifier_uniform;
+        else if(*pGlob->pNode->Operand[0].pTokn == "uniform" || *pGlob->pNode->Operand[0].pTokn == "const") {
+          eModifier |= InputModifier_uniform;
         }
         else {
           break;
         }
-        INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
+        pGlob = &pGlob->pNode->Operand[1];
       }
 
-      if(arg.eModifier != 0 &&
-        arg.eModifier != InputModifier_in && arg.eModifier != InputModifier_out &&
-        arg.eModifier != InputModifier_inout && arg.eModifier != InputModifier_uniform &&
-        arg.eModifier != (InputModifier_in | InputModifier_uniform))
+      if(eModifier != 0 &&
+        eModifier != InputModifier_in && eModifier != InputModifier_out &&
+        eModifier != InputModifier_inout && eModifier != InputModifier_uniform &&
+        eModifier != (InputModifier_in | InputModifier_uniform))
       {
         GetLogger()->OutputErrorW(m_aTokens[pArgScope->begin], UVS_EXPORT_TEXT(5050, "参数类型修饰错误"));
         return FALSE;
       }
 
-//NOT_INC_P:
-      arg.ptkType = p;
-      if(++p >= pEnd) {
-        nTypeOnlyCount++;
-        aArgs.push_back(arg);
-        break;
-      }
-      
-      if(*p == ',') {
-        nTypeOnlyCount++;
-        aArgs.push_back(arg);
-        INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
-        continue;
-      }
-
-      arg.ptkName = p;
-
-      if(++p >= pEnd) {
-        aArgs.push_back(arg);
-        break;
-      }
-
-      if(*p == ",") {
-        aArgs.push_back(arg);
-        INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
-        continue;
-      }
-      else if(*p == ":") {
-        INC_BUT_NOT_END(p, pEnd); // ERROR: 函数参数声明不正确
-        arg.szSemantic = GetUniqueString(p);
-      }
-      else {
-        // ERROR: 函数参数声明不正确
+      if(VerifyFunctionArgument(sNameCtx, pGlob, pStat->func.arguments_glob, types_array, nTypeOnlyCount) == FALSE) {
         return FALSE;
       }
-    }
+    } // for
 
-    ASSERT( ! aArgs.empty());
-
-    if(aArgs.size() == 1 && *(aArgs.front().ptkType) == "void")
-    {
-      // func(void) 形式
-      pStat->func.pArguments = 0;
-      pStat->func.nNumOfArguments = 0;
-    }
-    else
-    {
-      pStat->func.pArguments = (FUNCTION_ARGUMENT*)m_aArgumentsPack.size();
-      pStat->func.nNumOfArguments = aArgs.size();
-
-      //StringArray sFormalTypenames;
-      m_aArgumentsPack.reserve(m_aArgumentsPack.size() + aArgs.size());
-      //sFormalTypenames.reserve(aArgs.size());
-
-      for(auto it = aArgs.begin(); it != aArgs.end(); ++it)
-      {
-        if(it->ptkName)
-        {
-          const TYPEDESC* pTypeDesc = sNameSet.RegisterIdentifier(*it->ptkType, it->ptkName); // 注册在临时域内, 用来检查形参重名
-        }
-        m_aArgumentsPack.push_back(*it);
-      }
-    }
 
     return TRUE;
   }
 
   void CodeParser::RelocalePointer()
   {
-    RelocaleStatements(m_aStatements);
-    RelocaleStatements(m_aSubStatements);
   }
 
   GXLPCSTR CodeParser::GetUniqueString( const TOKEN* pSym )
@@ -3189,21 +3215,6 @@ namespace UVShader
     }
     ArithmeticExpression::Invoke(szFunc, szArguments);
   }
-
-  void CodeParser::RelocaleStatements(StatementArray& aStatements)
-  {
-    for(auto it = aStatements.begin(); it != aStatements.end(); ++it)
-    {
-      switch(it->type)
-      {
-      case StatementType_FunctionDecl:
-      case StatementType_Function:
-        IndexToPtr(it->func.pArguments, m_aArgumentsPack);
-        break;
-      }
-    }
-  }
-
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -7513,20 +7524,25 @@ namespace UVShader
     return result.second;
   }
 
-  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc)
+  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TOKEN::PtrCArray& type_array)
+    // const FUNCTION_ARGUMENT* pArguments, int argc)
   {
     ASSERT(m_pParent == NULL);
     FUNCDESC td;
     td.ret_type = strRetType;
     td.name = strName; // ptkName->ToString(strName);
 
+
+    //SYNTAXNODE::GlobPtrList sArgList;
+    //CodeParser::BreakComma(sArgList, arguments_glob);
+
     auto it = m_FuncMap.insert(clmake_pair(strName, td));
     //clStringA str;
-    for(int i = 0; i < argc; i++)
-    {
-      //str.Clear();
-      it->second.sFormalTypes.push_back(pArguments[i].ptkType);
-    }
+    //for(int i = 0; i < argc; i++)
+    //{
+    //  //str.Clear();
+    //}
+    it->second.sFormalTypes = type_array;
     return TRUE;
   }
 
@@ -8028,7 +8044,7 @@ namespace UVShader
           }
 
           top.iter = top.sInitList.begin();
-          top.ptkOpcode = pGlob->pNode->Operand[0].GetFrontToken();
+          top.ptkOpcode = pGlob->GetFrontToken(); // pGlob->pNode->Operand[0].GetFrontToken();
 
           if(index % scaler_count != 0)
           {

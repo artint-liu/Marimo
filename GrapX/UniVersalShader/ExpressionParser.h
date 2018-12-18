@@ -199,14 +199,6 @@ namespace UVShader
     InputModifier_uniform = 0x04, // Input only constant data
   };
 
-  struct FUNCTION_ARGUMENT // 函数参数
-  {
-    u32           eModifier;  // [opt]
-    const TOKEN*  ptkType;    // [req]
-    const TOKEN*  ptkName;    // [opt]
-    GXLPCSTR      szSemantic; // [opt]
-  };
-
   struct VALUE_CONTEXT
   {
     // [属性]
@@ -336,7 +328,8 @@ namespace UVShader
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
-    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
+    //GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
+    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TOKEN::PtrCArray& type_array);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     GXBOOL TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
@@ -561,8 +554,6 @@ namespace UVShader
 
     typedef clset<TYPEDESC>   TypeSet;
 
-    typedef clvector<FUNCTION_ARGUMENT> ArgumentsArray;
-    
     //////////////////////////////////////////////////////////////////////////
     struct STATEMENT_FUNC // 函数体/函数声明
     {
@@ -570,7 +561,7 @@ namespace UVShader
       GXLPCSTR     szReturnType;  // [req]
       GXLPCSTR     szName;        // [req]
       GXLPCSTR     szSemantic;    // [opt]
-      FUNCTION_ARGUMENT*  pArguments;       // [opt]
+      GLOB         arguments_glob;
       clsize              nNumOfArguments;  // [opt]
     };
 
@@ -696,7 +687,8 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
     GXBOOL  ParseStatement_SyntaxError(TKSCOPE* pScope);
-    GXBOOL  ParseFunctionArguments(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
+    GXBOOL  ParseFunctionArguments(NameContext& sNameCtx, STATEMENT* pStat, TKSCOPE* pArgScope, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount);
+    GXBOOL  VerifyFunctionArgument(NameContext& sNameCtx, const GLOB* pGlob, const GLOB& rBaseGlob, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount);
     //GXBOOL  ParseFunctionArguments2(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
@@ -757,7 +749,6 @@ namespace UVShader
     GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
 
     GXBOOL  ParseStatement(TKSCOPE* pScope);
-    void    RelocaleStatements(StatementArray& aStatements);
     void    RelocalePointer();
     
     GXLPCSTR GetUniqueString(const TOKEN* pSym);
@@ -871,8 +862,6 @@ namespace UVShader
     
     PARSER_CONTEXT*     m_pContext;
     PhonyTokenDict_T    m_PhonyTokenDict;   // 用户从替换的token中找到原始token信息
-
-    ArgumentsArray      m_aArgumentsPack;   // 所有函数参数都存在这个表里
 
     FileDict            m_sIncludeFiles;    // 包含文件集合, 仅限于Root parser
     Include*            m_pInclude;

@@ -595,22 +595,28 @@ namespace GrapX
           const auto& func = s.func;
 
           clStringA strArgs;
-          clStringA strType;
-          clStringA strName;
-          for(clsize i = 0; i < func.nNumOfArguments; i++)
-          {
-            strArgs.AppendFormat("%s%s %s", Get(static_cast<UVShader::InputModifier>(func.pArguments[i].eModifier)),
-              func.pArguments[i].ptkType->ToString(strType).CStr(),
-              func.pArguments[i].ptkName->ToString(strName).CStr());
+          //clStringA strType;
+          //clStringA strName;
+          //for(clsize i = 0; i < func.nNumOfArguments; i++)
+          //{
+          //  strArgs.AppendFormat("%s%s %s", Get(static_cast<UVShader::InputModifier>(func.pArguments[i].eModifier)),
+          //    func.pArguments[i].ptkType->ToString(strType).CStr(),
+          //    func.pArguments[i].ptkName->ToString(strName).CStr());
 
-            if(func.pArguments[i].szSemantic) {
-              strArgs.AppendFormat(" : %s", func.pArguments[i].szSemantic);
-            }
-            strArgs.Append(",");
+          //  if(func.pArguments[i].szSemantic) {
+          //    strArgs.AppendFormat(" : %s", func.pArguments[i].szSemantic);
+          //  }
+          //  strArgs.Append(",");
+          //}
+
+          //if(strArgs.IsNotEmpty()) {
+          //  strArgs.Remove(strArgs.GetLength() - 1, 1);
+          //}
+          if(s.func.arguments_glob.IsNode()) {
+            DumpBlock(&parser, s.func.arguments_glob.pNode, 0, 0, &strArgs);
           }
-
-          if(strArgs.IsNotEmpty()) {
-            strArgs.Remove(strArgs.GetLength() - 1, 1);
+          else if(s.func.arguments_glob.IsToken()) {
+            s.func.arguments_glob.pTokn->ToString(strArgs);
           }
 
           WriteFormat("%s%s %s(%s)", Get(func.eStorageClass), func.szReturnType, func.szName, strArgs);
