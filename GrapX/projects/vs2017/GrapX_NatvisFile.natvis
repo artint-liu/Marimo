@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--语法参考：-->
+<!--https://docs.microsoft.com/zh-cn/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015-->
+<!--https://docs.microsoft.com/zh-cn/visualstudio/debugger/format-specifiers-in-cpp?view=vs-2015-->
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="UVShader::SYNTAXNODE::GLOB">
+    <DisplayString Condition="ptr==nullptr">empty</DisplayString>
+    <!--<Expand>
+      <ExpandedItem>null</ExpandedItem>
+    </Expand>-->
+    <DisplayString Condition="ptr!=nullptr &amp;&amp; (pNode->magic&amp;65534)!=65534">
+      &lt;Token {pTokn,na}&gt;
+    </DisplayString>
+    <!--<Expand>
+      <ExpandedItem>pTokn</ExpandedItem>
+    </Expand>-->
+    <DisplayString Condition="ptr!=nullptr &amp;&amp; (pNode->magic&amp;65534)==65534">
+      &lt;Node&gt;{pNode->mode} ({pNode->pOpcode,na}) A:({pNode->Operand[0],na}) B:({pNode->Operand[1],na})
+    </DisplayString>
+    <Expand>
+      <Item Name="mode">pNode->mode</Item>
+      <Item Name="id">pNode->id</Item>
+      <Item Name="opcode">pNode->pOpcode</Item>
+      <Item Name="Operand 0">pNode->Operand[0]</Item>
+      <Item Name="Operand 1">pNode->Operand[1]</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="UVShader::TOKEN">
+    <DisplayString>token={marker,[length]s} size={length}</DisplayString>
+  </Type>
+</AutoVisualizer>

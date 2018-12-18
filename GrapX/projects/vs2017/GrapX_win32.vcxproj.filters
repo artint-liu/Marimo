@@ -47,4 +47,7 @@
       <Filter>res</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="GrapX_NatvisFile.natvis" />
+  </ItemGroup>
 </Project>

@@ -5,6 +5,10 @@
 #error Must be include "clAllocator.h" first.
 #endif // _CL_ALLOCATOR_H_
 
+//创建本机对象的自定义视图
+// https://docs.microsoft.com/zh-cn/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015
+// https://docs.microsoft.com/zh-cn/visualstudio/debugger/format-specifiers-in-cpp?view=vs-2015
+
 // autoexp.dat 解析文件
 //clstd::StringX<wchar_t,*>|clstd::StringX<unsigned short,*>{
 //  preview  (  #("L", [$e.m_pBuf,su]))

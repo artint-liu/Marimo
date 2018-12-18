@@ -466,6 +466,9 @@
   <ItemGroup>
     <ResourceCompile Include="res\GrapXUI.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="GrapX_NatvisFile.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\directxtex_desktop_2015.2018.8.18.2\build\native\directxtex_desktop_2015.targets" Condition="Exists('packages\directxtex_desktop_2015.2018.8.18.2\build\native\directxtex_desktop_2015.targets')" />

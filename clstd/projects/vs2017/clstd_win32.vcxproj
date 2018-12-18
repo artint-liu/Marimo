@@ -24,6 +24,9 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CL_ARCH_X64</PreprocessorDefinitions>
     </MASM>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="clstd_NatvisFile.natvis" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{0A932C05-F32C-466A-8192-A6212FA693BD}</ProjectGuid>
