@@ -2579,6 +2579,11 @@ namespace UVShader
       eMode = SYNTAXNODE::MODE_Return;
       pend = scope.begin + 2;
     }
+    else if(front == "switch") {
+      GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5026, "暂时不支持“switch”关键字"));
+      pend = scope.begin + 1;
+      return FALSE;
+    }
     else {
       bret = FALSE;
     }
@@ -4899,41 +4904,51 @@ namespace UVShader
     sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sTypeList.size(), aUserFunc);
     for (auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
     {
-      int i = 0;
-      size_t nConfirm = 0;
+      //int i = 0;
+      //size_t nConfirm = 0;
       ASSERT((*iter_func)->sFormalTypes.size() == sTypeList.size());
-      for (auto iter_arg = sTypeList.begin(); iter_arg != sTypeList.end(); ++iter_arg, ++i)
-      {
-        const TYPEDESC* pArgumentTypeDesc = *iter_arg;
-        const TOKEN* ptkFormal = (*iter_func)->sFormalTypes[i];
-        const TYPEDESC* pFormalTypeDesc = sNameSet.GetType(*ptkFormal);
-        //ASSERT(pFormalTypeDesc != NULL);
-
-        if(pFormalTypeDesc == NULL)
-        {
-          clStringW strW;
-          GetLogger()->OutputErrorW(*ptkFormal, UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), ptkFormal->ToString(strW).CStr());
-          return ERROR_TYPEDESC;
-        }
-
-        // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
-        if (pArgumentTypeDesc == NULL)
-        {
-          return ERROR_TYPEDESC; // 无法推导参数类型
-        }
-        else if (TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, pFuncNode->Operand[0].pTokn)) {
-          nConfirm++;
-        }
-        else {
-          break;
-        }
+      int result = CompareFunctionArguments(sNameSet, pFuncNode->Operand[0].pTokn, (*iter_func)->sFormalTypes, sTypeList);
+      if(result == -1) {
+        return ERROR_TYPEDESC;
       }
-
-      if(nConfirm == sTypeList.size()) {
+      else if(result == 1) {
         return sNameSet.GetType((*iter_func)->ret_type);
       }
     }
     return NULL;
+  }
+
+  int CodeParser::CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TOKEN::PtrCArray& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList)
+  {
+    // -1:出错，0：不匹配，1：匹配
+    int i = 0;
+    for(auto iter_arg = sCallTypeList.begin(); iter_arg != sCallTypeList.end(); ++iter_arg, ++i)
+    {
+      const TYPEDESC* pArgumentTypeDesc = *iter_arg;
+      //const TOKEN* ptkFormal = (*iter_func)->sFormalTypes[i];
+      const TYPEDESC* pFormalTypeDesc = sNameSet.GetType(*sFormalTypes[i]);
+      //ASSERT(pFormalTypeDesc != NULL);
+
+      if(pFormalTypeDesc == NULL)
+      {
+        clStringW strW;
+        GetLogger()->OutputErrorW(*sFormalTypes[i], UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), sFormalTypes[i]->ToString(strW).CStr());
+        return -1;
+      }
+
+      // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
+      if(pArgumentTypeDesc == NULL)
+      {
+        return -1; // 无法推导参数类型
+      }
+      else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, ptkFuncName)) {//pFuncNode->Operand[0].pTokn)) {
+        //nConfirm++;
+      }
+      else {
+        return 0;
+      }
+    }
+    return 1;
   }
 
   const TYPEDESC* CodeParser::InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode)
@@ -5181,6 +5196,15 @@ namespace UVShader
     }
     //}
 
+    // 扩展支持：结构体初始化类型
+    pRetType = InferConstructorsInStructType(vctx.name_ctx, sArgumentsTypeList, pFuncNode);
+    if(pRetType) {
+      vctx.ClearValueOnly();
+      vctx.result = ValueResult_OK;
+      vctx.pType = pRetType;
+      return pRetType;
+    }
+
     // TODO: 没有找到名字的提示找不到标识符, 找到名字但是参数不匹配的提示没有找到重载
     //  error C3861: “func”: 找不到标识符
     clStringW strW;
@@ -5189,6 +5213,37 @@ namespace UVShader
     vctx.result = ValueResult_3861;
 
     return NULL;
+  }
+
+  const TYPEDESC* CodeParser::InferConstructorsInStructType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sArgumentsTypeList, const SYNTAXNODE* pFuncNode)
+  {
+    if(pFuncNode->Operand[0].IsToken() == FALSE) {
+      return NULL;
+    }
+
+    const TOKEN* ptkFuncName = pFuncNode->Operand[0].pTokn;
+    const TYPEDESC* pTypeDesc = sNameSet.GetType(*ptkFuncName);
+    if(pTypeDesc == NULL || pTypeDesc->cate != TYPEDESC::TypeCate_Struct) {
+      return NULL;
+    }
+
+    TYPEDESC::CPtrList sMemberTypeList;
+    pTypeDesc->GetMemberTypeList(sMemberTypeList);
+    if(sMemberTypeList.size() != sArgumentsTypeList.size()) {
+      return NULL; // 参数数量不匹配，跳过
+    }
+
+    auto iter_MemberType = sMemberTypeList.begin();
+    auto iter_ArgumentsType = sArgumentsTypeList.begin();
+    for(; iter_MemberType != sMemberTypeList.end(); ++iter_MemberType, ++iter_ArgumentsType)
+    {
+      
+      if(TryTypeCasting(*iter_MemberType, *iter_ArgumentsType, ptkFuncName) == FALSE) {
+        return NULL;
+      }
+    }
+
+    return pTypeDesc;
   }
 
   const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const GLOB& sGlob)
@@ -7506,7 +7561,7 @@ namespace UVShader
 
     auto result = m_TypeMap.insert(clmake_pair(strName, td));
 
-    // 结构体声明可以重复
+    // 结构体声明后可以定义
     if(result.first->second.pMemberNode == NULL) {
       result.first->second.pMemberNode = pMemberNode;
       return TRUE;
@@ -7514,6 +7569,7 @@ namespace UVShader
     else if(pMemberNode == NULL) { // 定义后也可以声明
       return TRUE;
     }
+    // TODO: 定义两次给出错误信息
     return result.second;
   }
 
@@ -7532,16 +7588,7 @@ namespace UVShader
     td.ret_type = strRetType;
     td.name = strName; // ptkName->ToString(strName);
 
-
-    //SYNTAXNODE::GlobPtrList sArgList;
-    //CodeParser::BreakComma(sArgList, arguments_glob);
-
     auto it = m_FuncMap.insert(clmake_pair(strName, td));
-    //clStringA str;
-    //for(int i = 0; i < argc; i++)
-    //{
-    //  //str.Clear();
-    //}
     it->second.sFormalTypes = type_array;
     return TRUE;
   }

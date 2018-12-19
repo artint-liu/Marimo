@@ -755,6 +755,9 @@ namespace UVShader
     {"tanh", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"cosh", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"sinh", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"asfloat", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca}, // TODO: 只支持 int , uint
+    {"asint", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},   // TODO: 只支持 float, uint
+    {"asuint", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},  // TODO: 只支持 float, int
 
     {"reflect", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"atan2", INTRINSIC_FUNC::RetType_Argument1, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},

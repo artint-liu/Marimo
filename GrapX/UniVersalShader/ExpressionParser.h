@@ -771,7 +771,11 @@ namespace UVShader
 
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
+
+    int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TOKEN::PtrCArray& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList); // -1:出错，0：不匹配，1：匹配
+
     const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);
+    const TYPEDESC* InferConstructorsInStructType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sArgumentsTypeList, const SYNTAXNODE* pFuncNode); // 扩展语法：结构体构造
     ValueResult TokenToValue(VALUE_CONTEXT& vctx, const TOKEN* pToken) const;
     const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const GLOB& sGlob);
     const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const TOKEN* pToken) const;
