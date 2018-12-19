@@ -286,11 +286,11 @@ namespace UVShader
     , m_pParent(NULL)
     , m_nPPRecursion(0)
     , m_pInclude(&s_DefaultInclude)
-    , m_GlobalSet("$")
+    , m_GlobalCtx("$")
   {
-    m_GlobalSet.allow_keywords = KeywordFilter_typedef;
-    m_GlobalSet.SetParser(this);
-    m_GlobalSet.BuildIntrinsicType();
+    m_GlobalCtx.allow_keywords = KeywordFilter_typedef;
+    m_GlobalCtx.SetParser(this);
+    m_GlobalCtx.BuildIntrinsicType();
     InitPacks();
   }
 
@@ -301,7 +301,7 @@ namespace UVShader
     , m_pParent(pParent)
     , m_nPPRecursion(0)
     , m_pInclude(pInclude ? pInclude : &s_DefaultInclude)
-    , m_GlobalSet("$")
+    , m_GlobalCtx("$")
   {
     //m_GlobalSet.allow_keywords = KeywordFilter_typedef; // TODO: 去掉？
     //m_GlobalSet.SetParser(this);
@@ -362,7 +362,7 @@ namespace UVShader
   {
     m_ValueDict.clear();
     m_PhonyTokenDict.clear();
-    m_GlobalSet.Reset();
+    m_GlobalCtx.Reset();
     m_aTokens.clear();
     m_aStatements.clear();
     if(m_pLogger) {
@@ -1427,7 +1427,7 @@ namespace UVShader
 
     TKSCOPE scope(pScope->begin, definition_end);
     const size_t nErrorCount = DbgErrorCount();
-    if(_CL_NOT_(ParseExpression(stat.sRoot, &m_GlobalSet, scope)))
+    if(_CL_NOT_(ParseExpression(stat.sRoot, &m_GlobalCtx, scope)))
     {
       ASSERT(DbgErrorCount() > nErrorCount); // 确保内部输出了错误消息
       return FALSE;
@@ -1466,7 +1466,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
       SYNTAXNODE* pChainNode = stat.sRoot.pNode;
       while(pChainNode) {
-        Verify_IdentifierDefinition(m_GlobalSet, pChainNode->Operand[0].pNode, stat.defn.modifier == UniformModifier_const);
+        Verify_IdentifierDefinition(m_GlobalCtx, pChainNode->Operand[0].pNode, stat.defn.modifier == UniformModifier_const);
         pChainNode = pChainNode->Operand[1].pNode;
       }
 #endif
@@ -1475,7 +1475,7 @@ namespace UVShader
     else
     {
 #ifdef ENABLE_SYNTAX_VERIFY
-      Verify_IdentifierDefinition(m_GlobalSet, stat.sRoot.pNode, stat.defn.modifier == UniformModifier_const);
+      Verify_IdentifierDefinition(m_GlobalCtx, stat.sRoot.pNode, stat.defn.modifier == UniformModifier_const);
 #endif
       m_aStatements.push_back(stat);
     }
@@ -1499,7 +1499,7 @@ namespace UVShader
     TOKEN* p = &m_aTokens[pScope->begin];
     TOKEN* ptkReturnedType = p;
     const TOKEN* pEnd = &m_aTokens.front() + pScope->end;
-    TOKEN::PtrCArray types_array;
+    TYPEINSTANCE::Array types_array;
 
     STATEMENT stat = {StatementType_Empty};
 
@@ -1531,7 +1531,7 @@ namespace UVShader
 
     clStringA strFunctionName;
     strFunctionName.Format("%s()", stat.func.szName);
-    NameContext sNameSet_Func(strFunctionName, &m_GlobalSet);
+    NameContext sNameSet_Func(strFunctionName, &m_GlobalCtx);
 
     ASSERT(*p == '('); // 由前面的特征检查保证
     ASSERT(p->scope >= 0);  // 由 GenerateTokens 函数保证
@@ -1614,7 +1614,7 @@ namespace UVShader
 
 
     m_aStatements.push_back(stat);
-    m_GlobalSet.RegisterFunction(stat.func.szReturnType, stat.func.szName, types_array);
+    m_GlobalCtx.RegisterFunction(stat.func.szReturnType, stat.func.szName, types_array);
       //&m_aArgumentsPack[(size_t)stat.func.pArguments], stat.func.nNumOfArguments);
 
     pScope->begin = p - &m_aTokens.front();
@@ -2030,7 +2030,7 @@ namespace UVShader
     int nSignatures = 0;
     int nDefinition = 0;
     
-    pScope->begin = ParseStructDefinition(m_GlobalSet, *pScope, &stat_stru.sRoot,
+    pScope->begin = ParseStructDefinition(m_GlobalCtx, *pScope, &stat_stru.sRoot,
       &stat_vari.sRoot, &nSignatures, &nDefinition);
 
     if(stat_stru.sRoot.ptr)
@@ -2061,18 +2061,19 @@ namespace UVShader
     STATEMENT stat = { StatementType_Typedef };
 
     TKSCOPE::TYPE end = TKSCOPE::npos;
-    if(TryKeywords(m_GlobalSet, *pScope, &stat.sRoot, &end)) {
+    if(TryKeywords(m_GlobalCtx, *pScope, &stat.sRoot, &end)) {
       m_aStatements.push_back(stat);
     }
     pScope->begin = end;
     return TRUE;
   }
 
-  GXBOOL CodeParser::VerifyFunctionArgument(NameContext& sNameCtx, const GLOB* pGlob, const GLOB& rBaseGlob, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount)
+  GXBOOL CodeParser::VerifyFunctionArgument(NameContext& sNameCtx, const GLOB* pGlob, const GLOB& rBaseGlob, TYPEINSTANCE::Array& types_array, int& nTypeOnlyCount)
   {
     const TOKEN* ptkType = NULL;
     const TOKEN* ptkArgName = NULL;
     clStringW strW;
+    TYPEINSTANCE type_inst;
 
     if(pGlob->ptr == NULL)
     {
@@ -2082,10 +2083,6 @@ namespace UVShader
     }
     else if(pGlob->IsToken()) {
       ptkType = pGlob->pTokn;
-      //if(sNameCtx.GetType(*ptkType) == NULL) {
-      //  GetLogger()->OutputErrorW(ptkType, UVS_EXPORT_TEXT(5061, "“%s”不是一个类型"), ptkType->ToString(strW).CStr());
-      //  return FALSE;
-      //}
     }
     else // node
     {
@@ -2110,12 +2107,13 @@ namespace UVShader
       {
         if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript)
         {
-          const TYPEDESC* pTypeDesc = sNameCtx.RegisterMultidimIdentifier(*ptkType, second_glob.pNode, NULL);
-          if(pTypeDesc == NULL) {
+          type_inst.pTypeDesc = sNameCtx.RegisterMultidimIdentifier(*ptkType, second_glob.pNode, NULL);
+          if(type_inst.pTypeDesc == NULL) {
             DumpStateError(GetLogger(), sNameCtx.GetLastState(), *ptkType, *ptkArgName);
             return FALSE;
           }
-          types_array.push_back(ptkType);
+          type_inst.pLocation = ptkType;
+          types_array.push_back(type_inst);
           return TRUE;
         }
         else
@@ -2128,7 +2126,8 @@ namespace UVShader
     ASSERT(ptkType);
     if(ptkArgName == NULL)
     {
-      if(sNameCtx.GetType(*ptkType) == NULL) {
+      type_inst.pTypeDesc = sNameCtx.GetType(*ptkType);
+      if(type_inst.pTypeDesc == NULL) {
         GetLogger()->OutputErrorW(ptkType, UVS_EXPORT_TEXT(5061, "“%s”不是一个类型"), ptkType->ToString(strW).CStr());
         return FALSE;
       }
@@ -2136,18 +2135,19 @@ namespace UVShader
     }
     else
     {
-      const TYPEDESC* pTypeDesc = sNameCtx.RegisterIdentifier(*ptkType, ptkArgName);
-      if(pTypeDesc == NULL) {
+      type_inst.pTypeDesc = sNameCtx.RegisterIdentifier(*ptkType, ptkArgName);
+      if(type_inst.pTypeDesc == NULL) {
         DumpStateError(GetLogger(), sNameCtx.GetLastState(), *ptkType, *ptkArgName);
         return FALSE;
       }
     }
     
-    types_array.push_back(ptkType);
+    type_inst.pLocation = ptkType;
+    types_array.push_back(type_inst);
     return TRUE;
   }
 
-  GXBOOL CodeParser::ParseFunctionArguments(NameContext& sNameCtx, STATEMENT* pStat, TKSCOPE* pArgScope, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount)
+  GXBOOL CodeParser::ParseFunctionArguments(NameContext& sNameCtx, STATEMENT* pStat, TKSCOPE* pArgScope, TYPEINSTANCE::Array& types_array, int& nTypeOnlyCount)
   {
     // 函数参数格式
     // [InputModifier] Type Name [: Semantic]
@@ -3133,7 +3133,7 @@ namespace UVShader
     {
       pBlock->end = block_begin.scope + 1;
     }
-    else if(TryKeywords(m_GlobalSet, TKSCOPE(pBlock->begin, scope.end), pBlockNode, &pBlock->end))// FIXME: 暂时使用全局NameSet: m_GlobalSet
+    else if(TryKeywords(m_GlobalCtx, TKSCOPE(pBlock->begin, scope.end), pBlockNode, &pBlock->end))// FIXME: 暂时使用全局NameSet: m_GlobalSet
     {
       ; // 没想好该干啥，哇哈哈哈!
     }
@@ -4918,21 +4918,20 @@ namespace UVShader
     return NULL;
   }
 
-  int CodeParser::CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TOKEN::PtrCArray& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList)
+  int CodeParser::CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList)
   {
     // -1:出错，0：不匹配，1：匹配
     int i = 0;
     for(auto iter_arg = sCallTypeList.begin(); iter_arg != sCallTypeList.end(); ++iter_arg, ++i)
     {
       const TYPEDESC* pArgumentTypeDesc = *iter_arg;
-      //const TOKEN* ptkFormal = (*iter_func)->sFormalTypes[i];
-      const TYPEDESC* pFormalTypeDesc = sNameSet.GetType(*sFormalTypes[i]);
-      //ASSERT(pFormalTypeDesc != NULL);
+      const TYPEDESC* pFormalTypeDesc = sFormalTypes[i].pTypeDesc; // sNameSet.GetType(*sFormalTypes[i]);
 
       if(pFormalTypeDesc == NULL)
       {
         clStringW strW;
-        GetLogger()->OutputErrorW(*sFormalTypes[i], UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), sFormalTypes[i]->ToString(strW).CStr());
+        GetLogger()->OutputErrorW(*sFormalTypes[i].pLocation,
+          UVS_EXPORT_TEXT(2062, "意外的类型“%s”"), sFormalTypes[i].pLocation->ToString(strW).CStr());
         return -1;
       }
 
@@ -4941,7 +4940,7 @@ namespace UVShader
       {
         return -1; // 无法推导参数类型
       }
-      else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, ptkFuncName)) {//pFuncNode->Operand[0].pTokn)) {
+      else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, sFormalTypes[i].pLocation)) {//pFuncNode->Operand[0].pTokn)) {
         //nConfirm++;
       }
       else {
@@ -5994,7 +5993,7 @@ namespace UVShader
           TRACE("length of(%s) = %d\n", pMemberToken->ToString().CStr(), pTypeDesc->sDimensions.back());
 #endif
           //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
-          vctx.pType = m_GlobalSet.GetType(STR_INT);
+          vctx.pType = m_GlobalCtx.GetType(STR_INT);
           vctx.pool.assign(1, VALUE());
           vctx.pool.front().set(vctx.TypeRank(), &pTypeDesc->sDimensions.back());
           vctx.UsePool();
@@ -6043,7 +6042,7 @@ namespace UVShader
         DOTOPERATOR_RESULT sDotOperator;
         if(pTypeDesc->pDesc->lpDotOverride(pTypeDesc->pDesc, &sDotOperator, pNode->Operand[1].pTokn))
         {
-          vctx.pType = m_GlobalSet.GetType(sDotOperator.strType);
+          vctx.pType = m_GlobalCtx.GetType(sDotOperator.strType);
           if(vctx.IsNeedValue())
           {
             if(IS_SCALER_CATE(vctx.pType))
@@ -6259,7 +6258,7 @@ namespace UVShader
         if(IsComponent(pFirst, pSecond, NULL)) {
           pSecond->Resolve(R2, C2);
           strTypeName.Format("%s%d", pFirst->pElementType->name, C2);
-          return m_GlobalSet.GetType(strTypeName);
+          return m_GlobalCtx.GetType(strTypeName);
         }
       }
     }
@@ -6277,7 +6276,7 @@ namespace UVShader
         {
           pFirst->Resolve(R1, C1);
           strTypeName.Format("%s%d", pFirst->pElementType->name, R1);
-          return m_GlobalSet.GetType(strTypeName);
+          return m_GlobalCtx.GetType(strTypeName);
         }
       }
       else if(pSecond->IsMatrix() && (pFirst->pElementType == pSecond->pElementType))
@@ -6287,7 +6286,7 @@ namespace UVShader
         if(R2 == C1) {
           // R1 x C2
           strTypeName.Format("%s%dx%s", pFirst->pElementType->name, R1, C2);
-          return m_GlobalSet.GetType(strTypeName);
+          return m_GlobalCtx.GetType(strTypeName);
         }
       }
     }
@@ -7357,8 +7356,10 @@ namespace UVShader
     // int x[2][3][4] 列表储存为 "{4,3,2}"
     // 函数会依次注册"int*4", "int*4*3", "int*4*3*2"这几个类型，最后返回"int*4*3*2"这个类型描述
     // 对于自适应长度类型数组"int x[][3][4]", 最后返回的类型为"int*4*3*0"
+    // 注意多维数组类型并不一定注册在当前Context下，而是注册在基础类型所属的Context下
 
     const TYPEDESC* pBaseTypeDesc = GetType(strBaseType);
+    TypeMap& sCurrentTypeMap = pBaseTypeDesc->pNameCtx->m_TypeMap;
 
     TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, this };
     td.name = strBaseType;
@@ -7371,7 +7372,7 @@ namespace UVShader
 
       ASSERT(*it != 0 || (&*it == &sDimensions.back()));
 
-      auto result = m_TypeMap.insert(clmake_pair(td.name, td));
+      auto result = sCurrentTypeMap.insert(clmake_pair(td.name, td));
       td.pElementType = &result.first->second;
     }
     return td.pElementType;
@@ -7580,7 +7581,7 @@ namespace UVShader
     return result.second;
   }
 
-  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TOKEN::PtrCArray& type_array)
+  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TYPEINSTANCE::Array& type_array)
     // const FUNCTION_ARGUMENT* pArguments, int argc)
   {
     ASSERT(m_pParent == NULL);

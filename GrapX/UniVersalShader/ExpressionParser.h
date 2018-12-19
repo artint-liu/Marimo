@@ -111,12 +111,19 @@ namespace UVShader
     VALUE::Rank GetRank() const;
   };
 
+  struct TYPEINSTANCE
+  {
+    typedef clvector<TYPEINSTANCE>   Array;
+    const TYPEDESC* pTypeDesc;
+    const TOKEN*    pLocation; // 输出定位
+  };
+
   struct FUNCDESC // 用户定义的函数描述
   {
     // FIXME: 因为定义顺序关系, 返回值和形参应改储存TYPEDESC, 而不是名字, 这个要改暂时备忘
     clStringA         ret_type;     // 返回的类型
     clStringA         name;         // 类型名
-    TOKEN::PtrCArray  sFormalTypes; // 函数, 形参类型表
+    TYPEINSTANCE::Array  sFormalTypes; // 函数, 形参类型表
   };
 
   struct INTRINSIC_FUNC
@@ -329,7 +336,7 @@ namespace UVShader
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
     GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
     //GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
-    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TOKEN::PtrCArray& type_array);
+    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TYPEINSTANCE::Array& type_array);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     GXBOOL TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
@@ -687,8 +694,8 @@ namespace UVShader
     GXBOOL  ParseStatementAs_Definition(TKSCOPE* pScope);
     GXBOOL  ParseStatementAs_Function(TKSCOPE* pScope);
     GXBOOL  ParseStatement_SyntaxError(TKSCOPE* pScope);
-    GXBOOL  ParseFunctionArguments(NameContext& sNameCtx, STATEMENT* pStat, TKSCOPE* pArgScope, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount);
-    GXBOOL  VerifyFunctionArgument(NameContext& sNameCtx, const GLOB* pGlob, const GLOB& rBaseGlob, TOKEN::PtrCArray& types_array, int& nTypeOnlyCount);
+    GXBOOL  ParseFunctionArguments(NameContext& sNameCtx, STATEMENT* pStat, TKSCOPE* pArgScope, TYPEINSTANCE::Array& types_array, int& nTypeOnlyCount);
+    GXBOOL  VerifyFunctionArgument(NameContext& sNameCtx, const GLOB* pGlob, const GLOB& rBaseGlob, TYPEINSTANCE::Array& types_array, int& nTypeOnlyCount);
     //GXBOOL  ParseFunctionArguments2(NameContext& sNameSet, STATEMENT* pStat, TKSCOPE* pArgScope, int& nTypeOnlyCount);
 
     GXBOOL  ParseStatementAs_Typedef(TKSCOPE* pScope);
@@ -772,7 +779,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
 
-    int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TOKEN::PtrCArray& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList); // -1:出错，0：不匹配，1：匹配
+    int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList); // -1:出错，0：不匹配，1：匹配
 
     const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferConstructorsInStructType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sArgumentsTypeList, const SYNTAXNODE* pFuncNode); // 扩展语法：结构体构造
@@ -873,7 +880,7 @@ namespace UVShader
     CodeParser*         m_pSubParser;
     //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // 宏展开流
-    NameContext         m_GlobalSet;
+    NameContext         m_GlobalCtx;
     ValueDict           m_ValueDict;        // 常量表达式可以直接替换成数字的
 
   public:
