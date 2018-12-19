@@ -154,7 +154,7 @@ namespace UVShader
   //static const int c_plus_minus_precedence = 12; // +, - 作为符号时的优先级
 
   // 这个按照ASCII顺序分布, "+",",","-" 分别是43，44，45
-  ArithmeticExpression::MBO ArithmeticExpression::s_plus_minus[] = {
+  ArithmeticExpression::MBO ArithmeticExpression::s_plus_minus_sign[] = {
     {1, "+", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 正号
     {}, // 占位
     {1, "-", OPP(12), TRUE, UNARY_RIGHT_OPERAND}, // 负号

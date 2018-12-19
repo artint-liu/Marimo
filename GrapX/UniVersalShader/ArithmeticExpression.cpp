@@ -367,6 +367,12 @@ namespace UVShader
     sNode.Operand[0].ptr = (pOperandA == NULL) ? NULL : pOperandA->ptr;
     sNode.Operand[1].ptr = (pOperandB == NULL) ? NULL : pOperandB->ptr;
 
+    // 验证一元操作符不会出现在操作数中
+    ASSERT(pOperandA == NULL || pOperandA->ptr == NULL || pOperandA->IsNode() || (
+      (*pOperandA->pTokn) != '~' && (*pOperandA->pTokn) != '!' &&
+      (*pOperandA->pTokn) != '-' && (*pOperandA->pTokn) != '+' &&
+      (*pOperandA->pTokn) != "--" && (*pOperandA->pTokn) != "++"));
+
     pDest->pNode = m_NodePool.PushBack(sNode);
 
 #ifdef ENABLE_SYNTAX_NODE_ID

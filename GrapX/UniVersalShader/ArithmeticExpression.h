@@ -613,7 +613,7 @@ namespace UVShader
   protected:
     //static INTRINSIC_TYPE s_aIntrinsicType[];
     static MBO s_semantic;
-    static MBO s_plus_minus[];
+    static MBO s_plus_minus_sign[];
     static MBO s_Operator1[];
     static MBO s_Operator2[];
     static MBO s_UnaryLeftOperand[];
