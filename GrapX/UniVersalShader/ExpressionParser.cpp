@@ -16,8 +16,8 @@
 #define PARSER_BREAK2(PARSER, _GLOB) PARSER->DbgBreak(_GLOB)
 #define PARSER_ASSERT(_X, _GLOB) DbgAssert(_X, _GLOB)
 #define IS_SCALER_CATE(_CATE) (\
-  _CATE->cate == TYPEDESC::TypeCate_FloatScaler || \
-  _CATE->cate == TYPEDESC::TypeCate_IntegerScaler)
+  (_CATE)->cate == TYPEDESC::TypeCate_FloatScaler || \
+  (_CATE)->cate == TYPEDESC::TypeCate_IntegerScaler)
 
 //#define IS_VECTOR_CATE(_CATE) (_CATE->cate == TYPEDESC::TypeCate_Vector)
 //#define IS_MATRIX_CATE(_CATE) (_CATE->cate == TYPEDESC::TypeCate_Matrix)
@@ -44,10 +44,8 @@
 #define PARSER_NOTIMPLEMENT TRACE("%s(%d):没咋处理的地方\n", __FILE__, __LINE__)
 
 #define DUMP_STATE_IF_FAILED \
-if(state != VALUE::State_OK) { \
-  DumpValueState(vctx.pLogger, state, pOperator); \
-  vctx.result = ValueResult_Failed; \
-  return FALSE; }
+if(state != VALUE::State_OK && DumpValueState(vctx.pLogger, state, pOperator)) { \
+  vctx.result = ValueResult_Failed; return FALSE; }
 
 
 // TODO:
@@ -766,32 +764,34 @@ namespace UVShader
     return FALSE;
   }
 
-  void CodeParser::DumpValueState(CLogger* pLogger, VALUE::State state, const TOKEN* pToken)
+  GXBOOL CodeParser::DumpValueState(CLogger* pLogger, VALUE::State state, const TOKEN* pToken)
   {
+    // 警告返回FALSE，错误返回TRUE
+    clStringW strW;
     switch(state)
     {
     case VALUE::State_UnknownOpcode:
-      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5033, "无效的操作符", pLogger));
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5033, "无效的操作符：“%s”", pLogger), pToken->ToString(strW).CStr());
       break;
     case VALUE::State_SyntaxError:
-      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5034, "语法错误", pLogger));
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5034, "语法错误：“%s”", pLogger), pToken->ToString(strW).CStr());
       break;
     case VALUE::State_Overflow:
-      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5035, "溢出", pLogger));
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5035, "溢出：“%s”", pLogger), pToken->ToString(strW).CStr());
       break;
     case VALUE::State_IllegalChar:
-      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5036, "非法字符", pLogger));
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5036, "非法字符：“%s”", pLogger), pToken->ToString(strW).CStr());
       break;
     case VALUE::State_BadOpcode:
-      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5037, "错误的操作符", pLogger));
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5037, "错误的操作符：“%s”", pLogger), pToken->ToString(strW).CStr());
       break;
     case VALUE::State_IllegalNumber:
-      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5038, "非法的数字", pLogger));
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5038, "非法的数字：“%s”", pLogger), pToken->ToString(strW).CStr());
       break;
     case VALUE::State_DivideByZero:
       // error C2124 : 被零除或对零求模
-      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2124, "被零除或对零求模", pLogger));
-      break;
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(_WARNING(2124), "被零除或对零求模", pLogger));
+      return FALSE;
     case VALUE::State_BadIdentifier: // 内部输出
       break;
     case VALUE::State_Call: // 向量/矩阵等常量的初始化
@@ -802,6 +802,7 @@ namespace UVShader
       //PARSER_BREAK(const_expr_glob.pNode->Operand[1]);
       break;
     }
+    return TRUE; // “错误”返回
   }
 
   void CodeParser::DumpStateError(CLogger* pLogger, NameContext::State state, const TOKEN& tkType, const TOKEN& tkVar)
@@ -886,21 +887,6 @@ namespace UVShader
     else {
     }
   }
-
-  // 计算常量定义中的值
-  // 返回值：State_OK, State_Call, State_Variable 不会输出消息，
-  // 其它结果会在内部输出错误消息
-  //VALUE::State CodeParser::CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob)
-  //{
-  //  value_out.clear();
-  //  VALUE::State state = sNameCtx.CalculateConstantValue(value_out, this, &const_expr_glob);
-  //  if(state != VALUE::State_OK)
-  //  {
-  //    const TOKEN* pToken = const_expr_glob.GetFrontToken();
-  //    DumpValueState(GetLogger(), state, pToken);      
-  //  }
-  //  return state;
-  //}
 
   void CodeParser::DbgBreak(const GLOB& glob)
   {
@@ -4653,9 +4639,6 @@ namespace UVShader
             }
             else
             {
-              //clStringW strFrom = pRightTypeDesc->name;
-              //clStringW strTo = pLeftTypeDesc->name;
-              //GetLogger()->OutputErrorW(pNode->GetAnyTokenPAB(), UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
               GetLogger()->OutputTypeCastFailed(&pNode->GetAnyTokenPAB(), pNode->pOpcode, pLeftTypeDesc, pRightTypeDesc);
               result = FALSE;
             }
@@ -4949,7 +4932,7 @@ namespace UVShader
       {
         return -1; // 无法推导参数类型
       }
-      else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, sFormalTypes[i].pLocation)) {//pFuncNode->Operand[0].pTokn)) {
+      else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, sFormalTypes[i].pLocation, TRUE)) {//pFuncNode->Operand[0].pTokn)) {
         //nConfirm++;
       }
       else {
@@ -5273,16 +5256,17 @@ namespace UVShader
     VALUE val;
     VALUE::State s = val.set(*pToken);      
 
-    if(TEST_FLAG(s, VALUE::State_ErrorMask)) {
-      clStringW str;
-      if(TEST_FLAG(s, VALUE::State_IllegalNumber))
-      {
-        vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2041, "非法的数字 : “%s”", vctx.pLogger), pToken->ToString(str).CStr());
-      }
-      else
-      {
-        vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2021, "应输入数值, 而不是“%s”", vctx.pLogger), pToken->ToString(str).CStr());
-      }
+    if(TEST_FLAG(s, VALUE::State_ErrorMask) && DumpValueState(vctx.pLogger, s, pToken)) {
+      
+      //clStringW str;
+      //if(TEST_FLAG(s, VALUE::State_IllegalNumber))
+      //{
+      //  vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2041, "非法的数字 : “%s”", vctx.pLogger), pToken->ToString(str).CStr());
+      //}
+      //else
+      //{
+      //  vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2021, "应输入数值, 而不是“%s”", vctx.pLogger), pToken->ToString(str).CStr());
+      //}
       vctx.result = ValueResult_NotNumeric;
       return vctx.result;
     }
@@ -6357,8 +6341,42 @@ namespace UVShader
     // pOperator 为空相当于“=”操作
     // pAB内容可能会改变
 
+    if(*pOperator == "!=" || *pOperator == "==")
+    {
+      // [Doc\条件表达式]向量比较返回类型是bool向量
+      if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType)) {
+        vctx.pType = vctx.name_ctx.GetType("bool");
+      }
+      else if(IS_VECMAT_CATE(pAB[0].pType) && IS_VECMAT_CATE(pAB[1].pType))
+      {
+        int R0, C0, R1, C1;
+        pAB[0].pType->Resolve(R0, C0);
+        pAB[1].pType->Resolve(R1, C1);
 
-    if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
+        if(R0 != R1 || C0 != C1) {
+          vctx.pLogger->OutputTypeCastFailed(pLocation, pOperator, pAB[0].pType, pAB[1].pType);
+          vctx.ClearValue(ValueResult_Failed);
+          return FALSE;
+        }
+
+        clStringA strTypeName;
+        if(C0 == 0) {
+          strTypeName.Format("bool%d", R0);
+        }
+        else {
+          strTypeName.Format("bool%dx%d", R0, C0);
+        }
+
+        vctx.pType = vctx.name_ctx.GetType(strTypeName);
+      }
+      else
+      {
+        vctx.pLogger->OutputTypeCastFailed(pLocation, pOperator, pAB[0].pType, pAB[1].pType);
+        vctx.ClearValue(ValueResult_Failed);
+        return FALSE;
+      }
+    }
+    else if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
     {
       if(pAB[0].TypeRank() >= pAB[1].TypeRank()) {
         vctx.pType = pAB[0].pType;
@@ -6562,7 +6580,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL CodeParser::TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
+  GXBOOL CodeParser::TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation, GXBOOL bFormalParam)
   {
     ASSERT(pTypeTo != NULL && pTypeFrom != NULL);
 
@@ -6590,7 +6608,7 @@ namespace UVShader
         return TRUE;
       }
     }
-    else if(IS_STRUCT_CATE(pTypeTo) && IS_SCALER_CATE(pTypeFrom))
+    else if(IS_STRUCT_CATE(pTypeTo) && IS_SCALER_CATE(pTypeFrom) && bFormalParam == FALSE) // [Doc\函数\参数] 在函数调用时不会使用隐式类型扩展（如float扩展为float3）
     {
       return (pTypeTo->pDesc && pTypeTo->pDesc->component_type &&
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));

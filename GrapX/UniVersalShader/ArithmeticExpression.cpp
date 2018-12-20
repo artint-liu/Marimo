@@ -77,6 +77,7 @@
 //  const vec2 t= vec2(2,3);
 //  const float c[int(t.x) * int(t.y)];
 // HLSL不支持这种声明，uvs也暂时不打算支持这种声明
+// 7.HLSL向量/矩阵比较结果是bool向量类型，GLSL比较结果是bool类型
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -844,20 +845,28 @@ GO_NEXT:;
 
     typedef clstack<CONTEXT> SyntaxStack;
     SyntaxStack node_stack;
+    TKSCOPE::TYPE nBracketLimit = scope.begin + 1;
     GLOB A;
     CONTEXT c;
     TOKEN* pBack = &m_aTokens[scope.end - 1];
     A = m_aTokens[scope.begin];
-    //ASSERT(A.pTokn->precedence == 0); // 第一个必须不是运算符号
-    if(A.pTokn->precedence != 0)
+
+    if(*A.pTokn == '(' && (TKSCOPE::TYPE)(A.pTokn->scope + 1) < scope.end && // 类似"()[]"或者"()[][]"形式
+      m_aTokens[A.pTokn->scope + 1].scope != TKSCOPE::npos)
+    {
+      nBracketLimit = A.pTokn->scope + 1;
+      if(_CL_NOT_(ParseArithmeticExpression(0, TKSCOPE(scope.begin, nBracketLimit), &A))) {
+        return FALSE;
+      }
+    }
+    else if(A.pTokn->precedence != 0)
     {
       clStringW strW;
-      //m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(5040, "语法错误: “%s”"), A.pTokn->ToString(strW).CStr());
       GetLogger()->OutputErrorW(A.pTokn, UVS_EXPORT_TEXT(5040, "语法错误: “%s”"), A.pTokn->ToString(strW).CStr());
       return FALSE;
     }
 
-
+    // 从后往前拆解括号
     while(1) {
       if(pBack->scope == TKSCOPE::npos) {
         ERROR_MSG__MISSING_SEMICOLON(*A.pTokn);
@@ -874,18 +883,17 @@ GO_NEXT:;
       else {
         ASSERT(*pBack == '}');
         clStringW str;
-        //m_pMsg->WriteErrorW(TRUE, A.pTokn->offset(), UVS_EXPORT_TEXT(2054, "在“%s”之后应输入“%s”"), A.pTokn->ToString(str).CStr(), _CLTEXT("="));
         GetLogger()->OutputErrorW(A.pTokn, UVS_EXPORT_TEXT(2054, "在“%s”之后应输入“%s”"), A.pTokn->ToString(str).CStr(), _CLTEXT("="));
         c.mode = SYNTAXNODE::MODE_Undefined;
       }
 
       c.B.ptr = NULL;
 
-      if( ! ParseArithmeticExpression(0, TKSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B)) {
+      if(_CL_NOT_(ParseArithmeticExpression(0, TKSCOPE(pBack->scope + 1, pBack - &m_aTokens.front()), &c.B))) {
         return FALSE;
       }
 
-      if(scope.begin + 1 == pBack->scope) {
+      if(nBracketLimit == pBack->scope) {
         break;
       }
       else {
@@ -895,7 +903,7 @@ GO_NEXT:;
     }
 
     while(1) {
-      if( ! MakeSyntaxNode(pDesc, c.mode, &A, &c.B)) {
+      if(_CL_NOT_(MakeSyntaxNode(pDesc, c.mode, &A, &c.B))) {
         CLBREAK;
         return FALSE;
       }
@@ -1568,10 +1576,11 @@ GO_NEXT:;
       case '>': output = _Ty(t1 > t2); break;
       case '!': output = _Ty( ! t2); break;
       case '/':
+        output = t1 / t2;
         if(t2 == 0) {
           return State_DivideByZero;
         }
-        output = t1 / t2; break;
+        break;
       default:
         return State_UnknownOpcode;
         //TRACE("Unsupport opcode(%c).\n", opcode);
