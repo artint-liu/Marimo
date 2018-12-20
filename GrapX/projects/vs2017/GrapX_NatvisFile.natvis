@@ -30,4 +30,24 @@
   <Type Name="UVShader::TOKEN">
     <DisplayString>token={marker,[length]s} size={length}</DisplayString>
   </Type>
+
+  
+  <Type Name="Marimo::DATAPOOL_TYPE_DESC">
+    <DisplayString>{Cate} {(char*)((size_t)&amp;nName + nName),na}</DisplayString>
+  </Type>
+  
+  <Type Name="Marimo::DATAPOOL_VARIABLE_DESC">
+    <DisplayString>{(char*)((size_t)&amp;nName + nName),na}[{nCount}]@{nOffset}</DisplayString>
+    <Expand>
+      <Item Name="TypeDesc">(DATAPOOL_TYPE_DESC*)((GXINT_PTR)&amp;TypeDesc - TypeDesc)</Item>
+      <Item Name="Name">(char*)((size_t)&amp;nName + nName)</Item>
+      <Item Name="Offset">nOffset</Item>
+      <Item Name="Count">nCount</Item>
+      <Item Name="Info" Condition="bConst&amp;&amp;bDynamic">"const dynamic"</Item>
+      <Item Name="Info" Condition="!bConst&amp;&amp;bDynamic">"dynamic"</Item>
+      <Item Name="Info" Condition="bConst&amp;&amp;!bDynamic">"const"</Item>
+      <Item Name="Info" Condition="!bConst&amp;&amp;!bDynamic">""</Item>
+    </Expand>
+  </Type>
+
 </AutoVisualizer>
