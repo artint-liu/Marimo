@@ -1982,7 +1982,7 @@ namespace UVShader
 
       p = pTokensFront + clMin(scope.end, scope_var.end);
 
-      if(glob.pNode->Operand[1].IsNode() &&
+      if(glob.pNode->Operand[1].IsNode() && // <type> <identifier A>,<identifier B>... 形式
         glob.pNode->Operand[1].pNode->CompareOpcode(','))
       {
         MakeSyntaxNode(&glob, SYNTAXNODE::MODE_Chain, &glob, NULL);
@@ -1995,6 +1995,16 @@ namespace UVShader
           pChainNode = pChainNode->Operand[1].pNode;
         }
 #endif
+      }
+      else if (glob.pNode->Operand[1].IsToken()) // <type> <identifier>; 形式
+      {
+        if(_CL_NOT_(Verify_IdentifierDefinition(sNameSet, glob.pNode))) {
+          return scope.end;
+        }
+      }
+      else
+      {
+        CLBREAK;
       }
       pDefinitions->ptr = glob.ptr;
       return p - pTokensFront;
@@ -5257,16 +5267,6 @@ namespace UVShader
     VALUE::State s = val.set(*pToken);      
 
     if(TEST_FLAG(s, VALUE::State_ErrorMask) && DumpValueState(vctx.pLogger, s, pToken)) {
-      
-      //clStringW str;
-      //if(TEST_FLAG(s, VALUE::State_IllegalNumber))
-      //{
-      //  vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2041, "非法的数字 : “%s”", vctx.pLogger), pToken->ToString(str).CStr());
-      //}
-      //else
-      //{
-      //  vctx.pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2021, "应输入数值, 而不是“%s”", vctx.pLogger), pToken->ToString(str).CStr());
-      //}
       vctx.result = ValueResult_NotNumeric;
       return vctx.result;
     }
@@ -5509,8 +5509,13 @@ namespace UVShader
     const GLOB* pGlob = NULL;
     size_t nListDepth = rInitList.BeginList();
     size_t index = 0;
+    size_t remain = sMemberTypeList.size();
 
-    for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it)
+    VALUE_CONTEXT vctx(rInitList.GetNameContext());
+    vctx.pLogger = GetLogger();
+
+
+    for(auto it = sMemberTypeList.begin(); it != sMemberTypeList.end(); ++it, --remain)
     {
       if(IS_STRUCT_CATE(*it) || (*it)->cate == TYPEDESC::TypeCate_MultiDim)
       {
@@ -5530,30 +5535,69 @@ namespace UVShader
         continue;
       }
 
-      CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
-      switch(result)
-      {
-      case CInitList::Result_Failed:
+      // 标量
+      const TYPEDESC* pResultTypeDesc = rInitList.CastToValuePool(vctx, pRefType, nTopIndex, index);
+      if(pResultTypeDesc == NULL) {
         return NULL;
-      case CInitList::Result_ExpandVecMat:
-        nListDepth++;
-        index++;
-        break;
-      case CInitList::Result_Ok:
-      case CInitList::Result_NotAligned:
-        // 不处理
-        index++;
-        break;
-      case CInitList::Result_VecMatConstruct:
-        index += pRefType->CountOf();
-        break;
-      default:
-        CLBREAK; // 意外的返回值
-        break;
       }
+      else if(IS_STRUCT_CATE(pResultTypeDesc)) {
+        if(vctx.pValue == NULL) { // 没有推导出具体值
+          index += pRefType->CountOf();
+
+          // [Doc\初始化列表]不能推导值的构造函数必须位于结构体开头并且小于结构体长度
+          if(it == sMemberTypeList.begin() && pRefType->CountOf() <= sMemberTypeList.size()) {
+            rInitList.Step(nDimDepth, nListDepth);
+            break;
+          }
+          else {
+            GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+            break;
+          }
+        }
+        else { // 推导出具体值时，会构建一个假的堆栈，便于逐个取出替代值
+          nListDepth++;
+          index++;
+
+          if(pRefType->CountOf() > remain) {
+            GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
+            return NULL;
+          }
+        }
+      }
+      else if(IS_SCALER_CATE(pResultTypeDesc)) {
+        index++;
+      }
+      else {
+        CLBREAK; // 意外的类型
+      }
+      vctx.ClearValueOnly();
+      //switch(result)
+      //{
+      //case CInitList::Result_Failed:
+      //  return NULL;
+      //case CInitList::Result_ExpandVecMat:
+      //  nListDepth++;
+      //  index++;
+      //  break;
+      //case CInitList::Result_Ok:
+      //case CInitList::Result_NotAligned:
+      //  // 不处理
+      //  index++;
+      //  break;
+      //case CInitList::Result_VecMatConstruct:
+      //  index += pRefType->CountOf();
+      //  break;
+      //default:
+      //  CLBREAK; // 意外的返回值
+      //  break;
+      //}
 
 
-      if(rInitList.Step(nDimDepth, nListDepth) == FALSE || result == CInitList::Result_VecMatConstruct) {
+      //if(rInitList.Step(nDimDepth, nListDepth) == FALSE || result == CInitList::Result_VecMatConstruct) {
+      //  break;
+      //}
+
+      if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
         break;
       }
     }
@@ -5574,7 +5618,7 @@ namespace UVShader
     return pRefType;
   }
 
-  const TYPEDESC* CodeParser::InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
+  const TYPEDESC* CodeParser::InferInitList_LinearScalerArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDimDepth)
   {
     ASSERT(nTopIndex + pRefType->CountOf() <= rInitList.ValuePoolCount());
     size_t index;
@@ -5586,8 +5630,17 @@ namespace UVShader
     size_t array_count = bAdaptedLength ? (size_t)-1 : pRefType->sDimensions.back();
     for(index = 0; index < array_count;)
     {
-      CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
-      if(result != CInitList::Result_Ok) {
+      //CInitList::Result result = rInitList.CastToValuePool(pRefType->pElementType, nTopIndex, index);
+      //if(result != CInitList::Result_Ok) {
+      //  GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2077, "设定项不能用于标量数组"));
+      //  return NULL;
+      //}
+      VALUE_CONTEXT vctx(rInitList.GetNameContext());
+      vctx.pLogger = GetLogger();
+
+      const TYPEDESC* pResultTypeDesc = rInitList.CastToValuePool(vctx, pRefType->pElementType, nTopIndex, index);
+      if(IS_SCALER_CATE(pResultTypeDesc) == FALSE) {
+        GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2077, "设定项不能用于标量数组"));
         return NULL;
       }
 
@@ -5640,10 +5693,19 @@ namespace UVShader
       const GLOB* pGlob;
       index = 0;
       rInitList.DbgListBegin(pRefType->name);
-      CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
-      if(result != CInitList::Result_Ok) {
+      //CInitList::Result result = rInitList.CastToValuePool(pRefType, nTopIndex, index);
+      //if(result != CInitList::Result_Ok) {
+      //  return NULL;
+      //}
+      VALUE_CONTEXT vctx(rInitList.GetNameContext());
+      vctx.pLogger = GetLogger();
+
+      const TYPEDESC* pResultTypeDesc = rInitList.CastToValuePool(vctx, pRefType, nTopIndex, index);
+      if(IS_SCALER_CATE(pResultTypeDesc) == FALSE) {
+        GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2077, "设定项不能用于标量数组"));
         return NULL;
       }
+
       rInitList.DbgListEnd();
       TRACE("%s\n", rInitList.DbgGetString());
 
@@ -5655,7 +5717,7 @@ namespace UVShader
     }
     else if(IS_SCALER_CATE(pRefType->pElementType)) // 标量数组
     {
-      return InferInitList_LinearArray(nTopIndex, pRefType, rInitList, nDimDepth);
+      return InferInitList_LinearScalerArray(nTopIndex, pRefType, rInitList, nDimDepth);
     }
     else if(pRefType->cate == TYPEDESC::TypeCate_MultiDim) // 数组
     {
@@ -5751,48 +5813,7 @@ namespace UVShader
     m_aDbgExpressionOperStack.push_back(il.DbgGetString());
     return pTypeDesc;
   }
-#if 0
-  const TYPEDESC* CodeParser::InitList_SyncType(NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob)
-  {
-    const TYPEDESC* pElementType = NULL;
 
-    if(pElementGlob->IsNode() && pElementGlob->pNode->mode == SYNTAXNODE::MODE_InitList) {
-      pElementType = InferInitList(sNameSet, pRefType, *pElementGlob);
-    }
-    else {
-      pElementType = InferType(sNameSet, *pElementGlob);
-    }
-
-    if(pElementType == NULL) {
-      return NULL; // 出现错误
-    }
-    else if(pListType == NULL || pElementType == pListType) {
-      return pElementType;
-    }
-    else if(pElementType->name == STR_VOID) {
-      return pListType;
-    }
-    else if(IS_SCALER_CATE(pElementType) && IS_SCALER_CATE(pListType)) {
-      return pElementType->pDesc->rank >= pListType->pDesc->rank ? pElementType : pListType;
-    }
-    else if(IS_SCALER_CATE(pElementType) && (pListType->cate == TYPEDESC::TypeCate_MultiDim ||
-      pListType->cate == TYPEDESC::TypeCate_Vector || pListType->cate == TYPEDESC::TypeCate_Matrix))
-    {
-      return pListType;
-    }
-    else if(IS_SCALER_CATE(pListType) && (pElementType->cate == TYPEDESC::TypeCate_MultiDim ||
-      pElementType->cate == TYPEDESC::TypeCate_Vector || pElementType->cate == TYPEDESC::TypeCate_Matrix))
-    {
-      return pElementType;
-    }
-
-    // error C2440: “初始化”: 无法从“int”转换为“UVShader::TYPEDESC::TypeCate”
-    clStringW strFrom = pElementType->name;
-    clStringW strTo = pRefType->name;
-    OutputErrorW(*pElementGlob, UVS_EXPORT_TEXT(2440, "“初始化”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
-    return NULL;
-  }
-#endif
   const TYPEDESC* CodeParser::InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation)
   {
     if(pListType->IsSameType(pLeftType))
@@ -8066,7 +8087,7 @@ namespace UVShader
     return &(*Top().iter);
   }
 
-  CInitList::Result CInitList::CastToValuePool(const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index)
+  const TYPEDESC* CInitList::CastToValuePool(VALUE_CONTEXT& vctx, const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index)
   {
     // pRefTypeDesc 参考类型描述，标量/标量数组中这个是标量类型，结构体/向量/矩阵中这个是结构体/向量/矩阵类型
     // base_index  是当前列表的基础索引, 也可以理解为 top index
@@ -8076,26 +8097,29 @@ namespace UVShader
     const SYNTAXNODE::GLOB* pGlob = pElement ? &pElement->glob : NULL;
 
     const TYPEDESC* pTypeDesc = NULL;
-    Result func_result = Result_Ok;
+    //Result func_result = Result_Ok;
 
     if(pElement == NULL)
     {
       // 使用了“{}”定义，解释为0
       ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0);
+      pTypeDesc = m_rNameCtx.GetType("int");
     }
     else if(IsValue(pElement)) {
+      pTypeDesc = m_rNameCtx.GetType(pElement->pValue->rank);
       CLNOP
     }
     else
     {
       ASSERT(pGlob->IsToken() || _CL_NOT_(pGlob->CompareAsNode(SYNTAXNODE::MODE_InitList)));
-      VALUE_CONTEXT vctx(m_rNameCtx);
-      vctx.pLogger = GetLogger();
+      //VALUE_CONTEXT vctx(m_rNameCtx);
+      //vctx.pLogger = GetLogger();
       //vctx.bNeedValue = FALSE;
       pTypeDesc = m_pCodeParser->InferType(vctx, *pGlob);
 
       if(pTypeDesc == NULL) {
-        return Result_Failed;
+        //return Result_Failed;
+        return NULL;
       }
       else if(IS_VECMAT_CATE(pTypeDesc))
       {
@@ -8107,6 +8131,7 @@ namespace UVShader
           STACKDESC& top = Top();
           const size_t value_count = clMin(scaler_count, pTypeDesc->CountOf());
           ELEMENT el;
+          el.glob.ptr = NULL;
           for(size_t i = 0; i < value_count; i++)
           {
             ASSERT(m_pValuePool[i + index].rank == VALUE::Rank_Unsigned && m_pValuePool[i + index].nValue64 == 0); // 测试没被写过
@@ -8121,20 +8146,21 @@ namespace UVShader
           top.iter = top.sInitList.begin();
           top.ptkOpcode = pGlob->GetFrontToken(); // pGlob->pNode->Operand[0].GetFrontToken();
 
-          if(index % scaler_count != 0)
-          {
-            // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
-            return Result_NotAligned;
-          }
+//#if 1
+//          if(index % scaler_count != 0)
+//          {
+//            // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
+//            return Result_NotAligned;
+//          }
+//#endif
 
           pElement = Get();
           pGlob = NULL; // &(pElement->glob);
-          func_result = Result_ExpandVecMat;
+          //func_result = Result_ExpandVecMat;
         }
-        else {
-          func_result = Result_VecMatConstruct;
-        }
-
+        //else {
+        //  //func_result = Result_VecMatConstruct;
+        //}
       }
       else if(IS_SCALER_CATE(pTypeDesc))
       {
@@ -8155,12 +8181,13 @@ namespace UVShader
       else
       {
         GetLogger()->OutputErrorW(*pGlob, UVS_EXPORT_TEXT(5052, "初始值设定项不能用于初始化列表"));
-        return Result_Failed;
+        return NULL;
       }
     }
     //DbgListAdd(&pElement->glob);
     DbgListAdd(pElement);
-    return func_result;
+    ASSERT(pTypeDesc);
+    return pTypeDesc;
   }
 
   const TOKEN* CInitList::GetLocation() const
@@ -8285,6 +8312,11 @@ namespace UVShader
   {
     ASSERT(m_RearrangedGlob.size() == 1);
     return m_RearrangedGlob.front().Get();
+  }
+
+  UVShader::NameContext& CInitList::GetNameContext() const
+  {
+    return m_rNameCtx;
   }
 
   void CInitList::DbgListBegin(const clStringA& strTypeName)

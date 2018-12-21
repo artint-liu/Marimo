@@ -404,20 +404,23 @@ namespace UVShader
     {
       E_FAILED = -1
     };
-    enum Result
-    {
-      Result_Failed = -1,
-      Result_Ok = 0,
-      Result_ExpandVecMat = 1,  // 展开函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化
-      Result_NotAligned = 2,    // 函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化与index没对齐
-      Result_VecMatConstruct = 3,
-    };
+//#define REFACTOR_122
+//#ifndef REFACTOR_122
+//    enum Result
+//    {
+//      Result_Failed = -1,
+//      Result_Ok = 0,
+//      Result_ExpandVecMat = 1,  // 展开函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化
+//      Result_NotAligned = 2,    // 函数形式向量或者矩阵（类似"float3(a,b,c)"形式）初始化与index没对齐
+//      Result_VecMatConstruct = 3,
+//    };
+//#endif
 
     CInitList(CodeParser* pCodeParser, NameContext& rNameCtx, const SYNTAXNODE::GLOB* pInitListGlob);
     CLogger* GetLogger();
     void SetValuePool(VALUE* pValuePool, size_t count);
     const ELEMENT* Get();
-    Result CastToValuePool(const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index);
+    const TYPEDESC* CastToValuePool(VALUE_CONTEXT& vctx, const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index);
     const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
     GXBOOL Step(size_t nDimDepth, size_t nListDepth);
@@ -434,6 +437,7 @@ namespace UVShader
     VALUE* ValuePoolEnd() const;
     size_t ValuePoolCount() const;
     SYNTAXNODE*  GetRearrangedList();
+    NameContext& GetNameContext() const;
 
     void DbgListBegin(const clStringA& strTypeName);
     void DbgListAdd(const ELEMENT* pElement);
@@ -789,7 +793,7 @@ namespace UVShader
     const TYPEDESC* InferType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
     const TYPEDESC* RearrangeInitList(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList_Struct(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
-    const TYPEDESC* InferInitList_LinearArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
+    const TYPEDESC* InferInitList_LinearScalerArray(size_t nTopIndex, const TYPEDESC* pRefType, CInitList& rInitList, size_t nDepth);
     const TYPEDESC* InferInitList(ValuePool* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
@@ -798,7 +802,7 @@ namespace UVShader
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond) const;
     const TYPEDESC* InferTypesOfMultiplication(const TYPEDESC* pFirst, const TYPEDESC* pSecond) const;
-    const TYPEDESC* InitList_SyncType(NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob);
+    //const TYPEDESC* InitList_SyncType(NameContext& sNameSet, const TYPEDESC* pRefType, const TYPEDESC* pListType, const GLOB* pElementGlob);
     const TYPEDESC* InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation);
 #endif
 
