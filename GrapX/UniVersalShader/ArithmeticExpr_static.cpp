@@ -750,6 +750,7 @@ namespace UVShader
     {"trunc", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"isinf", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"isnan", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"transpose", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"radians", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"fwidth", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"tanh", INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},

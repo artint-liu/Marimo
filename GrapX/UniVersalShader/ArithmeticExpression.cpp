@@ -2676,4 +2676,46 @@ GO_NEXT:;
     return bWithWarning ? m_nErrorCount : (m_nErrorCount - m_nWarningCount);
   }
 
+  //////////////////////////////////////////////////////////////////////////
+  
+  RefString::RefString(CLLPCSTR szStableString)
+    : m_pStr(szStableString)
+    , m_nLength(clstd::strlenT(szStableString))
+  {
+  }
+
+  RefString::RefString(CLLPCSTR pStablePtr, size_t length)
+    : m_pStr(pStablePtr)
+    , m_nLength(length)
+  {
+  }
+
+  int RefString::Compare(const RefString& rstr) const
+  {
+    const size_t n = m_nLength <= rstr.m_nLength ? m_nLength : rstr.m_nLength;
+    int r = clstd::strncmpT(m_pStr, rstr.m_pStr, n);
+    if(m_nLength == rstr.m_nLength) {
+      return r;  
+    }
+    else if(m_nLength > rstr.m_nLength) {
+      return m_pStr[n];
+    }
+    return -(int)rstr.m_pStr[n];
+  }
+
+  b32 RefString::operator<(const RefString& rstr) const
+  {
+    return Compare(rstr) < 0;
+  }
+
+  b32 RefString::operator>(const RefString& rstr) const
+  {
+    return Compare(rstr) > 0;
+  }
+
+  b32 RefString::operator==(const RefString& rstr) const
+  {
+    return Compare(rstr) == 0;
+  }
+
 } // namespace UVShader

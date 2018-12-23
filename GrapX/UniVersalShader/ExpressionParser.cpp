@@ -5537,7 +5537,7 @@ namespace UVShader
 
       // 标量
       const TYPEDESC* pResultTypeDesc = rInitList.CastToValuePool(vctx, pRefType, nTopIndex, index);
-      if(pResultTypeDesc == NULL) {
+      if(pResultTypeDesc == NULL) { // 失败
         return NULL;
       }
       else if(IS_STRUCT_CATE(pResultTypeDesc)) {
@@ -5570,33 +5570,8 @@ namespace UVShader
       else {
         CLBREAK; // 意外的类型
       }
+
       vctx.ClearValueOnly();
-      //switch(result)
-      //{
-      //case CInitList::Result_Failed:
-      //  return NULL;
-      //case CInitList::Result_ExpandVecMat:
-      //  nListDepth++;
-      //  index++;
-      //  break;
-      //case CInitList::Result_Ok:
-      //case CInitList::Result_NotAligned:
-      //  // 不处理
-      //  index++;
-      //  break;
-      //case CInitList::Result_VecMatConstruct:
-      //  index += pRefType->CountOf();
-      //  break;
-      //default:
-      //  CLBREAK; // 意外的返回值
-      //  break;
-      //}
-
-
-      //if(rInitList.Step(nDimDepth, nListDepth) == FALSE || result == CInitList::Result_VecMatConstruct) {
-      //  break;
-      //}
-
       if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
         break;
       }
@@ -6844,7 +6819,9 @@ namespace UVShader
   {
     // 只有Root才能调用这个
     ASSERT(m_pParent == NULL);
-
+    if(m_BasicTypeMap.empty() == FALSE) {
+      return;
+    }
     TYPEDESC td = { TYPEDESC::TypeCate_Empty, this };
 
     // 内置基础类型
@@ -6862,7 +6839,7 @@ namespace UVShader
       td.pDesc = &s_aBaseType[i];
       ASSERT(td.name.BeginsWith(td.pDesc->component_type)); // 确保分量与类型名一致
 
-      m_TypeMap.insert(clmake_pair(td.name, td));
+      m_BasicTypeMap.insert(clmake_pair(s_aBaseType[i].name, td));
     }
 
     // 内置结构体
@@ -6873,10 +6850,10 @@ namespace UVShader
       td.name = s_aIntrinsicStruct[i].name;
       td.pDesc = &s_aIntrinsicStruct[i];
       ASSERT(td.name.BeginsWith(td.pDesc->component_type)); // 确保分量与类型名一致
-      auto it = m_TypeMap.find(td.pDesc->component_type);
-      ASSERT(it != m_TypeMap.end()); // 向量矩阵一定有元素类型
+      auto it = m_BasicTypeMap.find(td.pDesc->component_type);
+      ASSERT(it != m_BasicTypeMap.end()); // 向量矩阵一定有元素类型
       td.pElementType = &it->second;
-      m_TypeMap.insert(clmake_pair(td.name, td));
+      m_BasicTypeMap.insert(clmake_pair(s_aIntrinsicStruct[i].name, td));
       //}
     }
 
@@ -6887,35 +6864,34 @@ namespace UVShader
     td.pMemberNode = NULL;
     td.sDimensions.clear();
     td.pElementType = NULL;
-    m_TypeMap.insert(clmake_pair(td.name, td));
+    m_BasicTypeMap.insert(clmake_pair(STR_VOID, td));
 
     // 字符串类型
     //if(strType == s_szString) {
     td.cate = TYPEDESC::TypeCate_String;
     td.name = s_szString;
     td.pDesc = NULL;
-    m_TypeMap.insert(clmake_pair(td.name, td));
+    m_BasicTypeMap.insert(clmake_pair(s_szString, td));
 
     td.cate = TYPEDESC::TypeCate_Sampler1D;
     td.name = s_szSampler1D;
     td.pDesc = NULL;
-    m_TypeMap.insert(clmake_pair(td.name, td));
+    m_BasicTypeMap.insert(clmake_pair(s_szSampler1D, td));
 
     td.cate = TYPEDESC::TypeCate_Sampler2D;
     td.name = s_szSampler2D;
     td.pDesc = NULL;
-    m_TypeMap.insert(clmake_pair(td.name, td));
+    m_BasicTypeMap.insert(clmake_pair(s_szSampler2D, td));
 
     td.cate = TYPEDESC::TypeCate_Sampler3D;
     td.name = s_szSampler3D;
     td.pDesc = NULL;
-    m_TypeMap.insert(clmake_pair(td.name, td));
+    m_BasicTypeMap.insert(clmake_pair(s_szSampler3D, td));
 
     td.cate = TYPEDESC::TypeCate_SamplerCube;
     td.name = s_szSamplerCube;
     td.pDesc = NULL;
-    m_TypeMap.insert(clmake_pair(td.name, td));
-    //}
+    m_BasicTypeMap.insert(clmake_pair(s_szSamplerCube, td));
   }
 
   CLogger* NameContext::GetLogger() const
@@ -7420,7 +7396,9 @@ namespace UVShader
 
       ASSERT(*it != 0 || (&*it == &sDimensions.back()));
 
-      auto result = sCurrentTypeMap.insert(clmake_pair(td.name, td));
+      //auto result = sCurrentTypeMap.insert(clmake_pair(td.name, td));
+      RefString rstrName(m_pCodeParser->GetUniqueString(td.name), td.name.GetLength());
+      auto result = sCurrentTypeMap.insert(clmake_pair(rstrName, td));
       td.pElementType = &result.first->second;
     }
     return td.pElementType;
@@ -7608,7 +7586,8 @@ namespace UVShader
     td.name = ptkName->ToString(strName);
     td.pMemberNode = pMemberNode;
 
-    auto result = m_TypeMap.insert(clmake_pair(strName, td));
+    auto result = m_TypeMap.insert(clmake_pair(RefString(ptkName->marker, ptkName->length), td));
+    //auto result = m_TypeMap.insert(clmake_pair(strName, td));
 
     // 结构体声明后可以定义
     if(result.first->second.pMemberNode == NULL) {
@@ -7702,10 +7681,21 @@ namespace UVShader
 
   const TYPEDESC* NameContext::GetType(const clStringA& strType) const
   {
-    auto it = m_TypeMap.find(strType);
-    return (it != m_TypeMap.end())
-      ? &it->second
-      : (m_pParent ? m_pParent->GetType(strType) : NULL);
+    auto it = m_TypeMap.find(strType.CStr());
+    //return (it != m_TypeMap.end())
+    //  ? &it->second
+    //  : (m_pParent ? m_pParent->GetType(strType) : NULL);
+    if(it != m_TypeMap.end() || (m_BasicTypeMap.empty() == FALSE &&
+      (it = m_BasicTypeMap.find(strType.CStr())) != m_BasicTypeMap.end()))
+    {
+      // typedef 时 it->second.name != strType
+      //ASSERT(it->second.name == strType);
+      return &it->second;
+    }
+    else if(m_pParent) {
+      return m_pParent->GetType(strType);
+    }
+    return NULL;
   }
 
   const TYPEDESC* NameContext::GetType(const TOKEN& token) const
@@ -7755,7 +7745,12 @@ namespace UVShader
     clStringA name = pTypeDesc->name;
     name.TrimRight('0');
     name.AppendUInt32(static_cast<u32>(nCount));
-    auto result = m_TypeMap.insert(clmake_pair(name, *pTypeDesc));
+
+    auto result = m_TypeMap.insert(
+      clmake_pair(RefString(m_pCodeParser->GetUniqueString(name),
+        name.GetLength()), *pTypeDesc));
+    //auto result = m_TypeMap.insert(clmake_pair(name, *pTypeDesc));
+
     if(result.second) {
       result.first->second.name = name;
       result.first->second.sDimensions.back() = nCount;
@@ -7775,8 +7770,10 @@ namespace UVShader
       pDesc = &td;
     }
 
-    clStringA strNewName;
-    return m_TypeMap.insert(clmake_pair(ptkNewName->ToString(strNewName), *pDesc)).second
+    RefString strNewName(ptkNewName->marker, ptkNewName->length);
+    //clStringA strNewName;
+    //ptkNewName->ToString(strNewName);
+    return m_TypeMap.insert(clmake_pair(strNewName, *pDesc)).second
       ? State_Ok : State_DuplicatedType;
   }
 
@@ -8127,7 +8124,7 @@ namespace UVShader
 
         if(vctx.pValue)
         {
-          m_sStack.push_back(STACKDESC());
+          m_sStack.push_back(STACKDESC()); // 将折叠常量重新压入堆栈
           STACKDESC& top = Top();
           const size_t value_count = clMin(scaler_count, pTypeDesc->CountOf());
           ELEMENT el;
@@ -8146,21 +8143,9 @@ namespace UVShader
           top.iter = top.sInitList.begin();
           top.ptkOpcode = pGlob->GetFrontToken(); // pGlob->pNode->Operand[0].GetFrontToken();
 
-//#if 1
-//          if(index % scaler_count != 0)
-//          {
-//            // 需要上面先展开，这样这里返回后才会产生"初始值设定项太多"的错误
-//            return Result_NotAligned;
-//          }
-//#endif
-
           pElement = Get();
           pGlob = NULL; // &(pElement->glob);
-          //func_result = Result_ExpandVecMat;
         }
-        //else {
-        //  //func_result = Result_VecMatConstruct;
-        //}
       }
       else if(IS_SCALER_CATE(pTypeDesc))
       {

@@ -260,7 +260,7 @@ namespace UVShader
       size_t count;
     };
 
-    typedef clmap<clStringA, TYPEDESC>  TypeMap;
+    typedef clmap<RefString, TYPEDESC>  TypeMap;
     typedef std::multimap<clStringA, FUNCDESC>  FuncMap;
     typedef clmap<TokenPtr, IDNFDESC>  IdentifierMap;
     typedef clStringA::LPCSTR LPCSTR;
@@ -290,6 +290,7 @@ namespace UVShader
     const NameContext* m_pParent;     // 默认记录的祖先
     const NameContext* m_pVariParent; // 变量记录的祖先，比如结构体成员NameContext.m_pVariParent应该为空
 
+    TypeMap       m_BasicTypeMap;
     TypeMap       m_TypeMap;  // typedef 会产生两个内容相同的TYPEDESC
     FuncMap       m_FuncMap;
     IdentifierMap m_IdentifierMap;

@@ -83,6 +83,21 @@ namespace UVShader
     OPERATORPROC_NAMECTX lpSubscript; // "[]"下标重载
   };
 
+  class RefString
+  {
+  protected:
+    CLLPCSTR  m_pStr;
+    size_t    m_nLength;
+  public:
+    RefString(CLLPCSTR szStableString);
+    RefString(CLLPCSTR pStablePtr, size_t length);
+
+    int Compare(const RefString& rstr) const;
+    b32 operator==(const RefString& rstr) const;
+    b32 operator<(const RefString& rstr) const;
+    b32 operator>(const RefString& rstr) const;
+  };
+
   // 运行时记录符号和操作符等属性
   struct TOKEN : CTokens::iterator
   {
