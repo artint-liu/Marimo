@@ -68,6 +68,7 @@ namespace UVShader
   struct TYPEDESC
   {
     typedef cllist<const TYPEDESC*> CPtrList;
+    typedef clvector<TYPEDESC> Array;
     enum TypeCate
     {
       TypeCate_Empty,
@@ -290,7 +291,8 @@ namespace UVShader
     const NameContext* m_pParent;     // 默认记录的祖先
     const NameContext* m_pVariParent; // 变量记录的祖先，比如结构体成员NameContext.m_pVariParent应该为空
 
-    TypeMap       m_BasicTypeMap;
+    //TypeMap       m_BasicTypeMap;
+    TYPEDESC::Array m_aBasicType;
     TypeMap       m_TypeMap;  // typedef 会产生两个内容相同的TYPEDESC
     FuncMap       m_FuncMap;
     IdentifierMap m_IdentifierMap;
@@ -326,9 +328,10 @@ namespace UVShader
     GXBOOL SetReturnType(GXLPCSTR szTypeName);
     const TYPEDESC* GetReturnType() const;
 
-    const TYPEDESC* GetType(const clStringA& strType) const;
+    const TYPEDESC* GetType(const RefString& rstrType) const;
     const TYPEDESC* GetType(const TOKEN& token) const;
     const TYPEDESC* GetType(VALUE::Rank rank) const;
+    const TYPEDESC* GetIntrinsicType(const RefString& rstrType) const;
     const TYPEDESC* ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
     const TYPEDESC* GetIdentifier(const TOKEN* ptkName) const;
     const IDNFDESC* GetIdentifierDesc(const TOKEN* ptkName) const;
@@ -349,7 +352,7 @@ namespace UVShader
     State  GetLastState() const;
     void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
     
-    static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
+    //static GXBOOL TestIntrinsicType(TYPEDESC* pOut, const clStringA& strType);
 #ifdef ENABLE_SYNTAX_VERIFY
     VALUE::State CalculateConstantValue(State& eLastState, VALUE& value_out, const GLOB* pGlob) const;
     VALUE::State Calculate(VALUE& value_out, const SYNTAXNODE* pNode) const;

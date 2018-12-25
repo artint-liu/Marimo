@@ -89,6 +89,7 @@ namespace UVShader
     CLLPCSTR  m_pStr;
     size_t    m_nLength;
   public:
+    RefString();
     RefString(CLLPCSTR szStableString);
     RefString(CLLPCSTR pStablePtr, size_t length);
 
@@ -96,6 +97,10 @@ namespace UVShader
     b32 operator==(const RefString& rstr) const;
     b32 operator<(const RefString& rstr) const;
     b32 operator>(const RefString& rstr) const;
+    clStringA& ToString(clStringA& str) const;
+    clStringW& ToString(clStringW& str) const;
+    size_t GetLength() const;
+    b32 BeginsWith(CLLPCSTR szPrefix) const;
   };
 
   // 运行时记录符号和操作符等属性

@@ -2690,12 +2690,18 @@ GO_NEXT:;
   {
   }
 
+  RefString::RefString()
+    : m_pStr(NULL)
+    , m_nLength(0)
+  {
+  }
+
   int RefString::Compare(const RefString& rstr) const
   {
     const size_t n = m_nLength <= rstr.m_nLength ? m_nLength : rstr.m_nLength;
     int r = clstd::strncmpT(m_pStr, rstr.m_pStr, n);
-    if(m_nLength == rstr.m_nLength) {
-      return r;  
+    if(r != 0 || m_nLength == rstr.m_nLength) {
+      return r;
     }
     else if(m_nLength > rstr.m_nLength) {
       return m_pStr[n];
@@ -2711,6 +2717,35 @@ GO_NEXT:;
   b32 RefString::operator>(const RefString& rstr) const
   {
     return Compare(rstr) > 0;
+  }
+
+  clStringA& RefString::ToString(clStringA& str) const
+  {
+    str.Clear();
+    return str.Append(m_pStr, m_nLength);
+  }
+
+  clStringW& RefString::ToString(clStringW& str) const
+  {
+    str.Clear();
+    return str.Append(m_pStr, m_nLength);
+  }
+
+  size_t RefString::GetLength() const
+  {
+    return m_nLength;
+  }
+
+  b32 RefString::BeginsWith(CLLPCSTR szPrefix) const
+  {
+    size_t i = 0;
+    while(szPrefix[i]) {
+      if(i >= m_nLength || m_pStr[i] != szPrefix[i]) {
+        return FALSE;
+      }
+      ++i;
+    }
+    return TRUE;
   }
 
   b32 RefString::operator==(const RefString& rstr) const
