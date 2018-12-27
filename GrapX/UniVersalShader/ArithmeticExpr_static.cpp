@@ -530,9 +530,8 @@ namespace UVShader
       vctx.pType->cate == TYPEDESC::TypeCate_Matrix);
     ASSERT(pValue == NULL || pValue->IsNegative() == FALSE);
 
-    //clStringA str;
-    //vctx.pType->name.ToString(str);
-    clStringA str = vctx.pType->name;
+    clStringA str;
+    vctx.pType->name.ToString(str);
     ASSERT(str.EndsWith("x1") || str.EndsWith("x2") || str.EndsWith("x3") || str.EndsWith("x4"));
     str.Remove(str.GetLength() - 2, 2);
     str.TrimRight('1');

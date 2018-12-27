@@ -94,7 +94,7 @@ namespace UVShader
 
     TypeCate            cate;
     NameContext* const  pNameCtx;
-    clStringA           name; // 类型名
+    RefString           name; // 类型名
     COMMINTRTYPEDESC*   pDesc; // 结构体(内置) 的描述, 多维数组这个指向它的基础类型
     const SYNTAXNODE*   pMemberNode; // 结构体(用户定义) 的描述, 必须是"SYNTAXNODE::MODE_Block"
     DimList_T           sDimensions; // 维度列表 int var[a][b][c][d] 储存为{d，c，b，a}
@@ -346,7 +346,7 @@ namespace UVShader
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
-    const TYPEDESC* RegisterTypes(const clStringA& strBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
+    const TYPEDESC* RegisterTypes(const RefString& rstrBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
     const TYPEDESC* RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
 #endif
     State  GetLastState() const;
@@ -443,7 +443,7 @@ namespace UVShader
     SYNTAXNODE*  GetRearrangedList();
     NameContext& GetNameContext() const;
 
-    void DbgListBegin(const clStringA& strTypeName);
+    void DbgListBegin(const RefString& rstrTypeName);
     void DbgListAdd(const ELEMENT* pElement);
     void DbgListAdd(const clStringA& str);
     void DbgListEnd();
@@ -811,7 +811,7 @@ namespace UVShader
 #endif
 
     const TYPEDESC* InferRightValueType(NameContext& sNameSet, const GLOB& right_glob);
-    GXBOOL CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo);
+    GXBOOL CompareScaler(const RefString& rstrTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation, GXBOOL bFormalParam = FALSE); // pLocation 用于错误输出定位
     GXBOOL MergeValueContext(VALUE_CONTEXT& vctx, const TOKEN* pOperator, VALUE_CONTEXT* pAB, const TOKEN* pLocation); // pLocation 用于错误输出定位
     GXBOOL TryTypeCasting(const NameContext& sNameSet, GXLPCSTR szTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation); // pLocation 用于错误输出定位

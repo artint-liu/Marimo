@@ -2716,6 +2716,11 @@ GO_NEXT:;
     return -(int)rstr.m_pStr[n];
   }
 
+  b32 RefString::operator!=(const RefString& rstr) const
+  {
+    return Compare(rstr) != 0;
+  }
+
   b32 RefString::operator<(const RefString& rstr) const
   {
     return Compare(rstr) < 0;
@@ -2724,6 +2729,12 @@ GO_NEXT:;
   b32 RefString::operator>(const RefString& rstr) const
   {
     return Compare(rstr) > 0;
+  }
+
+  const ch& RefString::operator[](size_t index) const
+  {
+    ASSERT(m_pStr && index < m_nLength);
+    return m_pStr[index];
   }
 
   clStringA& RefString::ToString(clStringA& str) const
@@ -2738,6 +2749,11 @@ GO_NEXT:;
     return str.Append(m_pStr, m_nLength);
   }
 
+  CLLPCSTR RefString::GetPtr() const
+  {
+    return m_pStr;
+  }
+
   size_t RefString::GetLength() const
   {
     return m_nLength;
@@ -2748,6 +2764,27 @@ GO_NEXT:;
     size_t i = 0;
     while(szPrefix[i]) {
       if(i >= m_nLength || m_pStr[i] != szPrefix[i]) {
+        return FALSE;
+      }
+      ++i;
+    }
+    return TRUE;
+  }
+
+  b32 RefString::EndsWith(CLLPCSTR szPostfix) const
+  {
+    if(szPostfix == NULL) {
+      return TRUE;
+    }
+    const size_t nPostfixLen = clstd::strlenT(szPostfix);
+    if(m_nLength < nPostfixLen) {
+      return FALSE;
+    }
+    const size_t nTopIndex = m_nLength - nPostfixLen;
+
+    size_t i = 0;
+    while(szPostfix[i]) {
+      if(i >= m_nLength || m_pStr[nTopIndex + i] != szPostfix[i]) {
         return FALSE;
       }
       ++i;

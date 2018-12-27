@@ -257,6 +257,7 @@ namespace clstd
 
     size_t      Format          (const _TCh *pFmt, ...);  // 按照指定格式生成字符串（原来的内容会被替代）
 
+    size_t      Replace         (size_t idx, size_t uCount, const _TCh* pStr, size_t nStrLength);      // 从 idx 开始把 uCount 个字符替换为 pStr, 返回值是pStr替换后结尾的位置
     size_t      Replace         (size_t idx, size_t uCount, const _TCh* pStr);      // 从 idx 开始把 uCount 个字符替换为 pStr, 返回值是pStr替换后结尾的位置
     size_t      Replace         (_TCh cFind, _TCh cReplaceWith, size_t uStart = 0); // 查找某个字符，替换为另一个
     StringX&    Replace         (const _TCh* szFind, const _TCh* szReplace, size_t uStart = 0);

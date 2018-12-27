@@ -1865,33 +1865,40 @@ namespace clstd
   }
 
   _CLSTR_TEMPL
-    size_t _CLSTR_IMPL::Replace(size_t idx, size_t uCount, const _TCh* pStr)
+    size_t _CLSTR_IMPL::Replace(size_t idx, size_t uCount, const _TCh* pStr, size_t nStrLength)
   {
     const size_t uStrLength = CLSTR_LENGTH(m_pBuf);
-    const size_t uInputLength = (pStr == NULL) ? 0 : _Traits::StringLength(pStr);
+    //const size_t nStrLength = (pStr == NULL) ? 0 : _Traits::StringLength(pStr);
     if(idx > uStrLength)
       idx = uStrLength;
 
     if(idx + uCount > uStrLength || ((i32)uCount) < 0)
       uCount = uStrLength - idx;
 
-    if(uCount < uInputLength) {
-      _ResizeLength(uStrLength - uCount + uInputLength);
+    if(uCount < nStrLength) {
+      _ResizeLength(uStrLength - uCount + nStrLength);
     }
 
-    if(uStrLength - idx - uCount != 0 && uInputLength != uCount)
-      clmemmove(m_pBuf + idx + uInputLength,
+    if(uStrLength - idx - uCount != 0 && nStrLength != uCount)
+      clmemmove(m_pBuf + idx + nStrLength,
       m_pBuf + idx + uCount, (uStrLength - idx - uCount) * sizeof(_TCh));
 
-    if(uCount > uInputLength)
-      _Reduce(uStrLength - uCount + uInputLength);
-    if(pStr && uInputLength) {
-      _Traits::CopyStringN(m_pBuf + idx, pStr, uInputLength);
+    if(uCount > nStrLength)
+      _Reduce(uStrLength - uCount + nStrLength);
+    if(pStr && nStrLength) {
+      _Traits::CopyStringN(m_pBuf + idx, pStr, nStrLength);
       return (idx + uStrLength);
     }
     else {
       return idx;
     }
+  }
+
+  _CLSTR_TEMPL
+    size_t _CLSTR_IMPL::Replace(size_t idx, size_t uCount, const _TCh* pStr)
+  {
+    const size_t uInputLength = (pStr == NULL) ? 0 : _Traits::StringLength(pStr);
+    return Replace(idx, uCount, pStr, uInputLength);
   }
 
   _CLSTR_TEMPL

@@ -3978,7 +3978,10 @@ namespace UVShader
 
   void CLogger::OutputTypeCastFailed(const TOKEN* ptkLocation, const TOKEN* pOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom)
   {
-    clStringW strOpcode, strTo = pTypeTo->name, strFrom = pTypeFrom->name;
+    //clStringW strOpcode, strTo = pTypeTo->name, strFrom = pTypeFrom->name;
+    clStringW strOpcode, strTo, strFrom;
+    pTypeTo->name.ToString(strTo);
+    pTypeFrom->name.ToString(strFrom);
     pOpcode->ToString(strOpcode);
     OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2440, "“%s”: 无法从“%s”转换为“%s”", this),
       strOpcode.CStr(), strFrom.CStr(), strTo.CStr());
@@ -4464,12 +4467,11 @@ namespace UVShader
         const TOKEN& token = *second_glob.GetFrontToken();
         if(TryTypeCasting(pType, pRightTypeDesc, &token) == FALSE)
         {
-          clStringW strFrom = pRightTypeDesc->name;
-          clStringW strTo = pType->name;
-          //clStringW strFrom;
-          //pRightTypeDesc->name.ToString(strFrom);
-          //clStringW strTo;
-          //pType->name.ToString(strTo);
+          //clStringW strFrom = pRightTypeDesc->name;
+          //clStringW strTo = pType->name;
+          clStringW strFrom, strTo;
+          pRightTypeDesc->name.ToString(strFrom);
+          pType->name.ToString(strTo);
           GetLogger()->OutputErrorW(token, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
           return FALSE;
         }
@@ -4719,12 +4721,11 @@ namespace UVShader
       else if(TryTypeCasting(pTypeTo, pTypeFrom, pNode->Operand[0].pTokn) == FALSE)
       {
         // error C2440: “return”: 无法从“TypeFrom”转换为“TypeTo”
-        //clStringW strFrom;
-        //pTypeFrom->name.ToString(strFrom);
-        //clStringW strTo;
-        //pTypeTo->name.ToString(strTo);
-        clStringW strFrom = pTypeFrom->name;
-        clStringW strTo = pTypeTo->name;
+        clStringW strFrom, strTo;
+        pTypeFrom->name.ToString(strFrom);
+        pTypeTo->name.ToString(strTo);
+        //clStringW strFrom = pTypeFrom->name;
+        //clStringW strTo = pTypeTo->name;
         GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
         result = FALSE;
       }
@@ -5649,7 +5650,7 @@ namespace UVShader
       clStringA str = rInitList.DbgGetString();
       const size_t len = pRefType->name.GetLength();
       pRefType = pRefType->ConfirmArrayCount(index);
-      str.Replace(1, len, pRefType->name);
+      str.Replace(1, len, pRefType->name.GetPtr(), pRefType->name.GetLength());
       rInitList.DbgSetString(str);
     }
     TRACE("%s\n", rInitList.DbgGetString().CStr());
@@ -5729,7 +5730,7 @@ namespace UVShader
       if(bAdaptedLength) {
         const size_t len = pRefType->name.GetLength();
         pRefType = pRefType->ConfirmArrayCount(index);
-        rInitList.DbgGetString().Replace(1, len, pRefType->name);
+        rInitList.DbgGetString().Replace(1, len, pRefType->name.GetPtr(), pRefType->name.GetLength());
       }
 
       TRACE("%s\n", rInitList.DbgGetString().CStr());
@@ -5944,7 +5945,7 @@ namespace UVShader
       const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
       if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript) // 带下标的成员
       {
-        const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name.CStr());
+        const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
         if(pMemberContext)
         {
           //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
@@ -6007,7 +6008,7 @@ namespace UVShader
     }
     else if(pNode->Operand[1].IsToken())
     {
-      const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name.CStr());
+      const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
       if(pMemberContext)
       {
         ASSERT(vctx.result == ValueResult_OK || vctx.result == ValueResult_Variable);
@@ -6216,6 +6217,7 @@ namespace UVShader
     //          |ret    |out      |matrix         |float, int       |rows = number of rows in input x, columns = number of columns in input y
     //
 
+    const TYPEDESC* pResultType = NULL;
     clStringA strTypeName;
     int R1, C1;
     int R2, C2;
@@ -6253,8 +6255,10 @@ namespace UVShader
       {
         if(IsComponent(pFirst, pSecond, NULL)) {
           pSecond->Resolve(R2, C2);
-          strTypeName.Format("%s%d", pFirst->pElementType->name, C2);
-          return m_GlobalCtx.GetType(strTypeName.CStr());
+          //strTypeName.Format("%s%d", pFirst->pElementType->name, C2);
+          strTypeName.Append(pFirst->pElementType->name.GetPtr(), pFirst->pElementType->name.GetLength()).AppendInteger32(C2);
+          pResultType = m_GlobalCtx.GetType(strTypeName.CStr());
+          ASSERT(pResultType);
         }
       }
     }
@@ -6271,8 +6275,9 @@ namespace UVShader
         if(IsComponent(NULL, pFirst, pSecond))
         {
           pFirst->Resolve(R1, C1);
-          strTypeName.Format("%s%d", pFirst->pElementType->name, R1);
-          return m_GlobalCtx.GetType(strTypeName.CStr());
+          strTypeName.Append(pFirst->pElementType->name.GetPtr(), pFirst->pElementType->name.GetLength()).AppendInteger32(R1);
+          pResultType = m_GlobalCtx.GetType(strTypeName.CStr());
+          ASSERT(pResultType);
         }
       }
       else if(pSecond->IsMatrix() && (pFirst->pElementType == pSecond->pElementType))
@@ -6281,8 +6286,10 @@ namespace UVShader
         pSecond->Resolve(R2, C2);
         if(R2 == C1) {
           // R1 x C2
-          strTypeName.Format("%s%dx%s", pFirst->pElementType->name, R1, C2);
-          return m_GlobalCtx.GetType(strTypeName.CStr());
+          strTypeName.Append(pFirst->pElementType->name.GetPtr(), pFirst->pElementType->name.GetLength());
+          strTypeName.AppendFormat("%dx%s", R1, C2);
+          pResultType = m_GlobalCtx.GetType(strTypeName.CStr());
+          ASSERT(pResultType);
         }
       }
     }
@@ -6297,7 +6304,7 @@ namespace UVShader
     //  return pSecond;
     //}
     //else {}
-    return NULL;
+    return pResultType;
   }
 
   const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const GLOB& right_glob)
@@ -6324,10 +6331,10 @@ namespace UVShader
     return pRightType;
   }
   
-  GXBOOL CodeParser::CompareScaler(GXLPCSTR szTypeFrom, GXLPCSTR szTypeTo)
+  GXBOOL CodeParser::CompareScaler(const RefString& rstrTypeFrom, GXLPCSTR szTypeTo)
   {
     return (
-      (clstd::strcmpT(szTypeFrom, STR_FLOAT) || clstd::strcmpT(szTypeFrom, STR_HALF) || clstd::strcmpT(szTypeFrom, STR_DOUBLE)) &&
+      ((rstrTypeFrom == STR_FLOAT) || (rstrTypeFrom == STR_HALF) || (rstrTypeFrom == STR_DOUBLE)) &&
       (clstd::strcmpT(szTypeTo, STR_FLOAT) || clstd::strcmpT(szTypeTo, STR_HALF) || clstd::strcmpT(szTypeTo, STR_DOUBLE)) );
   }
 
@@ -6593,8 +6600,9 @@ namespace UVShader
         (pTypeTo->pDesc->rank != VALUE::Rank_Double && pTypeTo->pDesc->rank != VALUE::Rank_Float) &&
         (pTypeFrom->pDesc->rank != VALUE::Rank_Double && pTypeFrom->pDesc->rank != VALUE::Rank_Float)
         ) {
-        clStringW strFrom = pTypeFrom->name;
-        clStringW strTo = pTypeTo->name;
+        clStringW strFrom, strTo;
+        pTypeFrom->name.ToString(strFrom);
+        pTypeTo->name.ToString(strTo);
         GetLogger()->OutputErrorW(*pLocation, UVS_EXPORT_TEXT(4244, "从“%s”转换到“%s”，可能丢失数据"), strFrom.CStr(), strTo.CStr());
       }
       return TRUE;
@@ -7401,30 +7409,33 @@ namespace UVShader
 
 #ifdef ENABLE_SYNTAX_VERIFY
 
-  const TYPEDESC* NameContext::RegisterTypes(const clStringA& strBaseType, const TYPEDESC::DimList_T& sDimensions)
+  const TYPEDESC* NameContext::RegisterTypes(const RefString& rstrBaseType, const TYPEDESC::DimList_T& sDimensions)
   {
     // int x[2][3][4] 列表储存为 "{4,3,2}"
     // 函数会依次注册"int*4", "int*4*3", "int*4*3*2"这几个类型，最后返回"int*4*3*2"这个类型描述
     // 对于自适应长度类型数组"int x[][3][4]", 最后返回的类型为"int*4*3*0"
     // 注意多维数组类型并不一定注册在当前Context下，而是注册在基础类型所属的Context下
 
-    const TYPEDESC* pBaseTypeDesc = GetType(strBaseType.CStr());
+    const TYPEDESC* pBaseTypeDesc = GetType(rstrBaseType);
     TypeMap& sCurrentTypeMap = pBaseTypeDesc->pNameCtx->m_TypeMap;
+    clStringA strTypeName;
+    rstrBaseType.ToString(strTypeName);
 
     TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, this };
-    td.name = strBaseType;
+    //td.name = rstrBaseType;
     td.pElementType = pBaseTypeDesc;
     td.pDesc = pBaseTypeDesc->pDesc;
     for(auto it = sDimensions.begin(); it != sDimensions.end(); ++it)
     {
-      td.name.Append('*').AppendInteger32(*it); // int x[2][3][4] 记为"int*4*3*2"
+      strTypeName.Append('*').AppendInteger32(*it); // int x[2][3][4] 记为"int*4*3*2"
+      td.name = m_pCodeParser->GetUniqueString(strTypeName);
       td.sDimensions.push_back(*it);
 
       ASSERT(*it != 0 || (&*it == &sDimensions.back()));
 
       //auto result = sCurrentTypeMap.insert(clmake_pair(td.name, td));
-      RefString rstrName(m_pCodeParser->GetUniqueString(td.name), td.name.GetLength());
-      auto result = sCurrentTypeMap.insert(clmake_pair(rstrName, td));
+      //RefString rstrName(m_pCodeParser->GetUniqueString(td.name), td.name.GetLength());
+      auto result = sCurrentTypeMap.insert(clmake_pair(td.name, td));
       td.pElementType = &result.first->second;
     }
     return td.pElementType;
@@ -7535,9 +7546,9 @@ namespace UVShader
       {
         const TOKEN* ptkVariable = pFirstGlob->pTokn;
         ASSERT(sDimensions.empty() == FALSE);
-        clStringA strType;
+        //clStringA strType;
 
-        const TYPEDESC* pSizelessTypeDesc = RegisterTypes(tkType.ToString(strType), sDimensions); // 可能缺少最高维尺寸的数组类型
+        const TYPEDESC* pSizelessTypeDesc = RegisterTypes(RefString(tkType.marker, tkType.length), sDimensions); // 可能缺少最高维尺寸的数组类型
         TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
         m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, pValueExprGlob);
         if(m_eLastState == State_Ok) {
@@ -7608,9 +7619,9 @@ namespace UVShader
   {
     ASSERT(pMemberNode == NULL || pMemberNode->mode == SYNTAXNODE::MODE_Block);
     TYPEDESC td = {TYPEDESC::TypeCate_Empty, this};
-    clStringA strName;
+    //clStringA strName;
     td.cate = TYPEDESC::TypeCate_Struct;
-    td.name = ptkName->ToString(strName);
+    td.name.Set(ptkName->marker, ptkName->length);//->ToString(strName);
     td.pMemberNode = pMemberNode;
 
     auto result = m_TypeMap.insert(clmake_pair(RefString(ptkName->marker, ptkName->length), td));
@@ -7656,7 +7667,7 @@ namespace UVShader
       if(ppTypeDesc) {
         *ppTypeDesc = pTypeDesc;
       }
-      return ((*ptkTypename) != pTypeDesc->name); // 字典名与原始名不一致, 说明是typedef的类型
+      return (pTypeDesc->name != RefString(ptkTypename->marker, ptkTypename->length)); // 字典名与原始名不一致, 说明是typedef的类型
     }
     return FALSE;
   }
@@ -7666,7 +7677,7 @@ namespace UVShader
     const TYPEDESC* pTypeFunc = NULL;
     if(IsTypedefedType(ptkTypename, &pTypeFunc))
     {
-      strTypename = pTypeFunc->name;
+      pTypeFunc->name.ToString(strTypename);
       return TRUE;
     }
     ptkTypename->ToString(strTypename);
@@ -7772,8 +7783,8 @@ namespace UVShader
   {
     return clstd::BinarySearch(&m_aBasicType.front(), &m_aBasicType.back() + 1, rstrType,
       [](const TYPEDESC* pType, const RefString& rstr)->int{
-        RefString rstrA(pType->name.CStr(), pType->name.GetLength());
-        return rstrA.Compare(rstr);
+        //RefString rstrA(pType->name.CStr(), pType->name.GetLength());
+        return pType->name.Compare(rstr);
       });
   }
 
@@ -7781,7 +7792,8 @@ namespace UVShader
   {
     ASSERT(pTypeDesc->sDimensions.back() == 0); // 外部保证
     ASSERT(pTypeDesc->name.EndsWith("*0"));
-    clStringA name = pTypeDesc->name;
+    clStringA name;
+    pTypeDesc->name.ToString(name);
     name.TrimRight('0');
     name.AppendUInt32(static_cast<u32>(nCount));
 
@@ -7791,7 +7803,7 @@ namespace UVShader
     //auto result = m_TypeMap.insert(clmake_pair(name, *pTypeDesc));
 
     if(result.second) {
-      result.first->second.name = name;
+      result.first->second.name = result.first->first; // RefString
       result.first->second.sDimensions.back() = nCount;
     }
     return &result.first->second;
@@ -7867,42 +7879,44 @@ namespace UVShader
     if(name.BeginsWith(STR_HALF))
     {
       szScaler = STR_HALF;
-      szRxC = &name[STR_HALF_LENGTH];
+      szRxC =(name.GetLength() > STR_HALF_LENGTH) ?  &name[STR_HALF_LENGTH] : NULL;
     }
     else if(name.BeginsWith(STR_FLOAT))
     {
       szScaler = STR_FLOAT;
-      szRxC = &name[STR_FLOAT_LENGTH];
+      szRxC = (name.GetLength() > STR_FLOAT_LENGTH) ? &name[STR_FLOAT_LENGTH] : NULL;
     }
     else if(name.BeginsWith(STR_DOUBLE))
     {
       szScaler = STR_DOUBLE;
-      szRxC = &name[STR_DOUBLE_LENGTH];
+      szRxC = (name.GetLength() > STR_DOUBLE_LENGTH) ? &name[STR_DOUBLE_LENGTH] : NULL;
     }
     else if(name.BeginsWith(STR_INT))
     {
       szScaler = STR_INT;
-      szRxC = &name[STR_INT_LENGTH];
+      szRxC = (name.GetLength() > STR_INT_LENGTH) ? &name[STR_INT_LENGTH] : NULL;
     }
     else if(name.BeginsWith(STR_UINT))
     {
       szScaler = STR_UINT;
-      szRxC = &name[STR_UINT_LENGTH];
+      szRxC = (name.GetLength() > STR_UINT_LENGTH) ? &name[STR_UINT_LENGTH] : NULL;
     }
     else if(name.BeginsWith(STR_BOOL))
     {
       szScaler = STR_BOOL;
-      szRxC = &name[STR_BOOL_LENGTH];
+      szRxC = (name.GetLength() > STR_BOOL_LENGTH) ? &name[STR_BOOL_LENGTH] : NULL;
     }
     else
     {
       PARSER_NOTIMPLEMENT;
-      TRACE("%s\n", name.CStr());
+      clStringA str;
+      name.ToString(str);
+      TRACE("%s\n", str.CStr());
     }
 
     R = C = 0;
 
-    if(szScaler && szRxC[0] != '\0')
+    if(szScaler && szRxC != NULL)
     {
       R = szRxC[0] - '0';
       ASSERT(R >= 1 && R <= 4);
@@ -7949,7 +7963,7 @@ namespace UVShader
       return TRUE;
     }
 
-    const NameContext* pStructCtx = pNameCtx->GetStructContext(name.CStr());
+    const NameContext* pStructCtx = pNameCtx->GetStructContext(name);
     if(pStructCtx == NULL) {
       return FALSE;
     }
@@ -7974,7 +7988,8 @@ namespace UVShader
         }
         else
         {
-          clStringW strMemberName, strStructName = name;
+          clStringW strMemberName, strStructName;
+          name.ToString(strStructName);
           GetLogger()->OutputErrorW(ptkMember, UVS_EXPORT_TEXT(ERR_IS_NOT_MEMBER, "“%s”: 不是“%s”的成员"),
             ptkMember->ToString(strMemberName).CStr(), strStructName.CStr()); 
           return FALSE;
@@ -8343,10 +8358,10 @@ namespace UVShader
     return m_rNameCtx;
   }
 
-  void CInitList::DbgListBegin(const clStringA& strTypeName)
+  void CInitList::DbgListBegin(const RefString& rstrTypeName)
   {
     m_DebugStrings.back() = "<";
-    m_DebugStrings.back().Append(strTypeName).Append(">{");
+    m_DebugStrings.back().Append(rstrTypeName.GetPtr(), rstrTypeName.GetLength()).Append(">{");
 
     COMMALIST cm;
     cm.Init(m_pCodeParser);

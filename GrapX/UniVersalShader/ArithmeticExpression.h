@@ -96,12 +96,16 @@ namespace UVShader
     RefString& Set(CLLPCSTR pStablePtr, size_t length);
     int Compare(const RefString& rstr) const;
     b32 operator==(const RefString& rstr) const;
+    b32 operator!=(const RefString& rstr) const;
     b32 operator<(const RefString& rstr) const;
     b32 operator>(const RefString& rstr) const;
+    const ch& operator[](size_t index) const;
     clStringA& ToString(clStringA& str) const;
     clStringW& ToString(clStringW& str) const;
+    CLLPCSTR GetPtr() const;
     size_t GetLength() const;
     b32 BeginsWith(CLLPCSTR szPrefix) const;
+    b32 EndsWith(CLLPCSTR szPostfix) const;
   };
 
   // 运行时记录符号和操作符等属性
