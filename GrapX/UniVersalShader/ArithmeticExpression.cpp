@@ -2696,6 +2696,13 @@ GO_NEXT:;
   {
   }
 
+  RefString& RefString::Set(CLLPCSTR pStablePtr, size_t length)
+  {
+    m_pStr = pStablePtr;
+    m_nLength = length;
+    return *this;
+  }
+
   int RefString::Compare(const RefString& rstr) const
   {
     const size_t n = m_nLength <= rstr.m_nLength ? m_nLength : rstr.m_nLength;

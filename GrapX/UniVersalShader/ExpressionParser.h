@@ -122,8 +122,8 @@ namespace UVShader
   struct FUNCDESC // 用户定义的函数描述
   {
     // FIXME: 因为定义顺序关系, 返回值和形参应改储存TYPEDESC, 而不是名字, 这个要改暂时备忘
-    clStringA         ret_type;     // 返回的类型
-    clStringA         name;         // 类型名
+    RefString         ret_type;     // 返回的类型
+    RefString         name;         // 类型名
     TYPEINSTANCE::Array  sFormalTypes; // 函数, 形参类型表
   };
 
@@ -262,10 +262,10 @@ namespace UVShader
     };
 
     typedef clmap<RefString, TYPEDESC>  TypeMap;
-    typedef std::multimap<clStringA, FUNCDESC>  FuncMap;
+    typedef std::multimap<RefString, FUNCDESC>  FuncMap;
     typedef clmap<TokenPtr, IDNFDESC>  IdentifierMap;
     typedef clStringA::LPCSTR LPCSTR;
-    typedef clmap<clStringA, const NameContext*> StructContextMap;
+    typedef clmap<RefString, const NameContext*> StructContextMap;
     typedef ArithmeticExpression::GLOB GLOB;
     //typedef clmap<TokenPtr, ValuePool> ValuePoolMap;
 
@@ -325,7 +325,7 @@ namespace UVShader
     void BuildIntrinsicType();
     CLogger* GetLogger() const;
 
-    GXBOOL SetReturnType(GXLPCSTR szTypeName);
+    GXBOOL SetReturnType(const RefString& rstrTypeName);
     const TYPEDESC* GetReturnType() const;
 
     const TYPEDESC* GetType(const RefString& rstrType) const;
@@ -335,12 +335,12 @@ namespace UVShader
     const TYPEDESC* ConfirmArrayCount(const TYPEDESC* pTypeDesc, size_t nCount); // 设置不确定长度数组类型的长度
     const TYPEDESC* GetIdentifier(const TOKEN* ptkName) const;
     const IDNFDESC* GetIdentifierDesc(const TOKEN* ptkName) const;
-    const NameContext* GetStructContext(const clStringA& strName) const;
+    const NameContext* GetStructContext(const RefString& rstrName) const;
     State  TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName);
     GXBOOL RegisterStruct(const TOKEN* ptkName, const SYNTAXNODE* pMemberNode);
-    GXBOOL RegisterStructContext(const clStringA& strName, const NameContext* pContext);
+    GXBOOL RegisterStructContext(const RefString& rstrName, const NameContext* pContext);
     //GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
-    GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TYPEINSTANCE::Array& type_array);
+    GXBOOL RegisterFunction(const RefString& rstrRetType, const RefString& rstrName, const TYPEINSTANCE::Array& type_array);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     GXBOOL TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
@@ -835,7 +835,7 @@ namespace UVShader
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);
     GXBOOL Verify_Chain(const SYNTAXNODE* pNode, NameContext& sNameContext);
     GXBOOL Verify_Node(const SYNTAXNODE* pNode, NameContext& sNameContext, GXBOOL& result);
-    GXBOOL Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode);
+    GXBOOL Verify_StructMember(NameContext& sParentSet, const RefString& rstrStructName, const SYNTAXNODE& rNode);
     const TYPEDESC* Verify2_LeftValue(const NameContext& sNameSet, const GLOB& left_glob, const TOKEN& opcode); // opcode 主要是为了定位
     //GXBOOL Verify2_RightValue(const NameContext& sNameSet, const TYPEDESC* pType, SYNTAXNODE::MODE mode, const GLOB& right_glob);
 #endif

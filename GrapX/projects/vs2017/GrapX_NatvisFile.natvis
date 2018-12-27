@@ -31,7 +31,14 @@
     <DisplayString>token={marker,[length]s} size={length}</DisplayString>
   </Type>
 
-  
+  <Type Name="UVShader::RefString">
+    <DisplayString>RefString({m_pStr,[m_nLength]s})</DisplayString>
+  </Type>
+
+  <Type Name="UVShader::TYPEDESC">
+    <DisplayString>{cate} {name}</DisplayString>
+  </Type>
+
   <Type Name="Marimo::DATAPOOL_TYPE_DESC">
     <DisplayString>{Cate} {(char*)((size_t)&amp;nName + nName),na}</DisplayString>
   </Type>

@@ -1928,7 +1928,7 @@ namespace UVShader
           *pDefinitionNum = nDefination;
 
 #ifdef ENABLE_SYNTAX_VERIFY
-          Verify_StructMember(sNameSet, strName, *pMembers->pNode); // 检查失败仍然继续解析
+          Verify_StructMember(sNameSet, RefString(ptkName->marker, ptkName->length), *pMembers->pNode); // 检查失败仍然继续解析
 #endif
         }
       }
@@ -1997,16 +1997,13 @@ namespace UVShader
         }
 #endif
       }
-      else if (glob.pNode->Operand[1].IsToken()) // <type> <identifier>; 形式
+      else  // <type> <identifier/identifier[n]>; 形式
       {
         if(_CL_NOT_(Verify_IdentifierDefinition(sNameSet, glob.pNode))) {
           return scope.end;
         }
       }
-      else
-      {
-        CLBREAK;
-      }
+
       pDefinitions->ptr = glob.ptr;
       return p - pTokensFront;
     }
@@ -4752,7 +4749,7 @@ namespace UVShader
     return Verify_Chain(pNode, sNameContext);
   }
 
-  GXBOOL CodeParser::Verify_StructMember(NameContext& sParentSet, const clStringA& strStructName, const SYNTAXNODE& rNode)
+  GXBOOL CodeParser::Verify_StructMember(NameContext& sParentSet, const RefString& rstrStructName, const SYNTAXNODE& rNode)
   {
     GXBOOL result = TRUE;
     NameContext* pStructMemberSet = new NameContext(s_szStructMember, &sParentSet, NULL);
@@ -4839,7 +4836,7 @@ namespace UVShader
       return TRUE;
     });
 
-    sParentSet.RegisterStructContext(strStructName, pStructMemberSet);
+    sParentSet.RegisterStructContext(rstrStructName, pStructMemberSet);
     return result;
   }
 
@@ -4924,7 +4921,7 @@ namespace UVShader
         return ERROR_TYPEDESC;
       }
       else if(result == 1) {
-        return sNameSet.GetType((*iter_func)->ret_type.CStr());
+        return sNameSet.GetType((*iter_func)->ret_type);
       }
     }
     return NULL;
@@ -5947,7 +5944,7 @@ namespace UVShader
       const SYNTAXNODE* pMemberNode = pNode->Operand[1].pNode;
       if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript) // 带下标的成员
       {
-        const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
+        const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name.CStr());
         if(pMemberContext)
         {
           //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
@@ -6010,7 +6007,7 @@ namespace UVShader
     }
     else if(pNode->Operand[1].IsToken())
     {
-      const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
+      const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name.CStr());
       if(pMemberContext)
       {
         ASSERT(vctx.result == ValueResult_OK || vctx.result == ValueResult_Variable);
@@ -6814,7 +6811,6 @@ namespace UVShader
     m_TypeMap.clear();
     m_FuncMap.clear();
     m_IdentifierMap.clear();
-    m_StructContextMap.clear();
   }
 
   void NameContext::Reset()
@@ -6929,10 +6925,10 @@ namespace UVShader
     return m_pCodeParser->GetLogger();
   }
 
-  GXBOOL NameContext::SetReturnType(GXLPCSTR szTypeName)
+  GXBOOL NameContext::SetReturnType(const RefString& rstrTypeName)
   {
     ASSERT(GetReturnType() == NULL);
-    m_pReturnType = GetType(szTypeName);
+    m_pReturnType = GetType(rstrTypeName);
     return (m_pReturnType != NULL);
   }
 
@@ -7594,11 +7590,12 @@ namespace UVShader
   {
     const NameContext* pRoot = GetRoot(); // 没有局部函数, 所以直接从根查找
 
-    clStringA strFuncName;
-    pFuncName->ToString(strFuncName);
+    RefString rstrFuncName(pFuncName->marker, pFuncName->length);
+    //pFuncName->ToString(strFuncName);
 
-    auto it = pRoot->m_FuncMap.find(strFuncName);
-    while(it != pRoot->m_FuncMap.end() && it->first == strFuncName)
+
+    auto it = pRoot->m_FuncMap.find(rstrFuncName);
+    while(it != pRoot->m_FuncMap.end() && it->first == rstrFuncName)
     {
       if(it->second.sFormalTypes.size() == nFormalCount) {
         aMatchedFunc.push_back(&it->second);
@@ -7631,22 +7628,22 @@ namespace UVShader
     return result.second;
   }
 
-  GXBOOL NameContext::RegisterStructContext(const clStringA& strName, const NameContext* pContext)
+  GXBOOL NameContext::RegisterStructContext(const RefString& rstrName, const NameContext* pContext)
   {
-    auto result = m_StructContextMap.insert(clmake_pair(strName, pContext));
+    auto result = m_StructContextMap.insert(clmake_pair(rstrName, pContext));
     ASSERT(result.second); // RegisterStruct保证不会重复添加结构体定义
     return result.second;
   }
 
-  GXBOOL NameContext::RegisterFunction(const clStringA& strRetType, const clStringA& strName, const TYPEINSTANCE::Array& type_array)
+  GXBOOL NameContext::RegisterFunction(const RefString& rstrRetType, const RefString& rstrName, const TYPEINSTANCE::Array& type_array)
     // const FUNCTION_ARGUMENT* pArguments, int argc)
   {
     ASSERT(m_pParent == NULL);
     FUNCDESC td;
-    td.ret_type = strRetType;
-    td.name = strName; // ptkName->ToString(strName);
+    td.ret_type = rstrRetType;
+    td.name = rstrName; // ptkName->ToString(strName);
 
-    auto it = m_FuncMap.insert(clmake_pair(strName, td));
+    auto it = m_FuncMap.insert(clmake_pair(rstrName, td));
     it->second.sFormalTypes = type_array;
     return TRUE;
   }
@@ -7699,13 +7696,13 @@ namespace UVShader
     return &it->second;
   }
 
-  const NameContext* NameContext::GetStructContext(const clStringA& strName) const
+  const NameContext* NameContext::GetStructContext(const RefString& rstrName) const
   {
-    auto it = m_StructContextMap.find(strName);
+    auto it = m_StructContextMap.find(rstrName);
     return (it != m_StructContextMap.end())
       ? it->second
       : (m_pParent
-        ? m_pParent->GetStructContext(strName)
+        ? m_pParent->GetStructContext(rstrName)
         : NULL);
   }
 
@@ -7952,7 +7949,7 @@ namespace UVShader
       return TRUE;
     }
 
-    const NameContext* pStructCtx = pNameCtx->GetStructContext(name);
+    const NameContext* pStructCtx = pNameCtx->GetStructContext(name.CStr());
     if(pStructCtx == NULL) {
       return FALSE;
     }
