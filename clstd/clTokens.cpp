@@ -412,7 +412,7 @@ namespace clstd
   _TOEKN_TEMPL
     b32 _TOKEN_IMPL::iterator::operator!=(T_LPCSTR pStr) const
   {
-    return (_TStr(pStr).GetLength() != length || clstd::strncmpT(marker, pStr, (int)length));
+    return (strlenT(pStr) != length || clstd::strncmpT(marker, pStr, (int)length));
   }
 
   _TOEKN_TEMPL
