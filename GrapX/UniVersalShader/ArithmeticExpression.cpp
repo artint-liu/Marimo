@@ -78,6 +78,7 @@
 //  const float c[int(t.x) * int(t.y)];
 // HLSL不支持这种声明，uvs也暂时不打算支持这种声明
 // 7.HLSL向量/矩阵比较结果是bool向量类型，GLSL比较结果是bool类型
+// 8.GLSL支持表达式直接使用初始化列表，如“{1,2,3,4,5}[1]”结果是“2”，“float pos = {-0.5,-0.25,0.25,0.5}[int(rtime*br2)%4]*2.;”
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 

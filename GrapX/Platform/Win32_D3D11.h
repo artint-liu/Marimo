@@ -9,7 +9,7 @@
 #include <d3d11shader.h>
 #include <d3dcompiler.h>
 #include <d3dcommon.h>
-#include <DirectXTex.h>
+//#include <DirectXTex.h>
 
 //#define WM_GX_RESETDEVICE (WM_USER + 100)
 

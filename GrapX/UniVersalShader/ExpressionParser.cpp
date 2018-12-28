@@ -6678,7 +6678,7 @@ namespace UVShader
         clStringW strFrom, strTo;
         pTypeFrom->name.ToString(strFrom);
         pTypeTo->name.ToString(strTo);
-        GetLogger()->OutputErrorW(*pLocation, UVS_EXPORT_TEXT(4244, "从“%s”转换到“%s”，可能丢失数据"), strFrom.CStr(), strTo.CStr());
+        GetLogger()->OutputErrorW(*pLocation, UVS_EXPORT_TEXT(_WARNING(4244), "从“%s”转换到“%s”，可能丢失数据"), strFrom.CStr(), strTo.CStr());
       }
       return TRUE;
     }
