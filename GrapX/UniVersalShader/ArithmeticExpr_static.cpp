@@ -687,7 +687,7 @@ namespace UVShader
     {NULL},
   };
 
-  size_t s_nIntrinsicType = countof(s_aIntrinsicType) - 1;
+  size_t s_aIntrinsicType_len = countof(s_aIntrinsicType) - 1;
 
   COMMINTRTYPEDESC s_aBaseType[] =
   {
@@ -701,7 +701,7 @@ namespace UVShader
   //static GXLPCSTR s_ParamArray_Vec3[] = { "vec3", "vec3", "vec3", "vec3" };
   //static GXLPCSTR s_ParamArray_Vec4[] = { "vec4", "vec4", "vec4", "vec4" };
 
-  INTRINSIC_FUNC s_functions[] =
+  INTRINSIC_FUNC s_wildcard_functions[] =
   {
     // 高位含义: 
     // +-----------------------+
@@ -801,6 +801,43 @@ namespace UVShader
     {"mod", INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {NULL},
   };
+
+  BUILDIN_FUNCTION_PROTOTYPE s_functions_prototype[] = {
+    {"float", "determinant", 1, "float2x2"},
+    {"float", "determinant$", 1, "float3x3"}, // 重载函数，如果不是第一个要加一个后缀，确保二分查找可以正确定位到第一个
+    {"float", "determinant$", 1, "float4x4"},
+  };
+
+  size_t s_functions_prototype_len = countof(s_functions_prototype);
+
+#ifdef _DEBUG
+  class OrderChecker
+  {
+  public:
+    OrderChecker();
+  };
+
+
+  OrderChecker::OrderChecker()
+  {
+    for(size_t i = 1; i < s_functions_prototype_len; i++)
+    {
+      const BUILDIN_FUNCTION_PROTOTYPE& a = s_functions_prototype[i - 1];
+      const BUILDIN_FUNCTION_PROTOTYPE& b = s_functions_prototype[i];
+      ASSERT(RefString(a.name) <= RefString(b.name));
+    }
+
+    for(size_t i = 1; i < s_aIntrinsicType_len; i++)
+    {
+      const COMMINTRTYPEDESC& a = s_aIntrinsicType[i - 1];
+      const COMMINTRTYPEDESC& b = s_aIntrinsicType[i];
+      ASSERT(clstd::strcmpT(a.name, b.name) < 0);
+      ASSERT(RefString(a.name) < RefString(b.name));
+    }
+  }
+
+  OrderChecker s_checker; // 自动调用顺序检查
+#endif // #ifdef _DEBUG
 
   // 不对外使用
   //static GXLPCSTR s_Vec3_ParamArray0[] = { STR_FLOAT2, STR_FLOAT };

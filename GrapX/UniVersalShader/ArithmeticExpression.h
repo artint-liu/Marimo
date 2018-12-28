@@ -90,6 +90,7 @@ namespace UVShader
     size_t    m_nLength;
   public:
     RefString();
+    RefString(const clStringA& strStable);
     RefString(CLLPCSTR szStableString);
     RefString(CLLPCSTR pStablePtr, size_t length);
 
@@ -98,6 +99,7 @@ namespace UVShader
     b32 operator==(const RefString& rstr) const;
     b32 operator!=(const RefString& rstr) const;
     b32 operator<(const RefString& rstr) const;
+    b32 operator<=(const RefString& rstr) const;
     b32 operator>(const RefString& rstr) const;
     const ch& operator[](size_t index) const;
     clStringA& ToString(clStringA& str) const;

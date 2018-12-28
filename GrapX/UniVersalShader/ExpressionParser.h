@@ -164,6 +164,14 @@ namespace UVShader
     static int GetTypeTemplateTypeIndex(GXDWORD dwMasks);
   };
 
+  struct BUILDIN_FUNCTION_PROTOTYPE
+  {
+    GXLPCSTR  type;   // 返回值
+    GXLPCSTR  name;   // 函数名(key)
+    size_t    count;
+    GXLPCSTR  formal_param; // 串联形参表，如"float\0float\0"
+  };
+
   // 用来实现向量和矩阵的组合初始化
   // 如: float3(pos.xy, 1)
   //     float4(pos.xy, 1, 1)
@@ -287,7 +295,7 @@ namespace UVShader
 
   protected:
     CodeParser* m_pCodeParser;
-    clStringA m_strName;    // 域名
+    clStringA   m_strName;    // 域名
     const NameContext* m_pParent;     // 默认记录的祖先
     const NameContext* m_pVariParent; // 变量记录的祖先，比如结构体成员NameContext.m_pVariParent应该为空
 
@@ -310,7 +318,7 @@ namespace UVShader
     NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
     State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const TYPEDESC* pTypeDesc, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob);
-    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const clStringA& strType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob);
+    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const RefString& rstrType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob);
   public:
     NameContext(GXLPCSTR szName);
     NameContext(GXLPCSTR szName, const NameContext* pParent, const NameContext* pVariParent = reinterpret_cast<NameContext*>(-1));
@@ -483,7 +491,7 @@ namespace UVShader
 
     struct MACRO
     {
-      typedef clmap<clStringA, MACRO> Dict; // macro 支持重载，所以 key 的名字用 clStringA 来储存, Dict 要求具有排序性
+      typedef clmap<RefString, MACRO> Dict; // macro 支持重载，所以 key 的名字用 clStringA 来储存, Dict 要求具有排序性
       typedef clvector<int>           IntArray;
       //typedef clhash_set<clStringA>   Set;
       MACRO_TOKEN::Array aFormalParams; // 形参
@@ -789,6 +797,7 @@ namespace UVShader
 
     int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList); // -1:出错，0：不匹配，1：匹配
 
+    static GXLPCSTR InferBuildinFunction(const clStringA& strFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError);
     const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferConstructorsInStructType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sArgumentsTypeList, const SYNTAXNODE* pFuncNode); // 扩展语法：结构体构造
     ValueResult TokenToValue(VALUE_CONTEXT& vctx, const TOKEN* pToken) const;

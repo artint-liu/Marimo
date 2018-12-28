@@ -2696,6 +2696,12 @@ GO_NEXT:;
   {
   }
 
+  RefString::RefString(const clStringA& strStable)
+    : m_pStr(strStable.CStr())
+    , m_nLength(strStable.GetLength())
+  {
+  }
+
   RefString& RefString::Set(CLLPCSTR pStablePtr, size_t length)
   {
     m_pStr = pStablePtr;
@@ -2724,6 +2730,11 @@ GO_NEXT:;
   b32 RefString::operator<(const RefString& rstr) const
   {
     return Compare(rstr) < 0;
+  }
+
+  b32 RefString::operator<=(const RefString& rstr) const
+  {
+    return Compare(rstr) <= 0;
   }
 
   b32 RefString::operator>(const RefString& rstr) const
