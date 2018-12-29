@@ -94,10 +94,11 @@ namespace Marimo
   {
     // 这里不能用CLOG_*
     if(bError) {
-      _cl_traceW(szMessage);
+      // 这样写避免szMessage中的转义符
+      _cl_traceW(_CLTEXT("%s"), szMessage);
     }
     else if( ! m_bSilent){
-      _cl_traceW(szMessage);
+      _cl_traceW(_CLTEXT("%s"), szMessage); // 忘了为啥两条一样
     }
   }
 

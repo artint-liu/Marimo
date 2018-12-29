@@ -71,7 +71,13 @@
 // 3.GLSL支持“^^”符号，代表布尔异或，uvs不支持，查了一下，HLSL也没有这个符号。
 // 4.GLSL支持数组的length()方法，uvs支持这个方法
 // 5.GLSL支持数组初始化：
-//  vec4 Scene[] = vec4[](vec4(0, 0, 0, 1), vec4(1, 1, 1, 1), vec4(2, 2, 2, 1));
+//  （1）vec4 Scene[] = vec4[](vec4(0, 0, 0, 1), vec4(1, 1, 1, 1), vec4(2, 2, 2, 1));
+//  （2）const float [] weights = float [] (	0.44198,	0.27901);
+//  （3）sph[] lights = sph[] (
+//         sph(v30, 0., 0, 0),
+//         sph(vec3(-2., 2., 3.), .1, _wht_e, _lit1),
+//         sph(vec3(2., 3., -3.), .5, _rnbw_e, _lit2)
+//         ); // sph是结构体
 // HLSL不支持，uvs不打算支持这种形式。
 // 6.GLSL支持复杂表达式声明数组长度，如：
 //  const vec2 t= vec2(2,3);
@@ -79,6 +85,7 @@
 // HLSL不支持这种声明，uvs也暂时不打算支持这种声明
 // 7.HLSL向量/矩阵比较结果是bool向量类型，GLSL比较结果是bool类型
 // 8.GLSL支持表达式直接使用初始化列表，如“{1,2,3,4,5}[1]”结果是“2”，“float pos = {-0.5,-0.25,0.25,0.5}[int(rtime*br2)%4]*2.;”
+// 9.GLSL支持“struct Ray{vec3 o,d;},_ray;”这样的语法，没测试HLSL是否支持，C++不支持。
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -1599,6 +1606,15 @@ GO_NEXT:;
       else if(szOpcode[0] == '=' && szOpcode[1] == '=') {
         output = (t1 == t2);
       }
+      else if(szOpcode[0] == '!' && szOpcode[1] == '=') {
+        output = (t1 != t2);
+      }
+      else if(szOpcode[0] == '>' && szOpcode[1] == '=') {
+        output = _Ty(t1 >= t2);
+      }
+      else if(szOpcode[0] == '<' && szOpcode[1] == '=') {
+        output = _Ty(t1 <= t2);
+      }
       else {
         return State_UnknownOpcode;
         //TRACE("Unsupport opcode(%c).\n", opcode);
@@ -1614,7 +1630,16 @@ GO_NEXT:;
   {
     if(nOpcodeLen == 1)
     {
-      return State_UnknownOpcode;
+      switch(szOpcode[0])
+      {
+      case '%': output = t1 % t2; break;
+      case '^': output = t1 ^ t2; break;
+      case '&': output = t1 & t2; break;
+      case '|': output = t1 | t2; break;
+      case '~': output = (~t2); break;
+      default:
+        return State_UnknownOpcode;
+      }
     }
     else if(nOpcodeLen == 2)
     {

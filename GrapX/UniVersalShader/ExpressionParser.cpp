@@ -590,7 +590,7 @@ namespace UVShader
             const ArithmeticExpression::MBO& p = s_plus_minus_sign[(int)(it.marker[0] - '+')];
             // 一元操作符，+/-就不转换为正负号
             // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
-            if(l_back == STR_RETURN ||
+            if(l_back == STR_RETURN || l_back == ';' ||
               //(l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary)))
               (l_back.precedence != 0 && l_back != ')' && l_back != ']' && (l_back.unary_mask != UNARY_LEFT_OPERAND)))
             {
@@ -5698,7 +5698,7 @@ namespace UVShader
       vctx.pLogger = GetLogger();
 
       const TYPEDESC* pResultTypeDesc = rInitList.CastToValuePool(vctx, pRefType->pElementType, nTopIndex, index);
-      if(IS_SCALER_CATE(pResultTypeDesc) == FALSE) {
+      if(pResultTypeDesc == NULL || IS_SCALER_CATE(pResultTypeDesc) == FALSE) {
         GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2077, "设定项不能用于标量数组"));
         return NULL;
       }
