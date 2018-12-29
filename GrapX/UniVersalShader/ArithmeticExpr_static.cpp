@@ -45,6 +45,24 @@ namespace UVShader
   GXLPCSTR STR_BOOL3 = "bool3";
   GXLPCSTR STR_BOOL4 = "bool4";
 
+  GXLPCSTR STR_BOOL1x1 = "bool1x1";
+  GXLPCSTR STR_BOOL1x2 = "bool1x2";
+  GXLPCSTR STR_BOOL1x3 = "bool1x3";
+  GXLPCSTR STR_BOOL1x4 = "bool1x4";
+  GXLPCSTR STR_BOOL2x1 = "bool2x1";
+  GXLPCSTR STR_BOOL2x2 = "bool2x2";
+  GXLPCSTR STR_BOOL2x3 = "bool2x3";
+  GXLPCSTR STR_BOOL2x4 = "bool2x4";
+  GXLPCSTR STR_BOOL3x1 = "bool3x1";
+  GXLPCSTR STR_BOOL3x2 = "bool3x2";
+  GXLPCSTR STR_BOOL3x3 = "bool3x3";
+  GXLPCSTR STR_BOOL3x4 = "bool3x4";
+  GXLPCSTR STR_BOOL4x1 = "bool4x1";
+  GXLPCSTR STR_BOOL4x2 = "bool4x2";
+  GXLPCSTR STR_BOOL4x3 = "bool4x3";
+  GXLPCSTR STR_BOOL4x4 = "bool4x4";
+
+
   GXLPCSTR STR_INT1x1 = "int1x1";
   GXLPCSTR STR_INT1x2 = "int1x2";
   GXLPCSTR STR_INT1x3 = "int1x3";
@@ -567,27 +585,43 @@ namespace UVShader
 
   COMMINTRTYPEDESC s_aIntrinsicType[] =
   {
-    {STR_BOOL,  STR_BOOL,   VALUE::Rank_Signed, TYPEDESC::TypeCate_IntegerScaler},
-    {STR_BOOL2, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector2, OnVectorSubscript},
-    {STR_BOOL3, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector3, OnVectorSubscript},
-    {STR_BOOL4, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector4, OnVectorSubscript},
+    {STR_BOOL,    STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_IntegerScaler},
+    {STR_BOOL1x1, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL1x2, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL1x3, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL1x4, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL2,   STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector2, OnVectorSubscript},
+    {STR_BOOL2x1, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL2x2, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL2x3, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL2x4, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL3,   STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector3, OnVectorSubscript},
+    {STR_BOOL3x1, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL3x2, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL3x3, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL3x4, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL4,   STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Vector, OnVector4, OnVectorSubscript},
+    {STR_BOOL4x1, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL4x2, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL4x3, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
+    {STR_BOOL4x4, STR_BOOL, VALUE::Rank_Signed, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
 
-    {STR_DOUBLE, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_FloatScaler},
+    {STR_DOUBLE,    STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_FloatScaler},
     {STR_DOUBLE1x1, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE1x2, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE1x3, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE1x4, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_DOUBLE2, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Vector, OnVector2, OnVectorSubscript},
+    {STR_DOUBLE2,   STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Vector, OnVector2, OnVectorSubscript},
     {STR_DOUBLE2x1, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE2x2, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE2x3, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE2x4, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_DOUBLE3, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Vector, OnVector3, OnVectorSubscript},
+    {STR_DOUBLE3,   STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Vector, OnVector3, OnVectorSubscript},
     {STR_DOUBLE3x1, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE3x2, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE3x3, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE3x4, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
-    {STR_DOUBLE4, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Vector, OnVector4, OnVectorSubscript},
+    {STR_DOUBLE4,   STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Vector, OnVector4, OnVectorSubscript},
     {STR_DOUBLE4x1, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE4x2, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},
     {STR_DOUBLE4x3, STR_DOUBLE, VALUE::Rank_Double, TYPEDESC::TypeCate_Matrix, NULL, OnMatrixSubscript},

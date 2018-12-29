@@ -174,6 +174,8 @@ namespace UVShader
   const size_t STR_FLOAT_LENGTH  = clstd::strlenT(STR_FLOAT);
   const size_t STR_DOUBLE_LENGTH = clstd::strlenT(STR_DOUBLE);
 
+  const GXLPCSTR STR_RETURN = "return";
+
   static b32 s_bParserBreak = TRUE;
   static b32 s_bParserAssert = TRUE;
   static b32 s_bDumpSyntaxTree = TRUE;
@@ -588,7 +590,7 @@ namespace UVShader
             const ArithmeticExpression::MBO& p = s_plus_minus_sign[(int)(it.marker[0] - '+')];
             // 一元操作符，+/-就不转换为正负号
             // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
-            if(l_back == "return" ||
+            if(l_back == STR_RETURN ||
               //(l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary)))
               (l_back.precedence != 0 && l_back != ')' && l_back != ']' && (l_back.unary_mask != UNARY_LEFT_OPERAND)))
             {
@@ -598,7 +600,7 @@ namespace UVShader
           else if(it.length == 2 && (it.marker[1] == '-' || it.marker[1] == '+'))
           {
             // "++","--" 默认按照前缀操作符处理, 这里检查是否转换为后缀操作符
-            if(l_back.IsIdentifier()) {
+            if(l_back.IsIdentifier() && l_back != STR_RETURN) {
               const auto& p = s_UnaryLeftOperand[(int)(it.marker[0] - '+')];
               it->SetArithOperatorInfo(p);
             }
@@ -2416,7 +2418,7 @@ namespace UVShader
       break;
 
     case SYNTAXNODE::MODE_Return:
-      ASSERT(str[0] == "return");
+      ASSERT(str[0] == STR_RETURN);
       strOut.Format("return %s", str[1]);
       break;
 
@@ -2582,7 +2584,7 @@ namespace UVShader
       eMode = SYNTAXNODE::MODE_Flow_Discard;
       pend = scope.begin + 2;
     }
-    else if(front == "return")
+    else if(front == STR_RETURN)
     {
       eMode = SYNTAXNODE::MODE_Return;
       pend = scope.begin + 2;
@@ -6453,6 +6455,7 @@ namespace UVShader
         }
 
         vctx.pType = vctx.name_ctx.GetType(strTypeName.CStr());
+        ASSERT(vctx.pType);
       }
       else
       {
@@ -7497,7 +7500,7 @@ namespace UVShader
     clStringA strTypeName;
     rstrBaseType.ToString(strTypeName);
 
-    TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, this };
+    TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, pBaseTypeDesc->pNameCtx };
     //td.name = rstrBaseType;
     td.pElementType = pBaseTypeDesc;
     td.pDesc = pBaseTypeDesc->pDesc;
@@ -7509,8 +7512,6 @@ namespace UVShader
 
       ASSERT(*it != 0 || (&*it == &sDimensions.back()));
 
-      //auto result = sCurrentTypeMap.insert(clmake_pair(td.name, td));
-      //RefString rstrName(m_pCodeParser->GetUniqueString(td.name), td.name.GetLength());
       auto result = sCurrentTypeMap.insert(clmake_pair(td.name, td));
       td.pElementType = &result.first->second;
     }
