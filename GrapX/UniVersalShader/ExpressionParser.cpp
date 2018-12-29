@@ -263,6 +263,10 @@ namespace UVShader
   extern size_t s_aIntrinsicType_len;
   extern COMMINTRTYPEDESC s_aBaseType[];
   extern INTRINSIC_FUNC s_wildcard_functions[];
+  extern size_t s_wildcard_functions_len;
+  extern INTRINSIC_FUNC s_wildcard_unary_functions[];
+  extern size_t s_wildcard_unary_functions_len;
+
   extern PERCOMPONENTMATH s_PreComponentMath[];
 
   extern BUILDIN_FUNCTION_PROTOTYPE s_functions_prototype[];
@@ -5017,6 +5021,131 @@ namespace UVShader
     return NULL;
   }
 
+  GXBOOL CodeParser::InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx,
+    const clStringA& strFunctionName,
+    const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList)
+  {
+    //CHECK_VALUE_CONTEXT;
+    ASSERT(sExprList.size() == sArgumentsTypeList.size());
+
+    if(sExprList.size() == 1)
+    {
+      if(InferBuildinFunction_WildcardTable( // 一个参数函数原型
+        s_wildcard_unary_functions, s_wildcard_unary_functions_len,
+        vctx, strFunctionName, sExprList, sArgumentsTypeList) == FALSE) {
+        return FALSE;
+      }
+    }
+    else if(InferBuildinFunction_WildcardTable( // 多参数函数原型
+      s_wildcard_functions, s_wildcard_functions_len,
+      vctx, strFunctionName, sExprList, sArgumentsTypeList) == FALSE)
+    {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  GXBOOL CodeParser::InferBuildinFunction_WildcardTable(
+    INTRINSIC_FUNC* pFunctionsTable, size_t nTableLen, 
+    VALUE_CONTEXT& vctx,
+    const clStringA& strFunctionName,
+    const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList)
+  {
+    // 出错返回 FALSE，正常状态返回TRUE，根据vctx确定是否有结果
+
+    ASSERT(vctx.pType == NULL); // 外部保证这个，至少应该清理一下
+
+    const TYPEDESC* pRetType = NULL;
+
+    for(int i = 0; pFunctionsTable[i].name != NULL; i++)
+    {
+      if(strFunctionName == pFunctionsTable[i].name)
+      {
+        if(sArgumentsTypeList.size() == pFunctionsTable[i].count)
+        {
+          size_t n = 0;
+          auto iter_type = sArgumentsTypeList.begin();
+          auto iter_expr = sExprList.begin();
+          for(; n < pFunctionsTable[i].count; n++, ++iter_type, ++iter_expr)
+          {
+            const TYPEDESC* pTypeDesc = *iter_type; // InferType(sNameSet, *it);
+            if(pTypeDesc)
+            {
+              ASSERT(pFunctionsTable[i].type > INTRINSIC_FUNC::RetType_Last);
+              if(pFunctionsTable[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
+                pRetType = pTypeDesc;
+              }
+              else if(//pFunctionsTable[i].type == INTRINSIC_FUNC::RetType_FromName ||
+                pFunctionsTable[i].type == INTRINSIC_FUNC::RetType_Bool ||
+                pFunctionsTable[i].type == INTRINSIC_FUNC::RetType_Float4)
+              {
+              }
+              else if(pFunctionsTable[i].type == n) {
+                pRetType = pTypeDesc;
+              }
+              else if(pFunctionsTable[i].type < 0 || n >= pFunctionsTable[i].count) {
+                CLBREAK;
+              }
+
+              if(TEST_FLAG(pFunctionsTable[i].params[n], 8)) // out 修饰
+              {
+                // FIXME: 如果没有重载或者有重载并且形参数唯一匹配,才输出这条错误消息
+                if(iter_expr->IsNode()) {
+                  //error C2664: “UVShader::sincos”: 不能将参数 2 从“float”转换为“float &”
+                  clStringW strFunc = pFunctionsTable[i].name;
+                  GetLogger()->OutputErrorW(iter_expr->pNode->GetAnyTokenAPB(),
+                    UVS_EXPORT_TEXT(2664, "“%s”: 参数 %d 不能使用“out”修饰"),
+                    strFunc.CStr(), n); // TODO: 没有testcase
+                  return FALSE;
+                }
+              }
+
+              // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
+              if(TryTypeCasting(vctx.name_ctx, (GXDWORD)pFunctionsTable[i].params[n], pTypeDesc, iter_expr->GetFrontToken())) {
+                continue;
+              }
+              break;
+            }
+            else {
+              return FALSE;
+            }
+          } // for
+
+          if(n == pFunctionsTable[i].count) {
+            if(pFunctionsTable[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
+              vctx.pType = vctx.name_ctx.GetType(pRetType->pDesc->component_type);
+            }
+            else if(pFunctionsTable[i].type == INTRINSIC_FUNC::RetType_Bool) {
+              vctx.pType = vctx.name_ctx.GetType(STR_BOOL);
+            }
+            else if(pFunctionsTable[i].type == INTRINSIC_FUNC::RetType_Float4) {
+              vctx.pType = vctx.name_ctx.GetType(STR_FLOAT4);
+            }
+            else if(pFunctionsTable[i].type >= 0 && pFunctionsTable[i].type < (int)sArgumentsTypeList.size()) {
+              auto iter_type = sArgumentsTypeList.begin();
+              int index = 0;
+              while(index < pFunctionsTable[i].type) {
+                ++iter_type;
+                ++index;
+              }
+              vctx.pType = *iter_type;
+            }
+            else {
+              CLBREAK;
+            }
+
+            vctx.ClearValueOnly();
+            vctx.result = ValueResult_OK;
+            //vctx.pType = pRetType;
+            //return vctx.pType; //sNameSet.GetType(s_wildcard_functions[i].type);
+          }
+        }
+      }
+    }
+    return TRUE;
+  }
+
   const TYPEDESC* CodeParser::InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode)
   {
     CHECK_VALUE_CONTEXT;
@@ -5119,118 +5248,22 @@ namespace UVShader
     }
 
     // 通配符形式的内部函数列表
-    for(int i = 0; s_wildcard_functions[i].name != NULL; i++)
-    {
-      if(strFunctionName == s_wildcard_functions[i].name)
-      {
-        if(sArgumentsTypeList.size() == s_wildcard_functions[i].count)
-        {
-          size_t n = 0;
-          auto it = sArgumentsTypeList.begin();
-          auto it_expr = sExprList.begin();
-          for(; n < s_wildcard_functions[i].count; n++, ++it, ++it_expr)
-          {
-            const TYPEDESC* pTypeDesc = *it; // InferType(sNameSet, *it);
-            if(pTypeDesc)
-            {
-              ASSERT(s_wildcard_functions[i].type > INTRINSIC_FUNC::RetType_Last);
-              if(s_wildcard_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
-                pRetType = pTypeDesc;
-              }
-              else if(//s_wildcard_functions[i].type == INTRINSIC_FUNC::RetType_FromName ||
-                s_wildcard_functions[i].type == INTRINSIC_FUNC::RetType_Bool ||
-                s_wildcard_functions[i].type == INTRINSIC_FUNC::RetType_Float4)
-              {
-              }
-              else if(s_wildcard_functions[i].type == n) {
-                pRetType = pTypeDesc;
-              }
-              else if(s_wildcard_functions[i].type < 0 || n >= s_wildcard_functions[i].count) {
-                CLBREAK;
-              }
-
-              if(TEST_FLAG(s_wildcard_functions[i].params[n], 8)) // out 修饰
-              {
-                // FIXME: 如果没有重载或者有重载并且形参数唯一匹配,才输出这条错误消息
-                if(it_expr->IsNode()) {
-                  //error C2664: “UVShader::sincos”: 不能将参数 2 从“float”转换为“float &”
-                  clStringW strFunc = s_wildcard_functions[i].name;
-                  GetLogger()->OutputErrorW(it_expr->pNode->GetAnyTokenAPB(),
-                    UVS_EXPORT_TEXT(2664, "“%s”: 参数 %d 不能使用“out”修饰"),
-                    strFunc.CStr(), n); // TODO: 没有testcase
-                  return NULL;
-                }
-              }
-
-              // TODO: TryTypeCasting 最后这个参数只是大致定位,改为更准确的!
-              if(TryTypeCasting(vctx.name_ctx, (GXDWORD)s_wildcard_functions[i].params[n], pTypeDesc, pFuncNode->Operand[0].pTokn)) {
-                continue;
-              }
-              break;
-            }
-            else {
-              return NULL;
-            }
-          }
-
-          if(n == s_wildcard_functions[i].count) {
-            if(s_wildcard_functions[i].type == INTRINSIC_FUNC::RetType_Scaler0) {
-              vctx.pType = vctx.name_ctx.GetType(pRetType->pDesc->component_type);
-            }
-            else if(s_wildcard_functions[i].type == INTRINSIC_FUNC::RetType_Bool) {
-              vctx.pType = vctx.name_ctx.GetType(STR_BOOL);
-            }
-            else if(s_wildcard_functions[i].type == INTRINSIC_FUNC::RetType_Float4) {
-              vctx.pType = vctx.name_ctx.GetType(STR_FLOAT4);
-            }
-            else if(s_wildcard_functions[i].type >= 0 && s_wildcard_functions[i].type < (int)sArgumentsTypeList.size()) {
-              auto iter_type = sArgumentsTypeList.begin();
-              int index = 0;
-              while(index < s_wildcard_functions[i].type) {
-                ++iter_type;
-                ++index;
-              }
-              vctx.pType = *iter_type;
-            }
-            else {
-              CLBREAK;
-            }
-
-            vctx.ClearValueOnly();
-            vctx.result = ValueResult_OK;
-            //vctx.pType = pRetType;
-            return vctx.pType; //sNameSet.GetType(s_wildcard_functions[i].type);
-          }
-        }
-      }
+    if(InferBuildinFunction_Wildcard(vctx, strFunctionName, sExprList, sArgumentsTypeList) == FALSE) {
+      return NULL;
+    }
+    else if(vctx.pType) {
+      return vctx.pType;
     }
 
     // 确切参数类型的函数列表
     const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(strFunctionName);
 
-    //for(int i = 0; s_PreComponentMath[i].name != NULL; i++)
-    //{
     if(pPreCompMath)
     {
       int nScalerCount = 0;
       for(auto it = sArgumentsTypeList.begin(); it != sArgumentsTypeList.end(); ++it)
       {
         const TYPEDESC* pTypeDesc = *it; // InferType(sNameSet, *it);
-        //int R, C;
-
-        //pTypeDesc->Resolve(R, C);
-        //if(C == 0) // pTypeDesc必须是标量或者向量
-        //{
-        //  if(R == 0) {
-        //    nScalerCount++;
-        //  }
-        //  else {
-        //    nScalerCount += R;
-        //  }
-        //}
-        //else {
-        //  break;
-        //}
         nScalerCount += pTypeDesc->CountOf();
       }
 
@@ -6363,7 +6396,7 @@ namespace UVShader
         if(R2 == C1) {
           // R1 x C2
           strTypeName.Append(pFirst->pElementType->name.GetPtr(), pFirst->pElementType->name.GetLength());
-          strTypeName.AppendFormat("%dx%s", R1, C2);
+          strTypeName.AppendFormat("%dx%d", R1, C2);
           pResultType = m_GlobalCtx.GetType(strTypeName.CStr());
           ASSERT(pResultType);
         }
