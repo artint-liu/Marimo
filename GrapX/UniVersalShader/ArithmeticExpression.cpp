@@ -86,6 +86,14 @@
 // 7.HLSL向量/矩阵比较结果是bool向量类型，GLSL比较结果是bool类型
 // 8.GLSL支持表达式直接使用初始化列表，如“{1,2,3,4,5}[1]”结果是“2”，“float pos = {-0.5,-0.25,0.25,0.5}[int(rtime*br2)%4]*2.;”
 // 9.GLSL支持“struct Ray{vec3 o,d;},_ray;”这样的语法，没测试HLSL是否支持，C++不支持。
+// 10.GLSL有#elseif预处理指令，HLSL似乎只有#elif
+// 11.HLSL 不支持switch case语法：
+//     int n = 0, m = 0;
+//     switch(n)
+//     {
+//     case 0: n = 2; break;
+//     case 1: n = 2; if(m == 1) { case 2: n = 3; } break;
+//     }
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 

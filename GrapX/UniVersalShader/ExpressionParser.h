@@ -69,6 +69,7 @@ namespace UVShader
   {
     typedef cllist<const TYPEDESC*> CPtrList;
     typedef clvector<TYPEDESC> Array;
+    typedef clvector<const TYPEDESC*> CPtrArray;
     enum TypeCate
     {
       TypeCate_Empty,
@@ -162,6 +163,11 @@ namespace UVShader
     u16*      params;
 
     static int GetTypeTemplateTypeIndex(GXDWORD dwMasks);
+    int GetTemplateID(size_t nParamIndex) const
+    {
+      ASSERT(nParamIndex < count);
+      return ((params[nParamIndex] & 0xE000) >> 13);
+    }
   };
 
   struct BUILDIN_FUNCTION_PROTOTYPE
@@ -800,6 +806,7 @@ namespace UVShader
     static GXLPCSTR InferBuildinFunction(const clStringA& strFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError);
     GXBOOL InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx, const clStringA& strFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
     GXBOOL InferBuildinFunction_WildcardTable(INTRINSIC_FUNC* pFunctionsTable, size_t nTableLen, VALUE_CONTEXT& vctx, const clStringA& strFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
+    GXBOOL ExtendParamDimension(TYPEDESC::CPtrArray& aExtendArgumentTypes, const INTRINSIC_FUNC& test_func, const TYPEDESC::CPtrList& sArgumentsTypeList);
     const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferConstructorsInStructType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sArgumentsTypeList, const SYNTAXNODE* pFuncNode); // 扩展语法：结构体构造
     ValueResult TokenToValue(VALUE_CONTEXT& vctx, const TOKEN* pToken) const;

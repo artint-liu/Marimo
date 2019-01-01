@@ -738,11 +738,11 @@ namespace UVShader
   INTRINSIC_FUNC s_wildcard_functions[] =
   {
     // 高位含义: 
-    // +-----------------------+
-    // |15|14|13|12|11|10| 9| 8|
-    // +-----------------------+
-    // | tempid | I| B| ------ |
-    // +-----------------------+
+    // +-----------------------+-----------------------+
+    // |15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1| 0|
+    // +-----------------------+-----------------------+
+    // | tempid | I| B| ------ | O| C| 3| 2| 1| M| V| S|
+    // +-----------------------+-----------------------+
     // tempid: 模板类型id，相同id的形参类型也相同
     // I:Scaler/Vector/Matrix的分量可以是整数类型（浮点类型默认支持）
     // B:Scaler/Vector/Matrix的分量可以是布尔类型
@@ -766,6 +766,8 @@ namespace UVShader
 #define ARG_SamplerCube  "\x40\x00"
 #define ARG_OutMatVecSca "\x87\x00"
 
+#define ARG_Scaler1      "\x01\x20"
+
     {"atan2",       INTRINSIC_FUNC::RetType_Argument1, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"clamp",       INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca},
     {"cross",       INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
@@ -778,7 +780,7 @@ namespace UVShader
     {"pow",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
 
     {"reflect",     INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
-    {"refract",     INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_Vector ARG_Vector ARG_Scaler},
+    {"refract",     INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_Vector ARG_Vector ARG_Scaler1},
     {"sincos",      INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_OutMatVecSca ARG_OutMatVecSca},
     {"smoothstep",  INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
     {"step",        INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
