@@ -744,6 +744,8 @@ namespace UVShader
     TKSCOPE::TYPE  ParseFlowFor(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc);
     TKSCOPE::TYPE  ParseFlowWhile(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc);
     TKSCOPE::TYPE  ParseFlowDoWhile(const NameContext& sParentSet, const TKSCOPE& scope, GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowSwitch(const NameContext& sParentCtx, const TKSCOPE& scope, GLOB* pDesc);
+    TKSCOPE::TYPE  ParseFlowCase(const NameContext& sParentCtx, const TKSCOPE& scope, GLOB* pDesc);
     TKSCOPE::TYPE  ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDesc);
     TKSCOPE::TYPE  ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, int* pSignatures, int* pDefinition);
 

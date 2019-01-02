@@ -2520,6 +2520,10 @@ namespace UVShader
       pend = ParseFlowDoWhile(sNameSet, scope, pDesc);
       ASSERT(pend == TKSCOPE::npos || m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
     }
+    else if(front == "switch") {
+      pend = ParseFlowSwitch(sNameSet, scope, pDesc);
+      ASSERT(pend == TKSCOPE::npos || m_aTokens[pend - 1] == ';' || m_aTokens[pend - 1] == '}');
+    }
     else if(front == "typedef") {
       pend = ParseTypedef(sNameSet, scope, pDesc);
       ASSERT(pend == TKSCOPE::npos || m_aTokens[pend - 1] == ';');
@@ -2566,23 +2570,24 @@ namespace UVShader
       if(TEST_FLAG_NOT(sNameSet.allow_keywords, KeywordFilter_case)) {
         GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(2046, "非法 case"));
       }
+      
+      pend = ParseFlowCase(sNameSet, scope, pDesc);
+      //TKSCOPE::TYPE i = scope.begin + 1;
+      //for(; i < scope.end; i++)
+      //{
+      //  if(m_aTokens[i] == ':') {
+      //    break;
+      //  }
+      //}
 
-      TKSCOPE::TYPE i = scope.begin + 1;
-      for(; i < scope.end; i++)
-      {
-        if(m_aTokens[i] == ':') {
-          break;
-        }
-      }
-
-      if(i == scope.end) {
-        GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5025, "case 结尾缺少“:”"));
-        pend = scope.begin + 1;
-      }
-      else {
-        pend = i + 1;
-      }
-      eMode = SYNTAXNODE::MODE_Flow_Case;
+      //if(i == scope.end) {
+      //  GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5025, "case 结尾缺少“:”"));
+      //  pend = scope.begin + 1;
+      //}
+      //else {
+      //  pend = i + 1;
+      //}
+      //eMode = SYNTAXNODE::MODE_Flow_Case;
     }
     else if(front == "discard") {
       eMode = SYNTAXNODE::MODE_Flow_Discard;
@@ -2592,11 +2597,6 @@ namespace UVShader
     {
       eMode = SYNTAXNODE::MODE_Return;
       pend = scope.begin + 2;
-    }
-    else if(front == "switch") {
-      GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5026, "暂时不支持“switch”关键字"));
-      pend = scope.begin + 1;
-      return FALSE;
     }
     else {
       bret = FALSE;
@@ -2975,6 +2975,104 @@ namespace UVShader
     }
 
     return bret ? while_end : TKSCOPE::npos;
+  }
+
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowSwitch(const NameContext& sParentCtx, const TKSCOPE& scope, GLOB* pDesc)
+  {
+    ASSERT(m_aTokens[scope.begin] == "switch");
+    // switch(x) {...} 6 个token
+    if(scope.begin + 6 > scope.end) {
+      GetLogger()->OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5070, "switch ... case 意外的结束"));
+      return TKSCOPE::npos;
+    }
+
+    if(m_aTokens[scope.begin + 1].scope == TKSCOPE::npos || m_aTokens[scope.begin + 1] != '(')
+    {
+      GetLogger()->OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5071, "switch 语法错误：没有正确的条件表达式"));
+      return TKSCOPE::npos;
+    }
+
+    const TOKEN& tkStateBlockBegin = m_aTokens[m_aTokens[scope.begin + 1].scope + 1];
+    if(tkStateBlockBegin.scope == TKSCOPE::npos || tkStateBlockBegin != '{')
+    {
+      GetLogger()->OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5072, "switch 语法错误：条件表达式后需要代码块"));
+      return TKSCOPE::npos;
+    }
+
+    TKSCOPE sConditional(scope.begin + 2, m_aTokens[scope.begin + 1].scope);
+    TKSCOPE sStatementBlock(sConditional.end + 1, tkStateBlockBegin.scope + 1);
+    GLOB A = { 0 }, B = { 0 };
+
+    if(sConditional.end > scope.end || sStatementBlock.end > scope.end)
+    {
+      GetLogger()->OutputErrorW(m_aTokens[scope.begin], UVS_EXPORT_TEXT(5070, "switch ... case 意外的结束"));
+      return TKSCOPE::npos;
+    }
+
+    NameContext sSwitchCtx("switch", &sParentCtx); // 只是转换const修饰，理论上switch上下文不会注册变量，函数和类型，它的子集可以。
+
+    GXBOOL bret = ParseArithmeticExpression(0, sConditional, &A);
+    bret = bret && ParseToChain(B, &sSwitchCtx, sStatementBlock);
+    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_Switch, NULL, &A, &B);
+
+    return bret ? sStatementBlock.end : scope.end;
+  }
+
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowCase(const NameContext& sParentCtx, const TKSCOPE& scope, GLOB* pDesc)
+  {
+    ASSERT(m_aTokens[scope.begin] == "case");
+    const TOKEN& front = m_aTokens[scope.begin];
+
+    TKSCOPE::TYPE i = scope.begin + 1;
+    // 避免“...?...:...”三元操作符被解释为“case ...:”
+    while(i < scope.end && (m_aTokens[i] != ':' || m_aTokens[i].scope == 0)) {
+      i++;
+    }
+
+    if(i == scope.end) {
+      GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5025, "case 结尾缺少“:”"));
+      return scope.end;
+    }
+
+    GLOB A = { 0 }, B = { 0 }, C = { 0 };
+    TKSCOPE sCaseConditional(scope.begin + 1, i);
+
+    GXBOOL bret = ParseArithmeticExpression(0, sCaseConditional, &A);
+    GLOB* pCurrGlob = &B;
+    TKSCOPE step_scope = {i + 1, scope.end}; // 跳过"case"
+
+    NameContext sCaseCtx("case", &sParentCtx);
+
+    while(step_scope.GetSize() > 0 && m_aTokens[step_scope.begin] != "case")
+    {
+      C.ptr = NULL;
+
+      const TKSCOPE::TYPE pos = TryParseSingle(&sCaseCtx, C, step_scope);
+      if(pos == TKSCOPE::npos) {
+        return scope.end;
+      }
+      else if(pos == step_scope.begin + 1) {
+        if(m_aTokens[step_scope.begin] != ';') { // 步进一次只可能是遇到了单独的分号
+          return scope.end;
+        }
+        step_scope.begin = pos;
+        continue;
+      }
+
+      MakeSyntaxNode(pCurrGlob, SYNTAXNODE::MODE_Chain, &C, NULL);
+      if(C.IsNode() && C.pNode->mode == SYNTAXNODE::MODE_Definition)
+      {
+        clStringW strW;
+        GetLogger()->OutputErrorW(m_aTokens[step_scope.begin], UVS_EXPORT_TEXT(2360, "“%s”的初始化操作由“case”标签跳过"), C.GetFrontToken()->ToString(strW).CStr());
+        return scope.end;
+      }
+
+      step_scope.begin = pos;
+      pCurrGlob = &pCurrGlob->pNode->Operand[1];
+    }
+
+    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_Case, NULL, &A, &B);
+    return bret ? step_scope.begin : scope.end;
   }
 
   CodeParser::TKSCOPE::TYPE CodeParser::ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDest)
@@ -4753,6 +4851,10 @@ namespace UVShader
       InferFunctionReturnedType(vctx, pNode);
       return FALSE; // 不再遍历后面的节点
     }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_Switch)
+    {
+      return FALSE;
+    }
 
     PARSER_BREAK(pNode); // 应该处理 pNode->mode
     return TRUE;
@@ -5557,7 +5659,8 @@ namespace UVShader
         const TYPEDESC* pSource = InferType(vctx, pNode->Operand[1]);
         if(TryReinterpretCasting(pCastTypeDesc, pSource, pNode->Operand[0].pTokn))
         {
-          return pCastTypeDesc;
+          vctx.pType = pCastTypeDesc;
+          return vctx.pType;
         }
       }
       else {

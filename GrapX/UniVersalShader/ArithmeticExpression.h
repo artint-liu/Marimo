@@ -373,11 +373,12 @@ namespace UVShader
       MODE_Flow_For,            // for(A) {B} [[MODE_Flow_ForInit] [MODE_Flow_ForRunning]] [statement block]
       MODE_Flow_ForInit,        // for 的初始化部分 [MODE_Flow_ForInit] [MODE_Flow_ForRunning]
       MODE_Flow_ForRunning,     // for 的条件和步进部分
+      MODE_Flow_Switch,         // switch(A) {B}
+      MODE_Flow_Case,           // case A: B
 
       MODE_Flow_DoWhile,        // do{B}while(A)
       MODE_Flow_Break,
       MODE_Flow_Continue,
-      MODE_Flow_Case,           // 只检查,不支持
       MODE_Flow_Discard,
       MODE_Return,              // A="return" B
       MODE_Block,               // {A}B, B只可能是';'
