@@ -803,7 +803,7 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
 
-    int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList); // -1:出错，0：不匹配，1：匹配
+    int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList, GXBOOL bTolerance); // -1:出错，0：不匹配，1：匹配, bTolerance 更宽容的匹配
 
     static GXLPCSTR InferBuildinFunction(const clStringA& strFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError);
     GXBOOL InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx, const clStringA& strFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);

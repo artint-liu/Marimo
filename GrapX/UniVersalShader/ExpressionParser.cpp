@@ -799,9 +799,13 @@ namespace UVShader
     case VALUE::State_IllegalNumber:
       pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(5038, "非法的数字：“%s”", pLogger), pToken->ToString(strW).CStr());
       break;
-    case VALUE::State_DivideByZero:
+    case VALUE::State_DivideByZeroF: // 浮点数
       // error C2124 : 被零除或对零求模
       pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(_WARNING(2124), "被零除或对零求模", pLogger));
+      return FALSE;
+    case VALUE::State_DivideByZeroI: // 整数
+      // error C2124 : 被零除或对零求模
+      pLogger->OutputErrorW(*pToken, UVS_EXPORT_TEXT2(2124, "被零除或对零求模", pLogger));
       return FALSE;
     case VALUE::State_BadIdentifier: // 内部输出
       break;
@@ -5027,27 +5031,33 @@ namespace UVShader
     // 返回ERROR_TYPEDESC表示语法出现错误而失败
     // 返回NULL表示没找到匹配函数
 
+    static GXBOOL bTolerance[2] = {FALSE, TRUE}; // 第一次严格匹配，防止找到重载函数，如果找不到第二遍放宽匹配条件
     cllist<const FUNCDESC*> aUserFunc;
     sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sTypeList.size(), aUserFunc);
-    for (auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
+    
+    for (int n = aUserFunc.size() > 1 ? 0 : 1; n < 2; n++)
     {
-      //int i = 0;
-      //size_t nConfirm = 0;
-      ASSERT((*iter_func)->sFormalTypes.size() == sTypeList.size());
-      int result = CompareFunctionArguments(sNameSet, pFuncNode->Operand[0].pTokn, (*iter_func)->sFormalTypes, sTypeList);
-      if(result == -1) {
-        return ERROR_TYPEDESC;
-      }
-      else if(result == 1) {
-        return sNameSet.GetType((*iter_func)->ret_type);
+      for(auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
+      {
+        //int i = 0;
+        //size_t nConfirm = 0;
+        ASSERT((*iter_func)->sFormalTypes.size() == sTypeList.size());
+        int result = CompareFunctionArguments(sNameSet, pFuncNode->Operand[0].pTokn, (*iter_func)->sFormalTypes, sTypeList, bTolerance[n]);
+        if(result == -1) {
+          return ERROR_TYPEDESC;
+        }
+        else if(result == 1) {
+          return sNameSet.GetType((*iter_func)->ret_type);
+        }
       }
     }
     return NULL;
   }
 
-  int CodeParser::CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList)
+  int CodeParser::CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList, GXBOOL bTolerance)
   {
     // -1:出错，0：不匹配，1：匹配
+    // bTolerance = TRUE 更宽容的匹配，float可以映射为float2以上的类型
     int i = 0;
     for(auto iter_arg = sCallTypeList.begin(); iter_arg != sCallTypeList.end(); ++iter_arg, ++i)
     {
@@ -5067,10 +5077,7 @@ namespace UVShader
       {
         return -1; // 无法推导参数类型
       }
-      else if(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, sFormalTypes[i].pLocation, TRUE)) {//pFuncNode->Operand[0].pTokn)) {
-        //nConfirm++;
-      }
-      else {
+      else if(_CL_NOT_(TryTypeCasting(pFormalTypeDesc, pArgumentTypeDesc, sFormalTypes[i].pLocation, !(bTolerance)))) {
         return 0;
       }
     }
@@ -6898,7 +6905,7 @@ namespace UVShader
         return TRUE;
       }
     }
-    else if(IS_STRUCT_CATE(pTypeTo) && IS_SCALER_CATE(pTypeFrom) && bFormalParam == FALSE) // [Doc\函数\参数] 在函数调用时不会使用隐式类型扩展（如float扩展为float3）
+    else if(IS_VECMAT_CATE(pTypeTo) && IS_SCALER_CATE(pTypeFrom) && bFormalParam == FALSE) // [Doc\函数\参数] 在函数调用时不会使用隐式类型扩展（如float扩展为float3）
     {
       return (pTypeTo->pDesc && pTypeTo->pDesc->component_type &&
         CompareScaler(pTypeFrom->name, pTypeTo->pDesc->component_type));

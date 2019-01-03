@@ -277,7 +277,8 @@ namespace UVShader
       State_BadOpcode     = 0x10000000, // 错误的操作符
       State_IllegalNumber = 0x08000000, // 非法数字, 入8进制下的"05678"
       State_BadIdentifier = 0x04000000, // 找不到标识符
-      State_DivideByZero  = 0x02000000, // 除零
+      State_DivideByZeroF = 0x02000000, // 浮点除零（结果无穷大，警告）
+      State_DivideByZeroI = 0x01000000, // 整数除零（结果未定义，错误）
     };
 
     enum Rank {

@@ -1595,7 +1595,7 @@ GO_NEXT:;
       case '/':
         output = t1 / t2;
         if(t2 == 0) {
-          return State_DivideByZero;
+          return State_DivideByZeroF;
         }
         break;
       default:
@@ -1646,6 +1646,13 @@ GO_NEXT:;
       case '&': output = t1 & t2; break;
       case '|': output = t1 | t2; break;
       case '~': output = (~t2); break;
+      case '/':
+        if(t2 == 0) {
+          output = ~(_Ty)0;
+          return State_DivideByZeroI;
+        }
+        output = t1 / t2;
+        break;
       default:
         return State_UnknownOpcode;
       }
@@ -1702,15 +1709,15 @@ GO_NEXT:;
       state = CalculateT(fValue, szOpcode, nOpcodeLen, fValue, second.fValue);
     }
     else if(type == Rank_Unsigned) {
-      state = CalculateT(uValue, szOpcode, nOpcodeLen, uValue, second.uValue);
+      state = CalculateIT(uValue, szOpcode, nOpcodeLen, uValue, second.uValue);
       if(state == State_UnknownOpcode) {
-        state = CalculateIT(uValue, szOpcode, nOpcodeLen, uValue, second.uValue);
+        state = CalculateT(uValue, szOpcode, nOpcodeLen, uValue, second.uValue);
       }
     }
     else if(type == Rank_Signed) {
-      state = CalculateT(nValue, szOpcode, nOpcodeLen, nValue, second.nValue);
+      state = CalculateIT(nValue, szOpcode, nOpcodeLen, nValue, second.nValue);
       if(state == State_UnknownOpcode) {
-        state = CalculateIT(nValue, szOpcode, nOpcodeLen, nValue, second.nValue);
+        state = CalculateT(nValue, szOpcode, nOpcodeLen, nValue, second.nValue);
       }
     }
     else {
