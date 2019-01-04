@@ -502,7 +502,7 @@ namespace UVShader
       //typedef clhash_set<clStringA>   Set;
       MACRO_TOKEN::Array aFormalParams; // 形参
       MACRO_TOKEN::List aTokens;        // 替换内容
-      int               nOrder;         // 定义顺序，相当于id，防止无限展开
+      int               nid;            // 定义顺序，相当于id，防止无限展开
       size_t            nNumTokens;     // 宏名占用的token数量，最少为1
       //GXDWORD bTranslate     : 1; // 含有下面任意一个标记，需要转义
       //GXDWORD bHasLINE       : 1; // 有__LINE__宏, 这个宏是有变化的
@@ -523,6 +523,7 @@ namespace UVShader
       GXUINT            nRefCount;
       clstd::StringSetA Strings;
       MACRO::Dict       Macros;
+      size_t            mid;    // id计数器
     };
 
     struct MACRO_EXPAND_CONTEXT

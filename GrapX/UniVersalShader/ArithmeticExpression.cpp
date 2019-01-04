@@ -95,6 +95,7 @@
 //     case 1: n = 2; if(m == 1) { case 2: n = 3; } break;
 //     }
 // 12.GLSL 支持“#ifndef RAY_MODE && DEMO_MODE”这样的预处理，HLSL和C++不支持
+// 13.GLSL和HLSL对于预处理检查比较宽松，比如“#define ANTIALIASING;”(后面有个多余分号)或者“#define PIF.14159”(PIF与定义数字之间没有空格)是没问题的，C++会报错
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 

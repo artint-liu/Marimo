@@ -321,10 +321,10 @@ namespace UVShader
 
     if(pContext && ! pContext->Macros.empty())
     {
-      int n = 0;
-      for(auto it = pContext->Macros.begin(); it != pContext->Macros.end(); ++it, n++)
+      //int n = 0;
+      for(auto it = pContext->Macros.begin(); it != pContext->Macros.end(); ++it/*, n++*/)
       {
-        ASSERT(it->second.nOrder == n); // 必须指定宏的order
+        //ASSERT(it->second.nOrder == n); // 必须指定宏的order
         ASSERT(it->second.nNumTokens > 0); // 肯定大于0啊
       }
     }
@@ -1127,13 +1127,13 @@ namespace UVShader
 
     // 没有找到同名宏定义 || 不展开集合中存在的宏（防止无限展开）
     if(_CL_NOT_(ctx_out.pMacro = FindMacro(*it_begin)) || 
-      ctx_out.OrderSet.find(ctx_out.pMacro->nOrder) != ctx_out.OrderSet.end())
+      ctx_out.OrderSet.find(ctx_out.pMacro->nid) != ctx_out.OrderSet.end())
     {
       return MacroExpand_Skip;
     }
 
     TOKEN::List::iterator it = it_begin;
-    ctx_out.OrderSet.insert(ctx_out.pMacro->nOrder);
+    ctx_out.OrderSet.insert(ctx_out.pMacro->nid);
 
     if(ctx_out.pMacro->aFormalParams.empty() && ctx_out.pMacro->nNumTokens == 1)
     {
@@ -3451,7 +3451,7 @@ namespace UVShader
     ASSERT( ! tokens.empty() && tokens.front() == PREPROCESS_define);
     const auto count = tokens.size();
     l_m.nNumTokens = 0;
-    l_m.nOrder = m_pContext->Macros.size();
+    l_m.nid = m_pContext->mid++;
     //m_MacrosSet.insert(strMacroName);
 
     if(count == 1) {
@@ -3630,6 +3630,7 @@ namespace UVShader
 
     if(it != m_pContext->Macros.end())
     {
+      m_pContext->Macros.erase(it);
     }
   }
 
@@ -5863,7 +5864,7 @@ namespace UVShader
         CLBREAK; // 意外的类型
       }
 
-      vctx.ClearValueOnly();
+      vctx.ClearValue();
       if(rInitList.Step(nDimDepth, nListDepth) == FALSE) {
         break;
       }
