@@ -3438,7 +3438,7 @@ namespace UVShader
       }
     }
     else {
-      GetLogger()->OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(1021, "无效的预处理器命令 \"%s\"."), clStringW(tokens.front().ToString()));
+      GetLogger()->OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(_WARNING(1021), "无效的预处理器命令 \"%s\"."), clStringW(tokens.front().ToString()));
     }
     return ctx.iter_next.marker;
   }
@@ -3686,7 +3686,7 @@ namespace UVShader
     }
     else {
       // 不能识别的pragma子指令
-      GetLogger()->OutputErrorW(aTokens[1], UVS_EXPORT_TEXT(1021, "无效的预处理器命令 “%s”"), clStringW(aTokens[1].ToString()));
+      GetLogger()->OutputErrorW(aTokens[1], UVS_EXPORT_TEXT(_WARNING(1021), "无效的预处理器命令 “%s”"), clStringW(aTokens[1].ToString()));
     }
   }
 
@@ -3965,7 +3965,7 @@ namespace UVShader
           }
         }
         clStringW str(p, (size_t)pend - (size_t)p);
-        GetLogger()->OutputErrorW(p, UVS_EXPORT_TEXT(1021, "无效的预处理器命令 \"%s\"."), str);
+        GetLogger()->OutputErrorW(p, UVS_EXPORT_TEXT(_WARNING(1021), "无效的预处理器命令 \"%s\"."), str);
       }
     }
     
