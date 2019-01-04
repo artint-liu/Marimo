@@ -319,6 +319,9 @@ namespace UVShader
     GXBOOL IsNegative() const;
     State set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger);
     State set(const TOKEN& token);
+    State SetAsFloat(const TOKEN& token);
+    template<typename _RealT>
+    State SetAsFloat(TOKEN::T_LPCSTR ptr, size_t count);
     void set(Rank r, const void* pValue);
     VALUE& set(const VALUE& v);
     State UpgradeValueByRank(Rank _type);  // 调整为到 type 指定的级别, 对于浮点与整数类型会做类型转换

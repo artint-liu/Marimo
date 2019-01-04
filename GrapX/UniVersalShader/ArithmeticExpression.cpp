@@ -1303,8 +1303,8 @@ GO_NEXT:;
     return FALSE;
   }
 
-  template<typename _Ty>
-  _Ty MakeFloatValueWithExp(const GXQWORD* digi, GXBOOL bNegative, GXBOOL bNegExp)
+  template<typename _Ty, typename _PartT>
+  _Ty MakeFloatValueWithExp(const _PartT* digi, GXBOOL bNegative, GXBOOL bNegExp)
   {
     _Ty fValue = (_Ty)digi[1];
     while(fValue > _Ty(1.0)) {
@@ -1312,7 +1312,7 @@ GO_NEXT:;
     }
     fValue += digi[0];
 
-    if(digi[2]) {
+    if(digi[2] != 0) {
       if(bNegExp) {
         for(size_t i = 0; i < digi[2]; i++) {
           fValue *= _Ty(0.1);
@@ -1339,7 +1339,14 @@ GO_NEXT:;
 
   VALUE::State VALUE::set(const TOKEN& token)
   {
-    return set(token.marker, token.length, token.type == TOKEN::TokenType_Integer);
+    if(token.type == TOKEN::TokenType_Integer) {
+      return set(token.marker, token.length, TRUE);
+    }
+    State s = set(token.marker, token.length, FALSE);
+    if(s == State_Overflow) {
+      return SetAsFloat(token);
+    }
+    return s;
   }
 
   VALUE::State VALUE::set(TOKEN::T_LPCSTR ptr, size_t count, b32 bInteger)
@@ -1540,6 +1547,106 @@ GO_NEXT:;
       //  (TEST_FLAG_NOT(dwFlags, Rank_Signed) && uValue64 > UINT_MAX)) {
       //    SETBIT(dwFlags, Rank_F_LongLong);
       //}
+    }
+
+    rank = (Rank)dwFlags;
+    return State_OK;
+  }
+
+  VALUE::State VALUE::SetAsFloat(const TOKEN& token)
+  {
+#ifdef ENABLE_HIGH_PRECISION_FLOAT
+    return SetAsFloat<double>(token.marker, token.length);
+#else
+    return SetAsFloat<float>(token.marker, token.length);
+#endif
+  }
+
+  template<typename _RealT>
+  VALUE::State VALUE::SetAsFloat(TOKEN::T_LPCSTR ptr, size_t count)
+  {
+    // X是任意内容，D是指数字
+    // "-X" "+X" ".X" "Xf"
+    // "De-D" "DeD"
+
+    GXDWORD dwFlags = 0;
+    _RealT digi[3] = { 0 }; // [0]是整数部分，[1]是小数部分, [2]是指数
+    size_t p = 0; // part
+    size_t i = 0;
+    GXBOOL bNegExp = FALSE;
+    ASSERT(count != 0); // 不可能为空
+
+    rank = Rank_BadValue;
+    SET_FLAG(dwFlags, sizeof(_RealT) == sizeof(float) ? Rank_Float : Rank_Double);
+
+    // FIXME: 这种写法会认为"10f"为合法的,实际C/C++中不承认这种写法
+    //if(ptr[count - 1] == 'f' || ptr[count - 1] == 'F') {
+    //  SET_FLAG(dwFlags, Rank_Float);
+    //  count--;
+    //}
+
+    // 符号解析
+    if(ptr[i] == '-' || ptr[i] == '+') {
+      i++;
+    }
+
+    while(ptr[i] == 0x20 || ptr[i] == '\t' || ptr[i] == '\r' || ptr[i] == '\n') {
+      if(++i >= count) { // 只有一个+/-符号
+        return State_SyntaxError;
+      }
+    }
+
+    for(; i < count; i++)
+    {
+      if(ptr[i] == '.')
+      {
+        //SET_FLAG(dwFlags, Rank_Float);
+        p++;
+        if(p >= 2) { // 不会出现两个‘.’, 这个由TOKEN中的浮点数分析保证
+          return State_SyntaxError;
+        }
+      }
+      else if(ptr[i] == 'e' || ptr[i] == 'E')
+      {
+        p = 2;
+        i++;
+        //SET_FLAG(dwFlags, Rank_Float);
+        if(i >= count) {
+          return State_SyntaxError;
+        }
+
+        auto c = ptr[i];
+        if(c == '-') {
+          bNegExp = TRUE;
+        }
+        else if(c != '+') {
+          i--;
+        }
+      }
+      else if(ptr[i] >= '0' && ptr[i] <= '9')
+      {
+        int n = ptr[i] - '0';
+        digi[p] = digi[p] * _RealT(10) + (_RealT)n;
+      }
+      else {
+        return State_IllegalChar;
+      }
+    }
+
+    // 例子
+     //float x[] = {
+     //  9e9, 9.9e9, 9e9f, 9.9e9f,
+     //  9e-9, 9.9e-9, 9e-9f, 9.9e-9f };
+//#define R 18446744073709551616
+//#define R 1e3
+//#if R + R > 0
+//    int test = 0;
+//#endif
+
+    if(dwFlags == Rank_Float)
+    {
+      uValue64 = 0; // 清除高32位
+      fValue = MakeFloatValueWithExp<_RealT>(digi, ptr[0] == '-', bNegExp);
     }
 
     rank = (Rank)dwFlags;
