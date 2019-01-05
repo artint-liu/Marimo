@@ -455,19 +455,22 @@ namespace UVShader
 
     // 解析中保证一元操作符解析正确
     if(bresult && pOpcode->unary) {
-      if(A.pNode != NULL && B.pNode != NULL)
+      clStringW strW;
+      /*if(A.pNode != NULL && B.pNode != NULL)
       {
         // ERROR: 一元操作符不能同时带有左右操作数
         return FALSE;
       }
-      else if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_LEFT_OPERAND) && A.pNode != NULL)
+      else */if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_LEFT_OPERAND) && A.pNode != NULL)
       {
         // ERROR: 一元操作符不接受左值
+        GetLogger()->OutputErrorW(pOpcode, UVS_EXPORT_TEXT(5075, "“%s”：一元操作符不接受左值"), pOpcode->ToString(strW).CStr());
         return FALSE;
       }
       else if(TEST_FLAG_NOT(pOpcode->unary_mask, UNARY_RIGHT_OPERAND) && B.pNode != NULL)
       {
         // ERROR: 一元操作符不接受右值
+        GetLogger()->OutputErrorW(pOpcode, UVS_EXPORT_TEXT(5076, "“%s”：一元操作符不接受右值"), pOpcode->ToString(strW).CStr());
         return FALSE;
       }
     }

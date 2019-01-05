@@ -571,48 +571,11 @@ namespace UVShader
         GetLogger()->OutputErrorW(*it, UVS_EXPORT_TEXT(2121, "“#”: 无效字符 : 可能是宏展开的结果")); // 无效的"#"号_可能是宏扩展
       }
 
-      const int c_size = (int)m_aTokens.size();
+      const size_t c_size = (int)m_aTokens.size();
 
-      if(c_size == 0) // 单独表达式解析时才可能出现符号在开头的情况
+      if(TEST_FLAG_NOT(m_dwState, AttachFlag_Preprocess) && (it.marker[0] == '-' || it.marker[0] == '+'))
       {
-        // "++" "--" 默认是右操作数
-        if(it == '-' || it == '+')
-        {
-          it->SetArithOperatorInfo(s_plus_minus_sign[(int)(it.marker[0] - '+')]);
-        }
-      }
-      else if(c_size > 0)
-      {
-        if(it.marker[0] == '-' || it.marker[0] == '+')
-        {
-          ASSERT(it == '-' || it == '+' || it == "--" || it == "++" || it == "+=" || it == "-=");
-          const auto& l_back = m_aTokens.back();
-
-          // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
-          if(it.length == 1)
-          {
-            const ArithmeticExpression::MBO& p = s_plus_minus_sign[(int)(it.marker[0] - '+')];
-            // 一元操作符，+/-就不转换为正负号
-            // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
-            if(l_back == STR_RETURN || l_back == ';' ||
-              //(l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary)))
-              (l_back.precedence != 0 && l_back != ')' && l_back != ']' && (l_back.unary_mask != UNARY_LEFT_OPERAND)))
-            {
-              it->SetArithOperatorInfo(p);
-            }
-          }
-          else if(it.length == 2 && (it.marker[1] == '-' || it.marker[1] == '+'))
-          {
-            // "++","--" 默认按照前缀操作符处理, 这里检查是否转换为后缀操作符
-            if(l_back.IsIdentifier() && l_back != STR_RETURN) {
-              const auto& p = s_UnaryLeftOperand[(int)(it.marker[0] - '+')];
-              it->SetArithOperatorInfo(p);
-            }
-            else {
-              UnaryPendingList.push_back(c_size);
-            }
-          }
-        }
+        OnMinusPlus(UnaryPendingList, *it, c_size);
       }
       
       // 只是清理
@@ -1114,6 +1077,49 @@ namespace UVShader
     }
     ASSERT(((size_t)m_ExpandedStream.back().pContainer & 1) == 0);
     return TRUE;
+  }
+
+  void CodeParser::OnMinusPlus(cllist<clsize>& UnaryPendingList, TOKEN& it, size_t c_size)
+  {
+    ASSERT(it.marker[0] == '-' || it.marker[0] == '+');
+
+    if(c_size == 0) // 单独表达式解析时才可能出现符号在开头的情况
+    {
+      // "++" "--" 默认是右操作数
+      if(it.length == 1)
+      {
+        it.SetArithOperatorInfo(s_plus_minus_sign[(int)(it.marker[0] - '+')]);
+      }
+      return;
+    }
+
+    ASSERT(it == '-' || it == '+' || it == "--" || it == "++" || it == "+=" || it == "-=");
+    const auto& l_back = m_aTokens.back();
+
+    // 如果是 -,+ 检查前一个符号是不是操作符或者括号，如果是就认为这个 -,+ 是正负号
+    if(it.length == 1)
+    {
+      const ArithmeticExpression::MBO& p = s_plus_minus_sign[(int)(it.marker[0] - '+')];
+      // 一元操作符，+/-就不转换为正负号
+      // '}' 就不判断了 { something } - abc 这种格式应该是语法错误
+      if(l_back == STR_RETURN || l_back == ';' ||
+        //(l_back.precedence != 0 && l_back != ')' && l_back != ']' && (!l_back.unary)))
+        (l_back.precedence != 0 && l_back != ')' && l_back != ']' && (l_back.unary_mask != UNARY_LEFT_OPERAND)))
+      {
+        it.SetArithOperatorInfo(p);
+      }
+    }
+    else if(it.length == 2 && (it.marker[1] == '-' || it.marker[1] == '+'))
+    {
+      // "++","--" 默认按照前缀操作符处理, 这里检查是否转换为后缀操作符
+      if(l_back.IsIdentifier() && l_back != STR_RETURN) {
+        const auto& p = s_UnaryLeftOperand[(int)(it.marker[0] - '+')];
+        it.SetArithOperatorInfo(p);
+      }
+      else {
+        UnaryPendingList.push_back(c_size);
+      }
+    }
   }
 
   CodeParser::MacroExpand CodeParser::TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end)

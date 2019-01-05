@@ -755,6 +755,7 @@ namespace UVShader
 
     GXBOOL  MakeScope(TKSCOPE* pOut, MAKESCOPE* pParam);
     GXBOOL  OnToken(TOKEN& token);
+    void    OnMinusPlus(cllist<clsize>& UnaryPendingList, TOKEN& token, size_t c_size);
     void    GetNext(iterator& it);
     iterator  MakeupMacroFunc(TOKEN::List& stream, iterator& it, const iterator& end);
     void    ExpandMacroFunc(MACRO_EXPAND_CONTEXT& c);
