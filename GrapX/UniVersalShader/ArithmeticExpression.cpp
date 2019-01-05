@@ -2742,6 +2742,7 @@ GO_NEXT:;
   {
     m_errorlist.clear();
     m_nErrorCount = 0;
+    m_nWarningCount = 0;
     m_nSessionError = 0;
     m_nDisplayedError = 0;
   }

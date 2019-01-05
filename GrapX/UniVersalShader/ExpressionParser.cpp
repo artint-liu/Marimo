@@ -374,7 +374,7 @@ namespace UVShader
     m_GlobalCtx.Reset();
     m_aTokens.clear();
     m_aStatements.clear();
-    if(m_pLogger) {
+    if(m_pLogger && m_pParent == NULL) {
       m_pLogger->Reset();
     }
 
@@ -422,6 +422,11 @@ namespace UVShader
 
     if(it.marker[0] == '#' && TEST_FLAG_NOT(((CodeParser*)it.pContainer)->m_dwState, AttachFlag_Preprocess))
     {
+      if(TEST_FLAG(((CodeParser*)it.pContainer)->m_dwState, AttachFlag_RetainPreprocess))
+      {
+        it.length = 0;
+        return 0;
+      }
       CodeParser* pThis = (CodeParser*)it.pContainer;
 
       // 测试是否已经在预处理中
@@ -507,7 +512,7 @@ namespace UVShader
 
       // 如果在预处理中步进iterator则会将#当作一般符号处理
       // 这里判断如果下一个token仍然是#则置为0，这样会重新激活迭代器处理当前这个预处理
-      if(it == '#') {
+      if(it == '#') { // keep pound as PreProcessing command
         it.length = 0;
       }
 
@@ -984,7 +989,11 @@ namespace UVShader
       else if(it == ')') {
         depth--;
         if(depth <= 0) {
+          // 防止处理预处理命令
+          const GXDWORD dwOldState = m_dwState;
+          m_dwState |= AttachFlag_RetainPreprocess;
           ++it;
+          m_dwState = dwOldState;
           break;
         }
       }
@@ -1038,7 +1047,12 @@ namespace UVShader
       // 对于“#define Time Time+5”这种写法，如果这里展开，
       // 在次级再做展开就会产生“Time+5+5”这样错误的表达式
       stream.push_back(*it);
+
+      const GXDWORD dwOldState = m_dwState;
+      m_dwState |= AttachFlag_RetainPreprocess;
       ++it;
+      m_dwState = dwOldState;
+
     }
     else
     {
@@ -1049,6 +1063,7 @@ namespace UVShader
 
       if(depth < 0)
       {
+        CLBREAK; // 不应该到这里
         if(TEST_FLAG(m_dwState, AttachFlag_NotExpandCond)) {
           // FIXME: 这里没有处理 #if defined(ADD(1,2)) 这种符合ADD(a,b)形参的形式, 可能会导致后面表达式计算出错！
           token = save_token;
@@ -3971,7 +3986,7 @@ namespace UVShader
           }
         }
         clStringW str(p, (size_t)pend - (size_t)p);
-        GetLogger()->OutputErrorW(p, UVS_EXPORT_TEXT(_WARNING(1021), "无效的预处理器命令 \"%s\"."), str);
+        GetLogger()->OutputErrorW(p, UVS_EXPORT_TEXT(_WARNING(1021), "无效的预处理器命令 \"%s\"."), str.CStr());
       }
     }
     
@@ -4183,7 +4198,8 @@ namespace UVShader
   {
     va_list  arglist;
     va_start(arglist, code);
-    m_pMsg->VarWriteErrorW(TRUE, ptr, code, arglist);
+    const GXUINT error_id = code & (~UVS_WARNING_MASK);
+    m_pMsg->VarWriteErrorW(TEST_FLAG_NOT(code, UVS_WARNING_MASK), ptr, error_id, arglist);
     va_end(arglist);
   }
 
