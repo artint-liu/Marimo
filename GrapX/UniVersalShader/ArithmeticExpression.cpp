@@ -481,7 +481,7 @@ namespace UVShader
   GXBOOL ArithmeticExpression::IsLikeTypeCast(const TKSCOPE& scope, TKSCOPE::TYPE i)
   {
     const TOKEN& front = m_aTokens[scope.begin];
-    if(front == '(' && (TKSCOPE::TYPE)front.scope + 1 < scope.end) // (...)... 形式
+    if(front == '(' && (scope.begin == i || front.scope == i) && (TKSCOPE::TYPE)front.scope + 1 < scope.end) // (...)... 形式
     {
       const TOKEN& nt = m_aTokens[front.scope + 1];
       if((nt == '(' && nt.scope == scope.end - 1) ||
@@ -528,7 +528,7 @@ namespace UVShader
           if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
           {
             ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
-            if(IsLikeTypeCast(scope, i)) {
+            if(nCandidate > OPP(12) && IsLikeTypeCast(scope, i)) {
               return s.scope;
             }
             i = s.scope;
@@ -567,7 +567,7 @@ namespace UVShader
             {              
               return TKSCOPE::npos;
             }
-            if(IsLikeTypeCast(scope, i)) {
+            if(nCandidate > OPP(12) && IsLikeTypeCast(scope, i)) {
               return i;
             }
             i = s.scope;

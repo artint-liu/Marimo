@@ -557,7 +557,20 @@ namespace clstd
         if(*p == '\n') {
           return TRUE;
         }
+        else if(*p == '/' && (p - 1) >= ptr && *(p - 1) == '*') // C代码特有
+        {
+          p -= 2;
+          while(p >= ptr) {
+            if(*p == '*' && (p - 1) >= ptr && *(p - 1) == '/') {
+              p -= 2;
+              break;
+            }
+            --p;
+          }
+          continue;
+        }
         else if( ! IS_GAP(p)) {
+
           return FALSE;
         }
         --p;

@@ -1127,7 +1127,7 @@ namespace UVShader
     else if(it.length == 2 && (it.marker[1] == '-' || it.marker[1] == '+'))
     {
       // "++","--" 默认按照前缀操作符处理, 这里检查是否转换为后缀操作符
-      if(l_back.IsIdentifier() && l_back != STR_RETURN) {
+      if((l_back.IsIdentifier() && l_back != STR_RETURN) || l_back == ']') {
         const auto& p = s_UnaryLeftOperand[(int)(it.marker[0] - '+')];
         it.SetArithOperatorInfo(p);
       }
