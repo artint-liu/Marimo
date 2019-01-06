@@ -305,7 +305,7 @@ namespace UVShader
       {
         ArithmeticExpression* pThis = (ArithmeticExpression*)it.pContainer;
         //pThis->GetLogger()->WriteErrorW(TRUE, it.offset(), UVS_EXPORT_TEXT2(1071, "在注释中遇到意外的文件结束", pThis));
-        pThis->GetLogger()->OutputErrorW(it->marker, UVS_EXPORT_TEXT(1071, "在注释中遇到意外的文件结束"));
+        pThis->GetLogger()->OutputErrorW(it.marker, UVS_EXPORT_TEXT(1071, "在注释中遇到意外的文件结束"));
       }
       ++it;
     }

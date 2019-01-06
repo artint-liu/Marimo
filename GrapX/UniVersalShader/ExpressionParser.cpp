@@ -437,7 +437,7 @@ namespace UVShader
 
       if( ! TOKENSUTILITY::IsHeadOfLine(it.pContainer, it.marker)) {
         //ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
-        GetLogger()->OutputErrorW(it->marker, UVS_EXPORT_TEXT(2014, "预处理器命令必须作为第一个非空白空间启动"));
+        GetLogger()->OutputErrorW(it.marker, UVS_EXPORT_TEXT(2014, "预处理器命令必须作为第一个非空白空间启动"));
         return 0;
       }
 
@@ -4880,6 +4880,13 @@ namespace UVShader
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Flow_Switch)
     {
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
+    {
+      VALUE_CONTEXT vctx(sNameContext, FALSE);
+      vctx.pLogger = GetLogger();
+      InferType(vctx, pNode);
       return FALSE;
     }
 

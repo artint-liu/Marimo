@@ -773,6 +773,7 @@ namespace UVShader
     {"cross",       INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"distance",    INTRINSIC_FUNC::RetType_Scaler0,   2, (u16*)ARG_VecScal ARG_VecScal},
     {"dot",         INTRINSIC_FUNC::RetType_Scaler0,   2, (u16*)ARG_Vector ARG_Vector},
+    {"fmod",        INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"lerp",        INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
     {"max",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"min",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
