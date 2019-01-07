@@ -939,11 +939,33 @@ namespace UVShader
     RefString rstrTokenName(token.marker, token.length);
 
     auto& it_macro = m_pContext->Macros.find(rstrTokenName);
-    if(it_macro != m_pContext->Macros.end()) {
-      return &it_macro->second;
+    if(it_macro == m_pContext->Macros.end()) {
+      return NULL;
     }
 
-    return NULL;
+    // 对于“#define A B”并且B也是宏定义的形式进行查找，将A与最终的定义对应起来
+    if(it_macro->second.aFormalParams.size() == 0 && it_macro->second.aTokens.size() == 1)
+    {
+      MACRO_EXPAND_CONTEXT::IDSet_T sIDSet; // 防止无限查找
+      sIDSet.insert(it_macro->second.nid);
+      while(true) {
+        rstrTokenName.Set(it_macro->second.aTokens.front().marker, it_macro->second.aTokens.front().length);
+        auto& it_replace = m_pContext->Macros.find(rstrTokenName);
+
+        if(it_replace == m_pContext->Macros.end() ||
+          sIDSet.find(it_replace->second.nid) != sIDSet.end()) {
+          break;
+        }
+        it_macro = it_replace;
+        if(_CL_NOT_(it_replace->second.aFormalParams.size() == 0 && it_replace->second.aTokens.size() == 1))
+        {
+          break;
+        }
+        sIDSet.insert(it_macro->second.nid);
+      }
+    }
+    
+    return &it_macro->second;
   }
 
   void CodeParser::GetNext(ArithmeticExpression::iterator& it)
@@ -1278,7 +1300,7 @@ namespace UVShader
     }
   }
 
-  CodeParser::MacroExpand CodeParser::ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet) // 展开宏内容里的宏
+  CodeParser::MacroExpand CodeParser::ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::IDSet_T* pOrderSet) // 展开宏内容里的宏
   {
     TOKEN::List::iterator itMacroEnd; // 如果有展开的宏，则将宏的结尾放置在这个里面
     TOKEN::List::iterator it_end = sTokenList.end();

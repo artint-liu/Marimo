@@ -529,13 +529,13 @@ namespace UVShader
 
     struct MACRO_EXPAND_CONTEXT
     {
-      typedef clset<int> OrderSet_T;
+      typedef clset<int> IDSet_T;
       const TOKEN* pLineNumRef;
       TOKEN::List stream;
       const MACRO* pMacro;
 
       clvector<TOKEN::List> ActualParam;
-      OrderSet_T OrderSet; // 展开宏的集合，防止无限展开递归
+      IDSet_T OrderSet; // 展开宏的集合，防止无限展开递归
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -760,7 +760,7 @@ namespace UVShader
     void    GetNext(iterator& it);
     iterator  MakeupMacroFunc(TOKEN::List& stream, iterator& it, const iterator& end);
     void    ExpandMacroFunc(MACRO_EXPAND_CONTEXT& c);
-    MacroExpand ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::OrderSet_T* pOrderSet);
+    MacroExpand ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::IDSet_T* pOrderSet);
     MacroExpand TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
     GXBOOL  MergeStringToken(const TOKEN& token);
     const MACRO* FindMacro(const TOKEN& token);
