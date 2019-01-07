@@ -38,7 +38,7 @@ namespace UVShader
 {
   //class ArithmeticExpression : public SmartStreamA
   typedef clstd::TokensT<clStringA> CTokens;
-# define TOKENSUTILITY clstd::TokensUtility
+# define TOKENSUTILITY clstd::TokensUtility::cxxstyle
   class ArithmeticExpression;
   class NameContext;
   struct COMMINTRTYPEDESC;

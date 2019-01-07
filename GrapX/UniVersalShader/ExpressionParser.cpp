@@ -388,6 +388,7 @@ namespace UVShader
     if( ! m_pContext) {
       m_pContext = new PARSER_CONTEXT;
       m_pContext->nRefCount = 1;
+      m_pContext->mid = 1;
     }
 
     m_dwState = dwFlags;
@@ -443,7 +444,7 @@ namespace UVShader
 
       RTPPCONTEXT ctx;
       ctx.iter_next = it;
-      SmartStreamUtility::ExtendToNewLine(ctx.iter_next, 1, remain, 0x0001);
+      ctx.iter_next.length = TOKENSUTILITY::ExtendToNewLine(ctx.iter_next.marker, remain);
       
       // ppend 与 iter_next.marker 之间可能存在空白，大量注释等信息，为了
       // 减少预处理解析的工作量，这里预先存好 ppend 再步进 iter_next
@@ -807,6 +808,11 @@ namespace UVShader
       pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(2371, "“%s”: 重定义", pLogger), tkVar.ToString(strW).CStr());
       break;
     }
+    case NameContext::State_RequireInitList:
+    {
+      pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(5015, "“%s”: 数组定义需要初始化列表来设置", pLogger), tkVar.ToString(strW).CStr());
+      break;
+    }
     case NameContext::State_DefineAsType:
     {
       pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(5013, "“%s”: 变量已经被定义为类型", pLogger), tkVar.ToString(strW).CStr());
@@ -1052,7 +1058,6 @@ namespace UVShader
       m_dwState |= AttachFlag_RetainPreprocess;
       ++it;
       m_dwState = dwOldState;
-
     }
     else
     {
@@ -3085,12 +3090,14 @@ namespace UVShader
       }
 
       MakeSyntaxNode(pCurrGlob, SYNTAXNODE::MODE_Chain, &C, NULL);
+#if 0 // case 标签下初始化变量
       if(C.IsNode() && C.pNode->mode == SYNTAXNODE::MODE_Definition)
       {
         clStringW strW;
         GetLogger()->OutputErrorW(m_aTokens[step_scope.begin], UVS_EXPORT_TEXT(2360, "“%s”的初始化操作由“case”标签跳过"), C.GetFrontToken()->ToString(strW).CStr());
         return scope.end;
       }
+#endif
 
       step_scope.begin = pos;
       pCurrGlob = &pCurrGlob->pNode->Operand[1];
@@ -4533,6 +4540,11 @@ namespace UVShader
             if(pIdnfDesc && pIdnfDesc->pool.size() == 1) {
               SetRepalcedValue(right_glob, pIdnfDesc->pool.front());
             }
+          }
+          else // if(pVarableDecl->IsNode()) // 多维数组内部输出错误消息
+          {
+            ASSERT(DbgErrorCount() > nErrorCount);
+            return NULL;
           }
         }
         else
@@ -6666,6 +6678,37 @@ namespace UVShader
     // pOperator 为空相当于“=”操作
     // pAB内容可能会改变
 
+    // [整数限定操作符]
+    // 检查非法操作数类型，比如对浮点数求模
+    if(*pOperator == '%' || *pOperator == '&' || *pOperator == '|' || *pOperator == '~' ||
+      *pOperator == '^' || *pOperator == "<<" || *pOperator == ">>")
+    {
+      //C2296 : “ << ” : 非法，左操作数包含“float”类型
+      //C2297 : “ << ” : 非法，右操作数包含“float”类型
+      clStringW strOperatorW;
+      clStringW strTypeW;
+      GXBOOL bret = TRUE;
+
+      for(int i = 0; i < 2; i++)
+      {
+        if(pAB[i].pType->cate == TYPEDESC::TypeCate_FloatScaler ||
+          (IS_VECMAT_CATE(pAB[i].pType) && pAB[i].pType->pElementType->cate == TYPEDESC::TypeCate_FloatScaler))
+        {
+          // 注意：错误消息这么写是为了便于文本抽取
+          GetLogger()->OutputErrorW(*pLocation,
+            i == 0 ? UVS_EXPORT_TEXT(2296, "“%s” : 非法，左操作数包含“%s”类型")
+                   : UVS_EXPORT_TEXT(2297, "“%s” : 非法，右操作数包含“%s”类型"),
+            pOperator->ToString(strOperatorW).CStr(), pAB[i].pType->name.ToString(strTypeW).CStr());
+          bret = FALSE;
+        }
+      }
+
+      if(_CL_NOT_(bret)) {
+        vctx.ClearValue(ValueResult_Failed);
+        return bret;
+      }
+    }
+
     if(*pOperator == "!=" || *pOperator == "==")
     {
       // [Doc\条件表达式]向量比较返回类型是bool向量
@@ -6704,12 +6747,13 @@ namespace UVShader
     }
     else if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
     {
-      if(pAB[0].TypeRank() >= pAB[1].TypeRank()) {
-        vctx.pType = pAB[0].pType;
-      }
-      else {
-        vctx.pType = pAB[1].pType;
-      }
+      //if(pAB[0].TypeRank() >= pAB[1].TypeRank()) {
+      //  vctx.pType = pAB[0].pType;
+      //}
+      //else {
+      //  vctx.pType = pAB[1].pType;
+      //}
+      vctx.pType = (pAB[0].TypeRank() >= pAB[1].TypeRank()) ? pAB[0].pType : pAB[1].pType;
       ASSERT(pAB[0].pType->CountOf() == pAB[1].pType->CountOf());
     }
     else if(IS_SCALER_CATE(pAB[0].pType) && IS_VECMAT_CATE(pAB[1].pType))
@@ -7574,17 +7618,28 @@ namespace UVShader
     if(pValueExprGlob)
     {
       rIdnfDesc.glob = *pValueExprGlob;
+
+      if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList) == FALSE)
+      {
+        return State_RequireInitList;
+      }
+
       // 如果是初始化列表，就进行推导
       // 这里会重新输出一个整理过的初始化列表到sVariDesc.glob中
       if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
       {
         const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
+        const GXBOOL bSizeless = (rIdnfDesc.pDesc->CountOf() == 0);
         rIdnfDesc.pDesc = m_pCodeParser->InferInitList(&rIdnfDesc.pool, *this, pTypeDesc, &rIdnfDesc.glob);
+
         if(rIdnfDesc.pDesc == NULL) {
           ASSERT(rIdnfDesc.pool.empty());
           ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
           m_IdentifierMap.erase(insert_result.first);
           return State_CastTypeError;
+        }
+        else if(bSizeless) {
+          m_nCount += rIdnfDesc.pDesc->CountOf();
         }
       }
       else if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall))

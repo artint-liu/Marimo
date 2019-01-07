@@ -149,6 +149,38 @@ namespace clstd {
     template<class _TStr>
     b32 IsHeadOfLine(const TokensT<_TStr>* pToken, typename _TStr::LPCSTR pChar);
 
+    namespace cxxstyle // C++风格，忽略注释块
+    {
+      template<class _TStr>
+      b32 IsHeadOfLine(const TokensT<_TStr>* pToken, typename _TStr::LPCSTR pChar);
+
+      template<class _TStr>
+      clsize ExtendToNewLine(_TStr pTokenPtr, clsize remain)
+      {
+        clsize offset = 0;
+        while(offset < remain) {
+          if(pTokenPtr[offset] == '\n') {
+            if((offset > 0 && pTokenPtr[offset - 1] == '\\') ||
+              (offset > 1 && pTokenPtr[offset - 1] == '\r' && pTokenPtr[offset - 2] == '\\'))
+            {
+              ++offset;
+              continue;
+            }
+            return offset + 1;
+          }
+          else if(pTokenPtr[offset] == '*' && offset > 1 && pTokenPtr[offset - 1] == '/')
+          {
+            ++offset; // 防止“/*/”被认为是注释
+            while(++offset < remain && _CL_NOT_(pTokenPtr[offset] == '/' && pTokenPtr[offset - 1] == '*'))
+            {}
+          }
+          ++offset;
+        }
+        return remain;
+      }
+
+    } // namespace cxxstyle
+
 #if 0
     // 扫描一个字符串, 返回符合C语言的数字格式的长度
     // 字符串需要以数字或者'.'开头, 函数不会识别'+','-'

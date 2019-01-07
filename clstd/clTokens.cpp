@@ -33,6 +33,10 @@ namespace clstd
   namespace TokensUtility {
     template b32 IsHeadOfLine<clStringA>(const TokensT<clStringA>* pToken, clStringA::LPCSTR pChar);
     template b32 IsHeadOfLine<clStringW>(const TokensT<clStringW>* pToken, clStringW::LPCSTR pChar);
+    namespace cxxstyle {
+      template b32 IsHeadOfLine<clStringA>(const TokensT<clStringA>* pToken, clStringA::LPCSTR pChar);
+      template b32 IsHeadOfLine<clStringW>(const TokensT<clStringW>* pToken, clStringW::LPCSTR pChar);
+    } // namespace cxxstyle
 #if 0
     template clsize ExtendCStyleNumeric<ch>(const ch* str, clsize max_len);
     template clsize ExtendCStyleNumeric<wch>(const wch* str, clsize max_len);
@@ -557,26 +561,47 @@ namespace clstd
         if(*p == '\n') {
           return TRUE;
         }
-        else if(*p == '/' && (p - 1) >= ptr && *(p - 1) == '*') // C代码特有
-        {
-          p -= 2;
-          while(p >= ptr) {
-            if(*p == '*' && (p - 1) >= ptr && *(p - 1) == '/') {
-              p -= 2;
-              break;
-            }
-            --p;
-          }
-          continue;
-        }
         else if( ! IS_GAP(p)) {
-
           return FALSE;
         }
         --p;
       }
       return TRUE; // 到文档开头了
     }
+
+    namespace cxxstyle
+    {
+      template<class _TStr>
+      b32 IsHeadOfLine(const TokensT<_TStr>* pToken, typename _TStr::LPCSTR pChar)
+      {
+        auto* ptr = pToken->GetStreamPtr();
+        auto* p = pChar - 1;
+        while(p >= ptr) {
+          if(*p == '\n') {
+            return TRUE;
+          }
+          else if(*p == '/' && (p - 1) >= ptr && *(p - 1) == '*') // 注释块
+          {
+            p -= 2;
+            while(p >= ptr) {
+              if(*p == '*' && (p - 1) >= ptr && *(p - 1) == '/') {
+                p -= 2;
+                break;
+              }
+              --p;
+            }
+            continue;
+          }
+          else if(!IS_GAP(p)) {
+
+            return FALSE;
+          }
+          --p;
+        }
+        return TRUE; // 到文档开头了
+      }
+
+    } // namespace cxxstyle
 
 #if 0
     template<typename _TCh>

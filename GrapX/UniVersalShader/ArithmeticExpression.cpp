@@ -96,6 +96,7 @@
 //     }
 // 12.GLSL 支持“#ifndef RAY_MODE && DEMO_MODE”这样的预处理，HLSL和C++不支持
 // 13.GLSL和HLSL对于预处理检查比较宽松，比如“#define ANTIALIASING;”(后面有个多余分号)或者“#define PIF.14159”(PIF与定义数字之间没有空格)是没问题的，C++会报错
+// 14.case标签下可以初始化变量，这在C++语法里是不行的
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -1748,6 +1749,7 @@ GO_NEXT:;
   template<typename _Ty>
   VALUE::State VALUE::CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2)
   {
+    // [整数限定操作符]
     if(nOpcodeLen == 1)
     {
       switch(szOpcode[0])
