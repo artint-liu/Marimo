@@ -519,6 +519,7 @@ namespace UVShader
     void WriteMessageW(GXLPCWSTR szMessage);
 
     void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示
+    void OutputTypeCastFailed(const TOKEN* ptkLocation, GXLPCWSTR szOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom);
     void OutputTypeCastFailed(const TOKEN* ptkLocation, const TOKEN* pOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom);
 
     GXUINT MarkCode(GXUINT code, GXLPCSTR szMessage);

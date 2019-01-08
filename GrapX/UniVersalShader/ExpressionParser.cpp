@@ -273,10 +273,10 @@ namespace UVShader
   extern size_t s_functions_prototype_len;
 
 
-  const PERCOMPONENTMATH* FindPerComponentMathOperations(GXLPCSTR szName)
+  const PERCOMPONENTMATH* FindPerComponentMathOperations(const RefString& rstrName)
   {
     for(int i = 0; s_PreComponentMath[i].name != NULL; i++) {
-      if(clstd::strcmpT(szName, s_PreComponentMath[i].name) == 0) {
+      if(rstrName == s_PreComponentMath[i].name) {
         return &s_PreComponentMath[i];
       }
     }
@@ -4141,16 +4141,21 @@ namespace UVShader
   {
     OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2143, "语法错误 : 缺少“;”", this));
   }
+  
+  void CLogger::OutputTypeCastFailed(const TOKEN* ptkLocation, GXLPCWSTR szOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom)
+  {
+    clStringW strTo, strFrom;
+    pTypeTo->name.ToString(strTo);
+    pTypeFrom->name.ToString(strFrom);
+    //pOpcode->ToString(strOpcode);
+    OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2440, "“%s”: 无法从“%s”转换为“%s”", this),
+      szOpcode, strFrom.CStr(), strTo.CStr());
+  }
 
   void CLogger::OutputTypeCastFailed(const TOKEN* ptkLocation, const TOKEN* pOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom)
   {
-    //clStringW strOpcode, strTo = pTypeTo->name, strFrom = pTypeFrom->name;
-    clStringW strOpcode, strTo, strFrom;
-    pTypeTo->name.ToString(strTo);
-    pTypeFrom->name.ToString(strFrom);
-    pOpcode->ToString(strOpcode);
-    OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2440, "“%s”: 无法从“%s”转换为“%s”", this),
-      strOpcode.CStr(), strFrom.CStr(), strTo.CStr());
+    clStringW strOpcode;
+    OutputTypeCastFailed(ptkLocation, pOpcode ? pOpcode->ToString(strOpcode) : _CLTEXT("="), pTypeTo, pTypeFrom);
   }
 
   void CLogger::VarOutputErrorW(const TOKEN* pLocation, GXUINT code, va_list arglist) const
@@ -4643,10 +4648,11 @@ namespace UVShader
         {
           //clStringW strFrom = pRightTypeDesc->name;
           //clStringW strTo = pType->name;
-          clStringW strFrom, strTo;
-          pRightTypeDesc->name.ToString(strFrom);
-          pType->name.ToString(strTo);
-          GetLogger()->OutputErrorW(token, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+          //clStringW strFrom, strTo;
+          //pRightTypeDesc->name.ToString(strFrom);
+          //pType->name.ToString(strTo);
+          //GetLogger()->OutputErrorW(token, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+          GetLogger()->OutputTypeCastFailed(&token, second_glob.pNode->pOpcode, pType, pRightTypeDesc);
           return FALSE;
         }
       }
@@ -4895,12 +4901,13 @@ namespace UVShader
       else if(TryTypeCasting(pTypeTo, pTypeFrom, pNode->Operand[0].pTokn) == FALSE)
       {
         // error C2440: “return”: 无法从“TypeFrom”转换为“TypeTo”
-        clStringW strFrom, strTo;
-        pTypeFrom->name.ToString(strFrom);
-        pTypeTo->name.ToString(strTo);
+        //clStringW strFrom, strTo;
+        //pTypeFrom->name.ToString(strFrom);
+        //pTypeTo->name.ToString(strTo);
         //clStringW strFrom = pTypeFrom->name;
         //clStringW strTo = pTypeTo->name;
-        GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+        //GetLogger()->OutputErrorW(*pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(2440, "“=”: 无法从“%s”转换为“%s”"), strFrom.CStr(), strTo.CStr());
+        GetLogger()->OutputTypeCastFailed(pNode->Operand[0].pTokn, _CLTEXT("return"), pTypeTo, pTypeFrom);
         result = FALSE;
       }
       return FALSE;
@@ -4921,6 +4928,13 @@ namespace UVShader
       VALUE_CONTEXT vctx(sNameContext, FALSE);
       vctx.pLogger = GetLogger();
       InferType(vctx, pNode);
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Assignment)
+    {
+      clStringW strW;
+      GetIdentifierNameWithoutSeamantic(pNode->Operand[0])->ToString(strW);
+      GetLogger()->OutputErrorW(pNode, UVS_EXPORT_TEXT(5053, "“%s”无法使用初始化列表赋值"), strW.CStr());
       return FALSE;
     }
 
@@ -5090,31 +5104,37 @@ namespace UVShader
     return NULL;
   }
 
-  const TYPEDESC* CodeParser::InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode)
+  const TYPEDESC* CodeParser::InferUserFunctionType(FUNCDESC::CPtrList& aUserFunc, VALUE_CONTEXT& vctx, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode, int nStep)
   {
     // 返回ERROR_TYPEDESC表示语法出现错误而失败
     // 返回NULL表示没找到匹配函数
 
     static GXBOOL bTolerance[2] = {FALSE, TRUE}; // 第一次严格匹配，防止找到重载函数，如果找不到第二遍放宽匹配条件
-    cllist<const FUNCDESC*> aUserFunc;
-    sNameSet.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sTypeList.size(), aUserFunc);
-    
-    for (int n = aUserFunc.size() > 1 ? 0 : 1; n < 2; n++)
+    //cllist<const FUNCDESC*> aUserFunc;
+    if(nStep == 0) {
+      vctx.name_ctx.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sTypeList.size(), aUserFunc);
+    }
+
+    //for (int n = aUserFunc.size() > 1 ? 0 : 1; n < 2; n++)
+    //{
+    for(auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
     {
-      for(auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
-      {
-        //int i = 0;
-        //size_t nConfirm = 0;
-        ASSERT((*iter_func)->sFormalTypes.size() == sTypeList.size());
-        int result = CompareFunctionArguments(sNameSet, pFuncNode->Operand[0].pTokn, (*iter_func)->sFormalTypes, sTypeList, bTolerance[n]);
-        if(result == -1) {
-          return ERROR_TYPEDESC;
-        }
-        else if(result == 1) {
-          return sNameSet.GetType((*iter_func)->ret_type);
-        }
+      //int i = 0;
+      //size_t nConfirm = 0;
+      ASSERT((*iter_func)->sFormalTypes.size() == sTypeList.size());
+      int result = CompareFunctionArguments(vctx.name_ctx, pFuncNode->Operand[0].pTokn, (*iter_func)->sFormalTypes, sTypeList, bTolerance[nStep]);
+      if(result == -1) {
+        vctx.ClearValue(ValueResult_CanNotInferType);
+        return ERROR_TYPEDESC;
+      }
+      else if(result == 1) {
+        vctx.ClearValueOnly();
+        vctx.result = ValueResult_OK;
+        vctx.pType = vctx.name_ctx.GetType((*iter_func)->ret_type);
+        return vctx.pType;
       }
     }
+    //}
     return NULL;
   }
 
@@ -5148,10 +5168,10 @@ namespace UVShader
     return 1;
   }
 
-  GXLPCSTR CodeParser::InferBuildinFunction(const clStringA& strFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError)
+  GXLPCSTR CodeParser::InferBuildinFunction(const RefString& rstrFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError)
   {
     pError = FALSE;
-    RefString rstrKey(strFunctionName);
+    RefString rstrKey = rstrFunctionName;
 
     const BUILDIN_FUNCTION_PROTOTYPE* pPrototypeEnd = s_functions_prototype + s_functions_prototype_len;
     const BUILDIN_FUNCTION_PROTOTYPE* pPrototype =
@@ -5195,7 +5215,7 @@ namespace UVShader
   }
 
   GXBOOL CodeParser::InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx,
-    const clStringA& strFunctionName,
+    const RefString& rstrFunctionName,
     const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList)
   {
     //CHECK_VALUE_CONTEXT;
@@ -5205,13 +5225,13 @@ namespace UVShader
     {
       if(InferBuildinFunction_WildcardTable( // 一个参数函数原型
         s_wildcard_unary_functions, s_wildcard_unary_functions_len,
-        vctx, strFunctionName, sExprList, sArgumentsTypeList) == FALSE) {
+        vctx, rstrFunctionName, sExprList, sArgumentsTypeList) == FALSE) {
         return FALSE;
       }
     }
     else if(InferBuildinFunction_WildcardTable( // 多参数函数原型
       s_wildcard_functions, s_wildcard_functions_len,
-      vctx, strFunctionName, sExprList, sArgumentsTypeList) == FALSE)
+      vctx, rstrFunctionName, sExprList, sArgumentsTypeList) == FALSE)
     {
       return FALSE;
     }
@@ -5222,7 +5242,7 @@ namespace UVShader
   GXBOOL CodeParser::InferBuildinFunction_WildcardTable(
     INTRINSIC_FUNC* pFunctionsTable, size_t nTableLen, 
     VALUE_CONTEXT& vctx,
-    const clStringA& strFunctionName,
+    const RefString& rstrFunctionName,
     const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList)
   {
     // 出错返回 FALSE，正常状态返回TRUE，根据vctx确定是否有结果
@@ -5236,7 +5256,7 @@ namespace UVShader
     for(int i = 0; pFunctionsTable[i].name != NULL; i++)
     {
       const INTRINSIC_FUNC& test_func = pFunctionsTable[i];
-      if(strFunctionName == test_func.name)
+      if(rstrFunctionName == test_func.name)
       {
         if(sArgumentsTypeList.size() == test_func.count)
         {
@@ -5440,23 +5460,26 @@ namespace UVShader
       vctx.ClearValueOnly();
     }
 
-    pRetType = InferUserFunctionType(vctx.name_ctx, sArgumentsTypeList, pFuncNode);
+    FUNCDESC::CPtrList sUserFuncs;
+
+    // 用户定义函数 - 严格匹配
+    pRetType = InferUserFunctionType(sUserFuncs, vctx, sArgumentsTypeList, pFuncNode, 0);
     if(pRetType == ERROR_TYPEDESC) {
-      vctx.result = ValueResult_CanNotInferType;
+      //vctx.ClearValue(ValueResult_CanNotInferType);
       return NULL;
     }
     else if(pRetType) {
-      vctx.ClearValueOnly();
-      vctx.result = ValueResult_OK;
-      vctx.pType = pRetType;
+      //vctx.ClearValueOnly();
+      //vctx.result = ValueResult_OK;
+      //vctx.pType = pRetType;
       return pRetType;
     }
 
-    clStringA strFunctionName;
-    vctx.name_ctx.TranslateType(strFunctionName, pFuncNode->Operand[0].pTokn);
+    RefString rstrFunctionName;
+    vctx.name_ctx.TranslateType(rstrFunctionName, pFuncNode->Operand[0].pTokn);
 
     // mul()比较特殊
-    if(strFunctionName == s_szMultiplicationFunc && sArgumentsTypeList.size() == 2)
+    if(rstrFunctionName == s_szMultiplicationFunc && sArgumentsTypeList.size() == 2)
     {
       pRetType = InferTypesOfMultiplication(sArgumentsTypeList.front(), sArgumentsTypeList.back());
       if(pRetType) {
@@ -5469,7 +5492,7 @@ namespace UVShader
 
     // 内置函数原型查找
     GXBOOL bError = FALSE;
-    GXLPCSTR szRetType = InferBuildinFunction(strFunctionName, sArgumentsTypeList, &bError);
+    GXLPCSTR szRetType = InferBuildinFunction(rstrFunctionName, sArgumentsTypeList, &bError);
     if(bError) {
       vctx.ClearValue();
       vctx.result = ValueResult_Failed;      
@@ -5486,15 +5509,26 @@ namespace UVShader
     }
 
     // 通配符形式的内部函数列表
-    if(InferBuildinFunction_Wildcard(vctx, strFunctionName, sExprList, sArgumentsTypeList) == FALSE) {
+    if(InferBuildinFunction_Wildcard(vctx, rstrFunctionName, sExprList, sArgumentsTypeList) == FALSE) {
       return NULL;
     }
     else if(vctx.pType) {
       return vctx.pType;
     }
 
+    // 用户定义函数 - 宽松匹配
+    pRetType = InferUserFunctionType(sUserFuncs, vctx, sArgumentsTypeList, pFuncNode, 1);
+    if(pRetType == ERROR_TYPEDESC) {
+      return NULL;
+    }
+    else if(pRetType) {
+      return pRetType;
+    }
+
+
+
     // 确切参数类型的函数列表
-    const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(strFunctionName);
+    const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(rstrFunctionName);
 
     if(pPreCompMath)
     {
@@ -5733,6 +5767,7 @@ namespace UVShader
           vctx.pType = pCastTypeDesc;
           return vctx.pType;
         }
+        vctx.ClearValue(ValueResult_Failed);
       }
       else {
         PARSER_BREAK(pNode->Operand[0]);
@@ -7057,13 +7092,13 @@ namespace UVShader
     return FALSE;
   }
 
-  GXBOOL CodeParser::TryReinterpretCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation)
+  GXBOOL CodeParser::TryReinterpretCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* ptkLocation)
   {
-    if(TryTypeCasting(pTypeTo, pTypeFrom, pLocation)) {
+    if(TryTypeCasting(pTypeTo, pTypeFrom, ptkLocation)) {
       return TRUE;
     }
 
-    PARSER_NOTIMPLEMENT;
+    GetLogger()->OutputTypeCastFailed(ptkLocation, _CLTEXT("类型强制转换"), pTypeTo, pTypeFrom);
     return FALSE;
   }
 
@@ -7667,15 +7702,15 @@ namespace UVShader
       else if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall))
       {
         // TODO: 换成Infer函数
-        clStringA strFuncName;
+        RefString rstrFuncName;
         if(pValueExprGlob->pNode->Operand[0].IsToken() == FALSE) {
           GetLogger()->OutputMissingSemicolon(pValueExprGlob->pNode->Operand[0].GetFrontToken());
           m_IdentifierMap.erase(insert_result.first);
           return State_HasError;
         }
-        TranslateType(strFuncName, pValueExprGlob->pNode->Operand[0].pTokn);
+        TranslateType(rstrFuncName, pValueExprGlob->pNode->Operand[0].pTokn);
 
-        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(strFuncName);
+        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(rstrFuncName);
 
         if(pPreCompMath)
         {
@@ -7813,7 +7848,7 @@ namespace UVShader
     const TYPEDESC* pBaseTypeDesc = GetType(rstrBaseType);
     TypeMap& sCurrentTypeMap = pBaseTypeDesc->pNameCtx->m_TypeMap;
     clStringA strTypeName;
-    rstrBaseType.ToString(strTypeName);
+    pBaseTypeDesc->name.ToString(strTypeName); // name才是真实类型名
 
     TYPEDESC td = { TYPEDESC::TypeCate_MultiDim, pBaseTypeDesc->pNameCtx };
     //td.name = rstrBaseType;
@@ -8064,15 +8099,16 @@ namespace UVShader
     return FALSE;
   }
 
-  GXBOOL NameContext::TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const
+  GXBOOL NameContext::TranslateType(RefString& rstrTypename, const TOKEN* ptkTypename) const
   {
     const TYPEDESC* pTypeFunc = NULL;
     if(IsTypedefedType(ptkTypename, &pTypeFunc))
     {
-      pTypeFunc->name.ToString(strTypename);
+      rstrTypename = pTypeFunc->name;
       return TRUE;
     }
-    ptkTypename->ToString(strTypename);
+    rstrTypename.Set(ptkTypename->marker, ptkTypename->length);
+    //ptkTypename->ToString(strTypename);
     return FALSE;
   }
 

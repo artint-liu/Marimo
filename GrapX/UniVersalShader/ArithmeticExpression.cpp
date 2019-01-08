@@ -78,6 +78,8 @@
 //         sph(vec3(-2., 2., 3.), .1, _wht_e, _lit1),
 //         sph(vec3(2., 3., -3.), .5, _rnbw_e, _lit2)
 //         ); // sph是结构体
+// 5.1 基于以上，GLSL支持在声明数组后在其后给数组赋值：weights = {0.5, 0.5};
+//     但是HLSL和C++是不能这样给数组赋值的
 // HLSL不支持，uvs不打算支持这种形式。
 // 6.GLSL支持复杂表达式声明数组长度，如：
 //  const vec2 t= vec2(2,3);
@@ -97,6 +99,8 @@
 // 12.GLSL 支持“#ifndef RAY_MODE && DEMO_MODE”这样的预处理，HLSL和C++不支持
 // 13.GLSL和HLSL对于预处理检查比较宽松，比如“#define ANTIALIASING;”(后面有个多余分号)或者“#define PIF.14159”(PIF与定义数字之间没有空格)是没问题的，C++会报错
 // 14.case标签下可以初始化变量，这在C++语法里是不行的
+// 15.GLSL结构体定义可以使用const修饰，HLSL在结构体没有定义变量时是不能使用const修饰的。
+// 16.GLSL结构体结尾可以没有分号，HLSL不行
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 

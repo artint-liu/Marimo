@@ -122,6 +122,7 @@ namespace UVShader
 
   struct FUNCDESC // 用户定义的函数描述
   {
+    typedef cllist<const FUNCDESC*> CPtrList;
     // FIXME: 因为定义顺序关系, 返回值和形参应改储存TYPEDESC, 而不是名字, 这个要改暂时备忘
     RefString         ret_type;     // 返回的类型
     RefString         name;         // 类型名
@@ -357,7 +358,7 @@ namespace UVShader
     //GXBOOL RegisterFunction(const clStringA& strRetType, const clStringA& strName, const FUNCTION_ARGUMENT* pArguments, int argc);
     GXBOOL RegisterFunction(const RefString& rstrRetType, const RefString& rstrName, const TYPEINSTANCE::Array& type_array);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
-    GXBOOL TranslateType(clStringA& strTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
+    GXBOOL TranslateType(RefString& rstrTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
@@ -804,13 +805,13 @@ namespace UVShader
 
 
 #ifdef ENABLE_SYNTAX_VERIFY
-    const TYPEDESC* InferUserFunctionType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode); // 返回ERROR_TYPEDESC表示推导出现错误
+    const TYPEDESC* InferUserFunctionType(FUNCDESC::CPtrList& aUserFunc, VALUE_CONTEXT& vctx, const TYPEDESC::CPtrList& sTypeList, const SYNTAXNODE* pFuncNode, int nStep); // 返回ERROR_TYPEDESC表示推导出现错误
 
     int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList, GXBOOL bTolerance); // -1:出错，0：不匹配，1：匹配, bTolerance 更宽容的匹配
 
-    static GXLPCSTR InferBuildinFunction(const clStringA& strFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError);
-    GXBOOL InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx, const clStringA& strFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
-    GXBOOL InferBuildinFunction_WildcardTable(INTRINSIC_FUNC* pFunctionsTable, size_t nTableLen, VALUE_CONTEXT& vctx, const clStringA& strFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
+    static GXLPCSTR InferBuildinFunction(const RefString& rstrFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError);
+    GXBOOL InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx, const RefString& rstrFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
+    GXBOOL InferBuildinFunction_WildcardTable(INTRINSIC_FUNC* pFunctionsTable, size_t nTableLen, VALUE_CONTEXT& vctx, const RefString& rstrFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
     GXBOOL ExtendParamDimension(TYPEDESC::CPtrArray& aExtendArgumentTypes, const INTRINSIC_FUNC& test_func, const TYPEDESC::CPtrList& sArgumentsTypeList);
     const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);
     const TYPEDESC* InferConstructorsInStructType(const NameContext& sNameSet, const TYPEDESC::CPtrList& sArgumentsTypeList, const SYNTAXNODE* pFuncNode); // 扩展语法：结构体构造
