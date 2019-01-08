@@ -127,6 +127,7 @@ namespace UVShader
     RefString         ret_type;     // 返回的类型
     RefString         name;         // 类型名
     TYPEINSTANCE::Array  sFormalTypes; // 函数, 形参类型表
+    clStringW& ToString(clStringW& str) const;
   };
 
   struct INTRINSIC_FUNC

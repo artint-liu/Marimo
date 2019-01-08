@@ -5598,9 +5598,29 @@ namespace UVShader
     // TODO: 没有找到名字的提示找不到标识符, 找到名字但是参数不匹配的提示没有找到重载
     //  error C3861: “func”: 找不到标识符
     clStringW strW;
-    GetLogger()->OutputErrorW(*pFuncNode->Operand[0].pTokn, UVS_EXPORT_TEXT(3861, "“%s”: 找不到标识符"),
-      pFuncNode->Operand[0].pTokn->ToString(strW).CStr());
+    clStringW strInfoW;
+    if(_CL_NOT_(sUserFuncs.empty()))
+    {
+      clStringW strFunc;
+      strInfoW.Append(_CLTEXT("\r\n\t函数调用：\r\n"));
+      strInfoW.Append(_CLTEXT("\t\t")).Append(rstrFunctionName.GetPtr(), rstrFunctionName.GetLength()).Append('(');
+      for(const TYPEDESC* pt : sArgumentsTypeList)
+      {
+        strInfoW.Append(pt->name.GetPtr(), pt->name.GetLength()).Append(',');
+      }
+      strInfoW.TrimRight(',');
+      strInfoW.Append(_CLTEXT(")\r\n"));
+      strInfoW.Append(_CLTEXT("\t无法在下列原型中找到匹配项：\r\n"));
+      for(const FUNCDESC* fd : sUserFuncs)
+      {        
+        strInfoW.Append(_CLTEXT("\t\t")).Append(fd->ToString(strFunc)).Append(_CLTEXT("\r\n"));
+      }
+    }
+
+    GetLogger()->OutputErrorW(*pFuncNode->Operand[0].pTokn, UVS_EXPORT_TEXT(3861, "“%s”: 找不到标识符%s"),
+      pFuncNode->Operand[0].pTokn->ToString(strW).CStr(), strInfoW.CStr());
     vctx.result = ValueResult_3861;
+
 
     return NULL;
   }
@@ -9128,6 +9148,19 @@ namespace UVShader
   void VALUE_CONTEXT_CHECKER::ClearErrorCount()
   {
     --nErrorCount;
+  }
+
+  clStringW& FUNCDESC::ToString(clStringW& str) const
+  {
+    str.Clear();
+    str.Append(ret_type.GetPtr(), ret_type.GetLength()).Append(' ').Append(name.GetPtr(), name.GetLength()).Append('(');
+    for(const TYPEINSTANCE& ti : sFormalTypes)
+    {
+      str.Append(ti.pTypeDesc->name.GetPtr(), ti.pTypeDesc->name.GetLength()).Append(',');
+    }
+    str.TrimRight(',');
+    str.Append(')');
+    return str;
   }
 
 } // namespace UVShader

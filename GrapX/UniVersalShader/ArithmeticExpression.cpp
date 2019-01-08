@@ -533,8 +533,14 @@ namespace UVShader
           if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
           {
             ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
-            if(nCandidate > OPP(12) && IsLikeTypeCast(scope, i)) {
-              return s.scope;
+            //if(nCandidate > OPP(12) && IsLikeTypeCast(scope, i)) {
+            //  return s.scope;
+            //}
+            if(OPP(12) < nCandidate && IsLikeTypeCast(scope, i)) {
+              if(nMinPrecedence == OPP(12)) {
+                return s.scope;
+              }
+              nCandidate = OPP(12);
             }
             i = s.scope;
             continue;
