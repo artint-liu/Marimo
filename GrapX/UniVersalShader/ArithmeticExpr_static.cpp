@@ -775,10 +775,10 @@ namespace UVShader
     {"dot",         INTRINSIC_FUNC::RetType_Scaler0,   2, (u16*)ARG_Vector ARG_Vector},
     {"fmod",        INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
     {"lerp",        INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
-    {"max",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
-    {"min",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
+    {"max",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca}, // 支持常量折叠
+    {"min",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca}, // 支持常量折叠
     {"modf",        INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
-    {"pow",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
+    {"pow",         INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca}, // 支持常量折叠
 
     {"reflect",     INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_Vector ARG_Vector},
     {"refract",     INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_Vector ARG_Vector ARG_Scaler1},

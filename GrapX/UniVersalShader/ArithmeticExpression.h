@@ -329,15 +329,33 @@ namespace UVShader
     State Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1);
     State Calculate(const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const VALUE& param0, const VALUE& param1);
     clStringA ToString() const;
-    clStringA& ToString(clStringA& str) const;
+    clStringA& ToString(clStringA& str) const;    
     GXBOOL IsNumericRank() const;
     static GXBOOL IsNumericRank(Rank rank);
     template<typename _Ty>
     State CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
     template<typename _Ty>
     State CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
+    template<typename _Ty>
+    _Ty CastTo() const;
     int Compare(const VALUE& v) const; // 必须相同rank, *this - v 的结果,小于0则为-1， 等于0则为0，大于0则为1
   };
+
+  template<typename _Ty>
+  _Ty UVShader::VALUE::CastTo() const
+  {
+    switch(rank)
+    {
+    case UVShader::VALUE::Rank_Unsigned:      return _Ty(uValue);
+    case UVShader::VALUE::Rank_Signed:        return _Ty(nValue);
+    case UVShader::VALUE::Rank_Float:         return _Ty(fValue);
+    case UVShader::VALUE::Rank_Unsigned64:    return _Ty(uValue64);
+    case UVShader::VALUE::Rank_Signed64:      return _Ty(nValue64);
+    case UVShader::VALUE::Rank_Double:        return _Ty(fValue64);
+    }
+    CLBREAK;
+    return 0;
+  }
 
   typedef clvector<VALUE> ValuePool;
 
@@ -380,6 +398,7 @@ namespace UVShader
       MODE_Flow_ForRunning,     // for 的条件和步进部分
       MODE_Flow_Switch,         // switch(A) {B}
       MODE_Flow_Case,           // case A: B
+      MODE_Flow_CaseDefault,    // default: B | A=NULL
 
       MODE_Flow_DoWhile,        // do{B}while(A)
       MODE_Flow_Break,

@@ -2618,7 +2618,7 @@ namespace UVShader
       eMode = SYNTAXNODE::MODE_Flow_Continue;
       pend = scope.begin + 2;
     }
-    else if(front == "case") {
+    else if(front == "case" || front == "default") {
       if(TEST_FLAG_NOT(sNameSet.allow_keywords, KeywordFilter_case)) {
         GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(2046, "非法 case"));
       }
@@ -3072,30 +3072,41 @@ namespace UVShader
 
   CodeParser::TKSCOPE::TYPE CodeParser::ParseFlowCase(const NameContext& sParentCtx, const TKSCOPE& scope, GLOB* pDesc)
   {
-    ASSERT(m_aTokens[scope.begin] == "case");
+    const GXBOOL bCaseLabel = m_aTokens[scope.begin] == "case";
+    ASSERT(bCaseLabel || m_aTokens[scope.begin] == "default");
     const TOKEN& front = m_aTokens[scope.begin];
 
     TKSCOPE::TYPE i = scope.begin + 1;
-    // 避免“...?...:...”三元操作符被解释为“case ...:”
-    while(i < scope.end && (m_aTokens[i] != ':' || m_aTokens[i].scope == 0)) {
-      i++;
-    }
+    if(bCaseLabel)
+    {
+      // 避免“...?...:...”三元操作符被解释为“case ...:”
+      while(i < scope.end && (m_aTokens[i] != ':' || m_aTokens[i].scope == 0)) {
+        i++;
+      }
 
-    if(i == scope.end) {
-      GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5025, "case 结尾缺少“:”"));
-      return scope.end;
+      if(i == scope.end) {
+        GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5025, "case 结尾缺少“:”"));
+        return scope.end;
+      }
+    }
+    else
+    {
+      if(m_aTokens[i] != ':') {
+        GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5026, "switch 表达式中 default 格式不正确"));
+        return scope.end;
+      }
     }
 
     GLOB A = { 0 }, B = { 0 }, C = { 0 };
     TKSCOPE sCaseConditional(scope.begin + 1, i);
 
-    GXBOOL bret = ParseArithmeticExpression(0, sCaseConditional, &A);
+    GXBOOL bret = bCaseLabel ? ParseArithmeticExpression(0, sCaseConditional, &A) : TRUE;
     GLOB* pCurrGlob = &B;
     TKSCOPE step_scope = {i + 1, scope.end}; // 跳过"case"
 
-    NameContext sCaseCtx("case", &sParentCtx);
+    NameContext sCaseCtx(bCaseLabel ? "case" : "default", &sParentCtx);
 
-    while(step_scope.GetSize() > 0 && m_aTokens[step_scope.begin] != "case")
+    while(step_scope.GetSize() > 0 && m_aTokens[step_scope.begin] != "case" && m_aTokens[step_scope.begin] != "default")
     {
       C.ptr = NULL;
 
@@ -3125,7 +3136,7 @@ namespace UVShader
       pCurrGlob = &pCurrGlob->pNode->Operand[1];
     }
 
-    bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_Case, NULL, &A, &B);
+    bret = bret && MakeSyntaxNode(pDesc, bCaseLabel ? SYNTAXNODE::MODE_Flow_Case : SYNTAXNODE::MODE_Flow_CaseDefault, NULL, &A, &B);
     return bret ? step_scope.begin : scope.end;
   }
 
@@ -4449,7 +4460,11 @@ namespace UVShader
       }
       else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
       {
-        CLBREAK;
+        // error C2133: “a”: 未知的大小
+        clStringW strW;
+        ptkVar = GetIdentifierNameWithoutSeamantic(second_glob);
+        GetLogger()->OutputErrorW(ptkVar, UVS_EXPORT_TEXT(2133, "“%s”: 未知的大小"), ptkVar->ToString(strW).CStr());
+        return FALSE;
       }
       else if(second_glob.pNode->CompareOpcode(':')) // 语义
       {
@@ -5237,7 +5252,7 @@ namespace UVShader
     if(vctx.bNeedValue)
     {
       VALUE_CONTEXT::Array _vctx_params = vctx_params;
-      if(rstrFunctionName == "max" || rstrFunctionName == "min")
+      if(rstrFunctionName == "max" || rstrFunctionName == "min" || rstrFunctionName == "pow")
       {
         size_t n = 0;
         for(VALUE_CONTEXT& vp : _vctx_params) {
@@ -5269,6 +5284,18 @@ namespace UVShader
             vctx.pool.push_back(
               _vctx_params[0].pValue[i].Compare(
                 _vctx_params[1].pValue[i]) <= 0 ? _vctx_params[0].pValue[i] : _vctx_params[1].pValue[i]);
+          }
+          vctx.UsePool();
+        }
+        else if(rstrFunctionName == "pow")
+        {
+          VALUE value;
+          for(size_t i = 0; i < count; i++)
+          {
+            double r = pow(_vctx_params[0].pValue[i].CastTo<double>(), _vctx_params[1].pValue[i].CastTo<double>());
+            value.set(VALUE::Rank_Double, &r);
+            vctx.pool.push_back(value);
+            vctx.pool.back().CastValueByRank(vctx.TypeRank());
           }
           vctx.UsePool();
         }
@@ -5655,9 +5682,7 @@ namespace UVShader
     //  error C3861: “func”: 找不到标识符
     clStringW strW;
     clStringW strInfoW;
-    if(_CL_NOT_(sUserFuncs.empty()))
     {
-      clStringW strFunc;
       strInfoW.Append(_CLTEXT("\r\n\t函数调用：\r\n"));
       strInfoW.Append(_CLTEXT("\t\t")).Append(rstrFunctionName.GetPtr(), rstrFunctionName.GetLength()).Append('(');
       for(const TYPEDESC* pt : sArgumentsTypeList)
@@ -5666,7 +5691,12 @@ namespace UVShader
       }
       strInfoW.TrimRight(',');
       strInfoW.Append(_CLTEXT(")\r\n"));
+    }
+
+    if(_CL_NOT_(sUserFuncs.empty()))
+    {
       strInfoW.Append(_CLTEXT("\t无法在下列原型中找到匹配项：\r\n"));
+      clStringW strFunc;
       for(const FUNCDESC* fd : sUserFuncs)
       {        
         strInfoW.Append(_CLTEXT("\t\t")).Append(fd->ToString(strFunc)).Append(_CLTEXT("\r\n"));
@@ -5861,13 +5891,11 @@ namespace UVShader
       if(pNode->pOpcode->unary)
       {
         ASSERT(
-          *pNode->pOpcode == '~' ||
-          *pNode->pOpcode == '!' ||
-          *pNode->pOpcode == '-' ||
-          *pNode->pOpcode == '+' ||
-          *pNode->pOpcode == "--" ||
-          *pNode->pOpcode == "++" );
+          *pNode->pOpcode == '~' || *pNode->pOpcode == '!' ||
+          *pNode->pOpcode == '-' || *pNode->pOpcode == '+' ||
+          *pNode->pOpcode == "--" || *pNode->pOpcode == "++" );
 
+        // FIXME: 没有处理一元符号与操作数得计算
         if(pNode->pOpcode->unary_mask == 0x01)
         {
           return InferType(vctx, pNode->Operand[1]);
@@ -6870,6 +6898,13 @@ namespace UVShader
 
         vctx.pType = vctx.name_ctx.GetType(strTypeName.CStr());
         ASSERT(vctx.pType);
+      }
+      else if(pAB[0].pType->cate == TYPEDESC::TypeCate_Struct || pAB[1].pType->cate == TYPEDESC::TypeCate_Struct) {
+        clStringW strType0, strType1;
+        vctx.pLogger->OutputErrorW(pLocation, UVS_EXPORT_TEXT(5077, "无法将结构体直接用于比较：“%s”与“%s”"),
+          pAB[0].pType->name.ToString(strType0).CStr(), pAB[1].pType->name.ToString(strType0).CStr());
+        vctx.ClearValue(ValueResult_Failed);
+        return FALSE;
       }
       else
       {

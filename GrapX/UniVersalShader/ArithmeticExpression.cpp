@@ -101,6 +101,11 @@
 // 14.case标签下可以初始化变量，这在C++语法里是不行的
 // 15.GLSL结构体定义可以使用const修饰，HLSL在结构体没有定义变量时是不能使用const修饰的。
 // 16.GLSL结构体结尾可以没有分号，HLSL不行
+// 17.GLSL的结构体可以使用比较，如：
+//     RAY ra, rb;
+//     ...
+//     if(ra==rb) ...
+//   在HLSL中不支持这种比较
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -2791,7 +2796,9 @@ GO_NEXT:;
     if(TEST_FLAG(err, UVS_WARNING_MASK)) {
       m_nWarningCount++;
     }
-    m_nSessionError++;
+    else {
+      m_nSessionError++;
+    }
     if(m_nSessionError <= c_nMaxSessionError) {
       m_nDisplayedError++;
       if(m_nDisplayedError == c_nMaxErrorCount) {
