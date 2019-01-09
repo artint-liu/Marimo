@@ -5112,16 +5112,15 @@ namespace UVShader
     static GXBOOL bTolerance[2] = {FALSE, TRUE}; // 第一次严格匹配，防止找到重载函数，如果找不到第二遍放宽匹配条件
     //cllist<const FUNCDESC*> aUserFunc;
     if(nStep == 0) {
-      vctx.name_ctx.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, sTypeList.size(), aUserFunc);
+      vctx.name_ctx.GetMatchedFunctions(pFuncNode->Operand[0].pTokn, -1/*sTypeList.size()*/, aUserFunc);
     }
 
-    //for (int n = aUserFunc.size() > 1 ? 0 : 1; n < 2; n++)
-    //{
     for(auto iter_func = aUserFunc.begin(); iter_func != aUserFunc.end(); ++iter_func)
     {
-      //int i = 0;
-      //size_t nConfirm = 0;
-      ASSERT((*iter_func)->sFormalTypes.size() == sTypeList.size());
+      if((*iter_func)->sFormalTypes.size() != sTypeList.size()) {
+        continue;
+      }
+
       int result = CompareFunctionArguments(vctx.name_ctx, pFuncNode->Operand[0].pTokn, (*iter_func)->sFormalTypes, sTypeList, bTolerance[nStep]);
       if(result == -1) {
         vctx.ClearValue(ValueResult_CanNotInferType);
@@ -5134,7 +5133,6 @@ namespace UVShader
         return vctx.pType;
       }
     }
-    //}
     return NULL;
   }
 
@@ -5216,7 +5214,7 @@ namespace UVShader
 
   GXBOOL CodeParser::InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx,
     const RefString& rstrFunctionName,
-    const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList)
+    const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList, const VALUE_CONTEXT::Array& vctx_params)
   {
     //CHECK_VALUE_CONTEXT;
     ASSERT(sExprList.size() == sArgumentsTypeList.size());
@@ -5234,6 +5232,55 @@ namespace UVShader
       vctx, rstrFunctionName, sExprList, sArgumentsTypeList) == FALSE)
     {
       return FALSE;
+    }
+
+    if(vctx.bNeedValue)
+    {
+      VALUE_CONTEXT::Array _vctx_params = vctx_params;
+      if(rstrFunctionName == "max" || rstrFunctionName == "min")
+      {
+        size_t n = 0;
+        for(VALUE_CONTEXT& vp : _vctx_params) {
+          vp.CopyValue(vctx_params[n++]);
+          if(vp.TypeRank() < vctx.TypeRank()) {
+            vp.CastUpward(vctx.pType);
+          }
+        }
+        
+        //VALUE value;
+        vctx.result = ValueResult_OK;
+        vctx.pool.clear();
+        const size_t count = vctx.pType->CountOf();
+
+        if(rstrFunctionName == "max")
+        {
+          for(size_t i = 0; i < count; i++)
+          {
+            vctx.pool.push_back(
+              _vctx_params[0].pValue[i].Compare(
+                _vctx_params[1].pValue[i]) >= 0 ? _vctx_params[0].pValue[i] : _vctx_params[1].pValue[i]);
+          }
+          vctx.UsePool();
+        }
+        else if(rstrFunctionName == "min")
+        {
+          for(size_t i = 0; i < count; i++)
+          {
+            vctx.pool.push_back(
+              _vctx_params[0].pValue[i].Compare(
+                _vctx_params[1].pValue[i]) <= 0 ? _vctx_params[0].pValue[i] : _vctx_params[1].pValue[i]);
+          }
+          vctx.UsePool();
+        }
+        else
+        {
+          CLBREAK;
+        }
+      }
+      else {
+        vctx.bNeedValue = FALSE;
+        vctx.ClearValueOnly();
+      }
     }
 
     return TRUE;
@@ -5279,11 +5326,11 @@ namespace UVShader
                 pRetType = pTypeDesc;
               }
               else if(//test_func.type == INTRINSIC_FUNC::RetType_FromName ||
-                test_func.type == INTRINSIC_FUNC::RetType_Bool ||
-                test_func.type == INTRINSIC_FUNC::RetType_Float4)
+                test_func.type == INTRINSIC_FUNC::RetType_Bool/* ||
+                test_func.type == INTRINSIC_FUNC::RetType_Float4*/)
               {
               }
-              else if(test_func.type == n) {
+              else if(test_func.type == n) { // RetType_Argument0
                 pRetType = pTypeDesc;
               }
               else if(test_func.type < 0 || n >= test_func.count) {
@@ -5320,9 +5367,9 @@ namespace UVShader
             else if(test_func.type == INTRINSIC_FUNC::RetType_Bool) {
               vctx.pType = vctx.name_ctx.GetType(STR_BOOL);
             }
-            else if(test_func.type == INTRINSIC_FUNC::RetType_Float4) {
-              vctx.pType = vctx.name_ctx.GetType(STR_FLOAT4);
-            }
+            //else if(test_func.type == INTRINSIC_FUNC::RetType_Float4) {
+            //  vctx.pType = vctx.name_ctx.GetType(STR_FLOAT4);
+            //}
             else if(test_func.type >= 0 && test_func.type < (int)sExtendArgumentTypes.size()) {
               auto iter_type = sExtendArgumentTypes.begin();
               int index = 0;
@@ -5428,11 +5475,19 @@ namespace UVShader
     TYPEDESC::CPtrList sArgumentsTypeList;
     SYNTAXNODE::GlobList sExprList;
     BreakComma(sExprList, pFuncNode->Operand[1]);
-    VALUE_CONTEXT vctx_param(vctx);
+
+    VALUE_CONTEXT::Array vctx_params;
+    vctx_params.reserve(sExprList.size());
+    //auto iter_vctx_param = vctx_param.begin();
+
     GXBOOL bNeedValue = vctx.bNeedValue; // 参数中如果不是常量，则整个参数表都不储存常量
     for(auto it = sExprList.begin(); it != sExprList.end(); ++it)
     {
-      vctx_param.ClearValue();
+      //vctx_param.ClearValue();
+      vctx_params.push_back(vctx);
+      VALUE_CONTEXT& vctx_param = vctx_params.back();
+
+      vctx_param.bNeedValue = bNeedValue;
       const TYPEDESC* pTypeDesc = InferType(vctx_param, *it);
       if(vctx_param.result != ValueResult_OK && vctx_param.result != ValueResult_Variable) {
         vctx.result = vctx_param.result;
@@ -5457,7 +5512,12 @@ namespace UVShader
       vctx.UsePool();
     }
     else {
+      vctx.bNeedValue = FALSE;
       vctx.ClearValueOnly();
+      for(VALUE_CONTEXT& vc : vctx_params) {
+        vc.bNeedValue = FALSE;
+        vc.ClearValueOnly();
+      }
     }
 
     FUNCDESC::CPtrList sUserFuncs;
@@ -5465,13 +5525,9 @@ namespace UVShader
     // 用户定义函数 - 严格匹配
     pRetType = InferUserFunctionType(sUserFuncs, vctx, sArgumentsTypeList, pFuncNode, 0);
     if(pRetType == ERROR_TYPEDESC) {
-      //vctx.ClearValue(ValueResult_CanNotInferType);
       return NULL;
     }
     else if(pRetType) {
-      //vctx.ClearValueOnly();
-      //vctx.result = ValueResult_OK;
-      //vctx.pType = pRetType;
       return pRetType;
     }
 
@@ -5509,7 +5565,7 @@ namespace UVShader
     }
 
     // 通配符形式的内部函数列表
-    if(InferBuildinFunction_Wildcard(vctx, rstrFunctionName, sExprList, sArgumentsTypeList) == FALSE) {
+    if(InferBuildinFunction_Wildcard(vctx, rstrFunctionName, sExprList, sArgumentsTypeList, vctx_params) == FALSE) {
       return NULL;
     }
     else if(vctx.pType) {
@@ -6824,12 +6880,6 @@ namespace UVShader
     }
     else if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType))
     {
-      //if(pAB[0].TypeRank() >= pAB[1].TypeRank()) {
-      //  vctx.pType = pAB[0].pType;
-      //}
-      //else {
-      //  vctx.pType = pAB[1].pType;
-      //}
       vctx.pType = (pAB[0].TypeRank() >= pAB[1].TypeRank()) ? pAB[0].pType : pAB[1].pType;
       ASSERT(pAB[0].pType->CountOf() == pAB[1].pType->CountOf());
     }
@@ -7454,8 +7504,21 @@ namespace UVShader
           target_rank = VALUE::Rank_Double;
         }
         else {
+          VALUE_CONTEXT vctx(*this);
+          vctx.pLogger = GetLogger();
+          // 参考下面的[数组长度计算]
+          if(m_pCodeParser->InferFunctionReturnedType(vctx, pNode))
+          {
+            if(vctx.pValue == NULL) {
+              value_out.SetZero();
+              return VALUE::State_Call;
+            }
+            // FIXEME: 检查vctx.pool.size() == 1
+            value_out = *vctx.pValue;
+            return VALUE::State_OK;
+          }
           value_out.SetZero();
-          return VALUE::State_Call;
+          return VALUE::State_SyntaxError;
         }
 
         if(pNode->Operand[1].IsNode())
@@ -7520,6 +7583,30 @@ namespace UVShader
         vctx.pLogger = GetLogger();
         const TYPEDESC* pTypeDesc = m_pCodeParser->InferMemberType(vctx, pNode);
 
+        // [数组长度计算]应该改为：
+        // if(pTypeDesc)
+        // {
+        //   if(IS_SCALER_CATE(pTypeDesc))
+        //   {
+        //     if(vctx.pValue)
+        //     {
+        //       // 下标常量
+        //     }
+        //     else
+        //     {
+        //       // 下标变量
+        //     }
+        //   }
+        //   else
+        //   {
+        //     // 无法转换类型到标量
+        //   }
+        // }
+        // else
+        // {
+        //   // 出错
+        // }
+
         if(pTypeDesc && IS_SCALER_CATE(pTypeDesc))
         {
           if(vctx.pValue && vctx.count == 1)
@@ -7530,9 +7617,11 @@ namespace UVShader
           value_out.rank = VALUE::Rank_Undefined;
           return VALUE::State_Variable;
         }
-        else if(vctx.result == ValueResult_Undefined) {
-          PARSER_BREAK2(m_pCodeParser, pNode); // 不是数学类型
-        }
+        //else if(vctx.result == ValueResult_Undefined) {
+        //  PARSER_BREAK2(m_pCodeParser, pNode); // 不是数学类型
+        //}
+        value_out.SetZero();
+        return VALUE::State_SyntaxError;
       }
       //else {
       //  //VALUE_CONTEXT vctx(*this);
@@ -8046,6 +8135,7 @@ namespace UVShader
 
   void NameContext::GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const
   {
+    // nFormalCount == -1 表示不过滤参数数量
     const NameContext* pRoot = GetRoot(); // 没有局部函数, 所以直接从根查找
 
     RefString rstrFuncName(pFuncName->marker, pFuncName->length);
@@ -8055,7 +8145,7 @@ namespace UVShader
     auto it = pRoot->m_FuncMap.find(rstrFuncName);
     while(it != pRoot->m_FuncMap.end() && it->first == rstrFuncName)
     {
-      if(it->second.sFormalTypes.size() == nFormalCount) {
+      if(nFormalCount == (size_t)-1 || it->second.sFormalTypes.size() == nFormalCount) {
         aMatchedFunc.push_back(&it->second);
       }
       ++it;

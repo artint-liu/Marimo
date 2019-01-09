@@ -1796,6 +1796,32 @@ GO_NEXT:;
     return State_OK;
   }
 
+  int VALUE::Compare(const VALUE& v) const
+  {
+    ASSERT(rank == v.rank);
+    switch(rank)
+    {
+    case VALUE::Rank_Unsigned:
+      return uValue == v.uValue ? 0 : uValue < v.uValue ? -1 : 1;
+    case VALUE::Rank_Signed:
+      return nValue == v.nValue ? 0 : nValue < v.nValue ? -1 : 1;
+    case VALUE::Rank_Float:
+      return fValue == v.fValue ? 0 : fValue < v.fValue ? -1 : 1;
+    case VALUE::Rank_Unsigned64:
+      return uValue64 == v.uValue64 ? 0 : uValue64 < v.uValue64 ? -1 : 1;
+    case VALUE::Rank_Signed64:
+      return nValue64 == v.nValue64 ? 0 : nValue64 < v.nValue64 ? -1 : 1;
+    case VALUE::Rank_Double:
+      return fValue64 == v.fValue64 ? 0 : fValue64 < v.fValue64 ? -1 : 1;
+    case VALUE::Rank_String:
+      return uValue64 == v.uValue64 ? 0 : uValue64 < v.uValue64 ? -1 : 1;
+    default:
+      CLBREAK;
+      break;
+    }
+    return 0;
+  }
+
   VALUE::State VALUE::Calculate(const TOKEN& token, const VALUE& param0, const VALUE& param1)
   {
     return Calculate(token.marker, token.length, param0, param1);

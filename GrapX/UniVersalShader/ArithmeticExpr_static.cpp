@@ -786,11 +786,6 @@ namespace UVShader
     {"smoothstep",  INTRINSIC_FUNC::RetType_Argument0, 3, (u16*)ARG_MatVecSca ARG_MatVecSca ARG_MatVecSca}, // FIXME: 没有验证参数的一致性
     {"step",        INTRINSIC_FUNC::RetType_Argument0, 2, (u16*)ARG_MatVecSca ARG_MatVecSca},
 
-    {"tex2D",       INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 2维向量
-    {"tex2D$",      INTRINSIC_FUNC::RetType_Float4, 3, (u16*)ARG_Sampler2D ARG_Vector ARG_Scaler}, // FIXME: 2维向量
-    {"tex2DBias",   INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 4维向量
-    {"tex3D",       INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_Sampler3D ARG_Vector}, // FIXME: 3维向量
-    {"texCUBE",     INTRINSIC_FUNC::RetType_Float4, 2, (u16*)ARG_SamplerCube ARG_Vector},
     {NULL},
   };
 
@@ -843,9 +838,15 @@ namespace UVShader
 
 
   BUILDIN_FUNCTION_PROTOTYPE s_functions_prototype[] = {
-    {"float", "determinant", 1, "float2x2"},
-    {"float", "determinant$", 1, "float3x3"}, // 重载函数，如果不是第一个要加一个后缀，确保二分查找可以正确定位到第一个
-    {"float", "determinant$", 1, "float4x4"},
+    {"float",   "determinant", 1, "float2x2"},
+    {"float",   "determinant$", 1, "float3x3"}, // 重载函数，如果不是第一个要加一个后缀，确保二分查找可以正确定位到第一个
+    {"float",   "determinant$", 1, "float4x4"},
+
+    {"float4",  "tex2D",       2, "sampler2D\0float2"}, // (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 2维向量
+    {"float4",  "tex2D$",      3, "sampler2D\0float2\0float"}, // (u16*)ARG_Sampler2D ARG_Vector ARG_Scaler}, // FIXME: 2维向量
+    {"float4",  "tex2DBias",   2, "sampler2D\0float4"}, // (u16*)ARG_Sampler2D ARG_Vector}, // FIXME: 4维向量
+    {"float4",  "tex3D",       2, "sampler3D\0float3"}, // (u16*)ARG_Sampler3D ARG_Vector}, // FIXME: 3维向量
+    {"float4",  "texCUBE",     2, "samplerCUBE\0float3"}, // (u16*)ARG_SamplerCube ARG_Vector},
   };
 
   size_t s_functions_prototype_len = countof(s_functions_prototype);

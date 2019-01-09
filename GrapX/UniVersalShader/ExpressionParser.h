@@ -138,7 +138,7 @@ namespace UVShader
       //RetType_FromName = -2, // 返回类型是函数名
       //RetType_Vector4 = -3,  // 4维向量,一般代表颜色
       RetType_Bool = -3,
-      RetType_Float4 = -4,  // 4维向量,一般代表颜色
+      //RetType_Float4 = -4,  // 4维向量,一般代表颜色
       RetType_Last = -5,
       RetType_Argument0 = 0, // 返回类型同第一个参数类型
       RetType_Argument1 = 1, // 返回类型同第二个参数类型
@@ -225,6 +225,7 @@ namespace UVShader
 
   struct VALUE_CONTEXT
   {
+    typedef clvector<VALUE_CONTEXT> Array;
     // [属性]
     const NameContext&  name_ctx;
     const NameContext*  pMemberCtx;
@@ -811,7 +812,7 @@ namespace UVShader
     int CompareFunctionArguments(const NameContext &sNameSet, const TOKEN* ptkFuncName, const TYPEINSTANCE::Array& sFormalTypes, const TYPEDESC::CPtrList &sCallTypeList, GXBOOL bTolerance); // -1:出错，0：不匹配，1：匹配, bTolerance 更宽容的匹配
 
     static GXLPCSTR InferBuildinFunction(const RefString& rstrFunctionName, const TYPEDESC::CPtrList& sArgumentsTypeList, GXBOOL* pError);
-    GXBOOL InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx, const RefString& rstrFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
+    GXBOOL InferBuildinFunction_Wildcard(VALUE_CONTEXT& vctx, const RefString& rstrFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList, const VALUE_CONTEXT::Array& vctx_params);
     GXBOOL InferBuildinFunction_WildcardTable(INTRINSIC_FUNC* pFunctionsTable, size_t nTableLen, VALUE_CONTEXT& vctx, const RefString& rstrFunctionName, const SYNTAXNODE::GlobList& sExprList, const TYPEDESC::CPtrList& sArgumentsTypeList);
     GXBOOL ExtendParamDimension(TYPEDESC::CPtrArray& aExtendArgumentTypes, const INTRINSIC_FUNC& test_func, const TYPEDESC::CPtrList& sArgumentsTypeList);
     const TYPEDESC* InferFunctionReturnedType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pFuncNode);

@@ -336,6 +336,7 @@ namespace UVShader
     State CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
     template<typename _Ty>
     State CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
+    int Compare(const VALUE& v) const; // 必须相同rank, *this - v 的结果,小于0则为-1， 等于0则为0，大于0则为1
   };
 
   typedef clvector<VALUE> ValuePool;
