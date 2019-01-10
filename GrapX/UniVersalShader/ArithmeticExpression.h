@@ -380,6 +380,7 @@ namespace UVShader
       MODE_CommaList,           // 逗号列表, 增加这个是因为整理初始化列表时找逗号token做pOpcode比较麻烦 [A:statement] [B:next CommaList]
       MODE_Assignment,          // 初始化列表赋值: A=B; B应该是MODE_InitList, 其它形式赋值属于MODE_Opcode
       MODE_InitList,            // 数据初始化列表, {A}; B永远为空, Opcode 应该为‘{’或者为NULL
+      MODE_BracketList,         // 括号列表, (A,B); pOpcode必须是','的情况
       MODE_FunctionCall,        // 函数调用: A(B)
       MODE_TypeCast,            // 类型转换: (A)B
       MODE_Typedef,             // typedef A B;

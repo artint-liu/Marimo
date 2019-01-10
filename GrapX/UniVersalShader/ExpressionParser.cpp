@@ -1775,7 +1775,7 @@ namespace UVShader
   SYNTAXNODE::GlobList& CodeParser::BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob)
   {
     // (,) [a] [b,c]
-    if(sGlob.IsNode() && sGlob.pNode->CompareOpcode(',')) {
+    if(sGlob.IsNode() && sGlob.pNode->CompareOpcode(',') && sGlob.pNode->mode != SYNTAXNODE::MODE_BracketList) {
       sExprList.push_back(sGlob.pNode->Operand[0]);
 
       if(sGlob.pNode->Operand[1].IsNode()) {
@@ -2522,6 +2522,10 @@ namespace UVShader
 
     case SYNTAXNODE::MODE_CommaList:
       strOut.Format("%s,%s", str[0], str[1]);
+      break;
+
+    case SYNTAXNODE::MODE_BracketList:
+      strOut.Format("(%s,%s)", str[0], str[1]);
       break;
 
     default:
@@ -5304,10 +5308,10 @@ namespace UVShader
           CLBREAK;
         }
       }
-      else {
-        vctx.bNeedValue = FALSE;
-        vctx.ClearValueOnly();
-      }
+      //else {
+      //  vctx.bNeedValue = FALSE;
+      //  vctx.ClearValueOnly();
+      //}
     }
 
     return TRUE;

@@ -720,15 +720,19 @@ GO_NEXT:;
     {
       // (...) 形式
       ASSERT(m_aTokens[scope.end - 1].scope == scope.begin); // 括号肯定是匹配的
+      GXBOOL bRet = ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+
       if(front == '{') {
-        GXBOOL bRet = ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
         if(bRet) {
           bRet = MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_InitList, pDesc, NULL);
         }
         return bRet;
       }
       else {
-        return ParseArithmeticExpression(depth + 1, TKSCOPE(scope.begin + 1, scope.end - 1), pDesc, TOKEN::FIRST_OPCODE_PRECEDENCE);
+        if(pDesc->IsNode() && pDesc->pNode->CompareOpcode(',')) {
+          pDesc->pNode->mode = SYNTAXNODE::MODE_BracketList;
+        }
+        return bRet;
       }
     }
     else if(front.IsIdentifier() && m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
