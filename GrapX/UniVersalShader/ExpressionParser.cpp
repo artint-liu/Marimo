@@ -1421,6 +1421,10 @@ namespace UVShader
     else if((TKSCOPE::TYPE)p->semi_scope == TKSCOPE::npos || (TKSCOPE::TYPE)p->semi_scope > pScope->end) {
       return FALSE;
     }
+    else if(pScope->begin + 2 < pScope->end && m_aTokens[pScope->begin + 2] == '(') {
+      // 函数特征：<type> <func>() 
+      return FALSE;
+    }
 
     const TOKEN* pEnd = &m_aTokens.front() + p->semi_scope;
 
@@ -1889,7 +1893,8 @@ namespace UVShader
 
     ++p;
     if(p >= pEnd) {
-      GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”"));
+      //GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”"));
+      GetLogger()->OutputMissingSemicolon(p);
       return scope.end;
     }
     else if(*p == ';') {
@@ -2072,7 +2077,8 @@ namespace UVShader
     }
     else if(*p != ';') {
       clStringW str;
-      GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”(在“%s”的前面)"), p->ToString(str).CStr());
+      //GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”(在“%s”的前面)"), p->ToString(str).CStr());
+      GetLogger()->OutputMissingSemicolon(p);
       return scope.end;
     }
 
@@ -4154,7 +4160,9 @@ namespace UVShader
 
   void CLogger::OutputMissingSemicolon(const TOKEN* ptkLocation)
   {
-    OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2143, "语法错误 : 缺少“;”", this));
+    //OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2143, "语法错误 : 缺少“;”", this));
+    clStringW strW;
+    OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2143, "语法错误 : 缺少“;”(在“%s”的前面)", this), ptkLocation->ToString(strW).CStr());
   }
   
   void CLogger::OutputTypeCastFailed(const TOKEN* ptkLocation, GXLPCWSTR szOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom)
