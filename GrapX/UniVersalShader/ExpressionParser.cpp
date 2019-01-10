@@ -5803,6 +5803,12 @@ namespace UVShader
       vctx.result = ValueResult_OK;
       return vctx.pType;
     }
+    else if((vctx.pType = vctx.name_ctx.GetType(*pToken)) != NULL) // 类型
+    {
+      vctx.ClearValueOnly();
+      vctx.result = ValueResult_OK;
+      return vctx.pType;
+    }
 
     // 针对 stru.member[n] 这种情况的特殊用法，member使用pMemberCtx域，n使用name_ctx域
     const IDNFDESC* pVariDesc = vctx.pMemberCtx
@@ -6610,7 +6616,7 @@ namespace UVShader
         ASSERT(vctx_subscript.count == 1);
         ASSERT(vctx_subscript.pValue->nValue64 >= 0); // TODO: 输出错误提示不能为负值
         const size_t element_count = vctx.pType->pElementType->CountOf();
-        ASSERT(vctx_subscript.pValue->uValue64 * element_count < vctx.count);
+        PARSER_ASSERT(vctx_subscript.pValue->uValue64 * element_count < vctx.count, pNode->GetAnyTokenAPB());
         vctx.pValue += vctx_subscript.pValue->uValue64 * element_count;
         vctx.pType = vctx.pType->pElementType;
         ASSERT(vctx.count >= element_count)
@@ -8745,15 +8751,15 @@ namespace UVShader
         //return Result_Failed;
         return NULL;
       }
-      else if(IS_VECMAT_CATE(pTypeDesc))
+      else if(IS_STRUCT_CATE(pTypeDesc))
       {
-        const size_t scaler_count = pRefTypeDesc->CountOf();
+        //const size_t scaler_count = pRefTypeDesc->CountOf();
 
         if(vctx.pValue)
         {
           m_sStack.push_back(STACKDESC()); // 将折叠常量重新压入堆栈
           STACKDESC& top = Top();
-          const size_t value_count = clMin(scaler_count, pTypeDesc->CountOf());
+          const size_t value_count = pTypeDesc->CountOf();//clMin(scaler_count, pTypeDesc->CountOf());
           ELEMENT el;
           el.glob.ptr = NULL;
           for(size_t i = 0; i < value_count; i++)
