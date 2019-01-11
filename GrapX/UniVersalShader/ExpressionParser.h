@@ -442,6 +442,7 @@ namespace UVShader
     CLogger* GetLogger();
     void SetValuePool(VALUE* pValuePool, size_t count);
     const ELEMENT* Get();
+    const TYPEDESC* ExpandValue(VALUE_CONTEXT& vctx, size_t base_index, size_t array_index);
     const TYPEDESC* CastToValuePool(VALUE_CONTEXT& vctx, const TYPEDESC* pRefTypeDesc, size_t base_index, size_t array_index);
     const TOKEN* GetLocation() const; // 获得代码位置相关的Glob, 用于错误输出定位
     const SYNTAXNODE::GLOB* Step();
