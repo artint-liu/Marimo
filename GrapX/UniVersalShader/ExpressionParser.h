@@ -257,6 +257,7 @@ namespace UVShader
     const TYPEDESC* CastUpward(const TYPEDESC* pTargetType);
     const TYPEDESC* MergeType(const TYPEDESC* pScalerType, const TYPEDESC* pVecMatType);
     GXBOOL IsNeedValue() const;
+    void  GenerateMathComponentValue(const DOTOPERATOR_RESULT& sDotOperator);
     VALUE::Rank TypeRank() const;
   };
 
@@ -846,7 +847,7 @@ namespace UVShader
     const TYPEDESC* InferInitList(ValuePool* pValuePool, NameContext& sNameSet, const TYPEDESC* pRefType, GLOB* pInitListGlob); // pInitListGlob.pNode->mode 必须是 MODE_InitList
     //const TYPEDESC* InferInitMemberList(const NameContext& sNameSet, const TYPEDESC* pLeftType, const GLOB* pInitListGlob); // pInitListGlob->pNode->mode 必须是 MODE_InitList, 或者pInitListGlob是token
     const TYPEDESC* InferMemberType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
-    const TYPEDESC* InferSubscriptType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
+    const TYPEDESC* InferSubscriptType(VALUE_CONTEXT& vctx, const TYPEDESC* pDotOverrideType, const SYNTAXNODE* pNode);
     const TYPEDESC* InferSubscriptTypeB(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode);
     const TYPEDESC* InferTypeByOperator(const TOKEN* pOperator, const TYPEDESC* pFirst, const TYPEDESC* pSecond);
     const TYPEDESC* InferDifferentTypesOfCalculations(const TOKEN* pToken, const TYPEDESC* pFirst, const TYPEDESC* pSecond) const;

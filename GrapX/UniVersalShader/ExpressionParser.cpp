@@ -4838,7 +4838,8 @@ namespace UVShader
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Chain)
     {
-      CLBREAK; // 前面过滤掉，不可能到这里
+      result = Verify_Chain(pNode, sNameContext);
+      return FALSE;
     }
     else if(
       pNode->mode == SYNTAXNODE::MODE_Flow_ForInit ||
@@ -5202,7 +5203,7 @@ namespace UVShader
       {
         VALUE_CONTEXT vctx(sNameSet, FALSE);
         vctx.pLogger = GetLogger();
-        pTypeDesc = InferSubscriptType(vctx, pLeftNode);
+        pTypeDesc = InferSubscriptType(vctx, NULL, pLeftNode);
         return pTypeDesc;
       }
       else {
@@ -5962,7 +5963,7 @@ namespace UVShader
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
     {
-      return InferSubscriptType(vctx, pNode);
+      return InferSubscriptType(vctx, NULL, pNode);
     }
     else if(pNode->mode == SYNTAXNODE::MODE_TypeCast)
     {
@@ -6539,7 +6540,7 @@ FINAL_FUNC:
         //PARSER_ASSERT(pChildNode->CompareOpcode('.') == FALSE, pNode->Operand[0]); // 不应该出现使用'.'操作符且不是MODE_Opcode的情况
         //pTypeDesc = InferType(vctx, vctx.name_ctx, pChildNode);
         //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
-        InferSubscriptType(vctx, pChildNode);
+        InferSubscriptType(vctx, NULL, pChildNode);
         pTypeDesc = vctx.pType;
       }
       else {
@@ -6567,14 +6568,14 @@ FINAL_FUNC:
       if(pMemberNode->mode == SYNTAXNODE::MODE_Subscript) // 带下标的成员
       {
         const NameContext* pMemberContext = vctx.name_ctx.GetStructContext(pTypeDesc->name);
-        if(pMemberContext)
+        if(pMemberContext || pTypeDesc->pDesc->lpDotOverride)
         {
           //ASSERT(vctx.bNeedValue == FALSE); // 断在这里就是没实现计算值的功能
           VALUE_CONTEXT vctx_subscript(vctx);
           vctx_subscript.pValue = vctx.pValue;
           vctx_subscript.count = vctx.count;
           vctx_subscript.pMemberCtx = pMemberContext;
-          pTypeDesc = InferSubscriptType(vctx_subscript, pMemberNode);
+          pTypeDesc = InferSubscriptType(vctx_subscript, pTypeDesc, pMemberNode);
           if(vctx_subscript.result != ValueResult_OK && vctx_subscript.result != ValueResult_Variable) {
             vctx.result = vctx_subscript.result;
             vctx.pType = NULL;
@@ -6661,28 +6662,7 @@ FINAL_FUNC:
         if(pTypeDesc->pDesc->lpDotOverride(pTypeDesc->pDesc, &sDotOperator, pNode->Operand[1].pTokn))
         {
           vctx.pType = m_GlobalCtx.GetType(sDotOperator.strType.CStr());
-          if(vctx.IsNeedValue())
-          {
-            if(IS_SCALER_CATE(vctx.pType))
-            {
-              vctx.pValue = vctx.pValue + sDotOperator.components[0];
-              vctx.count = 1;
-            }
-            else if(IS_VECMAT_CATE(vctx.pType))
-            {
-              ValuePool temp_pool;
-              for(int i = 0; sDotOperator.components[i] != -1; i++)
-              {
-                temp_pool.push_back(vctx.pValue[sDotOperator.components[i]]);
-                temp_pool.back().CastValueByRank(vctx.TypeRank());
-              }
-              vctx.pool.assign(temp_pool.begin(), temp_pool.end());
-              vctx.UsePool();
-            }
-            else {
-              CLBREAK;
-            }
-          }
+          vctx.GenerateMathComponentValue(sDotOperator);
           return vctx.pType;
         }
       }
@@ -6699,7 +6679,7 @@ FINAL_FUNC:
     return pTypeDesc;
   }
 
-  const TYPEDESC* CodeParser::InferSubscriptType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode)
+  const TYPEDESC* CodeParser::InferSubscriptType(VALUE_CONTEXT& vctx, const TYPEDESC* pDotOverrideType, const SYNTAXNODE* pNode)
   {
     CHECK_VALUE_CONTEXT;
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript);
@@ -6707,7 +6687,22 @@ FINAL_FUNC:
     const TYPEDESC* pTypeDesc = NULL;
     if(pNode->Operand[0].ptr)
     {
-      pTypeDesc = InferType(vctx, pNode->Operand[0]);
+      if(vctx.pMemberCtx == NULL && pDotOverrideType != NULL)
+      {
+        DOTOPERATOR_RESULT sDotOperator;
+        if(_CL_NOT_(pDotOverrideType->pDesc->lpDotOverride(pDotOverrideType->pDesc, &sDotOperator, pNode->Operand[0].pTokn)))
+        {
+          vctx.ClearValue(ValueResult_NotStructMember);
+          return NULL;
+        }
+
+        vctx.pType = pTypeDesc = m_GlobalCtx.GetType(sDotOperator.strType.CStr());
+        vctx.GenerateMathComponentValue(sDotOperator);
+      }
+      else {
+        pTypeDesc = InferType(vctx, pNode->Operand[0]);
+      }
+
       if(pTypeDesc == NULL || (vctx.result != ValueResult_OK && vctx.result != ValueResult_Variable)) {
         return NULL;
       }
@@ -7804,7 +7799,7 @@ FINAL_FUNC:
       VALUE_CONTEXT vctx(*this);
       vctx.pLogger = GetLogger();
 
-      m_pCodeParser->InferSubscriptType(vctx, pNode);
+      m_pCodeParser->InferSubscriptType(vctx, NULL, pNode);
       if(vctx.result != ValueResult_OK || vctx.pType == NULL) {
         return VALUE::State_SyntaxError;
       }
@@ -8055,6 +8050,10 @@ FINAL_FUNC:
           ASSERT(nErrorCount < m_pCodeParser->DbgErrorCount());
           m_IdentifierMap.erase(insert_result.first);
           return State_HasError; // 计算表达式错误
+        }
+        else if(m_pCodeParser->TryTypeCasting(rIdnfDesc.pDesc, vctx.pType, ptkVariable) == FALSE) {
+          GetLogger()->OutputTypeCastFailed(ptkVariable, _CLTEXT("初始化"), rIdnfDesc.pDesc, vctx.pType);
+          return State_CastTypeError;
         }
         else if(vctx.pValue) {
           rIdnfDesc.pool.assign(vctx.pValue, vctx.pValue + vctx.count);
@@ -9428,6 +9427,36 @@ FINAL_FUNC:
   {
     ASSERT((pValue == NULL && count == 0) || (pValue != NULL && count > 0));
     return bNeedValue && result == ValueResult_OK && pValue != NULL;
+  }
+
+  void VALUE_CONTEXT::GenerateMathComponentValue(const DOTOPERATOR_RESULT& sDotOperator)
+  {
+    if(pValue == NULL) {
+      result = ValueResult_OK;
+      return;
+    }
+
+    if(IS_SCALER_CATE(pType))
+    {
+      pValue = pValue + sDotOperator.components[0];
+      count = 1;
+      result = ValueResult_OK;
+    }
+    else if(IS_VECMAT_CATE(pType))
+    {
+      ValuePool temp_pool;
+      for(int i = 0; sDotOperator.components[i] != -1; i++)
+      {
+        temp_pool.push_back(pValue[sDotOperator.components[i]]); // FIXME: 可能会有溢出
+        temp_pool.back().CastValueByRank(TypeRank());
+      }
+      pool.assign(temp_pool.begin(), temp_pool.end());
+      result = ValueResult_OK;
+      UsePool();
+    }
+    else {
+      CLBREAK;
+    }
   }
 
   VALUE::Rank VALUE_CONTEXT::TypeRank() const
