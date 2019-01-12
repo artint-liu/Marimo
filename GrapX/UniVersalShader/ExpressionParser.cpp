@@ -859,6 +859,26 @@ namespace UVShader
     }
   }
 
+  PHONYTOKEN* CodeParser::AddPhonyToken(TOKEN::Type type, const clStringA& str, const TOKEN* pToken)
+  {
+    ASSERT(pToken >= &m_aTokens.front() && pToken <= &m_aTokens.back());
+    m_aPhonyTokens.push_back(PHONYTOKEN());
+    PHONYTOKEN* pPhonyToken = &m_aPhonyTokens.back();
+    //*static_cast<TOKEN*>(pPhonyToken) = *pToken;
+    pPhonyToken->marker     = GetUniqueString(str);
+    pPhonyToken->length     = str.GetLength();
+    pPhonyToken->scope      = -1;
+    pPhonyToken->semi_scope = pToken->semi_scope;
+    pPhonyToken->precedence = 0;
+    pPhonyToken->unary      = 0;
+    pPhonyToken->unary_mask = 0;
+    
+    pPhonyToken->type       = type;
+    //pPhonyToken->bPhony     = 1;
+    pPhonyToken->ptkOriginal= pToken;
+    return pPhonyToken;
+  }
+
   void CodeParser::GetRepalcedValue(VALUE& value, const GLOB& glob) const
   {
     if(glob.IsToken()) {
@@ -1869,7 +1889,7 @@ namespace UVShader
     return sExprList;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, int* pSignatures, int* pDefinitionNum)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, const TOKEN** ppName, int* pSignatures, int* pDefinitionNum)
   {
     // pMembers->ptr为空表示解析失败，空定义pMembers->ptr也是一个block
 
@@ -1881,7 +1901,15 @@ namespace UVShader
 
     // 名字
     const TOKEN* ptkName = ++p;
-    if(ptkName >= pEnd || _CL_NOT_(ptkName->IsIdentifier()))
+    if(*ptkName == '{') // 匿名结构体
+    {
+      clStringA str;
+      str.Format("_st_noname_%u", p - &m_aTokens.front());
+
+      PHONYTOKEN* pPhonyToken = AddPhonyToken(TOKEN::TokenType_Identifier, str, ptkName);
+      ptkName = pPhonyToken;
+    }
+    else if(ptkName >= pEnd || _CL_NOT_(ptkName->IsIdentifier()))
     {
       clStringW str;
       GetLogger()->OutputErrorW(*ptkName, UVS_EXPORT_TEXT(2332, "“%s”: 缺少标记名"), (p - 1)->ToString(str).CStr());
@@ -1889,11 +1917,12 @@ namespace UVShader
       //return p - pTokensFront;
       return scope.end;
     }
+    else {
+      ++p;
+    }
 
-    clStringA strName;
-    p->ToString(strName);
+    *ppName = ptkName; // 返回结构体名，用来传递匿名结构体
 
-    ++p;
     if(p >= pEnd) {
       //GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”"));
       GetLogger()->OutputMissingSemicolon(p);
@@ -2045,7 +2074,6 @@ namespace UVShader
       }
 
       // 封装一个定义序列
-
       glob.pNode = AllocNode(SYNTAXNODE::MODE_Definition, NULL, glob.ptr);
       glob.pNode->Operand[0].pTokn = ptkName;
 
@@ -2089,7 +2117,7 @@ namespace UVShader
 
   GXBOOL CodeParser::ParseStatementAs_Struct(TKSCOPE* pScope)
   {
-    TOKEN* p = &m_aTokens[pScope->begin];
+    const TOKEN* p = &m_aTokens[pScope->begin];
     if(*p != "struct") {
       return FALSE;
     }
@@ -2103,12 +2131,12 @@ namespace UVShader
     int nDefinition = 0;
     
     pScope->begin = ParseStructDefinition(m_GlobalCtx, *pScope, &stat_stru.sRoot,
-      &stat_vari.sRoot, &nSignatures, &nDefinition);
+      &stat_vari.sRoot, &p, &nSignatures, &nDefinition);
 
     if(stat_stru.sRoot.ptr)
     {
       stat_stru.type = nSignatures ? StatementType_Signatures : StatementType_Struct;
-      stat_stru.stru.szName = GetUniqueString(p + 1);
+      stat_stru.stru.szName = GetUniqueString(p);
       stat_stru.stru.nNumOfMembers = nDefinition;
       m_aStatements.push_back(stat_stru);
 
@@ -2596,12 +2624,13 @@ namespace UVShader
       GLOB sVariable = { 0 };
       int nSignatures = 0;
       int nDefinition = 0;
-      pend = ParseStructDefinition(sNameSet, scope, &sMembers, &sVariable, &nSignatures, &nDefinition);
+      const TOKEN* ptkStructName = NULL;
+      pend = ParseStructDefinition(sNameSet, scope, &sMembers, &sVariable, &ptkStructName, &nSignatures, &nDefinition);
 
       if(sMembers.ptr)
       {
         GLOB sName;
-        sName = m_aTokens[scope.begin + 1];
+        sName.pTokn = ptkStructName;
 
         MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_StructDef, &sName, &sMembers);
       }

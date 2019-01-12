@@ -478,6 +478,14 @@ namespace UVShader
     clStringA& DbgGetString();
   };
 
+  struct PHONYTOKEN : TOKEN
+  {
+    typedef cllist<PHONYTOKEN>   List;
+    typedef clvector<PHONYTOKEN> Array;
+
+    const TOKEN* ptkOriginal; // 原始的token
+  };
+
   //////////////////////////////////////////////////////////////////////////
 
   class CodeParser : public ArithmeticExpression
@@ -759,7 +767,7 @@ namespace UVShader
     TKSCOPE::TYPE  ParseFlowSwitch(const NameContext& sParentCtx, const TKSCOPE& scope, GLOB* pDesc);
     TKSCOPE::TYPE  ParseFlowCase(const NameContext& sParentCtx, const TKSCOPE& scope, GLOB* pDesc);
     TKSCOPE::TYPE  ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDesc);
-    TKSCOPE::TYPE  ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, int* pSignatures, int* pDefinition);
+    TKSCOPE::TYPE  ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, const TOKEN** ppName, int* pSignatures, int* pDefinition);
 
     //const TYPEDESC* GetMember(const NameSet& sNameSet, const SYNTAXNODE* pNode) const;
     //VALUE::State CalcuateConstantValue(VALUE& value_out, const NameContext& sNameSet, const SYNTAXNODE::GLOB* pGlob);
@@ -878,6 +886,7 @@ namespace UVShader
 
 
     void SetRepalcedValue(const GLOB& glob, const VALUE& value);
+    PHONYTOKEN* AddPhonyToken(TOKEN::Type type, const clStringA& str, const TOKEN* pToken);
 
     //VALUE::State CalculateValueAsConstantDefinition(VALUE& value_out, NameContext& sNameCtx, const GLOB& const_expr_glob);
 
@@ -915,6 +924,8 @@ namespace UVShader
     
     PARSER_CONTEXT*     m_pContext;
     PhonyTokenDict_T    m_PhonyTokenDict;   // 用户从替换的token中找到原始token信息
+    PHONYTOKEN::Array   m_aPhonyTokens;     // 储存假的token
+
 
     FileDict            m_sIncludeFiles;    // 包含文件集合, 仅限于Root parser
     Include*            m_pInclude;
