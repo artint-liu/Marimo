@@ -4159,11 +4159,27 @@ namespace UVShader
     return FALSE;
   }
 
+  UVShader::ArithmeticExpression::T_LPCSTR CodeParser::Macro_SkipComment(T_LPCSTR p, T_LPCSTR end)
+  {
+    // 跳过块注释
+    if(*p == '/' && p + 1 < end && p[1] == '*') {
+      p += 2;
+      while(_CL_NOT_(p[0] == '*' && p + 1 < end && p[1] == '/'))
+      {
+        if(++p >= end) return end;
+      }
+      p += 2;
+    }
+    return p;
+  }
+
   CodeParser::T_LPCSTR CodeParser::Macro_SkipGapsAndNewLine(T_LPCSTR p, T_LPCSTR end)
   {
-    while((*p == '\t' || *p == 0x20 || *p == '\r' || *p == '\n') && p < end)
+    p = Macro_SkipComment(p, end);
+    while(p < end && (*p == '\t' || *p == 0x20 || *p == '\r' || *p == '\n'))
     {
       ++p;
+      p = Macro_SkipComment(p, end);
     }
     return p;
 
@@ -4172,8 +4188,9 @@ namespace UVShader
   CodeParser::T_LPCSTR CodeParser::Macro_SkipGaps(T_LPCSTR p, T_LPCSTR end)
   {
     do {
+      p = Macro_SkipComment(p, end);
       p++;
-    } while ((*p == '\t' || *p == 0x20) && p < end);
+    } while (p < end && (*p == '\t' || *p == 0x20));
     return p;
   }
 
@@ -4745,15 +4762,28 @@ namespace UVShader
   {
     GXBOOL result = TRUE;
 
-    if(pNode->mode == SYNTAXNODE::MODE_Chain)
+    if(pNode->mode == SYNTAXNODE::MODE_Chain) // 对chain进行特殊处理，防止堆栈溢出
     {
       do {
         // 验证第一个节点
         if(pNode->Operand[0].IsNode())
         {
-          Verify_Node(pNode->Operand[0].pNode, sNameContext, result);
+          GXBOOL bCheckNode = Verify_Node(pNode->Operand[0].pNode, sNameContext, result);
           if(result == FALSE) {
             return result;
+          }
+          else if(bCheckNode)
+          {
+            const SYNTAXNODE* pSubNode = pNode->Operand[0].pNode;
+
+            RecursiveNode<const SYNTAXNODE>(this, pSubNode, [this, &result, &sNameContext]
+            (const SYNTAXNODE* pNode, int depth) -> GXBOOL
+            {
+              return Verify_Node(pNode, sNameContext, result);
+            });
+            if(result == FALSE) {
+              return result;
+            }
           }
         }
         else if(pNode->Operand[0].ptr && InferRightValueType(sNameContext, pNode->Operand[0]) == NULL) {

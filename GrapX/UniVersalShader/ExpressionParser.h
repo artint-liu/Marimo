@@ -799,6 +799,7 @@ namespace UVShader
     GXBOOL   ExpandInnerMacro(TOKEN& token, const TOKEN& line_num); // 主要是替换__FILE__ __LINE__
 
 
+    static T_LPCSTR Macro_SkipComment(T_LPCSTR begin, T_LPCSTR end);  // 返回跳过注释的地址
     static T_LPCSTR Macro_SkipGapsAndNewLine(T_LPCSTR begin, T_LPCSTR end);  // 返回跳过制表符和空格后的字符串地址
     static T_LPCSTR Macro_SkipGaps(T_LPCSTR begin, T_LPCSTR end);  // 返回跳过制表符和空格后的字符串地址
     GXBOOL CompareString(T_LPCSTR str1, T_LPCSTR str2, size_t count);
