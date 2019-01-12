@@ -95,6 +95,7 @@ namespace UVShader
     RefString(CLLPCSTR pStablePtr, size_t length);
 
     RefString& Set(CLLPCSTR pStablePtr, size_t length);
+    RefString& Set(CLLPCSTR szStablePtr);
     int Compare(const RefString& rstr) const;
     b32 operator==(const RefString& rstr) const;
     b32 operator!=(const RefString& rstr) const;

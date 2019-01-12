@@ -1529,7 +1529,8 @@ namespace UVShader
 #ifdef ENABLE_SYNTAX_VERIFY
       SYNTAXNODE* pChainNode = stat.sRoot.pNode;
       while(pChainNode) {
-        Verify_IdentifierDefinition(m_GlobalCtx, pChainNode->Operand[0].pNode, stat.defn.modifier == UniformModifier_const);
+        Verify_IdentifierDefinition(m_GlobalCtx, pChainNode->Operand[0].pNode,
+          (stat.defn.modifier == UniformModifier_const) ? VerifyIdentifierDefinition_Const : 0);
         pChainNode = pChainNode->Operand[1].pNode;
       }
 #endif
@@ -1538,7 +1539,8 @@ namespace UVShader
     else
     {
 #ifdef ENABLE_SYNTAX_VERIFY
-      Verify_IdentifierDefinition(m_GlobalCtx, stat.sRoot.pNode, stat.defn.modifier == UniformModifier_const);
+      Verify_IdentifierDefinition(m_GlobalCtx, stat.sRoot.pNode,
+        (stat.defn.modifier == UniformModifier_const) ? VerifyIdentifierDefinition_Const : 0);
 #endif
       m_aStatements.push_back(stat);
     }
@@ -2002,8 +2004,6 @@ namespace UVShader
       }
       else // 空结构体
       {
-        //stat.type = StatementType_Struct;
-        //stat.stru.nNumOfMembers = 0;
         *pSignatures = 0;
         *pDefinitionNum = 0;
       }
@@ -4384,7 +4384,7 @@ namespace UVShader
     return TRUE;
   }
 
-  GXBOOL CodeParser::Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstIdentifier, GXBOOL bMember)
+  GXBOOL CodeParser::Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXDWORD dwFlags)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Definition); // 只检查定义
 
@@ -4417,7 +4417,7 @@ namespace UVShader
           if(pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Definition)
           {
             // 递归
-            return Verify_IdentifierDefinition(sNameSet, pNode->Operand[1].pNode, TRUE);
+            return Verify_IdentifierDefinition(sNameSet, pNode->Operand[1].pNode, dwFlags | VerifyIdentifierDefinition_Const);
           }
           else {
             // ERROR: "const i = 0;" 形式
@@ -4430,6 +4430,11 @@ namespace UVShader
           GetLogger()->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(4430, "缺少类型说明符"));
           return FALSE;
         }
+      }
+      else  if(*pNode->Operand[0].pTokn == "static")
+      {
+        // 递归
+        return Verify_IdentifierDefinition(sNameSet, pNode->Operand[1].pNode, dwFlags | VerifyIdentifierDefinition_Static);
       }
       else {
         const TYPEDESC* pType = sNameSet.GetType(*pNode->Operand[0].pTokn);
@@ -4446,10 +4451,10 @@ namespace UVShader
       CLBREAK;
     }
 
-    return Verify_IdentifierTypedDefinition(sNameSet, *pNode->Operand[0].pTokn, pNode->Operand[1], bConstIdentifier, bMember);
+    return Verify_IdentifierTypedDefinition(sNameSet, *pNode->Operand[0].pTokn, pNode->Operand[1], dwFlags);
   }
 
-  GXBOOL CodeParser::Verify_IdentifierTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstIdentifier, GXBOOL bMember)
+  GXBOOL CodeParser::Verify_IdentifierTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXDWORD dwFlags)
   {
     const TYPEDESC* pRightTypeDesc = NULL;
 
@@ -4584,7 +4589,7 @@ namespace UVShader
           return NULL;
         }
 
-        if(bConstIdentifier)
+        if(TEST_FLAG(dwFlags, VerifyIdentifierDefinition_Const)) //if(bConstIdentifier)
         {
           // TODO: 检查value与tkType类型是否匹配, 比如一个“string s = 23;”是非法的
           pRightTypeDesc = pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, &right_glob);
@@ -4625,9 +4630,10 @@ namespace UVShader
       else if(second_glob.pNode->CompareOpcode(','))
       {
         const size_t nErrorCount = DbgErrorCount();
-        ASSERT(bMember == FALSE); // 成员变量定义在结构体解析时已经展开了，不应该存在“,”并列式
-        if(Verify_IdentifierTypedDefinition(sNameSet, tkType, second_glob.pNode->Operand[0], bConstIdentifier, FALSE) == FALSE ||
-          Verify_IdentifierTypedDefinition(sNameSet, tkType, second_glob.pNode->Operand[1], bConstIdentifier, FALSE) == FALSE)
+        //ASSERT(bMember == FALSE); // 成员变量定义在结构体解析时已经展开了，不应该存在“,”并列式
+        ASSERT(TEST_FLAG(dwFlags, VerifyIdentifierDefinition_Member) == FALSE); // 成员变量定义在结构体解析时已经展开了，不应该存在“,”并列式
+        if(Verify_IdentifierTypedDefinition(sNameSet, tkType, second_glob.pNode->Operand[0], dwFlags) == FALSE ||
+          Verify_IdentifierTypedDefinition(sNameSet, tkType, second_glob.pNode->Operand[1], dwFlags) == FALSE)
         {
           ASSERT(DbgErrorCount() > nErrorCount);
           return FALSE;
@@ -6038,9 +6044,15 @@ namespace UVShader
       if(pRefType->IsSameType(pExpandedType) ||
         (IS_VECMAT_CATE(pRefType) && IS_VECMAT_CATE(pExpandedType) && pRefType->CountOf() >= pExpandedType->CountOf()))
       {
+        const CInitList::ELEMENT* pElement = rInitList.Get();
+        rInitList.DbgListAdd(pElement);
+
         nListDepth = rInitList.BeginList();
         rInitList.Step(nDimDepth, nListDepth);
         goto FINAL_FUNC;
+      }
+      else if(pExpandedType->CountOf() < pRefType->CountOf()) {
+        // nothing
       }
       else {
         GetLogger()->OutputTypeCastFailed(rInitList.GetLocation(), _CLTEXT("初始化列表"), pRefType, pExpandedType);
@@ -8750,6 +8762,7 @@ FINAL_FUNC:
     }
     return &(*Top().iter);
   }
+
   const TYPEDESC* CInitList::ExpandValue(VALUE_CONTEXT& vctx, size_t base_index, size_t array_index)
   {
     // base_index  是当前列表的基础索引, 也可以理解为 top index
@@ -8801,7 +8814,7 @@ FINAL_FUNC:
         }
         else {
           ASSERT(IS_STRUCT_CATE(pTypeDesc) && vctx.count == 0);
-          DbgListAdd(pElement);
+          //DbgListAdd(pElement);
         }
       }
       else if(_CL_NOT_(IS_SCALER_CATE(pTypeDesc)))

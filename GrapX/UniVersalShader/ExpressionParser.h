@@ -3,6 +3,10 @@
 
 #define ENABLE_SYNTAX_VERIFY // 语法检查开关, 只用来做语法解析临时调试用, 正式版不要关闭这个
 
+#define VerifyIdentifierDefinition_Static   0x0001
+#define VerifyIdentifierDefinition_Const    0x0002
+#define VerifyIdentifierDefinition_Member   0x0004
+
 namespace UVShader
 {
   class CodeParser;
@@ -390,6 +394,7 @@ namespace UVShader
 
   class CInitList
   {
+  public:
     union ELEMENT
     {
       typedef cllist<ELEMENT> List;
@@ -406,6 +411,7 @@ namespace UVShader
       const TOKEN* ptkOpcode; // 用于输出定位
     };
 
+  private:
     CodeParser*             m_pCodeParser;
     NameContext&            m_rNameCtx;
     const SYNTAXNODE::GLOB* m_pInitListGlob;
@@ -855,8 +861,9 @@ namespace UVShader
     const SYNTAXNODE::GLOB* GetIdentifierDeclWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量声明，可能含有下标，如“vColor[2][3]”
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
 
-    GXBOOL Verify_IdentifierTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXBOOL bConstIdentifier = FALSE, GXBOOL bMember = FALSE);
-    GXBOOL Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXBOOL bConstIdentifier = FALSE, GXBOOL bMember = FALSE);
+    GXBOOL Verify_IdentifierTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXDWORD dwFlags = 0);
+    GXBOOL Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXDWORD dwFlags = 0);
+
     //GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);
     GXBOOL Verify_Block(const SYNTAXNODE* pNode, const NameContext* pParentSet);

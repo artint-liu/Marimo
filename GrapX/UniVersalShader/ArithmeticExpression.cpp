@@ -2259,10 +2259,6 @@ GO_NEXT:;
     ASSERT(szText != NULL && length > 0);
     ASSERT(type == TokenType_String || operator==("true") || operator==("false"));
 
-#ifdef ENABLE_STRINGED_SYMBOL
-    symbol.Clear();
-    symbol.Append(szText, length);
-#endif // #ifdef ENABLE_STRINGED_SYMBOL
     pContainer = NULL;
     marker     = szText;
     length     = len;
@@ -2909,6 +2905,13 @@ GO_NEXT:;
   {
     m_pStr = pStablePtr;
     m_nLength = length;
+    return *this;
+  }
+
+  RefString& RefString::Set(CLLPCSTR szStablePtr)
+  {
+    m_pStr = szStablePtr;
+    m_nLength = clstd::strlenT(szStablePtr);
     return *this;
   }
 
