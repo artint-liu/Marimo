@@ -953,15 +953,19 @@ namespace UVShader
     token.SetPhonyString(emplace.first->second.szPhonyText, emplace.first->second.nPhonyLength);
   }
 
-  const CodeParser::MACRO* CodeParser::FindMacro(const TOKEN& token) // TODO: 正常的查找都要换做这个
+  auto CodeParser::AddMacro(const RefString& rstrMacroName, const MACRO& macro)
   {
-    //clStringA strTokenName = token.ToString();
-    RefString rstrTokenName(token.marker, token.length);
+    return m_pContext->Macros.insert(clmake_pair(rstrMacroName, macro));
+  }
 
-    auto& it_macro = m_pContext->Macros.find(rstrTokenName);
+  void CodeParser::NormalizeMacro(const RefString& rstrMacroName)
+  {
+    auto& it_macro = m_pContext->Macros.find(rstrMacroName);
     if(it_macro == m_pContext->Macros.end()) {
-      return NULL;
+      return;
     }
+
+    MACRO& origin_macro = it_macro->second;
 
     // 对于“#define A B”并且B也是宏定义的形式进行查找，将A与最终的定义对应起来
     if(it_macro->second.aFormalParams.size() == 0 && it_macro->second.aTokens.size() == 1)
@@ -969,7 +973,7 @@ namespace UVShader
       MACRO_EXPAND_CONTEXT::IDSet_T sIDSet; // 防止无限查找
       sIDSet.insert(it_macro->second.nid);
       while(true) {
-        rstrTokenName.Set(it_macro->second.aTokens.front().marker, it_macro->second.aTokens.front().length);
+        RefString rstrTokenName(it_macro->second.aTokens.front().marker, it_macro->second.aTokens.front().length);
         auto& it_replace = m_pContext->Macros.find(rstrTokenName);
 
         if(it_replace == m_pContext->Macros.end() ||
@@ -983,6 +987,19 @@ namespace UVShader
         }
         sIDSet.insert(it_macro->second.nid);
       }
+    }
+
+    origin_macro.aFormalParams = it_macro->second.aFormalParams;
+    origin_macro.aTokens       = it_macro->second.aTokens;
+  }
+
+  const CodeParser::MACRO* CodeParser::FindMacro(const TOKEN& token) // TODO: 正常的查找都要换做这个
+  {
+    RefString rstrTokenName(token.marker, token.length);
+
+    auto& it_macro = m_pContext->Macros.find(rstrTokenName);
+    if(it_macro == m_pContext->Macros.end()) {
+      return NULL;
     }
     
     return &it_macro->second;
@@ -3564,7 +3581,7 @@ namespace UVShader
     if(count == 2) // "#define MACRO" 形
     {
       l_m.nNumTokens = 1;
-      m_pContext->Macros.insert(clmake_pair(rstrMacroName, l_m));
+      AddMacro(rstrMacroName, l_m);
     }
     else if(count == 3) // "#define MACRO XXX" 形
     {
@@ -3575,7 +3592,7 @@ namespace UVShader
       }
 
       l_m.nNumTokens = 1;
-      auto result = m_pContext->Macros.insert(clmake_pair(rstrMacroName, l_m));
+      auto result = AddMacro(rstrMacroName, l_m);
 
       // 如果已经添加过，清除原有数据
       if( ! result.second) {
@@ -3629,7 +3646,7 @@ namespace UVShader
         l_m.nNumTokens = 1;
       }
 
-      auto result = m_pContext->Macros.insert(clmake_pair(rstrMacroName, l_m));
+      auto result = AddMacro(rstrMacroName, l_m);
       if( ! result.second) {
         result.first->second.clear();
       }
@@ -3641,6 +3658,8 @@ namespace UVShader
 
       result.first->second.set(m_pContext->Macros, tokens, l_define);
     }
+
+    NormalizeMacro(rstrMacroName);
   }
 
   void CodeParser::PP_Include(const TOKEN::Array& aTokens)

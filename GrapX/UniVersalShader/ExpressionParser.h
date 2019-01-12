@@ -781,6 +781,9 @@ namespace UVShader
     MacroExpand ExpandMacroContent(TOKEN::List& sTokenList, const TOKEN& line_num, MACRO_EXPAND_CONTEXT::IDSet_T* pOrderSet);
     MacroExpand TryMatchMacro(MACRO_EXPAND_CONTEXT& ctx_out, TOKEN::List::iterator* it_out, const TOKEN::List::iterator& it_begin, const TOKEN::List::iterator& it_end);
     GXBOOL  MergeStringToken(const TOKEN& token);
+
+    auto AddMacro(const RefString& rstrMacroName, const MACRO& macro);
+    void NormalizeMacro(const RefString& rstrMacroName);
     const MACRO* FindMacro(const TOKEN& token);
 
     T_LPCSTR DoPreprocess(const RTPPCONTEXT& ctx, T_LPCSTR begin, T_LPCSTR end);
