@@ -154,6 +154,8 @@ void test_flow_if()
   int d=3;
   int e=4;
   int f=5;
+  if(b > c) {
+  }
   if(a>b) {
     a=a;
   }
@@ -273,16 +275,20 @@ void test_flow_dowhile()
   int e=4;
   int f=5;
   do {
-  }while(a<b);
+  }
+  while(a<b);
   do {
     a++;
-  }while(a<b);
+  }
+  while(a<b);
   do {
     do {
       a++;
       ++b;
-    }while(b<c);
-  }while(a<b);
+    }
+    while(b<c);
+  }
+  while(a<b);
 }
 
 void test_flow_mix()
@@ -306,7 +312,8 @@ void test_flow_mix()
     else {
       do {
         f++;
-      }while(f<20);
+      }
+      while(f<20);
     }
   }
   for(int i=0;i<10;i++) {
@@ -322,7 +329,8 @@ void test_flow_mix()
     else {
       do {
         f++;
-      }while(f<20);
+      }
+      while(f<20);
     }
   }
 }

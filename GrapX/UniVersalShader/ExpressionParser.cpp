@@ -32,10 +32,10 @@
   (_CATE)->cate == TYPEDESC::TypeCate_Struct)
 
 #define IS_SAMPLER_CATE(_CATE) (\
-  _CATE == TYPEDESC::TypeCate_Sampler1D || \
-  _CATE == TYPEDESC::TypeCate_Sampler2D || \
-  _CATE == TYPEDESC::TypeCate_Sampler3D || \
-  _CATE == TYPEDESC::TypeCate_SamplerCube ) 
+  (_CATE)->cate == TYPEDESC::TypeCate_Sampler1D || \
+  (_CATE)->cate == TYPEDESC::TypeCate_Sampler2D || \
+  (_CATE)->cate == TYPEDESC::TypeCate_Sampler3D || \
+  (_CATE)->cate == TYPEDESC::TypeCate_SamplerCube ) 
 
 #define REDUCE_ERROR_MESSAGE
 
@@ -2235,6 +2235,15 @@ namespace UVShader
         }
         else
         {
+          // ShaderToy_XtBXDw_2071.txt 会断在这里
+          //-second_glob	<Node>MODE_Opcode (1) A:(<Token>token = "uv" size = 2) B : (<Token>token = "SV_Position" size = 11)	const UVShader::SYNTAXNODE::GLOB &
+          //  mode	MODE_Opcode (1)	UVShader::SYNTAXNODE::MODE
+          //  id	735	unsigned int
+          //  + opcode	0x0326e820 token = ":" size = 1	const UVShader::TOKEN *
+          //  +Operand 0 < Token > token = "uv" size = 2	UVShader::SYNTAXNODE::GLOB
+          //  + Operand 1 < Token > token = "SV_Position" size = 11	UVShader::SYNTAXNODE::GLOB
+          //  + [原始视图] {ptr = 0x02a6fc00 pNode = 0x02a6fc00 {mode = MODE_Opcode (1) magic = 65535 pOpcode = 0x0326e820 token = ":" size = 1 ...} ...}	const UVShader::SYNTAXNODE::GLOB
+
           CLBREAK; // 没实现
         }
       }
@@ -2922,7 +2931,7 @@ namespace UVShader
 
     const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
     if(eMode != SYNTAXNODE::MODE_Block) {
-      if(eMode != SYNTAXNODE::MODE_Chain) {
+      if(B.ptr && eMode != SYNTAXNODE::MODE_Chain) {
         bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
       }
       bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
@@ -2965,7 +2974,7 @@ namespace UVShader
       {
         const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
         if(eMode != SYNTAXNODE::MODE_Block) {
-          if(eMode != SYNTAXNODE::MODE_Chain) {
+          if(B.ptr && eMode != SYNTAXNODE::MODE_Chain) {
             bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
           }
           bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
@@ -3014,7 +3023,7 @@ namespace UVShader
 
     const SYNTAXNODE::MODE eMode = TryGetNodeMode(&B);
     if(eMode != SYNTAXNODE::MODE_Block) {
-      if(eMode != SYNTAXNODE::MODE_Chain) {
+      if(B.ptr && eMode != SYNTAXNODE::MODE_Chain) {
         bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
       }
       bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
@@ -3071,6 +3080,16 @@ namespace UVShader
     InitTokenScope(sConditional, while_token + 1, FALSE);
 
     GXBOOL bret = ParseToChain(B, &sNameSet_Do, sBlock);
+
+    if(bret && B.CompareAsNode(SYNTAXNODE::MODE_Block) == FALSE) {
+      // TODO: 忘了为啥要先转成MODE_Chain，如果这个多余其它的也去掉这个
+      //if(eMode != SYNTAXNODE::MODE_Chain) {
+      //  bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Chain, &B, NULL);
+      //}
+      bret = bret && MakeSyntaxNode(&B, SYNTAXNODE::MODE_Block, &B, NULL);
+    }
+
+
     bret = bret && ParseArithmeticExpression(0, sConditional, &A);
     bret = bret && MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Flow_DoWhile, NULL, &A, &B);
 
@@ -3419,7 +3438,7 @@ namespace UVShader
     // 如果不是代码块，就转换为代码块
     const SYNTAXNODE::MODE eMode = TryGetNodeMode(&uBlock);
     if(eMode != SYNTAXNODE::MODE_Block) {
-      if(eMode != SYNTAXNODE::MODE_Chain) {
+      if(uBlock.ptr && eMode != SYNTAXNODE::MODE_Chain) {
         bret = MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Chain, &uBlock, NULL);
       }
       bret = bret && MakeSyntaxNode(&uBlock, SYNTAXNODE::MODE_Block, &uBlock, NULL);
@@ -4786,8 +4805,22 @@ namespace UVShader
             }
           }
         }
-        else if(pNode->Operand[0].ptr && InferRightValueType(sNameContext, pNode->Operand[0]) == NULL) {
-          return FALSE;
+        else if(pNode->Operand[0].IsToken())
+        {
+          if(sNameContext.GetType(*pNode->Operand[0].pTokn) != NULL) // 类型
+          {
+            clStringW strW;
+            GetLogger()->OutputErrorW(pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(_WARNING(5059), "“%s” : 孤立的定义."), pNode->Operand[0].pTokn->ToString(strW).CStr());
+          }
+          else if(InferRightValueType(sNameContext, pNode->Operand[0]/*TODO: 这里验证的是token*/) == NULL) {
+            return FALSE;
+          }
+        }
+        else {
+          if(pNode->Operand[1].ptr) {
+            GetLogger()->OutputMissingSemicolon(&pNode->GetAnyTokenAPB());
+            return FALSE;
+          }
         }
 
         // 转移第二个节点到当前pNode
@@ -4844,17 +4877,31 @@ namespace UVShader
     else if(
       pNode->mode == SYNTAXNODE::MODE_Flow_ForInit ||
       pNode->mode == SYNTAXNODE::MODE_Flow_ForRunning ||
-      pNode->mode == SYNTAXNODE::MODE_Flow_While ||
-      pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile
-      )
+      pNode->mode == SYNTAXNODE::MODE_Flow_While )
     {
       return TRUE;
     }
-    else if(pNode->mode == SYNTAXNODE::MODE_Flow_If)
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile) // TODO: 把MODE_Flow_If合并进来测试一下
+    {
+      const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, pNode->Operand[0]);
+      if(result = (pTypeDesc != NULL)) {
+        if(pNode->Operand[1].IsToken()) {
+          VALUE_CONTEXT vctx(sNameContext);
+          vctx.pLogger = GetLogger();
+          pTypeDesc = InferType(vctx, pNode->Operand[1].pTokn);
+        }
+        else if(pNode->Operand[1].IsNode()) {
+          ASSERT(pNode->Operand[1].CompareAsNode(SYNTAXNODE::MODE_Block)); // 节点解析时保证
+          result = Verify_Block(pNode->Operand[1].pNode, &sNameContext);
+        }
+      }
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Flow_If) // TODO: 应该和MODE_Flow_DoWhile合并？
     {
       const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, pNode->Operand[0]);
       result = result && (pTypeDesc != NULL);
-      ASSERT(pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
+      ASSERT(pNode->Operand[1].ptr == NULL || pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
       return TRUE;
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Flow_ElseIf)
@@ -5036,6 +5083,13 @@ namespace UVShader
       return FALSE;
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
+    {
+      VALUE_CONTEXT vctx(sNameContext, FALSE);
+      vctx.pLogger = GetLogger();
+      InferType(vctx, pNode);
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_BracketList)
     {
       VALUE_CONTEXT vctx(sNameContext, FALSE);
       vctx.pLogger = GetLogger();
@@ -5893,12 +5947,6 @@ namespace UVShader
       //vctx.pValue = &vctx.pool.front();
       //vctx.count = vctx.pool.size();
       vctx.UsePool();
-      vctx.result = ValueResult_OK;
-      return vctx.pType;
-    }
-    else if((vctx.pType = vctx.name_ctx.GetType(*pToken)) != NULL) // 类型
-    {
-      vctx.ClearValueOnly();
       vctx.result = ValueResult_OK;
       return vctx.pType;
     }
@@ -7002,7 +7050,8 @@ FINAL_FUNC:
     if(*pOperator == "!=" || *pOperator == "==")
     {
       // [Doc\条件表达式]向量比较返回类型是bool向量
-      if(IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType)) {
+      if((IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType)) ||
+        (IS_SAMPLER_CATE(pAB[0].pType) && IS_SAMPLER_CATE(pAB[1].pType))) {
         vctx.pType = vctx.name_ctx.GetType("bool");
       }
       else if(IS_VECMAT_CATE(pAB[0].pType) && IS_VECMAT_CATE(pAB[1].pType))
@@ -8931,7 +8980,6 @@ FINAL_FUNC:
       vctx.pValue = pElement->pValue;
       vctx.count = 1;
       pTypeDesc = m_rNameCtx.GetType(pElement->pValue->rank);
-      CLNOP
     }
     else
     {

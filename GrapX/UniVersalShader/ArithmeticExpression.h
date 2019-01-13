@@ -402,12 +402,12 @@ namespace UVShader
       MODE_Flow_Case,           // case A: B
       MODE_Flow_CaseDefault,    // default: B | A=NULL
 
-      MODE_Flow_DoWhile,        // do{B}while(A)
+      MODE_Flow_DoWhile,        // do B while(A)
       MODE_Flow_Break,
       MODE_Flow_Continue,
       MODE_Flow_Discard,
       MODE_Return,              // A="return" B
-      MODE_Block,               // {A}B, B只可能是';'
+      MODE_Block,               // {A}B, B只可能是';'或者NULL
       MODE_Chain,               // 表达式链表,链表中的应该属于同一个作用域, [A:statement][B:next chain]，在chain结尾应该是[A:statement][B:NULL]这样
     };
 

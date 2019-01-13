@@ -233,6 +233,7 @@ void flow_test2()
 void test_flow_if()
 {
   int a = 0, b = 1, c = 2, d = 3, e = 4, f = 5;
+  if(b > c) ;
   if(a > b)
     a = a;
   b = b;
