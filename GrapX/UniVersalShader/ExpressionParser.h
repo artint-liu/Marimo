@@ -305,7 +305,7 @@ namespace UVShader
       State_RequireConstantExpression = -8, // 需要常量表达式
       State_RequireSubscript = -9,          // 缺少下标: int a[2][] = {};
       State_CastTypeError = -10,            // 类型转换错误，含有的右值不能转换成变量类型
-      State_RequireInitList = -11,
+      //State_RequireInitList = -11,
     };
 
   protected:

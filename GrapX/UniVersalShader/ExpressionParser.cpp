@@ -519,8 +519,10 @@ namespace UVShader
 
       RESET_FLAG(pThis->m_dwState, State_InPreprocess);
     }
-    else if((it.marker[0] == '\\' && remain > 0 && it.marker[1] == '\n') ||
-      (it.marker[0] == '\\' && remain > 1 && it.marker[1] == '\r' && it.marker[2] == '\n'))
+    else if(it.marker[0] == '\\' && (
+      (remain > 0 && it.marker[1] == '\n') ||
+      (remain > 1 && it.marker[1] == '\r' && it.marker[2] == '\n') ||
+      (remain == 1)) )
     {
       ++it;
     }
@@ -808,11 +810,11 @@ namespace UVShader
       pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(2371, "“%s”: 重定义", pLogger), tkVar.ToString(strW).CStr());
       break;
     }
-    case NameContext::State_RequireInitList:
-    {
-      pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(5015, "“%s”: 数组定义需要初始化列表来设置", pLogger), tkVar.ToString(strW).CStr());
-      break;
-    }
+    //case NameContext::State_RequireInitList:
+    //{
+    //  pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(5015, "“%s”: 数组定义需要初始化列表来设置", pLogger), tkVar.ToString(strW).CStr());
+    //  break;
+    //}
     case NameContext::State_DefineAsType:
     {
       pLogger->OutputErrorW(tkVar, UVS_EXPORT_TEXT2(5013, "“%s”: 变量已经被定义为类型", pLogger), tkVar.ToString(strW).CStr());
@@ -4613,7 +4615,6 @@ namespace UVShader
         // [/Doc]
 
 
-        //const GLOB& rInitList = second_glob.pNode->Operand[1];
         GLOB& right_glob = second_glob.pNode->Operand[1];
         if(right_glob.IsNode() == FALSE || right_glob.pNode->mode != SYNTAXNODE::MODE_InitList) {
           GetLogger()->OutputErrorW(tkType, UVS_EXPORT_TEXT(5048, "预期应该是初始化列表"));
@@ -4719,7 +4720,7 @@ namespace UVShader
             return NULL;
           }
 
-          pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl);
+          pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, &right_glob);
           // 后面比较pRightTypeDesc是否能转换为pType
         }
 
@@ -5923,6 +5924,7 @@ namespace UVShader
       return InferType(vctx, sGlob.pTokn);
     }
     CLBREAK;
+    return NULL;
   }
   
   ValueResult CodeParser::TokenToValue(VALUE_CONTEXT& vctx, const TOKEN* pToken) const
@@ -7709,6 +7711,7 @@ FINAL_FUNC:
       return VALUE::State_SyntaxError;
     }
     CLBREAK;
+    return VALUE::State_SyntaxError;
   }
 
   VALUE::State NameContext::Calculate(VALUE& value_out, const SYNTAXNODE* pNode) const
@@ -8023,10 +8026,10 @@ FINAL_FUNC:
     {
       rIdnfDesc.glob = *pValueExprGlob;
 
-      if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList) == FALSE)
-      {
-        return State_RequireInitList;
-      }
+      //if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList) == FALSE)
+      //{
+      //  return State_RequireInitList;
+      //}
 
       // 如果是初始化列表，就进行推导
       // 这里会重新输出一个整理过的初始化列表到sVariDesc.glob中
@@ -8125,6 +8128,17 @@ FINAL_FUNC:
           m_IdentifierMap.erase(insert_result.first);
           return State_HasError; // 计算表达式错误
         }
+        else if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && rIdnfDesc.pDesc->sDimensions.back() == 0 &&
+          vctx.pType->cate == TYPEDESC::TypeCate_MultiDim && rIdnfDesc.pDesc->sDimensions.size() == vctx.pType->sDimensions.size() &&
+          m_pCodeParser->TryTypeCasting(rIdnfDesc.pDesc->pElementType, vctx.pType->pElementType, ptkVariable) )
+        {
+          rIdnfDesc.pDesc = rIdnfDesc.pDesc->ConfirmArrayCount(vctx.pType->sDimensions.back());
+        }
+        else if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && vctx.pType->cate != TYPEDESC::TypeCate_MultiDim) {
+          // int a[3] = 0; 形式
+          GetLogger()->OutputErrorW(*pValueExprGlob, UVS_EXPORT_TEXT(5051, "应该使用初始化列表来初始化数组"));
+          return State_HasError;
+        }
         else if(m_pCodeParser->TryTypeCasting(rIdnfDesc.pDesc, vctx.pType, ptkVariable) == FALSE) {
           GetLogger()->OutputTypeCastFailed(ptkVariable, _CLTEXT("初始化"), rIdnfDesc.pDesc, vctx.pType);
           return State_CastTypeError;
@@ -8133,9 +8147,12 @@ FINAL_FUNC:
           rIdnfDesc.pool.assign(vctx.pValue, vctx.pValue + vctx.count);
 
           // 转换为对应级别的值
-          std::for_each(rIdnfDesc.pool.begin(), rIdnfDesc.pool.end(), [pTypeDesc](VALUE& value) {
-            value.CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
-          });
+          if(IS_SCALER_CATE(pTypeDesc) || IS_VECMAT_CATE(pTypeDesc))
+          {
+            std::for_each(rIdnfDesc.pool.begin(), rIdnfDesc.pool.end(), [pTypeDesc](VALUE& value) {
+              value.CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
+            });
+          }
         }
         else
         {
@@ -8197,6 +8214,7 @@ FINAL_FUNC:
     // 注意多维数组类型并不一定注册在当前Context下，而是注册在基础类型所属的Context下
 
     const TYPEDESC* pBaseTypeDesc = GetType(rstrBaseType);
+    ASSERT(pBaseTypeDesc->cate != TYPEDESC::TypeCate_Flag_MultiDim); // 肯定不是多维类型
     TypeMap& sCurrentTypeMap = pBaseTypeDesc->pNameCtx->m_TypeMap;
     clStringA strTypeName;
     pBaseTypeDesc->name.ToString(strTypeName); // name才是真实类型名
@@ -8331,10 +8349,6 @@ FINAL_FUNC:
         m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, pValueExprGlob);
         if(m_eLastState == State_Ok) {
           ASSERT(pVariDesc->pDesc);
-          if(pSizelessTypeDesc != pVariDesc->pDesc) {
-            CLNOP
-          }
-          //pVariDesc->pDesc = pTypeDesc;
           break;// 下面进行初始化列表的推导
         }
         else
@@ -8354,16 +8368,17 @@ FINAL_FUNC:
       }
     } // while
 
-    if(pValueExprGlob == NULL)
-    {
-      return pVariDesc->pDesc;
-    }
-    else if(_CL_NOT_(pValueExprGlob->IsNode() && pValueExprGlob->pNode->mode == SYNTAXNODE::MODE_InitList))
-    {
-      // int a[3] = 0; 形式
-      GetLogger()->OutputErrorW(*pValueExprGlob, UVS_EXPORT_TEXT(5051, "应该使用初始化列表来初始化数组"));
-      return NULL;
-    }
+    // 
+    //if(pValueExprGlob == NULL)
+    //{
+    //  return pVariDesc->pDesc;
+    //}
+    //else if(_CL_NOT_(pValueExprGlob->IsNode() && pValueExprGlob->pNode->mode == SYNTAXNODE::MODE_InitList))
+    //{
+    //  // int a[3] = 0; 形式
+    //  GetLogger()->OutputErrorW(*pValueExprGlob, UVS_EXPORT_TEXT(5051, "应该使用初始化列表来初始化数组"));
+    //  return NULL;
+    //}
 
     return pVariDesc->pDesc;
   }
@@ -8572,6 +8587,7 @@ FINAL_FUNC:
   {
     ASSERT(pTypeDesc->sDimensions.back() == 0); // 外部保证
     ASSERT(pTypeDesc->name.EndsWith("*0"));
+    ASSERT(pTypeDesc->sDimensions.size() == 1 || GetType(pTypeDesc->pElementType->name)); // 检查多维数组的上一级类型也存在
     clStringA name;
     pTypeDesc->name.ToString(name);
     name.TrimRight('0');
