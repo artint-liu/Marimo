@@ -537,7 +537,13 @@ namespace UVShader
 
           if(s.precedence == TOKEN::ID_BRACE) // 跳过非运算符, 也包括括号
           {
-            ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
+            //ASSERT(s.scope < (int)scope.end); // 闭括号肯定在表达式区间内
+            if(s.scope >= (int)scope.end) {
+              clStringA strA(GetPairOfBracket(s.marker[0]), 1);
+              clStringW strW = strA;
+              GetLogger()->OutputErrorW(s, UVS_EXPORT_TEXT(2059, "括号不匹配, 缺少\"%s\"."), strW.CStr());
+              return TKSCOPE::npos;
+            }
             //if(nCandidate > OPP(12) && IsLikeTypeCast(scope, i)) {
             //  return s.scope;
             //}

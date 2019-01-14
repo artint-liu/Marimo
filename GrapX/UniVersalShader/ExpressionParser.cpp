@@ -1031,7 +1031,8 @@ namespace UVShader
 
   CodeParser::iterator CodeParser::MakeupMacroFunc(TOKEN::List& stream, iterator& it, const iterator& end)
   {
-    int depth = 0;
+    int depth = 0;  // "()"
+    int depth1 = 0; // "{}"
     TOKEN::T_LPCSTR begin_ptr = it.marker;
     
     for(auto iter_stream = stream.begin(); iter_stream != stream.end(); ++iter_stream)
@@ -1041,6 +1042,12 @@ namespace UVShader
       }
       else if(*iter_stream == ')') {
         depth--;
+      }
+      else if(*iter_stream == '{') {
+        depth1++;
+      }
+      else if(*iter_stream == '}') {
+        depth1--;
       }
     }
 
@@ -1053,7 +1060,7 @@ namespace UVShader
       }
       else if(it == ')') {
         depth--;
-        if(depth <= 0) {
+        if(depth <= 0 && depth1 == 0) {
           // 防止处理预处理命令
           const GXDWORD dwOldState = m_dwState;
           m_dwState |= AttachFlag_RetainPreprocess;
@@ -1062,7 +1069,13 @@ namespace UVShader
           break;
         }
       }
-      else if(depth == 0 && it.marker > begin_ptr) {
+      else if(*it == '{') {
+        depth1++;
+      }
+      else if(*it == '}') {
+        depth1--;
+      }
+      else if(depth == 0 && depth1 == 0 && it.marker > begin_ptr) {
         // “MARCRO_FUNC”后面不是“(”
         stream.pop_back();
         break;
@@ -1243,7 +1256,8 @@ namespace UVShader
         return MacroExpand_Ok;
       }
 
-      int depth = 1;
+      int depth = 1;  // "()"
+      int depth1 = 0; // "{}"
 
       //
       // 准备宏实参表
@@ -1263,7 +1277,13 @@ namespace UVShader
             break;
           }
         }
-        else if(*it == ',' && depth == 1)
+        else if(*it == '{') {
+          depth1++;
+        }
+        else if(*it == '}') {
+          depth1--;
+        }
+        else if(*it == ',' && depth == 1 && depth1 == 0)
         {
           ctx_out.ActualParam.push_back(ll);
           continue;
@@ -6176,9 +6196,14 @@ namespace UVShader
 
         nListDepth = rInitList.BeginList();
         rInitList.Step(nDimDepth, nListDepth);
-        goto FINAL_FUNC;
+
+        if(pRefType->CountOf() == pExpandedType->CountOf())
+        {
+          goto FINAL_FUNC;
+        }
       }
       else if(pExpandedType->CountOf() < pRefType->CountOf()) {
+        // 可能是包含类型，由下面的RearrangeInitList来验证
         // nothing
       }
       else {
@@ -8919,9 +8944,9 @@ FINAL_FUNC:
       {
         if(vctx.pValue)
         {
-          m_sStack.push_back(STACKDESC()); // 将折叠常量重新压入堆栈
-          STACKDESC& top = Top();
-          const size_t value_count = pTypeDesc->CountOf();//clMin(scaler_count, pTypeDesc->CountOf());
+          STACKDESC stage;
+
+          const size_t value_count = pTypeDesc->CountOf();
           ELEMENT el;
           el.glob.ptr = NULL;
           for(size_t i = 0; i < value_count; i++)
@@ -8929,11 +8954,22 @@ FINAL_FUNC:
             //ASSERT(m_pValuePool[i + index].rank == VALUE::Rank_Unsigned && m_pValuePool[i + index].nValue64 == 0); // 测试没被写过
             m_pValuePool[i + index] = vctx.pValue[i];
             el.pValue = &m_pValuePool[i + index];
-            top.sInitList.push_back(el);
+            stage.sInitList.push_back(el);
           }
 
-          top.iter = top.sInitList.begin();
-          top.ptkOpcode = pGlob->GetFrontToken(); // pGlob->pNode->Operand[0].GetFrontToken();
+          if(IS_VECMAT_CATE(pTypeDesc))
+          {
+            STACKDESC& top = Top();
+            stage.iter = top.sInitList.insert(top.iter, stage.sInitList.begin(), stage.sInitList.end());
+            top.sInitList.erase(top.iter);
+            top.iter = stage.iter;
+          }
+          else
+          {
+            stage.ptkOpcode = pGlob->GetFrontToken(); // pGlob->pNode->Operand[0].GetFrontToken();
+            m_sStack.push_back(stage);
+            Top().iter = Top().sInitList.begin();
+          }
 
           pElement = Get();
           pGlob = NULL; // &(pElement->glob);
