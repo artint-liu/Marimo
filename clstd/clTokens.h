@@ -155,29 +155,7 @@ namespace clstd {
       b32 IsHeadOfLine(const TokensT<_TStr>* pToken, typename _TStr::LPCSTR pChar);
 
       template<class _TStr>
-      clsize ExtendToNewLine(_TStr pTokenPtr, clsize remain)
-      {
-        clsize offset = 0;
-        while(offset < remain) {
-          if(pTokenPtr[offset] == '\n') {
-            if((offset > 0 && pTokenPtr[offset - 1] == '\\') ||
-              (offset > 1 && pTokenPtr[offset - 1] == '\r' && pTokenPtr[offset - 2] == '\\'))
-            {
-              ++offset;
-              continue;
-            }
-            return offset + 1;
-          }
-          else if(pTokenPtr[offset] == '*' && offset > 1 && pTokenPtr[offset - 1] == '/')
-          {
-            ++offset; // 防止“/*/”被认为是注释
-            while(++offset < remain && _CL_NOT_(pTokenPtr[offset] == '/' && pTokenPtr[offset - 1] == '*'))
-            {}
-          }
-          ++offset;
-        }
-        return remain;
-      }
+      clsize ExtendToNewLine(_TStr pTokenPtr, clsize remain);
 
     } // namespace cxxstyle
 

@@ -239,17 +239,24 @@ namespace clstd
 #     ifdef _CL_ARCH_X86
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum);
 extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile, int nLine);
+extern "C" void _cl_Break();
 
 
-
-#       define CLBREAK       {__asm int 3}
-#       define CLABORT       {__asm int 3}
-
-// TODO:稍后实现CLUNIQUEBREAK
+#       if _MSC_FULL_VER >= 191627026
+#         define CLBREAK       {_cl_Break();}
+#         define CLABORT       {abort();}
+#         define CLUNIQUEBREAK {_cl_Break();}      // 只中断一次的断点
+#         define CLNOP         {do{}while(0);}
+#       else
+#         define CLBREAK       {__asm int 3}
+#         define CLABORT       {__asm int 3}
+// TODO: 稍后实现CLUNIQUEBREAK
 //  1.线程自己持有
 //  2.第一次中断，以后跳过并输出log
-#       define CLUNIQUEBREAK {__asm int 3}      // 只中断一次的断点
-#       define CLNOP         {__asm nop}
+#         define CLUNIQUEBREAK {__asm int 3}      // 只中断一次的断点
+#         define CLNOP         {__asm nop}
+#       endif
+
 #       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
 #       define ASSERT(x)      if(!(x)) {_cl_assertW(_CLTEXT(#x), __WFILE__, __LINE__); CLBREAK; } // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
 #       define STATIC_ASSERT(x)    static_assert(x, #x);

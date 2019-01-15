@@ -420,6 +420,15 @@ extern "C" void _cl_assertW(const wch *pszSrc, const wch *pszSrcFile,int nLine)
     pwszCaption,pszSrcFile, nLine, pszSrc);
 }
 
+#if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP) || defined(_CONSOLE)
+# ifdef _CL_ARCH_X86
+extern "C" void _cl_Break()
+{
+  __asm int 3
+}
+# endif
+#endif
+
 //#endif
 
 namespace clstd

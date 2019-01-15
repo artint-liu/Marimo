@@ -36,6 +36,8 @@ namespace clstd
     namespace cxxstyle {
       template b32 IsHeadOfLine<clStringA>(const TokensT<clStringA>* pToken, clStringA::LPCSTR pChar);
       template b32 IsHeadOfLine<clStringW>(const TokensT<clStringW>* pToken, clStringW::LPCSTR pChar);
+      template clsize ExtendToNewLine(const  ch* pTokenPtr, clsize remain);
+      template clsize ExtendToNewLine(const wch* pTokenPtr, clsize remain);
     } // namespace cxxstyle
 #if 0
     template clsize ExtendCStyleNumeric<ch>(const ch* str, clsize max_len);
@@ -600,6 +602,37 @@ namespace clstd
         }
         return TRUE; // 到文档开头了
       }
+
+      template<class _TStr>
+      clsize ExtendToNewLine(_TStr pTokenPtr, clsize remain)
+      {
+        clsize offset = 0;
+        b32 bDoubleSlash = FALSE;
+        while(offset < remain) {
+          if(pTokenPtr[offset] == '\n') {
+            if((offset > 0 && pTokenPtr[offset - 1] == '\\') ||
+              (offset > 1 && pTokenPtr[offset - 1] == '\r' && pTokenPtr[offset - 2] == '\\'))
+            {
+              ++offset;
+              continue;
+            }
+            return offset + 1;
+          }
+          else if(offset > 1 && pTokenPtr[offset - 1] == '/') {
+            if(pTokenPtr[offset] == '/') { // 单行注释
+              bDoubleSlash = TRUE;
+            }
+            else if(_CL_NOT_(bDoubleSlash) && pTokenPtr[offset] == '*') {
+              ++offset; // 防止“/*/”被认为是注释
+              while(++offset < remain && _CL_NOT_(pTokenPtr[offset] == '/' && pTokenPtr[offset - 1] == '*'))
+              {}
+            }
+          }
+          ++offset;
+        }
+        return remain;
+      }
+
 
     } // namespace cxxstyle
 
