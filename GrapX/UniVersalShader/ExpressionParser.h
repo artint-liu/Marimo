@@ -90,10 +90,10 @@ namespace UVShader
       TypeCate_Vector,
       TypeCate_Matrix,
       TypeCate_Struct,
-      TypeCate_Flag_Scaler   = 0x10000,
-      TypeCate_Flag_MultiDim = 0x20000,
-      TypeCate_Flag_Sampler  = 0x40000,
-      TypeCate_Flag_Struct   = 0x80000,
+      //TypeCate_Flag_Scaler   = 0x10000,
+      //TypeCate_Flag_MultiDim = 0x20000,
+      //TypeCate_Flag_Sampler  = 0x40000,
+      //TypeCate_Flag_Struct   = 0x80000,
     };
     typedef clvector<size_t> DimList_T;
 
@@ -239,12 +239,13 @@ namespace UVShader
     // [值]
     ValueResult     result;
     const TYPEDESC* pType;
-    const VALUE*    pValue;
+    const VALUE*    pValue; // 不能修改这个内容
     size_t          count;
     ValuePool       pool;
 
     VALUE_CONTEXT(const VALUE_CONTEXT& vctx);
     VALUE_CONTEXT(const NameContext& _name_ctx);
+    VALUE_CONTEXT(const NameContext& _name_ctx, CLogger* pLogger);
     VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue);
 
     void SetProperty(const VALUE_CONTEXT& vctx); // 从vctx复制属性
@@ -332,8 +333,8 @@ namespace UVShader
     NameContext(const NameContext& sNameCtx){}
     NameContext& operator=(const NameContext sNameCtx) { return *this; }
 
-    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const TYPEDESC* pTypeDesc, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob);
-    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const RefString& rstrType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob);
+    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const TYPEDESC* pTypeDesc, const TOKEN* ptkIdentifier, GXDWORD dwMidifier, const GLOB* pValueExprGlob);
+    State IntRegisterIdentifier(IDNFDESC** ppIdentifier, const RefString& rstrType, const TOKEN* ptkIdentifier, GXDWORD dwMidifier, const GLOB* pValueExprGlob);
   public:
     NameContext(GXLPCSTR szName);
     NameContext(GXLPCSTR szName, const NameContext* pParent, const NameContext* pVariParent = reinterpret_cast<NameContext*>(-1));
@@ -366,11 +367,11 @@ namespace UVShader
     GXBOOL RegisterFunction(const RefString& rstrRetType, const RefString& rstrName, const TYPEINSTANCE::Array& type_array);
     GXBOOL IsTypedefedType(const TOKEN* ptkTypename, const TYPEDESC** ppTypeDesc = NULL) const;
     GXBOOL TranslateType(RefString& rstrTypename, const TOKEN* ptkTypename) const; // 转换typedef定义过的类型
-    const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
-    const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkIdentifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, GXDWORD dwModifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
+    const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkIdentifier, GXDWORD dwModifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
     const TYPEDESC* RegisterTypes(const RefString& rstrBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
-    const TYPEDESC* RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob);
+    const TYPEDESC* RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, GXDWORD dwModifier, const GLOB* pValueExprGlob);
 #endif
     State  GetLastState() const;
     void GetMatchedFunctions(const TOKEN* pFuncName, size_t nFormalCount, cllist<const FUNCDESC*>& aMatchedFunc) const;
@@ -461,6 +462,7 @@ namespace UVShader
     GXBOOL NeedAlignDepth(size_t nDimDepth, size_t nListDepth) const;
     void ClearAlignDepthFlag();
     GXBOOL IsValue(const ELEMENT* pElement) const;
+    VALUE& FillZeroByRank(size_t index, VALUE::Rank rank);
 
     size_t GetMaxCount(const TYPEDESC* pRefType) const; // 如果是自适应长度，用这个来获得最大可能的长度，否则返回类型的实际长度
     size_t BeginList();
@@ -874,8 +876,8 @@ namespace UVShader
     const SYNTAXNODE::GLOB* GetIdentifierDeclWithoutSeamantic(const GLOB& glob); // 取去掉语意的变量声明，可能含有下标，如“vColor[2][3]”
     GXBOOL Verify_MacroFormalList(const MACRO_TOKEN::List& sFormalList);
 
-    GXBOOL Verify_IdentifierTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXDWORD dwFlags = 0);
-    GXBOOL Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXDWORD dwFlags = 0);
+    GXBOOL Verify_IdentifierTypedDefinition(NameContext& sNameSet, const TOKEN& tkType, const GLOB& second_glob, GXDWORD dwFlags = 0); // VerifyIdentifierDefinition_*
+    GXBOOL Verify_IdentifierDefinition(NameContext& sNameSet, const SYNTAXNODE* pNode, GXDWORD dwFlags = 0); // VerifyIdentifierDefinition_*
 
     //GXBOOL Verify2_VariableInit(NameContext& sNameSet, const TYPEDESC* pType, const SYNTAXNODE& rNode);
     //GXBOOL Verify_FunctionBlock(const STATEMENT_EXPR& expr);

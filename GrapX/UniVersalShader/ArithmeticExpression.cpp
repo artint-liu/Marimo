@@ -106,6 +106,10 @@
 //     ...
 //     if(ra==rb) ...
 //   在HLSL中不支持这种比较
+// 18.GLSL支持形参与局部变量重名，HLSL不支持，如：
+//  vec3 getColor(Hit h)
+//  ...
+// float h = h.s/float(S); // 在HLSL提示h重定义
 
 #define FOR_EACH_MBO(_N, _IDX) for(int _IDX = 0; s_Operator##_N[_IDX].szOperator != NULL; _IDX++)
 
@@ -1274,6 +1278,13 @@ GO_NEXT:;
     return *this;
   }
 
+  UVShader::VALUE& VALUE::SetZero(Rank r)
+  {
+    uValue64 = 0;
+    rank = r;
+    return *this;
+  }
+
   VALUE& VALUE::SetOne()
   {
     uValue64 = 1;
@@ -1717,7 +1728,7 @@ GO_NEXT:;
   }
 
   template<typename _Ty>
-  VALUE::State VALUE::CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2)
+  VALUE::State VALUE::CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, _Ty& t1, const _Ty& t2)
   {
     if(nOpcodeLen == 1)
     {
@@ -1761,6 +1772,18 @@ GO_NEXT:;
       else if(szOpcode[0] == '<' && szOpcode[1] == '=') {
         output = _Ty(t1 <= t2);
       }
+      else if(szOpcode[0] == '+' && szOpcode[1] == '=') {
+        output = _Ty(t1 += t2);
+      }
+      else if(szOpcode[0] == '-' && szOpcode[1] == '=') {
+        output = _Ty(t1 -= t2);
+      }
+      else if(szOpcode[0] == '*' && szOpcode[1] == '=') {
+        output = _Ty(t1 *= t2);
+      }
+      else if(szOpcode[0] == '/' && szOpcode[1] == '=') {
+        output = _Ty(t1 /= t2);
+      }
       else {
         return State_UnknownOpcode;
         //TRACE("Unsupport opcode(%c).\n", opcode);
@@ -1772,7 +1795,7 @@ GO_NEXT:;
   }
 
   template<typename _Ty>
-  VALUE::State VALUE::CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2)
+  VALUE::State VALUE::CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, _Ty& t1, const _Ty& t2)
   {
     // [整数限定操作符]
     if(nOpcodeLen == 1)
@@ -1802,6 +1825,13 @@ GO_NEXT:;
       }
       else if(szOpcode[0] == '>' && szOpcode[1] == '>') {
         output = (t1 >> t2);
+      }
+      else if(szOpcode[0] == '/' && szOpcode[1] == '=') {
+        if(t2 == 0) {
+          output = ~(_Ty)0;
+          return State_DivideByZeroI;
+        }
+        output = (t1 /= t2);
       }
       else {
         return State_UnknownOpcode;

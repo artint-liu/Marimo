@@ -2242,32 +2242,42 @@ namespace UVShader
       {
         ptkArgName = second_glob.pTokn;
       }
-      else
+      else if(second_glob.IsNode())
       {
         if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript)
         {
-          type_inst.pTypeDesc = sNameCtx.RegisterMultidimIdentifier(*ptkType, second_glob.pNode, NULL);
-          if(type_inst.pTypeDesc == NULL) {
-            DumpStateError(GetLogger(), sNameCtx.GetLastState(), *ptkType, *ptkArgName);
-            return FALSE;
+          type_inst.pTypeDesc = sNameCtx.RegisterMultidimIdentifier(*ptkType, second_glob.pNode, 0, NULL);
+        }
+        else if(second_glob.pNode->CompareOpcode(':'))
+        {
+          const GLOB* pVarableDecl = GetIdentifierDeclWithoutSeamantic(second_glob);
+          if(pVarableDecl == NULL) {
+            return NULL;
           }
-          type_inst.pLocation = ptkType;
-          types_array.push_back(type_inst);
-          return TRUE;
+          type_inst.pTypeDesc = sNameCtx.RegisterIdentifier(*ptkType, pVarableDecl, 0);
         }
         else
         {
-          // ShaderToy_XtBXDw_2071.txt 会断在这里
-          //-second_glob	<Node>MODE_Opcode (1) A:(<Token>token = "uv" size = 2) B : (<Token>token = "SV_Position" size = 11)	const UVShader::SYNTAXNODE::GLOB &
-          //  mode	MODE_Opcode (1)	UVShader::SYNTAXNODE::MODE
-          //  id	735	unsigned int
-          //  + opcode	0x0326e820 token = ":" size = 1	const UVShader::TOKEN *
-          //  +Operand 0 < Token > token = "uv" size = 2	UVShader::SYNTAXNODE::GLOB
-          //  + Operand 1 < Token > token = "SV_Position" size = 11	UVShader::SYNTAXNODE::GLOB
-          //  + [原始视图] {ptr = 0x02a6fc00 pNode = 0x02a6fc00 {mode = MODE_Opcode (1) magic = 65535 pOpcode = 0x0326e820 token = ":" size = 1 ...} ...}	const UVShader::SYNTAXNODE::GLOB
-
-          CLBREAK; // 没实现
+          const TOKEN& tk = second_glob.pNode->GetAnyTokenPAB();
+          clStringW strW;
+          GetLogger()->OutputErrorW(tk, UVS_EXPORT_TEXT(5078, "参数错误：参数中无法识别的符号“%s”"), tk.ToString(strW).CStr());
+          return FALSE;
         }
+
+        // 断言保证只处理上面的有效分支
+        ASSERT((second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) || second_glob.pNode->CompareOpcode(':'));
+        if(type_inst.pTypeDesc == NULL) {
+          DumpStateError(GetLogger(), sNameCtx.GetLastState(), *ptkType, *ptkArgName);
+          return FALSE;
+        }
+        type_inst.pLocation = ptkType;
+        types_array.push_back(type_inst);
+        return TRUE;
+      }
+      else {
+        // 应该到不了这里
+        GetLogger()->OutputMissingSemicolon(pGlob->GetFrontToken());
+        return FALSE;
       }
     }
 
@@ -2283,7 +2293,7 @@ namespace UVShader
     }
     else
     {
-      type_inst.pTypeDesc = sNameCtx.RegisterIdentifier(*ptkType, ptkArgName);
+      type_inst.pTypeDesc = sNameCtx.RegisterIdentifier(*ptkType, ptkArgName, 0);
       if(type_inst.pTypeDesc == NULL) {
         DumpStateError(GetLogger(), sNameCtx.GetLastState(), *ptkType, *ptkArgName);
         return FALSE;
@@ -4019,10 +4029,10 @@ namespace UVShader
       }
       else if(CompareString(p, PREPROCESS_elif, str_elif_len))
       {
-        // pp_stack 不空，说明在预处理域内，直接忽略
-        // pp_stack 为空，测试表达式(TODO)
+        // depth 不空，说明在预处理域内，直接忽略
+        // depth 为空，测试表达式(TODO)
         //if( ! sRankStack.empty()) {
-        if(depth) {
+        if(depth || session == PPCondRank_elif) {
           continue;
         }
 
@@ -4061,8 +4071,8 @@ namespace UVShader
       }
       else if(CompareString(p, PREPROCESS_else, 4))
       {
-        // pp_stack 不空，说明在预处理域内，直接忽略
-        // pp_stack 为空，转到下行行首
+        // depth 不空，说明在预处理域内，直接忽略
+        // depth 为空，转到下行行首
         //if( ! pp_stack.empty()) {
         if( depth || session == PPCondRank_elif) {
           continue;
@@ -4573,13 +4583,13 @@ namespace UVShader
     if(second_glob.IsToken())
     {
       ptkVar = second_glob.pTokn;
-      pType = sNameSet.RegisterIdentifier(tkType, ptkVar);
+      pType = sNameSet.RegisterIdentifier(tkType, ptkVar, dwFlags);
     }
     else if(second_glob.IsNode())
     {
       if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
       {
-        pType = sNameSet.RegisterMultidimIdentifier(tkType, second_glob.pNode, NULL);
+        pType = sNameSet.RegisterMultidimIdentifier(tkType, second_glob.pNode, 0, NULL);
       }
       else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
       {
@@ -4595,7 +4605,7 @@ namespace UVShader
         ptkVar = GetIdentifierNameWithoutSeamantic(second_glob);
         if(ptkVar)
         {
-          pType = sNameSet.RegisterIdentifier(tkType, ptkVar);
+          pType = sNameSet.RegisterIdentifier(tkType, ptkVar, dwFlags);
           ASSERT(pType || sNameSet.GetLastState() != NameContext::State_Ok);
           return TRUE;
         }
@@ -4629,7 +4639,7 @@ namespace UVShader
 
         if(pVarableDecl)
         {
-          pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, &right_glob);
+          pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, dwFlags, &right_glob);
         }
 
         if(pVarableDecl == NULL || pType == NULL)
@@ -4697,7 +4707,7 @@ namespace UVShader
         if(TEST_FLAG(dwFlags, VerifyIdentifierDefinition_Const)) //if(bConstIdentifier)
         {
           // TODO: 检查value与tkType类型是否匹配, 比如一个“string s = 23;”是非法的
-          pRightTypeDesc = pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, &right_glob);
+          pRightTypeDesc = pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, VerifyIdentifierDefinition_Const, &right_glob);
           if(pType) {
             //const ValuePool* pPool = sNameSet.GetValuePool(ptkVar);
             const IDNFDESC* pIdnfDesc = sNameSet.GetIdentifierDesc(ptkVar);
@@ -4705,11 +4715,11 @@ namespace UVShader
               SetRepalcedValue(right_glob, pIdnfDesc->pool.front());
             }
           }
-          else // if(pVarableDecl->IsNode()) // 多维数组内部输出错误消息
-          {
-            ASSERT(DbgErrorCount() > nErrorCount);
-            return NULL;
-          }
+          //else // if(pVarableDecl->IsNode()) // 多维数组内部输出错误消息
+          //{
+          //  ASSERT(DbgErrorCount() > nErrorCount);
+          //  return NULL;
+          //}
         }
         else
         {
@@ -4720,7 +4730,7 @@ namespace UVShader
             return NULL;
           }
 
-          pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, &right_glob);
+          pType = sNameSet.RegisterIdentifier(tkType, pVarableDecl, dwFlags, &right_glob);
           // 后面比较pRightTypeDesc是否能转换为pType
         }
 
@@ -5163,13 +5173,13 @@ namespace UVShader
         if(second_glob.IsToken())
         {
           ptkVar = second_glob.pTokn;
-          pType = pStructMemberSet->RegisterIdentifier(*ptkType, ptkVar);
+          pType = pStructMemberSet->RegisterIdentifier(*ptkType, ptkVar, 0);
         }
         else if(second_glob.IsNode())
         {
           if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript) // 下标
           {
-            pType = pStructMemberSet->RegisterMultidimIdentifier(*ptkType, second_glob.pNode, NULL);
+            pType = pStructMemberSet->RegisterMultidimIdentifier(*ptkType, second_glob.pNode, 0, NULL);
           }
           else if(second_glob.pNode->mode == SYNTAXNODE::MODE_Subscript0) // 自适应下标
           {
@@ -5181,7 +5191,7 @@ namespace UVShader
             ptkVar = GetIdentifierNameWithoutSeamantic(second_glob);
             if(ptkVar)
             {
-              pType = pStructMemberSet->RegisterIdentifier(*ptkType, ptkVar);
+              pType = pStructMemberSet->RegisterIdentifier(*ptkType, ptkVar, 0);
               ASSERT(pType || pStructMemberSet->GetLastState() != NameContext::State_Ok);
               return TRUE;
             }
@@ -5423,13 +5433,15 @@ namespace UVShader
 
     if(vctx.bNeedValue)
     {
+      // TODO: 修改一下，现在不是常量折叠也会进到这里来计算
       VALUE_CONTEXT::Array _vctx_params = vctx_params;
       if(rstrFunctionName == "max" || rstrFunctionName == "min" || rstrFunctionName == "pow")
       {
         size_t n = 0;
+        const size_t count = vctx.pType->CountOf();
         for(VALUE_CONTEXT& vp : _vctx_params) {
           vp.CopyValue(vctx_params[n++]);
-          if(vp.TypeRank() < vctx.TypeRank()) {
+          if(vp.TypeRank() < vctx.TypeRank() || vp.count < count) {
             vp.CastUpward(vctx.pType);
           }
         }
@@ -5437,7 +5449,7 @@ namespace UVShader
         //VALUE value;
         vctx.result = ValueResult_OK;
         vctx.pool.clear();
-        const size_t count = vctx.pType->CountOf();
+        //const size_t count = vctx.pType->CountOf();
 
         if(rstrFunctionName == "max")
         {
@@ -6808,7 +6820,7 @@ FINAL_FUNC:
       if(vctx.IsNeedValue() && vctx_subscript.pValue)
       {
         ASSERT(vctx_subscript.count == 1);
-        ASSERT(vctx_subscript.pValue->nValue64 >= 0); // TODO: 输出错误提示不能为负值
+        ASSERT(_CL_NOT_(vctx_subscript.pValue->IsNegative())); // TODO: 输出错误提示不能为负值
         const size_t element_count = vctx.pType->pElementType->CountOf();
         PARSER_ASSERT(vctx_subscript.pValue->uValue64 * element_count < vctx.count, pNode->GetAnyTokenAPB());
         vctx.pValue += vctx_subscript.pValue->uValue64 * element_count;
@@ -7969,7 +7981,7 @@ FINAL_FUNC:
 
   NameContext::State NameContext::IntRegisterIdentifier(
     IDNFDESC** ppVariable, const RefString& rstrType,
-    const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
+    const TOKEN* ptkVariable, GXDWORD dwModifier, const GLOB* pValueExprGlob)
   {
     const TYPEDESC* pDesc = GetType(rstrType);
     if(pDesc == NULL)
@@ -7978,12 +7990,12 @@ FINAL_FUNC:
       GetLogger()->OutputErrorW(ptkVariable, UVS_EXPORT_TEXT(5012, "“%s”: 类型未定义"), rstrType.ToString(strW).CStr());
       return State_TypeNotFound;
     }
-    return IntRegisterIdentifier(ppVariable, pDesc, ptkVariable, pValueExprGlob);
+    return IntRegisterIdentifier(ppVariable, pDesc, ptkVariable, dwModifier, pValueExprGlob);
   }
   
   NameContext::State NameContext::IntRegisterIdentifier(
     IDNFDESC** ppVariable, const TYPEDESC* pTypeDesc,
-    const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
+    const TOKEN* ptkVariable, GXDWORD dwModifier, const GLOB* pValueExprGlob)
   {
     ASSERT(ptkVariable);
 
@@ -8026,11 +8038,6 @@ FINAL_FUNC:
     {
       rIdnfDesc.glob = *pValueExprGlob;
 
-      //if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList) == FALSE)
-      //{
-      //  return State_RequireInitList;
-      //}
-
       // 如果是初始化列表，就进行推导
       // 这里会重新输出一个整理过的初始化列表到sVariDesc.glob中
       if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
@@ -8048,73 +8055,11 @@ FINAL_FUNC:
         else if(bSizeless) {
           m_nCount += rIdnfDesc.pDesc->CountOf();
         }
-      }
-      else if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_FunctionCall))
-      {
-        // TODO: 换成Infer函数
-        RefString rstrFuncName;
-        if(pValueExprGlob->pNode->Operand[0].IsToken() == FALSE) {
-          GetLogger()->OutputMissingSemicolon(pValueExprGlob->pNode->Operand[0].GetFrontToken());
-          m_IdentifierMap.erase(insert_result.first);
-          return State_HasError;
-        }
-        TranslateType(rstrFuncName, pValueExprGlob->pNode->Operand[0].pTokn);
 
-        const PERCOMPONENTMATH* pPreCompMath = FindPerComponentMathOperations(rstrFuncName);
-
-        if(pPreCompMath)
+        // 变量不记录数值
+        if(TEST_FLAG_NOT(dwModifier, VerifyIdentifierDefinition_Const))
         {
-          //VALUE value_zero;
-          //rIdnfDesc.pool.assign(pPreCompMath->scaler_count, value_zero.SetZero());
-          rIdnfDesc.pool.reserve(pPreCompMath->scaler_count);
-
-          SYNTAXNODE::GlobList sInitList;
-          VALUE_CONTEXT vctx_param(*this);
-          vctx_param.pLogger = GetLogger();
-          CodeParser::BreakComma(sInitList, pValueExprGlob->pNode->Operand[1]);
-          //int ii = 0;
-          for(auto it = sInitList.begin(); it != sInitList.end(); ++it/*, ii++*/)
-          {
-            vctx_param.ClearValue();
-            m_pCodeParser->InferType(vctx_param, *it);
-            //VALUE::State state = CalculateConstantValue(rIdnfDesc.pool[ii], m_pCodeParser, &*it);
-            if(vctx_param.pValue && vctx_param.count > 0)
-            {
-              //ASSERT(vctx_param.result == ValueResult_OK || vctx_param.result == ValueResult_Variable);
-              for(size_t ip = 0; ip < vctx_param.count; ip++)
-              {
-                rIdnfDesc.pool.push_back(vctx_param.pValue[ip]);
-                rIdnfDesc.pool.back().CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
-              }
-            }
-            else if(vctx_param.result == ValueResult_OK || vctx_param.result == ValueResult_Variable)
-            {
-              rIdnfDesc.pool.clear();
-              break;
-            }
-            //if(vctx_param.result != ValueResult_OK && vctx_param.result != ValueResult_Variable)
-            else
-            {
-              GetLogger()->OutputErrorW(*it, UVS_EXPORT_TEXT(5054, "无法计算表达式常量"));
-              m_IdentifierMap.erase(insert_result.first);
-              return State_RequireConstantExpression;
-            }
-            //rIdnfDesc.pool[ii].CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
-          }
-
-          if(_CL_NOT_(rIdnfDesc.pool.empty()))
-          {
-            ASSERT(rIdnfDesc.pool.size() == 1 || rIdnfDesc.pool.size() == rIdnfDesc.pDesc->CountOf());
-
-            if(rIdnfDesc.pool.size() < rIdnfDesc.pDesc->CountOf())
-            {
-              VALUE temp_value = rIdnfDesc.pool.front();
-              rIdnfDesc.pool.assign(rIdnfDesc.pDesc->CountOf(), temp_value);
-            }
-          }
-        }
-        else {
-          // 不处理
+          rIdnfDesc.pool.clear();
         }
       }
       else
@@ -8133,6 +8078,7 @@ FINAL_FUNC:
           m_pCodeParser->TryTypeCasting(rIdnfDesc.pDesc->pElementType, vctx.pType->pElementType, ptkVariable) )
         {
           rIdnfDesc.pDesc = rIdnfDesc.pDesc->ConfirmArrayCount(vctx.pType->sDimensions.back());
+          m_nCount += rIdnfDesc.pDesc->CountOf();
         }
         else if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && vctx.pType->cate != TYPEDESC::TypeCate_MultiDim) {
           // int a[3] = 0; 形式
@@ -8143,15 +8089,19 @@ FINAL_FUNC:
           GetLogger()->OutputTypeCastFailed(ptkVariable, _CLTEXT("初始化"), rIdnfDesc.pDesc, vctx.pType);
           return State_CastTypeError;
         }
-        else if(vctx.pValue) {
-          rIdnfDesc.pool.assign(vctx.pValue, vctx.pValue + vctx.count);
 
-          // 转换为对应级别的值
-          if(IS_SCALER_CATE(pTypeDesc) || IS_VECMAT_CATE(pTypeDesc))
+        if(vctx.pValue) {
+          if(TEST_FLAG(dwModifier, VerifyIdentifierDefinition_Const))
           {
-            std::for_each(rIdnfDesc.pool.begin(), rIdnfDesc.pool.end(), [pTypeDesc](VALUE& value) {
-              value.CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
-            });
+            rIdnfDesc.pool.assign(vctx.pValue, vctx.pValue + vctx.count);
+
+            // 转换为对应级别的值
+            if(IS_SCALER_CATE(pTypeDesc) || IS_VECMAT_CATE(pTypeDesc))
+            {
+              std::for_each(rIdnfDesc.pool.begin(), rIdnfDesc.pool.end(), [pTypeDesc](VALUE& value) {
+                value.CastValueByRank(static_cast<VALUE::Rank>(pTypeDesc->pDesc->rank));
+              });
+            }
           }
         }
         else
@@ -8160,10 +8110,6 @@ FINAL_FUNC:
           ASSERT(vctx.result == ValueResult_OK || vctx.result == ValueResult_Variable);
         }
       }
-
-      //if(rIdnfDesc.pool.empty()) {
-      //  rIdnfDesc.pool.clear();
-      //}
     }
     else {
       rIdnfDesc.glob.ptr = NULL;
@@ -8171,6 +8117,7 @@ FINAL_FUNC:
 
     // 尺寸一定与类型相符
     ASSERT(rIdnfDesc.pool.empty() || rIdnfDesc.pool.size() == rIdnfDesc.pDesc->CountOf());
+    ASSERT(TEST_FLAG(dwModifier, VerifyIdentifierDefinition_Const) ||  rIdnfDesc.pool.empty());
 
     ASSERT(rIdnfDesc.pDesc);
 
@@ -8178,18 +8125,18 @@ FINAL_FUNC:
     return State_Ok;
   }
 
-  const TYPEDESC* NameContext::RegisterIdentifier(const TOKEN& tkType, const GLOB* pVariableDeclGlob, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterIdentifier(const TOKEN& tkType, const GLOB* pVariableDeclGlob, GXDWORD dwModifier, const GLOB* pValueExprGlob)
   {
     if(pVariableDeclGlob->IsToken()) {
-      return RegisterIdentifier(tkType, pVariableDeclGlob->pTokn, pValueExprGlob);
+      return RegisterIdentifier(tkType, pVariableDeclGlob->pTokn, dwModifier, pValueExprGlob);
     }
     else if(pVariableDeclGlob->IsNode()) {
-      return RegisterMultidimIdentifier(tkType, pVariableDeclGlob->pNode, pValueExprGlob);
+      return RegisterMultidimIdentifier(tkType, pVariableDeclGlob->pNode, dwModifier, pValueExprGlob);
     }
     return NULL;
   }
 
-  const TYPEDESC* NameContext::RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkVariable, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkVariable, GXDWORD dwModifier, const GLOB* pValueExprGlob)
   {
     // PS: 返回值似乎没什么用
     //const TYPEDESC* pTypeDesc = NULL;
@@ -8199,7 +8146,7 @@ FINAL_FUNC:
     //tkType.ToString(strType);
     //ASSERT(strType.IsIdentifier());
 
-    m_eLastState = IntRegisterIdentifier(&pVariDesc, rstrType, ptkVariable, pValueExprGlob);
+    m_eLastState = IntRegisterIdentifier(&pVariDesc, rstrType, ptkVariable, dwModifier, pValueExprGlob);
     ASSERT(m_eLastState != State_Ok || pVariDesc->pDesc != NULL);
     return pVariDesc ? pVariDesc->pDesc : NULL;
   }
@@ -8214,7 +8161,7 @@ FINAL_FUNC:
     // 注意多维数组类型并不一定注册在当前Context下，而是注册在基础类型所属的Context下
 
     const TYPEDESC* pBaseTypeDesc = GetType(rstrBaseType);
-    ASSERT(pBaseTypeDesc->cate != TYPEDESC::TypeCate_Flag_MultiDim); // 肯定不是多维类型
+    ASSERT(pBaseTypeDesc->cate != TYPEDESC::TypeCate_MultiDim); // 肯定不是多维类型
     TypeMap& sCurrentTypeMap = pBaseTypeDesc->pNameCtx->m_TypeMap;
     clStringA strTypeName;
     pBaseTypeDesc->name.ToString(strTypeName); // name才是真实类型名
@@ -8237,7 +8184,7 @@ FINAL_FUNC:
     return td.pElementType;
   }
 
-  const TYPEDESC* NameContext::RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, const GLOB* pValueExprGlob)
+  const TYPEDESC* NameContext::RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, GXDWORD dwModifier, const GLOB* pValueExprGlob)
   {
     ASSERT(pNode->mode == SYNTAXNODE::MODE_Subscript || pNode->mode == SYNTAXNODE::MODE_Subscript0); // 外部保证
 
@@ -8346,7 +8293,7 @@ FINAL_FUNC:
 
         const TYPEDESC* pSizelessTypeDesc = RegisterTypes(RefString(tkType.marker, tkType.length), sDimensions); // 可能缺少最高维尺寸的数组类型
         TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
-        m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, pValueExprGlob);
+        m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, dwModifier, pValueExprGlob);
         if(m_eLastState == State_Ok) {
           ASSERT(pVariDesc->pDesc);
           break;// 下面进行初始化列表的推导
@@ -9090,9 +9037,8 @@ FINAL_FUNC:
         else if(vctx.count == 1) {
           //ASSERT(m_pValuePool[index].rank == VALUE::Rank_Unsigned && m_pValuePool[index].nValue64 == 0); // 测试没被写过
           m_pValuePool[index] = *vctx.pValue;
-          if(pRefTypeDesc->pDesc) {
-            m_pValuePool[index].CastValueByRank(pRefTypeDesc->GetRank());
-          }
+          ASSERT(pMemberType->pDesc);
+          m_pValuePool[index].CastValueByRank(pMemberType->GetRank());
         }
         else {
           CLBREAK;
@@ -9195,6 +9141,13 @@ FINAL_FUNC:
   GXBOOL CInitList::IsValue(const ELEMENT* pElement) const
   {
     return (pElement->pValue >= m_pValuePool && pElement->pValue < (m_pValuePool + m_nValueCount));
+  }
+
+  VALUE& CInitList::FillZeroByRank(size_t index, VALUE::Rank rank)
+  {
+    ASSERT(index < m_nValueCount);
+    ASSERT(m_pValuePool[index].IsZero() && m_pValuePool[index].rank == VALUE::Rank_Unsigned); // 覆盖测试
+    return m_pValuePool[index].SetZero(rank);
   }
 
   size_t CInitList::GetMaxCount(const TYPEDESC* pRefType) const
@@ -9371,6 +9324,18 @@ FINAL_FUNC:
   {
   }
 
+  VALUE_CONTEXT::VALUE_CONTEXT(const NameContext& _name_ctx, CLogger* pLogger)
+    : name_ctx(_name_ctx)
+    , pMemberCtx(NULL)
+    , bNeedValue(TRUE)
+    , pLogger(pLogger)
+    , result(ValueResult_Undefined)
+    , pType(NULL)
+    , pValue(NULL)
+    , count(0)
+  {
+  }
+
   VALUE_CONTEXT::VALUE_CONTEXT(const NameContext& _name_ctx, GXBOOL _bNeedValue)
     : name_ctx(_name_ctx)
     , pMemberCtx(NULL)
@@ -9498,6 +9463,14 @@ FINAL_FUNC:
       }
       UsePool();
     }
+    else if(IS_SCALER_CATE(pType) && IS_SCALER_CATE(pTargetType))
+    {
+      if(pool.empty()) {
+        pool.push_back(*pValue);
+        UsePool();
+      }
+      pool.front().CastValueByRank(pTargetType->GetRank());
+    }
     else
     {
       CLBREAK;
@@ -9593,14 +9566,19 @@ FINAL_FUNC:
       // 类型与数量一致
       ASSERT(vctx.count == vctx.pType->CountOf());
 
-      if(vctx.pool.empty() == FALSE &&
+      if(vctx.count &&
         (IS_SCALER_CATE(vctx.pType) || IS_VECMAT_CATE(vctx.pType)))
       {
         const VALUE::Rank rank = vctx.TypeRank();
         for(size_t i = 0; i < vctx.count; i++)
         {
-          ASSERT(rank == vctx.pValue[i].rank);
+          ASSERT(rank == vctx.pValue[i].rank || vctx.pValue[i].IsZero());
         }
+      }
+
+      for(size_t i = 0; i < vctx.count; i++)
+      {
+        ASSERT(vctx.pValue[i].rank >= VALUE::Rank_First && vctx.pValue[i].rank <= VALUE::Rank_Last);
       }
     }
 

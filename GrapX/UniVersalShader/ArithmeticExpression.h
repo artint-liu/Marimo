@@ -315,6 +315,7 @@ namespace UVShader
 
     void clear();
     VALUE& SetZero();
+    VALUE& SetZero(Rank r);
     VALUE& SetOne();
     GXBOOL IsZero() const;
     GXBOOL IsNegative() const;
@@ -334,9 +335,9 @@ namespace UVShader
     GXBOOL IsNumericRank() const;
     static GXBOOL IsNumericRank(Rank rank);
     template<typename _Ty>
-    State CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
+    State CalculateT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, _Ty& t1, const _Ty& t2);
     template<typename _Ty>
-    State CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, const _Ty& t1, const _Ty& t2);
+    State CalculateIT(_Ty& output, const TOKEN::T_LPCSTR szOpcode, size_t nOpcodeLen, _Ty& t1, const _Ty& t2);
     template<typename _Ty>
     _Ty CastTo() const;
     int Compare(const VALUE& v) const; // 必须相同rank, *this - v 的结果,小于0则为-1， 等于0则为0，大于0则为1
