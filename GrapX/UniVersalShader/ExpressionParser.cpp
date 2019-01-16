@@ -8025,10 +8025,7 @@ FINAL_FUNC:
     if(insert_result.second) {
       // 添加成功, 返回type描述
       m_eLastState = State_Ok;
-      //*ppType = result.first->second.pDesc;
-      //*ppVariable = &insert_result.first->second;
       m_nCount += rIdnfDesc.pDesc->CountOf();
-      //return State_Ok;
     }
     else {
       return State_DuplicatedIdentifier;
@@ -8153,14 +8150,22 @@ FINAL_FUNC:
 
 #ifdef ENABLE_SYNTAX_VERIFY
 
-  const TYPEDESC* NameContext::RegisterTypes(const RefString& rstrBaseType, const TYPEDESC::DimList_T& sDimensions)
+  const TYPEDESC* NameContext::RegisterTypes(const TOKEN& tkBaseType, const TYPEDESC::DimList_T& sDimensions)
   {
     // int x[2][3][4] 列表储存为 "{4,3,2}"
     // 函数会依次注册"int*4", "int*4*3", "int*4*3*2"这几个类型，最后返回"int*4*3*2"这个类型描述
     // 对于自适应长度类型数组"int x[][3][4]", 最后返回的类型为"int*4*3*0"
     // 注意多维数组类型并不一定注册在当前Context下，而是注册在基础类型所属的Context下
 
+    RefString rstrBaseType(tkBaseType.marker, tkBaseType.length);
+
     const TYPEDESC* pBaseTypeDesc = GetType(rstrBaseType);
+    if(pBaseTypeDesc == NULL) {
+      clStringW strW;
+      GetLogger()->OutputErrorW(tkBaseType, UVS_EXPORT_TEXT2(5012, "“%s”: 类型未定义", GetLogger()), tkBaseType.ToString(strW).CStr());
+      return NULL;
+    }
+
     ASSERT(pBaseTypeDesc->cate != TYPEDESC::TypeCate_MultiDim); // 肯定不是多维类型
     TypeMap& sCurrentTypeMap = pBaseTypeDesc->pNameCtx->m_TypeMap;
     clStringA strTypeName;
@@ -8291,8 +8296,13 @@ FINAL_FUNC:
         ASSERT(sDimensions.empty() == FALSE);
         //clStringA strType;
 
-        const TYPEDESC* pSizelessTypeDesc = RegisterTypes(RefString(tkType.marker, tkType.length), sDimensions); // 可能缺少最高维尺寸的数组类型
+        const TYPEDESC* pSizelessTypeDesc = RegisterTypes(tkType, sDimensions); // 可能缺少最高维尺寸的数组类型
         TRACE("var \"%s\":\n", pNode->GetAnyTokenAPB().ToString().CStr());
+        if(pSizelessTypeDesc == NULL) {
+          m_eLastState = State_HasError;
+          return NULL;
+        }
+
         m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, dwModifier, pValueExprGlob);
         if(m_eLastState == State_Ok) {
           ASSERT(pVariDesc->pDesc);

@@ -370,7 +370,7 @@ namespace UVShader
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const GLOB* pIdentifierDeclGlob, GXDWORD dwModifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
     const TYPEDESC* RegisterIdentifier(const TOKEN& tkType, const TOKEN* ptkIdentifier, GXDWORD dwModifier, const GLOB* pValueExprGlob = NULL); // TODO: 应该增加个第一参数是TYPEDESC的重载
 #ifdef ENABLE_SYNTAX_VERIFY
-    const TYPEDESC* RegisterTypes(const RefString& rstrBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
+    const TYPEDESC* RegisterTypes(const TOKEN& tkBaseType, const TYPEDESC::DimList_T& sDimensions); // 根据多维列表依次注册类型，返回值是最高维度类型
     const TYPEDESC* RegisterMultidimIdentifier(const TOKEN& tkType, const SYNTAXNODE* pNode, GXDWORD dwModifier, const GLOB* pValueExprGlob);
 #endif
     State  GetLastState() const;
