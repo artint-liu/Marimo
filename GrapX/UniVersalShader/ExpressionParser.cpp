@@ -5999,7 +5999,7 @@ namespace UVShader
       return NULL;
     }
     
-    vctx.pType = pVariDesc->pDesc;
+    vctx.pType = pVariDesc->pType;
     if(vctx.bNeedValue) {
       if(vctx.pValue == NULL) // 第一个进入的函数
       {
@@ -6019,7 +6019,8 @@ namespace UVShader
       }
       else
       {
-        ASSERT(vctx.count <= pVariDesc->nOffset + vctx.pType->CountOf());
+        //ASSERT(vctx.count <= pVariDesc->nOffset + vctx.pType->CountOf());
+        ASSERT(pVariDesc->nOffset + vctx.pType->CountOf() <= vctx.count);
         vctx.result = ValueResult_OK;
         vctx.pValue += pVariDesc->nOffset;
         vctx.count = vctx.pType->CountOf();
@@ -6030,7 +6031,7 @@ namespace UVShader
       vctx.result = ValueResult_OK;
     }
 
-    return pVariDesc->pDesc;
+    return pVariDesc->pType;
   }
   
   const TYPEDESC* CodeParser::InferType(VALUE_CONTEXT& vctx, const SYNTAXNODE* pNode)
@@ -6725,7 +6726,7 @@ FINAL_FUNC:
 
         if(pVariDesc)
         {
-          vctx.pType = pVariDesc->pDesc;
+          vctx.pType = pVariDesc->pType;
           if(vctx.IsNeedValue())
           {
             ASSERT(vctx.pValue && vctx.pType);
@@ -8016,8 +8017,8 @@ FINAL_FUNC:
     // 防止后面误用
     {
       IDNFDESC sIdnfDesc;
-      sIdnfDesc.pDesc = pTypeDesc;
-      sIdnfDesc.nOffset = m_nCount;
+      sIdnfDesc.pType = pTypeDesc;
+      sIdnfDesc.nOffset = m_nCount | IDNFDESC::Registering;
       insert_result = m_IdentifierMap.insert(clmake_pair(ptkVariable, sIdnfDesc));
     }
 
@@ -8025,7 +8026,7 @@ FINAL_FUNC:
     if(insert_result.second) {
       // 添加成功, 返回type描述
       m_eLastState = State_Ok;
-      m_nCount += rIdnfDesc.pDesc->CountOf();
+      m_nCount += rIdnfDesc.pType->CountOf();
     }
     else {
       return State_DuplicatedIdentifier;
@@ -8040,17 +8041,17 @@ FINAL_FUNC:
       if(pValueExprGlob->CompareAsNode(SYNTAXNODE::MODE_InitList))
       {
         const size_t nErrorCount = m_pCodeParser->DbgErrorCount();
-        const GXBOOL bSizeless = (rIdnfDesc.pDesc->CountOf() == 0);
-        rIdnfDesc.pDesc = m_pCodeParser->InferInitList(&rIdnfDesc.pool, *this, pTypeDesc, &rIdnfDesc.glob);
+        const GXBOOL bSizeless = (rIdnfDesc.pType->CountOf() == 0);
+        rIdnfDesc.pType = m_pCodeParser->InferInitList(&rIdnfDesc.pool, *this, pTypeDesc, &rIdnfDesc.glob);
 
-        if(rIdnfDesc.pDesc == NULL) {
+        if(rIdnfDesc.pType == NULL) {
           ASSERT(rIdnfDesc.pool.empty());
           ASSERT(nErrorCount != m_pCodeParser->DbgErrorCount()); // 缺少无法转换的提示信息
           m_IdentifierMap.erase(insert_result.first);
           return State_CastTypeError;
         }
         else if(bSizeless) {
-          m_nCount += rIdnfDesc.pDesc->CountOf();
+          m_nCount += rIdnfDesc.pType->CountOf();
         }
 
         // 变量不记录数值
@@ -8070,20 +8071,20 @@ FINAL_FUNC:
           m_IdentifierMap.erase(insert_result.first);
           return State_HasError; // 计算表达式错误
         }
-        else if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && rIdnfDesc.pDesc->sDimensions.back() == 0 &&
-          vctx.pType->cate == TYPEDESC::TypeCate_MultiDim && rIdnfDesc.pDesc->sDimensions.size() == vctx.pType->sDimensions.size() &&
-          m_pCodeParser->TryTypeCasting(rIdnfDesc.pDesc->pElementType, vctx.pType->pElementType, ptkVariable) )
+        else if(rIdnfDesc.pType->cate == TYPEDESC::TypeCate_MultiDim && rIdnfDesc.pType->sDimensions.back() == 0 &&
+          vctx.pType->cate == TYPEDESC::TypeCate_MultiDim && rIdnfDesc.pType->sDimensions.size() == vctx.pType->sDimensions.size() &&
+          m_pCodeParser->TryTypeCasting(rIdnfDesc.pType->pElementType, vctx.pType->pElementType, ptkVariable) )
         {
-          rIdnfDesc.pDesc = rIdnfDesc.pDesc->ConfirmArrayCount(vctx.pType->sDimensions.back());
-          m_nCount += rIdnfDesc.pDesc->CountOf();
+          rIdnfDesc.pType = rIdnfDesc.pType->ConfirmArrayCount(vctx.pType->sDimensions.back());
+          m_nCount += rIdnfDesc.pType->CountOf();
         }
-        else if(rIdnfDesc.pDesc->cate == TYPEDESC::TypeCate_MultiDim && vctx.pType->cate != TYPEDESC::TypeCate_MultiDim) {
+        else if(rIdnfDesc.pType->cate == TYPEDESC::TypeCate_MultiDim && vctx.pType->cate != TYPEDESC::TypeCate_MultiDim) {
           // int a[3] = 0; 形式
           GetLogger()->OutputErrorW(*pValueExprGlob, UVS_EXPORT_TEXT(5051, "应该使用初始化列表来初始化数组"));
           return State_HasError;
         }
-        else if(m_pCodeParser->TryTypeCasting(rIdnfDesc.pDesc, vctx.pType, ptkVariable) == FALSE) {
-          GetLogger()->OutputTypeCastFailed(ptkVariable, _CLTEXT("初始化"), rIdnfDesc.pDesc, vctx.pType);
+        else if(m_pCodeParser->TryTypeCasting(rIdnfDesc.pType, vctx.pType, ptkVariable) == FALSE) {
+          GetLogger()->OutputTypeCastFailed(ptkVariable, _CLTEXT("初始化"), rIdnfDesc.pType, vctx.pType);
           return State_CastTypeError;
         }
 
@@ -8113,10 +8114,12 @@ FINAL_FUNC:
     }
 
     // 尺寸一定与类型相符
-    ASSERT(rIdnfDesc.pool.empty() || rIdnfDesc.pool.size() == rIdnfDesc.pDesc->CountOf());
-    ASSERT(TEST_FLAG(dwModifier, VerifyIdentifierDefinition_Const) ||  rIdnfDesc.pool.empty());
+    ASSERT(rIdnfDesc.pool.empty() || rIdnfDesc.pool.size() == rIdnfDesc.pType->CountOf()); // 常量池得长度与类型相符
+    ASSERT(TEST_FLAG(dwModifier, VerifyIdentifierDefinition_Const) ||  rIdnfDesc.pool.empty()); // 常量确保有常量池
+    ASSERT(rIdnfDesc.pType); // 类型不为空
+    ASSERT(insert_result.first->second.IsRegistering()); // 登记中
 
-    ASSERT(rIdnfDesc.pDesc);
+    insert_result.first->second.nOffset &= (~IDNFDESC::Registering);
 
     *ppVariable = &insert_result.first->second;
     return State_Ok;
@@ -8144,8 +8147,8 @@ FINAL_FUNC:
     //ASSERT(strType.IsIdentifier());
 
     m_eLastState = IntRegisterIdentifier(&pVariDesc, rstrType, ptkVariable, dwModifier, pValueExprGlob);
-    ASSERT(m_eLastState != State_Ok || pVariDesc->pDesc != NULL);
-    return pVariDesc ? pVariDesc->pDesc : NULL;
+    ASSERT(m_eLastState != State_Ok || pVariDesc->pType != NULL);
+    return pVariDesc ? pVariDesc->pType : NULL;
   }
 
 #ifdef ENABLE_SYNTAX_VERIFY
@@ -8305,7 +8308,7 @@ FINAL_FUNC:
 
         m_eLastState = IntRegisterIdentifier(&pVariDesc, pSizelessTypeDesc, ptkVariable, dwModifier, pValueExprGlob);
         if(m_eLastState == State_Ok) {
-          ASSERT(pVariDesc->pDesc);
+          ASSERT(pVariDesc->pType);
           break;// 下面进行初始化列表的推导
         }
         else
@@ -8325,19 +8328,7 @@ FINAL_FUNC:
       }
     } // while
 
-    // 
-    //if(pValueExprGlob == NULL)
-    //{
-    //  return pVariDesc->pDesc;
-    //}
-    //else if(_CL_NOT_(pValueExprGlob->IsNode() && pValueExprGlob->pNode->mode == SYNTAXNODE::MODE_InitList))
-    //{
-    //  // int a[3] = 0; 形式
-    //  GetLogger()->OutputErrorW(*pValueExprGlob, UVS_EXPORT_TEXT(5051, "应该使用初始化列表来初始化数组"));
-    //  return NULL;
-    //}
-
-    return pVariDesc->pDesc;
+    return pVariDesc->pType;
   }
 
 #endif
@@ -8440,8 +8431,8 @@ FINAL_FUNC:
   {
     auto it = m_IdentifierMap.find(TokenPtr(ptkName));
     
-    return (it != m_IdentifierMap.end())
-      ? it->second.pDesc
+    return (it != m_IdentifierMap.end() && _CL_NOT_(it->second.IsRegistering()))
+      ? it->second.pType
       : (m_pVariParent
         ? m_pVariParent->GetIdentifier(ptkName)
         : ((ptkName->type == TOKEN::TokenType_String) ? GetType("string") : NULL));
@@ -8450,7 +8441,7 @@ FINAL_FUNC:
   const IDNFDESC* NameContext::GetIdentifierDesc(const TOKEN* ptkName) const
   {
     auto it = m_IdentifierMap.find(TokenPtr(ptkName));
-    if(it == m_IdentifierMap.end()) {
+    if(it == m_IdentifierMap.end() || it->second.IsRegistering()) {
       if(m_pVariParent) {
         return m_pVariParent->GetIdentifierDesc(ptkName);
       }

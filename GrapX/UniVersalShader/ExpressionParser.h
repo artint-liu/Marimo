@@ -212,11 +212,16 @@ namespace UVShader
 
   struct IDNFDESC
   {
-    const TYPEDESC*   pDesc;
-    size_t            nOffset;
-    //VALUE sConstValue;      // 规定 string 类型不能以 const 修饰，所以这里用VALUE
-    SYNTAXNODE::GLOB  glob; // 所有常量都应该定义这个值
-    ValuePool         pool;
+    const static size_t Registering = 1 << (sizeof(size_t) * 8 - 1); // 登记中
+    const TYPEDESC*   pType;
+    size_t            nOffset;// 与 Registering 不为 0 表示在登记
+    SYNTAXNODE::GLOB  glob;   // 所有常量都应该定义这个值
+    ValuePool         pool;   // 常量池
+
+    GXBOOL IsRegistering() const
+    {
+      return (nOffset & Registering) != 0;
+    }
   };
 
   enum InputModifier // 函数参数修饰
