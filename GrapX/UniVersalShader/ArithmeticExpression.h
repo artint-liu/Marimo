@@ -378,6 +378,7 @@ namespace UVShader
     enum MODE
     {
       MODE_Undefined,
+      MODE_Error,               // 已经在语法分析时给出了错误原因
       MODE_Opcode,              // 操作符 + 操作数 模式: A (操作符) B
       MODE_CommaList,           // 逗号列表, 增加这个是因为整理初始化列表时找逗号token做pOpcode比较麻烦 [A:statement] [B:next CommaList]
       MODE_Assignment,          // 初始化列表赋值: A=B; B应该是MODE_InitList, 其它形式赋值属于MODE_Opcode
@@ -484,11 +485,12 @@ namespace UVShader
 
     //VALUE::State Calcuate(const NameSet& sNameSet, VALUE& value_out, std::function<GXBOOL(const SYNTAXNODE*)> func) const;
     //void GetSourceScope(TKSCOPE& scope) const; // 获得源代码的区间，如果SYNTAXNODE中的节点被替换过
-    const TOKEN& GetAnyTokenAB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
+    const TOKEN& GetAnyTokenAB() const;    // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
     const TOKEN& GetAnyTokenAB2() const;   // 为错误处理找到一个定位的token 顺序:operand[0], operand[1]
-    const TOKEN& GetAnyTokenAPB() const;  // 为错误处理找到一个定位的token 顺序:operand[0], opcode, operand[1]
+    const TOKEN& GetAnyTokenAPB() const;   // 为错误处理找到一个定位的token 顺序:operand[0], opcode, operand[1]
     const TOKEN& GetAnyTokenBPA() const;
-    const TOKEN& GetAnyTokenPAB() const; // 为错误处理找到一个定位的token 顺序:opcode, operand[0], operand[1]
+    const TOKEN& GetAnyTokenPAB() const;   // 为错误处理找到一个定位的token 顺序:opcode, operand[0], operand[1]
+    const TOKEN* GetAnyTokenPtrPAB() const;   // 为错误处理找到一个定位的token 顺序:opcode, operand[0], operand[1]
   }; // struct SYNTAXNODE
 
   //////////////////////////////////////////////////////////////////////////

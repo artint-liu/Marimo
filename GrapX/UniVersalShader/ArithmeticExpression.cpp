@@ -280,14 +280,10 @@ namespace UVShader
   u32 ArithmeticExpression::StepIterator(ArithmeticExpression::iterator& it)
   {
     size_t remain = m_pEnd - it.marker;
-    if(it.BeginsWith('\"') && it.EndsWith('\"')) {
-      //TOKEN& l_token = *(TOKEN*)lParam;
+    if((it.BeginsWith('\"') && it.EndsWith('\"')) || (it.BeginsWith('\'') && it.EndsWith('\''))) {
       it->type = TOKEN::TokenType_String;
       return 0;
     }
-
-    //GXBOOL bIsLikeNumeric =  || 
-    //  (it.length > 0 && isdigit(it.marker[0]));
 
     // 并不十分精确, 具体看应用时的解析
     if(TryExtendNumeric(it, remain)) {
@@ -935,7 +931,7 @@ GO_NEXT:;
         ASSERT(*pBack == '}');
         clStringW str;
         GetLogger()->OutputErrorW(A.pTokn, UVS_EXPORT_TEXT(2054, "在“%s”之后应输入“%s”"), A.pTokn->ToString(str).CStr(), _CLTEXT("="));
-        c.mode = SYNTAXNODE::MODE_Undefined;
+        c.mode = SYNTAXNODE::MODE_Error;
       }
 
       c.B.ptr = NULL;
@@ -2705,6 +2701,26 @@ GO_NEXT:;
       return Operand[1].pNode->GetAnyTokenPAB();
     }
     CLBREAK;
+  }
+
+  const TOKEN* SYNTAXNODE::GetAnyTokenPtrPAB() const
+  {
+    if(pOpcode) {
+      return pOpcode;
+    }
+    else if(Operand[0].IsToken()) {
+      return Operand[0].pTokn;
+    }
+    else if(Operand[1].IsToken()) {
+      return Operand[1].pTokn;
+    }
+    else if(Operand[0].IsNode()) {
+      return Operand[0].pNode->GetAnyTokenPtrPAB();
+    }
+    else if(Operand[1].IsNode()) {
+      return Operand[1].pNode->GetAnyTokenPtrPAB();
+    }
+    return NULL;
   }
 
   bool TokenPtr::operator<(const TokenPtr& tp2) const

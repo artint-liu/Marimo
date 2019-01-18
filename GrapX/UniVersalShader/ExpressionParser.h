@@ -295,7 +295,6 @@ namespace UVShader
     typedef clStringA::LPCSTR LPCSTR;
     typedef clmap<RefString, const NameContext*> StructContextMap;
     typedef ArithmeticExpression::GLOB GLOB;
-    //typedef clmap<TokenPtr, ValuePool> ValuePoolMap;
 
     enum State
     {
@@ -320,14 +319,12 @@ namespace UVShader
     const NameContext* m_pParent;     // 默认记录的祖先
     const NameContext* m_pVariParent; // 变量记录的祖先，比如结构体成员NameContext.m_pVariParent应该为空
 
-    //TypeMap       m_BasicTypeMap;
     TYPEDESC::Array m_aBasicType;
     TypeMap       m_TypeMap;  // typedef 会产生两个内容相同的TYPEDESC
     FuncMap       m_FuncMap;
     IdentifierMap m_IdentifierMap;
     State         m_eLastState;
     StructContextMap  m_StructContextMap; // 结构体成员的NameContext
-    //ValuePoolMap      m_ValuePoolMap;
     const TYPEDESC*   m_pReturnType;
     size_t      m_nCount;
 
@@ -566,7 +563,7 @@ namespace UVShader
 
     //////////////////////////////////////////////////////////////////////////
 
-    enum AttachFlag // 注意: 与RTState共用标记位
+    enum AttachFlag
     {
       AttachFlag_Preprocess       = 0x00000001, // 在预处理中，这个状态不再认为#为预处理开始标记
       AttachFlag_RetainPreprocess = 0x00000002, // 保留预处理命令为激活状态
@@ -660,9 +657,10 @@ namespace UVShader
     };
 
 
-    enum RTState // 运行时状态, 与AttachFlag公用标记位
+    enum RTState // 运行时状态
     {
-      State_InPreprocess = 0x00000001, // 解析预处理
+      //State_InPreprocess = 0x00000001, // 解析预处理
+      State_MoreValidation = 0x00000001,   // 更多语法检查，在语法树链检查中，如果遇到错误也会继续检查后面的链的内容
     };
 
 
@@ -863,7 +861,7 @@ namespace UVShader
     const TYPEDESC* InitList_CastType(const TYPEDESC* pLeftType, const TYPEDESC* pListType, size_t nListCount, const GLOB* pLocation);
 #endif
 
-    const TYPEDESC* InferRightValueType(NameContext& sNameSet, const GLOB& right_glob);
+    const TYPEDESC* InferRightValueType(NameContext& sNameSet, const GLOB& right_glob, const TOKEN* ptkLocation);
     GXBOOL CompareScaler(const RefString& rstrTypeFrom, GXLPCSTR szTypeTo);
     GXBOOL TryTypeCasting(const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom, const TOKEN* pLocation, GXBOOL bFormalParam = FALSE); // pLocation 用于错误输出定位
     GXBOOL MergeValueContext(VALUE_CONTEXT& vctx, const TOKEN* pOperator, VALUE_CONTEXT* pAB, const TOKEN* pLocation); // pLocation 用于错误输出定位
@@ -926,7 +924,8 @@ namespace UVShader
   protected:
     typedef clmap<clStringW, clBuffer*> FileDict;
     typedef clmap<const void*, VALUE> ValueDict;
-    GXDWORD             m_dwState;          // 内部状态, 参考RTState
+    GXDWORD             m_dwState;          // 内部状态, 参考AttachFlag
+    GXDWORD             m_dwParserState;    // 内部状态, 参考RTState
     CodeParser*         m_pParent;
     TypeSet             m_TypeSet;
     StatementArray      m_aStatements;
@@ -941,9 +940,7 @@ namespace UVShader
 
     FileDict            m_sIncludeFiles;    // 包含文件集合, 仅限于Root parser
     Include*            m_pInclude;
-  //MACRO::Set          m_MacrosSet;        // 实名集合
     CodeParser*         m_pSubParser;
-    //MACRO_EXPAND_CONTEXT::List m_sMacroStack;
     TOKEN::List         m_ExpandedStream;   // 宏展开流
     NameContext         m_GlobalCtx;
     ValueDict           m_ValueDict;        // 常量表达式可以直接替换成数字的

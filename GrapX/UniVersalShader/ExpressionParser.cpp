@@ -289,6 +289,7 @@ namespace UVShader
     : m_pContext(NULL)
     , m_pSubParser(NULL)
     , m_dwState(0)
+    , m_dwParserState(State_MoreValidation)
     , m_pParent(NULL)
     , m_nPPRecursion(0)
     , m_pInclude(&s_DefaultInclude)
@@ -304,6 +305,7 @@ namespace UVShader
     : m_pContext(pContext)
     , m_pSubParser(NULL)
     , m_dwState(0)
+    , m_dwParserState(State_MoreValidation)
     , m_pParent(pParent)
     , m_nPPRecursion(0)
     , m_pInclude(pInclude ? pInclude : &s_DefaultInclude)
@@ -428,10 +430,10 @@ namespace UVShader
       CodeParser* pThis = (CodeParser*)it.pContainer;
 
       // 测试是否已经在预处理中
-      if(TEST_FLAG(pThis->m_dwState, State_InPreprocess)) {
+      if(TEST_FLAG(pThis->m_dwState, AttachFlag_Preprocess)) {
         return 0;
       }
-      SET_FLAG(pThis->m_dwState, State_InPreprocess);
+      SET_FLAG(pThis->m_dwState, AttachFlag_Preprocess);
 
       if( ! TOKENSUTILITY::IsHeadOfLine(it.pContainer, it.marker)) {
         //ERROR_MSG_C2014_预处理器命令必须作为第一个非空白空间启动;
@@ -450,7 +452,7 @@ namespace UVShader
       ++ctx.iter_next;
 
       if(++it >= ctx.iter_next) { // 只有一个'#', 直接跳过
-        RESET_FLAG(pThis->m_dwState, State_InPreprocess);
+        RESET_FLAG(pThis->m_dwState, AttachFlag_Preprocess);
         return 0;
       }
 
@@ -495,7 +497,7 @@ namespace UVShader
 
           // 防止进入MultiByteOperatorProc，因为这个函数要求it是无效的
           if(TEST_FLAG(m_aCharSem[it.marker[0]], M_CALLBACK)) {
-            RESET_FLAG(pThis->m_dwState, State_InPreprocess);
+            RESET_FLAG(pThis->m_dwState, AttachFlag_Preprocess);
             return 0;
           }
         }
@@ -514,7 +516,7 @@ namespace UVShader
         it.length = 0;
       }
 
-      RESET_FLAG(pThis->m_dwState, State_InPreprocess);
+      RESET_FLAG(pThis->m_dwState, AttachFlag_Preprocess);
     }
     else if(it.marker[0] == '\\' && (
       (remain > 0 && it.marker[1] == '\n') ||
@@ -590,8 +592,6 @@ namespace UVShader
 
       // 符号配对处理
       // ...={...}这种情况不更新EOE
-      //if(MarryBracket(sStack, token) && m_aTokens.back() != "=" &&
-      //  _CL_NOT_(CompareToken(token.scope - 1, "=")))
       MarryBracket(sStack, *it, TEST_FLAG(m_dwState, AttachFlag_Preprocess));
       
       if(OnToken(*it)) {
@@ -2084,6 +2084,11 @@ namespace UVShader
 
       p = pTokensFront + sMembersScope.end;
     } // else if(*p == '{')
+    else
+    {
+      GetLogger()->OutputMissingSemicolon(p);
+      return scope.end;
+    }
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -2716,24 +2721,9 @@ namespace UVShader
       if(TEST_FLAG_NOT(sNameSet.allow_keywords, KeywordFilter_case)) {
         GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(2046, "非法 case"));
       }
-      
-      pend = ParseFlowCase(sNameSet, scope, pDesc);
-      //TKSCOPE::TYPE i = scope.begin + 1;
-      //for(; i < scope.end; i++)
-      //{
-      //  if(m_aTokens[i] == ':') {
-      //    break;
-      //  }
-      //}
-
-      //if(i == scope.end) {
-      //  GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5025, "case 结尾缺少“:”"));
-      //  pend = scope.begin + 1;
-      //}
-      //else {
-      //  pend = i + 1;
-      //}
-      //eMode = SYNTAXNODE::MODE_Flow_Case;
+      else {
+        pend = ParseFlowCase(sNameSet, scope, pDesc);
+      }
     }
     else if(front == "discard") {
       eMode = SYNTAXNODE::MODE_Flow_Discard;
@@ -4400,12 +4390,8 @@ namespace UVShader
       {
         return GetIdentifierNameWithoutSeamantic(glob.pNode->Operand[0]);
       }
-      else
-      {
-        return NULL;
-      }
     }
-    CLBREAK;
+
     return NULL;
   }
 
@@ -4672,7 +4658,7 @@ namespace UVShader
         }
         else
         {
-          pRightTypeDesc = InferRightValueType(sNameSet, right_glob);
+          pRightTypeDesc = InferRightValueType(sNameSet, right_glob, ptkVar);
           if(pRightTypeDesc == NULL || pVarableDecl == NULL) {
             // InferRightValueType2和GetIdentifierWithoutSeamantic内部应该输出错误
             ASSERT(DbgErrorCount() > nErrorCount);
@@ -4703,6 +4689,11 @@ namespace UVShader
       }
       else
       {
+        const TOKEN* ptkLocation = second_glob.pNode->GetAnyTokenPtrPAB();
+        if(ptkLocation) {
+          GetLogger()->OutputMissingSemicolon(ptkLocation);
+          return FALSE;
+        }
         // 意料之外的变量定义语法
         PARSER_BREAK(second_glob);
         CLBREAK;
@@ -4755,7 +4746,7 @@ namespace UVShader
         if(pNode->Operand[0].IsNode())
         {
           GXBOOL bCheckNode = Verify_Node(pNode->Operand[0].pNode, sNameContext, result);
-          if(result == FALSE) {
+          if(result == FALSE && TEST_FLAG_NOT(m_dwParserState, State_MoreValidation)) {
             return result;
           }
           else if(bCheckNode)
@@ -4779,7 +4770,7 @@ namespace UVShader
             clStringW strW;
             GetLogger()->OutputErrorW(pNode->Operand[0].pTokn, UVS_EXPORT_TEXT(_WARNING(5059), "“%s” : 孤立的定义."), pNode->Operand[0].pTokn->ToString(strW).CStr());
           }
-          else if(InferRightValueType(sNameContext, pNode->Operand[0]/*TODO: 这里验证的是token*/) == NULL) {
+          else if(InferRightValueType(sNameContext, pNode->Operand[0], pNode->Operand[0].pTokn) == NULL) {
             return FALSE;
           }
         }
@@ -4829,7 +4820,7 @@ namespace UVShader
       }
       else if(pNode->Operand[0].IsToken())
       {
-        if(InferRightValueType(sNameContext, pNode->Operand[0]) == NULL)
+        if(InferRightValueType(sNameContext, pNode->Operand[0], pNode->Operand[0].pTokn) == NULL)
         {
           result = FALSE;
         }
@@ -4850,7 +4841,7 @@ namespace UVShader
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Flow_DoWhile) // TODO: 把MODE_Flow_If合并进来测试一下
     {
-      const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, pNode->Operand[0]);
+      const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, pNode->Operand[0], pNode->Operand[0].GetFrontToken());
       if(result = (pTypeDesc != NULL)) {
         if(pNode->Operand[1].IsToken()) {
           VALUE_CONTEXT vctx(sNameContext);
@@ -4866,7 +4857,7 @@ namespace UVShader
     }
     else if(pNode->mode == SYNTAXNODE::MODE_Flow_If) // TODO: 应该和MODE_Flow_DoWhile合并？
     {
-      const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, pNode->Operand[0]);
+      const TYPEDESC* pTypeDesc = InferRightValueType(sNameContext, pNode->Operand[0], pNode->Operand[0].GetFrontToken());
       result = result && (pTypeDesc != NULL);
       ASSERT(pNode->Operand[1].ptr == NULL || pNode->Operand[1].IsNode() && pNode->Operand[1].pNode->mode == SYNTAXNODE::MODE_Block);
       return TRUE;
@@ -4942,7 +4933,7 @@ namespace UVShader
           // 表达式中如果左侧出现错误就不再检查右侧，主要是防止重复信息太多
           // TODO: 需要验证左值
           const size_t nErrorCount = DbgErrorCount();
-          const TYPEDESC* pRightTypeDesc = InferRightValueType(sNameContext, pNode->Operand[1]);
+          const TYPEDESC* pRightTypeDesc = InferRightValueType(sNameContext, pNode->Operand[1], pNode->pOpcode);
           const TYPEDESC* pLeftTypeDesc = Verify2_LeftValue(sNameContext, pNode->Operand[0], *pNode->pOpcode);
 
           if(pRightTypeDesc == NULL || pLeftTypeDesc == NULL)
@@ -4970,7 +4961,7 @@ namespace UVShader
           {
             if(pNode->Operand[i].ptr)
             {
-              if(InferRightValueType(sNameContext, pNode->Operand[i]) == NULL)
+              if(InferRightValueType(sNameContext, pNode->Operand[i], pNode->pOpcode) == NULL)
               {
                 result = FALSE;
               }
@@ -5038,14 +5029,8 @@ namespace UVShader
     {
       return FALSE;
     }
-    else if(pNode->mode == SYNTAXNODE::MODE_Subscript)
-    {
-      VALUE_CONTEXT vctx(sNameContext, FALSE);
-      vctx.pLogger = GetLogger();
-      InferType(vctx, pNode);
-      return FALSE;
-    }
-    else if(pNode->mode == SYNTAXNODE::MODE_BracketList)
+    else if(pNode->mode == SYNTAXNODE::MODE_Subscript ||
+      pNode->mode == SYNTAXNODE::MODE_BracketList)
     {
       VALUE_CONTEXT vctx(sNameContext, FALSE);
       vctx.pLogger = GetLogger();
@@ -5055,8 +5040,16 @@ namespace UVShader
     else if(pNode->mode == SYNTAXNODE::MODE_Assignment)
     {
       clStringW strW;
-      GetIdentifierNameWithoutSeamantic(pNode->Operand[0])->ToString(strW);
-      GetLogger()->OutputErrorW(pNode, UVS_EXPORT_TEXT(5053, "“%s”无法使用初始化列表赋值"), strW.CStr());
+      const TOKEN* ptkVar = GetIdentifierNameWithoutSeamantic(pNode->Operand[0]);
+      if(ptkVar)
+      {
+        ptkVar->ToString(strW);
+        GetLogger()->OutputErrorW(pNode, UVS_EXPORT_TEXT(5053, "“%s”无法使用初始化列表赋值"), strW.CStr());
+      }
+      else
+      {
+        GetLogger()->OutputMissingSemicolon(pNode->GetAnyTokenPtrPAB());
+      }
       return FALSE;
     }
 
@@ -6220,7 +6213,7 @@ namespace UVShader
     }
 
 FINAL_FUNC:
-    if((rInitList.Depth() > nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE || index > pRefType->CountOf())
+    if((rInitList.Depth() >= nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE || index > pRefType->CountOf())
     {
       GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
       return NULL;
@@ -6268,7 +6261,7 @@ FINAL_FUNC:
     }
 
 
-    if((rInitList.Depth() > nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
+    if((rInitList.Depth() >= nDimDepth || rInitList.Depth() > nListDepth) && rInitList.IsEnd() == FALSE)
     {
       GetLogger()->OutputErrorW(rInitList.GetLocation(), UVS_EXPORT_TEXT(2078, "初始值设定项太多"));
       return NULL;
@@ -6916,19 +6909,16 @@ FINAL_FUNC:
     return pResultType;
   }
 
-  const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const GLOB& right_glob)
+  const TYPEDESC* CodeParser::InferRightValueType(NameContext& sNameSet, const GLOB& right_glob, const TOKEN* ptkLocation)
   {
-    // 这个函数外部不输出 Error/Warning
-    ASSERT(right_glob.IsNode() || right_glob.IsToken());
-
-    //ASSERT( // 这两个参数要一致
-    //  (ptkType == NULL && ppMinorType == NULL) ||
-    //  (ptkType != NULL && ppMinorType != NULL));
-
-    if(right_glob.IsNode() && right_glob.pNode->mode == SYNTAXNODE::MODE_InitList)
+    if(right_glob.ptr == NULL)
     {
-      CLBREAK; // 不能使用初始化列表
+      GetLogger()->OutputMissingSemicolon(ptkLocation);
+      return NULL;
     }
+
+    // 不能使用初始化列表
+    ASSERT(_CL_NOT_(right_glob.IsNode() && right_glob.pNode->mode == SYNTAXNODE::MODE_InitList));
 
     const size_t nErrorCount = DbgErrorCount();
     VALUE_CONTEXT vctx(sNameSet);
