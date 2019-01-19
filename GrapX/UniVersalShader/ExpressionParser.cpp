@@ -1159,7 +1159,10 @@ namespace UVShader
       it = MakeupMacroFunc(stream, it, end());
       next_token = *it;
       MacroExpand result = ExpandMacroContent(stream, token, NULL);
-      ASSERT(result == MacroExpand_Ok); // 对于不完整的宏调用，只能重新展开一次
+      if(result != MacroExpand_Ok) { // 对于不完整的宏调用，只能重新展开一次
+        GetLogger()->OutputMissingSemicolon(&m_aTokens.back());
+        return FALSE;
+      }
     }
     m_ExpandedStream = stream;
     m_ExpandedStream.push_back(next_token);
@@ -2100,7 +2103,7 @@ namespace UVShader
       pMembers->pNode->Operand[1].pTokn = p; // Block后面的分号
       return p - pTokensFront + 1;
     }
-    else if(p->IsIdentifier())
+    else if(p->IsIdentifier() && p->semi_scope >= 0)
     {
       const auto semi_end = p->semi_scope;
       TKSCOPE scope_var(p - pTokensFront, semi_end + 1);
@@ -2144,7 +2147,8 @@ namespace UVShader
       pDefinitions->ptr = glob.ptr;
       return p - pTokensFront;
     }
-    else if(*p != ';') {
+    else// if(*p != ';') 
+    {
       clStringW str;
       //GetLogger()->OutputErrorW(*p, UVS_EXPORT_TEXT(2143, "语法错误 : 缺少“;”(在“%s”的前面)"), p->ToString(str).CStr());
       GetLogger()->OutputMissingSemicolon(p);
@@ -4494,7 +4498,7 @@ namespace UVShader
           }
           else {
             // ERROR: "const i = 0;" 形式
-            GetLogger()->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(4430, "缺少类型说明符"));
+            GetLogger()->OutputErrorW(pNode->GetAnyTokenBPA(), UVS_EXPORT_TEXT(4430, "缺少类型说明符"));
             return FALSE;
           }
         }
@@ -4695,8 +4699,7 @@ namespace UVShader
           return FALSE;
         }
         // 意料之外的变量定义语法
-        PARSER_BREAK(second_glob);
-        CLBREAK;
+        GetLogger()->OutputMissingSemicolon(second_glob.GetFrontToken());
         return FALSE;
       }
     }
@@ -8169,6 +8172,7 @@ FINAL_FUNC:
     td.cate = TYPEDESC::TypeCate_Struct;
     td.name.Set(ptkName->marker, ptkName->length);//->ToString(strName);
     td.pMemberNode = pMemberNode;
+    td.pLocation = ptkName;
 
     auto result = m_TypeMap.insert(clmake_pair(RefString(ptkName->marker, ptkName->length), td));
     //auto result = m_TypeMap.insert(clmake_pair(strName, td));
@@ -8360,16 +8364,19 @@ FINAL_FUNC:
   NameContext::State NameContext::TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName)
   {
     clStringA strOriName;
-    TYPEDESC td = { TYPEDESC::TypeCate_Empty, this };
+    //TYPEDESC td = { TYPEDESC::TypeCate_Empty, this };
     const TYPEDESC* pDesc = GetType(*ptkOriName);
     if(pDesc == NULL) {
-      pDesc = &td;
+      //pDesc = &td; // 这是干嘛？没看懂
       return State_TypeNotFound;
     }
 
     RefString strNewName(ptkNewName->marker, ptkNewName->length);
-    return m_TypeMap.insert(clmake_pair(strNewName, *pDesc)).second
-      ? State_Ok : State_DuplicatedType;
+    auto it = m_TypeMap.insert(clmake_pair(strNewName, *pDesc));
+    if(it.second) {
+      it.first->second.pLocation = ptkNewName;
+    }
+    return it.second ? State_Ok : State_DuplicatedType;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -8492,7 +8499,14 @@ FINAL_FUNC:
   GXBOOL TYPEDESC::GetMemberTypeList(TYPEDESC::CPtrList& sMemberTypeList) const
   {
     ASSERT(IS_STRUCT_CATE(this)); // 外部保证
-    ASSERT(cate != TypeCate_Struct || pMemberNode->mode == SYNTAXNODE::MODE_Block); // 防止以后修改
+    //ASSERT(cate != TypeCate_Struct || pMemberNode->mode == SYNTAXNODE::MODE_Block); // 防止以后修改
+    if(cate == TypeCate_Struct && 
+      (pMemberNode == NULL || pMemberNode->mode != SYNTAXNODE::MODE_Block))
+    {
+      clStringW strW;
+      GetLogger()->OutputErrorW(pLocation, UVS_EXPORT_TEXT(5080, "结构体“%s”缺少定义"), name.ToString(strW).CStr());
+      return FALSE;
+    }
 
     sMemberTypeList.clear();
 
@@ -8534,6 +8548,7 @@ FINAL_FUNC:
         {
           clStringW strMemberName, strStructName;
           name.ToString(strStructName);
+          ptkMember->ToString(strMemberName);
           GetLogger()->OutputErrorW(ptkMember, UVS_EXPORT_TEXT(ERR_IS_NOT_MEMBER, "“%s”: 不是“%s”的成员"),
             ptkMember->ToString(strMemberName).CStr(), strStructName.CStr()); 
           return FALSE;

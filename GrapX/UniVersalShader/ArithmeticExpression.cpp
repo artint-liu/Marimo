@@ -2372,7 +2372,7 @@ GO_NEXT:;
   {
     // TODO: 断言验证type与marker内容的一致性
     // TODO: 以后可能会简化这个判断改为直接返回type
-    if(length < 1) {
+    if(length < 1 || type == TokenType_String) {
       ASSERT(type != TokenType_Identifier);
       return FALSE;
     }
