@@ -814,8 +814,8 @@ namespace UVShader
     {"floor",     INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"frac",      INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"fwidth",    INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
-    {"isinf",     INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
-    {"isnan",     INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
+    {"isinf",     INTRINSIC_FUNC::RetType_Bool,      1, (u16*)ARG_MatVecSca}, // TODO: 返回值需要修改为与输入参数同样维度
+    {"isnan",     INTRINSIC_FUNC::RetType_Bool,      1, (u16*)ARG_MatVecSca}, // TODO: 返回值需要修改为与输入参数同样维度
     {"length",    INTRINSIC_FUNC::RetType_Scaler0,   1, (u16*)ARG_Vector},
     {"log",       INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},
     {"log2",      INTRINSIC_FUNC::RetType_Argument0, 1, (u16*)ARG_MatVecSca},

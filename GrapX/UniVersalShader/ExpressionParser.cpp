@@ -5995,28 +5995,7 @@ namespace UVShader
     }
     else if(pNode->pOpcode)
     {
-      if(pNode->pOpcode->unary)
-      {
-        ASSERT(
-          *pNode->pOpcode == '~' || *pNode->pOpcode == '!' ||
-          *pNode->pOpcode == '-' || *pNode->pOpcode == '+' ||
-          *pNode->pOpcode == "--" || *pNode->pOpcode == "++" );
-
-        // FIXME: 没有处理一元符号与操作数得计算
-        if(pNode->pOpcode->unary_mask == 0x01)
-        {
-          return InferType(vctx, pNode->Operand[1]);
-        }
-        else if(pNode->pOpcode->unary_mask == 0x02)
-        {
-          return InferType(vctx, pNode->Operand[0]);
-        }
-        else // 11B
-        {
-          CLBREAK
-        }
-      }
-      else if(*pNode->pOpcode == '.')
+      if(*pNode->pOpcode == '.')
       {
         const TYPEDESC* pTypeDesc = InferMemberType(vctx, pNode);
         return pTypeDesc;
@@ -6024,7 +6003,12 @@ namespace UVShader
       else if(pNode->mode == SYNTAXNODE::MODE_Opcode)
       {
         ASSERT(pNode->pOpcode); // 上面分支判断了，这里防止以后重构遗失这个条件
-        if(pNode->Operand[0].ptr == NULL || pNode->Operand[1].ptr == NULL) {
+
+        // 一元，右操作数 || 一元，左操作数 || 二元，左或右操作数
+        if((pNode->pOpcode->unary_mask == 0x01 && pNode->Operand[1].ptr == NULL) ||
+          (pNode->pOpcode->unary_mask == 0x02 && pNode->Operand[0].ptr == NULL) ||
+          (pNode->pOpcode->unary == 0 && (pNode->Operand[0].ptr == NULL || pNode->Operand[1].ptr == NULL)))
+        {
           clStringW strW;
           pNode->pOpcode->ToString(strW);
           GetLogger()->OutputErrorW(pNode->pOpcode, UVS_EXPORT_TEXT(5046, "“%s”缺少必要的操作数"), strW.CStr());
@@ -6034,26 +6018,26 @@ namespace UVShader
       }
     }
 
-    const TYPEDESC* pTypeDesc[2] = {NULL, NULL};
+    //const TYPEDESC* pTypeDesc[2] = {NULL, NULL};
     VALUE_CONTEXT v[2] = {vctx.name_ctx, vctx.name_ctx};
     v[0].pLogger = v[1].pLogger = vctx.pLogger;
 
     if(pNode->CompareOpcode('?'))
     {
       ASSERT(pNode->Operand[1].CompareAsNode(':')); // 这个似乎外部保证过了，这里不再检查
-      pTypeDesc[0] = InferType(v[0], pNode->Operand[0]);
+      InferType(v[0], pNode->Operand[0]);
       if(v[0].result != ValueResult_OK && v[0].result != ValueResult_Variable) {
         vctx.result = v[0].result;
         return NULL;
       }
       else if(v[0].pValue == NULL) { // 只推导类型而不计算值
         v[1].bNeedValue = FALSE;
-        pTypeDesc[1] = InferType(v[1], pNode->Operand[1]);
+        InferType(v[1], pNode->Operand[1]);
         vctx.CopyValue(v[1]);
         return vctx.pType;
       }
       else if(v[0].count == 1) { // 标量bool
-        pTypeDesc[1] = InferType(v[1], _CL_NOT_(v[0].pValue->IsZero())
+        InferType(v[1], _CL_NOT_(v[0].pValue->IsZero())
           ? pNode->Operand[1].pNode->Operand[0]
           : pNode->Operand[1].pNode->Operand[1]);
         vctx.CopyValue(v[1]);
@@ -6064,35 +6048,44 @@ namespace UVShader
         return InferType(vctx, pNode->Operand[1].pNode);
       }
     }
+    else if(pNode->pOpcode && pNode->pOpcode->unary)
+    {
+      ASSERT(
+        *pNode->pOpcode == '~' || *pNode->pOpcode == '!' ||
+        *pNode->pOpcode == '-' || *pNode->pOpcode == '+' ||
+        *pNode->pOpcode == "--" || *pNode->pOpcode == "++");
+
+      ASSERT(pNode->pOpcode->unary_mask == 0x01 || pNode->pOpcode->unary_mask == 0x02);
+
+      VALUE_CONTEXT& vr = pNode->pOpcode->unary_mask == 0x01 ? v[1] : v[0];
+
+      if(InferType(vr, pNode->Operand[&vr - v]) == NULL) {
+        ASSERT(vr.pType == NULL);
+        vctx.ClearValue(vr.result);
+        return NULL;
+      }
+    }
     else
     {
       for(int i = 0; i < 2; i++)
       {
-        pTypeDesc[i] = InferType(v[i], pNode->Operand[i]);
+        if(InferType(v[i], pNode->Operand[i]) == NULL) {
+          ASSERT(v[i].pType == NULL);
+          vctx.result = v[i].result;
+          return NULL;
+        }
         PARSER_ASSERT(pNode->Operand[i].ptr != NULL, pNode->GetAnyTokenAPB());
-        ASSERT(v[i].pType == pTypeDesc[i]);
       }
     }
 
-    if(pTypeDesc[0] == NULL) {
-      vctx.result = v[0].result;
-      return NULL;
-    }
-    else if(pTypeDesc[1] == NULL) {
-      vctx.result = v[1].result;
-      return NULL;
-    }
-    else // if(pTypeDesc[0] != NULL && pTypeDesc[1] != NULL)
-    {
-      vctx.pType = InferTypeByOperator(pNode->pOpcode, pTypeDesc[0], pTypeDesc[1]);
-      if(vctx.pType) {
-        vctx.result = ValueResult_OK;
-        return vctx.pType;
-      }
-      MergeValueContext(vctx, pNode->pOpcode, v, &pNode->GetAnyTokenPAB());
+
+    vctx.pType = InferTypeByOperator(pNode->pOpcode, v[0].pType, v[1].pType);
+    if(vctx.pType) {
+      vctx.result = ValueResult_OK;
       return vctx.pType;
     }
-    return NULL;
+    MergeValueContext(vctx, pNode->pOpcode, v, &pNode->GetAnyTokenPAB());
+    return vctx.pType;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -6957,7 +6950,7 @@ FINAL_FUNC:
     // [整数限定操作符]
     // 检查非法操作数类型，比如对浮点数求模
     if(*pOperator == '%' || *pOperator == '&' || *pOperator == '|' || *pOperator == '~' ||
-      *pOperator == '^' || *pOperator == "<<" || *pOperator == ">>")
+      *pOperator == '^' || *pOperator == '!' || *pOperator == "<<" || *pOperator == ">>")
     {
       //C2296 : “ << ” : 非法，左操作数包含“float”类型
       //C2297 : “ << ” : 非法，右操作数包含“float”类型
@@ -6967,8 +6960,8 @@ FINAL_FUNC:
 
       for(int i = 0; i < 2; i++)
       {
-        if(pAB[i].pType->cate == TYPEDESC::TypeCate_FloatScaler ||
-          (IS_VECMAT_CATE(pAB[i].pType) && pAB[i].pType->pElementType->cate == TYPEDESC::TypeCate_FloatScaler))
+        if(pAB[i].pType && (pAB[i].pType->cate == TYPEDESC::TypeCate_FloatScaler ||
+          (IS_VECMAT_CATE(pAB[i].pType) && pAB[i].pType->pElementType->cate == TYPEDESC::TypeCate_FloatScaler)))
         {
           // 注意：错误消息这么写是为了便于文本抽取
           GetLogger()->OutputErrorW(*pLocation,
@@ -6985,7 +6978,17 @@ FINAL_FUNC:
       }
     }
 
-    if(*pOperator == "!=" || *pOperator == "==")
+    if(pOperator->unary) // TODO: 改成 else if???
+    {
+      if(pOperator->unary_mask == 0x01) {
+        vctx.pType = pAB[1].pType;
+      }
+      else if(pOperator->unary_mask == 0x02) {
+        vctx.pType = pAB[0].pType;
+      }
+    }
+    else if(*pOperator == '>' || *pOperator == '<' || *pOperator == "!=" ||
+      *pOperator == ">=" || *pOperator == "<=" || *pOperator == "==" )
     {
       // [Doc\条件表达式]向量比较返回类型是bool向量
       if((IS_SCALER_CATE(pAB[0].pType) && IS_SCALER_CATE(pAB[1].pType)) ||
@@ -7208,11 +7211,6 @@ FINAL_FUNC:
        for(size_t i = 0; i < count; i++)
        {
          VALUE::State state = value.Calculate(*pOperator, pAB[0].pValue[i], pAB[1].pValue[i]);
-         //if(state != VALUE::State_OK) {
-         //  DumpValueState(vctx.pLogger, state, pOperator);
-         //  vctx.result = ValueResult_Failed;
-         //  return FALSE;
-         //}
          DUMP_STATE_IF_FAILED;
          vctx.pool.push_back(value);
          vctx.pool.back().CastValueByRank(vctx.TypeRank());

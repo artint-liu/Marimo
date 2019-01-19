@@ -1803,6 +1803,7 @@ GO_NEXT:;
       case '&': output = t1 & t2; break;
       case '|': output = t1 | t2; break;
       case '~': output = (~t2); break;
+      case '!': output = (!t2); break;
       case '/':
         if(t2 == 0) {
           output = ~(_Ty)0;
