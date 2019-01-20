@@ -518,12 +518,13 @@ namespace UVShader
 
       RESET_FLAG(pThis->m_dwState, AttachFlag_Preprocess);
     }
-    else if(it.marker[0] == '\\' && (
-      (remain > 0 && it.marker[1] == '\n') ||
-      (remain > 1 && it.marker[1] == '\r' && it.marker[2] == '\n') ||
-      (remain == 1)) )
+    else if(it.marker[0] == '\\')
     {
-      ++it;
+      if((remain > 0 && it.marker[1] == '\n') ||
+        (remain > 1 && it.marker[1] == '\r' && it.marker[2] == '\n') ||
+        (remain == 1)) {
+        ++it;
+      }
     }
     else
     {
@@ -576,6 +577,9 @@ namespace UVShader
 
       if( ! m_pParent && *it == PREPROCESS_pound) {
         GetLogger()->OutputErrorW(*it, UVS_EXPORT_TEXT(2121, "“#”: 无效字符 : 可能是宏展开的结果")); // 无效的"#"号_可能是宏扩展
+      }
+      else if(*it == '\\') {
+        GetLogger()->OutputErrorW(*it, UVS_EXPORT_TEXT(2017, "非法的转义序列"));
       }
 
       const size_t c_size = (int)m_aTokens.size();
@@ -3263,7 +3267,10 @@ namespace UVShader
     }
     B = m_aTokens[front.semi_scope - 1];
 
-    ASSERT(A.IsToken()); // 目前仅处理这个情况
+    if(A.IsNode()) {
+      GetLogger()->OutputMissingSemicolonB(A.GetBackToken());
+      return TKSCOPE::npos;
+    }
     clStringA strTypename;
 
     NameContext::State state = sNameSet.TypeDefine(A.pTokn, B.pTokn);
@@ -3574,8 +3581,9 @@ namespace UVShader
     else if(tokens.front() == PREPROCESS_line) {
       clStringW str;
       if(tokens.size() != 2) {
-        GetLogger()->OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(2005, "#line 应输入行号，却找到“%s”"), _CLTEXT("new line"));
-        return end;
+        clStringW strW;
+        GetLogger()->OutputErrorW(tokens.front(), UVS_EXPORT_TEXT(2005, "#line 应输入行号，却找到“%s”"), tokens.size() > 2 ? tokens[2].ToString(strW).CStr() : _CLTEXT("new line"));
+        return ctx.iter_next.end(); // 这个才是正确的结束位置，end似乎不是
       }
       else if(tokens[1].type != TOKEN::TokenType_Integer)
       {
@@ -4250,7 +4258,13 @@ namespace UVShader
     clStringW strW;
     OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(2143, "语法错误 : 缺少“;”(在“%s”的前面)", this), ptkLocation->ToString(strW).CStr());
   }
-  
+
+  void CLogger::OutputMissingSemicolonB(const TOKEN* ptkLocation)
+  {
+    clStringW strW;
+    OutputErrorW(ptkLocation, UVS_EXPORT_TEXT2(5081, "语法错误 : 缺少“;”(在“%s”的后面)", this), ptkLocation->ToString(strW).CStr());
+  }
+
   void CLogger::OutputTypeCastFailed(const TOKEN* ptkLocation, GXLPCWSTR szOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom)
   {
     clStringW strTo, strFrom;
@@ -5140,6 +5154,7 @@ namespace UVShader
             break;
           case NameContext::State_TypeNotFound:
             CLBREAK; // 上面判断了，这里不应该有
+          case NameContext::State_HasError:
             break;
           default:
             PARSER_BREAK(second_glob); // 没有处理的错误

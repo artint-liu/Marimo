@@ -741,7 +741,7 @@ GO_NEXT:;
         return bRet;
       }
     }
-    else if(front.IsIdentifier() && m_aTokens[scope.begin + 1].scope == scope.end - 1)  // 整个表达式是函数调用
+    else if(front.IsIdentifier() && m_aTokens[scope.begin + 1].scope == scope.end - 1 && m_aTokens[scope.begin + 1] == '(')  // 整个表达式是函数调用
     {
       // X(...) 形式
       return ParseFunctionCall(scope, pDesc);

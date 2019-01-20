@@ -543,7 +543,8 @@ namespace UVShader
     void OutputErrorW(T_LPCSTR ptr, GXUINT code, ...);
     void WriteMessageW(GXLPCWSTR szMessage);
 
-    void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示
+    void OutputMissingSemicolon(const TOKEN* ptkLocation); // 输出缺少分号的提示, 在xx前面
+    void OutputMissingSemicolonB(const TOKEN* ptkLocation); // 输出缺少分号的提示, 在xx后面
     void OutputTypeCastFailed(const TOKEN* ptkLocation, GXLPCWSTR szOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom);
     void OutputTypeCastFailed(const TOKEN* ptkLocation, const TOKEN* pOpcode, const TYPEDESC* pTypeTo, const TYPEDESC* pTypeFrom);
 
