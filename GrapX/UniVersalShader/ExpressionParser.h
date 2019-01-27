@@ -758,7 +758,8 @@ namespace UVShader
     static GLOB* BreakDefinition(SYNTAXNODE::PtrList& sVarList, SYNTAXNODE* pNode); // 分散结构体成员
     static SYNTAXNODE::GlobList& BreakComma(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出逗号并列式
     static SYNTAXNODE::GlobPtrList& BreakComma(SYNTAXNODE::GlobPtrList& sExprList, GLOB& sGlob); // 列出逗号并列式
-    static SYNTAXNODE::GlobList& BreakChain(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出链并列式
+    static SYNTAXNODE::GlobList& BreakChain(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出链并列式，如果sGlob不是链，list为空
+    static SYNTAXNODE::GlobList& BreakChain2(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob); // 列出链并列式，如果sGlob不是链，就直接填进去
 
     GXBOOL  ParseExpression(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);
     GXBOOL  ParseToChain(GLOB& glob, NameContext* pNameSet, const TKSCOPE& scope);

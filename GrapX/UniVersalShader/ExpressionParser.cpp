@@ -1932,6 +1932,21 @@ namespace UVShader
     return sExprList;
   }
 
+  SYNTAXNODE::GlobList& CodeParser::BreakChain2(SYNTAXNODE::GlobList& sExprList, const GLOB& sGlob)
+  {
+    if(sGlob.IsNode() && sGlob.pNode->mode == SYNTAXNODE::MODE_Chain) {
+      sExprList.push_back(sGlob.pNode->Operand[0]);
+
+      if(sGlob.pNode->Operand[1].ptr) {
+        return BreakChain(sExprList, sGlob.pNode->Operand[1]);
+      }
+    }
+    else {
+      sExprList.push_back(sGlob);
+    }
+    return sExprList;
+  }
+
   CodeParser::TKSCOPE::TYPE CodeParser::ParseStructDefinition(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pMembers, GLOB* pDefinitions, const TOKEN** ppName, int* pSignatures, int* pDefinitionNum)
   {
     // pMembers->ptr为空表示解析失败，空定义pMembers->ptr也是一个block
@@ -3242,16 +3257,63 @@ namespace UVShader
     return bret ? step_scope.begin : scope.end;
   }
 
-  CodeParser::TKSCOPE::TYPE CodeParser::ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDest)
+  CodeParser::TKSCOPE::TYPE CodeParser::ParseTypedef(NameContext& sNameSet, const TKSCOPE& scope, GLOB* pDesc)
   {
     // typedef A B;
     GLOB A = {0}, B = {0};
+    GLOB S = {0};
     const TOKEN& front = m_aTokens[scope.begin];
     ASSERT(front == "typedef");
 
-    if(front.semi_scope - scope.begin < 3 || scope.GetSize() < 3) {
+    if((front.semi_scope >= 0 && front.semi_scope - scope.begin < 3) || scope.GetSize() < 3) {
       GetLogger()->OutputErrorW(front, UVS_EXPORT_TEXT(5019, "“typedef”语法错误"));
       return TKSCOPE::npos;
+    }
+
+    if(m_aTokens[scope.begin + 1] == "struct")
+    {
+      TKSCOPE type_scope(scope.begin + 1, scope.end);
+      GLOB sMembers = { 0 }, sTypes = { 0 };
+      int nSignatures = 0, nDefinition = 0;
+      const TOKEN* ptkStructName = NULL;
+      clsize pend = ParseStructDefinition(sNameSet, type_scope, &sMembers, &sTypes, &ptkStructName, &nSignatures, &nDefinition);
+
+      if(sMembers.ptr)
+      {
+        GLOB sName;
+        sName.pTokn = ptkStructName;
+        MakeSyntaxNode(&S, SYNTAXNODE::MODE_StructDef, &sName, &sMembers);
+      }
+
+      ASSERT(nSignatures == 0);  // 没处理这个错误
+      if(sTypes.ptr)
+      {
+        SYNTAXNODE::GlobList sChainList;
+        BreakChain2(sChainList, sTypes);
+        for(GLOB& glob : sChainList)
+        {
+          if(glob.IsNode() && glob.pNode->mode == SYNTAXNODE::MODE_Definition) {
+            glob.pNode->mode = SYNTAXNODE::MODE_Typedef;
+            if(glob.pNode->Operand[0].IsToken() && glob.pNode->Operand[1].IsToken()) {
+              const NameContext::State state = sNameSet.TypeDefine(glob.pNode->Operand[0].pTokn, glob.pNode->Operand[1].pTokn);
+              if(state == NameContext::State_HasError) {
+                return TKSCOPE::npos;
+              }
+              continue;
+            }
+          }
+          GetLogger()->OutputMissingSemicolon(glob.GetFrontToken());
+          return TKSCOPE::npos;
+        }
+        MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Chain, &S, NULL);
+        MakeSyntaxNode(&pDesc->pNode->Operand[1], SYNTAXNODE::MODE_Chain, &sTypes, NULL);
+        
+        return pend;
+      }
+
+      pDesc->ptr = S.ptr;
+      GetLogger()->OutputErrorW(S, UVS_EXPORT_TEXT(_WARNING(4091), "没有声明变量"));
+      return pend;
     }
 
     TKSCOPE type_scope(scope.begin + 1, front.semi_scope - 1);
@@ -3271,31 +3333,13 @@ namespace UVShader
       GetLogger()->OutputMissingSemicolonB(A.GetBackToken());
       return TKSCOPE::npos;
     }
-    clStringA strTypename;
 
     NameContext::State state = sNameSet.TypeDefine(A.pTokn, B.pTokn);
-    switch(state)
-    {
-    case NameContext::State_Ok: break;
-    case NameContext::State_TypeNotFound:
-    {
-      clStringA strTypenameW;
-      GetLogger()->OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5020, "“typedef”定义中使用的“%s”不是一个类型"), A.pTokn->ToString(strTypenameW).CStr());
+    if(state == NameContext::State_HasError) {
       return TKSCOPE::npos;
     }
-    case NameContext::State_DuplicatedType:
-    {
-      clStringA str;
-      GetLogger()->OutputErrorW(*A.pTokn, UVS_EXPORT_TEXT(5021, "“typedef”定义的类型“%s”已经存在"), B.pTokn->ToString(str).CStr());
-      return TKSCOPE::npos;
-    }
-    default:
-      CLBREAK; // 没有处理的错误
-      break;
-    }
 
-
-    MakeSyntaxNode(pDest, SYNTAXNODE::MODE_Typedef, NULL, &A, &B);
+    MakeSyntaxNode(pDesc, SYNTAXNODE::MODE_Typedef, NULL, &A, &B);
     return front.semi_scope + 1;
   }
 
@@ -4493,7 +4537,7 @@ namespace UVShader
           if(sNameSet.GetType(*pNode->Operand[1].pTokn)/* || NameContext::TestIntrinsicType(&sDesc, strType)*/)
           {
             // ERROR: "const float;" 形式
-            GetLogger()->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(4091, "没有声明变量"));
+            GetLogger()->OutputErrorW(*pNode->Operand[1].pTokn, UVS_EXPORT_TEXT(_WARNING(4091), "没有声明变量"));
             return FALSE;
           }
           else
@@ -5067,6 +5111,10 @@ namespace UVShader
       {
         GetLogger()->OutputMissingSemicolon(pNode->GetAnyTokenPtrPAB());
       }
+      return FALSE;
+    }
+    else if(pNode->mode == SYNTAXNODE::MODE_Typedef)
+    {
       return FALSE;
     }
 
@@ -8376,20 +8424,25 @@ FINAL_FUNC:
 
   NameContext::State NameContext::TypeDefine(const TOKEN* ptkOriName, const TOKEN* ptkNewName)
   {
-    clStringA strOriName;
+    //clStringA strOriName;
+    clStringW strW;
     //TYPEDESC td = { TYPEDESC::TypeCate_Empty, this };
     const TYPEDESC* pDesc = GetType(*ptkOriName);
     if(pDesc == NULL) {
       //pDesc = &td; // 这是干嘛？没看懂
-      return State_TypeNotFound;
+      GetLogger()->OutputErrorW(ptkOriName, UVS_EXPORT_TEXT(5020, "“typedef”定义中使用的“%s”不是一个类型"), ptkOriName->ToString(strW).CStr());
+      return State_HasError;
     }
 
     RefString strNewName(ptkNewName->marker, ptkNewName->length);
     auto it = m_TypeMap.insert(clmake_pair(strNewName, *pDesc));
     if(it.second) {
       it.first->second.pLocation = ptkNewName;
+      return State_Ok;
     }
-    return it.second ? State_Ok : State_DuplicatedType;
+
+    GetLogger()->OutputErrorW(ptkOriName, UVS_EXPORT_TEXT(5021, "“typedef”定义的类型“%s”已经存在"), ptkNewName->ToString(strW).CStr());
+    return State_HasError;
   }
 
   //////////////////////////////////////////////////////////////////////////
