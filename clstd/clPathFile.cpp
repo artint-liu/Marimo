@@ -1395,7 +1395,17 @@ namespace clpathfile
       });
     }
     else {
-      rFileList.push_back(szPath);
+      clstd::FindFile ff;
+      if(ff.NewFind(szPath)) {
+        _TString strDir = szPath;
+        FINDFILEDATAT ff_data;
+        ff.GetFile(&ff_data);
+        RemoveFileSpec(strDir);
+        if(fn(strDir, ff_data))
+        {
+          rFileList.push_back(szPath);
+        }
+      }
     }
     return rFileList;
   }
