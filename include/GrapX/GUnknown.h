@@ -17,13 +17,13 @@ class GUnknown
 protected:
   GUnknown() : m_uRefCount(0)
   {
-#ifdef _X86
+#ifdef _CL_ARCH_X86
 # ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     STATIC_ASSERT(sizeof(GUnknown) == 8);
 # else
     STATIC_ASSERT(sizeof(GUnknown) == 4);
 # endif
-#elif _X64
+#elif defined(_CL_ARCH_X64)
     //STATIC_ASSERT(sizeof(GUnknown) == 16);
 #endif // #ifdef _X86
   }

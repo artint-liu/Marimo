@@ -238,6 +238,9 @@
       <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>copy $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).Debug.lib $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).$(Configuration).lib</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -297,6 +300,9 @@
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
       <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>copy $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).Debug.lib $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).$(Configuration).lib</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -356,6 +362,9 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PreBuildEvent>
+      <Command>copy $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).Debug.lib $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).$(Configuration).lib</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -415,6 +424,9 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PreBuildEvent>
+      <Command>copy $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).Debug.lib $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).$(Configuration).lib</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>

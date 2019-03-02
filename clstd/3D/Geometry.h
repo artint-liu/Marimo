@@ -196,6 +196,12 @@ namespace clstd
       {
       }
 
+      AABBI_T(const AABBI_T& aabb)
+        : vMin(aabb.vMin)
+        , vMax(aabb.vMax)
+      {}
+
+
       AABBI_T(Type x0, Type y0, Type z0, Type x1, Type y1, Type z1)
         : vMin(x0, y0, z0)
         , vMax(x1, y1, z1)
@@ -248,6 +254,13 @@ namespace clstd
       {
         vMin -= vOffset;
         vMax -= vOffset;
+        return *this;
+      }
+
+      AABBI_T& operator=(const AABBI_T& aabb)
+      {
+        vMin = aabb.vMin;
+        vMax = aabb.vMax;
         return *this;
       }
 

@@ -14,7 +14,7 @@
 
 // 避免使用"PLATFORM"做为库定义宏，这个单词可能指构架平台，操作系统平台或者支付平台，容易引起歧异
 
-#if __cplusplus < 201103L
+#if __cplusplus < 201103L && !defined(__UNREAL__)
 # error 需要C++11或以上级别的编译器支持
 #endif
 
@@ -51,7 +51,13 @@
 //#endif
 
 #if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
-# include <windows.h>
+# if defined(__UNREAL__)
+#   include "AllowWindowsPlatformTypes.h"
+#   include <windows.h>
+#   include "HideWindowsPlatformTypes.h"
+# else
+#   include <windows.h>
+# endif
 //# if !defined(_WIN32) && !defined(_WIN64)
 //# define _WIN32
 //# endif // #if !defined(_CL_ARCH_X86) && !defined(_CL_ARCH_X64)
@@ -113,7 +119,7 @@ inline void InlSetZeroT(_Ty& t) {
 #endif // SAFE_ADDREF
 
 // Visual Studio 附加参数：/Zc:__cplusplus，则 __cplusplus == _MSVC_LANG
-#if __cplusplus >= 201402L
+#if __cplusplus >= 201402L || defined(__UNREAL__)
 # define CLENUM_CLASS(_TYPE, _ENUM)  enum class _ENUM : _TYPE
 # define CLTRIVIAL_DEFAULT = default
 #else
@@ -227,7 +233,7 @@ namespace clstd
 #     define VERIFY(v)     (v)
 #     define ASSERT(x)     assert(x)
 #     define STATIC_ASSERT(x)    static_assert(x, #x);
-#     define V(x)              if(FAILED(x)) { CLBREAK; }
+//#     define V(x)              if(FAILED(x)) { CLBREAK; }
 #     define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
 #   elif defined(_MSC_VER)
 
@@ -260,7 +266,7 @@ extern "C" void _cl_Break();
 #       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
 #       define ASSERT(x)      if(!(x)) {_cl_assertW(_CLTEXT(#x), __WFILE__, __LINE__); CLBREAK; } // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
 #       define STATIC_ASSERT(x)    static_assert(x, #x);
-#       define V(x)              if(FAILED(x)) { CLBREAK; }
+//#       define V(x)              if(FAILED(x)) { CLBREAK; }
 #       define V_RETURN(x)       if(FAILED(x)) { return GX_FAIL; }
 #     elif defined(_CL_ARCH_X64)
 //extern "C" void _cl_traceA(const char *fmt, ...);
@@ -279,7 +285,7 @@ extern "C" void _cl_NoOperation();
 #       define VERIFY(v)      if(!(v))  _cl_WinVerifyFailure(#v, __FILE__,__LINE__, GetLastError())
 #       define ASSERT(x)      if(!(x)) {_cl_assertW(_CLTEXT(#x), __WFILE__, __LINE__); _cl_Break();} // TODO: 不要在这里面加入程序功能逻辑代码，Release版下会被忽略
 #       define STATIC_ASSERT(x)    static_assert(x, #x);
-#       define V(x)              if(FAILED(x)) { _cl_Break(); }
+//#       define V(x)              if(FAILED(x)) { _cl_Break(); }
 #       define V_RETURN(x)       if(FAILED(x)) {return GX_FAIL;}
 #     endif // #ifdef _CL_ARCH_X86
 #   endif  // #   ifdef __clang__
@@ -298,7 +304,7 @@ void _cl_traceW(const wch *fmt, ...);
 #   define VERIFY(v)        (v)
 #   define ASSERT(x)        assert(x)
 #   define STATIC_ASSERT(x) static_assert(x, #x)
-#   define V(x)             (x)
+//#   define V(x)             (x)
 #   define V_RETURN(x)      (x)
 # else
 #	error 新平台
@@ -326,7 +332,7 @@ extern "C" void _cl_traceW(const wch *fmt, ...);
 #  define VERIFY(v)  (v)
 #  define ASSERT(x)
 #  define STATIC_ASSERT(x)
-#  define V(x)      (x)
+//#  define V(x)      (x)
 #  define V_RETURN(x)  (x)
 #endif  // _DEBUG
 

@@ -102,6 +102,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\socket\clSocket.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\socket\clSocketClient.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\socket\clSocketServer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_arc4.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_des.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_lmhash.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_md5.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_sha.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\thread\clLocker.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\thread\clMessageThread.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\thread\clSignal.cpp" />

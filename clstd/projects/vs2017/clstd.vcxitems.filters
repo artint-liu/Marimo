@@ -13,6 +13,12 @@
     <Filter Include="thread">
       <UniqueIdentifier>{2d6dfe6e-ce70-408d-b07c-7a94a6c5a4e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3rd_party">
+      <UniqueIdentifier>{1ad7f69c-9511-4c6e-987b-0ba352995e20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd_party\crypt">
+      <UniqueIdentifier>{6adb1e71-98e5-4904-bb5a-c468c3734fbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clAllocator.h" />
@@ -110,5 +116,20 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clParallelWork.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_md5.cpp">
+      <Filter>3rd_party\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_sha.cpp">
+      <Filter>3rd_party\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_arc4.cpp">
+      <Filter>3rd_party\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_des.cpp">
+      <Filter>3rd_party\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\third_party\crypt\crypt_lmhash.cpp">
+      <Filter>3rd_party\crypt</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
