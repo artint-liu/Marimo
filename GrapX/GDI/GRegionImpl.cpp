@@ -1821,3 +1821,89 @@ GRegionImpl* GRegionImpl::CreateRoundRectRgn(GAllocator* pAllocate, const GXRECT
 {
   return new(pAllocate) GRegionImpl(rect, nWidthEllipse, nHeightEllipse, pAllocate);
 }
+
+namespace GrapX
+{
+  class RegionFactoryImpl : public RegionFactory
+  {
+  private:
+    GAllocator* m_pRgnAllocator;
+
+  public:
+    RegionFactoryImpl()
+      : m_pRgnAllocator(new GAllocator(NULL))
+    {
+    }
+
+    virtual ~RegionFactoryImpl()
+    {
+      SAFE_DELETE(m_pRgnAllocator);
+    }
+
+    // 基类接口
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXHRESULT AddRef() override
+    {
+      return gxInterlockedIncrement(&m_nRefCount);
+    }
+    
+    GXHRESULT Release() override
+    {
+      GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
+      if(nRefCount == 0) {
+        delete this;
+        return 0;
+      }
+      return nRefCount;
+    }
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+    GXHRESULT CreateRectRgn(GRegion** ppRegion, const GXINT left, const GXINT top, const GXINT right, const GXINT bottom) override
+    {
+      GXRECT rect;
+      rect.left = left;
+      rect.top = top;
+      rect.right = right;
+      rect.bottom = bottom;
+
+      if(gxIsRectEmpty(&rect)) {
+        *ppRegion = (GRegion*)GRegionImpl::CreateEmptyRgn(m_pRgnAllocator);
+      }
+      else {
+        *ppRegion = (GRegion*)GRegionImpl::CreateRectRgn(m_pRgnAllocator, rect);
+      }
+      if(*ppRegion != NULL) {
+        return GX_OK;
+      }
+      return GX_FAIL;
+    }
+
+    GXHRESULT CreateRectRgnIndirect(GRegion** ppRegion, const GXRECT* lpRects, const GXUINT nCount) override
+    {
+      *ppRegion = (GRegion*)GRegionImpl::CreateRectRgnIndirect(m_pRgnAllocator, lpRects, nCount);
+      if(*ppRegion != NULL) {
+        return GX_OK;
+      }
+      return GX_FAIL;
+    }
+
+    GXHRESULT CreateRoundRectRgn(GRegion** ppRegion, const GXRECT& rect, const GXUINT nWidthEllipse, const GXUINT nHeightEllipse) override
+    {
+      *ppRegion = (GRegion*)GRegionImpl::CreateRoundRectRgn(m_pRgnAllocator, rect, nWidthEllipse, nHeightEllipse);
+      if(*ppRegion != NULL) {
+        return GX_OK;
+      }
+      return GX_FAIL;
+    }
+  };
+  
+  GXBOOL GXDLLAPI CreateRegionFactory(RegionFactory** ppFactory)
+  {
+    *ppFactory = new RegionFactoryImpl();
+    if(InlIsFailedToNewObject(*ppFactory)) {
+      return FALSE;
+    }
+    return TRUE;
+  }
+
+} // namespace GrapX

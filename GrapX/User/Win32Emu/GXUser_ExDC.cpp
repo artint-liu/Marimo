@@ -337,7 +337,7 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
     {
       GXLPCWSTR szBaseDir = _CLTEXT("Resource\\OBM\\");
       GXLPCWSTR szOBMFile = NULL;
-      switch((GXDWORD)lpBitmapName)
+      switch((GXDWORD)(size_t)lpBitmapName)
       {
       case GXOBM_CLOSE:
         break;

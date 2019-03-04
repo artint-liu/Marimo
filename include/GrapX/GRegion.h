@@ -49,6 +49,27 @@ public:
   GXSTDINTERFACE(RGNCOMPLEX Union           (const GRegion* pRegion));
 };
 
+namespace GrapX
+{
+  class RegionFactory : public GUnknown
+  {
+  public:
+    // 基类接口
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+    GXSTDINTERFACE(GXHRESULT  AddRef         ());
+    GXSTDINTERFACE(GXHRESULT  Release        ());
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+    GXSTDINTERFACE(GXHRESULT    CreateRectRgn              (GRegion** ppRegion, const GXINT left, const GXINT top, const GXINT right, const GXINT bottom));
+    GXSTDINTERFACE(GXHRESULT    CreateRectRgnIndirect      (GRegion** ppRegion, const GXRECT* lpRects, const GXUINT nCount));
+    GXSTDINTERFACE(GXHRESULT    CreateRoundRectRgn         (GRegion** ppRegion, const GXRECT& rect, const GXUINT nWidthEllipse, const GXUINT nHeightEllipse));
+    
+  };
+
+  GXBOOL GXDLLAPI CreateRegionFactory(RegionFactory** ppFactory);
+
+}
+
 #else
 #pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _GREGION_H_

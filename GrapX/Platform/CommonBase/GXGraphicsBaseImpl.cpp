@@ -38,24 +38,27 @@ namespace GrapX
     else {
       *ppRegion = (GRegion*)GRegionImpl::CreateRectRgn(m_pRgnAllocator, rect);
     }
-    if(*ppRegion != NULL)
+    if(*ppRegion != NULL) {
       return GX_OK;
+    }
     return GX_FAIL;
   }
 
   GXHRESULT GraphicsBaseImpl::CreateRectRgnIndirect(GRegion** ppRegion, const GXRECT* lpRects, const GXUINT nCount)
   {
     *ppRegion = (GRegion*)GRegionImpl::CreateRectRgnIndirect(m_pRgnAllocator, lpRects, nCount);
-    if(*ppRegion != NULL)
+    if(*ppRegion != NULL) {
       return GX_OK;
+    }
     return GX_FAIL;
   }
 
   GXHRESULT GraphicsBaseImpl::CreateRoundRectRgn(GRegion** ppRegion, const GXRECT& rect, const GXUINT nWidthEllipse, const GXUINT nHeightEllipse)
   {
     *ppRegion = (GRegion*)GRegionImpl::CreateRoundRectRgn(m_pRgnAllocator, rect, nWidthEllipse, nHeightEllipse);
-    if(*ppRegion != NULL)
+    if(*ppRegion != NULL) {
       return GX_OK;
+    }
     return GX_FAIL;
   }
 
