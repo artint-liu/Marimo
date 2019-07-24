@@ -13,7 +13,6 @@
 //
 // clstd Headers
 //
-#include <cltree.h>
 //#include "socket/clSocket.h"
 //#include "3D/GrapVR.h"
 
@@ -48,6 +47,7 @@
 #include "GrapX/MOLogger.h"
 
 #include <clTransform.h>
+#include <cltree.h>
 
 #include <GrapX/StdMtl.h>
 #include <GrapX/GVNode.h>

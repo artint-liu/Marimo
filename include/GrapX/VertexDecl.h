@@ -108,6 +108,25 @@ struct GXVERTEX_P3T2N3F_C1D
       GXBYTE  b, g, r, a;   // 颜色
     };
   };
+
+  GXVERTEX_P3T2N3F_C1D() CLTRIVIAL_DEFAULT;
+  GXVERTEX_P3T2N3F_C1D(const GXVERTEX_P3T2N3F_C1D& v)
+    : pos(v.pos)
+    , texcoord(v.texcoord)
+    , normal(v.normal)
+    , color(v.color)
+  {
+  }
+
+
+  //GXVERTEX_P3T2N3F_C1D& operator=(const GXVERTEX_P3T2N3F_C1D& v)
+  //{
+  //  pos = v.pos;
+  //  texcoord = v.texcoord;
+  //  normal = v.normal;
+  //  color = v.color;
+  //  return *this;
+  //}
 };
 
 STATIC_ASSERT(sizeof(GXVERTEX_P3T2N3F_C1D) == 36);
