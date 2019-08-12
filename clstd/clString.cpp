@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "clStringCommon.hxx"
 
+
 #if (defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)) && ! defined(_CL_ENABLE_ICONV)
 # define _CL_ENABLE_ICONV
 #endif
@@ -30,7 +31,7 @@ static const struct STR_HEADER_EXP{
   ch            buf[4];
 }s_EmptyStr = { NULL, 0, 0, {'\0', '\0', '\0', '\0'} };
 
-const size_t  MAX_DIGITS = 80;
+const size_t  MAX_DIGITS = 310; // max double: 1.7976931348623158e+308
 
 #define CLSTD_HEADER_SIZE           (MEMBER_OFFSET(STR_HEADER_EXP, buf))
 #define CLSTR_PTR(_CLSTRBUF)        ((u8*)(_CLSTRBUF) - CLSTD_HEADER_SIZE)

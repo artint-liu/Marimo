@@ -111,8 +111,8 @@ namespace clstd
     return(buf);
   }
 
-  template wch* fcvt<wch, 80>(wch* buf, double arg, int ndigits, int *decpt, int *sign);
-  template  ch* fcvt< ch, 80>(ch* buf, double arg, int ndigits, int *decpt, int *sign);
-  template wch* ecvt<wch, 80>(wch* buf, double arg, int ndigits, int *decpt, int *sign);
-  template  ch* ecvt< ch, 80>(ch* buf, double arg, int ndigits, int *decpt, int *sign);
+  template wch* fcvt<wch, 310>(wch* buf, double arg, int ndigits, int *decpt, int *sign);
+  template  ch* fcvt< ch, 310>(ch* buf, double arg, int ndigits, int *decpt, int *sign);
+  template wch* ecvt<wch, 310>(wch* buf, double arg, int ndigits, int *decpt, int *sign);
+  template  ch* ecvt< ch, 310>(ch* buf, double arg, int ndigits, int *decpt, int *sign);
 } // namespace clstd

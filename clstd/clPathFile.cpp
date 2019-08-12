@@ -10,6 +10,10 @@
 # include <unistd.h>
 #endif // #if defined(_CL_SYSTEM_WINDOWS)
 
+#if defined(_CL_SYSTEM_ANDROID)
+# include <dirent.h>
+#endif
+
 #include "clString.h"
 #include "clPathFile.h"
 using namespace clstd;
@@ -1009,7 +1013,7 @@ namespace clpathfile
     return CreateDirectoryAlwaysT<wchar_t const*>(szDirName, _wmkdir);
 #else
     clStringA str(szDirName);
-    return CreateDirectoryAlwaysT((const ch*)str, mkdir);
+    return CreateDirectoryAlwaysT<wchar_t const*>((const ch*)str, mkdir);
 #endif
   }
 
@@ -1018,7 +1022,7 @@ namespace clpathfile
 #if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
     return CreateDirectoryAlwaysT<char const*>(szDirName, _mkdir);
 #else
-    return CreateDirectoryAlwaysT(szDirName, mkdir);
+    return CreateDirectoryAlwaysT<char const*>(szDirName, mkdir);
 #endif
   }
   //_findfirst
@@ -1092,15 +1096,15 @@ namespace clpathfile
 
   CLDWORD GetFileAttributes(const ch* szPath)
   {
-    struct stat st_stat;
-    int result = stat(szPath, st_stat); // to utf-8
+    struct stat stru_stat;
+    int result = stat(szPath, &stru_stat); // to utf-8
     if(result != 0)
     {
       CLOG_ERROR("GetFileAttributes(%s) failed.", szPath);
       return 0xffffffff;
     }
 
-    return FindFile::IntTranslateAttr(st_stat.st_mode);
+    return FindFile::IntTranslateAttr(stru_stat.st_mode);
   }
 
   b32 GetFileDescription(const wch* szPath, FILEATTRIBUTE* pFileAttr)
@@ -1111,19 +1115,19 @@ namespace clpathfile
 
   b32 GetFileDescription(const ch* szPath, FILEATTRIBUTE* pFileAttr)
   {
-    struct stat st_stat;
-    int result = stat(szPath, st_stat); // to utf-8
+    struct stat stru_stat;
+    int result = stat(szPath, &stru_stat); // to utf-8
     if(result != 0)
     {
       CLOG_ERROR("GetFileDescription(%s) failed.", szPath);
       return FALSE;
     }
 
-    pFileAttr->dwFileAttributes = FindFile::IntTranslateAttr(st_stat.st_mode);
-    pFileAttr->nCreationTime    = st_stat.st_ctime;
-    pFileAttr->nLastAccessTime  = st_stat.st_atime;
-    pFileAttr->nLastWriteTime   = st_stat.st_mtime;
-    pFileAttr->nFileSize        = st_stat.st_size;
+    pFileAttr->dwFileAttributes = FindFile::IntTranslateAttr(stru_stat.st_mode);
+    pFileAttr->nCreationTime    = stru_stat.st_ctime;
+    pFileAttr->nLastAccessTime  = stru_stat.st_atime;
+    pFileAttr->nLastWriteTime   = stru_stat.st_mtime;
+    pFileAttr->nFileSize        = stru_stat.st_size;
     return TRUE;
   }
 #endif
@@ -1296,11 +1300,10 @@ namespace clstd
     if(!GetFile(&finddataA)) {
       return FALSE;
     }
-    clStringW str(finddataA.cFilename);
-    clstd::strcpynT(FindFileData->szFilename, (const wch*)str, MAX_PATH);
+    clStringW str(finddataA.cFileName);
+    clstd::strcpynT(FindFileData->cFileName, (const wch*)str, MAX_PATH);
     FindFileData->dwAttributes    = finddataA.dwAttributes;
-    FindFileData->nFileSizeHigh   = finddataA.nFileSizeHigh;
-    FindFileData->nFileSizeLow    = finddataA.nFileSizeLow;
+    FindFileData->nFileSize       = finddataA.nFileSize;
     FindFileData->nCreationTime   = finddataA.nCreationTime;
     FindFileData->nLastAccessTime = finddataA.nLastAccessTime;
     FindFileData->nLastWriteTime  = finddataA.nLastWriteTime;
@@ -1328,15 +1331,15 @@ namespace clstd
           continue;
         }
 
-        clstd::strcpynT(FindFileData->szFilename, ptr->d_name, MAX_PATH);
+        clstd::strcpynT(FindFileData->cFileName, ptr->d_name, MAX_PATH);
         stat(ptr->d_name, &_sStat);
 
         FindFileData->dwAttributes = IntTranslateAttr(_sStat.st_mode);
-        FindFileData->nFileSizeHigh = 0;
-        FindFileData->nFileSizeLow = _sStat.st_size;
-        FindFileData->nCreationTime = _sStat.st_ctime;
+        //FindFileData->nFileSizeHigh = 0;
+        FindFileData->nFileSize       = _sStat.st_size;
+        FindFileData->nCreationTime   = _sStat.st_ctime;
         FindFileData->nLastAccessTime = _sStat.st_atime;
-        FindFileData->nLastWriteTime = _sStat.st_mtime;
+        FindFileData->nLastWriteTime  = _sStat.st_mtime;
       }
       break;
     }

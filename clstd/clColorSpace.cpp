@@ -505,17 +505,17 @@ namespace clstd
   template<class _TDataDef>
   _COLOR_RGBTEMPL_F<_TDataDef>& _COLOR_RGBTEMPL_F<_TDataDef>::operator=(const float4& v4)
   {
-    r = v4.rgba.r;
-    g = v4.rgba.g;
-    b = v4.rgba.b;
-    a = v4.rgba.a;
+      this->r = v4.rgba.r;
+      this->g = v4.rgba.g;
+      this->b = v4.rgba.b;
+      this->a = v4.rgba.a;
     return *this;
   }
 
   template<class _TDataDef>
   float4& _COLOR_RGBTEMPL_F<_TDataDef>::ToFloat4(float4& v4) const
   {
-    v4.set(r, g, b, a);
+    v4.set(this->r, this->g, this->b, this->a);
     return v4;
   }
 

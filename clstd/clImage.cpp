@@ -881,7 +881,7 @@ namespace clstd
       return true;
     }
 
-    int add_width = abs((int)ceil(factor * m_height));
+    int add_width = fabs((int)ceil(factor * m_height));
     //int add_height = abs((int)ceil(factorY * m_width));
 
     if(_CL_NOT_(pDestImage->Set(m_width + add_width, m_height, (const char*)m_format.name, m_depth))) {
@@ -955,7 +955,7 @@ namespace clstd
       return true;
     }
 
-    int add_height = abs((int)ceil(factor * m_width));
+    int add_height = fabs((int)ceil(factor * m_width));
 
     if(_CL_NOT_(pDestImage->Set(m_width, m_height + add_height, (const char*)m_format.name, m_depth))) {
       return FALSE;

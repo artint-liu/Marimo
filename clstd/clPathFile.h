@@ -369,7 +369,7 @@ namespace clstd
     //const static long InvalidHandleValue = -1L;
     //long        handle;
     //_finddata_t finddata;
-    DIR*      m_dir;
+    struct DIR*      m_dir;
     clStringA m_strMatchName;
 #endif // #if defined(_WINDOWS) || defined(_WIN32)
   public:

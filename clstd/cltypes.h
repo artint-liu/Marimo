@@ -78,18 +78,27 @@ typedef uintptr_t           u32_ptr;
 typedef char                ch;
 typedef char                ach;
 
-#if __cplusplus >= 201103L
+
+#if defined(_MSC_VER)
+typedef wchar_t             wch;
+# define _CLTEXT(_str_)     L##_str_
+#else
 typedef char16_t            wch;
 # define _CLTEXT(_str_)     u##_str_
-#else
-# if defined(_MSC_VER)
-typedef wchar_t             wch;
-#   define _CLTEXT(_str_)     L##_str_
-# elif defined(__GNUC__) || defined(__clang__)
-typedef wchar_t             wch; // 32 Bits
-#   define _CLTEXT(_str_)     L##_str_
-# endif
 #endif
+
+//#if __cplusplus >= 201103L
+//typedef char16_t            wch;
+//# define _CLTEXT(_str_)     u##_str_
+//#else
+//# if defined(_MSC_VER)
+//typedef wchar_t             wch;
+//#   define _CLTEXT(_str_)     L##_str_
+//# elif defined(__GNUC__) || defined(__clang__)
+//typedef wchar_t             wch; // 32 Bits
+//#   define _CLTEXT(_str_)     L##_str_
+//# endif
+//#endif
 
 // 用来做多重定义的如: #define __FUNCTIONW__ _CLTEXT2(__FUNCTION__)
 #define _CLTEXT2(_STR) _CLTEXT(_STR)

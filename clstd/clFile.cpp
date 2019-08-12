@@ -338,7 +338,7 @@ namespace clstd
   //}
 
 
-  int File::WritefA(const ch* format, ...)
+  int File::Writef(const ch* format, ...)
   {
     va_list arglist;
 
@@ -353,7 +353,7 @@ namespace clstd
     return (int)dwNumWrite;
   }
 
-  int File::WritefW(const wch* format, ...)
+  int File::Writef(const wch* format, ...)
   {
     va_list arglist;
 

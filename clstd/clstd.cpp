@@ -15,6 +15,10 @@
 # include <fcntl.h>
 #endif
 
+#if defined(_CL_SYSTEM_ANDROID)
+# include <unistd.h>
+#endif
+
 #include "clStringAttach.h"
 #define MAX_TRACE_BUFFER 2048
 
@@ -341,7 +345,7 @@ namespace clstd
 #else
   void Sleep(u32 dwMilliseconds)
   {
-    usleep(dwMilliseconds * 1000);
+    ::usleep(dwMilliseconds * 1000);
   }
 #endif
 

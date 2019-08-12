@@ -34,8 +34,8 @@ namespace clstd
       rArray.insert(rArray.begin(), rList.begin(), rList.end());
       ForEach(&rArray.front(), sizeof(_ElementT), rArray.size(), fn);
       
-      cllist<_ElementT>::iterator it_dest = rList.begin();
-      clvector<_ElementT>::iterator it_src = rArray.begin();
+      typename cllist<_ElementT>::iterator it_dest = rList.begin();
+      typename clvector<_ElementT>::iterator it_src = rArray.begin();
       for(; it_dest != rList.end(); ++it_dest, ++it_src)
       {
         *it_dest = *it_src;
@@ -53,8 +53,8 @@ namespace clstd
       ForEach(&rDestArray.front(), sizeof(_DestT), &rSrcArray.front(), sizeof(_SrcT), 
         rDestArray.size() < rSrcArray.size() ? rDestArray.size() : rSrcArray.size(), fn);
 
-      cllist<_DestT>::iterator it_dest = rDestList.begin();
-      clvector<_DestT>::iterator it_src = rDestArray.begin();
+      typename cllist<_DestT>::iterator it_dest = rDestList.begin();
+      typename clvector<_DestT>::iterator it_src = rDestArray.begin();
       for(; it_dest != rDestList.end(); ++it_dest, ++it_src)
       {
         *it_dest = *it_src;

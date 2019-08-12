@@ -388,6 +388,15 @@ void TestFormatString2() // 字符串格式化异常
   CLOG("%s", str.CStr());
 }
 
+void TestFormatString3()
+{
+  clStringA str;
+  //str.Format("%02d | %.2f %.2f %.2f %.2f\n", 0, p->x, p->y, p->z, p->w);
+  double a = 1e300;
+  double b = DBL_MAX;
+  str.Format("%.2f %.2f", a, b);
+}
+
 void TestExpandString()
 {
   clmap<clStringA, clStringA> EnvDict;
@@ -457,6 +466,7 @@ int main(int argc, char* argv[])
   TestFormatString0();
   TestFormatString1();
   TestFormatString2();
+  TestFormatString3();
 
   TestExpandString();
 
