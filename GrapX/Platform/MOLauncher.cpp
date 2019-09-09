@@ -19,10 +19,10 @@ struct PLATFORMLIST
 };
 
 PLATFORMLIST g_PlatformList[] = {
-  {_T("Win32 Direct3D 9.0c"),   GXPLATFORM_WIN32_DIRECT3D9},
+  //{_T("Win32 Direct3D 9.0c"),   GXPLATFORM_WIN32_DIRECT3D9},
   {_T("Win32 Direct3D 11"),     GXPLATFORM_WIN32_DIRECT3D11},
-  {_T("Win32 OpenGL 2.0"),      GXPLATFORM_WIN32_OPENGL},
-  {_T("X OpenGL ES 2.0 (Emu)"), GXPLATFORM_X_OPENGLES2},
+  //{_T("Win32 OpenGL 2.0"),      GXPLATFORM_WIN32_OPENGL},
+  //{_T("X OpenGL ES 2.0 (Emu)"), GXPLATFORM_X_OPENGLES2},
   {NULL, 0},
 };
 

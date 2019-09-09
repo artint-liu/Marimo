@@ -3,9 +3,9 @@
 #include <GrapX/GXGraphics.H>
 #include <GrapX/GPrimitive.h>
 
-void TestPrimitive_InvalidParameter(GXGraphics* pGraphics)
+void TestPrimitive_InvalidParameter(GrapX::Graphics* pGraphics)
 {
-  GPrimitive* pPrimitive = NULL;
+  GrapX::Primitive* pPrimitive = NULL;
 
   // GXResUsage_Default 没有给出初始化数据
   GXHRESULT hr = pGraphics->CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Default, 4, 0, NULL, 6, 2, NULL);
@@ -20,10 +20,10 @@ void TestPrimitive_InvalidParameter(GXGraphics* pGraphics)
   ASSERT(GXFAILED(hr));
 }
 
-void TestPrimitive_Named(GXGraphics* pGraphics)
+void TestPrimitive_Named(GrapX::Graphics* pGraphics)
 {
-  GPrimitive* pPrimitive = NULL;
-  GPrimitive* pPrimitive2 = NULL;
+  GrapX::Primitive* pPrimitive = NULL;
+  GrapX::Primitive* pPrimitive2 = NULL;
   GXHRESULT hr = pGraphics->CreatePrimitive(&pPrimitive, "Quad", MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Write, 4, 0, NULL, 6, 2, NULL);
   ASSERT(GXSUCCEEDED(hr));
 
@@ -36,9 +36,9 @@ void TestPrimitive_Named(GXGraphics* pGraphics)
   SAFE_RELEASE(pPrimitive2);
 }
 
-void TestPrimitive_Map(GXGraphics* pGraphics)
+void TestPrimitive_Map(GrapX::Graphics* pGraphics)
 {
-  GPrimitive* pPrimitive = NULL;
+  GrapX::Primitive* pPrimitive = NULL;
   GXHRESULT hr = pGraphics->CreatePrimitive(&pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P4T2F_C1D), GXResUsage::Write, 4, 0, NULL, 6, 2, NULL);
 
   GXVERTEX_P4T2F_C1D vertices[4];
@@ -71,7 +71,7 @@ void TestPrimitive_Map(GXGraphics* pGraphics)
 
 }
 
-void TestPrimitive(GXGraphics* pGraphics)
+void TestPrimitive(GrapX::Graphics* pGraphics)
 {
   TestPrimitive_InvalidParameter(pGraphics);
   TestPrimitive_Named(pGraphics);

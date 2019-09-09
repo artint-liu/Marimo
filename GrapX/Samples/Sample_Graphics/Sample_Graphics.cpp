@@ -27,13 +27,13 @@ using namespace std;
 //TCHAR szTitle[MAX_LOADSTRING];        // 标题栏文本
 //TCHAR szWindowClass[MAX_LOADSTRING];      // 主窗口类名
 
-GTexture* g_pPatternTex;
-GTexture* g_pImage0;
-GTexture* g_pImage1;
+GrapX::Texture* g_pPatternTex;
+GrapX::Texture* g_pImage0;
+GrapX::Texture* g_pImage1;
 //HWND g_hWnd;
 
-void TestPrimitive(GXGraphics* pGraphics);
-void TestRenderTarget(GXGraphics* pGraphics);
+void TestPrimitive(GrapX::Graphics* pGraphics);
+void TestRenderTarget(GrapX::Graphics* pGraphics);
 
 //void Test1(RECT& rect);
 //void Test2(RECT& rect);
@@ -75,12 +75,12 @@ class MyGraphicsTest : public GXApp
 {
   GXFont*     m_pFont;
   GXFont*     m_pFontS;
-  GXRenderTarget*    m_pTarget;
-  GXRenderTarget*    m_pTarget2;
+  GrapX::RenderTarget*    m_pTarget;
+  GrapX::RenderTarget*    m_pTarget2;
   //GXImage*    m_pImageNonPow2;
-  GTexture*   m_pTestIcon;
-  GTexture*   m_pEmptyTex;
-  GTexture*   m_pTexture;
+  GrapX::Texture*   m_pTestIcon;
+  GrapX::Texture*   m_pEmptyTex;
+  GrapX::Texture*   m_pTexture;
   GRegion*    m_pRegion;
   GRegion*    m_pRegion2;
   int         m_nPage;
@@ -207,7 +207,7 @@ public:
       m_nSubPage++;
     return GXApp::KeyMessage(pKeyInfo);
   }
-  void DrawGrid(GXCanvas* pCanvas, GXRECT& rect);
+  void DrawGrid(GrapX::Canvas* pCanvas, GXRECT& rect);
   void TestDrawHelpText(GXRECT& rect);
   void TestDrawElements(GXRECT& rect);
   void TestTextAndClip(GXRECT& rect);
@@ -228,7 +228,7 @@ GXDWORD RandAlphaColor()
   return GXRGB(rand() & 255, rand() & 255, rand() & 255) | ((rand() & 255) << 24);
 }
 
-void MyGraphicsTest::DrawGrid(GXCanvas* pCanvas, GXRECT& rect)
+void MyGraphicsTest::DrawGrid(GrapX::Canvas* pCanvas, GXRECT& rect)
 {
   for(int y = 100; y < rect.bottom; y += 100)
     pCanvas->DrawLine(0, y, rect.right, y, 0xffd0d0d0);
@@ -260,7 +260,7 @@ void MyGraphicsTest::TestDrawHelpText(GXRECT& rect)
   L"7.test CopyRect and StretchRect\n"
   L"8.test scroll texture\n";
 #endif
-  GXCanvas* pCanvas = m_pGraphics->LockCanvas(NULL, NULL, NULL);
+  GrapX::Canvas* pCanvas = m_pGraphics->LockCanvas(NULL, NULL, NULL);
   pCanvas->Clear(0xffe0e0e0);
 
   DrawGrid(pCanvas, rect);
@@ -280,7 +280,7 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   GXREGN regnDst;
   GXREGN regnSrc;
 
-  GXCanvas* pCanvas = m_pGraphics->LockCanvas(NULL, NULL, NULL);
+  GrapX::Canvas* pCanvas = m_pGraphics->LockCanvas(NULL, NULL, NULL);
   pCanvas->Clear(0xffe0e0e0);
   DrawGrid(pCanvas, rect);
 
@@ -383,11 +383,11 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
   pCanvas->FillRectangle(400 + 10, 50 - 10, 100, 100, 0x8000ff00);
   pCanvas->FillRectangle(450 + 10, 100 - 10, 100, 100, 0x80ff0000);
 
-  pCanvas->SetCompositingMode(CM_SourceCopy);
+  pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceCopy);
   pCanvas->FillRectangle(600 + 10, 50 - 10, 100, 100, 0x8000ff00);
   pCanvas->FillRectangle(650 + 10, 100 - 10, 100, 100, 0x80ff0000);
 
-  pCanvas->SetCompositingMode(CM_SourceOver);
+  pCanvas->SetCompositingMode(GrapX::CompositingMode_SourceOver);
   pCanvas->TextOut(m_pFontS, 10, 600, "Clip Drawing:", -1, 0xff000000);
   GXRECT rect2;
   m_pRegion2->GetBounding(&rect2);
@@ -408,42 +408,42 @@ void MyGraphicsTest::TestDrawElements(GXRECT& rect)
     rgDest.left = 210;
     rgDest.top = 625;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_None", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_None);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_None);
 
     rgDest.left = 360;
     rgDest.top = 625;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CW90", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CW90);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_CW90);
 
     rgDest.left = 510;
     rgDest.top = 625;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CCW90", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CCW90);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_CCW90);
 
     rgDest.left = 10;
     rgDest.top = 825;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_180", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_180);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_180);
 
     rgDest.left = 160;
     rgDest.top = 825;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CW90_Flip", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CW90_Flip);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_CW90_Flip);
 
     rgDest.left = 310;
     rgDest.top = 825;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_180_Flip", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_180_Flip);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_180_Flip);
 
     rgDest.left = 460;
     rgDest.top = 825;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_CCW90_Flip", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_CCW90_Flip);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_CCW90_Flip);
 
     rgDest.left = 610;
     rgDest.top = 825;
     pCanvas->TextOut(m_pFontS, rgDest.left, rgDest.top - 25, "Rotate_FlipHorizontal", -1, 0xff000000);
-    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, Rotate_FlipHorizontal);
+    pCanvas->DrawTexture(m_pTestIcon, &rgDest, &rgSrc, GrapX::Rotate_FlipHorizontal);
   }
 
   SAFE_RELEASE(pCanvas);
@@ -457,7 +457,7 @@ void MyGraphicsTest::TestTextAndClip(GXRECT& rect)
   regn.width = (rect.right - rect.left) / 4 * 3;
   regn.height = (rect.bottom - rect.top) / 2 - 80;
 
-  GXCanvas* pCanvas = m_pGraphics->LockCanvas(NULL, &regn, NULL);
+  GrapX::Canvas* pCanvas = m_pGraphics->LockCanvas(NULL, &regn, NULL);
   pCanvas->Clear(0xffe0e0e0);
 
   const int c_max = 50;
@@ -480,7 +480,7 @@ void MyGraphicsTest::TestDrawToRTInRegion(GXRECT& rect)
   // m_nPage == 3 裁剪测试
   // m_nPage == 4 RT绘制
   // m_nPage == 5 裁剪测试 + RT绘制
-  GXCanvas* pCanvas = m_nPage == 3
+  GrapX::Canvas* pCanvas = m_nPage == 3
     ? m_pGraphics->LockCanvas(NULL, NULL, NULL)
     : m_pGraphics->LockCanvas(m_pTarget, NULL, NULL);
 
@@ -539,7 +539,7 @@ void MyGraphicsTest::TestDrawToRTInRegion(GXRECT& rect)
 
 void MyGraphicsTest::TestDrawToTwoRT(GXRECT& rect)
 {
-  GXCanvas* pCanvas;
+  GrapX::Canvas* pCanvas;
   GXREGN regnDst;
   const float fRadius = 40.0f;
   const GXCOLORREF crClear0 = 0xe0e0e0e0;
@@ -575,7 +575,7 @@ void MyGraphicsTest::TestDrawToTwoRT(GXRECT& rect)
 
 void MyGraphicsTest::TestCopyAndStretchRect(GXRECT& rect)
 {
-  GXCanvas* pCanvas;
+  GrapX::Canvas* pCanvas;
   GXREGN regn;
   GXRECT rcSrc;
   GXRECT rcDest;
@@ -623,7 +623,7 @@ void MyGraphicsTest::TestScroll(GXRECT& rect)
   REGN regn;
 
   gxSetRegn(&regn, 0, 0, rect.right, rect.bottom);
-  GXCanvas* pCanvas = m_pGraphics->LockCanvas(NULL, &regn, NULL);
+  GrapX::Canvas* pCanvas = m_pGraphics->LockCanvas(NULL, &regn, NULL);
 
   //pCanvas->SetSamplerState(0, GXSAMP_MINFILTER, GXTEXFILTER_POINT);
   //pCanvas->SetSamplerState(0, GXSAMP_MAGFILTER, GXTEXFILTER_POINT);
@@ -669,7 +669,7 @@ void MyGraphicsTest::TestClear(GXRECT& rect)
 {
   REGN regn;
   gxSetRegn(&regn, 0, 0, rect.right, rect.bottom);
-  GXCanvas* pCanvas = m_pGraphics->LockCanvas(NULL, &regn, NULL);
+  GrapX::Canvas* pCanvas = m_pGraphics->LockCanvas(NULL, &regn, NULL);
   
   pCanvas->Clear(0xff00ff00);
   

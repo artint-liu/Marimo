@@ -1176,10 +1176,13 @@ namespace GrapX
         SAFE_RELEASE(m_pCurDepthStencilView);
         m_pCurRenderTarget = pTargetImpl;
         m_pCurRenderTargetView = pTargetImpl->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
-        m_pCurDepthStencilView = pTargetImpl->IntGetDepthStencilTextureUnsafe()->m_pD3D11DepthStencilView;
+        if(pTargetImpl->IntGetDepthStencilTextureUnsafe())
+        {
+          m_pCurDepthStencilView = pTargetImpl->IntGetDepthStencilTextureUnsafe()->m_pD3D11DepthStencilView;
+          m_pCurDepthStencilView->AddRef();
+        }
         m_pCurRenderTarget->AddRef();
         m_pCurRenderTargetView->AddRef();
-        m_pCurDepthStencilView->AddRef();
 
         m_pImmediateContext->OMSetRenderTargets(1, &m_pCurRenderTargetView, m_pCurDepthStencilView);
       }

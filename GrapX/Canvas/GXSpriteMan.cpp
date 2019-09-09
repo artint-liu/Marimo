@@ -511,10 +511,10 @@ template<class _DESCT>
 void IntSaveSpriteNamdAndId(clFile& file, int nTab, const _DESCT& d)
 {
   if(d.id != 0) {
-    file.WritefA("%*sid=\"%d\";\r\n", nTab, "", d.id);
+    file.Writef("%*sid=\"%d\";\r\n", nTab, "", d.id);
   }
   if(d.name != NULL && d.name[0] != '\0') {
-    file.WritefA("%*sname=\"%s\";\r\n", nTab, "", d.name);
+    file.Writef("%*sname=\"%s\";\r\n", nTab, "", d.name);
   }
 }
 
@@ -536,14 +536,14 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
     return FALSE;
   }
 
-  file.WritefA("smart{version = \"0.0.1.0\";}\r\n");
-  file.WritefA("Sprite {\r\n"); // <Sprite>
+  file.Writef("smart{version = \"0.0.1.0\";}\r\n");
+  file.Writef("Sprite {\r\n"); // <Sprite>
 
   clStringW strRelativePath;
   clpathfile::RelativePathTo(strRelativePath, szFilename, FALSE, pDesc->szImageFile, FALSE);
   clStringA strFilenameA(strRelativePath);
-  file.WritefA("  File=\"%s\";\r\n", (const char*)strFilenameA);
-  file.WritefA("  Module {\r\n"); // <Module>
+  file.Writef("  File=\"%s\";\r\n", (const char*)strFilenameA);
+  file.Writef("  Module {\r\n"); // <Module>
 
   //
   // Module
@@ -553,14 +553,14 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
     for(GXUINT i = 0; i < pDesc->nNumOfModules; i++)
     {
       GXSprite::MODULE& m = pDesc->aModules[i];
-      file.WritefA("    rect {\r\n"); // <rect>
+      file.Writef("    rect {\r\n"); // <rect>
       IntSaveSpriteNamdAndId(file, 6, m);
-      file.WritefA("      left=%d; top=%d;\r\n", m.regn.left, m.regn.top);
-      file.WritefA("      right=%d; bottom=%d;\r\n", m.regn.left + m.regn.width, m.regn.top + m.regn.height);
-      file.WritefA("    };\r\n"); // </rect>
+      file.Writef("      left=%d; top=%d;\r\n", m.regn.left, m.regn.top);
+      file.Writef("      right=%d; bottom=%d;\r\n", m.regn.left + m.regn.width, m.regn.top + m.regn.height);
+      file.Writef("    };\r\n"); // </rect>
     }
   }
-  file.WritefA("  };\r\n"); // </Module>
+  file.Writef("  };\r\n"); // </Module>
 
   //
   // Frame列表信息
@@ -570,20 +570,20 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
     for(GXUINT i = 0; i < pDesc->nNumOfFrames; i++)
     {
       GXSprite::FRAME& f = pDesc->aFrames[i];
-      file.WritefA("  Frame {\r\n"); // <frame>
+      file.Writef("  Frame {\r\n"); // <frame>
       IntSaveSpriteNamdAndId(file, 4, f);
-      //file.WritefA("    start=\"%d\"; count=\"%d\";\r\n", f.start, f.count);
+      //file.Writef("    start=\"%d\"; count=\"%d\";\r\n", f.start, f.count);
 
       // Frame描述信息
       for(GXUINT n = 0; n < f.count; n++)
       {
         GXSprite::FRAME_MODULE& fd = pDesc->aFrameModules[n + f.start];
-        file.WritefA("    module {\r\n");
-        file.WritefA("      index=\"%d\"; flags=\"%d\"; x=\"%d\"; y=\"%d\";\r\n", 
+        file.Writef("    module {\r\n");
+        file.Writef("      index=\"%d\"; flags=\"%d\"; x=\"%d\"; y=\"%d\";\r\n",
           fd.nModuleIdx, fd.rotate, fd.offset.x, fd.offset.y);
-        file.WritefA("    };\r\n");
+        file.Writef("    };\r\n");
       }
-      file.WritefA("  };\r\n"); // </frame>
+      file.Writef("  };\r\n"); // </frame>
     }
   }
 
@@ -596,21 +596,21 @@ GXBOOL GXDLLAPI ___GXSaveSpriteToFileW___(GXLPCWSTR szFilename, const GXSPRITE_D
     for(GXUINT i = 0; i < pDesc->nNumOfAnimations; i++)
     {
       GXSprite::ANIMATION& a = pDesc->aAnimations[i];
-      file.WritefA("    Animation {\r\n"); // <animation>
+      file.Writef("    Animation {\r\n"); // <animation>
       IntSaveSpriteNamdAndId(file, 6, a);
-      file.WritefA("      rate=\"%d\"; start=\"%d\"; count=\"%d\";\r\n", a.rate, a.start, a.count);
+      file.Writef("      rate=\"%d\"; start=\"%d\"; count=\"%d\";\r\n", a.rate, a.start, a.count);
 
       strFrameList.Clear();
       for(GXUINT n = 0; n < a.count; n++) {
         strFrameList.AppendFormat("%d,", pDesc->aAnimFrames[n + a.start]);
       }
       strFrameList.TrimRight(',');
-      file.WritefA("      frames=\"%s\"\r\n", (const char*)strFrameList);
-      file.WritefA("    };\r\n"); // </animation>
+      file.Writef("      frames=\"%s\"\r\n", (const char*)strFrameList);
+      file.Writef("    };\r\n"); // </animation>
     }
   }
 
-  file.WritefA("};\r\n"); // </Sprite>
+  file.Writef("};\r\n"); // </Sprite>
   return TRUE;
 
 }
@@ -687,7 +687,7 @@ GXBOOL GXDLLAPI GXSaveSpriteToFileW(GXLPCWSTR szFilename, const GXSPRITE_DESCW* 
         //stock.CloseSection(pFrameModuleSection);
       }
       //stock.CloseSection(pFrameSection);
-      //file.WritefA("  };\r\n"); // </frame>
+      //file.Writef("  };\r\n"); // </frame>
     }
   }
 
