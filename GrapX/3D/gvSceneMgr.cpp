@@ -48,7 +48,7 @@ GXHRESULT GVSceneMgr::Release()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXHRESULT GVSceneMgr::Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr)
+GXHRESULT GXDLLAPI GVSceneMgr::Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr)
 {
 
   GVSceneMgr* pSceneMgr = new GVSceneMgr(pGraphics);

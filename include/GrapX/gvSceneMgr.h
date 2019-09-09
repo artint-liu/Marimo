@@ -16,7 +16,7 @@ private:
   GVNodeArray  m_aModel;
 
 public:
-  static GXHRESULT Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr);
+  static GXHRESULT GXDLLAPI Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr);
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef    ();

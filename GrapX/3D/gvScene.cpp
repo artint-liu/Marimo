@@ -65,26 +65,20 @@ GVScene::~GVScene()
 
 GXHRESULT GVScene::Create(GrapX::Graphics* pGraphics, GVSceneMgr* pSceneMgr, GXLPCWSTR szDefaultMtl, GVScene** ppScene)
 {
+  GVSceneMgr* _pSceneMgr = NULL;
   if(pSceneMgr == NULL)
   {
     GVSceneMgr::Create(pGraphics, &pSceneMgr);
+    _pSceneMgr = pSceneMgr;
   }
   GVScene* pScene = new GVScene(pGraphics, pSceneMgr, szDefaultMtl);
   if( ! InlCheckNewAndIncReference(pScene))
   {
     return GX_FAIL;
   }
-  //GXHRESULT hr = pScene->AddRef();
-  //if(GXSUCCEEDED(hr))
-  //{
-  //  *ppScene = pScene;
-  //}
-  //else
-  //{
-  //  SAFE_RELEASE(pScene);
-  //}
+
   *ppScene = pScene;
-  SAFE_RELEASE(pSceneMgr);
+  SAFE_RELEASE(_pSceneMgr);
   return GX_OK;
 }
 
