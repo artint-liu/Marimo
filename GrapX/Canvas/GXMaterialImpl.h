@@ -3,6 +3,8 @@
 struct STANDARDMTLUNIFORMTABLE;
 class BlendState;
 class DepthStencilState;
+
+#define DEFAULT_RENDER_QUEUE 100
 //////////////////////////////////////////////////////////////////////////
 namespace GrapX
 {
@@ -18,11 +20,15 @@ namespace GrapX
       GXDEPTHSTENCILDESC  DepthStencilDesc;
     };
     typedef clhash_map<clStringA, GXUINT> MtlStateDict;
+    typedef clvector<ObjectT<Texture> > TextureArray;
     //typedef clstd::FixedBuffer clFixedBuffer;
   private:
     static MtlStateDict s_MtlStateDict;
     Graphics*             m_pGraphics;
     Shader*               m_pShader;
+    Marimo::DataPool*     m_pDataPool;
+    TextureArray          m_aTextures;
+
     //GShaderStub*        m_pShaderStub;
     //GTextureBase*       m_aTextureSlot[GX_MAX_TEXTURE_STAGE];
     //clFixedBuffer       m_Buffer;
@@ -31,7 +37,7 @@ namespace GrapX
     //GBlendState*        m_pBlendState;
     //GSamplerState*      m_pSamplerState;
     //UniformArray*       m_pUniformsForReloading;    // 用来Reload前的储存数据, 将来可能还要好好想想放在什么位置合理
-    //int                 m_nRenderQueue;
+    int                   m_nRenderQueue;
     //GXDWORD             m_bSequential : 1;
 
   public:
@@ -99,8 +105,7 @@ namespace GrapX
 
     inline  Shader*      InlGetShaderUnsafe    () const
     {
-      CLBREAK;
-      return NULL;
+      return m_pShader;
     }
 
     //inline  GShaderStub*  InlGetShaderStubUnsafe() const;

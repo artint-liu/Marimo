@@ -350,6 +350,8 @@ namespace GrapX
   MaterialImpl::MaterialImpl(Graphics* pGraphics, Shader* pShader)
     : m_pGraphics(pGraphics)
     , m_pShader(pShader)
+    , m_pDataPool(NULL)
+    , m_nRenderQueue(DEFAULT_RENDER_QUEUE)
   {
   }
 
@@ -387,8 +389,7 @@ namespace GrapX
 
   int MaterialImpl::GetRenderQueue() const
   {
-    CLBREAK;
-    return -1;
+    return m_nRenderQueue;
   }
 
   GXHRESULT MaterialImpl::GetFilename(clStringW* pstrFilename)
@@ -399,8 +400,27 @@ namespace GrapX
 
   GXBOOL MaterialImpl::InitMaterial()
   {
-    CLBREAK;
-    return FALSE;
+    Marimo::DATAPOOL_MANIFEST manifest;
+    m_pShader->GetDataPoolDeclaration(&manifest);
+    GXHRESULT hr = Marimo::DataPool::CreateDataPool(&m_pDataPool, NULL, manifest.pTypes, manifest.pVariables, Marimo::DataPoolCreation_NotCross16BytesBoundary);
+
+    GXINT nMaxSlot = 0;
+    for (GXUINT n = 0;; n++)
+    {
+      const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->GetBindResource(n);
+      if (pDesc == NULL) {
+        break;
+      }
+      else if (pDesc->type == Shader::BindType::Sampler) {
+        nMaxSlot = clMax(nMaxSlot, pDesc->slot + 1);
+      }
+    }
+
+    if (nMaxSlot) {
+      m_aTextures.assign(nMaxSlot, NULL);
+    }
+
+    return TRUE;
   }
 
   GXHRESULT MaterialImpl::BindDataByName(GXLPCSTR szPoolName, GXLPCSTR szStruct)

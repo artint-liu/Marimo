@@ -942,7 +942,7 @@ namespace GrapX
         }
       }
 
-      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), pBuffer->GetSize());
+      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
       FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
       if(fi_fmt == FIF_UNKNOWN) {
         return GX_ERROR_HANDLE;
