@@ -617,7 +617,7 @@ namespace GrapXToDX11
 
     for(int i = 0; i < nCount; i++)
     {
-      Desc.SemanticIndex = 0;
+      Desc.SemanticIndex = pVerticesDecl[i].UsageIndex;
       switch(pVerticesDecl[i].Usage)
       {
       CASE_USAGE(POSITION);

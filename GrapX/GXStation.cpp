@@ -433,7 +433,7 @@ GXBOOL GXSTATION::ConvMessageX(GXLPMSG lpMsg, GXSYSMSG &SysMsg)
   lpMsg->hwnd = NULL; // ¿¼ÂÇÈ¥µô SysMsg.handle;
   lpMsg->message = SysMsg.message & (~GXSysMessage_Bits); // GXWndMsg, GXSysMessage
   gxGetCursorPos(&lpMsg->pt);
-  if(SysMsg.message >= GXSysMessage_MouseFirst && SysMsg.message >= GXSysMessage_MouseLast)
+  if(SysMsg.message >= GXSysMessage_MouseFirst && SysMsg.message <= GXSysMessage_MouseLast)
   {
     lpMsg->lParam = GXMAKELPARAM(lpMsg->pt.x, lpMsg->pt.y);
   }

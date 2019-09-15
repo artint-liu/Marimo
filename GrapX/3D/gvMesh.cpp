@@ -377,7 +377,7 @@ GXBOOL GVMesh::IntCreateMesh(Graphics* pGraphics, const GVMESHDATA* pMeshCompone
     }
     if(pMeshComponent->pTangents) {
       nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_TANGENT, 0);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float3), nStride, pMeshComponent->pTangents, pMeshComponent->nVertexCount);
+      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float4), nStride, pMeshComponent->pTangents, pMeshComponent->nVertexCount);
     }
     if(pMeshComponent->pBinormals) {
       nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_BINORMAL, 0);
@@ -1191,7 +1191,7 @@ GXSIZE_T GVMESHDATA::Build(const GVMESHDATA* pMeshComponent, GXLPVERTEXELEMENT l
   ve.Offset += sizeof(float3);
 
   mesh::InlAppendVertDecl<float3>(pMeshComponent->pNormals, GXDECLUSAGE_NORMAL, aVertDecl, ve);
-  mesh::InlAppendVertDecl<float3>(pMeshComponent->pTangents, GXDECLUSAGE_TANGENT, aVertDecl, ve);
+  mesh::InlAppendVertDecl<float4>(pMeshComponent->pTangents, GXDECLUSAGE_TANGENT, aVertDecl, ve);
   mesh::InlAppendVertDecl<float3>(pMeshComponent->pBinormals, GXDECLUSAGE_BINORMAL, aVertDecl, ve);
 
   ve.Type = GXDECLTYPE_FLOAT2;
