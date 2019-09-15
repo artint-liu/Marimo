@@ -18,7 +18,7 @@ public:
   GXSTDINTERFACE(GXHRESULT    Initialize      (GXApp* m_pApp, GXAPP_DESC* pDesc, GXOUT GrapX::Graphics** ppGraphics));
   GXSTDINTERFACE(GXHRESULT    Finalize        (GXINOUT GrapX::Graphics** ppGraphics));
   GXSTDINTERFACE(GXHRESULT    MainLoop        ());
-  GXSTDINTERFACE(GXVOID       GetPlatformID   (GXPlatformIdentity* pIdentity));
+  GXSTDINTERFACE(GXPlatformIdentity GetPlatformID   () const);
   GXSTDINTERFACE(GXLPCWSTR    GetRootDir      ());
   GXSTDINTERFACE(GXHRESULT    QueryFeature    (GXDWORD dwFeatureCode, GXVOID** ppUnknown)); // 查询平台相关的特征值, 这个与平台相关的扩展, ppUnknown 可能是对象或者指针
   //GXSTDINTERFACE(GXUpdateRate GetUpdateRate   () const);

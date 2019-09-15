@@ -4,46 +4,47 @@
 #ifdef REFACTOR_SHADER
 struct STD_CANVAS_UNIFORM
 {
-  GXINT_PTR id_matViewProj;             // ViewProjection;
-  GXINT_PTR id_matViewProjInv;          // ViewProjectionInverse;
+#include "CommonUniforms.h"
+  //GXINT_PTR id_matViewProj;             // ViewProjection;
+  //GXINT_PTR id_matViewProjInv;          // ViewProjectionInverse;
 
-  GXINT_PTR id_matView;                 // View;
-  GXINT_PTR id_matViewInv;              // ViewInverse;
+  //GXINT_PTR id_matView;                 // View;
+  //GXINT_PTR id_matViewInv;              // ViewInverse;
 
-  GXINT_PTR id_matProj;                 // Projection;
-  GXINT_PTR id_matProjInv;              // ProjectionInverse;
+  //GXINT_PTR id_matProj;                 // Projection;
+  //GXINT_PTR id_matProjInv;              // ProjectionInverse;
 
-  GXINT_PTR id_matWorldViewProj;        // WorldViewProjection;
-  GXINT_PTR id_matWorldViewProjInv;     // WorldViewProjectionInverse;
+  //GXINT_PTR id_matWorldViewProj;        // WorldViewProjection;
+  //GXINT_PTR id_matWorldViewProjInv;     // WorldViewProjectionInverse;
 
-  GXINT_PTR id_matWorld;                // World;
-  GXINT_PTR id_matWorldInv;             // WorldInverse;
+  //GXINT_PTR id_matWorld;                // World;
+  //GXINT_PTR id_matWorldInv;             // WorldInverse;
 
-  GXINT_PTR id_matWorldView;            // WorldView;
-  GXINT_PTR id_matWorldViewInv;         // WorldViewInverse;
+  //GXINT_PTR id_matWorldView;            // WorldView;
+  //GXINT_PTR id_matWorldViewInv;         // WorldViewInverse;
 
-  GXINT_PTR id_matMainLight;            // 主光空间的变换矩阵
+  //GXINT_PTR id_matMainLight;            // 主光空间的变换矩阵
 
-  GXINT_PTR id_vTime;                    // x: sin(vTime.z), y: cos(vTime.z), z: (TickCount % 10000) * 1e-3f * 2 * PI, w:TickCount * 1e-3f
-  GXINT_PTR id_fFPS;                     // FPS;
-  GXINT_PTR id_fFOV;                     // FOV;
+  //GXINT_PTR id_vTime;                    // x: sin(vTime.z), y: cos(vTime.z), z: (TickCount % 10000) * 1e-3f * 2 * PI, w:TickCount * 1e-3f
+  //GXINT_PTR id_fFPS;                     // FPS;
+  //GXINT_PTR id_fFOV;                     // FOV;
 
-  GXINT_PTR id_vViewportDim;             // ViewportDimensions;
-  GXINT_PTR id_vViewportDimInv;          // ViewportDimensionsInverse;
-  GXINT_PTR id_fFarClipPlane;            // FarClipPlane;
-  GXINT_PTR id_fNearClipPlane;           // NearClipPlane;
+  //GXINT_PTR id_vViewportDim;             // ViewportDimensions;
+  //GXINT_PTR id_vViewportDimInv;          // ViewportDimensionsInverse;
+  //GXINT_PTR id_fFarClipPlane;            // FarClipPlane;
+  //GXINT_PTR id_fNearClipPlane;           // NearClipPlane;
 
-  GXINT_PTR id_fMouseCoordX;             // MouseCoordinateX;
-  GXINT_PTR id_fMouseCoordY;             // MouseCoordinateY;
+  //GXINT_PTR id_fMouseCoordX;             // MouseCoordinateX;
+  //GXINT_PTR id_fMouseCoordY;             // MouseCoordinateY;
 
-  GXINT_PTR id_vViewDir;                 // ViewDirection;
-  GXINT_PTR id_vViewPos;                 // ViewPosition;
+  //GXINT_PTR id_vViewDir;                 // ViewDirection;
+  //GXINT_PTR id_vViewPos;                 // ViewPosition;
 
-  // TODO: 光源相关的不要放在引擎里，要放在客户端，因为客户端已经具备了自定义通用常量的能力
-  GXINT_PTR id_vMainLightDir;            // TODO: 移走！
-  GXINT_PTR id_vLightDiffuse;            // TODO: 移走！
-  GXINT_PTR id_fLightIntensity;          // TODO: 移走！ 
-  GXINT_PTR id_vLightAmbient;            // TODO: 移走！ 环境光颜色
+  //// TODO: 光源相关的不要放在引擎里，要放在客户端，因为客户端已经具备了自定义通用常量的能力
+  //GXINT_PTR id_vMainLightDir;            // TODO: 移走！
+  //GXINT_PTR id_vLightDiffuse;            // TODO: 移走！
+  //GXINT_PTR id_fLightIntensity;          // TODO: 移走！ 
+  //GXINT_PTR id_vLightAmbient;            // TODO: 移走！ 环境光颜色
 };
 #endif
 

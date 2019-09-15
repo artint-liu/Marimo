@@ -8,7 +8,7 @@
 
   // 设备事件
   virtual GXHRESULT Invoke              (GRESCRIPTDESC* pDesc) override;
-  virtual void      GetPlatformID       (GXPlatformIdentity* pIdentity) override;
+  virtual GXPlatformIdentity GetPlatformID       () const override;
 
   // 激活函数,之后的所有D3D操作必须由Graphics接口实现
   virtual GXBOOL    Activate            (GXBOOL bActive) override;

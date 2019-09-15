@@ -8,9 +8,16 @@ namespace clstd
 {
 
   Camera::Camera()
-    : m_vEyePt    (100.0f,100.0f,10.0f)
-    , m_vLookatPt (0.0f,0.0f,0.0f)
+    : m_vEyePt    (0.0f)
+    , m_vLookatPt (0,0,1)
     , m_vUpVec    (float3::AxisY)
+    , m_vLeft     (-float3::AxisX)
+    , m_vRight    (float3::AxisX)
+    , m_vTop      (float3::AxisY)
+    , m_vFront    (float3::AxisZ)
+    , m_matView   (float4x4::Identity)
+    , m_matProj   (float4x4::Identity)
+    , m_matViewProj(float4x4::Identity)
     , m_fAspect   (1.0f)
     , m_fovy      (CL_PI / 4.0f)
     , m_fNear     (1.0f)

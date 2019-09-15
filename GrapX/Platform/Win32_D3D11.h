@@ -24,7 +24,7 @@ public:
 
   virtual GXHRESULT Initialize    (GXApp* pApp, GXAPP_DESC* pDesc, GrapX::Graphics** ppGraphics);
   virtual GXHRESULT Finalize      (GXINOUT GrapX::Graphics** ppGraphics);
-  virtual GXVOID    GetPlatformID (GXPlatformIdentity* pIdentity);
+  virtual GXPlatformIdentity GetPlatformID () const override;
   virtual GXLPCWSTR GetRootDir    ();
 };
 

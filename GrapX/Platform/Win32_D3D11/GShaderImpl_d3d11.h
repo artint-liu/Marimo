@@ -3,6 +3,7 @@
 
 #ifndef _SHADER_CLASS_D3D11_IMPLEMENT_HEADER_DEFINE_FILE_
 #define _SHADER_CLASS_D3D11_IMPLEMENT_HEADER_DEFINE_FILE_
+struct STD_CANVAS_UNIFORM;
 
 //////////////////////////////////////////////////////////////////////////
 // 关于ShaderConst和Uniform的含义:
@@ -91,7 +92,7 @@ namespace GrapX
       GXBOOL Activate();
       GXBOOL BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab); // 因为没有大小，只生成vs或者ps CB与合集的索引关系
       GXBOOL BuildCBTable(Marimo::DataPool* pDataPool); // 第一次创建Effect或者Material时创建D3D CB
-      GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool);
+      GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool, STD_CANVAS_UNIFORM* pUniforms = NULL);
       const BINDRESOURCE_DESC* GetBindResource(GXUINT nIndex) const;
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 

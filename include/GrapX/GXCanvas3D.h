@@ -49,6 +49,7 @@ namespace GrapX
 
     GXSTDINTERFACE(void           SetViewport           (GXVIEWPORT* pViewport));
     GXSTDINTERFACE(GXLPCVIEWPORT  GetViewport           () const);
+    GXSTDINTERFACE(float          GetAspect             () const);
 
     GXSTDINTERFACE(const FrustumPlanes*     GetViewFrustum        ());
 #ifdef REFACTOR_SHADER

@@ -3,6 +3,8 @@
 #define _GXGRAPHICS_INLINE_RENDERTARGET_D3D11_
 #define _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 #define _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D11_
+#define _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
+#define _GXGRAPHICS_INLINE_SHADER_D3D11_
 
 // 全局头文件
 #include <GrapX.h>
@@ -72,7 +74,6 @@
 #include "Canvas/GXMaterialImpl.h"
 // </Canvas3D用的>
 #ifdef ENABLE_GRAPHICS_API_DX11
-
 //////////////////////////////////////////////////////////////////////////
 #define D3D11_GRAPHICS_IMPL
 namespace GrapX
@@ -364,10 +365,10 @@ namespace GrapX
       }
       return FALSE;
     }
-    void GraphicsImpl::GetPlatformID(GXPlatformIdentity* pIdentity)
+    GXPlatformIdentity GraphicsImpl::GetPlatformID() const
     {
       ASSERT(m_pIdentity == GXPLATFORM_WIN32_DIRECT3D11);
-      *pIdentity = m_pIdentity;
+      return m_pIdentity;
     }
 
     GXBOOL GraphicsImpl::Activate(GXBOOL bActive)

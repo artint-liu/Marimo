@@ -146,8 +146,11 @@ END
 //
 
 IDC_COPY                CURSOR                  "idc_copy.cur"
+
 GXIDC_DIVIDER           CURSOR                  "idc_divider.cur"
+
 GXIDC_DIVIDEROPEN       CURSOR                  "idc_divideropen.cur"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -157,6 +160,7 @@ GXIDC_DIVIDEROPEN       CURSOR                  "idc_divideropen.cur"
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_DRAGARROW           ICON                    "idi_dragarrow.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -175,6 +179,16 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// raw
+//
+
+IDR_COMMON                raw                     "include\\GrapX\\CommonUniforms.h"
+
+IDR_MARIMO_DX11           raw                     "GrapX\\Platform\\Win32_D3D11\\marimo.cgh"
 
 #endif    // 中文(简体，中国) resources
 /////////////////////////////////////////////////////////////////////////////

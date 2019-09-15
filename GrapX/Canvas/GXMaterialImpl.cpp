@@ -345,6 +345,7 @@ namespace GrapX
 
   MaterialImpl::~MaterialImpl()
   {
+    SAFE_RELEASE(m_pDataPool);
   }
 
   MaterialImpl::MaterialImpl(Graphics* pGraphics, Shader* pShader)
@@ -434,6 +435,22 @@ namespace GrapX
     CLBREAK;
     return GX_FAIL;
   }
+
+  Marimo::DataPool* MaterialImpl::GetDataPoolUnsafe() const
+  {
+    return m_pDataPool;
+  }
+
+  GXBOOL MaterialImpl::Commit()
+  {
+    GXUINT slot = 0;
+    for(auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
+    {
+      m_pGraphics->SetTexture(*it, slot);
+    }
+    return TRUE;
+  }
+
 } // namespace GrapX
 
 //////////////////////////////////////////////////////////////////////////

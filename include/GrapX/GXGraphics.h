@@ -91,7 +91,7 @@ namespace GrapX
 
     // 设备事件
     GXSTDINTERFACE(GXHRESULT Invoke             (GRESCRIPTDESC* pDesc));
-    GXSTDINTERFACE(void      GetPlatformID      (GXPlatformIdentity* pIdentity));
+    GXSTDINTERFACE(GXPlatformIdentity GetPlatformID      () const);
 
 
     // 激活函数,之后的所有D3D操作必须由Graphics接口实现

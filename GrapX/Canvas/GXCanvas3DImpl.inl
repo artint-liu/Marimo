@@ -122,7 +122,9 @@ Graphics* Canvas3DImpl::GetGraphicsUnsafe() const
 GXHRESULT Canvas3DImpl::SetMaterial(Material* pMtlInst)
 {
   MaterialImpl* pMtlInstImpl = (MaterialImpl*)pMtlInst;
-  Shader* pShader = pMtlInstImpl->InlGetShaderUnsafe();
+  //Shader* pShader = pMtlInstImpl->InlGetShaderUnsafe();
+  ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pMtlInstImpl->InlGetShaderUnsafe());
+
   //GShaderStub* pShaderStub = pMtlInstImpl->InlGetShaderStubUnsafe();
 
 #if 0
@@ -133,7 +135,11 @@ GXHRESULT Canvas3DImpl::SetMaterial(Material* pMtlInst)
 #endif // REFACTOR_SHADER
 #endif // 0
 
-  m_pGraphicsImpl->InlSetShader(pShader);
+  if(m_pGraphicsImpl->InlSetShader(pShaderImpl))
+  {
+    pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
+    pMtlInstImpl->Commit();
+  }
   return TRUE;
 }
 
@@ -156,27 +162,35 @@ GCamera* Canvas3DImpl::GetCameraUnsafe()
 GXHRESULT Canvas3DImpl::UpdateCommonUniforms()
 {
   GCAMERACONETXT CameraCtx;
-  GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
+  //GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
 
   m_pCamera->GetContext(&CameraCtx);
 
 #ifdef REFACTOR_SHADER
-  ACCESS_AS(float4x4, id_matViewProj) = CameraCtx.matView * CameraCtx.matProjection;
-  ACCESS_AS(float4x4, id_matViewProjInv) = ACCESS_AS(float4x4, id_matViewProj);
-  ACCESS_AS(float4x4, id_matViewProjInv).inverse();
-  ACCESS_AS(float4x4, id_matWorldViewProj) = CameraCtx.matWorld * ACCESS_AS(float4x4, id_matViewProj);
+  //ACCESS_AS(float4x4, id_matViewProj) = CameraCtx.matView * CameraCtx.matProjection;
+  //ACCESS_AS(float4x4, id_matViewProjInv) = ACCESS_AS(float4x4, id_matViewProj);
+  //ACCESS_AS(float4x4, id_matViewProjInv).inverse();
+  //ACCESS_AS(float4x4, id_matWorldViewProj) = CameraCtx.matWorld * ACCESS_AS(float4x4, id_matViewProj);
 
-  ACCESS_AS(float3, id_vViewPos) = m_pCamera->GetPos();
-  ACCESS_AS(float3, id_vViewDir) = m_pCamera->GetFront();
+  //ACCESS_AS(float3, id_vViewPos) = m_pCamera->GetPos();
+  //ACCESS_AS(float3, id_vViewDir) = m_pCamera->GetFront();
 
   GXDWORD dwTick = gxGetTickCount();
-  float4& vTime = ACCESS_AS(float4, id_vTime);
-  vTime.w = (float)dwTick * 1e-3f;
-  vTime.z = (float)(dwTick % 10000) * 1e-3f * CL_2PI;
-  vTime.x = sin(vTime.z);
-  vTime.y = cos(vTime.z);
+  //float4& vTime = ACCESS_AS(float4, id_vTime);
+  //vTime.w = (float)dwTick * 1e-3f;
+  //vTime.z = (float)(dwTick % 10000) * 1e-3f * CL_2PI;
+  //vTime.x = sin(vTime.z);
+  //vTime.y = cos(vTime.z);
+  SetWorldMatrix(float4x4::Identity);
+  m_StdCanvasUniform._CameraWorldPos = m_pCamera->GetPos();
+  m_StdCanvasUniform._CameraWorldDir = m_pCamera->GetFront();
 
-  m_ViewFrustum.set(ACCESS_AS(float4x4, id_matWorldViewProj));
+  m_StdCanvasUniform._Time.x = (float)dwTick * 1e-3f;
+  m_StdCanvasUniform._Time.y = (float)(dwTick % 10000) * 1e-3f * CL_2PI;
+  m_StdCanvasUniform._Time.z = cos(m_StdCanvasUniform._Time.y);
+  m_StdCanvasUniform._Time.w = sin(m_StdCanvasUniform._Time.y);
+
+  //m_ViewFrustum.set(ACCESS_AS(float4x4, id_matWorldViewProj));
 #else
   m_StdUniforms.g_matViewProj = CameraCtx.matView * CameraCtx.matProjection;
   m_StdUniforms.g_matViewProjInv = m_StdUniforms.g_matViewProj;
@@ -202,7 +216,7 @@ GXHRESULT Canvas3DImpl::Draw(GVSequence* pSequence)
   typedef GVSequence::RenderDescArray RenderDescArray;
   Material* pMtlInst = NULL;
   const int nArrayCount = pSequence->GetArrayCount();
-  GXLPCBYTE lpCanvasUniform = (GXLPCBYTE)m_CanvasUniformBuf.GetPtr();
+  //GXLPCBYTE lpCanvasUniform = (GXLPCBYTE)m_CanvasUniformBuf.GetPtr();
   for(int nArrayIndex = 0; nArrayIndex < nArrayCount; nArrayIndex++)
   {
     const RenderDescArray& aDesc = pSequence->GetArray(nArrayIndex);
@@ -230,7 +244,7 @@ GXHRESULT Canvas3DImpl::Draw(GVSequence* pSequence)
           // TODO: 这个是否只有在 SetWorldMatrix() 后才需要提交?
           // TODO: 应该改为一个标准接口
 #ifdef REFACTOR_SHADER
-          static_cast<MaterialImpl*>(pMtlInst)->IntCommit(lpCanvasUniform);
+          //static_cast<MaterialImpl*>(pMtlInst)->IntCommit(lpCanvasUniform);
 #else
           static_cast<MaterialImpl*>(pMtlInst)->IntCommit(&m_StdUniforms);
 #endif // #ifdef REFACTOR_SHADER
@@ -266,10 +280,18 @@ GXHRESULT Canvas3DImpl::Draw(GVSequence* pSequence)
 void Canvas3DImpl::SetWorldMatrix(const float4x4& matWorld)
 {
 #ifdef REFACTOR_SHADER
-  GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
-  ACCESS_AS(float4x4, id_matWorldViewProj) = matWorld * ACCESS_AS(float4x4, id_matViewProj);
-  ACCESS_AS(float4x4, id_matWorld)         = matWorld;
-  ACCESS_AS(float4x4, id_matWorldView)     = matWorld * ACCESS_AS(float4x4, id_matView);
+  //GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
+  //ACCESS_AS(float4x4, id_matWorldViewProj) = matWorld * ACCESS_AS(float4x4, id_matViewProj);
+  //ACCESS_AS(float4x4, id_matWorld)         = matWorld;
+  //ACCESS_AS(float4x4, id_matWorldView)     = matWorld * ACCESS_AS(float4x4, id_matView);
+  GCAMERACONETXT CameraCtx;
+  m_pCamera->GetContext(&CameraCtx);
+
+  m_StdCanvasUniform.MARIMO_MATRIX_M = matWorld;
+  m_StdCanvasUniform.MARIMO_MATRIX_V = CameraCtx.matView;
+  m_StdCanvasUniform.MARIMO_MATRIX_P = CameraCtx.matProjection;
+  m_StdCanvasUniform.MARIMO_MATRIX_MVP = matWorld * CameraCtx.matView * CameraCtx.matProjection;
+
 #else
   m_StdUniforms.g_matWorldViewProj = matWorld * m_StdUniforms.g_matViewProj;
   m_StdUniforms.g_matWorld = matWorld;
@@ -287,9 +309,9 @@ GXDWORD Canvas3DImpl::GetGlobalHandle(GXLPCSTR szName)
   Marimo::ShaderConstName* pConstNameObj = m_pGraphicsImpl->InlGetShaderConstantNameObj();
   GXINT_PTR handle = pConstNameObj->AllocHandle(szName, GXUB_UNDEFINED);
 
-  if(pConstNameObj->GetSize() > m_CanvasUniformBuf.GetSize()) {
-    BroadcastCanvasUniformBufferSize(pConstNameObj->GetSize());
-  }
+  //if(pConstNameObj->GetSize() > m_CanvasUniformBuf.GetSize()) {
+  //  BroadcastCanvasUniformBufferSize(pConstNameObj->GetSize());
+  //}
 
   return (GXDWORD)handle;
 }
@@ -297,13 +319,13 @@ GXDWORD Canvas3DImpl::GetGlobalHandle(GXLPCSTR szName)
 template<typename _Ty>
 GXHRESULT Canvas3DImpl::SetCanvasUniformT(GXDWORD dwGlobalHandle, const _Ty& rUniform)
 {
-  if(dwGlobalHandle & (sizeof(float) - 1) || dwGlobalHandle > m_CanvasUniformBuf.GetSize()) {
-    return GX_FAIL;
-  }
+  //if(dwGlobalHandle & (sizeof(float) - 1) || dwGlobalHandle > m_CanvasUniformBuf.GetSize()) {
+  //  return GX_FAIL;
+  //}
 
-  // FIXME: 应该做尺寸检查!
-  _Ty* pUniform = (_Ty*)((GXLPBYTE)m_CanvasUniformBuf.GetPtr() + dwGlobalHandle);
-  *pUniform = rUniform;
+  //// FIXME: 应该做尺寸检查!
+  //_Ty* pUniform = (_Ty*)((GXLPBYTE)m_CanvasUniformBuf.GetPtr() + dwGlobalHandle);
+  //*pUniform = rUniform;
   return GX_OK;
 }
 
@@ -471,54 +493,59 @@ void Canvas3DImpl::SetupCanvasUniform()
 {
   Marimo::ShaderConstName* pConstNameObj = m_pGraphicsImpl->InlGetShaderConstantNameObj();
 
-  ALLOC_GLOBAL_CONST(matViewProj,         GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matViewProj,         GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matViewProjInv,      GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matView,             GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matViewInv,          GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matProj,             GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matProjInv,          GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matWorldViewProj,    GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matWorldViewProjInv, GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matWorld,            GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matWorldInv,         GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matWorldView,        GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matWorldViewInv,     GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(matMainLight,        GXUB_MATRIX4);
-  ALLOC_GLOBAL_CONST(vTime,               GXUB_FLOAT4);
-  ALLOC_GLOBAL_CONST(fFPS,                GXUB_FLOAT);
-  ALLOC_GLOBAL_CONST(fFOV,                GXUB_FLOAT); 
-  ALLOC_GLOBAL_CONST(vViewportDim,        GXUB_FLOAT2);
-  ALLOC_GLOBAL_CONST(vViewportDimInv,     GXUB_FLOAT2);
-  ALLOC_GLOBAL_CONST(fFarClipPlane,       GXUB_FLOAT);
-  ALLOC_GLOBAL_CONST(fNearClipPlane,      GXUB_FLOAT);
-  ALLOC_GLOBAL_CONST(fMouseCoordX,        GXUB_FLOAT);
-  ALLOC_GLOBAL_CONST(fMouseCoordY,        GXUB_FLOAT);
-  ALLOC_GLOBAL_CONST(vViewDir,            GXUB_FLOAT3);
-  ALLOC_GLOBAL_CONST(vViewPos,            GXUB_FLOAT3);
-  ALLOC_GLOBAL_CONST(vMainLightDir,       GXUB_FLOAT3);
-  ALLOC_GLOBAL_CONST(vLightDiffuse,       GXUB_FLOAT3);
-  ALLOC_GLOBAL_CONST(fLightIntensity,     GXUB_FLOAT);
-  ALLOC_GLOBAL_CONST(vLightAmbient,       GXUB_FLOAT3);
+  //ALLOC_GLOBAL_CONST(matViewProj,         GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matViewProj,         GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matViewProjInv,      GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matView,             GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matViewInv,          GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matProj,             GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matProjInv,          GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matWorldViewProj,    GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matWorldViewProjInv, GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matWorld,            GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matWorldInv,         GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matWorldView,        GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matWorldViewInv,     GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(matMainLight,        GXUB_MATRIX4);
+  //ALLOC_GLOBAL_CONST(vTime,               GXUB_FLOAT4);
+  //ALLOC_GLOBAL_CONST(fFPS,                GXUB_FLOAT);
+  //ALLOC_GLOBAL_CONST(fFOV,                GXUB_FLOAT); 
+  //ALLOC_GLOBAL_CONST(vViewportDim,        GXUB_FLOAT2);
+  //ALLOC_GLOBAL_CONST(vViewportDimInv,     GXUB_FLOAT2);
+  //ALLOC_GLOBAL_CONST(fFarClipPlane,       GXUB_FLOAT);
+  //ALLOC_GLOBAL_CONST(fNearClipPlane,      GXUB_FLOAT);
+  //ALLOC_GLOBAL_CONST(fMouseCoordX,        GXUB_FLOAT);
+  //ALLOC_GLOBAL_CONST(fMouseCoordY,        GXUB_FLOAT);
+  //ALLOC_GLOBAL_CONST(vViewDir,            GXUB_FLOAT3);
+  //ALLOC_GLOBAL_CONST(vViewPos,            GXUB_FLOAT3);
+  //ALLOC_GLOBAL_CONST(vMainLightDir,       GXUB_FLOAT3);
+  //ALLOC_GLOBAL_CONST(vLightDiffuse,       GXUB_FLOAT3);
+  //ALLOC_GLOBAL_CONST(fLightIntensity,     GXUB_FLOAT);
+  //ALLOC_GLOBAL_CONST(vLightAmbient,       GXUB_FLOAT3);
 
   //m_CanvasUniformBuf.Resize(pConstNameObj->GetSize(), TRUE); // FIXME: 这里有点不太对，AllocHandle中会通知m_GlobalConstantBuf尺寸已经改变。
-  if(pConstNameObj->GetSize() > m_CanvasUniformBuf.GetSize()) {
-    BroadcastCanvasUniformBufferSize(pConstNameObj->GetSize());
-  }
+  //if(pConstNameObj->GetSize() > m_CanvasUniformBuf.GetSize()) {
+  //  BroadcastCanvasUniformBufferSize(pConstNameObj->GetSize());
+  //}
 
   // 单独设置缓冲大小，当前的Canvas3D还没有注册，所以收不到 
   // BroadcastCanvasUniformBufferSize 产生的广播消息
-  ASSERT(m_CanvasUniformBuf.GetSize() == 0); // 确保当前Canvas3D没有收到广播
-  m_CanvasUniformBuf.Resize(pConstNameObj->GetSize(), TRUE);
+  //ASSERT(m_CanvasUniformBuf.GetSize() == 0); // 确保当前Canvas3D没有收到广播
+  //m_CanvasUniformBuf.Resize(pConstNameObj->GetSize(), TRUE);
 
 
   // TODO: 重构完成后去除这些
 #ifdef REFACTOR_SHADER
-  GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
-  ACCESS_AS(float3, id_vMainLightDir) = float3::normalize(float3(1.0f));
-  ACCESS_AS(float3, id_vLightDiffuse) = float3(1.5f);
-  ACCESS_AS(float3, id_vLightAmbient) = float3(0.2f);
-  ACCESS_AS(float, id_fLightIntensity) = 3.8f;
+  //GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
+  //ACCESS_AS(float3, id_vMainLightDir) = float3::normalize(float3(1.0f));
+  //ACCESS_AS(float3, id_vLightDiffuse) = float3(1.5f);
+  //ACCESS_AS(float3, id_vLightAmbient) = float3(0.2f);
+  //ACCESS_AS(float, id_fLightIntensity) = 3.8f;
+  m_StdCanvasUniform.MARIMO_MATRIX_M = float4x4::Identity;
+  m_StdCanvasUniform.MARIMO_MATRIX_V = float4x4::Identity;
+  m_StdCanvasUniform.MARIMO_MATRIX_P = float4x4::Identity;
+  m_StdCanvasUniform.MARIMO_MATRIX_MVP = float4x4::Identity;
+
 #else
   m_StdUniforms.g_vMainLightDir = float3::normalize(float3(1.0f));
   m_StdUniforms.g_vLightDiffuse = float3(1.5f);
@@ -531,10 +558,10 @@ GXHRESULT Canvas3DImpl::Invoke( GRESCRIPTDESC* pDesc )
 {
   if(pDesc->szCmdString == NULL)
   {
-    if(pDesc->dwCmdCode == RC_CanvasUniformSize && m_CanvasUniformBuf.GetSize() < (clsize)pDesc->wParam)
-    {
-      m_CanvasUniformBuf.Resize(pDesc->wParam, TRUE);
-    }
+    //if(pDesc->dwCmdCode == RC_CanvasUniformSize && m_CanvasUniformBuf.GetSize() < (clsize)pDesc->wParam)
+    //{
+    //  m_CanvasUniformBuf.Resize(pDesc->wParam, TRUE);
+    //}
   }
   return GX_OK;
 }

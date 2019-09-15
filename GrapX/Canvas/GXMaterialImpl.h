@@ -103,6 +103,9 @@ namespace GrapX
     //virtual GXHRESULT SetTextureByNameFromFileW   (GXLPCSTR szName, GXLPCWSTR szFilename) override;
     //virtual GXHRESULT SetTextureByIndexFromFileW  (GXUINT nIndex, GXLPCWSTR szFilename) override;
 
+    Marimo::DataPool* GetDataPoolUnsafe() const;
+    GXBOOL Commit();
+
     inline  Shader*      InlGetShaderUnsafe    () const
     {
       return m_pShader;

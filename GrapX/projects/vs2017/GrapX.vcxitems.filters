@@ -447,6 +447,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXShaderT.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\CommonUniforms.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp">
@@ -933,6 +936,9 @@
       <Filter>Platform\CommInline</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\Platform\Readme.txt" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\marimo.cgh">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="$(MSBuildThisFileDirectory)..\..\Utility\HLSL\Aero.fx" />

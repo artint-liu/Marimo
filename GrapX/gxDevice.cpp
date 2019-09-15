@@ -340,8 +340,7 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
   lpStation->pGraphics->CreateEffect(&lpStockObject->pAeroEffect  , lpStockObject->pAeroShader);
   lpStation->pGraphics->CreateEffect(&lpStockObject->pBlurEffect  , lpStockObject->pBlurShader);
   lpStation->pGraphics->CreateEffect(&lpStockObject->pSimpleEffect, lpStockObject->pSimpleShader);
-  GXPlatformIdentity PlatformId;
-  lpStation->pGraphics->GetPlatformID(&PlatformId);
+  GXPlatformIdentity PlatformId = lpStation->pGraphics->GetPlatformID();
   if(PlatformId == GXPLATFORM_X_OPENGLES2)
   {
     //lpStockObject->pAeroEffect->BindTextureSlot("s_baseMap", 0);

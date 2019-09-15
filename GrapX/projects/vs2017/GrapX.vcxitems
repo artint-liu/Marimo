@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\CommonUniforms.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\DataInfrastructure.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\DataPool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\DataPoolIterator.h" />
@@ -312,6 +313,7 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\OGL_StateBlock.inl" />
     <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\OGL_TextureImpl.inl" />
     <None Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\X_ShaderImpl.inl" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\marimo.cgh" />
     <None Include="$(MSBuildThisFileDirectory)..\..\User\Win32Emu\GUXTheme.inl" />
   </ItemGroup>
   <ItemGroup>

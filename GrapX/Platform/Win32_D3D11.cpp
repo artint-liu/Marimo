@@ -164,9 +164,9 @@ GXHRESULT IGXPlatform_Win32D3D11::Finalize(GXINOUT GrapX::Graphics** ppGraphics)
   return IMOPlatform_Win32Base::Finalize(ppGraphics);
 }
 
-GXVOID IGXPlatform_Win32D3D11::GetPlatformID(GXPlatformIdentity* pIdentity)
+GXPlatformIdentity IGXPlatform_Win32D3D11::GetPlatformID() const
 {
-  *pIdentity = GXPLATFORM_WIN32_DIRECT3D9;
+  return GXPLATFORM_WIN32_DIRECT3D9;
 }
 
 //GXDWORD GXCALLBACK IGXPlatform_Win32D3D11::UITask(GXLPVOID lParam)

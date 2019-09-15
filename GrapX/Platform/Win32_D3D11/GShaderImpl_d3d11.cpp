@@ -6,6 +6,7 @@
 // 全局头文件
 #include <GrapX.h>
 #include <User/GrapX.Hxx>
+#include "res/resource.h"
 
 // 标准接口
 //#include "Include/GUnknown.h"
@@ -36,10 +37,13 @@
 #include "clPathFile.h"
 #include "Platform/Win32_D3D11/GShaderImpl_D3D11.h"
 #include "clStringSet.h"
+#include "GrapX/StdMtl.h"
 
 //#define PS_REG_IDX_SHIFT 16
 //#define PS_REG_IDX_PART  (1 << PS_REG_IDX_SHIFT)
 #define PS_HANDLE_SHIFT 16
+extern HINSTANCE g_hDLLModule;
+
 namespace GrapX
 {
   namespace D3D11
@@ -439,7 +443,7 @@ namespace GrapX
       GXBOOL bval = TRUE;
       aCodes.reserve(nCount);
 
-      IHLSLInclude* pInclude = new IHLSLInclude(NULL, clStringA(szResourceDir));
+      IHLSLInclude* pInclude = new IHLSLInclude(m_pGraphicsImpl, clStringA(szResourceDir));
       ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       DATAPOOL_MAPPER decl_mapper_vs;
       DATAPOOL_MAPPER decl_mapper_ps;
@@ -488,7 +492,7 @@ namespace GrapX
 
       DATAPOOL_MAPPER decl_mapper;
       clvector<size_t> aIndexTabA, aIndexTabB;
-      if((bval = MergeDataPoolMapped(decl_mapper, decl_mapper_vs, aIndexTabA, decl_mapper_ps, aIndexTabB)))
+      if(bval && (bval = MergeDataPoolMapped(decl_mapper, decl_mapper_vs, aIndexTabA, decl_mapper_ps, aIndexTabB)))
       {
         DATAPOOL_MAPPER arrayMapper[2] = {decl_mapper_vs, decl_mapper_ps};
         clvector<size_t> arrayIndexTab[2] = {aIndexTabA, aIndexTabB};
@@ -852,14 +856,22 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL ShaderImpl::CommitConstantBuffer(Marimo::DataPool* pDataPool)
+    GXBOOL ShaderImpl::CommitConstantBuffer(Marimo::DataPool* pDataPool, STD_CANVAS_UNIFORM* pUniforms)
     {
       ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
 
       GXLPBYTE pSourceBuffer = reinterpret_cast<GXLPBYTE>(pDataPool->GetRootPtr());
       
+      D3D11CB_DESC* pCBDesc = D3D11CB_GetDescBegin();
       D3D11CB_DESC* const pCBDescEnd = D3D11CB_GetDescEnd();
-      for(D3D11CB_DESC* pCBDesc = D3D11CB_GetDescBegin(); pCBDesc != pCBDescEnd; ++pCBDesc)
+      if(pUniforms && sizeof(STD_CANVAS_UNIFORM) == pCBDesc->cbSize)
+      {
+        pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL, pUniforms, 0, 0);
+        pSourceBuffer += pCBDesc->cbSize;
+        ++pCBDesc;
+      }
+
+      for(; pCBDesc != pCBDescEnd; ++pCBDesc)
       {
         pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL, pSourceBuffer, 0, 0);
         pSourceBuffer += pCBDesc->cbSize;
@@ -1244,6 +1256,7 @@ namespace GrapX
       // shader 输入参数信息
       //LPVOID pInterCodePtr = pInterCode->pCode->GetBufferPointer();
       //SIZE_T InterCodeLen = pInterCode->pCode->GetBufferSize();
+      pInterCode->pReflection = NULL;
       hval = D3DReflect(pInterCode->pCode->GetBufferPointer(), pInterCode->pCode->GetBufferSize(),
         IID_ID3D11ShaderReflection, (void**)&pInterCode->pReflection);
 

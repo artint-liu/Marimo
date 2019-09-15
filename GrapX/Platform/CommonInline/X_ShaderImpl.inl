@@ -1,6 +1,8 @@
 ﻿const int c_D3D_INCLUDE_LOCAL  = 0;
 const int c_D3D_INCLUDE_SYSTEM = 1;
 
+#define GRAPX_hModule NULL
+
 template<class _ID3DIncludeT, typename _IncludeTypeT>
 class IHLSLIncludeT : public _ID3DIncludeT
 {
@@ -30,7 +32,44 @@ public:
 
   STDMETHOD(Open)(_IncludeTypeT IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
   {
-    if(IncludeType == c_D3D_INCLUDE_LOCAL || IncludeType == c_D3D_INCLUDE_SYSTEM)
+    //extern GXLPCWSTR g_szPlatformSourceCodePath;
+    //extern GXLPCWSTR g_szGraphicsImplSourceCodePath;
+    if(IncludeType == c_D3D_INCLUDE_SYSTEM)
+    {
+      HRSRC hRsrc = NULL;
+      if(clstd::strcmpiT(pFileName, "marimo.cgh") == 0)
+      {
+        if(m_pGraphics->GetPlatformID() == GXPLATFORM_WIN32_DIRECT3D11)
+        {
+          hRsrc = FindResource(g_hDLLModule, MAKEINTRESOURCE(IDR_MARIMO_DX11), _T("raw"));
+        }
+        else {
+          CLBREAK;
+        }
+
+      }
+      else if(clstd::strcmpiT(pFileName, "CommonUniform.h") == 0)
+      {
+        hRsrc = FindResource(g_hDLLModule, MAKEINTRESOURCE(IDR_COMMON), _T("raw"));
+      }
+
+      if(hRsrc)
+      {
+        HGLOBAL hGlb = LoadResource(g_hDLLModule, hRsrc);
+        if(hGlb)
+        {
+          *ppData = LockResource(hGlb);
+          *pBytes = SizeofResource(g_hDLLModule, hRsrc);
+          return S_OK;
+
+          // 16位遗留api，不需要调用释放资源
+          //FreeResource(hGlb);
+          //UnlockResource()
+        }
+      }
+      CLOG_ERROR("Can not find resource %s", pFileName);
+    }
+    else if(IncludeType == c_D3D_INCLUDE_LOCAL)
     {
       clFile file;
       clStringA strFullPath;

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by GrapXUI.rc
+// Microsoft Visual C++ 生成的包含文件。
+// 供 GrapXUI.rc 使用
 //
 #define IDC_DIVIDER                     106
 #define IDD_PLATFORM                    106
@@ -10,6 +10,8 @@
 #define IDC_COPY                        113
 #define IDI_ICON1                       114
 #define IDI_DRAGARROW                   114
+#define IDR_COMMON                      118
+#define IDR_MARIMO_DX11                 119
 #define IDD_TBCUSTOMIZE                 200
 #define IDC_AVAILBTN_LBOX               201
 #define IDC_RESET_BTN                   202
@@ -30,7 +32,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        118
+#define _APS_NEXT_RESOURCE_VALUE        121
 #define _APS_NEXT_COMMAND_VALUE         40007
 #define _APS_NEXT_CONTROL_VALUE         1019
 #define _APS_NEXT_SYMED_VALUE           101

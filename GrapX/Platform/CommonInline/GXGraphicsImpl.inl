@@ -484,6 +484,8 @@ GXHRESULT GraphicsImpl::CreateMaterial(Material** ppMtlInst, Shader* pShader)
     return GX_FAIL;
   }
 
+  static_cast<ShaderImpl*>(pShader)->BuildCBTable(pNewMaterial->GetDataPoolUnsafe());
+
   *ppMtlInst = pNewMaterial;
   return GX_OK;
 }

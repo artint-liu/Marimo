@@ -1,0 +1,4 @@
+cbuffer MarimoCommon
+{
+#include <CommonUniform.h>
+}

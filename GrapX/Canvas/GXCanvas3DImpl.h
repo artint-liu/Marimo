@@ -22,7 +22,7 @@ protected:
   DepthStencilStateImpl*    m_pCurDepthStencilState;
   SamplerState*             m_pSamplerState;
 #ifdef REFACTOR_SHADER
-  clstd::FixedBuffer        m_CanvasUniformBuf;
+  //clstd::FixedBuffer        m_CanvasUniformBuf;
   STD_CANVAS_UNIFORM        m_StdCanvasUniform;
 #else
   STANDARDMTLUNIFORMTABLE   m_StdUniforms;
@@ -70,7 +70,8 @@ public:
   GXHRESULT   SetCanvasMatrix       (GXLPCSTR szName, const float4x4& rMatrix) override;
 
   void        SetViewport           (GXVIEWPORT* pViewport) override;
-  GXLPCVIEWPORT GetViewport() const;
+  GXLPCVIEWPORT GetViewport         () const override;
+  float       GetAspect             () const override;
 
   GXHRESULT   SetMaterial           (Material* pMaterial) override;
   GXHRESULT   SetPrimitive          (Primitive* pPrimitive) override;
@@ -88,6 +89,11 @@ public:
   STANDARDMTLUNIFORMTABLE*  GetStandardUniform    ();
 #endif // REFACTOR_SHADER
 };
+
+float Canvas3DImpl::GetAspect() const
+{
+  return (float)m_Viewport.regn.w / (float)m_Viewport.regn.h;
+}
 
 //////////////////////////////////////////////////////////////////////////
 #endif // _IMPLEMENT_GRAP_X_CANVAS_3D_H_
