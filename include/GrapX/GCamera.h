@@ -61,6 +61,8 @@ public:
   GXSTDINTERFACE(CFloat3&      GetFront          () const);
   GXSTDINTERFACE(float         GetFov            () const);
   GXSTDINTERFACE(float         SetFov            (float fFov));
+  GXSTDINTERFACE(const float4x4& GetViewMatrix   () const);
+  GXSTDINTERFACE(void          SetViewMatrix     (const float4x4& matView));
   //GXSTDINTERFACE(CFloat3&      GetDir            () const);
 };
 
@@ -91,6 +93,8 @@ public:
   virtual CFloat3&      GetFront          () const;
   virtual float         GetFov            () const;
   virtual float         SetFov            (float fFov);
+  const float4x4&       GetViewMatrix     () const override;
+  void                  SetViewMatrix     (const float4x4& matView) override;
   //virtual CFloat3&      GetDir            () const;
 };
 
@@ -124,6 +128,8 @@ public:
   virtual CFloat3&      GetFront          () const;
   virtual float         GetFov            () const;
   virtual float         SetFov            (float fFov);
+  const float4x4&       GetViewMatrix     () const override;
+  void                  SetViewMatrix     (const float4x4& matView) override;
   //virtual CFloat3&      GetDir            () const;
 };
 
@@ -152,6 +158,8 @@ public:
   virtual CFloat3&      GetFront          () const;
   virtual float         GetFov            () const;
   virtual float         SetFov            (float fFov);
+  const float4x4&       GetViewMatrix     () const override;
+  void                  SetViewMatrix     (const float4x4& matView) override;
   //virtual CFloat3&      GetDir            () const;
 };
 

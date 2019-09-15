@@ -53,12 +53,14 @@ namespace clstd
     void Forward    (float fSize, bool bSetLookat);
     void Translation(float xOffset, float yOffset);
 
+    void SetViewMatrix(const float4x4& matView);
+
     void DeltaPitch (float fDelta);   // 屏幕x轴
     void DeltaYaw   (float fDelta);   // 屏幕y轴
     void DeltaRoll  (float fDelta);   // 屏幕z轴
 
     void DeltaYawPitchRoll(const float Yaw, const float Pitch, const float Roll);
-    b32  IsSimilarUpDir(CFloat3& vDir, float fEpsilon);  // 检查Front与Up方向, 如果近似则返回true
+    b32  IsSimilarUpDir(CFloat3& vDir, float fEpsilon);  // 检查Front与Up方向, 如果近似则返回true    
 
     void UpdateMat();
 

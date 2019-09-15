@@ -142,6 +142,15 @@ float GCamera_ScreenAligned::SetFov( float fFov )
   return 0.0f;
 }
 
+const float4x4& GCamera_ScreenAligned::GetViewMatrix() const
+{
+  return float4x4::Identity;
+}
+
+void GCamera_ScreenAligned::SetViewMatrix(const float4x4& matView)
+{
+}
+
 //CFloat3& GCamera_ScreenAligned::GetDir() const
 //{
 //  return float3::AxisZ;
@@ -307,6 +316,16 @@ float GCamera_Trackball::SetFov( float fFov )
   return fPrev;
 }
 
+const float4x4& GCamera_Trackball::GetViewMatrix() const
+{
+  return m_matView;
+}
+
+void GCamera_Trackball::SetViewMatrix(const float4x4& matView)
+{
+  clstd::Camera::SetViewMatrix(matView);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 GCamera_FirstPerson::GCamera_FirstPerson()
 {
@@ -424,6 +443,16 @@ float GCamera_FirstPerson::SetFov( float fFov )
   m_fovy = fFov;
   UpdateMat();
   return fPrev;
+}
+
+const float4x4& GCamera_FirstPerson::GetViewMatrix() const
+{
+  return m_matView;
+}
+
+void GCamera_FirstPerson::SetViewMatrix(const float4x4& matView)
+{
+  clstd::Camera::SetViewMatrix(matView);
 }
 
 //CFloat3& GCamera_FirstPerson::GetDir() const

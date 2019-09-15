@@ -184,7 +184,7 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     }
     break;
 
-  case GXWM_EXITSIZEMOVE:
+  case WM_EXITSIZEMOVE:
     {
       TRACE("GXWM_EXITSIZEMOVE\n");
       IntWin32ResizeWindow(hWnd, pApp);
@@ -585,9 +585,14 @@ i32 GXUIMsgThread::StartRoutine()
 #ifndef _DEV_DISABLE_UI_CODE
   GXApp* pApp = (GXApp*)m_pPlatform->m_pApp;
   GrapX::Graphics* pGraphics = pApp->GetGraphicsUnsafe();
+  GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
 
   pGraphics->Activate(TRUE);  // ¿ªÊ¼²¶»ñGraphics×´Ì¬
   GXHRESULT hval = pApp->OnCreate();
+  if(GetWindowLong(lpStation->hBindWin32Wnd, GWL_STYLE) & WS_THICKFRAME)
+  {
+    SendMessage(lpStation->hBindWin32Wnd, WM_EXITSIZEMOVE, 0, 0);
+  }
   pGraphics->Activate(FALSE);
 
   if(GXFAILED(hval)) {

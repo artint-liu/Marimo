@@ -171,6 +171,26 @@ namespace clstd
     m_vLookatPt = m_vLookatPt + xaxis + yaxis;
   }
 
+  void Camera::SetViewMatrix(const float4x4& matView)
+  {
+    m_matView = matView;
+    float4 vRight = matView.GetColumn(0);
+    float4 vTop = matView.GetColumn(1);
+    float4 vFront = matView.GetColumn(2);
+    m_vRight.set(vRight.x, vRight.y, vRight.z);
+    m_vTop.set(vTop.x, vTop.y, vTop.z);
+    m_vFront.set(vFront.x, vFront.y, vFront.z);
+    m_vLeft = - m_vRight;
+    
+    float len = (m_vEyePt - m_vLookatPt).length();
+    float4x4 matInvView = matView;
+    matInvView.inverse();
+    m_vEyePt = matInvView.GetRow(3);
+    m_vLookatPt = m_vEyePt + float3::normalize(m_vFront) * len;
+
+    m_matViewProj = m_matView * m_matProj;
+  }
+
   void Camera::UpdateMat()
   {
     m_vFront = float3::normalize(m_vLookatPt - m_vEyePt);
