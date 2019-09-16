@@ -8,6 +8,7 @@ Canvas3DImpl::Canvas3DImpl(GraphicsImpl* pGraphics)
   , m_pTarget       (NULL)
   //, m_pImage        (NULL)
   , m_pCamera       (NULL)
+  //, m_pCurMaterialImpl  (NULL)
   , m_pBlendState   (NULL)
   //, m_pDepthStencil (NULL)
   , m_pSamplerState (NULL)
@@ -25,6 +26,7 @@ Canvas3DImpl::~Canvas3DImpl()
   m_pGraphicsImpl->UnregisterResource(this);
   SAFE_RELEASE(m_pCurDepthStencilState);
   //SAFE_RELEASE(m_pImage);
+  //SAFE_RELEASE(m_pCurMaterialImpl);
   SAFE_RELEASE(m_pTarget);
   SAFE_RELEASE(m_pBlendState);
   //SAFE_RELEASE(m_pDepthStencil);
@@ -121,22 +123,12 @@ Graphics* Canvas3DImpl::GetGraphicsUnsafe() const
 
 GXHRESULT Canvas3DImpl::SetMaterial(Material* pMtlInst)
 {
-  MaterialImpl* pMtlInstImpl = (MaterialImpl*)pMtlInst;
-  //Shader* pShader = pMtlInstImpl->InlGetShaderUnsafe();
+  MaterialImpl* pMtlInstImpl = static_cast<MaterialImpl*>(pMtlInst);
   ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pMtlInstImpl->InlGetShaderUnsafe());
 
-  //GShaderStub* pShaderStub = pMtlInstImpl->InlGetShaderStubUnsafe();
-
-#if 0
-#ifdef REFACTOR_SHADER
-  pMtlInstImpl->IntCommit((GXLPCBYTE)m_CanvasUniformBuf.GetPtr());
-#else
-  pMtlInstImpl->IntCommit(&m_StdUniforms);
-#endif // REFACTOR_SHADER
-#endif // 0
-
-  if(m_pGraphicsImpl->InlSetShader(pShaderImpl))
+  if(m_pGraphicsImpl->InlSetShader(pShaderImpl) || m_CurMaterialImpl.operator!=(pMtlInstImpl))
   {
+    m_CurMaterialImpl = pMtlInstImpl;
     pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
     pMtlInstImpl->Commit();
   }

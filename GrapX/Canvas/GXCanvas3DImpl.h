@@ -18,6 +18,7 @@ protected:
   GCamera*                  m_pCamera;
 
   FrustumPlanes             m_ViewFrustum;
+  ObjectT<MaterialImpl>     m_CurMaterialImpl;
   BlendStateImpl*           m_pBlendState;
   DepthStencilStateImpl*    m_pCurDepthStencilState;
   SamplerState*             m_pSamplerState;

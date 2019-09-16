@@ -887,10 +887,10 @@ namespace Marimo
         clStringA strFullPath;
         clpathfile::CombinePath(strFullPath, pDesc->strImageDir, str);
         m_loader.aFiles[i] = strFullPath;
-        pGraphics->CreateTextureFromFile(&pTexture, clStringW(strFullPath), GXResUsage::Default);
+        pGraphics->CreateTextureFromFile(&pTexture, clStringW(strFullPath), 1, GXResUsage::Default);
       }
       else {
-        pGraphics->CreateTextureFromFile(&pTexture, clStringW(str), GXResUsage::Default);
+        pGraphics->CreateTextureFromFile(&pTexture, clStringW(str), 1, GXResUsage::Default);
       }
       m_ImageArray.push_back(pTexture);
       i++;

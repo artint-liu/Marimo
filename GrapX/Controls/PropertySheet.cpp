@@ -812,7 +812,7 @@ PROCESS_IT:
               if(bChangeTex) {
                 SAFE_RELEASE(item.pTexture);
                 LPGXGRAPHICS pGraphics = GXGetGraphics(m_hWnd);
-                pGraphics->CreateTextureFromFile(&item.pTexture, item.strVal, GXResUsage::Default);
+                pGraphics->CreateTextureFromFile(&item.pTexture, item.strVal, 1, GXResUsage::Default);
                 NotifyParent(GXNM_RETURN, item);
                 Invalidate(FALSE);
               }
@@ -1641,7 +1641,7 @@ DRAW_SCROLLBAR:
               GXHWND hWnd = m_pPropSheet->Get();
               LPGXGRAPHICS pGraphics = GXGetGraphics(hWnd);
               ASSERT(item.pTexture == NULL);
-              pGraphics->CreateTextureFromFile(&item.pTexture, item.strVal, GXResUsage::Default);
+              pGraphics->CreateTextureFromFile(&item.pTexture, item.strVal, 1, GXResUsage::Default);
             }
           }
           break;

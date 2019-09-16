@@ -191,7 +191,7 @@ GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
 #endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
 
 #ifdef _GXGRAPHICS_INLINE_SHADER_D3D11_
-GXBOOL GraphicsImpl::InlSetShader(Shader* pShader)
+GXBOOL GraphicsImpl::InlSetShader(Shader* pShader) // 没有改变返回 FALSE
 {
   if(m_pCurShader == pShader)
   {
@@ -207,7 +207,7 @@ GXBOOL GraphicsImpl::InlSetShader(Shader* pShader)
     //  SAFE_RELEASE(pVertexShader);
     //}
 #endif // D3D9_LOW_DEBUG
-    return TRUE;
+    return FALSE;
   }
   ASSERT(pShader != NULL);
   SAFE_RELEASE(m_pCurShader);

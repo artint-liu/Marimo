@@ -877,9 +877,16 @@ namespace GrapX
         pSourceBuffer += pCBDesc->cbSize;
       }
 
-      pImmediateContext->VSSetConstantBuffers(0, m_pPixelCB - m_pVertexCB, m_pVertexCB);
-      pImmediateContext->PSSetConstantBuffers(0, D3D11CB_GetPixelCBEnd() - m_pPixelCB, m_pPixelCB);
-      return FALSE;
+      UINT count = m_pPixelCB - m_pVertexCB;
+      if(count) {
+        pImmediateContext->VSSetConstantBuffers(0, count, m_pVertexCB);
+      }
+
+      count = D3D11CB_GetPixelCBEnd() - m_pPixelCB;
+      if(count) {
+        pImmediateContext->PSSetConstantBuffers(0, count, m_pPixelCB);
+      }
+      return TRUE;
     }
 
     const GrapX::Shader::BINDRESOURCE_DESC* ShaderImpl::GetBindResource(GXUINT nIndex) const
@@ -1136,7 +1143,10 @@ namespace GrapX
       {
         ID3D11ShaderReflection* pReflection = it->pReflection;
         D3D11_SHADER_DESC D3D11ShaderDesc;
+        D3D11_SIGNATURE_PARAMETER_DESC spd;
+
         pReflection->GetDesc(&D3D11ShaderDesc);
+        pReflection->GetInputParameterDesc(0, &spd);
 
         for(UINT cb_index = 0; cb_index < D3D11ShaderDesc.ConstantBuffers; cb_index++)
         {

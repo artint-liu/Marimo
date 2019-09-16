@@ -213,7 +213,8 @@ namespace UVShader
 
   struct IDNFDESC
   {
-    const static size_t Registering = 1 << (sizeof(size_t) * 8 - 1); // 登记中
+    const static size_t shift = (sizeof(size_t) * 8 - 1);
+    const static size_t Registering = (size_t)1 << shift; // 登记中
     const TYPEDESC*   pType;
     size_t            nOffset;// 与 Registering 不为 0 表示在登记
     SYNTAXNODE::GLOB  glob;   // 所有常量都应该定义这个值

@@ -929,7 +929,7 @@ namespace GrapX
     }
 
 
-    GXHRESULT GraphicsImpl::CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage)
+    GXHRESULT GraphicsImpl::CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage)
     {
       GRESKETCH rs = { RCC_Texture };
       GXHRESULT hr = GX_FAIL;
@@ -977,7 +977,7 @@ namespace GrapX
 
 
       hr = CreateTexture(ppTexture, NULL, FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp),
-        format, eUsage, 1, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+        format, eUsage, MipLevels, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
 
       // 有名字的要注册一下
       if(GXSUCCEEDED(hr) && szName)
@@ -991,7 +991,7 @@ namespace GrapX
       return hr;
     }
 
-    GXHRESULT GraphicsImpl::CreateTextureFromFile(Texture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage)
+    GXHRESULT GraphicsImpl::CreateTextureFromFile(Texture** ppTexture, GXLPCWSTR szFilePath, GXUINT MipLevels, GXResUsage eUsage)
     {
       GRESKETCH rs = { RCC_Texture };
       clpathfile::CombinePath(rs.strResourceName, m_strResourceDir, szFilePath);
@@ -1008,7 +1008,7 @@ namespace GrapX
         clstd::MemBuffer buffer;
         if(file.ReadToBuffer(&buffer))
         {
-          hr = CreateTextureFromMemory(ppTexture, NULL, &buffer, eUsage);
+          hr = CreateTextureFromMemory(ppTexture, NULL, &buffer, MipLevels, eUsage);
           if(GXSUCCEEDED(hr)) {
             m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
             m_ResMgr.Register(&rs, *ppTexture);

@@ -422,7 +422,7 @@ GXHBITMAP GXDLLAPI gxLoadBitmapW(
         strFilename = clStringW(szBaseDir) + szOBMFile;
     }
     if(strFilename.GetLength() != 0) {
-      lpStation->pGraphics->CreateTextureFromFile(&pBitmap->pDrawingTexture, strFilename, GXResUsage::Default);
+      lpStation->pGraphics->CreateTextureFromFile(&pBitmap->pDrawingTexture, strFilename, 1, GXResUsage::Default);
     }
     else {
       lpStation->pGraphics->CreateTexture(&pBitmap->pDrawingTexture, NULL, 16, 16, GXFMT_A8, GXResUsage::Default, 1);

@@ -145,8 +145,8 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture));
 
     // eUsage参数只有在首次创建时限定纹理的使用行为，对于重复创建的纹理文件，eUsage作用会被忽略
-    GXSTDINTERFACE(GXHRESULT CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage));
-    GXSTDINTERFACE(GXHRESULT CreateTextureFromFile  (Texture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage));
+    GXSTDINTERFACE(GXHRESULT CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage));
+    GXSTDINTERFACE(GXHRESULT CreateTextureFromFile  (Texture** ppTexture, GXLPCWSTR szFilePath, GXUINT MipLevels, GXResUsage eUsage));
 
     //GXSTDINTERFACE(GXHRESULT CreateTextureFromFileEx(
     //  GTexture**  ppTexture, 

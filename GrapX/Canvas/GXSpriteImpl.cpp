@@ -797,7 +797,7 @@ GXBOOL GXSpriteImpl::Initialize(GrapX::Graphics* pGraphics, const GXSPRITE_DESCW
 {
   m_strImageFile = pDesc->szImageFile;
 
-  if(GXFAILED(pGraphics->CreateTextureFromFile(&m_pTexture, m_strImageFile, GXResUsage::Default))) {
+  if(GXFAILED(pGraphics->CreateTextureFromFile(&m_pTexture, m_strImageFile, 1, GXResUsage::Default))) {
     CLOG_ERRORW(_CLTEXT("GXSprite : Can not create sprite image(\"%s\").\r\n"), m_strImageFile);
     return FALSE;
   }
@@ -877,7 +877,7 @@ GXBOOL GXSpriteImpl::Initialize(GrapX::Graphics* pGraphics, const GXSPRITE_DESCW
 
 GXBOOL GXSpriteImpl::Initialize(GrapX::Graphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount )
 {
-  if(GXFAILED(pGraphics->CreateTextureFromFile(&m_pTexture, szTextureFile, GXResUsage::Default)))
+  if(GXFAILED(pGraphics->CreateTextureFromFile(&m_pTexture, szTextureFile, 1, GXResUsage::Default)))
   {
     CLOG_ERRORW(_CLTEXT("GXSprite : Can not create sprite image(\"%s\").\r\n"), m_strImageFile);
     return FALSE;

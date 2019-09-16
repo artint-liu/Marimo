@@ -51,8 +51,8 @@
   GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture) override;
 
 
-  GXHRESULT CreateTextureFromMemory  (Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXResUsage eUsage) override;
-  GXHRESULT CreateTextureFromFile    (Texture** ppTexture, GXLPCWSTR szFilePath, GXResUsage eUsage) override;
+  GXHRESULT CreateTextureFromMemory  (Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage) override;
+  GXHRESULT CreateTextureFromFile    (Texture** ppTexture, GXLPCWSTR szFilePath, GXUINT MipLevels, GXResUsage eUsage) override;
   //virtual GXHRESULT CreateTextureFromFileEx  (Texture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter = GXFILTER_NONE, GXDWORD MipFilter = GXFILTER_NONE, GXCOLORREF ColorKey = 0, GXOUT LPGXIMAGEINFOX pSrcInfo = NULL) override;
 
   // Volume Texture
