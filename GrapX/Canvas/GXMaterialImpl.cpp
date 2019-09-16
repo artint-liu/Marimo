@@ -380,11 +380,22 @@ namespace GrapX
 
   GXBOOL MaterialImpl::SetTexture(GXUINT nSlot, Texture* pTexture)
   {
+    if (m_aTextures.size() > nSlot)
+    {
+      m_aTextures[nSlot] = pTexture;
+      return TRUE;
+    }
     return FALSE;
   }
 
   GXBOOL MaterialImpl::SetTexture(GXLPCSTR szSamplerName, Texture* pTexture)
   {
+    const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->FindBindResource(szSamplerName);
+    if (pDesc && m_aTextures.size() > pDesc->slot)
+    {
+      m_aTextures[pDesc->slot] = pTexture;
+      return TRUE;
+    }
     return FALSE;
   }
 

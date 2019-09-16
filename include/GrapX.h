@@ -4909,6 +4909,7 @@ struct STOCKOBJECT
   GrapX::Effect* pBlurEffect;
   GrapX::Effect* pSimpleEffect;
   GrapX::Effect* pFastGaussianBlurEffect;
+  GrapX::Texture* pWhiteTexture8x8;
   GXFont*   pDefaultFont;
 };
 typedef STOCKOBJECT* LPSTOCKOBJECT;

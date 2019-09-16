@@ -364,6 +364,11 @@ GXBOOL CreateStockObject(GXLPSTATION lpStation)
 
   lpStockObject->pDefaultFont = lpStation->pGraphics->CreateFontW(0, 16, DEFAULT_FONT_NAMEW);
 
+  GXDWORD white[8 * 8];
+  memset(white, 0xff, sizeof(white));
+  lpStation->pGraphics->CreateTexture(&lpStockObject->pWhiteTexture8x8, "White8x8", 8, 8, Format_B8G8R8A8, GXResUsage::Default, 1, white, 0);
+
+
   return TRUE;
 }
 
@@ -374,6 +379,7 @@ GXBOOL DestroyStockObject(GXLPSTATION lpStation)
     return FALSE;
   }
 
+  SAFE_RELEASE(lpStockObject->pWhiteTexture8x8);
   SAFE_RELEASE(lpStockObject->pDefaultFont);
 
   SAFE_RELEASE(lpStockObject->pFastGaussianBlurEffect);
