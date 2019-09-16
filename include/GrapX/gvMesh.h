@@ -12,7 +12,7 @@ struct GVMESHDATA
   GXSIZE_T   nIndexCount;      // 索引数量
   float3*     pVertices;        // 顶点, 这个必须有
   float3*     pNormals;         // 法线, 可选
-  float3*     pTangents;        // 切线, 可选
+  float4*     pTangents;        // 切线, 可选
   float3*     pBinormals;       // 副法线, 可选
   float2*     pTexcoord0;       // 第一层UV, 可选
   float2*     pTexcoord1;       // 第二层UV, 可选
