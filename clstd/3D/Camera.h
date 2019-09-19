@@ -48,7 +48,7 @@ namespace clstd
 
     bool InitializePerspectiveLH  (const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar, float fovy, float fAspect);
     bool InitializeOrthoLH        (const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar, float w, float h);
-
+    Camera& Rotate  (const float3& axis, float radians, enum ESpace space);
     void RotateEye  (float fHAngle, float fVAngle);   // 旋转观察位置
     void Forward    (float fSize, bool bSetLookat);
     void Translation(float xOffset, float yOffset);

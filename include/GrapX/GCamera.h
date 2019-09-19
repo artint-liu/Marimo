@@ -1,6 +1,11 @@
 ﻿#ifndef _G_CAMERA_H_
 #define _G_CAMERA_H_
 
+namespace clstd
+{
+  enum ESpace;
+} // namespace clstd
+
 namespace GrapX
 {
   class CanvasCore;
@@ -26,12 +31,12 @@ struct GCAMERACONETXT
   float4x4  matProjection;  // Out
 };
 
-enum CameraType
-{
-  CAM_SCRALIGNED,
-  CAM_TRACKBALL,
-  CAM_FIRSTPERSON,
-};
+//enum CameraType
+//{
+//  CAM_SCRALIGNED,
+//  CAM_TRACKBALL,
+//  CAM_FIRSTPERSON,
+//};
 
 class GXDLL GCamera : public GUnknown
 {
@@ -44,13 +49,14 @@ public:
   virtual GXHRESULT Release    ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  virtual GXHRESULT GetContext (GCAMERACONETXT* pCamContext);
+  GXSTDINTERFACE(GXHRESULT GetContext (GCAMERACONETXT* pCamContext));
 
-  GXSTDINTERFACE(CameraType    GetType           () const);
-  GXSTDINTERFACE(void          DeltaPitch        (float fDelta));   // 屏幕x轴
-  GXSTDINTERFACE(void          DeltaYaw          (float fDelta));   // 屏幕y轴
-  GXSTDINTERFACE(void          DeltaRoll         (float fDelta));   // 屏幕z轴
-  GXSTDINTERFACE(void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll));
+  //GXSTDINTERFACE(CameraType    GetType           () const);
+  //GXSTDINTERFACE(void          DeltaPitch        (float fDelta));   // 屏幕x轴
+  //GXSTDINTERFACE(void          DeltaYaw          (float fDelta));   // 屏幕y轴
+  //GXSTDINTERFACE(void          DeltaRoll         (float fDelta));   // 屏幕z轴
+  //GXSTDINTERFACE(void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll));
+  GXSTDINTERFACE(GCamera&      Rotate            (const float3& axis, float radians, enum clstd::ESpace space));
   GXSTDINTERFACE(void          Translation       (const float2& vOffset));  // 屏幕空间平移
   GXSTDINTERFACE(void          SetPos            (const float3& vPos));
   GXSTDINTERFACE(void          SetPosFront       (const float3& vPos, const float3& vFront));
@@ -64,6 +70,8 @@ public:
   GXSTDINTERFACE(const float4x4& GetViewMatrix   () const);
   GXSTDINTERFACE(void          SetViewMatrix     (const float4x4& matView));
   //GXSTDINTERFACE(CFloat3&      GetDir            () const);
+
+  static BOOL Create(GCamera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp = float3::AxisY, float fNear = 1.0f, float fFar = 1000.0f);
 };
 
 class GXDLL GCamera_ScreenAligned : public GCamera
@@ -77,12 +85,13 @@ public:
 
   static GCamera_ScreenAligned* Create(GrapX::CanvasCore* pCanvasCore);
 public:
-  virtual CameraType    GetType           () const;
+  //virtual CameraType    GetType           () const;
   virtual GXHRESULT     GetContext        (GCAMERACONETXT* pCamContext);
-  virtual void          DeltaPitch        (float fDelta);   // 屏幕x轴
-  virtual void          DeltaYaw          (float fDelta);   // 屏幕y轴
-  virtual void          DeltaRoll         (float fDelta);   // 屏幕z轴
-  virtual void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll);
+  //virtual void          DeltaPitch        (float fDelta);   // 屏幕x轴
+  //virtual void          DeltaYaw          (float fDelta);   // 屏幕y轴
+  //virtual void          DeltaRoll         (float fDelta);   // 屏幕z轴
+  //virtual void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll);
+  GCamera&      Rotate            (const float3& axis, float radians, enum clstd::ESpace space) override;
   virtual void          Translation       (const float2& vOffset);
   virtual void          SetPos            (const float3& vPos);
   virtual void          SetPosFront       (const float3& vPos, const float3& vFront);
@@ -98,6 +107,7 @@ public:
   //virtual CFloat3&      GetDir            () const;
 };
 
+#if 0
 
 class GXDLL GCamera_Trackball : public GCamera, clstd::Camera
 {
@@ -162,5 +172,6 @@ public:
   void                  SetViewMatrix     (const float4x4& matView) override;
   //virtual CFloat3&      GetDir            () const;
 };
+#endif
 
 #endif // _G_CAMERA_H_

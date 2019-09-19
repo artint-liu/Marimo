@@ -129,9 +129,9 @@ GXHRESULT Canvas3DImpl::SetMaterial(Material* pMtlInst)
   if(m_pGraphicsImpl->InlSetShader(pShaderImpl) || m_CurMaterialImpl.operator!=(pMtlInstImpl))
   {
     m_CurMaterialImpl = pMtlInstImpl;
-    pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
-    pMtlInstImpl->Commit();
   }
+  pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
+  pMtlInstImpl->Commit();
   return TRUE;
 }
 

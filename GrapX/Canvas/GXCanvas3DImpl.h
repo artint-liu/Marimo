@@ -7,12 +7,12 @@ class Canvas3DImpl : public Canvas3D
 {
   friend class GraphicsImpl;
 protected:
-  GraphicsImpl*           m_pGraphicsImpl;
+  GraphicsImpl*             m_pGraphicsImpl;
   //GXINT                     m_xExt;          // 物理尺寸，不受原点位置影响
   //GXINT                     m_yExt;
   GXSIZE                    m_sExtent;
   //GTexture*                 m_pDepthStencil;
-  RenderTargetImpl*       m_pTarget;
+  RenderTargetImpl*         m_pTarget;
   //GXImage*                  m_pImage;
   GXVIEWPORT                m_Viewport;
   GCamera*                  m_pCamera;

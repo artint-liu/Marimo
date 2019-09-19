@@ -3,6 +3,7 @@
 #include "cl3d.h"
 //#include "../floatx.h"
 #include "Camera.h"
+#include "clTransform.h"
 
 namespace clstd
 {
@@ -63,6 +64,32 @@ namespace clstd
 
     InitializeCommon();
     return true;
+  }
+
+  Camera& Camera::Rotate(const float3& axis, float radians, ESpace space)
+  {
+    float4x4 mat;
+    mat.RotationAxis(axis, radians);
+    if(space == S_Self)
+    {
+      SetViewMatrix(m_matView * mat);
+    }
+    else if(space == S_World)
+    {
+      //float3x3 mat3x3(mat);
+      //float3x3 matView3x3(m_matView);
+      //float3x3 r = mat3x3 * matView3x3;
+      //SetViewMatrix(float4x4(
+      //  r._11, r._12, r._13, m_matView._14,
+      //  r._21, r._22, r._23, m_matView._24,
+      //  r._31, r._32, r._33, m_matView._34,
+      //  m_matView._41, m_matView._42, m_matView._43, m_matView._44
+      //));
+      //SetViewMatrix(mat * m_matView);
+      m_vLookatPt = (m_vLookatPt - m_vEyePt) * mat + m_vEyePt;
+      UpdateMat();
+    }
+    return *this;
   }
 
   void Camera::InitializeCommon()

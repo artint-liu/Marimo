@@ -34,6 +34,7 @@ GXHRESULT GCamera::Release()
   }
   return nRefCount;
 }
+
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
 GXHRESULT GCamera::GetContext(GCAMERACONETXT* pCamContext)
@@ -59,10 +60,10 @@ GCamera_ScreenAligned* GCamera_ScreenAligned::Create(GrapX::CanvasCore* pCanvasC
   return pCamScrAligned;
 }
 
-CameraType GCamera_ScreenAligned::GetType() const
-{
-  return CAM_SCRALIGNED;
-}
+//CameraType GCamera_ScreenAligned::GetType() const
+//{
+//  return CAM_SCRALIGNED;
+//}
 
 GXHRESULT GCamera_ScreenAligned::GetContext(GCAMERACONETXT* pCamContext)
 {
@@ -79,21 +80,26 @@ GXHRESULT GCamera_ScreenAligned::GetContext(GCAMERACONETXT* pCamContext)
   return GX_OK;
 }
 
-void GCamera_ScreenAligned::DeltaPitch(float fDelta)
+GCamera& GCamera_ScreenAligned::Rotate(const float3& axis, float radians, enum clstd::ESpace space)
 {
+  return *this;
 }
 
-void GCamera_ScreenAligned::DeltaYaw(float fDelta)
-{
-}
-
-void GCamera_ScreenAligned::DeltaRoll(float fDelta)
-{
-}
-
-void GCamera_ScreenAligned::DeltaYawPitchRoll(const float Yaw, const float Pitch, const float Roll)
-{
-}
+//void GCamera_ScreenAligned::DeltaPitch(float fDelta)
+//{
+//}
+//
+//void GCamera_ScreenAligned::DeltaYaw(float fDelta)
+//{
+//}
+//
+//void GCamera_ScreenAligned::DeltaRoll(float fDelta)
+//{
+//}
+//
+//void GCamera_ScreenAligned::DeltaYawPitchRoll(const float Yaw, const float Pitch, const float Roll)
+//{
+//}
 
 void GCamera_ScreenAligned::Translation(const float2& vOffset)
 {
@@ -156,6 +162,7 @@ void GCamera_ScreenAligned::SetViewMatrix(const float4x4& matView)
 //  return float3::AxisZ;
 //}
 //////////////////////////////////////////////////////////////////////////
+#if 0
 GCamera_Trackball::GCamera_Trackball()
   : GCamera()
 {
@@ -459,3 +466,180 @@ void GCamera_FirstPerson::SetViewMatrix(const float4x4& matView)
 //{
 //
 //}
+#endif
+
+namespace GrapX
+{
+  namespace Implement
+  {
+    class CameraImpl : public GCamera, public clstd::Camera
+    {
+    public:
+      CameraImpl();
+      GXBOOL CameraImpl::Initialize(const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar);
+
+      GXHRESULT GetContext (GCAMERACONETXT* pCamContext) override;
+      void          Translation       (const float2& vOffset) override;  // 屏幕空间平移
+      void          SetPos            (const float3& vPos) override;
+      void          SetPosFront       (const float3& vPos, const float3& vFront) override;
+      GCamera&      Rotate            (const float3& axis, float radians, clstd::ESpace space) override;
+      CFloat3&      GetPos            () const override;
+      CFloat3&      GetUp             () const override; // 初始化时的向上的方向
+      CFloat3&      GetTop            () const override; // 摄像机的顶方向,不是Up,俯仰角改变的话这个会改变
+      CFloat3&      GetRight          () const override;
+      CFloat3&      GetFront          () const override;
+      float         GetFov            () const override;
+      float         SetFov            (float fFov) override;
+      const float4x4& GetViewMatrix   () const override;
+      void          SetViewMatrix     (const float4x4& matView) override;
+    };
+
+    CameraImpl::CameraImpl()
+    {
+    }
+
+    //GXHRESULT CameraImpl::Create(CameraImpl** ppCamera)
+    //{
+    //  CameraImpl* pCamera = new CameraImpl;
+    //  pCamera->AddRef();
+
+    //  *ppCamera = pCamera;
+    //  return GX_OK;
+    //}
+
+    GXBOOL CameraImpl::Initialize(const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar)
+    {
+      if(!clstd::Camera::InitializePerspectiveLH(vEye, vLookAt, vUp, fNear, fFar, fovy, fAspect)) {
+        return FALSE;
+      }
+      UpdateMat();
+      return TRUE;
+    }
+
+    //CameraType CameraImpl::GetType() const
+    //{
+    //  return CAM_FIRSTPERSON;
+    //}
+
+    GXHRESULT CameraImpl::GetContext(GCAMERACONETXT* pCamContext)
+    {
+      pCamContext->matWorld = float4x4::Identity;
+      pCamContext->matView = m_matView;
+      pCamContext->matProjection = m_matProj;
+      return GX_OK;
+    }
+
+    //void CameraImpl::DeltaPitch(float fDelta)
+    //{
+    //  clstd::Camera::DeltaPitch(fDelta);
+    //  UpdateMat();
+    //}
+
+    //void CameraImpl::DeltaYaw(float fDelta)
+    //{
+    //  clstd::Camera::DeltaYaw(fDelta);
+    //  UpdateMat();
+    //}
+
+    //void CameraImpl::DeltaRoll(float fDelta)
+    //{
+    //  clstd::Camera::DeltaRoll(fDelta);
+    //  UpdateMat();
+    //}
+
+    //void CameraImpl::DeltaYawPitchRoll(const float Yaw, const float Pitch, const float Roll)
+    //{
+    //  clstd::Camera::DeltaYawPitchRoll(Yaw, Pitch, Roll);
+    //  UpdateMat();
+    //}
+
+    void CameraImpl::Translation(const float2& vOffset)
+    {
+      float3 v3Offset = -m_vRight * vOffset.x + m_vTop * vOffset.y;
+      m_vLookatPt += v3Offset;
+      m_vEyePt += v3Offset;
+      UpdateMat();
+    }
+
+    void CameraImpl::SetPos(const float3& vPos)
+    {
+      m_vLookatPt += (vPos - m_vEyePt);
+      m_vEyePt = vPos;
+      UpdateMat();
+    }
+
+    void CameraImpl::SetPosFront(const float3& vPos, const float3& vFront)
+    {
+      m_vEyePt = vPos;
+      m_vLookatPt = vPos + vFront * 1.0f;
+      UpdateMat();
+    }
+
+    ::GCamera& CameraImpl::Rotate(const float3& axis, float radians, clstd::ESpace space)
+    {
+      clstd::Camera::Rotate(axis, radians, space);
+      return *this;
+    }
+
+    const float3& CameraImpl::GetPos() const
+    {
+      return m_vEyePt;
+    }
+
+    const float3& CameraImpl::GetUp() const
+    {
+      return m_vUpVec;
+    }
+
+    const float3& CameraImpl::GetTop() const
+    {
+      return m_vTop;
+    }
+    const float3& CameraImpl::GetRight() const
+    {
+      return m_vRight;
+    }
+
+    const float3& CameraImpl::GetFront() const
+    {
+      return m_vFront;
+    }
+
+    float CameraImpl::GetFov() const
+    {
+      return m_fovy;
+    }
+
+    float CameraImpl::SetFov(float fFov)
+    {
+      float fPrev = m_fovy;
+      m_fovy = fFov;
+      UpdateMat();
+      return fPrev;
+    }
+
+    const float4x4& CameraImpl::GetViewMatrix() const
+    {
+      return m_matView;
+    }
+
+    void CameraImpl::SetViewMatrix(const float4x4& matView)
+    {
+      clstd::Camera::SetViewMatrix(matView);
+    }
+  }
+}
+
+BOOL GCamera::Create(GCamera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp /*= float3::AxisY*/, float fNear /*= 1.0f*/, float fFar /*= 1000.0f*/)
+{
+  GrapX::Implement::CameraImpl* pCamera = new GrapX::Implement::CameraImpl;
+  pCamera->AddRef();
+
+  if(_CL_NOT_(pCamera->Initialize(fAspect, fovy, vEye, vLookAt, vUp, fNear, fFar))) {
+    pCamera->Release();
+    return FALSE;
+  }
+
+  *ppCamera = pCamera;
+  return GX_OK;
+}
