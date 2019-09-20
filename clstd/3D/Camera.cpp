@@ -69,25 +69,26 @@ namespace clstd
   Camera& Camera::Rotate(const float3& axis, float radians, ESpace space)
   {
     float4x4 mat;
-    mat.RotationAxis(axis, radians);
     if(space == S_Self)
     {
+      mat.RotationAxis(axis, radians);
       SetViewMatrix(m_matView * mat);
     }
     else if(space == S_World)
     {
-      //float3x3 mat3x3(mat);
-      //float3x3 matView3x3(m_matView);
-      //float3x3 r = mat3x3 * matView3x3;
-      //SetViewMatrix(float4x4(
-      //  r._11, r._12, r._13, m_matView._14,
-      //  r._21, r._22, r._23, m_matView._24,
-      //  r._31, r._32, r._33, m_matView._34,
-      //  m_matView._41, m_matView._42, m_matView._43, m_matView._44
-      //));
-      //SetViewMatrix(mat * m_matView);
-      m_vLookatPt = (m_vLookatPt - m_vEyePt) * mat + m_vEyePt;
-      UpdateMat();
+      mat.RotationAxis(axis, -radians);
+      float3x3 mat3x3(mat);
+      float3x3 matView3x3(m_matView);
+      float3x3 r = mat3x3 * matView3x3;
+
+      float4x4 matView(
+        r._11, r._12, r._13, 0,
+        r._21, r._22, r._23, 0,
+        r._31, r._32, r._33, 0,
+        -float3::dot(float3(r._11, r._21, r._31), m_vEyePt),
+        -float3::dot(float3(r._12, r._22, r._32), m_vEyePt),
+        -float3::dot(float3(r._13, r._23, r._33), m_vEyePt), 1);
+      SetViewMatrix(matView);
     }
     return *this;
   }
