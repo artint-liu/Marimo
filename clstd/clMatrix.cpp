@@ -347,7 +347,26 @@ namespace clstd
     return *this;
   }
 
-  _float3x3& _float3x3::set( float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33 )
+  clstd::_float3x3& _float3x3::RotationAxis(const _float3& vAxis, const float fAngle)
+  {
+    float3 v;
+    Vec3Normalize(&v, &vAxis);
+    const float s = sin(fAngle);
+    const float c = cos(fAngle);
+
+    dm[0][0] = (1.0f - c) * v.x * v.x + c;
+    dm[1][0] = (1.0f - c) * v.x * v.y - s * v.z;
+    dm[2][0] = (1.0f - c) * v.x * v.z + s * v.y;
+    dm[0][1] = (1.0f - c) * v.y * v.x + s * v.z;
+    dm[1][1] = (1.0f - c) * v.y * v.y + c;
+    dm[2][1] = (1.0f - c) * v.y * v.z - s * v.x;
+    dm[0][2] = (1.0f - c) * v.z * v.x - s * v.y;
+    dm[1][2] = (1.0f - c) * v.z * v.y + s * v.x;
+    dm[2][2] = (1.0f - c) * v.z * v.z + c;
+    return *this;
+  }
+
+  _float3x3& _float3x3::set(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
   {
     _11 = m11; _12 = m12; _13 = m13;
     _21 = m21; _22 = m22; _23 = m23;
@@ -1019,18 +1038,20 @@ namespace clstd
   _float4x4* MatrixRotationAxis(_float4x4 *pout, const float3 *pv, float angle)
   {
     float3 v;
+    const float s = sin(angle);
+    const float c = cos(angle);
 
     Vec3Normalize(&v,pv);
     MatrixIdentity(pout);
-    pout->dm[0][0] = (1.0f - cos(angle)) * v.x * v.x + cos(angle);
-    pout->dm[1][0] = (1.0f - cos(angle)) * v.x * v.y - sin(angle) * v.z;
-    pout->dm[2][0] = (1.0f - cos(angle)) * v.x * v.z + sin(angle) * v.y;
-    pout->dm[0][1] = (1.0f - cos(angle)) * v.y * v.x + sin(angle) * v.z;
-    pout->dm[1][1] = (1.0f - cos(angle)) * v.y * v.y + cos(angle);
-    pout->dm[2][1] = (1.0f - cos(angle)) * v.y * v.z - sin(angle) * v.x;
-    pout->dm[0][2] = (1.0f - cos(angle)) * v.z * v.x - sin(angle) * v.y;
-    pout->dm[1][2] = (1.0f - cos(angle)) * v.z * v.y + sin(angle) * v.x;
-    pout->dm[2][2] = (1.0f - cos(angle)) * v.z * v.z + cos(angle);
+    pout->dm[0][0] = (1.0f - c) * v.x * v.x + c;
+    pout->dm[1][0] = (1.0f - c) * v.x * v.y - s * v.z;
+    pout->dm[2][0] = (1.0f - c) * v.x * v.z + s * v.y;
+    pout->dm[0][1] = (1.0f - c) * v.y * v.x + s * v.z;
+    pout->dm[1][1] = (1.0f - c) * v.y * v.y + c;
+    pout->dm[2][1] = (1.0f - c) * v.y * v.z - s * v.x;
+    pout->dm[0][2] = (1.0f - c) * v.z * v.x - s * v.y;
+    pout->dm[1][2] = (1.0f - c) * v.z * v.y + s * v.x;
+    pout->dm[2][2] = (1.0f - c) * v.z * v.z + c;
     return pout;
   }
 

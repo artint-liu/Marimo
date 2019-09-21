@@ -101,17 +101,19 @@ GCamera& GCamera_ScreenAligned::Rotate(const float3& axis, float radians, enum c
 //{
 //}
 
-void GCamera_ScreenAligned::Translation(const float2& vOffset)
+GCamera& GCamera_ScreenAligned::Translate(const float3& vOffset, clstd::ESpace space)
 {
+  return *this;
 }
 
-void GCamera_ScreenAligned::SetPos(const float3& vPos)
+GCamera& GCamera_ScreenAligned::SetPos(const float3& vPos)
 {
+  return *this;
 }
 
-void GCamera_ScreenAligned::SetPosFront(const float3& vPos, const float3& vFront)
-{
-}
+//void GCamera_ScreenAligned::SetPosFront(const float3& vPos, const float3& vFront)
+//{
+//}
 
 const float3& GCamera_ScreenAligned::GetPos() const
 {
@@ -479,12 +481,12 @@ namespace GrapX
       GXBOOL CameraImpl::Initialize(const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar);
 
       GXHRESULT GetContext (GCAMERACONETXT* pCamContext) override;
-      void          Translation       (const float2& vOffset) override;  // 屏幕空间平移
-      void          SetPos            (const float3& vPos) override;
-      void          SetPosFront       (const float3& vPos, const float3& vFront) override;
+      GCamera&      Translate         (const float3& vOffset, clstd::ESpace space) override;
+      GCamera&      SetPos            (const float3& vPos) override;
+      //void          SetPosFront       (const float3& vPos, const float3& vFront) override;
       GCamera&      Rotate            (const float3& axis, float radians, clstd::ESpace space) override;
       CFloat3&      GetPos            () const override;
-      CFloat3&      GetUp             () const override; // 初始化时的向上的方向
+      //CFloat3&      GetUp             () const override; // 初始化时的向上的方向
       CFloat3&      GetTop            () const override; // 摄像机的顶方向,不是Up,俯仰角改变的话这个会改变
       CFloat3&      GetRight          () const override;
       CFloat3&      GetFront          () const override;
@@ -512,7 +514,7 @@ namespace GrapX
       if(!clstd::Camera::InitializePerspectiveLH(vEye, vLookAt, vUp, fNear, fFar, fovy, fAspect)) {
         return FALSE;
       }
-      UpdateMat();
+      //UpdateMat();
       return TRUE;
     }
 
@@ -553,27 +555,31 @@ namespace GrapX
     //  UpdateMat();
     //}
 
-    void CameraImpl::Translation(const float2& vOffset)
+    GCamera& CameraImpl::Translate(const float3& vOffset, clstd::ESpace space)
     {
-      float3 v3Offset = -m_vRight * vOffset.x + m_vTop * vOffset.y;
-      m_vLookatPt += v3Offset;
-      m_vEyePt += v3Offset;
-      UpdateMat();
+      //float3 v3Offset = -m_vRight * vOffset.x + m_vTop * vOffset.y;
+      //m_vLookatPt += v3Offset;
+      //m_vEyePt += v3Offset;
+      //UpdateMat();
+      clstd::Camera::Translate(vOffset, space);
+      return *this;
     }
 
-    void CameraImpl::SetPos(const float3& vPos)
+    GCamera& CameraImpl::SetPos(const float3& vPos)
     {
-      m_vLookatPt += (vPos - m_vEyePt);
+      //m_vLookatPt += (vPos - m_vEyePt);
       m_vEyePt = vPos;
-      UpdateMat();
+      clstd::Camera::OnEyePositionChanged();
+      return *this;
+      //UpdateMat();
     }
 
-    void CameraImpl::SetPosFront(const float3& vPos, const float3& vFront)
-    {
-      m_vEyePt = vPos;
-      m_vLookatPt = vPos + vFront * 1.0f;
-      UpdateMat();
-    }
+    //void CameraImpl::SetPosFront(const float3& vPos, const float3& vFront)
+    //{
+    //  m_vEyePt = vPos;
+    //  m_vLookatPt = vPos + vFront * 1.0f;
+    //  UpdateMat();
+    //}
 
     ::GCamera& CameraImpl::Rotate(const float3& axis, float radians, clstd::ESpace space)
     {
@@ -586,10 +592,10 @@ namespace GrapX
       return m_vEyePt;
     }
 
-    const float3& CameraImpl::GetUp() const
-    {
-      return m_vUpVec;
-    }
+    //const float3& CameraImpl::GetUp() const
+    //{
+    //  return m_vUpVec;
+    //}
 
     const float3& CameraImpl::GetTop() const
     {
@@ -614,7 +620,8 @@ namespace GrapX
     {
       float fPrev = m_fovy;
       m_fovy = fFov;
-      UpdateMat();
+      //UpdateMat();
+      UpdateProjectionMatrix();
       return fPrev;
     }
 

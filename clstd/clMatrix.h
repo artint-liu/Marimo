@@ -46,6 +46,7 @@ namespace clstd
     _float3x3& RotationY(const float fAngle); // radian
     _float3x3& RotationZ(const float fAngle); // radian
 
+    _float3x3& RotationAxis(const _float3& vAxis, const float fAngle);
 
     // 欧拉角转换部分算法来自 Euler angle convertion algorithm is from Ogre
     // The matrix must be orthonormal.  The decomposition is yaw*pitch*roll

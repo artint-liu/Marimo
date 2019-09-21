@@ -57,11 +57,11 @@ public:
   //GXSTDINTERFACE(void          DeltaRoll         (float fDelta));   // 屏幕z轴
   //GXSTDINTERFACE(void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll));
   GXSTDINTERFACE(GCamera&      Rotate            (const float3& axis, float radians, enum clstd::ESpace space));
-  GXSTDINTERFACE(void          Translation       (const float2& vOffset));  // 屏幕空间平移
-  GXSTDINTERFACE(void          SetPos            (const float3& vPos));
-  GXSTDINTERFACE(void          SetPosFront       (const float3& vPos, const float3& vFront));
+  GXSTDINTERFACE(GCamera&      Translate         (const float3& vOffset, clstd::ESpace space));
+  GXSTDINTERFACE(GCamera&      SetPos            (const float3& vPos));
+  //GXSTDINTERFACE(void          SetPosFront       (const float3& vPos, const float3& vFront));
   GXSTDINTERFACE(CFloat3&      GetPos            () const);
-  GXSTDINTERFACE(CFloat3&      GetUp             () const); // 初始化时的向上的方向
+  //GXSTDINTERFACE(CFloat3&      GetUp             () const); // 初始化时的向上的方向
   GXSTDINTERFACE(CFloat3&      GetTop            () const); // 摄像机的顶方向,不是Up,俯仰角改变的话这个会改变
   GXSTDINTERFACE(CFloat3&      GetRight          () const);
   GXSTDINTERFACE(CFloat3&      GetFront          () const);
@@ -92,16 +92,16 @@ public:
   //virtual void          DeltaRoll         (float fDelta);   // 屏幕z轴
   //virtual void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll);
   GCamera&      Rotate            (const float3& axis, float radians, enum clstd::ESpace space) override;
-  virtual void          Translation       (const float2& vOffset);
-  virtual void          SetPos            (const float3& vPos);
-  virtual void          SetPosFront       (const float3& vPos, const float3& vFront);
-  virtual CFloat3&      GetPos            () const;
-  virtual CFloat3&      GetUp             () const;
-  virtual CFloat3&      GetTop            () const; // 摄像机的顶方向,不是Up
-  virtual CFloat3&      GetRight          () const;
-  virtual CFloat3&      GetFront          () const;
-  virtual float         GetFov            () const;
-  virtual float         SetFov            (float fFov);
+  GCamera&      Translate         (const float3& vOffset, clstd::ESpace space) override;
+  GCamera&      SetPos            (const float3& vPos);
+  //void          SetPosFront       (const float3& vPos, const float3& vFront);
+  CFloat3&      GetPos            () const;
+  CFloat3&      GetUp             () const;
+  CFloat3&      GetTop            () const; // 摄像机的顶方向,不是Up
+  CFloat3&      GetRight          () const;
+  CFloat3&      GetFront          () const;
+  float         GetFov            () const;
+  float         SetFov            (float fFov);
   const float4x4&       GetViewMatrix     () const override;
   void                  SetViewMatrix     (const float4x4& matView) override;
   //virtual CFloat3&      GetDir            () const;

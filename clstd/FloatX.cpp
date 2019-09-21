@@ -24,16 +24,19 @@ namespace clstd
   _float2 _float2::AxisX(1.0f, 0.0f);
   _float2 _float2::AxisY(0.0f, 1.0f);
   _float2 _float2::Origin(0.0f, 0.0f);
+  _float2 _float2::One(1.0f);
 
   _float3 _float3::AxisX(1.0f, 0.0f, 0.0f);
   _float3 _float3::AxisY(0.0f, 1.0f, 0.0f);
   _float3 _float3::AxisZ(0.0f, 0.0f, 1.0f);
   _float3 _float3::Origin(0.0f, 0.0f, 0.0f);
+  _float3 _float3::One(1.0f);
 
   _float4 _float4::AxisX(1.0f, 0.0f, 0.0f, 1.0f);
   _float4 _float4::AxisY(0.0f, 1.0f, 0.0f, 1.0f);
   _float4 _float4::AxisZ(0.0f, 0.0f, 1.0f, 1.0f);
   _float4 _float4::Origin(0.0f, 0.0f, 0.0f, 1.0f);
+  _float4 _float4::One(1.0f);
 
   _float3::_float3(const _float4& v)
   {
