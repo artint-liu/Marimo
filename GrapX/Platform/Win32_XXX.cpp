@@ -234,10 +234,22 @@ LRESULT CALLBACK IMOPlatform_Win32Base::WndProc(HWND hWnd, UINT message, WPARAM 
     {
       IntWin32SwitchFullScreen(hWnd);
     }
+    else if(wParam == VK_MENU)
+    {
+      GXUIPostSysMessage(GXSysMessage_KeyDown, wParam, lParam);
+    }
     else {
       return DefWindowProc(hWnd, message, wParam, lParam);
     }
     break;
+
+  case WM_SYSKEYUP:
+    if(wParam == VK_MENU)
+    {
+      GXUIPostSysMessage(GXSysMessage_KeyUp, wParam, lParam);
+    }
+    break;
+
   case WM_CREATE:
     {
       DragAcceptFiles(hWnd, TRUE);

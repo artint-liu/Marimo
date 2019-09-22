@@ -152,15 +152,19 @@ namespace GrapX
         m_Format == Format_D24S8 || m_Format == Format_D24X8)
       {
         TexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+        TexDesc.Usage = D3D11_USAGE_DEFAULT;
+        TexDesc.CPUAccessFlags = 0;
       }
       else if(bRenderTarget) {
         TexDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+        TexDesc.Usage = D3D11_USAGE_DEFAULT;
+        TexDesc.CPUAccessFlags = 0;
       }
       else {
         TexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage, m_nMipLevels, (pInitData != NULL));
       }
 
-      GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage, m_nMipLevels, (pInitData != NULL));
       ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
 
       HRESULT hval;
@@ -488,7 +492,7 @@ namespace GrapX
     //////////////////////////////////////////////////////////////////////////
 
     TextureImpl_DepthStencil::TextureImpl_DepthStencil(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
-      : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+      : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
       , m_pD3D11DepthStencilView(NULL)
     {
     }

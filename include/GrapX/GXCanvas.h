@@ -3,12 +3,12 @@
 
 class GRegion;
 class GXFont;
-class GCamera;
 struct GXSTATION;
 
 namespace GrapX
 {
   class Primitive;
+  class Camera;
   class Texture;
   class RenderTarget;
   class Effect;

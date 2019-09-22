@@ -140,13 +140,13 @@ GXHRESULT Canvas3DImpl::SetPrimitive(Primitive* pPrimitive)
   return m_pGraphicsImpl->SetPrimitive(pPrimitive);
 }
 
-GXHRESULT Canvas3DImpl::SetCamera(GCamera* pCamera)
+GXHRESULT Canvas3DImpl::SetCamera(Camera* pCamera)
 {
   m_pCamera = pCamera;
   return GX_OK;
 }
 
-GCamera* Canvas3DImpl::GetCameraUnsafe()
+Camera* Canvas3DImpl::GetCameraUnsafe()
 {
   return m_pCamera;
 }

@@ -310,7 +310,7 @@ GXBOOL GVScene::RayTraceFromViewport(GrapX::Canvas3D* pCanvas, const GXPOINT* pP
 {
   float3 vPos;
   pCanvas->PositionFromScreen(pPoint, 1.0f - 1e-5f, &vPos);
-  GCamera* pCamera = pCanvas->GetCameraUnsafe();
+  GrapX::Camera* pCamera = pCanvas->GetCameraUnsafe();
   const float3 vCameraPos = pCamera->GetPos();
 
   clstd::ScopedSafeLocker lock(&m_Locker);

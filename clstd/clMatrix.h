@@ -232,6 +232,7 @@ namespace clstd
   _float4x4*  MatrixRotationAxis        (_float4x4* pout, const _float3 *pv, float angle);
   _float4x4*  MatrixPerspectiveFovLH    (_float4x4* pout, float fovy, float aspect, float zn, float zf);
   _float4x4*  MatrixOrthoLH             (_float4x4* pout, float w, float h, float zn, float zf);
+  _float3x3*  MatrixRotationQuaternion  (_float3x3* pout, const _quaternion *pq);
   _float4x4*  MatrixRotationQuaternion  (_float4x4* pout, const _quaternion *pq);
   _float4x4*  MatrixAffineTransformation(_float4x4* pout, const _float3* scaling, const _float3* rotationcenter, const _quaternion* rotation, const _float3* translation);
 

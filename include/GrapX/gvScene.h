@@ -5,13 +5,13 @@
 class GVSceneMgr;
 class GVPhySimulator;
 class GVNode;
-class GCamera;
 class GVSequence;
 enum GVRenderType;
 
 namespace GrapX
 {
   class Graphics;
+  class Camera;
   class Canvas3D;
 } // namespace GrapX
 //namespace Marimo
@@ -25,7 +25,7 @@ namespace GrapX
 struct GVSCENEUPDATE // Node update中这个具有const限制,不能改变Canvas和Camera的状态
 {
   GrapX::Canvas3D* pCanvas3D;
-  GCamera*    pCamera;        // 就是储存在Canvas3D中的对象
+  GrapX::Camera*    pCamera;        // 就是储存在Canvas3D中的对象
   GXUINT      uDrawCallCount;
   GXDWORD     dwDeltaTime;    // 当前Update传入的DeltaTime(单位:ms)
   float       fDeltaTime;     // 浮点标记的DeltaTime(单位:s)
@@ -88,7 +88,7 @@ public:
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   virtual GXBOOL    RayTrace              (const GVNode::Ray& ray, const GVNode::AABB* pAABB, GVNode** ppModel, float3* pHit, GVNode* pParent = NULL);
-  virtual GXBOOL    RayTraceFromViewport  (GrapX::Canvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit = NULL);
+  virtual GXBOOL    RayTraceFromViewport  (GrapX::Canvas3D* pCanvas, const GXPOINT* pPoint, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit = NULL); // ppNode 不会增加引用
   virtual GXHRESULT SetPhysicalSimlator   (GVPhySimulator* pPhySimulator);
   virtual GVNode*   FindNodeUnsafe        (GXLPCSTR szName);
 

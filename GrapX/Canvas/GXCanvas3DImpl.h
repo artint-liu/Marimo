@@ -15,7 +15,7 @@ protected:
   RenderTargetImpl*         m_pTarget;
   //GXImage*                  m_pImage;
   GXVIEWPORT                m_Viewport;
-  GCamera*                  m_pCamera;
+  Camera*                   m_pCamera;
 
   FrustumPlanes             m_ViewFrustum;
   ObjectT<MaterialImpl>     m_CurMaterialImpl;
@@ -76,8 +76,8 @@ public:
 
   GXHRESULT   SetMaterial           (Material* pMaterial) override;
   GXHRESULT   SetPrimitive          (Primitive* pPrimitive) override;
-  GXHRESULT   SetCamera             (GCamera* pCamera) override;
-  GCamera*    GetCameraUnsafe       () override;
+  GXHRESULT   SetCamera             (Camera* pCamera) override;
+  Camera*     GetCameraUnsafe       () override;
   GXHRESULT   Activate              () override;
   GXHRESULT   UpdateCommonUniforms  () override;
   GXHRESULT   Draw                  (GVSequence* pSequence) override;

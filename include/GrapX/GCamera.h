@@ -4,6 +4,7 @@
 namespace clstd
 {
   enum ESpace;
+  struct _quaternion;
 } // namespace clstd
 
 namespace GrapX
@@ -11,7 +12,6 @@ namespace GrapX
   class CanvasCore;
 } // namespace GrapX
 
-#include <3D/Camera.h>
 //
 // GCAMERACONETXT 的掩码
 enum
@@ -38,43 +38,52 @@ struct GCAMERACONETXT
 //  CAM_FIRSTPERSON,
 //};
 
-class GXDLL GCamera : public GUnknown
+namespace GrapX
 {
-protected:
-public:
-  GCamera();
-  virtual ~GCamera();
+  class GXDLL Camera : public GUnknown
+  {
+  protected:
+  public:
+    Camera();
+    virtual ~Camera();
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-  virtual GXHRESULT AddRef     ();
-  virtual GXHRESULT Release    ();
+    virtual GXHRESULT AddRef     ();
+    virtual GXHRESULT Release    ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  GXSTDINTERFACE(GXHRESULT GetContext (GCAMERACONETXT* pCamContext));
+    GXSTDINTERFACE(GXHRESULT GetContext (GCAMERACONETXT* pCamContext));
 
-  //GXSTDINTERFACE(CameraType    GetType           () const);
-  //GXSTDINTERFACE(void          DeltaPitch        (float fDelta));   // 屏幕x轴
-  //GXSTDINTERFACE(void          DeltaYaw          (float fDelta));   // 屏幕y轴
-  //GXSTDINTERFACE(void          DeltaRoll         (float fDelta));   // 屏幕z轴
-  //GXSTDINTERFACE(void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll));
-  GXSTDINTERFACE(GCamera&      Rotate            (const float3& axis, float radians, enum clstd::ESpace space));
-  GXSTDINTERFACE(GCamera&      Translate         (const float3& vOffset, clstd::ESpace space));
-  GXSTDINTERFACE(GCamera&      SetPos            (const float3& vPos));
-  //GXSTDINTERFACE(void          SetPosFront       (const float3& vPos, const float3& vFront));
-  GXSTDINTERFACE(CFloat3&      GetPos            () const);
-  //GXSTDINTERFACE(CFloat3&      GetUp             () const); // 初始化时的向上的方向
-  GXSTDINTERFACE(CFloat3&      GetTop            () const); // 摄像机的顶方向,不是Up,俯仰角改变的话这个会改变
-  GXSTDINTERFACE(CFloat3&      GetRight          () const);
-  GXSTDINTERFACE(CFloat3&      GetFront          () const);
-  GXSTDINTERFACE(float         GetFov            () const);
-  GXSTDINTERFACE(float         SetFov            (float fFov));
-  GXSTDINTERFACE(const float4x4& GetViewMatrix   () const);
-  GXSTDINTERFACE(void          SetViewMatrix     (const float4x4& matView));
-  //GXSTDINTERFACE(CFloat3&      GetDir            () const);
+    //GXSTDINTERFACE(CameraType    GetType           () const);
+    //GXSTDINTERFACE(void          DeltaPitch        (float fDelta));   // 屏幕x轴
+    //GXSTDINTERFACE(void          DeltaYaw          (float fDelta));   // 屏幕y轴
+    //GXSTDINTERFACE(void          DeltaRoll         (float fDelta));   // 屏幕z轴
+    //GXSTDINTERFACE(void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll));
+    GXSTDINTERFACE(Camera&        Rotate            (const float3& axis, float radians, enum clstd::ESpace space));
+    GXSTDINTERFACE(Camera&        RotateAround      (const float3& point, const float3& axis, float radians));
 
-  static BOOL Create(GCamera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp = float3::AxisY, float fNear = 1.0f, float fFar = 1000.0f);
-};
+    GXSTDINTERFACE(Camera&        Translate         (const float3& vOffset, clstd::ESpace space));
+    GXSTDINTERFACE(Camera&        SetPos            (const float3& vPos));
+    //GXSTDINTERFACE(void          SetPosFront       (const float3& vPos, const float3& vFront));
+    GXSTDINTERFACE(CFloat3&       GetPos            () const);
+    GXSTDINTERFACE(Camera&        SetRotation       (const float3x3& mat));
+    GXSTDINTERFACE(Camera&        SetRotation       (const float3& vRight, const float3& vTop, const float3& vFront));
+    GXSTDINTERFACE(Camera&        SetRotation       (const clstd::_quaternion& quat));
 
-class GXDLL GCamera_ScreenAligned : public GCamera
+    //GXSTDINTERFACE(CFloat3&      GetUp             () const); // 初始化时的向上的方向
+    GXSTDINTERFACE(CFloat3&       GetTop            () const); // 摄像机的顶方向,不是Up,俯仰角改变的话这个会改变
+    GXSTDINTERFACE(CFloat3&       GetRight          () const);
+    GXSTDINTERFACE(CFloat3&       GetFront          () const);
+    GXSTDINTERFACE(float          GetFov            () const);
+    GXSTDINTERFACE(float          SetFov            (float fFov));
+    GXSTDINTERFACE(const float4x4& GetViewMatrix   () const);
+    GXSTDINTERFACE(void           SetViewMatrix     (const float4x4& matView));
+    //GXSTDINTERFACE(CFloat3&      GetDir            () const);
+
+    static BOOL Create(Camera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp = float3::AxisY, float fNear = 1.0f, float fFar = 1000.0f);
+  };
+} // namespace GrapX
+
+class GXDLL GCamera_ScreenAligned : public GrapX::Camera
 {
 protected:
   GrapX::CanvasCore* m_pCanvasCore;
@@ -91,11 +100,16 @@ public:
   //virtual void          DeltaYaw          (float fDelta);   // 屏幕y轴
   //virtual void          DeltaRoll         (float fDelta);   // 屏幕z轴
   //virtual void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll);
-  GCamera&      Rotate            (const float3& axis, float radians, enum clstd::ESpace space) override;
-  GCamera&      Translate         (const float3& vOffset, clstd::ESpace space) override;
-  GCamera&      SetPos            (const float3& vPos);
+  GrapX::Camera&        Rotate            (const float3& axis, float radians, enum clstd::ESpace space) override;
+  GrapX::Camera&        RotateAround      (const float3& point, const float3& axis, float radians) override;
+  GrapX::Camera&        Translate         (const float3& vOffset, clstd::ESpace space) override;
+  GrapX::Camera&        SetPos            (const float3& vPos);
   //void          SetPosFront       (const float3& vPos, const float3& vFront);
   CFloat3&      GetPos            () const;
+  Camera&       SetRotation       (const float3x3& mat) override;
+  Camera&       SetRotation       (const float3& vRight, const float3& vTop, const float3& vFront) override;
+  Camera&       SetRotation       (const clstd::_quaternion& quat) override;
+
   CFloat3&      GetUp             () const;
   CFloat3&      GetTop            () const; // 摄像机的顶方向,不是Up
   CFloat3&      GetRight          () const;

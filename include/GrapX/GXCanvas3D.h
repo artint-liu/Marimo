@@ -23,8 +23,8 @@ namespace GrapX
 
     GXSTDINTERFACE(GXHRESULT      SetMaterial           (Material* pMtlInst));
     GXSTDINTERFACE(GXHRESULT      SetPrimitive          (Primitive* pPrimitive));
-    GXSTDINTERFACE(GXHRESULT      SetCamera             (GCamera* pCamera));
-    GXSTDINTERFACE(GCamera*       GetCameraUnsafe       ());
+    GXSTDINTERFACE(GXHRESULT      SetCamera             (Camera* pCamera));
+    GXSTDINTERFACE(Camera*        GetCameraUnsafe       ());
     GXSTDINTERFACE(GXHRESULT      GetDepthStencil       (Texture** ppDepthStencil));
     GXSTDINTERFACE(void           SetWorldMatrix        (const float4x4& matWorld));
 

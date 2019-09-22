@@ -7,40 +7,44 @@
 #include "GrapX/GXCanvas.h"
 #include "GrapX/GXKernel.h"
 
+#include <3D/Camera.h>
+
 // 私有头文件
 //#include "GCamera.h"
-
-GCamera::GCamera()
+namespace GrapX
 {
-}
+  Camera::Camera()
+  {
+  }
 
-GCamera::~GCamera()
-{
-}
+  Camera::~Camera()
+  {
+  }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-GXHRESULT GCamera::AddRef()
-{
-  return gxInterlockedIncrement(&m_nRefCount);
-}
-
-GXHRESULT GCamera::Release()
-{
-  GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
-  if(nRefCount == 0)
+  GXHRESULT Camera::AddRef()
   {
-    delete this;
-    return GX_OK;
+    return gxInterlockedIncrement(&m_nRefCount);
   }
-  return nRefCount;
-}
+
+  GXHRESULT Camera::Release()
+  {
+    GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
+    if(nRefCount == 0)
+    {
+      delete this;
+      return GX_OK;
+    }
+    return nRefCount;
+  }
 
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXHRESULT GCamera::GetContext(GCAMERACONETXT* pCamContext)
-{
-  return GX_FAIL;
-}
+  GXHRESULT Camera::GetContext(GCAMERACONETXT* pCamContext)
+  {
+    return GX_FAIL;
+  }
+} // namespace GrapX
 
 //////////////////////////////////////////////////////////////////////////
 float3 GCamera_ScreenAligned::m_vTop = -float3::AxisY;
@@ -80,7 +84,12 @@ GXHRESULT GCamera_ScreenAligned::GetContext(GCAMERACONETXT* pCamContext)
   return GX_OK;
 }
 
-GCamera& GCamera_ScreenAligned::Rotate(const float3& axis, float radians, enum clstd::ESpace space)
+GrapX::Camera& GCamera_ScreenAligned::Rotate(const float3& axis, float radians, enum clstd::ESpace space)
+{
+  return *this;
+}
+
+GrapX::Camera& GCamera_ScreenAligned::RotateAround(const float3& point, const float3& axis, float radians)
 {
   return *this;
 }
@@ -101,12 +110,12 @@ GCamera& GCamera_ScreenAligned::Rotate(const float3& axis, float radians, enum c
 //{
 //}
 
-GCamera& GCamera_ScreenAligned::Translate(const float3& vOffset, clstd::ESpace space)
+GrapX::Camera& GCamera_ScreenAligned::Translate(const float3& vOffset, clstd::ESpace space)
 {
   return *this;
 }
 
-GCamera& GCamera_ScreenAligned::SetPos(const float3& vPos)
+GrapX::Camera& GCamera_ScreenAligned::SetPos(const float3& vPos)
 {
   return *this;
 }
@@ -118,6 +127,21 @@ GCamera& GCamera_ScreenAligned::SetPos(const float3& vPos)
 const float3& GCamera_ScreenAligned::GetPos() const
 {
   return float3::Origin;
+}
+
+GrapX::Camera& GCamera_ScreenAligned::SetRotation(const float3x3& mat)
+{
+  return *this;
+}
+
+GrapX::Camera& GCamera_ScreenAligned::SetRotation(const float3& vRight, const float3& vTop, const float3& vFront)
+{
+  return *this;
+}
+
+GrapX::Camera& GCamera_ScreenAligned::SetRotation(const clstd::_quaternion& quat)
+{
+  return *this;
 }
 
 const float3& GCamera_ScreenAligned::GetUp() const
@@ -474,19 +498,23 @@ namespace GrapX
 {
   namespace Implement
   {
-    class CameraImpl : public GCamera, public clstd::Camera
+    class CameraImpl : public GrapX::Camera, public clstd::Camera
     {
     public:
       CameraImpl();
       GXBOOL CameraImpl::Initialize(const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar);
 
       GXHRESULT GetContext (GCAMERACONETXT* pCamContext) override;
-      GCamera&      Translate         (const float3& vOffset, clstd::ESpace space) override;
-      GCamera&      SetPos            (const float3& vPos) override;
+      GrapX::Camera&      Translate         (const float3& vOffset, clstd::ESpace space) override;
+      GrapX::Camera&      SetPos            (const float3& vPos) override;
       //void          SetPosFront       (const float3& vPos, const float3& vFront) override;
-      GCamera&      Rotate            (const float3& axis, float radians, clstd::ESpace space) override;
-      CFloat3&      GetPos            () const override;
+      GrapX::Camera&      Rotate            (const float3& axis, float radians, clstd::ESpace space) override;
+      GrapX::Camera&      RotateAround      (const float3& point, const float3& axis, float radians) override;
+      CFloat3&            GetPos            () const override;
       //CFloat3&      GetUp             () const override; // 初始化时的向上的方向
+      GrapX::Camera&      SetRotation       (const float3& vRight, const float3& vTop, const float3& vFront);
+      GrapX::Camera&      SetRotation       (const float3x3& mat);
+      GrapX::Camera&      SetRotation       (const clstd::_quaternion& quat);
       CFloat3&      GetTop            () const override; // 摄像机的顶方向,不是Up,俯仰角改变的话这个会改变
       CFloat3&      GetRight          () const override;
       CFloat3&      GetFront          () const override;
@@ -555,7 +583,7 @@ namespace GrapX
     //  UpdateMat();
     //}
 
-    GCamera& CameraImpl::Translate(const float3& vOffset, clstd::ESpace space)
+    GrapX::Camera& CameraImpl::Translate(const float3& vOffset, clstd::ESpace space)
     {
       //float3 v3Offset = -m_vRight * vOffset.x + m_vTop * vOffset.y;
       //m_vLookatPt += v3Offset;
@@ -565,7 +593,7 @@ namespace GrapX
       return *this;
     }
 
-    GCamera& CameraImpl::SetPos(const float3& vPos)
+    GrapX::Camera& CameraImpl::SetPos(const float3& vPos)
     {
       //m_vLookatPt += (vPos - m_vEyePt);
       m_vEyePt = vPos;
@@ -581,15 +609,51 @@ namespace GrapX
     //  UpdateMat();
     //}
 
-    ::GCamera& CameraImpl::Rotate(const float3& axis, float radians, clstd::ESpace space)
+    GrapX::Camera& CameraImpl::Rotate(const float3& axis, float radians, clstd::ESpace space)
     {
       clstd::Camera::Rotate(axis, radians, space);
+      return *this;
+    }
+
+    GrapX::Camera& CameraImpl::RotateAround(const float3& point, const float3& axis, float radians)
+    {
+      float3x3 mat;
+      float3x3 matView3(m_matView);
+      mat.RotationAxis(axis, radians);
+      // 未完成！
+      //m_vEyePt = (point - m_vEyePt) * mat + m_vEyePt;
+      //m_vEyePt = (m_vEyePt - point) * mat + point;
+      //clstd::Camera::OnEyePositionChanged();
+      //mat.RotationAxis(axis, -radians);
+      //float3 delta = point - m_vEyePt;
+      //delta = delta - (delta * mat);
+      //m_vEyePt += delta;
+      mat = matView3 * mat;
+      clstd::Camera::SetRotation(mat);
       return *this;
     }
 
     const float3& CameraImpl::GetPos() const
     {
       return m_vEyePt;
+    }
+
+    GrapX::Camera& CameraImpl::SetRotation(const float3& vRight, const float3& vTop, const float3& vFront)
+    {
+      clstd::Camera::SetRotation(vRight, vTop, vFront);
+      return *this;
+    }
+
+    GrapX::Camera& CameraImpl::SetRotation(const float3x3& mat)
+    {
+      clstd::Camera::SetRotation(mat);
+      return *this;
+    }
+
+    GrapX::Camera& CameraImpl::SetRotation(const clstd::_quaternion& quat)
+    {
+      clstd::Camera::SetRotation(quat);
+      return *this;
     }
 
     //const float3& CameraImpl::GetUp() const
@@ -637,7 +701,7 @@ namespace GrapX
   }
 }
 
-BOOL GCamera::Create(GCamera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp /*= float3::AxisY*/, float fNear /*= 1.0f*/, float fFar /*= 1000.0f*/)
+BOOL GrapX::Camera::Create(GrapX::Camera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp /*= float3::AxisY*/, float fNear /*= 1.0f*/, float fFar /*= 1000.0f*/)
 {
   GrapX::Implement::CameraImpl* pCamera = new GrapX::Implement::CameraImpl;
   pCamera->AddRef();

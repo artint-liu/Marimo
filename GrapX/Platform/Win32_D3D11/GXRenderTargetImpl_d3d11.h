@@ -25,6 +25,7 @@ namespace GrapX
       GraphicsImpl* m_pGraphics;
       TextureImpl_RenderTarget* m_pColorTexture;
       TextureImpl_DepthStencil* m_pDepthStencilTexture;
+      TextureImpl_GPUReadBack*  m_pReadBackTexture = NULL;
       const GXINT m_nWidth;
       const GXINT m_nHeight;
 
@@ -53,6 +54,7 @@ namespace GrapX
       TextureImpl_DepthStencil* IntGetDepthStencilTextureUnsafe();
 
     protected:
+      GXBOOL IntCreateReadBackTexture(TextureImpl_GPUReadBack** ppReadBackTex);
       GXBOOL InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight);
 
     };

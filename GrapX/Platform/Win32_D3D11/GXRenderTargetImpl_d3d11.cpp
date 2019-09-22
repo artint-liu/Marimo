@@ -43,6 +43,7 @@ namespace GrapX
 
     RenderTargetImpl::~RenderTargetImpl()
     {
+      SAFE_RELEASE(m_pReadBackTexture);
       SAFE_RELEASE(m_pColorTexture);
       SAFE_RELEASE(m_pDepthStencilTexture);
     }
@@ -93,34 +94,35 @@ namespace GrapX
       }
       else if(eUsage == GXResUsage::Read)
       {
-        GXSIZE sDimension;
-        //GXBOOL bval = TRUE;
-        GXFormat format = m_pColorTexture->GetFormat();
-        m_pColorTexture->GetDimension(&sDimension);
-
-        TextureImpl_GPUReadBack* pReadBackTexture = new TextureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
-        if(InlIsFailedToNewObject(pReadBackTexture)) {
-          return GX_ERROR_OUROFMEMORY;
-        }
-
-        if(_CL_NOT_(pReadBackTexture->InitReadBackTexture()))
+        TextureImpl_GPUReadBack* pReadBackTexture = NULL;
+        if(IntCreateReadBackTexture(&pReadBackTexture))
         {
-          SAFE_RELEASE(pReadBackTexture);
-          return GX_FAIL;
+          ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+          pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+          *ppColorTexture = pReadBackTexture;
+          pReadBackTexture = NULL;
+          return GX_OK;
         }
-
-        ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
-        pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
-        *ppColorTexture = pReadBackTexture;
-        pReadBackTexture = NULL;
-        return GX_OK;
       }
       return GX_FAIL;
     }
 
     Texture* RenderTargetImpl::GetColorTextureUnsafe(GXResUsage eUsage)
     {
-      return m_pColorTexture;
+      if(eUsage == GXResUsage::Default)
+      {
+        return m_pColorTexture;
+      }
+      else if(eUsage == GXResUsage::Read)
+      {
+        if(m_pReadBackTexture || IntCreateReadBackTexture(&m_pReadBackTexture))
+        {
+          ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+          pD3D11Context->CopyResource(m_pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+          return m_pReadBackTexture;
+        }
+      }
+      return NULL;
     }
 
     GXHRESULT RenderTargetImpl::GetDepthStencilTexture(Texture** ppDepthStencilTexture)
@@ -341,6 +343,28 @@ namespace GrapX
     TextureImpl_DepthStencil* RenderTargetImpl::IntGetDepthStencilTextureUnsafe()
     {
       return m_pDepthStencilTexture;
+    }
+
+    GXBOOL RenderTargetImpl::IntCreateReadBackTexture(TextureImpl_GPUReadBack** ppReadBackTex)
+    {
+      GXSIZE sDimension;
+      GXFormat format = m_pColorTexture->GetFormat();
+      m_pColorTexture->GetDimension(&sDimension);
+
+      TextureImpl_GPUReadBack* pReadBackTexture = new TextureImpl_GPUReadBack(m_pGraphics, format, sDimension.cx, sDimension.cy);
+      if(InlIsFailedToNewObject(pReadBackTexture)) {
+        CLOG_ERROR("%s(%d): 无法创建纹理对象", __FUNCTION__, __LINE__);
+        return FALSE;
+      }
+
+      if(_CL_NOT_(pReadBackTexture->InitReadBackTexture()))
+      {
+        CLOG_ERROR("%s(%d): 初始化纹理失败", __FUNCTION__, __LINE__);
+        SAFE_RELEASE(pReadBackTexture);
+        return FALSE;
+      }
+      *ppReadBackTex = pReadBackTexture;
+      return TRUE;
     }
 
     GXBOOL RenderTargetImpl::InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight)

@@ -309,9 +309,7 @@ namespace clstd
 
   _float3x3& _float3x3::FromQuaternion( const _quaternion *pq )
   {
-    float4x4 mat;
-    MatrixRotationQuaternion(&mat, pq);
-    *this = mat;
+    MatrixRotationQuaternion(this, pq);
     return *this;
   }
 
@@ -1077,6 +1075,30 @@ namespace clstd
 
     //  pout->dm[2][3] = 1.0f;
     pout->dm[3][2] = -zn / (zf - zn);
+    return pout;
+  }
+
+  _float3x3* MatrixRotationQuaternion(_float3x3 *pout, const _quaternion *pq)
+  {
+    const float xx = pq->x * pq->x;
+    const float yy = pq->y * pq->y;
+    const float zz = pq->z * pq->z;
+    const float xy = pq->x * pq->y;
+    const float zw = pq->z * pq->w;
+    const float xz = pq->x * pq->z;
+    const float yw = pq->y * pq->w;
+    const float yz = pq->y * pq->z;
+    const float xw = pq->x * pq->w;
+
+    pout->dm[0][0] = 1.0f - 2.0f * (yy + zz);
+    pout->dm[0][1] = 2.0f * (xy + zw);
+    pout->dm[0][2] = 2.0f * (xz - yw);
+    pout->dm[1][0] = 2.0f * (xy - zw);
+    pout->dm[1][1] = 1.0f - 2.0f * (xx + zz);
+    pout->dm[1][2] = 2.0f * (yz + xw);
+    pout->dm[2][0] = 2.0f * (xz + yw);
+    pout->dm[2][1] = 2.0f * (yz - xw);
+    pout->dm[2][2] = 1.0f - 2.0f * (xx + yy);
     return pout;
   }
 

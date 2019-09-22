@@ -16,7 +16,7 @@ protected:
   BlendStateImpl*     m_pBlendStateImpl;
   //DepthStencilState*  m_pDepthStencilState;
   SamplerStateImpl*   m_pSamplerState;
-  GCamera*            m_pCamera;
+  Camera*             m_pCamera;
 
   void CommitState();
 public:

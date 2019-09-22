@@ -126,6 +126,31 @@ namespace clstd
     return *this;
   }
 
+  Camera& Camera::SetRotation(const float3x3& mat)
+  {
+    m_vRight.set(mat._11, mat._21, mat._31);
+    m_vTop.set(mat._12, mat._22, mat._32);
+    m_vFront.set(mat._13, mat._23, mat._33);
+    UpdateViewMatrix();
+    return *this;
+  }
+
+  Camera& Camera::SetRotation(const float3& vRight, const float3& vTop, const float3& vFront)
+  {
+    m_vRight = vRight;
+    m_vTop = vTop;
+    m_vFront = vFront;
+    UpdateViewMatrix();
+    return *this;
+  }
+
+  Camera& Camera::SetRotation(const _quaternion& quat)
+  {
+    float3x3 mat;
+    mat.FromQuaternion(&quat);
+    return SetRotation(mat);
+  }
+
   void Camera::LookAt(const float3& vWorldPos, const float3& up /*= float3::AxisY*/)
   {
     m_vFront = float3::normalize(vWorldPos - m_vEyePt);
