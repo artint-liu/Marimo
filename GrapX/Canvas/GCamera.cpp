@@ -617,18 +617,13 @@ namespace GrapX
 
     GrapX::Camera& CameraImpl::RotateAround(const float3& point, const float3& axis, float radians)
     {
-      float3x3 mat;
+      float3x3 mat, matT;
       float3x3 matView3(m_matView);
-      mat.RotationAxis(axis, radians);
-      // Î´Íê³É£¡
-      //m_vEyePt = (point - m_vEyePt) * mat + m_vEyePt;
-      //m_vEyePt = (m_vEyePt - point) * mat + point;
-      //clstd::Camera::OnEyePositionChanged();
-      //mat.RotationAxis(axis, -radians);
-      //float3 delta = point - m_vEyePt;
-      //delta = delta - (delta * mat);
-      //m_vEyePt += delta;
-      mat = matView3 * mat;
+      mat.RotationAxis(axis, -radians);
+      matT = mat;
+      matT.transpose();
+      m_vEyePt = (m_vEyePt - point) * matT + point;
+      mat = mat * matView3;
       clstd::Camera::SetRotation(mat);
       return *this;
     }
