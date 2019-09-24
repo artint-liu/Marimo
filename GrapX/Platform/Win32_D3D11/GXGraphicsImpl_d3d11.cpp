@@ -668,7 +668,7 @@ namespace GrapX
     // 这个计算对 "GXCLEAR_*" 和 "D3D11_CLEAR_*" 的定义数值有要求, 不能随便改变
         UINT uClearFlags = (dwFlags & (GXCLEAR_DEPTH | GXCLEAR_STENCIL)) >> 1;
 
-        if(uClearFlags != 0) {
+        if(uClearFlags != 0 && m_pCurDepthStencilView) {
           m_pImmediateContext->ClearDepthStencilView(m_pCurDepthStencilView, uClearFlags, z, (UINT8)dwStencil);
         }
       }

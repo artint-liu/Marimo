@@ -5,6 +5,7 @@
 #define _GRAP_X_CANVAS_3D_INTERFACE_H_
 
 class GVSequence;
+class GVNode;
 struct STANDARDMTLUNIFORMTABLE;
 namespace GrapX
 {
@@ -20,6 +21,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT      Activate              ());
     GXSTDINTERFACE(GXHRESULT      Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil));
     GXSTDINTERFACE(GXHRESULT      Draw                  (GVSequence* pSequence));
+    GXSTDINTERFACE(GXHRESULT      Draw                  (Shader* pShader, GVNode* pNode)); // 临时
 
     GXSTDINTERFACE(GXHRESULT      SetMaterial           (Material* pMtlInst));
     GXSTDINTERFACE(GXHRESULT      SetPrimitive          (Primitive* pPrimitive));

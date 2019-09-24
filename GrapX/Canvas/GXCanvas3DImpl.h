@@ -81,6 +81,7 @@ public:
   GXHRESULT   Activate              () override;
   GXHRESULT   UpdateCommonUniforms  () override;
   GXHRESULT   Draw                  (GVSequence* pSequence) override;
+  GXHRESULT   Draw                  (Shader* pShader, GVNode* pNode) override;
 
   GXHRESULT   GetDepthStencil       (Texture** ppDepthStencil) override;
 

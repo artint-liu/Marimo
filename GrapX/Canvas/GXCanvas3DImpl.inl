@@ -65,7 +65,7 @@ RenderTarget* Canvas3DImpl::GetTargetUnsafe() const
 
 GXBOOL Canvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
 {
-  Texture* pTexture = NULL;
+  //Texture* pTexture = NULL;
   if(pTarget == NULL)
   {
     m_pGraphicsImpl->GetBackBuffer(&pTarget);
@@ -103,7 +103,7 @@ GXBOOL Canvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
     m_Viewport = *pViewport;
     SetupCanvasUniform();
 
-    SAFE_RELEASE(pTexture);
+    //SAFE_RELEASE(pTexture);
 
     GRESKETCH sSketch;
     sSketch.dwCategoryId = RCC_Canvas3D;
@@ -112,7 +112,7 @@ GXBOOL Canvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
     return TRUE;
   }
 
-  SAFE_RELEASE(pTexture);
+  //SAFE_RELEASE(pTexture);
   return FALSE;
 }
 
@@ -130,7 +130,11 @@ GXHRESULT Canvas3DImpl::SetMaterial(Material* pMtlInst)
   {
     m_CurMaterialImpl = pMtlInstImpl;
   }
-  pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
+
+  if(pMtlInstImpl->GetDataPoolUnsafe())
+  {
+    pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
+  }
   pMtlInstImpl->Commit();
   return TRUE;
 }
@@ -266,6 +270,41 @@ GXHRESULT Canvas3DImpl::Draw(GVSequence* pSequence)
       }
     }
   }
+  return GX_OK;
+}
+
+GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode)
+{
+  GVRENDERDESC Desc;
+  pNode->GetRenderDesc(GVRT_Normal, &Desc);
+
+  if(TEST_FLAG(Desc.dwFlags, GVNF_CONTAINER)) {
+    return GX_FAIL;
+  }
+
+  if(TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
+    SetWorldMatrix(Desc.matWorld);
+  }
+  m_CurMaterialImpl = NULL;
+  m_pGraphicsImpl->InlSetShader(pShader);
+
+  ASSERT(Desc.pPrimitive != NULL);
+  m_pGraphicsImpl->SetPrimitive(Desc.pPrimitive);
+  //if(Desc.pPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE)
+  if(Desc.pPrimitive->GetIndexCount() > 0)
+  {
+    m_pGraphicsImpl->DrawPrimitive(Desc.ePrimType,
+      Desc.BaseVertexIndex, Desc.MinIndex, Desc.NumVertices,
+      Desc.StartIndex, Desc.PrimitiveCount);
+  }
+  else {
+    ASSERT(0);
+  }
+
+  if(TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
+    SetWorldMatrix(float4x4::Identity);
+  }
+
   return GX_OK;
 }
 

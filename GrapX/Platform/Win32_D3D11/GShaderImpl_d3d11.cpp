@@ -804,6 +804,10 @@ namespace GrapX
       //  return FALSE;
       //}
       D3D11CB_DESC* pDesc = D3D11CB_GetDescBegin();
+      if(pDesc == NULL) {
+        return TRUE;
+      }
+
       if(pDesc->pD3D11ConstantBuffer) {
         return FALSE;
       }
@@ -1257,7 +1261,7 @@ namespace GrapX
       if(FAILED(hval))
       {
         if(pErrorBlob != NULL) {
-          TRACE("Shader compiled error:\n>%s\n", (char*)pErrorBlob->GetBufferPointer());
+          CLOG_ERROR("Shader compiled error:\n>%s\n", (char*)pErrorBlob->GetBufferPointer());
         }
         SAFE_RELEASE(pErrorBlob);
         return hval;

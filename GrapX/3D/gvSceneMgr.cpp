@@ -48,7 +48,7 @@ GXHRESULT GVSceneMgr::Release()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXHRESULT GXDLLAPI GVSceneMgr::Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr)
+GXHRESULT GVSceneMgr::Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr)
 {
 
   GVSceneMgr* pSceneMgr = new GVSceneMgr(pGraphics);
@@ -83,4 +83,11 @@ GXHRESULT GVSceneMgr::UnmanageNode(GVNode* pNode)
     }
   }
   return GX_FAIL;
+}
+
+GVNodeArray& GVSceneMgr::GetNodeArray(GVNodeArray& arrayNodes)
+{
+  arrayNodes.clear();
+  arrayNodes.insert(arrayNodes.end(), m_aModel.begin(), m_aModel.end());
+  return arrayNodes;
 }

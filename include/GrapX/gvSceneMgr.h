@@ -5,9 +5,9 @@
 
 class GVNode;
 
-class GVSceneMgr : public GUnknown
+typedef clvector<GVNode*> GVNodeArray;
+class GXDLL GVSceneMgr : public GUnknown
 {
-  typedef clvector<GVNode*> GVNodeArray;
 private:
   GrapX::Graphics* m_pGraphics;
   GVSceneMgr(GrapX::Graphics* pGraphics);
@@ -16,7 +16,7 @@ private:
   GVNodeArray  m_aModel;
 
 public:
-  static GXHRESULT GXDLLAPI Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr);
+  static GXHRESULT Create(GrapX::Graphics* pGraphics, GVSceneMgr** ppSceneMgr);
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef    ();
@@ -26,6 +26,7 @@ public:
   virtual GXHRESULT ManageNode   (GVNode* pNode);
   virtual GXHRESULT UnmanageNode (GVNode* pNode);
 
+  GVNodeArray& GetNodeArray(GVNodeArray& arrayNodes);
 };
 
 #endif // _GRAPVR_SCENE_MANAGER_H_
