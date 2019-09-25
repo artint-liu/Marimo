@@ -1238,6 +1238,7 @@ namespace GrapX
         return TargetType::Vertex;
       }
       CLBREAK; // 不支持的shader类型
+      return TargetType::Undefine;
     }
 
     GXHRESULT ShaderImpl::CompileShader(INTERMEDIATE_CODE* pInterCode, const GXSHADER_SOURCE_DESC* pShaderDesc, ID3DInclude* pInclude)

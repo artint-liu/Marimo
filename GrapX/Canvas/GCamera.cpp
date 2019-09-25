@@ -502,7 +502,8 @@ namespace GrapX
     {
     public:
       CameraImpl();
-      GXBOOL CameraImpl::Initialize(const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar);
+      GXBOOL Initialize(const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar);
+      GXBOOL InitializeOrthoGraphic(float w, float h, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar);
 
       GXHRESULT GetContext (GCAMERACONETXT* pCamContext) override;
       GrapX::Camera&      Translate         (const float3& vOffset, clstd::ESpace space) override;
@@ -537,14 +538,22 @@ namespace GrapX
     //  return GX_OK;
     //}
 
-    GXBOOL CameraImpl::Initialize(const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar)
+    GXBOOL CameraImpl::Initialize(float fAspect, float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar)
     {
       if(!clstd::Camera::InitializePerspectiveLH(vEye, vLookAt, vUp, fNear, fFar, fovy, fAspect)) {
         return FALSE;
       }
-      //UpdateMat();
       return TRUE;
     }
+
+    GXBOOL CameraImpl::InitializeOrthoGraphic(float w, float h, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar)
+    {
+      if(!clstd::Camera::InitializeOrthoLH(vEye, vLookAt, vUp, fNear, fFar, w, h)) {
+        return FALSE;
+      }
+      return TRUE;
+    }
+
 
     //CameraType CameraImpl::GetType() const
     //{
@@ -696,12 +705,26 @@ namespace GrapX
   }
 }
 
-BOOL GrapX::Camera::Create(GrapX::Camera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp /*= float3::AxisY*/, float fNear /*= 1.0f*/, float fFar /*= 1000.0f*/)
+BOOL GrapX::Camera::Create(GrapX::Camera** ppCamera, float fAspect, float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp /*= float3::AxisY*/, float fNear /*= 1.0f*/, float fFar /*= 1000.0f*/)
 {
   GrapX::Implement::CameraImpl* pCamera = new GrapX::Implement::CameraImpl;
   pCamera->AddRef();
 
   if(_CL_NOT_(pCamera->Initialize(fAspect, fovy, vEye, vLookAt, vUp, fNear, fFar))) {
+    pCamera->Release();
+    return FALSE;
+  }
+
+  *ppCamera = pCamera;
+  return GX_OK;
+}
+
+BOOL GrapX::Camera::CreateOrthographic(Camera** ppCamera, float w, float h, const float3& vEye, const float3& vLookAt, const float3& vUp, float fNear, float fFar)
+{
+  GrapX::Implement::CameraImpl* pCamera = new GrapX::Implement::CameraImpl;
+  pCamera->AddRef();
+
+  if(_CL_NOT_(pCamera->InitializeOrthoGraphic(w, h, vEye, vLookAt, vUp, fNear, fFar))) {
     pCamera->Release();
     return FALSE;
   }

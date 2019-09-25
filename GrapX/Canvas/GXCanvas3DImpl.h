@@ -3,6 +3,9 @@
 
 #ifndef _IMPLEMENT_GRAP_X_CANVAS_3D_H_
 #define _IMPLEMENT_GRAP_X_CANVAS_3D_H_
+
+#define MRT_SUPPORT_COUNT 4
+
 class Canvas3DImpl : public Canvas3D
 {
   friend class GraphicsImpl;
@@ -12,7 +15,9 @@ protected:
   //GXINT                     m_yExt;
   GXSIZE                    m_sExtent;
   //GTexture*                 m_pDepthStencil;
-  RenderTargetImpl*         m_pTarget;
+  //RenderTargetImpl*         m_pTarget;
+  ObjectT<RenderTargetImpl> m_pTargets[MRT_SUPPORT_COUNT];
+  int                       m_nTargetCount = NULL;
   //GXImage*                  m_pImage;
   GXVIEWPORT                m_Viewport;
   Camera*                   m_pCamera;
@@ -46,7 +51,8 @@ public:
   GXSIZE*         GetTargetDimension    (GXSIZE* pSize) const override;
   Graphics*       GetGraphicsUnsafe     () const override;
   RenderTarget*   GetTargetUnsafe       () const override;
-  GXBOOL          Initialize            (RenderTarget* pTarget, GXLPCVIEWPORT pViewport);
+  RenderTarget*   GetTargetUnsafe       (int index) const override;
+  GXBOOL          Initialize            (RenderTarget** pTargetArray, size_t nCount, GXLPCVIEWPORT pViewport);
 
   GXHRESULT   Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil) override;
   GXHRESULT   TransformPosition     (const float3* pPos, GXOUT float4* pView) override; // Transform world position to screen
@@ -81,7 +87,7 @@ public:
   GXHRESULT   Activate              () override;
   GXHRESULT   UpdateCommonUniforms  () override;
   GXHRESULT   Draw                  (GVSequence* pSequence) override;
-  GXHRESULT   Draw                  (Shader* pShader, GVNode* pNode) override;
+  GXHRESULT   Draw                  (Shader* pShader, GVNode* pNode, const float4x4* pTransform) override;
 
   GXHRESULT   GetDepthStencil       (Texture** ppDepthStencil) override;
 

@@ -5,7 +5,7 @@ Canvas3DImpl::Canvas3DImpl(GraphicsImpl* pGraphics)
   , m_pGraphicsImpl (pGraphics)
   //, m_xExt          (0)
   //, m_yExt          (0)
-  , m_pTarget       (NULL)
+  //, m_pTarget       (NULL)
   //, m_pImage        (NULL)
   , m_pCamera       (NULL)
   //, m_pCurMaterialImpl  (NULL)
@@ -27,7 +27,7 @@ Canvas3DImpl::~Canvas3DImpl()
   SAFE_RELEASE(m_pCurDepthStencilState);
   //SAFE_RELEASE(m_pImage);
   //SAFE_RELEASE(m_pCurMaterialImpl);
-  SAFE_RELEASE(m_pTarget);
+  //SAFE_RELEASE(m_pTarget);
   SAFE_RELEASE(m_pBlendState);
   //SAFE_RELEASE(m_pDepthStencil);
   SAFE_RELEASE(m_pSamplerState);
@@ -60,60 +60,52 @@ GXSIZE* Canvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
 
 RenderTarget* Canvas3DImpl::GetTargetUnsafe() const
 {
-  return m_pTarget;
+  return m_pTargets[0];
 }
 
-GXBOOL Canvas3DImpl::Initialize(RenderTarget* pTarget, GXLPCVIEWPORT pViewport)
+RenderTarget* Canvas3DImpl::GetTargetUnsafe(int index) const
+{
+  return index < m_nTargetCount ? m_pTargets[index].CastPtr<RenderTarget>() : NULL;
+}
+
+GXBOOL Canvas3DImpl::Initialize(RenderTarget** pTargetArray, size_t nCount, GXLPCVIEWPORT pViewport)
 {
   //Texture* pTexture = NULL;
-  if(pTarget == NULL)
+  if(pTargetArray == NULL || nCount == 0 || pTargetArray[0] == NULL)
   {
+    RenderTarget* pTarget = NULL;
     m_pGraphicsImpl->GetBackBuffer(&pTarget);
+    m_pTargets[0] = static_cast<RenderTargetImpl*>(pTarget);
+    m_nTargetCount = 1;
+    SAFE_RELEASE(pTarget);
   }
-
-  
-  InlSetNewObjectT(m_pTarget, static_cast<RenderTargetImpl*>(pTarget));
-
-  //if((pTexture != NULL && (pTexture->GetUsage() & GXRU_TEX_RENDERTARGET)) ||
-  //  pTexture == NULL)
+  else
   {
-    //ASSERT(m_pTarget == NULL);
-
-    //m_pTargetTex = (GTextureImpl*)pTexture;
-    //if(m_pTargetTex != NULL)
-    //{
-    //  m_pTargetTex->AddRef();
-    //  m_pTargetTex->GetDimension((GXUINT*)&m_xExt, (GXUINT*)&m_yExt);
-    //}
-    //else
-    //{
-    //  GXGRAPHICSDEVICE_DESC GraphDeviceDesc;
-    //  m_pGraphicsImpl->GetDesc(&GraphDeviceDesc);
-    //  m_xExt = GraphDeviceDesc.BackBufferWidth;
-    //  m_yExt = GraphDeviceDesc.BackBufferHeight;
-    //}
-    m_pTarget->GetDimension(&m_sExtent);
-
-    if(m_pCurDepthStencilState == NULL)
+    for(size_t i = 0; i < nCount; i++)
     {
-      GXDEPTHSTENCILDESC DepthStencil(TRUE, FALSE);
-      m_pGraphicsImpl->CreateDepthStencilState((DepthStencilState**)&m_pCurDepthStencilState, &DepthStencil);
+      m_pTargets[i] = static_cast<RenderTargetImpl*>(pTargetArray[i]);
     }
-
-    m_Viewport = *pViewport;
-    SetupCanvasUniform();
-
-    //SAFE_RELEASE(pTexture);
-
-    GRESKETCH sSketch;
-    sSketch.dwCategoryId = RCC_Canvas3D;
-    sSketch.strResourceName.Format(_CLTEXT("%x"), this);
-    m_pGraphicsImpl->RegisterResource(this, &sSketch);
-    return TRUE;
+    m_nTargetCount = (int)nCount;
   }
+
+  m_pTargets[0]->GetDimension(&m_sExtent);
+
+  if(m_pCurDepthStencilState == NULL)
+  {
+    GXDEPTHSTENCILDESC DepthStencil(TRUE, FALSE);
+    m_pGraphicsImpl->CreateDepthStencilState((DepthStencilState**)&m_pCurDepthStencilState, &DepthStencil);
+  }
+
+  m_Viewport = *pViewport;
+  SetupCanvasUniform();
 
   //SAFE_RELEASE(pTexture);
-  return FALSE;
+
+  GRESKETCH sSketch;
+  sSketch.dwCategoryId = RCC_Canvas3D;
+  sSketch.strResourceName.Format(_CLTEXT("%x"), this);
+  m_pGraphicsImpl->RegisterResource(this, &sSketch);
+  return TRUE;
 }
 
 Graphics* Canvas3DImpl::GetGraphicsUnsafe() const
@@ -273,7 +265,7 @@ GXHRESULT Canvas3DImpl::Draw(GVSequence* pSequence)
   return GX_OK;
 }
 
-GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode)
+GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode, const float4x4* pTransform)
 {
   GVRENDERDESC Desc;
   pNode->GetRenderDesc(GVRT_Normal, &Desc);
@@ -282,9 +274,10 @@ GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode)
     return GX_FAIL;
   }
 
-  if(TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
-    SetWorldMatrix(Desc.matWorld);
+  if(pTransform) {
+    SetWorldMatrix(*pTransform);
   }
+
   m_CurMaterialImpl = NULL;
   m_pGraphicsImpl->InlSetShader(pShader);
 
@@ -301,7 +294,7 @@ GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode)
     ASSERT(0);
   }
 
-  if(TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
+  if(pTransform) {
     SetWorldMatrix(float4x4::Identity);
   }
 
@@ -494,7 +487,7 @@ GXHRESULT Canvas3DImpl::GetDepthStencil(Texture** ppDepthStencil)
 
   //*ppDepthStencil = m_pDepthStencil;
   //return m_pDepthStencil->AddRef();
-  return m_pTarget->GetDepthStencilTexture(ppDepthStencil);
+  return m_pTargets[0]->GetDepthStencilTexture(ppDepthStencil);
 }
 
 const Canvas3D::FrustumPlanes* Canvas3DImpl::GetViewFrustum()

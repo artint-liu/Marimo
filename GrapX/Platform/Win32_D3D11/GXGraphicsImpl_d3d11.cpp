@@ -1189,6 +1189,38 @@ namespace GrapX
       }
       return TRUE;
     }
+
+    GXBOOL GraphicsImpl::InlSetRenderTarget(Canvas3DImpl* pCanvas3D)
+    {
+      RenderTargetImpl** pTargets = &pCanvas3D->m_pTargets[0];
+      RenderTargetImpl* pTargetImpl = static_cast<RenderTargetImpl*>(pTargets[0]);
+
+      SAFE_RELEASE(m_pCurRenderTarget);
+      SAFE_RELEASE(m_pCurRenderTargetView);
+      SAFE_RELEASE(m_pCurDepthStencilView);
+
+      if(pTargetImpl->IntGetDepthStencilTextureUnsafe())
+      {
+        m_pCurDepthStencilView = pTargetImpl->IntGetDepthStencilTextureUnsafe()->m_pD3D11DepthStencilView;
+        m_pCurDepthStencilView->AddRef();
+      }
+
+      ID3D11RenderTargetView* rtv[MRT_SUPPORT_COUNT];
+
+      m_pCurRenderTarget = pTargetImpl;
+      m_pCurRenderTargetView = pTargetImpl->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
+      m_pCurRenderTarget->AddRef();
+      m_pCurRenderTargetView->AddRef();
+
+      for(GXUINT i = 0; i < pCanvas3D->m_nTargetCount; i++)
+      {
+        rtv[i] = pTargets[0]->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
+      }
+
+      m_pImmediateContext->OMSetRenderTargets(pCanvas3D->m_nTargetCount, rtv, m_pCurDepthStencilView);
+      return TRUE;
+    }
+
   } // namespace D3D11
 }
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11

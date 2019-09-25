@@ -647,26 +647,40 @@ GXFont* GraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GX
 
 #include "Canvas/GXCanvas3DImpl.h"
 #include "Canvas/GXCanvas3DImpl.inl"
-GXHRESULT GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
+
+GXBOOL GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, size_t nCount, LPCREGN lpRegn, float fNear, float fFar)
 {
   GXREGN    regn = 0;
-  GXHRESULT hval = GX_OK;
+  //GXHRESULT hval = GX_OK;
+  GXBOOL bret = TRUE;
   GXLPCSTR  c_szError_NoSameSize = __FUNCTION__": Image and DepthStencil-texture must be in same size.\n";
 
+  if(nCount > 1)
+  {
+    for(size_t i = 0; i < nCount; i++)
+    {
+      if(pTargetArray[i] == NULL) {
+        CLOG_ERROR("%s(%d): 默认缓冲不能与离屏缓冲混用", __FUNCTION__, __LINE__);
+        return FALSE;
+      }
+    }
+  }
+
   // 获得 Image 的尺寸, 如果是 NULL 则取后台缓冲的尺寸
-  if(pTarget) {
+  if(pTargetArray && nCount > 0 && pTargetArray[0]) {
     GXSIZE sDimension;
-    pTarget->GetDimension(&sDimension);
+    pTargetArray[0]->GetDimension(&sDimension);
     regn.width  = sDimension.cx;
     regn.height = sDimension.cy;
 
-    //GXUINT nDepthWidth, nDepthHeight;
-    //pDepthStencil->GetDimension(&nDepthWidth, &nDepthHeight);
-
-    //if(regn.width != nDepthWidth || regn.height != nDepthHeight) {
-    //  CLOG_ERROR(c_szError_NoSameSize);
-    //  return GX_FAIL;
-    //}
+    for(size_t i = 1; i < nCount; i++)
+    {
+      pTargetArray[i]->GetDimension(&sDimension);
+      if(regn.width != sDimension.cx || regn.height != sDimension.cy) {
+        CLOG_ERROR("%s(%d): 多缓冲目标的尺寸不一致", __FUNCTION__, __LINE__);
+        return FALSE;
+      }
+    }
   }
   else// if(pImage == NULL && pDepthStencil == NULL) 
   {
@@ -674,7 +688,9 @@ GXHRESULT GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget* pTar
     GetDesc(&Desc);
     regn.width  = Desc.BackBufferWidth;
     regn.height = Desc.BackBufferHeight;
-    pTarget = m_pBackBufferRenderTarget;
+    //pTarget = m_pBackBufferRenderTarget;
+    pTargetArray = NULL;
+    nCount = 0;
   }
   //else
   //{
@@ -694,16 +710,20 @@ GXHRESULT GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget* pTar
   }
 
   GXVIEWPORT Viewport(&regn, fNear, fFar);
-  if( ! pCanvas3D->Initialize(pTarget, &Viewport))
+  if( ! pCanvas3D->Initialize(pTargetArray, nCount, &Viewport))
   {
     pCanvas3D->Release();
     pCanvas3D = NULL;
-    hval = GX_FAIL;
+    bret = FALSE;
   }
   *ppCanvas3D = pCanvas3D;
-  return hval;
+  return bret;
 }
 
+GXBOOL GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
+{
+  return CreateCanvas3D(ppCanvas3D, &pTarget, 1, lpRegn, fNear, fFar);
+}
 //////////////////////////////////////////////////////////////////////////
 #if 0
 GXHRESULT GraphicsImpl::IntCreateSdrPltDescW(GShader** ppShader, GXLPCWSTR szShaderDesc, GXLPCSTR szPlatformSect, MTLFILEPARAMDESC* pMtlParam)

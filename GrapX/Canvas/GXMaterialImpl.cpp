@@ -429,7 +429,7 @@ namespace GrapX
     }
 
     if (nMaxSlot) {
-      m_aTextures.assign(nMaxSlot, NULL);
+      m_aTextures.assign(nMaxSlot, ObjectT<Texture>(NULL));
     }
 
     return TRUE;

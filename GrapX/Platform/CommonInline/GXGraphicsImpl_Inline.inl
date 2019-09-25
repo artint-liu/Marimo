@@ -62,9 +62,9 @@ GXBOOL GraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTarge
 #if defined(_GXGRAPHICS_INLINE_CANVAS_D3D9_) || defined(_GXGRAPHICS_INLINE_CANVAS_D3D11_) || defined(_GXGRAPHICS_INLINE_CANVAS_GLES2_)
 GXHRESULT GraphicsImpl::InlSetCanvas(CanvasCore *pCanvasCore)
 {
-  //GXCanvasImpl* pCanvas = (GXCanvasImpl*)pICanvas;
-  if(m_pCurCanvasCore == (CanvasCore*)pCanvasCore)
+  if(m_pCurCanvasCore == (CanvasCore*)pCanvasCore) {
     return GX_OK;
+  }
 
   // 释放上一个对象
   SAFE_RELEASE(m_pCurCanvasCore);
@@ -76,9 +76,17 @@ GXHRESULT GraphicsImpl::InlSetCanvas(CanvasCore *pCanvasCore)
   {
     ASSERT(TEST_FLAG(m_dwFlags, F_ACTIVATE) != 0);
     hr = m_pCurCanvasCore->AddRef();
-    GrapX::RenderTarget* pTarget = pCanvasCore->GetTargetUnsafe();
-    if(m_pCurRenderTarget != pTarget) {
-      InlSetRenderTarget(pTarget, 0);
+    if(pCanvasCore->GetType() == RESTYPE_CANVAS3D)
+    {
+      Canvas3DImpl* pCanvas3DImpl = reinterpret_cast<Canvas3DImpl*>(pCanvasCore);
+      InlSetRenderTarget(pCanvas3DImpl);
+    }
+    else
+    {
+      RenderTarget* pTarget = pCanvasCore->GetTargetUnsafe();
+      if(m_pCurRenderTarget != pTarget) {
+        InlSetRenderTarget(pTarget, 0);
+      }
     }
   }
   else {

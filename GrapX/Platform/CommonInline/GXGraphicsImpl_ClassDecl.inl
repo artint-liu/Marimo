@@ -93,17 +93,18 @@
   // GXCanvas
   virtual Canvas*   LockCanvas              (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags) override;
 
-  virtual GXHRESULT   CreateCanvas3D          (Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
+  GXBOOL      CreateCanvas3D          (Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, size_t nCount, LPCREGN lpRegn, float fNear, float fFar) override;
+  GXBOOL      CreateCanvas3D          (Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
   //virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
-  virtual GXHRESULT   CreateEffect            (Effect** ppEffect, Shader* pShader) override;
-  virtual GXHRESULT   CreateMaterial          (Material** ppMtlInst, Shader* pShader) override;
-  virtual GXHRESULT   CreateMaterialFromFile  (Material** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
+  GXHRESULT   CreateEffect            (Effect** ppEffect, Shader* pShader) override;
+  GXHRESULT   CreateMaterial          (Material** ppMtlInst, Shader* pShader) override;
+  GXHRESULT   CreateMaterialFromFile  (Material** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
   //virtual GXHRESULT   CreateMaterialFromFile  (GXMaterialInst** ppMtlInst, GXLPCWSTR szShaderDesc, MtlLoadType eLoadType) override;
 
-  virtual GXHRESULT   CreateRasterizerState   (RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc) override;
-  virtual GXHRESULT   CreateBlendState        (BlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum) override;
-  virtual GXHRESULT   CreateDepthStencilState (DepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState) override;
-  virtual GXHRESULT   CreateSamplerState      (SamplerState** ppSamplerState, const GXSAMPLERDESC* pDesc) override;
+  GXHRESULT   CreateRasterizerState   (RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc) override;
+  GXHRESULT   CreateBlendState        (BlendState** ppBlendState, GXBLENDDESC* pState, GXUINT nNum) override;
+  GXHRESULT   CreateDepthStencilState (DepthStencilState** ppDepthStencilState, GXDEPTHSTENCILDESC* pState) override;
+  GXHRESULT   CreateSamplerState      (SamplerState** ppSamplerState, const GXSAMPLERDESC* pDesc) override;
 
   // GXImage
   // TODO: 即使创建失败,也会返回一个默认图片
@@ -174,7 +175,8 @@ private:
 
   inline GXLPCSTR   InlGetPlatformStringA () const;
   inline GXBOOL     InlSetTexture         (TexBaseImpl* pTexture, GXUINT uStage);
-  inline GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTargetIndex);
+  inline GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTar);
+  inline GXBOOL     InlSetRenderTarget    (Canvas3DImpl* pCanvas3D);
   //inline GXBOOL     InlSetDepthStencil    (Texture* pTexture);
 
   inline GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
@@ -216,7 +218,7 @@ private:  // 状态对象
   RenderTargetImpl*       m_pCurRenderTarget;
   //GTextureImpl*           m_pCurDepthStencil;
   Shader*                 m_pCurShader;
-  CanvasCore*           m_pCurCanvasCore;
+  CanvasCore*             m_pCurCanvasCore;
   //GRenderStateImpl*       m_pCurRenderState;
   RasterizerStateImpl*    m_pCurRasterizerState;
   BlendStateImpl*         m_pCurBlendState;
