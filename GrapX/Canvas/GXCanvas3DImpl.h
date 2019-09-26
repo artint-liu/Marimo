@@ -17,7 +17,7 @@ protected:
   //GTexture*                 m_pDepthStencil;
   //RenderTargetImpl*         m_pTarget;
   ObjectT<RenderTargetImpl> m_pTargets[MRT_SUPPORT_COUNT];
-  int                       m_nTargetCount = NULL;
+  GXUINT                    m_nTargetCount = NULL;
   //GXImage*                  m_pImage;
   GXVIEWPORT                m_Viewport;
   Camera*                   m_pCamera;

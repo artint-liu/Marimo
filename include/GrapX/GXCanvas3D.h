@@ -19,9 +19,10 @@ namespace GrapX
 
     GXSTDINTERFACE(GXHRESULT      Invoke                (GRESCRIPTDESC* pDesc));
     GXSTDINTERFACE(GXHRESULT      Activate              ());
+
     GXSTDINTERFACE(GXHRESULT      Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil));
     GXSTDINTERFACE(GXHRESULT      Draw                  (GVSequence* pSequence));
-    GXSTDINTERFACE(GXHRESULT      Draw                  (Shader* pShader, GVNode* pNode)); // 临时
+    GXSTDINTERFACE(GXHRESULT      Draw                  (Shader* pShader, GVNode* pNode, const float4x4* pTransform = NULL)); // 临时
 
     GXSTDINTERFACE(GXHRESULT      SetMaterial           (Material* pMtlInst));
     GXSTDINTERFACE(GXHRESULT      SetPrimitive          (Primitive* pPrimitive));
@@ -58,7 +59,7 @@ namespace GrapX
 #else
     GXSTDINTERFACE(STANDARDMTLUNIFORMTABLE* GetStandardUniform    ());  // 返回的数据可以在应用程序中修改
 #endif // #ifdef REFACTOR_SHADER
-
+    GXSTDINTERFACE(RenderTarget*  GetTargetUnsafe       (int index) const);
     GXSTDINTERFACE(GXHRESULT      UpdateCommonUniforms  ());
   };
 } // namespace GrapX

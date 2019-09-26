@@ -1214,7 +1214,7 @@ namespace GrapX
 
       for(GXUINT i = 0; i < pCanvas3D->m_nTargetCount; i++)
       {
-        rtv[i] = pTargets[0]->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
+        rtv[i] = pTargets[i]->IntGetColorTextureUnsafe()->m_pD3D11RenderTargetView;
       }
 
       m_pImmediateContext->OMSetRenderTargets(pCanvas3D->m_nTargetCount, rtv, m_pCurDepthStencilView);

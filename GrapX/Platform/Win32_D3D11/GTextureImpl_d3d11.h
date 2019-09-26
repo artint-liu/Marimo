@@ -127,6 +127,7 @@ namespace GrapX
       TextureImpl_RenderTarget(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
       virtual ~TextureImpl_RenderTarget();
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture);
+      ID3D11RenderTargetView* D3DGetRenderTargetView() const;
     };
 
     //////////////////////////////////////////////////////////////////////////

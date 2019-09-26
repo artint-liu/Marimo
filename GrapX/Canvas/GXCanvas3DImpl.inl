@@ -507,7 +507,18 @@ GXHRESULT Canvas3DImpl::Clear(GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWO
 {
   if(m_pGraphicsImpl->IsActiveCanvas(this))
   {
-    return m_pGraphicsImpl->Clear(NULL, 0, dwFlags, crClear, z, dwStencil);
+    m_pGraphicsImpl->Clear(NULL, 0, dwFlags, crClear, z, dwStencil);
+    
+    if(TEST_FLAG(dwFlags, GXCLEAR_TARGET))
+    {
+      GXColor color = crClear;
+      for(GXUINT i = 1; i < m_nTargetCount; i++)
+      {
+        m_pGraphicsImpl->D3DGetDeviceContext()->ClearRenderTargetView(
+          m_pTargets[i]->IntGetColorTextureUnsafe()->D3DGetRenderTargetView(), (const FLOAT*)&color);
+      }
+    }
+    return GX_OK;
   }
   return GX_FAIL;     
 }

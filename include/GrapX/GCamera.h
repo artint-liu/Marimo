@@ -79,7 +79,8 @@ namespace GrapX
     GXSTDINTERFACE(void           SetViewMatrix     (const float4x4& matView));
     //GXSTDINTERFACE(CFloat3&      GetDir            () const);
 
-    static BOOL Create(Camera** ppCamera, const float fAspect, const float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp = float3::AxisY, float fNear = 1.0f, float fFar = 1000.0f);
+    static BOOL Create(Camera** ppCamera, float fAspect, float fovy, const float3& vEye, const float3& vLookAt, const float3& vUp = float3::AxisY, float fNear = 1.0f, float fFar = 1000.0f);
+    static BOOL CreateOrthographic(Camera** ppCamera, float w, float h, const float3& vEye, const float3& vLookAt, const float3& vUp = float3::AxisY, float fNear = 1.0f, float fFar = 1000.0f);
   };
 } // namespace GrapX
 

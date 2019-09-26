@@ -88,13 +88,13 @@ namespace GrapX
     ObjectT() : m_pObject(NULL)
     {}
 
-    ObjectT(_TUnknown* pObj)
+    explicit ObjectT(_TUnknown* pObj)
       : m_pObject(pObj)
     {
       SAFE_ADDREF(pObj);
     }
 
-    ObjectT(const ObjectT& NewObject)
+    explicit ObjectT(const ObjectT& NewObject)
       : m_pObject(NULL)
     {
       operator=(NewObject.operator->());
@@ -142,6 +142,12 @@ namespace GrapX
 
     template<class ObjectT2>
     ObjectT2* CastPtr()
+    {
+      return static_cast<ObjectT2*>(m_pObject);
+    }
+
+    template<class ObjectT2>
+    ObjectT2* CastPtr() const
     {
       return static_cast<ObjectT2*>(m_pObject);
     }

@@ -489,6 +489,11 @@ namespace GrapX
       return SUCCEEDED(hval);
     }
 
+    ID3D11RenderTargetView* TextureImpl_RenderTarget::D3DGetRenderTargetView() const
+    {
+      return m_pD3D11RenderTargetView;
+    }
+
     //////////////////////////////////////////////////////////////////////////
 
     TextureImpl_DepthStencil::TextureImpl_DepthStencil(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
