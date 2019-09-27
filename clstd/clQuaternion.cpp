@@ -146,7 +146,7 @@ namespace clstd
 
   _quaternion& _quaternion::YawPitchRollA(float yaw, float pitch, float roll)
   {
-    return *QuaternionRotationYawPitchRoll(this, CL_AGNLE2RAD(yaw), CL_AGNLE2RAD(pitch), CL_AGNLE2RAD(roll));
+    return *QuaternionRotationYawPitchRoll(this, CL_DEG2RAD(yaw), CL_DEG2RAD(pitch), CL_DEG2RAD(roll));
   }
 
   _quaternion& _quaternion::YawPitchRollR(float yaw, float pitch, float roll)
@@ -156,7 +156,7 @@ namespace clstd
 
   _quaternion& _quaternion::YawPitchRollA(const _euler& e)
   {
-    return *QuaternionRotationYawPitchRoll(this, CL_AGNLE2RAD(e.yaw), CL_AGNLE2RAD(e.pitch), CL_AGNLE2RAD(e.roll));
+    return *QuaternionRotationYawPitchRoll(this, CL_DEG2RAD(e.yaw), CL_DEG2RAD(e.pitch), CL_DEG2RAD(e.roll));
   }
 
   _quaternion& _quaternion::YawPitchRollR(const _euler& e)

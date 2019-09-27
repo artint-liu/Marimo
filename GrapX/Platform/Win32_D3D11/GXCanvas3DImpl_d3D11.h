@@ -51,6 +51,9 @@ namespace GrapX
       GXHRESULT       AddRef                () override;
       GXHRESULT       Release               () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+      GXBOOL         SetTarget             (RenderTarget** pTargetArray, GXUINT count) override;
+      GXBOOL         SetTarget             (RenderTarget* pTarget) override;
+
       GXBOOL          Begin                 ();
       GXBOOL          End                   ();
       GXHRESULT       Invoke                (GRESCRIPTDESC* pDesc) override;
@@ -90,7 +93,7 @@ namespace GrapX
 
       GXHRESULT   SetMaterial           (Material* pMaterial) override;
       GXHRESULT   SetPrimitive          (Primitive* pPrimitive) override;
-      GXHRESULT   SetCamera             (Camera* pCamera) override;
+      void        SetCamera             (Camera* pCamera) override;
       Camera*     GetCameraUnsafe       () override;
       //GXHRESULT   Activate              () override;
       GXHRESULT   UpdateCommonUniforms  () override;

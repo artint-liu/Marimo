@@ -102,6 +102,7 @@ namespace GrapX
       m_pGraphicsImpl->UnregisterResource(this);
       SAFE_RELEASE(m_pCurDepthStencilState);
       //SAFE_RELEASE(m_pImage);
+      SAFE_RELEASE(m_pCamera);
       //SAFE_RELEASE(m_pCurMaterialImpl);
       //SAFE_RELEASE(m_pTarget);
       SAFE_RELEASE(m_pBlendState);
@@ -128,6 +129,82 @@ namespace GrapX
     }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
+    GXBOOL Canvas3DImpl::SetTarget(RenderTarget** pTargetArray, GXUINT nCount)
+    {
+      if((pTargetArray == NULL && nCount != 0) || (pTargetArray != NULL && nCount == 0))
+      {
+        CLOG_ERROR("%s(%d): 使用后台缓冲必须两个参数都为NULL", __FUNCTION__, __LINE__);
+        return FALSE;
+      }
+
+      for(int i = 0; i < MRT_SUPPORT_COUNT; i++) {
+        m_pTargets[i] = NULL;
+      }
+
+
+      if((pTargetArray == NULL && nCount == 0) || (pTargetArray[0] == NULL && nCount == 1))
+      {
+        RenderTarget* pTarget = NULL;
+        m_pGraphicsImpl->GetBackBuffer(&pTarget);
+        m_pTargets[0] = static_cast<RenderTargetImpl*>(pTarget);
+        m_nTargetCount = 1;
+        m_pTargets[0]->GetDimension(&m_sExtent);
+        SAFE_RELEASE(pTarget);
+
+        if(m_pGraphicsImpl->IsActiveCanvas(this))
+        {
+          m_pGraphicsImpl->InlSetRenderTarget(NULL, 0);
+        }
+
+      }
+      else
+      {
+        GXSIZE sExtent, sOther;
+        if(pTargetArray[0] == NULL) {
+          CLOG_ERROR("%s(%d): 后台缓冲不能使用多目标渲染", __FUNCTION__, __LINE__);
+          return FALSE;
+        }
+
+        pTargetArray[0]->GetDimension(&sExtent);
+
+        for(int i = 1; i < nCount; i++)
+        {
+          if(pTargetArray[i] == NULL) {
+            CLOG_ERROR("%s(%d): 后台缓冲不能使用多目标渲染", __FUNCTION__, __LINE__);
+            return FALSE;
+          }
+          pTargetArray[i]->GetDimension(&sOther);
+          if(sOther.cx != sExtent.cx || sOther.cy != sExtent.cy) {
+            CLOG_ERROR("%s(%d): 多目标渲染尺寸不一致", __FUNCTION__, __LINE__);
+            return NULL;
+          }
+        }
+
+        for(size_t i = 0; i < nCount; i++)
+        {
+          m_pTargets[i] = static_cast<RenderTargetImpl*>(pTargetArray[i]);
+        }
+
+        if(m_pGraphicsImpl->IsActiveCanvas(this))
+        {
+          m_pGraphicsImpl->InlSetRenderTarget(this);
+        }
+
+        m_sExtent = sExtent;
+        m_nTargetCount = nCount;
+      }
+
+      // TODO: 设置深度模板缓冲
+
+      m_Viewport.regn.Set(0, 0, m_sExtent.cx, m_sExtent.cy);
+      return TRUE;
+    }
+
+    GXBOOL Canvas3DImpl::SetTarget(RenderTarget* pTarget)
+    {
+      return Canvas3DImpl::SetTarget(&pTarget, 1);
+    }
+
     GXSIZE* Canvas3DImpl::GetTargetDimension(GXSIZE* pSize) const
     {
       *pSize = m_sExtent;
@@ -152,33 +229,39 @@ namespace GrapX
     GXBOOL Canvas3DImpl::Initialize(RenderTarget** pTargetArray, size_t nCount, GXLPCVIEWPORT pViewport)
     {
       //Texture* pTexture = NULL;
-      if (pTargetArray == NULL || nCount == 0 || pTargetArray[0] == NULL)
-      {
-        RenderTarget* pTarget = NULL;
-        m_pGraphicsImpl->GetBackBuffer(&pTarget);
-        m_pTargets[0] = static_cast<RenderTargetImpl*>(pTarget);
-        m_nTargetCount = 1;
-        SAFE_RELEASE(pTarget);
-      }
-      else
-      {
-        for (size_t i = 0; i < nCount; i++)
-        {
-          m_pTargets[i] = static_cast<RenderTargetImpl*>(pTargetArray[i]);
-        }
-        m_nTargetCount = (int)nCount;
-      }
+      //if (pTargetArray == NULL || nCount == 0 || pTargetArray[0] == NULL)
+      //{
+      //  RenderTarget* pTarget = NULL;
+      //  m_pGraphicsImpl->GetBackBuffer(&pTarget);
+      //  m_pTargets[0] = static_cast<RenderTargetImpl*>(pTarget);
+      //  m_nTargetCount = 1;
+      //  SAFE_RELEASE(pTarget);
+      //}
+      //else
+      //{
+      //  for (size_t i = 0; i < nCount; i++)
+      //  {
+      //    m_pTargets[i] = static_cast<RenderTargetImpl*>(pTargetArray[i]);
+      //  }
+      //  m_nTargetCount = (int)nCount;
+      //}
 
-      m_pTargets[0]->GetDimension(&m_sExtent);
+      //m_pTargets[0]->GetDimension(&m_sExtent);
+      if(_CL_NOT_(Canvas3DImpl::SetTarget(pTargetArray, nCount))) {
+        return FALSE;
+      }
+      m_Viewport = *pViewport;
 
+      // TODO: 去掉这个
       if (m_pCurDepthStencilState == NULL)
       {
         GXDEPTHSTENCILDESC DepthStencil(TRUE, FALSE);
         m_pGraphicsImpl->CreateDepthStencilState((DepthStencilState**)&m_pCurDepthStencilState, &DepthStencil);
       }
 
-      m_Viewport = *pViewport;
       SetupCanvasUniform();
+
+      Camera::Create(&m_pCamera, GetAspect(), CL_DEG2RAD(75.0f), 1.0f, float3::Origin);
 
       //SAFE_RELEASE(pTexture);
 
@@ -217,10 +300,14 @@ namespace GrapX
       return m_pGraphicsImpl->SetPrimitive(pPrimitive);
     }
 
-    GXHRESULT Canvas3DImpl::SetCamera(Camera* pCamera)
+    void Canvas3DImpl::SetCamera(Camera* pCamera)
     {
-      m_pCamera = pCamera;
-      return GX_OK;
+      if(pCamera)
+      {
+        SAFE_RELEASE(m_pCamera);
+        m_pCamera = pCamera;
+        pCamera->AddRef();
+      }
     }
 
     Camera* Canvas3DImpl::GetCameraUnsafe()

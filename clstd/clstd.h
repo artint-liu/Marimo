@@ -84,8 +84,8 @@
 #define CL_2PI        (CL_PI * 2.0f)
 #define CL_INVERSEPI  ((float)  0.318309886f)
 #define CL_INVERSE2PI ((float)1.0f / CL_2PI)
-#define CL_RAD2AGNLE(r) (r * 180.0f / CL_PI)
-#define CL_AGNLE2RAD(r) (r * CL_PI / 180.0f)
+#define CL_RAD2DEG(r) (r * 180.0f / CL_PI)
+#define CL_DEG2RAD(r) (r * CL_PI / 180.0f)
 
 #define CLMAKEFOURCC(ch0, ch1, ch2, ch3)                      \
   ((CLDWORD)(CLBYTE)(ch0) | ((CLDWORD)(CLBYTE)(ch1) << 8) |   \

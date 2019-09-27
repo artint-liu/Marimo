@@ -18,7 +18,8 @@ namespace GrapX
 
   public:
     Canvas3D(GXUINT nPrioruty, GXDWORD dwType) : CanvasCore(nPrioruty, dwType) {}
-
+    GXSTDINTERFACE(GXBOOL         SetTarget             (RenderTarget** pTargetArray, GXUINT count));
+    GXSTDINTERFACE(GXBOOL         SetTarget             (RenderTarget* pTarget));
     GXSTDINTERFACE(RenderTarget*  GetTargetUnsafe       (GXUINT index) const);
     GXSTDINTERFACE(GXHRESULT      Invoke                (GRESCRIPTDESC* pDesc));
     GXSTDINTERFACE(GXBOOL         Begin                 ());
@@ -33,7 +34,7 @@ namespace GrapX
 
     GXSTDINTERFACE(GXHRESULT      SetMaterial           (Material* pMtlInst));
     GXSTDINTERFACE(GXHRESULT      SetPrimitive          (Primitive* pPrimitive));
-    GXSTDINTERFACE(GXHRESULT      SetCamera             (Camera* pCamera));
+    GXSTDINTERFACE(void           SetCamera             (Camera* pCamera));
     GXSTDINTERFACE(Camera*        GetCameraUnsafe       ());
     GXSTDINTERFACE(GXHRESULT      GetDepthStencil       (Texture** ppDepthStencil));
     GXSTDINTERFACE(void           SetWorldMatrix        (const float4x4& matWorld));
