@@ -103,6 +103,7 @@ namespace GrapX
 
       //GXBOOL      IntCheckSizeOfTargetAndDepth();
       GXVOID      BuildInputLayout();
+      void IntEnumAdapter();
 
     private:
       const GXUINT            s_uCanvasCacheCount;

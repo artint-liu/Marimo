@@ -450,6 +450,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\CommonUniforms.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvas3DImpl_d3D11.h">
+      <Filter>Platform\Win32_D3X11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp">
@@ -878,6 +881,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\UniVersalShader\GXShaderT.cpp">
       <Filter>Lib\ShaderT</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvas3DImpl_d3D11.cpp">
+      <Filter>Platform\Win32_D3X11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

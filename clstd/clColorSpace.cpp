@@ -559,7 +559,7 @@ namespace clstd
   }
 
   template<class _TDataDef>
-  u32 _COLOR_RGBTEMPL_F<_TDataDef>::ARGB()
+  u32 _COLOR_RGBTEMPL_F<_TDataDef>::ARGB() const
   {
     Internal::COLOR_ARGB ret;
     Internal::_PackColorValue(ret, *this);
@@ -567,7 +567,7 @@ namespace clstd
   }
 
   template<class _TDataDef>
-  u32 _COLOR_RGBTEMPL_F<_TDataDef>::ABGR()
+  u32 _COLOR_RGBTEMPL_F<_TDataDef>::ABGR() const
   {
     Internal::COLOR_ABGR ret;
     Internal::_PackColorValue(ret, *this);

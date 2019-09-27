@@ -105,6 +105,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GStateBlock_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GTextureImpl_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvas3DImpl_d3D11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GStateBlock_d3d11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GTextureImpl_d3d11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GVertexDeclImpl_d3d11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvas3DImpl_d3D11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvasImpl_d3d11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXGraphicsImpl_d3d11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXRenderTargetImpl_d3d11.cpp" />

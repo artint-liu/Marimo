@@ -31,6 +31,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "DXGI.lib")
 //#pragma comment(lib, "d3dx11d.lib")
 #ifdef ENABLE_GRAPHICS_API_DX11
 //////////////////////////////////////////////////////////////////////////

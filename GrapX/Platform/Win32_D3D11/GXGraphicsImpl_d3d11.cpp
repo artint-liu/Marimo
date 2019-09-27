@@ -69,6 +69,9 @@
 #include <FreeImage.h>
 
 // Canvas3D用的
+#include "GrapX/StdMtl.h"
+#include "Canvas/GXCanvas3DImpl.h"
+#include "Platform/Win32_D3D11/GXCanvas3DImpl_d3d11.h"
 #include "GrapX/GCamera.h"
 #include "GrapX/GrapVR.h"  // Canvas3D 用的
 #include "Canvas/GXMaterialImpl.h"
@@ -204,6 +207,8 @@ namespace GrapX
       sd.SampleDesc.Count = 1;
       sd.SampleDesc.Quality = 0;
       sd.Windowed = TRUE;
+
+      IntEnumAdapter();
 
       HRESULT hval = E_FAIL;
 
@@ -650,13 +655,13 @@ namespace GrapX
     }
 #endif
 
-    GXHRESULT GraphicsImpl::Clear(const GXRECT* lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, float z, GXDWORD dwStencil)
+    GXHRESULT GraphicsImpl::Clear(const GXRECT* lpRects, GXUINT nCount, GXDWORD dwFlags, const GXColor& crClear, float z, GXDWORD dwStencil)
     {
       if(lpRects == NULL || nCount == 0)
       {
         if(TEST_FLAG(dwFlags, GXCLEAR_TARGET)) {
-          GXColor color = crClear;
-          m_pImmediateContext->ClearRenderTargetView(m_pCurRenderTargetView, (const FLOAT*)&color);
+          //GXColor color = crClear;
+          m_pImmediateContext->ClearRenderTargetView(m_pCurRenderTargetView, (const FLOAT*)&crClear);
         }
 
 #if 0
@@ -703,31 +708,32 @@ namespace GrapX
         clstd::LocalBuffer<sizeof(CANVAS_PRMI_VERT) * 6 * 64> buf;
         buf.Resize(sizeof(CANVAS_PRMI_VERT) * 6 * nCount, FALSE);
         CANVAS_PRMI_VERT* pVert = reinterpret_cast<CANVAS_PRMI_VERT*>(buf.GetPtr());
+        GXCOLOR color = crClear.ARGB();
         for(GXUINT i = 0; i < nCount; i++)
         {
           pVert[0].pos.set((float)lpRects[i].left, (float)lpRects[i].top, z, 1);
           pVert[0].texcoord.set(0, 0);
-          pVert[0].color = crClear;
+          pVert[0].color = color;
 
           pVert[1].pos.set((float)lpRects[i].right, (float)lpRects[i].top, z, 1);
           pVert[1].texcoord.set(0, 0);
-          pVert[1].color = crClear;
+          pVert[1].color = color;
 
           pVert[2].pos.set((float)lpRects[i].left, (float)lpRects[i].bottom, z, 1);
           pVert[2].texcoord.set(0, 0);
-          pVert[2].color = crClear;
+          pVert[2].color = color;
 
           pVert[3].pos.set((float)lpRects[i].left, (float)lpRects[i].bottom, z, 1);
           pVert[3].texcoord.set(0, 0);
-          pVert[3].color = crClear;
+          pVert[3].color = color;
 
           pVert[4].pos.set((float)lpRects[i].right, (float)lpRects[i].top, z, 1);
           pVert[4].texcoord.set(0, 0);
-          pVert[4].color = crClear;
+          pVert[4].color = color;
 
           pVert[5].pos.set((float)lpRects[i].right, (float)lpRects[i].bottom, z, 1);
           pVert[5].texcoord.set(0, 0);
-          pVert[5].color = crClear;
+          pVert[5].color = color;
 
           pVert += 6;
         }
@@ -785,6 +791,30 @@ namespace GrapX
       m_pVertexLayout = pInputLayout;
       m_pVertexLayout->AddRef();
       m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
+    }
+
+    void GraphicsImpl::IntEnumAdapter()
+    {
+      IDXGIFactory* pFactory = NULL;
+      IDXGIAdapter * pAdapter;
+
+      // Create a DXGIFactory object.
+      if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pFactory)))
+      {
+        return ;
+      }
+      
+      DXGI_ADAPTER_DESC desc;
+      CLOG("Adapter list");
+      for (UINT i = 0; pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
+      {
+        pAdapter->GetDesc(&desc);
+        CLOGW(_CLTEXT("%s.VendorId:%u.DeviceId:%u.SubSysId:%u.Revision:%u"), desc.Description, desc.VendorId, desc.DeviceId, desc.SubSysId, desc.Revision);
+        SAFE_RELEASE(pAdapter);
+      }
+
+
+      SAFE_RELEASE(pFactory);
     }
 
     GXHRESULT GraphicsImpl::DrawPrimitive(const GXPrimitiveType eType, const GXUINT StartVertex,

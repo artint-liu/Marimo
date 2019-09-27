@@ -35,7 +35,7 @@
   virtual GXHRESULT SetDepthStencilState  (DepthStencilState* pDepthStencilState) override;
   virtual GXHRESULT SetSamplerState       (GXUINT slot, SamplerState* pSamplerState) override;
 
-  virtual GXHRESULT Clear               (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil) override;
+  virtual GXHRESULT Clear               (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil) override;
   virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount) override;
   virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXINT BaseVertexIndex, const GXUINT MinIndex, const GXUINT NumVertices, const GXUINT StartIndex, const GXUINT PrimitiveCount) override;
 
@@ -199,7 +199,10 @@ public:
   inline GXBOOL     InlIsActiveBlendState         (BlendStateImpl* pBlendState);
   inline GXBOOL     InlIsActiveDepthStencilState  (DepthStencilStateImpl* pDepthStencilState);
   inline GXBOOL     InlIsActiveSamplerState       (SamplerStateImpl* pSamplerState);
-  inline Marimo::ShaderConstName* InlGetShaderConstantNameObj();
+  inline Marimo::ShaderConstName* InlGetShaderConstantNameObj()
+  {
+    return m_pShaderConstName;
+  }
 
 private: // 用于管理的对象
   CanvasImpl**          m_aCanvasPtrCache;

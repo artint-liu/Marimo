@@ -608,15 +608,17 @@ i32 GXUIMsgThread::StartRoutine()
   pGraphics->Activate(FALSE);
 
   if(GXFAILED(hval)) {
-    return hval;
+    ::PostMessage(lpStation->hBindWin32Wnd, WM_CLOSE, 0, 0);
   }
-
-  GXMSG gxmsg;
-  while(gxGetMessage(&gxmsg, NULL))
+  else
   {
-    // 在处理拖拽消息时, 这个函数可能要很久才返回
-    gxTranslateMessage(&gxmsg);
-    gxDispatchMessageW(&gxmsg);
+    GXMSG gxmsg;
+    while (gxGetMessage(&gxmsg, NULL))
+    {
+      // 在处理拖拽消息时, 这个函数可能要很久才返回
+      gxTranslateMessage(&gxmsg);
+      gxDispatchMessageW(&gxmsg);
+    }
   }
 #endif // _DEV_DISABLE_UI_CODE
 

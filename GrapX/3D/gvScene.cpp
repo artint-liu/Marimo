@@ -410,10 +410,12 @@ GXHRESULT GVScene::RenderAll( Canvas3D* pCanvas, GVRenderType eType )
   m_uDrawCallCount = 0;
 
   pCanvas->UpdateCommonUniforms();
-  pCanvas->Activate();
-  pCanvas->Clear(GXCLEAR_TARGET|GXCLEAR_DEPTH, 0, 1.0f, NULL);
+  pCanvas->Begin();
+  pCanvas->Clear(0, 1.0f, NULL);
 
-  return RenderRecursive(pCanvas, m_pRoot, eType);
+  GXHRESULT hr = RenderRecursive(pCanvas, m_pRoot, eType);
+  pCanvas->End();
+  return hr;
 }
 
 GXHRESULT GVScene::SaveFileRecursive(clFile* pFile, GVNode* pParent, GXINOUT u32& nVertBase)

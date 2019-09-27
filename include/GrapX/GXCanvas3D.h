@@ -7,6 +7,7 @@
 class GVSequence;
 class GVNode;
 struct STANDARDMTLUNIFORMTABLE;
+
 namespace GrapX
 {
   class Canvas3D : public CanvasCore
@@ -14,13 +15,19 @@ namespace GrapX
   public:
     typedef clstd::geometry::Ray Ray;
     typedef clstd::geometry::FrustumPlanes FrustumPlanes;
+
   public:
     Canvas3D(GXUINT nPrioruty, GXDWORD dwType) : CanvasCore(nPrioruty, dwType) {}
 
+    GXSTDINTERFACE(RenderTarget*  GetTargetUnsafe       (GXUINT index) const);
     GXSTDINTERFACE(GXHRESULT      Invoke                (GRESCRIPTDESC* pDesc));
-    GXSTDINTERFACE(GXHRESULT      Activate              ());
+    GXSTDINTERFACE(GXBOOL         Begin                 ());
+    GXSTDINTERFACE(GXBOOL         End                   ());
 
-    GXSTDINTERFACE(GXHRESULT      Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil));
+    GXSTDINTERFACE(GXBOOL         Clear                 (GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil, GXDWORD dwFlags = GXCLEAR_ALL));
+    GXSTDINTERFACE(GXBOOL         Clear                 (const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil, GXDWORD dwFlags = GXCLEAR_ALL));
+    //GXSTDINTERFACE(GXHRESULT      Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil));
+
     GXSTDINTERFACE(GXHRESULT      Draw                  (GVSequence* pSequence));
     GXSTDINTERFACE(GXHRESULT      Draw                  (Shader* pShader, GVNode* pNode, const float4x4* pTransform = NULL)); // 临时
 
@@ -59,7 +66,6 @@ namespace GrapX
 #else
     GXSTDINTERFACE(STANDARDMTLUNIFORMTABLE* GetStandardUniform    ());  // 返回的数据可以在应用程序中修改
 #endif // #ifdef REFACTOR_SHADER
-    GXSTDINTERFACE(RenderTarget*  GetTargetUnsafe       (int index) const);
     GXSTDINTERFACE(GXHRESULT      UpdateCommonUniforms  ());
   };
 } // namespace GrapX

@@ -530,11 +530,6 @@ inline GXBOOL GraphicsImpl::InlIsActiveSamplerState(SamplerStateImpl* pSamplerSt
   return m_pCurSamplerState == pSamplerState;
 }
 
-inline Marimo::ShaderConstName* GraphicsImpl::InlGetShaderConstantNameObj()
-{
-  return m_pShaderConstName;
-}
-
 inline GXBOOL GraphicsImpl::InlIsActiveRasterizerState(RasterizerStateImpl* pRasterizerState)
 {
   return m_pCurRasterizerState == pRasterizerState;

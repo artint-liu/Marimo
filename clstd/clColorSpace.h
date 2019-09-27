@@ -375,9 +375,9 @@ namespace clstd
 
     _COLOR_RGBTEMPL_F& set(u32 aarrggbb);
 
-    u32 ARGB();
+    u32 ARGB() const;
 
-    u32 ABGR();
+    u32 ABGR() const;
 
     float GetGray() const;
   };
