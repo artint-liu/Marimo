@@ -16,7 +16,7 @@
 #include "GrapX/GXFont.h"
 #include "GrapX/GXCanvas3D.h"
 #include "GrapX/GStateBlock.h"
-#include "GrapX/MOLogger.h"
+//#include "GrapX/MOLogger.h"
 #include "GrapX/DataPool.h"
 #include "GrapX/DataPoolVariable.h"
 
@@ -30,22 +30,22 @@
 #include "Platform/Win32_D3D11/GVertexDeclImpl_d3d11.h"
 
 // 私有头文件
-#include <clPathFile.h>
+//#include <clPathFile.h>
 #include "Platform/Win32_D3D11/GStateBlock_d3d11.h"
 #include <GrapX/VertexDecl.h>
 #include "Canvas/GXResourceMgr.h"
 #include "Canvas/GXEffectImpl.h"
 //#include "Console.h"
-#include <Smart/SmartStream.h>
-#include <Smart/SmartProfile.h>
+//#include <Smart/SmartStream.h>
+//#include <Smart/SmartProfile.h>
 
-#include "GrapX/GXKernel.h"
-#include "GrapX/GXUser.h"
-#include <GDI/RegionFunc.h>
-#include <GDI/GRegionImpl.h>
+//#include "GrapX/GXKernel.h"
+//#include "GrapX/GXUser.h"
+//#include <GDI/RegionFunc.h>
+//#include <GDI/GRegionImpl.h>
 #include "Platform/Win32_D3D11/GTextureImpl_d3d11.h"
 
-#include "Canvas/GXImageImpl.h"
+//#include "Canvas/GXImageImpl.h"
 #include "Platform/Win32_D3D11/GXCanvasImpl_d3d11.h"
 
 #include "GrapX/gxError.h"
@@ -60,7 +60,7 @@
 #include "Platform/Win32_D3D11/GXGraphicsImpl_d3d11.h"
 #include "Platform/Win32_D3D11/GXRenderTargetImpl_d3d11.h"
 //#include "Canvas/GXMaterialImpl.h"
-#include <FreeImage.h>
+//#include <FreeImage.h>
 
 // Canvas3D用的
 
@@ -167,7 +167,7 @@ namespace GrapX
 
         pTargetArray[0]->GetDimension(&sExtent);
 
-        for(int i = 1; i < nCount; i++)
+        for(GXUINT i = 1; i < nCount; i++)
         {
           if(pTargetArray[i] == NULL) {
             CLOG_ERROR("%s(%d): 后台缓冲不能使用多目标渲染", __FUNCTION__, __LINE__);
@@ -226,7 +226,7 @@ namespace GrapX
       return index < m_nTargetCount ? m_pTargets[index].CastPtr<RenderTarget>() : NULL;
     }
 
-    GXBOOL Canvas3DImpl::Initialize(RenderTarget** pTargetArray, size_t nCount, GXLPCVIEWPORT pViewport)
+    GXBOOL Canvas3DImpl::Initialize(RenderTarget** pTargetArray, GXUINT nCount, GXLPCVIEWPORT pViewport)
     {
       //Texture* pTexture = NULL;
       //if (pTargetArray == NULL || nCount == 0 || pTargetArray[0] == NULL)
@@ -261,7 +261,7 @@ namespace GrapX
 
       SetupCanvasUniform();
 
-      Camera::Create(&m_pCamera, GetAspect(), CL_DEG2RAD(75.0f), 1.0f, float3::Origin);
+      Camera::Create(&m_pCamera, GetAspect(), CL_DEG2RAD(75.0f), float3::Origin, float3::AxisZ);
 
       //SAFE_RELEASE(pTexture);
 

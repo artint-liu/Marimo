@@ -115,6 +115,11 @@ GrapX::Camera& GCamera_ScreenAligned::Translate(const float3& vOffset, clstd::ES
   return *this;
 }
 
+GrapX::Camera& GCamera_ScreenAligned::LookAt(const float3& vWorldPos, const float3& vUp)
+{
+  return *this;
+}
+
 GrapX::Camera& GCamera_ScreenAligned::SetPos(const float3& vPos)
 {
   return *this;
@@ -507,6 +512,7 @@ namespace GrapX
 
       GXHRESULT GetContext (GCAMERACONETXT* pCamContext) override;
       GrapX::Camera&      Translate         (const float3& vOffset, clstd::ESpace space) override;
+      GrapX::Camera&      LookAt            (const float3& vWorldPos, const float3& vUp) override;
       GrapX::Camera&      SetPos            (const float3& vPos) override;
       //void          SetPosFront       (const float3& vPos, const float3& vFront) override;
       GrapX::Camera&      Rotate            (const float3& axis, float radians, clstd::ESpace space) override;
@@ -599,6 +605,12 @@ namespace GrapX
       //m_vEyePt += v3Offset;
       //UpdateMat();
       clstd::Camera::Translate(vOffset, space);
+      return *this;
+    }
+
+    GrapX::Camera& CameraImpl::LookAt(const float3& vWorldPos, const float3& vUp)
+    {
+      clstd::Camera::LookAt(vWorldPos, vUp);
       return *this;
     }
 

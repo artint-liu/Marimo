@@ -60,10 +60,10 @@ namespace GrapX
     //GXSTDINTERFACE(void          DeltaYawPitchRoll (const float Yaw, const float Pitch, const float Roll));
     GXSTDINTERFACE(Camera&        Rotate            (const float3& axis, float radians, enum clstd::ESpace space));
     GXSTDINTERFACE(Camera&        RotateAround      (const float3& point, const float3& axis, float radians));
-
     GXSTDINTERFACE(Camera&        Translate         (const float3& vOffset, clstd::ESpace space));
+
+    GXSTDINTERFACE(Camera&        LookAt            (const float3& vWorldPos, const float3& vUp = float3::AxisY));
     GXSTDINTERFACE(Camera&        SetPos            (const float3& vPos));
-    //GXSTDINTERFACE(void          SetPosFront       (const float3& vPos, const float3& vFront));
     GXSTDINTERFACE(CFloat3&       GetPos            () const);
     GXSTDINTERFACE(Camera&        SetRotation       (const float3x3& mat));
     GXSTDINTERFACE(Camera&        SetRotation       (const float3& vRight, const float3& vTop, const float3& vFront));
@@ -104,6 +104,7 @@ public:
   GrapX::Camera&        Rotate            (const float3& axis, float radians, enum clstd::ESpace space) override;
   GrapX::Camera&        RotateAround      (const float3& point, const float3& axis, float radians) override;
   GrapX::Camera&        Translate         (const float3& vOffset, clstd::ESpace space) override;
+  GrapX::Camera&        LookAt            (const float3& vWorldPos, const float3& vUp) override;
   GrapX::Camera&        SetPos            (const float3& vPos);
   //void          SetPosFront       (const float3& vPos, const float3& vFront);
   CFloat3&      GetPos            () const;

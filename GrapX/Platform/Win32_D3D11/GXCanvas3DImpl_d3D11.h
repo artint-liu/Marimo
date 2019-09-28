@@ -15,16 +15,14 @@ namespace GrapX
       friend class GraphicsImpl;
     protected:
       GraphicsImpl*             m_pGraphicsImpl;
-      //GXINT                     m_xExt;          // 物理尺寸，不受原点位置影响
-      //GXINT                     m_yExt;
-      GXSIZE                    m_sExtent;
-      //GTexture*                 m_pDepthStencil;
-      //RenderTargetImpl*         m_pTarget;
+      GXSIZE                    m_sExtent;    // RenderTarget尺寸决定
+
       ObjectT<RenderTargetImpl> m_pTargets[MRT_SUPPORT_COUNT];
       GXUINT                    m_nTargetCount = NULL;
-      //GXImage*                  m_pImage;
-      GXVIEWPORT                m_Viewport;
+
+      GXVIEWPORT                m_Viewport;     // 用户设置的视口
       Camera*                   m_pCamera;
+
 
       FrustumPlanes             m_ViewFrustum;
       ObjectT<MaterialImpl>     m_CurMaterialImpl;
@@ -61,10 +59,10 @@ namespace GrapX
       Graphics*       GetGraphicsUnsafe     () const override;
       RenderTarget*   GetTargetUnsafe       () const override;
       RenderTarget*   GetTargetUnsafe       (GXUINT index) const override;
-      GXBOOL          Initialize            (RenderTarget** pTargetArray, size_t nCount, GXLPCVIEWPORT pViewport);
+      GXBOOL          Initialize            (RenderTarget** pTargetArray, GXUINT nCount, GXLPCVIEWPORT pViewport);
 
-      GXBOOL Clear(GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil, GXDWORD dwFlags) override;
-      GXBOOL Clear(const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil, GXDWORD dwFlags) override;
+      GXBOOL Clear          (GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil, GXDWORD dwFlags) override;
+      GXBOOL Clear          (const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil, GXDWORD dwFlags) override;
 
       GXHRESULT   TransformPosition     (const float3* pPos, GXOUT float4* pView) override; // Transform world position to screen
       GXHRESULT   PositionToView        (const float3* pPos, GXOUT float3* pView) override; // like transform but it is float3 pos
