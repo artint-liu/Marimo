@@ -71,6 +71,7 @@ namespace GrapX
     void SetDepthStencilState(DepthStencilState* pState) override;
     void SetRasterizerState(RasterizerState* pState) override;
     void SetBlendState(BlendState* pState) override;
+    GXBOOL SetState(GXLPCSTR szStateCommand) override;
 
     Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
     GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture) override;

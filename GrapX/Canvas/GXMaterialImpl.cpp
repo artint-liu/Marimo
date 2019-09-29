@@ -16,6 +16,9 @@
 #include "clTokens.h"
 
 using namespace clstd;
+GXBOOL Parse(GXBLENDDESC& desc, TokensA& tokens, TokensA::iterator& iter);
+GXBOOL Parse(GXDEPTHSTENCILDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter);
+
 
 // 这个 MOGenerateDeclarationCodes 生成代码要用
 DATALAYOUT g_StandardMtl[] =
@@ -400,6 +403,33 @@ namespace GrapX
     }
   }
 
+  GXBOOL MaterialImpl::SetState(GXLPCSTR szStateCommand)
+  {
+    TokensA tokens(szStateCommand, strlenT(szStateCommand));
+    GXBLENDDESC sBlendDesc;
+    GXRASTERIZERDESC sRaterizerDesc;
+    GXDEPTHSTENCILDESC sDepthStencilDesc(TRUE, FALSE);
+
+    auto iter = tokens.begin();
+
+    while(iter != tokens.end())
+    {
+      ::Parse(sBlendDesc, tokens, iter);
+      if(iter == tokens.end()) {
+        break;
+      }
+      ::Parse(sDepthStencilDesc, tokens, iter);
+    }    
+
+    SAFE_RELEASE(m_pRasterizer);
+    m_pGraphics->CreateRasterizerState(&m_pRasterizer, &sRaterizerDesc);
+    SAFE_RELEASE(m_pDepthStencil);
+    m_pGraphics->CreateDepthStencilState(&m_pDepthStencil, &sDepthStencilDesc);
+    SAFE_RELEASE(m_pBlendState);
+    m_pGraphics->CreateBlendState(&m_pBlendState, &sBlendDesc, 1);
+    return TRUE;
+  }
+
   Marimo::DataPoolVariable MaterialImpl::GetUniform(GXLPCSTR szName)
   {
     Marimo::DataPoolVariable var;
@@ -517,7 +547,7 @@ namespace GrapX
 } // namespace GrapX
 
 //////////////////////////////////////////////////////////////////////////
-#define CMP_STR(_STR, _ENUM) if (clstd::strncmpT(str, _STR, len)) { return _ENUM; }
+#define CMP_STR(_STR, _ENUM) if (strncmpT(str, _STR, len) == 0) { return _ENUM; }
 #define CHECK_END(_ITER) if(_ITER == tokens.end()) { return FALSE; }
 GXBlend GXStringToBlend(GXLPCSTR str, size_t len)
 {
@@ -548,8 +578,15 @@ GXCHAR szOff[] = "off";
 
 GXBOOL GXBLENDDESC::Parse(GXLPCSTR szLine)
 {
-  clstd::TokensA tokens(szLine, clstd::strlenT(szLine));
-  clstd::TokensA::iterator iter = tokens.begin();
+  TokensA tokens(szLine, strlenT(szLine));
+  TokensA::iterator iter = tokens.begin();
+  return ::Parse(*this, tokens, iter);
+}
+
+// 解析成功返回TRUE
+// iter步进到下一个解析位置
+GXBOOL Parse(GXBLENDDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter)
+{
   if (iter == szBlend)
   {
     ++iter;
@@ -557,9 +594,10 @@ GXBOOL GXBLENDDESC::Parse(GXLPCSTR szLine)
 
     if (iter == szOff)
     {
-      BlendEnable = FALSE;
-      SrcBlend    = GXBLEND_ONE;
-      DestBlend   = GXBLEND_ZERO;
+      desc.BlendEnable = FALSE;
+      desc.SrcBlend    = GXBLEND_ONE;
+      desc.DestBlend   = GXBLEND_ZERO;
+      ++iter;
       return TRUE;
     }
 
@@ -569,12 +607,14 @@ GXBOOL GXBLENDDESC::Parse(GXLPCSTR szLine)
     GXBlend _SrcBlend = GXStringToBlend(iter.marker, iter.length);
     GXBlend _DestBlend = GXStringToBlend(iterSecond.marker, iterSecond.length);
     if (_SrcBlend == GXBLEND_FORCE_DWORD || _DestBlend == GXBLEND_FORCE_DWORD) {
+      iter = iterSecond + 1;
       return FALSE;
     }
 
-    SrcBlend = _SrcBlend;
-    DestBlend = _DestBlend;
-    BlendEnable = _CL_NOT_(_SrcBlend == GXBLEND_ONE && _DestBlend == GXBLEND_ZERO);
+    desc.SrcBlend = _SrcBlend;
+    desc.DestBlend = _DestBlend;
+    desc.BlendEnable = _CL_NOT_(_SrcBlend == GXBLEND_ONE && _DestBlend == GXBLEND_ZERO);
+    iter = iterSecond + 1;
     return TRUE;
   }
   //else if (iter == szColorMask)
@@ -593,19 +633,27 @@ GXBOOL GXDEPTHSTENCILDESC::Parse(GXLPCSTR szLine)
 {
   clstd::TokensA tokens(szLine, clstd::strlenT(szLine));
   clstd::TokensA::iterator iter = tokens.begin();
+  return ::Parse(*this, tokens, iter);
+}
+
+GXBOOL Parse(GXDEPTHSTENCILDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter)
+{
   CHECK_END(iter);
   if (iter == "zwrite")
   {
     ++iter;
     CHECK_END(iter);
     if (iter == "off") {
-      DepthEnable = FALSE;
+      desc.DepthEnable = FALSE;
+      ++iter;
       return TRUE;
     }
     else if (iter == "on") {
-      DepthEnable = TRUE;
+      desc.DepthEnable = TRUE;
+      ++iter;
       return TRUE;
     }
+    ++iter;
   }
   return FALSE;
 }

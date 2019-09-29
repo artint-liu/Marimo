@@ -150,6 +150,7 @@ namespace GrapX
     GXSTDINTERFACE(void         SetDepthStencilState(DepthStencilState* pState));
     GXSTDINTERFACE(void         SetRasterizerState(RasterizerState* pState));
     GXSTDINTERFACE(void         SetBlendState(BlendState* pState));
+    GXSTDINTERFACE(GXBOOL       SetState(GXLPCSTR szStateCommand));
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
     GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
