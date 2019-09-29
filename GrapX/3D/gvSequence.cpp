@@ -69,30 +69,31 @@ const GVSequence::RenderDescArray& GVSequence::GetArray(int nIndex)
 int GVSequence::Add(GVRENDERDESC* pDesc)
 {
   int nRenderQueue = pDesc->RenderQueue & 0xffff;
-  ASSERT(nRenderQueue >= 0 && nRenderQueue <= (int)RenderQueue_Max);
+  ASSERT(nRenderQueue >= 0 && nRenderQueue <= (int)GrapX::RenderQueue_Max);
 
   if(pDesc->pPrimitive) {
     pDesc->pPrimitive->AddRef();
   }
+
   ASSERT(pDesc->pMaterial);
   pDesc->pMaterial->AddRef();
 
-  if(nRenderQueue < RenderQueue_Background) {
+  if(nRenderQueue < GrapX::RenderQueue_Background) {
     m_aRenderDesc[0].push_back(*pDesc);
   }
-  else if(nRenderQueue < RenderQueue_Geometry) {
+  else if(nRenderQueue < GrapX::RenderQueue_Geometry) {
     m_aRenderDesc[1].push_back(*pDesc);
   }
-  else if(nRenderQueue < RenderQueue_AlphaTest) {
+  else if(nRenderQueue < GrapX::RenderQueue_AlphaTest) {
     m_aRenderDesc[2].push_back(*pDesc);
   }
-  else if(nRenderQueue < RenderQueue_Transparent) {
+  else if(nRenderQueue < GrapX::RenderQueue_Transparent) {
     m_aRenderDesc[3].push_back(*pDesc);
   }
-  else if(nRenderQueue < RenderQueue_Overlay) {
+  else if(nRenderQueue < GrapX::RenderQueue_Overlay) {
     m_aRenderDesc[4].push_back(*pDesc);
   }
-  else if(nRenderQueue < RenderQueue_Max) {
+  else if(nRenderQueue < GrapX::RenderQueue_Max) {
     m_aRenderDesc[5].push_back(*pDesc);
   }
 
@@ -126,25 +127,25 @@ int GXDLLAPI MOParseRenderQueue( GXLPCSTR szName )
   }
 
   clStringA str = szName;
-  int nQueue = (int)RenderQueue_Geometry;
+  int nQueue = (int)GrapX::RenderQueue_Geometry;
   str.MakeUpper();
   if(str.BeginsWith("BACKGROUND")) {
-    nQueue = RenderQueue_Background;
+    nQueue = GrapX::RenderQueue_Background;
   }  
   else if(str.BeginsWith("GEOMETRY")) {
-    nQueue = RenderQueue_Geometry;
+    nQueue = GrapX::RenderQueue_Geometry;
   }
   else if(str.BeginsWith("ALPHATEST")) {
-    nQueue = RenderQueue_AlphaTest;
+    nQueue = GrapX::RenderQueue_AlphaTest;
   }
   else if(str.BeginsWith("TRANSPARENT")) {
-    nQueue = RenderQueue_Transparent;
+    nQueue = GrapX::RenderQueue_Transparent;
   }
   else if(str.BeginsWith("OVERLAY")) {
-    nQueue = RenderQueue_Overlay;
+    nQueue = GrapX::RenderQueue_Overlay;
   }
   else if(str.BeginsWith("MAX")) {
-    nQueue = RenderQueue_Max;
+    nQueue = GrapX::RenderQueue_Max;
   }
 
   size_t p = str.FindAny("+-");

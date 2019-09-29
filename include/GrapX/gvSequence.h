@@ -1,23 +1,6 @@
 ﻿#ifndef _GRAPVR_SEQUENCE_H_
 #define _GRAPVR_SEQUENCE_H_
 
-// Background   1000
-// Geometry     2000
-// Alpha test   2500
-// Transparent  3000
-// Overlay      4000
-// Max          4095
-
-// Render queue - 参考Unity3D文档的定义
-enum RenderQueue {
-  RenderQueue_Background  = 1000,
-  RenderQueue_Geometry    = 2000,
-  RenderQueue_AlphaTest   = 2500,
-  RenderQueue_Transparent = 3000,
-  RenderQueue_Overlay     = 4000,
-  RenderQueue_Max         = 4095,
-};
-
 class GXDLL GVSequence : public GUnknown
 {
 public:

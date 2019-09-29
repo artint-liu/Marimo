@@ -291,6 +291,7 @@ namespace GrapX
       {
         pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
       }
+
       pMtlInstImpl->Commit();
       return TRUE;
     }

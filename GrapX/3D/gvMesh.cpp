@@ -85,11 +85,11 @@ GXBOOL GVMesh::InitializeAsObjFromFile(Graphics* pGraphics, GXLPCWSTR szFilename
     return bval;
   }
   if(file.OpenExisting(szFilename)) {
-    clBuffer* pBuffer = NULL;
-    file.MapToBuffer(&pBuffer);
+    clstd::MemBuffer buf;
+    file.Read(&buf);
     m_strName = szFilename;
-    bval = InitializeAsObjFromMemory(pGraphics, pBuffer, pTransform);
-    SAFE_DELETE(pBuffer);
+    bval = InitializeAsObjFromMemory(pGraphics, &buf, pTransform);
+    //SAFE_DELETE(pBuffer);
   }
   return bval;
 }
@@ -823,7 +823,7 @@ namespace mesh
     {
       for(GXUINT nVertIndex = 0; nVertIndex < nVertCount; nVertIndex++) {
         memcpy(lpFirstElement, lpSourceStream, cbElementStride);
-        lpSourceStream = ((GXBYTE*)cbElementStride + cbElementStride);
+        lpSourceStream = ((GXBYTE*)lpSourceStream + cbElementStride);
         lpFirstElement = ((GXBYTE*)lpFirstElement + nStride);
       }
     }

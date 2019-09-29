@@ -13,6 +13,7 @@
 #include "smart/SmartRepository.h"
 #include "GrapX/DataPool.h"
 #include "GrapX/DataPoolVariable.h"
+#include "clTokens.h"
 
 using namespace clstd;
 
@@ -346,6 +347,9 @@ namespace GrapX
   MaterialImpl::~MaterialImpl()
   {
     SAFE_RELEASE(m_pDataPool);
+    SAFE_RELEASE(m_pRasterizer);
+    SAFE_RELEASE(m_pDepthStencil);
+    SAFE_RELEASE(m_pBlendState);
   }
 
   MaterialImpl::MaterialImpl(Graphics* pGraphics, Shader* pShader)
@@ -370,6 +374,30 @@ namespace GrapX
   Graphics* MaterialImpl::GetGraphicsUnsafe() const
   {
     return m_pGraphics;
+  }
+
+  void MaterialImpl::SetDepthStencilState(DepthStencilState* pState)
+  {
+    if(pState)
+    {
+      InlSetNewObjectAlwaysT(m_pDepthStencil, pState);
+    }
+  }
+
+  void MaterialImpl::SetRasterizerState(RasterizerState* pState)
+  {
+    if (pState)
+    {
+      InlSetNewObjectAlwaysT(m_pRasterizer, pState);
+    }
+  }
+
+  void MaterialImpl::SetBlendState(BlendState* pState)
+  {
+    if (pState)
+    {
+      InlSetNewObjectAlwaysT(m_pBlendState, pState);
+    }
   }
 
   Marimo::DataPoolVariable MaterialImpl::GetUniform(GXLPCSTR szName)
@@ -397,6 +425,15 @@ namespace GrapX
       return TRUE;
     }
     return FALSE;
+  }
+
+  int MaterialImpl::SetRenderQueue(int nRenderQueue)
+  {
+    int nPrevRenderQueue = m_nRenderQueue;
+    if (nRenderQueue >= 0 && nRenderQueue <= RenderQueue_Max) {
+      m_nRenderQueue = nRenderQueue;
+    }
+    return nPrevRenderQueue;
   }
 
   int MaterialImpl::GetRenderQueue() const
@@ -427,6 +464,16 @@ namespace GrapX
         nMaxSlot = clMax(nMaxSlot, pDesc->slot + 1);
       }
     }
+
+    GXRASTERIZERDESC sRaterizerDesc;
+    m_pGraphics->CreateRasterizerState(&m_pRasterizer, &sRaterizerDesc);
+
+    GXDEPTHSTENCILDESC sDepthStencilDesc(TRUE, FALSE);
+    m_pGraphics->CreateDepthStencilState(&m_pDepthStencil, &sDepthStencilDesc);
+
+    GXBLENDDESC sBlendDesc;
+    m_pGraphics->CreateBlendState(&m_pBlendState, &sBlendDesc, 1);
+
 
     if (nMaxSlot) {
       m_aTextures.assign(nMaxSlot, ObjectT<Texture>(NULL));
@@ -459,9 +506,109 @@ namespace GrapX
     {
       m_pGraphics->SetTexture(*it, slot);
     }
+
+    m_pGraphics->SetBlendState(m_pBlendState);
+    m_pGraphics->SetRasterizerState(m_pRasterizer);
+    m_pGraphics->SetDepthStencilState(m_pDepthStencil);
+
     return TRUE;
   }
 
 } // namespace GrapX
+
+//////////////////////////////////////////////////////////////////////////
+#define CMP_STR(_STR, _ENUM) if (clstd::strncmpT(str, _STR, len)) { return _ENUM; }
+#define CHECK_END(_ITER) if(_ITER == tokens.end()) { return FALSE; }
+GXBlend GXStringToBlend(GXLPCSTR str, size_t len)
+{
+  CMP_STR("zero", GXBLEND_ZERO)
+  else CMP_STR("one", GXBLEND_ONE)
+  else CMP_STR("srccolor", GXBLEND_SRCCOLOR)
+  else CMP_STR("oneminussrccolor", GXBLEND_INVSRCCOLOR)
+  else CMP_STR("srcalpha", GXBLEND_SRCALPHA)
+  else CMP_STR("oneminussrcalpha", GXBLEND_INVSRCALPHA)
+  else CMP_STR("destalpha", GXBLEND_DESTALPHA)
+  else CMP_STR("oneminusdestalpha", GXBLEND_INVDESTALPHA)
+  else CMP_STR("destcolor", GXBLEND_DESTCOLOR)
+  else CMP_STR("oneminusdestcolor", GXBLEND_INVDESTCOLOR)
+  //else CMP_STR("one", GXBLEND_SRCALPHASAT);
+  //else CMP_STR("one", GXBLEND_BOTHSRCALPHA);
+  //else CMP_STR("one", GXBLEND_BOTHINVSRCALPHA);
+  //else CMP_STR("one", GXBLEND_BLENDFACTOR);
+  //else CMP_STR("one", GXBLEND_INVBLENDFACTOR);
+  //else CMP_STR("one", GXBLEND_SRCCOLOR2);
+  //else CMP_STR("one", GXBLEND_INVSRCCOLOR2);
+  return GXBLEND_FORCE_DWORD;
+}
+
+
+GXCHAR szBlend[] = "blend";
+GXCHAR szColorMask[] = "colormask";
+GXCHAR szOff[] = "off";
+
+GXBOOL GXBLENDDESC::Parse(GXLPCSTR szLine)
+{
+  clstd::TokensA tokens(szLine, clstd::strlenT(szLine));
+  clstd::TokensA::iterator iter = tokens.begin();
+  if (iter == szBlend)
+  {
+    ++iter;
+    CHECK_END(iter);
+
+    if (iter == szOff)
+    {
+      BlendEnable = FALSE;
+      SrcBlend    = GXBLEND_ONE;
+      DestBlend   = GXBLEND_ZERO;
+      return TRUE;
+    }
+
+    clstd::TokensA::iterator iterSecond = iter + 1;
+    CHECK_END(iterSecond);
+
+    GXBlend _SrcBlend = GXStringToBlend(iter.marker, iter.length);
+    GXBlend _DestBlend = GXStringToBlend(iterSecond.marker, iterSecond.length);
+    if (_SrcBlend == GXBLEND_FORCE_DWORD || _DestBlend == GXBLEND_FORCE_DWORD) {
+      return FALSE;
+    }
+
+    SrcBlend = _SrcBlend;
+    DestBlend = _DestBlend;
+    BlendEnable = _CL_NOT_(_SrcBlend == GXBLEND_ONE && _DestBlend == GXBLEND_ZERO);
+    return TRUE;
+  }
+  //else if (iter == szColorMask)
+  //{
+  //  ++iter;
+  //  if (iter == tokens.end()) {
+  //    return FALSE;
+  //  }
+
+  //  iter.
+  //}
+  return FALSE;
+}
+
+GXBOOL GXDEPTHSTENCILDESC::Parse(GXLPCSTR szLine)
+{
+  clstd::TokensA tokens(szLine, clstd::strlenT(szLine));
+  clstd::TokensA::iterator iter = tokens.begin();
+  CHECK_END(iter);
+  if (iter == "zwrite")
+  {
+    ++iter;
+    CHECK_END(iter);
+    if (iter == "off") {
+      DepthEnable = FALSE;
+      return TRUE;
+    }
+    else if (iter == "on") {
+      DepthEnable = TRUE;
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 
 //////////////////////////////////////////////////////////////////////////

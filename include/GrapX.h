@@ -4761,7 +4761,7 @@ struct GXVIEWPORT
 typedef GXVIEWPORT*         GXLPVIEWPORT;
 typedef const GXVIEWPORT*   GXLPCVIEWPORT;
 
-struct GXBLENDDESC
+struct GXDLL GXBLENDDESC
 {
   GXBOOL    BlendEnable;
   GXBlend   SrcBlend;
@@ -4799,7 +4799,9 @@ struct GXBLENDDESC
     , DestBlendAlpha(GXBLEND_INVSRCALPHA)
     , BlendOpAlpha  (GXBLENDOP_ADD)
     , WriteMask     (0xf)
-  {}  
+  {}
+
+  GXBOOL Parse(GXLPCSTR szLine); // 大小写敏感
 };
 
 struct GXDEPTHSTENCILOP
@@ -4815,9 +4817,10 @@ struct GXDEPTHSTENCILOP
     , StencilPassOp     (GXSTENCILOP_KEEP)
     , StencilFunc       (GXCMP_ALWAYS)
   {}
+  
 };
 
-struct GXDEPTHSTENCILDESC
+struct GXDLL GXDEPTHSTENCILDESC
 {
   GXBOOL            DepthEnable;
   GXDWORD           DepthWriteMask; //Depth Write Enable
@@ -4836,6 +4839,8 @@ struct GXDEPTHSTENCILDESC
     , StencilReadMask (bStencil ? 0xff : 0)
     , StencilWriteMask(bStencil ? 0xff : 0)
   {}
+
+  GXBOOL Parse(GXLPCSTR szLine); // 大小写敏感
 };
 
 struct GXRASTERIZERDESC

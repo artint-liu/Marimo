@@ -303,6 +303,34 @@ namespace clstd
     return bRet;
   }
 
+  b32 File::Read(MemBuffer* pBuffer, WriteBuffer mode /*= WriteBuffer::Overwrite*/, int nFileOffset /*= 0*/, u32 cbSize /*= 0*/)
+  {
+    u32 dwSizeHigh;
+    const i32 nReadSize = (cbSize == 0) ? GetSize(&dwSizeHigh)
+      : clMin((u32)(GetSize(&dwSizeHigh) - (u32)nFileOffset), cbSize);
+
+    // return false if file size great than 2GB.
+    if (nReadSize <= 0 || dwSizeHigh != 0) {
+      return FALSE;
+    }
+
+    u32 nNumBytes = 0;
+    SetPointer64(nFileOffset, 0);
+
+    if (mode == WriteBuffer::Overwrite)
+    {
+      pBuffer->Resize(nReadSize, FALSE);
+      return Read(pBuffer->GetPtr(), nReadSize, &nNumBytes) && (nReadSize == nNumBytes);
+    }
+    else if (mode == WriteBuffer::Append)
+    {
+      clsize cbOld = pBuffer->GetSize();
+      pBuffer->Resize(cbOld + nReadSize, FALSE);
+      return Read((CLLPVOID)((clsize)pBuffer->GetPtr() + cbOld), nReadSize, &nNumBytes) && (nReadSize == nNumBytes);
+    }
+    return FALSE;
+  }
+
   b32 File::Write(CLLPCVOID lpBuffer, u32 nNumberOfBytesToWrite, u32* lpNumberOfBytesWritten)
   {
     u32 dwNumWrite;

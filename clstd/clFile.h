@@ -62,6 +62,12 @@ namespace clstd
       A_Temporary   = 0x00000100,  // The file is being used for temporary storage. File systems attempt to keep all of the data in memory for quicker access rather than flushing the data back to mass storage. A temporary file should be deleted by the application as soon as it is no longer needed.
     };
 
+    enum class WriteBuffer : int
+    {
+      Overwrite = 0,
+      Append,
+    };
+
     struct TIME
     {
       u32 dwLowDateTime; 
@@ -121,7 +127,8 @@ namespace clstd
     u64  SetPointer64 (u64 uMove, u32 uMode);
     u32  GetSize      (u32* pdwFileSizeHight) const;
     void GetTime      (TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime) const;
-    b32  Read         (CLLPVOID lpBuffer, u32 nNumOfBytesToRead,  u32* lpNumberOfBytesRead = NULL);
+    b32  Read         (MemBuffer* pBuffer, WriteBuffer mode = WriteBuffer::Overwrite, int nFileOffset = 0, u32 cbSize = 0); // 读入小于2GB的内容
+    b32  Read         (CLLPVOID lpBuffer, u32 nNumOfBytesToRead, u32* lpNumberOfBytesRead = NULL);
     b32  Write        (CLLPCVOID lpBuffer, u32 nNumberOfBytesToWrite, u32* lpNumberOfBytesWritten = NULL);
     b32  Write        (const BufferBase& buffer, u32* lpNumberOfBytesWritten = NULL);
 
@@ -129,9 +136,15 @@ namespace clstd
     int  Writef       (const ch* format, ...);
     int  Writef       (const wch* format, ...);
 
-    b32  ReadToBuffer (MemBuffer* pBuffer, int nFileOffset = 0, u32 cbSize = 0);
-    b32  MapToBuffer  (CLBYTE** pBuffer, int nFileOffset, int cbSize, u32* pcbSize); // 从nFileOffset偏移开始读cbSize（0表示读到文件末尾）字节到pBuffer缓冲中，实际读入大小是pcbSize
-    b32  MapToBuffer  (MemBuffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
+
+
+    // 准备丢弃
+    CLDEPRECATED_ATTRIBUTE
+      b32  ReadToBuffer (MemBuffer* pBuffer, int nFileOffset = 0, u32 cbSize = 0); 
+    CLDEPRECATED_ATTRIBUTE
+      b32  MapToBuffer  (CLBYTE** pBuffer, int nFileOffset, int cbSize, u32* pcbSize); // 从nFileOffset偏移开始读cbSize（0表示读到文件末尾）字节到pBuffer缓冲中，实际读入大小是pcbSize
+    CLDEPRECATED_ATTRIBUTE
+      b32  MapToBuffer  (MemBuffer** ppBuffer, int nFileOffset = 0, int cbSize = 0);
 
     static void GetSystemTime(TIME* pTime); // 以文件时间形式获得当前时间(UTC)
     static void GetFileTime(CLLPCWSTR szFilePath, TIME* lpCreationTime, TIME* lpLastAccessTime, TIME* lpLastWriteTime);

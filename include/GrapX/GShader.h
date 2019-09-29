@@ -33,7 +33,11 @@ struct STANDARDMTLUNIFORMTABLE;
 
 namespace GrapX
 {
+  class BlendState;
   class TextureBase;
+  class RasterizerState;
+  class DepthStencilState;
+
   class GVertexDeclaration : public GResource
   {
   public:
@@ -107,6 +111,25 @@ namespace GrapX
     //GXSTDINTERFACE(void BindTextureSlot(GXLPCSTR szTextureName, int nSlot));
   };
 
+
+  // Background   1000
+  // Geometry     2000
+  // Alpha test   2500
+  // Transparent  3000
+  // Overlay      4000
+  // Max          4095
+
+  // Render queue - 参考Unity3D文档的定义
+  enum RenderQueue {
+    RenderQueue_Background  = 1000,
+    RenderQueue_Geometry    = 2000,
+    RenderQueue_AlphaTest   = 2500,
+    RenderQueue_Transparent = 3000,
+    RenderQueue_Overlay     = 4000,
+    RenderQueue_Max         = 4095,
+  };
+
+
   class Material : public GResource
   {
   public:
@@ -124,12 +147,17 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT    Release           ());
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
+    GXSTDINTERFACE(void         SetDepthStencilState(DepthStencilState* pState));
+    GXSTDINTERFACE(void         SetRasterizerState(RasterizerState* pState));
+    GXSTDINTERFACE(void         SetBlendState(BlendState* pState));
+
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
     GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
     GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture));
     GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture));
 
     GXSTDINTERFACE(GXHRESULT  GetFilename         (clStringW* pstrFilename));
+    GXSTDINTERFACE(int        SetRenderQueue      (int nRenderQueue));
     GXSTDINTERFACE(int        GetRenderQueue      () const);
 
     // 旧兼容接口

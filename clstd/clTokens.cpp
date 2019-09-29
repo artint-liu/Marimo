@@ -72,6 +72,13 @@ namespace clstd
     , m_lParam          (0)
     , m_lParamTrigger   (0)
   {
+    if(pStream != NULL && uCountOfChar > 0)
+    {
+      // make end
+      m_itEnd.pContainer = this;
+      m_itEnd.marker = &pStream[uCountOfChar];
+      m_itEnd.length = 0;
+    }
   }
 
   _TOEKN_TEMPL
@@ -80,7 +87,8 @@ namespace clstd
     m_pBegin = pStream;
     m_pEnd   = pStream + uCountOfChar;
 
-    m_itEnd.pContainer  = this;
+    // make end
+    m_itEnd.pContainer = this;
     m_itEnd.marker      = &pStream[uCountOfChar];
     m_itEnd.length      = 0;
     return TRUE;

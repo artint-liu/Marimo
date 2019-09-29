@@ -483,7 +483,7 @@ namespace clpathfile
       ASSERT(s_strRootDir.IsNotEmpty());
       CombinePathT(
         (_TString&)strPath, 
-        (const _TString&)s_strRootDir, 
+        _TString(s_strRootDir),
         (const _TString&)strPath);
     }
     return strPath.GetLength();

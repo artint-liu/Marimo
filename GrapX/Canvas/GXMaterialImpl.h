@@ -4,7 +4,7 @@ struct STANDARDMTLUNIFORMTABLE;
 class BlendState;
 class DepthStencilState;
 
-#define DEFAULT_RENDER_QUEUE 100
+#define DEFAULT_RENDER_QUEUE GrapX::RenderQueue_Geometry
 //////////////////////////////////////////////////////////////////////////
 namespace GrapX
 {
@@ -32,9 +32,9 @@ namespace GrapX
     //GShaderStub*        m_pShaderStub;
     //GTextureBase*       m_aTextureSlot[GX_MAX_TEXTURE_STAGE];
     //clFixedBuffer       m_Buffer;
-    //GRasterizerState*   m_pRasterizer;
-    //GDepthStencilState* m_pDepthStencil;
-    //GBlendState*        m_pBlendState;
+    RasterizerState*      m_pRasterizer = NULL;
+    DepthStencilState*    m_pDepthStencil = NULL;
+    BlendState*           m_pBlendState = NULL;
     //GSamplerState*      m_pSamplerState;
     //UniformArray*       m_pUniformsForReloading;    // 用来Reload前的储存数据, 将来可能还要好好想想放在什么位置合理
     int                   m_nRenderQueue;
@@ -68,6 +68,10 @@ namespace GrapX
     GXHRESULT   Invoke            (GRESCRIPTDESC* pDesc) override;
     Graphics*   GetGraphicsUnsafe () const override;
 
+    void SetDepthStencilState(DepthStencilState* pState) override;
+    void SetRasterizerState(RasterizerState* pState) override;
+    void SetBlendState(BlendState* pState) override;
+
     Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
     GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture) override;
     GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture) override;
@@ -75,6 +79,7 @@ namespace GrapX
     //virtual GXHRESULT   SetTextureSlot    (GXLPCSTR szName, GXINT nSlot);
     //virtual GXINT       GetTextureSlot    (GXLPCSTR szName);
     //virtual GXBOOL      IsSequential      () override;
+    int         SetRenderQueue    (int nRenderQueue) override;
     int         GetRenderQueue    () const override;
     //virtual GrapX::Graphics* GetGraphicsUnsafe () override;
     GXHRESULT   GetFilename      (clStringW* pstrFilename) override;

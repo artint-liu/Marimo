@@ -5,6 +5,9 @@
 class GVScene;
 //class GPrimitiveVI;
 
+#define GVGeometry_CreateScreenQuad(_GRAPH, _NODE) GVGeometry::CreateQuadPlane(_GRAPH, float3::Origin, -float3::AxisZ, float3::AxisY, float2(2.0f), 1, 1, &_NODE)
+
+
 class GXDLL GVGeometry : public GVMesh
 {
 public:
