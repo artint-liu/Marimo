@@ -449,7 +449,7 @@ namespace GrapX
     //////////////////////////////////////////////////////////////////////////
 
     TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
-      : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Read)
+      : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
       , m_pD3D11RenderTargetView(NULL)
     {
     }
