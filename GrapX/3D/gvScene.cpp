@@ -492,12 +492,14 @@ GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
   return GX_FAIL;
 }
 
-GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired )
+GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwLayerMask, GXDWORD dwRequired )
 {  
   GVNode::AABB          aabbAbs;
   GVRENDERDESC          Desc;
   const GVNode::FrustumPlanes*  pFrustum;
   clstack<GVNode*>      NodeStack;
+
+  dwRequired |= GVNF_VISIBLE;
 
   pCanvas->UpdateCommonUniforms();
   pFrustum = pCanvas->GetViewFrustum();
@@ -510,7 +512,7 @@ GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, GVR
     {
       pNode->GetRenderDesc(eType, &Desc);
 
-      if( ! TEST_FLAGS_ALL(Desc.dwFlags, (GVNF_VISIBLE | dwRequired))) {
+      if(_CL_NOT_(TEST_FLAGS_ALL(Desc.dwFlags, dwRequired)) || (dwLayerMask & Desc.dwLayer)) {
         // 准备下一次循环
         pNode = pNode->GetNext();
         continue;

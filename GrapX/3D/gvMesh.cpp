@@ -213,6 +213,7 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primit
 void GVMesh::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
 {
   pRenderDesc->dwFlags         = m_dwFlags;
+  pRenderDesc->dwLayer         = m_dwLayer;
   pRenderDesc->ePrimType       = GXPT_TRIANGLELIST;
   pRenderDesc->pPrimitive      = m_pPrimitive;
   pRenderDesc->pMaterial       = m_pMtlInst;

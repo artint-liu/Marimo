@@ -318,6 +318,7 @@ void GVSkeleton::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
   pRenderDesc->matWorld         = m_Transformation.GlobalMatrix;
 
   pRenderDesc->dwFlags          = m_dwFlags;
+  pRenderDesc->dwLayer          = m_dwLayer;
   pRenderDesc->BaseVertexIndex  = 0;
   pRenderDesc->MinIndex         = 0;
   pRenderDesc->NumVertices      = m_nPrimiCount * 2;

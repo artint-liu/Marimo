@@ -107,7 +107,8 @@ public:
   
   // 参考 GVNodeFlags, 如果 dwRequired 不是 GVNode 返回标志的子集, 则不会被加到渲染队列中
   // dwRequired 不必指定 GVNF_VISIBLE 标志, 这个标志是默认的
-  GXHRESULT Generate    (GrapX::Canvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwRequired);
+  // dwCullingMask 剔除掩码, 默认是0, (dwCullingMask & GVNode::m_dwLayer) != 0 则不进行收集
+  GXHRESULT Generate    (GrapX::Canvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwLayerMask, GXDWORD dwRequired);
   void      Update      (GrapX::Canvas3D* pCanvas, GXDWORD dwDeltaTime);
 
   inline GXDWORD        GetDeltaTime  ();

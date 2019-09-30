@@ -62,7 +62,8 @@ namespace GrapX
       struct D3D11CB_DESC
       {
         ID3D11Buffer* pD3D11ConstantBuffer;
-        GXUINT        cbSize;
+        GXUINT        cbSize : 24;
+        GXUINT        type : 8;  // 标记cb_MarimoCommon
       };
       clstd::MemBuffer            m_D11ResDescPool; // D3D11 描述池
       ID3D11Buffer**              m_pVertexCB;
@@ -97,7 +98,7 @@ namespace GrapX
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 
       GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
-      ID3D11Buffer* D3D11CreateBuffer(D3D11CB_DESC& desc, size_t cbSize);
+      ID3D11Buffer* D3D11CreateBuffer(D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize);
       ID3D11InputLayout* D3D11GetInputLayout(VertexDeclImpl* pVertexDecl);
       void DbgCheck(INTERMEDIATE_CODE::Array& aInterCode);
 

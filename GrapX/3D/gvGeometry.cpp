@@ -327,6 +327,7 @@ GXBOOL GVGeometry::CreatePrimitive(Graphics* pGraphics, GXPrimitiveType eType, i
 void GVGeometry::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
 {
   pRenderDesc->dwFlags         = m_dwFlags;
+  pRenderDesc->dwLayer         = m_dwLayer;
   pRenderDesc->ePrimType       = m_eType;
   pRenderDesc->pPrimitive      = m_pPrimitive;
   pRenderDesc->pMaterial       = m_pMtlInst;

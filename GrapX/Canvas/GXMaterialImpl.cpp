@@ -17,7 +17,8 @@
 
 using namespace clstd;
 GXBOOL Parse(GXBLENDDESC& desc, TokensA& tokens, TokensA::iterator& iter);
-GXBOOL Parse(GXDEPTHSTENCILDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter);
+GXBOOL Parse(GXRASTERIZERDESC& desc, TokensA& tokens, TokensA::iterator& iter);
+GXBOOL Parse(GXDEPTHSTENCILDESC& desc, TokensA& tokens, TokensA::iterator& iter);
 
 
 // 这个 MOGenerateDeclarationCodes 生成代码要用
@@ -407,32 +408,60 @@ namespace GrapX
   {
     TokensA tokens(szStateCommand, strlenT(szStateCommand));
     GXBLENDDESC sBlendDesc;
-    GXRASTERIZERDESC sRaterizerDesc;
+    GXRASTERIZERDESC sRasterizerDesc;
     GXDEPTHSTENCILDESC sDepthStencilDesc(TRUE, FALSE);
+    GXBOOL bBlend = FALSE, bRasterizer = FALSE, bDepthStencil = FALSE;
 
     auto iter = tokens.begin();
 
     while(iter != tokens.end())
     {
-      ::Parse(sBlendDesc, tokens, iter);
+      if (::Parse(sBlendDesc, tokens, iter)) {
+        bBlend= TRUE;
+      }
+
       if(iter == tokens.end()) {
         break;
       }
-      ::Parse(sDepthStencilDesc, tokens, iter);
-    }    
 
-    SAFE_RELEASE(m_pRasterizer);
-    m_pGraphics->CreateRasterizerState(&m_pRasterizer, &sRaterizerDesc);
-    SAFE_RELEASE(m_pDepthStencil);
-    m_pGraphics->CreateDepthStencilState(&m_pDepthStencil, &sDepthStencilDesc);
-    SAFE_RELEASE(m_pBlendState);
-    m_pGraphics->CreateBlendState(&m_pBlendState, &sBlendDesc, 1);
+      if (::Parse(sDepthStencilDesc, tokens, iter)) {
+        bDepthStencil = TRUE;
+      }
+
+      if (iter == tokens.end()) {
+        break;
+      }
+
+      if (::Parse(sRasterizerDesc, tokens, iter)) {
+        bRasterizer = TRUE;
+      }
+    }
+
+    // 根据修改标记更换渲染状态
+    if(bRasterizer) {
+      SAFE_RELEASE(m_pRasterizer);
+      m_pGraphics->CreateRasterizerState(&m_pRasterizer, &sRasterizerDesc);
+    }
+
+    if(bDepthStencil) {
+      SAFE_RELEASE(m_pDepthStencil);
+      m_pGraphics->CreateDepthStencilState(&m_pDepthStencil, &sDepthStencilDesc);
+    }
+
+    if(bBlend) {
+      SAFE_RELEASE(m_pBlendState);
+      m_pGraphics->CreateBlendState(&m_pBlendState, &sBlendDesc, 1);
+    }
+
     return TRUE;
   }
 
   Marimo::DataPoolVariable MaterialImpl::GetUniform(GXLPCSTR szName)
   {
     Marimo::DataPoolVariable var;
+    if(m_pDataPool) {
+      m_pDataPool->QueryByName(szName, &var);
+    }
     return var;
   }
 
@@ -512,6 +541,50 @@ namespace GrapX
     return TRUE;
   }
 
+  GXBOOL MaterialImpl::SetFloat(GXLPCSTR szName, float value)
+  {
+    Marimo::DataPoolVariable var = GetUniform(szName);
+    if (var.IsValid())
+    {
+      return var.Set(value);
+    }
+    return FALSE;
+  }
+
+  float  MaterialImpl::GetFloat(GXLPCSTR szName)
+  {
+    Marimo::DataPoolVariable var = GetUniform(szName);
+    if (var.IsValid())
+    {
+      return var.ToFloat();
+    }
+    return 0;
+  }
+
+  GXBOOL MaterialImpl::SetVector(GXLPCSTR szName, float4* pVector)
+  {
+    Marimo::DataPoolVariable var = GetUniform(szName);
+    if (var.IsValid())
+    {
+      MOVarFloat4 var4 = var.CastTo<MOVarFloat4>();
+      var4 = *pVector;
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  GXBOOL MaterialImpl::GetVector(float4* pOut, GXLPCSTR szName)
+  {
+    Marimo::DataPoolVariable var = GetUniform(szName);
+    if (var.IsValid())
+    {
+      MOVarFloat4 var4 = var.CastTo<MOVarFloat4>();
+      *pOut = (float4&)var;
+      return TRUE;
+    }
+    return FALSE;
+  }
+
   GXHRESULT MaterialImpl::BindDataByName(GXLPCSTR szPoolName, GXLPCSTR szStruct)
   {
     CLBREAK;
@@ -549,7 +622,7 @@ namespace GrapX
 //////////////////////////////////////////////////////////////////////////
 #define CMP_STR(_STR, _ENUM) if (strncmpT(str, _STR, len) == 0) { return _ENUM; }
 #define CHECK_END(_ITER) if(_ITER == tokens.end()) { return FALSE; }
-GXBlend GXStringToBlend(GXLPCSTR str, size_t len)
+GXBlend GXDLLAPI MOStringToBlend(GXLPCSTR str, size_t len)
 {
   CMP_STR("zero", GXBLEND_ZERO)
   else CMP_STR("one", GXBLEND_ONE)
@@ -571,6 +644,50 @@ GXBlend GXStringToBlend(GXLPCSTR str, size_t len)
   return GXBLEND_FORCE_DWORD;
 }
 
+
+GXBlendOp GXDLLAPI MOStringToBlendOp(GXLPCSTR str, size_t len)
+{
+  CMP_STR("add", GXBLENDOP_ADD)
+  else CMP_STR("subtract", GXBLENDOP_SUBTRACT)
+  else CMP_STR("revsubtract", GXBLENDOP_REVSUBTRACT)
+  else CMP_STR("min", GXBLENDOP_MIN)
+  else CMP_STR("max", GXBLENDOP_MAX)
+  return GXBLENDOP_FORCE_DWORD;
+}
+
+GXStencilOp GXDLLAPI MOStringToStencilOp(GXLPCSTR str, size_t len)
+{
+  CMP_STR("keep", GXSTENCILOP_KEEP)
+  else CMP_STR("zero", GXSTENCILOP_ZERO)
+  else CMP_STR("replace", GXSTENCILOP_REPLACE)
+  else CMP_STR("incrsat", GXSTENCILOP_INCRSAT)
+  else CMP_STR("decrsat", GXSTENCILOP_DECRSAT)
+  else CMP_STR("invert", GXSTENCILOP_INVERT)
+  else CMP_STR("incr", GXSTENCILOP_INCR)
+  else CMP_STR("decr", GXSTENCILOP_DECR)
+  return GXSTENCILOP_FORCE_DWORD;
+}
+
+GXCullMode GXDLLAPI MOStringToCullMode(GXLPCSTR str, size_t len)
+{
+  CMP_STR("none", GXCULL_NONE)
+  else CMP_STR("cw", GXCULL_CW)
+  else CMP_STR("ccw", GXCULL_CCW)
+  return GXCULL_FORCE_DWORD;
+}
+
+GXCompareFunc GXDLLAPI MOStringToCompareFunc(GXLPCSTR str, size_t len)
+{
+  CMP_STR("never", GXCMP_NEVER)
+  else CMP_STR("less", GXCMP_LESS)
+  else CMP_STR("equal", GXCMP_EQUAL)
+  else CMP_STR("lessequal", GXCMP_LESSEQUAL)
+  else CMP_STR("greater", GXCMP_GREATER)
+  else CMP_STR("notequal", GXCMP_NOTEQUAL)
+  else CMP_STR("greaterequal", GXCMP_GREATEREQUAL)
+  else CMP_STR("always", GXCMP_ALWAYS)
+  return GXCMP_FORCE_DWORD;
+}
 
 GXCHAR szBlend[] = "blend";
 GXCHAR szColorMask[] = "colormask";
@@ -604,8 +721,8 @@ GXBOOL Parse(GXBLENDDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator
     clstd::TokensA::iterator iterSecond = iter + 1;
     CHECK_END(iterSecond);
 
-    GXBlend _SrcBlend = GXStringToBlend(iter.marker, iter.length);
-    GXBlend _DestBlend = GXStringToBlend(iterSecond.marker, iterSecond.length);
+    GXBlend _SrcBlend = MOStringToBlend(iter.marker, iter.length);
+    GXBlend _DestBlend = MOStringToBlend(iterSecond.marker, iterSecond.length);
     if (_SrcBlend == GXBLEND_FORCE_DWORD || _DestBlend == GXBLEND_FORCE_DWORD) {
       iter = iterSecond + 1;
       return FALSE;
@@ -658,5 +775,9 @@ GXBOOL Parse(GXDEPTHSTENCILDESC& desc, clstd::TokensA& tokens, clstd::TokensA::i
   return FALSE;
 }
 
+GXBOOL Parse(GXRASTERIZERDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter)
+{
+  return FALSE;
+}
 
 //////////////////////////////////////////////////////////////////////////

@@ -86,6 +86,13 @@ namespace GrapX
     GXHRESULT   GetFilename      (clStringW* pstrFilename) override;
 
     GXBOOL InitMaterial();
+
+
+    GXBOOL    SetFloat(GXLPCSTR szName, float value) override;
+    float     GetFloat(GXLPCSTR szName) override;
+    GXBOOL    SetVector(GXLPCSTR szName, float4* pVector) override;
+    GXBOOL    GetVector(float4* pOut, GXLPCSTR szName) override;
+
     //virtual GXHRESULT   Clone             (GXMaterialInst** ppCuplicateMtlInst) override;
 
     //virtual GXHRESULT   SaveFileW         (GXLPCWSTR szFilename) override;

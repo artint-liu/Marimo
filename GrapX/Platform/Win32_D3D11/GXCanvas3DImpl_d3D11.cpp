@@ -77,6 +77,8 @@ namespace GrapX
 {
   namespace D3D11
   {
+#include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
+
     Canvas3DImpl::Canvas3DImpl(GraphicsImpl* pGraphics)
       : m_pGraphicsImpl (pGraphics)
       //, m_xExt          (0)

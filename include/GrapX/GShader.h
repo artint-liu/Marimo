@@ -150,12 +150,17 @@ namespace GrapX
     GXSTDINTERFACE(void         SetDepthStencilState(DepthStencilState* pState));
     GXSTDINTERFACE(void         SetRasterizerState(RasterizerState* pState));
     GXSTDINTERFACE(void         SetBlendState(BlendState* pState));
-    GXSTDINTERFACE(GXBOOL       SetState(GXLPCSTR szStateCommand));
+    GXSTDINTERFACE(GXBOOL       SetState(GXLPCSTR szStateCommand)); // 大小写敏感，只识别全小写命令
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
     GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
     GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture));
     GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture));
+
+    GXSTDINTERFACE(GXBOOL       SetFloat(GXLPCSTR szName, float value));
+    GXSTDINTERFACE(float        GetFloat(GXLPCSTR szName));
+    GXSTDINTERFACE(GXBOOL       SetVector(GXLPCSTR szName, float4* pVector));
+    GXSTDINTERFACE(GXBOOL       GetVector(float4* pOut, GXLPCSTR szName));
 
     GXSTDINTERFACE(GXHRESULT  GetFilename         (clStringW* pstrFilename));
     GXSTDINTERFACE(int        SetRenderQueue      (int nRenderQueue));

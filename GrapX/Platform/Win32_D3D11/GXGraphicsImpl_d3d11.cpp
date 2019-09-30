@@ -1036,7 +1036,7 @@ namespace GrapX
       if(file.OpenExisting(rs.strResourceName))
       {
         clstd::MemBuffer buffer;
-        if(file.ReadToBuffer(&buffer))
+        if(file.Read(&buffer))
         {
           hr = CreateTextureFromMemory(ppTexture, NULL, &buffer, MipLevels, eUsage);
           if(GXSUCCEEDED(hr)) {

@@ -93,7 +93,7 @@
   // GXCanvas
   virtual Canvas*   LockCanvas              (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags) override;
 
-  GXBOOL      CreateCanvas3D          (Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, size_t nCount, LPCREGN lpRegn, float fNear, float fFar) override;
+  GXBOOL      CreateCanvas3D          (Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, GXUINT nCount, LPCREGN lpRegn, float fNear, float fFar) override;
   GXBOOL      CreateCanvas3D          (Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
   //virtual GXHRESULT   CreateCanvas3D          (GXCanvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar) override;
   GXHRESULT   CreateEffect            (Effect** ppEffect, Shader* pShader) override;
@@ -175,11 +175,11 @@ private:
 
   inline GXLPCSTR   InlGetPlatformStringA () const;
   inline GXBOOL     InlSetTexture         (TexBaseImpl* pTexture, GXUINT uStage);
-  inline GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTar);
-  inline GXBOOL     InlSetRenderTarget    (Canvas3DImpl* pCanvas3D);
+  GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTar);
+  GXBOOL     InlSetRenderTarget    (Canvas3DImpl* pCanvas3D);
   //inline GXBOOL     InlSetDepthStencil    (Texture* pTexture);
 
-  inline GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
+  GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
   //inline GXBOOL     InlSetRenderState       (GRenderStateImpl* pRenderState);
   template<class _TState>
   inline GXBOOL     InlSetStateT            (GXUINT slot, _TState*& pCurState, _TState* pState);

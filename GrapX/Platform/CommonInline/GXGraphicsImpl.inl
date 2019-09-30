@@ -648,7 +648,7 @@ GXFont* GraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GX
 #include "Canvas/GXCanvas3DImpl.h"
 #include "Canvas/GXCanvas3DImpl.inl"
 
-GXBOOL GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, size_t nCount, LPCREGN lpRegn, float fNear, float fFar)
+GXBOOL GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, GXUINT nCount, LPCREGN lpRegn, float fNear, float fFar)
 {
   GXREGN    regn = 0;
   //GXHRESULT hval = GX_OK;

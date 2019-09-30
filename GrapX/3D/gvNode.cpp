@@ -20,6 +20,7 @@
 GVNode::GVNode(GVScene* pScene, GXDWORD dwClassCode)
   : m_ClsCode (dwClassCode)
   , m_dwFlags (GVNF_DEFAULT)
+  , m_dwLayer (0)
   , m_dwInterfaceCaps(0xffffffff)
 {
   //m_matRelative.identity();
@@ -69,6 +70,18 @@ GXDWORD GVNode::CombineFlags(GXDWORD dwFlags)
   GXDWORD dwOldFlags = m_dwFlags;
   m_dwFlags |= dwFlags;
   return dwOldFlags;
+}
+
+GXDWORD GVNode::SetLayer(GXDWORD dwLayerMask)
+{
+  GXDWORD dwOldLayer = m_dwLayer;
+  m_dwLayer = dwLayerMask;
+  return dwOldLayer;
+}
+
+GXDWORD GVNode::GetLayer() const
+{
+  return m_dwLayer;
 }
 
 void GVNode::UpdateChildPos()

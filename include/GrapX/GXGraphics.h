@@ -273,7 +273,7 @@ namespace GrapX
     GXSTDINTERFACE(Canvas*    LockCanvas                 (RenderTarget* pTarget, const LPREGN lpRegn, GXDWORD dwFlags));
 
     // 如果 pImage 为 NULL, 则忽略 DepthStencil 参数
-    GXSTDINTERFACE(GXBOOL       CreateCanvas3D             (Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, size_t nCount, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
+    GXSTDINTERFACE(GXBOOL       CreateCanvas3D             (Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, GXUINT nCount, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
     GXSTDINTERFACE(GXBOOL       CreateCanvas3D             (Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
     //GXSTDINTERFACE(GXHRESULT    CreateCanvas3D             (GXCanvas3D** ppCanvas3D, GXRenderTarget* pTarget, GTexture* pDepthStencil, LPCREGN lpRegn = NULL, float fNear = 0.0f, float fFar = 1.0f));
 

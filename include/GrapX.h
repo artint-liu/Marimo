@@ -5258,7 +5258,15 @@ GXDWORD GXDLLAPI MOTestDeclElementFlags   (LPCGXVERTEXELEMENT pVertDecl); // 根
 void    GXDLLAPI MOTestShaderCapsString   (LPCGXVERTEXELEMENT pVertDecl, clStringA& strMacro);  // 根据顶点声明测试Shader输入元素,并生成Shader编译宏
 void    GXDLLAPI MOMakeShaderCapsString   (GXDWORD dwCapsFlags, clStringA& strMacro);  // 根据标志生成Shader编译宏
 GXINT   GXDLLAPI MOGetDeclOffset          (GXIN LPCGXVERTEXELEMENT pVertDecl, GXIN GXDeclUsage Usage, GXIN GXUINT UsageIndex, GXOUT LPGXVERTEXELEMENT lpDesc = NULL); // 获得指定的偏移
-int     GXDLLAPI MOParseRenderQueue       (GXLPCSTR szName);
+int     GXDLLAPI MOParseRenderQueue       (GXLPCSTR szName); // 支持简单加减法公式
+
+// 字符串转枚举
+GXBlend       GXDLLAPI MOStringToBlend      (GXLPCSTR str, size_t len);
+GXBlendOp     GXDLLAPI MOStringToBlendOp    (GXLPCSTR str, size_t len);
+GXStencilOp   GXDLLAPI MOStringToStencilOp  (GXLPCSTR str, size_t len);
+GXCullMode    GXDLLAPI MOStringToCullMode   (GXLPCSTR str, size_t len);
+GXCompareFunc GXDLLAPI MOStringToCompareFunc(GXLPCSTR str, size_t len);
+
 
 GXHRESULT GXDLLAPI MOCompileHLSL          (GXLPCWSTR szShaderDesc, GXLPCWSTR szResourceDir, GXLPCSTR szPlatformSect, MOSHADERBUFFERS* pBuffers);
 #define MOGetDeclVertexStride MOGetDeclVertexSize

@@ -822,7 +822,7 @@ namespace GrapX
         if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
           iter_var.ToVariable(var);
           if(var.GetOffset() > 0) {
-            D3D11CreateBuffer(pDesc[nCB++], var.GetOffset());
+            D3D11CreateBuffer(pDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
             break;
           }
         }
@@ -830,7 +830,7 @@ namespace GrapX
 
       if(iter_var == iter_var_end)
       {
-        D3D11CreateBuffer(pDesc[nCB++], pDataPool->GetRootSize());
+        D3D11CreateBuffer(pDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, pDataPool->GetRootSize());
       }
       else
       {
@@ -838,7 +838,7 @@ namespace GrapX
         for(; iter_var != iter_var_end; ++iter_var) {
           if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
             iter_var.ToVariable(var);
-            D3D11CreateBuffer(pDesc[nCB++], var.GetSize());
+            D3D11CreateBuffer(pDesc[nCB++], iter_var.TypeName(), var.GetSize());
           }
           else {
             break;
@@ -868,25 +868,37 @@ namespace GrapX
       
       D3D11CB_DESC* pCBDesc = D3D11CB_GetDescBegin();
       D3D11CB_DESC* const pCBDescEnd = D3D11CB_GetDescEnd();
-      if(pUniforms && sizeof(STD_CANVAS_UNIFORM) == pCBDesc->cbSize)
+      //if(pUniforms && sizeof(STD_CANVAS_UNIFORM) == pCBDesc->cbSize)
+      //{
+      //  pSourceBuffer += pCBDesc->cbSize;
+      //  ++pCBDesc;
+      //}
+
+      if (pUniforms)
       {
-        pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL, pUniforms, 0, 0);
-        pSourceBuffer += pCBDesc->cbSize;
-        ++pCBDesc;
+        for (; pCBDesc != pCBDescEnd; ++pCBDesc)
+        {
+          ASSERT(((pCBDesc->type == 1) && sizeof(STD_CANVAS_UNIFORM) == pCBDesc->cbSize) || pCBDesc->type != 1);
+          pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL,
+            ((pCBDesc->type == 1) ? (const void*)pUniforms : (const void*)pSourceBuffer), 0, 0);
+          pSourceBuffer += pCBDesc->cbSize;
+        }
+      }
+      else
+      {
+        for (; pCBDesc != pCBDescEnd; ++pCBDesc)
+        {
+          pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL, pSourceBuffer, 0, 0);
+          pSourceBuffer += pCBDesc->cbSize;
+        }
       }
 
-      for(; pCBDesc != pCBDescEnd; ++pCBDesc)
-      {
-        pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL, pSourceBuffer, 0, 0);
-        pSourceBuffer += pCBDesc->cbSize;
-      }
-
-      UINT count = m_pPixelCB - m_pVertexCB;
+      UINT count = (UINT)(UINT_PTR)(m_pPixelCB - m_pVertexCB);
       if(count) {
         pImmediateContext->VSSetConstantBuffers(0, count, m_pVertexCB);
       }
 
-      count = D3D11CB_GetPixelCBEnd() - m_pPixelCB;
+      count = (UINT)(UINT_PTR)(D3D11CB_GetPixelCBEnd() - m_pPixelCB);
       if(count) {
         pImmediateContext->PSSetConstantBuffers(0, count, m_pPixelCB);
       }
@@ -1086,7 +1098,7 @@ namespace GrapX
       return TRUE;
     }
 
-    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(D3D11CB_DESC& desc, size_t cbSize)
+    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize)
     {
       ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       D3D11_BUFFER_DESC bd;
@@ -1098,7 +1110,14 @@ namespace GrapX
       bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
       bd.CPUAccessFlags = 0;
 
+      if (szName && clstd::strcmpT(szName, "cb_MarimoCommon") == 0)
+      {
+        desc.type = 1;
+      }
+
       desc.cbSize = cbSize;
+      ASSERT(((desc.type == 1) && sizeof(STD_CANVAS_UNIFORM) == desc.cbSize) || desc.type != 1);
+
       HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &desc.pD3D11ConstantBuffer);
       if(SUCCEEDED(hr)) {
         return desc.pD3D11ConstantBuffer;

@@ -108,6 +108,7 @@ struct GVRENDERDESC
   float4x4          matWorld;   // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
 
   GXDWORD dwFlags;              // 参考 GVModelFlags 定义
+  GXDWORD dwLayer;
   GXUINT  RenderQueue;          // 渲染队列, 尚未使用, 这个默认取自Material中的记录
   GXINT   BaseVertexIndex;      // StartVertex
   GXUINT  MinIndex;
@@ -143,6 +144,7 @@ protected:
   GXDWORD       m_ClsCode;
   clStringA     m_strName;
   GXDWORD       m_dwFlags;        // GVModelFlags
+  GXDWORD       m_dwLayer;        // 层掩码
   GXDWORD       m_dwInterfaceCaps;
   AABB          m_aabbLocal;
 
@@ -165,6 +167,8 @@ public:
   GXBOOL    Show                      (GXBOOL bShow);
   GXDWORD   SetFlags                  (GXDWORD dwNewFlags); // 设置新标志, 这个会清除原来的标志
   GXDWORD   CombineFlags              (GXDWORD dwFlags);    // 与原有标志合并
+  GXDWORD   SetLayer                  (GXDWORD dwLayerMask);
+  GXDWORD   GetLayer                  () const;
 //void      CombineRecursiveFlags    (GXDWORD dwFlags);
 //void      RemoveRecursiveFlags     (GXDWORD dwFlags);
   GXVOID    GetAbsoluteAABB           (AABB& aabb) const;
