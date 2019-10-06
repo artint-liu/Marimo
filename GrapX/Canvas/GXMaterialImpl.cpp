@@ -486,6 +486,18 @@ namespace GrapX
     return FALSE;
   }
 
+  GXBOOL MaterialImpl::GetTexture(GXLPCSTR szSamplerName, Texture** ppTexture)
+  {
+    const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->FindBindResource(szSamplerName);
+    if (pDesc && m_aTextures.size() > pDesc->slot)
+    {
+      *ppTexture = m_aTextures[pDesc->slot];
+      SAFE_ADDREF(*ppTexture);
+      return TRUE;
+    }
+    return FALSE;
+  }
+
   int MaterialImpl::SetRenderQueue(int nRenderQueue)
   {
     int nPrevRenderQueue = m_nRenderQueue;
@@ -500,10 +512,10 @@ namespace GrapX
     return m_nRenderQueue;
   }
 
-  GXHRESULT MaterialImpl::GetFilename(clStringW* pstrFilename)
+  GXBOOL MaterialImpl::GetFilename(clStringW* pstrFilename)
   {
     CLBREAK;
-    return GX_FAIL;
+    return FALSE;
   }
 
   GXBOOL MaterialImpl::InitMaterial()

@@ -155,6 +155,7 @@ namespace GrapX
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
     GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
     GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture));
+    GXSTDINTERFACE(GXBOOL       GetTexture(GXLPCSTR szSamplerName, Texture** ppTexture));
     GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture));
 
     GXSTDINTERFACE(GXBOOL       SetFloat(GXLPCSTR szName, float value));
@@ -162,9 +163,9 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL       SetVector(GXLPCSTR szName, float4* pVector));
     GXSTDINTERFACE(GXBOOL       GetVector(float4* pOut, GXLPCSTR szName));
 
-    GXSTDINTERFACE(GXHRESULT  GetFilename         (clStringW* pstrFilename));
-    GXSTDINTERFACE(int        SetRenderQueue      (int nRenderQueue));
-    GXSTDINTERFACE(int        GetRenderQueue      () const);
+    GXSTDINTERFACE(GXBOOL       GetFilename         (clStringW* pstrFilename));
+    GXSTDINTERFACE(int          SetRenderQueue      (int nRenderQueue));
+    GXSTDINTERFACE(int          GetRenderQueue      () const);
 
     // 旧兼容接口
     GXSTDINTERFACE(GXHRESULT  SetParameters       (ParamType eType, GXDEFINITION* pParameters, int nCount = 0));  // 更新列表中的参数值, 如果nCount为0, 则列表的结尾必须以空字符串或者NULL结尾

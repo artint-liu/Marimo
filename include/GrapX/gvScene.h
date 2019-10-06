@@ -6,7 +6,7 @@ class GVSceneMgr;
 class GVPhySimulator;
 class GVNode;
 class GVSequence;
-enum GVRenderType;
+//enum GVRenderType;
 
 namespace GrapX
 {
@@ -73,7 +73,7 @@ private:
   virtual ~GVScene();
 
 private:
-  GXHRESULT RenderRecursive   (GrapX::Canvas3D* pCanvas, GVNode* pParent, GVRenderType eType);
+  GXHRESULT RenderRecursive   (GrapX::Canvas3D* pCanvas, GVNode* pParent, int nRenderCate);
   GXBOOL    RayTraceRecursive (const GVNode::NormalizedRay& ray, GVNode* pParent, const GVNode::AABB* pAABB, GVNode** ppNode, float3* pHit);
   GXHRESULT UpdateRecursive   (const GVSCENEUPDATE& sContext, GVNode* pParent);
   GXHRESULT SaveFileRecursive (clFile* pFile, GVNode* pParent, GXINOUT u32& nVertBase);
@@ -101,14 +101,14 @@ public:
   GXBOOL    IsChild     (GVNode* pNode);
   GXHRESULT Add         (GVNode* pNode, GVNode* pParent = NULL);
   GXHRESULT Delete      (GVNode* pNode); // Model必须在GVScene中
-  GXHRESULT RenderAll   (GrapX::Canvas3D* pCanvas, GVRenderType eType);  // 不做裁剪,会将整个场景中的所有可渲染物都渲染出来
+  GXHRESULT RenderAll   (GrapX::Canvas3D* pCanvas, int nRenderCate);  // 不做裁剪,会将整个场景中的所有可渲染物都渲染出来
   GXHRESULT SaveToFileW (GXLPCWSTR szFilename);
   GXHRESULT GetRoot     (GVNode** ppRootNode);
   
   // 参考 GVNodeFlags, 如果 dwRequired 不是 GVNode 返回标志的子集, 则不会被加到渲染队列中
   // dwRequired 不必指定 GVNF_VISIBLE 标志, 这个标志是默认的
   // dwCullingMask 剔除掩码, 默认是0, (dwCullingMask & GVNode::m_dwLayer) != 0 则不进行收集
-  GXHRESULT Generate    (GrapX::Canvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwLayerMask, GXDWORD dwRequired);
+  GXHRESULT Generate    (GrapX::Canvas3D* pCanvas, GVSequence* pRenderSequence, int nRenderCate, GXDWORD dwLayerMask, GXDWORD dwRequired);
   void      Update      (GrapX::Canvas3D* pCanvas, GXDWORD dwDeltaTime);
 
   inline GXDWORD        GetDeltaTime  ();

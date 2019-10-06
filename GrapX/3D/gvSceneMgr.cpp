@@ -10,8 +10,7 @@
 //#include <vector>
 //#include <clstd/clTree.h>
 
-//#include <3D/GVNode.h>
-//#include <3D/gvMesh.h>
+#include "GrapX/GShader.h"
 #include "GrapX/gvSceneMgr.h"
 #include "GrapX/GrapVR.h"
 

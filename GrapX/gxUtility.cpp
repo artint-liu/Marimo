@@ -154,10 +154,10 @@ namespace GrapX
         return bval;
       }
       if(file.OpenExisting(szFilename)) {
-        clBuffer* pBuffer = NULL;
-        file.MapToBuffer(&pBuffer);
-        bval = LoadFromMemory(pBuffer, pTransform, aMeshs);
-        SAFE_DELETE(pBuffer);
+        clBuffer buf;
+        file.Read(&buf);
+        bval = LoadFromMemory(&buf, pTransform, aMeshs);
+        //SAFE_DELETE(pBuffer);
       }
       return bval;
     }

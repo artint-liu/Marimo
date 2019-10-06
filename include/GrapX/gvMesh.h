@@ -31,8 +31,9 @@ struct GVMESHDATA
 
 class GXDLL GVMesh : public GVNode
 {
+  //typedef clvector<GrapX::ObjectT<GrapX::Material>>  MaterialArray;
 protected:
-  GrapX::Material*  m_pMtlInst;
+  MaterialArray     m_MtlInsts;
   GrapX::Primitive* m_pPrimitive;
   GXUINT            m_nPrimiCount;
   GXUINT            m_nVertCount;
@@ -61,7 +62,7 @@ public:
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   //virtual GXBOOL  Update          (const GVSCENEUPDATE& sContext);
-  virtual void    GetRenderDesc   (GVRenderType eType, GVRENDERDESC* pRenderDesc);
+  virtual void    GetRenderDesc   (int nRenderCate, GVRENDERDESC* pRenderDesc);
   virtual GXVOID  CalculateAABB   ();
   virtual GXBOOL  RayTrace        (const Ray& ray, NODERAYTRACE* pRayTrace);
   //virtual float   RayTrace        (const Ray& ray, float3* pHit);
@@ -69,11 +70,11 @@ public:
 
   // 文件存取相关的
   virtual GXHRESULT SaveFile (clSmartRepository* pStorage);
-  virtual GXHRESULT SetMaterial    (GrapX::Material* pMtlInst);
+  virtual GXBOOL SetMaterial    (GrapX::Material* pMtlInst, int nRenderCate) override;
 
-  virtual GXHRESULT GetMaterial          (GrapX::Material** ppMtlInst);
+  virtual GXBOOL GetMaterial          (int nRenderCate, GrapX::Material** ppMtlInst) override;
   //virtual GXHRESULT SetMaterialInst         (GXMaterialInst* pMtlInst, GXDWORD dwFlags);
-  virtual GXHRESULT GetMaterialFilename(clStringW* pstrFilename);
+  virtual GXBOOL GetMaterialFilename(int nRenderCate, clStringW* pstrFilename) override;
   //virtual GXHRESULT SetMaterialInstFromFileW(GXLPCWSTR szFilename, GXDWORD dwFlags);
 
   void ApplyTransform(); // 将变换应用到顶点

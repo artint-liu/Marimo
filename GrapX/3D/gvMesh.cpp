@@ -37,7 +37,7 @@ using namespace GrapX;
 
 GVMesh::GVMesh(Graphics* pGraphics)
   : GVNode       (NULL, GXMAKEFOURCC('M','E','S','H'))
-  , m_pMtlInst    (NULL)
+  //, m_pMtlInst    (NULL)
   , m_pPrimitive  (NULL)
   , m_nPrimiCount (0)
   , m_nVertCount  (0)
@@ -47,7 +47,7 @@ GVMesh::GVMesh(Graphics* pGraphics)
 
 GVMesh::GVMesh(Graphics* pGraphics, GXDWORD dwClassCode)
   : GVNode       (NULL, dwClassCode)
-  , m_pMtlInst(NULL)
+  //, m_pMtlInst(NULL)
   , m_pPrimitive(NULL)
   , m_nPrimiCount (0)
   , m_nVertCount  (0)
@@ -65,7 +65,8 @@ void GVMesh::Clear()
   m_nPrimiCount = 0;
   m_nVertCount  = 0;
   m_nStartIndex = 0;
-  SAFE_RELEASE(m_pMtlInst);
+  m_MtlInsts.clear();
+  //SAFE_RELEASE(m_pMtlInst);
   SAFE_RELEASE(m_pPrimitive);
 }
 
@@ -210,21 +211,31 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primit
   return TRUE;
 }
 
-void GVMesh::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
+void GVMesh::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
-  pRenderDesc->dwFlags         = m_dwFlags;
-  pRenderDesc->dwLayer         = m_dwLayer;
-  pRenderDesc->ePrimType       = GXPT_TRIANGLELIST;
-  pRenderDesc->pPrimitive      = m_pPrimitive;
-  pRenderDesc->pMaterial       = m_pMtlInst;
-  pRenderDesc->matWorld        = m_Transformation.GlobalMatrix;
-  pRenderDesc->BaseVertexIndex = 0;
-  pRenderDesc->RenderQueue     = m_pMtlInst ? m_pMtlInst->GetRenderQueue() : 0;
+  if(nRenderCate < (int)m_MtlInsts.size())
+  {
+    pRenderDesc->dwFlags = m_dwFlags;
+    pRenderDesc->dwLayer = m_dwLayer;
+    pRenderDesc->ePrimType = GXPT_TRIANGLELIST;
+    pRenderDesc->pPrimitive = m_pPrimitive;
+    pRenderDesc->pMaterial = m_MtlInsts[nRenderCate];
+    pRenderDesc->matWorld = m_Transformation.GlobalMatrix;
+    pRenderDesc->BaseVertexIndex = 0;
+    pRenderDesc->RenderQueue = pRenderDesc->pMaterial ? pRenderDesc->pMaterial->GetRenderQueue() : 0;
 
-  pRenderDesc->MinIndex        = 0;
-  pRenderDesc->NumVertices     = m_nVertCount;
-  pRenderDesc->StartIndex      = m_nStartIndex;
-  pRenderDesc->PrimitiveCount  = m_nPrimiCount;
+    pRenderDesc->MinIndex = 0;
+    pRenderDesc->NumVertices = m_nVertCount;
+    pRenderDesc->StartIndex = m_nStartIndex;
+    pRenderDesc->PrimitiveCount = m_nPrimiCount;
+  }
+  else
+  {
+    pRenderDesc->dwFlags = 0;
+    pRenderDesc->dwLayer = 0;
+    pRenderDesc->pPrimitive = NULL;
+    pRenderDesc->PrimitiveCount = 0;
+  }
 }
 
 GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改为 NormalizedRay
@@ -295,30 +306,50 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
   return FALSE;
 }
 
-GXHRESULT GVMesh::SetMaterial(GrapX::Material* pMtlInst)
+GXBOOL GVMesh::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
 {
-  return InlSetNewObjectT(m_pMtlInst, pMtlInst);
+  if (nRenderCate >= (int)m_MtlInsts.size()) {
+    m_MtlInsts.resize((size_t)nRenderCate + 1, GrapX::ObjectT<GrapX::Material>(NULL));
+  }
+  m_MtlInsts[nRenderCate] = pMtlInst;
+
+  return TRUE;
+  //return InlSetNewObjectT(m_pMtlInst, pMtlInst);
 }
 
-GXHRESULT GVMesh::GetMaterial(GrapX::Material** ppMtlInst)
+GXBOOL GVMesh::GetMaterial(int nRenderCate, GrapX::Material** ppMtlInst)
 {
-  if(m_pMtlInst != NULL) {
-    *ppMtlInst = m_pMtlInst;
-    m_pMtlInst->AddRef();
-    return GX_OK;
+  if (nRenderCate < (int)m_MtlInsts.size()) {
+    *ppMtlInst = m_MtlInsts[nRenderCate];
+    (*ppMtlInst)->AddRef();
+    return TRUE;
   }
-  return GX_FAIL;
+  return FALSE;
+  //if(m_pMtlInst != NULL) {
+  //  *ppMtlInst = m_pMtlInst;
+  //  m_pMtlInst->AddRef();
+  //  return GX_OK;
+  //}
+  //return GX_FAIL;
 }
 
-GXHRESULT GVMesh::GetMaterialFilename(clStringW* pstrFilename)
+GXBOOL GVMesh::GetMaterialFilename(int nRenderCate, clStringW* pstrFilename)
 {
-  if(m_pMtlInst == NULL) {
-    return GX_FAIL;
+  if (nRenderCate < (int)m_MtlInsts.size() && m_MtlInsts[nRenderCate] != NULL) {
+    if (pstrFilename == NULL) {
+      return TRUE; // 只是探测 m_pMtlInst 是否有效就直接返回
+    }
+    return m_MtlInsts[nRenderCate]->GetFilename(pstrFilename);
   }
-  else if(pstrFilename == NULL) {
-    return GX_OK; // 只是探测 m_pMtlInst 是否有效就直接返回
-  }
-  return m_pMtlInst->GetFilename(pstrFilename);
+  return FALSE;
+
+  //if(m_pMtlInst == NULL) {
+  //  return GX_FAIL;
+  //}
+  //else if(pstrFilename == NULL) {
+  //  return GX_OK; // 只是探测 m_pMtlInst 是否有效就直接返回
+  //}
+  //return m_pMtlInst->GetFilename(pstrFilename);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -504,8 +535,8 @@ GXHRESULT GVMesh::Clone( GVNode** ppClonedNode/*, GXBOOL bRecursive*/ )
   pNewMesh->m_aabbLocal       = m_aabbLocal;
   pNewMesh->m_Transformation  = m_Transformation;
 
-  pNewMesh->m_pMtlInst = m_pMtlInst;
-  pNewMesh->m_pMtlInst->AddRef();
+  pNewMesh->m_MtlInsts = m_MtlInsts;
+  //pNewMesh->m_pMtlInst->AddRef();
 
   pNewMesh->m_pPrimitive = m_pPrimitive;
   pNewMesh->m_pPrimitive->AddRef();
@@ -580,10 +611,10 @@ GXHRESULT GVMesh::SaveFile(SmartRepository* pStorage)
 {
   pStorage->WriteStringA(NULL, MESH_NAME, GetName());
 
-  if(m_pMtlInst != NULL)
+  if(m_MtlInsts.empty() == false && m_MtlInsts[0] != NULL)
   {
     clStringW strMtlFile;
-    m_pMtlInst->GetFilename(&strMtlFile);
+    m_MtlInsts[0]->GetFilename(&strMtlFile);
     if(strMtlFile.IsNotEmpty()) {
       m_pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
       pStorage->WriteStringW(NULL, MESH_MTLINST, strMtlFile);

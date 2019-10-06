@@ -35,6 +35,7 @@
 #include <GrapX/VertexDecl.h>
 #include "Canvas/GXResourceMgr.h"
 #include "Canvas/GXEffectImpl.h"
+#include "Canvas/GXMaterialImpl.h"
 //#include "Console.h"
 //#include <Smart/SmartStream.h>
 //#include <Smart/SmartProfile.h>
@@ -66,7 +67,6 @@
 
 #include "GrapX/GCamera.h"
 #include "GrapX/GrapVR.h"  // Canvas3D 用的
-#include "Canvas/GXMaterialImpl.h"
 #include "Canvas/GXCanvas3DImpl.h"
 #include "GXCanvas3DImpl_d3D11.h"
 // </Canvas3D用的>
@@ -436,10 +436,10 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode, const float4x4* pTransform)
+    GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode, int nRenderCate, const float4x4* pTransform)
     {
       GVRENDERDESC Desc;
-      pNode->GetRenderDesc(GVRT_Normal, &Desc);
+      pNode->GetRenderDesc(nRenderCate, &Desc);
 
       if (TEST_FLAG(Desc.dwFlags, GVNF_CONTAINER)) {
         return GX_FAIL;

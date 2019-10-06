@@ -247,10 +247,10 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(clSmartRepository* pStorage)
 {
   pStorage->WriteStringA(NULL, SKINNEDMESH_NAME, GetName());
 
-  if(m_pMtlInst != NULL)
+  if(m_MtlInsts.empty() == FALSE && m_MtlInsts[0] != NULL)
   {
     clStringW strMtlFile;
-    m_pMtlInst->GetFilename(&strMtlFile);
+    m_MtlInsts[0]->GetFilename(&strMtlFile);
     if(strMtlFile.IsNotEmpty()) {
       m_pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
       pStorage->WriteStringW(NULL, SKINNEDMESH_MTLINST, strMtlFile);

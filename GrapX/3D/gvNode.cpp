@@ -276,30 +276,30 @@ GXBOOL GVNode::Collision()
   return TRUE;
 }
 
-void GVNode::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
+void GVNode::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
   memset(pRenderDesc, 0, sizeof(GVRENDERDESC));
 }
 
-GXHRESULT GVNode::SetMaterial(GrapX::Material* pMtlInst)
+GXBOOL GVNode::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
 {
   return GX_OK;
 }
 
-GXHRESULT GVNode::GetMaterial(GrapX::Material** ppMtlInst)
+GXBOOL GVNode::GetMaterial(int nRenderCate, GrapX::Material** ppMtlInst)
 {
   *ppMtlInst = NULL;
   CLBREAK;
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::GetMaterialFilename(clStringW* pstrFilename)
+GXBOOL GVNode::GetMaterialFilename(int nRenderCate, clStringW* pstrFilename)
 {
   CLBREAK;
   return GX_FAIL;
 }
 
-GXHRESULT GVNode::SetMaterial(GrapX::Material* pMtlInst, GXDWORD dwFlags)
+GXBOOL GVNode::SetMaterial(GrapX::Material* pMtlInst, GXDWORD dwFlags)
 {
   // 如果要根据顶点属性加载纹理的话, 就使用文件名方式加载
   if(TEST_FLAG_NOT(dwFlags, NODEMTL_IGNOREVERT))
@@ -325,7 +325,7 @@ GXHRESULT GVNode::SetMaterial(GrapX::Material* pMtlInst, GXDWORD dwFlags)
   return SetMaterial(pMtlInst);
 }
 
-GXHRESULT GVNode::SetMaterialFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags)
+GXBOOL GVNode::SetMaterialFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags)
 {
   // 设置子节点
   if(TEST_FLAG(dwFlags, NODEMTL_SETCHILDREN|NODEMTL_SETSONONLY)) {
@@ -349,7 +349,7 @@ GXHRESULT GVNode::SetMaterialFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFi
   if(TEST_FLAG_NOT(dwFlags, NODEMTL_IGNOREVERT))
   {
     GVRENDERDESC renderdesc;
-    GetRenderDesc(GVRT_Normal, &renderdesc);
+    GetRenderDesc(DefaultRenderCategory, &renderdesc);
     if(renderdesc.pPrimitive == NULL) {
       CLOG_WARNING("%s : Primitive is null.\r\n", __FUNCTION__);
       return GX_OK;
@@ -375,10 +375,10 @@ GXHRESULT GVNode::SetMaterialFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFi
   }
 
   pGraphics->CreateMaterialFromFile(&pMtlInst, strFilename, eLoadType);
-  GXHRESULT hval = SetMaterial(pMtlInst);
+  GXBOOL bret = SetMaterial(pMtlInst);
   SAFE_RELEASE(pMtlInst);
 
-  return hval;
+  return bret;
 }
 
 GXHRESULT GVNode::SaveFileA(GXLPCSTR szFilename)

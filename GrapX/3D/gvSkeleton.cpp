@@ -310,20 +310,31 @@ GVSkeleton::~GVSkeleton()
   SAFE_RELEASE(m_pPrimitive);
 }
 
-void GVSkeleton::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
+void GVSkeleton::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
-  pRenderDesc->pPrimitive       = m_pPrimitive;
-  pRenderDesc->ePrimType        = GXPT_LINELIST;
-  pRenderDesc->pMaterial        = m_pMtlInst;
-  pRenderDesc->matWorld         = m_Transformation.GlobalMatrix;
+  if(nRenderCate < (int)m_MtlInsts.size())
+  {
+    pRenderDesc->pPrimitive = m_pPrimitive;
+    pRenderDesc->ePrimType = GXPT_LINELIST;
+    pRenderDesc->pMaterial = m_MtlInsts[nRenderCate];
+    pRenderDesc->matWorld = m_Transformation.GlobalMatrix;
 
-  pRenderDesc->dwFlags          = m_dwFlags;
-  pRenderDesc->dwLayer          = m_dwLayer;
-  pRenderDesc->BaseVertexIndex  = 0;
-  pRenderDesc->MinIndex         = 0;
-  pRenderDesc->NumVertices      = m_nPrimiCount * 2;
-  pRenderDesc->StartIndex       = 0;
-  pRenderDesc->PrimitiveCount   = m_nPrimiCount;
+    pRenderDesc->dwFlags = m_dwFlags;
+    pRenderDesc->dwLayer = m_dwLayer;
+    pRenderDesc->RenderQueue = pRenderDesc->pMaterial ? pRenderDesc->pMaterial->GetRenderQueue() : 0;
+    pRenderDesc->BaseVertexIndex = 0;
+    pRenderDesc->MinIndex = 0;
+    pRenderDesc->NumVertices = m_nPrimiCount * 2;
+    pRenderDesc->StartIndex = 0;
+    pRenderDesc->PrimitiveCount = m_nPrimiCount;
+  }
+  else
+  {
+    pRenderDesc->dwFlags = 0;
+    pRenderDesc->dwLayer = 0;
+    pRenderDesc->pPrimitive = NULL;
+    pRenderDesc->PrimitiveCount = 0;
+  }
 }
 
 void GVSkeleton::BuildUpdateOrderTable()

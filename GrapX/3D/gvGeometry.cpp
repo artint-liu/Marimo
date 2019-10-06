@@ -78,7 +78,7 @@ GVGeometry::GVGeometry(Graphics* pGraphics, GEOTYPE eType)
 
 GVGeometry::~GVGeometry()
 {
-  SAFE_RELEASE(m_pMtlInst);
+  //SAFE_RELEASE(m_pMtlInst);
   SAFE_RELEASE(m_pPrimitive);
 }
 
@@ -324,21 +324,31 @@ GXBOOL GVGeometry::CreatePrimitive(Graphics* pGraphics, GXPrimitiveType eType, i
   return bval;
 }
 
-void GVGeometry::GetRenderDesc(GVRenderType eType, GVRENDERDESC* pRenderDesc)
+void GVGeometry::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
-  pRenderDesc->dwFlags         = m_dwFlags;
-  pRenderDesc->dwLayer         = m_dwLayer;
-  pRenderDesc->ePrimType       = m_eType;
-  pRenderDesc->pPrimitive      = m_pPrimitive;
-  pRenderDesc->pMaterial       = m_pMtlInst;
-  pRenderDesc->matWorld        = m_Transformation.GlobalMatrix;
-  pRenderDesc->RenderQueue     = m_pMtlInst ? m_pMtlInst->GetRenderQueue() : 0;
-  pRenderDesc->BaseVertexIndex = 0;
+  if(nRenderCate < (int)m_MtlInsts.size())
+  {
+    pRenderDesc->dwFlags = m_dwFlags;
+    pRenderDesc->dwLayer = m_dwLayer;
+    pRenderDesc->ePrimType = m_eType;
+    pRenderDesc->pPrimitive = m_pPrimitive;
+    pRenderDesc->pMaterial = m_MtlInsts[nRenderCate];
+    pRenderDesc->matWorld = m_Transformation.GlobalMatrix;
+    pRenderDesc->RenderQueue = pRenderDesc->pMaterial ? pRenderDesc->pMaterial->GetRenderQueue() : 0;
+    pRenderDesc->BaseVertexIndex = 0;
 
-  pRenderDesc->MinIndex        = 0;
-  pRenderDesc->NumVertices     = m_nVertCount;
-  pRenderDesc->StartIndex      = m_nStartIndex;
-  pRenderDesc->PrimitiveCount  = m_nPrimiCount;
+    pRenderDesc->MinIndex = 0;
+    pRenderDesc->NumVertices = m_nVertCount;
+    pRenderDesc->StartIndex = m_nStartIndex;
+    pRenderDesc->PrimitiveCount = m_nPrimiCount;
+  }
+  else
+  {
+    pRenderDesc->dwFlags = 0;
+    pRenderDesc->dwLayer = 0;
+    pRenderDesc->pPrimitive = NULL;
+    pRenderDesc->PrimitiveCount = 0;
+  }
 }
 
 //float GVGeometry::RayTrace(const Ray& ray, float3* pHit)
@@ -379,24 +389,6 @@ GXBOOL GVGeometry::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace)
   return FALSE;
 }
 
-//GXHRESULT GVGeometry::SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags)
-//{
-//  if(bSetChild) {
-//    GVGeometry* pChild = (GVGeometry*)m_pFirstChild;
-//    while(pChild != NULL)
-//    {
-//      pChild->SetMaterialInst(pMtlInst, bSetChild);
-//      pChild = (GVGeometry*)(pChild->m_pNext);
-//    }
-//  }
-//
-//  SAFE_RELEASE(m_pMtlInst);
-//  m_pMtlInst = pMtlInst;
-//  if(m_pMtlInst != NULL) {
-//    return m_pMtlInst->AddRef();
-//  }
-//  return GX_OK;
-//}
 //////////////////////////////////////////////////////////////////////////
 GXHRESULT GVGeometry::CreateBox(Graphics* pGraphics, CFloat3& vCenter, CFloat3& vExtent, GXCOLOR clr, GVGeometry** ppGeometry, GXDWORD dwVertexFlags)
 {
@@ -1444,14 +1436,15 @@ GXHRESULT GVGeometry::CreateTorus(
   return hval;
 }
 
-GXHRESULT GVGeometry::CreateSphere(
+template<class _ColorT>
+GXHRESULT GVGeometry::CreateSphereT(
   Graphics*   pGraphics,
   float         fOffset,
   float         fRadius,
   int           nSegments,
   int           nSides,
   float         fHemisphere,
-  GXColor32     color, 
+  _ColorT       color,
   GVGeometry**  ppGeometry,
   float4x4*     pTransform,
   GXDWORD       dwVertexFlags)
@@ -1488,11 +1481,12 @@ GXHRESULT GVGeometry::CreateSphere(
     }
   }
 
-  GXColor32* pColor32 = NULL;
+  _ColorT* pColors = NULL;
   if(dwVertexFlags & GXVF_COLOR)
   {
-    pColor32 = new GXColor32[aVertices.size()];
-    mesh::SetVertexElement(pColor32, sizeof(GXColor32), sizeof(GXColor32), &color, aVertices.size());
+    STATIC_ASSERT(sizeof(_ColorT) == sizeof(GXColor32) || sizeof(_ColorT) == sizeof(GXColor));
+    pColors = new _ColorT[aVertices.size()];
+    mesh::SetVertexElement(pColors, sizeof(_ColorT), sizeof(_ColorT), &color, aVertices.size());
   }
 
   GVMESHDATA MeshComp = {0};
@@ -1505,7 +1499,12 @@ GXHRESULT GVGeometry::CreateSphere(
     MeshComp.pNormals = &aNormals.front();
   }
   if(TEST_FLAG(dwVertexFlags, GXVF_COLOR)) {
-    MeshComp.pColors32 = pColor32;
+    if (sizeof(_ColorT) == sizeof(GXColor32)) {
+      MeshComp.pColors32 = reinterpret_cast<GXColor32*>(pColors);
+    }
+    else {
+      MeshComp.pColors = reinterpret_cast<GXColor*>(pColors);
+    }
   }
   if(TEST_FLAG(dwVertexFlags, GXVF_TEXCOORD)) {
     MeshComp.pTexcoord0 = &aTexcoord.front();
@@ -1520,8 +1519,18 @@ GXHRESULT GVGeometry::CreateSphere(
 
   pGeometry->m_eType = GXPT_TRIANGLELIST;
   *ppGeometry = pGeometry;
-  SAFE_DELETE_ARRAY(pColor32);
+  SAFE_DELETE_ARRAY(pColors);
   return hval;
+}
+
+GXHRESULT GVGeometry::CreateSphere(Graphics* pGraphics, float fOffset, float fRadius, int nSegments, int nSides, float fHemisphere, GXColor32 color, GVGeometry** ppGeometry, float4x4* pTransform, GXDWORD dwVertexFlags)
+{
+  return CreateSphereT<GXColor32>(pGraphics, fOffset, fRadius, nSegments, nSides, fHemisphere, color, ppGeometry, pTransform, dwVertexFlags);
+}
+
+GXHRESULT GVGeometry::CreateSphere(Graphics* pGraphics, float fOffset, float fRadius, int nSegments, int nSides, float fHemisphere, GXColor color, GVGeometry** ppGeometry, float4x4* pTransform, GXDWORD dwVertexFlags)
+{
+  return CreateSphereT<GXColor>(pGraphics, fOffset, fRadius, nSegments, nSides, fHemisphere, color, ppGeometry, pTransform, dwVertexFlags);
 }
 
 GXHRESULT GVGeometry::CreateCapsule(

@@ -63,13 +63,14 @@ enum GVNodeInterfaceCaps
   GVIC_COLLISION = 0x00000004,
 };
 
-enum GVRenderType
-{
-  GVRT_Normal  = 0x100, // 这个名字不够酷, 想着以后改一下
-  GVRT_Reflact = 0x200,
-  GVRT_Reflect = 0x300,
-  GVRT_Shadow  = 0x400,
-};
+const int DefaultRenderCategory = 0;
+//enum GVRenderType
+//{
+//  GVRT_Normal  = 0x100, // 这个名字不够酷, 想着以后改一下
+//  GVRT_Reflact = 0x200,
+//  GVRT_Reflect = 0x300,
+//  GVRT_Shadow  = 0x400,
+//};
 //
 // GVNode::SetMaterialInst 和
 // GVNode::SetMaterialInstFromFileW 标志:
@@ -135,6 +136,7 @@ public:
   typedef clstd::geometry::Plane Plane;
   typedef clstd::geometry::NormalizedRay NormalizedRay;
   typedef clstd::geometry::FrustumPlanes FrustumPlanes;
+  typedef clvector<GrapX::ObjectT<GrapX::Material>>  MaterialArray;
   enum ESpace {
     S_ABSOLUTE = clstd::S_World,
     S_RELATIVE = clstd::S_Self,
@@ -193,8 +195,8 @@ public:
   GXBOOL    SetDirection              (CFloat3& vDir, CFloat3& vUp/*, ESpace eTransform = S_RELATIVE*/);
   GVNode*   FindChild                 (GVNode* pStart, GXLPCSTR szName);
   GVNode*   SetParent                 (GVNode* pNewParent, bool bLast = false);
-  GXHRESULT SetMaterial               (GrapX::Material* pMtlInst, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
-  GXHRESULT SetMaterialFromFile       (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
+  GXBOOL    SetMaterial               (GrapX::Material* pMtlInst, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
+  GXBOOL    SetMaterialFromFile       (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXDWORD dwFlags);  // 参考 NODEMTL_* 标志
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
   virtual GXHRESULT AddRef    ();
@@ -205,11 +207,11 @@ public:
   virtual GXBOOL    Update                    (const GVSCENEUPDATE& sContext);
   virtual GXBOOL    Collision                 ();
   virtual GXVOID    CalculateAABB             ();
-  virtual void      GetRenderDesc             (GVRenderType eType, GVRENDERDESC* pRenderDesc);
+  virtual void      GetRenderDesc             (int nRenderCate, GVRENDERDESC* pRenderDesc);
   virtual GXBOOL    RayTrace                  (const Ray& ray, NODERAYTRACE* pRayTrace);
-  virtual GXHRESULT SetMaterial               (GrapX::Material* pMtlInst);
-  virtual GXHRESULT GetMaterial               (GrapX::Material** ppMtlInst);
-  virtual GXHRESULT GetMaterialFilename       (clStringW* pstrFilename); // 参数可以为NULL, 此时用来探测是否含有材质, 返回值决定了是否含有材质
+  virtual GXBOOL    SetMaterial               (GrapX::Material* pMtlInst, int nRenderCate = DefaultRenderCategory);
+  virtual GXBOOL    GetMaterial               (int nRenderCate, GrapX::Material** ppMtlInst);
+  virtual GXBOOL    GetMaterialFilename       (int nRenderCate, clStringW* pstrFilename); // 参数可以为NULL, 此时用来探测是否含有材质, 返回值决定了是否含有材质
   virtual GXHRESULT Clone                     (GVNode** ppClonedNode/*, GXBOOL bRecursive*/); // 写的不好，要重构，1.继承类应该可以直接使用基类的clone函数，对扩展的成员变量进行处理 2.支持递归
 
   virtual GXHRESULT SaveFileA(GXLPCSTR szFilename);

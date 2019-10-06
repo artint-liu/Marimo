@@ -141,11 +141,11 @@ GXHRESULT GVScene::Add(GVNode* pNode, GVNode* pParent)
       // Set MtlInst if not empty
       //
       GVRENDERDESC sDesc;
-      pTraversal->GetRenderDesc(GVRT_Normal, &sDesc);
+      pTraversal->GetRenderDesc(DefaultRenderCategory, &sDesc);
 
       GXBOOL bHasMesh = sDesc.pPrimitive != NULL;
 
-      if(bHasMesh && GXFAILED(pTraversal->GetMaterialFilename(NULL))) {
+      if(bHasMesh && _CL_NOT_(pTraversal->GetMaterialFilename(DefaultRenderCategory, NULL))) {
         pTraversal->SetMaterialFromFile(m_pGraphics, m_strDefaultMtl, NULL);
           //FALSE, MLT_REFERENCE);
       }
@@ -345,7 +345,7 @@ GXHRESULT GVScene::UpdateRecursive(const GVSCENEUPDATE& sContext, GVNode* pParen
   return GX_OK;
 }
 
-GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, GVRenderType eType)
+GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, int nRenderCate)
 {
   GVRENDERDESC Desc;
   GVNode* pModel = pParent->GetFirstChild();
@@ -354,7 +354,7 @@ GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, GV
 
   while(pModel != NULL)
   {
-    pModel->GetRenderDesc(eType, &Desc);
+    pModel->GetRenderDesc(nRenderCate, &Desc);
 
     if( ! TEST_FLAG(Desc.dwFlags, GVNF_VISIBLE)) {
       // 准备下一次循环
@@ -396,7 +396,7 @@ GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, GV
     }
 
     if(pModel->GetFirstChild() != NULL) {
-      RenderRecursive(pCanvas, pModel, eType);
+      RenderRecursive(pCanvas, pModel, nRenderCate);
     }
 
     // 准备下一次循环
@@ -405,7 +405,7 @@ GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, GV
   return GX_OK;
 }
 
-GXHRESULT GVScene::RenderAll( Canvas3D* pCanvas, GVRenderType eType )
+GXHRESULT GVScene::RenderAll(Canvas3D* pCanvas, int nRenderCate)
 {
   m_uDrawCallCount = 0;
 
@@ -413,7 +413,7 @@ GXHRESULT GVScene::RenderAll( Canvas3D* pCanvas, GVRenderType eType )
   pCanvas->Begin();
   pCanvas->Clear(0, 1.0f, NULL);
 
-  GXHRESULT hr = RenderRecursive(pCanvas, m_pRoot, eType);
+  GXHRESULT hr = RenderRecursive(pCanvas, m_pRoot, nRenderCate);
   pCanvas->End();
   return hr;
 }
@@ -426,7 +426,7 @@ GXHRESULT GVScene::SaveFileRecursive(clFile* pFile, GVNode* pParent, GXINOUT u32
 
   while(pNode != NULL)
   {
-    pNode->GetRenderDesc(GVRT_Normal, &Desc);
+    pNode->GetRenderDesc(DefaultRenderCategory, &Desc);
 
     if( ! TEST_FLAG(Desc.dwFlags, GVNF_VISIBLE)) {
       // 准备下一次循环
@@ -492,7 +492,7 @@ GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
   return GX_FAIL;
 }
 
-GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, GVRenderType eType, GXDWORD dwLayerMask, GXDWORD dwRequired )
+GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int nRenderCate, GXDWORD dwLayerMask, GXDWORD dwRequired )
 {  
   GVNode::AABB          aabbAbs;
   GVRENDERDESC          Desc;
@@ -510,7 +510,7 @@ GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, GVR
   {
     while(pNode != NULL)
     {
-      pNode->GetRenderDesc(eType, &Desc);
+      pNode->GetRenderDesc(nRenderCate, &Desc);
 
       if(_CL_NOT_(TEST_FLAGS_ALL(Desc.dwFlags, dwRequired)) || (dwLayerMask & Desc.dwLayer)) {
         // 准备下一次循环

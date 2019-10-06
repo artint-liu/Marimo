@@ -43,7 +43,7 @@ public:
   virtual GXHRESULT AddRef  ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-  virtual void    GetRenderDesc   (GVRenderType eType, GVRENDERDESC* pRenderDesc);
+  virtual void    GetRenderDesc   (int nRenderCate, GVRENDERDESC* pRenderDesc);
   virtual GXBOOL  RayTrace       (const Ray& ray, NODERAYTRACE* pRayTrace);
 
   //GXHRESULT SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags);
@@ -118,6 +118,31 @@ public:
     GVGeometry**  ppGeometry,
     float4x4*     pTransform = NULL,
     GXDWORD       dwVertexFlags = (GXVF_NORMAL|GXVF_COLOR|GXVF_TEXCOORD));
+
+  template<class _ColorT>
+  static GXHRESULT CreateSphereT(
+    GrapX::Graphics*   pGraphics,
+    float         fOffset,
+    float         fRadius,
+    int           nSegments,
+    int           nSides,
+    float         fHemisphere,
+    _ColorT       color,
+    GVGeometry**  ppGeometry,
+    float4x4*     pTransform,
+    GXDWORD       dwVertexFlags);
+
+  static GXHRESULT CreateSphere(
+    GrapX::Graphics*   pGraphics,
+    float         fOffset,
+    float         fRadius,
+    int           nSegments,
+    int           nSides,
+    float         fHemisphere,
+    GXColor       color,
+    GVGeometry**  ppGeometry,
+    float4x4*     pTransform = NULL,
+    GXDWORD       dwVertexFlags = (GXVF_NORMAL | GXVF_COLOR | GXVF_TEXCOORD));
 
   static GXHRESULT CreateSphere(
     GrapX::Graphics*   pGraphics,

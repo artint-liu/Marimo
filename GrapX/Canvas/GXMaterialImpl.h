@@ -75,6 +75,7 @@ namespace GrapX
 
     Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
     GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture) override;
+    GXBOOL       GetTexture(GXLPCSTR szSamplerName, Texture** ppTexture) override;
     GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture) override;
 
     //virtual GXHRESULT   SetTextureSlot    (GXLPCSTR szName, GXINT nSlot);
@@ -83,7 +84,7 @@ namespace GrapX
     int         SetRenderQueue    (int nRenderQueue) override;
     int         GetRenderQueue    () const override;
     //virtual GrapX::Graphics* GetGraphicsUnsafe () override;
-    GXHRESULT   GetFilename      (clStringW* pstrFilename) override;
+    GXBOOL   GetFilename      (clStringW* pstrFilename) override;
 
     GXBOOL InitMaterial();
 
