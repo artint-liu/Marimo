@@ -545,11 +545,16 @@ namespace GrapX
     GXBLENDDESC sBlendDesc;
     m_pGraphics->CreateBlendState(&m_pBlendState, &sBlendDesc, 1);
 
+    GXSamplerDesc sSamplerDesc(GXTADDRESS_WRAP, 0, GXTEXFILTER_LINEAR);
+    SamplerState* pSamplerState = NULL;
+    m_pGraphics->CreateSamplerState(&pSamplerState, &sSamplerDesc);
 
     if (nMaxSlot) {
       m_aTextures.assign(nMaxSlot, ObjectT<Texture>(NULL));
+      m_aSamplerStates.assign(nMaxSlot, ObjectT<SamplerState>(pSamplerState));
     }
 
+    SAFE_RELEASE(pSamplerState);
     return TRUE;
   }
 
@@ -625,6 +630,9 @@ namespace GrapX
     m_pGraphics->SetBlendState(m_pBlendState);
     m_pGraphics->SetRasterizerState(m_pRasterizer);
     m_pGraphics->SetDepthStencilState(m_pDepthStencil);
+    if(_CL_NOT_(m_aSamplerStates.empty())) {
+      m_pGraphics->SetSamplerState(0, (GXUINT)m_aSamplerStates.size(), &m_aSamplerStates.front());
+    }
 
     return TRUE;
   }

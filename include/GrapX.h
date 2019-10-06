@@ -4894,6 +4894,17 @@ struct GXSamplerDesc : public GXSAMPLERDESC
     MipFilter   = GXTEXFILTER_POINT;
   }
 
+  GXSamplerDesc(GXTextureAddress addr, const GXColor& color, GXTextureFilterType type)
+  {
+    AddressU = addr;
+    AddressV = addr;
+    AddressW = addr;
+    BorderColor = color;
+    MagFilter = type;
+    MinFilter = type;
+    MipFilter = type;
+  }
+
   operator const GXSAMPLERDESC*() const
   {
     return this;

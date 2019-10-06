@@ -271,9 +271,23 @@ namespace GrapX
     GXBOOL TextureImpl::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
     {
       ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
-      D3D11_BOX box = {UINT(lprcSource->left), UINT(lprcSource->top), 0, UINT(lprcSource->right), UINT(lprcSource->bottom), 1};
+      D3D11_BOX box = {0, 0, 0, m_nWidth, m_nHeight, 1};
+        // {UINT(lprcSource->left), UINT(lprcSource->top), 0, UINT(lprcSource->right), UINT(lprcSource->bottom), 1};
+      UINT x = 0, y = 0;
+      if(lpptDestination) {
+        x = lpptDestination->x;
+        y = lpptDestination->y;
+      }
+
+      if(lprcSource) {
+        box.left = lprcSource->left;
+        box.top = lprcSource->top;
+        box.right = lprcSource->right;
+        box.bottom = lprcSource->bottom;
+      }
+
       pD3D11Context->CopySubresourceRegion(
-        m_pD3D11Texture, 0, lpptDestination->x, lpptDestination->y, 0,
+        m_pD3D11Texture, 0, x, y, 0,
         static_cast<TextureImpl*>(pSrc)->m_pD3D11Texture, 0, &box);
       return TRUE;
     }

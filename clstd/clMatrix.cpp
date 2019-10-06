@@ -364,6 +364,11 @@ namespace clstd
     return *this;
   }
 
+  clstd::_float3x3& _float3x3::LookAt(const _float3& vDir, const _float3& vUp)
+  {
+    return *MatrixLookAtLH(this, &vDir, &vUp);
+  }
+
   _float3x3& _float3x3::set(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
   {
     _11 = m11; _12 = m12; _13 = m13;
@@ -869,6 +874,35 @@ namespace clstd
   }
 
   //////////////////////////////////////////////////////////////////////////
+  _float3x3* MatrixLookAtLH(_float3x3* pout, const _float3 *pDir, const _float3 *pUp)
+  {
+    float3 right, rightn, up, upn, vec;
+
+    //Vec3Subtract(&vec2, pat, peye);
+    Vec3Normalize(&vec, pDir);
+    Vec3Cross(&right, pUp, &vec);
+    Vec3Cross(&up, &vec, &right);
+    Vec3Normalize(&rightn, &right);
+    Vec3Normalize(&upn, &up);
+    pout->dm[0][0] = rightn.x;
+    pout->dm[1][0] = rightn.y;
+    pout->dm[2][0] = rightn.z;
+    //pout->dm[3][0] = -Vec3Dot(&rightn, peye);
+    pout->dm[0][1] = upn.x;
+    pout->dm[1][1] = upn.y;
+    pout->dm[2][1] = upn.z;
+    //pout->dm[3][1] = -Vec3Dot(&upn, peye);
+    pout->dm[0][2] = vec.x;
+    pout->dm[1][2] = vec.y;
+    pout->dm[2][2] = vec.z;
+    //pout->dm[3][2] = -Vec3Dot(&vec, peye);
+    //pout->dm[0][3] = 0.0f;
+    //pout->dm[1][3] = 0.0f;
+    //pout->dm[2][3] = 0.0f;
+    //pout->dm[3][3] = 1.0f;
+    return pout;
+  }
+
   _float4x4* MatrixLookAtLH(_float4x4 *pout, const float3 *peye, const float3 *pat, const float3 *pup)
   {
     float3 right, rightn, up, upn, vec, vec2;

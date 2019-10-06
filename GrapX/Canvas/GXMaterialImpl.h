@@ -21,6 +21,7 @@ namespace GrapX
     };
     typedef clhash_map<clStringA, GXUINT> MtlStateDict;
     typedef clvector<ObjectT<Texture> > TextureArray;
+    typedef clvector<ObjectT<SamplerState> > SamplerStateArray;
     //typedef clstd::FixedBuffer clFixedBuffer;
   private:
     static MtlStateDict s_MtlStateDict;
@@ -28,6 +29,7 @@ namespace GrapX
     Shader*               m_pShader;
     Marimo::DataPool*     m_pDataPool;
     TextureArray          m_aTextures;
+    SamplerStateArray     m_aSamplerStates;
 
     //GShaderStub*        m_pShaderStub;
     //GTextureBase*       m_aTextureSlot[GX_MAX_TEXTURE_STAGE];

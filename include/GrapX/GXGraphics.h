@@ -117,6 +117,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT SetBlendState        (BlendState* pBlendState));
     GXSTDINTERFACE(GXHRESULT SetDepthStencilState (DepthStencilState* pDepthStencilState));
     GXSTDINTERFACE(GXHRESULT SetSamplerState      (GXUINT slot, SamplerState* pSamplerState));
+    GXSTDINTERFACE(GXBOOL    SetSamplerState      (GXUINT nStartSlot, GXUINT nSamplerCount, SamplerState** pSamplerStateArray));
 
     GXSTDINTERFACE(GXHRESULT Clear              (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil));
     GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount));

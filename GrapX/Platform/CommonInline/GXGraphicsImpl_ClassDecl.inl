@@ -34,6 +34,8 @@
   virtual GXHRESULT SetBlendState         (BlendState* pBlendState) override;
   virtual GXHRESULT SetDepthStencilState  (DepthStencilState* pDepthStencilState) override;
   virtual GXHRESULT SetSamplerState       (GXUINT slot, SamplerState* pSamplerState) override;
+  virtual GXBOOL    SetSamplerState       (GXUINT nStartSlot, GXUINT nSamplerCount, SamplerState** pSamplerStateArray) override;
+
 
   virtual GXHRESULT Clear               (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil) override;
   virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount) override;

@@ -48,6 +48,9 @@ namespace clstd
 
     _float3x3& RotationAxis(const _float3& vAxis, const float fAngle);
 
+    _float3x3& LookAt(const _float3& vDir, const _float3& vUp); // left handed
+
+
     // 欧拉角转换部分算法来自 Euler angle convertion algorithm is from Ogre
     // The matrix must be orthonormal.  The decomposition is yaw*pitch*roll
     // where yaw is rotation about the Up vector, pitch is rotation about the
@@ -223,6 +226,7 @@ namespace clstd
   b32         MatrixDecomposeScalingRotation  (const _float4x4 *pm, _float3* poutscale, _quaternion* poutrotation);
   void        MatrixDecomposeTranslation      (const _float4x4 *pm, _float3 *pouttranslation);
   _float4x4*  MatrixLookAtLH            (_float4x4* pout, const _float3 *peye, const _float3 *pat, const _float3 *pup);
+  _float3x3*  MatrixLookAtLH            (_float3x3* pout, const _float3 *pDir, const _float3 *pUp);
   _float4x4*  MatrixRotationX           (_float4x4* pout, float angle);
   _float4x4*  MatrixRotationY           (_float4x4* pout, float angle);
   _float4x4*  MatrixRotationZ           (_float4x4* pout, float angle);

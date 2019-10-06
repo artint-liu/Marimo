@@ -1251,6 +1251,20 @@ namespace GrapX
       return TRUE;
     }
 
+    GXBOOL GraphicsImpl::SetSamplerState(GXUINT nStartSlot, GXUINT nSamplerCount, SamplerState** pSamplerStateArray)
+    {
+      SAFE_RELEASE(m_pCurSamplerState);
+      ID3D11SamplerState*  temp_array[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT];
+      SamplerStateImpl** pImplArray = reinterpret_cast<SamplerStateImpl**>(pSamplerStateArray);
+      for(GXUINT i = 0; i < nSamplerCount; i++)
+      {
+        temp_array[i] = pImplArray[i]->m_pD3D11SamplerState;
+      }
+      m_pImmediateContext->PSSetSamplers(nStartSlot, nSamplerCount, temp_array);
+      return TRUE;
+    }
+
+
   } // namespace D3D11
 }
 #endif // #ifdef ENABLE_GRAPHICS_API_DX11
