@@ -189,7 +189,8 @@ namespace GrapX
 
         if(m_pGraphicsImpl->IsActiveCanvas(this))
         {
-          m_pGraphicsImpl->InlSetRenderTarget(this);
+          //m_pGraphicsImpl->InlSetRenderTarget(this);
+          m_pGraphicsImpl->InlSetCanvas(NULL);
         }
 
         m_sExtent = sExtent;

@@ -3,6 +3,8 @@
 #ifndef _GTEXTURE_D3D11_IMPLEMENT_H_
 #define _GTEXTURE_D3D11_IMPLEMENT_H_
 
+#define ENABLE_DirectXTex
+
 namespace GrapX
 {
   namespace D3D11
@@ -81,7 +83,8 @@ namespace GrapX
       GXBOOL      Unmap             () override;
       GXBOOL      UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch) override;
       GrapX::Graphics* GetGraphicsUnsafe () override;
-
+      GXBOOL      SaveToMemory      (clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat) override;
+      GXBOOL      SaveToFile        (GXLPCWSTR szFileName, GXLPCSTR szDestFormat) override;
     protected:
       TextureImpl(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage);
       virtual ~TextureImpl();
@@ -92,6 +95,8 @@ namespace GrapX
       //ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);
       GXBOOL IntD3D11CreateResource(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
       GXUINT GetMinPitchSize() const;
+
+      GXBOOL IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat);
 
     protected:
       D3D11_MAPPED_SUBRESOURCE  m_sMappedResource;

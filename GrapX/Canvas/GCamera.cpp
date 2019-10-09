@@ -179,6 +179,10 @@ float GCamera_ScreenAligned::SetFov( float fFov )
   return 0.0f;
 }
 
+void GCamera_ScreenAligned::SetNearFar(float fNear, float fFar)
+{
+}
+
 const float4x4& GCamera_ScreenAligned::GetViewMatrix() const
 {
   return float4x4::Identity;
@@ -527,6 +531,7 @@ namespace GrapX
       CFloat3&      GetFront          () const override;
       float         GetFov            () const override;
       float         SetFov            (float fFov) override;
+      void          SetNearFar        (float fNear, float fFar) override;
       const float4x4& GetViewMatrix   () const override;
       void          SetViewMatrix     (const float4x4& matView) override;
     };
@@ -703,6 +708,13 @@ namespace GrapX
       //UpdateMat();
       UpdateProjectionMatrix();
       return fPrev;
+    }
+
+    void CameraImpl::SetNearFar(float fNear, float fFar)
+    {
+      m_fNear = fNear;
+      m_fFar = fFar;
+      UpdateProjectionMatrix();
     }
 
     const float4x4& CameraImpl::GetViewMatrix() const

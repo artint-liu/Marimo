@@ -35,7 +35,7 @@ namespace GrapX
     // 放到Graphics中
     // GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
     // 放到GXImage中
-    // GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
+    
 
     Texture() : TextureBase(0, RESTYPE_TEXTURE2D) {}
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
@@ -49,6 +49,8 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL       Unmap             ());
     GXSTDINTERFACE(GXBOOL       UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch));
 
+    GXSTDINTERFACE(GXBOOL       SaveToMemory     (clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat));
+    GXSTDINTERFACE(GXBOOL       SaveToFile       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
   };
 
   class Texture3D : public TextureBase

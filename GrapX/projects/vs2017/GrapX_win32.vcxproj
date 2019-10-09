@@ -236,7 +236,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <Profile>true</Profile>
       <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>copy $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).Debug.lib $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).$(Configuration).lib</Command>
@@ -272,7 +272,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <Profile>true</Profile>
       <IgnoreSpecificDefaultLibraries>libcmtd.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -304,7 +304,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
       <Command>copy $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).Release.lib $(ProjectDir)..\..\..\clstd\bin\$(PlatformToolset)\clstd_win32.$(PlatformTarget).$(Configuration).lib</Command>
@@ -339,7 +339,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -370,7 +370,7 @@
       <ProgramDatabaseFile>$(OutDir)Frame UI.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -405,7 +405,7 @@
       <ProgramDatabaseFile>$(OutDir)Frame UI.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -438,7 +438,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
@@ -476,7 +476,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX64</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../../../clstd/bin/$(PlatformToolset)\;$(ProjectDir)../../third_party/FreeType/lib/$(PlatformTarget);$(ProjectDir)../../../clstd/third_party/pthread/lib;$(VLDDIR)/lib/Win$(PlatformArchitecture);$(ProjectDir)../../third_party/FreeImage/x$(PlatformArchitecture);$(ProjectDir)..\..\third_party\DirectXTex\Desktop_2017\$(PlatformTarget)\$(Configuration)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>

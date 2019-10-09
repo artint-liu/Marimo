@@ -23,6 +23,12 @@
 #include <clPathFile.h>
 #ifdef ENABLE_GRAPHICS_API_DX11
 #include <FreeImage.h>
+#include "clImage.h"
+
+#ifdef ENABLE_DirectXTex
+# include "third_party/DirectXTex/DirectXTex.h"
+# pragma comment(lib, "DirectXTex.lib")
+#endif
 
 // Resource Usage |Default |Dynamic |Immutable |Staging
 // GPU - Read     |yes     |yes     |yes       |yes¹
@@ -226,6 +232,157 @@ namespace GrapX
       return GetBytesOfGraphicsFormat(m_Format) * m_nWidth;
     }
 
+    GXBOOL TextureImpl::IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat)
+    {
+      //ASSERT(m_eResUsage == GXResUsage::SystemMem || m_eResUsage == GXResUsage::Read);
+      GXBOOL bval = TRUE;
+      Texture::MAPPED mapped;
+      if (Map(&mapped, GXResMap::Read))
+      {
+        clStringA strFormat = pImageFormat;
+        strFormat.MakeUpper();
+#ifdef ENABLE_DirectXTex
+        if (strFormat == "DDS" || strFormat == "DXT")
+        {
+          DirectX::Image image;
+          DirectX::Blob blob;
+          D3D11_TEXTURE2D_DESC desc;
+          m_pD3D11Texture->GetDesc(&desc);
+          image.width = m_nWidth;
+          image.height = m_nHeight;
+          image.format = desc.Format;
+          image.rowPitch = mapped.Pitch;
+          image.slicePitch = mapped.Pitch * m_nHeight;
+          image.pixels = (uint8_t*)mapped.pBits;
+
+          if (SUCCEEDED(DirectX::SaveToDDSMemory(image, DirectX::DDS_FLAGS_NONE, blob)))
+          {
+            pBuffer->Resize(0, FALSE);
+            pBuffer->Append(blob.GetBufferPointer(), blob.GetBufferSize());
+          }
+          else
+          {
+            bval = FALSE;
+          }
+        }
+        else
+#endif
+        {
+          GXUINT bpp = GetBytesOfGraphicsFormat(m_Format);
+
+          GXLPVOID pSourceBits = mapped.pBits;
+          GXINT nSourcePitch = mapped.Pitch;
+          clstd::Image temp_image;
+          FREE_IMAGE_TYPE fit = FIT_BITMAP;
+          switch (m_Format)
+          {
+          case Format_R8G8B8A8:
+            temp_image.Set(m_nWidth, m_nHeight, "RGBA", 8, pSourceBits, nSourcePitch);
+            break;
+          case Format_B8G8R8X8:
+            temp_image.Set(m_nWidth, m_nHeight, "BGRX", 8, pSourceBits, nSourcePitch);
+            break;
+          case Format_B8G8R8:
+            temp_image.Set(m_nWidth, m_nHeight, "BGRX", 8, pSourceBits, nSourcePitch);
+            break;
+          case Format_R8:
+            temp_image.Set(m_nWidth, m_nHeight, "R", 8, pSourceBits, nSourcePitch);
+            break;
+          case Format_R8G8:
+            temp_image.Set(m_nWidth, m_nHeight, "RG", 8, pSourceBits, nSourcePitch);
+            break;
+          case Format_R32G32B32A32_Float:
+            fit = FIT_RGBAF;
+            break;
+          case Format_R32:
+            fit = FIT_FLOAT;
+            break;
+          }
+
+          if (temp_image.GetDataSize() > 0)
+          {
+            temp_image.SetFormat("BGRA");
+            pSourceBits = temp_image.GetLine(0);
+            nSourcePitch = temp_image.GetPitch();
+            bpp = temp_image.GetChannels();
+          }
+
+          FIBITMAP* fibmp = (fit == FIT_BITMAP)
+            ? FreeImage_Allocate(m_nWidth, m_nHeight, bpp * 8)
+            : FreeImage_AllocateT(fit, m_nWidth, m_nHeight, bpp * 8);
+          BYTE* pDest = FreeImage_GetBits(fibmp);
+          GXINT nDestPitch = FreeImage_GetPitch(fibmp);
+
+          pDest += nDestPitch * (m_nHeight - 1);
+          for (GXUINT y = 0; y < m_nHeight; y++)
+          {
+            memcpy(pDest, pSourceBits, clMin(nDestPitch, nSourcePitch));
+
+            pDest -= nDestPitch;
+            pSourceBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(pSourceBits) + nSourcePitch);
+          }
+
+          FREE_IMAGE_FORMAT fi_format = FIF_UNKNOWN;
+
+          if (strFormat == "PNG") {
+            fi_format = FIF_PNG;
+          }
+          else if (strFormat == "JPEG" || strFormat == "JPG") {
+            fi_format = FIF_JPEG;
+          }
+          else if (strFormat == "TIF" || strFormat == "TIFF") {
+            fi_format = FIF_TIFF;
+          }
+          else if (strFormat == "TGA") {
+            fi_format = FIF_TARGA;
+          }
+          else if (strFormat == "BMP") {
+            fi_format = FIF_BMP;
+          }
+          else if (strFormat == "EXR") {
+            fi_format = FIF_EXR;
+          }
+
+          if (fi_format != FIF_UNKNOWN)
+          {
+            FIMEMORY* fimemory = FreeImage_OpenMemory();
+            if (FreeImage_SaveToMemory(fi_format, fibmp, fimemory))
+            {
+              BYTE *pData;
+              DWORD size_in_bytes;
+              if (FreeImage_AcquireMemory(fimemory, &pData, &size_in_bytes))
+              {
+                pBuffer->Resize(0, FALSE);
+                pBuffer->Append(pData, size_in_bytes);
+              }
+              else
+              {
+                bval = FALSE;
+              }
+            }
+            else
+            {
+              bval = FALSE;
+            }
+            FreeImage_CloseMemory(fimemory);
+          }
+          else
+          {
+            bval = FALSE;
+          }
+
+          FreeImage_Unload(fibmp);
+        }
+        Unmap();
+      }
+      else
+      {
+        CLOG_ERROR("%s(%d): Unable map texture", __FILE__, __LINE__);
+        CLBREAK;
+      }
+      return bval;
+    }
+
     //////////////////////////////////////////////////////////////////////////
     GXBOOL TextureImpl::Clear(GXCOLOR dwColor)
     {
@@ -402,6 +559,30 @@ namespace GrapX
     Graphics*  TextureImpl::GetGraphicsUnsafe()
     {
       return m_pGraphics;
+    }
+
+    GXBOOL TextureImpl::SaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat)
+    {
+      if (m_eResUsage == GXResUsage::SystemMem || m_eResUsage == GXResUsage::Read || m_eResUsage == GXResUsage::ReadWrite) {
+        return IntSaveToMemory(pBuffer, szDestFormat);
+      }
+      CLBREAK;
+      return FALSE;
+    }
+
+    GXBOOL TextureImpl::SaveToFile(GXLPCWSTR szFileName, GXLPCSTR szDestFormat)
+    {
+      clstd::MemBuffer buffer;
+      if (SaveToMemory(&buffer, szDestFormat))
+      {
+        clstd::File file;
+        if (file.CreateAlways(szFileName))
+        {
+          file.Write(buffer);
+          return TRUE;
+        }
+      }
+      return FALSE;
     }
 
     GXSIZE* TextureImpl::GetDimension(GXSIZE* pDimension)

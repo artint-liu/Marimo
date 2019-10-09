@@ -1001,10 +1001,15 @@ namespace GrapX
         format = GXFMT_A8R8G8B8;
 #endif
       }
+      else if (bpp == 128)
+      {
+        format = Format_R32G32B32A32_Float;
+      }
       else {
         CLBREAK;
       }
 
+      FreeImage_FlipVertical(fibmp);
 
       hr = CreateTexture(ppTexture, NULL, FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp),
         format, eUsage, MipLevels, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
