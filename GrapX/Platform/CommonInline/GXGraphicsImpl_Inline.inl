@@ -148,6 +148,7 @@ GXBOOL GraphicsImpl::InlSetTexture(TexBaseImpl* pTexture, GXUINT uStage)
   }
   m_pCurTexture[uStage]->AddRef();
   //m_pd3dDevice->SetTexture(uStage, pTexture->D3DTexture());
+  ASSERT(pTexture->D3DResourceView());
   m_pImmediateContext->PSSetShaderResources(uStage, 1, &pTexture->D3DResourceView());
   return TRUE;
 }
@@ -234,7 +235,8 @@ GXBOOL GraphicsImpl::InlSetShader(Shader* pShader) // 没有改变返回 FALSE
 GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
 {
   ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
-  if(InlSetShader(pShaderImpl)) {
+  InlSetShader(pShaderImpl);
+  {
     pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
     pEffectImpl->Commit();
     return TRUE;

@@ -437,9 +437,10 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode, int nRenderCate, const float4x4* pTransform)
+    GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode, const float4x4* pTransform)
     {
       GVRENDERDESC Desc;
+      const int nRenderCate = 0;
       pNode->GetRenderDesc(nRenderCate, &Desc);
 
       if (TEST_FLAG(Desc.dwFlags, GVNF_CONTAINER)) {

@@ -20,6 +20,15 @@ namespace GrapX
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe ());      // 不会增加引用计数
   };
 
+  struct TEXTURE_DESC
+  {
+    GXUINT      Width;
+    GXUINT      Height;
+    GXUINT      MipLevels;
+    GXFormat    Format;
+    GXResUsage  Usage;
+  };
+
   // Texture 2D
   class Texture : public TextureBase
   {
@@ -43,6 +52,7 @@ namespace GrapX
 
     GXSTDINTERFACE(GXBOOL       Clear             (GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
     GXSTDINTERFACE(GXSIZE*      GetDimension      (GXSIZE* pDimension));  // 取纹理的尺寸, 这个值可能会跟屏幕尺寸变化
+    GXSTDINTERFACE(void         GetDesc           (TEXTURE_DESC* pDesc));
     GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));
     GXSTDINTERFACE(GXBOOL       CopyRect          (Texture* pSourceTexture, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource));
     GXSTDINTERFACE(GXBOOL       Map               (MAPPED* pLockRect, GXResMap eResMap)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替

@@ -77,6 +77,7 @@ namespace GrapX
       GXResUsage  GetUsage          () override;
       GXFormat    GetFormat         () override;
       GXVOID      GenerateMipMaps   () override;
+      void        GetDesc           (TEXTURE_DESC* pDesc) override;
       GXBOOL      GetDesc           (GXBITMAP*lpBitmap) override;
       GXBOOL      CopyRect          (Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
       GXBOOL      Map               (MAPPED* pMappedRect, GXResMap eResMap) override;

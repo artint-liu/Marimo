@@ -11,7 +11,7 @@ struct STANDARDMTLUNIFORMTABLE;
 namespace GrapX
 {
   class Canvas3D : public CanvasCore
-  {
+   {
   public:
     typedef clstd::geometry::Ray Ray;
     typedef clstd::geometry::FrustumPlanes FrustumPlanes;
@@ -30,7 +30,7 @@ namespace GrapX
     //GXSTDINTERFACE(GXHRESULT      Clear                 (GXDWORD dwFlags, GXCOLOR crClear, GXFLOAT z, GXDWORD dwStencil));
 
     GXSTDINTERFACE(GXHRESULT      Draw                  (GVSequence* pSequence));
-    GXSTDINTERFACE(GXHRESULT      Draw                  (Shader* pShader, GVNode* pNode, int nRenderCate, const float4x4* pTransform = NULL)); // 临时
+    GXSTDINTERFACE(GXHRESULT      Draw                  (Shader* pShader, GVNode* pNode, const float4x4* pTransform = NULL)); // 临时
 
     GXSTDINTERFACE(GXHRESULT      SetMaterial           (Material* pMtlInst));
     GXSTDINTERFACE(GXHRESULT      SetPrimitive          (Primitive* pPrimitive));

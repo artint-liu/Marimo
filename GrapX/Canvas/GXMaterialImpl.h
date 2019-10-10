@@ -4,6 +4,11 @@ struct STANDARDMTLUNIFORMTABLE;
 class BlendState;
 class DepthStencilState;
 
+namespace Marimo
+{
+  class DataPoolVariable;
+} // namespace Marimo
+
 #define DEFAULT_RENDER_QUEUE GrapX::RenderQueue_Geometry
 //////////////////////////////////////////////////////////////////////////
 namespace GrapX
@@ -19,17 +24,27 @@ namespace GrapX
       GXBLENDDESC         BlendDesc;
       GXDEPTHSTENCILDESC  DepthStencilDesc;
     };
+
+    struct TEXTUREUNIT
+    {
+      ObjectT<Texture> texture;
+      Marimo::DataPoolVariable TexelSize;
+      //ObjectT<SamplerState> sampler;
+      //GXBOOL bTexelSize;
+    };
     typedef clhash_map<clStringA, GXUINT> MtlStateDict;
     typedef clvector<ObjectT<Texture> > TextureArray;
     typedef clvector<ObjectT<SamplerState> > SamplerStateArray;
+    typedef clvector<TEXTUREUNIT> TextureUnitArray;
     //typedef clstd::FixedBuffer clFixedBuffer;
   private:
     static MtlStateDict s_MtlStateDict;
     Graphics*             m_pGraphics;
-    Shader*               m_pShader;
-    Marimo::DataPool*     m_pDataPool;
-    TextureArray          m_aTextures;
+    Shader*               m_pShader = NULL;
+    Marimo::DataPool*     m_pDataPool = NULL;
+    //TextureArray          m_aTextures;
     SamplerStateArray     m_aSamplerStates;
+    TextureUnitArray      m_aTextures;
 
     //GShaderStub*        m_pShaderStub;
     //GTextureBase*       m_aTextureSlot[GX_MAX_TEXTURE_STAGE];

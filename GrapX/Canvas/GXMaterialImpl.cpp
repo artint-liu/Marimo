@@ -6,7 +6,6 @@
 #include "GrapX/GTexture.h"
 #include "GrapX/GXCanvas.h"
 #include "GrapX/GStateBlock.h"
-#include "GXMaterialImpl.h"
 #include "GrapX/StdMtl.h"
 #include "GrapX/gxError.h"
 #include "Smart/smartstream.h"
@@ -14,6 +13,8 @@
 #include "GrapX/DataPool.h"
 #include "GrapX/DataPoolVariable.h"
 #include "clTokens.h"
+#include "GXMaterialImpl.h"
+#include "clStringAttach.h"
 
 using namespace clstd;
 GXBOOL Parse(GXBLENDDESC& desc, TokensA& tokens, TokensA::iterator& iter);
@@ -469,7 +470,7 @@ namespace GrapX
   {
     if (m_aTextures.size() > nSlot)
     {
-      m_aTextures[nSlot] = pTexture;
+      m_aTextures[nSlot].texture = pTexture;
       return TRUE;
     }
     return FALSE;
@@ -480,7 +481,7 @@ namespace GrapX
     const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->FindBindResource(szSamplerName);
     if (pDesc && m_aTextures.size() > pDesc->slot)
     {
-      m_aTextures[pDesc->slot] = pTexture;
+      m_aTextures[pDesc->slot].texture = pTexture;
       return TRUE;
     }
     return FALSE;
@@ -491,7 +492,7 @@ namespace GrapX
     const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->FindBindResource(szSamplerName);
     if (pDesc && m_aTextures.size() > pDesc->slot)
     {
-      *ppTexture = m_aTextures[pDesc->slot];
+      *ppTexture = m_aTextures[pDesc->slot].texture;
       SAFE_ADDREF(*ppTexture);
       return TRUE;
     }
@@ -545,16 +546,38 @@ namespace GrapX
     GXBLENDDESC sBlendDesc;
     m_pGraphics->CreateBlendState(&m_pBlendState, &sBlendDesc, 1);
 
-    GXSamplerDesc sSamplerDesc(GXTADDRESS_WRAP, 0, GXTEXFILTER_LINEAR);
-    SamplerState* pSamplerState = NULL;
-    m_pGraphics->CreateSamplerState(&pSamplerState, &sSamplerDesc);
-
     if (nMaxSlot) {
-      m_aTextures.assign(nMaxSlot, ObjectT<Texture>(NULL));
+      GXSamplerDesc sSamplerDesc(GXTADDRESS_WRAP, 0, GXTEXFILTER_LINEAR);
+      SamplerState* pSamplerState = NULL;
+      m_pGraphics->CreateSamplerState(&pSamplerState, &sSamplerDesc);
+
+      m_aTextures.resize(nMaxSlot);
       m_aSamplerStates.assign(nMaxSlot, ObjectT<SamplerState>(pSamplerState));
+
+      ch buffer[128];
+      clStringAttachA strName(buffer, sizeof(buffer));
+      for (GXUINT index = 0;; index++)
+      {
+        auto desc = m_pShader->GetBindResource(index);
+        if (desc == NULL) {
+          break;
+        }
+        
+        if (desc->type == Shader::BindType::Texture)
+        {
+          strName.Clear();
+          strName.Append(desc->name).Append("_TexelSize");
+          Marimo::DataPoolVariable var = GetUniform(strName.CStr());
+          if (var.IsValid() && clstd::strcmpT(var.GetTypeName(), "float4") != 0)
+          {
+            m_aTextures[desc->slot].TexelSize = var;
+          }
+        }
+      }
+
+      SAFE_RELEASE(pSamplerState);
     }
 
-    SAFE_RELEASE(pSamplerState);
     return TRUE;
   }
 
@@ -622,9 +645,9 @@ namespace GrapX
   GXBOOL MaterialImpl::Commit()
   {
     GXUINT slot = 0;
-    for(auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
+    for (auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
     {
-      m_pGraphics->SetTexture(*it, slot);
+      m_pGraphics->SetTexture(it->texture, slot);
     }
 
     m_pGraphics->SetBlendState(m_pBlendState);

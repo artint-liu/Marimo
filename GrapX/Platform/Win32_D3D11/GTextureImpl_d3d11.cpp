@@ -77,7 +77,8 @@ namespace GrapX
       {
         //OnDeviceEvent(DE_LostDevice);
         INVOKE_LOST_DEVICE;
-        if(m_pD3D11Texture && m_pD3D11ShaderView) {
+        if((m_pD3D11Texture && m_pD3D11ShaderView) &&
+          (m_dwResType == RESTYPE_TEXTURE2D || m_dwResType == RESTYPE_TEXTURE3D || m_dwResType == RESTYPE_TEXTURE_CUBE)) {
           m_pGraphics->UnregisterResource(this);
         }
         delete this;
@@ -162,7 +163,7 @@ namespace GrapX
         TexDesc.CPUAccessFlags = 0;
       }
       else if(bRenderTarget) {
-        TexDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+        TexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
         TexDesc.Usage = D3D11_USAGE_DEFAULT;
         TexDesc.CPUAccessFlags = 0;
       }
@@ -606,6 +607,7 @@ namespace GrapX
 
     GXVOID TextureImpl::GenerateMipMaps()
     {
+      m_pGraphics->D3DGetDeviceContext()->GenerateMips(m_pD3D11ShaderView);
     }
 
     GXBOOL TextureImpl::GetDesc(GXBITMAP*lpBitmap)
@@ -635,6 +637,17 @@ namespace GrapX
       return TRUE;
     }
 
+    void TextureImpl::GetDesc(TEXTURE_DESC* pDesc)
+    {
+      D3D11_TEXTURE2D_DESC desc;
+      m_pD3D11Texture->GetDesc(&desc);
+      pDesc->Width      = m_nWidth;
+      pDesc->Height     = m_nHeight;
+      pDesc->MipLevels  = desc.MipLevels;
+      pDesc->Format     = m_Format;
+      pDesc->Usage      = m_eResUsage;
+    }
+
     //////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////////////////
@@ -647,6 +660,7 @@ namespace GrapX
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
       , m_pD3D11RenderTargetView(NULL)
     {
+      m_dwResType = RESTYPE_RENDERTEXTURE;
     }
 
     TextureImpl_RenderTarget::~TextureImpl_RenderTarget()
@@ -695,6 +709,7 @@ namespace GrapX
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
       , m_pD3D11DepthStencilView(NULL)
     {
+      m_dwResType = RESTYPE_DEPTHSTENCILTEXTURE;
     }
 
     TextureImpl_DepthStencil::~TextureImpl_DepthStencil()

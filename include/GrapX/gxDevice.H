@@ -42,12 +42,8 @@ extern "C"
 #if defined(_WIN32_XXX) || defined(_WIN32) || defined(_WINDOWS)
   //GXBOOL          GXDLLAPI GXUICreateStation      (HWND hWnd, IGXPlatform* lpPlatform);
 # ifndef _DEV_DISABLE_UI_CODE
-#   ifdef REFACTOR_SYSQUEUE
   GXBOOL          GXDLLAPI GXUIPostSysMessage     (GXSysMessage message, GXWPARAM wParam, GXLPARAM lParam);
   GXBOOL          GXDLLAPI GXUIPostRootMessage    (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
-#   else
-  GXBOOL          GXDLLAPI GXUIPostRootMessage    (GXHWND hWnd, GXUINT message, GXWPARAM wParam, GXLPARAM lParam);
-#   endif
   GXLRESULT       GXDLLAPI GXUISetCursor          (GXWPARAM wParam, GXLPARAM lParam);
 # endif // _DEV_DISABLE_UI_CODE
 //#else
