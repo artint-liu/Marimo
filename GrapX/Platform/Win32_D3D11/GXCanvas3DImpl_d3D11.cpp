@@ -290,12 +290,13 @@ namespace GrapX
         m_CurMaterialImpl = pMtlInstImpl;
       }
 
+      pMtlInstImpl->Commit();
+
       if (pMtlInstImpl->GetDataPoolUnsafe())
       {
         pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
       }
 
-      pMtlInstImpl->Commit();
       return TRUE;
     }
 

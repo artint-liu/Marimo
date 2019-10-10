@@ -4,16 +4,30 @@
 class Graphics;
 //class GShaderStub;
 class GraphicsImpl;
+
+namespace Marimo
+{
+  class DataPoolVariable;
+} // namespace Marimo
+
 namespace GrapX
 {
   class EffectImpl : public Effect
   {
-    typedef clvector<ObjectT<Texture> > TextureArray;
+    struct TEXTUREUNIT
+    {
+      ObjectT<Texture> texture;
+      Marimo::DataPoolVariable TexelSize;
+      //ObjectT<SamplerState> sampler;
+      //GXBOOL bTexelSize;
+    };
+
+    typedef clvector<TEXTUREUNIT> TextureUnitArray;
   protected:
     Graphics*           m_pGraphics;
     Shader*             m_pShader;
     Marimo::DataPool*   m_pDataPool;
-    TextureArray        m_aTextures;
+    TextureUnitArray    m_aTextures;
 
   public:
     EffectImpl(Graphics* pGraphics, Shader* pShader);

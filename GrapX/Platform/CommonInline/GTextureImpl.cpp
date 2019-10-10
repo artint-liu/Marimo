@@ -30,7 +30,7 @@
 //#include "Platform/Win32_D3D9/GStateBlock_d3d9.h"
 #include <GrapX/VertexDecl.h>
 #include "Canvas/GXResourceMgr.h"
-#include "Canvas/GXEffectImpl.h"
+//#include "Canvas/GXEffectImpl.h"
 //#include "Console.h"
 #include <Smart/SmartStream.h>
 #include <clTokens.h>

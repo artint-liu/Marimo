@@ -568,7 +568,7 @@ namespace GrapX
           strName.Clear();
           strName.Append(desc->name).Append("_TexelSize");
           Marimo::DataPoolVariable var = GetUniform(strName.CStr());
-          if (var.IsValid() && clstd::strcmpT(var.GetTypeName(), "float4") != 0)
+          if (var.IsValid() && clstd::strcmpT(var.GetTypeName(), "float4") == 0)
           {
             m_aTextures[desc->slot].TexelSize = var;
           }
@@ -648,6 +648,11 @@ namespace GrapX
     for (auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
     {
       m_pGraphics->SetTexture(it->texture, slot);
+      if(it->TexelSize.IsValid() && (it->texture != NULL)) {
+        GXSIZE size;
+        it->texture->GetDimension(&size);
+        it->TexelSize.CastTo<float4>().set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
+      }
     }
 
     m_pGraphics->SetBlendState(m_pBlendState);

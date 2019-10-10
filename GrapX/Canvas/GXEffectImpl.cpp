@@ -8,6 +8,7 @@
 #include "GrapX/DataPool.h"
 #include "GrapX/DataPoolVariable.h"
 #include "GXEffectImpl.h"
+#include "clStringAttach.h"
 
 //DATALAYOUT g_CanvasCommon[] =
 //{
@@ -69,7 +70,7 @@ namespace GrapX
     if(nSlot >= m_aTextures.size()) {
       return FALSE;
     }
-    m_aTextures[nSlot] = pTexture;
+    m_aTextures[nSlot].texture = pTexture;
     return TRUE;
   }
 
@@ -79,7 +80,7 @@ namespace GrapX
     if(pDesc && pDesc->type == Shader::BindType::Sampler)
     {
       ASSERT(pDesc->slot < (int)m_aTextures.size());
-      m_aTextures[pDesc->slot] = pTexture;
+      m_aTextures[pDesc->slot].texture = pTexture;
       return TRUE;
     }
     return FALSE;
@@ -136,7 +137,29 @@ namespace GrapX
     }
 
     if(nMaxSlot) {
-      m_aTextures.assign(nMaxSlot, ObjectT<Texture>(NULL));
+      m_aTextures.resize(nMaxSlot);
+
+      ch buffer[128];
+      clStringAttachA strName(buffer, sizeof(buffer));
+      for(GXUINT index = 0;; index++)
+      {
+        auto desc = m_pShader->GetBindResource(index);
+        if(desc == NULL) {
+          break;
+        }
+
+        if(desc->type == Shader::BindType::Texture)
+        {
+          strName.Clear();
+          strName.Append(desc->name).Append("_TexelSize");
+          Marimo::DataPoolVariable var = GetUniform(strName.CStr());
+          if(var.IsValid() && clstd::strcmpT(var.GetTypeName(), "float4") == 0)
+          {
+            m_aTextures[desc->slot].TexelSize = var;
+          }
+        }
+      }
+
     }
 
     return GXSUCCEEDED(hr);
@@ -147,15 +170,15 @@ namespace GrapX
     GXUINT slot = 0;
     for(auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
     {
-      m_pGraphics->SetTexture(*it, slot);
+      m_pGraphics->SetTexture(it->texture, slot);
+      if(it->TexelSize.IsValid() && (it->texture != NULL)) {
+        GXSIZE size;
+        it->texture->GetDimension(&size);
+        it->TexelSize.CastTo<float4>().set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
+      }
     }
     return TRUE;
   }
-
-  //GXBOOL EffectImpl::CommitUniform()
-  //{
-  //  return m_pShader->CommitConstantBuffer(m_pDataPool);
-  //}
 
   GXUINT EffectImpl::GetHandle(const GXCHAR* pName) const
   {
