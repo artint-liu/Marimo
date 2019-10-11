@@ -143,7 +143,7 @@ namespace GrapX
       return FALSE;
     }
 
-    GXBOOL RenderTargetImpl::SaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat)
+    GXBOOL RenderTargetImpl::SaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip)
     {
       GXSIZE sDimension;
       GXFormat format = m_pColorTexture->GetFormat();
@@ -151,16 +151,16 @@ namespace GrapX
       Texture* pReadBackTexture = NULL;
 
       GetColorTexture(&pReadBackTexture, GXResUsage::Read);
-      GXBOOL bval = pReadBackTexture->SaveToMemory(pBuffer, pImageFormat);
+      GXBOOL bval = pReadBackTexture->SaveToMemory(pBuffer, pImageFormat, bVertFlip);
 
       SAFE_RELEASE(pReadBackTexture);
       return bval;
     }
 
-    GXBOOL RenderTargetImpl::SaveToFile(GXLPCWSTR szFilePath, GXLPCSTR pImageFormat)
+    GXBOOL RenderTargetImpl::SaveToFile(GXLPCWSTR szFilePath, GXLPCSTR pImageFormat, GXBOOL bVertFlip)
     {
       clstd::MemBuffer buffer;
-      if(SaveToMemory(&buffer, pImageFormat))
+      if(SaveToMemory(&buffer, pImageFormat, bVertFlip))
       {
         clstd::File file;
         if(file.CreateAlways(szFilePath))

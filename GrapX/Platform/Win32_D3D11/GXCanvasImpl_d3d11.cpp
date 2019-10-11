@@ -346,6 +346,7 @@ namespace GrapX
     {
       if(m_Commands.GetSize() > 0) {
         Flush();
+        m_pGraphics->InlSetCanvas(NULL);
       }
 
       // 最多两个引用
@@ -780,6 +781,7 @@ namespace GrapX
 
             if (bCommitEffectCB) { // 依赖上面的TexelSize更新
               IntCommitEffectCB();
+              bCommitEffectCB = FALSE;
             }
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
               nBaseVertex, 0, pTextureCmd->uVertexCount, nStartIndex, pTextureCmd->uIndexCount / 3);

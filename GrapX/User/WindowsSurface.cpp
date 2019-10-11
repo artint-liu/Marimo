@@ -113,7 +113,7 @@ RGNCOMPLEX GXWindowsSurface::InvalidateRect(GXRECT* lpRect)
 
 GXBOOL GXWindowsSurface::SaveToFileW(GXLPCWSTR lpFilename, GXLPCSTR lpFormat)
 {
-  return m_pRenderTar->SaveToFile(lpFilename, lpFormat);
+  return m_pRenderTar->SaveToFile(lpFilename, lpFormat, FALSE);
 }
 
 GXBOOL GXWindowsSurface::Scroll(int dx, int dy, LPGXCRECT lprcScroll, GRegion* lprgnClip, GRegion** lpprgnUpdate)

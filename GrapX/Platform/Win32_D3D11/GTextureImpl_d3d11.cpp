@@ -233,7 +233,7 @@ namespace GrapX
       return GetBytesOfGraphicsFormat(m_Format) * m_nWidth;
     }
 
-    GXBOOL TextureImpl::IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat)
+    GXBOOL TextureImpl::IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip)
     {
       //ASSERT(m_eResUsage == GXResUsage::SystemMem || m_eResUsage == GXResUsage::Read);
       GXBOOL bval = TRUE;
@@ -314,13 +314,26 @@ namespace GrapX
           BYTE* pDest = FreeImage_GetBits(fibmp);
           GXINT nDestPitch = FreeImage_GetPitch(fibmp);
 
-          pDest += nDestPitch * (m_nHeight - 1);
-          for (GXUINT y = 0; y < m_nHeight; y++)
+          if(bVertFlip)
           {
-            memcpy(pDest, pSourceBits, clMin(nDestPitch, nSourcePitch));
+            pDest += nDestPitch * (m_nHeight - 1);
+            for(GXUINT y = 0; y < m_nHeight; y++)
+            {
+              memcpy(pDest, pSourceBits, clMin(nDestPitch, nSourcePitch));
 
-            pDest -= nDestPitch;
-            pSourceBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(pSourceBits) + nSourcePitch);
+              pDest -= nDestPitch;
+              pSourceBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(pSourceBits) + nSourcePitch);
+            }
+          }
+          else
+          {
+            for(GXUINT y = 0; y < m_nHeight; y++)
+            {
+              memcpy(pDest, pSourceBits, clMin(nDestPitch, nSourcePitch));
+
+              pDest += nDestPitch;
+              pSourceBits = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(pSourceBits) + nSourcePitch);
+            }
           }
 
           FREE_IMAGE_FORMAT fi_format = FIF_UNKNOWN;
@@ -562,19 +575,19 @@ namespace GrapX
       return m_pGraphics;
     }
 
-    GXBOOL TextureImpl::SaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat)
+    GXBOOL TextureImpl::SaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat, GXBOOL bVertFlip)
     {
       if (m_eResUsage == GXResUsage::SystemMem || m_eResUsage == GXResUsage::Read || m_eResUsage == GXResUsage::ReadWrite) {
-        return IntSaveToMemory(pBuffer, szDestFormat);
+        return IntSaveToMemory(pBuffer, szDestFormat, bVertFlip);
       }
       CLBREAK;
       return FALSE;
     }
 
-    GXBOOL TextureImpl::SaveToFile(GXLPCWSTR szFileName, GXLPCSTR szDestFormat)
+    GXBOOL TextureImpl::SaveToFile(GXLPCWSTR szFileName, GXLPCSTR szDestFormat, GXBOOL bVertFlip)
     {
       clstd::MemBuffer buffer;
-      if (SaveToMemory(&buffer, szDestFormat))
+      if (SaveToMemory(&buffer, szDestFormat, bVertFlip))
       {
         clstd::File file;
         if (file.CreateAlways(szFileName))

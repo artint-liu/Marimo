@@ -24,8 +24,8 @@ namespace GrapX
     GXSTDINTERFACE(Texture*   GetColorTextureUnsafe (GXResUsage eUsage)); // 只接受 GXResUsage::Default 或者 GXResUsage::Read
     GXSTDINTERFACE(GXHRESULT  GetDepthStencilTexture(Texture** ppDepthStencilTexture));
     GXSTDINTERFACE(GXBOOL     StretchRect           (Texture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
-    GXSTDINTERFACE(GXBOOL     SaveToFile            (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat));
-    GXSTDINTERFACE(GXBOOL     SaveToMemory          (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat));
+    GXSTDINTERFACE(GXBOOL     SaveToFile            (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat, GXBOOL bVertFlip));
+    GXSTDINTERFACE(GXBOOL     SaveToMemory          (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip));
   };
 } // namespace GrapX
 

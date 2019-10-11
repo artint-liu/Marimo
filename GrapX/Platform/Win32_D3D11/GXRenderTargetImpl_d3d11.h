@@ -44,8 +44,8 @@ namespace GrapX
       Texture*   GetColorTextureUnsafe  (GXResUsage eUsage) override; // 只接受 GXResUsage::Default 或者 GXResUsage::Read
       GXHRESULT  GetDepthStencilTexture (Texture** ppDepthStencilTexture) override;
       GXBOOL     StretchRect            (Texture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter) override;
-      GXBOOL     SaveToFile             (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat) override;
-      GXBOOL     SaveToMemory           (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat) override;
+      GXBOOL     SaveToFile             (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat, GXBOOL bVertFlip) override;
+      GXBOOL     SaveToMemory           (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip) override;
 
 
     public:

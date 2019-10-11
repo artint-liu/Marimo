@@ -59,8 +59,8 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL       Unmap             ());
     GXSTDINTERFACE(GXBOOL       UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch));
 
-    GXSTDINTERFACE(GXBOOL       SaveToMemory     (clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat));
-    GXSTDINTERFACE(GXBOOL       SaveToFile       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat));
+    GXSTDINTERFACE(GXBOOL       SaveToMemory     (clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat, GXBOOL bVertFlip));
+    GXSTDINTERFACE(GXBOOL       SaveToFile       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat, GXBOOL bVertFlip));
   };
 
   class Texture3D : public TextureBase
