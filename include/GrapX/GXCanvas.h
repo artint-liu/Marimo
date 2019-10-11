@@ -34,7 +34,8 @@ namespace GrapX
   {
     CPI_SETTEXTURECOLOR = 1,    // uParam 设置纹理颜色
     CPI_SETCOLORADDITIVE = 2,   // uParam 设置颜色累加值
-    CPI_SETTEXTCLIP = 3,        // 设置文字的裁剪, 只是临时改变设备的矩形裁剪区, pParam指向GXRECT,
+    CPI_SETCOLORMULTIPLY = 3,   // lParam 设置颜色乘值,float4类型
+    CPI_SETTEXTCLIP = 4,        // 设置文字的裁剪, 只是临时改变设备的矩形裁剪区, pParam指向GXRECT,
                                 // 如果使用任何裁剪函数设置, 将清除这个函数的效果
     //CPI_SETPIXELSIZEINV  = 4, // 像素尺寸的倒数, 相当于纹理坐标上一个像素的跨度, pParam 指向了float2结构
     //CPI_SETEXTTEXTURE = 5,      // 设置额外的纹理, uParam 是纹理的Stage, pParam 指向纹理对象

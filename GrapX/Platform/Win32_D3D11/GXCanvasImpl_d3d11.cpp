@@ -873,14 +873,27 @@ namespace GrapX
         case CF_ColorAdditive:
         {
           TRACE_CMD("CF_ColorAdditive\n");
-          const STATESWITCHING_COLORADD* pColorAddCmd = pCmdPtr->cast_to<STATESWITCHING_COLORADD>();
+          const STATESWITCHING_COLOR* pColorAddCmd = pCmdPtr->cast_to<STATESWITCHING_COLOR>();
 
           pColorAddCmd->color.ToFloat4(m_color_add);
           if(m_CurrentEffect.color_add.IsValid()) // TODO: 改为不判断形式
           {
             m_CurrentEffect.color_add = m_color_add;
             bCommitEffectCB = TRUE;
-            //IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
+          }
+        }
+        break;
+
+        case CF_ColorMultiply:
+        {
+          TRACE_CMD("CF_ColorMultiply\n");
+          const STATESWITCHING_COLOR* pColorMulCmd = pCmdPtr->cast_to<STATESWITCHING_COLOR>();
+
+          pColorMulCmd->color.ToFloat4(m_color_mul);
+          if(m_CurrentEffect.color_mul.IsValid()) // TODO: 改为不判断形式
+          {
+            m_CurrentEffect.color_mul = m_color_mul;
+            bCommitEffectCB = TRUE;
           }
         }
         break;
@@ -1057,11 +1070,22 @@ namespace GrapX
         {
           m_CallState.color_add = uParam;
 
-          STATESWITCHING_COLORADD* pCommand = IntAppendCommand<STATESWITCHING_COLORADD>(CF_ColorAdditive);
+          STATESWITCHING_COLOR* pCommand = IntAppendCommand<STATESWITCHING_COLOR>(CF_ColorAdditive);
           pCommand->color = m_CallState.color_add;
         }
       }
       break;
+
+      case CPI_SETCOLORMULTIPLY:
+      {
+        dwRet = 0;
+        m_CallState.color_mul = *(float4*)pParam;
+
+        STATESWITCHING_COLOR* pCommand = IntAppendCommand<STATESWITCHING_COLOR>(CF_ColorMultiply);
+        pCommand->color = m_CallState.color_mul;
+      }
+      break;
+
       case CPI_SETTEXTCLIP:
       {
         GXLPRECT lpRect = (GXLPRECT)pParam;

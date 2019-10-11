@@ -164,6 +164,7 @@ namespace GrapX
         CF_CompositingMode,
         CF_Effect,
         CF_ColorAdditive,
+        CF_ColorMultiply,
         //CF_SetExtTexture,
         CF_SetSamplerState,
         CF_SetTransform,
@@ -258,7 +259,7 @@ namespace GrapX
         GXCOLORREF  color;
       };
 
-      struct STATESWITCHING_COLORADD : public CMDBASE
+      struct STATESWITCHING_COLOR : public CMDBASE
       {
         GXColor color;
       };
