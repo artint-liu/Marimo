@@ -29,7 +29,7 @@
   //virtual GXHRESULT SetPrimitiveVI      (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0) override;
 
   // 理论上GXGraphics没有 Set** 类函数, SetTexture 例外, 因为 SetTexture 同时肩负这清空指定设备纹理的任务
-  virtual GXHRESULT SetTexture            (TextureBase* pTexture, GXUINT uStage = 0) override;
+  virtual GXBOOL    SetTexture            (TextureBase* pTexture, GXUINT uStage = 0) override;
   virtual GXHRESULT SetRasterizerState    (RasterizerState* pRasterizerState) override;
   virtual GXHRESULT SetBlendState         (BlendState* pBlendState) override;
   virtual GXHRESULT SetDepthStencilState  (DepthStencilState* pDepthStencilState) override;
@@ -175,13 +175,14 @@ private:
   GXBOOL    SetViewport               (const GXVIEWPORT* pViewport);
   GXVOID    SetShaderComposerPathW    (GXLPCWSTR szPath);
 
-  inline GXLPCSTR   InlGetPlatformStringA () const;
-  inline GXBOOL     InlSetTexture         (TexBaseImpl* pTexture, GXUINT uStage);
+  inline GXLPCSTR     InlGetPlatformStringA () const;
+  inline StateResult  InlSetTexture         (TexBaseImpl* pTexture, GXUINT uStage);
   GXBOOL     InlSetRenderTarget    (RenderTarget* pTarget, GXUINT uRenderTar);
   GXBOOL     InlSetRenderTarget    (Canvas3DImpl* pCanvas3D);
   //inline GXBOOL     InlSetDepthStencil    (Texture* pTexture);
 
   GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
+  GXBOOL     IntSetEffect            (EffectImpl* pEffect);
   //inline GXBOOL     InlSetRenderState       (GRenderStateImpl* pRenderState);
   template<class _TState>
   inline GXBOOL     InlSetStateT            (GXUINT slot, _TState*& pCurState, _TState* pState);
@@ -190,7 +191,6 @@ private:
   inline GXBOOL     InlSetDepthStencilState (DepthStencilStateImpl* pDepthStencilState);
   inline GXBOOL     InlSetSamplerState      (GXUINT slot, SamplerStateImpl* pSamplerState);
   inline GXBOOL     InlSetShader            (Shader* pShader);
-  inline GXBOOL     InlSetEffect            (EffectImpl* pEffect);
   inline GXHRESULT  InlSetVertexDecl        (VertexDeclImpl* pVertexDecl);
   inline GXBOOL     IsActiveCanvas          (CanvasCore* pCanvasCore);
   //inline GXBOOL     IsActiveRenderState     (GRenderStateImpl* pRenderState);

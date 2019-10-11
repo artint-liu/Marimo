@@ -17,7 +17,7 @@ namespace GrapX
     struct TEXTUREUNIT
     {
       ObjectT<Texture> texture;
-      Marimo::DataPoolVariable TexelSize;
+      MOVarFloat4 TexelSize;
       //ObjectT<SamplerState> sampler;
       //GXBOOL bTexelSize;
     };
@@ -48,8 +48,9 @@ namespace GrapX
     Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
     GXHRESULT Clone(Effect** ppNewEffect) override;
 
-    GXBOOL InitEffect();
-    GXBOOL Commit();
+    GXBOOL InitEffect   ();
+    GXBOOL Commit       ();
+    GXBOOL UpdateTexelSize (GXUINT slot, Texture* pTexture);
 
 
     // ¾ÉµÄ¼æÈÝ½Ó¿Ú

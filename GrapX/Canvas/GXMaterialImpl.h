@@ -28,7 +28,7 @@ namespace GrapX
     struct TEXTUREUNIT
     {
       ObjectT<Texture> texture;
-      Marimo::DataPoolVariable TexelSize;
+      MOVarFloat4 TexelSize;
       //ObjectT<SamplerState> sampler;
       //GXBOOL bTexelSize;
     };

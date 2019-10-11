@@ -124,35 +124,35 @@ GXBOOL GraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
 }
 #endif // _GXGRAPHICS_INLINE_TEXTURE_
 
-#ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
-GXBOOL GraphicsImpl::InlSetTexture(TexBaseImpl* pTexture, GXUINT uStage)
-{
-#ifdef _DEBUG
-  if(uStage >= MAX_TEXTURE_STAGE) {
-    TRACE("Error: Stage out of range.\n");
-    return FALSE;
-  }
-#endif // #ifdef _DEBUG
-
-  if(pTexture == m_pCurTexture[uStage])
-    return TRUE;
-
-  SAFE_RELEASE(m_pCurTexture[uStage]);
-  m_pCurTexture[uStage] = pTexture;
-
-  if(m_pCurTexture[uStage] == NULL)
-  {
-    //m_pImmediateContext->PSSetShaderResources(uStage, 1, );
-    //m_pd3dDevice->SetTexture(uStage, NULL);
-    return TRUE;
-  }
-  m_pCurTexture[uStage]->AddRef();
-  //m_pd3dDevice->SetTexture(uStage, pTexture->D3DTexture());
-  ASSERT(pTexture->D3DResourceView());
-  m_pImmediateContext->PSSetShaderResources(uStage, 1, &pTexture->D3DResourceView());
-  return TRUE;
-}
-#endif // #ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
+//#ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
+//GXBOOL GraphicsImpl::InlSetTexture(TexBaseImpl* pTexture, GXUINT uStage)
+//{
+//#ifdef _DEBUG
+//  if(uStage >= MAX_TEXTURE_STAGE) {
+//    TRACE("Error: Stage out of range.\n");
+//    return FALSE;
+//  }
+//#endif // #ifdef _DEBUG
+//
+//  if(pTexture == m_pCurTexture[uStage])
+//    return TRUE;
+//
+//  SAFE_RELEASE(m_pCurTexture[uStage]);
+//  m_pCurTexture[uStage] = pTexture;
+//
+//  if(m_pCurTexture[uStage] == NULL)
+//  {
+//    //m_pImmediateContext->PSSetShaderResources(uStage, 1, );
+//    //m_pd3dDevice->SetTexture(uStage, NULL);
+//    return TRUE;
+//  }
+//  m_pCurTexture[uStage]->AddRef();
+//  //m_pd3dDevice->SetTexture(uStage, pTexture->D3DTexture());
+//  ASSERT(pTexture->D3DResourceView());
+//  m_pImmediateContext->PSSetShaderResources(uStage, 1, &pTexture->D3DResourceView());
+//  return TRUE;
+//}
+//#endif // #ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 
 #ifdef _GXGRAPHICS_INLINE_SHADER_D3D9_
 GXBOOL GraphicsImpl::InlSetShader(GShader* pShader)
@@ -231,19 +231,19 @@ GXBOOL GraphicsImpl::InlSetShader(Shader* pShader) // 没有改变返回 FALSE
   return TRUE;
 }
 #endif // _GXGRAPHICS_INLINE_SHADER_
-#ifdef _GXGRAPHICS_INLINE_EFFECT_D3D11_
-GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
-{
-  ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
-  InlSetShader(pShaderImpl);
-  {
-    pEffectImpl->Commit();
-    pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
-    return TRUE;
-  }
-  return FALSE;
-}
-#endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
+//#ifdef _GXGRAPHICS_INLINE_EFFECT_D3D11_
+//GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
+//{
+//  ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
+//  InlSetShader(pShaderImpl);
+//  {
+//    pEffectImpl->Commit();
+//    pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
+//    return TRUE;
+//  }
+//  return FALSE;
+//}
+//#endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
 
 #ifdef _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D9_
 GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)

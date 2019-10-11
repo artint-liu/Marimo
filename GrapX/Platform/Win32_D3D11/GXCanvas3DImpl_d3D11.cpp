@@ -438,7 +438,7 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT Canvas3DImpl::Draw(Shader* pShader, GVNode* pNode, const float4x4* pTransform)
+    GXHRESULT Canvas3DImpl::Draw(Material* pMaterial, GVNode* pNode, const float4x4* pTransform)
     {
       GVRENDERDESC Desc;
       const int nRenderCate = 0;
@@ -453,7 +453,8 @@ namespace GrapX
       }
 
       m_CurMaterialImpl = NULL;
-      m_pGraphicsImpl->InlSetShader(pShader);
+      //m_pGraphicsImpl->InlSetShader(pShader);
+      SetMaterial(pMaterial);
 
       ASSERT(Desc.pPrimitive != NULL);
       m_pGraphicsImpl->SetPrimitive(Desc.pPrimitive);

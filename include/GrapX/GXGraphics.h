@@ -112,7 +112,7 @@ namespace GrapX
     //GXSTDINTERFACE(GXHRESULT SetPrimitiveVI     (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0));
 
     // 理论上GXGraphics没有 Set** 类函数, SetTexture 例外, 因为 SetTexture 同时肩负这清空指定设备纹理的任务
-    GXSTDINTERFACE(GXHRESULT SetTexture           (TextureBase* pTexture, GXUINT uStage = 0));
+    GXSTDINTERFACE(GXBOOL    SetTexture           (TextureBase* pTexture, GXUINT uStage = 0));
     GXSTDINTERFACE(GXHRESULT SetRasterizerState   (RasterizerState* pRasterizerState));
     GXSTDINTERFACE(GXHRESULT SetBlendState        (BlendState* pBlendState));
     GXSTDINTERFACE(GXHRESULT SetDepthStencilState (DepthStencilState* pDepthStencilState));

@@ -6,7 +6,7 @@
 #define COLORREF_TO_NATIVE(CLR) ((CLR & 0xff00ff00) | ((CLR & 0xff0000) >> 16) | ((CLR & 0xff) << 16))
 #define NATIVE_TO_COLORREF(CLR) COLORREF_TO_NATIVE(CLR)
 
-#define MAX_TEXTURE_STAGE  16
+#define MAX_TEXTURE_STAGE  D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT
 //////////////////////////////////////////////////////////////////////////
 //
 //GXGraphics
@@ -57,6 +57,13 @@ namespace GrapX
       GXBOOL        bWaitForVSync;
       GXLPCWSTR     szRootDir;
       ILogger*      pLogger;
+    };
+
+    enum class StateResult : int
+    {
+      Failed = -1,
+      Ok = 0,
+      Same = 1,
     };
 
     class GraphicsImpl : public GraphicsBaseImpl
@@ -150,6 +157,7 @@ namespace GrapX
     {
       return "d3d11";
     }
+
 
   } // namespace D3D11
 } // namespace GrapX

@@ -489,7 +489,7 @@ namespace GrapX
         (m_pClipRegion != NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[1]) ||
         (m_pClipRegion != NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[0]) ); // UpdateStencil 中间状态
       
-      m_pGraphics->InlSetEffect(m_ClearEffect.pEffectImpl);
+      m_pGraphics->IntSetEffect(m_ClearEffect.pEffectImpl);
       m_pWriteStencil->SetStencilRef(dwStencil);
       m_pGraphics->InlSetDepthStencilState(m_pWriteStencil);
       m_pGraphics->InlSetBlendState(TEST_FLAG(dwFlags, GXCLEAR_TARGET) ? m_pOMOpaque : m_pOMNoColor);
@@ -522,7 +522,7 @@ namespace GrapX
 
       // 状态恢复
       m_pGraphics->SetPrimitive(static_cast<Primitive*>(m_pPrimitive));
-      m_pGraphics->InlSetEffect(m_CurrentEffect.pEffectImpl);
+      m_pGraphics->IntSetEffect(m_CurrentEffect.pEffectImpl);
       m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[m_pClipRegion == NULL ? 0 : 1]);
       m_pGraphics->InlSetBlendState(m_pBlendStateImpl);
 
@@ -596,7 +596,7 @@ namespace GrapX
           m_CurrentEffect.color_add = m_color_add;
         }
 
-        m_pGraphics->InlSetEffect(m_CurrentEffect.pEffectImpl);
+        m_pGraphics->IntSetEffect(m_CurrentEffect.pEffectImpl);
         UpdateStencil(m_pClipRegion);
 
         gxRectToRegn(&regn, &m_rcClip);
@@ -623,7 +623,7 @@ namespace GrapX
 
     void CanvasImpl::IntCommitEffectCB()
     {
-      static_cast<ShaderImpl*>(m_CurrentEffect.pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_CurrentEffect.pEffectImpl->GetDataPoolUnsafe()); // TODO: 局部更新
+      static_cast<ShaderImpl*>(m_CurrentEffect.pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_CurrentEffect.pEffectImpl->GetDataPoolUnsafe());
     }
 
     Graphics* CanvasImpl::GetGraphicsUnsafe() const
@@ -700,6 +700,7 @@ namespace GrapX
 
       m_pGraphics->Enter();
       CommitState();  // TODO: 如果 bEmptyRect 为 TRUE, 则不提交状态
+      GXBOOL bCommitEffectCB = TRUE;
 
       GXUINT nBaseVertex = 0;
       GXUINT nStartIndex = 0;
@@ -723,6 +724,9 @@ namespace GrapX
           const DRAWCALL_LINELIST* pLineListCmd = pCmdPtr->cast_to<DRAWCALL_LINELIST>();
           if(bEmptyRect == FALSE) {
 
+            if (bCommitEffectCB) {
+              IntCommitEffectCB();
+            }
             m_pGraphics->DrawPrimitive(GXPT_LINELIST,
               nBaseVertex, 0, pLineListCmd->uVertexCount, nStartIndex, pLineListCmd->uIndexCount / 2);
           }
@@ -737,6 +741,9 @@ namespace GrapX
           TRACE_CMD("CF_Points\n");
           const DRAWCALL_POINTS* pPointsCmd = pCmdPtr->cast_to<DRAWCALL_POINTS>();
           if(bEmptyRect == FALSE) {
+            if (bCommitEffectCB) {
+              IntCommitEffectCB();
+            }
             m_pGraphics->DrawPrimitive(GXPT_POINTLIST, nBaseVertex, pPointsCmd->uVertexCount);
           }
           nBaseVertex += pPointsCmd->uVertexCount;
@@ -747,6 +754,9 @@ namespace GrapX
           TRACE_CMD("CF_Trangle\n");
           const DRAWCALL_TRIANGLELIST* pTriangleListCmd = pCmdPtr->cast_to<DRAWCALL_TRIANGLELIST>();
           if(bEmptyRect == FALSE) {
+            if (bCommitEffectCB) {
+              IntCommitEffectCB();
+            }
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
               nBaseVertex, 0, pTriangleListCmd->uVertexCount, nStartIndex, pTriangleListCmd->uIndexCount / 3);
           }
@@ -763,7 +773,14 @@ namespace GrapX
           // TODO: 需要一个Texture对象记录状态
           if(bEmptyRect == FALSE)
           {
-            m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTextureCmd->pTexture), 0);
+            if (m_pGraphics->InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTextureCmd->pTexture), 0) == StateResult::Ok)
+            {
+              m_CurrentEffect.pEffectImpl->UpdateTexelSize(0, pTextureCmd->pTexture);
+            }
+
+            if (bCommitEffectCB) { // 依赖上面的TexelSize更新
+              IntCommitEffectCB();
+            }
             m_pGraphics->DrawPrimitive(GXPT_TRIANGLELIST,
               nBaseVertex, 0, pTextureCmd->uVertexCount, nStartIndex, pTextureCmd->uIndexCount / 3);
           }
@@ -846,7 +863,7 @@ namespace GrapX
           }
 
           //m_pEffectImpl = pEffectCmd->pEffectImpl;
-          m_pGraphics->InlSetEffect(pEffectCmd->pEffectImpl);
+          m_pGraphics->IntSetEffect(pEffectCmd->pEffectImpl);
           pEffectCmd->pEffectImpl->Release();
         }
         break;
@@ -860,7 +877,8 @@ namespace GrapX
           if(m_CurrentEffect.color_add.IsValid()) // TODO: 改为不判断形式
           {
             m_CurrentEffect.color_add = m_color_add;
-            IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
+            bCommitEffectCB = TRUE;
+            //IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
           }
         }
         break;
@@ -958,7 +976,8 @@ namespace GrapX
          
           if(m_CurrentEffect.transform.IsValid()) { // TODO: 改为不判断形式
             m_CurrentEffect.transform = pTransformCmd->transform;
-            IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
+            bCommitEffectCB = TRUE;
+            //IntCommitEffectCB(); // FIXME: 这里全部重新提交了CB
           }
         }
         break;

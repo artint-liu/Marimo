@@ -56,7 +56,7 @@ namespace Marimo
     }
 
     template<class _Ty>
-    inline _Ty& CastTo() // Reinterpret cast
+    inline _Ty& CastTo() // Reinterpret cast, 转换Variable类型，而不是储存的数据类型
     {
       return *(_Ty*)this;
     }

@@ -570,7 +570,7 @@ namespace GrapX
           Marimo::DataPoolVariable var = GetUniform(strName.CStr());
           if (var.IsValid() && clstd::strcmpT(var.GetTypeName(), "float4") == 0)
           {
-            m_aTextures[desc->slot].TexelSize = var;
+            m_aTextures[desc->slot].TexelSize = var.CastTo<MOVarFloat4>();
           }
         }
       }
@@ -651,7 +651,7 @@ namespace GrapX
       if(it->TexelSize.IsValid() && (it->texture != NULL)) {
         GXSIZE size;
         it->texture->GetDimension(&size);
-        it->TexelSize.CastTo<float4>().set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
+        it->TexelSize->set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
       }
     }
 
@@ -825,6 +825,19 @@ GXBOOL Parse(GXDEPTHSTENCILDESC& desc, clstd::TokensA& tokens, clstd::TokensA::i
 
 GXBOOL Parse(GXRASTERIZERDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter)
 {
+  CHECK_END(iter);
+  if (iter == "cull")
+  {
+    ++iter;
+    CHECK_END(iter);
+    GXCullMode cull = MOStringToCullMode(iter.marker, iter.length);
+    if(cull != GXCULL_FORCE_DWORD)
+    {
+      desc.CullMode = cull;
+    }
+    ++iter;
+    return TRUE;
+  }
   return FALSE;
 }
 

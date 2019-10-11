@@ -529,6 +529,8 @@ namespace GrapX
 
       D3D11_SHADER_DESC sShaderDesc;
       pReflection->GetDesc(&sShaderDesc);
+
+      // 绑定对象
       for(UINT nn = 0; nn < sShaderDesc.BoundResources; nn++)
       {
         D3D11_SHADER_INPUT_BIND_DESC bind_desc;
@@ -556,6 +558,15 @@ namespace GrapX
           break;
         }
         CLNOP;
+      }
+
+      // 顶点输入
+      TRACE("Input Signature\n");
+      for (UINT is = 0; is < sShaderDesc.InputParameters; is++)
+      {
+        D3D11_SIGNATURE_PARAMETER_DESC signature_desc;
+        pReflection->GetInputParameterDesc(is, &signature_desc);
+        TRACE("%d:%s[%d]\n", signature_desc.Stream, signature_desc.SemanticName, signature_desc.SemanticIndex);
       }
 
       Marimo::DATAPOOL_DECLARATION sEmpty = { NULL };
@@ -1286,6 +1297,13 @@ namespace GrapX
         SAFE_RELEASE(pErrorBlob);
         return hval;
       }
+
+#if 0 // 反编译调试
+      ID3DBlob* pDisassembleCode = NULL;
+      D3DDisassemble(pInterCode->pCode->GetBufferPointer(), pInterCode->pCode->GetBufferSize(), 0, NULL, &pDisassembleCode);
+      TRACE("%s", pDisassembleCode->GetBufferPointer());
+      SAFE_RELEASE(pDisassembleCode);
+#endif
 
       // shader 输入参数信息
       //LPVOID pInterCodePtr = pInterCode->pCode->GetBufferPointer();

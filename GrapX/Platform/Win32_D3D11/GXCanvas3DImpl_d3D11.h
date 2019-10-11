@@ -96,7 +96,8 @@ namespace GrapX
       //GXHRESULT   Activate              () override;
       GXHRESULT   UpdateCommonUniforms  () override;
       GXHRESULT   Draw                  (GVSequence* pSequence) override;
-      GXHRESULT   Draw                  (Shader* pShader, GVNode* pNode, const float4x4* pTransform) override;
+      GXHRESULT   Draw                  (Material* pMaterial, GVNode* pNode, const float4x4* pTransform) override;
+      //GXHRESULT   Draw                  (Shader* pShader, GVNode* pNode, const float4x4* pTransform) override;
 
       GXHRESULT   GetDepthStencil       (Texture** ppDepthStencil) override;
 

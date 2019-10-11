@@ -512,9 +512,9 @@ namespace GrapX
       return S_OK;
     }
 
-    GXHRESULT GraphicsImpl::SetTexture(TextureBase* pTexture, GXUINT uStage)
+    GXBOOL GraphicsImpl::SetTexture(TextureBase* pTexture, GXUINT uStage)
     {
-      return InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTexture), uStage);
+      return (InlSetTexture(reinterpret_cast<TexBaseImpl*>(pTexture), uStage) != StateResult::Failed);
     }
 
     GXBOOL GraphicsImpl::SetSafeClip(const GXREGN* pRegn)
@@ -1008,8 +1008,9 @@ namespace GrapX
       else {
         CLBREAK;
       }
-
+#if 0 // 不应该竖直翻转
       FreeImage_FlipVertical(fibmp);
+#endif
 
       hr = CreateTexture(ppTexture, NULL, FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp),
         format, eUsage, MipLevels, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
@@ -1269,6 +1270,45 @@ namespace GrapX
       return TRUE;
     }
 
+    GrapX::D3D11::StateResult GraphicsImpl::InlSetTexture(TexBaseImpl* pTexture, GXUINT uStage)
+    {
+#ifdef _DEBUG
+      if (uStage >= MAX_TEXTURE_STAGE) {
+        TRACE("Error: Stage out of range.\n");
+        return StateResult::Failed;
+      }
+#endif // #ifdef _DEBUG
+
+      if (pTexture == m_pCurTexture[uStage]) {
+        return StateResult::Same;
+      }
+
+      SAFE_RELEASE(m_pCurTexture[uStage]);
+      m_pCurTexture[uStage] = pTexture;
+
+      if (m_pCurTexture[uStage] == NULL)
+      {
+        m_pImmediateContext->PSSetShaderResources(uStage, 1, NULL);
+        return StateResult::Ok;
+      }
+
+      m_pCurTexture[uStage]->AddRef();
+      ASSERT(pTexture->D3DResourceView());
+      m_pImmediateContext->PSSetShaderResources(uStage, 1, &pTexture->D3DResourceView());
+      return StateResult::Ok;
+    }
+
+    GXBOOL GraphicsImpl::IntSetEffect(EffectImpl* pEffectImpl)
+    {
+      ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
+      return InlSetShader(pShaderImpl);
+      //{
+      //  pEffectImpl->Commit();
+      //  pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
+      //  return TRUE;
+      //}
+      //return FALSE;
+    }
 
   } // namespace D3D11
 }

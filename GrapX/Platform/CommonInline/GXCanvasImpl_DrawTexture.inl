@@ -34,10 +34,15 @@ const GXFLOAT fTop    = fInvTexHeight * rcSrc->top  + fHalfPixelHeight;
 const GXFLOAT fRight  = fInvTexWidth  * (rcSrc->left + rcSrc->width)  + fHalfPixelWidth;
 const GXFLOAT fBottom = fInvTexHeight * (rcSrc->top  + rcSrc->height) + fHalfPixelHeight;
 #elif defined(D3D11_CANVAS_IMPL)
-const GXFLOAT fLeft   = fInvTexWidth  * rcSrc->left;
-const GXFLOAT fTop    = fInvTexHeight * rcSrc->top;
-const GXFLOAT fRight  = fInvTexWidth  * (rcSrc->left + rcSrc->width);
-const GXFLOAT fBottom = fInvTexHeight * (rcSrc->top  + rcSrc->height);
+// 半像素偏移的参考
+// https://docs.microsoft.com/en-us/windows/win32/direct3d9/directly-mapping-texels-to-pixels?redirectedfrom=MSDN
+const GXFLOAT fHalfPixelWidth = 0.5f * fInvTexWidth;
+const GXFLOAT fHalfPixelHeight = 0.5f * fInvTexHeight;
+
+const GXFLOAT fLeft = fInvTexWidth * rcSrc->left - fHalfPixelWidth;
+const GXFLOAT fTop = fInvTexHeight * rcSrc->top - fHalfPixelHeight;
+const GXFLOAT fRight = fInvTexWidth * (rcSrc->left + rcSrc->width) - fHalfPixelWidth;
+const GXFLOAT fBottom = fInvTexHeight * (rcSrc->top + rcSrc->height) - fHalfPixelHeight;
 #else
 #error 需要定义inl的环境
 #endif
