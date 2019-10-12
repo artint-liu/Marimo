@@ -4104,11 +4104,17 @@ enum GXGraphicsFormat
   Format_R32G32B32A32_Float   = 230,
   Format_R32G32B32_Float      = 231,
 
+  // https://docs.microsoft.com/en-us/windows/win32/direct3d11/texture-block-compression-in-direct3d-11
+  // https://docs.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
+  Format_BC1                  = 250, // 4x4 pixel block 8 bytes
+  Format_BC2                  = 251, // 4x4 pixel block 16 bytes
+  Format_BC3                  = 252, // 4x4 pixel block 16 bytes
+
   // 深度/模板格式
-  Format_D32                  = 240,
-  Format_D16                  = 241,
-  Format_D24S8                = 242,
-  Format_D24X8                = 243,
+  Format_D32                  = 270,
+  Format_D16                  = 271,
+  Format_D24S8                = 272,
+  Format_D24X8                = 273,
 
   // 顶点索引
   Format_Index16              = 300,

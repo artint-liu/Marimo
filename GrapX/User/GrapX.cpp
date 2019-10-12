@@ -440,6 +440,13 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   case GXFMT_G32R32F:
     return 8;
 
+  case Format_BC1:
+    return 1; // 4x4 pixel， 实际应该是0.5
+
+  case Format_BC2:
+  case Format_BC3:
+    return 1; // 4x4 pixel
+
   case GXFMT_X8R8G8B8:
   case GXFMT_A8R8G8B8:
   case GXFMT_A8B8G8R8:

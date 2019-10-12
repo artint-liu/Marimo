@@ -315,6 +315,13 @@ namespace GrapXToDX11
     case Format_R8:
       return DXGI_FORMAT_R8_UNORM;
 
+    case Format_BC1:
+      return DXGI_FORMAT_BC1_UNORM;
+    case Format_BC2:
+      return DXGI_FORMAT_BC2_UNORM;
+    case Format_BC3:
+      return DXGI_FORMAT_BC3_UNORM;
+
     case Format_R16:
       return DXGI_FORMAT_R16_FLOAT;
     case Format_R32:
@@ -542,6 +549,9 @@ namespace GrapXToDX11
         CASE_TO_STRING(Format_D24X8);
         CASE_TO_STRING(Format_Index16);
         CASE_TO_STRING(Format_Index32);
+        CASE_TO_STRING(Format_BC1);
+        CASE_TO_STRING(Format_BC2);
+        CASE_TO_STRING(Format_BC3);
         CASE_TO_STRING(GXFMT_R8G8B8);
         CASE_TO_STRING(GXFMT_A8R8G8B8);
         CASE_TO_STRING(GXFMT_X8R8G8B8);

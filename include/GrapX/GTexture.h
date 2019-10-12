@@ -51,7 +51,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
 
-    GXSTDINTERFACE(GXBOOL       Clear             (GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
+    GXSTDINTERFACE(GXBOOL       Clear             (GXColor color));  // 实现不同, 建议不要在运行时随意使用!
     GXSTDINTERFACE(GXSIZE*      GetDimension      (GXSIZE* pDimension));  // 取纹理的尺寸, 这个值可能会跟屏幕尺寸变化
     GXSTDINTERFACE(void         GetDesc           (TEXTURE_DESC* pDesc));
     GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));

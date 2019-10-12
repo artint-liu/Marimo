@@ -247,29 +247,44 @@ namespace GrapX
     }
 
     //////////////////////////////////////////////////////////////////////////
-    GXBOOL TextureImpl::Clear(GXCOLOR dwColor)
+    GXBOOL TextureImpl::Clear(GXColor color)
     {
       ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
-      if(m_eResUsage == GXResUsage::Write || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
+
+      if(m_eResUsage == GXResUsage::Write || m_eResUsage == GXResUsage::ReadWrite ||
+        m_eResUsage == GXResUsage::SystemMem || m_eResUsage == GXResUsage::Default)
       {
+        if(m_eResUsage == GXResUsage::Default)
+        {
+          D3D11_TEXTURE2D_DESC desc;
+          m_pD3D11Texture->GetDesc(&desc);
+          if(desc.Usage == D3D11_USAGE_IMMUTABLE) {
+            return FALSE;
+          }
+        }
+
         int nWidth;
         int nHeight;
-        //if(lpRect == NULL) {
         nWidth = m_nWidth;
         nHeight = m_nHeight;
-        //}
-        //else {
-        //  nWidth = lpRect->right - lpRect->left;
-        //  nHeight = lpRect->bottom - lpRect->top;
-        //}
         GXUINT cbFormat = GetBytesOfGraphicsFormat(m_Format);
         GXLPVOID pData = new GXBYTE[cbFormat * m_nWidth * m_nHeight];
+        // FIXME: 颜色通道顺序不对
         if(cbFormat == 4)
         {
           GXDWORD* pColor = (GXDWORD*)pData;
+          GXCOLOR dwColor = color.ARGB();
           for(int i = nWidth * nHeight; i > 0; i--)
           {
             *pColor++ = dwColor;
+          }
+        }
+        else if(cbFormat == 16)
+        {
+          GXColor* pColor = (GXColor*)pData;
+          for(int i = nWidth * nHeight; i > 0; i--)
+          {
+            *pColor++ = color;
           }
         }
         else {

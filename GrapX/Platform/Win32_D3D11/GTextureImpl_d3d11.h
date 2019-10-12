@@ -69,7 +69,7 @@ namespace GrapX
       GXHRESULT   Release       () override;
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-      GXBOOL      Clear             (GXCOLOR dwColor) override;
+      GXBOOL      Clear             (GXColor color) override;
       //GXBOOL      GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio) override;
       GXSIZE*     GetDimension      (GXSIZE* pDimension) override;
       GXResUsage  GetUsage          () override;
