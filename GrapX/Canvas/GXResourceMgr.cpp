@@ -80,13 +80,16 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT GXResourceMgr::Unregister(GResource* pResource)
+    GXHRESULT GXResourceMgr::Unregister(GResource* pResource, GXBOOL bStrictness)
     {
       ResDict::iterator itRes = m_ResourceDict.find(pResource);
       if(itRes == m_ResourceDict.end())
       {
-        TRACE("Released by wrong resource manager.\n");
-        ASSERT(0);
+        if(bStrictness)
+        {
+          CLOG_ERROR("Released by wrong resource manager.");
+          CLBREAK;
+        }
         return -1;
       }
       GRESKETCH& ResFeatureDesc = itRes->second;

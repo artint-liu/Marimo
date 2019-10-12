@@ -39,7 +39,7 @@ namespace GrapX
       LPCRESKETCH     Find                      (GResource* pResource) const;
       GXHRESULT       RegisterUnfeatured        (GResource* pResource);
       GXHRESULT       Register                  (LPCRESKETCH pDesc, GResource* pResource);
-      GXHRESULT       Unregister                (GResource* pResource);
+      GXHRESULT       Unregister                (GResource* pResource, GXBOOL bStrictness = TRUE);
     };
 
     namespace ResourceSketch

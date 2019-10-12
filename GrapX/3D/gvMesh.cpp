@@ -262,6 +262,7 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
     PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Read);
     PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::Read);
 
+    // 如果锁定失败，则只返回AABB求交结果
     GXBYTE* pVertBuf = static_cast<GXBYTE*>(locker_v.GetPtr());
     VIndex* pIndicesBuf = static_cast<VIndex*>(locker_i.GetPtr());
     if( ! (pVertBuf && pIndicesBuf)) {

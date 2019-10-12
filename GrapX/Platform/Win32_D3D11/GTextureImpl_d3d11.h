@@ -3,8 +3,6 @@
 #ifndef _GTEXTURE_D3D11_IMPLEMENT_H_
 #define _GTEXTURE_D3D11_IMPLEMENT_H_
 
-#define ENABLE_DirectXTex
-
 namespace GrapX
 {
   namespace D3D11

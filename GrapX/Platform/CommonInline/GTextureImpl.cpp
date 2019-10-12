@@ -51,10 +51,19 @@
 //#include <freetype/ftglyph.h>
 //#include <Canvas/GFTFontImpl.h>
 //#include <GDI/GXShaderMgr.h>
+#include <FreeImage.h>
+#include "clImage.h"
 
 #include "GrapX/gxError.h"
+#ifdef ENABLE_DirectXTex
+# include "third_party/DirectXTex/DirectXTex.h"
+# pragma comment(lib, "DirectXTex.lib")
+#endif
 
-
+namespace GrapXToDX11
+{
+  DXGI_FORMAT   FormatFrom(GXFormat eFormat);
+} // namespace GrapXToDX11
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -144,5 +153,163 @@ namespace MarimoVerifier
       }
       return TRUE;
     }
+
   } // namespace Texture
 } // namespace MarimoVerifier
+
+namespace GrapX
+{
+  GXBOOL GXDLLAPI Texture::EncodeToMemory(clstd::MemBuffer* pBuffer, GXLPCVOID pBitsData, GXFormat format,
+    GXUINT width, GXUINT height, GXUINT cbPitch, GXLPCSTR szImageFormat, GXBOOL bVertFlip)
+  {
+    clStringA strFormat = szImageFormat;
+    GXBOOL bval = TRUE;
+    strFormat.MakeUpper();
+#ifdef ENABLE_DirectXTex
+    if (strFormat == "DDS" || strFormat == "DXT")
+    {
+      DirectX::Image image;
+      DirectX::Blob blob;
+      //D3D11_TEXTURE2D_DESC desc;
+      //m_pD3D11Texture->GetDesc(&desc);
+      image.width = width;
+      image.height = height;
+      image.format = GrapXToDX11::FormatFrom(format);
+      image.rowPitch = cbPitch;
+      image.slicePitch = cbPitch * height;
+      image.pixels = (uint8_t*)pBitsData;
+
+      if (SUCCEEDED(DirectX::SaveToDDSMemory(image, DirectX::DDS_FLAGS_NONE, blob)))
+      {
+        pBuffer->Resize(0, FALSE);
+        pBuffer->Append(blob.GetBufferPointer(), blob.GetBufferSize());
+      }
+      else
+      {
+        bval = FALSE;
+      }
+    }
+    else
+#endif
+    {
+      GXUINT bpp = GetBytesOfGraphicsFormat(format);
+
+      //GXLPVOID pBitsData = mapped.pBits;
+      //GXINT nSourcePitch = mapped.Pitch;
+      clstd::Image temp_image;
+      FREE_IMAGE_TYPE fit = FIT_BITMAP;
+      switch (format)
+      {
+      case Format_R8G8B8A8:
+        temp_image.Set(width, height, "RGBA", 8, pBitsData, cbPitch);
+        break;
+      case Format_B8G8R8X8:
+        temp_image.Set(width, height, "BGRX", 8, pBitsData, cbPitch);
+        break;
+      case Format_B8G8R8:
+        temp_image.Set(width, height, "BGRX", 8, pBitsData, cbPitch);
+        break;
+      case Format_R8:
+        temp_image.Set(width, height, "R", 8, pBitsData, cbPitch);
+        break;
+      case Format_R8G8:
+        temp_image.Set(width, height, "RG", 8, pBitsData, cbPitch);
+        break;
+      case Format_R32G32B32A32_Float:
+        fit = FIT_RGBAF;
+        break;
+      case Format_R32:
+        fit = FIT_FLOAT;
+        break;
+      }
+
+      if (temp_image.GetDataSize() > 0)
+      {
+        temp_image.SetFormat("BGRA");
+        pBitsData = temp_image.GetLine(0);
+        cbPitch = temp_image.GetPitch();
+        bpp = temp_image.GetChannels();
+      }
+
+      FIBITMAP* fibmp = (fit == FIT_BITMAP)
+        ? FreeImage_Allocate(width, height, bpp * 8)
+        : FreeImage_AllocateT(fit, width, height, bpp * 8);
+      BYTE* pDest = FreeImage_GetBits(fibmp);
+      GXUINT nDestPitch = FreeImage_GetPitch(fibmp);
+
+      if (bVertFlip)
+      {
+        pDest += nDestPitch * (height - 1);
+        for (GXUINT y = 0; y < height; y++)
+        {
+          memcpy(pDest, pBitsData, clMin(nDestPitch, cbPitch));
+
+          pDest -= nDestPitch;
+          pBitsData = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(pBitsData) + cbPitch);
+        }
+      }
+      else
+      {
+        for (GXUINT y = 0; y < height; y++)
+        {
+          memcpy(pDest, pBitsData, clMin(nDestPitch, cbPitch));
+
+          pDest += nDestPitch;
+          pBitsData = reinterpret_cast<GXLPVOID>(reinterpret_cast<size_t>(pBitsData) + cbPitch);
+        }
+      }
+
+      FREE_IMAGE_FORMAT fi_format = FIF_UNKNOWN;
+
+      if (strFormat == "PNG") {
+        fi_format = FIF_PNG;
+      }
+      else if (strFormat == "JPEG" || strFormat == "JPG") {
+        fi_format = FIF_JPEG;
+      }
+      else if (strFormat == "TIF" || strFormat == "TIFF") {
+        fi_format = FIF_TIFF;
+      }
+      else if (strFormat == "TGA") {
+        fi_format = FIF_TARGA;
+      }
+      else if (strFormat == "BMP") {
+        fi_format = FIF_BMP;
+      }
+      else if (strFormat == "EXR") {
+        fi_format = FIF_EXR;
+      }
+
+      if (fi_format != FIF_UNKNOWN)
+      {
+        FIMEMORY* fimemory = FreeImage_OpenMemory();
+        if (FreeImage_SaveToMemory(fi_format, fibmp, fimemory))
+        {
+          BYTE *pData;
+          DWORD size_in_bytes;
+          if (FreeImage_AcquireMemory(fimemory, &pData, &size_in_bytes))
+          {
+            pBuffer->Resize(0, FALSE);
+            pBuffer->Append(pData, size_in_bytes);
+          }
+          else
+          {
+            bval = FALSE;
+          }
+        }
+        else
+        {
+          bval = FALSE;
+        }
+        FreeImage_CloseMemory(fimemory);
+      }
+      else
+      {
+        bval = FALSE;
+      }
+
+      FreeImage_Unload(fibmp);
+    }
+    return bval;
+  }
+} // namespace GrapX

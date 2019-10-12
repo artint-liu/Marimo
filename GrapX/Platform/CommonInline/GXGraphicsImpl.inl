@@ -1120,7 +1120,7 @@ GXHRESULT GraphicsImpl::UnregisterResource(GResource* pResource)
 {
   clstd::ScopedSafeLocker locker(m_pGraphicsLocker);
 
-  return m_ResMgr.Unregister(pResource);
+  return m_ResMgr.Unregister(pResource, FALSE);
 }
 //////////////////////////////////////////////////////////////////////////
 

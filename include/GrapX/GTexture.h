@@ -1,6 +1,7 @@
 ﻿#ifndef _GRAPX_TEXTURE_H_
 #define _GRAPX_TEXTURE_H_
 
+#define ENABLE_DirectXTex
 //class GXGraphics;
 namespace GrapX
 {
@@ -61,6 +62,8 @@ namespace GrapX
 
     GXSTDINTERFACE(GXBOOL       SaveToMemory     (clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat, GXBOOL bVertFlip));
     GXSTDINTERFACE(GXBOOL       SaveToFile       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat, GXBOOL bVertFlip));
+
+    static GXBOOL GXDLLAPI EncodeToMemory (clstd::MemBuffer* pBuffer, GXLPCVOID pBitsData, GXFormat format, GXUINT width, GXUINT height, GXUINT cbPitch, GXLPCSTR szImageFormat, GXBOOL bVertFlip);
   };
 
   class Texture3D : public TextureBase
