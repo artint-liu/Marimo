@@ -213,7 +213,7 @@ namespace GrapX
         GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage,
         GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey)
       {
-        pDesc->dwCategoryId = RCC_Texture;
+        pDesc->dwCategoryId = RCC_Texture2D;
         pDesc->strResourceName.Format(_CLTEXT("%s,%d,%d,%d,%u,%d,%u,%u,%u,%08x"),
           pSrcFile, Width, Height, Depth, MipLevels, Format, ResUsage, Filter, MipFilter, ColorKey);
 

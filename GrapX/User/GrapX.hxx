@@ -102,7 +102,8 @@ enum ResCmd
 enum RESOURCE_CATEGORY_CODE // TODO: 这个要改为外部声明
 {
   RCC_FontA             = GXMAKEFOURCC('F','T','I','A'),
-  RCC_Texture           = GXMAKEFOURCC('T','X','F','W'),
+  RCC_Texture2D         = GXMAKEFOURCC('T','X','F','W'),
+  RCC_TextureCube       = GXMAKEFOURCC('T','X','C','B'),
   RCC_TextureName       = GXMAKEFOURCC('T','E','X','N'),
   RCC_Image             = GXMAKEFOURCC('I','M','F','W'),
   RCC_SpriteW           = GXMAKEFOURCC('S','P','F','W'),

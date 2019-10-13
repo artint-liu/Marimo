@@ -63,8 +63,9 @@
   //virtual GXHRESULT CreateTexture3DFromFileEx (Texture3D** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height, GXUINT Depth, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
 
   // Cube Texture
-  virtual GXHRESULT CreateTextureCube           (TextureCube** ppTexture, GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage) override;
-  virtual GXHRESULT CreateTextureCubeFromFile   (TextureCube** ppTexture, GXLPCWSTR pSrcFile) override;
+  GXBOOL CreateTextureCube(TextureCube** ppTexture, GXLPCSTR szName, GXUINT Size, GXFormat Format, GXResUsage ResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch) override;
+  GXBOOL CreateTextureCubeFromMemory(TextureCube** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage) override;
+  GXBOOL CreateTextureCubeFromFile(TextureCube** ppTexture, GXLPCWSTR pSrcFile, GXUINT MipLevels, GXResUsage eUsage) override;
   //virtual GXHRESULT CreateTextureCubeFromFileEx (TextureCube** ppTexture, GXLPCWSTR pSrcFile, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter, GXDWORD MipFilter, GXCOLORREF ColorKey, GXOUT LPGXIMAGEINFOX pSrcInfo) override;
 
 

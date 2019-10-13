@@ -58,13 +58,15 @@ namespace GrapX
     }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-    GXHRESULT TextureImpl::AddRef()
+
+    template<class _Interface>
+    GXHRESULT TextureBaseImplT<_Interface>::AddRef()
     {
       return gxInterlockedIncrement(&m_nRefCount);
     }
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-    GXHRESULT TextureImpl::Release()
+    template<class _Interface>
+    GXHRESULT TextureBaseImplT<_Interface>::Release()
     {
       clstd::ScopedLocker sl(m_pGraphics->GetLocker());
       GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
@@ -86,13 +88,14 @@ namespace GrapX
 
       return nRefCount;
     }
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
     TextureImpl::TextureImpl(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage)
-      : TextureBaseImplT<Texture>(static_cast<GraphicsImpl*>(pGraphics))
+      : TextureBaseImplT<Texture>(static_cast<GraphicsImpl*>(pGraphics), eFormat, nMipLevels, eResUsage)
       , m_pTextureData    (NULL)
-      , m_nMipLevels      (nMipLevels)
-      , m_Format          (eFormat)
-      , m_eResUsage       (eResUsage)
+      //, m_nMipLevels      (nMipLevels)
+      //, m_Format          (eFormat)
+      //, m_eResUsage       (eResUsage)
       , m_nWidth          (nWidth)
       , m_nHeight         (nHeight)
     {
@@ -113,7 +116,7 @@ namespace GrapX
 
       if(m_eResUsage != GXResUsage::SystemMem)
       {
-        if(_CL_NOT_(IntD3D11CreateResource(bRenderTarget, pInitData, nPitch))) {
+        if(_CL_NOT_(IntD3D11CreateResource(bRenderTarget, m_nWidth, m_nHeight, pInitData, nPitch))) {
           return FALSE;
         }
       }
@@ -135,20 +138,30 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL TextureImpl::IntD3D11CreateResource(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
+    template<class _Interface>
+    GXBOOL TextureBaseImplT<_Interface>::IntD3D11CreateResource(GXBOOL bRenderTarget, GXUINT nWidth, GXUINT nHeight, GXLPCVOID pInitData, GXUINT nPitch)
     {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
       D3D11_TEXTURE2D_DESC TexDesc;
       InlSetZeroT(TexDesc);
 
-      TexDesc.Width = m_nWidth;
-      TexDesc.Height = m_nHeight;
+      TexDesc.Width     = nWidth;
+      TexDesc.Height    = nHeight;
       TexDesc.MipLevels = m_nMipLevels;
-      TexDesc.ArraySize = 1;
-      TexDesc.Format = GrapXToDX11::FormatFrom(m_Format);
+      TexDesc.Format    = GrapXToDX11::FormatFrom(m_Format);
       TexDesc.SampleDesc.Count = 1;
       TexDesc.SampleDesc.Quality = 0;
+
+      if(m_dwResType == RESTYPE_TEXTURE_CUBE)
+      {
+        TexDesc.ArraySize = 6;
+        TexDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+      }
+      else
+      {
+        TexDesc.ArraySize = 1;
+      }
 
       if(m_Format == Format_D32 || m_Format == Format_D16 ||
         m_Format == Format_D24S8 || m_Format == Format_D24X8)
@@ -167,6 +180,7 @@ namespace GrapX
         GrapXToDX11::TextureDescFromResUsage(&TexDesc, m_eResUsage, m_nMipLevels, (pInitData != NULL));
       }
 
+
       ASSERT(TexDesc.Width < 16384 && TexDesc.Height < 16384);
 
       HRESULT hval;
@@ -178,13 +192,40 @@ namespace GrapX
       }
       else  if(m_nMipLevels == 1)
       {
-        InlSetZeroT(TexInitData);
-        TexInitData.pSysMem = pInitData;
-        TexInitData.SysMemPitch = nPitch;
-        hval = pd3dDevice->CreateTexture2D(&TexDesc, &TexInitData, &m_pD3D11Texture);
+        if(m_dwResType == RESTYPE_TEXTURE_CUBE)
+        {
+          D3D11_SUBRESOURCE_DATA aTexInitData[6] = {0};
+          GXUINT nFacePitch = GetBytesOfGraphicsFormat(m_Format) * nHeight;
+          aTexInitData[0].pSysMem = pInitData;
+          aTexInitData[0].SysMemPitch = nPitch;
+          aTexInitData[1].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch);
+          aTexInitData[1].SysMemPitch = nPitch;
+          aTexInitData[2].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 2);
+          aTexInitData[2].SysMemPitch = nPitch;
+          aTexInitData[3].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 3);
+          aTexInitData[3].SysMemPitch = nPitch;
+          aTexInitData[4].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 4);
+          aTexInitData[4].SysMemPitch = nPitch;
+          aTexInitData[5].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 5);
+          aTexInitData[5].SysMemPitch = nPitch;
+
+          hval = pd3dDevice->CreateTexture2D(&TexDesc, aTexInitData, &m_pD3D11Texture);
+        }
+        else
+        {
+          InlSetZeroT(TexInitData);
+          TexInitData.pSysMem = pInitData;
+          TexInitData.SysMemPitch = nPitch;
+          hval = pd3dDevice->CreateTexture2D(&TexDesc, &TexInitData, &m_pD3D11Texture);
+        }
       }
       else
       {
+        if(m_dwResType == RESTYPE_TEXTURE_CUBE)
+        {
+          return FALSE; // 没实现Cube 的Mipmaps
+        }
+
         clvector<D3D11_SUBRESOURCE_DATA> aInitData;
         aInitData.reserve(m_nMipLevels);
         InlSetZeroT(TexInitData);
@@ -192,7 +233,7 @@ namespace GrapX
         TexInitData.pSysMem = pInitData;
         TexInitData.SysMemPitch = nPitch;
         aInitData.push_back(TexInitData);
-        GXUINT nMipmapHeight = m_nHeight;
+        GXUINT nMipmapHeight = nHeight;
 
         for(GXUINT i = 1; i < m_nMipLevels; i++)
         {
@@ -210,8 +251,13 @@ namespace GrapX
         return FALSE;
       }
 
+
       if(TEST_FLAG(TexDesc.BindFlags, D3D11_BIND_SHADER_RESOURCE)) {
-        hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, NULL, &m_pD3D11ShaderView);
+        D3D11_SHADER_RESOURCE_VIEW_DESC sResourceViewDesc = {TexDesc.Format, D3D11_SRV_DIMENSION_TEXTURECUBE};
+        sResourceViewDesc.TextureCube.MipLevels = TexDesc.MipLevels;
+        sResourceViewDesc.TextureCube.MostDetailedMip = 0;
+
+        hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, (m_dwResType == RESTYPE_TEXTURE_CUBE) ? &sResourceViewDesc : NULL, &m_pD3D11ShaderView);
         if(m_nMipLevels == 0 && pInitData) {
           ASSERT(nPitch);
           ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
@@ -472,12 +518,14 @@ namespace GrapX
       return pDimension;
     }
 
-    GXResUsage TextureImpl::GetUsage()
+    template<class _Interface>
+    GXResUsage TextureBaseImplT<_Interface>::GetUsage()
     {
       return m_eResUsage;
     }
 
-    GXFormat TextureImpl::GetFormat()
+    template<class _Interface>
+    GXFormat TextureBaseImplT<_Interface>::GetFormat()
     {
       return m_Format;
     }
@@ -683,6 +731,70 @@ namespace GrapX
     }
 
     //////////////////////////////////////////////////////////////////////////
+
+    GXHRESULT TextureCubeImpl::Invoke(GRESCRIPTDESC* pDesc)
+    {
+      return 0;
+    }
+
+    GXUINT TextureCubeImpl::GetSize() const
+    {
+      return m_nSize;
+    }
+
+
+    TextureCubeImpl::TextureCubeImpl(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nSize, GXUINT nMipLevels, GXResUsage eResUsage)
+      : TextureBaseImplT<TextureCube>(static_cast<GraphicsImpl*>(pGraphics), eFormat, nMipLevels, eResUsage)
+      , m_nSize(nSize)
+    {
+      InlSetZeroT(m_sMappedResource);
+    }
+
+    TextureCubeImpl::~TextureCubeImpl()
+    {
+      SAFE_RELEASE(m_pD3D11Texture);
+      SAFE_RELEASE(m_pD3D11ShaderView);
+      SAFE_DELETE_ARRAY(m_pTextureData);
+    }
+
+    GXBOOL TextureCubeImpl::InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
+    {
+      const GXUINT nMinPitch = GetMinPitchSize6();
+      nPitch = clMax(nPitch, nMinPitch);
+
+      if(m_eResUsage != GXResUsage::SystemMem)
+      {
+        if(_CL_NOT_(IntD3D11CreateResource(bRenderTarget, m_nSize, m_nSize, pInitData, nPitch))) {
+          return FALSE;
+        }
+      }
+
+      if(m_eResUsage == GXResUsage::Read || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
+      {
+        const GXUINT nSize = nMinPitch * m_nSize;
+        m_pTextureData = new GXBYTE[nSize];
+        GXLPBYTE pDest = m_pTextureData;
+
+        if(pInitData)
+        {
+          for(GXUINT y = 0; y < m_nSize; y++, pDest += nMinPitch) {
+            memcpy(pDest, reinterpret_cast<GXLPVOID>((size_t)pInitData + nPitch * y), nMinPitch);
+          }
+        }
+      }
+
+      return TRUE;
+    }
+
+    GXUINT TextureCubeImpl::GetMinPitchSize6() const
+    {
+      return GetBytesOfGraphicsFormat(m_Format) * m_nSize * 6;
+    }
+
+    //GXBOOL TextureCubeImpl::IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip)
+    //{
+
+    //}
 
   } // namespace D3D11
 } // namespace GrapX

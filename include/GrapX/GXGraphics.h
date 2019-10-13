@@ -143,7 +143,7 @@ namespace GrapX
       GXLPCVOID   pInitData = NULL,
       GXUINT      nPitch = 0));   // 0表示使用默认pitch（nWidth*像素字节数）
 
-    GXSTDINTERFACE(GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture));
+    GXSTDINTERFACE(GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture)); // 没实现
 
     // eUsage参数只有在首次创建时限定纹理的使用行为，对于重复创建的纹理文件，eUsage作用会被忽略
     GXSTDINTERFACE(GXHRESULT CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage));
@@ -192,17 +192,18 @@ namespace GrapX
     //  GXOUT LPGXIMAGEINFOX pSrcInfo = NULL));
 
     // Cube Texture
-    GXSTDINTERFACE(GXHRESULT CreateTextureCube(
+    GXSTDINTERFACE(GXBOOL CreateTextureCube(
       TextureCube** ppTexture,
       GXLPCSTR      szName,
       GXUINT        Size,
-      GXUINT        MipLevels,
       GXFormat      Format,
-      GXDWORD       ResUsage));
+      GXResUsage    ResUsage,
+      GXUINT        MipLevels = 0,
+      GXLPCVOID     pInitData = NULL, // +x,-x,+y,-y,+z,-z 六个面横向列表
+      GXUINT        nPitch = 0));
 
-    GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFile(
-      TextureCube** ppTexture,
-      GXLPCWSTR     pSrcFile));
+    GXSTDINTERFACE(GXBOOL CreateTextureCubeFromMemory(TextureCube** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage));
+    GXSTDINTERFACE(GXBOOL CreateTextureCubeFromFile(TextureCube** ppTexture, GXLPCWSTR pSrcFile, GXUINT MipLevels, GXResUsage eUsage));
 
     //GXSTDINTERFACE(GXHRESULT CreateTextureCubeFromFileEx(
     //  GTextureCube**ppTexture,

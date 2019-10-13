@@ -490,6 +490,10 @@ namespace GrapX
       m_StdCanvasUniform.MARIMO_MATRIX_V = CameraCtx.matView;
       m_StdCanvasUniform.MARIMO_MATRIX_P = CameraCtx.matProjection;
       m_StdCanvasUniform.MARIMO_MATRIX_MVP = matWorld * CameraCtx.matView * CameraCtx.matProjection;
+      m_StdCanvasUniform.MARIMO_MATRIX_VP = CameraCtx.matView * CameraCtx.matProjection;
+      
+      m_StdCanvasUniform.MARIMO_MATRIX_I_VP = m_StdCanvasUniform.MARIMO_MATRIX_VP;
+      m_StdCanvasUniform.MARIMO_MATRIX_I_VP.inverse();
 
 #else
       m_StdUniforms.g_matWorldViewProj = matWorld * m_StdUniforms.g_matViewProj;

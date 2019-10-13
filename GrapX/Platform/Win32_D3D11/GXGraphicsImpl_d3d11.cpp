@@ -920,7 +920,7 @@ namespace GrapX
     GXHRESULT GraphicsImpl::CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height,
       GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
     {
-      GRESKETCH rs = { RCC_Texture };
+      GRESKETCH rs = { RCC_Texture2D };
       GXHRESULT hr = GX_FAIL;
 
       // 按命名查找资源
@@ -961,7 +961,7 @@ namespace GrapX
 
     GXHRESULT GraphicsImpl::CreateTextureFromMemory(Texture** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage)
     {
-      GRESKETCH rs = { RCC_Texture };
+      GRESKETCH rs = { RCC_Texture2D };
       GXHRESULT hr = GX_FAIL;
 
       // 按命名查找资源
@@ -1008,7 +1008,7 @@ namespace GrapX
       else {
         CLBREAK;
       }
-#if 0 // 不应该竖直翻转
+#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
       FreeImage_FlipVertical(fibmp);
 #endif
 
@@ -1029,7 +1029,7 @@ namespace GrapX
 
     GXHRESULT GraphicsImpl::CreateTextureFromFile(Texture** ppTexture, GXLPCWSTR szFilePath, GXUINT MipLevels, GXResUsage eUsage)
     {
-      GRESKETCH rs = { RCC_Texture };
+      GRESKETCH rs = { RCC_Texture2D };
       clpathfile::CombinePath(rs.strResourceName, m_strResourceDir, szFilePath);
 
       // 按命名查找资源
@@ -1055,45 +1055,6 @@ namespace GrapX
       return GX_E_OPEN_FAILED;
     }
 
-#if 0
-    GXHRESULT GXGraphicsImpl::CreateTextureFromFileEx(
-      Texture** ppTexture, GXLPCWSTR pSrcFile, GXUINT Width, GXUINT Height,
-      GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage, GXDWORD Filter /* = D3DX_FILTER_NONE */,
-      GXDWORD MipFilter /* = D3DX_FILTER_NONE */, GXCOLORREF ColorKey /* = 0 */,
-      OUT LPGXIMAGEINFOX pSrcInfo)
-    {
-      *ppTexture = NULL;
-      if(!MarimoVerifier::Texture::CreateFromFileParam("CreateTextureFromFileExW Error: ",
-        Width, Height, 1, MipLevels, Format, ResUsage, Filter, MipFilter)) {
-        return GX_FAIL;
-      }
-
-      clstd::ScopedLocker sl(m_pGraphicsLocker);
-      TextureFromFile *pGTex;
-      pGTex = new TextureFromFile(pSrcFile, Width, Height, MipLevels, Format, ResUsage, Filter, MipFilter, ColorKey, this);
-      m_pLogger->OutputFormatW(_CLTEXT("Load texture from file: %s"), pSrcFile);
-      if(pGTex != NULL)
-      {
-        pGTex->AddRef();
-
-        if(GXFAILED(pGTex->Create(pSrcInfo)))
-        {
-          pGTex->m_emType = TextureImpl::CreationFailed;
-          SAFE_RELEASE(pGTex);
-          m_pLogger->OutputFormatW(_CLTEXT("...Failed.\n"));
-          return GX_FAIL;
-        }
-
-        RegisterResource(pGTex, NULL);
-        m_pLogger->OutputFormatW(_CLTEXT("...Succeeded.\n"));
-        *ppTexture = pGTex;
-        return GX_OK;
-      }
-      m_pLogger->OutputFormatW(_CLTEXT("...Failed.\n"));
-      ASSERT(FALSE);
-      return GX_FAIL;
-    }
-#endif
 
     GXHRESULT GraphicsImpl::CreateTexture3D(
       Texture3D** ppTexture, GXLPCSTR szName,
@@ -1113,17 +1074,141 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT GraphicsImpl::CreateTextureCube(TextureCube** ppTexture,
-      GXLPCSTR szName, GXUINT Size, GXUINT MipLevels, GXFormat Format, GXDWORD ResUsage)
+    GXBOOL GraphicsImpl::CreateTextureCube(TextureCube** ppTexture, GXLPCSTR szName, GXUINT Size, GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
     {
-      CLBREAK;
+      GRESKETCH rs = { RCC_TextureCube };
+      GXHRESULT hr = GX_FAIL;
+
+      // 按命名查找资源
+      if(szName) {
+        rs.strResourceName = szName;
+        hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
+        if(GXSUCCEEDED(hr)) {
+          return hr;
+        }
+      }
+
+
+      *ppTexture = NULL;
+      TextureCubeImpl* pTexture = new TextureCubeImpl(this, Format, Size, MipLevels, eResUsage);
+
+      if(InlIsFailedToNewObject(pTexture)) {
+        return GX_FAIL;
+      }
+
+      if(_CL_NOT_(pTexture->InitTexture(FALSE, pInitData, nPitch)))
+      {
+        pTexture->Release();
+        pTexture = NULL;
+        return GX_FAIL;
+      }
+
+      RegisterResource(pTexture, szName ? &rs : NULL);
+      *ppTexture = pTexture;
       return GX_OK;
     }
 
-    GXHRESULT GraphicsImpl::CreateTextureCubeFromFile(TextureCube** ppTexture, GXLPCWSTR pSrcFile)
+    GXBOOL GraphicsImpl::CreateTextureCubeFromMemory(TextureCube** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage)
     {
-      CLBREAK;
-      return GX_OK;
+      GRESKETCH rs = { RCC_TextureCube };
+      GXBOOL bval = FALSE;
+
+      // 按命名查找资源
+      if(szName) {
+        rs.strResourceName = szName;
+        GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
+        if(GXSUCCEEDED(hr)) {
+          return FALSE;
+        }
+      }
+
+      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
+      FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
+      if(fi_fmt == FIF_UNKNOWN) {
+        return FALSE;
+      }
+
+      FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
+
+      // FIXME:
+      // 没有处理64位图像的地方
+      // 没有检查图片格式
+      GXFormat format;
+
+      //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
+      //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
+      const GXUINT bpp = FreeImage_GetBPP(fibmp);
+      if(bpp == 24)
+      {
+        format = Format_B8G8R8;
+      }
+      else if(bpp == 32)
+      {
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
+        format = GXFMT_A8B8G8R8;
+#else
+        format = GXFMT_A8R8G8B8;
+#endif
+      }
+      else if(bpp == 96)
+      {
+        format = Format_R32G32B32_Float;
+      }
+      else if(bpp == 128)
+      {
+        format = Format_R32G32B32A32_Float;
+      }
+      else {
+        CLBREAK;
+      }
+#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
+      FreeImage_FlipVertical(fibmp);
+#endif
+
+      if(FreeImage_GetWidth(fibmp) == FreeImage_GetHeight(fibmp) * 6)
+      {
+        bval = CreateTextureCube(ppTexture, NULL, FreeImage_GetHeight(fibmp),
+          format, eUsage, MipLevels, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+
+        // 有名字的要注册一下
+        if(bval && szName)
+        {
+          m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
+          m_ResMgr.Register(&rs, *ppTexture);
+        }
+      }
+
+      FreeImage_Unload(fibmp);
+      FreeImage_CloseMemory(fi_mem);
+      return bval;
+    }
+
+    GXBOOL GraphicsImpl::CreateTextureCubeFromFile(TextureCube** ppTexture, GXLPCWSTR szFilePath, GXUINT MipLevels, GXResUsage eUsage)
+    {
+      GRESKETCH rs = { RCC_TextureCube };
+      clpathfile::CombinePath(rs.strResourceName, m_strResourceDir, szFilePath);
+
+      // 按命名查找资源
+      GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
+      if(GXSUCCEEDED(hr)) {
+        return hr;
+      }
+
+      clstd::File file;
+      if(file.OpenExisting(rs.strResourceName))
+      {
+        clstd::MemBuffer buffer;
+        if(file.Read(&buffer))
+        {
+          hr = CreateTextureCubeFromMemory(ppTexture, NULL, &buffer, MipLevels, eUsage);
+          if(GXSUCCEEDED(hr)) {
+            m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
+            m_ResMgr.Register(&rs, *ppTexture);
+          }
+          return hr;
+        }
+      }
+      return GX_E_OPEN_FAILED;
     }
 
     //GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileEx(TextureCube** ppTexture, 

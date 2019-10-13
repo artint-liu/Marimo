@@ -154,9 +154,9 @@ namespace GrapX
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe () const);
     GXSTDINTERFACE(Marimo::DataPoolVariable GetUniform(GXLPCSTR szName));
-    GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture));
-    GXSTDINTERFACE(GXBOOL       GetTexture(GXLPCSTR szSamplerName, Texture** ppTexture));
-    GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture));
+    GXSTDINTERFACE(GXBOOL       SetTexture(GXUINT nSlot, TextureBase* pTexture));
+    GXSTDINTERFACE(GXBOOL       GetTexture(GXLPCSTR szSamplerName, TextureBase** ppTexture));
+    GXSTDINTERFACE(GXBOOL       SetTexture(GXLPCSTR szSamplerName, TextureBase* pTexture));
 
     GXSTDINTERFACE(GXBOOL       SetFloat(GXLPCSTR szName, float value));
     GXSTDINTERFACE(float        GetFloat(GXLPCSTR szName));

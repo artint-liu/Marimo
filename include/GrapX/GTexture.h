@@ -17,7 +17,7 @@ namespace GrapX
   public:
     GXSTDINTERFACE(GXResUsage   GetUsage          ());
     GXSTDINTERFACE(GXFormat     GetFormat         ());
-    GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
+    //GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe ());      // 不会增加引用计数
   };
 
@@ -56,6 +56,7 @@ namespace GrapX
     GXSTDINTERFACE(void         GetDesc           (TEXTURE_DESC* pDesc));
     GXSTDINTERFACE(GXBOOL       GetDesc           (GXBITMAP*lpBitmap));
     GXSTDINTERFACE(GXBOOL       CopyRect          (Texture* pSourceTexture, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource));
+    GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
     GXSTDINTERFACE(GXBOOL       Map               (MAPPED* pLockRect, GXResMap eResMap)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
     GXSTDINTERFACE(GXBOOL       Unmap             ());
     GXSTDINTERFACE(GXBOOL       UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch));
@@ -110,6 +111,13 @@ namespace GrapX
   class TextureCube : public TextureBase
   {
   public:
+  public:
+    struct MAPPED
+    {
+      GXINT     Pitch;
+      GXLPVOID  pBits;
+    };
+
     typedef struct __tagLOCKEDRECT
     {
       GXINT     Pitch;
@@ -122,18 +130,18 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
 
-    GXSTDINTERFACE(GXBOOL       Clear             (const GXLPRECT lpRect, GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
-    GXSTDINTERFACE(GXUINT       GetSize           ());    // 取m_nWidth成员的值
+    //GXSTDINTERFACE(GXBOOL       Clear             (const GXLPRECT lpRect, GXCOLOR dwColor));  // 实现不同, 建议不要在运行时随意使用!
+    GXSTDINTERFACE(GXUINT       GetSize           () const);    // 取m_nWidth成员的值
     GXSTDINTERFACE(GXResUsage   GetUsage          ());
     GXSTDINTERFACE(GXFormat     GetFormat         ());
-    GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
+    //GXSTDINTERFACE(GXVOID       GenerateMipMaps   ());
     //GXSTDINTERFACE(GXBOOL       CopyRect          (GTexture* pSrc, GXLPCRECT lprcSource, GXLPCPOINT lpptDestination));
     //GXSTDINTERFACE(GXBOOL       StretchRect       (GTexture* pSrc, GXLPCRECT lpDest, GXLPCRECT lpSrc, GXTextureFilterType eFilter));
     //GXSTDINTERFACE(GXBOOL       LockRect          (LPLOCKEDRECT lpLockRect, GXLPCRECT lpRect, GXDWORD Flags)); // TODO: 考虑以后是不是不要用lock, 用外围的接口代替
     //GXSTDINTERFACE(GXBOOL       UnlockRect        ());
     GXSTDINTERFACE(GrapX::Graphics*  GetGraphicsUnsafe ());      // 不会增加引用计数
 
-    GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));
+    //GXSTDINTERFACE(GXBOOL       SaveToFileW       (GXLPCWSTR pszFileName, GXLPCSTR pszDestFormat));
   };
 } // namespace GrapX
 

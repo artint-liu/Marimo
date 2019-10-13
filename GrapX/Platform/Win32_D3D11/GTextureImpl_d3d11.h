@@ -17,19 +17,35 @@ namespace GrapX
     class TextureBaseImplT : public _Interface
     {
     protected:
-      GraphicsImpl*             m_pGraphics;
-      ID3D11Texture2D*          m_pD3D11Texture;
-      ID3D11ShaderResourceView* m_pD3D11ShaderView;
+      GraphicsImpl*             m_pGraphics = NULL;
+      ID3D11Texture2D*          m_pD3D11Texture = NULL;
+      ID3D11ShaderResourceView* m_pD3D11ShaderView = NULL;
+
+      const GXUINT              m_nMipLevels = 0;
+      const GXFormat            m_Format     = Format_Unknown;
+      const GXResUsage          m_eResUsage  = GXResUsage::Default;
 
     public:
-      TextureBaseImplT(GraphicsImpl*pGraphics)
+      TextureBaseImplT(GraphicsImpl*pGraphics, GXFormat eFormat, GXUINT nMipLevels, GXResUsage eResUsage)
         : m_pGraphics(pGraphics)
         , m_pD3D11Texture(NULL)
         , m_pD3D11ShaderView(NULL)
+        , m_nMipLevels(nMipLevels)
+        , m_Format(eFormat)
+        , m_eResUsage(eResUsage)
       {};
 
-      virtual GXHRESULT AddRef () = NULL;
-      virtual GXHRESULT Release() = NULL;
+#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+      GXHRESULT   AddRef        () override;
+      GXHRESULT   Release       () override;
+#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+      GXBOOL IntD3D11CreateResource(GXBOOL bRenderTarget, GXUINT nWidth, GXUINT nHeight, GXLPCVOID pInitData, GXUINT nPitch);
+
+      GXResUsage  GetUsage          () override;
+      GXFormat    GetFormat         () override;
+
+      Graphics*   GetGraphicsUnsafe () override;
 
       inline ID3D11ShaderResourceView*& D3DResourceView()
       {
@@ -42,38 +58,28 @@ namespace GrapX
       }
     };
 
+    template<class _Interface>
+    Graphics* TextureBaseImplT<_Interface>::GetGraphicsUnsafe()
+    {
+      return m_pGraphics;
+    }
+
     class TextureImpl : public TextureBaseImplT<Texture>
     {
       friend class GraphicsImpl;
       friend class CanvasCoreImpl;
 
-    public:
-      //enum CREATETYPE
-      //{
-      //  CreationFailed    = -1, // 创建失败的
-      //  Invalid           = 0,
-      //  User              = 1,
-      //  File              = 2,
-      //  FileEx            = 3,
-      //  Resource          = 4,
-      //  ResourceEx        = 5,
-      //  OffscreenPlainSur = 6,
-      //  D3DSurfaceRef     = 7,
-      //  LastType
-      //};
     protected:
       virtual GXHRESULT   Invoke        (GRESCRIPTDESC* pDesc);
     public:
-#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-      GXHRESULT   AddRef        () override;
-      GXHRESULT   Release       () override;
-#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+//#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+//      GXHRESULT   AddRef        () override;
+//      GXHRESULT   Release       () override;
+//#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
       GXBOOL      Clear             (GXColor color) override;
       //GXBOOL      GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio) override;
       GXSIZE*     GetDimension      (GXSIZE* pDimension) override;
-      GXResUsage  GetUsage          () override;
-      GXFormat    GetFormat         () override;
       GXVOID      GenerateMipMaps   () override;
       void        GetDesc           (TEXTURE_DESC* pDesc) override;
       GXBOOL      GetDesc           (GXBITMAP*lpBitmap) override;
@@ -92,7 +98,6 @@ namespace GrapX
       //void   CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
       //GXBOOL           IntGetHelpTexture();
       //ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);
-      GXBOOL IntD3D11CreateResource(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
       GXUINT GetMinPitchSize() const;
 
       GXBOOL IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip);
@@ -101,12 +106,58 @@ namespace GrapX
       D3D11_MAPPED_SUBRESOURCE  m_sMappedResource;
       GXLPBYTE                  m_pTextureData;
 
-      const GXUINT              m_nMipLevels;
-      const GXFormat            m_Format;
-      const GXResUsage          m_eResUsage;
       const GXUINT              m_nWidth;
       const GXUINT              m_nHeight;
 
+    };
+
+    //////////////////////////////////////////////////////////////////////////
+
+    class TextureCubeImpl : public TextureBaseImplT<TextureCube>
+    {
+      friend class GraphicsImpl;
+      friend class CanvasCoreImpl;
+
+    protected:
+      virtual GXHRESULT   Invoke        (GRESCRIPTDESC* pDesc);
+    public:
+//#ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+//      GXHRESULT   AddRef        () override;
+//      GXHRESULT   Release       () override;
+//#endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+      //GXBOOL      Clear             (GXColor color) override;
+      //GXBOOL      GetRatio          (GXSizeRatio* pWidthRatio, GXSizeRatio* pHeightRatio) override;
+      GXUINT      GetSize           () const override;    // 取m_nWidth成员的值
+      //GXResUsage  GetUsage          () override;
+      //GXFormat    GetFormat         () override;
+      //GXVOID      GenerateMipMaps   () override;
+      //void        GetDesc           (TEXTURE_DESC* pDesc) override;
+      //GXBOOL      GetDesc           (GXBITMAP*lpBitmap) override;
+      //GXBOOL      CopyRect          (Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
+      //GXBOOL      Map               (MAPPED* pMappedRect, GXResMap eResMap) override;
+      //GXBOOL      Unmap             () override;
+      //GXBOOL      UpdateRect        (GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch) override;
+      //GrapX::Graphics* GetGraphicsUnsafe () override;
+      //GXBOOL      SaveToMemory      (clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat, GXBOOL bVertFlip) override;
+      //GXBOOL      SaveToFile        (GXLPCWSTR szFileName, GXLPCSTR szDestFormat, GXBOOL bVertFlip) override;
+    protected:
+      TextureCubeImpl(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nSize, GXUINT nMipLevels, GXResUsage eResUsage);
+      virtual ~TextureCubeImpl();
+
+      GXBOOL InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
+      //void   CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
+      //GXBOOL           IntGetHelpTexture();
+      //ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);
+      GXUINT GetMinPitchSize6() const;
+
+      //GXBOOL IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip);
+
+    protected:
+      D3D11_MAPPED_SUBRESOURCE  m_sMappedResource;
+      GXLPBYTE                  m_pTextureData = NULL;
+
+      const GXUINT              m_nSize = 0;
     };
 
     //LPDIRECT3DTEXTURE9 GTextureImpl::D3DTexture()

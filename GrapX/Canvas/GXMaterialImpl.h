@@ -27,13 +27,13 @@ namespace GrapX
 
     struct TEXTUREUNIT
     {
-      ObjectT<Texture> texture;
+      ObjectT<TextureBase> texture;
       MOVarFloat4 TexelSize;
       //ObjectT<SamplerState> sampler;
       //GXBOOL bTexelSize;
     };
     typedef clhash_map<clStringA, GXUINT> MtlStateDict;
-    typedef clvector<ObjectT<Texture> > TextureArray;
+    //typedef clvector<ObjectT<Texture> > TextureArray;
     typedef clvector<ObjectT<SamplerState> > SamplerStateArray;
     typedef clvector<TEXTUREUNIT> TextureUnitArray;
     //typedef clstd::FixedBuffer clFixedBuffer;
@@ -91,9 +91,9 @@ namespace GrapX
     GXBOOL SetState(GXLPCSTR szStateCommand) override;
 
     Marimo::DataPoolVariable GetUniform(GXLPCSTR szName) override;
-    GXBOOL       SetTexture(GXUINT nSlot, Texture* pTexture) override;
-    GXBOOL       GetTexture(GXLPCSTR szSamplerName, Texture** ppTexture) override;
-    GXBOOL       SetTexture(GXLPCSTR szSamplerName, Texture* pTexture) override;
+    GXBOOL       SetTexture(GXUINT nSlot, TextureBase* pTexture) override;
+    GXBOOL       GetTexture(GXLPCSTR szSamplerName, TextureBase** ppTexture) override;
+    GXBOOL       SetTexture(GXLPCSTR szSamplerName, TextureBase* pTexture) override;
 
     //virtual GXHRESULT   SetTextureSlot    (GXLPCSTR szName, GXINT nSlot);
     //virtual GXINT       GetTextureSlot    (GXLPCSTR szName);

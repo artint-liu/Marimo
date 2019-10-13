@@ -466,7 +466,7 @@ namespace GrapX
     return var;
   }
 
-  GXBOOL MaterialImpl::SetTexture(GXUINT nSlot, Texture* pTexture)
+  GXBOOL MaterialImpl::SetTexture(GXUINT nSlot, TextureBase* pTexture)
   {
     if (m_aTextures.size() > nSlot)
     {
@@ -476,7 +476,7 @@ namespace GrapX
     return FALSE;
   }
 
-  GXBOOL MaterialImpl::SetTexture(GXLPCSTR szSamplerName, Texture* pTexture)
+  GXBOOL MaterialImpl::SetTexture(GXLPCSTR szSamplerName, TextureBase* pTexture)
   {
     const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->FindBindResource(szSamplerName);
     if (pDesc && m_aTextures.size() > pDesc->slot)
@@ -487,7 +487,7 @@ namespace GrapX
     return FALSE;
   }
 
-  GXBOOL MaterialImpl::GetTexture(GXLPCSTR szSamplerName, Texture** ppTexture)
+  GXBOOL MaterialImpl::GetTexture(GXLPCSTR szSamplerName, TextureBase** ppTexture)
   {
     const Shader::BINDRESOURCE_DESC* pDesc = m_pShader->FindBindResource(szSamplerName);
     if (pDesc && m_aTextures.size() > pDesc->slot)
@@ -648,10 +648,20 @@ namespace GrapX
     for (auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
     {
       m_pGraphics->SetTexture(it->texture, slot);
+      // TODO: 挪到设置纹理里面
       if(it->TexelSize.IsValid() && (it->texture != NULL)) {
-        GXSIZE size;
-        it->texture->GetDimension(&size);
-        it->TexelSize->set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
+        if(it->texture->GetType() == RESTYPE_TEXTURE2D)
+        {
+          GXSIZE size;
+          static_cast<Texture*>(static_cast<TextureBase*>(it->texture))->GetDimension(&size);
+          it->TexelSize->set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
+        }
+        else if(it->texture->GetType() == RESTYPE_TEXTURE_CUBE)
+        {
+          TextureCube* pCube = static_cast<TextureCube*>(static_cast<TextureBase*>(it->texture));
+          GXINT width = pCube->GetSize();
+          it->TexelSize->set(1.0f / width, 1.0f / width, (float)width, (float)width);
+        }
       }
     }
 

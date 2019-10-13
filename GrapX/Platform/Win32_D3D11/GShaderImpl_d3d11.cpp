@@ -1074,7 +1074,7 @@ namespace GrapX
         {
           brd.name = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(*it));
           brd.type = BindType::Sampler;
-          brd.slot = it - mapper.arraySampler.begin();
+          brd.slot = (int)(it - mapper.arraySampler.begin());
           m_buffer.Append(&brd, sizeof(BINDRESOURCE_DESC));
         }
 
