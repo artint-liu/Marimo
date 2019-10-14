@@ -44,11 +44,10 @@ void GVSequence::Clear()
 {
   for(int i = 0; i < c_nNeedRefactorRenderDescCount; i++)
   {
-    for(auto it = m_aRenderDesc[i].begin();
-      it != m_aRenderDesc[i].end(); ++it)
+    for(GVRENDERDESC& desc : m_aRenderDesc[i])
     {
-      SAFE_RELEASE(it->pPrimitive);
-      SAFE_RELEASE(it->pMaterial);
+      SAFE_RELEASE(desc.pPrimitive);
+      SAFE_RELEASE(desc.pMaterial);
     }
     m_aRenderDesc[i].clear();
   }

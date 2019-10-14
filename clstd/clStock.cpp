@@ -68,6 +68,17 @@ namespace clstd
       clstd::strcmpT(szStr, sz_yesQ) == 0 ||
       clstd::strcmpT(szStr, sz_trueQ) == 0 ;
   }
+
+  b32 CheckBoolean(const ch* str, size_t len)
+  {
+    return _CheckBoolean(str, len);
+  }
+
+  b32 CheckBoolean(const wch* str, size_t len)
+  {
+    return _CheckBoolean(str, len);
+  }
+
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
 

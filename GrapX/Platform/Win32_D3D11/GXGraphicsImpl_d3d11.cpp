@@ -171,9 +171,10 @@ namespace GrapX
 
       // 创建标志
       UINT createDeviceFlags = 0;
-#ifdef _DEBUG
-      createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
+      if(TEST_FLAG(pDesc->dwCreateFlags, GRAPHICS_CREATION_FLAG_DEBUG))
+      {
+        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+      }
 
       static D3D_DRIVER_TYPE driverTypes[] =
       {

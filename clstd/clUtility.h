@@ -649,6 +649,10 @@ FINAL_RET:
   class StockA& ReadUserDefault(StockA& stock);
   class StockW& ReadUserDefault(StockW& stock);
 
+  // "yes", "true", "ok", "1"字符串返回TRUE，不区分大消息
+  b32 CheckBoolean(const ch* str, size_t len);
+  b32 CheckBoolean(const wch* str, size_t len);
+
 } // namespace clstd
 
 #endif // _CL_UTILITY_

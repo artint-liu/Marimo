@@ -51,12 +51,16 @@ namespace GrapX
     class RenderTargetImpl;
     class RenderTargetImpl_BackBuffer;
 
+#define GRAPHICS_CREATION_FLAG_DEBUG  0x00000001
+
     struct GRAPHICS_CREATION_DESC
     {
       HWND          hWnd;
       GXBOOL        bWaitForVSync;
       GXLPCWSTR     szRootDir;
       ILogger*      pLogger;
+      GXDWORD       dwCreateFlags; // GRAPHICS_CREATION_FLAG_
+      //GXAPP_DESC*   pAppDesc;
     };
 
     enum class StateResult : int

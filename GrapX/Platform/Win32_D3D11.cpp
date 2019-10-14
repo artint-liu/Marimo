@@ -112,11 +112,23 @@ GXHRESULT IGXPlatform_Win32D3D11::Initialize(GXApp* pApp, GXAPP_DESC* pDesc, Gra
   //{
   //  return GX_FAIL;
   //}
-  GrapX::D3D11::GRAPHICS_CREATION_DESC sDesc;
+  GrapX::D3D11::GRAPHICS_CREATION_DESC sDesc = {0};
   sDesc.hWnd          = m_hWnd;
   sDesc.bWaitForVSync = pDesc->dwStyle & GXADS_WAITFORVSYNC;
   sDesc.szRootDir     = m_strRootDir;
   sDesc.pLogger       = pDesc->pLogger;
+  //sDesc.dwCreateFlags      = CheckBoolean();
+  if(pDesc->pParameter)
+  {
+    for(int pidx = 0; pDesc->pParameter[pidx].szName != NULL; pidx++)
+    {
+      if(clstd::strcmpT(pDesc->pParameter[pidx].szName, "GraphicsEnvSet/Debug") == 0) {
+        if(clstd::CheckBoolean(pDesc->pParameter[pidx].szValue, clstd::strlenT(pDesc->pParameter[pidx].szValue))) {
+          sDesc.dwCreateFlags |= GRAPHICS_CREATION_FLAG_DEBUG;
+        }
+      }
+    }
+  }
   
   pGraphics = GrapX::D3D11::GraphicsImpl::Create(&sDesc);
 
