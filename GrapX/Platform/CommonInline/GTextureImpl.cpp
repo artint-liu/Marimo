@@ -62,7 +62,8 @@
 
 namespace GrapXToDX11
 {
-  DXGI_FORMAT   FormatFrom(GXFormat eFormat);
+  DXGI_FORMAT FormatFrom(GXFormat eFormat);
+  GXFormat    FormatFrom(DXGI_FORMAT eFormat);
 } // namespace GrapXToDX11
 
 //////////////////////////////////////////////////////////////////////////
@@ -206,9 +207,9 @@ namespace GrapX
       case Format_B8G8R8X8:
         temp_image.Set(width, height, "BGRX", 8, pBitsData, cbPitch);
         break;
-      case Format_B8G8R8:
-        temp_image.Set(width, height, "BGRX", 8, pBitsData, cbPitch);
-        break;
+      //case Format_B8G8R8:
+      //  temp_image.Set(width, height, "BGRX", 8, pBitsData, cbPitch);
+      //  break;
       case Format_R8:
         temp_image.Set(width, height, "R", 8, pBitsData, cbPitch);
         break;
@@ -221,6 +222,8 @@ namespace GrapX
       case Format_R32:
         fit = FIT_FLOAT;
         break;
+      default:
+        CLBREAK;
       }
 
       if (temp_image.GetDataSize() > 0)
@@ -312,4 +315,111 @@ namespace GrapX
     }
     return bval;
   }
+
+  GXFormat GXDLLAPI Texture::DecodeToMemory(clstd::Image* pImage, GXLPCVOID pBitsData, GXUINT cbData, GXBOOL bVertFlip)
+  {
+    FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBitsData, (DWORD)cbData);
+    FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);    
+    GXFormat format = GXFormat::Format_Unknown;
+
+    if (fi_fmt == FIF_UNKNOWN) {
+      return GXFormat::Format_Unknown;
+    }
+#ifdef ENABLE_DirectXTex
+    else if (fi_fmt == FIF_DDS)
+    {
+      DirectX::ScratchImage image;
+      if(SUCCEEDED(DirectX::LoadFromDDSMemory(pBitsData, cbData, 0, NULL, image)))
+      {
+        const DirectX::TexMetadata& meta = image.GetMetadata();
+        format = GrapXToDX11::FormatFrom(meta.format);
+        if (format != GXFormat::Format_Unknown)
+        {
+          GXLPCSTR szOrder = GetFormatChannelOrder(format);
+          if(szOrder)
+          {
+            int nChannelDepth = GetBytesOfGraphicsFormat(format) / clstd::strlenT(szOrder) * 8;
+            pImage->Set(meta.width, meta.height * meta.arraySize, szOrder, nChannelDepth,
+              image.GetPixels(), image.GetImages()->rowPitch);
+          }
+        }
+      }
+      return format;
+    }
+#endif
+
+    FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
+
+    // FIXME:
+    // 没有处理64位图像的地方
+    // 没有检查图片格式
+
+    //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
+    //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
+    const GXUINT bpp = FreeImage_GetBPP(fibmp);
+    const char* szFormat = NULL; // 均没验证顺序正确性
+    int channel_depth = 0;
+    if (bpp == 24)
+    {
+      CLBREAK;
+      //format = Format_B8G8R8;
+      //szFormat = "BGR";
+      //channel_depth = 8;
+    }
+    else if (bpp == 32)
+    {
+#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
+      format = GXFMT_A8B8G8R8;
+#else
+      format = GXFMT_A8R8G8B8;
+#endif
+      szFormat = "RGBA";
+      channel_depth = 8;
+  }
+    else if (bpp == 96)
+    {
+      format = Format_R32G32B32_Float;
+      szFormat = "RGB";
+      channel_depth = 32;
+    }
+    else if (bpp == 128)
+    {
+      format = Format_R32G32B32A32_Float;
+      szFormat = "RGBA";
+      channel_depth = 32;
+    }
+    else {
+      CLBREAK;
+    }
+
+    if (bVertFlip) {
+      FreeImage_FlipVertical(fibmp);
+    }
+
+
+    //if (FreeImage_GetWidth(fibmp) == FreeImage_GetHeight(fibmp) * 6)
+    //{
+    //  bval = CreateTextureCube(ppTexture, NULL, FreeImage_GetHeight(fibmp),
+    //    format, eUsage, MipLevels, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+
+    //  // 有名字的要注册一下
+    //  if (bval && szName)
+    //  {
+    //    m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
+    //    m_ResMgr.Register(&rs, *ppTexture);
+    //  }
+    //}
+    ASSERT((format == GXFormat::Format_Unknown && szFormat == NULL && channel_depth == 0) ||
+      (format != GXFormat::Format_Unknown && szFormat != NULL && channel_depth != 0));
+
+    if(format != GXFormat::Format_Unknown)
+    {
+      pImage->Set(FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp), szFormat, channel_depth, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+    }
+
+    FreeImage_Unload(fibmp);
+    FreeImage_CloseMemory(fi_mem);
+    return format;
+  }
+
 } // namespace GrapX

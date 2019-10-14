@@ -729,6 +729,7 @@ GXStencilOp GXDLLAPI MOStringToStencilOp(GXLPCSTR str, size_t len)
 GXCullMode GXDLLAPI MOStringToCullMode(GXLPCSTR str, size_t len)
 {
   CMP_STR("none", GXCULL_NONE)
+  else CMP_STR("off", GXCULL_NONE)
   else CMP_STR("cw", GXCULL_CW)
   else CMP_STR("ccw", GXCULL_CCW)
   return GXCULL_FORCE_DWORD;

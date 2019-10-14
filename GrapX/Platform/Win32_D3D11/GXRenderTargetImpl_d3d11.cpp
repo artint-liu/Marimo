@@ -192,14 +192,14 @@ namespace GrapX
       UINT uDepthStencilSupport = 0;
       pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eColorFormat), &uColorSupport);
       if(TEST_FLAG_NOT(uColorSupport, D3D11_FORMAT_SUPPORT_RENDER_TARGET)) {
-        CLOG_ERROR("RenderTarget: %s 格式不能作为渲染纹理", GrapXToDX11::FormatToString(eColorFormat));
+        CLOG_ERROR("RenderTarget: %s 格式不能作为渲染纹理", FormatToString(eColorFormat));
         return FALSE;
       }
 
       if(eDepthStencilFormat != Format_Unknown) {
         pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eDepthStencilFormat), &uDepthStencilSupport);
         if(TEST_FLAG_NOT(uDepthStencilSupport, D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)) {
-          CLOG_ERROR("RenderTarget: %s 格式不能作为渲染模板深度缓冲", GrapXToDX11::FormatToString(eDepthStencilFormat));
+          CLOG_ERROR("RenderTarget: %s 格式不能作为渲染模板深度缓冲", FormatToString(eDepthStencilFormat));
           return FALSE;
         }
       }

@@ -66,7 +66,8 @@
 #include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_d3d11.h"
 #include "Platform/Win32_D3D11/GXRenderTargetImpl_d3d11.h"
-#include <FreeImage.h>
+//#include <FreeImage.h>
+#include "clImage.h"
 
 // Canvas3D用的
 #include "GrapX/StdMtl.h"
@@ -973,47 +974,49 @@ namespace GrapX
         }
       }
 
-      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
-      FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
-      if(fi_fmt == FIF_UNKNOWN) {
-        return GX_ERROR_HANDLE;
-      }
+//      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
+//      FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
+//      if(fi_fmt == FIF_UNKNOWN) {
+//        return GX_ERROR_HANDLE;
+//      }
+//
+//      FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
+//
+//      // FIXME:
+//      // 没有处理64位图像的地方
+//      // 没有检查图片格式
+//      GXFormat format;
+//
+//      //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
+//      //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
+//      const GXUINT bpp = FreeImage_GetBPP(fibmp);
+//      if(bpp == 24)
+//      {
+//        format = Format_B8G8R8;
+//      }
+//      else if(bpp == 32)
+//      {
+//#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
+//        format = GXFMT_A8B8G8R8;
+//#else
+//        format = GXFMT_A8R8G8B8;
+//#endif
+//      }
+//      else if (bpp == 128)
+//      {
+//        format = Format_R32G32B32A32_Float;
+//      }
+//      else {
+//        CLBREAK;
+//      }
+//#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
+//      FreeImage_FlipVertical(fibmp);
+//#endif
+      clstd::Image image;
+      GXFormat format = Texture::DecodeToMemory(&image, pBuffer->GetPtr(), (GXUINT)pBuffer->GetSize(), TRUE);
 
-      FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
-
-      // FIXME:
-      // 没有处理64位图像的地方
-      // 没有检查图片格式
-      GXFormat format;
-
-      //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
-      //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
-      const GXUINT bpp = FreeImage_GetBPP(fibmp);
-      if(bpp == 24)
-      {
-        format = Format_B8G8R8;
-      }
-      else if(bpp == 32)
-      {
-#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
-        format = GXFMT_A8B8G8R8;
-#else
-        format = GXFMT_A8R8G8B8;
-#endif
-      }
-      else if (bpp == 128)
-      {
-        format = Format_R32G32B32A32_Float;
-      }
-      else {
-        CLBREAK;
-      }
-#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
-      FreeImage_FlipVertical(fibmp);
-#endif
-
-      hr = CreateTexture(ppTexture, NULL, FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp),
-        format, eUsage, MipLevels, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+      hr = CreateTexture(ppTexture, NULL, image.GetWidth(), image.GetHeight(),
+        format, eUsage, MipLevels, image.GetLine(0), image.GetPitch());
 
       // 有名字的要注册一下
       if(GXSUCCEEDED(hr) && szName)
@@ -1022,8 +1025,8 @@ namespace GrapX
         m_ResMgr.Register(&rs, *ppTexture);
       }
 
-      FreeImage_Unload(fibmp);
-      FreeImage_CloseMemory(fi_mem);
+      //FreeImage_Unload(fibmp);
+      //FreeImage_CloseMemory(fi_mem);
       return hr;
     }
 
@@ -1074,7 +1077,8 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXBOOL GraphicsImpl::CreateTextureCube(TextureCube** ppTexture, GXLPCSTR szName, GXUINT Size, GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
+    GXBOOL GraphicsImpl::CreateTextureCube(TextureCube** ppTexture, GXLPCSTR szName, GXUINT Width, GXUINT Height,
+      GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
     {
       GRESKETCH rs = { RCC_TextureCube };
       GXHRESULT hr = GX_FAIL;
@@ -1088,15 +1092,20 @@ namespace GrapX
         }
       }
 
+      if ((pInitData && Width != Height * 6 && Width * 6 != Height) ||
+        (pInitData == NULL && Width != Height)) {
+        CLOG_ERROR("%s:有初始化数据时，需要Width与Height相等，有初始化数据时，Width与Height比值应该是1:6或6:1", __FUNCTION__);
+        return FALSE;
+      }
 
       *ppTexture = NULL;
-      TextureCubeImpl* pTexture = new TextureCubeImpl(this, Format, Size, MipLevels, eResUsage);
+      TextureCubeImpl* pTexture = new TextureCubeImpl(this, Format, clMin(Width, Height), MipLevels, eResUsage);
 
       if(InlIsFailedToNewObject(pTexture)) {
         return GX_FAIL;
       }
 
-      if(_CL_NOT_(pTexture->InitTexture(FALSE, pInitData, nPitch)))
+      if(_CL_NOT_(pTexture->InitTexture(FALSE, Width, Height, pInitData, nPitch)))
       {
         pTexture->Release();
         pTexture = NULL;
@@ -1122,53 +1131,55 @@ namespace GrapX
         }
       }
 
-      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
-      FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
-      if(fi_fmt == FIF_UNKNOWN) {
-        return FALSE;
-      }
+//      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
+//      FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
+//      if(fi_fmt == FIF_UNKNOWN) {
+//        return FALSE;
+//      }
+//
+//      FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
+//
+//      // FIXME:
+//      // 没有处理64位图像的地方
+//      // 没有检查图片格式
+//      GXFormat format;
+//
+//      //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
+//      //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
+//      const GXUINT bpp = FreeImage_GetBPP(fibmp);
+//      if(bpp == 24)
+//      {
+//        format = Format_B8G8R8;
+//      }
+//      else if(bpp == 32)
+//      {
+//#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
+//        format = GXFMT_A8B8G8R8;
+//#else
+//        format = GXFMT_A8R8G8B8;
+//#endif
+//      }
+//      else if(bpp == 96)
+//      {
+//        format = Format_R32G32B32_Float;
+//      }
+//      else if(bpp == 128)
+//      {
+//        format = Format_R32G32B32A32_Float;
+//      }
+//      else {
+//        CLBREAK;
+//      }
+//#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
+//      FreeImage_FlipVertical(fibmp);
+//#endif
+      clstd::Image image;
+      GXFormat format = Texture::DecodeToMemory(&image, pBuffer->GetPtr(), (GXUINT)pBuffer->GetSize(), TRUE);
 
-      FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
-
-      // FIXME:
-      // 没有处理64位图像的地方
-      // 没有检查图片格式
-      GXFormat format;
-
-      //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
-      //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
-      const GXUINT bpp = FreeImage_GetBPP(fibmp);
-      if(bpp == 24)
+      if(format != GXFormat::Format_Unknown && (image.GetWidth() == image.GetHeight() * 6 || image.GetWidth() * 6 == image.GetHeight()))
       {
-        format = Format_B8G8R8;
-      }
-      else if(bpp == 32)
-      {
-#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
-        format = GXFMT_A8B8G8R8;
-#else
-        format = GXFMT_A8R8G8B8;
-#endif
-      }
-      else if(bpp == 96)
-      {
-        format = Format_R32G32B32_Float;
-      }
-      else if(bpp == 128)
-      {
-        format = Format_R32G32B32A32_Float;
-      }
-      else {
-        CLBREAK;
-      }
-#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
-      FreeImage_FlipVertical(fibmp);
-#endif
-
-      if(FreeImage_GetWidth(fibmp) == FreeImage_GetHeight(fibmp) * 6)
-      {
-        bval = CreateTextureCube(ppTexture, NULL, FreeImage_GetHeight(fibmp),
-          format, eUsage, MipLevels, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+        bval = CreateTextureCube(ppTexture, NULL, image.GetWidth(), image.GetHeight(),
+          format, eUsage, MipLevels, image.GetLine(0), image.GetPitch());
 
         // 有名字的要注册一下
         if(bval && szName)
@@ -1178,8 +1189,8 @@ namespace GrapX
         }
       }
 
-      FreeImage_Unload(fibmp);
-      FreeImage_CloseMemory(fi_mem);
+      //FreeImage_Unload(fibmp);
+      //FreeImage_CloseMemory(fi_mem);
       return bval;
     }
 

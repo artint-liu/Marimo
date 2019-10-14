@@ -195,11 +195,12 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL CreateTextureCube(
       TextureCube** ppTexture,
       GXLPCSTR      szName,
-      GXUINT        Size,
+      GXUINT        Width,            // width:height比值，无初始化数据时是1:1, 有初始化数据时是1:6, 6:1
+      GXUINT        Height,
       GXFormat      Format,
       GXResUsage    ResUsage,
       GXUINT        MipLevels = 0,
-      GXLPCVOID     pInitData = NULL, // +x,-x,+y,-y,+z,-z 六个面横向列表
+      GXLPCVOID     pInitData = NULL, // +x,-x,+y,-y,+z,-z 六个面列表, width : height 应该是6:1或者1:6
       GXUINT        nPitch = 0));
 
     GXSTDINTERFACE(GXBOOL CreateTextureCubeFromMemory(TextureCube** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage));

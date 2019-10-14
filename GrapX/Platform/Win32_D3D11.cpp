@@ -275,69 +275,61 @@ namespace GrapXToDX11
 //GXFMT_CxV8U8               
 //GXFMT_A1                   
 //GXFMT_A2B10G10R10_XR_BIAS  
-//GXFMT_BINARYBUFFER         
+//GXFMT_BINARYBUFFER        
+
+#define FORMAT_PARIS \
+  DEF_FORMAT_PAIR(Format_R8G8B8A8, DXGI_FORMAT_R8G8B8A8_UNORM);                        \
+  DEF_FORMAT_PAIR(Format_R8G8, DXGI_FORMAT_R8G8_UNORM);                                \
+  DEF_FORMAT_PAIR(Format_B8G8R8A8, DXGI_FORMAT_B8G8R8A8_UNORM);                        \
+  DEF_FORMAT_PAIR(Format_B8G8R8X8, DXGI_FORMAT_B8G8R8X8_UNORM);                        \
+  DEF_FORMAT_PAIR(Format_D32, DXGI_FORMAT_D32_FLOAT);                                  \
+  DEF_FORMAT_PAIR(Format_D16, DXGI_FORMAT_D16_UNORM);                                  \
+  DEF_FORMAT_PAIR(Format_D24S8, DXGI_FORMAT_D24_UNORM_S8_UINT);                        \
+  /*DEF_FORMAT_PAIR(Format_B8G8R8, DXGI_FORMAT_B8G8R8X8_TYPELESS);*/                   \
+  DEF_FORMAT_PAIR(Format_R16G16, DXGI_FORMAT_R16G16_FLOAT);                            \
+  DEF_FORMAT_PAIR(Format_R8, DXGI_FORMAT_R8_UNORM);                                    \
+  DEF_FORMAT_PAIR(Format_BC1, DXGI_FORMAT_BC1_UNORM);                                  \
+  DEF_FORMAT_PAIR(Format_BC2, DXGI_FORMAT_BC2_UNORM);                                  \
+  DEF_FORMAT_PAIR(Format_BC3, DXGI_FORMAT_BC3_UNORM);                                  \
+  DEF_FORMAT_PAIR(Format_R16, DXGI_FORMAT_R16_FLOAT);                                  \
+  DEF_FORMAT_PAIR(Format_R32, DXGI_FORMAT_R32_FLOAT);                                  \
+  DEF_FORMAT_PAIR(Format_A8, DXGI_FORMAT_A8_UNORM);                                    \
+  DEF_FORMAT_PAIR(Format_R32G32B32A32_Float, DXGI_FORMAT_R32G32B32A32_FLOAT);          \
+  DEF_FORMAT_PAIR(Format_R32G32B32_Float, DXGI_FORMAT_R32G32B32_FLOAT);                \
+
+
+#define DEF_FORMAT_PAIR(_FMTA, _FMTB) case _FMTA: return _FMTB
 
   DXGI_FORMAT FormatFrom(GXFormat eFormat)
   {
-    switch(eFormat)
+    switch (eFormat)
     {
-    case GXFMT_UNKNOWN: return DXGI_FORMAT_UNKNOWN;
-    case GXFMT_A8R8G8B8:  return DXGI_FORMAT_B8G8R8A8_UNORM;
-    case GXFMT_A8B8G8R8:  return DXGI_FORMAT_R8G8B8A8_UNORM;
-    case GXFMT_A8:  return DXGI_FORMAT_A8_UNORM;
-
-    case Format_R8G8B8A8:
-      return DXGI_FORMAT_R8G8B8A8_UNORM;
-    case Format_R8G8:
-      return DXGI_FORMAT_R8G8_UNORM;
-
-    //case Format_R8G8B8X8:
-    //  return DXGI_FORMAT_R8G8B8X8_UNORM;
-
-    case Format_B8G8R8A8:
-      return DXGI_FORMAT_B8G8R8A8_UNORM;
-    case Format_B8G8R8X8:
-      return DXGI_FORMAT_B8G8R8X8_UNORM;
-
-    case Format_D32:
-      return DXGI_FORMAT_D32_FLOAT;
-    case Format_D16:
-      return DXGI_FORMAT_D16_UNORM;
-    case Format_D24S8:
-    case Format_D24X8:
-      return DXGI_FORMAT_D24_UNORM_S8_UINT;
-      
-    case Format_B8G8R8:
-      return DXGI_FORMAT_B8G8R8A8_UNORM;
-
-    case Format_R16G16:
-      return DXGI_FORMAT_R16G16_FLOAT;
-    case Format_R8:
-      return DXGI_FORMAT_R8_UNORM;
-
-    case Format_BC1:
-      return DXGI_FORMAT_BC1_UNORM;
-    case Format_BC2:
-      return DXGI_FORMAT_BC2_UNORM;
-    case Format_BC3:
-      return DXGI_FORMAT_BC3_UNORM;
-
-    case Format_R16:
-      return DXGI_FORMAT_R16_FLOAT;
-    case Format_R32:
-      return DXGI_FORMAT_R32_FLOAT;
-    case Format_A8:
-      return DXGI_FORMAT_A8_UNORM;
-    case Format_R32G32B32A32_Float:
-      return DXGI_FORMAT_R32G32B32A32_FLOAT;
-    case Format_R32G32B32_Float:
-      return DXGI_FORMAT_R32G32B32_FLOAT;
-
+      DEF_FORMAT_PAIR(GXFMT_UNKNOWN, DXGI_FORMAT_UNKNOWN);
+      DEF_FORMAT_PAIR(GXFMT_A8R8G8B8, DXGI_FORMAT_B8G8R8A8_UNORM);
+      DEF_FORMAT_PAIR(GXFMT_A8B8G8R8, DXGI_FORMAT_R8G8B8A8_UNORM);
+      DEF_FORMAT_PAIR(GXFMT_A8, DXGI_FORMAT_A8_UNORM);
+      DEF_FORMAT_PAIR(Format_D24X8, DXGI_FORMAT_D24_UNORM_S8_UINT);
+      FORMAT_PARIS
     default:
       ASSERT(0);
     }
     return DXGI_FORMAT_UNKNOWN;
   }
+
+#undef DEF_FORMAT_PAIR
+#define DEF_FORMAT_PAIR(_FMTA, _FMTB) case _FMTB: return _FMTA
+
+  GXFormat FormatFrom(DXGI_FORMAT eFormat)
+  {
+    switch (eFormat)
+    {
+      FORMAT_PARIS
+    default:
+      ASSERT(0);
+    }
+    return GXFormat::Format_Unknown;
+  }
+
 
 #if 0
   void PrimitiveDescFromResUsage(IN GXDWORD ResUsage, D3D11_BUFFER_DESC* pDesc)
@@ -523,99 +515,6 @@ namespace GrapXToDX11
     }
     ASSERT(0);
     return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
-  }
-
-  GXLPCSTR FormatToString(GXFormat eFormat)
-  {
-#define CASE_TO_STRING(x) case x: return #x
-    switch(eFormat)
-    {
-        CASE_TO_STRING(Format_Unknown);
-        CASE_TO_STRING(Format_B8G8R8A8);
-        CASE_TO_STRING(Format_B8G8R8X8);
-        CASE_TO_STRING(Format_B8G8R8);
-        CASE_TO_STRING(Format_R8G8B8A8);
-        CASE_TO_STRING(Format_R8G8);
-        CASE_TO_STRING(Format_R16G16);
-        CASE_TO_STRING(Format_R8);
-        CASE_TO_STRING(Format_R16);
-        CASE_TO_STRING(Format_R32);
-        CASE_TO_STRING(Format_A8);
-        CASE_TO_STRING(Format_R32G32B32A32_Float);
-        CASE_TO_STRING(Format_R32G32B32_Float);
-        CASE_TO_STRING(Format_D32);
-        CASE_TO_STRING(Format_D16);
-        CASE_TO_STRING(Format_D24S8);
-        CASE_TO_STRING(Format_D24X8);
-        CASE_TO_STRING(Format_Index16);
-        CASE_TO_STRING(Format_Index32);
-        CASE_TO_STRING(Format_BC1);
-        CASE_TO_STRING(Format_BC2);
-        CASE_TO_STRING(Format_BC3);
-        CASE_TO_STRING(GXFMT_R8G8B8);
-        CASE_TO_STRING(GXFMT_A8R8G8B8);
-        CASE_TO_STRING(GXFMT_X8R8G8B8);
-        CASE_TO_STRING(GXFMT_R5G6B5);
-        CASE_TO_STRING(GXFMT_X1R5G5B5);
-        CASE_TO_STRING(GXFMT_A1R5G5B5);
-        CASE_TO_STRING(GXFMT_A4R4G4B4);
-        CASE_TO_STRING(GXFMT_R3G3B2);
-        CASE_TO_STRING(GXFMT_A8);
-        CASE_TO_STRING(GXFMT_A8R3G3B2);
-        CASE_TO_STRING(GXFMT_X4R4G4B4);
-        CASE_TO_STRING(GXFMT_A2B10G10R10);
-        CASE_TO_STRING(GXFMT_A8B8G8R8);
-        CASE_TO_STRING(GXFMT_X8B8G8R8);
-        CASE_TO_STRING(GXFMT_G16R16);
-        CASE_TO_STRING(GXFMT_A2R10G10B10);
-        CASE_TO_STRING(GXFMT_A16B16G16R16);
-
-        CASE_TO_STRING(GXFMT_A8P8);
-        CASE_TO_STRING(GXFMT_P8);
-        CASE_TO_STRING(GXFMT_L8);
-        CASE_TO_STRING(GXFMT_A8L8);
-        CASE_TO_STRING(GXFMT_A4L4);
-
-        CASE_TO_STRING(GXFMT_V8U8);
-        CASE_TO_STRING(GXFMT_L6V5U5);
-        CASE_TO_STRING(GXFMT_X8L8V8U8);
-        CASE_TO_STRING(GXFMT_Q8W8V8U8);
-        CASE_TO_STRING(GXFMT_V16U16);
-        CASE_TO_STRING(GXFMT_A2W10V10U10);
-        CASE_TO_STRING(GXFMT_DXT1);
-        CASE_TO_STRING(GXFMT_DXT2);
-        CASE_TO_STRING(GXFMT_DXT3);
-        CASE_TO_STRING(GXFMT_DXT4);
-        CASE_TO_STRING(GXFMT_DXT5);
-        CASE_TO_STRING(GXFMT_D16_LOCKABLE);
-        CASE_TO_STRING(GXFMT_D32);
-        CASE_TO_STRING(GXFMT_D15S1);
-        CASE_TO_STRING(GXFMT_D24S8);
-        CASE_TO_STRING(GXFMT_D24X8);
-        CASE_TO_STRING(GXFMT_D24X4S4);
-        CASE_TO_STRING(GXFMT_D16);
-        CASE_TO_STRING(GXFMT_D32F_LOCKABLE);
-        CASE_TO_STRING(GXFMT_D24FS8);
-        CASE_TO_STRING(GXFMT_D32_LOCKABLE);
-        CASE_TO_STRING(GXFMT_S8_LOCKABLE);
-        CASE_TO_STRING(GXFMT_L16);
-        CASE_TO_STRING(GXFMT_VERTEXDATA);
-        CASE_TO_STRING(GXFMT_INDEX16);
-        CASE_TO_STRING(GXFMT_INDEX32);
-        CASE_TO_STRING(GXFMT_R16F);
-        CASE_TO_STRING(GXFMT_G16R16F);
-        CASE_TO_STRING(GXFMT_A16B16G16R16F);
-        CASE_TO_STRING(GXFMT_R32F);
-        CASE_TO_STRING(GXFMT_G32R32F);
-        CASE_TO_STRING(GXFMT_A32B32G32R32F);
-        CASE_TO_STRING(GXFMT_CxV8U8);
-        CASE_TO_STRING(GXFMT_A1);
-
-    default:
-      break;
-    }
-    return "<error format>";
-#undef CASE_TO_STRING
   }
 
   void VertexLayoutFromVertexDecl(LPCGXVERTEXELEMENT pVerticesDecl, GXD3D11InputElementDescArray* pArray)

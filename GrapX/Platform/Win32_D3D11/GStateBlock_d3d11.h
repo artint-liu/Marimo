@@ -61,7 +61,7 @@ namespace GrapX
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
       virtual GXHRESULT Invoke        (GRESCRIPTDESC* pDesc) { return GX_OK; }
-
+      static D3D11_BLEND ColorBlendToAlphaBlend(GXBlend blend); // 从颜色合成枚举中获得alpha应该使用的合成枚举
     public:
       BlendStateImpl(GraphicsImpl* pGraphicsImpl);
       GXBOOL  Initialize  (GXBLENDDESC* pDesc, GXUINT nNum);

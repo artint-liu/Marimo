@@ -105,7 +105,7 @@ namespace clstd
 
     // ForEachPixel 目的是为了开发时快速验证算法，不保证效率，在实际产品中不建议使用这个方法
     template<class _TPixel, class _TFunc>
-    b32 ForEachPixel(_TFunc fn)
+    b32 ForEachPixel(_TFunc fn) // fn(_TPixel& p)
     {
       // 如果提供的像素格式与实际长度不符，返回FALSE
       if (sizeof(_TPixel) != (m_channel * m_depth / 8)) {
@@ -123,7 +123,7 @@ namespace clstd
     }
 
     template<class _TPixel, class _TFunc>
-    b32 ForEachPixelXY(_TFunc fn) // fu(int x, int y, _TPixel& p)
+    b32 ForEachPixelXY(_TFunc fn) // fn(int x, int y, _TPixel& p)
     {
       // 如果提供的像素格式与实际长度不符，返回FALSE
       if (sizeof(_TPixel) != (m_channel * m_depth / 8)) {

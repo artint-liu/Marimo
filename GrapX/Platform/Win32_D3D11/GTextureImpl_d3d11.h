@@ -145,11 +145,11 @@ namespace GrapX
       TextureCubeImpl(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nSize, GXUINT nMipLevels, GXResUsage eResUsage);
       virtual ~TextureCubeImpl();
 
-      GXBOOL InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
+      GXBOOL InitTexture(GXBOOL bRenderTarget, GXUINT nWidth, GXUINT nHeight, GXLPCVOID pInitData, GXUINT nPitch);
       //void   CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
       //GXBOOL           IntGetHelpTexture();
       //ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);
-      GXUINT GetMinPitchSize6() const;
+      GXUINT GetMinPitchSize(GXUINT nWidth) const;
 
       //GXBOOL IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip);
 

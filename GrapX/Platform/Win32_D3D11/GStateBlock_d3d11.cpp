@@ -192,6 +192,22 @@ namespace GrapX
       return nRefCount;
     }
 
+    D3D11_BLEND BlendStateImpl::ColorBlendToAlphaBlend(GXBlend blend)
+    {
+      switch (blend)
+      {
+      case GXBLEND_SRCCOLOR:          return D3D11_BLEND_SRC_ALPHA;
+      case GXBLEND_INVSRCCOLOR:           return D3D11_BLEND_INV_SRC_ALPHA;
+      case GXBLEND_DESTCOLOR: return D3D11_BLEND_DEST_ALPHA;
+      case GXBLEND_INVDESTCOLOR: return D3D11_BLEND_INV_DEST_ALPHA;
+      case GXBLEND_SRCCOLOR2: return D3D11_BLEND_SRC1_ALPHA;
+      case GXBLEND_INVSRCCOLOR2: return D3D11_BLEND_INV_SRC1_ALPHA;
+      default:
+        return (D3D11_BLEND)blend;
+      }
+      return (D3D11_BLEND)blend;
+    }
+
     BlendStateImpl::BlendStateImpl(GraphicsImpl* pGraphicsImpl)
       : BlendState     ()
       , m_pGraphicsImpl (pGraphicsImpl)
@@ -217,12 +233,21 @@ namespace GrapX
         D3D11_RENDER_TARGET_BLEND_DESC& RenderTarget = m_BlendDesc.RenderTarget[i];
 
         RenderTarget.BlendEnable            = Desc.BlendEnable;
-        RenderTarget.BlendOp                = (D3D11_BLEND_OP)Desc.BlendOp;
-        RenderTarget.BlendOpAlpha           = (D3D11_BLEND_OP)Desc.BlendOpAlpha;
-        RenderTarget.DestBlend              = (D3D11_BLEND)Desc.DestBlend;
-        RenderTarget.DestBlendAlpha         = (D3D11_BLEND)Desc.DestBlendAlpha;
         RenderTarget.SrcBlend               = (D3D11_BLEND)Desc.SrcBlend;
-        RenderTarget.SrcBlendAlpha          = (D3D11_BLEND)Desc.SrcBlendAlpha;
+        RenderTarget.DestBlend              = (D3D11_BLEND)Desc.DestBlend;
+        RenderTarget.BlendOp                = (D3D11_BLEND_OP)Desc.BlendOp;
+        if(Desc.SeparateAlphaBlend)
+        {
+          RenderTarget.SrcBlendAlpha  = (D3D11_BLEND)Desc.SrcBlendAlpha;
+          RenderTarget.DestBlendAlpha = (D3D11_BLEND)Desc.DestBlendAlpha;
+          RenderTarget.BlendOpAlpha   = (D3D11_BLEND_OP)Desc.BlendOpAlpha;
+        }
+        else
+        {
+          RenderTarget.SrcBlendAlpha  = ColorBlendToAlphaBlend(Desc.SrcBlend);
+          RenderTarget.DestBlendAlpha = ColorBlendToAlphaBlend(Desc.DestBlend);
+          RenderTarget.BlendOpAlpha   = (D3D11_BLEND_OP)Desc.BlendOp;
+        }
         RenderTarget.RenderTargetWriteMask  = (D3D11_BLEND)Desc.WriteMask;
       }
 

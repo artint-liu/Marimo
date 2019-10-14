@@ -157,6 +157,7 @@ namespace GrapX
       {
         TexDesc.ArraySize = 6;
         TexDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+        TexDesc.Width = TexDesc.Height = clMin(nWidth, nHeight);
       }
       else
       {
@@ -194,20 +195,25 @@ namespace GrapX
       {
         if(m_dwResType == RESTYPE_TEXTURE_CUBE)
         {
-          D3D11_SUBRESOURCE_DATA aTexInitData[6] = {0};
-          GXUINT nFacePitch = GetBytesOfGraphicsFormat(m_Format) * nHeight;
+          D3D11_SUBRESOURCE_DATA aTexInitData[6] = { {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0} };
+          GXUINT nFacePitch = 0;
+          if (nWidth == nHeight * 6)
+          {
+            nFacePitch = GetBytesOfGraphicsFormat(m_Format) * nHeight;
+          }
+          else if (nWidth * 6 == nHeight)
+          {
+            nFacePitch = nPitch * nWidth; // nWidth 是 face size
+          }
+          else {
+            CLBREAK;
+          }
           aTexInitData[0].pSysMem = pInitData;
-          aTexInitData[0].SysMemPitch = nPitch;
           aTexInitData[1].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch);
-          aTexInitData[1].SysMemPitch = nPitch;
           aTexInitData[2].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 2);
-          aTexInitData[2].SysMemPitch = nPitch;
           aTexInitData[3].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 3);
-          aTexInitData[3].SysMemPitch = nPitch;
           aTexInitData[4].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 4);
-          aTexInitData[4].SysMemPitch = nPitch;
           aTexInitData[5].pSysMem = (LPCVOID)((INT_PTR)pInitData + nFacePitch * 5);
-          aTexInitData[5].SysMemPitch = nPitch;
 
           hval = pd3dDevice->CreateTexture2D(&TexDesc, aTexInitData, &m_pD3D11Texture);
         }
@@ -757,38 +763,39 @@ namespace GrapX
       SAFE_DELETE_ARRAY(m_pTextureData);
     }
 
-    GXBOOL TextureCubeImpl::InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
+    GXBOOL TextureCubeImpl::InitTexture(GXBOOL bRenderTarget, GXUINT nWidth, GXUINT nHeight, GXLPCVOID pInitData, GXUINT nPitch)
     {
-      const GXUINT nMinPitch = GetMinPitchSize6();
+      const GXUINT nMinPitch = GetMinPitchSize(nWidth);
       nPitch = clMax(nPitch, nMinPitch);
 
       if(m_eResUsage != GXResUsage::SystemMem)
       {
-        if(_CL_NOT_(IntD3D11CreateResource(bRenderTarget, m_nSize, m_nSize, pInitData, nPitch))) {
+        if(_CL_NOT_(IntD3D11CreateResource(bRenderTarget, nWidth, nHeight, pInitData, nPitch))) {
           return FALSE;
         }
       }
 
       if(m_eResUsage == GXResUsage::Read || m_eResUsage == GXResUsage::ReadWrite || m_eResUsage == GXResUsage::SystemMem)
       {
-        const GXUINT nSize = nMinPitch * m_nSize;
-        m_pTextureData = new GXBYTE[nSize];
-        GXLPBYTE pDest = m_pTextureData;
+        CLBREAK; // 没实现
+        //const GXUINT nSize = nMinPitch * m_nSize;
+        //m_pTextureData = new GXBYTE[nSize];
+        //GXLPBYTE pDest = m_pTextureData;
 
-        if(pInitData)
-        {
-          for(GXUINT y = 0; y < m_nSize; y++, pDest += nMinPitch) {
-            memcpy(pDest, reinterpret_cast<GXLPVOID>((size_t)pInitData + nPitch * y), nMinPitch);
-          }
-        }
+        //if(pInitData)
+        //{
+        //  for(GXUINT y = 0; y < m_nSize; y++, pDest += nMinPitch) {
+        //    memcpy(pDest, reinterpret_cast<GXLPVOID>((size_t)pInitData + nPitch * y), nMinPitch);
+        //  }
+        //}
       }
 
       return TRUE;
     }
 
-    GXUINT TextureCubeImpl::GetMinPitchSize6() const
+    GXUINT TextureCubeImpl::GetMinPitchSize(GXUINT nWidth) const
     {
-      return GetBytesOfGraphicsFormat(m_Format) * m_nSize * 6;
+      return GetBytesOfGraphicsFormat(m_Format) * nWidth;
     }
 
     //GXBOOL TextureCubeImpl::IntSaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip)

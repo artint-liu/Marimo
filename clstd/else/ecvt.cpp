@@ -60,7 +60,7 @@ namespace clstd
      */
     if(fi != 0) {
       p1 = &buf[_NDIG];
-      while(fi != 0) {
+      while(p1 >= buf && fi != 0) {
         fj = modf(fi / 10.0, &fi);
         *--p1 = (int)((fj + .03) * 10) + '0';
         r2++;

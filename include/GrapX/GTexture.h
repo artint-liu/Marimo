@@ -3,6 +3,12 @@
 
 #define ENABLE_DirectXTex
 //class GXGraphics;
+
+namespace clstd
+{
+  class Image;
+} // namespace clstd
+
 namespace GrapX
 {
   class TextureBase : public GResource
@@ -65,6 +71,7 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL       SaveToFile       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat, GXBOOL bVertFlip));
 
     static GXBOOL GXDLLAPI EncodeToMemory (clstd::MemBuffer* pBuffer, GXLPCVOID pBitsData, GXFormat format, GXUINT width, GXUINT height, GXUINT cbPitch, GXLPCSTR szImageFormat, GXBOOL bVertFlip);
+    static GXFormat GXDLLAPI Texture::DecodeToMemory(clstd::Image* pImage, GXLPCVOID pBitsData, GXUINT cbData, GXBOOL bVertFlip);
   };
 
   class Texture3D : public TextureBase

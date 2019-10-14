@@ -4091,7 +4091,7 @@ enum GXGraphicsFormat
   Format_Unknown              = 0,
   Format_B8G8R8A8             = 200,
   Format_B8G8R8X8             = 201,
-  Format_B8G8R8               = 202,
+  //Format_B8G8R8               = 202,
   Format_R8G8B8A8             = 203,
   //Format_R8G8B8X8             = 204,
   Format_R8G8                 = 205,
@@ -5247,6 +5247,8 @@ inline GXHRESULT InlGetSafeObjectT(_TInterface** ppInterface, _TInterface* pHold
 // TODO: 是不是以后要加上"Gph"前缀呢?
 GXDLL GXINT         GetAdaptedSize        (GXINT nSize);
 GXDLL GXUINT        GetBytesOfGraphicsFormat  (GXFormat eFmt);
+GXDLL GXLPCSTR      FormatToString              (GXFormat eFormat);
+GXDLL GXLPCSTR      GetFormatChannelOrder       (GXFormat eFormat);
 GXDLL GXFormatCategory  GetGraphicsFormatCategory  (GXFormat eFmt);
 GXDLL GXBOOL        IsPow2            (GXINT nNum);
 GXDLL GXUINT        SizeRatioToDimension    (GXINT nTexRatio, GXUINT nModel, GXDWORD dwFlags);
