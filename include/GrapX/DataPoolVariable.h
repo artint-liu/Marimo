@@ -55,10 +55,27 @@ namespace Marimo
       return MemberOf(szMemberName);
     }
 
+    //转换Variable类型，而不是储存的数据类型
     template<class _Ty>
-    inline _Ty& CastTo() // Reinterpret cast, 转换Variable类型，而不是储存的数据类型
+    inline _Ty& CastToVariable() // Reinterpret cast
     {
+#ifdef _DEBUG
+      // 在编译期保证_Ty是DataPoolVariable
+      *((_Ty*)this)->m_vtbl;
+      *((_Ty*)this)->m_pDataPool;
+      *((_Ty*)this)->m_pBuffer;
+#endif
       return *(_Ty*)this;
+    }
+
+    // 之前修改说“CastTo()方法转换类型后提前意外析构”
+    // 但是没有重现出来，先这样改看看
+    // 后来想起来可能是CastTo<MOVarFloat4>()这种用法会出错（未验证），
+    // 所以要避免向Variable类型转换，这种情况要使用CastToVariable()
+    template<class _Ty>
+    inline _Ty& CastTo() // Reinterpret cast, 没有数据通知
+    {
+      return *(_Ty*)GetPtr();
     }
 
   public:

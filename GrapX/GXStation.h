@@ -50,7 +50,7 @@ struct GXSTATION
   GXDWORD             dwMagic;
   GXDWORD             m_dwFlags; // GXSTATIONSTATEFLAG_
   IGXPlatform*        lpPlatform;
-  GXUpdateRate        m_eUpdateRate;
+  GXUpdateRate        m_eUpdateRate = UpdateRate_RealTime;
   GXDWORD             dwUIThreadId;     // GXUI不支持多线程Wnd, 这里记录了UI线程ID, 用于校验
   GXMONITORINFO       MonitorInfo;
 #ifdef _WIN32

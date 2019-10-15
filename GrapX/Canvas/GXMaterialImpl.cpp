@@ -570,7 +570,7 @@ namespace GrapX
           Marimo::DataPoolVariable var = GetUniform(strName.CStr());
           if (var.IsValid() && clstd::strcmpT(var.GetTypeName(), "float4") == 0)
           {
-            m_aTextures[desc->slot].TexelSize = var.CastTo<MOVarFloat4>();
+            m_aTextures[desc->slot].TexelSize = var.CastTo<float4>();
           }
         }
       }
@@ -606,8 +606,7 @@ namespace GrapX
     Marimo::DataPoolVariable var = GetUniform(szName);
     if (var.IsValid())
     {
-      MOVarFloat4 var4 = var.CastTo<MOVarFloat4>();
-      var4 = *pVector;
+      var.CastTo<float4>() = *pVector;
       return TRUE;
     }
     return FALSE;
@@ -618,8 +617,7 @@ namespace GrapX
     Marimo::DataPoolVariable var = GetUniform(szName);
     if (var.IsValid())
     {
-      MOVarFloat4 var4 = var.CastTo<MOVarFloat4>();
-      *pOut = (float4&)var;
+      var.CastTo<float4>() = (float4&)var;
       return TRUE;
     }
     return FALSE;

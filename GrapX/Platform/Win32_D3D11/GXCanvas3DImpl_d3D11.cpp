@@ -381,10 +381,11 @@ namespace GrapX
       for (int nArrayIndex = 0; nArrayIndex < nArrayCount; nArrayIndex++)
       {
         const RenderDescArray& aDesc = pSequence->GetArray(nArrayIndex);
-        for (RenderDescArray::const_iterator it = aDesc.begin();
-          it != aDesc.end(); ++it)
+        //for (RenderDescArray::const_iterator it = aDesc.begin();
+        //  it != aDesc.end(); ++it)
+        for(const GVRENDERDESC& Desc : aDesc)
         {
-          const GVRENDERDESC& Desc = *it;
+          //const GVRENDERDESC& Desc = *it;
 
           if (TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
             SetWorldMatrix(Desc.matWorld);

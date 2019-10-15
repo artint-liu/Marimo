@@ -17,7 +17,7 @@ namespace GrapX
     struct TEXTUREUNIT
     {
       ObjectT<Texture> texture;
-      MOVarFloat4 TexelSize;
+      MOVariable TexelSize;
       //ObjectT<SamplerState> sampler;
       //GXBOOL bTexelSize;
     };

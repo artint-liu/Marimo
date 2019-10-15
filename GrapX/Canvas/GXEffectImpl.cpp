@@ -155,7 +155,7 @@ namespace GrapX
           Marimo::DataPoolVariable var = GetUniform(strName.CStr());
           if(var.IsValid() && clstd::strcmpT(var.GetTypeName(), "float4") == 0)
           {
-            m_aTextures[desc->slot].TexelSize = var.CastTo<MOVarFloat4>();
+            m_aTextures[desc->slot].TexelSize = var;
           }
         }
       }
@@ -192,7 +192,7 @@ namespace GrapX
     if(tu.TexelSize.IsValid())
     {
       pTexture->GetDimension(&size);
-      tu.TexelSize->set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
+      tu.TexelSize.CastTo<float4>().set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
     }
 
     return TRUE;

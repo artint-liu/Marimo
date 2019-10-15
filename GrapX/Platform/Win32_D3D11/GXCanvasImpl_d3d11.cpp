@@ -1665,9 +1665,9 @@ namespace GrapX
       if(pEffectImpl)
       {
         pEffectImpl->AddRef();
-        transform = pEffectImpl->GetUniform("matWVProj").CastTo<MOVarMatrix4>();
-        color_mul = pEffectImpl->GetUniform("Color").CastTo<MOVarFloat4>();
-        color_add = pEffectImpl->GetUniform("ColorAdd").CastTo<MOVarFloat4>();
+        transform = pEffectImpl->GetUniform("matWVProj").CastToVariable<MOVarMatrix4>();
+        color_mul = pEffectImpl->GetUniform("Color").CastToVariable<MOVarFloat4>();
+        color_add = pEffectImpl->GetUniform("ColorAdd").CastToVariable<MOVarFloat4>();
       }
     }
 

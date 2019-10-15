@@ -369,7 +369,7 @@ GXBOOL DesktopWindowsMgr::Render(GrapX::Canvas* pCanvas)
 
     float2 vTexelKernel((float)(c_flScaleWidth / g_SystemMetrics[GXSM_CXSCREEN]),
       (float)(c_flScaleHeight / g_SystemMetrics[GXSM_CYSCREEN]));
-    MOVarFloat2 var = m_lpStation->m_pStockObject->pAeroEffect->GetUniform("TexelKernel").CastTo<MOVarFloat2>();
+    MOVarFloat2 var = m_lpStation->m_pStockObject->pAeroEffect->GetUniform("TexelKernel").CastTo<float2>();
     var = vTexelKernel;
     //pCanvas->SetEffectUniformByName2f("TexelKernel", &vTexelKernel);
 
