@@ -324,6 +324,14 @@ GXBOOL GVGeometry::CreatePrimitive(Graphics* pGraphics, GXPrimitiveType eType, i
   return bval;
 }
 
+GVRENDERDESC2* GVGeometry::GetRenderDesc(int nRenderCate)
+{
+  if (nRenderCate >= (int)m_MtlInsts.size()) {
+    return NULL;
+  }
+  return &m_Renderer;
+}
+
 void GVGeometry::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
   if(nRenderCate < (int)m_MtlInsts.size())

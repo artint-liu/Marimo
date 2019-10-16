@@ -38,6 +38,9 @@ protected:
   GXUINT            m_nPrimiCount;
   GXUINT            m_nVertCount;
   GXUINT            m_nStartIndex;
+
+  GVRENDERDESC2     m_Renderer;
+
 protected:
   void   Clear();
   GXBOOL InitializeAsObjFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform);
@@ -63,6 +66,7 @@ public:
 
   //virtual GXBOOL  Update          (const GVSCENEUPDATE& sContext);
   virtual void    GetRenderDesc   (int nRenderCate, GVRENDERDESC* pRenderDesc);
+  GVRENDERDESC2*  GetRenderDesc         (int nRenderCate) override;
   virtual GXVOID  CalculateAABB   ();
   virtual GXBOOL  RayTrace        (const Ray& ray, NODERAYTRACE* pRayTrace);
   //virtual float   RayTrace        (const Ray& ray, float3* pHit);

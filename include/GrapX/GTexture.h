@@ -7,6 +7,7 @@
 namespace clstd
 {
   class Image;
+  struct IMAGEDESC;
 } // namespace clstd
 
 namespace GrapX
@@ -34,6 +35,14 @@ namespace GrapX
     GXUINT      MipLevels;
     GXFormat    Format;
     GXResUsage  Usage;
+  };
+
+  struct DECODE_TEXTURE_DESC
+  {
+    // 指针需要初始化
+    clstd::IMAGEDESC* pImageDesc;
+    clstd::MemBuffer* pBuffer;
+    GXUINT nMipLevels;
   };
 
   // Texture 2D
@@ -71,7 +80,7 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL       SaveToFile       (GXLPCWSTR szFileName, GXLPCSTR szDestFormat, GXBOOL bVertFlip));
 
     static GXBOOL GXDLLAPI EncodeToMemory (clstd::MemBuffer* pBuffer, GXLPCVOID pBitsData, GXFormat format, GXUINT width, GXUINT height, GXUINT cbPitch, GXLPCSTR szImageFormat, GXBOOL bVertFlip);
-    static GXFormat GXDLLAPI Texture::DecodeToMemory(clstd::Image* pImage, GXLPCVOID pBitsData, GXUINT cbData, GXBOOL bVertFlip);
+    static GXFormat GXDLLAPI Texture::DecodeToMemory(DECODE_TEXTURE_DESC* pDecodeDesc, GXLPCVOID pBitsData, GXUINT cbData, GXBOOL bVertFlip);
   };
 
   class Texture3D : public TextureBase

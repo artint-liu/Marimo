@@ -480,7 +480,10 @@ namespace GrapXToDX11
       CLBREAK;
       break;
     }
-    if(nMipLevels == 0) {
+    if(nMipLevels == 0 && 
+      _CL_NOT_(pDesc->Format >= DXGI_FORMAT_BC1_TYPELESS && pDesc->Format <= DXGI_FORMAT_BC5_SNORM) &&
+      _CL_NOT_(pDesc->Format >= DXGI_FORMAT_BC6H_TYPELESS && pDesc->Format <= DXGI_FORMAT_BC7_UNORM_SRGB))
+    {
       pDesc->MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
       pDesc->BindFlags |= (D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
     }

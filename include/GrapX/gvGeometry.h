@@ -44,6 +44,7 @@ public:
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   virtual void    GetRenderDesc   (int nRenderCate, GVRENDERDESC* pRenderDesc);
+  GVRENDERDESC2*  GetRenderDesc         (int nRenderCate) override;
   virtual GXBOOL  RayTrace       (const Ray& ray, NODERAYTRACE* pRayTrace);
 
   //GXHRESULT SetMaterialInst(GXMaterialInst* pMtlInst, GXDWORD dwFlags);

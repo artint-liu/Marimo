@@ -542,6 +542,14 @@ GXUINT GetBytesOfGraphicsFormat(GXFormat eFmt)
   //case GXFMT_BINARYBUFFER:
 }
 
+GXDLL GXUINT GetBitsOfGraphicsFormat(GXFormat eFmt)
+{
+  if (eFmt == Format_BC1) {
+    return 4;
+  }
+  return GetBytesOfGraphicsFormat(eFmt) * 8;
+}
+
 GXLPCSTR FormatToString(GXFormat eFormat)
 {
 #define CASE_TO_STRING(x) case x: return #x
@@ -645,6 +653,8 @@ GXDLL GXLPCSTR GetFormatChannelOrder(GXFormat eFormat)
   case Format_R8G8:     return "RG";
   case Format_R32G32B32A32_Float:    return "RGBA"; // 不确定
   case Format_R32:      return "R";
+  case Format_BC2:      return "X";
+  case Format_BC3:      return "X";
   default:
     CLBREAK;
   }

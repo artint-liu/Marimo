@@ -281,6 +281,11 @@ void GVNode::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
   memset(pRenderDesc, 0, sizeof(GVRENDERDESC));
 }
 
+GVRENDERDESC2* GVNode::GetRenderDesc(int nRenderCate)
+{
+  return NULL;
+}
+
 GXBOOL GVNode::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
 {
   return GX_OK;

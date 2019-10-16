@@ -182,6 +182,7 @@ protected:
   float             m_fResidue;   // 两帧之间的插值
 public:
   virtual void    GetRenderDesc   (int nRenderCate, GVRENDERDESC* pRenderDesc) override;
+  GVRENDERDESC2*  GetRenderDesc         (int nRenderCate) override;
 protected:
   GXBOOL          UpdateRenderData      ();
   void            BuildUpdateOrderTable ();

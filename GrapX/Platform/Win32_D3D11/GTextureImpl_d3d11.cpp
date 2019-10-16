@@ -239,12 +239,17 @@ namespace GrapX
         TexInitData.pSysMem = pInitData;
         TexInitData.SysMemPitch = nPitch;
         aInitData.push_back(TexInitData);
-        GXUINT nMipmapHeight = nHeight;
+        GXUINT nNumOfDataLines = nHeight;
+
+        if (m_Format == Format_BC2 || m_Format == Format_BC3)
+        {
+          nNumOfDataLines /= 4;
+        }
 
         for(GXUINT i = 1; i < m_nMipLevels; i++)
         {
-          TexInitData.pSysMem = reinterpret_cast<void*>(reinterpret_cast<size_t>(TexInitData.pSysMem) + TexInitData.SysMemPitch * nMipmapHeight);
-          nMipmapHeight = clMax((GXUINT)1, nMipmapHeight >> 1);
+          TexInitData.pSysMem = reinterpret_cast<void*>(reinterpret_cast<size_t>(TexInitData.pSysMem) + TexInitData.SysMemPitch * nNumOfDataLines);
+          nNumOfDataLines = clMax((GXUINT)1, nNumOfDataLines >> 1);
           TexInitData.SysMemPitch >>= 1;
           aInitData.push_back(TexInitData);
         }

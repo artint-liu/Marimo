@@ -310,6 +310,14 @@ GVSkeleton::~GVSkeleton()
   SAFE_RELEASE(m_pPrimitive);
 }
 
+GVRENDERDESC2* GVSkeleton::GetRenderDesc(int nRenderCate)
+{
+  if (nRenderCate >= (int)m_MtlInsts.size()) {
+    return NULL;
+  }
+  return &m_Renderer;
+}
+
 void GVSkeleton::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
   if(nRenderCate < (int)m_MtlInsts.size())

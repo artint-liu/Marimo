@@ -975,49 +975,21 @@ namespace GrapX
         }
       }
 
-//      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
-//      FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
-//      if(fi_fmt == FIF_UNKNOWN) {
-//        return GX_ERROR_HANDLE;
-//      }
-//
-//      FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
-//
-//      // FIXME:
-//      // 没有处理64位图像的地方
-//      // 没有检查图片格式
-//      GXFormat format;
-//
-//      //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
-//      //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
-//      const GXUINT bpp = FreeImage_GetBPP(fibmp);
-//      if(bpp == 24)
-//      {
-//        format = Format_B8G8R8;
-//      }
-//      else if(bpp == 32)
-//      {
-//#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
-//        format = GXFMT_A8B8G8R8;
-//#else
-//        format = GXFMT_A8R8G8B8;
-//#endif
-//      }
-//      else if (bpp == 128)
-//      {
-//        format = Format_R32G32B32A32_Float;
-//      }
-//      else {
-//        CLBREAK;
-//      }
-//#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
-//      FreeImage_FlipVertical(fibmp);
-//#endif
-      clstd::Image image;
-      GXFormat format = Texture::DecodeToMemory(&image, pBuffer->GetPtr(), (GXUINT)pBuffer->GetSize(), TRUE);
+      clstd::MemBuffer buffer;
+      clstd::IMAGEDESC sImgDesc;
+      DECODE_TEXTURE_DESC desc = {&sImgDesc, &buffer};
+      GXFormat format = Texture::DecodeToMemory(&desc, pBuffer->GetPtr(), (GXUINT)pBuffer->GetSize(), TRUE);
 
-      hr = CreateTexture(ppTexture, NULL, image.GetWidth(), image.GetHeight(),
-        format, eUsage, MipLevels, image.GetLine(0), image.GetPitch());
+      if (format == Format_BC2 || format == Format_BC3)
+      {
+        hr = CreateTexture(ppTexture, NULL, sImgDesc.width, sImgDesc.height,
+          format, eUsage, desc.nMipLevels, sImgDesc.ptr, sImgDesc.pitch);
+      }
+      else
+      {
+        hr = CreateTexture(ppTexture, NULL, sImgDesc.width, sImgDesc.height,
+          format, eUsage, MipLevels, sImgDesc.ptr, sImgDesc.pitch);
+      }
 
       // 有名字的要注册一下
       if(GXSUCCEEDED(hr) && szName)
@@ -1026,8 +998,6 @@ namespace GrapX
         m_ResMgr.Register(&rs, *ppTexture);
       }
 
-      //FreeImage_Unload(fibmp);
-      //FreeImage_CloseMemory(fi_mem);
       return hr;
     }
 
@@ -1082,14 +1052,13 @@ namespace GrapX
       GXFormat Format, GXResUsage eResUsage, GXUINT MipLevels, GXLPCVOID pInitData, GXUINT nPitch)
     {
       GRESKETCH rs = { RCC_TextureCube };
-      GXHRESULT hr = GX_FAIL;
 
       // 按命名查找资源
       if(szName) {
         rs.strResourceName = szName;
-        hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
+        GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
         if(GXSUCCEEDED(hr)) {
-          return hr;
+          return TRUE;
         }
       }
 
@@ -1103,19 +1072,19 @@ namespace GrapX
       TextureCubeImpl* pTexture = new TextureCubeImpl(this, Format, clMin(Width, Height), MipLevels, eResUsage);
 
       if(InlIsFailedToNewObject(pTexture)) {
-        return GX_FAIL;
+        return FALSE;
       }
 
       if(_CL_NOT_(pTexture->InitTexture(FALSE, Width, Height, pInitData, nPitch)))
       {
         pTexture->Release();
         pTexture = NULL;
-        return GX_FAIL;
+        return FALSE;
       }
 
       RegisterResource(pTexture, szName ? &rs : NULL);
       *ppTexture = pTexture;
-      return GX_OK;
+      return TRUE;
     }
 
     GXBOOL GraphicsImpl::CreateTextureCubeFromMemory(TextureCube** ppTexture, GXLPCWSTR szName, clstd::Buffer* pBuffer, GXUINT MipLevels, GXResUsage eUsage)
@@ -1132,66 +1101,25 @@ namespace GrapX
         }
       }
 
-//      FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBuffer->GetPtr(), (DWORD)pBuffer->GetSize());
-//      FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);
-//      if(fi_fmt == FIF_UNKNOWN) {
-//        return FALSE;
-//      }
-//
-//      FIBITMAP* fibmp = FreeImage_LoadFromMemory(fi_fmt, fi_mem);
-//
-//      // FIXME:
-//      // 没有处理64位图像的地方
-//      // 没有检查图片格式
-//      GXFormat format;
-//
-//      //GXUINT nDIBSize = FreeImage_GetDIBSize(fibmp);
-//      //GXUINT nMemSize = FreeImage_GetMemorySize(fibmp);
-//      const GXUINT bpp = FreeImage_GetBPP(fibmp);
-//      if(bpp == 24)
-//      {
-//        format = Format_B8G8R8;
-//      }
-//      else if(bpp == 32)
-//      {
-//#if FREEIMAGE_COLORORDER == FREEIMAGE_COLORORDER_RGB
-//        format = GXFMT_A8B8G8R8;
-//#else
-//        format = GXFMT_A8R8G8B8;
-//#endif
-//      }
-//      else if(bpp == 96)
-//      {
-//        format = Format_R32G32B32_Float;
-//      }
-//      else if(bpp == 128)
-//      {
-//        format = Format_R32G32B32A32_Float;
-//      }
-//      else {
-//        CLBREAK;
-//      }
-//#if 1 // 应该竖直翻转...前两天说不应该翻转，后来想起FreeImage是反着来的
-//      FreeImage_FlipVertical(fibmp);
-//#endif
-      clstd::Image image;
-      GXFormat format = Texture::DecodeToMemory(&image, pBuffer->GetPtr(), (GXUINT)pBuffer->GetSize(), TRUE);
+      clstd::MemBuffer buffer;
+      clstd::IMAGEDESC sImgDesc;
+      DECODE_TEXTURE_DESC desc = { &sImgDesc, &buffer };
+      GXFormat format = Texture::DecodeToMemory(&desc, pBuffer->GetPtr(), (GXUINT)pBuffer->GetSize(), TRUE);
 
-      if(format != GXFormat::Format_Unknown && (image.GetWidth() == image.GetHeight() * 6 || image.GetWidth() * 6 == image.GetHeight()))
+      if(format != GXFormat::Format_Unknown && (sImgDesc.width == sImgDesc.height * 6 || sImgDesc.width * 6 == sImgDesc.height))
       {
-        bval = CreateTextureCube(ppTexture, NULL, image.GetWidth(), image.GetHeight(),
-          format, eUsage, MipLevels, image.GetLine(0), image.GetPitch());
+        bval = CreateTextureCube(ppTexture, NULL, sImgDesc.width, sImgDesc.height,
+          format, eUsage, MipLevels, sImgDesc.ptr, sImgDesc.pitch);
 
         // 有名字的要注册一下
         if(bval && szName)
         {
           m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
           m_ResMgr.Register(&rs, *ppTexture);
+          bval = TRUE;
         }
       }
 
-      //FreeImage_Unload(fibmp);
-      //FreeImage_CloseMemory(fi_mem);
       return bval;
     }
 
@@ -1203,7 +1131,7 @@ namespace GrapX
       // 按命名查找资源
       GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppTexture), &rs);
       if(GXSUCCEEDED(hr)) {
-        return hr;
+        return TRUE;
       }
 
       clstd::File file;
@@ -1212,15 +1140,15 @@ namespace GrapX
         clstd::MemBuffer buffer;
         if(file.Read(&buffer))
         {
-          hr = CreateTextureCubeFromMemory(ppTexture, NULL, &buffer, MipLevels, eUsage);
-          if(GXSUCCEEDED(hr)) {
+          GXBOOL bval = CreateTextureCubeFromMemory(ppTexture, NULL, &buffer, MipLevels, eUsage);
+          if(bval) {
             m_ResMgr.Unregister(*ppTexture); // TODO: 暂时这么写吧，创建的核心功能还是得提到IntCreate中去
             m_ResMgr.Register(&rs, *ppTexture);
           }
-          return hr;
+          return bval;
         }
       }
-      return GX_E_OPEN_FAILED;
+      return FALSE;
     }
 
     //GXHRESULT GXGraphicsImpl::CreateTextureCubeFromFileEx(TextureCube** ppTexture, 

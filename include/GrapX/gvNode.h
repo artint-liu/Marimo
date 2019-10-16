@@ -118,6 +118,23 @@ struct GVRENDERDESC
   GXUINT  PrimitiveCount;
 };
 
+struct GVRENDERDESC2
+{
+  GrapX::Primitive* pPrimitive;
+  GXPrimitiveType   ePrimType;
+  GrapX::Material*   pMaterial;
+  float4x4          matWorld;   // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
+
+  GXDWORD dwFlags;              // 参考 GVModelFlags 定义
+  GXDWORD dwLayer;
+  GXUINT  RenderQueue;          // 渲染队列, 尚未使用, 这个默认取自Material中的记录
+  GXINT   BaseVertexIndex;      // StartVertex
+  GXUINT  MinIndex;
+  GXUINT  NumVertices;
+  GXUINT  StartIndex;
+  GXUINT  PrimitiveCount;
+};
+
 //struct GXGEOMETRYDESC
 //{
 //  AABB          aabb;
@@ -208,6 +225,7 @@ public:
   virtual GXBOOL    Collision                 ();
   virtual GXVOID    CalculateAABB             ();
   virtual void      GetRenderDesc             (int nRenderCate, GVRENDERDESC* pRenderDesc);
+  virtual GVRENDERDESC2* GetRenderDesc         (int nRenderCate);
   virtual GXBOOL    RayTrace                  (const Ray& ray, NODERAYTRACE* pRayTrace);
   virtual GXBOOL    SetMaterial               (GrapX::Material* pMtlInst, int nRenderCate = DefaultRenderCategory);
   virtual GXBOOL    GetMaterial               (int nRenderCate, GrapX::Material** ppMtlInst);

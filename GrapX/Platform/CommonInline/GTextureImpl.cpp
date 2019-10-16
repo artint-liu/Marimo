@@ -316,7 +316,7 @@ namespace GrapX
     return bval;
   }
 
-  GXFormat GXDLLAPI Texture::DecodeToMemory(clstd::Image* pImage, GXLPCVOID pBitsData, GXUINT cbData, GXBOOL bVertFlip)
+  GXFormat GXDLLAPI Texture::DecodeToMemory(DECODE_TEXTURE_DESC* pDecodeDesc, GXLPCVOID pBitsData, GXUINT cbData, GXBOOL bVertFlip)
   {
     FIMEMORY* fi_mem = FreeImage_OpenMemory((BYTE*)pBitsData, (DWORD)cbData);
     FREE_IMAGE_FORMAT fi_fmt = FreeImage_GetFileTypeFromMemory(fi_mem);    
@@ -338,9 +338,33 @@ namespace GrapX
           GXLPCSTR szOrder = GetFormatChannelOrder(format);
           if(szOrder)
           {
-            int nChannelDepth = GetBytesOfGraphicsFormat(format) / clstd::strlenT(szOrder) * 8;
-            pImage->Set(meta.width, meta.height * meta.arraySize, szOrder, nChannelDepth,
-              image.GetPixels(), image.GetImages()->rowPitch);
+            int nChannelDepth = GetBitsOfGraphicsFormat(format) / (int)clstd::strlenT(szOrder);
+
+            ASSERT(clstd::strlenT(szOrder) <= 4);
+            pDecodeDesc->pImageDesc->ptr = NULL;
+            pDecodeDesc->pImageDesc->width = (int)image.GetImages()->width;
+            pDecodeDesc->pImageDesc->height = (int)image.GetImages()->height * (int)meta.arraySize;
+            pDecodeDesc->pImageDesc->channel = (int)clstd::strlenT(szOrder);
+            pDecodeDesc->pImageDesc->pitch = (int)image.GetImages()->rowPitch;
+            pDecodeDesc->pImageDesc->depth = nChannelDepth;
+            clstd::strcpynT((GXLPSTR)pDecodeDesc->pImageDesc->format.name, szOrder, 4);
+
+            pDecodeDesc->pBuffer->Resize(0, FALSE);
+            if (format == Format_BC2 || format == Format_BC3)
+            {
+              pDecodeDesc->pBuffer->Append(image.GetPixels(), image.GetPixelsSize());
+              pDecodeDesc->nMipLevels = (int)image.GetImageCount();
+              // 压缩格式的pitch是一行数据块的尺寸，所以高度相应缩小防止拷贝出错
+              //pImage->Set(meta.width, ((meta.height + 3) / 4) * meta.arraySize, szOrder, nChannelDepth,
+              //  image.GetPixels(), image.GetImages()->rowPitch);
+            }
+            else
+            {
+              pDecodeDesc->pBuffer->Append(image.GetPixels(), image.GetPixelsSize());
+              //pImage->Set(meta.width, meta.height * meta.arraySize, szOrder, nChannelDepth,
+              //  image.GetPixels(), image.GetImages()->rowPitch);
+            }
+            pDecodeDesc->pImageDesc->ptr = pDecodeDesc->pBuffer->GetPtr();
           }
         }
       }
@@ -414,7 +438,19 @@ namespace GrapX
 
     if(format != GXFormat::Format_Unknown)
     {
-      pImage->Set(FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp), szFormat, channel_depth, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+      //pImage->Set(FreeImage_GetWidth(fibmp), FreeImage_GetHeight(fibmp), szFormat, channel_depth, FreeImage_GetBits(fibmp), FreeImage_GetPitch(fibmp));
+
+      pDecodeDesc->pImageDesc->ptr = NULL;
+      pDecodeDesc->pImageDesc->width = FreeImage_GetWidth(fibmp);
+      pDecodeDesc->pImageDesc->height = FreeImage_GetHeight(fibmp);
+      pDecodeDesc->pImageDesc->channel = (int)clstd::strlenT(szFormat);
+      pDecodeDesc->pImageDesc->pitch = FreeImage_GetPitch(fibmp);
+      pDecodeDesc->pImageDesc->depth = channel_depth;
+      clstd::strcpynT((GXLPSTR)pDecodeDesc->pImageDesc->format.name, szFormat, 4);
+
+      pDecodeDesc->pBuffer->Resize(0, FALSE);
+      pDecodeDesc->pBuffer->Append(FreeImage_GetBits(fibmp), pDecodeDesc->pImageDesc->height * pDecodeDesc->pImageDesc->pitch);
+      pDecodeDesc->pImageDesc->ptr = pDecodeDesc->pBuffer->GetPtr();
     }
 
     FreeImage_Unload(fibmp);

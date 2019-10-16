@@ -5247,6 +5247,7 @@ inline GXHRESULT InlGetSafeObjectT(_TInterface** ppInterface, _TInterface* pHold
 // TODO: 是不是以后要加上"Gph"前缀呢?
 GXDLL GXINT         GetAdaptedSize        (GXINT nSize);
 GXDLL GXUINT        GetBytesOfGraphicsFormat  (GXFormat eFmt);
+GXDLL GXUINT        GetBitsOfGraphicsFormat   (GXFormat eFmt);
 GXDLL GXLPCSTR      FormatToString              (GXFormat eFormat);
 GXDLL GXLPCSTR      GetFormatChannelOrder       (GXFormat eFormat);
 GXDLL GXFormatCategory  GetGraphicsFormatCategory  (GXFormat eFmt);

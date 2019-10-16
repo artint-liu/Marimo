@@ -211,6 +211,14 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primit
   return TRUE;
 }
 
+GVRENDERDESC2* GVMesh::GetRenderDesc(int nRenderCate)
+{
+  if (nRenderCate >= (int)m_MtlInsts.size()) {
+    return NULL;
+  }
+  return &m_Renderer;
+}
+
 void GVMesh::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
   if(nRenderCate < (int)m_MtlInsts.size())
