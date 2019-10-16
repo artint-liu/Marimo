@@ -354,15 +354,10 @@ namespace GrapX
             {
               pDecodeDesc->pBuffer->Append(image.GetPixels(), image.GetPixelsSize());
               pDecodeDesc->nMipLevels = (int)image.GetImageCount();
-              // 压缩格式的pitch是一行数据块的尺寸，所以高度相应缩小防止拷贝出错
-              //pImage->Set(meta.width, ((meta.height + 3) / 4) * meta.arraySize, szOrder, nChannelDepth,
-              //  image.GetPixels(), image.GetImages()->rowPitch);
             }
             else
             {
               pDecodeDesc->pBuffer->Append(image.GetPixels(), image.GetPixelsSize());
-              //pImage->Set(meta.width, meta.height * meta.arraySize, szOrder, nChannelDepth,
-              //  image.GetPixels(), image.GetImages()->rowPitch);
             }
             pDecodeDesc->pImageDesc->ptr = pDecodeDesc->pBuffer->GetPtr();
           }

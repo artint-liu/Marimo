@@ -48,7 +48,7 @@ GXBOOL GVSkinnedMeshSoft::Initialize(
   float*              pWeight, 
   GXSIZE_T            nClusterCount)
 {
-  if(IntCreatePrimitive(pGraphics, nPrimCount, lpVertDecl, lpVertics, nVertCount, pIndices, nIdxCount))
+  if(IntCreatePrimitive(pGraphics, nPrimCount, lpVertDecl, lpVertics, nVertCount, pIndices, nIdxCount, GXResUsage::Default))
   {
     m_pWeight = new float[nClusterCount * nVertCount];
     memcpy(m_pWeight, pWeight, nClusterCount * nVertCount * sizeof(float));

@@ -142,6 +142,9 @@ namespace GrapX
       GXUINT      MipLevels = 0,  // 为0时，MipMap自动计算，pInitData指向最高层图像数据；大于1时pInitData顺序接逐层数据，nPitch是最高层的步长
       GXLPCVOID   pInitData = NULL,
       GXUINT      nPitch = 0));   // 0表示使用默认pitch（nWidth*像素字节数）
+    // 对于DDS文件的压缩格式，MipLevels函数会被忽略而直接使用DDS中提供的mipmaps
+    // 其它格式，包括DDS的非压缩格式，如果提供了初始化数据和miplevels，则使用参数来初始化纹理
+    // 如果没有提供初始化数据，并且miplevels不为1，则会收集到最小级别
 
     GXSTDINTERFACE(GXHRESULT CreateTexture(Texture** ppTexture, GXLPCSTR szName, GXResUsage eUsage, Texture* pSourceTexture)); // 没实现
 

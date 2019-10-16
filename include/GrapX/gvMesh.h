@@ -23,6 +23,7 @@ struct GVMESHDATA
   GXColor*    pColors;          // 顶点色, 这个不会被转换为pColors32
   GXColor32*  pColors32;        // 顶点色, 如果pColors也不为空,则以pColors32为准
   VIndex*     pIndices;         // 索引列表,需要与索引数量一致
+  GXResUsage  usage;            // 资源创建方式，编辑器raytrace拾取要使用read方式
 
   static void   Destroy   (GVMESHDATA* pMeshData);
   static GXBOOL Check     (const GVMESHDATA* pMeshData);
@@ -43,9 +44,9 @@ protected:
 
 protected:
   void   Clear();
-  GXBOOL InitializeAsObjFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform);
-  GXBOOL InitializeAsObjFromMemory(GrapX::Graphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform);
-  GXBOOL IntCreatePrimitive(GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount);
+  GXBOOL InitializeAsObjFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXResUsage usage, const float4x4* pTransform);
+  GXBOOL InitializeAsObjFromMemory(GrapX::Graphics* pGraphics, clBufferBase* pBuffer, GXResUsage usage, const float4x4* pTransform);
+  GXBOOL IntCreatePrimitive(GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GXResUsage usage);
   GXBOOL IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GrapX::Primitive* pPrimitive);
   GXBOOL IntCreateMesh(GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshComponent);
   GXBOOL IntInitializeAsContainer(GrapX::Graphics* pGraphics, GVNode** pNodesArray, int nNodeCount);
@@ -53,7 +54,7 @@ protected:
 
   //static GXHRESULT SavePrimitive(SmartRepository* pStorage, GPrimitiveVI* pPrimitive, int nStartIndex, int nNumPrimi);
 
-  virtual GXHRESULT LoadFile (GrapX::Graphics* pGraphics, clSmartRepository* pStorage);
+  virtual GXHRESULT LoadFile (GrapX::Graphics* pGraphics, clSmartRepository* pStorage, GXResUsage usage);
 public:
   GVMesh(GrapX::Graphics* pGraphics);
   GVMesh(GrapX::Graphics* pGraphics, GXDWORD dwClassCode);
@@ -83,16 +84,16 @@ public:
 
   void ApplyTransform(); // 将变换应用到顶点
 
-  static GXHRESULT CreateUserPrimitive    (GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh);
+  static GXHRESULT CreateUserPrimitive    (GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GXResUsage usage, GVMesh** ppMesh);
   static GXHRESULT CreateUserPrimitive    (GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GrapX::Primitive* pPrimitive, GVMesh** ppMesh);
   static GXHRESULT CreateMesh             (GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshComponent, GVMesh** ppMesh);
   static GXHRESULT CreateContainer        (GrapX::Graphics* pGraphics, GVNode** pNodesArray, int nNodeCount, GVMesh** ppMesh); // 不增加pNodesArray中Node的引用计数
   //static GXHRESULT Clone                  (GVMesh** pNewMesh, GVMesh* pSourceMesh);
-  static GXHRESULT LoadObjFromFileA       (GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
-  static GXHRESULT LoadObjFromFileW       (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform = NULL);
+  static GXHRESULT LoadObjFromFileA       (GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, GXResUsage usage = GXResUsage::Default, const float4x4* pTransform = NULL);
+  static GXHRESULT LoadObjFromFileW       (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, GXResUsage usage = GXResUsage::Default, const float4x4* pTransform = NULL);
   static GXHRESULT LoadMeshFromFileA      (GrapX::Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh);
   static GXHRESULT LoadMeshFromFileW      (GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh);
-  static GXHRESULT LoadMeshFromRepository (GrapX::Graphics* pGraphics, clSmartRepository* pStorage, GVMesh** ppMesh);
+  static GXHRESULT LoadMeshFromRepository (GrapX::Graphics* pGraphics, clSmartRepository* pStorage, GXResUsage usage, GVMesh** ppMesh);
 };
 
 namespace mesh

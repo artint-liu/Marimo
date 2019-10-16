@@ -78,7 +78,7 @@ GXHRESULT GVMesh::AddRef()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-GXBOOL GVMesh::InitializeAsObjFromFile(Graphics* pGraphics, GXLPCWSTR szFilename, const float4x4* pTransform)
+GXBOOL GVMesh::InitializeAsObjFromFile(Graphics* pGraphics, GXLPCWSTR szFilename, GXResUsage usage, const float4x4* pTransform)
 {
   clFile file;
   GXBOOL bval = FALSE;
@@ -89,13 +89,13 @@ GXBOOL GVMesh::InitializeAsObjFromFile(Graphics* pGraphics, GXLPCWSTR szFilename
     clstd::MemBuffer buf;
     file.Read(&buf);
     m_strName = szFilename;
-    bval = InitializeAsObjFromMemory(pGraphics, &buf, pTransform);
+    bval = InitializeAsObjFromMemory(pGraphics, &buf, usage, pTransform);
     //SAFE_DELETE(pBuffer);
   }
   return bval;
 }
 
-GXBOOL GVMesh::InitializeAsObjFromMemory(Graphics* pGraphics, clBufferBase* pBuffer, const float4x4* pTransform)
+GXBOOL GVMesh::InitializeAsObjFromMemory(Graphics* pGraphics, clBufferBase* pBuffer, GXResUsage usage, const float4x4* pTransform)
 {
   using namespace ObjMeshUtility;
 
@@ -116,7 +116,7 @@ GXBOOL GVMesh::InitializeAsObjFromMemory(Graphics* pGraphics, clBufferBase* pBuf
 
         GVMesh::CreateUserPrimitive(pGraphics, me.aFaces.size(), MOGetSysVertexDecl(GXVD_P3T2N3F),
           &me.aVertices.front(), me.aVertices.size(), 
-          (VIndex*)&me.aFaces.front(), me.aFaces.size() * 3, &pSubMesh);
+          (VIndex*)&me.aFaces.front(), me.aFaces.size() * 3, usage, &pSubMesh);
 
         if(me.Name.IsNotEmpty()) {
           pSubMesh->SetName(me.Name);
@@ -142,7 +142,7 @@ GXBOOL GVMesh::InitializeAsObjFromMemory(Graphics* pGraphics, clBufferBase* pBuf
       PRIMARYMESH& me = aMeshs[0];
       IntCreatePrimitive(pGraphics, me.aFaces.size(), MOGetSysVertexDecl(GXVD_P3T2N3F), 
         &me.aVertices.front(), me.aVertices.size(),
-          (VIndex*)&me.aFaces.front(), me.aFaces.size() * 3);
+          (VIndex*)&me.aFaces.front(), me.aFaces.size() * 3, usage);
 
       if(me.Name.IsNotEmpty()) {
         m_strName = me.Name;
@@ -154,7 +154,7 @@ GXBOOL GVMesh::InitializeAsObjFromMemory(Graphics* pGraphics, clBufferBase* pBuf
   return bval;
 }
 
-GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount)
+GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GXResUsage usage)
 {
   GXBOOL bval = FALSE;
   //m_eType       = eType;
@@ -163,7 +163,7 @@ GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLP
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
   if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL,
-    lpVertDecl, GXResUsage::Default, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, 2, pIndices)))
+    lpVertDecl, usage, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, 2, pIndices)))
   {
     GXVERTEXELEMENT Desc;
     int nOffset = MOGetDeclOffset(lpVertDecl, GXDECLUSAGE_POSITION, 0, &Desc);
@@ -363,7 +363,7 @@ GXBOOL GVMesh::GetMaterialFilename(int nRenderCate, clStringW* pstrFilename)
 
 //////////////////////////////////////////////////////////////////////////
 
-GXHRESULT GVMesh::CreateUserPrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GVMesh** ppMesh)
+GXHRESULT GVMesh::CreateUserPrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GXResUsage usage, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if(pMesh == NULL) {
@@ -371,7 +371,7 @@ GXHRESULT GVMesh::CreateUserPrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, 
     return GX_FAIL;
   }
   pMesh->AddRef();
-  if(pMesh->IntCreatePrimitive(pGraphics, nPrimCount, lpVertDecl, lpVertics, nVertCount, pIndices, nIdxCount))
+  if(pMesh->IntCreatePrimitive(pGraphics, nPrimCount, lpVertDecl, lpVertics, nVertCount, pIndices, nIdxCount, usage))
   {
     *ppMesh = pMesh;
     return GX_OK;
@@ -446,7 +446,7 @@ GXBOOL GVMesh::IntCreateMesh(Graphics* pGraphics, const GVMESHDATA* pMeshCompone
       pMeshComponent->pBoneIndices == NULL && pMeshComponent->pBoneIndices32 == NULL);
 
     if( ! IntCreatePrimitive(pGraphics, pMeshComponent->nIndexCount / 3, VertElement, 
-      lpStreamSource, pMeshComponent->nVertexCount, pMeshComponent->pIndices, pMeshComponent->nIndexCount))
+      lpStreamSource, pMeshComponent->nVertexCount, pMeshComponent->pIndices, pMeshComponent->nIndexCount, pMeshComponent->usage))
     {
       bval = FALSE;
     }
@@ -558,13 +558,13 @@ GXHRESULT GVMesh::Clone( GVNode** ppClonedNode/*, GXBOOL bRecursive*/ )
   return GX_OK;
 }
 
-GXHRESULT GVMesh::LoadObjFromFileA(Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform /* = NULL */)
+GXHRESULT GVMesh::LoadObjFromFileA(Graphics* pGraphics, GXLPCSTR szFilename, GVMesh** ppMesh, GXResUsage usage, const float4x4* pTransform /* = NULL */)
 {
   clStringW strFile = szFilename;
-  return LoadObjFromFileW(pGraphics, strFile, ppMesh, pTransform);
+  return LoadObjFromFileW(pGraphics, strFile, ppMesh, usage, pTransform);
 }
 
-GXHRESULT GVMesh::LoadObjFromFileW(Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, const float4x4* pTransform /* = NULL */)
+GXHRESULT GVMesh::LoadObjFromFileW(Graphics* pGraphics, GXLPCWSTR szFilename, GVMesh** ppMesh, GXResUsage usage, const float4x4* pTransform /* = NULL */)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if(pMesh == NULL) {
@@ -572,7 +572,7 @@ GXHRESULT GVMesh::LoadObjFromFileW(Graphics* pGraphics, GXLPCWSTR szFilename, GV
     return GX_FAIL;
   }
   pMesh->AddRef();
-  if(pMesh->InitializeAsObjFromFile(pGraphics, szFilename, pTransform)) {
+  if(pMesh->InitializeAsObjFromFile(pGraphics, szFilename, usage, pTransform)) {
     *ppMesh = pMesh;
     return GX_OK;
   }
@@ -601,14 +601,14 @@ GXHRESULT GVMesh::LoadMeshFromFileW(Graphics* pGraphics, GXLPCWSTR szFilename, G
   return GX_FAIL;
 }
 
-GXHRESULT GVMesh::LoadMeshFromRepository(Graphics* pGraphics, SmartRepository* pStorage, GVMesh** ppMesh)
+GXHRESULT GVMesh::LoadMeshFromRepository(Graphics* pGraphics, SmartRepository* pStorage, GXResUsage usage, GVMesh** ppMesh)
 {
   GVMesh* pMesh = new GVMesh(NULL);
   if( ! InlCheckNewAndIncReference(pMesh)) {
     return GX_FAIL;
   }
 
-  if(pMesh->LoadFile(pGraphics, pStorage)) {
+  if(pMesh->LoadFile(pGraphics, pStorage, usage)) {
     *ppMesh = pMesh;
     return GX_OK;
   }
@@ -642,7 +642,7 @@ GXHRESULT GVMesh::SaveFile(SmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVMesh::LoadFile(Graphics* pGraphics, SmartRepository* pStorage)
+GXHRESULT GVMesh::LoadFile(Graphics* pGraphics, SmartRepository* pStorage, GXResUsage usage)
 {
   Clear();
   clStringA strName;
@@ -679,7 +679,7 @@ GXHRESULT GVMesh::LoadFile(Graphics* pGraphics, SmartRepository* pStorage)
     RepoUtility::LoadPrimitive(pStorage, "Mesh", VertexElement, &Vertices, &Indices, nStartIndex, nPrimiCount);
 
     bval = IntCreatePrimitive(pGraphics, nPrimiCount, VertexElement, Vertices.GetPtr(), 
-      nPrimiCount * 3, (VIndex*)Indices.GetPtr(), Indices.GetSize() / sizeof(VIndex));
+      nPrimiCount * 3, (VIndex*)Indices.GetPtr(), Indices.GetSize() / sizeof(VIndex), usage);
 
     if( ! pStorage->ReadStructT(NULL, MESH_TRANSFORM, matLocal)) {
       matLocal.identity();
