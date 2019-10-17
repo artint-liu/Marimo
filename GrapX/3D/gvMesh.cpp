@@ -404,54 +404,16 @@ GXBOOL GVMesh::IntCreateMesh(Graphics* pGraphics, const GVMESHDATA* pMeshCompone
   {
     GXVERTEXELEMENT VertElement[64];
     memset(&VertElement, 0, sizeof(VertElement));
-
-    GVMESHDATA::Build(pMeshComponent, VertElement);
-    const int nStride = MOGetDeclVertexSize(VertElement);
-    GXLPBYTE lpStreamSource = new GXBYTE[pMeshComponent->nVertexCount * nStride];
-
-    GXINT nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_POSITION, 0);
-    mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float3), nStride, pMeshComponent->pVertices, pMeshComponent->nVertexCount);
-
-    if(pMeshComponent->pNormals) {
-      nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_NORMAL, 0);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float3), nStride, pMeshComponent->pNormals, pMeshComponent->nVertexCount);
-    }
-    if(pMeshComponent->pTangents) {
-      nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_TANGENT, 0);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float4), nStride, pMeshComponent->pTangents, pMeshComponent->nVertexCount);
-    }
-    if(pMeshComponent->pBinormals) {
-      nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_BINORMAL, 0);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float3), nStride, pMeshComponent->pBinormals, pMeshComponent->nVertexCount);
-    }
-    if(pMeshComponent->pTexcoord0) {
-      nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_TEXCOORD, 0);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float2), nStride, pMeshComponent->pTexcoord0, pMeshComponent->nVertexCount);
-    }
-    if(pMeshComponent->pTexcoord1) {
-      nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_TEXCOORD, 1);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float2), nStride, pMeshComponent->pTexcoord1, pMeshComponent->nVertexCount);
-    }
-    if(pMeshComponent->pColors32) {
-      nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_COLOR, 0);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(GXDWORD), nStride, pMeshComponent->pColors32, pMeshComponent->nVertexCount);
-    }
-    else if(pMeshComponent->pColors) {
-      nOffset = MOGetDeclOffset(VertElement, GXDECLUSAGE_COLOR, 0);
-      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float4), nStride, pMeshComponent->pColors, pMeshComponent->nVertexCount);
-    }
-
-    // 没实现，暂时用断言提醒
-    ASSERT(pMeshComponent->pBoneWeights == NULL && pMeshComponent->pBoneWeights32 == NULL &&
-      pMeshComponent->pBoneIndices == NULL && pMeshComponent->pBoneIndices32 == NULL);
+    clstd::MemBuffer buffer;
+    PrimitiveUtility::ConvertMeshDataToStream(&buffer, VertElement, pMeshComponent);
 
     if( ! IntCreatePrimitive(pGraphics, pMeshComponent->nIndexCount / 3, VertElement, 
-      lpStreamSource, pMeshComponent->nVertexCount, pMeshComponent->pIndices, pMeshComponent->nIndexCount, pMeshComponent->usage))
+      buffer.GetPtr(), pMeshComponent->nVertexCount, pMeshComponent->pIndices, pMeshComponent->nIndexCount, pMeshComponent->usage))
     {
       bval = FALSE;
     }
 
-    SAFE_DELETE_ARRAY(lpStreamSource);
+    //SAFE_DELETE_ARRAY(lpStreamSource);
     return bval;
   }
   return FALSE;
@@ -759,6 +721,8 @@ void GVMesh::ApplyTransform()
 //////////////////////////////////////////////////////////////////////////
 namespace mesh
 {
+  typedef clvector<GXVERTEXELEMENT> VertElementArray;
+
   GXBOOL ValidateIndex(VIndex* pIndices, int nIndexCount, int nVertexCount)
   {
     for(int i = 0; i < nIndexCount; i++)
@@ -776,13 +740,39 @@ namespace mesh
   inline void InlAppendVertDecl(
     GXLPCVOID pMeshComponentElement,
     GXDeclUsage eUsage, 
-    clvector<GXVERTEXELEMENT>& aVertDecl, 
+    VertElementArray& aVertDecl, 
     GXVERTEXELEMENT& ve)
   {
     if(pMeshComponentElement) {
       ve.Usage = eUsage;
       aVertDecl.push_back(ve);
       ve.Offset += sizeof(_Ty);
+    }
+  }
+
+  void TryAppendTexcoordVertDecl(VertElementArray& aVertDecl, GXVERTEXELEMENT &ve, GXLPCVOID pElements, GXUINT UsageIndex,
+    GXDWORD dwMaskFlags, GXDWORD uv_float, GXDWORD uv_float2, GXDWORD uv_float3, GXDWORD uv_float4)
+  {
+    ve.UsageIndex = UsageIndex;
+    if (dwMaskFlags == uv_float)
+    {
+      ve.Type = GXDECLTYPE_FLOAT1;
+      mesh::InlAppendVertDecl<float>(pElements, GXDECLUSAGE_TEXCOORD, aVertDecl, ve);
+    }
+    else if (dwMaskFlags == uv_float2)
+    {
+      ve.Type = GXDECLTYPE_FLOAT2;
+      mesh::InlAppendVertDecl<float2>(pElements, GXDECLUSAGE_TEXCOORD, aVertDecl, ve);
+    }
+    else if (dwMaskFlags == uv_float3)
+    {
+      ve.Type = GXDECLTYPE_FLOAT3;
+      mesh::InlAppendVertDecl<float3>(pElements, GXDECLUSAGE_TEXCOORD, aVertDecl, ve);
+    }
+    else if (dwMaskFlags == uv_float4)
+    {
+      ve.Type = GXDECLTYPE_FLOAT4;
+      mesh::InlAppendVertDecl<float4>(pElements, GXDECLUSAGE_TEXCOORD, aVertDecl, ve);
     }
   }
 
@@ -870,6 +860,45 @@ namespace mesh
     }
     return TRUE;
   }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  template<typename _Ty>
+  inline void _CopyVertexElementT(void* lpDestStream, GXUINT nDestStride, const void* lpSrcStream, GXUINT nSrcStride, GXSIZE_T nVertCount)
+  {
+    for (GXUINT nVertIndex = 0; nVertIndex < nVertCount; nVertIndex++) {
+      *reinterpret_cast<_Ty*>(lpDestStream) = *reinterpret_cast<const _Ty*>(lpSrcStream);
+      lpDestStream = ((GXBYTE*)lpDestStream + nDestStride);
+      lpSrcStream = ((GXBYTE*)lpSrcStream + nSrcStride);
+    }
+  }
+
+  GXBOOL GXDLL CopyVertexElementFromStream(GXLPVOID lpDestStream, GXUINT nDestStride, GXLPCVOID lpSrcStream, GXUINT nSrcStride, GXUINT cbElementStride, GXSIZE_T nVertCount)
+  {
+    if (cbElementStride == 4) {
+      _CopyVertexElementT<GXDWORD>(lpDestStream, nDestStride, lpSrcStream, nSrcStride, nVertCount);
+    }
+    else if (cbElementStride == 8) {
+      _CopyVertexElementT<float2>(lpDestStream, nDestStride, lpSrcStream, nSrcStride, nVertCount);
+    }
+    else if (cbElementStride == 12) {
+      _CopyVertexElementT<float3>(lpDestStream, nDestStride, lpSrcStream, nSrcStride, nVertCount);
+    }
+    else if (cbElementStride == 16) {
+      _CopyVertexElementT<float4>(lpDestStream, nDestStride, lpSrcStream, nSrcStride, nVertCount);
+    }
+    else
+    {
+      for (GXUINT nVertIndex = 0; nVertIndex < nVertCount; nVertIndex++) {
+        memcpy(lpDestStream, lpSrcStream, cbElementStride);
+        lpDestStream = ((GXBYTE*)lpDestStream + nDestStride);
+        lpSrcStream  = ((GXBYTE*)lpSrcStream + nSrcStride);
+      }
+    }
+    return TRUE;
+  }
+
+  //////////////////////////////////////////////////////////////////////////
 
   template<typename _VIndexT>
   GXBOOL CalculateNormalsT(
@@ -1220,8 +1249,7 @@ GXBOOL GVMESHDATA::Check(const GVMESHDATA* pMesh)
 
 GXSIZE_T GVMESHDATA::Build(const GVMESHDATA* pMeshComponent, GXLPVERTEXELEMENT lpVertDelement)
 {
-  typedef clvector<GXVERTEXELEMENT> VertElementArray;
-  VertElementArray aVertDecl;
+  mesh::VertElementArray aVertDecl;
   GXVERTEXELEMENT ve;
   ve.Offset = 0;
   ve.Type = GXDECLTYPE_FLOAT3;
@@ -1237,10 +1265,18 @@ GXSIZE_T GVMESHDATA::Build(const GVMESHDATA* pMeshComponent, GXLPVERTEXELEMENT l
 
   ve.Type = GXDECLTYPE_FLOAT2;
   mesh::InlAppendVertDecl<float2>(pMeshComponent->pTexcoord0, GXDECLUSAGE_TEXCOORD, aVertDecl, ve);
+
   ve.UsageIndex = 1;
   mesh::InlAppendVertDecl<float2>(pMeshComponent->pTexcoord1, GXDECLUSAGE_TEXCOORD, aVertDecl, ve);
-  ve.UsageIndex = 0;
+  
+  mesh::TryAppendTexcoordVertDecl(aVertDecl, ve, pMeshComponent->pTexcoord2, 2, pMeshComponent->dwFlags & MESHDATA_FLAG_UV2_MASK, MESHDATA_FLAG_UV2_FLOAT, MESHDATA_FLAG_UV2_FLOAT2, MESHDATA_FLAG_UV2_FLOAT3, MESHDATA_FLAG_UV2_FLOAT4);
+  mesh::TryAppendTexcoordVertDecl(aVertDecl, ve, pMeshComponent->pTexcoord3, 3, pMeshComponent->dwFlags & MESHDATA_FLAG_UV3_MASK, MESHDATA_FLAG_UV3_FLOAT, MESHDATA_FLAG_UV3_FLOAT2, MESHDATA_FLAG_UV3_FLOAT3, MESHDATA_FLAG_UV3_FLOAT4);
+  mesh::TryAppendTexcoordVertDecl(aVertDecl, ve, pMeshComponent->pTexcoord4, 4, pMeshComponent->dwFlags & MESHDATA_FLAG_UV4_MASK, MESHDATA_FLAG_UV4_FLOAT, MESHDATA_FLAG_UV4_FLOAT2, MESHDATA_FLAG_UV4_FLOAT3, MESHDATA_FLAG_UV4_FLOAT4);
+  mesh::TryAppendTexcoordVertDecl(aVertDecl, ve, pMeshComponent->pTexcoord5, 5, pMeshComponent->dwFlags & MESHDATA_FLAG_UV5_MASK, MESHDATA_FLAG_UV5_FLOAT, MESHDATA_FLAG_UV5_FLOAT2, MESHDATA_FLAG_UV5_FLOAT3, MESHDATA_FLAG_UV5_FLOAT4);
+  mesh::TryAppendTexcoordVertDecl(aVertDecl, ve, pMeshComponent->pTexcoord6, 6, pMeshComponent->dwFlags & MESHDATA_FLAG_UV6_MASK, MESHDATA_FLAG_UV6_FLOAT, MESHDATA_FLAG_UV6_FLOAT2, MESHDATA_FLAG_UV6_FLOAT3, MESHDATA_FLAG_UV6_FLOAT4);
+  mesh::TryAppendTexcoordVertDecl(aVertDecl, ve, pMeshComponent->pTexcoord7, 7, pMeshComponent->dwFlags & MESHDATA_FLAG_UV7_MASK, MESHDATA_FLAG_UV7_FLOAT, MESHDATA_FLAG_UV7_FLOAT2, MESHDATA_FLAG_UV7_FLOAT3, MESHDATA_FLAG_UV7_FLOAT4);
 
+  ve.UsageIndex = 0;
   if(pMeshComponent->pBoneWeights32 != NULL || pMeshComponent->pBoneWeights != NULL)
   {
     ve.Usage = GXDECLUSAGE_BLENDWEIGHT;
@@ -1287,6 +1323,12 @@ void GVMESHDATA::Destroy(GVMESHDATA* pMeshData)
   SAFE_DELETE(pMeshData->pBinormals);
   SAFE_DELETE(pMeshData->pTexcoord0);
   SAFE_DELETE(pMeshData->pTexcoord1);
+  SAFE_DELETE(pMeshData->pTexcoord2);
+  SAFE_DELETE(pMeshData->pTexcoord3);
+  SAFE_DELETE(pMeshData->pTexcoord4);
+  SAFE_DELETE(pMeshData->pTexcoord5);
+  SAFE_DELETE(pMeshData->pTexcoord6);
+  SAFE_DELETE(pMeshData->pTexcoord7);
   SAFE_DELETE(pMeshData->pBoneWeights);
   SAFE_DELETE(pMeshData->pBoneWeights32);
   SAFE_DELETE(pMeshData->pBoneIndices);

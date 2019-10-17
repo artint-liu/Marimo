@@ -453,6 +453,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvas3DImpl_d3D11.h">
       <Filter>Platform\Win32_D3X11</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gxUtility.h">
+      <Filter>Include\GrapX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp">

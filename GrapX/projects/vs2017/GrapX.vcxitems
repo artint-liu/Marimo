@@ -54,6 +54,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXShaderT.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXSprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\GXUser.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gxUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOBehavior.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOComponent.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\MOConsoleStaff.h" />

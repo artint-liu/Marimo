@@ -534,48 +534,238 @@ namespace GrapX
     }
   } // namespace ObjMeshUtility
 
-  GXBOOL GXDLL PrimitiveUtility::SetUnifiedDiffuse(Primitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate)
+  namespace PrimitiveUtility
   {
-    GXVERTEXELEMENT element;
-    GXINT nOffset = pPrimitive->GetElementOffset(GXDECLUSAGE_COLOR, 0, &element);
-    if(nOffset < 0) {
-      CLOG_ERROR("%s : Primitive doesn't has diffuse element.\r\n", __FUNCTION__);
-      return FALSE;
-    }
+#define SIZE_OF_TEXCOORD_P(_FLAGS, _FLOAT, _FLOAT2, _FLOAT3, _FLOAT4) \
+  (_FLAGS == _FLOAT) ? sizeof(float) : ((_FLAGS == _FLOAT2) ? sizeof(float2) : ((_FLAGS == _FLOAT3) ? sizeof(float3) : sizeof(float4)))
 
-    ASSERT(element.Type == GXDECLTYPE_D3DCOLOR);
+#define SIZE_OF_TEXCOORD(_FLAGS, _NAME) \
+  ((_FLAGS & _NAME##_MASK) == _NAME##_FLOAT) ? sizeof(float) : \
+  (((_FLAGS & _NAME##_MASK) == _NAME##_FLOAT2) ? sizeof(float2) : \
+  (((_FLAGS & _NAME##_MASK) == _NAME##_FLOAT3) ? sizeof(float3) : sizeof(float4)))
 
-    PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::Write);
-    GXLPBYTE lpColors = (GXLPBYTE)locker_v.GetPtr();
-
-    int nNumVertices = pPrimitive->GetVertexCount();
-    int nStride = pPrimitive->GetVertexStride();
-
-    if(lpColors == NULL || nNumVertices == 0 || nStride <= 0) {
-      if(lpColors == NULL) {
-        CLOG_ERROR("%s : Can't get vertices buffer.\r\n", __FUNCTION__);
-      }
-      if(nNumVertices == 0) {
-        CLOG_ERROR("%s : Number of vertices is empty.\r\n", __FUNCTION__);
-      }
-      if(nStride <= 0) {
-        CLOG_ERROR("%s : Bad stride number.\r\n", __FUNCTION__);
-      }
-      return FALSE;
-    }
-
-    lpColors += nOffset;
-    for(int i = 0; i < nNumVertices; i++)
+    GXBOOL ConvertMeshDataToStream(clstd::MemBuffer* pBuffer, GXVERTEXELEMENT* pVertElement, const GVMESHDATA* pMeshComponent)
     {
-      *(GXColor32*)lpColors = crDiffuse;
-      lpColors += nStride;
+      GVMESHDATA::Build(pMeshComponent, pVertElement);
+      const GXUINT nStride = MOGetDeclVertexSize(pVertElement);
+      pBuffer->Resize(pMeshComponent->nVertexCount * nStride, FALSE);
+      GXLPBYTE lpStreamSource = pBuffer->CastPtr<GXBYTE>(); //new GXBYTE[pMeshComponent->nVertexCount * nStride];
+
+      GXINT nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_POSITION, 0);
+      mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float3), nStride, pMeshComponent->pVertices, pMeshComponent->nVertexCount);
+
+      if (pMeshComponent->pNormals) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_NORMAL, 0);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float3), nStride, pMeshComponent->pNormals, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTangents) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TANGENT, 0);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float4), nStride, pMeshComponent->pTangents, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pBinormals) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_BINORMAL, 0);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float3), nStride, pMeshComponent->pBinormals, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTexcoord0) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 0);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float2), nStride, pMeshComponent->pTexcoord0, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTexcoord1) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 1);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float2), nStride, pMeshComponent->pTexcoord1, pMeshComponent->nVertexCount);
+      }
+
+      if (pMeshComponent->pTexcoord2) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 2);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, SIZE_OF_TEXCOORD(pMeshComponent->dwFlags, MESHDATA_FLAG_UV2), nStride, pMeshComponent->pTexcoord2, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTexcoord3) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 3);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, SIZE_OF_TEXCOORD(pMeshComponent->dwFlags, MESHDATA_FLAG_UV3), nStride, pMeshComponent->pTexcoord3, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTexcoord4) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 4);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, SIZE_OF_TEXCOORD(pMeshComponent->dwFlags, MESHDATA_FLAG_UV4), nStride, pMeshComponent->pTexcoord4, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTexcoord5) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 5);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, SIZE_OF_TEXCOORD(pMeshComponent->dwFlags, MESHDATA_FLAG_UV5), nStride, pMeshComponent->pTexcoord5, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTexcoord6) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 6);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, SIZE_OF_TEXCOORD(pMeshComponent->dwFlags, MESHDATA_FLAG_UV6), nStride, pMeshComponent->pTexcoord6, pMeshComponent->nVertexCount);
+      }
+      if (pMeshComponent->pTexcoord7) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_TEXCOORD, 7);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, SIZE_OF_TEXCOORD(pMeshComponent->dwFlags, MESHDATA_FLAG_UV7), nStride, pMeshComponent->pTexcoord7, pMeshComponent->nVertexCount);
+      }
+
+      if (pMeshComponent->pColors32) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_COLOR, 0);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(GXDWORD), nStride, pMeshComponent->pColors32, pMeshComponent->nVertexCount);
+      }
+      else if (pMeshComponent->pColors) {
+        nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_COLOR, 0);
+        mesh::CopyVertexElementFromStream(lpStreamSource + nOffset, sizeof(float4), nStride, pMeshComponent->pColors, pMeshComponent->nVertexCount);
+      }
+
+      // 没实现，暂时用断言提醒
+      ASSERT(pMeshComponent->pBoneWeights == NULL && pMeshComponent->pBoneWeights32 == NULL &&
+        pMeshComponent->pBoneIndices == NULL && pMeshComponent->pBoneIndices32 == NULL);
+
+      return TRUE;
     }
 
-    //if(!bManualUpdate) {
-    //  pPrimitive->UpdateResouce(GPrimitive::ResourceVertices);
-    //}
-    return TRUE;
-  }
+    //////////////////////////////////////////////////////////////////////////
+
+    template<typename _Ty>
+    _Ty* TryCopyVertexStream(GXLPBYTE& lpDest, const GXVERTEXELEMENT* pVertElement, GXLPCBYTE lpStreamSource, GXUINT nStride, GXUINT nVertexCount, GXDeclUsage usage, GXUINT usage_index)
+    {
+      GXINT nOffset = MOGetDeclOffset(pVertElement, usage, usage_index);
+      if (nOffset >= 0) {
+        _Ty* pResult = reinterpret_cast<_Ty*>(lpDest);
+        mesh::CopyVertexElementFromStream(lpDest, sizeof(_Ty), lpStreamSource + nOffset, nStride, sizeof(_Ty), nVertexCount);
+        lpDest += sizeof(_Ty) * nVertexCount;
+        return pResult;
+      }
+      return NULL;
+    }
+
+    void* TryCopyVertexStream(GXLPBYTE& lpDest, GXDWORD* pdwFlags,
+      const GXVERTEXELEMENT* pVertElement, GXLPCBYTE lpStreamSource, GXUINT nStride, GXUINT nVertexCount, GXDeclUsage usage, GXUINT usage_index,
+      GXDWORD dwFloat1, GXDWORD dwFloat2, GXDWORD dwFloat3, GXDWORD dwFloat4)
+    {
+      GXVERTEXELEMENT ele;
+      GXINT nOffset = MOGetDeclOffset(pVertElement, usage, usage_index, &ele);
+      if (nOffset >= 0) {
+        void* pResult = lpDest;
+        if (ele.Type == GXDECLTYPE_FLOAT1) {
+          mesh::CopyVertexElementFromStream(lpDest, sizeof(float), lpStreamSource + nOffset, nStride, sizeof(float), nVertexCount);
+          lpDest += sizeof(float) * nVertexCount;
+          *pdwFlags |= dwFloat1;
+        }
+        else if (ele.Type == GXDECLTYPE_FLOAT2) {
+          mesh::CopyVertexElementFromStream(lpDest, sizeof(float2), lpStreamSource + nOffset, nStride, sizeof(float2), nVertexCount);
+          lpDest += sizeof(float2) * nVertexCount;
+          *pdwFlags |= dwFloat2;
+        }
+        else if (ele.Type == GXDECLTYPE_FLOAT3) {
+          mesh::CopyVertexElementFromStream(lpDest, sizeof(float3), lpStreamSource + nOffset, nStride, sizeof(float3), nVertexCount);
+          lpDest += sizeof(float3) * nVertexCount;
+          *pdwFlags |= dwFloat3;
+        }
+        else if (ele.Type == GXDECLTYPE_FLOAT4) {
+          mesh::CopyVertexElementFromStream(lpDest, sizeof(float4), lpStreamSource + nOffset, nStride, sizeof(float4), nVertexCount);
+          lpDest += sizeof(float4) * nVertexCount;
+          *pdwFlags |= dwFloat4;
+        }
+        else {
+          return NULL;
+        }
+        return pResult;
+      }
+      return NULL;
+    }
+
+    GXBOOL ConvertStreamToMeshData(GXOUT clstd::MemBuffer* pBuffer, GXOUT GVMESHDATA* pMeshComponent, GXLPCVOID pStream, GXUINT nVertexCount, const GXVERTEXELEMENT* pVertElement)
+    {
+      const GXUINT nStride = MOGetDeclVertexSize(pVertElement);
+      pBuffer->Resize(nVertexCount * nStride, FALSE);
+      GXLPCBYTE lpStreamSource = reinterpret_cast<GXLPCBYTE>(pStream); //new GXBYTE[pMeshComponent->nVertexCount * nStride];
+      GXLPBYTE lpDest = pBuffer->CastPtr<GXBYTE>();
+      //GXINT nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_POSITION, 0);
+      //if (nOffset >= 0) {
+      //  mesh::CopyVertexElementFromStream(lpDest, sizeof(float3), lpStreamSource + nOffset, nStride, sizeof(float3), nVertexCount);
+      //  lpDest += sizeof(float3) * nVertexCount;
+      //}
+
+      //InlSetZeroT(*pMeshComponent);
+
+      pMeshComponent->nVertexCount = nVertexCount;
+      pMeshComponent->pVertices = TryCopyVertexStream<float3>(lpDest, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_POSITION, 0);
+      pMeshComponent->pNormals = TryCopyVertexStream<float3>(lpDest, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_NORMAL, 0);
+      pMeshComponent->pTangents = TryCopyVertexStream<float4>(lpDest, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TANGENT, 0);
+      pMeshComponent->pBinormals = TryCopyVertexStream<float3>(lpDest, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_BINORMAL, 0);
+      pMeshComponent->pTexcoord0 = TryCopyVertexStream<float2>(lpDest, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 0);
+      pMeshComponent->pTexcoord1 = TryCopyVertexStream<float2>(lpDest, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 1);
+
+      pMeshComponent->dwFlags = 0;
+      pMeshComponent->pTexcoord2 = TryCopyVertexStream(lpDest, &pMeshComponent->dwFlags, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 2, MESHDATA_FLAG_UV2_FLOAT, MESHDATA_FLAG_UV2_FLOAT2, MESHDATA_FLAG_UV2_FLOAT3, MESHDATA_FLAG_UV2_FLOAT4);
+      pMeshComponent->pTexcoord3 = TryCopyVertexStream(lpDest, &pMeshComponent->dwFlags, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 3, MESHDATA_FLAG_UV3_FLOAT, MESHDATA_FLAG_UV3_FLOAT2, MESHDATA_FLAG_UV3_FLOAT3, MESHDATA_FLAG_UV3_FLOAT4);
+      pMeshComponent->pTexcoord4 = TryCopyVertexStream(lpDest, &pMeshComponent->dwFlags, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 4, MESHDATA_FLAG_UV4_FLOAT, MESHDATA_FLAG_UV4_FLOAT2, MESHDATA_FLAG_UV4_FLOAT3, MESHDATA_FLAG_UV4_FLOAT4);
+      pMeshComponent->pTexcoord5 = TryCopyVertexStream(lpDest, &pMeshComponent->dwFlags, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 5, MESHDATA_FLAG_UV5_FLOAT, MESHDATA_FLAG_UV5_FLOAT2, MESHDATA_FLAG_UV5_FLOAT3, MESHDATA_FLAG_UV5_FLOAT4);
+      pMeshComponent->pTexcoord6 = TryCopyVertexStream(lpDest, &pMeshComponent->dwFlags, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 6, MESHDATA_FLAG_UV6_FLOAT, MESHDATA_FLAG_UV6_FLOAT2, MESHDATA_FLAG_UV6_FLOAT3, MESHDATA_FLAG_UV6_FLOAT4);
+      pMeshComponent->pTexcoord7 = TryCopyVertexStream(lpDest, &pMeshComponent->dwFlags, pVertElement, lpStreamSource, nStride, nVertexCount, GXDECLUSAGE_TEXCOORD, 7, MESHDATA_FLAG_UV7_FLOAT, MESHDATA_FLAG_UV7_FLOAT2, MESHDATA_FLAG_UV7_FLOAT3, MESHDATA_FLAG_UV7_FLOAT4);
+
+      GXVERTEXELEMENT ele;
+      GXINT nOffset = MOGetDeclOffset(pVertElement, GXDECLUSAGE_COLOR, 0, &ele);
+      if(nOffset >= 0)
+      {
+        if (ele.Type == GXDECLTYPE_FLOAT4)
+        {
+          mesh::CopyVertexElementFromStream(lpDest, sizeof(GXColor), lpStreamSource + nOffset, nStride, sizeof(GXColor), nVertexCount);
+          lpDest += sizeof(GXColor) * nVertexCount;
+          pMeshComponent->pColors = reinterpret_cast<GXColor*>(lpDest);
+        }
+        else if (ele.Type == GXDECLTYPE_D3DCOLOR || ele.Type == GXDECLTYPE_UBYTE4) {
+          mesh::CopyVertexElementFromStream(lpDest, sizeof(GXColor32), lpStreamSource + nOffset, nStride, sizeof(GXColor32), nVertexCount);
+          lpDest += sizeof(GXColor32) * nVertexCount;
+          pMeshComponent->pColors32 = reinterpret_cast<GXColor32*>(lpDest);
+        }
+      }
+      //pMeshComponent->pBoneWeights;
+      //pMeshComponent->pBoneWeights32;   // 参考pBoneWeights, 同时存在时以此为准
+      //pMeshComponent->pBoneIndices;     // 骨骼索引
+      //pMeshComponent->pBoneIndices32;   // 骨骼索引
+
+      return TRUE;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    GXBOOL GXDLL SetUnifiedDiffuse(Primitive* pPrimitive, GXColor32 crDiffuse, GXBOOL bManualUpdate)
+    {
+      GXVERTEXELEMENT element;
+      GXINT nOffset = pPrimitive->GetElementOffset(GXDECLUSAGE_COLOR, 0, &element);
+      if (nOffset < 0) {
+        CLOG_ERROR("%s : Primitive doesn't has diffuse element.\r\n", __FUNCTION__);
+        return FALSE;
+      }
+
+      ASSERT(element.Type == GXDECLTYPE_D3DCOLOR);
+
+      PrimitiveUtility::MapVertices locker_v(pPrimitive, GXResMap::Write);
+      GXLPBYTE lpColors = (GXLPBYTE)locker_v.GetPtr();
+
+      int nNumVertices = pPrimitive->GetVertexCount();
+      int nStride = pPrimitive->GetVertexStride();
+
+      if (lpColors == NULL || nNumVertices == 0 || nStride <= 0) {
+        if (lpColors == NULL) {
+          CLOG_ERROR("%s : Can't get vertices buffer.\r\n", __FUNCTION__);
+        }
+        if (nNumVertices == 0) {
+          CLOG_ERROR("%s : Number of vertices is empty.\r\n", __FUNCTION__);
+        }
+        if (nStride <= 0) {
+          CLOG_ERROR("%s : Bad stride number.\r\n", __FUNCTION__);
+        }
+        return FALSE;
+      }
+
+      lpColors += nOffset;
+      for (int i = 0; i < nNumVertices; i++)
+      {
+        *(GXColor32*)lpColors = crDiffuse;
+        lpColors += nStride;
+      }
+
+      //if(!bManualUpdate) {
+      //  pPrimitive->UpdateResouce(GPrimitive::ResourceVertices);
+      //}
+      return TRUE;
+    }
+  } // namespace PrimitiveUtility
 
 #if 0
   GXDLL clstd::Image* TextureUtility::CreateImage(GTexture* pTexture)

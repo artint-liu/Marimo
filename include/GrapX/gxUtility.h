@@ -2,9 +2,11 @@
 #define _GRAPX_UTILITY_H_
 
 struct GVRENDERDESC;
+struct GVMESHDATA;
 namespace clstd
 {
   class Image;
+  class MemBuffer;
 } // namespace clstd
 
 namespace GrapX
@@ -61,7 +63,9 @@ namespace GrapX
   {
     // TODO: 将要实现
     // ConvertToplogyType();
-    //ResolveToMeshData(GVMESHDATA*);
+    // 不处理索引数据
+    GXBOOL GXDLL ConvertMeshDataToStream(GXOUT clstd::MemBuffer* pBuffer, GXOUT GXVERTEXELEMENT* pVertElement, const GVMESHDATA* pMeshComponent); // GXVERTEXELEMENT 要预留足够大，建议64个
+    GXBOOL GXDLL ConvertStreamToMeshData(GXOUT clstd::MemBuffer* pBuffer, GXOUT GVMESHDATA* pMeshComponent, GXLPCVOID pStream, GXUINT nVertexCount, const GXVERTEXELEMENT* pVertElement);
 
     //************************************
     // 设置Primitive中的Diffuse值，如果存在的话。

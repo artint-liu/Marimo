@@ -6,16 +6,57 @@ class GVScene;
 //class Primitive;
 //class GPrimitiveVI;
 
+//enum class
+
+#define MESHDATA_FLAG_UV2_FLOAT   0x00000001
+#define MESHDATA_FLAG_UV2_FLOAT2  0x00000000
+#define MESHDATA_FLAG_UV2_FLOAT3  0x00000002
+#define MESHDATA_FLAG_UV2_FLOAT4  0x00000003
+#define MESHDATA_FLAG_UV3_FLOAT   (MESHDATA_FLAG_UV2_FLOAT  << 2)
+#define MESHDATA_FLAG_UV3_FLOAT2  (MESHDATA_FLAG_UV2_FLOAT2 << 2)
+#define MESHDATA_FLAG_UV3_FLOAT3  (MESHDATA_FLAG_UV2_FLOAT3 << 2)
+#define MESHDATA_FLAG_UV3_FLOAT4  (MESHDATA_FLAG_UV2_FLOAT4 << 2)
+#define MESHDATA_FLAG_UV4_FLOAT   (MESHDATA_FLAG_UV2_FLOAT  << 4)
+#define MESHDATA_FLAG_UV4_FLOAT2  (MESHDATA_FLAG_UV2_FLOAT2 << 4)
+#define MESHDATA_FLAG_UV4_FLOAT3  (MESHDATA_FLAG_UV2_FLOAT3 << 4)
+#define MESHDATA_FLAG_UV4_FLOAT4  (MESHDATA_FLAG_UV2_FLOAT4 << 4)
+#define MESHDATA_FLAG_UV5_FLOAT   (MESHDATA_FLAG_UV2_FLOAT  << 6)
+#define MESHDATA_FLAG_UV5_FLOAT2  (MESHDATA_FLAG_UV2_FLOAT2 << 6)
+#define MESHDATA_FLAG_UV5_FLOAT3  (MESHDATA_FLAG_UV2_FLOAT3 << 6)
+#define MESHDATA_FLAG_UV5_FLOAT4  (MESHDATA_FLAG_UV2_FLOAT4 << 6)
+#define MESHDATA_FLAG_UV6_FLOAT   (MESHDATA_FLAG_UV2_FLOAT  << 8)
+#define MESHDATA_FLAG_UV6_FLOAT2  (MESHDATA_FLAG_UV2_FLOAT2 << 8)
+#define MESHDATA_FLAG_UV6_FLOAT3  (MESHDATA_FLAG_UV2_FLOAT3 << 8)
+#define MESHDATA_FLAG_UV6_FLOAT4  (MESHDATA_FLAG_UV2_FLOAT4 << 8)
+#define MESHDATA_FLAG_UV7_FLOAT   (MESHDATA_FLAG_UV2_FLOAT  << 10)
+#define MESHDATA_FLAG_UV7_FLOAT2  (MESHDATA_FLAG_UV2_FLOAT2 << 10)
+#define MESHDATA_FLAG_UV7_FLOAT3  (MESHDATA_FLAG_UV2_FLOAT3 << 10)
+#define MESHDATA_FLAG_UV7_FLOAT4  (MESHDATA_FLAG_UV2_FLOAT4 << 10)
+
+#define MESHDATA_FLAG_UV2_MASK  0x00000003
+#define MESHDATA_FLAG_UV3_MASK  (MESHDATA_FLAG_UV2_MASK << 2)
+#define MESHDATA_FLAG_UV4_MASK  (MESHDATA_FLAG_UV2_MASK << 4)
+#define MESHDATA_FLAG_UV5_MASK  (MESHDATA_FLAG_UV2_MASK << 6)
+#define MESHDATA_FLAG_UV6_MASK  (MESHDATA_FLAG_UV2_MASK << 8)
+#define MESHDATA_FLAG_UV7_MASK  (MESHDATA_FLAG_UV2_MASK << 10)
+
 struct GVMESHDATA
 {
-  GXSIZE_T   nVertexCount;     // 顶点数量, 除索引列表外, 下面的元素必须都与这个数量一致
-  GXSIZE_T   nIndexCount;      // 索引数量
+  GXDWORD     dwFlags;          // MESHDATA_FLAG
+  GXSIZE_T    nVertexCount;     // 顶点数量, 除索引列表外, 下面的元素必须都与这个数量一致
+  GXSIZE_T    nIndexCount;      // 索引数量
   float3*     pVertices;        // 顶点, 这个必须有
   float3*     pNormals;         // 法线, 可选
   float4*     pTangents;        // 切线, 可选
   float3*     pBinormals;       // 副法线, 可选
   float2*     pTexcoord0;       // 第一层UV, 可选
   float2*     pTexcoord1;       // 第二层UV, 可选
+  GXLPCVOID   pTexcoord2;       // 第三层UV, GXLPCVOID类型可以储存float，float2，float3，float4各种类型
+  GXLPCVOID   pTexcoord3;
+  GXLPCVOID   pTexcoord4;
+  GXLPCVOID   pTexcoord5;
+  GXLPCVOID   pTexcoord6;
+  GXLPCVOID   pTexcoord7;
   float3*     pBoneWeights;     // 骨骼权重, float3和DWORD任选其一, 内部将自动转换
   GXDWORD*    pBoneWeights32;   // 参考pBoneWeights, 同时存在时以此为准
   int*        pBoneIndices;     // 骨骼索引
@@ -25,8 +66,8 @@ struct GVMESHDATA
   VIndex*     pIndices;         // 索引列表,需要与索引数量一致
   GXResUsage  usage;            // 资源创建方式，编辑器raytrace拾取要使用read方式
 
-  static void   Destroy   (GVMESHDATA* pMeshData);
-  static GXBOOL Check     (const GVMESHDATA* pMeshData);
+  static void     Destroy   (GVMESHDATA* pMeshData);
+  static GXBOOL   Check     (const GVMESHDATA* pMeshData);
   static GXSIZE_T Build     (const GVMESHDATA* pMeshData, GXLPVERTEXELEMENT lpVertDelement); // 要给一个足够大的数组,建议64个
 };
 
@@ -113,6 +154,7 @@ namespace mesh
   GXBOOL GXDLL ValidateIndex(VIndex* pIndices, int nIndexCount, int nVertexCount);
   GXBOOL GXDLL ClearVertexElement(GXLPVOID lpFirstElement, GXSIZE_T cbElement, GXUINT nStride, GXSIZE_T nVertCount);
   GXBOOL GXDLL CopyVertexElementFromStream(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID lpSourceStream, GXSIZE_T nVertCount); // lpSourceStream 的大小是 cbElementStride
+  GXBOOL GXDLL CopyVertexElementFromStream(GXLPVOID lpDestStream, GXUINT nDestStride, GXLPCVOID lpSrcStream, GXUINT nSrcStride, GXUINT cbElementStride, GXSIZE_T nVertCount);
   GXBOOL GXDLL SetVertexElement(GXLPVOID lpFirstElement, GXUINT cbElementStride, GXUINT nStride, GXLPCVOID pValue, GXSIZE_T nVertCount);
   GXBOOL GXDLL TransformPosition(const float4x4& mat, float3* pVertices, GXUINT nCount, GXUINT nStride = 0);
   GXBOOL GXDLL TransformVectors(const float4x4& mat, float3* pVertors, GXUINT nCount, GXUINT nStride = 0);
