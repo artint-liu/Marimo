@@ -100,7 +100,7 @@ public:
 
   GXBOOL    IsChild     (GVNode* pNode);
   GXHRESULT Add         (GVNode* pNode, GVNode* pParent = NULL);
-  GXHRESULT Delete      (GVNode* pNode); // Model必须在GVScene中
+  GXHRESULT Delete      (GVNode* pNode); // Model必须在GVScene中, 如果pNode为NULL，则删除所有物体
   GXHRESULT RenderAll   (GrapX::Canvas3D* pCanvas, int nRenderCate);  // 不做裁剪,会将整个场景中的所有可渲染物都渲染出来
   GXHRESULT SaveToFileW (GXLPCWSTR szFilename);
   GXHRESULT GetRoot     (GVNode** ppRootNode);

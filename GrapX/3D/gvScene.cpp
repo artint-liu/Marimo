@@ -188,11 +188,18 @@ GXHRESULT GVScene::Add(GVNode* pNode, GVNode* pParent)
 
 GXHRESULT GVScene::Delete(GVNode* pNode)
 {
-  if(pNode == NULL) {
-    return GX_FAIL;
-  }
-
   clstd::ScopedSafeLocker lock(&m_Locker);
+
+  if (pNode == NULL) {
+    GVNode* pNode = m_pRoot->GetFirstChild();
+    while (pNode)
+    {
+      GVNode* pNextNode = pNode->GetNext();
+      Delete(pNode);
+      pNode = pNextNode;
+    }
+    return GX_OK;
+  }
 
   if( ! IsChild(pNode)) {
     return GX_FAIL;
