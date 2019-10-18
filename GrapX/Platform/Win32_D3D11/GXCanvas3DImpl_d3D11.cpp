@@ -285,7 +285,7 @@ namespace GrapX
       MaterialImpl* pMtlInstImpl = reinterpret_cast<MaterialImpl*>(pMtlInst);
       ShaderImpl* pShaderImpl = reinterpret_cast<ShaderImpl*>(pMtlInstImpl->InlGetShaderUnsafe());
 
-      if (m_pGraphicsImpl->InlSetShader(pShaderImpl) || m_CurMaterialImpl.operator!=(pMtlInstImpl))
+      if (m_pGraphicsImpl->InlSetShader(pShaderImpl) != StateResult::Failed || m_CurMaterialImpl.operator!=(pMtlInstImpl))
       {
         m_CurMaterialImpl = pMtlInstImpl;
       }

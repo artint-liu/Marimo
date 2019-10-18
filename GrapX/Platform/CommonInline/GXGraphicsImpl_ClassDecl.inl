@@ -191,7 +191,7 @@ private:
   inline GXBOOL     InlSetBlendState        (BlendStateImpl* pBlendState);
   inline GXBOOL     InlSetDepthStencilState (DepthStencilStateImpl* pDepthStencilState);
   inline GXBOOL     InlSetSamplerState      (GXUINT slot, SamplerStateImpl* pSamplerState);
-  inline GXBOOL     InlSetShader            (Shader* pShader);
+  inline StateResult InlSetShader            (Shader* pShader);
   inline GXHRESULT  InlSetVertexDecl        (VertexDeclImpl* pVertexDecl);
   inline GXBOOL     IsActiveCanvas          (CanvasCore* pCanvasCore);
   //inline GXBOOL     IsActiveRenderState     (GRenderStateImpl* pRenderState);

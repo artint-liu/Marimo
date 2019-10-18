@@ -1295,7 +1295,7 @@ namespace GrapX
       return TRUE;
     }
 
-    GrapX::D3D11::StateResult GraphicsImpl::InlSetTexture(TexBaseImpl* pTexture, GXUINT uStage)
+    StateResult GraphicsImpl::InlSetTexture(TexBaseImpl* pTexture, GXUINT uStage)
     {
 #ifdef _DEBUG
       if (uStage >= MAX_TEXTURE_STAGE) {
@@ -1323,16 +1323,30 @@ namespace GrapX
       return StateResult::Ok;
     }
 
+    StateResult GraphicsImpl::InlSetShader(Shader* pShader) // 没有改变返回 FALSE
+    {
+      if(m_pCurShader == pShader)
+      {
+        return StateResult::Same;
+      }
+
+      ASSERT(pShader != NULL);
+      SAFE_RELEASE(m_pCurShader);
+      SAFE_RELEASE(m_pVertexLayout);
+      m_pCurShader = pShader;
+
+      if(m_pCurShader != NULL)
+      {
+        m_pCurShader->AddRef();
+        ((ShaderImpl*)m_pCurShader)->Activate();
+      }
+      return StateResult::Ok;
+    }
+
     GXBOOL GraphicsImpl::IntSetEffect(EffectImpl* pEffectImpl)
     {
       ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
-      return InlSetShader(pShaderImpl);
-      //{
-      //  pEffectImpl->Commit();
-      //  pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
-      //  return TRUE;
-      //}
-      //return FALSE;
+      return InlSetShader(pShaderImpl) != StateResult::Failed;
     }
 
   } // namespace D3D11

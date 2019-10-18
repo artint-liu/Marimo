@@ -199,52 +199,6 @@ GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
 }
 #endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
 
-#ifdef _GXGRAPHICS_INLINE_SHADER_D3D11_
-GXBOOL GraphicsImpl::InlSetShader(Shader* pShader) // 没有改变返回 FALSE
-{
-  if(m_pCurShader == pShader)
-  {
-#ifdef D3D11_LOW_DEBUG
-    //if(m_pCurShader != NULL)
-    //{
-    //  LPDIRECT3DPIXELSHADER9 pPixelShader;
-    //  LPDIRECT3DVERTEXSHADER9 pVertexShader;
-    //  m_pd3dDevice->GetPixelShader(&pPixelShader);
-    //  m_pd3dDevice->GetVertexShader(&pVertexShader);
-    //  ASSERT(pPixelShader == ((GShaderImpl*)m_pCurShader)->m_pPixelShader && pVertexShader == ((GShaderImpl*)m_pCurShader)->m_pVertexShader);
-    //  SAFE_RELEASE(pPixelShader);
-    //  SAFE_RELEASE(pVertexShader);
-    //}
-#endif // D3D9_LOW_DEBUG
-    return FALSE;
-  }
-  ASSERT(pShader != NULL);
-  SAFE_RELEASE(m_pCurShader);
-  SAFE_RELEASE(m_pVertexLayout);
-  m_pCurShader = pShader;
-
-  if(m_pCurShader != NULL)
-  {
-    m_pCurShader->AddRef();
-    ((ShaderImpl*)m_pCurShader)->Activate();
-  }
-  return TRUE;
-}
-#endif // _GXGRAPHICS_INLINE_SHADER_
-//#ifdef _GXGRAPHICS_INLINE_EFFECT_D3D11_
-//GXBOOL GraphicsImpl::InlSetEffect(EffectImpl* pEffectImpl)
-//{
-//  ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(pEffectImpl->GetShaderUnsafe());
-//  InlSetShader(pShaderImpl);
-//  {
-//    pEffectImpl->Commit();
-//    pShaderImpl->CommitConstantBuffer(pEffectImpl->GetDataPoolUnsafe());
-//    return TRUE;
-//  }
-//  return FALSE;
-//}
-//#endif // _GXGRAPHICS_INLINE_EFFECT_D3D9_
-
 #ifdef _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D9_
 GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 {
