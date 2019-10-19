@@ -33,7 +33,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT      Draw                  (Material* pMaterial, GVNode* pNode, const float4x4* pTransform = NULL)); // 临时
     //GXSTDINTERFACE(GXHRESULT      Draw                  (Shader* pShader, GVNode* pNode, const float4x4* pTransform = NULL)); // 临时
 
-    GXSTDINTERFACE(GXHRESULT      SetMaterial           (Material* pMtlInst));
+    GXSTDINTERFACE(GXBOOL         SetMaterial           (Material* pMtlInst));
     GXSTDINTERFACE(GXHRESULT      SetPrimitive          (Primitive* pPrimitive));
     GXSTDINTERFACE(void           SetCamera             (Camera* pCamera));
     GXSTDINTERFACE(Camera*        GetCameraUnsafe       ());

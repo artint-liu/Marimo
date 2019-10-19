@@ -823,6 +823,7 @@ namespace GrapX
         return FALSE;
       }
 
+      ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       Marimo::DataPoolUtility::iterator iter_var = pDataPool->begin();
       Marimo::DataPoolUtility::iterator iter_var_end = pDataPool->end();
       Marimo::DataPoolVariable var;
@@ -833,7 +834,7 @@ namespace GrapX
         if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
           iter_var.ToVariable(var);
           if(var.GetOffset() > 0) {
-            D3D11CreateBuffer(pDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
+            D3D11CreateBuffer(pd3dDevice, pDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
             break;
           }
         }
@@ -841,7 +842,7 @@ namespace GrapX
 
       if(iter_var == iter_var_end)
       {
-        D3D11CreateBuffer(pDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, pDataPool->GetRootSize());
+        D3D11CreateBuffer(pd3dDevice, pDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, pDataPool->GetRootSize());
       }
       else
       {
@@ -849,7 +850,7 @@ namespace GrapX
         for(; iter_var != iter_var_end; ++iter_var) {
           if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
             iter_var.ToVariable(var);
-            D3D11CreateBuffer(pDesc[nCB++], iter_var.TypeName(), var.GetSize());
+            D3D11CreateBuffer(pd3dDevice, pDesc[nCB++], iter_var.TypeName(), var.GetSize());
           }
           else {
             break;
@@ -1109,9 +1110,9 @@ namespace GrapX
       return TRUE;
     }
 
-    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize)
+    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(ID3D11Device* pd3dDevice, D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize)
     {
-      ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      //ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       D3D11_BUFFER_DESC bd;
       InlSetZeroT(bd);
       ASSERT(cbSize > 0);

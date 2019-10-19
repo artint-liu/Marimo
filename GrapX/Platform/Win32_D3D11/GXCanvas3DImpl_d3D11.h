@@ -15,7 +15,7 @@ namespace GrapX
       friend class GraphicsImpl;
     protected:
       GraphicsImpl*             m_pGraphicsImpl;
-      GXSIZE                    m_sExtent;    // RenderTarget尺寸决定
+      GXSIZE                    m_sExtent = {0, 0};    // RenderTarget尺寸决定
 
       ObjectT<RenderTargetImpl> m_pTargets[MRT_SUPPORT_COUNT];
       GXUINT                    m_nTargetCount = NULL;
@@ -32,6 +32,7 @@ namespace GrapX
 #ifdef REFACTOR_SHADER
       //clstd::FixedBuffer        m_CanvasUniformBuf;
       STD_CANVAS_UNIFORM        m_StdCanvasUniform;
+      ID3D11Buffer*             m_pD3DCanvasBuffer = NULL;
 #else
       STANDARDMTLUNIFORMTABLE   m_StdUniforms;
 #endif // REFACTOR_SHADER
@@ -89,7 +90,7 @@ namespace GrapX
       GXLPCVIEWPORT GetViewport         () const override;
       float       GetAspect             () const override;
 
-      GXHRESULT   SetMaterial           (Material* pMaterial) override;
+      GXBOOL      SetMaterial           (Material* pMaterial) override;
       GXHRESULT   SetPrimitive          (Primitive* pPrimitive) override;
       void        SetCamera             (Camera* pCamera) override;
       Camera*     GetCameraUnsafe       () override;

@@ -360,8 +360,6 @@ namespace GrapX
   MaterialImpl::MaterialImpl(Graphics* pGraphics, Shader* pShader)
     : m_pGraphics(pGraphics)
     , m_pShader(pShader)
-    , m_pDataPool(NULL)
-    , m_nRenderQueue(DEFAULT_RENDER_QUEUE)
   {
   }
 
@@ -471,6 +469,8 @@ namespace GrapX
     if (m_aTextures.size() > nSlot)
     {
       m_aTextures[nSlot].texture = pTexture;
+      m_aTextures[nSlot].UpdateTexelSize(m_dwFlags);
+      m_dwFlags |= MATERIAL_FLAG_TEXTURE_CHANGED;
       return TRUE;
     }
     return FALSE;
@@ -482,6 +482,8 @@ namespace GrapX
     if (pDesc && m_aTextures.size() > pDesc->slot)
     {
       m_aTextures[pDesc->slot].texture = pTexture;
+      m_aTextures[pDesc->slot].UpdateTexelSize(m_dwFlags);
+      m_dwFlags |= MATERIAL_FLAG_TEXTURE_CHANGED;
       return TRUE;
     }
     return FALSE;
@@ -586,6 +588,7 @@ namespace GrapX
     Marimo::DataPoolVariable var = GetUniform(szName);
     if (var.IsValid())
     {
+      m_dwFlags |= MATERIAL_FLAG_UNIFORM_CHANGED;
       return var.Set(value);
     }
     return FALSE;
@@ -606,6 +609,7 @@ namespace GrapX
     Marimo::DataPoolVariable var = GetUniform(szName);
     if (var.IsValid())
     {
+      m_dwFlags |= MATERIAL_FLAG_UNIFORM_CHANGED;
       var.CastTo<float4>() = *pVector;
       return TRUE;
     }
@@ -640,37 +644,49 @@ namespace GrapX
     return m_pDataPool;
   }
 
-  GXBOOL MaterialImpl::Commit()
+  GXBOOL MaterialImpl::CommitStates()
   {
-    GXUINT slot = 0;
-    for (auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
-    {
-      m_pGraphics->SetTexture(it->texture, slot);
-      // TODO: 挪到设置纹理里面
-      if(it->TexelSize.IsValid() && (it->texture != NULL)) {
-        if(it->texture->GetType() == RESTYPE_TEXTURE2D)
-        {
-          GXSIZE size;
-          static_cast<Texture*>(static_cast<TextureBase*>(it->texture))->GetDimension(&size);
-          it->TexelSize->set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
-        }
-        else if(it->texture->GetType() == RESTYPE_TEXTURE_CUBE)
-        {
-          TextureCube* pCube = static_cast<TextureCube*>(static_cast<TextureBase*>(it->texture));
-          GXINT width = pCube->GetSize();
-          it->TexelSize->set(1.0f / width, 1.0f / width, (float)width, (float)width);
-        }
-      }
-    }
-
     m_pGraphics->SetBlendState(m_pBlendState);
     m_pGraphics->SetRasterizerState(m_pRasterizer);
     m_pGraphics->SetDepthStencilState(m_pDepthStencil);
     if(_CL_NOT_(m_aSamplerStates.empty())) {
       m_pGraphics->SetSamplerState(0, (GXUINT)m_aSamplerStates.size(), &m_aSamplerStates.front());
     }
+    return TRUE;
+  }
+
+  GXBOOL MaterialImpl::CommitTextures(GXBOOL bMaterialChanged)
+  {
+    if((m_dwFlags & MATERIAL_FLAG_TEXTURE_CHANGED) || bMaterialChanged)
+    {
+      GXUINT slot = 0;
+      for(auto it = m_aTextures.begin(); it != m_aTextures.end(); ++it, slot++)
+      {
+        m_pGraphics->SetTexture(it->texture, slot);
+      }
+    }
 
     return TRUE;
+  }
+
+  void MaterialImpl::TEXTUREUNIT::UpdateTexelSize(GXDWORD& dwFlags)
+  {
+    if(TexelSize.IsValid() && (texture != NULL)) {
+      if(texture->GetType() == RESTYPE_TEXTURE2D)
+      {
+        GXSIZE size;
+        static_cast<Texture*>(static_cast<TextureBase*>(texture))->GetDimension(&size);
+        TexelSize->set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
+        dwFlags |= MATERIAL_FLAG_UNIFORM_CHANGED;
+      }
+      else if(texture->GetType() == RESTYPE_TEXTURE_CUBE)
+      {
+        TextureCube* pCube = static_cast<TextureCube*>(static_cast<TextureBase*>(texture));
+        GXINT width = pCube->GetSize();
+        TexelSize->set(1.0f / width, 1.0f / width, (float)width, (float)width);
+        dwFlags |= MATERIAL_FLAG_UNIFORM_CHANGED;
+      }
+    }
   }
 
 } // namespace GrapX

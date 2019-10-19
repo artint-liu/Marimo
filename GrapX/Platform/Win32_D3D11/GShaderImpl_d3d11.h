@@ -25,6 +25,14 @@ namespace GrapX
       typedef Marimo::DATAPOOL_DECLARATION      DATAPOOL_DECLARATION;
       typedef Marimo::DATAPOOL_TYPE_DEFINITION  DATAPOOL_TYPE_DEFINITION;
       typedef clmap<clStringA, ID3D11InputLayout*> InputLayoutDict;
+    public:
+      struct D3D11CB_DESC
+      {
+        ID3D11Buffer* pD3D11ConstantBuffer;
+        GXUINT        cbSize : 24;
+        GXUINT        type : 8;  // 标记cb_MarimoCommon
+      };
+
     protected:
       enum class TargetType : GXUINT
       {
@@ -59,12 +67,6 @@ namespace GrapX
       // 同时储存VS，PS合集，VS，PS独立连续常量缓冲，
       // 如(合集:){G,len},{A,len},{B,len},{C,len},{D,len},|（VS:）G,A,D|（PS:）G,B,C
       // 只有合集遵守引用计数
-      struct D3D11CB_DESC
-      {
-        ID3D11Buffer* pD3D11ConstantBuffer;
-        GXUINT        cbSize : 24;
-        GXUINT        type : 8;  // 标记cb_MarimoCommon
-      };
       clstd::MemBuffer            m_D11ResDescPool; // D3D11 描述池
       ID3D11Buffer**              m_pVertexCB;
       ID3D11Buffer**              m_pPixelCB;
@@ -98,7 +100,7 @@ namespace GrapX
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 
       GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
-      ID3D11Buffer* D3D11CreateBuffer(D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize);
+      static ID3D11Buffer* D3D11CreateBuffer(ID3D11Device* pd3dDevice, D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize);
       ID3D11InputLayout* D3D11GetInputLayout(VertexDeclImpl* pVertexDecl);
       void DbgCheck(INTERMEDIATE_CODE::Array& aInterCode);
 

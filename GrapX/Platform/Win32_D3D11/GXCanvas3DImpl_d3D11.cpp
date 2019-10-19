@@ -110,6 +110,7 @@ namespace GrapX
       SAFE_RELEASE(m_pBlendState);
       //SAFE_RELEASE(m_pDepthStencil);
       SAFE_RELEASE(m_pSamplerState);
+      SAFE_RELEASE(m_pD3DCanvasBuffer);
     }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -249,6 +250,10 @@ namespace GrapX
       //  m_nTargetCount = (int)nCount;
       //}
 
+      ShaderImpl::D3D11CB_DESC desc;
+      ShaderImpl::D3D11CreateBuffer(m_pGraphicsImpl->D3DGetDevice(), desc, "cb_MarimoCommon", sizeof(STD_CANVAS_UNIFORM));
+      m_pD3DCanvasBuffer = desc.pD3D11ConstantBuffer;
+
       //m_pTargets[0]->GetDimension(&m_sExtent);
       if(_CL_NOT_(Canvas3DImpl::SetTarget(pTargetArray, nCount))) {
         return FALSE;
@@ -280,22 +285,29 @@ namespace GrapX
       return m_pGraphicsImpl;
     }
 
-    GXHRESULT Canvas3DImpl::SetMaterial(Material* pMtlInst)
+    GXBOOL Canvas3DImpl::SetMaterial(Material* pMtlInst)
     {
       MaterialImpl* pMtlInstImpl = reinterpret_cast<MaterialImpl*>(pMtlInst);
       ShaderImpl* pShaderImpl = reinterpret_cast<ShaderImpl*>(pMtlInstImpl->InlGetShaderUnsafe());
 
-      if (m_pGraphicsImpl->InlSetShader(pShaderImpl) != StateResult::Failed || m_CurMaterialImpl.operator!=(pMtlInstImpl))
-      {
-        m_CurMaterialImpl = pMtlInstImpl;
+      StateResult r = m_pGraphicsImpl->InlSetShader(pShaderImpl);
+      if(r == StateResult::Failed) {
+        return FALSE;
       }
 
-      pMtlInstImpl->Commit();
+      if(m_CurMaterialImpl.operator!=(pMtlInstImpl))
+      {
+        m_CurMaterialImpl = pMtlInstImpl;
+        pMtlInstImpl->CommitStates();
+        r = StateResult::Ok;
+      }
 
-      if (pMtlInstImpl->GetDataPoolUnsafe())
+      pMtlInstImpl->CommitTextures(r != StateResult::Same);
+      if(pMtlInstImpl->GetDataPoolUnsafe() && ((pMtlInstImpl->GetFlags() & MATERIAL_FLAG_UNIFORM_CHANGED) || r != StateResult::Same))
       {
         pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
       }
+      pMtlInstImpl->ClearFlags();
 
       return TRUE;
     }
