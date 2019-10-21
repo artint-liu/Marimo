@@ -32,6 +32,7 @@ class GVScene;
 #define MESHDATA_FLAG_UV7_FLOAT2  (MESHDATA_FLAG_UV2_FLOAT2 << 10)
 #define MESHDATA_FLAG_UV7_FLOAT3  (MESHDATA_FLAG_UV2_FLOAT3 << 10)
 #define MESHDATA_FLAG_UV7_FLOAT4  (MESHDATA_FLAG_UV2_FLOAT4 << 10)
+#define MESHDATA_FLAG_INDICES_32 0x10000
 
 #define MESHDATA_FLAG_UV2_MASK  0x00000003
 #define MESHDATA_FLAG_UV3_MASK  (MESHDATA_FLAG_UV2_MASK << 2)
@@ -63,7 +64,10 @@ struct GVMESHDATA
   GXDWORD*    pBoneIndices32;   // 骨骼索引
   GXColor*    pColors;          // 顶点色, 这个不会被转换为pColors32
   GXColor32*  pColors32;        // 顶点色, 如果pColors也不为空,则以pColors32为准
-  VIndex*     pIndices;         // 索引列表,需要与索引数量一致
+  union {
+    VIndex*     pIndices;         // 索引列表,需要与索引数量一致
+    VIndex32*   pIndices32;       // 32位索引列表
+  };
   GXResUsage  usage;            // 资源创建方式，编辑器raytrace拾取要使用read方式
 
   static void     Destroy   (GVMESHDATA* pMeshData);
@@ -87,7 +91,10 @@ protected:
   void   Clear();
   GXBOOL InitializeAsObjFromFile(GrapX::Graphics* pGraphics, GXLPCWSTR szFilename, GXResUsage usage, const float4x4* pTransform);
   GXBOOL InitializeAsObjFromMemory(GrapX::Graphics* pGraphics, clBufferBase* pBuffer, GXResUsage usage, const float4x4* pTransform);
+  template<typename _VIndexT>
+  GXBOOL IntCreatePrimitiveT(GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, _VIndexT* pIndices, GXSIZE_T nIdxCount, GXResUsage usage);
   GXBOOL IntCreatePrimitive(GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GXResUsage usage);
+  GXBOOL IntCreatePrimitive(GrapX::Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex32* pIndices, GXSIZE_T nIdxCount, GXResUsage usage);
   GXBOOL IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, GrapX::Primitive* pPrimitive);
   GXBOOL IntCreateMesh(GrapX::Graphics* pGraphics, const GVMESHDATA* pMeshComponent);
   GXBOOL IntInitializeAsContainer(GrapX::Graphics* pGraphics, GVNode** pNodesArray, int nNodeCount);

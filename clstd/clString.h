@@ -407,7 +407,7 @@ namespace clstd
 
   namespace StringUtility
   {
-    // 按照ch分割分解字符串
+    // 按照ch分割分解字符串, 不会跳过空白
     template<typename _TCh, class _Fn>
     size_t Resolve(const _TCh* str, size_t len, _TCh ch, _Fn fn) // fn(size_t index, const _TCh* str, size_t len)
     {

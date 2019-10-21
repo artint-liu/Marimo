@@ -508,7 +508,7 @@ namespace GrapX
         &pPrimitiveImpl->m_uVertexStride, &offset);
 
       if(pPrimitiveImpl->GetIndexCount()) {
-        m_pImmediateContext->IASetIndexBuffer(pPrimitiveImpl->m_pD3D11IndexBuffer, DXGI_FORMAT_R16_UINT, offset);
+        m_pImmediateContext->IASetIndexBuffer(pPrimitiveImpl->m_pD3D11IndexBuffer, pPrimitiveImpl->m_D3DIndexFormat, offset);
       }
 
       return S_OK;
@@ -1313,7 +1313,7 @@ namespace GrapX
 
       if (m_pCurTexture[uStage] == NULL)
       {
-        m_pImmediateContext->PSSetShaderResources(uStage, 1, NULL);
+        m_pImmediateContext->PSSetShaderResources(uStage, 1, NULL); // FIXME: ²»ÄÜÎªNULL
         return StateResult::Ok;
       }
 

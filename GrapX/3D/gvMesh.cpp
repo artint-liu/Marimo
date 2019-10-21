@@ -154,7 +154,8 @@ GXBOOL GVMesh::InitializeAsObjFromMemory(Graphics* pGraphics, clBufferBase* pBuf
   return bval;
 }
 
-GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GXResUsage usage)
+template<typename _VIndexT>
+GXBOOL GVMesh::IntCreatePrimitiveT(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, _VIndexT* pIndices, GXSIZE_T nIdxCount, GXResUsage usage)
 {
   GXBOOL bval = FALSE;
   //m_eType       = eType;
@@ -163,7 +164,7 @@ GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLP
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
   if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL,
-    lpVertDecl, usage, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, 2, pIndices)))
+    lpVertDecl, usage, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, sizeof(_VIndexT), pIndices)))
   {
     GXVERTEXELEMENT Desc;
     int nOffset = MOGetDeclOffset(lpVertDecl, GXDECLUSAGE_POSITION, 0, &Desc);
@@ -177,6 +178,16 @@ GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLP
     bval = TRUE;
   }
   return bval;
+}
+
+GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex* pIndices, GXSIZE_T nIdxCount, GXResUsage usage)
+{
+  return IntCreatePrimitiveT(pGraphics, nPrimCount, lpVertDecl, lpVertics, nVertCount, pIndices, nIdxCount, usage);
+}
+
+GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLPCVERTEXELEMENT lpVertDecl, GXLPVOID lpVertics, GXSIZE_T nVertCount, VIndex32* pIndices, GXSIZE_T nIdxCount, GXResUsage usage)
+{
+  return IntCreatePrimitiveT(pGraphics, nPrimCount, lpVertDecl, lpVertics, nVertCount, pIndices, nIdxCount, usage);
 }
 
 GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primitive* pPrimitive)
@@ -407,8 +418,16 @@ GXBOOL GVMesh::IntCreateMesh(Graphics* pGraphics, const GVMESHDATA* pMeshCompone
     clstd::MemBuffer buffer;
     PrimitiveUtility::ConvertMeshDataToStream(&buffer, VertElement, pMeshComponent);
 
-    if( ! IntCreatePrimitive(pGraphics, pMeshComponent->nIndexCount / 3, VertElement, 
-      buffer.GetPtr(), pMeshComponent->nVertexCount, pMeshComponent->pIndices, pMeshComponent->nIndexCount, pMeshComponent->usage))
+    if(TEST_FLAG(pMeshComponent->dwFlags, MESHDATA_FLAG_INDICES_32))
+    {
+      if (_CL_NOT_(IntCreatePrimitive(pGraphics, pMeshComponent->nIndexCount / 3, VertElement,
+        buffer.GetPtr(), pMeshComponent->nVertexCount, pMeshComponent->pIndices32, pMeshComponent->nIndexCount, pMeshComponent->usage)) )
+      {
+        bval = FALSE;
+      }
+    }
+    else if(_CL_NOT_(IntCreatePrimitive(pGraphics, pMeshComponent->nIndexCount / 3, VertElement, 
+            buffer.GetPtr(), pMeshComponent->nVertexCount, pMeshComponent->pIndices, pMeshComponent->nIndexCount, pMeshComponent->usage)) )
     {
       bval = FALSE;
     }

@@ -140,6 +140,7 @@ namespace GrapX
 
       const GXUINT              m_uIndexCount;
       const GXUINT              m_uIndexStride;
+      const DXGI_FORMAT         m_D3DIndexFormat;
       D3D11_MAPPED_SUBRESOURCE  m_sIndexMapped;
       GXLPBYTE                  m_pIndexBuffer;
 

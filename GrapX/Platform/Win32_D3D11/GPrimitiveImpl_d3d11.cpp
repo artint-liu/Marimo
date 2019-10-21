@@ -308,6 +308,7 @@ namespace GrapX
       , m_pD3D11IndexBuffer (NULL)
       , m_uIndexCount       (nIndexCount)
       , m_uIndexStride      (nIndexStride)
+      , m_D3DIndexFormat    (nIndexStride == 2 ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT)
       , m_pIndexBuffer      (NULL)
     {
       InlSetZeroT(m_sIndexMapped);
