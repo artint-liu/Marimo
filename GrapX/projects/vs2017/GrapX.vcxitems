@@ -233,6 +233,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolCompiler.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolErrorMsg.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolImpl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolImpl_SubPool.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolIterator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolVariable.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DesktopWindowsMgr.cpp" />

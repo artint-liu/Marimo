@@ -226,7 +226,8 @@ namespace Marimo
     };
 
   public:
-    DataPoolObject(GXLPCSTR szName) : _TDataPoolImpl(szName) {}
+    template<typename _Ty>
+    DataPoolObject(_Ty param) : _TDataPoolImpl(param) {}
     virtual ~DataPoolObject() {}
 
     virtual GXHRESULT ImportDataFromFile(GXLPCSTR szFilename) override
@@ -351,7 +352,7 @@ namespace Marimo
               }
             }
             else {
-              bval = DataPoolImpl::QueryByName(strVarName, &var);
+              bval = _TDataPoolImpl::QueryByName(strVarName, &var);
               if( ! bval) {
                 //nLine = import.ErrorMsg.LineFromPtr(sect->itSectionName.marker);
                 //CLOG_WARNINGW(L"%s(%d): 不存在名为\"%s\"的结构体\n", import.ErrorMsg.GetCurrentFilenameW(), nLine, clStringW(strVarName));
@@ -414,16 +415,7 @@ namespace Marimo
         } while(sect.NextSection(NULL));
       }
 
-      //if(varParent) {
       IntImportKeys(import, sectParent, varParent);
-      //}
-
-      //import.ss.CloseSection(sect);
-
-      //for(auto it = sVarDict.begin(); it != sVarDict.end(); ++it)
-      //{
-      //  CLOG("import %s[%d]\n", it->first, it->second.nCount);
-      //}
     }
 
     void IntImportKeys(IMPORT& import, const Section& sect, MOVariable* var)
@@ -441,7 +433,7 @@ namespace Marimo
             varMember = var->MemberOf(clStringA(strKey));
           }
           else {
-            DataPoolImpl::QueryByName(clStringA(strKey), &varMember);
+            _TDataPoolImpl::QueryByName(clStringA(strKey), &varMember);
           }
 
           if(varMember.IsValid())
@@ -522,7 +514,7 @@ namespace Marimo
         }
       } // for
     }
-  };
+  }; // template class
 
 
 
@@ -666,30 +658,27 @@ namespace Marimo
     clpathfile::MakeFullPath(strFilenameW);
     if(file.OpenExisting(strFilenameW))
     {
-      clBuffer* pBuffer;
+      clBuffer buffer;
       DefaultDataPoolInclude IncludeImpl;
-      if(file.MapToBuffer(&pBuffer)) {
+      if(file.Read(&buffer)) {
         // TODO: 这个从文件加载要检查BOM，并转换为Unicode格式
         //clStringA strDefine;
         //clStringA strFilenameA = (GXLPCWSTR)strFilenameW;
         //strDefine.Format("#FILE %s\n#LINE 1\n", (clStringA::LPCSTR)strFilenameA);
         //pBuffer->Insert(0, (GXLPCSTR)strDefine, strDefine.GetLength());
 
-        GXLPCSTR szDefinitionCodes = (GXLPCSTR)pBuffer->GetPtr();
+        GXLPCSTR szDefinitionCodes = (GXLPCSTR)buffer.GetPtr();
         DataPoolCompiler* pResolver = NULL;
-        if(szDefinitionCodes == NULL || pBuffer->GetSize() == 0) {
+        if(szDefinitionCodes == NULL || buffer.GetSize() == 0) {
           hval = GX_OK;
         }
         else {
-          hval = DataPoolCompiler::CreateFromMemory(&pResolver, strFilenameW, pInclude ? pInclude : &IncludeImpl, szDefinitionCodes, pBuffer->GetSize(), dwFlags);
+          hval = DataPoolCompiler::CreateFromMemory(&pResolver, strFilenameW, pInclude ? pInclude : &IncludeImpl, szDefinitionCodes, buffer.GetSize(), dwFlags);
           if(GXSUCCEEDED(hval)) {
             hval = CreateFromResolver(ppDataPool, szName, pResolver, dwFlags);
           }
           SAFE_RELEASE(pResolver);
         }
-
-        delete pBuffer;
-        pBuffer = NULL;
       }
     }
     else {
@@ -765,6 +754,20 @@ namespace Marimo
     *ppDataPool = pDataPoolObj;
     return hval;
   }
+
+  namespace DataPoolInternal
+  {
+    GXBOOL IntCreateSubPool(DataPool** ppSubPool, DataPoolImpl* pReference)
+    {
+      DataPoolObject<DataPoolImpl_SubPool>* pSubPool = new DataPoolObject<DataPoolImpl_SubPool>(pReference);
+      if (InlIsFailedToNewObject(pSubPool)) {
+        return FALSE;
+      }
+      *ppSubPool = pSubPool;
+      return TRUE;
+    }
+  }
+
 
   //DataPool::LPCENUMDESC DataPool::IntGetEnum( GXUINT nPackIndex ) const
   //{

@@ -95,37 +95,38 @@ namespace Marimo
   class DataPoolArray : public clBuffer
   {
   protected:
-      clBufferBase* m_pParent;
+    clBufferBase* m_pParent;
   public:
-      DataPoolArray(clBufferBase* pParent, u32 nPageSize)
-          : clBuffer(nPageSize)
-          , m_pParent(pParent)
-      {}
+    DataPoolArray(clBufferBase* pParent, u32 nPageSize)
+      : clBuffer(nPageSize)
+      , m_pParent(pParent)
+    {}
 
-      DataPoolArray(u32 nSize, GXLPBYTE pPlacement) // placement new 专用
-          : m_pParent((clBufferBase*)0x12345678)
-      {      
-          ASSERT((GXINT_PTR)this == (GXINT_PTR)pPlacement); // 纯验证用，没实际意义
+    DataPoolArray(u32 nSize, GXLPBYTE pPlacement) // placement new 专用
+      : m_pParent((clBufferBase*)0x12345678)
+    {
+      ASSERT((GXINT_PTR)this == (GXINT_PTR)pPlacement); // 纯验证用，没实际意义
 
-          m_lpBuffer  = (pPlacement + sizeof(DataPoolArray));
-          m_uSize     = nSize;
-          m_nCapacity = nSize;
-          m_nPageSize = 0;
-      }
+      m_lpBuffer = (pPlacement + sizeof(DataPoolArray));
+      m_uSize = nSize;
+      m_nCapacity = nSize;
+      m_nPageSize = 0;
+    }
 
-      void SetParent(clBufferBase* pParent) {
-          ASSERT( ! m_pParent || m_pParent == (clBufferBase*)0x12345678);
-          m_pParent = pParent;
-      }
+    void SetParent(clBufferBase* pParent) {
+      ASSERT(!m_pParent || m_pParent == (clBufferBase*)0x12345678);
+      m_pParent = pParent;
+    }
 
-      clBufferBase* GetParent() const {
-          return m_pParent;
-      }
+    clBufferBase* GetParent() const {
+      return m_pParent;
+    }
   };
 
   class DataPoolImpl : public DataPool
   {
     friend class DataPool;
+    friend class DataPoolImpl_SubPool;
     friend class DataPoolVariable;
     friend class DataPoolVariableImpl;
 
@@ -364,6 +365,7 @@ namespace Marimo
     virtual GXBOOL Save(GXLPCWSTR szFilename) override;
     virtual GXBOOL Save(clFile& file) override;
     virtual GXBOOL Load(clFile& file, DataPoolCreation dwFlags) override;
+    virtual GXBOOL CreateSubPool(DataPool** ppSubPool) override;
 
     virtual LPCSTR    GetVariableName     (GXUINT nIndex) const override; // 获得变量的名字
 
@@ -431,15 +433,9 @@ namespace Marimo
 
     const clBufferBase* IntGetEntryBuffer   () const; // 获得数据池最基础的buffer
     LPCTD         FindType            (GXLPCSTR szTypeName) const;
-    //void          CopyVariables       (VARIABLE_DESC* pDestVarDesc, GXLPCVOID pSrcVector, const clstd::STRINGSETDESC* pTable, GXINT_PTR lpBase);
     GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, VARIABLE* pVar);
     GXBOOL        IntQuery            (GXINOUT VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
     GXINT         IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar);
-//#ifdef ENABLE_DATAPOOL_WATCHER
-    //int           FindWatcher         (DataPoolWatcher* pWatcher);
-    //int           FindWatcherByName   (GXLPCSTR szClassName);
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-    //LPCENUMDESC   IntGetEnum          (GXUINT nPackIndex) const;  // m_aEnumPck中的索引
     LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
     GXBOOL        IntIgnore           (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
 
@@ -482,11 +478,6 @@ namespace Marimo
 
       clRefBuffer         m_VarBuffer;        // 变量空间开始地址, 这个指向了m_Buffer
 
-//#ifdef _DEBUG
-//      GXUINT              m_nDbgNumOfArray;   // 动态数组的缓冲区
-//      GXUINT              m_nDbgNumOfString;  // 动态数组的缓冲区
-//#endif // #ifdef _DEBUG
-
 #ifndef DISABLE_DATAPOOL_WATCHER
       struct WATCH_FIXED;
 
@@ -520,9 +511,134 @@ namespace Marimo
           void    IntImpulse              (WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse);
           void    IntCleanupWatchObj      (WatchFixedDict& sWatchDict);
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-      GXDWORD           m_dwRuntimeFlags; // RuntimeFlag 与 DataPoolCreation 供用，注意不要冲突
+      GXDWORD           m_dwRuntimeFlags; // RuntimeFlag 与 DataPoolCreation 共用，注意不要冲突
   }; // class DataPoolImpl
+
+  //////////////////////////////////////////////////////////////////////////
+
+  class DataPoolImpl_SubPool : public DataPool
+  {
+  public:
+    typedef const DataPoolImpl::VARIABLE_DESC*  LPCVD;
+    typedef DATAPOOL_HASHALGO     HASHALGO;
+    typedef DATAPOOL_TYPE_DESC    TYPE_DESC;
+    typedef DataPoolImpl::ENUM_DESC ENUM_DESC;
+    typedef DataPoolImpl::VARIABLE_DESC*        LPVD;
+    typedef const DataPoolImpl::VARIABLE_DESC*  LPCVD;
+    typedef const DataPoolImpl::ENUM_DESC*      LPCED;
+    typedef const DataPoolImpl::TYPE_DESC*      LPCTD;
+    typedef const DataPoolImpl::STRUCT_DESC*    LPCSD;
+
+    
+    typedef DATAPOOL_TYPE_DESC    TYPE_DESC;
+    //typedef DataPoolImpl::WatchFixedDict WatchFixedDict;
+    typedef DataPoolImpl::FILE_HEADER FILE_HEADER;
+    typedef DataPoolImpl::SIZELIST SIZELIST;
+    typedef DataPoolImpl::VARIABLE_DESC  VARIABLE_DESC;
+
+    typedef DataPoolImpl::FILE_BUFFERHEADER FILE_BUFFERHEADER;
+    enum RuntimeFlag
+    {
+      RuntimeFlag_Fixed = DataPoolImpl::RuntimeFlag_Fixed,
+      RuntimeFlag_Readonly = DataPoolImpl::RuntimeFlag_Readonly,
+      RuntimeFlag_AutoKnock = DataPoolImpl::RuntimeFlag_AutoKnock,
+    };
+
+  protected:
+    GrapX::ObjectT<DataPoolImpl> m_pReference;
+    clstd::FixedBuffer m_buffer;
+
+  protected:
+    GXBOOL        IntQuery            (GXINOUT DataPoolImpl::VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
+    GXINT         IntQueryByExpression(GXLPCSTR szExpression, DataPoolImpl::VARIABLE* pVar);
+    LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
+    GXBOOL        IntIgnore           (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+
+    LPCVD         IntGetVariable(LPCVD pVdd, GXLPCSTR szName/*, int nIndex*/);
+    DataPoolArray*  IntCreateArrayBuffer  (clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount);
+    GXBOOL        IntCreateUnary      (clBufferBase* pBuffer, LPCVD pThisVdd, DataPoolImpl::VARIABLE* pVar);
+    GXSIZE_T      IntGetRTDescHeader    (SIZELIST* pSizeList);   // 获得运行时描述表大小
+    GXSIZE_T      IntGetRTDescNames     ();   // 获得运行时描述表字符串表所占的大小
+    static GXUINT IntChangePtrSize      (GXUINT nSizeofPtr, VARIABLE_DESC* pVarDesc, GXUINT nCount, GXBOOL bNX16B);
+    clsize  LocalizePtr       ();
+
+    template<class _Ty>
+    static void   IntClearChangePtrFlag (_Ty* pTypeDesc, GXUINT nCount);
+
+    template<class _TIter>
+    _TIter& first_iterator    (_TIter& it);
+
+
+#ifndef DISABLE_DATAPOOL_WATCHER
+    typedef DataPoolImpl::WATCH_FIXED WATCH_FIXED;
+
+    typedef clset<GXLPCVOID>                      ImpulsingSet;
+    typedef clset<WATCH_FIXED>                    WatchFixedList;
+    typedef clmap<GXLPVOID, WatchFixedList>       WatchFixedDict;
+    typedef clmap<DataPoolArray*, WatchFixedDict> WatchableArray;
+
+    static  GXBOOL  IntAddToWatchDict       (WatchFixedDict& sDict, GXLPVOID key, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+    static  GXBOOL  IntRemoveFromWatchDict  (WatchFixedDict& sDict, GXLPVOID key, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+    GXBOOL  IntWatch                (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam);
+    void    IntImpulse              (WatchFixedDict& sDict, GXLPVOID key, DATAPOOL_IMPULSE* pImpulse);
+    void    IntCleanupWatchObj      (WatchFixedDict& sWatchDict);
+    GXBOOL  IntIsImpulsing    (const DataPoolVariable* pVar) const;
+#endif
+
+  public:
+    DataPoolImpl_SubPool(DataPoolImpl* pDataPool);
+    GXSTDIMPLEMENT(GXBOOL      Save                (GXLPCWSTR szFilename));
+    GXSTDIMPLEMENT(GXBOOL      Save                (clFile& file));
+    GXSTDIMPLEMENT(GXBOOL      Load                (clFile& file, DataPoolCreation dwFlags));
+    GXSTDIMPLEMENT(GXBOOL      CreateSubPool     (DataPool** pSubPool));  // 创建一个与当前数据结构一样的DataPool，除了数据外，所有结构引用此Pool
+
+    GXSTDIMPLEMENT(GXLPCSTR    GetVariableName     (GXUINT nIndex) const); // 获得变量的名字
+
+                                                                           // 从stock格式文件或者内存数据导入/导出的接口
+    //GXSTDIMPLEMENT(GXHRESULT   ImportDataFromFile  (GXLPCWSTR szFilename));
+    //GXSTDIMPLEMENT(GXHRESULT   ImportDataFromFile  (GXLPCSTR szFilename));
+    //GXSTDIMPLEMENT(GXHRESULT   ImportDataFromMemory(clstd::Buffer* pBuffer, GXLPCWSTR szRefFilename = NULL));
+    //GXSTDIMPLEMENT(GXHRESULT   ExportDataToFile    (GXLPCWSTR szFilename, GXLPCSTR szCodec = NULL)); // "ansi", "unicode"不区分大小写，默认为unicode
+    //GXSTDIMPLEMENT(GXHRESULT   ExportDataToFile    (GXLPCSTR szFilename, GXLPCSTR szCodec = NULL));
+    //GXSTDIMPLEMENT(GXHRESULT   ExportDataToMemory  (clstd::Buffer* pBuffer, GXLPCSTR szCodec = NULL));
+
+    GXSTDIMPLEMENT(GXDWORD     GetFlags            () const);
+
+    GXSTDIMPLEMENT(GXBOOL      IsFixedPool         () const);           // 池中不含有字符串和动态数组
+    GXSTDIMPLEMENT(GXLPVOID    GetRootPtr          () const);
+    GXSTDIMPLEMENT(GXSIZE_T    GetRootSize         () const);
+    GXSTDIMPLEMENT(GXUINT      GetNameId           (LPCSTR szName));    // 返回Type, Variable, Enum等内部稳定字符串的id
+    GXSTDIMPLEMENT(GXBOOL      QueryByName         (GXLPCSTR szName, DataPoolVariable* pVar));
+    GXSTDIMPLEMENT(GXBOOL      QueryByExpression   (GXLPCSTR szExpression, DataPoolVariable* pVar));
+    GXSTDIMPLEMENT(GXBOOL      FindFullName        (clStringA* str, DataPool::LPCVD pVarDesc, clBufferBase* pBuffer, GXUINT nOffset)); // 查找变量全名
+
+#ifndef DISABLE_DATAPOOL_WATCHER
+    GXSTDIMPLEMENT(GXBOOL      IsAutoKnock         ());
+    GXSTDIMPLEMENT(GXBOOL      IsKnocking          (const DataPoolVariable* pVar));
+    GXSTDIMPLEMENT(GXBOOL      SetAutoKnock        (GXBOOL bAutoKnock));
+
+    GXSTDIMPLEMENT(GXBOOL      Impulse             (const DataPoolVariable& var, DataAction reason, GXSIZE_T index, GXSIZE_T count));
+    GXSTDIMPLEMENT(GXBOOL      Watch               (GXLPCSTR szExpression, ImpulseProc pImpulseCallback, GXLPARAM lParam));
+    GXSTDIMPLEMENT(GXBOOL      Watch               (GXLPCSTR szExpression, DataPoolWatcher* pWatcher));
+    GXSTDIMPLEMENT(GXBOOL      Watch               (GXLPCSTR szExpression, GXHWND hWnd));
+    GXSTDIMPLEMENT(GXBOOL      Watch               (DataPoolVariable* pVar, ImpulseProc pImpulseCallback, GXLPARAM lParam));
+    GXSTDIMPLEMENT(GXBOOL      Watch               (DataPoolVariable* pVar, DataPoolWatcher* pWatcher));
+    GXSTDIMPLEMENT(GXBOOL      Watch               (DataPoolVariable* pVar, GXHWND hWnd));
+    GXSTDIMPLEMENT(GXBOOL      Ignore              (GXLPCSTR szExpression, ImpulseProc pImpulseCallback));
+    GXSTDIMPLEMENT(GXBOOL      Ignore              (GXLPCSTR szExpression, DataPoolWatcher* pWatcher));
+    GXSTDIMPLEMENT(GXBOOL      Ignore              (GXLPCSTR szExpression, GXHWND hWnd));
+    GXSTDIMPLEMENT(GXBOOL      Ignore              (DataPoolVariable* pVar, ImpulseProc pImpulseCallback));
+    GXSTDIMPLEMENT(GXBOOL      Ignore              (DataPoolVariable* pVar, DataPoolWatcher* pWatcher));
+    GXSTDIMPLEMENT(GXBOOL      Ignore              (DataPoolVariable* pVar, GXHWND hWnd));
+#endif // #ifndef DISABLE_DATAPOOL_WATCHER
+
+    GXSTDIMPLEMENT(iterator        begin       ());
+    GXSTDIMPLEMENT(iterator        end         ());
+    GXSTDIMPLEMENT(named_iterator  named_begin ());
+    GXSTDIMPLEMENT(named_iterator  named_end   ());
+  };
+
+  //////////////////////////////////////////////////////////////////////////
 
   // 如果是数字类型，则转换返回TRUE，否则返回FALSE
   // 支持0x十六进制，0b二进制，0开头的八进制和十进制

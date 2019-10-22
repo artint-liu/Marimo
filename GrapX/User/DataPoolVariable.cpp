@@ -399,12 +399,6 @@ namespace Marimo
     Variable::VTBL* s_pDynamicArrayNX16BVtbl  = &s_DynamicArrayNX16BVtbl;
   } // namespace Implement
 
-  
-  namespace Implement
-  {
-  
-  } // namespace Implement
-
   //////////////////////////////////////////////////////////////////////////
   Variable& Variable::operator=(const Variable& val)
   {

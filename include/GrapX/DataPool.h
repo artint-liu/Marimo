@@ -364,6 +364,7 @@ namespace Marimo
     GXSTDINTERFACE(GXBOOL      Save                (GXLPCWSTR szFilename));
     GXSTDINTERFACE(GXBOOL      Save                (clFile& file));
     GXSTDINTERFACE(GXBOOL      Load                (clFile& file, DataPoolCreation dwFlags));
+    GXSTDINTERFACE(GXBOOL      CreateSubPool       (DataPool** ppSubPool));  // 创建一个与当前数据结构一样的DataPool，除了数据外，所有结构引用此Pool
 
     GXSTDINTERFACE(GXLPCSTR    GetVariableName     (GXUINT nIndex) const); // 获得变量的名字
 

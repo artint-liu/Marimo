@@ -1,4 +1,5 @@
-﻿#include "GrapX.h"
+﻿#ifndef _HIDING_CODE_
+#include "GrapX.h"
 #include "GrapX.Hxx"
 
 #include "clStringSet.h"
@@ -15,6 +16,7 @@
 #include "GXStation.h"
 using namespace clstd;
 
+#endif // #ifndef _HIDING_CODE_
 // NX16B = not cross 16-byte boundary
 
 #define GSIT_Variables (m_aGSIT)
@@ -48,6 +50,7 @@ using namespace clstd;
 # define ASSERT_X64(x)
 #endif // #ifdef _X86
 
+#ifndef _HIDING_CODE_
 namespace Marimo
 {
   typedef DataPoolVariable Variable;
@@ -265,9 +268,12 @@ namespace Marimo
         return 0;
       }
     }
+
+    GXBOOL IntCreateSubPool(DataPool** ppSubPool, DataPoolImpl* pReference);
+
   } // namespace DataPoolInternal
 
-
+#endif // #ifndef _HIDING_CODE_
   namespace Implement
   {
     //extern DATAPOOL_TYPE_DECLARATION c_InternalTypeDefine[];
@@ -283,6 +289,7 @@ namespace Marimo
     extern DataPoolVariable::VTBL* s_pStaticArrayNX16BVtbl;
     extern DataPoolVariable::VTBL* s_pDynamicArrayNX16BVtbl;
 
+#ifndef _HIDING_CODE_
     void CopyVariables(DataPoolImpl::VARIABLE_DESC* pDestVarDesc, const DataPoolBuildTime::BTVarDescArray* pSrcVector, const STRINGSETDESC* pTable, GXINT_PTR lpBase)
     {
       int i = 0;
@@ -328,10 +335,11 @@ namespace Marimo
 
       return cbBuckets;
     }
-
+#endif // #ifndef _HIDING_CODE_
   } // namespace Implement
 
   //////////////////////////////////////////////////////////////////////////
+#ifndef _HIDING_CODE_
 
   DataPoolTypeClass operator&(DataPoolTypeClass a, DataPoolTypeClass b)
   {
@@ -405,17 +413,6 @@ namespace Marimo
       }
     }
 
-//#ifdef ENABLE_OLD_DATA_ACTION
-//#ifdef ENABLE_DATAPOOL_WATCHER
-//    // 释放所有的监视器
-//    for(WatcherArray::iterator it = m_aWatchers.begin();
-//      it != m_aWatchers.end(); ++it) {
-//        SAFE_RELEASE(*it);
-//    }
-//    m_aWatchers.clear();
-//#endif // #ifdef ENABLE_DATAPOOL_WATCHER
-//#else
-
 #ifndef DISABLE_DATAPOOL_WATCHER
     IntCleanupWatchObj(m_FixedDict);
     for(WatchableArray::iterator it = m_WatchableArray.begin(); it != m_WatchableArray.end(); ++it)
@@ -423,12 +420,11 @@ namespace Marimo
       IntCleanupWatchObj(it->second);
     }
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
-
-//#endif // #ifdef ENABLE_OLD_DATA_ACTION
-    //SAFE_DELETE(m_pBuffer);
   }
+
   //////////////////////////////////////////////////////////////////////////
-    GXBOOL DataPoolImpl::Initialize(LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolCreation dwFlags)
+
+  GXBOOL DataPoolImpl::Initialize(LPCTYPEDECL pTypeDecl, LPCVARDECL pVarDecl, DataPoolCreation dwFlags)
   {
     if(pVarDecl == NULL) {
       return FALSE;
@@ -615,6 +611,8 @@ namespace Marimo
     return NULL;
   }
 
+#endif // #ifndef _HIDING_CODE_
+
   DataPoolImpl::LPCVD DataPoolImpl::IntGetVariable(LPCVD pVdd, GXLPCSTR szName/*, int nIndex*/)
   {
     // TODO: 这里可以改为比较Name Id的方式，Name Id可以就是m_Buffer中的偏移
@@ -713,6 +711,8 @@ namespace Marimo
 
     return NULL;
   }
+
+#ifndef _HIDING_CODE_
 
   /*
   GXHRESULT DataPoolImpl::GetLayout(GXLPCSTR szStructName, DataLayoutArray* pLayout)
@@ -864,6 +864,7 @@ namespace Marimo
       }
     }
   }
+#endif // #ifndef _HIDING_CODE_
 
   GXDWORD DataPoolImpl::GetFlags() const
   {
@@ -980,8 +981,6 @@ namespace Marimo
     return FALSE;
   }
 
-
-
 #ifndef DISABLE_DATAPOOL_WATCHER
   GXBOOL DataPoolImpl::IsAutoKnock()
   {
@@ -1005,7 +1004,6 @@ namespace Marimo
     return bPrevFlag;
   }
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
-
 
   GXINT DataPoolImpl::IntQueryByExpression(GXLPCSTR szExpression, VARIABLE* pVar)
   {
@@ -1060,8 +1058,6 @@ namespace Marimo
 
     return result;
   }
-
-
 
   DataPoolImpl::LPCVD DataPoolImpl::IntFindVariable(LPCVD pVarDesc, int nCount, GXUINT nOffset)
   {
@@ -1132,7 +1128,6 @@ namespace Marimo
     it.pVarDesc += m_nNumOfVar;
     return it;
   }
-
 
   GXSIZE_T DataPoolImpl::IntGetRTDescHeader(SIZELIST* pSizeList)
   {
@@ -1377,6 +1372,7 @@ namespace Marimo
   }
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
+#ifndef _HIDING_CODE_
   const clBufferBase* DataPoolImpl::IntGetEntryBuffer() const
   {
     return &m_VarBuffer;
@@ -1404,6 +1400,8 @@ namespace Marimo
 //#endif // DEBUG_DECL_NAME
 //    }
 //  }
+
+#endif // #ifndef _HIDING_CODE_
 
   clsize DataPoolImpl::LocalizePtr()
   {
@@ -1444,6 +1442,8 @@ namespace Marimo
 
     return nSumSize;
   }
+
+#ifndef _HIDING_CODE_
 
   void DataPoolImpl::DbgIntDump()
   {
@@ -1800,6 +1800,7 @@ namespace Marimo
     return FALSE;
   }
 
+#endif // #ifndef _HIDING_CODE_
 
   //////////////////////////////////////////////////////////////////////////
 #ifndef DISABLE_DATAPOOL_WATCHER
@@ -1986,7 +1987,6 @@ namespace Marimo
 
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
-
   //////////////////////////////////////////////////////////////////////////
   //
   // 保存用的内部结构体
@@ -2152,7 +2152,7 @@ namespace Marimo
     //}
   };
   typedef clvector<BUFFER_SAVELOAD_DESC> BufDescArray;
-
+  
   GXBOOL DataPoolImpl::Save( GXLPCWSTR szFilename )
   {
     clFile file;
@@ -2799,6 +2799,13 @@ namespace Marimo
     return TRUE;
   }
 
+#ifndef _HIDING_CODE_
+
+  GXBOOL DataPoolImpl::CreateSubPool(DataPool** ppSubPool)
+  {
+    return DataPoolInternal::IntCreateSubPool(ppSubPool, this);
+  }
+
 #ifndef DISABLE_DATAPOOL_WATCHER
 
   void DataPoolImpl::IntCleanupWatchObj(WatchFixedDict& sWatchDict)
@@ -2817,6 +2824,7 @@ namespace Marimo
   }
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
+#endif // #ifndef _HIDING_CODE_
   DataPoolArray* DataPoolImpl::IntCreateArrayBuffer(clBufferBase* pParent, LPCVD pVarDesc, GXBYTE* pBaseData, int nInitCount)
   {
     ASSERT(pVarDesc->IsDynamicArray()); // 一定是动态数组
@@ -2846,6 +2854,8 @@ namespace Marimo
     }
     return *ppBuffer;
   }
+
+#ifndef _HIDING_CODE_
 
   //////////////////////////////////////////////////////////////////////////
   DataPoolImpl::VARIABLE_DESC::VTBL* DataPoolImpl::VARIABLE_DESC::GetUnaryMethod() const
@@ -2906,6 +2916,7 @@ namespace Marimo
 
 #endif // #ifndef DISABLE_DATAPOOL_WATCHER
 
+#endif // #ifndef _HIDING_CODE_
   GXUINT DataPoolImpl::GetNameId( LPCSTR szName )
   {
     DataPool::LPCSTR aNames = (DataPool::LPCSTR)m_pNamesTabEnd;
@@ -2932,7 +2943,7 @@ namespace Marimo
     }
     return 0;
   }
-
+#ifndef _HIDING_CODE_
 
   GXSIZE_T DATAPOOL_HASHALGO::HashString(GXLPCSTR str) const
   {
@@ -2943,4 +2954,4 @@ namespace Marimo
   }
 } // namespace Marimo
 
-//#include "DataPoolImpl.cpp"
+#endif // #ifndef _HIDING_CODE_

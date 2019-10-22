@@ -888,6 +888,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11\GXCanvas3DImpl_d3D11.cpp">
       <Filter>Platform\Win32_D3X11</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\User\DataPoolImpl_SubPool.cpp">
+      <Filter>Lib\User</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\Canvas\GXCanvas3DImpl.inl">
