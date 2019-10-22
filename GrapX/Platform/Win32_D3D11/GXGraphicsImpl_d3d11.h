@@ -89,6 +89,7 @@ namespace GrapX
         F_DEVICEHASLOST = 0x00000002,  // 设备已经丢失
         F_ACTIVATE = 0x00000004,
         F_SHOWCONSOLE = 0x00000008,
+        F_WAITFORVSYNC = 0x00000010,
       };
       typedef GrapX::Internal::GXResourceMgr  GXResourceMgr;
     public:

@@ -153,6 +153,9 @@ namespace GrapX
       m_strResourceDir = pDesc->szRootDir;
       m_hWnd = pDesc->hWnd;
       m_dwFlags |= F_CREATEDEVICE;
+      if(pDesc->bWaitForVSync) {
+        m_dwFlags |= F_WAITFORVSYNC;
+      }
 
       if(pDesc->pLogger) {
         m_pLogger = pDesc->pLogger;
@@ -454,7 +457,7 @@ namespace GrapX
     GXHRESULT GraphicsImpl::Present()
     {
       m_pGraphicsLocker->Lock();  // TODO: 想想怎么节省这个Lock
-      HRESULT hval = m_pSwapChain->Present(0, 0);
+      HRESULT hval = m_pSwapChain->Present((m_dwFlags & F_WAITFORVSYNC) ? 1 : 0, 0);
 #ifdef _DEBUG
       // 多线程时改变设备大小可能会导致失败
       if(GXFAILED(hval)) {

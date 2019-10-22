@@ -549,6 +549,9 @@ namespace Marimo
     clstd::FixedBuffer m_buffer;
 
   protected:
+    GXBOOL  Cleanup           (GXLPVOID lpBuffer, const DATAPOOL_VARIABLE_DESC* pVarDesc, int nVarDescCount);
+    GXBOOL  CleanupArray      (const VARIABLE_DESC* pVarDesc, GXLPVOID lpFirstElement, GXUINT nElementCount);
+
     GXBOOL        IntQuery            (GXINOUT DataPoolImpl::VARIABLE* pVar, GXLPCSTR szVariableName, GXUINT nIndex);
     GXINT         IntQueryByExpression(GXLPCSTR szExpression, DataPoolImpl::VARIABLE* pVar);
     LPCVD         IntFindVariable     (LPCVD pVarDesc, int nCount, GXUINT nOffset);
@@ -587,6 +590,8 @@ namespace Marimo
 
   public:
     DataPoolImpl_SubPool(DataPoolImpl* pDataPool);
+    virtual ~DataPoolImpl_SubPool();
+
     GXSTDIMPLEMENT(GXBOOL      Save                (GXLPCWSTR szFilename));
     GXSTDIMPLEMENT(GXBOOL      Save                (clFile& file));
     GXSTDIMPLEMENT(GXBOOL      Load                (clFile& file, DataPoolCreation dwFlags));

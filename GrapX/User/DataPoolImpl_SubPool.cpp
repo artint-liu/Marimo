@@ -31,6 +31,7 @@ namespace Marimo
     : m_pReference(pDataPool)
   {
     m_buffer.Resize(pDataPool->GetRootSize(), TRUE);    
+    //TRACE("sizeof(DataPoolImpl_SubPool):%u\n", sizeof(DataPoolImpl_SubPool));
   }
 
 #define _HIDING_CODE_
@@ -65,6 +66,7 @@ namespace Marimo
 
 #define m_VarBuffer       m_buffer
 #define DataPoolImpl      DataPoolImpl_SubPool
+#define VARIABLE_DATAPOOL_OBJECT m_pReference
 #include "DataPoolImpl.cpp"
 
   //////////////////////////////////////////////////////////////////////////

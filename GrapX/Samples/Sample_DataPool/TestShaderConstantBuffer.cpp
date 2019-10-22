@@ -236,8 +236,17 @@ void TestSlidingArray(DataPool* pDataPool, DataPoolVariable& varArray, GXLPCSTR 
 //}
 
 //////////////////////////////////////////////////////////////////////////
+#define REPLACE_SUB_DATAPOOL \
+if(bTestSub) { \
+  Marimo::DataPool* pSubPool = NULL; \
+  GXBOOL bret = pDataPool->CreateSubPool(&pSubPool); \
+  ASSERT(bret); \
+  SAFE_RELEASE(pDataPool); \
+  pDataPool = pSubPool; \
+}
 
-void TestShaderConstantBuffer_Common()
+
+void TestShaderConstantBuffer_Common(GXBOOL bTestSub)
 {
   static Marimo::DATAPOOL_VARIABLE_DECLARATION s_aShaderConstantBuffer[] =
   {
@@ -251,6 +260,8 @@ void TestShaderConstantBuffer_Common()
 
   Marimo::DataPool* pDataPool = NULL;
   GXHRESULT hr = Marimo::DataPool::CreateDataPool(&pDataPool, NULL, NULL, s_aShaderConstantBuffer, Marimo::DataPoolCreation_NotCross16BytesBoundary);
+  REPLACE_SUB_DATAPOOL;
+
   if(GXSUCCEEDED(hr)) {
     pDataPool->Save(_CLTEXT("Test\\TestShaderConstantBuffer.dpl"));
   }
@@ -296,10 +307,11 @@ void TestShaderConstantBuffer_Common()
   SAFE_RELEASE(pDataPool);
 }
 
-void TestShaderConstantBuffer_HLSLPackingRulesSample()
+void TestShaderConstantBuffer_HLSLPackingRulesSample(GXBOOL bTestSub)
 {
   Marimo::DataPool* pDataPool = NULL;
   GXHRESULT hr = Marimo::DataPool::CompileFromMemory(&pDataPool, NULL, NULL, g_szCodeSample, 0, Marimo::DataPoolCreation_NotCross16BytesBoundary);
+  REPLACE_SUB_DATAPOOL;
 
   Marimo::DataPoolVariable ie1, ie2, ie3, ie4, ie5, ie6, ie7, ie8, ie9, ie10, ie11, ie12;
   pDataPool->QueryByName("ie1", &ie1);
@@ -525,7 +537,7 @@ void CheckCommon1(const Marimo::DataPoolVariable& a1,
   }
 }
 
-void TestShaderConstantBuffer_HLSLPackingRulesSample2()
+void TestShaderConstantBuffer_HLSLPackingRulesSample2(GXBOOL bTestSub)
 {
   static GXLPCSTR szCodeSample2 = "\
   float  a1[7];     \n\
@@ -538,6 +550,7 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample2()
   Marimo::DataPool* pDataPool = NULL;
   GXHRESULT hr = Marimo::DataPool::CompileFromMemory(&pDataPool, NULL, NULL, szCodeSample2, 0, Marimo::DataPoolCreation_NotCross16BytesBoundary);
   ASSERT(GXSUCCEEDED(hr));
+  REPLACE_SUB_DATAPOOL;
 
   Marimo::DataPoolVariable a1, a2, mat4x3, mat3x4, mats;
   pDataPool->QueryByName("a1", &a1);         // [100] (0, 112)
@@ -576,7 +589,7 @@ void TestShaderConstantBuffer_HLSLPackingRulesSample2()
   SAFE_RELEASE(pDataPool);
 }
 
-void TestShaderConstantBuffer_HLSLPackingRulesSample3()
+void TestShaderConstantBuffer_HLSLPackingRulesSample3(GXBOOL bTestSub)
 {
   static GXLPCSTR szCodeSample3 = "\
 struct STU {          \n\
@@ -595,6 +608,7 @@ float  val_array[];   \n\
   Marimo::DataPool* pDataPool = NULL;
   GXHRESULT hr = Marimo::DataPool::CompileFromMemory(&pDataPool, NULL, NULL, szCodeSample3, 0, Marimo::DataPoolCreation_NotCross16BytesBoundary);
   ASSERT(GXSUCCEEDED(hr));
+  REPLACE_SUB_DATAPOOL;
 
   Marimo::DataPoolVariable stu_array, mat_array, vc2_array, val_array;
   Marimo::DataPoolVariable new_ele;
@@ -736,8 +750,13 @@ float  val_array[];   \n\
 
 void TestShaderConstantBuffer()
 {
-  TestShaderConstantBuffer_Common();
-  TestShaderConstantBuffer_HLSLPackingRulesSample();
-  TestShaderConstantBuffer_HLSLPackingRulesSample2();
-  TestShaderConstantBuffer_HLSLPackingRulesSample3();
+  TestShaderConstantBuffer_Common(FALSE);
+  TestShaderConstantBuffer_HLSLPackingRulesSample(FALSE);
+  TestShaderConstantBuffer_HLSLPackingRulesSample2(FALSE);
+  TestShaderConstantBuffer_HLSLPackingRulesSample3(FALSE);
+
+  TestShaderConstantBuffer_Common(TRUE);
+  TestShaderConstantBuffer_HLSLPackingRulesSample(TRUE);
+  TestShaderConstantBuffer_HLSLPackingRulesSample2(TRUE);
+  TestShaderConstantBuffer_HLSLPackingRulesSample3(TRUE);
 }
