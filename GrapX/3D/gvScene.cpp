@@ -500,7 +500,7 @@ GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
 }
 
 GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int nRenderCate, GXDWORD dwLayerMask, GXDWORD dwRequired )
-{  
+{
   GVNode::AABB          aabbAbs;
   GVRENDERDESC          Desc;
   const GVNode::FrustumPlanes*  pFrustum;
@@ -531,12 +531,14 @@ GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int
         ASSERT(Desc.pMaterial != NULL);
         
         // 能不能写的再优雅一些了？？？
-        if(TEST_FLAG(Desc.dwFlags, GVNF_NOCLIP))
+        if(TEST_FLAG(Desc.dwFlags, GVNF_NOCLIP)) {
           goto JMP_ADD;
+        }
 
         pNode->GetAbsoluteAABB(aabbAbs);
-        if(pFrustum->IntersectAABB(aabbAbs) == 0)
+        if(pFrustum->IntersectAABB(aabbAbs) == 0) {
           goto JMP_NEXT;
+        }
 JMP_ADD:  // 主要是这个不想写两遍
         pRenderSequence->Add(&Desc);
         ++m_uDrawCallCount;

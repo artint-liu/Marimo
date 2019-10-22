@@ -250,9 +250,13 @@ namespace GrapX
       //  m_nTargetCount = (int)nCount;
       //}
 
-      ShaderImpl::D3D11CB_DESC desc;
-      ShaderImpl::D3D11CreateBuffer(m_pGraphicsImpl->D3DGetDevice(), desc, "cb_MarimoCommon", sizeof(STD_CANVAS_UNIFORM));
-      m_pD3DCanvasBuffer = desc.pD3D11ConstantBuffer;
+      //ShaderImpl::D3D11CB_DESC desc;
+      //ShaderImpl::D3D11CreateBuffer(m_pGraphicsImpl->D3DGetDevice(), desc, "cb_MarimoCommon", sizeof(STD_CANVAS_UNIFORM));
+      //m_pD3DCanvasBuffer = desc.pD3D11ConstantBuffer;
+
+      D3D11_BUFFER_DESC bd = {sizeof(STD_CANVAS_UNIFORM), D3D11_USAGE_DEFAULT, D3D11_BIND_CONSTANT_BUFFER, 0, 0};
+      HRESULT hr = m_pGraphicsImpl->D3DGetDevice()->CreateBuffer(&bd, NULL, &m_pD3DCanvasBuffer);
+
 
       //m_pTargets[0]->GetDimension(&m_sExtent);
       if(_CL_NOT_(Canvas3DImpl::SetTarget(pTargetArray, nCount))) {
@@ -277,7 +281,7 @@ namespace GrapX
       sSketch.dwCategoryId = RCC_Canvas3D;
       sSketch.strResourceName.Format(_CLTEXT("%x"), this);
       m_pGraphicsImpl->RegisterResource(this, &sSketch);
-      return TRUE;
+      return SUCCEEDED(hr);
     }
 
     Graphics* Canvas3DImpl::GetGraphicsUnsafe() const
@@ -305,7 +309,7 @@ namespace GrapX
       pMtlInstImpl->CommitTextures(r != StateResult::Same);
       if(pMtlInstImpl->GetDataPoolUnsafe() && ((pMtlInstImpl->GetFlags() & MATERIAL_FLAG_UNIFORM_CHANGED) || r != StateResult::Same))
       {
-        pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), &m_StdCanvasUniform);
+        pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), m_pD3DCanvasBuffer);
       }
       pMtlInstImpl->ClearFlags();
 
@@ -363,7 +367,7 @@ namespace GrapX
       m_StdCanvasUniform._Time.z = cos(m_StdCanvasUniform._Time.y);
       m_StdCanvasUniform._Time.w = sin(m_StdCanvasUniform._Time.y);
 
-      //m_ViewFrustum.set(ACCESS_AS(float4x4, id_matWorldViewProj));
+      m_ViewFrustum.set(m_StdCanvasUniform.MARIMO_MATRIX_VP);
 #else
       m_StdUniforms.g_matViewProj = CameraCtx.matView * CameraCtx.matProjection;
       m_StdUniforms.g_matViewProjInv = m_StdUniforms.g_matViewProj;
@@ -389,16 +393,12 @@ namespace GrapX
       typedef GVSequence::RenderDescArray RenderDescArray;
       Material* pMtlInst = NULL;
       const int nArrayCount = pSequence->GetArrayCount();
-      //GXLPCBYTE lpCanvasUniform = (GXLPCBYTE)m_CanvasUniformBuf.GetPtr();
+
       for (int nArrayIndex = 0; nArrayIndex < nArrayCount; nArrayIndex++)
       {
         const RenderDescArray& aDesc = pSequence->GetArray(nArrayIndex);
-        //for (RenderDescArray::const_iterator it = aDesc.begin();
-        //  it != aDesc.end(); ++it)
         for(const GVRENDERDESC& Desc : aDesc)
         {
-          //const GVRENDERDESC& Desc = *it;
-
           if (TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
             SetWorldMatrix(Desc.matWorld);
           }
@@ -413,15 +413,6 @@ namespace GrapX
             {
               SetMaterial(Desc.pMaterial);
               pMtlInst = Desc.pMaterial;
-            }
-            else {
-              // TODO: 这个是否只有在 SetWorldMatrix() 后才需要提交?
-              // TODO: 应该改为一个标准接口
-#ifdef REFACTOR_SHADER
-          //static_cast<MaterialImpl*>(pMtlInst)->IntCommit(lpCanvasUniform);
-#else
-              static_cast<MaterialImpl*>(pMtlInst)->IntCommit(&m_StdUniforms);
-#endif // #ifdef REFACTOR_SHADER
             }
           }
           else {
@@ -513,6 +504,8 @@ namespace GrapX
       m_StdUniforms.g_matWorld = matWorld;
       m_StdUniforms.g_matWorldView = matWorld * m_StdUniforms.g_matView;
 #endif // #ifdef REFACTOR_SHADER
+
+      m_pGraphicsImpl->D3DGetDeviceContext()->UpdateSubresource(m_pD3DCanvasBuffer, 0, NULL, &m_StdCanvasUniform, 0, 0);
 
       //m_StdUniforms.g_matWorldViewProjInv;
       //m_StdUniforms.g_matWorldInv;

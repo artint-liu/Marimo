@@ -410,8 +410,8 @@ namespace GrapX
       , m_pBindResourceDesc(NULL)
       , m_nBindResourceDesc(0)
       , m_buffer(8)
-      , m_pVertexCB(NULL)
-      , m_pPixelCB(NULL)
+      //, m_pVertexCB(NULL)
+      //, m_pPixelCB(NULL)
     {
     }
 
@@ -431,7 +431,9 @@ namespace GrapX
         D3D11CB_DESC* const pDescEnd = D3D11CB_GetDescEnd();
         for(; pDesc != pDescEnd; pDesc++)
         {
-          SAFE_RELEASE(pDesc->pD3D11ConstantBuffer);
+          if(pDesc->pD3D11ConstantBuffer != CANVAS_COMMON_MARK_PTR) {
+            SAFE_RELEASE(pDesc->pD3D11ConstantBuffer);
+          }
           pDesc->cbSize = 0;
         }
       }
@@ -862,17 +864,22 @@ namespace GrapX
       ID3D11Buffer** pD3D11BufBegin = m_pVertexCB;
       ID3D11Buffer** const pD3D11BufEnd = D3D11CB_GetPixelCBEnd();
       ASSERT(((size_t)pD3D11BufEnd - (size_t)pD3D11BufBegin) % sizeof(ID3D11Buffer*) == 0);
+      int nUniformIndex = 0;
       for(; pD3D11BufBegin != pD3D11BufEnd; pD3D11BufBegin++)
       {
         // 索引转成内容
         ASSERT(reinterpret_cast<size_t>(*pD3D11BufBegin) < nCB);
         *pD3D11BufBegin = pDesc[reinterpret_cast<size_t>(*pD3D11BufBegin)].pD3D11ConstantBuffer;
+        if(*pD3D11BufBegin == CANVAS_COMMON_MARK_PTR) {
+          m_nCanvasUniformIndex[nUniformIndex++] = pD3D11BufBegin - m_pVertexCB; // m_pVertexCB 是表的开始
+          ASSERT(nUniformIndex < countof(m_nCanvasUniformIndex));
+        }
       }
 
       return TRUE;
     }
 
-    GXBOOL ShaderImpl::CommitConstantBuffer(Marimo::DataPool* pDataPool, STD_CANVAS_UNIFORM* pUniforms)
+    GXBOOL ShaderImpl::CommitConstantBuffer(Marimo::DataPool* pDataPool, ID3D11Buffer* pCanvasUniform)
     {
       ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
 
@@ -886,24 +893,35 @@ namespace GrapX
       //  ++pCBDesc;
       //}
 
-      if (pUniforms)
+      if (pCanvasUniform)
       {
-        for (; pCBDesc != pCBDescEnd; ++pCBDesc)
+        for(int i = 0; i < countof(m_nCanvasUniformIndex); i++)
         {
-          ASSERT(((pCBDesc->type == 1) && sizeof(STD_CANVAS_UNIFORM) == pCBDesc->cbSize) || pCBDesc->type != 1);
-          pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL,
-            ((pCBDesc->type == 1) ? (const void*)pUniforms : (const void*)pSourceBuffer), 0, 0);
-          pSourceBuffer += pCBDesc->cbSize;
+          if (m_nCanvasUniformIndex[i] >= 0) {
+            m_pVertexCB[m_nCanvasUniformIndex[i]] = pCanvasUniform; // m_pVertexCB 是数组开始位置
+          }
         }
       }
-      else
+
+      //{
+      //  for (; pCBDesc != pCBDescEnd; ++pCBDesc)
+      //  {
+      //    ASSERT(((pCBDesc->type == 1) && sizeof(STD_CANVAS_UNIFORM) == pCBDesc->cbSize) || pCBDesc->type != 1);
+      //    pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL,
+      //      ((pCBDesc->type == 1) ? (const void*)pUniforms : (const void*)pSourceBuffer), 0, 0);
+      //    pSourceBuffer += pCBDesc->cbSize;
+      //  }
+      //}
+      //else
+      //{
+      for (; pCBDesc != pCBDescEnd; ++pCBDesc)
       {
-        for (; pCBDesc != pCBDescEnd; ++pCBDesc)
-        {
+        if(pCBDesc->type != 1) {
           pImmediateContext->UpdateSubresource(pCBDesc->pD3D11ConstantBuffer, 0, NULL, pSourceBuffer, 0, 0);
-          pSourceBuffer += pCBDesc->cbSize;
         }
+        pSourceBuffer += pCBDesc->cbSize;
       }
+      //}
 
       UINT count = (UINT)(UINT_PTR)(m_pPixelCB - m_pVertexCB);
       if(count) {
@@ -1121,13 +1139,15 @@ namespace GrapX
       bd.ByteWidth      = cbSize;
       bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
       bd.CPUAccessFlags = 0;
+      desc.cbSize = cbSize;
 
       if (szName && clstd::strcmpT(szName, "cb_MarimoCommon") == 0)
       {
         desc.type = 1;
+        desc.pD3D11ConstantBuffer = CANVAS_COMMON_MARK_PTR;
+        return CANVAS_COMMON_MARK_PTR;
       }
 
-      desc.cbSize = cbSize;
       ASSERT(((desc.type == 1) && sizeof(STD_CANVAS_UNIFORM) == desc.cbSize) || desc.type != 1);
 
       HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &desc.pD3D11ConstantBuffer);

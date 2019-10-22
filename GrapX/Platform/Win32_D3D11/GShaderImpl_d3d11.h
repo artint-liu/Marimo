@@ -5,6 +5,8 @@
 #define _SHADER_CLASS_D3D11_IMPLEMENT_HEADER_DEFINE_FILE_
 struct STD_CANVAS_UNIFORM;
 
+#define CANVAS_COMMON_MARK_PTR  (ID3D11Buffer*)-100
+
 //////////////////////////////////////////////////////////////////////////
 // 关于ShaderConst和Uniform的含义:
 // Const表示常量,VertexShader 和 PixelShader 分别包含各自的Const常量
@@ -50,7 +52,7 @@ namespace GrapX
       };
 
     protected:
-      GraphicsImpl* m_pGraphicsImpl;
+      GraphicsImpl*               m_pGraphicsImpl;
       ID3D11VertexShader*         m_pD3D11VertexShader;
       ID3D11PixelShader*          m_pD3D11PixelShader;
       ID3DBlob*                   m_pD3DVertexInterCode;  // 用来和顶点声明进行绑定
@@ -68,8 +70,9 @@ namespace GrapX
       // 如(合集:){G,len},{A,len},{B,len},{C,len},{D,len},|（VS:）G,A,D|（PS:）G,B,C
       // 只有合集遵守引用计数
       clstd::MemBuffer            m_D11ResDescPool; // D3D11 描述池
-      ID3D11Buffer**              m_pVertexCB;
-      ID3D11Buffer**              m_pPixelCB;
+      ID3D11Buffer**              m_pVertexCB = NULL;
+      ID3D11Buffer**              m_pPixelCB = NULL;
+      int                         m_nCanvasUniformIndex[2] = { -1, -1 };
 
       D3D11CB_DESC* D3D11CB_GetDescBegin() const;
       D3D11CB_DESC* D3D11CB_GetDescEnd() const;
@@ -95,7 +98,7 @@ namespace GrapX
       GXBOOL Activate();
       GXBOOL BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab); // 因为没有大小，只生成vs或者ps CB与合集的索引关系
       GXBOOL BuildCBTable(Marimo::DataPool* pDataPool); // 第一次创建Effect或者Material时创建D3D CB
-      GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool, STD_CANVAS_UNIFORM* pUniforms = NULL);
+      GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool, ID3D11Buffer* pCanvasUniform = NULL);
       const BINDRESOURCE_DESC* GetBindResource(GXUINT nIndex) const;
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 

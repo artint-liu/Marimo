@@ -391,7 +391,7 @@ namespace clstd
       return false;
     }
 
-    if( ! file.ReadToBuffer(&m_Buffer)) {
+    if( ! file.Read(&m_Buffer)) {
       // ERROR:无法读取文件
       return false;
     }
