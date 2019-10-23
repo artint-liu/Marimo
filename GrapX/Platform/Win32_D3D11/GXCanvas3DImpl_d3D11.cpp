@@ -309,7 +309,10 @@ namespace GrapX
       pMtlInstImpl->CommitTextures(r != StateResult::Same);
       if(pMtlInstImpl->GetDataPoolUnsafe() && ((pMtlInstImpl->GetFlags() & MATERIAL_FLAG_UNIFORM_CHANGED) || r != StateResult::Same))
       {
-        pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDataPoolUnsafe(), m_pD3DCanvasBuffer);
+        if(pMtlInstImpl->GetFlags() & MATERIAL_FLAG_UNIFORM_CHANGED) {
+          pShaderImpl->UploadConstBuffer(pMtlInstImpl->GetDeviceDependBuffer(), pMtlInstImpl->GetDataPoolUnsafe());
+        }
+        pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDeviceDependBuffer(), m_pD3DCanvasBuffer);
       }
       pMtlInstImpl->ClearFlags();
 
@@ -343,14 +346,6 @@ namespace GrapX
 
       m_pCamera->GetContext(&CameraCtx);
 
-#ifdef REFACTOR_SHADER
-      //ACCESS_AS(float4x4, id_matViewProj) = CameraCtx.matView * CameraCtx.matProjection;
-      //ACCESS_AS(float4x4, id_matViewProjInv) = ACCESS_AS(float4x4, id_matViewProj);
-      //ACCESS_AS(float4x4, id_matViewProjInv).inverse();
-      //ACCESS_AS(float4x4, id_matWorldViewProj) = CameraCtx.matWorld * ACCESS_AS(float4x4, id_matViewProj);
-
-      //ACCESS_AS(float3, id_vViewPos) = m_pCamera->GetPos();
-      //ACCESS_AS(float3, id_vViewDir) = m_pCamera->GetFront();
 
       GXDWORD dwTick = gxGetTickCount();
       //float4& vTime = ACCESS_AS(float4, id_vTime);
@@ -368,23 +363,7 @@ namespace GrapX
       m_StdCanvasUniform._Time.w = sin(m_StdCanvasUniform._Time.y);
 
       m_ViewFrustum.set(m_StdCanvasUniform.MARIMO_MATRIX_VP);
-#else
-      m_StdUniforms.g_matViewProj = CameraCtx.matView * CameraCtx.matProjection;
-      m_StdUniforms.g_matViewProjInv = m_StdUniforms.g_matViewProj;
-      m_StdUniforms.g_matViewProjInv.inverse();
-      m_StdUniforms.g_matWorldViewProj = CameraCtx.matWorld * m_StdUniforms.g_matViewProj;
 
-      m_StdUniforms.g_vViewPos = m_pCamera->GetPos();
-      m_StdUniforms.g_vViewDir = m_pCamera->GetFront();
-
-      GXDWORD dwTick = gxGetTickCount();
-      m_StdUniforms.g_vTime.w = (float)dwTick * 1e-3f;
-      m_StdUniforms.g_vTime.z = (float)(dwTick % 10000) * 1e-3f * CL_2PI;
-      m_StdUniforms.g_vTime.x = sin(m_StdUniforms.g_vTime.z);
-      m_StdUniforms.g_vTime.y = cos(m_StdUniforms.g_vTime.z);
-
-      m_ViewFrustum.set(m_StdUniforms.g_matWorldViewProj);
-#endif // #ifdef REFACTOR_SHADER
       return GX_OK;
     }
 

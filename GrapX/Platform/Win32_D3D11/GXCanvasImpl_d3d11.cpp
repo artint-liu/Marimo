@@ -624,7 +624,13 @@ namespace GrapX
 
     void CanvasImpl::IntCommitEffectCB()
     {
-      static_cast<ShaderImpl*>(m_CurrentEffect.pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_CurrentEffect.pEffectImpl->GetDataPoolUnsafe());
+      EffectImpl* pEffectImpl = m_CurrentEffect.pEffectImpl;
+      
+      static_cast<ShaderImpl*>
+        (pEffectImpl->GetShaderUnsafe())->UploadConstBuffer(pEffectImpl->GetDeviceDependBuffer(), pEffectImpl->GetDataPoolUnsafe());
+
+      static_cast<ShaderImpl*>
+        (pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(pEffectImpl->GetDeviceDependBuffer());
     }
 
     Graphics* CanvasImpl::GetGraphicsUnsafe() const

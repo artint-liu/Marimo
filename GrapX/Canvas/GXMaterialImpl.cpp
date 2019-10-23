@@ -351,16 +351,21 @@ namespace GrapX
 
   MaterialImpl::~MaterialImpl()
   {
+    m_pShader->ReleaseDeviceDependBuffer(m_DDBuffer);
     SAFE_RELEASE(m_pDataPool);
     SAFE_RELEASE(m_pRasterizer);
     SAFE_RELEASE(m_pDepthStencil);
     SAFE_RELEASE(m_pBlendState);
+    SAFE_RELEASE(m_pShader);
   }
 
   MaterialImpl::MaterialImpl(Graphics* pGraphics, Shader* pShader)
     : m_pGraphics(pGraphics)
     , m_pShader(pShader)
   {
+    if(m_pShader) {
+      m_pShader->AddRef();
+    }
   }
 
   GXHRESULT MaterialImpl::IntCommit(GXLPCBYTE lpCanvasUniform)
@@ -523,9 +528,12 @@ namespace GrapX
 
   GXBOOL MaterialImpl::InitMaterial()
   {
-    Marimo::DATAPOOL_MANIFEST manifest;
-    m_pShader->GetDataPoolDeclaration(&manifest);
-    GXHRESULT hr = Marimo::DataPool::CreateDataPool(&m_pDataPool, NULL, manifest.pTypes, manifest.pVariables, Marimo::DataPoolCreation_NotCross16BytesBoundary);
+    Marimo::DataPool* pRenfernce = NULL;
+    if(m_pShader->GetDataPool(&pRenfernce))
+    {
+      pRenfernce->CreateSubPool(&m_pDataPool);
+      SAFE_RELEASE(pRenfernce);
+    }
 
     GXINT nMaxSlot = 0;
     for (GXUINT n = 0;; n++)
@@ -653,6 +661,11 @@ namespace GrapX
       m_pGraphics->SetSamplerState(0, (GXUINT)m_aSamplerStates.size(), &m_aSamplerStates.front());
     }
     return TRUE;
+  }
+
+  clstd::MemBuffer* MaterialImpl::GetDeviceDependBuffer()
+  {
+    return &m_DDBuffer;
   }
 
   GXBOOL MaterialImpl::CommitTextures(GXBOOL bMaterialChanged)

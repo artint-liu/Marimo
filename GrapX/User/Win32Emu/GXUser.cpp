@@ -773,7 +773,7 @@ GXBOOL GXDLLAPI gxCheckRadioButton(
   GXBOOL bRet = FALSE;
   while(lpWnd != NULL)
   {
-    int nID = (int)lpWnd->m_pMenu;
+    int nID = (int)(GXINT_PTR)lpWnd->m_pMenu;
     if(nID >= nIDFirstButton &&
       nID <= nIDLastButton )
     {

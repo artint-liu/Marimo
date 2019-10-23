@@ -30,10 +30,11 @@ namespace GrapX
     public:
       struct D3D11CB_DESC
       {
-        ID3D11Buffer* pD3D11ConstantBuffer;
+        //ID3D11Buffer* pD3D11ConstantBuffer;
         GXUINT        cbSize : 24;
         GXUINT        type : 8;  // 标记cb_MarimoCommon
       };
+      STATIC_ASSERT(sizeof(D3D11CB_DESC) == sizeof(GXINT));
 
     protected:
       enum class TargetType : GXUINT
@@ -59,24 +60,32 @@ namespace GrapX
       InputLayoutDict             m_InputLayoutDict;      // 顶点声明与shader映射关系对象表
 
       // DataPool 声明
+      clstd::MemBuffer            m_buffer;
       DATAPOOL_DECLARATION*       m_pDataPoolDecl; // 变量顺序: $Globals（varA，varB，varC...），各种CB（结构体形式）cb_A a, cb_B b ...
       DATAPOOL_TYPE_DEFINITION*   m_pDataPoolTypeDef;
       BINDRESOURCE_DESC*          m_pBindResourceDesc;
       size_t                      m_nBindResourceDesc;
-      clstd::MemBuffer            m_buffer;
 
       // 常量缓冲
-      // 同时储存VS，PS合集，VS，PS独立连续常量缓冲，
-      // 如(合集:){G,len},{A,len},{B,len},{C,len},{D,len},|（VS:）G,A,D|（PS:）G,B,C
-      // 只有合集遵守引用计数
-      clstd::MemBuffer            m_D11ResDescPool; // D3D11 描述池
-      ID3D11Buffer**              m_pVertexCB = NULL;
-      ID3D11Buffer**              m_pPixelCB = NULL;
-      int                         m_nCanvasUniformIndex[2] = { -1, -1 };
+      // 同时储存VS&PS合集，VS，PS独立连续常量缓冲，分成三部分
+      // 如:(合集部分){G:len,type},{A:len,type},{B:len,type},{C:len,type},{D:len,type},
+      //   （VS部分index）G,A,D|（PS部分index）G,B,C
+      // D3D11 DESC 描述池, 全部类型都是GXINT, 合集部分映射为D3D11CB_DESC使用
+      // D3D11 CB合集池, 全部类型都是ID3D11Buffer*, 合集部分维护引用
+      GXUINT                      m_nD3DCBPoolSize = 0;   // D3D11 CB 池尺寸
+      clvector<GXINT>             m_D11ResDescPool;       // D3D11 DESC 描述池
+      GXINT                       m_nVertexCBOffset = 0;
+      GXINT                       m_nPixelCBOffset = 0;
 
-      D3D11CB_DESC* D3D11CB_GetDescBegin() const;
-      D3D11CB_DESC* D3D11CB_GetDescEnd() const;
-      ID3D11Buffer** D3D11CB_GetPixelCBEnd() const;
+      //ID3D11Buffer**              m_pVertexCB = NULL;
+      //ID3D11Buffer**              m_pPixelCB = NULL;
+
+      int                         m_nCanvasUniformIndex[2] = { -1, -1 };
+      Marimo::DataPool*           m_pMainDataPool = NULL;
+
+      //D3D11CB_DESC* D3D11CB_GetDescBegin() const;
+      //D3D11CB_DESC* D3D11CB_GetDescEnd() const;
+      //ID3D11Buffer** D3D11CB_GetPixelCBEnd() const;
 
     public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -86,6 +95,8 @@ namespace GrapX
       GXHRESULT   Invoke             (GRESCRIPTDESC* pDesc) override;
       Graphics*   GetGraphicsUnsafe () const override;
       void        GetDataPoolDeclaration  (Marimo::DATAPOOL_MANIFEST* pManifest) const override;
+      GXBOOL      GetDataPool             (Marimo::DataPool** ppReferenceDataPool) const override;
+      GXBOOL      ReleaseDeviceDependBuffer(clstd::MemBuffer& sD3DCBPool) const override;
 
       ShaderImpl(GraphicsImpl* pGraphicsImpl);
       virtual ~ShaderImpl();
@@ -97,13 +108,18 @@ namespace GrapX
 
       GXBOOL Activate();
       GXBOOL BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab); // 因为没有大小，只生成vs或者ps CB与合集的索引关系
-      GXBOOL BuildCBTable(Marimo::DataPool* pDataPool); // 第一次创建Effect或者Material时创建D3D CB
-      GXBOOL CommitConstantBuffer(Marimo::DataPool* pDataPool, ID3D11Buffer* pCanvasUniform = NULL);
+      static void   SetCBDesc(D3D11CB_DESC& desc, GXLPCSTR name, size_t cbSize);
+      GXBOOL GenerateCBTable();
+      GXBOOL BuildCBTable(clstd::MemBuffer& sD3DCBPool) const;
+      //GXBOOL ReleaseCBTable(clstd::MemBuffer& sD3DCBPool) const;
+
+      void UploadConstBuffer(clstd::MemBuffer* pD3DCBPool, Marimo::DataPool* pDataPool);
+      GXBOOL CommitConstantBuffer(const clstd::MemBuffer* pD3DCBPool, ID3D11Buffer* pCanvasUniform = NULL);
       const BINDRESOURCE_DESC* GetBindResource(GXUINT nIndex) const;
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 
       GXBOOL BuildDataPoolDecl(DATAPOOL_MAPPER& mapper); // 注意内部会修改mapper
-      static ID3D11Buffer* D3D11CreateBuffer(ID3D11Device* pd3dDevice, D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize);
+      //ID3D11Buffer* D3D11CreateBuffer(ID3D11Device* pd3dDevice, D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize) const;
       ID3D11InputLayout* D3D11GetInputLayout(VertexDeclImpl* pVertexDecl);
       void DbgCheck(INTERMEDIATE_CODE::Array& aInterCode);
 

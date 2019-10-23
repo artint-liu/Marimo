@@ -140,7 +140,7 @@ namespace GrapX
         for(auto it = aConstantBuffers.begin(); it != aConstantBuffers.end(); ++it)
         {
           sSet.insert(it->Name);
-          sDict.insert(clmake_pair(it->Name, it - aConstantBuffers.begin()));
+          sDict.insert(clmake_pair(it->Name, (int)(it - aConstantBuffers.begin())));
         }
       }
 
@@ -355,22 +355,22 @@ namespace GrapX
       return TRUE;
     }
 
-    ShaderImpl::D3D11CB_DESC* ShaderImpl::D3D11CB_GetDescBegin() const
-    {
-      return reinterpret_cast<D3D11CB_DESC*>(m_D11ResDescPool.GetPtr());
-    }
+    //ShaderImpl::D3D11CB_DESC* ShaderImpl::D3D11CB_GetDescBegin() const
+    //{
+    //  return reinterpret_cast<D3D11CB_DESC*>(m_D11ResDescPool.GetPtr());
+    //}
 
-    ShaderImpl::D3D11CB_DESC* ShaderImpl::D3D11CB_GetDescEnd() const
-    {
-      ASSERT(m_pVertexCB != NULL);
-      return reinterpret_cast<D3D11CB_DESC*>(m_pVertexCB);
-    }
+    //ShaderImpl::D3D11CB_DESC* ShaderImpl::D3D11CB_GetDescEnd() const
+    //{
+    //  ASSERT(m_pVertexCB != NULL);
+    //  return reinterpret_cast<D3D11CB_DESC*>(m_pVertexCB);
+    //}
 
-    ID3D11Buffer** ShaderImpl::D3D11CB_GetPixelCBEnd() const
-    {
-      //return reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + m_D11ResDescPool.GetSize());
-      return reinterpret_cast<ID3D11Buffer**>(m_D11ResDescPool.GetEnd());
-    }
+    //ID3D11Buffer** ShaderImpl::D3D11CB_GetPixelCBEnd() const
+    //{
+    //  //return reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + m_D11ResDescPool.GetSize());
+    //  return reinterpret_cast<ID3D11Buffer**>(m_D11ResDescPool.GetEnd());
+    //}
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -417,6 +417,7 @@ namespace GrapX
 
     ShaderImpl::~ShaderImpl()
     {
+      SAFE_RELEASE(m_pMainDataPool);
       SAFE_RELEASE(m_pD3DVertexInterCode);
       SAFE_RELEASE(m_pD3D11VertexShader);
       SAFE_RELEASE(m_pD3D11PixelShader);
@@ -426,17 +427,17 @@ namespace GrapX
         SAFE_RELEASE(it->second);
       }
 
-      if(m_D11ResDescPool.GetSize() > 0){
-        D3D11CB_DESC* pDesc = D3D11CB_GetDescBegin();
-        D3D11CB_DESC* const pDescEnd = D3D11CB_GetDescEnd();
-        for(; pDesc != pDescEnd; pDesc++)
-        {
-          if(pDesc->pD3D11ConstantBuffer != CANVAS_COMMON_MARK_PTR) {
-            SAFE_RELEASE(pDesc->pD3D11ConstantBuffer);
-          }
-          pDesc->cbSize = 0;
-        }
-      }
+      //if(m_D11ResDescPool.GetSize() > 0){
+      //  D3D11CB_DESC* pDesc = D3D11CB_GetDescBegin();
+      //  D3D11CB_DESC* const pDescEnd = D3D11CB_GetDescEnd();
+      //  for(; pDesc != pDescEnd; pDesc++)
+      //  {
+      //    if(pDesc->pD3D11ConstantBuffer != CANVAS_COMMON_MARK_PTR) {
+      //      SAFE_RELEASE(pDesc->pD3D11ConstantBuffer);
+      //    }
+      //    pDesc->cbSize = 0;
+      //  }
+      //}
     }
 
     GXBOOL ShaderImpl::InitShader(GXLPCWSTR szResourceDir, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount)
@@ -488,9 +489,10 @@ namespace GrapX
           break;
         }
 
-
         SAFE_RELEASE(InterCode.pCode);
       }
+      SAFE_DELETE(pInclude);
+
 
       DATAPOOL_MAPPER decl_mapper;
       clvector<size_t> aIndexTabA, aIndexTabB;
@@ -519,7 +521,8 @@ namespace GrapX
         SAFE_RELEASE(it->pReflection);
       }
 
-      SAFE_DELETE(pInclude);
+      Marimo::DataPool::CreateDataPool(&m_pMainDataPool, NULL, m_pDataPoolTypeDef, m_pDataPoolDecl, Marimo::DataPoolCreation_NotCross16BytesBoundary);
+      GenerateCBTable();
       return bval;
     }
 
@@ -791,68 +794,83 @@ namespace GrapX
       if(nCombine + nMapper == 0) {
         return TRUE;
       }
-      m_D11ResDescPool.Resize(nCombine * sizeof(D3D11CB_DESC) + nMapper * sizeof(ID3D11Buffer*), TRUE);
+
+      m_nD3DCBPoolSize = (GXUINT)(nCombine * sizeof(ID3D11Buffer*) + nMapper * sizeof(ID3D11Buffer*));
+      m_D11ResDescPool.resize(nCombine + nMapper, -1);
       //m_arrayCB.reserve(nCombine + nMapper);
       //m_arrayCB.assign(nCombine, NULL);
-      m_pVertexCB = reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + nCombine * sizeof(D3D11CB_DESC));
-      m_pPixelCB = m_pVertexCB + pMapper[0].GetBufferCount();
+      //m_pVertexCB = reinterpret_cast<ID3D11Buffer**>(reinterpret_cast<size_t>(m_D11ResDescPool.GetPtr()) + nCombine * sizeof(D3D11CB_DESC));
+      //m_pPixelCB = m_pVertexCB + pMapper[0].GetBufferCount();
+      m_nVertexCBOffset = (GXINT)nCombine;
+      m_nPixelCBOffset = (GXINT)(nCombine + pMapper[0].GetBufferCount());
       
       int i = 0;
-      std::for_each(pIndexTab[0].begin(), pIndexTab[0].end(), [this, &i](size_t n) {
-        m_pVertexCB[i++] = (reinterpret_cast<ID3D11Buffer*>(n));
-      });
+      for(size_t& n : pIndexTab[0])
+      {
+        m_D11ResDescPool[m_nVertexCBOffset + i++] = (GXINT)n;
+      }
+      //std::for_each(pIndexTab[0].begin(), pIndexTab[0].end(), [this, &i](size_t n) {
+      //  m_pVertexCB[i++] = (reinterpret_cast<ID3D11Buffer*>(n));
+      //});
 
       i = 0;
-      std::for_each(pIndexTab[1].begin(), pIndexTab[1].end(), [this, &i](size_t n) {
-        m_pPixelCB[i++] = (reinterpret_cast<ID3D11Buffer*>(n));
-      });
+      for (size_t& n : pIndexTab[1])
+      {
+        m_D11ResDescPool[m_nPixelCBOffset + i++] = (GXINT)n;
+      }
+      //std::for_each(pIndexTab[1].begin(), pIndexTab[1].end(), [this, &i](size_t n) {
+      //  m_pPixelCB[i++] = (reinterpret_cast<ID3D11Buffer*>(n));
+      //});
 
       //ASSERT(m_arrayCB.size() == nCombine + nMapper);
       return TRUE;
     }
 
-    GXBOOL ShaderImpl::BuildCBTable(Marimo::DataPool* pDataPool)
+    void ShaderImpl::SetCBDesc(D3D11CB_DESC& desc, GXLPCSTR name, size_t cbSize)
     {
-      //if(m_arrayCB.front()) {
-      //  return FALSE;
-      //}
-      D3D11CB_DESC* pDesc = D3D11CB_GetDescBegin();
-      if(pDesc == NULL) {
+      desc.cbSize = cbSize;
+      desc.type = (name && clstd::strcmpT(name, "cb_MarimoCommon") == 0) ? 1 : 0;
+    }
+
+    GXBOOL ShaderImpl::GenerateCBTable()
+    {
+      if(m_D11ResDescPool.empty()) {
         return TRUE;
       }
-
-      if(pDesc->pD3D11ConstantBuffer) {
-        return FALSE;
-      }
+      D3D11CB_DESC* pDesc = reinterpret_cast<D3D11CB_DESC*>(&m_D11ResDescPool.front());
+        //D3D11CB_GetDescBegin();
 
       ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-      Marimo::DataPoolUtility::iterator iter_var = pDataPool->begin();
-      Marimo::DataPoolUtility::iterator iter_var_end = pDataPool->end();
+      Marimo::DataPoolUtility::iterator iter_var = m_pMainDataPool->begin();
+      Marimo::DataPoolUtility::iterator iter_var_end = m_pMainDataPool->end();
       Marimo::DataPoolVariable var;
-      size_t nCB = 0;
+      GXINT nCB = 0;
 
       // $Global D3D11 CB
-      for(; iter_var != iter_var_end; ++iter_var) {
-        if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
+      for (; iter_var != iter_var_end; ++iter_var) {
+        if (clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
           iter_var.ToVariable(var);
-          if(var.GetOffset() > 0) {
-            D3D11CreateBuffer(pd3dDevice, pDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
+          if (var.GetOffset() > 0) {
+            SetCBDesc(pDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
+            //D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
             break;
           }
         }
       }
 
-      if(iter_var == iter_var_end)
+      if (iter_var == iter_var_end)
       {
-        D3D11CreateBuffer(pd3dDevice, pDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, pDataPool->GetRootSize());
+        SetCBDesc(pDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, m_pMainDataPool->GetRootSize());
+        //D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, m_pMainDataPool->GetRootSize());
       }
       else
       {
         // Named D3D11 CB
-        for(; iter_var != iter_var_end; ++iter_var) {
-          if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
+        for (; iter_var != iter_var_end; ++iter_var) {
+          if (clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
             iter_var.ToVariable(var);
-            D3D11CreateBuffer(pd3dDevice, pDesc[nCB++], iter_var.TypeName(), var.GetSize());
+            SetCBDesc(pDesc[nCB++], iter_var.TypeName(), var.GetSize());
+            //D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], iter_var.TypeName(), var.GetSize());
           }
           else {
             break;
@@ -860,29 +878,174 @@ namespace GrapX
         }
       }
 
-      ASSERT(((size_t)m_pVertexCB - (size_t)pDesc) == nCB * sizeof(D3D11CB_DESC)); // 检查结尾准确性
-      ID3D11Buffer** pD3D11BufBegin = m_pVertexCB;
-      ID3D11Buffer** const pD3D11BufEnd = D3D11CB_GetPixelCBEnd();
-      ASSERT(((size_t)pD3D11BufEnd - (size_t)pD3D11BufBegin) % sizeof(ID3D11Buffer*) == 0);
+      const GXINT* pIndex = &m_D11ResDescPool.front() + m_nVertexCBOffset;
+      const GXINT* const pIndexBegin = pIndex;
+      const GXINT* const pIndexEnd = &m_D11ResDescPool.back() + 1;
+
+      ASSERT(((size_t)pIndexBegin - (size_t)pDesc) == nCB * sizeof(GXINT)); // 检查结尾准确性
+      //ASSERT(((size_t)pD3D11BufEnd - (size_t)pD3D11BufBegin) % sizeof(ID3D11Buffer*) == 0);
+
       int nUniformIndex = 0;
-      for(; pD3D11BufBegin != pD3D11BufEnd; pD3D11BufBegin++)
+      for (; pIndex != pIndexEnd; pIndex++)
       {
         // 索引转成内容
-        ASSERT(reinterpret_cast<size_t>(*pD3D11BufBegin) < nCB);
-        *pD3D11BufBegin = pDesc[reinterpret_cast<size_t>(*pD3D11BufBegin)].pD3D11ConstantBuffer;
-        if(*pD3D11BufBegin == CANVAS_COMMON_MARK_PTR) {
-          m_nCanvasUniformIndex[nUniformIndex++] = pD3D11BufBegin - m_pVertexCB; // m_pVertexCB 是表的开始
+        ASSERT((*pIndex) < nCB);
+        //*pD3D11BufBegin = pDesc[reinterpret_cast<size_t>(*pD3D11BufBegin)].pD3D11ConstantBuffer;
+        if (pDesc[*pIndex].type == 1) {
+          m_nCanvasUniformIndex[nUniformIndex++] = (GXINT)(pIndex - pIndexBegin);
           ASSERT(nUniformIndex < countof(m_nCanvasUniformIndex));
         }
+      }
+      return TRUE;
+    }
+
+    GXBOOL ShaderImpl::BuildCBTable(clstd::MemBuffer& sD3DCBPool) const
+    {
+      //if(m_arrayCB.front()) {
+      //  return FALSE;
+      //}
+      if(m_D11ResDescPool.empty()) {
+        return TRUE;
+      }
+
+      const D3D11CB_DESC* pDesc = reinterpret_cast<const D3D11CB_DESC*>(&m_D11ResDescPool.front());
+      sD3DCBPool.Resize(m_nD3DCBPoolSize, TRUE);
+
+
+      ID3D11Buffer** pD3DCB = reinterpret_cast<ID3D11Buffer**>(sD3DCBPool.GetPtr());
+      ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+
+      D3D11_BUFFER_DESC bd = {0, D3D11_USAGE_DEFAULT, D3D11_BIND_CONSTANT_BUFFER, 0, 0};
+
+      GXINT nCB = 0;
+      for(; nCB < m_nVertexCBOffset; nCB++)
+      {
+        if(pDesc[nCB].type == 1) { // Canvas Uniform
+          continue;
+        }
+        ASSERT(pDesc[nCB].cbSize > 0);
+        bd.ByteWidth = pDesc[nCB].cbSize;
+        pd3dDevice->CreateBuffer(&bd, 0, &pD3DCB[nCB]);
+      }
+
+      //ASSERT(pDesc->pD3D11ConstantBuffer == NULL);
+      //if(pDesc->pD3D11ConstantBuffer) {
+      //  return FALSE;
+      //}
+
+      //ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+      //Marimo::DataPoolUtility::iterator iter_var = m_pMainDataPool->begin();
+      //Marimo::DataPoolUtility::iterator iter_var_end = m_pMainDataPool->end();
+      //Marimo::DataPoolVariable var;
+      //size_t nCB = 0;
+
+      //// $Global D3D11 CB
+      //for(; iter_var != iter_var_end; ++iter_var) {
+      //  if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
+      //    iter_var.ToVariable(var);
+      //    if(var.GetOffset() > 0) {
+      //      D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
+      //      break;
+      //    }
+      //  }
+      //}
+
+      //if(iter_var == iter_var_end)
+      //{
+      //  D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, m_pMainDataPool->GetRootSize());
+      //}
+      //else
+      //{
+      //  // Named D3D11 CB
+      //  for(; iter_var != iter_var_end; ++iter_var) {
+      //    if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
+      //      iter_var.ToVariable(var);
+      //      D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], iter_var.TypeName(), var.GetSize());
+      //    }
+      //    else {
+      //      break;
+      //    }
+      //  }
+      //}
+
+      ID3D11Buffer** pD3D11BufBegin = pD3DCB + m_nVertexCBOffset;
+      //const ID3D11Buffer** const pD3D11BufEnd = );
+
+      const GXINT* pIndexBegin = &m_D11ResDescPool.front() + m_nVertexCBOffset;
+      const GXINT* const pIndexEnd = &m_D11ResDescPool.back() + 1;
+      //const GXINT* pIndex = pIndexBegin;
+
+      ASSERT((pIndexEnd - pIndexBegin) == (reinterpret_cast<const ID3D11Buffer**>(sD3DCBPool.GetEnd()) - pD3D11BufBegin));
+
+      //ID3D11Buffer** pD3D11DestBufBegin = (ID3D11Buffer**)((size_t)sD3DCBPool.GetPtr() + nCB * sizeof(D3D11CB_DESC));
+
+      //ASSERT(((size_t)m_pVertexCB - (size_t)pDesc) == nCB * sizeof(D3D11CB_DESC)); // 检查结尾准确性
+      //ASSERT(((size_t)pD3D11BufEnd - (size_t)pD3D11BufBegin) % sizeof(ID3D11Buffer*) == 0);
+
+      //int nUniformIndex = 0;
+      for(; pIndexBegin != pIndexEnd; ++pIndexBegin, ++pD3D11BufBegin)
+      {
+        ASSERT(*pIndexBegin < nCB);
+        *pD3D11BufBegin = pD3DCB[*pIndexBegin];
+        // 索引转成内容
+        //ASSERT(reinterpret_cast<size_t>(*pD3D11BufBegin) < nCB);
+        //*pD3D11DestBufBegin = pDestDesc[reinterpret_cast<size_t>(*pD3D11BufBegin)].pD3D11ConstantBuffer;
+        //if(*pD3D11DestBufBegin == CANVAS_COMMON_MARK_PTR) {
+        //  m_nCanvasUniformIndex[nUniformIndex++] = pD3D11BufBegin - m_pVertexCB; // m_pVertexCB 是表的开始
+        //  ASSERT(nUniformIndex < countof(m_nCanvasUniformIndex));
+        //}
       }
 
       return TRUE;
     }
 
-    GXBOOL ShaderImpl::CommitConstantBuffer(Marimo::DataPool* pDataPool, ID3D11Buffer* pCanvasUniform)
+    void ShaderImpl::UploadConstBuffer(clstd::MemBuffer* pD3DCBPool, Marimo::DataPool* pDataPool)
     {
       ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11Buffer** pD3D11CB = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetPtr());
+      ID3D11Buffer** pD3D11CBEnd = pD3D11CB + m_nVertexCBOffset;
+      D3D11CB_DESC* pDesc = reinterpret_cast<D3D11CB_DESC*>(&m_D11ResDescPool.front());
 
+      GXLPBYTE pSourceBuffer = reinterpret_cast<GXLPBYTE>(pDataPool->GetRootPtr());
+      for (; pD3D11CB != pD3D11CBEnd; ++pD3D11CB, ++pDesc)
+      {
+        // 只有Canvas Uniform D3D11 Buffer位置才是空的
+        ASSERT((pDesc->type == 0 && *pD3D11CB != NULL) || (pDesc->type == 1 && *pD3D11CB == NULL));
+        if (*pD3D11CB != NULL) {
+          pImmediateContext->UpdateSubresource(*pD3D11CB, 0, NULL, pSourceBuffer, 0, 0);
+        }
+        pSourceBuffer += pDesc->cbSize;
+      }
+    }
+
+    GXBOOL ShaderImpl::CommitConstantBuffer(const clstd::MemBuffer* pD3DCBPool, ID3D11Buffer* pCanvasUniform)
+    {
+      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11Buffer** pD3D11VertexCB = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetPtr()) + m_nVertexCBOffset;
+      ID3D11Buffer** pD3D11PixelCB  = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetPtr()) + m_nPixelCBOffset;
+      ID3D11Buffer** pD3D11EndCB    = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetEnd());
+
+      if (pCanvasUniform)
+      {
+        for (int i = 0; i < countof(m_nCanvasUniformIndex); i++)
+        {
+          if (m_nCanvasUniformIndex[i] >= 0) {
+            pD3D11VertexCB[m_nCanvasUniformIndex[i]] = pCanvasUniform; // pD3D11VertexCB 是数组开始位置
+          }
+        }
+      }
+
+      UINT count = (UINT)(pD3D11PixelCB - pD3D11VertexCB);
+      if(count > 0) {
+        pImmediateContext->VSSetConstantBuffers(0, count, pD3D11VertexCB);
+      }
+
+      count = (UINT)(pD3D11EndCB - pD3D11PixelCB);
+      if (count > 0) {
+        pImmediateContext->PSSetConstantBuffers(0, count, pD3D11PixelCB);
+      }
+
+#if 0
       GXLPBYTE pSourceBuffer = reinterpret_cast<GXLPBYTE>(pDataPool->GetRootPtr());
       
       D3D11CB_DESC* pCBDesc = D3D11CB_GetDescBegin();
@@ -932,6 +1095,7 @@ namespace GrapX
       if(count) {
         pImmediateContext->PSSetConstantBuffers(0, count, m_pPixelCB);
       }
+#endif
       return TRUE;
     }
 
@@ -986,13 +1150,16 @@ namespace GrapX
         mapper.aGlobal.push_back(desc);
       }
 
-      for(auto it = mapper.arraySampler.begin(); it != mapper.arraySampler.end(); ++it)
+      //for(auto it = mapper.arraySampler.begin(); it != mapper.arraySampler.end(); ++it)
+      for(GXLPCSTR name : mapper.arraySampler)
       {
-        mapper.Strings.add(*it);
+        mapper.Strings.add(name);
       }
-      for(auto it = mapper.arrayTexture.begin(); it != mapper.arrayTexture.end(); ++it)
+      
+      //for(auto it = mapper.arrayTexture.begin(); it != mapper.arrayTexture.end(); ++it)
+      for (GXLPCSTR name : mapper.arrayTexture)
       {
-        mapper.Strings.add(*it);
+        mapper.Strings.add(name);
       }
 
       // 计算总缓冲区大小
@@ -1101,7 +1268,7 @@ namespace GrapX
         {
           brd.name = (GXLPCSTR)((size_t)m_buffer.GetPtr() + mapper.Strings.offset(*it));
           brd.type = BindType::Texture;
-          brd.slot = it - mapper.arrayTexture.begin();
+          brd.slot = (int)(it - mapper.arrayTexture.begin());
           m_buffer.Append(&brd, sizeof(BINDRESOURCE_DESC));
         }
 
@@ -1121,41 +1288,41 @@ namespace GrapX
           }
         };
 
-        clstd::BubbleSort(static_cast<BIND*>(m_pBindResourceDesc), m_nBindResourceDesc);
+        clstd::BubbleSort(static_cast<BIND*>(m_pBindResourceDesc), (int)m_nBindResourceDesc);
       }
 
       ASSERT(m_buffer.GetSize() == nTotalSize); // 校验实际填充大小和计算大小
       return TRUE;
     }
 
-    ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(ID3D11Device* pd3dDevice, D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize)
-    {
-      //ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-      D3D11_BUFFER_DESC bd;
-      InlSetZeroT(bd);
-      ASSERT(cbSize > 0);
+    //ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(ID3D11Device* pd3dDevice, D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize) const
+    //{
+    //  //ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
+    //  D3D11_BUFFER_DESC bd;
+    //  InlSetZeroT(bd);
+    //  ASSERT(cbSize > 0);
 
-      bd.Usage          = D3D11_USAGE_DEFAULT;
-      bd.ByteWidth      = cbSize;
-      bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
-      bd.CPUAccessFlags = 0;
-      desc.cbSize = cbSize;
+    //  bd.Usage          = D3D11_USAGE_DEFAULT;
+    //  bd.ByteWidth      = cbSize;
+    //  bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
+    //  bd.CPUAccessFlags = 0;
+    //  desc.cbSize = cbSize;
 
-      if (szName && clstd::strcmpT(szName, "cb_MarimoCommon") == 0)
-      {
-        desc.type = 1;
-        desc.pD3D11ConstantBuffer = CANVAS_COMMON_MARK_PTR;
-        return CANVAS_COMMON_MARK_PTR;
-      }
+    //  if (szName && clstd::strcmpT(szName, "cb_MarimoCommon") == 0)
+    //  {
+    //    desc.type = 1;
+    //    desc.pD3D11ConstantBuffer = CANVAS_COMMON_MARK_PTR;
+    //    return CANVAS_COMMON_MARK_PTR;
+    //  }
 
-      ASSERT(((desc.type == 1) && sizeof(STD_CANVAS_UNIFORM) == desc.cbSize) || desc.type != 1);
+    //  ASSERT(((desc.type == 1) && sizeof(STD_CANVAS_UNIFORM) == desc.cbSize) || desc.type != 1);
 
-      HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &desc.pD3D11ConstantBuffer);
-      if(SUCCEEDED(hr)) {
-        return desc.pD3D11ConstantBuffer;
-      }
-      return NULL;
-    }
+    //  HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &desc.pD3D11ConstantBuffer);
+    //  if(SUCCEEDED(hr)) {
+    //    return desc.pD3D11ConstantBuffer;
+    //  }
+    //  return NULL;
+    //}
 
     ID3D11InputLayout* ShaderImpl::D3D11GetInputLayout(VertexDeclImpl* pVertexDecl)
     {
@@ -1174,7 +1341,7 @@ namespace GrapX
       //D3D11_INPUT_ELEMENT_DESC* pDesc = (D3D11_INPUT_ELEMENT_DESC*)&pVertexDecl->m_aDescs.front();
       HRESULT hr = pd3dDevice->CreateInputLayout(
         (D3D11_INPUT_ELEMENT_DESC*)&sInputLayoutArray.front(),
-        sInputLayoutArray.size() - 1, // 最后一个是空的结尾
+        (UINT)sInputLayoutArray.size() - 1, // 最后一个是空的结尾
         m_pD3DVertexInterCode->GetBufferPointer(),
         m_pD3DVertexInterCode->GetBufferSize(), &pD3D11InputLayout);
       ASSERT(SUCCEEDED(hr));
@@ -1272,6 +1439,28 @@ namespace GrapX
       pManifest->pTypes       = m_pDataPoolTypeDef;
       pManifest->pVariables   = m_pDataPoolDecl;
       pManifest->pImportFiles = NULL;
+    }
+
+    GXBOOL ShaderImpl::GetDataPool(Marimo::DataPool** ppReferenceDataPool) const
+    {
+      if(m_pMainDataPool)
+      {
+        *ppReferenceDataPool = m_pMainDataPool;
+        m_pMainDataPool->AddRef();
+        return TRUE;
+      }
+      *ppReferenceDataPool = NULL;
+      return FALSE;
+    }
+
+    GXBOOL ShaderImpl::ReleaseDeviceDependBuffer(clstd::MemBuffer& sD3DCBPool) const
+    {
+      ID3D11Buffer** pD3DCB = reinterpret_cast<ID3D11Buffer**>(sD3DCBPool.GetPtr());
+      for (GXINT nCB = 0; nCB < m_nVertexCBOffset; nCB++)
+      {
+        SAFE_RELEASE(pD3DCB[nCB]);
+      }
+      return TRUE;
     }
 
     GXBOOL ShaderImpl::CheckUpdateConstBuf()

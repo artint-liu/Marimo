@@ -31,6 +31,7 @@ namespace GrapX
 
   EffectImpl::~EffectImpl()
   {
+    m_pShader->ReleaseDeviceDependBuffer(m_DDBuffer);
     SAFE_RELEASE(m_pShader);
     SAFE_RELEASE(m_pDataPool);
   }
@@ -196,6 +197,11 @@ namespace GrapX
     }
 
     return TRUE;
+  }
+
+  clstd::MemBuffer* EffectImpl::GetDeviceDependBuffer()
+  {
+    return &m_DDBuffer;
   }
 
   GXUINT EffectImpl::GetHandle(const GXCHAR* pName) const

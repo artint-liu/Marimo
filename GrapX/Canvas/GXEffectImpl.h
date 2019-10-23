@@ -28,6 +28,7 @@ namespace GrapX
     Shader*             m_pShader;
     Marimo::DataPool*   m_pDataPool;
     TextureUnitArray    m_aTextures;
+    clstd::MemBuffer    m_DDBuffer;   // 设备相关
 
   public:
     EffectImpl(Graphics* pGraphics, Shader* pShader);
@@ -52,6 +53,7 @@ namespace GrapX
     GXBOOL Commit       ();
     GXBOOL UpdateTexelSize (GXUINT slot, Texture* pTexture);
 
+    clstd::MemBuffer* GetDeviceDependBuffer();
 
     // 旧的兼容接口
     GXUINT GetHandle(const GXCHAR* pName) const;

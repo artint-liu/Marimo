@@ -88,8 +88,10 @@ namespace GrapX
 
     GXSTDINTERFACE(Graphics*    GetGraphicsUnsafe       () const);
     GXSTDINTERFACE(void         GetDataPoolDeclaration  (Marimo::DATAPOOL_MANIFEST* pManifest) const);
+    GXSTDINTERFACE(GXBOOL       GetDataPool             (Marimo::DataPool** ppReferenceDataPool) const); // 返回参考DataPool, 写入这个DataPool不会影响渲染结果
     GXSTDINTERFACE(const BINDRESOURCE_DESC* GetBindResource(GXUINT nIndex) const);
     GXSTDINTERFACE(const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const);
+    GXSTDINTERFACE(GXBOOL ReleaseDeviceDependBuffer(clstd::MemBuffer& sD3DCBPool) const); // 释放设备相关缓冲（比较临时，以后考虑去掉这个）
   };
 
   class Effect : public GResource

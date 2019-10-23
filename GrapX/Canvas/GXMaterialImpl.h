@@ -50,6 +50,7 @@ namespace GrapX
     BlendState*           m_pBlendState = NULL;
     int                   m_nRenderQueue = DEFAULT_RENDER_QUEUE;
     GXDWORD               m_dwFlags = 0;
+    clstd::MemBuffer      m_DDBuffer;   // 设备相关
 
   public:
     static GXVOID InitializeMtlStateDict();
@@ -107,6 +108,9 @@ namespace GrapX
     Marimo::DataPool* GetDataPoolUnsafe() const;
     GXBOOL CommitTextures(GXBOOL bMaterialChanged);
     GXBOOL CommitStates();
+    clstd::MemBuffer* GetDeviceDependBuffer();
+    //clstd::MemBuffer& GetDeviceDependBuffer();
+
 
     inline  Shader*      InlGetShaderUnsafe    () const
     {

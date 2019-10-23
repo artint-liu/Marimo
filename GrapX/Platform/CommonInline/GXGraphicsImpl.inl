@@ -446,7 +446,7 @@ GXHRESULT GraphicsImpl::CreateEffect(Effect** ppEffect, Shader* pShader)
     return GX_FAIL;
   }
 
-  static_cast<ShaderImpl*>(pShader)->BuildCBTable(pEffect->GetDataPoolUnsafe());
+  static_cast<ShaderImpl*>(pShader)->BuildCBTable(*pEffect->GetDeviceDependBuffer());
 
   RegisterResource(pEffect, NULL);
   *ppEffect = pEffect;
@@ -484,7 +484,7 @@ GXHRESULT GraphicsImpl::CreateMaterial(Material** ppMtlInst, Shader* pShader)
     return GX_FAIL;
   }
 
-  static_cast<ShaderImpl*>(pShader)->BuildCBTable(pNewMaterial->GetDataPoolUnsafe());
+  static_cast<ShaderImpl*>(pShader)->BuildCBTable(*pNewMaterial->GetDeviceDependBuffer());
 
   *ppMtlInst = pNewMaterial;
   return GX_OK;

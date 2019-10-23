@@ -102,12 +102,12 @@ public:
       // 打开并映射文件
       if(file.OpenExisting(strFullPath))
       {
-        clBuffer* pBuffer = NULL;
+        clBuffer* pBuffer = new clBuffer(128);
         if(file.GetSize(NULL) == 0)
         {
-          pBuffer = new clBuffer(128);
+          //pBuffer = new clBuffer(128);
         }
-        else if( ! file.MapToBuffer(&pBuffer))
+        else if( ! file.Read(pBuffer))
         {
           return E_FAIL;
         }
