@@ -502,7 +502,7 @@ GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
 GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int nRenderCate, GXDWORD dwLayerMask, GXDWORD dwRequired )
 {
   GVNode::AABB          aabbAbs;
-  GVRENDERDESC          Desc;
+  //GVRENDERDESC          Desc;
   const GVNode::FrustumPlanes*  pFrustum;
   clstack<GVNode*>      NodeStack;
 
@@ -510,28 +510,30 @@ GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int
 
   pCanvas->UpdateCommonUniforms();
   pFrustum = pCanvas->GetViewFrustum();
-  pRenderSequence->Clear();
+  pRenderSequence->Clear(nRenderCate);
 
   GVNode* pNode = m_pRoot->GetFirstChild();
   while(true)
   {
     while(pNode != NULL)
     {
-      pNode->GetRenderDesc(nRenderCate, &Desc);
+      GVRENDERDESC2* pRenderer = pNode->GetRenderDesc(nRenderCate);
+      const GXDWORD dwFlags = pNode->GetFlags();
+      const GXDWORD dwLayer = pNode->GetLayer();
 
-      if(_CL_NOT_(TEST_FLAGS_ALL(Desc.dwFlags, dwRequired)) || (dwLayerMask & Desc.dwLayer)) {
+      if(_CL_NOT_(TEST_FLAGS_ALL(dwFlags, dwRequired)) || (dwLayerMask & dwLayer)) {
         // 准备下一次循环
         pNode = pNode->GetNext();
         continue;
       }
 
-      if(TEST_FLAG_NOT(Desc.dwFlags, GVNF_CONTAINER) && Desc.PrimitiveCount)
+      if(TEST_FLAG_NOT(dwFlags, GVNF_CONTAINER) && pRenderer->PrimitiveCount)
       {
-        ASSERT(Desc.pPrimitive != NULL);
-        ASSERT(Desc.pMaterial != NULL);
+        ASSERT(pRenderer->pPrimitive != NULL);
+        //ASSERT(pRenderer->pMaterial != NULL);
         
         // 能不能写的再优雅一些了？？？
-        if(TEST_FLAG(Desc.dwFlags, GVNF_NOCLIP)) {
+        if(TEST_FLAG(dwFlags, GVNF_NOCLIP)) {
           goto JMP_ADD;
         }
 
@@ -540,7 +542,7 @@ GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int
           goto JMP_NEXT;
         }
 JMP_ADD:  // 主要是这个不想写两遍
-        pRenderSequence->Add(&Desc);
+        pRenderSequence->Add(pRenderer);
         ++m_uDrawCallCount;
       }
 JMP_NEXT:

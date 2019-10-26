@@ -372,26 +372,30 @@ namespace GrapX
       typedef GVSequence::RenderDescArray RenderDescArray;
       Material* pMtlInst = NULL;
       const int nArrayCount = pSequence->GetArrayCount();
+      const int nRenderCategory = pSequence->GetRenderCategory();
 
       for (int nArrayIndex = 0; nArrayIndex < nArrayCount; nArrayIndex++)
       {
         const RenderDescArray& aDesc = pSequence->GetArray(nArrayIndex);
-        for(const GVRENDERDESC& Desc : aDesc)
+        for(const GVRENDERDESC2* pRenderer : aDesc)
         {
-          if (TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
-            SetWorldMatrix(Desc.matWorld);
+          const GXDWORD dwFlags = pRenderer->pNode->GetFlags();
+          if (TEST_FLAG(dwFlags, GVNF_UPDATEWORLDMAT)) {
+            SetWorldMatrix(pRenderer->pNode->GetTransform().GlobalMatrix);
           }
 
-          if (TEST_FLAG(Desc.dwFlags, GVNF_CONTAINER)) {
+          if (TEST_FLAG(dwFlags, GVNF_CONTAINER)) {
             continue;
           }
 
+          Material* pMaterial = pRenderer->materials[nRenderCategory];
+
           // Ó¦ÓÃ²ÄÖÊ
-          if (Desc.pMaterial != NULL) {
-            if (pMtlInst != Desc.pMaterial)
+          if (pMaterial != NULL) {
+            if (pMtlInst != pMaterial)
             {
-              SetMaterial(Desc.pMaterial);
-              pMtlInst = Desc.pMaterial;
+              SetMaterial(pMaterial);
+              pMtlInst = pMaterial;
             }
           }
           else {
@@ -399,21 +403,21 @@ namespace GrapX
             ASSERT(0);
           }
 
-          ASSERT(Desc.pPrimitive != NULL);
-          m_pGraphicsImpl->SetPrimitive(Desc.pPrimitive);
+          ASSERT(pRenderer->pPrimitive != NULL);
+          m_pGraphicsImpl->SetPrimitive(pRenderer->pPrimitive);
           //if(Desc.pPrimitive->GetType() == RESTYPE_INDEXED_PRIMITIVE)
-          if (Desc.pPrimitive->GetIndexCount() > 0)
+          if (pRenderer->pPrimitive->GetIndexCount() > 0)
           {
-            m_pGraphicsImpl->DrawPrimitive(Desc.ePrimType,
-              Desc.BaseVertexIndex, Desc.MinIndex, Desc.NumVertices,
-              Desc.StartIndex, Desc.PrimitiveCount);
+            m_pGraphicsImpl->DrawPrimitive(pRenderer->ePrimType,
+              pRenderer->BaseVertexIndex, pRenderer->MinIndex, pRenderer->NumVertices,
+              pRenderer->StartIndex, pRenderer->PrimitiveCount);
           }
           else {
             ASSERT(0);
           }
           //++m_uDrawCallCount;
 
-          if (TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
+          if (TEST_FLAG(dwFlags, GVNF_UPDATEWORLDMAT)) {
             SetWorldMatrix(float4x4::Identity);
           }
         }

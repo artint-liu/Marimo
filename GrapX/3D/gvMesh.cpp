@@ -43,6 +43,7 @@ GVMesh::GVMesh(Graphics* pGraphics)
   //, m_nVertCount  (0)
   //, m_nStartIndex (0)
 {
+  m_Renderer.pNode = this;
 }
 
 GVMesh::GVMesh(Graphics* pGraphics, GXDWORD dwClassCode)
@@ -53,6 +54,7 @@ GVMesh::GVMesh(Graphics* pGraphics, GXDWORD dwClassCode)
   //, m_nVertCount  (0)
   //, m_nStartIndex (0)
 {
+  m_Renderer.pNode = this;
 }
 
 GVMesh::~GVMesh()
@@ -332,6 +334,11 @@ GXBOOL GVMesh::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
     m_Renderer.materials.resize((size_t)nRenderCate + 1, GrapX::ObjectT<GrapX::Material>(NULL));
   }
   m_Renderer.materials[nRenderCate] = pMtlInst;
+
+  if(nRenderCate == 0)
+  {
+    m_Renderer.RenderQueue = pMtlInst->GetRenderQueue();
+  }
 
   return TRUE;
   //return InlSetNewObjectT(m_pMtlInst, pMtlInst);

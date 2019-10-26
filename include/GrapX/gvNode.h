@@ -5,6 +5,7 @@
 class GVScene;
 //class SmartRepository;
 struct GVSCENEUPDATE;
+class GVNode;
 //enum GXPRIMITIVETYPE;
 
 namespace GrapX
@@ -122,10 +123,11 @@ typedef clvector<GrapX::ObjectT<GrapX::Material>>  MaterialArray;
 
 struct GVRENDERDESC2
 {
+  GVNode*           pNode = NULL;
   GrapX::Primitive* pPrimitive = NULL;
   GXPrimitiveType   ePrimType = GXPT_TRIANGLELIST;
   MaterialArray     materials;
-  float4x4          matWorld = float4x4::Identity;             // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
+  //float4x4          matWorld = float4x4::Identity;             // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
 
   GXUINT            RenderQueue = GrapX::RenderQueue_Geometry;          // 渲染队列, 尚未使用, 这个默认取自Material中的记录
   GXINT             BaseVertexIndex = 0;      // StartVertex

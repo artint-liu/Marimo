@@ -4,7 +4,7 @@
 class GXDLL GVSequence : public GUnknown
 {
 public:
-  typedef clvector<GVRENDERDESC> RenderDescArray;
+  typedef clvector<GVRENDERDESC2*> RenderDescArray;
   typedef clmap<GXUINT, RenderDescArray> RenderQueue;
 protected:
   const static int c_nNumRQSlot = 4096;
@@ -12,6 +12,7 @@ protected:
   //RenderDescArray   m_aRenderDesc;
   //RenderDescArray   m_aRenderDesc2; // 这个需要排序
   RenderQueue       m_mapRenderQueue;
+  int               m_nRenderCate = 0;
 
   // 这个是临时的，目前仅分了5级渲染顺序，还没想好怎么设计渲染序列这个问题， 实际上应该是4096级，并且材质排序的
   const static int c_nNeedRefactorRenderDescCount = 6;
@@ -24,10 +25,11 @@ protected:
   GVSequence();
   virtual ~GVSequence();
 public:
-  void  Clear ();
-  int   Add   (GVRENDERDESC* pDesc);
+  void  Clear (int nRenderCate);
+  int   Add   (GVRENDERDESC2* pDesc);
 
   int   GetArrayCount ();
+  int   GetRenderCategory() const;
 
   const RenderDescArray&
         GetArray      (int nIndex);

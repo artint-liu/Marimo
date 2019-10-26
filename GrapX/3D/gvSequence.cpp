@@ -19,7 +19,7 @@ GVSequence::GVSequence()
 
 GVSequence::~GVSequence()
 {
-  Clear();
+  Clear(DefaultRenderCategory);
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -40,23 +40,28 @@ GXHRESULT GVSequence::Release()
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
-void GVSequence::Clear()
+void GVSequence::Clear(int nRenderCate)
 {
   for(int i = 0; i < c_nNeedRefactorRenderDescCount; i++)
   {
-    for(GVRENDERDESC& desc : m_aRenderDesc[i])
-    {
-      SAFE_RELEASE(desc.pPrimitive);
-      SAFE_RELEASE(desc.pMaterial);
-    }
+    //for(GVRENDERDESC2* pRenderer : m_aRenderDesc[i])
+    //{
+    //  SAFE_RELEASE(desc.pPrimitive);
+    //  SAFE_RELEASE(desc.pMaterial);
+    //}
     m_aRenderDesc[i].clear();
   }
-
+  m_nRenderCate = nRenderCate;
 }
 
 int GVSequence::GetArrayCount()
 {
   return c_nNeedRefactorRenderDescCount;
+}
+
+int GVSequence::GetRenderCategory() const
+{
+  return m_nRenderCate;
 }
 
 const GVSequence::RenderDescArray& GVSequence::GetArray(int nIndex)
@@ -65,35 +70,35 @@ const GVSequence::RenderDescArray& GVSequence::GetArray(int nIndex)
   return m_aRenderDesc[nIndex];
 }
 
-int GVSequence::Add(GVRENDERDESC* pDesc)
+int GVSequence::Add(GVRENDERDESC2* pDesc)
 {
   int nRenderQueue = pDesc->RenderQueue & 0xffff;
   ASSERT(nRenderQueue >= 0 && nRenderQueue <= (int)GrapX::RenderQueue_Max);
 
   if(pDesc->pPrimitive) {
-    pDesc->pPrimitive->AddRef();
+    //pDesc->pPrimitive->AddRef();
   }
 
-  ASSERT(pDesc->pMaterial);
-  pDesc->pMaterial->AddRef();
+  //ASSERT(pDesc->pMaterial);
+  //pDesc->pMaterial->AddRef();
 
   if(nRenderQueue < GrapX::RenderQueue_Background) {
-    m_aRenderDesc[0].push_back(*pDesc);
+    m_aRenderDesc[0].push_back(pDesc);
   }
   else if(nRenderQueue < GrapX::RenderQueue_Geometry) {
-    m_aRenderDesc[1].push_back(*pDesc);
+    m_aRenderDesc[1].push_back(pDesc);
   }
   else if(nRenderQueue < GrapX::RenderQueue_AlphaTest) {
-    m_aRenderDesc[2].push_back(*pDesc);
+    m_aRenderDesc[2].push_back(pDesc);
   }
   else if(nRenderQueue < GrapX::RenderQueue_Transparent) {
-    m_aRenderDesc[3].push_back(*pDesc);
+    m_aRenderDesc[3].push_back(pDesc);
   }
   else if(nRenderQueue < GrapX::RenderQueue_Overlay) {
-    m_aRenderDesc[4].push_back(*pDesc);
+    m_aRenderDesc[4].push_back(pDesc);
   }
   else if(nRenderQueue < GrapX::RenderQueue_Max) {
-    m_aRenderDesc[5].push_back(*pDesc);
+    m_aRenderDesc[5].push_back(pDesc);
   }
 
   return 0;
